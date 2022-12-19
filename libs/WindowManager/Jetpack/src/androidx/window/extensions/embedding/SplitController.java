@@ -65,6 +65,7 @@ import android.util.Pair;
 import android.util.Size;
 import android.util.SparseArray;
 import android.view.WindowMetrics;
+import android.window.TaskFragmentAnimationParams;
 import android.window.TaskFragmentInfo;
 import android.window.TaskFragmentParentInfo;
 import android.window.TaskFragmentTransaction;
@@ -1157,6 +1158,8 @@ public class SplitController implements JetpackTaskFragmentOrganizer.TaskFragmen
                 taskId);
         mPresenter.createTaskFragment(wct, expandedContainer.getTaskFragmentToken(),
                 activityInTask.getActivityToken(), new Rect(), WINDOWING_MODE_UNDEFINED);
+        mPresenter.updateAnimationParams(wct, expandedContainer.getTaskFragmentToken(),
+                TaskFragmentAnimationParams.DEFAULT);
         return expandedContainer;
     }
 

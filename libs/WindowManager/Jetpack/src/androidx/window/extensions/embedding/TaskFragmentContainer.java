@@ -26,6 +26,7 @@ import android.graphics.Rect;
 import android.os.Binder;
 import android.os.IBinder;
 import android.util.Size;
+import android.window.TaskFragmentAnimationParams;
 import android.window.TaskFragmentInfo;
 import android.window.WindowContainerTransaction;
 
@@ -106,6 +107,13 @@ class TaskFragmentContainer {
      */
     @WindowingMode
     private int mLastRequestedWindowingMode = WINDOWING_MODE_UNDEFINED;
+
+    /**
+     * TaskFragmentAnimationParams that was requested last via
+     * {@link android.window.WindowContainerTransaction}.
+     */
+    @NonNull
+    private TaskFragmentAnimationParams mLastAnimationParams = TaskFragmentAnimationParams.DEFAULT;
 
     /**
      * When the TaskFragment has appeared in server, but is empty, we should remove the TaskFragment
@@ -558,6 +566,21 @@ class TaskFragmentContainer {
      */
     void setLastRequestedWindowingMode(@WindowingMode int windowingModes) {
         mLastRequestedWindowingMode = windowingModes;
+    }
+
+    /**
+     * Checks if last requested {@link TaskFragmentAnimationParams} are equal to the provided value.
+     */
+    boolean areLastRequestedAnimationParamsEqual(
+            @NonNull TaskFragmentAnimationParams animationParams) {
+        return mLastAnimationParams.equals(animationParams);
+    }
+
+    /**
+     * Updates the last requested {@link TaskFragmentAnimationParams}.
+     */
+    void setLastRequestAnimationParams(@NonNull TaskFragmentAnimationParams animationParams) {
+        mLastAnimationParams = animationParams;
     }
 
     /** Gets the parent leaf Task id. */

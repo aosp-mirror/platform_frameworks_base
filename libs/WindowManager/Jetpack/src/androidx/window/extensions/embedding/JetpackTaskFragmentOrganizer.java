@@ -17,6 +17,7 @@
 package androidx.window.extensions.embedding;
 
 import static android.app.WindowConfiguration.WINDOWING_MODE_UNDEFINED;
+import static android.window.TaskFragmentOperation.OP_TYPE_SET_ANIMATION_PARAMS;
 
 import static androidx.window.extensions.embedding.SplitContainer.getFinishPrimaryWithSecondaryBehavior;
 import static androidx.window.extensions.embedding.SplitContainer.getFinishSecondaryWithPrimaryBehavior;
@@ -31,8 +32,10 @@ import android.graphics.Rect;
 import android.os.Bundle;
 import android.os.IBinder;
 import android.util.ArrayMap;
+import android.window.TaskFragmentAnimationParams;
 import android.window.TaskFragmentCreationParams;
 import android.window.TaskFragmentInfo;
+import android.window.TaskFragmentOperation;
 import android.window.TaskFragmentOrganizer;
 import android.window.TaskFragmentTransaction;
 import android.window.WindowContainerTransaction;
@@ -114,13 +117,14 @@ class JetpackTaskFragmentOrganizer extends TaskFragmentOrganizer {
      * @param activityIntent    Intent to start the secondary Activity with.
      * @param activityOptions   ActivityOptions to start the secondary Activity with.
      * @param windowingMode     the windowing mode to set for the TaskFragments.
+     * @param splitAttributes   the {@link SplitAttributes} to represent the split.
      */
     void startActivityToSide(@NonNull WindowContainerTransaction wct,
             @NonNull IBinder launchingFragmentToken, @NonNull Rect launchingFragmentBounds,
             @NonNull Activity launchingActivity, @NonNull IBinder secondaryFragmentToken,
             @NonNull Rect secondaryFragmentBounds, @NonNull Intent activityIntent,
             @Nullable Bundle activityOptions, @NonNull SplitRule rule,
-            @WindowingMode int windowingMode) {
+            @WindowingMode int windowingMode, @NonNull SplitAttributes splitAttributes) {
         final IBinder ownerToken = launchingActivity.getActivityToken();
 
         // Create or resize the launching TaskFragment.
@@ -131,6 +135,7 @@ class JetpackTaskFragmentOrganizer extends TaskFragmentOrganizer {
             createTaskFragmentAndReparentActivity(wct, launchingFragmentToken, ownerToken,
                     launchingFragmentBounds, windowingMode, launchingActivity);
         }
+        updateAnimationParams(wct, launchingFragmentToken, splitAttributes);
 
         // Create a TaskFragment for the secondary activity.
         final TaskFragmentCreationParams fragmentOptions = new TaskFragmentCreationParams.Builder(
@@ -144,6 +149,7 @@ class JetpackTaskFragmentOrganizer extends TaskFragmentOrganizer {
                 .setPairedPrimaryFragmentToken(launchingFragmentToken)
                 .build();
         createTaskFragment(wct, fragmentOptions);
+        updateAnimationParams(wct, secondaryFragmentToken, splitAttributes);
         wct.startActivityInTaskFragment(secondaryFragmentToken, ownerToken, activityIntent,
                 activityOptions);
 
@@ -163,6 +169,7 @@ class JetpackTaskFragmentOrganizer extends TaskFragmentOrganizer {
         resizeTaskFragment(wct, fragmentToken, new Rect());
         setAdjacentTaskFragments(wct, fragmentToken, null /* secondary */, null /* splitRule */);
         updateWindowingMode(wct, fragmentToken, WINDOWING_MODE_UNDEFINED);
+        updateAnimationParams(wct, fragmentToken, TaskFragmentAnimationParams.DEFAULT);
     }
 
     /**
@@ -175,6 +182,7 @@ class JetpackTaskFragmentOrganizer extends TaskFragmentOrganizer {
         createTaskFragmentAndReparentActivity(
                 wct, fragmentToken, activity.getActivityToken(), new Rect(),
                 WINDOWING_MODE_UNDEFINED, activity);
+        updateAnimationParams(wct, fragmentToken, TaskFragmentAnimationParams.DEFAULT);
     }
 
     /**
@@ -270,6 +278,24 @@ class JetpackTaskFragmentOrganizer extends TaskFragmentOrganizer {
         wct.setWindowingMode(mFragmentInfos.get(fragmentToken).getToken(), windowingMode);
     }
 
+    /**
+     * Updates the {@link TaskFragmentAnimationParams} for the given TaskFragment based on
+     * {@link SplitAttributes}.
+     */
+    void updateAnimationParams(@NonNull WindowContainerTransaction wct,
+            @NonNull IBinder fragmentToken, @NonNull SplitAttributes splitAttributes) {
+        updateAnimationParams(wct, fragmentToken, createAnimationParamsOrDefault(splitAttributes));
+    }
+
+    void updateAnimationParams(@NonNull WindowContainerTransaction wct,
+            @NonNull IBinder fragmentToken, @NonNull TaskFragmentAnimationParams animationParams) {
+        final TaskFragmentOperation operation = new TaskFragmentOperation.Builder(
+                OP_TYPE_SET_ANIMATION_PARAMS)
+                .setAnimationParams(animationParams)
+                .build();
+        wct.setTaskFragmentOperation(fragmentToken, operation);
+    }
+
     void deleteTaskFragment(@NonNull WindowContainerTransaction wct,
             @NonNull IBinder fragmentToken) {
         if (!mFragmentInfos.containsKey(fragmentToken)) {
@@ -290,5 +316,15 @@ class JetpackTaskFragmentOrganizer extends TaskFragmentOrganizer {
     @Override
     public void onTransactionReady(@NonNull TaskFragmentTransaction transaction) {
         mCallback.onTransactionReady(transaction);
+    }
+
+    private static TaskFragmentAnimationParams createAnimationParamsOrDefault(
+            @Nullable SplitAttributes splitAttributes) {
+        if (splitAttributes == null) {
+            return TaskFragmentAnimationParams.DEFAULT;
+        }
+        return new TaskFragmentAnimationParams.Builder()
+                .setAnimationBackgroundColor(splitAttributes.getAnimationBackgroundColor())
+                .build();
     }
 }
