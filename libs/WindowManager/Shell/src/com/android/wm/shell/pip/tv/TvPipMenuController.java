@@ -199,7 +199,7 @@ public class TvPipMenuController implements PipMenuController, TvPipMenuView.Lis
                 "%s: showMovementMenuOnly()", TAG);
         setInMoveMode(true);
         if (mMenuIsOpen) {
-            mPipMenuView.showMoveMenu(mDelegate.getPipGravity());
+            mPipMenuView.showMoveMenu(mTvPipBoundsState.getTvPipGravity());
         } else {
             mCloseAfterExitMoveMenu = true;
             showMenuInternal();
@@ -222,7 +222,7 @@ public class TvPipMenuController implements PipMenuController, TvPipMenuView.Lis
         mMenuIsOpen = true;
         grantPipMenuFocus(true);
         if (mInMoveMode) {
-            mPipMenuView.showMoveMenu(mDelegate.getPipGravity());
+            mPipMenuView.showMoveMenu(mTvPipBoundsState.getTvPipGravity());
         } else {
             mPipMenuView.showButtonsMenu(/* exitingMoveMode= */ false);
         }
@@ -236,7 +236,9 @@ public class TvPipMenuController implements PipMenuController, TvPipMenuView.Lis
     }
 
     void updateGravity(int gravity) {
-        mPipMenuView.showMovementHints(gravity);
+        if (mInMoveMode) {
+            mPipMenuView.showMovementHints(gravity);
+        }
     }
 
     private Rect calculateMenuSurfaceBounds(Rect pipBounds) {
@@ -499,8 +501,6 @@ public class TvPipMenuController implements PipMenuController, TvPipMenuView.Lis
         void movePip(int keycode);
 
         void onInMoveModeChanged();
-
-        int getPipGravity();
 
         void onMenuClosed();
 
