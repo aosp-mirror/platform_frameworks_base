@@ -1227,16 +1227,19 @@ public final class SystemServer implements Dumpable {
             Watchdog.getInstance().resumeWatchingCurrentThread("packagemanagermain");
         }
 
+        mFirstBoot = mPackageManagerService.isFirstBoot();
+        mPackageManager = mSystemContext.getPackageManager();
+        t.traceEnd();
+
+        t.traceBegin("DexUseManagerLocal");
         // DexUseManagerLocal needs to be loaded after PackageManagerLocal has been registered, but
         // before PackageManagerService starts processing binder calls to notifyDexLoad.
         // DexUseManagerLocal may also call artd, so ensure ArtModuleServiceManager is instantiated.
         ArtModuleServiceInitializer.setArtModuleServiceManager(new ArtModuleServiceManager());
         LocalManagerRegistry.addManager(
                 DexUseManagerLocal.class, DexUseManagerLocal.createInstance());
-
-        mFirstBoot = mPackageManagerService.isFirstBoot();
-        mPackageManager = mSystemContext.getPackageManager();
         t.traceEnd();
+
         if (!mRuntimeRestart && !isFirstBootOrUpgrade()) {
             FrameworkStatsLog.write(FrameworkStatsLog.BOOT_TIME_EVENT_ELAPSED_TIME_REPORTED,
                     FrameworkStatsLog
