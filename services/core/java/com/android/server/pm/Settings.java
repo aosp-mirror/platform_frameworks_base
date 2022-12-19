@@ -165,6 +165,7 @@ import java.util.Objects;
 import java.util.Random;
 import java.util.Set;
 import java.util.UUID;
+import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.function.Consumer;
 
 /**
@@ -5634,7 +5635,7 @@ public final class Settings implements Watchable, Snappable {
         @GuardedBy("mLock")
         // Tracking the mutations that haven't yet been written to legacy state.
         // This avoids unnecessary work when writing settings for multiple users.
-        private boolean mIsLegacyPermissionStateStale = false;
+        private AtomicBoolean mIsLegacyPermissionStateStale = new AtomicBoolean(false);
 
         @GuardedBy("mLock")
         // The mapping keys are user ids.
@@ -5725,8 +5726,8 @@ public final class Settings implements Watchable, Snappable {
         }
 
         public void writeStateForUserAsync(int userId) {
+            mIsLegacyPermissionStateStale.set(true);
             synchronized (mLock) {
-                mIsLegacyPermissionStateStale = true;
                 final long currentTimeMillis = SystemClock.uptimeMillis();
                 final long writePermissionDelayMillis = nextWritePermissionDelayMillis();
 
@@ -5773,24 +5774,18 @@ public final class Settings implements Watchable, Snappable {
             }
 
             Runnable writer = () -> {
-                final int version;
-                final String fingerprint;
-                final boolean isLegacyPermissionStateStale;
-                synchronized (mLock) {
-                    version = mVersions.get(userId, INITIAL_VERSION);
-                    fingerprint = mFingerprints.get(userId);
-                    isLegacyPermissionStateStale = mIsLegacyPermissionStateStale;
-                    mIsLegacyPermissionStateStale = false;
-                }
+                boolean isLegacyPermissionStateStale = mIsLegacyPermissionStateStale.getAndSet(
+                        false);
 
-                final RuntimePermissionsState runtimePermissions;
+                final Map<String, List<RuntimePermissionsState.PermissionState>>
+                        packagePermissions = new ArrayMap<>();
+                final Map<String, List<RuntimePermissionsState.PermissionState>>
+                        sharedUserPermissions = new ArrayMap<>();
                 synchronized (pmLock) {
                     if (sync || isLegacyPermissionStateStale) {
                         legacyPermissionDataProvider.writeLegacyPermissionStateTEMP();
                     }
 
-                    Map<String, List<RuntimePermissionsState.PermissionState>> packagePermissions =
-                            new ArrayMap<>();
                     int packagesSize = packageStates.size();
                     for (int i = 0; i < packagesSize; i++) {
                         String packageName = packageStates.keyAt(i);
@@ -5810,9 +5805,6 @@ public final class Settings implements Watchable, Snappable {
                         }
                     }
 
-                    Map<String, List<RuntimePermissionsState.PermissionState>>
-                            sharedUserPermissions =
-                            new ArrayMap<>();
                     final int sharedUsersSize = sharedUsers.size();
                     for (int i = 0; i < sharedUsersSize; i++) {
                         String sharedUserName = sharedUsers.keyAt(i);
@@ -5822,11 +5814,13 @@ public final class Settings implements Watchable, Snappable {
                                         sharedUserSetting.getLegacyPermissionState(), userId);
                         sharedUserPermissions.put(sharedUserName, permissions);
                     }
-
-                    runtimePermissions = new RuntimePermissionsState(version,
-                            fingerprint, packagePermissions, sharedUserPermissions);
                 }
                 synchronized (mLock) {
+                    int version = mVersions.get(userId, INITIAL_VERSION);
+                    String fingerprint = mFingerprints.get(userId);
+
+                    RuntimePermissionsState runtimePermissions = new RuntimePermissionsState(
+                            version, fingerprint, packagePermissions, sharedUserPermissions);
                     mPendingStatesToWrite.put(userId, runtimePermissions);
                 }
                 if (pmHandler != null) {
