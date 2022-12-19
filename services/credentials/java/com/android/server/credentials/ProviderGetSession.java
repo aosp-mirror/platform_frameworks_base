@@ -284,10 +284,9 @@ public final class ProviderGetSession extends ProviderSession<BeginGetCredential
             mUiCredentialEntries.put(entryId, credentialEntry);
             Log.i(TAG, "in prepareUiProviderData creating ui entry with id " + entryId);
             if (credentialEntry.getPendingIntent() != null) {
-                setUpFillInIntent(credentialEntry.getPendingIntent());
                 credentialUiEntries.add(new Entry(CREDENTIAL_ENTRY_KEY, entryId,
                         credentialEntry.getSlice(), credentialEntry.getPendingIntent(),
-                        /*fillInIntent=*/null));
+                        /*fillInIntent=*/setUpFillInIntent(credentialEntry.getPendingIntent())));
             } else {
                 Log.i(TAG, "No pending intent. Should not happen.");
             }
