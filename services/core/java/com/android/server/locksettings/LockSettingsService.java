@@ -883,7 +883,6 @@ public class LockSettingsService extends ILockSettings.Stub {
      * Migrate the credential for the FRP credential owner user if the following are satisfied:
      * - the user has a secure credential
      * - the FRP credential is not set up
-     * - the credential is based on a synthetic password.
      */
     private void migrateFrpCredential() {
         if (mStorage.readPersistentDataBlock() != PersistentData.NONE) {
@@ -892,15 +891,13 @@ public class LockSettingsService extends ILockSettings.Stub {
         for (UserInfo userInfo : mUserManager.getUsers()) {
             if (userOwnsFrpCredential(mContext, userInfo) && isUserSecure(userInfo.id)) {
                 synchronized (mSpManager) {
-                    if (isSyntheticPasswordBasedCredentialLocked(userInfo.id)) {
-                        int actualQuality = (int) getLong(LockPatternUtils.PASSWORD_TYPE_KEY,
-                                DevicePolicyManager.PASSWORD_QUALITY_UNSPECIFIED, userInfo.id);
+                    int actualQuality = (int) getLong(LockPatternUtils.PASSWORD_TYPE_KEY,
+                            DevicePolicyManager.PASSWORD_QUALITY_UNSPECIFIED, userInfo.id);
 
-                        mSpManager.migrateFrpPasswordLocked(
-                                getCurrentLskfBasedProtectorId(userInfo.id),
-                                userInfo,
-                                redactActualQualityToMostLenientEquivalentQuality(actualQuality));
-                    }
+                    mSpManager.migrateFrpPasswordLocked(
+                            getCurrentLskfBasedProtectorId(userInfo.id),
+                            userInfo,
+                            redactActualQualityToMostLenientEquivalentQuality(actualQuality));
                 }
                 return;
             }
@@ -941,13 +938,9 @@ public class LockSettingsService extends ILockSettings.Stub {
                 int serialNumber = mEarlyCreatedUsers.valueAt(i);
 
                 removeStateForReusedUserIdIfNecessary(userId, serialNumber);
-                synchronized (mSpManager) {
-                    if (!isSyntheticPasswordBasedCredentialLocked(userId)) {
-                        Slogf.i(TAG, "Creating locksettings state for user %d now that boot "
-                                + "is complete", userId);
-                        initializeSyntheticPassword(userId);
-                    }
-                }
+                Slogf.i(TAG, "Creating locksettings state for user %d now that boot is complete",
+                        userId);
+                initializeSyntheticPassword(userId);
             }
             mEarlyCreatedUsers = null; // no longer needed
 
@@ -1234,16 +1227,17 @@ public class LockSettingsService extends ILockSettings.Stub {
             return getFrpCredentialType();
         }
         synchronized (mSpManager) {
-            if (isSyntheticPasswordBasedCredentialLocked(userId)) {
-                final long protectorId = getCurrentLskfBasedProtectorId(userId);
-                int rawType = mSpManager.getCredentialType(protectorId, userId);
-                if (rawType != CREDENTIAL_TYPE_PASSWORD_OR_PIN) {
-                    return rawType;
-                }
-                return pinOrPasswordQualityToCredentialType(getKeyguardStoredQuality(userId));
+            final long protectorId = getCurrentLskfBasedProtectorId(userId);
+            if (protectorId == SyntheticPasswordManager.NULL_PROTECTOR_ID) {
+                // Only possible for new users during early boot (before onThirdPartyAppsStarted())
+                return CREDENTIAL_TYPE_NONE;
             }
+            int rawType = mSpManager.getCredentialType(protectorId, userId);
+            if (rawType != CREDENTIAL_TYPE_PASSWORD_OR_PIN) {
+                return rawType;
+            }
+            return pinOrPasswordQualityToCredentialType(getKeyguardStoredQuality(userId));
         }
-        return CREDENTIAL_TYPE_NONE;
     }
 
     private int getFrpCredentialType() {
@@ -2167,10 +2161,6 @@ public class LockSettingsService extends ILockSettings.Stub {
         VerifyCredentialResponse response;
 
         synchronized (mSpManager) {
-            if (!isSyntheticPasswordBasedCredentialLocked(userId)) {
-                Slog.wtf(TAG, "Unexpected credential type, should be SP based.");
-                return VerifyCredentialResponse.ERROR;
-            }
             if (userId == USER_FRP) {
                 return mSpManager.verifyFrpCredential(getGateKeeperService(), credential,
                         progressCallback);
@@ -2676,15 +2666,6 @@ public class LockSettingsService extends ILockSettings.Stub {
         setLong(LSKF_LAST_CHANGED_TIME_KEY, System.currentTimeMillis(), userId);
     }
 
-    private boolean isSyntheticPasswordBasedCredentialLocked(int userId) {
-        if (userId == USER_FRP) {
-            final int type = mStorage.readPersistentDataBlock().type;
-            return type == PersistentData.TYPE_SP || type == PersistentData.TYPE_SP_WEAVER;
-        }
-        long protectorId = getCurrentLskfBasedProtectorId(userId);
-        return protectorId != SyntheticPasswordManager.NULL_PROTECTOR_ID;
-    }
-
     /**
      * Stores the gatekeeper password temporarily.
      * @param gatekeeperPassword unlocked upon successful Synthetic Password
@@ -2892,10 +2873,6 @@ public class LockSettingsService extends ILockSettings.Stub {
                 }
             }
             synchronized (mSpManager) {
-                if (!isSyntheticPasswordBasedCredentialLocked(userId)) {
-                    Slog.w(TAG, "Synthetic password not enabled");
-                    return null;
-                }
                 long protectorId = getCurrentLskfBasedProtectorId(userId);
                 AuthenticationResult auth = mSpManager.unlockLskfBasedProtector(
                         getGateKeeperService(), protectorId, currentCredential, userId, null);
@@ -3222,9 +3199,7 @@ public class LockSettingsService extends ILockSettings.Stub {
 
         // Disable escrow token permanently on all other device/user types.
         Slog.i(TAG, "Disabling escrow token on user " + userId);
-        if (isSyntheticPasswordBasedCredentialLocked(userId)) {
-            mSpManager.destroyEscrowData(userId);
-        }
+        mSpManager.destroyEscrowData(userId);
     }
 
     /**
