@@ -630,11 +630,17 @@ public class ServiceState implements Parcelable {
     }
 
     /**
-     * Get current roaming indicator of phone
+     * Get current roaming indicator of phone. This roaming state could be overridden by the carrier
+     * config.
      * (note: not just decoding from TS 27.007 7.2)
-     *
+     * @see TelephonyDisplayInfo#isRoaming() for visualization purpose.
      * @return true if TS 27.007 7.2 roaming is true
      *              and ONS is different from SPN
+     * @see CarrierConfigManager#KEY_FORCE_HOME_NETWORK_BOOL
+     * @see CarrierConfigManager#KEY_GSM_ROAMING_NETWORKS_STRING_ARRAY
+     * @see CarrierConfigManager#KEY_GSM_NONROAMING_NETWORKS_STRING_ARRAY
+     * @see CarrierConfigManager#KEY_CDMA_ROAMING_NETWORKS_STRING_ARRAY
+     * @see CarrierConfigManager#KEY_CDMA_NONROAMING_NETWORKS_STRING_ARRAY
      */
     public boolean getRoaming() {
         return getVoiceRoaming() || getDataRoaming();
@@ -649,8 +655,9 @@ public class ServiceState implements Parcelable {
     public boolean getVoiceRoaming() {
         return getVoiceRoamingType() != ROAMING_TYPE_NOT_ROAMING;
     }
+
     /**
-     * Get current voice network roaming type
+     * Get current voice roaming type. This roaming type could be overridden by the carrier config.
      * @return roaming type
      * @hide
      */
@@ -700,7 +707,7 @@ public class ServiceState implements Parcelable {
     }
 
     /**
-     * Get current data network roaming type
+     * Get current data roaming type. This roaming type could be overridden by the carrier config.
      * @return roaming type
      * @hide
      */
