@@ -41,6 +41,7 @@ import com.android.systemui.common.ui.binder.TextViewBinder
 import com.android.systemui.common.ui.binder.TintedIconViewBinder
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.dagger.qualifiers.Main
+import com.android.systemui.dump.DumpManager
 import com.android.systemui.plugins.FalsingManager
 import com.android.systemui.statusbar.VibratorHelper
 import com.android.systemui.statusbar.policy.ConfigurationController
@@ -75,6 +76,7 @@ open class ChipbarCoordinator @Inject constructor(
         @Main mainExecutor: DelayableExecutor,
         accessibilityManager: AccessibilityManager,
         configurationController: ConfigurationController,
+        dumpManager: DumpManager,
         powerManager: PowerManager,
         private val falsingManager: FalsingManager,
         private val falsingCollector: FalsingCollector,
@@ -89,6 +91,7 @@ open class ChipbarCoordinator @Inject constructor(
         mainExecutor,
         accessibilityManager,
         configurationController,
+        dumpManager,
         powerManager,
         R.layout.chipbar,
         wakeLockBuilder,
@@ -224,8 +227,6 @@ open class ChipbarCoordinator @Inject constructor(
     private fun ViewGroup.getInnerView(): ViewGroup {
         return requireViewById(R.id.chipbar_inner)
     }
-
-    override fun start() {}
 
     override fun getTouchableRegion(view: View, outRect: Rect) {
         viewUtil.setRectToViewWindowLocation(view, outRect)

@@ -22,6 +22,7 @@ import android.os.PowerManager
 import android.view.ViewGroup
 import android.view.WindowManager
 import android.view.accessibility.AccessibilityManager
+import com.android.systemui.dump.DumpManager
 import com.android.systemui.media.taptotransfer.MediaTttFlags
 import com.android.systemui.media.taptotransfer.common.MediaTttLogger
 import com.android.systemui.statusbar.CommandQueue
@@ -39,6 +40,7 @@ class FakeMediaTttChipControllerReceiver(
     mainExecutor: DelayableExecutor,
     accessibilityManager: AccessibilityManager,
     configurationController: ConfigurationController,
+    dumpManager: DumpManager,
     powerManager: PowerManager,
     mainHandler: Handler,
     mediaTttFlags: MediaTttFlags,
@@ -55,6 +57,7 @@ class FakeMediaTttChipControllerReceiver(
         mainExecutor,
         accessibilityManager,
         configurationController,
+        dumpManager,
         powerManager,
         mainHandler,
         mediaTttFlags,
