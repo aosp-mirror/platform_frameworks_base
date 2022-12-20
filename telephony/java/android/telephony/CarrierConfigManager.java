@@ -9141,7 +9141,7 @@ public class CarrierConfigManager {
 
     /**
      * A list of premium capabilities the carrier supports. Applications can prompt users to
-     * purchase these premium capabilities from their carrier for a network boost.
+     * purchase these premium capabilities from their carrier for a performance boost.
      * Valid values are any of {@link TelephonyManager.PremiumCapability}.
      *
      * This is empty by default, indicating that no premium capabilities are supported.
@@ -9153,12 +9153,12 @@ public class CarrierConfigManager {
             "supported_premium_capabilities_int_array";
 
     /**
-     * The amount of time in milliseconds the notification for a network boost via
+     * The amount of time in milliseconds the notification for a performance boost via
      * premium capabilities will be visible to the user after
      * {@link TelephonyManager#purchasePremiumCapability(int, Executor, Consumer)}
      * requests user action to purchase the boost from the carrier. Once the timeout expires,
-     * the booster notification will be automatically dismissed and the request will fail with
-     * {@link TelephonyManager#PURCHASE_PREMIUM_CAPABILITY_RESULT_TIMEOUT}.
+     * the performance boost notification will be automatically dismissed and the request will fail
+     * with {@link TelephonyManager#PURCHASE_PREMIUM_CAPABILITY_RESULT_TIMEOUT}.
      *
      * The default value is 30 minutes.
      */
@@ -9166,11 +9166,11 @@ public class CarrierConfigManager {
             "premium_capability_notification_display_timeout_millis_long";
 
     /**
-     * The amount of time in milliseconds that the notification for a network boost via
+     * The amount of time in milliseconds that the notification for a performance boost via
      * premium capabilities should be blocked when
      * {@link TelephonyManager#purchasePremiumCapability(int, Executor, Consumer)}
      * returns a failure due to user action or timeout.
-     * The maximum number of network boost notifications to show the user are defined in
+     * The maximum number of performance boost notifications to show the user are defined in
      * {@link #KEY_PREMIUM_CAPABILITY_MAXIMUM_DAILY_NOTIFICATION_COUNT_INT} and
      * {@link #KEY_PREMIUM_CAPABILITY_MAXIMUM_MONTHLY_NOTIFICATION_COUNT_INT}.
      *
@@ -9184,7 +9184,7 @@ public class CarrierConfigManager {
             "premium_capability_notification_backoff_hysteresis_time_millis_long";
 
     /**
-     * The maximum number of times in a day that we display the notification for a network boost
+     * The maximum number of times in a day that we display the notification for a performance boost
      * via premium capabilities when
      * {@link TelephonyManager#purchasePremiumCapability(int, Executor, Consumer)}
      * returns a failure due to user action or timeout.
@@ -9198,8 +9198,8 @@ public class CarrierConfigManager {
             "premium_capability_maximum_daily_notification_count_int";
 
     /**
-     * The maximum number of times in a month that we display the notification for a network boost
-     * via premium capabilities when
+     * The maximum number of times in a month that we display the notification for a performance
+     * boost via premium capabilities when
      * {@link TelephonyManager#purchasePremiumCapability(int, Executor, Consumer)}
      * returns a failure due to user action or timeout.
      *
@@ -9242,7 +9242,7 @@ public class CarrierConfigManager {
             "premium_capability_network_setup_time_millis_long";
 
     /**
-     * The URL to redirect to when the user clicks on the notification for a network boost via
+     * The URL to redirect to when the user clicks on the notification for a performance boost via
      * premium capabilities after applications call
      * {@link TelephonyManager#purchasePremiumCapability(int, Executor, Consumer)}.
      * If the URL is empty or invalid, the purchase request will return

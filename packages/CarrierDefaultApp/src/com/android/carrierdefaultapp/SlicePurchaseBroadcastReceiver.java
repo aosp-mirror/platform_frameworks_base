@@ -53,9 +53,9 @@ import java.util.UUID;
 /**
  * The SlicePurchaseBroadcastReceiver listens for
  * {@link SlicePurchaseController#ACTION_START_SLICE_PURCHASE_APP} from the SlicePurchaseController
- * in the phone process to start the slice purchase application. It displays the network boost
+ * in the phone process to start the slice purchase application. It displays the performance boost
  * notification to the user and will start the {@link SlicePurchaseActivity} to display the
- * {@link WebView} to purchase network boosts from the user's carrier.
+ * {@link WebView} to purchase performance boosts from the user's carrier.
  */
 public class SlicePurchaseBroadcastReceiver extends BroadcastReceiver{
     private static final String TAG = "SlicePurchaseBroadcastReceiver";
@@ -66,27 +66,29 @@ public class SlicePurchaseBroadcastReceiver extends BroadcastReceiver{
      */
     private static final String UUID_BAD_PENDING_INTENT = "c360246e-95dc-4abf-9dc1-929a76cd7e53";
 
-    /** Channel ID for the network boost notification. */
-    private static final String NETWORK_BOOST_NOTIFICATION_CHANNEL_ID = "network_boost";
-    /** Tag for the network boost notification. */
-    public static final String NETWORK_BOOST_NOTIFICATION_TAG = "SlicePurchaseApp.Notification";
-    /** Action for when the user clicks the "Not now" button on the network boost notification. */
+    /** Channel ID for the performance boost notification. */
+    private static final String PERFORMANCE_BOOST_NOTIFICATION_CHANNEL_ID = "performance_boost";
+    /** Tag for the performance boost notification. */
+    public static final String PERFORMANCE_BOOST_NOTIFICATION_TAG = "SlicePurchaseApp.Notification";
+    /**
+     * Action for when the user clicks the "Not now" button on the performance boost notification.
+     */
     private static final String ACTION_NOTIFICATION_CANCELED =
             "com.android.phone.slice.action.NOTIFICATION_CANCELED";
 
     /**
      * A map of Intents sent by {@link SlicePurchaseController} for each capability.
-     * If this map contains an Intent for a given capability, the network boost notification to
+     * If this map contains an Intent for a given capability, the performance boost notification to
      * purchase the capability is visible to the user.
      * If this map does not contain an Intent for a given capability, either the capability was
      * never requested or the {@link SlicePurchaseActivity} is visible to the user.
-     * An Intent is added to this map when the network boost notification is displayed to the user
-     * and removed from the map when the notification is canceled.
+     * An Intent is added to this map when the performance boost notification is displayed to the
+     * user and removed from the map when the notification is canceled.
      */
     private static final Map<Integer, Intent> sIntents = new HashMap<>();
 
     /**
-     * Cancel the network boost notification for the given capability and
+     * Cancel the performance boost notification for the given capability and
      * remove the corresponding notification intent from the map.
      *
      * @param context The context to cancel the notification in.
@@ -95,7 +97,7 @@ public class SlicePurchaseBroadcastReceiver extends BroadcastReceiver{
     public static void cancelNotification(@NonNull Context context,
             @TelephonyManager.PremiumCapability int capability) {
         context.getSystemService(NotificationManager.class).cancelAsUser(
-                NETWORK_BOOST_NOTIFICATION_TAG, capability, UserHandle.ALL);
+                PERFORMANCE_BOOST_NOTIFICATION_TAG, capability, UserHandle.ALL);
         sIntents.remove(capability);
     }
 
@@ -263,7 +265,7 @@ public class SlicePurchaseBroadcastReceiver extends BroadcastReceiver{
                 onLocaleChanged(context);
                 break;
             case SlicePurchaseController.ACTION_START_SLICE_PURCHASE_APP:
-                onDisplayNetworkBoostNotification(context, intent, false);
+                onDisplayPerformanceBoostNotification(context, intent, false);
                 break;
             case SlicePurchaseController.ACTION_SLICE_PURCHASE_APP_RESPONSE_TIMEOUT:
                 onTimeout(context, intent);
@@ -283,13 +285,13 @@ public class SlicePurchaseBroadcastReceiver extends BroadcastReceiver{
             if (sIntents.get(capability) != null) {
                 // Notification is active -- update notification for new locale
                 context.getSystemService(NotificationManager.class).cancelAsUser(
-                        NETWORK_BOOST_NOTIFICATION_TAG, capability, UserHandle.ALL);
-                onDisplayNetworkBoostNotification(context, sIntents.get(capability), true);
+                        PERFORMANCE_BOOST_NOTIFICATION_TAG, capability, UserHandle.ALL);
+                onDisplayPerformanceBoostNotification(context, sIntents.get(capability), true);
             }
         }
     }
 
-    private void onDisplayNetworkBoostNotification(@NonNull Context context,
+    private void onDisplayPerformanceBoostNotification(@NonNull Context context,
             @NonNull Intent intent, boolean repeat) {
         if (!repeat && !isIntentValid(intent)) {
             sendSlicePurchaseAppResponse(intent,
@@ -299,8 +301,8 @@ public class SlicePurchaseBroadcastReceiver extends BroadcastReceiver{
 
         Resources res = getResources(context);
         NotificationChannel channel = new NotificationChannel(
-                NETWORK_BOOST_NOTIFICATION_CHANNEL_ID,
-                res.getString(R.string.network_boost_notification_channel),
+                PERFORMANCE_BOOST_NOTIFICATION_CHANNEL_ID,
+                res.getString(R.string.performance_boost_notification_channel),
                 NotificationManager.IMPORTANCE_DEFAULT);
         // CarrierDefaultApp notifications are unblockable by default. Make this channel blockable
         //  to allow users to disable notifications posted to this channel without affecting other
@@ -309,36 +311,39 @@ public class SlicePurchaseBroadcastReceiver extends BroadcastReceiver{
         context.getSystemService(NotificationManager.class).createNotificationChannel(channel);
 
         Notification notification =
-                new Notification.Builder(context, NETWORK_BOOST_NOTIFICATION_CHANNEL_ID)
+                new Notification.Builder(context, PERFORMANCE_BOOST_NOTIFICATION_CHANNEL_ID)
                         .setContentTitle(String.format(res.getString(
-                                R.string.network_boost_notification_title),
+                                R.string.performance_boost_notification_title),
                                 intent.getStringExtra(
                                         SlicePurchaseController.EXTRA_REQUESTING_APP_NAME)))
-                        .setContentText(res.getString(R.string.network_boost_notification_detail))
-                        .setSmallIcon(R.drawable.ic_network_boost)
+                        .setContentText(res.getString(
+                                R.string.performance_boost_notification_detail))
+                        .setSmallIcon(R.drawable.ic_performance_boost)
                         .setContentIntent(createContentIntent(context, intent, 1))
                         .setDeleteIntent(intent.getParcelableExtra(
                                 SlicePurchaseController.EXTRA_INTENT_CANCELED, PendingIntent.class))
                         // Add an action for the "Not now" button, which has the same behavior as
                         // the user canceling or closing the notification.
                         .addAction(new Notification.Action.Builder(
-                                Icon.createWithResource(context, R.drawable.ic_network_boost),
-                                res.getString(R.string.network_boost_notification_button_not_now),
+                                Icon.createWithResource(context, R.drawable.ic_performance_boost),
+                                res.getString(
+                                        R.string.performance_boost_notification_button_not_now),
                                 createCanceledIntent(context, intent)).build())
                         // Add an action for the "Manage" button, which has the same behavior as
                         // the user clicking on the notification.
                         .addAction(new Notification.Action.Builder(
-                                Icon.createWithResource(context, R.drawable.ic_network_boost),
-                                res.getString(R.string.network_boost_notification_button_manage),
+                                Icon.createWithResource(context, R.drawable.ic_performance_boost),
+                                res.getString(
+                                        R.string.performance_boost_notification_button_manage),
                                 createContentIntent(context, intent, 2)).build())
                         .build();
 
         int capability = intent.getIntExtra(SlicePurchaseController.EXTRA_PREMIUM_CAPABILITY,
                 SlicePurchaseController.PREMIUM_CAPABILITY_INVALID);
-        logd((repeat ? "Update" : "Display") + " the network boost notification for capability "
+        logd((repeat ? "Update" : "Display") + " the performance boost notification for capability "
                 + TelephonyManager.convertPremiumCapabilityToString(capability));
         context.getSystemService(NotificationManager.class).notifyAsUser(
-                NETWORK_BOOST_NOTIFICATION_TAG, capability, notification, UserHandle.ALL);
+                PERFORMANCE_BOOST_NOTIFICATION_TAG, capability, notification, UserHandle.ALL);
         if (!repeat) {
             sIntents.put(capability, intent);
             sendSlicePurchaseAppResponse(intent,
@@ -376,7 +381,7 @@ public class SlicePurchaseBroadcastReceiver extends BroadcastReceiver{
     }
 
     /**
-     * Create the intent for when the user clicks on the "Manage" button on the network boost
+     * Create the intent for when the user clicks on the "Manage" button on the performance boost
      * notification or the notification itself. This will open {@link SlicePurchaseActivity}.
      *
      * @param context The Context to create the intent for.
@@ -400,9 +405,9 @@ public class SlicePurchaseBroadcastReceiver extends BroadcastReceiver{
     }
 
     /**
-     * Create the canceled intent for when the user clicks the "Not now" button on the network boost
-     * notification. This will send {@link #ACTION_NOTIFICATION_CANCELED} and has the same function
-     * as if the user had canceled or removed the notification.
+     * Create the canceled intent for when the user clicks the "Not now" button on the performance
+     * boost notification. This will send {@link #ACTION_NOTIFICATION_CANCELED} and has the same
+     * behavior as if the user had canceled or removed the notification.
      *
      * @param context The Context to create the intent for.
      * @param intent The source Intent used to launch the slice purchase application.
@@ -427,7 +432,7 @@ public class SlicePurchaseBroadcastReceiver extends BroadcastReceiver{
                 + " timed out.");
         if (sIntents.get(capability) != null) {
             // Notification is still active -- cancel pending notification
-            logd("Closing network boost notification since the user did not respond in time.");
+            logd("Closing performance boost notification since the user did not respond in time.");
             cancelNotification(context, capability);
         } else {
             // SlicePurchaseActivity is still active -- ignore timer

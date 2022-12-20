@@ -34,7 +34,7 @@ import java.net.URL;
 import java.util.concurrent.TimeUnit;
 
 /**
- * Activity that launches when the user clicks on the network boost notification.
+ * Activity that launches when the user clicks on the performance boost notification.
  * This will open a {@link WebView} for the carrier website to allow the user to complete the
  * premium capability purchase.
  * The carrier website can get the requested premium capability using the JavaScript interface
@@ -42,7 +42,7 @@ import java.util.concurrent.TimeUnit;
  * If the purchase is successful, the carrier website shall notify the slice purchase application
  * using the JavaScript interface method
  * {@code SlicePurchaseWebInterface.notifyPurchaseSuccessful(duration)}, where {@code duration} is
- * the optional duration of the network boost.
+ * the optional duration of the performance boost.
  * If the purchase was not successful, the carrier website shall notify the slice purchase
  * application using the JavaScript interface method
  * {@code SlicePurchaseWebInterface.notifyPurchaseFailed(code, reason)}, where {@code code} is the
@@ -74,7 +74,7 @@ public class SlicePurchaseActivity extends Activity {
         logd("onCreate: subId=" + subId + ", capability="
                 + TelephonyManager.convertPremiumCapabilityToString(mCapability) + ", url=" + url);
 
-        // Cancel network boost notification
+        // Cancel performance boost notification
         SlicePurchaseBroadcastReceiver.cancelNotification(mApplicationContext, mCapability);
 
         // Verify purchase URL is valid
