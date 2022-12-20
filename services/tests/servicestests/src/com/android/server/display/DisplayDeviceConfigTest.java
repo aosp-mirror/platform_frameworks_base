@@ -161,6 +161,14 @@ public final class DisplayDeviceConfigTest {
         assertArrayEquals(new int[]{70, 80},
                 mDisplayDeviceConfig.getHighAmbientBrightnessThresholds());
 
+        assertEquals("sensor_12345",
+                mDisplayDeviceConfig.getScreenOffBrightnessSensor().type);
+        assertEquals("Sensor 12345",
+                mDisplayDeviceConfig.getScreenOffBrightnessSensor().name);
+
+        assertArrayEquals(new int[]{-1, 10, 20, 30, 40},
+                mDisplayDeviceConfig.getScreenOffBrightnessSensorValueToLux());
+
         // Todo(brup): Add asserts for BrightnessThrottlingData, DensityMapping,
         // HighBrightnessModeData AmbientLightSensor, RefreshRateLimitations and ProximitySensor.
     }
@@ -232,6 +240,7 @@ public final class DisplayDeviceConfigTest {
                 HIGH_BRIGHTNESS_THRESHOLD_OF_PEAK_REFRESH_RATE);
         assertArrayEquals(mDisplayDeviceConfig.getHighAmbientBrightnessThresholds(),
                 HIGH_AMBIENT_THRESHOLD_OF_PEAK_REFRESH_RATE);
+
         // Todo(brup): Add asserts for BrightnessThrottlingData, DensityMapping,
         // HighBrightnessModeData AmbientLightSensor, RefreshRateLimitations and ProximitySensor.
     }
@@ -283,6 +292,10 @@ public final class DisplayDeviceConfigTest {
                 +       "<thermalStatusLimit>light</thermalStatusLimit>\n"
                 +       "<allowInLowPowerMode>false</allowInLowPowerMode>\n"
                 +   "</highBrightnessMode>\n"
+                +   "<screenOffBrightnessSensor>\n"
+                +       "<type>sensor_12345</type>\n"
+                +       "<name>Sensor 12345</name>\n"
+                +   "</screenOffBrightnessSensor>\n"
                 +   "<ambientBrightnessChangeThresholds>\n"
                 +       "<brighteningThresholds>\n"
                 +           "<minimum>10</minimum>\n"
@@ -467,6 +480,13 @@ public final class DisplayDeviceConfigTest {
                 +           "</blockingZoneThreshold>\n"
                 +       "</higherBlockingZoneConfigs>\n"
                 +   "</refreshRate>\n"
+                +   "<screenOffBrightnessSensorValueToLux>\n"
+                +       "<item>-1</item>\n"
+                +       "<item>10</item>\n"
+                +       "<item>20</item>\n"
+                +       "<item>30</item>\n"
+                +       "<item>40</item>\n"
+                +   "</screenOffBrightnessSensorValueToLux>\n"
                 + "</displayConfiguration>\n";
     }
 
@@ -544,6 +564,7 @@ public final class DisplayDeviceConfigTest {
         when(mResources.getIntArray(
                 R.array.config_highAmbientBrightnessThresholdsOfFixedRefreshRate))
                 .thenReturn(HIGH_AMBIENT_THRESHOLD_OF_PEAK_REFRESH_RATE);
+
         mDisplayDeviceConfig = DisplayDeviceConfig.create(mContext, true);
     }
 
