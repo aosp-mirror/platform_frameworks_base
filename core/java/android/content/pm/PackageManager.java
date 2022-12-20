@@ -10427,9 +10427,7 @@ public abstract class PackageManager {
      * @throws NameNotFoundException if either a given package can not be found on the
      * system, or if the caller is not able to query for details about the source or
      * target packages.
-     * @hide
      */
-    @SystemApi
     @NonNull
     public boolean[] canPackageQuery(@NonNull String sourcePackageName,
             @NonNull String[] targetPackageNames) throws NameNotFoundException {
