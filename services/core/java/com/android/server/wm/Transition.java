@@ -171,7 +171,7 @@ class Transition implements BLASTSyncEngine.TransactionReadyListener {
     final ArraySet<WindowContainer> mParticipants = new ArraySet<>();
 
     /** The final animation targets derived from participants after promotion. */
-    private ArrayList<WindowContainer> mTargets;
+    private ArrayList<ChangeInfo> mTargets;
 
     /** The displays that this transition is running on. */
     private final ArrayList<DisplayContent> mTargetDisplays = new ArrayList<>();
@@ -625,7 +625,7 @@ class Transition implements BLASTSyncEngine.TransactionReadyListener {
         // usually only size 1
         final ArraySet<DisplayContent> displays = new ArraySet<>();
         for (int i = mTargets.size() - 1; i >= 0; --i) {
-            final WindowContainer target = mTargets.get(i);
+            final WindowContainer target = mTargets.get(i).mContainer;
             if (target.getParent() != null) {
                 final SurfaceControl targetLeash = getLeashSurface(target, null /* t */);
                 final SurfaceControl origParent = getOrigParentSurface(target);
@@ -858,7 +858,7 @@ class Transition implements BLASTSyncEngine.TransactionReadyListener {
         for (int i = 0; i < mTargetDisplays.size(); ++i) {
             final DisplayContent dc = mTargetDisplays.get(i);
             final AsyncRotationController asyncRotationController = dc.getAsyncRotationController();
-            if (asyncRotationController != null && mTargets.contains(dc)) {
+            if (asyncRotationController != null && containsChangeFor(dc, mTargets)) {
                 asyncRotationController.onTransitionFinished();
             }
             if (mTransientLaunches != null) {
@@ -925,6 +925,14 @@ class Transition implements BLASTSyncEngine.TransactionReadyListener {
         change.mFlags |= ChangeInfo.FLAG_CHANGE_NO_ANIMATION;
     }
 
+    @VisibleForTesting(visibility = VisibleForTesting.Visibility.PRIVATE)
+    static boolean containsChangeFor(WindowContainer wc, ArrayList<ChangeInfo> list) {
+        for (int i = list.size() - 1; i >= 0; --i) {
+            if (list.get(i).mContainer == wc) return true;
+        }
+        return false;
+    }
+
     @Override
     public void onTransactionReady(int syncId, SurfaceControl.Transaction transaction) {
         if (syncId != mSyncId) {
@@ -962,8 +970,7 @@ class Transition implements BLASTSyncEngine.TransactionReadyListener {
                 .containsBackAnimationTargets(this);
         // Resolve the animating targets from the participants
         mTargets = calculateTargets(mParticipants, mChanges);
-        final TransitionInfo info = calculateTransitionInfo(mType, mFlags, mTargets, mChanges,
-                transaction);
+        final TransitionInfo info = calculateTransitionInfo(mType, mFlags, mTargets, transaction);
         if (markBackAnimated) {
             mController.mAtm.mBackNavigationController.clearBackAnimations(mStartTransaction);
         }
@@ -972,7 +979,7 @@ class Transition implements BLASTSyncEngine.TransactionReadyListener {
             if (mOverrideOptions.getType() == ANIM_OPEN_CROSS_PROFILE_APPS) {
                 for (int i = 0; i < mTargets.size(); ++i) {
                     final TransitionInfo.Change c = info.getChanges().get(i);
-                    final ActivityRecord ar = mTargets.get(i).asActivityRecord();
+                    final ActivityRecord ar = mTargets.get(i).mContainer.asActivityRecord();
                     if (ar == null || c.getMode() != TRANSIT_OPEN) continue;
                     int flags = c.getFlags();
                     flags |= ar.mUserId == ar.mWmService.mCurrentUserId
@@ -1016,7 +1023,7 @@ class Transition implements BLASTSyncEngine.TransactionReadyListener {
             // already been reset by the original hiding-transition's finishTransaction (we can't
             // show in the finishTransaction because by then the activity doesn't hide until
             // surface placement).
-            for (WindowContainer p = ar.getParent(); p != null && !mTargets.contains(p);
+            for (WindowContainer p = ar.getParent(); p != null && !containsChangeFor(p, mTargets);
                     p = p.getParent()) {
                 if (p.getSurfaceControl() != null) {
                     transaction.show(p.getSurfaceControl());
@@ -1052,7 +1059,7 @@ class Transition implements BLASTSyncEngine.TransactionReadyListener {
         // This is non-null only if display has changes. It handles the visible windows that don't
         // need to be participated in the transition.
         final AsyncRotationController controller = dc.getAsyncRotationController();
-        if (controller != null && mTargets.contains(dc)) {
+        if (controller != null && containsChangeFor(dc, mTargets)) {
             controller.setupStartTransaction(transaction);
         }
         buildFinishTransaction(mFinishTransaction, info.getRootLeash());
@@ -1225,7 +1232,7 @@ class Transition implements BLASTSyncEngine.TransactionReadyListener {
         // Search for the home task. If it is supposed to be visible, then the navbar is not at
         // the bottom of the screen, so we need to animate it.
         for (int i = 0; i < mTargets.size(); ++i) {
-            final Task task = mTargets.get(i).asTask();
+            final Task task = mTargets.get(i).mContainer.asTask();
             if (task == null || !task.isActivityTypeHomeOrRecents()) continue;
             animate = task.isVisibleRequested();
             break;
@@ -1350,12 +1357,13 @@ class Transition implements BLASTSyncEngine.TransactionReadyListener {
      *
      * @return {@code true} if transition in target can be promoted to its parent.
      */
-    private static boolean canPromote(WindowContainer<?> target, Targets targets,
+    private static boolean canPromote(ChangeInfo targetChange, Targets targets,
             ArrayMap<WindowContainer, ChangeInfo> changes) {
+        final WindowContainer<?> target = targetChange.mContainer;
         final WindowContainer<?> parent = target.getParent();
         final ChangeInfo parentChange = changes.get(parent);
         if (!parent.canCreateRemoteAnimationTarget()
-                || parentChange == null || !parentChange.hasChanged(parent)) {
+                || parentChange == null || !parentChange.hasChanged()) {
             ProtoLog.v(ProtoLogGroup.WM_DEBUG_WINDOW_TRANSITIONS, "      SKIP: %s",
                     "parent can't be target " + parent);
             return false;
@@ -1365,21 +1373,20 @@ class Transition implements BLASTSyncEngine.TransactionReadyListener {
             return false;
         }
 
-        final ChangeInfo change = changes.get(target);
-        if (change.mStartParent != null && target.getParent() != change.mStartParent) {
+        if (targetChange.mStartParent != null && target.getParent() != targetChange.mStartParent) {
             // When a window is reparented, the state change won't fit into any of the parents.
             // Don't promote such change so that we can animate the reparent if needed.
             return false;
         }
 
-        final @TransitionInfo.TransitionMode int mode = change.getTransitMode(target);
+        final @TransitionInfo.TransitionMode int mode = targetChange.getTransitMode(target);
         for (int i = parent.getChildCount() - 1; i >= 0; --i) {
             final WindowContainer<?> sibling = parent.getChildAt(i);
             if (target == sibling) continue;
             ProtoLog.v(ProtoLogGroup.WM_DEBUG_WINDOW_TRANSITIONS, "      check sibling %s",
                     sibling);
             final ChangeInfo siblingChange = changes.get(sibling);
-            if (siblingChange == null || !targets.wasParticipated(sibling)) {
+            if (siblingChange == null || !targets.wasParticipated(siblingChange)) {
                 if (sibling.isVisibleRequested()) {
                     // Sibling is visible but not animating, so no promote.
                     ProtoLog.v(ProtoLogGroup.WM_DEBUG_WINDOW_TRANSITIONS,
@@ -1424,7 +1431,8 @@ class Transition implements BLASTSyncEngine.TransactionReadyListener {
         WindowContainer<?> lastNonPromotableParent = null;
         // Go through from the deepest target.
         for (int i = targets.mArray.size() - 1; i >= 0; --i) {
-            final WindowContainer<?> target = targets.mArray.valueAt(i);
+            final ChangeInfo targetChange = targets.mArray.valueAt(i);
+            final WindowContainer<?> target = targetChange.mContainer;
             ProtoLog.v(ProtoLogGroup.WM_DEBUG_WINDOW_TRANSITIONS, "    checking %s", target);
             final WindowContainer<?> parent = target.getParent();
             if (parent == lastNonPromotableParent) {
@@ -1432,7 +1440,7 @@ class Transition implements BLASTSyncEngine.TransactionReadyListener {
                         "      SKIP: its sibling was rejected");
                 continue;
             }
-            if (!canPromote(target, targets, changes)) {
+            if (!canPromote(targetChange, targets, changes)) {
                 lastNonPromotableParent = parent;
                 continue;
             }
@@ -1442,19 +1450,20 @@ class Transition implements BLASTSyncEngine.TransactionReadyListener {
             } else {
                 ProtoLog.v(ProtoLogGroup.WM_DEBUG_WINDOW_TRANSITIONS,
                         "        remove from targets %s", target);
-                targets.remove(i, target);
+                targets.remove(i);
             }
-            if (targets.mArray.indexOfValue(parent) < 0) {
+            final ChangeInfo parentChange = changes.get(parent);
+            if (targets.mArray.indexOfValue(parentChange) < 0) {
                 ProtoLog.v(ProtoLogGroup.WM_DEBUG_WINDOW_TRANSITIONS,
                         "      CAN PROMOTE: promoting to parent %s", parent);
                 // The parent has lower depth, so it will be checked in the later iteration.
                 i++;
-                targets.add(parent);
+                targets.add(parentChange);
             }
-            if ((changes.get(target).mFlags & ChangeInfo.FLAG_CHANGE_NO_ANIMATION) != 0) {
-                changes.get(parent).mFlags |= ChangeInfo.FLAG_CHANGE_NO_ANIMATION;
+            if ((targetChange.mFlags & ChangeInfo.FLAG_CHANGE_NO_ANIMATION) != 0) {
+                parentChange.mFlags |= ChangeInfo.FLAG_CHANGE_NO_ANIMATION;
             } else {
-                changes.get(parent).mFlags |= ChangeInfo.FLAG_CHANGE_YES_ANIMATION;
+                parentChange.mFlags |= ChangeInfo.FLAG_CHANGE_YES_ANIMATION;
             }
         }
     }
@@ -1465,7 +1474,7 @@ class Transition implements BLASTSyncEngine.TransactionReadyListener {
      */
     @VisibleForTesting
     @NonNull
-    static ArrayList<WindowContainer> calculateTargets(ArraySet<WindowContainer> participants,
+    static ArrayList<ChangeInfo> calculateTargets(ArraySet<WindowContainer> participants,
             ArrayMap<WindowContainer, ChangeInfo> changes) {
         ProtoLog.v(ProtoLogGroup.WM_DEBUG_WINDOW_TRANSITIONS,
                 "Start calculating TransitionInfo based on participants: %s", participants);
@@ -1485,12 +1494,12 @@ class Transition implements BLASTSyncEngine.TransactionReadyListener {
             final ChangeInfo changeInfo = changes.get(wc);
 
             // Reject no-ops
-            if (!changeInfo.hasChanged(wc)) {
+            if (!changeInfo.hasChanged()) {
                 ProtoLog.v(ProtoLogGroup.WM_DEBUG_WINDOW_TRANSITIONS,
                         "  Rejecting as no-op: %s", wc);
                 continue;
             }
-            targets.add(wc);
+            targets.add(changeInfo);
         }
         ProtoLog.v(ProtoLogGroup.WM_DEBUG_WINDOW_TRANSITIONS, "  Initial targets: %s",
                 targets.mArray);
@@ -1499,7 +1508,7 @@ class Transition implements BLASTSyncEngine.TransactionReadyListener {
         // Establish the relationship between the targets and their top changes.
         populateParentChanges(targets, changes);
 
-        final ArrayList<WindowContainer> targetList = targets.getListSortedByZ();
+        final ArrayList<ChangeInfo> targetList = targets.getListSortedByZ();
         ProtoLog.v(ProtoLogGroup.WM_DEBUG_WINDOW_TRANSITIONS, "  Final targets: %s", targetList);
         return targetList;
     }
@@ -1507,14 +1516,15 @@ class Transition implements BLASTSyncEngine.TransactionReadyListener {
     /** Populates parent to the change info and collects intermediate targets. */
     private static void populateParentChanges(Targets targets,
             ArrayMap<WindowContainer, ChangeInfo> changes) {
-        final ArrayList<WindowContainer<?>> intermediates = new ArrayList<>();
+        final ArrayList<ChangeInfo> intermediates = new ArrayList<>();
         // Make a copy to iterate because the original array may be modified.
-        final ArrayList<WindowContainer<?>> targetList = new ArrayList<>(targets.mArray.size());
+        final ArrayList<ChangeInfo> targetList = new ArrayList<>(targets.mArray.size());
         for (int i = targets.mArray.size() - 1; i >= 0; --i) {
             targetList.add(targets.mArray.valueAt(i));
         }
         for (int i = targetList.size() - 1; i >= 0; --i) {
-            final WindowContainer<?> wc = targetList.get(i);
+            final ChangeInfo targetChange = targetList.get(i);
+            final WindowContainer wc = targetChange.mContainer;
             // Wallpaper must belong to the top (regardless of how nested it is in DisplayAreas).
             final boolean skipIntermediateReports = isWallpaper(wc);
             intermediates.clear();
@@ -1523,34 +1533,34 @@ class Transition implements BLASTSyncEngine.TransactionReadyListener {
             for (WindowContainer<?> p = getAnimatableParent(wc); p != null;
                     p = getAnimatableParent(p)) {
                 final ChangeInfo parentChange = changes.get(p);
-                if (parentChange == null || !parentChange.hasChanged(p)) break;
+                if (parentChange == null || !parentChange.hasChanged()) break;
                 if (p.mRemoteToken == null) {
                     // Intermediate parents must be those that has window to be managed by Shell.
                     continue;
                 }
                 if (parentChange.mEndParent != null && !skipIntermediateReports) {
-                    changes.get(wc).mEndParent = p;
+                    targetChange.mEndParent = p;
                     // The chain above the parent was processed.
                     break;
                 }
-                if (targetList.contains(p)) {
+                if (targetList.contains(parentChange)) {
                     if (skipIntermediateReports) {
-                        changes.get(wc).mEndParent = p;
+                        targetChange.mEndParent = p;
                     } else {
-                        intermediates.add(p);
+                        intermediates.add(parentChange);
                     }
                     foundParentInTargets = true;
                     break;
                 } else if (reportIfNotTop(p) && !skipIntermediateReports) {
-                    intermediates.add(p);
+                    intermediates.add(parentChange);
                 }
             }
             if (!foundParentInTargets || intermediates.isEmpty()) continue;
             // Add any always-report parents along the way.
-            changes.get(wc).mEndParent = intermediates.get(0);
+            targetChange.mEndParent = intermediates.get(0).mContainer;
             for (int j = 0; j < intermediates.size() - 1; j++) {
-                final WindowContainer<?> intermediate = intermediates.get(j);
-                changes.get(intermediate).mEndParent = intermediates.get(j + 1);
+                final ChangeInfo intermediate = intermediates.get(j);
+                intermediate.mEndParent = intermediates.get(j + 1).mContainer;
                 targets.add(intermediate);
             }
         }
@@ -1611,14 +1621,13 @@ class Transition implements BLASTSyncEngine.TransactionReadyListener {
     @VisibleForTesting
     @NonNull
     static TransitionInfo calculateTransitionInfo(@TransitionType int type, int flags,
-            ArrayList<WindowContainer> sortedTargets,
-            ArrayMap<WindowContainer, ChangeInfo> changes,
+            ArrayList<ChangeInfo> sortedTargets,
             @Nullable SurfaceControl.Transaction startT) {
         final TransitionInfo out = new TransitionInfo(type, flags);
 
         WindowContainer<?> topApp = null;
         for (int i = 0; i < sortedTargets.size(); i++) {
-            final WindowContainer<?> wc = sortedTargets.get(i);
+            final WindowContainer<?> wc = sortedTargets.get(i).mContainer;
             if (!isWallpaper(wc)) {
                 topApp = wc;
                 break;
@@ -1629,7 +1638,7 @@ class Transition implements BLASTSyncEngine.TransactionReadyListener {
             return out;
         }
 
-        WindowContainer<?> ancestor = findCommonAncestor(sortedTargets, changes, topApp);
+        WindowContainer<?> ancestor = findCommonAncestor(sortedTargets, topApp);
 
         // Make leash based on highest (z-order) direct child of ancestor with a participant.
         // TODO(b/261418859): Handle the case when the target contains window containers which
@@ -1647,8 +1656,8 @@ class Transition implements BLASTSyncEngine.TransactionReadyListener {
         // Convert all the resolved ChangeInfos into TransactionInfo.Change objects in order.
         final int count = sortedTargets.size();
         for (int i = 0; i < count; ++i) {
-            final WindowContainer target = sortedTargets.get(i);
-            final ChangeInfo info = changes.get(target);
+            final ChangeInfo info = sortedTargets.get(i);
+            final WindowContainer target = info.mContainer;
             final TransitionInfo.Change change = new TransitionInfo.Change(
                     target.mRemoteToken != null ? target.mRemoteToken.toWindowContainerToken()
                             : null, getLeashSurface(target, startT));
@@ -1758,14 +1767,14 @@ class Transition implements BLASTSyncEngine.TransactionReadyListener {
      */
     @NonNull
     private static WindowContainer<?> findCommonAncestor(
-            @NonNull ArrayList<WindowContainer> targets,
-            @NonNull ArrayMap<WindowContainer, ChangeInfo> changes,
+            @NonNull ArrayList<ChangeInfo> targets,
             @NonNull WindowContainer<?> topApp) {
         WindowContainer<?> ancestor = topApp.getParent();
         // Go up ancestor parent chain until all targets are descendants. Ancestor should never be
         // null because all targets are attached.
         for (int i = targets.size() - 1; i >= 0; i--) {
-            final WindowContainer wc = targets.get(i);
+            final ChangeInfo change = targets.get(i);
+            final WindowContainer wc = change.mContainer;
             if (isWallpaper(wc)) {
                 // Skip the non-app window.
                 continue;
@@ -1777,7 +1786,6 @@ class Transition implements BLASTSyncEngine.TransactionReadyListener {
             // Make sure the previous parent is also a descendant to make sure the animation won't
             // be covered by other windows below the previous parent. For example, when reparenting
             // an activity from PiP Task to split screen Task.
-            final ChangeInfo change = changes.get(wc);
             final WindowContainer prevParent = change.mCommonAncestor;
             if (prevParent == null || !prevParent.isAttached()) {
                 continue;
@@ -1790,11 +1798,13 @@ class Transition implements BLASTSyncEngine.TransactionReadyListener {
     }
 
     private static WindowManager.LayoutParams getLayoutParamsForAnimationsStyle(int type,
-            ArrayList<WindowContainer> sortedTargets) {
+            ArrayList<ChangeInfo> sortedTargets) {
         // Find the layout params of the top-most application window that is part of the
         // transition, which is what will control the animation theme.
         final ArraySet<Integer> activityTypes = new ArraySet<>();
-        for (WindowContainer target : sortedTargets) {
+        final int targetCount = sortedTargets.size();
+        for (int i = 0; i < targetCount; ++i) {
+            final WindowContainer target = sortedTargets.get(i).mContainer;
             if (target.asActivityRecord() != null) {
                 activityTypes.add(target.getActivityType());
             } else if (target.asWindowToken() == null && target.asWindowState() == null) {
@@ -1818,7 +1828,7 @@ class Transition implements BLASTSyncEngine.TransactionReadyListener {
     }
 
     private static ActivityRecord findAnimLayoutParamsActivityRecord(
-            List<WindowContainer> sortedTargets,
+            List<ChangeInfo> sortedTargets,
             @TransitionType int transit, ArraySet<Integer> activityTypes) {
         // Remote animations always win, but fullscreen windows override non-fullscreen windows.
         ActivityRecord result = lookForTopWindowWithFilter(sortedTargets,
@@ -1835,9 +1845,11 @@ class Transition implements BLASTSyncEngine.TransactionReadyListener {
         return lookForTopWindowWithFilter(sortedTargets, w -> w.findMainWindow() != null);
     }
 
-    private static ActivityRecord lookForTopWindowWithFilter(List<WindowContainer> sortedTargets,
+    private static ActivityRecord lookForTopWindowWithFilter(List<ChangeInfo> sortedTargets,
             Predicate<ActivityRecord> filter) {
-        for (WindowContainer target : sortedTargets) {
+        final int count = sortedTargets.size();
+        for (int i = 0; i < count; ++i) {
+            final WindowContainer target = sortedTargets.get(i).mContainer;
             final ActivityRecord activityRecord = target.asTaskFragment() != null
                     ? target.asTaskFragment().getTopNonFinishingActivity()
                     : target.asActivityRecord();
@@ -1871,7 +1883,7 @@ class Transition implements BLASTSyncEngine.TransactionReadyListener {
         for (int i = mParticipants.size() - 1; i >= 0; --i) {
             final WindowContainer<?> wc = mParticipants.valueAt(i);
             final DisplayContent dc = wc.asDisplayContent();
-            if (dc == null || !mChanges.get(dc).hasChanged(dc)) continue;
+            if (dc == null || !mChanges.get(dc).hasChanged()) continue;
             dc.sendNewConfiguration();
             changed = true;
         }
@@ -1913,6 +1925,7 @@ class Transition implements BLASTSyncEngine.TransactionReadyListener {
         @Retention(RetentionPolicy.SOURCE)
         @interface Flag {}
 
+        @NonNull final WindowContainer mContainer;
         /**
          * "Parent" that is also included in the transition. When populating the parent changes, we
          * may skip the intermediate parents, so this may not be the actual parent in the hierarchy.
@@ -1945,6 +1958,7 @@ class Transition implements BLASTSyncEngine.TransactionReadyListener {
         float mSnapshotLuma;
 
         ChangeInfo(@NonNull WindowContainer origState) {
+            mContainer = origState;
             mVisible = origState.isVisibleRequested();
             mWindowingMode = origState.getWindowingMode();
             mAbsoluteBounds.set(origState.getBounds());
@@ -1954,13 +1968,19 @@ class Transition implements BLASTSyncEngine.TransactionReadyListener {
         }
 
         @VisibleForTesting
-        ChangeInfo(boolean visible, boolean existChange) {
+        ChangeInfo(@NonNull WindowContainer container, boolean visible, boolean existChange) {
+            mContainer = container;
             mVisible = visible;
             mExistenceChanged = existChange;
             mShowWallpaper = false;
         }
 
-        boolean hasChanged(@NonNull WindowContainer newState) {
+        @Override
+        public String toString() {
+            return mContainer.toString();
+        }
+
+        boolean hasChanged() {
             // the task including transient launch must promote to root task
             if ((mFlags & ChangeInfo.FLAG_TRANSIENT_LAUNCH) != 0
                     || (mFlags & ChangeInfo.FLAG_ABOVE_TRANSIENT_LAUNCH) != 0) {
@@ -1968,15 +1988,15 @@ class Transition implements BLASTSyncEngine.TransactionReadyListener {
             }
             // If it's invisible and hasn't changed visibility, always return false since even if
             // something changed, it wouldn't be a visible change.
-            final boolean currVisible = newState.isVisibleRequested();
+            final boolean currVisible = mContainer.isVisibleRequested();
             if (currVisible == mVisible && !mVisible) return false;
             return currVisible != mVisible
                     || mKnownConfigChanges != 0
                     // if mWindowingMode is 0, this container wasn't attached at collect time, so
                     // assume no change in windowing-mode.
-                    || (mWindowingMode != 0 && newState.getWindowingMode() != mWindowingMode)
-                    || !newState.getBounds().equals(mAbsoluteBounds)
-                    || mRotation != newState.getWindowConfiguration().getRotation();
+                    || (mWindowingMode != 0 && mContainer.getWindowingMode() != mWindowingMode)
+                    || !mContainer.getBounds().equals(mAbsoluteBounds)
+                    || mRotation != mContainer.getWindowConfiguration().getRotation();
         }
 
         @TransitionInfo.TransitionMode
@@ -2233,19 +2253,19 @@ class Transition implements BLASTSyncEngine.TransactionReadyListener {
      */
     private static class Targets {
         /** All targets. Its keys (depth) are sorted in ascending order naturally. */
-        final SparseArray<WindowContainer<?>> mArray = new SparseArray<>();
+        final SparseArray<ChangeInfo> mArray = new SparseArray<>();
         /** The targets which were represented by their parent. */
-        private ArrayList<WindowContainer<?>> mRemovedTargets;
+        private ArrayList<ChangeInfo> mRemovedTargets;
         private int mDepthFactor;
 
-        void add(WindowContainer<?> target) {
+        void add(ChangeInfo target) {
             // The number of slots per depth is larger than the total number of window container,
             // so the depth score (key) won't have collision.
             if (mDepthFactor == 0) {
-                mDepthFactor = target.mWmService.mRoot.getTreeWeight() + 1;
+                mDepthFactor = target.mContainer.mWmService.mRoot.getTreeWeight() + 1;
             }
-            int score = target.getPrefixOrderIndex();
-            WindowContainer<?> wc = target;
+            int score = target.mContainer.getPrefixOrderIndex();
+            WindowContainer<?> wc = target.mContainer;
             while (wc != null) {
                 final WindowContainer<?> parent = wc.getParent();
                 if (parent != null) {
@@ -2256,7 +2276,8 @@ class Transition implements BLASTSyncEngine.TransactionReadyListener {
             mArray.put(score, target);
         }
 
-        void remove(int index, WindowContainer<?> removingTarget) {
+        void remove(int index) {
+            final ChangeInfo removingTarget = mArray.valueAt(index);
             mArray.removeAt(index);
             if (mRemovedTargets == null) {
                 mRemovedTargets = new ArrayList<>();
@@ -2264,19 +2285,19 @@ class Transition implements BLASTSyncEngine.TransactionReadyListener {
             mRemovedTargets.add(removingTarget);
         }
 
-        boolean wasParticipated(WindowContainer<?> wc) {
+        boolean wasParticipated(ChangeInfo wc) {
             return mArray.indexOfValue(wc) >= 0
                     || (mRemovedTargets != null && mRemovedTargets.contains(wc));
         }
 
         /** Returns the target list sorted by z-order in ascending order (index 0 is top). */
-        ArrayList<WindowContainer> getListSortedByZ() {
-            final SparseArray<WindowContainer<?>> arrayByZ = new SparseArray<>(mArray.size());
+        ArrayList<ChangeInfo> getListSortedByZ() {
+            final SparseArray<ChangeInfo> arrayByZ = new SparseArray<>(mArray.size());
             for (int i = mArray.size() - 1; i >= 0; --i) {
                 final int zOrder = mArray.keyAt(i) % mDepthFactor;
                 arrayByZ.put(zOrder, mArray.valueAt(i));
             }
-            final ArrayList<WindowContainer> sortedTargets = new ArrayList<>(arrayByZ.size());
+            final ArrayList<ChangeInfo> sortedTargets = new ArrayList<>(arrayByZ.size());
             for (int i = arrayByZ.size() - 1; i >= 0; --i) {
                 sortedTargets.add(arrayByZ.valueAt(i));
             }

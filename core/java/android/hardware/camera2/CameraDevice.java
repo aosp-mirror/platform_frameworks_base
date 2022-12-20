@@ -859,6 +859,28 @@ public abstract class CameraDevice implements AutoCloseable {
      * format {@link android.graphics.ImageFormat#YUV_420_888} with a 10-bit profile
      * will cause a capture session initialization failure.
      * </p>
+     * <p>{@link android.graphics.ImageFormat#JPEG_R} may also be supported if advertised by
+     * {@link android.hardware.camera2.params.StreamConfigurationMap}. When initializing a capture
+     * session that includes a Jpeg/R camera output clients must consider the following items w.r.t.
+     * the 10-bit mandatory stream combination table:
+     *
+     * <ul>
+     *     <li>To generate the compressed Jpeg/R image a single
+     *     {@link android.graphics.ImageFormat#YCBCR_P010} output will be used internally by
+     *     the camera device.</li>
+     *     <li>On camera devices that are able to support concurrent 10 and 8-bit capture requests
+     *     see {@link android.hardware.camera2.params.DynamicRangeProfiles#getProfileCaptureRequestConstraints}
+     *     an extra {@link android.graphics.ImageFormat#JPEG} will also
+     *     be configured internally to help speed up the encoding process.</li>
+     * </ul>
+     *
+     * Jpeg/R camera outputs will typically be able to support the MAXIMUM device resolution.
+     * Clients can also call {@link StreamConfigurationMap#getOutputSizes(int)} for a complete list
+     * supported sizes.
+     * Camera clients that register a Jpeg/R output within a stream combination that doesn't fit
+     * in the mandatory stream table above can call
+     * {@link CameraDevice#isSessionConfigurationSupported} to ensure that this particular
+     * configuration is supported.</p>
      *
      * <p>Devices with the STREAM_USE_CASE capability ({@link
      * CameraCharacteristics#REQUEST_AVAILABLE_CAPABILITIES} includes {@link

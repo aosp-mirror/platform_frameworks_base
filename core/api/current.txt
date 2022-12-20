@@ -1174,6 +1174,8 @@ package android {
     field public static final int persistentDrawingCache = 16842990; // 0x10100ee
     field public static final int persistentWhenFeatureAvailable = 16844131; // 0x1010563
     field @Deprecated public static final int phoneNumber = 16843111; // 0x1010167
+    field public static final int physicalKeyboardHintLanguageTag;
+    field public static final int physicalKeyboardHintLayoutType;
     field public static final int pivotX = 16843189; // 0x10101b5
     field public static final int pivotY = 16843190; // 0x10101b6
     field public static final int pointerIcon = 16844041; // 0x1010509
@@ -4295,7 +4297,7 @@ package android.app {
     method @Deprecated public final void removeDialog(int);
     method public void reportFullyDrawn();
     method public android.view.DragAndDropPermissions requestDragAndDropPermissions(android.view.DragEvent);
-    method public void requestFullscreenMode(@NonNull int, @Nullable android.os.OutcomeReceiver<java.lang.Void,java.lang.Throwable>);
+    method public void requestFullscreenMode(int, @Nullable android.os.OutcomeReceiver<java.lang.Void,java.lang.Throwable>);
     method public final void requestPermissions(@NonNull String[], int);
     method public final void requestShowKeyboardShortcuts();
     method @Deprecated public boolean requestVisibleBehind(boolean);
@@ -15046,6 +15048,7 @@ package android.graphics {
     field public static final int FLEX_RGB_888 = 41; // 0x29
     field public static final int HEIC = 1212500294; // 0x48454946
     field public static final int JPEG = 256; // 0x100
+    field public static final int JPEG_R = 4101; // 0x1005
     field public static final int NV16 = 16; // 0x10
     field public static final int NV21 = 17; // 0x11
     field public static final int PRIVATE = 34; // 0x22
@@ -17227,6 +17230,7 @@ package android.hardware {
     field public static final int DATASPACE_DYNAMIC_DEPTH = 4098; // 0x1002
     field public static final int DATASPACE_HEIF = 4100; // 0x1004
     field public static final int DATASPACE_JFIF = 146931712; // 0x8c20000
+    field public static final int DATASPACE_JPEG_R = 4101; // 0x1005
     field public static final int DATASPACE_SCRGB = 411107328; // 0x18810000
     field public static final int DATASPACE_SCRGB_LINEAR = 406913024; // 0x18410000
     field public static final int DATASPACE_SRGB = 142671872; // 0x8810000
@@ -21195,6 +21199,7 @@ package android.media {
     method @NonNull public android.media.AudioTrack.Builder setAudioAttributes(@NonNull android.media.AudioAttributes) throws java.lang.IllegalArgumentException;
     method @NonNull public android.media.AudioTrack.Builder setAudioFormat(@NonNull android.media.AudioFormat) throws java.lang.IllegalArgumentException;
     method @NonNull public android.media.AudioTrack.Builder setBufferSizeInBytes(@IntRange(from=0) int) throws java.lang.IllegalArgumentException;
+    method @NonNull public android.media.AudioTrack.Builder setContext(@NonNull android.content.Context);
     method @NonNull public android.media.AudioTrack.Builder setEncapsulationMode(int);
     method @NonNull public android.media.AudioTrack.Builder setOffloadedPlayback(boolean);
     method @NonNull public android.media.AudioTrack.Builder setPerformanceMode(int);
@@ -40472,6 +40477,7 @@ package android.speech {
 
   public abstract class RecognitionService extends android.app.Service {
     ctor public RecognitionService();
+    method public int getMaxConcurrentSessionsCount();
     method public final android.os.IBinder onBind(android.content.Intent);
     method protected abstract void onCancel(android.speech.RecognitionService.Callback);
     method public void onCheckRecognitionSupport(@NonNull android.content.Intent, @NonNull android.speech.RecognitionService.SupportCallback);
@@ -43825,6 +43831,7 @@ package android.telephony {
 
   public final class SignalThresholdInfo implements android.os.Parcelable {
     method public int describeContents();
+    method public int getHysteresisDb();
     method public static int getMaximumNumberOfThresholdsAllowed();
     method public static int getMinimumNumberOfThresholdsAllowed();
     method public int getRadioAccessNetworkType();
@@ -43847,6 +43854,7 @@ package android.telephony {
   public static final class SignalThresholdInfo.Builder {
     ctor public SignalThresholdInfo.Builder();
     method @NonNull public android.telephony.SignalThresholdInfo build();
+    method @NonNull public android.telephony.SignalThresholdInfo.Builder setHysteresisDb(@IntRange(from=0) int);
     method @NonNull public android.telephony.SignalThresholdInfo.Builder setRadioAccessNetworkType(int);
     method @NonNull public android.telephony.SignalThresholdInfo.Builder setSignalMeasurementType(int);
     method @NonNull public android.telephony.SignalThresholdInfo.Builder setThresholds(@NonNull int[]);
@@ -44115,6 +44123,7 @@ package android.telephony {
     method public int getActiveSubscriptionInfoCountMax();
     method @RequiresPermission(android.Manifest.permission.READ_PHONE_STATE) public android.telephony.SubscriptionInfo getActiveSubscriptionInfoForSimSlotIndex(int);
     method @RequiresPermission(android.Manifest.permission.READ_PHONE_STATE) public java.util.List<android.telephony.SubscriptionInfo> getActiveSubscriptionInfoList();
+    method @NonNull @RequiresPermission(anyOf={android.Manifest.permission.READ_PHONE_STATE, "carrier privileges"}) public java.util.List<android.telephony.SubscriptionInfo> getAllSubscriptionInfoList();
     method @NonNull public java.util.List<android.telephony.SubscriptionInfo> getCompleteActiveSubscriptionInfoList();
     method public static int getDefaultDataSubscriptionId();
     method public static int getDefaultSmsSubscriptionId();
@@ -44126,7 +44135,8 @@ package android.telephony {
     method @NonNull @RequiresPermission(anyOf={android.Manifest.permission.READ_PHONE_NUMBERS, "android.permission.READ_PRIVILEGED_PHONE_STATE", "carrier privileges"}) public String getPhoneNumber(int, int);
     method @NonNull @RequiresPermission(anyOf={android.Manifest.permission.READ_PHONE_NUMBERS, "android.permission.READ_PRIVILEGED_PHONE_STATE", "carrier privileges"}) public String getPhoneNumber(int);
     method public static int getSlotIndex(int);
-    method @Nullable public int[] getSubscriptionIds(int);
+    method public static int getSubscriptionId(int);
+    method @Deprecated @Nullable public int[] getSubscriptionIds(int);
     method @NonNull public java.util.List<android.telephony.SubscriptionPlan> getSubscriptionPlans(int);
     method @NonNull @RequiresPermission(android.Manifest.permission.READ_PHONE_STATE) public java.util.List<android.telephony.SubscriptionInfo> getSubscriptionsInGroup(@NonNull android.os.ParcelUuid);
     method @RequiresPermission(android.Manifest.permission.READ_PHONE_STATE) public boolean isActiveSubscriptionId(int);
@@ -54438,6 +54448,8 @@ package android.view.inputmethod {
     method public String getMode();
     method @NonNull public CharSequence getNameOverride();
     method public int getNameResId();
+    method @Nullable public android.icu.util.ULocale getPhysicalKeyboardHintLanguageTag();
+    method @NonNull public String getPhysicalKeyboardHintLayoutType();
     method public boolean isAsciiCapable();
     method public boolean isAuxiliary();
     method public boolean overridesImplicitlyEnabledSubtype();
@@ -54452,6 +54464,7 @@ package android.view.inputmethod {
     method public android.view.inputmethod.InputMethodSubtype.InputMethodSubtypeBuilder setIsAuxiliary(boolean);
     method public android.view.inputmethod.InputMethodSubtype.InputMethodSubtypeBuilder setLanguageTag(String);
     method public android.view.inputmethod.InputMethodSubtype.InputMethodSubtypeBuilder setOverridesImplicitlyEnabledSubtype(boolean);
+    method @NonNull public android.view.inputmethod.InputMethodSubtype.InputMethodSubtypeBuilder setPhysicalKeyboardHint(@Nullable android.icu.util.ULocale, @NonNull String);
     method public android.view.inputmethod.InputMethodSubtype.InputMethodSubtypeBuilder setSubtypeExtraValue(String);
     method public android.view.inputmethod.InputMethodSubtype.InputMethodSubtypeBuilder setSubtypeIconResId(int);
     method public android.view.inputmethod.InputMethodSubtype.InputMethodSubtypeBuilder setSubtypeId(int);

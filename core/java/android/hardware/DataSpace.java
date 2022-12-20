@@ -408,6 +408,19 @@ public final class DataSpace {
      */
     public static final int DATASPACE_HEIF = 4100;
 
+    /**
+     * ISO/IEC TBD
+     *
+     * JPEG image with embedded recovery map following the Jpeg/R specification.
+     *
+     * <p>This value must always remain aligned with the public ImageFormat Jpeg/R definition and is
+     * valid with formats:
+     *    HAL_PIXEL_FORMAT_BLOB: JPEG image encoded by Jpeg/R encoder according to ISO/IEC TBD.
+     * The image contains a standard SDR JPEG and a recovery map. Jpeg/R decoders can use the
+     * map to recover the input image.</p>
+     */
+     public static final int DATASPACE_JPEG_R = 4101;
+
     /** @hide */
     @Retention(RetentionPolicy.SOURCE)
     @IntDef(flag = true, value = {
@@ -626,6 +639,7 @@ public final class DataSpace {
         DATASPACE_DEPTH,
         DATASPACE_DYNAMIC_DEPTH,
         DATASPACE_HEIF,
+        DATASPACE_JPEG_R,
         DATASPACE_UNKNOWN,
         DATASPACE_SCRGB_LINEAR,
         DATASPACE_SRGB,

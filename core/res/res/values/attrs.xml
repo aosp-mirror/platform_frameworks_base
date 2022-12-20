@@ -3812,6 +3812,17 @@
         <!-- The BCP-47 Language Tag of the subtype.  This replaces
         {@link android.R.styleable#InputMethod_Subtype_imeSubtypeLocale}.  -->
         <attr name="languageTag" format="string" />
+        <!-- The BCP-47 Language Tag of the preferred physical keyboard of the subtype. If it's not
+             specified, {@link android.R.styleable#InputMethod_Subtype_languageTag} will be used.
+             See also
+             {@link android.view.inputmethod.InputMethodSubtype#getPhysicalKeyboardHintLanguageTag}.
+             -->
+        <attr name="physicalKeyboardHintLanguageTag" format="string" />
+        <!-- The layout type of the preferred physical keyboard of the subtype.
+             It matches the layout type string in the keyboard layout definition. See also
+             {@link android.view.inputmethod.InputMethodSubtype#getPhysicalKeyboardHintLayoutType}.
+             -->
+        <attr name="physicalKeyboardHintLayoutType" format="string" />
     </declare-styleable>
 
     <!-- Use <code>spell-checker</code> as the root tag of the XML resource that

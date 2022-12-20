@@ -62,5 +62,13 @@ option java_package com.android.server.wm
 # bootanim finished:
 31007 wm_boot_animation_done (time|2|3)
 
+
+# IME surface parent is updated.
+32003 imf_update_ime_parent (surface name|3)
+# IME snapshot is shown.
+32004 imf_show_ime_screenshot (target window|3),(transition|1),(surface position|3)
+# IME snapshot is hidden.
+32005 imf_remove_ime_screenshot (target window|3)
+
 # Request surface flinger to show / hide the wallpaper surface.
 33001 wm_wallpaper_surface (Display Id|1|5),(Visible|1),(Target|3)

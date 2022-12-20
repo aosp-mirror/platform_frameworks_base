@@ -49,8 +49,11 @@ import static android.view.Display.INVALID_DISPLAY;
 import static android.view.WindowManager.DISPLAY_IME_POLICY_HIDE;
 import static android.view.WindowManager.DISPLAY_IME_POLICY_LOCAL;
 
+import static com.android.server.EventLogTags.IMF_HIDE_IME;
+import static com.android.server.EventLogTags.IMF_SHOW_IME;
 import static com.android.server.inputmethod.InputMethodBindingController.TIME_TO_RECONNECT;
 import static com.android.server.inputmethod.InputMethodUtils.isSoftInputModeStateVisibleAllowed;
+import static com.android.server.wm.WindowManagerDebugConfig.DEBUG_IME_VISIBILITY;
 
 import static java.lang.annotation.RetentionPolicy.SOURCE;
 
@@ -3439,6 +3442,12 @@ public final class InputMethodManagerService extends IInputMethodManager.Stub
             }
             // TODO(b/192412909): Check if we can always call onShowHideSoftInputRequested() or not.
             if (curMethod.showSoftInput(showInputToken, statsToken, showFlags, resultReceiver)) {
+                if (DEBUG_IME_VISIBILITY) {
+                    EventLog.writeEvent(IMF_SHOW_IME, statsToken.getTag(),
+                            Objects.toString(mCurFocusedWindow),
+                            InputMethodDebug.softInputDisplayReasonToString(reason),
+                            InputMethodDebug.softInputModeToString(mCurFocusedWindowSoftInputMode));
+                }
                 onShowHideSoftInputRequested(true /* show */, windowToken, reason);
             }
             mInputShown = true;
@@ -3537,6 +3546,12 @@ public final class InputMethodManagerService extends IInputMethodManager.Stub
             // TODO(b/192412909): Check if we can always call onShowHideSoftInputRequested() or not.
             if (curMethod.hideSoftInput(hideInputToken, statsToken, 0 /* flags */,
                     resultReceiver)) {
+                if (DEBUG_IME_VISIBILITY) {
+                    EventLog.writeEvent(IMF_HIDE_IME, statsToken.getTag(),
+                            Objects.toString(mCurFocusedWindow),
+                            InputMethodDebug.softInputDisplayReasonToString(reason),
+                            InputMethodDebug.softInputModeToString(mCurFocusedWindowSoftInputMode));
+                }
                 onShowHideSoftInputRequested(false /* show */, windowToken, reason);
             }
             res = true;

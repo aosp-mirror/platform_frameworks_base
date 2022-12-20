@@ -19,46 +19,49 @@ package com.android.server.speech;
 import static com.android.internal.infra.AbstractRemoteService.PERMANENT_BOUND_TIMEOUT_MS;
 
 import android.annotation.NonNull;
-import android.annotation.Nullable;
 import android.content.AttributionSource;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
+import android.os.IBinder;
 import android.os.RemoteException;
 import android.speech.IRecognitionListener;
 import android.speech.IRecognitionService;
 import android.speech.IRecognitionSupportCallback;
 import android.speech.RecognitionService;
 import android.speech.SpeechRecognizer;
+import android.text.TextUtils;
 import android.util.Log;
+import android.util.Pair;
 import android.util.Slog;
 
 import com.android.internal.annotations.GuardedBy;
 import com.android.internal.infra.ServiceConnector;
 
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
 final class RemoteSpeechRecognitionService extends ServiceConnector.Impl<IRecognitionService> {
     private static final String TAG = RemoteSpeechRecognitionService.class.getSimpleName();
     private static final boolean DEBUG = false;
+
+    /** Maximum number of clients connected to this object at the same time. */
+    private static final int MAX_CONCURRENT_CLIENTS = 100;
 
     private final Object mLock = new Object();
 
     private boolean mConnected = false;
 
-    @Nullable
-    private IRecognitionListener mListener;
-
-    @Nullable
+    /** Map containing info about connected clients indexed by the their listeners. */
     @GuardedBy("mLock")
-    private DelegatingListener mDelegatingListener;
+    private final Map<IBinder, ClientState> mClients = new HashMap<>();
 
-    // Makes sure we can block startListening() if session is still in progress.
+    /** List of pairs associating clients' binder tokens with corresponding listeners. */
     @GuardedBy("mLock")
-    private boolean mSessionInProgress = false;
-
-    // Makes sure we call startProxyOp / finishProxyOp at right times and only once per session.
-    @GuardedBy("mLock")
-    private boolean mRecordingInProgress = false;
+    private final List<Pair<IBinder, IRecognitionListener>> mClientListeners = new ArrayList<>();
 
     private final int mCallingUid;
     private final ComponentName mComponentName;
@@ -78,7 +81,7 @@ final class RemoteSpeechRecognitionService extends ServiceConnector.Impl<IRecogn
         mComponentName = serviceName;
 
         if (DEBUG) {
-            Slog.i(TAG, "Bound to recognition service at: " + serviceName.flattenToString());
+            Slog.i(TAG, "Bound to recognition service at: " + serviceName.flattenToString() + ".");
         }
     }
 
@@ -89,13 +92,14 @@ final class RemoteSpeechRecognitionService extends ServiceConnector.Impl<IRecogn
     void startListening(Intent recognizerIntent, IRecognitionListener listener,
             @NonNull AttributionSource attributionSource) {
         if (DEBUG) {
-            Slog.i(TAG, String.format("#startListening for package: %s, feature=%s, callingUid=%d",
+            Slog.i(TAG, TextUtils.formatSimple("#startListening for package: "
+                            + "%s, feature=%s, callingUid=%d.",
                     attributionSource.getPackageName(), attributionSource.getAttributionTag(),
                     mCallingUid));
         }
 
         if (listener == null) {
-            Log.w(TAG, "#startListening called with no preceding #setListening - ignoring");
+            Slog.w(TAG, "#startListening called with no preceding #setListening - ignoring.");
             return;
         }
 
@@ -105,29 +109,52 @@ final class RemoteSpeechRecognitionService extends ServiceConnector.Impl<IRecogn
         }
 
         synchronized (mLock) {
-            if (mSessionInProgress) {
-                Slog.i(TAG, "#startListening called while listening is in progress.");
-                tryRespondWithError(listener, SpeechRecognizer.ERROR_RECOGNIZER_BUSY);
-                return;
+            ClientState clientState = mClients.get(listener.asBinder());
+
+            if (clientState == null) {
+                if (mClients.size() >= MAX_CONCURRENT_CLIENTS) {
+                    tryRespondWithError(listener, SpeechRecognizer.ERROR_RECOGNIZER_BUSY);
+                    Log.i(TAG, "#startListening received "
+                            + "when the recognizer's capacity is full - ignoring this call.");
+                    return;
+                }
+
+                final ClientState newClientState = new ClientState();
+                newClientState.mDelegatingListener = new DelegatingListener(listener,
+                        () -> {
+                            // To be invoked in terminal calls on success.
+                            if (DEBUG) {
+                                Slog.i(TAG, "Recognition session completed successfully.");
+                            }
+                            synchronized (mLock) {
+                                newClientState.mRecordingInProgress = false;
+                            }
+                        },
+                        () -> {
+                            // To be invoked in terminal calls on failure.
+                            if (DEBUG) {
+                                Slog.i(TAG, "Recognition session failed.");
+                            }
+                            removeClient(listener);
+                        });
+
+                if (DEBUG) {
+                    Log.d(TAG, "Added a new client to the map.");
+                }
+                mClients.put(listener.asBinder(), newClientState);
+                clientState = newClientState;
+            } else {
+                if (clientState.mRecordingInProgress) {
+                    Slog.i(TAG, "#startListening called "
+                            + "while listening is in progress for this caller.");
+                    tryRespondWithError(listener, SpeechRecognizer.ERROR_CLIENT);
+                    return;
+                }
+                clientState.mRecordingInProgress = true;
             }
 
-            mSessionInProgress = true;
-            mRecordingInProgress = true;
-
-            mListener = listener;
-            mDelegatingListener = new DelegatingListener(listener, () -> {
-                // To be invoked in terminal calls of the callback: results() or error()
-                if (DEBUG) {
-                    Slog.i(TAG, "Recognition session complete");
-                }
-
-                synchronized (mLock) {
-                    resetStateLocked();
-                }
-            });
-
-            // Eager local evaluation to avoid reading a different or null value at closure-run-time
-            final DelegatingListener listenerToStart = this.mDelegatingListener;
+            // Eager local evaluation to avoid reading a different or null value at closure runtime.
+            final DelegatingListener listenerToStart = clientState.mDelegatingListener;
             run(service ->
                     service.startListening(
                             recognizerIntent,
@@ -147,26 +174,22 @@ final class RemoteSpeechRecognitionService extends ServiceConnector.Impl<IRecogn
         }
 
         synchronized (mLock) {
-            if (mListener == null) {
-                Log.w(TAG, "#stopListening called with no preceding #startListening - ignoring");
+            ClientState clientState = mClients.get(listener.asBinder());
+
+            if (clientState == null) {
+                Slog.w(TAG, "#stopListening called with no preceding #startListening - ignoring.");
                 tryRespondWithError(listener, SpeechRecognizer.ERROR_CLIENT);
                 return;
             }
-
-            if (mListener.asBinder() != listener.asBinder()) {
-                Log.w(TAG, "#stopListening called with an unexpected listener");
+            if (!clientState.mRecordingInProgress) {
                 tryRespondWithError(listener, SpeechRecognizer.ERROR_CLIENT);
+                Slog.i(TAG, "#stopListening called while listening isn't in progress - ignoring.");
                 return;
             }
+            clientState.mRecordingInProgress = false;
 
-            if (!mRecordingInProgress) {
-                Slog.i(TAG, "#stopListening called while listening isn't in progress, ignoring.");
-                return;
-            }
-            mRecordingInProgress = false;
-
-            // Eager local evaluation to avoid reading a different or null value at closure-run-time
-            final DelegatingListener listenerToStop = this.mDelegatingListener;
+            // Eager local evaluation to avoid reading a different or null value at closure runtime.
+            final DelegatingListener listenerToStop = clientState.mDelegatingListener;
             run(service -> service.stopListening(listenerToStop));
         }
     }
@@ -181,33 +204,30 @@ final class RemoteSpeechRecognitionService extends ServiceConnector.Impl<IRecogn
         }
 
         synchronized (mLock) {
-            if (mListener == null) {
+            ClientState clientState = mClients.get(listener.asBinder());
+
+            if (clientState == null) {
                 if (DEBUG) {
-                    Log.w(TAG, "#cancel called with no preceding #startListening - ignoring");
+                    Slog.w(TAG, "#cancel called with no preceding #startListening - ignoring.");
                 }
                 return;
             }
-
-            if (mListener.asBinder() != listener.asBinder()) {
-                Log.w(TAG, "#cancel called with an unexpected listener");
-                tryRespondWithError(listener, SpeechRecognizer.ERROR_CLIENT);
-                return;
-            }
+            clientState.mRecordingInProgress = false;
 
             // Temporary reference to allow for resetting the hard link mDelegatingListener to null.
-            IRecognitionListener delegatingListener = mDelegatingListener;
-
+            final IRecognitionListener delegatingListener = clientState.mDelegatingListener;
             run(service -> service.cancel(delegatingListener, isShutdown));
 
-            mRecordingInProgress = false;
-            mSessionInProgress = false;
-
-            mDelegatingListener = null;
-            mListener = null;
-
-            // Schedule to unbind after cancel is delivered.
+            // If shutdown, remove the client info from the map. Unbind if that was the last client.
             if (isShutdown) {
-                run(service -> unbind());
+                removeClient(listener);
+
+                if (mClients.isEmpty()) {
+                    if (DEBUG) {
+                        Slog.d(TAG, "Unbinding from the recognition service.");
+                    }
+                    run(service -> unbind());
+                }
             }
         }
     }
@@ -215,7 +235,6 @@ final class RemoteSpeechRecognitionService extends ServiceConnector.Impl<IRecogn
     void checkRecognitionSupport(
             Intent recognizerIntent,
             IRecognitionSupportCallback callback) {
-
         if (!mConnected) {
             try {
                 callback.onError(SpeechRecognizer.ERROR_SERVER_DISCONNECTED);
@@ -236,18 +255,14 @@ final class RemoteSpeechRecognitionService extends ServiceConnector.Impl<IRecogn
         run(service -> service.triggerModelDownload(recognizerIntent));
     }
 
-    void shutdown() {
+    void shutdown(IBinder clientToken) {
         synchronized (mLock) {
-            if (this.mListener == null) {
-                if (DEBUG) {
-                    Slog.i(TAG, "Package died, but session wasn't initialized. "
-                            + "Not invoking #cancel");
+            for (Pair<IBinder, IRecognitionListener> clientListener : mClientListeners) {
+                if (clientListener.first == clientToken) {
+                    cancel(clientListener.second, /* isShutdown */ true);
                 }
-                return;
             }
         }
-
-        cancel(mListener, true /* isShutdown */);
     }
 
     @Override // from ServiceConnector.Impl
@@ -265,15 +280,18 @@ final class RemoteSpeechRecognitionService extends ServiceConnector.Impl<IRecogn
 
         synchronized (mLock) {
             if (!connected) {
-                if (mListener == null) {
+                if (mClients.isEmpty()) {
                     Slog.i(TAG, "Connection to speech recognition service lost, but no "
                             + "#startListening has been invoked yet.");
                     return;
                 }
 
-                tryRespondWithError(mListener, SpeechRecognizer.ERROR_SERVER_DISCONNECTED);
-
-                resetStateLocked();
+                for (ClientState clientState : mClients.values()) {
+                    tryRespondWithError(
+                            clientState.mDelegatingListener.mRemoteListener,
+                            SpeechRecognizer.ERROR_SERVER_DISCONNECTED);
+                    removeClient(clientState.mDelegatingListener.mRemoteListener);
+                }
             }
         }
     }
@@ -283,11 +301,18 @@ final class RemoteSpeechRecognitionService extends ServiceConnector.Impl<IRecogn
         return PERMANENT_BOUND_TIMEOUT_MS;
     }
 
-    private void resetStateLocked() {
-        mListener = null;
-        mDelegatingListener = null;
-        mSessionInProgress = false;
-        mRecordingInProgress = false;
+    private void removeClient(IRecognitionListener listener) {
+        synchronized (mLock) {
+            ClientState clientState = mClients.remove(listener.asBinder());
+            if (clientState != null) {
+                if (DEBUG) {
+                    Slog.d(TAG, "Removed a client from the map with listener = "
+                            + listener.asBinder() + ".");
+                }
+                clientState.reset();
+            }
+            mClientListeners.removeIf(clientListener -> clientListener.second == listener);
+        }
     }
 
     private static void tryRespondWithError(IRecognitionListener listener, int errorCode) {
@@ -301,19 +326,35 @@ final class RemoteSpeechRecognitionService extends ServiceConnector.Impl<IRecogn
             }
         } catch (RemoteException e) {
             Slog.w(TAG,
-                    String.format("Failed to respond with an error %d to the client", errorCode),
-                    e);
+                    TextUtils.formatSimple("Failed to respond with an error %d to the client",
+                            errorCode), e);
+        }
+    }
+
+    boolean hasActiveSessions() {
+        synchronized (mLock) {
+            return !mClients.isEmpty();
+        }
+    }
+
+    void associateClientWithActiveListener(IBinder clientToken, IRecognitionListener listener) {
+        synchronized (mLock) {
+            if (mClients.containsKey(listener.asBinder())) {
+                mClientListeners.add(new Pair<>(clientToken, listener));
+            }
         }
     }
 
     private static class DelegatingListener extends IRecognitionListener.Stub {
-
         private final IRecognitionListener mRemoteListener;
-        private final Runnable mOnSessionComplete;
+        private final Runnable mOnSessionSuccess;
+        private final Runnable mOnSessionFailure;
 
-        DelegatingListener(IRecognitionListener listener, Runnable onSessionComplete) {
+        DelegatingListener(IRecognitionListener listener,
+                Runnable onSessionSuccess, Runnable onSessionFailure) {
             mRemoteListener = listener;
-            mOnSessionComplete = onSessionComplete;
+            mOnSessionSuccess = onSessionSuccess;
+            mOnSessionFailure = onSessionFailure;
         }
 
         @Override
@@ -344,18 +385,18 @@ final class RemoteSpeechRecognitionService extends ServiceConnector.Impl<IRecogn
         @Override
         public void onError(int error) throws RemoteException {
             if (DEBUG) {
-                Slog.i(TAG, String.format("Error %d during recognition session", error));
+                Slog.i(TAG, TextUtils.formatSimple("Error %d during recognition session.", error));
             }
-            mOnSessionComplete.run();
+            mOnSessionFailure.run();
             mRemoteListener.onError(error);
         }
 
         @Override
         public void onResults(Bundle results) throws RemoteException {
             if (DEBUG) {
-                Slog.i(TAG, "#onResults invoked for a recognition session");
+                Slog.i(TAG, "#onResults invoked for a recognition session.");
             }
-            mOnSessionComplete.run();
+            mOnSessionSuccess.run();
             mRemoteListener.onResults(results);
         }
 
@@ -372,15 +413,46 @@ final class RemoteSpeechRecognitionService extends ServiceConnector.Impl<IRecogn
         @Override
         public void onEndOfSegmentedSession() throws RemoteException {
             if (DEBUG) {
-                Slog.i(TAG, "#onEndOfSegmentedSession invoked for a recognition session");
+                Slog.i(TAG, "#onEndOfSegmentedSession invoked for a recognition session.");
             }
-            mOnSessionComplete.run();
+            mOnSessionSuccess.run();
             mRemoteListener.onEndOfSegmentedSession();
         }
 
         @Override
         public void onEvent(int eventType, Bundle params) throws RemoteException {
             mRemoteListener.onEvent(eventType, params);
+        }
+    }
+
+    /**
+     * Data class holding info about a connected client:
+     * <ul>
+     *   <li> {@link ClientState#mDelegatingListener}
+     *   - object holding callbacks to be invoked after the session is complete;
+     *   <li> {@link ClientState#mRecordingInProgress}
+     *   - flag denoting if the client is currently recording.
+     */
+    static class ClientState {
+        DelegatingListener mDelegatingListener;
+        boolean mRecordingInProgress;
+
+        ClientState(DelegatingListener delegatingListener, boolean recordingInProgress) {
+            mDelegatingListener = delegatingListener;
+            mRecordingInProgress = recordingInProgress;
+        }
+
+        ClientState(DelegatingListener delegatingListener) {
+            this(delegatingListener, true);
+        }
+
+        ClientState() {
+            this(null, true);
+        }
+
+        void reset() {
+            mDelegatingListener = null;
+            mRecordingInProgress = false;
         }
     }
 }

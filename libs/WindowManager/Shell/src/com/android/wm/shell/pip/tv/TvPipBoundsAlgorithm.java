@@ -22,7 +22,6 @@ import static android.view.KeyEvent.KEYCODE_DPAD_RIGHT;
 import static android.view.KeyEvent.KEYCODE_DPAD_UP;
 
 import static com.android.wm.shell.pip.tv.TvPipBoundsState.ORIENTATION_HORIZONTAL;
-import static com.android.wm.shell.pip.tv.TvPipBoundsState.ORIENTATION_UNDETERMINED;
 import static com.android.wm.shell.pip.tv.TvPipBoundsState.ORIENTATION_VERTICAL;
 
 import android.content.Context;
@@ -63,7 +62,8 @@ public class TvPipBoundsAlgorithm extends PipBoundsAlgorithm {
             @NonNull TvPipBoundsState tvPipBoundsState,
             @NonNull PipSnapAlgorithm pipSnapAlgorithm) {
         super(context, tvPipBoundsState, pipSnapAlgorithm,
-                new PipKeepClearAlgorithm() {});
+                new PipKeepClearAlgorithm() {
+                });
         this.mTvPipBoundsState = tvPipBoundsState;
         this.mKeepClearAlgorithm = new TvPipKeepClearAlgorithm();
         reloadResources(context);
@@ -98,7 +98,7 @@ public class TvPipBoundsAlgorithm extends PipBoundsAlgorithm {
                 && mTvPipBoundsState.getDesiredTvExpandedAspectRatio() != 0
                 && !mTvPipBoundsState.isTvPipManuallyCollapsed();
         if (isPipExpanded) {
-            updateGravityOnExpandToggled(Gravity.NO_GRAVITY, true);
+            updateGravityOnExpansionToggled(/* expanding= */ true);
         }
         mTvPipBoundsState.setTvPipExpanded(isPipExpanded);
         return adjustBoundsForTemporaryDecor(getTvPipPlacement().getBounds());
@@ -172,135 +172,85 @@ public class TvPipBoundsAlgorithm extends PipBoundsAlgorithm {
         return placement;
     }
 
-    /**
-     * @return previous gravity if it is to be saved, or {@link Gravity#NO_GRAVITY} if not.
-     */
-    int updateGravityOnExpandToggled(int previousGravity, boolean expanding) {
+    void updateGravityOnExpansionToggled(boolean expanding) {
         ProtoLog.d(ShellProtoLogGroup.WM_SHELL_PICTURE_IN_PICTURE,
-                "%s: updateGravityOnExpandToggled(), expanding: %b"
-                        + ", mOrientation: %d, previous gravity: %s",
-                TAG, expanding, mTvPipBoundsState.getTvFixedPipOrientation(),
-                Gravity.toString(previousGravity));
+                "%s: updateGravity, expanding: %b, fixedExpandedOrientation: %d",
+                TAG, expanding, mTvPipBoundsState.getTvFixedPipOrientation());
 
-        if (!mTvPipBoundsState.isTvExpandedPipSupported()) {
-            return Gravity.NO_GRAVITY;
-        }
+        int currentX = mTvPipBoundsState.getTvPipGravity() & Gravity.HORIZONTAL_GRAVITY_MASK;
+        int currentY = mTvPipBoundsState.getTvPipGravity() & Gravity.VERTICAL_GRAVITY_MASK;
+        int previousCollapsedX = mTvPipBoundsState.getTvPipPreviousCollapsedGravity()
+                & Gravity.HORIZONTAL_GRAVITY_MASK;
+        int previousCollapsedY = mTvPipBoundsState.getTvPipPreviousCollapsedGravity()
+                & Gravity.VERTICAL_GRAVITY_MASK;
 
-        if (expanding && mTvPipBoundsState.getTvFixedPipOrientation() == ORIENTATION_UNDETERMINED) {
-            float expandedRatio = mTvPipBoundsState.getDesiredTvExpandedAspectRatio();
-            if (expandedRatio == 0) {
-                return Gravity.NO_GRAVITY;
-            }
-            if (expandedRatio < 1) {
-                mTvPipBoundsState.setTvFixedPipOrientation(ORIENTATION_VERTICAL);
-            } else {
-                mTvPipBoundsState.setTvFixedPipOrientation(ORIENTATION_HORIZONTAL);
-            }
-        }
-
-        int gravityToSave = Gravity.NO_GRAVITY;
-        int currentGravity = mTvPipBoundsState.getTvPipGravity();
         int updatedGravity;
-
         if (expanding) {
-            // save collapsed gravity
-            gravityToSave = mTvPipBoundsState.getTvPipGravity();
+            // Save collapsed gravity.
+            mTvPipBoundsState.setTvPipPreviousCollapsedGravity(mTvPipBoundsState.getTvPipGravity());
 
             if (mTvPipBoundsState.getTvFixedPipOrientation() == ORIENTATION_HORIZONTAL) {
-                updatedGravity =
-                        Gravity.CENTER_HORIZONTAL | (currentGravity
-                                & Gravity.VERTICAL_GRAVITY_MASK);
+                updatedGravity = Gravity.CENTER_HORIZONTAL | currentY;
             } else {
-                updatedGravity =
-                        Gravity.CENTER_VERTICAL | (currentGravity
-                                & Gravity.HORIZONTAL_GRAVITY_MASK);
+                updatedGravity = currentX | Gravity.CENTER_VERTICAL;
             }
         } else {
-            if (previousGravity != Gravity.NO_GRAVITY) {
-                // The pip hasn't been moved since expanding,
-                // go back to previous collapsed position.
-                updatedGravity = previousGravity;
+            // Collapse to the edge that the user moved to before.
+            if (mTvPipBoundsState.getTvFixedPipOrientation() == ORIENTATION_HORIZONTAL) {
+                updatedGravity = previousCollapsedX | currentY;
             } else {
-                if (mTvPipBoundsState.getTvFixedPipOrientation() == ORIENTATION_HORIZONTAL) {
-                    updatedGravity =
-                            Gravity.RIGHT | (currentGravity & Gravity.VERTICAL_GRAVITY_MASK);
-                } else {
-                    updatedGravity =
-                            Gravity.BOTTOM | (currentGravity & Gravity.HORIZONTAL_GRAVITY_MASK);
-                }
+                updatedGravity = currentX | previousCollapsedY;
             }
         }
         mTvPipBoundsState.setTvPipGravity(updatedGravity);
         ProtoLog.d(ShellProtoLogGroup.WM_SHELL_PICTURE_IN_PICTURE,
                 "%s: new gravity: %s", TAG, Gravity.toString(updatedGravity));
-
-        return gravityToSave;
     }
 
     /**
-     * @return true if gravity changed
+     * @return true if the gravity changed
      */
     boolean updateGravity(int keycode) {
         ProtoLog.d(ShellProtoLogGroup.WM_SHELL_PICTURE_IN_PICTURE,
                 "%s: updateGravity, keycode: %d", TAG, keycode);
 
-        // Check if position change is valid
+        // Check if position change is valid.
         if (mTvPipBoundsState.isTvPipExpanded()) {
-            int mOrientation = mTvPipBoundsState.getTvFixedPipOrientation();
-            if (mOrientation == ORIENTATION_VERTICAL
+            int fixedOrientation = mTvPipBoundsState.getTvFixedPipOrientation();
+            if (fixedOrientation == ORIENTATION_VERTICAL
                     && (keycode == KEYCODE_DPAD_UP || keycode == KEYCODE_DPAD_DOWN)
-                    || mOrientation == ORIENTATION_HORIZONTAL
+                    || fixedOrientation == ORIENTATION_HORIZONTAL
                     && (keycode == KEYCODE_DPAD_RIGHT || keycode == KEYCODE_DPAD_LEFT)) {
                 return false;
             }
         }
 
-        int currentGravity = mTvPipBoundsState.getTvPipGravity();
-        int updatedGravity;
-        // First axis
+        int updatedX = mTvPipBoundsState.getTvPipGravity() & Gravity.HORIZONTAL_GRAVITY_MASK;
+        int updatedY = mTvPipBoundsState.getTvPipGravity() & Gravity.VERTICAL_GRAVITY_MASK;
+
         switch (keycode) {
             case KEYCODE_DPAD_UP:
-                updatedGravity = Gravity.TOP;
+                updatedY = Gravity.TOP;
                 break;
             case KEYCODE_DPAD_DOWN:
-                updatedGravity = Gravity.BOTTOM;
+                updatedY = Gravity.BOTTOM;
                 break;
             case KEYCODE_DPAD_LEFT:
-                updatedGravity = Gravity.LEFT;
+                updatedX = Gravity.LEFT;
                 break;
             case KEYCODE_DPAD_RIGHT:
-                updatedGravity = Gravity.RIGHT;
+                updatedX = Gravity.RIGHT;
                 break;
             default:
-                updatedGravity = currentGravity;
+                // NOOP - unsupported keycode
         }
 
-        // Second axis
-        switch (keycode) {
-            case KEYCODE_DPAD_UP:
-            case KEYCODE_DPAD_DOWN:
-                if (mTvPipBoundsState.isTvPipExpanded()) {
-                    updatedGravity |= Gravity.CENTER_HORIZONTAL;
-                } else {
-                    updatedGravity |= (currentGravity & Gravity.HORIZONTAL_GRAVITY_MASK);
-                }
-                break;
-            case KEYCODE_DPAD_LEFT:
-            case KEYCODE_DPAD_RIGHT:
-                if (mTvPipBoundsState.isTvPipExpanded()) {
-                    updatedGravity |= Gravity.CENTER_VERTICAL;
-                } else {
-                    updatedGravity |= (currentGravity & Gravity.VERTICAL_GRAVITY_MASK);
-                }
-                break;
-            default:
-                break;
-        }
+        int updatedGravity = updatedX | updatedY;
 
-        if (updatedGravity != currentGravity) {
+        if (updatedGravity != mTvPipBoundsState.getTvPipGravity()) {
             mTvPipBoundsState.setTvPipGravity(updatedGravity);
             ProtoLog.d(ShellProtoLogGroup.WM_SHELL_PICTURE_IN_PICTURE,
-                    "%s: new gravity: %s", TAG, Gravity.toString(updatedGravity));
+                    "%s: updateGravity, new gravity: %s", TAG, Gravity.toString(updatedGravity));
             return true;
         }
         return false;

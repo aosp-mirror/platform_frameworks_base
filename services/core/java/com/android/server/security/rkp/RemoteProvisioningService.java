@@ -20,9 +20,7 @@ import android.content.Context;
 import android.os.Binder;
 import android.os.OutcomeReceiver;
 import android.os.RemoteException;
-import android.security.rkp.IGetKeyCallback;
 import android.security.rkp.IGetRegistrationCallback;
-import android.security.rkp.IRegistration;
 import android.security.rkp.IRemoteProvisioning;
 import android.security.rkp.service.RegistrationProxy;
 import android.util.Log;
@@ -30,6 +28,7 @@ import android.util.Log;
 import com.android.server.SystemService;
 
 import java.time.Duration;
+import java.util.concurrent.Executor;
 
 /**
  * Implements the remote provisioning system service. This service is backed by a mainline
@@ -43,6 +42,35 @@ public class RemoteProvisioningService extends SystemService {
     private static final Duration CREATE_REGISTRATION_TIMEOUT = Duration.ofSeconds(10);
     private final RemoteProvisioningImpl mBinderImpl = new RemoteProvisioningImpl();
 
+    private static class RegistrationReceiver implements
+            OutcomeReceiver<RegistrationProxy, Exception> {
+        private final Executor mExecutor;
+        private final IGetRegistrationCallback mCallback;
+
+        RegistrationReceiver(Executor executor, IGetRegistrationCallback callback) {
+            mExecutor = executor;
+            mCallback = callback;
+        }
+
+        @Override
+        public void onResult(RegistrationProxy registration) {
+            try {
+                mCallback.onSuccess(new RemoteProvisioningRegistration(registration, mExecutor));
+            } catch (RemoteException e) {
+                Log.e(TAG, "Error calling success callback " + mCallback.hashCode(), e);
+            }
+        }
+
+        @Override
+        public void onError(Exception error) {
+            try {
+                mCallback.onError(error.toString());
+            } catch (RemoteException e) {
+                Log.e(TAG, "Error calling error callback " + mCallback.hashCode(), e);
+            }
+        }
+    }
+
     /** @hide */
     public RemoteProvisioningService(Context context) {
         super(context);
@@ -54,73 +82,20 @@ public class RemoteProvisioningService extends SystemService {
     }
 
     private final class RemoteProvisioningImpl extends IRemoteProvisioning.Stub {
-
-        final class RegistrationBinder extends IRegistration.Stub {
-            static final String TAG = RemoteProvisioningService.TAG;
-            private final RegistrationProxy mRegistration;
-
-            RegistrationBinder(RegistrationProxy registration) {
-                mRegistration = registration;
-            }
-
-            @Override
-            public void getKey(int keyId, IGetKeyCallback callback) {
-                Log.e(TAG, "RegistrationBinder.getKey NOT YET IMPLEMENTED");
-            }
-
-            @Override
-            public void cancelGetKey(IGetKeyCallback callback) {
-                Log.e(TAG, "RegistrationBinder.cancelGetKey NOT YET IMPLEMENTED");
-            }
-
-            @Override
-            public void storeUpgradedKey(byte[] oldKeyBlob, byte[] newKeyBlob) {
-                Log.e(TAG, "RegistrationBinder.storeUpgradedKey NOT YET IMPLEMENTED");
-            }
-        }
-
         @Override
         public void getRegistration(String irpcName, IGetRegistrationCallback callback)
                 throws RemoteException {
             final int callerUid = Binder.getCallingUidOrThrow();
             final long callingIdentity = Binder.clearCallingIdentity();
+            final Executor executor = getContext().getMainExecutor();
             try {
                 Log.i(TAG, "getRegistration(" + irpcName + ")");
-                RegistrationProxy.createAsync(
-                        getContext(),
-                        callerUid,
-                        irpcName,
-                        CREATE_REGISTRATION_TIMEOUT,
-                        getContext().getMainExecutor(),
-                        new OutcomeReceiver<>() {
-                            @Override
-                            public void onResult(RegistrationProxy registration) {
-                                try {
-                                    callback.onSuccess(new RegistrationBinder(registration));
-                                } catch (RemoteException e) {
-                                    Log.e(TAG, "Error calling success callback", e);
-                                }
-                            }
-
-                            @Override
-                            public void onError(Exception error) {
-                                try {
-                                    callback.onError(error.toString());
-                                } catch (RemoteException e) {
-                                    Log.e(TAG, "Error calling error callback", e);
-                                }
-                            }
-                        });
+                RegistrationProxy.createAsync(getContext(), callerUid, irpcName,
+                        CREATE_REGISTRATION_TIMEOUT, executor,
+                        new RegistrationReceiver(executor, callback));
             } finally {
                 Binder.restoreCallingIdentity(callingIdentity);
             }
-        }
-
-        @Override
-        public void cancelGetRegistration(IGetRegistrationCallback callback)
-                throws RemoteException {
-            Log.i(TAG, "cancelGetRegistration()");
-            callback.onError("cancelGetRegistration not yet implemented");
         }
     }
 }

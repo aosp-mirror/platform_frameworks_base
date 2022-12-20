@@ -17,6 +17,7 @@
 package com.android.server.permission.access
 
 import android.content.pm.PermissionGroupInfo
+import com.android.server.SystemConfig
 import com.android.server.permission.access.collection.* // ktlint-disable no-wildcard-imports
 import com.android.server.permission.access.permission.Permission
 import com.android.server.pm.permission.PermissionAllowlist
@@ -42,15 +43,15 @@ class SystemState private constructor(
     var packageStates: Map<String, PackageState>,
     var disabledSystemPackageStates: Map<String, PackageState>,
     val appIds: IntMap<IndexedListSet<String>>,
-    // A map of KnownPackagesInt to a set of known package names
-    val knownPackages: IntMap<IndexedListSet<String>>,
-    // A map of userId to packageName
-    val deviceAndProfileOwners: IntMap<String>,
-    // Whether the device supports leanback UI
+    // Mapping from KnownPackages keys to package names.
+    var knownPackages: IntMap<Array<String>>,
     var isLeanback: Boolean,
-    val privilegedPermissionAllowlistSourcePackageNames: IndexedListSet<String>,
+    var configPermissions: Map<String, SystemConfig.PermissionEntry>,
+    var privilegedPermissionAllowlistPackages: IndexedListSet<String>,
     var permissionAllowlist: PermissionAllowlist,
-    val implicitToSourcePermissions: Map<String, Set<String>>,
+    var implicitToSourcePermissions: IndexedMap<String, IndexedListSet<String>>,
+    // Mapping from user ID to package name.
+    var deviceAndProfileOwners: IntMap<String>,
     val permissionGroups: IndexedMap<String, PermissionGroupInfo>,
     val permissionTrees: IndexedMap<String, Permission>,
     val permissions: IndexedMap<String, Permission>
@@ -61,11 +62,12 @@ class SystemState private constructor(
         emptyMap(),
         IntMap(),
         IntMap(),
-        IntMap(),
         false,
+        emptyMap(),
         IndexedListSet(),
         PermissionAllowlist(),
         IndexedMap(),
+        IntMap(),
         IndexedMap(),
         IndexedMap(),
         IndexedMap()
@@ -77,12 +79,13 @@ class SystemState private constructor(
             packageStates,
             disabledSystemPackageStates,
             appIds.copy { it.copy() },
-            knownPackages.copy { it.copy() },
-            deviceAndProfileOwners.copy { it },
+            knownPackages,
             isLeanback,
-            privilegedPermissionAllowlistSourcePackageNames.copy(),
+            configPermissions,
+            privilegedPermissionAllowlistPackages,
             permissionAllowlist,
             implicitToSourcePermissions,
+            deviceAndProfileOwners,
             permissionGroups.copy { it },
             permissionTrees.copy { it },
             permissions.copy { it }

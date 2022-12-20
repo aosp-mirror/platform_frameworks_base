@@ -1350,6 +1350,9 @@ final class ActivityManagerShellCommand extends ShellCommand {
         final InputStream mInput;
         final String mGdbPort;
         final boolean mMonkey;
+        final boolean mSimpleMode;
+        final String mTarget;
+        final boolean mAlwaysContinue;
 
         static final int STATE_NORMAL = 0;
         static final int STATE_CRASHED = 1;
@@ -1377,16 +1380,30 @@ final class ActivityManagerShellCommand extends ShellCommand {
         boolean mGotGdbPrint;
 
         MyActivityController(IActivityManager iam, PrintWriter pw, InputStream input,
-                String gdbPort, boolean monkey) {
+                String gdbPort, boolean monkey, boolean simpleMode, String target,
+                boolean alwaysContinue) {
             mInterface = iam;
             mPw = pw;
             mInput = input;
             mGdbPort = gdbPort;
             mMonkey = monkey;
+            mSimpleMode = simpleMode;
+            mTarget = target;
+            mAlwaysContinue = alwaysContinue;
+        }
+
+        private boolean shouldHandlePackageOrProcess(String packageOrProcess) {
+            if (mTarget == null) {
+                return true; // Always handle all packages / processes.
+            }
+            return mTarget.equals(packageOrProcess);
         }
 
         @Override
         public boolean activityResuming(String pkg) {
+            if (!shouldHandlePackageOrProcess(pkg)) {
+                return true;
+            }
             synchronized (this) {
                 mPw.println("** Activity resuming: " + pkg);
                 mPw.flush();
@@ -1396,6 +1413,9 @@ final class ActivityManagerShellCommand extends ShellCommand {
 
         @Override
         public boolean activityStarting(Intent intent, String pkg) {
+            if (!shouldHandlePackageOrProcess(pkg)) {
+                return true;
+            }
             synchronized (this) {
                 mPw.println("** Activity starting: " + pkg);
                 mPw.flush();
@@ -1406,18 +1426,28 @@ final class ActivityManagerShellCommand extends ShellCommand {
         @Override
         public boolean appCrashed(String processName, int pid, String shortMsg, String longMsg,
                 long timeMillis, String stackTrace) {
+            if (!shouldHandlePackageOrProcess(processName)) {
+                return true; // Don't kill
+            }
             synchronized (this) {
-                mPw.println("** ERROR: PROCESS CRASHED");
-                mPw.println("processName: " + processName);
-                mPw.println("processPid: " + pid);
-                mPw.println("shortMsg: " + shortMsg);
-                mPw.println("longMsg: " + longMsg);
-                mPw.println("timeMillis: " + timeMillis);
-                mPw.println("uptime: " + SystemClock.uptimeMillis());
-                mPw.println("stack:");
-                mPw.print(stackTrace);
-                mPw.println("#");
+                if (mSimpleMode) {
+                    mPw.println("** PROCESS CRASHED: " + processName);
+                } else {
+                    mPw.println("** ERROR: PROCESS CRASHED");
+                    mPw.println("processName: " + processName);
+                    mPw.println("processPid: " + pid);
+                    mPw.println("shortMsg: " + shortMsg);
+                    mPw.println("longMsg: " + longMsg);
+                    mPw.println("timeMillis: " + timeMillis);
+                    mPw.println("uptime: " + SystemClock.uptimeMillis());
+                    mPw.println("stack:");
+                    mPw.print(stackTrace);
+                    mPw.println("#");
+                }
                 mPw.flush();
+                if (mAlwaysContinue) {
+                    return true;
+                }
                 int result = waitControllerLocked(pid, STATE_CRASHED);
                 return result == RESULT_CRASH_KILL ? false : true;
             }
@@ -1425,13 +1455,23 @@ final class ActivityManagerShellCommand extends ShellCommand {
 
         @Override
         public int appEarlyNotResponding(String processName, int pid, String annotation) {
+            if (!shouldHandlePackageOrProcess(processName)) {
+                return 0; // Continue
+            }
             synchronized (this) {
-                mPw.println("** ERROR: EARLY PROCESS NOT RESPONDING");
-                mPw.println("processName: " + processName);
-                mPw.println("processPid: " + pid);
-                mPw.println("annotation: " + annotation);
-                mPw.println("uptime: " + SystemClock.uptimeMillis());
+                if (mSimpleMode) {
+                    mPw.println("** EARLY PROCESS NOT RESPONDING: " + processName);
+                } else {
+                    mPw.println("** ERROR: EARLY PROCESS NOT RESPONDING");
+                    mPw.println("processName: " + processName);
+                    mPw.println("processPid: " + pid);
+                    mPw.println("annotation: " + annotation);
+                    mPw.println("uptime: " + SystemClock.uptimeMillis());
+                }
                 mPw.flush();
+                if (mAlwaysContinue) {
+                    return 0;
+                }
                 int result = waitControllerLocked(pid, STATE_EARLY_ANR);
                 if (result == RESULT_EARLY_ANR_KILL) return -1;
                 return 0;
@@ -1440,15 +1480,25 @@ final class ActivityManagerShellCommand extends ShellCommand {
 
         @Override
         public int appNotResponding(String processName, int pid, String processStats) {
+            if (!shouldHandlePackageOrProcess(processName)) {
+                return 0; // Default == show dialog
+            }
             synchronized (this) {
-                mPw.println("** ERROR: PROCESS NOT RESPONDING");
-                mPw.println("processName: " + processName);
-                mPw.println("processPid: " + pid);
-                mPw.println("uptime: " + SystemClock.uptimeMillis());
-                mPw.println("processStats:");
-                mPw.print(processStats);
-                mPw.println("#");
+                if (mSimpleMode) {
+                    mPw.println("** PROCESS NOT RESPONDING: " + processName);
+                } else {
+                    mPw.println("** ERROR: PROCESS NOT RESPONDING");
+                    mPw.println("processName: " + processName);
+                    mPw.println("processPid: " + pid);
+                    mPw.println("uptime: " + SystemClock.uptimeMillis());
+                    mPw.println("processStats:");
+                    mPw.print(processStats);
+                    mPw.println("#");
+                }
                 mPw.flush();
+                if (mAlwaysContinue) {
+                    return 0;
+                }
                 int result = waitControllerLocked(pid, STATE_ANR);
                 if (result == RESULT_ANR_KILL) return -1;
                 if (result == RESULT_ANR_WAIT) return 1;
@@ -1458,11 +1508,16 @@ final class ActivityManagerShellCommand extends ShellCommand {
 
         @Override
         public int systemNotResponding(String message) {
+            if (mTarget != null) {
+                return -1; // If any target is set, just return.
+            }
             synchronized (this) {
                 mPw.println("** ERROR: PROCESS NOT RESPONDING");
-                mPw.println("message: " + message);
-                mPw.println("#");
-                mPw.println("Allowing system to die.");
+                if (!mSimpleMode) {
+                    mPw.println("message: " + message);
+                    mPw.println("#");
+                    mPw.println("Allowing system to die.");
+                }
                 mPw.flush();
                 return -1;
             }
@@ -1568,6 +1623,9 @@ final class ActivityManagerShellCommand extends ShellCommand {
         }
 
         void printMessageForState() {
+            if (mAlwaysContinue && mSimpleMode) {
+                return; // In the simplest mode, we don't need to show anything.
+            }
             switch (mState) {
                 case STATE_NORMAL:
                     mPw.println("Monitoring activity manager...  available commands:");
@@ -1663,11 +1721,21 @@ final class ActivityManagerShellCommand extends ShellCommand {
         String opt;
         String gdbPort = null;
         boolean monkey = false;
+        boolean simpleMode = false;
+        boolean alwaysContinue = false;
+        String target = null;
+
         while ((opt=getNextOption()) != null) {
             if (opt.equals("--gdb")) {
                 gdbPort = getNextArgRequired();
+            } else if (opt.equals("-p")) {
+                target = getNextArgRequired();
             } else if (opt.equals("-m")) {
                 monkey = true;
+            } else if (opt.equals("-s")) {
+                simpleMode = true;
+            } else if (opt.equals("-c")) {
+                alwaysContinue = true;
             } else {
                 getErrPrintWriter().println("Error: Unknown option: " + opt);
                 return -1;
@@ -1675,7 +1743,7 @@ final class ActivityManagerShellCommand extends ShellCommand {
         }
 
         MyActivityController controller = new MyActivityController(mInterface, pw,
-                getRawInputStream(), gdbPort, monkey);
+                getRawInputStream(), gdbPort, monkey, simpleMode, target, alwaysContinue);
         controller.run();
         return 0;
     }
@@ -3896,9 +3964,12 @@ final class ActivityManagerShellCommand extends ShellCommand {
             pw.println("  make-uid-idle [--user <USER_ID> | all | current] <PACKAGE>");
             pw.println("      If the given application's uid is in the background and waiting to");
             pw.println("      become idle (not allowing background services), do that now.");
-            pw.println("  monitor [--gdb <port>]");
+            pw.println("  monitor [--gdb <port>] [-p <TARGET>] [-s] [-c]");
             pw.println("      Start monitoring for crashes or ANRs.");
             pw.println("      --gdb: start gdbserv on the given port at crash/ANR");
+            pw.println("      -p: only show events related to a specific process / package");
+            pw.println("      -s: simple mode, only show a summary line for each event");
+            pw.println("      -c: assume the input is always [c]ontinue");
             pw.println("  watch-uids [--oom <uid>]");
             pw.println("      Start watching for and reporting uid state changes.");
             pw.println("      --oom: specify a uid for which to report detailed change messages.");

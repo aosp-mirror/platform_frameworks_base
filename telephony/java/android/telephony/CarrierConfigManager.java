@@ -2990,6 +2990,39 @@ public class CarrierConfigManager {
             "5g_nr_sssinr_thresholds_int_array";
 
     /**
+     * An interval in dB for {@link SignalThresholdInfo#SIGNAL_MEASUREMENT_TYPE_SSRSRP} measurement
+     * type defining the required magnitude change between reports.
+     *
+     * <p>The default value is 2 and the minimum allowed value is 0. If no value or negative value
+     * is set, the default value 2 is used.
+     * @hide
+     */
+    public static final String
+            KEY_NGRAN_SSRSRP_HYSTERESIS_DB_INT = "ngran_ssrsrp_hysteresis_db_int";
+
+    /**
+     * An interval in dB for {@link SignalThresholdInfo#SIGNAL_MEASUREMENT_TYPE_SSRSRQ} measurement
+     * type defining the required magnitude change between reports.
+     *
+     * <p>The default value is 2 and the minimum allowed value is 0. If no value or negative value
+     * is set, the default value 2 is used.
+     *@hide
+     */
+    public static final String
+            KEY_NGRAN_SSRSRQ_HYSTERESIS_DB_INT = "ngran_ssrsrq_hysteresis_db_int";
+
+    /**
+     * An interval in dB for {@link SignalThresholdInfo#SIGNAL_MEASUREMENT_TYPE_SSSINR} measurement
+     * type defining the required magnitude change between reports.
+     *
+     * <p>The default value is 2 and the minimum allowed value is 0. If no value or negative value
+     * is set, the default value 2 is used.
+     * @hide
+     */
+    public static final String
+            KEY_NGRAN_SSSINR_HYSTERESIS_DB_INT = "ngran_sssinr_hysteresis_db_int";
+
+    /**
      * Bit-field integer to determine whether to use SS reference signal received power (SSRSRP),
      * SS reference signal received quality (SSRSRQ), or/and SS signal-to-noise and interference
      * ratio (SSSINR) for the number of 5G NR signal bars and signal criteria reporting enabling.
@@ -3326,6 +3359,38 @@ public class CarrierConfigManager {
             "lte_rssnr_thresholds_int_array";
 
     /**
+     * An interval in dB for {@link SignalThresholdInfo#SIGNAL_MEASUREMENT_TYPE_RSRP} measurement
+     * type defining the required magnitude change between reports.
+     *
+     * <p>The default value is 2 and the minimum allowed value is 0. If no value or negative value
+     * is set, the default value 2 is used.
+     * @hide
+     */
+    public static final String
+            KEY_EUTRAN_RSRP_HYSTERESIS_DB_INT = "eutran_rsrp_hysteresis_db_int";
+
+    /**
+     * An interval in dB for {@link SignalThresholdInfo#SIGNAL_MEASUREMENT_TYPE_RSRQ} measurement
+     * type defining the required magnitude change between reports.
+     *
+     * <p>The default value is 2 and the minimum allowed value is 0. If no value or negative value
+     * is set, the default value 2 is used.
+     * @hide
+     */
+    public static final String KEY_EUTRAN_RSRQ_HYSTERESIS_DB_INT = "eutran_rsrq_hysteresis_db_int";
+
+    /**
+     * An interval in dB for {@link SignalThresholdInfo#SIGNAL_MEASUREMENT_TYPE_RSSNR} measurement
+     * type defining the required magnitude change between reports.
+     *
+     * <p>The default value is 2 and the minimum allowed value is 0. If no value or negative value
+     * is set, the default value 2 is used.
+     * @hide
+     */
+    public static final String
+            KEY_EUTRAN_RSSNR_HYSTERESIS_DB_INT = "eutran_rssnr_hysteresis_db_int";
+
+    /**
      * Decides when clients try to bind to iwlan network service, which package name will
      * the binding intent go to.
      * @hide
@@ -3400,6 +3465,26 @@ public class CarrierConfigManager {
      */
     public static final String KEY_WCDMA_ECNO_THRESHOLDS_INT_ARRAY =
             "wcdma_ecno_thresholds_int_array";
+
+    /**
+     * An interval in dB for {@link SignalThresholdInfo#SIGNAL_MEASUREMENT_TYPE_RSCP} measurement
+     * type defining the required magnitude change between reports.
+     *
+     * <p>The default value is 2 and the minimum allowed value is 0. If no value or negative value
+     * is set, the default value 2 is used.
+     * @hide
+     */
+    public static final String KEY_UTRAN_RSCP_HYSTERESIS_DB_INT = "utran_rscp_hysteresis_db_int";
+
+    /**
+     * An interval in dB for {@link SignalThresholdInfo#SIGNAL_MEASUREMENT_TYPE_ECNO} measurement
+     * type defining the required magnitude change between reports.
+     *
+     * <p>The default value is 2 and the minimum allowed value is 0. If no value or negative value
+     * is set, the default value 2 is used.
+     * @hide
+     */
+    public static final String KEY_UTRAN_ECNO_HYSTERESIS_DB_INT = "utran_ecno_hysteresis_db_int";
 
     /**
      * The default measurement to use for signal strength reporting. If this is not specified, the
@@ -8686,6 +8771,16 @@ public class CarrierConfigManager {
             "gsm_rssi_thresholds_int_array";
 
     /**
+     * An interval in dB for {@link SignalThresholdInfo#SIGNAL_MEASUREMENT_TYPE_RSSI} measurement
+     * type defining the required magnitude change between reports.
+     *
+     * <p>The default value is 2 and the minimum allowed value is 0. If no value or negative value
+     * is set, the default value 2 is used.
+     * @hide
+     */
+    public static final String KEY_GERAN_RSSI_HYSTERESIS_DB_INT = "geran_rssi_hysteresis_db_int";
+
+    /**
      * Determines whether Wireless Priority Service call is supported over IMS.
      *
      * See Wireless Priority Service from https://www.fcc.gov/general/wireless-priority-service-wps
@@ -9666,6 +9761,15 @@ public class CarrierConfigManager {
                     15, /* SIGNAL_STRENGTH_GOOD */
                     30  /* SIGNAL_STRENGTH_GREAT */
                 });
+        sDefaults.putInt(KEY_GERAN_RSSI_HYSTERESIS_DB_INT, 2);
+        sDefaults.putInt(KEY_UTRAN_RSCP_HYSTERESIS_DB_INT, 2);
+        sDefaults.putInt(KEY_EUTRAN_RSRP_HYSTERESIS_DB_INT, 2);
+        sDefaults.putInt(KEY_EUTRAN_RSRQ_HYSTERESIS_DB_INT, 2);
+        sDefaults.putInt(KEY_EUTRAN_RSSNR_HYSTERESIS_DB_INT, 2);
+        sDefaults.putInt(KEY_NGRAN_SSRSRP_HYSTERESIS_DB_INT, 2);
+        sDefaults.putInt(KEY_NGRAN_SSRSRQ_HYSTERESIS_DB_INT, 2);
+        sDefaults.putInt(KEY_NGRAN_SSSINR_HYSTERESIS_DB_INT, 2);
+        sDefaults.putInt(KEY_UTRAN_ECNO_HYSTERESIS_DB_INT, 2);
         sDefaults.putInt(KEY_PARAMETERS_USE_FOR_5G_NR_SIGNAL_BAR_INT,
                 CellSignalStrengthNr.USE_SSRSRP);
         sDefaults.putBoolean(KEY_SIGNAL_STRENGTH_NR_NSA_USE_LTE_AS_PRIMARY_BOOL, true);

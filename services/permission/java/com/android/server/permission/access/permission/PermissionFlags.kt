@@ -317,172 +317,164 @@ object PermissionFlags {
      */
     const val MASK_EXEMPT = INSTALLER_EXEMPT or SYSTEM_EXEMPT or UPGRADE_EXEMPT
 
-    /**
-     * Mask for all API permission flags about permission restriction.
-     */
-    private const val API_MASK_RESTRICTION =
-        PackageManager.FLAG_PERMISSION_RESTRICTION_INSTALLER_EXEMPT or
-            PackageManager.FLAG_PERMISSION_RESTRICTION_SYSTEM_EXEMPT or
-            PackageManager.FLAG_PERMISSION_RESTRICTION_UPGRADE_EXEMPT or
-            PackageManager.FLAG_PERMISSION_APPLY_RESTRICTION
-
-    /**
-     * Mask for all permission flags about permission restriction.
-     */
-    private const val MASK_RESTRICTION = INSTALLER_EXEMPT or SYSTEM_EXEMPT or
-        UPGRADE_EXEMPT or RESTRICTION_REVOKED or SOFT_RESTRICTED
-
-    fun isPermissionGranted(policyFlags: Int): Boolean {
-        if (policyFlags.hasBits(INSTALL_GRANTED)) {
+    fun isPermissionGranted(flags: Int): Boolean {
+        if (flags.hasBits(INSTALL_GRANTED)) {
             return true
         }
-        if (policyFlags.hasBits(INSTALL_REVOKED)) {
+        if (flags.hasBits(INSTALL_REVOKED)) {
             return false
         }
-        if (policyFlags.hasBits(PROTECTION_GRANTED)) {
+        if (flags.hasBits(PROTECTION_GRANTED)) {
             return true
         }
-        if (policyFlags.hasBits(LEGACY_GRANTED) || policyFlags.hasBits(IMPLICIT_GRANTED)) {
+        if (flags.hasBits(LEGACY_GRANTED) || flags.hasBits(IMPLICIT_GRANTED)) {
             return true
         }
-        if (policyFlags.hasBits(RESTRICTION_REVOKED)) {
+        if (flags.hasBits(RESTRICTION_REVOKED)) {
             return false
         }
-        return policyFlags.hasBits(RUNTIME_GRANTED)
+        return flags.hasBits(RUNTIME_GRANTED)
     }
 
-    fun isAppOpGranted(policyFlags: Int): Boolean =
-        isPermissionGranted(policyFlags) && !policyFlags.hasBits(APP_OP_REVOKED)
+    fun isAppOpGranted(flags: Int): Boolean =
+        isPermissionGranted(flags) && !flags.hasBits(APP_OP_REVOKED)
 
-    fun isReviewRequired(policyFlags: Int): Boolean =
-        policyFlags.hasBits(LEGACY_GRANTED) && policyFlags.hasBits(IMPLICIT)
-
-    fun toApiFlags(policyFlags: Int): Int {
+    fun toApiFlags(flags: Int): Int {
         var apiFlags = 0
-        if (policyFlags.hasBits(USER_SET)) {
+        if (flags.hasBits(USER_SET)) {
             apiFlags = apiFlags or PackageManager.FLAG_PERMISSION_USER_SET
         }
-        if (policyFlags.hasBits(USER_FIXED)) {
+        if (flags.hasBits(USER_FIXED)) {
             apiFlags = apiFlags or PackageManager.FLAG_PERMISSION_USER_FIXED
         }
-        if (policyFlags.hasBits(POLICY_FIXED)) {
+        if (flags.hasBits(POLICY_FIXED)) {
             apiFlags = apiFlags or PackageManager.FLAG_PERMISSION_POLICY_FIXED
         }
-        if (policyFlags.hasBits(SYSTEM_FIXED)) {
+        if (flags.hasBits(SYSTEM_FIXED)) {
             apiFlags = apiFlags or PackageManager.FLAG_PERMISSION_SYSTEM_FIXED
         }
-        if (policyFlags.hasBits(PREGRANT)) {
+        if (flags.hasBits(PREGRANT)) {
             apiFlags = apiFlags or PackageManager.FLAG_PERMISSION_GRANTED_BY_DEFAULT
         }
-        if (policyFlags.hasBits(IMPLICIT)) {
-            apiFlags = apiFlags or if (policyFlags.hasBits(LEGACY_GRANTED)) {
+        if (flags.hasBits(IMPLICIT)) {
+            apiFlags = apiFlags or if (flags.hasBits(LEGACY_GRANTED)) {
                 PackageManager.FLAG_PERMISSION_REVIEW_REQUIRED
             } else {
                 PackageManager.FLAG_PERMISSION_REVOKE_WHEN_REQUESTED
             }
         }
-        if (policyFlags.hasBits(USER_SENSITIVE_WHEN_GRANTED)) {
+        if (flags.hasBits(USER_SENSITIVE_WHEN_GRANTED)) {
             apiFlags = apiFlags or PackageManager.FLAG_PERMISSION_USER_SENSITIVE_WHEN_GRANTED
         }
-        if (policyFlags.hasBits(USER_SENSITIVE_WHEN_REVOKED)) {
+        if (flags.hasBits(USER_SENSITIVE_WHEN_REVOKED)) {
             apiFlags = apiFlags or PackageManager.FLAG_PERMISSION_USER_SENSITIVE_WHEN_DENIED
         }
-        if (policyFlags.hasBits(INSTALLER_EXEMPT)) {
+        if (flags.hasBits(INSTALLER_EXEMPT)) {
             apiFlags = apiFlags or PackageManager.FLAG_PERMISSION_RESTRICTION_INSTALLER_EXEMPT
         }
-        if (policyFlags.hasBits(SYSTEM_EXEMPT)) {
+        if (flags.hasBits(SYSTEM_EXEMPT)) {
             apiFlags = apiFlags or PackageManager.FLAG_PERMISSION_RESTRICTION_SYSTEM_EXEMPT
         }
-        if (policyFlags.hasBits(UPGRADE_EXEMPT)) {
+        if (flags.hasBits(UPGRADE_EXEMPT)) {
             apiFlags = apiFlags or PackageManager.FLAG_PERMISSION_RESTRICTION_UPGRADE_EXEMPT
         }
-        if (policyFlags.hasBits(RESTRICTION_REVOKED) || policyFlags.hasBits(SOFT_RESTRICTED)) {
+        if (flags.hasBits(RESTRICTION_REVOKED) || flags.hasBits(SOFT_RESTRICTED)) {
             apiFlags = apiFlags or PackageManager.FLAG_PERMISSION_APPLY_RESTRICTION
         }
-        if (policyFlags.hasBits(ROLE)) {
+        if (flags.hasBits(ROLE)) {
             apiFlags = apiFlags or PackageManager.FLAG_PERMISSION_GRANTED_BY_ROLE
         }
-        if (policyFlags.hasBits(APP_OP_REVOKED)) {
+        if (flags.hasBits(APP_OP_REVOKED)) {
             apiFlags = apiFlags or PackageManager.FLAG_PERMISSION_REVOKED_COMPAT
         }
-        if (policyFlags.hasBits(ONE_TIME)) {
+        if (flags.hasBits(ONE_TIME)) {
             apiFlags = apiFlags or PackageManager.FLAG_PERMISSION_ONE_TIME
         }
-        if (policyFlags.hasBits(HIBERNATION)) {
+        if (flags.hasBits(HIBERNATION)) {
             apiFlags = apiFlags or PackageManager.FLAG_PERMISSION_AUTO_REVOKED
         }
-        if (policyFlags.hasBits(USER_SELECTED)) {
+        if (flags.hasBits(USER_SELECTED)) {
             apiFlags = apiFlags or PackageManager.FLAG_PERMISSION_SELECTED_LOCATION_ACCURACY
         }
         return apiFlags
     }
 
-    fun setRuntimePermissionGranted(policyFlags: Int, isGranted: Boolean): Int =
-        if (isGranted) policyFlags or RUNTIME_GRANTED else policyFlags andInv RUNTIME_GRANTED
+    fun updateRuntimePermissionGranted(flags: Int, isGranted: Boolean): Int =
+        if (isGranted) flags or RUNTIME_GRANTED else flags andInv RUNTIME_GRANTED
 
-    fun updatePolicyFlags(policyFlags: Int, apiFlagMask: Int, apiFlagValues: Int): Int {
-        check(!apiFlagMask.hasAnyBit(API_MASK_RESTRICTION)) {
-            "Permission flags about permission restriction can only be directly mutated by the" +
-                " policy"
-        }
-        val oldApiFlags = toApiFlags(policyFlags)
+    fun updateFlags(permission: Permission, flags: Int, apiFlagMask: Int, apiFlagValues: Int): Int {
+        val oldApiFlags = toApiFlags(flags)
         val newApiFlags = (oldApiFlags andInv apiFlagMask) or (apiFlagValues and apiFlagMask)
-        return toPolicyFlags(policyFlags, newApiFlags)
+        return fromApiFlags(newApiFlags, permission, flags)
     }
 
-    private fun toPolicyFlags(oldPolicyFlags: Int, apiFlags: Int): Int {
-        var policyFlags = 0
-        policyFlags = policyFlags or (oldPolicyFlags and INSTALL_GRANTED)
-        policyFlags = policyFlags or (oldPolicyFlags and INSTALL_REVOKED)
-        policyFlags = policyFlags or (oldPolicyFlags and PROTECTION_GRANTED)
+    private fun fromApiFlags(apiFlags: Int, permission: Permission, oldFlags: Int): Int {
+        var flags = 0
+        flags = flags or (oldFlags and INSTALL_GRANTED)
+        flags = flags or (oldFlags and INSTALL_REVOKED)
+        flags = flags or (oldFlags and PROTECTION_GRANTED)
         if (apiFlags.hasBits(PackageManager.FLAG_PERMISSION_GRANTED_BY_ROLE)) {
-            policyFlags = policyFlags or ROLE
+            flags = flags or ROLE
         }
-        policyFlags = policyFlags or (oldPolicyFlags and RUNTIME_GRANTED)
+        flags = flags or (oldFlags and RUNTIME_GRANTED)
         if (apiFlags.hasBits(PackageManager.FLAG_PERMISSION_USER_SET)) {
-            policyFlags = policyFlags or USER_SET
+            flags = flags or USER_SET
         }
         if (apiFlags.hasBits(PackageManager.FLAG_PERMISSION_USER_FIXED)) {
-            policyFlags = policyFlags or USER_FIXED
+            flags = flags or USER_FIXED
         }
         if (apiFlags.hasBits(PackageManager.FLAG_PERMISSION_POLICY_FIXED)) {
-            policyFlags = policyFlags or POLICY_FIXED
+            flags = flags or POLICY_FIXED
         }
         if (apiFlags.hasBits(PackageManager.FLAG_PERMISSION_SYSTEM_FIXED)) {
-            policyFlags = policyFlags or SYSTEM_FIXED
+            flags = flags or SYSTEM_FIXED
         }
         if (apiFlags.hasBits(PackageManager.FLAG_PERMISSION_GRANTED_BY_DEFAULT)) {
-            policyFlags = policyFlags or PREGRANT
+            flags = flags or PREGRANT
         }
-        policyFlags = policyFlags or (oldPolicyFlags and LEGACY_GRANTED)
-        policyFlags = policyFlags or (oldPolicyFlags and IMPLICIT_GRANTED)
+        flags = flags or (oldFlags and LEGACY_GRANTED)
+        flags = flags or (oldFlags and IMPLICIT_GRANTED)
         if (apiFlags.hasBits(PackageManager.FLAG_PERMISSION_REVIEW_REQUIRED) ||
             apiFlags.hasBits(PackageManager.FLAG_PERMISSION_REVOKE_WHEN_REQUESTED)) {
-            policyFlags = policyFlags or IMPLICIT
+            flags = flags or IMPLICIT
         }
         if (apiFlags.hasBits(PackageManager.FLAG_PERMISSION_USER_SENSITIVE_WHEN_GRANTED)) {
-            policyFlags = policyFlags or USER_SENSITIVE_WHEN_GRANTED
+            flags = flags or USER_SENSITIVE_WHEN_GRANTED
         }
         if (apiFlags.hasBits(PackageManager.FLAG_PERMISSION_USER_SENSITIVE_WHEN_DENIED)) {
-            policyFlags = policyFlags or USER_SENSITIVE_WHEN_REVOKED
+            flags = flags or USER_SENSITIVE_WHEN_REVOKED
         }
-        // FLAG_PERMISSION_APPLY_RESTRICTION can be either REVOKED_BY_RESTRICTION when the
-        // permission is hard restricted, or SOFT_RESTRICTED when the permission is soft restricted.
-        // However since we should never allow indirect mutation of restriction state, we can just
-        // get the flags about restriction from the old policy flags.
-        policyFlags = policyFlags or (oldPolicyFlags and MASK_RESTRICTION)
+        if (apiFlags.hasBits(PackageManager.FLAG_PERMISSION_RESTRICTION_INSTALLER_EXEMPT)) {
+            flags = flags or INSTALLER_EXEMPT
+        }
+        if (apiFlags.hasBits(PackageManager.FLAG_PERMISSION_RESTRICTION_SYSTEM_EXEMPT)) {
+            flags = flags or SYSTEM_EXEMPT
+        }
+        if (apiFlags.hasBits(PackageManager.FLAG_PERMISSION_RESTRICTION_UPGRADE_EXEMPT)) {
+            flags = flags or UPGRADE_EXEMPT
+        }
+        // We ignore whether FLAG_PERMISSION_APPLY_RESTRICTION is set here because previously
+        // platform may be relying on the old restorePermissionState() to get it correct later.
+        if (!flags.hasAnyBit(MASK_EXEMPT)) {
+            if (permission.isHardRestricted) {
+                flags = flags or RESTRICTION_REVOKED
+            }
+            if (permission.isSoftRestricted) {
+                flags = flags or SOFT_RESTRICTED
+            }
+        }
         if (apiFlags.hasBits(PackageManager.FLAG_PERMISSION_REVOKED_COMPAT)) {
-            policyFlags = policyFlags or APP_OP_REVOKED
+            flags = flags or APP_OP_REVOKED
         }
         if (apiFlags.hasBits(PackageManager.FLAG_PERMISSION_ONE_TIME)) {
-            policyFlags = policyFlags or ONE_TIME
+            flags = flags or ONE_TIME
         }
         if (apiFlags.hasBits(PackageManager.FLAG_PERMISSION_AUTO_REVOKED)) {
-            policyFlags = policyFlags or HIBERNATION
+            flags = flags or HIBERNATION
         }
         if (apiFlags.hasBits(PackageManager.FLAG_PERMISSION_SELECTED_LOCATION_ACCURACY)) {
-            policyFlags = policyFlags or USER_SELECTED
+            flags = flags or USER_SELECTED
         }
-        return policyFlags
+        return flags
     }
 }

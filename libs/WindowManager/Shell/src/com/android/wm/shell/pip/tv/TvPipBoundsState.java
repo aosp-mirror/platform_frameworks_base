@@ -27,6 +27,7 @@ import android.content.pm.PackageManager;
 import android.graphics.Insets;
 import android.util.Size;
 import android.view.Gravity;
+import android.view.View;
 
 import com.android.wm.shell.pip.PipBoundsAlgorithm;
 import com.android.wm.shell.pip.PipBoundsState;
@@ -52,22 +53,59 @@ public class TvPipBoundsState extends PipBoundsState {
     public @interface Orientation {
     }
 
-    public static final int DEFAULT_TV_GRAVITY = Gravity.BOTTOM | Gravity.RIGHT;
+    private final Context mContext;
+
+    private int mDefaultGravity;
+    private int mTvPipGravity;
+    private int mPreviousCollapsedGravity;
+    private boolean mIsRtl;
 
     private final boolean mIsTvExpandedPipSupported;
     private boolean mIsTvPipExpanded;
     private boolean mTvPipManuallyCollapsed;
     private float mDesiredTvExpandedAspectRatio;
-    private @Orientation int mTvFixedPipOrientation;
-    private int mTvPipGravity;
-    private @Nullable Size mTvExpandedSize;
-    private @NonNull Insets mPipMenuPermanentDecorInsets = Insets.NONE;
-    private @NonNull Insets mPipMenuTemporaryDecorInsets = Insets.NONE;
+    @Orientation
+    private int mTvFixedPipOrientation;
+    @Nullable
+    private Size mTvExpandedSize;
+    @NonNull
+    private Insets mPipMenuPermanentDecorInsets = Insets.NONE;
+    @NonNull
+    private Insets mPipMenuTemporaryDecorInsets = Insets.NONE;
 
     public TvPipBoundsState(@NonNull Context context) {
         super(context);
+        mContext = context;
+        updateDefaultGravity();
+        mPreviousCollapsedGravity = mDefaultGravity;
         mIsTvExpandedPipSupported = context.getPackageManager().hasSystemFeature(
                 PackageManager.FEATURE_EXPANDED_PICTURE_IN_PICTURE);
+    }
+
+    public int getDefaultGravity() {
+        return mDefaultGravity;
+    }
+
+    private void updateDefaultGravity() {
+        boolean isRtl = mContext.getResources().getConfiguration().getLayoutDirection()
+                == View.LAYOUT_DIRECTION_RTL;
+        mDefaultGravity = Gravity.BOTTOM | (isRtl ? Gravity.LEFT : Gravity.RIGHT);
+
+        if (mIsRtl != isRtl) {
+            int prevGravityX = mPreviousCollapsedGravity & Gravity.HORIZONTAL_GRAVITY_MASK;
+            int prevGravityY = mPreviousCollapsedGravity & Gravity.VERTICAL_GRAVITY_MASK;
+            if ((prevGravityX & Gravity.RIGHT) == Gravity.RIGHT) {
+                mPreviousCollapsedGravity = Gravity.LEFT | prevGravityY;
+            } else if ((prevGravityX & Gravity.LEFT) == Gravity.LEFT) {
+                mPreviousCollapsedGravity = Gravity.RIGHT | prevGravityY;
+            }
+        }
+        mIsRtl = isRtl;
+    }
+
+    @Override
+    public void onConfigurationChanged() {
+        updateDefaultGravity();
     }
 
     /**
@@ -86,7 +124,8 @@ public class TvPipBoundsState extends PipBoundsState {
     /** Resets the TV PiP state for a new activity. */
     public void resetTvPipState() {
         mTvFixedPipOrientation = ORIENTATION_UNDETERMINED;
-        mTvPipGravity = DEFAULT_TV_GRAVITY;
+        mTvPipGravity = mDefaultGravity;
+        mPreviousCollapsedGravity = mDefaultGravity;
         mTvPipManuallyCollapsed = false;
     }
 
@@ -102,16 +141,23 @@ public class TvPipBoundsState extends PipBoundsState {
     }
 
     /** Set the PiP aspect ratio for the expanded PiP (TV) that is desired by the app. */
-    public void setDesiredTvExpandedAspectRatio(float aspectRatio, boolean override) {
+    public void setDesiredTvExpandedAspectRatio(float expandedAspectRatio, boolean override) {
         if (override || mTvFixedPipOrientation == ORIENTATION_UNDETERMINED) {
-            mDesiredTvExpandedAspectRatio = aspectRatio;
             resetTvPipState();
+            mDesiredTvExpandedAspectRatio = expandedAspectRatio;
+            if (expandedAspectRatio != 0) {
+                if (expandedAspectRatio > 1) {
+                    mTvFixedPipOrientation = ORIENTATION_HORIZONTAL;
+                } else {
+                    mTvFixedPipOrientation = ORIENTATION_VERTICAL;
+                }
+            }
             return;
         }
-        if ((aspectRatio > 1 && mTvFixedPipOrientation == ORIENTATION_HORIZONTAL)
-                || (aspectRatio <= 1 && mTvFixedPipOrientation == ORIENTATION_VERTICAL)
-                || aspectRatio == 0) {
-            mDesiredTvExpandedAspectRatio = aspectRatio;
+        if ((expandedAspectRatio > 1 && mTvFixedPipOrientation == ORIENTATION_HORIZONTAL)
+                || (expandedAspectRatio <= 1 && mTvFixedPipOrientation == ORIENTATION_VERTICAL)
+                || expandedAspectRatio == 0) {
+            mDesiredTvExpandedAspectRatio = expandedAspectRatio;
         }
     }
 
@@ -121,11 +167,6 @@ public class TvPipBoundsState extends PipBoundsState {
      */
     public float getDesiredTvExpandedAspectRatio() {
         return mDesiredTvExpandedAspectRatio;
-    }
-
-    /** Sets the orientation the expanded TV PiP activity has been fixed to. */
-    public void setTvFixedPipOrientation(@Orientation int orientation) {
-        mTvFixedPipOrientation = orientation;
     }
 
     /** Returns the fixed orientation of the expanded PiP on TV. */
@@ -142,6 +183,14 @@ public class TvPipBoundsState extends PipBoundsState {
     /** Returns the current gravity of the TV PiP. */
     public int getTvPipGravity() {
         return mTvPipGravity;
+    }
+
+    public void setTvPipPreviousCollapsedGravity(int gravity) {
+        mPreviousCollapsedGravity = gravity;
+    }
+
+    public int getTvPipPreviousCollapsedGravity() {
+        return mPreviousCollapsedGravity;
     }
 
     /** Sets whether the TV PiP is currently expanded. */
@@ -173,7 +222,8 @@ public class TvPipBoundsState extends PipBoundsState {
         mPipMenuPermanentDecorInsets = permanentInsets;
     }
 
-    public @NonNull Insets getPipMenuPermanentDecorInsets() {
+    @NonNull
+    public Insets getPipMenuPermanentDecorInsets() {
         return mPipMenuPermanentDecorInsets;
     }
 
@@ -181,7 +231,8 @@ public class TvPipBoundsState extends PipBoundsState {
         mPipMenuTemporaryDecorInsets = temporaryDecorInsets;
     }
 
-    public @NonNull Insets getPipMenuTemporaryDecorInsets() {
+    @NonNull
+    public Insets getPipMenuTemporaryDecorInsets() {
         return mPipMenuTemporaryDecorInsets;
     }
 }

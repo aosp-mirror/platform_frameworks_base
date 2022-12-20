@@ -16,6 +16,11 @@
 
 package android.media;
 
+import static android.companion.virtual.VirtualDeviceManager.DEVICE_ID_DEFAULT;
+import static android.companion.virtual.VirtualDeviceParams.DEVICE_POLICY_DEFAULT;
+import static android.companion.virtual.VirtualDeviceParams.POLICY_TYPE_AUDIO;
+import static android.media.AudioManager.AUDIO_SESSION_ID_GENERATE;
+
 import android.annotation.CallbackExecutor;
 import android.annotation.FloatRange;
 import android.annotation.IntDef;
@@ -25,7 +30,9 @@ import android.annotation.Nullable;
 import android.annotation.RequiresPermission;
 import android.annotation.SystemApi;
 import android.annotation.TestApi;
+import android.companion.virtual.VirtualDeviceManager;
 import android.compat.annotation.UnsupportedAppUsage;
+import android.content.Context;
 import android.media.audiopolicy.AudioMix;
 import android.media.audiopolicy.AudioMixingRule;
 import android.media.audiopolicy.AudioPolicy;
@@ -545,7 +552,7 @@ public class AudioTrack extends PlayerBase
     /**
      * Audio session ID
      */
-    private int mSessionId = AudioManager.AUDIO_SESSION_ID_GENERATE;
+    private int mSessionId = AUDIO_SESSION_ID_GENERATE;
     /**
      * HW_AV_SYNC track AV Sync Header
      */
@@ -645,7 +652,7 @@ public class AudioTrack extends PlayerBase
             int bufferSizeInBytes, int mode)
     throws IllegalArgumentException {
         this(streamType, sampleRateInHz, channelConfig, audioFormat,
-                bufferSizeInBytes, mode, AudioManager.AUDIO_SESSION_ID_GENERATE);
+                bufferSizeInBytes, mode, AUDIO_SESSION_ID_GENERATE);
     }
 
     /**
@@ -749,12 +756,12 @@ public class AudioTrack extends PlayerBase
     public AudioTrack(AudioAttributes attributes, AudioFormat format, int bufferSizeInBytes,
             int mode, int sessionId)
                     throws IllegalArgumentException {
-        this(attributes, format, bufferSizeInBytes, mode, sessionId, false /*offload*/,
-                ENCAPSULATION_MODE_NONE, null /* tunerConfiguration */);
+        this(null /* context */, attributes, format, bufferSizeInBytes, mode, sessionId,
+                false /*offload*/, ENCAPSULATION_MODE_NONE, null /* tunerConfiguration */);
     }
 
-    private AudioTrack(AudioAttributes attributes, AudioFormat format, int bufferSizeInBytes,
-            int mode, int sessionId, boolean offload, int encapsulationMode,
+    private AudioTrack(@Nullable Context context, AudioAttributes attributes, AudioFormat format,
+            int bufferSizeInBytes, int mode, int sessionId, boolean offload, int encapsulationMode,
             @Nullable TunerConfiguration tunerConfiguration)
                     throws IllegalArgumentException {
         super(attributes, AudioPlaybackConfiguration.PLAYER_TYPE_JAM_AUDIOTRACK);
@@ -817,7 +824,13 @@ public class AudioTrack extends PlayerBase
 
         int[] sampleRate = new int[] {mSampleRate};
         int[] session = new int[1];
-        session[0] = sessionId;
+        if (sessionId == AUDIO_SESSION_ID_GENERATE) {
+            // If there's no specific session id requested, try to get one from context.
+            session[0] = getSessionIdForContext(context);
+        } else {
+            session[0] = sessionId;
+        }
+
         // native initialization
         int initResult = native_setup(new WeakReference<AudioTrack>(this), mAttributes,
                 sampleRate, mChannelMask, mChannelIndexMask, mAudioFormat,
@@ -1028,11 +1041,12 @@ public class AudioTrack extends PlayerBase
      * <br>Offload is false by default.
      */
     public static class Builder {
+        private Context mContext;
         private AudioAttributes mAttributes;
         private AudioFormat mFormat;
         private int mBufferSizeInBytes;
         private int mEncapsulationMode = ENCAPSULATION_MODE_NONE;
-        private int mSessionId = AudioManager.AUDIO_SESSION_ID_GENERATE;
+        private int mSessionId = AUDIO_SESSION_ID_GENERATE;
         private int mMode = MODE_STREAM;
         private int mPerformanceMode = PERFORMANCE_MODE_NONE;
         private boolean mOffload = false;
@@ -1043,6 +1057,19 @@ public class AudioTrack extends PlayerBase
          * Constructs a new Builder with the default values as described above.
          */
         public Builder() {
+        }
+
+        /**
+         * Sets the context the track belongs to. This context will be used to pull information,
+         * such as {@link android.content.AttributionSource} and device specific audio session ids,
+         * which will be associated with the {@link AudioTrack}. However, the context itself will
+         * not be retained by the {@link AudioTrack}.
+         * @param context a non-null {@link Context} instance
+         * @return the same Builder instance.
+         */
+        public @NonNull Builder setContext(@NonNull Context context) {
+            mContext = Objects.requireNonNull(context);
+            return this;
         }
 
         /**
@@ -1152,6 +1179,10 @@ public class AudioTrack extends PlayerBase
 
         /**
          * Sets the session ID the {@link AudioTrack} will be attached to.
+         *
+         * Note, that if there's a device specific session id asociated with the context, explicitly
+         * setting a session id using this method will override it
+         * (see {@link Builder#setContext(Context)}).
          * @param sessionId a strictly positive ID number retrieved from another
          *     <code>AudioTrack</code> via {@link AudioTrack#getAudioSessionId()} or allocated by
          *     {@link AudioManager} via {@link AudioManager#generateAudioSessionId()}, or
@@ -1161,7 +1192,7 @@ public class AudioTrack extends PlayerBase
          */
         public @NonNull Builder setSessionId(@IntRange(from = 1) int sessionId)
                 throws IllegalArgumentException {
-            if ((sessionId != AudioManager.AUDIO_SESSION_ID_GENERATE) && (sessionId < 1)) {
+            if ((sessionId != AUDIO_SESSION_ID_GENERATE) && (sessionId < 1)) {
                 throw new IllegalArgumentException("Invalid audio session ID " + sessionId);
             }
             mSessionId = sessionId;
@@ -1371,8 +1402,8 @@ public class AudioTrack extends PlayerBase
 
             try {
                 final AudioTrack track = new AudioTrack(
-                        mAttributes, mFormat, mBufferSizeInBytes, mMode, mSessionId, mOffload,
-                        mEncapsulationMode, mTunerConfiguration);
+                        mContext, mAttributes, mFormat, mBufferSizeInBytes, mMode, mSessionId,
+                        mOffload, mEncapsulationMode, mTunerConfiguration);
                 if (track.getState() == STATE_UNINITIALIZED) {
                     // release is not necessary
                     throw new UnsupportedOperationException("Cannot create AudioTrack");
@@ -1382,6 +1413,32 @@ public class AudioTrack extends PlayerBase
                 throw new UnsupportedOperationException(e.getMessage());
             }
         }
+    }
+
+    /**
+     * Helper method to extract device specific audio session id from Context.
+     *
+     * @param context {@link Context} to use for extraction of device specific session id.
+     * @return device specific session id. If context is null or doesn't have specific audio
+     *   session id associated, this method returns {@link AUDIO_SESSION_ID_GENERATE}.
+     */
+    private static int getSessionIdForContext(@Nullable Context context) {
+        if (context == null) {
+            return AUDIO_SESSION_ID_GENERATE;
+        }
+
+        int deviceId = context.getDeviceId();
+        if (deviceId == DEVICE_ID_DEFAULT) {
+            return AUDIO_SESSION_ID_GENERATE;
+        }
+
+        VirtualDeviceManager vdm = context.getSystemService(VirtualDeviceManager.class);
+        if (vdm == null || vdm.getDevicePolicy(deviceId, POLICY_TYPE_AUDIO)
+                == DEVICE_POLICY_DEFAULT) {
+            return AUDIO_SESSION_ID_GENERATE;
+        }
+
+        return vdm.getAudioPlaybackSessionId(deviceId);
     }
 
     /**

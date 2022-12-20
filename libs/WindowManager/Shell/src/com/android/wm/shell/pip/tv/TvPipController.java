@@ -18,6 +18,8 @@ package com.android.wm.shell.pip.tv;
 
 import static android.app.WindowConfiguration.ACTIVITY_TYPE_UNDEFINED;
 import static android.app.WindowConfiguration.WINDOWING_MODE_PINNED;
+import static android.view.KeyEvent.KEYCODE_DPAD_LEFT;
+import static android.view.KeyEvent.KEYCODE_DPAD_RIGHT;
 
 import android.annotation.IntDef;
 import android.app.ActivityManager;
@@ -137,7 +139,6 @@ public class TvPipController implements PipTransitionController.PipTransitionCal
 
     @State
     private int mState = STATE_NO_PIP;
-    private int mPreviousGravity = TvPipBoundsState.DEFAULT_TV_GRAVITY;
     private int mPinnedTaskId = NONEXISTENT_TASK_ID;
 
     // How long the shell will wait for the app to close the PiP if a custom action is set.
@@ -214,6 +215,7 @@ public class TvPipController implements PipTransitionController.PipTransitionCal
         mTvPipBoundsState = tvPipBoundsState;
         mTvPipBoundsState.setDisplayId(context.getDisplayId());
         mTvPipBoundsState.setDisplayLayout(new DisplayLayout(context, context.getDisplay()));
+
         mTvPipBoundsAlgorithm = tvPipBoundsAlgorithm;
         mTvPipBoundsController = tvPipBoundsController;
         mTvPipBoundsController.setListener(this);
@@ -243,7 +245,7 @@ public class TvPipController implements PipTransitionController.PipTransitionCal
     private void onInit() {
         mPipTransitionController.registerPipTransitionCallback(this);
 
-        loadConfigurations();
+        reloadResources();
 
         registerPipParamsChangedListener(mPipParamsChangedForwarder);
         registerTaskStackListenerCallback(mTaskStackListener);
@@ -266,9 +268,38 @@ public class TvPipController implements PipTransitionController.PipTransitionCal
         ProtoLog.d(ShellProtoLogGroup.WM_SHELL_PICTURE_IN_PICTURE,
                 "%s: onConfigurationChanged(), state=%s", TAG, stateToName(mState));
 
-        loadConfigurations();
+        int previousDefaultGravityX = mTvPipBoundsState.getDefaultGravity()
+                & Gravity.HORIZONTAL_GRAVITY_MASK;
+
+        reloadResources();
+
         mPipNotificationController.onConfigurationChanged();
         mTvPipBoundsAlgorithm.onConfigurationChanged(mContext);
+        mTvPipBoundsState.onConfigurationChanged();
+
+        int defaultGravityX = mTvPipBoundsState.getDefaultGravity()
+                & Gravity.HORIZONTAL_GRAVITY_MASK;
+        if (isPipShown() && previousDefaultGravityX != defaultGravityX) {
+            movePipToOppositeSide();
+        }
+    }
+
+    private void reloadResources() {
+        final Resources res = mContext.getResources();
+        mResizeAnimationDuration = res.getInteger(R.integer.config_pipResizeAnimationDuration);
+        mPipForceCloseDelay = res.getInteger(R.integer.config_pipForceCloseDelay);
+        mEduTextWindowExitAnimationDuration =
+                res.getInteger(R.integer.pip_edu_text_window_exit_animation_duration);
+    }
+
+    private void movePipToOppositeSide() {
+        ProtoLog.i(ShellProtoLogGroup.WM_SHELL_PICTURE_IN_PICTURE,
+                "%s: movePipToOppositeSide", TAG);
+        if ((mTvPipBoundsState.getTvPipGravity() & Gravity.RIGHT) == Gravity.RIGHT) {
+            movePip(KEYCODE_DPAD_LEFT);
+        } else if ((mTvPipBoundsState.getTvPipGravity() & Gravity.LEFT) == Gravity.LEFT) {
+            movePip(KEYCODE_DPAD_RIGHT);
+        }
     }
 
     /**
@@ -332,11 +363,7 @@ public class TvPipController implements PipTransitionController.PipTransitionCal
         ProtoLog.d(ShellProtoLogGroup.WM_SHELL_PICTURE_IN_PICTURE,
                 "%s: togglePipExpansion()", TAG);
         boolean expanding = !mTvPipBoundsState.isTvPipExpanded();
-        int saveGravity = mTvPipBoundsAlgorithm
-                .updateGravityOnExpandToggled(mPreviousGravity, expanding);
-        if (saveGravity != Gravity.NO_GRAVITY) {
-            mPreviousGravity = saveGravity;
-        }
+        mTvPipBoundsAlgorithm.updateGravityOnExpansionToggled(expanding);
         mTvPipBoundsState.setTvPipManuallyCollapsed(!expanding);
         mTvPipBoundsState.setTvPipExpanded(expanding);
 
@@ -347,21 +374,11 @@ public class TvPipController implements PipTransitionController.PipTransitionCal
     public void movePip(int keycode) {
         if (mTvPipBoundsAlgorithm.updateGravity(keycode)) {
             mTvPipMenuController.updateGravity(mTvPipBoundsState.getTvPipGravity());
-            mPreviousGravity = Gravity.NO_GRAVITY;
             updatePinnedStackBounds();
         } else {
             ProtoLog.d(ShellProtoLogGroup.WM_SHELL_PICTURE_IN_PICTURE,
                     "%s: Position hasn't changed", TAG);
         }
-    }
-
-    @Override
-    public int getPipGravity() {
-        return mTvPipBoundsState.getTvPipGravity();
-    }
-
-    public int getOrientation() {
-        return mTvPipBoundsState.getTvFixedPipOrientation();
     }
 
     @Override
@@ -516,14 +533,6 @@ public class TvPipController implements PipTransitionController.PipTransitionCal
         mState = state;
     }
 
-    private void loadConfigurations() {
-        final Resources res = mContext.getResources();
-        mResizeAnimationDuration = res.getInteger(R.integer.config_pipResizeAnimationDuration);
-        mPipForceCloseDelay = res.getInteger(R.integer.config_pipForceCloseDelay);
-        mEduTextWindowExitAnimationDuration =
-                res.getInteger(R.integer.pip_edu_text_window_exit_animation_duration);
-    }
-
     private void registerTaskStackListenerCallback(TaskStackListenerImpl taskStackListener) {
         taskStackListener.addListener(new TaskStackListenerCallback() {
             @Override
@@ -596,11 +605,7 @@ public class TvPipController implements PipTransitionController.PipTransitionCal
                 // 2) PiP is expanded, but expanded PiP was disabled
                 // --> collapse PiP
                 if (mTvPipBoundsState.isTvPipExpanded() && ratio == 0) {
-                    int saveGravity = mTvPipBoundsAlgorithm
-                            .updateGravityOnExpandToggled(mPreviousGravity, false);
-                    if (saveGravity != Gravity.NO_GRAVITY) {
-                        mPreviousGravity = saveGravity;
-                    }
+                    mTvPipBoundsAlgorithm.updateGravityOnExpansionToggled(/* expanding= */ false);
                     mTvPipBoundsState.setTvPipExpanded(false);
                     updatePinnedStackBounds();
                 }
@@ -610,11 +615,7 @@ public class TvPipController implements PipTransitionController.PipTransitionCal
                 if (!mTvPipBoundsState.isTvPipExpanded() && ratio != 0
                         && !mTvPipBoundsState.isTvPipManuallyCollapsed()) {
                     mTvPipBoundsAlgorithm.updateExpandedPipSize();
-                    int saveGravity = mTvPipBoundsAlgorithm
-                            .updateGravityOnExpandToggled(mPreviousGravity, true);
-                    if (saveGravity != Gravity.NO_GRAVITY) {
-                        mPreviousGravity = saveGravity;
-                    }
+                    mTvPipBoundsAlgorithm.updateGravityOnExpansionToggled(/* expanding= */ true);
                     mTvPipBoundsState.setTvPipExpanded(true);
                     updatePinnedStackBounds();
                 }
