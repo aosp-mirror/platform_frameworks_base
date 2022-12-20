@@ -6207,6 +6207,18 @@
          different from the home screen wallpaper. -->
     <bool name="config_independentLockscreenLiveWallpaper">false</bool>
 
+    <!-- Device state that corresponds to concurrent display mode where the default display
+         is the internal display. Public API for the feature is provided through Jetpack
+         WindowManager.
+         TODO(b/236022708) Move concurrent display state to device state config file
+    -->
+    <integer name="config_deviceStateConcurrentRearDisplay">-1</integer>
+
+    <!-- Physical display address that corresponds to the rear display in rear display mode
+         and concurrent display mode. Used to get information about the display before
+         entering the corresponding modes -->
+    <string name="config_rearDisplayPhysicalAddress" translatable="false"></string>
+
     <!-- List of certificate to be used for font fs-verity integrity verification -->
     <string-array translatable="false" name="config_fontManagerServiceCerts">
     </string-array>
