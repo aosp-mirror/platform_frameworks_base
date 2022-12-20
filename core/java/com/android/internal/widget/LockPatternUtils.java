@@ -1170,24 +1170,6 @@ public class LockPatternUtils {
         getTrustManager().reportEnabledTrustAgentsChanged(userHandle);
     }
 
-    public boolean isCredentialRequiredToDecrypt(boolean defaultValue) {
-        final int value = Settings.Global.getInt(mContentResolver,
-                Settings.Global.REQUIRE_PASSWORD_TO_DECRYPT, -1);
-        return value == -1 ? defaultValue : (value != 0);
-    }
-
-    public void setCredentialRequiredToDecrypt(boolean required) {
-        if (!(getUserManager().isSystemUser() || getUserManager().isPrimaryUser())) {
-            throw new IllegalStateException(
-                    "Only the system or primary user may call setCredentialRequiredForDecrypt()");
-        }
-
-        if (isDeviceEncryptionEnabled()){
-            Settings.Global.putInt(mContext.getContentResolver(),
-               Settings.Global.REQUIRE_PASSWORD_TO_DECRYPT, required ? 1 : 0);
-        }
-    }
-
     private void throwIfCalledOnMainThread() {
         if (Looper.getMainLooper().isCurrentThread()) {
             throw new IllegalStateException("should not be called from the main thread.");
