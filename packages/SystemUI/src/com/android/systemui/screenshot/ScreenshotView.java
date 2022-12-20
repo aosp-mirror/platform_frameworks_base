@@ -289,6 +289,9 @@ public class ScreenshotView extends FrameLayout implements
         mDismissButton.getBoundsOnScreen(tmpRect);
         swipeRegion.op(tmpRect, Region.Op.UNION);
 
+        mMessageContainer.findViewById(R.id.message_dismiss_button).getBoundsOnScreen(tmpRect);
+        swipeRegion.op(tmpRect, Region.Op.UNION);
+
         return swipeRegion;
     }
 
@@ -353,6 +356,9 @@ public class ScreenshotView extends FrameLayout implements
         mMessageContent.setText(
                 mContext.getString(R.string.screenshot_work_profile_notification, appName));
         mMessageContainer.setVisibility(VISIBLE);
+        mMessageContainer.findViewById(R.id.message_dismiss_button).setOnClickListener((v) -> {
+            mMessageContainer.setVisibility(View.GONE);
+        });
     }
 
     @Override // View
