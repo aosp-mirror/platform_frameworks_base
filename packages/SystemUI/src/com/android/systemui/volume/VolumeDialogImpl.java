@@ -288,6 +288,8 @@ public class VolumeDialogImpl implements VolumeDialog, Dumpable,
 
     private boolean mSeparateNotification;
 
+    private int mWindowGravity;
+
     @VisibleForTesting
     int mVolumeRingerIconDrawableId;
     @VisibleForTesting
@@ -514,7 +516,12 @@ public class VolumeDialogImpl implements VolumeDialog, Dumpable,
         lp.format = PixelFormat.TRANSLUCENT;
         lp.setTitle(VolumeDialogImpl.class.getSimpleName());
         lp.windowAnimations = -1;
-        lp.gravity = mContext.getResources().getInteger(R.integer.volume_dialog_gravity);
+
+        mWindowGravity = Gravity.getAbsoluteGravity(
+                mContext.getResources().getInteger(R.integer.volume_dialog_gravity),
+                mContext.getResources().getConfiguration().getLayoutDirection());
+        lp.gravity = mWindowGravity;
+
         mWindow.setAttributes(lp);
         mWindow.setLayout(WRAP_CONTENT, WRAP_CONTENT);
 
@@ -525,7 +532,8 @@ public class VolumeDialogImpl implements VolumeDialog, Dumpable,
         mDialog.setOnShowListener(dialog -> {
             mDialogView.getViewTreeObserver().addOnComputeInternalInsetsListener(this);
             if (!shouldSlideInVolumeTray()) {
-                mDialogView.setTranslationX(mDialogView.getWidth() / 2.0f);
+                mDialogView.setTranslationX(
+                        (isWindowGravityLeft() ? -1 : 1) * mDialogView.getWidth() / 2.0f);
             }
             mDialogView.setAlpha(0);
             mDialogView.animate()
@@ -694,6 +702,10 @@ public class VolumeDialogImpl implements VolumeDialog, Dumpable,
         initRingerH();
         initSettingsH(lockTaskModeState);
         initODICaptionsH();
+    }
+
+    private boolean isWindowGravityLeft() {
+        return (mWindowGravity & Gravity.LEFT) == Gravity.LEFT;
     }
 
     private void initDimens() {
@@ -1495,7 +1507,10 @@ public class VolumeDialogImpl implements VolumeDialog, Dumpable,
 
                     hideRingerDrawer();
                 }, 50));
-        if (!shouldSlideInVolumeTray()) animator.translationX(mDialogView.getWidth() / 2.0f);
+        if (!shouldSlideInVolumeTray()) {
+            animator.translationX(
+                    (isWindowGravityLeft() ? -1 : 1) * mDialogView.getWidth() / 2.0f);
+        }
         animator.setListener(getJankListener(getDialogView(), TYPE_DISMISS,
                 mDialogHideAnimationDurationMs)).start();
         checkODICaptionsTooltip(true);
