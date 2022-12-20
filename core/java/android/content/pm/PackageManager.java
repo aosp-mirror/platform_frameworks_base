@@ -1427,22 +1427,6 @@ public abstract class PackageManager {
      */
     public static final int INSTALL_GRANT_RUNTIME_PERMISSIONS = 0x00000100;
 
-    /**
-     * Flag parameter for {@link #installPackage} to indicate that all restricted
-     * permissions should be whitelisted. If {@link #INSTALL_ALL_USERS}
-     * is set the restricted permissions will be whitelisted for all users, otherwise
-     * only to the owner.
-     *
-     * <p>
-     * <strong>Note: </strong>In retrospect it would have been preferred to use
-     * more inclusive terminology when naming this API. Similar APIs added will
-     * refrain from using the term "whitelist".
-     * </p>
-     *
-     * @hide
-     */
-    public static final int INSTALL_ALL_WHITELIST_RESTRICTED_PERMISSIONS = 0x00400000;
-
     /** {@hide} */
     public static final int INSTALL_FORCE_VOLUME_UUID = 0x00000200;
 
@@ -1539,11 +1523,27 @@ public abstract class PackageManager {
     public static final int INSTALL_STAGED = 0x00200000;
 
     /**
+     * Flag parameter for {@link #installPackage} to indicate that all restricted
+     * permissions should be allowlisted. If {@link #INSTALL_ALL_USERS}
+     * is set the restricted permissions will be allowlisted for all users, otherwise
+     * only to the owner.
+     *
+     * <p>
+     * <strong>Note: </strong>In retrospect it would have been preferred to use
+     * more inclusive terminology when naming this API. Similar APIs added will
+     * refrain from using the term "whitelist".
+     * </p>
+     *
+     * @hide
+     */
+    public static final int INSTALL_ALL_WHITELIST_RESTRICTED_PERMISSIONS = 0x00400000;
+
+    /**
      * Flag parameter for {@link #installPackage} to indicate that check whether given APEX can be
      * updated should be disabled for this install.
      * @hide
      */
-    public static final int INSTALL_DISABLE_ALLOWED_APEX_UPDATE_CHECK = 0x00400000;
+    public static final int INSTALL_DISABLE_ALLOWED_APEX_UPDATE_CHECK = 0x00800000;
 
     /** @hide */
     @IntDef(flag = true, value = {
