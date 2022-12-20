@@ -17,6 +17,7 @@
 package android.companion.virtual;
 
 import static android.Manifest.permission.ADD_ALWAYS_UNLOCKED_DISPLAY;
+import static android.media.AudioManager.AUDIO_SESSION_ID_GENERATE;
 
 import android.annotation.IntDef;
 import android.annotation.NonNull;
@@ -191,6 +192,8 @@ public final class VirtualDeviceParams implements Parcelable {
     @NonNull private final List<VirtualSensorConfig> mVirtualSensorConfigs;
     @RecentsPolicy
     private final int mDefaultRecentsPolicy;
+    private final int mAudioPlaybackSessionId;
+    private final int mAudioRecordingSessionId;
 
     private VirtualDeviceParams(
             @LockState int lockState,
@@ -204,7 +207,9 @@ public final class VirtualDeviceParams implements Parcelable {
             @Nullable String name,
             @NonNull SparseIntArray devicePolicies,
             @NonNull List<VirtualSensorConfig> virtualSensorConfigs,
-            @RecentsPolicy int defaultRecentsPolicy) {
+            @RecentsPolicy int defaultRecentsPolicy,
+            int audioPlaybackSessionId,
+            int audioRecordingSessionId) {
         mLockState = lockState;
         mUsersWithMatchingAccounts =
                 new ArraySet<>(Objects.requireNonNull(usersWithMatchingAccounts));
@@ -220,6 +225,9 @@ public final class VirtualDeviceParams implements Parcelable {
         mDevicePolicies = Objects.requireNonNull(devicePolicies);
         mVirtualSensorConfigs = Objects.requireNonNull(virtualSensorConfigs);
         mDefaultRecentsPolicy = defaultRecentsPolicy;
+        mAudioPlaybackSessionId = audioPlaybackSessionId;
+        mAudioRecordingSessionId = audioRecordingSessionId;
+
     }
 
     @SuppressWarnings("unchecked")
@@ -237,6 +245,8 @@ public final class VirtualDeviceParams implements Parcelable {
         mVirtualSensorConfigs = new ArrayList<>();
         parcel.readTypedList(mVirtualSensorConfigs, VirtualSensorConfig.CREATOR);
         mDefaultRecentsPolicy = parcel.readInt();
+        mAudioPlaybackSessionId = parcel.readInt();
+        mAudioRecordingSessionId = parcel.readInt();
     }
 
     /**
@@ -371,6 +381,24 @@ public final class VirtualDeviceParams implements Parcelable {
         return mDefaultRecentsPolicy;
     }
 
+    /**
+     * Returns device-specific audio session id for playback.
+     *
+     * @see Builder#setAudioPlaybackSessionId(int)
+     */
+    public int getAudioPlaybackSessionId() {
+        return mAudioPlaybackSessionId;
+    }
+
+    /**
+     * Returns device-specific audio session id for recording.
+     *
+     * @see Builder#setAudioRecordingSessionId(int)
+     */
+    public int getAudioRecordingSessionId() {
+        return mAudioRecordingSessionId;
+    }
+
     @Override
     public int describeContents() {
         return 0;
@@ -390,6 +418,8 @@ public final class VirtualDeviceParams implements Parcelable {
         dest.writeSparseIntArray(mDevicePolicies);
         dest.writeTypedList(mVirtualSensorConfigs);
         dest.writeInt(mDefaultRecentsPolicy);
+        dest.writeInt(mAudioPlaybackSessionId);
+        dest.writeInt(mAudioRecordingSessionId);
     }
 
     @Override
@@ -422,7 +452,9 @@ public final class VirtualDeviceParams implements Parcelable {
                 && Objects.equals(mBlockedActivities, that.mBlockedActivities)
                 && mDefaultActivityPolicy == that.mDefaultActivityPolicy
                 && Objects.equals(mName, that.mName)
-                && mDefaultRecentsPolicy == that.mDefaultRecentsPolicy;
+                && mDefaultRecentsPolicy == that.mDefaultRecentsPolicy
+                && mAudioPlaybackSessionId == that.mAudioPlaybackSessionId
+                && mAudioRecordingSessionId == that.mAudioRecordingSessionId;
     }
 
     @Override
@@ -431,7 +463,7 @@ public final class VirtualDeviceParams implements Parcelable {
                 mLockState, mUsersWithMatchingAccounts, mAllowedCrossTaskNavigations,
                 mBlockedCrossTaskNavigations, mDefaultNavigationPolicy, mAllowedActivities,
                 mBlockedActivities, mDefaultActivityPolicy, mName, mDevicePolicies,
-                mDefaultRecentsPolicy);
+                mDefaultRecentsPolicy, mAudioPlaybackSessionId, mAudioRecordingSessionId);
         for (int i = 0; i < mDevicePolicies.size(); i++) {
             hashCode = 31 * hashCode + mDevicePolicies.keyAt(i);
             hashCode = 31 * hashCode + mDevicePolicies.valueAt(i);
@@ -454,6 +486,8 @@ public final class VirtualDeviceParams implements Parcelable {
                 + " mName=" + mName
                 + " mDevicePolicies=" + mDevicePolicies
                 + " mDefaultRecentsPolicy=" + mDefaultRecentsPolicy
+                + " mAudioPlaybackSessionId=" + mAudioPlaybackSessionId
+                + " mAudioRecordingSessionId=" + mAudioRecordingSessionId
                 + ")";
     }
 
@@ -490,6 +524,8 @@ public final class VirtualDeviceParams implements Parcelable {
         @NonNull private SparseIntArray mDevicePolicies = new SparseIntArray();
         @NonNull private List<VirtualSensorConfig> mVirtualSensorConfigs = new ArrayList<>();
         private int mDefaultRecentsPolicy;
+        private int mAudioPlaybackSessionId = AUDIO_SESSION_ID_GENERATE;
+        private int mAudioRecordingSessionId = AUDIO_SESSION_ID_GENERATE;
 
         /**
          * Sets the lock state of the device. The permission {@code ADD_ALWAYS_UNLOCKED_DISPLAY}
@@ -706,6 +742,54 @@ public final class VirtualDeviceParams implements Parcelable {
         }
 
         /**
+         * Sets audio playback session id specific for this virtual device.
+         *
+         * <p>Audio players constructed within context associated with this virtual device
+         * will be automatically assigned provided session id.
+         *
+         * <p>Requires {@link #DEVICE_POLICY_CUSTOM} to be set for {@link #POLICY_TYPE_AUDIO},
+         * otherwise {@link #build()} method will throw {@link IllegalArgumentException} if
+         * the playback session id is set to value other than
+         * {@link android.media.AudioManager.AUDIO_SESSION_ID_GENERATE}.
+         *
+         * @param playbackSessionId requested device-specific audio session id for playback
+         * @see android.media.AudioManager.generateAudioSessionId()
+         * @see android.media.AudioTrack.Builder.setContext(Context)
+         */
+        @NonNull
+        public Builder setAudioPlaybackSessionId(int playbackSessionId) {
+            if (playbackSessionId != AUDIO_SESSION_ID_GENERATE || playbackSessionId < 0) {
+                throw new IllegalArgumentException("Invalid playback audio session id");
+            }
+            mAudioPlaybackSessionId = playbackSessionId;
+            return this;
+        }
+
+        /**
+         * Sets audio recording session id specific for this virtual device.
+         *
+         * <p>{@link android.media.AudioRecord} constructed within context associated with this
+         * virtual device will be automatically assigned provided session id.
+         *
+         * <p>Requires {@link #DEVICE_POLICY_CUSTOM} to be set for {@link #POLICY_TYPE_AUDIO},
+         * otherwise {@link #build()} method will throw {@link IllegalArgumentException} if
+         * the recording session id is set to value other than
+         * {@link android.media.AudioManager.AUDIO_SESSION_ID_GENERATE}.
+         *
+         * @param recordingSessionId requested device-specific audio session id for playback
+         * @see android.media.AudioManager.generateAudioSessionId()
+         * @see android.media.AudioRecord.Builder.setContext(Context)
+         */
+        @NonNull
+        public Builder setAudioRecordingSessionId(int recordingSessionId) {
+            if (recordingSessionId != AUDIO_SESSION_ID_GENERATE || recordingSessionId < 0) {
+                throw new IllegalArgumentException("Invalid recording audio session id");
+            }
+            mAudioRecordingSessionId = recordingSessionId;
+            return this;
+        }
+
+        /**
          * Builds the {@link VirtualDeviceParams} instance.
          *
          * @throws IllegalArgumentException if there's mismatch between policy definition and
@@ -721,6 +805,15 @@ public final class VirtualDeviceParams implements Parcelable {
                         "DEVICE_POLICY_CUSTOM for POLICY_TYPE_SENSORS is required for creating "
                                 + "virtual sensors.");
             }
+
+            if ((mAudioPlaybackSessionId != AUDIO_SESSION_ID_GENERATE
+                    || mAudioRecordingSessionId != AUDIO_SESSION_ID_GENERATE)
+                    && mDevicePolicies.get(POLICY_TYPE_AUDIO, DEVICE_POLICY_DEFAULT)
+                    != DEVICE_POLICY_CUSTOM) {
+                throw new IllegalArgumentException("DEVICE_POLICY_CUSTOM for POLICY_TYPE_AUDIO is "
+                        + "required for configuration of device-specific audio session ids.");
+            }
+
             SparseArray<Set<String>> sensorNameByType = new SparseArray();
             for (int i = 0; i < mVirtualSensorConfigs.size(); ++i) {
                 VirtualSensorConfig config = mVirtualSensorConfigs.get(i);
@@ -744,7 +837,9 @@ public final class VirtualDeviceParams implements Parcelable {
                     mName,
                     mDevicePolicies,
                     mVirtualSensorConfigs,
-                    mDefaultRecentsPolicy);
+                    mDefaultRecentsPolicy,
+                    mAudioPlaybackSessionId,
+                    mAudioRecordingSessionId);
         }
     }
 }

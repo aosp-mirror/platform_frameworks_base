@@ -72,4 +72,16 @@ interface IVirtualDeviceManager {
     int createVirtualDisplay(in VirtualDisplayConfig virtualDisplayConfig,
             in IVirtualDisplayCallback callback, in IVirtualDevice virtualDevice,
             String packageName);
+
+    /**
+     * Returns device-specific session id for playback, or AUDIO_SESSION_ID_GENERATE
+     * if there's none.
+     */
+    int getAudioPlaybackSessionId(int deviceId);
+
+    /**
+     * Returns device-specific session id for recording, or AUDIO_SESSION_ID_GENERATE
+     * if there's none.
+     */
+    int getAudioRecordingSessionId(int deviceId);
 }
