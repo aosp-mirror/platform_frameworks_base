@@ -73,6 +73,8 @@ public class ZygoteProcess {
 
     private static final int ZYGOTE_CONNECT_TIMEOUT_MS = 20000;
 
+    private static final int APPLICATION_ZYGOTE_READ_TIMEOUT_MS = 5000;
+
     /**
      * Use a relatively short delay, because for app zygote, this is in the critical path of
      * service launch.
@@ -1108,6 +1110,9 @@ public class ZygoteProcess {
             state.mZygoteOutputWriter.newLine();
 
             state.mZygoteOutputWriter.flush();
+
+            // The system_server should not be blocked by a defective or bad application zygote.
+            state.mZygoteSessionSocket.setSoTimeout(APPLICATION_ZYGOTE_READ_TIMEOUT_MS);
 
             return (state.mZygoteInputStream.readInt() == 0);
         }
