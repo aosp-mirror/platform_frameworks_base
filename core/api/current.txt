@@ -363,6 +363,7 @@ package android {
     field public static final int allowGameFpsOverride = 16844378; // 0x101065a
     field public static final int allowNativeHeapPointerTagging = 16844306; // 0x1010612
     field public static final int allowParallelSyncs = 16843570; // 0x1010332
+    field public static final int allowSharedIsolatedProcess;
     field public static final int allowSingleTap = 16843353; // 0x1010259
     field public static final int allowTaskReparenting = 16843268; // 0x1010204
     field public static final int allowUndo = 16843999; // 0x10104df
@@ -9957,6 +9958,7 @@ package android.content {
     field public static final int BIND_INCLUDE_CAPABILITIES = 4096; // 0x1000
     field public static final int BIND_NOT_FOREGROUND = 4; // 0x4
     field public static final int BIND_NOT_PERCEPTIBLE = 256; // 0x100
+    field public static final int BIND_SHARED_ISOLATED_PROCESS = 8192; // 0x2000
     field public static final int BIND_WAIVE_PRIORITY = 32; // 0x20
     field public static final String BIOMETRIC_SERVICE = "biometric";
     field public static final String BLOB_STORE_SERVICE = "blob_store";
@@ -12533,6 +12535,7 @@ package android.content.pm {
     method public void dump(android.util.Printer, String);
     method public int getForegroundServiceType();
     field @NonNull public static final android.os.Parcelable.Creator<android.content.pm.ServiceInfo> CREATOR;
+    field public static final int FLAG_ALLOW_SHARED_ISOLATED_PROCESS = 16; // 0x10
     field public static final int FLAG_EXTERNAL_SERVICE = 4; // 0x4
     field public static final int FLAG_ISOLATED_PROCESS = 2; // 0x2
     field public static final int FLAG_SINGLE_USER = 1073741824; // 0x40000000

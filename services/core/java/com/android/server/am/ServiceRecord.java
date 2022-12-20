@@ -19,6 +19,7 @@ package com.android.server.am;
 import static android.app.PendingIntent.FLAG_IMMUTABLE;
 import static android.app.PendingIntent.FLAG_UPDATE_CURRENT;
 import static android.os.PowerExemptionManager.REASON_DENIED;
+import static android.os.Process.INVALID_UID;
 
 import static com.android.server.am.ActivityManagerDebugConfig.DEBUG_FOREGROUND_SERVICE;
 import static com.android.server.am.ActivityManagerDebugConfig.TAG_AM;
@@ -118,6 +119,7 @@ final class ServiceRecord extends Binder implements ComponentName.WithComponentN
     boolean fgWaiting;      // is a timeout for going foreground already scheduled?
     boolean isNotAppComponentUsage; // is service binding not considered component/package usage?
     boolean isForeground;   // is service currently in foreground mode?
+    boolean inSharedIsolatedProcess; // is the service in a shared isolated process
     int foregroundId;       // Notification ID of last foreground req.
     Notification foregroundNoti; // Notification record of foreground state.
     long fgDisplayTime;     // time at which the FGS notification should become visible
@@ -723,6 +725,7 @@ final class ServiceRecord extends Binder implements ComponentName.WithComponentN
         isSdkSandbox = false;
         sdkSandboxClientAppUid = 0;
         sdkSandboxClientAppPackage = null;
+        inSharedIsolatedProcess = false;
     }
 
     public static ServiceRecord newEmptyInstanceForTest(ActivityManagerService ams) {
@@ -734,14 +737,14 @@ final class ServiceRecord extends Binder implements ComponentName.WithComponentN
             Intent.FilterComparison intent, ServiceInfo sInfo, boolean callerIsFg,
             Runnable restarter) {
         this(ams, name, instanceName, definingPackageName, definingUid, intent, sInfo, callerIsFg,
-                restarter, null, 0, null);
+                restarter, sInfo.processName, INVALID_UID, null, false);
     }
 
     ServiceRecord(ActivityManagerService ams, ComponentName name,
             ComponentName instanceName, String definingPackageName, int definingUid,
             Intent.FilterComparison intent, ServiceInfo sInfo, boolean callerIsFg,
-            Runnable restarter, String sdkSandboxProcessName, int sdkSandboxClientAppUid,
-            String sdkSandboxClientAppPackage) {
+            Runnable restarter, String processName, int sdkSandboxClientAppUid,
+            String sdkSandboxClientAppPackage, boolean inSharedIsolatedProcess) {
         this.ams = ams;
         this.name = name;
         this.instanceName = instanceName;
@@ -752,16 +755,11 @@ final class ServiceRecord extends Binder implements ComponentName.WithComponentN
         serviceInfo = sInfo;
         appInfo = sInfo.applicationInfo;
         packageName = sInfo.applicationInfo.packageName;
-        this.isSdkSandbox = sdkSandboxProcessName != null;
+        this.isSdkSandbox = sdkSandboxClientAppUid != INVALID_UID;
         this.sdkSandboxClientAppUid = sdkSandboxClientAppUid;
         this.sdkSandboxClientAppPackage = sdkSandboxClientAppPackage;
-        if ((sInfo.flags & ServiceInfo.FLAG_ISOLATED_PROCESS) != 0) {
-            processName = sInfo.processName + ":" + instanceName.getClassName();
-        } else if (sdkSandboxProcessName != null) {
-            processName = sdkSandboxProcessName;
-        } else {
-            processName = sInfo.processName;
-        }
+        this.inSharedIsolatedProcess = inSharedIsolatedProcess;
+        this.processName = processName;
         permission = sInfo.permission;
         exported = sInfo.exported;
         this.restarter = restarter;
