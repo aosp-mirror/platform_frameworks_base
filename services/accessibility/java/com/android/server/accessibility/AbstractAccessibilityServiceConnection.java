@@ -42,6 +42,7 @@ import android.accessibilityservice.AccessibilityTrace;
 import android.accessibilityservice.IAccessibilityServiceClient;
 import android.accessibilityservice.IAccessibilityServiceConnection;
 import android.accessibilityservice.MagnificationConfig;
+import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.app.PendingIntent;
@@ -107,6 +108,8 @@ import com.android.server.wm.WindowManagerInternal;
 
 import java.io.FileDescriptor;
 import java.io.PrintWriter;
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -128,6 +131,11 @@ abstract class AbstractAccessibilityServiceConnection extends IAccessibilityServ
     private static final String TRACE_SVC_CLIENT = LOG_TAG + ".IAccessibilityServiceClient";
     private static final String TRACE_WM = "WindowManagerInternal";
     private static final int WAIT_WINDOWS_TIMEOUT_MILLIS = 5000;
+
+    /** Display type for displays associated with the default user of th device. */
+    public static final int DISPLAY_TYPE_DEFAULT = 1 << 0;
+    /** Display type for displays associated with an AccessibilityDisplayProxy user. */
+    public static final int DISPLAY_TYPE_PROXY = 1 << 1;
 
     protected static final String TAKE_SCREENSHOT = "takeScreenshot";
     protected final Context mContext;
@@ -156,6 +164,8 @@ abstract class AbstractAccessibilityServiceConnection extends IAccessibilityServ
 
     // The attribution tag set by the service that is bound to this instance
     protected String mAttributionTag;
+
+    protected int mDisplayTypes = DISPLAY_TYPE_DEFAULT;
 
     // The service that's bound to this instance. Whenever this value is non-null, this
     // object is registered as a death recipient
@@ -223,6 +233,14 @@ abstract class AbstractAccessibilityServiceConnection extends IAccessibilityServ
      * mapping from accessibility window id -> timestamp.
      */
     private SparseArray<Long> mRequestTakeScreenshotOfWindowTimestampMs = new SparseArray<>();
+
+    /** @hide */
+    @Retention(RetentionPolicy.SOURCE)
+    @IntDef(flag = true, prefix = { "DISPLAY_TYPE_" }, value = {
+            DISPLAY_TYPE_DEFAULT,
+            DISPLAY_TYPE_PROXY
+    })
+    public @interface DisplayTypes {}
 
     public interface SystemSupport {
         /**
@@ -520,7 +538,8 @@ abstract class AbstractAccessibilityServiceConnection extends IAccessibilityServ
             }
             final AccessibilityWindowInfo.WindowListSparseArray allWindows =
                     new AccessibilityWindowInfo.WindowListSparseArray();
-            final ArrayList<Integer> displayList = mA11yWindowManager.getDisplayListLocked();
+            final ArrayList<Integer> displayList = mA11yWindowManager.getDisplayListLocked(
+                    mDisplayTypes);
             final int displayListCounts = displayList.size();
             if (displayListCounts > 0) {
                 for (int i = 0; i < displayListCounts; i++) {
@@ -536,6 +555,10 @@ abstract class AbstractAccessibilityServiceConnection extends IAccessibilityServ
             }
             return allWindows;
         }
+    }
+
+    protected void setDisplayTypes(@DisplayTypes int displayTypes) {
+        mDisplayTypes = displayTypes;
     }
 
     @Override
