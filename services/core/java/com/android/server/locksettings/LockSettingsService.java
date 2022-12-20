@@ -1688,10 +1688,6 @@ public class LockSettingsService extends ILockSettings.Stub {
     }
 
     private void onPostPasswordChanged(LockscreenCredential newCredential, int userHandle) {
-        if (userHandle == UserHandle.USER_SYSTEM && isDeviceEncryptionEnabled() &&
-            shouldEncryptWithCredentials() && newCredential.isNone()) {
-            setCredentialRequiredToDecrypt(false);
-        }
         if (newCredential.isPattern()) {
             setBoolean(LockPatternUtils.PATTERN_EVER_CHOSEN_KEY, true, userHandle);
         }
@@ -1769,24 +1765,6 @@ public class LockSettingsService extends ILockSettings.Stub {
         return mInjector.getDevicePolicyManager().getPasswordHistoryLength(null, userId);
     }
 
-    private static boolean isDeviceEncryptionEnabled() {
-        return StorageManager.isEncrypted();
-    }
-
-    private boolean shouldEncryptWithCredentials() {
-        return isCredentialRequiredToDecrypt() && !isDoNotAskCredentialsOnBootSet();
-    }
-
-    private boolean isDoNotAskCredentialsOnBootSet() {
-        return mInjector.getDevicePolicyManager().getDoNotAskCredentialsOnBoot();
-    }
-
-    private boolean isCredentialRequiredToDecrypt() {
-        final int value = Settings.Global.getInt(mContext.getContentResolver(),
-                Settings.Global.REQUIRE_PASSWORD_TO_DECRYPT, -1);
-        return value != 0;
-    }
-
     private UserManager getUserManagerFromCache(int userId) {
         UserHandle userHandle = UserHandle.of(userId);
         if (mUserManagerCache.containsKey(userHandle)) {
@@ -1806,13 +1784,6 @@ public class LockSettingsService extends ILockSettings.Stub {
     @VisibleForTesting /** Note: this method is overridden in unit tests */
     protected boolean isCredentialSharableWithParent(int userId) {
         return getUserManagerFromCache(userId).isCredentialSharableWithParent();
-    }
-
-    private void setCredentialRequiredToDecrypt(boolean required) {
-        if (isDeviceEncryptionEnabled()) {
-            Settings.Global.putInt(mContext.getContentResolver(),
-                    Settings.Global.REQUIRE_PASSWORD_TO_DECRYPT, required ? 1 : 0);
-        }
     }
 
     /** Register the given WeakEscrowTokenRemovedListener. */
