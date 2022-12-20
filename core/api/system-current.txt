@@ -212,6 +212,7 @@ package android {
     field public static final String MODIFY_PARENTAL_CONTROLS = "android.permission.MODIFY_PARENTAL_CONTROLS";
     field public static final String MODIFY_QUIET_MODE = "android.permission.MODIFY_QUIET_MODE";
     field public static final String MODIFY_SETTINGS_OVERRIDEABLE_BY_RESTORE = "android.permission.MODIFY_SETTINGS_OVERRIDEABLE_BY_RESTORE";
+    field public static final String MONITOR_DEVICE_CONFIG_ACCESS = "android.permission.MONITOR_DEVICE_CONFIG_ACCESS";
     field public static final String MOVE_PACKAGE = "android.permission.MOVE_PACKAGE";
     field public static final String NETWORK_AIRPLANE_MODE = "android.permission.NETWORK_AIRPLANE_MODE";
     field public static final String NETWORK_CARRIER_PROVISIONING = "android.permission.NETWORK_CARRIER_PROVISIONING";

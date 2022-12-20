@@ -17,6 +17,7 @@
 package android.provider;
 
 import android.Manifest;
+import android.annotation.CallbackExecutor;
 import android.annotation.IntDef;
 import android.annotation.IntRange;
 import android.annotation.NonNull;
@@ -87,6 +88,7 @@ import android.util.ArrayMap;
 import android.util.ArraySet;
 import android.util.Log;
 import android.util.MemoryIntArray;
+import android.util.Slog;
 import android.view.Display;
 import android.view.MotionEvent;
 import android.view.ViewConfiguration;
@@ -112,6 +114,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
+import java.util.concurrent.Executor;
+
 /**
  * The Settings provider contains global system-level device preferences.
  */
@@ -2718,6 +2722,10 @@ public final class Settings {
     /** @hide - Private call() method to register monitor callback for 'configuration' table */
     public static final String CALL_METHOD_REGISTER_MONITOR_CALLBACK_CONFIG =
             "REGISTER_MONITOR_CALLBACK_config";
+
+    /** @hide - Private call() method to unregister monitor callback for 'configuration' table */
+    public static final String CALL_METHOD_UNREGISTER_MONITOR_CALLBACK_CONFIG =
+            "UNREGISTER_MONITOR_CALLBACK_config";
 
     /** @hide - String argument extra to the config monitor callback */
     public static final String EXTRA_MONITOR_CALLBACK_TYPE = "monitor_callback_type";
@@ -18370,16 +18378,41 @@ public final class Settings {
         }
 
         /**
-         * Register callback for monitoring Config table.
+         * Setter callback for monitoring Config table.
          *
-         * @param callback callback to register
+         * @param executor the {@link Executor} on which to invoke the callback
+         * @param callback callback to set
          *
          * @hide
          */
+        @SystemApi(client = SystemApi.Client.MODULE_LIBRARIES)
         @RequiresPermission(Manifest.permission.MONITOR_DEVICE_CONFIG_ACCESS)
-        public static void registerMonitorCallback(@NonNull ContentResolver resolver,
-                @NonNull RemoteCallback callback) {
-            registerMonitorCallbackAsUser(resolver, resolver.getUserId(), callback);
+        public static void setMonitorCallback(
+                @NonNull ContentResolver resolver,
+                @NonNull @CallbackExecutor Executor executor,
+                @NonNull DeviceConfig.MonitorCallback callback) {
+            setMonitorCallbackAsUser(executor, resolver, resolver.getUserId(), callback);
+        }
+
+        /**
+         * Clear callback for monitoring Config table.
+         * this may only be used to clear callback function registered by
+         * {@link Config#setMonitorCallback}
+         * @hide
+         */
+        @SystemApi(client = SystemApi.Client.MODULE_LIBRARIES)
+        @RequiresPermission(Manifest.permission.MONITOR_DEVICE_CONFIG_ACCESS)
+        public static void clearMonitorCallback(@NonNull ContentResolver resolver) {
+            try {
+                Bundle arg = new Bundle();
+                arg.putInt(CALL_METHOD_USER_KEY, resolver.getUserId());
+                IContentProvider cp = sProviderHolder.getProvider(resolver);
+                cp.call(resolver.getAttributionSource(),
+                        sProviderHolder.mUri.getAuthority(),
+                        CALL_METHOD_UNREGISTER_MONITOR_CALLBACK_CONFIG, null, arg);
+            } catch (RemoteException e) {
+                Log.w(TAG, "Can't clear config monitor callback", e);
+            }
         }
 
 
@@ -18446,19 +18479,23 @@ public final class Settings {
             }
         }
 
-        private static void registerMonitorCallbackAsUser(
+        private static void setMonitorCallbackAsUser(
+                @NonNull @CallbackExecutor Executor executor,
                 @NonNull ContentResolver resolver, @UserIdInt int userHandle,
-                @NonNull RemoteCallback callback) {
+                @NonNull DeviceConfig.MonitorCallback callback) {
             try {
                 Bundle arg = new Bundle();
                 arg.putInt(CALL_METHOD_USER_KEY, userHandle);
-                arg.putParcelable(CALL_METHOD_MONITOR_CALLBACK_KEY, callback);
+                arg.putParcelable(CALL_METHOD_MONITOR_CALLBACK_KEY,
+                        new RemoteCallback(result -> {
+                            handleMonitorCallback(result, executor, callback);
+                        }));
                 IContentProvider cp = sProviderHolder.getProvider(resolver);
                 cp.call(resolver.getAttributionSource(),
                         sProviderHolder.mUri.getAuthority(),
                         CALL_METHOD_REGISTER_MONITOR_CALLBACK_CONFIG, null, arg);
             } catch (RemoteException e) {
-                Log.w(TAG, "Can't register config monitor callback", e);
+                Log.w(TAG, "Can't set config monitor callback", e);
             }
         }
 
@@ -18466,6 +18503,32 @@ public final class Settings {
         public static void clearProviderForTest() {
             sProviderHolder.clearProviderForTest();
             sNameValueCache.clearGenerationTrackerForTest();
+        }
+
+        private static void handleMonitorCallback(
+                Bundle result,
+                @NonNull @CallbackExecutor Executor executor,
+                DeviceConfig.MonitorCallback monitorCallback) {
+            String callbackType = result.getString(EXTRA_MONITOR_CALLBACK_TYPE, "");
+            switch (callbackType) {
+                case EXTRA_NAMESPACE_UPDATED_CALLBACK:
+                    String updatedNamespace = result.getString(EXTRA_NAMESPACE);
+                    if (updatedNamespace != null) {
+                        executor.execute(() -> monitorCallback.onNamespaceUpdate(updatedNamespace));
+                    }
+                    break;
+                case EXTRA_ACCESS_CALLBACK:
+                    String callingPackage = result.getString(EXTRA_CALLING_PACKAGE, null);
+                    String namespace = result.getString(EXTRA_NAMESPACE, null);
+                    if (namespace != null && callingPackage != null) {
+                        executor.execute(() ->
+                                monitorCallback.onDeviceConfigAccess(callingPackage, namespace));
+                    }
+                    break;
+                default:
+                    Slog.w(TAG, "Unrecognized DeviceConfig callback");
+                    break;
+            }
         }
 
         private static String createCompositeName(@NonNull String namespace, @NonNull String name) {
