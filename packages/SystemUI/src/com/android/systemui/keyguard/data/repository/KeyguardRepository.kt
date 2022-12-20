@@ -29,6 +29,8 @@ import com.android.systemui.doze.DozeHost
 import com.android.systemui.doze.DozeMachine
 import com.android.systemui.doze.DozeTransitionCallback
 import com.android.systemui.doze.DozeTransitionListener
+import com.android.systemui.dreams.DreamCallbackController
+import com.android.systemui.dreams.DreamCallbackController.DreamCallback
 import com.android.systemui.keyguard.WakefulnessLifecycle
 import com.android.systemui.keyguard.shared.model.BiometricUnlockModel
 import com.android.systemui.keyguard.shared.model.BiometricUnlockSource
@@ -47,6 +49,7 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.distinctUntilChanged
+import kotlinx.coroutines.flow.merge
 
 /** Defines interface for classes that encapsulate application state for the keyguard. */
 interface KeyguardRepository {
@@ -176,6 +179,7 @@ constructor(
     private val keyguardUpdateMonitor: KeyguardUpdateMonitor,
     private val dozeTransitionListener: DozeTransitionListener,
     private val authController: AuthController,
+    private val dreamCallbackController: DreamCallbackController,
 ) : KeyguardRepository {
     private val _animateBottomAreaDozingTransitions = MutableStateFlow(false)
     override val animateBottomAreaDozingTransitions =
@@ -276,22 +280,35 @@ constructor(
             .distinctUntilChanged()
 
     override val isDreaming: Flow<Boolean> =
-        conflatedCallbackFlow {
-                val callback =
-                    object : KeyguardUpdateMonitorCallback() {
-                        override fun onDreamingStateChanged(isDreaming: Boolean) {
-                            trySendWithFailureLogging(isDreaming, TAG, "updated isDreaming")
+        merge(
+                conflatedCallbackFlow {
+                    val callback =
+                        object : KeyguardUpdateMonitorCallback() {
+                            override fun onDreamingStateChanged(isDreaming: Boolean) {
+                                trySendWithFailureLogging(isDreaming, TAG, "updated isDreaming")
+                            }
                         }
-                    }
-                keyguardUpdateMonitor.registerCallback(callback)
-                trySendWithFailureLogging(
-                    keyguardUpdateMonitor.isDreaming,
-                    TAG,
-                    "initial isDreaming",
-                )
+                    keyguardUpdateMonitor.registerCallback(callback)
+                    trySendWithFailureLogging(
+                        keyguardUpdateMonitor.isDreaming,
+                        TAG,
+                        "initial isDreaming",
+                    )
 
-                awaitClose { keyguardUpdateMonitor.removeCallback(callback) }
-            }
+                    awaitClose { keyguardUpdateMonitor.removeCallback(callback) }
+                },
+                conflatedCallbackFlow {
+                    val callback =
+                        object : DreamCallback {
+                            override fun onWakeUp() {
+                                trySendWithFailureLogging(false, TAG, "updated isDreaming")
+                            }
+                        }
+                    dreamCallbackController.addCallback(callback)
+
+                    awaitClose { dreamCallbackController.removeCallback(callback) }
+                }
+            )
             .distinctUntilChanged()
 
     override val linearDozeAmount: Flow<Float> = conflatedCallbackFlow {

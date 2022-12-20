@@ -746,27 +746,6 @@
     <!-- How long in milliseconds before full burn-in protection is achieved. -->
     <integer name="config_dreamOverlayMillisUntilFullJitter">240000</integer>
 
-    <!-- The duration in milliseconds of the y-translation animation when waking up from
-         the dream -->
-    <integer name="config_dreamOverlayOutTranslationYDurationMs">333</integer>
-    <!-- The delay in milliseconds of the y-translation animation when waking up from
-         the dream for the complications at the bottom of the screen -->
-    <integer name="config_dreamOverlayOutTranslationYDelayBottomMs">33</integer>
-    <!-- The delay in milliseconds of the y-translation animation when waking up from
-         the dream for the complications at the top of the screen -->
-    <integer name="config_dreamOverlayOutTranslationYDelayTopMs">117</integer>
-    <!-- The duration in milliseconds of the alpha animation when waking up from the dream -->
-    <integer name="config_dreamOverlayOutAlphaDurationMs">200</integer>
-    <!-- The delay in milliseconds of the alpha animation when waking up from the dream for the
-         complications at the top of the screen -->
-    <integer name="config_dreamOverlayOutAlphaDelayTopMs">217</integer>
-    <!-- The delay in milliseconds of the alpha animation when waking up from the dream for the
-         complications at the bottom of the screen -->
-    <integer name="config_dreamOverlayOutAlphaDelayBottomMs">133</integer>
-    <!-- The duration in milliseconds of the blur animation when waking up from
-         the dream -->
-    <integer name="config_dreamOverlayOutBlurDurationMs">250</integer>
-
     <integer name="complicationFadeOutMs">500</integer>
 
     <integer name="complicationFadeInMs">500</integer>
