@@ -32,7 +32,6 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.util.Objects;
 
-// TODO(b/261432333): Add more detailed javadocs on using DeviceAdminService.
 /**
  * Base class for implementing a policy update receiver. This class provides a convenience for
  * interpreting the raw intent actions ({@link #ACTION_DEVICE_POLICY_SET_RESULT} and
@@ -43,6 +42,10 @@ import java.util.Objects;
  *
  * <p>When publishing your {@code PolicyUpdatesReceiver} subclass as a receiver, it must
  * require the {@link android.Manifest.permission#BIND_DEVICE_ADMIN} permission.
+ *
+ * <p>Admins can implement {@link DeviceAdminService} to ensure they receive all policy updates
+ * (for policies they have set) via {@link #onPolicyChanged} by constantly being bound to by the
+ * system. For more information see {@link DeviceAdminService}.
  */
 public abstract class PolicyUpdatesReceiver extends BroadcastReceiver {
     private static String TAG = "PolicyUpdatesReceiver";

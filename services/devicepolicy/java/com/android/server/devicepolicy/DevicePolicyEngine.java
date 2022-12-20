@@ -28,6 +28,7 @@ import static android.app.admin.PolicyUpdatesReceiver.POLICY_SET_RESULT_SUCCESS;
 import android.Manifest;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.app.admin.DevicePolicyManager;
 import android.app.admin.PolicyUpdatesReceiver;
 import android.app.admin.TargetUser;
 import android.content.Context;
@@ -57,7 +58,9 @@ import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.Collections;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -86,11 +89,22 @@ final class DevicePolicyEngine {
      */
     private final Map<String, PolicyState<?>> mGlobalPolicies;
 
-    DevicePolicyEngine(@NonNull Context context) {
+    /**
+     * Map containing the current set of admins in each user with active policies.
+     */
+    private final SparseArray<Set<EnforcingAdmin>> mEnforcingAdmins;
+
+    private final DeviceAdminServiceController mDeviceAdminServiceController;
+
+    DevicePolicyEngine(
+            @NonNull Context context,
+            @NonNull DeviceAdminServiceController deviceAdminServiceController) {
         mContext = Objects.requireNonNull(context);
+        mDeviceAdminServiceController = Objects.requireNonNull(deviceAdminServiceController);
         mUserManager = mContext.getSystemService(UserManager.class);
         mLocalPolicies = new SparseArray<>();
         mGlobalPolicies = new HashMap<>();
+        mEnforcingAdmins = new SparseArray<>();
     }
 
     // TODO: add more documentation on broadcasts/callbacks to use to get current enforced values
@@ -136,6 +150,8 @@ final class DevicePolicyEngine {
                     // TODO: we're always sending this for now, should properly handle errors.
                     REASON_CONFLICTING_ADMIN_POLICY,
                     userId);
+
+            updateDeviceAdminServiceOnPolicyAddLocked(enforcingAdmin);
 
             write();
         }
@@ -186,6 +202,8 @@ final class DevicePolicyEngine {
             if (localPolicyState.getPoliciesSetByAdmins().isEmpty()) {
                 removeLocalPolicyStateLocked(policyDefinition, userId);
             }
+
+            updateDeviceAdminServiceOnPolicyRemoveLocked(enforcingAdmin);
 
             write();
         }
@@ -257,6 +275,8 @@ final class DevicePolicyEngine {
                     REASON_CONFLICTING_ADMIN_POLICY,
                     UserHandle.USER_ALL);
 
+            updateDeviceAdminServiceOnPolicyAddLocked(enforcingAdmin);
+
             write();
         }
     }
@@ -297,6 +317,8 @@ final class DevicePolicyEngine {
             if (policyState.getPoliciesSetByAdmins().isEmpty()) {
                 removeGlobalPolicyStateLocked(policyDefinition);
             }
+
+            updateDeviceAdminServiceOnPolicyRemoveLocked(enforcingAdmin);
 
             write();
         }
@@ -580,6 +602,7 @@ final class DevicePolicyEngine {
                 getTargetUser(admin.getUserId(), userId));
         extras.putInt(EXTRA_POLICY_UPDATE_REASON_KEY, reason);
         intent.putExtras(extras);
+        intent.addFlags(Intent.FLAG_RECEIVER_FOREGROUND);
 
         maybeSendIntentToAdminReceivers(
                 intent, UserHandle.of(admin.getUserId()), receivers);
@@ -622,6 +645,164 @@ final class DevicePolicyEngine {
         });
     }
 
+    /**
+     * Starts/Stops the services that handle {@link DevicePolicyManager#ACTION_DEVICE_ADMIN_SERVICE}
+     * in the enforcing admins for the given {@code userId}.
+     */
+    private void updateDeviceAdminsServicesForUser(
+            int userId, boolean enable, @NonNull String actionForLog) {
+        if (!enable) {
+            mDeviceAdminServiceController.stopServicesForUser(
+                    userId, actionForLog);
+        } else {
+            for (EnforcingAdmin admin : getEnforcingAdminsForUser(userId)) {
+                // DPCs are handled separately in DPMS, no need to reestablish the connection here.
+                if (admin.hasAuthority(EnforcingAdmin.DPC_AUTHORITY)) {
+                    continue;
+                }
+                mDeviceAdminServiceController.startServiceForAdmin(
+                        admin.getPackageName(), userId, actionForLog);
+            }
+        }
+    }
+
+    /**
+     * Handles internal state related to a user getting started.
+     */
+    void handleStartUser(int userId) {
+        updateDeviceAdminsServicesForUser(
+                userId, /* enable= */ true, /* actionForLog= */ "start-user");
+    }
+
+    /**
+     * Handles internal state related to a user getting started.
+     */
+    void handleUnlockUser(int userId) {
+        updateDeviceAdminsServicesForUser(
+                userId, /* enable= */ true, /* actionForLog= */ "unlock-user");
+    }
+
+    /**
+     * Handles internal state related to a user getting stopped.
+     */
+    void handleStopUser(int userId) {
+        updateDeviceAdminsServicesForUser(
+                userId, /* enable= */ false, /* actionForLog= */ "stop-user");
+    }
+
+    /**
+     * Handles internal state related to packages getting updated.
+     */
+    void handlePackageChanged(@Nullable String updatedPackage, int userId) {
+        if (updatedPackage == null) {
+            return;
+        }
+        updateDeviceAdminServiceOnPackageChanged(updatedPackage, userId);
+    }
+
+    /**
+     * Reestablishes the service that handles
+     * {@link DevicePolicyManager#ACTION_DEVICE_ADMIN_SERVICE} in the enforcing admin if the package
+     * was updated, as a package update results in the persistent connection getting reset.
+     */
+    private void updateDeviceAdminServiceOnPackageChanged(
+            @NonNull String updatedPackage, int userId) {
+        for (EnforcingAdmin admin : getEnforcingAdminsForUser(userId)) {
+            // DPCs are handled separately in DPMS, no need to reestablish the connection here.
+            if (admin.hasAuthority(EnforcingAdmin.DPC_AUTHORITY)) {
+                continue;
+            }
+            if (updatedPackage.equals(admin.getPackageName())) {
+                mDeviceAdminServiceController.startServiceForAdmin(
+                        updatedPackage, userId, /* actionForLog= */ "package-broadcast");
+            }
+        }
+    }
+
+    /**
+     * Called after an admin policy has been added to start binding to the admin if a connection
+     * was not already established.
+     */
+    private void updateDeviceAdminServiceOnPolicyAddLocked(@NonNull EnforcingAdmin enforcingAdmin) {
+        int userId = enforcingAdmin.getUserId();
+
+        // A connection is established with DPCs as soon as they are provisioned, so no need to
+        // connect when a policy is set.
+        if (enforcingAdmin.hasAuthority(EnforcingAdmin.DPC_AUTHORITY)) {
+            return;
+        }
+        if (mEnforcingAdmins.contains(userId)
+                && mEnforcingAdmins.get(userId).contains(enforcingAdmin)) {
+            return;
+        }
+
+        if (!mEnforcingAdmins.contains(enforcingAdmin.getUserId())) {
+            mEnforcingAdmins.put(enforcingAdmin.getUserId(), new HashSet<>());
+        }
+        mEnforcingAdmins.get(enforcingAdmin.getUserId()).add(enforcingAdmin);
+
+        mDeviceAdminServiceController.startServiceForAdmin(
+                enforcingAdmin.getPackageName(),
+                userId,
+                /* actionForLog= */ "policy-added");
+    }
+
+    /**
+     * Called after an admin policy has been removed to stop binding to the admin if they no longer
+     * have any policies set.
+     */
+    private void updateDeviceAdminServiceOnPolicyRemoveLocked(
+            @NonNull EnforcingAdmin enforcingAdmin) {
+        // TODO(b/263364434): centralise handling in one place.
+        // DPCs rely on a constant connection being established as soon as they are provisioned,
+        // so we shouldn't disconnect it even if they no longer have policies set.
+        if (enforcingAdmin.hasAuthority(EnforcingAdmin.DPC_AUTHORITY)) {
+            return;
+        }
+        if (doesAdminHavePolicies(enforcingAdmin)) {
+            return;
+        }
+
+        int userId = enforcingAdmin.getUserId();
+
+        if (mEnforcingAdmins.contains(userId)) {
+            mEnforcingAdmins.get(userId).remove(enforcingAdmin);
+            if (mEnforcingAdmins.get(userId).isEmpty()) {
+                mEnforcingAdmins.remove(enforcingAdmin.getUserId());
+            }
+        }
+
+        mDeviceAdminServiceController.stopServiceForAdmin(
+                enforcingAdmin.getPackageName(),
+                userId,
+                /* actionForLog= */ "policy-removed");
+    }
+
+    private boolean doesAdminHavePolicies(@NonNull EnforcingAdmin enforcingAdmin) {
+        for (String policy : mGlobalPolicies.keySet()) {
+            PolicyState<?> policyState = mGlobalPolicies.get(policy);
+            if (policyState.getPoliciesSetByAdmins().containsKey(enforcingAdmin)) {
+                return true;
+            }
+        }
+        for (int i = 0; i < mLocalPolicies.size(); i++) {
+            for (String policy : mLocalPolicies.get(mLocalPolicies.keyAt(i)).keySet()) {
+                PolicyState<?> policyState = mLocalPolicies.get(
+                        mLocalPolicies.keyAt(i)).get(policy);
+                if (policyState.getPoliciesSetByAdmins().containsKey(enforcingAdmin)) {
+                    return true;
+                }
+            }
+        }
+        return false;
+    }
+
+    @NonNull
+    private Set<EnforcingAdmin> getEnforcingAdminsForUser(int userId) {
+        return mEnforcingAdmins.contains(userId)
+                ? mEnforcingAdmins.get(userId) : Collections.emptySet();
+    }
+
     private void write() {
         Log.d(TAG, "Writing device policies to file.");
         new DevicePoliciesReaderWriter().writeToFileLocked();
@@ -649,6 +830,7 @@ final class DevicePolicyEngine {
         private static final String TAG_LOCAL_POLICY_ENTRY = "local-policy-entry";
         private static final String TAG_GLOBAL_POLICY_ENTRY = "global-policy-entry";
         private static final String TAG_ADMINS_POLICY_ENTRY = "admins-policy-entry";
+        private static final String TAG_ENFORCING_ADMINS_ENTRY = "enforcing-admins-entry";
         private static final String ATTR_USER_ID = "user-id";
         private static final String ATTR_POLICY_ID = "policy-id";
 
@@ -691,6 +873,7 @@ final class DevicePolicyEngine {
         void writeInner(TypedXmlSerializer serializer) throws IOException {
             writeLocalPoliciesInner(serializer);
             writeGlobalPoliciesInner(serializer);
+            writeEnforcingAdminsInner(serializer);
         }
 
         private void writeLocalPoliciesInner(TypedXmlSerializer serializer) throws IOException {
@@ -731,6 +914,19 @@ final class DevicePolicyEngine {
             }
         }
 
+        private void writeEnforcingAdminsInner(TypedXmlSerializer serializer) throws IOException {
+            if (mEnforcingAdmins != null) {
+                for (int i = 0; i < mEnforcingAdmins.size(); i++) {
+                    int userId = mEnforcingAdmins.keyAt(i);
+                    for (EnforcingAdmin admin : mEnforcingAdmins.get(userId)) {
+                        serializer.startTag(/* namespace= */ null, TAG_ENFORCING_ADMINS_ENTRY);
+                        admin.saveToXml(serializer);
+                        serializer.endTag(/* namespace= */ null, TAG_ENFORCING_ADMINS_ENTRY);
+                    }
+                }
+            }
+        }
+
         void readFromFileLocked() {
             if (!mFile.exists()) {
                 Log.d(TAG, "" + mFile + " doesn't exist");
@@ -765,6 +961,9 @@ final class DevicePolicyEngine {
                     case TAG_GLOBAL_POLICY_ENTRY:
                         readGlobalPoliciesInner(parser);
                         break;
+                    case TAG_ENFORCING_ADMINS_ENTRY:
+                        readEnforcingAdminsInner(parser);
+                        break;
                     default:
                         Log.e(TAG, "Unknown tag " + tag);
                 }
@@ -798,6 +997,15 @@ final class DevicePolicyEngine {
                 Log.e(TAG, "Error parsing file, " + policyKey + "doesn't have an "
                         + "AdminsPolicy.");
             }
+        }
+
+        private void readEnforcingAdminsInner(TypedXmlPullParser parser)
+                throws XmlPullParserException {
+            EnforcingAdmin admin = EnforcingAdmin.readFromXml(parser);
+            if (!mEnforcingAdmins.contains(admin.getUserId())) {
+                mEnforcingAdmins.put(admin.getUserId(), new HashSet<>());
+            }
+            mEnforcingAdmins.get(admin.getUserId()).add(admin);
         }
 
         @Nullable
