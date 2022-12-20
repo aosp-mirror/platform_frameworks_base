@@ -18,12 +18,13 @@ package com.android.systemui.qs.logging
 
 import android.service.quicksettings.Tile
 import com.android.systemui.log.dagger.QSLog
+import com.android.systemui.plugins.log.ConstantStringsLogger
+import com.android.systemui.plugins.log.ConstantStringsLoggerImpl
 import com.android.systemui.plugins.log.LogBuffer
 import com.android.systemui.plugins.log.LogLevel
 import com.android.systemui.plugins.log.LogLevel.DEBUG
 import com.android.systemui.plugins.log.LogLevel.ERROR
 import com.android.systemui.plugins.log.LogLevel.VERBOSE
-import com.android.systemui.plugins.log.LogLevel.WARNING
 import com.android.systemui.plugins.log.LogMessage
 import com.android.systemui.plugins.qs.QSTile
 import com.android.systemui.statusbar.StatusBarState
@@ -32,17 +33,8 @@ import javax.inject.Inject
 
 private const val TAG = "QSLog"
 
-class QSLogger @Inject constructor(
-    @QSLog private val buffer: LogBuffer
-) {
-
-    fun d(@CompileTimeConstant msg: String) = buffer.log(TAG, DEBUG, msg)
-
-    fun e(@CompileTimeConstant msg: String) = buffer.log(TAG, ERROR, msg)
-
-    fun v(@CompileTimeConstant msg: String) = buffer.log(TAG, VERBOSE, msg)
-
-    fun w(@CompileTimeConstant msg: String) = buffer.log(TAG, WARNING, msg)
+class QSLogger @Inject constructor(@QSLog private val buffer: LogBuffer) :
+    ConstantStringsLogger by ConstantStringsLoggerImpl(buffer, TAG) {
 
     fun logException(@CompileTimeConstant logMsg: String, ex: Exception) {
         buffer.log(TAG, ERROR, {}, { logMsg }, exception = ex)

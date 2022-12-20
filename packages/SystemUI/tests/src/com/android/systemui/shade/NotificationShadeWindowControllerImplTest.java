@@ -89,6 +89,7 @@ public class NotificationShadeWindowControllerImplTest extends SysuiTestCase {
     @Mock private ScreenOffAnimationController mScreenOffAnimationController;
     @Mock private AuthController mAuthController;
     @Mock private ShadeExpansionStateManager mShadeExpansionStateManager;
+    @Mock private ShadeWindowLogger mShadeWindowLogger;
     @Captor private ArgumentCaptor<WindowManager.LayoutParams> mLayoutParameters;
 
     private NotificationShadeWindowControllerImpl mNotificationShadeWindowController;
@@ -104,7 +105,8 @@ public class NotificationShadeWindowControllerImplTest extends SysuiTestCase {
                 mWindowManager, mActivityManager, mDozeParameters, mStatusBarStateController,
                 mConfigurationController, mKeyguardViewMediator, mKeyguardBypassController,
                 mColorExtractor, mDumpManager, mKeyguardStateController,
-                mScreenOffAnimationController, mAuthController, mShadeExpansionStateManager) {
+                mScreenOffAnimationController, mAuthController, mShadeExpansionStateManager,
+                mShadeWindowLogger) {
                     @Override
                     protected boolean isDebuggable() {
                         return false;
