@@ -22,6 +22,7 @@ import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.NonUiContext;
 import android.annotation.Nullable;
+import android.annotation.SuppressLint;
 import android.content.pm.PackageManager;
 import android.os.Bundle;
 import android.os.Parcel;
@@ -38,34 +39,65 @@ import java.util.Locale;
 import java.util.Objects;
 
 /**
- * Container for a batch of requests to the OverlayManagerService.
+ * A container for a batch of requests to the OverlayManager.
  *
- * Transactions are created using a builder interface. Example usage:
+ * <p>An app can get an {@link OverlayManagerTransaction} with the specified {@link OverlayManager}
+ * to handle the transaction. The app can register multiple overlays and unregister multiple
+ * registered overlays in one transaction commitment.
  *
- * final OverlayManager om = ctx.getSystemService(OverlayManager.class);
- * final OverlayManagerTransaction t = new OverlayManagerTransaction.Builder()
- *     .setEnabled(...)
- *     .setEnabled(...)
- *     .build();
- * om.commit(t);
+ * <p>The below example is registering a {@code updatingOverlay} and unregistering a {@code
+ * deprecatedOverlay} in one transaction commitment.
  *
+ * <pre>{@code
+ * final OverlayManager overlayManager = ctx.getSystemService(OverlayManager.class);
+ * final OverlayManagerTransaction transaction = new OverlayManagerTransaction(overlayManager);
+ * transaction.registerFabricatedOverlay(updatingOverlay);
+ * transaction.unregisterFabricatedOverlay(deprecatedOverlay)
+ * transaction.commit();
+ * }</pre>
+ *
+ * @see OverlayManager
+ * @see FabricatedOverlay
  * @hide
  */
-public class OverlayManagerTransaction
+public final class OverlayManagerTransaction
         implements Iterable<OverlayManagerTransaction.Request>, Parcelable {
     // TODO: remove @hide from this class when OverlayManager is added to the
     // SDK, but keep OverlayManagerTransaction.Request @hidden
     private final List<Request> mRequests;
     private final OverlayManager mOverlayManager;
 
-    OverlayManagerTransaction(
+    /**
+     * Container for a batch of requests to the OverlayManagerService.
+     *
+     * <p>Transactions are created using a builder interface. Example usage:
+     * <pre>{@code
+     * final OverlayManager om = ctx.getSystemService(OverlayManager.class);
+     * final OverlayManagerTransaction t = new OverlayManagerTransaction.Builder()
+     *     .setEnabled(...)
+     *     .setEnabled(...)
+     *     .build();
+     * om.commit(t);
+     * }</pre>
+     */
+    private OverlayManagerTransaction(
             @NonNull final List<Request> requests, @Nullable OverlayManager overlayManager) {
-        checkNotNull(requests);
+        Objects.requireNonNull(requests);
         if (requests.contains(null)) {
             throw new IllegalArgumentException("null request");
         }
         mRequests = requests;
         mOverlayManager = overlayManager;
+    }
+
+    /**
+     * Get an overlay manager transaction with the specified handler.
+     * @param overlayManager handles this transaction.
+     *
+     * @hide
+     */
+    public OverlayManagerTransaction(@NonNull OverlayManager overlayManager) {
+        this(new ArrayList<>(), Objects.requireNonNull(overlayManager));
     }
 
     private OverlayManagerTransaction(@NonNull final Parcel source) {
@@ -86,6 +118,11 @@ public class OverlayManagerTransaction
         return mRequests.iterator();
     }
 
+    /**
+     * {@inheritDoc}
+     *
+     * @hide
+     */
     @Override
     public String toString() {
         return String.format("OverlayManagerTransaction { mRequests = %s }", mRequests);
@@ -97,7 +134,7 @@ public class OverlayManagerTransaction
      *
      * @hide
      */
-    public static class Request {
+    public static final class Request {
         @IntDef(prefix = "TYPE_", value = {
                 TYPE_SET_ENABLED,
                 TYPE_SET_DISABLED,
@@ -117,6 +154,8 @@ public class OverlayManagerTransaction
         @NonNull
         public final OverlayIdentifier overlay;
         public final int userId;
+
+        @SuppressLint("NullableCollection")
         @Nullable
         public final Bundle extras;
 
@@ -161,22 +200,8 @@ public class OverlayManagerTransaction
      *
      * @hide
      */
-    public static class Builder {
+    public static final class Builder {
         private final List<Request> mRequests = new ArrayList<>();
-        @Nullable private final OverlayManager mOverlayManager;
-
-        public Builder() {
-            mOverlayManager = null;
-        }
-
-        /**
-         * The transaction builder for self-targeting.
-         *
-         * @param overlayManager is not null if the transaction is for self-targeting.
-         */
-        Builder(@NonNull OverlayManager overlayManager) {
-            mOverlayManager = Objects.requireNonNull(overlayManager);
-        }
 
         /**
          * Request that an overlay package be enabled and change its loading
@@ -228,12 +253,7 @@ public class OverlayManagerTransaction
          */
         @NonNull
         public Builder registerFabricatedOverlay(@NonNull FabricatedOverlay overlay) {
-            Objects.requireNonNull(overlay);
-
-            final Bundle extras = new Bundle();
-            extras.putParcelable(Request.BUNDLE_FABRICATED_OVERLAY, overlay.mOverlay);
-            mRequests.add(new Request(Request.TYPE_REGISTER_FABRICATED, overlay.getIdentifier(),
-                    UserHandle.USER_ALL, extras));
+            mRequests.add(generateRegisterFabricatedOverlayRequest(overlay));
             return this;
         }
 
@@ -246,10 +266,7 @@ public class OverlayManagerTransaction
          */
         @NonNull
         public Builder unregisterFabricatedOverlay(@NonNull OverlayIdentifier overlay) {
-            Objects.requireNonNull(overlay);
-
-            mRequests.add(new Request(Request.TYPE_UNREGISTER_FABRICATED, overlay,
-                    UserHandle.USER_ALL));
+            mRequests.add(generateUnRegisterFabricatedOverlayRequest(overlay));
             return this;
         }
 
@@ -262,17 +279,27 @@ public class OverlayManagerTransaction
          */
         @NonNull
         public OverlayManagerTransaction build() {
-            return new OverlayManagerTransaction(mRequests, mOverlayManager);
+            return new OverlayManagerTransaction(mRequests, null /* overlayManager */);
         }
     }
 
+    /**
+     * {@inheritDoc}
+     *
+     * @hide
+     */
     @Override
     public int describeContents() {
         return 0;
     }
 
+    /**
+     * {@inheritDoc}
+     *
+     * @hide
+     */
     @Override
-    public void writeToParcel(Parcel dest, int flags) {
+    public void writeToParcel(@NonNull Parcel dest, int flags) {
         final int size = mRequests.size();
         dest.writeInt(size);
         for (int i = 0; i < size; i++) {
@@ -284,6 +311,7 @@ public class OverlayManagerTransaction
         }
     }
 
+    @NonNull
     public static final Parcelable.Creator<OverlayManagerTransaction> CREATOR =
             new Parcelable.Creator<OverlayManagerTransaction>() {
 
@@ -311,6 +339,55 @@ public class OverlayManagerTransaction
     @NonUiContext
     public void commit() throws PackageManager.NameNotFoundException, IOException {
         mOverlayManager.commitSelfTarget(this);
+    }
+
+    private static Request generateRegisterFabricatedOverlayRequest(
+            @NonNull FabricatedOverlay overlay) {
+        Objects.requireNonNull(overlay);
+
+        final Bundle extras = new Bundle();
+        extras.putParcelable(Request.BUNDLE_FABRICATED_OVERLAY, overlay.mOverlay);
+        return new Request(Request.TYPE_REGISTER_FABRICATED, overlay.getIdentifier(),
+                UserHandle.USER_ALL, extras);
+    }
+
+    private static Request generateUnRegisterFabricatedOverlayRequest(
+            @NonNull OverlayIdentifier overlayIdentifier) {
+        Objects.requireNonNull(overlayIdentifier);
+
+        return new Request(Request.TYPE_UNREGISTER_FABRICATED, overlayIdentifier,
+                UserHandle.USER_ALL);
+    }
+
+    /**
+     * Registers the fabricated overlays with the overlay manager so it can be used to overlay
+     * the app resources in runtime.
+     *
+     * <p>If an overlay is re-registered the existing overlay will be replaced by the newly
+     * registered overlay. The registered overlay will be left unchanged until the target
+     * package or target overlayable is changed.
+     *
+     * @param overlay the overlay to register with the overlay manager
+     *
+     * @hide
+     */
+    @NonNull
+    public void registerFabricatedOverlay(@NonNull FabricatedOverlay overlay) {
+        mRequests.add(generateRegisterFabricatedOverlayRequest(overlay));
+    }
+
+    /**
+     * Unregisters the registered overlays from the overlay manager.
+     *
+     * @param overlay the overlay to be unregistered
+     *
+     * @see OverlayManager#getOverlayInfosForTarget(String)
+     * @see OverlayInfo#getOverlayIdentifier()
+     * @hide
+     */
+    @NonNull
+    public void unregisterFabricatedOverlay(@NonNull OverlayIdentifier overlay) {
+        mRequests.add(generateUnRegisterFabricatedOverlayRequest(overlay));
     }
 
     boolean isSelfTargetingTransaction() {
