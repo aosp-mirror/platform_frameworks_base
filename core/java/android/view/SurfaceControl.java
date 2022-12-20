@@ -27,12 +27,14 @@ import static android.view.SurfaceControlProto.HASH_CODE;
 import static android.view.SurfaceControlProto.LAYER_ID;
 import static android.view.SurfaceControlProto.NAME;
 
+import android.Manifest;
 import android.annotation.CallbackExecutor;
 import android.annotation.FloatRange;
 import android.annotation.IntDef;
 import android.annotation.IntRange;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.annotation.RequiresPermission;
 import android.annotation.Size;
 import android.annotation.TestApi;
 import android.compat.annotation.UnsupportedAppUsage;
@@ -3166,6 +3168,7 @@ public final class SurfaceControl implements Parcelable {
           *
           * @hide
           */
+        @RequiresPermission(Manifest.permission.WAKEUP_SURFACE_FLINGER)
         public Transaction setEarlyWakeupStart() {
             nativeSetEarlyWakeupStart(mNativeObject);
             return this;
@@ -3176,6 +3179,7 @@ public final class SurfaceControl implements Parcelable {
          *
          * @hide
          */
+        @RequiresPermission(Manifest.permission.WAKEUP_SURFACE_FLINGER)
         public Transaction setEarlyWakeupEnd() {
             nativeSetEarlyWakeupEnd(mNativeObject);
             return this;
