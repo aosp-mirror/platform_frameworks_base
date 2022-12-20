@@ -66,8 +66,8 @@ interface KeyguardTransitionRepository {
     }
 
     /**
-     * Begin a transition from one state to another. Will not start if another transition is in
-     * progress.
+     * Begin a transition from one state to another. Transitions are interruptible, and will issue a
+     * [TransitionStep] with state = [TransitionState.CANCELED] before beginning the next one.
      */
     fun startTransition(info: TransitionInfo): UUID?
 

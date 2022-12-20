@@ -22,6 +22,9 @@ import android.animation.ValueAnimator
 import android.view.View
 import android.view.animation.Interpolator
 import androidx.core.animation.doOnEnd
+import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.repeatOnLifecycle
+import com.android.systemui.R
 import com.android.systemui.animation.Interpolators
 import com.android.systemui.dreams.complication.ComplicationHostViewController
 import com.android.systemui.dreams.complication.ComplicationLayoutParams
@@ -29,10 +32,20 @@ import com.android.systemui.dreams.complication.ComplicationLayoutParams.POSITIO
 import com.android.systemui.dreams.complication.ComplicationLayoutParams.POSITION_TOP
 import com.android.systemui.dreams.complication.ComplicationLayoutParams.Position
 import com.android.systemui.dreams.dagger.DreamOverlayModule
+import com.android.systemui.keyguard.ui.viewmodel.DreamingToLockscreenTransitionViewModel
+import com.android.systemui.keyguard.ui.viewmodel.DreamingToLockscreenTransitionViewModel.Companion.DREAM_ANIMATION_DURATION
+import com.android.systemui.lifecycle.repeatWhenAttached
 import com.android.systemui.statusbar.BlurUtils
 import com.android.systemui.statusbar.CrossFadeHelper
+import com.android.systemui.statusbar.policy.ConfigurationController
+import com.android.systemui.statusbar.policy.ConfigurationController.ConfigurationListener
+import com.android.systemui.util.concurrency.DelayableExecutor
 import javax.inject.Inject
 import javax.inject.Named
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.collect
+import kotlinx.coroutines.flow.flatMapLatest
+import kotlinx.coroutines.launch
 
 /** Controller for dream overlay animations. */
 class DreamOverlayAnimationsController
@@ -43,6 +56,8 @@ constructor(
     private val mStatusBarViewController: DreamOverlayStatusBarViewController,
     private val mOverlayStateController: DreamOverlayStateController,
     @Named(DreamOverlayModule.DREAM_BLUR_RADIUS) private val mDreamBlurRadius: Int,
+    private val transitionViewModel: DreamingToLockscreenTransitionViewModel,
+    private val configController: ConfigurationController,
     @Named(DreamOverlayModule.DREAM_IN_BLUR_ANIMATION_DURATION)
     private val mDreamInBlurAnimDurationMs: Long,
     @Named(DreamOverlayModule.DREAM_IN_COMPLICATIONS_ANIMATION_DURATION)
@@ -51,22 +66,10 @@ constructor(
     private val mDreamInTranslationYDistance: Int,
     @Named(DreamOverlayModule.DREAM_IN_TRANSLATION_Y_DURATION)
     private val mDreamInTranslationYDurationMs: Long,
-    @Named(DreamOverlayModule.DREAM_OUT_TRANSLATION_Y_DISTANCE)
-    private val mDreamOutTranslationYDistance: Int,
-    @Named(DreamOverlayModule.DREAM_OUT_TRANSLATION_Y_DURATION)
-    private val mDreamOutTranslationYDurationMs: Long,
-    @Named(DreamOverlayModule.DREAM_OUT_TRANSLATION_Y_DELAY_BOTTOM)
-    private val mDreamOutTranslationYDelayBottomMs: Long,
-    @Named(DreamOverlayModule.DREAM_OUT_TRANSLATION_Y_DELAY_TOP)
-    private val mDreamOutTranslationYDelayTopMs: Long,
-    @Named(DreamOverlayModule.DREAM_OUT_ALPHA_DURATION) private val mDreamOutAlphaDurationMs: Long,
-    @Named(DreamOverlayModule.DREAM_OUT_ALPHA_DELAY_BOTTOM)
-    private val mDreamOutAlphaDelayBottomMs: Long,
-    @Named(DreamOverlayModule.DREAM_OUT_ALPHA_DELAY_TOP) private val mDreamOutAlphaDelayTopMs: Long,
-    @Named(DreamOverlayModule.DREAM_OUT_BLUR_DURATION) private val mDreamOutBlurDurationMs: Long
 ) {
 
     private var mAnimator: Animator? = null
+    private lateinit var view: View
 
     /**
      * Store the current alphas at the various positions. This is so that we may resume an animation
@@ -76,9 +79,63 @@ constructor(
 
     private var mCurrentBlurRadius: Float = 0f
 
+    fun init(view: View) {
+        this.view = view
+
+        view.repeatWhenAttached {
+            val configurationBasedDimensions = MutableStateFlow(loadFromResources(view))
+            val configCallback =
+                object : ConfigurationListener {
+                    override fun onDensityOrFontScaleChanged() {
+                        configurationBasedDimensions.value = loadFromResources(view)
+                    }
+                }
+
+            configController.addCallback(configCallback)
+
+            repeatOnLifecycle(Lifecycle.State.CREATED) {
+                /* Translation animations, when moving from DREAMING->LOCKSCREEN state */
+                launch {
+                    configurationBasedDimensions
+                        .flatMapLatest {
+                            transitionViewModel.dreamOverlayTranslationY(it.translationYPx)
+                        }
+                        .collect { px ->
+                            setElementsTranslationYAtPosition(
+                                px,
+                                ComplicationLayoutParams.POSITION_TOP
+                            )
+                            setElementsTranslationYAtPosition(
+                                px,
+                                ComplicationLayoutParams.POSITION_BOTTOM
+                            )
+                        }
+                }
+
+                /* Alpha animations, when moving from DREAMING->LOCKSCREEN state */
+                launch {
+                    transitionViewModel.dreamOverlayAlpha.collect { alpha ->
+                        setElementsAlphaAtPosition(
+                            alpha = alpha,
+                            position = ComplicationLayoutParams.POSITION_TOP,
+                            fadingOut = true,
+                        )
+                        setElementsAlphaAtPosition(
+                            alpha = alpha,
+                            position = ComplicationLayoutParams.POSITION_BOTTOM,
+                            fadingOut = true,
+                        )
+                    }
+                }
+            }
+
+            configController.removeCallback(configCallback)
+        }
+    }
+
     /** Starts the dream content and dream overlay entry animations. */
     @JvmOverloads
-    fun startEntryAnimations(view: View, animatorBuilder: () -> AnimatorSet = { AnimatorSet() }) {
+    fun startEntryAnimations(animatorBuilder: () -> AnimatorSet = { AnimatorSet() }) {
         cancelAnimations()
 
         mAnimator =
@@ -113,73 +170,9 @@ constructor(
     }
 
     /** Starts the dream content and dream overlay exit animations. */
-    @JvmOverloads
-    fun startExitAnimations(
-        view: View,
-        doneCallback: () -> Unit,
-        animatorBuilder: () -> AnimatorSet = { AnimatorSet() }
-    ) {
+    fun wakeUp(doneCallback: Runnable, executor: DelayableExecutor) {
         cancelAnimations()
-
-        mAnimator =
-            animatorBuilder().apply {
-                playTogether(
-                    blurAnimator(
-                        view = view,
-                        // Start the blurring wherever the entry animation ended, in
-                        // case it was cancelled early.
-                        fromBlurRadius = mCurrentBlurRadius,
-                        toBlurRadius = mDreamBlurRadius.toFloat(),
-                        durationMs = mDreamOutBlurDurationMs,
-                        interpolator = Interpolators.EMPHASIZED_ACCELERATE
-                    ),
-                    translationYAnimator(
-                        from = 0f,
-                        to = mDreamOutTranslationYDistance.toFloat(),
-                        durationMs = mDreamOutTranslationYDurationMs,
-                        delayMs = mDreamOutTranslationYDelayBottomMs,
-                        positions = POSITION_BOTTOM,
-                        interpolator = Interpolators.EMPHASIZED_ACCELERATE
-                    ),
-                    translationYAnimator(
-                        from = 0f,
-                        to = mDreamOutTranslationYDistance.toFloat(),
-                        durationMs = mDreamOutTranslationYDurationMs,
-                        delayMs = mDreamOutTranslationYDelayTopMs,
-                        positions = POSITION_TOP,
-                        interpolator = Interpolators.EMPHASIZED_ACCELERATE
-                    ),
-                    alphaAnimator(
-                        from =
-                            mCurrentAlphaAtPosition.getOrDefault(
-                                key = POSITION_BOTTOM,
-                                defaultValue = 1f
-                            ),
-                        to = 0f,
-                        durationMs = mDreamOutAlphaDurationMs,
-                        delayMs = mDreamOutAlphaDelayBottomMs,
-                        positions = POSITION_BOTTOM
-                    ),
-                    alphaAnimator(
-                        from =
-                            mCurrentAlphaAtPosition.getOrDefault(
-                                key = POSITION_TOP,
-                                defaultValue = 1f
-                            ),
-                        to = 0f,
-                        durationMs = mDreamOutAlphaDurationMs,
-                        delayMs = mDreamOutAlphaDelayTopMs,
-                        positions = POSITION_TOP
-                    )
-                )
-                doOnEnd {
-                    mAnimator = null
-                    mOverlayStateController.setExitAnimationsRunning(false)
-                    doneCallback()
-                }
-                start()
-            }
-        mOverlayStateController.setExitAnimationsRunning(true)
+        executor.executeDelayed(doneCallback, DREAM_ANIMATION_DURATION.inWholeMilliseconds)
     }
 
     /** Cancels the dream content and dream overlay animations, if they're currently running. */
@@ -288,4 +281,15 @@ constructor(
             mStatusBarViewController.setTranslationY(translationY)
         }
     }
+
+    private fun loadFromResources(view: View): ConfigurationBasedDimensions {
+        return ConfigurationBasedDimensions(
+            translationYPx =
+                view.resources.getDimensionPixelSize(R.dimen.dream_overlay_exit_y_offset),
+        )
+    }
+
+    private data class ConfigurationBasedDimensions(
+        val translationYPx: Int,
+    )
 }
