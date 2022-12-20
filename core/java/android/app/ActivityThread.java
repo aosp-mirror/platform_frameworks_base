@@ -4556,6 +4556,9 @@ public final class ActivityThread extends ClientTransactionHandler
             context.setOuterContext(service);
             service.attach(context, this, data.info.name, data.token, app,
                     ActivityManager.getService());
+            if (!service.isUiContext()) { // WindowProviderService is a UI Context.
+                service.updateDeviceId(mLastReportedDeviceId);
+            }
             service.onCreate();
             mServicesData.put(data.token, data);
             mServices.put(data.token, service);
