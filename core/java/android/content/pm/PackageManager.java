@@ -1545,6 +1545,14 @@ public abstract class PackageManager {
      */
     public static final int INSTALL_DISABLE_ALLOWED_APEX_UPDATE_CHECK = 0x00800000;
 
+    /**
+     * Flag parameter for {@link #installPackage} to bypass the low targer sdk version block
+     * for this install.
+     *
+     * @hide
+     */
+    public static final int INSTALL_BYPASS_LOW_TARGET_SDK_BLOCK = 0x00800000;
+
     /** @hide */
     @IntDef(flag = true, value = {
             DONT_KILL_APP,
