@@ -1243,7 +1243,8 @@ public class LockSettingsService extends ILockSettings.Stub {
 
     private int getFrpCredentialType() {
         PersistentData data = mStorage.readPersistentDataBlock();
-        if (data.type != PersistentData.TYPE_SP && data.type != PersistentData.TYPE_SP_WEAVER) {
+        if (data.type != PersistentData.TYPE_SP_GATEKEEPER &&
+                data.type != PersistentData.TYPE_SP_WEAVER) {
             return CREDENTIAL_TYPE_NONE;
         }
         int credentialType = SyntheticPasswordManager.getFrpCredentialType(data.payload);
