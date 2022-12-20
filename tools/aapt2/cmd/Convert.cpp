@@ -364,7 +364,8 @@ bool ExtractResourceConfig(const std::string& path, IAaptContext* context,
   }
   std::unordered_set<ResourceName> resources_exclude_list;
   bool result = ParseResourceConfig(content, context, resources_exclude_list,
-                                    out_options.name_collapse_exemptions);
+                                    out_options.name_collapse_exemptions,
+                                    out_options.path_shorten_exemptions);
   if (!result) {
     return false;
   }

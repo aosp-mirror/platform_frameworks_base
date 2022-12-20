@@ -322,7 +322,8 @@ bool ExtractConfig(const std::string& path, IAaptContext* context, OptimizeOptio
     return false;
   }
   return ParseResourceConfig(content, context, options->resources_exclude_list,
-                             options->table_flattener_options.name_collapse_exemptions);
+                             options->table_flattener_options.name_collapse_exemptions,
+                             options->table_flattener_options.path_shorten_exemptions);
 }
 
 bool ExtractAppDataFromManifest(OptimizeContext* context, const LoadedApk* apk,
