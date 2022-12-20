@@ -71,15 +71,19 @@ constructor(
             iconInteractor.isDataConnected,
             iconInteractor.isDataEnabled,
             iconInteractor.isDefaultConnectionFailed,
-        ) { networkTypeIconGroup, dataConnected, dataEnabled, failedConnection ->
-            if (!dataConnected || !dataEnabled || failedConnection) {
-                null
-            } else {
-                val desc =
-                    if (networkTypeIconGroup.dataContentDescription != 0)
-                        ContentDescription.Resource(networkTypeIconGroup.dataContentDescription)
-                    else null
-                Icon.Resource(networkTypeIconGroup.dataType, desc)
+            iconInteractor.alwaysShowDataRatIcon,
+        ) { networkTypeIconGroup, dataConnected, dataEnabled, failedConnection, alwaysShow ->
+            val desc =
+                if (networkTypeIconGroup.dataContentDescription != 0)
+                    ContentDescription.Resource(networkTypeIconGroup.dataContentDescription)
+                else null
+            val icon = Icon.Resource(networkTypeIconGroup.dataType, desc)
+            return@combine when {
+                alwaysShow -> icon
+                !dataConnected -> null
+                !dataEnabled -> null
+                failedConnection -> null
+                else -> icon
             }
         }
 

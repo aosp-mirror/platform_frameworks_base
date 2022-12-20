@@ -23,6 +23,7 @@ import android.net.NetworkCapabilities
 import android.net.NetworkCapabilities.NET_CAPABILITY_VALIDATED
 import android.net.NetworkCapabilities.TRANSPORT_CELLULAR
 import android.provider.Settings
+import android.telephony.CarrierConfigManager
 import android.telephony.SubscriptionInfo
 import android.telephony.SubscriptionManager
 import android.telephony.TelephonyCallback
@@ -30,6 +31,8 @@ import android.telephony.TelephonyCallback.ActiveDataSubscriptionIdListener
 import android.telephony.TelephonyManager
 import androidx.test.filters.SmallTest
 import com.android.internal.telephony.PhoneConstants
+import com.android.settingslib.R
+import com.android.settingslib.mobile.MobileMappings
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.statusbar.pipeline.mobile.data.model.MobileConnectivityModel
 import com.android.systemui.statusbar.pipeline.mobile.data.model.SubscriptionModel
@@ -50,6 +53,7 @@ import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.runBlocking
 import org.junit.After
 import org.junit.Assert.assertThrows
+import org.junit.Assert.assertTrue
 import org.junit.Before
 import org.junit.Test
 import org.mockito.ArgumentMatchers.anyInt
@@ -63,6 +67,7 @@ import org.mockito.MockitoAnnotations
 class MobileConnectionsRepositoryTest : SysuiTestCase() {
     private lateinit var underTest: MobileConnectionsRepositoryImpl
 
+    private lateinit var connectionFactory: MobileConnectionRepositoryImpl.Factory
     @Mock private lateinit var connectivityManager: ConnectivityManager
     @Mock private lateinit var subscriptionManager: SubscriptionManager
     @Mock private lateinit var telephonyManager: TelephonyManager
@@ -84,7 +89,7 @@ class MobileConnectionsRepositoryTest : SysuiTestCase() {
             }
         }
 
-        val connectionFactory: MobileConnectionRepositoryImpl.Factory =
+        connectionFactory =
             MobileConnectionRepositoryImpl.Factory(
                 context = context,
                 telephonyManager = telephonyManager,
@@ -381,6 +386,92 @@ class MobileConnectionsRepositoryTest : SysuiTestCase() {
             getDefaultNetworkCallback().onCapabilitiesChanged(NETWORK, caps)
 
             assertThat(latest).isEqualTo(MobileConnectivityModel(false, true))
+
+            job.cancel()
+        }
+
+    @Test
+    fun config_initiallyFromContext() =
+        runBlocking(IMMEDIATE) {
+            overrideResource(R.bool.config_showMin3G, true)
+            val configFromContext = MobileMappings.Config.readConfig(context)
+            assertThat(configFromContext.showAtLeast3G).isTrue()
+
+            // The initial value will be fetched when the repo is created, so we need to override
+            // the resources and then re-create the repo.
+            underTest =
+                MobileConnectionsRepositoryImpl(
+                    connectivityManager,
+                    subscriptionManager,
+                    telephonyManager,
+                    logger,
+                    mobileMappings,
+                    fakeBroadcastDispatcher,
+                    globalSettings,
+                    context,
+                    IMMEDIATE,
+                    scope,
+                    connectionFactory,
+                )
+
+            var latest: MobileMappings.Config? = null
+            val job = underTest.defaultDataSubRatConfig.onEach { latest = it }.launchIn(this)
+
+            assertTrue(latest!!.areEqual(configFromContext))
+            assertTrue(latest!!.showAtLeast3G)
+
+            job.cancel()
+        }
+
+    @Test
+    fun config_subIdChangeEvent_updated() =
+        runBlocking(IMMEDIATE) {
+            var latest: MobileMappings.Config? = null
+            val job = underTest.defaultDataSubRatConfig.onEach { latest = it }.launchIn(this)
+            assertThat(latest!!.showAtLeast3G).isFalse()
+
+            overrideResource(R.bool.config_showMin3G, true)
+            val configFromContext = MobileMappings.Config.readConfig(context)
+            assertThat(configFromContext.showAtLeast3G).isTrue()
+
+            // WHEN the change event is fired
+            fakeBroadcastDispatcher.registeredReceivers.forEach { receiver ->
+                receiver.onReceive(
+                    context,
+                    Intent(TelephonyManager.ACTION_DEFAULT_DATA_SUBSCRIPTION_CHANGED)
+                        .putExtra(PhoneConstants.SUBSCRIPTION_KEY, SUB_1_ID)
+                )
+            }
+
+            // THEN the config is updated
+            assertTrue(latest!!.areEqual(configFromContext))
+            assertTrue(latest!!.showAtLeast3G)
+
+            job.cancel()
+        }
+
+    @Test
+    fun config_carrierConfigChangeEvent_updated() =
+        runBlocking(IMMEDIATE) {
+            var latest: MobileMappings.Config? = null
+            val job = underTest.defaultDataSubRatConfig.onEach { latest = it }.launchIn(this)
+            assertThat(latest!!.showAtLeast3G).isFalse()
+
+            overrideResource(R.bool.config_showMin3G, true)
+            val configFromContext = MobileMappings.Config.readConfig(context)
+            assertThat(configFromContext.showAtLeast3G).isTrue()
+
+            // WHEN the change event is fired
+            fakeBroadcastDispatcher.registeredReceivers.forEach { receiver ->
+                receiver.onReceive(
+                    context,
+                    Intent(CarrierConfigManager.ACTION_CARRIER_CONFIG_CHANGED)
+                )
+            }
+
+            // THEN the config is updated
+            assertThat(latest!!.areEqual(configFromContext)).isTrue()
+            assertThat(latest!!.showAtLeast3G).isTrue()
 
             job.cancel()
         }
