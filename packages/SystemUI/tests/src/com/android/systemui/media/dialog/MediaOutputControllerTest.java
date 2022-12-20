@@ -102,8 +102,6 @@ public class MediaOutputControllerTest extends SysuiTestCase {
     private MediaOutputController.Callback mCb = mock(MediaOutputController.Callback.class);
     private MediaDevice mMediaDevice1 = mock(MediaDevice.class);
     private MediaDevice mMediaDevice2 = mock(MediaDevice.class);
-    private MediaItem mMediaItem1 = mock(MediaItem.class);
-    private MediaItem mMediaItem2 = mock(MediaItem.class);
     private NearbyDevice mNearbyDevice1 = mock(NearbyDevice.class);
     private NearbyDevice mNearbyDevice2 = mock(NearbyDevice.class);
     private MediaMetadata mMediaMetadata = mock(MediaMetadata.class);
@@ -127,7 +125,6 @@ public class MediaOutputControllerTest extends SysuiTestCase {
     private LocalMediaManager mLocalMediaManager;
     private List<MediaController> mMediaControllers = new ArrayList<>();
     private List<MediaDevice> mMediaDevices = new ArrayList<>();
-    private List<MediaItem> mMediaItemList = new ArrayList<>();
     private List<NearbyDevice> mNearbyDevices = new ArrayList<>();
     private MediaDescription mMediaDescription;
     private List<RoutingSessionInfo> mRoutingSessionInfos = new ArrayList<>();
@@ -162,10 +159,6 @@ public class MediaOutputControllerTest extends SysuiTestCase {
         when(mMediaDevice2.getId()).thenReturn(TEST_DEVICE_2_ID);
         mMediaDevices.add(mMediaDevice1);
         mMediaDevices.add(mMediaDevice2);
-        when(mMediaItem1.getMediaDevice()).thenReturn(Optional.of(mMediaDevice1));
-        when(mMediaItem2.getMediaDevice()).thenReturn(Optional.of(mMediaDevice2));
-        mMediaItemList.add(mMediaItem1);
-        mMediaItemList.add(mMediaItem2);
 
 
         when(mNearbyDevice1.getMediaRoute2Id()).thenReturn(TEST_DEVICE_1_ID);
@@ -337,6 +330,35 @@ public class MediaOutputControllerTest extends SysuiTestCase {
 
         assertThat(devices.containsAll(mMediaDevices)).isTrue();
         assertThat(devices.size()).isEqualTo(mMediaDevices.size());
+        assertThat(mMediaOutputController.getMediaItemList().size()).isEqualTo(
+                mMediaDevices.size() + 2);
+        verify(mCb).onDeviceListChanged();
+    }
+
+    @Test
+    public void advanced_categorizeMediaItems_withSuggestedDevice_verifyDeviceListSize() {
+        when(mFlags.isEnabled(Flags.OUTPUT_SWITCHER_ADVANCED_LAYOUT)).thenReturn(true);
+        when(mMediaDevice1.isSuggestedDevice()).thenReturn(true);
+        when(mMediaDevice2.isSuggestedDevice()).thenReturn(false);
+
+        mMediaOutputController.start(mCb);
+        reset(mCb);
+        mMediaOutputController.getMediaItemList().clear();
+        mMediaOutputController.onDeviceListUpdate(mMediaDevices);
+        final List<MediaDevice> devices = new ArrayList<>();
+        int dividerSize = 0;
+        for (MediaItem item : mMediaOutputController.getMediaItemList()) {
+            if (item.getMediaDevice().isPresent()) {
+                devices.add(item.getMediaDevice().get());
+            }
+            if (item.getMediaItemType() == MediaItem.MediaItemType.TYPE_GROUP_DIVIDER) {
+                dividerSize++;
+            }
+        }
+
+        assertThat(devices.containsAll(mMediaDevices)).isTrue();
+        assertThat(devices.size()).isEqualTo(mMediaDevices.size());
+        assertThat(dividerSize).isEqualTo(2);
         verify(mCb).onDeviceListChanged();
     }
 
