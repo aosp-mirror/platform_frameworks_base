@@ -24,6 +24,7 @@ import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.defaultMinSize
@@ -62,6 +63,7 @@ import androidx.compose.ui.graphics.drawscope.ContentDrawScope
 import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.graphics.drawscope.scale
 import androidx.compose.ui.layout.boundsInRoot
+import androidx.compose.ui.layout.findRootCoordinates
 import androidx.compose.ui.layout.layout
 import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.platform.ComposeView
@@ -118,12 +120,14 @@ fun Expandable(
     contentColor: Color = contentColorFor(color),
     borderStroke: BorderStroke? = null,
     onClick: ((Expandable) -> Unit)? = null,
+    interactionSource: MutableInteractionSource? = null,
     content: @Composable (Expandable) -> Unit,
 ) {
     Expandable(
         rememberExpandableController(color, shape, contentColor, borderStroke),
         modifier,
         onClick,
+        interactionSource,
         content,
     )
 }
@@ -158,6 +162,7 @@ fun Expandable(
     controller: ExpandableController,
     modifier: Modifier = Modifier,
     onClick: ((Expandable) -> Unit)? = null,
+    interactionSource: MutableInteractionSource? = null,
     content: @Composable (Expandable) -> Unit,
 ) {
     val controller = controller as ExpandableControllerImpl
@@ -189,6 +194,18 @@ fun Expandable(
         }
 
     var thisExpandableSize by remember { mutableStateOf(Size.Zero) }
+
+    /** Set the current element size as this Expandable size. */
+    fun Modifier.updateExpandableSize(): Modifier {
+        return this.onGloballyPositioned { coords ->
+            thisExpandableSize =
+                coords
+                    .findRootCoordinates()
+                    // Make sure that we report the actual size, and not the visual/clipped one.
+                    .localBoundingBoxOf(coords, clipBounds = false)
+                    .size
+        }
+    }
 
     // Make sure we don't read animatorState directly here to avoid recomposition every time the
     // state changes (i.e. every frame of the animation).
@@ -247,7 +264,7 @@ fun Expandable(
         controller.isDialogShowing.value -> {
             Box(
                 modifier
-                    .onGloballyPositioned { thisExpandableSize = it.boundsInRoot().size }
+                    .updateExpandableSize()
                     .then(minInteractiveSizeModifier)
                     .drawWithContent { /* Don't draw anything when the dialog is shown. */}
                     .onGloballyPositioned {
@@ -258,18 +275,25 @@ fun Expandable(
         else -> {
             val clickModifier =
                 if (onClick != null) {
-                    Modifier.clickable { onClick(controller.expandable) }
+                    if (interactionSource != null) {
+                        // If the caller provided an interaction source, then that means that they
+                        // will draw the click indication themselves.
+                        Modifier.clickable(interactionSource, indication = null) {
+                            onClick(controller.expandable)
+                        }
+                    } else {
+                        // If no interaction source is provided, we draw the default indication (a
+                        // ripple) and make sure it's clipped by the expandable shape.
+                        Modifier.clip(shape).clickable { onClick(controller.expandable) }
+                    }
                 } else {
                     Modifier
                 }
 
             Box(
                 modifier
-                    .onGloballyPositioned { thisExpandableSize = it.boundsInRoot().size }
+                    .updateExpandableSize()
                     .then(minInteractiveSizeModifier)
-                    // Note that clip() *must* be above the clickModifier to properly clip the
-                    // ripple.
-                    .clip(shape)
                     .then(clickModifier)
                     .background(color, shape)
                     .border(controller)

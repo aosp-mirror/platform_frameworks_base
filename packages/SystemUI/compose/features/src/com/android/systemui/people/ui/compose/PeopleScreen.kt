@@ -53,7 +53,6 @@ import com.android.systemui.R
 import com.android.systemui.compose.theme.LocalAndroidColorScheme
 import com.android.systemui.people.ui.viewmodel.PeopleTileViewModel
 import com.android.systemui.people.ui.viewmodel.PeopleViewModel
-import kotlinx.coroutines.flow.collect
 
 /**
  * Compose the screen associated to a [PeopleViewModel].
