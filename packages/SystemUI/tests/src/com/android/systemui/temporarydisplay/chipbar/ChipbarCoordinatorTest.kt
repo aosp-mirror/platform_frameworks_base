@@ -36,6 +36,7 @@ import com.android.systemui.common.shared.model.ContentDescription.Companion.loa
 import com.android.systemui.common.shared.model.Icon
 import com.android.systemui.common.shared.model.Text
 import com.android.systemui.common.shared.model.TintedIcon
+import com.android.systemui.dump.DumpManager
 import com.android.systemui.plugins.FalsingManager
 import com.android.systemui.statusbar.VibratorHelper
 import com.android.systemui.statusbar.policy.ConfigurationController
@@ -66,6 +67,7 @@ class ChipbarCoordinatorTest : SysuiTestCase() {
     @Mock private lateinit var logger: ChipbarLogger
     @Mock private lateinit var accessibilityManager: AccessibilityManager
     @Mock private lateinit var configurationController: ConfigurationController
+    @Mock private lateinit var dumpManager: DumpManager
     @Mock private lateinit var powerManager: PowerManager
     @Mock private lateinit var windowManager: WindowManager
     @Mock private lateinit var falsingManager: FalsingManager
@@ -100,6 +102,7 @@ class ChipbarCoordinatorTest : SysuiTestCase() {
                 fakeExecutor,
                 accessibilityManager,
                 configurationController,
+                dumpManager,
                 powerManager,
                 falsingManager,
                 falsingCollector,
