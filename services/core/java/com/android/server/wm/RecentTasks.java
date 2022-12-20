@@ -1348,8 +1348,7 @@ class RecentTasks {
                     + " activityType=" + task.getActivityType()
                     + " windowingMode=" + task.getWindowingMode()
                     + " isAlwaysOnTopWhenVisible=" + task.isAlwaysOnTopWhenVisible()
-                    + " intentFlags=" + task.getBaseIntent().getFlags()
-                    + " isEmbedded=" + task.isEmbedded());
+                    + " intentFlags=" + task.getBaseIntent().getFlags());
         }
 
         switch (task.getActivityType()) {
@@ -1382,11 +1381,6 @@ class RecentTasks {
 
         // If we're in lock task mode, ignore the root task
         if (task == mService.getLockTaskController().getRootTask()) {
-            return false;
-        }
-
-        // Ignore the task if it is a embedded task
-        if (task.isEmbedded()) {
             return false;
         }
 

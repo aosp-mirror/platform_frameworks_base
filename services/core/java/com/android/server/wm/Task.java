@@ -2980,9 +2980,8 @@ class Task extends TaskFragment {
                 // Found it. This activity on top of the given activity on the same TaskFragment.
                 return true;
             }
-            if (isSelfOrNonEmbeddedTask(parent.asTask())) {
-                // Found it. This activity is the direct child of a leaf Task without being
-                // embedded.
+            if (parent != null && parent.asTask() != null) {
+                // Found it. This activity is the direct child of a leaf Task.
                 return true;
             }
             // The candidate activity is being embedded. Checking if the bounds of the containing
@@ -2993,7 +2992,7 @@ class Task extends TaskFragment {
                     // Not occluding the grandparent.
                     break;
                 }
-                if (isSelfOrNonEmbeddedTask(grandParent.asTask())) {
+                if (grandParent.asTask() != null) {
                     // Found it. The activity occludes its parent TaskFragment and the parent
                     // TaskFragment also occludes its parent all the way up.
                     return true;
@@ -3004,13 +3003,6 @@ class Task extends TaskFragment {
             return false;
         });
         return top != activity ? top : null;
-    }
-
-    private boolean isSelfOrNonEmbeddedTask(Task task) {
-        if (task == this) {
-            return true;
-        }
-        return task != null && !task.isEmbedded();
     }
 
     @Override
@@ -5091,14 +5083,6 @@ class Task extends TaskFragment {
                 // window manager to keep the previous window it had previously
                 // created, if it still had one.
                 Task baseTask = r.getTask();
-                if (baseTask.isEmbedded()) {
-                    // If the task is embedded in a task fragment, there may have an existing
-                    // starting window in the parent task. This allows the embedded activities
-                    // to share the starting window and make sure that the window can have top
-                    // z-order by transferring to the top activity.
-                    baseTask = baseTask.getParent().asTaskFragment().getTask();
-                }
-
                 final ActivityRecord prev = baseTask.getActivity(
                         a -> a.mStartingData != null && a.showToCurrentUser());
                 mWmService.mStartingSurfaceController.showStartingWindow(r, prev, newTask,
