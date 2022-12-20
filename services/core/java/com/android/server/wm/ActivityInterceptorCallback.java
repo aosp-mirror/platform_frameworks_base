@@ -19,6 +19,7 @@ package com.android.server.wm;
 import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.annotation.SystemApi;
 import android.app.ActivityOptions;
 import android.app.TaskInfo;
 import android.content.Intent;
@@ -33,6 +34,7 @@ import java.lang.annotation.RetentionPolicy;
  * be called with the WindowManagerGlobalLock held.
  * @hide
  */
+@SystemApi(client = SystemApi.Client.SYSTEM_SERVER)
 public interface ActivityInterceptorCallback {
     /**
      * Called to allow intercepting activity launching based on the provided launch parameters and
@@ -165,6 +167,7 @@ public interface ActivityInterceptorCallback {
      * Data class for storing the various arguments needed for activity interception.
      * @hide
      */
+    @SystemApi(client = SystemApi.Client.SYSTEM_SERVER)
     final class ActivityInterceptorInfo {
         private final int mCallingUid;
         private final int mCallingPid;
@@ -389,6 +392,7 @@ public interface ActivityInterceptorCallback {
      * Data class for storing the intercept result.
      * @hide
      */
+    @SystemApi(client = SystemApi.Client.SYSTEM_SERVER)
     final class ActivityInterceptResult {
         @NonNull
         private final Intent mIntent;
@@ -396,15 +400,35 @@ public interface ActivityInterceptorCallback {
         @NonNull
         private final ActivityOptions mActivityOptions;
 
-        /** Generates the result of intercepting launching the {@link android.app.Activity}
+        private final boolean mActivityResolved;
+
+        /**
+         * This constructor should only be used if both {@link ActivityInfo} and {@link ResolveInfo}
+         * did not get resolved while interception.
+         * @hide
+         */
+        public ActivityInterceptResult(@NonNull Intent intent,
+                @NonNull ActivityOptions activityOptions) {
+            this(intent, activityOptions, false /* activityResolved */);
+        }
+
+        /**
+         * Generates the result of intercepting launching the {@link android.app.Activity}
+         *
+         * <p>Interceptor should return non-{@code null} result when {@link
+         * #onInterceptActivityLaunch(ActivityInterceptorInfo)} gets called as an indicator that
+         * interception has happened.
          *
          * @param intent is the modified {@link Intent} after interception.
          * @param activityOptions holds the {@link ActivityOptions} after interception.
+         * @param activityResolved should be {@code true} only if {@link ActivityInfo} or {@link
+         *                         ResolveInfo} gets resolved, otherwise should be {@code false}.
          */
-        public ActivityInterceptResult(
-                @NonNull Intent intent, @NonNull ActivityOptions activityOptions) {
+        public ActivityInterceptResult(@NonNull Intent intent,
+                @NonNull ActivityOptions activityOptions, boolean activityResolved) {
             this.mIntent = intent;
             this.mActivityOptions = activityOptions;
+            this.mActivityResolved = activityResolved;
         }
 
         /** Returns the intercepted {@link Intent} */
@@ -418,6 +442,13 @@ public interface ActivityInterceptorCallback {
         @NonNull
         public ActivityOptions getActivityOptions() {
             return mActivityOptions;
+        }
+
+        /**
+         * Returns if the {@link ActivityInfo} or {@link ResolveInfo} gets resolved.
+         */
+        public boolean isActivityResolved() {
+            return mActivityResolved;
         }
     }
 }

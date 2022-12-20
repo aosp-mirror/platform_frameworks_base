@@ -244,6 +244,9 @@ class ActivityStartInterceptor {
             mActivityOptions = interceptResult.getActivityOptions();
             mCallingPid = mRealCallingPid;
             mCallingUid = mRealCallingUid;
+            if (interceptResult.isActivityResolved()) {
+                return true;
+            }
             mRInfo = mSupervisor.resolveIntent(mIntent, null, mUserId, 0, mRealCallingUid);
             mAInfo = mSupervisor.resolveActivity(mIntent, mRInfo, mStartFlags,
                     null /*profilerInfo*/);

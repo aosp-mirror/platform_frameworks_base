@@ -169,3 +169,52 @@ package com.android.server.wifi {
 
 }
 
+package com.android.server.wm {
+
+  public interface ActivityInterceptorCallback {
+    method public default void onActivityLaunched(@NonNull android.app.TaskInfo, @NonNull android.content.pm.ActivityInfo, @NonNull com.android.server.wm.ActivityInterceptorCallback.ActivityInterceptorInfo);
+    method @Nullable public com.android.server.wm.ActivityInterceptorCallback.ActivityInterceptResult onInterceptActivityLaunch(@NonNull com.android.server.wm.ActivityInterceptorCallback.ActivityInterceptorInfo);
+    field public static final int MAINLINE_SDK_SANDBOX_ORDER_ID = 1001; // 0x3e9
+  }
+
+  public static final class ActivityInterceptorCallback.ActivityInterceptResult {
+    ctor public ActivityInterceptorCallback.ActivityInterceptResult(@NonNull android.content.Intent, @NonNull android.app.ActivityOptions, boolean);
+    method @NonNull public android.app.ActivityOptions getActivityOptions();
+    method @NonNull public android.content.Intent getIntent();
+    method public boolean isActivityResolved();
+  }
+
+  public static final class ActivityInterceptorCallback.ActivityInterceptorInfo {
+    method @NonNull public android.content.pm.ActivityInfo getActivityInfo();
+    method @Nullable public String getCallingFeatureId();
+    method @Nullable public String getCallingPackage();
+    method public int getCallingPid();
+    method public int getCallingUid();
+    method @Nullable public android.app.ActivityOptions getCheckedOptions();
+    method @Nullable public Runnable getClearOptionsAnimationRunnable();
+    method @NonNull public android.content.Intent getIntent();
+    method public int getRealCallingPid();
+    method public int getRealCallingUid();
+    method @NonNull public android.content.pm.ResolveInfo getResolveInfo();
+    method @Nullable public String getResolvedType();
+    method public int getUserId();
+  }
+
+  public static final class ActivityInterceptorCallback.ActivityInterceptorInfo.Builder {
+    ctor public ActivityInterceptorCallback.ActivityInterceptorInfo.Builder(int, int, int, int, int, @NonNull android.content.Intent, @NonNull android.content.pm.ResolveInfo, @NonNull android.content.pm.ActivityInfo);
+    method @NonNull public com.android.server.wm.ActivityInterceptorCallback.ActivityInterceptorInfo build();
+    method @NonNull public com.android.server.wm.ActivityInterceptorCallback.ActivityInterceptorInfo.Builder setCallingFeatureId(@NonNull String);
+    method @NonNull public com.android.server.wm.ActivityInterceptorCallback.ActivityInterceptorInfo.Builder setCallingPackage(@NonNull String);
+    method @NonNull public com.android.server.wm.ActivityInterceptorCallback.ActivityInterceptorInfo.Builder setCheckedOptions(@NonNull android.app.ActivityOptions);
+    method @NonNull public com.android.server.wm.ActivityInterceptorCallback.ActivityInterceptorInfo.Builder setClearOptionsAnimationRunnable(@NonNull Runnable);
+    method @NonNull public com.android.server.wm.ActivityInterceptorCallback.ActivityInterceptorInfo.Builder setResolvedType(@NonNull String);
+  }
+
+  public class ActivityInterceptorCallbackRegistry {
+    method @NonNull public static com.android.server.wm.ActivityInterceptorCallbackRegistry getInstance();
+    method public void registerActivityInterceptorCallback(int, @NonNull com.android.server.wm.ActivityInterceptorCallback);
+    method public void unregisterActivityInterceptorCallback(int);
+  }
+
+}
+

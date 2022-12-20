@@ -1027,4 +1027,25 @@ public class ActivityTaskManagerServiceTests extends WindowTestsBase {
     public void testSystemAndMainlineOrderIdsNotOverlapping() {
         assertTrue(MAINLINE_FIRST_ORDERED_ID - SYSTEM_LAST_ORDERED_ID > 1);
     }
+
+    @Test
+    public void testUnregisterActivityStartInterceptor() {
+        int size = mAtm.getActivityInterceptorCallbacks().size();
+        int orderId = SYSTEM_FIRST_ORDERED_ID;
+
+        mAtm.mInternal.registerActivityStartInterceptor(orderId,
+                (ActivityInterceptorCallback) info -> null);
+        assertEquals(size + 1, mAtm.getActivityInterceptorCallbacks().size());
+        assertTrue(mAtm.getActivityInterceptorCallbacks().contains(orderId));
+
+        mAtm.mInternal.unregisterActivityStartInterceptor(orderId);
+        assertEquals(size, mAtm.getActivityInterceptorCallbacks().size());
+        assertFalse(mAtm.getActivityInterceptorCallbacks().contains(orderId));
+    }
+
+    @Test(expected = IllegalArgumentException.class)
+    public void testUnregisterActivityStartInterceptor_IdNotExist() {
+        assertEquals(0, mAtm.getActivityInterceptorCallbacks().size());
+        mAtm.mInternal.unregisterActivityStartInterceptor(SYSTEM_FIRST_ORDERED_ID);
+    }
 }

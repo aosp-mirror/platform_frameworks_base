@@ -30,6 +30,7 @@ import static com.android.server.wm.ActivityInterceptorCallback.MAINLINE_SDK_SAN
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotEquals;
 import static org.junit.Assert.assertSame;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.ArgumentMatchers.eq;
@@ -358,6 +359,12 @@ public class ActivityStartInterceptorTest {
 
     public void addMockInterceptorCallback(
             @Nullable Intent intent, @Nullable ActivityOptions activityOptions) {
+        addMockInterceptorCallback(intent, activityOptions, false);
+    }
+
+    public void addMockInterceptorCallback(
+            @Nullable Intent intent, @Nullable ActivityOptions activityOptions,
+            boolean skipResolving) {
         int size = mActivityInterceptorCallbacks.size();
         mActivityInterceptorCallbacks.put(size, new ActivityInterceptorCallback() {
             @Override
@@ -368,7 +375,8 @@ public class ActivityStartInterceptorTest {
                 }
                 return new ActivityInterceptResult(
                         intent != null ? intent : info.getIntent(),
-                        activityOptions != null ? activityOptions : info.getCheckedOptions());
+                        activityOptions != null ? activityOptions : info.getCheckedOptions(),
+                        skipResolving);
             }
         });
     }
@@ -398,6 +406,30 @@ public class ActivityStartInterceptorTest {
 
         assertTrue(mInterceptor.intercept(null, null, mAInfo, null, null, null, 0, 0, null));
         assertEquals("android.test.second", mInterceptor.mIntent.getAction());
+    }
+
+    @Test
+    public void testInterceptionCallback_skipResolving() {
+        addMockInterceptorCallback(
+                new Intent("android.test.foo"),
+                ActivityOptions.makeBasic().setLaunchDisplayId(3), true);
+        ActivityInfo aInfo = mAInfo;
+        assertTrue(mInterceptor.intercept(null, null, aInfo, null, null, null, 0, 0, null));
+        assertEquals("android.test.foo", mInterceptor.mIntent.getAction());
+        assertEquals(3, mInterceptor.mActivityOptions.getLaunchDisplayId());
+        assertEquals(aInfo, mInterceptor.mAInfo); // mAInfo should not be resolved
+    }
+
+    @Test
+    public void testInterceptionCallback_NoSkipResolving() throws InterruptedException {
+        addMockInterceptorCallback(
+                new Intent("android.test.foo"),
+                ActivityOptions.makeBasic().setLaunchDisplayId(3));
+        ActivityInfo aInfo = mAInfo;
+        assertTrue(mInterceptor.intercept(null, null, aInfo, null, null, null, 0, 0, null));
+        assertEquals("android.test.foo", mInterceptor.mIntent.getAction());
+        assertEquals(3, mInterceptor.mActivityOptions.getLaunchDisplayId());
+        assertNotEquals(aInfo, mInterceptor.mAInfo); // mAInfo should be resolved after intercept
     }
 
     @Test
