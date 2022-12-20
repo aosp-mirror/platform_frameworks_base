@@ -19,12 +19,15 @@ package com.android.systemui.keyguard.domain.interactor
 
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.keyguard.data.repository.KeyguardTransitionRepository
+import com.android.systemui.keyguard.shared.model.AnimationParams
 import com.android.systemui.keyguard.shared.model.KeyguardState
 import com.android.systemui.keyguard.shared.model.KeyguardState.AOD
+import com.android.systemui.keyguard.shared.model.KeyguardState.DREAMING
 import com.android.systemui.keyguard.shared.model.KeyguardState.LOCKSCREEN
 import com.android.systemui.keyguard.shared.model.TransitionState
 import com.android.systemui.keyguard.shared.model.TransitionStep
 import javax.inject.Inject
+import kotlin.time.Duration
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.flow.map
@@ -42,6 +45,10 @@ constructor(
 
     /** LOCKSCREEN->AOD transition information. */
     val lockscreenToAodTransition: Flow<TransitionStep> = repository.transition(LOCKSCREEN, AOD)
+
+    /** DREAMING->LOCKSCREEN transition information. */
+    val dreamingToLockscreenTransition: Flow<TransitionStep> =
+        repository.transition(DREAMING, LOCKSCREEN)
 
     /** (any)->AOD transition information */
     val anyStateToAodTransition: Flow<TransitionStep> =
@@ -72,4 +79,21 @@ constructor(
     /* The last completed [KeyguardState] transition */
     val finishedKeyguardState: Flow<KeyguardState> =
         finishedKeyguardTransitionStep.map { step -> step.to }
+
+    /**
+     * Transitions will occur over a [totalDuration] with [TransitionStep]s being emitted in the
+     * range of [0, 1]. View animations should begin and end within a subset of this range. This
+     * function maps the [startTime] and [duration] into [0, 1], when this subset is valid.
+     */
+    fun transitionStepAnimation(
+        flow: Flow<TransitionStep>,
+        params: AnimationParams,
+        totalDuration: Duration,
+    ): Flow<Float> {
+        val start = (params.startTime / totalDuration).toFloat()
+        val chunks = (totalDuration / params.duration).toFloat()
+        return flow
+            .map { step -> (step.value - start) * chunks }
+            .filter { value -> value >= 0f && value <= 1f }
+    }
 }

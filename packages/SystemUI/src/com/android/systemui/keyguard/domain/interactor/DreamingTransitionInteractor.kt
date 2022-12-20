@@ -28,6 +28,8 @@ import com.android.systemui.keyguard.shared.model.KeyguardState
 import com.android.systemui.keyguard.shared.model.TransitionInfo
 import com.android.systemui.util.kotlin.sample
 import javax.inject.Inject
+import kotlin.time.Duration
+import kotlin.time.Duration.Companion.milliseconds
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.flow.combine
@@ -110,7 +112,7 @@ constructor(
                                 name,
                                 KeyguardState.DREAMING,
                                 KeyguardState.LOCKSCREEN,
-                                getAnimator(),
+                                getAnimator(TO_LOCKSCREEN_DURATION),
                             )
                         )
                     }
@@ -167,14 +169,16 @@ constructor(
         }
     }
 
-    private fun getAnimator(): ValueAnimator {
+    private fun getAnimator(duration: Duration = DEFAULT_DURATION): ValueAnimator {
         return ValueAnimator().apply {
             setInterpolator(Interpolators.LINEAR)
-            setDuration(TRANSITION_DURATION_MS)
+            setDuration(duration.inWholeMilliseconds)
         }
     }
 
     companion object {
-        private const val TRANSITION_DURATION_MS = 500L
+        private val DEFAULT_DURATION = 500.milliseconds
+        val TO_LOCKSCREEN_DURATION = 1183.milliseconds
+        @JvmField val TO_LOCKSCREEN_DURATION_MS = TO_LOCKSCREEN_DURATION.inWholeMilliseconds
     }
 }
