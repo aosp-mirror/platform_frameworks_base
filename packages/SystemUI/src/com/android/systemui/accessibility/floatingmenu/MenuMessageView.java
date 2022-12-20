@@ -61,6 +61,7 @@ class MenuMessageView extends LinearLayout implements
     MenuMessageView(Context context) {
         super(context);
 
+        setLayoutDirection(LAYOUT_DIRECTION_LOCALE);
         setVisibility(GONE);
 
         mTextView = new TextView(context);
