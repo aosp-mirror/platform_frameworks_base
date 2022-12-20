@@ -21,12 +21,14 @@ import static android.content.pm.PackageManager.PERMISSION_GRANTED;
 import static android.os.StrictMode.vmIncorrectContextUseEnabled;
 import static android.view.WindowManager.LayoutParams.WindowType;
 
+import android.annotation.CallbackExecutor;
 import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.UiContext;
 import android.companion.virtual.VirtualDevice;
 import android.companion.virtual.VirtualDeviceManager;
+import android.companion.virtual.VirtualDeviceParams;
 import android.compat.annotation.UnsupportedAppUsage;
 import android.content.AttributionSource;
 import android.content.AutofillOptions;
@@ -121,6 +123,7 @@ import java.util.List;
 import java.util.Objects;
 import java.util.Set;
 import java.util.concurrent.Executor;
+import java.util.function.IntConsumer;
 
 class ReceiverRestrictedContext extends ContextWrapper {
     @UnsupportedAppUsage
@@ -257,6 +260,13 @@ class ContextImpl extends Context {
     /** @see Context#isConfigurationContext() */
     private boolean mIsConfigurationBasedContext;
 
+    /**
+     *  Indicates that this context was created with an explicit device ID association via
+     *  Context#createDeviceContext and under no circumstances will it ever change, even if
+     *  this context is not associated with a display id, or if the associated display id changes.
+     */
+    private boolean mIsExplicitDeviceId = false;
+
     @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.P, trackingBug = 115609023)
     private final int mFlags;
 
@@ -371,6 +381,24 @@ class ContextImpl extends Context {
      */
     @ServiceInitializationState
     final int[] mServiceInitializationStateArray = new int[mServiceCache.length];
+
+    private final Object mDeviceIdListenerLock = new Object();
+    /**
+     * List of listeners for deviceId changes and their associated Executor.
+     * List is lazy-initialized on first registration
+     */
+    @GuardedBy("mDeviceIdListenerLock")
+    @Nullable
+    private ArrayList<DeviceIdChangeListenerDelegate> mDeviceIdChangeListeners;
+
+    private static class DeviceIdChangeListenerDelegate {
+        final @NonNull IntConsumer mListener;
+        final @NonNull Executor mExecutor;
+        DeviceIdChangeListenerDelegate(IntConsumer listener, Executor executor) {
+            mListener = listener;
+            mExecutor = executor;
+        }
+    }
 
     @UnsupportedAppUsage
     static ContextImpl getImpl(Context context) {
@@ -2699,15 +2727,7 @@ class ContextImpl extends Context {
 
     @Override
     public @NonNull Context createDeviceContext(int deviceId) {
-        boolean validDeviceId = deviceId == VirtualDeviceManager.DEVICE_ID_DEFAULT;
-        if (deviceId > VirtualDeviceManager.DEVICE_ID_DEFAULT) {
-            VirtualDeviceManager vdm = getSystemService(VirtualDeviceManager.class);
-            if (vdm != null) {
-                List<VirtualDevice> virtualDevices = vdm.getVirtualDevices();
-                validDeviceId = virtualDevices.stream().anyMatch(d -> d.getDeviceId() == deviceId);
-            }
-        }
-        if (!validDeviceId) {
+        if (!isValidDeviceId(deviceId)) {
             throw new IllegalArgumentException(
                     "Not a valid ID of the default device or any virtual device: " + deviceId);
         }
@@ -2718,7 +2738,33 @@ class ContextImpl extends Context {
                 mSplitName, mToken, mUser, mFlags, mClassLoader, null);
 
         context.mDeviceId = deviceId;
+        context.mIsExplicitDeviceId = true;
         return context;
+    }
+
+    /**
+     * Checks whether the passed {@code deviceId} is valid or not.
+     * {@link VirtualDeviceManager#DEVICE_ID_DEFAULT} is valid as it is the ID of the default
+     * device when no additional virtual devices exist. If {@code deviceId} is the id of
+     * a virtual device, it should correspond to a virtual device created by
+     * {@link VirtualDeviceManager#createVirtualDevice(int, VirtualDeviceParams)}.
+     */
+    private boolean isValidDeviceId(int deviceId) {
+        if (deviceId == VirtualDeviceManager.DEVICE_ID_DEFAULT) {
+            return true;
+        }
+        if (deviceId > VirtualDeviceManager.DEVICE_ID_DEFAULT) {
+            VirtualDeviceManager vdm = getSystemService(VirtualDeviceManager.class);
+            if (vdm != null) {
+                List<VirtualDevice> virtualDevices = vdm.getVirtualDevices();
+                for (int i = 0; i < virtualDevices.size(); i++) {
+                    if (virtualDevices.get(i).getDeviceId() == deviceId) {
+                        return true;
+                    }
+                }
+            }
+        }
+        return false;
     }
 
     @NonNull
@@ -2965,11 +3011,89 @@ class ContextImpl extends Context {
         if (mContextType == CONTEXT_TYPE_NON_UI) {
             mContextType = CONTEXT_TYPE_DISPLAY_CONTEXT;
         }
+        // TODO(b/253201821): Update deviceId when display is updated.
+    }
+
+    @Override
+    public void updateDeviceId(int updatedDeviceId) {
+        if (!isValidDeviceId(updatedDeviceId)) {
+            throw new IllegalArgumentException(
+                    "Not a valid ID of the default device or any virtual device: " + mDeviceId);
+        }
+        if (mIsExplicitDeviceId) {
+            throw new UnsupportedOperationException(
+                    "Cannot update device ID on a Context created with createDeviceContext()");
+        }
+        mDeviceId = updatedDeviceId;
+        notifyOnDeviceChangedListeners(updatedDeviceId);
     }
 
     @Override
     public int getDeviceId() {
         return mDeviceId;
+    }
+
+    @Override
+    public boolean isDeviceContext() {
+        return mIsExplicitDeviceId || isAssociatedWithDisplay();
+    }
+
+    @Override
+    public void registerDeviceIdChangeListener(@NonNull @CallbackExecutor Executor executor,
+            @NonNull IntConsumer listener) {
+        Objects.requireNonNull(executor, "executor cannot be null");
+        Objects.requireNonNull(listener, "listener cannot be null");
+
+        synchronized (mDeviceIdListenerLock) {
+            if (getDeviceIdListener(listener) != null) {
+                throw new IllegalArgumentException(
+                        "attempt to call registerDeviceIdChangeListener() "
+                                + "on a previously registered listener");
+            }
+            // lazy initialization
+            if (mDeviceIdChangeListeners == null) {
+                mDeviceIdChangeListeners = new ArrayList<>();
+            }
+            mDeviceIdChangeListeners.add(new DeviceIdChangeListenerDelegate(listener, executor));
+        }
+    }
+
+    @Override
+    public void unregisterDeviceIdChangeListener(@NonNull IntConsumer listener) {
+        Objects.requireNonNull(listener, "listener cannot be null");
+        synchronized (mDeviceIdListenerLock) {
+            DeviceIdChangeListenerDelegate listenerToRemove = getDeviceIdListener(listener);
+            if (listenerToRemove != null) {
+                mDeviceIdChangeListeners.remove(listenerToRemove);
+            }
+        }
+    }
+
+    @GuardedBy("mDeviceIdListenerLock")
+    @Nullable
+    private DeviceIdChangeListenerDelegate getDeviceIdListener(
+            @Nullable IntConsumer listener) {
+        if (mDeviceIdChangeListeners == null) {
+            return null;
+        }
+        for (int i = 0; i < mDeviceIdChangeListeners.size(); i++) {
+            DeviceIdChangeListenerDelegate delegate = mDeviceIdChangeListeners.get(i);
+            if (delegate.mListener == listener) {
+                return delegate;
+            }
+        }
+        return null;
+    }
+
+    private void notifyOnDeviceChangedListeners(int deviceId) {
+        synchronized (mDeviceIdListenerLock) {
+            if (mDeviceIdChangeListeners != null) {
+                for (DeviceIdChangeListenerDelegate delegate : mDeviceIdChangeListeners) {
+                    delegate.mExecutor.execute(() ->
+                            delegate.mListener.accept(deviceId));
+                }
+            }
+        }
     }
 
     @Override
@@ -3227,6 +3351,8 @@ class ContextImpl extends Context {
             opPackageName = container.mOpPackageName;
             setResources(container.mResources);
             mDisplay = container.mDisplay;
+            mDeviceId = container.mDeviceId;
+            mIsExplicitDeviceId = container.mIsExplicitDeviceId;
             mForceDisplayOverrideInResources = container.mForceDisplayOverrideInResources;
             mIsConfigurationBasedContext = container.mIsConfigurationBasedContext;
             mContextType = container.mContextType;

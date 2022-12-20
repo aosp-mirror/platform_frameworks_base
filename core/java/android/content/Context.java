@@ -109,6 +109,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.Executor;
 import java.util.function.Consumer;
+import java.util.function.IntConsumer;
 
 /**
  * Interface to global information about an application environment.  This is
@@ -6921,6 +6922,10 @@ public abstract class Context {
      * {@link android.companion.virtual.VirtualDeviceManager#DEVICE_ID_DEFAULT}. Similarly,
      * applications running on the default device may access the functionality of virtual devices.
      * </p>
+     * <p>
+     * Note that the newly created instance will be associated with the same display as the parent
+     * Context, regardless of the device ID passed here.
+     * </p>
      * @param deviceId The ID of the device to associate with this context.
      * @return A context associated with the given device ID.
      *
@@ -7256,16 +7261,112 @@ public abstract class Context {
     public abstract void updateDisplay(int displayId);
 
     /**
-     * Get the device ID this context is associated with. Applications can use this method to
+     * Updates the device ID association of this Context. Since a Context created with
+     * {@link #createDeviceContext} cannot change its device association, this method must
+     * not be called for instances created with {@link #createDeviceContext}.
+     *
+     * @param deviceId The new device ID to assign to this Context.
+     * @throws UnsupportedOperationException if the method is called on an instance that was
+     *         created with {@link Context#createDeviceContext(int)}
+     * @throws IllegalArgumentException if the given device ID is not a valid ID of the default
+     *         device or a virtual device.
+     *
+     * @see #isDeviceContext()
+     * @see #createDeviceContext(int)
+     * @hide
+     */
+    public void updateDeviceId(int deviceId) {
+        throw new RuntimeException("Not implemented. Must override in a subclass.");
+    }
+
+    /**
+     * Gets the device ID this context is associated with. Applications can use this method to
      * determine whether they are running on a virtual device and identify that device.
      *
      * The device ID of the host device is
      * {@link android.companion.virtual.VirtualDeviceManager#DEVICE_ID_DEFAULT}
      *
+     * <p>
+     * If the underlying device ID is changed by the system, for example, when an
+     * {@link Activity} is moved to a different virtual device, applications can register to listen
+     * to changes by calling
+     * {@link Context#registerDeviceIdChangeListener(Executor, IntConsumer)}.
+     * </p>
+     *
+     * <p>
+     * This method will only return a reliable value for this instance if
+     * {@link Context#isDeviceContext()} is {@code true}. The system can assign an arbitrary device
+     * id value for Contexts not logically associated with a device.
+     * </p>
+     *
      * @return the ID of the device this context is associated with.
+     * @see #isDeviceContext()
      * @see #createDeviceContext(int)
+     * @see #registerDeviceIdChangeListener(Executor, IntConsumer)
      */
     public int getDeviceId() {
+        throw new RuntimeException("Not implemented. Must override in a subclass.");
+    }
+
+    /**
+     * Indicates whether the value of {@link Context#getDeviceId()} can be relied upon for
+     * this instance. It will return {@code true} for Contexts created by
+     * {@link Context#createDeviceContext(int)}, as well as for UI and Display Contexts.
+     * <p>
+     * Contexts created with {@link Context#createDeviceContext(int)} will have an explicit
+     * device association, which will never change. UI Contexts and Display Contexts are
+     * already associated with a display, so if the device association is not explicitly
+     * given, {@link Context#getDeviceId()} will return the ID of the device associated with
+     * the associated display. The system can assign an arbitrary device id value for Contexts not
+     * logically associated with a device.
+     * </p>
+     *
+     * @return {@code true} if {@link Context#getDeviceId()} is reliable, {@code false} otherwise.
+     *
+     * @see #createDeviceContext(int)
+     * @see #getDeviceId()}
+     * @see #createDisplayContext(Display)
+     * @see #isUiContext()
+     */
+
+    public boolean isDeviceContext() {
+        throw new RuntimeException("Not implemented. Must override in a subclass.");
+    }
+
+    /**
+     * Adds a new device ID changed listener to the {@code Context}, which will be called when
+     * the device association is changed by the system.
+     * <p>
+     * The callback can be called when an app is moved to a different device and the {@code Context}
+     * is not explicily associated with a specific device.
+     * </p>
+     * <p> When an application receives a device id update callback, this Context is guaranteed to
+     * also have an updated display ID(if any) and {@link Configuration}.
+     * <p/>
+     * @param executor The Executor on whose thread to execute the callbacks of the {@code listener}
+     *                 object.
+     * @param listener The listener {@code IntConsumer} to call which will receive the updated
+     *                 device ID.
+     *
+     * @see Context#isDeviceContext()
+     * @see Context#getDeviceId()
+     * @see Context#createDeviceContext(int)
+     */
+    public void registerDeviceIdChangeListener(@NonNull @CallbackExecutor Executor executor,
+            @NonNull IntConsumer listener) {
+        throw new RuntimeException("Not implemented. Must override in a subclass.");
+    }
+
+    /**
+     * Removes a device ID changed listener from the Context. It's a no-op if
+     * the listener is not already registered.
+     *
+     * @param listener The {@code Consumer} to remove.
+     *
+     * @see #getDeviceId()
+     * @see #registerDeviceIdChangeListener(Executor, IntConsumer)
+     */
+    public void unregisterDeviceIdChangeListener(@NonNull IntConsumer listener) {
         throw new RuntimeException("Not implemented. Must override in a subclass.");
     }
 
