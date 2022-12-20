@@ -24,6 +24,7 @@ import android.graphics.Canvas;
 import android.graphics.Point;
 import android.util.AttributeSet;
 import android.util.MathUtils;
+import android.view.Choreographer;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.accessibility.AccessibilityManager;
@@ -492,12 +493,9 @@ public abstract class ActivatableNotificationView extends ExpandableOutlineView 
         if (animationListener != null) {
             mAppearAnimator.addListener(animationListener);
         }
-        if (delay > 0) {
-            // we need to apply the initial state already to avoid drawn frames in the wrong state
-            updateAppearAnimationAlpha();
-            updateAppearRect();
-            mAppearAnimator.setStartDelay(delay);
-        }
+        // we need to apply the initial state already to avoid drawn frames in the wrong state
+        updateAppearAnimationAlpha();
+        updateAppearRect();
         mAppearAnimator.addListener(new AnimatorListenerAdapter() {
             private boolean mWasCancelled;
 
@@ -528,7 +526,20 @@ public abstract class ActivatableNotificationView extends ExpandableOutlineView 
                 mWasCancelled = true;
             }
         });
-        mAppearAnimator.start();
+
+        // Cache the original animator so we can check if the animation should be started in the
+        // Choreographer callback. It's possible that the original animator (mAppearAnimator) is
+        // replaced with a new value before the callback is called.
+        ValueAnimator cachedAnimator = mAppearAnimator;
+        // Even when delay=0, starting the animation on the next frame is necessary to avoid jank.
+        // Not doing so will increase the chances our Animator will be forced to skip a value of
+        // the animation's progression, causing stutter.
+        Choreographer.getInstance().postFrameCallbackDelayed(
+                frameTimeNanos -> {
+                    if (mAppearAnimator == cachedAnimator) {
+                        mAppearAnimator.start();
+                    }
+                }, delay);
     }
 
     private int getCujType(boolean isAppearing) {
