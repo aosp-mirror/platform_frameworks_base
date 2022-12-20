@@ -654,17 +654,32 @@ namespace PaintGlue {
                                     bidiFlags, string);
     }
 
-    static jfloat doRunAdvance(const Paint* paint, const Typeface* typeface, const jchar buf[],
-            jint start, jint count, jint bufSize, jboolean isRtl, jint offset) {
+    static jfloat doRunAdvance(JNIEnv* env, const Paint* paint, const Typeface* typeface,
+                               const jchar buf[], jint start, jint count, jint bufSize,
+                               jboolean isRtl, jint offset, jfloatArray advances,
+                               jint advancesIndex) {
+        if (advances) {
+            size_t advancesLength = env->GetArrayLength(advances);
+            if ((size_t)(count + advancesIndex) > advancesLength) {
+                doThrowAIOOBE(env);
+                return 0;
+            }
+        }
         minikin::Bidi bidiFlags = isRtl ? minikin::Bidi::FORCE_RTL : minikin::Bidi::FORCE_LTR;
-        if (offset == start + count) {
+        if (offset == start + count && advances == nullptr) {
             return MinikinUtils::measureText(paint, bidiFlags, typeface, buf, start, count,
                     bufSize, nullptr);
         }
         std::unique_ptr<float[]> advancesArray(new float[count]);
         MinikinUtils::measureText(paint, bidiFlags, typeface, buf, start, count, bufSize,
                 advancesArray.get());
-        return minikin::getRunAdvance(advancesArray.get(), buf, start, count, offset);
+
+        float result = minikin::getRunAdvance(advancesArray.get(), buf, start, count, offset);
+        if (advances) {
+            minikin::distributeAdvances(advancesArray.get(), buf, start, count);
+            env->SetFloatArrayRegion(advances, advancesIndex, count, advancesArray.get());
+        }
+        return result;
     }
 
     static jfloat getRunAdvance___CIIIIZI_F(JNIEnv *env, jclass, jlong paintHandle, jcharArray text,
@@ -672,9 +687,9 @@ namespace PaintGlue {
         const Paint* paint = reinterpret_cast<Paint*>(paintHandle);
         const Typeface* typeface = paint->getAndroidTypeface();
         ScopedCharArrayRO textArray(env, text);
-        jfloat result = doRunAdvance(paint, typeface, textArray.get() + contextStart,
-                start - contextStart, end - start, contextEnd - contextStart, isRtl,
-                offset - contextStart);
+        jfloat result = doRunAdvance(env, paint, typeface, textArray.get() + contextStart,
+                                     start - contextStart, end - start, contextEnd - contextStart,
+                                     isRtl, offset - contextStart, nullptr, 0);
         return result;
     }
 
@@ -686,9 +701,23 @@ namespace PaintGlue {
         const Paint* paint = reinterpret_cast<Paint*>(paintHandle);
         const Typeface* typeface = reinterpret_cast<Typeface*>(typefaceHandle);
         ScopedCharArrayRO textArray(env, text);
-        jfloat result =
-                doRunAdvance(paint, typeface, textArray.get() + contextStart, start - contextStart,
-                             end - start, contextEnd - contextStart, isRtl, offset - contextStart);
+        jfloat result = doRunAdvance(env, paint, typeface, textArray.get() + contextStart,
+                                     start - contextStart, end - start, contextEnd - contextStart,
+                                     isRtl, offset - contextStart, nullptr, 0);
+        return result;
+    }
+
+    static jfloat getRunCharacterAdvance___CIIIIZI_FI_F(JNIEnv* env, jclass, jlong paintHandle,
+                                                        jcharArray text, jint start, jint end,
+                                                        jint contextStart, jint contextEnd,
+                                                        jboolean isRtl, jint offset,
+                                                        jfloatArray advances, jint advancesIndex) {
+        const Paint* paint = reinterpret_cast<Paint*>(paintHandle);
+        const Typeface* typeface = paint->getAndroidTypeface();
+        ScopedCharArrayRO textArray(env, text);
+        jfloat result = doRunAdvance(env, paint, typeface, textArray.get() + contextStart,
+                                     start - contextStart, end - start, contextEnd - contextStart,
+                                     isRtl, offset - contextStart, advances, advancesIndex);
         return result;
     }
 
@@ -1417,6 +1446,9 @@ static const JNINativeMethod methods[] = {
         {"nSetShadowLayer", "(JFFFI)V", (void*)PaintGlue::setShadowLayerInt},
         {"nHasShadowLayer", "(J)Z", (void*)PaintGlue::hasShadowLayer},
         {"nEqualsForTextMeasurement", "(JJ)Z", (void*)PaintGlue::equalsForTextMeasurement},
+        {"nGetRunCharacterAdvance", "(J[CIIIIZI[FI)F",
+         (void*)PaintGlue::getRunCharacterAdvance___CIIIIZI_FI_F},
+
 };
 
 int register_android_graphics_Paint(JNIEnv* env) {
