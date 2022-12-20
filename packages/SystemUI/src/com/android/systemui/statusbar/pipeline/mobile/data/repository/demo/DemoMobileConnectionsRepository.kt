@@ -106,7 +106,8 @@ constructor(
             )
 
     /** Demo mode doesn't currently support modifications to the mobile mappings */
-    val defaultDataSubRatConfig = MutableStateFlow(MobileMappings.Config.readConfig(context))
+    override val defaultDataSubRatConfig =
+        MutableStateFlow(MobileMappings.Config.readConfig(context))
 
     override val defaultMobileIconGroup = flowOf(TelephonyIcons.THREE_G)
 

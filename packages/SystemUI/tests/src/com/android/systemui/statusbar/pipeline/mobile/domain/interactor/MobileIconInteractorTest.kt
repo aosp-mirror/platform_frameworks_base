@@ -59,6 +59,7 @@ class MobileIconInteractorTest : SysuiTestCase() {
             MobileIconInteractorImpl(
                 scope,
                 mobileIconsInteractor.activeDataConnectionHasDataEnabled,
+                mobileIconsInteractor.alwaysShowDataRatIcon,
                 mobileIconsInteractor.defaultMobileIconMapping,
                 mobileIconsInteractor.defaultMobileIconGroup,
                 mobileIconsInteractor.isDefaultConnectionFailed,
@@ -218,6 +219,21 @@ class MobileIconInteractorTest : SysuiTestCase() {
             val job = underTest.networkTypeIconGroup.onEach { latest = it }.launchIn(this)
 
             assertThat(latest).isEqualTo(FakeMobileIconsInteractor.DEFAULT_ICON)
+
+            job.cancel()
+        }
+
+    @Test
+    fun alwaysShowDataRatIcon_matchesParent() =
+        runBlocking(IMMEDIATE) {
+            var latest: Boolean? = null
+            val job = underTest.alwaysShowDataRatIcon.onEach { latest = it }.launchIn(this)
+
+            mobileIconsInteractor.alwaysShowDataRatIcon.value = true
+            assertThat(latest).isTrue()
+
+            mobileIconsInteractor.alwaysShowDataRatIcon.value = false
+            assertThat(latest).isFalse()
 
             job.cancel()
         }

@@ -176,6 +176,14 @@ object Flags {
     @JvmField
     val LIGHT_REVEAL_MIGRATION = unreleasedFlag(218, "light_reveal_migration", teamfood = false)
 
+    /** Flag to control the migration of face auth to modern architecture. */
+    // TODO(b/262838215): Tracking bug
+    @JvmField val FACE_AUTH_REFACTOR = unreleasedFlag(220, "face_auth_refactor")
+
+    /** Flag to control the revamp of keyguard biometrics progress animation */
+    // TODO(b/244313043): Tracking bug
+    @JvmField val BIOMETRICS_ANIMATION_REVAMP = unreleasedFlag(221, "biometrics_animation_revamp")
+
     // 300 - power menu
     // TODO(b/254512600): Tracking Bug
     @JvmField val POWER_MENU_LITE = releasedFlag(300, "power_menu_lite")
@@ -267,7 +275,7 @@ object Flags {
 
     // 900 - media
     // TODO(b/254512697): Tracking Bug
-    val MEDIA_TAP_TO_TRANSFER = releasedFlag(900, "media_tap_to_transfer")
+    val MEDIA_TAP_TO_TRANSFER = unreleasedFlag(900, "media_tap_to_transfer", teamfood = true)
 
     // TODO(b/254512502): Tracking Bug
     val MEDIA_SESSION_ACTIONS = unreleasedFlag(901, "media_session_actions")
