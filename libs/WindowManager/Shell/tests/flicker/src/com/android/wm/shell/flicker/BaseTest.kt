@@ -33,7 +33,6 @@ import com.android.server.wm.flicker.statusBarWindowIsAlwaysVisible
 import com.android.server.wm.flicker.taskBarLayerIsVisibleAtStartAndEnd
 import com.android.server.wm.flicker.taskBarWindowIsAlwaysVisible
 import com.android.server.wm.traces.common.ComponentNameMatcher
-import com.android.server.wm.traces.parser.windowmanager.WindowManagerStateHelper
 import org.junit.Assume
 import org.junit.Test
 
@@ -49,15 +48,6 @@ constructor(
     protected val instrumentation: Instrumentation = InstrumentationRegistry.getInstrumentation(),
     protected val tapl: LauncherInstrumentation = LauncherInstrumentation()
 ) {
-    init {
-        flicker.scenario.setIsTablet(
-            WindowManagerStateHelper(instrumentation, clearCacheAfterParsing = false)
-                .currentState
-                .wmState
-                .isTablet
-        )
-    }
-
     /** Specification of the test transition to execute */
     abstract val transition: FlickerBuilder.() -> Unit
 
@@ -68,7 +58,7 @@ constructor(
     @FlickerBuilderProvider
     fun buildFlicker(): FlickerBuilder {
         return FlickerBuilder(instrumentation).apply {
-            setup { flicker.scenario.setIsTablet(wmHelper.currentState.wmState.isTablet) }
+            setup { flicker.scenario.setIsTablet(tapl.isTablet) }
             transition()
         }
     }
