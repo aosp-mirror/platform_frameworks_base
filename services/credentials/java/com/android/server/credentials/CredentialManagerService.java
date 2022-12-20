@@ -112,8 +112,9 @@ public final class CredentialManagerService
                 continue;
             }
             try {
-                serviceList.add(
-                        new CredentialManagerServiceImpl(this, mLock, resolvedUserId, serviceName));
+                serviceList.add(new CredentialManagerServiceImpl(this, mLock,
+                        resolvedUserId,
+                        serviceName));
             } catch (PackageManager.NameNotFoundException | SecurityException e) {
                 Log.i(TAG, "Unable to add serviceInfo : " + e.getMessage());
             }
@@ -137,20 +138,21 @@ public final class CredentialManagerService
         }
     }
 
+    @SuppressWarnings("GuardedBy") // ErrorProne requires initiateProviderSessionForRequestLocked
+    // to be guarded by 'service.mLock', which is the same as mLock.
     private List<ProviderSession> initiateProviderSessions(
             RequestSession session, List<String> requestOptions) {
         List<ProviderSession> providerSessions = new ArrayList<>();
         // Invoke all services of a user to initiate a provider session
-        runForUser(
-                (service) -> {
-                    if (service.isServiceCapable(requestOptions)) {
-                        ProviderSession providerSession =
-                                service.initiateProviderSessionForRequest(session);
-                        if (providerSession != null) {
-                            providerSessions.add(providerSession);
-                        }
-                    }
-                });
+        runForUser((service) -> {
+            synchronized (mLock) {
+                ProviderSession providerSession = service
+                        .initiateProviderSessionForRequestLocked(session, requestOptions);
+                if (providerSession != null) {
+                    providerSessions.add(providerSession);
+                }
+            }
+        });
         return providerSessions;
     }
 
