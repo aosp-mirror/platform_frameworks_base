@@ -1250,7 +1250,7 @@ public final class SystemServer implements Dumpable {
         // DexUseManagerLocal needs to be loaded after PackageManagerLocal has been registered, but
         // before PackageManagerService starts processing binder calls to notifyDexLoad.
         LocalManagerRegistry.addManager(
-                DexUseManagerLocal.class, DexUseManagerLocal.createInstance());
+                DexUseManagerLocal.class, DexUseManagerLocal.createInstance(mSystemContext));
         t.traceEnd();
 
         if (!mRuntimeRestart && !isFirstBootOrUpgrade()) {
