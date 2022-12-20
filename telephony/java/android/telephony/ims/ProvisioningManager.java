@@ -1831,6 +1831,8 @@ public class ProvisioningManager {
             return getITelephony().isRcsVolteSingleRegistrationCapable(mSubId);
         } catch (RemoteException | IllegalStateException e) {
             throw new ImsException(e.getMessage(), ImsException.CODE_ERROR_SERVICE_UNAVAILABLE);
+        } catch (ServiceSpecificException e) {
+            throw new ImsException(e.getMessage(), e.errorCode);
         }
     }
 
