@@ -121,7 +121,7 @@ public final class UnixEpochTime implements Parcelable {
     @Override
     public String toString() {
         return "UnixEpochTime{"
-                + "mElapsedRealtimeTimeMillis=" + mElapsedRealtimeMillis
+                + "mElapsedRealtimeMillis=" + mElapsedRealtimeMillis
                 + ", mUnixEpochTimeMillis=" + mUnixEpochTimeMillis
                 + '}';
     }

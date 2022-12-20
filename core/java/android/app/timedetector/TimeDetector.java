@@ -73,6 +73,18 @@ public interface TimeDetector {
     String SHELL_COMMAND_SUGGEST_NETWORK_TIME = "suggest_network_time";
 
     /**
+     * A shell command that prints the current network time information.
+     * @hide
+     */
+    String SHELL_COMMAND_GET_NETWORK_TIME = "get_network_time";
+
+    /**
+     * A shell command that clears the detector's network time information.
+     * @hide
+     */
+    String SHELL_COMMAND_CLEAR_NETWORK_TIME = "clear_network_time";
+
+    /**
      * A shell command that injects a GNSS time suggestion.
      * @hide
      */

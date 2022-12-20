@@ -380,6 +380,28 @@ public class TimeDetectorServiceTest {
     }
 
     @Test
+    public void testClearNetworkTime_withoutPermission() {
+        doThrow(new SecurityException("Mock"))
+                .when(mMockContext).enforceCallingPermission(anyString(), any());
+
+        assertThrows(SecurityException.class,
+                () -> mTimeDetectorService.clearNetworkTime());
+        verify(mMockContext).enforceCallingPermission(
+                eq(android.Manifest.permission.SET_TIME), anyString());
+    }
+
+    @Test
+    public void testClearNetworkTime() throws Exception {
+        doNothing().when(mMockContext).enforceCallingPermission(anyString(), any());
+
+        mTimeDetectorService.clearNetworkTime();
+
+        verify(mMockContext).enforceCallingPermission(
+                eq(android.Manifest.permission.SET_TIME), anyString());
+        verify(mFakeTimeDetectorStrategySpy).clearLatestNetworkSuggestion();
+    }
+
+    @Test
     public void testLatestNetworkTime() {
         NtpTrustedTime.TimeResult latestNetworkTime = new NtpTrustedTime.TimeResult(
                 1234L, 54321L, 999, InetSocketAddress.createUnresolved("test.timeserver", 123));

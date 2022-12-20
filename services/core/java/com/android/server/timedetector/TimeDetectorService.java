@@ -143,7 +143,7 @@ public final class TimeDetectorService extends ITimeDetectorService.Stub
         return getTimeCapabilitiesAndConfig(userId);
     }
 
-    TimeCapabilitiesAndConfig getTimeCapabilitiesAndConfig(@UserIdInt int userId) {
+    private TimeCapabilitiesAndConfig getTimeCapabilitiesAndConfig(@UserIdInt int userId) {
         enforceManageTimeDetectorPermission();
 
         final long token = mCallerIdentityInjector.clearCallingIdentity();
@@ -163,6 +163,9 @@ public final class TimeDetectorService extends ITimeDetectorService.Stub
         return updateConfiguration(callingUserId, configuration);
     }
 
+    /**
+     * Updates the user's configuration. Exposed for use by {@link TimeDetectorShellCommand}.
+     */
     boolean updateConfiguration(@UserIdInt int userId, @NonNull TimeConfiguration configuration) {
         // Resolve constants like USER_CURRENT to the true user ID as needed.
         int resolvedUserId = ActivityManager.handleIncomingUser(Binder.getCallingPid(),
@@ -256,7 +259,7 @@ public final class TimeDetectorService extends ITimeDetectorService.Stub
         }
     }
 
-    void handleConfigurationInternalChangedOnHandlerThread() {
+    private void handleConfigurationInternalChangedOnHandlerThread() {
         // Configuration has changed, but each user may have a different view of the configuration.
         // It's possible that this will cause unnecessary notifications but that shouldn't be a
         // problem.
@@ -287,6 +290,10 @@ public final class TimeDetectorService extends ITimeDetectorService.Stub
         }
     }
 
+    /**
+     * Sets the system time state. See {@link TimeState} for details. For use by {@link
+     * TimeDetectorShellCommand}.
+     */
     void setTimeState(@NonNull TimeState timeState) {
         enforceManageTimeDetectorPermission();
 
@@ -353,11 +360,31 @@ public final class TimeDetectorService extends ITimeDetectorService.Stub
         }
     }
 
+    /**
+     * Suggests network time with permission checks. For use by {@link TimeDetectorShellCommand}.
+     */
     void suggestNetworkTime(@NonNull NetworkTimeSuggestion timeSignal) {
         enforceSuggestNetworkTimePermission();
         Objects.requireNonNull(timeSignal);
 
         mHandler.post(() -> mTimeDetectorStrategy.suggestNetworkTime(timeSignal));
+    }
+
+    /**
+     * Clears the cached network time information. For use during tests to simulate when no network
+     * time has been made available. For use by {@link TimeDetectorShellCommand}.
+     *
+     * <p>This operation takes place in the calling thread.
+     */
+    void clearNetworkTime() {
+        enforceSuggestNetworkTimePermission();
+
+        final long token = Binder.clearCallingIdentity();
+        try {
+            mTimeDetectorStrategy.clearLatestNetworkSuggestion();
+        } finally {
+            Binder.restoreCallingIdentity(token);
+        }
     }
 
     @Override
@@ -388,6 +415,9 @@ public final class TimeDetectorService extends ITimeDetectorService.Stub
         }
     }
 
+    /**
+     * Suggests GNSS time with permission checks. For use by {@link TimeDetectorShellCommand}.
+     */
     void suggestGnssTime(@NonNull GnssTimeSuggestion timeSignal) {
         enforceSuggestGnssTimePermission();
         Objects.requireNonNull(timeSignal);
