@@ -1388,10 +1388,26 @@ public final class GameManagerService extends IGameManagerService.Stub {
                 configOverride = new GamePackageConfiguration(packageName);
                 settings.setConfigOverride(packageName, configOverride);
             }
-
         }
         GamePackageConfiguration.GameModeConfiguration internalConfig =
                 configOverride.getOrAddDefaultGameModeConfiguration(GameManager.GAME_MODE_CUSTOM);
+        final float scalingValueFrom = internalConfig.getScaling();
+        final int fpsValueFrom = internalConfig.getFps();
+        internalConfig.updateFromPublicGameModeConfig(gameModeConfig);
+
+        sendUserMessage(userId, WRITE_SETTINGS, EVENT_UPDATE_CUSTOM_GAME_MODE_CONFIG,
+                WRITE_DELAY_MILLIS);
+        sendUserMessage(userId, WRITE_GAME_MODE_INTERVENTION_LIST_FILE,
+                EVENT_UPDATE_CUSTOM_GAME_MODE_CONFIG, WRITE_DELAY_MILLIS /*delayMillis*/);
+
+        final int gameMode = getGameMode(packageName, userId);
+        if (gameMode == GameManager.GAME_MODE_CUSTOM) {
+            updateInterventions(packageName, gameMode, userId);
+        }
+        Slog.i(TAG, "Updated custom game mode config for package: " + packageName
+                + " with FPS=" + internalConfig.getFps() + ";Scaling="
+                + internalConfig.getScaling() + " under user " + userId);
+
         int gameUid = -1;
         try {
             gameUid = mPackageManager.getPackageUidAsUser(packageName, userId);
@@ -1400,18 +1416,8 @@ public final class GameManagerService extends IGameManagerService.Stub {
         }
         FrameworkStatsLog.write(FrameworkStatsLog.GAME_MODE_CONFIGURATION_CHANGED, gameUid,
                 Binder.getCallingUid(), gameModeToStatsdGameMode(GameManager.GAME_MODE_CUSTOM),
-                internalConfig.getScaling(), gameModeConfig.getScalingFactor(),
-                internalConfig.getFps(), gameModeConfig.getFpsOverride());
-        internalConfig.updateFromPublicGameModeConfig(gameModeConfig);
-
-        Slog.i(TAG, "Updated custom game mode config for package: " + packageName
-                + " with FPS=" + internalConfig.getFps() + ";Scaling="
-                + internalConfig.getScaling() + " under user " + userId);
-
-        sendUserMessage(userId, WRITE_SETTINGS, EVENT_UPDATE_CUSTOM_GAME_MODE_CONFIG,
-                WRITE_DELAY_MILLIS);
-        sendUserMessage(userId, WRITE_GAME_MODE_INTERVENTION_LIST_FILE,
-                EVENT_UPDATE_CUSTOM_GAME_MODE_CONFIG, WRITE_DELAY_MILLIS /*delayMillis*/);
+                scalingValueFrom, gameModeConfig.getScalingFactor(),
+                fpsValueFrom, gameModeConfig.getFpsOverride());
     }
 
     /**
