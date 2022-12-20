@@ -17,7 +17,7 @@
 package com.android.server.power.stats;
 
 import static android.os.BatteryConsumer.POWER_COMPONENT_ANY;
-import static android.os.BatteryConsumer.POWER_MODEL_MEASURED_ENERGY;
+import static android.os.BatteryConsumer.POWER_MODEL_ENERGY_CONSUMPTION;
 import static android.os.BatteryConsumer.POWER_MODEL_UNDEFINED;
 import static android.os.BatteryConsumer.PROCESS_STATE_BACKGROUND;
 import static android.os.BatteryConsumer.PROCESS_STATE_CACHED;
@@ -313,7 +313,7 @@ public class BatteryUsageStatsTest {
 
         addUidBatteryConsumer(builder, batteryStats, APP_UID1, null,
                 4321, 5432,
-                123, BatteryConsumer.POWER_MODEL_POWER_PROFILE, 345, POWER_MODEL_MEASURED_ENERGY,
+                123, BatteryConsumer.POWER_MODEL_POWER_PROFILE, 345, POWER_MODEL_ENERGY_CONSUMPTION,
                 456, 567, 678,
                 1777, 7771, 1888, 8881, 1999, 9991, 321, 654);
 

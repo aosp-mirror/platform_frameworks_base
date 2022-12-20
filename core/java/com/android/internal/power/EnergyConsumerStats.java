@@ -37,15 +37,14 @@ import java.lang.annotation.RetentionPolicy;
 import java.util.Arrays;
 
 /**
- * Tracks the measured charge consumption of various subsystems according to their
+ * Tracks the charge consumption of various subsystems according to their
  * {@link StandardPowerBucket} or custom power bucket (which is tied to
  * {@link android.hardware.power.stats.EnergyConsumer.ordinal}).
  *
- * This class doesn't use a TimeBase, and instead requires manually decisions about when to
+ * This class doesn't use a TimeBase, and instead requires manual decisions about when to
  * accumulate since it is trivial. However, in the future, a TimeBase could be used instead.
  */
-@VisibleForTesting
-public class MeasuredEnergyStats {
+public class EnergyConsumerStats {
     private static final String TAG = "MeasuredEnergyStats";
 
     // Note: {@link BatteryStats#VERSION} MUST be updated if standard
@@ -205,7 +204,7 @@ public class MeasuredEnergyStats {
          */
         private String getBucketName(int index) {
             if (isValidStandardBucket(index)) {
-                return DebugUtils.valueToString(MeasuredEnergyStats.class, "POWER_BUCKET_", index);
+                return DebugUtils.valueToString(EnergyConsumerStats.class, "POWER_BUCKET_", index);
             }
             final int customBucket = indexToCustomBucket(index);
             StringBuilder name = new StringBuilder().append("CUSTOM_").append(customBucket);
@@ -242,7 +241,7 @@ public class MeasuredEnergyStats {
      * supportedStandardBuckets must be of size {@link #NUMBER_STANDARD_POWER_BUCKETS}.
      * numCustomBuckets >= 0 is the number of (non-standard) custom power buckets on the device.
      */
-    public MeasuredEnergyStats(MeasuredEnergyStats.Config config) {
+    public EnergyConsumerStats(EnergyConsumerStats.Config config) {
         mConfig = config;
         final int numTotalBuckets = config.getNumberOfBuckets();
         mAccumulatedChargeMicroCoulomb = new long[numTotalBuckets];
@@ -259,15 +258,15 @@ public class MeasuredEnergyStats {
      * Reads a MeasuredEnergyStats from the supplied Parcel.
      */
     @Nullable
-    public static MeasuredEnergyStats createFromParcel(Config config, Parcel in) {
+    public static EnergyConsumerStats createFromParcel(Config config, Parcel in) {
         if (!in.readBoolean()) {
             return null;
         }
-        return new MeasuredEnergyStats(config, in);
+        return new EnergyConsumerStats(config, in);
     }
 
     /** Construct from parcel. */
-    public MeasuredEnergyStats(MeasuredEnergyStats.Config config, Parcel in) {
+    public EnergyConsumerStats(EnergyConsumerStats.Config config, Parcel in) {
         mConfig = config;
 
         final int size = in.readInt();
@@ -533,21 +532,22 @@ public class MeasuredEnergyStats {
      * possible (not necessarily supported) standard and custom buckets.
      *
      * Corresponding write performed by
-     * {@link #writeSummaryToParcel(MeasuredEnergyStats, Parcel)}.
+     * {@link #writeSummaryToParcel(EnergyConsumerStats, Parcel)}.
      *
      * @return a new MeasuredEnergyStats object as described.
      *         Returns null if the stats contain no non-0 information (such as if template is null
      *         or if the parcel indicates there is no data to populate).
      */
-    public static @Nullable MeasuredEnergyStats createAndReadSummaryFromParcel(
-            @Nullable Config config, Parcel in) {
+    @Nullable
+    public static EnergyConsumerStats createAndReadSummaryFromParcel(@Nullable Config config,
+            Parcel in) {
         final int arraySize = in.readInt();
         // Check if any MeasuredEnergyStats exists on the parcel
         if (arraySize == 0) return null;
 
         if (config == null) {
             // Nothing supported anymore. Create placeholder object just to consume the parcel data.
-            final MeasuredEnergyStats mes = new MeasuredEnergyStats(
+            final EnergyConsumerStats mes = new EnergyConsumerStats(
                     new Config(new boolean[arraySize], null, new int[0], new String[]{""}));
             mes.readSummaryFromParcel(in);
             return null;
@@ -557,12 +557,12 @@ public class MeasuredEnergyStats {
             Slog.wtf(TAG, "Size of MeasuredEnergyStats parcel (" + arraySize
                     + ") does not match config (" + config.getNumberOfBuckets() + ").");
             // Something is horribly wrong. Just consume the parcel and return null.
-            final MeasuredEnergyStats mes = new MeasuredEnergyStats(config);
+            final EnergyConsumerStats mes = new EnergyConsumerStats(config);
             mes.readSummaryFromParcel(in);
             return null;
         }
 
-        final MeasuredEnergyStats stats = new MeasuredEnergyStats(config);
+        final EnergyConsumerStats stats = new EnergyConsumerStats(config);
         stats.readSummaryFromParcel(in);
         if (stats.containsInterestingData()) {
             return stats;
@@ -585,7 +585,7 @@ public class MeasuredEnergyStats {
      *
      * Corresponding read performed by {@link #createAndReadSummaryFromParcel}.
      */
-    public static void writeSummaryToParcel(@Nullable MeasuredEnergyStats stats, Parcel dest) {
+    public static void writeSummaryToParcel(@Nullable EnergyConsumerStats stats, Parcel dest) {
         if (stats == null) {
             dest.writeInt(0);
             return;
@@ -607,7 +607,7 @@ public class MeasuredEnergyStats {
     }
 
     /** Reset accumulated charges of the given stats. */
-    public static void resetIfNotNull(@Nullable MeasuredEnergyStats stats) {
+    public static void resetIfNotNull(@Nullable EnergyConsumerStats stats) {
         if (stats != null) stats.reset();
     }
 

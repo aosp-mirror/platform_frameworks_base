@@ -52,12 +52,12 @@ public class AmbientDisplayPowerCalculator extends PowerCalculator {
     @Override
     public void calculate(BatteryUsageStats.Builder builder, BatteryStats batteryStats,
             long rawRealtimeUs, long rawUptimeUs, BatteryUsageStatsQuery query) {
-        final long measuredEnergyUC = batteryStats.getScreenDozeMeasuredBatteryConsumptionUC();
-        final int powerModel = getPowerModel(measuredEnergyUC, query);
+        final long energyConsumerUC = batteryStats.getScreenDozeEnergyConsumptionUC();
+        final int powerModel = getPowerModel(energyConsumerUC, query);
         final long durationMs = calculateDuration(batteryStats, rawRealtimeUs,
                 BatteryStats.STATS_SINCE_CHARGED);
         final double powerMah = calculateTotalPower(powerModel, batteryStats, rawRealtimeUs,
-                measuredEnergyUC);
+                energyConsumerUC);
         builder.getAggregateBatteryConsumerBuilder(
                 BatteryUsageStats.AGGREGATE_BATTERY_CONSUMER_SCOPE_DEVICE)
                 .setUsageDurationMillis(BatteryConsumer.POWER_COMPONENT_AMBIENT_DISPLAY, durationMs)
@@ -72,7 +72,7 @@ public class AmbientDisplayPowerCalculator extends PowerCalculator {
     private double calculateTotalPower(@BatteryConsumer.PowerModel int powerModel,
             BatteryStats batteryStats, long rawRealtimeUs, long consumptionUC) {
         switch (powerModel) {
-            case BatteryConsumer.POWER_MODEL_MEASURED_ENERGY:
+            case BatteryConsumer.POWER_MODEL_ENERGY_CONSUMPTION:
                 return uCtoMah(consumptionUC);
             case BatteryConsumer.POWER_MODEL_POWER_PROFILE:
             default:

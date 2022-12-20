@@ -91,7 +91,7 @@ public class BatteryUsageStatsProvider {
                 mPowerCalculators.add(new ScreenPowerCalculator(mPowerProfile));
                 mPowerCalculators.add(new AmbientDisplayPowerCalculator(mPowerProfile));
                 mPowerCalculators.add(new IdlePowerCalculator(mPowerProfile));
-                mPowerCalculators.add(new CustomMeasuredPowerCalculator(mPowerProfile));
+                mPowerCalculators.add(new CustomEnergyConsumerPowerCalculator(mPowerProfile));
                 mPowerCalculators.add(new UserPowerCalculator());
 
                 // It is important that SystemServicePowerCalculator be applied last,

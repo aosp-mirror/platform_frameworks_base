@@ -22,10 +22,10 @@ import android.os.BatteryManager;
 import android.os.BatteryStats;
 import android.os.BatteryStats.BitDescription;
 import android.os.BatteryStats.CpuUsageDetails;
+import android.os.BatteryStats.EnergyConsumerDetails;
 import android.os.BatteryStats.HistoryItem;
 import android.os.BatteryStats.HistoryStepDetails;
 import android.os.BatteryStats.HistoryTag;
-import android.os.BatteryStats.MeasuredEnergyDetails;
 import android.os.Build;
 import android.os.Parcel;
 import android.os.ParcelFormatException;
@@ -984,9 +984,9 @@ public class BatteryStatsHistory {
     /**
      * Records measured energy data.
      */
-    public void recordMeasuredEnergyDetails(long elapsedRealtimeMs, long uptimeMs,
-            MeasuredEnergyDetails measuredEnergyDetails) {
-        mHistoryCur.measuredEnergyDetails = measuredEnergyDetails;
+    public void recordEnergyConsumerDetails(long elapsedRealtimeMs, long uptimeMs,
+            EnergyConsumerDetails energyConsumerDetails) {
+        mHistoryCur.energyConsumerDetails = energyConsumerDetails;
         mHistoryCur.states2 |= HistoryItem.STATE2_EXTENSIONS_FLAG;
         writeHistoryItem(elapsedRealtimeMs, uptimeMs);
     }
@@ -1293,7 +1293,7 @@ public class BatteryStatsHistory {
                 && mHistoryLastWritten.batteryPlugType == cur.batteryPlugType
                 && mHistoryLastWritten.batteryTemperature == cur.batteryTemperature
                 && mHistoryLastWritten.batteryVoltage == cur.batteryVoltage
-                && mHistoryLastWritten.measuredEnergyDetails == null
+                && mHistoryLastWritten.energyConsumerDetails == null
                 && mHistoryLastWritten.cpuUsageDetails == null) {
             // We can merge this new change in with the last one.  Merging is
             // allowed as long as only the states have changed, and within those states
@@ -1396,7 +1396,7 @@ public class BatteryStatsHistory {
         cur.eventCode = HistoryItem.EVENT_NONE;
         cur.eventTag = null;
         cur.tagsFirstOccurrence = false;
-        cur.measuredEnergyDetails = null;
+        cur.energyConsumerDetails = null;
         cur.cpuUsageDetails = null;
         if (DEBUG) {
             Slog.i(TAG, "Writing history buffer: was " + mHistoryBufferLastPos
@@ -1517,7 +1517,7 @@ public class BatteryStatsHistory {
         if (stateIntChanged) {
             firstToken |= BatteryStatsHistory.DELTA_STATE_FLAG;
         }
-        if (cur.measuredEnergyDetails != null) {
+        if (cur.energyConsumerDetails != null) {
             extensionFlags |= BatteryStatsHistory.EXTENSION_MEASURED_ENERGY_FLAG;
             if (!mMeasuredEnergyHeaderWritten) {
                 extensionFlags |= BatteryStatsHistory.EXTENSION_MEASURED_ENERGY_HEADER_FLAG;
@@ -1653,22 +1653,22 @@ public class BatteryStatsHistory {
         dest.writeDouble(cur.wifiRailChargeMah);
         if (extensionFlags != 0) {
             dest.writeInt(extensionFlags);
-            if (cur.measuredEnergyDetails != null) {
+            if (cur.energyConsumerDetails != null) {
                 if (DEBUG) {
-                    Slog.i(TAG, "WRITE DELTA: measuredEnergyDetails=" + cur.measuredEnergyDetails);
+                    Slog.i(TAG, "WRITE DELTA: measuredEnergyDetails=" + cur.energyConsumerDetails);
                 }
                 if (!mMeasuredEnergyHeaderWritten) {
-                    MeasuredEnergyDetails.EnergyConsumer[] consumers =
-                            cur.measuredEnergyDetails.consumers;
+                    EnergyConsumerDetails.EnergyConsumer[] consumers =
+                            cur.energyConsumerDetails.consumers;
                     dest.writeInt(consumers.length);
-                    for (MeasuredEnergyDetails.EnergyConsumer consumer : consumers) {
+                    for (EnergyConsumerDetails.EnergyConsumer consumer : consumers) {
                         dest.writeInt(consumer.type);
                         dest.writeInt(consumer.ordinal);
                         dest.writeString(consumer.name);
                     }
                     mMeasuredEnergyHeaderWritten = true;
                 }
-                mVarintParceler.writeLongArray(dest, cur.measuredEnergyDetails.chargeUC);
+                mVarintParceler.writeLongArray(dest, cur.energyConsumerDetails.chargeUC);
             }
 
             if (cur.cpuUsageDetails != null) {

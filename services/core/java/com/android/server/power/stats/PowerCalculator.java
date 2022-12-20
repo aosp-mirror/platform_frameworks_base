@@ -79,17 +79,17 @@ public abstract class PowerCalculator {
     }
 
     protected static @BatteryConsumer.PowerModel int getPowerModel(
-            long measuredEnergyUC, @NonNull BatteryUsageStatsQuery query) {
-        if (measuredEnergyUC != BatteryStats.POWER_DATA_UNAVAILABLE
+            long consumedEnergyUC, @NonNull BatteryUsageStatsQuery query) {
+        if (consumedEnergyUC != BatteryStats.POWER_DATA_UNAVAILABLE
                 && !query.shouldForceUsePowerProfileModel()) {
-            return BatteryConsumer.POWER_MODEL_MEASURED_ENERGY;
+            return BatteryConsumer.POWER_MODEL_ENERGY_CONSUMPTION;
         }
         return BatteryConsumer.POWER_MODEL_POWER_PROFILE;
     }
 
-    protected static @BatteryConsumer.PowerModel int getPowerModel(long measuredEnergyUC) {
-        return measuredEnergyUC != BatteryStats.POWER_DATA_UNAVAILABLE
-                ? BatteryConsumer.POWER_MODEL_MEASURED_ENERGY
+    protected static @BatteryConsumer.PowerModel int getPowerModel(long consumedEnergyUC) {
+        return consumedEnergyUC != BatteryStats.POWER_DATA_UNAVAILABLE
+                ? BatteryConsumer.POWER_MODEL_ENERGY_CONSUMPTION
                 : BatteryConsumer.POWER_MODEL_POWER_PROFILE;
     }
 

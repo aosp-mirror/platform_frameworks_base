@@ -73,7 +73,7 @@ public class ScreenPowerCalculator extends PowerCalculator {
             long rawRealtimeUs, long rawUptimeUs, BatteryUsageStatsQuery query) {
         final PowerAndDuration totalPowerAndDuration = new PowerAndDuration();
 
-        final long consumptionUC = batteryStats.getScreenOnMeasuredBatteryConsumptionUC();
+        final long consumptionUC = batteryStats.getScreenOnEnergyConsumptionUC();
         final int powerModel = getPowerModel(consumptionUC, query);
         calculateTotalDurationAndPower(totalPowerAndDuration, powerModel, batteryStats,
                 rawRealtimeUs, BatteryStats.STATS_SINCE_CHARGED, consumptionUC);
@@ -87,12 +87,12 @@ public class ScreenPowerCalculator extends PowerCalculator {
         final SparseArray<UidBatteryConsumer.Builder> uidBatteryConsumerBuilders =
                 builder.getUidBatteryConsumerBuilders();
         switch (powerModel) {
-            case BatteryConsumer.POWER_MODEL_MEASURED_ENERGY:
+            case BatteryConsumer.POWER_MODEL_ENERGY_CONSUMPTION:
                 final PowerAndDuration appPowerAndDuration = new PowerAndDuration();
                 for (int i = uidBatteryConsumerBuilders.size() - 1; i >= 0; i--) {
                     final UidBatteryConsumer.Builder app = uidBatteryConsumerBuilders.valueAt(i);
-                    calculateAppUsingMeasuredEnergy(appPowerAndDuration, app.getBatteryStatsUid(),
-                            rawRealtimeUs);
+                    calculateAppUsingEnergyConsumption(appPowerAndDuration,
+                            app.getBatteryStatsUid(), rawRealtimeUs);
                     app.setUsageDurationMillis(BatteryConsumer.POWER_COMPONENT_SCREEN,
                                     appPowerAndDuration.durationMs)
                             .setConsumedPower(BatteryConsumer.POWER_COMPONENT_SCREEN,
@@ -134,7 +134,7 @@ public class ScreenPowerCalculator extends PowerCalculator {
                 statsType);
 
         switch (powerModel) {
-            case BatteryConsumer.POWER_MODEL_MEASURED_ENERGY:
+            case BatteryConsumer.POWER_MODEL_ENERGY_CONSUMPTION:
                 totalPowerAndDuration.powerMah = uCtoMah(consumptionUC);
                 break;
             case BatteryConsumer.POWER_MODEL_POWER_PROFILE:
@@ -144,11 +144,11 @@ public class ScreenPowerCalculator extends PowerCalculator {
         }
     }
 
-    private void calculateAppUsingMeasuredEnergy(PowerAndDuration appPowerAndDuration,
+    private void calculateAppUsingEnergyConsumption(PowerAndDuration appPowerAndDuration,
             BatteryStats.Uid u, long rawRealtimeUs) {
         appPowerAndDuration.durationMs = getProcessForegroundTimeMs(u, rawRealtimeUs);
 
-        final long chargeUC = u.getScreenOnMeasuredBatteryConsumptionUC();
+        final long chargeUC = u.getScreenOnEnergyConsumptionUC();
         if (chargeUC < 0) {
             Slog.wtf(TAG, "Screen energy not supported, so calculateApp shouldn't de called");
             appPowerAndDuration.powerMah = 0;

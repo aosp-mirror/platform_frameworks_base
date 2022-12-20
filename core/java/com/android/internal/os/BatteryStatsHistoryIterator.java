@@ -36,7 +36,7 @@ public class BatteryStatsHistoryIterator implements Iterator<BatteryStats.Histor
     private final BatteryStats.HistoryStepDetails mReadHistoryStepDetails =
             new BatteryStats.HistoryStepDetails();
     private final SparseArray<BatteryStats.HistoryTag> mHistoryTags = new SparseArray<>();
-    private BatteryStats.MeasuredEnergyDetails mMeasuredEnergyDetails;
+    private BatteryStats.EnergyConsumerDetails mEnergyConsumerDetails;
     private BatteryStats.CpuUsageDetails mCpuUsageDetails;
     private final BatteryStatsHistory.VarintParceler mVarintParceler =
             new BatteryStatsHistory.VarintParceler();
@@ -230,8 +230,8 @@ public class BatteryStatsHistoryIterator implements Iterator<BatteryStats.Histor
         if ((cur.states2 & BatteryStats.HistoryItem.STATE2_EXTENSIONS_FLAG) != 0) {
             final int extensionFlags = src.readInt();
             if ((extensionFlags & BatteryStatsHistory.EXTENSION_MEASURED_ENERGY_HEADER_FLAG) != 0) {
-                if (mMeasuredEnergyDetails == null) {
-                    mMeasuredEnergyDetails = new BatteryStats.MeasuredEnergyDetails();
+                if (mEnergyConsumerDetails == null) {
+                    mEnergyConsumerDetails = new BatteryStats.EnergyConsumerDetails();
                 }
 
                 final int consumerCount = src.readInt();
@@ -241,28 +241,28 @@ public class BatteryStatsHistoryIterator implements Iterator<BatteryStats.Histor
                             "EnergyConsumer count too high: " + consumerCount
                                     + ". Max = " + MAX_ENERGY_CONSUMER_COUNT);
                 }
-                mMeasuredEnergyDetails.consumers =
-                        new BatteryStats.MeasuredEnergyDetails.EnergyConsumer[consumerCount];
-                mMeasuredEnergyDetails.chargeUC = new long[consumerCount];
+                mEnergyConsumerDetails.consumers =
+                        new BatteryStats.EnergyConsumerDetails.EnergyConsumer[consumerCount];
+                mEnergyConsumerDetails.chargeUC = new long[consumerCount];
                 for (int i = 0; i < consumerCount; i++) {
-                    BatteryStats.MeasuredEnergyDetails.EnergyConsumer consumer =
-                            new BatteryStats.MeasuredEnergyDetails.EnergyConsumer();
+                    BatteryStats.EnergyConsumerDetails.EnergyConsumer consumer =
+                            new BatteryStats.EnergyConsumerDetails.EnergyConsumer();
                     consumer.type = src.readInt();
                     consumer.ordinal = src.readInt();
                     consumer.name = src.readString();
-                    mMeasuredEnergyDetails.consumers[i] = consumer;
+                    mEnergyConsumerDetails.consumers[i] = consumer;
                 }
             }
 
             if ((extensionFlags & BatteryStatsHistory.EXTENSION_MEASURED_ENERGY_FLAG) != 0) {
-                if (mMeasuredEnergyDetails == null) {
+                if (mEnergyConsumerDetails == null) {
                     throw new IllegalStateException("MeasuredEnergyDetails without a header");
                 }
 
-                mVarintParceler.readLongArray(src, mMeasuredEnergyDetails.chargeUC);
-                cur.measuredEnergyDetails = mMeasuredEnergyDetails;
+                mVarintParceler.readLongArray(src, mEnergyConsumerDetails.chargeUC);
+                cur.energyConsumerDetails = mEnergyConsumerDetails;
             } else {
-                cur.measuredEnergyDetails = null;
+                cur.energyConsumerDetails = null;
             }
 
             if ((extensionFlags & BatteryStatsHistory.EXTENSION_CPU_USAGE_HEADER_FLAG) != 0) {
@@ -295,7 +295,7 @@ public class BatteryStatsHistoryIterator implements Iterator<BatteryStats.Histor
                 cur.cpuUsageDetails = null;
             }
         } else {
-            cur.measuredEnergyDetails = null;
+            cur.energyConsumerDetails = null;
             cur.cpuUsageDetails = null;
         }
     }
