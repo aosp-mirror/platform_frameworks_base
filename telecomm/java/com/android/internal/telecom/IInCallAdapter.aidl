@@ -18,7 +18,9 @@ package com.android.internal.telecom;
 
 import android.net.Uri;
 import android.os.Bundle;
+import android.os.ResultReceiver;
 import android.telecom.PhoneAccountHandle;
+import android.telecom.CallEndpoint;
 
 /**
  * Internal remote callback interface for in-call services.
@@ -49,6 +51,8 @@ oneway interface IInCallAdapter {
     void mute(boolean shouldMute);
 
     void setAudioRoute(int route, String bluetoothAddress);
+
+    void requestCallEndpointChange(in CallEndpoint endpoint, in ResultReceiver callback);
 
     void enterBackgroundAudioProcessing(String callId);
 
