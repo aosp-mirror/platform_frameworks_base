@@ -2003,7 +2003,7 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
 
             mOverrideTaskTransition = options.getOverrideTaskTransition();
             mDismissKeyguard = options.getDismissKeyguard();
-            mShareIdentity = options.getShareIdentity();
+            mShareIdentity = options.isShareIdentityEnabled();
         }
 
         ColorDisplayService.ColorDisplayServiceInternal cds = LocalServices.getService(
