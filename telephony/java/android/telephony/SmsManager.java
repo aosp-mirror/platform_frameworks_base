@@ -297,6 +297,106 @@ public final class SmsManager {
      */
     public static final int SMS_MESSAGE_PERIOD_NOT_SPECIFIED = -1;
 
+    // RP-Cause Values For MO SMS as per TS 124 011, table 8.4.
+
+    /** @hide */
+    @IntDef(prefix = { "SMS_RP_CAUSE" }, value = {
+        SmsManager.SMS_RP_CAUSE_UNALLOCATED_NUMBER,
+        SmsManager.SMS_RP_CAUSE_OPERATOR_DETERMINED_BARRING,
+        SmsManager.SMS_RP_CAUSE_CALL_BARRING,
+        SmsManager.SMS_RP_CAUSE_RESERVED,
+        SmsManager.SMS_RP_CAUSE_SHORT_MESSAGE_TRANSFER_REJECTED,
+        SmsManager.SMS_RP_CAUSE_DESTINATION_OUT_OF_ORDER,
+        SmsManager.SMS_RP_CAUSE_UNIDENTIFIED_SUBSCRIBER,
+        SmsManager.SMS_RP_CAUSE_FACILITY_REJECTED,
+        SmsManager.SMS_RP_CAUSE_UNKNOWN_SUBSCRIBER,
+        SmsManager.SMS_RP_CAUSE_NETWORK_OUT_OF_ORDER,
+        SmsManager.SMS_RP_CAUSE_TEMPORARY_FAILURE,
+        SmsManager.SMS_RP_CAUSE_CONGESTION,
+        SmsManager.SMS_RP_CAUSE_RESOURCES_UNAVAILABLE,
+        SmsManager.SMS_RP_CAUSE_FACILITY_NOT_SUBSCRIBED,
+        SmsManager.SMS_RP_CAUSE_FACILITY_NOT_IMPLEMENTED,
+        SmsManager.SMS_RP_CAUSE_INVALID_MESSAGE_REFERENCE_VALUE,
+        SmsManager.SMS_RP_CAUSE_SEMANTICALLY_INCORRECT_MESSAGE,
+        SmsManager.SMS_RP_CAUSE_INVALID_MANDATORY_INFORMATION,
+        SmsManager.SMS_RP_CAUSE_MESSAGE_TYPE_NON_EXISTENT,
+        SmsManager.SMS_RP_CAUSE_MESSAGE_INCOMPATIBLE_WITH_PROTOCOL_STATE,
+        SmsManager.SMS_RP_CAUSE_INFORMATION_ELEMENT_NON_EXISTENT,
+        SmsManager.SMS_RP_CAUSE_PROTOCOL_ERROR,
+        SmsManager.SMS_RP_CAUSE_INTERWORKING_UNSPECIFIED
+    })
+    @Retention(RetentionPolicy.SOURCE)
+    public @interface SMS_RP_CAUSE {}
+
+    /** Unallocated Number Cause */
+    public static final int SMS_RP_CAUSE_UNALLOCATED_NUMBER = 1;
+
+    /** RP-Cause for Operator Barring */
+    public static final int SMS_RP_CAUSE_OPERATOR_DETERMINED_BARRING = 8;
+
+    /** RP-Cause Value for Call Barring */
+    public static final int SMS_RP_CAUSE_CALL_BARRING = 10;
+
+    /** RP-Cause value for Reserved Number */
+    public static final int SMS_RP_CAUSE_RESERVED = 11;
+
+    /** RP-Cause Value for Message Transfer Rejected by Network */
+    public static final int SMS_RP_CAUSE_SHORT_MESSAGE_TRANSFER_REJECTED = 21;
+
+    /** RP-Cause Value for Destination is Out of Order */
+    public static final int SMS_RP_CAUSE_DESTINATION_OUT_OF_ORDER = 27;
+
+    /** RP-Cause Value when Subscriber is not Identified */
+    public static final int SMS_RP_CAUSE_UNIDENTIFIED_SUBSCRIBER = 28;
+
+    /** RP-Cause Value when SMS Facility if Rejected by Operator */
+    public static final int SMS_RP_CAUSE_FACILITY_REJECTED = 29;
+
+    /** RP-Cause Value when Subscriber is not Identified */
+    public static final int SMS_RP_CAUSE_UNKNOWN_SUBSCRIBER = 30;
+
+    /** RP-Cause Value when network is out of order*/
+    public static final int SMS_RP_CAUSE_NETWORK_OUT_OF_ORDER = 38;
+
+    /** RP-Cause Value For Temporary failure*/
+    public static final int SMS_RP_CAUSE_TEMPORARY_FAILURE = 41;
+
+    /** RP-Cause Value for SMS Failure due to Congestion in network*/
+    public static final int SMS_RP_CAUSE_CONGESTION = 42;
+
+    /** RP-Cause Value when Network Resources are unavailable */
+    public static final int SMS_RP_CAUSE_RESOURCES_UNAVAILABLE = 47;
+
+    /** RP-Cause Value when SMS Facilty is not subscribed by Reote device */
+    public static final int SMS_RP_CAUSE_FACILITY_NOT_SUBSCRIBED = 50;
+
+    /** RP-Cause Value when network does not provide the received service */
+    public static final int SMS_RP_CAUSE_FACILITY_NOT_IMPLEMENTED = 69;
+
+    /** RP-Cause Value when RP-MessageRefere */
+    public static final int SMS_RP_CAUSE_INVALID_MESSAGE_REFERENCE_VALUE = 81;
+
+    /** RP-Cause Value when network does not provide the received service */
+    public static final int SMS_RP_CAUSE_SEMANTICALLY_INCORRECT_MESSAGE = 95;
+
+    /** RP-Cause Value when network does not provide the received service */
+    public static final int SMS_RP_CAUSE_INVALID_MANDATORY_INFORMATION = 96;
+
+    /** RP-Cause Value when network does not provide the received service */
+    public static final int SMS_RP_CAUSE_MESSAGE_TYPE_NON_EXISTENT = 97;
+
+    /** RP-Cause Value when network does not provide the received service */
+    public static final int SMS_RP_CAUSE_MESSAGE_INCOMPATIBLE_WITH_PROTOCOL_STATE = 98;
+
+    /** RP-Cause Value when network does not provide the received service */
+    public static final int SMS_RP_CAUSE_INFORMATION_ELEMENT_NON_EXISTENT  = 99;
+
+    /** RP-Cause Value when network does not provide the received service */
+    public static final int SMS_RP_CAUSE_PROTOCOL_ERROR = 111;
+
+    /** RP-Cause Value when network does not provide the received service */
+    public static final int SMS_RP_CAUSE_INTERWORKING_UNSPECIFIED = 127;
+
     /** @hide */
     @IntDef(prefix = { "PREMIUM_SMS_CONSENT" }, value = {
         SmsManager.PREMIUM_SMS_CONSENT_UNKNOWN,
