@@ -79,6 +79,7 @@ import com.android.server.pm.dex.DexoptUtils;
 import com.android.server.pm.dex.PackageDexUsage;
 import com.android.server.pm.parsing.pkg.AndroidPackageUtils;
 import com.android.server.pm.pkg.AndroidPackage;
+import com.android.server.pm.pkg.PackageState;
 import com.android.server.pm.pkg.PackageStateInternal;
 
 import dalvik.system.DexFile;
@@ -472,8 +473,7 @@ public class PackageDexOptimizer {
             String classLoaderContext, int dexoptFlags, int uid,
             CompilerStats.PackageStats packageStats, boolean downgrade, String profileName,
             String dexMetadataPath, int compilationReason) {
-        String oatDir = getPackageOatDirIfSupported(pkg,
-                pkgSetting.getTransientState().isUpdatedSystemApp());
+        String oatDir = getPackageOatDirIfSupported(pkgSetting, pkg);
 
         int dexoptNeeded = getDexoptNeeded(pkg.getPackageName(), path, isa, compilerFilter,
                 classLoaderContext, profileAnalysisResult, downgrade, dexoptFlags, oatDir);
@@ -1026,8 +1026,9 @@ public class PackageDexOptimizer {
      * not needed or unsupported for the package.
      */
     @Nullable
-    private String getPackageOatDirIfSupported(AndroidPackage pkg, boolean isUpdatedSystemApp) {
-        if (!AndroidPackageUtils.canHaveOatDir(pkg, isUpdatedSystemApp)) {
+    private String getPackageOatDirIfSupported(@NonNull PackageState packageState,
+            @NonNull AndroidPackage pkg) {
+        if (!AndroidPackageUtils.canHaveOatDir(packageState, pkg)) {
             return null;
         }
         File codePath = new File(pkg.getPath());

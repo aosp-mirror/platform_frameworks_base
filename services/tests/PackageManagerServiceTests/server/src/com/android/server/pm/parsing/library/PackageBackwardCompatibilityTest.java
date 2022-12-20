@@ -55,7 +55,7 @@ public class PackageBackwardCompatibilityTest extends PackageSharedLibraryUpdate
                 .hideAsParsed())
                 .hideAsFinal();
 
-        checkBackwardsCompatibility(before, after);
+        checkBackwardsCompatibility(before, after, false);
     }
 
     /**
@@ -93,7 +93,8 @@ public class PackageBackwardCompatibilityTest extends PackageSharedLibraryUpdate
         }
         after.addUsesLibrary(ORG_APACHE_HTTP_LEGACY);
 
-        checkBackwardsCompatibility(before, ((ParsedPackage) after.hideAsParsed()).hideAsFinal());
+        checkBackwardsCompatibility(before, ((ParsedPackage) after.hideAsParsed()).hideAsFinal(),
+                false);
     }
 
     /**
@@ -122,7 +123,7 @@ public class PackageBackwardCompatibilityTest extends PackageSharedLibraryUpdate
                 .hideAsParsed())
                 .hideAsFinal();
 
-        checkBackwardsCompatibility(before, after);
+        checkBackwardsCompatibility(before, after, false);
     }
 
     /**
@@ -147,7 +148,8 @@ public class PackageBackwardCompatibilityTest extends PackageSharedLibraryUpdate
         after.addUsesLibrary(ANDROID_TEST_MOCK);
         after.addUsesLibrary(ANDROID_TEST_RUNNER);
 
-        checkBackwardsCompatibility(before, ((ParsedPackage) after.hideAsParsed()).hideAsFinal());
+        checkBackwardsCompatibility(before, ((ParsedPackage) after.hideAsParsed()).hideAsFinal(),
+                false);
     }
 
     /**
@@ -164,7 +166,8 @@ public class PackageBackwardCompatibilityTest extends PackageSharedLibraryUpdate
         ParsingPackage after = PackageImpl.forTesting(PACKAGE_NAME)
                 .setTargetSdkVersion(Build.VERSION_CODES.CUR_DEVELOPMENT);
 
-        checkBackwardsCompatibility(before, ((ParsedPackage) after.hideAsParsed()).hideAsFinal());
+        checkBackwardsCompatibility(before, ((ParsedPackage) after.hideAsParsed()).hideAsFinal(),
+                false);
     }
 
     /**
@@ -181,7 +184,8 @@ public class PackageBackwardCompatibilityTest extends PackageSharedLibraryUpdate
         ParsingPackage after = PackageImpl.forTesting(PACKAGE_NAME)
                 .setTargetSdkVersion(Build.VERSION_CODES.CUR_DEVELOPMENT);
 
-        checkBackwardsCompatibility(before, ((ParsedPackage) after.hideAsParsed()).hideAsFinal());
+        checkBackwardsCompatibility(before, ((ParsedPackage) after.hideAsParsed()).hideAsFinal(),
+                false);
     }
 
     /**
@@ -200,7 +204,9 @@ public class PackageBackwardCompatibilityTest extends PackageSharedLibraryUpdate
         assertThat(lastUpdater).isInstanceOf(ApexSharedLibraryUpdater.class);
     }
 
-    private void checkBackwardsCompatibility(ParsedPackage before, AndroidPackage after) {
-        checkBackwardsCompatibility(before, after, PackageBackwardCompatibility::getInstance);
+    private void checkBackwardsCompatibility(ParsedPackage before, AndroidPackage after,
+            boolean isSystemApp) {
+        checkBackwardsCompatibility(before, after, isSystemApp,
+                PackageBackwardCompatibility::getInstance);
     }
 }

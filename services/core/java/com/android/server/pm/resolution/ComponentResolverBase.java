@@ -290,7 +290,7 @@ public abstract class ComponentResolverBase extends WatchableImpl implements Com
                 continue;
             }
 
-            if (safeMode && !pkg.isSystem()) {
+            if (safeMode && !ps.isSystem()) {
                 continue;
             }
             if (appInfoGenerator == null) {

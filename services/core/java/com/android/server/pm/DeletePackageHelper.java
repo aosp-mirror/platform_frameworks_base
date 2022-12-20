@@ -536,7 +536,7 @@ final class DeletePackageHelper {
                     nextUserId);
             mPm.mDomainVerificationManager.clearPackageForUser(ps.getPackageName(), nextUserId);
         }
-        mPermissionManager.onPackageUninstalled(ps.getPackageName(), ps.getAppId(), pkg,
+        mPermissionManager.onPackageUninstalled(ps.getPackageName(), ps.getAppId(), ps, pkg,
                 sharedUserPkgs, userId);
 
         if (outInfo != null) {

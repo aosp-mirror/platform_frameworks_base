@@ -31,8 +31,8 @@ abstract class PackageSharedLibraryUpdaterTest {
     protected static final String PACKAGE_NAME = "org.package.name";
 
     static void checkBackwardsCompatibility(ParsedPackage before, AndroidPackage after,
-            Supplier<PackageSharedLibraryUpdater> updaterSupplier) {
-        updaterSupplier.get().updatePackage(before, false);
+            boolean isSystemApp, Supplier<PackageSharedLibraryUpdater> updaterSupplier) {
+        updaterSupplier.get().updatePackage(before, isSystemApp, false);
         check(before.hideAsFinal(), after);
     }
 

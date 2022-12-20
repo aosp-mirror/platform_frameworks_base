@@ -54,7 +54,7 @@ public class OrgApacheHttpLegacyUpdaterTest extends PackageSharedLibraryUpdaterT
                 .hideAsParsed())
                 .hideAsFinal();
 
-        checkBackwardsCompatibility(before, after);
+        checkBackwardsCompatibility(before, after, false);
     }
 
     @Test
@@ -73,7 +73,7 @@ public class OrgApacheHttpLegacyUpdaterTest extends PackageSharedLibraryUpdaterT
                 .hideAsParsed())
                 .hideAsFinal();
 
-        checkBackwardsCompatibility(before, after);
+        checkBackwardsCompatibility(before, after, false);
     }
 
     @Test
@@ -91,7 +91,7 @@ public class OrgApacheHttpLegacyUpdaterTest extends PackageSharedLibraryUpdaterT
 
         // No change is required because although org.apache.http.legacy has been removed from
         // the bootclasspath the package explicitly requests it.
-        checkBackwardsCompatibility(before, after);
+        checkBackwardsCompatibility(before, after, false);
     }
 
     @Test
@@ -109,7 +109,7 @@ public class OrgApacheHttpLegacyUpdaterTest extends PackageSharedLibraryUpdaterT
 
         // No change is required because although org.apache.http.legacy has been removed from
         // the bootclasspath the package explicitly requests it.
-        checkBackwardsCompatibility(before, after);
+        checkBackwardsCompatibility(before, after, false);
     }
 
     @Test
@@ -127,7 +127,7 @@ public class OrgApacheHttpLegacyUpdaterTest extends PackageSharedLibraryUpdaterT
 
         // No change is required because the package explicitly requests org.apache.http.legacy
         // and is targeted at the current version so does not need backwards compatibility.
-        checkBackwardsCompatibility(before, after);
+        checkBackwardsCompatibility(before, after, false);
     }
 
     @Test
@@ -145,10 +145,11 @@ public class OrgApacheHttpLegacyUpdaterTest extends PackageSharedLibraryUpdaterT
 
         // No change is required because the package explicitly requests org.apache.http.legacy
         // and is targeted at the current version so does not need backwards compatibility.
-        checkBackwardsCompatibility(before, after);
+        checkBackwardsCompatibility(before, after, false);
     }
 
-    private void checkBackwardsCompatibility(ParsedPackage before, AndroidPackage after) {
-        checkBackwardsCompatibility(before, after, OrgApacheHttpLegacyUpdater::new);
+    private void checkBackwardsCompatibility(ParsedPackage before, AndroidPackage after,
+            boolean isSystemApp) {
+        checkBackwardsCompatibility(before, after, isSystemApp, OrgApacheHttpLegacyUpdater::new);
     }
 }

@@ -29,6 +29,7 @@ import android.permission.PermissionManager;
 import android.permission.PermissionManagerInternal;
 
 import com.android.server.pm.pkg.AndroidPackage;
+import com.android.server.pm.pkg.PackageState;
 
 import java.io.FileDescriptor;
 import java.io.PrintWriter;
@@ -567,11 +568,11 @@ public interface PermissionManagerServiceInterface extends PermissionManagerInte
     /**
      * Callback when a package has been added.
      *
-     * @param pkg the added package
+     * @param packageState the added package
      * @param isInstantApp whether the added package is an instant app
      * @param oldPkg the old package, or {@code null} if none
      */
-    void onPackageAdded(@NonNull AndroidPackage pkg, boolean isInstantApp,
+    void onPackageAdded(@NonNull PackageState packageState, boolean isInstantApp,
             @Nullable AndroidPackage oldPkg);
 
     /**
@@ -598,16 +599,16 @@ public interface PermissionManagerServiceInterface extends PermissionManagerInte
      * Callback when a package has been uninstalled.
      * <p>
      * The package may have been fully removed from the system, or only marked as uninstalled for
-     * this user but still instlaled for other users.
-     *
-     * TODO: Pass PackageState instead.
+     * this user but still installed for other users.
      *
      * @param packageName the name of the uninstalled package
      * @param appId the app ID of the uninstalled package
-     * @param pkg the uninstalled package, or {@code null} if unavailable
+     * @param packageState the uninstalled package
+     * @param pkg the uninstalled package
      * @param sharedUserPkgs the packages that are in the same shared user
      * @param userId the user ID the package is uninstalled for
      */
-    void onPackageUninstalled(@NonNull String packageName, int appId, @Nullable AndroidPackage pkg,
+    void onPackageUninstalled(@NonNull String packageName, int appId,
+            @NonNull PackageState packageState, @NonNull AndroidPackage pkg,
             @NonNull List<AndroidPackage> sharedUserPkgs, @UserIdInt int userId);
 }

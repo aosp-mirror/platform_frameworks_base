@@ -194,9 +194,14 @@ final class InitAppsHelper {
             }
         }
         final OverlayConfig overlayConfig = OverlayConfig.initializeSystemInstance(
-                consumer -> mPm.forEachPackageInternal(mPm.snapshotComputer(),
-                        pkg -> consumer.accept(pkg, pkg.isSystem(),
-                                apkInApexPreInstalledPaths.get(pkg.getPackageName()))));
+                consumer -> mPm.forEachPackageState(mPm.snapshotComputer(),
+                        packageState -> {
+                            var pkg = packageState.getPkg();
+                            if (pkg != null) {
+                                consumer.accept(pkg, packageState.isSystem(),
+                                        apkInApexPreInstalledPaths.get(pkg.getPackageName()));
+                            }
+                        }));
 
         // do this first before mucking with mPackages for the "expecting better" case
         updateStubSystemAppsList(mStubSystemApps);

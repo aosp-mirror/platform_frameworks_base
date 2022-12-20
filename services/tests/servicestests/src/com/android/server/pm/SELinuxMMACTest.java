@@ -28,11 +28,12 @@ import android.platform.test.annotations.Presubmit;
 import com.android.server.compat.PlatformCompat;
 import com.android.server.pm.parsing.pkg.PackageImpl;
 import com.android.server.pm.parsing.pkg.ParsedPackage;
-import com.android.server.pm.pkg.AndroidPackage;
+import com.android.server.pm.pkg.PackageState;
 
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
+import org.mockito.Mockito;
 import org.mockito.junit.MockitoJUnitRunner;
 
 
@@ -52,78 +53,90 @@ public class SELinuxMMACTest {
 
     @Test
     public void getSeInfoOptInToLatest() {
-        AndroidPackage pkg = makePackage(Build.VERSION_CODES.P);
+        var packageState = makePackageState(Build.VERSION_CODES.P);
         when(mMockCompatibility.isChangeEnabledInternal(eq(SELinuxMMAC.SELINUX_LATEST_CHANGES),
-                argThat(argument -> argument.packageName.equals(pkg.getPackageName()))))
+                argThat(argument -> argument.packageName.equals(packageState.getPackageName()))))
                 .thenReturn(true);
-        assertThat(SELinuxMMAC.getSeInfo(pkg, null, mMockCompatibility),
+        assertThat(SELinuxMMAC.getSeInfo(packageState, packageState.getAndroidPackage(), null,
+                        mMockCompatibility),
                 is("default:targetSdkVersion=" + LATEST_OPT_IN_VERSION));
     }
 
     @Test
     public void getSeInfoOptInToR() {
-        AndroidPackage pkg = makePackage(Build.VERSION_CODES.P);
+        var packageState = makePackageState(Build.VERSION_CODES.P);
         when(mMockCompatibility.isChangeEnabledInternal(eq(SELinuxMMAC.SELINUX_R_CHANGES),
-                argThat(argument -> argument.packageName.equals(pkg.getPackageName()))))
+                argThat(argument -> argument.packageName.equals(packageState.getPackageName()))))
                 .thenReturn(true);
-        assertThat(SELinuxMMAC.getSeInfo(pkg, null, mMockCompatibility),
+        assertThat(SELinuxMMAC.getSeInfo(packageState, packageState.getAndroidPackage(), null,
+                        mMockCompatibility),
                 is("default:targetSdkVersion=" + R_OPT_IN_VERSION));
     }
 
     @Test
     public void getSeInfoNoOptIn() {
-        AndroidPackage pkg = makePackage(Build.VERSION_CODES.P);
+        var packageState = makePackageState(Build.VERSION_CODES.P);
         when(mMockCompatibility.isChangeEnabledInternal(eq(SELinuxMMAC.SELINUX_LATEST_CHANGES),
-                argThat(argument -> argument.packageName.equals(pkg.getPackageName()))))
+                argThat(argument -> argument.packageName.equals(packageState.getPackageName()))))
                 .thenReturn(false);
-        assertThat(SELinuxMMAC.getSeInfo(pkg, null, mMockCompatibility),
+        assertThat(SELinuxMMAC.getSeInfo(packageState, packageState.getAndroidPackage(), null,
+                        mMockCompatibility),
                 is("default:targetSdkVersion=28"));
     }
 
     @Test
     public void getSeInfoNoOptInButAlreadyLatest() {
-        AndroidPackage pkg = makePackage(LATEST_OPT_IN_VERSION);
+        var packageState = makePackageState(LATEST_OPT_IN_VERSION);
         when(mMockCompatibility.isChangeEnabledInternal(eq(SELinuxMMAC.SELINUX_LATEST_CHANGES),
-                argThat(argument -> argument.packageName.equals(pkg.getPackageName()))))
+                argThat(argument -> argument.packageName.equals(packageState.getPackageName()))))
                 .thenReturn(false);
-        assertThat(SELinuxMMAC.getSeInfo(pkg, null, mMockCompatibility),
+        assertThat(SELinuxMMAC.getSeInfo(packageState, packageState.getAndroidPackage(), null,
+                        mMockCompatibility),
                 is("default:targetSdkVersion=" + LATEST_OPT_IN_VERSION));
     }
 
     @Test
     public void getSeInfoTargetingCurDevelopment() {
-        AndroidPackage pkg = makePackage(Build.VERSION_CODES.CUR_DEVELOPMENT);
+        var packageState = makePackageState(Build.VERSION_CODES.CUR_DEVELOPMENT);
         when(mMockCompatibility.isChangeEnabledInternal(eq(SELinuxMMAC.SELINUX_LATEST_CHANGES),
-                argThat(argument -> argument.packageName.equals(pkg.getPackageName()))))
+                argThat(argument -> argument.packageName.equals(packageState.getPackageName()))))
                 .thenReturn(true);
-        assertThat(SELinuxMMAC.getSeInfo(pkg, null, mMockCompatibility),
+        assertThat(SELinuxMMAC.getSeInfo(packageState, packageState.getAndroidPackage(), null,
+                        mMockCompatibility),
                 is("default:targetSdkVersion=" + Build.VERSION_CODES.CUR_DEVELOPMENT));
     }
 
     @Test
     public void getSeInfoNoOptInButAlreadyR() {
-        AndroidPackage pkg = makePackage(R_OPT_IN_VERSION);
+        var packageState = makePackageState(R_OPT_IN_VERSION);
         when(mMockCompatibility.isChangeEnabledInternal(eq(SELinuxMMAC.SELINUX_R_CHANGES),
-                argThat(argument -> argument.packageName.equals(pkg.getPackageName()))))
+                argThat(argument -> argument.packageName.equals(packageState.getPackageName()))))
                 .thenReturn(false);
-        assertThat(SELinuxMMAC.getSeInfo(pkg, null, mMockCompatibility),
+        assertThat(SELinuxMMAC.getSeInfo(packageState, packageState.getAndroidPackage(), null,
+                        mMockCompatibility),
                 is("default:targetSdkVersion=" + R_OPT_IN_VERSION));
     }
 
     @Test
     public void getSeInfoOptInRButLater() {
-        AndroidPackage pkg = makePackage(R_OPT_IN_VERSION + 1);
+        var packageState = makePackageState(R_OPT_IN_VERSION + 1);
         when(mMockCompatibility.isChangeEnabledInternal(eq(SELinuxMMAC.SELINUX_R_CHANGES),
-                argThat(argument -> argument.packageName.equals(pkg.getPackageName()))))
+                argThat(argument -> argument.packageName.equals(packageState.getPackageName()))))
                 .thenReturn(true);
-        assertThat(SELinuxMMAC.getSeInfo(pkg, null, mMockCompatibility),
+        assertThat(SELinuxMMAC.getSeInfo(packageState, packageState.getAndroidPackage(), null,
+                        mMockCompatibility),
                 is("default:targetSdkVersion=" + (R_OPT_IN_VERSION + 1)));
     }
 
-    private AndroidPackage makePackage(int targetSdkVersion) {
-        return ((ParsedPackage) PackageImpl.forTesting(PACKAGE_NAME)
-                .setTargetSdkVersion(targetSdkVersion)
-                .hideAsParsed())
-                .hideAsFinal();
+    private PackageState makePackageState(int targetSdkVersion) {
+        var packageState = Mockito.mock(PackageState.class);
+        when(packageState.getPackageName()).thenReturn(PACKAGE_NAME);
+        when(packageState.getAndroidPackage()).thenReturn(
+                ((ParsedPackage) PackageImpl.forTesting(PACKAGE_NAME)
+                        .setTargetSdkVersion(targetSdkVersion)
+                        .hideAsParsed())
+                        .hideAsFinal()
+        );
+        return packageState;
     }
 }

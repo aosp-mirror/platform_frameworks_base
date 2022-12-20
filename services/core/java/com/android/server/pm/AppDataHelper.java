@@ -23,6 +23,7 @@ import static com.android.server.pm.PackageManagerServiceUtils.logCriticalInfo;
 
 import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.annotation.UserIdInt;
 import android.content.pm.PackageManager;
 import android.content.pm.UserInfo;
 import android.os.CreateAppDataArgs;
@@ -47,6 +48,7 @@ import com.android.server.SystemServerInitThreadPool;
 import com.android.server.pm.dex.ArtManagerService;
 import com.android.server.pm.parsing.pkg.AndroidPackageUtils;
 import com.android.server.pm.pkg.AndroidPackage;
+import com.android.server.pm.pkg.PackageState;
 import com.android.server.pm.pkg.PackageStateInternal;
 import com.android.server.pm.pkg.SELinuxUtil;
 
@@ -179,13 +181,13 @@ public class AppDataHelper {
     }
 
     private void prepareAppDataAndMigrate(@NonNull Installer.Batch batch,
-            @NonNull AndroidPackage pkg, int userId, @StorageManager.StorageFlags int flags,
-            boolean maybeMigrateAppData) {
+            @NonNull PackageState packageState, @NonNull AndroidPackage pkg, @UserIdInt int userId,
+            @StorageManager.StorageFlags int flags, boolean maybeMigrateAppData) {
         prepareAppData(batch, pkg, Process.INVALID_UID, userId, flags).thenRun(() -> {
             // Note: this code block is executed with the Installer lock
             // already held, since it's invoked as a side-effect of
             // executeBatchLI()
-            if (maybeMigrateAppData && maybeMigrateAppDataLIF(pkg, userId)) {
+            if (maybeMigrateAppData && maybeMigrateAppDataLIF(packageState, pkg, userId)) {
                 // We may have just shuffled around app data directories, so
                 // prepare them one more time
                 final Installer.Batch batchInner = new Installer.Batch();
@@ -320,8 +322,9 @@ public class AppDataHelper {
      * CE/DE data to match the {@code defaultToDeviceProtectedStorage} flag
      * requested by the app.
      */
-    private boolean maybeMigrateAppDataLIF(AndroidPackage pkg, int userId) {
-        if (pkg.isSystem() && !StorageManager.isFileEncrypted()
+    private boolean maybeMigrateAppDataLIF(@NonNull PackageState packageState,
+            @NonNull AndroidPackage pkg, @UserIdInt int userId) {
+        if (packageState.isSystem() && !StorageManager.isFileEncrypted()
                 && PackageManager.APPLY_DEFAULT_TO_DEVICE_PROTECTED_STORAGE) {
             final int storageTarget = pkg.isDefaultToDeviceProtectedStorage()
                     ? StorageManager.FLAG_STORAGE_DE : StorageManager.FLAG_STORAGE_CE;
@@ -454,7 +457,7 @@ public class AppDataHelper {
             }
 
             if (ps.getUserStateOrDefault(userId).isInstalled()) {
-                prepareAppDataAndMigrate(batch, ps.getPkg(), userId, flags, migrateAppData);
+                prepareAppDataAndMigrate(batch, ps, ps.getPkg(), userId, flags, migrateAppData);
                 preparedCount++;
             }
         }
@@ -529,8 +532,8 @@ public class AppDataHelper {
                         && packageStateInternal.getUserStateOrDefault(
                                 UserHandle.USER_SYSTEM).isInstalled()) {
                     AndroidPackage pkg = packageStateInternal.getPkg();
-                    prepareAppDataAndMigrate(batch, pkg, UserHandle.USER_SYSTEM, storageFlags,
-                            true /* maybeMigrateAppData */);
+                    prepareAppDataAndMigrate(batch, packageStateInternal, pkg,
+                            UserHandle.USER_SYSTEM, storageFlags, true /* maybeMigrateAppData */);
                     count++;
                 }
             }

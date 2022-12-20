@@ -133,6 +133,7 @@ import com.android.server.pm.UserManagerService;
 import com.android.server.pm.parsing.PackageInfoUtils;
 import com.android.server.pm.parsing.pkg.AndroidPackageUtils;
 import com.android.server.pm.pkg.AndroidPackage;
+import com.android.server.pm.pkg.PackageState;
 import com.android.server.pm.pkg.PackageStateInternal;
 import com.android.server.pm.pkg.component.ComponentMutateUtils;
 import com.android.server.pm.pkg.component.ParsedPermission;
@@ -2337,7 +2338,8 @@ public class PermissionManagerServiceImpl implements PermissionManagerServiceInt
         }
     }
 
-    private List<String> addAllPermissionsInternal(@NonNull AndroidPackage pkg) {
+    private List<String> addAllPermissionsInternal(@NonNull PackageState packageState,
+                    @NonNull AndroidPackage pkg) {
         final int N = ArrayUtils.size(pkg.getPermissions());
         ArrayList<String> definitionChangedPermissions = new ArrayList<>();
         for (int i=0; i<N; i++) {
@@ -2375,7 +2377,7 @@ public class PermissionManagerServiceImpl implements PermissionManagerServiceInt
                     oldPermission, permissionInfo, mPackageManagerInt);
             synchronized (mLock) {
                 final Permission permission = Permission.createOrUpdate(oldPermission,
-                        permissionInfo, pkg, mRegistry.getPermissionTrees(),
+                        permissionInfo, packageState, mRegistry.getPermissionTrees(),
                         isOverridingSystemPermission);
                 if (p.isTree()) {
                     mRegistry.addPermissionTree(permission);
@@ -2976,7 +2978,7 @@ public class PermissionManagerServiceImpl implements PermissionManagerServiceInt
 
                 if ((installPermissionsChangedForUser || replace)
                         && !userState.areInstallPermissionsFixed(ps.getPackageName())
-                        && !ps.isSystem() || ps.getTransientState().isUpdatedSystemApp()) {
+                        && !ps.isSystem() || ps.isUpdatedSystemApp()) {
                     // This is the first that we have heard about this package, so the
                     // permissions we have now selected are fixed until explicitly
                     // changed.
@@ -3304,7 +3306,7 @@ public class PermissionManagerServiceImpl implements PermissionManagerServiceInt
         if (Objects.equals(packageName, PLATFORM_PACKAGE_NAME)) {
             return true;
         }
-        if (!pkg.isPrivileged()) {
+        if (!packageSetting.isPrivileged()) {
             return true;
         }
         if (!mPrivilegedPermissionAllowlistSourcePackageNames
@@ -3314,13 +3316,13 @@ public class PermissionManagerServiceImpl implements PermissionManagerServiceInt
         final String permissionName = permission.getName();
         final String containingApexPackageName =
                 mApexManager.getActiveApexPackageNameContainingPackage(packageName);
-        final Boolean allowlistState = getPrivilegedPermissionAllowlistState(pkg, permissionName,
-                containingApexPackageName);
+        final Boolean allowlistState = getPrivilegedPermissionAllowlistState(packageSetting,
+                permissionName, containingApexPackageName);
         if (allowlistState != null) {
             return allowlistState;
         }
         // Updated system apps do not need to be allowlisted
-        if (packageSetting.getTransientState().isUpdatedSystemApp()) {
+        if (packageSetting.isUpdatedSystemApp()) {
             // Let shouldGrantPermissionByProtectionFlags() decide whether the privileged permission
             // can be granted, because an updated system app may be in a shared UID, and in case a
             // new privileged permission is requested by the updated system app but not the factory
@@ -3354,18 +3356,18 @@ public class PermissionManagerServiceImpl implements PermissionManagerServiceInt
     }
 
     @Nullable
-    private Boolean getPrivilegedPermissionAllowlistState(@NonNull AndroidPackage pkg,
+    private Boolean getPrivilegedPermissionAllowlistState(@NonNull PackageState packageState,
             @NonNull String permissionName, String containingApexPackageName) {
         final PermissionAllowlist permissionAllowlist =
                 SystemConfig.getInstance().getPermissionAllowlist();
-        final String packageName = pkg.getPackageName();
-        if (pkg.isVendor()) {
+        final String packageName = packageState.getPackageName();
+        if (packageState.isVendor()) {
             return permissionAllowlist.getVendorPrivilegedAppAllowlistState(packageName,
                     permissionName);
-        } else if (pkg.isProduct()) {
+        } else if (packageState.isProduct()) {
             return permissionAllowlist.getProductPrivilegedAppAllowlistState(packageName,
                     permissionName);
-        } else if (pkg.isSystemExt()) {
+        } else if (packageState.isSystemExt()) {
             return permissionAllowlist.getSystemExtPrivilegedAppAllowlistState(packageName,
                     permissionName);
         } else if (containingApexPackageName != null) {
@@ -3374,7 +3376,7 @@ public class PermissionManagerServiceImpl implements PermissionManagerServiceInt
             if (nonApexAllowlistState != null) {
                 // TODO(andreionea): Remove check as soon as all apk-in-apex
                 // permission allowlists are migrated.
-                Slog.w(TAG, "Package " + pkg.getPackageName() + " is an APK in APEX,"
+                Slog.w(TAG, "Package " + packageName + " is an APK in APEX,"
                         + " but has permission allowlist on the system image. Please bundle the"
                         + " allowlist in the " + containingApexPackageName + " APEX instead.");
             }
@@ -3425,17 +3427,17 @@ public class PermissionManagerServiceImpl implements PermissionManagerServiceInt
         boolean allowed = false;
         final boolean isPrivilegedPermission = bp.isPrivileged();
         final boolean isOemPermission = bp.isOem();
-        if (!allowed && (isPrivilegedPermission || isOemPermission) && pkg.isSystem()) {
+        if (!allowed && (isPrivilegedPermission || isOemPermission) && pkgSetting.isSystem()) {
             final String permissionName = bp.getName();
             // For updated system applications, a privileged/oem permission
             // is granted only if it had been defined by the original application.
-            if (pkgSetting.getTransientState().isUpdatedSystemApp()) {
+            if (pkgSetting.isUpdatedSystemApp()) {
                 final PackageStateInternal disabledPs = mPackageManagerInt
                         .getDisabledSystemPackage(pkg.getPackageName());
                 final AndroidPackage disabledPkg = disabledPs == null ? null : disabledPs.getPkg();
                 if (disabledPkg != null
-                        && ((isPrivilegedPermission && disabledPkg.isPrivileged())
-                        || (isOemPermission && canGrantOemPermission(disabledPkg,
+                        && ((isPrivilegedPermission && disabledPs.isPrivileged())
+                        || (isOemPermission && canGrantOemPermission(disabledPs,
                                 permissionName)))) {
                     if (disabledPkg.getRequestedPermissions().contains(permissionName)) {
                         allowed = true;
@@ -3447,13 +3449,14 @@ public class PermissionManagerServiceImpl implements PermissionManagerServiceInt
                     }
                 }
             } else {
-                allowed = (isPrivilegedPermission && pkg.isPrivileged())
-                        || (isOemPermission && canGrantOemPermission(pkg, permissionName));
+                allowed = (isPrivilegedPermission && pkgSetting.isPrivileged())
+                        || (isOemPermission && canGrantOemPermission(pkgSetting, permissionName));
             }
             // In any case, don't grant a privileged permission to privileged vendor apps, if
             // the permission's protectionLevel does not have the extra 'vendorPrivileged'
             // flag.
-            if (allowed && isPrivilegedPermission && !bp.isVendorPrivileged() && pkg.isVendor()) {
+            if (allowed && isPrivilegedPermission && !bp.isVendorPrivileged()
+                    && pkgSetting.isVendor()) {
                 Slog.w(TAG, "Permission " + permissionName
                         + " cannot be granted to privileged vendor apk " + pkg.getPackageName()
                         + " because it isn't a 'vendorPrivileged' permission.");
@@ -3488,8 +3491,7 @@ public class PermissionManagerServiceImpl implements PermissionManagerServiceInt
             // this app is a verifier, then it gets the permission.
             allowed = true;
         }
-        if (!allowed && bp.isPreInstalled()
-                && pkg.isSystem()) {
+        if (!allowed && bp.isPreInstalled() && pkgSetting.isSystem()) {
             // Any pre-installed system app is allowed to get this permission.
             allowed = true;
         }
@@ -3586,16 +3588,18 @@ public class PermissionManagerServiceImpl implements PermissionManagerServiceInt
         return mPackageManagerInt.getPackageStateInternal(sourcePackageName);
     }
 
-    private static boolean canGrantOemPermission(AndroidPackage pkg, String permission) {
-        if (!pkg.isOem()) {
+    private static boolean canGrantOemPermission(@NonNull PackageState packageState,
+            String permission) {
+        if (!packageState.isOem()) {
             return false;
         }
+        var packageName = packageState.getPackageName();
         // all oem permissions must explicitly be granted or denied
         final Boolean granted = SystemConfig.getInstance().getPermissionAllowlist()
-                .getOemAppAllowlistState(pkg.getPackageName(), permission);
+                .getOemAppAllowlistState(packageState.getPackageName(), permission);
         if (granted == null) {
             throw new IllegalStateException("OEM permission " + permission
-                    + " requested by package " + pkg.getPackageName()
+                    + " requested by package " + packageName
                     + " must be explicitly declared granted or not");
         }
         return Boolean.TRUE == granted;
@@ -4648,8 +4652,8 @@ public class PermissionManagerServiceImpl implements PermissionManagerServiceInt
         }
     }
 
-    private void onPackageAddedInternal(@NonNull AndroidPackage pkg, boolean isInstantApp,
-            @Nullable AndroidPackage oldPkg) {
+    private void onPackageAddedInternal(@NonNull PackageState packageState,
+            @NonNull AndroidPackage pkg, boolean isInstantApp, @Nullable AndroidPackage oldPkg) {
         if (!pkg.getAdoptPermissions().isEmpty()) {
             // This package wants to adopt ownership of permissions from
             // another package.
@@ -4682,7 +4686,7 @@ public class PermissionManagerServiceImpl implements PermissionManagerServiceInt
             Slog.w(TAG, "Permissions from package " + pkg.getPackageName()
                     + " ignored: instant apps cannot define new permissions.");
         } else {
-            permissionsWithChangedDefinition = addAllPermissionsInternal(pkg);
+            permissionsWithChangedDefinition = addAllPermissionsInternal(packageState, pkg);
         }
 
         boolean hasOldPkg = oldPkg != null;
@@ -5016,14 +5020,13 @@ public class PermissionManagerServiceImpl implements PermissionManagerServiceInt
     }
 
     private void onPackageUninstalledInternal(@NonNull String packageName, int appId,
-            @Nullable AndroidPackage pkg, @NonNull List<AndroidPackage> sharedUserPkgs,
-            @UserIdInt int[] userIds) {
+            @NonNull PackageState packageState, @Nullable AndroidPackage pkg,
+            @NonNull List<AndroidPackage> sharedUserPkgs, @UserIdInt int[] userIds) {
         // TODO: Handle the case when a system app upgrade is uninstalled and need to rejoin
         //  a shared UID permission state.
 
-        // TODO: Move these checks to check PackageState to be more reliable.
         // System packages should always have an available APK.
-        if (pkg != null && pkg.isSystem()
+        if (packageState.isSystem() && pkg != null
                 // We may be fully removing invalid system packages during boot, and in that case we
                 // do want to remove their permission state. So make sure that the package is only
                 // being marked as uninstalled instead of fully removed.
@@ -5046,8 +5049,8 @@ public class PermissionManagerServiceImpl implements PermissionManagerServiceInt
                 // or packages running under the shared user of the removed
                 // package if revoking the permissions requested only by the removed
                 // package is successful and this causes a change in gids.
-                revokeSharedUserPermissionsForLeavingPackageInternal(pkg, appId,
-                        sharedUserPkgs, userId);
+                revokeSharedUserPermissionsForLeavingPackageInternal(pkg, appId, sharedUserPkgs,
+                        userId);
             }
         }
     }
@@ -5229,10 +5232,12 @@ public class PermissionManagerServiceImpl implements PermissionManagerServiceInt
     }
 
     @Override
-    public void onPackageAdded(@NonNull AndroidPackage pkg, boolean isInstantApp,
-            @Nullable AndroidPackage oldPkg) {
+    public void onPackageAdded(@NonNull PackageState packageState, boolean isInstantApp,
+                    @Nullable AndroidPackage oldPkg) {
+        Objects.requireNonNull(packageState);
+        var pkg = packageState.getAndroidPackage();
         Objects.requireNonNull(pkg);
-        onPackageAddedInternal(pkg, isInstantApp, oldPkg);
+        onPackageAddedInternal(packageState, pkg, isInstantApp, oldPkg);
     }
 
     @Override
@@ -5256,15 +5261,17 @@ public class PermissionManagerServiceImpl implements PermissionManagerServiceInt
 
     @Override
     public void onPackageUninstalled(@NonNull String packageName, int appId,
-            @Nullable AndroidPackage pkg, @NonNull List<AndroidPackage> sharedUserPkgs,
-            @UserIdInt int userId) {
+            @NonNull PackageState packageState, @Nullable AndroidPackage pkg,
+            @NonNull List<AndroidPackage> sharedUserPkgs, @UserIdInt int userId) {
+        Objects.requireNonNull(packageState, "packageState");
         Objects.requireNonNull(packageName, "packageName");
         Objects.requireNonNull(sharedUserPkgs, "sharedUserPkgs");
         Preconditions.checkArgument(userId >= UserHandle.USER_SYSTEM
                 || userId == UserHandle.USER_ALL, "userId");
         final int[] userIds = userId == UserHandle.USER_ALL ? getAllUserIds()
                 : new int[] { userId };
-        onPackageUninstalledInternal(packageName, appId, pkg, sharedUserPkgs, userIds);
+        onPackageUninstalledInternal(packageName, appId, packageState, pkg, sharedUserPkgs,
+                userIds);
     }
 
     /**
