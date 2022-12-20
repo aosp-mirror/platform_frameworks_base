@@ -21,6 +21,7 @@ import static android.app.BroadcastOptions.DELIVERY_GROUP_POLICY_MOST_RECENT;
 import static android.media.AudioManager.RINGER_MODE_NORMAL;
 import static android.media.AudioManager.RINGER_MODE_SILENT;
 import static android.media.AudioManager.RINGER_MODE_VIBRATE;
+import static android.media.AudioManager.STREAM_MUSIC;
 import static android.media.AudioManager.STREAM_SYSTEM;
 import static android.os.Process.FIRST_APPLICATION_UID;
 import static android.os.Process.INVALID_UID;
@@ -382,6 +383,7 @@ public class AudioService extends IAudioService.Stub
     private static final int MSG_RESET_SPATIALIZER = 50;
     private static final int MSG_NO_LOG_FOR_PLAYER_I = 51;
     private static final int MSG_DISPATCH_PREFERRED_MIXER_ATTRIBUTES = 52;
+    private static final int MSG_LOWER_VOLUME_TO_RS1 = 53;
 
     /** Messages handled by the {@link SoundDoseHelper}. */
     /*package*/ static final int SAFE_MEDIA_VOLUME_MSG_START = 1000;
@@ -8580,6 +8582,10 @@ public class AudioService extends IAudioService.Stub
                     onDispatchPreferredMixerAttributesChanged(msg.getData(), msg.arg1);
                     break;
 
+                case MSG_LOWER_VOLUME_TO_RS1:
+                    onLowerVolumeToRs1();
+                    break;
+
                 default:
                     if (msg.what >= SAFE_MEDIA_VOLUME_MSG_START) {
                         // msg could be for the SoundDoseHelper
@@ -9787,6 +9793,38 @@ public class AudioService extends IAudioService.Stub
         mSoundDoseHelper.disableSafeMediaVolume(callingPackage);
     }
 
+    @Override
+    public void lowerVolumeToRs1(String callingPackage) {
+        enforceVolumeController("lowerVolumeToRs1");
+        postLowerVolumeToRs1();
+    }
+
+    /*package*/ void postLowerVolumeToRs1() {
+        sendMsg(mAudioHandler, MSG_LOWER_VOLUME_TO_RS1, SENDMSG_QUEUE,
+                // no params, no delay
+                0, 0, null, 0);
+    }
+
+    /**
+     * Called when handling MSG_LOWER_VOLUME_TO_RS1
+     */
+    private void onLowerVolumeToRs1() {
+        final ArrayList<AudioDeviceAttributes> devices = getDevicesForAttributesInt(
+                new AudioAttributes.Builder().setUsage(AudioAttributes.USAGE_MEDIA).build(), true);
+        final int nativeDeviceType;
+        final AudioDeviceAttributes ada;
+        if (devices.isEmpty()) {
+            ada = devices.get(0);
+            nativeDeviceType = ada.getInternalType();
+        } else {
+            nativeDeviceType = AudioSystem.DEVICE_OUT_USB_HEADSET;
+            ada = new AudioDeviceAttributes(AudioSystem.DEVICE_OUT_USB_HEADSET, "");
+        }
+        final int index = mSoundDoseHelper.safeMediaVolumeIndex(nativeDeviceType);
+        setStreamVolumeWithAttributionInt(STREAM_MUSIC, index, /*flags*/ 0, ada,
+                "com.android.server.audio", "AudioService");
+    }
+
     //==========================================================================================
     // Hdmi CEC:
     // - System audio mode:
@@ -10298,6 +10336,9 @@ public class AudioService extends IAudioService.Stub
     public interface ISafeHearingVolumeController {
         /** Displays an instructional safeguard as required by the safe hearing standard. */
         void postDisplaySafeVolumeWarning(int flags);
+
+        /** Displays a warning about transient exposure to high level playback */
+        void postDisplayCsdWarning(@AudioManager.CsdWarning int csdEvent, int displayDurationMs);
     }
 
     /** Wrapper which encapsulates the {@link IVolumeController} functionality. */
@@ -10397,6 +10438,20 @@ public class AudioService extends IAudioService.Stub
                 mController.displaySafeVolumeWarning(flags);
             } catch (RemoteException e) {
                 Log.w(TAG, "Error calling displaySafeVolumeWarning", e);
+            }
+        }
+
+        @Override
+        public void postDisplayCsdWarning(
+                @AudioManager.CsdWarning int csdWarning, int displayDurationMs) {
+            if (mController == null) {
+                Log.e(TAG, "Unable to display CSD warning, no controller");
+                return;
+            }
+            try {
+                mController.displayCsdWarning(csdWarning, displayDurationMs);
+            } catch (RemoteException e) {
+                Log.w(TAG, "Error calling displayCsdWarning for warning " + csdWarning, e);
             }
         }
 

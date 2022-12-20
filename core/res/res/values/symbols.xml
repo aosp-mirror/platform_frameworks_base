@@ -283,6 +283,7 @@
   <java-symbol type="attr" name="autofillSaveCustomSubtitleMaxHeight"/>
   <java-symbol type="bool" name="action_bar_embed_tabs" />
   <java-symbol type="bool" name="action_bar_expanded_action_views_exclusive" />
+  <java-symbol type="bool" name="config_audio_csd_enabled_default" />
   <java-symbol type="integer" name="config_audio_notif_vol_default" />
   <java-symbol type="integer" name="config_audio_notif_vol_steps" />
   <java-symbol type="integer" name="config_audio_ring_vol_default" />
@@ -659,6 +660,10 @@
   <java-symbol type="string" name="contentServiceSync" />
   <java-symbol type="string" name="contentServiceSyncNotificationTitle" />
   <java-symbol type="string" name="contentServiceTooManyDeletesNotificationDesc" />
+  <java-symbol type="string" name="csd_dose_reached_warning" />
+  <java-symbol type="string" name="csd_dose_repeat_warning" />
+  <java-symbol type="string" name="csd_entering_RS2_warning" />
+  <java-symbol type="string" name="csd_momentary_exposure_warning" />
   <java-symbol type="string" name="date_and_time" />
   <java-symbol type="string" name="date_picker_decrement_day_button" />
   <java-symbol type="string" name="date_picker_decrement_month_button" />

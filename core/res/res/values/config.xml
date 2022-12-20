@@ -2011,6 +2011,9 @@
     <!-- The default volume for the ring stream -->
     <integer name="config_audio_ring_vol_default">5</integer>
 
+    <!-- Enable sound dose computation and warnings -->
+    <bool name="config_audio_csd_enabled_default">false</bool>
+
     <!-- The default value for whether head tracking for
          spatial audio is enabled for a newly connected audio device -->
     <bool name="config_spatial_audio_head_tracking_enabled_default">false</bool>

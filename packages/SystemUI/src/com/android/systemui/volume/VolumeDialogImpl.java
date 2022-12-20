@@ -109,6 +109,7 @@ import android.widget.Toast;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 
+import com.android.internal.annotations.GuardedBy;
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.config.sysui.SystemUiDeviceConfigFlags;
 import com.android.internal.graphics.drawable.BackgroundBlurDrawable;
@@ -272,7 +273,10 @@ public class VolumeDialogImpl implements VolumeDialog, Dumpable,
     private boolean mAutomute = VolumePrefs.DEFAULT_ENABLE_AUTOMUTE;
     private boolean mSilentMode = VolumePrefs.DEFAULT_ENABLE_SILENT_MODE;
     private State mState;
+    @GuardedBy("mSafetyWarningLock")
     private SafetyWarningDialog mSafetyWarning;
+    @GuardedBy("mSafetyWarningLock")
+    private CsdWarningDialog mCsdDialog;
     private boolean mHovering = false;
     private final boolean mShowActiveStreamOnly;
     private boolean mConfigChanged = false;
@@ -1476,6 +1480,23 @@ public class VolumeDialogImpl implements VolumeDialog, Dumpable,
                 AccessibilityManager.FLAG_CONTENT_CONTROLS);
     }
 
+    protected void scheduleCsdTimeoutH(int timeoutMs) {
+        mHandler.removeMessages(H.CSD_TIMEOUT);
+        mHandler.sendMessageDelayed(mHandler.obtainMessage(H.CSD_TIMEOUT,
+                Events.DISMISS_REASON_CSD_WARNING_TIMEOUT, 0), timeoutMs);
+        Log.i(TAG, "scheduleCsdTimeoutH " + timeoutMs + "ms " + Debug.getCaller());
+        mController.userActivity();
+    }
+
+    private void onCsdTimeoutH() {
+        synchronized (mSafetyWarningLock) {
+            if (mCsdDialog == null) {
+                return;
+            }
+            mCsdDialog.dismiss();
+        }
+    }
+
     protected void dismissH(int reason) {
         Trace.beginSection("VolumeDialogImpl#dismissH");
 
@@ -2060,6 +2081,30 @@ public class VolumeDialogImpl implements VolumeDialog, Dumpable,
         rescheduleTimeoutH();
     }
 
+    private void showCsdWarningH(int csdWarning, int durationMs) {
+        synchronized (mSafetyWarningLock) {
+            if (mCsdDialog != null) {
+                return;
+            }
+            mCsdDialog = new CsdWarningDialog(csdWarning,
+                    mContext, mController.getAudioManager()) {
+                @Override
+                protected void cleanUp() {
+                    synchronized (mSafetyWarningLock) {
+                        mCsdDialog = null;
+                    }
+                    recheckH(null);
+                }
+            };
+            mCsdDialog.show();
+        }
+        recheckH(null);
+        if (durationMs > 0) {
+            scheduleCsdTimeoutH(durationMs);
+        }
+        rescheduleTimeoutH();
+    }
+
     private String getStreamLabelH(StreamState ss) {
         if (ss == null) {
             return "";
@@ -2239,6 +2284,11 @@ public class VolumeDialogImpl implements VolumeDialog, Dumpable,
         }
 
         @Override
+        public void onShowCsdWarning(int csdWarning, int durationMs) {
+            showCsdWarningH(csdWarning, durationMs);
+        }
+
+        @Override
         public void onAccessibilityModeChanged(Boolean showA11yStream) {
             mShowA11yStream = showA11yStream == null ? false : showA11yStream;
             VolumeRow activeRow = getActiveRow();
@@ -2265,6 +2315,7 @@ public class VolumeDialogImpl implements VolumeDialog, Dumpable,
         private static final int SET_STREAM_IMPORTANT = 5;
         private static final int RESCHEDULE_TIMEOUT = 6;
         private static final int STATE_CHANGED = 7;
+        private static final int CSD_TIMEOUT = 8;
 
         public H() {
             super(Looper.getMainLooper());
@@ -2281,6 +2332,7 @@ public class VolumeDialogImpl implements VolumeDialog, Dumpable,
                 case SET_STREAM_IMPORTANT: setStreamImportantH(msg.arg1, msg.arg2 != 0); break;
                 case RESCHEDULE_TIMEOUT: rescheduleTimeoutH(); break;
                 case STATE_CHANGED: onStateChangedH(mState); break;
+                case CSD_TIMEOUT: onCsdTimeoutH(); break;
             }
         }
     }
