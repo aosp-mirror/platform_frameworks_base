@@ -17966,8 +17966,10 @@ package android.hardware.camera2 {
     method @Nullable public android.util.Range<java.lang.Long> getEstimatedCaptureLatencyRangeMillis(int, @NonNull android.util.Size, int);
     method @NonNull public <T> java.util.List<android.util.Size> getExtensionSupportedSizes(int, @NonNull Class<T>);
     method @NonNull public java.util.List<android.util.Size> getExtensionSupportedSizes(int, int);
+    method @NonNull public java.util.List<android.util.Size> getPostviewSupportedSizes(int, @NonNull android.util.Size, int);
     method @NonNull public java.util.List<java.lang.Integer> getSupportedExtensions();
     method public boolean isCaptureProcessProgressAvailable(int);
+    method public boolean isPostviewAvailable(int);
     field public static final int EXTENSION_AUTOMATIC = 0; // 0x0
     field @Deprecated public static final int EXTENSION_BEAUTY = 1; // 0x1
     field public static final int EXTENSION_BOKEH = 2; // 0x2
@@ -18639,7 +18641,9 @@ package android.hardware.camera2.params {
     method @NonNull public java.util.concurrent.Executor getExecutor();
     method public int getExtension();
     method @NonNull public java.util.List<android.hardware.camera2.params.OutputConfiguration> getOutputConfigurations();
+    method @Nullable public android.hardware.camera2.params.OutputConfiguration getPostviewOutputConfiguration();
     method @NonNull public android.hardware.camera2.CameraExtensionSession.StateCallback getStateCallback();
+    method public void setPostviewOutputConfiguration(@Nullable android.hardware.camera2.params.OutputConfiguration);
   }
 
   public final class Face {

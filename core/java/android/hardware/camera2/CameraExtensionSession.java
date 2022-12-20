@@ -311,10 +311,15 @@ public abstract class CameraExtensionSession implements AutoCloseable {
      * The rest of the settings included in the request will be entirely overridden by
      * the device-specific extension. </p>
      *
-     * <p>The {@link CaptureRequest.Builder#addTarget} supports only one
+     * <p> If {@link CameraExtensionCharacteristics#isPostviewAvailable} returns
+     * false, the {@link CaptureRequest.Builder#addTarget} will support only one
      * ImageFormat.YUV_420_888 or ImageFormat.JPEG target surface. {@link CaptureRequest}
-     * arguments that include further targets will cause
-     * IllegalArgumentException to be thrown. </p>
+     * arguments that include further targets will cause IllegalArgumentException to be thrown.
+     * If postview is available, {@link CaptureRequest.Builder#addTarget} will support up to two
+     * ImageFormat.YUV_420_888 or ImageFormat.JPEG target surfaces for the still capture and
+     * postview. IllegalArgumentException will be thrown if a postview target is added without
+     * a still capture target, if more than two target surfaces are added, or if the surface
+     * formats for postview and capture are not equivalent.
      *
      * <p>Starting with Android {@link android.os.Build.VERSION_CODES#TIRAMISU} single capture
      * requests will also support the preview {@link android.graphics.ImageFormat#PRIVATE} target
