@@ -1121,6 +1121,14 @@
     <dimen name="magnification_setting_button_done_corner_radius">100dp</dimen>
     <dimen name="magnification_setting_button_done_padding_vertical">10dp</dimen>
     <dimen name="magnification_setting_button_done_padding_horizontal">24dp</dimen>
+    <dimen name="magnification_setting_image_button_height">58dp</dimen>
+    <dimen name="magnification_setting_image_button_corner_radius">48dp</dimen>
+    <dimen name="magnification_setting_image_button_background_width">316dp</dimen>
+    <dimen name="magnification_setting_image_button_background_corner_radius">80dp</dimen>
+    <dimen name="magnification_setting_image_button_padding_vertical">12dp</dimen>
+    <dimen name="magnification_setting_image_button_padding_horizontal">24dp</dimen>
+    <dimen name="magnification_setting_image_button_open_in_full_padding_vertical">16dp</dimen>
+    <dimen name="magnification_setting_image_button_open_in_full_padding_horizontal">28dp</dimen>
 
     <!-- How far from the right edge of the screen you need to drag the window before the button
          repositions to the other side. -->

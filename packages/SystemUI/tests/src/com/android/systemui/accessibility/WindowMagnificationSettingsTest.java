@@ -16,6 +16,8 @@
 
 package com.android.systemui.accessibility;
 
+import static com.google.common.truth.Truth.assertThat;
+
 import static junit.framework.Assert.assertEquals;
 import static junit.framework.Assert.assertNotNull;
 
@@ -24,6 +26,7 @@ import static org.mockito.Mockito.verify;
 
 import android.annotation.IdRes;
 import android.content.Context;
+import android.content.pm.ActivityInfo;
 import android.provider.Settings;
 import android.testing.AndroidTestingRunner;
 import android.testing.TestableLooper;
@@ -181,6 +184,21 @@ public class WindowMagnificationSettingsTest extends SysuiTestCase {
         diagonalScrollingSwitch.performClick();
 
         verify(mWindowMagnificationSettingsCallback).onSetDiagonalScrolling(!currentCheckedState);
+    }
+
+    @Test
+    public void onConfigurationChanged_selectedButtonIsStillSelected() {
+        // Open view
+        mWindowMagnificationSettings.showSettingPanel();
+        View magnifierMediumButton = getInternalView(R.id.magnifier_medium_button);
+        magnifierMediumButton.performClick();
+
+        mWindowMagnificationSettings.onConfigurationChanged(ActivityInfo.CONFIG_UI_MODE);
+
+        // Since the view is re-inflated after onConfigurationChanged,
+        // we need to get the view again.
+        magnifierMediumButton = getInternalView(R.id.magnifier_medium_button);
+        assertThat(magnifierMediumButton.isSelected()).isTrue();
     }
 
     private <T extends View> T getInternalView(@IdRes int idRes) {
