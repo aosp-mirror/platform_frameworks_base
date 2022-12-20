@@ -27,6 +27,7 @@ import androidx.test.filters.SmallTest
 import com.android.systemui.R
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.dagger.qualifiers.Main
+import com.android.systemui.dump.DumpManager
 import com.android.systemui.statusbar.policy.ConfigurationController
 import com.android.systemui.statusbar.policy.ConfigurationController.ConfigurationListener
 import com.android.systemui.util.concurrency.DelayableExecutor
@@ -66,6 +67,8 @@ class TemporaryViewDisplayControllerTest : SysuiTestCase() {
     @Mock
     private lateinit var configurationController: ConfigurationController
     @Mock
+    private lateinit var dumpManager: DumpManager
+    @Mock
     private lateinit var windowManager: WindowManager
     @Mock
     private lateinit var powerManager: PowerManager
@@ -91,6 +94,7 @@ class TemporaryViewDisplayControllerTest : SysuiTestCase() {
             fakeExecutor,
             accessibilityManager,
             configurationController,
+            dumpManager,
             powerManager,
             fakeWakeLockBuilder,
             fakeClock,
@@ -989,6 +993,7 @@ class TemporaryViewDisplayControllerTest : SysuiTestCase() {
         @Main mainExecutor: DelayableExecutor,
         accessibilityManager: AccessibilityManager,
         configurationController: ConfigurationController,
+        dumpManager: DumpManager,
         powerManager: PowerManager,
         wakeLockBuilder: WakeLock.Builder,
         systemClock: SystemClock,
@@ -999,6 +1004,7 @@ class TemporaryViewDisplayControllerTest : SysuiTestCase() {
         mainExecutor,
         accessibilityManager,
         configurationController,
+        dumpManager,
         powerManager,
         R.layout.chipbar,
         wakeLockBuilder,
