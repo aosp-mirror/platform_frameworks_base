@@ -29,7 +29,6 @@ import android.app.time.UnixEpochTime;
 import android.app.timedetector.ITimeDetectorService;
 import android.app.timedetector.ManualTimeSuggestion;
 import android.app.timedetector.TelephonyTimeSuggestion;
-import android.app.timedetector.TimePoint;
 import android.content.Context;
 import android.os.Binder;
 import android.os.Handler;
@@ -361,6 +360,34 @@ public final class TimeDetectorService extends ITimeDetectorService.Stub
         mHandler.post(() -> mTimeDetectorStrategy.suggestNetworkTime(timeSignal));
     }
 
+    @Override
+    public UnixEpochTime latestNetworkTime() {
+        NetworkTimeSuggestion suggestion = getLatestNetworkSuggestion();
+        if (suggestion != null) {
+            return suggestion.getUnixEpochTime();
+        } else {
+            throw new ParcelableException(new DateTimeException("Missing network time fix"));
+        }
+    }
+
+    /**
+     * Returns the latest network suggestion accepted. For use by {@link TimeDetectorShellCommand}.
+     */
+    @Nullable
+    NetworkTimeSuggestion getLatestNetworkSuggestion() {
+        // TODO(b/222295093): Return the latest network time from mTimeDetectorStrategy once we can
+        //  be sure that all uses of NtpTrustedTime results in a suggestion being made to the time
+        //  detector. mNtpTrustedTime can be removed once this happens.
+        NtpTrustedTime.TimeResult ntpResult = mNtpTrustedTime.getCachedTimeResult();
+        if (ntpResult != null) {
+            UnixEpochTime unixEpochTime = new UnixEpochTime(
+                    ntpResult.getElapsedRealtimeMillis(), ntpResult.getTimeMillis());
+            return new NetworkTimeSuggestion(unixEpochTime, ntpResult.getUncertaintyMillis());
+        } else {
+            return null;
+        }
+    }
+
     void suggestGnssTime(@NonNull GnssTimeSuggestion timeSignal) {
         enforceSuggestGnssTimePermission();
         Objects.requireNonNull(timeSignal);
@@ -374,19 +401,6 @@ public final class TimeDetectorService extends ITimeDetectorService.Stub
         Objects.requireNonNull(timeSignal);
 
         mHandler.post(() -> mTimeDetectorStrategy.suggestExternalTime(timeSignal));
-    }
-
-    @Override
-    public TimePoint latestNetworkTime() {
-        // TODO(b/222295093): Return the latest network time from mTimeDetectorStrategy once we can
-        //  be sure that all uses of NtpTrustedTime results in a suggestion being made to the time
-        //  detector. mNtpTrustedTime can be removed once this happens.
-        NtpTrustedTime.TimeResult ntpResult = mNtpTrustedTime.getCachedTimeResult();
-        if (ntpResult != null) {
-            return new TimePoint(ntpResult.getTimeMillis(), ntpResult.getElapsedRealtimeMillis());
-        } else {
-            throw new ParcelableException(new DateTimeException("Missing network time fix"));
-        }
     }
 
     @Override
@@ -421,7 +435,7 @@ public final class TimeDetectorService extends ITimeDetectorService.Stub
     private void enforceSuggestNetworkTimePermission() {
         mContext.enforceCallingPermission(
                 android.Manifest.permission.SET_TIME,
-                "set time");
+                "suggest network time");
     }
 
     private void enforceSuggestGnssTimePermission() {

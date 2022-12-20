@@ -18,8 +18,8 @@ package android.os;
 
 import android.annotation.NonNull;
 import android.app.IAlarmManager;
+import android.app.time.UnixEpochTime;
 import android.app.timedetector.ITimeDetectorService;
-import android.app.timedetector.TimePoint;
 import android.compat.annotation.UnsupportedAppUsage;
 import android.content.Context;
 import android.location.ILocationManager;
@@ -300,7 +300,7 @@ public final class SystemClock {
         ITimeDetectorService timeDetectorService = ITimeDetectorService.Stub
                 .asInterface(ServiceManager.getService(Context.TIME_DETECTOR_SERVICE));
         if (timeDetectorService != null) {
-            TimePoint time;
+            UnixEpochTime time;
             try {
                 time = timeDetectorService.latestNetworkTime();
             } catch (ParcelableException e) {
