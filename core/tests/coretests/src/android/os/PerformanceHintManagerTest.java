@@ -137,4 +137,13 @@ public class PerformanceHintManagerTest {
         assumeNotNull(s);
         s.close();
     }
+
+    @Test
+    public void testSetThreadsWithIllegalArgument() {
+        Session session = createSession();
+        assumeNotNull(session);
+        assertThrows(IllegalArgumentException.class, () -> {
+            session.setThreads(new int[] { });
+        });
+    }
 }
