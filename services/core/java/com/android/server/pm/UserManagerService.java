@@ -2441,9 +2441,9 @@ public class UserManagerService extends IUserManager.Stub {
             mGuestRestrictions.clear();
             mGuestRestrictions.putAll(restrictions);
             final List<UserInfo> guests = getGuestUsers();
-            for (UserInfo guest : guests) {
+            for (int i = 0; i < guests.size(); i++) {
                 synchronized (mRestrictionsLock) {
-                    updateUserRestrictionsInternalLR(mGuestRestrictions, guest.id);
+                    updateUserRestrictionsInternalLR(mGuestRestrictions, guests.get(i).id);
                 }
             }
         }
@@ -3688,7 +3688,8 @@ public class UserManagerService extends IUserManager.Stub {
             }
             // DISALLOW_CONFIG_WIFI was made a default guest restriction some time during version 6.
             final List<UserInfo> guestUsers = getGuestUsers();
-            for (UserInfo guestUser : guestUsers) {
+            for (int i = 0; i < guestUsers.size(); i++) {
+                final UserInfo guestUser = guestUsers.get(i);
                 if (guestUser != null && !hasUserRestriction(
                         UserManager.DISALLOW_CONFIG_WIFI, guestUser.id)) {
                     setUserRestriction(UserManager.DISALLOW_CONFIG_WIFI, true, guestUser.id);
