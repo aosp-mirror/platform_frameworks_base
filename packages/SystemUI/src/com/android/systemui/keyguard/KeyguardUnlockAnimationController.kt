@@ -321,6 +321,7 @@ class KeyguardUnlockAnimationController @Inject constructor(
                     // and unlock the device as well as hiding the surface.
                     if (surfaceBehindAlpha == 0f) {
                         Log.d(TAG, "surfaceBehindAlphaAnimator#onAnimationEnd")
+                        surfaceBehindRemoteAnimationTargets = null
                         keyguardViewMediator.get().finishSurfaceBehindRemoteAnimation(
                             false /* cancelled */)
                     } else {
@@ -825,13 +826,13 @@ class KeyguardUnlockAnimationController @Inject constructor(
         // Make sure we made the surface behind fully visible, just in case. It should already be
         // fully visible. The exit animation is finished, and we should not hold the leash anymore,
         // so forcing it to 1f.
-        surfaceBehindAlphaAnimator.cancel()
-        surfaceBehindEntryAnimator.cancel()
         surfaceBehindAlpha = 1f
         setSurfaceBehindAppearAmount(1f)
+        surfaceBehindAlphaAnimator.cancel()
+        surfaceBehindEntryAnimator.cancel()
         try {
             launcherUnlockController?.setUnlockAmount(1f, false /* forceIfAnimating */)
-        }  catch (e: RemoteException) {
+        } catch (e: RemoteException) {
             Log.e(TAG, "Remote exception in notifyFinishedKeyguardExitAnimation", e)
         }
 
