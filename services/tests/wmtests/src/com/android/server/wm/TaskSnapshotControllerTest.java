@@ -202,7 +202,7 @@ public class TaskSnapshotControllerTest extends WindowTestsBase {
         // Verify no NPE happens when calling createTaskSnapshot.
         try {
             final TaskSnapshot.Builder builder = new TaskSnapshot.Builder();
-            mWm.mTaskSnapshotController.createTaskSnapshot(mAppWindow.mActivityRecord.getTask(),
+            mWm.mTaskSnapshotController.createSnapshot(mAppWindow.mActivityRecord.getTask(),
                     1f /* scaleFraction */, PixelFormat.UNKNOWN, null /* outTaskSize */, builder);
         } catch (NullPointerException e) {
             fail("There should be no exception when calling createTaskSnapshot");
@@ -223,7 +223,7 @@ public class TaskSnapshotControllerTest extends WindowTestsBase {
         try {
             final TaskSnapshot.Builder builder = new TaskSnapshot.Builder();
             spyOn(builder);
-            mWm.mTaskSnapshotController.createTaskSnapshot(
+            mWm.mTaskSnapshotController.createSnapshot(
                     mAppWindow.mActivityRecord.getTask(), 1f /* scaleFraction */,
                     PixelFormat.UNKNOWN, null /* outTaskSize */, builder);
             // Verify the builder should includes IME surface.
