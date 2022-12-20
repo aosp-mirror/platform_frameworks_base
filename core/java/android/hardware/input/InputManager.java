@@ -30,7 +30,6 @@ import android.app.ActivityThread;
 import android.compat.annotation.ChangeId;
 import android.compat.annotation.UnsupportedAppUsage;
 import android.content.Context;
-import android.content.pm.PackageManager;
 import android.hardware.BatteryState;
 import android.hardware.SensorManager;
 import android.hardware.lights.Light;
@@ -1910,11 +1909,6 @@ public final class InputManager {
      */
     @RequiresPermission(Manifest.permission.WRITE_SECURE_SETTINGS)
     public void setStylusEverUsed(@NonNull Context context, boolean stylusEverUsed) {
-        if (context.checkCallingPermission(Manifest.permission.WRITE_SECURE_SETTINGS)
-                != PackageManager.PERMISSION_GRANTED) {
-            throw new SecurityException("You need WRITE_SECURE_SETTINGS permission "
-                + "to set stylus ever used.");
-        }
         Settings.Global.putInt(context.getContentResolver(),
                 Settings.Global.STYLUS_EVER_USED, stylusEverUsed ? 1 : 0);
     }
