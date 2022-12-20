@@ -412,7 +412,7 @@ object Flags {
 
     // TODO(b/261979569): Tracking Bug
     val QUICK_TAP_FLOW_FRAMEWORK =
-            unreleasedFlag(1401, "quick_tap_flow_framework", teamfood = false)
+        unreleasedFlag(1401, "quick_tap_flow_framework", teamfood = false)
 
     // 1500 - chooser
     // TODO(b/254512507): Tracking Bug
