@@ -17,6 +17,7 @@
 
 package android.app;
 
+import android.app.LocaleConfig;
 import android.os.LocaleList;
 
 /**
@@ -29,7 +30,6 @@ import android.os.LocaleList;
  * @hide
  */
  interface ILocaleManager {
-
      /**
       * Sets a specified app’s app-specific UI locales.
       */
@@ -45,4 +45,7 @@ import android.os.LocaleList;
        */
      LocaleList getSystemLocales();
 
+     void setOverrideLocaleConfig(String packageName, int userId, in LocaleConfig localeConfig);
+
+     LocaleConfig getOverrideLocaleConfig(String packageName, int userId);
  }
