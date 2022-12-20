@@ -16,6 +16,7 @@
 
 package com.android.server.companion.virtual;
 
+import static android.companion.virtual.VirtualDeviceParams.DEVICE_POLICY_DEFAULT;
 import static android.media.AudioManager.AUDIO_SESSION_ID_GENERATE;
 
 import static com.android.server.wm.ActivityInterceptorCallback.VIRTUAL_DEVICE_SERVICE_ORDERED_ID;
@@ -363,14 +364,10 @@ public class VirtualDeviceManagerService extends SystemService {
         @VirtualDeviceParams.DevicePolicy
         public int getDevicePolicy(int deviceId, @VirtualDeviceParams.PolicyType int policyType) {
             synchronized (mVirtualDeviceManagerLock) {
-                for (int i = 0; i < mVirtualDevices.size(); i++) {
-                    final VirtualDeviceImpl device = mVirtualDevices.valueAt(i);
-                    if (device.getDeviceId() == deviceId) {
-                        return device.getDevicePolicy(policyType);
-                    }
-                }
+                VirtualDeviceImpl virtualDevice = mVirtualDevices.get(deviceId);
+                return virtualDevice != null
+                        ? virtualDevice.getDevicePolicy(policyType) : DEVICE_POLICY_DEFAULT;
             }
-            return VirtualDeviceParams.DEVICE_POLICY_DEFAULT;
         }
 
 
@@ -513,15 +510,9 @@ public class VirtualDeviceManagerService extends SystemService {
         @Override
         public int getDeviceOwnerUid(int deviceId) {
             synchronized (mVirtualDeviceManagerLock) {
-                int size = mVirtualDevices.size();
-                for (int i = 0; i < size; i++) {
-                    VirtualDeviceImpl device = mVirtualDevices.valueAt(i);
-                    if (device.getDeviceId() == deviceId) {
-                        return device.getOwnerUid();
-                    }
-                }
+                VirtualDeviceImpl virtualDevice = mVirtualDevices.get(deviceId);
+                return virtualDevice != null ? virtualDevice.getOwnerUid() : Process.INVALID_UID;
             }
-            return Process.INVALID_UID;
         }
 
         @Override
