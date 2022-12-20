@@ -21,7 +21,6 @@ import static android.view.InsetsControllerProto.CONTROL;
 import static android.view.InsetsControllerProto.STATE;
 import static android.view.InsetsState.ITYPE_CAPTION_BAR;
 import static android.view.InsetsState.ITYPE_IME;
-import static android.view.InsetsState.toInternalType;
 import static android.view.InsetsState.toPublicType;
 import static android.view.ViewRootImpl.CAPTION_ON_SHELL;
 import static android.view.WindowInsets.Type.FIRST;
@@ -742,6 +741,7 @@ public class InsetsController implements WindowInsetsController, InsetsAnimation
 
     private void updateState(InsetsState newState) {
         mState.set(newState, 0 /* types */);
+        @InsetsType int existingTypes = 0;
         @InsetsType int visibleTypes = 0;
         @InsetsType int disabledUserAnimationTypes = 0;
         @InsetsType int[] cancelledUserAnimationTypes = {0};
@@ -760,10 +760,15 @@ public class InsetsController implements WindowInsetsController, InsetsAnimation
                 }
             }
             getSourceConsumer(type).updateSource(source, animationType);
+            existingTypes |= insetsType;
             if (source.isVisible()) {
                 visibleTypes |= insetsType;
             }
         }
+
+        // If a type doesn't have a source, treat it as visible if it is visible by default.
+        visibleTypes |= WindowInsets.Type.defaultVisible() & ~existingTypes;
+
         if (mVisibleTypes != visibleTypes) {
             if (WindowInsets.Type.hasCompatSystemBars(mVisibleTypes ^ visibleTypes)) {
                 mCompatSysUiVisibilityStaled = true;
@@ -1103,6 +1108,29 @@ public class InsetsController implements WindowInsetsController, InsetsAnimation
             @AnimationType int animationType,
             @LayoutInsetsDuringAnimation int layoutInsetsDuringAnimation,
             boolean useInsetsAnimationThread, @Nullable ImeTracker.Token statsToken) {
+        final boolean visible = layoutInsetsDuringAnimation == LAYOUT_INSETS_DURING_ANIMATION_SHOWN;
+
+        // Basically, we accept the requested visibilities from the upstream callers...
+        setRequestedVisibleTypes(visible ? types : 0, types);
+
+        // However, we might reject the request in some cases, such as delaying showing IME or
+        // rejecting showing IME.
+        controlAnimationUncheckedInner(types, cancellationSignal, listener, frame, fromIme,
+                durationMs, interpolator, animationType, layoutInsetsDuringAnimation,
+                useInsetsAnimationThread, statsToken);
+
+        // We are finishing setting the requested visible types. Report them to the server and/or
+        // the app.
+        reportRequestedVisibleTypes();
+    }
+
+    private void controlAnimationUncheckedInner(@InsetsType int types,
+            @Nullable CancellationSignal cancellationSignal,
+            WindowInsetsAnimationControlListener listener, @Nullable Rect frame, boolean fromIme,
+            long durationMs, Interpolator interpolator,
+            @AnimationType int animationType,
+            @LayoutInsetsDuringAnimation int layoutInsetsDuringAnimation,
+            boolean useInsetsAnimationThread, @Nullable ImeTracker.Token statsToken) {
         ImeTracker.get().onProgress(statsToken, ImeTracker.PHASE_CLIENT_CONTROL_ANIMATION);
         if ((types & mTypesBeingCancelled) != 0) {
             throw new IllegalStateException("Cannot start a new insets animation of "
@@ -1119,13 +1147,15 @@ public class InsetsController implements WindowInsetsController, InsetsAnimation
                     && !mState.getSource(ITYPE_IME).isVisible()) {
                 // We've requested IMM to show IME, but the IME is not controllable. We need to
                 // cancel the request.
-                getSourceConsumer(ITYPE_IME).hide(true, animationType);
+                setRequestedVisibleTypes(0 /* visibleTypes */, ime());
+                if (getSourceConsumer(ITYPE_IME).onAnimationStateChanged(false /* running */)) {
+                    notifyVisibilityChanged();
+                }
             }
         }
         if (types == 0) {
             // nothing to animate.
             listener.onCancelled(null);
-            reportRequestedVisibleTypes();
             if (DEBUG) Log.d(TAG, "no types to animate in controlAnimationUnchecked");
             return;
         }
@@ -1161,7 +1191,11 @@ public class InsetsController implements WindowInsetsController, InsetsAnimation
                     }
                 });
             }
-            reportRequestedVisibleTypes();
+
+            // The requested visibilities should be delayed as well. Otherwise, the server will
+            // create already visible leashes for us before we play the show animation.
+            setRequestedVisibleTypes(mReportedRequestedVisibleTypes, types);
+
             Trace.asyncTraceEnd(TRACE_TAG_VIEW, "IC.showRequestFromApi", 0);
             return;
         }
@@ -1169,7 +1203,6 @@ public class InsetsController implements WindowInsetsController, InsetsAnimation
         if (typesReady == 0) {
             if (DEBUG) Log.d(TAG, "No types ready. onCancelled()");
             listener.onCancelled(null);
-            reportRequestedVisibleTypes();
             return;
         }
 
@@ -1198,12 +1231,20 @@ public class InsetsController implements WindowInsetsController, InsetsAnimation
         } else {
             Trace.asyncTraceBegin(TRACE_TAG_VIEW, "IC.pendingAnim", 0);
         }
-        if (layoutInsetsDuringAnimation == LAYOUT_INSETS_DURING_ANIMATION_SHOWN) {
-            showDirectly(types, fromIme);
-        } else {
-            hideDirectly(types, false /* animationFinished */, animationType, fromIme);
+        onAnimationStateChanged(types, true /* running */);
+
+        if (fromIme) {
+            switch (animationType) {
+                case ANIMATION_TYPE_SHOW:
+                    Trace.asyncTraceEnd(TRACE_TAG_VIEW, "IC.showRequestFromIme", 0);
+                    break;
+                case ANIMATION_TYPE_HIDE:
+                    Trace.asyncTraceEnd(TRACE_TAG_VIEW, "IC.hideRequestFromIme", 0);
+                    break;
+            }
+        } else if (animationType == ANIMATION_TYPE_HIDE) {
+            Trace.asyncTraceEnd(TRACE_TAG_VIEW, "IC.hideRequestFromApi", 0);
         }
-        reportRequestedVisibleTypes();
     }
 
     // TODO(b/242962223): Make this setter restrictive.
@@ -1228,11 +1269,6 @@ public class InsetsController implements WindowInsetsController, InsetsAnimation
             boolean canRun = true;
             if (show) {
                 // Show request
-                if (fromIme) {
-                    ImeTracing.getInstance().triggerClientDump(
-                            "ImeInsetsSourceConsumer#requestShow", mHost.getInputMethodManager(),
-                            null /* icProto */);
-                }
                 switch(consumer.requestShow(fromIme)) {
                     case ShowResult.SHOW_IMMEDIATELY:
                         break;
@@ -1246,14 +1282,10 @@ public class InsetsController implements WindowInsetsController, InsetsAnimation
                         // IME cannot be shown (since it didn't have focus), proceed
                         // with animation of other types.
                         canRun = false;
+
+                        // Reject the show request.
+                        setRequestedVisibleTypes(0 /* visibleTypes */, consumer.getType());
                         break;
-                }
-            } else {
-                // Hide request
-                // TODO: Move notifyHidden() to beginning of the hide animation
-                // (when visibility actually changes using hideDirectly()).
-                if (!fromIme) {
-                    consumer.notifyHidden();
                 }
             }
             if (!canRun) {
@@ -1266,24 +1298,6 @@ public class InsetsController implements WindowInsetsController, InsetsAnimation
             if (control != null && control.getLeash() != null) {
                 controls.put(control.getId(), new InsetsSourceControl(control));
                 typesReady |= consumer.getType();
-            } else if (animationType == ANIMATION_TYPE_SHOW) {
-                if (DEBUG) Log.d(TAG, "collectSourceControls no control for show(). fromIme: "
-                        + fromIme);
-                // We don't have a control at the moment. However, we still want to update requested
-                // visibility state such that in case we get control, we can apply show animation.
-                if (fromIme) {
-                    ImeTracing.getInstance().triggerClientDump(
-                            "InsetsSourceConsumer#show", mHost.getInputMethodManager(),
-                            null /* icProto */);
-                }
-                consumer.show(fromIme);
-            } else if (animationType == ANIMATION_TYPE_HIDE) {
-                if (fromIme) {
-                    ImeTracing.getInstance().triggerClientDump(
-                            "InsetsSourceConsumer#hide", mHost.getInputMethodManager(),
-                            null /* icProto */);
-                }
-                consumer.hide();
             }
         }
         return new Pair<>(typesReady, imeReady);
@@ -1332,6 +1346,7 @@ public class InsetsController implements WindowInsetsController, InsetsAnimation
     @VisibleForTesting
     @Override
     public void notifyFinished(InsetsAnimationControlRunner runner, boolean shown) {
+        setRequestedVisibleTypes(shown ? runner.getTypes() : 0, runner.getTypes());
         cancelAnimation(runner, false /* invokeCallback */);
         if (DEBUG) Log.d(TAG, "notifyFinished. shown: " + shown);
         if (runner.getAnimationType() == ANIMATION_TYPE_RESIZE) {
@@ -1343,15 +1358,13 @@ public class InsetsController implements WindowInsetsController, InsetsAnimation
         if (shown) {
             ImeTracker.get().onProgress(statsToken,
                     ImeTracker.PHASE_CLIENT_ANIMATION_FINISHED_SHOW);
-            showDirectly(runner.getTypes(), true /* fromIme */);
             ImeTracker.get().onShown(statsToken);
         } else {
             ImeTracker.get().onProgress(statsToken,
                     ImeTracker.PHASE_CLIENT_ANIMATION_FINISHED_HIDE);
-            hideDirectly(runner.getTypes(), true /* animationFinished */,
-                    runner.getAnimationType(), true /* fromIme */);
             ImeTracker.get().onHidden(statsToken);
         }
+        reportRequestedVisibleTypes();
     }
 
     @Override
@@ -1388,28 +1401,31 @@ public class InsetsController implements WindowInsetsController, InsetsAnimation
                     "cancelAnimation of types: %d, animType: %d, host: %s",
                     control.getTypes(), control.getAnimationType(), mHost.getRootViewTitle()));
         }
-        boolean stateChanged = false;
+        @InsetsType int removedTypes = 0;
         for (int i = mRunningAnimations.size() - 1; i >= 0; i--) {
             RunningAnimation runningAnimation = mRunningAnimations.get(i);
             if (runningAnimation.runner == control) {
                 mRunningAnimations.remove(i);
-                ArraySet<Integer> types = toInternalType(control.getTypes());
-                for (int j = types.size() - 1; j >= 0; j--) {
-                    if (types.valueAt(j) == ITYPE_IME) {
-                        ImeTracing.getInstance().triggerClientDump(
-                                "InsetsSourceConsumer#notifyAnimationFinished",
-                                mHost.getInputMethodManager(), null /* icProto */);
-                    }
-                    stateChanged |= getSourceConsumer(types.valueAt(j)).notifyAnimationFinished();
-                }
+                removedTypes = control.getTypes();
                 if (invokeCallback) {
                     dispatchAnimationEnd(runningAnimation.runner.getAnimation());
                 }
                 break;
             }
         }
-        if (stateChanged) {
-            mHost.notifyInsetsChanged();
+        onAnimationStateChanged(removedTypes, false /* running */);
+    }
+
+    private void onAnimationStateChanged(@InsetsType int types, boolean running) {
+        boolean insetsChanged = false;
+        for (int i = mSourceConsumers.size() - 1; i >= 0; i--) {
+            final InsetsSourceConsumer consumer = mSourceConsumers.valueAt(i);
+            if ((consumer.getType() & types) != 0) {
+                insetsChanged |= consumer.onAnimationStateChanged(running);
+            }
+        }
+        if (insetsChanged) {
+            notifyVisibilityChanged();
         }
     }
 
@@ -1472,27 +1488,28 @@ public class InsetsController implements WindowInsetsController, InsetsAnimation
         return ANIMATION_TYPE_NONE;
     }
 
-    void setRequestedVisibleTypes(@InsetsType int visibleTypes, @InsetsType int mask) {
+    @VisibleForTesting(visibility = VisibleForTesting.Visibility.PACKAGE)
+    public void setRequestedVisibleTypes(@InsetsType int visibleTypes, @InsetsType int mask) {
         final @InsetsType int requestedVisibleTypes =
                 (mRequestedVisibleTypes & ~mask) | (visibleTypes & mask);
         if (mRequestedVisibleTypes != requestedVisibleTypes) {
-            if (WindowInsets.Type.hasCompatSystemBars(
-                    mRequestedVisibleTypes ^ requestedVisibleTypes)) {
-                mCompatSysUiVisibilityStaled = true;
-            }
             mRequestedVisibleTypes = requestedVisibleTypes;
         }
     }
 
     /**
-     * Sends the requested visible types to window manager if any of them is changed.
+     * Called when finishing setting requested visible types or finishing setting controls.
      */
     private void reportRequestedVisibleTypes() {
-        updateCompatSysUiVisibility();
         if (mReportedRequestedVisibleTypes != mRequestedVisibleTypes) {
+            final @InsetsType int diff = mRequestedVisibleTypes ^ mReportedRequestedVisibleTypes;
+            if (WindowInsets.Type.hasCompatSystemBars(diff)) {
+                mCompatSysUiVisibilityStaled = true;
+            }
             mReportedRequestedVisibleTypes = mRequestedVisibleTypes;
             mHost.updateRequestedVisibleTypes(mReportedRequestedVisibleTypes);
         }
+        updateCompatSysUiVisibility();
     }
 
     @VisibleForTesting
@@ -1536,39 +1553,6 @@ public class InsetsController implements WindowInsetsController, InsetsAnimation
                 show ? ANIMATION_TYPE_SHOW : ANIMATION_TYPE_HIDE,
                 show ? LAYOUT_INSETS_DURING_ANIMATION_SHOWN : LAYOUT_INSETS_DURING_ANIMATION_HIDDEN,
                 !hasAnimationCallbacks /* useInsetsAnimationThread */, statsToken);
-    }
-
-    private void hideDirectly(@InsetsType int types, boolean animationFinished,
-            @AnimationType int animationType, boolean fromIme) {
-        if ((types & ime()) != 0) {
-            ImeTracing.getInstance().triggerClientDump("InsetsController#hideDirectly",
-                    mHost.getInputMethodManager(), null /* icProto */);
-        }
-        final ArraySet<Integer> internalTypes = InsetsState.toInternalType(types);
-        for (int i = internalTypes.size() - 1; i >= 0; i--) {
-            getSourceConsumer(internalTypes.valueAt(i)).hide(animationFinished, animationType);
-        }
-        reportRequestedVisibleTypes();
-
-        if (fromIme) {
-            Trace.asyncTraceEnd(TRACE_TAG_VIEW, "IC.hideRequestFromIme", 0);
-        }
-    }
-
-    private void showDirectly(@InsetsType int types, boolean fromIme) {
-        if ((types & ime()) != 0) {
-            ImeTracing.getInstance().triggerClientDump("InsetsController#showDirectly",
-                    mHost.getInputMethodManager(), null /* icProto */);
-        }
-        final ArraySet<Integer> internalTypes = InsetsState.toInternalType(types);
-        for (int i = internalTypes.size() - 1; i >= 0; i--) {
-            getSourceConsumer(internalTypes.valueAt(i)).show(false /* fromIme */);
-        }
-        reportRequestedVisibleTypes();
-
-        if (fromIme) {
-            Trace.asyncTraceEnd(TRACE_TAG_VIEW, "IC.showRequestFromIme", 0);
-        }
     }
 
     /**
