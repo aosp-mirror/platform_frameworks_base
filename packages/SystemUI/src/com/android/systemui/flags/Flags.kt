@@ -176,6 +176,10 @@ object Flags {
     @JvmField
     val LIGHT_REVEAL_MIGRATION = unreleasedFlag(218, "light_reveal_migration", teamfood = false)
 
+    // TODO(b/262780002): Tracking Bug
+    @JvmField
+    val REVAMPED_WALLPAPER_UI = unreleasedFlag(222, "revamped_wallpaper_ui", teamfood = false)
+
     /** Flag to control the migration of face auth to modern architecture. */
     // TODO(b/262838215): Tracking bug
     @JvmField val FACE_AUTH_REFACTOR = unreleasedFlag(220, "face_auth_refactor")
