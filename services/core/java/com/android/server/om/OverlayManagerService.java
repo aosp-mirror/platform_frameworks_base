@@ -51,6 +51,7 @@ import android.content.om.IOverlayManager;
 import android.content.om.OverlayIdentifier;
 import android.content.om.OverlayInfo;
 import android.content.om.OverlayManagerTransaction;
+import android.content.om.OverlayManagerTransaction.Request;
 import android.content.om.OverlayableInfo;
 import android.content.pm.IPackageManager;
 import android.content.pm.PackageManagerInternal;
@@ -107,6 +108,7 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -978,7 +980,8 @@ public final class OverlayManagerService extends SystemService {
             synchronized (mLock) {
                 // execute the requests (as calling user)
                 Set<UserPackage> affectedPackagesToUpdate = null;
-                for (final OverlayManagerTransaction.Request request : transaction) {
+                for (Iterator<Request> it = transaction.getRequests(); it.hasNext(); ) {
+                    Request request = it.next();
                     affectedPackagesToUpdate = CollectionUtils.addAll(affectedPackagesToUpdate,
                             executeRequest(request));
                 }
