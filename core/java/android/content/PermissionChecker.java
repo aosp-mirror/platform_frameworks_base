@@ -73,13 +73,12 @@ public final class PermissionChecker {
     public static final int PERMISSION_GRANTED = PermissionCheckerManager.PERMISSION_GRANTED;
 
     /**
-     * The permission is denied. Applicable only to runtime and app op permissions.
+     * The permission is denied. Applicable only to runtime permissions.
      *
      * <p>Returned when:
      * <ul>
      *   <li>the runtime permission is granted, but the corresponding app op is denied
      *       for runtime permissions.</li>
-     *   <li>the app ops is ignored for app op permissions.</li>
      * </ul>
      *
      * @hide
