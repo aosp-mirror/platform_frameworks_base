@@ -360,6 +360,17 @@ public class LogModule {
     }
 
     /**
+     * Provides a {@link LogBuffer} for use by
+     *  {@link com.android.keyguard.faceauth.KeyguardFaceAuthManagerImpl}.
+     */
+    @Provides
+    @SysUISingleton
+    @FaceAuthLog
+    public static LogBuffer provideFaceAuthLog(LogBufferFactory factory) {
+        return factory.create("KeyguardFaceAuthManagerLog", 300);
+    }
+
+    /**
      * Provides a {@link LogBuffer} for bluetooth-related logs.
      */
     @Provides
