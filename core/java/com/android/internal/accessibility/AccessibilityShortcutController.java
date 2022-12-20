@@ -21,6 +21,7 @@ import static android.view.WindowManager.LayoutParams.TYPE_KEYGUARD_DIALOG;
 import static android.view.accessibility.AccessibilityManager.ACCESSIBILITY_SHORTCUT_KEY;
 
 import static com.android.internal.accessibility.dialog.AccessibilityTargetHelper.getTargets;
+import static com.android.internal.os.RoSystemProperties.SUPPORT_ONE_HANDED_MODE;
 import static com.android.internal.util.ArrayUtils.convertToLongArray;
 
 import android.accessibilityservice.AccessibilityServiceInfo;
@@ -151,11 +152,13 @@ public class AccessibilityShortcutController {
                             Settings.Secure.ACCESSIBILITY_DISPLAY_DALTONIZER_ENABLED,
                             "1" /* Value to enable */, "0" /* Value to disable */,
                             R.string.color_correction_feature_name));
-            featuresMap.put(ONE_HANDED_COMPONENT_NAME,
-                    new ToggleableFrameworkFeatureInfo(
-                            Settings.Secure.ONE_HANDED_MODE_ACTIVATED,
-                            "1" /* Value to enable */, "0" /* Value to disable */,
-                            R.string.one_handed_mode_feature_name));
+            if (SUPPORT_ONE_HANDED_MODE) {
+                featuresMap.put(ONE_HANDED_COMPONENT_NAME,
+                        new ToggleableFrameworkFeatureInfo(
+                                Settings.Secure.ONE_HANDED_MODE_ACTIVATED,
+                                "1" /* Value to enable */, "0" /* Value to disable */,
+                                R.string.one_handed_mode_feature_name));
+            }
             featuresMap.put(REDUCE_BRIGHT_COLORS_COMPONENT_NAME,
                     new ToggleableFrameworkFeatureInfo(
                             Settings.Secure.REDUCE_BRIGHT_COLORS_ACTIVATED,
