@@ -37,7 +37,6 @@ import android.telephony.TelephonyManager
 import androidx.annotation.VisibleForTesting
 import com.android.internal.telephony.PhoneConstants
 import com.android.settingslib.SignalIcon.MobileIconGroup
-import com.android.settingslib.mobile.MobileMappings
 import com.android.settingslib.mobile.MobileMappings.Config
 import com.android.systemui.broadcast.BroadcastDispatcher
 import com.android.systemui.common.coroutine.ConflatedCallbackFlow.conflatedCallbackFlow
@@ -152,17 +151,7 @@ constructor(
             IntentFilter(CarrierConfigManager.ACTION_CARRIER_CONFIG_CHANGED)
         )
 
-    /**
-     * [Config] is an object that tracks relevant configuration flags for a given subscription ID.
-     * In the case of [MobileMappings], it's hard-coded to check the default data subscription's
-     * config, so this will apply to every icon that we care about.
-     *
-     * Relevant bits in the config are things like
-     * [CarrierConfigManager.KEY_SHOW_4G_FOR_LTE_DATA_ICON_BOOL]
-     *
-     * This flow will produce whenever the default data subscription or the carrier config changes.
-     */
-    private val defaultDataSubRatConfig: StateFlow<Config> =
+    override val defaultDataSubRatConfig: StateFlow<Config> =
         merge(defaultDataSubIdChangeEvent, carrierConfigChangedEvent)
             .mapLatest { Config.readConfig(context) }
             .stateIn(

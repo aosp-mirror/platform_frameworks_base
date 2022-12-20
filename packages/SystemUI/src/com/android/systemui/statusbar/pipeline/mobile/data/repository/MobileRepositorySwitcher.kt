@@ -19,6 +19,7 @@ package com.android.systemui.statusbar.pipeline.mobile.data.repository
 import android.os.Bundle
 import androidx.annotation.VisibleForTesting
 import com.android.settingslib.SignalIcon
+import com.android.settingslib.mobile.MobileMappings
 import com.android.systemui.common.coroutine.ConflatedCallbackFlow.conflatedCallbackFlow
 import com.android.systemui.dagger.qualifiers.Application
 import com.android.systemui.demomode.DemoMode
@@ -121,6 +122,15 @@ constructor(
                 scope,
                 SharingStarted.WhileSubscribed(),
                 realRepository.activeMobileDataSubscriptionId.value
+            )
+
+    override val defaultDataSubRatConfig: StateFlow<MobileMappings.Config> =
+        activeRepo
+            .flatMapLatest { it.defaultDataSubRatConfig }
+            .stateIn(
+                scope,
+                SharingStarted.WhileSubscribed(),
+                realRepository.defaultDataSubRatConfig.value
             )
 
     override val defaultMobileIconMapping: Flow<Map<String, SignalIcon.MobileIconGroup>> =
