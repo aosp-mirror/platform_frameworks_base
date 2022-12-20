@@ -344,7 +344,6 @@ public class DisplayPolicy {
     private boolean mShouldAttachNavBarToAppDuringTransition;
 
     // -------- PolicyHandler --------
-    private static final int MSG_REQUEST_TRANSIENT_BARS = 2;
     private static final int MSG_ENABLE_POINTER_LOCATION = 4;
     private static final int MSG_DISABLE_POINTER_LOCATION = 5;
 
@@ -364,11 +363,6 @@ public class DisplayPolicy {
         @Override
         public void handleMessage(Message msg) {
             switch (msg.what) {
-                case MSG_REQUEST_TRANSIENT_BARS:
-                    synchronized (mLock) {
-                        ((Runnable) msg.obj).run();
-                    }
-                    break;
                 case MSG_ENABLE_POINTER_LOCATION:
                     enablePointerLocation();
                     break;
@@ -413,7 +407,11 @@ public class DisplayPolicy {
         mSystemGestures = new SystemGesturesPointerEventListener(mUiContext, mHandler,
                 new SystemGesturesPointerEventListener.Callbacks() {
 
+                    private static final long MOUSE_GESTURE_DELAY_MS = 500;
+
+                    private Runnable mOnSwipeFromLeft = this::onSwipeFromLeft;
                     private Runnable mOnSwipeFromTop = this::onSwipeFromTop;
+                    private Runnable mOnSwipeFromRight = this::onSwipeFromRight;
                     private Runnable mOnSwipeFromBottom = this::onSwipeFromBottom;
 
                     private Insets getControllableInsets(WindowState win) {
@@ -514,24 +512,47 @@ public class DisplayPolicy {
                     }
 
                     @Override
+                    public void onMouseHoverAtLeft() {
+                        mHandler.removeCallbacks(mOnSwipeFromLeft);
+                        mHandler.postDelayed(mOnSwipeFromLeft, MOUSE_GESTURE_DELAY_MS);
+                    }
+
+                    @Override
                     public void onMouseHoverAtTop() {
-                        mHandler.removeMessages(MSG_REQUEST_TRANSIENT_BARS);
-                        Message msg = mHandler.obtainMessage(MSG_REQUEST_TRANSIENT_BARS);
-                        msg.obj = mOnSwipeFromTop;
-                        mHandler.sendMessageDelayed(msg, 500 /* delayMillis */);
+                        mHandler.removeCallbacks(mOnSwipeFromTop);
+                        mHandler.postDelayed(mOnSwipeFromTop, MOUSE_GESTURE_DELAY_MS);
+                    }
+
+                    @Override
+                    public void onMouseHoverAtRight() {
+                        mHandler.removeCallbacks(mOnSwipeFromRight);
+                        mHandler.postDelayed(mOnSwipeFromRight, MOUSE_GESTURE_DELAY_MS);
                     }
 
                     @Override
                     public void onMouseHoverAtBottom() {
-                        mHandler.removeMessages(MSG_REQUEST_TRANSIENT_BARS);
-                        Message msg = mHandler.obtainMessage(MSG_REQUEST_TRANSIENT_BARS);
-                        msg.obj = mOnSwipeFromBottom;
-                        mHandler.sendMessageDelayed(msg, 500 /* delayMillis */);
+                        mHandler.removeCallbacks(mOnSwipeFromBottom);
+                        mHandler.postDelayed(mOnSwipeFromBottom, MOUSE_GESTURE_DELAY_MS);
                     }
 
                     @Override
-                    public void onMouseLeaveFromEdge() {
-                        mHandler.removeMessages(MSG_REQUEST_TRANSIENT_BARS);
+                    public void onMouseLeaveFromLeft() {
+                        mHandler.removeCallbacks(mOnSwipeFromLeft);
+                    }
+
+                    @Override
+                    public void onMouseLeaveFromTop() {
+                        mHandler.removeCallbacks(mOnSwipeFromTop);
+                    }
+
+                    @Override
+                    public void onMouseLeaveFromRight() {
+                        mHandler.removeCallbacks(mOnSwipeFromRight);
+                    }
+
+                    @Override
+                    public void onMouseLeaveFromBottom() {
+                        mHandler.removeCallbacks(mOnSwipeFromBottom);
                     }
                 });
         displayContent.registerPointerEventListener(mSystemGestures);
