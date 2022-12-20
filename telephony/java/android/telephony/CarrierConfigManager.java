@@ -8652,6 +8652,14 @@ public class CarrierConfigManager {
         public static final String KEY_SUPPORTS_EAP_AKA_FAST_REAUTH_BOOL =
                 KEY_PREFIX + "supports_eap_aka_fast_reauth_bool";
 
+        /**
+         * Type of IP preference used to prioritize ePDG servers. Possible values are
+         * {@link #EPDG_ADDRESS_IPV4_PREFERRED}, {@link #EPDG_ADDRESS_IPV6_PREFERRED},
+         * {@link #EPDG_ADDRESS_IPV4_ONLY}
+         */
+        public static final String KEY_EPDG_ADDRESS_IP_TYPE_PREFERENCE_INT =
+                KEY_PREFIX + "epdg_address_ip_type_preference_int";
+
         /** @hide */
         @IntDef({AUTHENTICATION_METHOD_EAP_ONLY, AUTHENTICATION_METHOD_CERT})
         public @interface AuthenticationMethodType {}
@@ -8715,6 +8723,39 @@ public class CarrierConfigManager {
          *     Exchange Protocol Version 2 (IKEv2)</a>
          */
         public static final int ID_TYPE_KEY_ID = 11;
+
+        /** @hide */
+        @IntDef({
+                EPDG_ADDRESS_IPV4_PREFERRED,
+                EPDG_ADDRESS_IPV6_PREFERRED,
+                EPDG_ADDRESS_IPV4_ONLY,
+                EPDG_ADDRESS_IPV6_ONLY,
+                EPDG_ADDRESS_SYSTEM_PREFERRED
+        })
+        public @interface EpdgAddressIpPreference {}
+
+        /** Prioritize IPv4 ePDG addresses. */
+        public static final int EPDG_ADDRESS_IPV4_PREFERRED = 0;
+
+        /** Prioritize IPv6 ePDG addresses */
+        public static final int EPDG_ADDRESS_IPV6_PREFERRED = 1;
+
+        /** Use IPv4 ePDG addresses only. */
+        public static final int EPDG_ADDRESS_IPV4_ONLY = 2;
+
+        /** Use IPv6 ePDG addresses only.
+         * @hide
+         */
+        public static final int EPDG_ADDRESS_IPV6_ONLY = 3;
+
+        /** Follow the priority from DNS resolution results, which are sorted by using RFC6724
+         * algorithm.
+         *
+         * @see <a href="https://tools.ietf.org/html/rfc6724#section-6">RFC 6724, Default Address
+         *     Selection for Internet Protocol Version 6 (IPv6)</a>
+         * @hide
+         */
+        public static final int EPDG_ADDRESS_SYSTEM_PREFERRED = 4;
 
         private Iwlan() {}
 
@@ -8799,7 +8840,7 @@ public class CarrierConfigManager {
             defaults.putInt(KEY_EPDG_PCO_ID_IPV6_INT, 0);
             defaults.putInt(KEY_EPDG_PCO_ID_IPV4_INT, 0);
             defaults.putBoolean(KEY_SUPPORTS_EAP_AKA_FAST_REAUTH_BOOL, false);
-
+            defaults.putInt(KEY_EPDG_ADDRESS_IP_TYPE_PREFERENCE_INT, EPDG_ADDRESS_IPV4_PREFERRED);
             return defaults;
         }
     }

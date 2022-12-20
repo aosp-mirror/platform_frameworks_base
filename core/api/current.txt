@@ -42755,6 +42755,9 @@ package android.telephony {
     field public static final int AUTHENTICATION_METHOD_CERT = 1; // 0x1
     field public static final int AUTHENTICATION_METHOD_EAP_ONLY = 0; // 0x0
     field public static final int EPDG_ADDRESS_CELLULAR_LOC = 3; // 0x3
+    field public static final int EPDG_ADDRESS_IPV4_ONLY = 2; // 0x2
+    field public static final int EPDG_ADDRESS_IPV4_PREFERRED = 0; // 0x0
+    field public static final int EPDG_ADDRESS_IPV6_PREFERRED = 1; // 0x1
     field public static final int EPDG_ADDRESS_PCO = 2; // 0x2
     field public static final int EPDG_ADDRESS_PLMN = 1; // 0x1
     field public static final int EPDG_ADDRESS_STATIC = 0; // 0x0
@@ -42769,6 +42772,7 @@ package android.telephony {
     field public static final String KEY_CHILD_SESSION_AES_CTR_KEY_SIZE_INT_ARRAY = "iwlan.child_session_aes_ctr_key_size_int_array";
     field public static final String KEY_DIFFIE_HELLMAN_GROUPS_INT_ARRAY = "iwlan.diffie_hellman_groups_int_array";
     field public static final String KEY_DPD_TIMER_SEC_INT = "iwlan.dpd_timer_sec_int";
+    field public static final String KEY_EPDG_ADDRESS_IP_TYPE_PREFERENCE_INT = "iwlan.epdg_address_ip_type_preference_int";
     field public static final String KEY_EPDG_ADDRESS_PRIORITY_INT_ARRAY = "iwlan.epdg_address_priority_int_array";
     field public static final String KEY_EPDG_AUTHENTICATION_METHOD_INT = "iwlan.epdg_authentication_method_int";
     field public static final String KEY_EPDG_PCO_ID_IPV4_INT = "iwlan.epdg_pco_id_ipv4_int";
