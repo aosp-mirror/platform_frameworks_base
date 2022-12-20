@@ -684,6 +684,15 @@ public abstract class AbstractMasterSystemService<M extends AbstractMasterSystem
      */
     @GuardedBy("mLock")
     protected List<S> updateCachedServiceListLocked(@UserIdInt int userId, boolean disabled) {
+        if (mServiceNameResolver.isConfiguredInMultipleMode()) {
+            // In multiple mode, we have multiple instances of AbstractPerUserSystemService, per
+            // user where each instance holds information needed to connect to a backend. An
+            // update operation in this mode needs to account for addition, deletion, change
+            // of backends and cannot be executed in the scope of a given
+            // AbstractPerUserSystemService.
+            return updateCachedServiceListMultiModeLocked(userId, disabled);
+        }
+        // isConfiguredInMultipleMode is false
         final List<S> services = getServiceListForUserLocked(userId);
         if (services == null) {
             return null;
@@ -700,6 +709,19 @@ public abstract class AbstractMasterSystemService<M extends AbstractMasterSystem
                     }
                 }
             }
+        }
+        return services;
+    }
+
+    @GuardedBy("mLock")
+    private List<S> updateCachedServiceListMultiModeLocked(int userId, boolean disabled) {
+        final int resolvedUserId = ActivityManager.handleIncomingUser(Binder.getCallingPid(),
+                Binder.getCallingUid(), userId, false, false, null,
+                null);
+        List<S> services = new ArrayList<>();
+	synchronized (mLock) {
+            removeCachedServiceListLocked(resolvedUserId);
+            services = getServiceListForUserLocked(userId);
         }
         return services;
     }
