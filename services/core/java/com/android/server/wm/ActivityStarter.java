@@ -1661,6 +1661,12 @@ class ActivityStarter {
             pmInternal.grantImplicitAccess(mStartActivity.mUserId, mIntent,
                     UserHandle.getAppId(mStartActivity.info.applicationInfo.uid) /*recipient*/,
                     resultToUid /*visible*/, true /*direct*/);
+        } else if (mStartActivity.mShareIdentity) {
+            final PackageManagerInternal pmInternal =
+                    mService.getPackageManagerInternalLocked();
+            pmInternal.grantImplicitAccess(mStartActivity.mUserId, mIntent,
+                    UserHandle.getAppId(mStartActivity.info.applicationInfo.uid) /*recipient*/,
+                    r.launchedFromUid /*visible*/, true /*direct*/);
         }
         final Task startedTask = mStartActivity.getTask();
         if (newTask) {
