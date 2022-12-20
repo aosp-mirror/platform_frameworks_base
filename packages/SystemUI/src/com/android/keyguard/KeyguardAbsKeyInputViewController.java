@@ -103,7 +103,6 @@ public abstract class KeyguardAbsKeyInputViewController<T extends KeyguardAbsKey
 
     @Override
     public void reset() {
-        super.reset();
         // start fresh
         mDismissing = false;
         mView.resetPasswordText(false /* animate */, false /* announce */);
