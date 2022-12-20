@@ -292,6 +292,7 @@ class DemoMobileConnectionsRepositoryTest : SysuiTestCase() {
                 assertThat(connectionInfo.dataActivityDirection).isEqualTo(model.activity)
                 assertThat(connectionInfo.carrierNetworkChangeActive)
                     .isEqualTo(model.carrierNetworkChange)
+                assertThat(connectionInfo.isRoaming).isEqualTo(model.roaming)
 
                 // TODO(b/261029387) check these once we start handling them
                 assertThat(connectionInfo.isEmergencyOnly).isFalse()
@@ -313,6 +314,7 @@ fun validMobileEvent(
     inflateStrength: Boolean? = false,
     activity: Int? = null,
     carrierNetworkChange: Boolean = false,
+    roaming: Boolean = false,
 ): FakeNetworkEventModel =
     FakeNetworkEventModel.Mobile(
         level = level,
@@ -322,4 +324,5 @@ fun validMobileEvent(
         inflateStrength = inflateStrength,
         activity = activity,
         carrierNetworkChange = carrierNetworkChange,
+        roaming = roaming,
     )
