@@ -21,7 +21,6 @@ import static android.view.InsetsControllerProto.CONTROL;
 import static android.view.InsetsControllerProto.STATE;
 import static android.view.InsetsState.ITYPE_CAPTION_BAR;
 import static android.view.InsetsState.ITYPE_IME;
-import static android.view.InsetsState.toPublicType;
 import static android.view.ViewRootImpl.CAPTION_ON_SHELL;
 import static android.view.WindowInsets.Type.FIRST;
 import static android.view.WindowInsets.Type.LAST;
@@ -569,8 +568,9 @@ public class InsetsController implements WindowInsetsController, InsetsAnimation
     private final InsetsState mLastDispatchedState = new InsetsState();
 
     private final Rect mFrame = new Rect();
-    private final BiFunction<InsetsController, Integer, InsetsSourceConsumer> mConsumerCreator;
+    private final BiFunction<InsetsController, InsetsSource, InsetsSourceConsumer> mConsumerCreator;
     private final SparseArray<InsetsSourceConsumer> mSourceConsumers = new SparseArray<>();
+    private final InsetsSourceConsumer mImeSourceConsumer;
     private final Host mHost;
     private final Handler mHandler;
 
@@ -621,19 +621,20 @@ public class InsetsController implements WindowInsetsController, InsetsAnimation
             this::invokeControllableInsetsChangedListeners;
 
     public InsetsController(Host host) {
-        this(host, (controller, type) -> {
-            if (type == ITYPE_IME) {
-                return new ImeInsetsSourceConsumer(controller.mState, Transaction::new, controller);
+        this(host, (controller, source) -> {
+            if (source.getType() == ime()) {
+                return new ImeInsetsSourceConsumer(source.getId(), controller.mState,
+                        Transaction::new, controller);
             } else {
-                return new InsetsSourceConsumer(type, controller.mState, Transaction::new,
-                        controller);
+                return new InsetsSourceConsumer(source.getId(), source.getType(), controller.mState,
+                        Transaction::new, controller);
             }
         }, host.getHandler());
     }
 
     @VisibleForTesting
     public InsetsController(Host host,
-            BiFunction<InsetsController, Integer, InsetsSourceConsumer> consumerCreator,
+            BiFunction<InsetsController, InsetsSource, InsetsSourceConsumer> consumerCreator,
             Handler handler) {
         mHost = host;
         mConsumerCreator = consumerCreator;
@@ -683,6 +684,9 @@ public class InsetsController implements WindowInsetsController, InsetsAnimation
                 dispatchAnimationEnd(finishedAnimations.get(i));
             }
         };
+
+        // Make mImeSourceConsumer always non-null.
+        mImeSourceConsumer = getSourceConsumer(new InsetsSource(ITYPE_IME, ime()));
     }
 
     @VisibleForTesting
@@ -741,28 +745,37 @@ public class InsetsController implements WindowInsetsController, InsetsAnimation
 
     private void updateState(InsetsState newState) {
         mState.set(newState, 0 /* types */);
+        for (int i = mSourceConsumers.size() - 1; i >= 0; i--) {
+            final InsetsSourceConsumer consumer = mSourceConsumers.valueAt(i);
+            final InsetsSource source = newState.peekSource(consumer.getId());
+            if (source == null && consumer != mImeSourceConsumer) {
+                // IME source consumer should always be there since we need to communicate with
+                // InputMethodManager no matter we have the source or not.
+                mSourceConsumers.removeAt(i);
+            }
+        }
         @InsetsType int existingTypes = 0;
         @InsetsType int visibleTypes = 0;
         @InsetsType int disabledUserAnimationTypes = 0;
         @InsetsType int[] cancelledUserAnimationTypes = {0};
-        for (@InternalInsetsType int type = 0; type < InsetsState.SIZE; type++) {
-            InsetsSource source = newState.peekSource(type);
+        for (int i = 0; i < InsetsState.SIZE; i++) {
+            InsetsSource source = newState.peekSource(i);
             if (source == null) continue;
-            @InsetsType int insetsType = toPublicType(type);
-            @AnimationType int animationType = getAnimationType(insetsType);
+            @InsetsType int type = source.getType();
+            @AnimationType int animationType = getAnimationType(type);
             if (!source.isUserControllable()) {
                 // The user animation is not allowed when visible frame is empty.
-                disabledUserAnimationTypes |= insetsType;
+                disabledUserAnimationTypes |= type;
                 if (animationType == ANIMATION_TYPE_USER) {
                     // Existing user animation needs to be cancelled.
                     animationType = ANIMATION_TYPE_NONE;
-                    cancelledUserAnimationTypes[0] |= insetsType;
+                    cancelledUserAnimationTypes[0] |= type;
                 }
             }
-            getSourceConsumer(type).updateSource(source, animationType);
-            existingTypes |= insetsType;
+            getSourceConsumer(source).updateSource(source, animationType);
+            existingTypes |= type;
             if (source.isVisible()) {
-                visibleTypes |= insetsType;
+                visibleTypes |= type;
             }
         }
 
@@ -899,25 +912,34 @@ public class InsetsController implements WindowInsetsController, InsetsAnimation
         }
 
         @InsetsType int controllableTypes = 0;
+        int consumedControlCount = 0;
         final int[] showTypes = new int[1];
         final int[] hideTypes = new int[1];
 
         // Ensure to update all existing source consumers
         for (int i = mSourceConsumers.size() - 1; i >= 0; i--) {
             final InsetsSourceConsumer consumer = mSourceConsumers.valueAt(i);
-            final InsetsSourceControl control = mTmpControlArray.get(consumer.getInternalType());
+            final InsetsSourceControl control = mTmpControlArray.get(consumer.getId());
+            if (control != null) {
+                controllableTypes |= control.getType();
+                consumedControlCount++;
+            }
 
             // control may be null, but we still need to update the control to null if it got
             // revoked.
             consumer.setControl(control, showTypes, hideTypes);
         }
 
-        // Ensure to create source consumers if not available yet.
-        for (int i = mTmpControlArray.size() - 1; i >= 0; i--) {
-            final InsetsSourceControl control = mTmpControlArray.valueAt(i);
-            final InsetsSourceConsumer consumer = getSourceConsumer(control.getId());
-            consumer.setControl(control, showTypes, hideTypes);
-            controllableTypes |= control.getType();
+        if (consumedControlCount != mTmpControlArray.size()) {
+            // Whoops! The server sent us some controls without sending corresponding sources.
+            for (int i = mTmpControlArray.size() - 1; i >= 0; i--) {
+                final InsetsSourceControl control = mTmpControlArray.valueAt(i);
+                final InsetsSourceConsumer consumer = mSourceConsumers.get(control.getId());
+                if (consumer == null) {
+                    control.release(SurfaceControl::release);
+                    Log.e(TAG, control + " has no consumer.");
+                }
+            }
         }
 
         if (mTmpControlArray.size() > 0) {
@@ -1144,11 +1166,11 @@ public class InsetsController implements WindowInsetsController, InsetsAnimation
             types &= ~mDisabledUserAnimationInsetsTypes;
 
             if (fromIme && (disabledTypes & ime()) != 0
-                    && !mState.getSource(ITYPE_IME).isVisible()) {
+                    && !mState.getSource(mImeSourceConsumer.getId()).isVisible()) {
                 // We've requested IMM to show IME, but the IME is not controllable. We need to
                 // cancel the request.
                 setRequestedVisibleTypes(0 /* visibleTypes */, ime());
-                if (getSourceConsumer(ITYPE_IME).onAnimationStateChanged(false /* running */)) {
+                if (mImeSourceConsumer.onAnimationStateChanged(false /* running */)) {
                     notifyVisibilityChanged();
                 }
             }
@@ -1163,11 +1185,10 @@ public class InsetsController implements WindowInsetsController, InsetsAnimation
         if (DEBUG) Log.d(TAG, "controlAnimation types: " + types);
         mLastStartedAnimTypes |= types;
 
-        final ArraySet<Integer> internalTypes = InsetsState.toInternalType(types);
         final SparseArray<InsetsSourceControl> controls = new SparseArray<>();
 
         Pair<Integer, Boolean> typesReadyPair = collectSourceControls(
-                fromIme, internalTypes, controls, animationType);
+                fromIme, types, controls, animationType);
         int typesReady = typesReadyPair.first;
         boolean imeReady = typesReadyPair.second;
         if (DEBUG) Log.d(TAG, String.format(
@@ -1257,13 +1278,15 @@ public class InsetsController implements WindowInsetsController, InsetsAnimation
     /**
      * @return Pair of (types ready to animate, IME ready to animate).
      */
-    private Pair<Integer, Boolean> collectSourceControls(boolean fromIme,
-            ArraySet<Integer> internalTypes, SparseArray<InsetsSourceControl> controls,
-            @AnimationType int animationType) {
+    private Pair<Integer, Boolean> collectSourceControls(boolean fromIme, @InsetsType int types,
+            SparseArray<InsetsSourceControl> controls, @AnimationType int animationType) {
         int typesReady = 0;
         boolean imeReady = true;
-        for (int i = internalTypes.size() - 1; i >= 0; i--) {
-            final InsetsSourceConsumer consumer = getSourceConsumer(internalTypes.valueAt(i));
+        for (int i = mSourceConsumers.size() - 1; i >= 0; i--) {
+            final InsetsSourceConsumer consumer = mSourceConsumers.valueAt(i);
+            if ((consumer.getType() & types) == 0) {
+                continue;
+            }
             boolean show = animationType == ANIMATION_TYPE_SHOW
                     || animationType == ANIMATION_TYPE_USER;
             boolean canRun = true;
@@ -1291,7 +1314,7 @@ public class InsetsController implements WindowInsetsController, InsetsAnimation
             if (!canRun) {
                 if (WARN) Log.w(TAG, String.format(
                         "collectSourceControls can't continue show for type: %s fromIme: %b",
-                        InsetsState.typeToString(consumer.getInternalType()), fromIme));
+                        WindowInsets.Type.toString(consumer.getType()), fromIme));
                 continue;
             }
             final InsetsSourceControl control = consumer.getControl();
@@ -1437,14 +1460,27 @@ public class InsetsController implements WindowInsetsController, InsetsAnimation
     }
 
     @VisibleForTesting
-    public @NonNull InsetsSourceConsumer getSourceConsumer(int id) {
-        InsetsSourceConsumer consumer = mSourceConsumers.get(id);
+    public @NonNull InsetsSourceConsumer getSourceConsumer(InsetsSource source) {
+        final int sourceId = source.getId();
+        InsetsSourceConsumer consumer = mSourceConsumers.get(sourceId);
         if (consumer != null) {
             return consumer;
         }
-        consumer = mConsumerCreator.apply(this, id);
-        mSourceConsumers.put(id, consumer);
+        if (source.getType() == ime() && mImeSourceConsumer != null) {
+            // WindowInsets.Type.ime() should be only provided by one source.
+            mSourceConsumers.remove(mImeSourceConsumer.getId());
+            consumer = mImeSourceConsumer;
+            consumer.setId(sourceId);
+        } else {
+            consumer = mConsumerCreator.apply(this, source);
+        }
+        mSourceConsumers.put(sourceId, consumer);
         return consumer;
+    }
+
+    @VisibleForTesting
+    public @NonNull InsetsSourceConsumer getImeSourceConsumer() {
+        return mImeSourceConsumer;
     }
 
     @VisibleForTesting
@@ -1467,14 +1503,14 @@ public class InsetsController implements WindowInsetsController, InsetsAnimation
      * Called when current window gains focus.
      */
     public void onWindowFocusGained(boolean hasViewFocused) {
-        getSourceConsumer(ITYPE_IME).onWindowFocusGained(hasViewFocused);
+        mImeSourceConsumer.onWindowFocusGained(hasViewFocused);
     }
 
     /**
      * Called when current window loses focus.
      */
     public void onWindowFocusLost() {
-        getSourceConsumer(ITYPE_IME).onWindowFocusLost();
+        mImeSourceConsumer.onWindowFocusLost();
     }
 
     @VisibleForTesting
@@ -1518,13 +1554,12 @@ public class InsetsController implements WindowInsetsController, InsetsAnimation
         // TODO(b/166736352): We should only skip the animation of specific types, not all types.
         boolean skipAnim = false;
         if ((types & ime()) != 0) {
-            final InsetsSourceConsumer consumer = mSourceConsumers.get(ITYPE_IME);
-            final InsetsSourceControl imeControl = consumer != null ? consumer.getControl() : null;
+            final InsetsSourceControl imeControl = mImeSourceConsumer.getControl();
             // Skip showing animation once that made by system for some reason.
             // (e.g. starting window with IME snapshot)
             if (imeControl != null) {
                 skipAnim = imeControl.getAndClearSkipAnimationOnce() && show
-                        && consumer.hasViewFocusWhenWindowFocusGain();
+                        && mImeSourceConsumer.hasViewFocusWhenWindowFocusGain();
             }
         }
         applyAnimation(types, show, fromIme, skipAnim, statsToken);
@@ -1683,7 +1718,7 @@ public class InsetsController implements WindowInsetsController, InsetsAnimation
         @InsetsType int result = 0;
         for (int i = mSourceConsumers.size() - 1; i >= 0; i--) {
             InsetsSourceConsumer consumer = mSourceConsumers.valueAt(i);
-            InsetsSource source = mState.peekSource(consumer.getInternalType());
+            InsetsSource source = mState.peekSource(consumer.getId());
             if (consumer.getControl() != null && source != null && source.isUserControllable()) {
                 result |= consumer.getType();
             }

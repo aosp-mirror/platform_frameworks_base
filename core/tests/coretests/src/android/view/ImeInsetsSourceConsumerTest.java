@@ -60,7 +60,7 @@ import org.mockito.Spy;
 public class ImeInsetsSourceConsumerTest {
 
     Context mContext = InstrumentationRegistry.getInstrumentation().getTargetContext();
-    ImeInsetsSourceConsumer mImeConsumer;
+    InsetsSourceConsumer mImeConsumer;
     @Spy InsetsController mController;
     SurfaceControl mLeash;
 
@@ -86,7 +86,7 @@ public class ImeInsetsSourceConsumerTest {
                     false,
                     TYPE_APPLICATION, WINDOWING_MODE_UNDEFINED,
                     SOFT_INPUT_ADJUST_RESIZE, 0, 0);
-            mImeConsumer = (ImeInsetsSourceConsumer) mController.getSourceConsumer(ITYPE_IME);
+            mImeConsumer = mController.getImeSourceConsumer();
         });
     }
 

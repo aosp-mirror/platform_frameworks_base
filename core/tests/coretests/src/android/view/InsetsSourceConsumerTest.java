@@ -100,7 +100,7 @@ public class InsetsSourceConsumerTest {
             mState.addSource(mSpyInsetsSource);
 
             mController = new InsetsController(new ViewRootInsetsControllerHost(mViewRoot));
-            mConsumer = new InsetsSourceConsumer(ITYPE_STATUS_BAR, mState,
+            mConsumer = new InsetsSourceConsumer(ITYPE_STATUS_BAR, statusBars(), mState,
                     () -> mMockTransaction, mController) {
                 @Override
                 public void removeSurface() {
@@ -146,7 +146,7 @@ public class InsetsSourceConsumerTest {
         InsetsController controller = new InsetsController(new ViewRootInsetsControllerHost(
                 mViewRoot));
         InsetsSourceConsumer consumer = new InsetsSourceConsumer(
-                ITYPE_IME, state, null, controller);
+                ITYPE_IME, ime(), state, null, controller);
 
         InsetsSource source = new InsetsSource(ITYPE_IME, ime());
         source.setFrame(0, 1, 2, 3);
@@ -216,9 +216,9 @@ public class InsetsSourceConsumerTest {
         InstrumentationRegistry.getInstrumentation().runOnMainSync(() -> {
             InsetsState state = new InsetsState();
             ViewRootInsetsControllerHost host = new ViewRootInsetsControllerHost(mViewRoot);
-            InsetsController insetsController = new InsetsController(host, (controller, type) -> {
-                if (type == ITYPE_IME) {
-                    return new InsetsSourceConsumer(ITYPE_IME, state,
+            InsetsController insetsController = new InsetsController(host, (controller, source) -> {
+                if (source.getType() == ime()) {
+                    return new InsetsSourceConsumer(ITYPE_IME, ime(), state,
                             () -> mMockTransaction, controller) {
                         @Override
                         public int requestShow(boolean fromController) {
@@ -226,10 +226,11 @@ public class InsetsSourceConsumerTest {
                         }
                     };
                 }
-                return new InsetsSourceConsumer(type, controller.getState(), Transaction::new,
-                        controller);
+                return new InsetsSourceConsumer(source.getId(), source.getType(),
+                        controller.getState(), Transaction::new, controller);
             }, host.getHandler());
-            InsetsSourceConsumer imeConsumer = insetsController.getSourceConsumer(ITYPE_IME);
+            InsetsSource imeSource = new InsetsSource(ITYPE_IME, ime());
+            InsetsSourceConsumer imeConsumer = insetsController.getSourceConsumer(imeSource);
 
             // Initial IME insets source control with its leash.
             imeConsumer.setControl(new InsetsSourceControl(ITYPE_IME, ime(), mLeash,
