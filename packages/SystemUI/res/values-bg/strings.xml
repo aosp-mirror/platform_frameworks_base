@@ -731,6 +731,8 @@
     <string name="wifi_is_off" msgid="5389597396308001471">"Функцията за Wi‑Fi е изключена"</string>
     <string name="bt_is_off" msgid="7436344904889461591">"Функцията за Bluetooth е изключена"</string>
     <string name="dnd_is_off" msgid="3185706903793094463">"Режимът „Не безпокойте“ е изключен"</string>
+    <!-- no translation found for dnd_is_on (7009368176361546279) -->
+    <skip />
     <string name="qs_dnd_prompt_auto_rule" msgid="3535469468310002616">"Режимът „Не безпокойте“ бе включен от автоматично правило (<xliff:g id="ID_1">%s</xliff:g>)."</string>
     <string name="qs_dnd_prompt_app" msgid="4027984447935396820">"Режимът „Не безпокойте“ бе включен от приложение (<xliff:g id="ID_1">%s</xliff:g>)."</string>
     <string name="qs_dnd_prompt_auto_rule_app" msgid="1841469944118486580">"Режимът „Не безпокойте“ бе включен от автоматично правило или от приложение."</string>
@@ -1010,10 +1012,8 @@
     <string name="rear_display_unfold_bottom_sheet_title" msgid="2137403802960396357">"Да се ползва ли предната камера за по-добро селфи?"</string>
     <string name="rear_display_bottom_sheet_description" msgid="1852662982816810352">"Използвайте задната камера за по-широка снимка с по-висока разделителна способност."</string>
     <string name="rear_display_bottom_sheet_warning" msgid="800995919558238930"><b>"✱ Този екран ще се изключи"</b></string>
-    <!-- no translation found for rear_display_accessibility_folded_animation (1538121649587978179) -->
-    <skip />
-    <!-- no translation found for rear_display_accessibility_unfolded_animation (1946153682258289040) -->
-    <skip />
+    <string name="rear_display_accessibility_folded_animation" msgid="1538121649587978179">"Разгъване на сгъваемо устройство"</string>
+    <string name="rear_display_accessibility_unfolded_animation" msgid="1946153682258289040">"Обръщане на сгъваемо устройство"</string>
     <!-- no translation found for stylus_battery_low (7134370101603167096) -->
     <skip />
 </resources>

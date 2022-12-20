@@ -731,6 +731,8 @@
     <string name="wifi_is_off" msgid="5389597396308001471">"વાઇ-ફાઇ બંધ છે"</string>
     <string name="bt_is_off" msgid="7436344904889461591">"બ્લૂટૂથ બંધ છે"</string>
     <string name="dnd_is_off" msgid="3185706903793094463">"ખલેલ પાડશો નહીં બંધ છે"</string>
+    <!-- no translation found for dnd_is_on (7009368176361546279) -->
+    <skip />
     <string name="qs_dnd_prompt_auto_rule" msgid="3535469468310002616">"ખલેલ પાડશો નહીં એક સ્વચાલિત નિયમ દ્વારા ચાલુ કરાયું હતું (<xliff:g id="ID_1">%s</xliff:g>)."</string>
     <string name="qs_dnd_prompt_app" msgid="4027984447935396820">"ખલેલ પાડશો નહીં એક ઍપ્લિકેશન દ્વારા ચાલુ કરાયું હતું (<xliff:g id="ID_1">%s</xliff:g>)."</string>
     <string name="qs_dnd_prompt_auto_rule_app" msgid="1841469944118486580">"ખલેલ પાડશો નહીં એક સ્વચાલિત નિયમ અથવા ઍપ્લિકેશન દ્વારા ચાલુ કરાયું હતું."</string>
@@ -1010,10 +1012,8 @@
     <string name="rear_display_unfold_bottom_sheet_title" msgid="2137403802960396357">"બહેતર સેલ્ફી લેવા ફ્રન્ટ ડિસ્પ્લે પર ફ્લિપ કરીએ?"</string>
     <string name="rear_display_bottom_sheet_description" msgid="1852662982816810352">"વધુ ઉચ્ચ રિઝોલ્યુશનવાળો વિશાળ ફોટો લેવા માટે પાછલા કૅમેરાનો ઉપયોગ કરો."</string>
     <string name="rear_display_bottom_sheet_warning" msgid="800995919558238930"><b>"✱ આ સ્ક્રીન બંધ થઈ જશે"</b></string>
-    <!-- no translation found for rear_display_accessibility_folded_animation (1538121649587978179) -->
-    <skip />
-    <!-- no translation found for rear_display_accessibility_unfolded_animation (1946153682258289040) -->
-    <skip />
+    <string name="rear_display_accessibility_folded_animation" msgid="1538121649587978179">"ફોલ્ડ કરી શકાય એવું ડિવાઇસ અનફોલ્ડ કરવામાં આવી રહ્યું છે"</string>
+    <string name="rear_display_accessibility_unfolded_animation" msgid="1946153682258289040">"ફોલ્ડ કરી શકાય એવું ડિવાઇસ ફ્લિપ કરવામાં આવી રહ્યું છે"</string>
     <!-- no translation found for stylus_battery_low (7134370101603167096) -->
     <skip />
 </resources>

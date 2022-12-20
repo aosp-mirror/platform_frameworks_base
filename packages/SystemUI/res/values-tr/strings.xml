@@ -731,6 +731,8 @@
     <string name="wifi_is_off" msgid="5389597396308001471">"Kablosuz bağlantı kapalı"</string>
     <string name="bt_is_off" msgid="7436344904889461591">"Bluetooth kapalı"</string>
     <string name="dnd_is_off" msgid="3185706903793094463">"Rahatsız Etmeyin kapalı"</string>
+    <!-- no translation found for dnd_is_on (7009368176361546279) -->
+    <skip />
     <string name="qs_dnd_prompt_auto_rule" msgid="3535469468310002616">"Rahatsız Etmeyin ayarı bir otomatik kural (<xliff:g id="ID_1">%s</xliff:g>) tarafından açıldı."</string>
     <string name="qs_dnd_prompt_app" msgid="4027984447935396820">"Rahatsız Etmeyin ayarı bir uygulama (<xliff:g id="ID_1">%s</xliff:g>) tarafından açıldı."</string>
     <string name="qs_dnd_prompt_auto_rule_app" msgid="1841469944118486580">"Rahatsız Etmeyin ayarı bir otomatik kural veya uygulama tarafından açıldı."</string>

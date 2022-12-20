@@ -731,6 +731,8 @@
     <string name="wifi_is_off" msgid="5389597396308001471">"Wi-Fi imezimwa"</string>
     <string name="bt_is_off" msgid="7436344904889461591">"Bluetooth imezimwa"</string>
     <string name="dnd_is_off" msgid="3185706903793094463">"Kipengele cha Usinisumbue kimezimwa"</string>
+    <!-- no translation found for dnd_is_on (7009368176361546279) -->
+    <skip />
     <string name="qs_dnd_prompt_auto_rule" msgid="3535469468310002616">"Kipengele cha Usinisumbue kimewashwa na sheria ya kiotomatiki <xliff:g id="ID_1">%s</xliff:g>."</string>
     <string name="qs_dnd_prompt_app" msgid="4027984447935396820">"Kipengele cha usinisumbue kimewashwa na programu (<xliff:g id="ID_1">%s</xliff:g>)."</string>
     <string name="qs_dnd_prompt_auto_rule_app" msgid="1841469944118486580">"Kipengele cha Usinisumbue kimewashwa na sheria ya kiotomatiki au programu."</string>
@@ -872,8 +874,7 @@
     <string name="media_output_dialog_button_stop_casting" msgid="6581379537930199189">"Acha kutuma"</string>
     <string name="media_output_dialog_accessibility_title" msgid="4681741064190167888">"Vifaa vya kutoa sauti vilivyopo"</string>
     <string name="media_output_dialog_accessibility_seekbar" msgid="5332843993805568978">"Sauti"</string>
-    <!-- no translation found for media_output_dialog_volume_percentage (1613984910585111798) -->
-    <skip />
+    <string name="media_output_dialog_volume_percentage" msgid="1613984910585111798">"<xliff:g id="PERCENTAGE">%1$d</xliff:g>%%"</string>
     <string name="media_output_first_broadcast_title" msgid="6292237789860753022">"Jinsi utangazaji unavyofanya kazi"</string>
     <string name="media_output_broadcast" msgid="3555580945878071543">"Tangaza"</string>
     <string name="media_output_first_notify_broadcast_message" msgid="6353857724136398494">"Watu walio karibu nawe wenye vifaa oanifu vya Bluetooth wanaweza kusikiliza maudhui unayoyatangaza"</string>
@@ -987,8 +988,7 @@
     <string name="dream_overlay_status_bar_camera_mic_off" msgid="3199425257833773569">"Kamera na maikrofoni zimezimwa"</string>
     <string name="dream_overlay_status_bar_notification_indicator" msgid="8091389255691081711">"{count,plural, =1{Arifa #}other{Arifa #}}"</string>
     <string name="dream_overlay_weather_complication_desc" msgid="824503662089783824">"<xliff:g id="WEATHER_CONDITION">%1$s</xliff:g>, <xliff:g id="TEMPERATURE">%2$s</xliff:g>"</string>
-    <!-- no translation found for note_task_button_label (8718616095800343136) -->
-    <skip />
+    <string name="note_task_button_label" msgid="8718616095800343136">"Kuandika vidokezo"</string>
     <string name="broadcasting_description_is_broadcasting" msgid="765627502786404290">"Inaarifu"</string>
     <string name="bt_le_audio_broadcast_dialog_title" msgid="3605428497924077811">"Ungependa kusimamisha utangazaji kwenye <xliff:g id="APP_NAME">%1$s</xliff:g>?"</string>
     <string name="bt_le_audio_broadcast_dialog_sub_title" msgid="7889684551194225793">"Ikiwa unatangaza kwenye <xliff:g id="SWITCHAPP">%1$s</xliff:g> au unabadilisha maudhui, tangazo lako la sasa litasimamishwa"</string>
@@ -1012,10 +1012,8 @@
     <string name="rear_display_unfold_bottom_sheet_title" msgid="2137403802960396357">"Ungependa kugeuza skrini ya mbele ili upige selfi?"</string>
     <string name="rear_display_bottom_sheet_description" msgid="1852662982816810352">"Tumia kamera ya nyuma ili upige picha pana iliyo na ubora wa juu."</string>
     <string name="rear_display_bottom_sheet_warning" msgid="800995919558238930"><b>"✱ Skrini hii itajizima"</b></string>
-    <!-- no translation found for rear_display_accessibility_folded_animation (1538121649587978179) -->
-    <skip />
-    <!-- no translation found for rear_display_accessibility_unfolded_animation (1946153682258289040) -->
-    <skip />
+    <string name="rear_display_accessibility_folded_animation" msgid="1538121649587978179">"Kifaa kinachokunjwa kikikunjuliwa"</string>
+    <string name="rear_display_accessibility_unfolded_animation" msgid="1946153682258289040">"Kifaa kinachokunjwa kikigeuzwa"</string>
     <!-- no translation found for stylus_battery_low (7134370101603167096) -->
     <skip />
 </resources>
