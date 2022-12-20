@@ -290,6 +290,17 @@ public class AlarmManager {
     @EnabledSince(targetSdkVersion = Build.VERSION_CODES.TIRAMISU)
     public static final long SCHEDULE_EXACT_ALARM_DENIED_BY_DEFAULT = 226439802L;
 
+    /**
+     * Holding the permission {@link Manifest.permission#SCHEDULE_EXACT_ALARM} will no longer pin
+     * the standby-bucket of the app to
+     * {@link android.app.usage.UsageStatsManager#STANDBY_BUCKET_WORKING_SET} or better.
+     *
+     * @hide
+     */
+    @ChangeId
+    @EnabledSince(targetSdkVersion = Build.VERSION_CODES.UPSIDE_DOWN_CAKE)
+    public static final long SCHEDULE_EXACT_ALARM_DOES_NOT_ELEVATE_BUCKET = 262645982L;
+
     @UnsupportedAppUsage
     private final IAlarmManager mService;
     private final Context mContext;
