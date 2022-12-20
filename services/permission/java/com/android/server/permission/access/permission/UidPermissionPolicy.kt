@@ -78,6 +78,38 @@ class UidPermissionPolicy : SchemePolicy() {
         onPermissionFlagsChangedListeners.forEachIndexed { _, it -> it.onStateMutated() }
     }
 
+    override fun MutateStateScope.onInitialized() {
+        newState.systemState.configPermissions.forEach { (permissionName, permissionEntry) ->
+            val permissions = newState.systemState.permissions
+            val oldPermission = permissions[permissionName]
+            val newPermission = if (oldPermission != null) {
+                if (permissionEntry.gids != null) {
+                    oldPermission.copy(
+                        gids = permissionEntry.gids, areGidsPerUser = permissionEntry.perUser
+                    )
+                } else {
+                    return@forEach
+                }
+            } else {
+                @Suppress("DEPRECATION")
+                val permissionInfo = PermissionInfo().apply {
+                    name = permissionName
+                    packageName = PLATFORM_PACKAGE_NAME
+                    protectionLevel = PermissionInfo.PROTECTION_SIGNATURE
+                }
+                if (permissionEntry.gids != null) {
+                    Permission(
+                        permissionInfo, false, Permission.TYPE_CONFIG, 0, permissionEntry.gids,
+                        permissionEntry.perUser
+                    )
+                } else {
+                    Permission(permissionInfo, false, Permission.TYPE_CONFIG, 0)
+                }
+            }
+            permissions[permissionName] = newPermission
+        }
+    }
+
     override fun MutateStateScope.onUserAdded(userId: Int) {
         newState.systemState.packageStates.forEach { (_, packageState) ->
             evaluateAllPermissionStatesForPackageAndUser(packageState, userId, null)
@@ -142,6 +174,7 @@ class UidPermissionPolicy : SchemePolicy() {
         addPermissionGroups(packageState)
         addPermissions(packageState, changedPermissionNames)
         // TODO: revokeStoragePermissionsIfScopeExpandedInternal()
+        // TODO: revokeSystemAlertWindowIfUpgradedPast23()
         trimPermissions(packageState.packageName, changedPermissionNames)
         trimPermissionStates(packageState.appId)
         changedPermissionNames.forEachIndexed { _, permissionName ->
@@ -348,6 +381,8 @@ class UidPermissionPolicy : SchemePolicy() {
         if (packageState != null && androidPackage == null) {
             return
         }
+        // TODO: STOPSHIP: We may need to retain permission definitions by disabled system packages
+        //  to retain their permission state.
 
         val isPermissionTreeRemoved = systemState.permissionTrees.removeAllIndexed {
             _, permissionTreeName, permissionTree ->
@@ -417,6 +452,7 @@ class UidPermissionPolicy : SchemePolicy() {
         val requestedPermissions = IndexedSet<String>()
         forEachPackageInAppId(appId) {
             requestedPermissions += it.androidPackage!!.requestedPermissions
+            // TODO: STOPSHIP: Retain permissions requested by disabled system packages.
         }
         newState.userStates.forEachIndexed { _, userId, userState ->
             userState.uidPermissionFlags[appId].forEachReversedIndexed { _, permissionName, _ ->
@@ -556,12 +592,21 @@ class UidPermissionPolicy : SchemePolicy() {
         } else if (permission.isRuntime) {
             var newFlags = oldFlags and PermissionFlags.MASK_RUNTIME
             if (getAppIdTargetSdkVersion(appId, permissionName) < Build.VERSION_CODES.M) {
-                newFlags = newFlags or PermissionFlags.LEGACY_GRANTED
-                // Explicitly check against the old state to determine if this permission is new.
-                val isNewPermission =
-                    getOldStatePermissionFlags(appId, userId, permissionName) == 0
-                if (isNewPermission) {
-                    newFlags = newFlags or PermissionFlags.IMPLICIT
+                if (permission.isRuntimeOnly) {
+                    // Different from the old implementation, which simply skips a runtime-only
+                    // permission, we now only allow holding on to the restriction related flags,
+                    // since such flags may only be set one-time in some cases, and disallow all
+                    // other flags thus keeping it revoked.
+                    newFlags = newFlags and PermissionFlags.MASK_EXEMPT
+                } else {
+                    newFlags = newFlags or PermissionFlags.LEGACY_GRANTED
+                    // Explicitly check against the old state to determine if this permission is
+                    // new.
+                    val isNewPermission =
+                        getOldStatePermissionFlags(appId, userId, permissionName) == 0
+                    if (isNewPermission) {
+                        newFlags = newFlags or PermissionFlags.IMPLICIT
+                    }
                 }
             } else {
                 newFlags = newFlags andInv PermissionFlags.LEGACY_GRANTED
@@ -743,8 +788,7 @@ class UidPermissionPolicy : SchemePolicy() {
         if (!androidPackage.isPrivileged) {
             return true
         }
-        if (permission.packageName !in
-            newState.systemState.privilegedPermissionAllowlistSourcePackageNames) {
+        if (permission.packageName !in newState.systemState.privilegedPermissionAllowlistPackages) {
             return true
         }
         val allowlistState = getPrivilegedPermissionAllowlistState(androidPackage, permission.name)

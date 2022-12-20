@@ -19,6 +19,7 @@ package com.android.server.permission.access
 import android.util.Log
 import com.android.modules.utils.BinaryXmlPullParser
 import com.android.modules.utils.BinaryXmlSerializer
+import com.android.server.SystemConfig
 import com.android.server.permission.access.appop.PackageAppOpPolicy
 import com.android.server.permission.access.appop.UidAppOpPolicy
 import com.android.server.permission.access.collection.* // ktlint-disable no-wildcard-imports
@@ -59,7 +60,12 @@ class AccessPolicy private constructor(
         userIds: IntSet,
         packageStates: Map<String, PackageState>,
         disabledSystemPackageStates: Map<String, PackageState>,
-        permissionAllowlist: PermissionAllowlist
+        knownPackages: IntMap<Array<String>>,
+        isLeanback: Boolean,
+        configPermissions: Map<String, SystemConfig.PermissionEntry>,
+        privilegedPermissionAllowlistPackages: IndexedListSet<String>,
+        permissionAllowlist: PermissionAllowlist,
+        implicitToSourcePermissions: IndexedMap<String, IndexedListSet<String>>
     ) {
         state.systemState.apply {
             this.userIds += userIds
@@ -69,13 +75,24 @@ class AccessPolicy private constructor(
                 appIds.getOrPut(packageState.appId) { IndexedListSet() }
                     .add(packageState.packageName)
             }
+            this.knownPackages = knownPackages
+            this.isLeanback = isLeanback
+            this.configPermissions = configPermissions
+            this.privilegedPermissionAllowlistPackages = privilegedPermissionAllowlistPackages
             this.permissionAllowlist = permissionAllowlist
+            this.implicitToSourcePermissions = implicitToSourcePermissions
         }
     }
 
     fun GetStateScope.onStateMutated() {
         forEachSchemePolicy {
             with(it) { onStateMutated() }
+        }
+    }
+
+    fun MutateStateScope.onInitialized() {
+        forEachSchemePolicy {
+            with(it) { onInitialized() }
         }
     }
 
@@ -291,6 +308,8 @@ abstract class SchemePolicy {
     )
 
     open fun GetStateScope.onStateMutated() {}
+
+    open fun MutateStateScope.onInitialized() {}
 
     open fun MutateStateScope.onUserAdded(userId: Int) {}
 

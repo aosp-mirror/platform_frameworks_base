@@ -16,6 +16,11 @@
 
 package android.media;
 
+import static android.companion.virtual.VirtualDeviceManager.DEVICE_ID_DEFAULT;
+import static android.companion.virtual.VirtualDeviceParams.DEVICE_POLICY_DEFAULT;
+import static android.companion.virtual.VirtualDeviceParams.POLICY_TYPE_AUDIO;
+import static android.media.AudioManager.AUDIO_SESSION_ID_GENERATE;
+
 import android.annotation.CallbackExecutor;
 import android.annotation.FloatRange;
 import android.annotation.IntDef;
@@ -26,6 +31,7 @@ import android.annotation.RequiresPermission;
 import android.annotation.SystemApi;
 import android.annotation.TestApi;
 import android.app.ActivityThread;
+import android.companion.virtual.VirtualDeviceManager;
 import android.compat.annotation.UnsupportedAppUsage;
 import android.content.AttributionSource;
 import android.content.AttributionSource.ScopedParcelState;
@@ -455,7 +461,7 @@ public class AudioRecord implements AudioRouting, MicrophoneDirection,
 
         int[] sampleRate = new int[] {mSampleRate};
         int[] session = new int[1];
-        session[0] = sessionId;
+        session[0] = resolveSessionId(context, sessionId);
 
         //TODO: update native initialization when information about hardware init failure
         //      due to capture device already open is available.
@@ -624,15 +630,15 @@ public class AudioRecord implements AudioRouting, MicrophoneDirection,
 
         /**
          * Sets the context the record belongs to. This context will be used to pull information,
-         * such as {@link android.content.AttributionSource}, which will be associated with
-         * the AudioRecord. However, the context itself will not be retained by the AudioRecord.
+         * such as {@link android.content.AttributionSource} and device specific session ids,
+         * which will be associated with the {@link AudioRecord} the AudioRecord.
+         * However, the context itself will not be retained by the AudioRecord.
          * @param context a non-null {@link Context} instance
          * @return the same Builder instance.
          */
         public @NonNull Builder setContext(@NonNull Context context) {
-            Objects.requireNonNull(context);
             // keep reference, we only copy the data when building
-            mContext = context;
+            mContext = Objects.requireNonNull(context);
             return this;
         }
 
@@ -746,6 +752,9 @@ public class AudioRecord implements AudioRouting, MicrophoneDirection,
         /**
          * @hide
          * To be only used by system components.
+         *
+         * Note, that if there's a device specific session id asociated with the context, explicitly
+         * setting a session id using this method will override it.
          * @param sessionId ID of audio session the AudioRecord must be attached to, or
          *     {@link AudioManager#AUDIO_SESSION_ID_GENERATE} if the session isn't known at
          *     construction time.
@@ -981,6 +990,45 @@ public class AudioRecord implements AudioRouting, MicrophoneDirection,
                 throw new UnsupportedOperationException(e.getMessage());
             }
         }
+    }
+
+    /**
+     * Helper method to resolve session id to be used for AudioRecord initialization.
+     *
+     * This method will assign session id in following way:
+     * 1. Explicitly requested session id has the highest priority, if there is one,
+     *    it will be used.
+     * 2. If there's device-specific session id asociated with the provided context,
+     *    it will be used.
+     * 3. Otherwise {@link AUDIO_SESSION_ID_GENERATE} is returned.
+     *
+     * @param context {@link Context} to use for extraction of device specific session id.
+     * @param requestedSessionId explicitly requested session id or AUDIO_SESSION_ID_GENERATE.
+     * @return session id to be passed to AudioService for the {@link AudioRecord} instance given
+     *   provided {@link Context} instance and explicitly requested session id.
+     */
+    private static int resolveSessionId(@Nullable Context context, int requestedSessionId) {
+        if (requestedSessionId != AUDIO_SESSION_ID_GENERATE) {
+            // Use explicitly requested session id.
+            return requestedSessionId;
+        }
+
+        if (context == null) {
+            return AUDIO_SESSION_ID_GENERATE;
+        }
+
+        int deviceId = context.getDeviceId();
+        if (deviceId == DEVICE_ID_DEFAULT) {
+            return AUDIO_SESSION_ID_GENERATE;
+        }
+
+        VirtualDeviceManager vdm = context.getSystemService(VirtualDeviceManager.class);
+        if (vdm == null || vdm.getDevicePolicy(deviceId, POLICY_TYPE_AUDIO)
+                == DEVICE_POLICY_DEFAULT) {
+            return AUDIO_SESSION_ID_GENERATE;
+        }
+
+        return vdm.getAudioRecordingSessionId(deviceId);
     }
 
     // Convenience method for the constructor's parameter checks.

@@ -3422,6 +3422,8 @@
 
     <!-- Allows an app to prevent non-system-overlay windows from being drawn on top of it -->
     <permission android:name="android.permission.HIDE_OVERLAY_WINDOWS"
+                android:label="@string/permlab_hideOverlayWindows"
+                android:description="@string/permdesc_hideOverlayWindows"
                 android:protectionLevel="normal" />
 
     <!-- ================================== -->
@@ -6351,7 +6353,7 @@
     <!-- @SystemApi Allows to access all app shortcuts.
          @hide -->
     <permission android:name="android.permission.ACCESS_SHORTCUTS"
-        android:protectionLevel="signature|role" />
+        android:protectionLevel="signature|role|recents" />
 
     <!-- @SystemApi Allows unlimited calls to shortcut mutation APIs.
          @hide -->

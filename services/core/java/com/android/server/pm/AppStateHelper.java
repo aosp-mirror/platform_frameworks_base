@@ -19,9 +19,13 @@ package com.android.server.pm;
 import android.app.ActivityManager;
 import android.app.ActivityManager.RunningAppProcessInfo;
 import android.app.ActivityManagerInternal;
+import android.app.ActivityThread;
+import android.app.usage.NetworkStats;
+import android.app.usage.NetworkStatsManager;
 import android.content.Context;
 import android.media.AudioManager;
 import android.media.IAudioService;
+import android.net.ConnectivityManager;
 import android.os.ServiceManager;
 import android.os.SystemProperties;
 import android.telecom.TelecomManager;
@@ -33,11 +37,15 @@ import com.android.server.LocalServices;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.TimeUnit;
 
 /**
  * A helper class to provide queries for app states concerning gentle-update.
  */
 public class AppStateHelper {
+    // The duration to monitor network usage to determine if network is active or not
+    private static final long ACTIVE_NETWORK_DURATION_MILLIS = TimeUnit.MINUTES.toMillis(10);
+
     private final Context mContext;
 
     public AppStateHelper(Context context) {
@@ -127,12 +135,35 @@ public class AppStateHelper {
         return hasAudioFocus(packageName) || isRecordingAudio(packageName);
     }
 
-    /**
-     * True if the app is sending or receiving network data.
-     */
-    private boolean hasActiveNetwork(String packageName) {
-        // To be implemented
+    private boolean hasActiveNetwork(List<String> packageNames, int networkType) {
+        var pm = ActivityThread.getPackageManager();
+        var nsm = mContext.getSystemService(NetworkStatsManager.class);
+        var endTime = System.currentTimeMillis();
+        var startTime = endTime - ACTIVE_NETWORK_DURATION_MILLIS;
+        try (var stats = nsm.querySummary(networkType, null, startTime, endTime)) {
+            var bucket = new NetworkStats.Bucket();
+            while (stats.hasNextBucket()) {
+                stats.getNextBucket(bucket);
+                var packageName = pm.getNameForUid(bucket.getUid());
+                if (!packageNames.contains(packageName)) {
+                    continue;
+                }
+                if (bucket.getRxPackets() > 0 || bucket.getTxPackets() > 0) {
+                    return true;
+                }
+            }
+        } catch (Exception ignore) {
+        }
         return false;
+    }
+
+    /**
+     * True if any app has sent or received network data over the past
+     * {@link #ACTIVE_NETWORK_DURATION_MILLIS} milliseconds.
+     */
+    private boolean hasActiveNetwork(List<String> packageNames) {
+        return hasActiveNetwork(packageNames, ConnectivityManager.TYPE_WIFI)
+                || hasActiveNetwork(packageNames, ConnectivityManager.TYPE_MOBILE);
     }
 
     /**
@@ -141,12 +172,11 @@ public class AppStateHelper {
     public boolean hasInteractingApp(List<String> packageNames) {
         for (var packageName : packageNames) {
             if (hasActiveAudio(packageName)
-                    || hasActiveNetwork(packageName)
                     || isAppTopVisible(packageName)) {
                 return true;
             }
         }
-        return false;
+        return hasActiveNetwork(packageNames);
     }
 
     /**

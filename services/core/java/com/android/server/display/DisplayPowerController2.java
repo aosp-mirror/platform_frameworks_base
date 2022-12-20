@@ -202,6 +202,9 @@ final class DisplayPowerController2 implements AutomaticBrightnessController.Cal
     // True if auto-brightness should be used.
     private boolean mUseSoftwareAutoBrightnessConfig;
 
+    // True if the brightness config has changed and the short-term model needs to be reset
+    private boolean mShouldResetShortTermModel;
+
     // Whether or not the color fade on screen on / off is enabled.
     private final boolean mColorFadeEnabled;
 
@@ -868,6 +871,13 @@ final class DisplayPowerController2 implements AutomaticBrightnessController.Cal
             return;
         }
 
+        float userLux = BrightnessMappingStrategy.NO_USER_LUX;
+        float userBrightness = BrightnessMappingStrategy.NO_USER_BRIGHTNESS;
+        if (mInteractiveModeBrightnessMapper != null) {
+            userLux = mInteractiveModeBrightnessMapper.getUserLux();
+            userBrightness = mInteractiveModeBrightnessMapper.getUserBrightness();
+        }
+
         final boolean isIdleScreenBrightnessEnabled = resources.getBoolean(
                 R.bool.config_enableIdleScreenBrightnessMode);
         mInteractiveModeBrightnessMapper = BrightnessMappingStrategy.create(resources,
@@ -995,7 +1005,7 @@ final class DisplayPowerController2 implements AutomaticBrightnessController.Cal
                     ambientBrightnessThresholdsIdle, screenBrightnessThresholdsIdle, mContext,
                     mHbmController, mBrightnessThrottler, mIdleModeBrightnessMapper,
                     mDisplayDeviceConfig.getAmbientHorizonShort(),
-                    mDisplayDeviceConfig.getAmbientHorizonLong());
+                    mDisplayDeviceConfig.getAmbientHorizonLong(), userLux, userBrightness);
 
             mBrightnessEventRingBuffer =
                     new RingBuffer<>(BrightnessEvent.class, RINGBUFFER_MAX);
@@ -1220,7 +1230,9 @@ final class DisplayPowerController2 implements AutomaticBrightnessController.Cal
                     mBrightnessConfiguration,
                     mLastUserSetScreenBrightness,
                     userSetBrightnessChanged, autoBrightnessAdjustment,
-                    autoBrightnessAdjustmentChanged, mPowerRequest.policy);
+                    autoBrightnessAdjustmentChanged, mPowerRequest.policy,
+                    mShouldResetShortTermModel);
+            mShouldResetShortTermModel = false;
         }
 
         if (mBrightnessTracker != null) {
@@ -1626,8 +1638,10 @@ final class DisplayPowerController2 implements AutomaticBrightnessController.Cal
     }
 
     @Override
-    public void setBrightnessConfiguration(BrightnessConfiguration c) {
-        Message msg = mHandler.obtainMessage(MSG_CONFIGURE_BRIGHTNESS, c);
+    public void setBrightnessConfiguration(BrightnessConfiguration c,
+            boolean shouldResetShortTermModel) {
+        Message msg = mHandler.obtainMessage(MSG_CONFIGURE_BRIGHTNESS,
+                shouldResetShortTermModel ? 1 : 0, /* unused */ 0, c);
         msg.sendToTarget();
     }
 
@@ -2485,6 +2499,7 @@ final class DisplayPowerController2 implements AutomaticBrightnessController.Cal
                     break;
                 case MSG_CONFIGURE_BRIGHTNESS:
                     mBrightnessConfiguration = (BrightnessConfiguration) msg.obj;
+                    mShouldResetShortTermModel = msg.arg1 == 1;
                     updatePowerState();
                     break;
 

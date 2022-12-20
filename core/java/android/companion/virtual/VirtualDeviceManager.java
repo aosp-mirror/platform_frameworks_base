@@ -16,6 +16,8 @@
 
 package android.companion.virtual;
 
+import static android.media.AudioManager.AUDIO_SESSION_ID_GENERATE;
+
 import android.annotation.CallbackExecutor;
 import android.annotation.IntDef;
 import android.annotation.IntRange;
@@ -252,6 +254,42 @@ public final class VirtualDeviceManager {
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }
+    }
+
+    /**
+     * Returns device-specific audio session id for audio playback.
+     *
+     * @param deviceId - id of the virtual audio device
+     * @return Device specific session id to be used for audio playback (see
+     *     {@link android.media.AudioManager.generateAudioSessionId}) if virtual device has
+     *     {@link VirtualDeviceParams.POLICY_TYPE_AUDIO} set to
+     *     {@link VirtualDeviceParams.DEVICE_POLICY_CUSTOM} and Virtual Audio Device
+     *     is configured in context-aware mode.
+     *     Otherwise {@link AUDIO_SESSION_ID_GENERATE} constant is returned.
+     * @hide
+     */
+    public int getAudioPlaybackSessionId(int deviceId) {
+        //TODO - Return session id rerouted to VirtualAudioDevice if the VirtualAudioDevice
+        //is configured to operate in context-aware mode.
+        return AUDIO_SESSION_ID_GENERATE;
+    }
+
+    /**
+     * Returns device-specific audio session id for audio recording.
+     *
+     * @param deviceId - id of the virtual audio device
+     * @return Device specific session id to be used for audio recording (see
+     *     {@link android.media.AudioManager.generateAudioSessionId}) if virtual device has
+     *     {@link VirtualDeviceParams.POLICY_TYPE_AUDIO} set to
+     *     {@link VirtualDeviceParams.DEVICE_POLICY_CUSTOM} and Virtual Audio Device
+     *     is configured in context-aware mode.
+     *     Otherwise {@link AUDIO_SESSION_ID_GENERATE} constant is returned.
+     * @hide
+     */
+    public int getAudioRecordingSessionId(int deviceId) {
+        //TODO - Return session id corresponding to VirtualAudioDevice injection if the
+        // VirtualAudioDevice is configured to operate in context-aware mode.
+        return AUDIO_SESSION_ID_GENERATE;
     }
 
     /**

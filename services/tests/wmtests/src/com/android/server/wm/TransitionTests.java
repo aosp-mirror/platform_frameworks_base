@@ -89,7 +89,6 @@ import org.junit.runner.RunWith;
 import org.mockito.ArgumentCaptor;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Objects;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
@@ -129,10 +128,10 @@ public class TransitionTests extends WindowTestsBase {
         final ActivityRecord closing = createActivityRecord(oldTask);
         final ActivityRecord opening = createActivityRecord(newTask);
         // Start states.
-        changes.put(newTask, new Transition.ChangeInfo(false /* vis */, true /* exChg */));
-        changes.put(oldTask, new Transition.ChangeInfo(true /* vis */, true /* exChg */));
-        changes.put(opening, new Transition.ChangeInfo(false /* vis */, true /* exChg */));
-        changes.put(closing, new Transition.ChangeInfo(true /* vis */, true /* exChg */));
+        changes.put(newTask, new Transition.ChangeInfo(newTask, false /* vis */, true /* exChg */));
+        changes.put(oldTask, new Transition.ChangeInfo(oldTask, true /* vis */, true /* exChg */));
+        changes.put(opening, new Transition.ChangeInfo(opening, false /* vis */, true /* exChg */));
+        changes.put(closing, new Transition.ChangeInfo(closing, true /* vis */, true /* exChg */));
         fillChangeMap(changes, newTask);
         // End states.
         closing.setVisibleRequested(false);
@@ -144,9 +143,9 @@ public class TransitionTests extends WindowTestsBase {
         // Check basic both tasks participating
         participants.add(oldTask);
         participants.add(newTask);
-        ArrayList<WindowContainer> targets = Transition.calculateTargets(participants, changes);
-        TransitionInfo info = Transition.calculateTransitionInfo(transit, flags, targets, changes,
-                mMockT);
+        ArrayList<Transition.ChangeInfo> targets =
+                Transition.calculateTargets(participants, changes);
+        TransitionInfo info = Transition.calculateTransitionInfo(transit, flags, targets, mMockT);
         assertEquals(2, info.getChanges().size());
         assertEquals(transit, info.getType());
 
@@ -154,7 +153,7 @@ public class TransitionTests extends WindowTestsBase {
         participants.add(opening);
         participants.add(closing);
         targets = Transition.calculateTargets(participants, changes);
-        info = Transition.calculateTransitionInfo(transit, flags, targets, changes, mMockT);
+        info = Transition.calculateTransitionInfo(transit, flags, targets, mMockT);
         assertEquals(2, info.getChanges().size());
         assertNotNull(info.getChange(newTask.mRemoteToken.toWindowContainerToken()));
         assertNotNull(info.getChange(oldTask.mRemoteToken.toWindowContainerToken()));
@@ -162,7 +161,7 @@ public class TransitionTests extends WindowTestsBase {
         // Check combined prune and promote
         participants.remove(newTask);
         targets = Transition.calculateTargets(participants, changes);
-        info = Transition.calculateTransitionInfo(transit, flags, targets, changes, mMockT);
+        info = Transition.calculateTransitionInfo(transit, flags, targets, mMockT);
         assertEquals(2, info.getChanges().size());
         assertNotNull(info.getChange(newTask.mRemoteToken.toWindowContainerToken()));
         assertNotNull(info.getChange(oldTask.mRemoteToken.toWindowContainerToken()));
@@ -170,7 +169,7 @@ public class TransitionTests extends WindowTestsBase {
         // Check multi promote
         participants.remove(oldTask);
         targets = Transition.calculateTargets(participants, changes);
-        info = Transition.calculateTransitionInfo(transit, flags, targets, changes, mMockT);
+        info = Transition.calculateTransitionInfo(transit, flags, targets, mMockT);
         assertEquals(2, info.getChanges().size());
         assertNotNull(info.getChange(newTask.mRemoteToken.toWindowContainerToken()));
         assertNotNull(info.getChange(oldTask.mRemoteToken.toWindowContainerToken()));
@@ -190,13 +189,16 @@ public class TransitionTests extends WindowTestsBase {
         final ActivityRecord opening = createActivityRecord(newNestedTask);
         final ActivityRecord opening2 = createActivityRecord(newNestedTask2);
         // Start states.
-        changes.put(newTask, new Transition.ChangeInfo(false /* vis */, true /* exChg */));
-        changes.put(newNestedTask, new Transition.ChangeInfo(false /* vis */, true /* exChg */));
-        changes.put(newNestedTask2, new Transition.ChangeInfo(false /* vis */, true /* exChg */));
-        changes.put(oldTask, new Transition.ChangeInfo(true /* vis */, true /* exChg */));
-        changes.put(opening, new Transition.ChangeInfo(false /* vis */, true /* exChg */));
-        changes.put(opening2, new Transition.ChangeInfo(false /* vis */, true /* exChg */));
-        changes.put(closing, new Transition.ChangeInfo(true /* vis */, true /* exChg */));
+        changes.put(newTask, new Transition.ChangeInfo(newTask, false /* vis */, true /* exChg */));
+        changes.put(newNestedTask,
+                new Transition.ChangeInfo(newNestedTask, false /* vis */, true /* exChg */));
+        changes.put(newNestedTask2,
+                new Transition.ChangeInfo(newNestedTask2, false /* vis */, true /* exChg */));
+        changes.put(oldTask, new Transition.ChangeInfo(oldTask, true /* vis */, true /* exChg */));
+        changes.put(opening, new Transition.ChangeInfo(opening, false /* vis */, true /* exChg */));
+        changes.put(opening2,
+                new Transition.ChangeInfo(opening2, false /* vis */, true /* exChg */));
+        changes.put(closing, new Transition.ChangeInfo(closing, true /* vis */, true /* exChg */));
         fillChangeMap(changes, newTask);
         // End states.
         closing.setVisibleRequested(false);
@@ -210,9 +212,9 @@ public class TransitionTests extends WindowTestsBase {
         participants.add(oldTask);
         participants.add(opening);
         participants.add(opening2);
-        ArrayList<WindowContainer> targets = Transition.calculateTargets(participants, changes);
-        TransitionInfo info = Transition.calculateTransitionInfo(transit, flags, targets, changes,
-                mMockT);
+        ArrayList<Transition.ChangeInfo> targets =
+                Transition.calculateTargets(participants, changes);
+        TransitionInfo info = Transition.calculateTransitionInfo(transit, flags, targets, mMockT);
         assertEquals(2, info.getChanges().size());
         assertEquals(transit, info.getType());
         assertNotNull(info.getChange(newTask.mRemoteToken.toWindowContainerToken()));
@@ -221,7 +223,7 @@ public class TransitionTests extends WindowTestsBase {
         // Check that unchanging but visible descendant of sibling prevents promotion
         participants.remove(opening2);
         targets = Transition.calculateTargets(participants, changes);
-        info = Transition.calculateTransitionInfo(transit, flags, targets, changes, mMockT);
+        info = Transition.calculateTransitionInfo(transit, flags, targets, mMockT);
         assertEquals(2, info.getChanges().size());
         assertNotNull(info.getChange(newNestedTask.mRemoteToken.toWindowContainerToken()));
         assertNotNull(info.getChange(oldTask.mRemoteToken.toWindowContainerToken()));
@@ -241,12 +243,16 @@ public class TransitionTests extends WindowTestsBase {
         final ActivityRecord showing = createActivityRecord(showNestedTask);
         final ActivityRecord showing2 = createActivityRecord(showTask2);
         // Start states.
-        changes.put(showTask, new Transition.ChangeInfo(false /* vis */, true /* exChg */));
-        changes.put(showNestedTask, new Transition.ChangeInfo(false /* vis */, true /* exChg */));
-        changes.put(showTask2, new Transition.ChangeInfo(false /* vis */, true /* exChg */));
-        changes.put(tda, new Transition.ChangeInfo(false /* vis */, true /* exChg */));
-        changes.put(showing, new Transition.ChangeInfo(false /* vis */, true /* exChg */));
-        changes.put(showing2, new Transition.ChangeInfo(false /* vis */, true /* exChg */));
+        changes.put(showTask,
+                new Transition.ChangeInfo(showTask, false /* vis */, true /* exChg */));
+        changes.put(showNestedTask,
+                new Transition.ChangeInfo(showNestedTask, false /* vis */, true /* exChg */));
+        changes.put(showTask2,
+                new Transition.ChangeInfo(showTask2, false /* vis */, true /* exChg */));
+        changes.put(tda, new Transition.ChangeInfo(tda, false /* vis */, true /* exChg */));
+        changes.put(showing, new Transition.ChangeInfo(showing, false /* vis */, true /* exChg */));
+        changes.put(showing2,
+                new Transition.ChangeInfo(showing2, false /* vis */, true /* exChg */));
         fillChangeMap(changes, tda);
 
         // End states.
@@ -259,9 +265,9 @@ public class TransitionTests extends WindowTestsBase {
         // Check promotion to DisplayArea
         participants.add(showing);
         participants.add(showing2);
-        ArrayList<WindowContainer> targets = Transition.calculateTargets(participants, changes);
-        TransitionInfo info = Transition.calculateTransitionInfo(transit, flags, targets, changes,
-                mMockT);
+        ArrayList<Transition.ChangeInfo> targets =
+                Transition.calculateTargets(participants, changes);
+        TransitionInfo info = Transition.calculateTransitionInfo(transit, flags, targets, mMockT);
         assertEquals(1, info.getChanges().size());
         assertEquals(transit, info.getType());
         assertNotNull(info.getChange(tda.mRemoteToken.toWindowContainerToken()));
@@ -269,14 +275,14 @@ public class TransitionTests extends WindowTestsBase {
         // Check that organized tasks get reported even if not top
         makeTaskOrganized(showTask);
         targets = Transition.calculateTargets(participants, changes);
-        info = Transition.calculateTransitionInfo(transit, flags, targets, changes, mMockT);
+        info = Transition.calculateTransitionInfo(transit, flags, targets, mMockT);
         assertEquals(2, info.getChanges().size());
         assertNotNull(info.getChange(tda.mRemoteToken.toWindowContainerToken()));
         assertNotNull(info.getChange(showTask.mRemoteToken.toWindowContainerToken()));
         // Even if DisplayArea explicitly participating
         participants.add(tda);
         targets = Transition.calculateTargets(participants, changes);
-        info = Transition.calculateTransitionInfo(transit, flags, targets, changes, mMockT);
+        info = Transition.calculateTransitionInfo(transit, flags, targets, mMockT);
         assertEquals(2, info.getChanges().size());
     }
 
@@ -297,10 +303,9 @@ public class TransitionTests extends WindowTestsBase {
         opening.setVisibleRequested(true);
         closing.setVisibleRequested(false);
 
-        ArrayList<WindowContainer> targets = Transition.calculateTargets(
+        ArrayList<Transition.ChangeInfo> targets = Transition.calculateTargets(
                 transition.mParticipants, transition.mChanges);
-        TransitionInfo info = Transition.calculateTransitionInfo(
-                0, 0, targets, transition.mChanges, mMockT);
+        TransitionInfo info = Transition.calculateTransitionInfo(0, 0, targets, mMockT);
         assertEquals(2, info.getChanges().size());
         // There was an existence change on open, so it should be OPEN rather than SHOW
         assertEquals(TRANSIT_OPEN,
@@ -334,10 +339,9 @@ public class TransitionTests extends WindowTestsBase {
             tasks[i].getTopMostActivity().setVisibleRequested((i % 2) != 0);
         }
 
-        ArrayList<WindowContainer> targets = Transition.calculateTargets(
+        ArrayList<Transition.ChangeInfo> targets = Transition.calculateTargets(
                 transition.mParticipants, transition.mChanges);
-        TransitionInfo info = Transition.calculateTransitionInfo(
-                0, 0, targets, transition.mChanges, mMockT);
+        TransitionInfo info = Transition.calculateTransitionInfo(0, 0, targets, mMockT);
         assertEquals(taskCount, info.getChanges().size());
         // verify order is top-to-bottem
         for (int i = 0; i < taskCount; ++i) {
@@ -384,10 +388,9 @@ public class TransitionTests extends WindowTestsBase {
             tasks[i].getTopMostActivity().setVisibleRequested((i % 2) != 0);
         }
 
-        ArrayList<WindowContainer> targets = Transition.calculateTargets(
+        ArrayList<Transition.ChangeInfo> targets = Transition.calculateTargets(
                 transition.mParticipants, transition.mChanges);
-        TransitionInfo info = Transition.calculateTransitionInfo(
-                0, 0, targets, transition.mChanges, mMockT);
+        TransitionInfo info = Transition.calculateTransitionInfo(0, 0, targets, mMockT);
         // verify that wallpaper is at bottom
         assertEquals(taskCount + 1, info.getChanges().size());
         // The wallpaper is not organized, so it won't have a token; however, it will be marked
@@ -410,11 +413,13 @@ public class TransitionTests extends WindowTestsBase {
         final ActivityRecord hiding = createActivityRecord(topTask);
         final ActivityRecord closing = createActivityRecord(topTask);
         // Start states.
-        changes.put(topTask, new Transition.ChangeInfo(true /* vis */, false /* exChg */));
-        changes.put(belowTask, new Transition.ChangeInfo(false /* vis */, false /* exChg */));
-        changes.put(showing, new Transition.ChangeInfo(false /* vis */, false /* exChg */));
-        changes.put(hiding, new Transition.ChangeInfo(true /* vis */, false /* exChg */));
-        changes.put(closing, new Transition.ChangeInfo(true /* vis */, true /* exChg */));
+        changes.put(topTask, new Transition.ChangeInfo(topTask, true /* vis */, false /* exChg */));
+        changes.put(belowTask,
+                new Transition.ChangeInfo(belowTask, false /* vis */, false /* exChg */));
+        changes.put(showing,
+                new Transition.ChangeInfo(showing, false /* vis */, false /* exChg */));
+        changes.put(hiding, new Transition.ChangeInfo(hiding, true /* vis */, false /* exChg */));
+        changes.put(closing, new Transition.ChangeInfo(closing, true /* vis */, true /* exChg */));
         fillChangeMap(changes, topTask);
         // End states.
         showing.setVisibleRequested(true);
@@ -424,10 +429,11 @@ public class TransitionTests extends WindowTestsBase {
         participants.add(belowTask);
         participants.add(hiding);
         participants.add(closing);
-        ArrayList<WindowContainer> targets = Transition.calculateTargets(participants, changes);
+        ArrayList<Transition.ChangeInfo> targets =
+                Transition.calculateTargets(participants, changes);
         assertEquals(2, targets.size());
-        assertTrue(targets.contains(belowTask));
-        assertTrue(targets.contains(topTask));
+        assertTrue(Transition.containsChangeFor(belowTask, targets));
+        assertTrue(Transition.containsChangeFor(topTask, targets));
     }
 
     @Test
@@ -442,11 +448,14 @@ public class TransitionTests extends WindowTestsBase {
         final ActivityRecord opening = createActivityRecord(topTask);
         final ActivityRecord closing = createActivityRecord(belowTask);
         // Start states.
-        changes.put(topTask, new Transition.ChangeInfo(false /* vis */, false /* exChg */));
-        changes.put(belowTask, new Transition.ChangeInfo(true /* vis */, false /* exChg */));
-        changes.put(showing, new Transition.ChangeInfo(false /* vis */, false /* exChg */));
-        changes.put(opening, new Transition.ChangeInfo(false /* vis */, true /* exChg */));
-        changes.put(closing, new Transition.ChangeInfo(true /* vis */, false /* exChg */));
+        changes.put(topTask,
+                new Transition.ChangeInfo(topTask, false /* vis */, false /* exChg */));
+        changes.put(belowTask,
+                new Transition.ChangeInfo(belowTask, true /* vis */, false /* exChg */));
+        changes.put(showing,
+                new Transition.ChangeInfo(showing, false /* vis */, false /* exChg */));
+        changes.put(opening, new Transition.ChangeInfo(opening, false /* vis */, true /* exChg */));
+        changes.put(closing, new Transition.ChangeInfo(closing, true /* vis */, false /* exChg */));
         fillChangeMap(changes, topTask);
         // End states.
         showing.setVisibleRequested(true);
@@ -456,10 +465,11 @@ public class TransitionTests extends WindowTestsBase {
         participants.add(belowTask);
         participants.add(showing);
         participants.add(opening);
-        ArrayList<WindowContainer> targets = Transition.calculateTargets(participants, changes);
+        ArrayList<Transition.ChangeInfo> targets =
+                Transition.calculateTargets(participants, changes);
         assertEquals(2, targets.size());
-        assertTrue(targets.contains(belowTask));
-        assertTrue(targets.contains(topTask));
+        assertTrue(Transition.containsChangeFor(belowTask, targets));
+        assertTrue(Transition.containsChangeFor(topTask, targets));
     }
 
     @Test
@@ -473,10 +483,10 @@ public class TransitionTests extends WindowTestsBase {
         final ActivityRecord closing = createActivityRecord(oldTask);
         final ActivityRecord opening = createActivityRecord(newTask);
         // Start states.
-        changes.put(newTask, new Transition.ChangeInfo(false /* vis */, true /* exChg */));
-        changes.put(oldTask, new Transition.ChangeInfo(true /* vis */, true /* exChg */));
-        changes.put(opening, new Transition.ChangeInfo(false /* vis */, true /* exChg */));
-        changes.put(closing, new Transition.ChangeInfo(true /* vis */, true /* exChg */));
+        changes.put(newTask, new Transition.ChangeInfo(newTask, false /* vis */, true /* exChg */));
+        changes.put(oldTask, new Transition.ChangeInfo(oldTask, true /* vis */, true /* exChg */));
+        changes.put(opening, new Transition.ChangeInfo(opening, false /* vis */, true /* exChg */));
+        changes.put(closing, new Transition.ChangeInfo(closing, true /* vis */, true /* exChg */));
         transition.setNoAnimation(opening);
         fillChangeMap(changes, newTask);
         // End states.
@@ -491,19 +501,20 @@ public class TransitionTests extends WindowTestsBase {
         participants.add(newTask);
         participants.add(opening);
         participants.add(closing);
-        ArrayList<WindowContainer> targets = Transition.calculateTargets(participants, changes);
-        TransitionInfo info = Transition.calculateTransitionInfo(transit, flags, targets, changes,
-                mMockT);
+        ArrayList<Transition.ChangeInfo> targets =
+                Transition.calculateTargets(participants, changes);
+        TransitionInfo info = Transition.calculateTransitionInfo(transit, flags, targets, mMockT);
         assertNotNull(info.getChange(newTask.mRemoteToken.toWindowContainerToken()));
         assertTrue(info.getChange(newTask.mRemoteToken.toWindowContainerToken())
                 .hasFlags(TransitionInfo.FLAG_NO_ANIMATION));
 
         // Check that no-animation flag is NOT promoted if at-least on child *is* animated
         final ActivityRecord opening2 = createActivityRecord(newTask);
-        changes.put(opening2, new Transition.ChangeInfo(false /* vis */, true /* exChg */));
+        changes.put(opening2,
+                new Transition.ChangeInfo(opening2, false /* vis */, true /* exChg */));
         participants.add(opening2);
         targets = Transition.calculateTargets(participants, changes);
-        info = Transition.calculateTransitionInfo(transit, flags, targets, changes, mMockT);
+        info = Transition.calculateTransitionInfo(transit, flags, targets, mMockT);
         assertNotNull(info.getChange(newTask.mRemoteToken.toWindowContainerToken()));
         assertFalse(info.getChange(newTask.mRemoteToken.toWindowContainerToken())
                 .hasFlags(TransitionInfo.FLAG_NO_ANIMATION));
@@ -531,10 +542,9 @@ public class TransitionTests extends WindowTestsBase {
         mDisplayContent.getWindowConfiguration().setRotation(
                 (mDisplayContent.getWindowConfiguration().getRotation() + 1) % 4);
 
-        ArrayList<WindowContainer> targets = Transition.calculateTargets(
+        ArrayList<Transition.ChangeInfo> targets = Transition.calculateTargets(
                 transition.mParticipants, transition.mChanges);
-        TransitionInfo info = Transition.calculateTransitionInfo(
-                0, 0, targets, transition.mChanges, mMockT);
+        TransitionInfo info = Transition.calculateTransitionInfo(0, 0, targets, mMockT);
         // The wallpaper is not organized, so it won't have a token; however, it will be marked
         // as IS_WALLPAPER
         assertEquals(FLAG_IS_WALLPAPER, info.getChanges().get(0).getFlags());
@@ -596,10 +606,12 @@ public class TransitionTests extends WindowTestsBase {
             wc.getWindowConfiguration().setRotation(newRotation);
         }
 
-        final ArrayList<WindowContainer> targets = Transition.calculateTargets(
+        final ArrayList<Transition.ChangeInfo> targets = Transition.calculateTargets(
                 transition.mParticipants, transition.mChanges);
         // Especially the activities must be in the targets.
-        assertTrue(targets.containsAll(Arrays.asList(wcs)));
+        for (WindowContainer<?> wc : wcs) {
+            assertTrue(Transition.containsChangeFor(wc, targets));
+        }
     }
 
     @Test
@@ -622,15 +634,22 @@ public class TransitionTests extends WindowTestsBase {
                 openInChangeTask);
 
         // Start states.
-        changes.put(openTask, new Transition.ChangeInfo(false /* vis */, true /* exChg */));
-        changes.put(changeTask, new Transition.ChangeInfo(true /* vis */, false /* exChg */));
-        changes.put(openInOpenTask, new Transition.ChangeInfo(false /* vis */, true /* exChg */));
-        changes.put(openInChangeTask, new Transition.ChangeInfo(false /* vis */, true /* exChg */));
+        changes.put(openTask,
+                new Transition.ChangeInfo(openTask, false /* vis */, true /* exChg */));
+        changes.put(changeTask,
+                new Transition.ChangeInfo(changeTask, true /* vis */, false /* exChg */));
+        changes.put(openInOpenTask,
+                new Transition.ChangeInfo(openInOpenTask, false /* vis */, true /* exChg */));
+        changes.put(openInChangeTask,
+                new Transition.ChangeInfo(openInChangeTask, false /* vis */, true /* exChg */));
         changes.put(changeInChangeTask,
-                new Transition.ChangeInfo(true /* vis */, false /* exChg */));
-        changes.put(openInOpen, new Transition.ChangeInfo(false /* vis */, true /* exChg */));
-        changes.put(openInChange, new Transition.ChangeInfo(false /* vis */, true /* exChg */));
-        changes.put(changeInChange, new Transition.ChangeInfo(true /* vis */, false /* exChg */));
+                new Transition.ChangeInfo(changeInChangeTask, true /* vis */, false /* exChg */));
+        changes.put(openInOpen,
+                new Transition.ChangeInfo(openInOpen, false /* vis */, true /* exChg */));
+        changes.put(openInChange,
+                new Transition.ChangeInfo(openInChange, false /* vis */, true /* exChg */));
+        changes.put(changeInChange,
+                new Transition.ChangeInfo(changeInChange, true /* vis */, false /* exChg */));
         fillChangeMap(changes, openTask);
         // End states.
         changeInChange.setVisibleRequested(true);
@@ -646,10 +665,9 @@ public class TransitionTests extends WindowTestsBase {
         participants.add(openInChange);
         // Explicitly add changeTask (to test independence with parents)
         participants.add(changeTask);
-        final ArrayList<WindowContainer> targets =
+        final ArrayList<Transition.ChangeInfo> targets =
                 Transition.calculateTargets(participants, changes);
-        TransitionInfo info = Transition.calculateTransitionInfo(transit, flags, targets, changes,
-                mMockT);
+        TransitionInfo info = Transition.calculateTransitionInfo(transit, flags, targets, mMockT);
         // Root changes should always be considered independent
         assertTrue(isIndependent(
                 info.getChange(openTask.mRemoteToken.toWindowContainerToken()), info));
@@ -685,10 +703,10 @@ public class TransitionTests extends WindowTestsBase {
         final ActivityRecord opening = createActivityRecord(newTask);
         opening.setOccludesParent(false);
         // Start states.
-        changes.put(newTask, new Transition.ChangeInfo(false /* vis */, true /* exChg */));
-        changes.put(oldTask, new Transition.ChangeInfo(true /* vis */, false /* exChg */));
-        changes.put(opening, new Transition.ChangeInfo(false /* vis */, true /* exChg */));
-        changes.put(closing, new Transition.ChangeInfo(true /* vis */, false /* exChg */));
+        changes.put(newTask, new Transition.ChangeInfo(newTask, false /* vis */, true /* exChg */));
+        changes.put(oldTask, new Transition.ChangeInfo(oldTask, true /* vis */, false /* exChg */));
+        changes.put(opening, new Transition.ChangeInfo(opening, false /* vis */, true /* exChg */));
+        changes.put(closing, new Transition.ChangeInfo(closing, true /* vis */, false /* exChg */));
         fillChangeMap(changes, newTask);
         // End states.
         closing.setVisibleRequested(true);
@@ -700,9 +718,9 @@ public class TransitionTests extends WindowTestsBase {
         // Check basic both tasks participating
         participants.add(oldTask);
         participants.add(newTask);
-        ArrayList<WindowContainer> targets = Transition.calculateTargets(participants, changes);
-        TransitionInfo info = Transition.calculateTransitionInfo(transit, flags, targets, changes,
-                mMockT);
+        ArrayList<Transition.ChangeInfo> targets =
+                Transition.calculateTargets(participants, changes);
+        TransitionInfo info = Transition.calculateTransitionInfo(transit, flags, targets, mMockT);
         assertEquals(2, info.getChanges().size());
         assertEquals(transit, info.getType());
 
@@ -726,10 +744,10 @@ public class TransitionTests extends WindowTestsBase {
         final ActivityRecord opening = createActivityRecord(newTask);
         opening.setOccludesParent(false);
         // Start states.
-        changes.put(newTask, new Transition.ChangeInfo(false /* vis */, true /* exChg */));
-        changes.put(oldTask, new Transition.ChangeInfo(true /* vis */, false /* exChg */));
-        changes.put(opening, new Transition.ChangeInfo(false /* vis */, true /* exChg */));
-        changes.put(closing, new Transition.ChangeInfo(true /* vis */, false /* exChg */));
+        changes.put(newTask, new Transition.ChangeInfo(newTask, false /* vis */, true /* exChg */));
+        changes.put(oldTask, new Transition.ChangeInfo(oldTask, true /* vis */, false /* exChg */));
+        changes.put(opening, new Transition.ChangeInfo(opening, false /* vis */, true /* exChg */));
+        changes.put(closing, new Transition.ChangeInfo(closing, true /* vis */, false /* exChg */));
         fillChangeMap(changes, newTask);
         // End states.
         closing.setVisibleRequested(true);
@@ -741,9 +759,9 @@ public class TransitionTests extends WindowTestsBase {
         // Check basic both tasks participating
         participants.add(oldTask);
         participants.add(newTask);
-        ArrayList<WindowContainer> targets = Transition.calculateTargets(participants, changes);
-        TransitionInfo info = Transition.calculateTransitionInfo(transit, flags, targets, changes,
-                mMockT);
+        ArrayList<Transition.ChangeInfo> targets =
+                Transition.calculateTargets(participants, changes);
+        TransitionInfo info = Transition.calculateTransitionInfo(transit, flags, targets, mMockT);
         assertEquals(2, info.getChanges().size());
         assertEquals(transit, info.getType());
 
@@ -785,7 +803,7 @@ public class TransitionTests extends WindowTestsBase {
             final int flags = 0;
             final TransitionInfo info = Transition.calculateTransitionInfo(transition.mType, flags,
                     Transition.calculateTargets(transition.mParticipants, transition.mChanges),
-                    transition.mChanges, mMockT);
+                    mMockT);
             transition.abort();
             return info.getChanges().get(0);
         };
@@ -1210,18 +1228,20 @@ public class TransitionTests extends WindowTestsBase {
         doReturn(true).when(activity1).hasStartingWindow();
 
         // Start states.
-        changes.put(activity0, new Transition.ChangeInfo(true /* vis */, false /* exChg */));
-        changes.put(activity1, new Transition.ChangeInfo(false /* vis */, false /* exChg */));
+        changes.put(activity0,
+                new Transition.ChangeInfo(activity0, true /* vis */, false /* exChg */));
+        changes.put(activity1,
+                new Transition.ChangeInfo(activity1, false /* vis */, false /* exChg */));
         // End states.
         activity0.setVisibleRequested(false);
         activity1.setVisibleRequested(true);
 
         participants.add(activity0);
         participants.add(activity1);
-        final ArrayList<WindowContainer> targets = Transition.calculateTargets(
+        final ArrayList<Transition.ChangeInfo> targets = Transition.calculateTargets(
                 participants, changes);
         final TransitionInfo info = Transition.calculateTransitionInfo(
-                transition.mType, 0 /* flags */, targets, changes, mMockT);
+                transition.mType, 0 /* flags */, targets, mMockT);
 
         // All windows in the Task should have FLAG_IS_BEHIND_STARTING_WINDOW because the starting
         // window should cover the whole Task.
@@ -1251,11 +1271,14 @@ public class TransitionTests extends WindowTestsBase {
         final ActivityRecord closingActivity = embeddedTf.getBottomMostActivity();
         final ActivityRecord openingActivity = embeddedTf.getTopMostActivity();
         // Start states.
-        changes.put(embeddedTf, new Transition.ChangeInfo(true /* vis */, false /* exChg */));
-        changes.put(closingActivity, new Transition.ChangeInfo(true /* vis */, false /* exChg */));
-        changes.put(openingActivity, new Transition.ChangeInfo(false /* vis */, true /* exChg */));
-        changes.put(nonEmbeddedActivity, new Transition.ChangeInfo(true /* vis */,
-                false /* exChg */));
+        changes.put(embeddedTf,
+                new Transition.ChangeInfo(embeddedTf, true /* vis */, false /* exChg */));
+        changes.put(closingActivity,
+                new Transition.ChangeInfo(closingActivity, true /* vis */, false /* exChg */));
+        changes.put(openingActivity,
+                new Transition.ChangeInfo(openingActivity, false /* vis */, true /* exChg */));
+        changes.put(nonEmbeddedActivity, new Transition.ChangeInfo(nonEmbeddedActivity,
+                true /* vis */, false /* exChg */));
         // End states.
         closingActivity.setVisibleRequested(false);
         openingActivity.setVisibleRequested(true);
@@ -1264,10 +1287,10 @@ public class TransitionTests extends WindowTestsBase {
         participants.add(closingActivity);
         participants.add(openingActivity);
         participants.add(nonEmbeddedActivity);
-        final ArrayList<WindowContainer> targets = Transition.calculateTargets(
+        final ArrayList<Transition.ChangeInfo> targets = Transition.calculateTargets(
                 participants, changes);
         final TransitionInfo info = Transition.calculateTransitionInfo(
-                transition.mType, 0 /* flags */, targets, changes, mMockT);
+                transition.mType, 0 /* flags */, targets, mMockT);
 
         // All windows in the Task should have FLAG_IN_TASK_WITH_EMBEDDED_ACTIVITY because the Task
         // contains embedded activity.
@@ -1297,10 +1320,11 @@ public class TransitionTests extends WindowTestsBase {
                 .build();
         final ActivityRecord embeddedActivity = embeddedTf.getTopMostActivity();
         // Start states.
-        changes.put(task, new Transition.ChangeInfo(true /* vis */, false /* exChg */));
-        changes.put(nonEmbeddedActivity, new Transition.ChangeInfo(true /* vis */,
-                false /* exChg */));
-        changes.put(embeddedTf, new Transition.ChangeInfo(false /* vis */, true /* exChg */));
+        changes.put(task, new Transition.ChangeInfo(task, true /* vis */, false /* exChg */));
+        changes.put(nonEmbeddedActivity,
+                new Transition.ChangeInfo(nonEmbeddedActivity, true /* vis */, false /* exChg */));
+        changes.put(embeddedTf,
+                new Transition.ChangeInfo(embeddedTf, false /* vis */, true /* exChg */));
         // End states.
         nonEmbeddedActivity.setVisibleRequested(false);
         embeddedActivity.setVisibleRequested(true);
@@ -1308,10 +1332,10 @@ public class TransitionTests extends WindowTestsBase {
 
         participants.add(nonEmbeddedActivity);
         participants.add(embeddedTf);
-        final ArrayList<WindowContainer> targets = Transition.calculateTargets(
+        final ArrayList<Transition.ChangeInfo> targets = Transition.calculateTargets(
                 participants, changes);
         final TransitionInfo info = Transition.calculateTransitionInfo(
-                transition.mType, 0 /* flags */, targets, changes, mMockT);
+                transition.mType, 0 /* flags */, targets, mMockT);
 
         // The embedded with bounds overridden should not have the flag.
         assertEquals(2, info.getChanges().size());
@@ -1339,10 +1363,10 @@ public class TransitionTests extends WindowTestsBase {
         activity.setVisibleRequested(true);
 
         participants.add(activity);
-        final ArrayList<WindowContainer> targets = Transition.calculateTargets(
+        final ArrayList<Transition.ChangeInfo> targets = Transition.calculateTargets(
                 participants, changes);
         final TransitionInfo info = Transition.calculateTransitionInfo(
-                transition.mType, 0 /* flags */, targets, changes, mMockT);
+                transition.mType, 0 /* flags */, targets, mMockT);
 
         // Opening activity that is filling Task after transition should have the flag.
         assertEquals(1, info.getChanges().size());
@@ -1367,10 +1391,10 @@ public class TransitionTests extends WindowTestsBase {
         activity.setVisibleRequested(false);
 
         participants.add(activity);
-        final ArrayList<WindowContainer> targets = Transition.calculateTargets(
+        final ArrayList<Transition.ChangeInfo> targets = Transition.calculateTargets(
                 participants, changes);
         final TransitionInfo info = Transition.calculateTransitionInfo(
-                transition.mType, 0 /* flags */, targets, changes, mMockT);
+                transition.mType, 0 /* flags */, targets, mMockT);
 
         // Closing activity that is filling Task before transition should have the flag.
         assertEquals(1, info.getChanges().size());
@@ -1395,10 +1419,10 @@ public class TransitionTests extends WindowTestsBase {
         activity.setVisibleRequested(false);
 
         participants.add(activity);
-        final ArrayList<WindowContainer> targets = Transition.calculateTargets(
+        final ArrayList<Transition.ChangeInfo> targets = Transition.calculateTargets(
                 participants, changes);
         final TransitionInfo info = Transition.calculateTransitionInfo(
-                transition.mType, 0 /* flags */, targets, changes, mMockT);
+                transition.mType, 0 /* flags */, targets, mMockT);
 
         // Change contains last parent info.
         assertEquals(1, info.getChanges().size());
@@ -1433,10 +1457,10 @@ public class TransitionTests extends WindowTestsBase {
         activity.reparent(embeddedTf, POSITION_TOP);
 
         // Verify that both activity and TaskFragment are included.
-        final ArrayList<WindowContainer> targets = Transition.calculateTargets(
+        final ArrayList<Transition.ChangeInfo> targets = Transition.calculateTargets(
                 transition.mParticipants, transition.mChanges);
-        assertTrue(targets.contains(embeddedTf));
-        assertTrue(targets.contains(activity));
+        assertTrue(Transition.containsChangeFor(embeddedTf, targets));
+        assertTrue(Transition.containsChangeFor(activity, targets));
     }
 
     @Test
@@ -1470,10 +1494,10 @@ public class TransitionTests extends WindowTestsBase {
 
         participants.add(embeddedTf);
         participants.add(nonEmbeddedActivity);
-        final ArrayList<WindowContainer> targets = Transition.calculateTargets(
+        final ArrayList<Transition.ChangeInfo> targets = Transition.calculateTargets(
                 participants, changes);
         final TransitionInfo info = Transition.calculateTransitionInfo(transition.mType,
-                0 /* flags */, targets, changes, mMockT);
+                0 /* flags */, targets, mMockT);
 
         // Background color should be set on both Activity and embedded TaskFragment.
         final int expectedBackgroundColor = ColorUtils.setAlphaComponent(
@@ -1560,10 +1584,10 @@ public class TransitionTests extends WindowTestsBase {
         c.windowConfiguration.setBounds(bounds);
         task.onRequestedOverrideConfigurationChanged(c);
 
-        ArrayList<WindowContainer> targets = Transition.calculateTargets(
+        ArrayList<Transition.ChangeInfo> targets = Transition.calculateTargets(
                 transition.mParticipants, transition.mChanges);
         TransitionInfo info = Transition.calculateTransitionInfo(
-                TRANSIT_CHANGE, 0, targets, transition.mChanges, mMockT);
+                TRANSIT_CHANGE, 0, targets, mMockT);
         assertEquals(mockSnapshot,
                 info.getChange(task.mRemoteToken.toWindowContainerToken()).getSnapshot());
         transition.abort();
@@ -1617,7 +1641,7 @@ public class TransitionTests extends WindowTestsBase {
     private static void fillChangeMap(ArrayMap<WindowContainer, Transition.ChangeInfo> changes,
             WindowContainer top) {
         for (WindowContainer curr = top.getParent(); curr != null; curr = curr.getParent()) {
-            changes.put(curr, new Transition.ChangeInfo(true /* vis */, false /* exChg */));
+            changes.put(curr, new Transition.ChangeInfo(curr, true /* vis */, false /* exChg */));
         }
     }
 

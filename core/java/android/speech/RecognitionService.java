@@ -42,6 +42,8 @@ import android.util.Pair;
 import com.android.internal.util.function.pooled.PooledLambda;
 
 import java.lang.ref.WeakReference;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Objects;
 
 /**
@@ -55,7 +57,7 @@ public abstract class RecognitionService extends Service {
      */
     @SdkConstant(SdkConstantType.SERVICE_ACTION)
     public static final String SERVICE_INTERFACE = "android.speech.RecognitionService";
-    
+
     /**
      * Name under which a RecognitionService component publishes information about itself.
      * This meta-data should reference an XML resource containing a
@@ -71,17 +73,12 @@ public abstract class RecognitionService extends Service {
     /** Debugging flag */
     private static final boolean DBG = false;
 
+    private static final int DEFAULT_MAX_CONCURRENT_SESSIONS_COUNT = 1;
+
+    private final Map<IBinder, SessionState> mSessions = new HashMap<>();
+
     /** Binder of the recognition service */
-    private RecognitionServiceBinder mBinder = new RecognitionServiceBinder(this);
-
-    /**
-     * The current callback of an application that invoked the
-     *
-     * {@link RecognitionService#onStartListening(Intent, Callback)} method
-     */
-    private Callback mCurrentCallback = null;
-
-    private boolean mStartedDataDelivery;
+    private final RecognitionServiceBinder mBinder = new RecognitionServiceBinder(this);
 
     private static final int MSG_START_LISTENING = 1;
 
@@ -110,7 +107,7 @@ public abstract class RecognitionService extends Service {
                     dispatchCancel((IRecognitionListener) msg.obj);
                     break;
                 case MSG_RESET:
-                    dispatchClearCallback();
+                    dispatchClearCallback((IRecognitionListener) msg.obj);
                     break;
                 case MSG_CHECK_RECOGNITION_SUPPORT:
                     Pair<Intent, IRecognitionSupportCallback> intentAndListener =
@@ -127,71 +124,90 @@ public abstract class RecognitionService extends Service {
 
     private void dispatchStartListening(Intent intent, final IRecognitionListener listener,
             @NonNull AttributionSource attributionSource) {
+        Callback currentCallback = null;
+        SessionState sessionState = mSessions.get(listener.asBinder());
+
         try {
-            if (mCurrentCallback == null) {
-                boolean preflightPermissionCheckPassed =
-                        intent.hasExtra(RecognizerIntent.EXTRA_AUDIO_SOURCE)
-                        || checkPermissionForPreflightNotHardDenied(attributionSource);
-                if (preflightPermissionCheckPassed) {
-                    if (DBG) {
-                        Log.d(TAG, "created new mCurrentCallback, listener = "
-                                + listener.asBinder());
-                    }
-                    mCurrentCallback = new Callback(listener, attributionSource);
-                    RecognitionService.this.onStartListening(intent, mCurrentCallback);
+            if (sessionState == null) {
+                if (mSessions.size() >= getMaxConcurrentSessionsCount()) {
+                    listener.onError(SpeechRecognizer.ERROR_RECOGNIZER_BUSY);
+                    Log.i(TAG, "#startListening received "
+                            + "when the service's capacity is full - ignoring this call.");
+                    return;
                 }
 
-                if (!preflightPermissionCheckPassed || !checkPermissionAndStartDataDelivery()) {
+                boolean preflightPermissionCheckPassed =
+                        intent.hasExtra(RecognizerIntent.EXTRA_AUDIO_SOURCE)
+                                || checkPermissionForPreflightNotHardDenied(attributionSource);
+                if (preflightPermissionCheckPassed) {
+                    currentCallback = new Callback(listener, attributionSource);
+                    sessionState = new SessionState(currentCallback);
+                    RecognitionService.this.onStartListening(intent, currentCallback);
+                }
+
+                if (!preflightPermissionCheckPassed
+                        || !checkPermissionAndStartDataDelivery(sessionState)) {
                     listener.onError(SpeechRecognizer.ERROR_INSUFFICIENT_PERMISSIONS);
                     if (preflightPermissionCheckPassed) {
-                        // If we attempted to start listening, cancel the callback
-                        RecognitionService.this.onCancel(mCurrentCallback);
-                        dispatchClearCallback();
+                        // If start listening was attempted, cancel the callback.
+                        RecognitionService.this.onCancel(currentCallback);
+                        finishDataDelivery(sessionState);
+                        sessionState.reset();
                     }
-                    Log.i(TAG, "caller doesn't have permission:"
-                            + Manifest.permission.RECORD_AUDIO);
+                    Log.i(TAG, "#startListening received from a caller "
+                            + "without permission " + Manifest.permission.RECORD_AUDIO + ".");
+                } else {
+                    if (DBG) {
+                        Log.d(TAG, "Added a new session to the map.");
+                    }
+                    mSessions.put(listener.asBinder(), sessionState);
                 }
             } else {
-                listener.onError(SpeechRecognizer.ERROR_RECOGNIZER_BUSY);
-                Log.i(TAG, "concurrent startListening received - ignoring this call");
+                listener.onError(SpeechRecognizer.ERROR_CLIENT);
+                Log.i(TAG, "#startListening received "
+                        + "for a listener which is already in session - ignoring this call.");
             }
         } catch (RemoteException e) {
-            Log.d(TAG, "onError call from startListening failed");
+            Log.d(TAG, "#onError call from #startListening failed.");
         }
     }
 
     private void dispatchStopListening(IRecognitionListener listener) {
-        try {
-            if (mCurrentCallback == null) {
+        SessionState sessionState = mSessions.get(listener.asBinder());
+        if (sessionState == null) {
+            try {
                 listener.onError(SpeechRecognizer.ERROR_CLIENT);
-                Log.w(TAG, "stopListening called with no preceding startListening - ignoring");
-            } else if (mCurrentCallback.mListener.asBinder() != listener.asBinder()) {
-                listener.onError(SpeechRecognizer.ERROR_RECOGNIZER_BUSY);
-                Log.w(TAG, "stopListening called by other caller than startListening - ignoring");
-            } else { // the correct state
-                RecognitionService.this.onStopListening(mCurrentCallback);
+            } catch (RemoteException e) {
+                Log.d(TAG, "#onError call from #stopListening failed.");
             }
-        } catch (RemoteException e) { // occurs if onError fails
-            Log.d(TAG, "onError call from stopListening failed");
+            Log.w(TAG, "#stopListening received for a listener "
+                    + "which has not started a session - ignoring this call.");
+        } else {
+            RecognitionService.this.onStopListening(sessionState.mCallback);
         }
     }
 
     private void dispatchCancel(IRecognitionListener listener) {
-        if (mCurrentCallback == null) {
-            if (DBG) Log.d(TAG, "cancel called with no preceding startListening - ignoring");
-        } else if (mCurrentCallback.mListener.asBinder() != listener.asBinder()) {
-            Log.w(TAG, "cancel called by client who did not call startListening - ignoring");
-        } else { // the correct state
-            RecognitionService.this.onCancel(mCurrentCallback);
-            dispatchClearCallback();
-            if (DBG) Log.d(TAG, "canceling - setting mCurrentCallback to null");
+        SessionState sessionState = mSessions.get(listener.asBinder());
+        if (sessionState == null) {
+            Log.w(TAG, "#cancel received for a listener which has not started a session "
+                    + "- ignoring this call.");
+        } else {
+            RecognitionService.this.onCancel(sessionState.mCallback);
+            dispatchClearCallback(listener);
         }
     }
 
-    private void dispatchClearCallback() {
-        finishDataDelivery();
-        mCurrentCallback = null;
-        mStartedDataDelivery = false;
+    private void dispatchClearCallback(IRecognitionListener listener) {
+        SessionState sessionState = mSessions.remove(listener.asBinder());
+        if (sessionState != null) {
+            if (DBG) {
+                Log.d(TAG, "Removed session from the map for listener = "
+                        + listener.asBinder() + ".");
+            }
+            finishDataDelivery(sessionState);
+            sessionState.reset();
+        }
     }
 
     private void dispatchCheckRecognitionSupport(
@@ -203,11 +219,11 @@ public abstract class RecognitionService extends Service {
         RecognitionService.this.onTriggerModelDownload(intent);
     }
 
-    private class StartListeningArgs {
+    private static class StartListeningArgs {
         public final Intent mIntent;
 
         public final IRecognitionListener mListener;
-        public final @NonNull AttributionSource mAttributionSource;
+        @NonNull public final AttributionSource mAttributionSource;
 
         public StartListeningArgs(Intent intent, IRecognitionListener listener,
                 @NonNull AttributionSource attributionSource) {
@@ -306,25 +322,40 @@ public abstract class RecognitionService extends Service {
     }
 
     private void handleAttributionContextCreation(@NonNull AttributionSource attributionSource) {
-        if (mCurrentCallback != null
-                && mCurrentCallback.mCallingAttributionSource.equals(attributionSource)) {
-            mCurrentCallback.mAttributionContextCreated = true;
+        for (SessionState sessionState : mSessions.values()) {
+            Callback currentCallback = sessionState.mCallback;
+            if (currentCallback != null
+                    && currentCallback.mCallingAttributionSource.equals(attributionSource)) {
+                currentCallback.mAttributionContextCreated = true;
+            }
         }
     }
 
     @Override
     public final IBinder onBind(final Intent intent) {
-        if (DBG) Log.d(TAG, "onBind, intent=" + intent);
+        if (DBG) Log.d(TAG, "#onBind, intent=" + intent);
         return mBinder;
     }
 
     @Override
     public void onDestroy() {
-        if (DBG) Log.d(TAG, "onDestroy");
-        finishDataDelivery();
-        mCurrentCallback = null;
+        if (DBG) Log.d(TAG, "#onDestroy");
+        for (SessionState sessionState : mSessions.values()) {
+            finishDataDelivery(sessionState);
+            sessionState.reset();
+        }
+        mSessions.clear();
         mBinder.clearReference();
         super.onDestroy();
+    }
+
+    /**
+     * Returns the maximal number of recognition sessions ongoing at the same time.
+     * <p>
+     * The default value is 1, meaning concurrency should be enabled by overriding this method.
+     */
+    public int getMaxConcurrentSessionsCount() {
+        return DEFAULT_MAX_CONCURRENT_SESSIONS_COUNT;
     }
 
     /**
@@ -335,8 +366,8 @@ public abstract class RecognitionService extends Service {
      */
     public class Callback {
         private final IRecognitionListener mListener;
-        private final @NonNull AttributionSource mCallingAttributionSource;
-        private @Nullable Context mAttributionContext;
+        @NonNull private final AttributionSource mCallingAttributionSource;
+        @Nullable private Context mAttributionContext;
         private boolean mAttributionContextCreated;
 
         private Callback(IRecognitionListener listener,
@@ -355,7 +386,7 @@ public abstract class RecognitionService extends Service {
         /**
          * The service should call this method when sound has been received. The purpose of this
          * function is to allow giving feedback to the user regarding the captured audio.
-         * 
+         *
          * @param buffer a buffer containing a sequence of big-endian 16-bit integers representing a
          *        single channel audio stream. The sample rate is implementation dependent.
          */
@@ -372,11 +403,11 @@ public abstract class RecognitionService extends Service {
 
         /**
          * The service should call this method when a network or recognition error occurred.
-         * 
+         *
          * @param error code is defined in {@link SpeechRecognizer}
          */
         public void error(@SpeechRecognizer.RecognitionError int error) throws RemoteException {
-            Message.obtain(mHandler, MSG_RESET).sendToTarget();
+            Message.obtain(mHandler, MSG_RESET, mListener).sendToTarget();
             mListener.onError(error);
         }
 
@@ -386,7 +417,7 @@ public abstract class RecognitionService extends Service {
          * {@link #results(Bundle)} when partial results are ready. This method may be called zero,
          * one or multiple times for each call to {@link SpeechRecognizer#startListening(Intent)},
          * depending on the speech recognition service implementation.
-         * 
+         *
          * @param partialResults the returned results. To retrieve the results in
          *        ArrayList&lt;String&gt; format use {@link Bundle#getStringArrayList(String)} with
          *        {@link SpeechRecognizer#RESULTS_RECOGNITION} as a parameter
@@ -398,7 +429,7 @@ public abstract class RecognitionService extends Service {
         /**
          * The service should call this method when the endpointer is ready for the user to start
          * speaking.
-         * 
+         *
          * @param params parameters set by the recognition service. Reserved for future use.
          */
         public void readyForSpeech(Bundle params) throws RemoteException {
@@ -407,20 +438,20 @@ public abstract class RecognitionService extends Service {
 
         /**
          * The service should call this method when recognition results are ready.
-         * 
+         *
          * @param results the recognition results. To retrieve the results in {@code
          *        ArrayList<String>} format use {@link Bundle#getStringArrayList(String)} with
          *        {@link SpeechRecognizer#RESULTS_RECOGNITION} as a parameter
          */
         public void results(Bundle results) throws RemoteException {
-            Message.obtain(mHandler, MSG_RESET).sendToTarget();
+            Message.obtain(mHandler, MSG_RESET, mListener).sendToTarget();
             mListener.onResults(results);
         }
 
         /**
          * The service should call this method when the sound level in the audio stream has changed.
          * There is no guarantee that this method will be called.
-         * 
+         *
          * @param rmsdB the new RMS dB value
          */
         public void rmsChanged(float rmsdB) throws RemoteException {
@@ -444,7 +475,7 @@ public abstract class RecognitionService extends Service {
          */
         @SuppressLint({"CallbackMethodName", "RethrowRemoteException"})
         public void endOfSegmentedSession() throws RemoteException {
-            Message.obtain(mHandler, MSG_RESET).sendToTarget();
+            Message.obtain(mHandler, MSG_RESET, mListener).sendToTarget();
             mListener.onEndOfSegmentedSession();
         }
 
@@ -469,7 +500,8 @@ public abstract class RecognitionService extends Service {
          * AttributionSource)
          */
         @SuppressLint("CallbackMethodName")
-        public @NonNull AttributionSource getCallingAttributionSource() {
+        @NonNull
+        public AttributionSource getCallingAttributionSource() {
             return mCallingAttributionSource;
         }
 
@@ -490,7 +522,6 @@ public abstract class RecognitionService extends Service {
      * these methods on any thread.
      */
     public static class SupportCallback {
-
         private final IRecognitionSupportCallback mCallback;
 
         private SupportCallback(IRecognitionSupportCallback callback) {
@@ -521,7 +552,7 @@ public abstract class RecognitionService extends Service {
         }
     }
 
-/** Binder of the recognition service */
+    /** Binder of the recognition service. */
     private static final class RecognitionServiceBinder extends IRecognitionService.Stub {
         private final WeakReference<RecognitionService> mServiceRef;
 
@@ -538,7 +569,7 @@ public abstract class RecognitionService extends Service {
             final RecognitionService service = mServiceRef.get();
             if (service != null) {
                 service.mHandler.sendMessage(Message.obtain(service.mHandler,
-                        MSG_START_LISTENING, service.new StartListeningArgs(
+                        MSG_START_LISTENING, new StartListeningArgs(
                                 recognizerIntent, listener, attributionSource)));
             }
         }
@@ -589,17 +620,21 @@ public abstract class RecognitionService extends Service {
         }
     }
 
-    private boolean checkPermissionAndStartDataDelivery() {
-        if (mCurrentCallback.mAttributionContextCreated) {
+    private boolean checkPermissionAndStartDataDelivery(SessionState sessionState) {
+        if (sessionState.mCallback.mAttributionContextCreated) {
             return true;
         }
+
         if (PermissionChecker.checkPermissionAndStartDataDelivery(
-                RecognitionService.this, Manifest.permission.RECORD_AUDIO,
-                mCurrentCallback.getAttributionContextForCaller().getAttributionSource(),
-                /*message*/ null) == PermissionChecker.PERMISSION_GRANTED) {
-            mStartedDataDelivery = true;
+                RecognitionService.this,
+                Manifest.permission.RECORD_AUDIO,
+                sessionState.mCallback.getAttributionContextForCaller().getAttributionSource(),
+                /* message */ null)
+                == PermissionChecker.PERMISSION_GRANTED) {
+            sessionState.mStartedDataDelivery = true;
         }
-        return mStartedDataDelivery;
+
+        return sessionState.mStartedDataDelivery;
     }
 
     private boolean checkPermissionForPreflightNotHardDenied(AttributionSource attributionSource) {
@@ -609,12 +644,39 @@ public abstract class RecognitionService extends Service {
                 || result == PermissionChecker.PERMISSION_SOFT_DENIED;
     }
 
-    void finishDataDelivery() {
-        if (mStartedDataDelivery) {
-            mStartedDataDelivery = false;
+    void finishDataDelivery(SessionState sessionState) {
+        if (sessionState.mStartedDataDelivery) {
+            sessionState.mStartedDataDelivery = false;
             final String op = AppOpsManager.permissionToOp(Manifest.permission.RECORD_AUDIO);
             PermissionChecker.finishDataDelivery(RecognitionService.this, op,
-                    mCurrentCallback.getAttributionContextForCaller().getAttributionSource());
+                    sessionState.mCallback.getAttributionContextForCaller().getAttributionSource());
+        }
+    }
+
+    /**
+     * Data class containing information about an ongoing session:
+     * <ul>
+     *   <li> {@link SessionState#mCallback} - callback of the client that invoked the
+     *   {@link RecognitionService#onStartListening(Intent, Callback)} method;
+     *   <li> {@link SessionState#mStartedDataDelivery} - flag denoting if data
+     *   is being delivered to the client.
+     */
+    private static class SessionState {
+        private Callback mCallback;
+        private boolean mStartedDataDelivery;
+
+        SessionState(Callback callback, boolean startedDataDelivery) {
+            mCallback = callback;
+            mStartedDataDelivery = startedDataDelivery;
+        }
+
+        SessionState(Callback currentCallback) {
+            this(currentCallback, false);
+        }
+
+        void reset() {
+            mCallback = null;
+            mStartedDataDelivery = false;
         }
     }
 }

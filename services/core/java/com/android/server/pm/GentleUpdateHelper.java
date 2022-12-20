@@ -39,7 +39,10 @@ import android.os.SystemProperties;
 import android.text.format.DateUtils;
 import android.util.Slog;
 
+import com.android.internal.util.Preconditions;
+
 import java.util.ArrayDeque;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.TimeUnit;
@@ -101,6 +104,13 @@ public class GentleUpdateHelper {
         public boolean isTimedOut() {
             return SystemClock.elapsedRealtime() >= mFinishTime;
         }
+        /**
+         * The remaining time before this pending check is timed out.
+         */
+        public long getRemainingTimeMillis() {
+            long timeout = mFinishTime - SystemClock.elapsedRealtime();
+            return Math.max(timeout, 0);
+        }
     }
 
     private final Context mContext;
@@ -108,6 +118,7 @@ public class GentleUpdateHelper {
     private final AppStateHelper mAppStateHelper;
     // Worker thread only
     private final ArrayDeque<PendingInstallConstraintsCheck> mPendingChecks = new ArrayDeque<>();
+    private final ArrayList<CompletableFuture<Boolean>> mPendingIdleFutures = new ArrayList<>();
     private boolean mHasPendingIdleJob;
 
     GentleUpdateHelper(Context context, Looper looper, AppStateHelper appStateHelper) {
@@ -130,39 +141,41 @@ public class GentleUpdateHelper {
     CompletableFuture<InstallConstraintsResult> checkInstallConstraints(
             List<String> packageNames, InstallConstraints constraints,
             long timeoutMillis) {
-        var future = new CompletableFuture<InstallConstraintsResult>();
+        var resultFuture = new CompletableFuture<InstallConstraintsResult>();
         mHandler.post(() -> {
-            long clampedTimeoutMillis = timeoutMillis;
-            if (constraints.isRequireDeviceIdle()) {
-                // Device-idle-constraint is required. Clamp the timeout to ensure
-                // timeout-check happens after device-idle-check.
-                clampedTimeoutMillis = Math.max(timeoutMillis, PENDING_CHECK_MILLIS);
-            }
-
             var pendingCheck = new PendingInstallConstraintsCheck(
-                    packageNames, constraints, future, clampedTimeoutMillis);
-            if (constraints.isRequireDeviceIdle()) {
-                mPendingChecks.add(pendingCheck);
-                // JobScheduler doesn't provide queries about whether the device is idle.
-                // We schedule 2 tasks to determine device idle. If the idle job is executed
-                // before the delayed runnable, we know the device is idle.
-                // Note #processPendingCheck will be no-op for the task executed later.
-                scheduleIdleJob();
-                mHandler.postDelayed(() -> processPendingCheck(pendingCheck, false),
-                        PENDING_CHECK_MILLIS);
-            } else if (!processPendingCheck(pendingCheck, false)) {
-                // Not resolved. Schedule a job for re-check
-                mPendingChecks.add(pendingCheck);
-                scheduleIdleJob();
-            }
-
-            if (!future.isDone()) {
-                // Ensure the pending check is resolved after timeout, no matter constraints
-                // satisfied or not.
-                mHandler.postDelayed(() -> processPendingCheck(pendingCheck, false),
-                        clampedTimeoutMillis);
-            }
+                    packageNames, constraints, resultFuture, timeoutMillis);
+            var deviceIdleFuture = constraints.isRequireDeviceIdle()
+                    ? checkDeviceIdle() : CompletableFuture.completedFuture(false);
+            deviceIdleFuture.thenAccept(isIdle -> {
+                Preconditions.checkState(mHandler.getLooper().isCurrentThread());
+                if (!processPendingCheck(pendingCheck, isIdle)) {
+                    // Not resolved. Schedule a job for re-check
+                    mPendingChecks.add(pendingCheck);
+                    scheduleIdleJob();
+                    // Ensure the pending check is resolved after timeout, no matter constraints
+                    // satisfied or not.
+                    mHandler.postDelayed(() -> processPendingCheck(
+                            pendingCheck, false), pendingCheck.getRemainingTimeMillis());
+                }
+            });
         });
+        return resultFuture;
+    }
+
+    /**
+     * Checks if the device is idle or not.
+     * @return A future resolved to {@code true} if the device is idle, or {@code false} if not.
+     */
+    @WorkerThread
+    private CompletableFuture<Boolean> checkDeviceIdle() {
+        // JobScheduler doesn't provide queries about whether the device is idle.
+        // We schedule 2 tasks here and the task which resolves
+        // the future first will determine whether the device is idle or not.
+        var future = new CompletableFuture<Boolean>();
+        mPendingIdleFutures.add(future);
+        scheduleIdleJob();
+        mHandler.postDelayed(() -> future.complete(false), PENDING_CHECK_MILLIS);
         return future;
     }
 
@@ -194,6 +207,11 @@ public class GentleUpdateHelper {
     private void runIdleJob() {
         mHasPendingIdleJob = false;
         processPendingChecksInIdle();
+
+        for (var f : mPendingIdleFutures) {
+            f.complete(true);
+        }
+        mPendingIdleFutures.clear();
     }
 
     @WorkerThread

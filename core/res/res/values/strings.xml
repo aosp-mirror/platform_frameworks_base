@@ -1122,6 +1122,11 @@
     <!-- Description of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
     <string name="permdesc_systemAlertWindow">This app can appear on top of other apps or other parts of the screen. This may interfere with normal app usage and change the way that other apps appear.</string>
 
+    <!-- Title of hide overlay windows permission, which allows an app to hide overlay windows from other apps. -->
+    <string name="permlab_hideOverlayWindows">hide other apps overlays</string>
+    <!-- Description of hide overlay windows permission, which allows an app to prevent overlays from being drawn on top of it. [CHAR LIMIT=NONE] -->
+    <string name="permdesc_hideOverlayWindows">This app can request that the system hides overlays originating from apps from being shown on top of it.</string>
+
     <!-- Title of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
     <string name="permlab_runInBackground">run in the background</string>
     <!-- Description of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
