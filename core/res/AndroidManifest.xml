@@ -6893,6 +6893,12 @@
     <permission android:name="android.permission.GET_APP_METADATA"
                 android:protectionLevel="signature" />
 
+    <!-- @SystemApi Allows the holder to call health connect migration APIs.
+        @hide -->
+    <permission android:name="android.permission.MIGRATE_HEALTH_CONNECT_DATA"
+        android:protectionLevel="signature|knownSigner"
+        android:knownCerts="@array/config_healthConnectMigrationKnownSigners" />
+
     <!-- Attribution for Geofencing service. -->
     <attribution android:tag="GeofencingService" android:label="@string/geofencing_service"/>
     <!-- Attribution for Country Detector. -->
