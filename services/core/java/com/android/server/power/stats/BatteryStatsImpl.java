@@ -7423,6 +7423,12 @@ public class BatteryStatsImpl extends BatteryStats {
         return getPowerBucketConsumptionUC(EnergyConsumerStats.POWER_BUCKET_WIFI);
     }
 
+    @GuardedBy("this")
+    @Override
+    public long getCameraEnergyConsumptionUC() {
+        return getPowerBucketConsumptionUC(EnergyConsumerStats.POWER_BUCKET_CAMERA);
+    }
+
     /**
      * Returns the consumption (in microcoulombs) that the given standard power bucket consumed.
      * Will return {@link #POWER_DATA_UNAVAILABLE} if data is unavailable

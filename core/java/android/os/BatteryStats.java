@@ -2921,6 +2921,15 @@ public abstract class BatteryStats {
     public abstract long getWifiEnergyConsumptionUC();
 
     /**
+     * Returns the battery consumption (in microcoulombs) of camera, derived from on
+     * device power measurement data.
+     * Will return {@link #POWER_DATA_UNAVAILABLE} if data is unavailable.
+     *
+     * {@hide}
+     */
+    public abstract long getCameraEnergyConsumptionUC();
+
+    /**
      * Returns the battery consumption (in microcoulombs) that each
      * {@link android.hardware.power.stats.EnergyConsumer.ordinal} of (custom) energy consumer
      * type {@link android.hardware.power.stats.EnergyConsumerType#OTHER}) consumed.

@@ -48,17 +48,26 @@ public class CameraPowerCalculator extends PowerCalculator {
             long rawRealtimeUs, long rawUptimeUs, BatteryUsageStatsQuery query) {
         super.calculate(builder, batteryStats, rawRealtimeUs, rawUptimeUs, query);
 
-        final long durationMs = batteryStats.getCameraOnTime(rawRealtimeUs,
-                BatteryStats.STATS_SINCE_CHARGED) / 1000;
-        final double powerMah = mPowerEstimator.calculatePower(durationMs);
+        long consumptionUc = batteryStats.getCameraEnergyConsumptionUC();
+        int powerModel = getPowerModel(consumptionUc, query);
+        long durationMs =
+                batteryStats.getCameraOnTime(
+                        rawRealtimeUs, BatteryStats.STATS_SINCE_CHARGED) / 1000;
+        double powerMah;
+        if (powerModel == BatteryConsumer.POWER_MODEL_ENERGY_CONSUMPTION) {
+            powerMah = uCtoMah(consumptionUc);
+        } else {
+            powerMah = mPowerEstimator.calculatePower(durationMs);
+        }
+
         builder.getAggregateBatteryConsumerBuilder(
-                BatteryUsageStats.AGGREGATE_BATTERY_CONSUMER_SCOPE_DEVICE)
+                        BatteryUsageStats.AGGREGATE_BATTERY_CONSUMER_SCOPE_DEVICE)
                 .setUsageDurationMillis(BatteryConsumer.POWER_COMPONENT_CAMERA, durationMs)
-                .setConsumedPower(BatteryConsumer.POWER_COMPONENT_CAMERA, powerMah);
+                .setConsumedPower(BatteryConsumer.POWER_COMPONENT_CAMERA, powerMah, powerModel);
         builder.getAggregateBatteryConsumerBuilder(
-                BatteryUsageStats.AGGREGATE_BATTERY_CONSUMER_SCOPE_ALL_APPS)
+                        BatteryUsageStats.AGGREGATE_BATTERY_CONSUMER_SCOPE_ALL_APPS)
                 .setUsageDurationMillis(BatteryConsumer.POWER_COMPONENT_CAMERA, durationMs)
-                .setConsumedPower(BatteryConsumer.POWER_COMPONENT_CAMERA, powerMah);
+                .setConsumedPower(BatteryConsumer.POWER_COMPONENT_CAMERA, powerMah, powerModel);
     }
 
     @Override

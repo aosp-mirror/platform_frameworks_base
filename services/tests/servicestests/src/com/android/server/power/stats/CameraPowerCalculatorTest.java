@@ -40,13 +40,57 @@ public class CameraPowerCalculatorTest {
 
     @Rule
     public final BatteryUsageStatsRule mStatsRule = new BatteryUsageStatsRule()
-            .setAveragePower(PowerProfile.POWER_CAMERA, 360.0);
+            .setAveragePower(PowerProfile.POWER_CAMERA, 360.0)
+            .initMeasuredEnergyStatsLocked();
 
     @Test
     public void testTimerBasedModel() {
         BatteryStatsImpl stats = mStatsRule.getBatteryStats();
-        stats.noteCameraOnLocked(APP_UID, 1000, 1000);
-        stats.noteCameraOffLocked(APP_UID, 2000, 2000);
+        synchronized (stats) { // To keep the GuardedBy check happy
+            stats.noteCameraOnLocked(APP_UID, 1000, 1000);
+            stats.noteCameraOffLocked(APP_UID, 2000, 2000);
+        }
+
+        CameraPowerCalculator calculator =
+                new CameraPowerCalculator(mStatsRule.getPowerProfile());
+
+        mStatsRule.apply(BatteryUsageStatsRule.POWER_PROFILE_MODEL_ONLY, calculator);
+
+        UidBatteryConsumer consumer = mStatsRule.getUidBatteryConsumer(APP_UID);
+        assertThat(consumer.getUsageDurationMillis(BatteryConsumer.POWER_COMPONENT_CAMERA))
+                .isEqualTo(1000);
+        assertThat(consumer.getConsumedPower(BatteryConsumer.POWER_COMPONENT_CAMERA))
+                .isWithin(PRECISION).of(0.1);
+        assertThat(consumer.getPowerModel(BatteryConsumer.POWER_COMPONENT_CAMERA))
+                .isEqualTo(BatteryConsumer.POWER_MODEL_POWER_PROFILE);
+
+        final BatteryConsumer deviceBatteryConsumer = mStatsRule.getDeviceBatteryConsumer();
+        assertThat(deviceBatteryConsumer
+                .getUsageDurationMillis(BatteryConsumer.POWER_COMPONENT_CAMERA))
+                .isEqualTo(1000);
+        assertThat(deviceBatteryConsumer.getConsumedPower(BatteryConsumer.POWER_COMPONENT_CAMERA))
+                .isWithin(PRECISION).of(0.1);
+        assertThat(deviceBatteryConsumer.getPowerModel(BatteryConsumer.POWER_COMPONENT_CAMERA))
+                .isEqualTo(BatteryConsumer.POWER_MODEL_POWER_PROFILE);
+
+        final BatteryConsumer appsBatteryConsumer = mStatsRule.getAppsBatteryConsumer();
+        assertThat(appsBatteryConsumer
+                .getUsageDurationMillis(BatteryConsumer.POWER_COMPONENT_CAMERA))
+                .isEqualTo(1000);
+        assertThat(appsBatteryConsumer.getConsumedPower(BatteryConsumer.POWER_COMPONENT_CAMERA))
+                .isWithin(PRECISION).of(0.1);
+        assertThat(appsBatteryConsumer.getPowerModel(BatteryConsumer.POWER_COMPONENT_CAMERA))
+                .isEqualTo(BatteryConsumer.POWER_MODEL_POWER_PROFILE);
+    }
+
+    @Test
+    public void testEnergyConsumptionBasedModel() {
+        BatteryStatsImpl stats = mStatsRule.getBatteryStats();
+        synchronized (stats) { // To keep the GuardedBy check happy
+            stats.noteCameraOnLocked(APP_UID, 1000, 1000);
+            stats.noteCameraOffLocked(APP_UID, 2000, 2000);
+            stats.updateCameraEnergyConsumerStatsLocked(720_000, 6000); // 0.72C == 0.2mAh
+        }
 
         CameraPowerCalculator calculator =
                 new CameraPowerCalculator(mStatsRule.getPowerProfile());
@@ -58,19 +102,27 @@ public class CameraPowerCalculatorTest {
                 .isEqualTo(1000);
         assertThat(consumer.getConsumedPower(BatteryConsumer.POWER_COMPONENT_CAMERA))
                 .isWithin(PRECISION).of(0.1);
+        // Per-UID energy consumer model is not implemented yet, so the result will be based on the
+        // power profile
+        assertThat(consumer.getPowerModel(BatteryConsumer.POWER_COMPONENT_CAMERA))
+                .isEqualTo(BatteryConsumer.POWER_MODEL_POWER_PROFILE);
 
         final BatteryConsumer deviceBatteryConsumer = mStatsRule.getDeviceBatteryConsumer();
         assertThat(deviceBatteryConsumer
                 .getUsageDurationMillis(BatteryConsumer.POWER_COMPONENT_CAMERA))
                 .isEqualTo(1000);
         assertThat(deviceBatteryConsumer.getConsumedPower(BatteryConsumer.POWER_COMPONENT_CAMERA))
-                .isWithin(PRECISION).of(0.1);
+                .isWithin(PRECISION).of(0.2);
+        assertThat(deviceBatteryConsumer.getPowerModel(BatteryConsumer.POWER_COMPONENT_CAMERA))
+                .isEqualTo(BatteryConsumer.POWER_MODEL_ENERGY_CONSUMPTION);
 
         final BatteryConsumer appsBatteryConsumer = mStatsRule.getAppsBatteryConsumer();
         assertThat(appsBatteryConsumer
                 .getUsageDurationMillis(BatteryConsumer.POWER_COMPONENT_CAMERA))
                 .isEqualTo(1000);
         assertThat(appsBatteryConsumer.getConsumedPower(BatteryConsumer.POWER_COMPONENT_CAMERA))
-                .isWithin(PRECISION).of(0.1);
+                .isWithin(PRECISION).of(0.2);
+        assertThat(appsBatteryConsumer.getPowerModel(BatteryConsumer.POWER_COMPONENT_CAMERA))
+                .isEqualTo(BatteryConsumer.POWER_MODEL_ENERGY_CONSUMPTION);
     }
 }
