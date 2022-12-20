@@ -95,6 +95,7 @@ internal class DemoMobileConnectionParameterizedTest(private val testCase: TestC
                     inflateStrength = testCase.inflateStrength,
                     activity = testCase.activity,
                     carrierNetworkChange = testCase.carrierNetworkChange,
+                    roaming = testCase.roaming,
                 )
 
             fakeNetworkEventFlow.value = networkModel
@@ -116,6 +117,7 @@ internal class DemoMobileConnectionParameterizedTest(private val testCase: TestC
                 assertThat(connectionInfo.dataActivityDirection).isEqualTo(model.activity)
                 assertThat(connectionInfo.carrierNetworkChangeActive)
                     .isEqualTo(model.carrierNetworkChange)
+                assertThat(connectionInfo.isRoaming).isEqualTo(model.roaming)
 
                 // TODO(b/261029387): check these once we start handling them
                 assertThat(connectionInfo.isEmergencyOnly).isFalse()
@@ -138,6 +140,7 @@ internal class DemoMobileConnectionParameterizedTest(private val testCase: TestC
         val inflateStrength: Boolean,
         @Annotation.DataActivityType val activity: Int,
         val carrierNetworkChange: Boolean,
+        val roaming: Boolean,
     ) {
         override fun toString(): String {
             return "INPUT(level=$level, " +
@@ -146,7 +149,8 @@ internal class DemoMobileConnectionParameterizedTest(private val testCase: TestC
                 "carrierId=$carrierId, " +
                 "inflateStrength=$inflateStrength, " +
                 "activity=$activity, " +
-                "carrierNetworkChange=$carrierNetworkChange)"
+                "carrierNetworkChange=$carrierNetworkChange, " +
+                "roaming=$roaming)"
         }
 
         // Convenience for iterating test data and creating new cases
@@ -158,6 +162,7 @@ internal class DemoMobileConnectionParameterizedTest(private val testCase: TestC
             inflateStrength: Boolean? = null,
             @Annotation.DataActivityType activity: Int? = null,
             carrierNetworkChange: Boolean? = null,
+            roaming: Boolean? = null,
         ): TestCase =
             TestCase(
                 level = level ?: this.level,
@@ -166,7 +171,8 @@ internal class DemoMobileConnectionParameterizedTest(private val testCase: TestC
                 carrierId = carrierId ?: this.carrierId,
                 inflateStrength = inflateStrength ?: this.inflateStrength,
                 activity = activity ?: this.activity,
-                carrierNetworkChange = carrierNetworkChange ?: this.carrierNetworkChange
+                carrierNetworkChange = carrierNetworkChange ?: this.carrierNetworkChange,
+                roaming = roaming ?: this.roaming,
             )
     }
 
@@ -193,6 +199,8 @@ internal class DemoMobileConnectionParameterizedTest(private val testCase: TestC
                 TelephonyManager.DATA_ACTIVITY_INOUT
             )
         private val carrierNetworkChange = booleanList
+        // false first so the base case doesn't have roaming set (more common)
+        private val roaming = listOf(false, true)
 
         @Parameters(name = "{0}") @JvmStatic fun data() = testData()
 
@@ -226,7 +234,8 @@ internal class DemoMobileConnectionParameterizedTest(private val testCase: TestC
                     carrierIds.first(),
                     inflateStrength.first(),
                     activity.first(),
-                    carrierNetworkChange.first()
+                    carrierNetworkChange.first(),
+                    roaming.first(),
                 )
 
             val tail =
@@ -237,6 +246,7 @@ internal class DemoMobileConnectionParameterizedTest(private val testCase: TestC
                         inflateStrength.map { baseCase.modifiedBy(inflateStrength = it) },
                         activity.map { baseCase.modifiedBy(activity = it) },
                         carrierNetworkChange.map { baseCase.modifiedBy(carrierNetworkChange = it) },
+                        roaming.map { baseCase.modifiedBy(roaming = it) }
                     )
                     .flatten()
 

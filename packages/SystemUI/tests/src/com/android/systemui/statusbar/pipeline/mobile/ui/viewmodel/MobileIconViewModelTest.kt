@@ -234,6 +234,22 @@ class MobileIconViewModelTest : SysuiTestCase() {
             job.cancel()
         }
 
+    @Test
+    fun roaming() =
+        runBlocking(IMMEDIATE) {
+            interactor.isRoaming.value = true
+            var latest: Boolean? = null
+            val job = underTest.roaming.onEach { latest = it }.launchIn(this)
+
+            assertThat(latest).isTrue()
+
+            interactor.isRoaming.value = false
+
+            assertThat(latest).isFalse()
+
+            job.cancel()
+        }
+
     /** Convenience constructor for these tests */
     private fun defaultSignal(
         level: Int = 1,

@@ -50,4 +50,12 @@ interface MobileConnectionRepository {
      * [SubscriptionManager.getDefaultDataSubscriptionId]
      */
     val isDefaultDataSubscription: StateFlow<Boolean>
+
+    /**
+     * See [TelephonyManager.getCdmaEnhancedRoamingIndicatorDisplayNumber]. This bit only matters if
+     * the connection type is CDMA.
+     *
+     * True if the Enhanced Roaming Indicator (ERI) display number is not [TelephonyManager.ERI_OFF]
+     */
+    val cdmaRoaming: StateFlow<Boolean>
 }

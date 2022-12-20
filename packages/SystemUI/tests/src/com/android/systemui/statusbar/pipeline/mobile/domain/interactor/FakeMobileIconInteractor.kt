@@ -30,6 +30,8 @@ class FakeMobileIconInteractor : MobileIconInteractor {
     private val _isEmergencyOnly = MutableStateFlow(false)
     override val isEmergencyOnly = _isEmergencyOnly
 
+    override val isRoaming = MutableStateFlow(false)
+
     private val _isFailedConnection = MutableStateFlow(false)
     override val isDefaultConnectionFailed = _isFailedConnection
 

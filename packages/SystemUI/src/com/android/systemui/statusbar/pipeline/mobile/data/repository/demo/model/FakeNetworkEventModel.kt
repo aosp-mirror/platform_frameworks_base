@@ -34,6 +34,7 @@ sealed interface FakeNetworkEventModel {
         val inflateStrength: Boolean?,
         @DataActivityType val activity: Int?,
         val carrierNetworkChange: Boolean,
+        val roaming: Boolean,
     ) : FakeNetworkEventModel
 
     data class MobileDisabled(
