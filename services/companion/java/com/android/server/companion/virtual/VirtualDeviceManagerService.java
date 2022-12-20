@@ -42,6 +42,7 @@ import android.hardware.display.VirtualDisplayConfig;
 import android.os.Binder;
 import android.os.Handler;
 import android.os.IBinder;
+import android.os.LocaleList;
 import android.os.Looper;
 import android.os.Parcel;
 import android.os.Process;
@@ -589,6 +590,21 @@ public class VirtualDeviceManagerService extends SystemService {
         @Override
         public int getBaseVirtualDisplayFlags(IVirtualDevice virtualDevice) {
             return ((VirtualDeviceImpl) virtualDevice).getBaseVirtualDisplayFlags();
+        }
+
+        @Override
+        @Nullable
+        public LocaleList getPreferredLocaleListForUid(int uid) {
+            // TODO: b/263188984 support the case where an app is running on multiple VDs
+            synchronized (mVirtualDeviceManagerLock) {
+                for (int i = 0; i < mAppsOnVirtualDevices.size(); i++) {
+                    if (mAppsOnVirtualDevices.valueAt(i).contains(uid)) {
+                        int deviceId = mAppsOnVirtualDevices.keyAt(i);
+                        return mVirtualDevices.get(deviceId).getDeviceLocaleList();
+                    }
+                }
+            }
+            return null;
         }
 
         @Override
