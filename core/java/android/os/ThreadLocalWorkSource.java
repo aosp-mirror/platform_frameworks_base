@@ -39,8 +39,8 @@ package android.os;
  */
 public final class ThreadLocalWorkSource {
     public static final int UID_NONE = Message.UID_NONE;
-    private static final ThreadLocal<Integer> sWorkSourceUid =
-            ThreadLocal.withInitial(() -> UID_NONE);
+    private static final ThreadLocal<int []> sWorkSourceUid =
+            ThreadLocal.withInitial(() -> new int[] {UID_NONE});
 
     /**
      * Returns the UID to blame for the code currently executed on this thread.
@@ -50,7 +50,7 @@ public final class ThreadLocalWorkSource {
      * <p>It can also be set manually using {@link #setUid(int)}.
      */
     public static int getUid() {
-        return sWorkSourceUid.get();
+        return sWorkSourceUid.get()[0];
     }
 
     /**
@@ -65,7 +65,7 @@ public final class ThreadLocalWorkSource {
      */
     public static long setUid(int uid) {
         final long token = getToken();
-        sWorkSourceUid.set(uid);
+        sWorkSourceUid.get()[0] = uid;
         return token;
     }
 
@@ -73,7 +73,7 @@ public final class ThreadLocalWorkSource {
      * Restores the state using the provided token.
      */
     public static void restore(long token) {
-        sWorkSourceUid.set(parseUidFromToken(token));
+        sWorkSourceUid.get()[0] = parseUidFromToken(token);
     }
 
     /**
@@ -88,7 +88,7 @@ public final class ThreadLocalWorkSource {
      * </pre>
      *
      * @return a token that can be used to restore the state.
-     **/
+     */
     public static long clear() {
         return setUid(UID_NONE);
     }
@@ -98,7 +98,7 @@ public final class ThreadLocalWorkSource {
     }
 
     private static long getToken() {
-        return sWorkSourceUid.get();
+        return sWorkSourceUid.get()[0];
     }
 
     private ThreadLocalWorkSource() {
