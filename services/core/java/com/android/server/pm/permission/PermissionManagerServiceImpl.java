@@ -683,7 +683,7 @@ public class PermissionManagerServiceImpl implements PermissionManagerServiceInt
             if (bp == null) {
                 return;
             }
-            if (bp.isDynamic()) {
+            if (!bp.isDynamic()) {
                 // TODO: switch this back to SecurityException
                 Slog.wtf(TAG, "Not allowed to modify non-dynamic permission "
                         + permName);
@@ -1299,13 +1299,13 @@ public class PermissionManagerServiceImpl implements PermissionManagerServiceInt
                     }
                 }
             }
+        }
 
-            if ((flags & PackageManager.FLAG_PERMISSION_WHITELIST_INSTALLER) != 0) {
-                if (!isCallerPrivileged && !isCallerInstallerOnRecord) {
-                    throw new SecurityException("Modifying installer allowlist requires"
-                            + " being installer on record or "
-                            + Manifest.permission.WHITELIST_RESTRICTED_PERMISSIONS);
-                }
+        if ((flags & PackageManager.FLAG_PERMISSION_WHITELIST_INSTALLER) != 0) {
+            if (!isCallerPrivileged && !isCallerInstallerOnRecord) {
+                throw new SecurityException("Modifying installer allowlist requires"
+                        + " being installer on record or "
+                        + Manifest.permission.WHITELIST_RESTRICTED_PERMISSIONS);
             }
         }
 
