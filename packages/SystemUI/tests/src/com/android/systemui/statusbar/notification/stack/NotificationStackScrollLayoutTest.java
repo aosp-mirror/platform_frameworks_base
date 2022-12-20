@@ -20,6 +20,7 @@ import static android.view.View.GONE;
 
 import static com.android.systemui.statusbar.notification.stack.NotificationStackScrollLayout.ROWS_ALL;
 import static com.android.systemui.statusbar.notification.stack.NotificationStackScrollLayout.ROWS_GENTLE;
+import static com.android.systemui.statusbar.notification.stack.NotificationStackScrollLayout.RUBBER_BAND_FACTOR_NORMAL;
 
 import static com.google.common.truth.Truth.assertThat;
 import static com.google.common.truth.Truth.assertWithMessage;
@@ -47,6 +48,7 @@ import static org.mockito.Mockito.when;
 import android.graphics.Rect;
 import android.testing.AndroidTestingRunner;
 import android.testing.TestableLooper;
+import android.testing.TestableResources;
 import android.util.MathUtils;
 import android.view.MotionEvent;
 import android.view.View;
@@ -99,6 +101,7 @@ public class NotificationStackScrollLayoutTest extends SysuiTestCase {
     private NotificationStackScrollLayout mStackScroller;  // Normally test this
     private NotificationStackScrollLayout mStackScrollerInternal;  // See explanation below
     private AmbientState mAmbientState;
+    private TestableResources mTestableResources;
 
     @Rule public MockitoRule mockito = MockitoJUnit.rule();
     @Mock private CentralSurfaces mCentralSurfaces;
@@ -123,6 +126,7 @@ public class NotificationStackScrollLayoutTest extends SysuiTestCase {
     @UiThreadTest
     public void setUp() throws Exception {
         allowTestableLooperAsMainThread();
+        mTestableResources = mContext.getOrCreateTestableResources();
 
         // Interact with real instance of AmbientState.
         mAmbientState = spy(new AmbientState(
@@ -394,7 +398,7 @@ public class NotificationStackScrollLayoutTest extends SysuiTestCase {
     @Test
     @UiThreadTest
     public void testSetExpandedHeight_withSplitShade_doesntInterpolateStackHeight() {
-        mContext.getOrCreateTestableResources()
+        mTestableResources
                 .addOverride(R.bool.config_use_split_notification_shade, /* value= */ true);
         final int[] expectedStackHeight = {0};
 
@@ -405,12 +409,12 @@ public class NotificationStackScrollLayoutTest extends SysuiTestCase {
                     .isEqualTo(expectedStackHeight[0]);
         });
 
-        mContext.getOrCreateTestableResources()
+        mTestableResources
                 .addOverride(R.bool.config_use_split_notification_shade, /* value= */ false);
         expectedStackHeight[0] = 0;
         mStackScroller.setExpandedHeight(100f);
 
-        mContext.getOrCreateTestableResources()
+        mTestableResources
                 .addOverride(R.bool.config_use_split_notification_shade, /* value= */ true);
         expectedStackHeight[0] = 100;
         mStackScroller.setExpandedHeight(100f);
@@ -779,6 +783,39 @@ public class NotificationStackScrollLayoutTest extends SysuiTestCase {
 
         // Then: mAmbientState.scrollY should be set to be 0
         assertEquals(mAmbientState.getScrollY(), 0);
+    }
+
+    @Test
+    public void testSplitShade_hasTopOverscroll() {
+        mTestableResources
+                .addOverride(R.bool.config_use_split_notification_shade, /* value= */ true);
+        mStackScroller.updateSplitNotificationShade();
+        mAmbientState.setExpansionFraction(1f);
+
+        int topOverscrollPixels = 100;
+        mStackScroller.setOverScrolledPixels(topOverscrollPixels, true, false);
+
+        float expectedTopOverscrollAmount = topOverscrollPixels * RUBBER_BAND_FACTOR_NORMAL;
+        assertEquals(expectedTopOverscrollAmount, mStackScroller.getCurrentOverScrollAmount(true));
+        assertEquals(expectedTopOverscrollAmount, mAmbientState.getStackY());
+    }
+
+    @Test
+    public void testNormalShade_hasNoTopOverscroll() {
+        mTestableResources
+                .addOverride(R.bool.config_use_split_notification_shade, /* value= */ false);
+        mStackScroller.updateSplitNotificationShade();
+        mAmbientState.setExpansionFraction(1f);
+
+        int topOverscrollPixels = 100;
+        mStackScroller.setOverScrolledPixels(topOverscrollPixels, true, false);
+
+        float expectedTopOverscrollAmount = topOverscrollPixels * RUBBER_BAND_FACTOR_NORMAL;
+        assertEquals(expectedTopOverscrollAmount, mStackScroller.getCurrentOverScrollAmount(true));
+        // When not in split shade mode, then the overscroll effect is handled in
+        // NotificationPanelViewController and not in NotificationStackScrollLayout. Therefore
+        // mAmbientState must have stackY set to 0
+        assertEquals(0f, mAmbientState.getStackY());
     }
 
     private void setBarStateForTest(int state) {
