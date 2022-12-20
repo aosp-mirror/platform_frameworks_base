@@ -18,14 +18,11 @@ package com.android.systemui.stylus
 
 import android.hardware.BatteryState
 import android.hardware.input.InputManager
-import android.util.Log
 import android.view.InputDevice
 import com.android.systemui.CoreStartable
 import com.android.systemui.dagger.SysUISingleton
-import com.android.systemui.dagger.qualifiers.Background
 import com.android.systemui.flags.FeatureFlags
 import com.android.systemui.flags.Flags
-import java.util.concurrent.Executor
 import javax.inject.Inject
 
 /**
@@ -40,16 +37,7 @@ constructor(
     private val inputManager: InputManager,
     private val stylusUsiPowerUi: StylusUsiPowerUI,
     private val featureFlags: FeatureFlags,
-    @Background private val executor: Executor,
-) : CoreStartable, StylusManager.StylusCallback, InputManager.InputDeviceBatteryListener {
-
-    override fun onStylusAdded(deviceId: Int) {
-        val device = inputManager.getInputDevice(deviceId) ?: return
-
-        if (!device.isExternal) {
-            registerBatteryListener(deviceId)
-        }
-    }
+) : CoreStartable, StylusManager.StylusCallback, StylusManager.StylusBatteryCallback {
 
     override fun onStylusBluetoothConnected(deviceId: Int, btAddress: String) {
         stylusUsiPowerUi.refresh()
@@ -59,15 +47,7 @@ constructor(
         stylusUsiPowerUi.refresh()
     }
 
-    override fun onStylusRemoved(deviceId: Int) {
-        val device = inputManager.getInputDevice(deviceId) ?: return
-
-        if (!device.isExternal) {
-            unregisterBatteryListener(deviceId)
-        }
-    }
-
-    override fun onBatteryStateChanged(
+    override fun onStylusUsiBatteryStateChanged(
         deviceId: Int,
         eventTimeMillis: Long,
         batteryState: BatteryState
@@ -77,39 +57,19 @@ constructor(
         }
     }
 
-    private fun registerBatteryListener(deviceId: Int) {
-        try {
-            inputManager.addInputDeviceBatteryListener(deviceId, executor, this)
-        } catch (e: SecurityException) {
-            Log.e(TAG, "$e: Failed to register battery listener for $deviceId.")
-        }
-    }
-
-    private fun unregisterBatteryListener(deviceId: Int) {
-        try {
-            inputManager.removeInputDeviceBatteryListener(deviceId, this)
-        } catch (e: SecurityException) {
-            Log.e(TAG, "$e: Failed to unregister battery listener for $deviceId.")
-        }
-    }
-
     override fun start() {
         if (!featureFlags.isEnabled(Flags.ENABLE_USI_BATTERY_NOTIFICATIONS)) return
-        addBatteryListenerForInternalStyluses()
+        if (!hostDeviceSupportsStylusInput()) return
 
         stylusManager.registerCallback(this)
         stylusManager.startListener()
     }
 
-    private fun addBatteryListenerForInternalStyluses() {
-        // For most devices, an active stylus is represented by an internal InputDevice.
-        // This InputDevice will be present in InputManager before CoreStartables run,
-        // and will not be removed. In many cases, it reports the battery level of the stylus.
-        inputManager.inputDeviceIds
+    private fun hostDeviceSupportsStylusInput(): Boolean {
+        return inputManager.inputDeviceIds
             .asSequence()
             .mapNotNull { inputManager.getInputDevice(it) }
-            .filter { it.supportsSource(InputDevice.SOURCE_STYLUS) }
-            .forEach { onStylusAdded(it.id) }
+            .any { it.supportsSource(InputDevice.SOURCE_STYLUS) && !it.isExternal }
     }
 
     companion object {
