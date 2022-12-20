@@ -26,6 +26,7 @@ import android.security.keystore.UserNotAuthenticatedException;
 import android.util.Slog;
 import android.util.SparseArray;
 
+import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.util.ArrayUtils;
 import com.android.internal.widget.LockscreenCredential;
 
@@ -60,6 +61,7 @@ import javax.crypto.spec.GCMParameterSpec;
  * <p> The encrypted credential is stored in-memory only so the cache does not persist across
  * reboots.
  */
+@VisibleForTesting // public visibility is needed for Mockito
 public class ManagedProfilePasswordCache {
 
     private static final String TAG = "ManagedProfilePasswordCache";
