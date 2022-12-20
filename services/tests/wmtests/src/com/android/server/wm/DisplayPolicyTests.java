@@ -24,6 +24,7 @@ import static android.view.RoundedCorners.NO_ROUNDED_CORNERS;
 import static android.view.Surface.ROTATION_0;
 import static android.view.ViewGroup.LayoutParams.MATCH_PARENT;
 import static android.view.ViewGroup.LayoutParams.WRAP_CONTENT;
+import static android.view.WindowInsets.Type.navigationBars;
 import static android.view.WindowInsetsController.APPEARANCE_LIGHT_NAVIGATION_BARS;
 import static android.view.WindowManager.LayoutParams.FLAG_ALT_FOCUSABLE_IM;
 import static android.view.WindowManager.LayoutParams.FLAG_DIM_BEHIND;
@@ -184,7 +185,7 @@ public class DisplayPolicyTests extends WindowTestsBase {
         mDisplayContent.setLayoutNeeded();
         mDisplayContent.performLayout(true /* initial */, false /* updateImeWindows */);
 
-        final InsetsSource navSource = new InsetsSource(ITYPE_NAVIGATION_BAR);
+        final InsetsSource navSource = new InsetsSource(ITYPE_NAVIGATION_BAR, navigationBars());
         navSource.setFrame(mNavBarWindow.getFrame());
         opaqueDarkNavBar.mAboveInsetsState.addSource(navSource);
         opaqueLightNavBar.mAboveInsetsState.addSource(navSource);
@@ -254,14 +255,15 @@ public class DisplayPolicyTests extends WindowTestsBase {
 
     @Test
     public void testOverlappingWithNavBar() {
-        final InsetsSource navSource = new InsetsSource(ITYPE_NAVIGATION_BAR);
+        final InsetsSource navSource = new InsetsSource(ITYPE_NAVIGATION_BAR, navigationBars());
         navSource.setFrame(new Rect(100, 200, 200, 300));
         testOverlappingWithNavBarType(navSource);
     }
 
     @Test
     public void testOverlappingWithExtraNavBar() {
-        final InsetsSource navSource = new InsetsSource(ITYPE_EXTRA_NAVIGATION_BAR);
+        final InsetsSource navSource =
+                new InsetsSource(ITYPE_EXTRA_NAVIGATION_BAR, navigationBars());
         navSource.setFrame(new Rect(100, 200, 200, 300));
         testOverlappingWithNavBarType(navSource);
     }

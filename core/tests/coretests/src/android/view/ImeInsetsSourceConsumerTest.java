@@ -92,8 +92,8 @@ public class ImeInsetsSourceConsumerTest {
 
     @Test
     public void testImeVisibility() {
-        final InsetsSourceControl ime =
-                new InsetsSourceControl(ITYPE_IME, mLeash, false, new Point(), Insets.NONE);
+        final InsetsSourceControl ime = new InsetsSourceControl(ITYPE_IME, WindowInsets.Type.ime(),
+                mLeash, false, new Point(), Insets.NONE);
         mController.onControlsChanged(new InsetsSourceControl[] { ime });
 
         InstrumentationRegistry.getInstrumentation().runOnMainSync(() -> {
@@ -121,8 +121,8 @@ public class ImeInsetsSourceConsumerTest {
             mController.show(WindowInsets.Type.ime(), true /* fromIme */, null /* statsToken */);
 
             // set control and verify visibility is applied.
-            InsetsSourceControl control =
-                    new InsetsSourceControl(ITYPE_IME, mLeash, false, new Point(), Insets.NONE);
+            InsetsSourceControl control = new InsetsSourceControl(ITYPE_IME,
+                    WindowInsets.Type.ime(), mLeash, false, new Point(), Insets.NONE);
             mController.onControlsChanged(new InsetsSourceControl[] { control });
             // IME show animation should be triggered when control becomes available.
             verify(mController).applyAnimation(
@@ -161,8 +161,8 @@ public class ImeInsetsSourceConsumerTest {
             }
 
             // set control and verify visibility is applied.
-            InsetsSourceControl control = Mockito.spy(
-                    new InsetsSourceControl(ITYPE_IME, mLeash, false, new Point(), Insets.NONE));
+            InsetsSourceControl control = Mockito.spy(new InsetsSourceControl(ITYPE_IME,
+                    WindowInsets.Type.ime(), mLeash, false, new Point(), Insets.NONE));
             // Simulate IME source control set this flag when the target has starting window.
             control.setSkipAnimationOnce(true);
 
@@ -173,7 +173,7 @@ public class ImeInsetsSourceConsumerTest {
                 verify(control).getAndClearSkipAnimationOnce();
                 verify(mController).applyAnimation(eq(WindowInsets.Type.ime()),
                         eq(true) /* show */, eq(false) /* fromIme */,
-                        eq(expectSkipAnim) /* skipAnim */, null /* statsToken */);
+                        eq(expectSkipAnim) /* skipAnim */, eq(null) /* statsToken */);
             }
 
             // If previously hasViewFocus is false, verify when requesting the IME visible next
@@ -187,7 +187,7 @@ public class ImeInsetsSourceConsumerTest {
                 verify(control).getAndClearSkipAnimationOnce();
                 verify(mController).applyAnimation(eq(WindowInsets.Type.ime()),
                         eq(true) /* show */, eq(true) /* fromIme */,
-                        eq(false) /* skipAnim */, null /* statsToken */);
+                        eq(false) /* skipAnim */, eq(null) /* statsToken */);
             }
         });
     }

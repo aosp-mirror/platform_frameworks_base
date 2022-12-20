@@ -69,7 +69,7 @@ public class InsetsAnimationControlImplTest {
     private InsetsAnimationControlImpl mController;
 
     private SurfaceSession mSession = new SurfaceSession();
-    private SurfaceControl mTopLeash;
+    private SurfaceControl mStatusLeash;
     private SurfaceControl mNavLeash;
     private InsetsState mInsetsState;
 
@@ -80,7 +80,7 @@ public class InsetsAnimationControlImplTest {
     @Before
     public void setup() {
         MockitoAnnotations.initMocks(this);
-        mTopLeash = new SurfaceControl.Builder(mSession)
+        mStatusLeash = new SurfaceControl.Builder(mSession)
                 .setName("testSurface")
                 .build();
         mNavLeash = new SurfaceControl.Builder(mSession)
@@ -92,15 +92,16 @@ public class InsetsAnimationControlImplTest {
         InsetsSourceConsumer topConsumer = new InsetsSourceConsumer(ITYPE_STATUS_BAR, mInsetsState,
                 () -> mMockTransaction, mMockController);
         topConsumer.setControl(
-                new InsetsSourceControl(
-                        ITYPE_STATUS_BAR, mTopLeash, true, new Point(0, 0),
-                        Insets.of(0, 100, 0, 0)),
+                new InsetsSourceControl(ITYPE_STATUS_BAR, WindowInsets.Type.statusBars(),
+                        mStatusLeash, true, new Point(0, 0), Insets.of(0, 100, 0, 0)),
                 new int[1], new int[1]);
 
         InsetsSourceConsumer navConsumer = new InsetsSourceConsumer(ITYPE_NAVIGATION_BAR,
                 mInsetsState, () -> mMockTransaction, mMockController);
-        navConsumer.setControl(new InsetsSourceControl(ITYPE_NAVIGATION_BAR, mNavLeash, true,
-                new Point(400, 0), Insets.of(0, 0, 100, 0)), new int[1], new int[1]);
+        navConsumer.setControl(
+                new InsetsSourceControl(ITYPE_NAVIGATION_BAR, WindowInsets.Type.navigationBars(),
+                        mNavLeash, true, new Point(400, 0), Insets.of(0, 0, 100, 0)),
+                new int[1], new int[1]);
         navConsumer.hide();
 
         SparseArray<InsetsSourceControl> controls = new SparseArray<>();
@@ -143,7 +144,7 @@ public class InsetsAnimationControlImplTest {
         assertEquals(2, params.size());
         SurfaceParams first = params.get(0);
         SurfaceParams second = params.get(1);
-        SurfaceParams topParams = first.surface == mTopLeash ? first : second;
+        SurfaceParams topParams = first.surface == mStatusLeash ? first : second;
         SurfaceParams navParams = first.surface == mNavLeash ? first : second;
         assertPosition(topParams.matrix, new Rect(0, 0, 500, 100), new Rect(0, -70, 500, 30));
         assertPosition(navParams.matrix, new Rect(400, 0, 500, 500), new Rect(460, 0, 560, 500));

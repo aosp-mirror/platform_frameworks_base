@@ -97,7 +97,7 @@ public class InsetsSourceConsumerTest {
                 // activity isn't running, lets ignore BadTokenException.
             }
             mState = new InsetsState();
-            mSpyInsetsSource = Mockito.spy(new InsetsSource(ITYPE_STATUS_BAR));
+            mSpyInsetsSource = Mockito.spy(new InsetsSource(ITYPE_STATUS_BAR, statusBars()));
             mState.addSource(mSpyInsetsSource);
 
             mController = new InsetsController(new ViewRootInsetsControllerHost(mViewRoot));
@@ -113,8 +113,8 @@ public class InsetsSourceConsumerTest {
         instrumentation.waitForIdleSync();
 
         mConsumer.setControl(
-                new InsetsSourceControl(ITYPE_STATUS_BAR, mLeash, true /* initialVisible */,
-                        new Point(), Insets.NONE),
+                new InsetsSourceControl(ITYPE_STATUS_BAR, statusBars(), mLeash,
+                        true /* initialVisible */, new Point(), Insets.NONE),
                 new int[1], new int[1]);
     }
 
@@ -146,7 +146,7 @@ public class InsetsSourceConsumerTest {
         InsetsSourceConsumer consumer = new InsetsSourceConsumer(
                 ITYPE_IME, state, null, controller);
 
-        InsetsSource source = new InsetsSource(ITYPE_IME);
+        InsetsSource source = new InsetsSource(ITYPE_IME, ime());
         source.setFrame(0, 1, 2, 3);
         consumer.updateSource(new InsetsSource(source), ANIMATION_TYPE_NONE);
 
@@ -182,8 +182,8 @@ public class InsetsSourceConsumerTest {
             verifyZeroInteractions(mMockTransaction);
             int[] hideTypes = new int[1];
             mConsumer.setControl(
-                    new InsetsSourceControl(ITYPE_STATUS_BAR, mLeash, true /* initialVisible */,
-                            new Point(), Insets.NONE),
+                    new InsetsSourceControl(ITYPE_STATUS_BAR, statusBars(), mLeash,
+                            true /* initialVisible */, new Point(), Insets.NONE),
                     new int[1], hideTypes);
             assertEquals(statusBars(), hideTypes[0]);
             assertFalse(mRemoveSurfaceCalled);
@@ -200,8 +200,8 @@ public class InsetsSourceConsumerTest {
             mRemoveSurfaceCalled = false;
             int[] hideTypes = new int[1];
             mConsumer.setControl(
-                    new InsetsSourceControl(ITYPE_STATUS_BAR, mLeash, false /* initialVisible */,
-                            new Point(), Insets.NONE),
+                    new InsetsSourceControl(ITYPE_STATUS_BAR, statusBars(), mLeash,
+                            false /* initialVisible */, new Point(), Insets.NONE),
                     new int[1], hideTypes);
             assertTrue(mRemoveSurfaceCalled);
             assertEquals(0, hideTypes[0]);
@@ -230,7 +230,7 @@ public class InsetsSourceConsumerTest {
             InsetsSourceConsumer imeConsumer = insetsController.getSourceConsumer(ITYPE_IME);
 
             // Initial IME insets source control with its leash.
-            imeConsumer.setControl(new InsetsSourceControl(ITYPE_IME, mLeash,
+            imeConsumer.setControl(new InsetsSourceControl(ITYPE_IME, ime(), mLeash,
                     false /* initialVisible */, new Point(), Insets.NONE), new int[1], new int[1]);
             reset(mMockTransaction);
 
@@ -239,7 +239,7 @@ public class InsetsSourceConsumerTest {
             insetsController.controlWindowInsetsAnimation(ime(), 0L,
                     null /* interpolator */, null /* cancellationSignal */, null /* listener */);
             assertEquals(ANIMATION_TYPE_USER, insetsController.getAnimationType(ime()));
-            imeConsumer.setControl(new InsetsSourceControl(ITYPE_IME, mLeash,
+            imeConsumer.setControl(new InsetsSourceControl(ITYPE_IME, ime(), mLeash,
                     true /* initialVisible */, new Point(), Insets.NONE), new int[1], new int[1]);
             verify(mMockTransaction, never()).show(mLeash);
         });

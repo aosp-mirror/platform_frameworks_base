@@ -61,7 +61,7 @@ public class ParcelableBenchmark {
     public void timeReadWriteInsetsState(int reps) {
         final InsetsState insetsState = new InsetsState();
         for (int i = 0; i < InsetsState.SIZE; i++) {
-            insetsState.addSource(new InsetsSource(i));
+            insetsState.addSource(new InsetsSource(i, InsetsState.toPublicType(i)));
         }
         for (int i = 0; i < reps; i++) {
             insetsState.writeToParcel(mParcel, 0);
