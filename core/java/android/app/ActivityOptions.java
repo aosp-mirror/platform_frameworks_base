@@ -1499,13 +1499,13 @@ public class ActivityOptions extends ComponentOptions {
      * Returns whether the launching app has opted-in to sharing its identity with the launched
      * activity.
      *
+     * @return {@code true} if the launching app has opted-in to sharing its identity
+     *
      * @see #setShareIdentityEnabled(boolean)
      * @see Activity#getLaunchedFromUid()
      * @see Activity#getLaunchedFromPackage()
-     *
-     * @hide
      */
-    public boolean getShareIdentity() {
+    public boolean isShareIdentityEnabled() {
         return mShareIdentity;
     }
 

@@ -4611,6 +4611,7 @@ package android.app {
     method public boolean getLockTaskMode();
     method public int getSplashScreenStyle();
     method public boolean isPendingIntentBackgroundActivityLaunchAllowed();
+    method public boolean isShareIdentityEnabled();
     method public static android.app.ActivityOptions makeBasic();
     method public static android.app.ActivityOptions makeClipRevealAnimation(android.view.View, int, int, int, int);
     method public static android.app.ActivityOptions makeCustomAnimation(android.content.Context, int, int);
