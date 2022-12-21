@@ -490,7 +490,7 @@ class SyntheticPasswordManager {
             android.hardware.weaver.V1_0.IWeaver hidlWeaver = getWeaverHidlService();
             if (hidlWeaver != null) {
                 Slog.i(TAG, "Using HIDL weaver service");
-                return new WeaverHidlWrapper(hidlWeaver);
+                return new WeaverHidlAdapter(hidlWeaver);
             }
         } catch (RemoteException e) {
             Slog.w(TAG, "Failed to get HIDL weaver service.", e);
