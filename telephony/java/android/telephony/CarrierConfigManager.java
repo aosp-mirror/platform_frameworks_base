@@ -7609,6 +7609,55 @@ public class CarrierConfigManager {
         public static final String KEY_EMERGENCY_REQUIRES_VOLTE_ENABLED_BOOL =
                 KEY_PREFIX + "emergency_requires_volte_enabled_bool";
 
+        /**
+         * This values indicates that the cross SIM redialing timer shall be disabled.
+         *
+         * @see #KEY_CROSS_STACK_REDIAL_TIMER_SEC_INT
+         * @see #KEY_QUICK_CROSS_STACK_REDIAL_TIMER_SEC_INT
+         * @hide
+         */
+        public static final int REDIAL_TIMER_DISABLED = 0;
+
+        /**
+         * A timer to guard the max attempting time on current SIM slot so that modem will not
+         * stuck in current SIM slot for long time. On timer expiry, if emergency call on the
+         * other SIM slot is preferable, telephony shall cancel the emergency call and place the
+         * call on the other SIM slot. If this value is set to {@link #REDIAL_TIMER_DISABLED}, then
+         * the timer will never be started and domain selection continues on the current SIM slot.
+         * This value should be greater than the value of {@link #KEY_EMERGENCY_SCAN_TIMER_SEC_INT}.
+         *
+         * The default value for the timer is 120 seconds.
+         * @hide
+         */
+        public static final String KEY_CROSS_STACK_REDIAL_TIMER_SEC_INT =
+                KEY_PREFIX + "cross_stack_redial_timer_sec_int";
+
+        /**
+         * If emergency calls are only allowed with normal-registered service and UE should get
+         * normal service in a short time with acquired band information, telephony
+         * expects dialing emergency call will be completed in a short time.
+         * If dialing is not completed with in a certain timeout, telephony shall place on
+         * another SIM slot. If this value is set to {@link #REDIAL_TIMER_DISABLED}, then the timer
+         * will never be started and domain selection continues on the current SIM slot.
+         * The timer shall be started for the first trial of each subscription and shall be ignored
+         * in the roaming networks and non-domestic networks.
+         *
+         * The default value for the timer is {@link #REDIAL_TIMER_DISABLED}.
+         * @hide
+         */
+        public static final String KEY_QUICK_CROSS_STACK_REDIAL_TIMER_SEC_INT =
+                KEY_PREFIX + "quick_cross_stack_redial_timer_sec_int";
+
+        /**
+         * Indicates whether the quick cross stack redial timer will be triggered only when
+         * the device is registered to the network.
+         *
+         * The default value is {@code true}.
+         * @hide
+         */
+        public static final String KEY_START_QUICK_CROSS_STACK_REDIAL_TIMER_WHEN_REGISTERED_BOOL =
+                KEY_PREFIX + "start_quick_cross_stack_redial_timer_when_registered_bool";
+
         private static PersistableBundle getDefaults() {
             PersistableBundle defaults = new PersistableBundle();
             defaults.putBoolean(KEY_RETRY_EMERGENCY_ON_IMS_PDN_BOOL, false);
@@ -7675,6 +7724,10 @@ public class CarrierConfigManager {
             defaults.putBoolean(KEY_EMERGENCY_REQUIRES_VOLTE_ENABLED_BOOL, false);
             defaults.putStringArray(KEY_EMERGENCY_CDMA_PREFERRED_NUMBERS_STRING_ARRAY,
                     new String[0]);
+            defaults.putInt(KEY_CROSS_STACK_REDIAL_TIMER_SEC_INT, 120);
+            defaults.putInt(KEY_QUICK_CROSS_STACK_REDIAL_TIMER_SEC_INT, REDIAL_TIMER_DISABLED);
+            defaults.putBoolean(KEY_START_QUICK_CROSS_STACK_REDIAL_TIMER_WHEN_REGISTERED_BOOL,
+                    true);
 
             return defaults;
         }
