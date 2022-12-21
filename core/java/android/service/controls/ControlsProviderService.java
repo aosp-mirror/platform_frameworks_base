@@ -61,7 +61,7 @@ public abstract class ControlsProviderService extends Service {
      * the same package that will be launched embedded in the device controls space.
      *
      * The activity must be exported, enabled and protected by
-     * {@link Manifest.permission.BIND_CONTROLS}.
+     * {@link Manifest.permission#BIND_CONTROLS}.
      *
      * It is recommended that the activity is declared {@code android:resizeableActivity="true"}.
      */
