@@ -899,10 +899,16 @@ final class HdmiCecLocalDeviceTv extends HdmiCecLocalDevice {
 
     @ServiceThreadOnly
     void startArcAction(boolean enabled) {
+        startArcAction(enabled, null);
+    }
+
+    @ServiceThreadOnly
+    void startArcAction(boolean enabled, IHdmiControlCallback callback) {
         assertRunOnServiceThread();
         HdmiDeviceInfo info = getAvrDeviceInfo();
         if (info == null) {
             Slog.w(TAG, "Failed to start arc action; No AVR device.");
+            invokeCallback(callback, HdmiControlManager.RESULT_TARGET_NOT_AVAILABLE);
             return;
         }
         if (!canStartArcUpdateAction(info.getLogicalAddress(), enabled)) {
@@ -910,19 +916,37 @@ final class HdmiCecLocalDeviceTv extends HdmiCecLocalDevice {
             if (enabled && !isConnectedToArcPort(info.getPhysicalAddress())) {
                 displayOsd(OSD_MESSAGE_ARC_CONNECTED_INVALID_PORT);
             }
+            invokeCallback(callback, HdmiControlManager.RESULT_INCORRECT_MODE);
+            return;
+        }
+        if (enabled && mService.earcBlocksArcConnection()) {
+            Slog.i(TAG,
+                    "ARC connection blocked because eARC connection is established or being "
+                            + "established.");
+            invokeCallback(callback, HdmiControlManager.RESULT_INCORRECT_MODE);
             return;
         }
 
-        // Terminate opposite action and start action if not exist.
+        // Terminate opposite action and create an action with callback.
         if (enabled) {
             removeAction(RequestArcTerminationAction.class);
-            if (!hasAction(RequestArcInitiationAction.class)) {
-                addAndStartAction(new RequestArcInitiationAction(this, info.getLogicalAddress()));
+            if (hasAction(RequestArcInitiationAction.class)) {
+                RequestArcInitiationAction existingInitiationAction =
+                        getActions(RequestArcInitiationAction.class).get(0);
+                existingInitiationAction.addCallback(callback);
+            } else {
+                addAndStartAction(
+                        new RequestArcInitiationAction(this, info.getLogicalAddress(), callback));
             }
         } else {
             removeAction(RequestArcInitiationAction.class);
-            if (!hasAction(RequestArcTerminationAction.class)) {
-                addAndStartAction(new RequestArcTerminationAction(this, info.getLogicalAddress()));
+            if (hasAction(RequestArcTerminationAction.class)) {
+                RequestArcTerminationAction existingTerminationAction =
+                        getActions(RequestArcTerminationAction.class).get(0);
+                existingTerminationAction.addCallback(callback);
+            } else {
+                addAndStartAction(
+                        new RequestArcTerminationAction(this, info.getLogicalAddress(), callback));
             }
         }
     }
@@ -1010,6 +1034,13 @@ final class HdmiCecLocalDeviceTv extends HdmiCecLocalDevice {
     protected int handleInitiateArc(HdmiCecMessage message) {
         assertRunOnServiceThread();
 
+        if (mService.earcBlocksArcConnection()) {
+            Slog.i(TAG,
+                    "ARC connection blocked because eARC connection is established or being "
+                            + "established.");
+            return Constants.ABORT_NOT_IN_CORRECT_MODE;
+        }
+
         if (!canStartArcUpdateAction(message.getSource(), true)) {
             HdmiDeviceInfo avrDeviceInfo = getAvrDeviceInfo();
             if (avrDeviceInfo == null) {
@@ -1023,9 +1054,8 @@ final class HdmiCecLocalDeviceTv extends HdmiCecLocalDevice {
             return Constants.ABORT_REFUSED;
         }
 
-        // In case where <Initiate Arc> is started by <Request ARC Initiation>
-        // need to clean up RequestArcInitiationAction.
-        removeAction(RequestArcInitiationAction.class);
+        // In case where <Initiate Arc> is started by <Request ARC Initiation>, this message is
+        // handled in RequestArcInitiationAction as well.
         SetArcTransmissionStateAction action = new SetArcTransmissionStateAction(this,
                 message.getSource(), true);
         addAndStartAction(action);
@@ -1059,9 +1089,8 @@ final class HdmiCecLocalDeviceTv extends HdmiCecLocalDevice {
             return Constants.HANDLED;
         }
         // Do not check ARC configuration since the AVR might have been already removed.
-        // Clean up RequestArcTerminationAction in case <Terminate Arc> was started by
-        // <Request ARC Termination>.
-        removeAction(RequestArcTerminationAction.class);
+        // In case where <Terminate Arc> is started by <Request ARC Termination>, this
+        // message is handled in RequestArcTerminationAction as well.
         SetArcTransmissionStateAction action = new SetArcTransmissionStateAction(this,
                 message.getSource(), false);
         addAndStartAction(action);

@@ -18,6 +18,7 @@ package com.android.server.hdmi;
 
 import static com.android.server.hdmi.Constants.HDMI_EARC_STATUS_ARC_PENDING;
 import static com.android.server.hdmi.Constants.HDMI_EARC_STATUS_EARC_CONNECTED;
+import static com.android.server.hdmi.Constants.HDMI_EARC_STATUS_EARC_PENDING;
 import static com.android.server.hdmi.Constants.HDMI_EARC_STATUS_IDLE;
 
 import android.hardware.hdmi.HdmiDeviceInfo;
@@ -69,23 +70,36 @@ public class HdmiEarcLocalDeviceTx extends HdmiEarcLocalDevice {
     HdmiEarcLocalDeviceTx(HdmiControlService service) {
         super(service, HdmiDeviceInfo.DEVICE_TV);
 
+        synchronized (mLock) {
+            mEarcStatus = HDMI_EARC_STATUS_EARC_PENDING;
+        }
         mReportCapsHandler = new Handler(service.getServiceLooper());
         mReportCapsRunnable = new ReportCapsRunnable();
     }
 
     protected void handleEarcStateChange(@Constants.EarcStatus int status) {
+        int oldEarcStatus;
         synchronized (mLock) {
             HdmiLogger.debug(TAG, "eARC state change [old:%b new %b]", mEarcStatus,
                     status);
+            oldEarcStatus = mEarcStatus;
             mEarcStatus = status;
         }
 
         mReportCapsHandler.removeCallbacksAndMessages(null);
         if (status == HDMI_EARC_STATUS_IDLE) {
             notifyEarcStatusToAudioService(false, new ArrayList<>());
+            mService.startArcAction(false, null);
         } else if (status == HDMI_EARC_STATUS_ARC_PENDING) {
             notifyEarcStatusToAudioService(false, new ArrayList<>());
+            mService.startArcAction(true, null);
+        } else if (status == HDMI_EARC_STATUS_EARC_PENDING
+                && oldEarcStatus == HDMI_EARC_STATUS_ARC_PENDING) {
+            mService.startArcAction(false, null);
         } else if (status == HDMI_EARC_STATUS_EARC_CONNECTED) {
+            if (oldEarcStatus == HDMI_EARC_STATUS_ARC_PENDING) {
+                mService.startArcAction(false, null);
+            }
             mReportCapsHandler.postDelayed(mReportCapsRunnable, REPORT_CAPS_MAX_DELAY_MS);
         }
     }
