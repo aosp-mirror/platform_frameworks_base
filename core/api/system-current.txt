@@ -4531,12 +4531,14 @@ package android.hardware.hdmi {
 
   public final class HdmiPortInfo implements android.os.Parcelable {
     ctor public HdmiPortInfo(int, int, int, boolean, boolean, boolean);
+    ctor public HdmiPortInfo(int, int, int, boolean, boolean, boolean, boolean);
     method public int describeContents();
     method public int getAddress();
     method public int getId();
     method public int getType();
     method public boolean isArcSupported();
     method public boolean isCecSupported();
+    method public boolean isEarcSupported();
     method public boolean isMhlSupported();
     method public void writeToParcel(android.os.Parcel, int);
     field @NonNull public static final android.os.Parcelable.Creator<android.hardware.hdmi.HdmiPortInfo> CREATOR;

@@ -22,6 +22,7 @@ import static android.hardware.hdmi.HdmiDeviceInfo.DEVICE_TV;
 import static com.android.server.SystemService.PHASE_BOOT_COMPLETED;
 import static com.android.server.SystemService.PHASE_SYSTEM_SERVICES_READY;
 import static com.android.server.hdmi.HdmiControlService.INITIATED_BY_ENABLE_CEC;
+import static com.android.server.hdmi.HdmiControlService.WAKE_UP_SCREEN_ON;
 
 import static com.google.common.truth.Truth.assertThat;
 
@@ -29,6 +30,8 @@ import static junit.framework.Assert.assertFalse;
 import static junit.framework.Assert.assertTrue;
 import static junit.framework.TestCase.assertEquals;
 
+import static org.mockito.ArgumentMatchers.anyBoolean;
+import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.doReturn;
@@ -127,13 +130,13 @@ public class HdmiControlServiceTest {
         mLocalDevices.add(mPlaybackDeviceSpy);
         mHdmiPortInfo = new HdmiPortInfo[4];
         mHdmiPortInfo[0] =
-                new HdmiPortInfo(1, HdmiPortInfo.PORT_INPUT, 0x2100, true, false, false);
+                new HdmiPortInfo(1, HdmiPortInfo.PORT_INPUT, 0x2100, true, false, false, false);
         mHdmiPortInfo[1] =
-                new HdmiPortInfo(2, HdmiPortInfo.PORT_INPUT, 0x2200, true, false, false);
+                new HdmiPortInfo(2, HdmiPortInfo.PORT_INPUT, 0x2200, true, false, false, false);
         mHdmiPortInfo[2] =
-                new HdmiPortInfo(3, HdmiPortInfo.PORT_INPUT, 0x2000, true, false, false);
+                new HdmiPortInfo(3, HdmiPortInfo.PORT_INPUT, 0x2000, true, false, true, true);
         mHdmiPortInfo[3] =
-                new HdmiPortInfo(4, HdmiPortInfo.PORT_INPUT, 0x3000, true, false, false);
+                new HdmiPortInfo(4, HdmiPortInfo.PORT_INPUT, 0x3000, true, false, false, false);
         mNativeWrapper.setPortInfo(mHdmiPortInfo);
         mHdmiControlServiceSpy.initService();
         mPowerManager = new FakePowerManagerWrapper(mContextSpy);
@@ -1080,6 +1083,174 @@ public class HdmiControlServiceTest {
         mTestLooper.moveTimeForward(HdmiConfig.TIMEOUT_MS);
         mTestLooper.dispatchAll();
         assertThat(mHdmiControlServiceSpy.audioSystem()).isNull();
+    }
+
+    @Test
+    public void disableEarc_clearEarcLocalDevice() {
+        mHdmiControlServiceSpy.setEarcSupported(true);
+        mHdmiControlServiceSpy.clearEarcLocalDevice();
+        mHdmiControlServiceSpy.addEarcLocalDevice(
+                new HdmiEarcLocalDeviceTx(mHdmiControlServiceSpy));
+        assertThat(mHdmiControlServiceSpy.getEarcLocalDevice()).isNotNull();
+
+        mHdmiControlServiceSpy.setEarcEnabled(HdmiControlManager.EARC_FEATURE_DISABLED);
+        mTestLooper.dispatchAll();
+        assertThat(mHdmiControlServiceSpy.getEarcLocalDevice()).isNull();
+    }
+
+    @Test
+    public void disableCec_doNotClearEarcLocalDevice() {
+        mHdmiControlServiceSpy.setEarcSupported(true);
+        mHdmiControlServiceSpy.clearEarcLocalDevice();
+        mHdmiControlServiceSpy.addEarcLocalDevice(
+                new HdmiEarcLocalDeviceTx(mHdmiControlServiceSpy));
+        assertThat(mHdmiControlServiceSpy.getEarcLocalDevice()).isNotNull();
+
+        mHdmiControlServiceSpy.setCecEnabled(HdmiControlManager.HDMI_CEC_CONTROL_DISABLED);
+        mTestLooper.dispatchAll();
+        assertThat(mHdmiControlServiceSpy.getEarcLocalDevice()).isNotNull();
+    }
+
+    @Test
+    public void enableCec_initializeCecLocalDevices() {
+        mHdmiControlServiceSpy.setEarcSupported(true);
+        Mockito.clearInvocations(mHdmiControlServiceSpy);
+        mHdmiControlServiceSpy.setCecEnabled(HdmiControlManager.HDMI_CEC_CONTROL_DISABLED);
+        mTestLooper.dispatchAll();
+        mHdmiControlServiceSpy.setCecEnabled(HdmiControlManager.HDMI_CEC_CONTROL_ENABLED);
+        mTestLooper.dispatchAll();
+        verify(mHdmiControlServiceSpy, times(1)).initializeCecLocalDevices(anyInt());
+        verify(mHdmiControlServiceSpy, times(0)).initializeEarcLocalDevice(anyInt());
+    }
+
+    @Test
+    public void enableEarc_initializeEarcLocalDevices() {
+        mHdmiControlServiceSpy.setEarcSupported(true);
+        Mockito.clearInvocations(mHdmiControlServiceSpy);
+        mHdmiControlServiceSpy.setEarcEnabled(HdmiControlManager.EARC_FEATURE_DISABLED);
+        mTestLooper.dispatchAll();
+        mHdmiControlServiceSpy.setEarcEnabled(HdmiControlManager.EARC_FEATURE_ENABLED);
+        mTestLooper.dispatchAll();
+        verify(mHdmiControlServiceSpy, times(0)).initializeCecLocalDevices(anyInt());
+        verify(mHdmiControlServiceSpy, times(1)).initializeEarcLocalDevice(anyInt());
+    }
+
+    @Test
+    public void disableCec_DoNotInformHalAboutEarc() {
+        mHdmiControlServiceSpy.setEarcSupported(true);
+        mHdmiControlServiceSpy.getHdmiCecConfig().setIntValue(
+                HdmiControlManager.CEC_SETTING_NAME_HDMI_CEC_ENABLED,
+                HdmiControlManager.HDMI_CEC_CONTROL_ENABLED);
+        mTestLooper.dispatchAll();
+        Mockito.clearInvocations(mHdmiControlServiceSpy);
+        mHdmiControlServiceSpy.getHdmiCecConfig().setIntValue(
+                HdmiControlManager.CEC_SETTING_NAME_HDMI_CEC_ENABLED,
+                HdmiControlManager.HDMI_CEC_CONTROL_DISABLED);
+        mTestLooper.dispatchAll();
+        verify(mHdmiControlServiceSpy, times(0)).setEarcEnabledInHal(anyBoolean());
+    }
+
+    @Test
+    public void disableEarc_informHalAboutEarc() {
+        mHdmiControlServiceSpy.getHdmiCecConfig().setIntValue(
+                HdmiControlManager.SETTING_NAME_EARC_ENABLED,
+                HdmiControlManager.EARC_FEATURE_ENABLED);
+        mHdmiControlServiceSpy.setEarcSupported(true);
+        mTestLooper.dispatchAll();
+        Mockito.clearInvocations(mHdmiControlServiceSpy);
+        mHdmiControlServiceSpy.getHdmiCecConfig().setIntValue(
+                HdmiControlManager.SETTING_NAME_EARC_ENABLED,
+                HdmiControlManager.EARC_FEATURE_DISABLED);
+        mTestLooper.dispatchAll();
+        verify(mHdmiControlServiceSpy, times(1)).setEarcEnabledInHal(false);
+        verify(mHdmiControlServiceSpy, times(0)).setEarcEnabledInHal(true);
+    }
+
+    @Test
+    public void enableCec_DoNotInformHalAboutEarc() {
+        mHdmiControlServiceSpy.getHdmiCecConfig().setIntValue(
+                HdmiControlManager.CEC_SETTING_NAME_HDMI_CEC_ENABLED,
+                HdmiControlManager.HDMI_CEC_CONTROL_DISABLED);
+        mHdmiControlServiceSpy.setEarcSupported(true);
+        mTestLooper.dispatchAll();
+        Mockito.clearInvocations(mHdmiControlServiceSpy);
+        mHdmiControlServiceSpy.getHdmiCecConfig().setIntValue(
+                HdmiControlManager.CEC_SETTING_NAME_HDMI_CEC_ENABLED,
+                HdmiControlManager.HDMI_CEC_CONTROL_ENABLED);
+        mTestLooper.dispatchAll();
+        verify(mHdmiControlServiceSpy, times(0)).setEarcEnabledInHal(anyBoolean());
+    }
+
+    @Test
+    public void enableEarc_informHalAboutEarc() {
+        mHdmiControlServiceSpy.getHdmiCecConfig().setIntValue(
+                HdmiControlManager.SETTING_NAME_EARC_ENABLED,
+                HdmiControlManager.EARC_FEATURE_DISABLED);
+        mHdmiControlServiceSpy.setEarcSupported(true);
+        mTestLooper.dispatchAll();
+        Mockito.clearInvocations(mHdmiControlServiceSpy);
+        mHdmiControlServiceSpy.getHdmiCecConfig().setIntValue(
+                HdmiControlManager.SETTING_NAME_EARC_ENABLED,
+                HdmiControlManager.EARC_FEATURE_ENABLED);
+        mTestLooper.dispatchAll();
+        verify(mHdmiControlServiceSpy, times(1)).setEarcEnabledInHal(true);
+        verify(mHdmiControlServiceSpy, times(0)).setEarcEnabledInHal(false);
+    }
+
+    @Test
+    public void bootWithEarcEnabled_informHalAboutEarc() {
+        mHdmiControlServiceSpy.getHdmiCecConfig().setIntValue(
+                HdmiControlManager.SETTING_NAME_EARC_ENABLED,
+                HdmiControlManager.EARC_FEATURE_ENABLED);
+        mHdmiControlServiceSpy.setEarcSupported(true);
+        mTestLooper.dispatchAll();
+        Mockito.clearInvocations(mHdmiControlServiceSpy);
+        mHdmiControlServiceSpy.initService();
+        mTestLooper.dispatchAll();
+        verify(mHdmiControlServiceSpy, times(1)).setEarcEnabledInHal(true);
+        verify(mHdmiControlServiceSpy, times(0)).setEarcEnabledInHal(false);
+    }
+
+    @Test
+    public void bootWithEarcDisabled_informHalAboutEarc() {
+        mHdmiControlServiceSpy.getHdmiCecConfig().setIntValue(
+                HdmiControlManager.SETTING_NAME_EARC_ENABLED,
+                HdmiControlManager.EARC_FEATURE_DISABLED);
+        mHdmiControlServiceSpy.setEarcSupported(true);
+        mTestLooper.dispatchAll();
+        Mockito.clearInvocations(mHdmiControlServiceSpy);
+        mHdmiControlServiceSpy.initService();
+        mTestLooper.dispatchAll();
+        verify(mHdmiControlServiceSpy, times(1)).setEarcEnabledInHal(false);
+        verify(mHdmiControlServiceSpy, times(0)).setEarcEnabledInHal(true);
+    }
+
+    @Test
+    public void wakeUpWithEarcEnabled_informHalAboutEarc() {
+        mHdmiControlServiceSpy.getHdmiCecConfig().setIntValue(
+                HdmiControlManager.SETTING_NAME_EARC_ENABLED,
+                HdmiControlManager.EARC_FEATURE_ENABLED);
+        mHdmiControlServiceSpy.setEarcSupported(true);
+        mTestLooper.dispatchAll();
+        Mockito.clearInvocations(mHdmiControlServiceSpy);
+        mHdmiControlServiceSpy.onWakeUp(WAKE_UP_SCREEN_ON);
+        mTestLooper.dispatchAll();
+        verify(mHdmiControlServiceSpy, times(1)).setEarcEnabledInHal(true);
+        verify(mHdmiControlServiceSpy, times(0)).setEarcEnabledInHal(false);
+    }
+
+    @Test
+    public void wakeUpWithEarcDisabled_informHalAboutEarc() {
+        mHdmiControlServiceSpy.getHdmiCecConfig().setIntValue(
+                HdmiControlManager.SETTING_NAME_EARC_ENABLED,
+                HdmiControlManager.EARC_FEATURE_DISABLED);
+        mHdmiControlServiceSpy.setEarcSupported(true);
+        mTestLooper.dispatchAll();
+        Mockito.clearInvocations(mHdmiControlServiceSpy);
+        mHdmiControlServiceSpy.onWakeUp(WAKE_UP_SCREEN_ON);
+        mTestLooper.dispatchAll();
+        verify(mHdmiControlServiceSpy, times(1)).setEarcEnabledInHal(false);
+        verify(mHdmiControlServiceSpy, times(0)).setEarcEnabledInHal(true);
     }
 
     protected static class MockPlaybackDevice extends HdmiCecLocalDevicePlayback {
