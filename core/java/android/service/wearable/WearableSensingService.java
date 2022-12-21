@@ -22,6 +22,7 @@ import android.annotation.Nullable;
 import android.annotation.SystemApi;
 import android.app.Service;
 import android.app.ambientcontext.AmbientContextEvent;
+import android.app.ambientcontext.AmbientContextEventRequest;
 import android.app.wearable.WearableSensingManager;
 import android.content.Intent;
 import android.os.Bundle;
@@ -30,9 +31,14 @@ import android.os.ParcelFileDescriptor;
 import android.os.PersistableBundle;
 import android.os.RemoteCallback;
 import android.os.SharedMemory;
+import android.service.ambientcontext.AmbientContextDetectionResult;
+import android.service.ambientcontext.AmbientContextDetectionServiceStatus;
 import android.util.Slog;
 
+import java.util.Arrays;
+import java.util.HashSet;
 import java.util.Objects;
+import java.util.Set;
 import java.util.function.Consumer;
 
 /**
@@ -116,6 +122,60 @@ public abstract class WearableSensingService extends Service {
                     };
                     WearableSensingService.this.onDataProvided(data, sharedMemory, consumer);
                 }
+
+                /** {@inheritDoc} */
+                @Override
+                public void startDetection(@NonNull AmbientContextEventRequest request,
+                        String packageName, RemoteCallback detectionResultCallback,
+                        RemoteCallback statusCallback) {
+                    Objects.requireNonNull(request);
+                    Objects.requireNonNull(packageName);
+                    Objects.requireNonNull(detectionResultCallback);
+                    Objects.requireNonNull(statusCallback);
+                    Consumer<AmbientContextDetectionResult> detectionResultConsumer = result -> {
+                        Bundle bundle = new Bundle();
+                        bundle.putParcelable(
+                                AmbientContextDetectionResult.RESULT_RESPONSE_BUNDLE_KEY, result);
+                        detectionResultCallback.sendResult(bundle);
+                    };
+                    Consumer<AmbientContextDetectionServiceStatus> statusConsumer = status -> {
+                        Bundle bundle = new Bundle();
+                        bundle.putParcelable(
+                                AmbientContextDetectionServiceStatus.STATUS_RESPONSE_BUNDLE_KEY,
+                                status);
+                        statusCallback.sendResult(bundle);
+                    };
+                    WearableSensingService.this.onStartDetection(
+                            request, packageName, statusConsumer, detectionResultConsumer);
+                    Slog.d(TAG, "startDetection " + request);
+                }
+
+                /** {@inheritDoc} */
+                @Override
+                public void stopDetection(String packageName) {
+                    Objects.requireNonNull(packageName);
+                    WearableSensingService.this.onStopDetection(packageName);
+                }
+
+                /** {@inheritDoc} */
+                @Override
+                public void queryServiceStatus(@AmbientContextEvent.EventCode int[] eventTypes,
+                        String packageName, RemoteCallback callback) {
+                    Objects.requireNonNull(eventTypes);
+                    Objects.requireNonNull(packageName);
+                    Objects.requireNonNull(callback);
+                    Consumer<AmbientContextDetectionServiceStatus> consumer = response -> {
+                        Bundle bundle = new Bundle();
+                        bundle.putParcelable(
+                                AmbientContextDetectionServiceStatus.STATUS_RESPONSE_BUNDLE_KEY,
+                                response);
+                        callback.sendResult(bundle);
+                    };
+                    Integer[] events = intArrayToIntegerArray(eventTypes);
+                    WearableSensingService.this.onQueryServiceStatus(
+                            new HashSet<>(Arrays.asList(events)), packageName, consumer);
+                }
+
             };
         }
         Slog.w(TAG, "Incorrect service interface, returning null.");
@@ -155,4 +215,61 @@ public abstract class WearableSensingService extends Service {
             @NonNull PersistableBundle data,
             @Nullable SharedMemory sharedMemory,
             @NonNull Consumer<Integer> statusConsumer);
+
+    /**
+     * Called when a client app requests starting detection of the events in the request. The
+     * implementation should keep track of whether the user has explicitly consented to detecting
+     * the events using on-going ambient sensor (e.g. microphone), and agreed to share the
+     * detection results with this client app. If the user has not consented, the detection
+     * should not start, and the statusConsumer should get a response with STATUS_ACCESS_DENIED.
+     * If the user has made the consent and the underlying services are available, the
+     * implementation should start detection and provide detected events to the
+     * detectionResultConsumer. If the type of event needs immediate attention, the implementation
+     * should send result as soon as detected. Otherwise, the implementation can batch response.
+     * The ongoing detection will keep running, until onStopDetection is called. If there were
+     * previously requested detections from the same package, regardless of the type of events in
+     * the request, the previous request will be replaced with the new request and pending events
+     * are discarded.
+     *
+     * @param request The request with events to detect.
+     * @param packageName the requesting app's package name
+     * @param statusConsumer the consumer for the service status.
+     * @param detectionResultConsumer the consumer for the detected event
+     */
+    @BinderThread
+    public abstract void onStartDetection(@NonNull AmbientContextEventRequest request,
+            @NonNull String packageName,
+            @NonNull Consumer<AmbientContextDetectionServiceStatus> statusConsumer,
+            @NonNull Consumer<AmbientContextDetectionResult> detectionResultConsumer);
+
+    /**
+     * Stops detection of the events. Events that are not being detected will be ignored.
+     *
+     * @param packageName stops detection for the given package.
+     */
+    public abstract void onStopDetection(@NonNull String packageName);
+
+    /**
+     * Called when a query for the detection status occurs. The implementation should check
+     * the detection status of the requested events for the package, and provide results in a
+     * {@link AmbientContextDetectionServiceStatus} for the consumer.
+     *
+     * @param eventTypes The events to check for status.
+     * @param packageName the requesting app's package name
+     * @param consumer the consumer for the query results
+     */
+    @BinderThread
+    public abstract void onQueryServiceStatus(@NonNull Set<Integer> eventTypes,
+            @NonNull String packageName,
+            @NonNull Consumer<AmbientContextDetectionServiceStatus> consumer);
+
+    @NonNull
+    private static Integer[] intArrayToIntegerArray(@NonNull int[] integerSet) {
+        Integer[] intArray = new Integer[integerSet.length];
+        int i = 0;
+        for (Integer type : integerSet) {
+            intArray[i++] = type;
+        }
+        return intArray;
+    }
 }

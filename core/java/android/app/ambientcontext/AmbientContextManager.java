@@ -117,7 +117,8 @@ public final class AmbientContextManager {
      */
     @NonNull public static List<AmbientContextEvent> getEventsFromIntent(@NonNull Intent intent) {
         if (intent.hasExtra(AmbientContextManager.EXTRA_AMBIENT_CONTEXT_EVENTS)) {
-            return intent.getParcelableArrayListExtra(EXTRA_AMBIENT_CONTEXT_EVENTS, android.app.ambientcontext.AmbientContextEvent.class);
+            return intent.getParcelableArrayListExtra(EXTRA_AMBIENT_CONTEXT_EVENTS,
+                    android.app.ambientcontext.AmbientContextEvent.class);
         } else {
             return new ArrayList<>();
         }
@@ -143,6 +144,9 @@ public final class AmbientContextManager {
      * If any of the events are not consented by user, the response has
      * {@link AmbientContextManager#STATUS_ACCESS_DENIED}, and the app can
      * call {@link #startConsentActivity} to redirect the user to the consent screen.
+     * If the AmbientContextRequest contains a mixed set of events containing values both greater
+     * than and less than {@link AmbientContextEvent.EVENT_VENDOR_WEARABLE_START}, the request
+     * will be rejected with {@link AmbientContextManager#STATUS_NOT_SUPPORTED}.
      * <p />
      *
      * Example:
@@ -197,6 +201,9 @@ public final class AmbientContextManager {
 
     /**
      * Requests the consent data host to open an activity that allows users to modify consent.
+     * If the eventTypes contains a mixed set of events containing values both greater than and less
+     * than {@link AmbientContextEvent.EVENT_VENDOR_WEARABLE_START}, the request will be rejected
+     * with {@link AmbientContextManager#STATUS_NOT_SUPPORTED}.
      *
      * @param eventTypes The set of event codes to be consented.
      */
@@ -226,6 +233,9 @@ public final class AmbientContextManager {
      * observer receives a callback on the provided {@link PendingIntent} when the requested
      * event is detected. Registering another observer from the same package that has already been
      * registered will override the previous observer.
+     * If the AmbientContextRequest contains a mixed set of events containing values both greater
+     * than and less than {@link AmbientContextEvent.EVENT_VENDOR_WEARABLE_START}, the request
+     * will be rejected with {@link AmbientContextManager#STATUS_NOT_SUPPORTED}.
      * <p />
      *
      * Example:
@@ -308,6 +318,9 @@ public final class AmbientContextManager {
      * {@link #registerObserver(AmbientContextEventRequest, PendingIntent, Executor, Consumer)},
      * the previous observer will be replaced with the new observer with the PendingIntent callback.
      * Or vice versa.
+     * If the AmbientContextRequest contains a mixed set of events containing values both greater
+     * than and less than {@link AmbientContextEvent.EVENT_VENDOR_WEARABLE_START}, the request
+     * will be rejected with {@link AmbientContextManager#STATUS_NOT_SUPPORTED}.
      *
      * When the registration completes, a status will be returned to client through
      * {@link AmbientContextCallback#onRegistrationComplete(int)}.
