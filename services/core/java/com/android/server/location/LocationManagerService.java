@@ -202,6 +202,9 @@ public class LocationManagerService extends ILocationManager.Stub implements
         @Override
         public void onUserStarting(TargetUser user) {
             mUserInfoHelper.onUserStarted(user.getUserIdentifier());
+
+            // log location enabled state on start to minimize coverage loss
+            mService.logLocationEnabledState();
         }
 
         @Override
@@ -553,6 +556,7 @@ public class LocationManagerService extends ILocationManager.Stub implements
         }
 
         EVENT_LOG.logLocationEnabled(userId, enabled);
+        logLocationEnabledState();
 
         Intent intent = new Intent(LocationManager.MODE_CHANGED_ACTION)
                 .putExtra(LocationManager.EXTRA_LOCATION_ENABLED, enabled)
@@ -561,6 +565,20 @@ public class LocationManagerService extends ILocationManager.Stub implements
         mContext.sendBroadcastAsUser(intent, UserHandle.of(userId));
 
         refreshAppOpsRestrictions(userId);
+    }
+
+    private void logLocationEnabledState() {
+        boolean locationEnabled = false;
+        // Location setting is considered on if it is enabled for any one user
+        int[] runningUserIds = mInjector.getUserInfoHelper().getRunningUserIds();
+        for (int userId : runningUserIds) {
+            locationEnabled = mInjector.getSettingsHelper().isLocationEnabled(userId);
+            if (locationEnabled) {
+                break;
+            }
+        }
+        mInjector.getLocationUsageLogger()
+            .logLocationEnabledStateChanged(locationEnabled);
     }
 
     @Override
