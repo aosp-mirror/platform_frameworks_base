@@ -5204,6 +5204,15 @@
          the format [System DeviceState]:[WM Jetpack Posture], for example: "0:1". -->
     <string-array name="config_device_state_postures" translatable="false" />
 
+    <!-- Which Surface rotations are considered as tabletop posture (horizontal hinge) when the
+         device is half-folded. Other half-folded postures will be assumed to be book (vertical
+         hinge) mode. Units: degrees; valid values: 0, 90, 180, 270. -->
+    <integer-array name="config_deviceTabletopRotations" />
+
+    <!-- This flag indicates that a display with fold-state FLAT should always be considered as
+         having a separating hinge. -->
+    <bool name="config_isDisplayHingeAlwaysSeparating">false</bool>
+
     <!-- Aspect ratio of letterboxing for fixed orientation. Values <= 1.0 will be ignored.
          Note: Activity min/max aspect ratio restrictions will still be respected.
          Therefore this override can control the maximum screen area that can be occupied by
@@ -5252,13 +5261,25 @@
 
     <!-- Horizontal position of a center of the letterboxed app window.
         0 corresponds to the left side of the screen and 1 to the right side. If given value < 0
-        or > 1, it is ignored and central position is used (0.5). -->
+        or > 1 it is ignored and for non-book mode central position is used (0.5); for book mode
+         left is used (0.0). -->
     <item name="config_letterboxHorizontalPositionMultiplier" format="float" type="dimen">0.5</item>
 
     <!-- Vertical position of a center of the letterboxed app window.
         0 corresponds to the upper side of the screen and 1 to the lower side. If given value < 0
-        or > 1, it is ignored and central position is used (0.5). -->
+        or > 1 it is ignored and for non-tabletop mode central position is used (0.5); for
+         tabletop mode top (0.0) is used. -->
     <item name="config_letterboxVerticalPositionMultiplier" format="float" type="dimen">0.0</item>
+
+    <!-- Horizontal position of a center of the letterboxed app window when in book mode.
+    0 corresponds to the left side of the screen and 1 to the right side. If given value < 0
+    or > 1, it is ignored and left position is used (0.0). -->
+    <item name="config_letterboxBookModePositionMultiplier" format="float" type="dimen">0.0</item>
+
+    <!-- Vertical position of a center of the letterboxed app window when in tabletop mode.
+        0 corresponds to the upper side of the screen and 1 to the lower side. If given value < 0
+        or > 1, it is ignored and top position is used (0.0). -->
+    <item name="config_letterboxTabletopModePositionMultiplier" format="float" type="dimen">0.0</item>
 
     <!-- Whether horizontal reachability repositioning is allowed for letterboxed fullscreen apps.
     -->
@@ -5286,6 +5307,26 @@
             - Option 2 - Bottom.
         If given value is outside of this range, the option 1 (center) is assummed. -->
     <integer name="config_letterboxDefaultPositionForVerticalReachability">1</integer>
+
+    <!-- Default horizontal position of the letterboxed app window when reachability is
+    enabled and an app is fullscreen in landscape device orientation and in book mode. When
+    reachability is enabled, the position can change between left, center and right. This config
+    defines the default one:
+        - Option 0 - Left.
+        - Option 1 - Center.
+        - Option 2 - Right.
+    If given value is outside of this range, the option 0 (left) is assummed. -->
+    <integer name="config_letterboxDefaultPositionForBookModeReachability">0</integer>
+
+    <!-- Default vertical position of the letterboxed app window when reachability is
+        enabled and an app is fullscreen in portrait device orientation and in tabletop mode. When
+        reachability is enabled, the position can change between top, center and bottom. This config
+        defines the default one:
+            - Option 0 - Top.
+            - Option 1 - Center.
+            - Option 2 - Bottom.
+        If given value is outside of this range, the option 0 (top) is assummed. -->
+    <integer name="config_letterboxDefaultPositionForTabletopModeReachability">0</integer>
 
     <!-- Whether displaying letterbox education is enabled for letterboxed fullscreen apps. -->
     <bool name="config_letterboxIsEducationEnabled">false</bool>

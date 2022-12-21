@@ -68,4 +68,8 @@ message LetterboxProto {
   LetterboxHorizontalReachability letterbox_position_for_horizontal_reachability = 1;
   // Represents the current vertical position for the letterboxed activity
   LetterboxVerticalReachability letterbox_position_for_vertical_reachability = 2;
+  // Represents the current horizontal position for the letterboxed activity in book mode
+  LetterboxHorizontalReachability letterbox_position_for_book_mode_reachability = 3;
+  // Represents the current vertical position for the letterboxed activity in tabletop mode
+  LetterboxVerticalReachability letterbox_position_for_tabletop_mode_reachability = 4;
 }

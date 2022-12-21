@@ -8149,7 +8149,7 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
     }
 
     /**
-     * Adjusts position of resolved bounds if they doesn't fill the parent using gravity
+     * Adjusts position of resolved bounds if they don't fill the parent using gravity
      * requested in the config or via an ADB command. For more context see {@link
      * LetterboxUiController#getHorizontalPositionMultiplier(Configuration)} and
      * {@link LetterboxUiController#getVerticalPositionMultiplier(Configuration)}
@@ -8168,9 +8168,8 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
         int offsetX = 0;
         if (parentBounds.width() != screenResolvedBounds.width()) {
             if (screenResolvedBounds.width() <= parentAppBounds.width()) {
-                float positionMultiplier =
-                        mLetterboxUiController.getHorizontalPositionMultiplier(
-                                newParentConfiguration);
+                float positionMultiplier = mLetterboxUiController.getHorizontalPositionMultiplier(
+                        newParentConfiguration);
                 offsetX = (int) Math.ceil((parentAppBounds.width() - screenResolvedBounds.width())
                         * positionMultiplier);
             }
@@ -8180,9 +8179,8 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
         int offsetY = 0;
         if (parentBounds.height() != screenResolvedBounds.height()) {
             if (screenResolvedBounds.height() <= parentAppBounds.height()) {
-                float positionMultiplier =
-                        mLetterboxUiController.getVerticalPositionMultiplier(
-                                newParentConfiguration);
+                float positionMultiplier = mLetterboxUiController.getVerticalPositionMultiplier(
+                        newParentConfiguration);
                 offsetY = (int) Math.ceil((parentAppBounds.height() - screenResolvedBounds.height())
                         * positionMultiplier);
             }
