@@ -1368,6 +1368,10 @@
     <string name="user_add_user_message_long">You can share this device with other people by creating additional users. Each user has their own space, which they can customize with apps, wallpaper, and so on. Users can also adjust device settings like Wi\u2011Fi that affect everyone.\n\nWhen you add a new user, that person needs to set up their space.\n\nAny user can update apps for all other users. Accessibility settings and services may not transfer to the new user.</string>
     <!-- Message for add user confirmation dialog - short version. [CHAR LIMIT=none] -->
     <string name="user_add_user_message_short">When you add a new user, that person needs to set up their space.\n\nAny user can update apps for all other users. </string>
+    <!-- Title for grant user admin privileges dialog [CHAR LIMIT=30] -->
+    <string name="user_grant_admin_title">Give this user admin privileges?</string>
+    <!-- Message for grant admin privileges dialog. [CHAR LIMIT=none] -->
+    <string name="user_grant_admin_message">As an admin, they will be able to manage other users, modify device settings and factory reset the device.</string>
     <!-- Title of dialog to setup a new user [CHAR LIMIT=30] -->
     <string name="user_setup_dialog_title">Set up user now?</string>
     <!-- Message in dialog to setup a new user after creation [CHAR LIMIT=none] -->
@@ -1434,6 +1438,10 @@
     <!-- Dialog message on action exit guest (ephemeral guest) [CHAR LIMIT=80] -->
     <string name="guest_exit_dialog_message">This will delete
         apps and data from the current guest session</string>
+    <!-- Dialog message on action grant admin privileges [CHAR LIMIT=60] -->
+    <string name="grant_admin">Give this user admin privileges</string>
+    <!-- Dialog message on action not grant admin privileges [CHAR LIMIT=60] -->
+    <string name="not_grant_admin">Do not give user admin privileges</string>
     <!-- Dialog button on action exit guest (ephemeral guest) [CHAR LIMIT=80] -->
     <string name="guest_exit_dialog_button">Exit</string>
     <!-- Dialog title on action exit guest (non-ephemeral guest) [CHAR LIMIT=32] -->
