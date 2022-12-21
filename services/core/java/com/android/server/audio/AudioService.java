@@ -3733,18 +3733,6 @@ public class AudioService extends IAudioService.Stub
         }
     }
 
-    // TODO enforce MODIFY_AUDIO_SYSTEM_SETTINGS when defined
-    private void enforceModifyAudioRoutingOrSystemSettingsPermission() {
-        if (mContext.checkCallingOrSelfPermission(android.Manifest.permission.MODIFY_AUDIO_ROUTING)
-                != PackageManager.PERMISSION_GRANTED
-                /*&& mContext.checkCallingOrSelfPermission(
-                        android.Manifest.permission.MODIFY_AUDIO_SYSTEM_SETTINGS)
-                            != PackageManager.PERMISSION_DENIED*/) {
-            throw new SecurityException(
-                    "Missing MODIFY_AUDIO_ROUTING or MODIFY_AUDIO_SYSTEM_SETTINGS permission");
-        }
-    }
-
     private void enforceAccessUltrasoundPermission() {
         if (mContext.checkCallingOrSelfPermission(android.Manifest.permission.ACCESS_ULTRASOUND)
                 != PackageManager.PERMISSION_GRANTED) {
@@ -3856,13 +3844,16 @@ public class AudioService extends IAudioService.Stub
         return AudioSystem.getMinVolumeIndexForAttributes(attr);
     }
 
+    @Override
+    @android.annotation.EnforcePermission(anyOf =
+            {"MODIFY_AUDIO_ROUTING", "MODIFY_AUDIO_SYSTEM_SETTINGS"})
     /** @see AudioDeviceVolumeManager#setDeviceVolume(VolumeInfo, AudioDeviceAttributes)
      * Part of service interface, check permissions and parameters here
      * Note calling package is for logging purposes only, not to be trusted
      */
     public void setDeviceVolume(@NonNull VolumeInfo vi, @NonNull AudioDeviceAttributes ada,
             @NonNull String callingPackage) {
-        enforceModifyAudioRoutingOrSystemSettingsPermission();
+        super.setDeviceVolume_enforcePermission();
         Objects.requireNonNull(vi);
         Objects.requireNonNull(ada);
         Objects.requireNonNull(callingPackage);
@@ -4828,12 +4819,15 @@ public class AudioService extends IAudioService.Stub
         }
     }
 
+    @Override
+    @android.annotation.EnforcePermission(anyOf =
+            {"MODIFY_AUDIO_ROUTING", "MODIFY_AUDIO_SYSTEM_SETTINGS"})
     /**
      * @see AudioDeviceVolumeManager#getDeviceVolume(VolumeInfo, AudioDeviceAttributes)
      */
     public @NonNull VolumeInfo getDeviceVolume(@NonNull VolumeInfo vi,
             @NonNull AudioDeviceAttributes ada, @NonNull String callingPackage) {
-        enforceModifyAudioRoutingOrSystemSettingsPermission();
+        super.getDeviceVolume_enforcePermission();
         Objects.requireNonNull(vi);
         Objects.requireNonNull(ada);
         Objects.requireNonNull(callingPackage);
