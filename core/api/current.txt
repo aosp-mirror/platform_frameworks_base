@@ -24109,6 +24109,7 @@ package android.media {
     method public int getDisableReason();
     method public int getFlags();
     method @NonNull public String getRouteId();
+    method public int getSessionParticipantCount();
     method public void writeToParcel(@NonNull android.os.Parcel, int);
     field @NonNull public static final android.os.Parcelable.Creator<android.media.RouteListingPreference.Item> CREATOR;
     field public static final int DISABLE_REASON_AD = 3; // 0x3
@@ -24124,6 +24125,7 @@ package android.media {
     method @NonNull public android.media.RouteListingPreference.Item build();
     method @NonNull public android.media.RouteListingPreference.Item.Builder setDisableReason(int);
     method @NonNull public android.media.RouteListingPreference.Item.Builder setFlags(int);
+    method @NonNull public android.media.RouteListingPreference.Item.Builder setSessionParticipantCount(@IntRange(from=0) int);
   }
 
   public final class RoutingSessionInfo implements android.os.Parcelable {
