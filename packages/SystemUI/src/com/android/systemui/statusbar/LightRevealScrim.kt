@@ -90,8 +90,13 @@ object LiftReveal : LightRevealEffect {
 class LinearLightRevealEffect(private val isVertical: Boolean) : LightRevealEffect {
 
     // Interpolator that reveals >80% of the content at 0.5 progress, makes revealing faster
-    private val interpolator = PathInterpolator(/* controlX1= */ 0.4f, /* controlY1= */ 0f,
-            /* controlX2= */ 0.2f, /* controlY2= */ 1f)
+    private val interpolator =
+        PathInterpolator(
+            /* controlX1= */ 0.4f,
+            /* controlY1= */ 0f,
+            /* controlX2= */ 0.2f,
+            /* controlY2= */ 1f
+        )
 
     override fun setRevealAmountOnScrim(amount: Float, scrim: LightRevealScrim) {
         val interpolatedAmount = interpolator.getInterpolation(amount)
@@ -116,17 +121,17 @@ class LinearLightRevealEffect(private val isVertical: Boolean) : LightRevealEffe
 
         if (isVertical) {
             scrim.setRevealGradientBounds(
-                left = scrim.width / 2 - (scrim.width / 2) * gradientBoundsAmount,
+                left = scrim.viewWidth / 2 - (scrim.viewWidth / 2) * gradientBoundsAmount,
                 top = 0f,
-                right = scrim.width / 2 + (scrim.width / 2) * gradientBoundsAmount,
-                bottom = scrim.height.toFloat()
+                right = scrim.viewWidth / 2 + (scrim.viewWidth / 2) * gradientBoundsAmount,
+                bottom = scrim.viewHeight.toFloat()
             )
         } else {
             scrim.setRevealGradientBounds(
                 left = 0f,
-                top = scrim.height / 2 - (scrim.height / 2) * gradientBoundsAmount,
-                right = scrim.width.toFloat(),
-                bottom = scrim.height / 2 + (scrim.height / 2) * gradientBoundsAmount
+                top = scrim.viewHeight / 2 - (scrim.viewHeight / 2) * gradientBoundsAmount,
+                right = scrim.viewWidth.toFloat(),
+                bottom = scrim.viewHeight / 2 + (scrim.viewHeight / 2) * gradientBoundsAmount
             )
         }
     }
@@ -234,7 +239,14 @@ class PowerButtonReveal(
  * transparent center. The center position, size, and stops of the gradient can be manipulated to
  * reveal views below the scrim as if they are being 'lit up'.
  */
-class LightRevealScrim(context: Context?, attrs: AttributeSet?) : View(context, attrs) {
+class LightRevealScrim
+@JvmOverloads
+constructor(
+    context: Context?,
+    attrs: AttributeSet?,
+    initialWidth: Int? = null,
+    initialHeight: Int? = null
+) : View(context, attrs) {
 
     /** Listener that is called if the scrim's opaqueness changes */
     lateinit var isScrimOpaqueChangedListener: Consumer<Boolean>
@@ -276,6 +288,17 @@ class LightRevealScrim(context: Context?, attrs: AttributeSet?) : View(context, 
     var revealGradientCenter = PointF()
     var revealGradientWidth: Float = 0f
     var revealGradientHeight: Float = 0f
+
+    /**
+     * Keeps the initial value until the view is measured. See [LightRevealScrim.onMeasure].
+     *
+     * Needed as the view dimensions are used before the onMeasure pass happens, and without preset
+     * width and height some flicker during fold/unfold happens.
+     */
+    internal var viewWidth: Int = initialWidth ?: 0
+        private set
+    internal var viewHeight: Int = initialHeight ?: 0
+        private set
 
     /**
      * Alpha of the fill that can be used in the beginning of the animation to hide the content.
@@ -375,6 +398,11 @@ class LightRevealScrim(context: Context?, attrs: AttributeSet?) : View(context, 
         invalidate()
     }
 
+    override fun onMeasure(widthMeasureSpec: Int, heightMeasureSpec: Int) {
+        super.onMeasure(widthMeasureSpec, heightMeasureSpec)
+        viewWidth = measuredWidth
+        viewHeight = measuredHeight
+    }
     /**
      * Sets bounds for the transparent oval gradient that reveals the views below the scrim. This is
      * simply a helper method that sets [revealGradientCenter], [revealGradientWidth], and
