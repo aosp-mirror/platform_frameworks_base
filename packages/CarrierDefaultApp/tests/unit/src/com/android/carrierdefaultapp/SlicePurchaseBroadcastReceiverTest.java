@@ -172,13 +172,13 @@ public class SlicePurchaseBroadcastReceiverTest {
     }
 
     @Test
-    public void testDisplayNetworkBoostNotification() throws Exception {
-        displayNetworkBoostNotification();
+    public void testDisplayPerformanceBoostNotification() throws Exception {
+        displayPerformanceBoostNotification();
 
-        // verify network boost notification was shown
+        // verify performance boost notification was shown
         ArgumentCaptor<Notification> captor = ArgumentCaptor.forClass(Notification.class);
         verify(mNotificationManager).notifyAsUser(
-                eq(SlicePurchaseBroadcastReceiver.NETWORK_BOOST_NOTIFICATION_TAG),
+                eq(SlicePurchaseBroadcastReceiver.PERFORMANCE_BOOST_NOTIFICATION_TAG),
                 eq(TelephonyManager.PREMIUM_CAPABILITY_PRIORITIZE_LATENCY),
                 captor.capture(),
                 eq(UserHandle.ALL));
@@ -195,7 +195,7 @@ public class SlicePurchaseBroadcastReceiverTest {
         verify(mNotificationShownIntent).send();
     }
 
-    private void displayNetworkBoostNotification() {
+    private void displayPerformanceBoostNotification() {
         // set up pending intents
         doReturn(TelephonyManager.PHONE_PROCESS_NAME).when(mPendingIntent).getCreatorPackage();
         doReturn(true).when(mPendingIntent).isBroadcast();
@@ -244,14 +244,14 @@ public class SlicePurchaseBroadcastReceiverTest {
 
         // verify notification was canceled
         verify(mNotificationManager).cancelAsUser(
-                eq(SlicePurchaseBroadcastReceiver.NETWORK_BOOST_NOTIFICATION_TAG),
+                eq(SlicePurchaseBroadcastReceiver.PERFORMANCE_BOOST_NOTIFICATION_TAG),
                 eq(TelephonyManager.PREMIUM_CAPABILITY_PRIORITIZE_LATENCY),
                 eq(UserHandle.ALL));
     }
 
     @Test
     public void testNotificationTimeout() throws Exception {
-        displayNetworkBoostNotification();
+        displayPerformanceBoostNotification();
 
         // send ACTION_SLICE_PURCHASE_APP_RESPONSE_TIMEOUT
         doReturn(SlicePurchaseController.ACTION_SLICE_PURCHASE_APP_RESPONSE_TIMEOUT).when(mIntent)
@@ -262,7 +262,7 @@ public class SlicePurchaseBroadcastReceiverTest {
 
         // verify notification was canceled
         verify(mNotificationManager).cancelAsUser(
-                eq(SlicePurchaseBroadcastReceiver.NETWORK_BOOST_NOTIFICATION_TAG),
+                eq(SlicePurchaseBroadcastReceiver.PERFORMANCE_BOOST_NOTIFICATION_TAG),
                 eq(TelephonyManager.PREMIUM_CAPABILITY_PRIORITIZE_LATENCY),
                 eq(UserHandle.ALL));
     }
@@ -274,7 +274,7 @@ public class SlicePurchaseBroadcastReceiverTest {
         Locale before = getLocale();
 
         // display notification
-        displayNetworkBoostNotification();
+        displayPerformanceBoostNotification();
         clearInvocations(mNotificationManager);
         clearInvocations(mNotificationShownIntent);
 
@@ -291,11 +291,11 @@ public class SlicePurchaseBroadcastReceiverTest {
 
         // verify notification was updated and SlicePurchaseController was not notified
         verify(mNotificationManager).cancelAsUser(
-                eq(SlicePurchaseBroadcastReceiver.NETWORK_BOOST_NOTIFICATION_TAG),
+                eq(SlicePurchaseBroadcastReceiver.PERFORMANCE_BOOST_NOTIFICATION_TAG),
                 eq(TelephonyManager.PREMIUM_CAPABILITY_PRIORITIZE_LATENCY),
                 eq(UserHandle.ALL));
         verify(mNotificationManager).notifyAsUser(
-                eq(SlicePurchaseBroadcastReceiver.NETWORK_BOOST_NOTIFICATION_TAG),
+                eq(SlicePurchaseBroadcastReceiver.PERFORMANCE_BOOST_NOTIFICATION_TAG),
                 eq(TelephonyManager.PREMIUM_CAPABILITY_PRIORITIZE_LATENCY),
                 any(Notification.class),
                 eq(UserHandle.ALL));

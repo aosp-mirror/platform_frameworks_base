@@ -54,20 +54,24 @@ public final class RouteListingPreference implements Parcelable {
             };
 
     @NonNull private final List<Item> mItems;
+    private final boolean mUseSystemOrdering;
 
     /**
      * Creates an instance with the given values.
      *
      * @param items See {@link #getItems()}.
+     * @param useSystemOrdering See {@link #getUseSystemOrdering()}
      */
-    public RouteListingPreference(@NonNull List<Item> items) {
+    public RouteListingPreference(@NonNull List<Item> items, boolean useSystemOrdering) {
         mItems = List.copyOf(Objects.requireNonNull(items));
+        mUseSystemOrdering = useSystemOrdering;
     }
 
     private RouteListingPreference(Parcel in) {
         List<Item> items =
                 in.readParcelableList(new ArrayList<>(), Item.class.getClassLoader(), Item.class);
         mItems = List.copyOf(items);
+        mUseSystemOrdering = in.readBoolean();
     }
 
     /**
@@ -77,6 +81,15 @@ public final class RouteListingPreference implements Parcelable {
     @NonNull
     public List<Item> getItems() {
         return mItems;
+    }
+
+    /**
+     * Returns true if the application would like media route listing to use the system's ordering
+     * strategy, or false if the application would like route listing to respect the ordering
+     * obtained from {@link #getItems()}.
+     */
+    public boolean getUseSystemOrdering() {
+        return mUseSystemOrdering;
     }
 
     // RouteListingPreference Parcelable implementation.
@@ -89,6 +102,7 @@ public final class RouteListingPreference implements Parcelable {
     @Override
     public void writeToParcel(@NonNull Parcel dest, int flags) {
         dest.writeParcelableList(mItems, flags);
+        dest.writeBoolean(mUseSystemOrdering);
     }
 
     // Equals and hashCode.
@@ -102,12 +116,12 @@ public final class RouteListingPreference implements Parcelable {
             return false;
         }
         RouteListingPreference that = (RouteListingPreference) other;
-        return mItems.equals(that.mItems);
+        return mItems.equals(that.mItems) && mUseSystemOrdering == that.mUseSystemOrdering;
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(mItems);
+        return Objects.hash(mItems, mUseSystemOrdering);
     }
 
     /** Holds preference information for a specific route in a {@link RouteListingPreference}. */

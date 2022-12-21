@@ -545,6 +545,10 @@ public class CameraExtensionsProxyService extends Service {
                 sz.height = size.getHeight();
                 sizeList.sizes.add(sz);
             }
+
+            if (!sizeList.sizes.isEmpty()) {
+                ret.add(sizeList);
+            }
         }
 
         return ret;
@@ -740,6 +744,19 @@ public class CameraExtensionsProxyService extends Service {
         }
 
         @Override
+        public List<SizeList> getSupportedPostviewResolutions(
+                android.hardware.camera2.extension.Size captureSize) {
+            Size sz = new Size(captureSize.width, captureSize.height);
+            Map<Integer, List<Size>> supportedSizesMap =
+                    mAdvancedExtender.getSupportedPostviewResolutions(sz);
+            if (supportedSizesMap != null) {
+                return initializeParcelable(supportedSizesMap);
+            }
+
+            return null;
+        }
+
+        @Override
         public List<SizeList> getSupportedPreviewOutputResolutions(String cameraId) {
             Map<Integer, List<Size>> supportedSizesMap =
                     mAdvancedExtender.getSupportedPreviewOutputResolutions(cameraId);
@@ -836,6 +853,15 @@ public class CameraExtensionsProxyService extends Service {
         public boolean isCaptureProcessProgressAvailable() {
             if (LATENCY_IMPROVEMENTS_SUPPORTED) {
                 return mAdvancedExtender.isCaptureProcessProgressAvailable();
+            }
+
+            return false;
+        }
+
+        @Override
+        public boolean isPostviewAvailable() {
+            if (LATENCY_IMPROVEMENTS_SUPPORTED) {
+                return mAdvancedExtender.isPostviewAvailable();
             }
 
             return false;
@@ -1167,11 +1193,13 @@ public class CameraExtensionsProxyService extends Service {
 
         @Override
         public CameraSessionConfig initSession(String cameraId, OutputSurface previewSurface,
-                OutputSurface imageCaptureSurface) {
+                OutputSurface imageCaptureSurface, OutputSurface postviewSurface) {
             OutputSurfaceImplStub outputPreviewSurfaceImpl =
                     new OutputSurfaceImplStub(previewSurface);
             OutputSurfaceImplStub outputImageCaptureSurfaceImpl =
                     new OutputSurfaceImplStub(imageCaptureSurface);
+            OutputSurfaceImplStub outputPostviewSurfaceImpl =
+                    new OutputSurfaceImplStub(postviewSurface);
 
             Camera2SessionConfigImpl sessionConfig;
 
@@ -1179,7 +1207,8 @@ public class CameraExtensionsProxyService extends Service {
                 OutputSurfaceConfigurationImplStub outputSurfaceConfigs =
                         new OutputSurfaceConfigurationImplStub(outputPreviewSurfaceImpl,
                         // Image Analysis Output is currently only supported in CameraX
-                        outputImageCaptureSurfaceImpl, null /*imageAnalysisSurfaceConfig*/);
+                        outputImageCaptureSurfaceImpl, null /*imageAnalysisSurfaceConfig*/,
+                        outputPostviewSurfaceImpl);
 
                 sessionConfig = mSessionProcessor.initSession(cameraId,
                         mCharacteristicsHashMap, getApplicationContext(), outputSurfaceConfigs);
@@ -1264,7 +1293,14 @@ public class CameraExtensionsProxyService extends Service {
         }
 
         @Override
-        public int startCapture(ICaptureCallback callback) {
+        public int startCapture(ICaptureCallback callback, boolean isPostviewRequested) {
+            if (LATENCY_IMPROVEMENTS_SUPPORTED) {
+                return isPostviewRequested ? mSessionProcessor.startCaptureWithPostview(
+                        new CaptureCallbackStub(callback, mCameraId)) :
+                        mSessionProcessor.startCapture(new CaptureCallbackStub(callback,
+                        mCameraId));
+            }
+
             return mSessionProcessor.startCapture(new CaptureCallbackStub(callback, mCameraId));
         }
 
@@ -1288,12 +1324,15 @@ public class CameraExtensionsProxyService extends Service {
         private OutputSurfaceImpl mOutputPreviewSurfaceImpl;
         private OutputSurfaceImpl mOutputImageCaptureSurfaceImpl;
         private OutputSurfaceImpl mOutputImageAnalysisSurfaceImpl;
+        private OutputSurfaceImpl mOutputPostviewSurfaceImpl;
 
         public OutputSurfaceConfigurationImplStub(OutputSurfaceImpl previewOutput,
-                OutputSurfaceImpl imageCaptureOutput, OutputSurfaceImpl imageAnalysisOutput) {
+                OutputSurfaceImpl imageCaptureOutput, OutputSurfaceImpl imageAnalysisOutput,
+                OutputSurfaceImpl postviewOutput) {
             mOutputPreviewSurfaceImpl = previewOutput;
             mOutputImageCaptureSurfaceImpl = imageCaptureOutput;
             mOutputImageAnalysisSurfaceImpl = imageAnalysisOutput;
+            mOutputPostviewSurfaceImpl = postviewOutput;
         }
 
         @Override
@@ -1309,6 +1348,11 @@ public class CameraExtensionsProxyService extends Service {
         @Override
         public OutputSurfaceImpl getImageAnalysisOutputSurface() {
             return mOutputImageAnalysisSurfaceImpl;
+        }
+
+        @Override
+        public OutputSurfaceImpl getPostviewOutputSurface() {
+            return mOutputPostviewSurfaceImpl;
         }
     }
 
@@ -1498,6 +1542,15 @@ public class CameraExtensionsProxyService extends Service {
         }
 
         @Override
+        public boolean isPostviewAvailable() {
+            if (LATENCY_IMPROVEMENTS_SUPPORTED) {
+                return mImageExtender.isPostviewAvailable();
+            }
+
+            return false;
+        }
+
+        @Override
         public CaptureStageImpl onEnableSession() {
             return initializeParcelable(mImageExtender.onEnableSession(), mCameraId);
         }
@@ -1568,6 +1621,21 @@ public class CameraExtensionsProxyService extends Service {
             if (INIT_API_SUPPORTED) {
                 List<Pair<Integer, android.util.Size[]>> sizes =
                         mImageExtender.getSupportedResolutions();
+                if ((sizes != null) && !sizes.isEmpty()) {
+                    return initializeParcelable(sizes);
+                }
+            }
+
+            return null;
+        }
+
+        @Override
+        public List<SizeList> getSupportedPostviewResolutions(
+                android.hardware.camera2.extension.Size captureSize) {
+            if (LATENCY_IMPROVEMENTS_SUPPORTED) {
+                Size sz = new Size(captureSize.width, captureSize.height);
+                List<Pair<Integer, android.util.Size[]>> sizes =
+                        mImageExtender.getSupportedPostviewResolutions(sz);
                 if ((sizes != null) && !sizes.isEmpty()) {
                     return initializeParcelable(sizes);
                 }
@@ -1715,8 +1783,21 @@ public class CameraExtensionsProxyService extends Service {
         }
 
         @Override
-        public void onResolutionUpdate(android.hardware.camera2.extension.Size size) {
-            mCaptureProcessor.onResolutionUpdate(new android.util.Size(size.width, size.height));
+        public void onPostviewOutputSurface(Surface surface) {
+            mCaptureProcessor.onPostviewOutputSurface(surface);
+        }
+
+        @Override
+        public void onResolutionUpdate(android.hardware.camera2.extension.Size size,
+                android.hardware.camera2.extension.Size postviewSize) {
+            if (postviewSize != null) {
+                mCaptureProcessor.onResolutionUpdate(
+                        new android.util.Size(size.width, size.height),
+                        new android.util.Size(postviewSize.width, postviewSize.height));
+            } else {
+                mCaptureProcessor.onResolutionUpdate(
+                        new android.util.Size(size.width, size.height));
+            }
         }
 
         @Override
@@ -1725,7 +1806,8 @@ public class CameraExtensionsProxyService extends Service {
         }
 
         @Override
-        public void process(List<CaptureBundle> captureList, IProcessResultImpl resultCallback) {
+        public void process(List<CaptureBundle> captureList, IProcessResultImpl resultCallback,
+                boolean isPostviewRequested) {
             HashMap<Integer, Pair<Image, TotalCaptureResult>> captureMap = new HashMap<>();
             for (CaptureBundle captureBundle : captureList) {
                 captureMap.put(captureBundle.stage, new Pair<> (
@@ -1734,7 +1816,12 @@ public class CameraExtensionsProxyService extends Service {
                                 captureBundle.sequenceId)));
             }
             if (!captureMap.isEmpty()) {
-                if ((resultCallback != null) && (RESULT_API_SUPPORTED)) {
+                if ((LATENCY_IMPROVEMENTS_SUPPORTED) && (isPostviewRequested)) {
+                    ProcessResultCallback processResultCallback = (resultCallback != null)
+                            ? new ProcessResultCallback(resultCallback, mCameraId) : null;
+                    mCaptureProcessor.processWithPostview(captureMap, processResultCallback,
+                            null /*executor*/);
+                } else if ((resultCallback != null) && (RESULT_API_SUPPORTED)) {
                     mCaptureProcessor.process(captureMap, new ProcessResultCallback(resultCallback,
                                     mCameraId), null /*executor*/);
                 } else if (resultCallback == null) {

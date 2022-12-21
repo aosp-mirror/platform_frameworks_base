@@ -204,7 +204,7 @@ public class WifiPowerCalculatorTest {
         assertThat(uidConsumer.getConsumedPower(BatteryConsumer.POWER_COMPONENT_WIFI))
                 .isWithin(PRECISION).of(0.2214666 / (0.2214666 + 0.645200) * 1_000_000 / 3600000);
         assertThat(uidConsumer.getPowerModel(BatteryConsumer.POWER_COMPONENT_WIFI))
-                .isEqualTo(BatteryConsumer.POWER_MODEL_MEASURED_ENERGY);
+                .isEqualTo(BatteryConsumer.POWER_MODEL_ENERGY_CONSUMPTION);
 
         BatteryConsumer deviceConsumer = mStatsRule.getDeviceBatteryConsumer();
         assertThat(deviceConsumer.getUsageDurationMillis(BatteryConsumer.POWER_COMPONENT_WIFI))
@@ -212,13 +212,13 @@ public class WifiPowerCalculatorTest {
         assertThat(deviceConsumer.getConsumedPower(BatteryConsumer.POWER_COMPONENT_WIFI))
                 .isWithin(PRECISION).of(0.27777);
         assertThat(deviceConsumer.getPowerModel(BatteryConsumer.POWER_COMPONENT_WIFI))
-                .isEqualTo(BatteryConsumer.POWER_MODEL_MEASURED_ENERGY);
+                .isEqualTo(BatteryConsumer.POWER_MODEL_ENERGY_CONSUMPTION);
 
         BatteryConsumer appsConsumer = mStatsRule.getDeviceBatteryConsumer();
         assertThat(appsConsumer.getConsumedPower(BatteryConsumer.POWER_COMPONENT_WIFI))
                 .isWithin(PRECISION).of(0.277777);
         assertThat(appsConsumer.getPowerModel(BatteryConsumer.POWER_COMPONENT_WIFI))
-                .isEqualTo(BatteryConsumer.POWER_MODEL_MEASURED_ENERGY);
+                .isEqualTo(BatteryConsumer.POWER_MODEL_ENERGY_CONSUMPTION);
     }
 
     @Test
@@ -258,7 +258,7 @@ public class WifiPowerCalculatorTest {
         assertThat(uidConsumer.getConsumedPower(BatteryConsumer.POWER_COMPONENT_WIFI))
                 .isWithin(PRECISION).of(1.0325211);
         assertThat(uidConsumer.getPowerModel(BatteryConsumer.POWER_COMPONENT_WIFI))
-                .isEqualTo(BatteryConsumer.POWER_MODEL_MEASURED_ENERGY);
+                .isEqualTo(BatteryConsumer.POWER_MODEL_ENERGY_CONSUMPTION);
 
         final BatteryConsumer.Key foreground = uidConsumer.getKey(
                 BatteryConsumer.POWER_COMPONENT_WIFI,
@@ -327,6 +327,6 @@ public class WifiPowerCalculatorTest {
         assertThat(uidConsumer.getConsumedPower(BatteryConsumer.POWER_COMPONENT_WIFI))
                 .isWithin(PRECISION).of(0.8231573 / (0.8231573 + 0.8759216) * 1_000_000 / 3600000);
         assertThat(uidConsumer.getPowerModel(BatteryConsumer.POWER_COMPONENT_WIFI))
-                .isEqualTo(BatteryConsumer.POWER_MODEL_MEASURED_ENERGY);
+                .isEqualTo(BatteryConsumer.POWER_MODEL_ENERGY_CONSUMPTION);
     }
 }

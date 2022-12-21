@@ -74,8 +74,16 @@ public final class MediaProjectionManager {
      * Returns an {@link Intent} that <b>must</b> be passed to
      * {@link Activity#startActivityForResult(Intent, int)} (or similar) in order to start screen
      * capture. The activity will prompt the user whether to allow screen capture.  The result of
-     * this activity (received by overriding {@link Activity#onActivityResult(int, int, Intent)})
+     * this activity (received by overriding {@link Activity#onActivityResult(int, int, Intent)}
      * should be passed to {@link #getMediaProjection(int, Intent)}.
+     * <p>
+     * Identical to calling {@link #createScreenCaptureIntent(MediaProjectionConfig)} with
+     * a {@link MediaProjectionConfig#createConfigForUserChoice()}.
+     * </p>
+     * <p>
+     * Should be used instead of {@link #createScreenCaptureIntent(MediaProjectionConfig)} when the
+     * calling app does not want to customize the activity shown to the user.
+     * </p>
      */
     @NonNull
     public Intent createScreenCaptureIntent() {
@@ -99,20 +107,25 @@ public final class MediaProjectionManager {
      *
      * <p>
      * If {@link MediaProjectionConfig} was created from:
-     * <li>
-     *     <ul>
+     * <ul>
+     *     <li>
      *         {@link MediaProjectionConfig#createConfigForDisplay(int)}, then creates an
      *         {@link Intent} for capturing this particular display. The activity limits the user's
      *         choice to just the display specified.
-     *     </ul>
-     *     <ul>
+     *     </li>
+     *     <li>
      *         {@link MediaProjectionConfig#createConfigForUserChoice()}, then creates an
      *         {@link Intent} for deferring which region to capture to the user. This gives the
      *         user the same behaviour as calling {@link #createScreenCaptureIntent()}. The
      *         activity gives the user the choice between
      *         {@link android.view.Display#DEFAULT_DISPLAY}, or a different region.
-     *     </ul>
-     * </li>
+     *     </li>
+     * </ul>
+     * </p>
+     * <p>
+     * Should be used instead of {@link #createScreenCaptureIntent()} when the calling app wants to
+     * customize the activity shown to the user.
+     * </p>
      *
      * @param config Customization for the {@link MediaProjection} that this {@link Intent} requests
      *               the user's consent for.

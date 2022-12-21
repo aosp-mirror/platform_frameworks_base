@@ -16,9 +16,6 @@
 
 package android.media;
 
-import static android.companion.virtual.VirtualDeviceManager.DEVICE_ID_DEFAULT;
-import static android.companion.virtual.VirtualDeviceParams.DEVICE_POLICY_DEFAULT;
-import static android.companion.virtual.VirtualDeviceParams.POLICY_TYPE_AUDIO;
 import static android.media.AudioManager.AUDIO_SESSION_ID_GENERATE;
 
 import android.annotation.CallbackExecutor;
@@ -30,7 +27,6 @@ import android.annotation.Nullable;
 import android.annotation.RequiresPermission;
 import android.annotation.SystemApi;
 import android.annotation.TestApi;
-import android.companion.virtual.VirtualDeviceManager;
 import android.compat.annotation.UnsupportedAppUsage;
 import android.content.Context;
 import android.media.audiopolicy.AudioMix;
@@ -824,12 +820,7 @@ public class AudioTrack extends PlayerBase
 
         int[] sampleRate = new int[] {mSampleRate};
         int[] session = new int[1];
-        if (sessionId == AUDIO_SESSION_ID_GENERATE) {
-            // If there's no specific session id requested, try to get one from context.
-            session[0] = getSessionIdForContext(context);
-        } else {
-            session[0] = sessionId;
-        }
+        session[0] = resolvePlaybackSessionId(context, sessionId);
 
         // native initialization
         int initResult = native_setup(new WeakReference<AudioTrack>(this), mAttributes,
@@ -1413,32 +1404,6 @@ public class AudioTrack extends PlayerBase
                 throw new UnsupportedOperationException(e.getMessage());
             }
         }
-    }
-
-    /**
-     * Helper method to extract device specific audio session id from Context.
-     *
-     * @param context {@link Context} to use for extraction of device specific session id.
-     * @return device specific session id. If context is null or doesn't have specific audio
-     *   session id associated, this method returns {@link AUDIO_SESSION_ID_GENERATE}.
-     */
-    private static int getSessionIdForContext(@Nullable Context context) {
-        if (context == null) {
-            return AUDIO_SESSION_ID_GENERATE;
-        }
-
-        int deviceId = context.getDeviceId();
-        if (deviceId == DEVICE_ID_DEFAULT) {
-            return AUDIO_SESSION_ID_GENERATE;
-        }
-
-        VirtualDeviceManager vdm = context.getSystemService(VirtualDeviceManager.class);
-        if (vdm == null || vdm.getDevicePolicy(deviceId, POLICY_TYPE_AUDIO)
-                == DEVICE_POLICY_DEFAULT) {
-            return AUDIO_SESSION_ID_GENERATE;
-        }
-
-        return vdm.getAudioPlaybackSessionId(deviceId);
     }
 
     /**

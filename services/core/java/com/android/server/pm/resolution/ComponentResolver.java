@@ -498,9 +498,9 @@ public class ComponentResolver extends ComponentResolverLocked implements
         }
 
         String packageName = activity.getPackageName();
-        AndroidPackage pkg = computer.getPackage(packageName);
+        var packageState = computer.getPackageStateInternal(packageName);
 
-        final boolean privilegedApp = pkg.isPrivileged();
+        final boolean privilegedApp = packageState.isPrivileged();
         String className = activity.getClassName();
         if (!privilegedApp) {
             // non-privileged applications can never define a priority >0

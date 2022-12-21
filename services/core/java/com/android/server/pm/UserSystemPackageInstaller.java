@@ -352,10 +352,11 @@ class UserSystemPackageInstaller {
         final String notSystemFmt = "%s is allowlisted and present but not a system package.";
         final String overlayFmt = "%s is allowlisted unnecessarily since it's a static overlay.";
         for (String pkgName : allWhitelistedPackages) {
-            final AndroidPackage pkg = pmInt.getPackage(pkgName);
+            var packageState = pmInt.getPackageStateInternal(pkgName);
+            var pkg = packageState == null ? null : packageState.getAndroidPackage();
             if (pkg == null) {
                 warnings.add(String.format(notPresentFmt, pkgName));
-            } else if (!pkg.isSystem()) {
+            } else if (!packageState.isSystem()) {
                 warnings.add(String.format(notSystemFmt, pkgName));
             } else if (shouldUseOverlayTargetName(pkg)) {
                 warnings.add(String.format(overlayFmt, pkgName));
@@ -380,8 +381,9 @@ class UserSystemPackageInstaller {
         // Check whether all system packages are indeed allowlisted.
         final String logMessageFmt = "System package %s is not whitelisted using "
                 + "'install-in-user-type' in SystemConfig for any user types!";
-        pmInt.forEachPackage(pkg -> {
-            if (!pkg.isSystem() || pkg.isApex()) return;
+        pmInt.forEachPackageState(packageState -> {
+            var pkg = packageState.getAndroidPackage();
+            if (pkg == null || !packageState.isSystem() || pkg.isApex()) return;
             final String pkgName = pkg.getManifestPackageName();
             if (!allWhitelistedPackages.contains(pkgName)
                     && !shouldUseOverlayTargetName(pmInt.getPackage(pkgName))) {
@@ -523,8 +525,9 @@ class UserSystemPackageInstaller {
 
         final Set<String> installPackages = new ArraySet<>();
         final PackageManagerInternal pmInt = LocalServices.getService(PackageManagerInternal.class);
-        pmInt.forEachPackage(pkg -> {
-            if (!pkg.isSystem()) {
+        pmInt.forEachPackageState(packageState -> {
+            var pkg = packageState.getAndroidPackage();
+            if (pkg == null || !packageState.isSystem()) {
                 return;
             }
             if (shouldInstallPackage(pkg, mWhitelistedPackagesForUserTypes,

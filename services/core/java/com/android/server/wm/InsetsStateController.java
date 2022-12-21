@@ -38,6 +38,7 @@ import android.view.InsetsSource;
 import android.view.InsetsSourceControl;
 import android.view.InsetsState;
 import android.view.InsetsState.InternalInsetsType;
+import android.view.WindowInsets;
 
 import com.android.internal.protolog.common.ProtoLog;
 import com.android.server.inputmethod.InputMethodManagerInternal;
@@ -80,7 +81,7 @@ class InsetsStateController {
                 return;
             }
             for (InsetsSourceControl control : controls) {
-                if (control.getType() == ITYPE_IME) {
+                if (control.getType() == WindowInsets.Type.ime()) {
                     mDisplayContent.mWmService.mH.post(() ->
                             InputMethodManagerInternal.get().removeImeSurface());
                 }
@@ -246,7 +247,7 @@ class InsetsStateController {
 
     void notifyControlRevoked(@NonNull InsetsControlTarget previousControlTarget,
             InsetsSourceProvider provider) {
-        removeFromControlMaps(previousControlTarget, provider.getSource().getType(),
+        removeFromControlMaps(previousControlTarget, provider.getSource().getId(),
                 false /* fake */);
     }
 

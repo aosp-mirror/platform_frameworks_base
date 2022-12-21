@@ -275,11 +275,11 @@ public class BatteryUsageStatsPulledTest {
 
         uidBuilder.setConsumedPower(keyFg, 9100, BatteryConsumer.POWER_MODEL_POWER_PROFILE)
                 .setUsageDurationMillis(keyFg, 8100)
-                .setConsumedPower(keyBg, 9200, BatteryConsumer.POWER_MODEL_MEASURED_ENERGY)
+                .setConsumedPower(keyBg, 9200, BatteryConsumer.POWER_MODEL_ENERGY_CONSUMPTION)
                 .setUsageDurationMillis(keyBg, 8200)
-                .setConsumedPower(keyFgs, 9300, BatteryConsumer.POWER_MODEL_MEASURED_ENERGY)
+                .setConsumedPower(keyFgs, 9300, BatteryConsumer.POWER_MODEL_ENERGY_CONSUMPTION)
                 .setUsageDurationMillis(keyFgs, 8300)
-                .setConsumedPower(keyCached, 9400, BatteryConsumer.POWER_MODEL_MEASURED_ENERGY)
+                .setConsumedPower(keyCached, 9400, BatteryConsumer.POWER_MODEL_ENERGY_CONSUMPTION)
                 .setUsageDurationMillis(keyFgs, 8400);
 
         builder.getOrCreateUidBatteryConsumerBuilder(UID_1)
@@ -302,7 +302,7 @@ public class BatteryUsageStatsPulledTest {
                         BatteryConsumer.POWER_MODEL_POWER_PROFILE) // Empty
                 .setConsumedPower(
                         BatteryConsumer.POWER_COMPONENT_CAMERA, 20150,
-                        BatteryConsumer.POWER_MODEL_MEASURED_ENERGY)
+                        BatteryConsumer.POWER_MODEL_ENERGY_CONSUMPTION)
                 .setConsumedPowerForCustomComponent(
                         BatteryConsumer.FIRST_CUSTOM_POWER_COMPONENT_ID, 20200)
                 .setUsageDurationMillis(

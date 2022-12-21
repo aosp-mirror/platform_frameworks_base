@@ -24,7 +24,7 @@ import android.content.pm.PackageManagerInternal;
 import android.util.ArrayMap;
 
 import com.android.server.pm.PackageManagerServiceUtils;
-import com.android.server.pm.pkg.AndroidPackage;
+import com.android.server.pm.pkg.PackageState;
 
 import java.io.IOException;
 import java.util.Map;
@@ -44,13 +44,13 @@ interface PackageManagerHelper {
      * @return a map of package name to all packages installed in the user
      */
     @NonNull
-    ArrayMap<String, AndroidPackage> initializeForUser(final int userId);
+    ArrayMap<String, PackageState> initializeForUser(final int userId);
 
     /**
      * Retrieves the package information if it is installed for the user.
      */
     @Nullable
-    AndroidPackage getPackageForUser(@NonNull final String packageName, final int userId);
+    PackageState getPackageStateForUser(@NonNull final String packageName, final int userId);
 
     /**
      * Returns whether the package is an instant app.

@@ -16,6 +16,9 @@
 
 package com.android.server.locales;
 
+import android.annotation.NonNull;
+import android.os.UserHandle;
+
 import com.android.internal.content.PackageMonitor;
 
 /**
@@ -35,12 +38,16 @@ final class LocaleManagerServicePackageMonitor extends PackageMonitor {
     private LocaleManagerBackupHelper mBackupHelper;
     private SystemAppUpdateTracker mSystemAppUpdateTracker;
     private AppUpdateTracker mAppUpdateTracker;
+    private LocaleManagerService mLocaleManagerService;
 
-    LocaleManagerServicePackageMonitor(LocaleManagerBackupHelper localeManagerBackupHelper,
-            SystemAppUpdateTracker systemAppUpdateTracker, AppUpdateTracker appUpdateTracker) {
+    LocaleManagerServicePackageMonitor(@NonNull LocaleManagerBackupHelper localeManagerBackupHelper,
+            @NonNull SystemAppUpdateTracker systemAppUpdateTracker,
+            @NonNull AppUpdateTracker appUpdateTracker,
+            @NonNull LocaleManagerService localeManagerService) {
         mBackupHelper = localeManagerBackupHelper;
         mSystemAppUpdateTracker = systemAppUpdateTracker;
         mAppUpdateTracker = appUpdateTracker;
+        mLocaleManagerService = localeManagerService;
     }
 
     @Override
@@ -56,6 +63,7 @@ final class LocaleManagerServicePackageMonitor extends PackageMonitor {
     @Override
     public void onPackageRemoved(String packageName, int uid) {
         mBackupHelper.onPackageRemoved(packageName, uid);
+        mLocaleManagerService.deleteOverrideLocaleConfig(packageName, UserHandle.getUserId(uid));
     }
 
     @Override

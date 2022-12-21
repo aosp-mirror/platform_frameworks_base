@@ -375,7 +375,7 @@ public class LockSettingsService extends ILockSettings.Stub {
      * @param profileUserId  profile user Id
      * @param profileUserPassword  profile original password (when it has separated lock).
      */
-    public void tieProfileLockIfNecessary(int profileUserId,
+    private void tieProfileLockIfNecessary(int profileUserId,
             LockscreenCredential profileUserPassword) {
         if (DEBUG) Slog.v(TAG, "Check child profile lock for user: " + profileUserId);
         // Only for profiles that shares credential with parent
@@ -713,7 +713,8 @@ public class LockSettingsService extends ILockSettings.Stub {
             userHandle);
     }
 
-    public void onCleanupUser(int userId) {
+    @VisibleForTesting
+    void onCleanupUser(int userId) {
         hideEncryptionNotification(new UserHandle(userId));
         // User is stopped with its CE key evicted. Restore strong auth requirement to the default
         // flags after boot since stopping and restarting a user later is equivalent to rebooting
@@ -725,7 +726,7 @@ public class LockSettingsService extends ILockSettings.Stub {
         }
     }
 
-    public void onStartUser(final int userId) {
+    private void onStartUser(final int userId) {
         maybeShowEncryptionNotificationForUser(userId, "user started");
     }
 
@@ -779,7 +780,7 @@ public class LockSettingsService extends ILockSettings.Stub {
         }
     }
 
-    public void onUnlockUser(final int userId) {
+    private void onUnlockUser(final int userId) {
         // Perform tasks which require locks in LSS on a handler, as we are callbacks from
         // ActivityManager.unlockUser()
         mHandler.post(new Runnable() {
@@ -1222,7 +1223,7 @@ public class LockSettingsService extends ILockSettings.Stub {
      * {@link #CREDENTIAL_TYPE_PATTERN}, {@link #CREDENTIAL_TYPE_PIN} and
      * {@link #CREDENTIAL_TYPE_PASSWORD}
      */
-    public int getCredentialTypeInternal(int userId) {
+    private int getCredentialTypeInternal(int userId) {
         if (userId == USER_FRP) {
             return getFrpCredentialType();
         }
@@ -1687,10 +1688,6 @@ public class LockSettingsService extends ILockSettings.Stub {
     }
 
     private void onPostPasswordChanged(LockscreenCredential newCredential, int userHandle) {
-        if (userHandle == UserHandle.USER_SYSTEM && isDeviceEncryptionEnabled() &&
-            shouldEncryptWithCredentials() && newCredential.isNone()) {
-            setCredentialRequiredToDecrypt(false);
-        }
         if (newCredential.isPattern()) {
             setBoolean(LockPatternUtils.PATTERN_EVER_CHOSEN_KEY, true, userHandle);
         }
@@ -1768,24 +1765,6 @@ public class LockSettingsService extends ILockSettings.Stub {
         return mInjector.getDevicePolicyManager().getPasswordHistoryLength(null, userId);
     }
 
-    private static boolean isDeviceEncryptionEnabled() {
-        return StorageManager.isEncrypted();
-    }
-
-    private boolean shouldEncryptWithCredentials() {
-        return isCredentialRequiredToDecrypt() && !isDoNotAskCredentialsOnBootSet();
-    }
-
-    private boolean isDoNotAskCredentialsOnBootSet() {
-        return mInjector.getDevicePolicyManager().getDoNotAskCredentialsOnBoot();
-    }
-
-    private boolean isCredentialRequiredToDecrypt() {
-        final int value = Settings.Global.getInt(mContext.getContentResolver(),
-                Settings.Global.REQUIRE_PASSWORD_TO_DECRYPT, -1);
-        return value != 0;
-    }
-
     private UserManager getUserManagerFromCache(int userId) {
         UserHandle userHandle = UserHandle.of(userId);
         if (mUserManagerCache.containsKey(userHandle)) {
@@ -1802,15 +1781,9 @@ public class LockSettingsService extends ILockSettings.Stub {
         }
     }
 
+    @VisibleForTesting /** Note: this method is overridden in unit tests */
     protected boolean isCredentialSharableWithParent(int userId) {
         return getUserManagerFromCache(userId).isCredentialSharableWithParent();
-    }
-
-    private void setCredentialRequiredToDecrypt(boolean required) {
-        if (isDeviceEncryptionEnabled()) {
-            Settings.Global.putInt(mContext.getContentResolver(),
-                    Settings.Global.REQUIRE_PASSWORD_TO_DECRYPT, required ? 1 : 0);
-        }
     }
 
     /** Register the given WeakEscrowTokenRemovedListener. */
@@ -2560,7 +2533,7 @@ public class LockSettingsService extends ILockSettings.Stub {
         }
     }
 
-    protected synchronized IGateKeeperService getGateKeeperService() {
+    private synchronized IGateKeeperService getGateKeeperService() {
         if (mGateKeeperService != null) {
             return mGateKeeperService;
         }

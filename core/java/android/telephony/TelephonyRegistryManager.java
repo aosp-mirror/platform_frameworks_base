@@ -40,6 +40,7 @@ import android.telephony.TelephonyManager.CarrierPrivilegesCallback;
 import android.telephony.emergency.EmergencyNumber;
 import android.telephony.ims.ImsCallSession;
 import android.telephony.ims.ImsReasonInfo;
+import android.telephony.ims.MediaQualityStatus;
 import android.util.ArraySet;
 import android.util.Log;
 
@@ -540,6 +541,27 @@ public class TelephonyRegistryManager {
             sRegistry.notifyCallQualityChanged(callQuality, slotIndex, subId, networkType);
         } catch (RemoteException ex) {
             // system process is dead
+            throw ex.rethrowFromSystemServer();
+        }
+    }
+
+    /**
+     * Notify change of media quality status {@link MediaQualityStatus} crosses media quality
+     * threshold
+     * <p/>
+     * Currently thresholds for this indication can be configurable by CARRIER_CONFIG
+     * {@link CarrierConfigManager#KEY_VOICE_RTP_THRESHOLDS_PACKET_LOSS_RATE_INT}
+     * {@link CarrierConfigManager#KEY_VOICE_RTP_THRESHOLDS_INACTIVITY_TIME_IN_MILLIS_INT}
+     * {@link CarrierConfigManager#KEY_VOICE_RTP_THRESHOLDS_JITTER_INT}
+     *
+     * @param status media quality status
+     */
+    public void notifyMediaQualityStatusChanged(
+            int slotIndex, int subId, @NonNull MediaQualityStatus status) {
+        try {
+            sRegistry.notifyMediaQualityStatusChanged(slotIndex, subId, status);
+        } catch (RemoteException ex) {
+            // system server crash
             throw ex.rethrowFromSystemServer();
         }
     }
@@ -1085,6 +1107,10 @@ public class TelephonyRegistryManager {
 
         if (telephonyCallback instanceof TelephonyCallback.LinkCapacityEstimateChangedListener) {
             eventList.add(TelephonyCallback.EVENT_LINK_CAPACITY_ESTIMATE_CHANGED);
+        }
+
+        if (telephonyCallback instanceof TelephonyCallback.MediaQualityStatusChangedListener) {
+            eventList.add(TelephonyCallback.EVENT_MEDIA_QUALITY_STATUS_CHANGED);
         }
 
         return eventList;

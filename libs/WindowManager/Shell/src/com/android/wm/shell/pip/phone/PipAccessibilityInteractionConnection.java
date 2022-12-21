@@ -24,6 +24,7 @@ import android.graphics.Region;
 import android.os.Bundle;
 import android.os.RemoteException;
 import android.view.MagnificationSpec;
+import android.view.SurfaceControl;
 import android.view.accessibility.AccessibilityManager;
 import android.view.accessibility.AccessibilityNodeInfo;
 import android.view.accessibility.AccessibilityWindowInfo;
@@ -380,5 +381,8 @@ public class PipAccessibilityInteractionConnection {
         public void notifyOutsideTouch() throws RemoteException {
             // Do nothing
         }
-    }
+
+        @Override
+    public void attachAccessibilityOverlayToWindow(SurfaceControl sc) {}
+}
 }

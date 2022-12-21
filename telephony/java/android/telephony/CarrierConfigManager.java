@@ -45,6 +45,7 @@ import android.telephony.gba.UaSecurityProtocolIdentifier;
 import android.telephony.ims.ImsReasonInfo;
 import android.telephony.ims.ImsRegistrationAttributes;
 import android.telephony.ims.ImsSsData;
+import android.telephony.ims.MediaQualityStatus;
 import android.telephony.ims.RcsUceAdapter;
 import android.telephony.ims.feature.MmTelFeature;
 import android.telephony.ims.feature.RcsFeature;
@@ -6347,6 +6348,50 @@ public class CarrierConfigManager {
         public static final String KEY_DTMFNB_PAYLOAD_TYPE_INT_ARRAY  =
                 KEY_PREFIX + "dtmfnb_payload_type_int_array";
 
+        /**
+         * This indicates the threshold for RTP packet loss rate in percentage. If measured packet
+         * loss rate crosses this, a callback with {@link MediaQualityStatus} will be invoked to
+         * listeners.
+         * See {@link android.telephony.TelephonyCallback.MediaQualityStatusChangedListener}
+         *
+         * <p/>
+         * Valid threshold range : 0 ~ 100
+         *
+         * @hide
+         */
+        public static final String KEY_VOICE_RTP_PACKET_LOSS_RATE_THRESHOLD_INT =
+                KEY_PREFIX + "rtp_packet_loss_rate_threshold_int";
+
+
+        /**
+         * This indicates the threshold for RTP jitter value in milliseconds (RFC3550). If measured
+         * jitter value crosses this, a callback with {@link MediaQualityStatus} will be invoked
+         * to listeners.
+         * See {@link android.telephony.TelephonyCallback.MediaQualityStatusChangedListener}
+         *
+         * <p/>
+         * Valid threshold range : 0 ~ 10000
+         *
+         * @hide
+         */
+        public static final String KEY_VOICE_RTP_JITTER_THRESHOLD_MILLIS_INT =
+                KEY_PREFIX + "rtp_jitter_threshold_millis_int";
+
+        /**
+         * This indicates the threshold for RTP inactivity time in milliseconds. If measured
+         * inactivity timer crosses this, a callback with {@link MediaQualityStatus} will be invoked
+         * to listeners.
+         * See {@link android.telephony.TelephonyCallback.MediaQualityStatusChangedListener}
+         *
+         * <p/>
+         * Valid threshold range : 0 ~ 60000
+         *
+         * @hide
+         */
+        public static final String KEY_VOICE_RTP_INACTIVITY_TIME_THRESHOLD_MILLIS_LONG =
+                KEY_PREFIX + "rtp_inactivity_time_threshold_millis_long";
+
+
         /** @hide */
         @IntDef({
             BANDWIDTH_EFFICIENT,
@@ -6833,6 +6878,9 @@ public class CarrierConfigManager {
             defaults.putInt(KEY_AUDIO_AS_BANDWIDTH_KBPS_INT, 41);
             defaults.putInt(KEY_AUDIO_RS_BANDWIDTH_BPS_INT, 600);
             defaults.putInt(KEY_AUDIO_RR_BANDWIDTH_BPS_INT, 2000);
+            defaults.putInt(KEY_VOICE_RTP_PACKET_LOSS_RATE_THRESHOLD_INT, 40);
+            defaults.putInt(KEY_VOICE_RTP_JITTER_THRESHOLD_MILLIS_INT, 120);
+            defaults.putLong(KEY_VOICE_RTP_INACTIVITY_TIME_THRESHOLD_MILLIS_LONG, 5000);
 
             defaults.putIntArray(
                     KEY_AUDIO_INACTIVITY_CALL_END_REASONS_INT_ARRAY,
@@ -6988,12 +7036,124 @@ public class CarrierConfigManager {
         public static final String KEY_SMS_OVER_IMS_SUPPORTED_RATS_INT_ARRAY =
                 KEY_PREFIX + "sms_over_ims_supported_rats_int_array";
 
+        /**
+         * Maximum Retry Count for Failure, If the Retry Count exceeds this value,
+         * it must display to User Interface as sending failed
+         */
+        public static final String KEY_SMS_MAX_RETRY_COUNT_INT =
+                KEY_PREFIX + "sms_max_retry_count_int";
+
+        /**
+         * Maximum Retry Count for SMS over IMS on Failure, If the Retry Count exceeds this value,
+         * and if the retry count is less than KEY_SMS_MAX_RETRY_COUNT_INT
+         * sending SMS should fallback to CS
+         */
+        public static final String KEY_SMS_MAX_RETRY_COUNT_OVER_IMS_INT =
+                KEY_PREFIX + "sms_max_retry_count_over_ims_int";
+
+        /**
+         * Delay Timer Value in milliseconds
+         * Retry SMS over IMS after this Timer expires
+         */
+        public static final String KEY_SMS_OVER_IMS_SEND_RETRY_DELAY_MILLIS_INT =
+                KEY_PREFIX + "sms_rover_ims_send_retry_delay_millis_int";
+
+        /**
+         * TR1 Timer Value in milliseconds,
+         * Waits for RP-Ack from network for MO SMS.
+         */
+        public static final String KEY_SMS_TR1_TIMER_MILLIS_INT =
+                KEY_PREFIX + "sms_tr1_timer_millis_int";
+
+        /**
+         * TR2 Timer Value in milliseconds,
+         * Waits for RP-Ack from Transfer Layer for MT SMS.
+         */
+        public static final String KEY_SMS_TR2_TIMER_MILLIS_INT =
+                KEY_PREFIX + "sms_tr2_timer_millis_int";
+
+        /**
+         * SMS RP-Cause Values for which SMS should be retried over IMS
+         *
+         * <p>Possible values are,
+         * {@link SmsManager#SMS_RP_CAUSE_UNALLOCATED_NUMBER}
+         * {@link SmsManager#SMS_RP_CAUSE_OPERATOR_DETERMINED_BARRING}
+         * {@link SmsManager#SMS_RP_CAUSE_CALL_BARRING}
+         * {@link SmsManager#SMS_RP_CAUSE_RESERVED}
+         * {@link SmsManager#SMS_RP_CAUSE_SHORT_MESSAGE_TRANSFER_REJECTED}
+         * {@link SmsManager#SMS_RP_CAUSE_DESTINATION_OUT_OF_ORDER}
+         * {@link SmsManager#SMS_RP_CAUSE_UNIDENTIFIED_SUBSCRIBER}
+         * {@link SmsManager#SMS_RP_CAUSE_FACILITY_REJECTED}
+         * {@link SmsManager#SMS_RP_CAUSE_UNKNOWN_SUBSCRIBER}
+         * {@link SmsManager#SMS_RP_CAUSE_NETWORK_OUT_OF_ORDER}
+         * {@link SmsManager#SMS_RP_CAUSE_TEMPORARY_FAILURE}
+         * {@link SmsManager#SMS_RP_CAUSE_CONGESTION}
+         * {@link SmsManager#SMS_RP_CAUSE_RESOURCES_UNAVAILABLE}
+         * {@link SmsManager#SMS_RP_CAUSE_FACILITY_NOT_SUBSCRIBED}
+         * {@link SmsManager#SMS_RP_CAUSE_FACILITY_NOT_IMPLEMENTED}
+         * {@link SmsManager#SMS_RP_CAUSE_INVALID_MESSAGE_REFERENCE_VALUE}
+         * {@link SmsManager#SMS_RP_CAUSE_SEMANTICALLY_INCORRECT_MESSAGE}
+         * {@link SmsManager#SMS_RP_CAUSE_INVALID_MANDATORY_INFORMATION}
+         * {@link SmsManager#SMS_RP_CAUSE_MESSAGE_TYPE_NON_EXISTENT}
+         * {@link SmsManager#SMS_RP_CAUSE_MESSAGE_INCOMPATIBLE_WITH_PROTOCOL_STATE}
+         * {@link SmsManager#SMS_RP_CAUSE_INFORMATION_ELEMENT_NON_EXISTENT}
+         * {@link SmsManager#SMS_RP_CAUSE_PROTOCOL_ERROR}
+         * {@link SmsManager#SMS_RP_CAUSE_INTERWORKING_UNSPECIFIED
+         */
+        public static final String KEY_SMS_RP_CAUSE_VALUES_TO_RETRY_OVER_IMS_INT_ARRAY =
+                KEY_PREFIX + "sms_rp_cause_values_to_retry_over_ims_int_array";
+
+        /**
+         * SMS RP-Cause Values for which Sending SMS should fallback
+         */
+        public static final String KEY_SMS_RP_CAUSE_VALUES_TO_FALLBACK_INT_ARRAY =
+                KEY_PREFIX + "sms_rp_cause_values_to_fallback_int_array";
+
         private static PersistableBundle getDefaults() {
             PersistableBundle defaults = new PersistableBundle();
             defaults.putBoolean(KEY_SMS_OVER_IMS_SUPPORTED_BOOL, true);
             defaults.putBoolean(KEY_SMS_CSFB_RETRY_ON_FAILURE_BOOL, true);
 
             defaults.putInt(KEY_SMS_OVER_IMS_FORMAT_INT, SMS_FORMAT_3GPP);
+
+            defaults.putInt(KEY_SMS_MAX_RETRY_COUNT_INT, 3);
+            defaults.putInt(KEY_SMS_MAX_RETRY_COUNT_OVER_IMS_INT, 3);
+            defaults.putInt(KEY_SMS_OVER_IMS_SEND_RETRY_DELAY_MILLIS_INT,
+                    2000);
+            defaults.putInt(KEY_SMS_TR1_TIMER_MILLIS_INT, 130000);
+            defaults.putInt(KEY_SMS_TR2_TIMER_MILLIS_INT, 15000);
+
+            defaults.putIntArray(
+                    KEY_SMS_RP_CAUSE_VALUES_TO_RETRY_OVER_IMS_INT_ARRAY,
+                    new int[] {
+                        SmsManager.SMS_RP_CAUSE_TEMPORARY_FAILURE
+                    });
+            defaults.putIntArray(
+                    KEY_SMS_RP_CAUSE_VALUES_TO_FALLBACK_INT_ARRAY,
+                    new int[] {
+                        SmsManager.SMS_RP_CAUSE_UNALLOCATED_NUMBER,
+                        SmsManager.SMS_RP_CAUSE_OPERATOR_DETERMINED_BARRING,
+                        SmsManager.SMS_RP_CAUSE_CALL_BARRING,
+                        SmsManager.SMS_RP_CAUSE_RESERVED,
+                        SmsManager.SMS_RP_CAUSE_SHORT_MESSAGE_TRANSFER_REJECTED,
+                        SmsManager.SMS_RP_CAUSE_DESTINATION_OUT_OF_ORDER,
+                        SmsManager.SMS_RP_CAUSE_UNIDENTIFIED_SUBSCRIBER,
+                        SmsManager.SMS_RP_CAUSE_FACILITY_REJECTED,
+                        SmsManager.SMS_RP_CAUSE_UNKNOWN_SUBSCRIBER,
+                        SmsManager.SMS_RP_CAUSE_NETWORK_OUT_OF_ORDER,
+                        SmsManager.SMS_RP_CAUSE_CONGESTION,
+                        SmsManager.SMS_RP_CAUSE_RESOURCES_UNAVAILABLE,
+                        SmsManager.SMS_RP_CAUSE_FACILITY_NOT_SUBSCRIBED,
+                        SmsManager.SMS_RP_CAUSE_FACILITY_NOT_IMPLEMENTED,
+                        SmsManager.SMS_RP_CAUSE_INVALID_MESSAGE_REFERENCE_VALUE,
+                        SmsManager.SMS_RP_CAUSE_SEMANTICALLY_INCORRECT_MESSAGE,
+                        SmsManager.SMS_RP_CAUSE_INVALID_MANDATORY_INFORMATION,
+                        SmsManager.SMS_RP_CAUSE_MESSAGE_TYPE_NON_EXISTENT,
+                        SmsManager.SMS_RP_CAUSE_MESSAGE_INCOMPATIBLE_WITH_PROTOCOL_STATE,
+                        SmsManager.SMS_RP_CAUSE_INFORMATION_ELEMENT_NON_EXISTENT,
+                        SmsManager.SMS_RP_CAUSE_PROTOCOL_ERROR,
+                        SmsManager.SMS_RP_CAUSE_INTERWORKING_UNSPECIFIED
+                    });
 
             defaults.putIntArray(
                     KEY_SMS_OVER_IMS_SUPPORTED_RATS_INT_ARRAY,
@@ -8604,6 +8764,14 @@ public class CarrierConfigManager {
         public static final String KEY_SUPPORTS_EAP_AKA_FAST_REAUTH_BOOL =
                 KEY_PREFIX + "supports_eap_aka_fast_reauth_bool";
 
+        /**
+         * Type of IP preference used to prioritize ePDG servers. Possible values are
+         * {@link #EPDG_ADDRESS_IPV4_PREFERRED}, {@link #EPDG_ADDRESS_IPV6_PREFERRED},
+         * {@link #EPDG_ADDRESS_IPV4_ONLY}
+         */
+        public static final String KEY_EPDG_ADDRESS_IP_TYPE_PREFERENCE_INT =
+                KEY_PREFIX + "epdg_address_ip_type_preference_int";
+
         /** @hide */
         @IntDef({AUTHENTICATION_METHOD_EAP_ONLY, AUTHENTICATION_METHOD_CERT})
         public @interface AuthenticationMethodType {}
@@ -8667,6 +8835,39 @@ public class CarrierConfigManager {
          *     Exchange Protocol Version 2 (IKEv2)</a>
          */
         public static final int ID_TYPE_KEY_ID = 11;
+
+        /** @hide */
+        @IntDef({
+                EPDG_ADDRESS_IPV4_PREFERRED,
+                EPDG_ADDRESS_IPV6_PREFERRED,
+                EPDG_ADDRESS_IPV4_ONLY,
+                EPDG_ADDRESS_IPV6_ONLY,
+                EPDG_ADDRESS_SYSTEM_PREFERRED
+        })
+        public @interface EpdgAddressIpPreference {}
+
+        /** Prioritize IPv4 ePDG addresses. */
+        public static final int EPDG_ADDRESS_IPV4_PREFERRED = 0;
+
+        /** Prioritize IPv6 ePDG addresses */
+        public static final int EPDG_ADDRESS_IPV6_PREFERRED = 1;
+
+        /** Use IPv4 ePDG addresses only. */
+        public static final int EPDG_ADDRESS_IPV4_ONLY = 2;
+
+        /** Use IPv6 ePDG addresses only.
+         * @hide
+         */
+        public static final int EPDG_ADDRESS_IPV6_ONLY = 3;
+
+        /** Follow the priority from DNS resolution results, which are sorted by using RFC6724
+         * algorithm.
+         *
+         * @see <a href="https://tools.ietf.org/html/rfc6724#section-6">RFC 6724, Default Address
+         *     Selection for Internet Protocol Version 6 (IPv6)</a>
+         * @hide
+         */
+        public static final int EPDG_ADDRESS_SYSTEM_PREFERRED = 4;
 
         private Iwlan() {}
 
@@ -8751,7 +8952,7 @@ public class CarrierConfigManager {
             defaults.putInt(KEY_EPDG_PCO_ID_IPV6_INT, 0);
             defaults.putInt(KEY_EPDG_PCO_ID_IPV4_INT, 0);
             defaults.putBoolean(KEY_SUPPORTS_EAP_AKA_FAST_REAUTH_BOOL, false);
-
+            defaults.putInt(KEY_EPDG_ADDRESS_IP_TYPE_PREFERENCE_INT, EPDG_ADDRESS_IPV4_PREFERRED);
             return defaults;
         }
     }
@@ -9141,7 +9342,7 @@ public class CarrierConfigManager {
 
     /**
      * A list of premium capabilities the carrier supports. Applications can prompt users to
-     * purchase these premium capabilities from their carrier for a network boost.
+     * purchase these premium capabilities from their carrier for a performance boost.
      * Valid values are any of {@link TelephonyManager.PremiumCapability}.
      *
      * This is empty by default, indicating that no premium capabilities are supported.
@@ -9153,12 +9354,12 @@ public class CarrierConfigManager {
             "supported_premium_capabilities_int_array";
 
     /**
-     * The amount of time in milliseconds the notification for a network boost via
+     * The amount of time in milliseconds the notification for a performance boost via
      * premium capabilities will be visible to the user after
      * {@link TelephonyManager#purchasePremiumCapability(int, Executor, Consumer)}
      * requests user action to purchase the boost from the carrier. Once the timeout expires,
-     * the booster notification will be automatically dismissed and the request will fail with
-     * {@link TelephonyManager#PURCHASE_PREMIUM_CAPABILITY_RESULT_TIMEOUT}.
+     * the performance boost notification will be automatically dismissed and the request will fail
+     * with {@link TelephonyManager#PURCHASE_PREMIUM_CAPABILITY_RESULT_TIMEOUT}.
      *
      * The default value is 30 minutes.
      */
@@ -9166,11 +9367,11 @@ public class CarrierConfigManager {
             "premium_capability_notification_display_timeout_millis_long";
 
     /**
-     * The amount of time in milliseconds that the notification for a network boost via
+     * The amount of time in milliseconds that the notification for a performance boost via
      * premium capabilities should be blocked when
      * {@link TelephonyManager#purchasePremiumCapability(int, Executor, Consumer)}
      * returns a failure due to user action or timeout.
-     * The maximum number of network boost notifications to show the user are defined in
+     * The maximum number of performance boost notifications to show the user are defined in
      * {@link #KEY_PREMIUM_CAPABILITY_MAXIMUM_DAILY_NOTIFICATION_COUNT_INT} and
      * {@link #KEY_PREMIUM_CAPABILITY_MAXIMUM_MONTHLY_NOTIFICATION_COUNT_INT}.
      *
@@ -9184,7 +9385,7 @@ public class CarrierConfigManager {
             "premium_capability_notification_backoff_hysteresis_time_millis_long";
 
     /**
-     * The maximum number of times in a day that we display the notification for a network boost
+     * The maximum number of times in a day that we display the notification for a performance boost
      * via premium capabilities when
      * {@link TelephonyManager#purchasePremiumCapability(int, Executor, Consumer)}
      * returns a failure due to user action or timeout.
@@ -9198,8 +9399,8 @@ public class CarrierConfigManager {
             "premium_capability_maximum_daily_notification_count_int";
 
     /**
-     * The maximum number of times in a month that we display the notification for a network boost
-     * via premium capabilities when
+     * The maximum number of times in a month that we display the notification for a performance
+     * boost via premium capabilities when
      * {@link TelephonyManager#purchasePremiumCapability(int, Executor, Consumer)}
      * returns a failure due to user action or timeout.
      *
@@ -9242,7 +9443,7 @@ public class CarrierConfigManager {
             "premium_capability_network_setup_time_millis_long";
 
     /**
-     * The URL to redirect to when the user clicks on the notification for a network boost via
+     * The URL to redirect to when the user clicks on the notification for a performance boost via
      * premium capabilities after applications call
      * {@link TelephonyManager#purchasePremiumCapability(int, Executor, Consumer)}.
      * If the URL is empty or invalid, the purchase request will return

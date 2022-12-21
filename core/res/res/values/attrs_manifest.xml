@@ -2963,6 +2963,18 @@
              Context.createAttributionContext() using the first attribution tag
              contained here. -->
         <attr name="attributionTags" />
+        <!-- If true, and this is an {@link android.R.attr#isolatedProcess} service, the service
+             is allowed to be bound in a shared isolated process with other isolated services.
+             Note that these other isolated services can also belong to other apps from different
+             vendors.
+             <p>
+             Shared isolated processes are created when using the
+             {@link android.content.Context#BIND_SHARED_ISOLATED_PROCESS) during service binding.
+             <p>
+             Note that when this flag is used, the {@link android.R.attr#process} attribute is
+             ignored when the process is bound into a shared isolated process by a client.
+        -->
+        <attr name="allowSharedIsolatedProcess" format="boolean" />
     </declare-styleable>
 
     <!-- @hide The <code>apex-system-service</code> tag declares an apex system service

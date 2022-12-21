@@ -32,6 +32,7 @@ import org.junit.runner.RunWith;
 
 @RunWith(AndroidJUnit4.class)
 @SmallTest
+@SuppressWarnings("GuardedBy")
 public class AmbientDisplayPowerCalculatorTest {
     private static final double PRECISION = 0.00001;
     private static final long MINUTE_IN_MS = 60 * 1000;
@@ -46,19 +47,19 @@ public class AmbientDisplayPowerCalculatorTest {
         mStatsRule.initMeasuredEnergyStatsLocked();
         BatteryStatsImpl stats = mStatsRule.getBatteryStats();
 
-        stats.updateDisplayMeasuredEnergyStatsLocked(new long[]{300_000_000},
+        stats.updateDisplayEnergyConsumerStatsLocked(new long[]{300_000_000},
                 new int[]{Display.STATE_ON}, 0);
 
         stats.noteScreenStateLocked(0, Display.STATE_DOZE, 30 * MINUTE_IN_MS, 30 * MINUTE_IN_MS,
                 30 * MINUTE_IN_MS);
 
-        stats.updateDisplayMeasuredEnergyStatsLocked(new long[]{200_000_000},
+        stats.updateDisplayEnergyConsumerStatsLocked(new long[]{200_000_000},
                 new int[]{Display.STATE_DOZE}, 30 * MINUTE_IN_MS);
 
         stats.noteScreenStateLocked(0, Display.STATE_OFF, 120 * MINUTE_IN_MS, 120 * MINUTE_IN_MS,
                 120 * MINUTE_IN_MS);
 
-        stats.updateDisplayMeasuredEnergyStatsLocked(new long[]{100_000_000},
+        stats.updateDisplayEnergyConsumerStatsLocked(new long[]{100_000_000},
                 new int[]{Display.STATE_OFF}, 120 * MINUTE_IN_MS);
 
         AmbientDisplayPowerCalculator calculator =
@@ -73,7 +74,7 @@ public class AmbientDisplayPowerCalculatorTest {
         assertThat(consumer.getConsumedPower(BatteryConsumer.POWER_COMPONENT_AMBIENT_DISPLAY))
                 .isWithin(PRECISION).of(27.777778);
         assertThat(consumer.getPowerModel(BatteryConsumer.POWER_COMPONENT_AMBIENT_DISPLAY))
-                .isEqualTo(BatteryConsumer.POWER_MODEL_MEASURED_ENERGY);
+                .isEqualTo(BatteryConsumer.POWER_MODEL_ENERGY_CONSUMPTION);
     }
 
     @Test
@@ -88,13 +89,13 @@ public class AmbientDisplayPowerCalculatorTest {
 
         stats.noteScreenStateLocked(0, screenStates[0], 0, 0, 0);
         stats.noteScreenStateLocked(1, screenStates[1], 0, 0, 0);
-        stats.updateDisplayMeasuredEnergyStatsLocked(new long[]{300, 400}, screenStates, 0);
+        stats.updateDisplayEnergyConsumerStatsLocked(new long[]{300, 400}, screenStates, 0);
 
         // Switch display0 to doze
         screenStates[0] = Display.STATE_DOZE;
         stats.noteScreenStateLocked(0, screenStates[0], 30 * MINUTE_IN_MS, 30 * MINUTE_IN_MS,
                 30 * MINUTE_IN_MS);
-        stats.updateDisplayMeasuredEnergyStatsLocked(new long[]{200, 300},
+        stats.updateDisplayEnergyConsumerStatsLocked(new long[]{200, 300},
                 screenStates, 30 * MINUTE_IN_MS);
 
         // Switch display1 to doze
@@ -102,7 +103,7 @@ public class AmbientDisplayPowerCalculatorTest {
         stats.noteScreenStateLocked(1, Display.STATE_DOZE, 90 * MINUTE_IN_MS, 90 * MINUTE_IN_MS,
                 90 * MINUTE_IN_MS);
         // 100,000,000 uC should be attributed to display 0 doze here.
-        stats.updateDisplayMeasuredEnergyStatsLocked(new long[]{100_000_000, 700_000_000},
+        stats.updateDisplayEnergyConsumerStatsLocked(new long[]{100_000_000, 700_000_000},
                 screenStates, 90 * MINUTE_IN_MS);
 
         // Switch display0 to off
@@ -110,14 +111,14 @@ public class AmbientDisplayPowerCalculatorTest {
         stats.noteScreenStateLocked(0, screenStates[0], 120 * MINUTE_IN_MS, 120 * MINUTE_IN_MS,
                 120 * MINUTE_IN_MS);
         // 40,000,000 and 70,000,000 uC should be attributed to display 0 and 1 doze here.
-        stats.updateDisplayMeasuredEnergyStatsLocked(new long[]{40_000_000, 70_000_000},
+        stats.updateDisplayEnergyConsumerStatsLocked(new long[]{40_000_000, 70_000_000},
                 screenStates, 120 * MINUTE_IN_MS);
 
         // Switch display1 to off
         screenStates[1] = Display.STATE_OFF;
         stats.noteScreenStateLocked(1, screenStates[1], 150 * MINUTE_IN_MS, 150 * MINUTE_IN_MS,
                 150 * MINUTE_IN_MS);
-        stats.updateDisplayMeasuredEnergyStatsLocked(new long[]{100, 90_000_000}, screenStates,
+        stats.updateDisplayEnergyConsumerStatsLocked(new long[]{100, 90_000_000}, screenStates,
                 150 * MINUTE_IN_MS);
         // 90,000,000 uC should be attributed to display 1 doze here.
 
@@ -134,7 +135,7 @@ public class AmbientDisplayPowerCalculatorTest {
         assertThat(consumer.getConsumedPower(BatteryConsumer.POWER_COMPONENT_AMBIENT_DISPLAY))
                 .isWithin(PRECISION).of(83.33333);
         assertThat(consumer.getPowerModel(BatteryConsumer.POWER_COMPONENT_AMBIENT_DISPLAY))
-                .isEqualTo(BatteryConsumer.POWER_MODEL_MEASURED_ENERGY);
+                .isEqualTo(BatteryConsumer.POWER_MODEL_ENERGY_CONSUMPTION);
     }
 
     @Test

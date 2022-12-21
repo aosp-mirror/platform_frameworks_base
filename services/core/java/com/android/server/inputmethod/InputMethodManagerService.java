@@ -183,6 +183,7 @@ import com.android.server.LocalServices;
 import com.android.server.ServiceThread;
 import com.android.server.SystemServerInitThreadPool;
 import com.android.server.SystemService;
+import com.android.server.companion.virtual.VirtualDeviceManagerInternal;
 import com.android.server.input.InputManagerInternal;
 import com.android.server.inputmethod.InputMethodManagerInternal.InputMethodListListener;
 import com.android.server.inputmethod.InputMethodSubtypeSwitchingController.ImeSubtypeListItem;
@@ -304,6 +305,8 @@ public final class InputMethodManagerService extends IInputMethodManager.Stub
      */
     @Nullable
     private AudioManagerInternal mAudioManagerInternal = null;
+    @Nullable
+    private VirtualDeviceManagerInternal mVdmInternal = null;
 
     // All known input methods.
     final ArrayList<InputMethodInfo> mMethodList = new ArrayList<>();
@@ -2533,6 +2536,16 @@ public final class InputMethodManagerService extends IInputMethodManager.Stub
         mCurVirtualDisplayToScreenMatrix =
                 getVirtualDisplayToScreenMatrixLocked(cs.mSelfReportedDisplayId,
                         mDisplayIdToShowIme);
+        // Override the locale hints if the app is running on a virtual device.
+        if (mVdmInternal == null) {
+            mVdmInternal = LocalServices.getService(VirtualDeviceManagerInternal.class);
+        }
+        if (mVdmInternal != null && editorInfo.hintLocales == null) {
+            LocaleList hintsFromVirtualDevice = mVdmInternal.getPreferredLocaleListForUid(cs.mUid);
+            if (hintsFromVirtualDevice != null) {
+                editorInfo.hintLocales = hintsFromVirtualDevice;
+            }
+        }
         mCurEditorInfo = editorInfo;
 
         // If configured, we want to avoid starting up the IME if it is not supposed to be showing

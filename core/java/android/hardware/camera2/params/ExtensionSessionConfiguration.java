@@ -16,6 +16,7 @@
 package android.hardware.camera2.params;
 
 import android.annotation.NonNull;
+import android.annotation.Nullable;
 
 import android.hardware.camera2.CameraExtensionCharacteristics.Extension;
 import android.hardware.camera2.CameraExtensionSession;
@@ -32,6 +33,7 @@ public final class ExtensionSessionConfiguration {
 
     private int mExtensionType;
     private List<OutputConfiguration> mOutputs;
+    private OutputConfiguration mPostviewOutput = null;
     private Executor mExecutor = null;
     private CameraExtensionSession.StateCallback mCallback = null;
 
@@ -61,6 +63,28 @@ public final class ExtensionSessionConfiguration {
     public @Extension
     int getExtension() {
         return mExtensionType;
+    }
+
+    /**
+     * Set the postview for still capture output configuration.
+     *
+     * @param postviewOutput output configuration for postview
+     * @see android.hardware.camera2.CameraExtensionCharacteristics#isPostviewAvailable
+     */
+    public
+    void setPostviewOutputConfiguration(@Nullable OutputConfiguration postviewOutput) {
+        mPostviewOutput = postviewOutput;
+    }
+
+    /**
+     * Get the postview for still capture output configuration.
+     *
+     * @return output configuration for postview
+     * @see android.hardware.camera2.CameraExtensionCharacteristics#isPostviewAvailable
+     */
+    public @Nullable // Postview output is optional
+    OutputConfiguration getPostviewOutputConfiguration() {
+        return mPostviewOutput;
     }
 
     /**

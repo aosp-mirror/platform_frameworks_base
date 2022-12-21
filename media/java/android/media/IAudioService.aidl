@@ -261,6 +261,8 @@ interface IAudioService {
 
     void disableSafeMediaVolume(String callingPackage);
 
+    void lowerVolumeToRs1(String callingPackage);
+
     int setHdmiSystemAudioSupported(boolean on);
 
     boolean isHdmiSystemAudioSupported();

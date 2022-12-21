@@ -19,6 +19,7 @@ package com.android.wm.shell.compatui;
 import static android.app.TaskInfo.CAMERA_COMPAT_CONTROL_HIDDEN;
 import static android.app.TaskInfo.CAMERA_COMPAT_CONTROL_TREATMENT_APPLIED;
 import static android.view.InsetsState.ITYPE_EXTRA_NAVIGATION_BAR;
+import static android.view.WindowInsets.Type.navigationBars;
 
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.spyOn;
 
@@ -291,7 +292,7 @@ public class CompatUIControllerTest extends ShellTestCase {
         mController.onCompatInfoChanged(createTaskInfo(DISPLAY_ID, TASK_ID,
                 /* hasSizeCompat= */ true, CAMERA_COMPAT_CONTROL_HIDDEN), mMockTaskListener);
         InsetsState insetsState = new InsetsState();
-        InsetsSource insetsSource = new InsetsSource(ITYPE_EXTRA_NAVIGATION_BAR);
+        InsetsSource insetsSource = new InsetsSource(ITYPE_EXTRA_NAVIGATION_BAR, navigationBars());
         insetsSource.setFrame(0, 0, 1000, 1000);
         insetsState.addSource(insetsSource);
 

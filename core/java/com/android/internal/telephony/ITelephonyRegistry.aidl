@@ -32,6 +32,8 @@ import android.telephony.PreciseDataConnectionState;
 import android.telephony.ServiceState;
 import android.telephony.SignalStrength;
 import android.telephony.emergency.EmergencyNumber;
+import android.telephony.ims.MediaQualityStatus;
+
 import com.android.internal.telephony.ICarrierConfigChangeListener;
 import com.android.internal.telephony.ICarrierPrivilegesCallback;
 import com.android.internal.telephony.IPhoneStateListener;
@@ -92,6 +94,7 @@ interface ITelephonyRegistry {
             in EmergencyNumber emergencyNumber);
     void notifyCallQualityChanged(in CallQuality callQuality, int phoneId, int subId,
             int callNetworkType);
+    void notifyMediaQualityStatusChanged(int phoneId, int subId, in MediaQualityStatus status);
     void notifyImsDisconnectCause(int subId, in ImsReasonInfo imsReasonInfo);
     void notifyRegistrationFailed(int slotIndex, int subId, in CellIdentity cellIdentity,
             String chosenPlmn, int domain, int causeCode, int additionalCauseCode);

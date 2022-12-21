@@ -574,6 +574,147 @@ public final class CameraExtensionCharacteristics {
     }
 
     /**
+     * Checks for postview support of still capture.
+     *
+     * <p>A postview is a preview version of the still capture that is available before the final
+     * image. For example, it can be used as a temporary placeholder for the requested capture
+     * while the final image is being processed. The supported sizes for a still capture's postview
+     * can be retrieved using
+     * {@link CameraExtensionCharacteristics#getPostviewSupportedSizes(int, Size, int)}.
+     * The formats of the still capture and postview should be equivalent upon capture request.</p>
+     *
+     * @param extension the extension type
+     * @return {@code true} in case postview is supported, {@code false} otherwise
+     *
+     * @throws IllegalArgumentException in case the extension type is not a
+     * supported device-specific extension
+     */
+    public boolean isPostviewAvailable(@Extension int extension) {
+        long clientId = registerClient(mContext);
+        if (clientId < 0) {
+            throw new IllegalArgumentException("Unsupported extensions");
+        }
+
+        try {
+            if (!isExtensionSupported(mCameraId, extension, mChars)) {
+                throw new IllegalArgumentException("Unsupported extension");
+            }
+
+            if (areAdvancedExtensionsSupported()) {
+                IAdvancedExtenderImpl extender = initializeAdvancedExtension(extension);
+                extender.init(mCameraId);
+                return extender.isPostviewAvailable();
+            } else {
+                Pair<IPreviewExtenderImpl, IImageCaptureExtenderImpl> extenders =
+                        initializeExtension(extension);
+                extenders.second.init(mCameraId, mChars.getNativeMetadata());
+                return extenders.second.isPostviewAvailable();
+            }
+        } catch (RemoteException e) {
+            Log.e(TAG, "Failed to query the extension for postview availability! Extension "
+                    + "service does not respond!");
+        } finally {
+            unregisterClient(clientId);
+        }
+
+        return false;
+    }
+
+    /**
+     * Get a list of the postview sizes supported for a still capture, using its
+     * capture size {@code captureSize}, to use as an output for the postview request.
+     *
+     * <p>Available postview sizes will always be either equal to or less than the still
+     * capture size. When choosing the most applicable postview size for a usecase, it should
+     * be noted that lower resolution postviews will generally be available more quickly
+     * than larger resolution postviews. For example, when choosing a size for an optimized
+     * postview that will be displayed as a placeholder while the final image is processed,
+     * the resolution closest to the preview size may be most suitable.</p>
+     *
+     * <p>Note that device-specific extensions are allowed to support only a subset
+     * of the camera resolutions advertised by
+     * {@link StreamConfigurationMap#getOutputSizes}.</p>
+     *
+     * @param extension the extension type
+     * @param captureSize size of the still capture for which the postview is requested
+     * @param format device-specific extension output format of the still capture and
+     * postview
+     * @return non-modifiable list of available sizes or an empty list if the format and
+     * size is not supported.
+     * @throws IllegalArgumentException in case of unsupported extension or if postview
+     * feature is not supported by extension.
+     */
+    @NonNull
+    public List<Size> getPostviewSupportedSizes(@Extension int extension,
+            @NonNull Size captureSize, int format) {
+
+        long clientId = registerClient(mContext);
+        if (clientId < 0) {
+            throw new IllegalArgumentException("Unsupported extensions");
+        }
+
+        try {
+            if (!isExtensionSupported(mCameraId, extension, mChars)) {
+                throw new IllegalArgumentException("Unsupported extension");
+            }
+
+            android.hardware.camera2.extension.Size sz =
+                    new android.hardware.camera2.extension.Size();
+            sz.width = captureSize.getWidth();
+            sz.height = captureSize.getHeight();
+
+            StreamConfigurationMap streamMap = mChars.get(
+                    CameraCharacteristics.SCALER_STREAM_CONFIGURATION_MAP);
+
+            if (areAdvancedExtensionsSupported()) {
+                switch(format) {
+                    case ImageFormat.YUV_420_888:
+                    case ImageFormat.JPEG:
+                        break;
+                    default:
+                        throw new IllegalArgumentException("Unsupported format: " + format);
+                }
+                IAdvancedExtenderImpl extender = initializeAdvancedExtension(extension);
+                extender.init(mCameraId);
+                return generateSupportedSizes(extender.getSupportedPostviewResolutions(
+                    sz), format, streamMap);
+            } else {
+                Pair<IPreviewExtenderImpl, IImageCaptureExtenderImpl> extenders =
+                        initializeExtension(extension);
+                extenders.second.init(mCameraId, mChars.getNativeMetadata());
+                if ((extenders.second.getCaptureProcessor() == null) ||
+                        !isPostviewAvailable(extension)) {
+                    // Extensions that don't implement any capture processor
+                    // and have processing occur in the HAL don't currently support the
+                    // postview feature
+                    throw new IllegalArgumentException("Extension does not support "
+                            + "postview feature");
+                }
+
+                if (format == ImageFormat.YUV_420_888) {
+                    return generateSupportedSizes(
+                            extenders.second.getSupportedPostviewResolutions(sz),
+                            format, streamMap);
+                } else if (format == ImageFormat.JPEG) {
+                    // The framework will perform the additional encoding pass on the
+                    // processed YUV_420 buffers.
+                    return generateJpegSupportedSizes(
+                            extenders.second.getSupportedPostviewResolutions(sz),
+                                    streamMap);
+                } else {
+                    throw new IllegalArgumentException("Unsupported format: " + format);
+                }
+            }
+        } catch (RemoteException e) {
+            Log.e(TAG, "Failed to query the extension postview supported sizes! Extension "
+                    + "service does not respond!");
+            return Collections.emptyList();
+        } finally {
+            unregisterClient(clientId);
+        }
+    }
+
+    /**
      * Get a list of sizes compatible with {@code klass} to use as an output for the
      * repeating request
      * {@link CameraExtensionSession#setRepeatingRequest}.

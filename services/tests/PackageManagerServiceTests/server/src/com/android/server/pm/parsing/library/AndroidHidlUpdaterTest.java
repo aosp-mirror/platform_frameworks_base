@@ -54,7 +54,7 @@ public class AndroidHidlUpdaterTest extends PackageSharedLibraryUpdaterTest {
                 .hideAsFinal();
 
         // no change, not system
-        checkBackwardsCompatibility(before, after);
+        checkBackwardsCompatibility(before, after, false);
     }
 
     @Test
@@ -73,7 +73,7 @@ public class AndroidHidlUpdaterTest extends PackageSharedLibraryUpdaterTest {
                 .setSystem(true)
                 .hideAsFinal();
 
-        checkBackwardsCompatibility(before, after);
+        checkBackwardsCompatibility(before, after, true);
     }
 
     @Test
@@ -90,7 +90,7 @@ public class AndroidHidlUpdaterTest extends PackageSharedLibraryUpdaterTest {
                 .hideAsFinal();
 
         // no change, not system
-        checkBackwardsCompatibility(before, after);
+        checkBackwardsCompatibility(before, after, false);
     }
 
     @Test
@@ -112,7 +112,7 @@ public class AndroidHidlUpdaterTest extends PackageSharedLibraryUpdaterTest {
                 .setSystem(true)
                 .hideAsFinal();
 
-        checkBackwardsCompatibility(before, after);
+        checkBackwardsCompatibility(before, after, true);
     }
 
     @Test
@@ -129,7 +129,7 @@ public class AndroidHidlUpdaterTest extends PackageSharedLibraryUpdaterTest {
                 .hideAsFinal();
 
         // Libraries are removed because they are not available for non-system apps
-        checkBackwardsCompatibility(before, after);
+        checkBackwardsCompatibility(before, after, false);
     }
 
     @Test
@@ -151,7 +151,7 @@ public class AndroidHidlUpdaterTest extends PackageSharedLibraryUpdaterTest {
 
         // No change is required because the package explicitly requests the HIDL libraries
         // and is targeted at the current version so does not need backwards compatibility.
-        checkBackwardsCompatibility(before, after);
+        checkBackwardsCompatibility(before, after, true);
     }
 
     @Test
@@ -168,7 +168,7 @@ public class AndroidHidlUpdaterTest extends PackageSharedLibraryUpdaterTest {
                 .hideAsFinal();
 
         // Libraries are removed because they are not available for apps targeting Q+
-        checkBackwardsCompatibility(before, after);
+        checkBackwardsCompatibility(before, after, false);
     }
 
     @Test
@@ -185,10 +185,11 @@ public class AndroidHidlUpdaterTest extends PackageSharedLibraryUpdaterTest {
                 .hideAsFinal();
 
         // Libraries are removed because they are not available for apps targeting Q+
-        checkBackwardsCompatibility(before, after);
+        checkBackwardsCompatibility(before, after, false);
     }
 
-    private void checkBackwardsCompatibility(ParsedPackage before, AndroidPackage after) {
-        checkBackwardsCompatibility(before, after, AndroidHidlUpdater::new);
+    private void checkBackwardsCompatibility(ParsedPackage before, AndroidPackage after,
+            boolean isSystemApp) {
+        checkBackwardsCompatibility(before, after, isSystemApp, AndroidHidlUpdater::new);
     }
 }

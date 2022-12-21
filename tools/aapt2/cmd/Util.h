@@ -81,7 +81,8 @@ std::regex GetRegularExpression(const std::string &input);
 
 bool ParseResourceConfig(const std::string& content, IAaptContext* context,
                          std::unordered_set<ResourceName>& out_resource_exclude_list,
-                         std::set<ResourceName>& out_name_collapse_exemptions);
+                         std::set<ResourceName>& out_name_collapse_exemptions,
+                         std::set<ResourceName>& out_path_shorten_exemptions);
 
 }  // namespace aapt
 

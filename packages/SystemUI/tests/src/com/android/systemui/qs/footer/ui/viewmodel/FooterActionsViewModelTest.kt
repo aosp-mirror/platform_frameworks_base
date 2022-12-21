@@ -84,7 +84,7 @@ class FooterActionsViewModelTest : SysuiTestCase() {
                     ContentDescription.Resource(R.string.accessibility_quick_settings_settings)
                 )
             )
-        assertThat(settings.background).isEqualTo(R.drawable.qs_footer_action_circle)
+        assertThat(settings.backgroundColor).isEqualTo(R.attr.offStateColor)
         assertThat(settings.iconTint).isNull()
     }
 
@@ -105,7 +105,7 @@ class FooterActionsViewModelTest : SysuiTestCase() {
                     ContentDescription.Resource(R.string.accessibility_quick_settings_power_menu)
                 )
             )
-        assertThat(power.background).isEqualTo(R.drawable.qs_footer_action_circle_color)
+        assertThat(power.backgroundColor).isEqualTo(com.android.internal.R.attr.colorAccent)
         assertThat(power.iconTint)
             .isEqualTo(
                 Utils.getColorAttrDefaultColor(
@@ -170,7 +170,7 @@ class FooterActionsViewModelTest : SysuiTestCase() {
         assertThat(userSwitcher).isNotNull()
         assertThat(userSwitcher!!.icon)
             .isEqualTo(Icon.Loaded(picture, ContentDescription.Loaded("Signed in as foo")))
-        assertThat(userSwitcher.background).isEqualTo(R.drawable.qs_footer_action_circle)
+        assertThat(userSwitcher.backgroundColor).isEqualTo(R.attr.offStateColor)
 
         // Change the current user name.
         userSwitcherControllerWrapper.currentUserName = "bar"

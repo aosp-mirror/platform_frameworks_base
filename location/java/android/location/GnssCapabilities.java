@@ -39,33 +39,35 @@ public final class GnssCapabilities implements Parcelable {
     /** @hide */
     public static final int TOP_HAL_CAPABILITY_SCHEDULING = 1;
     /** @hide */
-    public static final int TOP_HAL_CAPABILITY_MSB = 2;
+    public static final int TOP_HAL_CAPABILITY_MSB = 1 << 1;
     /** @hide */
-    public static final int TOP_HAL_CAPABILITY_MSA = 4;
+    public static final int TOP_HAL_CAPABILITY_MSA = 1 << 2;
     /** @hide */
-    public static final int TOP_HAL_CAPABILITY_SINGLE_SHOT = 8;
+    public static final int TOP_HAL_CAPABILITY_SINGLE_SHOT = 1 << 3;
     /** @hide */
-    public static final int TOP_HAL_CAPABILITY_ON_DEMAND_TIME = 16;
+    public static final int TOP_HAL_CAPABILITY_ON_DEMAND_TIME = 1 << 4;
     /** @hide */
-    public static final int TOP_HAL_CAPABILITY_GEOFENCING = 32;
+    public static final int TOP_HAL_CAPABILITY_GEOFENCING = 1 << 5;
     /** @hide */
-    public static final int TOP_HAL_CAPABILITY_MEASUREMENTS = 64;
+    public static final int TOP_HAL_CAPABILITY_MEASUREMENTS = 1 << 6;
     /** @hide */
-    public static final int TOP_HAL_CAPABILITY_NAV_MESSAGES = 128;
+    public static final int TOP_HAL_CAPABILITY_NAV_MESSAGES = 1 << 7;
     /** @hide */
-    public static final int TOP_HAL_CAPABILITY_LOW_POWER_MODE = 256;
+    public static final int TOP_HAL_CAPABILITY_LOW_POWER_MODE = 1 << 8;
     /** @hide */
-    public static final int TOP_HAL_CAPABILITY_SATELLITE_BLOCKLIST = 512;
+    public static final int TOP_HAL_CAPABILITY_SATELLITE_BLOCKLIST = 1 << 9;
     /** @hide */
-    public static final int TOP_HAL_CAPABILITY_MEASUREMENT_CORRECTIONS = 1024;
+    public static final int TOP_HAL_CAPABILITY_MEASUREMENT_CORRECTIONS = 1 << 10;
     /** @hide */
-    public static final int TOP_HAL_CAPABILITY_ANTENNA_INFO = 2048;
+    public static final int TOP_HAL_CAPABILITY_ANTENNA_INFO = 1 << 11;
     /** @hide */
-    public static final int TOP_HAL_CAPABILITY_CORRELATION_VECTOR = 4096;
+    public static final int TOP_HAL_CAPABILITY_CORRELATION_VECTOR = 1 << 12;
     /** @hide */
-    public static final int TOP_HAL_CAPABILITY_SATELLITE_PVT = 8192;
+    public static final int TOP_HAL_CAPABILITY_SATELLITE_PVT = 1 << 13;
     /** @hide */
-    public static final int TOP_HAL_CAPABILITY_MEASUREMENT_CORRECTIONS_FOR_DRIVING = 16384;
+    public static final int TOP_HAL_CAPABILITY_MEASUREMENT_CORRECTIONS_FOR_DRIVING = 1 << 14;
+    /** @hide */
+    public static final int TOP_HAL_CAPABILITY_ACCUMULATED_DELTA_RANGE = 1 << 15;
 
     /** @hide */
     @IntDef(flag = true, prefix = {"TOP_HAL_CAPABILITY_"}, value = {TOP_HAL_CAPABILITY_SCHEDULING,
@@ -75,7 +77,8 @@ public final class GnssCapabilities implements Parcelable {
             TOP_HAL_CAPABILITY_LOW_POWER_MODE, TOP_HAL_CAPABILITY_SATELLITE_BLOCKLIST,
             TOP_HAL_CAPABILITY_MEASUREMENT_CORRECTIONS, TOP_HAL_CAPABILITY_ANTENNA_INFO,
             TOP_HAL_CAPABILITY_CORRELATION_VECTOR, TOP_HAL_CAPABILITY_SATELLITE_PVT,
-            TOP_HAL_CAPABILITY_MEASUREMENT_CORRECTIONS_FOR_DRIVING})
+            TOP_HAL_CAPABILITY_MEASUREMENT_CORRECTIONS_FOR_DRIVING,
+            TOP_HAL_CAPABILITY_ACCUMULATED_DELTA_RANGE})
 
     @Retention(RetentionPolicy.SOURCE)
     public @interface TopHalCapabilityFlags {}
@@ -362,6 +365,19 @@ public final class GnssCapabilities implements Parcelable {
     }
 
     /**
+     * Returns {@code true} if GNSS chipset supports accumulated delta range, {@code false}
+     * otherwise.
+     *
+     * <p>The accumulated delta range information can be queried in
+     * {@link android.location.GnssMeasurement#getAccumulatedDeltaRangeState()},
+     * {@link android.location.GnssMeasurement#getAccumulatedDeltaRangeMeters()}, and
+     * {@link android.location.GnssMeasurement#getAccumulatedDeltaRangeUncertaintyMeters()}.
+     */
+    public boolean hasAccumulatedDeltaRange() {
+        return (mTopFlags & TOP_HAL_CAPABILITY_ACCUMULATED_DELTA_RANGE) != 0;
+    }
+
+    /**
      * Returns {@code true} if GNSS chipset supports line-of-sight satellite identification
      * measurement corrections, {@code false} otherwise.
      */
@@ -554,6 +570,9 @@ public final class GnssCapabilities implements Parcelable {
         if (hasMeasurementCorrectionsForDriving()) {
             builder.append("MEASUREMENT_CORRECTIONS_FOR_DRIVING ");
         }
+        if (hasAccumulatedDeltaRange()) {
+            builder.append("ACCUMULATED_DELTA_RANGE ");
+        }
         if (hasMeasurementCorrectionsLosSats()) {
             builder.append("LOS_SATS ");
         }
@@ -737,6 +756,15 @@ public final class GnssCapabilities implements Parcelable {
          */
         public @NonNull Builder setHasMeasurementCorrectionsForDriving(boolean capable) {
             mTopFlags = setFlag(mTopFlags, TOP_HAL_CAPABILITY_MEASUREMENT_CORRECTIONS_FOR_DRIVING,
+                    capable);
+            return this;
+        }
+
+        /**
+         * Sets accumulated delta range capability.
+         */
+        public @NonNull Builder setHasAccumulatedDeltaRange(boolean capable) {
+            mTopFlags = setFlag(mTopFlags, TOP_HAL_CAPABILITY_ACCUMULATED_DELTA_RANGE,
                     capable);
             return this;
         }

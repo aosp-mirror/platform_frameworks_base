@@ -207,7 +207,7 @@ public class AbstractAccessibilityServiceConnectionTest {
         addA11yWindowInfo(mA11yWindowInfos, PIP_WINDOWID, true, Display.DEFAULT_DISPLAY);
         addA11yWindowInfo(mA11yWindowInfosOnSecondDisplay, WINDOWID_ONSECONDDISPLAY, false,
                 SECONDARY_DISPLAY_ID);
-        when(mMockA11yWindowManager.getDisplayListLocked()).thenReturn(mDisplayList);
+        when(mMockA11yWindowManager.getDisplayListLocked(anyInt())).thenReturn(mDisplayList);
         when(mMockA11yWindowManager.getWindowListLocked(Display.DEFAULT_DISPLAY))
                 .thenReturn(mA11yWindowInfos);
         when(mMockA11yWindowManager.findA11yWindowInfoByIdLocked(WINDOWID))

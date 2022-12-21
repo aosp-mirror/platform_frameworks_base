@@ -127,13 +127,14 @@ public class DisplayImeControllerTest extends ShellTestCase {
     private InsetsSourceControl[] insetsSourceControl() {
         return new InsetsSourceControl[]{
                 new InsetsSourceControl(
-                        ITYPE_IME, mock(SurfaceControl.class), false, new Point(0, 0), Insets.NONE)
+                        ITYPE_IME, ime(), mock(SurfaceControl.class), false, new Point(0, 0),
+                        Insets.NONE)
         };
     }
 
     private InsetsState insetsStateWithIme(boolean visible) {
         InsetsState state = new InsetsState();
-        state.addSource(new InsetsSource(ITYPE_IME));
+        state.addSource(new InsetsSource(ITYPE_IME, ime()));
         state.setSourceVisible(ITYPE_IME, visible);
         return state;
     }

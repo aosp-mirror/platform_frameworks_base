@@ -564,6 +564,11 @@ public class SettingsProvider extends ContentProvider {
                 break;
             }
 
+            case Settings.CALL_METHOD_UNREGISTER_MONITOR_CALLBACK_CONFIG: {
+                clearMonitorCallback();
+                break;
+            }
+
             case Settings.CALL_METHOD_LIST_GLOBAL: {
                 Bundle result = new Bundle();
                 result.putStringArrayList(RESULT_SETTINGS_LIST,
@@ -2349,6 +2354,16 @@ public class SettingsProvider extends ContentProvider {
                         + Manifest.permission.MONITOR_DEVICE_CONFIG_ACCESS);
         synchronized (mLock) {
             mConfigMonitorCallback = callback;
+        }
+    }
+
+    private void clearMonitorCallback() {
+        getContext().enforceCallingOrSelfPermission(
+                Manifest.permission.MONITOR_DEVICE_CONFIG_ACCESS,
+                "Permission denial: registering for config access requires: "
+                        + Manifest.permission.MONITOR_DEVICE_CONFIG_ACCESS);
+        synchronized (mLock) {
+            mConfigMonitorCallback = null;
         }
     }
 

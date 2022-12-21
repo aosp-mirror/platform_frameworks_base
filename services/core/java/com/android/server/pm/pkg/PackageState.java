@@ -164,12 +164,12 @@ public interface PackageState {
     List<SharedLibrary> getUsesLibraries();
 
     /**
-     * @see AndroidPackage#isPrivileged()
+     * @see ApplicationInfo#PRIVATE_FLAG_PRIVILEGED
      */
     boolean isPrivileged();
 
     /**
-     * @see AndroidPackage#isSystem()
+     * @see ApplicationInfo#FLAG_SYSTEM
      */
     boolean isSystem();
 
@@ -367,19 +367,19 @@ public interface PackageState {
     boolean isInstallPermissionsFixed();
 
     /**
-     * @see AndroidPackage#isOdm()
+     * @see ApplicationInfo#PRIVATE_FLAG_ODM
      * @hide
      */
     boolean isOdm();
 
     /**
-     * @see AndroidPackage#isOem()
+     * @see ApplicationInfo#PRIVATE_FLAG_OEM
      * @hide
      */
     boolean isOem();
 
     /**
-     * @see AndroidPackage#isProduct()
+     * @see ApplicationInfo#PRIVATE_FLAG_PRODUCT
      * @hide
      */
     boolean isProduct();
@@ -391,7 +391,7 @@ public interface PackageState {
     boolean isRequiredForSystemUser();
 
     /**
-     * @see AndroidPackage#isSystemExt()
+     * @see ApplicationInfo#PRIVATE_FLAG_SYSTEM_EXT
      * @hide
      */
     boolean isSystemExt();
@@ -410,7 +410,7 @@ public interface PackageState {
     boolean isApkInUpdatedApex();
 
     /**
-     * @see AndroidPackage#isVendor()
+     * @see ApplicationInfo#PRIVATE_FLAG_VENDOR
      * @hide
      */
     boolean isVendor();

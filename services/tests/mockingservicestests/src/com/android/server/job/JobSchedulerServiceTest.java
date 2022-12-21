@@ -254,11 +254,6 @@ public class JobSchedulerServiceTest {
 
         ConnectivityController connectivityController = mService.getConnectivityController();
         spyOn(connectivityController);
-        mService.mConstants.RUNTIME_MIN_DATA_TRANSFER_GUARANTEE_MS = 10 * MINUTE_IN_MILLIS;
-        mService.mConstants.RUNTIME_DATA_TRANSFER_LIMIT_MS = 60 * MINUTE_IN_MILLIS;
-        mService.mConstants.RUNTIME_MIN_USER_INITIATED_DATA_TRANSFER_GUARANTEE_BUFFER_FACTOR = 1.5f;
-        mService.mConstants.RUNTIME_MIN_USER_INITIATED_DATA_TRANSFER_GUARANTEE_MS = HOUR_IN_MILLIS;
-        mService.mConstants.RUNTIME_USER_INITIATED_DATA_TRANSFER_LIMIT_MS = 6 * HOUR_IN_MILLIS;
 
         assertEquals(mService.mConstants.RUNTIME_MIN_EJ_GUARANTEE_MS,
                 mService.getMinJobExecutionGuaranteeMs(ejMax));
@@ -311,7 +306,8 @@ public class JobSchedulerServiceTest {
                 .when(connectivityController).getEstimatedTransferTimeMs(any());
         assertEquals(
                 (long) (mService.mConstants.RUNTIME_MIN_USER_INITIATED_DATA_TRANSFER_GUARANTEE_MS
-                        * 2 * 1.5),
+                        * 2 * mService.mConstants
+                                .RUNTIME_MIN_USER_INITIATED_DATA_TRANSFER_GUARANTEE_BUFFER_FACTOR),
                 mService.getMinJobExecutionGuaranteeMs(jobUIDT));
         doReturn(mService.mConstants.RUNTIME_USER_INITIATED_DATA_TRANSFER_LIMIT_MS * 2)
                 .when(connectivityController).getEstimatedTransferTimeMs(any());

@@ -107,7 +107,7 @@ public class WifiPowerCalculator extends PowerCalculator {
             }
 
             final long consumptionUC =
-                    app.getBatteryStatsUid().getWifiMeasuredBatteryConsumptionUC();
+                    app.getBatteryStatsUid().getWifiEnergyConsumptionUC();
             final int powerModel = getPowerModel(consumptionUC, query);
 
             calculateApp(powerDurationAndTraffic, app.getBatteryStatsUid(), powerModel,
@@ -138,7 +138,7 @@ public class WifiPowerCalculator extends PowerCalculator {
             }
         }
 
-        final long consumptionUC = batteryStats.getWifiMeasuredBatteryConsumptionUC();
+        final long consumptionUC = batteryStats.getWifiEnergyConsumptionUC();
         final int powerModel = getPowerModel(consumptionUC, query);
         calculateRemaining(powerDurationAndTraffic, powerModel, batteryStats, rawRealtimeUs,
                 BatteryStats.STATS_SINCE_CHARGED, batteryStats.hasWifiActivityReporting(),
@@ -214,7 +214,7 @@ public class WifiPowerCalculator extends PowerCalculator {
                                             idleTimeCounter.getCountForProcessState(processState));
                         } else {
                             powerDurationAndTraffic.powerPerKeyMah[i] =
-                                    uCtoMah(u.getWifiMeasuredBatteryConsumptionUC(processState));
+                                    uCtoMah(u.getWifiEnergyConsumptionUC(processState));
                         }
                     }
                 }
@@ -264,7 +264,7 @@ public class WifiPowerCalculator extends PowerCalculator {
         long totalDurationMs;
         double totalPowerMah = 0;
 
-        if (powerModel == BatteryConsumer.POWER_MODEL_MEASURED_ENERGY) {
+        if (powerModel == BatteryConsumer.POWER_MODEL_ENERGY_CONSUMPTION) {
             totalPowerMah = uCtoMah(consumptionUC);
         }
 

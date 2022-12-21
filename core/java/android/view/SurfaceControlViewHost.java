@@ -376,6 +376,7 @@ public class SurfaceControlViewHost {
     public void setView(@NonNull View view, @NonNull WindowManager.LayoutParams attrs) {
         Objects.requireNonNull(view);
         attrs.flags |= WindowManager.LayoutParams.FLAG_HARDWARE_ACCELERATED;
+        addWindowToken(attrs);
         view.setLayoutParams(attrs);
         mViewRoot.setView(view, attrs, null);
     }
@@ -453,4 +454,11 @@ public class SurfaceControlViewHost {
     public IBinder getFocusGrantToken() {
         return mWm.getFocusGrantToken();
     }
+
+    private void addWindowToken(WindowManager.LayoutParams attrs) {
+        final WindowManagerImpl wm =
+                (WindowManagerImpl) mViewRoot.mContext.getSystemService(Context.WINDOW_SERVICE);
+        attrs.token = wm.getDefaultToken();
+    }
 }
+

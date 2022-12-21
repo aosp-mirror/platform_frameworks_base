@@ -54,6 +54,13 @@ interface MobileIconInteractor {
     /** True if this line of service is emergency-only */
     val isEmergencyOnly: StateFlow<Boolean>
 
+    /**
+     * True if this connection is considered roaming. The roaming bit can come from [ServiceState],
+     * or directly from the telephony manager's CDMA ERI number value. Note that we don't consider a
+     * connection to be roaming while carrier network change is active
+     */
+    val isRoaming: StateFlow<Boolean>
+
     /** Int describing the connection strength. 0-4 OR 1-5. See [numberOfLevels] */
     val level: StateFlow<Int>
 
@@ -93,6 +100,18 @@ class MobileIconInteractorImpl(
     override val isEmergencyOnly: StateFlow<Boolean> =
         connectionInfo
             .mapLatest { it.isEmergencyOnly }
+            .stateIn(scope, SharingStarted.WhileSubscribed(), false)
+
+    override val isRoaming: StateFlow<Boolean> =
+        combine(connectionInfo, connectionRepository.cdmaRoaming) { connection, cdmaRoaming ->
+                if (connection.carrierNetworkChangeActive) {
+                    false
+                } else if (connection.isGsm) {
+                    connection.isRoaming
+                } else {
+                    cdmaRoaming
+                }
+            }
             .stateIn(scope, SharingStarted.WhileSubscribed(), false)
 
     override val level: StateFlow<Int> =

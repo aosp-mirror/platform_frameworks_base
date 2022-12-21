@@ -25,8 +25,9 @@ import static com.android.dx.mockito.inline.extended.ExtendedMockito.doReturn;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.mock;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.mockitoSession;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.verify;
-import static com.android.server.wm.ActivityInterceptorCallback.FIRST_ORDERED_ID;
-import static com.android.server.wm.ActivityInterceptorCallback.LAST_ORDERED_ID;
+import static com.android.server.wm.ActivityInterceptorCallback.MAINLINE_FIRST_ORDERED_ID;
+import static com.android.server.wm.ActivityInterceptorCallback.SYSTEM_FIRST_ORDERED_ID;
+import static com.android.server.wm.ActivityInterceptorCallback.SYSTEM_LAST_ORDERED_ID;
 import static com.android.server.wm.ActivityRecord.State.PAUSED;
 import static com.android.server.wm.ActivityRecord.State.PAUSING;
 import static com.android.server.wm.ActivityRecord.State.RESUMED;
@@ -45,6 +46,7 @@ import static org.mockito.Mockito.atLeast;
 import static org.mockito.Mockito.doCallRealMethod;
 import static org.mockito.Mockito.when;
 
+import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.app.Activity;
 import android.app.ActivityManager;
@@ -957,11 +959,12 @@ public class ActivityTaskManagerServiceTests extends WindowTestsBase {
 
     @Test(expected = IllegalArgumentException.class)
     public void testRegisterActivityStartInterceptor_IndexTooSmall() {
-        mAtm.mInternal.registerActivityStartInterceptor(FIRST_ORDERED_ID - 1,
+        mAtm.mInternal.registerActivityStartInterceptor(SYSTEM_FIRST_ORDERED_ID - 1,
                 new ActivityInterceptorCallback() {
                     @Nullable
                     @Override
-                    public ActivityInterceptResult intercept(ActivityInterceptorInfo info) {
+                    public ActivityInterceptResult onInterceptActivityLaunch(
+                            @NonNull ActivityInterceptorInfo info) {
                         return null;
                     }
                 });
@@ -969,11 +972,12 @@ public class ActivityTaskManagerServiceTests extends WindowTestsBase {
 
     @Test(expected = IllegalArgumentException.class)
     public void testRegisterActivityStartInterceptor_IndexTooLarge() {
-        mAtm.mInternal.registerActivityStartInterceptor(LAST_ORDERED_ID + 1,
+        mAtm.mInternal.registerActivityStartInterceptor(SYSTEM_LAST_ORDERED_ID + 1,
                 new ActivityInterceptorCallback() {
                     @Nullable
                     @Override
-                    public ActivityInterceptResult intercept(ActivityInterceptorInfo info) {
+                    public ActivityInterceptResult onInterceptActivityLaunch(
+                            @NonNull ActivityInterceptorInfo info) {
                         return null;
                     }
                 });
@@ -981,19 +985,21 @@ public class ActivityTaskManagerServiceTests extends WindowTestsBase {
 
     @Test(expected = IllegalArgumentException.class)
     public void testRegisterActivityStartInterceptor_DuplicateId() {
-        mAtm.mInternal.registerActivityStartInterceptor(FIRST_ORDERED_ID,
+        mAtm.mInternal.registerActivityStartInterceptor(SYSTEM_FIRST_ORDERED_ID,
                 new ActivityInterceptorCallback() {
                     @Nullable
                     @Override
-                    public ActivityInterceptResult intercept(ActivityInterceptorInfo info) {
+                    public ActivityInterceptResult onInterceptActivityLaunch(
+                            @NonNull ActivityInterceptorInfo info) {
                         return null;
                     }
                 });
-        mAtm.mInternal.registerActivityStartInterceptor(FIRST_ORDERED_ID,
+        mAtm.mInternal.registerActivityStartInterceptor(SYSTEM_FIRST_ORDERED_ID,
                 new ActivityInterceptorCallback() {
                     @Nullable
                     @Override
-                    public ActivityInterceptResult intercept(ActivityInterceptorInfo info) {
+                    public ActivityInterceptResult onInterceptActivityLaunch(
+                            @NonNull ActivityInterceptorInfo info) {
                         return null;
                     }
                 });
@@ -1003,16 +1009,43 @@ public class ActivityTaskManagerServiceTests extends WindowTestsBase {
     public void testRegisterActivityStartInterceptor() {
         assertEquals(0, mAtm.getActivityInterceptorCallbacks().size());
 
-        mAtm.mInternal.registerActivityStartInterceptor(FIRST_ORDERED_ID,
+        mAtm.mInternal.registerActivityStartInterceptor(SYSTEM_FIRST_ORDERED_ID,
                 new ActivityInterceptorCallback() {
                     @Nullable
                     @Override
-                    public ActivityInterceptResult intercept(ActivityInterceptorInfo info) {
+                    public ActivityInterceptResult onInterceptActivityLaunch(
+                            @NonNull ActivityInterceptorInfo info) {
                         return null;
                     }
                 });
 
         assertEquals(1, mAtm.getActivityInterceptorCallbacks().size());
-        assertTrue(mAtm.getActivityInterceptorCallbacks().contains(FIRST_ORDERED_ID));
+        assertTrue(mAtm.getActivityInterceptorCallbacks().contains(SYSTEM_FIRST_ORDERED_ID));
+    }
+
+    @Test
+    public void testSystemAndMainlineOrderIdsNotOverlapping() {
+        assertTrue(MAINLINE_FIRST_ORDERED_ID - SYSTEM_LAST_ORDERED_ID > 1);
+    }
+
+    @Test
+    public void testUnregisterActivityStartInterceptor() {
+        int size = mAtm.getActivityInterceptorCallbacks().size();
+        int orderId = SYSTEM_FIRST_ORDERED_ID;
+
+        mAtm.mInternal.registerActivityStartInterceptor(orderId,
+                (ActivityInterceptorCallback) info -> null);
+        assertEquals(size + 1, mAtm.getActivityInterceptorCallbacks().size());
+        assertTrue(mAtm.getActivityInterceptorCallbacks().contains(orderId));
+
+        mAtm.mInternal.unregisterActivityStartInterceptor(orderId);
+        assertEquals(size, mAtm.getActivityInterceptorCallbacks().size());
+        assertFalse(mAtm.getActivityInterceptorCallbacks().contains(orderId));
+    }
+
+    @Test(expected = IllegalArgumentException.class)
+    public void testUnregisterActivityStartInterceptor_IdNotExist() {
+        assertEquals(0, mAtm.getActivityInterceptorCallbacks().size());
+        mAtm.mInternal.unregisterActivityStartInterceptor(SYSTEM_FIRST_ORDERED_ID);
     }
 }

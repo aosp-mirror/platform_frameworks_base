@@ -2011,6 +2011,9 @@
     <!-- The default volume for the ring stream -->
     <integer name="config_audio_ring_vol_default">5</integer>
 
+    <!-- Enable sound dose computation and warnings -->
+    <bool name="config_audio_csd_enabled_default">false</bool>
+
     <!-- The default value for whether head tracking for
          spatial audio is enabled for a newly connected audio device -->
     <bool name="config_spatial_audio_head_tracking_enabled_default">false</bool>
@@ -2130,6 +2133,8 @@
     <string name="config_systemAutomotiveCalendarSyncManager" translatable="false"></string>
     <!-- The name of the package that will hold the default automotive navigation role. -->
     <string name="config_defaultAutomotiveNavigation" translatable="false"></string>
+    <!-- The name of the package that will hold the system wear health service role. -->
+    <string name="config_systemWearHealthService" translatable="false"></string>
 
     <!-- The name of the package that will handle updating the device management role. -->
     <string name="config_devicePolicyManagementUpdater" translatable="false"></string>
@@ -4240,8 +4245,21 @@
      If no service with the specified name exists on the device, on device search wil be
      disabled.
      Example: "com.android.intelliegence/.SearchUiService"
--->
+    -->
     <string name="config_defaultSearchUiService" translatable="false"></string>
+
+    <!-- The component name, flattened to a string, for the system's credential manager
+      hybrid service. This service allows credential retrieval and storage from, and to
+      remote devices.
+
+     This service must be trusted, as it can be activated without explicit consent of the user.
+     If no service with the specified name exists on the device, credential manager
+     will still work, but remote credential retrieval and storage will not be offered to
+     the user.
+
+     See android.credentials.CredentialManager
+    -->
+    <string name="config_defaultCredentialManagerHybridService" translatable="false"></string>
 
     <!-- The package name for the system's smartspace service.
      This service returns smartspace results.

@@ -41,6 +41,7 @@ import com.android.systemui.statusbar.pipeline.mobile.data.model.DataConnectionS
 data class MobileConnectionModel(
     /** From [ServiceStateListener.onServiceStateChanged] */
     val isEmergencyOnly: Boolean = false,
+    val isRoaming: Boolean = false,
 
     /** From [SignalStrengthsListener.onSignalStrengthsChanged] */
     val isGsm: Boolean = false,

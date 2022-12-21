@@ -30,6 +30,7 @@ import android.util.ArraySet
 import android.util.SparseArray
 import android.util.SparseIntArray
 import com.android.internal.R
+import com.android.server.pm.parsing.pkg.AndroidPackageUtils
 import com.android.server.pm.parsing.pkg.PackageImpl
 import com.android.server.pm.pkg.AndroidPackage
 import com.android.server.pm.pkg.component.ParsedActivityImpl
@@ -126,7 +127,23 @@ class AndroidPackageTest : ParcelableComponentTest(AndroidPackage::class, Packag
         "addUsesStaticLibrary",
         "getUsesStaticLibraries",
         "getUsesStaticLibrariesVersions",
-        "getUsesStaticLibrariesCertDigests"
+        "getUsesStaticLibrariesCertDigests",
+
+        // Tested through getSetByValue via AndroidPackageHidden APIs, to be removed eventually
+        "setOdm",
+        "setOem",
+        "setPrivileged",
+        "setProduct",
+        "setSystem",
+        "setSystemExt",
+        "setVendor",
+        "isOdm",
+        "isOem",
+        "isPrivileged",
+        "isProduct",
+        "isSystem",
+        "isSystemExt",
+        "isVendor",
     )
 
     override val baseParams = listOf(
@@ -221,15 +238,11 @@ class AndroidPackageTest : ParcelableComponentTest(AndroidPackage::class, Packag
         AndroidPackage::isLargeHeap,
         AndroidPackage::isMultiArch,
         AndroidPackage::isNativeLibraryRootRequiresIsa,
-        AndroidPackage::isOdm,
-        AndroidPackage::isOem,
         AndroidPackage::isOnBackInvokedCallbackEnabled,
         AndroidPackage::isOverlay,
         AndroidPackage::isOverlayIsStatic,
         AndroidPackage::isPartiallyDirectBootAware,
         AndroidPackage::isPersistent,
-        AndroidPackage::isPrivileged,
-        AndroidPackage::isProduct,
         AndroidPackage::isProfileableByShell,
         AndroidPackage::isRequestLegacyExternalStorage,
         AndroidPackage::isRequiredForAllUsers,
@@ -240,14 +253,11 @@ class AndroidPackageTest : ParcelableComponentTest(AndroidPackage::class, Packag
         AndroidPackage::isStaticSharedLibrary,
         AndroidPackage::isStub,
         AndroidPackage::isSupportsRtl,
-        AndroidPackage::isSystem,
-        AndroidPackage::isSystemExt,
         AndroidPackage::isTestOnly,
         AndroidPackage::isUse32BitAbi,
         AndroidPackage::isUseEmbeddedDex,
         AndroidPackage::isUsesCleartextTraffic,
         AndroidPackage::isUsesNonSdkApi,
-        AndroidPackage::isVendor,
         AndroidPackage::isVisibleToInstantApps,
         AndroidPackage::isVmSafeMode,
         AndroidPackage::isLeavingSharedUid,
@@ -518,6 +528,38 @@ class AndroidPackageTest : ParcelableComponentTest(AndroidPackage::class, Packag
             }
         ),
         getter(AndroidPackage::getKnownActivityEmbeddingCerts, setOf("TESTEMBEDDINGCERT")),
+        getSetByValue({ AndroidPackageUtils.isOdm(it) }, "isOdm", PackageImpl::setOdm, true),
+        getSetByValue({ AndroidPackageUtils.isOem(it) }, "isOem", PackageImpl::setOem, true),
+        getSetByValue(
+            { AndroidPackageUtils.isPrivileged(it) },
+            "isPrivileged",
+            PackageImpl::setPrivileged,
+            true
+        ),
+        getSetByValue(
+            { AndroidPackageUtils.isProduct(it) },
+            "isProduct",
+            PackageImpl::setProduct,
+            true
+        ),
+        getSetByValue(
+            { AndroidPackageUtils.isVendor(it) },
+            "isVendor",
+            PackageImpl::setVendor,
+            true
+        ),
+        getSetByValue(
+            { AndroidPackageUtils.isSystem(it) },
+            "isSystem",
+            PackageImpl::setSystem,
+            true
+        ),
+        getSetByValue(
+            { AndroidPackageUtils.isSystemExt(it) },
+            "isSystemExt",
+            PackageImpl::setSystemExt,
+            true
+        ),
     )
 
     override fun initialObject() = PackageImpl.forParsing(

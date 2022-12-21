@@ -30,7 +30,7 @@ import android.service.credentials.BeginCreateCredentialRequest;
 import android.service.credentials.BeginCreateCredentialResponse;
 import android.service.credentials.BeginGetCredentialRequest;
 import android.service.credentials.BeginGetCredentialResponse;
-import android.service.credentials.CredentialProviderException;
+import android.service.credentials.CredentialProviderErrors;
 import android.service.credentials.CredentialProviderService;
 import android.service.credentials.IBeginCreateCredentialCallback;
 import android.service.credentials.IBeginGetCredentialCallback;
@@ -72,8 +72,7 @@ public class RemoteCredentialService extends ServiceConnector.Impl<ICredentialPr
         /** Called when a successful response is received from the remote provider. */
         void onProviderResponseSuccess(@Nullable T response);
         /** Called when a failure response is received from the remote provider. */
-        void onProviderResponseFailure(int errorCode, @Nullable String errorType,
-                @Nullable CharSequence message);
+        void onProviderResponseFailure(int internalErrorCode, @Nullable Exception e);
         /** Called when the remote provider service dies. */
         void onProviderServiceDied(RemoteCredentialService service);
     }
@@ -208,36 +207,31 @@ public class RemoteCredentialService extends ServiceConnector.Impl<ICredentialPr
                 Log.i(TAG, "In RemoteCredentialService execute error is timeout");
                 dispatchCancellationSignal(cancellationSink.get());
                 callback.onProviderResponseFailure(
-                        CredentialProviderException.ERROR_TIMEOUT,
-                        null,
-                        error.getMessage());
+                        CredentialProviderErrors.ERROR_TIMEOUT,
+                        null);
             } else if (error instanceof CancellationException) {
                 Log.i(TAG, "In RemoteCredentialService execute error is cancellation");
                 dispatchCancellationSignal(cancellationSink.get());
                 callback.onProviderResponseFailure(
-                        CredentialProviderException.ERROR_TASK_CANCELED,
-                        null,
-                        error.getMessage());
+                        CredentialProviderErrors.ERROR_TASK_CANCELED,
+                        null);
             } else if (error instanceof GetCredentialException) {
                 Log.i(TAG, "In RemoteCredentialService execute error is provider get"
                         + "error");
                 callback.onProviderResponseFailure(
-                        CredentialProviderException.ERROR_PROVIDER_FAILURE,
-                        ((GetCredentialException) error).errorType,
-                        error.getMessage());
+                        CredentialProviderErrors.ERROR_PROVIDER_FAILURE,
+                        (GetCredentialException) error);
             } else if (error instanceof CreateCredentialException) {
                 Log.i(TAG, "In RemoteCredentialService execute error is provider create "
                         + "error");
                 callback.onProviderResponseFailure(
-                        CredentialProviderException.ERROR_PROVIDER_FAILURE,
-                        ((CreateCredentialException) error).errorType,
-                        error.getMessage());
+                        CredentialProviderErrors.ERROR_PROVIDER_FAILURE,
+                        (CreateCredentialException) error);
             } else {
                 Log.i(TAG, "In RemoteCredentialService execute error is unknown");
                 callback.onProviderResponseFailure(
-                        CredentialProviderException.ERROR_UNKNOWN,
-                        null,
-                        error.getMessage());
+                        CredentialProviderErrors.ERROR_UNKNOWN,
+                        (Exception) error);
             }
         }
     }

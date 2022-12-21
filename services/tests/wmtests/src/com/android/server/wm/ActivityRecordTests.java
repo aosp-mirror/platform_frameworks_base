@@ -3216,14 +3216,14 @@ public class ActivityRecordTests extends WindowTestsBase {
     public void testImeInsetsFrozenFlag_resetWhenReportedToBeImeInputTarget() {
         final WindowState app = createWindow(null, TYPE_APPLICATION, "app");
 
-        InsetsSource imeSource = new InsetsSource(ITYPE_IME);
+        InsetsSource imeSource = new InsetsSource(ITYPE_IME, ime());
         app.mAboveInsetsState.addSource(imeSource);
         mDisplayContent.setImeLayeringTarget(app);
         mDisplayContent.updateImeInputAndControlTarget(app);
 
         InsetsState state = app.getInsetsState();
-        assertFalse(state.getSource(ITYPE_IME).isVisible());
-        assertTrue(state.getSource(ITYPE_IME).getFrame().isEmpty());
+        assertFalse(state.getSource(imeSource.getId()).isVisible());
+        assertTrue(state.getSource(imeSource.getId()).getFrame().isEmpty());
 
         // Simulate app is closing and expect IME insets is frozen.
         mDisplayContent.mOpeningApps.clear();
@@ -3288,7 +3288,7 @@ public class ActivityRecordTests extends WindowTestsBase {
         assertFalse(app2.mActivityRecord.mImeInsetsFrozenUntilStartInput);
         verify(app2.mClient, atLeastOnce()).resized(any(), anyBoolean(), any(),
                 insetsStateCaptor.capture(), anyBoolean(), anyBoolean(), anyInt(), anyInt(),
-                anyInt());
+                anyBoolean());
         assertFalse(app2.getInsetsState().getSource(ITYPE_IME).isVisible());
     }
 

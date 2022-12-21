@@ -1674,7 +1674,7 @@ class ActivityStarter {
         mRootWindowContainer.startPowerModeLaunchIfNeeded(
                 false /* forceSend */, mStartActivity);
 
-        final boolean isTaskSwitch = startedTask != prevTopTask && !startedTask.isEmbedded();
+        final boolean isTaskSwitch = startedTask != prevTopTask;
         mTargetRootTask.startActivityLocked(mStartActivity, topRootTask, newTask, isTaskSwitch,
                 mOptions, sourceRecord);
         if (mDoResume) {
@@ -2753,8 +2753,7 @@ class ActivityStarter {
         } else {
             TaskFragment candidateTf = mAddingToTaskFragment != null ? mAddingToTaskFragment : null;
             if (candidateTf == null) {
-                final ActivityRecord top = task.topRunningActivity(false /* focusableOnly */,
-                        false /* includingEmbeddedTask */);
+                final ActivityRecord top = task.topRunningActivity(false /* focusableOnly */);
                 if (top != null) {
                     candidateTf = top.getTaskFragment();
                 }

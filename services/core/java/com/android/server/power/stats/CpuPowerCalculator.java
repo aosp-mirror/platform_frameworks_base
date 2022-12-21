@@ -124,7 +124,7 @@ public class CpuPowerCalculator extends PowerCalculator {
             }
         }
 
-        final long consumptionUC = batteryStats.getCpuMeasuredBatteryConsumptionUC();
+        final long consumptionUC = batteryStats.getCpuEnergyConsumptionUC();
         final int powerModel = getPowerModel(consumptionUC, query);
 
         builder.getAggregateBatteryConsumerBuilder(
@@ -133,13 +133,13 @@ public class CpuPowerCalculator extends PowerCalculator {
         builder.getAggregateBatteryConsumerBuilder(
                 BatteryUsageStats.AGGREGATE_BATTERY_CONSUMER_SCOPE_DEVICE)
                 .setConsumedPower(BatteryConsumer.POWER_COMPONENT_CPU,
-                        powerModel == BatteryConsumer.POWER_MODEL_MEASURED_ENERGY
+                        powerModel == BatteryConsumer.POWER_MODEL_ENERGY_CONSUMPTION
                                 ? uCtoMah(consumptionUC) : totalPowerMah, powerModel);
     }
 
     private void calculateApp(UidBatteryConsumer.Builder app, BatteryStats.Uid u,
             BatteryUsageStatsQuery query, Result result, BatteryConsumer.Key[] keys) {
-        final long consumptionUC = u.getCpuMeasuredBatteryConsumptionUC();
+        final long consumptionUC = u.getCpuEnergyConsumptionUC();
         final int powerModel = getPowerModel(consumptionUC, query);
         calculatePowerAndDuration(u, powerModel, consumptionUC, BatteryStats.STATS_SINCE_CHARGED,
                 result);
@@ -150,8 +150,8 @@ public class CpuPowerCalculator extends PowerCalculator {
 
         if (query.isProcessStateDataNeeded() && keys != null) {
             switch (powerModel) {
-                case BatteryConsumer.POWER_MODEL_MEASURED_ENERGY:
-                    calculateMeasuredPowerPerProcessState(app, u, keys);
+                case BatteryConsumer.POWER_MODEL_ENERGY_CONSUMPTION:
+                    calculateEnergyConsumptionPerProcessState(app, u, keys);
                     break;
                 case BatteryConsumer.POWER_MODEL_POWER_PROFILE:
                     calculateModeledPowerPerProcessState(app, u, keys, result);
@@ -160,7 +160,7 @@ public class CpuPowerCalculator extends PowerCalculator {
         }
     }
 
-    private void calculateMeasuredPowerPerProcessState(UidBatteryConsumer.Builder app,
+    private void calculateEnergyConsumptionPerProcessState(UidBatteryConsumer.Builder app,
             BatteryStats.Uid u, BatteryConsumer.Key[] keys) {
         for (BatteryConsumer.Key key : keys) {
             // The key for PROCESS_STATE_UNSPECIFIED aka PROCESS_STATE_ANY has already been
@@ -171,10 +171,10 @@ public class CpuPowerCalculator extends PowerCalculator {
                 continue;
             }
 
-            final long consumptionUC = u.getCpuMeasuredBatteryConsumptionUC(key.processState);
+            final long consumptionUC = u.getCpuEnergyConsumptionUC(key.processState);
             if (consumptionUC != 0) {
                 app.setConsumedPower(key, uCtoMah(consumptionUC),
-                        BatteryConsumer.POWER_MODEL_MEASURED_ENERGY);
+                        BatteryConsumer.POWER_MODEL_ENERGY_CONSUMPTION);
             }
         }
     }
@@ -226,7 +226,7 @@ public class CpuPowerCalculator extends PowerCalculator {
 
         final double powerMah;
         switch (powerModel) {
-            case BatteryConsumer.POWER_MODEL_MEASURED_ENERGY:
+            case BatteryConsumer.POWER_MODEL_ENERGY_CONSUMPTION:
                 powerMah = uCtoMah(consumptionUC);
                 break;
             case BatteryConsumer.POWER_MODEL_POWER_PROFILE:

@@ -42,9 +42,10 @@ import com.android.credentialmanager.jetpack.developer.CreateCredentialRequest
 import com.android.credentialmanager.jetpack.developer.CreatePasswordRequest
 import com.android.credentialmanager.jetpack.developer.CreatePublicKeyCredentialRequest
 import com.android.credentialmanager.jetpack.developer.PublicKeyCredential.Companion.TYPE_PUBLIC_KEY_CREDENTIAL
-import com.android.credentialmanager.jetpack.provider.ActionUi
-import com.android.credentialmanager.jetpack.provider.CredentialEntryUi
-import com.android.credentialmanager.jetpack.provider.SaveEntryUi
+import com.android.credentialmanager.jetpack.provider.Action
+import com.android.credentialmanager.jetpack.provider.CredentialCountInformation
+import com.android.credentialmanager.jetpack.provider.CredentialEntry
+import com.android.credentialmanager.jetpack.provider.CreateEntry
 import org.json.JSONObject
 
 /** Utility functions for converting CredentialManager data structures to or from UI formats. */
@@ -107,7 +108,8 @@ class GetFlowUtils {
       context: Context,
     ): List<CredentialEntryInfo> {
       return credentialEntries.map {
-        val credentialEntryUi = CredentialEntryUi.fromSlice(it.slice)
+        // TODO: handle NPE gracefully
+        val credentialEntry = CredentialEntry.fromSlice(it.slice)!!
 
         // Consider directly move the UI object into the class.
         return@map CredentialEntryInfo(
@@ -116,14 +118,14 @@ class GetFlowUtils {
           entrySubkey = it.subkey,
           pendingIntent = it.pendingIntent,
           fillInIntent = it.frameworkExtrasIntent,
-          credentialType = credentialEntryUi.credentialType.toString(),
-          credentialTypeDisplayName = credentialEntryUi.credentialTypeDisplayName.toString(),
-          userName = credentialEntryUi.userName.toString(),
-          displayName = credentialEntryUi.userDisplayName?.toString(),
+          credentialType = credentialEntry.type.toString(),
+          credentialTypeDisplayName = credentialEntry.typeDisplayName.toString(),
+          userName = credentialEntry.username.toString(),
+          displayName = credentialEntry.displayName?.toString(),
           // TODO: proper fallback
-          icon = credentialEntryUi.entryIcon?.loadDrawable(context)
-            ?: context.getDrawable(R.drawable.ic_other_sign_in)!!,
-          lastUsedTimeMillis = credentialEntryUi.lastUsedTimeMillis,
+          icon = credentialEntry.icon?.loadDrawable(context)
+                  ?: context.getDrawable(R.drawable.ic_other_sign_in)!!,
+          lastUsedTimeMillis = credentialEntry.lastUsedTimeMillis,
         )
       }
     }
@@ -170,7 +172,8 @@ class GetFlowUtils {
       providerIcon: Drawable,
     ): List<ActionEntryInfo> {
       return actionEntries.map {
-        val actionEntryUi = ActionUi.fromSlice(it.slice)
+        // TODO: handle NPE gracefully
+        val actionEntryUi = Action.fromSlice(it.slice)!!
 
         return@map ActionEntryInfo(
           providerId = providerId,
@@ -178,10 +181,10 @@ class GetFlowUtils {
           entrySubkey = it.subkey,
           pendingIntent = it.pendingIntent,
           fillInIntent = it.frameworkExtrasIntent,
-          title = actionEntryUi.text.toString(),
+          title = actionEntryUi.title.toString(),
           // TODO: gracefully fail
           icon = providerIcon,
-          subTitle = actionEntryUi.subtext?.toString(),
+          subTitle = actionEntryUi.subTitle?.toString(),
         )
       }
     }
@@ -383,7 +386,8 @@ class CreateFlowUtils {
       context: Context,
     ): List<CreateOptionInfo> {
       return creationEntries.map {
-        val saveEntryUi = SaveEntryUi.fromSlice(it.slice)
+        // TODO: handle NPE gracefully
+        val createEntry = CreateEntry.fromSlice(it.slice)!!
 
         return@map CreateOptionInfo(
           // TODO: remove fallbacks
@@ -392,13 +396,16 @@ class CreateFlowUtils {
           entrySubkey = it.subkey,
           pendingIntent = it.pendingIntent,
           fillInIntent = it.frameworkExtrasIntent,
-          userProviderDisplayName = saveEntryUi.userProviderAccountName as String,
-          profileIcon = saveEntryUi.profileIcon?.loadDrawable(context)
-            ?: requestDisplayInfo.typeIcon,
-          passwordCount = saveEntryUi.passwordCount ?: 0,
-          passkeyCount = saveEntryUi.passkeyCount ?: 0,
-          totalCredentialCount = saveEntryUi.totalCredentialCount ?: 0,
-          lastUsedTimeMillis = saveEntryUi.lastUsedTimeMillis ?: 0,
+          userProviderDisplayName = createEntry.accountName.toString(),
+          profileIcon = createEntry.icon?.loadDrawable(context)
+                  ?: requestDisplayInfo.typeIcon,
+          passwordCount = CredentialCountInformation.getPasswordCount(
+                  createEntry.credentialCountInformationList) ?: 0,
+          passkeyCount = CredentialCountInformation.getPasskeyCount(
+                  createEntry.credentialCountInformationList) ?: 0,
+          totalCredentialCount = CredentialCountInformation.getTotalCount(
+                  createEntry.credentialCountInformationList) ?: 0,
+          lastUsedTimeMillis = createEntry.lastUsedTimeMillis ?: 0,
         )
       }
     }

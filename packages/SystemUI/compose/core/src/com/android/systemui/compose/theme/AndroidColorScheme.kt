@@ -65,10 +65,12 @@ class AndroidColorScheme internal constructor(context: Context) {
     val colorForeground = getColor(context, R.attr.colorForeground)
     val colorForegroundInverse = getColor(context, R.attr.colorForegroundInverse)
 
-    private fun getColor(context: Context, attr: Int): Color {
-        val ta = context.obtainStyledAttributes(intArrayOf(attr))
-        @ColorInt val color = ta.getColor(0, 0)
-        ta.recycle()
-        return Color(color)
+    companion object {
+        fun getColor(context: Context, attr: Int): Color {
+            val ta = context.obtainStyledAttributes(intArrayOf(attr))
+            @ColorInt val color = ta.getColor(0, 0)
+            ta.recycle()
+            return Color(color)
+        }
     }
 }

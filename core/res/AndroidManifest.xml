@@ -315,6 +315,7 @@
     <protected-broadcast android:name="android.media.MASTER_BALANCE_CHANGED_ACTION" />
     <protected-broadcast android:name="android.media.SCO_AUDIO_STATE_CHANGED" />
     <protected-broadcast android:name="android.media.ACTION_SCO_AUDIO_STATE_UPDATED" />
+    <protected-broadcast android:name="com.android.server.audio.action.CHECK_MUSIC_ACTIVE" />
 
     <protected-broadcast android:name="android.intent.action.MEDIA_REMOVED" />
     <protected-broadcast android:name="android.intent.action.MEDIA_UNMOUNTED" />
@@ -3626,7 +3627,12 @@
     <permission android:name="android.permission.READ_APP_SPECIFIC_LOCALES"
                 android:protectionLevel="signature|installer" />
 
-    <!-- @hide Allows an application to monitor {@link android.provider.Settings.Config} access.
+    <!-- @hide Allows applications to set an application-specific {@link LocaleConfig}.
+    <p>Not for use by third-party applications. -->
+    <permission android:name="android.permission.SET_APP_SPECIFIC_LOCALECONFIG"
+        android:protectionLevel="signature" />
+
+    <!-- @SystemApi @hide Allows an application to monitor {@link android.provider.Settings.Config} access.
     <p>Not for use by third-party applications. -->
     <permission android:name="android.permission.MONITOR_DEVICE_CONFIG_ACCESS"
         android:protectionLevel="signature"/>
@@ -4978,7 +4984,7 @@
     <permission android:name="android.permission.ROTATE_SURFACE_FLINGER"
         android:protectionLevel="signature|recents" />
 
-    <!-- @SystemApi Allows an application to provide hints to SurfaceFlinger that can influence
+    <!-- Allows an application to provide hints to SurfaceFlinger that can influence
          its wakes up time to compose the next frame. This is a subset of the capabilities granted
          by {@link #ACCESS_SURFACE_FLINGER}.
          <p>Not for use by third-party applications.

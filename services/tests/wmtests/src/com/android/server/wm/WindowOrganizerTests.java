@@ -802,7 +802,7 @@ public class WindowOrganizerTests extends WindowTestsBase {
         mWm.mAtmService.mWindowOrganizerController.applyTransaction(wct);
 
         assertThat(navigationBarInsetsReceiverTask.mLocalInsetsSourceProviders
-                .valueAt(0).getSource().getType()).isEqualTo(ITYPE_TOP_GENERIC_OVERLAY);
+                .valueAt(0).getSource().getId()).isEqualTo(ITYPE_TOP_GENERIC_OVERLAY);
     }
 
     @Test

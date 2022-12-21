@@ -145,6 +145,7 @@
     <uses-permission android:name="android.permission.LOCATION_BYPASS" />
     <uses-permission android:name="android.permission.READ_DEVICE_CONFIG" />
     <uses-permission android:name="android.permission.WRITE_DEVICE_CONFIG" />
+    <uses-permission android:name="android.permission.MONITOR_DEVICE_CONFIG_ACCESS" />
     <uses-permission android:name="android.permission.BROADCAST_STICKY" />
     <uses-permission android:name="android.permission.MANAGE_ACCESSIBILITY" />
     <!-- Development tool permissions granted to the shell. -->
@@ -514,6 +515,9 @@
 
     <!-- Permissions needed for CTS test - CtsLocaleManagerTestCases -->
     <uses-permission android:name="android.permission.READ_APP_SPECIFIC_LOCALES" />
+
+    <!-- Permissions needed for CTS test - CtsLocaleManagerTestCases -->
+    <uses-permission android:name="android.permission.SET_APP_SPECIFIC_LOCALECONFIG" />
 
     <!-- Permissions used for manual testing of time detection behavior. -->
     <uses-permission android:name="android.permission.SUGGEST_MANUAL_TIME" />

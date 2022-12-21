@@ -35,7 +35,6 @@ import android.util.proto.ProtoOutputStream;
 import android.view.InsetsSource;
 import android.view.InsetsSourceConsumer;
 import android.view.InsetsSourceControl;
-import android.view.InsetsState;
 import android.view.WindowInsets;
 import android.view.inputmethod.ImeTracker;
 import android.window.TaskSnapshot;
@@ -58,7 +57,7 @@ final class ImeInsetsSourceProvider extends WindowContainerInsetsSourceProvider 
     private Runnable mShowImeRunner;
     private boolean mIsImeLayoutDrawn;
     private boolean mImeShowing;
-    private final InsetsSource mLastSource = new InsetsSource(ITYPE_IME);
+    private final InsetsSource mLastSource = new InsetsSource(ITYPE_IME, WindowInsets.Type.ime());
 
     /** @see #setFrozen(boolean) */
     private boolean mFrozen;
@@ -142,7 +141,7 @@ final class ImeInsetsSourceProvider extends WindowContainerInsetsSourceProvider 
     @Override
     protected boolean updateClientVisibility(InsetsControlTarget caller) {
         boolean changed = super.updateClientVisibility(caller);
-        if (changed && caller.isRequestedVisible(InsetsState.toPublicType(mSource.getType()))) {
+        if (changed && caller.isRequestedVisible(mSource.getType())) {
             reportImeDrawnForOrganizer(caller);
         }
         return changed;

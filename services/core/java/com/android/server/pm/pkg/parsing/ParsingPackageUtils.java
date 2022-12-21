@@ -824,8 +824,8 @@ public class ParsingPackageUtils {
     }
 
     private static boolean hasTooManyComponents(ParsingPackage pkg) {
-        return pkg.getActivities().size() + pkg.getServices().size() + pkg.getProviders().size()
-                > MAX_NUM_COMPONENTS;
+        return (pkg.getActivities().size() + pkg.getServices().size() + pkg.getProviders().size()
+                + pkg.getReceivers().size()) > MAX_NUM_COMPONENTS;
     }
 
     /**

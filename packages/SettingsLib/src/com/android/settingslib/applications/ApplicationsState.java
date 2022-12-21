@@ -123,6 +123,7 @@ public class ApplicationsState {
     final int mAdminRetrieveFlags;
     final int mRetrieveFlags;
     PackageIntentReceiver mPackageIntentReceiver;
+    PackageIntentReceiver mClonePackageIntentReceiver;
 
     boolean mResumed;
     boolean mHaveDisabledApps;
@@ -263,6 +264,15 @@ public class ApplicationsState {
         if (mPackageIntentReceiver == null) {
             mPackageIntentReceiver = new PackageIntentReceiver();
             mPackageIntentReceiver.registerReceiver();
+        }
+
+        // Listen to any package additions in clone user to refresh the app list.
+        if (mClonePackageIntentReceiver == null) {
+            int cloneUserId = AppUtils.getCloneUserId(mContext);
+            if (cloneUserId != -1) {
+                mClonePackageIntentReceiver = new PackageIntentReceiver();
+                mClonePackageIntentReceiver.registerReceiverForClone(cloneUserId);
+            }
         }
 
         final List<ApplicationInfo> prevApplications = mApplications;
@@ -455,6 +465,10 @@ public class ApplicationsState {
         if (mPackageIntentReceiver != null) {
             mPackageIntentReceiver.unregisterReceiver();
             mPackageIntentReceiver = null;
+        }
+        if (mClonePackageIntentReceiver != null) {
+            mClonePackageIntentReceiver.unregisterReceiver();
+            mClonePackageIntentReceiver = null;
         }
     }
 
@@ -1525,6 +1539,12 @@ public class ApplicationsState {
             } else if (Intent.ACTION_USER_REMOVED.equals(actionStr)) {
                 removeUser(intent.getIntExtra(Intent.EXTRA_USER_HANDLE, UserHandle.USER_NULL));
             }
+        }
+
+        public void registerReceiverForClone(int cloneId) {
+            IntentFilter filter = new IntentFilter(Intent.ACTION_PACKAGE_ADDED);
+            filter.addDataScheme("package");
+            mContext.registerReceiverAsUser(this, UserHandle.of(cloneId), filter, null, null);
         }
     }
 

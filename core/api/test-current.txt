@@ -1861,6 +1861,7 @@ package android.os {
   }
 
   public static class PerformanceHintManager.Session implements java.io.Closeable {
+    method @Nullable public int[] getThreadIds();
     method public void sendHint(int);
     field public static final int CPU_LOAD_DOWN = 1; // 0x1
     field public static final int CPU_LOAD_RESET = 2; // 0x2

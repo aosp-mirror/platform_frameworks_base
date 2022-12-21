@@ -41,6 +41,8 @@ public class VirtualDeviceParamsTest {
 
     private static final String SENSOR_NAME = "VirtualSensorName";
     private static final String SENSOR_VENDOR = "VirtualSensorVendor";
+    private static final int PLAYBACK_SESSION_ID = 42;
+    private static final int RECORDING_SESSION_ID = 77;
 
     @Test
     public void parcelable_shouldRecreateSuccessfully() {
@@ -49,6 +51,8 @@ public class VirtualDeviceParamsTest {
                 .setUsersWithMatchingAccounts(Set.of(UserHandle.of(123), UserHandle.of(456)))
                 .setDevicePolicy(POLICY_TYPE_SENSORS, DEVICE_POLICY_CUSTOM)
                 .setDevicePolicy(POLICY_TYPE_AUDIO, DEVICE_POLICY_CUSTOM)
+                .setAudioPlaybackSessionId(PLAYBACK_SESSION_ID)
+                .setAudioRecordingSessionId(RECORDING_SESSION_ID)
                 .addVirtualSensorConfig(
                         new VirtualSensorConfig.Builder(TYPE_ACCELEROMETER, SENSOR_NAME)
                                 .setVendor(SENSOR_VENDOR)
@@ -65,6 +69,8 @@ public class VirtualDeviceParamsTest {
                 .containsExactly(UserHandle.of(123), UserHandle.of(456));
         assertThat(params.getDevicePolicy(POLICY_TYPE_SENSORS)).isEqualTo(DEVICE_POLICY_CUSTOM);
         assertThat(params.getDevicePolicy(POLICY_TYPE_AUDIO)).isEqualTo(DEVICE_POLICY_CUSTOM);
+        assertThat(params.getAudioPlaybackSessionId()).isEqualTo(PLAYBACK_SESSION_ID);
+        assertThat(params.getAudioRecordingSessionId()).isEqualTo(RECORDING_SESSION_ID);
 
         List<VirtualSensorConfig> sensorConfigs = params.getVirtualSensorConfigs();
         assertThat(sensorConfigs).hasSize(1);

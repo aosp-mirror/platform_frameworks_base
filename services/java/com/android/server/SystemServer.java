@@ -46,6 +46,7 @@ import android.content.pm.PackageManager;
 import android.content.pm.PackageManagerInternal;
 import android.content.res.Configuration;
 import android.content.res.Resources.Theme;
+import android.credentials.CredentialManager;
 import android.database.sqlite.SQLiteCompatibilityWalFlags;
 import android.database.sqlite.SQLiteGlobal;
 import android.graphics.GraphicsStatsService;
@@ -1227,16 +1228,19 @@ public final class SystemServer implements Dumpable {
             Watchdog.getInstance().resumeWatchingCurrentThread("packagemanagermain");
         }
 
+        mFirstBoot = mPackageManagerService.isFirstBoot();
+        mPackageManager = mSystemContext.getPackageManager();
+        t.traceEnd();
+
+        t.traceBegin("DexUseManagerLocal");
         // DexUseManagerLocal needs to be loaded after PackageManagerLocal has been registered, but
         // before PackageManagerService starts processing binder calls to notifyDexLoad.
         // DexUseManagerLocal may also call artd, so ensure ArtModuleServiceManager is instantiated.
         ArtModuleServiceInitializer.setArtModuleServiceManager(new ArtModuleServiceManager());
         LocalManagerRegistry.addManager(
                 DexUseManagerLocal.class, DexUseManagerLocal.createInstance());
-
-        mFirstBoot = mPackageManagerService.isFirstBoot();
-        mPackageManager = mSystemContext.getPackageManager();
         t.traceEnd();
+
         if (!mRuntimeRestart && !isFirstBootOrUpgrade()) {
             FrameworkStatsLog.write(FrameworkStatsLog.BOOT_TIME_EVENT_ELAPSED_TIME_REPORTED,
                     FrameworkStatsLog
@@ -2609,9 +2613,16 @@ public final class SystemServer implements Dumpable {
         }
 
         if (mPackageManager.hasSystemFeature(PackageManager.FEATURE_CREDENTIALS)) {
-            t.traceBegin("StartCredentialManagerService");
-            mSystemServiceManager.startService(CREDENTIAL_MANAGER_SERVICE_CLASS);
-            t.traceEnd();
+            boolean credentialManagerEnabled =
+                    DeviceConfig.getBoolean(DeviceConfig.NAMESPACE_CREDENTIAL,
+                    CredentialManager.DEVICE_CONFIG_ENABLE_CREDENTIAL_MANAGER, true);
+            if (credentialManagerEnabled) {
+                t.traceBegin("StartCredentialManagerService");
+                mSystemServiceManager.startService(CREDENTIAL_MANAGER_SERVICE_CLASS);
+                t.traceEnd();
+            } else {
+                Slog.d(TAG, "CredentialManager disabled.");
+            }
         }
 
         // Translation manager service

@@ -17,6 +17,7 @@
 package com.android.server.wm;
 
 import static android.view.InsetsState.ITYPE_IME;
+import static android.view.WindowInsets.Type.ime;
 import static android.view.WindowManager.LayoutParams.TYPE_APPLICATION;
 import static android.view.WindowManager.LayoutParams.TYPE_INPUT_METHOD;
 
@@ -38,7 +39,7 @@ import org.junit.runner.RunWith;
 @RunWith(WindowTestRunner.class)
 public class ImeInsetsSourceProviderTest extends WindowTestsBase {
 
-    private InsetsSource mImeSource = new InsetsSource(ITYPE_IME);
+    private InsetsSource mImeSource = new InsetsSource(ITYPE_IME, ime());
     private ImeInsetsSourceProvider mImeProvider;
 
     @Before

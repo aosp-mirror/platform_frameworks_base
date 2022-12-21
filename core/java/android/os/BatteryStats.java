@@ -1043,12 +1043,13 @@ public abstract class BatteryStats {
 
         /**
          * Returns the battery consumption (in microcoulombs) of bluetooth for this uid,
-         * derived from on device power measurement data.
+         * derived from {@link android.hardware.power.stats.EnergyConsumerType#BLUETOOTH} bucket
+         * provided by the PowerStats service.
          * Will return {@link #POWER_DATA_UNAVAILABLE} if data is unavailable.
          *
          * {@hide}
          */
-        public abstract long getBluetoothMeasuredBatteryConsumptionUC();
+        public abstract long getBluetoothEnergyConsumptionUC();
 
         /**
          * Returns the battery consumption (in microcoulombs) of the uid's bluetooth usage
@@ -1057,17 +1058,18 @@ public abstract class BatteryStats {
          *
          * {@hide}
          */
-        public abstract long getBluetoothMeasuredBatteryConsumptionUC(
+        public abstract long getBluetoothEnergyConsumptionUC(
                 @BatteryConsumer.ProcessState int processState);
 
         /**
          * Returns the battery consumption (in microcoulombs) of the uid's cpu usage, derived from
-         * on device power measurement data.
+         * derived from {@link android.hardware.power.stats.EnergyConsumerType#CPU} bucket
+         * provided by the PowerStats service.
          * Will return {@link #POWER_DATA_UNAVAILABLE} if data is unavailable.
          *
          * {@hide}
          */
-        public abstract long getCpuMeasuredBatteryConsumptionUC();
+        public abstract long getCpuEnergyConsumptionUC();
 
         /**
          * Returns the battery consumption (in microcoulombs) of the uid's cpu usage when in the
@@ -1076,26 +1078,28 @@ public abstract class BatteryStats {
          *
          * {@hide}
          */
-        public abstract long getCpuMeasuredBatteryConsumptionUC(
+        public abstract long getCpuEnergyConsumptionUC(
                 @BatteryConsumer.ProcessState int processState);
 
         /**
          * Returns the battery consumption (in microcoulombs) of the uid's GNSS usage, derived from
-         * on device power measurement data.
+         * derived from {@link android.hardware.power.stats.EnergyConsumerType#GNSS} bucket
+         * provided by the PowerStats service.
          * Will return {@link #POWER_DATA_UNAVAILABLE} if data is unavailable.
          *
          * {@hide}
          */
-        public abstract long getGnssMeasuredBatteryConsumptionUC();
+        public abstract long getGnssEnergyConsumptionUC();
 
         /**
          * Returns the battery consumption (in microcoulombs) of the uid's radio usage, derived from
-         * on device power measurement data.
+         * derived from {@link android.hardware.power.stats.EnergyConsumerType#MOBILE_RADIO}
+         * bucket provided by the PowerStats service.
          * Will return {@link #POWER_DATA_UNAVAILABLE} if data is unavailable.
          *
          * {@hide}
          */
-        public abstract long getMobileRadioMeasuredBatteryConsumptionUC();
+        public abstract long getMobileRadioEnergyConsumptionUC();
 
         /**
          * Returns the battery consumption (in microcoulombs) of the uid's radio usage when in the
@@ -1104,26 +1108,28 @@ public abstract class BatteryStats {
          *
          * {@hide}
          */
-        public abstract long getMobileRadioMeasuredBatteryConsumptionUC(
+        public abstract long getMobileRadioEnergyConsumptionUC(
                 @BatteryConsumer.ProcessState int processState);
 
         /**
          * Returns the battery consumption (in microcoulombs) of the screen while on and uid active,
-         * derived from on device power measurement data.
+         * derived from {@link android.hardware.power.stats.EnergyConsumerType#DISPLAY} bucket
+         * provided by the PowerStats service.
          * Will return {@link #POWER_DATA_UNAVAILABLE} if data is unavailable.
          *
          * {@hide}
          */
-        public abstract long getScreenOnMeasuredBatteryConsumptionUC();
+        public abstract long getScreenOnEnergyConsumptionUC();
 
         /**
          * Returns the battery consumption (in microcoulombs) of wifi for this uid,
-         * derived from on device power measurement data.
+         * derived from {@link android.hardware.power.stats.EnergyConsumerType#WIFI} bucket
+         * provided by the PowerStats service.
          * Will return {@link #POWER_DATA_UNAVAILABLE} if data is unavailable.
          *
          * {@hide}
          */
-        public abstract long getWifiMeasuredBatteryConsumptionUC();
+        public abstract long getWifiEnergyConsumptionUC();
 
         /**
          * Returns the battery consumption (in microcoulombs) of the uid's wifi usage when in the
@@ -1132,7 +1138,7 @@ public abstract class BatteryStats {
          *
          * {@hide}
          */
-        public abstract long getWifiMeasuredBatteryConsumptionUC(
+        public abstract long getWifiEnergyConsumptionUC(
                 @BatteryConsumer.ProcessState int processState);
 
 
@@ -1147,7 +1153,7 @@ public abstract class BatteryStats {
          *
          * {@hide}
          */
-        public abstract @Nullable long[] getCustomConsumerMeasuredBatteryConsumptionUC();
+        public abstract @Nullable long[] getCustomEnergyConsumerBatteryConsumptionUC();
 
         public static abstract class Sensor {
 
@@ -1776,7 +1782,7 @@ public abstract class BatteryStats {
     /**
      * Measured energy delta from the previous reading.
      */
-    public static final class MeasuredEnergyDetails {
+    public static final class EnergyConsumerDetails {
         /**
          * Description of the energy consumer, such as CPU, DISPLAY etc
          */
@@ -1986,8 +1992,8 @@ public abstract class BatteryStats {
         // Non-null when there is more detailed information at this step.
         public HistoryStepDetails stepDetails;
 
-        // Non-null when there is measured energy information
-        public MeasuredEnergyDetails measuredEnergyDetails;
+        // Non-null when there is energy consumer information
+        public EnergyConsumerDetails energyConsumerDetails;
 
         // Non-null when there is CPU usage information
         public CpuUsageDetails cpuUsageDetails;
@@ -2200,7 +2206,7 @@ public abstract class BatteryStats {
             eventCode = EVENT_NONE;
             eventTag = null;
             tagsFirstOccurrence = false;
-            measuredEnergyDetails = null;
+            energyConsumerDetails = null;
             cpuUsageDetails = null;
         }
 
@@ -2251,7 +2257,7 @@ public abstract class BatteryStats {
             }
             tagsFirstOccurrence = o.tagsFirstOccurrence;
             currentTime = o.currentTime;
-            measuredEnergyDetails = o.measuredEnergyDetails;
+            energyConsumerDetails = o.energyConsumerDetails;
             cpuUsageDetails = o.cpuUsageDetails;
         }
 
@@ -2858,7 +2864,7 @@ public abstract class BatteryStats {
      *
      * {@hide}
      */
-    public abstract long getBluetoothMeasuredBatteryConsumptionUC();
+    public abstract long getBluetoothEnergyConsumptionUC();
 
     /**
      * Returns the battery consumption (in microcoulombs) of the cpu, derived from on device power
@@ -2867,7 +2873,7 @@ public abstract class BatteryStats {
      *
      * {@hide}
      */
-    public abstract long getCpuMeasuredBatteryConsumptionUC();
+    public abstract long getCpuEnergyConsumptionUC();
 
     /**
      * Returns the battery consumption (in microcoulombs) of the GNSS, derived from on device power
@@ -2876,7 +2882,7 @@ public abstract class BatteryStats {
      *
      * {@hide}
      */
-    public abstract long getGnssMeasuredBatteryConsumptionUC();
+    public abstract long getGnssEnergyConsumptionUC();
 
     /**
      * Returns the battery consumption (in microcoulombs) of the radio, derived from on device power
@@ -2885,7 +2891,7 @@ public abstract class BatteryStats {
      *
      * {@hide}
      */
-    public abstract long getMobileRadioMeasuredBatteryConsumptionUC();
+    public abstract long getMobileRadioEnergyConsumptionUC();
 
     /**
      * Returns the battery consumption (in microcoulombs) of the screen while on, derived from on
@@ -2894,7 +2900,7 @@ public abstract class BatteryStats {
      *
      * {@hide}
      */
-    public abstract long getScreenOnMeasuredBatteryConsumptionUC();
+    public abstract long getScreenOnEnergyConsumptionUC();
 
     /**
      * Returns the battery consumption (in microcoulombs) of the screen in doze, derived from on
@@ -2903,7 +2909,7 @@ public abstract class BatteryStats {
      *
      * {@hide}
      */
-    public abstract long getScreenDozeMeasuredBatteryConsumptionUC();
+    public abstract long getScreenDozeEnergyConsumptionUC();
 
     /**
      * Returns the battery consumption (in microcoulombs) of wifi, derived from on
@@ -2912,7 +2918,7 @@ public abstract class BatteryStats {
      *
      * {@hide}
      */
-    public abstract long getWifiMeasuredBatteryConsumptionUC();
+    public abstract long getWifiEnergyConsumptionUC();
 
     /**
      * Returns the battery consumption (in microcoulombs) that each
@@ -2924,7 +2930,7 @@ public abstract class BatteryStats {
      *
      * {@hide}
      */
-    public abstract @Nullable long[] getCustomConsumerMeasuredBatteryConsumptionUC();
+    public abstract @Nullable long[] getCustomEnergyConsumerBatteryConsumptionUC();
 
     /**
      * Returns the names of all {@link android.hardware.power.stats.EnergyConsumer}'s
@@ -7088,19 +7094,19 @@ public abstract class BatteryStats {
                     }
                 }
                 boolean firstExtension = true;
-                if (rec.measuredEnergyDetails != null) {
+                if (rec.energyConsumerDetails != null) {
                     firstExtension = false;
                     if (!checkin) {
                         item.append(" ext=energy:");
-                        item.append(rec.measuredEnergyDetails);
+                        item.append(rec.energyConsumerDetails);
                     } else {
                         item.append(",XE");
-                        for (int i = 0; i < rec.measuredEnergyDetails.consumers.length; i++) {
-                            if (rec.measuredEnergyDetails.chargeUC[i] != POWER_DATA_UNAVAILABLE) {
+                        for (int i = 0; i < rec.energyConsumerDetails.consumers.length; i++) {
+                            if (rec.energyConsumerDetails.chargeUC[i] != POWER_DATA_UNAVAILABLE) {
                                 item.append(',');
-                                item.append(rec.measuredEnergyDetails.consumers[i].name);
+                                item.append(rec.energyConsumerDetails.consumers[i].name);
                                 item.append('=');
-                                item.append(rec.measuredEnergyDetails.chargeUC[i]);
+                                item.append(rec.energyConsumerDetails.chargeUC[i]);
                             }
                         }
                     }

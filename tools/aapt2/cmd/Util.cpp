@@ -448,7 +448,8 @@ std::regex GetRegularExpression(const std::string &input) {
 
 bool ParseResourceConfig(const std::string& content, IAaptContext* context,
                          std::unordered_set<ResourceName>& out_resource_exclude_list,
-                         std::set<ResourceName>& out_name_collapse_exemptions) {
+                         std::set<ResourceName>& out_name_collapse_exemptions,
+                         std::set<ResourceName>& out_path_shorten_exemptions) {
   for (StringPiece line : util::Tokenize(content, '\n')) {
     line = util::TrimWhitespace(line);
     if (line.empty()) {
@@ -477,6 +478,8 @@ bool ParseResourceConfig(const std::string& content, IAaptContext* context,
         out_resource_exclude_list.insert(resource_name.ToResourceName());
       } else if (directive == "no_collapse" || directive == "no_obfuscate") {
         out_name_collapse_exemptions.insert(resource_name.ToResourceName());
+      } else if (directive == "no_path_shorten") {
+        out_path_shorten_exemptions.insert(resource_name.ToResourceName());
       }
     }
   }

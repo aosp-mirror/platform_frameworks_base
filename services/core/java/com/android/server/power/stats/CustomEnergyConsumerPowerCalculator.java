@@ -32,10 +32,10 @@ import java.util.Arrays;
  * Calculates the amount of power consumed by custom energy consumers (i.e. consumers of type
  * {@link android.hardware.power.stats.EnergyConsumerType#OTHER}).
  */
-public class CustomMeasuredPowerCalculator extends PowerCalculator {
-    private static final String TAG = "CustomMeasuredPowerCalc";
+public class CustomEnergyConsumerPowerCalculator extends PowerCalculator {
+    private static final String TAG = "CustomEnergyCsmrPowerCalc";
 
-    public CustomMeasuredPowerCalculator(PowerProfile powerProfile) {
+    public CustomEnergyConsumerPowerCalculator(PowerProfile powerProfile) {
     }
 
     @Override
@@ -55,16 +55,16 @@ public class CustomMeasuredPowerCalculator extends PowerCalculator {
             totalAppPowerMah = calculateApp(app, app.getBatteryStatsUid(), totalAppPowerMah);
         }
 
-        final double[] customMeasuredPowerMah = calculateMeasuredEnergiesMah(
-                batteryStats.getCustomConsumerMeasuredBatteryConsumptionUC());
-        if (customMeasuredPowerMah != null) {
+        final double[] customEnergyConsumerPowerMah = uCtoMah(
+                batteryStats.getCustomEnergyConsumerBatteryConsumptionUC());
+        if (customEnergyConsumerPowerMah != null) {
             final AggregateBatteryConsumer.Builder deviceBatteryConsumerBuilder =
                     builder.getAggregateBatteryConsumerBuilder(
                             BatteryUsageStats.AGGREGATE_BATTERY_CONSUMER_SCOPE_DEVICE);
-            for (int i = 0; i < customMeasuredPowerMah.length; i++) {
+            for (int i = 0; i < customEnergyConsumerPowerMah.length; i++) {
                 deviceBatteryConsumerBuilder.setConsumedPowerForCustomComponent(
                         BatteryConsumer.FIRST_CUSTOM_POWER_COMPONENT_ID + i,
-                        customMeasuredPowerMah[i]);
+                        customEnergyConsumerPowerMah[i]);
             }
         }
         if (totalAppPowerMah != null) {
@@ -82,38 +82,39 @@ public class CustomMeasuredPowerCalculator extends PowerCalculator {
     private double[] calculateApp(UidBatteryConsumer.Builder app, BatteryStats.Uid u,
             double[] totalPowerMah) {
         double[] newTotalPowerMah = null;
-        final double[] customMeasuredPowerMah = calculateMeasuredEnergiesMah(
-                u.getCustomConsumerMeasuredBatteryConsumptionUC());
-        if (customMeasuredPowerMah != null) {
+        final double[] customEnergyConsumerPowerMah =
+                uCtoMah(u.getCustomEnergyConsumerBatteryConsumptionUC());
+        if (customEnergyConsumerPowerMah != null) {
             if (totalPowerMah == null) {
-                newTotalPowerMah = new double[customMeasuredPowerMah.length];
-            } else if (totalPowerMah.length != customMeasuredPowerMah.length) {
+                newTotalPowerMah = new double[customEnergyConsumerPowerMah.length];
+            } else if (totalPowerMah.length != customEnergyConsumerPowerMah.length) {
                 Slog.wtf(TAG, "Number of custom energy components is not the same for all apps: "
-                        + totalPowerMah.length + ", " + customMeasuredPowerMah.length);
-                newTotalPowerMah = Arrays.copyOf(totalPowerMah, customMeasuredPowerMah.length);
+                        + totalPowerMah.length + ", " + customEnergyConsumerPowerMah.length);
+                newTotalPowerMah = Arrays.copyOf(totalPowerMah,
+                        customEnergyConsumerPowerMah.length);
             } else {
                 newTotalPowerMah = totalPowerMah;
             }
-            for (int i = 0; i < customMeasuredPowerMah.length; i++) {
+            for (int i = 0; i < customEnergyConsumerPowerMah.length; i++) {
                 app.setConsumedPowerForCustomComponent(
                         BatteryConsumer.FIRST_CUSTOM_POWER_COMPONENT_ID + i,
-                        customMeasuredPowerMah[i]);
+                        customEnergyConsumerPowerMah[i]);
                 if (!app.isVirtualUid()) {
-                    newTotalPowerMah[i] += customMeasuredPowerMah[i];
+                    newTotalPowerMah[i] += customEnergyConsumerPowerMah[i];
                 }
             }
         }
         return newTotalPowerMah;
     }
 
-    private double[] calculateMeasuredEnergiesMah(long[] measuredChargeUC) {
-        if (measuredChargeUC == null) {
+    private double[] uCtoMah(long[] chargeUC) {
+        if (chargeUC == null) {
             return null;
         }
-        final double[] measuredEnergiesMah = new double[measuredChargeUC.length];
-        for (int i = 0; i < measuredChargeUC.length; i++) {
-            measuredEnergiesMah[i] = uCtoMah(measuredChargeUC[i]);
+        final double[] mah = new double[chargeUC.length];
+        for (int i = 0; i < chargeUC.length; i++) {
+            mah[i] = uCtoMah(chargeUC[i]);
         }
-        return measuredEnergiesMah;
+        return mah;
     }
 }

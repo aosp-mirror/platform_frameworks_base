@@ -58,7 +58,7 @@ public class GnssPowerCalculator extends PowerCalculator {
         for (int i = uidBatteryConsumerBuilders.size() - 1; i >= 0; i--) {
             final UidBatteryConsumer.Builder app = uidBatteryConsumerBuilders.valueAt(i);
             final long consumptionUC =
-                    app.getBatteryStatsUid().getGnssMeasuredBatteryConsumptionUC();
+                    app.getBatteryStatsUid().getGnssEnergyConsumptionUC();
             final int powerModel = getPowerModel(consumptionUC, query);
             final double powerMah = calculateApp(app, app.getBatteryStatsUid(), powerModel,
                     rawRealtimeUs, averageGnssPowerMa, consumptionUC);
@@ -67,10 +67,10 @@ public class GnssPowerCalculator extends PowerCalculator {
             }
         }
 
-        final long consumptionUC = batteryStats.getGnssMeasuredBatteryConsumptionUC();
+        final long consumptionUC = batteryStats.getGnssEnergyConsumptionUC();
         final int powerModel = getPowerModel(consumptionUC, query);
         double powerMah;
-        if (powerModel == BatteryConsumer.POWER_MODEL_MEASURED_ENERGY) {
+        if (powerModel == BatteryConsumer.POWER_MODEL_ENERGY_CONSUMPTION) {
             powerMah = uCtoMah(consumptionUC);
         } else {
             powerMah = appsPowerMah;
@@ -85,12 +85,12 @@ public class GnssPowerCalculator extends PowerCalculator {
 
     private double calculateApp(UidBatteryConsumer.Builder app, BatteryStats.Uid u,
             @BatteryConsumer.PowerModel int powerModel, long rawRealtimeUs,
-            double averageGnssPowerMa, long measuredChargeUC) {
+            double averageGnssPowerMa, long consumedEnergyUC) {
         final long durationMs = computeDuration(u, rawRealtimeUs, BatteryStats.STATS_SINCE_CHARGED);
         final double powerMah;
         switch (powerModel) {
-            case BatteryConsumer.POWER_MODEL_MEASURED_ENERGY:
-                powerMah = uCtoMah(measuredChargeUC);
+            case BatteryConsumer.POWER_MODEL_ENERGY_CONSUMPTION:
+                powerMah = uCtoMah(consumedEnergyUC);
                 break;
             case BatteryConsumer.POWER_MODEL_POWER_PROFILE:
             default:

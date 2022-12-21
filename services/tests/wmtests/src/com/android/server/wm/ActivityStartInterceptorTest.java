@@ -16,6 +16,7 @@
 
 package com.android.server.wm;
 
+import static android.app.sdksandbox.SdkSandboxManager.ACTION_START_SANDBOXED_ACTIVITY;
 import static android.content.pm.ActivityInfo.LOCK_TASK_LAUNCH_MODE_DEFAULT;
 import static android.content.pm.ApplicationInfo.FLAG_SUSPENDED;
 
@@ -25,15 +26,19 @@ import static com.android.dx.mockito.inline.extended.ExtendedMockito.times;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.verify;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.when;
 import static com.android.server.pm.PackageManagerService.PLATFORM_PACKAGE_NAME;
+import static com.android.server.wm.ActivityInterceptorCallback.MAINLINE_SDK_SANDBOX_ORDER_ID;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotEquals;
 import static org.junit.Assert.assertSame;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.ArgumentMatchers.nullable;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.never;
 
+import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.app.ActivityManagerInternal;
 import android.app.ActivityOptions;
@@ -68,6 +73,7 @@ import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
 import org.mockito.Mock;
+import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
 
 /**
@@ -353,16 +359,24 @@ public class ActivityStartInterceptorTest {
 
     public void addMockInterceptorCallback(
             @Nullable Intent intent, @Nullable ActivityOptions activityOptions) {
+        addMockInterceptorCallback(intent, activityOptions, false);
+    }
+
+    public void addMockInterceptorCallback(
+            @Nullable Intent intent, @Nullable ActivityOptions activityOptions,
+            boolean skipResolving) {
         int size = mActivityInterceptorCallbacks.size();
         mActivityInterceptorCallbacks.put(size, new ActivityInterceptorCallback() {
             @Override
-            public ActivityInterceptResult intercept(ActivityInterceptorInfo info) {
+            public ActivityInterceptResult onInterceptActivityLaunch(@NonNull
+                    ActivityInterceptorInfo info) {
                 if (intent == null && activityOptions == null) {
                     return null;
                 }
                 return new ActivityInterceptResult(
-                        intent != null ? intent : info.intent,
-                        activityOptions != null ? activityOptions : info.checkedOptions);
+                        intent != null ? intent : info.getIntent(),
+                        activityOptions != null ? activityOptions : info.getCheckedOptions(),
+                        skipResolving);
             }
         });
     }
@@ -395,6 +409,30 @@ public class ActivityStartInterceptorTest {
     }
 
     @Test
+    public void testInterceptionCallback_skipResolving() {
+        addMockInterceptorCallback(
+                new Intent("android.test.foo"),
+                ActivityOptions.makeBasic().setLaunchDisplayId(3), true);
+        ActivityInfo aInfo = mAInfo;
+        assertTrue(mInterceptor.intercept(null, null, aInfo, null, null, null, 0, 0, null));
+        assertEquals("android.test.foo", mInterceptor.mIntent.getAction());
+        assertEquals(3, mInterceptor.mActivityOptions.getLaunchDisplayId());
+        assertEquals(aInfo, mInterceptor.mAInfo); // mAInfo should not be resolved
+    }
+
+    @Test
+    public void testInterceptionCallback_NoSkipResolving() throws InterruptedException {
+        addMockInterceptorCallback(
+                new Intent("android.test.foo"),
+                ActivityOptions.makeBasic().setLaunchDisplayId(3));
+        ActivityInfo aInfo = mAInfo;
+        assertTrue(mInterceptor.intercept(null, null, aInfo, null, null, null, 0, 0, null));
+        assertEquals("android.test.foo", mInterceptor.mIntent.getAction());
+        assertEquals(3, mInterceptor.mActivityOptions.getLaunchDisplayId());
+        assertNotEquals(aInfo, mInterceptor.mAInfo); // mAInfo should be resolved after intercept
+    }
+
+    @Test
     public void testActivityLaunchedCallback_singleCallback() {
         addMockInterceptorCallback(null, null);
 
@@ -404,5 +442,31 @@ public class ActivityStartInterceptorTest {
         mInterceptor.onActivityLaunched(null, mock(ActivityRecord.class));
 
         verify(callback, times(1)).onActivityLaunched(any(), any(), any());
+    }
+
+    @Test
+    public void testSandboxServiceInterceptionHappensToSandboxedActivityAction()
+            throws InterruptedException {
+
+        ActivityInterceptorCallback spyCallback = Mockito.spy(info -> null);
+        mActivityInterceptorCallbacks.put(MAINLINE_SDK_SANDBOX_ORDER_ID, spyCallback);
+
+        Intent intent = new Intent().setAction(ACTION_START_SANDBOXED_ACTIVITY);
+        mInterceptor.intercept(intent, null, mAInfo, null, null, null, 0, 0, null);
+
+        verify(spyCallback, times(1)).onInterceptActivityLaunch(
+                any(ActivityInterceptorCallback.ActivityInterceptorInfo.class));
+    }
+
+    @Test
+    public void testSandboxServiceInterceptionNotCalledForNotSandboxedActivityAction() {
+        ActivityInterceptorCallback spyCallback = Mockito.spy(info -> null);
+        mActivityInterceptorCallbacks.put(MAINLINE_SDK_SANDBOX_ORDER_ID, spyCallback);
+
+        Intent intent = new Intent();
+        mInterceptor.intercept(intent, null, mAInfo, null, null, null, 0, 0, null);
+
+        verify(spyCallback, never()).onInterceptActivityLaunch(
+                any(ActivityInterceptorCallback.ActivityInterceptorInfo.class));
     }
 }

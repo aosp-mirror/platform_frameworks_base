@@ -23,8 +23,8 @@ import static junit.framework.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 
-import android.window.TaskSnapshot;
 import android.platform.test.annotations.Presubmit;
+import android.window.TaskSnapshot;
 
 import androidx.test.filters.SmallTest;
 
@@ -89,7 +89,7 @@ public class TaskSnapshotCacheTest extends TaskSnapshotPersisterTestBase {
         mCache.putSnapshot(window.getTask(), createSnapshot());
         assertNotNull(mCache.getSnapshot(window.getTask().mTaskId, 0 /* userId */,
                 false /* restoreFromDisk */, false /* isLowResolution */));
-        mCache.onTaskRemoved(window.getTask().mTaskId);
+        mCache.onIdRemoved(window.getTask().mTaskId);
         assertNull(mCache.getSnapshot(window.getTask().mTaskId, 0 /* userId */,
                 false /* restoreFromDisk */, false /* isLowResolution */));
     }
@@ -98,7 +98,7 @@ public class TaskSnapshotCacheTest extends TaskSnapshotPersisterTestBase {
     public void testReduced_notCached() {
         final WindowState window = createWindow(null, FIRST_APPLICATION_WINDOW, "window");
         mPersister.persistSnapshot(window.getTask().mTaskId, mWm.mCurrentUserId, createSnapshot());
-        mPersister.waitForQueueEmpty();
+        mSnapshotPersistQueue.waitForQueueEmpty();
         assertNull(mCache.getSnapshot(window.getTask().mTaskId, mWm.mCurrentUserId,
                 false /* restoreFromDisk */, false /* isLowResolution */));
 
@@ -115,7 +115,7 @@ public class TaskSnapshotCacheTest extends TaskSnapshotPersisterTestBase {
     public void testRestoreFromDisk() {
         final WindowState window = createWindow(null, FIRST_APPLICATION_WINDOW, "window");
         mPersister.persistSnapshot(window.getTask().mTaskId, mWm.mCurrentUserId, createSnapshot());
-        mPersister.waitForQueueEmpty();
+        mSnapshotPersistQueue.waitForQueueEmpty();
         assertNull(mCache.getSnapshot(window.getTask().mTaskId, mWm.mCurrentUserId,
                 false /* restoreFromDisk */, false /* isLowResolution */));
 

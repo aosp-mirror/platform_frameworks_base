@@ -1130,18 +1130,18 @@ public final class PermissionPolicyService extends SystemService {
                 new ActivityInterceptorCallback() {
                     @Nullable
                     @Override
-                    public ActivityInterceptorCallback.ActivityInterceptResult intercept(
-                            ActivityInterceptorInfo info) {
+                    public ActivityInterceptorCallback.ActivityInterceptResult
+                            onInterceptActivityLaunch(@NonNull ActivityInterceptorInfo info) {
                         return null;
                     }
 
                     @Override
                     public void onActivityLaunched(TaskInfo taskInfo, ActivityInfo activityInfo,
                             ActivityInterceptorInfo info) {
-                        super.onActivityLaunched(taskInfo, activityInfo, info);
                         if (!shouldShowNotificationDialogOrClearFlags(taskInfo,
-                                activityInfo.packageName, info.callingPackage, info.intent,
-                                info.checkedOptions, activityInfo.name, true)
+                                activityInfo.packageName, info.getCallingPackage(),
+                                info.getIntent(), info.getCheckedOptions(), activityInfo.name,
+                                true)
                                 || isNoDisplayActivity(activityInfo)) {
                             return;
                         }
@@ -1318,12 +1318,12 @@ public final class PermissionPolicyService extends SystemService {
                     ACTION_REQUEST_PERMISSIONS_FOR_OTHER);
             grantPermission.putExtra(Intent.EXTRA_PACKAGE_NAME, pkgName);
 
-            final boolean remoteAnimation = info != null && info.checkedOptions != null
-                    && info.checkedOptions.getAnimationType() == ANIM_REMOTE_ANIMATION
-                    && info.clearOptionsAnimation != null;
+            final boolean remoteAnimation = info != null && info.getCheckedOptions() != null
+                    && info.getCheckedOptions().getAnimationType() == ANIM_REMOTE_ANIMATION
+                    && info.getClearOptionsAnimationRunnable() != null;
             ActivityOptions options = remoteAnimation ? ActivityOptions.makeRemoteAnimation(
-                        info.checkedOptions.getRemoteAnimationAdapter(),
-                        info.checkedOptions.getRemoteTransition())
+                        info.getCheckedOptions().getRemoteAnimationAdapter(),
+                        info.getCheckedOptions().getRemoteTransition())
                     : new ActivityOptions(new Bundle());
             options.setTaskOverlay(true, false);
             options.setLaunchTaskId(taskId);
@@ -1333,7 +1333,7 @@ public final class PermissionPolicyService extends SystemService {
                 // animation from the intercepted activity and its siblings to prevent duplication.
                 // This should trigger ActivityRecord#clearOptionsAnimationForSiblings for the
                 // intercepted activity.
-                info.clearOptionsAnimation.run();
+                info.getClearOptionsAnimationRunnable().run();
             }
             try {
                 mContext.startActivityAsUser(grantPermission, options.toBundle(), user);

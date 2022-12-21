@@ -144,7 +144,7 @@ public class InternetDialogController implements AccessPointController.AccessPoi
     private static final boolean DEBUG = Log.isLoggable(TAG, Log.DEBUG);
     private static final TelephonyDisplayInfo DEFAULT_TELEPHONY_DISPLAY_INFO =
             new TelephonyDisplayInfo(TelephonyManager.NETWORK_TYPE_UNKNOWN,
-                    TelephonyDisplayInfo.OVERRIDE_NETWORK_TYPE_NONE);
+                    TelephonyDisplayInfo.OVERRIDE_NETWORK_TYPE_NONE, false);
 
     static final int MAX_WIFI_ENTRY_COUNT = 3;
 

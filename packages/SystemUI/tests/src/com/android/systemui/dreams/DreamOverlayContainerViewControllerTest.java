@@ -203,7 +203,7 @@ public class DreamOverlayContainerViewControllerTest extends SysuiTestCase {
 
         mController.onViewAttached();
 
-        verify(mAnimationsController).startEntryAnimations(mDreamOverlayContainerView);
+        verify(mAnimationsController).startEntryAnimations();
         verify(mAnimationsController, never()).cancelAnimations();
     }
 
@@ -213,7 +213,7 @@ public class DreamOverlayContainerViewControllerTest extends SysuiTestCase {
 
         mController.onViewAttached();
 
-        verify(mAnimationsController, never()).startEntryAnimations(mDreamOverlayContainerView);
+        verify(mAnimationsController, never()).startEntryAnimations();
     }
 
     @Test
