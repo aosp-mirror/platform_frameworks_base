@@ -41226,6 +41226,7 @@ package android.telecom {
     method public void disconnect(@NonNull android.telecom.DisconnectCause, @NonNull java.util.concurrent.Executor, @NonNull android.os.OutcomeReceiver<java.lang.Void,android.telecom.CallException>);
     method @NonNull public android.os.ParcelUuid getCallId();
     method public void rejectCall(@NonNull java.util.concurrent.Executor, @NonNull android.os.OutcomeReceiver<java.lang.Void,android.telecom.CallException>);
+    method public void requestCallEndpointChange(@NonNull android.telecom.CallEndpoint, @NonNull java.util.concurrent.Executor, @NonNull android.os.OutcomeReceiver<java.lang.Void,android.telecom.CallException>);
     method public void setActive(@NonNull java.util.concurrent.Executor, @NonNull android.os.OutcomeReceiver<java.lang.Void,android.telecom.CallException>);
     method public void setInactive(@NonNull java.util.concurrent.Executor, @NonNull android.os.OutcomeReceiver<java.lang.Void,android.telecom.CallException>);
     method public void startCallStreaming(@NonNull java.util.concurrent.Executor, @NonNull android.os.OutcomeReceiver<java.lang.Void,android.telecom.CallException>);
@@ -41263,10 +41264,12 @@ package android.telecom {
 
   public interface CallEventCallback {
     method public void onAnswer(int, @NonNull java.util.function.Consumer<java.lang.Boolean>);
-    method public void onCallAudioStateChanged(@NonNull android.telecom.CallAudioState);
+    method public void onAvailableCallEndpointsChanged(@NonNull java.util.List<android.telecom.CallEndpoint>);
+    method public void onCallEndpointChanged(@NonNull android.telecom.CallEndpoint);
     method public void onCallStreamingFailed(int);
     method public void onCallStreamingStarted(@NonNull java.util.function.Consumer<java.lang.Boolean>);
     method public void onDisconnect(@NonNull java.util.function.Consumer<java.lang.Boolean>);
+    method public void onMuteStateChanged(boolean);
     method public void onReject(@NonNull java.util.function.Consumer<java.lang.Boolean>);
     method public void onSetActive(@NonNull java.util.function.Consumer<java.lang.Boolean>);
     method public void onSetInactive(@NonNull java.util.function.Consumer<java.lang.Boolean>);

@@ -31,6 +31,8 @@ import android.os.ResultReceiver;
 import com.android.internal.telecom.ClientTransactionalServiceRepository;
 import com.android.internal.telecom.ICallControl;
 
+import java.util.List;
+import java.util.Objects;
 import java.util.concurrent.Executor;
 
 /**
@@ -214,6 +216,42 @@ public final class CallControl implements AutoCloseable {
             try {
                 mServerInterface.startCallStreaming(mCallId,
                         new CallControlResultReceiver("startCallStreaming", executor, callback));
+            } catch (RemoteException e) {
+                throw e.rethrowAsRuntimeException();
+            }
+        } else {
+            throw new IllegalStateException(INTERFACE_ERROR_MSG);
+        }
+    }
+
+    /**
+     * Request a CallEndpoint change. Clients should not define their own CallEndpoint when
+     * requesting a change. Instead, the new endpoint should be one of the valid endpoints provided
+     * by {@link CallEventCallback#onAvailableCallEndpointsChanged(List)}.
+     *
+     * @param callEndpoint ; The {@link CallEndpoint} to change to.
+     * @param executor     ; The {@link Executor} on which the {@link OutcomeReceiver} callback
+     *                     will be called on.
+     * @param callback     ; The {@link OutcomeReceiver} that will be completed on the Telecom side
+     *                     that details success or failure of the requested operation.
+     *
+     *                     {@link OutcomeReceiver#onResult} will be called if Telecom has
+     *                     successfully changed the CallEndpoint that was requested.
+     *
+     *                     {@link OutcomeReceiver#onError} will be called if Telecom has failed to
+     *                     switch to the requested CallEndpoint.  A {@link CallException} will be
+     *                     passed that details why the operation failed.
+     */
+    public void requestCallEndpointChange(@NonNull CallEndpoint callEndpoint,
+            @CallbackExecutor @NonNull Executor executor,
+            @NonNull OutcomeReceiver<Void, CallException> callback) {
+        Objects.requireNonNull(callEndpoint);
+        Objects.requireNonNull(executor);
+        Objects.requireNonNull(callback);
+        if (mServerInterface != null) {
+            try {
+                mServerInterface.requestCallEndpointChange(callEndpoint,
+                        new CallControlResultReceiver("endpointChange", executor, callback));
             } catch (RemoteException e) {
                 throw e.rethrowAsRuntimeException();
             }
