@@ -867,13 +867,13 @@ public class WindowProcessController extends ConfigurationContainer<Configuratio
     // TODO(b/199277729): Consider whether we need to add special casing for edge cases like
     //  activity-embeddings etc.
     void updateAppSpecificSettingsForAllActivitiesInPackage(String packageName, Integer nightMode,
-            LocaleList localesOverride) {
+            LocaleList localesOverride, @Configuration.GrammaticalGender int gender) {
         for (int i = mActivities.size() - 1; i >= 0; --i) {
             final ActivityRecord r = mActivities.get(i);
             // Activities from other packages could be sharing this process. Only propagate updates
             // to those activities that are part of the package whose app-specific settings changed
             if (packageName.equals(r.packageName)
-                    && r.applyAppSpecificConfig(nightMode, localesOverride)
+                    && r.applyAppSpecificConfig(nightMode, localesOverride, gender)
                     && r.isVisibleRequested()) {
                 r.ensureActivityConfiguration(0 /* globalChanges */, true /* preserveWindow */);
             }

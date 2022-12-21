@@ -29,6 +29,7 @@ import android.content.IIntentSender;
 import android.content.Intent;
 import android.content.pm.ApplicationInfo;
 import android.content.res.CompatibilityInfo;
+import android.content.res.Configuration;
 import android.os.Bundle;
 import android.os.IBinder;
 import android.os.LocaleList;
@@ -622,10 +623,19 @@ public abstract class ActivityTaskManagerInternal {
         @Nullable
         public final LocaleList mLocales;
 
+        /**
+         * Gender for the application, null if app-specific grammatical gender is not set.
+         */
+        @Nullable
+        public final @Configuration.GrammaticalGender
+        Integer mGrammaticalGender;
+
         @VisibleForTesting(visibility = VisibleForTesting.Visibility.PACKAGE)
-        public PackageConfig(Integer nightMode, LocaleList locales) {
+        public PackageConfig(Integer nightMode, LocaleList locales,
+                @Configuration.GrammaticalGender Integer grammaticalGender) {
             mNightMode = nightMode;
             mLocales = locales;
+            mGrammaticalGender = grammaticalGender;
         }
 
         /**
@@ -658,6 +668,13 @@ public abstract class ActivityTaskManagerInternal {
          * instead use the {@link LocaleManagerService#setApplicationLocales}
          */
         PackageConfigurationUpdater setLocales(LocaleList locales);
+
+        /**
+         * Sets the gender for the current application. This setting is persisted and will
+         * override the system configuration for this application.
+         */
+        PackageConfigurationUpdater setGrammaticalGender(
+                @Configuration.GrammaticalGender int gender);
 
         /**
          * Commit changes.
