@@ -46,6 +46,8 @@ interface IPackageInstallerSession {
     void commit(in IntentSender statusReceiver, boolean forTransferred);
     void transfer(in String packageName);
     void abandon();
+    void seal();
+    List<String> fetchPackageNames();
 
     DataLoaderParamsParcel getDataLoaderParams();
     void addFile(int location, String name, long lengthBytes, in byte[] metadata, in byte[] signature);

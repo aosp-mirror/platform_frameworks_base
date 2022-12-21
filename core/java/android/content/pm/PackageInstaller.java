@@ -44,8 +44,11 @@ import android.annotation.SuppressLint;
 import android.annotation.SystemApi;
 import android.annotation.TestApi;
 import android.app.ActivityManager;
+import android.app.ActivityThread;
 import android.app.AppGlobals;
 import android.compat.annotation.UnsupportedAppUsage;
+import android.content.IIntentReceiver;
+import android.content.IIntentSender;
 import android.content.Intent;
 import android.content.IntentSender;
 import android.content.pm.PackageManager.DeleteFlags;
@@ -59,9 +62,11 @@ import android.graphics.Bitmap;
 import android.icu.util.ULocale;
 import android.net.Uri;
 import android.os.Build;
+import android.os.Bundle;
 import android.os.FileBridge;
 import android.os.Handler;
 import android.os.HandlerExecutor;
+import android.os.IBinder;
 import android.os.Parcel;
 import android.os.ParcelFileDescriptor;
 import android.os.Parcelable;
@@ -226,8 +231,8 @@ public class PackageInstaller {
      * {@link #STATUS_PENDING_USER_ACTION}, {@link #STATUS_SUCCESS},
      * {@link #STATUS_FAILURE}, {@link #STATUS_FAILURE_ABORTED},
      * {@link #STATUS_FAILURE_BLOCKED}, {@link #STATUS_FAILURE_CONFLICT},
-     * {@link #STATUS_FAILURE_INCOMPATIBLE}, {@link #STATUS_FAILURE_INVALID}, or
-     * {@link #STATUS_FAILURE_STORAGE}.
+     * {@link #STATUS_FAILURE_INCOMPATIBLE}, {@link #STATUS_FAILURE_INVALID},
+     * {@link #STATUS_FAILURE_STORAGE}, or {@link #STATUS_FAILURE_TIMEOUT}.
      * <p>
      * More information about a status may be available through additional
      * extras; see the individual status documentation for details.
@@ -439,6 +444,13 @@ public class PackageInstaller {
      * @see #EXTRA_STATUS_MESSAGE
      */
     public static final int STATUS_FAILURE_INCOMPATIBLE = 7;
+
+    /**
+     * The operation failed because it didn't complete within the specified timeout.
+     *
+     * @see #EXTRA_STATUS_MESSAGE
+     */
+    public static final int STATUS_FAILURE_TIMEOUT = 8;
 
     /**
      * Default value, non-streaming installation session.
@@ -970,6 +982,61 @@ public class PackageInstaller {
         try {
             mInstaller.waitForInstallConstraints(
                     mInstallerPackageName, packageNames, constraints, callback, timeoutMillis);
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
+    /**
+     * Commit the session when all constraints are satisfied. This is a convenient method to
+     * combine {@link #waitForInstallConstraints(List, InstallConstraints, IntentSender, long)}
+     * and {@link Session#commit(IntentSender)}.
+     * <p>
+     * Once this method is called, the session is sealed and no additional mutations
+     * may be performed on the session. In the case of timeout, you may commit the
+     * session again using this method or {@link Session#commit(IntentSender)} for retries.
+     *
+     * @param statusReceiver Called when the state of the session changes. Intents
+     *                       sent to this receiver contain {@link #EXTRA_STATUS}.
+     *                       Refer to the individual status codes on how to handle them.
+     * @param constraints The requirements to satisfy before committing the session.
+     * @param timeoutMillis The maximum time to wait, in milliseconds until the
+     *                      constraints are satisfied. The caller will be notified via
+     *                      {@code statusReceiver} if timeout happens before commit.
+     */
+    public void commitSessionAfterInstallConstraintsAreMet(int sessionId,
+            @NonNull IntentSender statusReceiver, @NonNull InstallConstraints constraints,
+            @DurationMillisLong long timeoutMillis) {
+        try {
+            var session = mInstaller.openSession(sessionId);
+            session.seal();
+            var packageNames = session.fetchPackageNames();
+            var intentSender = new IntentSender((IIntentSender) new IIntentSender.Stub() {
+                @Override
+                public void send(int code, Intent intent, String resolvedType,
+                        IBinder allowlistToken, IIntentReceiver finishedReceiver,
+                        String requiredPermission, Bundle options)  {
+                    var result = intent.getParcelableExtra(
+                            PackageInstaller.EXTRA_INSTALL_CONSTRAINTS_RESULT,
+                            InstallConstraintsResult.class);
+                    try {
+                        if (result.isAllConstraintsSatisfied()) {
+                            session.commit(statusReceiver, false);
+                        } else {
+                            // timeout
+                            final Intent fillIn = new Intent();
+                            fillIn.putExtra(PackageInstaller.EXTRA_SESSION_ID, sessionId);
+                            fillIn.putExtra(PackageInstaller.EXTRA_STATUS, STATUS_FAILURE_TIMEOUT);
+                            fillIn.putExtra(PackageInstaller.EXTRA_STATUS_MESSAGE,
+                                    "Install constraints not satisfied within timeout");
+                            statusReceiver.sendIntent(
+                                    ActivityThread.currentApplication(), 0, fillIn, null, null);
+                        }
+                    } catch (Exception ignore) {
+                    }
+                }
+            });
+            waitForInstallConstraints(packageNames, constraints, intentSender, timeoutMillis);
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }
