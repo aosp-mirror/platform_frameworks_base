@@ -14745,14 +14745,10 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
         if (isAdb) {
             // If shell command runs after user setup completed check device status. Otherwise, OK.
             if (mIsWatch || hasUserSetupCompleted(UserHandle.USER_SYSTEM)) {
-                // In non-headless system user mode, DO can be setup only if
-                // there's no non-system user.
-                // In headless system user mode, DO can be setup only if there are
-                // two users: the headless system user and the foreground user.
-                // If there could be multiple foreground users, this constraint should be modified.
+                // DO can be setup only if there are no users which are neither created by default
+                // nor marked as FOR_TESTING
 
-                int maxNumberOfExistingUsers = isHeadlessSystemUserMode ? 2 : 1;
-                if (mUserManager.getUserCount() > maxNumberOfExistingUsers) {
+                if (nonTestNonPrecreatedUsersExist()) {
                     return STATUS_NONSYSTEM_USER_EXISTS;
                 }
 
@@ -14780,6 +14776,18 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
             }
             return STATUS_OK;
         }
+    }
+
+    /**
+     * True if there are any users on the device which were not setup by default (1 usually, 2 for
+     * devices with a headless system user) and also are not marked as FOR_TESTING.
+     */
+    private boolean nonTestNonPrecreatedUsersExist() {
+        int allowedUsers = UserManager.isHeadlessSystemUserMode() ? 2 : 1;
+
+        return mUserManagerInternal.getUsers(/* excludeDying= */ true).stream()
+                .filter(u -> !u.isForTesting())
+                .count() > allowedUsers;
     }
 
     private int checkDeviceOwnerProvisioningPreCondition(@UserIdInt int callingUserId) {
@@ -19546,7 +19554,7 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
     }
 
     private boolean shouldAllowBypassingDevicePolicyManagementRoleQualificationInternal() {
-        if (mUserManager.getUserCount() > 1) {
+        if (nonTestNonPrecreatedUsersExist()) {
             return false;
         }
         AccountManager am = AccountManager.get(mContext);
