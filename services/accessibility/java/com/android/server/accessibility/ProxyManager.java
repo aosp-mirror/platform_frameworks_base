@@ -103,7 +103,6 @@ public class ProxyManager {
                 };
         client.asBinder().linkToDeath(deathRecipient, 0);
 
-        mA11yWindowManager.startTrackingDisplayProxy(displayId);
         // Notify apps that the service state has changed.
         // A11yManager#A11yServicesStateChangeListener
         synchronized (mLock) {
