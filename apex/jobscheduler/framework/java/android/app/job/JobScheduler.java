@@ -400,6 +400,8 @@ public abstract class JobScheduler {
      * Returns {@code true} if the app currently holds the
      * {@link android.Manifest.permission#RUN_LONG_JOBS} permission, allowing it to run long jobs.
      * @hide
+     * TODO(255371817): consider exposing this to apps who could call
+     * {@link #scheduleAsPackage(JobInfo, String, int, String)}
      */
     public boolean hasRunLongJobsPermission(@NonNull String packageName, @UserIdInt int userId) {
         return false;
