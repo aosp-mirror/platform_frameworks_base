@@ -38,6 +38,7 @@ import android.os.PersistableBundle;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.util.List;
+import java.util.Map;
 
 /**
  * This is an API for scheduling various types of jobs against the framework that will be executed
@@ -264,6 +265,31 @@ public abstract class JobScheduler {
     }
 
     /**
+     * Get a JobScheduler instance that is dedicated to a specific namespace. Any API calls using
+     * this instance will interact with jobs in that namespace, unless the API documentation says
+     * otherwise. Attempting to update a job scheduled in another namespace will not be possible
+     * but will instead create or update the job inside the current namespace. A JobScheduler
+     * instance dedicated to a namespace must be used to schedule or update jobs in that namespace.
+     * @see #getNamespace()
+     * @hide
+     */
+    @NonNull
+    public JobScheduler forNamespace(@NonNull String namespace) {
+        throw new RuntimeException("Not implemented. Must override in a subclass.");
+    }
+
+    /**
+     * Get the namespace this JobScheduler instance is operating in. A {@code null} value means
+     * that the app has not specified a namespace for this instance, and it is therefore using the
+     * default namespace.
+     * @hide
+     */
+    @Nullable
+    public String getNamespace() {
+        throw new RuntimeException("Not implemented. Must override in a subclass.");
+    }
+
+    /**
      * Schedule a job to be executed.  Will replace any currently scheduled job with the same
      * ID with the new information in the {@link JobInfo}.  If a job with the given ID is currently
      * running, it will be stopped.
@@ -364,12 +390,36 @@ public abstract class JobScheduler {
     public abstract void cancelAll();
 
     /**
+     * Cancel <em>all</em> jobs that have been scheduled by the calling application, regardless of
+     * namespace.
+     * @hide
+     */
+    public void cancelInAllNamespaces() {
+        throw new RuntimeException("Not implemented. Must override in a subclass.");
+    }
+
+    /**
      * Retrieve all jobs that have been scheduled by the calling application.
      *
      * @return a list of all of the app's scheduled jobs.  This includes jobs that are
      *     currently started as well as those that are still waiting to run.
      */
     public abstract @NonNull List<JobInfo> getAllPendingJobs();
+
+    /**
+     * Retrieve all jobs that have been scheduled by the calling application within the current
+     * namespace.
+     *
+     * @return a list of all of the app's scheduled jobs scheduled with the current namespace.
+     * If a namespace hasn't been explicitly set with {@link #forNamespace(String)},
+     * then this will return jobs in the default namespace.
+     * This includes jobs that are currently started as well as those that are still waiting to run.
+     * @hide
+     */
+    @NonNull
+    public Map<String, List<JobInfo>> getPendingJobsInAllNamespaces() {
+        throw new RuntimeException("Not implemented. Must override in a subclass.");
+    }
 
     /**
      * Look up the description of a scheduled job.

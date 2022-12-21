@@ -1251,6 +1251,9 @@ public class JobInfo implements Parcelable {
          * in them all being treated the same. The priorities each have slightly different
          * behaviors, as noted in their relevant javadoc.
          *
+         * Starting in Android version {@link android.os.Build.VERSION_CODES#UPSIDE_DOWN_CAKE},
+         * the priority will only affect sorting order within the job's namespace.
+         *
          * <b>NOTE:</b> Setting all of your jobs to high priority will not be
          * beneficial to your app and in fact may hurt its performance in the
          * long run.

@@ -615,7 +615,7 @@ class JobConcurrencyManager {
     private boolean isSimilarJobRunningLocked(JobStatus job) {
         for (int i = mRunningJobs.size() - 1; i >= 0; --i) {
             JobStatus js = mRunningJobs.valueAt(i);
-            if (job.getUid() == js.getUid() && job.getJobId() == js.getJobId()) {
+            if (job.matches(js.getUid(), js.getNamespace(), js.getJobId())) {
                 return true;
             }
         }
@@ -1687,12 +1687,12 @@ class JobConcurrencyManager {
 
     @GuardedBy("mLock")
     boolean executeTimeoutCommandLocked(PrintWriter pw, String pkgName, int userId,
-            boolean hasJobId, int jobId) {
+            @Nullable String namespace, boolean hasJobId, int jobId) {
         boolean foundSome = false;
         for (int i = 0; i < mActiveServices.size(); i++) {
             final JobServiceContext jc = mActiveServices.get(i);
             final JobStatus js = jc.getRunningJobLocked();
-            if (jc.timeoutIfExecutingLocked(pkgName, userId, hasJobId, jobId, "shell")) {
+            if (jc.timeoutIfExecutingLocked(pkgName, userId, namespace, hasJobId, jobId, "shell")) {
                 foundSome = true;
                 pw.print("Timing out: ");
                 js.printUniqueId(pw);
@@ -1709,11 +1709,13 @@ class JobConcurrencyManager {
      */
     @Nullable
     @GuardedBy("mLock")
-    Pair<Long, Long> getEstimatedNetworkBytesLocked(String pkgName, int uid, int jobId) {
+    Pair<Long, Long> getEstimatedNetworkBytesLocked(String pkgName, int uid,
+            String namespace, int jobId) {
         for (int i = 0; i < mActiveServices.size(); i++) {
             final JobServiceContext jc = mActiveServices.get(i);
             final JobStatus js = jc.getRunningJobLocked();
-            if (js != null && js.matches(uid, jobId) && js.getSourcePackageName().equals(pkgName)) {
+            if (js != null && js.matches(uid, namespace, jobId)
+                    && js.getSourcePackageName().equals(pkgName)) {
                 return jc.getEstimatedNetworkBytes();
             }
         }
@@ -1726,11 +1728,13 @@ class JobConcurrencyManager {
      */
     @Nullable
     @GuardedBy("mLock")
-    Pair<Long, Long> getTransferredNetworkBytesLocked(String pkgName, int uid, int jobId) {
+    Pair<Long, Long> getTransferredNetworkBytesLocked(String pkgName, int uid,
+            String namespace, int jobId) {
         for (int i = 0; i < mActiveServices.size(); i++) {
             final JobServiceContext jc = mActiveServices.get(i);
             final JobStatus js = jc.getRunningJobLocked();
-            if (js != null && js.matches(uid, jobId) && js.getSourcePackageName().equals(pkgName)) {
+            if (js != null && js.matches(uid, namespace, jobId)
+                    && js.getSourcePackageName().equals(pkgName)) {
                 return jc.getTransferredNetworkBytes();
             }
         }
@@ -1753,6 +1757,9 @@ class JobConcurrencyManager {
         pendingJobQueue.resetIterator();
         while ((js = pendingJobQueue.next()) != null) {
             s.append("(")
+                    .append("{")
+                    .append(js.getNamespace())
+                    .append("} ")
                     .append(js.getJob().getId())
                     .append(", ")
                     .append(js.getUid())
@@ -1777,6 +1784,9 @@ class JobConcurrencyManager {
                 if (job == null) {
                     s.append("nothing");
                 } else {
+                    if (job.getNamespace() != null) {
+                        s.append(job.getNamespace()).append(":");
+                    }
                     s.append(job.getJobId()).append("/").append(job.getUid());
                 }
                 s.append(")");

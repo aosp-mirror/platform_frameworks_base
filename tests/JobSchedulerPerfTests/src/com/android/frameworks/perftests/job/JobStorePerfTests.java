@@ -208,6 +208,6 @@ public class JobStorePerfTests {
                 .setPersisted(true)
                 .build();
         return JobStatus.createFromJobInfo(
-                jobInfo, callingUid, SOURCE_PACKAGE, SOURCE_USER_ID, testTag);
+                jobInfo, callingUid, SOURCE_PACKAGE, SOURCE_USER_ID, null, testTag);
     }
 }
