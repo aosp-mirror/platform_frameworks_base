@@ -16,11 +16,14 @@
 
 package com.android.internal.app;
 
+import static android.util.PollingCheck.waitFor;
+
 import static androidx.test.espresso.Espresso.onView;
 import static androidx.test.espresso.action.ViewActions.click;
 import static androidx.test.espresso.action.ViewActions.swipeUp;
 import static androidx.test.espresso.assertion.ViewAssertions.matches;
 import static androidx.test.espresso.matcher.ViewMatchers.isDisplayed;
+import static androidx.test.espresso.matcher.ViewMatchers.isSelected;
 import static androidx.test.espresso.matcher.ViewMatchers.withId;
 import static androidx.test.espresso.matcher.ViewMatchers.withText;
 
@@ -48,6 +51,8 @@ import androidx.test.rule.ActivityTestRule;
 import com.android.internal.R;
 import com.android.internal.app.ResolverActivity.ResolvedComponentInfo;
 import com.android.internal.app.ChooserActivityWorkProfileTest.TestCase.Tab;
+
+import junit.framework.AssertionFailedError;
 
 import org.junit.Before;
 import org.junit.Rule;
@@ -331,8 +336,17 @@ public class ChooserActivityWorkProfileTest {
         final int stringId = tab == Tab.WORK ? R.string.resolver_work_tab
                 : R.string.resolver_personal_tab;
 
-        onView(withText(stringId)).perform(click());
-        waitForIdle();
+        waitFor(() -> {
+            onView(withText(stringId)).perform(click());
+            waitForIdle();
+
+            try {
+                onView(withText(stringId)).check(matches(isSelected()));
+                return true;
+            } catch (AssertionFailedError e) {
+                return false;
+            }
+        });
 
         onView(withId(R.id.contentPanel))
                 .perform(swipeUp());
