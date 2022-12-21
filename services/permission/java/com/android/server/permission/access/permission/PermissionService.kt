@@ -40,6 +40,7 @@ import android.os.ServiceManager
 import android.os.UserHandle
 import android.os.UserManager
 import android.permission.IOnPermissionsChangeListener
+import android.permission.PermissionControllerManager
 import android.permission.PermissionManager
 import android.provider.Settings
 import android.util.DebugUtils
@@ -48,10 +49,12 @@ import android.util.Log
 import com.android.internal.compat.IPlatformCompat
 import com.android.internal.logging.MetricsLogger
 import com.android.internal.logging.nano.MetricsProto
+import com.android.internal.util.DumpUtils
 import com.android.internal.util.Preconditions
 import com.android.server.FgThread
 import com.android.server.LocalManagerRegistry
 import com.android.server.LocalServices
+import com.android.server.PermissionThread
 import com.android.server.ServiceThread
 import com.android.server.SystemConfig
 import com.android.server.permission.access.AccessCheckingService
@@ -80,6 +83,10 @@ import com.android.server.policy.SoftRestrictedPermissionPolicy
 import libcore.util.EmptyArray
 import java.io.FileDescriptor
 import java.io.PrintWriter
+import java.util.concurrent.CompletableFuture
+import java.util.concurrent.ExecutionException
+import java.util.concurrent.TimeUnit
+import java.util.concurrent.TimeoutException
 
 /**
  * Modern implementation of [PermissionManagerServiceInterface].
@@ -105,6 +112,17 @@ class PermissionService(
     private lateinit var onPermissionFlagsChangedListener: OnPermissionFlagsChangedListener
 
     private val mountedStorageVolumes = IndexedSet<String?>()
+
+    private lateinit var permissionControllerManager: PermissionControllerManager
+
+    /**
+     * A permission backup might contain apps that are not installed. In this case we delay the
+     * restoration until the app is installed.
+     *
+     * This array (`userId -> noDelayedBackupLeft`) is `true` for all the users where
+     * there is **no more** delayed backup left.
+     */
+    private val isDelayedPermissionBackupFinished = IntBooleanMap()
 
     fun initialize() {
         metricsLogger = MetricsLogger()
@@ -161,9 +179,7 @@ class PermissionService(
                 with(policy) { getPermissionGroups()[permissionGroupName] }
             } ?: return null
 
-            val isPermissionGroupVisible =
-                snapshot.isPackageVisibleToUid(permissionGroup.packageName, callingUid)
-            if (!isPermissionGroupVisible) {
+            if (!snapshot.isPackageVisibleToUid(permissionGroup.packageName, callingUid)) {
                 return null
             }
         }
@@ -199,9 +215,7 @@ class PermissionService(
                 with(policy) { getPermissions()[permissionName] }
             } ?: return null
 
-            val isPermissionVisible =
-                snapshot.isPackageVisibleToUid(permission.packageName, callingUid)
-            if (!isPermissionVisible) {
+            if (!snapshot.isPackageVisibleToUid(permission.packageName, callingUid)) {
                 return null
             }
 
@@ -274,12 +288,30 @@ class PermissionService(
         }
     }
 
-    override fun getAllPermissionsWithProtection(protection: Int): List<PermissionInfo> {
-        TODO("Not yet implemented")
-    }
+    override fun getAllPermissionsWithProtection(protection: Int): List<PermissionInfo> =
+        getPermissionsWithProtectionOrProtectionFlags { permission ->
+            permission.protection == protection
+        }
 
-    override fun getAllPermissionsWithProtectionFlags(protectionFlags: Int): List<PermissionInfo> {
-        TODO("Not yet implemented")
+    override fun getAllPermissionsWithProtectionFlags(protectionFlags: Int): List<PermissionInfo> =
+        getPermissionsWithProtectionOrProtectionFlags { permission ->
+            permission.protectionFlags.hasBits(protectionFlags)
+        }
+
+    private inline fun getPermissionsWithProtectionOrProtectionFlags(
+        predicate: (Permission) -> Boolean
+    ): List<PermissionInfo> {
+        service.getState {
+            with(policy) {
+                return getPermissions().mapNotNullIndexed { _, _, permission ->
+                    if (predicate(permission)) {
+                        permission.generatePermissionInfo(0)
+                    } else {
+                        null
+                    }
+                }
+            }
+        }
     }
 
     override fun getPermissionGids(permissionName: String, userId: Int): IntArray {
@@ -290,11 +322,100 @@ class PermissionService(
     }
 
     override fun addPermission(permissionInfo: PermissionInfo, async: Boolean): Boolean {
-        TODO("Not yet implemented")
+        val permissionName = permissionInfo.name
+        requireNotNull(permissionName) { "permissionName cannot be null" }
+        val callingUid = Binder.getCallingUid()
+        if (packageManagerLocal.withUnfilteredSnapshot().use { it.isUidInstantApp(callingUid) }) {
+            throw SecurityException("Instant apps cannot add permissions")
+        }
+        if (permissionInfo.labelRes == 0 && permissionInfo.nonLocalizedLabel == null) {
+            throw SecurityException("Label must be specified in permission")
+        }
+        val oldPermission: Permission?
+
+        service.mutateState {
+            val permissionTree = getAndEnforcePermissionTree(permissionName)
+            enforcePermissionTreeSize(permissionInfo, permissionTree)
+
+            oldPermission = with(policy) { getPermissions()[permissionName] }
+            if (oldPermission != null && !oldPermission.isDynamic) {
+                throw SecurityException(
+                    "Not allowed to modify non-dynamic permission $permissionName"
+                )
+            }
+
+            permissionInfo.packageName = permissionTree.permissionInfo.packageName
+            @Suppress("DEPRECATION")
+            permissionInfo.protectionLevel =
+                PermissionInfo.fixProtectionLevel(permissionInfo.protectionLevel)
+
+            val newPermission = Permission(
+                permissionInfo, true, Permission.TYPE_DYNAMIC, permissionTree.appId
+            )
+
+            with(policy) { addPermission(newPermission, !async) }
+        }
+
+        return oldPermission == null
     }
 
     override fun removePermission(permissionName: String) {
-        TODO("Not yet implemented")
+        val callingUid = Binder.getCallingUid()
+        if (packageManagerLocal.withUnfilteredSnapshot().use { it.isUidInstantApp(callingUid) }) {
+            throw SecurityException("Instant applications don't have access to this method")
+        }
+        service.mutateState {
+            getAndEnforcePermissionTree(permissionName)
+            val permission = with(policy) { getPermissions()[permissionName] } ?: return@mutateState
+
+            if (!permission.isDynamic) {
+                // TODO(b/67371907): switch to logging if it fails
+                throw SecurityException(
+                    "Not allowed to modify non-dynamic permission $permissionName"
+                )
+            }
+
+            with(policy) { removePermission(permission) }
+        }
+    }
+    private fun GetStateScope.getAndEnforcePermissionTree(permissionName: String): Permission {
+        val callingUid = Binder.getCallingUid()
+        val permissionTree = with(policy) { findPermissionTree(permissionName) }
+        if (permissionTree != null && permissionTree.appId == UserHandle.getAppId(callingUid)) {
+                return permissionTree
+        }
+
+        throw SecurityException(
+            "Calling UID $callingUid is not allowed to add to or remove from the permission tree"
+        )
+    }
+
+    private fun GetStateScope.enforcePermissionTreeSize(
+        permissionInfo: PermissionInfo,
+        permissionTree: Permission
+    ) {
+        // We calculate the max size of permissions defined by this uid and throw
+        // if that plus the size of 'info' would exceed our stated maximum.
+        if (permissionTree.appId != Process.SYSTEM_UID) {
+            val permissionTreeFootprint = calculatePermissionTreeFootprint(permissionTree)
+            if (permissionTreeFootprint + permissionInfo.calculateFootprint() >
+                MAX_PERMISSION_TREE_FOOTPRINT
+            ) {
+                throw SecurityException("Permission tree size cap exceeded")
+            }
+        }
+    }
+
+    private fun GetStateScope.calculatePermissionTreeFootprint(permissionTree: Permission): Int {
+        var size = 0
+        with(policy) {
+            getPermissions().forEachValueIndexed { _, permission ->
+                if (permissionTree.appId == permission.appId) {
+                    size += permission.footprint
+                }
+            }
+        }
+        return size
     }
 
     override fun checkUidPermission(uid: Int, permissionName: String): Int {
@@ -1099,30 +1220,300 @@ class PermissionService(
         with(policy) { setPermissionFlags(appId, userId, permissionName, newFlags) }
     }
 
+    override fun getAllowlistedRestrictedPermissions(
+        packageName: String,
+        allowlistedFlags: Int,
+        userId: Int
+    ): IndexedList<String>? {
+        requireNotNull(packageName) { "packageName cannot be null" }
+        Preconditions.checkFlagsArgument(allowlistedFlags, PERMISSION_ALLOWLIST_MASK)
+        Preconditions.checkArgumentNonnegative(userId, "userId cannot be null")
+
+        enforceCallingOrSelfCrossUserPermission(
+            userId, enforceFullPermission = false, enforceShellRestriction = false,
+            "getAllowlistedRestrictedPermissions"
+        )
+
+        if (!userManagerInternal.exists(userId)) {
+            Log.w(LOG_TAG, "AllowlistedRestrictedPermission api: Unknown user $userId")
+            return null
+        }
+
+        val callingUid = Binder.getCallingUid()
+        val packageState = packageManagerLocal.withFilteredSnapshot(callingUid, userId)
+            .use { it.getPackageState(packageName) } ?: return null
+        val androidPackage = packageState.androidPackage ?: return null
+
+        val isCallerPrivileged = context.checkCallingOrSelfPermission(
+            Manifest.permission.WHITELIST_RESTRICTED_PERMISSIONS
+        ) == PackageManager.PERMISSION_GRANTED
+
+        if (allowlistedFlags.hasBits(PackageManager.FLAG_PERMISSION_WHITELIST_SYSTEM) &&
+            !isCallerPrivileged) {
+            throw SecurityException(
+                "Querying system allowlist requires " +
+                    Manifest.permission.WHITELIST_RESTRICTED_PERMISSIONS
+            )
+        }
+
+        val isCallerInstallerOnRecord =
+            packageManagerInternal.isCallerInstallerOfRecord(androidPackage, callingUid)
+
+        if (allowlistedFlags.hasAnyBit(PackageManager.FLAG_PERMISSION_WHITELIST_UPGRADE or
+                PackageManager.FLAG_PERMISSION_WHITELIST_INSTALLER)) {
+            if (!isCallerPrivileged && !isCallerInstallerOnRecord) {
+                throw SecurityException(
+                    "Querying upgrade or installer allowlist requires being installer on record" +
+                        " or ${Manifest.permission.WHITELIST_RESTRICTED_PERMISSIONS}"
+                )
+            }
+        }
+
+        return getAllowlistedRestrictedPermissionsUnchecked(
+            packageState.appId, allowlistedFlags, userId
+        )
+    }
+
+    /**
+     * This method does not enforce checks on the caller, should only be called after
+     * required checks.
+     */
+    private fun getAllowlistedRestrictedPermissionsUnchecked(
+        appId: Int,
+        allowlistedFlags: Int,
+        userId: Int
+    ): IndexedList<String>? {
+        val permissionFlags = service.getState {
+            with(policy) { getUidPermissionFlags(appId, userId) }
+        } ?: return null
+
+        var queryFlags = 0
+        if (allowlistedFlags.hasBits(PackageManager.FLAG_PERMISSION_WHITELIST_SYSTEM)) {
+            queryFlags = queryFlags or PermissionFlags.SYSTEM_EXEMPT
+        }
+        if (allowlistedFlags.hasBits(PackageManager.FLAG_PERMISSION_WHITELIST_UPGRADE)) {
+            queryFlags = queryFlags or PermissionFlags.UPGRADE_EXEMPT
+        }
+        if (allowlistedFlags.hasBits(PackageManager.FLAG_PERMISSION_WHITELIST_INSTALLER)) {
+            queryFlags = queryFlags or PermissionFlags.INSTALLER_EXEMPT
+        }
+
+        return permissionFlags.mapNotNullIndexed { _, permissionName, flags ->
+            if (flags.hasAnyBit(queryFlags)) permissionName else null
+        }
+    }
+
     override fun addAllowlistedRestrictedPermission(
         packageName: String,
         permissionName: String,
-        flags: Int,
+        allowlistedFlags: Int,
         userId: Int
     ): Boolean {
-        TODO("Not yet implemented")
-    }
+        requireNotNull(permissionName) { "permissionName cannot be null" }
+        if (!enforceRestrictedPermission(permissionName)) {
+            return false
+        }
 
-    override fun getAllowlistedRestrictedPermissions(
-        packageName: String,
-        flags: Int,
-        userId: Int
-    ): MutableList<String> {
-        TODO("Not yet implemented")
+        val permissionNames = getAllowlistedRestrictedPermissions(
+            packageName, allowlistedFlags, userId
+        ) ?: IndexedList(1)
+
+        if (permissionName !in permissionNames) {
+            permissionNames += permissionName
+            return setAllowlistedRestrictedPermissions(
+                packageName, permissionNames, allowlistedFlags, userId, isAddingPermission = true
+            )
+        }
+        return false
     }
 
     override fun removeAllowlistedRestrictedPermission(
         packageName: String,
         permissionName: String,
-        flags: Int,
+        allowlistedFlags: Int,
         userId: Int
     ): Boolean {
-        TODO("Not yet implemented")
+        requireNotNull(permissionName) { "permissionName cannot be null" }
+        if (!enforceRestrictedPermission(permissionName)) {
+            return false
+        }
+
+        val permissions = getAllowlistedRestrictedPermissions(
+            packageName, allowlistedFlags, userId
+        ) ?: return false
+
+        if (permissions.remove(permissionName)) {
+            return setAllowlistedRestrictedPermissions(
+                packageName, permissions, allowlistedFlags, userId, isAddingPermission = false
+            )
+        }
+
+        return false
+    }
+
+    private fun enforceRestrictedPermission(permissionName: String): Boolean {
+        val permission = service.getState { with(policy) { getPermissions()[permissionName] } }
+        if (permission == null) {
+            Log.w(LOG_TAG, "permission definition for $permissionName does not exist")
+            return false
+        }
+
+        if (packageManagerLocal.withFilteredSnapshot()
+                .use { it.getPackageState(permission.packageName) } == null) {
+            return false
+        }
+
+        val isImmutablyRestrictedPermission =
+            permission.isHardOrSoftRestricted && permission.isImmutablyRestricted
+        if (isImmutablyRestrictedPermission && context.checkCallingOrSelfPermission(
+                Manifest.permission.WHITELIST_RESTRICTED_PERMISSIONS
+            ) != PackageManager.PERMISSION_GRANTED) {
+            throw SecurityException(
+                "Cannot modify allowlist of an immutably restricted permission: ${permission.name}"
+            )
+        }
+
+        return true
+    }
+
+    private fun setAllowlistedRestrictedPermissions(
+        packageName: String,
+        allowlistedPermissions: List<String>,
+        allowlistedFlags: Int,
+        userId: Int,
+        isAddingPermission: Boolean
+    ): Boolean {
+        Preconditions.checkArgument(allowlistedFlags.countOneBits() == 1)
+
+        val isCallerPrivileged = context.checkCallingOrSelfPermission(
+            Manifest.permission.WHITELIST_RESTRICTED_PERMISSIONS
+        ) == PackageManager.PERMISSION_GRANTED
+
+        val callingUid = Binder.getCallingUid()
+        val packageState = packageManagerLocal.withFilteredSnapshot(callingUid, userId)
+            .use { snapshot -> snapshot.packageStates[packageName] ?: return false }
+        val androidPackage = packageState.androidPackage ?: return false
+
+        val isCallerInstallerOnRecord =
+            packageManagerInternal.isCallerInstallerOfRecord(androidPackage, callingUid)
+
+        if (allowlistedFlags.hasBits(PackageManager.FLAG_PERMISSION_WHITELIST_UPGRADE)) {
+            if (!isCallerPrivileged && !isCallerInstallerOnRecord) {
+                throw SecurityException(
+                    "Modifying upgrade allowlist requires being installer on record or " +
+                        Manifest.permission.WHITELIST_RESTRICTED_PERMISSIONS
+                )
+            }
+            if (isAddingPermission && !isCallerPrivileged) {
+                throw SecurityException(
+                    "Adding to upgrade allowlist requires" +
+                        Manifest.permission.WHITELIST_RESTRICTED_PERMISSIONS
+                )
+            }
+        }
+
+        setAllowlistedRestrictedPermissionsUnchecked(
+            androidPackage, packageState.appId, allowlistedPermissions, allowlistedFlags, userId
+        )
+
+        return true
+    }
+
+    /**
+     * This method does not enforce checks on the caller, should only be called after
+     * required checks.
+     */
+    private fun setAllowlistedRestrictedPermissionsUnchecked(
+        androidPackage: AndroidPackage,
+        appId: Int,
+        allowlistedPermissions: List<String>,
+        allowlistedFlags: Int,
+        userId: Int
+    ) {
+        service.mutateState {
+            with(policy) {
+                val permissionsFlags =
+                    getUidPermissionFlags(appId, userId) ?: return@mutateState
+
+                val permissions = getPermissions()
+                androidPackage.requestedPermissions.forEachIndexed { _, requestedPermission ->
+                    val permission = permissions[requestedPermission]
+                    if (permission == null || !permission.isHardOrSoftRestricted) {
+                        return@forEachIndexed
+                    }
+
+                    val oldFlags = permissionsFlags[requestedPermission] ?: 0
+                    val wasGranted = PermissionFlags.isPermissionGranted(oldFlags)
+
+                    var newFlags = oldFlags
+                    var mask = 0
+                    var allowlistFlagsCopy = allowlistedFlags
+                    while (allowlistFlagsCopy != 0) {
+                        val flag = 1 shl allowlistFlagsCopy.countTrailingZeroBits()
+                        allowlistFlagsCopy = allowlistFlagsCopy and flag.inv()
+                        when (flag) {
+                            PackageManager.FLAG_PERMISSION_WHITELIST_SYSTEM -> {
+                                mask = mask or PermissionFlags.SYSTEM_EXEMPT
+                                newFlags =
+                                    if (allowlistedPermissions.contains(requestedPermission)) {
+                                        newFlags or PermissionFlags.SYSTEM_EXEMPT
+                                    } else {
+                                        newFlags andInv PermissionFlags.SYSTEM_EXEMPT
+                                    }
+                            }
+                            PackageManager.FLAG_PERMISSION_WHITELIST_UPGRADE -> {
+                                mask = mask or PermissionFlags.UPGRADE_EXEMPT
+                                newFlags =
+                                    if (allowlistedPermissions.contains(requestedPermission)) {
+                                        newFlags or PermissionFlags.UPGRADE_EXEMPT
+                                    } else {
+                                        newFlags andInv PermissionFlags.UPGRADE_EXEMPT
+                                    }
+                            }
+                            PackageManager.FLAG_PERMISSION_WHITELIST_INSTALLER -> {
+                                mask = mask or PermissionFlags.INSTALLER_EXEMPT
+                                newFlags =
+                                    if (allowlistedPermissions.contains(requestedPermission)) {
+                                        newFlags or PermissionFlags.INSTALLER_EXEMPT
+                                    } else {
+                                        newFlags andInv PermissionFlags.INSTALLER_EXEMPT
+                                    }
+                            }
+                        }
+                    }
+
+                    if (oldFlags == newFlags) {
+                        return@forEachIndexed
+                    }
+
+                    val wasAllowlisted = oldFlags.hasAnyBit(PermissionFlags.MASK_EXEMPT)
+                    val isAllowlisted = newFlags.hasAnyBit(PermissionFlags.MASK_EXEMPT)
+
+                    // If the permission is policy fixed as granted but it is no longer
+                    // on any of the allowlists we need to clear the policy fixed flag
+                    // as allowlisting trumps policy i.e. policy cannot grant a non
+                    // grantable permission.
+                    if (oldFlags.hasBits(PermissionFlags.POLICY_FIXED)) {
+                        if (!isAllowlisted && wasGranted) {
+                            mask = mask or PermissionFlags.POLICY_FIXED
+                            newFlags = newFlags andInv PermissionFlags.POLICY_FIXED
+                        }
+                    }
+
+                    // If we are allowlisting an app that does not support runtime permissions
+                    // we need to make sure it goes through the permission review UI at launch.
+                    if (androidPackage.targetSdkVersion < Build.VERSION_CODES.M &&
+                        !wasAllowlisted && isAllowlisted) {
+                        mask = mask or PermissionFlags.IMPLICIT
+                        newFlags = newFlags or PermissionFlags.IMPLICIT
+                    }
+
+                    updatePermissionFlags(
+                        appId, userId, requestedPermission, mask, newFlags
+                    )
+                }
+            }
+        }
     }
 
     override fun resetRuntimePermissions(androidPackage: AndroidPackage, userId: Int) {
@@ -1159,8 +1550,29 @@ class PermissionService(
         )
     }
 
+
+
     override fun getAppOpPermissionPackages(permissionName: String): Array<String> {
-        TODO("Not yet implemented")
+        requireNotNull(permissionName) { "permissionName cannot be null" }
+        val packageNames = IndexedSet<String>()
+
+        val permission = service.getState {
+            with(policy) { getPermissions()[permissionName] }
+        }
+        if (permission == null || !permission.isAppOp) {
+            packageNames.toTypedArray()
+        }
+
+        packageManagerLocal.withUnfilteredSnapshot().use { snapshot ->
+            snapshot.packageStates.forEach packageStates@{ (_, packageState) ->
+                val androidPackage = packageState.androidPackage ?: return@packageStates
+                if (permissionName in androidPackage.requestedPermissions) {
+                    packageNames += androidPackage.packageName
+                }
+            }
+        }
+
+        return packageNames.toTypedArray()
     }
 
     override fun getAllAppOpPermissionPackages(): Map<String, Set<String>> {
@@ -1183,19 +1595,63 @@ class PermissionService(
     }
 
     override fun backupRuntimePermissions(userId: Int): ByteArray? {
-        TODO("Not yet implemented")
+        Preconditions.checkArgumentNonnegative(userId, "userId cannot be null")
+        val backup = CompletableFuture<ByteArray>()
+        permissionControllerManager.getRuntimePermissionBackup(
+            UserHandle.of(userId), PermissionThread.getExecutor(), backup::complete
+        )
+
+        return try {
+            backup.get(BACKUP_TIMEOUT_MILLIS, TimeUnit.MILLISECONDS)
+        } catch (e: Exception) {
+            when (e) {
+                is TimeoutException, is InterruptedException, is ExecutionException -> {
+                    Log.e(LOG_TAG, "Cannot create permission backup for user $userId", e)
+                    null
+                }
+                else -> throw e
+            }
+        }
     }
 
     override fun restoreRuntimePermissions(backup: ByteArray, userId: Int) {
-        TODO("Not yet implemented")
+        requireNotNull(backup) { "backup" }
+        Preconditions.checkArgumentNonnegative(userId, "userId")
+
+        synchronized(isDelayedPermissionBackupFinished) {
+            isDelayedPermissionBackupFinished -= userId
+        }
+        permissionControllerManager.stageAndApplyRuntimePermissionsBackup(
+            backup, UserHandle.of(userId)
+        )
     }
 
     override fun restoreDelayedRuntimePermissions(packageName: String, userId: Int) {
-        TODO("Not yet implemented")
+        requireNotNull(packageName) { "packageName" }
+        Preconditions.checkArgumentNonnegative(userId, "userId")
+
+        synchronized(isDelayedPermissionBackupFinished) {
+            if (isDelayedPermissionBackupFinished.get(userId, false)) {
+                return
+            }
+        }
+        permissionControllerManager.applyStagedRuntimePermissionBackup(
+            packageName, UserHandle.of(userId), PermissionThread.getExecutor()
+        ) { hasMoreBackup ->
+            if (hasMoreBackup) {
+                return@applyStagedRuntimePermissionBackup
+            }
+            synchronized(isDelayedPermissionBackupFinished) {
+                isDelayedPermissionBackupFinished.put(userId, true)
+            }
+        }
     }
 
     override fun dump(fd: FileDescriptor, pw: PrintWriter, args: Array<out String>?) {
-        TODO("Not yet implemented")
+        if (!DumpUtils.checkDumpPermission(context, LOG_TAG, pw)) {
+            return
+        }
+        context.getSystemService(PermissionControllerManager::class.java)!!.dump(fd, args)
     }
 
     override fun getPermissionTEMP(
@@ -1231,7 +1687,10 @@ class PermissionService(
     }
 
     override fun onSystemReady() {
-        TODO("Not yet implemented")
+        // TODO STOPSHIP privappPermissionsViolationsfix check
+        permissionControllerManager = PermissionControllerManager(
+            context, PermissionThread.getHandler()
+        )
     }
 
     override fun onUserCreated(userId: Int) {
@@ -1349,13 +1808,12 @@ class PermissionService(
         if (activityManager != null) {
             val appId = UserHandle.getAppId(uid)
             val userId = UserHandle.getUserId(uid)
-            val identity = Binder.clearCallingIdentity()
-            try {
-                activityManager.killUidForPermissionChange(appId, userId, reason)
-            } catch (e: RemoteException) {
-                /* ignore - same process */
-            } finally {
-                Binder.restoreCallingIdentity(identity)
+            Binder::class.withClearedCallingIdentity {
+                try {
+                    activityManager.killUidForPermissionChange(appId, userId, reason)
+                } catch (e: RemoteException) {
+                    /* ignore - same process */
+                }
             }
         }
     }
@@ -1678,5 +2136,15 @@ class PermissionService(
         private const val UNREQUESTABLE_MASK = PermissionFlags.RESTRICTION_REVOKED or
             PermissionFlags.SYSTEM_FIXED or PermissionFlags.POLICY_FIXED or
             PermissionFlags.USER_FIXED
+
+        private val BACKUP_TIMEOUT_MILLIS = TimeUnit.SECONDS.toMillis(60)
+
+        /** Cap the size of permission trees that 3rd party apps can define; in characters of text  */
+        private const val MAX_PERMISSION_TREE_FOOTPRINT = 32768
+
+        private const val PERMISSION_ALLOWLIST_MASK =
+            PackageManager.FLAG_PERMISSION_WHITELIST_UPGRADE or
+            PackageManager.FLAG_PERMISSION_WHITELIST_SYSTEM or
+            PackageManager.FLAG_PERMISSION_WHITELIST_INSTALLER
     }
 }
