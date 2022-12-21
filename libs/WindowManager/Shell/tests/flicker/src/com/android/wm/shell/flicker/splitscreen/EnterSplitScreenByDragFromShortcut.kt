@@ -53,7 +53,7 @@ class EnterSplitScreenByDragFromShortcut(flicker: FlickerTest) : SplitScreenBase
 
     @Before
     fun before() {
-        Assume.assumeTrue(flicker.scenario.isTablet)
+        Assume.assumeTrue(tapl.isTablet)
     }
 
     override val transition: FlickerBuilder.() -> Unit

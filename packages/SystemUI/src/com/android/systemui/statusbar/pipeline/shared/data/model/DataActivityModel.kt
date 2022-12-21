@@ -14,20 +14,19 @@
  * limitations under the License.
  */
 
-package com.android.systemui.statusbar.pipeline.wifi.shared.model
+package com.android.systemui.statusbar.pipeline.shared.data.model
 
 import com.android.systemui.log.table.Diffable
 import com.android.systemui.log.table.TableRowLogger
 
-/** Provides information on the current wifi activity. */
-data class WifiActivityModel(
-    /** True if the wifi has activity in (download). */
+/** Provides information about the current data activity direction */
+data class DataActivityModel(
+    /** True if the connection has activity in (download). */
     val hasActivityIn: Boolean,
-    /** True if the wifi has activity out (upload). */
+    /** True if the connection has activity out (upload). */
     val hasActivityOut: Boolean,
-) : Diffable<WifiActivityModel> {
-
-    override fun logDiffs(prevVal: WifiActivityModel, row: TableRowLogger) {
+) : Diffable<DataActivityModel> {
+    override fun logDiffs(prevVal: DataActivityModel, row: TableRowLogger) {
         if (prevVal.hasActivityIn != hasActivityIn) {
             row.logChange(COL_ACTIVITY_IN, hasActivityIn)
         }
@@ -42,6 +41,6 @@ data class WifiActivityModel(
     }
 }
 
-const val ACTIVITY_PREFIX = "wifiActivity"
+const val ACTIVITY_PREFIX = "dataActivity"
 private const val COL_ACTIVITY_IN = "in"
 private const val COL_ACTIVITY_OUT = "out"

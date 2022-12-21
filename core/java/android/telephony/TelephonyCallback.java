@@ -27,6 +27,8 @@ import android.os.Binder;
 import android.os.Build;
 import android.telephony.emergency.EmergencyNumber;
 import android.telephony.ims.ImsReasonInfo;
+import android.telephony.ims.MediaQualityStatus;
+import android.telephony.ims.MediaThreshold;
 import android.util.Log;
 
 import com.android.internal.annotations.VisibleForTesting;
@@ -592,6 +594,19 @@ public class TelephonyCallback {
     public static final int EVENT_TRIGGER_NOTIFY_ANBR = 38;
 
     /**
+     * Event for changes to the media quality status
+     *
+     * <p>Requires permission {@link android.Manifest.permission#READ_PRECISE_PHONE_STATE}
+     *
+     * @see MediaQualityStatusChangedListener#onMediaQualityStatusChanged
+     *
+     * @hide
+     */
+    @SystemApi
+    @RequiresPermission(Manifest.permission.READ_PRECISE_PHONE_STATE)
+    public static final int EVENT_MEDIA_QUALITY_STATUS_CHANGED = 39;
+
+    /**
      * @hide
      */
     @IntDef(prefix = {"EVENT_"}, value = {
@@ -632,7 +647,8 @@ public class TelephonyCallback {
             EVENT_ALLOWED_NETWORK_TYPE_LIST_CHANGED,
             EVENT_LEGACY_CALL_STATE_CHANGED,
             EVENT_LINK_CAPACITY_ESTIMATE_CHANGED,
-            EVENT_TRIGGER_NOTIFY_ANBR
+            EVENT_TRIGGER_NOTIFY_ANBR,
+            EVENT_MEDIA_QUALITY_STATUS_CHANGED
     })
     @Retention(RetentionPolicy.SOURCE)
     public @interface TelephonyEvent {
@@ -1517,6 +1533,30 @@ public class TelephonyCallback {
     }
 
     /**
+     * Interface for media quality status changed listener.
+     *
+     * @hide
+     */
+    @SystemApi
+    public interface MediaQualityStatusChangedListener {
+        /**
+         * Callback invoked when the media quality status of IMS call changes. This call back
+         * means current media quality status crosses at least one of threshold values in {@link
+         * MediaThreshold}. Listener needs to get quality information & check whether it crossed
+         * listener's threshold.
+         *
+         * <p/> Currently thresholds for this indication can be configurable by CARRIER_CONFIG
+         * {@link CarrierConfigManager#KEY_VOICE_RTP_THRESHOLDS_PACKET_LOSS_RATE_INT}
+         * {@link CarrierConfigManager#KEY_VOICE_RTP_THRESHOLDS_INACTIVITY_TIME_IN_MILLIS_INT}
+         * {@link CarrierConfigManager#KEY_VOICE_RTP_THRESHOLDS_JITTER_INT}
+         *
+         * @param mediaQualityStatus The media quality status currently measured.
+         */
+        @RequiresPermission(Manifest.permission.READ_PRECISE_PHONE_STATE)
+        void onMediaQualityStatusChanged(@NonNull MediaQualityStatus mediaQualityStatus);
+    }
+
+    /**
      * The callback methods need to be called on the handler thread where
      * this object was created.  If the binder did that for us it'd be nice.
      * <p>
@@ -1872,6 +1912,17 @@ public class TelephonyCallback {
             Binder.withCleanCallingIdentity(
                     () -> mExecutor.execute(() -> listener.onLinkCapacityEstimateChanged(
                             linkCapacityEstimateList)));
+        }
+
+        public void onMediaQualityStatusChanged(
+                MediaQualityStatus mediaQualityStatus) {
+            MediaQualityStatusChangedListener listener =
+                    (MediaQualityStatusChangedListener) mTelephonyCallbackWeakRef.get();
+            if (listener == null) return;
+
+            Binder.withCleanCallingIdentity(
+                    () -> mExecutor.execute(() -> listener.onMediaQualityStatusChanged(
+                            mediaQualityStatus)));
         }
     }
 }

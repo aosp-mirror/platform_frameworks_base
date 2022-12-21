@@ -186,6 +186,7 @@ constructor(
         connection.dataEnabled.value = true
         connection.isDefaultDataSubscription.value = state.dataType != null
 
+        connection.cdmaRoaming.value = state.roaming
         connection.connectionInfo.value = state.toMobileConnectionModel()
     }
 
@@ -229,6 +230,7 @@ constructor(
     private fun Mobile.toMobileConnectionModel(): MobileConnectionModel {
         return MobileConnectionModel(
             isEmergencyOnly = false, // TODO(b/261029387): not yet supported
+            isRoaming = roaming,
             isGsm = false, // TODO(b/261029387): not yet supported
             cdmaLevel = level ?: 0,
             primaryLevel = level ?: 0,
@@ -260,4 +262,6 @@ class DemoMobileConnectionRepository(override val subId: Int) : MobileConnection
     override val dataEnabled = MutableStateFlow(true)
 
     override val isDefaultDataSubscription = MutableStateFlow(true)
+
+    override val cdmaRoaming = MutableStateFlow(false)
 }

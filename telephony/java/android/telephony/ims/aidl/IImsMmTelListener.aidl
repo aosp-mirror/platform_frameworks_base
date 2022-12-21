@@ -20,6 +20,7 @@ import android.os.Bundle;
 
 import android.telephony.ims.ImsCallProfile;
 import android.telephony.ims.ImsReasonInfo;
+import android.telephony.ims.MediaQualityStatus;
 import android.telephony.ims.aidl.IImsCallSessionListener;
 import android.telephony.ims.aidl.IImsTrafficSessionCallback;
 
@@ -42,4 +43,5 @@ interface IImsMmTelListener {
             int trafficDirection, in IImsTrafficSessionCallback callback);
     oneway void onModifyImsTrafficSession(int token, int accessNetworkType);
     oneway void onStopImsTrafficSession(int token);
+    oneway void onMediaQualityStatusChanged(in MediaQualityStatus status);
 }

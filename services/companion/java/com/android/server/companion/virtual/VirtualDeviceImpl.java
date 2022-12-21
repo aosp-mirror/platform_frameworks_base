@@ -60,6 +60,7 @@ import android.hardware.input.VirtualTouchEvent;
 import android.hardware.input.VirtualTouchscreenConfig;
 import android.os.Binder;
 import android.os.IBinder;
+import android.os.LocaleList;
 import android.os.Looper;
 import android.os.PowerManager;
 import android.os.RemoteException;
@@ -123,6 +124,9 @@ final class VirtualDeviceImpl extends IVirtualDevice.Stub
     // The default setting for showing the pointer on new displays.
     @GuardedBy("mVirtualDeviceLock")
     private boolean mDefaultShowPointerIcon = true;
+    @GuardedBy("mVirtualDeviceLock")
+    @Nullable
+    private LocaleList mLocaleList = null;
 
     private ActivityListener createListenerAdapter() {
         return new ActivityListener() {
@@ -247,10 +251,27 @@ final class VirtualDeviceImpl extends IVirtualDevice.Stub
         return mParams.getName();
     }
 
+    /** Returns the locale of the device. */
+    LocaleList getDeviceLocaleList() {
+        synchronized (mVirtualDeviceLock) {
+            return mLocaleList;
+        }
+    }
+
     /** Returns the policy specified for this policy type */
     public @VirtualDeviceParams.DevicePolicy int getDevicePolicy(
             @VirtualDeviceParams.PolicyType int policyType) {
         return mParams.getDevicePolicy(policyType);
+    }
+
+    /** Returns device-specific audio session id for playback. */
+    public int getAudioPlaybackSessionId() {
+        return mParams.getAudioPlaybackSessionId();
+    }
+
+    /** Returns device-specific audio session id for recording. */
+    public int getAudioRecordingSessionId() {
+        return mParams.getAudioRecordingSessionId();
     }
 
     /** Returns the unique device ID of this device. */
@@ -334,6 +355,7 @@ final class VirtualDeviceImpl extends IVirtualDevice.Stub
                 mVirtualAudioController.stopListening();
                 mVirtualAudioController = null;
             }
+            mLocaleList = null;
         }
         mOnDeviceCloseListener.onClose(mDeviceId);
         mAppToken.unlinkToDeath(this, 0);
@@ -435,6 +457,7 @@ final class VirtualDeviceImpl extends IVirtualDevice.Stub
                         "Cannot create a virtual keyboard for a display not associated with "
                                 + "this virtual device");
             }
+            mLocaleList = LocaleList.forLanguageTags(config.getLanguageTag());
         }
         final long ident = Binder.clearCallingIdentity();
         try {

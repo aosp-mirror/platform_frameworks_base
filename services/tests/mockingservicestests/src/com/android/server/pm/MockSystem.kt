@@ -55,6 +55,7 @@ import com.android.dx.mockito.inline.extended.ExtendedMockito.spy
 import com.android.dx.mockito.inline.extended.StaticMockitoSession
 import com.android.dx.mockito.inline.extended.StaticMockitoSessionBuilder
 import com.android.internal.R
+import com.android.server.LocalManagerRegistry
 import com.android.server.LocalServices
 import com.android.server.LockGuard
 import com.android.server.SystemConfig
@@ -148,6 +149,7 @@ class MockSystem(withSession: (StaticMockitoSessionBuilder) -> Unit = {}) {
                 .mockStatic(LockGuard::class.java)
                 .mockStatic(EventLog::class.java)
                 .mockStatic(LocalServices::class.java)
+                .mockStatic(LocalManagerRegistry::class.java)
                 .mockStatic(DeviceConfig::class.java)
                 .mockStatic(HexEncoding::class.java)
                 .apply(withSession)
@@ -325,16 +327,16 @@ class MockSystem(withSession: (StaticMockitoSessionBuilder) -> Unit = {}) {
         whenever(mocks.settings.keySetManagerService).thenReturn(mocks.keySetManagerService)
         whenever(mocks.settings.keySetManagerService).thenReturn(mocks.keySetManagerService)
         whenever(mocks.settings.snapshot()).thenReturn(mocks.settings)
-        whenever(mocks.packageAbiHelper.derivePackageAbi(
-                any(AndroidPackage::class.java), anyBoolean(), nullable(), any(File::class.java))) {
+        whenever(mocks.packageAbiHelper.derivePackageAbi(any(AndroidPackage::class.java),
+            anyBoolean(), anyBoolean(), nullable(), any(File::class.java))) {
             android.util.Pair(PackageAbiHelper.Abis("", ""),
                     PackageAbiHelper.NativeLibraryPaths("", false, "", ""))
         }
         whenever(mocks.userManagerInternal.getUsers(true, false, false)).thenReturn(DEFAULT_USERS)
         whenever(mocks.userManagerService.userIds).thenReturn(intArrayOf(0))
         whenever(mocks.userManagerService.exists(0)).thenReturn(true)
-        whenever(mocks.packageAbiHelper.deriveNativeLibraryPaths(
-                any(AndroidPackage::class.java), anyBoolean(), any(File::class.java))) {
+        whenever(mocks.packageAbiHelper.deriveNativeLibraryPaths(any(AndroidPackage::class.java),
+                anyBoolean(), anyBoolean(), any(File::class.java))) {
             PackageAbiHelper.NativeLibraryPaths("", false, "", "")
         }
         whenever(mocks.injector.bootstrap(any(PackageManagerService::class.java))) {

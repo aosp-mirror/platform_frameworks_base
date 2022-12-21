@@ -43,7 +43,7 @@ import android.util.SparseLongArray;
 
 import com.android.internal.annotations.GuardedBy;
 import com.android.internal.annotations.VisibleForTesting;
-import com.android.internal.power.MeasuredEnergyStats;
+import com.android.internal.power.EnergyConsumerStats;
 import com.android.internal.util.FrameworkStatsLog;
 import com.android.server.LocalServices;
 
@@ -156,11 +156,13 @@ public class BatteryExternalStatsWorker implements BatteryStatsImpl.ExternalStat
      * unless it is of {@link EnergyConsumer#type}=={@link EnergyConsumerType#OTHER}
      */
     @GuardedBy("mWorkerLock")
-    private @Nullable SparseArray<int[]> mEnergyConsumerTypeToIdMap = null;
+    @Nullable
+    private SparseArray<int[]> mEnergyConsumerTypeToIdMap = null;
 
-    /** Snapshot of measured energies, or null if no measured energies are supported. */
+    /** Snapshot of energy consumers, or null if no EnergyConsumers are supported. */
     @GuardedBy("mWorkerLock")
-    private @Nullable MeasuredEnergySnapshot mMeasuredEnergySnapshot = null;
+    @Nullable
+    private EnergyConsumerSnapshot mEnergyConsumerSnapshot = null;
 
     /**
      * Timestamp at which all external stats were last collected in
@@ -218,14 +220,14 @@ public class BatteryExternalStatsWorker implements BatteryStatsImpl.ExternalStat
                 final SparseArray<EnergyConsumer> idToConsumer
                         = populateEnergyConsumerSubsystemMapsLocked();
                 if (idToConsumer != null) {
-                    mMeasuredEnergySnapshot = new MeasuredEnergySnapshot(idToConsumer);
+                    mEnergyConsumerSnapshot = new EnergyConsumerSnapshot(idToConsumer);
                     try {
                         final EnergyConsumerResult[] initialEcrs = getEnergyConsumptionData().get(
                                 EXTERNAL_STATS_SYNC_TIMEOUT_MILLIS, TimeUnit.MILLISECONDS);
                         // According to spec, initialEcrs will include 0s for consumers that haven't
                         // used any energy yet, as long as they are supported; however,
                         // attributed uid energies will be absent if their energy is 0.
-                        mMeasuredEnergySnapshot.updateAndGetDelta(initialEcrs, voltageMv);
+                        mEnergyConsumerSnapshot.updateAndGetDelta(initialEcrs, voltageMv);
                     } catch (TimeoutException | InterruptedException e) {
                         Slog.w(TAG, "timeout or interrupt reading initial getEnergyConsumedAsync: "
                                 + e);
@@ -235,12 +237,12 @@ public class BatteryExternalStatsWorker implements BatteryStatsImpl.ExternalStat
                                 + e.getCause());
                         // Continue running, later attempts to query may be successful.
                     }
-                    customBucketNames = mMeasuredEnergySnapshot.getOtherOrdinalNames();
+                    customBucketNames = mEnergyConsumerSnapshot.getOtherOrdinalNames();
                     supportedStdBuckets = getSupportedEnergyBuckets(idToConsumer);
                 }
             }
             synchronized (mStats) {
-                mStats.initMeasuredEnergyStatsLocked(supportedStdBuckets, customBucketNames);
+                mStats.initEnergyConsumerStatsLocked(supportedStdBuckets, customBucketNames);
             }
         }
     }
@@ -520,7 +522,8 @@ public class BatteryExternalStatsWorker implements BatteryStatsImpl.ExternalStat
         CompletableFuture<ModemActivityInfo> modemFuture = CompletableFuture.completedFuture(null);
         boolean railUpdated = false;
 
-        CompletableFuture<EnergyConsumerResult[]> futureECRs = getMeasuredEnergyLocked(updateFlags);
+        CompletableFuture<EnergyConsumerResult[]> futureECRs =
+                getEnergyConsumersLocked(updateFlags);
 
         if ((updateFlags & BatteryStatsImpl.ExternalStatsSync.UPDATE_WIFI) != 0) {
             // We were asked to fetch WiFi data.
@@ -626,9 +629,9 @@ public class BatteryExternalStatsWorker implements BatteryStatsImpl.ExternalStat
             Slog.w(TAG, "exception reading modem stats: " + e.getCause());
         }
 
-        final MeasuredEnergySnapshot.MeasuredEnergyDeltaData measuredEnergyDeltas;
-        if (mMeasuredEnergySnapshot == null || futureECRs == null) {
-            measuredEnergyDeltas = null;
+        final EnergyConsumerSnapshot.EnergyConsumerDeltaData energyConsumerDeltas;
+        if (mEnergyConsumerSnapshot == null || futureECRs == null) {
+            energyConsumerDeltas = null;
         } else {
             final int voltageMv;
             synchronized (mStats) {
@@ -639,7 +642,7 @@ public class BatteryExternalStatsWorker implements BatteryStatsImpl.ExternalStat
             try {
                 ecrs = futureECRs.get(EXTERNAL_STATS_SYNC_TIMEOUT_MILLIS, TimeUnit.MILLISECONDS);
             } catch (TimeoutException | InterruptedException e) {
-                // TODO (b/180519623): Invalidate the MeasuredEnergy derived data until next reset.
+                // TODO (b/180519623): Invalidate the EnergyConsumer derived data until next reset.
                 Slog.w(TAG, "timeout or interrupt reading getEnergyConsumedAsync: " + e);
                 ecrs = null;
             } catch (ExecutionException e) {
@@ -647,7 +650,7 @@ public class BatteryExternalStatsWorker implements BatteryStatsImpl.ExternalStat
                 ecrs = null;
             }
 
-            measuredEnergyDeltas = mMeasuredEnergySnapshot.updateAndGetDelta(ecrs, voltageMv);
+            energyConsumerDeltas = mEnergyConsumerSnapshot.updateAndGetDelta(ecrs, voltageMv);
         }
 
         final long elapsedRealtime = SystemClock.elapsedRealtime();
@@ -663,9 +666,10 @@ public class BatteryExternalStatsWorker implements BatteryStatsImpl.ExternalStat
                     BatteryStats.HistoryItem.EVENT_COLLECT_EXTERNAL_STATS,
                     reason, 0);
 
-            if (measuredEnergyDeltas != null && !measuredEnergyDeltas.isEmpty()) {
-                mStats.recordMeasuredEnergyDetailsLocked(elapsedRealtime, uptime,
-                        mMeasuredEnergySnapshot.getMeasuredEnergyDetails(measuredEnergyDeltas));
+            if (energyConsumerDeltas != null && !energyConsumerDeltas.isEmpty()
+                    && mStats.isUsageHistoryEnabled()) {
+                mStats.recordEnergyConsumerDetailsLocked(elapsedRealtime, uptime,
+                        mEnergyConsumerSnapshot.getEnergyConsumerDetails(energyConsumerDeltas));
             }
 
             if ((updateFlags & UPDATE_CPU) != 0) {
@@ -675,10 +679,10 @@ public class BatteryExternalStatsWorker implements BatteryStatsImpl.ExternalStat
                 }
 
                 final long[] cpuClusterChargeUC;
-                if (measuredEnergyDeltas == null) {
+                if (energyConsumerDeltas == null) {
                     cpuClusterChargeUC = null;
                 } else {
-                    cpuClusterChargeUC = measuredEnergyDeltas.cpuClusterChargeUC;
+                    cpuClusterChargeUC = energyConsumerDeltas.cpuClusterChargeUC;
                 }
                 mStats.updateCpuTimeLocked(onBattery, onBatteryScreenOff, cpuClusterChargeUC);
             }
@@ -692,37 +696,37 @@ public class BatteryExternalStatsWorker implements BatteryStatsImpl.ExternalStat
                 mStats.updateRpmStatsLocked(elapsedRealtimeUs);
             }
 
-            // Inform mStats about each applicable measured energy (unless addressed elsewhere).
-            if (measuredEnergyDeltas != null) {
-                final long[] displayChargeUC = measuredEnergyDeltas.displayChargeUC;
+            // Inform mStats about each applicable energy consumers (unless addressed elsewhere).
+            if (energyConsumerDeltas != null) {
+                final long[] displayChargeUC = energyConsumerDeltas.displayChargeUC;
                 if (displayChargeUC != null && displayChargeUC.length > 0) {
                     // If updating, pass in what BatteryExternalStatsWorker thinks
                     // displayScreenStates is.
-                    mStats.updateDisplayMeasuredEnergyStatsLocked(displayChargeUC,
+                    mStats.updateDisplayEnergyConsumerStatsLocked(displayChargeUC,
                             displayScreenStates, elapsedRealtime);
                 }
 
-                final long gnssChargeUC = measuredEnergyDeltas.gnssChargeUC;
-                if (gnssChargeUC != MeasuredEnergySnapshot.UNAVAILABLE) {
-                    mStats.updateGnssMeasuredEnergyStatsLocked(gnssChargeUC, elapsedRealtime);
+                final long gnssChargeUC = energyConsumerDeltas.gnssChargeUC;
+                if (gnssChargeUC != EnergyConsumerSnapshot.UNAVAILABLE) {
+                    mStats.updateGnssEnergyConsumerStatsLocked(gnssChargeUC, elapsedRealtime);
                 }
             }
             // Inform mStats about each applicable custom energy bucket.
-            if (measuredEnergyDeltas != null
-                    && measuredEnergyDeltas.otherTotalChargeUC != null) {
+            if (energyConsumerDeltas != null
+                    && energyConsumerDeltas.otherTotalChargeUC != null) {
                 // Iterate over the custom (EnergyConsumerType.OTHER) ordinals.
-                for (int ord = 0; ord < measuredEnergyDeltas.otherTotalChargeUC.length; ord++) {
-                    long totalEnergy = measuredEnergyDeltas.otherTotalChargeUC[ord];
-                    SparseLongArray uidEnergies = measuredEnergyDeltas.otherUidChargesUC[ord];
-                    mStats.updateCustomMeasuredEnergyStatsLocked(ord, totalEnergy, uidEnergies);
+                for (int ord = 0; ord < energyConsumerDeltas.otherTotalChargeUC.length; ord++) {
+                    long totalEnergy = energyConsumerDeltas.otherTotalChargeUC[ord];
+                    SparseLongArray uidEnergies = energyConsumerDeltas.otherUidChargesUC[ord];
+                    mStats.updateCustomEnergyConsumerStatsLocked(ord, totalEnergy, uidEnergies);
                 }
             }
 
             if (bluetoothInfo != null) {
                 if (bluetoothInfo.isValid()) {
-                    final long btChargeUC = measuredEnergyDeltas != null
-                            ? measuredEnergyDeltas.bluetoothChargeUC
-                            : MeasuredEnergySnapshot.UNAVAILABLE;
+                    final long btChargeUC = energyConsumerDeltas != null
+                            ? energyConsumerDeltas.bluetoothChargeUC
+                            : EnergyConsumerSnapshot.UNAVAILABLE;
                     mStats.updateBluetoothStateLocked(bluetoothInfo,
                             btChargeUC, elapsedRealtime, uptime);
                 } else {
@@ -736,8 +740,9 @@ public class BatteryExternalStatsWorker implements BatteryStatsImpl.ExternalStat
 
         if (wifiInfo != null) {
             if (wifiInfo.isValid()) {
-                final long wifiChargeUC = measuredEnergyDeltas != null ?
-                        measuredEnergyDeltas.wifiChargeUC : MeasuredEnergySnapshot.UNAVAILABLE;
+                final long wifiChargeUC =
+                        energyConsumerDeltas != null ? energyConsumerDeltas.wifiChargeUC
+                                : EnergyConsumerSnapshot.UNAVAILABLE;
                 final NetworkStatsManager networkStatsManager = mInjector.getSystemService(
                         NetworkStatsManager.class);
                 mStats.updateWifiState(extractDeltaLocked(wifiInfo),
@@ -748,8 +753,8 @@ public class BatteryExternalStatsWorker implements BatteryStatsImpl.ExternalStat
         }
 
         if (modemInfo != null) {
-            final long mobileRadioChargeUC = measuredEnergyDeltas != null
-                    ? measuredEnergyDeltas.mobileRadioChargeUC : MeasuredEnergySnapshot.UNAVAILABLE;
+            final long mobileRadioChargeUC = energyConsumerDeltas != null
+                    ? energyConsumerDeltas.mobileRadioChargeUC : EnergyConsumerSnapshot.UNAVAILABLE;
             final NetworkStatsManager networkStatsManager = mInjector.getSystemService(
                     NetworkStatsManager.class);
             mStats.noteModemControllerActivity(modemInfo, mobileRadioChargeUC, elapsedRealtime,
@@ -864,7 +869,7 @@ public class BatteryExternalStatsWorker implements BatteryStatsImpl.ExternalStat
 
     /**
      * Map the {@link EnergyConsumerType}s in the given energyArray to
-     * their corresponding {@link MeasuredEnergyStats.StandardPowerBucket}s.
+     * their corresponding {@link EnergyConsumerStats.StandardPowerBucket}s.
      * Does not include custom energy buckets (which are always, by definition, supported).
      *
      * @return array with true for index i if standard energy bucket i is supported.
@@ -874,30 +879,30 @@ public class BatteryExternalStatsWorker implements BatteryStatsImpl.ExternalStat
         if (idToConsumer == null) {
             return null;
         }
-        final boolean[] buckets = new boolean[MeasuredEnergyStats.NUMBER_STANDARD_POWER_BUCKETS];
+        final boolean[] buckets = new boolean[EnergyConsumerStats.NUMBER_STANDARD_POWER_BUCKETS];
         final int size = idToConsumer.size();
         for (int idx = 0; idx < size; idx++) {
             final EnergyConsumer consumer = idToConsumer.valueAt(idx);
             switch (consumer.type) {
                 case EnergyConsumerType.BLUETOOTH:
-                    buckets[MeasuredEnergyStats.POWER_BUCKET_BLUETOOTH] = true;
+                    buckets[EnergyConsumerStats.POWER_BUCKET_BLUETOOTH] = true;
                     break;
                 case EnergyConsumerType.CPU_CLUSTER:
-                    buckets[MeasuredEnergyStats.POWER_BUCKET_CPU] = true;
+                    buckets[EnergyConsumerStats.POWER_BUCKET_CPU] = true;
                     break;
                 case EnergyConsumerType.GNSS:
-                    buckets[MeasuredEnergyStats.POWER_BUCKET_GNSS] = true;
+                    buckets[EnergyConsumerStats.POWER_BUCKET_GNSS] = true;
                     break;
                 case EnergyConsumerType.MOBILE_RADIO:
-                    buckets[MeasuredEnergyStats.POWER_BUCKET_MOBILE_RADIO] = true;
+                    buckets[EnergyConsumerStats.POWER_BUCKET_MOBILE_RADIO] = true;
                     break;
                 case EnergyConsumerType.DISPLAY:
-                    buckets[MeasuredEnergyStats.POWER_BUCKET_SCREEN_ON] = true;
-                    buckets[MeasuredEnergyStats.POWER_BUCKET_SCREEN_DOZE] = true;
-                    buckets[MeasuredEnergyStats.POWER_BUCKET_SCREEN_OTHER] = true;
+                    buckets[EnergyConsumerStats.POWER_BUCKET_SCREEN_ON] = true;
+                    buckets[EnergyConsumerStats.POWER_BUCKET_SCREEN_DOZE] = true;
+                    buckets[EnergyConsumerStats.POWER_BUCKET_SCREEN_OTHER] = true;
                     break;
                 case EnergyConsumerType.WIFI:
-                    buckets[MeasuredEnergyStats.POWER_BUCKET_WIFI] = true;
+                    buckets[EnergyConsumerStats.POWER_BUCKET_WIFI] = true;
                     break;
             }
         }
@@ -925,9 +930,9 @@ public class BatteryExternalStatsWorker implements BatteryStatsImpl.ExternalStat
     @VisibleForTesting
     @GuardedBy("mWorkerLock")
     @Nullable
-    public CompletableFuture<EnergyConsumerResult[]> getMeasuredEnergyLocked(
+    public CompletableFuture<EnergyConsumerResult[]> getEnergyConsumersLocked(
             @ExternalUpdateFlag int flags) {
-        if (mMeasuredEnergySnapshot == null || mPowerStatsInternal == null) return null;
+        if (mEnergyConsumerSnapshot == null || mPowerStatsInternal == null) return null;
 
         if (flags == UPDATE_ALL) {
             // Gotta catch 'em all... including custom (non-specific) subsystems

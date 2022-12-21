@@ -43,7 +43,8 @@ public class ApexSharedLibraryUpdater extends PackageSharedLibraryUpdater {
     }
 
     @Override
-    public void updatePackage(ParsedPackage parsedPackage, boolean isUpdatedSystemApp) {
+    public void updatePackage(ParsedPackage parsedPackage, boolean isSystemApp,
+            boolean isUpdatedSystemApp) {
         final int builtInLibCount = mSharedLibraries.size();
         for (int i = 0; i < builtInLibCount; i++) {
             updateSharedLibraryForPackage(mSharedLibraries.valueAt(i), parsedPackage);

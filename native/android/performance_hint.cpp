@@ -62,18 +62,21 @@ private:
 
 struct APerformanceHintSession {
 public:
-    APerformanceHintSession(sp<IHintSession> session, int64_t preferredRateNanos,
-                            int64_t targetDurationNanos);
+    APerformanceHintSession(sp<IHintManager> hintManager, sp<IHintSession> session,
+                            int64_t preferredRateNanos, int64_t targetDurationNanos);
     APerformanceHintSession() = delete;
     ~APerformanceHintSession();
 
     int updateTargetWorkDuration(int64_t targetDurationNanos);
     int reportActualWorkDuration(int64_t actualDurationNanos);
     int sendHint(int32_t hint);
+    int setThreads(const int32_t* threadIds, size_t size);
+    int getThreadIds(int32_t* const threadIds, size_t* size);
 
 private:
     friend struct APerformanceHintManager;
 
+    sp<IHintManager> mHintManager;
     sp<IHintSession> mHintSession;
     // HAL preferred update rate
     const int64_t mPreferredRateNanos;
@@ -140,7 +143,7 @@ APerformanceHintSession* APerformanceHintManager::createSession(
     if (!ret.isOk() || !session) {
         return nullptr;
     }
-    return new APerformanceHintSession(std::move(session), mPreferredRateNanos,
+    return new APerformanceHintSession(mHintManager, std::move(session), mPreferredRateNanos,
                                        initialTargetWorkDurationNanos);
 }
 
@@ -150,10 +153,12 @@ int64_t APerformanceHintManager::getPreferredRateNanos() const {
 
 // ===================================== APerformanceHintSession implementation
 
-APerformanceHintSession::APerformanceHintSession(sp<IHintSession> session,
+APerformanceHintSession::APerformanceHintSession(sp<IHintManager> hintManager,
+                                                 sp<IHintSession> session,
                                                  int64_t preferredRateNanos,
                                                  int64_t targetDurationNanos)
-      : mHintSession(std::move(session)),
+      : mHintManager(hintManager),
+        mHintSession(std::move(session)),
         mPreferredRateNanos(preferredRateNanos),
         mTargetDurationNanos(targetDurationNanos),
         mFirstTargetMetTimestamp(0),
@@ -260,6 +265,47 @@ int APerformanceHintSession::sendHint(int32_t hint) {
     return 0;
 }
 
+int APerformanceHintSession::setThreads(const int32_t* threadIds, size_t size) {
+    if (size == 0) {
+        ALOGE("%s: the list of thread ids must not be empty.", __FUNCTION__);
+        return EINVAL;
+    }
+    std::vector<int32_t> tids(threadIds, threadIds + size);
+    binder::Status ret = mHintManager->setHintSessionThreads(mHintSession, tids);
+    if (!ret.isOk()) {
+        ALOGE("%s: failed: %s", __FUNCTION__, ret.exceptionMessage().c_str());
+        if (ret.exceptionCode() == binder::Status::Exception::EX_SECURITY ||
+            ret.exceptionCode() == binder::Status::Exception::EX_ILLEGAL_ARGUMENT) {
+            return EINVAL;
+        }
+        return EPIPE;
+    }
+    return 0;
+}
+
+int APerformanceHintSession::getThreadIds(int32_t* const threadIds, size_t* size) {
+    std::vector<int32_t> tids;
+    binder::Status ret = mHintManager->getHintSessionThreadIds(mHintSession, &tids);
+    if (!ret.isOk()) {
+        ALOGE("%s: failed: %s", __FUNCTION__, ret.exceptionMessage().c_str());
+        return EPIPE;
+    }
+
+    // When threadIds is nullptr, this is the first call to determine the size
+    // of the thread ids list.
+    if (threadIds == nullptr) {
+        *size = tids.size();
+        return 0;
+    }
+
+    // Second call to return the actual list of thread ids.
+    *size = tids.size();
+    for (size_t i = 0; i < *size; ++i) {
+        threadIds[i] = tids[i];
+    }
+    return 0;
+}
+
 // ===================================== C API
 APerformanceHintManager* APerformanceHint_getManager() {
     return APerformanceHintManager::getInstance();
@@ -291,6 +337,23 @@ void APerformanceHint_closeSession(APerformanceHintSession* session) {
 
 int APerformanceHint_sendHint(void* session, int32_t hint) {
     return reinterpret_cast<APerformanceHintSession*>(session)->sendHint(hint);
+}
+
+int APerformanceHint_setThreads(APerformanceHintSession* session, const int32_t* threadIds,
+                                size_t size) {
+    if (session == nullptr) {
+        return EINVAL;
+    }
+    return session->setThreads(threadIds, size);
+}
+
+int APerformanceHint_getThreadIds(void* aPerformanceHintSession, int32_t* const threadIds,
+                                  size_t* const size) {
+    if (aPerformanceHintSession == nullptr) {
+        return EINVAL;
+    }
+    return static_cast<APerformanceHintSession*>(aPerformanceHintSession)
+            ->getThreadIds(threadIds, size);
 }
 
 void APerformanceHint_setIHintManagerForTesting(void* iManager) {

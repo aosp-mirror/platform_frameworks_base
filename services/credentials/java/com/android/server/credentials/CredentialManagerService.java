@@ -112,8 +112,9 @@ public final class CredentialManagerService
                 continue;
             }
             try {
-                serviceList.add(
-                        new CredentialManagerServiceImpl(this, mLock, resolvedUserId, serviceName));
+                serviceList.add(new CredentialManagerServiceImpl(this, mLock,
+                        resolvedUserId,
+                        serviceName));
             } catch (PackageManager.NameNotFoundException | SecurityException e) {
                 Log.i(TAG, "Unable to add serviceInfo : " + e.getMessage());
             }
@@ -137,20 +138,21 @@ public final class CredentialManagerService
         }
     }
 
+    @SuppressWarnings("GuardedBy") // ErrorProne requires initiateProviderSessionForRequestLocked
+    // to be guarded by 'service.mLock', which is the same as mLock.
     private List<ProviderSession> initiateProviderSessions(
             RequestSession session, List<String> requestOptions) {
         List<ProviderSession> providerSessions = new ArrayList<>();
         // Invoke all services of a user to initiate a provider session
-        runForUser(
-                (service) -> {
-                    if (service.isServiceCapable(requestOptions)) {
-                        ProviderSession providerSession =
-                                service.initiateProviderSessionForRequest(session);
-                        if (providerSession != null) {
-                            providerSessions.add(providerSession);
-                        }
-                    }
-                });
+        runForUser((service) -> {
+            synchronized (mLock) {
+                ProviderSession providerSession = service
+                        .initiateProviderSessionForRequestLocked(session, requestOptions);
+                if (providerSession != null) {
+                    providerSessions.add(providerSession);
+                }
+            }
+        });
         return providerSessions;
     }
 
@@ -175,12 +177,20 @@ public final class CredentialManagerService
 
             // Initiate all provider sessions
             List<ProviderSession> providerSessions =
-                    initiateProviderSessions(
-                            session,
-                            request.getGetCredentialOptions().stream()
-                                    .map(GetCredentialOption::getType)
-                                    .collect(Collectors.toList()));
-            // TODO : Return error when no providers available
+                    initiateProviderSessions(session, request.getGetCredentialOptions()
+                            .stream().map(GetCredentialOption::getType)
+                            .collect(Collectors.toList()));
+
+            if (providerSessions.isEmpty()) {
+                try {
+                    // TODO("Replace with properly defined error type")
+                    callback.onError("unknown_type",
+                            "No providers available to fulfill request.");
+                } catch (RemoteException e) {
+                    Log.i(TAG, "Issue invoking onError on IGetCredentialCallback "
+                            + "callback: " + e.getMessage());
+                }
+            }
 
             // Iterate over all provider sessions and invoke the request
             providerSessions.forEach(providerGetSession -> {
@@ -212,7 +222,17 @@ public final class CredentialManagerService
             // Initiate all provider sessions
             List<ProviderSession> providerSessions =
                     initiateProviderSessions(session, List.of(request.getType()));
-            // TODO : Return error when no providers available
+
+            if (providerSessions.isEmpty()) {
+                try {
+                    // TODO("Replace with properly defined error type")
+                    callback.onError("unknown_type",
+                            "No providers available to fulfill request.");
+                } catch (RemoteException e) {
+                    Log.i(TAG, "Issue invoking onError on ICreateCredentialCallback "
+                            + "callback: " + e.getMessage());
+                }
+            }
 
             // Iterate over all provider sessions and invoke the request
             providerSessions.forEach(

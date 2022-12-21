@@ -55,7 +55,7 @@ public class RemoveUnnecessaryAndroidTestBaseLibraryTest
                 .hideAsFinal();
 
         // No change required.
-        checkBackwardsCompatibility(before, after);
+        checkBackwardsCompatibility(before, after, false);
     }
 
     @Test
@@ -72,7 +72,7 @@ public class RemoveUnnecessaryAndroidTestBaseLibraryTest
                 .hideAsFinal();
 
         // No change required.
-        checkBackwardsCompatibility(before, after);
+        checkBackwardsCompatibility(before, after, false);
     }
 
     @Test
@@ -89,7 +89,7 @@ public class RemoveUnnecessaryAndroidTestBaseLibraryTest
                 .hideAsParsed())
                 .hideAsFinal();
 
-        checkBackwardsCompatibility(before, after);
+        checkBackwardsCompatibility(before, after, false);
     }
 
     @Test
@@ -106,7 +106,7 @@ public class RemoveUnnecessaryAndroidTestBaseLibraryTest
                 .hideAsParsed())
                 .hideAsFinal();
 
-        checkBackwardsCompatibility(before, after);
+        checkBackwardsCompatibility(before, after, false);
     }
 
     @Test
@@ -121,7 +121,7 @@ public class RemoveUnnecessaryAndroidTestBaseLibraryTest
                 .hideAsParsed())
                 .hideAsFinal();
 
-        checkBackwardsCompatibility(before, after);
+        checkBackwardsCompatibility(before, after, false);
     }
 
     @Test
@@ -138,7 +138,7 @@ public class RemoveUnnecessaryAndroidTestBaseLibraryTest
                 .hideAsParsed())
                 .hideAsFinal();
 
-        checkBackwardsCompatibility(before, after);
+        checkBackwardsCompatibility(before, after, false);
     }
 
     @Test
@@ -156,16 +156,17 @@ public class RemoveUnnecessaryAndroidTestBaseLibraryTest
                 .hideAsParsed())
                 .hideAsFinal();
 
-        checkBackwardsCompatibility(before, after);
+        checkBackwardsCompatibility(before, after, false);
     }
 
-    private void checkBackwardsCompatibility(ParsedPackage before, AndroidPackage after) {
+    private void checkBackwardsCompatibility(ParsedPackage before, AndroidPackage after,
+            boolean isSystemApp) {
         // TODO(b/72538146) - Cannot use constructor reference here because it is also used in
         // PackageBackwardCompatibility and that seems to create a package-private lambda in
         // android.content.pm which this then tries to reuse but fails because it cannot access
         // package-private classes/members because the test is loaded by a different ClassLoader
         // than the lambda.
-        checkBackwardsCompatibility(before, after,
+        checkBackwardsCompatibility(before, after, isSystemApp,
                 () -> new RemoveUnnecessaryAndroidTestBaseLibrary());
     }
 

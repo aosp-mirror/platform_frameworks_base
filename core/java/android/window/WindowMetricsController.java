@@ -22,10 +22,12 @@ import static android.view.WindowManager.LayoutParams.SOFT_INPUT_ADJUST_NOTHING;
 
 import android.annotation.NonNull;
 import android.app.ResourcesManager;
+import android.app.WindowConfiguration;
 import android.content.Context;
 import android.content.res.Configuration;
 import android.graphics.Rect;
 import android.os.RemoteException;
+import android.util.DisplayMetrics;
 import android.view.Display;
 import android.view.DisplayInfo;
 import android.view.InsetsState;
@@ -57,48 +59,52 @@ public final class WindowMetricsController {
 
     /** @see WindowManager#getCurrentWindowMetrics() */
     public WindowMetrics getCurrentWindowMetrics() {
-        final Rect bounds = getCurrentBounds(mContext);
-
-        // TODO(b/187712731): Provide density for WindowMetrics.
-        return new WindowMetrics(bounds, computeWindowInsets(bounds));
-    }
-
-    private static Rect getCurrentBounds(Context context) {
-        synchronized (ResourcesManager.getInstance()) {
-            return context.getResources().getConfiguration().windowConfiguration.getBounds();
-        }
+        return getWindowMetricsInternal(false /* isMaximum */);
     }
 
     /** @see WindowManager#getMaximumWindowMetrics() */
     public WindowMetrics getMaximumWindowMetrics() {
-        final Rect maxBounds = getMaximumBounds(mContext);
-
-        // TODO(b/187712731): Provide density for WindowMetrics.
-        return new WindowMetrics(maxBounds, computeWindowInsets(maxBounds));
+        return getWindowMetricsInternal(true /* isMaximum */);
     }
 
-    private static Rect getMaximumBounds(Context context) {
-        synchronized (ResourcesManager.getInstance()) {
-            return context.getResources().getConfiguration().windowConfiguration.getMaxBounds();
-        }
-    }
-
-    private WindowInsets computeWindowInsets(Rect bounds) {
-        // Initialize params which used for obtaining all system insets.
-        final WindowManager.LayoutParams params = new WindowManager.LayoutParams();
-        params.token = Context.getToken(mContext);
-        return getWindowInsetsFromServerForCurrentDisplay(params, bounds);
-    }
-
-    private WindowInsets getWindowInsetsFromServerForCurrentDisplay(
-            WindowManager.LayoutParams attrs, Rect bounds) {
+    /**
+     * The core implementation to obtain {@link WindowMetrics}
+     *
+     * @param isMaximum {@code true} to obtain {@link WindowManager#getCurrentWindowMetrics()}.
+     *                  {@code false} to obtain {@link WindowManager#getMaximumWindowMetrics()}.
+     */
+    private WindowMetrics getWindowMetricsInternal(boolean isMaximum) {
+        final Rect bounds;
+        final float density;
         final boolean isScreenRound;
         final int windowingMode;
         synchronized (ResourcesManager.getInstance()) {
             final Configuration config = mContext.getResources().getConfiguration();
+            final WindowConfiguration winConfig = config.windowConfiguration;
+            bounds = (isMaximum) ? winConfig.getMaxBounds() : winConfig.getBounds();
+            // Multiply default density scale because WindowMetrics provide the density value with
+            // the scaling factor for the Density Independent Pixel unit, which is the same unit
+            // as DisplayMetrics#density
+            density = config.densityDpi * DisplayMetrics.DENSITY_DEFAULT_SCALE;
             isScreenRound = config.isScreenRound();
-            windowingMode = config.windowConfiguration.getWindowingMode();
+            windowingMode = winConfig.getWindowingMode();
         }
+        final WindowInsets windowInsets = computeWindowInsets(bounds, isScreenRound, windowingMode);
+        return new WindowMetrics(bounds, windowInsets, density);
+    }
+
+    private WindowInsets computeWindowInsets(Rect bounds, boolean isScreenRound,
+            @WindowConfiguration.WindowingMode int windowingMode) {
+        // Initialize params which used for obtaining all system insets.
+        final WindowManager.LayoutParams params = new WindowManager.LayoutParams();
+        params.token = Context.getToken(mContext);
+        return getWindowInsetsFromServerForCurrentDisplay(params, bounds, isScreenRound,
+                windowingMode);
+    }
+
+    private WindowInsets getWindowInsetsFromServerForCurrentDisplay(
+            WindowManager.LayoutParams attrs, Rect bounds, boolean isScreenRound,
+            @WindowConfiguration.WindowingMode int windowingMode) {
         return getWindowInsetsFromServerForDisplay(mContext.getDisplayId(), attrs, bounds,
                 isScreenRound, windowingMode);
     }
@@ -165,7 +171,12 @@ public final class WindowMetricsController {
                             currentDisplayInfo.roundedCorners)
                     .setDisplayCutout(currentDisplayInfo.displayCutout).build();
 
-            maxMetrics.add(new WindowMetrics(maxBounds, windowInsets));
+            // Multiply default density scale because WindowMetrics provide the density value with
+            // the scaling factor for the Density Independent Pixel unit, which is the same unit
+            // as DisplayMetrics#density
+            final float density = currentDisplayInfo.logicalDensityDpi
+                    * DisplayMetrics.DENSITY_DEFAULT_SCALE;
+            maxMetrics.add(new WindowMetrics(maxBounds, windowInsets, density));
         }
         return maxMetrics;
     }

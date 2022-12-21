@@ -112,7 +112,7 @@ import java.util.Set;
  *       WEAVER_SLOT: Contains the Weaver slot number used by this protector.  Only exists if the
  *                    protector uses Weaver.
  */
-public class SyntheticPasswordManager {
+class SyntheticPasswordManager {
     private static final String SP_BLOB_NAME = "spblob";
     private static final String SP_E0_NAME = "e0";
     private static final String SP_P1_NAME = "p1";
@@ -394,7 +394,7 @@ public class SyntheticPasswordManager {
         }
     }
 
-    static class SyntheticPasswordBlob {
+    private static class SyntheticPasswordBlob {
         byte mVersion;
         byte mProtectorType;
         byte[] mContent;
@@ -431,7 +431,7 @@ public class SyntheticPasswordManager {
     static final int TOKEN_TYPE_STRONG = 0;
     static final int TOKEN_TYPE_WEAK = 1;
 
-    static class TokenData {
+    private static class TokenData {
         byte[] secdiscardableOnDisk;
         byte[] weaverSecret;
         byte[] aggregatedSecret;
@@ -1623,7 +1623,7 @@ public class SyntheticPasswordManager {
         SyntheticPasswordCrypto.destroyProtectorKey(keyAlias);
     }
 
-    public static long generateProtectorId() {
+    private static long generateProtectorId() {
         SecureRandom rng = new SecureRandom();
         long result;
         do {
@@ -1685,15 +1685,17 @@ public class SyntheticPasswordManager {
         return Arrays.copyOf(key, mWeaverConfig.keySize);
     }
 
+    @VisibleForTesting
     protected long sidFromPasswordHandle(byte[] handle) {
         return nativeSidFromPasswordHandle(handle);
     }
 
+    @VisibleForTesting
     protected byte[] scrypt(byte[] password, byte[] salt, int n, int r, int p, int outLen) {
         return new Scrypt().scrypt(password, salt, n, r, p, outLen);
     }
 
-    native long nativeSidFromPasswordHandle(byte[] handle);
+    private native long nativeSidFromPasswordHandle(byte[] handle);
 
     @VisibleForTesting
     static byte[] bytesToHex(byte[] bytes) {

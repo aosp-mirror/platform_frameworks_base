@@ -243,6 +243,29 @@ abstract class ParcelableComponentTest(
     )
 
     /**
+     * Variant of [getSetByValue] that allows specifying a non-member [getFunction]. Mostly used
+     * for AndroidPackageHidden for APIs which are hidden from the interface.
+     */
+    @Suppress("UNCHECKED_CAST")
+    protected fun <ObjectType, ReturnType, SetType : Any?, CompareType : Any?> getSetByValue(
+        getFunction: (ObjectType) -> ReturnType,
+        getFunctionName: String,
+        setFunction: KFunction2<ObjectType, SetType, Any?>,
+        value: CompareType,
+        transformGet: (ReturnType) -> CompareType = { it as CompareType },
+        transformSet: (CompareType) -> SetType = { it as SetType },
+        compare: (CompareType, CompareType) -> Boolean? = Objects::equals
+    ) = Param(
+        getFunctionName,
+        { transformGet(getFunction(it as ObjectType)) },
+        setFunction.name,
+        { setFunction.call(it.first() as ObjectType, transformSet(it[1] as CompareType)) },
+        { value },
+        { first, second -> compare(first as CompareType, second as CompareType) == true },
+        verifyFunctionName = false
+    )
+
+    /**
      * Variant of [getSetByValue] that allows specifying a [setFunction] with 2 inputs.
      */
     @Suppress("UNCHECKED_CAST")
@@ -407,7 +430,7 @@ abstract class ParcelableComponentTest(
                 - excludedMethods)
             .distinct()
 
-        val allTestedFunctions = params.flatMap {
+        val allTestedFunctions = params.filter(Param::verifyFunctionName).flatMap {
             listOfNotNull(it.getFunctionName, it.setFunctionName)
         }
         expect.that(allTestedFunctions).containsExactlyElementsIn(expectedFunctions)
@@ -427,6 +450,7 @@ abstract class ParcelableComponentTest(
         val setFunctionName: String?,
         val setFunction: (Array<Any?>) -> Unit,
         val value: () -> Any?,
-        val compare: (Any?, Any?) -> Boolean = Objects::equals
+        val compare: (Any?, Any?) -> Boolean = Objects::equals,
+        val verifyFunctionName: Boolean = true
     )
 }

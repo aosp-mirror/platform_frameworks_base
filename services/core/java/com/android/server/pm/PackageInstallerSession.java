@@ -1910,8 +1910,8 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
             return true;
         }
 
-        return !existingPkgSetting.getPkg().isSystem()
-                && !existingPkgSetting.getTransientState().isUpdatedSystemApp();
+        return !existingPkgSetting.isSystem()
+                && !existingPkgSetting.isUpdatedSystemApp();
     }
 
     /**

@@ -86,7 +86,7 @@ public final class MovePackageHelper {
             throw new PackageManagerException(MOVE_FAILED_DOESNT_EXIST, "Missing package");
         }
         final AndroidPackage pkg = packageState.getPkg();
-        if (pkg.isSystem()) {
+        if (packageState.isSystem()) {
             throw new PackageManagerException(MOVE_FAILED_SYSTEM_PACKAGE,
                     "Cannot move system application");
         }

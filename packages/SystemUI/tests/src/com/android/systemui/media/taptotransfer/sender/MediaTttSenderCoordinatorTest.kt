@@ -38,6 +38,7 @@ import com.android.systemui.R
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.classifier.FalsingCollector
 import com.android.systemui.common.shared.model.Text.Companion.loadText
+import com.android.systemui.dump.DumpManager
 import com.android.systemui.media.taptotransfer.MediaTttFlags
 import com.android.systemui.media.taptotransfer.common.MediaTttLogger
 import com.android.systemui.plugins.FalsingManager
@@ -81,6 +82,7 @@ class MediaTttSenderCoordinatorTest : SysuiTestCase() {
     @Mock private lateinit var applicationInfo: ApplicationInfo
     @Mock private lateinit var commandQueue: CommandQueue
     @Mock private lateinit var configurationController: ConfigurationController
+    @Mock private lateinit var dumpManager: DumpManager
     @Mock private lateinit var falsingManager: FalsingManager
     @Mock private lateinit var falsingCollector: FalsingCollector
     @Mock private lateinit var chipbarLogger: ChipbarLogger
@@ -137,6 +139,7 @@ class MediaTttSenderCoordinatorTest : SysuiTestCase() {
                 fakeExecutor,
                 accessibilityManager,
                 configurationController,
+                dumpManager,
                 powerManager,
                 falsingManager,
                 falsingCollector,

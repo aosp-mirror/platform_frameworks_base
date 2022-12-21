@@ -1159,7 +1159,7 @@ public class TransitionTests extends WindowTestsBase {
         // normally.
         mWm.mSyncEngine.abort(openTransition.getSyncId());
 
-        verify(snapshotController, times(1)).recordTaskSnapshot(eq(task2), eq(false));
+        verify(snapshotController, times(1)).recordSnapshot(eq(task2), eq(false));
 
         openTransition.finishTransition();
 
@@ -1183,12 +1183,12 @@ public class TransitionTests extends WindowTestsBase {
 
         // Make sure we haven't called recordSnapshot (since we are transient, it shouldn't be
         // called until finish).
-        verify(snapshotController, times(0)).recordTaskSnapshot(eq(task1), eq(false));
+        verify(snapshotController, times(0)).recordSnapshot(eq(task1), eq(false));
 
         enteringAnimReports.clear();
         closeTransition.finishTransition();
 
-        verify(snapshotController, times(1)).recordTaskSnapshot(eq(task1), eq(false));
+        verify(snapshotController, times(1)).recordSnapshot(eq(task1), eq(false));
         assertTrue(enteringAnimReports.contains(activity2));
     }
 

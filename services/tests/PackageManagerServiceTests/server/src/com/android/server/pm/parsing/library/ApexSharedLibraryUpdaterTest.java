@@ -97,7 +97,7 @@ public class ApexSharedLibraryUpdaterTest extends PackageSharedLibraryUpdaterTes
                 .hideAsParsed())
                 .hideAsFinal();
 
-        checkBackwardsCompatibility(before, after);
+        checkBackwardsCompatibility(before, after, false);
     }
 
     @Test
@@ -115,7 +115,7 @@ public class ApexSharedLibraryUpdaterTest extends PackageSharedLibraryUpdaterTes
         // note: target sdk is not what matters in this logic. It's the system SDK
         // should be removed because on 30+ (R+) it is implicit
 
-        checkBackwardsCompatibility(before, after);
+        checkBackwardsCompatibility(before, after, false);
     }
 
     @Test
@@ -131,7 +131,7 @@ public class ApexSharedLibraryUpdaterTest extends PackageSharedLibraryUpdaterTes
 
         // note: target sdk is not what matters in this logic. It's the system SDK
         // nothing should change because the implicit from is only from a future platform release
-        checkBackwardsCompatibility(before, after);
+        checkBackwardsCompatibility(before, after, false);
     }
 
     @Test
@@ -151,7 +151,7 @@ public class ApexSharedLibraryUpdaterTest extends PackageSharedLibraryUpdaterTes
 
         // note: target sdk is not what matters in this logic. It's the system SDK
         // nothing should change because the implicit from is only from a future platform release
-        checkBackwardsCompatibility(before, after);
+        checkBackwardsCompatibility(before, after, false);
     }
 
     @Test
@@ -166,7 +166,7 @@ public class ApexSharedLibraryUpdaterTest extends PackageSharedLibraryUpdaterTes
                 .hideAsFinal();
 
         // should not be affected because it is still in the BCP in 30 / R
-        checkBackwardsCompatibility(before, after);
+        checkBackwardsCompatibility(before, after, false);
     }
 
     @Test
@@ -182,7 +182,7 @@ public class ApexSharedLibraryUpdaterTest extends PackageSharedLibraryUpdaterTes
                 .hideAsFinal();
 
         // should be present because this was in BCP in 29 / Q
-        checkBackwardsCompatibility(before, after);
+        checkBackwardsCompatibility(before, after, false);
     }
 
     /**
@@ -206,7 +206,7 @@ public class ApexSharedLibraryUpdaterTest extends PackageSharedLibraryUpdaterTes
 
         // the library is now in the BOOTCLASSPATH (for the second time) so it doesn't need to be
         // listed
-        checkBackwardsCompatibility(before, after);
+        checkBackwardsCompatibility(before, after, false);
     }
 
     /**
@@ -233,7 +233,7 @@ public class ApexSharedLibraryUpdaterTest extends PackageSharedLibraryUpdaterTes
 
         // in this example, we are at the point where the library is not in the BOOTCLASSPATH.
         // Because the app targets Q / 29 (when this library was in the BCP) then we need to add it
-        checkBackwardsCompatibility(before, after);
+        checkBackwardsCompatibility(before, after, false);
     }
 
     /**
@@ -258,7 +258,7 @@ public class ApexSharedLibraryUpdaterTest extends PackageSharedLibraryUpdaterTes
         // in this example, we are at the point where the library is not in the BOOTCLASSPATH.
         // Because the app targets R/30 (when this library was removed from the BCP) then we don't
         //need to add it
-        checkBackwardsCompatibility(before, after);
+        checkBackwardsCompatibility(before, after, false);
     }
 
     /**
@@ -284,7 +284,7 @@ public class ApexSharedLibraryUpdaterTest extends PackageSharedLibraryUpdaterTes
 
         // in this example, we are at the point where the library is not in the BOOTCLASSPATH.
         // Because the app wants to use the library, it needs to be present
-        checkBackwardsCompatibility(before, after);
+        checkBackwardsCompatibility(before, after, false);
     }
 
     /**
@@ -304,7 +304,7 @@ public class ApexSharedLibraryUpdaterTest extends PackageSharedLibraryUpdaterTes
                 .hideAsFinal();
 
         // in this example, we are at the point where the library is still in the BCP
-        checkBackwardsCompatibility(before, after);
+        checkBackwardsCompatibility(before, after, false);
     }
 
     /**
@@ -326,7 +326,7 @@ public class ApexSharedLibraryUpdaterTest extends PackageSharedLibraryUpdaterTes
                 .hideAsFinal();
 
         // in this example, we are at the point where the library was removed from the BCP
-        checkBackwardsCompatibility(before, after);
+        checkBackwardsCompatibility(before, after, false);
     }
 
     @Test
@@ -343,7 +343,7 @@ public class ApexSharedLibraryUpdaterTest extends PackageSharedLibraryUpdaterTes
                 .hideAsFinal();
 
         // in this example, we are at the point where the library was removed from the BCP
-        checkBackwardsCompatibility(before, after);
+        checkBackwardsCompatibility(before, after, false);
     }
 
     @Test
@@ -360,11 +360,12 @@ public class ApexSharedLibraryUpdaterTest extends PackageSharedLibraryUpdaterTes
                 .hideAsFinal();
 
         // in this example, we are at the point where the library was removed from the BCP
-        checkBackwardsCompatibility(before, after);
+        checkBackwardsCompatibility(before, after, false);
     }
 
-    private void checkBackwardsCompatibility(ParsedPackage before, AndroidPackage after) {
-        checkBackwardsCompatibility(before, after,
+    private void checkBackwardsCompatibility(ParsedPackage before, AndroidPackage after,
+            boolean isSystemApp) {
+        checkBackwardsCompatibility(before, after, isSystemApp,
                 () -> new ApexSharedLibraryUpdater(mSharedLibraries));
     }
 }

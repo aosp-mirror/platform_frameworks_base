@@ -189,6 +189,8 @@ public final class HintManagerService extends SystemService {
 
         private static native void nativeSendHint(long halPtr, int hint);
 
+        private static native void nativeSetThreads(long halPtr, int[] tids);
+
         private static native long nativeGetHintSessionPreferredRate();
 
         /** Wrapper for HintManager.nativeInit */
@@ -236,6 +238,11 @@ public final class HintManagerService extends SystemService {
         /** Wrapper for HintManager.nativeGetHintSessionPreferredRate */
         public long halGetHintSessionPreferredRate() {
             return nativeGetHintSessionPreferredRate();
+        }
+
+        /** Wrapper for HintManager.nativeSetThreads */
+        public void halSetThreads(long halPtr, int[] tids) {
+            nativeSetThreads(halPtr, tids);
         }
     }
 
@@ -400,6 +407,18 @@ public final class HintManagerService extends SystemService {
         }
 
         @Override
+        public void setHintSessionThreads(@NonNull IHintSession hintSession, @NonNull int[] tids) {
+            AppHintSession appHintSession = (AppHintSession) hintSession;
+            appHintSession.setThreads(tids);
+        }
+
+        @Override
+        public int[] getHintSessionThreadIds(@NonNull IHintSession hintSession) {
+            AppHintSession appHintSession = (AppHintSession) hintSession;
+            return appHintSession.getThreadIds();
+        }
+
+        @Override
         public void dump(FileDescriptor fd, PrintWriter pw, String[] args) {
             if (!DumpUtils.checkDumpPermission(getContext(), TAG, pw)) {
                 return;
@@ -434,11 +453,12 @@ public final class HintManagerService extends SystemService {
     final class AppHintSession extends IHintSession.Stub implements IBinder.DeathRecipient {
         protected final int mUid;
         protected final int mPid;
-        protected final int[] mThreadIds;
+        protected int[] mThreadIds;
         protected final IBinder mToken;
         protected long mHalSessionPtr;
         protected long mTargetDurationNanos;
         protected boolean mUpdateAllowed;
+        protected int[] mNewThreadIds;
 
         protected AppHintSession(
                 int uid, int pid, int[] threadIds, IBinder token,
@@ -541,6 +561,38 @@ public final class HintManagerService extends SystemService {
             }
         }
 
+        public void setThreads(@NonNull int[] tids) {
+            synchronized (mLock) {
+                if (mHalSessionPtr == 0) {
+                    return;
+                }
+                if (tids.length == 0) {
+                    throw new IllegalArgumentException("Thread id list can't be empty.");
+                }
+                final int callingUid = Binder.getCallingUid();
+                final int callingTgid = Process.getThreadGroupLeader(Binder.getCallingPid());
+                final long identity = Binder.clearCallingIdentity();
+                try {
+                    if (!checkTidValid(callingUid, callingTgid, tids)) {
+                        throw new SecurityException("Some tid doesn't belong to the application.");
+                    }
+                } finally {
+                    Binder.restoreCallingIdentity(identity);
+                }
+                if (!updateHintAllowed()) {
+                    Slogf.v(TAG, "update hint not allowed, storing tids.");
+                    mNewThreadIds = tids;
+                    return;
+                }
+                mNativeWrapper.halSetThreads(mHalSessionPtr, tids);
+                mThreadIds = tids;
+            }
+        }
+
+        public int[] getThreadIds() {
+            return mThreadIds;
+        }
+
         private void onProcStateChanged() {
             updateHintAllowed();
         }
@@ -556,6 +608,11 @@ public final class HintManagerService extends SystemService {
             synchronized (mLock) {
                 if (mHalSessionPtr == 0) return;
                 mNativeWrapper.halResumeHintSession(mHalSessionPtr);
+                if (mNewThreadIds != null) {
+                    mNativeWrapper.halSetThreads(mHalSessionPtr, mNewThreadIds);
+                    mThreadIds = mNewThreadIds;
+                    mNewThreadIds = null;
+                }
             }
         }
 

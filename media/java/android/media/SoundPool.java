@@ -16,6 +16,8 @@
 
 package android.media;
 
+import static android.media.AudioManager.AUDIO_SESSION_ID_GENERATE;
+
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.content.Context;
@@ -29,6 +31,7 @@ import android.util.Log;
 
 import java.io.File;
 import java.io.FileDescriptor;
+import java.util.Objects;
 import java.util.concurrent.atomic.AtomicReference;
 
 
@@ -146,12 +149,14 @@ public class SoundPool extends PlayerBase {
      *     SoundPool instance
      */
     public SoundPool(int maxStreams, int streamType, int srcQuality) {
-        this(maxStreams,
-                new AudioAttributes.Builder().setInternalLegacyStreamType(streamType).build());
+        this(/*context=*/null, maxStreams,
+                new AudioAttributes.Builder().setInternalLegacyStreamType(streamType).build(),
+                AUDIO_SESSION_ID_GENERATE);
         PlayerBase.deprecateStreamTypeForPlayback(streamType, "SoundPool", "SoundPool()");
     }
 
-    private SoundPool(int maxStreams, AudioAttributes attributes) {
+    private SoundPool(@Nullable Context context, int maxStreams,
+            @NonNull AudioAttributes attributes, int sessionId) {
         super(attributes, AudioPlaybackConfiguration.PLAYER_TYPE_JAM_SOUNDPOOL);
 
         // do native setup
@@ -160,8 +165,7 @@ public class SoundPool extends PlayerBase {
         }
         mAttributes = attributes;
 
-        // FIXME: b/174876164 implement session id for soundpool
-        baseRegisterPlayer(AudioSystem.AUDIO_SESSION_ALLOCATE);
+        baseRegisterPlayer(resolvePlaybackSessionId(context, sessionId));
     }
 
     /**
@@ -555,6 +559,8 @@ public class SoundPool extends PlayerBase {
     public static class Builder {
         private int mMaxStreams = 1;
         private AudioAttributes mAudioAttributes;
+        private Context mContext;
+        private int mSessionId = AUDIO_SESSION_ID_GENERATE;
 
         /**
          * Constructs a new Builder with the defaults format values.
@@ -596,12 +602,49 @@ public class SoundPool extends PlayerBase {
             return this;
         }
 
+        /**
+         * Sets the session ID the {@link SoundPool} will be attached to.
+         *
+         * Note, that if there's a device specific session id associated with the context
+         * (see {@link Builder#setContext(Context)}), explicitly setting a session id using this
+         * method will override it.
+         *
+         * @param sessionId a strictly positive ID number retrieved from another player or
+         *   allocated by {@link AudioManager} via {@link AudioManager#generateAudioSessionId()},
+         *   or {@link AudioManager#AUDIO_SESSION_ID_GENERATE}.
+         * @return the same {@link Builder} instance
+         * @throws IllegalArgumentException when sessionId is invalid.
+         */
+        public @NonNull Builder setAudioSessionId(int sessionId) {
+            if ((sessionId != AUDIO_SESSION_ID_GENERATE) && (sessionId < 1)) {
+                throw new IllegalArgumentException("Invalid audio session ID " + sessionId);
+            }
+            mSessionId = sessionId;
+            return this;
+        }
+
+        /**
+         * Sets the context the SoundPool belongs to.
+         *
+         * The context will be used to pull information, such as
+         * {@link android.content.AttributionSource} and device specific audio session ids,
+         * which will be associated with the {@link SoundPool}. However, the context itself will
+         * not be retained by the {@link SoundPool} instance after initialization.
+         *
+         * @param context a non-null {@link Context} instance
+         * @return the same {@link Builder} instance.
+         */
+        public @NonNull Builder setContext(@NonNull Context context) {
+            mContext = Objects.requireNonNull(context);
+            return this;
+        }
+
         public SoundPool build() {
             if (mAudioAttributes == null) {
                 mAudioAttributes = new AudioAttributes.Builder()
                         .setUsage(AudioAttributes.USAGE_MEDIA).build();
             }
-            return new SoundPool(mMaxStreams, mAudioAttributes);
+            return new SoundPool(mContext, mMaxStreams, mAudioAttributes, mSessionId);
         }
     }
 }

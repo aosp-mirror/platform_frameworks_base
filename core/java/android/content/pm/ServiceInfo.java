@@ -79,6 +79,20 @@ public class ServiceInfo extends ComponentInfo
     public static final int FLAG_USE_APP_ZYGOTE = 0x0008;
 
     /**
+     * Bit in {@link #flags}: If set, and this is an {@link android.R.attr#isolatedProcess}
+     * service, the service is allowed to be bound in a shared isolated process with other
+     * isolated services. Note that these other isolated services can also belong to other
+     * apps from different vendors.
+     *
+     * Shared isolated processes are created when using the
+     * {@link android.content.Context#BIND_SHARED_ISOLATED_PROCESS) during service binding.
+     *
+     * Note that when this flag is used, the {@link android.R.attr#process} attribute is
+     * ignored when the process is bound into a shared isolated process by a client.
+     */
+    public static final int FLAG_ALLOW_SHARED_ISOLATED_PROCESS = 0x0010;
+
+    /**
      * Bit in {@link #flags} indicating if the service is visible to ephemeral applications.
      * @hide
      */

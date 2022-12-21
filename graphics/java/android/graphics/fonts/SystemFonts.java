@@ -22,8 +22,8 @@ import android.graphics.FontListParser;
 import android.graphics.Typeface;
 import android.text.FontConfig;
 import android.util.ArrayMap;
-import android.util.ArraySet;
 import android.util.Log;
+import android.util.SparseIntArray;
 
 import com.android.internal.annotations.GuardedBy;
 import com.android.internal.annotations.VisibleForTesting;
@@ -117,17 +117,18 @@ public final class SystemFonts {
             }
         }
 
+
         final FontFamily defaultFamily = defaultFonts.isEmpty() ? null : createFontFamily(
                 defaultFonts, languageTags, variant, false, cache);
-
         // Insert family into fallback map.
         for (int i = 0; i < fallbackMap.size(); i++) {
             final String name = fallbackMap.keyAt(i);
             final NativeFamilyListSet familyListSet = fallbackMap.valueAt(i);
-            if (familyListSet.seenXmlFamilies.contains(xmlFamily)) {
+            int identityHash = System.identityHashCode(xmlFamily);
+            if (familyListSet.seenXmlFamilies.get(identityHash, -1) != -1) {
                 continue;
             } else {
-                familyListSet.seenXmlFamilies.add(xmlFamily);
+                familyListSet.seenXmlFamilies.append(identityHash, 1);
             }
             final ArrayList<FontConfig.Font> fallback = specificFallbackFonts.get(name);
             if (fallback == null) {
@@ -213,7 +214,7 @@ public final class SystemFonts {
                 return;
             }
             familyListSet.familyList.add(family);
-            familyListSet.seenXmlFamilies.add(xmlFamily);
+            familyListSet.seenXmlFamilies.append(System.identityHashCode(xmlFamily), 1);
         }
         fallbackListMap.put(familyName, familyListSet);
     }
@@ -276,7 +277,7 @@ public final class SystemFonts {
 
     private static final class NativeFamilyListSet {
         public List<FontFamily> familyList = new ArrayList<>();
-        public Set<FontConfig.FontFamily> seenXmlFamilies = new ArraySet<>();
+        public SparseIntArray seenXmlFamilies = new SparseIntArray();
     }
 
     /** @hide */

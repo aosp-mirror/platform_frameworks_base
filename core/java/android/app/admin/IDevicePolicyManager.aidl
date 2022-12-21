@@ -29,6 +29,7 @@ import android.app.admin.PreferentialNetworkServiceConfig;
 import android.app.admin.StartInstallingUpdateCallback;
 import android.app.admin.SystemUpdateInfo;
 import android.app.admin.SystemUpdatePolicy;
+import android.app.admin.PackagePolicy;
 import android.app.admin.PasswordMetrics;
 import android.app.admin.FactoryResetProtectionPolicy;
 import android.app.admin.ManagedProfileProvisioningParams;
@@ -329,6 +330,14 @@ interface IDevicePolicyManager {
     boolean getCrossProfileContactsSearchDisabled(in ComponentName who);
     boolean getCrossProfileContactsSearchDisabledForUser(int userId);
     void startManagedQuickContact(String lookupKey, long contactId, boolean isContactIdIgnored, long directoryId, in Intent originalIntent);
+
+    void setManagedProfileCallerIdAccessPolicy(in PackagePolicy policy);
+    PackagePolicy getManagedProfileCallerIdAccessPolicy();
+    boolean hasManagedProfileCallerIdAccess(int userId, String packageName);
+
+    void setManagedProfileContactsAccessPolicy(in PackagePolicy policy);
+    PackagePolicy getManagedProfileContactsAccessPolicy();
+    boolean hasManagedProfileContactsAccess(int userId, String packageName);
 
     void setBluetoothContactSharingDisabled(in ComponentName who, boolean disabled);
     boolean getBluetoothContactSharingDisabled(in ComponentName who);

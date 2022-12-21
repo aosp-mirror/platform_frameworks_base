@@ -452,6 +452,9 @@ public interface ParsingPackage {
     List<ParsedProvider> getProviders();
 
     @NonNull
+    List<ParsedActivity> getReceivers();
+
+    @NonNull
     List<String> getRequestedPermissions();
 
     @Nullable

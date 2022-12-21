@@ -245,7 +245,7 @@ public class InsetsState implements Parcelable {
 
             // IME won't be reported in max insets as the size depends on the EditorInfo of the IME
             // target.
-            if (source.getType() != ITYPE_IME) {
+            if (source.getType() != WindowInsets.Type.ime()) {
                 InsetsSource ignoringVisibilitySource = ignoringVisibilityState != null
                         ? ignoringVisibilityState.getSource(type)
                         : source;
@@ -442,7 +442,7 @@ public class InsetsState implements Parcelable {
             @Nullable boolean[] typeVisibilityMap) {
         Insets insets = source.calculateInsets(relativeFrame, ignoreVisibility);
 
-        int type = toPublicType(source.getType());
+        final int type = source.getType();
         processSourceAsPublicType(source, typeInsetsMap, typeSideMap, typeVisibilityMap,
                 insets, type);
 
@@ -486,7 +486,7 @@ public class InsetsState implements Parcelable {
         if (typeSideMap != null) {
             @InternalInsetsSide int insetSide = getInsetSide(insets);
             if (insetSide != ISIDE_UNKNOWN) {
-                typeSideMap.put(source.getType(), insetSide);
+                typeSideMap.put(source.getId(), insetSide);
             }
         }
     }
@@ -519,7 +519,7 @@ public class InsetsState implements Parcelable {
         if (source != null) {
             return source;
         }
-        source = new InsetsSource(type);
+        source = new InsetsSource(type, toPublicType(type));
         mSources[type] = source;
         return source;
     }
@@ -708,7 +708,7 @@ public class InsetsState implements Parcelable {
     }
 
     public void addSource(InsetsSource source) {
-        mSources[source.getType()] = source;
+        mSources[source.getId()] = source;
     }
 
     public static boolean clearsCompatInsets(int windowType, int windowFlags, int windowingMode) {

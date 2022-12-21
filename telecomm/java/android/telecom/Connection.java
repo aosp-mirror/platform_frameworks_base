@@ -19,6 +19,7 @@ package android.telecom;
 import static android.Manifest.permission.MODIFY_PHONE_STATE;
 
 import android.Manifest;
+import android.annotation.CallbackExecutor;
 import android.annotation.ElapsedRealtimeLong;
 import android.annotation.IntDef;
 import android.annotation.IntRange;
@@ -39,6 +40,7 @@ import android.os.Handler;
 import android.os.IBinder;
 import android.os.Looper;
 import android.os.Message;
+import android.os.OutcomeReceiver;
 import android.os.Parcel;
 import android.os.ParcelFileDescriptor;
 import android.os.Parcelable;
@@ -69,6 +71,7 @@ import java.util.List;
 import java.util.Objects;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.Executor;
 
 /**
  * Represents a phone call or connection to a remote endpoint that carries voice and/or video
@@ -1280,6 +1283,8 @@ public abstract class Connection extends Conferenceable {
         /** @hide */
         public void onPhoneAccountChanged(Connection c, PhoneAccountHandle pHandle) {}
         public void onConnectionTimeReset(Connection c) {}
+        public void onEndpointChanged(Connection c, CallEndpoint endpoint, Executor executor,
+                OutcomeReceiver<Void, CallEndpointException> callback) {}
     }
 
     /**
@@ -2162,6 +2167,7 @@ public abstract class Connection extends Conferenceable {
     private PhoneAccountHandle mPhoneAccountHandle;
     private int mState = STATE_NEW;
     private CallAudioState mCallAudioState;
+    private CallEndpoint mCallEndpoint;
     private Uri mAddress;
     private int mAddressPresentation;
     private String mCallerDisplayName;
@@ -2290,7 +2296,11 @@ public abstract class Connection extends Conferenceable {
      * @return The audio state of the connection, describing how its audio is currently
      *         being routed by the system. This is {@code null} if this Connection
      *         does not directly know about its audio state.
+     * @deprecated Use {@link #getCurrentCallEndpoint()},
+     * {@link #onAvailableCallEndpointsChanged(List)} and
+     * {@link #onMuteStateChanged(boolean)} instead.
      */
+    @Deprecated
     public final CallAudioState getCallAudioState() {
         return mCallAudioState;
     }
@@ -2454,6 +2464,43 @@ public abstract class Connection extends Conferenceable {
         mCallAudioState = state;
         onAudioStateChanged(getAudioState());
         onCallAudioStateChanged(state);
+    }
+
+    /**
+     * Inform this Connection that the audio endpoint has been changed.
+     *
+     * @param endpoint The new call endpoint.
+     * @hide
+     */
+    final void setCallEndpoint(CallEndpoint endpoint) {
+        checkImmutable();
+        Log.d(this, "setCallEndpoint %s", endpoint);
+        mCallEndpoint = endpoint;
+        onCallEndpointChanged(endpoint);
+    }
+
+    /**
+     * Inform this Connection that the available call endpoints have been changed.
+     *
+     * @param availableEndpoints The available call endpoints.
+     * @hide
+     */
+    final void setAvailableCallEndpoints(List<CallEndpoint> availableEndpoints) {
+        checkImmutable();
+        Log.d(this, "setAvailableCallEndpoints");
+        onAvailableCallEndpointsChanged(availableEndpoints);
+    }
+
+    /**
+     * Inform this Connection that its audio mute state has been changed.
+     *
+     * @param isMuted The new mute state.
+     * @hide
+     */
+    final void setMuteState(boolean isMuted) {
+        checkImmutable();
+        Log.d(this, "setMuteState %s", isMuted);
+        onMuteStateChanged(isMuted);
     }
 
     /**
@@ -3081,7 +3128,10 @@ public abstract class Connection extends Conferenceable {
      * @param route The audio route to use (one of {@link CallAudioState#ROUTE_BLUETOOTH},
      *              {@link CallAudioState#ROUTE_EARPIECE}, {@link CallAudioState#ROUTE_SPEAKER}, or
      *              {@link CallAudioState#ROUTE_WIRED_HEADSET}).
+     * @deprecated Use {@link #requestCallEndpointChange(CallEndpoint, Executor, OutcomeReceiver)}
+     * instead.
      */
+    @Deprecated
     public final void setAudioRoute(int route) {
         for (Listener l : mListeners) {
             l.onAudioRouteChanged(this, route, null);
@@ -3101,12 +3151,49 @@ public abstract class Connection extends Conferenceable {
      * <p>
      * See also {@link InCallService#requestBluetoothAudio(BluetoothDevice)}
      * @param bluetoothDevice The bluetooth device to connect to.
+     * @deprecated Use {@link #requestCallEndpointChange(CallEndpoint, Executor, OutcomeReceiver)}
+     * instead.
      */
+    @Deprecated
     public void requestBluetoothAudio(@NonNull BluetoothDevice bluetoothDevice) {
         for (Listener l : mListeners) {
             l.onAudioRouteChanged(this, CallAudioState.ROUTE_BLUETOOTH,
                     bluetoothDevice.getAddress());
         }
+    }
+
+    /**
+     * Request audio routing to a specific CallEndpoint. Clients should not define their own
+     * CallEndpoint when requesting a change. Instead, the new endpoint should be one of the valid
+     * endpoints provided by {@link #onAvailableCallEndpointsChanged(List)}.
+     * When this request is honored, there will be change to the {@link #getCurrentCallEndpoint()}.
+     * <p>
+     * Used by self-managed {@link ConnectionService}s which wish to change the CallEndpoint for a
+     * self-managed {@link Connection} (see {@link PhoneAccount#CAPABILITY_SELF_MANAGED}.)
+     * <p>
+     * See also
+     * {@link InCallService#requestCallEndpointChange(CallEndpoint, Executor, OutcomeReceiver)}.
+     *
+     * @param endpoint The call endpoint to use.
+     * @param executor The executor of where the callback will execute.
+     * @param callback The callback to notify the result of the endpoint change.
+     */
+    public final void requestCallEndpointChange(@NonNull CallEndpoint endpoint,
+            @NonNull @CallbackExecutor Executor executor,
+            @NonNull OutcomeReceiver<Void, CallEndpointException> callback) {
+        for (Listener l : mListeners) {
+            l.onEndpointChanged(this, endpoint, executor, callback);
+        }
+    }
+
+    /**
+     * Obtains the current CallEndpoint.
+     *
+     * @return An object encapsulating the CallEndpoint.
+     */
+    @NonNull
+    public final CallEndpoint getCurrentCallEndpoint() {
+        return mCallEndpoint;
     }
 
     /**
@@ -3160,8 +3247,33 @@ public abstract class Connection extends Conferenceable {
      * Notifies this Connection that the {@link #getCallAudioState()} property has a new value.
      *
      * @param state The new connection audio state.
+     * @deprecated Use {@link #onCallEndpointChanged(CallEndpoint)},
+     * {@link #onAvailableCallEndpointsChanged(List)} and
+     * {@link #onMuteStateChanged(boolean)} instead.
      */
+    @Deprecated
     public void onCallAudioStateChanged(CallAudioState state) {}
+
+    /**
+     * Notifies this Connection that the audio endpoint has been changed.
+     *
+     * @param callEndpoint The current CallEndpoint.
+     */
+    public void onCallEndpointChanged(@NonNull CallEndpoint callEndpoint) {}
+
+    /**
+     * Notifies this Connection that the available call endpoints have been changed.
+     *
+     * @param availableEndpoints The set of available CallEndpoint.
+     */
+    public void onAvailableCallEndpointsChanged(@NonNull List<CallEndpoint> availableEndpoints) {}
+
+    /**
+     * Notifies this Connection that its audio mute state has been changed.
+     *
+     * @param isMuted The current mute state.
+     */
+    public void onMuteStateChanged(boolean isMuted) {}
 
     /**
      * Inform this Connection when it will or will not be tracked by an {@link InCallService} which

@@ -37,7 +37,7 @@ import com.android.internal.os.KernelCpuSpeedReader;
 import com.android.internal.os.KernelCpuUidTimeReader;
 import com.android.internal.os.KernelSingleUidTimeReader;
 import com.android.internal.os.PowerProfile;
-import com.android.internal.power.MeasuredEnergyStats;
+import com.android.internal.power.EnergyConsumerStats;
 
 import org.junit.Before;
 import org.junit.Rule;
@@ -137,10 +137,10 @@ public class SystemServicePowerCalculatorTest {
     @Test
     public void testMeasuredEnergyBasedModel() {
         final boolean[] supportedPowerBuckets =
-                new boolean[MeasuredEnergyStats.NUMBER_STANDARD_POWER_BUCKETS];
-        supportedPowerBuckets[MeasuredEnergyStats.POWER_BUCKET_CPU] = true;
+                new boolean[EnergyConsumerStats.NUMBER_STANDARD_POWER_BUCKETS];
+        supportedPowerBuckets[EnergyConsumerStats.POWER_BUCKET_CPU] = true;
         mStatsRule.getBatteryStats()
-                .initMeasuredEnergyStatsLocked(supportedPowerBuckets, new String[0]);
+                .initEnergyConsumerStatsLocked(supportedPowerBuckets, new String[0]);
 
         prepareBatteryStats(new long[]{50000000, 100000000});
 

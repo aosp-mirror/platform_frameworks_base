@@ -16,8 +16,6 @@
 
 package android.view;
 
-import static android.view.WindowCallbacks.RESIZE_MODE_INVALID;
-
 import android.annotation.Nullable;
 import android.content.res.Configuration;
 import android.graphics.PixelFormat;
@@ -166,11 +164,12 @@ public class WindowlessWindowManager implements IWindowSession {
                 if (mRealWm instanceof IWindowSession.Stub) {
                     mRealWm.grantInputChannel(displayId,
                             new SurfaceControl(sc, "WindowlessWindowManager.addToDisplay"),
-                            window, mHostInputToken, attrs.flags, attrs.privateFlags, attrs.type,
+                            window, mHostInputToken,
+                            attrs.flags, attrs.privateFlags, attrs.type, attrs.token,
                             mFocusGrantToken, attrs.getTitle().toString(), outInputChannel);
                 } else {
                     mRealWm.grantInputChannel(displayId, sc, window, mHostInputToken, attrs.flags,
-                            attrs.privateFlags, attrs.type, mFocusGrantToken,
+                            attrs.privateFlags, attrs.type, attrs.token, mFocusGrantToken,
                             attrs.getTitle().toString(), outInputChannel);
                 }
             } catch (RemoteException e) {
@@ -508,8 +507,9 @@ public class WindowlessWindowManager implements IWindowSession {
 
     @Override
     public void grantInputChannel(int displayId, SurfaceControl surface, IWindow window,
-            IBinder hostInputToken, int flags, int privateFlags, int type, IBinder focusGrantToken,
-            String inputHandleName, InputChannel outInputChannel) {
+            IBinder hostInputToken, int flags, int privateFlags, int type,
+            IBinder windowToken, IBinder focusGrantToken, String inputHandleName,
+            InputChannel outInputChannel) {
     }
 
     @Override
@@ -550,7 +550,7 @@ public class WindowlessWindowManager implements IWindowSession {
                 mTmpConfig.setConfiguration(mConfiguration, mConfiguration);
                 s.mClient.resized(mTmpFrames, false /* reportDraw */, mTmpConfig, state,
                         false /* forceLayout */, false /* alwaysConsumeSystemBars */, s.mDisplayId,
-                        Integer.MAX_VALUE, RESIZE_MODE_INVALID);
+                        Integer.MAX_VALUE, false /* dragResizing */);
             } catch (RemoteException e) {
                 // Too bad
             }

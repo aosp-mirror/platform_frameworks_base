@@ -132,7 +132,7 @@ public abstract class BatteryConsumer {
     @IntDef(prefix = {"POWER_MODEL_"}, value = {
             POWER_MODEL_UNDEFINED,
             POWER_MODEL_POWER_PROFILE,
-            POWER_MODEL_MEASURED_ENERGY,
+            POWER_MODEL_ENERGY_CONSUMPTION,
     })
     @Retention(RetentionPolicy.SOURCE)
     public @interface PowerModel {
@@ -150,9 +150,9 @@ public abstract class BatteryConsumer {
     public static final int POWER_MODEL_POWER_PROFILE = 1;
 
     /**
-     * Power model that is based on energy consumption measured by on-device power monitors.
+     * Power model that is based on energy consumption stats provided by PowerStats HAL.
      */
-    public static final int POWER_MODEL_MEASURED_ENERGY = 2;
+    public static final int POWER_MODEL_ENERGY_CONSUMPTION = 2;
 
     /**
      * Identifiers of consumed power aggregations.
@@ -469,8 +469,8 @@ public abstract class BatteryConsumer {
      */
     public static String powerModelToString(@BatteryConsumer.PowerModel int powerModel) {
         switch (powerModel) {
-            case BatteryConsumer.POWER_MODEL_MEASURED_ENERGY:
-                return "measured energy";
+            case BatteryConsumer.POWER_MODEL_ENERGY_CONSUMPTION:
+                return "energy consumption";
             case BatteryConsumer.POWER_MODEL_POWER_PROFILE:
                 return "power profile";
             default:
@@ -484,7 +484,7 @@ public abstract class BatteryConsumer {
      */
     public static int powerModelToProtoEnum(@BatteryConsumer.PowerModel int powerModel) {
         switch (powerModel) {
-            case BatteryConsumer.POWER_MODEL_MEASURED_ENERGY:
+            case BatteryConsumer.POWER_MODEL_ENERGY_CONSUMPTION:
                 return BatteryUsageStatsAtomsProto.PowerComponentModel.MEASURED_ENERGY;
             case BatteryConsumer.POWER_MODEL_POWER_PROFILE:
                 return BatteryUsageStatsAtomsProto.PowerComponentModel.POWER_PROFILE;

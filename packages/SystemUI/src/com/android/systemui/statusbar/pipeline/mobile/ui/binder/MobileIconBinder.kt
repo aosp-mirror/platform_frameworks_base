@@ -21,6 +21,7 @@ import android.view.View.GONE
 import android.view.View.VISIBLE
 import android.view.ViewGroup
 import android.widget.ImageView
+import android.widget.Space
 import androidx.core.view.isVisible
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.repeatOnLifecycle
@@ -29,7 +30,6 @@ import com.android.systemui.R
 import com.android.systemui.common.ui.binder.IconViewBinder
 import com.android.systemui.lifecycle.repeatWhenAttached
 import com.android.systemui.statusbar.pipeline.mobile.ui.viewmodel.MobileIconViewModel
-import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.launch
 
@@ -43,6 +43,8 @@ object MobileIconBinder {
         val networkTypeView = view.requireViewById<ImageView>(R.id.mobile_type)
         val iconView = view.requireViewById<ImageView>(R.id.mobile_signal)
         val mobileDrawable = SignalDrawable(view.context).also { iconView.setImageDrawable(it) }
+        val roamingView = view.requireViewById<ImageView>(R.id.mobile_roaming)
+        val roamingSpace = view.requireViewById<Space>(R.id.mobile_roaming_space)
 
         view.isVisible = true
         iconView.isVisible = true
@@ -64,12 +66,21 @@ object MobileIconBinder {
                     }
                 }
 
+                // Set the roaming indicator
+                launch {
+                    viewModel.roaming.distinctUntilChanged().collect { isRoaming ->
+                        roamingView.isVisible = isRoaming
+                        roamingSpace.isVisible = isRoaming
+                    }
+                }
+
                 // Set the tint
                 launch {
                     viewModel.tint.collect { tint ->
                         val tintList = ColorStateList.valueOf(tint)
                         iconView.imageTintList = tintList
                         networkTypeView.imageTintList = tintList
+                        roamingView.imageTintList = tintList
                     }
                 }
             }

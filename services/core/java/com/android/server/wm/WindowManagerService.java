@@ -704,6 +704,7 @@ public class WindowManagerService extends IWindowManager.Stub
     // changes the orientation.
     private final PowerManager.WakeLock mScreenFrozenLock;
 
+    final SnapshotPersistQueue mSnapshotPersistQueue;
     final TaskSnapshotController mTaskSnapshotController;
 
     final BlurController mBlurController;
@@ -1210,7 +1211,8 @@ public class WindowManagerService extends IWindowManager.Stub
         mSyncEngine = new BLASTSyncEngine(this);
 
         mWindowPlacerLocked = new WindowSurfacePlacer(this);
-        mTaskSnapshotController = new TaskSnapshotController(this);
+        mSnapshotPersistQueue = new SnapshotPersistQueue();
+        mTaskSnapshotController = new TaskSnapshotController(this, mSnapshotPersistQueue);
 
         mWindowTracing = WindowTracing.createDefaultAndStartLooper(this,
                 Choreographer.getInstance());
@@ -5168,7 +5170,7 @@ public class WindowManagerService extends IWindowManager.Stub
         mSystemReady = true;
         mPolicy.systemReady();
         mRoot.forAllDisplayPolicies(DisplayPolicy::systemReady);
-        mTaskSnapshotController.systemReady();
+        mSnapshotPersistQueue.systemReady();
         mHasWideColorGamutSupport = queryWideColorGamutSupport();
         mHasHdrSupport = queryHdrSupport();
         UiThread.getHandler().post(mSettingsObserver::loadSettings);
@@ -7138,20 +7140,6 @@ public class WindowManagerService extends IWindowManager.Stub
         return 0;
     }
 
-    void setDockedRootTaskResizing(boolean resizing) {
-        getDefaultDisplayContentLocked().getDockedDividerController().setResizing(resizing);
-        requestTraversal();
-    }
-
-    @Override
-    public void setDockedTaskDividerTouchRegion(Rect touchRegion) {
-        synchronized (mGlobalLock) {
-            final DisplayContent dc = getDefaultDisplayContentLocked();
-            dc.getDockedDividerController().setTouchRegion(touchRegion);
-            dc.updateTouchExcludeRegion();
-        }
-    }
-
     void setForceDesktopModeOnExternalDisplays(boolean forceDesktopModeOnExternalDisplays) {
         synchronized (mGlobalLock) {
             mForceDesktopModeOnExternalDisplays = forceDesktopModeOnExternalDisplays;
@@ -8657,16 +8645,17 @@ public class WindowManagerService extends IWindowManager.Stub
      */
     void grantInputChannel(Session session, int callingUid, int callingPid, int displayId,
             SurfaceControl surface, IWindow window, IBinder hostInputToken,
-            int flags, int privateFlags, int type, IBinder focusGrantToken,
+            int flags, int privateFlags, int type, IBinder windowToken, IBinder focusGrantToken,
             String inputHandleName, InputChannel outInputChannel) {
+        final int sanitizedType = sanitizeWindowType(session, displayId, windowToken, type);
         final InputApplicationHandle applicationHandle;
         final String name;
         final InputChannel clientChannel;
         synchronized (mGlobalLock) {
             EmbeddedWindowController.EmbeddedWindow win =
                     new EmbeddedWindowController.EmbeddedWindow(session, this, window,
-                            mInputToWindowMap.get(hostInputToken), callingUid, callingPid, type,
-                            displayId, focusGrantToken, inputHandleName);
+                            mInputToWindowMap.get(hostInputToken), callingUid, callingPid,
+                            sanitizedType, displayId, focusGrantToken, inputHandleName);
             clientChannel = win.openInputChannel();
             mEmbeddedWindowController.add(clientChannel.getToken(), win);
             applicationHandle = win.getApplicationHandle();
@@ -8674,7 +8663,8 @@ public class WindowManagerService extends IWindowManager.Stub
         }
 
         updateInputChannel(clientChannel.getToken(), callingUid, callingPid, displayId, surface,
-                name, applicationHandle, flags, privateFlags, type, null /* region */, window);
+                name, applicationHandle, flags, privateFlags, sanitizedType,
+                null /* region */, window);
 
         clientChannel.copyTo(outInputChannel);
     }
@@ -9184,7 +9174,7 @@ public class WindowManagerService extends IWindowManager.Stub
 
     @Override
     public void setTaskSnapshotEnabled(boolean enabled) {
-        mTaskSnapshotController.setTaskSnapshotEnabled(enabled);
+        mTaskSnapshotController.setSnapshotEnabled(enabled);
     }
 
     @Override
@@ -9251,7 +9241,7 @@ public class WindowManagerService extends IWindowManager.Stub
                     throw new IllegalArgumentException(
                             "Failed to find matching task for taskId=" + taskId);
                 }
-                taskSnapshot = mTaskSnapshotController.captureTaskSnapshot(task, false);
+                taskSnapshot = mTaskSnapshotController.captureSnapshot(task, false);
             }
         } finally {
             Binder.restoreCallingIdentity(token);
@@ -9359,5 +9349,37 @@ public class WindowManagerService extends IWindowManager.Stub
     @Override
     public boolean isGlobalKey(int keyCode) {
         return mPolicy.isGlobalKey(keyCode);
+    }
+
+    private int sanitizeWindowType(Session session, int displayId, IBinder windowToken, int type) {
+        // Determine whether this window type is valid for this process.
+        final boolean isTypeValid;
+        if (type == TYPE_ACCESSIBILITY_OVERLAY && windowToken != null) {
+            // Only accessibility services can add accessibility overlays.
+            // Accessibility services will have a WindowToken with type
+            // TYPE_ACCESSIBILITY_OVERLAY.
+            final DisplayContent displayContent = mRoot.getDisplayContent(displayId);
+            final WindowToken token = displayContent.getWindowToken(windowToken);
+            if (token == null) {
+                isTypeValid = false;
+            } else if (type == token.getWindowType()) {
+                isTypeValid = true;
+            } else {
+                isTypeValid = false;
+            }
+        } else if (!session.mCanAddInternalSystemWindow && type != 0) {
+            Slog.w(
+                    TAG_WM,
+                    "Requires INTERNAL_SYSTEM_WINDOW permission if assign type to"
+                            + " input. New type will be 0.");
+            isTypeValid = false;
+        } else {
+            isTypeValid = true;
+        }
+
+        if (!isTypeValid) {
+            return 0;
+        }
+        return type;
     }
 }

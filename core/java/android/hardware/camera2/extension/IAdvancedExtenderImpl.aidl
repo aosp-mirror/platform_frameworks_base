@@ -30,8 +30,10 @@ interface IAdvancedExtenderImpl
             int format);
     @nullable List<SizeList> getSupportedPreviewOutputResolutions(in String cameraId);
     @nullable List<SizeList> getSupportedCaptureOutputResolutions(in String cameraId);
+    @nullable List<SizeList> getSupportedPostviewResolutions(in Size captureSize);
     ISessionProcessorImpl getSessionProcessor();
     CameraMetadataNative getAvailableCaptureRequestKeys(in String cameraId);
     CameraMetadataNative getAvailableCaptureResultKeys(in String cameraId);
     boolean isCaptureProcessProgressAvailable();
+    boolean isPostviewAvailable();
 }

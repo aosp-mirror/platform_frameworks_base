@@ -21,6 +21,8 @@ import static android.accessibilityservice.AccessibilityTrace.FLAGS_WINDOW_MANAG
 import static android.view.WindowManager.LayoutParams.TYPE_ACCESSIBILITY_OVERLAY;
 
 import static com.android.internal.util.function.pooled.PooledLambda.obtainMessage;
+import static com.android.server.accessibility.AbstractAccessibilityServiceConnection.DISPLAY_TYPE_DEFAULT;
+import static com.android.server.accessibility.AbstractAccessibilityServiceConnection.DISPLAY_TYPE_PROXY;
 
 import android.annotation.NonNull;
 import android.annotation.Nullable;
@@ -169,6 +171,7 @@ public class AccessibilityWindowManager {
         private List<AccessibilityWindowInfo> mWindows;
         private boolean mTrackingWindows = false;
         private boolean mHasWatchOutsideTouchWindow;
+        private boolean mIsProxy;
 
         /**
          * Constructor for DisplayWindowsObserver.
@@ -1016,6 +1019,33 @@ public class AccessibilityWindowManager {
     }
 
     /**
+     * Starts tracking a display as belonging to a proxy. Creates the window observer if necessary.
+     * @param displayId
+     */
+    public void startTrackingDisplayProxy(int displayId) {
+        startTrackingWindows(displayId);
+        synchronized (mLock) {
+            DisplayWindowsObserver observer = mDisplayWindowsObservers.get(displayId);
+            if (observer != null) {
+                observer.mIsProxy = true;
+            }
+        }
+    }
+
+    /**
+     * Stops tracking a display as belonging to a proxy.
+     * @param displayId
+     */
+    public void stopTrackingDisplayProxy(int displayId) {
+        synchronized (mLock) {
+            DisplayWindowsObserver observer = mDisplayWindowsObservers.get(displayId);
+            if (observer != null) {
+                observer.mIsProxy = false;
+            }
+        }
+    }
+
+    /**
      * Checks if we are tracking windows on any display.
      *
      * @return {@code true} if the observer is tracking windows on any display,
@@ -1728,15 +1758,21 @@ public class AccessibilityWindowManager {
     /**
      * Returns the display list including all displays which are tracking windows.
      *
+     * @param displayTypes the types of displays to retrieve
      * @return The display list.
      */
-    public ArrayList<Integer> getDisplayListLocked() {
+    public ArrayList<Integer> getDisplayListLocked(
+            @AbstractAccessibilityServiceConnection.DisplayTypes int displayTypes) {
         final ArrayList<Integer> displayList = new ArrayList<>();
         final int count = mDisplayWindowsObservers.size();
         for (int i = 0; i < count; i++) {
             final DisplayWindowsObserver observer = mDisplayWindowsObservers.valueAt(i);
             if (observer != null) {
-                displayList.add(observer.mDisplayId);
+                if (!observer.mIsProxy && (displayTypes & DISPLAY_TYPE_DEFAULT) != 0) {
+                    displayList.add(observer.mDisplayId);
+                } else if (observer.mIsProxy && (displayTypes & DISPLAY_TYPE_PROXY) != 0) {
+                    displayList.add(observer.mDisplayId);
+                }
             }
         }
         return displayList;

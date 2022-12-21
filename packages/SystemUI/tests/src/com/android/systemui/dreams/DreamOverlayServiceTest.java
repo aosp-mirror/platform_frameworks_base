@@ -139,6 +139,9 @@ public class DreamOverlayServiceTest extends SysuiTestCase {
     @Mock
     UiEventLogger mUiEventLogger;
 
+    @Mock
+    DreamCallbackController mDreamCallbackController;
+
     @Captor
     ArgumentCaptor<View> mViewCaptor;
 
@@ -172,8 +175,8 @@ public class DreamOverlayServiceTest extends SysuiTestCase {
 
         mService = new DreamOverlayService(
                 mContext,
-                mMainExecutor,
                 mLifecycleOwner,
+                mMainExecutor,
                 mWindowManager,
                 mComplicationComponentFactory,
                 mDreamComplicationComponentFactory,
@@ -182,7 +185,8 @@ public class DreamOverlayServiceTest extends SysuiTestCase {
                 mKeyguardUpdateMonitor,
                 mUiEventLogger,
                 mTouchInsetManager,
-                LOW_LIGHT_COMPONENT);
+                LOW_LIGHT_COMPONENT,
+                mDreamCallbackController);
     }
 
     @Test
@@ -394,6 +398,7 @@ public class DreamOverlayServiceTest extends SysuiTestCase {
         mService.onWakeUp(callback);
         mMainExecutor.runAllReady();
         verify(mDreamOverlayContainerViewController).wakeUp(callback, mMainExecutor);
+        verify(mDreamCallbackController).onWakeUp();
     }
 
     @Test

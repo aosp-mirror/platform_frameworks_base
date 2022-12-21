@@ -31,6 +31,7 @@ import android.telephony.ServiceState;
 import android.telephony.SignalStrength;
 import android.telephony.emergency.EmergencyNumber;
 import android.telephony.ims.ImsReasonInfo;
+import android.telephony.ims.MediaQualityStatus;
 
 /**
  * {@hide}
@@ -76,4 +77,5 @@ oneway interface IPhoneStateListener {
     void onDataEnabledChanged(boolean enabled, int reason);
     void onAllowedNetworkTypesChanged(in int reason, in long allowedNetworkType);
     void onLinkCapacityEstimateChanged(in List<LinkCapacityEstimate> linkCapacityEstimateList);
+    void onMediaQualityStatusChanged(in MediaQualityStatus mediaQualityStatus);
 }

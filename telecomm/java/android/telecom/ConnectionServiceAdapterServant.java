@@ -21,6 +21,7 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
 import android.os.RemoteException;
+import android.os.ResultReceiver;
 import android.telecom.Logging.Session;
 
 import com.android.internal.os.SomeArgs;
@@ -691,6 +692,12 @@ final class ConnectionServiceAdapterServant {
             args.argi1 = direction;
             args.arg2 = sessionInfo;
             mHandler.obtainMessage(MSG_SET_CALL_DIRECTION, args).sendToTarget();
+        }
+
+        @Override
+        public void requestCallEndpointChange(String callId, CallEndpoint endpoint,
+                ResultReceiver callback, Session.Info sessionInfo) {
+            // Do nothing
         }
     };
 

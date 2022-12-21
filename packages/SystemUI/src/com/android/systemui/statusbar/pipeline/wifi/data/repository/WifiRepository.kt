@@ -42,9 +42,8 @@ import com.android.systemui.statusbar.pipeline.dagger.WifiTableLog
 import com.android.systemui.statusbar.pipeline.shared.ConnectivityPipelineLogger
 import com.android.systemui.statusbar.pipeline.shared.ConnectivityPipelineLogger.Companion.SB_LOGGING_TAG
 import com.android.systemui.statusbar.pipeline.shared.ConnectivityPipelineLogger.Companion.logInputChange
+import com.android.systemui.statusbar.pipeline.shared.data.model.DataActivityModel
 import com.android.systemui.statusbar.pipeline.wifi.data.model.WifiNetworkModel
-import com.android.systemui.statusbar.pipeline.wifi.shared.model.ACTIVITY_PREFIX
-import com.android.systemui.statusbar.pipeline.wifi.shared.model.WifiActivityModel
 import java.util.concurrent.Executor
 import javax.inject.Inject
 import kotlinx.coroutines.CoroutineScope
@@ -74,7 +73,7 @@ interface WifiRepository {
     val wifiNetwork: StateFlow<WifiNetworkModel>
 
     /** Observable for the current wifi network activity. */
-    val wifiActivity: StateFlow<WifiActivityModel>
+    val wifiActivity: StateFlow<DataActivityModel>
 }
 
 /** Real implementation of [WifiRepository]. */
@@ -230,7 +229,7 @@ class WifiRepositoryImpl @Inject constructor(
             initialValue = WIFI_NETWORK_DEFAULT
         )
 
-    override val wifiActivity: StateFlow<WifiActivityModel> =
+    override val wifiActivity: StateFlow<DataActivityModel> =
             if (wifiManager == null) {
                 Log.w(SB_LOGGING_TAG, "Null WifiManager; skipping activity callback")
                 flowOf(ACTIVITY_DEFAULT)
@@ -238,7 +237,7 @@ class WifiRepositoryImpl @Inject constructor(
                 conflatedCallbackFlow {
                     val callback = TrafficStateCallback { state ->
                         logger.logInputChange("onTrafficStateChange", prettyPrintActivity(state))
-                        trySend(trafficStateToWifiActivityModel(state))
+                        trySend(trafficStateToDataActivityModel(state))
                     }
                     wifiManager.registerTrafficStateCallback(mainExecutor, callback)
                     awaitClose { wifiManager.unregisterTrafficStateCallback(callback) }
@@ -256,7 +255,9 @@ class WifiRepositoryImpl @Inject constructor(
                 )
 
     companion object {
-        val ACTIVITY_DEFAULT = WifiActivityModel(hasActivityIn = false, hasActivityOut = false)
+        private const val ACTIVITY_PREFIX = "wifiActivity"
+
+        val ACTIVITY_DEFAULT = DataActivityModel(hasActivityIn = false, hasActivityOut = false)
         // Start out with no known wifi network.
         // Note: [WifiStatusTracker] (the old implementation of connectivity logic) does do an
         // initial fetch to get a starting wifi network. But, it uses a deprecated API
@@ -265,8 +266,8 @@ class WifiRepositoryImpl @Inject constructor(
         // NetworkCallback inside [wifiNetwork] for our wifi network information.
         val WIFI_NETWORK_DEFAULT = WifiNetworkModel.Inactive
 
-        private fun trafficStateToWifiActivityModel(state: Int): WifiActivityModel {
-            return WifiActivityModel(
+        private fun trafficStateToDataActivityModel(state: Int): DataActivityModel {
+            return DataActivityModel(
                 hasActivityIn = state == TrafficStateCallback.DATA_ACTIVITY_IN ||
                     state == TrafficStateCallback.DATA_ACTIVITY_INOUT,
                 hasActivityOut = state == TrafficStateCallback.DATA_ACTIVITY_OUT ||

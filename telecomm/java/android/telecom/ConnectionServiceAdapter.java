@@ -17,9 +17,12 @@
 package android.telecom;
 
 import android.net.Uri;
+import android.os.Binder;
 import android.os.Bundle;
 import android.os.IBinder.DeathRecipient;
+import android.os.OutcomeReceiver;
 import android.os.RemoteException;
+import android.os.ResultReceiver;
 
 import com.android.internal.telecom.IConnectionServiceAdapter;
 import com.android.internal.telecom.RemoteServiceCallback;
@@ -29,6 +32,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.Executor;
 
 /**
  * Provides methods for IConnectionService implementations to interact with the system phone app.
@@ -567,6 +571,41 @@ final class ConnectionServiceAdapter implements DeathRecipient {
         }
     }
 
+    /**
+     * Sets the call endpoint associated with a {@link Connection}.
+     *
+     * @param callId The unique ID of the call.
+     * @param endpoint The new call endpoint (see {@link CallEndpoint}).
+     * @param executor The executor of where the callback will execute.
+     * @param callback The callback to notify the result of the endpoint change.
+     */
+    void requestCallEndpointChange(String callId, CallEndpoint endpoint, Executor executor,
+            OutcomeReceiver<Void, CallEndpointException> callback) {
+        Log.v(this, "requestCallEndpointChange");
+        for (IConnectionServiceAdapter adapter : mAdapters) {
+            try {
+                adapter.requestCallEndpointChange(callId, endpoint, new ResultReceiver(null) {
+                    @Override
+                    protected void onReceiveResult(int resultCode, Bundle result) {
+                        super.onReceiveResult(resultCode, result);
+                        final long identity = Binder.clearCallingIdentity();
+                        try {
+                            if (resultCode == CallEndpoint.ENDPOINT_OPERATION_SUCCESS) {
+                                executor.execute(() -> callback.onResult(null));
+                            } else {
+                                executor.execute(() -> callback.onError(result.getParcelable(
+                                        CallEndpointException.CHANGE_ERROR,
+                                        CallEndpointException.class)));
+                            }
+                        } finally {
+                            Binder.restoreCallingIdentity(identity);
+                        }
+                    }}, Log.getExternalSession());
+            } catch (RemoteException ignored) {
+                Log.d(this, "Remote exception calling requestCallEndpointChange");
+            }
+        }
+    }
 
     /**
      * Informs Telecom of a connection level event.

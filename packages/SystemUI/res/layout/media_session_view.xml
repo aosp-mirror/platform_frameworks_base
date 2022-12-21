@@ -186,7 +186,7 @@
         app:layout_constraintBottom_toBottomOf="parent"
         app:barrierDirection="end"
         app:constraint_referenced_ids="actionPrev,media_scrubbing_elapsed_time,media_progress_bar,actionNext,media_scrubbing_total_time,action0,action1,action2,action3,action4"
-        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintRight_toRightOf="@id/actionPlayPause"
         />
 
     <!-- This barrier is used in expanded view to constrain the bottom row of actions -->

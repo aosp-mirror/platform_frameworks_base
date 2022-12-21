@@ -49,7 +49,7 @@ import javax.crypto.SecretKey;
 import javax.crypto.spec.GCMParameterSpec;
 import javax.crypto.spec.SecretKeySpec;
 
-public class SyntheticPasswordCrypto {
+class SyntheticPasswordCrypto {
     private static final String TAG = "SyntheticPasswordCrypto";
     private static final int AES_GCM_KEY_SIZE = 32; // AES-256-GCM
     private static final int AES_GCM_IV_SIZE = 12;

@@ -17,44 +17,27 @@
 package com.android.server.wm;
 
 import static com.android.server.wm.WindowManagerDebugConfig.DEBUG_SCREENSHOT;
-import static com.android.server.wm.WindowManagerDebugConfig.TAG_WITH_CLASS_NAME;
 import static com.android.server.wm.WindowManagerDebugConfig.TAG_WM;
 
 import android.annotation.NonNull;
 import android.annotation.Nullable;
-import android.content.pm.PackageManager;
-import android.graphics.Bitmap;
+import android.app.ActivityManager;
 import android.graphics.PixelFormat;
-import android.graphics.Point;
-import android.graphics.RecordingCanvas;
 import android.graphics.Rect;
-import android.graphics.RenderNode;
-import android.hardware.HardwareBuffer;
 import android.os.Environment;
 import android.os.Handler;
-import android.os.Trace;
 import android.util.ArraySet;
-import android.util.Pair;
 import android.util.Slog;
 import android.view.Display;
-import android.view.InsetsState;
-import android.view.SurfaceControl;
-import android.view.ThreadedRenderer;
-import android.view.WindowInsets.Type;
-import android.view.WindowInsetsController.Appearance;
-import android.view.WindowManager.LayoutParams;
 import android.window.ScreenCapture;
-import android.window.SnapshotDrawerUtils;
 import android.window.TaskSnapshot;
 
 import com.android.internal.annotations.VisibleForTesting;
-import com.android.internal.graphics.ColorUtils;
 import com.android.server.policy.WindowManagerPolicy.ScreenOffListener;
-import com.android.server.wm.utils.InsetUtils;
+import com.android.server.wm.BaseAppSnapshotPersister.PersistInfoProvider;
 
 import com.google.android.collect.Sets;
 
-import java.io.PrintWriter;
 import java.util.Set;
 
 /**
@@ -70,75 +53,60 @@ import java.util.Set;
  * <p>
  * To access this class, acquire the global window manager lock.
  */
-class TaskSnapshotController {
-    private static final String TAG = TAG_WITH_CLASS_NAME ? "TaskSnapshotController" : TAG_WM;
+class TaskSnapshotController extends AbsAppSnapshotController<Task, TaskSnapshotCache> {
+    static final String SNAPSHOTS_DIRNAME = "snapshots";
 
-    /**
-     * Return value for {@link #getSnapshotMode}: We are allowed to take a real screenshot to be
-     * used as the snapshot.
-     */
-    @VisibleForTesting
-    static final int SNAPSHOT_MODE_REAL = 0;
-
-    /**
-     * Return value for {@link #getSnapshotMode}: We are not allowed to take a real screenshot but
-     * we should try to use the app theme to create a fake representation of the app.
-     */
-    @VisibleForTesting
-    static final int SNAPSHOT_MODE_APP_THEME = 1;
-
-    /**
-     * Return value for {@link #getSnapshotMode}: We aren't allowed to take any snapshot.
-     */
-    @VisibleForTesting
-    static final int SNAPSHOT_MODE_NONE = 2;
-
-    private final WindowManagerService mService;
-
-    private final TaskSnapshotCache mCache;
     private final TaskSnapshotPersister mPersister;
-    private final TaskSnapshotLoader mLoader;
     private final ArraySet<Task> mSkipClosingAppSnapshotTasks = new ArraySet<>();
     private final ArraySet<Task> mTmpTasks = new ArraySet<>();
     private final Handler mHandler = new Handler();
-    private final float mHighResTaskSnapshotScale;
 
-    private final Rect mTmpRect = new Rect();
+    private final PersistInfoProvider mPersistInfoProvider;
 
-    /**
-     * Flag indicating whether we are running on an Android TV device.
-     */
-    private final boolean mIsRunningOnTv;
+    TaskSnapshotController(WindowManagerService service, SnapshotPersistQueue persistQueue) {
+        super(service);
+        mPersistInfoProvider = createPersistInfoProvider(service,
+                Environment::getDataSystemCeDirectory);
+        mPersister = new TaskSnapshotPersister(persistQueue, mPersistInfoProvider);
 
-    /**
-     * Flag indicating whether we are running on an IoT device.
-     */
-    private final boolean mIsRunningOnIoT;
-
-    /**
-     * Flag indicating if task snapshot is enabled on this device.
-     */
-    private boolean mTaskSnapshotEnabled;
-
-    TaskSnapshotController(WindowManagerService service) {
-        mService = service;
-        mPersister = new TaskSnapshotPersister(mService, Environment::getDataSystemCeDirectory);
-        mLoader = new TaskSnapshotLoader(mPersister);
-        mCache = new TaskSnapshotCache(mService, mLoader);
-        mIsRunningOnTv = mService.mContext.getPackageManager().hasSystemFeature(
-                PackageManager.FEATURE_LEANBACK);
-        mIsRunningOnIoT = mService.mContext.getPackageManager().hasSystemFeature(
-                PackageManager.FEATURE_EMBEDDED);
-        mHighResTaskSnapshotScale = mService.mContext.getResources().getFloat(
-                com.android.internal.R.dimen.config_highResTaskSnapshotScale);
-        mTaskSnapshotEnabled =
-                !mService.mContext
+        initialize(new TaskSnapshotCache(service, new AppSnapshotLoader(mPersistInfoProvider)));
+        final boolean snapshotEnabled =
+                !service.mContext
                         .getResources()
                         .getBoolean(com.android.internal.R.bool.config_disableTaskSnapshots);
+        setSnapshotEnabled(snapshotEnabled);
     }
 
-    void systemReady() {
-        mPersister.start();
+    static PersistInfoProvider createPersistInfoProvider(WindowManagerService service,
+            BaseAppSnapshotPersister.DirectoryResolver resolver) {
+        final float highResTaskSnapshotScale = service.mContext.getResources().getFloat(
+                com.android.internal.R.dimen.config_highResTaskSnapshotScale);
+        final float lowResTaskSnapshotScale = service.mContext.getResources().getFloat(
+                com.android.internal.R.dimen.config_lowResTaskSnapshotScale);
+
+        if (lowResTaskSnapshotScale < 0 || 1 <= lowResTaskSnapshotScale) {
+            throw new RuntimeException("Low-res scale must be between 0 and 1");
+        }
+        if (highResTaskSnapshotScale <= 0 || 1 < highResTaskSnapshotScale) {
+            throw new RuntimeException("High-res scale must be between 0 and 1");
+        }
+        if (highResTaskSnapshotScale <= lowResTaskSnapshotScale) {
+            throw new RuntimeException("High-res scale must be greater than low-res scale");
+        }
+
+        final float lowResScaleFactor;
+        final boolean enableLowResSnapshots;
+        if (lowResTaskSnapshotScale > 0) {
+            lowResScaleFactor = lowResTaskSnapshotScale / highResTaskSnapshotScale;
+            enableLowResSnapshots = true;
+        } else {
+            lowResScaleFactor = 0;
+            enableLowResSnapshots = false;
+        }
+        final boolean use16BitFormat = service.mContext.getResources().getBoolean(
+                com.android.internal.R.bool.config_use16BitTaskSnapshotPixelFormat);
+        return new PersistInfoProvider(resolver, SNAPSHOTS_DIRNAME,
+                enableLowResSnapshots, lowResScaleFactor, use16BitFormat);
     }
 
     void onTransitionStarting(DisplayContent displayContent) {
@@ -182,60 +150,18 @@ class TaskSnapshotController {
         snapshotTasks(tasks, false /* allowSnapshotHome */);
     }
 
-    /**
-     * This is different than {@link #recordTaskSnapshot(Task, boolean)} because it doesn't store
-     * the snapshot to the cache and returns the TaskSnapshot immediately.
-     *
-     * This is only used for testing so the snapshot content can be verified.
-     */
-    @VisibleForTesting
-    TaskSnapshot captureTaskSnapshot(Task task, boolean snapshotHome) {
-        final TaskSnapshot snapshot;
-        if (snapshotHome) {
-            snapshot = snapshotTask(task);
-        } else {
-            switch (getSnapshotMode(task)) {
-                case SNAPSHOT_MODE_NONE:
-                    return null;
-                case SNAPSHOT_MODE_APP_THEME:
-                    snapshot = drawAppThemeSnapshot(task);
-                    break;
-                case SNAPSHOT_MODE_REAL:
-                    snapshot = snapshotTask(task);
-                    break;
-                default:
-                    snapshot = null;
-                    break;
-            }
-        }
-        return snapshot;
-    }
-
-    void recordTaskSnapshot(Task task, boolean allowSnapshotHome) {
+    void recordSnapshot(Task task, boolean allowSnapshotHome) {
         final boolean snapshotHome = allowSnapshotHome && task.isActivityTypeHome();
-        final TaskSnapshot snapshot = captureTaskSnapshot(task, snapshotHome);
-        if (snapshot == null) {
-            return;
-        }
-
-        final HardwareBuffer buffer = snapshot.getHardwareBuffer();
-        if (buffer.getWidth() == 0 || buffer.getHeight() == 0) {
-            buffer.close();
-            Slog.e(TAG, "Invalid task snapshot dimensions " + buffer.getWidth() + "x"
-                    + buffer.getHeight());
-        } else {
-            mCache.putSnapshot(task, snapshot);
-            // Don't persist or notify the change for the temporal snapshot.
-            if (!snapshotHome) {
-                mPersister.persistSnapshot(task.mTaskId, task.mUserId, snapshot);
-                task.onSnapshotChanged(snapshot);
-            }
+        final TaskSnapshot snapshot = recordSnapshotInner(task, allowSnapshotHome);
+        if (!snapshotHome && snapshot != null) {
+            mPersister.persistSnapshot(task.mTaskId, task.mUserId, snapshot);
+            task.onSnapshotChanged(snapshot);
         }
     }
 
     private void snapshotTasks(ArraySet<Task> tasks, boolean allowSnapshotHome) {
         for (int i = tasks.size() - 1; i >= 0; i--) {
-            recordTaskSnapshot(tasks.valueAt(i), allowSnapshotHome);
+            recordSnapshot(tasks.valueAt(i), allowSnapshotHome);
         }
     }
 
@@ -247,7 +173,7 @@ class TaskSnapshotController {
     TaskSnapshot getSnapshot(int taskId, int userId, boolean restoreFromDisk,
             boolean isLowResolution) {
         return mCache.getSnapshot(taskId, userId, restoreFromDisk, isLowResolution
-                && mPersister.enableLowResSnapshots());
+                && mPersistInfoProvider.enableLowResSnapshots());
     }
 
     /**
@@ -262,7 +188,7 @@ class TaskSnapshotController {
      * we're looking for, but during app transitions, trampoline activities can appear in the
      * children, which should be ignored.
      */
-    @Nullable private ActivityRecord findAppTokenForSnapshot(Task task) {
+    @Nullable protected ActivityRecord findAppTokenForSnapshot(Task task) {
         return task.getActivity((r) -> {
             if (r == null || !r.isSurfaceShowing() || r.findMainWindow() == null) {
                 return false;
@@ -277,112 +203,10 @@ class TaskSnapshotController {
         });
     }
 
-    /**
-     * Validates the state of the Task is appropriate to capture a snapshot, collects
-     * information from the task and populates the builder.
-     *
-     * @param task the task to capture
-     * @param pixelFormat the desired pixel format, or {@link PixelFormat#UNKNOWN} to
-     *                    automatically select
-     * @param builder the snapshot builder to populate
-     *
-     * @return true if the state of the task is ok to proceed
-     */
-    @VisibleForTesting
-    boolean prepareTaskSnapshot(Task task, int pixelFormat, TaskSnapshot.Builder builder) {
-        final Pair<ActivityRecord, WindowState> result = checkIfReadyToSnapshot(task);
-        if (result == null) {
-            return false;
-        }
-        final ActivityRecord activity = result.first;
-        final WindowState mainWindow = result.second;
-        final Rect contentInsets = getSystemBarInsets(mainWindow.getFrame(),
-                mainWindow.getInsetsStateWithVisibilityOverride());
-        final Rect letterboxInsets = activity.getLetterboxInsets();
-        InsetUtils.addInsets(contentInsets, letterboxInsets);
 
-        builder.setIsRealSnapshot(true);
-        builder.setId(System.currentTimeMillis());
-        builder.setContentInsets(contentInsets);
-        builder.setLetterboxInsets(letterboxInsets);
-
-        final boolean isWindowTranslucent = mainWindow.getAttrs().format != PixelFormat.OPAQUE;
-        final boolean isShowWallpaper = mainWindow.hasWallpaper();
-
-        if (pixelFormat == PixelFormat.UNKNOWN) {
-            pixelFormat = mPersister.use16BitFormat() && activity.fillsParent()
-                    && !(isWindowTranslucent && isShowWallpaper)
-                    ? PixelFormat.RGB_565
-                    : PixelFormat.RGBA_8888;
-        }
-
-        final boolean isTranslucent = PixelFormat.formatHasAlpha(pixelFormat)
-                && (!activity.fillsParent() || isWindowTranslucent);
-
-        builder.setTopActivityComponent(activity.mActivityComponent);
-        builder.setPixelFormat(pixelFormat);
-        builder.setIsTranslucent(isTranslucent);
-        builder.setOrientation(activity.getTask().getConfiguration().orientation);
-        builder.setRotation(activity.getTask().getDisplayContent().getRotation());
-        builder.setWindowingMode(task.getWindowingMode());
-        builder.setAppearance(getAppearance(task));
-        return true;
-    }
-
-    /**
-     * Check if the state of the Task is appropriate to capture a snapshot, such like the task
-     * snapshot or the associated IME surface snapshot.
-     *
-     * @param task the target task to capture the snapshot
-     * @return Pair of (the top activity of the task, the main window of the task) if passed the
-     * state checking. Returns {@code null} if the task state isn't ready to snapshot.
-     */
-    Pair<ActivityRecord, WindowState> checkIfReadyToSnapshot(Task task) {
-        if (!mService.mPolicy.isScreenOn()) {
-            if (DEBUG_SCREENSHOT) {
-                Slog.i(TAG_WM, "Attempted to take screenshot while display was off.");
-            }
-            return null;
-        }
-        final ActivityRecord activity = findAppTokenForSnapshot(task);
-        if (activity == null) {
-            if (DEBUG_SCREENSHOT) {
-                Slog.w(TAG_WM, "Failed to take screenshot. No visible windows for " + task);
-            }
-            return null;
-        }
-        if (activity.hasCommittedReparentToAnimationLeash()) {
-            if (DEBUG_SCREENSHOT) {
-                Slog.w(TAG_WM, "Failed to take screenshot. App is animating " + activity);
-            }
-            return null;
-        }
-
-        final WindowState mainWindow = activity.findMainWindow();
-        if (mainWindow == null) {
-            Slog.w(TAG_WM, "Failed to take screenshot. No main window for " + task);
-            return null;
-        }
-        if (activity.hasFixedRotationTransform()) {
-            if (DEBUG_SCREENSHOT) {
-                Slog.i(TAG_WM, "Skip taking screenshot. App has fixed rotation " + activity);
-            }
-            // The activity is in a temporal state that it has different rotation than the task.
-            return null;
-        }
-        return new Pair<>(activity, mainWindow);
-    }
-
-    @Nullable
-    ScreenCapture.ScreenshotHardwareBuffer createTaskSnapshot(@NonNull Task task,
-            TaskSnapshot.Builder builder) {
-        Point taskSize = new Point();
-        Trace.traceBegin(Trace.TRACE_TAG_WINDOW_MANAGER, "createTaskSnapshot");
-        final ScreenCapture.ScreenshotHardwareBuffer taskSnapshot = createTaskSnapshot(task,
-                mHighResTaskSnapshotScale, builder.getPixelFormat(), taskSize, builder);
-        Trace.traceEnd(Trace.TRACE_TAG_WINDOW_MANAGER);
-        builder.setTaskSize(taskSize);
-        return taskSnapshot;
+    @Override
+    protected boolean use16BitFormat() {
+        return mPersistInfoProvider.use16BitFormat();
     }
 
     @Nullable
@@ -416,101 +240,25 @@ class TaskSnapshotController {
         if (checkIfReadyToSnapshot(task) == null) {
             return null;
         }
-        final int pixelFormat = mPersister.use16BitFormat()
+        final int pixelFormat = mPersistInfoProvider.use16BitFormat()
                     ? PixelFormat.RGB_565
                     : PixelFormat.RGBA_8888;
         return createImeSnapshot(task, pixelFormat);
     }
 
-    @Nullable
-    ScreenCapture.ScreenshotHardwareBuffer createTaskSnapshot(@NonNull Task task,
-            float scaleFraction, int pixelFormat, Point outTaskSize, TaskSnapshot.Builder builder) {
-        if (task.getSurfaceControl() == null) {
-            if (DEBUG_SCREENSHOT) {
-                Slog.w(TAG_WM, "Failed to take screenshot. No surface control for " + task);
-            }
-            return null;
-        }
-        task.getBounds(mTmpRect);
-        mTmpRect.offsetTo(0, 0);
-
-        SurfaceControl[] excludeLayers;
-        final WindowState imeWindow = task.getDisplayContent().mInputMethodWindow;
-        // Exclude IME window snapshot when IME isn't proper to attach to app.
-        final boolean excludeIme = imeWindow != null && imeWindow.getSurfaceControl() != null
-                && !task.getDisplayContent().shouldImeAttachedToApp();
-        final WindowState navWindow =
-                task.getDisplayContent().getDisplayPolicy().getNavigationBar();
-        // If config_attachNavBarToAppDuringTransition is true, the nav bar will be reparent to the
-        // the swiped app when entering recent app, therefore the task will contain the navigation
-        // bar and we should exclude it from snapshot.
-        final boolean excludeNavBar = navWindow != null;
-        if (excludeIme && excludeNavBar) {
-            excludeLayers = new SurfaceControl[2];
-            excludeLayers[0] = imeWindow.getSurfaceControl();
-            excludeLayers[1] = navWindow.getSurfaceControl();
-        } else if (excludeIme || excludeNavBar) {
-            excludeLayers = new SurfaceControl[1];
-            excludeLayers[0] =
-                    excludeIme ? imeWindow.getSurfaceControl() : navWindow.getSurfaceControl();
-        } else {
-            excludeLayers = new SurfaceControl[0];
-        }
-        builder.setHasImeSurface(!excludeIme && imeWindow != null && imeWindow.isVisible());
-
-        final ScreenCapture.ScreenshotHardwareBuffer screenshotBuffer =
-                ScreenCapture.captureLayersExcluding(
-                        task.getSurfaceControl(), mTmpRect, scaleFraction,
-                        pixelFormat, excludeLayers);
-        if (outTaskSize != null) {
-            outTaskSize.x = mTmpRect.width();
-            outTaskSize.y = mTmpRect.height();
-        }
-        final HardwareBuffer buffer = screenshotBuffer == null ? null
-                : screenshotBuffer.getHardwareBuffer();
-        if (isInvalidHardwareBuffer(buffer)) {
-            return null;
-        }
-        return screenshotBuffer;
+    @Override
+    ActivityRecord getTopActivity(Task source) {
+        return source.getTopMostActivity();
     }
 
-    static boolean isInvalidHardwareBuffer(HardwareBuffer buffer) {
-        return buffer == null || buffer.isClosed() // This must be checked before getting size.
-                || buffer.getWidth() <= 1 || buffer.getHeight() <= 1;
+    @Override
+    ActivityRecord getTopFullscreenActivity(Task source) {
+        return source.getTopFullscreenActivity();
     }
 
-    @Nullable
-    TaskSnapshot snapshotTask(Task task) {
-        return snapshotTask(task, PixelFormat.UNKNOWN);
-    }
-
-    @Nullable
-    TaskSnapshot snapshotTask(Task task, int pixelFormat) {
-        TaskSnapshot.Builder builder = new TaskSnapshot.Builder();
-
-        if (!prepareTaskSnapshot(task, pixelFormat, builder)) {
-            // Failed some pre-req. Has been logged.
-            return null;
-        }
-
-        final ScreenCapture.ScreenshotHardwareBuffer screenshotBuffer =
-                createTaskSnapshot(task, builder);
-
-        if (screenshotBuffer == null) {
-            // Failed to acquire image. Has been logged.
-            return null;
-        }
-        builder.setSnapshot(screenshotBuffer.getHardwareBuffer());
-        builder.setColorSpace(screenshotBuffer.getColorSpace());
-        return builder.build();
-    }
-
-    void setTaskSnapshotEnabled(boolean enabled) {
-        mTaskSnapshotEnabled = enabled;
-    }
-
-    boolean shouldDisableSnapshots() {
-        return mIsRunningOnTv || mIsRunningOnIoT || !mTaskSnapshotEnabled;
+    @Override
+    ActivityManager.TaskDescription getTaskDescription(Task source) {
+        return source.getTaskDescription();
     }
 
     /**
@@ -538,74 +286,6 @@ class TaskSnapshotController {
         }
     }
 
-    @VisibleForTesting
-    int getSnapshotMode(Task task) {
-        final ActivityRecord topChild = task.getTopMostActivity();
-        if (!task.isActivityTypeStandardOrUndefined() && !task.isActivityTypeAssistant()) {
-            return SNAPSHOT_MODE_NONE;
-        } else if (topChild != null && topChild.shouldUseAppThemeSnapshot()) {
-            return SNAPSHOT_MODE_APP_THEME;
-        } else {
-            return SNAPSHOT_MODE_REAL;
-        }
-    }
-
-    /**
-     * If we are not allowed to take a real screenshot, this attempts to represent the app as best
-     * as possible by using the theme's window background.
-     */
-    private TaskSnapshot drawAppThemeSnapshot(Task task) {
-        final ActivityRecord topChild = task.getTopMostActivity();
-        if (topChild == null) {
-            return null;
-        }
-        final WindowState mainWindow = topChild.findMainWindow();
-        if (mainWindow == null) {
-            return null;
-        }
-        final int color = ColorUtils.setAlphaComponent(
-                task.getTaskDescription().getBackgroundColor(), 255);
-        final LayoutParams attrs = mainWindow.getAttrs();
-        final Rect taskBounds = task.getBounds();
-        final InsetsState insetsState = mainWindow.getInsetsStateWithVisibilityOverride();
-        final Rect systemBarInsets = getSystemBarInsets(mainWindow.getFrame(), insetsState);
-        final SnapshotDrawerUtils.SystemBarBackgroundPainter decorPainter =
-                new SnapshotDrawerUtils.SystemBarBackgroundPainter(attrs.flags,
-                attrs.privateFlags, attrs.insetsFlags.appearance, task.getTaskDescription(),
-                mHighResTaskSnapshotScale, mainWindow.getRequestedVisibleTypes());
-        final int taskWidth = taskBounds.width();
-        final int taskHeight = taskBounds.height();
-        final int width = (int) (taskWidth * mHighResTaskSnapshotScale);
-        final int height = (int) (taskHeight * mHighResTaskSnapshotScale);
-
-        final RenderNode node = RenderNode.create("TaskSnapshotController", null);
-        node.setLeftTopRightBottom(0, 0, width, height);
-        node.setClipToBounds(false);
-        final RecordingCanvas c = node.start(width, height);
-        c.drawColor(color);
-        decorPainter.setInsets(systemBarInsets);
-        decorPainter.drawDecors(c /* statusBarExcludeFrame */, null /* alreadyDrawnFrame */);
-        node.end(c);
-        final Bitmap hwBitmap = ThreadedRenderer.createHardwareBitmap(node, width, height);
-        if (hwBitmap == null) {
-            return null;
-        }
-        final Rect contentInsets = new Rect(systemBarInsets);
-        final Rect letterboxInsets = topChild.getLetterboxInsets();
-        InsetUtils.addInsets(contentInsets, letterboxInsets);
-
-        // Note, the app theme snapshot is never translucent because we enforce a non-translucent
-        // color above
-        return new TaskSnapshot(
-                System.currentTimeMillis() /* id */,
-                topChild.mActivityComponent, hwBitmap.getHardwareBuffer(),
-                hwBitmap.getColorSpace(), mainWindow.getConfiguration().orientation,
-                mainWindow.getWindowConfiguration().getRotation(), new Point(taskWidth, taskHeight),
-                contentInsets, letterboxInsets, false /* isLowResolution */,
-                false /* isRealSnapshot */, task.getWindowingMode(),
-                getAppearance(task), false /* isTranslucent */, false /* hasImeSurface */);
-    }
-
     /**
      * Called when an {@link ActivityRecord} has been removed.
      */
@@ -621,7 +301,7 @@ class TaskSnapshotController {
     }
 
     void notifyTaskRemovedFromRecents(int taskId, int userId) {
-        mCache.onTaskRemoved(taskId);
+        mCache.onIdRemoved(taskId);
         mPersister.onTaskRemovedFromRecents(taskId, userId);
     }
 
@@ -634,15 +314,6 @@ class TaskSnapshotController {
      */
     void removeObsoleteTaskFiles(ArraySet<Integer> persistentTaskIds, int[] runningUserIds) {
         mPersister.removeObsoleteFiles(persistentTaskIds, runningUserIds);
-    }
-
-    /**
-     * Temporarily pauses/unpauses persisting of task snapshots.
-     *
-     * @param paused Whether task snapshot persisting should be paused.
-     */
-    void setPersisterPaused(boolean paused) {
-        mPersister.setPaused(paused);
     }
 
     /**
@@ -691,34 +362,8 @@ class TaskSnapshotController {
         snapshotTasks(mTmpTasks, allowSnapshotHome);
     }
 
-    /**
-     * @return The {@link Appearance} flags for the top fullscreen opaque window in the given
-     *         {@param task}.
-     */
-    private @Appearance int getAppearance(Task task) {
-        final ActivityRecord topFullscreenActivity = task.getTopFullscreenActivity();
-        final WindowState topFullscreenOpaqueWindow = topFullscreenActivity != null
-                ? topFullscreenActivity.getTopFullscreenOpaqueWindow()
-                : null;
-        if (topFullscreenOpaqueWindow != null) {
-            return topFullscreenOpaqueWindow.mAttrs.insetsFlags.appearance;
-        }
-        return 0;
-    }
-
-    static Rect getSystemBarInsets(Rect frame, InsetsState state) {
-        return state.calculateInsets(
-                frame, Type.systemBars(), false /* ignoreVisibility */).toRect();
-    }
-
     private boolean isAnimatingByRecents(@NonNull Task task) {
         return task.isAnimatingByRecents()
                 || mService.mAtmService.getTransitionController().inRecentsTransition(task);
-    }
-
-    void dump(PrintWriter pw, String prefix) {
-        pw.println(prefix + "mHighResTaskSnapshotScale=" + mHighResTaskSnapshotScale);
-        pw.println(prefix + "mTaskSnapshotEnabled=" + mTaskSnapshotEnabled);
-        mCache.dump(pw, prefix);
     }
 }

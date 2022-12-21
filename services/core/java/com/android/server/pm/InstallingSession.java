@@ -53,7 +53,6 @@ import com.android.internal.content.InstallLocationUtils;
 import com.android.internal.content.NativeLibraryHelper;
 import com.android.internal.util.Preconditions;
 import com.android.server.pm.parsing.PackageParser2;
-import com.android.server.pm.pkg.AndroidPackage;
 
 import libcore.io.IoUtils;
 
@@ -197,12 +196,13 @@ class InstallingSession {
         }
         // Override with defaults if needed.
         Computer snapshot = mPm.snapshotComputer();
-        AndroidPackage installedPkg = snapshot.getPackage(packageName);
+        var installedPkgState = snapshot.getPackageStateInternal(packageName);
+        var installedPkg = installedPkgState == null ? null : installedPkgState.getAndroidPackage();
         if (installedPkg != null) {
             // Currently installed package which the new package is attempting to replace
             recommendedInstallLocation = InstallLocationUtils.installLocationPolicy(
                     installLocation, recommendedInstallLocation, mInstallFlags,
-                    installedPkg.isSystem(), installedPkg.isExternalStorage());
+                    installedPkgState.isSystem(), installedPkg.isExternalStorage());
         }
 
         final boolean onInt = (mInstallFlags & PackageManager.INSTALL_INTERNAL) != 0;

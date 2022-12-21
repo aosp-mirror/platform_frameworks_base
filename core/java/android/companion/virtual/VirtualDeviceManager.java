@@ -269,9 +269,14 @@ public final class VirtualDeviceManager {
      * @hide
      */
     public int getAudioPlaybackSessionId(int deviceId) {
-        //TODO - Return session id rerouted to VirtualAudioDevice if the VirtualAudioDevice
-        //is configured to operate in context-aware mode.
-        return AUDIO_SESSION_ID_GENERATE;
+        if (mService == null) {
+            return AUDIO_SESSION_ID_GENERATE;
+        }
+        try {
+            return mService.getAudioPlaybackSessionId(deviceId);
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
     }
 
     /**
@@ -287,9 +292,14 @@ public final class VirtualDeviceManager {
      * @hide
      */
     public int getAudioRecordingSessionId(int deviceId) {
-        //TODO - Return session id corresponding to VirtualAudioDevice injection if the
-        // VirtualAudioDevice is configured to operate in context-aware mode.
-        return AUDIO_SESSION_ID_GENERATE;
+        if (mService == null) {
+            return AUDIO_SESSION_ID_GENERATE;
+        }
+        try {
+            return mService.getAudioRecordingSessionId(deviceId);
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
     }
 
     /**

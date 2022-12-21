@@ -212,6 +212,7 @@ import android.app.admin.FactoryResetProtectionPolicy;
 import android.app.admin.FullyManagedDeviceProvisioningParams;
 import android.app.admin.ManagedProfileProvisioningParams;
 import android.app.admin.NetworkEvent;
+import android.app.admin.PackagePolicy;
 import android.app.admin.ParcelableGranteeMap;
 import android.app.admin.ParcelableResource;
 import android.app.admin.PasswordMetrics;
@@ -757,6 +758,12 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
     private final DeviceStateCacheImpl mStateCache = new DeviceStateCacheImpl();
     private final Object mESIDInitilizationLock = new Object();
     private EnterpriseSpecificIdCalculator mEsidCalculator;
+
+    /**
+     * Contains the list of OEM Default Role Holders for Contact-related roles
+     * (DIALER, SMS, SYSTEM_CONTACTS)
+     */
+    private final Set<String> mContactSystemRoleHolders;
 
     /**
      * Contains (package-user) pairs to remove. An entry (p, u) implies that removal of package p
@@ -1907,6 +1914,7 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
         if (!mHasFeature) {
             // Skip the rest of the initialization
             mSetupContentObserver = null;
+            mContactSystemRoleHolders = Collections.emptySet();
             return;
         }
 
@@ -1952,8 +1960,48 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
             mDevicePolicyEngine.load();
         }
 
+        mContactSystemRoleHolders = fetchOemSystemHolders(/* roleResIds...= */
+                com.android.internal.R.string.config_defaultSms,
+                com.android.internal.R.string.config_defaultDialer,
+                com.android.internal.R.string.config_systemContacts
+        );
+
         // The binder caches are not enabled until the first invalidation.
         invalidateBinderCaches();
+    }
+
+    /**
+     * Fetch the OEM System Holders for the supplied roleNames
+     *
+     * @param roleResIds the list of resource ids whose role holders are needed
+     * @return the set of packageNames that handle the requested roles
+     */
+    private @NonNull Set<String> fetchOemSystemHolders(int... roleResIds) {
+        Set<String> packageNames = new ArraySet<>();
+
+        for (int roleResId : roleResIds) {
+            String packageName = getDefaultRoleHolderPackageName(roleResId);
+            if (packageName != null) {
+                packageNames.add(packageName);
+            }
+        }
+
+        return Collections.unmodifiableSet(packageNames);
+    }
+
+
+    private @Nullable String getDefaultRoleHolderPackageName(int resId) {
+        String packageNameAndSignature = mContext.getString(resId);
+
+        if (TextUtils.isEmpty(packageNameAndSignature)) {
+            return null;
+        }
+
+        if (packageNameAndSignature.contains(":")) {
+            return packageNameAndSignature.split(":")[0];
+        }
+
+        return packageNameAndSignature;
     }
 
     private Owners makeOwners(Injector injector, PolicyPathProvider pathProvider) {
@@ -12103,10 +12151,14 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
 
         synchronized (getLockObject()) {
             ActiveAdmin admin = getProfileOwnerLocked(caller.getUserId());
-            if (admin.disableCallerId != disabled) {
-                admin.disableCallerId = disabled;
-                saveSettingsLocked(caller.getUserId());
+            if (disabled) {
+                admin.mManagedProfileCallerIdAccess =
+                        new PackagePolicy(PackagePolicy.PACKAGE_POLICY_ALLOWLIST);
+            } else {
+                admin.mManagedProfileCallerIdAccess =
+                        new PackagePolicy(PackagePolicy.PACKAGE_POLICY_BLOCKLIST);
             }
+            saveSettingsLocked(caller.getUserId());
         }
         DevicePolicyEventLogger
                 .createEvent(DevicePolicyEnums.SET_CROSS_PROFILE_CALLER_ID_DISABLED)
@@ -12126,7 +12178,21 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
 
         synchronized (getLockObject()) {
             ActiveAdmin admin = getProfileOwnerLocked(caller.getUserId());
-            return admin.disableCallerId;
+            if (admin == null) {
+                return false;
+            }
+
+            if (admin.mManagedProfileCallerIdAccess == null) {
+                return admin.disableCallerId;
+            }
+
+            if (admin.mManagedProfileCallerIdAccess.getPolicyType()
+                    == PackagePolicy.PACKAGE_POLICY_ALLOWLIST_AND_SYSTEM) {
+                Slogf.w(LOG_TAG, "Denying callerId due to PACKAGE_POLICY_SYSTEM policyType");
+            }
+
+            return admin.mManagedProfileCallerIdAccess.getPolicyType()
+                    != PackagePolicy.PACKAGE_POLICY_BLOCKLIST;
         }
     }
 
@@ -12139,8 +12205,121 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
 
         synchronized (getLockObject()) {
             ActiveAdmin admin = getProfileOwnerAdminLocked(userId);
-            return (admin != null) ? admin.disableCallerId : false;
+            if (admin == null) {
+                return false;
+            }
+
+            if (admin.mManagedProfileCallerIdAccess == null) {
+                return admin.disableCallerId;
+            }
+
+            return admin.mManagedProfileCallerIdAccess.getPolicyType()
+                    == PackagePolicy.PACKAGE_POLICY_ALLOWLIST;
         }
+    }
+
+    @Override
+    public void setManagedProfileCallerIdAccessPolicy(PackagePolicy policy) {
+        if (!mHasFeature) {
+            return;
+        }
+        final CallerIdentity caller = getCallerIdentity();
+        Preconditions.checkCallAuthorization((isProfileOwner(caller)
+                && isManagedProfile(caller.getUserId())));
+        synchronized (getLockObject()) {
+            ActiveAdmin admin = getProfileOwnerLocked(caller.getUserId());
+            admin.disableCallerId = false;
+            admin.mManagedProfileCallerIdAccess = policy;
+            saveSettingsLocked(caller.getUserId());
+        }
+    }
+
+    @Override
+    public PackagePolicy getManagedProfileCallerIdAccessPolicy() {
+        if (!mHasFeature) {
+            return null;
+        }
+        final CallerIdentity caller = getCallerIdentity();
+        Preconditions.checkCallAuthorization((isProfileOwner(caller)
+                && isManagedProfile(caller.getUserId())));
+        synchronized (getLockObject()) {
+            ActiveAdmin admin = getProfileOwnerLocked(caller.getUserId());
+            return (admin != null) ? admin.mManagedProfileCallerIdAccess : null;
+        }
+    }
+
+    @Override
+    public boolean hasManagedProfileCallerIdAccess(int userId, String packageName) {
+        Preconditions.checkArgumentNonnegative(userId, "Invalid userId");
+
+        final CallerIdentity caller = getCallerIdentity();
+        Preconditions.checkCallAuthorization(hasCrossUsersPermission(caller, userId));
+
+        synchronized (getLockObject()) {
+            ActiveAdmin admin = getProfileOwnerAdminLocked(userId);
+            if (admin != null) {
+                if (admin.mManagedProfileCallerIdAccess == null) {
+                    return !admin.disableCallerId;
+                }
+                return admin.mManagedProfileCallerIdAccess.isPackageAllowed(packageName,
+                        mContactSystemRoleHolders);
+            }
+        }
+        return true;
+    }
+
+    @Override
+    public void setManagedProfileContactsAccessPolicy(PackagePolicy policy) {
+        if (!mHasFeature) {
+            return;
+        }
+        final CallerIdentity caller = getCallerIdentity();
+        Preconditions.checkCallAuthorization((isProfileOwner(caller)
+                && isManagedProfile(caller.getUserId())));
+
+        synchronized (getLockObject()) {
+            ActiveAdmin admin = getProfileOwnerLocked(caller.getUserId());
+            admin.disableContactsSearch = false;
+            admin.mManagedProfileContactsAccess = policy;
+            saveSettingsLocked(caller.getUserId());
+        }
+    }
+
+    @Override
+    public PackagePolicy getManagedProfileContactsAccessPolicy() {
+        if (!mHasFeature) {
+            return null;
+        }
+
+        final CallerIdentity caller = getCallerIdentity();
+        Preconditions.checkCallAuthorization((isProfileOwner(caller)
+                && isManagedProfile(caller.getUserId())));
+
+        synchronized (getLockObject()) {
+            ActiveAdmin admin = getProfileOwnerLocked(caller.getUserId());
+            return (admin != null) ? admin.mManagedProfileContactsAccess : null;
+        }
+    }
+
+    @Override
+    public boolean hasManagedProfileContactsAccess(int userId, String packageName) {
+        Preconditions.checkArgumentNonnegative(userId, "Invalid userId");
+
+        final CallerIdentity caller = getCallerIdentity();
+        Preconditions.checkCallAuthorization(hasCrossUsersPermission(caller, userId));
+
+        synchronized (getLockObject()) {
+            ActiveAdmin admin = getProfileOwnerAdminLocked(userId);
+            if (admin != null) {
+                if (admin.mManagedProfileContactsAccess == null) {
+                    return !admin.disableContactsSearch;
+                }
+
+                return admin.mManagedProfileContactsAccess.isPackageAllowed(packageName,
+                        mContactSystemRoleHolders);
+            }
+        }
+        return true;
     }
 
     @Override
@@ -12154,10 +12333,14 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
 
         synchronized (getLockObject()) {
             ActiveAdmin admin = getProfileOwnerLocked(caller.getUserId());
-            if (admin.disableContactsSearch != disabled) {
-                admin.disableContactsSearch = disabled;
-                saveSettingsLocked(caller.getUserId());
+            if (disabled) {
+                admin.mManagedProfileContactsAccess =
+                        new PackagePolicy(PackagePolicy.PACKAGE_POLICY_ALLOWLIST);
+            } else {
+                admin.mManagedProfileContactsAccess =
+                        new PackagePolicy(PackagePolicy.PACKAGE_POLICY_BLOCKLIST);
             }
+            saveSettingsLocked(caller.getUserId());
         }
         DevicePolicyEventLogger
                 .createEvent(DevicePolicyEnums.SET_CROSS_PROFILE_CONTACTS_SEARCH_DISABLED)
@@ -12177,7 +12360,14 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
 
         synchronized (getLockObject()) {
             ActiveAdmin admin = getProfileOwnerLocked(caller.getUserId());
-            return admin.disableContactsSearch;
+            if (admin == null) {
+                return false;
+            }
+            if (admin.mManagedProfileContactsAccess == null) {
+                return admin.disableContactsSearch;
+            }
+            return admin.mManagedProfileContactsAccess.getPolicyType()
+                    != PackagePolicy.PACKAGE_POLICY_BLOCKLIST;
         }
     }
 
@@ -12190,7 +12380,19 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
 
         synchronized (getLockObject()) {
             ActiveAdmin admin = getProfileOwnerAdminLocked(userId);
-            return (admin != null) ? admin.disableContactsSearch : false;
+            if (admin == null) {
+                return false;
+            }
+
+            if (admin.mManagedProfileContactsAccess == null) {
+                return admin.disableContactsSearch;
+            }
+            if (admin.mManagedProfileContactsAccess.getPolicyType()
+                    == PackagePolicy.PACKAGE_POLICY_ALLOWLIST_AND_SYSTEM) {
+                Slogf.w(LOG_TAG, "Denying contacts due to PACKAGE_POLICY_SYSTEM policyType");
+            }
+            return admin.mManagedProfileContactsAccess.getPolicyType()
+                    != PackagePolicy.PACKAGE_POLICY_BLOCKLIST;
         }
     }
 

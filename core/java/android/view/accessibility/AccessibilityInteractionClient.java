@@ -46,6 +46,7 @@ import android.util.Pair;
 import android.util.SparseArray;
 import android.util.SparseLongArray;
 import android.view.Display;
+import android.view.SurfaceControl;
 import android.view.ViewConfiguration;
 import android.window.ScreenCapture;
 
@@ -1625,5 +1626,22 @@ public final class AccessibilityInteractionClient
                 Arrays.asList(Thread.currentThread().getStackTrace()),
                 new HashSet<String>(Arrays.asList("getStackTrace", "logTraceClient")),
                 FLAGS_ACCESSIBILITY_INTERACTION_CLIENT);
+    }
+
+    /** Attaches an accessibility overlay to the specified window. */
+    public void attachAccessibilityOverlayToWindow(
+            int connectionId, int accessibilityWindowId, SurfaceControl sc) {
+        synchronized (mInstanceLock) {
+            try {
+                IAccessibilityServiceConnection connection = getConnection(connectionId);
+                if (connection == null) {
+                    Log.e(LOG_TAG, "Error while getting service connection.");
+                    return;
+                }
+                connection.attachAccessibilityOverlayToWindow(accessibilityWindowId, sc);
+            } catch (RemoteException re) {
+                Log.e(LOG_TAG, "Error while calling remote attachAccessibilityOverlayToWindow", re);
+            }
+        }
     }
 }

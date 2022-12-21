@@ -593,7 +593,7 @@ public interface Computer extends PackageDataSnapshot {
     CharSequence getHarmfulAppWarning(@NonNull String packageName, @UserIdInt int userId);
 
     /**
-     * Only keep package names that refer to {@link AndroidPackage#isSystem system} packages.
+     * Only keep package names that refer to {@link PackageState#isSystem system} packages.
      *
      * @param pkgNames The packages to filter
      *

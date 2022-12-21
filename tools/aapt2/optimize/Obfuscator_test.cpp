@@ -28,6 +28,7 @@ using ::aapt::test::GetValue;
 using ::testing::AnyOf;
 using ::testing::Eq;
 using ::testing::HasSubstr;
+using ::testing::IsFalse;
 using ::testing::IsTrue;
 using ::testing::Not;
 using ::testing::NotNull;
@@ -100,6 +101,44 @@ TEST(ObfuscatorTest, SkipColorFileRefPaths) {
   // Expect that the path map to not contain the ColorStateList
   ASSERT_THAT(path_map.find("res/color/colorlist.xml"), Eq(path_map.end()));
   ASSERT_THAT(path_map.find("res/color-mdp-v21/colorlist.xml"), Eq(path_map.end()));
+}
+
+TEST(ObfuscatorTest, SkipPathShortenExemptions) {
+  std::unique_ptr<IAaptContext> context = test::ContextBuilder().Build();
+
+  std::unique_ptr<ResourceTable> table =
+      test::ResourceTableBuilder()
+          .AddFileReference("android:drawable/xmlfile", "res/drawables/xmlfile.xml")
+          .AddFileReference("android:drawable/xmlfile2", "res/drawables/xmlfile2.xml")
+          .AddString("android:string/string", "res/should/still/be/the/same.png")
+          .Build();
+
+  OptimizeOptions options{.shorten_resource_paths = true};
+  TableFlattenerOptions& flattenerOptions = options.table_flattener_options;
+  flattenerOptions.path_shorten_exemptions.insert(
+      ResourceName({}, ResourceType::kDrawable, "xmlfile"));
+  std::map<std::string, std::string>& path_map = options.table_flattener_options.shortened_path_map;
+  ASSERT_TRUE(Obfuscator(options).Consume(context.get(), table.get()));
+
+  // Expect that the path map to not contain the first drawable which is in exemption set
+  EXPECT_THAT(path_map.find("res/drawables/xmlfile.xml"), Eq(path_map.end()));
+
+  // Expect that the path map to contain the second drawable which is not in exemption set
+  EXPECT_THAT(path_map.find("res/drawables/xmlfile2.xml"), Not(Eq(path_map.end())));
+
+  FileReference* ref = GetValue<FileReference>(table.get(), "android:drawable/xmlfile");
+  EXPECT_THAT(ref, NotNull());
+  ASSERT_THAT(HasFailure(), IsFalse());
+  // The path of first drawable in exemption was not changed
+  EXPECT_THAT("res/drawables/xmlfile.xml", Eq(*ref->path));
+
+  // The file path of second drawable not in exemption set was changed
+  EXPECT_THAT(path_map.at("res/drawables/xmlfile2.xml"), Not(Eq("res/drawables/xmlfile2.xml")));
+
+  FileReference* ref2 = GetValue<FileReference>(table.get(), "android:drawable/xmlfile2");
+  ASSERT_THAT(ref, NotNull());
+  // The map of second drawable not in exemption correctly points to the new location of the file
+  EXPECT_THAT(path_map["res/drawables/xmlfile2.xml"], Eq(*ref2->path));
 }
 
 TEST(ObfuscatorTest, KeepExtensions) {

@@ -28,6 +28,8 @@ import com.android.systemui.doze.DozeHost
 import com.android.systemui.doze.DozeMachine
 import com.android.systemui.doze.DozeTransitionCallback
 import com.android.systemui.doze.DozeTransitionListener
+import com.android.systemui.dreams.DreamCallbackController
+import com.android.systemui.dreams.DreamCallbackController.DreamCallback
 import com.android.systemui.keyguard.WakefulnessLifecycle
 import com.android.systemui.keyguard.shared.model.BiometricUnlockModel
 import com.android.systemui.keyguard.shared.model.BiometricUnlockSource
@@ -66,6 +68,7 @@ class KeyguardRepositoryImplTest : SysuiTestCase() {
     @Mock private lateinit var dozeTransitionListener: DozeTransitionListener
     @Mock private lateinit var authController: AuthController
     @Mock private lateinit var keyguardUpdateMonitor: KeyguardUpdateMonitor
+    @Mock private lateinit var dreamCallbackController: DreamCallbackController
 
     private lateinit var underTest: KeyguardRepositoryImpl
 
@@ -83,6 +86,7 @@ class KeyguardRepositoryImplTest : SysuiTestCase() {
                 keyguardUpdateMonitor,
                 dozeTransitionListener,
                 authController,
+                dreamCallbackController,
             )
     }
 
@@ -318,7 +322,7 @@ class KeyguardRepositoryImplTest : SysuiTestCase() {
         }
 
     @Test
-    fun isDreaming() =
+    fun isDreamingFromKeyguardUpdateMonitor() =
         runTest(UnconfinedTestDispatcher()) {
             whenever(keyguardUpdateMonitor.isDreaming()).thenReturn(false)
             var latest: Boolean? = null
@@ -333,6 +337,26 @@ class KeyguardRepositoryImplTest : SysuiTestCase() {
             assertThat(latest).isTrue()
 
             captor.value.onDreamingStateChanged(false)
+            assertThat(latest).isFalse()
+
+            job.cancel()
+        }
+
+    @Test
+    fun isDreamingFromDreamCallbackController() =
+        runTest(UnconfinedTestDispatcher()) {
+            whenever(keyguardUpdateMonitor.isDreaming()).thenReturn(true)
+            var latest: Boolean? = null
+            val job = underTest.isDreaming.onEach { latest = it }.launchIn(this)
+
+            assertThat(latest).isTrue()
+
+            val listener =
+                withArgCaptor<DreamCallbackController.DreamCallback> {
+                    verify(dreamCallbackController).addCallback(capture())
+                }
+
+            listener.onWakeUp()
             assertThat(latest).isFalse()
 
             job.cancel()

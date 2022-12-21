@@ -27,13 +27,13 @@ import android.hardware.camera2.extension.OutputSurface;
 interface ISessionProcessorImpl
 {
     CameraSessionConfig initSession(in String cameraId, in OutputSurface previewSurface,
-            in OutputSurface imageCaptureSurface);
+            in OutputSurface imageCaptureSurface, in OutputSurface postviewSurface);
     void deInitSession();
     void onCaptureSessionStart(IRequestProcessorImpl requestProcessor);
     void onCaptureSessionEnd();
     int startRepeating(in ICaptureCallback callback);
     void stopRepeating();
-    int startCapture(in ICaptureCallback callback);
+    int startCapture(in ICaptureCallback callback, in boolean isPostviewRequested);
     void setParameters(in CaptureRequest captureRequest);
     int startTrigger(in CaptureRequest captureRequest, in ICaptureCallback callback);
     @nullable LatencyPair getRealtimeCaptureLatency();

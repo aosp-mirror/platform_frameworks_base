@@ -23,4 +23,5 @@ interface IOutputSurfaceConfiguration
     OutputSurface getPreviewOutputSurface();
     OutputSurface getImageCaptureOutputSurface();
     OutputSurface getImageAnalysisOutputSurface();
+    OutputSurface getPostviewOutputSurface();
 }

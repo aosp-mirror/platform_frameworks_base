@@ -103,6 +103,11 @@ object Flags {
     // TODO(b/257315550): Tracking Bug
     val NO_HUN_FOR_OLD_WHEN = unreleasedFlag(118, "no_hun_for_old_when", teamfood = true)
 
+    // TODO(b/260335638): Tracking Bug
+    @JvmField
+    val NOTIFICATION_INLINE_REPLY_ANIMATION =
+        unreleasedFlag(174148361, "notification_inline_reply_animation", teamfood = true)
+
     val FILTER_UNSEEN_NOTIFS_ON_KEYGUARD =
         unreleasedFlag(254647461, "filter_unseen_notifs_on_keyguard", teamfood = true)
 
@@ -182,6 +187,10 @@ object Flags {
      */
     // TODO(b/260619425): Tracking Bug
     @JvmField val MODERN_ALTERNATE_BOUNCER = unreleasedFlag(219, "modern_alternate_bouncer")
+
+    // TODO(b/262780002): Tracking Bug
+    @JvmField
+    val REVAMPED_WALLPAPER_UI = unreleasedFlag(222, "revamped_wallpaper_ui", teamfood = false)
 
     /** Flag to control the migration of face auth to modern architecture. */
     // TODO(b/262838215): Tracking bug
@@ -413,7 +422,7 @@ object Flags {
 
     // TODO(b/261979569): Tracking Bug
     val QUICK_TAP_FLOW_FRAMEWORK =
-            unreleasedFlag(1401, "quick_tap_flow_framework", teamfood = false)
+        unreleasedFlag(1401, "quick_tap_flow_framework", teamfood = false)
 
     // 1500 - chooser
     // TODO(b/254512507): Tracking Bug

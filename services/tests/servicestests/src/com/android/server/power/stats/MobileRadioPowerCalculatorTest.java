@@ -527,7 +527,7 @@ public class MobileRadioPowerCalculatorTest {
         stats.noteModemControllerActivity(null, POWER_DATA_UNAVAILABLE, 12000, 12000,
                 mNetworkStatsManager);
 
-        assertThat(uid.getMobileRadioMeasuredBatteryConsumptionUC()).isAtMost(0);
+        assertThat(uid.getMobileRadioEnergyConsumptionUC()).isAtMost(0);
         // 12000-8000 = 4000 ms == 4_000_000 us
         assertThat(uid.getMobileRadioActiveTimeInProcessState(BatteryConsumer.PROCESS_STATE_ANY))
                 .isEqualTo(4_000_000);
@@ -622,19 +622,19 @@ public class MobileRadioPowerCalculatorTest {
         assertThat(deviceConsumer.getConsumedPower(BatteryConsumer.POWER_COMPONENT_MOBILE_RADIO))
                 .isWithin(PRECISION).of(2.77778);
         assertThat(deviceConsumer.getPowerModel(BatteryConsumer.POWER_COMPONENT_MOBILE_RADIO))
-                .isEqualTo(BatteryConsumer.POWER_MODEL_MEASURED_ENERGY);
+                .isEqualTo(BatteryConsumer.POWER_MODEL_ENERGY_CONSUMPTION);
 
         BatteryConsumer appsConsumer = mStatsRule.getAppsBatteryConsumer();
         assertThat(appsConsumer.getConsumedPower(BatteryConsumer.POWER_COMPONENT_MOBILE_RADIO))
                 .isWithin(PRECISION).of(1.53934);
         assertThat(appsConsumer.getPowerModel(BatteryConsumer.POWER_COMPONENT_MOBILE_RADIO))
-                .isEqualTo(BatteryConsumer.POWER_MODEL_MEASURED_ENERGY);
+                .isEqualTo(BatteryConsumer.POWER_MODEL_ENERGY_CONSUMPTION);
 
         UidBatteryConsumer uidConsumer = mStatsRule.getUidBatteryConsumer(APP_UID);
         assertThat(uidConsumer.getConsumedPower(BatteryConsumer.POWER_COMPONENT_MOBILE_RADIO))
                 .isWithin(PRECISION).of(1.53934);
         assertThat(uidConsumer.getPowerModel(BatteryConsumer.POWER_COMPONENT_MOBILE_RADIO))
-                .isEqualTo(BatteryConsumer.POWER_MODEL_MEASURED_ENERGY);
+                .isEqualTo(BatteryConsumer.POWER_MODEL_ENERGY_CONSUMPTION);
     }
 
     @Test
@@ -687,15 +687,15 @@ public class MobileRadioPowerCalculatorTest {
 
         mStatsRule.setTime(20000, 20000);
 
-        assertThat(uid.getMobileRadioMeasuredBatteryConsumptionUC())
+        assertThat(uid.getMobileRadioEnergyConsumptionUC())
                 .isIn(Range.open(20_000_000L, 21_000_000L));
-        assertThat(uid.getMobileRadioMeasuredBatteryConsumptionUC(
+        assertThat(uid.getMobileRadioEnergyConsumptionUC(
                 BatteryConsumer.PROCESS_STATE_FOREGROUND))
                 .isIn(Range.open(13_000_000L, 14_000_000L));
-        assertThat(uid.getMobileRadioMeasuredBatteryConsumptionUC(
+        assertThat(uid.getMobileRadioEnergyConsumptionUC(
                 BatteryConsumer.PROCESS_STATE_BACKGROUND))
                 .isIn(Range.open(7_000_000L, 8_000_000L));
-        assertThat(uid.getMobileRadioMeasuredBatteryConsumptionUC(
+        assertThat(uid.getMobileRadioEnergyConsumptionUC(
                 BatteryConsumer.PROCESS_STATE_FOREGROUND_SERVICE))
                 .isEqualTo(0);
 

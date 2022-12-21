@@ -130,6 +130,7 @@ import com.android.server.pm.parsing.PackageInfoUtils;
 import com.android.server.pm.parsing.pkg.AndroidPackageUtils;
 import com.android.server.pm.permission.PermissionManagerServiceInternal;
 import com.android.server.pm.pkg.AndroidPackage;
+import com.android.server.pm.pkg.PackageState;
 import com.android.server.pm.pkg.PackageStateInternal;
 import com.android.server.pm.pkg.PackageStateUtils;
 import com.android.server.pm.pkg.PackageUserStateInternal;
@@ -223,7 +224,7 @@ public class ComputerEngine implements Computer {
             }
 
             return PackageUserStateUtils.isMatch(pkgState.getUserStateOrDefault(userId),
-                    pkg.isSystem(), pkg.isEnabled(), component, flags);
+                    pkgState.isSystem(), pkg.isEnabled(), component, flags);
         }
 
         @Nullable
@@ -1571,7 +1572,8 @@ public class ComputerEngine implements Computer {
         }
 
         AndroidPackage p = mPackages.get(packageName);
-        if (matchFactoryOnly && p != null && !p.isSystem()) {
+        var packageState = mSettings.getPackage(packageName);
+        if (matchFactoryOnly && p != null && !packageState.isSystem()) {
             return null;
         }
         if (DEBUG_PACKAGE_INFO) {
@@ -1689,7 +1691,7 @@ public class ComputerEngine implements Computer {
             for (AndroidPackage p : mPackages.values()) {
                 PackageStateInternal ps = getPackageStateInternal(p.getPackageName());
                 if (listFactory) {
-                    if (!p.isSystem()) {
+                    if (!ps.isSystem()) {
                         continue;
                     }
                     PackageStateInternal psDisabled =
@@ -2566,8 +2568,9 @@ public class ComputerEngine implements Computer {
     public int getPackageUidInternal(String packageName,
             @PackageManager.PackageInfoFlagsBits long flags, int userId, int callingUid) {
         // reader
+        var packageState = mSettings.getPackage(packageName);
         final AndroidPackage p = mPackages.get(packageName);
-        if (p != null && AndroidPackageUtils.isMatchForSystemOnly(p, flags)) {
+        if (p != null && AndroidPackageUtils.isMatchForSystemOnly(packageState, flags)) {
             final PackageStateInternal ps = getPackageStateInternal(p.getPackageName(), callingUid);
             if (ps != null && ps.getUserStateOrDefault(userId).isInstalled()
                     && !shouldFilterApplication(ps, callingUid, userId)) {
@@ -3616,7 +3619,7 @@ public class ComputerEngine implements Computer {
             return null;
         }
         if (ps.getPkg() != null
-                && AndroidPackageUtils.isMatchForSystemOnly(ps.getPkg(), flags)) {
+                && AndroidPackageUtils.isMatchForSystemOnly(ps, flags)) {
             if (ps.getUserStateOrDefault(userId).isInstalled()
                     && !shouldFilterApplication(ps, callingUid, userId)) {
                 return mPermissionManager.getGidsForUid(UserHandle.getUid(userId,
@@ -5416,6 +5419,7 @@ public class ComputerEngine implements Computer {
         final int userId = UserHandle.getCallingUserId();
         for (int index = 0; index < numPackages; index++) {
             final AndroidPackage p = mPackages.valueAt(index);
+            var packageState = mSettings.getPackage(p.getPackageName());
 
             final boolean matchesUnaware = ((flags & MATCH_DIRECT_BOOT_UNAWARE) != 0)
                     && !p.isDirectBootAware();
@@ -5423,7 +5427,7 @@ public class ComputerEngine implements Computer {
                     && p.isDirectBootAware();
 
             if (p.isPersistent()
-                    && (!safeMode || p.isSystem())
+                    && (!safeMode || packageState.isSystem())
                     && (matchesUnaware || matchesAware)) {
                 PackageStateInternal ps = mSettings.getPackage(p.getPackageName());
                 if (ps != null) {
@@ -5522,7 +5526,7 @@ public class ComputerEngine implements Computer {
     }
 
     /**
-     * Only keep package names that refer to {@link AndroidPackage#isSystem system} packages.
+     * Only keep package names that refer to {@link PackageState#isSystem system} packages.
      *
      * @param pkgNames The packages to filter
      *
@@ -5542,13 +5546,13 @@ public class ComputerEngine implements Computer {
                 continue;
             }
 
-            AndroidPackage pkg = getPackage(pkgName);
-            if (pkg == null) {
+            var packageState = getPackageStateInternal(pkgName);
+            if (packageState == null || packageState.getAndroidPackage() == null) {
                 Log.w(TAG, "Could not find package " + pkgName);
                 continue;
             }
 
-            if (!pkg.isSystem()) {
+            if (!packageState.isSystem()) {
                 Log.w(TAG, pkgName + " is not system");
                 continue;
             }

@@ -37,10 +37,15 @@ using namespace testing;
 class MockIHintManager : public IHintManager {
 public:
     MOCK_METHOD(Status, createHintSession,
-                (const ::android::sp<::android::IBinder>& token, const ::std::vector<int32_t>& tids,
-                 int64_t durationNanos, ::android::sp<::android::os::IHintSession>* _aidl_return),
+                (const sp<IBinder>& token, const ::std::vector<int32_t>& tids,
+                 int64_t durationNanos, ::android::sp<IHintSession>* _aidl_return),
                 (override));
     MOCK_METHOD(Status, getHintSessionPreferredRate, (int64_t * _aidl_return), (override));
+    MOCK_METHOD(Status, setHintSessionThreads,
+                (const sp<IHintSession>& hintSession, const ::std::vector<int32_t>& tids),
+                (override));
+    MOCK_METHOD(Status, getHintSessionThreadIds,
+                (const sp<IHintSession>& hintSession, ::std::vector<int32_t>* tids), (override));
     MOCK_METHOD(IBinder*, onAsBinder, (), (override));
 };
 
@@ -140,4 +145,37 @@ TEST_F(PerformanceHintTest, TestSession) {
 
     EXPECT_CALL(*iSession, close()).Times(Exactly(1));
     APerformanceHint_closeSession(session);
+}
+
+TEST_F(PerformanceHintTest, SetThreads) {
+    APerformanceHintManager* manager = createManager();
+
+    std::vector<int32_t> tids;
+    tids.push_back(1);
+    tids.push_back(2);
+    int64_t targetDuration = 56789L;
+
+    StrictMock<MockIHintSession>* iSession = new StrictMock<MockIHintSession>();
+    sp<IHintSession> session_sp(iSession);
+
+    EXPECT_CALL(*mMockIHintManager, createHintSession(_, Eq(tids), Eq(targetDuration), _))
+            .Times(Exactly(1))
+            .WillRepeatedly(DoAll(SetArgPointee<3>(std::move(session_sp)), Return(Status())));
+
+    APerformanceHintSession* session =
+            APerformanceHint_createSession(manager, tids.data(), tids.size(), targetDuration);
+    ASSERT_TRUE(session);
+
+    std::vector<int32_t> emptyTids;
+    int result = APerformanceHint_setThreads(session, emptyTids.data(), emptyTids.size());
+    EXPECT_EQ(EINVAL, result);
+
+    std::vector<int32_t> newTids;
+    newTids.push_back(1);
+    newTids.push_back(3);
+    EXPECT_CALL(*mMockIHintManager, setHintSessionThreads(_, Eq(newTids)))
+            .Times(Exactly(1))
+            .WillOnce(Return(Status()));
+    result = APerformanceHint_setThreads(session, newTids.data(), newTids.size());
+    EXPECT_EQ(0, result);
 }

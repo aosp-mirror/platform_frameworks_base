@@ -30,6 +30,8 @@ class FakeMobileConnectionRepository(override val subId: Int) : MobileConnection
     private val _isDefaultDataSubscription = MutableStateFlow(true)
     override val isDefaultDataSubscription = _isDefaultDataSubscription
 
+    override val cdmaRoaming = MutableStateFlow(false)
+
     fun setConnectionInfo(model: MobileConnectionModel) {
         _connectionInfo.value = model
     }

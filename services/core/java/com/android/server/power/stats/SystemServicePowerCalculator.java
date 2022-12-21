@@ -73,12 +73,12 @@ public class SystemServicePowerCalculator extends PowerCalculator {
             return;
         }
 
-        final long consumptionUC = systemUid.getCpuMeasuredBatteryConsumptionUC();
+        final long consumptionUC = systemUid.getCpuEnergyConsumptionUC();
         final int powerModel = getPowerModel(consumptionUC, query);
 
         double systemServicePowerMah;
-        if (powerModel == BatteryConsumer.POWER_MODEL_MEASURED_ENERGY) {
-            systemServicePowerMah = calculatePowerUsingMeasuredConsumption(batteryStats,
+        if (powerModel == BatteryConsumer.POWER_MODEL_ENERGY_CONSUMPTION) {
+            systemServicePowerMah = calculatePowerUsingEnergyConsumption(batteryStats,
                     systemUid, consumptionUC);
         } else {
             systemServicePowerMah = calculatePowerUsingPowerProfile(batteryStats);
@@ -120,11 +120,11 @@ public class SystemServicePowerCalculator extends PowerCalculator {
                         systemServicePowerMah);
     }
 
-    private double calculatePowerUsingMeasuredConsumption(BatteryStats batteryStats,
+    private double calculatePowerUsingEnergyConsumption(BatteryStats batteryStats,
             BatteryStats.Uid systemUid, long consumptionUC) {
         // Use the PowerProfile based model to estimate the ratio between the power consumed
         // while handling incoming binder calls and the entire System UID power consumption.
-        // Apply that ratio to the _measured_ system UID power consumption to get a more
+        // Apply that ratio to the _EnergyConsumer_ system UID power consumption to get a more
         // accurate estimate of the power consumed by incoming binder calls.
         final double systemServiceModeledPowerMah = calculatePowerUsingPowerProfile(batteryStats);
         final double systemUidModeledPowerMah = mCpuPowerCalculator.calculateUidModeledPowerMah(

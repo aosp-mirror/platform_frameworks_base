@@ -40,9 +40,11 @@ interface IImageCaptureExtenderImpl
     @nullable List<CaptureStageImpl> getCaptureStages();
     int getMaxCaptureStage();
     @nullable List<SizeList> getSupportedResolutions();
+    @nullable List<SizeList> getSupportedPostviewResolutions(in Size captureSize);
     LatencyRange getEstimatedCaptureLatencyRange(in Size outputSize);
     CameraMetadataNative getAvailableCaptureRequestKeys();
     CameraMetadataNative getAvailableCaptureResultKeys();
     boolean isCaptureProcessProgressAvailable();
     @nullable LatencyPair getRealtimeCaptureLatency();
+    boolean isPostviewAvailable();
 }

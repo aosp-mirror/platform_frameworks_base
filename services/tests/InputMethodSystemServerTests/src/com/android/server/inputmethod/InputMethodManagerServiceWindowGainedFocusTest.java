@@ -28,6 +28,8 @@ import static android.view.WindowManager.LayoutParams.SOFT_INPUT_STATE_UNCHANGED
 import static android.view.WindowManager.LayoutParams.SOFT_INPUT_STATE_UNSPECIFIED;
 import static android.view.WindowManager.LayoutParams.SOFT_INPUT_STATE_VISIBLE;
 
+import static com.android.dx.mockito.inline.extended.ExtendedMockito.doReturn;
+
 import static com.google.common.truth.Truth.assertThat;
 
 import static org.mockito.ArgumentMatchers.any;
@@ -35,6 +37,7 @@ import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.Mockito.when;
 
 import android.os.IBinder;
+import android.os.LocaleList;
 import android.os.RemoteException;
 import android.util.Log;
 import android.view.inputmethod.EditorInfo;
@@ -47,11 +50,14 @@ import com.android.internal.inputmethod.InputBindResult;
 import com.android.internal.inputmethod.InputMethodDebug;
 import com.android.internal.inputmethod.StartInputFlags;
 import com.android.internal.inputmethod.StartInputReason;
+import com.android.server.LocalServices;
+import com.android.server.companion.virtual.VirtualDeviceManagerInternal;
 import com.android.server.wm.WindowManagerInternal;
 
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
+import org.mockito.Mock;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -84,6 +90,8 @@ public class InputMethodManagerServiceWindowGainedFocusTest
             };
     private static final int DEFAULT_SOFT_INPUT_FLAG =
             StartInputFlags.VIEW_HAS_FOCUS | StartInputFlags.IS_TEXT_EDITOR;
+    @Mock
+    VirtualDeviceManagerInternal mMockVdmInternal;
 
     @Parameterized.Parameters(name = "softInputState={0}, softInputAdjustment={1}")
     public static List<Object[]> softInputModeConfigs() {
@@ -254,6 +262,19 @@ public class InputMethodManagerServiceWindowGainedFocusTest
                 mTargetSdkVersion /* unverifiedTargetSdkVersion */,
                 mCallingUserId /* userId */,
                 mMockImeOnBackInvokedDispatcher /* imeDispatcher */);
+    }
+
+    @Test
+    public void startInputOrWindowGainedFocus_localeHintsOverride() throws RemoteException {
+        doReturn(mMockVdmInternal).when(
+                () -> LocalServices.getService(VirtualDeviceManagerInternal.class));
+        LocaleList overrideLocale = LocaleList.forLanguageTags("zh-CN");
+        doReturn(overrideLocale).when(mMockVdmInternal).getPreferredLocaleListForUid(anyInt());
+        mockHasImeFocusAndRestoreImeVisibility(false /* restoreImeVisibility */);
+
+        assertThat(startInputOrWindowGainedFocus(DEFAULT_SOFT_INPUT_FLAG,
+                true /* forwardNavigation */)).isEqualTo(SUCCESS_WAITING_IME_BINDING_RESULT);
+        assertThat(mEditorInfo.hintLocales).isEqualTo(overrideLocale);
     }
 
     private void mockHasImeFocusAndRestoreImeVisibility(boolean restoreImeVisibility) {

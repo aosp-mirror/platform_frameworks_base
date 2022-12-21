@@ -16,6 +16,8 @@
 
 package com.android.server.pm;
 
+import android.annotation.NonNull;
+import android.annotation.Nullable;
 import android.compat.annotation.ChangeId;
 import android.compat.annotation.Disabled;
 import android.compat.annotation.EnabledAfter;
@@ -29,6 +31,7 @@ import android.util.Xml;
 import com.android.server.compat.PlatformCompat;
 import com.android.server.pm.parsing.pkg.AndroidPackageUtils;
 import com.android.server.pm.pkg.AndroidPackage;
+import com.android.server.pm.pkg.PackageState;
 import com.android.server.pm.pkg.SharedUserApi;
 
 import libcore.io.IoUtils;
@@ -381,14 +384,15 @@ public final class SELinuxMMAC {
      * @param compatibility     the PlatformCompat service to ask about state of compat changes.
      * @return String representing the resulting seinfo.
      */
-    public static String getSeInfo(AndroidPackage pkg, SharedUserApi sharedUser,
-            PlatformCompat compatibility) {
+    public static String getSeInfo(@NonNull PackageState packageState, @NonNull AndroidPackage pkg,
+            @Nullable SharedUserApi sharedUser, @NonNull PlatformCompat compatibility) {
         final int targetSdkVersion = getTargetSdkVersionForSeInfo(pkg, sharedUser,
                 compatibility);
         // TODO(b/71593002): isPrivileged for sharedUser and appInfo should never be out of sync.
         // They currently can be if the sharedUser apps are signed with the platform key.
-        final boolean isPrivileged = (sharedUser != null)
-                ? sharedUser.isPrivileged() | pkg.isPrivileged() : pkg.isPrivileged();
+        final boolean isPrivileged =
+                (sharedUser != null) ? sharedUser.isPrivileged() | packageState.isPrivileged()
+                        : packageState.isPrivileged();
         return getSeInfo(pkg, isPrivileged, targetSdkVersion);
     }
 

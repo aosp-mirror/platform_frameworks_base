@@ -27,13 +27,13 @@ import com.android.systemui.statusbar.pipeline.airplane.ui.viewmodel.AirplaneMod
 import com.android.systemui.statusbar.pipeline.shared.ConnectivityConstants
 import com.android.systemui.statusbar.pipeline.shared.ConnectivityPipelineLogger
 import com.android.systemui.statusbar.pipeline.shared.data.model.ConnectivitySlot
+import com.android.systemui.statusbar.pipeline.shared.data.model.DataActivityModel
 import com.android.systemui.statusbar.pipeline.shared.data.repository.FakeConnectivityRepository
 import com.android.systemui.statusbar.pipeline.wifi.data.model.WifiNetworkModel
 import com.android.systemui.statusbar.pipeline.wifi.data.repository.FakeWifiRepository
 import com.android.systemui.statusbar.pipeline.wifi.domain.interactor.WifiInteractor
 import com.android.systemui.statusbar.pipeline.wifi.domain.interactor.WifiInteractorImpl
 import com.android.systemui.statusbar.pipeline.wifi.shared.WifiConstants
-import com.android.systemui.statusbar.pipeline.wifi.shared.model.WifiActivityModel
 import com.android.systemui.statusbar.pipeline.wifi.ui.model.WifiIcon
 import com.google.common.truth.Truth.assertThat
 import kotlinx.coroutines.CoroutineScope
@@ -209,7 +209,7 @@ class WifiViewModelTest : SysuiTestCase() {
             .launchIn(this)
 
         // WHEN we update the repo to have activity
-        val activity = WifiActivityModel(hasActivityIn = true, hasActivityOut = true)
+        val activity = DataActivityModel(hasActivityIn = true, hasActivityOut = true)
         wifiRepository.setWifiActivity(activity)
         yield()
 
@@ -252,7 +252,7 @@ class WifiViewModelTest : SysuiTestCase() {
             .launchIn(this)
 
         // WHEN we update the repo to have activity
-        val activity = WifiActivityModel(hasActivityIn = true, hasActivityOut = true)
+        val activity = DataActivityModel(hasActivityIn = true, hasActivityOut = true)
         wifiRepository.setWifiActivity(activity)
         yield()
 
@@ -293,7 +293,7 @@ class WifiViewModelTest : SysuiTestCase() {
             .onEach { latestQs = it }
             .launchIn(this)
 
-        val activity = WifiActivityModel(hasActivityIn = true, hasActivityOut = true)
+        val activity = DataActivityModel(hasActivityIn = true, hasActivityOut = true)
         wifiRepository.setWifiActivity(activity)
         yield()
 
@@ -319,7 +319,7 @@ class WifiViewModelTest : SysuiTestCase() {
             .onEach { latest = it }
             .launchIn(this)
 
-        val activity = WifiActivityModel(hasActivityIn = true, hasActivityOut = false)
+        val activity = DataActivityModel(hasActivityIn = true, hasActivityOut = false)
         wifiRepository.setWifiActivity(activity)
         yield()
 
@@ -341,7 +341,7 @@ class WifiViewModelTest : SysuiTestCase() {
             .onEach { latest = it }
             .launchIn(this)
 
-        val activity = WifiActivityModel(hasActivityIn = false, hasActivityOut = true)
+        val activity = DataActivityModel(hasActivityIn = false, hasActivityOut = true)
         wifiRepository.setWifiActivity(activity)
         yield()
 
@@ -363,7 +363,7 @@ class WifiViewModelTest : SysuiTestCase() {
             .onEach { latest = it }
             .launchIn(this)
 
-        val activity = WifiActivityModel(hasActivityIn = false, hasActivityOut = true)
+        val activity = DataActivityModel(hasActivityIn = false, hasActivityOut = true)
         wifiRepository.setWifiActivity(activity)
         yield()
 
@@ -385,7 +385,7 @@ class WifiViewModelTest : SysuiTestCase() {
             .onEach { latest = it }
             .launchIn(this)
 
-        val activity = WifiActivityModel(hasActivityIn = true, hasActivityOut = false)
+        val activity = DataActivityModel(hasActivityIn = true, hasActivityOut = false)
         wifiRepository.setWifiActivity(activity)
         yield()
 
@@ -407,7 +407,7 @@ class WifiViewModelTest : SysuiTestCase() {
             .onEach { latest = it }
             .launchIn(this)
 
-        val activity = WifiActivityModel(hasActivityIn = true, hasActivityOut = false)
+        val activity = DataActivityModel(hasActivityIn = true, hasActivityOut = false)
         wifiRepository.setWifiActivity(activity)
         yield()
 
@@ -429,7 +429,7 @@ class WifiViewModelTest : SysuiTestCase() {
             .onEach { latest = it }
             .launchIn(this)
 
-        val activity = WifiActivityModel(hasActivityIn = false, hasActivityOut = true)
+        val activity = DataActivityModel(hasActivityIn = false, hasActivityOut = true)
         wifiRepository.setWifiActivity(activity)
         yield()
 
@@ -451,7 +451,7 @@ class WifiViewModelTest : SysuiTestCase() {
             .onEach { latest = it }
             .launchIn(this)
 
-        val activity = WifiActivityModel(hasActivityIn = true, hasActivityOut = true)
+        val activity = DataActivityModel(hasActivityIn = true, hasActivityOut = true)
         wifiRepository.setWifiActivity(activity)
         yield()
 
@@ -473,7 +473,7 @@ class WifiViewModelTest : SysuiTestCase() {
             .onEach { latest = it }
             .launchIn(this)
 
-        val activity = WifiActivityModel(hasActivityIn = false, hasActivityOut = false)
+        val activity = DataActivityModel(hasActivityIn = false, hasActivityOut = false)
         wifiRepository.setWifiActivity(activity)
         yield()
 

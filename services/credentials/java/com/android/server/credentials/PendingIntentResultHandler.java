@@ -18,7 +18,9 @@ package com.android.server.credentials;
 
 import android.app.Activity;
 import android.content.Intent;
+import android.credentials.CreateCredentialException;
 import android.credentials.CreateCredentialResponse;
+import android.credentials.GetCredentialException;
 import android.credentials.GetCredentialResponse;
 import android.credentials.ui.ProviderPendingIntentResponse;
 import android.service.credentials.CredentialProviderService;
@@ -31,7 +33,7 @@ import android.service.credentials.CredentialsResponseContent;
  */
 public class PendingIntentResultHandler {
     /** Returns true if the result is successful and may contain result extras. */
-    public static boolean isSuccessfulResponse(
+    public static boolean isValidResponse(
             ProviderPendingIntentResponse pendingIntentResponse) {
         //TODO: Differentiate based on extra_error in the resultData
         return pendingIntentResponse.getResultCode() == Activity.RESULT_OK;
@@ -65,5 +67,29 @@ public class PendingIntentResultHandler {
         return resultData.getParcelableExtra(
                 CredentialProviderService.EXTRA_GET_CREDENTIAL_RESPONSE,
                 GetCredentialResponse.class);
+    }
+
+    /** Extract the {@link CreateCredentialException} from the
+     * given pending intent . */
+    public static CreateCredentialException extractCreateCredentialException(
+            Intent resultData) {
+        if (resultData == null) {
+            return null;
+        }
+        return resultData.getParcelableExtra(
+                CredentialProviderService.EXTRA_CREATE_CREDENTIAL_EXCEPTION,
+                CreateCredentialException.class);
+    }
+
+    /** Extract the {@link GetCredentialException} from the
+     * given pending intent . */
+    public static GetCredentialException extractGetCredentialException(
+            Intent resultData) {
+        if (resultData == null) {
+            return null;
+        }
+        return resultData.getParcelableExtra(
+                CredentialProviderService.EXTRA_GET_CREDENTIAL_EXCEPTION,
+                GetCredentialException.class);
     }
 }

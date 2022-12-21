@@ -25,8 +25,6 @@ import static android.view.InsetsSourceConsumerProto.IS_REQUESTED_VISIBLE;
 import static android.view.InsetsSourceConsumerProto.PENDING_FRAME;
 import static android.view.InsetsSourceConsumerProto.PENDING_VISIBLE_FRAME;
 import static android.view.InsetsSourceConsumerProto.SOURCE_CONTROL;
-import static android.view.InsetsState.ITYPE_IME;
-import static android.view.InsetsState.getDefaultVisibility;
 
 import static com.android.internal.annotations.VisibleForTesting.Visibility.PACKAGE;
 
@@ -35,12 +33,10 @@ import android.annotation.Nullable;
 import android.graphics.Rect;
 import android.util.Log;
 import android.util.proto.ProtoOutputStream;
-import android.view.InsetsState.InternalInsetsType;
 import android.view.SurfaceControl.Transaction;
 import android.view.WindowInsets.Type.InsetsType;
 
 import com.android.internal.annotations.VisibleForTesting;
-import com.android.internal.inputmethod.ImeTracing;
 
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
@@ -74,7 +70,7 @@ public class InsetsSourceConsumer {
 
     protected final InsetsController mController;
     protected final InsetsState mState;
-    private final @InternalInsetsType int mInternalType;
+    private int mId;
     private final @InsetsType int mType;
 
     private static final String TAG = "InsetsSourceConsumer";
@@ -90,16 +86,17 @@ public class InsetsSourceConsumer {
     private Rect mPendingVisibleFrame;
 
     /**
-     * @param type The {@link InternalInsetsType} of the consumed insets.
+     * @param id The ID of the consumed insets.
+     * @param type The {@link InsetsType} of the consumed insets.
      * @param state The current {@link InsetsState} of the consumed insets.
      * @param transactionSupplier The source of new {@link Transaction} instances. The supplier
      *         must provide *new* instances, which will be explicitly closed by this class.
      * @param controller The {@link InsetsController} to use for insets interaction.
      */
-    public InsetsSourceConsumer(@InternalInsetsType int type, InsetsState state,
+    public InsetsSourceConsumer(int id, @InsetsType int type, InsetsState state,
             Supplier<Transaction> transactionSupplier, InsetsController controller) {
-        mType = InsetsState.toPublicType(type);
-        mInternalType = type;
+        mId = id;
+        mType = type;
         mState = state;
         mTransactionSupplier = transactionSupplier;
         mController = controller;
@@ -116,10 +113,6 @@ public class InsetsSourceConsumer {
      */
     public boolean setControl(@Nullable InsetsSourceControl control,
             @InsetsType int[] showTypes, @InsetsType int[] hideTypes) {
-        if (mInternalType == ITYPE_IME) {
-            ImeTracing.getInstance().triggerClientDump("InsetsSourceConsumer#setControl",
-                    mController.getHost().getInputMethodManager(), null /* icProto */);
-        }
         if (Objects.equals(mSourceControl, control)) {
             if (mSourceControl != null && mSourceControl != control) {
                 mSourceControl.release(SurfaceControl::release);
@@ -132,7 +125,7 @@ public class InsetsSourceConsumer {
         mSourceControl = control;
         if (control != null) {
             if (DEBUG) Log.d(TAG, String.format("setControl -> %s on %s",
-                    InsetsState.typeToString(control.getType()),
+                    WindowInsets.Type.toString(control.getType()),
                     mController.getHost().getRootViewTitle()));
         }
         if (mSourceControl == null) {
@@ -140,12 +133,11 @@ public class InsetsSourceConsumer {
             mController.notifyControlRevoked(this);
 
             // Check if we need to restore server visibility.
-            final InsetsSource source = mState.getSource(mInternalType);
-            final boolean serverVisibility =
-                    mController.getLastDispatchedState().getSourceOrDefaultVisibility(
-                            mInternalType);
-            if (source.isVisible() != serverVisibility) {
-                source.setVisible(serverVisibility);
+            final InsetsSource localSource = mState.peekSource(mId);
+            final InsetsSource serverSource = mController.getLastDispatchedState().peekSource(mId);
+            if (localSource != null && serverSource != null
+                    && localSource.isVisible() != serverSource.isVisible()) {
+                localSource.setVisible(serverSource.isVisible());
                 mController.notifyVisibilityChanged();
             }
         } else {
@@ -202,30 +194,41 @@ public class InsetsSourceConsumer {
         return (mController.getRequestedVisibleTypes() & mType) != 0;
     }
 
+    int getId() {
+        return mId;
+    }
+
+    void setId(int id) {
+        mId = id;
+    }
+
     @InsetsType int getType() {
         return mType;
     }
 
-    @InternalInsetsType int getInternalType() {
-        return mInternalType;
-    }
+    /**
+     * Called right after the animation is started or finished.
+     */
+    @VisibleForTesting(visibility = PACKAGE)
+    public boolean onAnimationStateChanged(boolean running) {
+        boolean insetsChanged = false;
+        if (!running && mPendingFrame != null) {
+            final InsetsSource source = mState.peekSource(mId);
+            if (source != null) {
+                source.setFrame(mPendingFrame);
+                source.setVisibleFrame(mPendingVisibleFrame);
+                insetsChanged = true;
+            }
+            mPendingFrame = null;
+            mPendingVisibleFrame = null;
+        }
 
-    @VisibleForTesting
-    public void show(boolean fromIme) {
-        if (DEBUG) Log.d(TAG, String.format("Call show() for type: %s fromIme: %b ",
-                InsetsState.typeToString(mInternalType), fromIme));
-        setRequestedVisible(true);
-    }
-
-    @VisibleForTesting
-    public void hide() {
-        if (DEBUG) Log.d(TAG, String.format("Call hide for %s on %s",
-                InsetsState.typeToString(mInternalType), mController.getHost().getRootViewTitle()));
-        setRequestedVisible(false);
-    }
-
-    void hide(boolean animationFinished, @AnimationType int animationType) {
-        hide();
+        // We apply the visibility override after the animation is started. We don't do this before
+        // that because we need to know the initial insets state while creating the animation.
+        // We also need to apply the override after the animation is finished because the requested
+        // visibility can be set when finishing the user animation.
+        insetsChanged |= applyLocalVisibilityOverride();
+        return insetsChanged;
     }
 
     /**
@@ -247,32 +250,27 @@ public class InsetsSourceConsumer {
         return mHasViewFocusWhenWindowFocusGain;
     }
 
-    boolean applyLocalVisibilityOverride() {
-        final InsetsSource source = mState.peekSource(mInternalType);
-        final boolean isVisible = source != null ? source.isVisible() : getDefaultVisibility(
-                mInternalType);
-        final boolean hasControl = mSourceControl != null;
+    @VisibleForTesting(visibility = PACKAGE)
+    public boolean applyLocalVisibilityOverride() {
+        final InsetsSource source = mState.peekSource(mId);
+        if (source == null) {
+            return false;
+        }
         final boolean requestedVisible = (mController.getRequestedVisibleTypes() & mType) != 0;
 
-        if (mInternalType == ITYPE_IME) {
-            ImeTracing.getInstance().triggerClientDump(
-                    "InsetsSourceConsumer#applyLocalVisibilityOverride",
-                    mController.getHost().getInputMethodManager(), null /* icProto */);
-        }
-
         // If we don't have control, we are not able to change the visibility.
-        if (!hasControl) {
+        if (mSourceControl == null) {
             if (DEBUG) Log.d(TAG, "applyLocalVisibilityOverride: No control in "
                     + mController.getHost().getRootViewTitle()
                     + " requestedVisible=" + requestedVisible);
             return false;
         }
-        if (isVisible == requestedVisible) {
+        if (source.isVisible() == requestedVisible) {
             return false;
         }
         if (DEBUG) Log.d(TAG, String.format("applyLocalVisibilityOverride: %s requestedVisible: %b",
                 mController.getHost().getRootViewTitle(), requestedVisible));
-        mState.getSource(mInternalType).setVisible(requestedVisible);
+        source.setVisible(requestedVisible);
         return true;
     }
 
@@ -299,13 +297,6 @@ public class InsetsSourceConsumer {
     }
 
     /**
-     * Notify listeners that window is now hidden.
-     */
-    void notifyHidden() {
-        // no-op for types that always return ShowResult#SHOW_IMMEDIATELY.
-    }
-
-    /**
      * Remove surface on which this consumer type is drawn.
      */
     public void removeSurface() {
@@ -314,7 +305,7 @@ public class InsetsSourceConsumer {
 
     @VisibleForTesting(visibility = PACKAGE)
     public void updateSource(InsetsSource newSource, @AnimationType int animationType) {
-        InsetsSource source = mState.peekSource(mInternalType);
+        InsetsSource source = mState.peekSource(mId);
         if (source == null || animationType == ANIMATION_TYPE_NONE
                 || source.getFrame().equals(newSource.getFrame())) {
             mPendingFrame = null;
@@ -334,31 +325,6 @@ public class InsetsSourceConsumer {
         newSource.setVisibleFrame(source.getVisibleFrame());
         mState.addSource(newSource);
         if (DEBUG) Log.d(TAG, "updateSource: " + newSource);
-    }
-
-    @VisibleForTesting(visibility = PACKAGE)
-    public boolean notifyAnimationFinished() {
-        if (mPendingFrame != null) {
-            InsetsSource source = mState.getSource(mInternalType);
-            source.setFrame(mPendingFrame);
-            source.setVisibleFrame(mPendingVisibleFrame);
-            mPendingFrame = null;
-            mPendingVisibleFrame = null;
-            return true;
-        }
-        return false;
-    }
-
-    /**
-     * Sets requested visibility from the client, regardless of whether we are able to control it at
-     * the moment.
-     */
-    protected void setRequestedVisible(boolean requestedVisible) {
-        mController.setRequestedVisibleTypes(requestedVisible ? mType : 0, mType);
-        if (DEBUG) Log.d(TAG, "setRequestedVisible: " + requestedVisible);
-        if (applyLocalVisibilityOverride()) {
-            mController.notifyVisibilityChanged();
-        }
     }
 
     private void applyRequestedVisibilityToControl() {
@@ -383,7 +349,7 @@ public class InsetsSourceConsumer {
 
     void dumpDebug(ProtoOutputStream proto, long fieldId) {
         final long token = proto.start(fieldId);
-        proto.write(INTERNAL_INSETS_TYPE, InsetsState.typeToString(mInternalType));
+        proto.write(INTERNAL_INSETS_TYPE, WindowInsets.Type.toString(mType));
         proto.write(HAS_WINDOW_FOCUS, mHasWindowFocus);
         proto.write(IS_REQUESTED_VISIBLE, (mController.getRequestedVisibleTypes() & mType) != 0);
         if (mSourceControl != null) {

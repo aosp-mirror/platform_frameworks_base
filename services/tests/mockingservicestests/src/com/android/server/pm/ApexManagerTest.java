@@ -49,6 +49,7 @@ import androidx.test.filters.SmallTest;
 import androidx.test.runner.AndroidJUnit4;
 
 import com.android.server.pm.parsing.PackageParser2;
+import com.android.server.pm.parsing.pkg.AndroidPackageUtils;
 import com.android.server.pm.pkg.AndroidPackage;
 import com.android.server.pm.pkg.parsing.ParsingPackageUtils;
 
@@ -380,7 +381,7 @@ public class ApexManagerTest {
                 findFactory(results, "test.apex.rebootless").apexInfo);
         assertThat(factoryPkg.getBaseApkPath()).isEqualTo(activeApexInfo.modulePath);
         assertThat(factoryPkg.getLongVersionCode()).isEqualTo(1);
-        assertThat(factoryPkg.isSystem()).isTrue();
+        assertThat(AndroidPackageUtils.isSystem(factoryPkg)).isTrue();
     }
 
     @Test
@@ -410,7 +411,7 @@ public class ApexManagerTest {
                 findFactory(results, "test.apex.rebootless").apexInfo);
         assertThat(factoryPkg.getBaseApkPath()).isEqualTo(factoryApexInfo.modulePath);
         assertThat(factoryPkg.getLongVersionCode()).isEqualTo(1);
-        assertThat(factoryPkg.isSystem()).isTrue();
+        assertThat(AndroidPackageUtils.isSystem(factoryPkg)).isTrue();
     }
 
     @Test

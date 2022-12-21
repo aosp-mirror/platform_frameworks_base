@@ -161,6 +161,7 @@ import com.android.server.pm.PackageList;
 import com.android.server.pm.UserManagerInternal;
 import com.android.server.pm.permission.PermissionManagerServiceInternal;
 import com.android.server.pm.pkg.AndroidPackage;
+import com.android.server.pm.pkg.PackageState;
 import com.android.server.pm.pkg.component.ParsedAttribution;
 import com.android.server.policy.AppOpsPolicy;
 
@@ -3590,11 +3591,11 @@ public class AppOpsService extends IAppOpsService.Stub implements PersistenceSch
      *
      * @return The restriction matching the package
      */
-    private RestrictionBypass getBypassforPackage(@NonNull AndroidPackage pkg) {
-        return new RestrictionBypass(pkg.getUid() == Process.SYSTEM_UID, pkg.isPrivileged(),
-                mContext.checkPermission(android.Manifest.permission
-                        .EXEMPT_FROM_AUDIO_RECORD_RESTRICTIONS, -1, pkg.getUid())
-                == PackageManager.PERMISSION_GRANTED);
+    private RestrictionBypass getBypassforPackage(@NonNull PackageState packageState) {
+        return new RestrictionBypass(packageState.getAppId() == Process.SYSTEM_UID,
+                packageState.isPrivileged(), mContext.checkPermission(
+                android.Manifest.permission.EXEMPT_FROM_AUDIO_RECORD_RESTRICTIONS, -1,
+                packageState.getAppId()) == PackageManager.PERMISSION_GRANTED);
     }
 
     /**
@@ -3690,11 +3691,12 @@ public class AppOpsService extends IAppOpsService.Stub implements PersistenceSch
         final long ident = Binder.clearCallingIdentity();
         try {
             PackageManagerInternal pmInt = LocalServices.getService(PackageManagerInternal.class);
-            AndroidPackage pkg = pmInt.getPackage(packageName);
+            var pkgState = pmInt.getPackageStateInternal(packageName);
+            var pkg = pkgState == null ? null : pkgState.getAndroidPackage();
             if (pkg != null) {
                 isAttributionTagValid = isAttributionInPackage(pkg, attributionTag);
-                pkgUid = UserHandle.getUid(userId, UserHandle.getAppId(pkg.getUid()));
-                bypass = getBypassforPackage(pkg);
+                pkgUid = UserHandle.getUid(userId, pkgState.getAppId());
+                bypass = getBypassforPackage(pkgState);
             }
             if (!isAttributionTagValid) {
                 AndroidPackage proxyPkg = proxyPackageName != null

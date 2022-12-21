@@ -93,11 +93,11 @@ public class BluetoothPowerCalculator extends PowerCalculator {
             calculateApp(app, powerAndDuration, query);
         }
 
-        final long measuredChargeUC = batteryStats.getBluetoothMeasuredBatteryConsumptionUC();
-        final int powerModel = getPowerModel(measuredChargeUC, query);
+        final long consumedEnergyUC = batteryStats.getBluetoothEnergyConsumptionUC();
+        final int powerModel = getPowerModel(consumedEnergyUC, query);
         final ControllerActivityCounter activityCounter =
                 batteryStats.getBluetoothControllerActivity();
-        calculatePowerAndDuration(null, powerModel, measuredChargeUC,
+        calculatePowerAndDuration(null, powerModel, consumedEnergyUC,
                 activityCounter, query.shouldForceUsePowerProfileModel(), powerAndDuration);
 
         // Subtract what the apps used, but clamp to 0.
@@ -127,12 +127,12 @@ public class BluetoothPowerCalculator extends PowerCalculator {
 
     private void calculateApp(UidBatteryConsumer.Builder app, PowerAndDuration powerAndDuration,
             BatteryUsageStatsQuery query) {
-        final long measuredChargeUC =
-                app.getBatteryStatsUid().getBluetoothMeasuredBatteryConsumptionUC();
-        final int powerModel = getPowerModel(measuredChargeUC, query);
+        final long consumedEnergyUC =
+                app.getBatteryStatsUid().getBluetoothEnergyConsumptionUC();
+        final int powerModel = getPowerModel(consumedEnergyUC, query);
         final ControllerActivityCounter activityCounter =
                 app.getBatteryStatsUid().getBluetoothControllerActivity();
-        calculatePowerAndDuration(app.getBatteryStatsUid(), powerModel, measuredChargeUC,
+        calculatePowerAndDuration(app.getBatteryStatsUid(), powerModel, consumedEnergyUC,
                 activityCounter, query.shouldForceUsePowerProfileModel(), powerAndDuration);
 
         app.setUsageDurationMillis(
@@ -163,7 +163,7 @@ public class BluetoothPowerCalculator extends PowerCalculator {
     /** Returns bluetooth power usage based on the best data available. */
     private void calculatePowerAndDuration(@Nullable BatteryStats.Uid uid,
             @BatteryConsumer.PowerModel int powerModel,
-            long measuredChargeUC, ControllerActivityCounter counter, boolean ignoreReportedPower,
+            long consumedEnergyUC, ControllerActivityCounter counter, boolean ignoreReportedPower,
             PowerAndDuration powerAndDuration) {
         if (counter == null) {
             powerAndDuration.durationMs = 0;
@@ -183,8 +183,8 @@ public class BluetoothPowerCalculator extends PowerCalculator {
 
         powerAndDuration.durationMs = idleTimeMs + rxTimeMs + txTimeMs;
 
-        if (powerModel == BatteryConsumer.POWER_MODEL_MEASURED_ENERGY) {
-            powerAndDuration.powerMah = uCtoMah(measuredChargeUC);
+        if (powerModel == BatteryConsumer.POWER_MODEL_ENERGY_CONSUMPTION) {
+            powerAndDuration.powerMah = uCtoMah(consumedEnergyUC);
             if (uid != null && powerAndDuration.keys != null) {
                 for (int i = 0; i < powerAndDuration.keys.length; i++) {
                     BatteryConsumer.Key key = powerAndDuration.keys[i];
@@ -195,7 +195,7 @@ public class BluetoothPowerCalculator extends PowerCalculator {
                     }
 
                     powerAndDuration.powerPerKeyMah[i] =
-                            uCtoMah(uid.getBluetoothMeasuredBatteryConsumptionUC(processState));
+                            uCtoMah(uid.getBluetoothEnergyConsumptionUC(processState));
                 }
             }
         } else {

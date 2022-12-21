@@ -103,7 +103,7 @@ open class SetRequestedOrientationWhilePinnedTest(flicker: FlickerTest) : PipTra
      */
     @Before
     fun setup() {
-        Assume.assumeFalse(flicker.scenario.isTablet)
+        Assume.assumeFalse(tapl.isTablet)
     }
 
     @Presubmit

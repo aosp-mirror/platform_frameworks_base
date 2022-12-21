@@ -16,6 +16,9 @@
 
 package com.android.server.companion.virtual;
 
+import static android.companion.virtual.VirtualDeviceParams.DEVICE_POLICY_DEFAULT;
+import static android.media.AudioManager.AUDIO_SESSION_ID_GENERATE;
+
 import static com.android.server.wm.ActivityInterceptorCallback.VIRTUAL_DEVICE_SERVICE_ORDERED_ID;
 
 import android.annotation.NonNull;
@@ -39,6 +42,7 @@ import android.hardware.display.VirtualDisplayConfig;
 import android.os.Binder;
 import android.os.Handler;
 import android.os.IBinder;
+import android.os.LocaleList;
 import android.os.Looper;
 import android.os.Parcel;
 import android.os.Process;
@@ -134,21 +138,22 @@ public class VirtualDeviceManagerService extends SystemService {
 
         @Nullable
         @Override
-        public ActivityInterceptResult intercept(ActivityInterceptorInfo info) {
-            if (info.callingPackage == null) {
+        public ActivityInterceptResult onInterceptActivityLaunch(@NonNull
+                ActivityInterceptorInfo info) {
+            if (info.getCallingPackage() == null) {
                 return null;
             }
-            PendingTrampoline pt = mPendingTrampolines.remove(info.callingPackage);
+            PendingTrampoline pt = mPendingTrampolines.remove(info.getCallingPackage());
             if (pt == null) {
                 return null;
             }
             pt.mResultReceiver.send(VirtualDeviceManager.LAUNCH_SUCCESS, null);
-            ActivityOptions options = info.checkedOptions;
+            ActivityOptions options = info.getCheckedOptions();
             if (options == null) {
                 options = ActivityOptions.makeBasic();
             }
             return new ActivityInterceptResult(
-                    info.intent, options.setLaunchDisplayId(pt.mDisplayId));
+                    info.getIntent(), options.setLaunchDisplayId(pt.mDisplayId));
         }
     };
 
@@ -361,14 +366,10 @@ public class VirtualDeviceManagerService extends SystemService {
         @VirtualDeviceParams.DevicePolicy
         public int getDevicePolicy(int deviceId, @VirtualDeviceParams.PolicyType int policyType) {
             synchronized (mVirtualDeviceManagerLock) {
-                for (int i = 0; i < mVirtualDevices.size(); i++) {
-                    final VirtualDeviceImpl device = mVirtualDevices.valueAt(i);
-                    if (device.getDeviceId() == deviceId) {
-                        return device.getDevicePolicy(policyType);
-                    }
-                }
+                VirtualDeviceImpl virtualDevice = mVirtualDevices.get(deviceId);
+                return virtualDevice != null
+                        ? virtualDevice.getDevicePolicy(policyType) : DEVICE_POLICY_DEFAULT;
             }
-            return VirtualDeviceParams.DEVICE_POLICY_DEFAULT;
         }
 
 
@@ -386,6 +387,24 @@ public class VirtualDeviceManagerService extends SystemService {
                 }
             }
             return VirtualDeviceManager.DEVICE_ID_DEFAULT;
+        }
+
+        @Override // Binder call
+        public int getAudioPlaybackSessionId(int deviceId) {
+            synchronized (mVirtualDeviceManagerLock) {
+                VirtualDeviceImpl virtualDevice = mVirtualDevices.get(deviceId);
+                return virtualDevice != null
+                        ? virtualDevice.getAudioPlaybackSessionId() : AUDIO_SESSION_ID_GENERATE;
+            }
+        }
+
+        @Override // Binder call
+        public int getAudioRecordingSessionId(int deviceId) {
+            synchronized (mVirtualDeviceManagerLock) {
+                VirtualDeviceImpl virtualDevice = mVirtualDevices.get(deviceId);
+                return virtualDevice != null
+                        ? virtualDevice.getAudioRecordingSessionId() : AUDIO_SESSION_ID_GENERATE;
+            }
         }
 
         @Nullable
@@ -493,15 +512,9 @@ public class VirtualDeviceManagerService extends SystemService {
         @Override
         public int getDeviceOwnerUid(int deviceId) {
             synchronized (mVirtualDeviceManagerLock) {
-                int size = mVirtualDevices.size();
-                for (int i = 0; i < size; i++) {
-                    VirtualDeviceImpl device = mVirtualDevices.valueAt(i);
-                    if (device.getDeviceId() == deviceId) {
-                        return device.getOwnerUid();
-                    }
-                }
+                VirtualDeviceImpl virtualDevice = mVirtualDevices.get(deviceId);
+                return virtualDevice != null ? virtualDevice.getOwnerUid() : Process.INVALID_UID;
             }
-            return Process.INVALID_UID;
         }
 
         @Override
@@ -577,6 +590,21 @@ public class VirtualDeviceManagerService extends SystemService {
         @Override
         public int getBaseVirtualDisplayFlags(IVirtualDevice virtualDevice) {
             return ((VirtualDeviceImpl) virtualDevice).getBaseVirtualDisplayFlags();
+        }
+
+        @Override
+        @Nullable
+        public LocaleList getPreferredLocaleListForUid(int uid) {
+            // TODO: b/263188984 support the case where an app is running on multiple VDs
+            synchronized (mVirtualDeviceManagerLock) {
+                for (int i = 0; i < mAppsOnVirtualDevices.size(); i++) {
+                    if (mAppsOnVirtualDevices.valueAt(i).contains(uid)) {
+                        int deviceId = mAppsOnVirtualDevices.keyAt(i);
+                        return mVirtualDevices.get(deviceId).getDeviceLocaleList();
+                    }
+                }
+            }
+            return null;
         }
 
         @Override

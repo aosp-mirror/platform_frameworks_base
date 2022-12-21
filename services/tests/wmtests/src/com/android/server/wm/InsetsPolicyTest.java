@@ -197,14 +197,14 @@ public class InsetsPolicyTest extends WindowTestsBase {
                 mDisplayContent.getInsetsStateController().getControlsForDispatch(dialog);
         assertNotNull(dialogControls);
         assertEquals(1, dialogControls.length);
-        assertEquals(ITYPE_NAVIGATION_BAR, dialogControls[0].getType());
+        assertEquals(navigationBars(), dialogControls[0].getType());
 
         // fullscreenApp is hiding status bar, and it can keep controlling status bar.
         final InsetsSourceControl[] fullscreenAppControls =
                 mDisplayContent.getInsetsStateController().getControlsForDispatch(fullscreenApp);
         assertNotNull(fullscreenAppControls);
         assertEquals(1, fullscreenAppControls.length);
-        assertEquals(ITYPE_STATUS_BAR, fullscreenAppControls[0].getType());
+        assertEquals(statusBars(), fullscreenAppControls[0].getType());
 
         // Assume mFocusedWindow is updated but mTopFullscreenOpaqueWindowState hasn't.
         final WindowState newFocusedFullscreenApp = addWindow(TYPE_APPLICATION, "newFullscreenApp");
@@ -232,7 +232,7 @@ public class InsetsPolicyTest extends WindowTestsBase {
                 mDisplayContent.getInsetsStateController().getControlsForDispatch(panel);
         assertNotNull(panelControls);
         assertEquals(1, panelControls.length);
-        assertEquals(ITYPE_NAVIGATION_BAR, panelControls[0].getType());
+        assertEquals(navigationBars(), panelControls[0].getType());
 
         // Add notificationShade and make it can receive keys.
         final WindowState shade = addWindow(TYPE_NOTIFICATION_SHADE, "notificationShade");
@@ -254,7 +254,7 @@ public class InsetsPolicyTest extends WindowTestsBase {
         panelControls = mDisplayContent.getInsetsStateController().getControlsForDispatch(panel);
         assertNotNull(panelControls);
         assertEquals(1, panelControls.length);
-        assertEquals(ITYPE_NAVIGATION_BAR, panelControls[0].getType());
+        assertEquals(navigationBars(), panelControls[0].getType());
     }
 
     @SetupWindows(addWindows = W_ACTIVITY)
@@ -321,7 +321,7 @@ public class InsetsPolicyTest extends WindowTestsBase {
         assertEquals(2, controls.length);
         for (int i = controls.length - 1; i >= 0; i--) {
             final InsetsSourceControl control = controls[i];
-            if (control.getType() == ITYPE_STATUS_BAR) {
+            if (control.getType() == statusBars()) {
                 assertNull(controls[i].getLeash());
             } else {
                 assertNotNull(controls[i].getLeash());

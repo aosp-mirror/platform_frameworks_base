@@ -87,6 +87,11 @@ static void sendHint(int64_t session_ptr, SessionHint hint) {
     appSession->sendHint(hint);
 }
 
+static void setThreads(int64_t session_ptr, const std::vector<int32_t>& threadIds) {
+    sp<IPowerHintSession> appSession = reinterpret_cast<IPowerHintSession*>(session_ptr);
+    appSession->setThreads(threadIds);
+}
+
 static int64_t getHintSessionPreferredRate() {
     int64_t rate = -1;
     auto result = gPowerHalController.getHintSessionPreferredRate();
@@ -149,6 +154,16 @@ static void nativeSendHint(JNIEnv* env, jclass /* clazz */, jlong session_ptr, j
     sendHint(session_ptr, static_cast<SessionHint>(hint));
 }
 
+static void nativeSetThreads(JNIEnv* env, jclass /* clazz */, jlong session_ptr, jintArray tids) {
+    ScopedIntArrayRO arrayThreadIds(env, tids);
+
+    std::vector<int32_t> threadIds(arrayThreadIds.size());
+    for (size_t i = 0; i < arrayThreadIds.size(); i++) {
+        threadIds[i] = arrayThreadIds[i];
+    }
+    setThreads(session_ptr, threadIds);
+}
+
 static jlong nativeGetHintSessionPreferredRate(JNIEnv* /* env */, jclass /* clazz */) {
     return static_cast<jlong>(getHintSessionPreferredRate());
 }
@@ -164,6 +179,7 @@ static const JNINativeMethod sHintManagerServiceMethods[] = {
         {"nativeUpdateTargetWorkDuration", "(JJ)V", (void*)nativeUpdateTargetWorkDuration},
         {"nativeReportActualWorkDuration", "(J[J[J)V", (void*)nativeReportActualWorkDuration},
         {"nativeSendHint", "(JI)V", (void*)nativeSendHint},
+        {"nativeSetThreads", "(J[I)V", (void*)nativeSetThreads},
         {"nativeGetHintSessionPreferredRate", "()J", (void*)nativeGetHintSessionPreferredRate},
 };
 

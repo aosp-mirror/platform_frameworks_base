@@ -261,7 +261,7 @@ public class DisplayImeController implements DisplayController.OnDisplaysChanged
                     if (activeControl == null) {
                         continue;
                     }
-                    if (activeControl.getType() == InsetsState.ITYPE_IME) {
+                    if (activeControl.getType() == WindowInsets.Type.ime()) {
                         imeSourceControl = activeControl;
                     }
                 }

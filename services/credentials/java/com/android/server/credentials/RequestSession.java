@@ -93,6 +93,7 @@ abstract class RequestSession<T, U> implements CredentialManagerUi.CredentialMan
 
     @Override // from CredentialManagerUiCallbacks
     public void onUiCancellation() {
+        Log.i(TAG, "Ui canceled");
         // User canceled the activity
         finishSession();
     }
@@ -133,10 +134,12 @@ abstract class RequestSession<T, U> implements CredentialManagerUi.CredentialMan
     }
 
     protected void finishSession() {
+        Log.i(TAG, "finishing session");
         clearProviderSessions();
     }
 
     protected void clearProviderSessions() {
+        Log.i(TAG, "Clearing sessions");
         //TODO: Implement
         mProviders.clear();
     }
@@ -151,6 +154,9 @@ abstract class RequestSession<T, U> implements CredentialManagerUi.CredentialMan
     }
 
     private void getProviderDataAndInitiateUi() {
+        Log.i(TAG, "In getProviderDataAndInitiateUi");
+        Log.i(TAG, "In getProviderDataAndInitiateUi providers size: " + mProviders.size());
+
         ArrayList<ProviderData> providerDataList = new ArrayList<>();
         for (ProviderSession session : mProviders.values()) {
             Log.i(TAG, "preparing data for : " + session.getComponentName());

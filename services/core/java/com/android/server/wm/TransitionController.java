@@ -631,12 +631,12 @@ class TransitionController {
             mWakeT.apply();
             // Usually transitions put quite a load onto the system already (with all the things
             // happening in app), so pause task snapshot persisting to not increase the load.
-            mAtm.mWindowManager.mTaskSnapshotController.setPersisterPaused(true);
+            mAtm.mWindowManager.mSnapshotPersistQueue.setPaused(true);
             mTransitionPlayerProc.setRunningRemoteAnimation(true);
         } else if (mPlayingTransitions.isEmpty()) {
             mWakeT.setEarlyWakeupEnd();
             mWakeT.apply();
-            mAtm.mWindowManager.mTaskSnapshotController.setPersisterPaused(false);
+            mAtm.mWindowManager.mSnapshotPersistQueue.setPaused(false);
             mTransitionPlayerProc.setRunningRemoteAnimation(false);
             mRemotePlayer.clear();
             return;
