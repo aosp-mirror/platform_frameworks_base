@@ -385,6 +385,7 @@ package android {
     field public static final int allowTaskReparenting = 16843268; // 0x1010204
     field public static final int allowUndo = 16843999; // 0x10104df
     field public static final int allowUntrustedActivityEmbedding = 16844393; // 0x1010669
+    field public static final int allowUpdateOwnership;
     field public static final int alpha = 16843551; // 0x101031f
     field public static final int alphabeticModifiers = 16844110; // 0x101054e
     field public static final int alphabeticShortcut = 16843235; // 0x10101e3

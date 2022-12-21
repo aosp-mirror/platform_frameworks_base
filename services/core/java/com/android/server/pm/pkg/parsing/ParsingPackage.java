@@ -387,6 +387,8 @@ public interface ParsingPackage {
 
     ParsingPackage setLocaleConfigRes(int localeConfigRes);
 
+    ParsingPackage setAllowUpdateOwnership(boolean value);
+
     /**
      * Sets the trusted host certificates of apps that are allowed to embed activities of this
      * application.

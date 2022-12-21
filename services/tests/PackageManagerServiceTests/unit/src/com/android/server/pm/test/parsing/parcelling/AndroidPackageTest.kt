@@ -218,6 +218,7 @@ class AndroidPackageTest : ParcelableComponentTest(AndroidPackage::class, Packag
         AndroidPackage::isAllowClearUserDataOnFailedRestore,
         AndroidPackage::isAllowNativeHeapPointerTagging,
         AndroidPackage::isAllowTaskReparenting,
+        AndroidPackage::isAllowUpdateOwnership,
         AndroidPackage::isBackupInForeground,
         AndroidPackage::isHardwareAccelerated,
         AndroidPackage::isCantSaveState,

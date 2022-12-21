@@ -333,6 +333,10 @@ final class InstallPackageHelper {
             if (updateOwnerFromSysconfig != null) {
                 // For system app, we always use the update owner from sysconfig if presented.
                 installSource = installSource.setUpdateOwnerPackageName(updateOwnerFromSysconfig);
+            } else if (!parsedPackage.isAllowUpdateOwnership()) {
+                // If the app wants to opt-out of the update ownership enforcement via manifest,
+                // it overrides the installer's use of #setRequestUpdateOwnership.
+                installSource = installSource.setUpdateOwnerPackageName(null);
             } else if (!isApex) {
                 final boolean isUpdate = oldPkgSetting != null;
                 final String oldUpdateOwner =
