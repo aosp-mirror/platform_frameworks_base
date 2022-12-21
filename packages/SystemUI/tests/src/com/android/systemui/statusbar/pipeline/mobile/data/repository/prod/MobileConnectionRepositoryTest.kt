@@ -32,6 +32,8 @@ import android.telephony.TelephonyManager.DATA_CONNECTING
 import android.telephony.TelephonyManager.DATA_DISCONNECTED
 import android.telephony.TelephonyManager.DATA_DISCONNECTING
 import android.telephony.TelephonyManager.DATA_UNKNOWN
+import android.telephony.TelephonyManager.ERI_OFF
+import android.telephony.TelephonyManager.ERI_ON
 import android.telephony.TelephonyManager.NETWORK_TYPE_LTE
 import android.telephony.TelephonyManager.NETWORK_TYPE_UNKNOWN
 import androidx.test.filters.SmallTest
@@ -398,6 +400,61 @@ class MobileConnectionRepositoryTest : SysuiTestCase() {
             whenever(telephonyManager.isDataConnectionAllowed).thenReturn(false)
             globalSettings.putInt(subIdSettingName, 0)
             assertThat(latest).isFalse()
+
+            job.cancel()
+        }
+
+    @Test
+    fun `roaming - cdma - queries telephony manager`() =
+        runBlocking(IMMEDIATE) {
+            var latest: Boolean? = null
+            // Start the telephony collection job so that cdmaRoaming starts updating
+            val telephonyJob = underTest.connectionInfo.launchIn(this)
+            val job = underTest.cdmaRoaming.onEach { latest = it }.launchIn(this)
+
+            val cb = getTelephonyCallbackForType<ServiceStateListener>()
+
+            val serviceState = ServiceState()
+            serviceState.roaming = false
+
+            // CDMA roaming is off, GSM roaming is off
+            whenever(telephonyManager.cdmaEnhancedRoamingIndicatorDisplayNumber).thenReturn(ERI_OFF)
+            cb.onServiceStateChanged(serviceState)
+
+            assertThat(latest).isFalse()
+
+            // CDMA roaming is off, GSM roaming is on
+            whenever(telephonyManager.cdmaEnhancedRoamingIndicatorDisplayNumber).thenReturn(ERI_ON)
+            cb.onServiceStateChanged(serviceState)
+
+            assertThat(latest).isTrue()
+
+            telephonyJob.cancel()
+            job.cancel()
+        }
+
+    @Test
+    fun `roaming - gsm - queries service state`() =
+        runBlocking(IMMEDIATE) {
+            var latest: Boolean? = null
+            val job = underTest.connectionInfo.onEach { latest = it.isRoaming }.launchIn(this)
+
+            val serviceState = ServiceState()
+            serviceState.roaming = false
+
+            val cb = getTelephonyCallbackForType<ServiceStateListener>()
+
+            // CDMA roaming is off, GSM roaming is off
+            whenever(telephonyManager.cdmaEnhancedRoamingIndicatorDisplayNumber).thenReturn(ERI_OFF)
+            cb.onServiceStateChanged(serviceState)
+
+            assertThat(latest).isFalse()
+
+            // CDMA roaming is off, GSM roaming is on
+            serviceState.roaming = true
+            cb.onServiceStateChanged(serviceState)
+
+            assertThat(latest).isTrue()
 
             job.cancel()
         }
