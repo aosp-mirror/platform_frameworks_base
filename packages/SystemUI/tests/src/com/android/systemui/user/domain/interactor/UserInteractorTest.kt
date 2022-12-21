@@ -175,6 +175,8 @@ class UserInteractorTest : SysuiTestCase() {
 
             underTest.onRecordSelected(UserRecord(info = userInfos[1]), dialogShower)
 
+            verify(uiEventLogger, times(1))
+                .log(MultiUserActionsEvent.SWITCH_TO_USER_FROM_USER_SWITCHER)
             verify(dialogShower).dismiss()
             verify(activityManager).switchUser(userInfos[1].id)
             Unit
@@ -190,6 +192,33 @@ class UserInteractorTest : SysuiTestCase() {
 
             underTest.onRecordSelected(UserRecord(info = userInfos.last()))
 
+            verify(uiEventLogger, times(1))
+                .log(MultiUserActionsEvent.SWITCH_TO_GUEST_FROM_USER_SWITCHER)
+            verify(activityManager).switchUser(userInfos.last().id)
+            Unit
+        }
+
+    @Test
+    fun `onRecordSelected - switch to restricted user`() =
+        runBlocking(IMMEDIATE) {
+            var userInfos = createUserInfos(count = 2, includeGuest = false).toMutableList()
+            userInfos.add(
+                UserInfo(
+                    60,
+                    "Restricted user",
+                    /* iconPath= */ "",
+                    /* flags= */ UserInfo.FLAG_FULL,
+                    UserManager.USER_TYPE_FULL_RESTRICTED,
+                )
+            )
+            userRepository.setUserInfos(userInfos)
+            userRepository.setSelectedUserInfo(userInfos[0])
+            userRepository.setSettings(UserSwitcherSettingsModel(isUserSwitcherEnabled = true))
+
+            underTest.onRecordSelected(UserRecord(info = userInfos.last()))
+
+            verify(uiEventLogger, times(1))
+                .log(MultiUserActionsEvent.SWITCH_TO_RESTRICTED_USER_FROM_USER_SWITCHER)
             verify(activityManager).switchUser(userInfos.last().id)
             Unit
         }
@@ -206,6 +235,8 @@ class UserInteractorTest : SysuiTestCase() {
 
             underTest.onRecordSelected(UserRecord(isGuest = true), dialogShower)
 
+            verify(uiEventLogger, times(1))
+                .log(MultiUserActionsEvent.CREATE_GUEST_FROM_USER_SWITCHER)
             verify(dialogShower).dismiss()
             verify(manager).createGuest(any())
             Unit
@@ -221,6 +252,8 @@ class UserInteractorTest : SysuiTestCase() {
 
             underTest.onRecordSelected(UserRecord(isAddSupervisedUser = true), dialogShower)
 
+            verify(uiEventLogger, times(1))
+                .log(MultiUserActionsEvent.CREATE_RESTRICTED_USER_FROM_USER_SWITCHER)
             verify(dialogShower, never()).dismiss()
             verify(activityStarter).startActivity(any(), anyBoolean())
         }
