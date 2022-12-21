@@ -159,7 +159,7 @@ public abstract class HandwritingGesture {
      * @hide
      */
     @TestApi
-    public @GestureType int getGestureType() {
+    public final @GestureType int getGestureType() {
         return mType;
     }
 
@@ -173,7 +173,7 @@ public abstract class HandwritingGesture {
      * example 2: join can fail if the gesture is drawn over text but there is no whitespace.
      */
     @Nullable
-    public String getFallbackText() {
+    public final String getFallbackText() {
         return mFallbackText;
     }
 }
