@@ -40,6 +40,7 @@ import android.app.Activity;
 import android.app.ActivityManager;
 import android.app.BroadcastOptions;
 import android.app.GameManager;
+import android.app.GrammaticalInflectionManager;
 import android.app.IApplicationThread;
 import android.app.IServiceConnection;
 import android.app.VrManager;
@@ -3940,6 +3941,8 @@ public abstract class Context {
             CREDENTIAL_SERVICE,
             DEVICE_LOCK_SERVICE,
             VIRTUALIZATION_SERVICE,
+            GRAMMATICAL_INFLECTION_SERVICE,
+
     })
     @Retention(RetentionPolicy.SOURCE)
     public @interface ServiceName {}
@@ -6135,6 +6138,14 @@ public abstract class Context {
      */
     @SystemApi
     public static final String VIRTUALIZATION_SERVICE = "virtualization";
+
+    /**
+     * Use with {@link #getSystemService(String)} to retrieve a
+     * {@link GrammaticalInflectionManager}.
+     *
+     * @see #getSystemService(String)
+     */
+    public static final String GRAMMATICAL_INFLECTION_SERVICE = "grammatical_inflection";
 
     /**
      * Determine whether the given permission is allowed for a particular
