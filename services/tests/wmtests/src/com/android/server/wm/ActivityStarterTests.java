@@ -384,7 +384,7 @@ public class ActivityStarterTests extends WindowTestsBase {
         doReturn(null).when(mMockPackageManager).resolveIntent(any(), any(), anyLong(), anyLong(),
                 anyInt(), anyBoolean(), anyInt());
         doReturn(null).when(mMockPackageManager).resolveIntentExported(any(), any(),
-                anyLong(), anyLong(), anyInt(), anyBoolean(), anyInt());
+                anyLong(), anyLong(), anyInt(), anyBoolean(), anyInt(), anyInt());
         doReturn(new ComponentName("", "")).when(mMockPackageManager).getSystemUiServiceComponent();
 
         // Never review permissions

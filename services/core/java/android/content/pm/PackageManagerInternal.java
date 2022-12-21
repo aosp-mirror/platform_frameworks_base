@@ -582,7 +582,7 @@ public abstract class PackageManagerInternal {
     public abstract ResolveInfo resolveIntentExported(Intent intent, String resolvedType,
             @PackageManager.ResolveInfoFlagsBits long flags,
             @PrivateResolveFlags long privateResolveFlags, int userId, boolean resolveForStart,
-            int filterCallingUid);
+            int filterCallingUid, int callingPid);
 
     /**
     * Resolves a service intent, allowing instant apps to be resolved.

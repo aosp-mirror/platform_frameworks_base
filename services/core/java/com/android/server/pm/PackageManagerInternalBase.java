@@ -473,10 +473,10 @@ abstract class PackageManagerInternalBase extends PackageManagerInternal {
     public final ResolveInfo resolveIntentExported(Intent intent, String resolvedType,
             @PackageManager.ResolveInfoFlagsBits long flags,
             @PackageManagerInternal.PrivateResolveFlags long privateResolveFlags, int userId,
-            boolean resolveForStart, int filterCallingUid) {
+            boolean resolveForStart, int filterCallingUid, int callingPid) {
         return getResolveIntentHelper().resolveIntentInternal(snapshot(),
                 intent, resolvedType, flags, privateResolveFlags, userId, resolveForStart,
-                filterCallingUid, true);
+                filterCallingUid, true, callingPid);
     }
 
     @Override

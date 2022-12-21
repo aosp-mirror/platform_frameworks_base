@@ -417,7 +417,8 @@ public class ActivityStartController {
 
                 // Collect information about the target of the Intent.
                 ActivityInfo aInfo = mSupervisor.resolveActivity(intent, resolvedTypes[i],
-                        0 /* startFlags */, null /* profilerInfo */, userId, filterCallingUid);
+                        0 /* startFlags */, null /* profilerInfo */, userId, filterCallingUid,
+                        callingPid);
                 aInfo = mService.mAmInternal.getActivityInfoForUser(aInfo, userId);
 
                 if (aInfo != null) {

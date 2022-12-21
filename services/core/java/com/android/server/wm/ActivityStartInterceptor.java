@@ -247,7 +247,8 @@ class ActivityStartInterceptor {
             if (interceptResult.isActivityResolved()) {
                 return true;
             }
-            mRInfo = mSupervisor.resolveIntent(mIntent, null, mUserId, 0, mRealCallingUid);
+            mRInfo = mSupervisor.resolveIntent(mIntent, null, mUserId, 0,
+                    mRealCallingUid, mRealCallingPid);
             mAInfo = mSupervisor.resolveActivity(mIntent, mRInfo, mStartFlags,
                     null /*profilerInfo*/);
             return true;
@@ -289,7 +290,8 @@ class ActivityStartInterceptor {
         mResolvedType = null;
 
         final UserInfo parent = mUserManager.getProfileParent(mUserId);
-        mRInfo = mSupervisor.resolveIntent(mIntent, mResolvedType, parent.id, 0, mRealCallingUid);
+        mRInfo = mSupervisor.resolveIntent(mIntent, mResolvedType, parent.id, 0,
+                mRealCallingUid, mRealCallingPid);
         mAInfo = mSupervisor.resolveActivity(mIntent, mRInfo, mStartFlags, null /*profilerInfo*/);
         return true;
     }
@@ -310,10 +312,10 @@ class ActivityStartInterceptor {
         final UserInfo parent = mUserManager.getProfileParent(mUserId);
         if (parent != null) {
             mRInfo = mSupervisor.resolveIntent(mIntent, mResolvedType, parent.id, 0,
-                    mRealCallingUid);
+                    mRealCallingUid, mRealCallingPid);
         } else {
             mRInfo = mSupervisor.resolveIntent(mIntent, mResolvedType, mUserId, 0,
-                    mRealCallingUid);
+                    mRealCallingUid, mRealCallingPid);
         }
         mAInfo = mSupervisor.resolveActivity(mIntent, mRInfo, mStartFlags, null /*profilerInfo*/);
         return true;
@@ -346,7 +348,8 @@ class ActivityStartInterceptor {
         mCallingPid = mRealCallingPid;
         mCallingUid = mRealCallingUid;
         mResolvedType = null;
-        mRInfo = mSupervisor.resolveIntent(mIntent, mResolvedType, mUserId, 0, mRealCallingUid);
+        mRInfo = mSupervisor.resolveIntent(mIntent, mResolvedType, mUserId, 0,
+                mRealCallingUid, mRealCallingPid);
         mAInfo = mSupervisor.resolveActivity(mIntent, mRInfo, mStartFlags, null /*profilerInfo*/);
         return true;
     }
@@ -365,7 +368,8 @@ class ActivityStartInterceptor {
         mCallingPid = mRealCallingPid;
         mCallingUid = mRealCallingUid;
         mResolvedType = null;
-        mRInfo = mSupervisor.resolveIntent(mIntent, mResolvedType, mUserId, 0, mRealCallingUid);
+        mRInfo = mSupervisor.resolveIntent(mIntent, mResolvedType, mUserId, 0,
+                mRealCallingUid, mRealCallingPid);
         mAInfo = mSupervisor.resolveActivity(mIntent, mRInfo, mStartFlags, null /*profilerInfo*/);
         return true;
     }
@@ -400,7 +404,8 @@ class ActivityStartInterceptor {
         }
 
         final UserInfo parent = mUserManager.getProfileParent(mUserId);
-        mRInfo = mSupervisor.resolveIntent(mIntent, mResolvedType, parent.id, 0, mRealCallingUid);
+        mRInfo = mSupervisor.resolveIntent(mIntent, mResolvedType, parent.id, 0,
+                mRealCallingUid, mRealCallingPid);
         mAInfo = mSupervisor.resolveActivity(mIntent, mRInfo, mStartFlags, null /*profilerInfo*/);
         return true;
     }
@@ -457,7 +462,8 @@ class ActivityStartInterceptor {
         mCallingUid = mRealCallingUid;
         mResolvedType = null;
 
-        mRInfo = mSupervisor.resolveIntent(mIntent, mResolvedType, mUserId, 0, mRealCallingUid);
+        mRInfo = mSupervisor.resolveIntent(mIntent, mResolvedType, mUserId, 0,
+                mRealCallingUid, mRealCallingPid);
         mAInfo = mSupervisor.resolveActivity(mIntent, mRInfo, mStartFlags, null /*profilerInfo*/);
         return true;
     }

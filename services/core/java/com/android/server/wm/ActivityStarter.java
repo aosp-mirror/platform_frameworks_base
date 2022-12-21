@@ -528,7 +528,8 @@ class ActivityStarter {
 
             resolveInfo = supervisor.resolveIntent(intent, resolvedType, userId,
                     0 /* matchFlags */,
-                    computeResolveFilterUid(callingUid, realCallingUid, filterCallingUid));
+                    computeResolveFilterUid(callingUid, realCallingUid, filterCallingUid),
+                    realCallingPid);
             if (resolveInfo == null) {
                 final UserInfo userInfo = supervisor.getUserInfo(userId);
                 if (userInfo != null && userInfo.isManagedProfile()) {
@@ -551,7 +552,7 @@ class ActivityStarter {
                                 PackageManager.MATCH_DIRECT_BOOT_AWARE
                                         | PackageManager.MATCH_DIRECT_BOOT_UNAWARE,
                                 computeResolveFilterUid(callingUid, realCallingUid,
-                                        filterCallingUid));
+                                        filterCallingUid), realCallingPid);
                     }
                 }
             }
@@ -806,7 +807,7 @@ class ActivityStarter {
         mRequest.resolveInfo = mSupervisor.resolveIntent(mRequest.intent, null /* resolvedType */,
                 mRequest.userId, 0 /* matchFlags */,
                 computeResolveFilterUid(mRequest.callingUid, mRequest.realCallingUid,
-                        mRequest.filterCallingUid));
+                        mRequest.filterCallingUid), mRequest.realCallingPid);
         mRequest.activityInfo =
                 mRequest.resolveInfo != null ? mRequest.resolveInfo.activityInfo : null;
         if (mRequest.activityInfo != null) {
@@ -1143,7 +1144,8 @@ class ActivityStarter {
 
                 rInfo = mSupervisor.resolveIntent(intent, resolvedType, userId, 0,
                         computeResolveFilterUid(
-                                callingUid, realCallingUid, request.filterCallingUid));
+                                callingUid, realCallingUid, request.filterCallingUid),
+                        realCallingPid);
                 aInfo = mSupervisor.resolveActivity(intent, rInfo, startFlags,
                         null /*profilerInfo*/);
 

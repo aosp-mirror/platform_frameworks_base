@@ -197,6 +197,7 @@ import android.app.IStopUserCallback;
 import android.app.ITaskStackListener;
 import android.app.IUiAutomationConnection;
 import android.app.IUidObserver;
+import android.app.IUnsafeIntentStrictModeCallback;
 import android.app.IUserSwitchObserver;
 import android.app.Instrumentation;
 import android.app.Notification;
@@ -694,6 +695,10 @@ public class ActivityManagerService extends IActivityManager.Stub
     static final int BROADCAST_QUEUE_BG = 1;
     static final int BROADCAST_QUEUE_BG_OFFLOAD = 2;
     static final int BROADCAST_QUEUE_FG_OFFLOAD = 3;
+
+    @GuardedBy("this")
+    private final SparseArray<IUnsafeIntentStrictModeCallback>
+            mStrictModeCallbacks = new SparseArray<>();
 
     // Convenient for easy iteration over the queues. Foreground is first
     // so that dispatch of foreground broadcasts gets precedence.
@@ -8796,6 +8801,27 @@ public class ActivityManagerService extends IActivityManager.Stub
         }
     }
 
+    /**
+     * Register a callback to raise strict mode violations.
+     * @param callback The binder used to communicate the violations.
+     */
+    @Override
+    public void registerStrictModeCallback(IBinder callback) {
+        int callingPid = Binder.getCallingPid();
+        mStrictModeCallbacks.put(callingPid,
+                IUnsafeIntentStrictModeCallback.Stub.asInterface(callback));
+        try {
+            callback.linkToDeath(new DeathRecipient() {
+                @Override
+                public void binderDied() {
+                    mStrictModeCallbacks.remove(callingPid);
+                }
+            }, 0);
+        } catch (RemoteException e) {
+            mStrictModeCallbacks.remove(callingPid);
+        }
+    }
+
     // Depending on the policy in effect, there could be a bunch of
     // these in quick succession so we try to batch these together to
     // minimize disk writes, number of dropbox entries, and maximize
@@ -12657,7 +12683,7 @@ public class ActivityManagerService extends IActivityManager.Stub
      * @param query the list of broadcast filters
      * @param platformCompat the instance of platform compat
      */
-    private static void filterNonExportedComponents(Intent intent, int callingUid,
+    private void filterNonExportedComponents(Intent intent, int callingUid, int callingPid,
             List query, PlatformCompat platformCompat, String callerPackage, String resolvedType) {
         if (query == null
                 || intent.getPackage() != null
@@ -12665,6 +12691,7 @@ public class ActivityManagerService extends IActivityManager.Stub
                 || ActivityManager.canAccessUnexportedComponents(callingUid)) {
             return;
         }
+        IUnsafeIntentStrictModeCallback callback = mStrictModeCallbacks.get(callingPid);
         for (int i = query.size() - 1; i >= 0; i--) {
             String componentInfo;
             ResolveInfo resolveInfo;
@@ -12684,6 +12711,15 @@ public class ActivityManagerService extends IActivityManager.Stub
                 componentInfo = broadcastFilter.packageName;
             } else {
                 continue;
+            }
+            if (callback != null) {
+                mHandler.post(() -> {
+                    try {
+                        callback.onImplicitIntentMatchedInternalComponent(intent.cloneFilter());
+                    } catch (RemoteException e) {
+                        mStrictModeCallbacks.remove(callingPid);
+                    }
+                });
             }
             boolean hasToBeExportedToMatch = platformCompat.isChangeEnabledByUid(
                     ActivityManagerService.IMPLICIT_INTENTS_ONLY_MATCH_EXPORTED_COMPONENTS,
@@ -14616,7 +14652,7 @@ public class ActivityManagerService extends IActivityManager.Stub
             }
         }
 
-        filterNonExportedComponents(intent, callingUid, registeredReceivers,
+        filterNonExportedComponents(intent, callingUid, callingPid, registeredReceivers,
                 mPlatformCompat, callerPackage, resolvedType);
         int NR = registeredReceivers != null ? registeredReceivers.size() : 0;
         if (!ordered && NR > 0 && !mEnableModernQueue) {
@@ -14722,7 +14758,7 @@ public class ActivityManagerService extends IActivityManager.Stub
         if ((receivers != null && receivers.size() > 0)
                 || resultTo != null) {
             BroadcastQueue queue = broadcastQueueForIntent(intent);
-            filterNonExportedComponents(intent, callingUid, receivers,
+            filterNonExportedComponents(intent, callingUid, callingPid, receivers,
                     mPlatformCompat, callerPackage, resolvedType);
             BroadcastRecord r = new BroadcastRecord(queue, intent, callerApp, callerPackage,
                     callerFeatureId, callingPid, callingUid, callerInstantApp, resolvedType,
@@ -18194,6 +18230,16 @@ public class ActivityManagerService extends IActivityManager.Stub
             synchronized (ActivityManagerService.this) {
                 return mServices.getClientPackagesLocked(servicePackageName);
             }
+        }
+
+        @Override
+        public IUnsafeIntentStrictModeCallback getRegisteredStrictModeCallback(int callingPid) {
+            return mStrictModeCallbacks.get(callingPid);
+        }
+
+        @Override
+        public void unregisterStrictModeCallback(int callingPid) {
+            mStrictModeCallbacks.remove(callingPid);
         }
     }
 

@@ -331,6 +331,7 @@ interface IActivityManager {
     @UnsupportedAppUsage
     void handleApplicationStrictModeViolation(in IBinder app, int penaltyMask,
             in StrictMode.ViolationInfo crashInfo);
+    void registerStrictModeCallback(in IBinder binder);
     boolean isTopActivityImmersive();
     void crashApplicationWithType(int uid, int initialPid, in String packageName, int userId,
             in String message, boolean force, int exceptionTypeId);
