@@ -44,6 +44,7 @@ import static com.android.systemui.statusbar.StatusBarState.SHADE_LOCKED;
 import static com.android.systemui.statusbar.VibratorHelper.TOUCH_VIBRATION_ATTRIBUTES;
 import static com.android.systemui.statusbar.notification.stack.StackStateAnimator.ANIMATION_DURATION_FOLD_TO_AOD;
 import static com.android.systemui.util.DumpUtilsKt.asIndenting;
+import static com.android.systemui.util.kotlin.JavaAdapterKt.collectFlow;
 
 import static java.lang.Float.isNaN;
 
@@ -139,6 +140,10 @@ import com.android.systemui.fragments.FragmentService;
 import com.android.systemui.keyguard.KeyguardUnlockAnimationController;
 import com.android.systemui.keyguard.domain.interactor.AlternateBouncerInteractor;
 import com.android.systemui.keyguard.domain.interactor.KeyguardBottomAreaInteractor;
+import com.android.systemui.keyguard.domain.interactor.KeyguardTransitionInteractor;
+import com.android.systemui.keyguard.shared.model.TransitionState;
+import com.android.systemui.keyguard.shared.model.TransitionStep;
+import com.android.systemui.keyguard.ui.viewmodel.DreamingToLockscreenTransitionViewModel;
 import com.android.systemui.keyguard.ui.viewmodel.KeyguardBottomAreaViewModel;
 import com.android.systemui.media.controls.pipeline.MediaDataManager;
 import com.android.systemui.media.controls.ui.KeyguardMediaController;
@@ -679,6 +684,12 @@ public final class NotificationPanelViewController implements Dumpable {
     private boolean mGestureWaitForTouchSlop;
     private boolean mIgnoreXTouchSlop;
     private boolean mExpandLatencyTracking;
+    private DreamingToLockscreenTransitionViewModel mDreamingToLockscreenTransitionViewModel;
+
+    private KeyguardTransitionInteractor mKeyguardTransitionInteractor;
+    private boolean mIsDreamToLockscreenTransitionRunning = false;
+    private int mDreamingToLockscreenTransitionTranslationY;
+    private boolean mUnocclusionTransitionFlagEnabled = false;
 
     private final Runnable mFlingCollapseRunnable = () -> fling(0, false /* expand */,
             mNextCollapseSpeedUpFactor, false /* expandBecauseOfFalsing */);
@@ -693,6 +704,12 @@ public final class NotificationPanelViewController implements Dumpable {
             postToView(mHideExpandedRunnable);
         }
     };
+
+    private final Consumer<TransitionStep> mDreamingToLockscreenTransition =
+            (TransitionStep step) -> {
+                mIsDreamToLockscreenTransitionRunning =
+                    step.getTransitionState() == TransitionState.RUNNING;
+            };
 
     @Inject
     public NotificationPanelViewController(NotificationPanelView view,
@@ -763,6 +780,8 @@ public final class NotificationPanelViewController implements Dumpable {
             KeyguardBottomAreaViewModel keyguardBottomAreaViewModel,
             KeyguardBottomAreaInteractor keyguardBottomAreaInteractor,
             AlternateBouncerInteractor alternateBouncerInteractor,
+            DreamingToLockscreenTransitionViewModel dreamingToLockscreenTransitionViewModel,
+            KeyguardTransitionInteractor keyguardTransitionInteractor,
             DumpManager dumpManager) {
         keyguardStateController.addCallback(new KeyguardStateController.Callback() {
             @Override
@@ -778,6 +797,8 @@ public final class NotificationPanelViewController implements Dumpable {
         mShadeLog = shadeLogger;
         mShadeHeightLogger = shadeHeightLogger;
         mGutsManager = gutsManager;
+        mDreamingToLockscreenTransitionViewModel = dreamingToLockscreenTransitionViewModel;
+        mKeyguardTransitionInteractor = keyguardTransitionInteractor;
         mView.addOnAttachStateChangeListener(new View.OnAttachStateChangeListener() {
             @Override
             public void onViewAttachedToWindow(View v) {
@@ -922,6 +943,8 @@ public final class NotificationPanelViewController implements Dumpable {
                 SysUIUnfoldComponent::getKeyguardUnfoldTransition);
         mNotificationPanelUnfoldAnimationController = unfoldComponent.map(
                 SysUIUnfoldComponent::getNotificationPanelUnfoldAnimationController);
+
+        mUnocclusionTransitionFlagEnabled = featureFlags.isEnabled(Flags.UNOCCLUSION_TRANSITION);
 
         mQsFrameTranslateController = qsFrameTranslateController;
         updateUserSwitcherFlags();
@@ -1076,6 +1099,18 @@ public final class NotificationPanelViewController implements Dumpable {
         mKeyguardUnfoldTransition.ifPresent(u -> u.setup(mView));
         mNotificationPanelUnfoldAnimationController.ifPresent(controller ->
                 controller.setup(mNotificationContainerParent));
+
+        if (mUnocclusionTransitionFlagEnabled) {
+            collectFlow(mView, mDreamingToLockscreenTransitionViewModel.getLockscreenAlpha(),
+                    dreamingToLockscreenTransitionAlpha(mNotificationStackScrollLayoutController));
+
+            collectFlow(mView, mDreamingToLockscreenTransitionViewModel.lockscreenTranslationY(
+                    mDreamingToLockscreenTransitionTranslationY),
+                    dreamingToLockscreenTransitionY(mNotificationStackScrollLayoutController));
+
+            collectFlow(mView, mKeyguardTransitionInteractor.getDreamingToLockscreenTransition(),
+                    mDreamingToLockscreenTransition);
+        }
     }
 
     @VisibleForTesting
@@ -1110,6 +1145,8 @@ public final class NotificationPanelViewController implements Dumpable {
         mUdfpsMaxYBurnInOffset = mResources.getDimensionPixelSize(R.dimen.udfps_burn_in_offset_y);
         mSplitShadeScrimTransitionDistance = mResources.getDimensionPixelSize(
                 R.dimen.split_shade_scrim_transition_distance);
+        mDreamingToLockscreenTransitionTranslationY = mResources.getDimensionPixelSize(
+                R.dimen.dreaming_to_lockscreen_transition_lockscreen_translation_y);
     }
 
     private void updateViewControllers(KeyguardStatusView keyguardStatusView,
@@ -1773,10 +1810,14 @@ public final class NotificationPanelViewController implements Dumpable {
     }
 
     private void updateClock() {
+        if (mIsDreamToLockscreenTransitionRunning) {
+            return;
+        }
         float alpha = mClockPositionResult.clockAlpha * mKeyguardOnlyContentAlpha;
         mKeyguardStatusViewController.setAlpha(alpha);
         mKeyguardStatusViewController
-                .setTranslationYExcludingMedia(mKeyguardOnlyTransitionTranslationY);
+            .setTranslationY(mKeyguardOnlyTransitionTranslationY, /* excludeMedia= */true);
+
         if (mKeyguardQsUserSwitchController != null) {
             mKeyguardQsUserSwitchController.setAlpha(alpha);
         }
@@ -2660,7 +2701,9 @@ public final class NotificationPanelViewController implements Dumpable {
         } else if (statusBarState == KEYGUARD
                 || statusBarState == StatusBarState.SHADE_LOCKED) {
             mKeyguardBottomArea.setVisibility(View.VISIBLE);
-            mKeyguardBottomArea.setAlpha(1f);
+            if (!mIsDreamToLockscreenTransitionRunning) {
+                mKeyguardBottomArea.setAlpha(1f);
+            }
         } else {
             mKeyguardBottomArea.setVisibility(View.GONE);
         }
@@ -3527,6 +3570,9 @@ public final class NotificationPanelViewController implements Dumpable {
     }
 
     private void updateNotificationTranslucency() {
+        if (mIsDreamToLockscreenTransitionRunning) {
+            return;
+        }
         float alpha = 1f;
         if (mClosingWithAlphaFadeOut && !mExpandingFromHeadsUp
                 && !mHeadsUpManager.hasPinnedHeadsUp()) {
@@ -3582,6 +3628,9 @@ public final class NotificationPanelViewController implements Dumpable {
     }
 
     private void updateKeyguardBottomAreaAlpha() {
+        if (mIsDreamToLockscreenTransitionRunning) {
+            return;
+        }
         // There are two possible panel expansion behaviors:
         // • User dragging up to unlock: we want to fade out as quick as possible
         //   (ALPHA_EXPANSION_THRESHOLD) to avoid seeing the bouncer over the bottom area.
@@ -3614,7 +3663,9 @@ public final class NotificationPanelViewController implements Dumpable {
     }
 
     private void onExpandingFinished() {
-        mScrimController.onExpandingFinished();
+        if (!mUnocclusionTransitionFlagEnabled) {
+            mScrimController.onExpandingFinished();
+        }
         mNotificationStackScrollLayoutController.onExpansionStopped();
         mHeadsUpManager.onExpandingFinished();
         mConversationNotificationManager.onNotificationPanelExpandStateChanged(isFullyCollapsed());
@@ -5807,6 +5858,32 @@ public final class NotificationPanelViewController implements Dumpable {
             mView.post(mMaybeHideExpandedRunnable);
         }
         mCurrentPanelState = state;
+    }
+
+    private Consumer<Float> dreamingToLockscreenTransitionAlpha(
+            NotificationStackScrollLayoutController stackScroller) {
+        return (Float alpha) -> {
+            mKeyguardStatusViewController.setAlpha(alpha);
+            stackScroller.setAlpha(alpha);
+
+            mKeyguardBottomAreaInteractor.setAlpha(alpha);
+            mLockIconViewController.setAlpha(alpha);
+
+            if (mKeyguardQsUserSwitchController != null) {
+                mKeyguardQsUserSwitchController.setAlpha(alpha);
+            }
+            if (mKeyguardUserSwitcherController != null) {
+                mKeyguardUserSwitcherController.setAlpha(alpha);
+            }
+        };
+    }
+
+    private Consumer<Float> dreamingToLockscreenTransitionY(
+                NotificationStackScrollLayoutController stackScroller) {
+        return (Float translationY) -> {
+            mKeyguardStatusViewController.setTranslationY(translationY,  /* excludeMedia= */false);
+            stackScroller.setTranslationY(translationY);
+        };
     }
 
     @VisibleForTesting

@@ -179,6 +179,5 @@ constructor(
     companion object {
         private val DEFAULT_DURATION = 500.milliseconds
         val TO_LOCKSCREEN_DURATION = 1183.milliseconds
-        @JvmField val TO_LOCKSCREEN_DURATION_MS = TO_LOCKSCREEN_DURATION.inWholeMilliseconds
     }
 }
