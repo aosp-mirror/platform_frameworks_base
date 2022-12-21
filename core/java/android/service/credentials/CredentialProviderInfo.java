@@ -24,6 +24,7 @@ import android.app.AppGlobals;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
+import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageManager;
 import android.content.pm.ResolveInfo;
 import android.content.pm.ServiceInfo;
@@ -58,6 +59,7 @@ public final class CredentialProviderInfo {
     private final Drawable mIcon;
     @Nullable
     private final CharSequence mLabel;
+    private final boolean mIsSystemProvider;
 
     /**
      * Constructs an information instance of the credential provider.
@@ -65,13 +67,14 @@ public final class CredentialProviderInfo {
      * @param context the context object
      * @param serviceComponent the serviceComponent of the provider service
      * @param userId the android userId for which the current process is running
+     * @param isSystemProvider whether this provider is a system provider
      * @throws PackageManager.NameNotFoundException If provider service is not found
      * @throws SecurityException If provider does not require the relevant permission
      */
     public CredentialProviderInfo(@NonNull Context context,
-            @NonNull ComponentName serviceComponent, int userId)
+            @NonNull ComponentName serviceComponent, int userId, boolean isSystemProvider)
             throws PackageManager.NameNotFoundException {
-        this(context, getServiceInfoOrThrow(serviceComponent, userId));
+        this(context, getServiceInfoOrThrow(serviceComponent, userId), isSystemProvider);
     }
 
     /**
@@ -79,8 +82,11 @@ public final class CredentialProviderInfo {
      * @param context the context object
      * @param serviceInfo the service info for the provider app. This must be retrieved from the
      *                    {@code PackageManager}
+     * @param isSystemProvider whether the provider is a system app or not
      */
-    public CredentialProviderInfo(@NonNull Context context, @NonNull ServiceInfo serviceInfo) {
+    public CredentialProviderInfo(@NonNull Context context,
+            @NonNull ServiceInfo serviceInfo,
+            boolean isSystemProvider) {
         if (!Manifest.permission.BIND_CREDENTIAL_PROVIDER_SERVICE.equals(serviceInfo.permission)) {
             Log.i(TAG, "Credential Provider Service from : " + serviceInfo.packageName
                     + "does not require permission"
@@ -95,6 +101,7 @@ public final class CredentialProviderInfo {
         mLabel = mServiceInfo.loadSafeLabel(
                 mContext.getPackageManager(), 0 /* do not ellipsize */,
                 TextUtils.SAFE_STRING_FLAG_FIRST_LINE | TextUtils.SAFE_STRING_FLAG_TRIM);
+        mIsSystemProvider = isSystemProvider;
         Log.i(TAG, "mLabel is : " + mLabel + ", for: " + mServiceInfo.getComponentName()
                 .flattenToString());
         populateProviderCapabilities(context, serviceInfo);
@@ -147,6 +154,42 @@ public final class CredentialProviderInfo {
     }
 
     /**
+     * Returns the valid credential provider services available for the user with the
+     * given {@code userId}.
+     */
+    @NonNull
+    public static List<CredentialProviderInfo> getAvailableSystemServices(
+            @NonNull Context context,
+            @UserIdInt int userId) {
+        final List<CredentialProviderInfo> services = new ArrayList<>();
+
+        final List<ResolveInfo> resolveInfos =
+                context.getPackageManager().queryIntentServicesAsUser(
+                        new Intent(CredentialProviderService.SYSTEM_SERVICE_INTERFACE),
+                        PackageManager.ResolveInfoFlags.of(PackageManager.GET_META_DATA),
+                        userId);
+        for (ResolveInfo resolveInfo : resolveInfos) {
+            final ServiceInfo serviceInfo = resolveInfo.serviceInfo;
+            try {
+                ApplicationInfo appInfo = context.getPackageManager().getApplicationInfo(
+                        serviceInfo.packageName,
+                        PackageManager.ApplicationInfoFlags.of(PackageManager.MATCH_SYSTEM_ONLY));
+                if (appInfo != null
+                        && context.checkPermission(Manifest.permission.SYSTEM_CREDENTIAL_PROVIDER,
+                        /*pId=*/-1, appInfo.uid) == PackageManager.PERMISSION_GRANTED) {
+                    services.add(new CredentialProviderInfo(context, serviceInfo,
+                            /*isSystemProvider=*/true));
+                }
+            } catch (SecurityException e) {
+                Log.i(TAG, "Error getting info for " + serviceInfo + ": " + e);
+            } catch (PackageManager.NameNotFoundException e) {
+                Log.i(TAG, "Error getting info for " + serviceInfo + ": " + e);
+            }
+        }
+        return services;
+    }
+
+    /**
      * Returns true if the service supports the given {@code credentialType}, false otherwise.
      */
     @NonNull
@@ -158,6 +201,10 @@ public final class CredentialProviderInfo {
     @NonNull
     public ServiceInfo getServiceInfo() {
         return mServiceInfo;
+    }
+
+    public boolean isSystemProvider() {
+        return mIsSystemProvider;
     }
 
     /** Returns the service icon. */
@@ -195,7 +242,8 @@ public final class CredentialProviderInfo {
         for (ResolveInfo resolveInfo : resolveInfos) {
             final ServiceInfo serviceInfo = resolveInfo.serviceInfo;
             try {
-                services.add(new CredentialProviderInfo(context, serviceInfo));
+                services.add(new CredentialProviderInfo(context,
+                        serviceInfo, false));
             } catch (SecurityException e) {
                 Log.w(TAG, "Error getting info for " + serviceInfo + ": " + e);
             }
