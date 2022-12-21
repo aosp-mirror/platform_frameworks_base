@@ -229,6 +229,7 @@ public class DreamOverlayService extends android.service.dreams.DreamOverlayServ
      * Inserts {@link Window} to host the dream overlay into the dream's parent window. Must be
      * called from the main executing thread. The window attributes closely mirror those that are
      * set by the {@link android.service.dreams.DreamService} on the dream Window.
+     *
      * @param layoutParams The {@link android.view.WindowManager.LayoutParams} which allow inserting
      *                     into the dream window.
      */
@@ -275,7 +276,11 @@ public class DreamOverlayService extends android.service.dreams.DreamOverlayServ
 
     private void resetCurrentDreamOverlayLocked() {
         if (mStarted && mWindow != null) {
-            mWindowManager.removeView(mWindow.getDecorView());
+            try {
+                mWindowManager.removeView(mWindow.getDecorView());
+            } catch (IllegalArgumentException e) {
+                Log.e(TAG, "Error removing decor view when resetting overlay", e);
+            }
         }
 
         mStateController.setOverlayActive(false);
