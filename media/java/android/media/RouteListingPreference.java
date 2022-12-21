@@ -87,6 +87,9 @@ public final class RouteListingPreference implements Parcelable {
      * Returns true if the application would like media route listing to use the system's ordering
      * strategy, or false if the application would like route listing to respect the ordering
      * obtained from {@link #getItems()}.
+     *
+     * <p>The system's ordering strategy is implementation-dependent, but may take into account each
+     * route's recency or frequency of use in order to rank them.
      */
     public boolean getUseSystemOrdering() {
         return mUseSystemOrdering;
