@@ -517,6 +517,9 @@ object Flags {
     // TODO(b/266955521): Tracking bug
     @JvmField val SCREENSHOT_DETECTION = unreleasedFlag(1303, "screenshot_detection")
 
+    // TODO(b/251205791): Tracking Bug
+    @JvmField val SCREENSHOT_APP_CLIPS = releasedFlag(1304, "screenshot_app_clips")
+
     // 1400 - columbus
     // TODO(b/254512756): Tracking Bug
     val QUICK_TAP_IN_PCC = releasedFlag(1400, "quick_tap_in_pcc")
@@ -554,7 +557,7 @@ object Flags {
     @JvmField val DUAL_SHADE = releasedFlag(1801, "dual_shade")
 
     // 1900
-    @JvmField val NOTE_TASKS = unreleasedFlag(1900, "keycode_flag")
+    @JvmField val NOTE_TASKS = releasedFlag(1900, "keycode_flag")
 
     // 2000 - device controls
     @Keep @JvmField val USE_APP_PANELS = releasedFlag(2000, "use_app_panels", teamfood = true)
