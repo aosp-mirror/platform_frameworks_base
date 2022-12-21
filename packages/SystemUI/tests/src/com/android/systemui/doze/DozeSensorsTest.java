@@ -37,6 +37,7 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import android.content.res.Resources;
 import android.database.ContentObserver;
 import android.hardware.Sensor;
 import android.hardware.display.AmbientDisplayConfiguration;
@@ -78,7 +79,8 @@ import java.util.function.Consumer;
 @RunWithLooper
 @SmallTest
 public class DozeSensorsTest extends SysuiTestCase {
-
+    @Mock
+    private Resources mResources;
     @Mock
     private AsyncSensorManager mSensorManager;
     @Mock
@@ -428,7 +430,7 @@ public class DozeSensorsTest extends SysuiTestCase {
 
     @Test
     public void testGesturesAllInitiallyRespectSettings() {
-        DozeSensors dozeSensors = new DozeSensors(mSensorManager, mDozeParameters,
+        DozeSensors dozeSensors = new DozeSensors(mResources, mSensorManager, mDozeParameters,
                 mAmbientDisplayConfiguration, mWakeLock, mCallback, mProxCallback, mDozeLog,
                 mProximitySensor, mFakeSettings, mAuthController,
                 mDevicePostureController, mUserTracker);
@@ -438,9 +440,47 @@ public class DozeSensorsTest extends SysuiTestCase {
         }
     }
 
+    @Test
+    public void liftToWake_defaultSetting_configDefaultFalse() {
+        // WHEN the default lift to wake gesture setting is false
+        when(mResources.getBoolean(
+                com.android.internal.R.bool.config_dozePickupGestureEnabled)).thenReturn(false);
+
+        DozeSensors dozeSensors = new DozeSensors(mResources, mSensorManager, mDozeParameters,
+                mAmbientDisplayConfiguration, mWakeLock, mCallback, mProxCallback, mDozeLog,
+                mProximitySensor, mFakeSettings, mAuthController,
+                mDevicePostureController, mUserTracker);
+
+        for (TriggerSensor sensor : dozeSensors.mTriggerSensors) {
+            // THEN lift to wake's TriggerSensor enabledBySettings is false
+            if (sensor.mPulseReason == DozeLog.REASON_SENSOR_PICKUP) {
+                assertFalse(sensor.enabledBySetting());
+            }
+        }
+    }
+
+    @Test
+    public void liftToWake_defaultSetting_configDefaultTrue() {
+        // WHEN the default lift to wake gesture setting is true
+        when(mResources.getBoolean(
+                com.android.internal.R.bool.config_dozePickupGestureEnabled)).thenReturn(true);
+
+        DozeSensors dozeSensors = new DozeSensors(mResources, mSensorManager, mDozeParameters,
+                mAmbientDisplayConfiguration, mWakeLock, mCallback, mProxCallback, mDozeLog,
+                mProximitySensor, mFakeSettings, mAuthController,
+                mDevicePostureController, mUserTracker);
+
+        for (TriggerSensor sensor : dozeSensors.mTriggerSensors) {
+            // THEN lift to wake's TriggerSensor enabledBySettings is true
+            if (sensor.mPulseReason == DozeLog.REASON_SENSOR_PICKUP) {
+                assertTrue(sensor.enabledBySetting());
+            }
+        }
+    }
+
     private class TestableDozeSensors extends DozeSensors {
         TestableDozeSensors() {
-            super(mSensorManager, mDozeParameters,
+            super(mResources, mSensorManager, mDozeParameters,
                     mAmbientDisplayConfiguration, mWakeLock, mCallback, mProxCallback, mDozeLog,
                     mProximitySensor, mFakeSettings, mAuthController,
                     mDevicePostureController, mUserTracker);
