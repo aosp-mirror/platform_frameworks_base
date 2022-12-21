@@ -16,6 +16,10 @@
 
 package android.media;
 
+import static android.companion.virtual.VirtualDeviceManager.DEVICE_ID_DEFAULT;
+import static android.companion.virtual.VirtualDeviceParams.DEVICE_POLICY_DEFAULT;
+import static android.companion.virtual.VirtualDeviceParams.POLICY_TYPE_AUDIO;
+
 import android.annotation.CallbackExecutor;
 import android.annotation.IntDef;
 import android.annotation.IntRange;
@@ -34,6 +38,7 @@ import android.app.compat.CompatChanges;
 import android.bluetooth.BluetoothCodecConfig;
 import android.bluetooth.BluetoothDevice;
 import android.bluetooth.BluetoothLeAudioCodecConfig;
+import android.companion.virtual.VirtualDeviceManager;
 import android.compat.annotation.ChangeId;
 import android.compat.annotation.EnabledSince;
 import android.compat.annotation.UnsupportedAppUsage;
@@ -100,6 +105,7 @@ public class AudioManager {
 
     private Context mOriginalContext;
     private Context mApplicationContext;
+    private @Nullable VirtualDeviceManager mVirtualDeviceManager; // Lazy initialized.
     private long mVolumeKeyUpTime;
     private static final String TAG = "AudioManager";
     private static final boolean DEBUG = false;
@@ -856,6 +862,14 @@ public class AudioManager {
         IBinder b = ServiceManager.getService(Context.AUDIO_SERVICE);
         sService = IAudioService.Stub.asInterface(b);
         return sService;
+    }
+
+    private VirtualDeviceManager getVirtualDeviceManager() {
+        if (mVirtualDeviceManager != null) {
+            return mVirtualDeviceManager;
+        }
+        mVirtualDeviceManager = getContext().getSystemService(VirtualDeviceManager.class);
+        return mVirtualDeviceManager;
     }
 
     /**
@@ -3635,8 +3649,12 @@ public class AudioManager {
      * whether sounds are heard or not.
      * @hide
      */
-    public void  playSoundEffect(@SystemSoundEffect int effectType, int userId) {
+    public void playSoundEffect(@SystemSoundEffect int effectType, int userId) {
         if (effectType < 0 || effectType >= NUM_SOUND_EFFECTS) {
+            return;
+        }
+
+        if (delegateSoundEffectToVdm(effectType)) {
             return;
         }
 
@@ -3657,8 +3675,12 @@ public class AudioManager {
      * NOTE: This version is for applications that have their own
      * settings panel for enabling and controlling volume.
      */
-    public void  playSoundEffect(@SystemSoundEffect int effectType, float volume) {
+    public void playSoundEffect(@SystemSoundEffect int effectType, float volume) {
         if (effectType < 0 || effectType >= NUM_SOUND_EFFECTS) {
+            return;
+        }
+
+        if (delegateSoundEffectToVdm(effectType)) {
             return;
         }
 
@@ -3668,6 +3690,28 @@ public class AudioManager {
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }
+    }
+
+    /**
+     * Checks whether this {@link AudioManager} instance is asociated with {@link VirtualDevice}
+     * configured with custom device policy for audio. If there is such device, request to play
+     * sound effect is forwarded to {@link VirtualDeviceManager}.
+     *
+     * @param effectType - The type of sound effect.
+     * @return true if the request was forwarded to {@link VirtualDeviceManager} instance,
+     * false otherwise.
+     */
+    private boolean delegateSoundEffectToVdm(@SystemSoundEffect int effectType) {
+        int deviceId = getContext().getDeviceId();
+        if (deviceId != DEVICE_ID_DEFAULT) {
+            VirtualDeviceManager vdm = getVirtualDeviceManager();
+            if (vdm != null && vdm.getDevicePolicy(deviceId, POLICY_TYPE_AUDIO)
+                    != DEVICE_POLICY_DEFAULT) {
+                vdm.playSoundEffect(deviceId, effectType);
+                return true;
+            }
+        }
+        return false;
     }
 
     /**
