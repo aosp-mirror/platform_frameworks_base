@@ -135,6 +135,8 @@
   </staging-public-group>
 
   <staging-public-group type="string" first-id="0x01cb0000">
+    <!-- @hide @SystemApi -->
+    <public name="config_systemWearHealthService" />
   </staging-public-group>
 
   <staging-public-group type="dimen" first-id="0x01ca0000">

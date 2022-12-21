@@ -2133,6 +2133,8 @@
     <string name="config_systemAutomotiveCalendarSyncManager" translatable="false"></string>
     <!-- The name of the package that will hold the default automotive navigation role. -->
     <string name="config_defaultAutomotiveNavigation" translatable="false"></string>
+    <!-- The name of the package that will hold the system wear health service role. -->
+    <string name="config_systemWearHealthService" translatable="false"></string>
 
     <!-- The name of the package that will handle updating the device management role. -->
     <string name="config_devicePolicyManagementUpdater" translatable="false"></string>
