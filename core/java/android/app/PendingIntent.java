@@ -57,6 +57,7 @@ import android.util.AndroidException;
 import android.util.ArraySet;
 import android.util.Log;
 import android.util.Pair;
+import android.util.Slog;
 import android.util.proto.ProtoOutputStream;
 
 import com.android.internal.annotations.GuardedBy;
@@ -427,7 +428,7 @@ public final class PendingIntent implements Parcelable {
                         + " PendingIntent, use FLAG_NO_CREATE, however, to create a"
                         + " new PendingIntent with an implicit Intent use"
                         + " FLAG_IMMUTABLE.";
-                Log.wtfStack(TAG, msg);
+                Slog.wtfStack(TAG, msg);
             } else {
                 String msg = "New mutable implicit PendingIntent: pkg=" + packageName
                         + ", action=" + intent.getAction()

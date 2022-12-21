@@ -946,8 +946,7 @@ public class KeyguardIndicationController {
         if (mStatusBarKeyguardViewManager.isBouncerShowing()) {
             if (mAlternateBouncerInteractor.isVisibleState()) {
                 return; // udfps affordance is highlighted, no need to show action to unlock
-            } else if (!mKeyguardUpdateMonitor.getIsFaceAuthenticated()
-                    && mKeyguardUpdateMonitor.isFaceEnrolled()) {
+            } else if (mKeyguardUpdateMonitor.isFaceEnrolled()) {
                 String message = mContext.getString(R.string.keyguard_retry);
                 mStatusBarKeyguardViewManager.setKeyguardMessage(message, mInitialTextColorState);
             }
