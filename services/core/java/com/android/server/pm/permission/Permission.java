@@ -29,7 +29,6 @@ import android.util.Log;
 import android.util.Slog;
 
 import com.android.server.pm.PackageManagerService;
-import com.android.server.pm.pkg.AndroidPackage;
 import com.android.server.pm.pkg.PackageState;
 import com.android.server.pm.pkg.component.ParsedPermission;
 
@@ -104,6 +103,15 @@ public final class Permission {
     public Permission(@NonNull PermissionInfo permissionInfo, @PermissionType int type) {
         mPermissionInfo = permissionInfo;
         mType = type;
+    }
+
+    public Permission(@NonNull PermissionInfo permissionInfo, @PermissionType int type,
+            boolean reconciled, int uid, int[] gids, boolean gidsPerUser) {
+        this(permissionInfo, type);
+        mReconciled = reconciled;
+        mUid = uid;
+        mGids = gids;
+        mGidsPerUser = gidsPerUser;
     }
 
     @NonNull
