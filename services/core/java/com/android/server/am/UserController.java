@@ -1567,8 +1567,8 @@ class UserController implements Handler.Callback {
      *
      * @return whether the user was started
      */
-    boolean startUserOnSecondaryDisplay(@UserIdInt int userId, int displayId) {
-        checkCallingHasOneOfThosePermissions("startUserOnSecondaryDisplay",
+    boolean startUserVisibleOnDisplay(@UserIdInt int userId, int displayId) {
+        checkCallingHasOneOfThosePermissions("startUserOnDisplay",
                 MANAGE_USERS, INTERACT_ACROSS_USERS);
 
         try {
@@ -3713,7 +3713,7 @@ class UserController implements Handler.Callback {
         }
 
         boolean isUsersOnSecondaryDisplaysEnabled() {
-            return UserManager.isUsersOnSecondaryDisplaysEnabled();
+            return UserManager.isVisibleBackgroundUsersEnabled();
         }
 
         void onUserStarting(@UserIdInt int userId) {

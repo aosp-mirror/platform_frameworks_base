@@ -109,12 +109,12 @@ abstract class UserVisibilityMediatorTestCase extends ExtendedMockitoTestCase {
     private Handler mHandler;
     protected AsyncUserVisibilityListener.Factory mListenerFactory;
 
-    private final boolean mUsersOnSecondaryDisplaysEnabled;
+    private final boolean mBackgroundUsersOnDisplaysEnabled;
 
     protected UserVisibilityMediator mMediator;
 
-    protected UserVisibilityMediatorTestCase(boolean usersOnSecondaryDisplaysEnabled) {
-        mUsersOnSecondaryDisplaysEnabled = usersOnSecondaryDisplaysEnabled;
+    protected UserVisibilityMediatorTestCase(boolean backgroundUsersOnDisplaysEnabled) {
+        mBackgroundUsersOnDisplaysEnabled = backgroundUsersOnDisplaysEnabled;
     }
 
     @Before
@@ -123,7 +123,7 @@ abstract class UserVisibilityMediatorTestCase extends ExtendedMockitoTestCase {
         Thread thread = mHandler.getLooper().getThread();
         Log.i(TAG, "setFixtures(): using thread " + thread + " (from handler " + mHandler + ")");
         mListenerFactory = new AsyncUserVisibilityListener.Factory(mExpect, thread);
-        mMediator = new UserVisibilityMediator(mUsersOnSecondaryDisplaysEnabled, mHandler);
+        mMediator = new UserVisibilityMediator(mBackgroundUsersOnDisplaysEnabled, mHandler);
         mDumpableDumperRule.addDumpable(mMediator);
     }
 
