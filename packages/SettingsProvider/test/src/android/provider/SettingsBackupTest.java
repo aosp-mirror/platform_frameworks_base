@@ -659,7 +659,8 @@ public class SettingsBackupTest {
                     Settings.Global.Wearable.BEDTIME_MODE,
                     Settings.Global.Wearable.BEDTIME_HARD_MODE,
                     Settings.Global.Wearable.EARLY_UPDATES_STATUS,
-                    Settings.Global.Wearable.RSB_WAKE_ENABLED);
+                    Settings.Global.Wearable.RSB_WAKE_ENABLED,
+                    Settings.Global.Wearable.LOCK_SCREEN_STATE);
 
     private static final Set<String> BACKUP_DENY_LIST_SECURE_SETTINGS =
              newHashSet(
