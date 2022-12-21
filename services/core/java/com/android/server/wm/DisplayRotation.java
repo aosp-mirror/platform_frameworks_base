@@ -58,6 +58,7 @@ import android.provider.Settings;
 import android.util.Slog;
 import android.util.TimeUtils;
 import android.util.proto.ProtoOutputStream;
+import android.view.DisplayAddress;
 import android.view.IWindowManager;
 import android.view.Surface;
 import android.window.TransitionRequestInfo;
@@ -211,15 +212,16 @@ public class DisplayRotation {
     private boolean mDemoHdmiRotationLock;
     private boolean mDemoRotationLock;
 
-    DisplayRotation(WindowManagerService service, DisplayContent displayContent) {
-        this(service, displayContent, displayContent.getDisplayPolicy(),
+    DisplayRotation(WindowManagerService service, DisplayContent displayContent,
+            DisplayAddress displayAddress) {
+        this(service, displayContent, displayAddress, displayContent.getDisplayPolicy(),
                 service.mDisplayWindowSettings, service.mContext, service.getWindowManagerLock());
     }
 
     @VisibleForTesting
     DisplayRotation(WindowManagerService service, DisplayContent displayContent,
-            DisplayPolicy displayPolicy, DisplayWindowSettings displayWindowSettings,
-            Context context, Object lock) {
+            DisplayAddress displayAddress, DisplayPolicy displayPolicy,
+            DisplayWindowSettings displayWindowSettings, Context context, Object lock) {
         mService = service;
         mDisplayContent = displayContent;
         mDisplayPolicy = displayPolicy;
@@ -235,6 +237,8 @@ public class DisplayRotation {
         mDeskDockRotation = readRotation(R.integer.config_deskDockRotation);
         mUndockedHdmiRotation = readRotation(R.integer.config_undockedHdmiRotation);
 
+        mRotation = readDefaultDisplayRotation(displayAddress);
+
         if (isDefaultDisplay) {
             final Handler uiHandler = UiThread.getHandler();
             mOrientationListener = new OrientationListener(mContext, uiHandler);
@@ -246,6 +250,33 @@ public class DisplayRotation {
                 mFoldController = new FoldController();
             }
         }
+    }
+
+    // Change the default value to the value specified in the sysprop
+    // ro.bootanim.set_orientation_<display_id>. Four values are supported: ORIENTATION_0,
+    // ORIENTATION_90, ORIENTATION_180 and ORIENTATION_270.
+    // If the value isn't specified or is ORIENTATION_0, nothing will be changed.
+    // This is needed to support having default orientation different from the natural
+    // device orientation. For example, on tablets that may want to keep natural orientation
+    // portrait for applications compatibility but have landscape orientation as a default choice
+    // from the UX perspective.
+    @Surface.Rotation
+    private int readDefaultDisplayRotation(DisplayAddress displayAddress) {
+        if (!(displayAddress instanceof DisplayAddress.Physical)) {
+            return Surface.ROTATION_0;
+        }
+        final DisplayAddress.Physical physicalAddress = (DisplayAddress.Physical) displayAddress;
+        String syspropValue = SystemProperties.get(
+                "ro.bootanim.set_orientation_" + physicalAddress.getPhysicalDisplayId(),
+                "ORIENTATION_0");
+        if (syspropValue.equals("ORIENTATION_90")) {
+            return Surface.ROTATION_90;
+        } else if (syspropValue.equals("ORIENTATION_180")) {
+            return Surface.ROTATION_180;
+        } else if (syspropValue.equals("ORIENTATION_270")) {
+            return Surface.ROTATION_270;
+        }
+        return Surface.ROTATION_0;
     }
 
     private int readRotation(int resID) {
