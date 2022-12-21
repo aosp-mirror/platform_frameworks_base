@@ -583,6 +583,15 @@ status_t BootAnimation::readyToRun() {
     mFlingerSurface = s;
     mTargetInset = -1;
 
+    // Rotate the boot animation according to the value specified in the sysprop
+    // ro.bootanim.set_orientation_<display_id>. Four values are supported: ORIENTATION_0,
+    // ORIENTATION_90, ORIENTATION_180 and ORIENTATION_270.
+    // If the value isn't specified or is ORIENTATION_0, nothing will be changed.
+    // This is needed to support having boot animation in orientations different from the natural
+    // device orientation. For example, on tablets that may want to keep natural orientation
+    // portrait for applications compatibility and to have the boot animation in landscape.
+    rotateAwayFromNaturalOrientationIfNeeded();
+
     projectSceneToWindow();
 
     // Register a display event receiver
@@ -594,6 +603,50 @@ status_t BootAnimation::readyToRun() {
             new DisplayEventCallback(this), nullptr);
 
     return NO_ERROR;
+}
+
+void BootAnimation::rotateAwayFromNaturalOrientationIfNeeded() {
+    const auto orientation = parseOrientationProperty();
+
+    if (orientation == ui::ROTATION_0) {
+        // Do nothing if the sysprop isn't set or is set to ROTATION_0.
+        return;
+    }
+
+    if (orientation == ui::ROTATION_90 || orientation == ui::ROTATION_270) {
+        std::swap(mWidth, mHeight);
+        std::swap(mInitWidth, mInitHeight);
+        mFlingerSurfaceControl->updateDefaultBufferSize(mWidth, mHeight);
+    }
+
+    Rect displayRect(0, 0, mWidth, mHeight);
+    Rect layerStackRect(0, 0, mWidth, mHeight);
+
+    SurfaceComposerClient::Transaction t;
+    t.setDisplayProjection(mDisplayToken, orientation, layerStackRect, displayRect);
+    t.apply();
+}
+
+ui::Rotation BootAnimation::parseOrientationProperty() {
+    const auto displayIds = SurfaceComposerClient::getPhysicalDisplayIds();
+    if (displayIds.size() == 0) {
+        return ui::ROTATION_0;
+    }
+    const auto displayId = displayIds[0];
+    const auto syspropName = [displayId] {
+        std::stringstream ss;
+        ss << "ro.bootanim.set_orientation_" << displayId.value;
+        return ss.str();
+    }();
+    const auto syspropValue = android::base::GetProperty(syspropName, "ORIENTATION_0");
+    if (syspropValue == "ORIENTATION_90") {
+        return ui::ROTATION_90;
+    } else if (syspropValue == "ORIENTATION_180") {
+        return ui::ROTATION_180;
+    } else if (syspropValue == "ORIENTATION_270") {
+        return ui::ROTATION_270;
+    }
+    return ui::ROTATION_0;
 }
 
 void BootAnimation::projectSceneToWindow() {

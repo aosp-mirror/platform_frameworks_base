@@ -60,6 +60,7 @@ import android.os.PowerManagerInternal;
 import android.os.SystemClock;
 import android.platform.test.annotations.Presubmit;
 import android.provider.Settings;
+import android.view.DisplayAddress;
 import android.view.Surface;
 import android.view.WindowManager;
 
@@ -101,6 +102,7 @@ public class DisplayRotationTests {
     private static WindowManagerService sMockWm;
     private DisplayContent mMockDisplayContent;
     private DisplayPolicy mMockDisplayPolicy;
+    private DisplayAddress mMockDisplayAddress;
     private Context mMockContext;
     private Resources mMockRes;
     private SensorManager mMockSensorManager;
@@ -1091,9 +1093,11 @@ public class DisplayRotationTests {
             when(mMockResolver.acquireProvider(Settings.AUTHORITY))
                     .thenReturn(mFakeSettingsProvider.getIContentProvider());
 
+            mMockDisplayAddress = mock(DisplayAddress.class);
+
             mMockDisplayWindowSettings = mock(DisplayWindowSettings.class);
-            mTarget = new DisplayRotation(sMockWm, mMockDisplayContent, mMockDisplayPolicy,
-                    mMockDisplayWindowSettings, mMockContext, new Object());
+            mTarget = new DisplayRotation(sMockWm, mMockDisplayContent, mMockDisplayAddress,
+                    mMockDisplayPolicy, mMockDisplayWindowSettings, mMockContext, new Object());
             reset(sMockWm);
 
             captureObservers();
