@@ -20,6 +20,7 @@ import android.view.View
 import android.view.ViewGroup
 import android.view.ViewGroupOverlay
 import android.view.ViewRootImpl
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.material3.contentColorFor
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
@@ -62,6 +63,7 @@ fun rememberExpandableController(
     color: Color,
     shape: Shape,
     contentColor: Color = contentColorFor(color),
+    borderStroke: BorderStroke? = null,
 ): ExpandableController {
     val composeViewRoot = LocalView.current
     val density = LocalDensity.current
@@ -87,11 +89,20 @@ fun rememberExpandableController(
     val isComposed = remember { mutableStateOf(true) }
     DisposableEffect(Unit) { onDispose { isComposed.value = false } }
 
-    return remember(color, contentColor, shape, composeViewRoot, density, layoutDirection) {
+    return remember(
+        color,
+        contentColor,
+        shape,
+        borderStroke,
+        composeViewRoot,
+        density,
+        layoutDirection,
+    ) {
         ExpandableControllerImpl(
             color,
             contentColor,
             shape,
+            borderStroke,
             composeViewRoot,
             density,
             animatorState,
@@ -109,6 +120,7 @@ internal class ExpandableControllerImpl(
     internal val color: Color,
     internal val contentColor: Color,
     internal val shape: Shape,
+    internal val borderStroke: BorderStroke?,
     internal val composeViewRoot: View,
     internal val density: Density,
     internal val animatorState: MutableState<LaunchAnimator.State?>,

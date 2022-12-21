@@ -77,7 +77,6 @@ import android.view.View;
 import android.view.ViewTreeObserver;
 import android.view.WindowManager;
 
-import androidx.test.filters.FlakyTest;
 import androidx.test.filters.SmallTest;
 
 import com.android.internal.colorextraction.ColorExtractor;
@@ -142,6 +141,7 @@ import com.android.wm.shell.sysui.ShellCommandHandler;
 import com.android.wm.shell.sysui.ShellController;
 import com.android.wm.shell.sysui.ShellInit;
 
+import org.junit.After;
 import org.junit.Before;
 import org.junit.Ignore;
 import org.junit.Test;
@@ -152,13 +152,13 @@ import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 import org.mockito.stubbing.Answer;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Optional;
 
-@FlakyTest
 @SmallTest
 @RunWith(AndroidTestingRunner.class)
 @TestableLooper.RunWithLooper(setAsMainLooper = true)
@@ -409,6 +409,15 @@ public class BubblesTest extends SysuiTestCase {
         // Get a reference to KeyguardStateController.Callback
         verify(mKeyguardStateController, atLeastOnce())
                 .addCallback(mKeyguardStateControllerCallbackCaptor.capture());
+    }
+
+    @After
+    public void tearDown() {
+        ArrayList<Bubble> bubbles = new ArrayList<>(mBubbleData.getBubbles());
+        for (int i = 0; i < bubbles.size(); i++) {
+            mBubbleController.removeBubble(bubbles.get(i).getKey(),
+                    Bubbles.DISMISS_NO_LONGER_BUBBLE);
+        }
     }
 
     @Test

@@ -731,6 +731,8 @@
     <string name="wifi_is_off" msgid="5389597396308001471">"Wi-Fi បាន​បិទ"</string>
     <string name="bt_is_off" msgid="7436344904889461591">"ប៊្លូធូស​បាន​បិទ"</string>
     <string name="dnd_is_off" msgid="3185706903793094463">"មុខងារ​កុំរំខាន​បាន​បិទ"</string>
+    <!-- no translation found for dnd_is_on (7009368176361546279) -->
+    <skip />
     <string name="qs_dnd_prompt_auto_rule" msgid="3535469468310002616">"មុខងារ​កុំ​រំខាន​ត្រូវបាន​បើកដោយច្បាប់​ស្វ័យ​ប្រវត្តិ (<xliff:g id="ID_1">%s</xliff:g>)។"</string>
     <string name="qs_dnd_prompt_app" msgid="4027984447935396820">"មុខងារ​កុំ​រំខាន​ត្រូវបាន​បើកដោយកម្មវិធី (<xliff:g id="ID_1">%s</xliff:g>)។"</string>
     <string name="qs_dnd_prompt_auto_rule_app" msgid="1841469944118486580">"មុខងារ​កុំ​រំខាន​ត្រូវបាន​បើកដោយច្បាប់​ស្វ័យ​ប្រវត្តិ ឬ​កម្មវិធី។"</string>
@@ -1010,10 +1012,8 @@
     <string name="rear_display_unfold_bottom_sheet_title" msgid="2137403802960396357">"ត្រឡប់ទៅផ្ទាំងអេក្រង់ខាងមុខ​ ដើម្បី​ថត​សែលហ្វីកាន់តែបានល្អឬ?"</string>
     <string name="rear_display_bottom_sheet_description" msgid="1852662982816810352">"ប្រើកាមេរ៉ាខាងក្រោយ ដើម្បីទទួលបានរូបថតកាន់តែធំជាមួយនឹងកម្រិតគុណភាពកាន់តែខ្ពស់។"</string>
     <string name="rear_display_bottom_sheet_warning" msgid="800995919558238930"><b>"✱ អេក្រង់នេះនឹងបិទ"</b></string>
-    <!-- no translation found for rear_display_accessibility_folded_animation (1538121649587978179) -->
-    <skip />
-    <!-- no translation found for rear_display_accessibility_unfolded_animation (1946153682258289040) -->
-    <skip />
+    <string name="rear_display_accessibility_folded_animation" msgid="1538121649587978179">"ឧបករណ៍អាច​បត់បានកំពុងត្រូវបានលា"</string>
+    <string name="rear_display_accessibility_unfolded_animation" msgid="1946153682258289040">"ឧបករណ៍អាច​បត់បានកំពុងត្រូវបានលា"</string>
     <!-- no translation found for stylus_battery_low (7134370101603167096) -->
     <skip />
 </resources>

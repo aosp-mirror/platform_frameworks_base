@@ -71,6 +71,7 @@ import android.os.BatteryStats;
 import android.os.PowerExemptionManager;
 import android.os.PowerManager;
 import android.os.ServiceManager;
+import android.os.SystemUpdateManager;
 import android.os.UserManager;
 import android.os.Vibrator;
 import android.os.storage.StorageManager;
@@ -137,6 +138,12 @@ public class FrameworkServicesModule {
     @Singleton
     static AlarmManager provideAlarmManager(Context context) {
         return context.getSystemService(AlarmManager.class);
+    }
+
+    @Provides
+    @Singleton
+    static Optional<SystemUpdateManager> provideSystemUpdateManager(Context context) {
+        return Optional.ofNullable(context.getSystemService(SystemUpdateManager.class));
     }
 
     /** */

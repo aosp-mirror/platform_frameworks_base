@@ -43,8 +43,7 @@ import com.android.systemui.dagger.qualifiers.Main;
 import com.android.systemui.dreams.complication.Complication;
 import com.android.systemui.dreams.dagger.DreamOverlayComponent;
 import com.android.systemui.dreams.touch.DreamOverlayTouchMonitor;
-
-import java.util.concurrent.Executor;
+import com.android.systemui.util.concurrency.DelayableExecutor;
 
 import javax.inject.Inject;
 import javax.inject.Named;
@@ -61,10 +60,11 @@ public class DreamOverlayService extends android.service.dreams.DreamOverlayServ
     // The Context is used to construct the hosting constraint layout and child overlay views.
     private final Context mContext;
     // The Executor ensures actions and ui updates happen on the same thread.
-    private final Executor mExecutor;
+    private final DelayableExecutor mExecutor;
     // A controller for the dream overlay container view (which contains both the status bar and the
     // content area).
     private DreamOverlayContainerViewController mDreamOverlayContainerViewController;
+    private final DreamCallbackController mDreamCallbackController;
     private final KeyguardUpdateMonitor mKeyguardUpdateMonitor;
     @Nullable
     private final ComponentName mLowLightDreamComponent;
@@ -126,14 +126,15 @@ public class DreamOverlayService extends android.service.dreams.DreamOverlayServ
     @Inject
     public DreamOverlayService(
             Context context,
-            @Main Executor executor,
+            @Main DelayableExecutor executor,
             WindowManager windowManager,
             DreamOverlayComponent.Factory dreamOverlayComponentFactory,
             DreamOverlayStateController stateController,
             KeyguardUpdateMonitor keyguardUpdateMonitor,
             UiEventLogger uiEventLogger,
             @Nullable @Named(LowLightDreamModule.LOW_LIGHT_DREAM_COMPONENT)
-                    ComponentName lowLightDreamComponent) {
+                    ComponentName lowLightDreamComponent,
+            DreamCallbackController dreamCallbackController) {
         mContext = context;
         mExecutor = executor;
         mWindowManager = windowManager;
@@ -142,6 +143,7 @@ public class DreamOverlayService extends android.service.dreams.DreamOverlayServ
         mKeyguardUpdateMonitor.registerCallback(mKeyguardCallback);
         mStateController = stateController;
         mUiEventLogger = uiEventLogger;
+        mDreamCallbackController = dreamCallbackController;
 
         final ViewModelStore viewModelStore = new ViewModelStore();
         final Complication.Host host =
@@ -217,6 +219,7 @@ public class DreamOverlayService extends android.service.dreams.DreamOverlayServ
     public void onWakeUp(@NonNull Runnable onCompletedCallback) {
         mExecutor.execute(() -> {
             if (mDreamOverlayContainerViewController != null) {
+                mDreamCallbackController.onWakeUp();
                 mDreamOverlayContainerViewController.wakeUp(onCompletedCallback, mExecutor);
             }
         });

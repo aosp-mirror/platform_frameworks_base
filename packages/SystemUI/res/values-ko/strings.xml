@@ -731,6 +731,8 @@
     <string name="wifi_is_off" msgid="5389597396308001471">"Wi-Fi가 사용 중지됨"</string>
     <string name="bt_is_off" msgid="7436344904889461591">"블루투스가 사용 중지됨"</string>
     <string name="dnd_is_off" msgid="3185706903793094463">"방해 금지 모드가 사용 중지됨"</string>
+    <!-- no translation found for dnd_is_on (7009368176361546279) -->
+    <skip />
     <string name="qs_dnd_prompt_auto_rule" msgid="3535469468310002616">"방해 금지 모드가 자동 규칙(<xliff:g id="ID_1">%s</xliff:g>)에 의해 사용 설정되었습니다."</string>
     <string name="qs_dnd_prompt_app" msgid="4027984447935396820">"방해 금지 모드가 앱(<xliff:g id="ID_1">%s</xliff:g>)에 의해 사용 설정되었습니다."</string>
     <string name="qs_dnd_prompt_auto_rule_app" msgid="1841469944118486580">"방해 금지 모드가 자동 규칙 또는 앱에 의해 사용 설정되었습니다."</string>
