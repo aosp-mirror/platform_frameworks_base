@@ -51,6 +51,11 @@ open class DumpManager @Inject constructor() {
         registerDumpable(name, module, DumpPriority.CRITICAL)
     }
 
+    /** See [registerNormalDumpable]. */
+    fun registerNormalDumpable(module: Dumpable) {
+        registerNormalDumpable(module::class.java.simpleName, module)
+    }
+
     /**
      * Registers a dumpable to be called during the NORMAL section of the bug report.
      *

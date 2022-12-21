@@ -221,6 +221,7 @@ android_library {
         "WindowManager-Shell",
         "LowLightDreamLib",
         "motion_tool_lib",
+        "androidx.core_core-animation-testing-nodeps",
     ],
 }
 

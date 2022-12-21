@@ -40,8 +40,8 @@ public final class Tile implements Parcelable {
 
     /**
      * An unavailable state indicates that for some reason this tile is not currently
-     * available to the user for some reason, and will have no click action.  The tile's
-     * icon will be tinted differently to reflect this state.
+     * available to the user, and will have no click action.  The tile's icon will be
+     * tinted differently to reflect this state.
      */
     public static final int STATE_UNAVAILABLE = 0;
 

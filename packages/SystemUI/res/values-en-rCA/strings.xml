@@ -731,6 +731,8 @@
     <string name="wifi_is_off" msgid="5389597396308001471">"Wi-Fi is off"</string>
     <string name="bt_is_off" msgid="7436344904889461591">"Bluetooth is off"</string>
     <string name="dnd_is_off" msgid="3185706903793094463">"Do Not Disturb is off"</string>
+    <!-- no translation found for dnd_is_on (7009368176361546279) -->
+    <skip />
     <string name="qs_dnd_prompt_auto_rule" msgid="3535469468310002616">"Do Not Disturb was turned on by an automatic rule (<xliff:g id="ID_1">%s</xliff:g>)."</string>
     <string name="qs_dnd_prompt_app" msgid="4027984447935396820">"Do Not Disturb was turned on by an app (<xliff:g id="ID_1">%s</xliff:g>)."</string>
     <string name="qs_dnd_prompt_auto_rule_app" msgid="1841469944118486580">"Do Not Disturb was turned on by an automatic rule or app."</string>
@@ -1002,8 +1004,7 @@
     <string name="keyguard_affordance_enablement_dialog_qr_scanner_instruction" msgid="5355839079232119791">"• Install a camera app"</string>
     <string name="keyguard_affordance_enablement_dialog_home_instruction_1" msgid="8438311171750568633">"• The app is set up"</string>
     <string name="keyguard_affordance_enablement_dialog_home_instruction_2" msgid="8308525385889021652">"• At least one device is available"</string>
-    <!-- no translation found for keyguard_affordance_press_too_short (2687995216454987952) -->
-    <skip />
+    <string name="keyguard_affordance_press_too_short" msgid="2687995216454987952">"Press and hold to activate"</string>
     <string name="rear_display_bottom_sheet_cancel" msgid="3461468855493357248">"Cancel"</string>
     <string name="rear_display_bottom_sheet_confirm" msgid="4383356544661421206">"Flip now"</string>
     <string name="rear_display_fold_bottom_sheet_title" msgid="6081542277622721548">"Unfold phone for a better selfie"</string>
@@ -1012,6 +1013,5 @@
     <string name="rear_display_bottom_sheet_warning" msgid="800995919558238930"><b>"✱ This screen will turn off"</b></string>
     <string name="rear_display_accessibility_folded_animation" msgid="1538121649587978179">"Foldable device being unfolded"</string>
     <string name="rear_display_accessibility_unfolded_animation" msgid="1946153682258289040">"Foldable device being flipped around"</string>
-    <!-- no translation found for stylus_battery_low (7134370101603167096) -->
-    <skip />
+    <string name="stylus_battery_low" msgid="7134370101603167096">"Stylus battery low"</string>
 </resources>

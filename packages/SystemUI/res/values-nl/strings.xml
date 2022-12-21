@@ -731,6 +731,8 @@
     <string name="wifi_is_off" msgid="5389597396308001471">"Wifi staat uit"</string>
     <string name="bt_is_off" msgid="7436344904889461591">"Bluetooth staat uit"</string>
     <string name="dnd_is_off" msgid="3185706903793094463">"Niet storen staat uit"</string>
+    <!-- no translation found for dnd_is_on (7009368176361546279) -->
+    <skip />
     <string name="qs_dnd_prompt_auto_rule" msgid="3535469468310002616">"Niet storen is aangezet door een automatische regel (<xliff:g id="ID_1">%s</xliff:g>)."</string>
     <string name="qs_dnd_prompt_app" msgid="4027984447935396820">"Niet storen is aangezet door een app (<xliff:g id="ID_1">%s</xliff:g>)."</string>
     <string name="qs_dnd_prompt_auto_rule_app" msgid="1841469944118486580">"Niet storen is aangezet door een automatische regel of app."</string>
@@ -1010,10 +1012,8 @@
     <string name="rear_display_unfold_bottom_sheet_title" msgid="2137403802960396357">"Omkeren naar scherm voorkant voor een betere selfie?"</string>
     <string name="rear_display_bottom_sheet_description" msgid="1852662982816810352">"Gebruik de camera aan de achterzijde voor een bredere foto met hogere resolutie."</string>
     <string name="rear_display_bottom_sheet_warning" msgid="800995919558238930"><b>"✱ Dit scherm gaat uit"</b></string>
-    <!-- no translation found for rear_display_accessibility_folded_animation (1538121649587978179) -->
-    <skip />
-    <!-- no translation found for rear_display_accessibility_unfolded_animation (1946153682258289040) -->
-    <skip />
+    <string name="rear_display_accessibility_folded_animation" msgid="1538121649587978179">"Opvouwbaar apparaat wordt uitgevouwen"</string>
+    <string name="rear_display_accessibility_unfolded_animation" msgid="1946153682258289040">"Opvouwbaar apparaat wordt gedraaid"</string>
     <!-- no translation found for stylus_battery_low (7134370101603167096) -->
     <skip />
 </resources>
