@@ -845,6 +845,9 @@ public final class TransitionInfo implements Parcelable {
         private HardwareBuffer mThumbnail;
         private int mAnimations;
         private @ColorInt int mBackgroundColor;
+        // Customize activity transition animation
+        private CustomActivityTransition mCustomActivityOpenTransition;
+        private CustomActivityTransition mCustomActivityCloseTransition;
 
         private AnimationOptions(int type) {
             mType = type;
@@ -860,6 +863,15 @@ public final class TransitionInfo implements Parcelable {
             mTransitionBounds.readFromParcel(in);
             mThumbnail = in.readTypedObject(HardwareBuffer.CREATOR);
             mAnimations = in.readInt();
+            mCustomActivityOpenTransition = in.readTypedObject(CustomActivityTransition.CREATOR);
+            mCustomActivityCloseTransition = in.readTypedObject(CustomActivityTransition.CREATOR);
+        }
+
+        /** Make basic customized animation for a package */
+        public static AnimationOptions makeCommonAnimOptions(String packageName) {
+            AnimationOptions options = new AnimationOptions(ANIM_FROM_STYLE);
+            options.mPackageName = packageName;
+            return options;
         }
 
         public static AnimationOptions makeAnimOptionsFromLayoutParameters(
@@ -868,6 +880,27 @@ public final class TransitionInfo implements Parcelable {
             options.mPackageName = lp.packageName;
             options.mAnimations = lp.windowAnimations;
             return options;
+        }
+
+        /** Add customized window animations */
+        public void addOptionsFromLayoutParameters(WindowManager.LayoutParams lp) {
+            mAnimations = lp.windowAnimations;
+        }
+
+        /** Add customized activity animation attributes */
+        public void addCustomActivityTransition(boolean isOpen,
+                int enterResId, int exitResId, int backgroundColor) {
+            CustomActivityTransition customTransition = isOpen
+                    ? mCustomActivityOpenTransition : mCustomActivityCloseTransition;
+            if (customTransition == null) {
+                customTransition = new CustomActivityTransition();
+                if (isOpen) {
+                    mCustomActivityOpenTransition = customTransition;
+                } else {
+                    mCustomActivityCloseTransition = customTransition;
+                }
+            }
+            customTransition.addCustomActivityTransition(enterResId, exitResId, backgroundColor);
         }
 
         public static AnimationOptions makeCustomAnimOptions(String packageName, int enterResId,
@@ -945,6 +978,11 @@ public final class TransitionInfo implements Parcelable {
             return mAnimations;
         }
 
+        /** Return customized activity transition if existed. */
+        public CustomActivityTransition getCustomActivityTransition(boolean open) {
+            return open ? mCustomActivityOpenTransition : mCustomActivityCloseTransition;
+        }
+
         @Override
         public void writeToParcel(Parcel dest, int flags) {
             dest.writeInt(mType);
@@ -956,6 +994,8 @@ public final class TransitionInfo implements Parcelable {
             mTransitionBounds.writeToParcel(dest, flags);
             dest.writeTypedObject(mThumbnail, flags);
             dest.writeInt(mAnimations);
+            dest.writeTypedObject(mCustomActivityOpenTransition, flags);
+            dest.writeTypedObject(mCustomActivityCloseTransition, flags);
         }
 
         @NonNull
@@ -995,6 +1035,69 @@ public final class TransitionInfo implements Parcelable {
         public String toString() {
             return "{ AnimationOptions type= " + typeToString(mType) + " package=" + mPackageName
                     + " override=" + mOverrideTaskTransition + " b=" + mTransitionBounds + "}";
+        }
+
+        /** Customized activity transition. */
+        public static class CustomActivityTransition implements Parcelable {
+            private int mCustomEnterResId;
+            private int mCustomExitResId;
+            private int mCustomBackgroundColor;
+
+            /** Returns customize activity animation enter resource id */
+            public int getCustomEnterResId() {
+                return mCustomEnterResId;
+            }
+
+            /** Returns customize activity animation exit resource id */
+            public int getCustomExitResId() {
+                return mCustomExitResId;
+            }
+
+            /** Returns customize activity animation background color */
+            public int getCustomBackgroundColor() {
+                return mCustomBackgroundColor;
+            }
+            CustomActivityTransition() {}
+
+            CustomActivityTransition(Parcel in) {
+                mCustomEnterResId = in.readInt();
+                mCustomExitResId = in.readInt();
+                mCustomBackgroundColor = in.readInt();
+            }
+
+            /** Add customized activity animation attributes */
+            public void addCustomActivityTransition(
+                    int enterResId, int exitResId, int backgroundColor) {
+                mCustomEnterResId = enterResId;
+                mCustomExitResId = exitResId;
+                mCustomBackgroundColor = backgroundColor;
+            }
+
+            @Override
+            public int describeContents() {
+                return 0;
+            }
+
+            @Override
+            public void writeToParcel(Parcel dest, int flags) {
+                dest.writeInt(mCustomEnterResId);
+                dest.writeInt(mCustomExitResId);
+                dest.writeInt(mCustomBackgroundColor);
+            }
+
+            @NonNull
+            public static final Creator<CustomActivityTransition> CREATOR =
+                    new Creator<CustomActivityTransition>() {
+                        @Override
+                        public CustomActivityTransition createFromParcel(Parcel in) {
+                            return new CustomActivityTransition(in);
+                        }
+
+                        @Override
+                        public CustomActivityTransition[] newArray(int size) {
+                            return new CustomActivityTransition[size];
+                        }
+                    };
         }
     }
 }

@@ -486,6 +486,24 @@ public class ActivityClient {
         }
     }
 
+    void overrideActivityTransition(IBinder token, boolean open, int enterAnim, int exitAnim,
+            int backgroundColor) {
+        try {
+            getActivityClientController().overrideActivityTransition(
+                    token, open, enterAnim, exitAnim, backgroundColor);
+        } catch (RemoteException e) {
+            e.rethrowFromSystemServer();
+        }
+    }
+
+    void clearOverrideActivityTransition(IBinder token, boolean open) {
+        try {
+            getActivityClientController().clearOverrideActivityTransition(token, open);
+        } catch (RemoteException e) {
+            e.rethrowFromSystemServer();
+        }
+    }
+
     void overridePendingTransition(IBinder token, String packageName, int enterAnim, int exitAnim,
             int backgroundColor) {
         try {
