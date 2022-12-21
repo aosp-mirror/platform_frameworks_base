@@ -617,7 +617,6 @@ public class PhoneWindowManager implements WindowManagerPolicy {
     private final com.android.internal.policy.LogDecelerateInterpolator mLogDecelerateInterpolator
             = new LogDecelerateInterpolator(100, 0);
 
-    private boolean mPerDisplayFocusEnabled = false;
     private volatile int mTopFocusedDisplayId = INVALID_DISPLAY;
 
     private int mPowerButtonSuppressionDelayMillis = POWER_BUTTON_SUPPRESSION_DELAY_DEFAULT_MILLIS;
@@ -2117,9 +2116,6 @@ public class PhoneWindowManager implements WindowManagerPolicy {
 
         mHandleVolumeKeysInWM = mContext.getResources().getBoolean(
                 com.android.internal.R.bool.config_handleVolumeKeysInWindowManager);
-
-        mPerDisplayFocusEnabled = mContext.getResources().getBoolean(
-                com.android.internal.R.bool.config_perDisplayFocusEnabled);
 
         mWakeUpToLastStateTimeout = mContext.getResources().getInteger(
                 com.android.internal.R.integer.config_wakeUpToLastStateTimeoutMillis);
@@ -4314,23 +4310,20 @@ public class PhoneWindowManager implements WindowManagerPolicy {
             wakeUpFromWakeKey(event);
         }
 
-        if ((result & ACTION_PASS_TO_USER) != 0 && !mPerDisplayFocusEnabled
-                && displayId != INVALID_DISPLAY && displayId != mTopFocusedDisplayId) {
-            // If the key event is targeted to a specific display, then the user is interacting with
-            // that display. Therefore, give focus to the display that the user is interacting with,
-            // unless that display maintains its own focus.
-            Display display = mDisplayManager.getDisplay(displayId);
-            if ((display.getFlags() & Display.FLAG_OWN_FOCUS) == 0) {
-                // An event is targeting a non-focused display. Move the display to top so that
-                // it can become the focused display to interact with the user.
-                // This should be done asynchronously, once the focus logic is fully moved to input
-                // from windowmanager. Currently, we need to ensure the setInputWindows completes,
-                // which would force the focus event to be queued before the current key event.
-                // TODO(b/70668286): post call to 'moveDisplayToTop' to mHandler instead
-                Log.i(TAG, "Moving non-focused display " + displayId + " to top "
-                        + "because a key is targeting it");
-                mWindowManagerFuncs.moveDisplayToTop(displayId);
-            }
+        // If the key event is targeted to a specific display, then the user is interacting with
+        // that display. Therefore, try to give focus to the display that the user is interacting
+        // with.
+        if ((result & ACTION_PASS_TO_USER) != 0 && displayId != INVALID_DISPLAY
+                && displayId != mTopFocusedDisplayId) {
+            // An event is targeting a non-focused display. Move the display to top so that
+            // it can become the focused display to interact with the user.
+            // This should be done asynchronously, once the focus logic is fully moved to input
+            // from windowmanager. Currently, we need to ensure the setInputWindows completes,
+            // which would force the focus event to be queued before the current key event.
+            // TODO(b/70668286): post call to 'moveDisplayToTop' to mHandler instead
+            Log.i(TAG, "Moving non-focused display " + displayId + " to top "
+                    + "because a key is targeting it");
+            mWindowManagerFuncs.moveDisplayToTopIfAllowed(displayId);
         }
 
         return result;

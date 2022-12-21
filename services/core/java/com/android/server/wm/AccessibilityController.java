@@ -141,7 +141,7 @@ final class AccessibilityController {
     private final SparseArray<WindowsForAccessibilityObserver> mWindowsForAccessibilityObserver =
             new SparseArray<>();
     private SparseArray<IBinder> mFocusedWindow = new SparseArray<>();
-    private int mFocusedDisplay = -1;
+    private int mFocusedDisplay = Display.INVALID_DISPLAY;
     private final SparseBooleanArray mIsImeVisibleArray = new SparseBooleanArray();
     // Set to true if initializing window population complete.
     private boolean mAllObserversInitialized = true;

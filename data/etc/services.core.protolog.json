@@ -2035,6 +2035,12 @@
       "group": "WM_DEBUG_ANIM",
       "at": "com\/android\/server\/wm\/SurfaceAnimator.java"
     },
+    "-206549078": {
+      "message": "Not moving display (displayId=%d) to top. Top focused displayId=%d. Reason: config_perDisplayFocusEnabled",
+      "level": "INFO",
+      "group": "WM_DEBUG_FOCUS_LIGHT",
+      "at": "com\/android\/server\/wm\/WindowManagerService.java"
+    },
     "-203358733": {
       "message": "commitFinishDrawingLocked: mDrawState=READY_TO_SHOW %s",
       "level": "INFO",
@@ -2262,6 +2268,12 @@
       "level": "VERBOSE",
       "group": "WM_DEBUG_RESIZE",
       "at": "com\/android\/server\/wm\/WindowState.java"
+    },
+    "34682671": {
+      "message": "Not moving display (displayId=%d) to top. Top focused displayId=%d. Reason: FLAG_STEAL_TOP_FOCUS_DISABLED",
+      "level": "INFO",
+      "group": "WM_DEBUG_FOCUS_LIGHT",
+      "at": "com\/android\/server\/wm\/WindowManagerService.java"
     },
     "35398067": {
       "message": "goodToGo(): onAnimationStart, transit=%s, apps=%d, wallpapers=%d, nonApps=%d",
