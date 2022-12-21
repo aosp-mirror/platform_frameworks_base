@@ -57,14 +57,14 @@ public class BiasSchedulingTest extends AndroidTestCase {
     }
 
     public void testLowerBiasJobPreempted() throws Exception {
-        for (int i = 0; i < JobConcurrencyManager.STANDARD_CONCURRENCY_LIMIT; ++i) {
+        for (int i = 0; i < JobConcurrencyManager.MAX_CONCURRENCY_LIMIT; ++i) {
             JobInfo job = new JobInfo.Builder(100 + i, sJobServiceComponent)
                     .setBias(LOW_BIAS)
                     .setOverrideDeadline(0)
                     .build();
             mJobScheduler.schedule(job);
         }
-        final int higherBiasJobId = 100 + JobConcurrencyManager.STANDARD_CONCURRENCY_LIMIT;
+        final int higherBiasJobId = 100 + JobConcurrencyManager.MAX_CONCURRENCY_LIMIT;
         JobInfo jobHigher = new JobInfo.Builder(higherBiasJobId, sJobServiceComponent)
                 .setBias(HIGH_BIAS)
                 .setMinimumLatency(2000)
@@ -88,14 +88,14 @@ public class BiasSchedulingTest extends AndroidTestCase {
     }
 
     public void testHigherBiasJobNotPreempted() throws Exception {
-        for (int i = 0; i < JobConcurrencyManager.STANDARD_CONCURRENCY_LIMIT; ++i) {
+        for (int i = 0; i < JobConcurrencyManager.DEFAULT_CONCURRENCY_LIMIT; ++i) {
             JobInfo job = new JobInfo.Builder(100 + i, sJobServiceComponent)
                     .setBias(HIGH_BIAS)
                     .setOverrideDeadline(0)
                     .build();
             mJobScheduler.schedule(job);
         }
-        final int lowerBiasJobId = 100 + JobConcurrencyManager.STANDARD_CONCURRENCY_LIMIT;
+        final int lowerBiasJobId = 100 + JobConcurrencyManager.DEFAULT_CONCURRENCY_LIMIT;
         JobInfo jobLower = new JobInfo.Builder(lowerBiasJobId, sJobServiceComponent)
                 .setBias(LOW_BIAS)
                 .setMinimumLatency(2000)
