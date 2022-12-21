@@ -35,7 +35,6 @@ import static com.android.server.pm.AppsFilterUtils.canQueryAsInstaller;
 import static com.android.server.pm.AppsFilterUtils.canQueryViaComponents;
 import static com.android.server.pm.AppsFilterUtils.canQueryViaPackage;
 import static com.android.server.pm.AppsFilterUtils.canQueryViaUsesLibrary;
-import static com.android.server.pm.AppsFilterUtils.requestsQueryAllPackages;
 
 import android.annotation.NonNull;
 import android.annotation.Nullable;
@@ -63,6 +62,7 @@ import com.android.internal.util.FrameworkStatsLog;
 import com.android.server.FgThread;
 import com.android.server.compat.CompatChange;
 import com.android.server.om.OverlayReferenceMapper;
+import com.android.server.pm.AppsFilterUtils.ParallelComputeComponentVisibility;
 import com.android.server.pm.parsing.pkg.AndroidPackageUtils;
 import com.android.server.pm.pkg.AndroidPackage;
 import com.android.server.pm.pkg.PackageStateInternal;
@@ -185,13 +185,13 @@ public final class AppsFilterImpl extends AppsFilterLocked implements Watchable,
             String[] forceQueryableList,
             boolean systemAppsQueryable,
             @Nullable OverlayReferenceMapper.Provider overlayProvider,
-            Handler backgroundHandler) {
+            Handler handler) {
         mFeatureConfig = featureConfig;
         mForceQueryableByDevicePackageNames = forceQueryableList;
         mSystemAppsQueryable = systemAppsQueryable;
         mOverlayReferenceMapper = new OverlayReferenceMapper(true /*deferRebuild*/,
                 overlayProvider);
-        mBackgroundHandler = backgroundHandler;
+        mHandler = handler;
         mShouldFilterCache = new WatchedSparseBooleanMatrix();
         mShouldFilterCacheSnapshot = new SnapshotCache.Auto<>(
                 mShouldFilterCache, mShouldFilterCache, "AppsFilter.mShouldFilterCache");
@@ -428,7 +428,7 @@ public final class AppsFilterImpl extends AppsFilterLocked implements Watchable,
         }
         AppsFilterImpl appsFilter = new AppsFilterImpl(featureConfig,
                 forcedQueryablePackageNames, forceSystemAppsQueryable, null,
-                injector.getBackgroundHandler());
+                injector.getHandler());
         featureConfig.setAppsFilter(appsFilter);
         return appsFilter;
     }
@@ -797,7 +797,7 @@ public final class AppsFilterImpl extends AppsFilterLocked implements Watchable,
 
     private void updateEntireShouldFilterCacheAsync(PackageManagerInternal pmInternal,
             long delayMs, int reason) {
-        mBackgroundHandler.postDelayed(() -> {
+        mHandler.postDelayed(() -> {
             if (!mCacheValid.compareAndSet(CACHE_INVALID, CACHE_VALID)) {
                 // Cache is already valid.
                 return;
@@ -990,34 +990,15 @@ public final class AppsFilterImpl extends AppsFilterLocked implements Watchable,
      */
     private void recomputeComponentVisibility(
             ArrayMap<String, ? extends PackageStateInternal> existingSettings) {
+        final WatchedArraySet<String> protectedBroadcasts;
+        synchronized (mProtectedBroadcastsLock) {
+            protectedBroadcasts = mProtectedBroadcasts.snapshot();
+        }
+        final ParallelComputeComponentVisibility computer = new ParallelComputeComponentVisibility(
+                existingSettings, mForceQueryable, protectedBroadcasts);
         synchronized (mQueriesViaComponentLock) {
             mQueriesViaComponent.clear();
-        }
-        for (int i = existingSettings.size() - 1; i >= 0; i--) {
-            PackageStateInternal setting = existingSettings.valueAt(i);
-            if (setting.getPkg() == null || requestsQueryAllPackages(setting.getPkg())) {
-                continue;
-            }
-            for (int j = existingSettings.size() - 1; j >= 0; j--) {
-                if (i == j) {
-                    continue;
-                }
-                final PackageStateInternal otherSetting = existingSettings.valueAt(j);
-                if (otherSetting.getPkg() == null || mForceQueryable.contains(
-                        otherSetting.getAppId())) {
-                    continue;
-                }
-                final boolean canQueryViaComponents;
-                synchronized (mProtectedBroadcastsLock) {
-                    canQueryViaComponents = canQueryViaComponents(setting.getPkg(),
-                            otherSetting.getPkg(), mProtectedBroadcasts);
-                }
-                if (canQueryViaComponents) {
-                    synchronized (mQueriesViaComponentLock) {
-                        mQueriesViaComponent.add(setting.getAppId(), otherSetting.getAppId());
-                    }
-                }
-            }
+            computer.execute(mQueriesViaComponent);
         }
 
         mQueriesViaComponentRequireRecompute.set(false);

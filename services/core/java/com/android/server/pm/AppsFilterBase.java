@@ -137,10 +137,9 @@ public abstract class AppsFilterBase implements AppsFilterSnapshot {
     protected SnapshotCache<WatchedSparseSetArray<Integer>> mQueryableViaUsesPermissionSnapshot;
 
     /**
-     * Handler for running reasonably short background tasks such as building the initial
-     * visibility cache.
+     * Handler for running tasks such as building the initial visibility cache.
      */
-    protected Handler mBackgroundHandler;
+    protected Handler mHandler;
 
     /**
      * Pending full recompute of mQueriesViaComponent. Occurs when a package adds a new set of
