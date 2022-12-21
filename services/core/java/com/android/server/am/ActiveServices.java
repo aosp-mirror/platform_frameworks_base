@@ -3979,7 +3979,7 @@ public final class ActiveServices {
                             = new Intent.FilterComparison(service.cloneFilter());
                     final ServiceRestarter res = new ServiceRestarter();
                     String processName = getProcessNameForService(sInfo, name, callingPackage,
-                            instanceName, false, inSharedIsolatedProcess);
+                            instanceName, isSdkSandboxService, inSharedIsolatedProcess);
                     r = new ServiceRecord(mAm, className, name, definingPackageName,
                             definingUid, filter, sInfo, callingFromFg, res,
                             processName, sdkSandboxClientAppUid,
