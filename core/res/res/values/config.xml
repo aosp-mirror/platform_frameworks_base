@@ -2701,6 +2701,10 @@
     <!-- Whether UI for multi user should be shown -->
     <bool name="config_enableMultiUserUI">false</bool>
 
+    <!-- Whether multiple admins are allowed on the device. If set to true, new users can be created
+     with admin privileges and admin privileges can be granted/revoked from existing users. -->
+    <bool name="config_enableMultipleAdmins">false</bool>
+
     <!-- Whether the new Auto Selection Network UI should be shown -->
     <bool name="config_enableNewAutoSelectNetworkUI">false</bool>
 
