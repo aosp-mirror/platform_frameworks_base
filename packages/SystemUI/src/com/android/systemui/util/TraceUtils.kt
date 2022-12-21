@@ -17,6 +17,7 @@
 package com.android.systemui.util
 
 import android.os.Trace
+import android.os.TraceNameSupplier
 
 /**
  * Run a block within a [Trace] section.
@@ -38,6 +39,17 @@ class TraceUtils {
     companion object {
         inline fun traceRunnable(tag: String, crossinline block: () -> Unit): Runnable {
             return Runnable { traceSection(tag) { block() } }
+        }
+
+        /**
+         * Helper function for creating a Runnable object that implements TraceNameSupplier.
+         * This is useful for posting Runnables to Handlers with meaningful names.
+         */
+        inline fun namedRunnable(tag: String, crossinline block: () -> Unit): Runnable {
+            return object : Runnable, TraceNameSupplier {
+                override fun getTraceName(): String = tag
+                override fun run() = block()
+            }
         }
     }
 }

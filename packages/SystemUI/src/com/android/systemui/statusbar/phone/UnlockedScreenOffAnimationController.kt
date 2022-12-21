@@ -14,6 +14,7 @@ import android.view.WindowManager.fixScale
 import com.android.internal.jank.InteractionJankMonitor
 import com.android.internal.jank.InteractionJankMonitor.CUJ_SCREEN_OFF
 import com.android.internal.jank.InteractionJankMonitor.CUJ_SCREEN_OFF_SHOW_AOD
+import com.android.systemui.DejankUtils
 import com.android.systemui.animation.Interpolators
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.keyguard.KeyguardViewMediator
@@ -27,6 +28,7 @@ import com.android.systemui.statusbar.notification.PropertyAnimator
 import com.android.systemui.statusbar.notification.stack.AnimationProperties
 import com.android.systemui.statusbar.notification.stack.StackStateAnimator
 import com.android.systemui.statusbar.policy.KeyguardStateController
+import com.android.systemui.util.TraceUtils
 import com.android.systemui.util.settings.GlobalSettings
 import javax.inject.Inject
 
@@ -114,6 +116,11 @@ class UnlockedScreenOffAnimationController @Inject constructor(
                     mCentralSurfaces.notificationShadeWindowView, CUJ_SCREEN_OFF)
             }
         })
+    }
+
+    // FrameCallback used to delay starting the light reveal animation until the next frame
+    private val startLightRevealCallback = TraceUtils.namedRunnable("startLightReveal") {
+        lightRevealAnimator.start()
     }
 
     val animatorDurationScaleObserver = object : ContentObserver(null) {
@@ -223,6 +230,7 @@ class UnlockedScreenOffAnimationController @Inject constructor(
         decidedToAnimateGoingToSleep = null
 
         shouldAnimateInKeyguard = false
+        DejankUtils.removeCallbacks(startLightRevealCallback)
         lightRevealAnimator.cancel()
         handler.removeCallbacksAndMessages(null)
     }
@@ -253,7 +261,14 @@ class UnlockedScreenOffAnimationController @Inject constructor(
 
             shouldAnimateInKeyguard = true
             lightRevealAnimationPlaying = true
-            lightRevealAnimator.start()
+
+            // Start the animation on the next frame. startAnimation() is called after
+            // PhoneWindowManager makes a binder call to System UI on
+            // IKeyguardService#onStartedGoingToSleep(). By the time we get here, system_server is
+            // already busy making changes to PowerManager and DisplayManager. This increases our
+            // chance of missing the first frame, so to mitigate this we should start the animation
+            // on the next frame.
+            DejankUtils.postAfterTraversal(startLightRevealCallback)
             handler.postDelayed({
                 // Only run this callback if the device is sleeping (not interactive). This callback
                 // is removed in onStartedWakingUp, but since that event is asynchronously
