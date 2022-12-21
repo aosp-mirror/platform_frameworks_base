@@ -213,6 +213,9 @@ interface NativeInputManagerService {
     /** Get the bluetooth address of an input device if known, otherwise return null. */
     String getBluetoothAddress(int deviceId);
 
+    /** Set whether stylus button reporting through motion events should be enabled. */
+    void setStylusButtonMotionEventsEnabled(boolean enabled);
+
     /** The native implementation of InputManagerService methods. */
     class NativeImpl implements NativeInputManagerService {
         /** Pointer to native input manager service object, used by native code. */
@@ -439,5 +442,8 @@ interface NativeInputManagerService {
 
         @Override
         public native String getBluetoothAddress(int deviceId);
+
+        @Override
+        public native void setStylusButtonMotionEventsEnabled(boolean enabled);
     }
 }

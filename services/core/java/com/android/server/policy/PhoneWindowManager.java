@@ -2577,6 +2577,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
 
             mStylusButtonsDisabled = Settings.Secure.getIntForUser(resolver,
                     Secure.STYLUS_BUTTONS_DISABLED, 0, UserHandle.USER_CURRENT) == 1;
+            mInputManagerInternal.setStylusButtonMotionEventsEnabled(!mStylusButtonsDisabled);
         }
         if (updateRotation) {
             updateRotation(true);

@@ -302,6 +302,7 @@ public:
     void setCustomPointerIcon(const SpriteIcon& icon);
     void setMotionClassifierEnabled(bool enabled);
     std::optional<std::string> getBluetoothAddress(int32_t deviceId);
+    void setStylusButtonMotionEventsEnabled(bool enabled);
 
     /* --- InputReaderPolicyInterface implementation --- */
 
@@ -405,6 +406,9 @@ private:
 
         // Associated Pointer controller display.
         int32_t pointerDisplayId{ADISPLAY_ID_DEFAULT};
+
+        // True if stylus button reporting through motion events is enabled.
+        bool stylusButtonMotionEventsEnabled{true};
     } mLocked GUARDED_BY(mLock);
 
     std::atomic<bool> mInteractive;
@@ -654,6 +658,8 @@ void NativeInputManager::getReaderConfiguration(InputReaderConfiguration* outCon
         outConfig->defaultPointerDisplayId = mLocked.pointerDisplayId;
 
         outConfig->disabledDevices = mLocked.disabledInputDevices;
+
+        outConfig->stylusButtonMotionEventsEnabled = mLocked.stylusButtonMotionEventsEnabled;
     } // release lock
 }
 
@@ -1522,6 +1528,21 @@ void NativeInputManager::setMotionClassifierEnabled(bool enabled) {
 
 std::optional<std::string> NativeInputManager::getBluetoothAddress(int32_t deviceId) {
     return mInputManager->getReader().getBluetoothAddress(deviceId);
+}
+
+void NativeInputManager::setStylusButtonMotionEventsEnabled(bool enabled) {
+    { // acquire lock
+        AutoMutex _l(mLock);
+
+        if (mLocked.stylusButtonMotionEventsEnabled == enabled) {
+            return;
+        }
+
+        mLocked.stylusButtonMotionEventsEnabled = enabled;
+    } // release lock
+
+    mInputManager->getReader().requestRefreshConfiguration(
+            InputReaderConfiguration::CHANGE_STYLUS_BUTTON_REPORTING);
 }
 
 bool NativeInputManager::isPerDisplayTouchModeEnabled() {
@@ -2393,6 +2414,12 @@ static jstring nativeGetBluetoothAddress(JNIEnv* env, jobject nativeImplObj, jin
     return address ? env->NewStringUTF(address->c_str()) : nullptr;
 }
 
+static void nativeSetStylusButtonMotionEventsEnabled(JNIEnv* env, jobject nativeImplObj,
+                                                     jboolean enabled) {
+    NativeInputManager* im = getNativeInputManager(env, nativeImplObj);
+    im->setStylusButtonMotionEventsEnabled(enabled);
+}
+
 // ----------------------------------------------------------------------------
 
 static const JNINativeMethod gInputManagerMethods[] = {
@@ -2479,6 +2506,8 @@ static const JNINativeMethod gInputManagerMethods[] = {
         {"cancelCurrentTouch", "()V", (void*)nativeCancelCurrentTouch},
         {"setPointerDisplayId", "(I)V", (void*)nativeSetPointerDisplayId},
         {"getBluetoothAddress", "(I)Ljava/lang/String;", (void*)nativeGetBluetoothAddress},
+        {"setStylusButtonMotionEventsEnabled", "(Z)V",
+         (void*)nativeSetStylusButtonMotionEventsEnabled},
 };
 
 #define FIND_CLASS(var, className) \
