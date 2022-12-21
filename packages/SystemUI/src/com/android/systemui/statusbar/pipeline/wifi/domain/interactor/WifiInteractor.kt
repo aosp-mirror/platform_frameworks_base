@@ -22,7 +22,7 @@ import com.android.systemui.statusbar.pipeline.shared.data.model.ConnectivitySlo
 import com.android.systemui.statusbar.pipeline.shared.data.model.DataActivityModel
 import com.android.systemui.statusbar.pipeline.shared.data.repository.ConnectivityRepository
 import com.android.systemui.statusbar.pipeline.wifi.data.model.WifiNetworkModel
-import com.android.systemui.statusbar.pipeline.wifi.data.repository.prod.WifiRepository
+import com.android.systemui.statusbar.pipeline.wifi.data.repository.WifiRepository
 import javax.inject.Inject
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.StateFlow

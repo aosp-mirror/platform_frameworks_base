@@ -45,6 +45,7 @@ import com.android.systemui.statusbar.pipeline.shared.ConnectivityPipelineLogger
 import com.android.systemui.statusbar.pipeline.shared.data.model.DataActivityModel
 import com.android.systemui.statusbar.pipeline.shared.data.model.toWifiDataActivityModel
 import com.android.systemui.statusbar.pipeline.wifi.data.model.WifiNetworkModel
+import com.android.systemui.statusbar.pipeline.wifi.data.repository.WifiRepository
 import java.util.concurrent.Executor
 import javax.inject.Inject
 import kotlinx.coroutines.CoroutineScope
@@ -61,21 +62,6 @@ import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.mapLatest
 import kotlinx.coroutines.flow.merge
 import kotlinx.coroutines.flow.stateIn
-
-/** Provides data related to the wifi state. */
-interface WifiRepository {
-    /** Observable for the current wifi enabled status. */
-    val isWifiEnabled: StateFlow<Boolean>
-
-    /** Observable for the current wifi default status. */
-    val isWifiDefault: StateFlow<Boolean>
-
-    /** Observable for the current wifi network. */
-    val wifiNetwork: StateFlow<WifiNetworkModel>
-
-    /** Observable for the current wifi network activity. */
-    val wifiActivity: StateFlow<DataActivityModel>
-}
 
 /** Real implementation of [WifiRepository]. */
 @Suppress("EXPERIMENTAL_IS_NOT_ENABLED")

@@ -27,7 +27,6 @@ import com.android.systemui.statusbar.pipeline.shared.ConnectivityPipelineLogger
 import com.android.systemui.statusbar.pipeline.wifi.data.repository.demo.DemoModeWifiDataSource
 import com.android.systemui.statusbar.pipeline.wifi.data.repository.demo.DemoWifiRepository
 import com.android.systemui.statusbar.pipeline.wifi.data.repository.demo.model.FakeWifiEventModel
-import com.android.systemui.statusbar.pipeline.wifi.data.repository.prod.WifiRepository
 import com.android.systemui.statusbar.pipeline.wifi.data.repository.prod.WifiRepositoryImpl
 import com.android.systemui.util.concurrency.FakeExecutor
 import com.android.systemui.util.mockito.kotlinArgumentCaptor
