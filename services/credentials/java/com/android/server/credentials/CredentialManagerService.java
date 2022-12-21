@@ -314,9 +314,45 @@ public final class CredentialManagerService
         @Override
         public ICancellationSignal clearCredentialState(ClearCredentialStateRequest request,
                 IClearCredentialStateCallback callback, String callingPackage) {
-            // TODO: implement.
-            Log.i(TAG, "clearCredentialSession");
+            Log.i(TAG, "starting clearCredentialState with callingPackage: " + callingPackage);
+            // TODO : Implement cancellation
             ICancellationSignal cancelTransport = CancellationSignal.createTransport();
+
+            // New request session, scoped for this request only.
+            final ClearRequestSession session =
+                    new ClearRequestSession(
+                            getContext(),
+                            UserHandle.getCallingUserId(),
+                            callback,
+                            request,
+                            callingPackage);
+
+            // Initiate all provider sessions
+            // TODO: Determine if provider needs to have clear capability in their manifest
+            List<ProviderSession> providerSessions =
+                    initiateProviderSessions(session, List.of());
+
+            if (providerSessions.isEmpty()) {
+                try {
+                    // TODO("Replace with properly defined error type")
+                    callback.onError("unknown_type",
+                            "No providers available to fulfill request.");
+                } catch (RemoteException e) {
+                    Log.i(TAG, "Issue invoking onError on IClearCredentialStateCallback "
+                            + "callback: " + e.getMessage());
+                }
+            }
+
+            // Iterate over all provider sessions and invoke the request
+            providerSessions.forEach(
+                    providerClearSession -> {
+                        providerClearSession
+                                .getRemoteCredentialService()
+                                .onClearCredentialState(
+                                        (android.service.credentials.ClearCredentialStateRequest)
+                                                providerClearSession.getProviderRequest(),
+                                        /* callback= */ providerClearSession);
+                    });
             return cancelTransport;
         }
     }

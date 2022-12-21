@@ -76,7 +76,7 @@ public final class CredentialManagerServiceImpl extends
     @GuardedBy("mLock")
     public ProviderSession initiateProviderSessionForRequestLocked(
             RequestSession requestSession, List<String> requestOptions) {
-        if (!isServiceCapableLocked(requestOptions)) {
+        if (!requestOptions.isEmpty() && !isServiceCapableLocked(requestOptions)) {
             Log.i(TAG, "Service is not capable");
             return null;
         }
@@ -88,9 +88,7 @@ public final class CredentialManagerServiceImpl extends
         }
         final RemoteCredentialService remoteService = new RemoteCredentialService(
                 getContext(), mInfo.getServiceInfo().getComponentName(), mUserId);
-        ProviderSession providerSession =
-                requestSession.initiateProviderSession(mInfo, remoteService);
-        return providerSession;
+        return requestSession.initiateProviderSession(mInfo, remoteService);
     }
 
     /** Return true if at least one capability found. */
