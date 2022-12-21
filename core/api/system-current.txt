@@ -6683,6 +6683,7 @@ package android.media {
   }
 
   public final class AudioPlaybackConfiguration implements android.os.Parcelable {
+    method public int getChannelMask();
     method public int getClientPid();
     method public int getClientUid();
     method @RequiresPermission(android.Manifest.permission.MODIFY_AUDIO_ROUTING) public int getMutedBy();
@@ -6690,9 +6691,11 @@ package android.media {
     method public android.media.PlayerProxy getPlayerProxy();
     method public int getPlayerState();
     method public int getPlayerType();
+    method @IntRange(from=0) public int getSampleRate();
     method @IntRange(from=0) public int getSessionId();
     method public boolean isActive();
     method @RequiresPermission(android.Manifest.permission.MODIFY_AUDIO_ROUTING) public boolean isMuted();
+    method public boolean isSpatialized();
     field @RequiresPermission(android.Manifest.permission.MODIFY_AUDIO_ROUTING) public static final int MUTED_BY_APP_OPS = 8; // 0x8
     field @RequiresPermission(android.Manifest.permission.MODIFY_AUDIO_ROUTING) public static final int MUTED_BY_CLIENT_VOLUME = 16; // 0x10
     field @RequiresPermission(android.Manifest.permission.MODIFY_AUDIO_ROUTING) public static final int MUTED_BY_MASTER = 1; // 0x1
