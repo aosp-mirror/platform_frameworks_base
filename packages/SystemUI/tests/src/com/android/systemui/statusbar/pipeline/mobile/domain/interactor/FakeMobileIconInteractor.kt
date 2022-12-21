@@ -19,13 +19,25 @@ package com.android.systemui.statusbar.pipeline.mobile.domain.interactor
 import android.telephony.CellSignalStrength
 import com.android.settingslib.SignalIcon
 import com.android.settingslib.mobile.TelephonyIcons
+import com.android.systemui.statusbar.pipeline.mobile.data.model.NetworkNameModel
+import com.android.systemui.statusbar.pipeline.shared.data.model.DataActivityModel
 import kotlinx.coroutines.flow.MutableStateFlow
 
 class FakeMobileIconInteractor : MobileIconInteractor {
     override val alwaysShowDataRatIcon = MutableStateFlow(false)
 
+    override val activity =
+        MutableStateFlow(
+            DataActivityModel(
+                hasActivityIn = false,
+                hasActivityOut = false,
+            )
+        )
+
     private val _iconGroup = MutableStateFlow<SignalIcon.MobileIconGroup>(TelephonyIcons.THREE_G)
     override val networkTypeIconGroup = _iconGroup
+
+    override val networkName = MutableStateFlow(NetworkNameModel.Derived("demo mode"))
 
     private val _isEmergencyOnly = MutableStateFlow(false)
     override val isEmergencyOnly = _isEmergencyOnly
