@@ -4588,22 +4588,26 @@ public final class CameraCharacteristics extends CameraMetadata<CameraCharacteri
 
     /**
      * <p>Whether or not the camera device supports readout timestamp and
-     * onReadoutStarted callback.</p>
-     * <p>If this tag is HARDWARE, the camera device calls onReadoutStarted in addition to the
-     * onCaptureStarted callback for each capture. The timestamp passed into the callback
-     * is the start of camera image readout rather than the start of the exposure. In
-     * addition, the application can configure an
-     * {@link android.hardware.camera2.params.OutputConfiguration } with
-     * TIMESTAMP_BASE_READOUT_SENSOR timestamp base, in which case, the timestamp of the
-     * output surface matches the timestamp from the corresponding onReadoutStarted callback.</p>
+     * {@code onReadoutStarted} callback.</p>
+     * <p>If this tag is {@code HARDWARE}, the camera device calls
+     * {@link CameraCaptureSession.CaptureCallback#onReadoutStarted } in addition to the
+     * {@link CameraCaptureSession.CaptureCallback#onCaptureStarted } callback for each capture.
+     * The timestamp passed into the callback is the start of camera image readout rather than
+     * the start of the exposure. The timestamp source of
+     * {@link CameraCaptureSession.CaptureCallback#onReadoutStarted } is the same as that of
+     * {@link CameraCaptureSession.CaptureCallback#onCaptureStarted }.</p>
+     * <p>In addition, the application can switch an output surface's timestamp from start of
+     * exposure to start of readout by calling
+     * {@link android.hardware.camera2.params.OutputConfiguration#useReadoutTimestamp }.</p>
      * <p>The readout timestamp is beneficial for video recording, because the encoder favors
      * uniform timestamps, and the readout timestamps better reflect the cadence camera sensors
      * output data.</p>
-     * <p>If this tag is HARDWARE, the camera device produces the start-of-exposure and
-     * start-of-readout together. As a result, the onReadoutStarted is called right after
-     * onCaptureStarted. The difference in start-of-readout and start-of-exposure is the sensor
-     * exposure time, plus certain constant offset. The offset is usually due to camera sensor
-     * level crop, and it remains constant for a given camera sensor mode.</p>
+     * <p>Note that the camera device produces the start-of-exposure and start-of-readout callbacks
+     * together. As a result, the {@link CameraCaptureSession.CaptureCallback#onReadoutStarted }
+     * is called right after {@link CameraCaptureSession.CaptureCallback#onCaptureStarted }. The
+     * difference in start-of-readout and start-of-exposure is the sensor exposure time, plus
+     * certain constant offset. The offset is usually due to camera sensor level crop, and it is
+     * generally constant over time for the same set of output resolutions and capture settings.</p>
      * <p><b>Possible values:</b></p>
      * <ul>
      *   <li>{@link #SENSOR_READOUT_TIMESTAMP_NOT_SUPPORTED NOT_SUPPORTED}</li>
