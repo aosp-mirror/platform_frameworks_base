@@ -446,6 +446,10 @@ package android.telecom {
 
 package android.telephony {
 
+  public class CarrierConfigManager {
+    field public static final String KEY_MIN_UDP_PORT_4500_NAT_TIMEOUT_SEC_INT = "min_udp_port_4500_nat_timeout_sec_int";
+  }
+
   public abstract class CellSignalStrength {
     method public static int getNumSignalStrengthLevels();
   }
