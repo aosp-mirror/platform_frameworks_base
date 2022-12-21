@@ -2875,6 +2875,8 @@ class PackageManagerShellCommand extends ShellCommand {
                 newUserType = UserManager.USER_TYPE_FULL_DEMO;
             } else if ("--ephemeral".equals(opt)) {
                 flags |= UserInfo.FLAG_EPHEMERAL;
+            } else if ("--for-testing".equals(opt)) {
+                flags |= UserInfo.FLAG_FOR_TESTING;
             } else if ("--pre-create-only".equals(opt)) {
                 preCreateOnly = true;
             } else if ("--user-type".equals(opt)) {
@@ -4269,8 +4271,8 @@ class PackageManagerShellCommand extends ShellCommand {
         pw.println("  list users");
         pw.println("    Lists the current users.");
         pw.println("");
-        pw.println("  create-user [--profileOf USER_ID] [--managed] [--restricted] [--ephemeral]");
-        pw.println("      [--guest] [--pre-create-only] [--user-type USER_TYPE] USER_NAME");
+        pw.println("  create-user [--profileOf USER_ID] [--managed] [--restricted] [--guest]");
+        pw.println("       [--user-type USER_TYPE] [--ephemeral] [--for-testing] [--pre-create-only]   USER_NAME");
         pw.println("    Create a new user with the given USER_NAME, printing the new user identifier");
         pw.println("    of the user.");
         // TODO(b/142482943): Consider fetching the list of user types from UMS.

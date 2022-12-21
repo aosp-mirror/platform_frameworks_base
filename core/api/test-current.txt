@@ -897,6 +897,7 @@ package android.content.pm {
     method public boolean isDemo();
     method public boolean isEnabled();
     method public boolean isEphemeral();
+    method public boolean isForTesting();
     method public boolean isFull();
     method public boolean isGuest();
     method public boolean isInitialized();

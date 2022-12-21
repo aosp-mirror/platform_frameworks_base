@@ -254,7 +254,8 @@ public class UserManagerService extends IUserManager.Stub {
             | UserInfo.FLAG_RESTRICTED
             | UserInfo.FLAG_GUEST
             | UserInfo.FLAG_DEMO
-            | UserInfo.FLAG_FULL;
+            | UserInfo.FLAG_FULL
+            | UserInfo.FLAG_FOR_TESTING;
 
     @VisibleForTesting
     static final int MIN_USER_ID = UserHandle.MIN_SECONDARY_USER_ID;
