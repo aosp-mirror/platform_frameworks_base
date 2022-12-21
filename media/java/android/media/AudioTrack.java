@@ -28,6 +28,8 @@ import android.annotation.RequiresPermission;
 import android.annotation.SystemApi;
 import android.annotation.TestApi;
 import android.compat.annotation.UnsupportedAppUsage;
+import android.content.AttributionSource;
+import android.content.AttributionSource.ScopedParcelState;
 import android.content.Context;
 import android.media.audiopolicy.AudioMix;
 import android.media.audiopolicy.AudioMixingRule;
@@ -39,6 +41,7 @@ import android.os.Handler;
 import android.os.HandlerThread;
 import android.os.Looper;
 import android.os.Message;
+import android.os.Parcel;
 import android.os.PersistableBundle;
 import android.util.ArrayMap;
 import android.util.Log;
@@ -822,15 +825,20 @@ public class AudioTrack extends PlayerBase
         int[] session = new int[1];
         session[0] = resolvePlaybackSessionId(context, sessionId);
 
+        AttributionSource attributionSource = context == null
+                ? AttributionSource.myAttributionSource() : context.getAttributionSource();
+
         // native initialization
-        int initResult = native_setup(new WeakReference<AudioTrack>(this), mAttributes,
-                sampleRate, mChannelMask, mChannelIndexMask, mAudioFormat,
-                mNativeBufferSizeInBytes, mDataLoadMode, session, 0 /*nativeTrackInJavaObj*/,
-                offload, encapsulationMode, tunerConfiguration,
-                getCurrentOpPackageName());
-        if (initResult != SUCCESS) {
-            loge("Error code "+initResult+" when initializing AudioTrack.");
-            return; // with mState == STATE_UNINITIALIZED
+        try (ScopedParcelState attributionSourceState = attributionSource.asScopedParcelState()) {
+            int initResult = native_setup(new WeakReference<AudioTrack>(this), mAttributes,
+                    sampleRate, mChannelMask, mChannelIndexMask, mAudioFormat,
+                    mNativeBufferSizeInBytes, mDataLoadMode, session,
+                    attributionSourceState.getParcel(), 0 /*nativeTrackInJavaObj*/, offload,
+                    encapsulationMode, tunerConfiguration, getCurrentOpPackageName());
+            if (initResult != SUCCESS) {
+                loge("Error code " + initResult + " when initializing AudioTrack.");
+                return; // with mState == STATE_UNINITIALIZED
+            }
         }
 
         mSampleRate = sampleRate[0];
@@ -902,23 +910,27 @@ public class AudioTrack extends PlayerBase
             // *Native* AudioTrack, so the attributes parameters to native_setup() are ignored.
             int[] session = { 0 };
             int[] rates = { 0 };
-            int initResult = native_setup(new WeakReference<AudioTrack>(this),
-                    null /*mAttributes - NA*/,
-                    rates /*sampleRate - NA*/,
-                    0 /*mChannelMask - NA*/,
-                    0 /*mChannelIndexMask - NA*/,
-                    0 /*mAudioFormat - NA*/,
-                    0 /*mNativeBufferSizeInBytes - NA*/,
-                    0 /*mDataLoadMode - NA*/,
-                    session,
-                    nativeTrackInJavaObj,
-                    false /*offload*/,
-                    ENCAPSULATION_MODE_NONE,
-                    null /* tunerConfiguration */,
-                    "" /* opPackagename */);
-            if (initResult != SUCCESS) {
-                loge("Error code "+initResult+" when initializing AudioTrack.");
-                return; // with mState == STATE_UNINITIALIZED
+            try (ScopedParcelState attributionSourceState =
+                         AttributionSource.myAttributionSource().asScopedParcelState()) {
+                int initResult = native_setup(new WeakReference<AudioTrack>(this),
+                        null /*mAttributes - NA*/,
+                        rates /*sampleRate - NA*/,
+                        0 /*mChannelMask - NA*/,
+                        0 /*mChannelIndexMask - NA*/,
+                        0 /*mAudioFormat - NA*/,
+                        0 /*mNativeBufferSizeInBytes - NA*/,
+                        0 /*mDataLoadMode - NA*/,
+                        session,
+                        attributionSourceState.getParcel(),
+                        nativeTrackInJavaObj,
+                        false /*offload*/,
+                        ENCAPSULATION_MODE_NONE,
+                        null /* tunerConfiguration */,
+                        "" /* opPackagename */);
+                if (initResult != SUCCESS) {
+                    loge("Error code " + initResult + " when initializing AudioTrack.");
+                    return; // with mState == STATE_UNINITIALIZED
+                }
             }
 
             mSessionId = session[0];
@@ -4371,9 +4383,9 @@ public class AudioTrack extends PlayerBase
     private native final int native_setup(Object /*WeakReference<AudioTrack>*/ audiotrack_this,
             Object /*AudioAttributes*/ attributes,
             int[] sampleRate, int channelMask, int channelIndexMask, int audioFormat,
-            int buffSizeInBytes, int mode, int[] sessionId, long nativeAudioTrack,
-            boolean offload, int encapsulationMode, Object tunerConfiguration,
-            @NonNull String opPackageName);
+            int buffSizeInBytes, int mode, int[] sessionId, @NonNull Parcel attributionSource,
+            long nativeAudioTrack, boolean offload, int encapsulationMode,
+            Object tunerConfiguration, @NonNull String opPackageName);
 
     private native final void native_finalize();
 
