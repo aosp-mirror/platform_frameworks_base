@@ -138,6 +138,9 @@ public final class PointerIcon implements Parcelable {
     /** Type constant: grabbing. */
     public static final int TYPE_GRABBING = 1021;
 
+    /** Type constant: handwriting. */
+    public static final int TYPE_HANDWRITING = 1022;
+
     // OEM private types should be defined starting at this range to avoid
     // conflicts with any system types that may be defined in the future.
     private static final int TYPE_OEM_FIRST = 10000;
@@ -601,6 +604,8 @@ public final class PointerIcon implements Parcelable {
                 return com.android.internal.R.styleable.Pointer_pointerIconGrab;
             case TYPE_GRABBING:
                 return com.android.internal.R.styleable.Pointer_pointerIconGrabbing;
+            case TYPE_HANDWRITING:
+                return com.android.internal.R.styleable.Pointer_pointerIconHandwriting;
             default:
                 return 0;
         }
