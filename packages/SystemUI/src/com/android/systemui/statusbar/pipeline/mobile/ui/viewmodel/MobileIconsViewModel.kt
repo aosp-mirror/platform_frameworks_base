@@ -20,6 +20,7 @@ package com.android.systemui.statusbar.pipeline.mobile.ui.viewmodel
 
 import com.android.systemui.statusbar.pipeline.mobile.domain.interactor.MobileIconsInteractor
 import com.android.systemui.statusbar.pipeline.mobile.ui.view.ModernStatusBarMobileView
+import com.android.systemui.statusbar.pipeline.shared.ConnectivityConstants
 import com.android.systemui.statusbar.pipeline.shared.ConnectivityPipelineLogger
 import javax.inject.Inject
 import kotlinx.coroutines.InternalCoroutinesApi
@@ -36,13 +37,15 @@ constructor(
     val subscriptionIdsFlow: StateFlow<List<Int>>,
     private val interactor: MobileIconsInteractor,
     private val logger: ConnectivityPipelineLogger,
+    private val constants: ConnectivityConstants,
 ) {
     /** TODO: do we need to cache these? */
     fun viewModelForSub(subId: Int): MobileIconViewModel =
         MobileIconViewModel(
             subId,
             interactor.createMobileConnectionInteractorForSubId(subId),
-            logger
+            logger,
+            constants,
         )
 
     class Factory
@@ -50,12 +53,14 @@ constructor(
     constructor(
         private val interactor: MobileIconsInteractor,
         private val logger: ConnectivityPipelineLogger,
+        private val constants: ConnectivityConstants,
     ) {
         fun create(subscriptionIdsFlow: StateFlow<List<Int>>): MobileIconsViewModel {
             return MobileIconsViewModel(
                 subscriptionIdsFlow,
                 interactor,
                 logger,
+                constants,
             )
         }
     }
