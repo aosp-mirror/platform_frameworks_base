@@ -105,6 +105,14 @@ object KeyguardBouncerViewBinder {
                     }
 
                     launch {
+                        viewModel.showWithFullExpansion.collect { model ->
+                            hostViewController.resetSecurityContainer()
+                            hostViewController.showPromptReason(model.promptReason)
+                            hostViewController.onResume()
+                        }
+                    }
+
+                    launch {
                         viewModel.hide.collect {
                             hostViewController.cancelDismissAction()
                             hostViewController.cleanUp()

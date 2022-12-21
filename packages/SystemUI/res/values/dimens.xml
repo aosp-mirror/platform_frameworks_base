@@ -218,6 +218,9 @@
     <!-- Radius for notifications corners with adjacent notifications -->
     <dimen name="notification_corner_radius_small">4dp</dimen>
 
+    <!-- Vertical padding of the FSI container -->
+    <dimen name="fsi_chrome_vertical_padding">80dp</dimen>
+
     <!-- the padding of the shelf icon container -->
     <dimen name="shelf_icon_container_padding">13dp</dimen>
 

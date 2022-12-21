@@ -1425,7 +1425,7 @@
     <string name="ext_media_unmounting_notification_title" msgid="4147986383917892162">"<xliff:g id="NAME">%s</xliff:g>ని తొలగిస్తోంది"</string>
     <string name="ext_media_unmounting_notification_message" msgid="5717036261538754203">"తీసివేయవద్దు"</string>
     <string name="ext_media_init_action" msgid="2312974060585056709">"సెటప్ చేయండి"</string>
-    <string name="ext_media_unmount_action" msgid="966992232088442745">"తొలగించు"</string>
+    <string name="ext_media_unmount_action" msgid="966992232088442745">"తొలగించండి"</string>
     <string name="ext_media_browse_action" msgid="344865351947079139">"విశ్లేషించు"</string>
     <string name="ext_media_seamless_action" msgid="8837030226009268080">"అవుట్‌పుట్ మార్చండి"</string>
     <string name="ext_media_missing_title" msgid="3209472091220515046">"<xliff:g id="NAME">%s</xliff:g> కనుగొనబడటం లేదు"</string>
@@ -1525,7 +1525,7 @@
     <string name="gpsVerifNo" msgid="1671201856091564741">"కాదు"</string>
     <string name="sync_too_many_deletes" msgid="6999440774578705300">"తొలగింపు పరిమితి మించిపోయింది"</string>
     <string name="sync_too_many_deletes_desc" msgid="7409327940303504440">"<xliff:g id="TYPE_OF_SYNC">%2$s</xliff:g>, ఖాతా <xliff:g id="ACCOUNT_NAME">%3$s</xliff:g>కి సంబంధించి <xliff:g id="NUMBER_OF_DELETED_ITEMS">%1$d</xliff:g> తొలగించబడే అంశాలు ఉన్నాయి. మీరు ఏమి చేయాలనుకుంటున్నారు?"</string>
-    <string name="sync_really_delete" msgid="5657871730315579051">"అంశాలను తొలగించు"</string>
+    <string name="sync_really_delete" msgid="5657871730315579051">"అంశాలను తొలగించండి"</string>
     <string name="sync_undo_deletes" msgid="5786033331266418896">"తొలగింపులను చర్య రద్దు చేయండి"</string>
     <string name="sync_do_nothing" msgid="4528734662446469646">"ఇప్పటికీ ఏమీ చేయవద్దు"</string>
     <string name="choose_account_label" msgid="5557833752759831548">"ఖాతాను ఎంచుకోండి"</string>

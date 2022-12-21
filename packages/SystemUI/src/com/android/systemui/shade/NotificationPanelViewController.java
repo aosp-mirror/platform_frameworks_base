@@ -632,6 +632,7 @@ public final class NotificationPanelViewController implements Dumpable {
     private final KeyguardBottomAreaViewModel mKeyguardBottomAreaViewModel;
     private final KeyguardBottomAreaInteractor mKeyguardBottomAreaInteractor;
     private float mMinExpandHeight;
+    private ShadeHeightLogger mShadeHeightLogger;
     private boolean mPanelUpdateWhenAnimatorEnds;
     private boolean mHasVibratedOnOpen = false;
     private int mFixedDuration = NO_FIXED_DURATION;
@@ -711,6 +712,7 @@ public final class NotificationPanelViewController implements Dumpable {
             KeyguardUpdateMonitor keyguardUpdateMonitor,
             MetricsLogger metricsLogger,
             ShadeLogger shadeLogger,
+            ShadeHeightLogger shadeHeightLogger,
             ConfigurationController configurationController,
             Provider<FlingAnimationUtils.Builder> flingAnimationUtilsBuilder,
             StatusBarTouchableRegionManager statusBarTouchableRegionManager,
@@ -771,6 +773,7 @@ public final class NotificationPanelViewController implements Dumpable {
         mLockscreenGestureLogger = lockscreenGestureLogger;
         mShadeExpansionStateManager = shadeExpansionStateManager;
         mShadeLog = shadeLogger;
+        mShadeHeightLogger = shadeHeightLogger;
         mGutsManager = gutsManager;
         mView.addOnAttachStateChangeListener(new View.OnAttachStateChangeListener() {
             @Override
@@ -1815,6 +1818,7 @@ public final class NotificationPanelViewController implements Dumpable {
             waiting = true;
         } else {
             resetViews(false /* animate */);
+            mShadeHeightLogger.logFunctionCall("collapsePanel");
             setExpandedFraction(0); // just in case
         }
         if (!waiting) {
@@ -3691,6 +3695,7 @@ public final class NotificationPanelViewController implements Dumpable {
                                     beginJankMonitoring();
                                     fling(0  /* expand */);
                                 } else {
+                                    mShadeHeightLogger.logFunctionCall("expand");
                                     setExpandedFraction(1f);
                                 }
                                 mInstantExpanding = false;
@@ -4755,6 +4760,7 @@ public final class NotificationPanelViewController implements Dumpable {
         mInitialTouchFromKeyguard = mKeyguardStateController.isShowing();
         if (startTracking) {
             mTouchSlopExceeded = true;
+            mShadeHeightLogger.logFunctionCall("startExpandMotion");
             setExpandedHeight(mInitialOffsetOnTouch);
             onTrackingStarted();
         }
@@ -4900,6 +4906,7 @@ public final class NotificationPanelViewController implements Dumpable {
     @VisibleForTesting
     void setExpandedHeight(float height) {
         debugLog("setExpandedHeight(%.1f)", height);
+        mShadeHeightLogger.logFunctionCall("setExpandedHeight");
         setExpandedHeightInternal(height);
     }
 
@@ -4923,10 +4930,13 @@ public final class NotificationPanelViewController implements Dumpable {
             return;
         }
 
+        mShadeHeightLogger.logFunctionCall("updateExpandedHeightToMaxHeight");
         setExpandedHeight(currentMaxPanelHeight);
     }
 
     private void setExpandedHeightInternal(float h) {
+        mShadeHeightLogger.logSetExpandedHeightInternal(h, mSystemClock.currentTimeMillis());
+
         if (isNaN(h)) {
             Log.wtf(TAG, "ExpandedHeight set to NaN");
         }
@@ -4983,7 +4993,9 @@ public final class NotificationPanelViewController implements Dumpable {
 
     /** Sets the expanded height relative to a number from 0 to 1. */
     public void setExpandedFraction(float frac) {
-        setExpandedHeight(getMaxPanelTransitionDistance() * frac);
+        final int maxDist = getMaxPanelTransitionDistance();
+        mShadeHeightLogger.logFunctionCall("setExpandedFraction");
+        setExpandedHeight(maxDist * frac);
     }
 
     float getExpandedHeight() {
@@ -5045,6 +5057,7 @@ public final class NotificationPanelViewController implements Dumpable {
     /** Collapses the shade instantly without animation. */
     public void instantCollapse() {
         abortAnimations();
+        mShadeHeightLogger.logFunctionCall("instantCollapse");
         setExpandedFraction(0f);
         if (mExpanding) {
             notifyExpandingFinished();
@@ -5161,6 +5174,7 @@ public final class NotificationPanelViewController implements Dumpable {
                                         animator.getAnimatedFraction()));
                         setOverExpansionInternal(expansion, false /* isFromGesture */);
                     }
+                    mShadeHeightLogger.logFunctionCall("height animator update");
                     setExpandedHeightInternal((float) animation.getAnimatedValue());
                 });
         return animator;
@@ -5635,6 +5649,7 @@ public final class NotificationPanelViewController implements Dumpable {
         mStatusBarStateController.setUpcomingState(KEYGUARD);
         mStatusBarStateListener.onStateChanged(KEYGUARD);
         mStatusBarStateListener.onDozeAmountChanged(1f, 1f);
+        mShadeHeightLogger.logFunctionCall("showAodUi");
         setExpandedFraction(1f);
     }
 
@@ -6181,6 +6196,7 @@ public final class NotificationPanelViewController implements Dumpable {
                         // otherwise {@link NotificationStackScrollLayout}
                         // wrongly enables stack height updates at the start of lockscreen swipe-up
                         mAmbientState.setSwipingUp(h <= 0);
+                        mShadeHeightLogger.logFunctionCall("ACTION_MOVE");
                         setExpandedHeightInternal(newHeight);
                     }
                     break;

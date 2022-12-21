@@ -1096,7 +1096,7 @@ public class WallpaperManager {
     }
 
     /**
-     * Like {@link #getFastDrawable(int)}, but the returned Drawable has a number
+     * Like {@link #getDrawable(int)}, but the returned Drawable has a number
      * of limitations to reduce its overhead as much as possible. It will
      * never scale the wallpaper (only centering it if the requested bounds
      * do match the bitmap bounds, which should not be typical), doesn't

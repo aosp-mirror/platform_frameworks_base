@@ -170,6 +170,7 @@ class KeyguardQuickAffordanceProviderTest : SysuiTestCase() {
                     FakeFeatureFlags().apply {
                         set(Flags.CUSTOMIZABLE_LOCK_SCREEN_QUICK_AFFORDANCES, true)
                         set(Flags.LOCKSCREEN_CUSTOM_CLOCKS, true)
+                        set(Flags.REVAMPED_WALLPAPER_UI, true)
                     },
                 repository = { quickAffordanceRepository },
                 launchAnimator = launchAnimator,
