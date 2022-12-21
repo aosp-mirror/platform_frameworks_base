@@ -22,6 +22,7 @@ import android.content.Context
 import android.util.AttributeSet
 import com.android.systemui.surfaceeffects.ripple.RippleShader
 import com.android.systemui.surfaceeffects.ripple.RippleView
+import kotlin.math.pow
 
 /**
  * An expanding ripple effect for the media tap-to-transfer receiver chip.
@@ -58,5 +59,45 @@ class ReceiverChipRippleView(context: Context?, attrs: AttributeSet?) : RippleVi
             }
         })
         animator.reverse()
+    }
+
+    // Expands the ripple to cover full screen.
+    fun expandToFull(newHeight: Float, onAnimationEnd: Runnable? = null) {
+        if (!isStarted) {
+            return
+        }
+        // Reset all listeners to animator.
+        animator.removeAllListeners()
+        animator.removeAllUpdateListeners()
+
+        // Only show the outline as ripple expands and disappears when animation ends.
+        setRippleFill(false)
+
+        val startingPercentage = calculateStartingPercentage(newHeight)
+        animator.addUpdateListener { updateListener ->
+            val now = updateListener.currentPlayTime
+            val progress = updateListener.animatedValue as Float
+            rippleShader.progress = startingPercentage + (progress * (1 - startingPercentage))
+            rippleShader.distortionStrength = 1 - rippleShader.progress
+            rippleShader.pixelDensity = 1 - rippleShader.progress
+            rippleShader.time = now.toFloat()
+            invalidate()
+        }
+        animator.addListener(object : AnimatorListenerAdapter() {
+            override fun onAnimationEnd(animation: Animator?) {
+                animation?.let { visibility = GONE }
+                onAnimationEnd?.run()
+                isStarted = false
+            }
+        })
+        animator.start()
+    }
+
+    // Calculates the actual starting percentage according to ripple shader progress set method.
+    // Check calculations in [RippleShader.progress]
+    fun calculateStartingPercentage(newHeight: Float): Float {
+        val ratio = rippleShader.currentHeight / newHeight
+        val remainingPercentage = (1 - ratio).toDouble().pow(1 / 3.toDouble()).toFloat()
+        return 1 - remainingPercentage
     }
 }
