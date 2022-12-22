@@ -18,13 +18,16 @@ package com.android.systemui.statusbar.pipeline.mobile.data.repository.demo
 
 import android.telephony.Annotation
 import android.telephony.TelephonyManager
+import android.telephony.TelephonyManager.DATA_ACTIVITY_NONE
 import androidx.test.filters.SmallTest
 import com.android.settingslib.SignalIcon
 import com.android.settingslib.mobile.TelephonyIcons
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.statusbar.pipeline.mobile.data.model.DataConnectionState
 import com.android.systemui.statusbar.pipeline.mobile.data.model.MobileConnectionModel
+import com.android.systemui.statusbar.pipeline.mobile.data.model.NetworkNameModel
 import com.android.systemui.statusbar.pipeline.mobile.data.repository.demo.model.FakeNetworkEventModel
+import com.android.systemui.statusbar.pipeline.shared.data.model.toMobileDataActivityModel
 import com.android.systemui.util.mockito.mock
 import com.android.systemui.util.mockito.whenever
 import com.google.common.truth.Truth.assertThat
@@ -95,6 +98,8 @@ internal class DemoMobileConnectionParameterizedTest(private val testCase: TestC
                     inflateStrength = testCase.inflateStrength,
                     activity = testCase.activity,
                     carrierNetworkChange = testCase.carrierNetworkChange,
+                    roaming = testCase.roaming,
+                    name = "demo name",
                 )
 
             fakeNetworkEventFlow.value = networkModel
@@ -113,9 +118,12 @@ internal class DemoMobileConnectionParameterizedTest(private val testCase: TestC
                 assertThat(conn.subId).isEqualTo(model.subId)
                 assertThat(connectionInfo.cdmaLevel).isEqualTo(model.level)
                 assertThat(connectionInfo.primaryLevel).isEqualTo(model.level)
-                assertThat(connectionInfo.dataActivityDirection).isEqualTo(model.activity)
+                assertThat(connectionInfo.dataActivityDirection)
+                    .isEqualTo((model.activity ?: DATA_ACTIVITY_NONE).toMobileDataActivityModel())
                 assertThat(connectionInfo.carrierNetworkChangeActive)
                     .isEqualTo(model.carrierNetworkChange)
+                assertThat(connectionInfo.isRoaming).isEqualTo(model.roaming)
+                assertThat(conn.networkName.value).isEqualTo(NetworkNameModel.Derived(model.name))
 
                 // TODO(b/261029387): check these once we start handling them
                 assertThat(connectionInfo.isEmergencyOnly).isFalse()
@@ -138,6 +146,8 @@ internal class DemoMobileConnectionParameterizedTest(private val testCase: TestC
         val inflateStrength: Boolean,
         @Annotation.DataActivityType val activity: Int,
         val carrierNetworkChange: Boolean,
+        val roaming: Boolean,
+        val name: String,
     ) {
         override fun toString(): String {
             return "INPUT(level=$level, " +
@@ -146,7 +156,9 @@ internal class DemoMobileConnectionParameterizedTest(private val testCase: TestC
                 "carrierId=$carrierId, " +
                 "inflateStrength=$inflateStrength, " +
                 "activity=$activity, " +
-                "carrierNetworkChange=$carrierNetworkChange)"
+                "carrierNetworkChange=$carrierNetworkChange, " +
+                "roaming=$roaming, " +
+                "name=$name)"
         }
 
         // Convenience for iterating test data and creating new cases
@@ -158,6 +170,8 @@ internal class DemoMobileConnectionParameterizedTest(private val testCase: TestC
             inflateStrength: Boolean? = null,
             @Annotation.DataActivityType activity: Int? = null,
             carrierNetworkChange: Boolean? = null,
+            roaming: Boolean? = null,
+            name: String? = null,
         ): TestCase =
             TestCase(
                 level = level ?: this.level,
@@ -166,7 +180,9 @@ internal class DemoMobileConnectionParameterizedTest(private val testCase: TestC
                 carrierId = carrierId ?: this.carrierId,
                 inflateStrength = inflateStrength ?: this.inflateStrength,
                 activity = activity ?: this.activity,
-                carrierNetworkChange = carrierNetworkChange ?: this.carrierNetworkChange
+                carrierNetworkChange = carrierNetworkChange ?: this.carrierNetworkChange,
+                roaming = roaming ?: this.roaming,
+                name = name ?: this.name,
             )
     }
 
@@ -193,6 +209,9 @@ internal class DemoMobileConnectionParameterizedTest(private val testCase: TestC
                 TelephonyManager.DATA_ACTIVITY_INOUT
             )
         private val carrierNetworkChange = booleanList
+        // false first so the base case doesn't have roaming set (more common)
+        private val roaming = listOf(false, true)
+        private val names = listOf("name 1", "name 2")
 
         @Parameters(name = "{0}") @JvmStatic fun data() = testData()
 
@@ -226,7 +245,9 @@ internal class DemoMobileConnectionParameterizedTest(private val testCase: TestC
                     carrierIds.first(),
                     inflateStrength.first(),
                     activity.first(),
-                    carrierNetworkChange.first()
+                    carrierNetworkChange.first(),
+                    roaming.first(),
+                    names.first(),
                 )
 
             val tail =
@@ -237,6 +258,8 @@ internal class DemoMobileConnectionParameterizedTest(private val testCase: TestC
                         inflateStrength.map { baseCase.modifiedBy(inflateStrength = it) },
                         activity.map { baseCase.modifiedBy(activity = it) },
                         carrierNetworkChange.map { baseCase.modifiedBy(carrierNetworkChange = it) },
+                        roaming.map { baseCase.modifiedBy(roaming = it) },
+                        names.map { baseCase.modifiedBy(name = it) },
                     )
                     .flatten()
 

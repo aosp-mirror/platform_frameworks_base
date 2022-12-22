@@ -211,7 +211,7 @@ open class ChipbarCoordinator @Inject constructor(
         )
     }
 
-    override fun animateViewOut(view: ViewGroup, onAnimationEnd: Runnable) {
+    override fun animateViewOut(view: ViewGroup, removalReason: String?, onAnimationEnd: Runnable) {
         val innerView = view.getInnerView()
         innerView.accessibilityLiveRegion = ACCESSIBILITY_LIVE_REGION_NONE
         ViewHierarchyAnimator.animateRemoval(

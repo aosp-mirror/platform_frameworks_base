@@ -20,10 +20,10 @@ import android.net.wifi.WifiManager
 import androidx.test.filters.SmallTest
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.statusbar.pipeline.shared.data.model.ConnectivitySlot
+import com.android.systemui.statusbar.pipeline.shared.data.model.DataActivityModel
 import com.android.systemui.statusbar.pipeline.shared.data.repository.FakeConnectivityRepository
 import com.android.systemui.statusbar.pipeline.wifi.data.model.WifiNetworkModel
 import com.android.systemui.statusbar.pipeline.wifi.data.repository.FakeWifiRepository
-import com.android.systemui.statusbar.pipeline.wifi.shared.model.WifiActivityModel
 import com.google.common.truth.Truth.assertThat
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
@@ -225,23 +225,23 @@ class WifiInteractorImplTest : SysuiTestCase() {
 
     @Test
     fun activity_matchesRepoWifiActivity() = runBlocking(IMMEDIATE) {
-        var latest: WifiActivityModel? = null
+        var latest: DataActivityModel? = null
         val job = underTest
             .activity
             .onEach { latest = it }
             .launchIn(this)
 
-        val activity1 = WifiActivityModel(hasActivityIn = true, hasActivityOut = true)
+        val activity1 = DataActivityModel(hasActivityIn = true, hasActivityOut = true)
         wifiRepository.setWifiActivity(activity1)
         yield()
         assertThat(latest).isEqualTo(activity1)
 
-        val activity2 = WifiActivityModel(hasActivityIn = false, hasActivityOut = false)
+        val activity2 = DataActivityModel(hasActivityIn = false, hasActivityOut = false)
         wifiRepository.setWifiActivity(activity2)
         yield()
         assertThat(latest).isEqualTo(activity2)
 
-        val activity3 = WifiActivityModel(hasActivityIn = true, hasActivityOut = false)
+        val activity3 = DataActivityModel(hasActivityIn = true, hasActivityOut = false)
         wifiRepository.setWifiActivity(activity3)
         yield()
         assertThat(latest).isEqualTo(activity3)

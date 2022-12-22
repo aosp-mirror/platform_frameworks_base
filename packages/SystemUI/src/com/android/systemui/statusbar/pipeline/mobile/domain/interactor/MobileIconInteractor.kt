@@ -20,10 +20,13 @@ import android.telephony.CarrierConfigManager
 import com.android.settingslib.SignalIcon.MobileIconGroup
 import com.android.systemui.dagger.qualifiers.Application
 import com.android.systemui.statusbar.pipeline.mobile.data.model.DataConnectionState.Connected
+import com.android.systemui.statusbar.pipeline.mobile.data.model.NetworkNameModel
 import com.android.systemui.statusbar.pipeline.mobile.data.repository.MobileConnectionRepository
+import com.android.systemui.statusbar.pipeline.shared.data.model.DataActivityModel
 import com.android.systemui.util.CarrierConfigTracker
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
@@ -32,6 +35,9 @@ import kotlinx.coroutines.flow.mapLatest
 import kotlinx.coroutines.flow.stateIn
 
 interface MobileIconInteractor {
+    /** The current mobile data activity */
+    val activity: Flow<DataActivityModel>
+
     /** Only true if mobile is the default transport but is not validated, otherwise false */
     val isDefaultConnectionFailed: StateFlow<Boolean>
 
@@ -51,8 +57,24 @@ interface MobileIconInteractor {
     /** Observable for RAT type (network type) indicator */
     val networkTypeIconGroup: StateFlow<MobileIconGroup>
 
+    /**
+     * Provider name for this network connection. The name can be one of 3 values:
+     * 1. The default network name, if one is configured
+     * 2. A derived name based off of the intent [ACTION_SERVICE_PROVIDERS_UPDATED]
+     * 3. Or, in the case where the repository sends us the default network name, we check for an
+     * override in [connectionInfo.operatorAlphaShort], a value that is derived from [ServiceState]
+     */
+    val networkName: StateFlow<NetworkNameModel>
+
     /** True if this line of service is emergency-only */
     val isEmergencyOnly: StateFlow<Boolean>
+
+    /**
+     * True if this connection is considered roaming. The roaming bit can come from [ServiceState],
+     * or directly from the telephony manager's CDMA ERI number value. Note that we don't consider a
+     * connection to be roaming while carrier network change is active
+     */
+    val isRoaming: StateFlow<Boolean>
 
     /** Int describing the connection strength. 0-4 OR 1-5. See [numberOfLevels] */
     val level: StateFlow<Int>
@@ -75,9 +97,27 @@ class MobileIconInteractorImpl(
 ) : MobileIconInteractor {
     private val connectionInfo = connectionRepository.connectionInfo
 
+    override val activity = connectionInfo.mapLatest { it.dataActivityDirection }
+
     override val isDataEnabled: StateFlow<Boolean> = connectionRepository.dataEnabled
 
     override val isDefaultDataEnabled = defaultSubscriptionHasDataEnabled
+
+    override val networkName =
+        combine(connectionInfo, connectionRepository.networkName) { connection, networkName ->
+                if (
+                    networkName is NetworkNameModel.Default && connection.operatorAlphaShort != null
+                ) {
+                    NetworkNameModel.Derived(connection.operatorAlphaShort)
+                } else {
+                    networkName
+                }
+            }
+            .stateIn(
+                scope,
+                SharingStarted.WhileSubscribed(),
+                connectionRepository.networkName.value
+            )
 
     /** Observable for the current RAT indicator icon ([MobileIconGroup]) */
     override val networkTypeIconGroup: StateFlow<MobileIconGroup> =
@@ -93,6 +133,18 @@ class MobileIconInteractorImpl(
     override val isEmergencyOnly: StateFlow<Boolean> =
         connectionInfo
             .mapLatest { it.isEmergencyOnly }
+            .stateIn(scope, SharingStarted.WhileSubscribed(), false)
+
+    override val isRoaming: StateFlow<Boolean> =
+        combine(connectionInfo, connectionRepository.cdmaRoaming) { connection, cdmaRoaming ->
+                if (connection.carrierNetworkChangeActive) {
+                    false
+                } else if (connection.isGsm) {
+                    connection.isRoaming
+                } else {
+                    cdmaRoaming
+                }
+            }
             .stateIn(scope, SharingStarted.WhileSubscribed(), false)
 
     override val level: StateFlow<Int> =

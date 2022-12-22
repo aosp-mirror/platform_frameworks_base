@@ -36,7 +36,7 @@ import com.android.systemui.surfaceeffects.ripple.RippleShader.RippleShape
  */
 open class RippleView(context: Context?, attrs: AttributeSet?) : View(context, attrs) {
 
-    private lateinit var rippleShader: RippleShader
+    protected lateinit var rippleShader: RippleShader
     lateinit var rippleShape: RippleShape
         private set
 
