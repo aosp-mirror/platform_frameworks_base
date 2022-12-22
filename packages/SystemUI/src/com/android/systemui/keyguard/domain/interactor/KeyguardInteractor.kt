@@ -22,12 +22,16 @@ import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.keyguard.data.repository.KeyguardRepository
 import com.android.systemui.keyguard.shared.model.BiometricUnlockModel
 import com.android.systemui.keyguard.shared.model.DozeStateModel
+import com.android.systemui.keyguard.shared.model.DozeStateModel.Companion.isDozeOff
 import com.android.systemui.keyguard.shared.model.DozeTransitionModel
 import com.android.systemui.keyguard.shared.model.StatusBarState
 import com.android.systemui.keyguard.shared.model.WakefulnessModel
+import com.android.systemui.util.kotlin.sample
 import javax.inject.Inject
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.filter
+import kotlinx.coroutines.flow.merge
 
 /**
  * Encapsulates business-logic related to the keyguard but not to a more specific part within it.
@@ -52,8 +56,27 @@ constructor(
      * but not vice-versa.
      */
     val isDreaming: Flow<Boolean> = repository.isDreaming
+    /** Whether the system is dreaming with an overlay active */
+    val isDreamingWithOverlay: Flow<Boolean> = repository.isDreamingWithOverlay
+
+    /**
+     * Dozing and dreaming have overlapping events. If the doze state remains in FINISH, it means
+     * that doze mode is not running and DREAMING is ok to commence.
+     */
+    val isAbleToDream: Flow<Boolean> =
+        merge(isDreaming, isDreamingWithOverlay)
+            .sample(
+                dozeTransitionModel,
+                { isDreaming, dozeTransitionModel ->
+                    isDreaming && isDozeOff(dozeTransitionModel.to)
+                }
+            )
+            .distinctUntilChanged()
+
     /** Whether the keyguard is showing or not. */
     val isKeyguardShowing: Flow<Boolean> = repository.isKeyguardShowing
+    /** Whether the keyguard is occluded (covered by an activity). */
+    val isKeyguardOccluded: Flow<Boolean> = repository.isKeyguardOccluded
     /** Whether the keyguard is going away. */
     val isKeyguardGoingAway: Flow<Boolean> = repository.isKeyguardGoingAway
     /** Whether the bouncer is showing or not. */
@@ -74,8 +97,8 @@ constructor(
     /** The approximate location on the screen of the face unlock sensor, if one is available. */
     val faceSensorLocation: Flow<Point?> = repository.faceSensorLocation
 
-    fun dozeTransitionTo(state: DozeStateModel): Flow<DozeTransitionModel> {
-        return dozeTransitionModel.filter { it.to == state }
+    fun dozeTransitionTo(vararg states: DozeStateModel): Flow<DozeTransitionModel> {
+        return dozeTransitionModel.filter { states.contains(it.to) }
     }
     fun isKeyguardShowing(): Boolean {
         return repository.isKeyguardShowing()

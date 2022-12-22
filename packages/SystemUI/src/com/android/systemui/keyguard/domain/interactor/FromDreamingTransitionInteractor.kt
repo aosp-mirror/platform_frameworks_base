@@ -36,75 +36,40 @@ import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.launch
 
 @SysUISingleton
-class DreamingTransitionInteractor
+class FromDreamingTransitionInteractor
 @Inject
 constructor(
     @Application private val scope: CoroutineScope,
     private val keyguardInteractor: KeyguardInteractor,
     private val keyguardTransitionRepository: KeyguardTransitionRepository,
     private val keyguardTransitionInteractor: KeyguardTransitionInteractor,
-) : TransitionInteractor(DreamingTransitionInteractor::class.simpleName!!) {
-
-    private val canDreamFrom =
-        setOf(KeyguardState.LOCKSCREEN, KeyguardState.GONE, KeyguardState.DOZING)
+) : TransitionInteractor(FromDreamingTransitionInteractor::class.simpleName!!) {
 
     override fun start() {
-        listenForEntryToDreaming()
         listenForDreamingToLockscreen()
+        listenForDreamingToOccluded()
         listenForDreamingToGone()
         listenForDreamingToDozing()
     }
 
-    private fun listenForEntryToDreaming() {
-        scope.launch {
-            keyguardInteractor.isDreaming
-                .sample(
-                    combine(
-                        keyguardInteractor.dozeTransitionModel,
-                        keyguardTransitionInteractor.finishedKeyguardState,
-                        ::Pair
-                    ),
-                    ::toTriple
-                )
-                .collect { triple ->
-                    val (isDreaming, dozeTransitionModel, keyguardState) = triple
-                    // Dozing/AOD and dreaming have overlapping events. If the state remains in
-                    // FINISH, it means that doze mode is not running and DREAMING is ok to
-                    // commence.
-                    if (
-                        isDozeOff(dozeTransitionModel.to) &&
-                            isDreaming &&
-                            canDreamFrom.contains(keyguardState)
-                    ) {
-                        keyguardTransitionRepository.startTransition(
-                            TransitionInfo(
-                                name,
-                                keyguardState,
-                                KeyguardState.DREAMING,
-                                getAnimator(),
-                            )
-                        )
-                    }
-                }
-        }
-    }
-
     private fun listenForDreamingToLockscreen() {
         scope.launch {
-            keyguardInteractor.isDreaming
+            // Using isDreamingWithOverlay provides an optimized path to LOCKSCREEN state, which
+            // otherwise would have gone through OCCLUDED first
+            keyguardInteractor.isDreamingWithOverlay
                 .sample(
                     combine(
                         keyguardInteractor.dozeTransitionModel,
                         keyguardTransitionInteractor.startedKeyguardTransitionStep,
-                        ::Pair,
+                        ::Pair
                     ),
                     ::toTriple
                 )
                 .collect { triple ->
                     val (isDreaming, dozeTransitionModel, lastStartedTransition) = triple
                     if (
-                        isDozeOff(dozeTransitionModel.to) &&
-                            !isDreaming &&
+                        !isDreaming &&
+                            isDozeOff(dozeTransitionModel.to) &&
                             lastStartedTransition.to == KeyguardState.DREAMING
                     ) {
                         keyguardTransitionRepository.startTransition(
@@ -113,6 +78,42 @@ constructor(
                                 KeyguardState.DREAMING,
                                 KeyguardState.LOCKSCREEN,
                                 getAnimator(TO_LOCKSCREEN_DURATION),
+                            )
+                        )
+                    }
+                }
+        }
+    }
+
+    private fun listenForDreamingToOccluded() {
+        scope.launch {
+            keyguardInteractor.isDreaming
+                .sample(
+                    combine(
+                        keyguardInteractor.isKeyguardOccluded,
+                        keyguardTransitionInteractor.startedKeyguardTransitionStep,
+                        ::Pair,
+                    ),
+                    ::toTriple
+                )
+                .collect { triple ->
+                    val (isDreaming, isOccluded, lastStartedTransition) = triple
+                    if (
+                        isOccluded &&
+                            !isDreaming &&
+                            (lastStartedTransition.to == KeyguardState.DREAMING ||
+                                lastStartedTransition.to == KeyguardState.LOCKSCREEN)
+                    ) {
+                        // At the moment, checking for LOCKSCREEN state above provides a corrective
+                        // action. There's no great signal to determine when the dream is ending
+                        // and a transition to OCCLUDED is beginning directly. For now, the solution
+                        // is DREAMING->LOCKSCREEN->OCCLUDED
+                        keyguardTransitionRepository.startTransition(
+                            TransitionInfo(
+                                name,
+                                lastStartedTransition.to,
+                                KeyguardState.OCCLUDED,
+                                getAnimator(),
                             )
                         )
                     }
