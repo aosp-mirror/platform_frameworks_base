@@ -188,6 +188,19 @@ public class BiometricPrompt implements BiometricAuthenticator, BiometricConstan
         }
 
         /**
+         * Shows a default subtitle for the prompt if the subtitle would otherwise be
+         * null or empty. Currently for internal use only.
+         * @return This builder.
+         * @hide
+         */
+        @RequiresPermission(USE_BIOMETRIC_INTERNAL)
+        @NonNull
+        public Builder setUseDefaultSubtitle() {
+            mPromptInfo.setUseDefaultSubtitle(true);
+            return this;
+        }
+
+        /**
          * Optional: Sets a description that will be shown on the prompt.
          * @param description The description to display.
          * @return This builder.
@@ -626,6 +639,16 @@ public class BiometricPrompt implements BiometricAuthenticator, BiometricConstan
     @Nullable
     public CharSequence getSubtitle() {
         return mPromptInfo.getSubtitle();
+    }
+
+    /**
+     * Whether to use a default subtitle. For internal use only.
+     * @return See {@link Builder#setUseDefaultSubtitle()}.
+     * @hide
+     */
+    @RequiresPermission(USE_BIOMETRIC_INTERNAL)
+    public boolean shouldUseDefaultSubtitle() {
+        return mPromptInfo.isUseDefaultSubtitle();
     }
 
     /**
