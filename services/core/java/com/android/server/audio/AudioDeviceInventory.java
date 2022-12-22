@@ -33,6 +33,8 @@ import android.media.IAudioRoutesObserver;
 import android.media.ICapturePresetDevicesRoleDispatcher;
 import android.media.IStrategyPreferredDevicesDispatcher;
 import android.media.MediaMetrics;
+import android.media.permission.ClearCallingIdentityContext;
+import android.media.permission.SafeCloseable;
 import android.os.Binder;
 import android.os.RemoteCallbackList;
 import android.os.RemoteException;
@@ -635,14 +637,15 @@ public class AudioDeviceInventory {
 
     /*package*/ int setPreferredDevicesForStrategySync(int strategy,
             @NonNull List<AudioDeviceAttributes> devices) {
-        final long identity = Binder.clearCallingIdentity();
+        int status = AudioSystem.ERROR;
 
-        AudioService.sDeviceLogger.enqueue((new EventLogger.StringEvent(
-                                "setPreferredDevicesForStrategySync, strategy: " + strategy
-                                + " devices: " + devices)).printLog(TAG));
-        final int status = mAudioSystem.setDevicesRoleForStrategy(
-                strategy, AudioSystem.DEVICE_ROLE_PREFERRED, devices);
-        Binder.restoreCallingIdentity(identity);
+        try (SafeCloseable ignored = ClearCallingIdentityContext.create()) {
+            AudioService.sDeviceLogger.enqueue((new EventLogger.StringEvent(
+                            "setPreferredDevicesForStrategySync, strategy: " + strategy
+                            + " devices: " + devices)).printLog(TAG));
+            status = mAudioSystem.setDevicesRoleForStrategy(
+                    strategy, AudioSystem.DEVICE_ROLE_PREFERRED, devices);
+        }
 
         if (status == AudioSystem.SUCCESS) {
             mDeviceBroker.postSaveSetPreferredDevicesForStrategy(strategy, devices);
@@ -651,15 +654,16 @@ public class AudioDeviceInventory {
     }
 
     /*package*/ int removePreferredDevicesForStrategySync(int strategy) {
-        final long identity = Binder.clearCallingIdentity();
+        int status = AudioSystem.ERROR;
 
-        AudioService.sDeviceLogger.enqueue((new EventLogger.StringEvent(
-                "removePreferredDevicesForStrategySync, strategy: "
-                + strategy)).printLog(TAG));
+        try (SafeCloseable ignored = ClearCallingIdentityContext.create()) {
+            AudioService.sDeviceLogger.enqueue((new EventLogger.StringEvent(
+                            "removePreferredDevicesForStrategySync, strategy: "
+                            + strategy)).printLog(TAG));
 
-        final int status = mAudioSystem.removeDevicesRoleForStrategy(
-                strategy, AudioSystem.DEVICE_ROLE_PREFERRED);
-        Binder.restoreCallingIdentity(identity);
+            status = mAudioSystem.removeDevicesRoleForStrategy(
+                    strategy, AudioSystem.DEVICE_ROLE_PREFERRED);
+        }
 
         if (status == AudioSystem.SUCCESS) {
             mDeviceBroker.postSaveRemovePreferredDevicesForStrategy(strategy);
@@ -679,10 +683,12 @@ public class AudioDeviceInventory {
 
     /*package*/ int setPreferredDevicesForCapturePresetSync(
             int capturePreset, @NonNull List<AudioDeviceAttributes> devices) {
-        final long identity = Binder.clearCallingIdentity();
-        final int status = mAudioSystem.setDevicesRoleForCapturePreset(
-                capturePreset, AudioSystem.DEVICE_ROLE_PREFERRED, devices);
-        Binder.restoreCallingIdentity(identity);
+        int status = AudioSystem.ERROR;
+
+        try (SafeCloseable ignored = ClearCallingIdentityContext.create()) {
+            status = mAudioSystem.setDevicesRoleForCapturePreset(
+                    capturePreset, AudioSystem.DEVICE_ROLE_PREFERRED, devices);
+        }
 
         if (status == AudioSystem.SUCCESS) {
             mDeviceBroker.postSaveSetPreferredDevicesForCapturePreset(capturePreset, devices);
@@ -691,10 +697,12 @@ public class AudioDeviceInventory {
     }
 
     /*package*/ int clearPreferredDevicesForCapturePresetSync(int capturePreset) {
-        final long identity = Binder.clearCallingIdentity();
-        final int status = mAudioSystem.clearDevicesRoleForCapturePreset(
-                capturePreset, AudioSystem.DEVICE_ROLE_PREFERRED);
-        Binder.restoreCallingIdentity(identity);
+        int status  = AudioSystem.ERROR;
+
+        try (SafeCloseable ignored = ClearCallingIdentityContext.create()) {
+            status = mAudioSystem.clearDevicesRoleForCapturePreset(
+                    capturePreset, AudioSystem.DEVICE_ROLE_PREFERRED);
+        }
 
         if (status == AudioSystem.SUCCESS) {
             mDeviceBroker.postSaveClearPreferredDevicesForCapturePreset(capturePreset);

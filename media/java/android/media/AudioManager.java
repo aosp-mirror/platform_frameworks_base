@@ -1841,8 +1841,7 @@ public class AudioManager {
      * {@link #setPreferredDeviceForStrategy(AudioProductStrategy, AudioDeviceAttributes)}
      * {@link #setPreferredDevicesForStrategy(AudioProductStrategy, List<AudioDeviceAttributes>)}
      * @param strategy the strategy to query
-     * @return the preferred device for that strategy, or null if none was ever set or if the
-     *    strategy is invalid
+     * @return list of the preferred devices for that strategy
      */
     @SystemApi
     @RequiresPermission(android.Manifest.permission.MODIFY_AUDIO_ROUTING)
@@ -1902,7 +1901,6 @@ public class AudioManager {
      * @see #setPreferredDeviceForStrategy(AudioProductStrategy, AudioDeviceAttributes)
      * @see #setPreferredDevicesForStrategy(AudioProductStrategy, List)
      * @see #removePreferredDeviceForStrategy(AudioProductStrategy)
-     * @see #getPreferredDeviceForStrategy(AudioProductStrategy)
      * @see #getPreferredDevicesForStrategy(AudioProductStrategy)
      */
     @SystemApi
@@ -1966,30 +1964,9 @@ public class AudioManager {
             throws SecurityException {
         Objects.requireNonNull(executor);
         Objects.requireNonNull(listener);
-        synchronized (mPrefDevListenerLock) {
-            if (hasPrefDevListener(listener)) {
-                throw new IllegalArgumentException(
-                        "attempt to call addOnPreferredDevicesForStrategyChangedListener() "
-                                + "on a previously registered listener");
-            }
-            // lazy initialization of the list of strategy-preferred device listener
-            if (mPrefDevListeners == null) {
-                mPrefDevListeners = new ArrayList<>();
-            }
-            final int oldCbCount = mPrefDevListeners.size();
-            mPrefDevListeners.add(new PrefDevListenerInfo(listener, executor));
-            if (oldCbCount == 0 && mPrefDevListeners.size() > 0) {
-                // register binder for callbacks
-                if (mPrefDevDispatcherStub == null) {
-                    mPrefDevDispatcherStub = new StrategyPreferredDevicesDispatcherStub();
-                }
-                try {
-                    getService().registerStrategyPreferredDevicesDispatcher(mPrefDevDispatcherStub);
-                } catch (RemoteException e) {
-                    throw e.rethrowFromSystemServer();
-                }
-            }
-        }
+        mPrefDevListenerMgr.addListener(
+                executor, listener, "addOnPreferredDevicesForStrategyChangedListener",
+                () -> new StrategyPreferredDevicesDispatcherStub());
     }
 
     /**
@@ -2002,106 +1979,43 @@ public class AudioManager {
     public void removeOnPreferredDevicesForStrategyChangedListener(
             @NonNull OnPreferredDevicesForStrategyChangedListener listener) {
         Objects.requireNonNull(listener);
-        synchronized (mPrefDevListenerLock) {
-            if (!removePrefDevListener(listener)) {
-                throw new IllegalArgumentException(
-                        "attempt to call removeOnPreferredDeviceForStrategyChangedListener() "
-                                + "on an unregistered listener");
-            }
-            if (mPrefDevListeners.size() == 0) {
-                // unregister binder for callbacks
-                try {
-                    getService().unregisterStrategyPreferredDevicesDispatcher(
-                            mPrefDevDispatcherStub);
-                } catch (RemoteException e) {
-                    throw e.rethrowFromSystemServer();
-                } finally {
-                    mPrefDevDispatcherStub = null;
-                    mPrefDevListeners = null;
-                }
-            }
-        }
+        mPrefDevListenerMgr.removeListener(
+                listener, "removeOnPreferredDevicesForStrategyChangedListener");
     }
 
-
-    private final Object mPrefDevListenerLock = new Object();
     /**
-     * List of listeners for preferred device for strategy and their associated Executor.
-     * List is lazy-initialized on first registration
+     * Manages the OnPreferredDevicesForStrategyChangedListener listeners and the
+     * StrategyPreferredDevicesDispatcherStub
      */
-    @GuardedBy("mPrefDevListenerLock")
-    private @Nullable ArrayList<PrefDevListenerInfo> mPrefDevListeners;
-
-    private static class PrefDevListenerInfo {
-        final @NonNull OnPreferredDevicesForStrategyChangedListener mListener;
-        final @NonNull Executor mExecutor;
-        PrefDevListenerInfo(OnPreferredDevicesForStrategyChangedListener listener, Executor exe) {
-            mListener = listener;
-            mExecutor = exe;
-        }
-    }
-
-    @GuardedBy("mPrefDevListenerLock")
-    private StrategyPreferredDevicesDispatcherStub mPrefDevDispatcherStub;
+    private final CallbackUtil.LazyListenerManager<OnPreferredDevicesForStrategyChangedListener>
+            mPrefDevListenerMgr = new CallbackUtil.LazyListenerManager();
 
     private final class StrategyPreferredDevicesDispatcherStub
-            extends IStrategyPreferredDevicesDispatcher.Stub {
+            extends IStrategyPreferredDevicesDispatcher.Stub
+            implements CallbackUtil.DispatcherStub {
 
         @Override
         public void dispatchPrefDevicesChanged(int strategyId,
                                                @NonNull List<AudioDeviceAttributes> devices) {
-            // make a shallow copy of listeners so callback is not executed under lock
-            final ArrayList<PrefDevListenerInfo> prefDevListeners;
-            synchronized (mPrefDevListenerLock) {
-                if (mPrefDevListeners == null || mPrefDevListeners.size() == 0) {
-                    return;
-                }
-                prefDevListeners = (ArrayList<PrefDevListenerInfo>) mPrefDevListeners.clone();
-            }
             final AudioProductStrategy strategy =
                     AudioProductStrategy.getAudioProductStrategyWithId(strategyId);
-            final long ident = Binder.clearCallingIdentity();
+
+            mPrefDevListenerMgr.callListeners(
+                    (listener) -> listener.onPreferredDevicesForStrategyChanged(strategy, devices));
+        }
+
+        @Override
+        public void register(boolean register) {
             try {
-                for (PrefDevListenerInfo info : prefDevListeners) {
-                    info.mExecutor.execute(() ->
-                            info.mListener.onPreferredDevicesForStrategyChanged(strategy, devices));
+                if (register) {
+                    getService().registerStrategyPreferredDevicesDispatcher(this);
+                } else {
+                    getService().unregisterStrategyPreferredDevicesDispatcher(this);
                 }
-            } finally {
-                Binder.restoreCallingIdentity(ident);
+            } catch (RemoteException e) {
+                e.rethrowFromSystemServer();
             }
         }
-    }
-
-    @GuardedBy("mPrefDevListenerLock")
-    private @Nullable PrefDevListenerInfo getPrefDevListenerInfo(
-            OnPreferredDevicesForStrategyChangedListener listener) {
-        if (mPrefDevListeners == null) {
-            return null;
-        }
-        for (PrefDevListenerInfo info : mPrefDevListeners) {
-            if (info.mListener == listener) {
-                return info;
-            }
-        }
-        return null;
-    }
-
-    @GuardedBy("mPrefDevListenerLock")
-    private boolean hasPrefDevListener(OnPreferredDevicesForStrategyChangedListener listener) {
-        return getPrefDevListenerInfo(listener) != null;
-    }
-
-    @GuardedBy("mPrefDevListenerLock")
-    /**
-     * @return true if the listener was removed from the list
-     */
-    private boolean removePrefDevListener(OnPreferredDevicesForStrategyChangedListener listener) {
-        final PrefDevListenerInfo infoToRemove = getPrefDevListenerInfo(listener);
-        if (infoToRemove != null) {
-            mPrefDevListeners.remove(infoToRemove);
-            return true;
-        }
-        return false;
     }
 
     //====================================================================
