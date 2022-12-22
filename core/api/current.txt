@@ -24211,12 +24211,18 @@ package android.media {
   }
 
   public final class RouteListingPreference implements android.os.Parcelable {
-    ctor public RouteListingPreference(@NonNull java.util.List<android.media.RouteListingPreference.Item>, boolean);
     method public int describeContents();
     method @NonNull public java.util.List<android.media.RouteListingPreference.Item> getItems();
     method public boolean getUseSystemOrdering();
     method public void writeToParcel(@NonNull android.os.Parcel, int);
     field @NonNull public static final android.os.Parcelable.Creator<android.media.RouteListingPreference> CREATOR;
+  }
+
+  public static final class RouteListingPreference.Builder {
+    ctor public RouteListingPreference.Builder();
+    method @NonNull public android.media.RouteListingPreference build();
+    method @NonNull public android.media.RouteListingPreference.Builder setItems(@NonNull java.util.List<android.media.RouteListingPreference.Item>);
+    method @NonNull public android.media.RouteListingPreference.Builder setUseSystemOrdering(boolean);
   }
 
   public static final class RouteListingPreference.Item implements android.os.Parcelable {
