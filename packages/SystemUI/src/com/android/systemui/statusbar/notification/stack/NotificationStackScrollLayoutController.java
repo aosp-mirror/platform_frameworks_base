@@ -916,6 +916,11 @@ public class NotificationStackScrollLayoutController {
         return mView.getTranslationX();
     }
 
+    /** Set view y-translation */
+    public void setTranslationY(float translationY) {
+        mView.setTranslationY(translationY);
+    }
+
     public int indexOfChild(View view) {
         return mView.indexOfChild(view);
     }

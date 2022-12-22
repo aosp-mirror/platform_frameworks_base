@@ -114,7 +114,7 @@ public final class CameraManager {
      */
     @ChangeId
     @Overridable
-    @EnabledSince(targetSdkVersion = android.os.Build.VERSION_CODES.TIRAMISU)
+    @EnabledSince(targetSdkVersion = android.os.Build.VERSION_CODES.BASE)
     @TestApi
     public static final long OVERRIDE_FRONT_CAMERA_APP_COMPAT = 250678880L;
 

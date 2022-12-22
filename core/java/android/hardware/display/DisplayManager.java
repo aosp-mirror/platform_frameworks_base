@@ -139,6 +139,7 @@ public final class DisplayManager {
             VIRTUAL_DISPLAY_FLAG_ALWAYS_UNLOCKED,
             VIRTUAL_DISPLAY_FLAG_TOUCH_FEEDBACK_DISABLED,
             VIRTUAL_DISPLAY_FLAG_OWN_FOCUS,
+            VIRTUAL_DISPLAY_FLAG_STEAL_TOP_FOCUS_DISABLED,
     })
     @Retention(RetentionPolicy.SOURCE)
     public @interface VirtualDisplayFlag {}
@@ -428,6 +429,18 @@ public final class DisplayManager {
      */
     public static final int VIRTUAL_DISPLAY_FLAG_DEVICE_DISPLAY_GROUP = 1 << 15;
 
+
+    /**
+     * Virtual display flags: Indicates that the display should not become the top focused display
+     * by stealing the top focus from another display.
+     *
+     * @see Display#FLAG_STEAL_TOP_FOCUS_DISABLED
+     * @see #createVirtualDisplay
+     * @see #VIRTUAL_DISPLAY_FLAG_OWN_FOCUS
+     * @hide
+     */
+    @SystemApi
+    public static final int VIRTUAL_DISPLAY_FLAG_STEAL_TOP_FOCUS_DISABLED = 1 << 16;
 
     /** @hide */
     @IntDef(prefix = {"MATCH_CONTENT_FRAMERATE_"}, value = {

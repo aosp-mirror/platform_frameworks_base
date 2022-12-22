@@ -563,7 +563,7 @@ public class WindowManagerService extends IWindowManager.Stub
     /** Mapping from an InputWindowHandle token to the server's Window object. */
     final HashMap<IBinder, WindowState> mInputToWindowMap = new HashMap<>();
 
-    /** Global service lock used by the package the owns this service. */
+    /** Global service lock used by the package that owns this service. */
     final WindowManagerGlobalLock mGlobalLock;
 
     /**
@@ -3165,15 +3165,41 @@ public class WindowManagerService extends IWindowManager.Stub
     }
 
     @Override
-    public void moveDisplayToTop(int displayId) {
+    public void moveDisplayToTopIfAllowed(int displayId) {
+        moveDisplayToTopInternal(displayId);
+        syncInputTransactions(true /* waitForAnimations */);
+    }
+
+    /**
+     * Moves the given display to the top. If it cannot be moved to the top this method does
+     * nothing.
+     */
+    void moveDisplayToTopInternal(int displayId) {
         synchronized (mGlobalLock) {
             final DisplayContent displayContent = mRoot.getDisplayContent(displayId);
             if (displayContent != null && mRoot.getTopChild() != displayContent) {
+                // Check whether anything prevents us from moving the display to the top.
+                if (!displayContent.canStealTopFocus()) {
+                    ProtoLog.i(WM_DEBUG_FOCUS_LIGHT,
+                            "Not moving display (displayId=%d) to top. Top focused displayId=%d. "
+                                    + "Reason: FLAG_STEAL_TOP_FOCUS_DISABLED",
+                            displayId, mRoot.getTopFocusedDisplayContent().getDisplayId());
+                    return;
+                }
+
+                if (mPerDisplayFocusEnabled) {
+                    ProtoLog.i(WM_DEBUG_FOCUS_LIGHT,
+                            "Not moving display (displayId=%d) to top. Top focused displayId=%d. "
+                                    + "Reason: config_perDisplayFocusEnabled", displayId,
+                            mRoot.getTopFocusedDisplayContent().getDisplayId());
+                    return;
+                }
+
+                // Nothing prevented us from moving the display to the top. Let's do it!
                 displayContent.getParent().positionChildAt(WindowContainer.POSITION_TOP,
                         displayContent, true /* includingParents */);
             }
         }
-        syncInputTransactions(true /* waitForAnimations */);
     }
 
     @Override

@@ -900,7 +900,7 @@ class SyntheticPasswordManager {
             protectorSecret = transformUnderSecdiscardable(stretchedLskf,
                     createSecdiscardable(protectorId, userId));
             // No need to pass in quality since the credential type already encodes sufficient info
-            synchronizeFrpPassword(pwd, 0, userId);
+            synchronizeGatekeeperFrpPassword(pwd, 0, userId);
         }
         if (!credential.isNone()) {
             saveState(PASSWORD_DATA_NAME, pwd.toBytes(), protectorId, userId);
@@ -916,7 +916,7 @@ class SyntheticPasswordManager {
             LockscreenCredential userCredential,
             ICheckCredentialProgressCallback progressCallback) {
         PersistentData persistentData = mStorage.readPersistentDataBlock();
-        if (persistentData.type == PersistentData.TYPE_SP) {
+        if (persistentData.type == PersistentData.TYPE_SP_GATEKEEPER) {
             PasswordData pwd = PasswordData.fromBytes(persistentData.payload);
             byte[] stretchedLskf = stretchLskf(userCredential, pwd);
 
@@ -941,7 +941,7 @@ class SyntheticPasswordManager {
 
             return weaverVerify(weaverSlot, stretchedLskfToWeaverKey(stretchedLskf)).stripPayload();
         } else {
-            Slog.e(TAG, "persistentData.type must be TYPE_SP or TYPE_SP_WEAVER, but is "
+            Slog.e(TAG, "persistentData.type must be TYPE_SP_GATEKEEPER or TYPE_SP_WEAVER, but is "
                     + persistentData.type);
             return VerifyCredentialResponse.ERROR;
         }
@@ -960,7 +960,7 @@ class SyntheticPasswordManager {
             if (weaverSlot != INVALID_WEAVER_SLOT) {
                 synchronizeWeaverFrpPassword(pwd, requestedQuality, userInfo.id, weaverSlot);
             } else {
-                synchronizeFrpPassword(pwd, requestedQuality, userInfo.id);
+                synchronizeGatekeeperFrpPassword(pwd, requestedQuality, userInfo.id);
             }
         }
     }
@@ -994,13 +994,13 @@ class SyntheticPasswordManager {
         return true;
     }
 
-    private void synchronizeFrpPassword(@Nullable PasswordData pwd, int requestedQuality,
+    private void synchronizeGatekeeperFrpPassword(@Nullable PasswordData pwd, int requestedQuality,
             int userId) {
         if (shouldSynchronizeFrpCredential(pwd, userId)) {
             Slogf.d(TAG, "Syncing Gatekeeper-based FRP credential tied to user %d", userId);
             if (!isNoneCredential(pwd)) {
-                mStorage.writePersistentDataBlock(PersistentData.TYPE_SP, userId, requestedQuality,
-                        pwd.toBytes());
+                mStorage.writePersistentDataBlock(PersistentData.TYPE_SP_GATEKEEPER, userId,
+                        requestedQuality, pwd.toBytes());
             } else {
                 mStorage.writePersistentDataBlock(PersistentData.TYPE_NONE, userId, 0, null);
             }
@@ -1224,7 +1224,7 @@ class SyntheticPasswordManager {
                             pwd.credentialType = credential.getType();
                             saveState(PASSWORD_DATA_NAME, pwd.toBytes(), protectorId, userId);
                             syncState(userId);
-                            synchronizeFrpPassword(pwd, 0, userId);
+                            synchronizeGatekeeperFrpPassword(pwd, 0, userId);
                         } else {
                             Slog.w(TAG, "Fail to re-enroll user password for user " + userId);
                             // continue the flow anyway

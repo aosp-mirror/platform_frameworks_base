@@ -16,6 +16,9 @@
 
 package com.android.systemui.statusbar.pipeline.shared.data.model
 
+import android.net.wifi.WifiManager
+import android.telephony.Annotation
+import android.telephony.TelephonyManager
 import com.android.systemui.log.table.Diffable
 import com.android.systemui.log.table.TableRowLogger
 
@@ -44,3 +47,25 @@ data class DataActivityModel(
 const val ACTIVITY_PREFIX = "dataActivity"
 private const val COL_ACTIVITY_IN = "in"
 private const val COL_ACTIVITY_OUT = "out"
+
+fun @receiver:Annotation.DataActivityType Int.toMobileDataActivityModel(): DataActivityModel =
+    when (this) {
+        TelephonyManager.DATA_ACTIVITY_IN ->
+            DataActivityModel(hasActivityIn = true, hasActivityOut = false)
+        TelephonyManager.DATA_ACTIVITY_OUT ->
+            DataActivityModel(hasActivityIn = false, hasActivityOut = true)
+        TelephonyManager.DATA_ACTIVITY_INOUT ->
+            DataActivityModel(hasActivityIn = true, hasActivityOut = true)
+        else -> DataActivityModel(hasActivityIn = false, hasActivityOut = false)
+    }
+
+fun Int.toWifiDataActivityModel(): DataActivityModel =
+    when (this) {
+        WifiManager.TrafficStateCallback.DATA_ACTIVITY_IN ->
+            DataActivityModel(hasActivityIn = true, hasActivityOut = false)
+        WifiManager.TrafficStateCallback.DATA_ACTIVITY_OUT ->
+            DataActivityModel(hasActivityIn = false, hasActivityOut = true)
+        WifiManager.TrafficStateCallback.DATA_ACTIVITY_INOUT ->
+            DataActivityModel(hasActivityIn = true, hasActivityOut = true)
+        else -> DataActivityModel(hasActivityIn = false, hasActivityOut = false)
+    }

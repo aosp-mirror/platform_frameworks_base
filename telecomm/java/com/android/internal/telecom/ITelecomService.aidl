@@ -25,6 +25,8 @@ import android.os.Bundle;
 import android.os.UserHandle;
 import android.telecom.PhoneAccount;
 import android.content.pm.ParceledListSlice;
+import android.telecom.CallAttributes;
+import com.android.internal.telecom.ICallEventCallback;
 
 /**
  * Interface used to interact with Telecom. Mostly this is used by TelephonyManager for passing
@@ -390,5 +392,11 @@ interface ITelecomService {
      * @see TelecomServiceImpl#isInSelfManagedCall
      */
     boolean isInSelfManagedCall(String packageName, in UserHandle userHandle,
+        String callingPackage);
+
+    /**
+     * @see TelecomServiceImpl#addCall
+     */
+    void addCall(in CallAttributes callAttributes, in ICallEventCallback callback, String callId,
         String callingPackage);
 }

@@ -418,7 +418,26 @@ public final class PhoneAccount implements Parcelable {
      */
     public static final int CAPABILITY_VOICE_CALLING_AVAILABLE = 0x20000;
 
-    /* NEXT CAPABILITY: 0x40000 */
+
+    /**
+     * Flag indicating that this {@link PhoneAccount} supports the use TelecomManager APIs that
+     * utilize {@link android.os.OutcomeReceiver}s or {@link java.util.function.Consumer}s.
+     * Be aware, if this capability is set, {@link #CAPABILITY_SELF_MANAGED} will be amended by
+     * Telecom when this {@link PhoneAccount} is registered via
+     * {@link TelecomManager#registerPhoneAccount(PhoneAccount)}.
+     *
+     * <p>
+     * {@link android.os.OutcomeReceiver}s and {@link java.util.function.Consumer}s represent
+     * transactional operations because the operation can succeed or fail.  An app wishing to use
+     * transactional operations should define behavior for a successful and failed TelecomManager
+     * API call.
+     *
+     * @see #CAPABILITY_SELF_MANAGED
+     * @see #getCapabilities
+     */
+    public static final int CAPABILITY_SUPPORTS_TRANSACTIONAL_OPERATIONS = 0x40000;
+
+    /* NEXT CAPABILITY: [0x80000, 0x100000, 0x200000] */
 
     /**
      * URI scheme for telephone number URIs.

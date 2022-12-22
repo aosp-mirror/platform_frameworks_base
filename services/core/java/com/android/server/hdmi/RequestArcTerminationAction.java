@@ -16,6 +16,8 @@
 
 package com.android.server.hdmi;
 
+import android.hardware.hdmi.HdmiControlManager;
+import android.hardware.hdmi.IHdmiControlCallback;
 import android.hardware.tv.cec.V1_0.SendMessageResult;
 
 /**
@@ -35,6 +37,16 @@ final class RequestArcTerminationAction extends RequestArcAction {
         super(source, avrAddress);
     }
 
+    /**
+     * @Constructor
+     *
+     * @see RequestArcAction#RequestArcAction
+     */
+    RequestArcTerminationAction(HdmiCecLocalDevice source, int avrAddress,
+            IHdmiControlCallback callback) {
+        super(source, avrAddress, callback);
+    }
+
     @Override
     boolean start() {
         mState = STATE_WATING_FOR_REQUEST_ARC_REQUEST_RESPONSE;
@@ -49,10 +61,34 @@ final class RequestArcTerminationAction extends RequestArcAction {
                     // If failed to send <Request ARC Termination>, start "Disabled" ARC
                     // transmission action.
                     disableArcTransmission();
-                    finish();
+                    finishWithCallback(HdmiControlManager.RESULT_TARGET_NOT_AVAILABLE);
                 }
             }
         });
         return true;
+    }
+
+    @Override
+    boolean processCommand(HdmiCecMessage cmd) {
+        if (mState != STATE_WATING_FOR_REQUEST_ARC_REQUEST_RESPONSE
+                || !HdmiUtils.checkCommandSource(cmd, mAvrAddress, TAG)) {
+            return false;
+        }
+        int opcode = cmd.getOpcode();
+        switch (opcode) {
+            case Constants.MESSAGE_FEATURE_ABORT:
+                int originalOpcode = cmd.getParams()[0] & 0xFF;
+                if (originalOpcode == Constants.MESSAGE_REQUEST_ARC_TERMINATION) {
+                    disableArcTransmission();
+                    finishWithCallback(HdmiControlManager.RESULT_TARGET_NOT_AVAILABLE);
+                    return true;
+                }
+                return false;
+            case Constants.MESSAGE_TERMINATE_ARC:
+                finishWithCallback(HdmiControlManager.RESULT_SUCCESS);
+                // This message still needs to be handled in HdmiCecLocalDeviceTv as well.
+                return false;
+        }
+        return false;
     }
 }

@@ -30,6 +30,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.graphics.PixelFormat;
 import android.graphics.Rect;
+import android.media.tv.AdBuffer;
 import android.media.tv.AdRequest;
 import android.media.tv.AdResponse;
 import android.media.tv.BroadcastInfoRequest;
@@ -616,6 +617,13 @@ public abstract class TvInteractiveAppService extends Service {
         public void onAdResponse(@NonNull AdResponse response) {
         }
 
+        /**
+         * Called when an advertisement buffer is consumed.
+         * @hide
+         */
+        public void onAdBufferConsumed(AdBuffer buffer) {
+        }
+
         @Override
         public boolean onKeyDown(int keyCode, @NonNull KeyEvent event) {
             return false;
@@ -1190,6 +1198,17 @@ public abstract class TvInteractiveAppService extends Service {
         }
 
         /**
+         * Calls {@link #onAdBufferConsumed}.
+         */
+        void notifyAdBufferConsumed(AdBuffer buffer) {
+            if (DEBUG) {
+                Log.d(TAG,
+                        "notifyAdBufferConsumed (buffer=" + buffer + ")");
+            }
+            onAdBufferConsumed(buffer);
+        }
+
+        /**
          * Calls {@link #onRecordingStarted(String)}.
          */
         void notifyRecordingStarted(String recordingId) {
@@ -1289,6 +1308,33 @@ public abstract class TvInteractiveAppService extends Service {
                 }
             });
         }
+
+
+        /**
+         * Notifies when the advertisement buffer is filled and ready to be read.
+         * @hide
+         */
+        @CallSuper
+        public void notifyAdBuffer(AdBuffer buffer) {
+            executeOrPostRunnableOnMainThread(new Runnable() {
+                @MainThread
+                @Override
+                public void run() {
+                    try {
+                        if (DEBUG) {
+                            Log.d(TAG,
+                                    "notifyAdBuffer(buffer=" + buffer + ")");
+                        }
+                        if (mSessionCallback != null) {
+                            mSessionCallback.onAdBuffer(buffer);
+                        }
+                    } catch (RemoteException e) {
+                        Log.w(TAG, "error in notifyAdBuffer", e);
+                    }
+                }
+            });
+        }
+
 
         /**
          * Takes care of dispatching incoming input events and tells whether the event was handled.

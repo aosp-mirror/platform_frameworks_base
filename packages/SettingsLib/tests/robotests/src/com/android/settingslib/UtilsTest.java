@@ -448,25 +448,41 @@ public class UtilsTest {
 
     @Test
     public void containsIncompatibleChargers_returnTrue() {
-        final List<UsbPort> usbPorts = new ArrayList<>();
-        usbPorts.add(mUsbPort);
-        when(mUsbManager.getPorts()).thenReturn(usbPorts);
-        when(mUsbPort.getStatus()).thenReturn(mUsbPortStatus);
-        when(mUsbPortStatus.isConnected()).thenReturn(true);
-        when(mUsbPortStatus.getComplianceWarnings()).thenReturn(new int[]{1});
-
+        setupIncompatibleCharging();
         assertThat(Utils.containsIncompatibleChargers(mContext, "tag")).isTrue();
     }
 
     @Test
     public void containsIncompatibleChargers_emptyComplianceWarnings_returnFalse() {
+        setupIncompatibleCharging();
+        when(mUsbPortStatus.getComplianceWarnings()).thenReturn(new int[1]);
+
+        assertThat(Utils.containsIncompatibleChargers(mContext, "tag")).isFalse();
+    }
+
+    @Test
+    public void containsIncompatibleChargers_notSupportComplianceWarnings_returnFalse() {
+        setupIncompatibleCharging();
+        when(mUsbPort.supportsComplianceWarnings()).thenReturn(false);
+
+        assertThat(Utils.containsIncompatibleChargers(mContext, "tag")).isFalse();
+    }
+
+    @Test
+    public void containsIncompatibleChargers_usbNotConnected_returnFalse() {
+        setupIncompatibleCharging();
+        when(mUsbPortStatus.isConnected()).thenReturn(false);
+
+        assertThat(Utils.containsIncompatibleChargers(mContext, "tag")).isFalse();
+    }
+
+    private void setupIncompatibleCharging() {
         final List<UsbPort> usbPorts = new ArrayList<>();
         usbPorts.add(mUsbPort);
         when(mUsbManager.getPorts()).thenReturn(usbPorts);
         when(mUsbPort.getStatus()).thenReturn(mUsbPortStatus);
+        when(mUsbPort.supportsComplianceWarnings()).thenReturn(true);
         when(mUsbPortStatus.isConnected()).thenReturn(true);
-        when(mUsbPortStatus.getComplianceWarnings()).thenReturn(new int[1]);
-
-        assertThat(Utils.containsIncompatibleChargers(mContext, "tag")).isFalse();
+        when(mUsbPortStatus.getComplianceWarnings()).thenReturn(new int[]{1});
     }
 }

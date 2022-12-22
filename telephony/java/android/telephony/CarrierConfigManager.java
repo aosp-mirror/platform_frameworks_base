@@ -4468,6 +4468,18 @@ public class CarrierConfigManager {
             "data_switch_validation_timeout_long";
 
     /**
+     * The minimum timeout of UDP port 4500 NAT / firewall entries on the Internet PDN of this
+     * carrier network. This will be used by Android platform VPNs to tune IPsec NAT keepalive
+     * interval. If this value is too low to provide uninterrupted inbound connectivity, then
+     * Android system VPNs may indicate to applications that the VPN cannot support long-lived
+     * TCP connections.
+     * @hide
+     */
+    @SystemApi(client = SystemApi.Client.MODULE_LIBRARIES)
+    public static final String KEY_MIN_UDP_PORT_4500_NAT_TIMEOUT_SEC_INT =
+            "min_udp_port_4500_nat_timeout_sec_int";
+
+    /**
      * Specifies whether the system should prefix the EAP method to the anonymous identity.
      * The following prefix will be added if this key is set to TRUE:
      *   EAP-AKA: "0"
@@ -10098,6 +10110,7 @@ public class CarrierConfigManager {
         sDefaults.putStringArray(KEY_MMI_TWO_DIGIT_NUMBER_PATTERN_STRING_ARRAY, new String[0]);
         sDefaults.putInt(KEY_PARAMETERS_USED_FOR_LTE_SIGNAL_BAR_INT,
                 CellSignalStrengthLte.USE_RSRP);
+        sDefaults.putInt(KEY_MIN_UDP_PORT_4500_NAT_TIMEOUT_SEC_INT, 300);
         // Default wifi configurations.
         sDefaults.putAll(Wifi.getDefaults());
         sDefaults.putBoolean(ENABLE_EAP_METHOD_PREFIX_BOOL, false);

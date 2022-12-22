@@ -17,6 +17,7 @@
 package android.media.tv.interactive;
 
 import android.graphics.Rect;
+import android.media.tv.AdBuffer;
 import android.media.tv.AdRequest;
 import android.media.tv.BroadcastInfoRequest;
 import android.net.Uri;
@@ -37,6 +38,7 @@ oneway interface ITvInteractiveAppClient {
     void onSessionStateChanged(int state, int err, int seq);
     void onBiInteractiveAppCreated(in Uri biIAppUri, in String biIAppId, int seq);
     void onTeletextAppStateChanged(int state, int seq);
+    void onAdBuffer(in AdBuffer buffer, int seq);
     void onCommandRequest(in String cmdType, in Bundle parameters, int seq);
     void onSetVideoBounds(in Rect rect, int seq);
     void onRequestCurrentChannelUri(int seq);

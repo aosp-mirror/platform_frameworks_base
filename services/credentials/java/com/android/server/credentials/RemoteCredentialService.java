@@ -21,6 +21,7 @@ import android.annotation.Nullable;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
+import android.credentials.ClearCredentialStateException;
 import android.credentials.CreateCredentialException;
 import android.credentials.GetCredentialException;
 import android.os.Handler;
@@ -30,10 +31,12 @@ import android.service.credentials.BeginCreateCredentialRequest;
 import android.service.credentials.BeginCreateCredentialResponse;
 import android.service.credentials.BeginGetCredentialRequest;
 import android.service.credentials.BeginGetCredentialResponse;
+import android.service.credentials.ClearCredentialStateRequest;
 import android.service.credentials.CredentialProviderErrors;
 import android.service.credentials.CredentialProviderService;
 import android.service.credentials.IBeginCreateCredentialCallback;
 import android.service.credentials.IBeginGetCredentialCallback;
+import android.service.credentials.IClearCredentialStateCallback;
 import android.service.credentials.ICredentialProviderService;
 import android.text.format.DateUtils;
 import android.util.Log;
@@ -189,6 +192,53 @@ public class RemoteCredentialService extends ServiceConnector.Impl<ICredentialPr
             }
             return createCredentialFuture;
         }).orTimeout(TIMEOUT_REQUEST_MILLIS, TimeUnit.MILLISECONDS);
+
+        futureRef.set(connectThenExecute);
+        connectThenExecute.whenComplete((result, error) -> Handler.getMain().post(() ->
+                handleExecutionResponse(result, error, cancellationSink, callback)));
+    }
+
+    /** Main entry point to be called for executing a clearCredentialState call on the remote
+     * provider service.
+     * @param request the request to be sent to the provider
+     * @param callback the callback to be used to send back the provider response to the
+     *                 {@link ProviderClearSession} class that maintains provider state
+     */
+    public void onClearCredentialState(@NonNull ClearCredentialStateRequest request,
+            ProviderCallbacks<Void> callback) {
+        Log.i(TAG, "In onClearCredentialState in RemoteCredentialService");
+        AtomicReference<ICancellationSignal> cancellationSink = new AtomicReference<>();
+        AtomicReference<CompletableFuture<Void>> futureRef = new AtomicReference<>();
+
+        CompletableFuture<Void> connectThenExecute =
+                postAsync(service -> {
+                    CompletableFuture<Void> clearCredentialFuture =
+                            new CompletableFuture<>();
+                    ICancellationSignal cancellationSignal = service.onClearCredentialState(
+                            request, new IClearCredentialStateCallback.Stub() {
+                                @Override
+                                public void onSuccess() {
+                                    Log.i(TAG, "In onSuccess onClearCredentialState "
+                                            + "in RemoteCredentialService");
+                                    clearCredentialFuture.complete(null);
+                                }
+
+                                @Override
+                                public void onFailure(String errorType, CharSequence message) {
+                                    Log.i(TAG, "In onFailure in RemoteCredentialService");
+                                    String errorMsg = message == null ? "" :
+                                            String.valueOf(message);
+                                    clearCredentialFuture.completeExceptionally(
+                                            new ClearCredentialStateException(errorType, errorMsg));
+                                }});
+                    CompletableFuture<Void> future = futureRef.get();
+                    if (future != null && future.isCancelled()) {
+                        dispatchCancellationSignal(cancellationSignal);
+                    } else {
+                        cancellationSink.set(cancellationSignal);
+                    }
+                    return clearCredentialFuture;
+                }).orTimeout(TIMEOUT_REQUEST_MILLIS, TimeUnit.MILLISECONDS);
 
         futureRef.set(connectThenExecute);
         connectThenExecute.whenComplete((result, error) -> Handler.getMain().post(() ->

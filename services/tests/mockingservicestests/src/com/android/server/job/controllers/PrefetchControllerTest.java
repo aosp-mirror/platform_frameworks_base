@@ -184,7 +184,7 @@ public class PrefetchControllerTest {
     private static JobStatus createJobStatus(String testTag, String packageName, int callingUid,
             JobInfo jobInfo) {
         JobStatus js = JobStatus.createFromJobInfo(
-                jobInfo, callingUid, packageName, SOURCE_USER_ID, testTag);
+                jobInfo, callingUid, packageName, SOURCE_USER_ID, "PCTest", testTag);
         js.serviceProcessName = "testProcess";
         js.setStandbyBucket(FREQUENT_INDEX);
         // Make sure Doze and background-not-restricted don't affect tests.

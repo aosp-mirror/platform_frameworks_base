@@ -302,6 +302,17 @@ package android.net.netstats {
 
 }
 
+package android.net.wifi {
+
+  public final class WifiKeystore {
+    method @NonNull public static byte[] get(@NonNull String);
+    method @NonNull public static String[] list(@NonNull String);
+    method public static boolean put(@NonNull String, @NonNull byte[]);
+    method public static boolean remove(@NonNull String);
+  }
+
+}
+
 package android.os {
 
   public class ArtModuleServiceManager {
@@ -477,6 +488,10 @@ package android.telecom {
 }
 
 package android.telephony {
+
+  public class CarrierConfigManager {
+    field public static final String KEY_MIN_UDP_PORT_4500_NAT_TIMEOUT_SEC_INT = "min_udp_port_4500_nat_timeout_sec_int";
+  }
 
   public abstract class CellSignalStrength {
     method public static int getNumSignalStrengthLevels();

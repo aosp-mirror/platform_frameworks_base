@@ -147,8 +147,8 @@ public class FgsManagerControllerTest extends SysuiTestCase {
         setUserProfiles(0);
         setShowUserVisibleJobs(true);
 
-        UserVisibleJobSummary j1 = new UserVisibleJobSummary(0, 0, "pkg1", 0);
-        UserVisibleJobSummary j2 = new UserVisibleJobSummary(1, 0, "pkg2", 1);
+        UserVisibleJobSummary j1 = new UserVisibleJobSummary(0, 0, "pkg1", null, 0);
+        UserVisibleJobSummary j2 = new UserVisibleJobSummary(1, 0, "pkg2", null, 1);
         Assert.assertEquals(0, mFmc.getNumRunningPackages());
         mIUserVisibleJobObserver.onUserVisibleJobStateChanged(j1, true);
         Assert.assertEquals(1, mFmc.getNumRunningPackages());
@@ -167,8 +167,8 @@ public class FgsManagerControllerTest extends SysuiTestCase {
 
         Binder b1 = new Binder();
         Binder b2 = new Binder();
-        UserVisibleJobSummary j1 = new UserVisibleJobSummary(0, 0, "pkg1", 0);
-        UserVisibleJobSummary j3 = new UserVisibleJobSummary(1, 0, "pkg3", 1);
+        UserVisibleJobSummary j1 = new UserVisibleJobSummary(0, 0, "pkg1", null, 0);
+        UserVisibleJobSummary j3 = new UserVisibleJobSummary(1, 0, "pkg3", null, 1);
         Assert.assertEquals(0, mFmc.getNumRunningPackages());
         mIForegroundServiceObserver.onForegroundStateChanged(b1, "pkg1", 0, true);
         Assert.assertEquals(1, mFmc.getNumRunningPackages());
@@ -359,8 +359,8 @@ public class FgsManagerControllerTest extends SysuiTestCase {
         // pkg1 has only job
         // pkg2 has both job and fgs
         // pkg3 has only fgs
-        UserVisibleJobSummary j1 = new UserVisibleJobSummary(0, 0, "pkg1", 0);
-        UserVisibleJobSummary j2 = new UserVisibleJobSummary(1, 0, "pkg2", 1);
+        UserVisibleJobSummary j1 = new UserVisibleJobSummary(0, 0, "pkg1", null, 0);
+        UserVisibleJobSummary j2 = new UserVisibleJobSummary(1, 0, "pkg2", null, 1);
         Binder b2 = new Binder();
         Binder b3 = new Binder();
 

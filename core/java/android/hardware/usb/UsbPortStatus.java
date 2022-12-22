@@ -219,7 +219,11 @@ public final class UsbPortStatus implements Parcelable {
     public static final int DATA_STATUS_DISABLED_CONTAMINANT = 1 << 2;
 
     /**
-     * USB data is disabled due to docking event.
+     * This flag indicates that some or all data modes are disabled
+     * due to docking event, and the specific sub-statuses viz.,
+     * {@link #DATA_STATUS_DISABLED_DOCK_HOST_MODE},
+     * {@link #DATA_STATUS_DISABLED_DOCK_DEVICE_MODE}
+     * can be checked for individual modes.
      */
     public static final int DATA_STATUS_DISABLED_DOCK = 1 << 3;
 
@@ -233,6 +237,18 @@ public final class UsbPortStatus implements Parcelable {
      * USB data is disabled for debug.
      */
     public static final int DATA_STATUS_DISABLED_DEBUG = 1 << 5;
+
+    /**
+     * USB host mode is disabled due to docking event.
+     * {@link #DATA_STATUS_DISABLED_DOCK} will be set as well.
+     */
+    public static final int DATA_STATUS_DISABLED_DOCK_HOST_MODE = 1 << 6;
+
+    /**
+     * USB device mode is disabled due to docking event.
+     * {@link #DATA_STATUS_DISABLED_DOCK} will be set as well.
+     */
+    public static final int DATA_STATUS_DISABLED_DOCK_DEVICE_MODE = 1 << 7;
 
     /**
      * Unknown whether a power brick is connected.
@@ -329,6 +345,8 @@ public final class UsbPortStatus implements Parcelable {
             DATA_STATUS_DISABLED_OVERHEAT,
             DATA_STATUS_DISABLED_CONTAMINANT,
             DATA_STATUS_DISABLED_DOCK,
+            DATA_STATUS_DISABLED_DOCK_HOST_MODE,
+            DATA_STATUS_DISABLED_DOCK_DEVICE_MODE,
             DATA_STATUS_DISABLED_FORCE,
             DATA_STATUS_DISABLED_DEBUG
     })
@@ -357,6 +375,20 @@ public final class UsbPortStatus implements Parcelable {
         mSupportedRoleCombinations = supportedRoleCombinations;
         mContaminantProtectionStatus = contaminantProtectionStatus;
         mContaminantDetectionStatus = contaminantDetectionStatus;
+
+        // Older implementations that only set the DISABLED_DOCK_MODE will have the other two
+        // set at the HAL interface level, so the "dock mode only" state shouldn't be visible here.
+        // But the semantics are ensured here.
+        int disabledDockModes = (usbDataStatus &
+            (DATA_STATUS_DISABLED_DOCK_HOST_MODE | DATA_STATUS_DISABLED_DOCK_DEVICE_MODE));
+        if (disabledDockModes != 0) {
+            // Set DATA_STATUS_DISABLED_DOCK when one of DATA_STATUS_DISABLED_DOCK_*_MODE is set
+            usbDataStatus |= DATA_STATUS_DISABLED_DOCK;
+        } else {
+            // Clear DATA_STATUS_DISABLED_DOCK when none of DATA_STATUS_DISABLED_DOCK_*_MODE is set
+            usbDataStatus &= ~DATA_STATUS_DISABLED_DOCK;
+        }
+
         mUsbDataStatus = usbDataStatus;
         mPowerTransferLimited = powerTransferLimited;
         mPowerBrickConnectionStatus = powerBrickConnectionStatus;
@@ -472,7 +504,8 @@ public final class UsbPortStatus implements Parcelable {
      *         {@link #DATA_STATUS_UNKNOWN}, {@link #DATA_STATUS_ENABLED},
      *         {@link #DATA_STATUS_DISABLED_OVERHEAT}, {@link #DATA_STATUS_DISABLED_CONTAMINANT},
      *         {@link #DATA_STATUS_DISABLED_DOCK}, {@link #DATA_STATUS_DISABLED_FORCE},
-     *         {@link #DATA_STATUS_DISABLED_DEBUG}
+     *         {@link #DATA_STATUS_DISABLED_DEBUG}, {@link #DATA_STATUS_DISABLED_DOCK_HOST_MODE},
+     *         {@link #DATA_STATUS_DISABLED_DOCK_DEVICE_MODE}
      */
     public @UsbDataStatus int getUsbDataStatus() {
         return mUsbDataStatus;

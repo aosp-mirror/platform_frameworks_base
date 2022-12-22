@@ -64,6 +64,8 @@ import com.android.server.tare.EconomicPolicy;
 import com.android.server.tare.EconomyManagerInternal;
 import com.android.server.tare.JobSchedulerEconomicPolicy;
 
+import java.util.Objects;
+
 /**
  * Handles client binding and lifecycle of a job. Jobs execute one at a time on an instance of this
  * class.
@@ -304,7 +306,8 @@ public final class JobServiceContext implements ServiceConnection {
                 job.changedAuthorities.toArray(triggeredAuthorities);
             }
             final JobInfo ji = job.getJob();
-            mParams = new JobParameters(mRunningCallback, job.getJobId(), ji.getExtras(),
+            mParams = new JobParameters(mRunningCallback, job.getNamespace(), job.getJobId(),
+                    ji.getExtras(),
                     ji.getTransientExtras(), ji.getClipData(), ji.getClipGrantFlags(),
                     isDeadlineExpired, job.shouldTreatAsExpeditedJob(),
                     job.shouldTreatAsUserInitiatedJob(), triggeredUris, triggeredAuthorities,
@@ -518,11 +521,12 @@ public final class JobServiceContext implements ServiceConnection {
     }
 
     @GuardedBy("mLock")
-    boolean timeoutIfExecutingLocked(String pkgName, int userId, boolean matchJobId, int jobId,
-            String reason) {
+    boolean timeoutIfExecutingLocked(String pkgName, int userId, @Nullable String namespace,
+            boolean matchJobId, int jobId, String reason) {
         final JobStatus executing = getRunningJobLocked();
         if (executing != null && (userId == UserHandle.USER_ALL || userId == executing.getUserId())
                 && (pkgName == null || pkgName.equals(executing.getSourcePackageName()))
+                && Objects.equals(namespace, executing.getNamespace())
                 && (!matchJobId || jobId == executing.getJobId())) {
             if (mVerb == VERB_EXECUTING) {
                 mParams.setStopReason(JobParameters.STOP_REASON_TIMEOUT,

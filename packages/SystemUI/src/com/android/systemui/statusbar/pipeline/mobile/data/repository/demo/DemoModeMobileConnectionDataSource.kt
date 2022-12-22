@@ -99,6 +99,7 @@ constructor(
         val activity = getString("activity")?.toActivity()
         val carrierNetworkChange = getString("carriernetworkchange") == "show"
         val roaming = getString("roam") == "show"
+        val name = getString("networkname") ?: "demo mode"
 
         return Mobile(
             level = level,
@@ -109,6 +110,7 @@ constructor(
             activity = activity,
             carrierNetworkChange = carrierNetworkChange,
             roaming = roaming,
+            name = name,
         )
     }
 }

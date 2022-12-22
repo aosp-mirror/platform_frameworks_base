@@ -154,7 +154,7 @@ public class LockSettingsServiceTestable extends LockSettingsService {
                 storageManager, spManager, gsiService, recoverableKeyStoreManager,
                 userManagerInternal, deviceStateCache));
         mGateKeeperService = gatekeeper;
-        mAuthSecretServiceAidl = authSecretService;
+        mAuthSecretService = authSecretService;
     }
 
     @Override

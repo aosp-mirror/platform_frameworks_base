@@ -56,6 +56,7 @@ import com.android.systemui.user.legacyhelper.data.LegacyUserDataHelper
 import com.android.systemui.user.shared.model.UserActionModel
 import com.android.systemui.user.shared.model.UserModel
 import com.android.systemui.user.utils.MultiUserActionsEvent
+import com.android.systemui.user.utils.MultiUserActionsEventHelper
 import com.android.systemui.util.kotlin.pairwise
 import java.io.PrintWriter
 import javax.inject.Inject
@@ -372,6 +373,9 @@ constructor(
         if (LegacyUserDataHelper.isUser(record)) {
             // It's safe to use checkNotNull around record.info because isUser only returns true
             // if record.info is not null.
+            uiEventLogger.log(
+                MultiUserActionsEventHelper.userSwitchMetric(checkNotNull(record.info))
+            )
             selectUser(checkNotNull(record.info).id, dialogShower)
         } else {
             executeAction(LegacyUserDataHelper.toUserActionModel(record), dialogShower)

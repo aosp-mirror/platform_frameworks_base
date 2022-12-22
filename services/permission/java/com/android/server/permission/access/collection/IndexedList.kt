@@ -99,3 +99,10 @@ inline fun <T> IndexedList<T>.retainAllIndexed(predicate: (Int, T) -> Boolean): 
     }
     return isChanged
 }
+
+inline fun <T, R> IndexedList<T>.mapNotNullIndexed(transform: (T) -> R?): IndexedList<R> =
+    IndexedList<R>().also { destination ->
+        forEachIndexed { _, element ->
+            transform(element)?.let { destination += it }
+        }
+    }

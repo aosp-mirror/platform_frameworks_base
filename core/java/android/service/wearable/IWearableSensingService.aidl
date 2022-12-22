@@ -16,6 +16,7 @@
 
 package android.service.wearable;
 
+import android.app.ambientcontext.AmbientContextEventRequest;
 import android.os.PersistableBundle;
 import android.os.RemoteCallback;
 import android.os.SharedMemory;
@@ -29,4 +30,8 @@ import android.os.SharedMemory;
 oneway interface IWearableSensingService {
     void provideDataStream(in ParcelFileDescriptor parcelFileDescriptor, in RemoteCallback callback);
     void provideData(in PersistableBundle data, in SharedMemory sharedMemory, in RemoteCallback callback);
+    void startDetection(in AmbientContextEventRequest request, in String packageName,
+            in RemoteCallback detectionResultCallback, in RemoteCallback statusCallback);
+    void stopDetection(in String packageName);
+    void queryServiceStatus(in int[] eventTypes, in String packageName, in RemoteCallback callback);
 }

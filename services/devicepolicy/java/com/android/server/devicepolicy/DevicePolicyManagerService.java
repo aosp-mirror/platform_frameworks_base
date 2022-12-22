@@ -19572,6 +19572,11 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
                 }
                 admin.mtePolicy = flags;
                 saveSettingsLocked(caller.getUserId());
+
+                DevicePolicyEventLogger.createEvent(DevicePolicyEnums.SET_MTE_POLICY)
+                        .setInt(flags)
+                        .setAdmin(admin.info.getPackageName())
+                        .write();
             }
         }
     }

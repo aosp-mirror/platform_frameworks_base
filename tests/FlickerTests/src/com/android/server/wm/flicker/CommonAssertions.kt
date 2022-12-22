@@ -22,6 +22,8 @@ import com.android.server.wm.flicker.helpers.WindowUtils
 import com.android.server.wm.flicker.traces.region.RegionSubject
 import com.android.server.wm.traces.common.ComponentNameMatcher
 import com.android.server.wm.traces.common.IComponentNameMatcher
+import com.android.server.wm.traces.common.service.PlatformConsts
+import com.android.server.wm.traces.common.windowmanager.WindowManagerTrace
 
 /**
  * Checks that [ComponentNameMatcher.STATUS_BAR] window is visible and above the app windows in all
@@ -202,13 +204,15 @@ fun FlickerTest.navBarLayerPositionAtStartAndEnd() {
  * Asserts that the [ComponentNameMatcher.STATUS_BAR] layer is at the correct position at the start
  * of the SF trace
  */
-fun FlickerTest.statusBarLayerPositionAtStart() {
+fun FlickerTest.statusBarLayerPositionAtStart(
+    wmTrace: WindowManagerTrace? = this.reader.readWmTrace()
+) {
+    // collect navbar position for the equivalent WM state
+    val state = wmTrace?.firstOrNull() ?: error("WM state missing in $this")
+    val display = state.getDisplay(PlatformConsts.DEFAULT_DISPLAY) ?: error("Display not found")
+    val navBarPosition = WindowUtils.getExpectedStatusBarPosition(display)
     assertLayersStart {
-        val display =
-            this.entry.displays.minByOrNull { it.id }
-                ?: throw RuntimeException("There is no display!")
-        this.visibleRegion(ComponentNameMatcher.STATUS_BAR)
-            .coversExactly(WindowUtils.getStatusBarPosition(display))
+        this.visibleRegion(ComponentNameMatcher.STATUS_BAR).coversExactly(navBarPosition)
     }
 }
 
@@ -216,13 +220,15 @@ fun FlickerTest.statusBarLayerPositionAtStart() {
  * Asserts that the [ComponentNameMatcher.STATUS_BAR] layer is at the correct position at the end of
  * the SF trace
  */
-fun FlickerTest.statusBarLayerPositionAtEnd() {
+fun FlickerTest.statusBarLayerPositionAtEnd(
+    wmTrace: WindowManagerTrace? = this.reader.readWmTrace()
+) {
+    // collect navbar position for the equivalent WM state
+    val state = wmTrace?.lastOrNull() ?: error("WM state missing in $this")
+    val display = state.getDisplay(PlatformConsts.DEFAULT_DISPLAY) ?: error("Display not found")
+    val navBarPosition = WindowUtils.getExpectedStatusBarPosition(display)
     assertLayersEnd {
-        val display =
-            this.entry.displays.minByOrNull { it.id }
-                ?: throw RuntimeException("There is no display!")
-        this.visibleRegion(ComponentNameMatcher.STATUS_BAR)
-            .coversExactly(WindowUtils.getStatusBarPosition(display))
+        this.visibleRegion(ComponentNameMatcher.STATUS_BAR).coversExactly(navBarPosition)
     }
 }
 

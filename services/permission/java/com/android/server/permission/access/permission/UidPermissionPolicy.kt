@@ -361,7 +361,7 @@ class UidPermissionPolicy : SchemePolicy() {
             // Different from the old implementation, which may add an (incomplete) signature
             // permission inside another package's permission tree, we now consistently ignore such
             // permissions.
-            val permissionTree = getPermissionTree(permissionName)
+            val permissionTree = findPermissionTree(permissionName)
             val newPackageName = newPermissionInfo.packageName
             if (permissionTree != null && newPackageName != permissionTree.packageName) {
                 Log.w(
@@ -482,7 +482,7 @@ class UidPermissionPolicy : SchemePolicy() {
         if (!permission.isDynamic) {
             return permission
         }
-        val permissionTree = getPermissionTree(permission.name) ?: return permission
+        val permissionTree = findPermissionTree(permission.name) ?: return permission
         @Suppress("DEPRECATION")
         return permission.copy(
             permissionInfo = PermissionInfo(permission.permissionInfo).apply {
@@ -490,18 +490,6 @@ class UidPermissionPolicy : SchemePolicy() {
             }, appId = permissionTree.appId, isReconciled = true
         )
     }
-
-    private fun MutateStateScope.getPermissionTree(permissionName: String): Permission? =
-        newState.systemState.permissionTrees.firstNotNullOfOrNullIndexed {
-            _, permissionTreeName, permissionTree ->
-            if (permissionName.startsWith(permissionTreeName) &&
-                permissionName.length > permissionTreeName.length &&
-                permissionName[permissionTreeName.length] == '.') {
-                permissionTree
-            } else {
-                null
-            }
-        }
 
     private fun MutateStateScope.trimPermissionStates(appId: Int) {
         val requestedPermissions = IndexedSet<String>()
@@ -1103,6 +1091,26 @@ class UidPermissionPolicy : SchemePolicy() {
         with(persistence) { this@serializeUserState.serializeUserState(state, userId) }
     }
 
+    fun GetStateScope.getPermissionTrees(): IndexedMap<String, Permission> =
+        state.systemState.permissionTrees
+
+    fun GetStateScope.findPermissionTree(permissionName: String): Permission? =
+        state.systemState.permissionTrees.firstNotNullOfOrNullIndexed {
+                _, permissionTreeName, permissionTree ->
+            if (permissionName.startsWith(permissionTreeName) &&
+                permissionName.length > permissionTreeName.length &&
+                permissionName[permissionTreeName.length] == '.') {
+                permissionTree
+            } else {
+                null
+            }
+        }
+
+    fun MutateStateScope.addPermissionTree(permission: Permission) {
+        newState.systemState.permissionTrees[permission.name] = permission
+        newState.systemState.requestWrite()
+    }
+
     /**
      * returns all permission group definitions available in the system
      */
@@ -1114,6 +1122,16 @@ class UidPermissionPolicy : SchemePolicy() {
      */
     fun GetStateScope.getPermissions(): IndexedMap<String, Permission> =
         state.systemState.permissions
+
+    fun MutateStateScope.addPermission(permission: Permission, sync: Boolean = false) {
+        newState.systemState.permissions[permission.name] = permission
+        newState.systemState.requestWrite(sync)
+    }
+
+    fun MutateStateScope.removePermission(permission: Permission) {
+        newState.systemState.permissions -= permission.name
+        newState.systemState.requestWrite()
+    }
 
     fun GetStateScope.getUidPermissionFlags(appId: Int, userId: Int): IndexedMap<String, Int>? =
         state.userStates[userId]?.uidPermissionFlags?.get(appId)

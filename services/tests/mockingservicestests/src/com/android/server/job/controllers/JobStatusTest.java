@@ -920,12 +920,12 @@ public class JobStatusTest {
             long latestRunTimeElapsedMillis) {
         final JobInfo job = new JobInfo.Builder(101, new ComponentName("foo", "bar"))
                 .setRequiredNetworkType(JobInfo.NETWORK_TYPE_ANY).build();
-        return new JobStatus(job, 0, null, -1, 0, null, earliestRunTimeElapsedMillis,
+        return new JobStatus(job, 0, null, -1, 0, null, null, earliestRunTimeElapsedMillis,
                 latestRunTimeElapsedMillis, 0, 0, null, 0, 0);
     }
 
     private static JobStatus createJobStatus(JobInfo job) {
-        JobStatus jobStatus = JobStatus.createFromJobInfo(job, 0, null, -1, "JobStatusTest");
+        JobStatus jobStatus = JobStatus.createFromJobInfo(job, 0, null, -1, "JobStatusTest", null);
         jobStatus.serviceProcessName = "testProcess";
         return jobStatus;
     }
