@@ -1000,6 +1000,10 @@ public class TelephonyRegistry extends ITelephonyRegistry.Stub {
     @Override
     public void notifySubscriptionInfoChanged() {
         if (VDBG) log("notifySubscriptionInfoChanged:");
+        if (!checkNotifyPermission("notifySubscriptionInfoChanged()")) {
+            return;
+        }
+
         synchronized (mRecords) {
             if (!mHasNotifySubscriptionInfoChangedOccurred) {
                 log("notifySubscriptionInfoChanged: first invocation mRecords.size="
@@ -1026,6 +1030,10 @@ public class TelephonyRegistry extends ITelephonyRegistry.Stub {
     @Override
     public void notifyOpportunisticSubscriptionInfoChanged() {
         if (VDBG) log("notifyOpptSubscriptionInfoChanged:");
+        if (!checkNotifyPermission("notifyOpportunisticSubscriptionInfoChanged()")) {
+            return;
+        }
+
         synchronized (mRecords) {
             if (!mHasNotifyOpportunisticSubscriptionInfoChangedOccurred) {
                 log("notifyOpptSubscriptionInfoChanged: first invocation mRecords.size="
