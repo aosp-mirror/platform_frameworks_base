@@ -1125,7 +1125,7 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
         }
 
         mDisplayPolicy = new DisplayPolicy(mWmService, this);
-        mDisplayRotation = new DisplayRotation(mWmService, this);
+        mDisplayRotation = new DisplayRotation(mWmService, this, mDisplayInfo.address);
 
         mDeviceStateController = new DeviceStateController(mWmService.mContext, mWmService.mH,
                 newFoldState -> {

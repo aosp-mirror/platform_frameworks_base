@@ -21,6 +21,7 @@ import android.telephony.SubscriptionManager
 import android.telephony.TelephonyCallback
 import android.telephony.TelephonyManager
 import com.android.systemui.statusbar.pipeline.mobile.data.model.MobileConnectionModel
+import com.android.systemui.statusbar.pipeline.mobile.data.model.NetworkNameModel
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.StateFlow
 
@@ -50,4 +51,15 @@ interface MobileConnectionRepository {
      * [SubscriptionManager.getDefaultDataSubscriptionId]
      */
     val isDefaultDataSubscription: StateFlow<Boolean>
+
+    /**
+     * See [TelephonyManager.getCdmaEnhancedRoamingIndicatorDisplayNumber]. This bit only matters if
+     * the connection type is CDMA.
+     *
+     * True if the Enhanced Roaming Indicator (ERI) display number is not [TelephonyManager.ERI_OFF]
+     */
+    val cdmaRoaming: StateFlow<Boolean>
+
+    /** The service provider name for this network connection, or the default name */
+    val networkName: StateFlow<NetworkNameModel>
 }

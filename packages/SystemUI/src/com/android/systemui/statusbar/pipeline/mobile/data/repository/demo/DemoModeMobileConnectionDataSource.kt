@@ -98,6 +98,8 @@ constructor(
         val inflateStrength = getString("inflate")?.toBoolean()
         val activity = getString("activity")?.toActivity()
         val carrierNetworkChange = getString("carriernetworkchange") == "show"
+        val roaming = getString("roam") == "show"
+        val name = getString("networkname") ?: "demo mode"
 
         return Mobile(
             level = level,
@@ -107,6 +109,8 @@ constructor(
             inflateStrength = inflateStrength,
             activity = activity,
             carrierNetworkChange = carrierNetworkChange,
+            roaming = roaming,
+            name = name,
         )
     }
 }

@@ -17,12 +17,20 @@
 package com.android.wm.shell.desktopmode
 
 import android.app.ActivityManager
-import android.app.WindowConfiguration
 import android.app.WindowConfiguration.ACTIVITY_TYPE_HOME
+import android.app.WindowConfiguration.ACTIVITY_TYPE_STANDARD
+import android.app.WindowConfiguration.WINDOWING_MODE_FREEFORM
+import android.app.WindowConfiguration.WINDOWING_MODE_FULLSCREEN
 import android.app.WindowConfiguration.WINDOWING_MODE_UNDEFINED
 import android.app.WindowConfiguration.WindowingMode
 import android.content.Context
-import android.view.WindowManager
+import android.os.IBinder
+import android.view.SurfaceControl
+import android.view.WindowManager.TRANSIT_CHANGE
+import android.view.WindowManager.TRANSIT_OPEN
+import android.view.WindowManager.TRANSIT_TO_FRONT
+import android.window.TransitionInfo
+import android.window.TransitionRequestInfo
 import android.window.WindowContainerTransaction
 import androidx.annotation.BinderThread
 import com.android.internal.protolog.common.ProtoLog
@@ -51,7 +59,7 @@ class DesktopTasksController(
     private val transitions: Transitions,
     private val desktopModeTaskRepository: DesktopModeTaskRepository,
     @ShellMainThread private val mainExecutor: ShellExecutor
-) : RemoteCallable<DesktopTasksController> {
+) : RemoteCallable<DesktopTasksController>, Transitions.TransitionHandler {
 
     private val desktopMode: DesktopModeImpl
 
@@ -69,6 +77,7 @@ class DesktopTasksController(
             { createExternalInterface() },
             this
         )
+        transitions.addHandler(this)
     }
 
     /** Show all tasks, that are part of the desktop, on top of launcher */
@@ -81,7 +90,7 @@ class DesktopTasksController(
         // Execute transaction if there are pending operations
         if (!wct.isEmpty) {
             if (Transitions.ENABLE_SHELL_TRANSITIONS) {
-                transitions.startTransition(WindowManager.TRANSIT_TO_FRONT, wct, null /* handler */)
+                transitions.startTransition(TRANSIT_TO_FRONT, wct, null /* handler */)
             } else {
                 shellTaskOrganizer.applyTransaction(wct)
             }
@@ -101,11 +110,11 @@ class DesktopTasksController(
         // Bring other apps to front first
         bringDesktopAppsToFront(wct)
 
-        wct.setWindowingMode(task.getToken(), WindowConfiguration.WINDOWING_MODE_FREEFORM)
+        wct.setWindowingMode(task.getToken(), WINDOWING_MODE_FREEFORM)
         wct.reorder(task.getToken(), true /* onTop */)
 
         if (Transitions.ENABLE_SHELL_TRANSITIONS) {
-            transitions.startTransition(WindowManager.TRANSIT_CHANGE, wct, null /* handler */)
+            transitions.startTransition(TRANSIT_CHANGE, wct, null /* handler */)
         } else {
             shellTaskOrganizer.applyTransaction(wct)
         }
@@ -121,10 +130,10 @@ class DesktopTasksController(
         ProtoLog.v(WM_SHELL_DESKTOP_MODE, "moveToFullscreen: %d", task.taskId)
 
         val wct = WindowContainerTransaction()
-        wct.setWindowingMode(task.getToken(), WindowConfiguration.WINDOWING_MODE_FULLSCREEN)
+        wct.setWindowingMode(task.getToken(), WINDOWING_MODE_FULLSCREEN)
         wct.setBounds(task.getToken(), null)
         if (Transitions.ENABLE_SHELL_TRANSITIONS) {
-            transitions.startTransition(WindowManager.TRANSIT_CHANGE, wct, null /* handler */)
+            transitions.startTransition(TRANSIT_CHANGE, wct, null /* handler */)
         } else {
             shellTaskOrganizer.applyTransaction(wct)
         }
@@ -179,6 +188,80 @@ class DesktopTasksController(
 
     override fun getRemoteCallExecutor(): ShellExecutor {
         return mainExecutor
+    }
+
+    override fun startAnimation(
+        transition: IBinder,
+        info: TransitionInfo,
+        startTransaction: SurfaceControl.Transaction,
+        finishTransaction: SurfaceControl.Transaction,
+        finishCallback: Transitions.TransitionFinishCallback
+    ): Boolean {
+        // This handler should never be the sole handler, so should not animate anything.
+        return false
+    }
+
+    override fun handleRequest(
+        transition: IBinder,
+        request: TransitionRequestInfo
+    ): WindowContainerTransaction? {
+        // Check if we should skip handling this transition
+        val task: ActivityManager.RunningTaskInfo? = request.triggerTask
+        val shouldHandleRequest =
+            when {
+                // Only handle open or to front transitions
+                request.type != TRANSIT_OPEN && request.type != TRANSIT_TO_FRONT -> false
+                // Only handle when it is a task transition
+                task == null -> false
+                // Only handle standard type tasks
+                task.activityType != ACTIVITY_TYPE_STANDARD -> false
+                // Only handle fullscreen or freeform tasks
+                task.windowingMode != WINDOWING_MODE_FULLSCREEN &&
+                    task.windowingMode != WINDOWING_MODE_FREEFORM -> false
+                // Otherwise process it
+                else -> true
+            }
+
+        if (!shouldHandleRequest) {
+            return null
+        }
+
+        val activeTasks = desktopModeTaskRepository.getActiveTasks()
+
+        // Check if we should switch a fullscreen task to freeform
+        if (task?.windowingMode == WINDOWING_MODE_FULLSCREEN) {
+            // If there are any visible desktop tasks, switch the task to freeform
+            if (activeTasks.any { desktopModeTaskRepository.isVisibleTask(it) }) {
+                ProtoLog.d(
+                    WM_SHELL_DESKTOP_MODE,
+                    "DesktopTasksController#handleRequest: switch fullscreen task to freeform," +
+                        " taskId=%d",
+                    task.taskId
+                )
+                return WindowContainerTransaction().apply {
+                    setWindowingMode(task.token, WINDOWING_MODE_FREEFORM)
+                }
+            }
+        }
+
+        // CHeck if we should switch a freeform task to fullscreen
+        if (task?.windowingMode == WINDOWING_MODE_FREEFORM) {
+            // If no visible desktop tasks, switch this task to freeform as the transition came
+            // outside of this controller
+            if (activeTasks.none { desktopModeTaskRepository.isVisibleTask(it) }) {
+                ProtoLog.d(
+                    WM_SHELL_DESKTOP_MODE,
+                    "DesktopTasksController#handleRequest: switch freeform task to fullscreen," +
+                        " taskId=%d",
+                    task.taskId
+                )
+                return WindowContainerTransaction().apply {
+                    setWindowingMode(task.token, WINDOWING_MODE_FULLSCREEN)
+                    setBounds(task.token, null)
+                }
+            }
+        }
+        return null
     }
 
     /** Creates a new instance of the external interface to pass to another process. */

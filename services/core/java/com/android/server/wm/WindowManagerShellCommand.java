@@ -1219,9 +1219,17 @@ public class WindowManagerShellCommand extends ShellCommand {
             pw.println("Corner radius: "
                     + mLetterboxConfiguration.getLetterboxActivityCornersRadius());
             pw.println("Horizontal position multiplier: "
-                    + mLetterboxConfiguration.getLetterboxHorizontalPositionMultiplier());
+                    + mLetterboxConfiguration.getLetterboxHorizontalPositionMultiplier(
+                            false /* isInBookMode */));
             pw.println("Vertical position multiplier: "
-                    + mLetterboxConfiguration.getLetterboxVerticalPositionMultiplier());
+                    + mLetterboxConfiguration.getLetterboxVerticalPositionMultiplier(
+                            false /* isInTabletopMode */));
+            pw.println("Horizontal position multiplier (book mode): "
+                    + mLetterboxConfiguration.getLetterboxHorizontalPositionMultiplier(
+                            true /* isInBookMode */));
+            pw.println("Vertical position multiplier (tabletop mode): "
+                    + mLetterboxConfiguration.getLetterboxVerticalPositionMultiplier(
+                            true /* isInTabletopMode */));
             pw.println("Aspect ratio: "
                     + mLetterboxConfiguration.getFixedOrientationLetterboxAspectRatio());
             pw.println("Default min aspect ratio for unresizable apps: "
@@ -1238,10 +1246,10 @@ public class WindowManagerShellCommand extends ShellCommand {
                     mLetterboxConfiguration.getDefaultPositionForVerticalReachability()));
             pw.println("Current position for horizontal reachability:"
                     + LetterboxConfiguration.letterboxHorizontalReachabilityPositionToString(
-                        mLetterboxConfiguration.getLetterboxPositionForHorizontalReachability()));
+                    mLetterboxConfiguration.getLetterboxPositionForHorizontalReachability(false)));
             pw.println("Current position for vertical reachability:"
                     + LetterboxConfiguration.letterboxVerticalReachabilityPositionToString(
-                        mLetterboxConfiguration.getLetterboxPositionForVerticalReachability()));
+                    mLetterboxConfiguration.getLetterboxPositionForVerticalReachability(false)));
             pw.println("Is education enabled: "
                     + mLetterboxConfiguration.getIsEducationEnabled());
             pw.println("Is using split screen aspect ratio as aspect ratio for unresizable apps: "

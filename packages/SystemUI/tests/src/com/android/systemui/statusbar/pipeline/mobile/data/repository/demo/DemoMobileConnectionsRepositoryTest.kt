@@ -17,6 +17,7 @@
 package com.android.systemui.statusbar.pipeline.mobile.data.repository.demo
 
 import android.telephony.TelephonyManager.DATA_ACTIVITY_INOUT
+import android.telephony.TelephonyManager.DATA_ACTIVITY_NONE
 import android.telephony.TelephonyManager.UNKNOWN_CARRIER_ID
 import androidx.test.filters.SmallTest
 import com.android.settingslib.SignalIcon
@@ -24,9 +25,11 @@ import com.android.settingslib.mobile.TelephonyIcons.THREE_G
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.statusbar.pipeline.mobile.data.model.DataConnectionState
 import com.android.systemui.statusbar.pipeline.mobile.data.model.MobileConnectionModel
+import com.android.systemui.statusbar.pipeline.mobile.data.model.NetworkNameModel
 import com.android.systemui.statusbar.pipeline.mobile.data.model.SubscriptionModel
 import com.android.systemui.statusbar.pipeline.mobile.data.repository.demo.model.FakeNetworkEventModel
 import com.android.systemui.statusbar.pipeline.mobile.data.repository.demo.model.FakeNetworkEventModel.MobileDisabled
+import com.android.systemui.statusbar.pipeline.shared.data.model.toMobileDataActivityModel
 import com.android.systemui.util.mockito.mock
 import com.android.systemui.util.mockito.whenever
 import com.google.common.truth.Truth.assertThat
@@ -289,9 +292,12 @@ class DemoMobileConnectionsRepositoryTest : SysuiTestCase() {
                 assertThat(conn.subId).isEqualTo(model.subId)
                 assertThat(connectionInfo.cdmaLevel).isEqualTo(model.level)
                 assertThat(connectionInfo.primaryLevel).isEqualTo(model.level)
-                assertThat(connectionInfo.dataActivityDirection).isEqualTo(model.activity)
+                assertThat(connectionInfo.dataActivityDirection)
+                    .isEqualTo((model.activity ?: DATA_ACTIVITY_NONE).toMobileDataActivityModel())
                 assertThat(connectionInfo.carrierNetworkChangeActive)
                     .isEqualTo(model.carrierNetworkChange)
+                assertThat(connectionInfo.isRoaming).isEqualTo(model.roaming)
+                assertThat(conn.networkName.value).isEqualTo(NetworkNameModel.Derived(model.name))
 
                 // TODO(b/261029387) check these once we start handling them
                 assertThat(connectionInfo.isEmergencyOnly).isFalse()
@@ -313,6 +319,7 @@ fun validMobileEvent(
     inflateStrength: Boolean? = false,
     activity: Int? = null,
     carrierNetworkChange: Boolean = false,
+    roaming: Boolean = false,
 ): FakeNetworkEventModel =
     FakeNetworkEventModel.Mobile(
         level = level,
@@ -322,4 +329,6 @@ fun validMobileEvent(
         inflateStrength = inflateStrength,
         activity = activity,
         carrierNetworkChange = carrierNetworkChange,
+        roaming = roaming,
+        name = "demo name",
     )

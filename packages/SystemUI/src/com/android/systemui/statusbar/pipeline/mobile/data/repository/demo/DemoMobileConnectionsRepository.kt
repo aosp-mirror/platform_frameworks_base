@@ -18,6 +18,7 @@ package com.android.systemui.statusbar.pipeline.mobile.data.repository.demo
 
 import android.content.Context
 import android.telephony.SubscriptionManager.INVALID_SUBSCRIPTION_ID
+import android.telephony.TelephonyManager.DATA_ACTIVITY_NONE
 import android.util.Log
 import com.android.settingslib.SignalIcon
 import com.android.settingslib.mobile.MobileMappings
@@ -26,6 +27,7 @@ import com.android.systemui.dagger.qualifiers.Application
 import com.android.systemui.statusbar.pipeline.mobile.data.model.DataConnectionState
 import com.android.systemui.statusbar.pipeline.mobile.data.model.MobileConnectionModel
 import com.android.systemui.statusbar.pipeline.mobile.data.model.MobileConnectivityModel
+import com.android.systemui.statusbar.pipeline.mobile.data.model.NetworkNameModel
 import com.android.systemui.statusbar.pipeline.mobile.data.model.ResolvedNetworkType
 import com.android.systemui.statusbar.pipeline.mobile.data.model.ResolvedNetworkType.DefaultNetworkType
 import com.android.systemui.statusbar.pipeline.mobile.data.model.SubscriptionModel
@@ -34,6 +36,7 @@ import com.android.systemui.statusbar.pipeline.mobile.data.repository.MobileConn
 import com.android.systemui.statusbar.pipeline.mobile.data.repository.demo.model.FakeNetworkEventModel
 import com.android.systemui.statusbar.pipeline.mobile.data.repository.demo.model.FakeNetworkEventModel.Mobile
 import com.android.systemui.statusbar.pipeline.mobile.data.repository.demo.model.FakeNetworkEventModel.MobileDisabled
+import com.android.systemui.statusbar.pipeline.shared.data.model.toMobileDataActivityModel
 import javax.inject.Inject
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.ExperimentalCoroutinesApi
@@ -185,7 +188,9 @@ constructor(
         // This is always true here, because we split out disabled states at the data-source level
         connection.dataEnabled.value = true
         connection.isDefaultDataSubscription.value = state.dataType != null
+        connection.networkName.value = NetworkNameModel.Derived(state.name)
 
+        connection.cdmaRoaming.value = state.roaming
         connection.connectionInfo.value = state.toMobileConnectionModel()
     }
 
@@ -229,12 +234,13 @@ constructor(
     private fun Mobile.toMobileConnectionModel(): MobileConnectionModel {
         return MobileConnectionModel(
             isEmergencyOnly = false, // TODO(b/261029387): not yet supported
+            isRoaming = roaming,
             isGsm = false, // TODO(b/261029387): not yet supported
             cdmaLevel = level ?: 0,
             primaryLevel = level ?: 0,
             dataConnectionState =
                 DataConnectionState.Connected, // TODO(b/261029387): not yet supported
-            dataActivityDirection = activity,
+            dataActivityDirection = (activity ?: DATA_ACTIVITY_NONE).toMobileDataActivityModel(),
             carrierNetworkChangeActive = carrierNetworkChange,
             resolvedNetworkType = dataType.toResolvedNetworkType()
         )
@@ -260,4 +266,8 @@ class DemoMobileConnectionRepository(override val subId: Int) : MobileConnection
     override val dataEnabled = MutableStateFlow(true)
 
     override val isDefaultDataSubscription = MutableStateFlow(true)
+
+    override val cdmaRoaming = MutableStateFlow(false)
+
+    override val networkName = MutableStateFlow(NetworkNameModel.Derived("demo network"))
 }
