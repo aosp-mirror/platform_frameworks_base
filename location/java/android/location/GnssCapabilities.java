@@ -129,21 +129,26 @@ public final class GnssCapabilities implements Parcelable {
      * @hide
      */
     public static GnssCapabilities empty() {
-        return new GnssCapabilities(0, 0, 0, Collections.emptyList());
+        return new GnssCapabilities(/*topFlags=*/ 0, /*isAdrCapabilityKnown=*/ false,
+                /*measurementCorrectionsFlags=*/ 0, /*powerFlags=*/ 0, /*gnssSignalTypes=*/
+                Collections.emptyList());
     }
 
     private final @TopHalCapabilityFlags int mTopFlags;
+    private final boolean mIsAdrCapabilityKnown;
     private final @SubHalMeasurementCorrectionsCapabilityFlags int mMeasurementCorrectionsFlags;
     private final @SubHalPowerCapabilityFlags int mPowerFlags;
     private final @NonNull List<GnssSignalType> mGnssSignalTypes;
 
     private GnssCapabilities(
             @TopHalCapabilityFlags int topFlags,
+            boolean isAdrCapabilityKnown,
             @SubHalMeasurementCorrectionsCapabilityFlags int measurementCorrectionsFlags,
             @SubHalPowerCapabilityFlags int powerFlags,
             @NonNull List<GnssSignalType> gnssSignalTypes) {
         Objects.requireNonNull(gnssSignalTypes);
         mTopFlags = topFlags;
+        mIsAdrCapabilityKnown = isAdrCapabilityKnown;
         mMeasurementCorrectionsFlags = measurementCorrectionsFlags;
         mPowerFlags = powerFlags;
         mGnssSignalTypes = Collections.unmodifiableList(gnssSignalTypes);
@@ -154,12 +159,13 @@ public final class GnssCapabilities implements Parcelable {
      *
      * @hide
      */
-    public GnssCapabilities withTopHalFlags(@TopHalCapabilityFlags int flags) {
-        if (mTopFlags == flags) {
+    public GnssCapabilities withTopHalFlags(@TopHalCapabilityFlags int flags,
+            boolean isAdrCapabilityKnown) {
+        if (mTopFlags == flags && mIsAdrCapabilityKnown == isAdrCapabilityKnown) {
             return this;
         } else {
-            return new GnssCapabilities(flags, mMeasurementCorrectionsFlags, mPowerFlags,
-                    mGnssSignalTypes);
+            return new GnssCapabilities(flags, isAdrCapabilityKnown,
+                    mMeasurementCorrectionsFlags, mPowerFlags, mGnssSignalTypes);
         }
     }
 
@@ -174,7 +180,7 @@ public final class GnssCapabilities implements Parcelable {
         if (mMeasurementCorrectionsFlags == flags) {
             return this;
         } else {
-            return new GnssCapabilities(mTopFlags, flags, mPowerFlags,
+            return new GnssCapabilities(mTopFlags, mIsAdrCapabilityKnown, flags, mPowerFlags,
                     mGnssSignalTypes);
         }
     }
@@ -189,8 +195,8 @@ public final class GnssCapabilities implements Parcelable {
         if (mPowerFlags == flags) {
             return this;
         } else {
-            return new GnssCapabilities(mTopFlags, mMeasurementCorrectionsFlags, flags,
-                    mGnssSignalTypes);
+            return new GnssCapabilities(mTopFlags, mIsAdrCapabilityKnown,
+                    mMeasurementCorrectionsFlags, flags, mGnssSignalTypes);
         }
     }
 
@@ -204,8 +210,8 @@ public final class GnssCapabilities implements Parcelable {
         if (mGnssSignalTypes.equals(gnssSignalTypes)) {
             return this;
         } else {
-            return new GnssCapabilities(mTopFlags, mMeasurementCorrectionsFlags, mPowerFlags,
-                    new ArrayList<>(gnssSignalTypes));
+            return new GnssCapabilities(mTopFlags, mIsAdrCapabilityKnown,
+                    mMeasurementCorrectionsFlags, mPowerFlags, new ArrayList<>(gnssSignalTypes));
         }
     }
 
@@ -368,13 +374,27 @@ public final class GnssCapabilities implements Parcelable {
      * Returns {@code true} if GNSS chipset supports accumulated delta range, {@code false}
      * otherwise.
      *
+     * <p>The value is only known if {@link #isAccumulatedDeltaRangeCapabilityKnown()} is
+     * true.
+     *
      * <p>The accumulated delta range information can be queried in
      * {@link android.location.GnssMeasurement#getAccumulatedDeltaRangeState()},
      * {@link android.location.GnssMeasurement#getAccumulatedDeltaRangeMeters()}, and
      * {@link android.location.GnssMeasurement#getAccumulatedDeltaRangeUncertaintyMeters()}.
      */
     public boolean hasAccumulatedDeltaRange() {
+        if (!mIsAdrCapabilityKnown) {
+            throw new IllegalStateException("Accumulated delta range capability is unknown.");
+        }
         return (mTopFlags & TOP_HAL_CAPABILITY_ACCUMULATED_DELTA_RANGE) != 0;
+    }
+
+    /**
+     * Returns {@code true} if {@link #hasAccumulatedDeltaRange()} is known, {@code false}
+     * otherwise.
+     */
+    public boolean isAccumulatedDeltaRangeCapabilityKnown() {
+        return mIsAdrCapabilityKnown;
     }
 
     /**
@@ -484,6 +504,7 @@ public final class GnssCapabilities implements Parcelable {
 
         GnssCapabilities that = (GnssCapabilities) o;
         return mTopFlags == that.mTopFlags
+                && mIsAdrCapabilityKnown == that.mIsAdrCapabilityKnown
                 && mMeasurementCorrectionsFlags == that.mMeasurementCorrectionsFlags
                 && mPowerFlags == that.mPowerFlags
                 && mGnssSignalTypes.equals(that.mGnssSignalTypes);
@@ -491,15 +512,16 @@ public final class GnssCapabilities implements Parcelable {
 
     @Override
     public int hashCode() {
-        return Objects.hash(mTopFlags, mMeasurementCorrectionsFlags, mPowerFlags, mGnssSignalTypes);
+        return Objects.hash(mTopFlags, mIsAdrCapabilityKnown, mMeasurementCorrectionsFlags,
+                mPowerFlags, mGnssSignalTypes);
     }
 
     public static final @NonNull Creator<GnssCapabilities> CREATOR =
             new Creator<GnssCapabilities>() {
                 @Override
                 public GnssCapabilities createFromParcel(Parcel in) {
-                    return new GnssCapabilities(in.readInt(), in.readInt(), in.readInt(),
-                            in.createTypedArrayList(GnssSignalType.CREATOR));
+                    return new GnssCapabilities(in.readInt(), in.readBoolean(), in.readInt(),
+                            in.readInt(), in.createTypedArrayList(GnssSignalType.CREATOR));
                 }
 
                 @Override
@@ -516,6 +538,7 @@ public final class GnssCapabilities implements Parcelable {
     @Override
     public void writeToParcel(@NonNull Parcel parcel, int flags) {
         parcel.writeInt(mTopFlags);
+        parcel.writeBoolean(mIsAdrCapabilityKnown);
         parcel.writeInt(mMeasurementCorrectionsFlags);
         parcel.writeInt(mPowerFlags);
         parcel.writeTypedList(mGnssSignalTypes);
@@ -570,8 +593,10 @@ public final class GnssCapabilities implements Parcelable {
         if (hasMeasurementCorrectionsForDriving()) {
             builder.append("MEASUREMENT_CORRECTIONS_FOR_DRIVING ");
         }
-        if (hasAccumulatedDeltaRange()) {
+        if (mIsAdrCapabilityKnown && hasAccumulatedDeltaRange()) {
             builder.append("ACCUMULATED_DELTA_RANGE ");
+        } else if (!mIsAdrCapabilityKnown) {
+            builder.append("ACCUMULATED_DELTA_RANGE(unknown) ");
         }
         if (hasMeasurementCorrectionsLosSats()) {
             builder.append("LOS_SATS ");
@@ -618,12 +643,14 @@ public final class GnssCapabilities implements Parcelable {
     public static final class Builder {
 
         private @TopHalCapabilityFlags int mTopFlags;
+        private boolean mIsAdrCapabilityKnown;
         private @SubHalMeasurementCorrectionsCapabilityFlags int mMeasurementCorrectionsFlags;
         private @SubHalPowerCapabilityFlags int mPowerFlags;
         private @NonNull List<GnssSignalType> mGnssSignalTypes;
 
         public Builder() {
             mTopFlags = 0;
+            mIsAdrCapabilityKnown = false;
             mMeasurementCorrectionsFlags = 0;
             mPowerFlags = 0;
             mGnssSignalTypes = Collections.emptyList();
@@ -631,6 +658,7 @@ public final class GnssCapabilities implements Parcelable {
 
         public Builder(@NonNull GnssCapabilities capabilities) {
             mTopFlags = capabilities.mTopFlags;
+            mIsAdrCapabilityKnown = capabilities.mIsAdrCapabilityKnown;
             mMeasurementCorrectionsFlags = capabilities.mMeasurementCorrectionsFlags;
             mPowerFlags = capabilities.mPowerFlags;
             mGnssSignalTypes = capabilities.mGnssSignalTypes;
@@ -764,8 +792,18 @@ public final class GnssCapabilities implements Parcelable {
          * Sets accumulated delta range capability.
          */
         public @NonNull Builder setHasAccumulatedDeltaRange(boolean capable) {
+            mIsAdrCapabilityKnown = true;
             mTopFlags = setFlag(mTopFlags, TOP_HAL_CAPABILITY_ACCUMULATED_DELTA_RANGE,
                     capable);
+            return this;
+        }
+
+        /**
+         * Clears accumulated delta range capability and sets it as unknown.
+         */
+        public @NonNull Builder clearIsAccumulatedDeltaRangeCapabilityKnown() {
+            mIsAdrCapabilityKnown = false;
+            mTopFlags = setFlag(mTopFlags, TOP_HAL_CAPABILITY_ACCUMULATED_DELTA_RANGE, false);
             return this;
         }
 
@@ -860,8 +898,8 @@ public final class GnssCapabilities implements Parcelable {
          * Builds a new GnssCapabilities.
          */
         public @NonNull GnssCapabilities build() {
-            return new GnssCapabilities(mTopFlags, mMeasurementCorrectionsFlags, mPowerFlags,
-                    new ArrayList<>(mGnssSignalTypes));
+            return new GnssCapabilities(mTopFlags, mIsAdrCapabilityKnown,
+                    mMeasurementCorrectionsFlags, mPowerFlags, new ArrayList<>(mGnssSignalTypes));
         }
 
         private static int setFlag(int value, int flag, boolean set) {
