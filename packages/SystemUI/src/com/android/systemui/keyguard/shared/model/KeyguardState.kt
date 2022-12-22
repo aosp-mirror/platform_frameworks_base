@@ -57,4 +57,8 @@ enum class KeyguardState {
      * with SWIPE security method or face unlock without bypass.
      */
     GONE,
+    /*
+     * An activity is displaying over the keyguard.
+     */
+    OCCLUDED,
 }

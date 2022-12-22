@@ -23,6 +23,8 @@ import com.android.systemui.animation.Interpolators
 import com.android.systemui.keyguard.data.repository.FakeKeyguardRepository
 import com.android.systemui.keyguard.data.repository.KeyguardTransitionRepository
 import com.android.systemui.keyguard.data.repository.KeyguardTransitionRepositoryImpl
+import com.android.systemui.keyguard.shared.model.DozeStateModel
+import com.android.systemui.keyguard.shared.model.DozeTransitionModel
 import com.android.systemui.keyguard.shared.model.KeyguardState
 import com.android.systemui.keyguard.shared.model.TransitionInfo
 import com.android.systemui.keyguard.shared.model.WakeSleepReason
@@ -42,6 +44,7 @@ import org.junit.Test
 import org.junit.runner.RunWith
 import org.junit.runners.JUnit4
 import org.mockito.Mock
+import org.mockito.Mockito.reset
 import org.mockito.Mockito.verify
 import org.mockito.MockitoAnnotations
 
@@ -64,8 +67,8 @@ class KeyguardTransitionScenariosTest : SysuiTestCase() {
     // Used to verify transition requests for test output
     @Mock private lateinit var mockTransitionRepository: KeyguardTransitionRepository
 
-    private lateinit var lockscreenBouncerTransitionInteractor:
-        LockscreenBouncerTransitionInteractor
+    private lateinit var fromLockscreenTransitionInteractor: FromLockscreenTransitionInteractor
+    private lateinit var fromDreamingTransitionInteractor: FromDreamingTransitionInteractor
 
     @Before
     fun setUp() {
@@ -79,16 +82,73 @@ class KeyguardTransitionScenariosTest : SysuiTestCase() {
         transitionRepository = KeyguardTransitionRepositoryImpl()
         runner = KeyguardTransitionRunner(transitionRepository)
 
-        lockscreenBouncerTransitionInteractor =
-            LockscreenBouncerTransitionInteractor(
+        fromLockscreenTransitionInteractor =
+            FromLockscreenTransitionInteractor(
                 scope = testScope,
                 keyguardInteractor = KeyguardInteractor(keyguardRepository),
                 shadeRepository = shadeRepository,
                 keyguardTransitionRepository = mockTransitionRepository,
                 keyguardTransitionInteractor = KeyguardTransitionInteractor(transitionRepository),
             )
-        lockscreenBouncerTransitionInteractor.start()
+        fromLockscreenTransitionInteractor.start()
+
+        fromDreamingTransitionInteractor =
+            FromDreamingTransitionInteractor(
+                scope = testScope,
+                keyguardInteractor = KeyguardInteractor(keyguardRepository),
+                keyguardTransitionRepository = mockTransitionRepository,
+                keyguardTransitionInteractor = KeyguardTransitionInteractor(transitionRepository),
+            )
+        fromDreamingTransitionInteractor.start()
     }
+
+    @Test
+    fun `DREAMING to LOCKSCREEN`() =
+        testScope.runTest {
+            // GIVEN a device is dreaming and occluded
+            keyguardRepository.setDreamingWithOverlay(true)
+            keyguardRepository.setKeyguardOccluded(true)
+            runCurrent()
+
+            // GIVEN a prior transition has run to DREAMING
+            runner.startTransition(
+                testScope,
+                TransitionInfo(
+                    ownerName = "",
+                    from = KeyguardState.LOCKSCREEN,
+                    to = KeyguardState.DREAMING,
+                    animator =
+                        ValueAnimator().apply {
+                            duration = 10
+                            interpolator = Interpolators.LINEAR
+                        },
+                )
+            )
+            runCurrent()
+            reset(mockTransitionRepository)
+
+            // WHEN doze is complete
+            keyguardRepository.setDozeTransitionModel(
+                DozeTransitionModel(from = DozeStateModel.DOZE, to = DozeStateModel.FINISH)
+            )
+            // AND dreaming has stopped
+            keyguardRepository.setDreamingWithOverlay(false)
+            // AND occluded has stopped
+            keyguardRepository.setKeyguardOccluded(false)
+            runCurrent()
+
+            val info =
+                withArgCaptor<TransitionInfo> {
+                    verify(mockTransitionRepository).startTransition(capture())
+                }
+            // THEN a transition to BOUNCER should occur
+            assertThat(info.ownerName).isEqualTo("FromDreamingTransitionInteractor")
+            assertThat(info.from).isEqualTo(KeyguardState.DREAMING)
+            assertThat(info.to).isEqualTo(KeyguardState.LOCKSCREEN)
+            assertThat(info.animator).isNotNull()
+
+            coroutineContext.cancelChildren()
+        }
 
     @Test
     fun `LOCKSCREEN to BOUNCER via bouncer showing call`() =
@@ -97,7 +157,7 @@ class KeyguardTransitionScenariosTest : SysuiTestCase() {
             keyguardRepository.setWakefulnessModel(startingToWake())
             runCurrent()
 
-            // GIVEN a transition has run to LOCKSCREEN
+            // GIVEN a prior transition has run to LOCKSCREEN
             runner.startTransition(
                 testScope,
                 TransitionInfo(
@@ -122,7 +182,7 @@ class KeyguardTransitionScenariosTest : SysuiTestCase() {
                     verify(mockTransitionRepository).startTransition(capture())
                 }
             // THEN a transition to BOUNCER should occur
-            assertThat(info.ownerName).isEqualTo("LockscreenBouncerTransitionInteractor")
+            assertThat(info.ownerName).isEqualTo("FromLockscreenTransitionInteractor")
             assertThat(info.from).isEqualTo(KeyguardState.LOCKSCREEN)
             assertThat(info.to).isEqualTo(KeyguardState.BOUNCER)
             assertThat(info.animator).isNotNull()

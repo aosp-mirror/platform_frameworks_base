@@ -21,7 +21,7 @@ import com.android.systemui.SysuiTestCase
 import com.android.systemui.animation.Interpolators.EMPHASIZED_ACCELERATE
 import com.android.systemui.animation.Interpolators.EMPHASIZED_DECELERATE
 import com.android.systemui.keyguard.data.repository.FakeKeyguardTransitionRepository
-import com.android.systemui.keyguard.domain.interactor.DreamingTransitionInteractor.Companion.TO_LOCKSCREEN_DURATION
+import com.android.systemui.keyguard.domain.interactor.FromDreamingTransitionInteractor.Companion.TO_LOCKSCREEN_DURATION
 import com.android.systemui.keyguard.domain.interactor.KeyguardTransitionInteractor
 import com.android.systemui.keyguard.shared.model.AnimationParams
 import com.android.systemui.keyguard.shared.model.KeyguardState
