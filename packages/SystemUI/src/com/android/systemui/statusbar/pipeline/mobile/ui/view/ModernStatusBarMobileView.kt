@@ -24,7 +24,7 @@ import com.android.systemui.R
 import com.android.systemui.statusbar.BaseStatusBarFrameLayout
 import com.android.systemui.statusbar.StatusBarIconView.STATE_ICON
 import com.android.systemui.statusbar.pipeline.mobile.ui.binder.MobileIconBinder
-import com.android.systemui.statusbar.pipeline.mobile.ui.viewmodel.MobileIconViewModel
+import com.android.systemui.statusbar.pipeline.mobile.ui.viewmodel.LocationBasedMobileViewModel
 import java.util.ArrayList
 
 class ModernStatusBarMobileView(
@@ -71,7 +71,7 @@ class ModernStatusBarMobileView(
         fun constructAndBind(
             context: Context,
             slot: String,
-            viewModel: MobileIconViewModel,
+            viewModel: LocationBasedMobileViewModel,
         ): ModernStatusBarMobileView {
             return (LayoutInflater.from(context)
                     .inflate(R.layout.status_bar_mobile_signal_group_new, null)

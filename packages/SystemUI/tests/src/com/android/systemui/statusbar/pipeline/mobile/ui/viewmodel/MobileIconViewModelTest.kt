@@ -22,32 +22,42 @@ import com.android.settingslib.mobile.TelephonyIcons.THREE_G
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.common.shared.model.ContentDescription
 import com.android.systemui.common.shared.model.Icon
+import com.android.systemui.log.table.TableLogBuffer
 import com.android.systemui.statusbar.pipeline.mobile.domain.interactor.FakeMobileIconInteractor
 import com.android.systemui.statusbar.pipeline.shared.ConnectivityConstants
 import com.android.systemui.statusbar.pipeline.shared.ConnectivityPipelineLogger
 import com.android.systemui.statusbar.pipeline.shared.data.model.DataActivityModel
 import com.android.systemui.util.mockito.whenever
 import com.google.common.truth.Truth.assertThat
-import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
-import kotlinx.coroutines.runBlocking
+import kotlinx.coroutines.test.TestScope
+import kotlinx.coroutines.test.UnconfinedTestDispatcher
+import kotlinx.coroutines.test.runTest
 import kotlinx.coroutines.yield
 import org.junit.Before
 import org.junit.Test
 import org.mockito.Mock
 import org.mockito.MockitoAnnotations
 
+@Suppress("EXPERIMENTAL_IS_NOT_ENABLED")
+@OptIn(ExperimentalCoroutinesApi::class)
 @SmallTest
 class MobileIconViewModelTest : SysuiTestCase() {
     private lateinit var underTest: MobileIconViewModel
-    private val interactor = FakeMobileIconInteractor()
+    private lateinit var interactor: FakeMobileIconInteractor
     @Mock private lateinit var logger: ConnectivityPipelineLogger
     @Mock private lateinit var constants: ConnectivityConstants
+    @Mock private lateinit var tableLogBuffer: TableLogBuffer
+
+    private val testDispatcher = UnconfinedTestDispatcher()
+    private val testScope = TestScope(testDispatcher)
 
     @Before
     fun setUp() {
         MockitoAnnotations.initMocks(this)
+        interactor = FakeMobileIconInteractor(tableLogBuffer)
         interactor.apply {
             setLevel(1)
             setIsDefaultDataEnabled(true)
@@ -57,12 +67,13 @@ class MobileIconViewModelTest : SysuiTestCase() {
             setNumberOfLevels(4)
             isDataConnected.value = true
         }
-        underTest = MobileIconViewModel(SUB_1_ID, interactor, logger, constants)
+        underTest =
+            MobileIconViewModel(SUB_1_ID, interactor, logger, constants, testScope.backgroundScope)
     }
 
     @Test
     fun iconId_correctLevel_notCutout() =
-        runBlocking(IMMEDIATE) {
+        testScope.runTest {
             var latest: Int? = null
             val job = underTest.iconId.onEach { latest = it }.launchIn(this)
             val expected = defaultSignal()
@@ -74,7 +85,7 @@ class MobileIconViewModelTest : SysuiTestCase() {
 
     @Test
     fun iconId_cutout_whenDefaultDataDisabled() =
-        runBlocking(IMMEDIATE) {
+        testScope.runTest {
             interactor.setIsDefaultDataEnabled(false)
 
             var latest: Int? = null
@@ -88,7 +99,7 @@ class MobileIconViewModelTest : SysuiTestCase() {
 
     @Test
     fun networkType_dataEnabled_groupIsRepresented() =
-        runBlocking(IMMEDIATE) {
+        testScope.runTest {
             val expected =
                 Icon.Resource(
                     THREE_G.dataType,
@@ -106,7 +117,7 @@ class MobileIconViewModelTest : SysuiTestCase() {
 
     @Test
     fun networkType_nullWhenDisabled() =
-        runBlocking(IMMEDIATE) {
+        testScope.runTest {
             interactor.setIconGroup(THREE_G)
             interactor.setIsDataEnabled(false)
             var latest: Icon? = null
@@ -119,7 +130,7 @@ class MobileIconViewModelTest : SysuiTestCase() {
 
     @Test
     fun networkType_nullWhenFailedConnection() =
-        runBlocking(IMMEDIATE) {
+        testScope.runTest {
             interactor.setIconGroup(THREE_G)
             interactor.setIsDataEnabled(true)
             interactor.setIsFailedConnection(true)
@@ -133,7 +144,7 @@ class MobileIconViewModelTest : SysuiTestCase() {
 
     @Test
     fun networkType_nullWhenDataDisconnects() =
-        runBlocking(IMMEDIATE) {
+        testScope.runTest {
             val initial =
                 Icon.Resource(
                     THREE_G.dataType,
@@ -157,7 +168,7 @@ class MobileIconViewModelTest : SysuiTestCase() {
 
     @Test
     fun networkType_null_changeToDisabled() =
-        runBlocking(IMMEDIATE) {
+        testScope.runTest {
             val expected =
                 Icon.Resource(
                     THREE_G.dataType,
@@ -180,7 +191,7 @@ class MobileIconViewModelTest : SysuiTestCase() {
 
     @Test
     fun networkType_alwaysShow_shownEvenWhenDisabled() =
-        runBlocking(IMMEDIATE) {
+        testScope.runTest {
             interactor.setIconGroup(THREE_G)
             interactor.setIsDataEnabled(true)
             interactor.alwaysShowDataRatIcon.value = true
@@ -200,7 +211,7 @@ class MobileIconViewModelTest : SysuiTestCase() {
 
     @Test
     fun networkType_alwaysShow_shownEvenWhenDisconnected() =
-        runBlocking(IMMEDIATE) {
+        testScope.runTest {
             interactor.setIconGroup(THREE_G)
             interactor.isDataConnected.value = false
             interactor.alwaysShowDataRatIcon.value = true
@@ -220,7 +231,7 @@ class MobileIconViewModelTest : SysuiTestCase() {
 
     @Test
     fun networkType_alwaysShow_shownEvenWhenFailedConnection() =
-        runBlocking(IMMEDIATE) {
+        testScope.runTest {
             interactor.setIconGroup(THREE_G)
             interactor.setIsFailedConnection(true)
             interactor.alwaysShowDataRatIcon.value = true
@@ -240,7 +251,7 @@ class MobileIconViewModelTest : SysuiTestCase() {
 
     @Test
     fun roaming() =
-        runBlocking(IMMEDIATE) {
+        testScope.runTest {
             interactor.isRoaming.value = true
             var latest: Boolean? = null
             val job = underTest.roaming.onEach { latest = it }.launchIn(this)
@@ -256,10 +267,17 @@ class MobileIconViewModelTest : SysuiTestCase() {
 
     @Test
     fun `data activity - null when config is off`() =
-        runBlocking(IMMEDIATE) {
+        testScope.runTest {
             // Create a new view model here so the constants are properly read
             whenever(constants.shouldShowActivityConfig).thenReturn(false)
-            underTest = MobileIconViewModel(SUB_1_ID, interactor, logger, constants)
+            underTest =
+                MobileIconViewModel(
+                    SUB_1_ID,
+                    interactor,
+                    logger,
+                    constants,
+                    testScope.backgroundScope,
+                )
 
             var inVisible: Boolean? = null
             val inJob = underTest.activityInVisible.onEach { inVisible = it }.launchIn(this)
@@ -288,10 +306,17 @@ class MobileIconViewModelTest : SysuiTestCase() {
 
     @Test
     fun `data activity - config on - test indicators`() =
-        runBlocking(IMMEDIATE) {
+        testScope.runTest {
             // Create a new view model here so the constants are properly read
             whenever(constants.shouldShowActivityConfig).thenReturn(true)
-            underTest = MobileIconViewModel(SUB_1_ID, interactor, logger, constants)
+            underTest =
+                MobileIconViewModel(
+                    SUB_1_ID,
+                    interactor,
+                    logger,
+                    constants,
+                    testScope.backgroundScope,
+                )
 
             var inVisible: Boolean? = null
             val inJob = underTest.activityInVisible.onEach { inVisible = it }.launchIn(this)
@@ -340,16 +365,15 @@ class MobileIconViewModelTest : SysuiTestCase() {
             containerJob.cancel()
         }
 
-    /** Convenience constructor for these tests */
-    private fun defaultSignal(
-        level: Int = 1,
-        connected: Boolean = true,
-    ): Int {
-        return SignalDrawable.getState(level, /* numLevels */ 4, !connected)
-    }
-
     companion object {
-        private val IMMEDIATE = Dispatchers.Main.immediate
         private const val SUB_1_ID = 1
+
+        /** Convenience constructor for these tests */
+        fun defaultSignal(
+            level: Int = 1,
+            connected: Boolean = true,
+        ): Int {
+            return SignalDrawable.getState(level, /* numLevels */ 4, !connected)
+        }
     }
 }

@@ -16,12 +16,16 @@
 
 package com.android.systemui.statusbar.pipeline.mobile.data.repository
 
+import com.android.systemui.log.table.TableLogBuffer
 import com.android.systemui.statusbar.pipeline.mobile.data.model.MobileConnectionModel
 import com.android.systemui.statusbar.pipeline.mobile.data.model.NetworkNameModel
 import kotlinx.coroutines.flow.MutableStateFlow
 
 // TODO(b/261632894): remove this in favor of the real impl or DemoMobileConnectionRepository
-class FakeMobileConnectionRepository(override val subId: Int) : MobileConnectionRepository {
+class FakeMobileConnectionRepository(
+    override val subId: Int,
+    override val tableLogBuffer: TableLogBuffer,
+) : MobileConnectionRepository {
     private val _connectionInfo = MutableStateFlow(MobileConnectionModel())
     override val connectionInfo = _connectionInfo
 

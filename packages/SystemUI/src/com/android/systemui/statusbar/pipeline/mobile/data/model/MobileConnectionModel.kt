@@ -26,6 +26,8 @@ import android.telephony.TelephonyCallback.ServiceStateListener
 import android.telephony.TelephonyCallback.SignalStrengthsListener
 import android.telephony.TelephonyDisplayInfo
 import android.telephony.TelephonyManager
+import com.android.systemui.log.table.Diffable
+import com.android.systemui.log.table.TableRowLogger
 import com.android.systemui.statusbar.pipeline.mobile.data.model.DataConnectionState.Disconnected
 import com.android.systemui.statusbar.pipeline.shared.data.model.DataActivityModel
 
@@ -79,4 +81,72 @@ data class MobileConnectionModel(
      * [TelephonyDisplayInfo.getNetworkType]. This is used to look up the proper network type icon
      */
     val resolvedNetworkType: ResolvedNetworkType = ResolvedNetworkType.UnknownNetworkType,
-)
+) : Diffable<MobileConnectionModel> {
+    override fun logDiffs(prevVal: MobileConnectionModel, row: TableRowLogger) {
+        if (prevVal.dataConnectionState != dataConnectionState) {
+            row.logChange(COL_CONNECTION_STATE, dataConnectionState.toString())
+        }
+
+        if (prevVal.isEmergencyOnly != isEmergencyOnly) {
+            row.logChange(COL_EMERGENCY, isEmergencyOnly)
+        }
+
+        if (prevVal.isRoaming != isRoaming) {
+            row.logChange(COL_ROAMING, isRoaming)
+        }
+
+        if (prevVal.operatorAlphaShort != operatorAlphaShort) {
+            row.logChange(COL_OPERATOR, operatorAlphaShort)
+        }
+
+        if (prevVal.isGsm != isGsm) {
+            row.logChange(COL_IS_GSM, isGsm)
+        }
+
+        if (prevVal.cdmaLevel != cdmaLevel) {
+            row.logChange(COL_CDMA_LEVEL, cdmaLevel)
+        }
+
+        if (prevVal.primaryLevel != primaryLevel) {
+            row.logChange(COL_PRIMARY_LEVEL, primaryLevel)
+        }
+
+        if (prevVal.dataActivityDirection != dataActivityDirection) {
+            row.logChange(COL_ACTIVITY_DIRECTION, dataActivityDirection.toString())
+        }
+
+        if (prevVal.carrierNetworkChangeActive != carrierNetworkChangeActive) {
+            row.logChange(COL_CARRIER_NETWORK_CHANGE, carrierNetworkChangeActive)
+        }
+
+        if (prevVal.resolvedNetworkType != resolvedNetworkType) {
+            row.logChange(COL_RESOLVED_NETWORK_TYPE, resolvedNetworkType.toString())
+        }
+    }
+
+    override fun logFull(row: TableRowLogger) {
+        row.logChange(COL_CONNECTION_STATE, dataConnectionState.toString())
+        row.logChange(COL_EMERGENCY, isEmergencyOnly)
+        row.logChange(COL_ROAMING, isRoaming)
+        row.logChange(COL_OPERATOR, operatorAlphaShort)
+        row.logChange(COL_IS_GSM, isGsm)
+        row.logChange(COL_CDMA_LEVEL, cdmaLevel)
+        row.logChange(COL_PRIMARY_LEVEL, primaryLevel)
+        row.logChange(COL_ACTIVITY_DIRECTION, dataActivityDirection.toString())
+        row.logChange(COL_CARRIER_NETWORK_CHANGE, carrierNetworkChangeActive)
+        row.logChange(COL_RESOLVED_NETWORK_TYPE, resolvedNetworkType.toString())
+    }
+
+    companion object {
+        const val COL_EMERGENCY = "EmergencyOnly"
+        const val COL_ROAMING = "Roaming"
+        const val COL_OPERATOR = "OperatorName"
+        const val COL_IS_GSM = "IsGsm"
+        const val COL_CDMA_LEVEL = "CdmaLevel"
+        const val COL_PRIMARY_LEVEL = "PrimaryLevel"
+        const val COL_CONNECTION_STATE = "ConnectionState"
+        const val COL_ACTIVITY_DIRECTION = "DataActivity"
+        const val COL_CARRIER_NETWORK_CHANGE = "CarrierNetworkChangeActive"
+        const val COL_RESOLVED_NETWORK_TYPE = "NetworkType"
+    }
+}

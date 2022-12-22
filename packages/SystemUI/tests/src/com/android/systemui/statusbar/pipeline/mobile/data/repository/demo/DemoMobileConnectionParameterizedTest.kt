@@ -23,6 +23,7 @@ import androidx.test.filters.SmallTest
 import com.android.settingslib.SignalIcon
 import com.android.settingslib.mobile.TelephonyIcons
 import com.android.systemui.SysuiTestCase
+import com.android.systemui.log.table.TableLogBufferFactory
 import com.android.systemui.statusbar.pipeline.mobile.data.model.DataConnectionState
 import com.android.systemui.statusbar.pipeline.mobile.data.model.MobileConnectionModel
 import com.android.systemui.statusbar.pipeline.mobile.data.model.NetworkNameModel
@@ -30,6 +31,7 @@ import com.android.systemui.statusbar.pipeline.mobile.data.repository.demo.model
 import com.android.systemui.statusbar.pipeline.shared.data.model.toMobileDataActivityModel
 import com.android.systemui.util.mockito.mock
 import com.android.systemui.util.mockito.whenever
+import com.android.systemui.util.time.FakeSystemClock
 import com.google.common.truth.Truth.assertThat
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.cancel
@@ -54,6 +56,9 @@ import org.junit.runners.Parameterized.Parameters
 @RunWith(Parameterized::class)
 internal class DemoMobileConnectionParameterizedTest(private val testCase: TestCase) :
     SysuiTestCase() {
+
+    private val logFactory = TableLogBufferFactory(mock(), FakeSystemClock())
+
     private val testDispatcher = UnconfinedTestDispatcher()
     private val testScope = TestScope(testDispatcher)
 
@@ -76,6 +81,7 @@ internal class DemoMobileConnectionParameterizedTest(private val testCase: TestC
                 dataSource = mockDataSource,
                 scope = testScope.backgroundScope,
                 context = context,
+                logFactory = logFactory,
             )
 
         connectionsRepo.startProcessingCommands()
