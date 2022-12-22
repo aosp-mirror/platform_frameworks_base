@@ -40,16 +40,12 @@ import android.test.suitebuilder.annotation.SmallTest;
 
 import androidx.test.core.app.ApplicationProvider;
 
-import com.android.server.job.JobSchedulerInternal;
-
 import junit.framework.TestCase;
 
 import org.jetbrains.annotations.NotNull;
 import org.junit.Before;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
-
-import java.util.ArrayList;
 
 /**
  * Tests for SyncManager.
@@ -69,19 +65,12 @@ public class SyncManagerTest extends TestCase {
     private UserManager mUserManager;
     @Mock
     private AccountManagerInternal mAccountManagerInternal;
-    @Mock
-    private JobSchedulerInternal mJobSchedulerInternal;
 
     private class SyncManagerWithMockedServices extends SyncManager {
 
         @Override
         protected AccountManagerInternal getAccountManagerInternal() {
             return mAccountManagerInternal;
-        }
-
-        @Override
-        protected JobSchedulerInternal getJobSchedulerInternal() {
-            return mJobSchedulerInternal;
         }
 
         private SyncManagerWithMockedServices(Context context, boolean factoryTest) {
@@ -95,7 +84,6 @@ public class SyncManagerTest extends TestCase {
         mContext = spy(ApplicationProvider.getApplicationContext());
         when(mContext.getSystemService(Context.USER_SERVICE)).thenReturn(mUserManager);
         doNothing().when(mAccountManagerInternal).addOnAppPermissionChangeListener(any());
-        when(mJobSchedulerInternal.getSystemScheduledPendingJobs()).thenReturn(new ArrayList<>());
         mSyncManager = spy(new SyncManagerWithMockedServices(mContext, true));
     }
 
