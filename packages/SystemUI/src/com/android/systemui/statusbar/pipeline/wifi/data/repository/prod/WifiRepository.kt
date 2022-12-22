@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.android.systemui.statusbar.pipeline.wifi.data.repository
+package com.android.systemui.statusbar.pipeline.wifi.data.repository.prod
 
 import android.annotation.SuppressLint
 import android.content.IntentFilter

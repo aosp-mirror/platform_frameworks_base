@@ -752,7 +752,7 @@
 -packages/SystemUI/tests/src/com/android/systemui/statusbar/phone/panelstate/ShadeExpansionStateManagerTest.kt
 -packages/SystemUI/tests/src/com/android/systemui/statusbar/phone/userswitcher/StatusBarUserSwitcherControllerOldImplTest.kt
 -packages/SystemUI/tests/src/com/android/systemui/statusbar/pipeline/shared/ConnectivityPipelineLoggerTest.kt
--packages/SystemUI/tests/src/com/android/systemui/statusbar/pipeline/wifi/data/repository/WifiRepositoryImplTest.kt
+-packages/SystemUI/tests/src/com/android/systemui/statusbar/pipeline/wifi/data/repository/prod/WifiRepositoryImplTest.kt
 -packages/SystemUI/tests/src/com/android/systemui/statusbar/pipeline/wifi/domain/interactor/WifiInteractorImplTest.kt
 -packages/SystemUI/tests/src/com/android/systemui/statusbar/pipeline/wifi/ui/view/ModernStatusBarWifiViewTest.kt
 -packages/SystemUI/tests/src/com/android/systemui/statusbar/pipeline/wifi/ui/viewmodel/WifiViewModelTest.kt
