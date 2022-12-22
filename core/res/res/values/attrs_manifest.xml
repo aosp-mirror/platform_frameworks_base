@@ -1027,6 +1027,9 @@
         <flag name="layoutDirection" value="0x2000" />
         <!-- The color mode of the screen has changed (color gamut or dynamic range). -->
         <flag name="colorMode" value="0x4000" />
+        <!-- The grammatical gender has changed, for example the user set the grammatical gender
+             from the UI. -->
+        <flag name="grammaticalGender" value="0x8000" />
         <!-- The font scaling factor has changed, that is the user has
              selected a new global font size. -->
         <flag name="fontScale" value="0x40000000" />

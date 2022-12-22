@@ -46,6 +46,7 @@ import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.TestApi;
+import android.app.GrammaticalInflectionManager;
 import android.app.WindowConfiguration;
 import android.compat.annotation.UnsupportedAppUsage;
 import android.content.LocaleProto;
@@ -141,6 +142,44 @@ public final class Configuration implements Parcelable, Comparable<Configuration
     @UnsupportedAppUsage
     public boolean userSetLocale;
 
+    /**
+     * Current user preference for the grammatical gender.
+     */
+    @GrammaticalGender
+    private int mGrammaticalGender;
+
+    /** @hide */
+    @IntDef(prefix = { "GRAMMATICAL_GENDER_" }, value = {
+            GRAMMATICAL_GENDER_NOT_SPECIFIED,
+            GRAMMATICAL_GENDER_NEUTRAL,
+            GRAMMATICAL_GENDER_FEMININE,
+            GRAMMATICAL_GENDER_MASCULINE,
+    })
+    public @interface GrammaticalGender {}
+
+    /**
+     * Constant for grammatical gender: to indicate the user has not specified the terms
+     * of address for the application.
+     */
+    public static final int GRAMMATICAL_GENDER_NOT_SPECIFIED = 0;
+
+    /**
+     * Constant for grammatical gender: to indicate the terms of address the user
+     * preferred in an application is neuter.
+     */
+    public static final int GRAMMATICAL_GENDER_NEUTRAL = 2;
+
+    /**
+     * Constant for grammatical gender: to indicate the terms of address the user
+         * preferred in an application is feminine.
+     */
+    public static final int GRAMMATICAL_GENDER_FEMININE = 3;
+
+    /**
+     * Constant for grammatical gender: to indicate the terms of address the user
+     * preferred in an application is masculine.
+     */
+    public static final int GRAMMATICAL_GENDER_MASCULINE = 4;
 
     /** Constant for {@link #colorMode}: bits that encode whether the screen is wide gamut. */
     public static final int COLOR_MODE_WIDE_COLOR_GAMUT_MASK = 0x3;
@@ -1024,6 +1063,7 @@ public final class Configuration implements Parcelable, Comparable<Configuration
         }
         o.fixUpLocaleList();
         mLocaleList = o.mLocaleList;
+        mGrammaticalGender = o.mGrammaticalGender;
         userSetLocale = o.userSetLocale;
         touchscreen = o.touchscreen;
         keyboard = o.keyboard;
@@ -1510,6 +1550,7 @@ public final class Configuration implements Parcelable, Comparable<Configuration
         seq = 0;
         windowConfiguration.setToDefaults();
         fontWeightAdjustment = FONT_WEIGHT_ADJUSTMENT_UNDEFINED;
+        mGrammaticalGender = GRAMMATICAL_GENDER_NOT_SPECIFIED;
     }
 
     /**
@@ -1711,6 +1752,10 @@ public final class Configuration implements Parcelable, Comparable<Configuration
                 && delta.fontWeightAdjustment != fontWeightAdjustment) {
             changed |= ActivityInfo.CONFIG_FONT_WEIGHT_ADJUSTMENT;
             fontWeightAdjustment = delta.fontWeightAdjustment;
+        }
+        if (delta.mGrammaticalGender != mGrammaticalGender) {
+            changed |= ActivityInfo.CONFIG_GRAMMATICAL_GENDER;
+            mGrammaticalGender = delta.mGrammaticalGender;
         }
 
         return changed;
@@ -1929,6 +1974,10 @@ public final class Configuration implements Parcelable, Comparable<Configuration
                 && fontWeightAdjustment != delta.fontWeightAdjustment) {
             changed |= ActivityInfo.CONFIG_FONT_WEIGHT_ADJUSTMENT;
         }
+
+        if (!publicOnly&& mGrammaticalGender != delta.mGrammaticalGender) {
+            changed |= ActivityInfo.CONFIG_GRAMMATICAL_GENDER;
+        }
         return changed;
     }
 
@@ -2023,6 +2072,7 @@ public final class Configuration implements Parcelable, Comparable<Configuration
         dest.writeInt(assetsSeq);
         dest.writeInt(seq);
         dest.writeInt(fontWeightAdjustment);
+        dest.writeInt(mGrammaticalGender);
     }
 
     public void readFromParcel(Parcel source) {
@@ -2055,6 +2105,7 @@ public final class Configuration implements Parcelable, Comparable<Configuration
         assetsSeq = source.readInt();
         seq = source.readInt();
         fontWeightAdjustment = source.readInt();
+        mGrammaticalGender = source.readInt();
     }
 
     public static final @android.annotation.NonNull Parcelable.Creator<Configuration> CREATOR
@@ -2155,6 +2206,8 @@ public final class Configuration implements Parcelable, Comparable<Configuration
         if (n != 0) return n;
         n = this.fontWeightAdjustment - that.fontWeightAdjustment;
         if (n != 0) return n;
+        n = this.mGrammaticalGender - that.mGrammaticalGender;
+        if (n != 0) return n;
 
         // if (n != 0) return n;
         return n;
@@ -2196,7 +2249,34 @@ public final class Configuration implements Parcelable, Comparable<Configuration
         result = 31 * result + densityDpi;
         result = 31 * result + assetsSeq;
         result = 31 * result + fontWeightAdjustment;
+        result = 31 * result + mGrammaticalGender;
         return result;
+    }
+
+    /**
+     * Returns the user preference for the grammatical gender. Will be
+     * {@link #GRAMMATICAL_GENDER_NOT_SPECIFIED} or
+     * {@link #GRAMMATICAL_GENDER_NEUTRAL} or
+     * {@link #GRAMMATICAL_GENDER_FEMININE} or
+     * {@link #GRAMMATICAL_GENDER_MASCULINE}.
+     *
+     * @return The preferred grammatical gender.
+     */
+    @GrammaticalGender
+    public int getGrammaticalGender() {
+        return mGrammaticalGender;
+    }
+
+    /**
+     * Sets the user preference for the grammatical gender. This is only for frameworks to easily
+     * override the gender in the configuration. To update the grammatical gender for an application
+     * use {@link GrammaticalInflectionManager#setRequestedApplicationGrammaticalGender(int)}.
+     *
+     * @param grammaticalGender The preferred grammatical gender.
+     * @hide
+     */
+    public void setGrammaticalGender(@GrammaticalGender int grammaticalGender) {
+        mGrammaticalGender = grammaticalGender;
     }
 
     /**

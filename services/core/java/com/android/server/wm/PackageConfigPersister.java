@@ -16,6 +16,8 @@
 
 package com.android.server.wm;
 
+import static android.content.res.Configuration.GRAMMATICAL_GENDER_NOT_SPECIFIED;
+
 import android.annotation.NonNull;
 import android.content.res.Configuration;
 import android.os.Environment;
@@ -165,7 +167,8 @@ public class PackageConfigPersister {
             if (modifiedRecord != null) {
                 container.applyAppSpecificConfig(modifiedRecord.mNightMode,
                         LocaleOverlayHelper.combineLocalesIfOverlayExists(
-                        modifiedRecord.mLocales, mAtm.getGlobalConfiguration().getLocales()));
+                        modifiedRecord.mLocales, mAtm.getGlobalConfiguration().getLocales()),
+                        modifiedRecord.mGrammaticalGender);
             }
         }
     }
@@ -188,16 +191,19 @@ public class PackageConfigPersister {
             }
             boolean isNightModeChanged = updateNightMode(impl.getNightMode(), record);
             boolean isLocalesChanged = updateLocales(impl.getLocales(), record);
+            boolean isGenderChanged = updateGender(impl.getGrammaticalGender(), record);
 
             if ((record.mNightMode == null || record.isResetNightMode())
-                    && (record.mLocales == null || record.mLocales.isEmpty())) {
+                    && (record.mLocales == null || record.mLocales.isEmpty())
+                    && (record.mGrammaticalGender == null
+                            || record.mGrammaticalGender == GRAMMATICAL_GENDER_NOT_SPECIFIED)) {
                 // if all values default to system settings, we can remove the package.
                 removePackage(packageName, userId);
                 // if there was a pre-existing record for the package that was deleted,
                 // we return true (since it was successfully deleted), else false (since there was
                 // no change to the previous state).
                 return isRecordPresent;
-            } else if (!isNightModeChanged && !isLocalesChanged) {
+            } else if (!isNightModeChanged && !isLocalesChanged && !isGenderChanged) {
                 return false;
             } else {
                 final PackageConfigRecord pendingRecord =
@@ -211,7 +217,8 @@ public class PackageConfigPersister {
                 }
 
                 if (!updateNightMode(record.mNightMode, writeRecord)
-                        && !updateLocales(record.mLocales, writeRecord)) {
+                        && !updateLocales(record.mLocales, writeRecord)
+                        && !updateGender(record.mGrammaticalGender, writeRecord)) {
                     return false;
                 }
 
@@ -237,6 +244,15 @@ public class PackageConfigPersister {
             return false;
         }
         record.mLocales = requestedLocaleList;
+        return true;
+    }
+
+    private boolean updateGender(@Configuration.GrammaticalGender Integer requestedGender,
+            PackageConfigRecord record) {
+        if (requestedGender == null || requestedGender.equals(record.mGrammaticalGender)) {
+            return false;
+        }
+        record.mGrammaticalGender = requestedGender;
         return true;
     }
 
@@ -305,7 +321,9 @@ public class PackageConfigPersister {
                 return null;
             }
             return new ActivityTaskManagerInternal.PackageConfig(
-                    packageConfigRecord.mNightMode, packageConfigRecord.mLocales);
+                    packageConfigRecord.mNightMode,
+                    packageConfigRecord.mLocales,
+                    packageConfigRecord.mGrammaticalGender);
         }
     }
 
@@ -336,6 +354,8 @@ public class PackageConfigPersister {
         final int mUserId;
         Integer mNightMode;
         LocaleList mLocales;
+        @Configuration.GrammaticalGender
+        Integer mGrammaticalGender;
 
         PackageConfigRecord(String name, int userId) {
             mName = name;

@@ -132,6 +132,7 @@ import com.android.server.display.DisplayManagerService;
 import com.android.server.display.color.ColorDisplayService;
 import com.android.server.dreams.DreamManagerService;
 import com.android.server.emergency.EmergencyAffordanceService;
+import com.android.server.grammaticalinflection.GrammaticalInflectionService;
 import com.android.server.gpu.GpuService;
 import com.android.server.graphics.fonts.FontManagerService;
 import com.android.server.hdmi.HdmiControlService;
@@ -1766,6 +1767,14 @@ public final class SystemServer implements Dumpable {
             mSystemServiceManager.startService(LocaleManagerService.class);
         } catch (Throwable e) {
             reportWtf("starting LocaleManagerService service", e);
+        }
+        t.traceEnd();
+
+        t.traceBegin("StartGrammarInflectionService");
+        try {
+            mSystemServiceManager.startService(GrammaticalInflectionService.class);
+        } catch (Throwable e) {
+            reportWtf("starting GrammarInflectionService service", e);
         }
         t.traceEnd();
 

@@ -5650,6 +5650,11 @@ package android.app {
     field public static final int MODE_UNKNOWN = 0; // 0x0
   }
 
+  public class GrammaticalInflectionManager {
+    method public int getApplicationGrammaticalGender();
+    method public void setRequestedApplicationGrammaticalGender(int);
+  }
+
   public class Instrumentation {
     ctor public Instrumentation();
     method public android.os.TestLooperManager acquireLooperManager(android.os.Looper);
@@ -10005,6 +10010,7 @@ package android.content {
     field public static final String FILE_INTEGRITY_SERVICE = "file_integrity";
     field public static final String FINGERPRINT_SERVICE = "fingerprint";
     field public static final String GAME_SERVICE = "game";
+    field public static final String GRAMMATICAL_INFLECTION_SERVICE = "grammatical_inflection";
     field public static final String HARDWARE_PROPERTIES_SERVICE = "hardware_properties";
     field public static final String HEALTHCONNECT_SERVICE = "healthconnect";
     field public static final String INPUT_METHOD_SERVICE = "input_method";
@@ -11261,6 +11267,7 @@ package android.content.pm {
     field public static final int CONFIG_DENSITY = 4096; // 0x1000
     field public static final int CONFIG_FONT_SCALE = 1073741824; // 0x40000000
     field public static final int CONFIG_FONT_WEIGHT_ADJUSTMENT = 268435456; // 0x10000000
+    field public static final int CONFIG_GRAMMATICAL_GENDER = 32768; // 0x8000
     field public static final int CONFIG_KEYBOARD = 16; // 0x10
     field public static final int CONFIG_KEYBOARD_HIDDEN = 32; // 0x20
     field public static final int CONFIG_LAYOUT_DIRECTION = 8192; // 0x2000
@@ -12875,6 +12882,7 @@ package android.content.res {
     method public int diff(android.content.res.Configuration);
     method public boolean equals(android.content.res.Configuration);
     method @NonNull public static android.content.res.Configuration generateDelta(@NonNull android.content.res.Configuration, @NonNull android.content.res.Configuration);
+    method public int getGrammaticalGender();
     method public int getLayoutDirection();
     method @NonNull public android.os.LocaleList getLocales();
     method public boolean isLayoutSizeAtLeast(int);
@@ -12904,6 +12912,10 @@ package android.content.res {
     field @NonNull public static final android.os.Parcelable.Creator<android.content.res.Configuration> CREATOR;
     field public static final int DENSITY_DPI_UNDEFINED = 0; // 0x0
     field public static final int FONT_WEIGHT_ADJUSTMENT_UNDEFINED = 2147483647; // 0x7fffffff
+    field public static final int GRAMMATICAL_GENDER_FEMININE = 3; // 0x3
+    field public static final int GRAMMATICAL_GENDER_MASCULINE = 4; // 0x4
+    field public static final int GRAMMATICAL_GENDER_NEUTRAL = 2; // 0x2
+    field public static final int GRAMMATICAL_GENDER_NOT_SPECIFIED = 0; // 0x0
     field public static final int HARDKEYBOARDHIDDEN_NO = 1; // 0x1
     field public static final int HARDKEYBOARDHIDDEN_UNDEFINED = 0; // 0x0
     field public static final int HARDKEYBOARDHIDDEN_YES = 2; // 0x2
