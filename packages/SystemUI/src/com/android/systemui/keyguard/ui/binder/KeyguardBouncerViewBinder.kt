@@ -161,6 +161,12 @@ object KeyguardBouncerViewBinder {
                     }
 
                     launch {
+                        viewModel.isInteractable.collect { isInteractable ->
+                            hostViewController.setInteractable(isInteractable)
+                        }
+                    }
+
+                    launch {
                         viewModel.isBouncerVisible
                             .filter { !it }
                             .collect {
