@@ -5366,6 +5366,12 @@
          TODO(b/255532890) Enable when ignoreOrientationRequest is set -->
     <bool name="config_letterboxIsEnabledForTranslucentActivities">false</bool>
 
+    <!-- Whether camera compat treatment is enabled for issues caused by orientation mismatch
+        between camera buffers and an app window. This includes force rotation of fixed
+        orientation activities connected to the camera in fullscreen and showing a tooltip in
+        split screen. -->
+    <bool name="config_isWindowManagerCameraCompatTreatmentEnabled">false</bool>
+
     <!-- Whether a camera compat controller is enabled to allow the user to apply or revert
          treatment for stretched issues in camera viewfinder. -->
     <bool name="config_isCameraCompatControlForStretchedIssuesEnabled">false</bool>
