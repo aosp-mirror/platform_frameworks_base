@@ -3346,10 +3346,7 @@ public class InputManagerService extends IInputManager.Stub
         public void onInputMethodSubtypeChangedForKeyboardLayoutMapping(@UserIdInt int userId,
                 @Nullable InputMethodSubtypeHandle subtypeHandle,
                 @Nullable InputMethodSubtype subtype) {
-            if (DEBUG) {
-                Slog.i(TAG, "InputMethodSubtype changed: userId=" + userId
-                        + " subtypeHandle=" + subtypeHandle);
-            }
+            mKeyboardLayoutManager.onInputMethodSubtypeChanged(userId, subtypeHandle, subtype);
         }
 
         @Override
