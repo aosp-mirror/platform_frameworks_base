@@ -18263,6 +18263,7 @@ package android.hardware.camera2 {
     field public static final int REQUEST_AVAILABLE_CAPABILITIES_SYSTEM_CAMERA = 14; // 0xe
     field public static final int REQUEST_AVAILABLE_CAPABILITIES_ULTRA_HIGH_RESOLUTION_SENSOR = 16; // 0x10
     field public static final int REQUEST_AVAILABLE_CAPABILITIES_YUV_REPROCESSING = 7; // 0x7
+    field public static final int SCALER_AVAILABLE_STREAM_USE_CASES_CROPPED_RAW = 6; // 0x6
     field public static final int SCALER_AVAILABLE_STREAM_USE_CASES_DEFAULT = 0; // 0x0
     field public static final int SCALER_AVAILABLE_STREAM_USE_CASES_PREVIEW = 1; // 0x1
     field public static final int SCALER_AVAILABLE_STREAM_USE_CASES_PREVIEW_VIDEO_STILL = 4; // 0x4
@@ -18522,6 +18523,7 @@ package android.hardware.camera2 {
     field @NonNull public static final android.hardware.camera2.CaptureResult.Key<java.lang.Float> REPROCESS_EFFECTIVE_EXPOSURE_FACTOR;
     field @NonNull public static final android.hardware.camera2.CaptureResult.Key<java.lang.Byte> REQUEST_PIPELINE_DEPTH;
     field @NonNull public static final android.hardware.camera2.CaptureResult.Key<android.graphics.Rect> SCALER_CROP_REGION;
+    field @NonNull public static final android.hardware.camera2.CaptureResult.Key<android.graphics.Rect> SCALER_RAW_CROP_REGION;
     field @NonNull public static final android.hardware.camera2.CaptureResult.Key<java.lang.Integer> SCALER_ROTATE_AND_CROP;
     field @NonNull public static final android.hardware.camera2.CaptureResult.Key<float[]> SENSOR_DYNAMIC_BLACK_LEVEL;
     field @NonNull public static final android.hardware.camera2.CaptureResult.Key<java.lang.Integer> SENSOR_DYNAMIC_WHITE_LEVEL;

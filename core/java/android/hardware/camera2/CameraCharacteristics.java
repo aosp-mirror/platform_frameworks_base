@@ -3756,6 +3756,7 @@ public final class CameraCharacteristics extends CameraMetadata<CameraCharacteri
      *   <li>{@link #SCALER_AVAILABLE_STREAM_USE_CASES_VIDEO_RECORD VIDEO_RECORD}</li>
      *   <li>{@link #SCALER_AVAILABLE_STREAM_USE_CASES_PREVIEW_VIDEO_STILL PREVIEW_VIDEO_STILL}</li>
      *   <li>{@link #SCALER_AVAILABLE_STREAM_USE_CASES_VIDEO_CALL VIDEO_CALL}</li>
+     *   <li>{@link #SCALER_AVAILABLE_STREAM_USE_CASES_CROPPED_RAW CROPPED_RAW}</li>
      * </ul>
      *
      * <p><b>Optional</b> - The value for this key may be {@code null} on some devices.</p>
@@ -3765,6 +3766,7 @@ public final class CameraCharacteristics extends CameraMetadata<CameraCharacteri
      * @see #SCALER_AVAILABLE_STREAM_USE_CASES_VIDEO_RECORD
      * @see #SCALER_AVAILABLE_STREAM_USE_CASES_PREVIEW_VIDEO_STILL
      * @see #SCALER_AVAILABLE_STREAM_USE_CASES_VIDEO_CALL
+     * @see #SCALER_AVAILABLE_STREAM_USE_CASES_CROPPED_RAW
      */
     @PublicKey
     @NonNull

@@ -3748,9 +3748,9 @@ public class CaptureResult extends CameraMetadata<CaptureResult.Key<?>> {
      * <p>Output streams use this rectangle to produce their output, cropping to a smaller region
      * if necessary to maintain the stream's aspect ratio, then scaling the sensor input to
      * match the output's configured resolution.</p>
-     * <p>The crop region is applied after the RAW to other color space (e.g. YUV)
-     * conversion. Since raw streams (e.g. RAW16) don't have the conversion stage, they are not
-     * croppable. The crop region will be ignored by raw streams.</p>
+     * <p>The crop region is usually applied after the RAW to other color space (e.g. YUV)
+     * conversion. As a result RAW streams are not croppable unless supported by the
+     * camera device. See {@link CameraCharacteristics#SCALER_AVAILABLE_STREAM_USE_CASES android.scaler.availableStreamUseCases}#CROPPED_RAW for details.</p>
      * <p>For non-raw streams, any additional per-stream cropping will be done to maximize the
      * final pixel area of the stream.</p>
      * <p>For example, if the crop region is set to a 4:3 aspect ratio, then 4:3 streams will use
@@ -3845,6 +3845,7 @@ public class CaptureResult extends CameraMetadata<CaptureResult.Key<?>> {
      * @see CaptureRequest#CONTROL_ZOOM_RATIO
      * @see CaptureRequest#DISTORTION_CORRECTION_MODE
      * @see CameraCharacteristics#SCALER_AVAILABLE_MAX_DIGITAL_ZOOM
+     * @see CameraCharacteristics#SCALER_AVAILABLE_STREAM_USE_CASES
      * @see CameraCharacteristics#SCALER_CROPPING_TYPE
      * @see CameraCharacteristics#SENSOR_INFO_ACTIVE_ARRAY_SIZE
      * @see CameraCharacteristics#SENSOR_INFO_ACTIVE_ARRAY_SIZE_MAXIMUM_RESOLUTION
@@ -3950,6 +3951,60 @@ public class CaptureResult extends CameraMetadata<CaptureResult.Key<?>> {
     @NonNull
     public static final Key<Integer> SCALER_ROTATE_AND_CROP =
             new Key<Integer>("android.scaler.rotateAndCrop", int.class);
+
+    /**
+     * <p>The region of the sensor that corresponds to the RAW read out for this
+     * capture when the stream use case of a RAW stream is set to CROPPED_RAW.</p>
+     * <p>The coordinate system follows that of {@link CameraCharacteristics#SENSOR_INFO_PRE_CORRECTION_ACTIVE_ARRAY_SIZE android.sensor.info.preCorrectionActiveArraySize}.</p>
+     * <p>This CaptureResult key will be set when the corresponding CaptureRequest has a RAW target
+     * with stream use case set to
+     * {@link android.hardware.camera2.CameraMetadata#SCALER_AVAILABLE_STREAM_USE_CASES_CROPPED_RAW },
+     * otherwise it will be {@code null}.
+     * The value of this key specifies the region of the sensor used for the RAW capture and can
+     * be used to calculate the corresponding field of view of RAW streams.
+     * This field of view will always be &gt;= field of view for (processed) non-RAW streams for the
+     * capture. Note: The region specified may not necessarily be centered.</p>
+     * <p>For example: Assume a camera device has a pre correction active array size of
+     * {@code {0, 0, 1500, 2000}}. If the RAW_CROP_REGION is {@code {500, 375, 1500, 1125}}, that
+     * corresponds to a centered crop of 1/4th of the full field of view RAW stream.</p>
+     * <p>The metadata keys which describe properties of RAW frames:</p>
+     * <ul>
+     * <li>{@link CaptureResult#STATISTICS_HOT_PIXEL_MAP android.statistics.hotPixelMap}</li>
+     * <li>{@link CaptureResult#STATISTICS_LENS_SHADING_CORRECTION_MAP android.statistics.lensShadingCorrectionMap}</li>
+     * <li>{@link CameraCharacteristics#LENS_DISTORTION android.lens.distortion}</li>
+     * <li>{@link CameraCharacteristics#LENS_POSE_TRANSLATION android.lens.poseTranslation}</li>
+     * <li>{@link CameraCharacteristics#LENS_POSE_ROTATION android.lens.poseRotation}</li>
+     * <li>{@link CameraCharacteristics#LENS_DISTORTION android.lens.distortion}</li>
+     * <li>{@link CameraCharacteristics#LENS_INTRINSIC_CALIBRATION android.lens.intrinsicCalibration}</li>
+     * </ul>
+     * <p>should be interpreted in the effective after raw crop field-of-view coordinate system.
+     * In this coordinate system,
+     * {preCorrectionActiveArraySize.left, preCorrectionActiveArraySize.top} corresponds to the
+     * the top left corner of the cropped RAW frame and
+     * {preCorrectionActiveArraySize.right, preCorrectionActiveArraySize.bottom} corresponds to
+     * the bottom right corner. Client applications must use the values of the keys
+     * in the CaptureResult metadata if present.</p>
+     * <p>Crop regions (android.scaler.CropRegion), AE/AWB/AF regions and face coordinates still
+     * use the {@link CameraCharacteristics#SENSOR_INFO_ACTIVE_ARRAY_SIZE android.sensor.info.activeArraySize} coordinate system as usual.</p>
+     * <p><b>Units</b>: Pixel coordinates relative to
+     * {@link CameraCharacteristics#SENSOR_INFO_ACTIVE_ARRAY_SIZE android.sensor.info.activeArraySize} or
+     * {@link CameraCharacteristics#SENSOR_INFO_PRE_CORRECTION_ACTIVE_ARRAY_SIZE android.sensor.info.preCorrectionActiveArraySize} depending on distortion correction
+     * capability and mode</p>
+     * <p><b>Optional</b> - The value for this key may be {@code null} on some devices.</p>
+     *
+     * @see CameraCharacteristics#LENS_DISTORTION
+     * @see CameraCharacteristics#LENS_INTRINSIC_CALIBRATION
+     * @see CameraCharacteristics#LENS_POSE_ROTATION
+     * @see CameraCharacteristics#LENS_POSE_TRANSLATION
+     * @see CameraCharacteristics#SENSOR_INFO_ACTIVE_ARRAY_SIZE
+     * @see CameraCharacteristics#SENSOR_INFO_PRE_CORRECTION_ACTIVE_ARRAY_SIZE
+     * @see CaptureResult#STATISTICS_HOT_PIXEL_MAP
+     * @see CaptureResult#STATISTICS_LENS_SHADING_CORRECTION_MAP
+     */
+    @PublicKey
+    @NonNull
+    public static final Key<android.graphics.Rect> SCALER_RAW_CROP_REGION =
+            new Key<android.graphics.Rect>("android.scaler.rawCropRegion", android.graphics.Rect.class);
 
     /**
      * <p>Duration each pixel is exposed to
@@ -5635,6 +5690,7 @@ public class CaptureResult extends CameraMetadata<CaptureResult.Key<?>> {
     /*~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~
      * End generated code
      *~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~O@*/
+
 
 
 

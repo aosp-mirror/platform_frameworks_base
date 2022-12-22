@@ -289,7 +289,8 @@ public final class OutputConfiguration implements Parcelable {
          CameraMetadata.SCALER_AVAILABLE_STREAM_USE_CASES_STILL_CAPTURE,
          CameraMetadata.SCALER_AVAILABLE_STREAM_USE_CASES_VIDEO_RECORD,
          CameraMetadata.SCALER_AVAILABLE_STREAM_USE_CASES_PREVIEW_VIDEO_STILL,
-         CameraMetadata.SCALER_AVAILABLE_STREAM_USE_CASES_VIDEO_CALL})
+         CameraMetadata.SCALER_AVAILABLE_STREAM_USE_CASES_VIDEO_CALL,
+         CameraMetadata.SCALER_AVAILABLE_STREAM_USE_CASES_CROPPED_RAW})
     public @interface StreamUseCase {};
 
     /**
@@ -998,7 +999,7 @@ public final class OutputConfiguration implements Parcelable {
      */
     public void setStreamUseCase(@StreamUseCase long streamUseCase) {
         // Verify that the value is in range
-        long maxUseCaseValue = CameraMetadata.SCALER_AVAILABLE_STREAM_USE_CASES_VIDEO_CALL;
+        long maxUseCaseValue = CameraMetadata.SCALER_AVAILABLE_STREAM_USE_CASES_CROPPED_RAW;
         if (streamUseCase > maxUseCaseValue &&
                 streamUseCase < CameraMetadata.SCALER_AVAILABLE_STREAM_USE_CASES_VENDOR_START) {
             throw new IllegalArgumentException("Not a valid stream use case value " +
