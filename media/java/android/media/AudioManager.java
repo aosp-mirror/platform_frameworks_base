@@ -3500,6 +3500,19 @@ public class AudioManager {
     }
 
     /**
+     * Suspends the use of LE Audio.
+     *
+     * @param enable {@code true} to suspend le audio, {@code false} to unsuspend
+     *
+     * @hide
+     */
+    @SystemApi(client = SystemApi.Client.MODULE_LIBRARIES)
+    @RequiresPermission(android.Manifest.permission.BLUETOOTH_STACK)
+    public void setLeAudioSuspended(boolean enable) {
+        AudioSystem.setParameters("LeAudioSuspended=" + enable);
+    }
+
+    /**
      * Gets a variable number of parameter values from audio hardware.
      *
      * @param keys list of parameters
