@@ -70,7 +70,7 @@ public class DreamOverlayService extends android.service.dreams.DreamOverlayServ
     // A controller for the dream overlay container view (which contains both the status bar and the
     // content area).
     private DreamOverlayContainerViewController mDreamOverlayContainerViewController;
-    private final DreamCallbackController mDreamCallbackController;
+    private final DreamOverlayCallbackController mDreamOverlayCallbackController;
     private final KeyguardUpdateMonitor mKeyguardUpdateMonitor;
     @Nullable
     private final ComponentName mLowLightDreamComponent;
@@ -151,7 +151,7 @@ public class DreamOverlayService extends android.service.dreams.DreamOverlayServ
             TouchInsetManager touchInsetManager,
             @Nullable @Named(LowLightDreamModule.LOW_LIGHT_DREAM_COMPONENT)
                     ComponentName lowLightDreamComponent,
-            DreamCallbackController dreamCallbackController) {
+            DreamOverlayCallbackController dreamOverlayCallbackController) {
         mContext = context;
         mExecutor = executor;
         mWindowManager = windowManager;
@@ -160,7 +160,7 @@ public class DreamOverlayService extends android.service.dreams.DreamOverlayServ
         mKeyguardUpdateMonitor.registerCallback(mKeyguardCallback);
         mStateController = stateController;
         mUiEventLogger = uiEventLogger;
-        mDreamCallbackController = dreamCallbackController;
+        mDreamOverlayCallbackController = dreamOverlayCallbackController;
 
         final ViewModelStore viewModelStore = new ViewModelStore();
         final Complication.Host host =
@@ -229,6 +229,7 @@ public class DreamOverlayService extends android.service.dreams.DreamOverlayServ
                     dreamComponent != null && dreamComponent.equals(mLowLightDreamComponent));
             mUiEventLogger.log(DreamOverlayEvent.DREAM_OVERLAY_COMPLETE_START);
 
+            mDreamOverlayCallbackController.onStartDream();
             mStarted = true;
         });
     }
@@ -245,7 +246,7 @@ public class DreamOverlayService extends android.service.dreams.DreamOverlayServ
     public void onWakeUp(@NonNull Runnable onCompletedCallback) {
         mExecutor.execute(() -> {
             if (mDreamOverlayContainerViewController != null) {
-                mDreamCallbackController.onWakeUp();
+                mDreamOverlayCallbackController.onWakeUp();
                 mDreamOverlayContainerViewController.wakeUp(onCompletedCallback, mExecutor);
             }
         });
