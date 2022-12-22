@@ -324,10 +324,17 @@ public final class TunerSessionHidlTest extends ExtendedRadioMockitoTestCase {
 
     @Test
     public void tune_withUnsupportedSelector_throwsException() throws Exception {
+        ProgramSelector.Identifier dabPrimaryId =
+                new ProgramSelector.Identifier(ProgramSelector.IDENTIFIER_TYPE_DAB_SID_EXT,
+                        /* value= */ 0xA00111);
+        ProgramSelector.Identifier[] dabSecondaryIds =  new ProgramSelector.Identifier[]{
+                new ProgramSelector.Identifier(ProgramSelector.IDENTIFIER_TYPE_DAB_ENSEMBLE,
+                        /* value= */ 1337),
+                new ProgramSelector.Identifier(ProgramSelector.IDENTIFIER_TYPE_DAB_FREQUENCY,
+                        /* value= */ 225648)};
+        ProgramSelector unsupportedSelector = new ProgramSelector(ProgramSelector.PROGRAM_TYPE_DAB,
+                dabPrimaryId, dabSecondaryIds, /* vendorIds= */ null);
         openAidlClients(/* numClients= */ 1);
-        ProgramSelector unsupportedSelector = TestUtils.makeProgramSelector(
-                ProgramSelector.IDENTIFIER_TYPE_DAB_FREQUENCY, new ProgramSelector.Identifier(
-                        ProgramSelector.IDENTIFIER_TYPE_DAB_FREQUENCY, /* value= */ 300));
 
         UnsupportedOperationException thrown = assertThrows(UnsupportedOperationException.class,
                 () -> mTunerSessions[0].tune(unsupportedSelector));

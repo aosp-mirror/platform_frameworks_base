@@ -36,18 +36,18 @@ public final class ProgramSelectorTest {
     private static final long AM_FREQUENCY = 700;
     private static final ProgramSelector.Identifier FM_IDENTIFIER = new ProgramSelector.Identifier(
             ProgramSelector.IDENTIFIER_TYPE_AMFM_FREQUENCY, FM_FREQUENCY);
-    private static final ProgramSelector.Identifier DAB_SID_EXT_IDENTIFIER_1 =
-            new ProgramSelector.Identifier(ProgramSelector.IDENTIFIER_TYPE_DAB_SID_EXT,
-                    /* value= */ 0x1000011);
-    private static final ProgramSelector.Identifier DAB_SID_EXT_IDENTIFIER_2 =
-            new ProgramSelector.Identifier(ProgramSelector.IDENTIFIER_TYPE_DAB_SID_EXT,
-                    /* value= */ 0x10000112);
+    private static final ProgramSelector.Identifier DAB_DMB_SID_EXT_IDENTIFIER_1 =
+            new ProgramSelector.Identifier(ProgramSelector.IDENTIFIER_TYPE_DAB_DMB_SID_EXT,
+                    /* value= */ 0xA000000111L);
+    private static final ProgramSelector.Identifier DAB_DMB_SID_EXT_IDENTIFIER_2 =
+            new ProgramSelector.Identifier(ProgramSelector.IDENTIFIER_TYPE_DAB_DMB_SID_EXT,
+                    /* value= */ 0xA000000112L);
     private static final ProgramSelector.Identifier DAB_ENSEMBLE_IDENTIFIER =
             new ProgramSelector.Identifier(ProgramSelector.IDENTIFIER_TYPE_DAB_ENSEMBLE,
                     /* value= */ 0x1001);
     private static final ProgramSelector.Identifier DAB_FREQUENCY_IDENTIFIER =
             new ProgramSelector.Identifier(ProgramSelector.IDENTIFIER_TYPE_DAB_FREQUENCY,
-                    /* value= */ 94500);
+                    /* value= */ 220352);
 
     @Test
     public void getType_forIdentifier() {
@@ -80,13 +80,13 @@ public final class ProgramSelectorTest {
     @Test
     public void equals_withDifferentTypesForIdentifiers_returnsFalse() {
         assertWithMessage("Identifier with different identifier type")
-                .that(FM_IDENTIFIER).isNotEqualTo(DAB_SID_EXT_IDENTIFIER_1);
+                .that(FM_IDENTIFIER).isNotEqualTo(DAB_DMB_SID_EXT_IDENTIFIER_1);
     }
 
     @Test
     public void equals_withDifferentValuesForIdentifiers_returnsFalse() {
         assertWithMessage("Identifier with different identifier value")
-                .that(DAB_SID_EXT_IDENTIFIER_2).isNotEqualTo(DAB_SID_EXT_IDENTIFIER_1);
+                .that(DAB_DMB_SID_EXT_IDENTIFIER_2).isNotEqualTo(DAB_DMB_SID_EXT_IDENTIFIER_1);
     }
 
     @Test
@@ -168,19 +168,19 @@ public final class ProgramSelectorTest {
     @Test
     public void getFirstId_withIdInSelector() {
         ProgramSelector.Identifier[] secondaryIds = new ProgramSelector.Identifier[]{
-                DAB_ENSEMBLE_IDENTIFIER, DAB_SID_EXT_IDENTIFIER_2, DAB_FREQUENCY_IDENTIFIER};
+                DAB_ENSEMBLE_IDENTIFIER, DAB_DMB_SID_EXT_IDENTIFIER_2, DAB_FREQUENCY_IDENTIFIER};
         ProgramSelector selector = getDabSelector(secondaryIds, /* vendorIds= */ null);
 
-        long firstIdValue = selector.getFirstId(ProgramSelector.IDENTIFIER_TYPE_DAB_SID_EXT);
+        long firstIdValue = selector.getFirstId(ProgramSelector.IDENTIFIER_TYPE_DAB_DMB_SID_EXT);
 
         assertWithMessage("Value of the first DAB_SID_EXT identifier")
-                .that(firstIdValue).isEqualTo(DAB_SID_EXT_IDENTIFIER_1.getValue());
+                .that(firstIdValue).isEqualTo(DAB_DMB_SID_EXT_IDENTIFIER_1.getValue());
     }
 
     @Test
     public void getFirstId_withIdNotInSelector() {
         ProgramSelector.Identifier[] secondaryIds = new ProgramSelector.Identifier[]{
-                DAB_ENSEMBLE_IDENTIFIER, DAB_SID_EXT_IDENTIFIER_2};
+                DAB_ENSEMBLE_IDENTIFIER, DAB_DMB_SID_EXT_IDENTIFIER_2};
         ProgramSelector selector = getDabSelector(secondaryIds, /* vendorIds= */ null);
 
         int idType = ProgramSelector.IDENTIFIER_TYPE_AMFM_FREQUENCY;
@@ -195,13 +195,13 @@ public final class ProgramSelectorTest {
     @Test
     public void getAllIds_withIdInSelector() {
         ProgramSelector.Identifier[] secondaryIds = new ProgramSelector.Identifier[]{
-                DAB_ENSEMBLE_IDENTIFIER, DAB_SID_EXT_IDENTIFIER_2, DAB_FREQUENCY_IDENTIFIER};
+                DAB_ENSEMBLE_IDENTIFIER, DAB_DMB_SID_EXT_IDENTIFIER_2, DAB_FREQUENCY_IDENTIFIER};
         ProgramSelector.Identifier[] allIdsExpected =
-                {DAB_SID_EXT_IDENTIFIER_1, DAB_SID_EXT_IDENTIFIER_2};
+                {DAB_DMB_SID_EXT_IDENTIFIER_1, DAB_DMB_SID_EXT_IDENTIFIER_2};
         ProgramSelector selector = getDabSelector(secondaryIds, /* vendorIds= */ null);
 
         ProgramSelector.Identifier[] allIds =
-                selector.getAllIds(ProgramSelector.IDENTIFIER_TYPE_DAB_SID_EXT);
+                selector.getAllIds(ProgramSelector.IDENTIFIER_TYPE_DAB_DMB_SID_EXT);
 
         assertWithMessage("All DAB_SID_EXT identifiers in selector")
                 .that(allIds).isEqualTo(allIdsExpected);
@@ -244,14 +244,14 @@ public final class ProgramSelectorTest {
     @Test
     public void withSecondaryPreferred() {
         ProgramSelector.Identifier[] secondaryIds = new ProgramSelector.Identifier[]{
-                DAB_ENSEMBLE_IDENTIFIER, DAB_SID_EXT_IDENTIFIER_2, DAB_FREQUENCY_IDENTIFIER};
+                DAB_ENSEMBLE_IDENTIFIER, DAB_DMB_SID_EXT_IDENTIFIER_2, DAB_FREQUENCY_IDENTIFIER};
         long[] vendorIdsExpected = {12345, 678};
         ProgramSelector selector = getDabSelector(secondaryIds, vendorIdsExpected);
         ProgramSelector.Identifier[] secondaryIdsExpected = new ProgramSelector.Identifier[]{
-                DAB_ENSEMBLE_IDENTIFIER, DAB_FREQUENCY_IDENTIFIER, DAB_SID_EXT_IDENTIFIER_1};
+                DAB_ENSEMBLE_IDENTIFIER, DAB_FREQUENCY_IDENTIFIER, DAB_DMB_SID_EXT_IDENTIFIER_1};
 
         ProgramSelector selectorPreferred =
-                selector.withSecondaryPreferred(DAB_SID_EXT_IDENTIFIER_1);
+                selector.withSecondaryPreferred(DAB_DMB_SID_EXT_IDENTIFIER_1);
 
         assertWithMessage("Program type")
                 .that(selectorPreferred.getProgramType()).isEqualTo(selector.getProgramType());
@@ -458,7 +458,7 @@ public final class ProgramSelectorTest {
 
     private ProgramSelector getDabSelector(@Nullable ProgramSelector.Identifier[] secondaryIds,
             @Nullable long[] vendorIds) {
-        return new ProgramSelector(DAB_PROGRAM_TYPE, DAB_SID_EXT_IDENTIFIER_1, secondaryIds,
+        return new ProgramSelector(DAB_PROGRAM_TYPE, DAB_DMB_SID_EXT_IDENTIFIER_1, secondaryIds,
                 vendorIds);
     }
 }
