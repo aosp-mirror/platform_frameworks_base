@@ -426,7 +426,7 @@ public class ExitTransitionCoordinator extends ActivityTransitionCoordinator {
                 mSharedElementNotified = true;
                 delayCancel();
 
-                if (mExitCallbacks.isReturnTransitionAllowed()) {
+                if (mExitCallbacks != null && mExitCallbacks.isReturnTransitionAllowed()) {
                     mResultReceiver.send(MSG_ALLOW_RETURN_TRANSITION, null);
                 }
 
