@@ -85,6 +85,8 @@
     <string name="screenshot_share_description" msgid="2861628935812656612">"Ekranı paylaş"</string>
     <string name="screenshot_scroll_label" msgid="2930198809899329367">"Alanı genişlet"</string>
     <string name="screenshot_dismiss_description" msgid="4702341245899508786">"Ekran görüntüsünü kapat"</string>
+    <!-- no translation found for screenshot_dismiss_work_profile (3101530842987697045) -->
+    <skip />
     <string name="screenshot_preview_description" msgid="7606510140714080474">"Ekran görüntüsü önizlemesi"</string>
     <string name="screenshot_top_boundary_pct" msgid="2520148599096479332">"Üst sınır yüzde <xliff:g id="PERCENT">%1$d</xliff:g>"</string>
     <string name="screenshot_bottom_boundary_pct" msgid="3880821519814946478">"Alt sınır yüzde <xliff:g id="PERCENT">%1$d</xliff:g>"</string>
@@ -731,8 +733,7 @@
     <string name="wifi_is_off" msgid="5389597396308001471">"Kablosuz bağlantı kapalı"</string>
     <string name="bt_is_off" msgid="7436344904889461591">"Bluetooth kapalı"</string>
     <string name="dnd_is_off" msgid="3185706903793094463">"Rahatsız Etmeyin kapalı"</string>
-    <!-- no translation found for dnd_is_on (7009368176361546279) -->
-    <skip />
+    <string name="dnd_is_on" msgid="7009368176361546279">"Rahatsız Etmeyin modu açık"</string>
     <string name="qs_dnd_prompt_auto_rule" msgid="3535469468310002616">"Rahatsız Etmeyin ayarı bir otomatik kural (<xliff:g id="ID_1">%s</xliff:g>) tarafından açıldı."</string>
     <string name="qs_dnd_prompt_app" msgid="4027984447935396820">"Rahatsız Etmeyin ayarı bir uygulama (<xliff:g id="ID_1">%s</xliff:g>) tarafından açıldı."</string>
     <string name="qs_dnd_prompt_auto_rule_app" msgid="1841469944118486580">"Rahatsız Etmeyin ayarı bir otomatik kural veya uygulama tarafından açıldı."</string>
@@ -875,6 +876,8 @@
     <string name="media_output_dialog_accessibility_title" msgid="4681741064190167888">"Ses çıkışı için kullanılabilir cihazlar."</string>
     <string name="media_output_dialog_accessibility_seekbar" msgid="5332843993805568978">"Ses düzeyi"</string>
     <string name="media_output_dialog_volume_percentage" msgid="1613984910585111798">"%%<xliff:g id="PERCENTAGE">%1$d</xliff:g>"</string>
+    <!-- no translation found for media_output_group_title_speakers_and_displays (7169712332365659820) -->
+    <skip />
     <string name="media_output_first_broadcast_title" msgid="6292237789860753022">"Yayınlamanın işleyiş şekli"</string>
     <string name="media_output_broadcast" msgid="3555580945878071543">"Anons"</string>
     <string name="media_output_first_notify_broadcast_message" msgid="6353857724136398494">"Yakınınızda ve uyumlu Bluetooth cihazları olan kişiler yayınladığınız medya içeriğini dinleyebilir"</string>
@@ -1004,8 +1007,7 @@
     <string name="keyguard_affordance_enablement_dialog_qr_scanner_instruction" msgid="5355839079232119791">"• Kamera uygulaması yüklenmelidir"</string>
     <string name="keyguard_affordance_enablement_dialog_home_instruction_1" msgid="8438311171750568633">"• Uygulama kurulmuş olmalıdır"</string>
     <string name="keyguard_affordance_enablement_dialog_home_instruction_2" msgid="8308525385889021652">"• En az bir cihaz mevcut olmalıdır"</string>
-    <!-- no translation found for keyguard_affordance_press_too_short (2687995216454987952) -->
-    <skip />
+    <string name="keyguard_affordance_press_too_short" msgid="2687995216454987952">"Etkinleştirmek için basılı tutun"</string>
     <string name="rear_display_bottom_sheet_cancel" msgid="3461468855493357248">"İptal"</string>
     <string name="rear_display_bottom_sheet_confirm" msgid="4383356544661421206">"Şimdi çevirin"</string>
     <string name="rear_display_fold_bottom_sheet_title" msgid="6081542277622721548">"Daha iyi selfie çekmek için telefonu açın"</string>
@@ -1014,6 +1016,5 @@
     <string name="rear_display_bottom_sheet_warning" msgid="800995919558238930"><b>"✱ * Bu ekran kapatılacak"</b></string>
     <string name="rear_display_accessibility_folded_animation" msgid="1538121649587978179">"Katlanabilir cihaz açılıyor"</string>
     <string name="rear_display_accessibility_unfolded_animation" msgid="1946153682258289040">"Katlanabilir cihaz döndürülüyor"</string>
-    <!-- no translation found for stylus_battery_low (7134370101603167096) -->
-    <skip />
+    <string name="stylus_battery_low" msgid="7134370101603167096">"Ekran kaleminin pil seviyesi düşük"</string>
 </resources>

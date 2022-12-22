@@ -85,6 +85,8 @@
     <string name="screenshot_share_description" msgid="2861628935812656612">"ແບ່ງປັນຮູບໜ້າຈໍ"</string>
     <string name="screenshot_scroll_label" msgid="2930198809899329367">"ຖ່າຍຮູບເພີ່ມເຕີມ"</string>
     <string name="screenshot_dismiss_description" msgid="4702341245899508786">"ປິດຮູບໜ້າຈໍ"</string>
+    <!-- no translation found for screenshot_dismiss_work_profile (3101530842987697045) -->
+    <skip />
     <string name="screenshot_preview_description" msgid="7606510140714080474">"ຕົວຢ່າງຮູບໜ້າຈໍ"</string>
     <string name="screenshot_top_boundary_pct" msgid="2520148599096479332">"ຂອບເຂດທາງເທິງ <xliff:g id="PERCENT">%1$d</xliff:g> ເປີເຊັນ"</string>
     <string name="screenshot_bottom_boundary_pct" msgid="3880821519814946478">"ຂອບເຂດທາງລຸ່ມ <xliff:g id="PERCENT">%1$d</xliff:g> ເປີເຊັນ"</string>
@@ -731,8 +733,7 @@
     <string name="wifi_is_off" msgid="5389597396308001471">"Wi-Fi ປິດຢູ່"</string>
     <string name="bt_is_off" msgid="7436344904889461591">"Bluetooth ປິດຢູ່"</string>
     <string name="dnd_is_off" msgid="3185706903793094463">"ຫ້າມລົບກວນ ປິດຢູ່"</string>
-    <!-- no translation found for dnd_is_on (7009368176361546279) -->
-    <skip />
+    <string name="dnd_is_on" msgid="7009368176361546279">"ເປີດໂໝດຫ້າມລົບກວນແລ້ວ"</string>
     <string name="qs_dnd_prompt_auto_rule" msgid="3535469468310002616">"ໂໝດຫ້າມລົບກວນຖືກເປີດໃຊ້ໂດຍກົດອັດຕະໂນມັດ (<xliff:g id="ID_1">%s</xliff:g>)."</string>
     <string name="qs_dnd_prompt_app" msgid="4027984447935396820">"ມີແອັບເປີດໃຊ້ໂໝດຫ້າມລົບກວນ (<xliff:g id="ID_1">%s</xliff:g>)."</string>
     <string name="qs_dnd_prompt_auto_rule_app" msgid="1841469944118486580">"ໂໝດຫ້າມລົບກວນຖືກເປີດໃຊ້ໂດຍກົດອັດຕະໂນມັດ ຫຼື ແອັບໃດໜຶ່ງ."</string>
@@ -875,6 +876,8 @@
     <string name="media_output_dialog_accessibility_title" msgid="4681741064190167888">"ອຸປະກອນທີ່ສາມາດໃຊ້ໄດ້ສຳລັບເອົ້າພຸດສຽງ."</string>
     <string name="media_output_dialog_accessibility_seekbar" msgid="5332843993805568978">"ລະດັບສຽງ"</string>
     <string name="media_output_dialog_volume_percentage" msgid="1613984910585111798">"<xliff:g id="PERCENTAGE">%1$d</xliff:g>%%"</string>
+    <!-- no translation found for media_output_group_title_speakers_and_displays (7169712332365659820) -->
+    <skip />
     <string name="media_output_first_broadcast_title" msgid="6292237789860753022">"ການອອກອາກາດເຮັດວຽກແນວໃດ"</string>
     <string name="media_output_broadcast" msgid="3555580945878071543">"ອອກອາກາດ"</string>
     <string name="media_output_first_notify_broadcast_message" msgid="6353857724136398494">"ຄົນທີ່ຢູ່ໃກ້ທ່ານທີ່ມີອຸປະກອນ Bluetooth ທີ່ເຂົ້າກັນໄດ້ຈະສາມາດຟັງມີເດຍທີ່ທ່ານກຳລັງອອກອາກາດຢູ່ໄດ້"</string>
@@ -1004,8 +1007,7 @@
     <string name="keyguard_affordance_enablement_dialog_qr_scanner_instruction" msgid="5355839079232119791">"• ຕິດຕັ້ງແອັບກ້ອງຖ່າຍຮູບ"</string>
     <string name="keyguard_affordance_enablement_dialog_home_instruction_1" msgid="8438311171750568633">"• ແອັບໄດ້ຮັບການຕັ້ງຄ່າແລ້ວ"</string>
     <string name="keyguard_affordance_enablement_dialog_home_instruction_2" msgid="8308525385889021652">"• ມີຢ່າງໜ້ອຍ 1 ອຸປະກອນພ້ອມໃຫ້ນຳໃຊ້"</string>
-    <!-- no translation found for keyguard_affordance_press_too_short (2687995216454987952) -->
-    <skip />
+    <string name="keyguard_affordance_press_too_short" msgid="2687995216454987952">"ກົດຄ້າງໄວ້ເພື່ອເປີດນຳໃຊ້"</string>
     <string name="rear_display_bottom_sheet_cancel" msgid="3461468855493357248">"ຍົກເລີກ"</string>
     <string name="rear_display_bottom_sheet_confirm" msgid="4383356544661421206">"ປີ້ນດຽວນີ້"</string>
     <string name="rear_display_fold_bottom_sheet_title" msgid="6081542277622721548">"ກາງໂທລະສັບອອກເພື່ອການຖ່າຍເຊວຟີທີ່ດີຂຶ້ນ"</string>
@@ -1014,6 +1016,5 @@
     <string name="rear_display_bottom_sheet_warning" msgid="800995919558238930"><b>"✱ ໜ້າຈໍນີ້ຈະປິດ"</b></string>
     <string name="rear_display_accessibility_folded_animation" msgid="1538121649587978179">"ອຸປະກອນທີ່ພັບໄດ້ກຳລັງກາງອອກ"</string>
     <string name="rear_display_accessibility_unfolded_animation" msgid="1946153682258289040">"ອຸປະກອນທີ່ພັກໄດ້ກຳລັງປີ້ນໄປມາ"</string>
-    <!-- no translation found for stylus_battery_low (7134370101603167096) -->
-    <skip />
+    <string name="stylus_battery_low" msgid="7134370101603167096">"ແບັດເຕີຣີປາກກາເຫຼືອໜ້ອຍ"</string>
 </resources>

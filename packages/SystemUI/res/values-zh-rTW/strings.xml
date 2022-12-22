@@ -85,6 +85,8 @@
     <string name="screenshot_share_description" msgid="2861628935812656612">"分享螢幕截圖"</string>
     <string name="screenshot_scroll_label" msgid="2930198809899329367">"擴大螢幕截圖範圍"</string>
     <string name="screenshot_dismiss_description" msgid="4702341245899508786">"關閉螢幕截圖"</string>
+    <!-- no translation found for screenshot_dismiss_work_profile (3101530842987697045) -->
+    <skip />
     <string name="screenshot_preview_description" msgid="7606510140714080474">"螢幕截圖預覽"</string>
     <string name="screenshot_top_boundary_pct" msgid="2520148599096479332">"上方邊界百分之 <xliff:g id="PERCENT">%1$d</xliff:g>"</string>
     <string name="screenshot_bottom_boundary_pct" msgid="3880821519814946478">"下方邊界百分之 <xliff:g id="PERCENT">%1$d</xliff:g>"</string>
@@ -731,8 +733,7 @@
     <string name="wifi_is_off" msgid="5389597396308001471">"Wi-Fi 已關閉"</string>
     <string name="bt_is_off" msgid="7436344904889461591">"藍牙已關閉"</string>
     <string name="dnd_is_off" msgid="3185706903793094463">"零打擾模式已關閉"</string>
-    <!-- no translation found for dnd_is_on (7009368176361546279) -->
-    <skip />
+    <string name="dnd_is_on" msgid="7009368176361546279">"已開啟零打擾模式"</string>
     <string name="qs_dnd_prompt_auto_rule" msgid="3535469468310002616">"「<xliff:g id="ID_1">%s</xliff:g>」自動規則已將零打擾模式開啟。"</string>
     <string name="qs_dnd_prompt_app" msgid="4027984447935396820">"「<xliff:g id="ID_1">%s</xliff:g>」應用程式已將零打擾模式開啟。"</string>
     <string name="qs_dnd_prompt_auto_rule_app" msgid="1841469944118486580">"某個自動規則或應用程式已將零打擾模式開啟。"</string>
@@ -875,6 +876,8 @@
     <string name="media_output_dialog_accessibility_title" msgid="4681741064190167888">"可用於輸出音訊的裝置。"</string>
     <string name="media_output_dialog_accessibility_seekbar" msgid="5332843993805568978">"音量"</string>
     <string name="media_output_dialog_volume_percentage" msgid="1613984910585111798">"<xliff:g id="PERCENTAGE">%1$d</xliff:g>%%"</string>
+    <!-- no translation found for media_output_group_title_speakers_and_displays (7169712332365659820) -->
+    <skip />
     <string name="media_output_first_broadcast_title" msgid="6292237789860753022">"廣播功能的運作方式"</string>
     <string name="media_output_broadcast" msgid="3555580945878071543">"廣播"</string>
     <string name="media_output_first_notify_broadcast_message" msgid="6353857724136398494">"如果附近的人有相容的藍牙裝置，就可以聽到你正在廣播的媒體內容"</string>
@@ -1004,8 +1007,7 @@
     <string name="keyguard_affordance_enablement_dialog_qr_scanner_instruction" msgid="5355839079232119791">"• 安裝相機應用程式"</string>
     <string name="keyguard_affordance_enablement_dialog_home_instruction_1" msgid="8438311171750568633">"• 完成應用程式設定"</string>
     <string name="keyguard_affordance_enablement_dialog_home_instruction_2" msgid="8308525385889021652">"• 至少要有一部可用裝置"</string>
-    <!-- no translation found for keyguard_affordance_press_too_short (2687995216454987952) -->
-    <skip />
+    <string name="keyguard_affordance_press_too_short" msgid="2687995216454987952">"按住即可啟用"</string>
     <string name="rear_display_bottom_sheet_cancel" msgid="3461468855493357248">"取消"</string>
     <string name="rear_display_bottom_sheet_confirm" msgid="4383356544661421206">"立即翻轉"</string>
     <string name="rear_display_fold_bottom_sheet_title" msgid="6081542277622721548">"打開手機自拍效果較佳"</string>
@@ -1014,6 +1016,5 @@
     <string name="rear_display_bottom_sheet_warning" msgid="800995919558238930"><b>"✱ 這麼做會關閉這個螢幕"</b></string>
     <string name="rear_display_accessibility_folded_animation" msgid="1538121649587978179">"正在展開的折疊式裝置"</string>
     <string name="rear_display_accessibility_unfolded_animation" msgid="1946153682258289040">"正在翻轉折疊式裝置"</string>
-    <!-- no translation found for stylus_battery_low (7134370101603167096) -->
-    <skip />
+    <string name="stylus_battery_low" msgid="7134370101603167096">"觸控筆電力不足"</string>
 </resources>
