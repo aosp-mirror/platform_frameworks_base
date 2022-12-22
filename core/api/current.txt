@@ -8595,10 +8595,20 @@ package android.app.job {
     method public int getDeliveryCount();
     method public long getEstimatedNetworkDownloadBytes();
     method public long getEstimatedNetworkUploadBytes();
+    method @NonNull public android.os.PersistableBundle getExtras();
     method public android.content.Intent getIntent();
     method public long getMinimumNetworkChunkBytes();
     method public void writeToParcel(android.os.Parcel, int);
     field @NonNull public static final android.os.Parcelable.Creator<android.app.job.JobWorkItem> CREATOR;
+  }
+
+  public static final class JobWorkItem.Builder {
+    ctor public JobWorkItem.Builder();
+    method @NonNull public android.app.job.JobWorkItem build();
+    method @NonNull public android.app.job.JobWorkItem.Builder setEstimatedNetworkBytes(long, long);
+    method @NonNull public android.app.job.JobWorkItem.Builder setExtras(@NonNull android.os.PersistableBundle);
+    method @NonNull public android.app.job.JobWorkItem.Builder setIntent(@NonNull android.content.Intent);
+    method @NonNull public android.app.job.JobWorkItem.Builder setMinimumNetworkChunkBytes(long);
   }
 
 }

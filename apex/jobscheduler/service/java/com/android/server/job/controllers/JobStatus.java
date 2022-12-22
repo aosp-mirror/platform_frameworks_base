@@ -676,6 +676,12 @@ public final class JobStatus {
                 Slog.i(TAG, "Cloning job with persisted run times", new RuntimeException("here"));
             }
         }
+        if (jobStatus.executingWork != null && jobStatus.executingWork.size() > 0) {
+            executingWork = new ArrayList<>(jobStatus.executingWork);
+        }
+        if (jobStatus.pendingWork != null && jobStatus.pendingWork.size() > 0) {
+            pendingWork = new ArrayList<>(jobStatus.pendingWork);
+        }
     }
 
     /**

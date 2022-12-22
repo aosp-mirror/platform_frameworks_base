@@ -1406,6 +1406,7 @@ public class JobSchedulerService extends com.android.server.SystemService
                 if (toCancel.getJob().equals(job)) {
 
                     toCancel.enqueueWorkLocked(work);
+                    mJobs.touchJob(toCancel);
 
                     // If any of work item is enqueued when the source is in the foreground,
                     // exempt the entire job.
@@ -3775,6 +3776,14 @@ public class JobSchedulerService extends com.android.server.SystemService
                         }
                     }
                 }
+                if (job.isPersisted()) {
+                    // Intent.saveToXml() doesn't persist everything, so just reject all
+                    // JobWorkItems with Intents to be safe/predictable.
+                    if (jobWorkItem.getIntent() != null) {
+                        throw new IllegalArgumentException(
+                                "Cannot persist JobWorkItems with Intents");
+                    }
+                }
             }
             return JobScheduler.RESULT_SUCCESS;
         }
@@ -3837,9 +3846,6 @@ public class JobSchedulerService extends com.android.server.SystemService
             final int userId = UserHandle.getUserId(uid);
 
             enforceValidJobRequest(uid, job);
-            if (job.isPersisted()) {
-                throw new IllegalArgumentException("Can't enqueue work for persisted jobs");
-            }
             if (work == null) {
                 throw new NullPointerException("work is null");
             }

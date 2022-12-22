@@ -615,6 +615,9 @@ public final class JobServiceContext implements ServiceConnection {
                             "last work dequeued");
                     // This will finish the job.
                     doCallbackLocked(false, "last work dequeued");
+                } else {
+                    // Delivery count has been updated, so persist JobWorkItem change.
+                    mService.mJobs.touchJob(mRunningJob);
                 }
                 return work;
             }
@@ -632,6 +635,7 @@ public final class JobServiceContext implements ServiceConnection {
                     // Exception-throwing-can down the road to JobParameters.completeWork >:(
                     return true;
                 }
+                mService.mJobs.touchJob(mRunningJob);
                 return mRunningJob.completeWorkLocked(workId);
             }
         } finally {
