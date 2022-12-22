@@ -140,6 +140,7 @@ import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.content.ReferrerIntent;
 import com.android.internal.protolog.common.ProtoLog;
 import com.android.internal.util.ArrayUtils;
+import com.android.internal.util.FrameworkStatsLog;
 import com.android.internal.util.function.pooled.PooledLambda;
 import com.android.server.LocalServices;
 import com.android.server.am.ActivityManagerService;
@@ -1590,11 +1591,11 @@ public class ActivityTaskSupervisor implements RecentTasks.Callbacks {
      * @return Returns true if the given task was found and removed.
      */
     boolean removeTaskById(int taskId, boolean killProcess, boolean removeFromRecents,
-            String reason) {
+            String reason, int callingUid) {
         final Task task =
                 mRootWindowContainer.anyTaskForId(taskId, MATCH_ATTACHED_TASK_OR_RECENT_TASKS);
         if (task != null) {
-            removeTask(task, killProcess, removeFromRecents, reason);
+            removeTask(task, killProcess, removeFromRecents, reason, callingUid, null);
             return true;
         }
         Slog.w(TAG, "Request to remove task ignored for non-existent task " + taskId);
@@ -1602,9 +1603,51 @@ public class ActivityTaskSupervisor implements RecentTasks.Callbacks {
     }
 
     void removeTask(Task task, boolean killProcess, boolean removeFromRecents, String reason) {
+        removeTask(task, killProcess, removeFromRecents, reason, SYSTEM_UID, null);
+    }
+
+    void removeTask(Task task, boolean killProcess, boolean removeFromRecents, String reason,
+            int callingUid, String callerActivityClassName) {
         if (task.mInRemoveTask) {
             // Prevent recursion.
             return;
+        }
+        // We may have already checked that the callingUid has additional clearTask privileges, and
+        // cleared the calling identify. If so, we infer we do not need further restrictions here.
+        // TODO(b/263368846) Move to live with the rest of the ASM logic.
+        if (callingUid != SYSTEM_UID) {
+            ActivityRecord topActivity = task.getTopNonFinishingActivity();
+            boolean passesAsmChecks = topActivity != null
+                    && topActivity.getUid() == callingUid;
+            if (!passesAsmChecks) {
+                Slog.i(TAG, "Finishing task from background. t: " + task);
+                FrameworkStatsLog.write(FrameworkStatsLog.ACTIVITY_ACTION_BLOCKED,
+                        /* caller_uid */
+                        callingUid,
+                        /* caller_activity_class_name */
+                        callerActivityClassName,
+                        /* target_task_top_activity_uid */
+                        topActivity == null ? -1 : topActivity.getUid(),
+                        /* target_task_top_activity_class_name */
+                        topActivity == null ? null : topActivity.info.name,
+                        /* target_task_is_different */
+                        false,
+                        /* target_activity_uid */
+                        -1,
+                        /* target_activity_class_name */
+                        null,
+                        /* target_intent_action */
+                        null,
+                        /* target_intent_flags */
+                        0,
+                        /* action */
+                        FrameworkStatsLog.ACTIVITY_ACTION_BLOCKED__ACTION__FINISH_TASK,
+                        /* version */
+                        1,
+                        /* multi_window */
+                        false
+                );
+            }
         }
         task.mTransitionController.requestCloseTransitionIfNeeded(task);
         task.mInRemoveTask = true;
@@ -1728,7 +1771,7 @@ public class ActivityTaskSupervisor implements RecentTasks.Callbacks {
             // Task was trimmed from the recent tasks list -- remove the active task record as well
             // since the user won't really be able to go back to it
             removeTaskById(task.mTaskId, killProcess, false /* removeFromRecents */,
-                    "recent-task-trimmed");
+                    "recent-task-trimmed", SYSTEM_UID);
         }
         task.removedFromRecents();
     }
