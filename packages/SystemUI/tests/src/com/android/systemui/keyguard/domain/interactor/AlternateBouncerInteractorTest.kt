@@ -25,6 +25,7 @@ import com.android.systemui.flags.Flags
 import com.android.systemui.keyguard.data.repository.FakeBiometricRepository
 import com.android.systemui.keyguard.data.repository.FakeDeviceEntryFingerprintAuthRepository
 import com.android.systemui.keyguard.data.repository.KeyguardBouncerRepository
+import com.android.systemui.keyguard.data.repository.KeyguardBouncerRepositoryImpl
 import com.android.systemui.log.table.TableLogBuffer
 import com.android.systemui.util.time.FakeSystemClock
 import com.android.systemui.util.time.SystemClock
@@ -58,7 +59,7 @@ class AlternateBouncerInteractorTest : SysuiTestCase() {
     fun setup() {
         MockitoAnnotations.initMocks(this)
         bouncerRepository =
-            KeyguardBouncerRepository(
+            KeyguardBouncerRepositoryImpl(
                 mock(ViewMediatorCallback::class.java),
                 FakeSystemClock(),
                 TestCoroutineScope(),

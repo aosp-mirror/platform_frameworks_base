@@ -39,6 +39,9 @@ constructor(
     /** Observe on bouncer visibility. */
     val isBouncerVisible: Flow<Boolean> = interactor.isVisible
 
+    /** Can the user interact with the view? */
+    val isInteractable: Flow<Boolean> = interactor.isInteractable
+
     /** Observe whether bouncer is showing. */
     val show: Flow<KeyguardBouncerModel> = interactor.show
 

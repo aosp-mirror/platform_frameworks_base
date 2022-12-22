@@ -52,7 +52,6 @@ import android.view.WindowMetrics
 import androidx.test.filters.SmallTest
 import com.airbnb.lottie.LottieAnimationView
 import com.android.keyguard.KeyguardUpdateMonitor
-import com.android.keyguard.ViewMediatorCallback
 import com.android.systemui.R
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.SysuiTestableContext
@@ -61,9 +60,8 @@ import com.android.systemui.flags.FakeFeatureFlags
 import com.android.systemui.flags.Flags.MODERN_ALTERNATE_BOUNCER
 import com.android.systemui.keyguard.data.repository.FakeBiometricRepository
 import com.android.systemui.keyguard.data.repository.FakeDeviceEntryFingerprintAuthRepository
-import com.android.systemui.keyguard.data.repository.KeyguardBouncerRepository
+import com.android.systemui.keyguard.data.repository.FakeKeyguardBouncerRepository
 import com.android.systemui.keyguard.domain.interactor.AlternateBouncerInteractor
-import com.android.systemui.log.table.TableLogBuffer
 import com.android.systemui.recents.OverviewProxyService
 import com.android.systemui.util.concurrency.FakeExecutor
 import com.android.systemui.util.time.FakeSystemClock
@@ -111,7 +109,7 @@ class SideFpsControllerTest : SysuiTestCase() {
     @Captor lateinit var overlayCaptor: ArgumentCaptor<View>
     @Captor lateinit var overlayViewParamsCaptor: ArgumentCaptor<WindowManager.LayoutParams>
 
-    private lateinit var keyguardBouncerRepository: KeyguardBouncerRepository
+    private lateinit var keyguardBouncerRepository: FakeKeyguardBouncerRepository
     private lateinit var alternateBouncerInteractor: AlternateBouncerInteractor
     private val featureFlags = FakeFeatureFlags()
     private val executor = FakeExecutor(FakeSystemClock())
@@ -135,13 +133,7 @@ class SideFpsControllerTest : SysuiTestCase() {
     @Before
     fun setup() {
         featureFlags.set(MODERN_ALTERNATE_BOUNCER, true)
-        keyguardBouncerRepository =
-            KeyguardBouncerRepository(
-                mock(ViewMediatorCallback::class.java),
-                FakeSystemClock(),
-                TestCoroutineScope(),
-                mock(TableLogBuffer::class.java),
-            )
+        keyguardBouncerRepository = FakeKeyguardBouncerRepository()
         alternateBouncerInteractor =
             AlternateBouncerInteractor(
                 keyguardBouncerRepository,
