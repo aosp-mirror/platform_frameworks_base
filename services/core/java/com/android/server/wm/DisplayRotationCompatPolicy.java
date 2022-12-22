@@ -30,14 +30,12 @@ import static com.android.internal.protolog.ProtoLogGroup.WM_DEBUG_ORIENTATION;
 
 import android.annotation.NonNull;
 import android.annotation.Nullable;
-import android.content.Context;
 import android.content.pm.ActivityInfo.ScreenOrientation;
 import android.hardware.camera2.CameraManager;
 import android.os.Handler;
 import android.util.ArrayMap;
 import android.util.ArraySet;
 
-import com.android.internal.R;
 import com.android.internal.annotations.GuardedBy;
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.protolog.common.ProtoLog;
@@ -77,8 +75,6 @@ final class DisplayRotationCompatPolicy {
     private final WindowManagerService mWmService;
     private final CameraManager mCameraManager;
     private final Handler mHandler;
-    // TODO(b/218352945): Add an ADB command.
-    private final boolean mIsTreatmentEnabled;
 
     // Bi-directional map between package names and active camera IDs since we need to 1) get a
     // camera id by a package name when determining rotation; 2) get a package name by a camera id
@@ -114,15 +110,9 @@ final class DisplayRotationCompatPolicy {
         mHandler = handler;
         mDisplayContent = displayContent;
         mWmService = displayContent.mWmService;
-        mIsTreatmentEnabled = isTreatmentEnabled(mWmService.mContext);
         mCameraManager = mWmService.mContext.getSystemService(CameraManager.class);
         mCameraManager.registerAvailabilityCallback(
                 mWmService.mContext.getMainExecutor(), mAvailabilityCallback);
-    }
-
-    static boolean isTreatmentEnabled(@NonNull Context context) {
-        return context.getResources().getBoolean(
-                R.bool.config_isWindowManagerCameraCompatTreatmentEnabled);
     }
 
     void dispose() {
@@ -190,7 +180,9 @@ final class DisplayRotationCompatPolicy {
      * </ul>
      */
     private boolean isTreatmentEnabledForDisplay() {
-        return mIsTreatmentEnabled && mDisplayContent.getIgnoreOrientationRequest()
+        return mWmService.mLetterboxConfiguration.isCameraCompatTreatmentEnabled(
+                    /* checkDeviceConfig */ true)
+                && mDisplayContent.getIgnoreOrientationRequest()
                 // TODO(b/225928882): Support camera compat rotation for external displays
                 && mDisplayContent.getDisplay().getType() == TYPE_INTERNAL;
     }

@@ -1180,7 +1180,10 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
         updateDisplayAreaOrganizers();
 
         mDisplayRotationCompatPolicy =
-                DisplayRotationCompatPolicy.isTreatmentEnabled(mWmService.mContext)
+                // Not checking DeviceConfig value here to allow enabling via DeviceConfig
+                // without the need to restart the device.
+                mWmService.mLetterboxConfiguration.isCameraCompatTreatmentEnabled(
+                            /* checkDeviceConfig */ false)
                         ? new DisplayRotationCompatPolicy(this) : null;
 
         mInputMonitor = new InputMonitor(mWmService, this);
