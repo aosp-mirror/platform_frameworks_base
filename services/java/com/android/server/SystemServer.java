@@ -425,6 +425,8 @@ public final class SystemServer implements Dumpable {
             "com.android.server.sdksandbox.SdkSandboxManagerService$Lifecycle";
     private static final String AD_SERVICES_MANAGER_SERVICE_CLASS =
             "com.android.server.adservices.AdServicesManagerService$Lifecycle";
+    private static final String UPDATABLE_DEVICE_CONFIG_SERVICE_CLASS =
+            "com.android.server.deviceconfig.DeviceConfigInit$Lifecycle";
 
     private static final String TETHERING_CONNECTOR_CLASS = "android.net.ITetheringConnector";
 
@@ -1512,6 +1514,8 @@ public final class SystemServer implements Dumpable {
 
             t.traceBegin("InstallSystemProviders");
             mActivityManagerService.getContentProviderHelper().installSystemProviders();
+            // Device configuration used to be part of System providers
+            mSystemServiceManager.startService(UPDATABLE_DEVICE_CONFIG_SERVICE_CLASS);
             // Now that SettingsProvider is ready, reactivate SQLiteCompatibilityWalFlags
             SQLiteCompatibilityWalFlags.reset();
             t.traceEnd();

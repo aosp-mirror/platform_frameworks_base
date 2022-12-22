@@ -96,6 +96,7 @@ import android.provider.Settings.Config.SyncDisabledMode;
 import android.provider.Settings.Global;
 import android.provider.Settings.Secure;
 import android.provider.Settings.SetAllResult;
+import android.provider.UpdatableDeviceConfigServiceReadiness;
 import android.provider.settings.validators.SystemSettingsValidators;
 import android.provider.settings.validators.Validator;
 import android.text.TextUtils;
@@ -416,8 +417,14 @@ public class SettingsProvider extends ContentProvider {
             startWatchingUserRestrictionChanges();
         });
         ServiceManager.addService("settings", new SettingsService(this));
-        ServiceManager.addService("device_config", new DeviceConfigService(this));
+        addDeviceConfigServiceIfNeeded();
         return true;
+    }
+
+    private void addDeviceConfigServiceIfNeeded() {
+        if (!UpdatableDeviceConfigServiceReadiness.shouldStartUpdatableService()) {
+            ServiceManager.addService("device_config", new DeviceConfigService(this));
+        }
     }
 
     @Override
