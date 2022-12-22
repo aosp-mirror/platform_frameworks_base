@@ -17911,6 +17911,28 @@ public final class Settings {
             public static final String OEM_SETUP_VERSION = "oem_setup_version";
 
             /**
+             * The key to indicate to Setup Wizard if OEM setup is completed in Wear Services.
+             * @hide
+             */
+            public static final String OEM_SETUP_COMPLETED_STATUS = "oem_setup_completed_status";
+
+             /**
+              * Constant provided to Setup Wizard to inform about failure of OEM setup in Wear
+              * Services. The value should be provided with setting name {@link
+              * #OEM_SETUP_COMPLETED_STATUS}.
+              * @hide
+              */
+            public static final int OEM_SETUP_COMPLETED_FAILURE = 0;
+
+            /**
+             * Constant provided to Setup Wizard to inform about successful completion of OEM setup
+             * in Wear Services. The value should be provided with setting name {@link
+             * #OEM_SETUP_COMPLETED_STATUS}.
+             * @hide
+             */
+            public static final int OEM_SETUP_COMPLETED_SUCCESS = 1;
+
+            /**
              * Controls the gestures feature.
              * @hide
              */

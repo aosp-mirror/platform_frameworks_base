@@ -645,6 +645,7 @@ public class SettingsBackupTest {
                     Settings.Global.Wearable.ENABLE_ALL_LANGUAGES,
                     Settings.Global.Wearable.SETUP_LOCALE,
                     Settings.Global.Wearable.OEM_SETUP_VERSION,
+                    Settings.Global.Wearable.OEM_SETUP_COMPLETED_STATUS,
                     Settings.Global.Wearable.MASTER_GESTURES_ENABLED,
                     Settings.Global.Wearable.UNGAZE_ENABLED,
                     Settings.Global.Wearable.BURN_IN_PROTECTION_ENABLED,
