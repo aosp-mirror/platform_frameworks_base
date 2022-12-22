@@ -17,8 +17,10 @@
 package com.android.wm.shell;
 
 import static android.view.Display.DEFAULT_DISPLAY;
+import static org.junit.Assume.assumeTrue;
 
 import android.content.Context;
+import android.content.pm.PackageManager;
 import android.hardware.display.DisplayManager;
 import android.testing.TestableContext;
 
@@ -36,6 +38,7 @@ import org.mockito.MockitoAnnotations;
 public abstract class ShellTestCase {
 
     protected TestableContext mContext;
+    private PackageManager mPm;
 
     @Before
     public void shellSetup() {
@@ -46,6 +49,7 @@ public abstract class ShellTestCase {
         final Context context =
                 InstrumentationRegistry.getInstrumentation().getTargetContext();
         final DisplayManager dm = context.getSystemService(DisplayManager.class);
+        mPm = context.getPackageManager();
         mContext = new TestableContext(
                 context.createDisplayContext(dm.getDisplay(DEFAULT_DISPLAY)));
 
@@ -65,5 +69,14 @@ public abstract class ShellTestCase {
 
     protected Context getContext() {
         return mContext;
+    }
+
+    /**
+     * Makes an assumption that the test device is a TV device, used to guard tests that should
+     * only be run on TVs.
+     */
+    protected void assumeTelevision() {
+        assumeTrue(mPm.hasSystemFeature(PackageManager.FEATURE_LEANBACK)
+                || mPm.hasSystemFeature(PackageManager.FEATURE_LEANBACK_ONLY));
     }
 }

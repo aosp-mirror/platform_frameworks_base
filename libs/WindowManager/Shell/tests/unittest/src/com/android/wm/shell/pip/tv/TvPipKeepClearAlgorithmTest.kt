@@ -21,6 +21,7 @@ import android.graphics.Rect
 import android.testing.AndroidTestingRunner
 import android.util.Size
 import android.view.Gravity
+import com.android.wm.shell.ShellTestCase
 import com.android.wm.shell.pip.PipBoundsState.STASH_TYPE_BOTTOM
 import com.android.wm.shell.pip.PipBoundsState.STASH_TYPE_NONE
 import com.android.wm.shell.pip.PipBoundsState.STASH_TYPE_RIGHT
@@ -35,7 +36,7 @@ import org.junit.Test
 import org.junit.runner.RunWith
 
 @RunWith(AndroidTestingRunner::class)
-class TvPipKeepClearAlgorithmTest {
+class TvPipKeepClearAlgorithmTest : ShellTestCase() {
     private val DEFAULT_PIP_SIZE = Size(384, 216)
     private val EXPANDED_WIDE_PIP_SIZE = Size(384 * 2, 216)
     private val EXPANDED_TALL_PIP_SIZE = Size(384, 216 * 4)
@@ -74,72 +75,84 @@ class TvPipKeepClearAlgorithmTest {
 
     @Test
     fun testAnchorPosition_BottomRight() {
+        assumeTelevision()
         gravity = Gravity.BOTTOM or Gravity.RIGHT
         testAnchorPosition()
     }
 
     @Test
     fun testAnchorPosition_TopRight() {
+        assumeTelevision()
         gravity = Gravity.TOP or Gravity.RIGHT
         testAnchorPosition()
     }
 
     @Test
     fun testAnchorPosition_TopLeft() {
+        assumeTelevision()
         gravity = Gravity.TOP or Gravity.LEFT
         testAnchorPosition()
     }
 
     @Test
     fun testAnchorPosition_BottomLeft() {
+        assumeTelevision()
         gravity = Gravity.BOTTOM or Gravity.LEFT
         testAnchorPosition()
     }
 
     @Test
     fun testAnchorPosition_Right() {
+        assumeTelevision()
         gravity = Gravity.RIGHT
         testAnchorPosition()
     }
 
     @Test
     fun testAnchorPosition_Left() {
+        assumeTelevision()
         gravity = Gravity.LEFT
         testAnchorPosition()
     }
 
     @Test
     fun testAnchorPosition_Top() {
+        assumeTelevision()
         gravity = Gravity.TOP
         testAnchorPosition()
     }
 
     @Test
     fun testAnchorPosition_Bottom() {
+        assumeTelevision()
         gravity = Gravity.BOTTOM
         testAnchorPosition()
     }
 
     @Test
     fun testAnchorPosition_TopCenterHorizontal() {
+        assumeTelevision()
         gravity = Gravity.TOP or Gravity.CENTER_HORIZONTAL
         testAnchorPosition()
     }
 
     @Test
     fun testAnchorPosition_BottomCenterHorizontal() {
+        assumeTelevision()
         gravity = Gravity.BOTTOM or Gravity.CENTER_HORIZONTAL
         testAnchorPosition()
     }
 
     @Test
     fun testAnchorPosition_RightCenterVertical() {
+        assumeTelevision()
         gravity = Gravity.RIGHT or Gravity.CENTER_VERTICAL
         testAnchorPosition()
     }
 
     @Test
     fun testAnchorPosition_LeftCenterVertical() {
+        assumeTelevision()
         gravity = Gravity.LEFT or Gravity.CENTER_VERTICAL
         testAnchorPosition()
     }
@@ -153,6 +166,7 @@ class TvPipKeepClearAlgorithmTest {
 
     @Test
     fun test_AnchorBottomRight_KeepClearNotObstructing_StayAtAnchor() {
+        assumeTelevision()
         gravity = Gravity.BOTTOM or Gravity.RIGHT
 
         val sidebar = makeSideBar(DASHBOARD_WIDTH, Gravity.LEFT)
@@ -167,6 +181,7 @@ class TvPipKeepClearAlgorithmTest {
 
     @Test
     fun test_AnchorBottomRight_UnrestrictedRightSidebar_PushedLeft() {
+        assumeTelevision()
         gravity = Gravity.BOTTOM or Gravity.RIGHT
 
         val sidebar = makeSideBar(DASHBOARD_WIDTH, Gravity.RIGHT)
@@ -181,6 +196,7 @@ class TvPipKeepClearAlgorithmTest {
 
     @Test
     fun test_AnchorTopRight_UnrestrictedRightSidebar_PushedLeft() {
+        assumeTelevision()
         gravity = Gravity.TOP or Gravity.RIGHT
 
         val sidebar = makeSideBar(DASHBOARD_WIDTH, Gravity.RIGHT)
@@ -195,6 +211,7 @@ class TvPipKeepClearAlgorithmTest {
 
     @Test
     fun test_AnchorBottomLeft_UnrestrictedRightSidebar_StayAtAnchor() {
+        assumeTelevision()
         gravity = Gravity.BOTTOM or Gravity.LEFT
 
         val sidebar = makeSideBar(DASHBOARD_WIDTH, Gravity.RIGHT)
@@ -209,6 +226,7 @@ class TvPipKeepClearAlgorithmTest {
 
     @Test
     fun test_AnchorBottom_UnrestrictedRightSidebar_StayAtAnchor() {
+        assumeTelevision()
         gravity = Gravity.BOTTOM
 
         val sidebar = makeSideBar(DASHBOARD_WIDTH, Gravity.RIGHT)
@@ -223,6 +241,7 @@ class TvPipKeepClearAlgorithmTest {
 
     @Test
     fun testExpanded_AnchorBottom_UnrestrictedRightSidebar_StayAtAnchor() {
+        assumeTelevision()
         pipSize = EXPANDED_WIDE_PIP_SIZE
         gravity = Gravity.BOTTOM
 
@@ -238,6 +257,7 @@ class TvPipKeepClearAlgorithmTest {
 
     @Test
     fun test_AnchorBottomRight_RestrictedSmallBottomBar_PushedUp() {
+        assumeTelevision()
         gravity = Gravity.BOTTOM or Gravity.RIGHT
 
         val bottomBar = makeBottomBar(96)
@@ -253,6 +273,7 @@ class TvPipKeepClearAlgorithmTest {
 
     @Test
     fun test_AnchorBottomRight_RestrictedBottomSheet_StashDownAtAnchor() {
+        assumeTelevision()
         gravity = Gravity.BOTTOM or Gravity.RIGHT
 
         val bottomBar = makeBottomBar(BOTTOM_SHEET_HEIGHT)
@@ -270,6 +291,7 @@ class TvPipKeepClearAlgorithmTest {
 
     @Test
     fun test_AnchorBottomRight_UnrestrictedBottomSheet_PushUp() {
+        assumeTelevision()
         gravity = Gravity.BOTTOM or Gravity.RIGHT
 
         val bottomBar = makeBottomBar(BOTTOM_SHEET_HEIGHT)
@@ -285,6 +307,7 @@ class TvPipKeepClearAlgorithmTest {
 
     @Test
     fun test_AnchorBottomRight_UnrestrictedBottomSheet_RestrictedSidebar_StashAboveBottomSheet() {
+        assumeTelevision()
         gravity = Gravity.BOTTOM or Gravity.RIGHT
 
         val bottomBar = makeBottomBar(BOTTOM_SHEET_HEIGHT)
@@ -310,6 +333,7 @@ class TvPipKeepClearAlgorithmTest {
 
     @Test
     fun test_AnchorBottomRight_UnrestrictedBottomSheet_UnrestrictedSidebar_PushUpLeft() {
+        assumeTelevision()
         gravity = Gravity.BOTTOM or Gravity.RIGHT
 
         val bottomBar = makeBottomBar(BOTTOM_SHEET_HEIGHT)
@@ -332,6 +356,7 @@ class TvPipKeepClearAlgorithmTest {
 
     @Test
     fun test_Stashed_UnstashBoundsBecomeUnobstructed_Unstashes() {
+        assumeTelevision()
         gravity = Gravity.BOTTOM or Gravity.RIGHT
 
         val bottomBar = makeBottomBar(BOTTOM_SHEET_HEIGHT)
@@ -362,6 +387,7 @@ class TvPipKeepClearAlgorithmTest {
 
     @Test
     fun test_Stashed_UnstashBoundsStaysObstructed_DoesNotTriggerStash() {
+        assumeTelevision()
         gravity = Gravity.BOTTOM or Gravity.RIGHT
 
         val bottomBar = makeBottomBar(BOTTOM_SHEET_HEIGHT)
@@ -393,6 +419,7 @@ class TvPipKeepClearAlgorithmTest {
 
     @Test
     fun test_Stashed_UnstashBoundsObstructionChanges_UnstashTimeExtended() {
+        assumeTelevision()
         gravity = Gravity.BOTTOM or Gravity.RIGHT
 
         val bottomBar = makeBottomBar(BOTTOM_SHEET_HEIGHT)
@@ -432,6 +459,7 @@ class TvPipKeepClearAlgorithmTest {
 
     @Test
     fun test_ExpandedPiPHeightExceedsMovementBounds_AtAnchor() {
+        assumeTelevision()
         gravity = Gravity.RIGHT or Gravity.CENTER_VERTICAL
         pipSize = Size(DEFAULT_PIP_SIZE.width, SCREEN_SIZE.height)
         testAnchorPosition()
@@ -439,6 +467,7 @@ class TvPipKeepClearAlgorithmTest {
 
     @Test
     fun test_ExpandedPiPHeightExceedsMovementBounds_BottomBar_StashedUp() {
+        assumeTelevision()
         gravity = Gravity.RIGHT or Gravity.CENTER_VERTICAL
         pipSize = Size(DEFAULT_PIP_SIZE.width, SCREEN_SIZE.height)
         val bottomBar = makeBottomBar(96)
@@ -454,6 +483,7 @@ class TvPipKeepClearAlgorithmTest {
 
     @Test
     fun test_PipInsets() {
+        assumeTelevision()
         val insets = Insets.of(-1, -2, -3, -4)
         algorithm.setPipPermanentDecorInsets(insets)
 
@@ -488,6 +518,7 @@ class TvPipKeepClearAlgorithmTest {
 
     @Test
     fun test_AnchorRightExpandedPiP_UnrestrictedRightSidebar_PushedLeft() {
+        assumeTelevision()
         pipSize = EXPANDED_TALL_PIP_SIZE
         gravity = Gravity.RIGHT
 
@@ -503,6 +534,8 @@ class TvPipKeepClearAlgorithmTest {
 
     @Test
     fun test_AnchorRightExpandedPiP_RestrictedRightSidebar_StashedRight() {
+        assumeTelevision()
+        assumeTelevision()
         pipSize = EXPANDED_TALL_PIP_SIZE
         gravity = Gravity.RIGHT
 
