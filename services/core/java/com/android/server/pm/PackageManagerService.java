@@ -1105,8 +1105,9 @@ public class PackageManagerService implements PackageSender, TestUtilityService 
     @Deprecated
     @NonNull
     public Computer snapshotComputer(boolean allowLiveComputer) {
+        var isHoldingPackageLock = Thread.holdsLock(mLock);
         if (allowLiveComputer) {
-            if (Thread.holdsLock(mLock)) {
+            if (isHoldingPackageLock) {
                 // If the current thread holds mLock then it may have modified state but not
                 // yet invalidated the snapshot.  Always give the thread the live computer.
                 return mLiveComputer;
@@ -1118,6 +1119,15 @@ public class PackageManagerService implements PackageSender, TestUtilityService 
 
         if (oldSnapshot != null && oldSnapshot.getVersion() == pendingVersion) {
             return oldSnapshot.use();
+        }
+
+        if (isHoldingPackageLock) {
+            // If the current thread holds mLock then it already has exclusive write access to the
+            // two snapshot fields, and we can just go ahead and rebuild the snapshot.
+            @SuppressWarnings("GuardedBy")
+            var newSnapshot = rebuildSnapshot(oldSnapshot, pendingVersion);
+            sSnapshot.set(newSnapshot);
+            return newSnapshot.use();
         }
 
         synchronized (mSnapshotLock) {
@@ -1137,7 +1147,11 @@ public class PackageManagerService implements PackageSender, TestUtilityService 
                 // Fetch version one last time to ensure that the rebuilt snapshot matches
                 // the latest invalidation, which could have come in between entering the
                 // SnapshotLock and mLock sync blocks.
+                rebuildSnapshot = sSnapshot.get();
                 rebuildVersion = sSnapshotPendingVersion.get();
+                if (rebuildSnapshot != null && rebuildSnapshot.getVersion() == rebuildVersion) {
+                    return rebuildSnapshot.use();
+                }
 
                 // Build the snapshot for this version
                 var newSnapshot = rebuildSnapshot(rebuildSnapshot, rebuildVersion);
@@ -1147,7 +1161,7 @@ public class PackageManagerService implements PackageSender, TestUtilityService 
         }
     }
 
-    @GuardedBy({ "mLock", "mSnapshotLock"})
+    @GuardedBy("mLock")
     private Computer rebuildSnapshot(@Nullable Computer oldSnapshot, int newVersion) {
         var now = SystemClock.currentTimeMicro();
         var hits = oldSnapshot == null ? -1 : oldSnapshot.getUsed();
