@@ -100,4 +100,22 @@ public interface CallEventCallback {
      * @param callAudioState that is currently being used
      */
     void onCallAudioStateChanged(@NonNull CallAudioState callAudioState);
+
+    /**
+     * Telecom is informing the client to set the call in streaming.
+     *
+     * @param wasCompleted The {@link Consumer} to be completed. If the client can stream the
+     *                     call on their end, {@link Consumer#accept(Object)} should be called with
+     *                     {@link Boolean#TRUE}. Otherwise, {@link Consumer#accept(Object)}
+     *                     should be called with {@link Boolean#FALSE}.
+     */
+    void onCallStreamingStarted(@NonNull Consumer<Boolean> wasCompleted);
+
+    /**
+     * Telecom is informing the client user requested call streaming but the stream can't be
+     * started.
+     *
+     * @param reason Code to indicate the reason of this failure
+     */
+    void onCallStreamingFailed(@CallStreamingService.StreamingFailedReason int reason);
 }

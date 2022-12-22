@@ -35,6 +35,9 @@ oneway interface ICallEventCallback {
     void onReject(String callId, in ResultReceiver callback);
     void onDisconnect(String callId, in ResultReceiver callback);
     void onCallAudioStateChanged(String callId, in CallAudioState callAudioState);
+    // Streaming related. Client registered call streaming capabilities should override
+    void onCallStreamingStarted(String callId, in ResultReceiver callback);
+    void onCallStreamingFailed(String callId, int reason);
     // hidden methods that help with cleanup
     void removeCallFromTransactionalServiceWrapper(String callId);
 }

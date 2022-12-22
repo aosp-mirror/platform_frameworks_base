@@ -41089,6 +41089,7 @@ package android.telecom {
     field public static final int ROUTE_BLUETOOTH = 2; // 0x2
     field public static final int ROUTE_EARPIECE = 1; // 0x1
     field public static final int ROUTE_SPEAKER = 8; // 0x8
+    field public static final int ROUTE_STREAMING = 16; // 0x10
     field public static final int ROUTE_WIRED_HEADSET = 4; // 0x4
     field public static final int ROUTE_WIRED_OR_EARPIECE = 5; // 0x5
   }
@@ -41100,6 +41101,7 @@ package android.telecom {
     method public void rejectCall(@NonNull java.util.concurrent.Executor, @NonNull android.os.OutcomeReceiver<java.lang.Void,android.telecom.CallException>);
     method public void setActive(@NonNull java.util.concurrent.Executor, @NonNull android.os.OutcomeReceiver<java.lang.Void,android.telecom.CallException>);
     method public void setInactive(@NonNull java.util.concurrent.Executor, @NonNull android.os.OutcomeReceiver<java.lang.Void,android.telecom.CallException>);
+    method public void startCallStreaming(@NonNull java.util.concurrent.Executor, @NonNull android.os.OutcomeReceiver<java.lang.Void,android.telecom.CallException>);
   }
 
   public final class CallEndpoint implements android.os.Parcelable {
@@ -41135,6 +41137,8 @@ package android.telecom {
   public interface CallEventCallback {
     method public void onAnswer(int, @NonNull java.util.function.Consumer<java.lang.Boolean>);
     method public void onCallAudioStateChanged(@NonNull android.telecom.CallAudioState);
+    method public void onCallStreamingFailed(int);
+    method public void onCallStreamingStarted(@NonNull java.util.function.Consumer<java.lang.Boolean>);
     method public void onDisconnect(@NonNull java.util.function.Consumer<java.lang.Boolean>);
     method public void onReject(@NonNull java.util.function.Consumer<java.lang.Boolean>);
     method public void onSetActive(@NonNull java.util.function.Consumer<java.lang.Boolean>);
@@ -41198,6 +41202,18 @@ package android.telecom {
     method @NonNull public android.telecom.CallScreeningService.CallResponse.Builder setSilenceCall(boolean);
     method public android.telecom.CallScreeningService.CallResponse.Builder setSkipCallLog(boolean);
     method public android.telecom.CallScreeningService.CallResponse.Builder setSkipNotification(boolean);
+  }
+
+  public abstract class CallStreamingService extends android.app.Service {
+    ctor public CallStreamingService();
+    method @Nullable public android.os.IBinder onBind(@NonNull android.content.Intent);
+    method public void onCallStreamingStarted(@NonNull android.telecom.StreamingCall);
+    method public void onCallStreamingStateChanged(int);
+    method public void onCallStreamingStopped();
+    field public static final String SERVICE_INTERFACE = "android.telecom.CallStreamingService";
+    field public static final int STREAMING_FAILED_ALREADY_STREAMING = 1; // 0x1
+    field public static final int STREAMING_FAILED_NO_SENDER = 2; // 0x2
+    field public static final int STREAMING_FAILED_SENDER_BINDING_ERROR = 3; // 0x3
   }
 
   public abstract class Conference extends android.telecom.Conferenceable {
@@ -41665,6 +41681,7 @@ package android.telecom {
     field public static final int CAPABILITY_RTT = 4096; // 0x1000
     field public static final int CAPABILITY_SELF_MANAGED = 2048; // 0x800
     field public static final int CAPABILITY_SIM_SUBSCRIPTION = 4; // 0x4
+    field public static final int CAPABILITY_SUPPORTS_CALL_STREAMING = 524288; // 0x80000
     field public static final int CAPABILITY_SUPPORTS_TRANSACTIONAL_OPERATIONS = 262144; // 0x40000
     field public static final int CAPABILITY_SUPPORTS_VIDEO_CALLING = 1024; // 0x400
     field public static final int CAPABILITY_SUPPORTS_VOICE_CALLING_INDICATIONS = 65536; // 0x10000
@@ -41852,6 +41869,22 @@ package android.telecom {
     method public CharSequence getLabel();
     method public void writeToParcel(android.os.Parcel, int);
     field @NonNull public static final android.os.Parcelable.Creator<android.telecom.StatusHints> CREATOR;
+  }
+
+  public final class StreamingCall implements android.os.Parcelable {
+    ctor public StreamingCall(@NonNull android.content.ComponentName, @NonNull String, @NonNull android.net.Uri, @NonNull android.os.Bundle);
+    method public int describeContents();
+    method @NonNull public android.net.Uri getAddress();
+    method @NonNull public android.content.ComponentName getComponentName();
+    method @NonNull public String getDisplayName();
+    method @NonNull public android.os.Bundle getExtras();
+    method public int getState();
+    method public void setStreamingState(int);
+    method public void writeToParcel(@NonNull android.os.Parcel, int);
+    field @NonNull public static final android.os.Parcelable.Creator<android.telecom.StreamingCall> CREATOR;
+    field public static final int STATE_DISCONNECTED = 3; // 0x3
+    field public static final int STATE_HOLDING = 2; // 0x2
+    field public static final int STATE_STREAMING = 1; // 0x1
   }
 
   public class TelecomManager {
