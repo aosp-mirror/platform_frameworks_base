@@ -33,12 +33,14 @@ import com.android.systemui.temporarydisplay.ViewPriority
  * @property endItem an optional end item to display at the end of the chipbar (on the right in LTR
  * locales; on the left in RTL locales).
  * @property vibrationEffect an optional vibration effect when the chipbar is displayed
+ * @property allowSwipeToDismiss true if users are allowed to swipe up to dismiss this chipbar.
  */
 data class ChipbarInfo(
     val startIcon: TintedIcon,
     val text: Text,
     val endItem: ChipbarEndItem?,
     val vibrationEffect: VibrationEffect? = null,
+    val allowSwipeToDismiss: Boolean = false,
     override val windowTitle: String,
     override val wakeReason: String,
     override val timeoutMs: Int,

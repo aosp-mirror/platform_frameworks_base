@@ -31,6 +31,7 @@ import android.view.accessibility.AccessibilityManager.FLAG_CONTENT_CONTROLS
 import android.view.accessibility.AccessibilityManager.FLAG_CONTENT_ICONS
 import android.view.accessibility.AccessibilityManager.FLAG_CONTENT_TEXT
 import androidx.annotation.CallSuper
+import androidx.annotation.VisibleForTesting
 import com.android.systemui.CoreStartable
 import com.android.systemui.Dumpable
 import com.android.systemui.dagger.qualifiers.Main
@@ -108,9 +109,10 @@ abstract class TemporaryViewDisplayController<T : TemporaryViewInfo, U : Tempora
      * Whenever the current view disappears, the next-priority view will be displayed if it's still
      * valid.
      */
+    @VisibleForTesting
     internal val activeViews: MutableList<DisplayInfo> = mutableListOf()
 
-    private fun getCurrentDisplayInfo(): DisplayInfo? {
+    internal fun getCurrentDisplayInfo(): DisplayInfo? {
         return activeViews.getOrNull(0)
     }
 

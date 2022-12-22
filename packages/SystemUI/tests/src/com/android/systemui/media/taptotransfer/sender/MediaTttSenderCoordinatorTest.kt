@@ -50,6 +50,7 @@ import com.android.systemui.temporarydisplay.chipbar.ChipbarCoordinator
 import com.android.systemui.temporarydisplay.chipbar.ChipbarInfo
 import com.android.systemui.temporarydisplay.chipbar.ChipbarLogger
 import com.android.systemui.temporarydisplay.chipbar.FakeChipbarCoordinator
+import com.android.systemui.temporarydisplay.chipbar.SwipeChipbarAwayGestureHandler
 import com.android.systemui.util.concurrency.FakeExecutor
 import com.android.systemui.util.mockito.any
 import com.android.systemui.util.mockito.argumentCaptor
@@ -98,6 +99,7 @@ class MediaTttSenderCoordinatorTest : SysuiTestCase() {
     @Mock private lateinit var viewUtil: ViewUtil
     @Mock private lateinit var windowManager: WindowManager
     @Mock private lateinit var vibratorHelper: VibratorHelper
+    @Mock private lateinit var swipeHandler: SwipeChipbarAwayGestureHandler
     private lateinit var fakeWakeLockBuilder: WakeLockFake.Builder
     private lateinit var fakeWakeLock: WakeLockFake
     private lateinit var chipbarCoordinator: ChipbarCoordinator
@@ -148,6 +150,7 @@ class MediaTttSenderCoordinatorTest : SysuiTestCase() {
                 powerManager,
                 falsingManager,
                 falsingCollector,
+                swipeHandler,
                 viewUtil,
                 vibratorHelper,
                 fakeWakeLockBuilder,
