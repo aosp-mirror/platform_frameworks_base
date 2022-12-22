@@ -304,20 +304,23 @@ class CreateFlowUtils {
       isOnPasskeyIntroStateAlready: Boolean,
       isPasskeyFirstUse: Boolean,
     ): CreateCredentialUiState {
-      var createOptionSize = 0
       var lastSeenProviderWithNonEmptyCreateOptions: EnabledProviderInfo? = null
       var remoteEntry: RemoteInfo? = null
       var defaultProvider: EnabledProviderInfo? = null
+      var createOptionsPairs:
+              MutableList<Pair<CreateOptionInfo, EnabledProviderInfo>> = mutableListOf()
       enabledProviders.forEach {
           enabledProvider ->
         if (defaultProviderId != null) {
-          if (enabledProvider.name == defaultProviderId) {
+          if (enabledProvider.id == defaultProviderId) {
             defaultProvider = enabledProvider
           }
         }
         if (enabledProvider.createOptions.isNotEmpty()) {
-          createOptionSize += enabledProvider.createOptions.size
           lastSeenProviderWithNonEmptyCreateOptions = enabledProvider
+          enabledProvider.createOptions.forEach {
+            createOptionsPairs.add(Pair(it, enabledProvider))
+          }
         }
         if (enabledProvider.remoteEntry != null) {
           remoteEntry = enabledProvider.remoteEntry!!
@@ -327,16 +330,17 @@ class CreateFlowUtils {
         enabledProviders = enabledProviders,
         disabledProviders = disabledProviders,
         toCreateScreenState(
-          /*createOptionSize=*/createOptionSize,
+          /*createOptionSize=*/createOptionsPairs.size,
           /*isOnPasskeyIntroStateAlready=*/isOnPasskeyIntroStateAlready,
           /*requestDisplayInfo=*/requestDisplayInfo,
           /*defaultProvider=*/defaultProvider, /*remoteEntry=*/remoteEntry,
           /*isPasskeyFirstUse=*/isPasskeyFirstUse),
         requestDisplayInfo,
+        createOptionsPairs.sortedWith(compareByDescending{ it.first.lastUsedTimeMillis }),
         defaultProvider != null,
         toActiveEntry(
           /*defaultProvider=*/defaultProvider,
-          /*createOptionSize=*/createOptionSize,
+          /*createOptionSize=*/createOptionsPairs.size,
           /*lastSeenProviderWithNonEmptyCreateOptions=*/lastSeenProviderWithNonEmptyCreateOptions,
           /*remoteEntry=*/remoteEntry),
       )
