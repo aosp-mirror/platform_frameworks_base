@@ -30,6 +30,7 @@ import com.android.systemui.keyguard.ui.binder.KeyguardBottomAreaViewBinder
 import com.android.systemui.keyguard.ui.binder.KeyguardBottomAreaViewBinder.bind
 import com.android.systemui.keyguard.ui.viewmodel.KeyguardBottomAreaViewModel
 import com.android.systemui.plugins.FalsingManager
+import com.android.systemui.statusbar.VibratorHelper
 
 /**
  * Renders the bottom area of the lock-screen. Concerned primarily with the quick affordance UI
@@ -65,12 +66,14 @@ constructor(
         falsingManager: FalsingManager? = null,
         lockIconViewController: LockIconViewController? = null,
         messageDisplayer: MessageDisplayer? = null,
+        vibratorHelper: VibratorHelper? = null,
     ) {
         binding =
             bind(
                 this,
                 viewModel,
                 falsingManager,
+                vibratorHelper,
             ) {
                 messageDisplayer?.display(it)
             }
