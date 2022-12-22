@@ -184,8 +184,8 @@ public abstract class ClientTransactionHandler {
     /** Get package info. */
     public abstract LoadedApk getPackageInfoNoCheck(ApplicationInfo ai);
 
-    /** Deliver app configuration change notification. */
-    public abstract void handleConfigurationChanged(Configuration config);
+    /** Deliver app configuration change notification and device association. */
+    public abstract void handleConfigurationChanged(Configuration config, int deviceId);
 
     /**
      * Get {@link android.app.ActivityThread.ActivityClientRecord} instance that corresponds to the

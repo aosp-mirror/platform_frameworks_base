@@ -62,6 +62,7 @@ import android.app.servertransaction.ResumeActivityItem;
 import android.app.servertransaction.TransactionExecutor;
 import android.app.servertransaction.TransactionExecutorHelper;
 import android.bluetooth.BluetoothFrameworkInitializer;
+import android.companion.virtual.VirtualDeviceManager;
 import android.compat.annotation.UnsupportedAppUsage;
 import android.content.AttributionSource;
 import android.content.AutofillOptions;
@@ -361,6 +362,8 @@ public final class ActivityThread extends ClientTransactionHandler
     private int mLastProcessState = PROCESS_STATE_UNKNOWN;
     ArrayList<WeakReference<AssistStructure>> mLastAssistStructures = new ArrayList<>();
     private int mLastSessionId;
+    // Holds the value of the last reported device ID value from the server for the top activity.
+    int mLastReportedDeviceId;
     final ArrayMap<IBinder, CreateServiceData> mServicesData = new ArrayMap<>();
     @UnsupportedAppUsage
     final ArrayMap<IBinder, Service> mServices = new ArrayMap<>();
@@ -546,6 +549,9 @@ public final class ActivityThread extends ClientTransactionHandler
         boolean hideForNow;
         Configuration createdConfig;
         Configuration overrideConfig;
+        // TODO(b/263402465): pass deviceId directly in LaunchActivityItem#execute
+        // The deviceId assigned by the server when this activity was first started.
+        int mDeviceId;
         // Used for consolidating configs before sending on to Activity.
         private Configuration tmpConfig = new Configuration();
         // Callback used for updating activity override config and camera compat control state.
@@ -608,7 +614,7 @@ public final class ActivityThread extends ClientTransactionHandler
         }
 
         public ActivityClientRecord(IBinder token, Intent intent, int ident,
-                ActivityInfo info, Configuration overrideConfig,
+                ActivityInfo info, Configuration overrideConfig, int deviceId,
                 String referrer, IVoiceInteractor voiceInteractor, Bundle state,
                 PersistableBundle persistentState, List<ResultInfo> pendingResults,
                 List<ReferrerIntent> pendingNewIntents, ActivityOptions activityOptions,
@@ -630,6 +636,7 @@ public final class ActivityThread extends ClientTransactionHandler
             this.isForward = isForward;
             this.profilerInfo = profilerInfo;
             this.overrideConfig = overrideConfig;
+            this.mDeviceId = deviceId;
             this.packageInfo = client.getPackageInfoNoCheck(activityInfo.applicationInfo);
             mActivityOptions = activityOptions;
             mLaunchedFromBubble = launchedFromBubble;
@@ -3816,6 +3823,7 @@ public final class ActivityThread extends ClientTransactionHandler
 
         // Make sure we are running with the most recent config.
         mConfigurationController.handleConfigurationChanged(null, null);
+        updateDeviceIdForNonUIContexts(r.mDeviceId);
 
         if (localLOGV) Slog.v(
             TAG, "Handling launch of " + r);
@@ -6066,9 +6074,48 @@ public final class ActivityThread extends ClientTransactionHandler
         }
     }
 
+    private void updateDeviceIdForNonUIContexts(int deviceId) {
+        // Invalid device id is treated as a no-op.
+        if (deviceId == VirtualDeviceManager.DEVICE_ID_INVALID) {
+            return;
+        }
+        if (deviceId == mLastReportedDeviceId) {
+            return;
+        }
+        mLastReportedDeviceId = deviceId;
+        ArrayList<Context> nonUIContexts = new ArrayList<>();
+        // Update Application and Service contexts with implicit device association.
+        // UI Contexts are able to derived their device Id association from the display.
+        synchronized (mResourcesManager) {
+            final int numApps = mAllApplications.size();
+            for (int i = 0; i < numApps; i++) {
+                nonUIContexts.add(mAllApplications.get(i));
+            }
+            final int numServices = mServices.size();
+            for (int i = 0; i < numServices; i++) {
+                final Service service = mServices.valueAt(i);
+                // WindowProviderService is a UI Context.
+                if (!service.isUiContext()) {
+                    nonUIContexts.add(service);
+                }
+            }
+        }
+        for (Context context : nonUIContexts) {
+            try {
+                context.updateDeviceId(deviceId);
+            } catch (IllegalArgumentException e) {
+                // It can happen that the system already closed/removed a virtual device
+                // and the passed deviceId is no longer valid.
+                // TODO(b/263355088): check for validity of deviceId before updating
+                // instead of catching this exception once VDM add an API to validate ids.
+            }
+        }
+    }
+
     @Override
-    public void handleConfigurationChanged(Configuration config) {
+    public void handleConfigurationChanged(Configuration config, int deviceId) {
         mConfigurationController.handleConfigurationChanged(config);
+        updateDeviceIdForNonUIContexts(deviceId);
 
         // These are only done to maintain @UnsupportedAppUsage and should be removed someday.
         mCurDefaultDisplayDpi = mConfigurationController.getCurDefaultDisplayDpi();

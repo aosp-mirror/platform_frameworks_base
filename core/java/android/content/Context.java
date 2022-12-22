@@ -7291,7 +7291,9 @@ public abstract class Context {
      * Updates the device ID association of this Context. Since a Context created with
      * {@link #createDeviceContext} cannot change its device association, this method must
      * not be called for instances created with {@link #createDeviceContext}.
-     *
+     *<p>
+     * Note that updating the deviceId of the Context will not update its associated display.
+     *</p>
      * @param deviceId The new device ID to assign to this Context.
      * @throws UnsupportedOperationException if the method is called on an instance that was
      *         created with {@link Context#createDeviceContext(int)}
