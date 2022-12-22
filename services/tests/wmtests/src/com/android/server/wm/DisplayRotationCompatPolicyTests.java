@@ -39,15 +39,12 @@ import static org.mockito.Mockito.mock;
 import android.content.ComponentName;
 import android.content.pm.ActivityInfo.ScreenOrientation;
 import android.content.res.Configuration.Orientation;
-import android.content.res.Resources;
 import android.hardware.camera2.CameraManager;
 import android.os.Handler;
 import android.platform.test.annotations.Presubmit;
 import android.view.Display;
 
 import androidx.test.filters.SmallTest;
-
-import com.android.internal.R;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -73,7 +70,7 @@ public final class DisplayRotationCompatPolicyTests extends WindowTestsBase {
 
     private CameraManager mMockCameraManager;
     private Handler mMockHandler;
-    private Resources mResources;
+    private LetterboxConfiguration mLetterboxConfiguration;
 
     private DisplayRotationCompatPolicy mDisplayRotationCompatPolicy;
     private CameraManager.AvailabilityCallback mCameraAvailabilityCallback;
@@ -83,9 +80,10 @@ public final class DisplayRotationCompatPolicyTests extends WindowTestsBase {
 
     @Before
     public void setUp() throws Exception {
-        mResources = mContext.getResources();
-        spyOn(mResources);
-        when(mResources.getBoolean(R.bool.config_isWindowManagerCameraCompatTreatmentEnabled))
+        mLetterboxConfiguration = mDisplayContent.mWmService.mLetterboxConfiguration;
+        spyOn(mLetterboxConfiguration);
+        when(mLetterboxConfiguration.isCameraCompatTreatmentEnabled(
+                    /* checkDeviceConfig */ anyBoolean()))
                 .thenReturn(true);
 
         mMockCameraManager = mock(CameraManager.class);
@@ -115,7 +113,22 @@ public final class DisplayRotationCompatPolicyTests extends WindowTestsBase {
 
     @Test
     public void testGetOrientation_treatmentNotEnabled_returnUnspecified() {
-        when(mResources.getBoolean(R.bool.config_isWindowManagerCameraCompatTreatmentEnabled))
+        when(mLetterboxConfiguration.isCameraCompatTreatmentEnabled(
+                    /* checkDeviceConfig */ anyBoolean()))
+                .thenReturn(false);
+
+        mDisplayRotationCompatPolicy = new DisplayRotationCompatPolicy(mDisplayContent);
+        configureActivity(SCREEN_ORIENTATION_PORTRAIT);
+        mCameraAvailabilityCallback.onCameraOpened(CAMERA_ID_1, TEST_PACKAGE_1);
+
+        assertEquals(mDisplayRotationCompatPolicy.getOrientation(),
+                SCREEN_ORIENTATION_UNSPECIFIED);
+    }
+
+    @Test
+    public void testGetOrientation_treatmentDisabledViaDeviceConfig_returnUnspecified() {
+        when(mLetterboxConfiguration.isCameraCompatTreatmentEnabled(
+                    /* checkDeviceConfig */ true))
                 .thenReturn(false);
 
         mDisplayRotationCompatPolicy = new DisplayRotationCompatPolicy(mDisplayContent);
