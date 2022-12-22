@@ -420,7 +420,7 @@ public class BiometricUnlockController extends KeyguardUpdateMonitorCallback imp
         Runnable wakeUp = ()-> {
             if (!wasDeviceInteractive || mUpdateMonitor.isDreaming()) {
                 mLogger.i("bio wakelock: Authenticated, waking up...");
-                mPowerManager.wakeUp(SystemClock.uptimeMillis(), PowerManager.WAKE_REASON_GESTURE,
+                mPowerManager.wakeUp(SystemClock.uptimeMillis(), PowerManager.WAKE_REASON_BIOMETRIC,
                         "android.policy:BIOMETRIC");
             }
             Trace.beginSection("release wake-and-unlock");
