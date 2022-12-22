@@ -1370,8 +1370,8 @@ public final class NotificationPanelViewController implements Dumpable {
                 mFalsingManager,
                 mLockIconViewController,
                 stringResourceId ->
-                        mKeyguardIndicationController.showTransientIndication(stringResourceId)
-        );
+                        mKeyguardIndicationController.showTransientIndication(stringResourceId),
+                mVibratorHelper);
     }
 
     @VisibleForTesting
