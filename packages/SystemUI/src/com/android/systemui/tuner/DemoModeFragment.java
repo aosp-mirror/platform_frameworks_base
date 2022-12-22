@@ -33,6 +33,7 @@ import com.android.systemui.R;
 import com.android.systemui.demomode.DemoMode;
 import com.android.systemui.demomode.DemoModeAvailabilityTracker;
 import com.android.systemui.demomode.DemoModeController;
+import com.android.systemui.util.settings.GlobalSettings;
 
 public class DemoModeFragment extends PreferenceFragment implements OnPreferenceChangeListener {
 
@@ -54,13 +55,15 @@ public class DemoModeFragment extends PreferenceFragment implements OnPreference
     private SwitchPreference mOnSwitch;
 
     private DemoModeController mDemoModeController;
+    private GlobalSettings mGlobalSettings;
     private Tracker mDemoModeTracker;
 
     // We are the only ones who ever call this constructor, so don't worry about the warning
     @SuppressLint("ValidFragment")
-    public DemoModeFragment(DemoModeController demoModeController) {
+    public DemoModeFragment(DemoModeController demoModeController, GlobalSettings globalSettings) {
         super();
         mDemoModeController = demoModeController;
+        mGlobalSettings = globalSettings;
     }
 
 
@@ -80,7 +83,7 @@ public class DemoModeFragment extends PreferenceFragment implements OnPreference
         screen.addPreference(mOnSwitch);
         setPreferenceScreen(screen);
 
-        mDemoModeTracker = new Tracker(context);
+        mDemoModeTracker = new Tracker(context, mGlobalSettings);
         mDemoModeTracker.startTracking();
         updateDemoModeEnabled();
         updateDemoModeOn();
@@ -202,8 +205,8 @@ public class DemoModeFragment extends PreferenceFragment implements OnPreference
     }
 
     private class Tracker extends DemoModeAvailabilityTracker {
-        Tracker(Context context) {
-            super(context);
+        Tracker(Context context, GlobalSettings globalSettings) {
+            super(context, globalSettings);
         }
 
         @Override
