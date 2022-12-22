@@ -16,6 +16,9 @@
 
 package android.graphics;
 
+import android.annotation.IntDef;
+import android.annotation.NonNull;
+
 import libcore.util.NativeAllocationRegistry;
 
 import java.nio.Buffer;
@@ -25,8 +28,8 @@ import java.nio.ShortBuffer;
  * Class representing a mesh object.
  *
  * This class generates Mesh objects via the
- * {@link #make(MeshSpecification, Mode, Buffer, int, Rect)} and
- * {@link #makeIndexed(MeshSpecification, Mode, Buffer, int, ShortBuffer, Rect)} methods,
+ * {@link #make(MeshSpecification, int, Buffer, int, Rect)} and
+ * {@link #makeIndexed(MeshSpecification, int, Buffer, int, ShortBuffer, Rect)} methods,
  * where a {@link MeshSpecification} is required along with various attributes for
  * detailing the mesh object, including a mode, vertex buffer, optional index buffer, and bounds
  * for the mesh. Once generated, a mesh object can be drawn through
@@ -39,9 +42,20 @@ public class Mesh {
     private boolean mIsIndexed;
 
     /**
-     * Enum to determine how the mesh is represented.
+     * Determines how the mesh is represented and will be drawn.
      */
-    public enum Mode {Triangles, TriangleStrip}
+    @IntDef({TRIANGLES, TRIANGLE_STRIP})
+    private @interface Mode {}
+
+    /**
+     * The mesh will be drawn with triangles without utilizing shared vertices.
+     */
+    public static final int TRIANGLES = 0;
+
+    /**
+     * The mesh will be drawn with triangles utilizing shared vertices.
+     */
+    public static final int TRIANGLE_STRIP = 1;
 
     private static class MeshHolder {
         public static final NativeAllocationRegistry MESH_SPECIFICATION_REGISTRY =
@@ -53,7 +67,8 @@ public class Mesh {
      * Generates a {@link Mesh} object.
      *
      * @param meshSpec     {@link MeshSpecification} used when generating the mesh.
-     * @param mode         {@link Mode} enum
+     * @param mode         Determines what mode to draw the mesh in. Must be one of
+     *                     {@link Mesh#TRIANGLES} or {@link Mesh#TRIANGLE_STRIP}
      * @param vertexBuffer vertex buffer representing through {@link Buffer}. This provides the data
      *                     for all attributes provided within the meshSpec for every vertex. That
      *                     is, a vertex buffer should be (attributes size * number of vertices) in
@@ -63,9 +78,13 @@ public class Mesh {
      * @param bounds       bounds of the mesh object.
      * @return a new Mesh object.
      */
-    public static Mesh make(MeshSpecification meshSpec, Mode mode, Buffer vertexBuffer,
-            int vertexCount, Rect bounds) {
-        long nativeMesh = nativeMake(meshSpec.mNativeMeshSpec, mode.ordinal(), vertexBuffer,
+    @NonNull
+    public static Mesh make(@NonNull MeshSpecification meshSpec, @Mode int mode,
+            @NonNull Buffer vertexBuffer, int vertexCount, @NonNull Rect bounds) {
+        if (mode != TRIANGLES && mode != TRIANGLE_STRIP) {
+            throw new IllegalArgumentException("Invalid value passed in for mode parameter");
+        }
+        long nativeMesh = nativeMake(meshSpec.mNativeMeshSpec, mode, vertexBuffer,
                 vertexBuffer.isDirect(), vertexCount, vertexBuffer.position(), bounds.left,
                 bounds.top, bounds.right, bounds.bottom);
         if (nativeMesh == 0) {
@@ -78,7 +97,8 @@ public class Mesh {
      * Generates a {@link Mesh} object.
      *
      * @param meshSpec     {@link MeshSpecification} used when generating the mesh.
-     * @param mode         {@link Mode} enum
+     * @param mode         Determines what mode to draw the mesh in. Must be one of
+     *                     {@link Mesh#TRIANGLES} or {@link Mesh#TRIANGLE_STRIP}
      * @param vertexBuffer vertex buffer representing through {@link Buffer}. This provides the data
      *                     for all attributes provided within the meshSpec for every vertex. That
      *                     is, a vertex buffer should be (attributes size * number of vertices) in
@@ -92,9 +112,14 @@ public class Mesh {
      * @param bounds       bounds of the mesh object.
      * @return a new Mesh object.
      */
-    public static Mesh makeIndexed(MeshSpecification meshSpec, Mode mode, Buffer vertexBuffer,
-            int vertexCount, ShortBuffer indexBuffer, Rect bounds) {
-        long nativeMesh = nativeMakeIndexed(meshSpec.mNativeMeshSpec, mode.ordinal(), vertexBuffer,
+    @NonNull
+    public static Mesh makeIndexed(@NonNull MeshSpecification meshSpec, @Mode int mode,
+            @NonNull Buffer vertexBuffer, int vertexCount, @NonNull ShortBuffer indexBuffer,
+            @NonNull Rect bounds) {
+        if (mode != TRIANGLES && mode != TRIANGLE_STRIP) {
+            throw new IllegalArgumentException("Invalid value passed in for mode parameter");
+        }
+        long nativeMesh = nativeMakeIndexed(meshSpec.mNativeMeshSpec, mode, vertexBuffer,
                 vertexBuffer.isDirect(), vertexCount, vertexBuffer.position(), indexBuffer,
                 indexBuffer.isDirect(), indexBuffer.capacity(), indexBuffer.position(), bounds.left,
                 bounds.top, bounds.right, bounds.bottom);
@@ -114,7 +139,7 @@ public class Mesh {
      * @param color       the provided sRGB color will be converted into the shader program's output
      *                    colorspace and be available as a vec4 uniform in the program.
      */
-    public void setColorUniform(String uniformName, int color) {
+    public void setColorUniform(@NonNull String uniformName, int color) {
         setUniform(uniformName, Color.valueOf(color).getComponents(), true);
     }
 
@@ -128,7 +153,7 @@ public class Mesh {
      * @param color       the provided sRGB color will be converted into the shader program's output
      *                    colorspace and be available as a vec4 uniform in the program.
      */
-    public void setColorUniform(String uniformName, long color) {
+    public void setColorUniform(@NonNull String uniformName, long color) {
         Color exSRGB = Color.valueOf(color).convert(ColorSpace.get(ColorSpace.Named.EXTENDED_SRGB));
         setUniform(uniformName, exSRGB.getComponents(), true);
     }
@@ -143,7 +168,7 @@ public class Mesh {
      * @param color       the provided sRGB color will be converted into the shader program's output
      *                    colorspace and will be made available as a vec4 uniform in the program.
      */
-    public void setColorUniform(String uniformName, Color color) {
+    public void setColorUniform(@NonNull String uniformName, @NonNull Color color) {
         if (color == null) {
             throw new NullPointerException("The color parameter must not be null");
         }
@@ -160,7 +185,7 @@ public class Mesh {
      * @param uniformName name matching the float uniform declared in the shader program.
      * @param value       float value corresponding to the float uniform with the given name.
      */
-    public void setFloatUniform(String uniformName, float value) {
+    public void setFloatUniform(@NonNull String uniformName, float value) {
         setFloatUniform(uniformName, value, 0.0f, 0.0f, 0.0f, 1);
     }
 
@@ -173,7 +198,7 @@ public class Mesh {
      * @param value1      first float value corresponding to the float uniform with the given name.
      * @param value2      second float value corresponding to the float uniform with the given name.
      */
-    public void setFloatUniform(String uniformName, float value1, float value2) {
+    public void setFloatUniform(@NonNull String uniformName, float value1, float value2) {
         setFloatUniform(uniformName, value1, value2, 0.0f, 0.0f, 2);
     }
 
@@ -188,7 +213,8 @@ public class Mesh {
      * @param value3      third float value corresponding to the float unifiform with the given
      *                    name.
      */
-    public void setFloatUniform(String uniformName, float value1, float value2, float value3) {
+    public void setFloatUniform(
+            @NonNull String uniformName, float value1, float value2, float value3) {
         setFloatUniform(uniformName, value1, value2, value3, 0.0f, 3);
     }
 
@@ -204,7 +230,7 @@ public class Mesh {
      * @param value4      fourth float value corresponding to the float uniform with the given name.
      */
     public void setFloatUniform(
-            String uniformName, float value1, float value2, float value3, float value4) {
+            @NonNull String uniformName, float value1, float value2, float value3, float value4) {
         setFloatUniform(uniformName, value1, value2, value3, value4, 4);
     }
 
@@ -217,7 +243,7 @@ public class Mesh {
      * @param uniformName name matching the float uniform declared in the shader program.
      * @param values      float value corresponding to the vec4 float uniform with the given name.
      */
-    public void setFloatUniform(String uniformName, float[] values) {
+    public void setFloatUniform(@NonNull String uniformName, @NonNull float[] values) {
         setUniform(uniformName, values, false);
     }
 
@@ -249,7 +275,7 @@ public class Mesh {
      * @param uniformName name matching the int uniform delcared in the shader program.
      * @param value       value corresponding to the int uniform with the given name.
      */
-    public void setIntUniform(String uniformName, int value) {
+    public void setIntUniform(@NonNull String uniformName, int value) {
         setIntUniform(uniformName, value, 0, 0, 0, 1);
     }
 
@@ -262,7 +288,7 @@ public class Mesh {
      * @param value1      first value corresponding to the int uniform with the given name.
      * @param value2      second value corresponding to the int uniform with the given name.
      */
-    public void setIntUniform(String uniformName, int value1, int value2) {
+    public void setIntUniform(@NonNull String uniformName, int value1, int value2) {
         setIntUniform(uniformName, value1, value2, 0, 0, 2);
     }
 
@@ -276,7 +302,7 @@ public class Mesh {
      * @param value2      second value corresponding to the int uniform with the given name.
      * @param value3      third value corresponding to the int uniform with the given name.
      */
-    public void setIntUniform(String uniformName, int value1, int value2, int value3) {
+    public void setIntUniform(@NonNull String uniformName, int value1, int value2, int value3) {
         setIntUniform(uniformName, value1, value2, value3, 0, 3);
     }
 
@@ -291,7 +317,8 @@ public class Mesh {
      * @param value3      third value corresponding to the int uniform with the given name.
      * @param value4      fourth value corresponding to the int uniform with the given name.
      */
-    public void setIntUniform(String uniformName, int value1, int value2, int value3, int value4) {
+    public void setIntUniform(
+            @NonNull String uniformName, int value1, int value2, int value3, int value4) {
         setIntUniform(uniformName, value1, value2, value3, value4, 4);
     }
 
@@ -304,7 +331,7 @@ public class Mesh {
      * @param uniformName name matching the int uniform delcared in the shader program.
      * @param values      int values corresponding to the vec4 int uniform with the given name.
      */
-    public void setIntUniform(String uniformName, int[] values) {
+    public void setIntUniform(@NonNull String uniformName, @NonNull int[] values) {
         if (uniformName == null) {
             throw new NullPointerException("The uniformName parameter must not be null");
         }

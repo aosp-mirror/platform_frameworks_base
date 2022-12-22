@@ -668,11 +668,20 @@ public abstract class BaseCanvas {
     }
 
     /**
+     * Draws a mesh object to the screen.
+     *
+     * @param mesh {@link Mesh} object that will be drawn to the screen
+     * @param blendMode {@link BlendMode} used to blend mesh primitives with the Paint color/shader
+     * @param paint {@link Paint} used to provide a color/shader/blend mode.
+     *
      * @hide
      */
-    public void drawMesh(Mesh mesh, BlendMode blendMode, Paint paint) {
+    public void drawMesh(@NonNull Mesh mesh, BlendMode blendMode, @NonNull Paint paint) {
         if (!isHardwareAccelerated() && onHwFeatureInSwMode()) {
             throw new RuntimeException("software rendering doesn't support meshes");
+        }
+        if (blendMode == null) {
+            blendMode = BlendMode.MODULATE;
         }
         nDrawMesh(this.mNativeCanvasWrapper, mesh.getNativeWrapperInstance(),
                 blendMode.getXfermode().porterDuffMode, paint.getNativeInstance());

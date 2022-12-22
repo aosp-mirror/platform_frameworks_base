@@ -239,6 +239,7 @@ public:
 
     explicit MeshUniformBuilder(sk_sp<SkMeshSpecification> meshSpec) {
         fMeshSpec = sk_sp(meshSpec);
+        fUniforms = (SkData::MakeZeroInitialized(meshSpec->uniformSize()));
     }
 
     sk_sp<SkData> fUniforms;

@@ -17,15 +17,18 @@
 package android.graphics;
 
 import android.annotation.IntDef;
+import android.annotation.NonNull;
 
 import libcore.util.NativeAllocationRegistry;
+
+import java.util.List;
 
 /**
  * Class responsible for holding specifications for {@link Mesh} creations. This class
  * generates a {@link MeshSpecification} via the Make method, where multiple parameters to set up
  * the mesh are supplied, including attributes, vertex stride, varyings, and
  * vertex/fragment shaders. There are also additional methods to provide an optional
- * {@link ColorSpace} as well as an {@link AlphaType}.
+ * {@link ColorSpace} as well as an alpha type.
  *
  * Note that there are several limitations on various mesh specifications:
  * 1. The max amount of attributes allowed is 8.
@@ -42,12 +45,11 @@ public class MeshSpecification {
     long mNativeMeshSpec;
 
     /**
-     * Constants for {@link #make(Attribute[], int, Varying[], String, String, ColorSpace, int)}
+     * Constants for {@link #make(List, int, List, String, String)}
      * to determine alpha type. Describes how to interpret the alpha component of a pixel.
      */
     @IntDef({UNKNOWN, OPAQUE, PREMUL, UNPREMULT})
-    public @interface AlphaType {
-    }
+    private @interface AlphaType {}
 
     /**
      * uninitialized.
@@ -73,8 +75,7 @@ public class MeshSpecification {
      * Constants for {@link Attribute} and {@link Varying} for determining the data type.
      */
     @IntDef({FLOAT, FLOAT2, FLOAT3, FLOAT4, UBYTE4})
-    public @interface Type {
-    }
+    private @interface Type {}
 
     /**
      * Represents one float. Its equivalent shader type is float.
@@ -118,7 +119,7 @@ public class MeshSpecification {
         private int mOffset;
         private String mName;
 
-        public Attribute(@Type int type, int offset, String name) {
+        public Attribute(@Type int type, int offset, @NonNull String name) {
             mType = type;
             mOffset = offset;
             mName = name;
@@ -134,7 +135,7 @@ public class MeshSpecification {
         private int mType;
         private String mName;
 
-        public Varying(@Type int type, String name) {
+        public Varying(@Type int type, @NonNull String name) {
             mType = type;
             mName = name;
         }
@@ -162,10 +163,13 @@ public class MeshSpecification {
      * @param fragmentShader fragment shader to be supplied to the mesh.
      * @return {@link MeshSpecification} object for use when creating {@link Mesh}
      */
-    public static MeshSpecification make(Attribute[] attributes, int vertexStride,
-            Varying[] varyings, String vertexShader, String fragmentShader) {
-        long nativeMeshSpec =
-                nativeMake(attributes, vertexStride, varyings, vertexShader, fragmentShader);
+    @NonNull
+    public static MeshSpecification make(@NonNull List<Attribute> attributes, int vertexStride,
+            @NonNull List<Varying> varyings, @NonNull String vertexShader,
+            @NonNull String fragmentShader) {
+        long nativeMeshSpec = nativeMake(attributes.toArray(new Attribute[attributes.size()]),
+                vertexStride, varyings.toArray(new Varying[varyings.size()]), vertexShader,
+                fragmentShader);
         if (nativeMeshSpec == 0) {
             throw new IllegalArgumentException("MeshSpecification construction failed");
         }
@@ -189,9 +193,12 @@ public class MeshSpecification {
      * @param colorSpace     {@link ColorSpace} to tell what color space to work in.
      * @return {@link MeshSpecification} object for use when creating {@link Mesh}
      */
-    public static MeshSpecification make(Attribute[] attributes, int vertexStride,
-            Varying[] varyings, String vertexShader, String fragmentShader, ColorSpace colorSpace) {
-        long nativeMeshSpec = nativeMakeWithCS(attributes, vertexStride, varyings, vertexShader,
+    @NonNull
+    public static MeshSpecification make(@NonNull List<Attribute> attributes, int vertexStride,
+            @NonNull List<Varying> varyings, @NonNull String vertexShader,
+            @NonNull String fragmentShader, @NonNull ColorSpace colorSpace) {
+        long nativeMeshSpec = nativeMakeWithCS(attributes.toArray(new Attribute[attributes.size()]),
+                vertexStride, varyings.toArray(new Varying[varyings.size()]), vertexShader,
                 fragmentShader, colorSpace.getNativeInstance());
         if (nativeMeshSpec == 0) {
             throw new IllegalArgumentException("MeshSpecification construction failed");
@@ -215,14 +222,22 @@ public class MeshSpecification {
      * @param fragmentShader fragment shader to be supplied to the mesh.
      * @param colorSpace     {@link ColorSpace} to tell what color space to work in.
      * @param alphaType      Describes how to interpret the alpha component for a pixel. Must be
-     *                       one of {@link AlphaType} values.
+     *                       one of
+     *                       {@link MeshSpecification#UNKNOWN},
+     *                       {@link MeshSpecification#OPAQUE},
+     *                       {@link MeshSpecification#PREMUL}, or
+     *                       {@link MeshSpecification#UNPREMULT}
      * @return {@link MeshSpecification} object for use when creating {@link Mesh}
      */
-    public static MeshSpecification make(Attribute[] attributes, int vertexStride,
-            Varying[] varyings, String vertexShader, String fragmentShader, ColorSpace colorSpace,
+    @NonNull
+    public static MeshSpecification make(@NonNull List<Attribute> attributes, int vertexStride,
+            @NonNull List<Varying> varyings, @NonNull String vertexShader,
+            @NonNull String fragmentShader, @NonNull ColorSpace colorSpace,
             @AlphaType int alphaType) {
-        long nativeMeshSpec = nativeMakeWithAlpha(attributes, vertexStride, varyings, vertexShader,
-                fragmentShader, colorSpace.getNativeInstance(), alphaType);
+        long nativeMeshSpec =
+                nativeMakeWithAlpha(attributes.toArray(new Attribute[attributes.size()]),
+                        vertexStride, varyings.toArray(new Varying[varyings.size()]), vertexShader,
+                        fragmentShader, colorSpace.getNativeInstance(), alphaType);
         if (nativeMeshSpec == 0) {
             throw new IllegalArgumentException("MeshSpecification construction failed");
         }
