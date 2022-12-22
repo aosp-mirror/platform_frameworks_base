@@ -35,6 +35,7 @@ import android.util.Log;
 import android.util.proto.ProtoOutputStream;
 import android.view.SurfaceControl.Transaction;
 import android.view.WindowInsets.Type.InsetsType;
+import android.view.inputmethod.ImeTracker;
 
 import com.android.internal.annotations.VisibleForTesting;
 
@@ -50,10 +51,14 @@ import java.util.function.Supplier;
 public class InsetsSourceConsumer {
 
     @Retention(RetentionPolicy.SOURCE)
-    @IntDef(value = {ShowResult.SHOW_IMMEDIATELY, ShowResult.IME_SHOW_DELAYED, ShowResult.IME_SHOW_FAILED})
+    @IntDef(value = {
+            ShowResult.SHOW_IMMEDIATELY,
+            ShowResult.IME_SHOW_DELAYED,
+            ShowResult.IME_SHOW_FAILED
+    })
     @interface ShowResult {
         /**
-         * Window type is ready to be shown, will be shown immidiately.
+         * Window type is ready to be shown, will be shown immediately.
          */
         int SHOW_IMMEDIATELY = 0;
         /**
@@ -71,11 +76,13 @@ public class InsetsSourceConsumer {
     protected final InsetsController mController;
     protected final InsetsState mState;
     private int mId;
-    private final @InsetsType int mType;
+    @InsetsType
+    private final int mType;
 
     private static final String TAG = "InsetsSourceConsumer";
     private final Supplier<Transaction> mTransactionSupplier;
-    private @Nullable InsetsSourceControl mSourceControl;
+    @Nullable
+    private InsetsSourceControl mSourceControl;
     private boolean mHasWindowFocus;
 
     /**
@@ -180,7 +187,7 @@ public class InsetsSourceConsumer {
         return true;
     }
 
-    @VisibleForTesting
+    @VisibleForTesting(visibility = PACKAGE)
     public InsetsSourceControl getControl() {
         return mSourceControl;
     }
@@ -280,10 +287,16 @@ public class InsetsSourceConsumer {
      * @param fromController {@code true} if request is coming from controller.
      *                       (e.g. in IME case, controller is
      *                       {@link android.inputmethodservice.InputMethodService}).
+     * @param statsToken the token tracking the current IME show request or {@code null} otherwise.
+     *
+     * @implNote The {@code statsToken} is ignored here, and only handled in
+     * {@link ImeInsetsSourceConsumer} for IME animations only.
+     *
      * @return @see {@link ShowResult}.
      */
-    @VisibleForTesting
-    public @ShowResult int requestShow(boolean fromController) {
+    @VisibleForTesting(visibility = PACKAGE)
+    @ShowResult
+    public int requestShow(boolean fromController, @Nullable ImeTracker.Token statsToken) {
         return ShowResult.SHOW_IMMEDIATELY;
     }
 
