@@ -20,8 +20,6 @@ import android.content.res.ColorStateList
 import android.hardware.biometrics.BiometricSourceType
 import android.os.Handler
 import android.os.Trace
-import android.os.UserHandle
-import android.os.UserManager
 import android.view.View
 import com.android.keyguard.KeyguardSecurityModel
 import com.android.keyguard.KeyguardUpdateMonitor
@@ -131,12 +129,6 @@ constructor(
 
         if (!resumeBouncer && repository.primaryBouncerShow.value != null) {
             // If bouncer is visible, the bouncer is already showing.
-            return
-        }
-
-        val keyguardUserId = KeyguardUpdateMonitor.getCurrentUser()
-        if (keyguardUserId == UserHandle.USER_SYSTEM && UserManager.isSplitSystemUser()) {
-            // In split system user mode, we never unlock system user.
             return
         }
 

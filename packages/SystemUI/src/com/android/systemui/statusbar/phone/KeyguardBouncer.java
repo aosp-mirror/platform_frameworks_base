@@ -24,8 +24,6 @@ import android.content.res.ColorStateList;
 import android.hardware.biometrics.BiometricSourceType;
 import android.os.Handler;
 import android.os.Trace;
-import android.os.UserHandle;
-import android.os.UserManager;
 import android.util.Log;
 import android.view.KeyEvent;
 import android.view.View;
@@ -181,11 +179,6 @@ public class KeyguardBouncer {
      */
     public void show(boolean resetSecuritySelection, boolean isScrimmed) {
         final int keyguardUserId = KeyguardUpdateMonitor.getCurrentUser();
-        if (keyguardUserId == UserHandle.USER_SYSTEM && UserManager.isSplitSystemUser()) {
-            // In split system user mode, we never unlock system user.
-            return;
-        }
-
         try {
             Trace.beginSection("KeyguardBouncer#show");
 
@@ -216,9 +209,7 @@ public class KeyguardBouncer {
             }
 
             final int activeUserId = KeyguardUpdateMonitor.getCurrentUser();
-            final boolean isSystemUser =
-                UserManager.isSplitSystemUser() && activeUserId == UserHandle.USER_SYSTEM;
-            final boolean allowDismissKeyguard = !isSystemUser && activeUserId == keyguardUserId;
+            final boolean allowDismissKeyguard = activeUserId == keyguardUserId;
 
             // If allowed, try to dismiss the Keyguard. If no security auth (password/pin/pattern)
             // is set, this will dismiss the whole Keyguard. Otherwise, show the bouncer.

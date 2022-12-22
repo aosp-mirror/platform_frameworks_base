@@ -65,7 +65,6 @@ import android.util.Log;
 import android.view.WindowManager.LayoutParams;
 
 import com.android.internal.R;
-import com.android.internal.os.RoSystemProperties;
 import com.android.internal.util.FrameworkStatsLog;
 
 import java.io.IOException;
@@ -2065,17 +2064,6 @@ public class UserManager {
         return getMaxSupportedUsers() > 1
                 && SystemProperties.getBoolean("fw.show_multiuserui",
                 Resources.getSystem().getBoolean(R.bool.config_enableMultiUserUI));
-    }
-
-    /**
-     * @hide
-     * @return Whether the device is running with split system user. It means the system user and
-     * primary user are two separate users. Previously system user and primary user are combined as
-     * a single owner user.  see @link {android.os.UserHandle#USER_OWNER}
-     */
-    @TestApi
-    public static boolean isSplitSystemUser() {
-        return RoSystemProperties.FW_SYSTEM_USER_SPLIT;
     }
 
     /**

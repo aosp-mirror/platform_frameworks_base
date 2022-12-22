@@ -3677,14 +3677,12 @@ public class UserManagerService extends IUserManager.Stub {
         }
 
         if (userVersion < 6) {
-            final boolean splitSystemUser = UserManager.isSplitSystemUser();
             synchronized (mUsersLock) {
                 for (int i = 0; i < mUsers.size(); i++) {
                     UserData userData = mUsers.valueAt(i);
-                    // In non-split mode, only user 0 can have restricted profiles
-                    if (!splitSystemUser && userData.info.isRestricted()
-                            && (userData.info.restrictedProfileParentId
-                                    == UserInfo.NO_PROFILE_GROUP_ID)) {
+                    // Only system user can have restricted profiles
+                    if (userData.info.isRestricted() && (userData.info.restrictedProfileParentId
+                            == UserInfo.NO_PROFILE_GROUP_ID)) {
                         userData.info.restrictedProfileParentId = UserHandle.USER_SYSTEM;
                         userIdsToWrite.add(userData.info.id);
                     }
@@ -6435,7 +6433,6 @@ public class UserManagerService extends IUserManager.Stub {
         pw.println("  All guests ephemeral: " + Resources.getSystem().getBoolean(
                 com.android.internal.R.bool.config_guestUserEphemeral));
         pw.println("  Force ephemeral users: " + mForceEphemeralUsers);
-        pw.println("  Is split-system user: " + UserManager.isSplitSystemUser());
         final boolean isHeadlessSystemUserMode = isHeadlessSystemUserMode();
         pw.println("  Is headless-system mode: " + isHeadlessSystemUserMode);
         if (isHeadlessSystemUserMode != RoSystemProperties.MULTIUSER_HEADLESS_SYSTEM_USER) {

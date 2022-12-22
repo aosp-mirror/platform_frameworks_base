@@ -389,24 +389,6 @@ public class UserInfo implements Parcelable {
     }
 
     /**
-     * Returns true if the user is a split system user.
-     * <p>If {@link UserManager#isSplitSystemUser split system user mode} is not enabled,
-     * the method always returns false.
-     */
-    public boolean isSystemOnly() {
-        return isSystemOnly(id);
-    }
-
-    /**
-     * Returns true if the given user is a split system user.
-     * <p>If {@link UserManager#isSplitSystemUser split system user mode} is not enabled,
-     * the method always returns false.
-     */
-    public static boolean isSystemOnly(int userId) {
-        return userId == UserHandle.USER_SYSTEM && UserManager.isSplitSystemUser();
-    }
-
-    /**
      * @return true if this user can be switched to.
      **/
     public boolean supportsSwitchTo() {
@@ -437,7 +419,7 @@ public class UserInfo implements Parcelable {
         if (isProfile() || isGuest() || isRestricted()) {
             return false;
         }
-        if (UserManager.isSplitSystemUser() || UserManager.isHeadlessSystemUserMode()) {
+        if (UserManager.isHeadlessSystemUserMode()) {
             return id != UserHandle.USER_SYSTEM;
         } else {
             return id == UserHandle.USER_SYSTEM;

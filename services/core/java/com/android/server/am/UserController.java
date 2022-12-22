@@ -555,12 +555,6 @@ class UserController implements Handler.Callback {
                 // This user is already stopping, doesn't count.
                 continue;
             }
-            if (userId == UserHandle.USER_SYSTEM) {
-                // We only count system user as running when it is not a pure system user.
-                if (UserInfo.isSystemOnly(userId)) {
-                    continue;
-                }
-            }
             runningUsers.add(userId);
         }
         return runningUsers;

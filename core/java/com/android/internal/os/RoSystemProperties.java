@@ -48,9 +48,6 @@ public class RoSystemProperties {
     public static final boolean CONFIG_SMALL_BATTERY =
             SystemProperties.getBoolean("ro.config.small_battery", false);
 
-    // ------ ro.fw.* ------------ //
-    public static final boolean FW_SYSTEM_USER_SPLIT =
-            SystemProperties.getBoolean("ro.fw.system_user_split", false);
     /**
      * Indicates whether the device should run in headless system user mode,
      *   in which user 0 only runs the system, not a real user.

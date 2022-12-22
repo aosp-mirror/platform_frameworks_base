@@ -128,8 +128,7 @@ public class UninstallAlertFragment extends GuidedStepFragment {
     }
 
     /**
-     * Returns whether there is only one user on this device, not including
-     * the system-only user.
+     * Returns whether there is only one user on this device.
      */
     private boolean isSingleUser(UserManager userManager) {
         final int userCount = userManager.getUserCount();

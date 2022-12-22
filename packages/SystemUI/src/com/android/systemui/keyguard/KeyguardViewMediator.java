@@ -144,11 +144,11 @@ import com.android.systemui.statusbar.policy.KeyguardStateController;
 import com.android.systemui.statusbar.policy.UserSwitcherController;
 import com.android.systemui.util.DeviceConfigProxy;
 
+import dagger.Lazy;
+
 import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.concurrent.Executor;
-
-import dagger.Lazy;
 
 /**
  * Mediates requests related to the keyguard.  This includes queries about the
@@ -577,12 +577,6 @@ public class KeyguardViewMediator implements CoreStartable, Dumpable,
         @Override
         public void onDeviceProvisioned() {
             sendUserPresentBroadcast();
-            synchronized (KeyguardViewMediator.this) {
-                // If system user is provisioned, we might want to lock now to avoid showing launcher
-                if (mustNotUnlockCurrentUser()) {
-                    doKeyguardLocked(null);
-                }
-            }
         }
 
         @Override
@@ -1238,11 +1232,6 @@ public class KeyguardViewMediator implements CoreStartable, Dumpable,
 
     public void userActivity() {
         mPM.userActivity(SystemClock.uptimeMillis(), false);
-    }
-
-    boolean mustNotUnlockCurrentUser() {
-        return UserManager.isSplitSystemUser()
-                && KeyguardUpdateMonitor.getCurrentUser() == UserHandle.USER_SYSTEM;
     }
 
     private void setupLocked() {
@@ -1911,31 +1900,28 @@ public class KeyguardViewMediator implements CoreStartable, Dumpable,
             return;
         }
 
-        // In split system user mode, we never unlock system user.
-        if (!mustNotUnlockCurrentUser()
-                || !mUpdateMonitor.isDeviceProvisioned()) {
+        // if the setup wizard hasn't run yet, don't show
+        final boolean requireSim = !SystemProperties.getBoolean("keyguard.no_require_sim", false);
+        final boolean absent = SubscriptionManager.isValidSubscriptionId(
+                mUpdateMonitor.getNextSubIdForState(TelephonyManager.SIM_STATE_ABSENT));
+        final boolean disabled = SubscriptionManager.isValidSubscriptionId(
+                mUpdateMonitor.getNextSubIdForState(TelephonyManager.SIM_STATE_PERM_DISABLED));
+        final boolean lockedOrMissing = mUpdateMonitor.isSimPinSecure()
+                || ((absent || disabled) && requireSim);
 
-            // if the setup wizard hasn't run yet, don't show
-            final boolean requireSim = !SystemProperties.getBoolean("keyguard.no_require_sim", false);
-            final boolean absent = SubscriptionManager.isValidSubscriptionId(
-                    mUpdateMonitor.getNextSubIdForState(TelephonyManager.SIM_STATE_ABSENT));
-            final boolean disabled = SubscriptionManager.isValidSubscriptionId(
-                    mUpdateMonitor.getNextSubIdForState(TelephonyManager.SIM_STATE_PERM_DISABLED));
-            final boolean lockedOrMissing = mUpdateMonitor.isSimPinSecure()
-                    || ((absent || disabled) && requireSim);
-
-            if (!lockedOrMissing && shouldWaitForProvisioning()) {
-                if (DEBUG) Log.d(TAG, "doKeyguard: not showing because device isn't provisioned"
-                        + " and the sim is not locked or missing");
-                return;
+        if (!lockedOrMissing && shouldWaitForProvisioning()) {
+            if (DEBUG) {
+                Log.d(TAG, "doKeyguard: not showing because device isn't provisioned and the sim is"
+                        + " not locked or missing");
             }
+            return;
+        }
 
-            boolean forceShow = options != null && options.getBoolean(OPTION_FORCE_SHOW, false);
-            if (mLockPatternUtils.isLockScreenDisabled(KeyguardUpdateMonitor.getCurrentUser())
-                    && !lockedOrMissing && !forceShow) {
-                if (DEBUG) Log.d(TAG, "doKeyguard: not showing because lockscreen is off");
-                return;
-            }
+        boolean forceShow = options != null && options.getBoolean(OPTION_FORCE_SHOW, false);
+        if (mLockPatternUtils.isLockScreenDisabled(KeyguardUpdateMonitor.getCurrentUser())
+                && !lockedOrMissing && !forceShow) {
+            if (DEBUG) Log.d(TAG, "doKeyguard: not showing because lockscreen is off");
+            return;
         }
 
         if (DEBUG) Log.d(TAG, "doKeyguard: showing the lock screen");
@@ -2500,15 +2486,6 @@ public class KeyguardViewMediator implements CoreStartable, Dumpable,
         synchronized (KeyguardViewMediator.this) {
             if (DEBUG) Log.d(TAG, "handleHide");
 
-            if (mustNotUnlockCurrentUser()) {
-                // In split system user mode, we never unlock system user. The end user has to
-                // switch to another user.
-                // TODO: We should stop it early by disabling the swipe up flow. Right now swipe up
-                // still completes and makes the screen blank.
-                if (DEBUG) Log.d(TAG, "Split system user, quit unlocking.");
-                mKeyguardExitAnimationRunner = null;
-                return;
-            }
             mHiding = true;
 
             if (mShowing && !mOccluded) {
