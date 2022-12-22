@@ -493,9 +493,7 @@ public class TelephonyRegistry extends ITelephonyRegistry.Stub {
 
     private boolean isLocationPermissionRequired(Set<Integer> events) {
         return events.contains(TelephonyCallback.EVENT_CELL_LOCATION_CHANGED)
-                || events.contains(TelephonyCallback.EVENT_CELL_INFO_CHANGED)
-                || events.contains(TelephonyCallback.EVENT_REGISTRATION_FAILURE)
-                || events.contains(TelephonyCallback.EVENT_BARRING_INFO_CHANGED);
+                || events.contains(TelephonyCallback.EVENT_CELL_INFO_CHANGED);
     }
 
     private boolean isPhoneStatePermissionRequired(Set<Integer> events, String callingPackage,
@@ -1359,15 +1357,19 @@ public class TelephonyRegistry extends ITelephonyRegistry.Stub {
                 }
                 if (events.contains(TelephonyCallback.EVENT_BARRING_INFO_CHANGED)) {
                     BarringInfo barringInfo = mBarringInfo.get(r.phoneId);
-                    BarringInfo biNoLocation = barringInfo != null
-                            ? barringInfo.createLocationInfoSanitizedCopy() : null;
-                    if (VDBG) log("listen: call onBarringInfoChanged=" + barringInfo);
-                    try {
-                        r.callback.onBarringInfoChanged(
-                                checkFineLocationAccess(r, Build.VERSION_CODES.BASE)
-                                        ? barringInfo : biNoLocation);
-                    } catch (RemoteException ex) {
-                        remove(r.binder);
+                    if (VDBG) {
+                        log("listen: call onBarringInfoChanged=" + barringInfo);
+                    }
+                    if (barringInfo != null) {
+                        BarringInfo biNoLocation = barringInfo.createLocationInfoSanitizedCopy();
+
+                        try {
+                            r.callback.onBarringInfoChanged(
+                                    checkFineLocationAccess(r, Build.VERSION_CODES.BASE)
+                                            ? barringInfo : biNoLocation);
+                        } catch (RemoteException ex) {
+                            remove(r.binder);
+                        }
                     }
                 }
                 if (events.contains(
@@ -3618,29 +3620,21 @@ public class TelephonyRegistry extends ITelephonyRegistry.Stub {
 
     private boolean checkListenerPermission(Set<Integer> events, int subId, String callingPackage,
             @Nullable String callingFeatureId, String message) {
-        LocationAccessPolicy.LocationPermissionQuery.Builder locationQueryBuilder =
-                new LocationAccessPolicy.LocationPermissionQuery.Builder()
-                        .setCallingPackage(callingPackage)
-                        .setCallingFeatureId(callingFeatureId)
-                        .setMethod(message + " events: " + events)
-                        .setCallingPid(Binder.getCallingPid())
-                        .setCallingUid(Binder.getCallingUid());
-
-        boolean shouldCheckLocationPermissions = false;
-
+        boolean isPermissionCheckSuccessful = true;
         if (isLocationPermissionRequired(events)) {
+            LocationAccessPolicy.LocationPermissionQuery.Builder locationQueryBuilder =
+                    new LocationAccessPolicy.LocationPermissionQuery.Builder()
+                            .setCallingPackage(callingPackage)
+                            .setCallingFeatureId(callingFeatureId)
+                            .setMethod(message + " events: " + events)
+                            .setCallingPid(Binder.getCallingPid())
+                            .setCallingUid(Binder.getCallingUid());
             // Everything that requires fine location started in Q. So far...
             locationQueryBuilder.setMinSdkVersionForFine(Build.VERSION_CODES.Q);
             // If we're enforcing fine starting in Q, we also want to enforce coarse even for
             // older SDK versions.
             locationQueryBuilder.setMinSdkVersionForCoarse(0);
             locationQueryBuilder.setMinSdkVersionForEnforcement(0);
-            shouldCheckLocationPermissions = true;
-        }
-
-        boolean isPermissionCheckSuccessful = true;
-
-        if (shouldCheckLocationPermissions) {
             LocationAccessPolicy.LocationPermissionResult result =
                     LocationAccessPolicy.checkLocationPermission(
                             mContext, locationQueryBuilder.build());
