@@ -24,10 +24,11 @@ import static android.app.backup.BackupManagerMonitor.LOG_EVENT_ID_AGENT_LOGGING
 import static com.android.server.backup.BackupManagerService.DEBUG;
 import static com.android.server.backup.BackupManagerService.TAG;
 
+import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.app.IBackupAgent;
 import android.app.backup.BackupManagerMonitor;
-import android.app.backup.BackupRestoreEventLogger;
+import android.app.backup.BackupRestoreEventLogger.DataTypeResult;
 import android.app.backup.IBackupManagerMonitor;
 import android.content.pm.PackageInfo;
 import android.os.Bundle;
@@ -119,25 +120,30 @@ public class BackupManagerMonitorUtils {
         }
 
         try {
-            AndroidFuture<List<BackupRestoreEventLogger.DataTypeResult>> resultsFuture =
+            AndroidFuture<List<DataTypeResult>> resultsFuture =
                     new AndroidFuture<>();
             agent.getLoggerResults(resultsFuture);
-            Bundle loggerResultsBundle = new Bundle();
-            loggerResultsBundle.putParcelableList(
-                    EXTRA_LOG_AGENT_LOGGING_RESULTS,
+            return sendAgentLoggingResults(monitor, pkg,
                     resultsFuture.get(AGENT_LOGGER_RESULTS_TIMEOUT_MILLIS, TimeUnit.MILLISECONDS));
-            return BackupManagerMonitorUtils.monitorEvent(
-                    monitor,
-                    LOG_EVENT_ID_AGENT_LOGGING_RESULTS,
-                    pkg,
-                    LOG_EVENT_CATEGORY_AGENT,
-                    loggerResultsBundle);
         } catch (TimeoutException e) {
             Slog.w(TAG, "Timeout while waiting to retrieve logging results from agent", e);
         } catch (Exception e) {
             Slog.w(TAG, "Failed to retrieve logging results from agent", e);
         }
         return monitor;
+    }
+
+    public static IBackupManagerMonitor sendAgentLoggingResults(
+            @NonNull IBackupManagerMonitor monitor, PackageInfo pkg, List<DataTypeResult> results) {
+        Bundle loggerResultsBundle = new Bundle();
+        loggerResultsBundle.putParcelableList(
+                EXTRA_LOG_AGENT_LOGGING_RESULTS, results);
+        return monitorEvent(
+                monitor,
+                LOG_EVENT_ID_AGENT_LOGGING_RESULTS,
+                pkg,
+                LOG_EVENT_CATEGORY_AGENT,
+                loggerResultsBundle);
     }
 
     /**
