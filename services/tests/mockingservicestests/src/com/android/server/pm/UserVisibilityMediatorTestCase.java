@@ -79,6 +79,11 @@ abstract class UserVisibilityMediatorTestCase extends ExtendedMockitoTestCase {
     protected static final int OTHER_USER_ID = 666;
 
     /**
+     * Id for yeat another simple user.
+     */
+    protected static final int YET_ANOTHER_USER_ID = 700;
+
+    /**
      * Id for a user that has one profile (whose id is {@link #PROFILE_USER_ID}.
      *
      * <p>You can use {@link #addDefaultProfileAndParent()} to add both of this user to the service.
@@ -110,11 +115,14 @@ abstract class UserVisibilityMediatorTestCase extends ExtendedMockitoTestCase {
     protected AsyncUserVisibilityListener.Factory mListenerFactory;
 
     private final boolean mBackgroundUsersOnDisplaysEnabled;
+    private final boolean mBackgroundUserOnDefaultDisplayAllowed;
 
     protected UserVisibilityMediator mMediator;
 
-    protected UserVisibilityMediatorTestCase(boolean backgroundUsersOnDisplaysEnabled) {
+    protected UserVisibilityMediatorTestCase(boolean backgroundUsersOnDisplaysEnabled,
+            boolean backgroundUserOnDefaultDisplayAllowed) {
         mBackgroundUsersOnDisplaysEnabled = backgroundUsersOnDisplaysEnabled;
+        mBackgroundUserOnDefaultDisplayAllowed = backgroundUserOnDefaultDisplayAllowed;
     }
 
     @Before
@@ -123,7 +131,8 @@ abstract class UserVisibilityMediatorTestCase extends ExtendedMockitoTestCase {
         Thread thread = mHandler.getLooper().getThread();
         Log.i(TAG, "setFixtures(): using thread " + thread + " (from handler " + mHandler + ")");
         mListenerFactory = new AsyncUserVisibilityListener.Factory(mExpect, thread);
-        mMediator = new UserVisibilityMediator(mBackgroundUsersOnDisplaysEnabled, mHandler);
+        mMediator = new UserVisibilityMediator(mBackgroundUsersOnDisplaysEnabled,
+                mBackgroundUserOnDefaultDisplayAllowed, mHandler);
         mDumpableDumperRule.addDumpable(mMediator);
     }
 
@@ -170,14 +179,8 @@ abstract class UserVisibilityMediatorTestCase extends ExtendedMockitoTestCase {
         listener.verify();
     }
 
-    @Test
-    public final void testStartVisibleBgUser_onDefaultDisplay() throws Exception {
-        visibleBgUserCannotBeStartedOnDefaultDisplayTest();
-
-        assertInvisibleUserCannotBeAssignedExtraDisplay(USER_ID, SECONDARY_DISPLAY_ID);
-    }
-
-    protected final void visibleBgUserCannotBeStartedOnDefaultDisplayTest() throws Exception {
+    protected final @UserIdInt int visibleBgUserCannotBeStartedOnDefaultDisplayTest()
+            throws Exception {
         AsyncUserVisibilityListener listener = addListenerForNoEvents();
 
         int result = mMediator.assignUserToDisplayOnStart(USER_ID, USER_ID, BG_VISIBLE,
@@ -188,6 +191,8 @@ abstract class UserVisibilityMediatorTestCase extends ExtendedMockitoTestCase {
         expectNoDisplayAssignedToUser(USER_ID);
 
         listener.verify();
+
+        return USER_ID;
     }
 
     @Test
@@ -504,7 +509,14 @@ abstract class UserVisibilityMediatorTestCase extends ExtendedMockitoTestCase {
     }
 
     protected void assertStartUserResult(int actualResult, int expectedResult) {
-        assertWithMessage("startUser() result (where %s=%s and %s=%s)",
+        assertStartUserResult(actualResult, expectedResult, "");
+    }
+
+    @SuppressWarnings("AnnotateFormatMethod")
+    protected void assertStartUserResult(int actualResult, int expectedResult,
+            String extraMessageFormat, Object... extraMessageArguments) {
+        String extraMessage = String.format(extraMessageFormat, extraMessageArguments);
+        assertWithMessage("startUser() result %s(where %s=%s and %s=%s)", extraMessage,
                 expectedResult, userAssignmentResultToString(expectedResult),
                 actualResult, userAssignmentResultToString(actualResult))
                         .that(actualResult).isEqualTo(expectedResult);
