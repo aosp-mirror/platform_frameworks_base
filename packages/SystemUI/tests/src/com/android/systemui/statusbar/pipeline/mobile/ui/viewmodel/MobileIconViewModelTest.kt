@@ -23,7 +23,10 @@ import com.android.systemui.SysuiTestCase
 import com.android.systemui.common.shared.model.ContentDescription
 import com.android.systemui.common.shared.model.Icon
 import com.android.systemui.statusbar.pipeline.mobile.domain.interactor.FakeMobileIconInteractor
+import com.android.systemui.statusbar.pipeline.shared.ConnectivityConstants
 import com.android.systemui.statusbar.pipeline.shared.ConnectivityPipelineLogger
+import com.android.systemui.statusbar.pipeline.shared.data.model.DataActivityModel
+import com.android.systemui.util.mockito.whenever
 import com.google.common.truth.Truth.assertThat
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.launchIn
@@ -40,6 +43,7 @@ class MobileIconViewModelTest : SysuiTestCase() {
     private lateinit var underTest: MobileIconViewModel
     private val interactor = FakeMobileIconInteractor()
     @Mock private lateinit var logger: ConnectivityPipelineLogger
+    @Mock private lateinit var constants: ConnectivityConstants
 
     @Before
     fun setUp() {
@@ -53,7 +57,7 @@ class MobileIconViewModelTest : SysuiTestCase() {
             setNumberOfLevels(4)
             isDataConnected.value = true
         }
-        underTest = MobileIconViewModel(SUB_1_ID, interactor, logger)
+        underTest = MobileIconViewModel(SUB_1_ID, interactor, logger, constants)
     }
 
     @Test
@@ -232,6 +236,108 @@ class MobileIconViewModelTest : SysuiTestCase() {
             assertThat(latest).isEqualTo(expected)
 
             job.cancel()
+        }
+
+    @Test
+    fun roaming() =
+        runBlocking(IMMEDIATE) {
+            interactor.isRoaming.value = true
+            var latest: Boolean? = null
+            val job = underTest.roaming.onEach { latest = it }.launchIn(this)
+
+            assertThat(latest).isTrue()
+
+            interactor.isRoaming.value = false
+
+            assertThat(latest).isFalse()
+
+            job.cancel()
+        }
+
+    @Test
+    fun `data activity - null when config is off`() =
+        runBlocking(IMMEDIATE) {
+            // Create a new view model here so the constants are properly read
+            whenever(constants.shouldShowActivityConfig).thenReturn(false)
+            underTest = MobileIconViewModel(SUB_1_ID, interactor, logger, constants)
+
+            var inVisible: Boolean? = null
+            val inJob = underTest.activityInVisible.onEach { inVisible = it }.launchIn(this)
+
+            var outVisible: Boolean? = null
+            val outJob = underTest.activityInVisible.onEach { outVisible = it }.launchIn(this)
+
+            var containerVisible: Boolean? = null
+            val containerJob =
+                underTest.activityInVisible.onEach { containerVisible = it }.launchIn(this)
+
+            interactor.activity.value =
+                DataActivityModel(
+                    hasActivityIn = true,
+                    hasActivityOut = true,
+                )
+
+            assertThat(inVisible).isFalse()
+            assertThat(outVisible).isFalse()
+            assertThat(containerVisible).isFalse()
+
+            inJob.cancel()
+            outJob.cancel()
+            containerJob.cancel()
+        }
+
+    @Test
+    fun `data activity - config on - test indicators`() =
+        runBlocking(IMMEDIATE) {
+            // Create a new view model here so the constants are properly read
+            whenever(constants.shouldShowActivityConfig).thenReturn(true)
+            underTest = MobileIconViewModel(SUB_1_ID, interactor, logger, constants)
+
+            var inVisible: Boolean? = null
+            val inJob = underTest.activityInVisible.onEach { inVisible = it }.launchIn(this)
+
+            var outVisible: Boolean? = null
+            val outJob = underTest.activityOutVisible.onEach { outVisible = it }.launchIn(this)
+
+            var containerVisible: Boolean? = null
+            val containerJob =
+                underTest.activityContainerVisible.onEach { containerVisible = it }.launchIn(this)
+
+            interactor.activity.value =
+                DataActivityModel(
+                    hasActivityIn = true,
+                    hasActivityOut = false,
+                )
+
+            yield()
+
+            assertThat(inVisible).isTrue()
+            assertThat(outVisible).isFalse()
+            assertThat(containerVisible).isTrue()
+
+            interactor.activity.value =
+                DataActivityModel(
+                    hasActivityIn = false,
+                    hasActivityOut = true,
+                )
+
+            assertThat(inVisible).isFalse()
+            assertThat(outVisible).isTrue()
+            assertThat(containerVisible).isTrue()
+
+            interactor.activity.value =
+                DataActivityModel(
+                    hasActivityIn = false,
+                    hasActivityOut = false,
+                )
+
+            assertThat(inVisible).isFalse()
+            assertThat(outVisible).isFalse()
+            assertThat(containerVisible).isFalse()
+
+            inJob.cancel()
+            outJob.cancel()
+            containerJob.cancel()
         }
 
     /** Convenience constructor for these tests */

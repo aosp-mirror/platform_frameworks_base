@@ -1049,13 +1049,6 @@ public class PhoneWindowManager implements WindowManagerPolicy {
             return;
         }
 
-        // Don't dream if the user isn't user zero.
-        // TODO(b/261907079): Move this check to DreamManagerService#canStartDreamingInternal().
-        if (ActivityManager.getCurrentUser() != UserHandle.USER_SYSTEM) {
-            noDreamAction.run();
-            return;
-        }
-
         final DreamManagerInternal dreamManagerInternal = getDreamManagerInternal();
         if (dreamManagerInternal == null || !dreamManagerInternal.canStartDreaming(isScreenOn)) {
             noDreamAction.run();

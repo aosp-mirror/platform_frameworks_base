@@ -1272,6 +1272,9 @@
          translate into their final position. -->
     <dimen name="lockscreen_shade_keyguard_transition_distance">@dimen/lockscreen_shade_media_transition_distance</dimen>
 
+    <!-- DREAMING -> LOCKSCREEN transition: Amount to shift lockscreen content on entering -->
+    <dimen name="dreaming_to_lockscreen_transition_lockscreen_translation_y">40dp</dimen>
+
     <!-- The amount of vertical offset for the keyguard during the full shade transition. -->
     <dimen name="lockscreen_shade_keyguard_transition_vertical_offset">0dp</dimen>
 

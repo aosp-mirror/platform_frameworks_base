@@ -25,6 +25,7 @@ import com.android.settingslib.mobile.TelephonyIcons
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.statusbar.pipeline.mobile.data.model.DataConnectionState
 import com.android.systemui.statusbar.pipeline.mobile.data.model.MobileConnectionModel
+import com.android.systemui.statusbar.pipeline.mobile.data.model.NetworkNameModel
 import com.android.systemui.statusbar.pipeline.mobile.data.model.ResolvedNetworkType.DefaultNetworkType
 import com.android.systemui.statusbar.pipeline.mobile.data.model.ResolvedNetworkType.OverrideNetworkType
 import com.android.systemui.statusbar.pipeline.mobile.data.repository.FakeMobileConnectionRepository
@@ -298,6 +299,135 @@ class MobileIconInteractorTest : SysuiTestCase() {
             job.cancel()
         }
 
+    @Test
+    fun `roaming - is gsm - uses connection model`() =
+        runBlocking(IMMEDIATE) {
+            var latest: Boolean? = null
+            val job = underTest.isRoaming.onEach { latest = it }.launchIn(this)
+
+            connectionRepository.cdmaRoaming.value = true
+            connectionRepository.setConnectionInfo(
+                MobileConnectionModel(
+                    isGsm = true,
+                    isRoaming = false,
+                )
+            )
+            yield()
+
+            assertThat(latest).isFalse()
+
+            connectionRepository.setConnectionInfo(
+                MobileConnectionModel(
+                    isGsm = true,
+                    isRoaming = true,
+                )
+            )
+            yield()
+
+            assertThat(latest).isTrue()
+
+            job.cancel()
+        }
+
+    @Test
+    fun `roaming - is cdma - uses cdma roaming bit`() =
+        runBlocking(IMMEDIATE) {
+            var latest: Boolean? = null
+            val job = underTest.isRoaming.onEach { latest = it }.launchIn(this)
+
+            connectionRepository.cdmaRoaming.value = false
+            connectionRepository.setConnectionInfo(
+                MobileConnectionModel(
+                    isGsm = false,
+                    isRoaming = true,
+                )
+            )
+            yield()
+
+            assertThat(latest).isFalse()
+
+            connectionRepository.cdmaRoaming.value = true
+            connectionRepository.setConnectionInfo(
+                MobileConnectionModel(
+                    isGsm = false,
+                    isRoaming = false,
+                )
+            )
+            yield()
+
+            assertThat(latest).isTrue()
+
+            job.cancel()
+        }
+
+    @Test
+    fun `roaming - false while carrierNetworkChangeActive`() =
+        runBlocking(IMMEDIATE) {
+            var latest: Boolean? = null
+            val job = underTest.isRoaming.onEach { latest = it }.launchIn(this)
+
+            connectionRepository.cdmaRoaming.value = true
+            connectionRepository.setConnectionInfo(
+                MobileConnectionModel(
+                    isGsm = false,
+                    isRoaming = true,
+                    carrierNetworkChangeActive = true,
+                )
+            )
+            yield()
+
+            assertThat(latest).isFalse()
+
+            connectionRepository.cdmaRoaming.value = true
+            connectionRepository.setConnectionInfo(
+                MobileConnectionModel(
+                    isGsm = true,
+                    isRoaming = true,
+                    carrierNetworkChangeActive = true,
+                )
+            )
+            yield()
+
+            assertThat(latest).isFalse()
+
+            job.cancel()
+        }
+
+    @Test
+    fun `network name - uses operatorAlphaShot when non null and repo is default`() =
+        runBlocking(IMMEDIATE) {
+            var latest: NetworkNameModel? = null
+            val job = underTest.networkName.onEach { latest = it }.launchIn(this)
+
+            val testOperatorName = "operatorAlphaShort"
+
+            // Default network name, operator name is non-null, uses the operator name
+            connectionRepository.networkName.value = DEFAULT_NAME
+            connectionRepository.setConnectionInfo(
+                MobileConnectionModel(operatorAlphaShort = testOperatorName)
+            )
+            yield()
+
+            assertThat(latest).isEqualTo(NetworkNameModel.Derived(testOperatorName))
+
+            // Default network name, operator name is null, uses the default
+            connectionRepository.setConnectionInfo(MobileConnectionModel(operatorAlphaShort = null))
+            yield()
+
+            assertThat(latest).isEqualTo(DEFAULT_NAME)
+
+            // Derived network name, operator name non-null, uses the derived name
+            connectionRepository.networkName.value = DERIVED_NAME
+            connectionRepository.setConnectionInfo(
+                MobileConnectionModel(operatorAlphaShort = testOperatorName)
+            )
+            yield()
+
+            assertThat(latest).isEqualTo(DERIVED_NAME)
+
+            job.cancel()
+        }
+
     companion object {
         private val IMMEDIATE = Dispatchers.Main.immediate
 
@@ -307,5 +437,8 @@ class MobileIconInteractorTest : SysuiTestCase() {
         private const val SUB_1_ID = 1
         private val SUB_1 =
             mock<SubscriptionInfo>().also { whenever(it.subscriptionId).thenReturn(SUB_1_ID) }
+
+        private val DEFAULT_NAME = NetworkNameModel.Default("test default name")
+        private val DERIVED_NAME = NetworkNameModel.Derived("test derived name")
     }
 }
