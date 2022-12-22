@@ -59,8 +59,6 @@ import libcore.util.HexEncoding;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.nio.ByteBuffer;
-import java.security.NoSuchAlgorithmException;
-import java.security.SecureRandom;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashSet;
@@ -284,8 +282,10 @@ class SyntheticPasswordManager {
          */
         static SyntheticPassword create() {
             SyntheticPassword result = new SyntheticPassword(SYNTHETIC_PASSWORD_VERSION_V3);
-            byte[] escrowSplit0 = secureRandom(SYNTHETIC_PASSWORD_SECURITY_STRENGTH);
-            byte[] escrowSplit1 = secureRandom(SYNTHETIC_PASSWORD_SECURITY_STRENGTH);
+            byte[] escrowSplit0 =
+                    SecureRandomUtils.randomBytes(SYNTHETIC_PASSWORD_SECURITY_STRENGTH);
+            byte[] escrowSplit1 =
+                    SecureRandomUtils.randomBytes(SYNTHETIC_PASSWORD_SECURITY_STRENGTH);
             result.recreate(escrowSplit0, escrowSplit1);
             byte[] encrypteEscrowSplit0 = SyntheticPasswordCrypto.encrypt(result.mSyntheticPassword,
                     PERSONALIZATION_E0, escrowSplit0);
@@ -347,7 +347,7 @@ class SyntheticPasswordManager {
             result.scryptLogR = PASSWORD_SCRYPT_LOG_R;
             result.scryptLogP = PASSWORD_SCRYPT_LOG_P;
             result.credentialType = credentialType;
-            result.salt = secureRandom(PASSWORD_SALT_LENGTH);
+            result.salt = SecureRandomUtils.randomBytes(PASSWORD_SALT_LENGTH);
             return result;
         }
 
@@ -552,7 +552,7 @@ class SyntheticPasswordManager {
             throw new IllegalArgumentException("Invalid key size for weaver");
         }
         if (value == null) {
-            value = secureRandom(mWeaverConfig.valueSize);
+            value = SecureRandomUtils.randomBytes(mWeaverConfig.valueSize);
         }
         try {
             mWeaver.write(slot, key, value);
@@ -1039,9 +1039,9 @@ class SyntheticPasswordManager {
         }
         TokenData tokenData = new TokenData();
         tokenData.mType = type;
-        final byte[] secdiscardable = secureRandom(SECDISCARDABLE_LENGTH);
+        final byte[] secdiscardable = SecureRandomUtils.randomBytes(SECDISCARDABLE_LENGTH);
         if (isWeaverAvailable()) {
-            tokenData.weaverSecret = secureRandom(mWeaverConfig.valueSize);
+            tokenData.weaverSecret = SecureRandomUtils.randomBytes(mWeaverConfig.valueSize);
             tokenData.secdiscardableOnDisk = SyntheticPasswordCrypto.encrypt(tokenData.weaverSecret,
                             PERSONALIZATION_WEAVER_TOKEN, secdiscardable);
         } else {
@@ -1510,7 +1510,7 @@ class SyntheticPasswordManager {
      * been created.
      */
     private byte[] createSecdiscardable(long protectorId, int userId) {
-        byte[] data = secureRandom(SECDISCARDABLE_LENGTH);
+        byte[] data = SecureRandomUtils.randomBytes(SECDISCARDABLE_LENGTH);
         saveSecdiscardable(protectorId, data, userId);
         return data;
     }
@@ -1624,26 +1624,17 @@ class SyntheticPasswordManager {
     }
 
     private static long generateProtectorId() {
-        SecureRandom rng = new SecureRandom();
-        long result;
-        do {
-            result = rng.nextLong();
-        } while (result == NULL_PROTECTOR_ID);
-        return result;
+        while (true) {
+            final long result = SecureRandomUtils.randomLong();
+            if (result != NULL_PROTECTOR_ID) {
+                return result;
+            }
+        }
     }
 
     @VisibleForTesting
     static int fakeUserId(int userId) {
         return 100000 + userId;
-    }
-
-    protected static byte[] secureRandom(int length) {
-        try {
-            return SecureRandom.getInstance("SHA1PRNG").generateSeed(length);
-        } catch (NoSuchAlgorithmException e) {
-            e.printStackTrace();
-            return null;
-        }
     }
 
     private String getProtectorKeyAlias(long protectorId) {
