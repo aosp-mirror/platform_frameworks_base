@@ -146,7 +146,7 @@ class WifiViewModelTest : SysuiTestCase() {
 
     @Test
     fun activity_showActivityConfigFalse_outputsFalse() = runBlocking(IMMEDIATE) {
-        whenever(wifiConstants.shouldShowActivityConfig).thenReturn(false)
+        whenever(connectivityConstants.shouldShowActivityConfig).thenReturn(false)
         createAndSetViewModel()
         wifiRepository.setWifiNetwork(ACTIVE_VALID_WIFI_NETWORK)
 
@@ -183,7 +183,7 @@ class WifiViewModelTest : SysuiTestCase() {
 
     @Test
     fun activity_showActivityConfigFalse_noUpdatesReceived() = runBlocking(IMMEDIATE) {
-        whenever(wifiConstants.shouldShowActivityConfig).thenReturn(false)
+        whenever(connectivityConstants.shouldShowActivityConfig).thenReturn(false)
         createAndSetViewModel()
         wifiRepository.setWifiNetwork(ACTIVE_VALID_WIFI_NETWORK)
 
@@ -225,7 +225,7 @@ class WifiViewModelTest : SysuiTestCase() {
 
     @Test
     fun activity_nullSsid_outputsFalse() = runBlocking(IMMEDIATE) {
-        whenever(wifiConstants.shouldShowActivityConfig).thenReturn(true)
+        whenever(connectivityConstants.shouldShowActivityConfig).thenReturn(true)
         createAndSetViewModel()
 
         wifiRepository.setWifiNetwork(WifiNetworkModel.Active(NETWORK_ID, ssid = null))
@@ -268,7 +268,7 @@ class WifiViewModelTest : SysuiTestCase() {
 
     @Test
     fun activity_allLocationViewModelsReceiveSameData() = runBlocking(IMMEDIATE) {
-        whenever(wifiConstants.shouldShowActivityConfig).thenReturn(true)
+        whenever(connectivityConstants.shouldShowActivityConfig).thenReturn(true)
         createAndSetViewModel()
         wifiRepository.setWifiNetwork(ACTIVE_VALID_WIFI_NETWORK)
 
@@ -308,7 +308,7 @@ class WifiViewModelTest : SysuiTestCase() {
 
     @Test
     fun activityIn_hasActivityInTrue_outputsTrue() = runBlocking(IMMEDIATE) {
-        whenever(wifiConstants.shouldShowActivityConfig).thenReturn(true)
+        whenever(connectivityConstants.shouldShowActivityConfig).thenReturn(true)
         createAndSetViewModel()
         wifiRepository.setWifiNetwork(ACTIVE_VALID_WIFI_NETWORK)
 
@@ -330,7 +330,7 @@ class WifiViewModelTest : SysuiTestCase() {
 
     @Test
     fun activityIn_hasActivityInFalse_outputsFalse() = runBlocking(IMMEDIATE) {
-        whenever(wifiConstants.shouldShowActivityConfig).thenReturn(true)
+        whenever(connectivityConstants.shouldShowActivityConfig).thenReturn(true)
         createAndSetViewModel()
         wifiRepository.setWifiNetwork(ACTIVE_VALID_WIFI_NETWORK)
 
@@ -352,7 +352,7 @@ class WifiViewModelTest : SysuiTestCase() {
 
     @Test
     fun activityOut_hasActivityOutTrue_outputsTrue() = runBlocking(IMMEDIATE) {
-        whenever(wifiConstants.shouldShowActivityConfig).thenReturn(true)
+        whenever(connectivityConstants.shouldShowActivityConfig).thenReturn(true)
         createAndSetViewModel()
         wifiRepository.setWifiNetwork(ACTIVE_VALID_WIFI_NETWORK)
 
@@ -374,7 +374,7 @@ class WifiViewModelTest : SysuiTestCase() {
 
     @Test
     fun activityOut_hasActivityOutFalse_outputsFalse() = runBlocking(IMMEDIATE) {
-        whenever(wifiConstants.shouldShowActivityConfig).thenReturn(true)
+        whenever(connectivityConstants.shouldShowActivityConfig).thenReturn(true)
         createAndSetViewModel()
         wifiRepository.setWifiNetwork(ACTIVE_VALID_WIFI_NETWORK)
 
@@ -396,7 +396,7 @@ class WifiViewModelTest : SysuiTestCase() {
 
     @Test
     fun activityContainer_hasActivityInTrue_outputsTrue() = runBlocking(IMMEDIATE) {
-        whenever(wifiConstants.shouldShowActivityConfig).thenReturn(true)
+        whenever(connectivityConstants.shouldShowActivityConfig).thenReturn(true)
         createAndSetViewModel()
         wifiRepository.setWifiNetwork(ACTIVE_VALID_WIFI_NETWORK)
 
@@ -418,7 +418,7 @@ class WifiViewModelTest : SysuiTestCase() {
 
     @Test
     fun activityContainer_hasActivityOutTrue_outputsTrue() = runBlocking(IMMEDIATE) {
-        whenever(wifiConstants.shouldShowActivityConfig).thenReturn(true)
+        whenever(connectivityConstants.shouldShowActivityConfig).thenReturn(true)
         createAndSetViewModel()
         wifiRepository.setWifiNetwork(ACTIVE_VALID_WIFI_NETWORK)
 
@@ -440,7 +440,7 @@ class WifiViewModelTest : SysuiTestCase() {
 
     @Test
     fun activityContainer_inAndOutTrue_outputsTrue() = runBlocking(IMMEDIATE) {
-        whenever(wifiConstants.shouldShowActivityConfig).thenReturn(true)
+        whenever(connectivityConstants.shouldShowActivityConfig).thenReturn(true)
         createAndSetViewModel()
         wifiRepository.setWifiNetwork(ACTIVE_VALID_WIFI_NETWORK)
 
@@ -462,7 +462,7 @@ class WifiViewModelTest : SysuiTestCase() {
 
     @Test
     fun activityContainer_inAndOutFalse_outputsFalse() = runBlocking(IMMEDIATE) {
-        whenever(wifiConstants.shouldShowActivityConfig).thenReturn(true)
+        whenever(connectivityConstants.shouldShowActivityConfig).thenReturn(true)
         createAndSetViewModel()
         wifiRepository.setWifiNetwork(ACTIVE_VALID_WIFI_NETWORK)
 

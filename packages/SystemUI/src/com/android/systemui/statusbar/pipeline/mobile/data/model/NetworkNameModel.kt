@@ -21,22 +21,48 @@ import android.telephony.TelephonyManager.EXTRA_DATA_SPN
 import android.telephony.TelephonyManager.EXTRA_PLMN
 import android.telephony.TelephonyManager.EXTRA_SHOW_PLMN
 import android.telephony.TelephonyManager.EXTRA_SHOW_SPN
+import com.android.systemui.log.table.Diffable
+import com.android.systemui.log.table.TableRowLogger
 
 /**
  * Encapsulates the data needed to show a network name for a mobile network. The data is parsed from
  * the intent sent by [android.telephony.TelephonyManager.ACTION_SERVICE_PROVIDERS_UPDATED].
  */
-sealed interface NetworkNameModel {
+sealed interface NetworkNameModel : Diffable<NetworkNameModel> {
     val name: String
 
     /** The default name is read from [com.android.internal.R.string.lockscreen_carrier_default] */
-    data class Default(override val name: String) : NetworkNameModel
+    data class Default(override val name: String) : NetworkNameModel {
+        override fun logDiffs(prevVal: NetworkNameModel, row: TableRowLogger) {
+            if (prevVal !is Default || prevVal.name != name) {
+                row.logChange(COL_NETWORK_NAME, "Default($name)")
+            }
+        }
+
+        override fun logFull(row: TableRowLogger) {
+            row.logChange(COL_NETWORK_NAME, "Default($name)")
+        }
+    }
 
     /**
      * This name has been derived from telephony intents. see
      * [android.telephony.TelephonyManager.ACTION_SERVICE_PROVIDERS_UPDATED]
      */
-    data class Derived(override val name: String) : NetworkNameModel
+    data class Derived(override val name: String) : NetworkNameModel {
+        override fun logDiffs(prevVal: NetworkNameModel, row: TableRowLogger) {
+            if (prevVal !is Derived || prevVal.name != name) {
+                row.logChange(COL_NETWORK_NAME, "Derived($name)")
+            }
+        }
+
+        override fun logFull(row: TableRowLogger) {
+            row.logChange(COL_NETWORK_NAME, "Derived($name)")
+        }
+    }
+
+    companion object {
+        const val COL_NETWORK_NAME = "networkName"
+    }
 }
 
 fun Intent.toNetworkNameModel(separator: String): NetworkNameModel? {
