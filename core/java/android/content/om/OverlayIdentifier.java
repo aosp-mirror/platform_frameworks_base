@@ -41,7 +41,6 @@ import java.util.Objects;
  * @see OverlayInfo#getOverlayIdentifier()
  * @see OverlayManagerTransaction.Builder#unregisterFabricatedOverlay(OverlayIdentifier)
  */
-/** @hide */
 @DataClass(genConstructor = false, genBuilder = false, genHiddenBuilder = false,
         genEqualsHashCode = true, genToString = false)
 public final class OverlayIdentifier implements Parcelable {
@@ -176,7 +175,6 @@ public final class OverlayIdentifier implements Parcelable {
 
     /**
      * {@inheritDoc}
-     * @hide
      */
     @Override
     @DataClass.Generated.Member
@@ -194,7 +192,6 @@ public final class OverlayIdentifier implements Parcelable {
 
     /**
      * {@inheritDoc}
-     * @hide
      */
     @Override
     @DataClass.Generated.Member

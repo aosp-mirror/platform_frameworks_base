@@ -3429,15 +3429,10 @@ package android.content.integrity {
 package android.content.om {
 
   public final class OverlayInfo implements android.os.Parcelable {
-    method public int describeContents();
     method @Nullable public String getCategory();
     method @NonNull public String getPackageName();
-    method @Nullable public String getTargetOverlayableName();
-    method @NonNull public String getTargetPackageName();
     method public int getUserId();
     method public boolean isEnabled();
-    method public void writeToParcel(@NonNull android.os.Parcel, int);
-    field @NonNull public static final android.os.Parcelable.Creator<android.content.om.OverlayInfo> CREATOR;
   }
 
   public class OverlayManager {

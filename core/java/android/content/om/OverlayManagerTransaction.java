@@ -58,7 +58,6 @@ import java.util.Objects;
  *
  * @see OverlayManager
  * @see FabricatedOverlay
- * @hide
  */
 public final class OverlayManagerTransaction implements Parcelable {
     // TODO: remove @hide from this class when OverlayManager is added to the
@@ -92,8 +91,6 @@ public final class OverlayManagerTransaction implements Parcelable {
     /**
      * Get an overlay manager transaction with the specified handler.
      * @param overlayManager handles this transaction.
-     *
-     * @hide
      */
     public OverlayManagerTransaction(@NonNull OverlayManager overlayManager) {
         this(new ArrayList<>(), Objects.requireNonNull(overlayManager));
@@ -291,8 +288,6 @@ public final class OverlayManagerTransaction implements Parcelable {
 
     /**
      * {@inheritDoc}
-     *
-     * @hide
      */
     @Override
     public int describeContents() {
@@ -301,8 +296,6 @@ public final class OverlayManagerTransaction implements Parcelable {
 
     /**
      * {@inheritDoc}
-     *
-     * @hide
      */
     @Override
     public void writeToParcel(@NonNull Parcel dest, int flags) {
@@ -340,7 +333,6 @@ public final class OverlayManagerTransaction implements Parcelable {
      *
      * @throws IOException if there is a file operation error.
      * @throws PackageManager.NameNotFoundException if the package name is not found.
-     * @hide
      */
     @NonUiContext
     public void commit() throws PackageManager.NameNotFoundException, IOException {
@@ -374,8 +366,6 @@ public final class OverlayManagerTransaction implements Parcelable {
      * package or target overlayable is changed.
      *
      * @param overlay the overlay to register with the overlay manager
-     *
-     * @hide
      */
     @NonNull
     public void registerFabricatedOverlay(@NonNull FabricatedOverlay overlay) {
@@ -389,7 +379,6 @@ public final class OverlayManagerTransaction implements Parcelable {
      *
      * @see OverlayManager#getOverlayInfosForTarget(String)
      * @see OverlayInfo#getOverlayIdentifier()
-     * @hide
      */
     @NonNull
     public void unregisterFabricatedOverlay(@NonNull OverlayIdentifier overlay) {

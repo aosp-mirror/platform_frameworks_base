@@ -10033,6 +10033,7 @@ package android.content {
     field public static final String NFC_SERVICE = "nfc";
     field public static final String NOTIFICATION_SERVICE = "notification";
     field public static final String NSD_SERVICE = "servicediscovery";
+    field public static final String OVERLAY_SERVICE = "overlay";
     field public static final String PEOPLE_SERVICE = "people";
     field public static final String PERFORMANCE_HINT_SERVICE = "performance_hint";
     field public static final String POWER_SERVICE = "power";
@@ -11197,6 +11198,49 @@ package android.content {
     method public void writeToParcel(android.os.Parcel, int);
     field @NonNull public static final android.os.Parcelable.Creator<android.content.UriPermission> CREATOR;
     field public static final long INVALID_TIME = -9223372036854775808L; // 0x8000000000000000L
+  }
+
+}
+
+package android.content.om {
+
+  public class FabricatedOverlay {
+    ctor public FabricatedOverlay(@NonNull String, @NonNull String);
+    method @NonNull public android.content.om.OverlayIdentifier getIdentifier();
+    method @NonNull public void setResourceValue(@NonNull String, @IntRange(from=android.util.TypedValue.TYPE_FIRST_INT, to=android.util.TypedValue.TYPE_LAST_INT) int, int, @Nullable String);
+    method @NonNull public void setResourceValue(@NonNull String, int, @NonNull String, @Nullable String);
+    method @NonNull public void setResourceValue(@NonNull String, @NonNull android.os.ParcelFileDescriptor, @Nullable String);
+    method public void setTargetOverlayable(@Nullable String);
+  }
+
+  public final class OverlayIdentifier implements android.os.Parcelable {
+    method public int describeContents();
+    method public void writeToParcel(@NonNull android.os.Parcel, int);
+    field @NonNull public static final android.os.Parcelable.Creator<android.content.om.OverlayIdentifier> CREATOR;
+  }
+
+  public final class OverlayInfo implements android.os.Parcelable {
+    method public int describeContents();
+    method @NonNull public android.content.om.OverlayIdentifier getOverlayIdentifier();
+    method @Nullable public String getOverlayName();
+    method @Nullable public String getTargetOverlayableName();
+    method @NonNull public String getTargetPackageName();
+    method public void writeToParcel(@NonNull android.os.Parcel, int);
+    field @NonNull public static final android.os.Parcelable.Creator<android.content.om.OverlayInfo> CREATOR;
+  }
+
+  public class OverlayManager {
+    method @NonNull @NonUiContext public java.util.List<android.content.om.OverlayInfo> getOverlayInfosForTarget(@NonNull String);
+  }
+
+  public final class OverlayManagerTransaction implements android.os.Parcelable {
+    ctor public OverlayManagerTransaction(@NonNull android.content.om.OverlayManager);
+    method @NonUiContext public void commit() throws java.io.IOException, android.content.pm.PackageManager.NameNotFoundException;
+    method public int describeContents();
+    method @NonNull public void registerFabricatedOverlay(@NonNull android.content.om.FabricatedOverlay);
+    method @NonNull public void unregisterFabricatedOverlay(@NonNull android.content.om.OverlayIdentifier);
+    method public void writeToParcel(@NonNull android.os.Parcel, int);
+    field @NonNull public static final android.os.Parcelable.Creator<android.content.om.OverlayManagerTransaction> CREATOR;
   }
 
 }
@@ -13107,6 +13151,7 @@ package android.content.res.loader {
     method @NonNull public static android.content.res.loader.ResourcesProvider loadFromDirectory(@NonNull String, @Nullable android.content.res.loader.AssetsProvider) throws java.io.IOException;
     method @NonNull public static android.content.res.loader.ResourcesProvider loadFromSplit(@NonNull android.content.Context, @NonNull String) throws java.io.IOException;
     method @NonNull public static android.content.res.loader.ResourcesProvider loadFromTable(@NonNull android.os.ParcelFileDescriptor, @Nullable android.content.res.loader.AssetsProvider) throws java.io.IOException;
+    method @NonNull public static android.content.res.loader.ResourcesProvider loadOverlay(@NonNull android.content.om.OverlayInfo) throws java.io.IOException;
   }
 
 }

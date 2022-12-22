@@ -5784,7 +5784,6 @@ public abstract class Context {
      *
      * @see #getSystemService(String)
      * @see android.content.om.OverlayManager
-     * @hide
      */
     public static final String OVERLAY_SERVICE = "overlay";
 
