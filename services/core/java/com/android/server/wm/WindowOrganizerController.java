@@ -658,7 +658,8 @@ class WindowOrganizerController extends IWindowOrganizerController.Stub
             }
         }
 
-        if (windowingMode > -1) {
+        final int prevWindowingMode = container.getWindowingMode();
+        if (windowingMode > -1 && prevWindowingMode != windowingMode) {
             if (mService.isInLockTaskMode()
                     && WindowConfiguration.inMultiWindowMode(windowingMode)) {
                 throw new UnsupportedOperationException("Not supported to set multi-window"
@@ -672,9 +673,8 @@ class WindowOrganizerController extends IWindowOrganizerController.Stub
                 return effects;
             }
 
-            final int prevMode = container.getWindowingMode();
             container.setWindowingMode(windowingMode);
-            if (prevMode != container.getWindowingMode()) {
+            if (prevWindowingMode != container.getWindowingMode()) {
                 // The activity in the container may become focusable or non-focusable due to
                 // windowing modes changes (such as entering or leaving pinned windowing mode),
                 // so also apply the lifecycle effects to this transaction.
