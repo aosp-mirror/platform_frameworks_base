@@ -18,9 +18,11 @@ package android.content.pm;
 
 import static android.os.Build.VERSION_CODES.DONUT;
 
+import android.Manifest;
 import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.annotation.RequiresPermission;
 import android.annotation.SystemApi;
 import android.annotation.TestApi;
 import android.compat.annotation.UnsupportedAppUsage;
@@ -2253,6 +2255,8 @@ public class ApplicationInfo extends PackageItemInfo implements Parcelable {
      *
      * @hide
      */
+    @SystemApi
+    @RequiresPermission(Manifest.permission.DELETE_PACKAGES)
     public boolean hasFragileUserData() {
         return (privateFlags & PRIVATE_FLAG_HAS_FRAGILE_USER_DATA) != 0;
     }
@@ -2487,8 +2491,13 @@ public class ApplicationInfo extends PackageItemInfo implements Parcelable {
         return (privateFlags & ApplicationInfo.PRIVATE_FLAG_SIGNED_WITH_PLATFORM_KEY) != 0;
     }
 
-    /** @hide */
+    /**
+     * @return {@code true} if the application is permitted to hold privileged permissions.
+     *
+     * @hide */
     @TestApi
+    @SystemApi
+    @RequiresPermission(Manifest.permission.INSTALL_PACKAGES)
     public boolean isPrivilegedApp() {
         return (privateFlags & ApplicationInfo.PRIVATE_FLAG_PRIVILEGED) != 0;
     }

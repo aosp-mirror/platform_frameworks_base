@@ -814,7 +814,7 @@ package android.content.pm {
   public class ApplicationInfo extends android.content.pm.PackageItemInfo implements android.os.Parcelable {
     method public boolean hasRequestForegroundServiceExemption();
     method public boolean isOnBackInvokedCallbackEnabled();
-    method public boolean isPrivilegedApp();
+    method @RequiresPermission(android.Manifest.permission.INSTALL_PACKAGES) public boolean isPrivilegedApp();
     method public boolean isSystemApp();
     method public void setEnableOnBackInvokedCallback(boolean);
     field public static final int PRIVATE_FLAG_PRIVILEGED = 8; // 0x8
@@ -831,7 +831,6 @@ package android.content.pm {
 
   public static class PackageInstaller.SessionParams implements android.os.Parcelable {
     method public void setInstallFlagAllowTest();
-    method public void setInstallerPackageName(@Nullable String);
   }
 
   public abstract class PackageManager {

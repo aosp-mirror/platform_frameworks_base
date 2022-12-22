@@ -19,14 +19,16 @@ package com.android.packageinstaller.wear;
 import android.app.Notification;
 import android.app.NotificationChannel;
 import android.app.NotificationManager;
+import android.app.PendingIntent;
 import android.app.Service;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.FeatureInfo;
-import android.content.pm.IPackageDeleteObserver;
 import android.content.pm.PackageInfo;
+import android.content.pm.PackageInstaller;
 import android.content.pm.PackageManager;
+import android.content.pm.VersionedPackage;
 import android.database.Cursor;
 import android.net.Uri;
 import android.os.Build;
@@ -43,13 +45,18 @@ import android.util.ArrayMap;
 import android.util.Log;
 import android.util.Pair;
 
+import androidx.annotation.Nullable;
+
 import com.android.packageinstaller.DeviceUtils;
+import com.android.packageinstaller.EventResultPersister;
 import com.android.packageinstaller.PackageUtil;
 import com.android.packageinstaller.R;
+import com.android.packageinstaller.UninstallEventReceiver;
 
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
@@ -80,16 +87,30 @@ import java.util.Set;
  *  adb shell am startservice -a com.android.packageinstaller.wear.RETRY_GMS \
  *     com.android.packageinstaller/com.android.packageinstaller.wear.WearPackageInstallerService
  */
-public class WearPackageInstallerService extends Service {
+public class WearPackageInstallerService extends Service
+        implements EventResultPersister.EventResultObserver {
     private static final String TAG = "WearPkgInstallerService";
 
     private static final String WEAR_APPS_CHANNEL = "wear_app_install_uninstall";
+    private static final String BROADCAST_ACTION =
+            "com.android.packageinstaller.ACTION_UNINSTALL_COMMIT";
 
     private final int START_INSTALL = 1;
     private final int START_UNINSTALL = 2;
 
     private int mInstallNotificationId = 1;
     private final Map<String, Integer> mNotifIdMap = new ArrayMap<>();
+    private final Map<Integer, UninstallParams> mServiceIdToParams = new HashMap<>();
+
+    private class UninstallParams {
+        public String mPackageName;
+        public PowerManager.WakeLock mLock;
+
+        UninstallParams(String packageName, PowerManager.WakeLock lock) {
+            mPackageName = packageName;
+            mLock = lock;
+        }
+    }
 
     private final class ServiceHandler extends Handler {
         public ServiceHandler(Looper looper) {
@@ -211,7 +232,6 @@ public class WearPackageInstallerService extends Service {
         }
         final PackageManager pm = getPackageManager();
         File tempFile = null;
-        int installFlags = 0;
         PowerManager.WakeLock lock = getLock(this.getApplicationContext());
         boolean messageSent = false;
         try {
@@ -220,16 +240,13 @@ public class WearPackageInstallerService extends Service {
                 existingPkgInfo = pm.getPackageInfo(packageName,
                         PackageManager.MATCH_ANY_USER | PackageManager.GET_PERMISSIONS);
                 if (existingPkgInfo != null) {
-                    installFlags |= PackageManager.INSTALL_REPLACE_EXISTING;
+                    if (Log.isLoggable(TAG, Log.DEBUG)) {
+                        Log.d(TAG, "Replacing package:" + packageName);
+                    }
                 }
             } catch (PackageManager.NameNotFoundException e) {
                 // Ignore this exception. We could not find the package, will treat as a new
                 // installation.
-            }
-            if ((installFlags & PackageManager.INSTALL_REPLACE_EXISTING) != 0) {
-                if (Log.isLoggable(TAG, Log.DEBUG)) {
-                    Log.d(TAG, "Replacing package:" + packageName);
-                }
             }
             // TODO(28021618): This was left as a temp file due to the fact that this code is being
             //       deprecated and that we need the bare minimum to continue working moving forward
@@ -366,21 +383,60 @@ public class WearPackageInstallerService extends Service {
         final String packageName = WearPackageArgs.getPackageName(argsBundle);
 
         PowerManager.WakeLock lock = getLock(this.getApplicationContext());
+
+        UninstallParams params = new UninstallParams(packageName, lock);
+        mServiceIdToParams.put(startId, params);
+
         final PackageManager pm = getPackageManager();
         try {
             PackageInfo pkgInfo = pm.getPackageInfo(packageName, 0);
             getLabelAndUpdateNotification(packageName,
                     getString(R.string.uninstalling_app, pkgInfo.applicationInfo.loadLabel(pm)));
 
+            int uninstallId = UninstallEventReceiver.addObserver(this,
+                    EventResultPersister.GENERATE_NEW_ID, this);
+
+            Intent broadcastIntent = new Intent(BROADCAST_ACTION);
+            broadcastIntent.setFlags(Intent.FLAG_RECEIVER_FOREGROUND);
+            broadcastIntent.putExtra(EventResultPersister.EXTRA_ID, uninstallId);
+            broadcastIntent.putExtra(EventResultPersister.EXTRA_SERVICE_ID, startId);
+            broadcastIntent.setPackage(getPackageName());
+
+            PendingIntent pendingIntent = PendingIntent.getBroadcast(this, uninstallId,
+                    broadcastIntent, PendingIntent.FLAG_UPDATE_CURRENT
+                            | PendingIntent.FLAG_MUTABLE);
+
             // Found package, send uninstall request.
-            pm.deletePackage(packageName, new PackageDeleteObserver(lock, startId),
-                    PackageManager.DELETE_ALL_USERS);
+            pm.getPackageInstaller().uninstall(
+                    new VersionedPackage(packageName, PackageManager.VERSION_CODE_HIGHEST),
+                    PackageManager.DELETE_ALL_USERS,
+                    pendingIntent.getIntentSender());
 
             Log.i(TAG, "Sent delete request for " + packageName);
         } catch (IllegalArgumentException | PackageManager.NameNotFoundException e) {
             // Couldn't find the package, no need to call uninstall.
             Log.w(TAG, "Could not find package, not deleting " + packageName, e);
             finishService(lock, startId);
+        } catch (EventResultPersister.OutOfIdsException e) {
+            Log.e(TAG, "Fails to start uninstall", e);
+            finishService(lock, startId);
+        }
+    }
+
+    @Override
+    public void onResult(int status, int legacyStatus, @Nullable String message, int serviceId) {
+        if (mServiceIdToParams.containsKey(serviceId)) {
+            UninstallParams params = mServiceIdToParams.get(serviceId);
+            try {
+                if (status == PackageInstaller.STATUS_SUCCESS) {
+                    Log.i(TAG, "Package " + params.mPackageName + " was uninstalled.");
+                } else {
+                    Log.e(TAG, "Package uninstall failed " + params.mPackageName
+                            + ", returnCode " + legacyStatus);
+                }
+            } finally {
+                finishService(params.mLock, serviceId);
+            }
         }
     }
 
@@ -534,29 +590,6 @@ public class WearPackageInstallerService extends Service {
             Log.e(TAG, "Package install failed " + mApplicationPackageName
                     + ", errorCode " + errorCode);
             finishService(mWakeLock, mStartId);
-        }
-    }
-
-    private class PackageDeleteObserver extends IPackageDeleteObserver.Stub {
-        private PowerManager.WakeLock mWakeLock;
-        private int mStartId;
-
-        private PackageDeleteObserver(PowerManager.WakeLock wakeLock, int startId) {
-            mWakeLock = wakeLock;
-            mStartId = startId;
-        }
-
-        public void packageDeleted(String packageName, int returnCode) {
-            try {
-                if (returnCode >= 0) {
-                    Log.i(TAG, "Package " + packageName + " was uninstalled.");
-                } else {
-                    Log.e(TAG, "Package uninstall failed " + packageName + ", returnCode " +
-                            returnCode);
-                }
-            } finally {
-                finishService(mWakeLock, mStartId);
-            }
         }
     }
 

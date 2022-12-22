@@ -16,7 +16,6 @@
 
 package com.android.packageinstaller;
 
-import android.annotation.Nullable;
 import android.app.Activity;
 import android.app.AlertDialog;
 import android.app.Dialog;
@@ -31,7 +30,7 @@ import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
 
-import com.android.internal.app.AlertActivity;
+import androidx.annotation.Nullable;
 
 import java.io.File;
 import java.io.FileOutputStream;
@@ -58,6 +57,7 @@ public class InstallStaging extends AlertActivity {
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
+        setFinishOnTouchOutside(true);
         mAlert.setIcon(R.drawable.ic_file_download);
         mAlert.setTitle(getString(R.string.app_name_unknown));
         mAlert.setView(R.layout.install_content_view);
@@ -123,7 +123,8 @@ public class InstallStaging extends AlertActivity {
      * Show an error message and set result as error.
      */
     private void showError() {
-        (new ErrorDialog()).showAllowingStateLoss(getFragmentManager(), "error");
+        getFragmentManager().beginTransaction()
+                .add(new ErrorDialog(), "error").commitAllowingStateLoss();
 
         Intent result = new Intent();
         result.putExtra(Intent.EXTRA_INSTALL_RESULT,

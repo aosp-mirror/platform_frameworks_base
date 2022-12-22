@@ -16,9 +16,7 @@
 
 package com.android.packageinstaller;
 
-import android.annotation.Nullable;
 import android.app.Activity;
-import android.app.ActivityThread;
 import android.app.AlertDialog;
 import android.app.Dialog;
 import android.app.DialogFragment;
@@ -27,18 +25,17 @@ import android.app.FragmentTransaction;
 import android.app.PendingIntent;
 import android.content.Intent;
 import android.content.pm.ApplicationInfo;
-import android.content.pm.IPackageDeleteObserver2;
 import android.content.pm.PackageInstaller;
 import android.content.pm.PackageManager;
 import android.content.pm.VersionedPackage;
 import android.os.Bundle;
-import android.os.IBinder;
 import android.os.Process;
-import android.os.RemoteException;
 import android.os.UserHandle;
 import android.os.UserManager;
 import android.util.Log;
 import android.widget.Toast;
+
+import androidx.annotation.Nullable;
 
 /**
  * Start an uninstallation, show a dialog while uninstalling and return result to the caller.
@@ -57,7 +54,7 @@ public class UninstallUninstalling extends Activity implements
 
     private int mUninstallId;
     private ApplicationInfo mAppInfo;
-    private IBinder mCallback;
+    private PackageManager.UninstallCompleteCallback mCallback;
     private boolean mReturnResult;
     private String mLabel;
 
@@ -68,7 +65,8 @@ public class UninstallUninstalling extends Activity implements
         setFinishOnTouchOutside(false);
 
         mAppInfo = getIntent().getParcelableExtra(PackageUtil.INTENT_ATTR_APPLICATION_INFO);
-        mCallback = getIntent().getIBinderExtra(PackageInstaller.EXTRA_CALLBACK);
+        mCallback = getIntent().getParcelableExtra(PackageInstaller.EXTRA_CALLBACK,
+                PackageManager.UninstallCompleteCallback.class);
         mReturnResult = getIntent().getBooleanExtra(Intent.EXTRA_RETURN_RESULT, false);
         mLabel = getIntent().getStringExtra(EXTRA_APP_LABEL);
 
@@ -119,15 +117,10 @@ public class UninstallUninstalling extends Activity implements
                 int flags = allUsers ? PackageManager.DELETE_ALL_USERS : 0;
                 flags |= keepData ? PackageManager.DELETE_KEEP_DATA : 0;
 
-                try {
-                    ActivityThread.getPackageManager().getPackageInstaller().uninstall(
-                            new VersionedPackage(mAppInfo.packageName,
-                                    PackageManager.VERSION_CODE_HIGHEST),
-                            getPackageName(), flags, pendingIntent.getIntentSender(),
-                            user.getIdentifier());
-                } catch (RemoteException e) {
-                    e.rethrowFromSystemServer();
-                }
+                getPackageManager().getPackageInstaller().uninstall(
+                        new VersionedPackage(mAppInfo.packageName,
+                                PackageManager.VERSION_CODE_HIGHEST),
+                        flags, pendingIntent.getIntentSender());
             } else {
                 mUninstallId = savedInstanceState.getInt(UNINSTALL_ID);
                 UninstallEventReceiver.addObserver(this, mUninstallId, this);
@@ -135,7 +128,7 @@ public class UninstallUninstalling extends Activity implements
         } catch (EventResultPersister.OutOfIdsException | IllegalArgumentException e) {
             Log.e(LOG_TAG, "Fails to start uninstall", e);
             onResult(PackageInstaller.STATUS_FAILURE, PackageManager.DELETE_FAILED_INTERNAL_ERROR,
-                    null);
+                    null, 0);
         }
     }
 
@@ -152,15 +145,10 @@ public class UninstallUninstalling extends Activity implements
     }
 
     @Override
-    public void onResult(int status, int legacyStatus, @Nullable String message) {
+    public void onResult(int status, int legacyStatus, @Nullable String message, int serviceId) {
         if (mCallback != null) {
             // The caller will be informed about the result via a callback
-            final IPackageDeleteObserver2 observer = IPackageDeleteObserver2.Stub
-                    .asInterface(mCallback);
-            try {
-                observer.onPackageDeleted(mAppInfo.packageName, legacyStatus, message);
-            } catch (RemoteException ignored) {
-            }
+            mCallback.onUninstallComplete(mAppInfo.packageName, legacyStatus, message);
         } else if (mReturnResult) {
             // The caller will be informed about the result and might decide to display it
             Intent result = new Intent();

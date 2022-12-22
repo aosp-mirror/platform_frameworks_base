@@ -2579,6 +2579,10 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
                         : PackageInstaller.ACTION_CONFIRM_INSTALL);
         intent.setPackage(mPm.getPackageInstallerPackageName());
         intent.putExtra(PackageInstaller.EXTRA_SESSION_ID, sessionId);
+        synchronized (mLock) {
+            intent.putExtra(PackageInstaller.EXTRA_RESOLVED_BASE_PATH,
+                    mResolvedBaseFile != null ? mResolvedBaseFile.getAbsolutePath() : null);
+        }
 
         sendOnUserActionRequired(mContext, target, sessionId, intent);
     }

@@ -16,28 +16,22 @@
 
 package com.android.packageinstaller;
 
-import static android.content.pm.PackageInstaller.SessionParams.UID_UNKNOWN;
-
-import android.annotation.Nullable;
 import android.app.PendingIntent;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageInstaller;
+import android.content.pm.PackageInstaller.InstallInfo;
 import android.content.pm.PackageManager;
-import android.content.pm.parsing.ApkLiteParseUtils;
-import android.content.pm.parsing.PackageLite;
-import android.content.pm.parsing.result.ParseResult;
-import android.content.pm.parsing.result.ParseTypeImpl;
 import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
+import android.os.Process;
 import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 
-import com.android.internal.app.AlertActivity;
-import com.android.internal.content.InstallLocationUtils;
+import androidx.annotation.Nullable;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -139,34 +133,30 @@ public class InstallInstalling extends AlertActivity {
                 params.setOriginatingUri(getIntent()
                         .getParcelableExtra(Intent.EXTRA_ORIGINATING_URI));
                 params.setOriginatingUid(getIntent().getIntExtra(Intent.EXTRA_ORIGINATING_UID,
-                        UID_UNKNOWN));
+                        Process.INVALID_UID));
                 params.setInstallerPackageName(getIntent().getStringExtra(
                         Intent.EXTRA_INSTALLER_PACKAGE_NAME));
                 params.setInstallReason(PackageManager.INSTALL_REASON_USER);
 
                 File file = new File(mPackageURI.getPath());
                 try {
-                    final ParseTypeImpl input = ParseTypeImpl.forDefaultParsing();
-                    final ParseResult<PackageLite> result = ApkLiteParseUtils.parsePackageLite(
-                            input.reset(), file, /* flags */ 0);
-                    if (result.isError()) {
-                        Log.e(LOG_TAG, "Cannot parse package " + file + ". Assuming defaults.");
-                        Log.e(LOG_TAG,
-                                "Cannot calculate installed size " + file + ". Try only apk size.");
+                    final InstallInfo result = getPackageManager().getPackageInstaller()
+                            .getInstallInfo(file, 0);
+                    params.setAppPackageName(result.getPackageName());
+                    params.setInstallLocation(result.getInstallLocation());
+                    try {
+                        params.setSize(result.calculateInstalledSize(params));
+                    } catch (IOException e) {
+                        e.printStackTrace();
                         params.setSize(file.length());
-                    } else {
-                        final PackageLite pkg = result.getResult();
-                        params.setAppPackageName(pkg.getPackageName());
-                        params.setInstallLocation(pkg.getInstallLocation());
-                        params.setSize(InstallLocationUtils.calculateInstalledSize(pkg,
-                                params.abiOverride));
                     }
-                } catch (IOException e) {
+                } catch (PackageInstaller.PackageParsingException e) {
+
+                    Log.e(LOG_TAG, "Cannot parse package " + file + ". Assuming defaults.", e);
                     Log.e(LOG_TAG,
                             "Cannot calculate installed size " + file + ". Try only apk size.");
                     params.setSize(file.length());
                 }
-
                 try {
                     mInstallId = InstallEventReceiver
                             .addObserver(this, EventResultPersister.GENERATE_NEW_ID,
@@ -281,8 +271,11 @@ public class InstallInstalling extends AlertActivity {
      * @param statusCode    The installation result.
      * @param legacyStatus  The installation as used internally in the package manager.
      * @param statusMessage The detailed installation result.
+     * @param serviceId     Id for PowerManager.WakeLock service. Used only by Wear devices
+     *                      during an uninstall.
      */
-    private void launchFinishBasedOnResult(int statusCode, int legacyStatus, String statusMessage) {
+    private void launchFinishBasedOnResult(int statusCode, int legacyStatus, String statusMessage,
+            int serviceId /* ignore */) {
         if (statusCode == PackageInstaller.STATUS_SUCCESS) {
             launchSuccess();
         } else {
@@ -292,7 +285,7 @@ public class InstallInstalling extends AlertActivity {
 
     /**
      * Send the package to the package installer and then register a event result observer that
-     * will call {@link #launchFinishBasedOnResult(int, int, String)}
+     * will call {@link #launchFinishBasedOnResult(int, int, String, int)}
      */
     private final class InstallingAsyncTask extends AsyncTask<Void, Void,
             PackageInstaller.Session> {
@@ -318,6 +311,7 @@ public class InstallInstalling extends AlertActivity {
 
                 try (InputStream in = new FileInputStream(file)) {
                     long sizeBytes = file.length();
+                    long totalRead = 0;
                     try (OutputStream out = session
                             .openWrite("PackageInstaller", 0, sizeBytes)) {
                         byte[] buffer = new byte[1024 * 1024];
@@ -336,8 +330,9 @@ public class InstallInstalling extends AlertActivity {
 
                             out.write(buffer, 0, numRead);
                             if (sizeBytes > 0) {
-                                float fraction = ((float) numRead / (float) sizeBytes);
-                                session.addProgress(fraction);
+                                totalRead += numRead;
+                                float fraction = ((float) totalRead / (float) sizeBytes);
+                                session.setStagingProgress(fraction);
                             }
                         }
                     }
