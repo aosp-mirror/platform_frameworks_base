@@ -163,6 +163,15 @@ class ActivityClientController extends IActivityClientController.Stub {
     }
 
     @Override
+    public void activityRefreshed(IBinder token) {
+        final long origId = Binder.clearCallingIdentity();
+        synchronized (mGlobalLock) {
+            ActivityRecord.activityRefreshedLocked(token);
+        }
+        Binder.restoreCallingIdentity(origId);
+    }
+
+    @Override
     public void activityTopResumedStateLost() {
         final long origId = Binder.clearCallingIdentity();
         synchronized (mGlobalLock) {
