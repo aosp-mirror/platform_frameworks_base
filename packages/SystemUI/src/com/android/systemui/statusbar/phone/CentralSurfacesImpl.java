@@ -899,8 +899,6 @@ public class CentralSurfacesImpl implements CoreStartable, CentralSurfaces {
         mKeyguardIndicationController.init();
 
         mColorExtractor.addOnColorsChangedListener(mOnColorsChangedListener);
-        mStatusBarStateController.addCallback(mStateListener,
-                SysuiStatusBarStateController.RANK_STATUS_BAR);
 
         mWindowManager = (WindowManager) mContext.getSystemService(Context.WINDOW_SERVICE);
 
@@ -1519,10 +1517,11 @@ public class CentralSurfacesImpl implements CoreStartable, CentralSurfaces {
      * @param why the reason for the wake up
      */
     @Override
-    public void wakeUpIfDozing(long time, View where, String why) {
+    public void wakeUpIfDozing(long time, View where, String why,
+            @PowerManager.WakeReason int wakeReason) {
         if (mDozing && mScreenOffAnimationController.allowWakeUpIfDozing()) {
             mPowerManager.wakeUp(
-                    time, PowerManager.WAKE_REASON_GESTURE, "com.android.systemui:" + why);
+                    time, wakeReason, "com.android.systemui:" + why);
             mWakeUpComingFromTouch = true;
             mFalsingCollector.onScreenOnFromTouch();
         }
@@ -1599,6 +1598,8 @@ public class CentralSurfacesImpl implements CoreStartable, CentralSurfaces {
 
     protected void startKeyguard() {
         Trace.beginSection("CentralSurfaces#startKeyguard");
+        mStatusBarStateController.addCallback(mStateListener,
+                SysuiStatusBarStateController.RANK_STATUS_BAR);
         mBiometricUnlockController = mBiometricUnlockControllerLazy.get();
         mBiometricUnlockController.addBiometricModeListener(
                 new BiometricUnlockController.BiometricModeListener() {
@@ -3379,7 +3380,8 @@ public class CentralSurfacesImpl implements CoreStartable, CentralSurfaces {
         mStatusBarHideIconsForBouncerManager.setBouncerShowingAndTriggerUpdate(bouncerShowing);
         mCommandQueue.recomputeDisableFlags(mDisplayId, true /* animate */);
         if (mBouncerShowing) {
-            wakeUpIfDozing(SystemClock.uptimeMillis(), null, "BOUNCER_VISIBLE");
+            wakeUpIfDozing(SystemClock.uptimeMillis(), null, "BOUNCER_VISIBLE",
+                    PowerManager.WAKE_REASON_GESTURE);
         }
         updateScrimController();
         if (!mBouncerShowing) {
