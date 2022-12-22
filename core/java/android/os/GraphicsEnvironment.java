@@ -27,6 +27,7 @@ import android.content.pm.IPackageManager;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
 import android.content.pm.ResolveInfo;
+import android.os.storage.StorageManager;
 import android.provider.Settings;
 import android.text.TextUtils;
 import android.util.Log;
@@ -209,6 +210,25 @@ public class GraphicsEnvironment {
                 && appInfoWithMetaData.category == ApplicationInfo.CATEGORY_GAME) {
             mGameManager.notifyGraphicsEnvironmentSetup();
         }
+        Trace.traceEnd(Trace.TRACE_TAG_GRAPHICS);
+
+        Trace.traceBegin(Trace.TRACE_TAG_GRAPHICS, "setBlobCacheQuotaBytes");
+        new Thread(() -> {
+            try {
+                // Perform this lookup on a thread since getCacheQuotaBytes can be slow
+                // and we don't need the answer right away. The result is consumed in
+                // checkMultifileCacheSize in egl_cache_multifile.cpp. If the value isn't
+                // ready, a default is used. The results will likely be ready by the time
+                // an app starts using the blobcache.
+                final StorageManager sm = context.getSystemService(StorageManager.class);
+                final long cacheBytes = sm.getCacheQuotaBytes(appInfoWithMetaData.storageUuid);
+                final long scaledCacheBytes =
+                        getScaledCacheQuotaBytes(packageName, cacheBytes, appInfoWithMetaData);
+                setBlobCacheQuotaBytes(scaledCacheBytes);
+            } catch (IOException e) {
+                Log.w(TAG, "Failed to look up getCacheQuotaBytes for package: " + packageName);
+            }
+        }).start();
         Trace.traceEnd(Trace.TRACE_TAG_GRAPHICS);
     }
 
@@ -446,6 +466,31 @@ public class GraphicsEnvironment {
             ai = context.getApplicationInfo();
         }
         return ai;
+    }
+
+    private static long getScaledCacheQuotaBytes(String packageName, long cacheBytes,
+                                                 ApplicationInfo appInfoWithMetaData) {
+        if (cacheBytes <= 0) {
+            Log.v(TAG, "cacheBytes are zero for " + packageName);
+            return 0;
+        }
+        // Limit the amount of temp storage available to OpenGL drivers to a percentage
+        // based on the app type. Games will typically need more space than applications,
+        // so give them 50%, 25% for everything else.
+        long scaledCacheBytes = 0;
+        if (((appInfoWithMetaData.flags & ApplicationInfo.FLAG_IS_GAME) != 0)
+                || appInfoWithMetaData.category == ApplicationInfo.CATEGORY_GAME) {
+            scaledCacheBytes = cacheBytes / 2;
+            Log.v(TAG, "Treating " + packageName
+                    + " as a game, setting shader cache quota to 50% ("
+                    + scaledCacheBytes + ")");
+        } else {
+            scaledCacheBytes = cacheBytes / 4;
+            Log.v(TAG, "Treating " + packageName
+                    + " as an application, setting shader cache quota to 25% ("
+                    + scaledCacheBytes + ")");
+        }
+        return scaledCacheBytes;
     }
 
     /**
@@ -996,4 +1041,7 @@ public class GraphicsEnvironment {
      * Then the app process is allowed to send stats to GpuStats module.
      */
     public static native void hintActivityLaunch();
+
+    private static native void setBlobCacheQuotaBytes(long cacheBytes);
+
 }
