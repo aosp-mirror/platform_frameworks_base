@@ -76,13 +76,6 @@ public class FeatureFlagUtils {
     public static final String SETTINGS_APP_ALLOW_DARK_THEME_ACTIVATION_AT_BEDTIME =
             "settings_app_allow_dark_theme_activation_at_bedtime";
 
-    /**
-     * Hide back key in the Settings two pane design.
-     * @hide
-     */
-    public static final String SETTINGS_HIDE_SECOND_LAYER_PAGE_NAVIGATE_UP_BUTTON_IN_TWO_PANE =
-            "settings_hide_second_layer_page_navigate_up_button_in_two_pane";
-
     /** @hide */
     public static final String SETTINGS_AUTO_TEXT_WRAPPING = "settings_auto_text_wrapping";
 
@@ -168,7 +161,6 @@ public class FeatureFlagUtils {
         DEFAULT_FLAGS.put(SETTINGS_VOLUME_PANEL_IN_SYSTEMUI, "false");
         DEFAULT_FLAGS.put(SETTINGS_ENABLE_MONITOR_PHANTOM_PROCS, "true");
         DEFAULT_FLAGS.put(SETTINGS_APP_ALLOW_DARK_THEME_ACTIVATION_AT_BEDTIME, "true");
-        DEFAULT_FLAGS.put(SETTINGS_HIDE_SECOND_LAYER_PAGE_NAVIGATE_UP_BUTTON_IN_TWO_PANE, "true");
         DEFAULT_FLAGS.put(SETTINGS_AUTO_TEXT_WRAPPING, "false");
         DEFAULT_FLAGS.put(SETTINGS_NEW_KEYBOARD_UI, "false");
         DEFAULT_FLAGS.put(SETTINGS_NEW_KEYBOARD_SHORTCUT, "false");
@@ -189,7 +181,6 @@ public class FeatureFlagUtils {
         PERSISTENT_FLAGS.add(SETTINGS_SUPPORT_LARGE_SCREEN);
         PERSISTENT_FLAGS.add(SETTINGS_ENABLE_MONITOR_PHANTOM_PROCS);
         PERSISTENT_FLAGS.add(SETTINGS_APP_ALLOW_DARK_THEME_ACTIVATION_AT_BEDTIME);
-        PERSISTENT_FLAGS.add(SETTINGS_HIDE_SECOND_LAYER_PAGE_NAVIGATE_UP_BUTTON_IN_TWO_PANE);
         PERSISTENT_FLAGS.add(SETTINGS_AUTO_TEXT_WRAPPING);
         PERSISTENT_FLAGS.add(SETTINGS_NEW_KEYBOARD_UI);
         PERSISTENT_FLAGS.add(SETTINGS_NEW_KEYBOARD_SHORTCUT);
