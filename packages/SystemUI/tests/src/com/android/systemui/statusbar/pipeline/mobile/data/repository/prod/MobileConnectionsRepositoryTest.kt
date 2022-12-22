@@ -34,12 +34,15 @@ import com.android.internal.telephony.PhoneConstants
 import com.android.settingslib.R
 import com.android.settingslib.mobile.MobileMappings
 import com.android.systemui.SysuiTestCase
+import com.android.systemui.log.table.TableLogBuffer
+import com.android.systemui.log.table.TableLogBufferFactory
 import com.android.systemui.statusbar.pipeline.mobile.data.model.MobileConnectivityModel
 import com.android.systemui.statusbar.pipeline.mobile.data.model.SubscriptionModel
 import com.android.systemui.statusbar.pipeline.mobile.util.FakeMobileMappingsProxy
 import com.android.systemui.statusbar.pipeline.shared.ConnectivityPipelineLogger
 import com.android.systemui.util.mockito.any
 import com.android.systemui.util.mockito.argumentCaptor
+import com.android.systemui.util.mockito.eq
 import com.android.systemui.util.mockito.mock
 import com.android.systemui.util.mockito.whenever
 import com.android.systemui.util.settings.FakeSettings
@@ -57,6 +60,7 @@ import org.junit.Assert.assertTrue
 import org.junit.Before
 import org.junit.Test
 import org.mockito.ArgumentMatchers.anyInt
+import org.mockito.ArgumentMatchers.anyString
 import org.mockito.Mock
 import org.mockito.Mockito.verify
 import org.mockito.MockitoAnnotations
@@ -72,6 +76,7 @@ class MobileConnectionsRepositoryTest : SysuiTestCase() {
     @Mock private lateinit var subscriptionManager: SubscriptionManager
     @Mock private lateinit var telephonyManager: TelephonyManager
     @Mock private lateinit var logger: ConnectivityPipelineLogger
+    @Mock private lateinit var logBufferFactory: TableLogBufferFactory
 
     private val mobileMappings = FakeMobileMappingsProxy()
 
@@ -89,6 +94,10 @@ class MobileConnectionsRepositoryTest : SysuiTestCase() {
             }
         }
 
+        whenever(logBufferFactory.create(anyString(), anyInt())).thenAnswer { _ ->
+            mock<TableLogBuffer>()
+        }
+
         connectionFactory =
             MobileConnectionRepositoryImpl.Factory(
                 fakeBroadcastDispatcher,
@@ -99,6 +108,7 @@ class MobileConnectionsRepositoryTest : SysuiTestCase() {
                 logger = logger,
                 mobileMappingsProxy = mobileMappings,
                 scope = scope,
+                logFactory = logBufferFactory,
             )
 
         underTest =
@@ -266,6 +276,32 @@ class MobileConnectionsRepositoryTest : SysuiTestCase() {
             assertThrows(IllegalArgumentException::class.java) {
                 underTest.getRepoForSubId(SUB_1_ID)
             }
+
+            job.cancel()
+        }
+
+    @Test
+    fun `connection repository - log buffer contains sub id in its name`() =
+        runBlocking(IMMEDIATE) {
+            val job = underTest.subscriptions.launchIn(this)
+
+            whenever(subscriptionManager.completeActiveSubscriptionInfoList)
+                .thenReturn(listOf(SUB_1, SUB_2))
+            getSubscriptionCallback().onSubscriptionsChanged()
+
+            // Get repos to trigger creation
+            underTest.getRepoForSubId(SUB_1_ID)
+            verify(logBufferFactory)
+                .create(
+                    eq(MobileConnectionRepositoryImpl.tableBufferLogName(SUB_1_ID)),
+                    anyInt(),
+                )
+            underTest.getRepoForSubId(SUB_2_ID)
+            verify(logBufferFactory)
+                .create(
+                    eq(MobileConnectionRepositoryImpl.tableBufferLogName(SUB_2_ID)),
+                    anyInt(),
+                )
 
             job.cancel()
         }

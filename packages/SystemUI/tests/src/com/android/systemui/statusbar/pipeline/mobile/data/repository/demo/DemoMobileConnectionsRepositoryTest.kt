@@ -23,6 +23,8 @@ import androidx.test.filters.SmallTest
 import com.android.settingslib.SignalIcon
 import com.android.settingslib.mobile.TelephonyIcons.THREE_G
 import com.android.systemui.SysuiTestCase
+import com.android.systemui.dump.DumpManager
+import com.android.systemui.log.table.TableLogBufferFactory
 import com.android.systemui.statusbar.pipeline.mobile.data.model.DataConnectionState
 import com.android.systemui.statusbar.pipeline.mobile.data.model.MobileConnectionModel
 import com.android.systemui.statusbar.pipeline.mobile.data.model.NetworkNameModel
@@ -32,6 +34,7 @@ import com.android.systemui.statusbar.pipeline.mobile.data.repository.demo.model
 import com.android.systemui.statusbar.pipeline.shared.data.model.toMobileDataActivityModel
 import com.android.systemui.util.mockito.mock
 import com.android.systemui.util.mockito.whenever
+import com.android.systemui.util.time.FakeSystemClock
 import com.google.common.truth.Truth.assertThat
 import junit.framework.Assert
 import kotlinx.coroutines.ExperimentalCoroutinesApi
@@ -47,6 +50,9 @@ import org.junit.Test
 @OptIn(ExperimentalCoroutinesApi::class)
 @SmallTest
 class DemoMobileConnectionsRepositoryTest : SysuiTestCase() {
+    private val dumpManager: DumpManager = mock()
+    private val logFactory = TableLogBufferFactory(dumpManager, FakeSystemClock())
+
     private val testDispatcher = UnconfinedTestDispatcher()
     private val testScope = TestScope(testDispatcher)
 
@@ -68,6 +74,7 @@ class DemoMobileConnectionsRepositoryTest : SysuiTestCase() {
                 dataSource = mockDataSource,
                 scope = testScope.backgroundScope,
                 context = context,
+                logFactory = logFactory,
             )
 
         underTest.startProcessingCommands()

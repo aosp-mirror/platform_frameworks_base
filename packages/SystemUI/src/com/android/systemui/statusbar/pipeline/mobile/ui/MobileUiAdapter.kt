@@ -20,7 +20,6 @@ import com.android.systemui.CoreStartable
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.dagger.qualifiers.Application
 import com.android.systemui.statusbar.phone.StatusBarIconController
-import com.android.systemui.statusbar.phone.StatusBarIconController.IconManager
 import com.android.systemui.statusbar.pipeline.StatusBarPipelineFlags
 import com.android.systemui.statusbar.pipeline.mobile.domain.interactor.MobileIconsInteractor
 import com.android.systemui.statusbar.pipeline.mobile.ui.viewmodel.MobileIconsViewModel
@@ -70,6 +69,9 @@ constructor(
     private val mobileSubIdsState: StateFlow<List<Int>> =
         mobileSubIds.stateIn(scope, SharingStarted.WhileSubscribed(), listOf())
 
+    /** In order to keep the logs tame, we will reuse the same top-level mobile icons view model */
+    val mobileIconsViewModel = iconsViewModelFactory.create(mobileSubIdsState)
+
     override fun start() {
         // Only notify the icon controller if we want to *render* the new icons.
         // Note that this flow may still run if
@@ -81,12 +83,4 @@ constructor(
             }
         }
     }
-
-    /**
-     * Create a MobileIconsViewModel for a given [IconManager], and bind it to to the manager's
-     * lifecycle. This will start collecting on [mobileSubIdsState] and link our new pipeline with
-     * the old view system.
-     */
-    fun createMobileIconsViewModel(): MobileIconsViewModel =
-        iconsViewModelFactory.create(mobileSubIdsState)
 }

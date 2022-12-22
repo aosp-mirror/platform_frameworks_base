@@ -24,6 +24,8 @@ import androidx.test.filters.SmallTest
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.demomode.DemoMode
 import com.android.systemui.demomode.DemoModeController
+import com.android.systemui.dump.DumpManager
+import com.android.systemui.log.table.TableLogBufferFactory
 import com.android.systemui.statusbar.pipeline.mobile.data.model.SubscriptionModel
 import com.android.systemui.statusbar.pipeline.mobile.data.repository.demo.DemoMobileConnectionsRepository
 import com.android.systemui.statusbar.pipeline.mobile.data.repository.demo.DemoModeMobileConnectionDataSource
@@ -37,6 +39,7 @@ import com.android.systemui.util.mockito.kotlinArgumentCaptor
 import com.android.systemui.util.mockito.mock
 import com.android.systemui.util.mockito.whenever
 import com.android.systemui.util.settings.FakeSettings
+import com.android.systemui.util.time.FakeSystemClock
 import com.google.common.truth.Truth.assertThat
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -69,12 +72,14 @@ class MobileRepositorySwitcherTest : SysuiTestCase() {
     private lateinit var realRepo: MobileConnectionsRepositoryImpl
     private lateinit var demoRepo: DemoMobileConnectionsRepository
     private lateinit var mockDataSource: DemoModeMobileConnectionDataSource
+    private lateinit var logFactory: TableLogBufferFactory
 
     @Mock private lateinit var connectivityManager: ConnectivityManager
     @Mock private lateinit var subscriptionManager: SubscriptionManager
     @Mock private lateinit var telephonyManager: TelephonyManager
     @Mock private lateinit var logger: ConnectivityPipelineLogger
     @Mock private lateinit var demoModeController: DemoModeController
+    @Mock private lateinit var dumpManager: DumpManager
 
     private val globalSettings = FakeSettings()
     private val fakeNetworkEventsFlow = MutableStateFlow<FakeNetworkEventModel?>(null)
@@ -85,6 +90,8 @@ class MobileRepositorySwitcherTest : SysuiTestCase() {
     @Before
     fun setUp() {
         MockitoAnnotations.initMocks(this)
+
+        logFactory = TableLogBufferFactory(dumpManager, FakeSystemClock())
 
         // Never start in demo mode
         whenever(demoModeController.isInDemoMode).thenReturn(false)
@@ -114,6 +121,7 @@ class MobileRepositorySwitcherTest : SysuiTestCase() {
                 dataSource = mockDataSource,
                 scope = scope,
                 context = context,
+                logFactory = logFactory,
             )
 
         underTest =

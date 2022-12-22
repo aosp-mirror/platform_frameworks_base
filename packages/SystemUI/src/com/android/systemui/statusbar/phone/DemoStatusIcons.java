@@ -60,10 +60,12 @@ public class DemoStatusIcons extends StatusIconContainer implements DemoMode, Da
     private int mColor;
 
     private final MobileIconsViewModel mMobileIconsViewModel;
+    private final StatusBarLocation mLocation;
 
     public DemoStatusIcons(
             LinearLayout statusIcons,
             MobileIconsViewModel mobileIconsViewModel,
+            StatusBarLocation location,
             int iconSize
     ) {
         super(statusIcons.getContext());
@@ -71,6 +73,7 @@ public class DemoStatusIcons extends StatusIconContainer implements DemoMode, Da
         mIconSize = iconSize;
         mColor = DarkIconDispatcher.DEFAULT_ICON_TINT;
         mMobileIconsViewModel = mobileIconsViewModel;
+        mLocation = location;
 
         if (statusIcons instanceof StatusIconContainer) {
             setShouldRestrictIcons(((StatusIconContainer) statusIcons).isRestrictingIcons());
@@ -287,7 +290,7 @@ public class DemoStatusIcons extends StatusIconContainer implements DemoMode, Da
         ModernStatusBarMobileView view = ModernStatusBarMobileView.constructAndBind(
                 mobileContext,
                 "mobile",
-                mMobileIconsViewModel.viewModelForSub(subId)
+                mMobileIconsViewModel.viewModelForSub(subId, mLocation)
         );
 
         // mobile always goes at the end
