@@ -219,11 +219,10 @@ public class AmbientContextManagerService extends
 
         List<AmbientContextManagerPerUserService> serviceList =
                 new ArrayList<>(serviceNames.length);
-        if (!isDefaultServiceEnabled(resolvedUserId)) {
+        if (serviceNames.length == 2) {
             Slog.i(TAG, "Not using default services, "
                     + "services provided for testing should be exactly two services.");
-            if (serviceNames.length == 2) {
-                // Expecting two services for testing, first being the default and second wearable.
+            if (!isDefaultService(serviceNames[0]) && !isDefaultWearableService(serviceNames[1])) {
                 serviceList.add(new DefaultAmbientContextManagerPerUserService(
                         this, mLock, resolvedUserId,
                         AmbientContextManagerPerUserService.ServiceType.DEFAULT, serviceNames[0]));
@@ -231,10 +230,10 @@ public class AmbientContextManagerService extends
                         this, mLock, resolvedUserId,
                         AmbientContextManagerPerUserService.ServiceType.WEARABLE,
                         serviceNames[1]));
-            } else {
-                Slog.i(TAG, "Incorrect number of services provided for testing.");
             }
             return serviceList;
+        } else {
+            Slog.i(TAG, "Incorrect number of services provided for testing.");
         }
 
         for (String serviceName : serviceNames) {
@@ -426,6 +425,24 @@ public class AmbientContextManagerService extends
         }
 
         return AmbientContextManagerPerUserService.ServiceType.DEFAULT;
+    }
+
+    private boolean isDefaultService(String serviceName) {
+        final String defaultService = mContext.getResources()
+                .getString(R.string.config_defaultAmbientContextDetectionService);
+        if (defaultService != null && defaultService.equals(serviceName)) {
+            return true;
+        }
+        return false;
+    }
+
+    private boolean isDefaultWearableService(String serviceName) {
+        final String wearableService = mContext.getResources()
+                .getString(R.string.config_defaultWearableSensingService);
+        if (wearableService != null && wearableService.equals(serviceName)) {
+            return true;
+        }
+        return false;
     }
 
     private AmbientContextManagerPerUserService getServiceForType(int userId,
