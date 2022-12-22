@@ -6505,15 +6505,6 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
     }
 
     /**
-     * The MediaProjection instance is torn down.
-     */
-    @VisibleForTesting void stopMediaProjection() {
-        if (mContentRecorder != null) {
-            mContentRecorder.stopMediaProjection();
-        }
-    }
-
-    /**
      * Sets the incoming recording session. Should only be used when starting to record on
      * this display; stopping recording is handled separately when the display is destroyed.
      *

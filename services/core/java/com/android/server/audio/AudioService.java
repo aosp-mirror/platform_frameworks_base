@@ -11510,6 +11510,11 @@ public class AudioService extends IAudioService.Stub
             public void onCapturedContentResize(int width, int height) {
                 // Ignore resize of the captured content.
             }
+
+            @Override
+            public void onCapturedContentVisibilityChanged(boolean isVisible) {
+                // Ignore visibility changes of the captured content.
+            }
         };
         UnregisterOnStopCallback mProjectionCallback;
 

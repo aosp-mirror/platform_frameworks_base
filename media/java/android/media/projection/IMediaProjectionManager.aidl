@@ -48,7 +48,11 @@ interface IMediaProjectionManager {
     void notifyActiveProjectionCapturedContentResized(int width, int height);
 
     @JavaPassthrough(annotation = "@android.annotation.RequiresPermission(android.Manifest"
-            + ".permission.MANAGE_MEDIA_PROJECTION)")
+                + ".permission.MANAGE_MEDIA_PROJECTION)")
+    void notifyActiveProjectionCapturedContentVisibilityChanged(boolean isVisible);
+
+    @JavaPassthrough(annotation = "@android.annotation.RequiresPermission(android.Manifest"
+                + ".permission.MANAGE_MEDIA_PROJECTION)")
     void addCallback(IMediaProjectionWatcherCallback callback);
 
     @JavaPassthrough(annotation = "@android.annotation.RequiresPermission(android.Manifest"
