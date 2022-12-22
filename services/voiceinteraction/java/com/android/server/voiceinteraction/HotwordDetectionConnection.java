@@ -25,6 +25,7 @@ import static com.android.internal.util.FrameworkStatsLog.HOTWORD_DETECTOR_EVENT
 import static com.android.internal.util.FrameworkStatsLog.HOTWORD_DETECTOR_KEYPHRASE_TRIGGERED__DETECTOR_TYPE__NORMAL_DETECTOR;
 import static com.android.internal.util.FrameworkStatsLog.HOTWORD_DETECTOR_KEYPHRASE_TRIGGERED__DETECTOR_TYPE__TRUSTED_DETECTOR_DSP;
 import static com.android.internal.util.FrameworkStatsLog.HOTWORD_DETECTOR_KEYPHRASE_TRIGGERED__RESULT__KEYPHRASE_TRIGGER;
+import static com.android.internal.util.FrameworkStatsLog.HOTWORD_DETECTOR_KEYPHRASE_TRIGGERED__RESULT__SERVICE_CRASH;
 
 import android.annotation.NonNull;
 import android.annotation.Nullable;
@@ -541,6 +542,11 @@ final class HotwordDetectionConnection {
                             HotwordDetectorSession.HOTWORD_DETECTION_SERVICE_DIED);
                 });
             }
+            // Can improve to log exit reason if needed
+            HotwordMetricsLogger.writeKeyphraseTriggerEvent(
+                    mDetectorType,
+                    HOTWORD_DETECTOR_KEYPHRASE_TRIGGERED__RESULT__SERVICE_CRASH,
+                    mVoiceInteractionServiceUid);
         }
 
         @Override
