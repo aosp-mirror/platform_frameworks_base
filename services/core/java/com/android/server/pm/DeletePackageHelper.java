@@ -186,7 +186,7 @@ final class DeletePackageHelper {
                 SharedLibraryInfo libraryInfo = null;
                 if (pkg.getStaticSharedLibraryName() != null) {
                     libraryInfo = computer.getSharedLibraryInfo(pkg.getStaticSharedLibraryName(),
-                            pkg.getStaticSharedLibVersion());
+                            pkg.getStaticSharedLibraryVersion());
                 } else if (pkg.getSdkLibraryName() != null) {
                     libraryInfo = computer.getSharedLibraryInfo(pkg.getSdkLibraryName(),
                             pkg.getSdkLibVersionMajor());
