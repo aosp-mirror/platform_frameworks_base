@@ -9401,8 +9401,34 @@
         <attr name="label" />
         <!-- The key character map file resource. -->
         <attr name="keyboardLayout" format="reference" />
-        <!-- The locales the given keyboard layout corresponds to. -->
-        <attr name="locale" format="string" />
+        <!-- The locales the given keyboard layout corresponds to. This is a list of
+             BCP-47 conformant language tags separated by the delimiter ',' or '|'.
+             Some examples of language tags are: en-US, zh-Hans-CN, el-Grek-polyton.
+             It includes information for language code, country code, variant, and script
+             code like ‘Latn’, ‘Cyrl’, etc. -->
+        <attr name="keyboardLocale" format="string"/>
+        <!-- The layout type of the given keyboardLayout.
+             NOTE: The enum to int value mapping must remain stable -->
+        <attr name="keyboardLayoutType" format="enum">
+            <!-- Qwerty-based keyboard layout. -->
+            <enum name="qwerty" value="1" />
+            <!-- Qwertz-based keyboard layout. -->
+            <enum name="qwertz" value="2" />
+            <!-- Azerty-based keyboard layout. -->
+            <enum name="azerty" value="3" />
+            <!-- Dvorak keyboard layout. -->
+            <enum name="dvorak" value="4" />
+            <!-- Colemak keyboard layout. -->
+            <enum name="colemak" value="5" />
+            <!-- Workman keyboard layout. -->
+            <enum name="workman" value="6" />
+            <!-- Turkish-Q keyboard layout. -->
+            <enum name="turkish_q" value="7" />
+            <!-- Turkish-F keyboard layout. -->
+            <enum name="turkish_f" value="8" />
+            <!-- Keyboard layout that has been enhanced with a large number of extra characters. -->
+            <enum name="extended" value="9" />
+        </attr>
         <!-- The vendor ID of the hardware the given layout corresponds to. @hide -->
         <attr name="vendorId" format="integer" />
         <!-- The product ID of the hardware the given layout corresponds to. @hide -->
