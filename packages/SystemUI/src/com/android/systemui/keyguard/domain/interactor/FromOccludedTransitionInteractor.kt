@@ -80,7 +80,7 @@ constructor(
                                 name,
                                 KeyguardState.OCCLUDED,
                                 KeyguardState.LOCKSCREEN,
-                                getAnimator(),
+                                getAnimator(TO_LOCKSCREEN_DURATION),
                             )
                         )
                     }
@@ -97,6 +97,6 @@ constructor(
 
     companion object {
         private val DEFAULT_DURATION = 500.milliseconds
-        val TO_LOCKSCREEN_DURATION = 1183.milliseconds
+        val TO_LOCKSCREEN_DURATION = 933.milliseconds
     }
 }
