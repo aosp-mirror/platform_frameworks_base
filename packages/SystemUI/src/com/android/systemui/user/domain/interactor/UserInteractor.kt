@@ -115,9 +115,7 @@ constructor(
     private val callbackMutex = Mutex()
     private val callbacks = mutableSetOf<UserCallback>()
     private val userInfos: Flow<List<UserInfo>> =
-        repository.userInfos.map { userInfos ->
-            userInfos.filter { it.isFull }
-        }
+        repository.userInfos.map { userInfos -> userInfos.filter { it.isFull } }
 
     /** List of current on-device users to select from. */
     val users: Flow<List<UserModel>>
@@ -493,7 +491,7 @@ constructor(
 
     fun showUserSwitcher(context: Context, expandable: Expandable) {
         if (!featureFlags.isEnabled(Flags.FULL_SCREEN_USER_SWITCHER)) {
-            showDialog(ShowDialogRequestModel.ShowUserSwitcherDialog)
+            showDialog(ShowDialogRequestModel.ShowUserSwitcherDialog(expandable))
             return
         }
 
