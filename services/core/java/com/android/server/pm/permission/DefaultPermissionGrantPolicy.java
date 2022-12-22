@@ -1800,6 +1800,15 @@ final class DefaultPermissionGrantPolicy {
             PermissionState permState;
             if (permIdx >= 0) {
                 permState = uidState.valueAt(permIdx);
+                // Quick and dirty fix for shared UID packages - we should grant permission with the
+                // correct package even if a previous checkPermission() used a package that isn't
+                // requesting the permission. Ideally we should use package manager snapshot and get
+                // rid of this entire inner class.
+                if (!ArrayUtils.contains(permState.mPkgRequestingPerm.requestedPermissions,
+                        permission) && ArrayUtils.contains(pkg.requestedPermissions,
+                        permission)) {
+                    permState.mPkgRequestingPerm = pkg;
+                }
             } else {
                 permState = new PermissionState(permission, pkg, user);
                 uidState.put(permission, permState);
@@ -1887,7 +1896,7 @@ final class DefaultPermissionGrantPolicy {
          */
         private class PermissionState {
             private final @NonNull String mPermission;
-            private final @NonNull PackageInfo mPkgRequestingPerm;
+            private @NonNull PackageInfo mPkgRequestingPerm;
             private final @NonNull UserHandle mUser;
 
             /** Permission flags when the state was created */

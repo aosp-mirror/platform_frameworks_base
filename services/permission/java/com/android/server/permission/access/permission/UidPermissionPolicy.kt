@@ -271,7 +271,12 @@ class UidPermissionPolicy : SchemePolicy() {
                     this.packageName = packageName
                     protectionLevel = oldPermission.permissionInfo.protectionLevel
                 }
-                val newPermission = Permission(newPermissionInfo, false, oldPermission.type, 0)
+                // Different from the old implementation, which removes the GIDs upon permission
+                // adoption, but adds them back on the next boot, we now just consistently keep the
+                // GIDs.
+                val newPermission = oldPermission.copy(
+                    permissionInfo = newPermissionInfo, isReconciled = false, appId = 0
+                )
                 permissions.setValueAt(permissionIndex, newPermission)
                 systemState.requestWrite()
                 changedPermissionNames += permissionName
@@ -385,7 +390,10 @@ class UidPermissionPolicy : SchemePolicy() {
                 }
                 if (oldPermission.type == Permission.TYPE_CONFIG && !oldPermission.isReconciled) {
                     // It's a config permission and has no owner, take ownership now.
-                    Permission(newPermissionInfo, true, Permission.TYPE_CONFIG, packageState.appId)
+                    oldPermission.copy(
+                        permissionInfo = newPermissionInfo, isReconciled = true,
+                        appId = packageState.appId
+                    )
                 } else if (systemState.packageStates[oldPackageName]?.isSystem != true) {
                     Log.w(
                         LOG_TAG, "Overriding permission $permissionName with new declaration in" +
@@ -398,8 +406,12 @@ class UidPermissionPolicy : SchemePolicy() {
                             setPermissionFlags(appId, userId, permissionName, 0)
                         }
                     }
+                    // Different from the old implementation, which removes the GIDs upon permission
+                    // override, but adds them back on the next boot, we now just consistently keep
+                    // the GIDs.
                     Permission(
-                        newPermissionInfo, true, Permission.TYPE_MANIFEST, packageState.appId
+                        newPermissionInfo, true, Permission.TYPE_MANIFEST, packageState.appId,
+                        oldPermission.gids, oldPermission.areGidsPerUser
                     )
                 } else {
                     Log.w(
@@ -413,7 +425,17 @@ class UidPermissionPolicy : SchemePolicy() {
                 // Different from the old implementation, which doesn't update the permission
                 // definition upon app update, but does update it on the next boot, we now
                 // consistently update the permission definition upon app update.
-                Permission(newPermissionInfo, true, Permission.TYPE_MANIFEST, packageState.appId)
+                @Suppress("IfThenToElvis")
+                if (oldPermission != null) {
+                    oldPermission.copy(
+                        permissionInfo = newPermissionInfo, isReconciled = true,
+                        appId = packageState.appId
+                    )
+                } else {
+                    Permission(
+                        newPermissionInfo, true, Permission.TYPE_MANIFEST, packageState.appId
+                    )
+                }
             }
 
             if (parsedPermission.isTree) {
@@ -498,7 +520,7 @@ class UidPermissionPolicy : SchemePolicy() {
             // TODO: STOPSHIP: Retain permissions requested by disabled system packages.
         }
         newState.userStates.forEachIndexed { _, userId, userState ->
-            userState.uidPermissionFlags[appId].forEachReversedIndexed { _, permissionName, _ ->
+            userState.uidPermissionFlags[appId]?.forEachReversedIndexed { _, permissionName, _ ->
                 if (permissionName !in requestedPermissions) {
                     setPermissionFlags(appId, userId, permissionName, 0)
                 }
@@ -852,10 +874,12 @@ class UidPermissionPolicy : SchemePolicy() {
         permissionName: String
     ): Boolean? {
         val permissionAllowlist = newState.systemState.permissionAllowlist
-        // TODO(b/261913353): STOPSHIP: Add AndroidPackage.apexModuleName. The below is only for
-        //  passing compilation but won't actually work.
+        // TODO(b/261913353): STOPSHIP: Add AndroidPackage.apexModuleName.
         // val apexModuleName = androidPackage.apexModuleName
-        val apexModuleName = packageState.packageName
+        val apexModuleName = permissionAllowlist.apexPrivilegedAppAllowlists
+            .firstNotNullOfOrNullIndexed { _, apexModuleName, apexAllowlist ->
+                if (packageState.packageName in apexAllowlist) apexModuleName else null
+            }
         val packageName = packageState.packageName
         return when {
             packageState.isVendor -> permissionAllowlist.getVendorPrivilegedAppAllowlistState(
@@ -901,7 +925,7 @@ class UidPermissionPolicy : SchemePolicy() {
         return targetSdkVersion
     }
 
-    private fun MutateStateScope.anyPackageInAppId(
+    private inline fun MutateStateScope.anyPackageInAppId(
         appId: Int,
         state: AccessState = newState,
         predicate: (PackageState) -> Boolean
@@ -913,7 +937,7 @@ class UidPermissionPolicy : SchemePolicy() {
         }
     }
 
-    private fun MutateStateScope.forEachPackageInAppId(
+    private inline fun MutateStateScope.forEachPackageInAppId(
         appId: Int,
         state: AccessState = newState,
         action: (PackageState) -> Unit

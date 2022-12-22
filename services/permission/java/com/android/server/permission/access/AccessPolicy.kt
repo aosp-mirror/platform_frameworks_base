@@ -82,6 +82,11 @@ class AccessPolicy private constructor(
             this.permissionAllowlist = permissionAllowlist
             this.implicitToSourcePermissions = implicitToSourcePermissions
         }
+        state.userStates.apply {
+            userIds.forEachIndexed { _, userId ->
+                this[userId] = UserState()
+            }
+        }
     }
 
     fun GetStateScope.onStateMutated() {
@@ -115,12 +120,29 @@ class AccessPolicy private constructor(
     fun MutateStateScope.onStorageVolumeMounted(
         packageStates: Map<String, PackageState>,
         disabledSystemPackageStates: Map<String, PackageState>,
+        knownPackages: IntMap<Array<String>>,
         volumeUuid: String?,
         isSystemUpdated: Boolean
     ) {
+        val addedAppIds = IntSet()
         newState.systemState.apply {
             this.packageStates = packageStates
             this.disabledSystemPackageStates = disabledSystemPackageStates
+            packageStates.forEach { (packageName, packageState) ->
+                if (packageState.volumeUuid == volumeUuid) {
+                    val appId = packageState.appId
+                    appIds.getOrPut(appId) {
+                        addedAppIds += appId
+                        IndexedListSet()
+                    } += packageName
+                }
+            }
+            this.knownPackages = knownPackages
+        }
+        addedAppIds.forEachIndexed { _, appId ->
+            forEachSchemePolicy {
+                with(it) { onAppIdAdded(appId) }
+            }
         }
         forEachSchemePolicy {
             with(it) { onStorageVolumeMounted(volumeUuid, isSystemUpdated) }
@@ -130,6 +152,7 @@ class AccessPolicy private constructor(
     fun MutateStateScope.onPackageAdded(
         packageStates: Map<String, PackageState>,
         disabledSystemPackageStates: Map<String, PackageState>,
+        knownPackages: IntMap<Array<String>>,
         packageName: String
     ) {
         val packageState = packageStates[packageName]
@@ -145,7 +168,8 @@ class AccessPolicy private constructor(
             appIds.getOrPut(appId) {
                 isAppIdAdded = true
                 IndexedListSet()
-            }.add(packageName)
+            } += packageName
+            this.knownPackages = knownPackages
         }
         if (isAppIdAdded) {
             forEachSchemePolicy {
@@ -160,6 +184,7 @@ class AccessPolicy private constructor(
     fun MutateStateScope.onPackageRemoved(
         packageStates: Map<String, PackageState>,
         disabledSystemPackageStates: Map<String, PackageState>,
+        knownPackages: IntMap<Array<String>>,
         packageName: String,
         appId: Int
     ) {
@@ -178,6 +203,7 @@ class AccessPolicy private constructor(
                     isAppIdRemoved = true
                 }
             }
+            this.knownPackages = knownPackages
         }
         forEachSchemePolicy {
             with(it) { onPackageRemoved(packageName, appId) }
@@ -192,12 +218,14 @@ class AccessPolicy private constructor(
     fun MutateStateScope.onPackageInstalled(
         packageStates: Map<String, PackageState>,
         disabledSystemPackageStates: Map<String, PackageState>,
+        knownPackages: IntMap<Array<String>>,
         packageName: String,
         userId: Int
     ) {
         newState.systemState.apply {
             this.packageStates = packageStates
             this.disabledSystemPackageStates = disabledSystemPackageStates
+            this.knownPackages = knownPackages
         }
         val packageState = packageStates[packageName]
         // TODO(zhanghai): STOPSHIP: Remove check before feature enable.
@@ -212,6 +240,7 @@ class AccessPolicy private constructor(
     fun MutateStateScope.onPackageUninstalled(
         packageStates: Map<String, PackageState>,
         disabledSystemPackageStates: Map<String, PackageState>,
+        knownPackages: IntMap<Array<String>>,
         packageName: String,
         appId: Int,
         userId: Int
@@ -219,6 +248,7 @@ class AccessPolicy private constructor(
         newState.systemState.apply {
             this.packageStates = packageStates
             this.disabledSystemPackageStates = disabledSystemPackageStates
+            this.knownPackages = knownPackages
         }
         forEachSchemePolicy {
             with(it) { onPackageUninstalled(packageName, appId, userId) }

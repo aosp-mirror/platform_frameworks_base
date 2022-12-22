@@ -88,6 +88,7 @@ class AccessCheckingService(context: Context) : SystemService(context) {
             configPermissions, privilegedPermissionAllowlistPackages, permissionAllowlist,
             implicitToSourcePermissions
         )
+        persistence.initialize()
         persistence.read(state)
         this.state = state
 
@@ -98,43 +99,6 @@ class AccessCheckingService(context: Context) : SystemService(context) {
         appOpService.initialize()
         permissionService.initialize()
     }
-
-    private val PackageManagerInternal.knownPackages: IntMap<Array<String>>
-        get() = IntMap<Array<String>>().apply {
-            this[KnownPackages.PACKAGE_INSTALLER] = getKnownPackageNames(
-                KnownPackages.PACKAGE_INSTALLER, UserHandle.USER_SYSTEM
-            )
-            this[KnownPackages.PACKAGE_PERMISSION_CONTROLLER] = getKnownPackageNames(
-                KnownPackages.PACKAGE_PERMISSION_CONTROLLER, UserHandle.USER_SYSTEM
-            )
-            this[KnownPackages.PACKAGE_VERIFIER] = getKnownPackageNames(
-                KnownPackages.PACKAGE_VERIFIER, UserHandle.USER_SYSTEM
-            )
-            this[KnownPackages.PACKAGE_SETUP_WIZARD] = getKnownPackageNames(
-                KnownPackages.PACKAGE_SETUP_WIZARD, UserHandle.USER_SYSTEM
-            )
-            this[KnownPackages.PACKAGE_SYSTEM_TEXT_CLASSIFIER] = getKnownPackageNames(
-                KnownPackages.PACKAGE_SYSTEM_TEXT_CLASSIFIER, UserHandle.USER_SYSTEM
-            )
-            this[KnownPackages.PACKAGE_CONFIGURATOR] = getKnownPackageNames(
-                KnownPackages.PACKAGE_CONFIGURATOR, UserHandle.USER_SYSTEM
-            )
-            this[KnownPackages.PACKAGE_INCIDENT_REPORT_APPROVER] = getKnownPackageNames(
-                KnownPackages.PACKAGE_INCIDENT_REPORT_APPROVER, UserHandle.USER_SYSTEM
-            )
-            this[KnownPackages.PACKAGE_APP_PREDICTOR] = getKnownPackageNames(
-                KnownPackages.PACKAGE_APP_PREDICTOR, UserHandle.USER_SYSTEM
-            )
-            this[KnownPackages.PACKAGE_COMPANION] = getKnownPackageNames(
-                KnownPackages.PACKAGE_COMPANION, UserHandle.USER_SYSTEM
-            )
-            this[KnownPackages.PACKAGE_RETAIL_DEMO] = getKnownPackageNames(
-                KnownPackages.PACKAGE_RETAIL_DEMO, UserHandle.USER_SYSTEM
-            )
-            this[KnownPackages.PACKAGE_RECENTS] = getKnownPackageNames(
-                KnownPackages.PACKAGE_RECENTS, UserHandle.USER_SYSTEM
-            )
-        }
 
     private val SystemConfig.isLeanback: Boolean
         get() = PackageManager.FEATURE_LEANBACK in availableFeatures
@@ -187,10 +151,12 @@ class AccessCheckingService(context: Context) : SystemService(context) {
 
     internal fun onStorageVolumeMounted(volumeUuid: String?, isSystemUpdated: Boolean) {
         val (packageStates, disabledSystemPackageStates) = packageManagerLocal.allPackageStates
+        val knownPackages = packageManagerInternal.knownPackages
         mutateState {
             with(policy) {
                 onStorageVolumeMounted(
-                    packageStates, disabledSystemPackageStates, volumeUuid, isSystemUpdated
+                    packageStates, disabledSystemPackageStates, knownPackages, volumeUuid,
+                    isSystemUpdated
                 )
             }
         }
@@ -198,35 +164,48 @@ class AccessCheckingService(context: Context) : SystemService(context) {
 
     internal fun onPackageAdded(packageName: String) {
         val (packageStates, disabledSystemPackageStates) = packageManagerLocal.allPackageStates
+        val knownPackages = packageManagerInternal.knownPackages
         mutateState {
-            with(policy) { onPackageAdded(packageStates, disabledSystemPackageStates, packageName) }
+            with(policy) {
+                onPackageAdded(
+                    packageStates, disabledSystemPackageStates, knownPackages, packageName
+                )
+            }
         }
     }
 
     internal fun onPackageRemoved(packageName: String, appId: Int) {
         val (packageStates, disabledSystemPackageStates) = packageManagerLocal.allPackageStates
+        val knownPackages = packageManagerInternal.knownPackages
         mutateState {
             with(policy) {
-                onPackageRemoved(packageStates, disabledSystemPackageStates, packageName, appId)
+                onPackageRemoved(
+                    packageStates, disabledSystemPackageStates, knownPackages, packageName, appId
+                )
             }
         }
     }
 
     internal fun onPackageInstalled(packageName: String, userId: Int) {
         val (packageStates, disabledSystemPackageStates) = packageManagerLocal.allPackageStates
+        val knownPackages = packageManagerInternal.knownPackages
         mutateState {
             with(policy) {
-                onPackageInstalled(packageStates, disabledSystemPackageStates, packageName, userId)
+                onPackageInstalled(
+                    packageStates, disabledSystemPackageStates, knownPackages, packageName, userId
+                )
             }
         }
     }
 
     internal fun onPackageUninstalled(packageName: String, appId: Int, userId: Int) {
         val (packageStates, disabledSystemPackageStates) = packageManagerLocal.allPackageStates
+        val knownPackages = packageManagerInternal.knownPackages
         mutateState {
             with(policy) {
                 onPackageUninstalled(
-                    packageStates, disabledSystemPackageStates, packageName, appId, userId
+                    packageStates, disabledSystemPackageStates, knownPackages, packageName, appId,
+                    userId
                 )
             }
         }
@@ -235,6 +214,43 @@ class AccessCheckingService(context: Context) : SystemService(context) {
     private val PackageManagerLocal.allPackageStates:
         Pair<Map<String, PackageState>, Map<String, PackageState>>
         get() = withUnfilteredSnapshot().use { it.packageStates to it.disabledSystemPackageStates }
+
+    private val PackageManagerInternal.knownPackages: IntMap<Array<String>>
+        get() = IntMap<Array<String>>().apply {
+            this[KnownPackages.PACKAGE_INSTALLER] = getKnownPackageNames(
+                KnownPackages.PACKAGE_INSTALLER, UserHandle.USER_SYSTEM
+            )
+            this[KnownPackages.PACKAGE_PERMISSION_CONTROLLER] = getKnownPackageNames(
+                KnownPackages.PACKAGE_PERMISSION_CONTROLLER, UserHandle.USER_SYSTEM
+            )
+            this[KnownPackages.PACKAGE_VERIFIER] = getKnownPackageNames(
+                KnownPackages.PACKAGE_VERIFIER, UserHandle.USER_SYSTEM
+            )
+            this[KnownPackages.PACKAGE_SETUP_WIZARD] = getKnownPackageNames(
+                KnownPackages.PACKAGE_SETUP_WIZARD, UserHandle.USER_SYSTEM
+            )
+            this[KnownPackages.PACKAGE_SYSTEM_TEXT_CLASSIFIER] = getKnownPackageNames(
+                KnownPackages.PACKAGE_SYSTEM_TEXT_CLASSIFIER, UserHandle.USER_SYSTEM
+            )
+            this[KnownPackages.PACKAGE_CONFIGURATOR] = getKnownPackageNames(
+                KnownPackages.PACKAGE_CONFIGURATOR, UserHandle.USER_SYSTEM
+            )
+            this[KnownPackages.PACKAGE_INCIDENT_REPORT_APPROVER] = getKnownPackageNames(
+                KnownPackages.PACKAGE_INCIDENT_REPORT_APPROVER, UserHandle.USER_SYSTEM
+            )
+            this[KnownPackages.PACKAGE_APP_PREDICTOR] = getKnownPackageNames(
+                KnownPackages.PACKAGE_APP_PREDICTOR, UserHandle.USER_SYSTEM
+            )
+            this[KnownPackages.PACKAGE_COMPANION] = getKnownPackageNames(
+                KnownPackages.PACKAGE_COMPANION, UserHandle.USER_SYSTEM
+            )
+            this[KnownPackages.PACKAGE_RETAIL_DEMO] = getKnownPackageNames(
+                KnownPackages.PACKAGE_RETAIL_DEMO, UserHandle.USER_SYSTEM
+            )
+            this[KnownPackages.PACKAGE_RECENTS] = getKnownPackageNames(
+                KnownPackages.PACKAGE_RECENTS, UserHandle.USER_SYSTEM
+            )
+        }
 
     @OptIn(ExperimentalContracts::class)
     internal inline fun <T> getState(action: GetStateScope.() -> T): T {
