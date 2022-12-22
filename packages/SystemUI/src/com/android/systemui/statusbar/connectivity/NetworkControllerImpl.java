@@ -1302,7 +1302,7 @@ public class NetworkControllerImpl extends BroadcastReceiver
             }
         }
         String wifi = args.getString("wifi");
-        if (wifi != null) {
+        if (wifi != null && !mStatusBarPipelineFlags.runNewWifiIconBackend()) {
             boolean show = wifi.equals("show");
             String level = args.getString("level");
             if (level != null) {

@@ -497,6 +497,11 @@ public interface StatusBarIconController {
 
             ModernStatusBarWifiView view = onCreateModernStatusBarWifiView(slot);
             mGroup.addView(view, index, onCreateLayoutParams());
+
+            if (mIsInDemoMode) {
+                mDemoStatusIcons.addModernWifiView(mWifiViewModel);
+            }
+
             return view;
         }
 
@@ -688,6 +693,9 @@ public interface StatusBarIconController {
             mIsInDemoMode = true;
             if (mDemoStatusIcons == null) {
                 mDemoStatusIcons = createDemoStatusIcons();
+                if (mStatusBarPipelineFlags.useNewWifiIcon()) {
+                    mDemoStatusIcons.addModernWifiView(mWifiViewModel);
+                }
             }
             mDemoStatusIcons.onDemoModeStarted();
         }
