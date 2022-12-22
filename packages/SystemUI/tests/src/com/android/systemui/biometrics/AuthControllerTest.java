@@ -152,6 +152,8 @@ public class AuthControllerTest extends SysuiTestCase {
     @Mock
     private WakefulnessLifecycle mWakefulnessLifecycle;
     @Mock
+    private AuthDialogPanelInteractionDetector mPanelInteractionDetector;
+    @Mock
     private UserManager mUserManager;
     @Mock
     private LockPatternUtils mLockPatternUtils;
@@ -953,9 +955,10 @@ public class AuthControllerTest extends SysuiTestCase {
             super(context, mExecution, mCommandQueue, mActivityTaskManager, mWindowManager,
                     mFingerprintManager, mFaceManager, () -> mUdfpsController,
                     () -> mSideFpsController, mDisplayManager, mWakefulnessLifecycle,
-                    mUserManager, mLockPatternUtils, mUdfpsLogger, mLogContextInteractor,
-                    () -> mBiometricPromptCredentialInteractor, () -> mCredentialViewModel,
-                    mInteractionJankMonitor, mHandler, mBackgroundExecutor, mVibratorHelper);
+                    mPanelInteractionDetector, mUserManager, mLockPatternUtils, mUdfpsLogger,
+                    mLogContextInteractor, () -> mBiometricPromptCredentialInteractor,
+                    () -> mCredentialViewModel, mInteractionJankMonitor, mHandler,
+                    mBackgroundExecutor, mVibratorHelper);
         }
 
         @Override
@@ -963,7 +966,9 @@ public class AuthControllerTest extends SysuiTestCase {
                 boolean requireConfirmation, int userId, int[] sensorIds,
                 String opPackageName, boolean skipIntro, long operationId, long requestId,
                 @BiometricManager.BiometricMultiSensorMode int multiSensorConfig,
-                WakefulnessLifecycle wakefulnessLifecycle, UserManager userManager,
+                WakefulnessLifecycle wakefulnessLifecycle,
+                AuthDialogPanelInteractionDetector panelInteractionDetector,
+                UserManager userManager,
                 LockPatternUtils lockPatternUtils) {
 
             mLastBiometricPromptInfo = promptInfo;
