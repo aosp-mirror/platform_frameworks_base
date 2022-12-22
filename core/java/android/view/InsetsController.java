@@ -1203,8 +1203,6 @@ public class InsetsController implements WindowInsetsController, InsetsAnimation
             return;
         }
         ImeTracker.get().onProgress(statsToken, ImeTracker.PHASE_CLIENT_DISABLED_USER_ANIMATION);
-
-        cancelExistingControllers(types);
         if (DEBUG) Log.d(TAG, "controlAnimation types: " + types);
         mLastStartedAnimTypes |= types;
 
@@ -1236,9 +1234,9 @@ public class InsetsController implements WindowInsetsController, InsetsAnimation
                 });
             }
 
-            // The requested visibilities should be delayed as well. Otherwise, the server will
-            // create already visible leashes for us before we play the show animation.
-            setRequestedVisibleTypes(mReportedRequestedVisibleTypes, types);
+            // The requested visibilities should be delayed as well. Otherwise, we might override
+            // the insets visibility before playing animation.
+            setRequestedVisibleTypes(mReportedRequestedVisibleTypes, typesReady);
 
             Trace.asyncTraceEnd(TRACE_TAG_VIEW, "IC.showRequestFromApi", 0);
             if (!fromIme) {
@@ -1250,7 +1248,6 @@ public class InsetsController implements WindowInsetsController, InsetsAnimation
         if (typesReady == 0) {
             if (DEBUG) Log.d(TAG, "No types ready. onCancelled()");
             listener.onCancelled(null);
-            reportRequestedVisibleTypes();
             Trace.asyncTraceEnd(TRACE_TAG_VIEW, "IC.showRequestFromApi", 0);
             if (!fromIme) {
                 Trace.asyncTraceEnd(TRACE_TAG_VIEW, "IC.showRequestFromApiToImeReady", 0);
@@ -1258,6 +1255,7 @@ public class InsetsController implements WindowInsetsController, InsetsAnimation
             return;
         }
 
+        cancelExistingControllers(typesReady);
 
         final InsetsAnimationControlRunner runner = useInsetsAnimationThread
                 ? new InsetsAnimationThreadControlRunner(controls,
@@ -1344,6 +1342,8 @@ public class InsetsController implements WindowInsetsController, InsetsAnimation
                         setRequestedVisibleTypes(0 /* visibleTypes */, consumer.getType());
                         break;
                 }
+            } else {
+                consumer.requestHide(fromIme, statsToken);
             }
             if (!canRun) {
                 if (WARN) Log.w(TAG, String.format(
