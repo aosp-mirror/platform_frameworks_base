@@ -66,6 +66,7 @@ import com.android.server.pm.AppsFilterUtils.ParallelComputeComponentVisibility;
 import com.android.server.pm.parsing.pkg.AndroidPackageUtils;
 import com.android.server.pm.pkg.AndroidPackage;
 import com.android.server.pm.pkg.PackageStateInternal;
+import com.android.server.pm.pkg.SharedUserApi;
 import com.android.server.pm.pkg.component.ParsedInstrumentation;
 import com.android.server.pm.pkg.component.ParsedPermission;
 import com.android.server.pm.pkg.component.ParsedUsesPermission;
@@ -80,7 +81,6 @@ import com.android.server.utils.Watcher;
 
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collection;
 import java.util.List;
 import java.util.Objects;
 
@@ -1047,7 +1047,6 @@ public final class AppsFilterImpl extends AppsFilterLocked implements Watchable,
         final ArrayMap<String, ? extends PackageStateInternal> settings =
                 snapshot.getPackageStates();
         final UserInfo[] users = snapshot.getUserInfos();
-        final Collection<SharedUserSetting> sharedUserSettings = snapshot.getAllSharedUsers();
         final int userCount = users.length;
         if (!isReplace || !retainImplicitGrantOnReplace) {
             synchronized (mImplicitlyQueryableLock) {
@@ -1156,9 +1155,11 @@ public final class AppsFilterImpl extends AppsFilterLocked implements Watchable,
         // shared user members to re-establish visibility between them and other packages.
         // NOTE: this must come after all removals from data structures but before we update the
         // cache
-        if (setting.hasSharedUser()) {
+        final SharedUserApi sharedUserApi = setting.hasSharedUser()
+                ? snapshot.getSharedUser(setting.getSharedUserAppId()) : null;
+        if (sharedUserApi != null) {
             final ArraySet<? extends PackageStateInternal> sharedUserPackages =
-                    getSharedUserPackages(setting.getSharedUserAppId(), sharedUserSettings);
+                    sharedUserApi.getPackageStates();
             for (int i = sharedUserPackages.size() - 1; i >= 0; i--) {
                 if (sharedUserPackages.valueAt(i) == setting) {
                     continue;
@@ -1171,9 +1172,9 @@ public final class AppsFilterImpl extends AppsFilterLocked implements Watchable,
         if (mCacheReady) {
             removeAppIdFromVisibilityCache(setting.getAppId());
 
-            if (setting.hasSharedUser()) {
+            if (sharedUserApi != null) {
                 final ArraySet<? extends PackageStateInternal> sharedUserPackages =
-                        getSharedUserPackages(setting.getSharedUserAppId(), sharedUserSettings);
+                        sharedUserApi.getPackageStates();
                 for (int i = sharedUserPackages.size() - 1; i >= 0; i--) {
                     PackageStateInternal siblingSetting =
                             sharedUserPackages.valueAt(i);

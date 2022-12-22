@@ -41,6 +41,7 @@ import com.android.internal.util.function.QuadFunction;
 import com.android.server.om.OverlayReferenceMapper;
 import com.android.server.pm.pkg.AndroidPackage;
 import com.android.server.pm.pkg.PackageStateInternal;
+import com.android.server.pm.pkg.SharedUserApi;
 import com.android.server.pm.snapshot.PackageDataSnapshot;
 import com.android.server.utils.SnapshotCache;
 import com.android.server.utils.Watched;
@@ -51,7 +52,6 @@ import com.android.server.utils.WatchedSparseSetArray;
 
 import java.io.PrintWriter;
 import java.util.Arrays;
-import java.util.Collection;
 import java.util.Objects;
 import java.util.concurrent.atomic.AtomicBoolean;
 
@@ -409,9 +409,11 @@ public abstract class AppsFilterBase implements AppsFilterSnapshot {
                 final PackageStateInternal packageState = (PackageStateInternal) callingSetting;
                 if (packageState.hasSharedUser()) {
                     callingPkgSetting = null;
-                    callingSharedPkgSettings.addAll(getSharedUserPackages(
-                            packageState.getSharedUserAppId(), snapshot.getAllSharedUsers()));
-
+                    final SharedUserApi sharedUserApi =
+                            snapshot.getSharedUser(packageState.getSharedUserAppId());
+                    if (sharedUserApi != null) {
+                        callingSharedPkgSettings.addAll(sharedUserApi.getPackageStates());
+                    }
                 } else {
                     callingPkgSetting = packageState;
                 }
@@ -696,17 +698,6 @@ public abstract class AppsFilterBase implements AppsFilterSnapshot {
         Slog.i(TAG,
                 "interaction: " + (callingSetting == null ? "system" : callingSetting) + " -> "
                         + targetPkgSetting + " " + description);
-    }
-
-    protected ArraySet<? extends PackageStateInternal> getSharedUserPackages(int sharedUserAppId,
-            Collection<SharedUserSetting> sharedUserSettings) {
-        for (SharedUserSetting setting : sharedUserSettings) {
-            if (setting.mAppId != sharedUserAppId) {
-                continue;
-            }
-            return setting.getPackageStates();
-        }
-        return new ArraySet<>();
     }
 
     /**

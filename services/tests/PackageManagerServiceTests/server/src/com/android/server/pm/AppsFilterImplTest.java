@@ -24,6 +24,7 @@ import static org.hamcrest.Matchers.contains;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -225,6 +226,13 @@ public class AppsFilterImplTest {
         when(mSnapshot.getPackageStates()).thenAnswer(x -> mExisting);
         when(mSnapshot.getAllSharedUsers()).thenReturn(mSharedUserSettings);
         when(mSnapshot.getUserInfos()).thenReturn(USER_INFO_LIST);
+        when(mSnapshot.getSharedUser(anyInt())).thenAnswer(invocation -> {
+            final int sharedUserAppId = invocation.getArgument(0);
+            return mSharedUserSettings.stream()
+                    .filter(sharedUserSetting -> sharedUserSetting.getAppId() == sharedUserAppId)
+                    .findAny()
+                    .orElse(null);
+        });
         when(mPmInternal.snapshot()).thenReturn(mSnapshot);
 
         // Can't mock postDelayed because of some weird bug in Mockito.
