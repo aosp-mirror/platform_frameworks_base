@@ -96,10 +96,16 @@ public final class JobStatus {
     public static final long NO_LATEST_RUNTIME = Long.MAX_VALUE;
     public static final long NO_EARLIEST_RUNTIME = 0L;
 
-    static final int CONSTRAINT_CHARGING = JobInfo.CONSTRAINT_FLAG_CHARGING; // 1 < 0
-    static final int CONSTRAINT_IDLE = JobInfo.CONSTRAINT_FLAG_DEVICE_IDLE;  // 1 << 2
-    static final int CONSTRAINT_BATTERY_NOT_LOW = JobInfo.CONSTRAINT_FLAG_BATTERY_NOT_LOW; // 1 << 1
-    static final int CONSTRAINT_STORAGE_NOT_LOW = JobInfo.CONSTRAINT_FLAG_STORAGE_NOT_LOW; // 1 << 3
+    @VisibleForTesting(visibility = VisibleForTesting.Visibility.PACKAGE)
+    public static final int CONSTRAINT_CHARGING = JobInfo.CONSTRAINT_FLAG_CHARGING; // 1 < 0
+    @VisibleForTesting(visibility = VisibleForTesting.Visibility.PACKAGE)
+    public static final int CONSTRAINT_IDLE = JobInfo.CONSTRAINT_FLAG_DEVICE_IDLE;  // 1 << 2
+    @VisibleForTesting(visibility = VisibleForTesting.Visibility.PACKAGE)
+    public static final int CONSTRAINT_BATTERY_NOT_LOW =
+            JobInfo.CONSTRAINT_FLAG_BATTERY_NOT_LOW; // 1 << 1
+    @VisibleForTesting(visibility = VisibleForTesting.Visibility.PACKAGE)
+    public static final int CONSTRAINT_STORAGE_NOT_LOW =
+            JobInfo.CONSTRAINT_FLAG_STORAGE_NOT_LOW; // 1 << 3
     public static final int CONSTRAINT_TIMING_DELAY = 1 << 31;
     public static final int CONSTRAINT_DEADLINE = 1 << 30;
     public static final int CONSTRAINT_CONNECTIVITY = 1 << 28;
@@ -1820,7 +1826,8 @@ public final class JobStatus {
      * separately from the job's explicitly requested constraints and MUST be satisfied before
      * the job can run if the app doesn't have quota.
      */
-    private void addDynamicConstraints(int constraints) {
+    @VisibleForTesting
+    public void addDynamicConstraints(int constraints) {
         if ((constraints & CONSTRAINT_WITHIN_QUOTA) != 0) {
             // Quota should never be used as a dynamic constraint.
             Slog.wtf(TAG, "Tried to set quota as a dynamic constraint");
