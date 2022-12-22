@@ -16,10 +16,13 @@
 
 package com.android.server.wm;
 
+import static android.app.servertransaction.ActivityLifecycleItem.ON_PAUSE;
+import static android.app.servertransaction.ActivityLifecycleItem.ON_STOP;
 import static android.content.pm.ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE;
 import static android.content.pm.ActivityInfo.SCREEN_ORIENTATION_LOCKED;
 import static android.content.pm.ActivityInfo.SCREEN_ORIENTATION_NOSENSOR;
 import static android.content.pm.ActivityInfo.SCREEN_ORIENTATION_PORTRAIT;
+import static android.content.pm.ActivityInfo.SCREEN_ORIENTATION_UNSET;
 import static android.content.pm.ActivityInfo.SCREEN_ORIENTATION_UNSPECIFIED;
 import static android.content.pm.ActivityInfo.screenOrientationToString;
 import static android.content.res.Configuration.ORIENTATION_PORTRAIT;
@@ -27,12 +30,18 @@ import static android.content.res.Configuration.ORIENTATION_UNDEFINED;
 import static android.view.Display.TYPE_INTERNAL;
 
 import static com.android.internal.protolog.ProtoLogGroup.WM_DEBUG_ORIENTATION;
+import static com.android.internal.protolog.ProtoLogGroup.WM_DEBUG_STATES;
 
 import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.app.servertransaction.ClientTransaction;
+import android.app.servertransaction.RefreshCallbackItem;
+import android.app.servertransaction.ResumeActivityItem;
 import android.content.pm.ActivityInfo.ScreenOrientation;
+import android.content.res.Configuration;
 import android.hardware.camera2.CameraManager;
 import android.os.Handler;
+import android.os.RemoteException;
 import android.util.ArrayMap;
 import android.util.ArraySet;
 
@@ -65,11 +74,15 @@ final class DisplayRotationCompatPolicy {
     private static final int CAMERA_CLOSED_ROTATION_UPDATE_DELAY_MS = 2000;
     // Delay for updating display rotation after Camera connection is opened. This delay is
     // selected to be long enough to avoid conflicts with transitions on the app's side.
-    // Using half CAMERA_CLOSED_ROTATION_UPDATE_DELAY_MS to avoid flickering when an app
+    // Using a delay < CAMERA_CLOSED_ROTATION_UPDATE_DELAY_MS to avoid flickering when an app
     // is flipping between front and rear cameras (in case requested orientation changes at
     // runtime at the same time) or when size compat mode is restarted.
     private static final int CAMERA_OPENED_ROTATION_UPDATE_DELAY_MS =
             CAMERA_CLOSED_ROTATION_UPDATE_DELAY_MS / 2;
+    // Delay for ensuring that onActivityRefreshed is always called after an activity refresh. The
+    // client process may not always report the event back to the server, such as process is
+    // crashed or got killed.
+    private static final int REFRESH_CALLBACK_TIMEOUT_MS = 2000;
 
     private final DisplayContent mDisplayContent;
     private final WindowManagerService mWmService;
@@ -98,6 +111,9 @@ final class DisplayRotationCompatPolicy {
                     notifyCameraClosed(cameraId);
                 }
             };
+
+    @ScreenOrientation
+    private int mLastReportedOrientation = SCREEN_ORIENTATION_UNSET;
 
     DisplayRotationCompatPolicy(@NonNull DisplayContent displayContent) {
         this(displayContent, displayContent.mWmService.mH);
@@ -132,7 +148,13 @@ final class DisplayRotationCompatPolicy {
      * #shouldComputeCameraCompatOrientation} for conditions enabling the treatment.
      */
     @ScreenOrientation
-    synchronized int getOrientation() {
+    int getOrientation() {
+        mLastReportedOrientation = getOrientationInternal();
+        return mLastReportedOrientation;
+    }
+
+    @ScreenOrientation
+    private synchronized int getOrientationInternal() {
         if (!isTreatmentEnabledForDisplay()) {
             return SCREEN_ORIENTATION_UNSPECIFIED;
         }
@@ -166,6 +188,73 @@ final class DisplayRotationCompatPolicy {
                 mDisplayContent.mDisplayId, screenOrientationToString(orientation),
                 isPortraitActivity, isNaturalDisplayOrientationPortrait);
         return orientation;
+    }
+
+    /**
+     * "Refreshes" activity by going through "stopped -> resumed" or "paused -> resumed" cycle.
+     * This allows to clear cached values in apps (e.g. display or camera rotation) that influence
+     * camera preview and can lead to sideways or stretching issues persisting even after force
+     * rotation.
+     */
+    void onActivityConfigurationChanging(ActivityRecord activity, Configuration newConfig,
+            Configuration lastReportedConfig) {
+        if (!isTreatmentEnabledForDisplay()
+                || !mWmService.mLetterboxConfiguration.isCameraCompatRefreshEnabled()
+                || !shouldRefreshActivity(activity, newConfig, lastReportedConfig)) {
+            return;
+        }
+        boolean cycleThroughStop = mWmService.mLetterboxConfiguration
+                .isCameraCompatRefreshCycleThroughStopEnabled();
+        try {
+            activity.mLetterboxUiController.setIsRefreshAfterRotationRequested(true);
+            ProtoLog.v(WM_DEBUG_STATES,
+                    "Refershing activity for camera compatibility treatment, "
+                            + "activityRecord=%s", activity);
+            final ClientTransaction transaction = ClientTransaction.obtain(
+                    activity.app.getThread(), activity.token);
+            transaction.addCallback(
+                    RefreshCallbackItem.obtain(cycleThroughStop ? ON_STOP : ON_PAUSE));
+            transaction.setLifecycleStateRequest(ResumeActivityItem.obtain(/* isForward */ false));
+            activity.mAtmService.getLifecycleManager().scheduleTransaction(transaction);
+            mHandler.postDelayed(
+                    () -> onActivityRefreshed(activity),
+                    REFRESH_CALLBACK_TIMEOUT_MS);
+        } catch (RemoteException e) {
+            activity.mLetterboxUiController.setIsRefreshAfterRotationRequested(false);
+        }
+    }
+
+    void onActivityRefreshed(@NonNull ActivityRecord activity) {
+        activity.mLetterboxUiController.setIsRefreshAfterRotationRequested(false);
+    }
+
+    String getSummaryForDisplayRotationHistoryRecord() {
+        String summaryIfEnabled = "";
+        if (isTreatmentEnabledForDisplay()) {
+            ActivityRecord topActivity = mDisplayContent.topRunningActivity(
+                    /* considerKeyguardState= */ true);
+            summaryIfEnabled =
+                    " mLastReportedOrientation="
+                            + screenOrientationToString(mLastReportedOrientation)
+                    + " topActivity="
+                            + (topActivity == null ? "null" : topActivity.shortComponentName)
+                    + " isTreatmentEnabledForActivity="
+                            + isTreatmentEnabledForActivity(topActivity)
+                    + " CameraIdPackageNameBiMap="
+                            + mCameraIdPackageBiMap.getSummaryForDisplayRotationHistoryRecord();
+        }
+        return "DisplayRotationCompatPolicy{"
+                + " isTreatmentEnabledForDisplay=" + isTreatmentEnabledForDisplay()
+                + summaryIfEnabled
+                + " }";
+    }
+
+    // Refreshing only when configuration changes after rotation.
+    private boolean shouldRefreshActivity(ActivityRecord activity, Configuration newConfig,
+            Configuration lastReportedConfig) {
+        return newConfig.windowConfiguration.getDisplayRotation()
+                        != lastReportedConfig.windowConfiguration.getDisplayRotation()
+                && isTreatmentEnabledForActivity(activity);
     }
 
     /**
@@ -221,8 +310,6 @@ final class DisplayRotationCompatPolicy {
         mHandler.postDelayed(
                 () ->  delayedUpdateOrientationWithWmLock(cameraId, packageName),
                 CAMERA_OPENED_ROTATION_UPDATE_DELAY_MS);
-        // TODO(b/218352945): Restart activity after forced rotation to avoid issues cased by
-        // in-app caching of pre-rotation display / camera properties.
     }
 
     private void updateOrientationWithWmLock() {
@@ -251,8 +338,12 @@ final class DisplayRotationCompatPolicy {
         mScheduledToBeRemovedCameraIdSet.add(cameraId);
         // No need to update orientation for this camera if it's already closed.
         mScheduledOrientationUpdateCameraIdSet.remove(cameraId);
-        // Delay is needed to avoid rotation flickering when an app is flipping between front and
-        // rear cameras or when size compat mode is restarted.
+        scheduleRemoveCameraId(cameraId);
+    }
+
+    // Delay is needed to avoid rotation flickering when an app is flipping between front and
+    // rear cameras, when size compat mode is restarted or activity is being refreshed.
+    private void scheduleRemoveCameraId(@NonNull String cameraId) {
         mHandler.postDelayed(
                 () -> removeCameraId(cameraId),
                 CAMERA_CLOSED_ROTATION_UPDATE_DELAY_MS);
@@ -264,12 +355,34 @@ final class DisplayRotationCompatPolicy {
                 // Already reconnected to this camera, no need to clean up.
                 return;
             }
+            if (isActivityForCameraIdRefreshing(cameraId)) {
+                ProtoLog.v(WM_DEBUG_ORIENTATION,
+                        "Display id=%d is notified that Camera %s is closed but activity is"
+                                + " still refreshing. Rescheduling an update.",
+                        mDisplayContent.mDisplayId, cameraId);
+                mScheduledToBeRemovedCameraIdSet.add(cameraId);
+                scheduleRemoveCameraId(cameraId);
+                return;
+            }
             mCameraIdPackageBiMap.removeCameraId(cameraId);
         }
         ProtoLog.v(WM_DEBUG_ORIENTATION,
                 "Display id=%d is notified that Camera %s is closed, updating rotation.",
                 mDisplayContent.mDisplayId, cameraId);
         updateOrientationWithWmLock();
+    }
+
+    private boolean isActivityForCameraIdRefreshing(String cameraId) {
+        ActivityRecord topActivity = mDisplayContent.topRunningActivity(
+                /* considerKeyguardState= */ true);
+        if (!isTreatmentEnabledForActivity(topActivity)) {
+            return false;
+        }
+        String activeCameraId = mCameraIdPackageBiMap.getCameraId(topActivity.packageName);
+        if (activeCameraId == null || activeCameraId != cameraId) {
+            return false;
+        }
+        return topActivity.mLetterboxUiController.isRefreshAfterRotationRequested();
     }
 
     private static class CameraIdPackageNameBiMap {
@@ -290,6 +403,11 @@ final class DisplayRotationCompatPolicy {
             return mPackageToCameraIdMap.containsKey(packageName);
         }
 
+        @Nullable
+        String getCameraId(String packageName) {
+            return mPackageToCameraIdMap.get(packageName);
+        }
+
         void removeCameraId(String cameraId) {
             String packageName = mCameraIdToPackageMap.get(cameraId);
             if (packageName == null) {
@@ -297,6 +415,10 @@ final class DisplayRotationCompatPolicy {
             }
             mPackageToCameraIdMap.remove(packageName, cameraId);
             mCameraIdToPackageMap.remove(cameraId, packageName);
+        }
+
+        String getSummaryForDisplayRotationHistoryRecord() {
+            return "{ mPackageToCameraIdMap=" + mPackageToCameraIdMap + " }";
         }
 
         private void removePackageName(String packageName) {

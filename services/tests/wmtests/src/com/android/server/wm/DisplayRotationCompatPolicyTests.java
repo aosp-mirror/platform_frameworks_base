@@ -16,6 +16,8 @@
 
 package com.android.server.wm;
 
+import static android.app.servertransaction.ActivityLifecycleItem.ON_PAUSE;
+import static android.app.servertransaction.ActivityLifecycleItem.ON_STOP;
 import static android.content.pm.ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE;
 import static android.content.pm.ActivityInfo.SCREEN_ORIENTATION_LOCKED;
 import static android.content.pm.ActivityInfo.SCREEN_ORIENTATION_NOSENSOR;
@@ -23,6 +25,8 @@ import static android.content.pm.ActivityInfo.SCREEN_ORIENTATION_PORTRAIT;
 import static android.content.pm.ActivityInfo.SCREEN_ORIENTATION_UNSPECIFIED;
 import static android.content.res.Configuration.ORIENTATION_LANDSCAPE;
 import static android.content.res.Configuration.ORIENTATION_PORTRAIT;
+import static android.view.Surface.ROTATION_0;
+import static android.view.Surface.ROTATION_90;
 
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.doAnswer;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.doReturn;
@@ -34,15 +38,23 @@ import static org.junit.Assert.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.ArgumentMatchers.anyLong;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
 
+import android.app.servertransaction.ClientTransaction;
+import android.app.servertransaction.RefreshCallbackItem;
+import android.app.servertransaction.ResumeActivityItem;
 import android.content.ComponentName;
 import android.content.pm.ActivityInfo.ScreenOrientation;
+import android.content.res.Configuration;
 import android.content.res.Configuration.Orientation;
 import android.hardware.camera2.CameraManager;
 import android.os.Handler;
 import android.platform.test.annotations.Presubmit;
 import android.view.Display;
+import android.view.Surface.Rotation;
 
 import androidx.test.filters.SmallTest;
 
@@ -85,6 +97,10 @@ public final class DisplayRotationCompatPolicyTests extends WindowTestsBase {
         when(mLetterboxConfiguration.isCameraCompatTreatmentEnabled(
                     /* checkDeviceConfig */ anyBoolean()))
                 .thenReturn(true);
+        when(mLetterboxConfiguration.isCameraCompatRefreshEnabled())
+                .thenReturn(true);
+        when(mLetterboxConfiguration.isCameraCompatRefreshCycleThroughStopEnabled())
+                .thenReturn(true);
 
         mMockCameraManager = mock(CameraManager.class);
         doAnswer(invocation -> {
@@ -112,35 +128,34 @@ public final class DisplayRotationCompatPolicyTests extends WindowTestsBase {
     }
 
     @Test
-    public void testGetOrientation_treatmentNotEnabled_returnUnspecified() {
+    public void testTreatmentNotEnabled_noForceRotationOrRefresh() throws Exception {
         when(mLetterboxConfiguration.isCameraCompatTreatmentEnabled(
                     /* checkDeviceConfig */ anyBoolean()))
                 .thenReturn(false);
 
-        mDisplayRotationCompatPolicy = new DisplayRotationCompatPolicy(mDisplayContent);
         configureActivity(SCREEN_ORIENTATION_PORTRAIT);
         mCameraAvailabilityCallback.onCameraOpened(CAMERA_ID_1, TEST_PACKAGE_1);
 
         assertEquals(mDisplayRotationCompatPolicy.getOrientation(),
                 SCREEN_ORIENTATION_UNSPECIFIED);
+
+        assertNoForceRotationOrRefresh();
     }
 
     @Test
-    public void testGetOrientation_treatmentDisabledViaDeviceConfig_returnUnspecified() {
+    public void testTreatmentDisabledViaDeviceConfig_noForceRotationOrRefresh() throws Exception {
         when(mLetterboxConfiguration.isCameraCompatTreatmentEnabled(
                     /* checkDeviceConfig */ true))
                 .thenReturn(false);
 
-        mDisplayRotationCompatPolicy = new DisplayRotationCompatPolicy(mDisplayContent);
         configureActivity(SCREEN_ORIENTATION_PORTRAIT);
         mCameraAvailabilityCallback.onCameraOpened(CAMERA_ID_1, TEST_PACKAGE_1);
 
-        assertEquals(mDisplayRotationCompatPolicy.getOrientation(),
-                SCREEN_ORIENTATION_UNSPECIFIED);
+        assertNoForceRotationOrRefresh();
     }
 
     @Test
-    public void testGetOrientation_multiWindowMode_returnUnspecified() {
+    public void testMultiWindowMode_returnUnspecified_noForceRotationOrRefresh() throws Exception {
         configureActivity(SCREEN_ORIENTATION_PORTRAIT);
         final TestSplitOrganizer organizer = new TestSplitOrganizer(mAtm, mDisplayContent);
         mActivity.getTask().reparent(organizer.mPrimary, WindowContainer.POSITION_TOP,
@@ -149,53 +164,46 @@ public final class DisplayRotationCompatPolicyTests extends WindowTestsBase {
         mCameraAvailabilityCallback.onCameraOpened(CAMERA_ID_1, TEST_PACKAGE_1);
 
         assertTrue(mActivity.inMultiWindowMode());
-        assertEquals(mDisplayRotationCompatPolicy.getOrientation(),
-                SCREEN_ORIENTATION_UNSPECIFIED);
+        assertNoForceRotationOrRefresh();
     }
 
     @Test
-    public void testGetOrientation_orientationUnspecified_returnUnspecified() {
+    public void testOrientationUnspecified_noForceRotationOrRefresh() throws Exception {
         configureActivity(SCREEN_ORIENTATION_UNSPECIFIED);
 
-        mCameraAvailabilityCallback.onCameraOpened(CAMERA_ID_1, TEST_PACKAGE_1);
-
-        assertEquals(mDisplayRotationCompatPolicy.getOrientation(),
-                SCREEN_ORIENTATION_UNSPECIFIED);
+        assertNoForceRotationOrRefresh();
     }
 
     @Test
-    public void testGetOrientation_orientationLocked_returnUnspecified() {
+    public void testOrientationLocked_noForceRotationOrRefresh() throws Exception {
         configureActivity(SCREEN_ORIENTATION_LOCKED);
 
         mCameraAvailabilityCallback.onCameraOpened(CAMERA_ID_1, TEST_PACKAGE_1);
 
-        assertEquals(mDisplayRotationCompatPolicy.getOrientation(),
-                SCREEN_ORIENTATION_UNSPECIFIED);
+        assertNoForceRotationOrRefresh();
     }
 
     @Test
-    public void testGetOrientation_orientationNoSensor_returnUnspecified() {
+    public void testOrientationNoSensor_noForceRotationOrRefresh() throws Exception {
         configureActivity(SCREEN_ORIENTATION_NOSENSOR);
 
         mCameraAvailabilityCallback.onCameraOpened(CAMERA_ID_1, TEST_PACKAGE_1);
 
-        assertEquals(mDisplayRotationCompatPolicy.getOrientation(),
-                SCREEN_ORIENTATION_UNSPECIFIED);
+        assertNoForceRotationOrRefresh();
     }
 
     @Test
-    public void testGetOrientation_ignoreOrientationRequestIsFalse_returnUnspecified() {
+    public void testIgnoreOrientationRequestIsFalse_noForceRotationOrRefresh() throws Exception {
         mDisplayContent.setIgnoreOrientationRequest(false);
 
         configureActivity(SCREEN_ORIENTATION_PORTRAIT);
         mCameraAvailabilityCallback.onCameraOpened(CAMERA_ID_1, TEST_PACKAGE_1);
 
-        assertEquals(mDisplayRotationCompatPolicy.getOrientation(),
-                SCREEN_ORIENTATION_UNSPECIFIED);
+        assertNoForceRotationOrRefresh();
     }
 
     @Test
-    public void testGetOrientation_displayNotInternal_returnUnspecified() {
+    public void testDisplayNotInternal_noForceRotationOrRefresh() throws Exception {
         Display display = mDisplayContent.getDisplay();
         spyOn(display);
 
@@ -203,52 +211,51 @@ public final class DisplayRotationCompatPolicyTests extends WindowTestsBase {
         mCameraAvailabilityCallback.onCameraOpened(CAMERA_ID_1, TEST_PACKAGE_1);
 
         when(display.getType()).thenReturn(Display.TYPE_EXTERNAL);
-        assertEquals(mDisplayRotationCompatPolicy.getOrientation(),
-                SCREEN_ORIENTATION_UNSPECIFIED);
+        assertNoForceRotationOrRefresh();
 
         when(display.getType()).thenReturn(Display.TYPE_WIFI);
-        assertEquals(mDisplayRotationCompatPolicy.getOrientation(),
-                SCREEN_ORIENTATION_UNSPECIFIED);
+        assertNoForceRotationOrRefresh();
 
         when(display.getType()).thenReturn(Display.TYPE_OVERLAY);
-        assertEquals(mDisplayRotationCompatPolicy.getOrientation(),
-                SCREEN_ORIENTATION_UNSPECIFIED);
+        assertNoForceRotationOrRefresh();
 
         when(display.getType()).thenReturn(Display.TYPE_VIRTUAL);
-        assertEquals(mDisplayRotationCompatPolicy.getOrientation(),
-                SCREEN_ORIENTATION_UNSPECIFIED);
+        assertNoForceRotationOrRefresh();
     }
 
     @Test
-    public void testGetOrientation_noCameraConnection_returnUnspecified() {
+    public void testNoCameraConnection_noForceRotationOrRefresh() throws Exception {
         configureActivity(SCREEN_ORIENTATION_PORTRAIT);
 
-        assertEquals(mDisplayRotationCompatPolicy.getOrientation(),
-                SCREEN_ORIENTATION_UNSPECIFIED);
+        assertNoForceRotationOrRefresh();
     }
 
     @Test
-    public void testGetOrientation_cameraReconnected_returnNotUnspecified() {
+    public void testCameraReconnected_forceRotationAndRefresh() throws Exception {
         configureActivity(SCREEN_ORIENTATION_PORTRAIT);
 
         mCameraAvailabilityCallback.onCameraOpened(CAMERA_ID_1, TEST_PACKAGE_1);
         mCameraAvailabilityCallback.onCameraClosed(CAMERA_ID_1);
         mCameraAvailabilityCallback.onCameraOpened(CAMERA_ID_1, TEST_PACKAGE_1);
+        callOnActivityConfigurationChanging(mActivity, /* isDisplayRotationChanging */ true);
 
         assertEquals(mDisplayRotationCompatPolicy.getOrientation(),
                 SCREEN_ORIENTATION_PORTRAIT);
+        assertActivityRefreshRequested(/* refreshRequested */ true);
     }
 
     @Test
-    public void testGetOrientation_reconnectedToDifferentCamera_returnNotUnspecified() {
+    public void testReconnectedToDifferentCamera_forceRotationAndRefresh() throws Exception {
         configureActivity(SCREEN_ORIENTATION_PORTRAIT);
 
         mCameraAvailabilityCallback.onCameraOpened(CAMERA_ID_1, TEST_PACKAGE_1);
         mCameraAvailabilityCallback.onCameraClosed(CAMERA_ID_1);
         mCameraAvailabilityCallback.onCameraOpened(CAMERA_ID_2, TEST_PACKAGE_1);
+        callOnActivityConfigurationChanging(mActivity, /* isDisplayRotationChanging */ true);
 
         assertEquals(mDisplayRotationCompatPolicy.getOrientation(),
                 SCREEN_ORIENTATION_PORTRAIT);
+        assertActivityRefreshRequested(/* refreshRequested */ true);
     }
 
     @Test
@@ -267,13 +274,12 @@ public final class DisplayRotationCompatPolicyTests extends WindowTestsBase {
     }
 
     @Test
-    public void testGetOrientation_cameraOpenedForDifferentPackage_returnUnspecified() {
+    public void testCameraOpenedForDifferentPackage_noForceRotationOrRefresh() throws Exception {
         configureActivity(SCREEN_ORIENTATION_PORTRAIT);
 
         mCameraAvailabilityCallback.onCameraOpened(CAMERA_ID_1, TEST_PACKAGE_2);
 
-        assertEquals(mDisplayRotationCompatPolicy.getOrientation(),
-                SCREEN_ORIENTATION_UNSPECIFIED);
+        assertNoForceRotationOrRefresh();
     }
 
     @Test
@@ -320,6 +326,42 @@ public final class DisplayRotationCompatPolicyTests extends WindowTestsBase {
                 expectedOrientation);
     }
 
+    @Test
+    public void testOnActivityConfigurationChanging_refreshDisabled_noRefresh() throws Exception {
+        when(mLetterboxConfiguration.isCameraCompatRefreshEnabled()).thenReturn(false);
+
+        configureActivity(SCREEN_ORIENTATION_PORTRAIT);
+
+        mCameraAvailabilityCallback.onCameraOpened(CAMERA_ID_1, TEST_PACKAGE_1);
+        callOnActivityConfigurationChanging(mActivity, /* isDisplayRotationChanging */ true);
+
+        assertActivityRefreshRequested(/* refreshRequested */ false);
+    }
+
+    @Test
+    public void testOnActivityConfigurationChanging_displayRotationNotChanging_noRefresh()
+            throws Exception {
+        configureActivity(SCREEN_ORIENTATION_PORTRAIT);
+
+        mCameraAvailabilityCallback.onCameraOpened(CAMERA_ID_1, TEST_PACKAGE_1);
+        callOnActivityConfigurationChanging(mActivity, /* isDisplayRotationChanging */ false);
+
+        assertActivityRefreshRequested(/* refreshRequested */ false);
+    }
+
+    @Test
+    public void testOnActivityConfigurationChanging_cycleThroughStopDisabled() throws Exception {
+        when(mLetterboxConfiguration.isCameraCompatRefreshCycleThroughStopEnabled())
+                .thenReturn(false);
+
+        configureActivity(SCREEN_ORIENTATION_PORTRAIT);
+
+        mCameraAvailabilityCallback.onCameraOpened(CAMERA_ID_1, TEST_PACKAGE_1);
+        callOnActivityConfigurationChanging(mActivity, /* isDisplayRotationChanging */ true);
+
+        assertActivityRefreshRequested(/* refreshRequested */ true, /* cycleThroughStop */ false);
+    }
+
     private void configureActivity(@ScreenOrientation int activityOrientation) {
         configureActivityAndDisplay(activityOrientation, ORIENTATION_PORTRAIT);
     }
@@ -337,7 +379,50 @@ public final class DisplayRotationCompatPolicyTests extends WindowTestsBase {
                 .setTask(mTask)
                 .build();
 
+        spyOn(mActivity.mAtmService.getLifecycleManager());
+        spyOn(mActivity.mLetterboxUiController);
+
         doReturn(mActivity).when(mDisplayContent).topRunningActivity(anyBoolean());
         doReturn(naturalOrientation).when(mDisplayContent).getNaturalOrientation();
+    }
+
+    private void assertActivityRefreshRequested(boolean refreshRequested) throws Exception {
+        assertActivityRefreshRequested(refreshRequested, /* cycleThroughStop*/ true);
+    }
+
+    private void assertActivityRefreshRequested(boolean refreshRequested,
+                boolean cycleThroughStop) throws Exception {
+        verify(mActivity.mLetterboxUiController, times(refreshRequested ? 1 : 0))
+                .setIsRefreshAfterRotationRequested(true);
+
+        final ClientTransaction transaction = ClientTransaction.obtain(
+                mActivity.app.getThread(), mActivity.token);
+        transaction.addCallback(RefreshCallbackItem.obtain(cycleThroughStop ? ON_STOP : ON_PAUSE));
+        transaction.setLifecycleStateRequest(ResumeActivityItem.obtain(/* isForward */ false));
+
+        verify(mActivity.mAtmService.getLifecycleManager(), times(refreshRequested ? 1 : 0))
+                .scheduleTransaction(eq(transaction));
+    }
+
+    private void assertNoForceRotationOrRefresh() throws Exception {
+        callOnActivityConfigurationChanging(mActivity, /* isDisplayRotationChanging */ true);
+
+        assertEquals(mDisplayRotationCompatPolicy.getOrientation(),
+                SCREEN_ORIENTATION_UNSPECIFIED);
+        assertActivityRefreshRequested(/* refreshRequested */ false);
+    }
+
+    private void callOnActivityConfigurationChanging(
+            ActivityRecord activity, boolean isDisplayRotationChanging) {
+        mDisplayRotationCompatPolicy.onActivityConfigurationChanging(activity,
+                /* newConfig */ createConfigurationWithDisplayRotation(ROTATION_0),
+                /* newConfig */ createConfigurationWithDisplayRotation(
+                        isDisplayRotationChanging ? ROTATION_90 : ROTATION_0));
+    }
+
+    private static Configuration createConfigurationWithDisplayRotation(@Rotation int rotation) {
+        final Configuration config = new Configuration();
+        config.windowConfiguration.setDisplayRotation(rotation);
+        return config;
     }
 }

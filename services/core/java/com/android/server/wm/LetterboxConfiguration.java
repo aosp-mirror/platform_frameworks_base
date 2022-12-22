@@ -195,6 +195,16 @@ final class LetterboxConfiguration {
     // See DisplayRotationCompatPolicy for context.
     private final boolean mIsCameraCompatTreatmentEnabled;
 
+    // Whether activity "refresh" in camera compatibility treatment is enabled.
+    // See RefreshCallbackItem for context.
+    private boolean mIsCameraCompatTreatmentRefreshEnabled = true;
+
+    // Whether activity "refresh" in camera compatibility treatment should happen using the
+    // "stopped -> resumed" cycle rather than "paused -> resumed" cycle. Using "stop -> resumed"
+    // cycle by default due to higher success rate confirmed with app compatibility testing.
+    // See RefreshCallbackItem for context.
+    private boolean mIsCameraCompatRefreshCycleThroughStopEnabled = true;
+
     LetterboxConfiguration(Context systemUiContext) {
         this(systemUiContext, new LetterboxConfigurationPersister(systemUiContext,
                 () -> readLetterboxHorizontalReachabilityPositionFromConfig(systemUiContext,
@@ -971,6 +981,47 @@ final class LetterboxConfiguration {
     private static boolean isCameraCompatTreatmentAllowed() {
         return DeviceConfig.getBoolean(DeviceConfig.NAMESPACE_WINDOW_MANAGER,
                 "enable_camera_compat_treatment", false);
+    }
+
+    /** Whether camera compatibility refresh is enabled. */
+    boolean isCameraCompatRefreshEnabled() {
+        return mIsCameraCompatTreatmentRefreshEnabled;
+    }
+
+    /** Overrides whether camera compatibility treatment is enabled. */
+    void setCameraCompatRefreshEnabled(boolean enabled) {
+        mIsCameraCompatTreatmentRefreshEnabled = enabled;
+    }
+
+    /**
+     * Resets whether camera compatibility treatment is enabled to {@code true}.
+     */
+    void resetCameraCompatRefreshEnabled() {
+        mIsCameraCompatTreatmentRefreshEnabled = true;
+    }
+
+    /**
+     * Whether activity "refresh" in camera compatibility treatment should happen using the
+     * "stopped -> resumed" cycle rather than "paused -> resumed" cycle.
+     */
+    boolean isCameraCompatRefreshCycleThroughStopEnabled() {
+        return mIsCameraCompatRefreshCycleThroughStopEnabled;
+    }
+
+    /**
+     * Overrides whether activity "refresh" in camera compatibility treatment should happen using
+     * "stopped -> resumed" cycle rather than "paused -> resumed" cycle.
+     */
+    void setCameraCompatRefreshCycleThroughStopEnabled(boolean enabled) {
+        mIsCameraCompatRefreshCycleThroughStopEnabled = enabled;
+    }
+
+    /**
+     * Resets  whether activity "refresh" in camera compatibility treatment should happen using
+     * "stopped -> resumed" cycle rather than "paused -> resumed" cycle to {@code true}.
+     */
+    void resetCameraCompatRefreshCycleThroughStopEnabled() {
+        mIsCameraCompatRefreshCycleThroughStopEnabled = true;
     }
 
 }

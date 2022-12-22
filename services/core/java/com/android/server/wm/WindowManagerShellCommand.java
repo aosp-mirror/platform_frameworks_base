@@ -959,6 +959,14 @@ public class WindowManagerShellCommand extends ShellCommand {
                     runSetBooleanFlag(pw, mLetterboxConfiguration
                             ::setTranslucentLetterboxingOverrideEnabled);
                     break;
+                case "--isCameraCompatRefreshEnabled":
+                    runSetBooleanFlag(pw, enabled -> mLetterboxConfiguration
+                            .setCameraCompatRefreshEnabled(enabled));
+                    break;
+                case "--isCameraCompatRefreshCycleThroughStopEnabled":
+                    runSetBooleanFlag(pw, enabled -> mLetterboxConfiguration
+                            .setCameraCompatRefreshCycleThroughStopEnabled(enabled));
+                    break;
                 default:
                     getErrPrintWriter().println(
                             "Error: Unrecognized letterbox style option: " + arg);
@@ -1024,6 +1032,13 @@ public class WindowManagerShellCommand extends ShellCommand {
                         break;
                     case "isTranslucentLetterboxingEnabled":
                         mLetterboxConfiguration.resetTranslucentLetterboxingEnabled();
+                        break;
+                    case "isCameraCompatRefreshEnabled":
+                        mLetterboxConfiguration.resetCameraCompatRefreshEnabled();
+                        break;
+                    case "isCameraCompatRefreshCycleThroughStopEnabled":
+                        mLetterboxConfiguration
+                                .resetCameraCompatRefreshCycleThroughStopEnabled();
                         break;
                     default:
                         getErrPrintWriter().println(
@@ -1126,6 +1141,8 @@ public class WindowManagerShellCommand extends ShellCommand {
             mLetterboxConfiguration.resetIsEducationEnabled();
             mLetterboxConfiguration.resetIsSplitScreenAspectRatioForUnresizableAppsEnabled();
             mLetterboxConfiguration.resetTranslucentLetterboxingEnabled();
+            mLetterboxConfiguration.resetCameraCompatRefreshEnabled();
+            mLetterboxConfiguration.resetCameraCompatRefreshCycleThroughStopEnabled();
         }
     }
 
@@ -1170,6 +1187,11 @@ public class WindowManagerShellCommand extends ShellCommand {
             pw.println("Is using split screen aspect ratio as aspect ratio for unresizable apps: "
                     + mLetterboxConfiguration
                             .getIsSplitScreenAspectRatioForUnresizableAppsEnabled());
+
+            pw.println("    Is activity \"refresh\" in camera compatibility treatment enabled: "
+                    + mLetterboxConfiguration.isCameraCompatRefreshEnabled());
+            pw.println("    Refresh using \"stopped -> resumed\" cycle: "
+                    + mLetterboxConfiguration.isCameraCompatRefreshCycleThroughStopEnabled());
 
             pw.println("Background type: "
                     + LetterboxConfiguration.letterboxBackgroundTypeToString(
@@ -1380,6 +1402,12 @@ public class WindowManagerShellCommand extends ShellCommand {
         pw.println("        unresizable apps.");
         pw.println("      --isTranslucentLetterboxingEnabled [true|1|false|0]");
         pw.println("        Whether letterboxing for translucent activities is enabled.");
+        pw.println("      --isCameraCompatRefreshEnabled [true|1|false|0]");
+        pw.println("        Whether camera compatibility refresh is enabled.");
+        pw.println("      --isCameraCompatRefreshCycleThroughStopEnabled [true|1|false|0]");
+        pw.println("        Whether activity \"refresh\" in camera compatibility treatment should");
+        pw.println("        happen using the \"stopped -> resumed\" cycle rather than");
+        pw.println("        \"paused -> resumed\" cycle.");
         pw.println("  reset-letterbox-style [aspectRatio|cornerRadius|backgroundType");
         pw.println("      |backgroundColor|wallpaperBlurRadius|wallpaperDarkScrimAlpha");
         pw.println("      |horizontalPositionMultiplier|verticalPositionMultiplier");
