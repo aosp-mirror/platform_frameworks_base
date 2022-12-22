@@ -4737,10 +4737,10 @@ public interface WindowManager extends ViewManager {
             }
             if (providedInsets != null) {
                 sb.append(System.lineSeparator());
-                sb.append(prefix).append("  providedInsets:");
+                sb.append(" providedInsets=");
                 for (int i = 0; i < providedInsets.length; ++i) {
-                    sb.append(System.lineSeparator());
-                    sb.append(prefix).append("    ").append(providedInsets[i]);
+                    if (i > 0) sb.append(' ');
+                    sb.append((providedInsets[i]));
                 }
             }
             if (insetsRoundedCornerFrame) {
@@ -4749,12 +4749,10 @@ public interface WindowManager extends ViewManager {
             }
             if (paramsForRotation != null && paramsForRotation.length != 0) {
                 sb.append(System.lineSeparator());
-                sb.append(prefix).append("  paramsForRotation:");
+                sb.append(prefix).append("  paramsForRotation=");
                 for (int i = 0; i < paramsForRotation.length; ++i) {
-                    // Additional prefix needed for the beginning of the params of the new rotation.
-                    sb.append(System.lineSeparator()).append(prefix).append("    ");
-                    sb.append(Surface.rotationToString(i)).append("=");
-                    sb.append(paramsForRotation[i].toString(prefix + "    "));
+                    if (i > 0) sb.append(' ');
+                    sb.append(paramsForRotation[i].toString());
                 }
             }
 
