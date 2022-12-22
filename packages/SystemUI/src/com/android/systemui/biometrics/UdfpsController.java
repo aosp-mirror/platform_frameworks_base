@@ -62,6 +62,7 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 
 import com.android.internal.annotations.VisibleForTesting;
+import com.android.internal.logging.InstanceId;
 import com.android.internal.util.LatencyTracker;
 import com.android.keyguard.FaceAuthApiRequestReason;
 import com.android.keyguard.KeyguardUpdateMonitor;
@@ -547,7 +548,9 @@ public class UdfpsController implements DozeReceiver, Dumpable {
         }
 
         final int biometricTouchReportedTouchType = toBiometricTouchReportedTouchType(event);
-        final int sessionId = mSessionTracker.getSessionId(getBiometricSessionType()).getId();
+        final InstanceId sessionIdProvider = mSessionTracker.getSessionId(
+                getBiometricSessionType());
+        final int sessionId = (sessionIdProvider != null) ? sessionIdProvider.getId() : -1;
         final int touchConfigId = BOUNDING_BOX_TOUCH_CONFIG_ID;
 
         SysUiStatsLog.write(SysUiStatsLog.BIOMETRIC_TOUCH_REPORTED, biometricTouchReportedTouchType,
