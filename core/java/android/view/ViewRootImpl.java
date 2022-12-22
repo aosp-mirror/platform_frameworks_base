@@ -3720,15 +3720,18 @@ public final class ViewRootImpl implements ViewParent,
 
         final int seqId = mSyncSeqId;
         mWmsRequestSyncGroupState = WMS_SYNC_PENDING;
-        mWmsRequestSyncGroup = new SurfaceSyncGroup(t -> {
+        mWmsRequestSyncGroup = new SurfaceSyncGroup("wmsSync-" + mTag, t -> {
             mWmsRequestSyncGroupState = WMS_SYNC_MERGED;
             reportDrawFinished(t, seqId);
         });
+        Trace.traceBegin(Trace.TRACE_TAG_VIEW,
+                "create WMS Sync group=" + mWmsRequestSyncGroup.getName());
         if (DEBUG_BLAST) {
-            Log.d(mTag, "Setup new sync id=" + mWmsRequestSyncGroup);
+            Log.d(mTag, "Setup new sync=" + mWmsRequestSyncGroup.getName());
         }
 
         mWmsRequestSyncGroup.addToSync(this);
+        Trace.traceEnd(Trace.TRACE_TAG_VIEW);
         notifySurfaceSyncStarted();
     }
 
@@ -11294,20 +11297,28 @@ public final class ViewRootImpl implements ViewParent,
 
     @Override
     public SurfaceSyncGroup getOrCreateSurfaceSyncGroup() {
+        boolean newSyncGroup = false;
         if (mActiveSurfaceSyncGroup == null) {
-            mActiveSurfaceSyncGroup = new SurfaceSyncGroup();
+            mActiveSurfaceSyncGroup = new SurfaceSyncGroup(mTag);
             updateSyncInProgressCount(mActiveSurfaceSyncGroup);
             if (!mIsInTraversal && !mTraversalScheduled) {
                 scheduleTraversals();
             }
-            if (DEBUG_BLAST) {
-                Log.d(mTag, "Creating new active sync group " + mActiveSurfaceSyncGroup);
-            }
-        } else {
-            if (DEBUG_BLAST) {
-                Log.d(mTag, "Return already created active sync group " + mActiveSurfaceSyncGroup);
+            newSyncGroup = true;
+        }
+
+        Trace.instant(Trace.TRACE_TAG_VIEW,
+                "getOrCreateSurfaceSyncGroup isNew=" + newSyncGroup + " " + mTag);
+
+        if (DEBUG_BLAST) {
+            if (newSyncGroup) {
+                Log.d(mTag, "Creating new active sync group " + mActiveSurfaceSyncGroup.getName());
+            } else {
+                Log.d(mTag, "Return already created active sync group "
+                        + mActiveSurfaceSyncGroup.getName());
             }
         }
+
         return mActiveSurfaceSyncGroup;
     };
 
