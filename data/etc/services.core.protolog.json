@@ -499,6 +499,12 @@
       "group": "WM_DEBUG_ORIENTATION",
       "at": "com\/android\/server\/wm\/WindowManagerService.java"
     },
+    "-1631991057": {
+      "message": "Display id=%d is notified that Camera %s is closed but activity is still refreshing. Rescheduling an update.",
+      "level": "VERBOSE",
+      "group": "WM_DEBUG_ORIENTATION",
+      "at": "com\/android\/server\/wm\/DisplayRotationCompatPolicy.java"
+    },
     "-1630752478": {
       "message": "removeLockedTask: removed %s",
       "level": "DEBUG",
@@ -642,6 +648,12 @@
       "level": "DEBUG",
       "group": "WM_DEBUG_WINDOW_INSETS",
       "at": "com\/android\/server\/wm\/InsetsSourceProvider.java"
+    },
+    "-1480918485": {
+      "message": "Refreshed activity: %s",
+      "level": "INFO",
+      "group": "WM_DEBUG_STATES",
+      "at": "com\/android\/server\/wm\/ActivityRecord.java"
     },
     "-1480772131": {
       "message": "No app or window is requesting an orientation, return %d for display id=%d",
@@ -4260,6 +4272,12 @@
       "level": "INFO",
       "group": "WM_DEBUG_REMOTE_ANIMATIONS",
       "at": "com\/android\/server\/wm\/RemoteAnimationController.java"
+    },
+    "1967643923": {
+      "message": "Refershing activity for camera compatibility treatment, activityRecord=%s",
+      "level": "VERBOSE",
+      "group": "WM_DEBUG_STATES",
+      "at": "com\/android\/server\/wm\/DisplayRotationCompatPolicy.java"
     },
     "1967975839": {
       "message": "Changing app %s visible=%b performLayout=%b",

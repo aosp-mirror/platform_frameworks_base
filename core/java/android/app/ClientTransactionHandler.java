@@ -139,6 +139,9 @@ public abstract class ClientTransactionHandler {
     /** Restart the activity after it was stopped. */
     public abstract void performRestartActivity(@NonNull ActivityClientRecord r, boolean start);
 
+     /** Report that activity was refreshed to server. */
+    public abstract void reportRefresh(@NonNull ActivityClientRecord r);
+
     /** Set pending activity configuration in case it will be updated by other transaction item. */
     public abstract void updatePendingActivityConfiguration(@NonNull IBinder token,
             Configuration overrideConfig);

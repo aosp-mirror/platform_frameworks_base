@@ -5342,6 +5342,11 @@ public final class ActivityThread extends ClientTransactionHandler
         }
     }
 
+    @Override
+    public void reportRefresh(ActivityClientRecord r) {
+        ActivityClient.getInstance().activityRefreshed(r.token);
+    }
+
     private void handleSetCoreSettings(Bundle coreSettings) {
         synchronized (mCoreSettingsLock) {
             mCoreSettings = coreSettings;
