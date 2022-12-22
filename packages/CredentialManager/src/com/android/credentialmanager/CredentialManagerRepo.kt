@@ -214,17 +214,21 @@ class CredentialManagerRepo(
       GetCredentialProviderData.Builder("io.enpass.app")
         .setCredentialEntries(
           listOf<Entry>(
+              newGetEntry(
+                  "key1", "subkey-1", TYPE_PASSWORD_CREDENTIAL, "Password",
+                  "elisa.family@outlook.com", null, 3L
+              ),
             newGetEntry(
               "key1", "subkey-1", TYPE_PUBLIC_KEY_CREDENTIAL, "Passkey",
-              "elisa.bakery@gmail.com", "Elisa Beckett", 300L
+              "elisa.bakery@gmail.com", "Elisa Beckett", 0L
             ),
             newGetEntry(
               "key1", "subkey-2", TYPE_PASSWORD_CREDENTIAL, "Password",
-              "elisa.bakery@gmail.com", null, 300L
+              "elisa.bakery@gmail.com", null, 10L
             ),
             newGetEntry(
-              "key1", "subkey-3", TYPE_PASSWORD_CREDENTIAL, "Password",
-              "elisa.family@outlook.com", null, 100L
+              "key1", "subkey-3", TYPE_PUBLIC_KEY_CREDENTIAL, "Passkey",
+              "elisa.family@outlook.com", "Elisa Beckett", 1L
             ),
           )
         ).setAuthenticationEntry(
@@ -247,12 +251,12 @@ class CredentialManagerRepo(
         .setCredentialEntries(
           listOf<Entry>(
             newGetEntry(
-              "key1", "subkey-1", TYPE_PASSWORD_CREDENTIAL, "Password",
-              "elisa.family@outlook.com", null, 600L
+              "key1", "subkey-2", TYPE_PASSWORD_CREDENTIAL, "Password",
+              "elisa.family@outlook.com", null, 4L
             ),
             newGetEntry(
-              "key1", "subkey-2", TYPE_PUBLIC_KEY_CREDENTIAL, "Passkey",
-              "elisa.family@outlook.com", null, 100L
+                  "key1", "subkey-3", TYPE_PASSWORD_CREDENTIAL, "Password",
+                  "elisa.work@outlook.com", null, 11L
             ),
           )
         ).setAuthenticationEntry(
