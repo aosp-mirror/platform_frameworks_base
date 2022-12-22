@@ -136,10 +136,6 @@ public interface WindowManagerPolicy extends WindowManagerPolicyConstants {
     @IntDef({NAV_BAR_LEFT, NAV_BAR_RIGHT, NAV_BAR_BOTTOM})
     @interface NavigationBarPosition {}
 
-    @Retention(SOURCE)
-    @IntDef({ALT_BAR_UNKNOWN, ALT_BAR_LEFT, ALT_BAR_RIGHT, ALT_BAR_BOTTOM, ALT_BAR_TOP})
-    @interface AltBarPosition {}
-
     /**
      * Pass this event to the user / app.  To be returned from
      * {@link #interceptKeyBeforeQueueing}.
@@ -334,8 +330,11 @@ public interface WindowManagerPolicy extends WindowManagerPolicyConstants {
         /**
          * Hint to window manager that the user is interacting with a display that should be treated
          * as the top display.
+         *
+         * Calling this method does not guarantee that the display will be moved to top. The window
+         * manager will make the final decision whether or not to move the display.
          */
-        void moveDisplayToTop(int displayId);
+        void moveDisplayToTopIfAllowed(int displayId);
 
         /**
          * Return whether the app transition state is idle.

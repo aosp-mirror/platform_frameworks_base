@@ -403,7 +403,7 @@ class Session extends IWindowSession.Stub implements IBinder.DeathRecipient {
                             pi.getIntentSender().getTarget());
                     final ActivityInfo info = mService.mAtmService.resolveActivityInfoForIntent(
                             launchIntent, null /* resolvedType */, user.getIdentifier(),
-                            callingUid);
+                            callingUid, callingPid);
                     item.setActivityInfo(info);
                 }
             } finally {
@@ -437,7 +437,7 @@ class Session extends IWindowSession.Stub implements IBinder.DeathRecipient {
                 }
                 final ActivityInfo info = mService.mAtmService.resolveActivityInfoForIntent(
                         shortcutIntents[0], null /* resolvedType */, user.getIdentifier(),
-                        callingUid);
+                        callingUid, callingPid);
                 item.setActivityInfo(info);
             }
         } else if (hasTask) {
@@ -461,7 +461,8 @@ class Session extends IWindowSession.Stub implements IBinder.DeathRecipient {
                 } else {
                     // Resolve the activity info manually if the task was restored after reboot
                     final ActivityInfo info = mService.mAtmService.resolveActivityInfoForIntent(
-                            task.intent, null /* resolvedType */, task.mUserId, callingUid);
+                            task.intent, null /* resolvedType */, task.mUserId, callingUid,
+                            callingPid);
                     item.setActivityInfo(info);
                 }
             }

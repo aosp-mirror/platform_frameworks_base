@@ -605,4 +605,36 @@ public class HdmiCecNetworkTest {
 
         assertThat(mHdmiCecNetwork.getSafeCecDevicesLocked()).hasSize(1);
     }
+
+    @Test
+    public void disableCec_clearCecLocalDevices() {
+        mHdmiCecNetwork.clearLocalDevices();
+        mHdmiCecNetwork.addLocalDevice(HdmiDeviceInfo.DEVICE_TV,
+                new HdmiCecLocalDeviceTv(mHdmiControlService));
+
+        assertThat(mHdmiCecNetwork.getLocalDeviceList()).hasSize(1);
+        assertThat(mHdmiCecNetwork.getLocalDeviceList().get(0)).isInstanceOf(
+                HdmiCecLocalDeviceTv.class);
+        mHdmiControlService.setCecEnabled(HdmiControlManager.HDMI_CEC_CONTROL_DISABLED);
+        mTestLooper.dispatchAll();
+
+        assertThat(mHdmiCecNetwork.getLocalDeviceList()).hasSize(0);
+    }
+
+    @Test
+    public void disableEarc_doNotClearCecLocalDevices() {
+        mHdmiCecNetwork.clearLocalDevices();
+        mHdmiCecNetwork.addLocalDevice(HdmiDeviceInfo.DEVICE_TV,
+                new HdmiCecLocalDeviceTv(mHdmiControlService));
+
+        assertThat(mHdmiCecNetwork.getLocalDeviceList()).hasSize(1);
+        assertThat(mHdmiCecNetwork.getLocalDeviceList().get(0)).isInstanceOf(
+                HdmiCecLocalDeviceTv.class);
+        mHdmiControlService.setEarcEnabled(HdmiControlManager.EARC_FEATURE_DISABLED);
+        mTestLooper.dispatchAll();
+
+        assertThat(mHdmiCecNetwork.getLocalDeviceList()).hasSize(1);
+        assertThat(mHdmiCecNetwork.getLocalDeviceList().get(0)).isInstanceOf(
+                HdmiCecLocalDeviceTv.class);
+    }
 }

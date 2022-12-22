@@ -277,6 +277,8 @@ public class JobParameters implements Parcelable {
 
     @UnsupportedAppUsage
     private final int jobId;
+    @Nullable
+    private final String mJobNamespace;
     private final PersistableBundle extras;
     private final Bundle transientExtras;
     private final ClipData clipData;
@@ -295,7 +297,7 @@ public class JobParameters implements Parcelable {
     private String debugStopReason; // Human readable stop reason for debugging.
 
     /** @hide */
-    public JobParameters(IBinder callback, int jobId, PersistableBundle extras,
+    public JobParameters(IBinder callback, String namespace, int jobId, PersistableBundle extras,
             Bundle transientExtras, ClipData clipData, int clipGrantFlags,
             boolean overrideDeadlineExpired, boolean isExpedited,
             boolean isUserInitiated, Uri[] triggeredContentUris,
@@ -312,6 +314,7 @@ public class JobParameters implements Parcelable {
         this.mTriggeredContentUris = triggeredContentUris;
         this.mTriggeredContentAuthorities = triggeredContentAuthorities;
         this.network = network;
+        this.mJobNamespace = namespace;
     }
 
     /**
@@ -319,6 +322,19 @@ public class JobParameters implements Parcelable {
      */
     public int getJobId() {
         return jobId;
+    }
+
+    /**
+     * Get the namespace this job was placed in.
+     *
+     * @see JobScheduler#forNamespace(String)
+     * @return The namespace this job was scheduled in. Will be {@code null} if there was no
+     * explicit namespace set and this job is therefore in the default namespace.
+     * @hide
+     */
+    @Nullable
+    public String getJobNamespace() {
+        return mJobNamespace;
     }
 
     /**
@@ -540,6 +556,7 @@ public class JobParameters implements Parcelable {
 
     private JobParameters(Parcel in) {
         jobId = in.readInt();
+        mJobNamespace = in.readString();
         extras = in.readPersistableBundle();
         transientExtras = in.readBundle();
         if (in.readInt() != 0) {
@@ -581,6 +598,7 @@ public class JobParameters implements Parcelable {
     @Override
     public void writeToParcel(Parcel dest, int flags) {
         dest.writeInt(jobId);
+        dest.writeString(mJobNamespace);
         dest.writePersistableBundle(extras);
         dest.writeBundle(transientExtras);
         if (clipData != null) {

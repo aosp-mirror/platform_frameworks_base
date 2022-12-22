@@ -601,7 +601,8 @@ class ContextImpl extends Context {
                             && !getSystemService(UserManager.class)
                                     .isUserUnlockingOrUnlocked(UserHandle.myUserId())) {
                         throw new IllegalStateException("SharedPreferences in credential encrypted "
-                                + "storage are not available until after user is unlocked");
+                                + "storage are not available until after user (id "
+                                + UserHandle.myUserId() + ") is unlocked");
                     }
                 }
                 sp = new SharedPreferencesImpl(file, mode);
@@ -3317,7 +3318,6 @@ class ContextImpl extends Context {
             @Nullable String splitName, @Nullable IBinder token, @Nullable UserHandle user,
             int flags, @Nullable ClassLoader classLoader, @Nullable String overrideOpPackageName) {
         mOuterContext = this;
-
         // If creator didn't specify which storage to use, use the default
         // location for application.
         if ((flags & (Context.CONTEXT_CREDENTIAL_PROTECTED_STORAGE

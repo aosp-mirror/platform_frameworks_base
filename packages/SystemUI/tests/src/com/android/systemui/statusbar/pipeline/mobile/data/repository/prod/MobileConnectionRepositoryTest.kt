@@ -16,6 +16,7 @@
 
 package com.android.systemui.statusbar.pipeline.mobile.data.repository.prod
 
+import android.content.Intent
 import android.os.UserHandle
 import android.provider.Settings
 import android.telephony.CellSignalStrengthCdma
@@ -23,10 +24,16 @@ import android.telephony.ServiceState
 import android.telephony.SignalStrength
 import android.telephony.SubscriptionInfo
 import android.telephony.TelephonyCallback
+import android.telephony.TelephonyCallback.DataActivityListener
 import android.telephony.TelephonyCallback.ServiceStateListener
 import android.telephony.TelephonyDisplayInfo
 import android.telephony.TelephonyDisplayInfo.OVERRIDE_NETWORK_TYPE_LTE_CA
 import android.telephony.TelephonyManager
+import android.telephony.TelephonyManager.DATA_ACTIVITY_DORMANT
+import android.telephony.TelephonyManager.DATA_ACTIVITY_IN
+import android.telephony.TelephonyManager.DATA_ACTIVITY_INOUT
+import android.telephony.TelephonyManager.DATA_ACTIVITY_NONE
+import android.telephony.TelephonyManager.DATA_ACTIVITY_OUT
 import android.telephony.TelephonyManager.DATA_CONNECTED
 import android.telephony.TelephonyManager.DATA_CONNECTING
 import android.telephony.TelephonyManager.DATA_DISCONNECTED
@@ -34,18 +41,27 @@ import android.telephony.TelephonyManager.DATA_DISCONNECTING
 import android.telephony.TelephonyManager.DATA_UNKNOWN
 import android.telephony.TelephonyManager.ERI_OFF
 import android.telephony.TelephonyManager.ERI_ON
+import android.telephony.TelephonyManager.EXTRA_PLMN
+import android.telephony.TelephonyManager.EXTRA_SHOW_PLMN
+import android.telephony.TelephonyManager.EXTRA_SHOW_SPN
+import android.telephony.TelephonyManager.EXTRA_SPN
+import android.telephony.TelephonyManager.EXTRA_SUBSCRIPTION_ID
 import android.telephony.TelephonyManager.NETWORK_TYPE_LTE
 import android.telephony.TelephonyManager.NETWORK_TYPE_UNKNOWN
 import androidx.test.filters.SmallTest
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.statusbar.pipeline.mobile.data.model.DataConnectionState
 import com.android.systemui.statusbar.pipeline.mobile.data.model.MobileConnectionModel
+import com.android.systemui.statusbar.pipeline.mobile.data.model.NetworkNameModel
 import com.android.systemui.statusbar.pipeline.mobile.data.model.ResolvedNetworkType.DefaultNetworkType
 import com.android.systemui.statusbar.pipeline.mobile.data.model.ResolvedNetworkType.OverrideNetworkType
 import com.android.systemui.statusbar.pipeline.mobile.data.model.ResolvedNetworkType.UnknownNetworkType
+import com.android.systemui.statusbar.pipeline.mobile.data.model.toNetworkNameModel
 import com.android.systemui.statusbar.pipeline.mobile.data.repository.FakeMobileConnectionsRepository
 import com.android.systemui.statusbar.pipeline.mobile.util.FakeMobileMappingsProxy
 import com.android.systemui.statusbar.pipeline.shared.ConnectivityPipelineLogger
+import com.android.systemui.statusbar.pipeline.shared.data.model.DataActivityModel
+import com.android.systemui.statusbar.pipeline.shared.data.model.toMobileDataActivityModel
 import com.android.systemui.util.mockito.any
 import com.android.systemui.util.mockito.argumentCaptor
 import com.android.systemui.util.mockito.mock
@@ -90,8 +106,11 @@ class MobileConnectionRepositoryTest : SysuiTestCase() {
             MobileConnectionRepositoryImpl(
                 context,
                 SUB_1_ID,
+                DEFAULT_NAME,
+                SEP,
                 telephonyManager,
                 globalSettings,
+                fakeBroadcastDispatcher,
                 connectionsRepo.defaultDataSubId,
                 connectionsRepo.globalMobileDataSettingChangedEvent,
                 mobileMappings,
@@ -249,10 +268,11 @@ class MobileConnectionRepositoryTest : SysuiTestCase() {
             var latest: MobileConnectionModel? = null
             val job = underTest.connectionInfo.onEach { latest = it }.launchIn(this)
 
-            val callback = getTelephonyCallbackForType<TelephonyCallback.DataActivityListener>()
-            callback.onDataActivity(3)
+            val callback = getTelephonyCallbackForType<DataActivityListener>()
+            callback.onDataActivity(DATA_ACTIVITY_INOUT)
 
-            assertThat(latest?.dataActivityDirection).isEqualTo(3)
+            assertThat(latest?.dataActivityDirection)
+                .isEqualTo(DATA_ACTIVITY_INOUT.toMobileDataActivityModel())
 
             job.cancel()
         }
@@ -459,6 +479,112 @@ class MobileConnectionRepositoryTest : SysuiTestCase() {
             job.cancel()
         }
 
+    @Test
+    fun `activity - updates from callback`() =
+        runBlocking(IMMEDIATE) {
+            var latest: DataActivityModel? = null
+            val job =
+                underTest.connectionInfo.onEach { latest = it.dataActivityDirection }.launchIn(this)
+
+            assertThat(latest)
+                .isEqualTo(DataActivityModel(hasActivityIn = false, hasActivityOut = false))
+
+            val cb = getTelephonyCallbackForType<DataActivityListener>()
+            cb.onDataActivity(DATA_ACTIVITY_IN)
+            assertThat(latest)
+                .isEqualTo(DataActivityModel(hasActivityIn = true, hasActivityOut = false))
+
+            cb.onDataActivity(DATA_ACTIVITY_OUT)
+            assertThat(latest)
+                .isEqualTo(DataActivityModel(hasActivityIn = false, hasActivityOut = true))
+
+            cb.onDataActivity(DATA_ACTIVITY_INOUT)
+            assertThat(latest)
+                .isEqualTo(DataActivityModel(hasActivityIn = true, hasActivityOut = true))
+
+            cb.onDataActivity(DATA_ACTIVITY_NONE)
+            assertThat(latest)
+                .isEqualTo(DataActivityModel(hasActivityIn = false, hasActivityOut = false))
+
+            cb.onDataActivity(DATA_ACTIVITY_DORMANT)
+            assertThat(latest)
+                .isEqualTo(DataActivityModel(hasActivityIn = false, hasActivityOut = false))
+
+            cb.onDataActivity(1234)
+            assertThat(latest)
+                .isEqualTo(DataActivityModel(hasActivityIn = false, hasActivityOut = false))
+
+            job.cancel()
+        }
+
+    @Test
+    fun `network name - default`() =
+        runBlocking(IMMEDIATE) {
+            var latest: NetworkNameModel? = null
+            val job = underTest.networkName.onEach { latest = it }.launchIn(this)
+
+            assertThat(latest).isEqualTo(DEFAULT_NAME)
+
+            job.cancel()
+        }
+
+    @Test
+    fun `network name - uses broadcast info - returns derived`() =
+        runBlocking(IMMEDIATE) {
+            var latest: NetworkNameModel? = null
+            val job = underTest.networkName.onEach { latest = it }.launchIn(this)
+
+            val intent = spnIntent()
+
+            fakeBroadcastDispatcher.registeredReceivers.forEach { receiver ->
+                receiver.onReceive(context, intent)
+            }
+
+            assertThat(latest).isEqualTo(intent.toNetworkNameModel(SEP))
+
+            job.cancel()
+        }
+
+    @Test
+    fun `network name - broadcast not for this sub id - returns default`() =
+        runBlocking(IMMEDIATE) {
+            var latest: NetworkNameModel? = null
+            val job = underTest.networkName.onEach { latest = it }.launchIn(this)
+
+            val intent = spnIntent(subId = 101)
+
+            fakeBroadcastDispatcher.registeredReceivers.forEach { receiver ->
+                receiver.onReceive(context, intent)
+            }
+
+            assertThat(latest).isEqualTo(DEFAULT_NAME)
+
+            job.cancel()
+        }
+
+    @Test
+    fun `network name - operatorAlphaShort - tracked`() =
+        runBlocking(IMMEDIATE) {
+            var latest: String? = null
+
+            val job =
+                underTest.connectionInfo.onEach { latest = it.operatorAlphaShort }.launchIn(this)
+
+            val shortName = "short name"
+            val serviceState = ServiceState()
+            serviceState.setOperatorName(
+                /* longName */ "long name",
+                /* shortName */ shortName,
+                /* numeric */ "12345",
+            )
+
+            getTelephonyCallbackForType<ServiceStateListener>().onServiceStateChanged(serviceState)
+
+            assertThat(latest).isEqualTo(shortName)
+
+            job.cancel()
+        }
+
     private fun getTelephonyCallbacks(): List<TelephonyCallback> {
         val callbackCaptor = argumentCaptor<TelephonyCallback>()
         Mockito.verify(telephonyManager).registerTelephonyCallback(any(), callbackCaptor.capture())
@@ -484,10 +610,31 @@ class MobileConnectionRepositoryTest : SysuiTestCase() {
         return signalStrength
     }
 
+    private fun spnIntent(
+        subId: Int = SUB_1_ID,
+        showSpn: Boolean = true,
+        spn: String = SPN,
+        showPlmn: Boolean = true,
+        plmn: String = PLMN,
+    ): Intent =
+        Intent(TelephonyManager.ACTION_SERVICE_PROVIDERS_UPDATED).apply {
+            putExtra(EXTRA_SUBSCRIPTION_ID, subId)
+            putExtra(EXTRA_SHOW_SPN, showSpn)
+            putExtra(EXTRA_SPN, spn)
+            putExtra(EXTRA_SHOW_PLMN, showPlmn)
+            putExtra(EXTRA_PLMN, plmn)
+        }
+
     companion object {
         private val IMMEDIATE = Dispatchers.Main.immediate
         private const val SUB_1_ID = 1
         private val SUB_1 =
             mock<SubscriptionInfo>().also { whenever(it.subscriptionId).thenReturn(SUB_1_ID) }
+
+        private val DEFAULT_NAME = NetworkNameModel.Default("default name")
+        private const val SEP = "-"
+
+        private const val SPN = "testSpn"
+        private const val PLMN = "testPlmn"
     }
 }

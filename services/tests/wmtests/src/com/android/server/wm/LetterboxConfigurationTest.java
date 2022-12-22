@@ -26,6 +26,7 @@ import static com.android.server.wm.LetterboxConfiguration.LETTERBOX_VERTICAL_RE
 import static com.android.server.wm.LetterboxConfiguration.LETTERBOX_VERTICAL_REACHABILITY_POSITION_TOP;
 
 import static org.mockito.ArgumentMatchers.anyInt;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
@@ -39,7 +40,8 @@ import androidx.test.filters.SmallTest;
 import org.junit.Before;
 import org.junit.Test;
 
-import java.util.function.Consumer;
+import java.util.Arrays;
+import java.util.function.BiConsumer;
 
 @SmallTest
 @Presubmit
@@ -58,20 +60,28 @@ public class LetterboxConfigurationTest {
 
     @Test
     public void test_whenReadingValues_storeIsInvoked() {
-        mLetterboxConfiguration.getLetterboxPositionForHorizontalReachability();
-        verify(mLetterboxConfigurationPersister).getLetterboxPositionForHorizontalReachability();
-        mLetterboxConfiguration.getLetterboxPositionForVerticalReachability();
-        verify(mLetterboxConfigurationPersister).getLetterboxPositionForVerticalReachability();
+        for (boolean halfFoldPose : Arrays.asList(false, true)) {
+            mLetterboxConfiguration.getLetterboxPositionForHorizontalReachability(halfFoldPose);
+            verify(mLetterboxConfigurationPersister).getLetterboxPositionForHorizontalReachability(
+                    halfFoldPose);
+            mLetterboxConfiguration.getLetterboxPositionForVerticalReachability(halfFoldPose);
+            verify(mLetterboxConfigurationPersister).getLetterboxPositionForVerticalReachability(
+                    halfFoldPose);
+        }
     }
 
     @Test
     public void test_whenSettingValues_updateConfigurationIsInvoked() {
-        mLetterboxConfiguration.movePositionForHorizontalReachabilityToNextRightStop();
-        verify(mLetterboxConfigurationPersister).setLetterboxPositionForHorizontalReachability(
-                anyInt());
-        mLetterboxConfiguration.movePositionForVerticalReachabilityToNextBottomStop();
-        verify(mLetterboxConfigurationPersister).setLetterboxPositionForVerticalReachability(
-                anyInt());
+        for (boolean halfFoldPose : Arrays.asList(false, true)) {
+            mLetterboxConfiguration.movePositionForHorizontalReachabilityToNextRightStop(
+                    halfFoldPose);
+            verify(mLetterboxConfigurationPersister).setLetterboxPositionForHorizontalReachability(
+                    eq(halfFoldPose), anyInt());
+            mLetterboxConfiguration.movePositionForVerticalReachabilityToNextBottomStop(
+                    halfFoldPose);
+            verify(mLetterboxConfigurationPersister).setLetterboxPositionForVerticalReachability(
+                    eq(halfFoldPose), anyInt());
+        }
     }
 
     @Test
@@ -81,33 +91,65 @@ public class LetterboxConfigurationTest {
                 /* from */ LETTERBOX_HORIZONTAL_REACHABILITY_POSITION_CENTER,
                 /* expected */ LETTERBOX_HORIZONTAL_REACHABILITY_POSITION_LEFT,
                 /* expectedTime */ 1,
+                /* halfFoldPose */ false,
                 LetterboxConfiguration::movePositionForHorizontalReachabilityToNextLeftStop);
         assertForHorizontalMove(
                 /* from */ LETTERBOX_HORIZONTAL_REACHABILITY_POSITION_CENTER,
                 /* expected */ LETTERBOX_HORIZONTAL_REACHABILITY_POSITION_RIGHT,
                 /* expectedTime */ 1,
+                /* halfFoldPose */ false,
                 LetterboxConfiguration::movePositionForHorizontalReachabilityToNextRightStop);
         // Starting from left
         assertForHorizontalMove(
                 /* from */ LETTERBOX_HORIZONTAL_REACHABILITY_POSITION_LEFT,
                 /* expected */ LETTERBOX_HORIZONTAL_REACHABILITY_POSITION_LEFT,
                 /* expectedTime */ 2,
+                /* halfFoldPose */ false,
                 LetterboxConfiguration::movePositionForHorizontalReachabilityToNextLeftStop);
         assertForHorizontalMove(
                 /* from */ LETTERBOX_HORIZONTAL_REACHABILITY_POSITION_LEFT,
                 /* expected */ LETTERBOX_HORIZONTAL_REACHABILITY_POSITION_CENTER,
                 /* expectedTime */ 1,
+                /* halfFoldPose */ false,
                 LetterboxConfiguration::movePositionForHorizontalReachabilityToNextRightStop);
         // Starting from right
         assertForHorizontalMove(
                 /* from */ LETTERBOX_HORIZONTAL_REACHABILITY_POSITION_RIGHT,
                 /* expected */ LETTERBOX_HORIZONTAL_REACHABILITY_POSITION_RIGHT,
                 /* expectedTime */ 2,
+                /* halfFoldPose */ false,
                 LetterboxConfiguration::movePositionForHorizontalReachabilityToNextRightStop);
         assertForHorizontalMove(
                 /* from */ LETTERBOX_HORIZONTAL_REACHABILITY_POSITION_RIGHT,
                 /* expected */ LETTERBOX_HORIZONTAL_REACHABILITY_POSITION_CENTER,
                 /* expectedTime */ 2,
+                /* halfFoldPose */ false,
+                LetterboxConfiguration::movePositionForHorizontalReachabilityToNextLeftStop);
+        // Starting from left - book mode
+        assertForHorizontalMove(
+                /* from */ LETTERBOX_HORIZONTAL_REACHABILITY_POSITION_LEFT,
+                /* expected */ LETTERBOX_HORIZONTAL_REACHABILITY_POSITION_LEFT,
+                /* expectedTime */ 1,
+                /* halfFoldPose */ true,
+                LetterboxConfiguration::movePositionForHorizontalReachabilityToNextLeftStop);
+        assertForHorizontalMove(
+                /* from */ LETTERBOX_HORIZONTAL_REACHABILITY_POSITION_LEFT,
+                /* expected */ LETTERBOX_HORIZONTAL_REACHABILITY_POSITION_RIGHT,
+                /* expectedTime */ 1,
+                /* halfFoldPose */ true,
+                LetterboxConfiguration::movePositionForHorizontalReachabilityToNextRightStop);
+        // Starting from right - book mode
+        assertForHorizontalMove(
+                /* from */ LETTERBOX_HORIZONTAL_REACHABILITY_POSITION_RIGHT,
+                /* expected */ LETTERBOX_HORIZONTAL_REACHABILITY_POSITION_RIGHT,
+                /* expectedTime */ 2,
+                /* halfFoldPose */ true,
+                LetterboxConfiguration::movePositionForHorizontalReachabilityToNextRightStop);
+        assertForHorizontalMove(
+                /* from */ LETTERBOX_HORIZONTAL_REACHABILITY_POSITION_RIGHT,
+                /* expected */ LETTERBOX_HORIZONTAL_REACHABILITY_POSITION_LEFT,
+                /* expectedTime */ 2,
+                /* halfFoldPose */ true,
                 LetterboxConfiguration::movePositionForHorizontalReachabilityToNextLeftStop);
     }
 
@@ -118,55 +160,87 @@ public class LetterboxConfigurationTest {
                 /* from */ LETTERBOX_VERTICAL_REACHABILITY_POSITION_CENTER,
                 /* expected */ LETTERBOX_VERTICAL_REACHABILITY_POSITION_BOTTOM,
                 /* expectedTime */ 1,
+                /* halfFoldPose */ false,
                 LetterboxConfiguration::movePositionForVerticalReachabilityToNextBottomStop);
         assertForVerticalMove(
                 /* from */ LETTERBOX_VERTICAL_REACHABILITY_POSITION_CENTER,
                 /* expected */ LETTERBOX_VERTICAL_REACHABILITY_POSITION_TOP,
                 /* expectedTime */ 1,
+                /* halfFoldPose */ false,
                 LetterboxConfiguration::movePositionForVerticalReachabilityToNextTopStop);
         // Starting from top
         assertForVerticalMove(
                 /* from */ LETTERBOX_VERTICAL_REACHABILITY_POSITION_TOP,
                 /* expected */ LETTERBOX_VERTICAL_REACHABILITY_POSITION_CENTER,
                 /* expectedTime */ 1,
+                /* halfFoldPose */ false,
                 LetterboxConfiguration::movePositionForVerticalReachabilityToNextBottomStop);
         assertForVerticalMove(
                 /* from */ LETTERBOX_VERTICAL_REACHABILITY_POSITION_TOP,
                 /* expected */ LETTERBOX_VERTICAL_REACHABILITY_POSITION_TOP,
                 /* expectedTime */ 2,
+                /* halfFoldPose */ false,
                 LetterboxConfiguration::movePositionForVerticalReachabilityToNextTopStop);
         // Starting from bottom
         assertForVerticalMove(
                 /* from */ LETTERBOX_VERTICAL_REACHABILITY_POSITION_BOTTOM,
                 /* expected */ LETTERBOX_VERTICAL_REACHABILITY_POSITION_CENTER,
                 /* expectedTime */ 2,
+                /* halfFoldPose */ false,
                 LetterboxConfiguration::movePositionForVerticalReachabilityToNextTopStop);
         assertForVerticalMove(
                 /* from */ LETTERBOX_VERTICAL_REACHABILITY_POSITION_BOTTOM,
                 /* expected */ LETTERBOX_VERTICAL_REACHABILITY_POSITION_BOTTOM,
                 /* expectedTime */ 2,
+                /* halfFoldPose */ false,
+                LetterboxConfiguration::movePositionForVerticalReachabilityToNextBottomStop);
+        // Starting from top - tabletop mode
+        assertForVerticalMove(
+                /* from */ LETTERBOX_VERTICAL_REACHABILITY_POSITION_TOP,
+                /* expected */ LETTERBOX_VERTICAL_REACHABILITY_POSITION_BOTTOM,
+                /* expectedTime */ 1,
+                /* halfFoldPose */ true,
+                LetterboxConfiguration::movePositionForVerticalReachabilityToNextBottomStop);
+        assertForVerticalMove(
+                /* from */ LETTERBOX_VERTICAL_REACHABILITY_POSITION_TOP,
+                /* expected */ LETTERBOX_VERTICAL_REACHABILITY_POSITION_TOP,
+                /* expectedTime */ 1,
+                /* halfFoldPose */ true,
+                LetterboxConfiguration::movePositionForVerticalReachabilityToNextTopStop);
+        // Starting from bottom - tabletop mode
+        assertForVerticalMove(
+                /* from */ LETTERBOX_VERTICAL_REACHABILITY_POSITION_BOTTOM,
+                /* expected */ LETTERBOX_VERTICAL_REACHABILITY_POSITION_TOP,
+                /* expectedTime */ 2,
+                /* halfFoldPose */ true,
+                LetterboxConfiguration::movePositionForVerticalReachabilityToNextTopStop);
+        assertForVerticalMove(
+                /* from */ LETTERBOX_VERTICAL_REACHABILITY_POSITION_BOTTOM,
+                /* expected */ LETTERBOX_VERTICAL_REACHABILITY_POSITION_BOTTOM,
+                /* expectedTime */ 2,
+                /* halfFoldPose */ true,
                 LetterboxConfiguration::movePositionForVerticalReachabilityToNextBottomStop);
     }
 
     private void assertForHorizontalMove(int from, int expected, int expectedTime,
-            Consumer<LetterboxConfiguration> move) {
+            boolean halfFoldPose, BiConsumer<LetterboxConfiguration, Boolean> move) {
         // We are in the current position
-        when(mLetterboxConfiguration.getLetterboxPositionForHorizontalReachability())
+        when(mLetterboxConfiguration.getLetterboxPositionForHorizontalReachability(halfFoldPose))
                 .thenReturn(from);
-        move.accept(mLetterboxConfiguration);
+        move.accept(mLetterboxConfiguration, halfFoldPose);
         verify(mLetterboxConfigurationPersister,
-                times(expectedTime)).setLetterboxPositionForHorizontalReachability(
+                times(expectedTime)).setLetterboxPositionForHorizontalReachability(halfFoldPose,
                 expected);
     }
 
     private void assertForVerticalMove(int from, int expected, int expectedTime,
-            Consumer<LetterboxConfiguration> move) {
+            boolean halfFoldPose, BiConsumer<LetterboxConfiguration, Boolean> move) {
         // We are in the current position
-        when(mLetterboxConfiguration.getLetterboxPositionForVerticalReachability())
+        when(mLetterboxConfiguration.getLetterboxPositionForVerticalReachability(halfFoldPose))
                 .thenReturn(from);
-        move.accept(mLetterboxConfiguration);
+        move.accept(mLetterboxConfiguration, halfFoldPose);
         verify(mLetterboxConfigurationPersister,
-                times(expectedTime)).setLetterboxPositionForVerticalReachability(
+                times(expectedTime)).setLetterboxPositionForVerticalReachability(halfFoldPose,
                 expected);
     }
 }

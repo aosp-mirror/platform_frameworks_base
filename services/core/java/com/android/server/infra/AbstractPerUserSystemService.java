@@ -182,8 +182,12 @@ public abstract class AbstractPerUserSystemService<S extends AbstractPerUserSyst
             final String componentName = getComponentNameLocked();
             return new ComponentName[] { getServiceComponent(componentName) };
         }
+
         final String[] componentNames = mMaster.mServiceNameResolver.getServiceNameList(
                 mUserId);
+        if (componentNames == null) {
+            return null;
+        }
         ComponentName[] serviceComponents = new ComponentName[componentNames.length];
         for (int i = 0; i < componentNames.length; i++) {
             serviceComponents[i] = getServiceComponent(componentNames[i]);

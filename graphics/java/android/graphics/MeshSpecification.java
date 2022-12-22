@@ -25,7 +25,7 @@ import libcore.util.NativeAllocationRegistry;
  * generates a {@link MeshSpecification} via the Make method, where multiple parameters to set up
  * the mesh are supplied, including attributes, vertex stride, varyings, and
  * vertex/fragment shaders. There are also additional methods to provide an optional
- * {@link ColorSpace} as well as an alpha type.
+ * {@link ColorSpace} as well as an {@link AlphaType}.
  *
  * Note that there are several limitations on various mesh specifications:
  * 1. The max amount of attributes allowed is 8.
@@ -43,15 +43,30 @@ public class MeshSpecification {
 
     /**
      * Constants for {@link #make(Attribute[], int, Varying[], String, String, ColorSpace, int)}
-     * to determine alpha type
+     * to determine alpha type. Describes how to interpret the alpha component of a pixel.
      */
     @IntDef({UNKNOWN, OPAQUE, PREMUL, UNPREMULT})
     public @interface AlphaType {
     }
 
+    /**
+     * uninitialized.
+     */
     public static final int UNKNOWN = 0;
+
+    /**
+     * Pixel is opaque.
+     */
     public static final int OPAQUE = 1;
+
+    /**
+     * Pixel components are premultiplied by alpha.
+     */
     public static final int PREMUL = 2;
+
+    /**
+     * Pixel components are independent of alpha.
+     */
     public static final int UNPREMULT = 3;
 
     /**
@@ -61,15 +76,41 @@ public class MeshSpecification {
     public @interface Type {
     }
 
+    /**
+     * Represents one float. Its equivalent shader type is float.
+     */
     public static final int FLOAT = 0;
+
+    /**
+     * Represents two floats. Its equivalent shader type is float2.
+     */
     public static final int FLOAT2 = 1;
+
+    /**
+     * Represents three floats. Its equivalent shader type is float3.
+     */
     public static final int FLOAT3 = 2;
+
+    /**
+     * Represents four floats. Its equivalent shader type is float4.
+     */
     public static final int FLOAT4 = 3;
+
+    /**
+     * Represents four bytes. Its equivalent shader type is half4.
+     */
     public static final int UBYTE4 = 4;
 
     /**
      * Data class to represent a single attribute in a shader. Note that type parameter must be
      * one of {@link #FLOAT}, {@link #FLOAT2}, {@link #FLOAT3}, {@link #FLOAT4}, or {@link #UBYTE4}.
+     *
+     * Note that offset is the offset in number of bytes. For example, if we had two attributes
+     *
+     * Float3 att1
+     * Float att2
+     *
+     * att1 would have an offset of 0, while att2 would have an offset of 12 bytes.
      */
     public static class Attribute {
         @Type
@@ -106,14 +147,19 @@ public class MeshSpecification {
     }
 
     /**
-     * Creates a {@link MeshSpecification} object.
+     * Creates a {@link MeshSpecification} object for use within {@link Mesh}.
      *
      * @param attributes     list of attributes represented by {@link Attribute}. Can hold a max of
      *                       8.
-     * @param vertexStride   length of vertex stride. Max of 1024 is accepted.
+     * @param vertexStride   length of vertex stride in bytes. This should be the size of a single
+     *                       vertex' attributes. Max of 1024 is accepted.
      * @param varyings       List of varyings represented by {@link Varying}. Can hold a max of 6.
-     * @param vertexShader   vertex shader to be supplied to the mesh.
-     * @param fragmentShader fragment shader to be suppied to the mesh.
+     *                       Note that `position` is provided by default, does not need to be
+     *                       provided in the list, and does not count towards
+     *                       the 6 varyings allowed.
+     * @param vertexShader   vertex shader to be supplied to the mesh. Ensure that the position
+     *                       varying is set within the shader to get proper results.
+     * @param fragmentShader fragment shader to be supplied to the mesh.
      * @return {@link MeshSpecification} object for use when creating {@link Mesh}
      */
     public static MeshSpecification make(Attribute[] attributes, int vertexStride,
@@ -131,10 +177,14 @@ public class MeshSpecification {
      *
      * @param attributes     list of attributes represented by {@link Attribute}. Can hold a max of
      *                       8.
-     * @param vertexStride   length of vertex stride. Max of 1024 is accepted.
-     * @param varyings       List of varyings represented by {@link Varying}. Can hold a max of
-     *                       6.
-     * @param vertexShader   vertex shader to be supplied to the mesh.
+     * @param vertexStride   length of vertex stride in bytes. This should be the size of a single
+     *                       vertex' attributes. Max of 1024 is accepted.
+     * @param varyings       List of varyings represented by {@link Varying}. Can hold a max of 6.
+     *                       Note that `position` is provided by default, does not need to be
+     *                       provided in the list, and does not count towards
+     *                       the 6 varyings allowed.
+     * @param vertexShader   vertex shader to be supplied to the mesh. Ensure that the position
+     *                       varying is set within the shader to get proper results.
      * @param fragmentShader fragment shader to be supplied to the mesh.
      * @param colorSpace     {@link ColorSpace} to tell what color space to work in.
      * @return {@link MeshSpecification} object for use when creating {@link Mesh}
@@ -154,10 +204,15 @@ public class MeshSpecification {
      *
      * @param attributes     list of attributes represented by {@link Attribute}. Can hold a max of
      *                       8.
-     * @param vertexStride   length of vertex stride. Max of 1024 is accepted.
+     * @param vertexStride   length of vertex stride in bytes. This should be the size of a single
+     *                       vertex' attributes. Max of 1024 is accepted.
      * @param varyings       List of varyings represented by {@link Varying}. Can hold a max of 6.
-     * @param vertexShader   vertex shader code to be supplied to the mesh.
-     * @param fragmentShader fragment shader code to be suppied to the mesh.
+     *                       Note that `position` is provided by default, does not need to be
+     *                       provided in the list, and does not count towards
+     *                       the 6 varyings allowed.
+     * @param vertexShader   vertex shader to be supplied to the mesh. Ensure that the position
+     *                       varying is set within the shader to get proper results.
+     * @param fragmentShader fragment shader to be supplied to the mesh.
      * @param colorSpace     {@link ColorSpace} to tell what color space to work in.
      * @param alphaType      Describes how to interpret the alpha component for a pixel. Must be
      *                       one of {@link AlphaType} values.

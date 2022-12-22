@@ -137,7 +137,7 @@ public class StateControllerTest {
                 .setMinimumLatency(Math.abs(jobId) + 1)
                 .build();
         return JobStatus.createFromJobInfo(
-                jobInfo, CALLING_UID, SOURCE_PACKAGE, SOURCE_USER_ID, testTag);
+                jobInfo, CALLING_UID, SOURCE_PACKAGE, SOURCE_USER_ID, "SCTest", testTag);
     }
 
     @Test

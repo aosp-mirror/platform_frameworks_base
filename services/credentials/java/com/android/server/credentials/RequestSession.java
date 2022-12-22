@@ -144,7 +144,7 @@ abstract class RequestSession<T, U> implements CredentialManagerUi.CredentialMan
         mProviders.clear();
     }
 
-    private boolean isAnyProviderPending() {
+    boolean isAnyProviderPending() {
         for (ProviderSession session : mProviders.values()) {
             if (ProviderSession.isStatusWaitingForRemoteResponse(session.getStatus())) {
                 return true;

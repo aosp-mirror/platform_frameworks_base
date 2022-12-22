@@ -2460,6 +2460,7 @@ public final class InputMethodManager {
         final EditorInfo editorInfo = connectionPair.second;
         final Handler icHandler;
         InputBindResult res = null;
+        final boolean hasServedView;
         synchronized (mH) {
             // Now that we are locked again, validate that our state hasn't
             // changed.
@@ -2591,6 +2592,7 @@ public final class InputMethodManager {
             switch (res.result) {
                 case InputBindResult.ResultCode.ERROR_NOT_IME_TARGET_WINDOW:
                     mRestartOnNextWindowFocus = true;
+                    mServedView = null;
                     break;
             }
             if (mCompletions != null) {
@@ -2598,10 +2600,11 @@ public final class InputMethodManager {
                     mCurBindState.mImeSession.displayCompletions(mCompletions);
                 }
             }
+            hasServedView = mServedView != null;
         }
 
         // Notify the app that the InputConnection is initialized and ready for use.
-        if (ic != null && res != null && res.method != null) {
+        if (ic != null && res != null && res.method != null && hasServedView) {
             if (DEBUG) {
                 Log.v(TAG, "Calling View.onInputConnectionOpened: view= " + view
                         + ", ic=" + ic + ", editorInfo=" + editorInfo + ", handler=" + icHandler);

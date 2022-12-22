@@ -61,10 +61,11 @@ import java.util.List;
 public final class AutoShowTest {
 
     @Rule public UnlockScreenRule mUnlockScreenRule = new UnlockScreenRule();
-
-    @Rule
-    public ScreenCaptureRule mScreenCaptureRule =
+    @Rule public ScreenCaptureRule mScreenCaptureRule =
             new ScreenCaptureRule("/sdcard/InputMethodStressTest");
+    @Rule public DisableLockScreenRule mDisableLockScreenRule = new DisableLockScreenRule();
+    @Rule public ScreenOrientationRule mScreenOrientationRule =
+            new ScreenOrientationRule(true /* isPortrait */);
 
     // TODO(b/240359838): add test case {@code Configuration.SCREENLAYOUT_SIZE_LARGE}.
     @Parameterized.Parameters(

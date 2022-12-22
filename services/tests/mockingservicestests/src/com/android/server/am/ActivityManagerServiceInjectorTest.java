@@ -69,70 +69,70 @@ public final class ActivityManagerServiceInjectorTest extends ExtendedMockitoTes
     }
 
     @Test
-    public void testGetSecondaryDisplayIdsForStartingBackgroundUsers_notSupported() {
+    public void testGetDisplayIdsForStartingBackgroundUsers_notSupported() {
         mockUmIsUsersOnSecondaryDisplaysEnabled(false);
 
-        int [] displayIds = mInjector.getSecondaryDisplayIdsForStartingBackgroundUsers();
+        int [] displayIds = mInjector.getDisplayIdsForStartingVisibleBackgroundUsers();
 
-        assertWithMessage("mAms.getSecondaryDisplayIdsForStartingBackgroundUsers()")
+        assertWithMessage("mAms.getDisplayIdsForStartingBackgroundUsers()")
                 .that(displayIds).isNull();
     }
 
     @Test
-    public void testGetSecondaryDisplayIdsForStartingBackgroundUsers_noDisplaysAtAll() {
+    public void testGetDisplayIdsForStartingBackgroundUsers_noDisplaysAtAll() {
         mockUmIsUsersOnSecondaryDisplaysEnabled(true);
         mockGetDisplays();
 
-        int[] displayIds = mInjector.getSecondaryDisplayIdsForStartingBackgroundUsers();
+        int[] displayIds = mInjector.getDisplayIdsForStartingVisibleBackgroundUsers();
 
-        assertWithMessage("mAms.getSecondaryDisplayIdsForStartingBackgroundUsers()")
+        assertWithMessage("mAms.getDisplayIdsForStartingBackgroundUsers()")
                 .that(displayIds).isNull();
     }
 
     @Test
-    public void testGetSecondaryDisplayIdsForStartingBackgroundUsers_defaultDisplayOnly() {
+    public void testGetDisplayIdsForStartingBackgroundUsers_defaultDisplayOnly() {
         mockUmIsUsersOnSecondaryDisplaysEnabled(true);
         mockGetDisplays(mDefaultDisplay);
 
-        int[] displayIds = mInjector.getSecondaryDisplayIdsForStartingBackgroundUsers();
+        int[] displayIds = mInjector.getDisplayIdsForStartingVisibleBackgroundUsers();
 
-        assertWithMessage("mAms.getSecondaryDisplayIdsForStartingBackgroundUsers()")
+        assertWithMessage("mAms.getDisplayIdsForStartingBackgroundUsers()")
                 .that(displayIds).isNull();
     }
 
     @Test
-    public void testGetSecondaryDisplayIdsForStartingBackgroundUsers_noDefaultDisplay() {
+    public void testGetDisplayIdsForStartingBackgroundUsers_noDefaultDisplay() {
         mockUmIsUsersOnSecondaryDisplaysEnabled(true);
         mockGetDisplays(validDisplay(42));
 
-        int[] displayIds = mInjector.getSecondaryDisplayIdsForStartingBackgroundUsers();
+        int[] displayIds = mInjector.getDisplayIdsForStartingVisibleBackgroundUsers();
 
-        assertWithMessage("mAms.getSecondaryDisplayIdsForStartingBackgroundUsers()")
+        assertWithMessage("mAms.getDisplayIdsForStartingBackgroundUsers()")
                 .that(displayIds).isNull();
     }
 
     @Test
-    public void testGetSecondaryDisplayIdsForStartingBackgroundUsers_mixed() {
+    public void testGetDisplayIdsForStartingBackgroundUsers_mixed() {
         mockUmIsUsersOnSecondaryDisplaysEnabled(true);
         mockGetDisplays(mDefaultDisplay, validDisplay(42), invalidDisplay(108));
 
-        int[] displayIds = mInjector.getSecondaryDisplayIdsForStartingBackgroundUsers();
+        int[] displayIds = mInjector.getDisplayIdsForStartingVisibleBackgroundUsers();
 
-        assertWithMessage("mAms.getSecondaryDisplayIdsForStartingBackgroundUsers()")
+        assertWithMessage("mAms.getDisplayIdsForStartingBackgroundUsers()")
                 .that(displayIds).isNotNull();
-        assertWithMessage("mAms.getSecondaryDisplayIdsForStartingBackgroundUsers()")
+        assertWithMessage("mAms.getDisplayIdsForStartingBackgroundUsers()")
                 .that(displayIds).asList().containsExactly(42);
     }
 
     // Extra test to make sure the array is properly copied...
     @Test
-    public void testGetSecondaryDisplayIdsForStartingBackgroundUsers_mixed_invalidFirst() {
+    public void testGetDisplayIdsForStartingBackgroundUsers_mixed_invalidFirst() {
         mockUmIsUsersOnSecondaryDisplaysEnabled(true);
         mockGetDisplays(invalidDisplay(108), mDefaultDisplay, validDisplay(42));
 
-        int[] displayIds = mInjector.getSecondaryDisplayIdsForStartingBackgroundUsers();
+        int[] displayIds = mInjector.getDisplayIdsForStartingVisibleBackgroundUsers();
 
-        assertWithMessage("mAms.getSecondaryDisplayIdsForStartingBackgroundUsers()")
+        assertWithMessage("mAms.getDisplayIdsForStartingBackgroundUsers()")
                 .that(displayIds).asList().containsExactly(42);
     }
 
@@ -160,6 +160,6 @@ public final class ActivityManagerServiceInjectorTest extends ExtendedMockitoTes
 
     private void mockUmIsUsersOnSecondaryDisplaysEnabled(boolean enabled) {
         Log.d(TAG, "Mocking UserManager.isUsersOnSecondaryDisplaysEnabled() to return " + enabled);
-        doReturn(enabled).when(() -> UserManager.isUsersOnSecondaryDisplaysEnabled());
+        doReturn(enabled).when(() -> UserManager.isVisibleBackgroundUsersEnabled());
     }
 }

@@ -232,7 +232,6 @@ public class ScrimController implements ViewTreeObserver.OnPreDrawListener, Dump
     private boolean mExpansionAffectsAlpha = true;
     private boolean mAnimateChange;
     private boolean mUpdatePending;
-    private boolean mTracking;
     private long mAnimationDuration = -1;
     private long mAnimationDelay;
     private Animator.AnimatorListener mAnimatorListener;
@@ -526,7 +525,6 @@ public class ScrimController implements ViewTreeObserver.OnPreDrawListener, Dump
     }
 
     public void onTrackingStarted() {
-        mTracking = true;
         mDarkenWhileDragging = !mKeyguardStateController.canDismissLockScreen();
         if (!mKeyguardUnlockAnimationController.isPlayingCannedUnlockAnimation()) {
             mAnimatingPanelExpansionOnUnlock = false;
@@ -534,7 +532,6 @@ public class ScrimController implements ViewTreeObserver.OnPreDrawListener, Dump
     }
 
     public void onExpandingFinished() {
-        mTracking = false;
         setUnocclusionAnimationRunning(false);
     }
 
@@ -1450,8 +1447,6 @@ public class ScrimController implements ViewTreeObserver.OnPreDrawListener, Dump
         pw.print(" expansionProgress=");
         pw.println(mTransitionToLockScreenFullShadeNotificationsProgress);
 
-        pw.print("  mTracking=");
-        pw.println(mTracking);
         pw.print("  mDefaultScrimAlpha=");
         pw.println(mDefaultScrimAlpha);
         pw.print("  mPanelExpansionFraction=");

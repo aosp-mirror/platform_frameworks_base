@@ -66,6 +66,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 import java.util.Set;
 import java.util.StringJoiner;
 import java.util.function.Consumer;
@@ -386,8 +387,8 @@ public final class JobStore {
      * @return the JobStatus that matches the provided uId and jobId, or null if none found.
      */
     @Nullable
-    public JobStatus getJobByUidAndJobId(int uid, int jobId) {
-        return mJobSet.get(uid, jobId);
+    public JobStatus getJobByUidAndJobId(int uid, @Nullable String namespace, int jobId) {
+        return mJobSet.get(uid, namespace, jobId);
     }
 
     /**
@@ -764,6 +765,9 @@ public final class JobStore {
             if (jobStatus.getSourcePackageName() != null) {
                 out.attribute(null, "sourcePackageName", jobStatus.getSourcePackageName());
             }
+            if (jobStatus.getNamespace() != null) {
+                out.attribute(null, "namespace", jobStatus.getNamespace());
+            }
             if (jobStatus.getSourceTag() != null) {
                 out.attribute(null, "sourceTag", jobStatus.getSourceTag());
             }
@@ -1135,6 +1139,7 @@ public final class JobStore {
             }
 
             String sourcePackageName = parser.getAttributeValue(null, "sourcePackageName");
+            final String namespace = parser.getAttributeValue(null, "namespace");
             final String sourceTag = parser.getAttributeValue(null, "sourceTag");
 
             int eventType;
@@ -1292,7 +1297,7 @@ public final class JobStore {
                     sourceUserId, nowElapsed);
             JobStatus js = new JobStatus(
                     builtJob, uid, sourcePackageName, sourceUserId,
-                    appBucket, sourceTag,
+                    appBucket, namespace, sourceTag,
                     elapsedRuntimes.first, elapsedRuntimes.second,
                     lastSuccessfulRunTime, lastFailedRunTime,
                     (rtcIsGood) ? null : rtcRuntimes, internalFlags, /* dynamicConstraints */ 0);
@@ -1592,12 +1597,12 @@ public final class JobStore {
             return jobs != null && jobs.contains(job);
         }
 
-        public JobStatus get(int uid, int jobId) {
+        public JobStatus get(int uid, @Nullable String namespace, int jobId) {
             ArraySet<JobStatus> jobs = mJobs.get(uid);
             if (jobs != null) {
                 for (int i = jobs.size() - 1; i >= 0; i--) {
                     JobStatus job = jobs.valueAt(i);
-                    if (job.getJobId() == jobId) {
+                    if (job.getJobId() == jobId && Objects.equals(namespace, job.getNamespace())) {
                         return job;
                     }
                 }

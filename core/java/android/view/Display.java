@@ -332,6 +332,34 @@ public final class Display {
     public static final int FLAG_OWN_FOCUS = 1 << 11;
 
     /**
+     * Flag: Indicates that the display should not become the top focused display by stealing the
+     * top focus from another display.
+     *
+     * <p>The result is that only targeted input events (displayId of input event matches the
+     * displayId of the display) can reach this display. A display with this flag set can still
+     * become the top focused display, if the system consists of only one display or if all
+     * displays have this flag set. In both cases the default display becomes the top focused
+     * display.
+     *
+     * <p>Note:  A display only has a focused window if either
+     * - the display is the top focused display or
+     * - the display manages its own focus (via {@link #FLAG_OWN_FOCUS})
+     * - or all the displays manage their own focus (via {@code config_perDisplayFocusEnabled} flag)
+     * If a display has no focused window, no input event is dispatched to it. Therefore this
+     * flag is only useful together with {@link #FLAG_OWN_FOCUS} and will be
+     * ignored if it is not set.
+     *
+     * <p>Note: The framework only supports IME on the top focused display (b/262520411). Therefore,
+     * Enabling this flag on a display implicitly disables showing any IME. This is not intended
+     * behavior but cannot be fixed until b/262520411 is implemented. If you need IME on display do
+     * not set this flag.
+     *
+     * @hide
+     * @see #getFlags()
+     */
+    public static final int FLAG_STEAL_TOP_FOCUS_DISABLED = 1 << 12;
+
+    /**
      * Display flag: Indicates that the contents of the display should not be scaled
      * to fit the physical screen dimensions.  Used for development only to emulate
      * devices with smaller physicals screens while preserving density.
@@ -1703,6 +1731,16 @@ public final class Display {
      */
     public boolean isTrusted() {
         return (mFlags & FLAG_TRUSTED) == FLAG_TRUSTED;
+    }
+
+    /**
+     * @return {@code true} if the display can steal the top focus from another display.
+     *
+     * @see #FLAG_STEAL_TOP_FOCUS_DISABLED
+     * @hide
+     */
+    public boolean canStealTopFocus() {
+        return (mFlags & FLAG_STEAL_TOP_FOCUS_DISABLED) == 0;
     }
 
     private void updateDisplayInfoLocked() {

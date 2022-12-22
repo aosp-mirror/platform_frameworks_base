@@ -1760,6 +1760,8 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
             AccessibilityServiceConnection service = state.mBoundServices.get(i);
             service.notifyClearAccessibilityNodeInfoCache();
         }
+
+        mProxyManager.clearCacheLocked();
     }
 
     private void notifyMagnificationChangedLocked(int displayId, @NonNull Region region,
@@ -3714,6 +3716,10 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
         mProxyManager.registerProxy(client, displayId, mContext,
                 sIdCounter++, mMainHandler, mSecurityPolicy, this, getTraceManager(),
                 mWindowManagerService, mA11yWindowManager);
+
+        synchronized (mLock) {
+            notifyClearAccessibilityCacheLocked();
+        }
         return true;
     }
 

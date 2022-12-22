@@ -758,7 +758,7 @@ public final class VirtualDeviceParams implements Parcelable {
          */
         @NonNull
         public Builder setAudioPlaybackSessionId(int playbackSessionId) {
-            if (playbackSessionId != AUDIO_SESSION_ID_GENERATE || playbackSessionId < 0) {
+            if (playbackSessionId < 0) {
                 throw new IllegalArgumentException("Invalid playback audio session id");
             }
             mAudioPlaybackSessionId = playbackSessionId;
@@ -782,7 +782,7 @@ public final class VirtualDeviceParams implements Parcelable {
          */
         @NonNull
         public Builder setAudioRecordingSessionId(int recordingSessionId) {
-            if (recordingSessionId != AUDIO_SESSION_ID_GENERATE || recordingSessionId < 0) {
+            if (recordingSessionId < 0) {
                 throw new IllegalArgumentException("Invalid recording audio session id");
             }
             mAudioRecordingSessionId = recordingSessionId;

@@ -44,6 +44,7 @@ import android.graphics.Rect;
 import android.hardware.hdmi.HdmiControlManager;
 import android.hardware.hdmi.HdmiDeviceInfo;
 import android.media.PlaybackParams;
+import android.media.tv.AdBuffer;
 import android.media.tv.AdRequest;
 import android.media.tv.AdResponse;
 import android.media.tv.AitInfo;
@@ -2520,7 +2521,30 @@ public final class TvInputManagerService extends SystemService {
                 }
             } finally {
                 Binder.restoreCallingIdentity(identity);
-            };
+            }
+        }
+
+        @Override
+        public void notifyAdBuffer(
+                IBinder sessionToken, AdBuffer buffer, int userId) {
+            final int callingUid = Binder.getCallingUid();
+            final int callingPid = Binder.getCallingPid();
+            final int resolvedUserId = resolveCallingUserId(callingPid, callingUid,
+                    userId, "notifyAdBuffer");
+            final long identity = Binder.clearCallingIdentity();
+            try {
+                synchronized (mLock) {
+                    try {
+                        SessionState sessionState = getSessionStateLocked(sessionToken, callingUid,
+                                resolvedUserId);
+                        getSessionLocked(sessionState).notifyAdBuffer(buffer);
+                    } catch (RemoteException | SessionNotFoundException e) {
+                        Slog.e(TAG, "error in notifyAdBuffer", e);
+                    }
+                }
+            } finally {
+                Binder.restoreCallingIdentity(identity);
+            }
         }
 
         @Override
@@ -3624,7 +3648,7 @@ public final class TvInputManagerService extends SystemService {
         }
 
         @Override
-        public void onBroadcastInfoResponse (BroadcastInfoResponse response) {
+        public void onBroadcastInfoResponse(BroadcastInfoResponse response) {
             synchronized (mLock) {
                 if (DEBUG) {
                     Slog.d(TAG, "onBroadcastInfoResponse()");
@@ -3641,7 +3665,7 @@ public final class TvInputManagerService extends SystemService {
         }
 
         @Override
-        public void onAdResponse (AdResponse response) {
+        public void onAdResponse(AdResponse response) {
             synchronized (mLock) {
                 if (DEBUG) {
                     Slog.d(TAG, "onAdResponse()");
@@ -3653,6 +3677,24 @@ public final class TvInputManagerService extends SystemService {
                     mSessionState.client.onAdResponse(response, mSessionState.seq);
                 } catch (RemoteException e) {
                     Slog.e(TAG, "error in onAdResponse", e);
+                }
+            }
+        }
+
+        @Override
+        public void onAdBufferConsumed(AdBuffer buffer) {
+            synchronized (mLock) {
+                if (DEBUG) {
+                    Slog.d(TAG, "onAdBufferConsumed()");
+                }
+                if (mSessionState.session == null || mSessionState.client == null) {
+                    return;
+                }
+                try {
+                    mSessionState.client.onAdBufferConsumed(
+                            buffer, mSessionState.seq);
+                } catch (RemoteException e) {
+                    Slog.e(TAG, "error in onAdBufferConsumed", e);
                 }
             }
         }

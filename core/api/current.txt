@@ -13192,13 +13192,14 @@ package android.credentials {
 
   public final class GetCredentialRequest implements android.os.Parcelable {
     method public int describeContents();
+    method @NonNull public android.os.Bundle getData();
     method @NonNull public java.util.List<android.credentials.GetCredentialOption> getGetCredentialOptions();
     method public void writeToParcel(@NonNull android.os.Parcel, int);
     field @NonNull public static final android.os.Parcelable.Creator<android.credentials.GetCredentialRequest> CREATOR;
   }
 
   public static final class GetCredentialRequest.Builder {
-    ctor public GetCredentialRequest.Builder();
+    ctor public GetCredentialRequest.Builder(@NonNull android.os.Bundle);
     method @NonNull public android.credentials.GetCredentialRequest.Builder addGetCredentialOption(@NonNull android.credentials.GetCredentialOption);
     method @NonNull public android.credentials.GetCredentialRequest build();
     method @NonNull public android.credentials.GetCredentialRequest.Builder setGetCredentialOptions(@NonNull java.util.List<android.credentials.GetCredentialOption>);
@@ -17786,6 +17787,7 @@ package android.hardware.camera2 {
     method public void onCaptureSequenceAborted(@NonNull android.hardware.camera2.CameraCaptureSession, int);
     method public void onCaptureSequenceCompleted(@NonNull android.hardware.camera2.CameraCaptureSession, int, long);
     method public void onCaptureStarted(@NonNull android.hardware.camera2.CameraCaptureSession, @NonNull android.hardware.camera2.CaptureRequest, long, long);
+    method public void onReadoutStarted(@NonNull android.hardware.camera2.CameraCaptureSession, @NonNull android.hardware.camera2.CaptureRequest, long, long);
   }
 
   public abstract static class CameraCaptureSession.StateCallback {
@@ -18779,6 +18781,7 @@ package android.hardware.camera2.params {
     method public int getSurfaceGroupId();
     method @NonNull public java.util.List<android.view.Surface> getSurfaces();
     method public int getTimestampBase();
+    method public boolean isReadoutTimestampUsed();
     method public void removeSensorPixelModeUsed(int);
     method public void removeSurface(@NonNull android.view.Surface);
     method public void setDynamicRangeProfile(long);
@@ -18786,6 +18789,7 @@ package android.hardware.camera2.params {
     method public void setPhysicalCameraId(@Nullable String);
     method public void setStreamUseCase(long);
     method public void setTimestampBase(int);
+    method public void useReadoutTimestamp(boolean);
     method public void writeToParcel(android.os.Parcel, int);
     field @NonNull public static final android.os.Parcelable.Creator<android.hardware.camera2.params.OutputConfiguration> CREATOR;
     field public static final int MIRROR_MODE_AUTO = 0; // 0x0
@@ -20425,6 +20429,8 @@ package android.media {
     field @NonNull public static final android.os.Parcelable.Creator<android.media.AudioDescriptor> CREATOR;
     field public static final int STANDARD_EDID = 1; // 0x1
     field public static final int STANDARD_NONE = 0; // 0x0
+    field public static final int STANDARD_SADB = 2; // 0x2
+    field public static final int STANDARD_VSADB = 3; // 0x3
   }
 
   public abstract class AudioDeviceCallback {
@@ -39361,6 +39367,8 @@ package android.service.controls {
     method public final boolean onUnbind(@NonNull android.content.Intent);
     method public abstract void performControlAction(@NonNull String, @NonNull android.service.controls.actions.ControlAction, @NonNull java.util.function.Consumer<java.lang.Integer>);
     method public static void requestAddControl(@NonNull android.content.Context, @NonNull android.content.ComponentName, @NonNull android.service.controls.Control);
+    field public static final String EXTRA_LOCKSCREEN_ALLOW_TRIVIAL_CONTROLS = "android.service.controls.extra.LOCKSCREEN_ALLOW_TRIVIAL_CONTROLS";
+    field public static final String META_DATA_PANEL_ACTIVITY = "android.service.controls.META_DATA_PANEL_ACTIVITY";
     field public static final String SERVICE_CONTROLS = "android.service.controls.ControlsProviderService";
     field @NonNull public static final String TAG = "ControlsProviderService";
   }
@@ -41038,6 +41046,32 @@ package android.telecom {
     field public static final int RTT_MODE_VCO = 3; // 0x3
   }
 
+  public final class CallAttributes implements android.os.Parcelable {
+    method public int describeContents();
+    method @NonNull public android.net.Uri getAddress();
+    method public int getCallCapabilities();
+    method public int getCallType();
+    method public int getDirection();
+    method @NonNull public CharSequence getDisplayName();
+    method @NonNull public android.telecom.PhoneAccountHandle getPhoneAccountHandle();
+    method public void writeToParcel(@Nullable android.os.Parcel, int);
+    field public static final int AUDIO_CALL = 1; // 0x1
+    field @NonNull public static final android.os.Parcelable.Creator<android.telecom.CallAttributes> CREATOR;
+    field public static final int DIRECTION_INCOMING = 1; // 0x1
+    field public static final int DIRECTION_OUTGOING = 2; // 0x2
+    field public static final int SUPPORTS_SET_INACTIVE = 2; // 0x2
+    field public static final int SUPPORTS_STREAM = 4; // 0x4
+    field public static final int SUPPORTS_TRANSFER = 8; // 0x8
+    field public static final int VIDEO_CALL = 2; // 0x2
+  }
+
+  public static final class CallAttributes.Builder {
+    ctor public CallAttributes.Builder(@NonNull android.telecom.PhoneAccountHandle, int, @NonNull CharSequence, @NonNull android.net.Uri);
+    method @NonNull public android.telecom.CallAttributes build();
+    method @NonNull public android.telecom.CallAttributes.Builder setCallCapabilities(int);
+    method @NonNull public android.telecom.CallAttributes.Builder setCallType(int);
+  }
+
   public final class CallAudioState implements android.os.Parcelable {
     ctor public CallAudioState(boolean, int, int);
     method public static String audioRouteToString(int);
@@ -41054,6 +41088,15 @@ package android.telecom {
     field public static final int ROUTE_SPEAKER = 8; // 0x8
     field public static final int ROUTE_WIRED_HEADSET = 4; // 0x4
     field public static final int ROUTE_WIRED_OR_EARPIECE = 5; // 0x5
+  }
+
+  public final class CallControl implements java.lang.AutoCloseable {
+    method public void close();
+    method public void disconnect(@NonNull android.telecom.DisconnectCause, @NonNull java.util.concurrent.Executor, @NonNull android.os.OutcomeReceiver<java.lang.Void,android.telecom.CallException>);
+    method @NonNull public android.os.ParcelUuid getCallId();
+    method public void rejectCall(@NonNull java.util.concurrent.Executor, @NonNull android.os.OutcomeReceiver<java.lang.Void,android.telecom.CallException>);
+    method public void setActive(@NonNull java.util.concurrent.Executor, @NonNull android.os.OutcomeReceiver<java.lang.Void,android.telecom.CallException>);
+    method public void setInactive(@NonNull java.util.concurrent.Executor, @NonNull android.os.OutcomeReceiver<java.lang.Void,android.telecom.CallException>);
   }
 
   public final class CallEndpoint implements android.os.Parcelable {
@@ -41084,6 +41127,30 @@ package android.telecom {
     field public static final int ERROR_ENDPOINT_DOES_NOT_EXIST = 1; // 0x1
     field public static final int ERROR_REQUEST_TIME_OUT = 2; // 0x2
     field public static final int ERROR_UNSPECIFIED = 4; // 0x4
+  }
+
+  public interface CallEventCallback {
+    method public void onAnswer(int, @NonNull java.util.function.Consumer<java.lang.Boolean>);
+    method public void onCallAudioStateChanged(@NonNull android.telecom.CallAudioState);
+    method public void onDisconnect(@NonNull java.util.function.Consumer<java.lang.Boolean>);
+    method public void onReject(@NonNull java.util.function.Consumer<java.lang.Boolean>);
+    method public void onSetActive(@NonNull java.util.function.Consumer<java.lang.Boolean>);
+    method public void onSetInactive(@NonNull java.util.function.Consumer<java.lang.Boolean>);
+  }
+
+  public final class CallException extends java.lang.RuntimeException implements android.os.Parcelable {
+    ctor public CallException(@Nullable String);
+    ctor public CallException(@Nullable String, int);
+    method public int describeContents();
+    method public int getCode();
+    method public void writeToParcel(@NonNull android.os.Parcel, int);
+    field public static final int CODE_CALL_CANNOT_BE_SET_TO_ACTIVE = 4; // 0x4
+    field public static final int CODE_CALL_IS_NOT_BEING_TRACKED = 3; // 0x3
+    field public static final int CODE_CALL_NOT_PERMITTED_AT_PRESENT_TIME = 5; // 0x5
+    field public static final int CODE_CANNOT_HOLD_CURRENT_ACTIVE_CALL = 2; // 0x2
+    field public static final int CODE_ERROR_UNKNOWN = 1; // 0x1
+    field public static final int CODE_OPERATION_TIMED_OUT = 6; // 0x6
+    field @NonNull public static final android.os.Parcelable.Creator<android.telecom.CallException> CREATOR;
   }
 
   public abstract class CallRedirectionService extends android.app.Service {
@@ -41595,6 +41662,7 @@ package android.telecom {
     field public static final int CAPABILITY_RTT = 4096; // 0x1000
     field public static final int CAPABILITY_SELF_MANAGED = 2048; // 0x800
     field public static final int CAPABILITY_SIM_SUBSCRIPTION = 4; // 0x4
+    field public static final int CAPABILITY_SUPPORTS_TRANSACTIONAL_OPERATIONS = 262144; // 0x40000
     field public static final int CAPABILITY_SUPPORTS_VIDEO_CALLING = 1024; // 0x400
     field public static final int CAPABILITY_SUPPORTS_VOICE_CALLING_INDICATIONS = 65536; // 0x10000
     field public static final int CAPABILITY_VIDEO_CALLING = 8; // 0x8
@@ -41787,6 +41855,7 @@ package android.telecom {
     method public void acceptHandover(android.net.Uri, int, android.telecom.PhoneAccountHandle);
     method @Deprecated @RequiresPermission(anyOf={android.Manifest.permission.ANSWER_PHONE_CALLS, android.Manifest.permission.MODIFY_PHONE_STATE}) public void acceptRingingCall();
     method @Deprecated @RequiresPermission(anyOf={android.Manifest.permission.ANSWER_PHONE_CALLS, android.Manifest.permission.MODIFY_PHONE_STATE}) public void acceptRingingCall(int);
+    method @RequiresPermission(android.Manifest.permission.MANAGE_OWN_CALLS) public void addCall(@NonNull android.telecom.CallAttributes, @NonNull java.util.concurrent.Executor, @NonNull android.os.OutcomeReceiver<android.telecom.CallControl,android.telecom.CallException>, @NonNull android.telecom.CallEventCallback);
     method public void addNewIncomingCall(android.telecom.PhoneAccountHandle, android.os.Bundle);
     method public void addNewIncomingConference(@NonNull android.telecom.PhoneAccountHandle, @NonNull android.os.Bundle);
     method @RequiresPermission(android.Manifest.permission.MODIFY_PHONE_STATE) public void cancelMissedCallsNotification();
@@ -54259,7 +54328,7 @@ package android.view.inputmethod {
   }
 
   public abstract class HandwritingGesture {
-    method @Nullable public String getFallbackText();
+    method @Nullable public final String getFallbackText();
     field public static final int GESTURE_TYPE_DELETE = 4; // 0x4
     field public static final int GESTURE_TYPE_DELETE_RANGE = 64; // 0x40
     field public static final int GESTURE_TYPE_INSERT = 2; // 0x2

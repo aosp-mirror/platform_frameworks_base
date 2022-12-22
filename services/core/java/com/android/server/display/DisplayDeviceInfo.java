@@ -180,6 +180,15 @@ final class DisplayDeviceInfo {
     public static final int FLAG_DEVICE_DISPLAY_GROUP = 1 << 18;
 
     /**
+     * Flag: Indicates that the display should not become the top focused display by stealing the
+     * top focus from another display.
+     *
+     * @see Display#FLAG_STEAL_TOP_FOCUS_DISABLED
+     * @hide
+     */
+    public static final int FLAG_STEAL_TOP_FOCUS_DISABLED = 1 << 19;
+
+    /**
      * Touch attachment: Display does not receive touch.
      */
     public static final int TOUCH_NONE = 0;
@@ -648,6 +657,9 @@ final class DisplayDeviceInfo {
         }
         if ((flags & FLAG_OWN_FOCUS) != 0) {
             msg.append(", FLAG_OWN_FOCUS");
+        }
+        if ((flags & FLAG_STEAL_TOP_FOCUS_DISABLED) != 0) {
+            msg.append(", FLAG_STEAL_TOP_FOCUS_DISABLED");
         }
         return msg.toString();
     }

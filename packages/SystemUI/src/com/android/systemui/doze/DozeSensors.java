@@ -24,6 +24,7 @@ import static com.android.systemui.plugins.SensorManagerPlugin.Sensor.TYPE_WAKE_
 import static com.android.systemui.plugins.SensorManagerPlugin.Sensor.TYPE_WAKE_LOCK_SCREEN;
 
 import android.annotation.AnyThread;
+import android.content.res.Resources;
 import android.database.ContentObserver;
 import android.hardware.Sensor;
 import android.hardware.SensorManager;
@@ -43,6 +44,7 @@ import android.view.Display;
 import androidx.annotation.NonNull;
 import androidx.annotation.VisibleForTesting;
 
+import com.android.internal.R;
 import com.android.internal.logging.UiEvent;
 import com.android.internal.logging.UiEventLogger;
 import com.android.internal.logging.UiEventLoggerImpl;
@@ -143,6 +145,7 @@ public class DozeSensors {
     }
 
     DozeSensors(
+            Resources resources,
             AsyncSensorManager sensorManager,
             DozeParameters dozeParameters,
             AmbientDisplayConfiguration config,
@@ -188,7 +191,8 @@ public class DozeSensors {
                 new TriggerSensor(
                         mSensorManager.getDefaultSensor(Sensor.TYPE_PICK_UP_GESTURE),
                         Settings.Secure.DOZE_PICK_UP_GESTURE,
-                        true /* settingDef */,
+                        resources.getBoolean(
+                                R.bool.config_dozePickupGestureEnabled) /* settingDef */,
                         config.dozePickupSensorAvailable(),
                         DozeLog.REASON_SENSOR_PICKUP, false /* touchCoords */,
                         false /* touchscreen */,

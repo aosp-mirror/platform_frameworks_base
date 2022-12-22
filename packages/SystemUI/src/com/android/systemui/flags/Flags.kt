@@ -188,10 +188,6 @@ object Flags {
     // TODO(b/260619425): Tracking Bug
     @JvmField val MODERN_ALTERNATE_BOUNCER = unreleasedFlag(219, "modern_alternate_bouncer")
 
-    // TODO(b/262780002): Tracking Bug
-    @JvmField
-    val REVAMPED_WALLPAPER_UI = unreleasedFlag(222, "revamped_wallpaper_ui", teamfood = false)
-
     /** Flag to control the migration of face auth to modern architecture. */
     // TODO(b/262838215): Tracking bug
     @JvmField val FACE_AUTH_REFACTOR = unreleasedFlag(220, "face_auth_refactor")
@@ -199,6 +195,15 @@ object Flags {
     /** Flag to control the revamp of keyguard biometrics progress animation */
     // TODO(b/244313043): Tracking bug
     @JvmField val BIOMETRICS_ANIMATION_REVAMP = unreleasedFlag(221, "biometrics_animation_revamp")
+
+    // TODO(b/262780002): Tracking Bug
+    @JvmField
+    val REVAMPED_WALLPAPER_UI = unreleasedFlag(222, "revamped_wallpaper_ui", teamfood = false)
+
+    /** A different path for unocclusion transitions back to keyguard */
+    // TODO(b/262859270): Tracking Bug
+    @JvmField
+    val UNOCCLUSION_TRANSITION = unreleasedFlag(223, "unocclusion_transition", teamfood = false)
 
     // 300 - power menu
     // TODO(b/254512600): Tracking Bug
@@ -314,6 +319,10 @@ object Flags {
 
     // TODO(b/261734857): Tracking Bug
     @JvmField val UMO_TURBULENCE_NOISE = unreleasedFlag(909, "umo_turbulence_noise")
+
+    // TODO(b/263272731): Tracking Bug
+    val MEDIA_TTT_RECEIVER_SUCCESS_RIPPLE =
+        unreleasedFlag(910, "media_ttt_receiver_success_ripple", teamfood = true)
 
     // 1000 - dock
     val SIMULATE_DOCK_THROUGH_CHARGING = releasedFlag(1000, "simulate_dock_through_charging")
@@ -447,11 +456,11 @@ object Flags {
     @JvmField val NOTE_TASKS = unreleasedFlag(1900, "keycode_flag")
 
     // 2000 - device controls
-    @Keep @JvmField val USE_APP_PANELS = unreleasedFlag(2000, "use_app_panels", teamfood = true)
+    @Keep @JvmField val USE_APP_PANELS = releasedFlag(2000, "use_app_panels", teamfood = true)
 
     @JvmField
     val APP_PANELS_ALL_APPS_ALLOWED =
-        unreleasedFlag(2001, "app_panels_all_apps_allowed", teamfood = true)
+        releasedFlag(2001, "app_panels_all_apps_allowed", teamfood = true)
 
     // 2100 - Falsing Manager
     @JvmField val FALSING_FOR_LONG_TAPS = releasedFlag(2100, "falsing_for_long_taps")

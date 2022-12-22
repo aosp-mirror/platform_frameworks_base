@@ -29,7 +29,8 @@ import java.nio.ShortBuffer;
  * {@link #makeIndexed(MeshSpecification, Mode, Buffer, int, ShortBuffer, Rect)} methods,
  * where a {@link MeshSpecification} is required along with various attributes for
  * detailing the mesh object, including a mode, vertex buffer, optional index buffer, and bounds
- * for the mesh.
+ * for the mesh. Once generated, a mesh object can be drawn through
+ * {@link Canvas#drawMesh(Mesh, BlendMode, Paint)}
  *
  * @hide
  */
@@ -53,8 +54,12 @@ public class Mesh {
      *
      * @param meshSpec     {@link MeshSpecification} used when generating the mesh.
      * @param mode         {@link Mode} enum
-     * @param vertexBuffer vertex buffer representing through {@link Buffer}.
-     * @param vertexCount  the number of vertices represented in the vertexBuffer.
+     * @param vertexBuffer vertex buffer representing through {@link Buffer}. This provides the data
+     *                     for all attributes provided within the meshSpec for every vertex. That
+     *                     is, a vertex buffer should be (attributes size * number of vertices) in
+     *                     length to be valid. Note that currently implementation will have a CPU
+     *                     backed buffer generated.
+     * @param vertexCount  the number of vertices represented in the vertexBuffer and mesh.
      * @param bounds       bounds of the mesh object.
      * @return a new Mesh object.
      */
@@ -70,13 +75,20 @@ public class Mesh {
     }
 
     /**
-     * Generates an indexed {@link Mesh} object.
+     * Generates a {@link Mesh} object.
      *
      * @param meshSpec     {@link MeshSpecification} used when generating the mesh.
      * @param mode         {@link Mode} enum
-     * @param vertexBuffer vertex buffer representing through {@link Buffer}.
-     * @param vertexCount  the number of vertices represented in the vertexBuffer.
-     * @param indexBuffer  index buffer representing through {@link ShortBuffer}.
+     * @param vertexBuffer vertex buffer representing through {@link Buffer}. This provides the data
+     *                     for all attributes provided within the meshSpec for every vertex. That
+     *                     is, a vertex buffer should be (attributes size * number of vertices) in
+     *                     length to be valid. Note that currently implementation will have a CPU
+     *                     backed buffer generated.
+     * @param vertexCount  the number of vertices represented in the vertexBuffer and mesh.
+     * @param indexBuffer  index buffer representing through {@link ShortBuffer}. Indices are
+     *                     required to be 16 bits, so ShortBuffer is necessary. Note that
+     *                     currently implementation will have a CPU
+     *                     backed buffer generated.
      * @param bounds       bounds of the mesh object.
      * @return a new Mesh object.
      */
@@ -93,7 +105,10 @@ public class Mesh {
     }
 
     /**
-     * Sets the uniform color value corresponding to the shader assigned to the mesh.
+     * Sets the uniform color value corresponding to the shader assigned to the mesh. If the shader
+     * does not have a uniform with that name or if the uniform is declared with a type other than
+     * vec3 or vec4 and corresponding layout(color) annotation then an IllegalArgumentExcepton is
+     * thrown.
      *
      * @param uniformName name matching the color uniform declared in the shader program.
      * @param color       the provided sRGB color will be converted into the shader program's output
@@ -104,7 +119,10 @@ public class Mesh {
     }
 
     /**
-     * Sets the uniform color value corresponding to the shader assigned to the mesh.
+     * Sets the uniform color value corresponding to the shader assigned to the mesh. If the shader
+     * does not have a uniform with that name or if the uniform is declared with a type other than
+     * vec3 or vec4 and corresponding layout(color) annotation then an IllegalArgumentExcepton is
+     * thrown.
      *
      * @param uniformName name matching the color uniform declared in the shader program.
      * @param color       the provided sRGB color will be converted into the shader program's output
@@ -116,7 +134,10 @@ public class Mesh {
     }
 
     /**
-     * Sets the uniform color value corresponding to the shader assigned to the mesh.
+     * Sets the uniform color value corresponding to the shader assigned to the mesh. If the shader
+     * does not have a uniform with that name or if the uniform is declared with a type other than
+     * vec3 or vec4 and corresponding layout(color) annotation then an IllegalArgumentExcepton is
+     * thrown.
      *
      * @param uniformName name matching the color uniform declared in the shader program.
      * @param color       the provided sRGB color will be converted into the shader program's output
@@ -132,7 +153,9 @@ public class Mesh {
     }
 
     /**
-     * Sets the uniform color value corresponding to the shader assigned to the mesh.
+     * Sets the uniform value corresponding to the shader assigned to the mesh. If the shader does
+     * not have a uniform with that name or if the uniform is declared with a type other than a
+     * float or float[1] then an IllegalArgumentException is thrown.
      *
      * @param uniformName name matching the float uniform declared in the shader program.
      * @param value       float value corresponding to the float uniform with the given name.
@@ -142,7 +165,9 @@ public class Mesh {
     }
 
     /**
-     * Sets the uniform color value corresponding to the shader assigned to the mesh.
+     * Sets the uniform value corresponding to the shader assigned to the mesh. If the shader does
+     * not have a uniform with that name or if the uniform is declared with a type other than a
+     * vec2 or float[2] then an IllegalArgumentException is thrown.
      *
      * @param uniformName name matching the float uniform declared in the shader program.
      * @param value1      first float value corresponding to the float uniform with the given name.
@@ -153,7 +178,9 @@ public class Mesh {
     }
 
     /**
-     * Sets the uniform color value corresponding to the shader assigned to the mesh.
+     * Sets the uniform value corresponding to the shader assigned to the mesh. If the shader does
+     * not have a uniform with that name or if the uniform is declared with a type other than a
+     * vec3 or float[3] then an IllegalArgumentException is thrown.
      *
      * @param uniformName name matching the float uniform declared in the shader program.
      * @param value1      first float value corresponding to the float uniform with the given name.
@@ -166,7 +193,9 @@ public class Mesh {
     }
 
     /**
-     * Sets the uniform color value corresponding to the shader assigned to the mesh.
+     * Sets the uniform value corresponding to the shader assigned to the mesh. If the shader does
+     * not have a uniform with that name or if the uniform is declared with a type other than a
+     * vec4 or float[4] then an IllegalArgumentException is thrown.
      *
      * @param uniformName name matching the float uniform declared in the shader program.
      * @param value1      first float value corresponding to the float uniform with the given name.
@@ -180,7 +209,10 @@ public class Mesh {
     }
 
     /**
-     * Sets the uniform color value corresponding to the shader assigned to the mesh.
+     * Sets the uniform value corresponding to the shader assigned to the mesh. If the shader does
+     * not have a uniform with that name or if the uniform is declared with a type other than a
+     * float (for N=1), vecN, or float[N], where N is the length of the values param, then an
+     * IllegalArgumentException is thrown.
      *
      * @param uniformName name matching the float uniform declared in the shader program.
      * @param values      float value corresponding to the vec4 float uniform with the given name.
@@ -210,7 +242,9 @@ public class Mesh {
     }
 
     /**
-     * Sets the uniform color value corresponding to the shader assigned to the mesh.
+     * Sets the uniform value corresponding to the shader assigned to the mesh. If the shader does
+     * not have a uniform with that name or if the uniform is declared with a type other than int
+     * or int[1] then an IllegalArgumentException is thrown.
      *
      * @param uniformName name matching the int uniform delcared in the shader program.
      * @param value       value corresponding to the int uniform with the given name.
@@ -220,7 +254,9 @@ public class Mesh {
     }
 
     /**
-     * Sets the uniform color value corresponding to the shader assigned to the mesh.
+     * Sets the uniform value corresponding to the shader assigned to the mesh. If the shader does
+     * not have a uniform with that name or if the uniform is declared with a type other than ivec2
+     * or int[2] then an IllegalArgumentException is thrown.
      *
      * @param uniformName name matching the int uniform delcared in the shader program.
      * @param value1      first value corresponding to the int uniform with the given name.
@@ -231,7 +267,9 @@ public class Mesh {
     }
 
     /**
-     * Sets the uniform color value corresponding to the shader assigned to the mesh.
+     * Sets the uniform value corresponding to the shader assigned to the mesh. If the shader does
+     * not have a uniform with that name or if the uniform is declared with a type other than ivec3
+     * or int[3] then an IllegalArgumentException is thrown.
      *
      * @param uniformName name matching the int uniform delcared in the shader program.
      * @param value1      first value corresponding to the int uniform with the given name.
@@ -243,7 +281,9 @@ public class Mesh {
     }
 
     /**
-     * Sets the uniform color value corresponding to the shader assigned to the mesh.
+     * Sets the uniform value corresponding to the shader assigned to the mesh. If the shader does
+     * not have a uniform with that name or if the uniform is declared with a type other than ivec4
+     * or int[4] then an IllegalArgumentException is thrown.
      *
      * @param uniformName name matching the int uniform delcared in the shader program.
      * @param value1      first value corresponding to the int uniform with the given name.
@@ -256,7 +296,10 @@ public class Mesh {
     }
 
     /**
-     * Sets the uniform color value corresponding to the shader assigned to the mesh.
+     * Sets the uniform value corresponding to the shader assigned to the mesh. If the shader does
+     * not have a uniform with that name or if the uniform is declared with a type other than an
+     * int (for N=1), ivecN, or int[N], where N is the length of the values param, then an
+     * IllegalArgumentException is thrown.
      *
      * @param uniformName name matching the int uniform delcared in the shader program.
      * @param values      int values corresponding to the vec4 int uniform with the given name.

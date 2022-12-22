@@ -137,9 +137,17 @@ public class WifiNl80211Manager {
         void onScanResultReady();
 
         /**
+         * Deprecated in Android 14. Newer wificond implementation should call
+         * onScanRequestFailed().
          * Called when a scan has failed.
+         * @deprecated The usage is replaced by {@link ScanEventCallback#onScanFailed(int)}
          */
+
         void onScanFailed();
+        /**
+         * Called when a scan has failed with errorCode.
+         */
+        default void onScanFailed(int errorCode) {}
     }
 
     /**
@@ -226,6 +234,18 @@ public class WifiNl80211Manager {
             final long token = Binder.clearCallingIdentity();
             try {
                 mExecutor.execute(() -> mCallback.onScanFailed());
+            } finally {
+                Binder.restoreCallingIdentity(token);
+            }
+        }
+
+        @Override
+        public void OnScanRequestFailed(int errorCode) {
+            Log.d(TAG, "Scan failed event with error code: " + errorCode);
+            final long token = Binder.clearCallingIdentity();
+            try {
+                mExecutor.execute(() -> mCallback.onScanFailed(
+                        toFrameworkScanStatusCode(errorCode)));
             } finally {
                 Binder.restoreCallingIdentity(token);
             }
@@ -1030,6 +1050,32 @@ public class WifiNl80211Manager {
     }
 
     /**
+     * @deprecated replaced by {@link #startScan2(String, int, Set, List, Bundle)}
+     */
+    @Deprecated
+    public boolean startScan(@NonNull String ifaceName, @WifiAnnotations.ScanType int scanType,
+            @SuppressLint("NullableCollection") @Nullable Set<Integer> freqs,
+            @SuppressLint("NullableCollection") @Nullable List<byte[]> hiddenNetworkSSIDs,
+            @SuppressLint("NullableCollection") @Nullable Bundle extraScanningParams) {
+        IWifiScannerImpl scannerImpl = getScannerImpl(ifaceName);
+        if (scannerImpl == null) {
+            Log.e(TAG, "No valid wificond scanner interface handler for iface=" + ifaceName);
+            return false;
+        }
+        SingleScanSettings settings = createSingleScanSettings(scanType, freqs, hiddenNetworkSSIDs,
+                extraScanningParams);
+        if (settings == null) {
+            return false;
+        }
+        try {
+            return scannerImpl.scan(settings);
+        } catch (RemoteException e1) {
+            Log.e(TAG, "Failed to request scan due to remote exception");
+        }
+        return false;
+    }
+
+    /**
      * Start a scan using the specified parameters. A scan is an asynchronous operation. The
      * result of the operation is returned in the {@link ScanEventCallback} registered when
      * setting up an interface using
@@ -1049,24 +1095,41 @@ public class WifiNl80211Manager {
      * @param hiddenNetworkSSIDs List of hidden networks to be scanned for, a null indicates that
      *                           no hidden frequencies will be scanned for.
      * @param extraScanningParams bundle of extra scanning parameters.
-     * @return Returns true on success, false on failure (e.g. when called before the interface
-     * has been set up).
+     * @return Returns one of the scan status codes defined in {@code WifiScanner#REASON_*}
      */
-    public boolean startScan(@NonNull String ifaceName, @WifiAnnotations.ScanType int scanType,
+    public int startScan2(@NonNull String ifaceName, @WifiAnnotations.ScanType int scanType,
             @SuppressLint("NullableCollection") @Nullable Set<Integer> freqs,
             @SuppressLint("NullableCollection") @Nullable List<byte[]> hiddenNetworkSSIDs,
             @SuppressLint("NullableCollection") @Nullable Bundle extraScanningParams) {
         IWifiScannerImpl scannerImpl = getScannerImpl(ifaceName);
         if (scannerImpl == null) {
             Log.e(TAG, "No valid wificond scanner interface handler for iface=" + ifaceName);
-            return false;
+            return WifiScanner.REASON_INVALID_ARGS;
         }
+        SingleScanSettings settings = createSingleScanSettings(scanType, freqs, hiddenNetworkSSIDs,
+                extraScanningParams);
+        if (settings == null) {
+            return WifiScanner.REASON_INVALID_ARGS;
+        }
+        try {
+            int status = scannerImpl.scanRequest(settings);
+            return toFrameworkScanStatusCode(status);
+        } catch (RemoteException e1) {
+            Log.e(TAG, "Failed to request scan due to remote exception");
+        }
+        return WifiScanner.REASON_UNSPECIFIED;
+    }
+
+    private SingleScanSettings createSingleScanSettings(@WifiAnnotations.ScanType int scanType,
+            @SuppressLint("NullableCollection") @Nullable Set<Integer> freqs,
+            @SuppressLint("NullableCollection") @Nullable List<byte[]> hiddenNetworkSSIDs,
+            @SuppressLint("NullableCollection") @Nullable Bundle extraScanningParams) {
         SingleScanSettings settings = new SingleScanSettings();
         try {
             settings.scanType = getScanType(scanType);
         } catch (IllegalArgumentException e) {
             Log.e(TAG, "Invalid scan type ", e);
-            return false;
+            return null;
         }
         settings.channelSettings  = new ArrayList<>();
         settings.hiddenNetworks  = new ArrayList<>();
@@ -1094,12 +1157,25 @@ public class WifiNl80211Manager {
             }
         }
 
-        try {
-            return scannerImpl.scan(settings);
-        } catch (RemoteException e1) {
-            Log.e(TAG, "Failed to request scan due to remote exception");
+        return settings;
+    }
+
+    private int toFrameworkScanStatusCode(int scanStatus) {
+        switch(scanStatus) {
+            case IWifiScannerImpl.SCAN_STATUS_SUCCESS:
+                return WifiScanner.REASON_SUCCEEDED;
+            case IWifiScannerImpl.SCAN_STATUS_FAILED_BUSY:
+                return WifiScanner.REASON_BUSY;
+            case IWifiScannerImpl.SCAN_STATUS_FAILED_ABORT:
+                return WifiScanner.REASON_ABORT;
+            case IWifiScannerImpl.SCAN_STATUS_FAILED_NODEV:
+                return WifiScanner.REASON_NO_DEV;
+            case IWifiScannerImpl.SCAN_STATUS_FAILED_INVALID_ARGS:
+                return WifiScanner.REASON_INVALID_ARGS;
+            case IWifiScannerImpl.SCAN_STATUS_FAILED_GENERIC:
+            default:
+                return WifiScanner.REASON_UNSPECIFIED;
         }
-        return false;
     }
 
     /**

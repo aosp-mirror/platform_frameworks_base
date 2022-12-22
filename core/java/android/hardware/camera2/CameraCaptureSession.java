@@ -1245,10 +1245,28 @@ public abstract class CameraCaptureSession implements AutoCloseable {
          * the start of exposure, particularly when autoexposure is changing exposure duration
          * between frames.</p>
          *
-         * <p>This timestamp may not match {@link CaptureResult#SENSOR_TIMESTAMP the result
-         * timestamp field}. It will, however, match the timestamp of buffers sent to the
-         * output surfaces with {@link OutputConfiguration#TIMESTAMP_BASE_READOUT_SENSOR}
-         * timestamp base.</p>
+         * <p>The timestamps match the timestamps of the output surfaces with readout timestamp
+         * enabled (via {@link OutputConfiguration#useReadoutTimestamp}) if:</p>
+         * <ul>
+         * <li> Timestamp base is {@link OutputConfiguration#TIMESTAMP_BASE_DEFAULT} and the
+         * output
+         *   <ul>
+         *   <li> is not a SurfaceView surface, and </li>
+         *   <li> is not a MediaRecoder, MediaCodec, or ImageReader surface with {@link
+         *   android.hardware.HardwareBuffer#USAGE_VIDEO_ENCODE} usage flag or the device's {@link
+         *   CameraCharacteristics#SENSOR_INFO_TIMESTAMP_SOURCE} is {@code UNKNOWN}</li>
+         *   </ul>
+         * </li>
+         * <li> Timestamp base is {@link OutputConfiguration#TIMESTAMP_BASE_SENSOR},</li>
+         * <li> Timestamp base is {@link OutputConfiguration#TIMESTAMP_BASE_MONOTONIC} and the
+         *  device's {@link CameraCharacteristics#SENSOR_INFO_TIMESTAMP_SOURCE} is {@code
+         *  UNKNOWN},</li>
+         * <li> Timestamp base is {@link OutputConfiguration#TIMESTAMP_BASE_REALTIME} and the
+         *  device's {@link CameraCharacteristics#SENSOR_INFO_TIMESTAMP_SOURCE} is {@code REALTIME}
+         * </li>
+         * </ul>
+         * <p>Otherwise, the timestamps won't match the timestamp of the output surfaces. See
+         * the possible parameters for {@link OutputConfiguration#setTimestampBase} for details.</p>
          *
          * <p>This callback will be called only if {@link
          * CameraCharacteristics#SENSOR_READOUT_TIMESTAMP} is
@@ -1261,8 +1279,6 @@ public abstract class CameraCaptureSession implements AutoCloseable {
          *                  the timestamp at the input image's start of readout for a
          *                  reprocess request, in nanoseconds.
          * @param frameNumber the frame number for this capture
-         *
-         * @hide
          */
         public void onReadoutStarted(@NonNull CameraCaptureSession session,
                 @NonNull CaptureRequest request, long timestamp, long frameNumber) {

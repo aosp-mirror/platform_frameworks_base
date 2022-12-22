@@ -38,12 +38,14 @@ import androidx.annotation.VisibleForTesting
 import com.android.internal.telephony.PhoneConstants
 import com.android.settingslib.SignalIcon.MobileIconGroup
 import com.android.settingslib.mobile.MobileMappings.Config
+import com.android.systemui.R
 import com.android.systemui.broadcast.BroadcastDispatcher
 import com.android.systemui.common.coroutine.ConflatedCallbackFlow.conflatedCallbackFlow
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.dagger.qualifiers.Application
 import com.android.systemui.dagger.qualifiers.Background
 import com.android.systemui.statusbar.pipeline.mobile.data.model.MobileConnectivityModel
+import com.android.systemui.statusbar.pipeline.mobile.data.model.NetworkNameModel
 import com.android.systemui.statusbar.pipeline.mobile.data.model.SubscriptionModel
 import com.android.systemui.statusbar.pipeline.mobile.data.repository.MobileConnectionRepository
 import com.android.systemui.statusbar.pipeline.mobile.data.repository.MobileConnectionsRepository
@@ -87,6 +89,14 @@ constructor(
     private val mobileConnectionRepositoryFactory: MobileConnectionRepositoryImpl.Factory
 ) : MobileConnectionsRepository {
     private var subIdRepositoryCache: MutableMap<Int, MobileConnectionRepository> = mutableMapOf()
+
+    private val defaultNetworkName =
+        NetworkNameModel.Default(
+            context.getString(com.android.internal.R.string.lockscreen_carrier_default)
+        )
+
+    private val networkNameSeparator: String =
+        context.getString(R.string.status_bar_network_name_separator)
 
     /**
      * State flow that emits the set of mobile data subscriptions, each represented by its own
@@ -243,6 +253,8 @@ constructor(
     private fun createRepositoryForSubId(subId: Int): MobileConnectionRepository {
         return mobileConnectionRepositoryFactory.build(
             subId,
+            defaultNetworkName,
+            networkNameSeparator,
             defaultDataSubId,
             globalMobileDataSettingChangedEvent,
         )

@@ -51,6 +51,7 @@ public abstract class ProviderSession<T, R>
     @Nullable protected Credential mFinalCredentialResponse;
     @NonNull protected final T mProviderRequest;
     @Nullable protected R mProviderResponse;
+    @NonNull protected Boolean mProviderResponseSet = false;
     @Nullable protected Pair<String, CredentialEntry> mUiRemoteEntry;
 
 
@@ -84,7 +85,8 @@ public abstract class ProviderSession<T, R>
      */
     public static boolean isCompletionStatus(Status status) {
         return status == Status.CREDENTIAL_RECEIVED_FROM_INTENT
-                || status == Status.CREDENTIAL_RECEIVED_FROM_SELECTION;
+                || status == Status.CREDENTIAL_RECEIVED_FROM_SELECTION
+                || status == Status.COMPLETE;
     }
 
     /**
@@ -130,7 +132,8 @@ public abstract class ProviderSession<T, R>
         CREDENTIAL_RECEIVED_FROM_INTENT,
         PENDING_INTENT_INVOKED,
         CREDENTIAL_RECEIVED_FROM_SELECTION,
-        SAVE_ENTRIES_RECEIVED, CANCELED
+        SAVE_ENTRIES_RECEIVED, CANCELED,
+        COMPLETE
     }
 
     /** Converts exception to a provider session status. */
@@ -181,6 +184,11 @@ public abstract class ProviderSession<T, R>
     /** Get the request to be sent to the provider. */
     protected T getProviderRequest() {
         return mProviderRequest;
+    }
+
+    /** Returns whether the provider response is set. */
+    protected Boolean isProviderResponseSet() {
+        return mProviderResponse != null || mProviderResponseSet;
     }
 
     /** Update the response state stored with the provider session. */

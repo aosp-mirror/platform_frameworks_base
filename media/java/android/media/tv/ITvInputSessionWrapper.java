@@ -74,6 +74,7 @@ public class ITvInputSessionWrapper extends ITvInputSession.Stub implements Hand
     private static final int DO_REMOVE_BROADCAST_INFO = 25;
     private static final int DO_SET_IAPP_NOTIFICATION_ENABLED = 26;
     private static final int DO_REQUEST_AD = 27;
+    private static final int DO_NOTIFY_AD_BUFFER = 28;
 
     private final boolean mIsRecordingSession;
     private final HandlerCaller mCaller;
@@ -224,6 +225,7 @@ public class ITvInputSessionWrapper extends ITvInputSession.Stub implements Hand
             case DO_START_RECORDING: {
                 SomeArgs args = (SomeArgs) msg.obj;
                 mTvInputRecordingSessionImpl.startRecording((Uri) args.arg1, (Bundle) args.arg2);
+                args.recycle();
                 break;
             }
             case DO_STOP_RECORDING: {
@@ -252,6 +254,10 @@ public class ITvInputSessionWrapper extends ITvInputSession.Stub implements Hand
             }
             case DO_REQUEST_AD: {
                 mTvInputSessionImpl.requestAd((AdRequest) msg.obj);
+                break;
+            }
+            case DO_NOTIFY_AD_BUFFER: {
+                mTvInputSessionImpl.notifyAdBuffer((AdBuffer) msg.obj);
                 break;
             }
             default: {
@@ -422,6 +428,11 @@ public class ITvInputSessionWrapper extends ITvInputSession.Stub implements Hand
     @Override
     public void requestAd(AdRequest request) {
         mCaller.executeOrSendMessage(mCaller.obtainMessageO(DO_REQUEST_AD, request));
+    }
+
+    @Override
+    public void notifyAdBuffer(AdBuffer buffer) {
+        mCaller.executeOrSendMessage(mCaller.obtainMessageO(DO_NOTIFY_AD_BUFFER, buffer));
     }
 
     private final class TvInputEventReceiver extends InputEventReceiver {

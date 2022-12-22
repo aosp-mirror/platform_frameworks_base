@@ -328,6 +328,6 @@ public class ThermalStatusRestrictionTest {
 
     private JobStatus createJobStatus(String testTag, JobInfo jobInfo) {
         return JobStatus.createFromJobInfo(
-                jobInfo, CALLING_UID, SOURCE_PACKAGE, SOURCE_USER_ID, testTag);
+                jobInfo, CALLING_UID, SOURCE_PACKAGE, SOURCE_USER_ID, "TSRTest", testTag);
     }
 }

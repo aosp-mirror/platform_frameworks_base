@@ -17,6 +17,7 @@
 package com.android.systemui.statusbar.pipeline.mobile.data.repository
 
 import com.android.systemui.statusbar.pipeline.mobile.data.model.MobileConnectionModel
+import com.android.systemui.statusbar.pipeline.mobile.data.model.NetworkNameModel
 import kotlinx.coroutines.flow.MutableStateFlow
 
 // TODO(b/261632894): remove this in favor of the real impl or DemoMobileConnectionRepository
@@ -31,6 +32,9 @@ class FakeMobileConnectionRepository(override val subId: Int) : MobileConnection
     override val isDefaultDataSubscription = _isDefaultDataSubscription
 
     override val cdmaRoaming = MutableStateFlow(false)
+
+    override val networkName =
+        MutableStateFlow<NetworkNameModel>(NetworkNameModel.Default("default"))
 
     fun setConnectionInfo(model: MobileConnectionModel) {
         _connectionInfo.value = model

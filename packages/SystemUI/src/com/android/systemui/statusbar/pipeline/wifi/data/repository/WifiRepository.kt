@@ -43,6 +43,7 @@ import com.android.systemui.statusbar.pipeline.shared.ConnectivityPipelineLogger
 import com.android.systemui.statusbar.pipeline.shared.ConnectivityPipelineLogger.Companion.SB_LOGGING_TAG
 import com.android.systemui.statusbar.pipeline.shared.ConnectivityPipelineLogger.Companion.logInputChange
 import com.android.systemui.statusbar.pipeline.shared.data.model.DataActivityModel
+import com.android.systemui.statusbar.pipeline.shared.data.model.toWifiDataActivityModel
 import com.android.systemui.statusbar.pipeline.wifi.data.model.WifiNetworkModel
 import java.util.concurrent.Executor
 import javax.inject.Inject
@@ -237,7 +238,7 @@ class WifiRepositoryImpl @Inject constructor(
                 conflatedCallbackFlow {
                     val callback = TrafficStateCallback { state ->
                         logger.logInputChange("onTrafficStateChange", prettyPrintActivity(state))
-                        trySend(trafficStateToDataActivityModel(state))
+                        trySend(state.toWifiDataActivityModel())
                     }
                     wifiManager.registerTrafficStateCallback(mainExecutor, callback)
                     awaitClose { wifiManager.unregisterTrafficStateCallback(callback) }
@@ -265,15 +266,6 @@ class WifiRepositoryImpl @Inject constructor(
         // [ConnectivityManager.NetworkCallback] results instead. So, for now we'll just rely on the
         // NetworkCallback inside [wifiNetwork] for our wifi network information.
         val WIFI_NETWORK_DEFAULT = WifiNetworkModel.Inactive
-
-        private fun trafficStateToDataActivityModel(state: Int): DataActivityModel {
-            return DataActivityModel(
-                hasActivityIn = state == TrafficStateCallback.DATA_ACTIVITY_IN ||
-                    state == TrafficStateCallback.DATA_ACTIVITY_INOUT,
-                hasActivityOut = state == TrafficStateCallback.DATA_ACTIVITY_OUT ||
-                    state == TrafficStateCallback.DATA_ACTIVITY_INOUT,
-            )
-        }
 
         private fun networkCapabilitiesToWifiInfo(
             networkCapabilities: NetworkCapabilities

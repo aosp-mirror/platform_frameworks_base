@@ -2672,9 +2672,9 @@
          will be locked. -->
     <bool name="config_multiuserDelayUserDataLocking">false</bool>
 
-    <!-- Whether the device allows users to start in background on secondary displays.
+    <!-- Whether the device allows users to start in background visible on displays.
          Should be false for most devices, except automotive vehicle with passenger displays. -->
-    <bool name="config_multiuserUsersOnSecondaryDisplays">false</bool>
+    <bool name="config_multiuserVisibleBackgroundUsers">false</bool>
 
     <!-- Whether to automatically switch to the designated Dock User (the user chosen for
          displaying dreams, etc.) after a timeout when the device is docked.  -->
@@ -4154,11 +4154,33 @@
    -->
     <string name="config_defaultAmbientContextDetectionService" translatable="false"></string>
 
+    <!-- The component names for the system's AmbientContextEvent detection services.
+      These services must be trusted, as it can be activated without explicit consent of the user.
+      See android.service.ambientcontext.AmbientContextDetectionService and
+      android.service.wearable.WearableSensingService.
+      -->
+    <string-array name="config_defaultAmbientContextServices">
+        <item>@string/config_defaultAmbientContextDetectionService</item>
+        <item>@string/config_defaultWearableSensingService</item>
+    </string-array>
+
     <!-- The component name for the default system wearable sensing service.
         This service must be trusted, as it can be activated without explicit consent of the user.
         See android.service.wearable.WearableSensingService.
    -->
     <string name="config_defaultWearableSensingService" translatable="false"></string>
+
+    <!-- Component name that accepts ACTION_SEND intents for requesting ambient context consent for
+         wearable sensing. -->
+    <string translatable="false" name="config_defaultWearableSensingConsentComponent"></string>
+
+    <!-- Intent extra key for the caller's package name while requesting
+          ambient context consent for wearable sensing. -->
+    <string translatable="false" name="config_wearableAmbientContextPackageNameExtraKey"></string>
+
+    <!-- Intent extra key for the event code int array while requesting
+          ambient context consent for wearable sensing. -->
+    <string translatable="false" name="config_wearableAmbientContextEventArrayExtraKey"></string>
 
     <!-- Component name that accepts ACTION_SEND intents for requesting ambient context consent. -->
     <string translatable="false" name="config_defaultAmbientContextConsentComponent"></string>
@@ -5204,6 +5226,15 @@
          the format [System DeviceState]:[WM Jetpack Posture], for example: "0:1". -->
     <string-array name="config_device_state_postures" translatable="false" />
 
+    <!-- Which Surface rotations are considered as tabletop posture (horizontal hinge) when the
+         device is half-folded. Other half-folded postures will be assumed to be book (vertical
+         hinge) mode. Units: degrees; valid values: 0, 90, 180, 270. -->
+    <integer-array name="config_deviceTabletopRotations" />
+
+    <!-- This flag indicates that a display with fold-state FLAT should always be considered as
+         having a separating hinge. -->
+    <bool name="config_isDisplayHingeAlwaysSeparating">false</bool>
+
     <!-- Aspect ratio of letterboxing for fixed orientation. Values <= 1.0 will be ignored.
          Note: Activity min/max aspect ratio restrictions will still be respected.
          Therefore this override can control the maximum screen area that can be occupied by
@@ -5252,13 +5283,25 @@
 
     <!-- Horizontal position of a center of the letterboxed app window.
         0 corresponds to the left side of the screen and 1 to the right side. If given value < 0
-        or > 1, it is ignored and central position is used (0.5). -->
+        or > 1 it is ignored and for non-book mode central position is used (0.5); for book mode
+         left is used (0.0). -->
     <item name="config_letterboxHorizontalPositionMultiplier" format="float" type="dimen">0.5</item>
 
     <!-- Vertical position of a center of the letterboxed app window.
         0 corresponds to the upper side of the screen and 1 to the lower side. If given value < 0
-        or > 1, it is ignored and central position is used (0.5). -->
+        or > 1 it is ignored and for non-tabletop mode central position is used (0.5); for
+         tabletop mode top (0.0) is used. -->
     <item name="config_letterboxVerticalPositionMultiplier" format="float" type="dimen">0.0</item>
+
+    <!-- Horizontal position of a center of the letterboxed app window when in book mode.
+    0 corresponds to the left side of the screen and 1 to the right side. If given value < 0
+    or > 1, it is ignored and left position is used (0.0). -->
+    <item name="config_letterboxBookModePositionMultiplier" format="float" type="dimen">0.0</item>
+
+    <!-- Vertical position of a center of the letterboxed app window when in tabletop mode.
+        0 corresponds to the upper side of the screen and 1 to the lower side. If given value < 0
+        or > 1, it is ignored and top position is used (0.0). -->
+    <item name="config_letterboxTabletopModePositionMultiplier" format="float" type="dimen">0.0</item>
 
     <!-- Whether horizontal reachability repositioning is allowed for letterboxed fullscreen apps.
     -->
@@ -5286,6 +5329,26 @@
             - Option 2 - Bottom.
         If given value is outside of this range, the option 1 (center) is assummed. -->
     <integer name="config_letterboxDefaultPositionForVerticalReachability">1</integer>
+
+    <!-- Default horizontal position of the letterboxed app window when reachability is
+    enabled and an app is fullscreen in landscape device orientation and in book mode. When
+    reachability is enabled, the position can change between left, center and right. This config
+    defines the default one:
+        - Option 0 - Left.
+        - Option 1 - Center.
+        - Option 2 - Right.
+    If given value is outside of this range, the option 0 (left) is assummed. -->
+    <integer name="config_letterboxDefaultPositionForBookModeReachability">0</integer>
+
+    <!-- Default vertical position of the letterboxed app window when reachability is
+        enabled and an app is fullscreen in portrait device orientation and in tabletop mode. When
+        reachability is enabled, the position can change between top, center and bottom. This config
+        defines the default one:
+            - Option 0 - Top.
+            - Option 1 - Center.
+            - Option 2 - Bottom.
+        If given value is outside of this range, the option 0 (top) is assummed. -->
+    <integer name="config_letterboxDefaultPositionForTabletopModeReachability">0</integer>
 
     <!-- Whether displaying letterbox education is enabled for letterboxed fullscreen apps. -->
     <bool name="config_letterboxIsEducationEnabled">false</bool>

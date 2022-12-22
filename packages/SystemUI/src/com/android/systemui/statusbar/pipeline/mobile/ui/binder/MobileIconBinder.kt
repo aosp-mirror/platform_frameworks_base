@@ -17,6 +17,7 @@
 package com.android.systemui.statusbar.pipeline.mobile.ui.binder
 
 import android.content.res.ColorStateList
+import android.view.View
 import android.view.View.GONE
 import android.view.View.VISIBLE
 import android.view.ViewGroup
@@ -40,6 +41,9 @@ object MobileIconBinder {
         view: ViewGroup,
         viewModel: MobileIconViewModel,
     ) {
+        val activityContainer = view.requireViewById<View>(R.id.inout_container)
+        val activityIn = view.requireViewById<ImageView>(R.id.mobile_in)
+        val activityOut = view.requireViewById<ImageView>(R.id.mobile_out)
         val networkTypeView = view.requireViewById<ImageView>(R.id.mobile_type)
         val iconView = view.requireViewById<ImageView>(R.id.mobile_signal)
         val mobileDrawable = SignalDrawable(view.context).also { iconView.setImageDrawable(it) }
@@ -74,6 +78,15 @@ object MobileIconBinder {
                     }
                 }
 
+                // Set the activity indicators
+                launch { viewModel.activityInVisible.collect { activityIn.isVisible = it } }
+
+                launch { viewModel.activityOutVisible.collect { activityOut.isVisible = it } }
+
+                launch {
+                    viewModel.activityContainerVisible.collect { activityContainer.isVisible = it }
+                }
+
                 // Set the tint
                 launch {
                     viewModel.tint.collect { tint ->
@@ -81,6 +94,8 @@ object MobileIconBinder {
                         iconView.imageTintList = tintList
                         networkTypeView.imageTintList = tintList
                         roamingView.imageTintList = tintList
+                        activityIn.imageTintList = tintList
+                        activityOut.imageTintList = tintList
                     }
                 }
             }

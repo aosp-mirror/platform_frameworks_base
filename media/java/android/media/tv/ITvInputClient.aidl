@@ -17,6 +17,7 @@
 package android.media.tv;
 
 import android.content.ComponentName;
+import android.media.tv.AdBuffer;
 import android.media.tv.AdResponse;
 import android.media.tv.AitInfo;
 import android.media.tv.BroadcastInfoResponse;
@@ -59,4 +60,5 @@ oneway interface ITvInputClient {
 
     // For ad response
     void onAdResponse(in AdResponse response, int seq);
+    void onAdBufferConsumed(in AdBuffer buffer, int seq);
 }

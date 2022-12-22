@@ -46,6 +46,8 @@ import static android.hardware.usb.UsbPortStatus.DATA_STATUS_DISABLED_CONTAMINAN
 import static android.hardware.usb.UsbPortStatus.DATA_STATUS_DISABLED_DOCK;
 import static android.hardware.usb.UsbPortStatus.DATA_STATUS_DISABLED_FORCE;
 import static android.hardware.usb.UsbPortStatus.DATA_STATUS_DISABLED_DEBUG;
+import static android.hardware.usb.UsbPortStatus.DATA_STATUS_DISABLED_DOCK_HOST_MODE;
+import static android.hardware.usb.UsbPortStatus.DATA_STATUS_DISABLED_DOCK_DEVICE_MODE;
 import static android.hardware.usb.UsbPortStatus.COMPLIANCE_WARNING_DEBUG_ACCESSORY;
 import static android.hardware.usb.UsbPortStatus.COMPLIANCE_WARNING_BC_1_2;
 import static android.hardware.usb.UsbPortStatus.COMPLIANCE_WARNING_MISSING_RP;
@@ -676,6 +678,15 @@ public final class UsbPort {
             statusString.append("disabled-debug, ");
         }
 
+        if ((usbDataStatus & DATA_STATUS_DISABLED_DOCK_HOST_MODE) ==
+            DATA_STATUS_DISABLED_DOCK_HOST_MODE) {
+            statusString.append("disabled-host-dock, ");
+        }
+
+        if ((usbDataStatus & DATA_STATUS_DISABLED_DOCK_DEVICE_MODE) ==
+            DATA_STATUS_DISABLED_DOCK_DEVICE_MODE) {
+            statusString.append("disabled-device-dock, ");
+        }
         return statusString.toString().replaceAll(", $", "");
     }
 

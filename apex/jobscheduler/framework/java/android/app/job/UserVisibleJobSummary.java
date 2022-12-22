@@ -17,8 +17,11 @@
 package android.app.job;
 
 import android.annotation.NonNull;
+import android.annotation.Nullable;
 import android.os.Parcel;
 import android.os.Parcelable;
+
+import java.util.Objects;
 
 /**
  * Summary of a scheduled job that the user is meant to be aware of.
@@ -30,13 +33,16 @@ public class UserVisibleJobSummary implements Parcelable {
     private final int mSourceUserId;
     @NonNull
     private final String mSourcePackageName;
+    @Nullable
+    private final String mNamespace;
     private final int mJobId;
 
     public UserVisibleJobSummary(int callingUid, int sourceUserId,
-            @NonNull String sourcePackageName, int jobId) {
+            @NonNull String sourcePackageName, String namespace, int jobId) {
         mCallingUid = callingUid;
         mSourceUserId = sourceUserId;
         mSourcePackageName = sourcePackageName;
+        mNamespace = namespace;
         mJobId = jobId;
     }
 
@@ -44,6 +50,7 @@ public class UserVisibleJobSummary implements Parcelable {
         mCallingUid = in.readInt();
         mSourceUserId = in.readInt();
         mSourcePackageName = in.readString();
+        mNamespace = in.readString();
         mJobId = in.readInt();
     }
 
@@ -53,6 +60,10 @@ public class UserVisibleJobSummary implements Parcelable {
 
     public int getJobId() {
         return mJobId;
+    }
+
+    public String getNamespace() {
+        return mNamespace;
     }
 
     public int getSourceUserId() {
@@ -71,6 +82,7 @@ public class UserVisibleJobSummary implements Parcelable {
         return mCallingUid == that.mCallingUid
                 && mSourceUserId == that.mSourceUserId
                 && mSourcePackageName.equals(that.mSourcePackageName)
+                && Objects.equals(mNamespace, that.mNamespace)
                 && mJobId == that.mJobId;
     }
 
@@ -80,6 +92,9 @@ public class UserVisibleJobSummary implements Parcelable {
         result = 31 * result + mCallingUid;
         result = 31 * result + mSourceUserId;
         result = 31 * result + mSourcePackageName.hashCode();
+        if (mNamespace != null) {
+            result = 31 * result + mNamespace.hashCode();
+        }
         result = 31 * result + mJobId;
         return result;
     }
@@ -90,6 +105,7 @@ public class UserVisibleJobSummary implements Parcelable {
                 + "callingUid=" + mCallingUid
                 + ", sourceUserId=" + mSourceUserId
                 + ", sourcePackageName='" + mSourcePackageName + "'"
+                + ", namespace=" + mNamespace
                 + ", jobId=" + mJobId
                 + "}";
     }
@@ -104,6 +120,7 @@ public class UserVisibleJobSummary implements Parcelable {
         dest.writeInt(mCallingUid);
         dest.writeInt(mSourceUserId);
         dest.writeString(mSourcePackageName);
+        dest.writeString(mNamespace);
         dest.writeInt(mJobId);
     }
 

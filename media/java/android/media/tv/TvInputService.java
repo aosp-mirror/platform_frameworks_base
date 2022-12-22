@@ -913,6 +913,27 @@ public abstract class TvInputService extends Service {
             });
         }
 
+        /**
+         * Notifies the advertisement buffer is consumed.
+         * @hide
+         */
+        public void notifyAdBufferConsumed(AdBuffer buffer) {
+            executeOrPostRunnableOnMainThread(new Runnable() {
+                @MainThread
+                @Override
+                public void run() {
+                    try {
+                        if (DEBUG) Log.d(TAG, "notifyAdBufferConsumed");
+                        if (mSessionCallback != null) {
+                            mSessionCallback.onAdBufferConsumed(buffer);
+                        }
+                    } catch (RemoteException e) {
+                        Log.w(TAG, "error in notifyAdBufferConsumed", e);
+                    }
+                }
+            });
+        }
+
         private void notifyTimeShiftStartPositionChanged(final long timeMs) {
             executeOrPostRunnableOnMainThread(new Runnable() {
                 @MainThread
@@ -1126,6 +1147,13 @@ public abstract class TvInputService extends Service {
          * @param request advertisement request received
          */
         public void onRequestAd(@NonNull AdRequest request) {
+        }
+
+        /**
+         * Called when advertisement buffer is ready.
+         * @hide
+         */
+        public void onAdBuffer(AdBuffer buffer) {
         }
 
         /**
@@ -1751,6 +1779,10 @@ public abstract class TvInputService extends Service {
 
         void requestAd(AdRequest request) {
             onRequestAd(request);
+        }
+
+        void notifyAdBuffer(AdBuffer buffer) {
+            onAdBuffer(buffer);
         }
 
         /**
