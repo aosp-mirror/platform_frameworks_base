@@ -14951,6 +14951,8 @@ package android.graphics {
     enum_constant public static final android.graphics.ColorSpace.Named ACESCG;
     enum_constant public static final android.graphics.ColorSpace.Named ADOBE_RGB;
     enum_constant public static final android.graphics.ColorSpace.Named BT2020;
+    enum_constant public static final android.graphics.ColorSpace.Named BT2020_HLG;
+    enum_constant public static final android.graphics.ColorSpace.Named BT2020_PQ;
     enum_constant public static final android.graphics.ColorSpace.Named BT709;
     enum_constant public static final android.graphics.ColorSpace.Named CIE_LAB;
     enum_constant public static final android.graphics.ColorSpace.Named CIE_XYZ;
