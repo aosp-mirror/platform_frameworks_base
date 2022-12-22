@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.android.keyguard
+package com.android.systemui.shade
 
 import android.testing.AndroidTestingRunner
 import android.view.View
@@ -25,6 +25,7 @@ import com.android.systemui.SysuiTestCase
 import com.android.systemui.plugins.statusbar.StatusBarStateController
 import com.android.systemui.statusbar.StatusBarState.KEYGUARD
 import com.android.systemui.statusbar.StatusBarState.SHADE
+import com.android.systemui.statusbar.StatusBarState.SHADE_LOCKED
 import com.android.systemui.unfold.UnfoldTransitionProgressProvider.TransitionProgressListener
 import com.android.systemui.unfold.util.NaturalRotationUnfoldProgressProvider
 import com.android.systemui.util.mockito.capture
@@ -45,7 +46,7 @@ import org.mockito.MockitoAnnotations
  */
 @SmallTest
 @RunWith(AndroidTestingRunner::class)
-class KeyguardUnfoldTransitionTest : SysuiTestCase() {
+class NotificationPanelUnfoldAnimationControllerTest : SysuiTestCase() {
 
     @Mock private lateinit var progressProvider: NaturalRotationUnfoldProgressProvider
 
@@ -55,7 +56,7 @@ class KeyguardUnfoldTransitionTest : SysuiTestCase() {
 
     @Mock private lateinit var statusBarStateController: StatusBarStateController
 
-    private lateinit var underTest: KeyguardUnfoldTransition
+    private lateinit var underTest: NotificationPanelUnfoldAnimationController
     private lateinit var progressListener: TransitionProgressListener
     private var xTranslationMax = 0f
 
@@ -64,24 +65,26 @@ class KeyguardUnfoldTransitionTest : SysuiTestCase() {
         MockitoAnnotations.initMocks(this)
 
         xTranslationMax =
-            context.resources.getDimensionPixelSize(R.dimen.keyguard_unfold_translation_x).toFloat()
+            context.resources.getDimensionPixelSize(R.dimen.notification_side_paddings).toFloat()
 
-        underTest = KeyguardUnfoldTransition(context, statusBarStateController, progressProvider)
-
+        underTest =
+            NotificationPanelUnfoldAnimationController(
+                context,
+                statusBarStateController,
+                progressProvider
+            )
         underTest.setup(parent)
-        underTest.statusViewCentered = false
 
         verify(progressProvider).addCallback(capture(progressListenerCaptor))
         progressListener = progressListenerCaptor.value
     }
 
     @Test
-    fun onTransition_centeredViewDoesNotMove() {
+    fun whenInKeyguardState_viewDoesNotMove() {
         whenever(statusBarStateController.getState()).thenReturn(KEYGUARD)
-        underTest.statusViewCentered = true
 
         val view = View(context)
-        whenever(parent.findViewById<View>(R.id.lockscreen_clock_view_large)).thenReturn(view)
+        whenever(parent.findViewById<View>(R.id.quick_settings_panel)).thenReturn(view)
 
         progressListener.onTransitionStarted()
         assertThat(view.translationX).isZero()
@@ -97,31 +100,31 @@ class KeyguardUnfoldTransitionTest : SysuiTestCase() {
     }
 
     @Test
-    fun whenInShadeState_viewDoesNotMove() {
+    fun whenInShadeState_viewDoesMove() {
         whenever(statusBarStateController.getState()).thenReturn(SHADE)
 
         val view = View(context)
-        whenever(parent.findViewById<View>(R.id.lockscreen_clock_view_large)).thenReturn(view)
+        whenever(parent.findViewById<View>(R.id.quick_settings_panel)).thenReturn(view)
 
         progressListener.onTransitionStarted()
         assertThat(view.translationX).isZero()
 
         progressListener.onTransitionProgress(0f)
-        assertThat(view.translationX).isZero()
+        assertThat(view.translationX).isEqualTo(xTranslationMax)
 
         progressListener.onTransitionProgress(0.5f)
-        assertThat(view.translationX).isZero()
+        assertThat(view.translationX).isEqualTo(0.5f * xTranslationMax)
 
         progressListener.onTransitionFinished()
         assertThat(view.translationX).isZero()
     }
 
     @Test
-    fun whenInKeyguardState_viewDoesMove() {
-        whenever(statusBarStateController.getState()).thenReturn(KEYGUARD)
+    fun whenInShadeLockedState_viewDoesMove() {
+        whenever(statusBarStateController.getState()).thenReturn(SHADE_LOCKED)
 
         val view = View(context)
-        whenever(parent.findViewById<View>(R.id.lockscreen_clock_view_large)).thenReturn(view)
+        whenever(parent.findViewById<View>(R.id.quick_settings_panel)).thenReturn(view)
 
         progressListener.onTransitionStarted()
         assertThat(view.translationX).isZero()
