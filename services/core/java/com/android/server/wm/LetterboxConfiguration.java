@@ -16,16 +16,12 @@
 
 package com.android.server.wm;
 
-import static com.android.server.wm.ActivityTaskManagerDebugConfig.TAG_ATM;
-import static com.android.server.wm.ActivityTaskManagerDebugConfig.TAG_WITH_CLASS_NAME;
-
 import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.content.Context;
 import android.graphics.Color;
 import android.provider.DeviceConfig;
-import android.util.Slog;
 
 import com.android.internal.R;
 import com.android.internal.annotations.VisibleForTesting;
@@ -36,8 +32,6 @@ import java.util.function.Function;
 
 /** Reads letterbox configs from resources and controls their overrides at runtime. */
 final class LetterboxConfiguration {
-
-    private static final String TAG = TAG_WITH_CLASS_NAME ? "LetterboxConfiguration" : TAG_ATM;
 
     /**
      * Override of aspect ratio for fixed orientation letterboxing that is set via ADB with
@@ -150,14 +144,6 @@ final class LetterboxConfiguration {
     // side of the screen and 1.0 to the bottom side.
     private float mLetterboxVerticalPositionMultiplier;
 
-    // Horizontal position of a center of the letterboxed app window when the device is half-folded.
-    // 0 corresponds to the left side of the screen and 1.0 to the right side.
-    private float mLetterboxBookModePositionMultiplier;
-
-    // Vertical position of a center of the letterboxed app window when the device is half-folded.
-    // 0 corresponds to the top side of the screen and 1.0 to the bottom side.
-    private float mLetterboxTabletopModePositionMultiplier;
-
     // Default horizontal position the letterboxed app window when horizontal reachability is
     // enabled and an app is fullscreen in landscape device orientation.
     // It is used as a starting point for mLetterboxPositionForHorizontalReachability.
@@ -193,15 +179,8 @@ final class LetterboxConfiguration {
 
     LetterboxConfiguration(Context systemUiContext) {
         this(systemUiContext, new LetterboxConfigurationPersister(systemUiContext,
-                () -> readLetterboxHorizontalReachabilityPositionFromConfig(systemUiContext,
-                        /* forBookMode */ false),
-                () -> readLetterboxVerticalReachabilityPositionFromConfig(systemUiContext,
-                        /* forTabletopMode */ false),
-                () -> readLetterboxHorizontalReachabilityPositionFromConfig(systemUiContext,
-                        /* forBookMode */ true),
-                () -> readLetterboxVerticalReachabilityPositionFromConfig(systemUiContext,
-                        /* forTabletopMode */ true)
-        ));
+                () -> readLetterboxHorizontalReachabilityPositionFromConfig(systemUiContext),
+                () -> readLetterboxVerticalReachabilityPositionFromConfig(systemUiContext)));
     }
 
     @VisibleForTesting
@@ -221,18 +200,14 @@ final class LetterboxConfiguration {
                 R.dimen.config_letterboxHorizontalPositionMultiplier);
         mLetterboxVerticalPositionMultiplier = mContext.getResources().getFloat(
                 R.dimen.config_letterboxVerticalPositionMultiplier);
-        mLetterboxBookModePositionMultiplier = mContext.getResources().getFloat(
-                R.dimen.config_letterboxBookModePositionMultiplier);
-        mLetterboxTabletopModePositionMultiplier = mContext.getResources().getFloat(
-                R.dimen.config_letterboxTabletopModePositionMultiplier);
         mIsHorizontalReachabilityEnabled = mContext.getResources().getBoolean(
                 R.bool.config_letterboxIsHorizontalReachabilityEnabled);
         mIsVerticalReachabilityEnabled = mContext.getResources().getBoolean(
                 R.bool.config_letterboxIsVerticalReachabilityEnabled);
         mDefaultPositionForHorizontalReachability =
-                readLetterboxHorizontalReachabilityPositionFromConfig(mContext, false);
+                readLetterboxHorizontalReachabilityPositionFromConfig(mContext);
         mDefaultPositionForVerticalReachability =
-                readLetterboxVerticalReachabilityPositionFromConfig(mContext, false);
+                readLetterboxVerticalReachabilityPositionFromConfig(mContext);
         mIsEducationEnabled = mContext.getResources().getBoolean(
                 R.bool.config_letterboxIsEducationEnabled);
         setDefaultMinAspectRatioForUnresizableApps(mContext.getResources().getFloat(
@@ -485,30 +460,11 @@ final class LetterboxConfiguration {
      * or via an ADB command. 0 corresponds to the left side of the screen and 1 to the
      * right side.
      */
-    float getLetterboxHorizontalPositionMultiplier(boolean isInBookMode) {
-        if (isInBookMode) {
-            if (mLetterboxBookModePositionMultiplier < 0.0f
-                    || mLetterboxBookModePositionMultiplier > 1.0f) {
-                Slog.w(TAG,
-                        "mLetterboxBookModePositionMultiplier out of bounds (isInBookMode=true): "
-                        + mLetterboxBookModePositionMultiplier);
-                // Default to left position if invalid value is provided.
-                return 0.0f;
-            } else {
-                return mLetterboxBookModePositionMultiplier;
-            }
-        } else {
-            if (mLetterboxHorizontalPositionMultiplier < 0.0f
-                    || mLetterboxHorizontalPositionMultiplier > 1.0f) {
-                Slog.w(TAG,
-                        "mLetterboxBookModePositionMultiplier out of bounds (isInBookMode=false):"
-                        + mLetterboxBookModePositionMultiplier);
-                // Default to central position if invalid value is provided.
-                return 0.5f;
-            } else {
-                return mLetterboxHorizontalPositionMultiplier;
-            }
-        }
+    float getLetterboxHorizontalPositionMultiplier() {
+        return (mLetterboxHorizontalPositionMultiplier < 0.0f
+                || mLetterboxHorizontalPositionMultiplier > 1.0f)
+                        // Default to central position if invalid value is provided.
+                        ? 0.5f : mLetterboxHorizontalPositionMultiplier;
     }
 
     /*
@@ -517,18 +473,11 @@ final class LetterboxConfiguration {
      * or via an ADB command. 0 corresponds to the top side of the screen and 1 to the
      * bottom side.
      */
-    float getLetterboxVerticalPositionMultiplier(boolean isInTabletopMode) {
-        if (isInTabletopMode) {
-            return (mLetterboxTabletopModePositionMultiplier < 0.0f
-                    || mLetterboxTabletopModePositionMultiplier > 1.0f)
-                    // Default to top position if invalid value is provided.
-                    ? 0.0f : mLetterboxTabletopModePositionMultiplier;
-        } else {
-            return (mLetterboxVerticalPositionMultiplier < 0.0f
-                    || mLetterboxVerticalPositionMultiplier > 1.0f)
-                    // Default to central position if invalid value is provided.
-                    ? 0.5f : mLetterboxVerticalPositionMultiplier;
-        }
+    float getLetterboxVerticalPositionMultiplier() {
+        return (mLetterboxVerticalPositionMultiplier < 0.0f
+                || mLetterboxVerticalPositionMultiplier > 1.0f)
+                        // Default to central position if invalid value is provided.
+                        ? 0.5f : mLetterboxVerticalPositionMultiplier;
     }
 
     /**
@@ -669,8 +618,7 @@ final class LetterboxConfiguration {
      */
     void resetDefaultPositionForHorizontalReachability() {
         mDefaultPositionForHorizontalReachability =
-                readLetterboxHorizontalReachabilityPositionFromConfig(mContext,
-                        false /* forBookMode */);
+                readLetterboxHorizontalReachabilityPositionFromConfig(mContext);
     }
 
     /**
@@ -679,34 +627,27 @@ final class LetterboxConfiguration {
      */
     void resetDefaultPositionForVerticalReachability() {
         mDefaultPositionForVerticalReachability =
-                readLetterboxVerticalReachabilityPositionFromConfig(mContext,
-                        false /* forTabletopMode */);
+                readLetterboxVerticalReachabilityPositionFromConfig(mContext);
     }
 
     @LetterboxHorizontalReachabilityPosition
-    private static int readLetterboxHorizontalReachabilityPositionFromConfig(Context context,
-            boolean forBookMode) {
+    private static int readLetterboxHorizontalReachabilityPositionFromConfig(Context context) {
         int position = context.getResources().getInteger(
-                forBookMode
-                    ? R.integer.config_letterboxDefaultPositionForBookModeReachability
-                    : R.integer.config_letterboxDefaultPositionForHorizontalReachability);
+                R.integer.config_letterboxDefaultPositionForHorizontalReachability);
         return position == LETTERBOX_HORIZONTAL_REACHABILITY_POSITION_LEFT
-                || position == LETTERBOX_HORIZONTAL_REACHABILITY_POSITION_CENTER
-                || position == LETTERBOX_HORIZONTAL_REACHABILITY_POSITION_RIGHT
+                    || position == LETTERBOX_HORIZONTAL_REACHABILITY_POSITION_CENTER
+                    || position == LETTERBOX_HORIZONTAL_REACHABILITY_POSITION_RIGHT
                     ? position : LETTERBOX_HORIZONTAL_REACHABILITY_POSITION_CENTER;
     }
 
     @LetterboxVerticalReachabilityPosition
-    private static int readLetterboxVerticalReachabilityPositionFromConfig(Context context,
-            boolean forTabletopMode) {
+    private static int readLetterboxVerticalReachabilityPositionFromConfig(Context context) {
         int position = context.getResources().getInteger(
-                forTabletopMode
-                    ? R.integer.config_letterboxDefaultPositionForTabletopModeReachability
-                    : R.integer.config_letterboxDefaultPositionForVerticalReachability);
+                R.integer.config_letterboxDefaultPositionForVerticalReachability);
         return position == LETTERBOX_VERTICAL_REACHABILITY_POSITION_TOP
                 || position == LETTERBOX_VERTICAL_REACHABILITY_POSITION_CENTER
                 || position == LETTERBOX_VERTICAL_REACHABILITY_POSITION_BOTTOM
-                    ? position : LETTERBOX_VERTICAL_REACHABILITY_POSITION_CENTER;
+                ? position : LETTERBOX_VERTICAL_REACHABILITY_POSITION_CENTER;
     }
 
     /*
@@ -715,10 +656,9 @@ final class LetterboxConfiguration {
      *
      * <p>The position multiplier is changed after each double tap in the letterbox area.
      */
-    float getHorizontalMultiplierForReachability(boolean isDeviceInBookMode) {
+    float getHorizontalMultiplierForReachability() {
         final int letterboxPositionForHorizontalReachability =
-                mLetterboxConfigurationPersister.getLetterboxPositionForHorizontalReachability(
-                        isDeviceInBookMode);
+                mLetterboxConfigurationPersister.getLetterboxPositionForHorizontalReachability();
         switch (letterboxPositionForHorizontalReachability) {
             case LETTERBOX_HORIZONTAL_REACHABILITY_POSITION_LEFT:
                 return 0.0f;
@@ -739,10 +679,9 @@ final class LetterboxConfiguration {
      *
      * <p>The position multiplier is changed after each double tap in the letterbox area.
      */
-    float getVerticalMultiplierForReachability(boolean isDeviceInTabletopMode) {
+    float getVerticalMultiplierForReachability() {
         final int letterboxPositionForVerticalReachability =
-                mLetterboxConfigurationPersister.getLetterboxPositionForVerticalReachability(
-                        isDeviceInTabletopMode);
+                mLetterboxConfigurationPersister.getLetterboxPositionForVerticalReachability();
         switch (letterboxPositionForVerticalReachability) {
             case LETTERBOX_VERTICAL_REACHABILITY_POSITION_TOP:
                 return 0.0f;
@@ -762,9 +701,8 @@ final class LetterboxConfiguration {
      * enabled.
      */
     @LetterboxHorizontalReachabilityPosition
-    int getLetterboxPositionForHorizontalReachability(boolean isInFullScreenBookMode) {
-        return mLetterboxConfigurationPersister.getLetterboxPositionForHorizontalReachability(
-                isInFullScreenBookMode);
+    int getLetterboxPositionForHorizontalReachability() {
+        return mLetterboxConfigurationPersister.getLetterboxPositionForHorizontalReachability();
     }
 
     /*
@@ -772,9 +710,8 @@ final class LetterboxConfiguration {
      * enabled.
      */
     @LetterboxVerticalReachabilityPosition
-    int getLetterboxPositionForVerticalReachability(boolean isInFullScreenTabletopMode) {
-        return mLetterboxConfigurationPersister.getLetterboxPositionForVerticalReachability(
-                isInFullScreenTabletopMode);
+    int getLetterboxPositionForVerticalReachability() {
+        return mLetterboxConfigurationPersister.getLetterboxPositionForVerticalReachability();
     }
 
     /** Returns a string representing the given {@link LetterboxHorizontalReachabilityPosition}. */
@@ -813,41 +750,34 @@ final class LetterboxConfiguration {
      * Changes letterbox position for horizontal reachability to the next available one on the
      * right side.
      */
-    void movePositionForHorizontalReachabilityToNextRightStop(boolean isDeviceInBookMode) {
-        updatePositionForHorizontalReachability(isDeviceInBookMode, prev -> Math.min(
-                prev + (isDeviceInBookMode ? 2 : 1), // Move 2 stops in book mode to avoid center.
-                LETTERBOX_HORIZONTAL_REACHABILITY_POSITION_RIGHT));
+    void movePositionForHorizontalReachabilityToNextRightStop() {
+        updatePositionForHorizontalReachability(prev -> Math.min(
+                prev + 1, LETTERBOX_HORIZONTAL_REACHABILITY_POSITION_RIGHT));
     }
 
     /**
      * Changes letterbox position for horizontal reachability to the next available one on the left
      * side.
      */
-    void movePositionForHorizontalReachabilityToNextLeftStop(boolean isDeviceInBookMode) {
-        updatePositionForHorizontalReachability(isDeviceInBookMode, prev -> Math.max(
-                prev - (isDeviceInBookMode ? 2 : 1), 0)); // Move 2 stops in book mode to avoid
-                                                          // center.
+    void movePositionForHorizontalReachabilityToNextLeftStop() {
+        updatePositionForHorizontalReachability(prev -> Math.max(prev - 1, 0));
     }
 
     /**
      * Changes letterbox position for vertical reachability to the next available one on the bottom
      * side.
      */
-    void movePositionForVerticalReachabilityToNextBottomStop(boolean isDeviceInTabletopMode) {
-        updatePositionForVerticalReachability(isDeviceInTabletopMode, prev -> Math.min(
-                prev + (isDeviceInTabletopMode ? 2 : 1), // Move 2 stops in tabletop mode to avoid
-                                                         // center.
-                LETTERBOX_VERTICAL_REACHABILITY_POSITION_BOTTOM));
+    void movePositionForVerticalReachabilityToNextBottomStop() {
+        updatePositionForVerticalReachability(prev -> Math.min(
+                prev + 1, LETTERBOX_VERTICAL_REACHABILITY_POSITION_BOTTOM));
     }
 
     /**
      * Changes letterbox position for vertical reachability to the next available one on the top
      * side.
      */
-    void movePositionForVerticalReachabilityToNextTopStop(boolean isDeviceInTabletopMode) {
-        updatePositionForVerticalReachability(isDeviceInTabletopMode, prev -> Math.max(
-                prev - (isDeviceInTabletopMode ? 2 : 1), 0)); // Move 2 stops in tabletop mode to
-                                                              // avoid center.
+    void movePositionForVerticalReachabilityToNextTopStop() {
+        updatePositionForVerticalReachability(prev -> Math.max(prev - 1, 0));
     }
 
     /**
@@ -924,27 +854,25 @@ final class LetterboxConfiguration {
     }
 
     /** Calculates a new letterboxPositionForHorizontalReachability value and updates the store */
-    private void updatePositionForHorizontalReachability(boolean isDeviceInBookMode,
+    private void updatePositionForHorizontalReachability(
             Function<Integer, Integer> newHorizonalPositionFun) {
         final int letterboxPositionForHorizontalReachability =
-                mLetterboxConfigurationPersister.getLetterboxPositionForHorizontalReachability(
-                        isDeviceInBookMode);
+                mLetterboxConfigurationPersister.getLetterboxPositionForHorizontalReachability();
         final int nextHorizontalPosition = newHorizonalPositionFun.apply(
                 letterboxPositionForHorizontalReachability);
         mLetterboxConfigurationPersister.setLetterboxPositionForHorizontalReachability(
-                isDeviceInBookMode, nextHorizontalPosition);
+                nextHorizontalPosition);
     }
 
     /** Calculates a new letterboxPositionForVerticalReachability value and updates the store */
-    private void updatePositionForVerticalReachability(boolean isDeviceInTabletopMode,
+    private void updatePositionForVerticalReachability(
             Function<Integer, Integer> newVerticalPositionFun) {
         final int letterboxPositionForVerticalReachability =
-                mLetterboxConfigurationPersister.getLetterboxPositionForVerticalReachability(
-                        isDeviceInTabletopMode);
+                mLetterboxConfigurationPersister.getLetterboxPositionForVerticalReachability();
         final int nextVerticalPosition = newVerticalPositionFun.apply(
                 letterboxPositionForVerticalReachability);
         mLetterboxConfigurationPersister.setLetterboxPositionForVerticalReachability(
-                isDeviceInTabletopMode, nextVerticalPosition);
+                nextVerticalPosition);
     }
 
     // TODO(b/262378106): Cache runtime flag and implement DeviceConfig.OnPropertiesChangedListener

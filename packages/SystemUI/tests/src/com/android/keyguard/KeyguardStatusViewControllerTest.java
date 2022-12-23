@@ -25,7 +25,6 @@ import android.test.suitebuilder.annotation.SmallTest;
 import android.testing.AndroidTestingRunner;
 
 import com.android.systemui.SysuiTestCase;
-import com.android.systemui.flags.FeatureFlags;
 import com.android.systemui.plugins.ClockAnimations;
 import com.android.systemui.statusbar.phone.DozeParameters;
 import com.android.systemui.statusbar.phone.ScreenOffAnimationController;
@@ -60,8 +59,6 @@ public class KeyguardStatusViewControllerTest extends SysuiTestCase {
     @Mock
     DozeParameters mDozeParameters;
     @Mock
-    FeatureFlags mFeatureFlags;
-    @Mock
     ScreenOffAnimationController mScreenOffAnimationController;
     @Captor
     private ArgumentCaptor<KeyguardUpdateMonitorCallback> mKeyguardUpdateMonitorCallbackCaptor;
@@ -80,7 +77,6 @@ public class KeyguardStatusViewControllerTest extends SysuiTestCase {
                 mKeyguardUpdateMonitor,
                 mConfigurationController,
                 mDozeParameters,
-                mFeatureFlags,
                 mScreenOffAnimationController);
     }
 
@@ -100,9 +96,9 @@ public class KeyguardStatusViewControllerTest extends SysuiTestCase {
     public void setTranslationYExcludingMedia_forwardsCallToView() {
         float translationY = 123f;
 
-        mController.setTranslationY(translationY, /* excludeMedia= */true);
+        mController.setTranslationYExcludingMedia(translationY);
 
-        verify(mKeyguardStatusView).setChildrenTranslationY(translationY, /* excludeMedia= */true);
+        verify(mKeyguardStatusView).setChildrenTranslationYExcludingMediaView(translationY);
     }
 
     @Test

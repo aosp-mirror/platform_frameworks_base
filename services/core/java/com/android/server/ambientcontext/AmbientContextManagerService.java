@@ -17,7 +17,6 @@
 package com.android.server.ambientcontext;
 
 import static android.provider.DeviceConfig.NAMESPACE_AMBIENT_CONTEXT_MANAGER_SERVICE;
-import static android.provider.DeviceConfig.NAMESPACE_WEARABLE_SENSING;
 
 import android.Manifest;
 import android.annotation.NonNull;
@@ -45,16 +44,12 @@ import com.android.internal.R;
 import com.android.internal.util.DumpUtils;
 import com.android.server.LocalServices;
 import com.android.server.SystemService;
-import com.android.server.ambientcontext.AmbientContextManagerPerUserService.ServiceType;
 import com.android.server.infra.AbstractMasterSystemService;
 import com.android.server.infra.FrameworkResourcesServiceNameResolver;
 import com.android.server.pm.KnownPackages;
 
 import java.io.FileDescriptor;
 import java.io.PrintWriter;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Objects;
 import java.util.Set;
@@ -67,12 +62,6 @@ public class AmbientContextManagerService extends
                 AmbientContextManagerPerUserService> {
     private static final String TAG = AmbientContextManagerService.class.getSimpleName();
     private static final String KEY_SERVICE_ENABLED = "service_enabled";
-    private static final Set<Integer> DEFAULT_EVENT_SET = new HashSet<>(){{
-            add(AmbientContextEvent.EVENT_COUGH);
-            add(AmbientContextEvent.EVENT_SNORE);
-            add(AmbientContextEvent.EVENT_BACK_DOUBLE_TAP);
-        }
-    };
 
     /** Default value in absence of {@link DeviceConfig} override. */
     private static final boolean DEFAULT_SERVICE_ENABLED = true;
@@ -115,16 +104,14 @@ public class AmbientContextManagerService extends
 
     private final Context mContext;
     boolean mIsServiceEnabled;
-    boolean mIsWearableServiceEnabled;
     private Set<ClientRequest> mExistingClientRequests;
 
     public AmbientContextManagerService(Context context) {
         super(context,
                 new FrameworkResourcesServiceNameResolver(
                         context,
-                        R.array.config_defaultAmbientContextServices,
-                        /*isMultiple=*/ true),
-                /*disallowProperty=*/null,
+                        R.string.config_defaultAmbientContextDetectionService),
+                        /*disallowProperty=*/null,
                 PACKAGE_UPDATE_POLICY_REFRESH_EAGER
                         | /*To avoid high latency*/ PACKAGE_RESTART_POLICY_REFRESH_EAGER);
         mContext = context;
@@ -146,9 +133,6 @@ public class AmbientContextManagerService extends
 
             mIsServiceEnabled = DeviceConfig.getBoolean(
                     NAMESPACE_AMBIENT_CONTEXT_MANAGER_SERVICE,
-                    KEY_SERVICE_ENABLED, DEFAULT_SERVICE_ENABLED);
-            mIsWearableServiceEnabled = DeviceConfig.getBoolean(
-                    NAMESPACE_WEARABLE_SENSING,
                     KEY_SERVICE_ENABLED, DEFAULT_SERVICE_ENABLED);
         }
     }
@@ -196,63 +180,13 @@ public class AmbientContextManagerService extends
             mIsServiceEnabled = DeviceConfig.getBoolean(
                     NAMESPACE_AMBIENT_CONTEXT_MANAGER_SERVICE,
                     KEY_SERVICE_ENABLED, DEFAULT_SERVICE_ENABLED);
-            mIsWearableServiceEnabled = DeviceConfig.getBoolean(
-                    NAMESPACE_WEARABLE_SENSING,
-                    KEY_SERVICE_ENABLED, DEFAULT_SERVICE_ENABLED);
         }
     }
 
     @Override
     protected AmbientContextManagerPerUserService newServiceLocked(int resolvedUserId,
             boolean disabled) {
-        // This service uses newServiceListLocked, it is configured in multiple mode.
-        return null;
-    }
-
-    @Override // from AbstractMasterSystemService
-    protected List<AmbientContextManagerPerUserService> newServiceListLocked(int resolvedUserId,
-            boolean disabled, String[] serviceNames) {
-        if (serviceNames == null || serviceNames.length == 0) {
-            Slog.i(TAG, "serviceNames sent in newServiceListLocked is null, or empty");
-            return new ArrayList<>();
-        }
-
-        List<AmbientContextManagerPerUserService> serviceList =
-                new ArrayList<>(serviceNames.length);
-        if (!isDefaultServiceEnabled(resolvedUserId)) {
-            Slog.i(TAG, "Not using default services, "
-                    + "services provided for testing should be exactly two services.");
-            if (serviceNames.length == 2) {
-                // Expecting two services for testing, first being the default and second wearable.
-                serviceList.add(new DefaultAmbientContextManagerPerUserService(
-                        this, mLock, resolvedUserId,
-                        AmbientContextManagerPerUserService.ServiceType.DEFAULT, serviceNames[0]));
-                serviceList.add(new WearableAmbientContextManagerPerUserService(
-                        this, mLock, resolvedUserId,
-                        AmbientContextManagerPerUserService.ServiceType.WEARABLE,
-                        serviceNames[1]));
-            } else {
-                Slog.i(TAG, "Incorrect number of services provided for testing.");
-            }
-            return serviceList;
-        }
-
-        for (String serviceName : serviceNames) {
-            Slog.d(TAG, "newServicesListLocked with service name: " + serviceName);
-            if (getServiceType(serviceName)
-                    == AmbientContextManagerPerUserService.ServiceType.WEARABLE) {
-                serviceList.add(new
-                        WearableAmbientContextManagerPerUserService(
-                        this, mLock, resolvedUserId,
-                        AmbientContextManagerPerUserService.ServiceType.WEARABLE, serviceName));
-            } else {
-                serviceList.add(new DefaultAmbientContextManagerPerUserService(
-                        this, mLock, resolvedUserId,
-                        AmbientContextManagerPerUserService.ServiceType.DEFAULT, serviceName));
-            }
-
-        }
-        return serviceList;
+        return new AmbientContextManagerPerUserService(this, mLock, resolvedUserId);
     }
 
     @Override
@@ -305,10 +239,7 @@ public class AmbientContextManagerService extends
         mContext.enforceCallingOrSelfPermission(
                 Manifest.permission.ACCESS_AMBIENT_CONTEXT_EVENT, TAG);
         synchronized (mLock) {
-            AmbientContextManagerPerUserService service =
-                    getAmbientContextManagerPerUserServiceForEventTypes(
-                            userId,
-                            request.getEventTypes());
+            final AmbientContextManagerPerUserService service = getServiceForUserLocked(userId);
             if (service != null) {
                 service.startDetection(request, packageName, observer);
             } else {
@@ -326,19 +257,11 @@ public class AmbientContextManagerService extends
         mContext.enforceCallingOrSelfPermission(
                 Manifest.permission.ACCESS_AMBIENT_CONTEXT_EVENT, TAG);
         synchronized (mLock) {
-            for (ClientRequest cr : mExistingClientRequests) {
-                Slog.i(TAG, "Looping through clients");
-                if (cr.hasUserIdAndPackageName(userId, packageName)) {
-                    Slog.i(TAG, "we have an existing client");
-                    AmbientContextManagerPerUserService service =
-                            getAmbientContextManagerPerUserServiceForEventTypes(
-                                    userId, cr.getRequest().getEventTypes());
-                    if (service != null) {
-                        service.stopDetection(packageName);
-                    } else {
-                        Slog.i(TAG, "service not available for user_id: " + userId);
-                    }
-                }
+            final AmbientContextManagerPerUserService service = getServiceForUserLocked(userId);
+            if (service != null) {
+                service.stopDetection(packageName);
+            } else {
+                Slog.i(TAG, "service not available for user_id: " + userId);
             }
         }
     }
@@ -353,9 +276,7 @@ public class AmbientContextManagerService extends
         mContext.enforceCallingOrSelfPermission(
                 Manifest.permission.ACCESS_AMBIENT_CONTEXT_EVENT, TAG);
         synchronized (mLock) {
-            AmbientContextManagerPerUserService service =
-                    getAmbientContextManagerPerUserServiceForEventTypes(
-                            userId, intArrayToIntegerSet(eventTypes));
+            final AmbientContextManagerPerUserService service = getServiceForUserLocked(userId);
             if (service != null) {
                 service.onQueryServiceStatus(eventTypes, packageName, callback);
             } else {
@@ -366,18 +287,14 @@ public class AmbientContextManagerService extends
 
     private void restorePreviouslyEnabledClients(int userId) {
         synchronized (mLock) {
-            final List<AmbientContextManagerPerUserService> services =
-                    getServiceListForUserLocked(userId);
-            for (AmbientContextManagerPerUserService service : services) {
-                for (ClientRequest clientRequest : mExistingClientRequests) {
-                    // Start detection for previously enabled clients
-                    if (clientRequest.hasUserId(userId)) {
-                        Slog.d(TAG, "Restoring detection for "
-                                + clientRequest.getPackageName());
-                        service.startDetection(clientRequest.getRequest(),
-                                clientRequest.getPackageName(),
-                                clientRequest.getObserver());
-                    }
+            final AmbientContextManagerPerUserService service = getServiceForUserLocked(userId);
+            for (ClientRequest clientRequest : mExistingClientRequests) {
+                // Start detection for previously enabled clients
+                if (clientRequest.hasUserId(userId)) {
+                    Slog.d(TAG, "Restoring detection for " + clientRequest.getPackageName());
+                    service.startDetection(clientRequest.getRequest(),
+                            clientRequest.getPackageName(),
+                            clientRequest.getObserver());
                 }
             }
         }
@@ -386,12 +303,9 @@ public class AmbientContextManagerService extends
     /**
      * Returns the AmbientContextManagerPerUserService component for this user.
      */
-    public ComponentName getComponentName(
-            @UserIdInt int userId,
-            AmbientContextManagerPerUserService.ServiceType serviceType) {
+    public ComponentName getComponentName(@UserIdInt int userId) {
         synchronized (mLock) {
-            final AmbientContextManagerPerUserService service =
-                    getServiceForType(userId, serviceType);
+            final AmbientContextManagerPerUserService service = getServiceForUserLocked(userId);
             if (service != null) {
                 return service.getComponentName();
             }
@@ -399,114 +313,10 @@ public class AmbientContextManagerService extends
         return null;
     }
 
-    private AmbientContextManagerPerUserService getAmbientContextManagerPerUserServiceForEventTypes(
-              @UserIdInt int userId, Set<Integer> eventTypes) {
-        if (isWearableEventTypesOnly(eventTypes)) {
-            return getServiceForType(userId,
-                    AmbientContextManagerPerUserService.ServiceType.WEARABLE);
-        } else {
-            return getServiceForType(userId,
-                    AmbientContextManagerPerUserService.ServiceType.DEFAULT);
-        }
-    }
-
-    private Set<Integer> intArrayToIntegerSet(int[] eventTypes) {
-        Set<Integer> types = new HashSet<>();
-        for (Integer i : eventTypes) {
-            types.add(i);
-        }
-        return types;
-    }
-
-    private AmbientContextManagerPerUserService.ServiceType getServiceType(String serviceName) {
-        final String wearableService = mContext.getResources()
-                .getString(R.string.config_defaultWearableSensingService);
-        if (wearableService != null && wearableService.equals(serviceName)) {
-            return AmbientContextManagerPerUserService.ServiceType.WEARABLE;
-        }
-
-        return AmbientContextManagerPerUserService.ServiceType.DEFAULT;
-    }
-
-    private AmbientContextManagerPerUserService getServiceForType(int userId,
-            AmbientContextManagerPerUserService.ServiceType serviceType) {
-        Slog.d(TAG, "getServiceForType with userid: "
-                + userId + " service type: " + serviceType.name());
-        synchronized (mLock) {
-            final List<AmbientContextManagerPerUserService> services =
-                    getServiceListForUserLocked(userId);
-            Slog.d(TAG, "Services that are available: "
-                    + (services == null ? "null services" : services.size()
-                    + " number of services"));
-            if (services == null) {
-                return null;
-            }
-
-            for (AmbientContextManagerPerUserService service : services) {
-                if (service.getServiceType() == serviceType) {
-                    return service;
-                }
-            }
-        }
-        return null;
-    }
-
-    private boolean isWearableEventTypesOnly(Set<Integer> eventTypes) {
-        if (eventTypes.isEmpty()) {
-            Slog.d(TAG, "empty event types.");
-            return false;
-        }
-        for (Integer eventType : eventTypes) {
-            if (eventType < AmbientContextEvent.EVENT_VENDOR_WEARABLE_START) {
-                Slog.d(TAG, "Not all events types are wearable events.");
-                return false;
-            }
-        }
-        Slog.d(TAG, "only wearable events.");
-        return true;
-    }
-
-    private boolean isWearableEventTypesOnly(int[] eventTypes) {
-        Integer[] events = intArrayToIntegerArray(eventTypes);
-        return isWearableEventTypesOnly(new HashSet<>(Arrays.asList(events)));
-    }
-
-    private boolean containsMixedEvents(int[] eventTypes) {
-        if (isWearableEventTypesOnly(eventTypes)) {
-            return false;
-        }
-        // It's not only wearable events so check if it's only default events.
-        for (Integer event : eventTypes) {
-            if (!DEFAULT_EVENT_SET.contains(event)) {
-                // mixed events.
-                Slog.w(TAG, "Received mixed event types, this is not supported.");
-                return true;
-            }
-        }
-        // Only default events.
-        return false;
-    }
-
-    private static int[] integerSetToIntArray(@NonNull Set<Integer> integerSet) {
-        int[] intArray = new int[integerSet.size()];
-        int i = 0;
-        for (Integer type : integerSet) {
-            intArray[i++] = type;
-        }
-        return intArray;
-    }
-
-    @NonNull
-    private static Integer[] intArrayToIntegerArray(@NonNull int[] integerSet) {
-        Integer[] intArray = new Integer[integerSet.length];
-        int i = 0;
-        for (Integer type : integerSet) {
-            intArray[i++] = type;
-        }
-        return intArray;
-    }
-
     private final class AmbientContextManagerInternal extends IAmbientContextManager.Stub {
+        final AmbientContextManagerPerUserService mService = getServiceForUserLocked(
+                UserHandle.getCallingUserId());
+
         @Override
         public void registerObserver(
                 AmbientContextEventRequest request, PendingIntent resultPendingIntent,
@@ -514,21 +324,17 @@ public class AmbientContextManagerService extends
             Objects.requireNonNull(request);
             Objects.requireNonNull(resultPendingIntent);
             Objects.requireNonNull(statusCallback);
-            AmbientContextManagerPerUserService service =
-                    getAmbientContextManagerPerUserServiceForEventTypes(
-                            UserHandle.getCallingUserId(),
-                            request.getEventTypes());
             // Wrap the PendingIntent and statusCallback in a IAmbientContextObserver to make the
             // code unified
             IAmbientContextObserver observer = new IAmbientContextObserver.Stub() {
                 @Override
                 public void onEvents(List<AmbientContextEvent> events) throws RemoteException {
-                    service.sendDetectionResultIntent(resultPendingIntent, events);
+                    mService.sendDetectionResultIntent(resultPendingIntent, events);
                 }
 
                 @Override
                 public void onRegistrationComplete(int statusCode) throws RemoteException {
-                    service.sendStatusCallback(statusCallback,
+                    AmbientContextManagerPerUserService.sendStatusCallback(statusCallback,
                             statusCode);
                 }
             };
@@ -550,37 +356,13 @@ public class AmbientContextManagerService extends
             mContext.enforceCallingOrSelfPermission(
                     Manifest.permission.ACCESS_AMBIENT_CONTEXT_EVENT, TAG);
             assertCalledByPackageOwner(packageName);
-            AmbientContextManagerPerUserService service =
-                    getAmbientContextManagerPerUserServiceForEventTypes(
-                            UserHandle.getCallingUserId(),
-                            request.getEventTypes());
-
-            if (service == null) {
-                Slog.w(TAG, "onRegisterObserver unavailable user_id: "
-                        + UserHandle.getCallingUserId());
-            }
-
-            if (service.getServiceType() == ServiceType.DEFAULT && !mIsServiceEnabled) {
-                Slog.d(TAG, "Service not available.");
-                service.completeRegistration(observer,
+            if (!mIsServiceEnabled) {
+                Slog.w(TAG, "Service not available.");
+                AmbientContextManagerPerUserService.completeRegistration(observer,
                         AmbientContextManager.STATUS_SERVICE_UNAVAILABLE);
                 return;
             }
-            if (service.getServiceType() == ServiceType.WEARABLE && !mIsWearableServiceEnabled) {
-                Slog.d(TAG, "Wearable Service not available.");
-                service.completeRegistration(observer,
-                        AmbientContextManager.STATUS_SERVICE_UNAVAILABLE);
-                return;
-            }
-            if (containsMixedEvents(integerSetToIntArray(request.getEventTypes()))) {
-                Slog.d(TAG, "AmbientContextEventRequest contains mixed events,"
-                        + " this is not supported.");
-                service.completeRegistration(observer,
-                        AmbientContextManager.STATUS_NOT_SUPPORTED);
-                return;
-            }
-
-            service.onRegisterObserver(request, packageName, observer);
+            mService.onRegisterObserver(request, packageName, observer);
         }
 
         @Override
@@ -588,20 +370,7 @@ public class AmbientContextManagerService extends
             mContext.enforceCallingOrSelfPermission(
                     Manifest.permission.ACCESS_AMBIENT_CONTEXT_EVENT, TAG);
             assertCalledByPackageOwner(callingPackage);
-
-            AmbientContextManagerPerUserService service = null;
-            for (ClientRequest cr : mExistingClientRequests) {
-                if (cr.getPackageName().equals(callingPackage)) {
-                    service = getAmbientContextManagerPerUserServiceForEventTypes(
-                            UserHandle.getCallingUserId(), cr.getRequest().getEventTypes());
-                    if (service != null) {
-                        service.onUnregisterObserver(callingPackage);
-                    } else {
-                        Slog.w(TAG, "onUnregisterObserver unavailable user_id: "
-                                + UserHandle.getCallingUserId());
-                    }
-                }
-            }
+            mService.onUnregisterObserver(callingPackage);
         }
 
         @Override
@@ -613,40 +382,14 @@ public class AmbientContextManagerService extends
             mContext.enforceCallingOrSelfPermission(
                     Manifest.permission.ACCESS_AMBIENT_CONTEXT_EVENT, TAG);
             assertCalledByPackageOwner(callingPackage);
-            synchronized (mLock) {
-                AmbientContextManagerPerUserService service =
-                        getAmbientContextManagerPerUserServiceForEventTypes(
-                                UserHandle.getCallingUserId(), intArrayToIntegerSet(eventTypes));
-                if (service == null) {
-                    Slog.w(TAG, "onQueryServiceStatus unavailable user_id: "
-                            + UserHandle.getCallingUserId());
-                }
-
-                if (service.getServiceType() == ServiceType.DEFAULT && !mIsServiceEnabled) {
-                    Slog.d(TAG, "Service not available.");
-                    service.sendStatusCallback(statusCallback,
-                            AmbientContextManager.STATUS_SERVICE_UNAVAILABLE);
-                    return;
-                }
-                if (service.getServiceType() == ServiceType.WEARABLE
-                        && !mIsWearableServiceEnabled) {
-                    Slog.d(TAG, "Wearable Service not available.");
-                    service.sendStatusCallback(statusCallback,
-                            AmbientContextManager.STATUS_SERVICE_UNAVAILABLE);
-                    return;
-                }
-
-                if (containsMixedEvents(eventTypes)) {
-                    Slog.d(TAG, "AmbientContextEventRequest contains mixed events,"
-                            + " this is not supported.");
-                    service.sendStatusCallback(statusCallback,
-                            AmbientContextManager.STATUS_NOT_SUPPORTED);
-                    return;
-                }
-
-                service.onQueryServiceStatus(eventTypes, callingPackage,
-                        statusCallback);
+            if (!mIsServiceEnabled) {
+                Slog.w(TAG, "Detection service not available.");
+                AmbientContextManagerPerUserService.sendStatusCallback(statusCallback,
+                        AmbientContextManager.STATUS_SERVICE_UNAVAILABLE);
+                return;
             }
+            mService.onQueryServiceStatus(eventTypes, callingPackage,
+                    statusCallback);
         }
 
         @Override
@@ -656,23 +399,7 @@ public class AmbientContextManagerService extends
             assertCalledByPackageOwner(callingPackage);
             mContext.enforceCallingOrSelfPermission(
                     Manifest.permission.ACCESS_AMBIENT_CONTEXT_EVENT, TAG);
-
-            if (containsMixedEvents(eventTypes)) {
-                Slog.d(TAG, "AmbientContextEventRequest contains mixed events,"
-                        + " this is not supported.");
-                return;
-            }
-
-            AmbientContextManagerPerUserService service =
-                    getAmbientContextManagerPerUserServiceForEventTypes(
-                            UserHandle.getCallingUserId(), intArrayToIntegerSet(eventTypes));
-
-            if (service != null) {
-                service.onStartConsentActivity(eventTypes, callingPackage);
-            } else {
-                Slog.w(TAG, "startConsentActivity unavailable user_id: "
-                        + UserHandle.getCallingUserId());
-            }
+            mService.onStartConsentActivity(eventTypes, callingPackage);
         }
 
         @Override

@@ -55,8 +55,6 @@ class LetterboxConfigurationPersister {
     private final Context mContext;
     private final Supplier<Integer> mDefaultHorizontalReachabilitySupplier;
     private final Supplier<Integer> mDefaultVerticalReachabilitySupplier;
-    private final Supplier<Integer> mDefaultBookModeReachabilitySupplier;
-    private final Supplier<Integer> mDefaultTabletopModeReachabilitySupplier;
 
     // Horizontal position of a center of the letterboxed app window which is global to prevent
     // "jumps" when switching between letterboxed apps. It's updated to reposition the app window
@@ -66,11 +64,6 @@ class LetterboxConfigurationPersister {
     @LetterboxHorizontalReachabilityPosition
     private volatile int mLetterboxPositionForHorizontalReachability;
 
-    // The same as mLetterboxPositionForHorizontalReachability but used when the device is
-    // half-folded.
-    @LetterboxHorizontalReachabilityPosition
-    private volatile int mLetterboxPositionForBookModeReachability;
-
     // Vertical position of a center of the letterboxed app window which is global to prevent
     // "jumps" when switching between letterboxed apps. It's updated to reposition the app window
     // in response to a double tap gesture (see LetterboxUiController#handleDoubleTap). Used in
@@ -78,11 +71,6 @@ class LetterboxConfigurationPersister {
     // ActivityRecord#updateResolvedBoundsPosition.
     @LetterboxVerticalReachabilityPosition
     private volatile int mLetterboxPositionForVerticalReachability;
-
-    // The same as mLetterboxPositionForVerticalReachability but used when the device is
-    // half-folded.
-    @LetterboxVerticalReachabilityPosition
-    private volatile int mLetterboxPositionForTabletopModeReachability;
 
     @NonNull
     private final AtomicFile mConfigurationFile;
@@ -95,13 +83,9 @@ class LetterboxConfigurationPersister {
 
     LetterboxConfigurationPersister(Context systemUiContext,
             Supplier<Integer> defaultHorizontalReachabilitySupplier,
-            Supplier<Integer> defaultVerticalReachabilitySupplier,
-            Supplier<Integer> defaultBookModeReachabilitySupplier,
-            Supplier<Integer> defaultTabletopModeReachabilitySupplier) {
+            Supplier<Integer> defaultVerticalReachabilitySupplier) {
         this(systemUiContext, defaultHorizontalReachabilitySupplier,
                 defaultVerticalReachabilitySupplier,
-                defaultBookModeReachabilitySupplier,
-                defaultTabletopModeReachabilitySupplier,
                 Environment.getDataSystemDirectory(), new PersisterQueue(),
                 /* completionCallback */ null);
     }
@@ -109,18 +93,11 @@ class LetterboxConfigurationPersister {
     @VisibleForTesting
     LetterboxConfigurationPersister(Context systemUiContext,
             Supplier<Integer> defaultHorizontalReachabilitySupplier,
-            Supplier<Integer> defaultVerticalReachabilitySupplier,
-            Supplier<Integer> defaultBookModeReachabilitySupplier,
-            Supplier<Integer> defaultTabletopModeReachabilitySupplier,
-            File configFolder,
+            Supplier<Integer> defaultVerticalReachabilitySupplier, File configFolder,
             PersisterQueue persisterQueue, @Nullable Consumer<String> completionCallback) {
         mContext = systemUiContext.createDeviceProtectedStorageContext();
         mDefaultHorizontalReachabilitySupplier = defaultHorizontalReachabilitySupplier;
         mDefaultVerticalReachabilitySupplier = defaultVerticalReachabilitySupplier;
-        mDefaultBookModeReachabilitySupplier =
-                defaultBookModeReachabilitySupplier;
-        mDefaultTabletopModeReachabilitySupplier =
-                defaultTabletopModeReachabilitySupplier;
         mCompletionCallback = completionCallback;
         final File prefFiles = new File(configFolder, LETTERBOX_CONFIGURATION_FILENAME);
         mConfigurationFile = new AtomicFile(prefFiles);
@@ -140,12 +117,8 @@ class LetterboxConfigurationPersister {
      * enabled.
      */
     @LetterboxHorizontalReachabilityPosition
-    int getLetterboxPositionForHorizontalReachability(boolean forBookMode) {
-        if (forBookMode) {
-            return mLetterboxPositionForBookModeReachability;
-        } else {
-            return mLetterboxPositionForHorizontalReachability;
-        }
+    int getLetterboxPositionForHorizontalReachability() {
+        return mLetterboxPositionForHorizontalReachability;
     }
 
     /*
@@ -153,55 +126,31 @@ class LetterboxConfigurationPersister {
      * enabled.
      */
     @LetterboxVerticalReachabilityPosition
-    int getLetterboxPositionForVerticalReachability(boolean forTabletopMode) {
-        if (forTabletopMode) {
-            return mLetterboxPositionForTabletopModeReachability;
-        } else {
-            return mLetterboxPositionForVerticalReachability;
-        }
+    int getLetterboxPositionForVerticalReachability() {
+        return mLetterboxPositionForVerticalReachability;
     }
 
     /**
      * Updates letterboxPositionForVerticalReachability if different from the current value
      */
-    void setLetterboxPositionForHorizontalReachability(boolean forBookMode,
+    void setLetterboxPositionForHorizontalReachability(
             int letterboxPositionForHorizontalReachability) {
-        if (forBookMode) {
-            if (mLetterboxPositionForBookModeReachability
-                    != letterboxPositionForHorizontalReachability) {
-                mLetterboxPositionForBookModeReachability =
-                        letterboxPositionForHorizontalReachability;
-                updateConfiguration();
-            }
-        } else {
-            if (mLetterboxPositionForHorizontalReachability
-                    != letterboxPositionForHorizontalReachability) {
-                mLetterboxPositionForHorizontalReachability =
-                        letterboxPositionForHorizontalReachability;
-                updateConfiguration();
-            }
+        if (mLetterboxPositionForHorizontalReachability
+                != letterboxPositionForHorizontalReachability) {
+            mLetterboxPositionForHorizontalReachability =
+                    letterboxPositionForHorizontalReachability;
+            updateConfiguration();
         }
     }
 
     /**
      * Updates letterboxPositionForVerticalReachability if different from the current value
      */
-    void setLetterboxPositionForVerticalReachability(boolean forTabletopMode,
+    void setLetterboxPositionForVerticalReachability(
             int letterboxPositionForVerticalReachability) {
-        if (forTabletopMode) {
-            if (mLetterboxPositionForTabletopModeReachability
-                    != letterboxPositionForVerticalReachability) {
-                mLetterboxPositionForTabletopModeReachability =
-                        letterboxPositionForVerticalReachability;
-                updateConfiguration();
-            }
-        } else {
-            if (mLetterboxPositionForVerticalReachability
-                    != letterboxPositionForVerticalReachability) {
-                mLetterboxPositionForVerticalReachability =
-                        letterboxPositionForVerticalReachability;
-                updateConfiguration();
-            }
+        if (mLetterboxPositionForVerticalReachability != letterboxPositionForVerticalReachability) {
+            mLetterboxPositionForVerticalReachability = letterboxPositionForVerticalReachability;
+            updateConfiguration();
         }
     }
 
@@ -209,10 +158,6 @@ class LetterboxConfigurationPersister {
     void useDefaultValue() {
         mLetterboxPositionForHorizontalReachability = mDefaultHorizontalReachabilitySupplier.get();
         mLetterboxPositionForVerticalReachability = mDefaultVerticalReachabilitySupplier.get();
-        mLetterboxPositionForBookModeReachability =
-                mDefaultBookModeReachabilitySupplier.get();
-        mLetterboxPositionForTabletopModeReachability =
-                mDefaultTabletopModeReachabilitySupplier.get();
     }
 
     private void readCurrentConfiguration() {
@@ -226,10 +171,6 @@ class LetterboxConfigurationPersister {
                     letterboxData.letterboxPositionForHorizontalReachability;
             mLetterboxPositionForVerticalReachability =
                     letterboxData.letterboxPositionForVerticalReachability;
-            mLetterboxPositionForBookModeReachability =
-                    letterboxData.letterboxPositionForBookModeReachability;
-            mLetterboxPositionForTabletopModeReachability =
-                    letterboxData.letterboxPositionForTabletopModeReachability;
         } catch (IOException ioe) {
             Slog.e(TAG,
                     "Error reading from LetterboxConfigurationPersister. "
@@ -251,8 +192,6 @@ class LetterboxConfigurationPersister {
         mPersisterQueue.addItem(new UpdateValuesCommand(mConfigurationFile,
                 mLetterboxPositionForHorizontalReachability,
                 mLetterboxPositionForVerticalReachability,
-                mLetterboxPositionForBookModeReachability,
-                mLetterboxPositionForTabletopModeReachability,
                 mCompletionCallback), /* flush */ true);
     }
 
@@ -282,18 +221,13 @@ class LetterboxConfigurationPersister {
 
         private final int mHorizontalReachability;
         private final int mVerticalReachability;
-        private final int mBookModeReachability;
-        private final int mTabletopModeReachability;
 
         UpdateValuesCommand(@NonNull AtomicFile fileToUpdate,
                 int horizontalReachability, int verticalReachability,
-                int bookModeReachability, int tabletopModeReachability,
                 @Nullable Consumer<String> onComplete) {
             mFileToUpdate = fileToUpdate;
             mHorizontalReachability = horizontalReachability;
             mVerticalReachability = verticalReachability;
-            mBookModeReachability = bookModeReachability;
-            mTabletopModeReachability = tabletopModeReachability;
             mOnComplete = onComplete;
         }
 
@@ -303,10 +237,6 @@ class LetterboxConfigurationPersister {
                     new WindowManagerProtos.LetterboxProto();
             letterboxData.letterboxPositionForHorizontalReachability = mHorizontalReachability;
             letterboxData.letterboxPositionForVerticalReachability = mVerticalReachability;
-            letterboxData.letterboxPositionForBookModeReachability =
-                    mBookModeReachability;
-            letterboxData.letterboxPositionForTabletopModeReachability =
-                    mTabletopModeReachability;
             final byte[] bytes = WindowManagerProtos.LetterboxProto.toByteArray(letterboxData);
 
             FileOutputStream fos = null;

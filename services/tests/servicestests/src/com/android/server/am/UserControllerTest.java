@@ -243,10 +243,11 @@ public class UserControllerTest {
     }
 
     @Test
-    public void testStartUserVisibleOnDisplay() {
-        boolean started = mUserController.startUserVisibleOnDisplay(TEST_USER_ID, 42);
+    public void testStartUserOnSecondaryDisplay() {
+        boolean started = mUserController.startUserOnSecondaryDisplay(TEST_USER_ID, 42);
 
-        assertWithMessage("startUserOnDisplay(%s, %s)", TEST_USER_ID, 42).that(started).isTrue();
+        assertWithMessage("startUserOnSecondaryDisplay(%s, %s)", TEST_USER_ID, 42).that(started)
+                .isTrue();
         verifyUserAssignedToDisplay(TEST_USER_ID, 42);
 
         verify(mInjector.getWindowManager(), never()).startFreezingScreen(anyInt(), anyInt());

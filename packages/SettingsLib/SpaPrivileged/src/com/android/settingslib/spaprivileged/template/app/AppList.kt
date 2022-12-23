@@ -60,7 +60,6 @@ data class AppListInput<T : AppRecord>(
     val listModel: AppListModel<T>,
     val state: AppListState,
     val header: @Composable () -> Unit,
-    val noItemMessage: String? = null,
     val bottomPadding: Dp,
 )
 
@@ -80,7 +79,7 @@ internal fun <T : AppRecord> AppListInput<T>.AppListImpl(
 ) {
     LogCompositions(TAG, config.userId.toString())
     val appListData = appListDataSupplier()
-    listModel.AppListWidget(appListData, header, bottomPadding, noItemMessage)
+    listModel.AppListWidget(appListData, header, bottomPadding)
 }
 
 @Composable
@@ -88,14 +87,12 @@ private fun <T : AppRecord> AppListModel<T>.AppListWidget(
     appListData: State<AppListData<T>?>,
     header: @Composable () -> Unit,
     bottomPadding: Dp,
-    noItemMessage: String?
 ) {
     val timeMeasurer = rememberTimeMeasurer(TAG)
     appListData.value?.let { (list, option) ->
         timeMeasurer.logFirst("app list first loaded")
         if (list.isEmpty()) {
-            header()
-            PlaceholderTitle(noItemMessage ?: stringResource(R.string.no_applications))
+            PlaceholderTitle(stringResource(R.string.no_applications))
             return
         }
         LazyColumn(

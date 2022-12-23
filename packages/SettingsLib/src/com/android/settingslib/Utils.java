@@ -653,9 +653,6 @@ public class Utils {
         }
         for (UsbPort usbPort : usbPortList) {
             Log.d(tag, "usbPort: " + usbPort);
-            if (!usbPort.supportsComplianceWarnings()) {
-                continue;
-            }
             final UsbPortStatus usbStatus = usbPort.getStatus();
             if (usbStatus == null || !usbStatus.isConnected()) {
                 continue;

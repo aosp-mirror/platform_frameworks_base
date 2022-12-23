@@ -169,9 +169,11 @@ class RippleShader(rippleShape: RippleShape = RippleShape.CIRCLE) :
             setFloatUniform("in_progress", value)
             val curvedProg = 1 - (1 - value) * (1 - value) * (1 - value)
 
-            currentWidth = maxSize.x * curvedProg
-            currentHeight = maxSize.y * curvedProg
-            setFloatUniform("in_size", /* width= */ currentWidth, /* height= */ currentHeight)
+            setFloatUniform(
+                "in_size",
+                /* width= */ maxSize.x * curvedProg,
+                /* height= */ maxSize.y * curvedProg
+            )
             setFloatUniform("in_thickness", maxSize.y * curvedProg * 0.5f)
             // radius should not exceed width and height values.
             setFloatUniform("in_cornerRadius", Math.min(maxSize.x, maxSize.y) * curvedProg)
@@ -235,10 +237,4 @@ class RippleShader(rippleShape: RippleShape = RippleShape.CIRCLE) :
      * False for a ring effect.
      */
     var rippleFill: Boolean = false
-
-    var currentWidth: Float = 0f
-        private set
-
-    var currentHeight: Float = 0f
-        private set
 }

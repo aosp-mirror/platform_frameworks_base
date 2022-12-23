@@ -197,7 +197,6 @@ import android.app.IStopUserCallback;
 import android.app.ITaskStackListener;
 import android.app.IUiAutomationConnection;
 import android.app.IUidObserver;
-import android.app.IUnsafeIntentStrictModeCallback;
 import android.app.IUserSwitchObserver;
 import android.app.Instrumentation;
 import android.app.Notification;
@@ -695,10 +694,6 @@ public class ActivityManagerService extends IActivityManager.Stub
     static final int BROADCAST_QUEUE_BG = 1;
     static final int BROADCAST_QUEUE_BG_OFFLOAD = 2;
     static final int BROADCAST_QUEUE_FG_OFFLOAD = 3;
-
-    @GuardedBy("this")
-    private final SparseArray<IUnsafeIntentStrictModeCallback>
-            mStrictModeCallbacks = new SparseArray<>();
 
     // Convenient for easy iteration over the queues. Foreground is first
     // so that dispatch of foreground broadcasts gets precedence.
@@ -8801,27 +8796,6 @@ public class ActivityManagerService extends IActivityManager.Stub
         }
     }
 
-    /**
-     * Register a callback to raise strict mode violations.
-     * @param callback The binder used to communicate the violations.
-     */
-    @Override
-    public void registerStrictModeCallback(IBinder callback) {
-        int callingPid = Binder.getCallingPid();
-        mStrictModeCallbacks.put(callingPid,
-                IUnsafeIntentStrictModeCallback.Stub.asInterface(callback));
-        try {
-            callback.linkToDeath(new DeathRecipient() {
-                @Override
-                public void binderDied() {
-                    mStrictModeCallbacks.remove(callingPid);
-                }
-            }, 0);
-        } catch (RemoteException e) {
-            mStrictModeCallbacks.remove(callingPid);
-        }
-    }
-
     // Depending on the policy in effect, there could be a bunch of
     // these in quick succession so we try to batch these together to
     // minimize disk writes, number of dropbox entries, and maximize
@@ -12683,7 +12657,7 @@ public class ActivityManagerService extends IActivityManager.Stub
      * @param query the list of broadcast filters
      * @param platformCompat the instance of platform compat
      */
-    private void filterNonExportedComponents(Intent intent, int callingUid, int callingPid,
+    private static void filterNonExportedComponents(Intent intent, int callingUid,
             List query, PlatformCompat platformCompat, String callerPackage, String resolvedType) {
         if (query == null
                 || intent.getPackage() != null
@@ -12691,7 +12665,6 @@ public class ActivityManagerService extends IActivityManager.Stub
                 || ActivityManager.canAccessUnexportedComponents(callingUid)) {
             return;
         }
-        IUnsafeIntentStrictModeCallback callback = mStrictModeCallbacks.get(callingPid);
         for (int i = query.size() - 1; i >= 0; i--) {
             String componentInfo;
             ResolveInfo resolveInfo;
@@ -12711,15 +12684,6 @@ public class ActivityManagerService extends IActivityManager.Stub
                 componentInfo = broadcastFilter.packageName;
             } else {
                 continue;
-            }
-            if (callback != null) {
-                mHandler.post(() -> {
-                    try {
-                        callback.onImplicitIntentMatchedInternalComponent(intent.cloneFilter());
-                    } catch (RemoteException e) {
-                        mStrictModeCallbacks.remove(callingPid);
-                    }
-                });
             }
             boolean hasToBeExportedToMatch = platformCompat.isChangeEnabledByUid(
                     ActivityManagerService.IMPLICIT_INTENTS_ONLY_MATCH_EXPORTED_COMPONENTS,
@@ -14652,7 +14616,7 @@ public class ActivityManagerService extends IActivityManager.Stub
             }
         }
 
-        filterNonExportedComponents(intent, callingUid, callingPid, registeredReceivers,
+        filterNonExportedComponents(intent, callingUid, registeredReceivers,
                 mPlatformCompat, callerPackage, resolvedType);
         int NR = registeredReceivers != null ? registeredReceivers.size() : 0;
         if (!ordered && NR > 0 && !mEnableModernQueue) {
@@ -14758,7 +14722,7 @@ public class ActivityManagerService extends IActivityManager.Stub
         if ((receivers != null && receivers.size() > 0)
                 || resultTo != null) {
             BroadcastQueue queue = broadcastQueueForIntent(intent);
-            filterNonExportedComponents(intent, callingUid, callingPid, receivers,
+            filterNonExportedComponents(intent, callingUid, receivers,
                     mPlatformCompat, callerPackage, resolvedType);
             BroadcastRecord r = new BroadcastRecord(queue, intent, callerApp, callerPackage,
                     callerFeatureId, callingPid, callingUid, callerInstantApp, resolvedType,
@@ -16610,8 +16574,8 @@ public class ActivityManagerService extends IActivityManager.Stub
     }
 
     @Override
-    public boolean startUserInBackgroundVisibleOnDisplay(int userId, int displayId) {
-        int[] displayIds = getDisplayIdsForStartingVisibleBackgroundUsers();
+    public boolean startUserInBackgroundOnSecondaryDisplay(int userId, int displayId) {
+        int[] displayIds = getSecondaryDisplayIdsForStartingBackgroundUsers();
         boolean validDisplay = false;
         if (displayIds != null) {
             for (int i = 0; i < displayIds.length; i++) {
@@ -16631,14 +16595,14 @@ public class ActivityManagerService extends IActivityManager.Stub
                     displayId, mInjector);
         }
         // Permission check done inside UserController.
-        return mInjector.startUserInBackgroundVisibleOnDisplay(userId, displayId);
+        return mInjector.startUserOnSecondaryDisplay(userId, displayId);
     }
 
     @Override
-    public int[] getDisplayIdsForStartingVisibleBackgroundUsers() {
-        enforceCallingHasAtLeastOnePermission("getDisplayIdsForStartingVisibleBackgroundUsers()",
+    public int[] getSecondaryDisplayIdsForStartingBackgroundUsers() {
+        enforceCallingHasAtLeastOnePermission("getSecondaryDisplayIdsForStartingBackgroundUsers()",
                 MANAGE_USERS, INTERACT_ACROSS_USERS);
-        return mInjector.getDisplayIdsForStartingVisibleBackgroundUsers();
+        return mInjector.getSecondaryDisplayIdsForStartingBackgroundUsers();
     }
 
     /** @deprecated see the AIDL documentation {@inheritDoc} */
@@ -18231,16 +18195,6 @@ public class ActivityManagerService extends IActivityManager.Stub
                 return mServices.getClientPackagesLocked(servicePackageName);
             }
         }
-
-        @Override
-        public IUnsafeIntentStrictModeCallback getRegisteredStrictModeCallback(int callingPid) {
-            return mStrictModeCallbacks.get(callingPid);
-        }
-
-        @Override
-        public void unregisterStrictModeCallback(int callingPid) {
-            mStrictModeCallbacks.remove(callingPid);
-        }
     }
 
     long inputDispatchingTimedOut(int pid, final boolean aboveSystem, TimeoutRecord timeoutRecord) {
@@ -18837,7 +18791,7 @@ public class ActivityManagerService extends IActivityManager.Stub
         }
 
         /**
-         * Called by {@code AMS.getDisplayIdsForStartingVisibleBackgroundUsers()}.
+         * Called by {@code AMS.getSecondaryDisplayIdsForStartingBackgroundUsers()}.
          */
         // NOTE: ideally Injector should have no complex logic, but if this logic was moved to AMS,
         // it could not be tested with the existing ActivityManagerServiceTest (as DisplayManager,
@@ -18847,9 +18801,9 @@ public class ActivityManagerService extends IActivityManager.Stub
         // was added on FrameworksMockingServicesTests and hence uses Extended Mockito to mock
         // final and static stuff)
         @Nullable
-        public int[] getDisplayIdsForStartingVisibleBackgroundUsers() {
-            if (!UserManager.isVisibleBackgroundUsersEnabled()) {
-                Slogf.w(TAG, "getDisplayIdsForStartingVisibleBackgroundUsers(): not supported");
+        public int[] getSecondaryDisplayIdsForStartingBackgroundUsers() {
+            if (!UserManager.isUsersOnSecondaryDisplaysEnabled()) {
+                Slogf.w(TAG, "getSecondaryDisplayIdsForStartingBackgroundUsers(): not supported");
                 return null;
             }
 
@@ -18895,7 +18849,7 @@ public class ActivityManagerService extends IActivityManager.Stub
                 // KitchenSink (or other app) can be used while running CTS tests on devices that
                 // don't have a real display.
                 // STOPSHIP: if not removed, it should at least be unit tested
-                String testingProp = "fw.display_ids_for_starting_users_for_testing_purposes";
+                String testingProp = "fw.secondary_display_for_starting_users_for_testing_purposes";
                 int displayId = SystemProperties.getInt(testingProp, Display.DEFAULT_DISPLAY);
                 if (displayId != Display.DEFAULT_DISPLAY && displayId > 0) {
                     Slogf.w(TAG, "getSecondaryDisplayIdsForStartingBackgroundUsers(): no valid "
@@ -18903,8 +18857,8 @@ public class ActivityManagerService extends IActivityManager.Stub
                             testingProp);
                     return new int[] { displayId };
                 }
-                Slogf.e(TAG, "getDisplayIdsForStartingBackgroundUsers(): no valid display on %s",
-                        Arrays.toString(allDisplays));
+                Slogf.e(TAG, "getSecondaryDisplayIdsForStartingBackgroundUsers(): no valid display"
+                        + " on %s", Arrays.toString(allDisplays));
                 return null;
             }
 
@@ -18912,7 +18866,7 @@ public class ActivityManagerService extends IActivityManager.Stub
                 int[] validDisplayIds = new int[numberValidDisplays];
                 System.arraycopy(displayIds, 0, validDisplayIds, 0, numberValidDisplays);
                 if (DEBUG_MU) {
-                    Slogf.d(TAG, "getDisplayIdsForStartingVisibleBackgroundUsers(): returning "
+                    Slogf.d(TAG, "getSecondaryDisplayIdsForStartingBackgroundUsers(): returning "
                             + "only valid displays (%d instead of %d): %s", numberValidDisplays,
                             displayIds.length, Arrays.toString(validDisplayIds));
                 }
@@ -18920,17 +18874,17 @@ public class ActivityManagerService extends IActivityManager.Stub
             }
 
             if (DEBUG_MU) {
-                Slogf.d(TAG, "getDisplayIdsForStartingVisibleBackgroundUsers(): returning all (but "
-                        + "DEFAULT_DISPLAY) displays : %s", Arrays.toString(displayIds));
+                Slogf.d(TAG, "getSecondaryDisplayIdsForStartingBackgroundUsers(): returning all "
+                        + "(but DEFAULT_DISPLAY) displays : %s", Arrays.toString(displayIds));
             }
             return displayIds;
         }
 
         /**
-         * Called by {@code AMS.startUserInBackgroundVisibleOnDisplay()}.
+         * Called by {@code AMS.startUserOnSecondaryDisplay()}.
          */
-        public boolean startUserInBackgroundVisibleOnDisplay(int userId, int displayId) {
-            return mUserController.startUserVisibleOnDisplay(userId, displayId);
+        public boolean startUserOnSecondaryDisplay(int userId, int displayId) {
+            return mUserController.startUserOnSecondaryDisplay(userId, displayId);
         }
 
         /**

@@ -331,7 +331,7 @@ abstract class TemporaryViewDisplayController<T : TemporaryViewInfo, U : Tempora
             return
         }
 
-        removeViewFromWindow(displayInfo, removalReason)
+        removeViewFromWindow(displayInfo)
 
         // Prune anything that's already timed out before determining if we should re-display a
         // different chipbar.
@@ -358,14 +358,14 @@ abstract class TemporaryViewDisplayController<T : TemporaryViewInfo, U : Tempora
         removeViewFromWindow(displayInfo)
     }
 
-    private fun removeViewFromWindow(displayInfo: DisplayInfo, removalReason: String? = null) {
+    private fun removeViewFromWindow(displayInfo: DisplayInfo) {
         val view = displayInfo.view
         if (view == null) {
             logger.logViewRemovalIgnored(displayInfo.info.id, "View is null")
             return
         }
         displayInfo.view = null // Need other places??
-        animateViewOut(view, removalReason) {
+        animateViewOut(view) {
             windowManager.removeView(view)
             displayInfo.wakeLock?.release(displayInfo.info.wakeReason)
         }
@@ -428,11 +428,7 @@ abstract class TemporaryViewDisplayController<T : TemporaryViewInfo, U : Tempora
      *
      * @param onAnimationEnd an action that *must* be run once the animation finishes successfully.
      */
-    internal open fun animateViewOut(
-        view: ViewGroup,
-        removalReason: String? = null,
-        onAnimationEnd: Runnable
-    ) {
+    internal open fun animateViewOut(view: ViewGroup, onAnimationEnd: Runnable) {
         onAnimationEnd.run()
     }
 

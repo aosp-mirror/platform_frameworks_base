@@ -46,86 +46,83 @@ data class Permission(
         @Suppress("DEPRECATION")
         get() = permissionInfo.protectionLevel
 
-    inline val protection: Int
-        get() = permissionInfo.protection
-
     inline val isInternal: Boolean
-        get() = protection == PermissionInfo.PROTECTION_INTERNAL
+        get() = permissionInfo.protection == PermissionInfo.PROTECTION_INTERNAL
 
     inline val isNormal: Boolean
-        get() = protection == PermissionInfo.PROTECTION_NORMAL
+        get() = permissionInfo.protection == PermissionInfo.PROTECTION_NORMAL
 
     inline val isRuntime: Boolean
-        get() = protection == PermissionInfo.PROTECTION_DANGEROUS
+        get() = permissionInfo.protection == PermissionInfo.PROTECTION_DANGEROUS
 
     inline val isSignature: Boolean
-        get() = protection == PermissionInfo.PROTECTION_SIGNATURE
-
-    inline val protectionFlags: Int
-        get() = permissionInfo.protectionFlags
+        get() = permissionInfo.protection == PermissionInfo.PROTECTION_SIGNATURE
 
     inline val isAppOp: Boolean
-        get() = protectionFlags.hasBits(PermissionInfo.PROTECTION_FLAG_APPOP)
+        get() = permissionInfo.protectionFlags.hasBits(PermissionInfo.PROTECTION_FLAG_APPOP)
 
     inline val isAppPredictor: Boolean
-        get() = protectionFlags.hasBits(PermissionInfo.PROTECTION_FLAG_APP_PREDICTOR)
+        get() = permissionInfo.protectionFlags.hasBits(PermissionInfo.PROTECTION_FLAG_APP_PREDICTOR)
 
     inline val isCompanion: Boolean
-        get() = protectionFlags.hasBits(PermissionInfo.PROTECTION_FLAG_COMPANION)
+        get() = permissionInfo.protectionFlags.hasBits(PermissionInfo.PROTECTION_FLAG_COMPANION)
 
     inline val isConfigurator: Boolean
-        get() = protectionFlags.hasBits(PermissionInfo.PROTECTION_FLAG_CONFIGURATOR)
+        get() = permissionInfo.protectionFlags.hasBits(PermissionInfo.PROTECTION_FLAG_CONFIGURATOR)
 
     inline val isDevelopment: Boolean
-        get() = protectionFlags.hasBits(PermissionInfo.PROTECTION_FLAG_DEVELOPMENT)
+        get() = permissionInfo.protectionFlags.hasBits(PermissionInfo.PROTECTION_FLAG_DEVELOPMENT)
 
     inline val isIncidentReportApprover: Boolean
-        get() = protectionFlags.hasBits(PermissionInfo.PROTECTION_FLAG_INCIDENT_REPORT_APPROVER)
+        get() = permissionInfo.protectionFlags
+            .hasBits(PermissionInfo.PROTECTION_FLAG_INCIDENT_REPORT_APPROVER)
 
     inline val isInstaller: Boolean
-        get() = protectionFlags.hasBits(PermissionInfo.PROTECTION_FLAG_INSTALLER)
+        get() = permissionInfo.protectionFlags.hasBits(PermissionInfo.PROTECTION_FLAG_INSTALLER)
 
     inline val isInstant: Boolean
-        get() = protectionFlags.hasBits(PermissionInfo.PROTECTION_FLAG_INSTANT)
+        get() = permissionInfo.protectionFlags.hasBits(PermissionInfo.PROTECTION_FLAG_INSTANT)
 
     inline val isKnownSigner: Boolean
-        get() = protectionFlags.hasBits(PermissionInfo.PROTECTION_FLAG_KNOWN_SIGNER)
+        get() = permissionInfo.protectionFlags.hasBits(PermissionInfo.PROTECTION_FLAG_KNOWN_SIGNER)
 
     inline val isOem: Boolean
-        get() = protectionFlags.hasBits(PermissionInfo.PROTECTION_FLAG_OEM)
+        get() = permissionInfo.protectionFlags.hasBits(PermissionInfo.PROTECTION_FLAG_OEM)
 
     inline val isPre23: Boolean
-        get() = protectionFlags.hasBits(PermissionInfo.PROTECTION_FLAG_PRE23)
+        get() = permissionInfo.protectionFlags.hasBits(PermissionInfo.PROTECTION_FLAG_PRE23)
 
     inline val isPreInstalled: Boolean
-        get() = protectionFlags.hasBits(PermissionInfo.PROTECTION_FLAG_PREINSTALLED)
+        get() = permissionInfo.protectionFlags.hasBits(PermissionInfo.PROTECTION_FLAG_PREINSTALLED)
 
     inline val isPrivileged: Boolean
-        get() = protectionFlags.hasBits(PermissionInfo.PROTECTION_FLAG_PRIVILEGED)
+        get() = permissionInfo.protectionFlags.hasBits(PermissionInfo.PROTECTION_FLAG_PRIVILEGED)
 
     inline val isRecents: Boolean
-        get() = protectionFlags.hasBits(PermissionInfo.PROTECTION_FLAG_RECENTS)
+        get() = permissionInfo.protectionFlags.hasBits(PermissionInfo.PROTECTION_FLAG_RECENTS)
 
     inline val isRetailDemo: Boolean
-        get() = protectionFlags.hasBits(PermissionInfo.PROTECTION_FLAG_RETAIL_DEMO)
+        get() = permissionInfo.protectionFlags.hasBits(PermissionInfo.PROTECTION_FLAG_RETAIL_DEMO)
 
     inline val isRole: Boolean
-        get() = protectionFlags.hasBits(PermissionInfo.PROTECTION_FLAG_ROLE)
+        get() = permissionInfo.protectionFlags.hasBits(PermissionInfo.PROTECTION_FLAG_ROLE)
 
     inline val isRuntimeOnly: Boolean
-        get() = protectionFlags.hasBits(PermissionInfo.PROTECTION_FLAG_RUNTIME_ONLY)
+        get() = permissionInfo.protectionFlags.hasBits(PermissionInfo.PROTECTION_FLAG_RUNTIME_ONLY)
 
     inline val isSetup: Boolean
-        get() = protectionFlags.hasBits(PermissionInfo.PROTECTION_FLAG_SETUP)
+        get() = permissionInfo.protectionFlags.hasBits(PermissionInfo.PROTECTION_FLAG_SETUP)
 
     inline val isSystemTextClassifier: Boolean
-        get() = protectionFlags.hasBits(PermissionInfo.PROTECTION_FLAG_SYSTEM_TEXT_CLASSIFIER)
+        get() = permissionInfo.protectionFlags
+            .hasBits(PermissionInfo.PROTECTION_FLAG_SYSTEM_TEXT_CLASSIFIER)
 
     inline val isVendorPrivileged: Boolean
-        get() = protectionFlags.hasBits(PermissionInfo.PROTECTION_FLAG_VENDOR_PRIVILEGED)
+        get() = permissionInfo.protectionFlags
+            .hasBits(PermissionInfo.PROTECTION_FLAG_VENDOR_PRIVILEGED)
 
     inline val isVerifier: Boolean
-        get() = protectionFlags.hasBits(PermissionInfo.PROTECTION_FLAG_VERIFIER)
+        get() = permissionInfo.protectionFlags.hasBits(PermissionInfo.PROTECTION_FLAG_VERIFIER)
 
     inline val isHardRestricted: Boolean
         get() = permissionInfo.flags.hasBits(PermissionInfo.FLAG_HARD_RESTRICTED)
@@ -136,22 +133,11 @@ data class Permission(
     inline val isSoftRestricted: Boolean
         get() = permissionInfo.flags.hasBits(PermissionInfo.FLAG_SOFT_RESTRICTED)
 
-    inline val isHardOrSoftRestricted: Boolean
-        get() = permissionInfo.flags.hasBits(
-            PermissionInfo.FLAG_HARD_RESTRICTED or PermissionInfo.FLAG_SOFT_RESTRICTED
-        )
-
-    inline val isImmutablyRestricted: Boolean
-        get() = permissionInfo.flags.hasBits(PermissionInfo.FLAG_IMMUTABLY_RESTRICTED)
-
     inline val knownCerts: Set<String>
         get() = permissionInfo.knownCerts
 
     inline val hasGids: Boolean
         get() = gids.isNotEmpty()
-
-    inline val footprint: Int
-        get() = name.length + permissionInfo.calculateFootprint()
 
     fun getGidsForUser(userId: Int): IntArray =
         if (areGidsPerUser) {

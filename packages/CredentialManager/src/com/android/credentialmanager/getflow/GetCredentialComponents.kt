@@ -62,7 +62,7 @@ import com.android.credentialmanager.R
 import com.android.credentialmanager.common.material.ModalBottomSheetLayout
 import com.android.credentialmanager.common.material.ModalBottomSheetValue
 import com.android.credentialmanager.common.material.rememberModalBottomSheetState
-import com.android.credentialmanager.common.ui.ActionButton
+import com.android.credentialmanager.common.ui.CancelButton
 import com.android.credentialmanager.common.ui.Entry
 import com.android.credentialmanager.common.ui.TextOnSurface
 import com.android.credentialmanager.common.ui.TextSecondary
@@ -96,6 +96,7 @@ fun GetCredentialScreen(
                             requestDisplayInfo = uiState.requestDisplayInfo,
                             providerDisplayInfo = uiState.providerDisplayInfo,
                             onEntrySelected = viewModel::onEntrySelected,
+                            onCancel = viewModel::onCancel,
                             onMoreOptionSelected = viewModel::onMoreOptionSelected,
                         )
                     } else {
@@ -134,6 +135,7 @@ fun PrimarySelectionCard(
     requestDisplayInfo: RequestDisplayInfo,
     providerDisplayInfo: ProviderDisplayInfo,
     onEntrySelected: (EntryInfo) -> Unit,
+    onCancel: () -> Unit,
     onMoreOptionSelected: () -> Unit,
 ) {
     val sortedUserNameToCredentialEntryList =
@@ -179,6 +181,9 @@ fun PrimarySelectionCard(
                             onEntrySelected = onEntrySelected,
                         )
                     }
+                    item {
+                        SignInAnotherWayRow(onSelect = onMoreOptionSelected)
+                    }
                 }
             }
             Divider(
@@ -189,9 +194,7 @@ fun PrimarySelectionCard(
                 horizontalArrangement = Arrangement.SpaceBetween,
                 modifier = Modifier.fillMaxWidth().padding(horizontal = 24.dp)
             ) {
-                ActionButton(
-                    stringResource(R.string.get_dialog_use_saved_passkey_for),
-                    onMoreOptionSelected)
+                CancelButton(stringResource(R.string.get_dialog_button_label_no_thanks), onCancel)
             }
             Divider(
                 thickness = 18.dp,
@@ -422,22 +425,13 @@ fun CredentialEntryRow(
     Entry(
         onClick = { onEntrySelected(credentialEntryInfo) },
         icon = {
-            if (credentialEntryInfo.icon != null) {
-                Image(
-                    modifier = Modifier.padding(start = 10.dp).size(32.dp),
-                    bitmap = credentialEntryInfo.icon.toBitmap().asImageBitmap(),
-                    // TODO: add description.
-                    contentDescription = "",
-                )
-            } else {
-                Icon(
-                    modifier = Modifier.padding(start = 10.dp).size(32.dp),
-                    painter = painterResource(R.drawable.ic_other_sign_in),
-                    // TODO: add description.
-                    contentDescription = "",
-                    tint = LocalAndroidColorScheme.current.colorAccentPrimaryVariant
-                )
-            }
+            Icon(
+                modifier = Modifier.padding(start = 10.dp).size(32.dp),
+                bitmap = credentialEntryInfo.icon.toBitmap().asImageBitmap(),
+                // TODO: add description.
+                contentDescription = "",
+                tint = LocalAndroidColorScheme.current.colorAccentPrimaryVariant,
+            )
         },
         label = {
             Column() {
@@ -550,35 +544,49 @@ fun ActionEntryRow(
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
+fun SignInAnotherWayRow(onSelect: () -> Unit) {
+    Entry(
+        onClick = onSelect,
+        label = {
+            TextOnSurfaceVariant(
+                text = stringResource(R.string.get_dialog_use_saved_passkey_for),
+                style = MaterialTheme.typography.titleLarge,
+                modifier = Modifier.padding(vertical = 16.dp)
+            )
+        }
+    )
+}
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
 fun SnackBarScreen(
     onClick: (Boolean) -> Unit,
     onCancel: () -> Unit,
 ) {
     // TODO: Change the height, width and position according to the design
-    Snackbar(
-        modifier = Modifier.padding(horizontal = 40.dp).padding(top = 700.dp),
+    Snackbar (
+        modifier = Modifier.padding(horizontal = 80.dp).padding(top = 700.dp),
         shape = EntryShape.FullMediumRoundedCorner,
         containerColor = LocalAndroidColorScheme.current.colorBackground,
         contentColor = LocalAndroidColorScheme.current.colorAccentPrimaryVariant,
-        action = {
+    ) {
+        Row(
+            horizontalArrangement = Arrangement.SpaceBetween,
+            verticalAlignment = Alignment.CenterVertically,
+        ) {
             TextButton(
-                onClick = { onClick(true) },
+                onClick = {onClick(true)},
             ) {
-                Text(text = stringResource(R.string.snackbar_action))
+                Text(text = stringResource(R.string.get_dialog_use_saved_passkey_for))
             }
-        },
-        dismissAction = {
             IconButton(onClick = onCancel) {
                 Icon(
                     Icons.Filled.Close,
                     contentDescription = stringResource(
                         R.string.accessibility_close_button
-                    ),
-                    tint = LocalAndroidColorScheme.current.colorAccentTertiary
+                    )
                 )
             }
-        },
-    ) {
-        Text(text = stringResource(R.string.get_dialog_use_saved_passkey_for))
+        }
     }
 }

@@ -17,6 +17,7 @@
 package com.android.systemui.statusbar.pipeline.mobile.data.model
 
 import android.annotation.IntRange
+import android.telephony.Annotation.DataActivityType
 import android.telephony.CellSignalStrength
 import android.telephony.TelephonyCallback.CarrierNetworkListener
 import android.telephony.TelephonyCallback.DataActivityListener
@@ -27,7 +28,6 @@ import android.telephony.TelephonyCallback.SignalStrengthsListener
 import android.telephony.TelephonyDisplayInfo
 import android.telephony.TelephonyManager
 import com.android.systemui.statusbar.pipeline.mobile.data.model.DataConnectionState.Disconnected
-import com.android.systemui.statusbar.pipeline.shared.data.model.DataActivityModel
 
 /**
  * Data class containing all of the relevant information for a particular line of service, known as
@@ -39,42 +39,29 @@ import com.android.systemui.statusbar.pipeline.shared.data.model.DataActivityMod
  * threading complex system objects through the pipeline.
  */
 data class MobileConnectionModel(
-    /** Fields below are from [ServiceStateListener.onServiceStateChanged] */
+    /** From [ServiceStateListener.onServiceStateChanged] */
     val isEmergencyOnly: Boolean = false,
     val isRoaming: Boolean = false,
-    /**
-     * See [android.telephony.ServiceState.getOperatorAlphaShort], this value is defined as the
-     * current registered operator name in short alphanumeric format. In some cases this name might
-     * be preferred over other methods of calculating the network name
-     */
-    val operatorAlphaShort: String? = null,
 
-    /** Fields below from [SignalStrengthsListener.onSignalStrengthsChanged] */
+    /** From [SignalStrengthsListener.onSignalStrengthsChanged] */
     val isGsm: Boolean = false,
     @IntRange(from = 0, to = 4)
     val cdmaLevel: Int = CellSignalStrength.SIGNAL_STRENGTH_NONE_OR_UNKNOWN,
     @IntRange(from = 0, to = 4)
     val primaryLevel: Int = CellSignalStrength.SIGNAL_STRENGTH_NONE_OR_UNKNOWN,
 
-    /** Fields below from [DataConnectionStateListener.onDataConnectionStateChanged] */
+    /** Mapped from [DataConnectionStateListener.onDataConnectionStateChanged] */
     val dataConnectionState: DataConnectionState = Disconnected,
 
-    /**
-     * Fields below from [DataActivityListener.onDataActivity]. See [TelephonyManager] for the
-     * values
-     */
-    val dataActivityDirection: DataActivityModel =
-        DataActivityModel(
-            hasActivityIn = false,
-            hasActivityOut = false,
-        ),
+    /** From [DataActivityListener.onDataActivity]. See [TelephonyManager] for the values */
+    @DataActivityType val dataActivityDirection: Int? = null,
 
-    /** Fields below from [CarrierNetworkListener.onCarrierNetworkChange] */
+    /** From [CarrierNetworkListener.onCarrierNetworkChange] */
     val carrierNetworkChangeActive: Boolean = false,
 
-    /** Fields below from [DisplayInfoListener.onDisplayInfoChanged]. */
-
     /**
+     * From [DisplayInfoListener.onDisplayInfoChanged].
+     *
      * [resolvedNetworkType] is the [TelephonyDisplayInfo.getOverrideNetworkType] if it exists or
      * [TelephonyDisplayInfo.getNetworkType]. This is used to look up the proper network type icon
      */

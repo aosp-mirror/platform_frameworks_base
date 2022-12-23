@@ -21,24 +21,20 @@ import android.app.job.JobInfo;
 import android.app.job.JobSnapshot;
 import android.app.job.JobWorkItem;
 import android.content.pm.ParceledListSlice;
-import java.util.Map;
 
  /**
   * IPC interface that supports the app-facing {@link #JobScheduler} api.
   * {@hide}
   */
 interface IJobScheduler {
-    int schedule(String namespace, in JobInfo job);
-    int enqueue(String namespace, in JobInfo job, in JobWorkItem work);
-    int scheduleAsPackage(String namespace, in JobInfo job, String packageName, int userId, String tag);
-    void cancel(String namespace, int jobId);
+    int schedule(in JobInfo job);
+    int enqueue(in JobInfo job, in JobWorkItem work);
+    int scheduleAsPackage(in JobInfo job, String packageName, int userId, String tag);
+    void cancel(int jobId);
     void cancelAll();
-    void cancelAllInNamespace(String namespace);
-    // Returns Map<String, ParceledListSlice>, where the keys are the namespaces.
-    Map<String, ParceledListSlice<JobInfo>> getAllPendingJobs();
-    ParceledListSlice<JobInfo> getAllPendingJobsInNamespace(String namespace);
-    JobInfo getPendingJob(String namespace, int jobId);
-    int getPendingJobReason(String namespace, int jobId);
+    ParceledListSlice getAllPendingJobs();
+    JobInfo getPendingJob(int jobId);
+    int getPendingJobReason(int jobId);
     boolean canRunLongJobs(String packageName);
     boolean hasRunLongJobsPermission(String packageName, int userId);
     List<JobInfo> getStartedJobs();

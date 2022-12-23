@@ -715,7 +715,7 @@ public class ActivityTaskSupervisor implements RecentTasks.Callbacks {
     }
 
     ResolveInfo resolveIntent(Intent intent, String resolvedType, int userId, int flags,
-            int filterCallingUid, int callingPid) {
+            int filterCallingUid) {
         try {
             Trace.traceBegin(TRACE_TAG_WINDOW_MANAGER, "resolveIntent");
             int modifiedFlags = flags
@@ -742,7 +742,7 @@ public class ActivityTaskSupervisor implements RecentTasks.Callbacks {
             try {
                 return mService.getPackageManagerInternalLocked().resolveIntentExported(
                         intent, resolvedType, modifiedFlags, privateResolveFlags, userId, true,
-                        filterCallingUid, callingPid);
+                        filterCallingUid);
             } finally {
                 Binder.restoreCallingIdentity(token);
             }
@@ -752,9 +752,8 @@ public class ActivityTaskSupervisor implements RecentTasks.Callbacks {
     }
 
     ActivityInfo resolveActivity(Intent intent, String resolvedType, int startFlags,
-            ProfilerInfo profilerInfo, int userId, int filterCallingUid, int callingPid) {
-        final ResolveInfo rInfo = resolveIntent(intent, resolvedType, userId, 0,
-                filterCallingUid, callingPid);
+            ProfilerInfo profilerInfo, int userId, int filterCallingUid) {
+        final ResolveInfo rInfo = resolveIntent(intent, resolvedType, userId, 0, filterCallingUid);
         return resolveActivity(intent, rInfo, startFlags, profilerInfo);
     }
 

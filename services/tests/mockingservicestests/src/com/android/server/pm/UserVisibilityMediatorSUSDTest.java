@@ -61,7 +61,7 @@ public final class UserVisibilityMediatorSUSDTest extends UserVisibilityMediator
         expectUserAssignedToDisplay(INVALID_DISPLAY, USER_ID);
         expectUserAssignedToDisplay(SECONDARY_DISPLAY_ID, USER_ID);
 
-        expectNoDisplayAssignedToUser(USER_NULL);
+        expectDisplayAssignedToUser(USER_NULL, INVALID_DISPLAY);
 
         listener.verify();
     }
@@ -99,8 +99,7 @@ public final class UserVisibilityMediatorSUSDTest extends UserVisibilityMediator
     }
 
     @Test
-    public void testStartVisibleBgProfile_onDefaultDisplay_whenParentIsCurrentUser()
-            throws Exception {
+    public void testStartBgProfile_onDefaultDisplay_whenParentIsCurrentUser() throws Exception {
         AsyncUserVisibilityListener listener = addListenerForEvents(
                 onInvisible(INITIAL_CURRENT_USER_ID),
                 onVisible(PARENT_USER_ID),
@@ -124,7 +123,7 @@ public final class UserVisibilityMediatorSUSDTest extends UserVisibilityMediator
     }
 
     @Test
-    public void testStartVisibleBgUser_onSecondaryDisplay() throws Exception {
+    public void testStartBgUser_onSecondaryDisplay() throws Exception {
         AsyncUserVisibilityListener listener = addListenerForNoEvents();
 
         int result = mMediator.assignUserToDisplayOnStart(USER_ID, USER_ID, BG_VISIBLE,
@@ -134,7 +133,7 @@ public final class UserVisibilityMediatorSUSDTest extends UserVisibilityMediator
         expectUserIsNotVisibleAtAll(USER_ID);
         expectNoDisplayAssignedToUser(USER_ID);
 
-        expectInitialCurrentUserAssignedToDisplay(SECONDARY_DISPLAY_ID);
+        expectNoUserAssignedToDisplay(SECONDARY_DISPLAY_ID);
 
         listener.verify();
     }

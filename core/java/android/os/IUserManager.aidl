@@ -51,7 +51,6 @@ interface IUserManager {
     String[] getPreInstallableSystemPackages(in String userType);
     void setUserEnabled(int userId);
     void setUserAdmin(int userId);
-    void revokeUserAdmin(int userId);
     void evictCredentialEncryptionKey(int userId);
     boolean removeUser(int userId);
     boolean removeUserEvenWhenDisallowed(int userId);

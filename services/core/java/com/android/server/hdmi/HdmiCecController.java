@@ -70,10 +70,6 @@ import java.util.function.Predicate;
  * <p>It can be created only by {@link HdmiCecController#create}
  *
  * <p>Declared as package-private, accessed by {@link HdmiControlService} only.
- *
- * <p>Also manages HDMI HAL methods that are shared between CEC and eARC. To make eARC
- * fully independent of the presence of a CEC HAL, we should split this class into HdmiCecController
- * and HdmiController TODO(b/255751565).
  */
 final class HdmiCecController {
     private static final String TAG = "HdmiCecController";
@@ -414,31 +410,6 @@ final class HdmiCecController {
         assertRunOnServiceThread();
         HdmiLogger.debug("enableSystemCecControl: %b", enabled);
         mNativeWrapperImpl.enableSystemCecControl(enabled);
-    }
-
-    /**
-     * Configures the type of HDP signal that the driver and HAL use for actions other than eARC,
-     * such as signaling EDID updates.
-     */
-    @ServiceThreadOnly
-    void setHpdSignalType(@Constants.HpdSignalType int signal, int portId) {
-        assertRunOnServiceThread();
-        // Stub.
-        // TODO: bind to native.
-        // TODO: handle error return values here, with logging.
-    }
-
-    /**
-     * Gets the type of the HDP signal that the driver and HAL use for actions other than eARC,
-     * such as signaling EDID updates.
-     */
-    @ServiceThreadOnly
-    @Constants.HpdSignalType
-    int getHpdSignalType(int portId) {
-        assertRunOnServiceThread();
-        // Stub.
-        // TODO: bind to native.
-        return Constants.HDMI_HPD_TYPE_PHYSICAL;
     }
 
     /**
@@ -1095,8 +1066,6 @@ final class HdmiCecController {
                 HdmiPortInfo[] hdmiPortInfo = new HdmiPortInfo[hdmiPortInfos.length];
                 int i = 0;
                 for (android.hardware.tv.hdmi.HdmiPortInfo portInfo : hdmiPortInfos) {
-                    // TODO: the earc argument is stubbed for now.
-                    // To be replaced by portInfo.earcSupported.
                     hdmiPortInfo[i] =
                             new HdmiPortInfo(
                                     portInfo.portId,
@@ -1104,8 +1073,7 @@ final class HdmiCecController {
                                     portInfo.physicalAddress,
                                     portInfo.cecSupported,
                                     false,
-                                    portInfo.arcSupported,
-                                    false);
+                                    portInfo.arcSupported);
                     i++;
                 }
                 return hdmiPortInfo;
@@ -1266,8 +1234,7 @@ final class HdmiCecController {
                             portInfo.physicalAddress,
                             portInfo.cecSupported,
                             false,
-                            portInfo.arcSupported,
-                            false);
+                            portInfo.arcSupported);
                     i++;
                 }
                 return hdmiPortInfo;
@@ -1448,8 +1415,7 @@ final class HdmiCecController {
                             portInfo.physicalAddress,
                             portInfo.cecSupported,
                             false,
-                            portInfo.arcSupported,
-                            false);
+                            portInfo.arcSupported);
                     i++;
                 }
                 return hdmiPortInfo;

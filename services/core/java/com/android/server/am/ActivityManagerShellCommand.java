@@ -373,8 +373,8 @@ final class ActivityManagerShellCommand extends ShellCommand {
                     return runGetCurrentForegroundProcess(pw, mInternal, mTaskInterface);
                 case "reset-dropbox-rate-limiter":
                     return runResetDropboxRateLimiter();
-                case "list-displays-for-starting-users":
-                    return runListDisplaysForStartingUsers(pw);
+                case "list-secondary-displays-for-starting-users":
+                    return runListSecondaryDisplaysForStartingUsers(pw);
                 case "set-foreground-service-delegate":
                     return runSetForegroundServiceDelegate(pw);
                 default:
@@ -2157,11 +2157,11 @@ final class ActivityManagerShellCommand extends ShellCommand {
             success = mInterface.startUserInBackgroundWithListener(userId, waiter);
             displaySuffix = "";
         } else {
-            if (!UserManager.isVisibleBackgroundUsersEnabled()) {
+            if (!UserManager.isUsersOnSecondaryDisplaysEnabled()) {
                 pw.println("Not supported");
                 return -1;
             }
-            success = mInterface.startUserInBackgroundVisibleOnDisplay(userId, displayId);
+            success = mInterface.startUserInBackgroundOnSecondaryDisplay(userId, displayId);
             displaySuffix = " on display " + displayId;
         }
         if (wait && success) {
@@ -3745,8 +3745,8 @@ final class ActivityManagerShellCommand extends ShellCommand {
         return 0;
     }
 
-    int runListDisplaysForStartingUsers(PrintWriter pw) throws RemoteException {
-        int[] displayIds = mInterface.getDisplayIdsForStartingVisibleBackgroundUsers();
+    int runListSecondaryDisplaysForStartingUsers(PrintWriter pw) throws RemoteException {
+        int[] displayIds = mInterface.getSecondaryDisplayIdsForStartingBackgroundUsers();
         pw.println(displayIds == null || displayIds.length == 0
                 ? "none"
                 : Arrays.toString(displayIds));
@@ -4116,7 +4116,7 @@ final class ActivityManagerShellCommand extends ShellCommand {
             pw.println("         Set an app's background restriction level which in turn map to a app standby bucket.");
             pw.println("  get-bg-restriction-level [--user <USER_ID>] <PACKAGE>");
             pw.println("         Get an app's background restriction level.");
-            pw.println("  list-displays-for-starting-users");
+            pw.println("  list-secondary-displays-for-starting-users");
             pw.println("         Lists the id of displays that can be used to start users on "
                     + "background.");
             pw.println("  set-foreground-service-delegate [--user <USER_ID>] <PACKAGE> start|stop");

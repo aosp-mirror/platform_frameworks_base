@@ -32,7 +32,7 @@ class UserConfigRepo(context: Context) {
         }
     }
 
-    fun setIsPasskeyFirstUse(
+    fun setIsFirstUse(
         isFirstUse: Boolean
     ) {
         sharedPreferences.edit().apply {
@@ -45,7 +45,7 @@ class UserConfigRepo(context: Context) {
         return sharedPreferences.getString(DEFAULT_PROVIDER, null)
     }
 
-    fun getIsPasskeyFirstUse(): Boolean {
+    fun getIsFirstUse(): Boolean {
         return sharedPreferences.getBoolean(IS_PASSKEY_FIRST_USE, true)
     }
 

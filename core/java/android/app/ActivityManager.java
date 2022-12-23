@@ -4380,7 +4380,7 @@ public class ActivityManager {
      *
      * <p>This method will allow the user to launch activities on that display, and it's typically
      * used only on automotive builds when the vehicle has multiple displays (you can verify if it's
-     * supported by calling {@link UserManager#isVisibleBackgroundUsersSupported()}).
+     * supported by calling {@link UserManager#isUsersOnSecondaryDisplaysSupported()}).
      *
      * <p><b>NOTE:</b> differently from {@link #switchUser(int)}, which stops the current foreground
      * user before starting a new one, this method does not stop the previous user running in
@@ -4404,13 +4404,14 @@ public class ActivityManager {
     @TestApi
     @RequiresPermission(anyOf = {android.Manifest.permission.MANAGE_USERS,
             android.Manifest.permission.INTERACT_ACROSS_USERS})
-    public boolean startUserInBackgroundVisibleOnDisplay(@UserIdInt int userId, int displayId) {
-        if (!UserManager.isVisibleBackgroundUsersEnabled()) {
+    public boolean startUserInBackgroundOnSecondaryDisplay(@UserIdInt int userId,
+            int displayId) {
+        if (!UserManager.isUsersOnSecondaryDisplaysEnabled()) {
             throw new UnsupportedOperationException(
                     "device does not support users on secondary displays");
         }
         try {
-            return getService().startUserInBackgroundVisibleOnDisplay(userId, displayId);
+            return getService().startUserInBackgroundOnSecondaryDisplay(userId, displayId);
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }
@@ -4426,9 +4427,9 @@ public class ActivityManager {
     @Nullable
     @RequiresPermission(anyOf = {android.Manifest.permission.MANAGE_USERS,
             android.Manifest.permission.INTERACT_ACROSS_USERS})
-    public int[] getDisplayIdsForStartingVisibleBackgroundUsers() {
+    public int[] getSecondaryDisplayIdsForStartingBackgroundUsers() {
         try {
-            return getService().getDisplayIdsForStartingVisibleBackgroundUsers();
+            return getService().getSecondaryDisplayIdsForStartingBackgroundUsers();
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }
@@ -4588,7 +4589,7 @@ public class ActivityManager {
      * Stops the given {@code userId}.
      *
      * <p><b>NOTE:</b> on systems that support
-     * {@link UserManager#isVisibleBackgroundUsersSupported() background users on secondary
+     * {@link UserManager#isUsersOnSecondaryDisplaysSupported() background users on secondary
      * displays}, this method will also unassign the user from the display it was started on.
      *
      * @hide

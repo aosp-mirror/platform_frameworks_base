@@ -58,10 +58,10 @@ constructor(
 
     // Keep track of the key used for the session tokens. This information is used to know when to
     // dispatch a removed event so that a media object for a local session will be removed.
-    private val keyedTokens: MutableMap<String, MutableSet<TokenId>> = mutableMapOf()
+    private val keyedTokens: MutableMap<String, MutableSet<MediaSession.Token>> = mutableMapOf()
 
     // Keep track of which media session tokens have associated notifications.
-    private val tokensWithNotifications: MutableSet<TokenId> = mutableSetOf()
+    private val tokensWithNotifications: MutableSet<MediaSession.Token> = mutableSetOf()
 
     private val sessionListener =
         object : MediaSessionManager.OnActiveSessionsChangedListener {
@@ -101,15 +101,15 @@ constructor(
         isSsReactivated: Boolean
     ) {
         backgroundExecutor.execute {
-            data.token?.let { tokensWithNotifications.add(TokenId(it)) }
+            data.token?.let { tokensWithNotifications.add(it) }
             val isMigration = oldKey != null && key != oldKey
             if (isMigration) {
                 keyedTokens.remove(oldKey)?.let { removed -> keyedTokens.put(key, removed) }
             }
             if (data.token != null) {
-                keyedTokens.get(key)?.let { tokens -> tokens.add(TokenId(data.token)) }
+                keyedTokens.get(key)?.let { tokens -> tokens.add(data.token) }
                     ?: run {
-                        val tokens = mutableSetOf(TokenId(data.token))
+                        val tokens = mutableSetOf(data.token)
                         keyedTokens.put(key, tokens)
                     }
             }
@@ -125,7 +125,7 @@ constructor(
                 isMigration ||
                     remote == null ||
                     remote.sessionToken == data.token ||
-                    !tokensWithNotifications.contains(TokenId(remote.sessionToken))
+                    !tokensWithNotifications.contains(remote.sessionToken)
             ) {
                 // Not filtering in this case. Passing the event along to listeners.
                 dispatchMediaDataLoaded(key, oldKey, data, immediately)
@@ -136,7 +136,7 @@ constructor(
                 // If the local session uses a different notification key, then lets go a step
                 // farther and dismiss the media data so that media controls for the local session
                 // don't hang around while casting.
-                if (!keyedTokens.get(key)!!.contains(TokenId(remote.sessionToken))) {
+                if (!keyedTokens.get(key)!!.contains(remote.sessionToken)) {
                     dispatchMediaDataRemoved(key)
                 }
             }
@@ -199,15 +199,6 @@ constructor(
                     packageControllers.put(controller.packageName, tokens)
                 }
         }
-        tokensWithNotifications.retainAll(controllers.map { TokenId(it.sessionToken) })
-    }
-
-    /**
-     * Represents a unique identifier for a [MediaSession.Token].
-     *
-     * It's used to avoid storing strong binders for media session tokens.
-     */
-    private data class TokenId(val id: Int) {
-        constructor(token: MediaSession.Token) : this(token.hashCode())
+        tokensWithNotifications.retainAll(controllers.map { it.sessionToken })
     }
 }

@@ -267,7 +267,8 @@ public class LockSettingsService extends ILockSettings.Stub {
     protected boolean mHasSecureLockScreen;
 
     protected IGateKeeperService mGateKeeperService;
-    protected IAuthSecret mAuthSecretService;
+    protected IAuthSecret mAuthSecretServiceAidl;
+    protected android.hardware.authsecret.V1_0.IAuthSecret mAuthSecretServiceHidl;
 
     private static final String GSI_RUNNING_PROP = "ro.gsid.image_running";
 
@@ -836,19 +837,16 @@ public class LockSettingsService extends ILockSettings.Stub {
     }
 
     private void getAuthSecretHal() {
-        mAuthSecretService =
-                IAuthSecret.Stub.asInterface(
-                        ServiceManager.waitForDeclaredService(IAuthSecret.DESCRIPTOR + "/default"));
-        if (mAuthSecretService != null) {
-            Slog.i(TAG, "Device implements AIDL AuthSecret HAL");
-        } else {
+        mAuthSecretServiceAidl = IAuthSecret.Stub.asInterface(ServiceManager.
+                                 waitForDeclaredService(IAuthSecret.DESCRIPTOR + "/default"));
+        if (mAuthSecretServiceAidl == null) {
+            Slog.i(TAG, "Device doesn't implement AuthSecret HAL(aidl), try to get hidl version");
+
             try {
-                android.hardware.authsecret.V1_0.IAuthSecret authSecretServiceHidl =
-                        android.hardware.authsecret.V1_0.IAuthSecret.getService(/* retry */ true);
-                mAuthSecretService = new AuthSecretHidlAdapter(authSecretServiceHidl);
-                Slog.i(TAG, "Device implements HIDL AuthSecret HAL");
+                mAuthSecretServiceHidl =
+                    android.hardware.authsecret.V1_0.IAuthSecret.getService(/* retry */ true);
             } catch (NoSuchElementException e) {
-                Slog.i(TAG, "Device doesn't implement AuthSecret HAL");
+                Slog.i(TAG, "Device doesn't implement AuthSecret HAL(hidl)");
             } catch (RemoteException e) {
                 Slog.w(TAG, "Failed to get AuthSecret HAL(hidl)", e);
             }
@@ -1245,8 +1243,7 @@ public class LockSettingsService extends ILockSettings.Stub {
 
     private int getFrpCredentialType() {
         PersistentData data = mStorage.readPersistentDataBlock();
-        if (data.type != PersistentData.TYPE_SP_GATEKEEPER &&
-                data.type != PersistentData.TYPE_SP_WEAVER) {
+        if (data.type != PersistentData.TYPE_SP && data.type != PersistentData.TYPE_SP_WEAVER) {
             return CREDENTIAL_TYPE_NONE;
         }
         int credentialType = SyntheticPasswordManager.getFrpCredentialType(data.payload);
@@ -2580,16 +2577,25 @@ public class LockSettingsService extends ILockSettings.Stub {
         // If the given user is the primary user, pass the auth secret to the HAL.  Only the system
         // user can be primary.  Check for the system user ID before calling getUserInfo(), as other
         // users may still be under construction.
-        if (mAuthSecretService == null) {
-            return;
-        }
         if (userId == UserHandle.USER_SYSTEM &&
                 mUserManager.getUserInfo(userId).isPrimary()) {
-            final byte[] secret = sp.deriveVendorAuthSecret();
-            try {
-                mAuthSecretService.setPrimaryUserCredential(secret);
-            } catch (RemoteException e) {
-                Slog.w(TAG, "Failed to pass primary user secret to AuthSecret HAL", e);
+            final byte[] rawSecret = sp.deriveVendorAuthSecret();
+            if (mAuthSecretServiceAidl != null) {
+                try {
+                    mAuthSecretServiceAidl.setPrimaryUserCredential(rawSecret);
+                } catch (RemoteException e) {
+                    Slog.w(TAG, "Failed to pass primary user secret to AuthSecret HAL(aidl)", e);
+                }
+            } else if (mAuthSecretServiceHidl != null) {
+                try {
+                    final ArrayList<Byte> secret = new ArrayList<>(rawSecret.length);
+                    for (int i = 0; i < rawSecret.length; ++i) {
+                        secret.add(rawSecret[i]);
+                    }
+                    mAuthSecretServiceHidl.primaryUserCredential(secret);
+                } catch (RemoteException e) {
+                    Slog.w(TAG, "Failed to pass primary user secret to AuthSecret HAL(hidl)", e);
+                }
             }
         }
     }

@@ -470,8 +470,7 @@ public class HdmiCecNetwork {
         for (HdmiPortInfo info : cecPortInfo) {
             if (mhlSupportedPorts.contains(info.getId())) {
                 result.add(new HdmiPortInfo(info.getId(), info.getType(), info.getAddress(),
-                        info.isCecSupported(), true, info.isArcSupported(),
-                        info.isEarcSupported()));
+                        info.isCecSupported(), true, info.isArcSupported()));
             } else {
                 result.add(info);
             }

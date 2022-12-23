@@ -89,7 +89,6 @@ import android.util.Log;
 import android.util.Pair;
 import android.util.Slog;
 import android.util.SparseArray;
-import android.util.SparseArrayMap;
 import android.util.SparseBooleanArray;
 import android.util.SparseIntArray;
 import android.util.SparseSetArray;
@@ -150,7 +149,6 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
-import java.util.Map;
 import java.util.Objects;
 import java.util.function.Consumer;
 import java.util.function.Predicate;
@@ -379,12 +377,8 @@ public class JobSchedulerService extends com.android.server.SystemService
     @GuardedBy("mLock")
     private final ArraySet<JobStatus> mChangedJobList = new ArraySet<>();
 
-    /**
-     * Cached pending job reasons. Mapping from UID -> namespace -> job ID -> reason.
-     */
     @GuardedBy("mPendingJobReasonCache") // Use its own lock to avoid blocking JS processing
-    private final SparseArrayMap<String, SparseIntArray> mPendingJobReasonCache =
-            new SparseArrayMap<>();
+    private final SparseArray<SparseIntArray> mPendingJobReasonCache = new SparseArray<>();
 
     /**
      * Named indices into standby bucket arrays, for clarity in referring to
@@ -1339,7 +1333,7 @@ public class JobSchedulerService extends com.android.server.SystemService
     private final Predicate<Integer> mIsUidActivePredicate = this::isUidActive;
 
     public int scheduleAsPackage(JobInfo job, JobWorkItem work, int uId, String packageName,
-            int userId, @Nullable String namespace, String tag) {
+            int userId, String tag) {
         // Rate limit excessive schedule() calls.
         final String servicePkg = job.getService().getPackageName();
         if (job.isPersisted() && (packageName == null || packageName.equals(servicePkg))) {
@@ -1398,7 +1392,7 @@ public class JobSchedulerService extends com.android.server.SystemService
         }
 
         synchronized (mLock) {
-            final JobStatus toCancel = mJobs.getJobByUidAndJobId(uId, namespace, job.getId());
+            final JobStatus toCancel = mJobs.getJobByUidAndJobId(uId, job.getId());
 
             if (work != null && toCancel != null) {
                 // Fast path: we are adding work to an existing job, and the JobInfo is not
@@ -1415,8 +1409,7 @@ public class JobSchedulerService extends com.android.server.SystemService
                 }
             }
 
-            JobStatus jobStatus =
-                    JobStatus.createFromJobInfo(job, uId, packageName, userId, namespace, tag);
+            JobStatus jobStatus = JobStatus.createFromJobInfo(job, uId, packageName, userId, tag);
 
             // Return failure early if expedited job quota used up.
             if (jobStatus.isRequestedExpeditedJob()) {
@@ -1511,47 +1504,26 @@ public class JobSchedulerService extends com.android.server.SystemService
         return JobScheduler.RESULT_SUCCESS;
     }
 
-    private ArrayMap<String, List<JobInfo>> getPendingJobs(int uid) {
-        final ArrayMap<String, List<JobInfo>> outMap = new ArrayMap<>();
-        synchronized (mLock) {
-            ArraySet<JobStatus> jobs = mJobs.getJobsByUid(uid);
-            // Write out for loop to avoid addAll() creating an Iterator.
-            for (int i = jobs.size() - 1; i >= 0; i--) {
-                final JobStatus job = jobs.valueAt(i);
-                List<JobInfo> outList = outMap.get(job.getNamespace());
-                if (outList == null) {
-                    outList = new ArrayList<JobInfo>(jobs.size());
-                    outMap.put(job.getNamespace(), outList);
-                }
-
-                outList.add(job.getJob());
-            }
-            return outMap;
-        }
-    }
-
-    private List<JobInfo> getPendingJobsInNamespace(int uid, @Nullable String namespace) {
+    public List<JobInfo> getPendingJobs(int uid) {
         synchronized (mLock) {
             ArraySet<JobStatus> jobs = mJobs.getJobsByUid(uid);
             ArrayList<JobInfo> outList = new ArrayList<JobInfo>(jobs.size());
             // Write out for loop to avoid addAll() creating an Iterator.
             for (int i = jobs.size() - 1; i >= 0; i--) {
                 final JobStatus job = jobs.valueAt(i);
-                if (Objects.equals(namespace, job.getNamespace())) {
-                    outList.add(job.getJob());
-                }
+                outList.add(job.getJob());
             }
             return outList;
         }
     }
 
     @JobScheduler.PendingJobReason
-    private int getPendingJobReason(int uid, String namespace, int jobId) {
+    private int getPendingJobReason(int uid, int jobId) {
         int reason;
         // Some apps may attempt to query this frequently, so cache the reason under a separate lock
         // so that the rest of JS processing isn't negatively impacted.
         synchronized (mPendingJobReasonCache) {
-            SparseIntArray jobIdToReason = mPendingJobReasonCache.get(uid, namespace);
+            SparseIntArray jobIdToReason = mPendingJobReasonCache.get(uid);
             if (jobIdToReason != null) {
                 reason = jobIdToReason.get(jobId, JobScheduler.PENDING_JOB_REASON_UNDEFINED);
                 if (reason != JobScheduler.PENDING_JOB_REASON_UNDEFINED) {
@@ -1560,17 +1532,16 @@ public class JobSchedulerService extends com.android.server.SystemService
             }
         }
         synchronized (mLock) {
-            reason = getPendingJobReasonLocked(uid, namespace, jobId);
+            reason = getPendingJobReasonLocked(uid, jobId);
             if (DEBUG) {
-                Slog.v(TAG, "getPendingJobReason("
-                        + uid + "," + namespace + "," + jobId + ")=" + reason);
+                Slog.v(TAG, "getPendingJobReason(" + uid + "," + jobId + ")=" + reason);
             }
         }
         synchronized (mPendingJobReasonCache) {
-            SparseIntArray jobIdToReason = mPendingJobReasonCache.get(uid, namespace);
+            SparseIntArray jobIdToReason = mPendingJobReasonCache.get(uid);
             if (jobIdToReason == null) {
                 jobIdToReason = new SparseIntArray();
-                mPendingJobReasonCache.add(uid, namespace, jobIdToReason);
+                mPendingJobReasonCache.put(uid, jobIdToReason);
             }
             jobIdToReason.put(jobId, reason);
         }
@@ -1579,10 +1550,10 @@ public class JobSchedulerService extends com.android.server.SystemService
 
     @JobScheduler.PendingJobReason
     @GuardedBy("mLock")
-    private int getPendingJobReasonLocked(int uid, String namespace, int jobId) {
+    private int getPendingJobReasonLocked(int uid, int jobId) {
         // Very similar code to isReadyToBeExecutedLocked.
 
-        JobStatus job = mJobs.getJobByUidAndJobId(uid, namespace, jobId);
+        JobStatus job = mJobs.getJobByUidAndJobId(uid, jobId);
         if (job == null) {
             // Job doesn't exist.
             return JobScheduler.PENDING_JOB_REASON_INVALID_JOB_ID;
@@ -1674,12 +1645,12 @@ public class JobSchedulerService extends com.android.server.SystemService
         return JobScheduler.PENDING_JOB_REASON_UNDEFINED;
     }
 
-    private JobInfo getPendingJob(int uid, @Nullable String namespace, int jobId) {
+    public JobInfo getPendingJob(int uid, int jobId) {
         synchronized (mLock) {
             ArraySet<JobStatus> jobs = mJobs.getJobsByUid(uid);
             for (int i = jobs.size() - 1; i >= 0; i--) {
                 JobStatus job = jobs.valueAt(i);
-                if (job.getJobId() == jobId && Objects.equals(namespace, job.getNamespace())) {
+                if (job.getJobId() == jobId) {
                     return job.getJob();
                 }
             }
@@ -1755,19 +1726,11 @@ public class JobSchedulerService extends com.android.server.SystemService
      * This will remove the job from the master list, and cancel the job if it was staged for
      * execution or being executed.
      *
-     * @param uid              Uid to check against for removal of a job.
+     * @param uid Uid to check against for removal of a job.
      * @param includeSourceApp Whether to include jobs scheduled for this UID by another UID.
      *                         If false, only jobs scheduled by this UID will be cancelled.
      */
     public boolean cancelJobsForUid(int uid, boolean includeSourceApp,
-            @JobParameters.StopReason int reason, int internalReasonCode, String debugReason) {
-        return cancelJobsForUid(uid, includeSourceApp,
-                /* namespaceOnly */ false, /* namespace */ null,
-                reason, internalReasonCode, debugReason);
-    }
-
-    private boolean cancelJobsForUid(int uid, boolean includeSourceApp,
-            boolean namespaceOnly, @Nullable String namespace,
             @JobParameters.StopReason int reason, int internalReasonCode, String debugReason) {
         if (uid == Process.SYSTEM_UID) {
             Slog.wtfStack(TAG, "Can't cancel all jobs for system uid");
@@ -1785,10 +1748,8 @@ public class JobSchedulerService extends com.android.server.SystemService
             }
             for (int i = 0; i < jobsForUid.size(); i++) {
                 JobStatus toRemove = jobsForUid.valueAt(i);
-                if (!namespaceOnly || Objects.equals(namespace, toRemove.getNamespace())) {
-                    cancelJobImplLocked(toRemove, null, reason, internalReasonCode, debugReason);
-                    jobsCanceled = true;
-                }
+                cancelJobImplLocked(toRemove, null, reason, internalReasonCode, debugReason);
+                jobsCanceled = true;
             }
         }
         return jobsCanceled;
@@ -1802,11 +1763,11 @@ public class JobSchedulerService extends com.android.server.SystemService
      * @param uid   Uid of the calling client.
      * @param jobId Id of the job, provided at schedule-time.
      */
-    private boolean cancelJob(int uid, String namespace, int jobId, int callingUid,
+    private boolean cancelJob(int uid, int jobId, int callingUid,
             @JobParameters.StopReason int reason) {
         JobStatus toCancel;
         synchronized (mLock) {
-            toCancel = mJobs.getJobByUidAndJobId(uid, namespace, jobId);
+            toCancel = mJobs.getJobByUidAndJobId(uid, jobId);
             if (toCancel != null) {
                 cancelJobImplLocked(toCancel, null, reason,
                         JobParameters.INTERNAL_STOP_REASON_CANCELED,
@@ -2236,8 +2197,7 @@ public class JobSchedulerService extends com.android.server.SystemService
         jobStatus.stopTrackingJobLocked(incomingJob);
 
         synchronized (mPendingJobReasonCache) {
-            SparseIntArray reasonCache =
-                    mPendingJobReasonCache.get(jobStatus.getUid(), jobStatus.getNamespace());
+            SparseIntArray reasonCache = mPendingJobReasonCache.get(jobStatus.getUid());
             if (reasonCache != null) {
                 reasonCache.delete(jobStatus.getJobId());
             }
@@ -2268,8 +2228,7 @@ public class JobSchedulerService extends com.android.server.SystemService
     /** Remove the pending job reason for this job from the cache. */
     void resetPendingJobReasonCache(@NonNull JobStatus jobStatus) {
         synchronized (mPendingJobReasonCache) {
-            final SparseIntArray reasons =
-                    mPendingJobReasonCache.get(jobStatus.getUid(), jobStatus.getNamespace());
+            final SparseIntArray reasons = mPendingJobReasonCache.get(jobStatus.getUid());
             if (reasons != null) {
                 reasons.delete(jobStatus.getJobId());
             }
@@ -2531,8 +2490,7 @@ public class JobSchedulerService extends com.android.server.SystemService
             if (DEBUG) {
                 Slog.d(TAG, "Could not find job to remove. Was job removed while executing?");
             }
-            JobStatus newJs = mJobs.getJobByUidAndJobId(
-                    jobStatus.getUid(), jobStatus.getNamespace(), jobStatus.getJobId());
+            JobStatus newJs = mJobs.getJobByUidAndJobId(jobStatus.getUid(), jobStatus.getJobId());
             if (newJs != null) {
                 // This job was stopped because the app scheduled a new job with the same job ID.
                 // Check if the new job is ready to run.
@@ -2989,12 +2947,10 @@ public class JobSchedulerService extends com.android.server.SystemService
                     synchronized (mPendingJobReasonCache) {
                         for (int i = 0; i < numRunnableJobs; ++i) {
                             final JobStatus job = runnableJobs.get(i);
-                            SparseIntArray reasons =
-                                    mPendingJobReasonCache.get(job.getUid(), job.getNamespace());
+                            SparseIntArray reasons = mPendingJobReasonCache.get(job.getUid());
                             if (reasons == null) {
                                 reasons = new SparseIntArray();
-                                mPendingJobReasonCache
-                                        .add(job.getUid(), job.getNamespace(), reasons);
+                                mPendingJobReasonCache.put(job.getUid(), reasons);
                             }
                             // We're force batching these jobs, so consider it an optimization
                             // policy reason.
@@ -3704,8 +3660,11 @@ public class JobSchedulerService extends com.android.server.SystemService
             return canPersist;
         }
 
-        private int validateJob(@NonNull JobInfo job, int callingUid, int sourceUserId,
-                @Nullable String sourcePkgName, @Nullable JobWorkItem jobWorkItem) {
+        private void validateJob(JobInfo job, int callingUid) {
+            validateJob(job, callingUid, null);
+        }
+
+        private void validateJob(JobInfo job, int callingUid, @Nullable JobWorkItem jobWorkItem) {
             final boolean rejectNegativeNetworkEstimates = CompatChanges.isChangeEnabled(
                             JobInfo.REJECT_NEGATIVE_NETWORK_ESTIMATES, callingUid);
             job.enforceValidity(
@@ -3723,37 +3682,6 @@ public class JobSchedulerService extends com.android.server.SystemService
                 if (job.isPeriodic()) {
                     Slog.wtf(TAG, "Periodic jobs mustn't have"
                             + " FLAG_EXEMPT_FROM_APP_STANDBY. Job=" + job);
-                }
-            }
-            if (job.isUserInitiated()) {
-                int sourceUid = -1;
-                if (sourceUserId != -1 && sourcePkgName != null) {
-                    try {
-                        sourceUid = AppGlobals.getPackageManager().getPackageUid(
-                                sourcePkgName, 0, sourceUserId);
-                    } catch (RemoteException ex) {
-                        // Can't happen, PackageManager runs in the same process.
-                    }
-                }
-                // We aim to check the permission of both the source and calling app so that apps
-                // don't attempt to bypass the permission by using other apps to do the work.
-                if (sourceUid != -1) {
-                    // Check the permission of the source app.
-                    final int sourceResult =
-                            validateRunLongJobsPermission(sourceUid, sourcePkgName);
-                    if (sourceResult != JobScheduler.RESULT_SUCCESS) {
-                        return sourceResult;
-                    }
-                }
-                final String callingPkgName = job.getService().getPackageName();
-                if (callingUid != sourceUid || !callingPkgName.equals(sourcePkgName)) {
-                    // Source app is different from calling app. Make sure the calling app also has
-                    // the permission.
-                    final int callingResult =
-                            validateRunLongJobsPermission(callingUid, callingPkgName);
-                    if (callingResult != JobScheduler.RESULT_SUCCESS) {
-                        return callingResult;
-                    }
                 }
             }
             if (jobWorkItem != null) {
@@ -3776,24 +3704,11 @@ public class JobSchedulerService extends com.android.server.SystemService
                     }
                 }
             }
-            return JobScheduler.RESULT_SUCCESS;
-        }
-
-        private int validateRunLongJobsPermission(int uid, String packageName) {
-            final int state = getRunLongJobsPermissionState(uid, packageName);
-            if (state == PermissionChecker.PERMISSION_HARD_DENIED) {
-                throw new SecurityException(android.Manifest.permission.RUN_LONG_JOBS
-                        + " required to schedule user-initiated jobs.");
-            }
-            if (state == PermissionChecker.PERMISSION_SOFT_DENIED) {
-                return JobScheduler.RESULT_FAILURE;
-            }
-            return JobScheduler.RESULT_SUCCESS;
         }
 
         // IJobScheduler implementation
         @Override
-        public int schedule(String namespace, JobInfo job) throws RemoteException {
+        public int schedule(JobInfo job) throws RemoteException {
             if (DEBUG) {
                 Slog.d(TAG, "Scheduling job: " + job.toString());
             }
@@ -3809,19 +3724,12 @@ public class JobSchedulerService extends com.android.server.SystemService
                 }
             }
 
-            final int result = validateJob(job, uid, -1, null, null);
-            if (result != JobScheduler.RESULT_SUCCESS) {
-                return result;
-            }
-
-            if (namespace != null) {
-                namespace = namespace.intern();
-            }
+            validateJob(job, uid);
 
             final long ident = Binder.clearCallingIdentity();
             try {
                 return JobSchedulerService.this.scheduleAsPackage(job, null, uid, null, userId,
-                        namespace, null);
+                        null);
             } finally {
                 Binder.restoreCallingIdentity(ident);
             }
@@ -3829,7 +3737,7 @@ public class JobSchedulerService extends com.android.server.SystemService
 
         // IJobScheduler implementation
         @Override
-        public int enqueue(String namespace, JobInfo job, JobWorkItem work) throws RemoteException {
+        public int enqueue(JobInfo job, JobWorkItem work) throws RemoteException {
             if (DEBUG) {
                 Slog.d(TAG, "Enqueueing job: " + job.toString() + " work: " + work);
             }
@@ -3844,27 +3752,20 @@ public class JobSchedulerService extends com.android.server.SystemService
                 throw new NullPointerException("work is null");
             }
 
-            final int result = validateJob(job, uid, -1, null, work);
-            if (result != JobScheduler.RESULT_SUCCESS) {
-                return result;
-            }
-
-            if (namespace != null) {
-                namespace = namespace.intern();
-            }
+            validateJob(job, uid, work);
 
             final long ident = Binder.clearCallingIdentity();
             try {
                 return JobSchedulerService.this.scheduleAsPackage(job, work, uid, null, userId,
-                        namespace, null);
+                        null);
             } finally {
                 Binder.restoreCallingIdentity(ident);
             }
         }
 
         @Override
-        public int scheduleAsPackage(String namespace, JobInfo job, String packageName, int userId,
-                String tag) throws RemoteException {
+        public int scheduleAsPackage(JobInfo job, String packageName, int userId, String tag)
+                throws RemoteException {
             final int callerUid = Binder.getCallingUid();
             if (DEBUG) {
                 Slog.d(TAG, "Caller uid " + callerUid + " scheduling job: " + job.toString()
@@ -3882,75 +3783,48 @@ public class JobSchedulerService extends com.android.server.SystemService
                         + " not permitted to schedule jobs for other apps");
             }
 
-            int result = validateJob(job, callerUid, userId, packageName, null);
-            if (result != JobScheduler.RESULT_SUCCESS) {
-                return result;
-            }
-
-            if (namespace != null) {
-                namespace = namespace.intern();
-            }
+            validateJob(job, callerUid);
 
             final long ident = Binder.clearCallingIdentity();
             try {
                 return JobSchedulerService.this.scheduleAsPackage(job, null, callerUid,
-                        packageName, userId, namespace, tag);
+                        packageName, userId, tag);
             } finally {
                 Binder.restoreCallingIdentity(ident);
             }
         }
 
         @Override
-        public Map<String, ParceledListSlice<JobInfo>> getAllPendingJobs() throws RemoteException {
+        public ParceledListSlice<JobInfo> getAllPendingJobs() throws RemoteException {
             final int uid = Binder.getCallingUid();
 
             final long ident = Binder.clearCallingIdentity();
             try {
-                final ArrayMap<String, List<JobInfo>> jobs =
-                        JobSchedulerService.this.getPendingJobs(uid);
-                final ArrayMap<String, ParceledListSlice<JobInfo>> outMap = new ArrayMap<>();
-                for (int i = 0; i < jobs.size(); ++i) {
-                    outMap.put(jobs.keyAt(i), new ParceledListSlice<>(jobs.valueAt(i)));
-                }
-                return outMap;
+                return new ParceledListSlice<>(JobSchedulerService.this.getPendingJobs(uid));
             } finally {
                 Binder.restoreCallingIdentity(ident);
             }
         }
 
         @Override
-        public ParceledListSlice<JobInfo> getAllPendingJobsInNamespace(String namespace)
-                throws RemoteException {
+        public int getPendingJobReason(int jobId) throws RemoteException {
             final int uid = Binder.getCallingUid();
 
             final long ident = Binder.clearCallingIdentity();
             try {
-                return new ParceledListSlice<>(
-                        JobSchedulerService.this.getPendingJobsInNamespace(uid, namespace));
+                return JobSchedulerService.this.getPendingJobReason(uid, jobId);
             } finally {
                 Binder.restoreCallingIdentity(ident);
             }
         }
 
         @Override
-        public JobInfo getPendingJob(String namespace, int jobId) throws RemoteException {
+        public JobInfo getPendingJob(int jobId) throws RemoteException {
             final int uid = Binder.getCallingUid();
 
             final long ident = Binder.clearCallingIdentity();
             try {
-                return JobSchedulerService.this.getPendingJob(uid, namespace, jobId);
-            } finally {
-                Binder.restoreCallingIdentity(ident);
-            }
-        }
-
-        @Override
-        public int getPendingJobReason(String namespace, int jobId) throws RemoteException {
-            final int uid = Binder.getCallingUid();
-
-            final long ident = Binder.clearCallingIdentity();
-            try {
-                return JobSchedulerService.this.getPendingJobReason(uid, namespace, jobId);
+                return JobSchedulerService.this.getPendingJob(uid, jobId);
             } finally {
                 Binder.restoreCallingIdentity(ident);
             }
@@ -3973,29 +3847,12 @@ public class JobSchedulerService extends com.android.server.SystemService
         }
 
         @Override
-        public void cancelAllInNamespace(String namespace) throws RemoteException {
-            final int uid = Binder.getCallingUid();
-            final long ident = Binder.clearCallingIdentity();
-            try {
-                JobSchedulerService.this.cancelJobsForUid(uid,
-                        // Documentation says only jobs scheduled BY the app will be cancelled
-                        /* includeSourceApp */ false,
-                        /* namespaceOnly */ true, namespace,
-                        JobParameters.STOP_REASON_CANCELLED_BY_APP,
-                        JobParameters.INTERNAL_STOP_REASON_CANCELED,
-                        "cancelAllInNamespace() called by app, callingUid=" + uid);
-            } finally {
-                Binder.restoreCallingIdentity(ident);
-            }
-        }
-
-        @Override
-        public void cancel(String namespace, int jobId) throws RemoteException {
+        public void cancel(int jobId) throws RemoteException {
             final int uid = Binder.getCallingUid();
 
             final long ident = Binder.clearCallingIdentity();
             try {
-                JobSchedulerService.this.cancelJob(uid, namespace, jobId, uid,
+                JobSchedulerService.this.cancelJob(uid, jobId, uid,
                         JobParameters.STOP_REASON_CANCELLED_BY_APP);
             } finally {
                 Binder.restoreCallingIdentity(ident);
@@ -4173,9 +4030,8 @@ public class JobSchedulerService extends com.android.server.SystemService
     }
 
     // Shell command infrastructure: run the given job immediately
-    int executeRunCommand(String pkgName, int userId, @Nullable String namespace,
-            int jobId, boolean satisfied, boolean force) {
-        Slog.d(TAG, "executeRunCommand(): " + pkgName + "/" + namespace + "/" + userId
+    int executeRunCommand(String pkgName, int userId, int jobId, boolean satisfied, boolean force) {
+        Slog.d(TAG, "executeRunCommand(): " + pkgName + "/" + userId
                 + " " + jobId + " s=" + satisfied + " f=" + force);
 
         try {
@@ -4186,7 +4042,7 @@ public class JobSchedulerService extends com.android.server.SystemService
             }
 
             synchronized (mLock) {
-                final JobStatus js = mJobs.getJobByUidAndJobId(uid, namespace, jobId);
+                final JobStatus js = mJobs.getJobByUidAndJobId(uid, jobId);
                 if (js == null) {
                     return JobSchedulerShellCommand.CMD_ERR_NO_JOB;
                 }
@@ -4216,14 +4072,14 @@ public class JobSchedulerService extends com.android.server.SystemService
 
     // Shell command infrastructure: immediately timeout currently executing jobs
     int executeTimeoutCommand(PrintWriter pw, String pkgName, int userId,
-            @Nullable String namespace, boolean hasJobId, int jobId) {
+            boolean hasJobId, int jobId) {
         if (DEBUG) {
             Slog.v(TAG, "executeTimeoutCommand(): " + pkgName + "/" + userId + " " + jobId);
         }
 
         synchronized (mLock) {
             final boolean foundSome = mConcurrencyManager.executeTimeoutCommandLocked(pw,
-                    pkgName, userId, namespace, hasJobId, jobId);
+                    pkgName, userId, hasJobId, jobId);
             if (!foundSome) {
                 pw.println("No matching executing jobs found.");
             }
@@ -4232,7 +4088,7 @@ public class JobSchedulerService extends com.android.server.SystemService
     }
 
     // Shell command infrastructure: cancel a scheduled job
-    int executeCancelCommand(PrintWriter pw, String pkgName, int userId, @Nullable String namespace,
+    int executeCancelCommand(PrintWriter pw, String pkgName, int userId,
             boolean hasJobId, int jobId) {
         if (DEBUG) {
             Slog.v(TAG, "executeCancelCommand(): " + pkgName + "/" + userId + " " + jobId);
@@ -4260,8 +4116,7 @@ public class JobSchedulerService extends com.android.server.SystemService
             }
         } else {
             pw.println("Canceling job " + pkgName + "/#" + jobId + " in user " + userId);
-            if (!cancelJob(pkgUid, namespace, jobId,
-                    Process.SHELL_UID, JobParameters.STOP_REASON_USER)) {
+            if (!cancelJob(pkgUid, jobId, Process.SHELL_UID, JobParameters.STOP_REASON_USER)) {
                 pw.println("No matching job found.");
             }
         }
@@ -4308,8 +4163,8 @@ public class JobSchedulerService extends com.android.server.SystemService
         }
     }
 
-    int getEstimatedNetworkBytes(PrintWriter pw, String pkgName, int userId, String namespace,
-            int jobId, int byteOption) {
+    int getEstimatedNetworkBytes(PrintWriter pw, String pkgName, int userId, int jobId,
+            int byteOption) {
         try {
             final int uid = AppGlobals.getPackageManager().getPackageUid(pkgName, 0,
                     userId != UserHandle.USER_ALL ? userId : UserHandle.USER_SYSTEM);
@@ -4321,10 +4176,9 @@ public class JobSchedulerService extends com.android.server.SystemService
             }
 
             synchronized (mLock) {
-                final JobStatus js = mJobs.getJobByUidAndJobId(uid, namespace, jobId);
+                final JobStatus js = mJobs.getJobByUidAndJobId(uid, jobId);
                 if (DEBUG) {
-                    Slog.d(TAG, "get-estimated-network-bytes " + uid + "/"
-                            + namespace + "/" + jobId + ": " + js);
+                    Slog.d(TAG, "get-estimated-network-bytes " + uid + "/" + jobId + ": " + js);
                 }
                 if (js == null) {
                     pw.print("unknown("); UserHandle.formatUid(pw, uid);
@@ -4334,8 +4188,8 @@ public class JobSchedulerService extends com.android.server.SystemService
 
                 final long downloadBytes;
                 final long uploadBytes;
-                final Pair<Long, Long> bytes = mConcurrencyManager.getEstimatedNetworkBytesLocked(
-                        pkgName, uid, namespace, jobId);
+                final Pair<Long, Long> bytes =
+                        mConcurrencyManager.getEstimatedNetworkBytesLocked(pkgName, uid, jobId);
                 if (bytes == null) {
                     downloadBytes = js.getEstimatedNetworkDownloadBytes();
                     uploadBytes = js.getEstimatedNetworkUploadBytes();
@@ -4356,8 +4210,8 @@ public class JobSchedulerService extends com.android.server.SystemService
         return 0;
     }
 
-    int getTransferredNetworkBytes(PrintWriter pw, String pkgName, int userId, String namespace,
-            int jobId, int byteOption) {
+    int getTransferredNetworkBytes(PrintWriter pw, String pkgName, int userId, int jobId,
+            int byteOption) {
         try {
             final int uid = AppGlobals.getPackageManager().getPackageUid(pkgName, 0,
                     userId != UserHandle.USER_ALL ? userId : UserHandle.USER_SYSTEM);
@@ -4369,10 +4223,9 @@ public class JobSchedulerService extends com.android.server.SystemService
             }
 
             synchronized (mLock) {
-                final JobStatus js = mJobs.getJobByUidAndJobId(uid, namespace, jobId);
+                final JobStatus js = mJobs.getJobByUidAndJobId(uid, jobId);
                 if (DEBUG) {
-                    Slog.d(TAG, "get-transferred-network-bytes " + uid
-                            + namespace + "/" + "/" + jobId + ": " + js);
+                    Slog.d(TAG, "get-transferred-network-bytes " + uid + "/" + jobId + ": " + js);
                 }
                 if (js == null) {
                     pw.print("unknown("); UserHandle.formatUid(pw, uid);
@@ -4382,8 +4235,8 @@ public class JobSchedulerService extends com.android.server.SystemService
 
                 final long downloadBytes;
                 final long uploadBytes;
-                final Pair<Long, Long> bytes = mConcurrencyManager.getTransferredNetworkBytesLocked(
-                        pkgName, uid, namespace, jobId);
+                final Pair<Long, Long> bytes =
+                        mConcurrencyManager.getTransferredNetworkBytesLocked(pkgName, uid, jobId);
                 if (bytes == null) {
                     downloadBytes = 0;
                     uploadBytes = 0;
@@ -4404,16 +4257,11 @@ public class JobSchedulerService extends com.android.server.SystemService
         return 0;
     }
 
-    /** Returns true if both the appop and permission are granted. */
     private boolean checkRunLongJobsPermission(int packageUid, String packageName) {
-        return getRunLongJobsPermissionState(packageUid, packageName)
-                == PermissionChecker.PERMISSION_GRANTED;
-    }
-
-    private int getRunLongJobsPermissionState(int packageUid, String packageName) {
+        // Returns true if both the appop and permission are granted.
         return PermissionChecker.checkPermissionForPreflight(getTestableContext(),
                 android.Manifest.permission.RUN_LONG_JOBS, PermissionChecker.PID_UNKNOWN,
-                packageUid, packageName);
+                packageUid, packageName) == PermissionChecker.PERMISSION_GRANTED;
     }
 
     @VisibleForTesting
@@ -4432,8 +4280,7 @@ public class JobSchedulerService extends com.android.server.SystemService
     }
 
     // Shell command infrastructure
-    int getJobState(PrintWriter pw, String pkgName, int userId, @Nullable String namespace,
-            int jobId) {
+    int getJobState(PrintWriter pw, String pkgName, int userId, int jobId) {
         try {
             final int uid = AppGlobals.getPackageManager().getPackageUid(pkgName, 0,
                     userId != UserHandle.USER_ALL ? userId : UserHandle.USER_SYSTEM);
@@ -4445,17 +4292,11 @@ public class JobSchedulerService extends com.android.server.SystemService
             }
 
             synchronized (mLock) {
-                final JobStatus js = mJobs.getJobByUidAndJobId(uid, namespace, jobId);
-                if (DEBUG) {
-                    Slog.d(TAG,
-                            "get-job-state " + namespace + "/" + uid + "/" + jobId + ": " + js);
-                }
+                final JobStatus js = mJobs.getJobByUidAndJobId(uid, jobId);
+                if (DEBUG) Slog.d(TAG, "get-job-state " + uid + "/" + jobId + ": " + js);
                 if (js == null) {
-                    pw.print("unknown(");
-                    UserHandle.formatUid(pw, uid);
-                    pw.print("/jid");
-                    pw.print(jobId);
-                    pw.println(")");
+                    pw.print("unknown("); UserHandle.formatUid(pw, uid);
+                    pw.print("/jid"); pw.print(jobId); pw.println(")");
                     return JobSchedulerShellCommand.CMD_ERR_NO_JOB;
                 }
 
@@ -4631,9 +4472,7 @@ public class JobSchedulerService extends com.android.server.SystemService
                     }
                     jobPrinted = true;
 
-                    pw.print("JOB ");
-                    job.printUniqueId(pw);
-                    pw.print(": ");
+                    pw.print("JOB #"); job.printUniqueId(pw); pw.print(": ");
                     pw.println(job.toShortStringExceptUniqueId());
 
                     pw.increaseIndent();

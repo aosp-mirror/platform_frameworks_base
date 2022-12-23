@@ -23,7 +23,6 @@ import android.annotation.Nullable;
 import android.annotation.SystemService;
 import android.content.Context;
 import android.graphics.Rect;
-import android.media.tv.AdBuffer;
 import android.media.tv.AdRequest;
 import android.media.tv.AdResponse;
 import android.media.tv.BroadcastInfoRequest;
@@ -557,18 +556,6 @@ public final class TvInteractiveAppManager {
                         return;
                     }
                     record.postTeletextAppStateChanged(state);
-                }
-            }
-
-            @Override
-            public void onAdBuffer(AdBuffer buffer, int seq) {
-                synchronized (mSessionCallbackRecordMap) {
-                    SessionCallbackRecord record = mSessionCallbackRecordMap.get(seq);
-                    if (record == null) {
-                        Log.e(TAG, "Callback not found for seq " + seq);
-                        return;
-                    }
-                    record.postAdBuffer(buffer);
                 }
             }
         };
@@ -1291,21 +1278,6 @@ public final class TvInteractiveAppManager {
         }
 
         /**
-         * Notifies the advertisement buffer is consumed.
-         */
-        public void notifyAdBufferConsumed(AdBuffer buffer) {
-            if (mToken == null) {
-                Log.w(TAG, "The session has been already released");
-                return;
-            }
-            try {
-                mService.notifyAdBufferConsumed(mToken, buffer, mUserId);
-            } catch (RemoteException e) {
-                throw e.rethrowFromSystemServer();
-            }
-        }
-
-        /**
          * Releases this session.
          */
         public void release() {
@@ -1833,17 +1805,6 @@ public final class TvInteractiveAppManager {
                 @Override
                 public void run() {
                     mSessionCallback.onTeletextAppStateChanged(mSession, state);
-                }
-            });
-        }
-
-        void postAdBuffer(AdBuffer buffer) {
-            mHandler.post(new Runnable() {
-                @Override
-                public void run() {
-                    if (mSession.getInputSession() != null) {
-                        mSession.getInputSession().notifyAdBuffer(buffer);
-                    }
                 }
             });
         }

@@ -67,11 +67,6 @@ public class LetterboxConfigurationPersisterTest {
                         R.integer.config_letterboxDefaultPositionForHorizontalReachability),
                 () -> mContext.getResources().getInteger(
                         R.integer.config_letterboxDefaultPositionForVerticalReachability),
-                () -> mContext.getResources().getInteger(
-                        R.integer.config_letterboxDefaultPositionForBookModeReachability),
-                () -> mContext.getResources().getInteger(
-                        R.integer.config_letterboxDefaultPositionForTabletopModeReachability
-                ),
                 mConfigFolder, mPersisterQueue, mQueueState);
         mQueueListener = queueEmpty -> mQueueState.onItemAdded();
         mPersisterQueue.addListener(mQueueListener);
@@ -89,15 +84,14 @@ public class LetterboxConfigurationPersisterTest {
     @Test
     public void test_whenStoreIsCreated_valuesAreDefaults() {
         final int positionForHorizontalReachability =
-                mLetterboxConfigurationPersister.getLetterboxPositionForHorizontalReachability(
-                        false);
+                mLetterboxConfigurationPersister.getLetterboxPositionForHorizontalReachability();
         final int defaultPositionForHorizontalReachability =
                 mContext.getResources().getInteger(
                         R.integer.config_letterboxDefaultPositionForHorizontalReachability);
         Assert.assertEquals(defaultPositionForHorizontalReachability,
                 positionForHorizontalReachability);
         final int positionForVerticalReachability =
-                mLetterboxConfigurationPersister.getLetterboxPositionForVerticalReachability(false);
+                mLetterboxConfigurationPersister.getLetterboxPositionForVerticalReachability();
         final int defaultPositionForVerticalReachability =
                 mContext.getResources().getInteger(
                         R.integer.config_letterboxDefaultPositionForVerticalReachability);
@@ -107,16 +101,15 @@ public class LetterboxConfigurationPersisterTest {
 
     @Test
     public void test_whenUpdatedWithNewValues_valuesAreWritten() {
-        mLetterboxConfigurationPersister.setLetterboxPositionForHorizontalReachability(false,
+        mLetterboxConfigurationPersister.setLetterboxPositionForHorizontalReachability(
                 LETTERBOX_HORIZONTAL_REACHABILITY_POSITION_LEFT);
-        mLetterboxConfigurationPersister.setLetterboxPositionForVerticalReachability(false,
+        mLetterboxConfigurationPersister.setLetterboxPositionForVerticalReachability(
                 LETTERBOX_VERTICAL_REACHABILITY_POSITION_TOP);
         waitForCompletion(mPersisterQueue);
         final int newPositionForHorizontalReachability =
-                mLetterboxConfigurationPersister.getLetterboxPositionForHorizontalReachability(
-                        false);
+                mLetterboxConfigurationPersister.getLetterboxPositionForHorizontalReachability();
         final int newPositionForVerticalReachability =
-                mLetterboxConfigurationPersister.getLetterboxPositionForVerticalReachability(false);
+                mLetterboxConfigurationPersister.getLetterboxPositionForVerticalReachability();
         Assert.assertEquals(LETTERBOX_HORIZONTAL_REACHABILITY_POSITION_LEFT,
                 newPositionForHorizontalReachability);
         Assert.assertEquals(LETTERBOX_VERTICAL_REACHABILITY_POSITION_TOP,
@@ -127,24 +120,24 @@ public class LetterboxConfigurationPersisterTest {
     public void test_whenUpdatedWithNewValues_valuesAreReadAfterRestart() {
         final PersisterQueue firstPersisterQueue = new PersisterQueue();
         final LetterboxConfigurationPersister firstPersister = new LetterboxConfigurationPersister(
-                mContext, () -> -1, () -> -1, () -> -1, () -> -1, mContext.getFilesDir(),
-                firstPersisterQueue, mQueueState);
+                mContext, () -> -1, () -> -1, mContext.getFilesDir(), firstPersisterQueue,
+                mQueueState);
         firstPersister.start();
-        firstPersister.setLetterboxPositionForHorizontalReachability(false,
+        firstPersister.setLetterboxPositionForHorizontalReachability(
                 LETTERBOX_HORIZONTAL_REACHABILITY_POSITION_LEFT);
-        firstPersister.setLetterboxPositionForVerticalReachability(false,
+        firstPersister.setLetterboxPositionForVerticalReachability(
                 LETTERBOX_VERTICAL_REACHABILITY_POSITION_TOP);
         waitForCompletion(firstPersisterQueue);
         stopPersisterSafe(firstPersisterQueue);
         final PersisterQueue secondPersisterQueue = new PersisterQueue();
         final LetterboxConfigurationPersister secondPersister = new LetterboxConfigurationPersister(
-                mContext, () -> -1, () -> -1, () -> -1, () -> -1, mContext.getFilesDir(),
-                secondPersisterQueue, mQueueState);
+                mContext, () -> -1, () -> -1, mContext.getFilesDir(), secondPersisterQueue,
+                mQueueState);
         secondPersister.start();
         final int newPositionForHorizontalReachability =
-                secondPersister.getLetterboxPositionForHorizontalReachability(false);
+                secondPersister.getLetterboxPositionForHorizontalReachability();
         final int newPositionForVerticalReachability =
-                secondPersister.getLetterboxPositionForVerticalReachability(false);
+                secondPersister.getLetterboxPositionForVerticalReachability();
         Assert.assertEquals(LETTERBOX_HORIZONTAL_REACHABILITY_POSITION_LEFT,
                 newPositionForHorizontalReachability);
         Assert.assertEquals(LETTERBOX_VERTICAL_REACHABILITY_POSITION_TOP,
@@ -156,16 +149,15 @@ public class LetterboxConfigurationPersisterTest {
 
     @Test
     public void test_whenUpdatedWithNewValuesAndDeleted_valuesAreDefaults() {
-        mLetterboxConfigurationPersister.setLetterboxPositionForHorizontalReachability(false,
+        mLetterboxConfigurationPersister.setLetterboxPositionForHorizontalReachability(
                 LETTERBOX_HORIZONTAL_REACHABILITY_POSITION_LEFT);
-        mLetterboxConfigurationPersister.setLetterboxPositionForVerticalReachability(false,
+        mLetterboxConfigurationPersister.setLetterboxPositionForVerticalReachability(
                 LETTERBOX_VERTICAL_REACHABILITY_POSITION_TOP);
         waitForCompletion(mPersisterQueue);
         final int newPositionForHorizontalReachability =
-                mLetterboxConfigurationPersister.getLetterboxPositionForHorizontalReachability(
-                        false);
+                mLetterboxConfigurationPersister.getLetterboxPositionForHorizontalReachability();
         final int newPositionForVerticalReachability =
-                mLetterboxConfigurationPersister.getLetterboxPositionForVerticalReachability(false);
+                mLetterboxConfigurationPersister.getLetterboxPositionForVerticalReachability();
         Assert.assertEquals(LETTERBOX_HORIZONTAL_REACHABILITY_POSITION_LEFT,
                 newPositionForHorizontalReachability);
         Assert.assertEquals(LETTERBOX_VERTICAL_REACHABILITY_POSITION_TOP,
@@ -173,15 +165,14 @@ public class LetterboxConfigurationPersisterTest {
         deleteConfiguration(mLetterboxConfigurationPersister, mPersisterQueue);
         waitForCompletion(mPersisterQueue);
         final int positionForHorizontalReachability =
-                mLetterboxConfigurationPersister.getLetterboxPositionForHorizontalReachability(
-                        false);
+                mLetterboxConfigurationPersister.getLetterboxPositionForHorizontalReachability();
         final int defaultPositionForHorizontalReachability =
                 mContext.getResources().getInteger(
                         R.integer.config_letterboxDefaultPositionForHorizontalReachability);
         Assert.assertEquals(defaultPositionForHorizontalReachability,
                 positionForHorizontalReachability);
         final int positionForVerticalReachability =
-                mLetterboxConfigurationPersister.getLetterboxPositionForVerticalReachability(false);
+                mLetterboxConfigurationPersister.getLetterboxPositionForVerticalReachability();
         final int defaultPositionForVerticalReachability =
                 mContext.getResources().getInteger(
                         R.integer.config_letterboxDefaultPositionForVerticalReachability);

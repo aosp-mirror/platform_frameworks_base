@@ -123,7 +123,8 @@ class GetFlowUtils {
           userName = credentialEntry.username.toString(),
           displayName = credentialEntry.displayName?.toString(),
           // TODO: proper fallback
-          icon = credentialEntry.icon?.loadDrawable(context),
+          icon = credentialEntry.icon?.loadDrawable(context)
+                  ?: context.getDrawable(R.drawable.ic_other_sign_in)!!,
           lastUsedTimeMillis = credentialEntry.lastUsedTimeMillis,
         )
       }
@@ -195,8 +196,9 @@ class CreateFlowUtils {
 
     fun toEnabledProviderList(
       providerDataList: List<CreateCredentialProviderData>,
+      requestDisplayInfo: RequestDisplayInfo,
       context: Context,
-    ): List<EnabledProviderInfo> {
+    ): List<com.android.credentialmanager.createflow.EnabledProviderInfo> {
       // TODO: get from the actual service info
       val packageManager = context.packageManager
 
@@ -217,7 +219,7 @@ class CreateFlowUtils {
           name = it.providerFlattenedComponentName,
           displayName = pkgInfo.applicationInfo.loadLabel(packageManager).toString(),
           createOptions = toCreationOptionInfoList(
-            it.providerFlattenedComponentName, it.saveEntries, context),
+            it.providerFlattenedComponentName, it.saveEntries, requestDisplayInfo, context),
           remoteEntry = toRemoteInfo(it.providerFlattenedComponentName, it.remoteEntry),
         )
       }
@@ -226,14 +228,14 @@ class CreateFlowUtils {
     fun toDisabledProviderList(
       providerDataList: List<DisabledProviderData>?,
       context: Context,
-    ): List<DisabledProviderInfo>? {
+    ): List<com.android.credentialmanager.createflow.DisabledProviderInfo>? {
       // TODO: get from the actual service info
       val packageManager = context.packageManager
       return providerDataList?.map {
         val pkgInfo = packageManager
           .getPackageInfo(it.providerFlattenedComponentName,
             PackageManager.PackageInfoFlags.of(0))
-        DisabledProviderInfo(
+        com.android.credentialmanager.createflow.DisabledProviderInfo(
           icon = pkgInfo.applicationInfo.loadIcon(packageManager)!!,
           name = it.providerFlattenedComponentName,
           displayName = pkgInfo.applicationInfo.loadLabel(packageManager).toString(),
@@ -293,15 +295,14 @@ class CreateFlowUtils {
     fun toCreateCredentialUiState(
       enabledProviders: List<EnabledProviderInfo>,
       disabledProviders: List<DisabledProviderInfo>?,
-      defaultProviderId: String?,
       requestDisplayInfo: RequestDisplayInfo,
       isOnPasskeyIntroStateAlready: Boolean,
-      isPasskeyFirstUse: Boolean,
     ): CreateCredentialUiState {
       var createOptionSize = 0
       var lastSeenProviderWithNonEmptyCreateOptions: EnabledProviderInfo? = null
       var remoteEntry: RemoteInfo? = null
       var defaultProvider: EnabledProviderInfo? = null
+      val defaultProviderId = UserConfigRepo.getInstance().getDefaultProviderId()
       enabledProviders.forEach {
           enabledProvider ->
         if (defaultProviderId != null) {
@@ -321,18 +322,13 @@ class CreateFlowUtils {
         enabledProviders = enabledProviders,
         disabledProviders = disabledProviders,
         toCreateScreenState(
-          /*createOptionSize=*/createOptionSize,
-          /*isOnPasskeyIntroStateAlready=*/isOnPasskeyIntroStateAlready,
-          /*requestDisplayInfo=*/requestDisplayInfo,
-          /*defaultProvider=*/defaultProvider, /*remoteEntry=*/remoteEntry,
-          /*isPasskeyFirstUse=*/isPasskeyFirstUse),
+          createOptionSize, isOnPasskeyIntroStateAlready,
+          requestDisplayInfo, defaultProvider, remoteEntry),
         requestDisplayInfo,
-        defaultProvider != null,
+        isOnPasskeyIntroStateAlready,
         toActiveEntry(
-          /*defaultProvider=*/defaultProvider,
-          /*createOptionSize=*/createOptionSize,
-          /*lastSeenProviderWithNonEmptyCreateOptions=*/lastSeenProviderWithNonEmptyCreateOptions,
-          /*remoteEntry=*/remoteEntry),
+          /*defaultProvider=*/defaultProvider, createOptionSize,
+          lastSeenProviderWithNonEmptyCreateOptions, remoteEntry),
       )
     }
 
@@ -342,10 +338,9 @@ class CreateFlowUtils {
       requestDisplayInfo: RequestDisplayInfo,
       defaultProvider: EnabledProviderInfo?,
       remoteEntry: RemoteInfo?,
-      isPasskeyFirstUse: Boolean,
     ): CreateScreenState {
       return if (
-        isPasskeyFirstUse && requestDisplayInfo
+        UserConfigRepo.getInstance().getIsFirstUse() && requestDisplayInfo
           .type == TYPE_PUBLIC_KEY_CREDENTIAL && !isOnPasskeyIntroStateAlready) {
         CreateScreenState.PASSKEY_INTRO
       } else if (
@@ -387,6 +382,7 @@ class CreateFlowUtils {
     private fun toCreationOptionInfoList(
       providerId: String,
       creationEntries: List<Entry>,
+      requestDisplayInfo: RequestDisplayInfo,
       context: Context,
     ): List<CreateOptionInfo> {
       return creationEntries.map {
@@ -401,7 +397,8 @@ class CreateFlowUtils {
           pendingIntent = it.pendingIntent,
           fillInIntent = it.frameworkExtrasIntent,
           userProviderDisplayName = createEntry.accountName.toString(),
-          profileIcon = createEntry.icon?.loadDrawable(context),
+          profileIcon = createEntry.icon?.loadDrawable(context)
+                  ?: requestDisplayInfo.typeIcon,
           passwordCount = CredentialCountInformation.getPasswordCount(
                   createEntry.credentialCountInformationList) ?: 0,
           passkeyCount = CredentialCountInformation.getPasskeyCount(

@@ -16,7 +16,6 @@
 
 package com.android.server.job;
 
-import android.annotation.Nullable;
 import android.app.ActivityManager;
 import android.app.AppGlobals;
 import android.content.pm.IPackageManager;
@@ -108,8 +107,7 @@ public final class JobSchedulerShellCommand extends BasicShellCommandHandler {
         }
     }
 
-    private boolean printError(int errCode, String pkgName, int userId, @Nullable String namespace,
-            int jobId) {
+    private boolean printError(int errCode, String pkgName, int userId, int jobId) {
         PrintWriter pw;
         switch (errCode) {
             case CMD_ERR_NO_PACKAGE:
@@ -126,10 +124,6 @@ public final class JobSchedulerShellCommand extends BasicShellCommandHandler {
                 pw.print(jobId);
                 pw.print(" in package ");
                 pw.print(pkgName);
-                if (namespace != null) {
-                    pw.print(" / namespace ");
-                    pw.print(namespace);
-                }
                 pw.print(" / user ");
                 pw.println(userId);
                 return true;
@@ -140,10 +134,6 @@ public final class JobSchedulerShellCommand extends BasicShellCommandHandler {
                 pw.print(jobId);
                 pw.print(" in package ");
                 pw.print(pkgName);
-                if (namespace != null) {
-                    pw.print(" / namespace ");
-                    pw.print(namespace);
-                }
                 pw.print(" / user ");
                 pw.print(userId);
                 pw.println(" has functional constraints but --force not specified");
@@ -160,7 +150,6 @@ public final class JobSchedulerShellCommand extends BasicShellCommandHandler {
         boolean force = false;
         boolean satisfied = false;
         int userId = UserHandle.USER_SYSTEM;
-        String namespace = null;
 
         String opt;
         while ((opt = getNextOption()) != null) {
@@ -180,11 +169,6 @@ public final class JobSchedulerShellCommand extends BasicShellCommandHandler {
                     userId = Integer.parseInt(getNextArgRequired());
                     break;
 
-                case "-n":
-                case "--namespace":
-                    namespace = getNextArgRequired();
-                    break;
-
                 default:
                     pw.println("Error: unknown option '" + opt + "'");
                     return -1;
@@ -201,9 +185,8 @@ public final class JobSchedulerShellCommand extends BasicShellCommandHandler {
 
         final long ident = Binder.clearCallingIdentity();
         try {
-            int ret = mInternal.executeRunCommand(pkgName, userId, namespace,
-                    jobId, satisfied, force);
-            if (printError(ret, pkgName, userId, namespace, jobId)) {
+            int ret = mInternal.executeRunCommand(pkgName, userId, jobId, satisfied, force);
+            if (printError(ret, pkgName, userId, jobId)) {
                 return ret;
             }
 
@@ -224,7 +207,6 @@ public final class JobSchedulerShellCommand extends BasicShellCommandHandler {
         checkPermission("force timeout jobs");
 
         int userId = UserHandle.USER_ALL;
-        String namespace = null;
 
         String opt;
         while ((opt = getNextOption()) != null) {
@@ -232,11 +214,6 @@ public final class JobSchedulerShellCommand extends BasicShellCommandHandler {
                 case "-u":
                 case "--user":
                     userId = UserHandle.parseUserArg(getNextArgRequired());
-                    break;
-
-                case "-n":
-                case "--namespace":
-                    namespace = getNextArgRequired();
                     break;
 
                 default:
@@ -255,8 +232,7 @@ public final class JobSchedulerShellCommand extends BasicShellCommandHandler {
 
         final long ident = Binder.clearCallingIdentity();
         try {
-            return mInternal.executeTimeoutCommand(pw, pkgName, userId, namespace,
-                    jobIdStr != null, jobId);
+            return mInternal.executeTimeoutCommand(pw, pkgName, userId, jobIdStr != null, jobId);
         } finally {
             Binder.restoreCallingIdentity(ident);
         }
@@ -266,7 +242,6 @@ public final class JobSchedulerShellCommand extends BasicShellCommandHandler {
         checkPermission("cancel jobs");
 
         int userId = UserHandle.USER_SYSTEM;
-        String namespace = null;
 
         String opt;
         while ((opt = getNextOption()) != null) {
@@ -274,11 +249,6 @@ public final class JobSchedulerShellCommand extends BasicShellCommandHandler {
                 case "-u":
                 case "--user":
                     userId = UserHandle.parseUserArg(getNextArgRequired());
-                    break;
-
-                case "-n":
-                case "--namespace":
-                    namespace = getNextArgRequired();
                     break;
 
                 default:
@@ -298,8 +268,7 @@ public final class JobSchedulerShellCommand extends BasicShellCommandHandler {
 
         final long ident = Binder.clearCallingIdentity();
         try {
-            return mInternal.executeCancelCommand(pw, pkgName, userId, namespace,
-                    jobIdStr != null, jobId);
+            return mInternal.executeCancelCommand(pw, pkgName, userId, jobIdStr != null, jobId);
         } finally {
             Binder.restoreCallingIdentity(ident);
         }
@@ -350,7 +319,6 @@ public final class JobSchedulerShellCommand extends BasicShellCommandHandler {
         checkPermission("get estimated bytes");
 
         int userId = UserHandle.USER_SYSTEM;
-        String namespace = null;
 
         String opt;
         while ((opt = getNextOption()) != null) {
@@ -358,11 +326,6 @@ public final class JobSchedulerShellCommand extends BasicShellCommandHandler {
                 case "-u":
                 case "--user":
                     userId = UserHandle.parseUserArg(getNextArgRequired());
-                    break;
-
-                case "-n":
-                case "--namespace":
-                    namespace = getNextArgRequired();
                     break;
 
                 default:
@@ -381,9 +344,8 @@ public final class JobSchedulerShellCommand extends BasicShellCommandHandler {
 
         final long ident = Binder.clearCallingIdentity();
         try {
-            int ret = mInternal.getEstimatedNetworkBytes(pw, pkgName, userId, namespace,
-                    jobId, byteOption);
-            printError(ret, pkgName, userId, namespace, jobId);
+            int ret = mInternal.getEstimatedNetworkBytes(pw, pkgName, userId, jobId, byteOption);
+            printError(ret, pkgName, userId, jobId);
             return ret;
         } finally {
             Binder.restoreCallingIdentity(ident);
@@ -406,7 +368,6 @@ public final class JobSchedulerShellCommand extends BasicShellCommandHandler {
         checkPermission("get transferred bytes");
 
         int userId = UserHandle.USER_SYSTEM;
-        String namespace = null;
 
         String opt;
         while ((opt = getNextOption()) != null) {
@@ -414,11 +375,6 @@ public final class JobSchedulerShellCommand extends BasicShellCommandHandler {
                 case "-u":
                 case "--user":
                     userId = UserHandle.parseUserArg(getNextArgRequired());
-                    break;
-
-                case "-n":
-                case "--namespace":
-                    namespace = getNextArgRequired();
                     break;
 
                 default:
@@ -437,9 +393,8 @@ public final class JobSchedulerShellCommand extends BasicShellCommandHandler {
 
         final long ident = Binder.clearCallingIdentity();
         try {
-            int ret = mInternal.getTransferredNetworkBytes(pw, pkgName, userId, namespace,
-                    jobId, byteOption);
-            printError(ret, pkgName, userId, namespace, jobId);
+            int ret = mInternal.getTransferredNetworkBytes(pw, pkgName, userId, jobId, byteOption);
+            printError(ret, pkgName, userId, jobId);
             return ret;
         } finally {
             Binder.restoreCallingIdentity(ident);
@@ -450,7 +405,6 @@ public final class JobSchedulerShellCommand extends BasicShellCommandHandler {
         checkPermission("get job state");
 
         int userId = UserHandle.USER_SYSTEM;
-        String namespace = null;
 
         String opt;
         while ((opt = getNextOption()) != null) {
@@ -458,11 +412,6 @@ public final class JobSchedulerShellCommand extends BasicShellCommandHandler {
                 case "-u":
                 case "--user":
                     userId = UserHandle.parseUserArg(getNextArgRequired());
-                    break;
-
-                case "-n":
-                case "--namespace":
-                    namespace = getNextArgRequired();
                     break;
 
                 default:
@@ -481,8 +430,8 @@ public final class JobSchedulerShellCommand extends BasicShellCommandHandler {
 
         final long ident = Binder.clearCallingIdentity();
         try {
-            int ret = mInternal.getJobState(pw, pkgName, userId, namespace, jobId);
-            printError(ret, pkgName, userId, namespace, jobId);
+            int ret = mInternal.getJobState(pw, pkgName, userId, jobId);
+            printError(ret, pkgName, userId, jobId);
             return ret;
         } finally {
             Binder.restoreCallingIdentity(ident);
@@ -572,8 +521,7 @@ public final class JobSchedulerShellCommand extends BasicShellCommandHandler {
         pw.println("Job scheduler (jobscheduler) commands:");
         pw.println("  help");
         pw.println("    Print this help text.");
-        pw.println("  run [-f | --force] [-s | --satisfied] [-u | --user USER_ID]"
-                + " [-n | --namespace NAMESPACE] PACKAGE JOB_ID");
+        pw.println("  run [-f | --force] [-s | --satisfied] [-u | --user USER_ID] PACKAGE JOB_ID");
         pw.println("    Trigger immediate execution of a specific scheduled job. For historical");
         pw.println("    reasons, some constraints, such as battery, are ignored when this");
         pw.println("    command is called. If you don't want any constraints to be ignored,");
@@ -582,30 +530,23 @@ public final class JobSchedulerShellCommand extends BasicShellCommandHandler {
         pw.println("      -f or --force: run the job even if technical constraints such as");
         pw.println("         connectivity are not currently met. This is incompatible with -f ");
         pw.println("         and so an error will be reported if both are given.");
-        pw.println("      -n or --namespace: specify the namespace this job sits in; the default");
-        pw.println("         is null (no namespace).");
         pw.println("      -s or --satisfied: run the job only if all constraints are met.");
         pw.println("         This is incompatible with -f and so an error will be reported");
         pw.println("         if both are given.");
         pw.println("      -u or --user: specify which user's job is to be run; the default is");
         pw.println("         the primary or system user");
-        pw.println("  timeout [-u | --user USER_ID] [-n | --namespace NAMESPACE]"
-                + " [PACKAGE] [JOB_ID]");
+        pw.println("  timeout [-u | --user USER_ID] [PACKAGE] [JOB_ID]");
         pw.println("    Trigger immediate timeout of currently executing jobs, as if their.");
         pw.println("    execution timeout had expired.");
         pw.println("    Options:");
         pw.println("      -u or --user: specify which user's job is to be run; the default is");
         pw.println("         all users");
-        pw.println("      -n or --namespace: specify the namespace this job sits in; the default");
-        pw.println("         is null (no namespace).");
-        pw.println("  cancel [-u | --user USER_ID] [-n | --namespace NAMESPACE] PACKAGE [JOB_ID]");
+        pw.println("  cancel [-u | --user USER_ID] PACKAGE [JOB_ID]");
         pw.println("    Cancel a scheduled job.  If a job ID is not supplied, all jobs scheduled");
         pw.println("    by that package will be canceled.  USE WITH CAUTION.");
         pw.println("    Options:");
         pw.println("      -u or --user: specify which user's job is to be run; the default is");
         pw.println("         the primary or system user");
-        pw.println("      -n or --namespace: specify the namespace this job sits in; the default");
-        pw.println("         is null (no namespace).");
         pw.println("  heartbeat [num]");
         pw.println("    No longer used.");
         pw.println("  monitor-battery [on|off]");
@@ -617,14 +558,12 @@ public final class JobSchedulerShellCommand extends BasicShellCommandHandler {
         pw.println("    Return whether the battery is currently considered to be charging.");
         pw.println("  get-battery-not-low");
         pw.println("    Return whether the battery is currently considered to not be low.");
-        pw.println("  get-estimated-download-bytes [-u | --user USER_ID]"
-                + " [-n | --namespace NAMESPACE] PACKAGE JOB_ID");
+        pw.println("  get-estimated-download-bytes [-u | --user USER_ID] PACKAGE JOB_ID");
         pw.println("    Return the most recent estimated download bytes for the job.");
         pw.println("    Options:");
         pw.println("      -u or --user: specify which user's job is to be run; the default is");
         pw.println("         the primary or system user");
-        pw.println("  get-estimated-upload-bytes [-u | --user USER_ID]"
-                + " [-n | --namespace NAMESPACE] PACKAGE JOB_ID");
+        pw.println("  get-estimated-upload-bytes [-u | --user USER_ID] PACKAGE JOB_ID");
         pw.println("    Return the most recent estimated upload bytes for the job.");
         pw.println("    Options:");
         pw.println("      -u or --user: specify which user's job is to be run; the default is");
@@ -633,20 +572,17 @@ public final class JobSchedulerShellCommand extends BasicShellCommandHandler {
         pw.println("    Return the last storage update sequence number that was received.");
         pw.println("  get-storage-not-low");
         pw.println("    Return whether storage is currently considered to not be low.");
-        pw.println("  get-transferred-download-bytes [-u | --user USER_ID]"
-                + " [-n | --namespace NAMESPACE] PACKAGE JOB_ID");
+        pw.println("  get-transferred-download-bytes [-u | --user USER_ID] PACKAGE JOB_ID");
         pw.println("    Return the most recent transferred download bytes for the job.");
         pw.println("    Options:");
         pw.println("      -u or --user: specify which user's job is to be run; the default is");
         pw.println("         the primary or system user");
-        pw.println("  get-transferred-upload-bytes [-u | --user USER_ID]"
-                + " [-n | --namespace NAMESPACE] PACKAGE JOB_ID");
+        pw.println("  get-transferred-upload-bytes [-u | --user USER_ID] PACKAGE JOB_ID");
         pw.println("    Return the most recent transferred upload bytes for the job.");
         pw.println("    Options:");
         pw.println("      -u or --user: specify which user's job is to be run; the default is");
         pw.println("         the primary or system user");
-        pw.println("  get-job-state [-u | --user USER_ID] [-n | --namespace NAMESPACE]"
-                + " PACKAGE JOB_ID");
+        pw.println("  get-job-state [-u | --user USER_ID] PACKAGE JOB_ID");
         pw.println("    Return the current state of a job, may be any combination of:");
         pw.println("      pending: currently on the pending list, waiting to be active");
         pw.println("      active: job is actively running");
@@ -658,8 +594,6 @@ public final class JobSchedulerShellCommand extends BasicShellCommandHandler {
         pw.println("    Options:");
         pw.println("      -u or --user: specify which user's job is to be run; the default is");
         pw.println("         the primary or system user");
-        pw.println("      -n or --namespace: specify the namespace this job sits in; the default");
-        pw.println("         is null (no namespace).");
         pw.println("  trigger-dock-state [idle|active]");
         pw.println("    Trigger wireless charging dock state.  Active by default.");
         pw.println();

@@ -159,24 +159,18 @@ constructor(
         ensureOverlayRemoved()
 
         val newRoot = SurfaceControlViewHost(context, context.display!!, wwm)
-        val params = getLayoutParams()
         val newView =
-            LightRevealScrim(
-                    context,
-                    attrs = null,
-                    initialWidth = params.width,
-                    initialHeight = params.height
-                )
-                .apply {
-                    revealEffect = createLightRevealEffect()
-                    isScrimOpaqueChangedListener = Consumer {}
-                    revealAmount =
-                        when (reason) {
-                            FOLD -> TRANSPARENT
-                            UNFOLD -> BLACK
-                        }
-                }
+            LightRevealScrim(context, null).apply {
+                revealEffect = createLightRevealEffect()
+                isScrimOpaqueChangedListener = Consumer {}
+                revealAmount =
+                    when (reason) {
+                        FOLD -> TRANSPARENT
+                        UNFOLD -> BLACK
+                    }
+            }
 
+        val params = getLayoutParams()
         newRoot.setView(newView, params)
 
         if (onOverlayReady != null) {

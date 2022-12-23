@@ -79,7 +79,7 @@ public class JobSetTest {
                 .setRequiresCharging(true)
                 .build();
         return JobStatus.createFromJobInfo(jobInfo, callingUid, mContext.getPackageName(),
-                mContext.getUserId(), "Namespace", "Test");
+                mContext.getUserId(), "Test");
     }
 
     @Test

@@ -547,6 +547,7 @@ public abstract class Animator implements Cloneable {
      */
     void skipToEndValue(boolean inReverse) {}
 
+
     /**
      * Internal use only.
      *
@@ -564,13 +565,13 @@ public abstract class Animator implements Cloneable {
      * repetition. lastPlayTime is similar and is used to calculate how many repeats have been
      * done between the two times.
      */
-    void animateValuesInRange(long currentPlayTime, long lastPlayTime, boolean notify) {}
+    void animateValuesInRange(long currentPlayTime, long lastPlayTime) {}
 
     /**
      * Internal use only. This animates any animation that has ended since lastPlayTime.
      * If an animation hasn't been finished, no change will be made.
      */
-    void animateSkipToEnds(long currentPlayTime, long lastPlayTime, boolean notify) {}
+    void animateSkipToEnds(long currentPlayTime, long lastPlayTime) {}
 
     /**
      * Internal use only. Adds all start times (after delay) to and end times to times.

@@ -23,6 +23,7 @@ import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.hardware.display.DisplayManager.VirtualDisplayFlag;
 import android.media.projection.MediaProjection;
+import android.os.Handler;
 import android.os.Parcel;
 import android.os.Parcelable;
 import android.view.Surface;
@@ -34,8 +35,7 @@ import java.util.List;
 
 /**
  * Holds configuration used to create {@link VirtualDisplay} instances. See
- * {@link MediaProjection#createVirtualDisplay} and
- * {@link android.companion.virtual.VirtualDeviceManager.VirtualDevice#createVirtualDisplay}.
+ * {@link MediaProjection#createVirtualDisplay(VirtualDisplayConfig, VirtualDisplay.Callback, Handler)}.
  *
  * @hide
  */

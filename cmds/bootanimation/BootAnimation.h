@@ -30,8 +30,6 @@
 #include <utils/Thread.h>
 #include <binder/IBinder.h>
 
-#include <ui/Rotation.h>
-
 #include <EGL/egl.h>
 #include <GLES2/gl2.h>
 
@@ -202,8 +200,6 @@ private:
     ui::Size limitSurfaceSize(int width, int height) const;
     void resizeSurface(int newWidth, int newHeight);
     void projectSceneToWindow();
-    void rotateAwayFromNaturalOrientationIfNeeded();
-    ui::Rotation parseOrientationProperty();
 
     bool shouldStopPlayingPart(const Animation::Part& part, int fadedFramesCount,
                                int lastDisplayedProgress);

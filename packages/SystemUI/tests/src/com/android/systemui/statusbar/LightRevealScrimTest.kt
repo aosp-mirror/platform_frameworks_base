@@ -20,7 +20,6 @@ import android.testing.AndroidTestingRunner
 import android.view.View
 import androidx.test.filters.SmallTest
 import com.android.systemui.SysuiTestCase
-import com.google.common.truth.Truth.assertThat
 import org.junit.Assert.assertFalse
 import org.junit.Assert.assertTrue
 import org.junit.Before
@@ -37,7 +36,7 @@ class LightRevealScrimTest : SysuiTestCase() {
 
   @Before
   fun setUp() {
-    scrim = LightRevealScrim(context, null, DEFAULT_WIDTH, DEFAULT_HEIGHT)
+    scrim = LightRevealScrim(context, null)
     scrim.isScrimOpaqueChangedListener = Consumer { opaque ->
       isOpaque = opaque
     }
@@ -63,26 +62,5 @@ class LightRevealScrimTest : SysuiTestCase() {
   fun testRevealSetsOpaque() {
     scrim.revealAmount = 0.5f
     assertFalse("Scrim is opaque even though it's revealed", scrim.isScrimOpaque)
-  }
-
-  @Test
-  fun testBeforeOnMeasure_defaultDimensions() {
-    assertThat(scrim.viewWidth).isEqualTo(DEFAULT_WIDTH)
-    assertThat(scrim.viewHeight).isEqualTo(DEFAULT_HEIGHT)
-  }
-
-  @Test
-  fun testAfterOnMeasure_measuredDimensions() {
-    scrim.measure(/* widthMeasureSpec= */ exact(1), /* heightMeasureSpec= */ exact(2))
-
-    assertThat(scrim.viewWidth).isEqualTo(1)
-    assertThat(scrim.viewHeight).isEqualTo(2)
-  }
-
-  private fun exact(value: Int) = View.MeasureSpec.makeMeasureSpec(value, View.MeasureSpec.EXACTLY)
-
-  private companion object {
-    private const val DEFAULT_WIDTH = 42
-    private const val DEFAULT_HEIGHT = 24
   }
 }

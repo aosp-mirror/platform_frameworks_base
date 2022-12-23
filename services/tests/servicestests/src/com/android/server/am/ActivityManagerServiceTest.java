@@ -834,35 +834,35 @@ public class ActivityManagerServiceTest {
     }
 
     @Test
-    public void testGetDisplayIdsForStartingBackgroundUsers() {
+    public void testGetSecondaryDisplayIdsForStartingBackgroundUsers() {
         mInjector.secondaryDisplayIdsForStartingBackgroundUsers = new int[]{4, 8, 15, 16, 23, 42};
 
-        int [] displayIds = mAms.getDisplayIdsForStartingVisibleBackgroundUsers();
+        int [] displayIds = mAms.getSecondaryDisplayIdsForStartingBackgroundUsers();
 
-        assertWithMessage("mAms.getDisplayIdsForStartingVisibleBackgroundUsers()")
+        assertWithMessage("mAms.getSecondaryDisplayIdsForStartingBackgroundUsers()")
                 .that(displayIds).asList().containsExactly(4, 8, 15, 16, 23, 42);
     }
 
     @Test
-    public void testStartUserInBackgroundVisibleOnDisplay_invalidDisplay() {
+    public void testStartUserInBackgroundOnSecondaryDisplay_invalidDisplay() {
         mInjector.secondaryDisplayIdsForStartingBackgroundUsers = new int[]{4, 8, 15, 16, 23, 42};
 
         assertThrows(IllegalArgumentException.class,
-                () -> mAms.startUserInBackgroundVisibleOnDisplay(USER_ID, 666));
+                () -> mAms.startUserInBackgroundOnSecondaryDisplay(USER_ID, 666));
 
         assertWithMessage("UserController.startUserOnSecondaryDisplay() calls")
                 .that(mInjector.usersStartedOnSecondaryDisplays).isEmpty();
     }
 
     @Test
-    public void testStartUserInBackgroundVisibleOnDisplay_validDisplay_failed() {
+    public void testStartUserInBackgroundOnSecondaryDisplay_validDisplay_failed() {
         mInjector.secondaryDisplayIdsForStartingBackgroundUsers = new int[]{ 4, 8, 15, 16, 23, 42 };
         mInjector.returnValueForstartUserOnSecondaryDisplay = false;
 
-        boolean started = mAms.startUserInBackgroundVisibleOnDisplay(USER_ID, 42);
+        boolean started = mAms.startUserInBackgroundOnSecondaryDisplay(USER_ID, 42);
         Log.v(TAG, "Started: " + started);
 
-        assertWithMessage("mAms.startUserInBackgroundOnDisplay(%s, 42)", USER_ID)
+        assertWithMessage("mAms.startUserInBackgroundOnSecondaryDisplay(%s, 42)", USER_ID)
                 .that(started).isFalse();
         assertWithMessage("UserController.startUserOnSecondaryDisplay() calls")
                 .that(mInjector.usersStartedOnSecondaryDisplays)
@@ -870,16 +870,16 @@ public class ActivityManagerServiceTest {
     }
 
     @Test
-    public void testStartUserInBackgroundVisibleOnDisplay_validDisplay_success() {
+    public void testStartUserInBackgroundOnSecondaryDisplay_validDisplay_success() {
         mInjector.secondaryDisplayIdsForStartingBackgroundUsers = new int[]{ 4, 8, 15, 16, 23, 42 };
         mInjector.returnValueForstartUserOnSecondaryDisplay = true;
 
-        boolean started = mAms.startUserInBackgroundVisibleOnDisplay(USER_ID, 42);
+        boolean started = mAms.startUserInBackgroundOnSecondaryDisplay(USER_ID, 42);
         Log.v(TAG, "Started: " + started);
 
-        assertWithMessage("mAms.startUserInBackgroundOnDisplay(%s, 42)", USER_ID)
+        assertWithMessage("mAms.startUserInBackgroundOnSecondaryDisplay(%s, 42)", USER_ID)
                 .that(started).isTrue();
-        assertWithMessage("UserController.startUserOnDisplay() calls")
+        assertWithMessage("UserController.startUserOnSecondaryDisplay() calls")
                 .that(mInjector.usersStartedOnSecondaryDisplays)
                 .containsExactly(new Pair<>(USER_ID, 42));
     }
@@ -1004,12 +1004,12 @@ public class ActivityManagerServiceTest {
         }
 
         @Override
-        public int[] getDisplayIdsForStartingVisibleBackgroundUsers() {
+        public int[] getSecondaryDisplayIdsForStartingBackgroundUsers() {
             return secondaryDisplayIdsForStartingBackgroundUsers;
         }
 
         @Override
-        public boolean startUserInBackgroundVisibleOnDisplay(int userId, int displayId) {
+        public boolean startUserOnSecondaryDisplay(int userId, int displayId) {
             usersStartedOnSecondaryDisplays.add(new Pair<>(userId, displayId));
             return returnValueForstartUserOnSecondaryDisplay;
         }

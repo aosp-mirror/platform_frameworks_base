@@ -291,7 +291,7 @@ class DisplayWindowSettings {
 
         boolean dontMoveToTop = settings.mDontMoveToTop != null
                 ? settings.mDontMoveToTop : false;
-        dc.mDontMoveToTop = !dc.canStealTopFocus() || dontMoveToTop;
+        dc.mDontMoveToTop = dontMoveToTop;
 
         if (includeRotationSettings) applyRotationSettingsToDisplayLocked(dc);
     }

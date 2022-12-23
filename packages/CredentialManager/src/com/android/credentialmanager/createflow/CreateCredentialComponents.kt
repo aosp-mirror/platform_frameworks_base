@@ -14,11 +14,14 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Divider
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.material.icons.Icons
@@ -40,7 +43,7 @@ import com.android.credentialmanager.R
 import com.android.credentialmanager.common.material.ModalBottomSheetLayout
 import com.android.credentialmanager.common.material.ModalBottomSheetValue
 import com.android.credentialmanager.common.material.rememberModalBottomSheetState
-import com.android.credentialmanager.common.ui.ActionButton
+import com.android.credentialmanager.common.ui.CancelButton
 import com.android.credentialmanager.common.ui.ConfirmButton
 import com.android.credentialmanager.common.ui.Entry
 import com.android.credentialmanager.common.ui.TextOnSurface
@@ -76,30 +79,28 @@ fun CreateCredentialScreen(
                         requestDisplayInfo = uiState.requestDisplayInfo,
                         enabledProviderList = uiState.enabledProviders,
                         disabledProviderList = uiState.disabledProviders,
+                        onCancel = viewModel::onCancel,
                         onOptionSelected = viewModel::onEntrySelectedFromFirstUseScreen,
                         onDisabledPasswordManagerSelected =
                         viewModel::onDisabledPasswordManagerSelected,
-                        onMoreOptionsSelected = viewModel::onMoreOptionsSelectedOnProviderSelection,
+                        onRemoteEntrySelected = viewModel::onEntrySelected,
                     )
                     CreateScreenState.CREATION_OPTION_SELECTION -> CreationSelectionCard(
                         requestDisplayInfo = uiState.requestDisplayInfo,
                         enabledProviderList = uiState.enabledProviders,
                         providerInfo = uiState.activeEntry?.activeProvider!!,
                         createOptionInfo = uiState.activeEntry.activeEntryInfo as CreateOptionInfo,
+                        showActiveEntryOnly = uiState.showActiveEntryOnly,
                         onOptionSelected = viewModel::onEntrySelected,
                         onConfirm = viewModel::onConfirmEntrySelected,
-                        onMoreOptionsSelected = viewModel::onMoreOptionsSelectedOnCreationSelection,
+                        onCancel = viewModel::onCancel,
+                        onMoreOptionsSelected = viewModel::onMoreOptionsSelected,
                     )
                     CreateScreenState.MORE_OPTIONS_SELECTION -> MoreOptionsSelectionCard(
                         requestDisplayInfo = uiState.requestDisplayInfo,
                         enabledProviderList = uiState.enabledProviders,
                         disabledProviderList = uiState.disabledProviders,
-                        hasDefaultProvider = uiState.hasDefaultProvider,
-                        isFromProviderSelection = uiState.isFromProviderSelection!!,
-                        onBackProviderSelectionButtonSelected =
-                        viewModel::onBackProviderSelectionButtonSelected,
-                        onBackCreationSelectionButtonSelected =
-                        viewModel::onBackCreationSelectionButtonSelected,
+                        onBackButtonSelected = viewModel::onBackButtonSelected,
                         onOptionSelected = viewModel::onEntrySelectedFromMoreOptionScreen,
                         onDisabledPasswordManagerSelected =
                         viewModel::onDisabledPasswordManagerSelected,
@@ -171,7 +172,7 @@ fun ConfirmationCard(
                 TextSecondary(
                     text = stringResource(R.string.passkey_creation_intro_body_password),
                     style = MaterialTheme.typography.bodyMedium,
-                    modifier = Modifier.padding(start = 16.dp, end = 4.dp),
+                    modifier = Modifier.padding(start = 16.dp),
                 )
             }
             Divider(
@@ -191,7 +192,7 @@ fun ConfirmationCard(
                 TextSecondary(
                     text = stringResource(R.string.passkey_creation_intro_body_fingerprint),
                     style = MaterialTheme.typography.bodyMedium,
-                    modifier = Modifier.padding(start = 16.dp, end = 4.dp),
+                    modifier = Modifier.padding(start = 16.dp),
                 )
             }
             Divider(
@@ -211,7 +212,7 @@ fun ConfirmationCard(
                 TextSecondary(
                     text = stringResource(R.string.passkey_creation_intro_body_device),
                     style = MaterialTheme.typography.bodyMedium,
-                    modifier = Modifier.padding(start = 16.dp, end = 4.dp),
+                    modifier = Modifier.padding(start = 16.dp),
                 )
             }
             Divider(
@@ -222,7 +223,7 @@ fun ConfirmationCard(
                 horizontalArrangement = Arrangement.SpaceBetween,
                 modifier = Modifier.fillMaxWidth().padding(horizontal = 24.dp)
             ) {
-                ActionButton(
+                CancelButton(
                     stringResource(R.string.string_cancel),
                     onClick = onCancel
                 )
@@ -248,7 +249,8 @@ fun ProviderSelectionCard(
     disabledProviderList: List<DisabledProviderInfo>?,
     onOptionSelected: (ActiveEntry) -> Unit,
     onDisabledPasswordManagerSelected: () -> Unit,
-    onMoreOptionsSelected: () -> Unit,
+    onCancel: () -> Unit,
+    onRemoteEntrySelected: (EntryInfo) -> Unit,
 ) {
     ContainerCard() {
         Column() {
@@ -299,7 +301,124 @@ fun ProviderSelectionCard(
                         enabledProviderInfo.createOptions.forEach { createOptionInfo ->
                             item {
                                 MoreOptionsInfoRow(
-                                    requestDisplayInfo = requestDisplayInfo,
+                                    providerInfo = enabledProviderInfo,
+                                    createOptionInfo = createOptionInfo,
+                                    onOptionSelected = {
+                                        onOptionSelected(
+                                            ActiveEntry(
+                                                enabledProviderInfo,
+                                                createOptionInfo
+                                            )
+                                        )
+                                    })
+                            }
+                        }
+                    }
+                    if (disabledProviderList != null && disabledProviderList.isNotEmpty()) {
+                        item {
+                            MoreOptionsDisabledProvidersRow(
+                                disabledProviders = disabledProviderList,
+                                onDisabledPasswordManagerSelected =
+                                onDisabledPasswordManagerSelected,
+                            )
+                        }
+                    }
+                }
+            }
+            // TODO: handle the error situation that if multiple remoteInfos exists
+            enabledProviderList.forEach { enabledProvider ->
+                if (enabledProvider.remoteEntry != null) {
+                    TextButton(
+                        onClick = {
+                            onRemoteEntrySelected(enabledProvider.remoteEntry!!)
+                        },
+                        modifier = Modifier
+                            .padding(horizontal = 24.dp)
+                            .align(alignment = Alignment.CenterHorizontally),
+                        colors = ButtonDefaults.textButtonColors(
+                            contentColor = MaterialTheme.colorScheme.primary,
+                        )
+                    ) {
+                        Text(
+                            text = stringResource(R.string.string_save_to_another_device),
+                            textAlign = TextAlign.Center,
+                        )
+                    }
+                }
+            }
+            Divider(
+                thickness = 24.dp,
+                color = Color.Transparent
+            )
+            Row(
+                horizontalArrangement = Arrangement.Start,
+                modifier = Modifier.fillMaxWidth().padding(horizontal = 24.dp)
+            ) {
+                CancelButton(stringResource(R.string.string_cancel), onCancel)
+            }
+            Divider(
+                thickness = 18.dp,
+                color = Color.Transparent,
+                modifier = Modifier.padding(bottom = 16.dp)
+            )
+        }
+    }
+}
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+fun MoreOptionsSelectionCard(
+    requestDisplayInfo: RequestDisplayInfo,
+    enabledProviderList: List<EnabledProviderInfo>,
+    disabledProviderList: List<DisabledProviderInfo>?,
+    onBackButtonSelected: () -> Unit,
+    onOptionSelected: (ActiveEntry) -> Unit,
+    onDisabledPasswordManagerSelected: () -> Unit,
+    onRemoteEntrySelected: (EntryInfo) -> Unit,
+) {
+    ContainerCard() {
+        Column() {
+            TopAppBar(
+                title = {
+                    TextOnSurface(
+                        text = when (requestDisplayInfo.type) {
+                            TYPE_PUBLIC_KEY_CREDENTIAL ->
+                                stringResource(R.string.create_passkey_in_title)
+                            TYPE_PASSWORD_CREDENTIAL ->
+                                stringResource(R.string.save_password_to_title)
+                            else -> stringResource(R.string.save_sign_in_to_title)
+                        },
+                        style = MaterialTheme.typography.titleMedium,
+                    )
+                },
+                navigationIcon = {
+                    IconButton(onClick = onBackButtonSelected) {
+                        Icon(
+                            Icons.Filled.ArrowBack,
+                            stringResource(R.string.accessibility_back_arrow_button)
+                        )
+                    }
+                },
+                colors = TopAppBarDefaults.smallTopAppBarColors
+                    (containerColor = Color.Transparent),
+            )
+            Divider(
+                thickness = 8.dp,
+                color = Color.Transparent
+            )
+            ContainerCard(
+                shape = MaterialTheme.shapes.medium,
+                modifier = Modifier
+                    .padding(horizontal = 24.dp)
+                    .align(alignment = Alignment.CenterHorizontally)
+            ) {
+                LazyColumn(
+                    verticalArrangement = Arrangement.spacedBy(2.dp)
+                ) {
+                    enabledProviderList.forEach { enabledProviderInfo ->
+                        enabledProviderInfo.createOptions.forEach { createOptionInfo ->
+                            item {
+                                MoreOptionsInfoRow(
                                     providerInfo = enabledProviderInfo,
                                     createOptionInfo = createOptionInfo,
                                     onOptionSelected = {
@@ -320,124 +439,6 @@ fun ProviderSelectionCard(
                             onDisabledPasswordManagerSelected,
                         )
                     }
-                }
-            }
-            Divider(
-                thickness = 24.dp,
-                color = Color.Transparent
-            )
-            // TODO: handle the error situation that if multiple remoteInfos exists
-            enabledProviderList.forEach { enabledProvider ->
-                if (enabledProvider.remoteEntry != null) {
-                    Row(
-                        horizontalArrangement = Arrangement.Start,
-                        modifier = Modifier.fillMaxWidth().padding(horizontal = 24.dp)
-                    ) {
-                        ActionButton(
-                            stringResource(R.string.string_more_options),
-                            onMoreOptionsSelected
-                        )
-                    }
-                }
-            }
-            Divider(
-                thickness = 18.dp,
-                color = Color.Transparent,
-                modifier = Modifier.padding(bottom = 16.dp)
-            )
-        }
-    }
-}
-
-@OptIn(ExperimentalMaterial3Api::class)
-@Composable
-fun MoreOptionsSelectionCard(
-    requestDisplayInfo: RequestDisplayInfo,
-    enabledProviderList: List<EnabledProviderInfo>,
-    disabledProviderList: List<DisabledProviderInfo>?,
-    hasDefaultProvider: Boolean,
-    isFromProviderSelection: Boolean,
-    onBackProviderSelectionButtonSelected: () -> Unit,
-    onBackCreationSelectionButtonSelected: () -> Unit,
-    onOptionSelected: (ActiveEntry) -> Unit,
-    onDisabledPasswordManagerSelected: () -> Unit,
-    onRemoteEntrySelected: (EntryInfo) -> Unit,
-) {
-    ContainerCard() {
-        Column() {
-            TopAppBar(
-                title = {
-                    TextOnSurface(
-                        text =
-                        stringResource(
-                            R.string.save_credential_to_title,
-                            when (requestDisplayInfo.type) {
-                                TYPE_PUBLIC_KEY_CREDENTIAL ->
-                                    stringResource(R.string.passkey)
-                                TYPE_PASSWORD_CREDENTIAL ->
-                                    stringResource(R.string.password)
-                                else -> stringResource(R.string.sign_in_info)
-                            }),
-                        style = MaterialTheme.typography.titleMedium,
-                    )
-                },
-                navigationIcon = {
-                    IconButton(
-                        onClick =
-                        if (isFromProviderSelection)
-                            onBackProviderSelectionButtonSelected
-                        else onBackCreationSelectionButtonSelected
-                    ) {
-                        Icon(
-                            Icons.Filled.ArrowBack,
-                            stringResource(R.string.accessibility_back_arrow_button)
-                        )
-                    }
-                },
-                colors = TopAppBarDefaults.smallTopAppBarColors
-                    (containerColor = Color.Transparent),
-                modifier = Modifier.padding(top = 12.dp)
-            )
-            Divider(
-                thickness = 8.dp,
-                color = Color.Transparent
-            )
-            ContainerCard(
-                shape = MaterialTheme.shapes.medium,
-                modifier = Modifier
-                    .padding(horizontal = 24.dp)
-                    .align(alignment = Alignment.CenterHorizontally)
-            ) {
-                LazyColumn(
-                    verticalArrangement = Arrangement.spacedBy(2.dp)
-                ) {
-                    if (hasDefaultProvider) {
-                        enabledProviderList.forEach { enabledProviderInfo ->
-                            enabledProviderInfo.createOptions.forEach { createOptionInfo ->
-                                item {
-                                    MoreOptionsInfoRow(
-                                        requestDisplayInfo = requestDisplayInfo,
-                                        providerInfo = enabledProviderInfo,
-                                        createOptionInfo = createOptionInfo,
-                                        onOptionSelected = {
-                                            onOptionSelected(
-                                                ActiveEntry(
-                                                    enabledProviderInfo,
-                                                    createOptionInfo
-                                                )
-                                            )
-                                        })
-                                }
-                            }
-                        }
-                        item {
-                            MoreOptionsDisabledProvidersRow(
-                                disabledProviders = disabledProviderList,
-                                onDisabledPasswordManagerSelected =
-                                onDisabledPasswordManagerSelected,
-                            )
-                        }
-                    }
                     // TODO: handle the error situation that if multiple remoteInfos exists
                     enabledProviderList.forEach {
                         if (it.remoteEntry != null) {
@@ -452,7 +453,7 @@ fun MoreOptionsSelectionCard(
                 }
             }
             Divider(
-                thickness = 8.dp,
+                thickness = 18.dp,
                 color = Color.Transparent,
                 modifier = Modifier.padding(bottom = 40.dp)
             )
@@ -495,7 +496,7 @@ fun MoreOptionsRowIntroCard(
                 horizontalArrangement = Arrangement.SpaceBetween,
                 modifier = Modifier.fillMaxWidth().padding(horizontal = 24.dp)
             ) {
-                ActionButton(
+                CancelButton(
                     stringResource(R.string.use_once),
                     onClick = onUseOnceSelected
                 )
@@ -520,93 +521,40 @@ fun CreationSelectionCard(
     enabledProviderList: List<EnabledProviderInfo>,
     providerInfo: EnabledProviderInfo,
     createOptionInfo: CreateOptionInfo,
+    showActiveEntryOnly: Boolean,
     onOptionSelected: (EntryInfo) -> Unit,
     onConfirm: () -> Unit,
+    onCancel: () -> Unit,
     onMoreOptionsSelected: () -> Unit,
 ) {
     ContainerCard() {
         Column() {
-            Divider(
-                thickness = 24.dp,
-                color = Color.Transparent
-            )
             Icon(
                 bitmap = providerInfo.icon.toBitmap().asImageBitmap(),
                 contentDescription = null,
                 tint = Color.Unspecified,
-                modifier = Modifier.align(alignment = Alignment.CenterHorizontally).size(32.dp)
-            )
-            TextSecondary(
-                text = providerInfo.displayName,
-                style = MaterialTheme.typography.titleLarge,
-                modifier = Modifier.padding(vertical = 10.dp)
-                    .align(alignment = Alignment.CenterHorizontally),
-                textAlign = TextAlign.Center,
+                modifier = Modifier.align(alignment = Alignment.CenterHorizontally)
+                    .padding(all = 24.dp).size(32.dp)
             )
             TextOnSurface(
                 text = when (requestDisplayInfo.type) {
                     TYPE_PUBLIC_KEY_CREDENTIAL -> stringResource(
                         R.string.choose_create_option_passkey_title,
-                        requestDisplayInfo.appDomainName
+                        providerInfo.displayName
                     )
                     TYPE_PASSWORD_CREDENTIAL -> stringResource(
                         R.string.choose_create_option_password_title,
-                        requestDisplayInfo.appDomainName
+                        providerInfo.displayName
                     )
                     else -> stringResource(
                         R.string.choose_create_option_sign_in_title,
-                        requestDisplayInfo.appDomainName
+                        providerInfo.displayName
                     )
                 },
                 style = MaterialTheme.typography.titleMedium,
                 modifier = Modifier.padding(horizontal = 24.dp)
                     .align(alignment = Alignment.CenterHorizontally),
                 textAlign = TextAlign.Center,
-            )
-            ContainerCard(
-                shape = MaterialTheme.shapes.medium,
-                modifier = Modifier
-                    .padding(all = 24.dp)
-                    .align(alignment = Alignment.CenterHorizontally),
-            ) {
-                PrimaryCreateOptionRow(
-                    requestDisplayInfo = requestDisplayInfo,
-                    entryInfo = createOptionInfo,
-                    onOptionSelected = onOptionSelected
-                )
-            }
-            var shouldShowMoreOptionsButton = false
-            var createOptionsSize = 0
-            var remoteEntry: RemoteInfo? = null
-            enabledProviderList.forEach { enabledProvider ->
-                if (enabledProvider.remoteEntry != null) {
-                    remoteEntry = enabledProvider.remoteEntry
-                }
-                createOptionsSize += enabledProvider.createOptions.size
-            }
-            if (createOptionsSize > 1 || remoteEntry != null) {
-                shouldShowMoreOptionsButton = true
-            }
-            Row(
-                horizontalArrangement =
-                if (shouldShowMoreOptionsButton) Arrangement.SpaceBetween else Arrangement.End,
-                modifier = Modifier.fillMaxWidth().padding(horizontal = 24.dp)
-            ) {
-                if (shouldShowMoreOptionsButton) {
-                    ActionButton(
-                        stringResource(R.string.string_more_options),
-                        onClick = onMoreOptionsSelected
-                    )
-                }
-                ConfirmButton(
-                    stringResource(R.string.string_continue),
-                    onClick = onConfirm
-                )
-            }
-            Divider(
-                thickness = 1.dp,
-                color = Color.LightGray,
-                modifier = Modifier.padding(start = 24.dp, end = 24.dp, top = 18.dp)
             )
             if (createOptionInfo.userProviderDisplayName != null) {
                 TextSecondary(
@@ -622,8 +570,88 @@ fun CreationSelectionCard(
                         createOptionInfo.userProviderDisplayName
                     ),
                     style = MaterialTheme.typography.bodyLarge,
-                    modifier = Modifier.padding(
-                        start = 24.dp, top = 8.dp, bottom = 18.dp, end = 24.dp)
+                    modifier = Modifier.padding(all = 24.dp)
+                        .align(alignment = Alignment.CenterHorizontally),
+                )
+            }
+            ContainerCard(
+                shape = MaterialTheme.shapes.medium,
+                modifier = Modifier
+                    .padding(horizontal = 24.dp)
+                    .align(alignment = Alignment.CenterHorizontally),
+            ) {
+                PrimaryCreateOptionRow(
+                    requestDisplayInfo = requestDisplayInfo,
+                    entryInfo = createOptionInfo,
+                    onOptionSelected = onOptionSelected
+                )
+            }
+            if (!showActiveEntryOnly) {
+                var createOptionsSize = 0
+                enabledProviderList.forEach { enabledProvider ->
+                    createOptionsSize += enabledProvider.createOptions.size
+                }
+                if (createOptionsSize > 1) {
+                    TextButton(
+                        onClick = onMoreOptionsSelected,
+                        modifier = Modifier
+                            .padding(horizontal = 24.dp)
+                            .align(alignment = Alignment.CenterHorizontally),
+                        colors = ButtonDefaults.textButtonColors(
+                            contentColor = MaterialTheme.colorScheme.primary,
+                        ),
+                    ) {
+                        Text(
+                            text =
+                            when (requestDisplayInfo.type) {
+                                TYPE_PUBLIC_KEY_CREDENTIAL ->
+                                    stringResource(R.string.string_create_in_another_place)
+                                else -> stringResource(R.string.string_save_to_another_place)
+                            },
+                            textAlign = TextAlign.Center,
+                        )
+                    }
+                } else if (
+                    requestDisplayInfo.type == TYPE_PUBLIC_KEY_CREDENTIAL
+                ) {
+                    // TODO: handle the error situation that if multiple remoteInfos exists
+                    enabledProviderList.forEach { enabledProvider ->
+                        if (enabledProvider.remoteEntry != null) {
+                            TextButton(
+                                onClick = {
+                                    onOptionSelected(enabledProvider.remoteEntry!!)
+                                },
+                                modifier = Modifier
+                                    .padding(horizontal = 24.dp)
+                                    .align(alignment = Alignment.CenterHorizontally),
+                                colors = ButtonDefaults.textButtonColors(
+                                    contentColor = MaterialTheme.colorScheme.primary,
+                                ),
+                            ) {
+                                Text(
+                                    text = stringResource(R.string.string_use_another_device),
+                                    textAlign = TextAlign.Center,
+                                )
+                            }
+                        }
+                    }
+                }
+            }
+            Divider(
+                thickness = 24.dp,
+                color = Color.Transparent
+            )
+            Row(
+                horizontalArrangement = Arrangement.SpaceBetween,
+                modifier = Modifier.fillMaxWidth().padding(horizontal = 24.dp)
+            ) {
+                CancelButton(
+                    stringResource(R.string.string_cancel),
+                    onClick = onCancel
+                )
+                ConfirmButton(
+                    stringResource(R.string.string_continue),
+                    onClick = onConfirm
                 )
             }
             Divider(
@@ -684,7 +712,7 @@ fun ExternalOnlySelectionCard(
                 horizontalArrangement = Arrangement.SpaceBetween,
                 modifier = Modifier.fillMaxWidth().padding(horizontal = 24.dp)
             ) {
-                ActionButton(
+                CancelButton(
                     stringResource(R.string.string_cancel),
                     onClick = onCancel
                 )
@@ -712,20 +740,16 @@ fun PrimaryCreateOptionRow(
     Entry(
         onClick = { onOptionSelected(entryInfo) },
         icon = {
-            if (entryInfo is CreateOptionInfo && entryInfo.profileIcon != null) {
-                Image(
-                    bitmap = entryInfo.profileIcon.toBitmap().asImageBitmap(),
-                    contentDescription = null,
-                    modifier = Modifier.padding(start = 10.dp).size(32.dp),
-                )
-            } else {
-                Icon(
-                    bitmap = requestDisplayInfo.typeIcon.toBitmap().asImageBitmap(),
-                    contentDescription = null,
-                    tint = LocalAndroidColorScheme.current.colorAccentPrimaryVariant,
-                    modifier = Modifier.padding(start = 10.dp).size(32.dp),
-                )
-            }
+            Icon(
+                bitmap = if (entryInfo is CreateOptionInfo) {
+                    entryInfo.profileIcon.toBitmap().asImageBitmap()
+                } else {
+                    requestDisplayInfo.typeIcon.toBitmap().asImageBitmap()
+                },
+                contentDescription = null,
+                tint = LocalAndroidColorScheme.current.colorAccentPrimaryVariant,
+                modifier = Modifier.padding(start = 10.dp).size(32.dp)
+            )
         },
         label = {
             Column() {
@@ -739,9 +763,9 @@ fun PrimaryCreateOptionRow(
                         )
                         TextSecondary(
                             text = if (requestDisplayInfo.subtitle != null) {
-                                requestDisplayInfo.subtitle + " • " + stringResource(
+                                stringResource(
                                     R.string.passkey_before_subtitle
-                                )
+                                ) + " - " + requestDisplayInfo.subtitle
                             } else {
                                 stringResource(R.string.passkey_before_subtitle)
                             },
@@ -763,25 +787,11 @@ fun PrimaryCreateOptionRow(
                         )
                     }
                     else -> {
-                        if (requestDisplayInfo.subtitle != null) {
-                            TextOnSurfaceVariant(
-                                text = requestDisplayInfo.title,
-                                style = MaterialTheme.typography.titleLarge,
-                                modifier = Modifier.padding(top = 16.dp, start = 5.dp),
-                            )
-                            TextOnSurfaceVariant(
-                                text = requestDisplayInfo.subtitle,
-                                style = MaterialTheme.typography.bodyMedium,
-                                modifier = Modifier.padding(bottom = 16.dp, start = 5.dp),
-                            )
-                        } else {
-                            TextOnSurfaceVariant(
-                                text = requestDisplayInfo.title,
-                                style = MaterialTheme.typography.titleLarge,
-                                modifier = Modifier.padding(
-                                    top = 16.dp, bottom = 16.dp, start = 5.dp),
-                            )
-                        }
+                        TextOnSurfaceVariant(
+                            text = requestDisplayInfo.title,
+                            style = MaterialTheme.typography.titleLarge,
+                            modifier = Modifier.padding(top = 16.dp, bottom = 16.dp, start = 5.dp),
+                        )
                     }
                 }
             }
@@ -792,7 +802,6 @@ fun PrimaryCreateOptionRow(
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun MoreOptionsInfoRow(
-    requestDisplayInfo: RequestDisplayInfo,
     providerInfo: EnabledProviderInfo,
     createOptionInfo: CreateOptionInfo,
     onOptionSelected: () -> Unit
@@ -817,67 +826,50 @@ fun MoreOptionsInfoRow(
                     TextSecondary(
                         text = createOptionInfo.userProviderDisplayName,
                         style = MaterialTheme.typography.bodyMedium,
-                        modifier = Modifier.padding(start = 5.dp),
+                        // TODO: update the logic here for the case there is only total count
+                        modifier = if (
+                            createOptionInfo.passwordCount != null ||
+                            createOptionInfo.passkeyCount != null
+                        ) Modifier.padding(start = 5.dp) else Modifier
+                            .padding(bottom = 16.dp, start = 5.dp),
                     )
                 }
-                if (requestDisplayInfo.type == TYPE_PUBLIC_KEY_CREDENTIAL ||
-                    requestDisplayInfo.type == TYPE_PASSWORD_CREDENTIAL) {
-                    if (createOptionInfo.passwordCount != null &&
-                        createOptionInfo.passkeyCount != null
-                    ) {
-                        TextSecondary(
-                            text =
-                            stringResource(
-                                R.string.more_options_usage_passwords_passkeys,
-                                createOptionInfo.passwordCount,
-                                createOptionInfo.passkeyCount
-                            ),
-                            style = MaterialTheme.typography.bodyMedium,
-                            modifier = Modifier.padding(bottom = 16.dp, start = 5.dp),
-                        )
-                    } else if (createOptionInfo.passwordCount != null) {
-                        TextSecondary(
-                            text =
-                            stringResource(
-                                R.string.more_options_usage_passwords,
-                                createOptionInfo.passwordCount
-                            ),
-                            style = MaterialTheme.typography.bodyMedium,
-                            modifier = Modifier.padding(bottom = 16.dp, start = 5.dp),
-                        )
-                    } else if (createOptionInfo.passkeyCount != null) {
-                        TextSecondary(
-                            text =
-                            stringResource(
-                                R.string.more_options_usage_passkeys,
-                                createOptionInfo.passkeyCount
-                            ),
-                            style = MaterialTheme.typography.bodyMedium,
-                            modifier = Modifier.padding(bottom = 16.dp, start = 5.dp),
-                        )
-                    } else {
-                        Divider(
-                            thickness = 16.dp,
-                            color = Color.Transparent,
-                        )
-                    }
-                } else {
-                    if (createOptionInfo.totalCredentialCount != null) {
-                        TextSecondary(
-                            text =
-                            stringResource(
-                                R.string.more_options_usage_credentials,
-                                createOptionInfo.totalCredentialCount
-                            ),
-                            style = MaterialTheme.typography.bodyMedium,
-                            modifier = Modifier.padding(bottom = 16.dp, start = 5.dp),
-                        )
-                    } else {
-                        Divider(
-                            thickness = 16.dp,
-                            color = Color.Transparent,
-                        )
-                    }
+                if (createOptionInfo.passwordCount != null &&
+                    createOptionInfo.passkeyCount != null
+                ) {
+                    TextSecondary(
+                        text =
+                        stringResource(
+                            R.string.more_options_usage_passwords_passkeys,
+                            createOptionInfo.passwordCount,
+                            createOptionInfo.passkeyCount
+                        ),
+                        style = MaterialTheme.typography.bodyMedium,
+                        modifier = Modifier.padding(bottom = 16.dp, start = 5.dp),
+                    )
+                } else if (createOptionInfo.passwordCount != null) {
+                    TextSecondary(
+                        text =
+                        stringResource(
+                            R.string.more_options_usage_passwords,
+                            createOptionInfo.passwordCount
+                        ),
+                        style = MaterialTheme.typography.bodyMedium,
+                        modifier = Modifier.padding(bottom = 16.dp, start = 5.dp),
+                    )
+                } else if (createOptionInfo.passkeyCount != null) {
+                    TextSecondary(
+                        text =
+                        stringResource(
+                            R.string.more_options_usage_passkeys,
+                            createOptionInfo.passkeyCount
+                        ),
+                        style = MaterialTheme.typography.bodyMedium,
+                        modifier = Modifier.padding(bottom = 16.dp, start = 5.dp),
+                    )
+                } else if (createOptionInfo.totalCredentialCount != null) {
+                    // TODO: Handle the case when there is total count
+                    // but no passwords and passkeys after design is set
                 }
             }
         }
@@ -909,7 +901,7 @@ fun MoreOptionsDisabledProvidersRow(
                     )
                     // TODO: Update the subtitle once design is confirmed
                     TextSecondary(
-                        text = disabledProviders.joinToString(separator = " • ") { it.displayName },
+                        text = disabledProviders.joinToString(separator = ", ") { it.displayName },
                         style = MaterialTheme.typography.bodyMedium,
                         modifier = Modifier.padding(bottom = 16.dp, start = 5.dp),
                     )

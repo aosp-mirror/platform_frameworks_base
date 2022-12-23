@@ -32,9 +32,7 @@ import javax.inject.Inject
  * A class to do the user creation process. It shows a progress dialog, and manages the user
  * creation
  */
-class UserCreator
-@Inject
-constructor(
+class UserCreator @Inject constructor(
     private val context: Context,
     private val userManager: UserManager,
     @Main private val mainExecutor: Executor,
@@ -44,14 +42,14 @@ constructor(
      * Shows a progress dialog then starts the user creation process on the main thread.
      *
      * @param successCallback is called when the user creation is successful.
-     * @param errorCallback is called when userManager.createUser returns null. (Exceptions are not
-     * handled by this class)
+     * @param errorCallback is called when userManager.createUser returns null.
+     * (Exceptions are not handled by this class)
      */
     fun createUser(
         userName: String?,
         userIcon: Drawable?,
         successCallback: Consumer<UserInfo?>,
-        errorCallback: Runnable
+       errorCallback: Runnable
     ) {
         val userCreationProgressDialog: Dialog = UserCreatingDialog(context)
         userCreationProgressDialog.show()
@@ -73,21 +71,11 @@ constructor(
                         newUserIcon = UserIcons.getDefaultUserIcon(res, user.id, false)
                     }
                     userManager.setUserIcon(
-                        user.id,
-                        UserIcons.convertToBitmapAtUserIconSize(res, newUserIcon)
-                    )
+                        user.id, UserIcons.convertToBitmapAtUserIconSize(res, newUserIcon))
                 }
                 userCreationProgressDialog.dismiss()
                 successCallback.accept(user)
             }
         }
-    }
-
-    fun setUserAdmin(userId: Int) {
-        userManager.setUserAdmin(userId)
-    }
-
-    fun isHeadlessSystemUserMode(): Boolean {
-        return UserManager.isHeadlessSystemUserMode()
     }
 }

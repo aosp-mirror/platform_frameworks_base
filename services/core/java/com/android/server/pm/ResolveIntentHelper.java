@@ -25,8 +25,6 @@ import static com.android.server.pm.PackageManagerService.TAG;
 import android.annotation.NonNull;
 import android.annotation.UserIdInt;
 import android.app.ActivityManager;
-import android.app.ActivityManagerInternal;
-import android.app.IUnsafeIntentStrictModeCallback;
 import android.app.PendingIntent;
 import android.content.ComponentName;
 import android.content.ContentResolver;
@@ -44,7 +42,6 @@ import android.content.pm.ProviderInfo;
 import android.content.pm.ResolveInfo;
 import android.os.Binder;
 import android.os.Bundle;
-import android.os.Handler;
 import android.os.Process;
 import android.os.RemoteException;
 import android.os.Trace;
@@ -56,7 +53,6 @@ import android.util.Slog;
 import com.android.internal.app.ResolverActivity;
 import com.android.internal.util.ArrayUtils;
 import com.android.internal.util.FrameworkStatsLog;
-import com.android.server.LocalServices;
 import com.android.server.am.ActivityManagerService;
 import com.android.server.compat.PlatformCompat;
 import com.android.server.pm.pkg.AndroidPackage;
@@ -88,8 +84,6 @@ final class ResolveIntentHelper {
     private final Supplier<ResolveInfo> mResolveInfoSupplier;
     @NonNull
     private final Supplier<ActivityInfo> mInstantAppInstallerActivitySupplier;
-    @NonNull
-    private final Handler mHandler;
 
     ResolveIntentHelper(@NonNull Context context,
             @NonNull PreferredActivityHelper preferredActivityHelper,
@@ -97,8 +91,7 @@ final class ResolveIntentHelper {
             @NonNull DomainVerificationManagerInternal domainVerificationManager,
             @NonNull UserNeedsBadgingCache userNeedsBadgingCache,
             @NonNull Supplier<ResolveInfo> resolveInfoSupplier,
-            @NonNull Supplier<ActivityInfo> instantAppInstallerActivitySupplier,
-            @NonNull Handler handler) {
+            @NonNull Supplier<ActivityInfo> instantAppInstallerActivitySupplier) {
         mContext = context;
         mPreferredActivityHelper = preferredActivityHelper;
         mPlatformCompat = platformCompat;
@@ -107,12 +100,11 @@ final class ResolveIntentHelper {
         mUserNeedsBadging = userNeedsBadgingCache;
         mResolveInfoSupplier = resolveInfoSupplier;
         mInstantAppInstallerActivitySupplier = instantAppInstallerActivitySupplier;
-        mHandler = handler;
     }
 
     private static void filterNonExportedComponents(Intent intent, int filterCallingUid,
-            int callingPid, List<ResolveInfo> query, PlatformCompat platformCompat,
-            String resolvedType, Computer computer, Handler handler) {
+            List<ResolveInfo> query, PlatformCompat platformCompat, String resolvedType,
+            Computer computer) {
         if (query == null
                 || intent.getPackage() != null
                 || intent.getComponent() != null
@@ -121,10 +113,6 @@ final class ResolveIntentHelper {
         }
         AndroidPackage caller = computer.getPackage(filterCallingUid);
         String callerPackage = caller == null ? "Not specified" : caller.getPackageName();
-        ActivityManagerInternal activityManagerInternal = LocalServices
-                .getService(ActivityManagerInternal.class);
-        final IUnsafeIntentStrictModeCallback callback = activityManagerInternal
-                .getRegisteredStrictModeCallback(callingPid);
         for (int i = query.size() - 1; i >= 0; i--) {
             if (!query.get(i).getComponentInfo().exported) {
                 boolean hasToBeExportedToMatch = platformCompat.isChangeEnabledByUid(
@@ -142,15 +130,6 @@ final class ResolveIntentHelper {
                         resolvedType,
                         intent.getScheme(),
                         hasToBeExportedToMatch);
-                if (callback != null) {
-                    handler.post(() -> {
-                        try {
-                            callback.onImplicitIntentMatchedInternalComponent(intent.cloneFilter());
-                        } catch (RemoteException e) {
-                            activityManagerInternal.unregisterStrictModeCallback(callingPid);
-                        }
-                    });
-                }
                 if (!hasToBeExportedToMatch) {
                     return;
                 }
@@ -169,7 +148,7 @@ final class ResolveIntentHelper {
             @PackageManagerInternal.PrivateResolveFlags long privateResolveFlags, int userId,
             boolean resolveForStart, int filterCallingUid) {
         return resolveIntentInternal(computer, intent, resolvedType, flags,
-                privateResolveFlags, userId, resolveForStart, filterCallingUid, false, 0);
+                privateResolveFlags, userId, resolveForStart, filterCallingUid, false);
     }
 
     /**
@@ -181,8 +160,7 @@ final class ResolveIntentHelper {
     public ResolveInfo resolveIntentInternal(Computer computer, Intent intent, String resolvedType,
             @PackageManager.ResolveInfoFlagsBits long flags,
             @PackageManagerInternal.PrivateResolveFlags long privateResolveFlags, int userId,
-            boolean resolveForStart, int filterCallingUid, boolean exportedComponentsOnly,
-            int callingPid) {
+            boolean resolveForStart, int filterCallingUid, boolean exportedComponentsOnly) {
         try {
             Trace.traceBegin(TRACE_TAG_PACKAGE_MANAGER, "resolveIntent");
 
@@ -199,8 +177,8 @@ final class ResolveIntentHelper {
                     resolvedType, flags, privateResolveFlags, filterCallingUid, userId,
                     resolveForStart, true /*allowDynamicSplits*/);
             if (exportedComponentsOnly) {
-                filterNonExportedComponents(intent, filterCallingUid, callingPid, query,
-                        mPlatformCompat, resolvedType, computer, mHandler);
+                filterNonExportedComponents(intent, filterCallingUid, query,
+                        mPlatformCompat, resolvedType, computer);
             }
             Trace.traceEnd(TRACE_TAG_PACKAGE_MANAGER);
 

@@ -36,14 +36,13 @@ import android.credentials.ui.RequestInfo
 import android.credentials.ui.BaseDialogResult
 import android.credentials.ui.ProviderPendingIntentResponse
 import android.credentials.ui.UserSelectionDialogResult
+import android.graphics.drawable.Icon
 import android.os.Binder
 import android.os.Bundle
 import android.os.ResultReceiver
 import android.service.credentials.CredentialProviderService
 import android.util.ArraySet
-import com.android.credentialmanager.createflow.RequestDisplayInfo
-import com.android.credentialmanager.createflow.EnabledProviderInfo
-import com.android.credentialmanager.createflow.DisabledProviderInfo
+import com.android.credentialmanager.createflow.CreateCredentialUiState
 import com.android.credentialmanager.getflow.GetCredentialUiState
 import com.android.credentialmanager.jetpack.developer.CreatePasswordRequest.Companion.toBundle
 import com.android.credentialmanager.jetpack.developer.CreatePublicKeyCredentialRequest
@@ -68,7 +67,7 @@ class CredentialManagerRepo(
     requestInfo = intent.extras?.getParcelable(
       RequestInfo.EXTRA_REQUEST_INFO,
       RequestInfo::class.java
-    ) ?: testCreatePasskeyRequestInfo()
+    ) ?: testGetRequestInfo()
 
     providerEnabledList = when (requestInfo.type) {
       RequestInfo.TYPE_CREATE ->
@@ -135,24 +134,19 @@ class CredentialManagerRepo(
     )
   }
 
-  fun getCreateProviderEnableListInitialUiState(): List<EnabledProviderInfo> {
+  fun createCredentialInitialUiState(): CreateCredentialUiState {
+    val requestDisplayInfo = CreateFlowUtils.toRequestDisplayInfo(requestInfo, context)
     val providerEnabledList = CreateFlowUtils.toEnabledProviderList(
       // Handle runtime cast error
-      providerEnabledList as List<CreateCredentialProviderData>, context)
+      providerEnabledList as List<CreateCredentialProviderData>, requestDisplayInfo, context)
+    val providerDisabledList = CreateFlowUtils.toDisabledProviderList(
+      // Handle runtime cast error
+      providerDisabledList, context)
     providerEnabledList.forEach{providerInfo -> providerInfo.createOptions =
       providerInfo.createOptions.sortedWith(compareBy { it.lastUsedTimeMillis }).reversed()
     }
-    return providerEnabledList
-  }
-
-  fun getCreateProviderDisableListInitialUiState(): List<DisabledProviderInfo>? {
-    return CreateFlowUtils.toDisabledProviderList(
-      // Handle runtime cast error
-      providerDisabledList, context)
-  }
-
-  fun getCreateRequestDisplayInfoInitialUiState(): RequestDisplayInfo {
-    return CreateFlowUtils.toRequestDisplayInfo(requestInfo, context)
+    return CreateFlowUtils.toCreateCredentialUiState(
+      providerEnabledList, providerDisabledList, requestDisplayInfo, false)
   }
 
   companion object {
@@ -173,33 +167,33 @@ class CredentialManagerRepo(
 
   // TODO: below are prototype functionalities. To be removed for productionization.
   private fun testCreateCredentialEnabledProviderList(): List<CreateCredentialProviderData> {
-      return listOf(
-          CreateCredentialProviderData
-              .Builder("io.enpass.app")
-              .setSaveEntries(
-                  listOf<Entry>(
-                      newCreateEntry("key1", "subkey-1", "elisa.beckett@gmail.com",
-                          20, 7, 27, 10000),
-                      newCreateEntry("key1", "subkey-2", "elisa.work@google.com",
-                          20, 7, 27, 11000),
-                  )
-              )
-              .setRemoteEntry(
-                  newRemoteEntry("key2", "subkey-1")
-              )
-              .build(),
-          CreateCredentialProviderData
-              .Builder("com.dashlane")
-              .setSaveEntries(
-                  listOf<Entry>(
-                      newCreateEntry("key1", "subkey-3", "elisa.beckett@dashlane.com",
-                          20, 7, 27, 30000),
-                      newCreateEntry("key1", "subkey-4", "elisa.work@dashlane.com",
-                          20, 7, 27, 31000),
-                  )
-              )
-              .build(),
-      )
+    return listOf(
+      CreateCredentialProviderData
+        .Builder("io.enpass.app")
+        .setSaveEntries(
+          listOf<Entry>(
+            newCreateEntry("key1", "subkey-1", "elisa.beckett@gmail.com",
+              20, 7, 27, 10000),
+            newCreateEntry("key1", "subkey-2", "elisa.work@google.com",
+              20, 7, 27, 11000),
+          )
+        )
+        .setRemoteEntry(
+          newRemoteEntry("key2", "subkey-1")
+        )
+        .build(),
+      CreateCredentialProviderData
+        .Builder("com.dashlane")
+        .setSaveEntries(
+          listOf<Entry>(
+            newCreateEntry("key1", "subkey-3", "elisa.beckett@dashlane.com",
+              20, 7, 27, 30000),
+            newCreateEntry("key1", "subkey-4", "elisa.work@dashlane.com",
+              20, 7, 27, 31000),
+          )
+        )
+        .build(),
+    )
   }
 
   private fun testDisabledProviderList(): List<DisabledProviderData>? {
@@ -318,7 +312,8 @@ class CredentialManagerRepo(
 
         val credentialEntry = CredentialEntry(credentialType, credentialTypeDisplayName, userName,
                 userDisplayName, pendingIntent, lastUsedTimeMillis
-                ?: 0L, null, false)
+                ?: 0L, Icon.createWithResource(context, R.drawable.ic_passkey),
+                false)
 
         return Entry(
                 key,
@@ -327,7 +322,7 @@ class CredentialManagerRepo(
                 pendingIntent,
                 null
         )
-  }
+    }
 
     private fun newCreateEntry(
             key: String,
@@ -356,7 +351,7 @@ class CredentialManagerRepo(
 
         val createEntry = CreateEntry(
                 providerDisplayName, pendingIntent,
-                null, lastUsedTimeMillis,
+                Icon.createWithResource(context, R.drawable.ic_profile), lastUsedTimeMillis,
                 listOf(
                         CredentialCountInformation.createPasswordCountInformation(passwordCount),
                         CredentialCountInformation.createPublicKeyCountInformation(passkeyCount),
@@ -467,9 +462,7 @@ class CredentialManagerRepo(
   private fun testGetRequestInfo(): RequestInfo {
     return RequestInfo.newGetRequestInfo(
       Binder(),
-      GetCredentialRequest.Builder(
-        Bundle()
-      )
+      GetCredentialRequest.Builder()
         .addGetCredentialOption(
           GetCredentialOption(
             TYPE_PUBLIC_KEY_CREDENTIAL, Bundle(), Bundle(), /*requireSystemProvider=*/ false)

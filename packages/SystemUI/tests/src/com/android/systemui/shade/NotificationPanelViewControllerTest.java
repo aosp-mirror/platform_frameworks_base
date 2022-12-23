@@ -105,8 +105,6 @@ import com.android.systemui.fragments.FragmentService;
 import com.android.systemui.keyguard.KeyguardUnlockAnimationController;
 import com.android.systemui.keyguard.domain.interactor.AlternateBouncerInteractor;
 import com.android.systemui.keyguard.domain.interactor.KeyguardBottomAreaInteractor;
-import com.android.systemui.keyguard.domain.interactor.KeyguardTransitionInteractor;
-import com.android.systemui.keyguard.ui.viewmodel.DreamingToLockscreenTransitionViewModel;
 import com.android.systemui.keyguard.ui.viewmodel.KeyguardBottomAreaViewModel;
 import com.android.systemui.media.controls.pipeline.MediaDataManager;
 import com.android.systemui.media.controls.ui.KeyguardMediaController;
@@ -290,8 +288,6 @@ public class NotificationPanelViewControllerTest extends SysuiTestCase {
     @Mock private KeyguardBottomAreaViewModel mKeyguardBottomAreaViewModel;
     @Mock private KeyguardBottomAreaInteractor mKeyguardBottomAreaInteractor;
     @Mock private AlternateBouncerInteractor mAlternateBouncerInteractor;
-    @Mock private DreamingToLockscreenTransitionViewModel mDreamingToLockscreenTransitionViewModel;
-    @Mock private KeyguardTransitionInteractor mKeyguardTransitionInteractor;
     @Mock private MotionEvent mDownMotionEvent;
     @Captor
     private ArgumentCaptor<NotificationStackScrollLayout.OnEmptySpaceClickListener>
@@ -509,8 +505,6 @@ public class NotificationPanelViewControllerTest extends SysuiTestCase {
                 mKeyguardBottomAreaViewModel,
                 mKeyguardBottomAreaInteractor,
                 mAlternateBouncerInteractor,
-                mDreamingToLockscreenTransitionViewModel,
-                mKeyguardTransitionInteractor,
                 mDumpManager);
         mNotificationPanelViewController.initDependencies(
                 mCentralSurfaces,

@@ -746,8 +746,6 @@ public class ThermalManagerService extends SystemService {
                         }
                         ret.add(new Temperature(t.value, t.type, t.name, t.throttlingStatus));
                     }
-                } catch (IllegalArgumentException | IllegalStateException e) {
-                    Slog.e(TAG, "Couldn't getCurrentCoolingDevices due to invalid status", e);
                 } catch (RemoteException e) {
                     Slog.e(TAG, "Couldn't getCurrentTemperatures, reconnecting", e);
                     connectToHal();
@@ -778,8 +776,6 @@ public class ThermalManagerService extends SystemService {
                         }
                         ret.add(new CoolingDevice(t.value, t.type, t.name));
                     }
-                } catch (IllegalArgumentException | IllegalStateException e) {
-                    Slog.e(TAG, "Couldn't getCurrentCoolingDevices due to invalid status", e);
                 } catch (RemoteException e) {
                     Slog.e(TAG, "Couldn't getCurrentCoolingDevices, reconnecting", e);
                     connectToHal();
@@ -803,8 +799,6 @@ public class ThermalManagerService extends SystemService {
 
                     return Arrays.stream(halRet).filter(t -> t.type == type).collect(
                             Collectors.toList());
-                } catch (IllegalArgumentException | IllegalStateException e) {
-                    Slog.e(TAG, "Couldn't getTemperatureThresholds due to invalid status", e);
                 } catch (RemoteException e) {
                     Slog.e(TAG, "Couldn't getTemperatureThresholds, reconnecting...", e);
                     connectToHal();
@@ -830,27 +824,12 @@ public class ThermalManagerService extends SystemService {
                     mInstance = IThermal.Stub.asInterface(binder);
                     try {
                         binder.linkToDeath(this, 0);
+                        mInstance.registerThermalChangedCallback(mThermalChangedCallback);
                     } catch (RemoteException e) {
                         Slog.e(TAG, "Unable to connect IThermal AIDL instance", e);
                         mInstance = null;
                     }
-                    if (mInstance != null) {
-                        registerThermalChangedCallback();
-                    }
                 }
-            }
-        }
-
-        @VisibleForTesting
-        void registerThermalChangedCallback() {
-            try {
-                mInstance.registerThermalChangedCallback(mThermalChangedCallback);
-            } catch (IllegalArgumentException | IllegalStateException e) {
-                Slog.e(TAG, "Couldn't registerThermalChangedCallback due to invalid status",
-                        e);
-            } catch (RemoteException e) {
-                Slog.e(TAG, "Unable to connect IThermal AIDL instance", e);
-                mInstance = null;
             }
         }
 

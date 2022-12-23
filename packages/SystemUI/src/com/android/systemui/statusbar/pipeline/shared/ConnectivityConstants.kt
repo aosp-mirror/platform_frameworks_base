@@ -16,10 +16,8 @@
 
 package com.android.systemui.statusbar.pipeline.shared
 
-import android.content.Context
 import android.telephony.TelephonyManager
 import com.android.systemui.Dumpable
-import com.android.systemui.R
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.dump.DumpManager
 import com.android.systemui.statusbar.pipeline.shared.ConnectivityPipelineLogger.Companion.SB_LOGGING_TAG
@@ -34,25 +32,15 @@ import javax.inject.Inject
 @SysUISingleton
 class ConnectivityConstants
 @Inject
-constructor(
-    context: Context,
-    dumpManager: DumpManager,
-    telephonyManager: TelephonyManager,
-) : Dumpable {
+constructor(dumpManager: DumpManager, telephonyManager: TelephonyManager) : Dumpable {
     init {
-        dumpManager.registerNormalDumpable("${SB_LOGGING_TAG}Constants", this)
+        dumpManager.registerDumpable("${SB_LOGGING_TAG}Constants", this)
     }
 
     /** True if this device has the capability for data connections and false otherwise. */
     val hasDataCapabilities = telephonyManager.isDataCapable
 
-    /** True if we should show the activityIn/activityOut icons and false otherwise */
-    val shouldShowActivityConfig = context.resources.getBoolean(R.bool.config_showActivity)
-
     override fun dump(pw: PrintWriter, args: Array<out String>) {
-        pw.apply {
-            println("hasDataCapabilities=$hasDataCapabilities")
-            println("shouldShowActivityConfig=$shouldShowActivityConfig")
-        }
+        pw.apply { println("hasDataCapabilities=$hasDataCapabilities") }
     }
 }

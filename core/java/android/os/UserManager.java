@@ -2912,15 +2912,14 @@ public class UserManager {
     /**
      * @hide
      */
-    public static boolean isVisibleBackgroundUsersEnabled() {
-        return SystemProperties.getBoolean("fw.visible_bg_users",
+    public static boolean isUsersOnSecondaryDisplaysEnabled() {
+        return SystemProperties.getBoolean("fw.users_on_secondary_displays",
                 Resources.getSystem()
-                        .getBoolean(R.bool.config_multiuserVisibleBackgroundUsers));
+                        .getBoolean(R.bool.config_multiuserUsersOnSecondaryDisplays));
     }
 
     /**
-     * Returns whether the device allows (full) users to be started in background visible in a given
-     * display (which would allow them to launch activities in that display).
+     * Returns whether the device allows users to run (and launch activities) on secondary displays.
      *
      * @return {@code false} for most devices, except on automotive builds for vehiches with
      * passenger displays.
@@ -2928,8 +2927,8 @@ public class UserManager {
      * @hide
      */
     @TestApi
-    public boolean isVisibleBackgroundUsersSupported() {
-        return isVisibleBackgroundUsersEnabled();
+    public boolean isUsersOnSecondaryDisplaysSupported() {
+        return isUsersOnSecondaryDisplaysEnabled();
     }
 
     /**
@@ -4097,26 +4096,6 @@ public class UserManager {
     public void setUserAdmin(@UserIdInt int userId) {
         try {
             mService.setUserAdmin(userId);
-        } catch (RemoteException re) {
-            throw re.rethrowFromSystemServer();
-        }
-    }
-
-    /**
-     * Revokes admin privileges from the user, if such a user exists.
-     *
-     * <p>Note that this does not alter the user's pre-existing user restrictions.
-     *
-     * @param userId the id of the user to revoke admin rights from
-     * @hide
-     */
-    @RequiresPermission(allOf = {
-            Manifest.permission.INTERACT_ACROSS_USERS_FULL,
-            Manifest.permission.MANAGE_USERS
-    })
-    public void revokeUserAdmin(@UserIdInt int userId) {
-        try {
-            mService.revokeUserAdmin(userId);
         } catch (RemoteException re) {
             throw re.rethrowFromSystemServer();
         }

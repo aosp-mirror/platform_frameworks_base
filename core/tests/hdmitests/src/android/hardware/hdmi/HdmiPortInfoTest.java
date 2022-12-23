@@ -37,38 +37,26 @@ public class HdmiPortInfoTest {
         boolean isCec = true;
         boolean isMhl = false;
         boolean isArcSupported = false;
-        boolean isEarcSupported = false;
 
         new EqualsTester()
                 .addEqualityGroup(
-                        new HdmiPortInfo(portId, portType, address, isCec, isMhl, isArcSupported,
-                                isEarcSupported),
-                        new HdmiPortInfo(portId, portType, address, isCec, isMhl, isArcSupported,
-                                isEarcSupported))
+                        new HdmiPortInfo(portId, portType, address, isCec, isMhl, isArcSupported),
+                        new HdmiPortInfo(portId, portType, address, isCec, isMhl, isArcSupported))
                 .addEqualityGroup(
                         new HdmiPortInfo(
-                                portId + 1, portType, address, isCec, isMhl, isArcSupported,
-                                isEarcSupported))
+                                portId + 1, portType, address, isCec, isMhl, isArcSupported))
                 .addEqualityGroup(
                         new HdmiPortInfo(
-                                portId, portType + 1, address, isCec, isMhl, isArcSupported,
-                                isEarcSupported))
+                                portId, portType + 1, address, isCec, isMhl, isArcSupported))
                 .addEqualityGroup(
                         new HdmiPortInfo(
-                                portId, portType, address + 1, isCec, isMhl, isArcSupported,
-                                isEarcSupported))
+                                portId, portType, address + 1, isCec, isMhl, isArcSupported))
                 .addEqualityGroup(
-                        new HdmiPortInfo(portId, portType, address, !isCec, isMhl, isArcSupported,
-                                isEarcSupported))
+                        new HdmiPortInfo(portId, portType, address, !isCec, isMhl, isArcSupported))
                 .addEqualityGroup(
-                        new HdmiPortInfo(portId, portType, address, isCec, !isMhl, isArcSupported,
-                                isEarcSupported))
+                        new HdmiPortInfo(portId, portType, address, isCec, !isMhl, isArcSupported))
                 .addEqualityGroup(
-                        new HdmiPortInfo(portId, portType, address, isCec, isMhl, !isArcSupported,
-                                isEarcSupported))
-                .addEqualityGroup(
-                        new HdmiPortInfo(portId, portType, address, isCec, isMhl, isArcSupported,
-                                !isEarcSupported))
+                        new HdmiPortInfo(portId, portType, address, isCec, isMhl, !isArcSupported))
                 .testEquals();
     }
 }

@@ -17,7 +17,6 @@
 package android.media.tv.interactive;
 
 import android.graphics.Rect;
-import android.media.tv.AdBuffer;
 import android.media.tv.AdResponse;
 import android.media.tv.BroadcastInfoResponse;
 import android.media.tv.TvTrackInfo;
@@ -72,7 +71,6 @@ interface ITvInteractiveAppManager {
     void notifyBroadcastInfoResponse(in IBinder sessionToken, in BroadcastInfoResponse response,
             int UserId);
     void notifyAdResponse(in IBinder sessionToken, in AdResponse response, int UserId);
-    void notifyAdBufferConsumed(in IBinder sessionToken, in AdBuffer buffer, int userId);
 
     void createMediaView(in IBinder sessionToken, in IBinder windowToken, in Rect frame,
             int userId);

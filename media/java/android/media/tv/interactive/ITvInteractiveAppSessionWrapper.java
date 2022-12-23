@@ -20,7 +20,6 @@ import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.content.Context;
 import android.graphics.Rect;
-import android.media.tv.AdBuffer;
 import android.media.tv.AdResponse;
 import android.media.tv.BroadcastInfoResponse;
 import android.media.tv.TvContentRating;
@@ -84,7 +83,6 @@ public class ITvInteractiveAppSessionWrapper
     private static final int DO_REMOVE_MEDIA_VIEW = 29;
     private static final int DO_NOTIFY_RECORDING_STARTED = 30;
     private static final int DO_NOTIFY_RECORDING_STOPPED = 31;
-    private static final int DO_NOTIFY_AD_BUFFER_CONSUMED = 32;
 
     private final HandlerCaller mCaller;
     private Session mSessionImpl;
@@ -253,10 +251,6 @@ public class ITvInteractiveAppSessionWrapper
             }
             case DO_REMOVE_MEDIA_VIEW: {
                 mSessionImpl.removeMediaView(true);
-                break;
-            }
-            case DO_NOTIFY_AD_BUFFER_CONSUMED: {
-                mSessionImpl.notifyAdBufferConsumed((AdBuffer) msg.obj);
                 break;
             }
             default: {
@@ -428,11 +422,6 @@ public class ITvInteractiveAppSessionWrapper
     @Override
     public void notifyAdResponse(AdResponse response) {
         mCaller.executeOrSendMessage(mCaller.obtainMessageO(DO_NOTIFY_AD_RESPONSE, response));
-    }
-
-    @Override
-    public void notifyAdBufferConsumed(AdBuffer buffer) {
-        mCaller.executeOrSendMessage(mCaller.obtainMessageO(DO_NOTIFY_AD_BUFFER_CONSUMED, buffer));
     }
 
     @Override

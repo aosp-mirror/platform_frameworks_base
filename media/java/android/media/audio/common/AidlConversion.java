@@ -585,10 +585,6 @@ public class AidlConversion {
         switch (standard) {
             case AudioDescriptor.STANDARD_EDID:
                 return AudioStandard.EDID;
-            case AudioDescriptor.STANDARD_SADB:
-                return AudioStandard.SADB;
-            case AudioDescriptor.STANDARD_VSADB:
-                return AudioStandard.VSADB;
             case AudioDescriptor.STANDARD_NONE:
             default:
                 return AudioStandard.NONE;
@@ -603,10 +599,6 @@ public class AidlConversion {
         switch (standard) {
             case AudioStandard.EDID:
                 return AudioDescriptor.STANDARD_EDID;
-            case AudioStandard.SADB:
-                return AudioDescriptor.STANDARD_SADB;
-            case AudioStandard.VSADB:
-                return AudioDescriptor.STANDARD_VSADB;
             case AudioStandard.NONE:
             default:
                 return AudioDescriptor.STANDARD_NONE;

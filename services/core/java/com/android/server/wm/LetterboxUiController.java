@@ -275,62 +275,30 @@ final class LetterboxUiController {
                 && mActivityRecord.fillsParent();
     }
 
-    // Check if we are in the given pose and in fullscreen mode.
-    // Note that we check the task rather than the parent as with ActivityEmbedding the parent might
-    // be a TaskFragment, and its windowing mode is always MULTI_WINDOW, even if the task is
-    // actually fullscreen.
-    private boolean isDisplayFullScreenAndInPosture(DeviceStateController.FoldState state,
-            boolean isTabletop) {
-        Task task = mActivityRecord.getTask();
-        return mActivityRecord.mDisplayContent != null
-                && mActivityRecord.mDisplayContent.getDisplayRotation().isDeviceInPosture(state,
-                    isTabletop)
-                && task != null
-                && task.getWindowingMode() == WINDOWING_MODE_FULLSCREEN;
-    }
-
-    // Note that we check the task rather than the parent as with ActivityEmbedding the parent might
-    // be a TaskFragment, and its windowing mode is always MULTI_WINDOW, even if the task is
-    // actually fullscreen.
-    private boolean isDisplayFullScreenAndSeparatingHinge() {
-        Task task = mActivityRecord.getTask();
-        return mActivityRecord.mDisplayContent != null
-                && mActivityRecord.mDisplayContent.getDisplayRotation().isDisplaySeparatingHinge()
-                && task != null
-                && task.getWindowingMode() == WINDOWING_MODE_FULLSCREEN;
-    }
-
-
     float getHorizontalPositionMultiplier(Configuration parentConfiguration) {
         // Don't check resolved configuration because it may not be updated yet during
         // configuration change.
-        boolean bookMode = isDisplayFullScreenAndInPosture(
-                DeviceStateController.FoldState.HALF_FOLDED, false /* isTabletop */);
         return isHorizontalReachabilityEnabled(parentConfiguration)
                 // Using the last global dynamic position to avoid "jumps" when moving
                 // between apps or activities.
-                ? mLetterboxConfiguration.getHorizontalMultiplierForReachability(bookMode)
-                : mLetterboxConfiguration.getLetterboxHorizontalPositionMultiplier(bookMode);
+                ? mLetterboxConfiguration.getHorizontalMultiplierForReachability()
+                : mLetterboxConfiguration.getLetterboxHorizontalPositionMultiplier();
     }
 
     float getVerticalPositionMultiplier(Configuration parentConfiguration) {
         // Don't check resolved configuration because it may not be updated yet during
         // configuration change.
-        boolean tabletopMode = isDisplayFullScreenAndInPosture(
-                DeviceStateController.FoldState.HALF_FOLDED, true /* isTabletop */);
         return isVerticalReachabilityEnabled(parentConfiguration)
                 // Using the last global dynamic position to avoid "jumps" when moving
                 // between apps or activities.
-                ? mLetterboxConfiguration.getVerticalMultiplierForReachability(tabletopMode)
-                : mLetterboxConfiguration.getLetterboxVerticalPositionMultiplier(tabletopMode);
+                ? mLetterboxConfiguration.getVerticalMultiplierForReachability()
+                : mLetterboxConfiguration.getLetterboxVerticalPositionMultiplier();
     }
 
     float getFixedOrientationLetterboxAspectRatio() {
-        return isDisplayFullScreenAndSeparatingHinge()
-                ? getSplitScreenAspectRatio()
-                : mActivityRecord.shouldCreateCompatDisplayInsets()
-                    ? getDefaultMinAspectRatioForUnresizableApps()
-                    : mLetterboxConfiguration.getFixedOrientationLetterboxAspectRatio();
+        return mActivityRecord.shouldCreateCompatDisplayInsets()
+                ? getDefaultMinAspectRatioForUnresizableApps()
+                : mLetterboxConfiguration.getFixedOrientationLetterboxAspectRatio();
     }
 
     private float getDefaultMinAspectRatioForUnresizableApps() {
@@ -383,13 +351,11 @@ final class LetterboxUiController {
             return;
         }
 
-        boolean isInFullScreenBookMode = isDisplayFullScreenAndSeparatingHinge();
         int letterboxPositionForHorizontalReachability = mLetterboxConfiguration
-                .getLetterboxPositionForHorizontalReachability(isInFullScreenBookMode);
+                .getLetterboxPositionForHorizontalReachability();
         if (mLetterbox.getInnerFrame().left > x) {
             // Moving to the next stop on the left side of the app window: right > center > left.
-            mLetterboxConfiguration.movePositionForHorizontalReachabilityToNextLeftStop(
-                    isInFullScreenBookMode);
+            mLetterboxConfiguration.movePositionForHorizontalReachabilityToNextLeftStop();
             int changeToLog =
                     letterboxPositionForHorizontalReachability
                             == LETTERBOX_HORIZONTAL_REACHABILITY_POSITION_CENTER
@@ -398,8 +364,7 @@ final class LetterboxUiController {
             logLetterboxPositionChange(changeToLog);
         } else if (mLetterbox.getInnerFrame().right < x) {
             // Moving to the next stop on the right side of the app window: left > center > right.
-            mLetterboxConfiguration.movePositionForHorizontalReachabilityToNextRightStop(
-                    isInFullScreenBookMode);
+            mLetterboxConfiguration.movePositionForHorizontalReachabilityToNextRightStop();
             int changeToLog =
                     letterboxPositionForHorizontalReachability
                             == LETTERBOX_HORIZONTAL_REACHABILITY_POSITION_CENTER
@@ -423,13 +388,11 @@ final class LetterboxUiController {
             // Only react to clicks at the top and bottom of the letterboxed app window.
             return;
         }
-        boolean isInFullScreenTabletopMode = isDisplayFullScreenAndSeparatingHinge();
         int letterboxPositionForVerticalReachability = mLetterboxConfiguration
-                .getLetterboxPositionForVerticalReachability(isInFullScreenTabletopMode);
+                .getLetterboxPositionForVerticalReachability();
         if (mLetterbox.getInnerFrame().top > y) {
             // Moving to the next stop on the top side of the app window: bottom > center > top.
-            mLetterboxConfiguration.movePositionForVerticalReachabilityToNextTopStop(
-                    isInFullScreenTabletopMode);
+            mLetterboxConfiguration.movePositionForVerticalReachabilityToNextTopStop();
             int changeToLog =
                     letterboxPositionForVerticalReachability
                             == LETTERBOX_VERTICAL_REACHABILITY_POSITION_CENTER
@@ -438,8 +401,7 @@ final class LetterboxUiController {
             logLetterboxPositionChange(changeToLog);
         } else if (mLetterbox.getInnerFrame().bottom < y) {
             // Moving to the next stop on the bottom side of the app window: top > center > bottom.
-            mLetterboxConfiguration.movePositionForVerticalReachabilityToNextBottomStop(
-                    isInFullScreenTabletopMode);
+            mLetterboxConfiguration.movePositionForVerticalReachabilityToNextBottomStop();
             int changeToLog =
                     letterboxPositionForVerticalReachability
                             == LETTERBOX_VERTICAL_REACHABILITY_POSITION_CENTER
@@ -750,10 +712,10 @@ final class LetterboxUiController {
                 + getVerticalPositionMultiplier(mActivityRecord.getParent().getConfiguration()));
         pw.println(prefix + "  letterboxPositionForHorizontalReachability="
                 + LetterboxConfiguration.letterboxHorizontalReachabilityPositionToString(
-                mLetterboxConfiguration.getLetterboxPositionForHorizontalReachability(false)));
+                    mLetterboxConfiguration.getLetterboxPositionForHorizontalReachability()));
         pw.println(prefix + "  letterboxPositionForVerticalReachability="
                 + LetterboxConfiguration.letterboxVerticalReachabilityPositionToString(
-                mLetterboxConfiguration.getLetterboxPositionForVerticalReachability(false)));
+                    mLetterboxConfiguration.getLetterboxPositionForVerticalReachability()));
         pw.println(prefix + "  fixedOrientationLetterboxAspectRatio="
                 + mLetterboxConfiguration.getFixedOrientationLetterboxAspectRatio());
         pw.println(prefix + "  defaultMinAspectRatioForUnresizableApps="
@@ -818,20 +780,14 @@ final class LetterboxUiController {
         int positionToLog = APP_COMPAT_STATE_CHANGED__LETTERBOX_POSITION__UNKNOWN_POSITION;
         if (isHorizontalReachabilityEnabled()) {
             int letterboxPositionForHorizontalReachability = getLetterboxConfiguration()
-                    .getLetterboxPositionForHorizontalReachability(
-                            isDisplayFullScreenAndInPosture(
-                                    DeviceStateController.FoldState.HALF_FOLDED,
-                                    false /* isTabletop */));
+                    .getLetterboxPositionForHorizontalReachability();
             positionToLog = letterboxHorizontalReachabilityPositionToLetterboxPosition(
-                    letterboxPositionForHorizontalReachability);
+                            letterboxPositionForHorizontalReachability);
         } else if (isVerticalReachabilityEnabled()) {
             int letterboxPositionForVerticalReachability = getLetterboxConfiguration()
-                    .getLetterboxPositionForVerticalReachability(
-                            isDisplayFullScreenAndInPosture(
-                                    DeviceStateController.FoldState.HALF_FOLDED,
-                                    true /* isTabletop */));
+                    .getLetterboxPositionForVerticalReachability();
             positionToLog = letterboxVerticalReachabilityPositionToLetterboxPosition(
-                    letterboxPositionForVerticalReachability);
+                            letterboxPositionForVerticalReachability);
         }
         return positionToLog;
     }
