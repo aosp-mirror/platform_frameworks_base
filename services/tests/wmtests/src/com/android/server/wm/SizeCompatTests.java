@@ -92,6 +92,7 @@ import android.provider.DeviceConfig;
 import android.provider.DeviceConfig.Properties;
 import android.view.InsetsFrameProvider;
 import android.view.InsetsSource;
+import android.view.InsetsState;
 import android.view.WindowManager;
 
 import androidx.test.filters.MediumTest;
@@ -1464,6 +1465,12 @@ public class SizeCompatTests extends WindowTestsBase {
         assertEquals(new Rect(notchHeight, 0, 0, 0), mActivity.getLetterboxInsets());
         assertTrue(displayPolicy.isFullyTransparentAllowed(w, ITYPE_STATUS_BAR));
         assertActivityMaxBoundsSandboxed();
+
+        // The insets state for metrics should be rotated (landscape).
+        final InsetsState insetsState = new InsetsState();
+        mActivity.mDisplayContent.getInsetsPolicy().getInsetsForWindowMetrics(
+                mActivity, insetsState);
+        assertEquals(dh, insetsState.getDisplayFrame().width());
     }
 
     @Test

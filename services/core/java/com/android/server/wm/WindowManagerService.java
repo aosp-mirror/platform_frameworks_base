@@ -8924,28 +8924,17 @@ public class WindowManagerService extends IWindowManager.Stub
     }
 
     @Override
-    public boolean getWindowInsets(WindowManager.LayoutParams attrs, int displayId,
-            InsetsState outInsetsState) {
-        final int uid = Binder.getCallingUid();
+    public boolean getWindowInsets(int displayId, IBinder token, InsetsState outInsetsState) {
         final long origId = Binder.clearCallingIdentity();
         try {
             synchronized (mGlobalLock) {
-                final DisplayContent dc = getDisplayContentOrCreate(displayId, attrs.token);
+                final DisplayContent dc = getDisplayContentOrCreate(displayId, token);
                 if (dc == null) {
                     throw new WindowManager.InvalidDisplayException("Display#" + displayId
                             + "could not be found!");
                 }
-                final WindowToken token = dc.getWindowToken(attrs.token);
-                final float overrideScale = mAtmService.mCompatModePackages.getCompatScale(
-                        attrs.packageName, uid);
-                final InsetsState state = dc.getInsetsPolicy().getInsetsForWindowMetrics(attrs);
-                outInsetsState.set(state, true /* copySources */);
-                if (WindowState.hasCompatScale(attrs, token, overrideScale)) {
-                    final float compatScale = token != null && token.hasSizeCompatBounds()
-                            ? token.getCompatScale() * overrideScale
-                            : overrideScale;
-                    outInsetsState.scale(1f / compatScale);
-                }
+                final WindowToken winToken = dc.getWindowToken(token);
+                dc.getInsetsPolicy().getInsetsForWindowMetrics(winToken, outInsetsState);
                 return dc.getDisplayPolicy().areSystemBarsForcedConsumedLw();
             }
         } finally {
