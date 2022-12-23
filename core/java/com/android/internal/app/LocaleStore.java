@@ -23,6 +23,7 @@ import android.os.LocaleList;
 import android.provider.Settings;
 import android.telephony.TelephonyManager;
 import android.util.Log;
+import android.view.inputmethod.InputMethodSubtype;
 
 import com.android.internal.annotations.VisibleForTesting;
 
@@ -45,10 +46,11 @@ public class LocaleStore {
         @VisibleForTesting static final int SUGGESTION_TYPE_SIM = 1 << 0;
         @VisibleForTesting static final int SUGGESTION_TYPE_CFG = 1 << 1;
         // Only for per-app language picker
-        private static final int SUGGESTION_TYPE_CURRENT = 1 << 2;
+        @VisibleForTesting static final int SUGGESTION_TYPE_CURRENT = 1 << 2;
         // Only for per-app language picker
-        private static final int SUGGESTION_TYPE_SYSTEM_LANGUAGE = 1 << 3;
-
+        @VisibleForTesting  static final int SUGGESTION_TYPE_SYSTEM_LANGUAGE = 1 << 3;
+        // Only for per-app language picker
+        @VisibleForTesting static final int SUGGESTION_TYPE_OTHER_APP_LANGUAGE = 1 << 4;
         private final Locale mLocale;
         private final Locale mParent;
         private final String mId;
@@ -259,7 +261,16 @@ public class LocaleStore {
         }
     }
 
-    public static LocaleInfo getAppCurrentLocaleInfo(Context context, String appPackageName) {
+    /**
+     * Get the application's activated locale.
+     *
+     * @param context UI activity's context.
+     * @param appPackageName The application's package name.
+     * @param isAppSelected True if the application is selected in the UI; false otherwise.
+     * @return A LocaleInfo with the application's activated locale.
+     */
+    public static LocaleInfo getAppActivatedLocaleInfo(Context context, String appPackageName,
+            boolean isAppSelected) {
         if (appPackageName == null) {
             return null;
         }
@@ -272,7 +283,11 @@ public class LocaleStore {
 
             if (locale != null) {
                 LocaleInfo localeInfo = new LocaleInfo(locale);
-                localeInfo.mSuggestionFlags |= LocaleInfo.SUGGESTION_TYPE_CURRENT;
+                if (isAppSelected) {
+                    localeInfo.mSuggestionFlags |= LocaleInfo.SUGGESTION_TYPE_CURRENT;
+                } else {
+                    localeInfo.mSuggestionFlags |= LocaleInfo.SUGGESTION_TYPE_OTHER_APP_LANGUAGE;
+                }
                 localeInfo.mIsTranslated = true;
                 return localeInfo;
             }
@@ -280,6 +295,24 @@ public class LocaleStore {
             Log.d(TAG, "IllegalArgumentException ", e);
         }
         return null;
+    }
+
+    /**
+     * Transform IME's language tag to LocaleInfo.
+     *
+     * @param list A list which includes IME's subtype.
+     * @return A LocaleInfo set which includes IME's language tags.
+     */
+    public static Set<LocaleInfo> transformImeLanguageTagToLocaleInfo(
+            List<InputMethodSubtype> list) {
+        Set<LocaleInfo> imeLocales = new HashSet<>();
+        for (InputMethodSubtype subtype : list) {
+            LocaleInfo localeInfo = new LocaleInfo(subtype.getLanguageTag());
+            localeInfo.mSuggestionFlags |= LocaleInfo.SUGGESTION_TYPE_OTHER_APP_LANGUAGE;
+            localeInfo.mIsTranslated = true;
+            imeLocales.add(localeInfo);
+        }
+        return imeLocales;
     }
 
     /**
@@ -457,5 +490,14 @@ public class LocaleStore {
             result = sLocaleCache.get(id);
         }
         return result;
+    }
+
+    /**
+     * API for testing.
+     */
+    @UnsupportedAppUsage
+    @VisibleForTesting
+    public static LocaleInfo fromLocale(Locale locale) {
+        return new LocaleInfo(locale);
     }
 }
