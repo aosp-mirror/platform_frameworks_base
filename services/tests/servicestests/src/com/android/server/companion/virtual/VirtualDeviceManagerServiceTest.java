@@ -35,7 +35,6 @@ import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.ArgumentMatchers.nullable;
 import static org.mockito.Mockito.argThat;
-import static org.mockito.Mockito.doCallRealMethod;
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.mock;
@@ -97,8 +96,9 @@ import android.view.DisplayInfo;
 import android.view.KeyEvent;
 import android.view.WindowManager;
 
-import androidx.test.InstrumentationRegistry;
+import androidx.test.platform.app.InstrumentationRegistry;
 
+import com.android.compatibility.common.util.AdoptShellPermissionsRule;
 import com.android.internal.app.BlockedAppStreamingActivity;
 import com.android.server.LocalServices;
 import com.android.server.input.InputManagerInternal;
@@ -107,6 +107,7 @@ import com.android.server.sensors.SensorManagerInternal;
 import com.google.android.collect.Sets;
 
 import org.junit.Before;
+import org.junit.Rule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.ArgumentCaptor;
@@ -194,6 +195,11 @@ public class VirtualDeviceManagerServiceTest {
                     .setAssociatedDisplayId(DISPLAY_ID_1)
                     .build();
     private static final String TEST_SITE = "http://test";
+
+    @Rule
+    public AdoptShellPermissionsRule mAdoptShellPermissionsRule = new AdoptShellPermissionsRule(
+            InstrumentationRegistry.getInstrumentation().getUiAutomation(),
+            Manifest.permission.CREATE_VIRTUAL_DEVICE);
 
     private Context mContext;
     private InputManagerMockHelper mInputManagerMockHelper;
@@ -304,10 +310,9 @@ public class VirtualDeviceManagerServiceTest {
         LocalServices.removeServiceForTest(DisplayManagerInternal.class);
         LocalServices.addService(DisplayManagerInternal.class, mDisplayManagerInternalMock);
 
-        mContext = Mockito.spy(new ContextWrapper(InstrumentationRegistry.getTargetContext()));
+        mContext = Mockito.spy(new ContextWrapper(
+                InstrumentationRegistry.getInstrumentation().getTargetContext()));
         doReturn(mContext).when(mContext).createContextAsUser(eq(Process.myUserHandle()), anyInt());
-        doNothing().when(mContext).enforceCallingOrSelfPermission(
-                eq(Manifest.permission.CREATE_VIRTUAL_DEVICE), anyString());
         when(mContext.getSystemService(Context.DEVICE_POLICY_SERVICE)).thenReturn(
                 mDevicePolicyManagerMock);
 
@@ -844,76 +849,76 @@ public class VirtualDeviceManagerServiceTest {
     @Test
     public void createVirtualDpad_noPermission_failsSecurityException() {
         mDeviceImpl.mVirtualDisplayIds.add(DISPLAY_ID_1);
-        doCallRealMethod().when(mContext).enforceCallingOrSelfPermission(
-                eq(Manifest.permission.CREATE_VIRTUAL_DEVICE), anyString());
-        assertThrows(SecurityException.class,
-                () -> mDeviceImpl.createVirtualDpad(DPAD_CONFIG, BINDER));
+        try (DropShellPermissionsTemporarily drop = new DropShellPermissionsTemporarily()) {
+            assertThrows(SecurityException.class,
+                    () -> mDeviceImpl.createVirtualDpad(DPAD_CONFIG, BINDER));
+        }
     }
 
     @Test
     public void createVirtualKeyboard_noPermission_failsSecurityException() {
         mDeviceImpl.mVirtualDisplayIds.add(DISPLAY_ID_1);
-        doCallRealMethod().when(mContext).enforceCallingOrSelfPermission(
-                eq(Manifest.permission.CREATE_VIRTUAL_DEVICE), anyString());
-        assertThrows(SecurityException.class,
-                () -> mDeviceImpl.createVirtualKeyboard(KEYBOARD_CONFIG, BINDER));
+        try (DropShellPermissionsTemporarily drop = new DropShellPermissionsTemporarily()) {
+            assertThrows(SecurityException.class,
+                    () -> mDeviceImpl.createVirtualKeyboard(KEYBOARD_CONFIG, BINDER));
+        }
     }
 
     @Test
     public void createVirtualMouse_noPermission_failsSecurityException() {
         mDeviceImpl.mVirtualDisplayIds.add(DISPLAY_ID_1);
-        doCallRealMethod().when(mContext).enforceCallingOrSelfPermission(
-                eq(Manifest.permission.CREATE_VIRTUAL_DEVICE), anyString());
-        assertThrows(SecurityException.class,
-                () -> mDeviceImpl.createVirtualMouse(MOUSE_CONFIG, BINDER));
+        try (DropShellPermissionsTemporarily drop = new DropShellPermissionsTemporarily()) {
+            assertThrows(SecurityException.class,
+                    () -> mDeviceImpl.createVirtualMouse(MOUSE_CONFIG, BINDER));
+        }
     }
 
     @Test
     public void createVirtualTouchscreen_noPermission_failsSecurityException() {
         mDeviceImpl.mVirtualDisplayIds.add(DISPLAY_ID_1);
-        doCallRealMethod().when(mContext).enforceCallingOrSelfPermission(
-                eq(Manifest.permission.CREATE_VIRTUAL_DEVICE), anyString());
-        assertThrows(SecurityException.class,
-                () -> mDeviceImpl.createVirtualTouchscreen(TOUCHSCREEN_CONFIG, BINDER));
+        try (DropShellPermissionsTemporarily drop = new DropShellPermissionsTemporarily()) {
+            assertThrows(SecurityException.class,
+                    () -> mDeviceImpl.createVirtualTouchscreen(TOUCHSCREEN_CONFIG, BINDER));
+        }
     }
 
     @Test
     public void createVirtualNavigationTouchpad_noPermission_failsSecurityException() {
         mDeviceImpl.mVirtualDisplayIds.add(DISPLAY_ID_1);
-        doCallRealMethod().when(mContext).enforceCallingOrSelfPermission(
-                eq(Manifest.permission.CREATE_VIRTUAL_DEVICE), anyString());
-        assertThrows(SecurityException.class,
-                () -> mDeviceImpl.createVirtualNavigationTouchpad(NAVIGATION_TOUCHPAD_CONFIG,
-                        BINDER));
+        try (DropShellPermissionsTemporarily drop = new DropShellPermissionsTemporarily()) {
+            assertThrows(SecurityException.class,
+                    () -> mDeviceImpl.createVirtualNavigationTouchpad(NAVIGATION_TOUCHPAD_CONFIG,
+                            BINDER));
+        }
     }
 
     @Test
     public void createVirtualSensor_noPermission_failsSecurityException() {
-        doCallRealMethod().when(mContext).enforceCallingOrSelfPermission(
-                eq(Manifest.permission.CREATE_VIRTUAL_DEVICE), anyString());
-        assertThrows(
-                SecurityException.class,
-                () -> mDeviceImpl.createVirtualSensor(
-                        BINDER,
-                        new VirtualSensorConfig.Builder(
-                                Sensor.TYPE_ACCELEROMETER, DEVICE_NAME).build()));
+        try (DropShellPermissionsTemporarily drop = new DropShellPermissionsTemporarily()) {
+            assertThrows(
+                    SecurityException.class,
+                    () -> mDeviceImpl.createVirtualSensor(
+                            BINDER,
+                            new VirtualSensorConfig.Builder(
+                                    Sensor.TYPE_ACCELEROMETER, DEVICE_NAME).build()));
+        }
     }
 
     @Test
     public void onAudioSessionStarting_noPermission_failsSecurityException() {
         mDeviceImpl.mVirtualDisplayIds.add(DISPLAY_ID_1);
-        doCallRealMethod().when(mContext).enforceCallingOrSelfPermission(
-                eq(Manifest.permission.CREATE_VIRTUAL_DEVICE), anyString());
-        assertThrows(SecurityException.class,
-                () -> mDeviceImpl.onAudioSessionStarting(
-                        DISPLAY_ID_1, mRoutingCallback, mConfigChangedCallback));
+        try (DropShellPermissionsTemporarily drop = new DropShellPermissionsTemporarily()) {
+            assertThrows(SecurityException.class,
+                    () -> mDeviceImpl.onAudioSessionStarting(
+                            DISPLAY_ID_1, mRoutingCallback, mConfigChangedCallback));
+        }
     }
 
     @Test
     public void onAudioSessionEnded_noPermission_failsSecurityException() {
-        doCallRealMethod().when(mContext).enforceCallingOrSelfPermission(
-                eq(Manifest.permission.CREATE_VIRTUAL_DEVICE), anyString());
-        assertThrows(SecurityException.class, () -> mDeviceImpl.onAudioSessionEnded());
+        try (DropShellPermissionsTemporarily drop = new DropShellPermissionsTemporarily()) {
+            assertThrows(SecurityException.class, () -> mDeviceImpl.onAudioSessionEnded());
+        }
     }
 
     @Test
@@ -1592,5 +1597,19 @@ public class VirtualDeviceManagerServiceTest {
                 mPendingTrampolineCallback, mActivityListener, mRunningAppsChangedCallback, params);
         mVdms.addVirtualDevice(virtualDeviceImpl);
         return virtualDeviceImpl;
+    }
+
+    /** Helper class to drop permissions temporarily and restore them at the end of a test. */
+    static final class DropShellPermissionsTemporarily implements AutoCloseable {
+        DropShellPermissionsTemporarily() {
+            InstrumentationRegistry.getInstrumentation().getUiAutomation()
+                    .dropShellPermissionIdentity();
+        }
+
+        @Override
+        public void close() {
+            InstrumentationRegistry.getInstrumentation().getUiAutomation()
+                    .adoptShellPermissionIdentity();
+        }
     }
 }
