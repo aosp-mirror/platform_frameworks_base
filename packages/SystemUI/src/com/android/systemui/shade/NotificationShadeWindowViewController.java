@@ -19,6 +19,7 @@ package com.android.systemui.shade;
 import android.app.StatusBarManager;
 import android.media.AudioManager;
 import android.media.session.MediaSessionLegacyHelper;
+import android.os.PowerManager;
 import android.os.SystemClock;
 import android.util.Log;
 import android.view.GestureDetector;
@@ -238,7 +239,9 @@ public class NotificationShadeWindowViewController {
                         () -> mService.wakeUpIfDozing(
                                 SystemClock.uptimeMillis(),
                                 mView,
-                                "LOCK_ICON_TOUCH"));
+                                "LOCK_ICON_TOUCH",
+                                PowerManager.WAKE_REASON_GESTURE)
+                );
 
                 // In case we start outside of the view bounds (below the status bar), we need to
                 // dispatch

@@ -359,6 +359,7 @@ public interface StatusBarIconController {
         // Whether or not these icons show up in dumpsys
         protected boolean mShouldLog = false;
         private StatusBarIconController mController;
+        private final StatusBarLocation mLocation;
 
         // Enables SystemUI demo mode to take effect in this group
         protected boolean mDemoable = true;
@@ -381,11 +382,12 @@ public interface StatusBarIconController {
             mContext = group.getContext();
             mIconSize = mContext.getResources().getDimensionPixelSize(
                     com.android.internal.R.dimen.status_bar_icon_size);
+            mLocation = location;
 
             if (statusBarPipelineFlags.runNewMobileIconsBackend()) {
                 // This starts the flow for the new pipeline, and will notify us of changes if
                 // {@link StatusBarPipelineFlags#useNewMobileIcons} is also true.
-                mMobileIconsViewModel = mobileUiAdapter.createMobileIconsViewModel();
+                mMobileIconsViewModel = mobileUiAdapter.getMobileIconsViewModel();
                 MobileIconsBinder.bind(mGroup, mMobileIconsViewModel);
             } else {
                 mMobileIconsViewModel = null;
@@ -394,7 +396,7 @@ public interface StatusBarIconController {
             if (statusBarPipelineFlags.runNewWifiIconBackend()) {
                 // This starts the flow for the new pipeline, and will notify us of changes if
                 // {@link StatusBarPipelineFlags#useNewWifiIcon} is also true.
-                mWifiViewModel = wifiUiAdapter.bindGroup(mGroup, location);
+                mWifiViewModel = wifiUiAdapter.bindGroup(mGroup, mLocation);
             } else {
                 mWifiViewModel = null;
             }
@@ -495,6 +497,11 @@ public interface StatusBarIconController {
 
             ModernStatusBarWifiView view = onCreateModernStatusBarWifiView(slot);
             mGroup.addView(view, index, onCreateLayoutParams());
+
+            if (mIsInDemoMode) {
+                mDemoStatusIcons.addModernWifiView(mWifiViewModel);
+            }
+
             return view;
         }
 
@@ -569,7 +576,7 @@ public interface StatusBarIconController {
                     .constructAndBind(
                             mobileContext,
                             slot,
-                            mMobileIconsViewModel.viewModelForSub(subId)
+                            mMobileIconsViewModel.viewModelForSub(subId, mLocation)
                         );
         }
 
@@ -686,6 +693,9 @@ public interface StatusBarIconController {
             mIsInDemoMode = true;
             if (mDemoStatusIcons == null) {
                 mDemoStatusIcons = createDemoStatusIcons();
+                if (mStatusBarPipelineFlags.useNewWifiIcon()) {
+                    mDemoStatusIcons.addModernWifiView(mWifiViewModel);
+                }
             }
             mDemoStatusIcons.onDemoModeStarted();
         }
@@ -705,7 +715,12 @@ public interface StatusBarIconController {
         }
 
         protected DemoStatusIcons createDemoStatusIcons() {
-            return new DemoStatusIcons((LinearLayout) mGroup, mMobileIconsViewModel, mIconSize);
+            return new DemoStatusIcons(
+                    (LinearLayout) mGroup,
+                    mMobileIconsViewModel,
+                    mLocation,
+                    mIconSize
+            );
         }
     }
 }

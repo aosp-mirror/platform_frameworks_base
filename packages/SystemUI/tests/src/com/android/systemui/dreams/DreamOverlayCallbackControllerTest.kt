@@ -18,6 +18,7 @@ package com.android.systemui.dreams
 import android.testing.AndroidTestingRunner
 import androidx.test.filters.SmallTest
 import com.android.systemui.SysuiTestCase
+import com.google.common.truth.Truth.assertThat
 import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -30,23 +31,27 @@ import org.mockito.MockitoAnnotations
 
 @SmallTest
 @RunWith(AndroidTestingRunner::class)
-class DreamCallbackControllerTest : SysuiTestCase() {
+class DreamOverlayCallbackControllerTest : SysuiTestCase() {
 
-    @Mock private lateinit var callback: DreamCallbackController.DreamCallback
+    @Mock private lateinit var callback: DreamOverlayCallbackController.Callback
 
-    private lateinit var underTest: DreamCallbackController
+    private lateinit var underTest: DreamOverlayCallbackController
 
     @Before
     fun setUp() {
         MockitoAnnotations.initMocks(this)
-        underTest = DreamCallbackController()
+        underTest = DreamOverlayCallbackController()
     }
 
     @Test
-    fun testOnWakeUpInvokesCallback() {
+    fun onWakeUpInvokesCallback() {
+        underTest.onStartDream()
+        assertThat(underTest.isDreaming).isEqualTo(true)
+
         underTest.addCallback(callback)
         underTest.onWakeUp()
         verify(callback).onWakeUp()
+        assertThat(underTest.isDreaming).isEqualTo(false)
 
         // Adding twice should not invoke twice
         reset(callback)
@@ -59,5 +64,28 @@ class DreamCallbackControllerTest : SysuiTestCase() {
         underTest.removeCallback(callback)
         underTest.onWakeUp()
         verify(callback, never()).onWakeUp()
+    }
+
+    @Test
+    fun onStartDreamInvokesCallback() {
+        underTest.addCallback(callback)
+
+        assertThat(underTest.isDreaming).isEqualTo(false)
+
+        underTest.onStartDream()
+        verify(callback).onStartDream()
+        assertThat(underTest.isDreaming).isEqualTo(true)
+
+        // Adding twice should not invoke twice
+        reset(callback)
+        underTest.addCallback(callback)
+        underTest.onStartDream()
+        verify(callback, times(1)).onStartDream()
+
+        // After remove, no call to callback
+        reset(callback)
+        underTest.removeCallback(callback)
+        underTest.onStartDream()
+        verify(callback, never()).onStartDream()
     }
 }

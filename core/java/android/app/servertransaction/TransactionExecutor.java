@@ -126,10 +126,13 @@ public class TransactionExecutor {
             final ClientTransactionItem item = callbacks.get(i);
             if (DEBUG_RESOLVER) Slog.d(TAG, tId(transaction) + "Resolving callback: " + item);
             final int postExecutionState = item.getPostExecutionState();
-            final int closestPreExecutionState = mHelper.getClosestPreExecutionState(r,
-                    item.getPostExecutionState());
-            if (closestPreExecutionState != UNDEFINED) {
-                cycleToPath(r, closestPreExecutionState, transaction);
+
+            if (item.shouldHaveDefinedPreExecutionState()) {
+                final int closestPreExecutionState = mHelper.getClosestPreExecutionState(r,
+                        item.getPostExecutionState());
+                if (closestPreExecutionState != UNDEFINED) {
+                    cycleToPath(r, closestPreExecutionState, transaction);
+                }
             }
 
             item.execute(mTransactionHandler, token, mPendingActions);

@@ -5,6 +5,7 @@ import android.animation.AnimatorListenerAdapter
 import android.animation.ValueAnimator
 import android.content.Context
 import android.content.res.Configuration
+import android.os.PowerManager
 import android.os.SystemClock
 import android.util.IndentingPrintWriter
 import android.util.MathUtils
@@ -272,7 +273,12 @@ class LockscreenShadeTransitionController @Inject constructor(
         // Bind the click listener of the shelf to go to the full shade
         notificationShelfController.setOnClickListener {
             if (statusBarStateController.state == StatusBarState.KEYGUARD) {
-                centralSurfaces.wakeUpIfDozing(SystemClock.uptimeMillis(), it, "SHADE_CLICK")
+                centralSurfaces.wakeUpIfDozing(
+                        SystemClock.uptimeMillis(),
+                        it,
+                        "SHADE_CLICK",
+                        PowerManager.WAKE_REASON_GESTURE,
+                )
                 goToLockedShade(it)
             }
         }

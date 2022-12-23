@@ -46,11 +46,17 @@ class FakeKeyguardRepository : KeyguardRepository {
     private val _isKeyguardShowing = MutableStateFlow(false)
     override val isKeyguardShowing: Flow<Boolean> = _isKeyguardShowing
 
+    private val _isKeyguardOccluded = MutableStateFlow(false)
+    override val isKeyguardOccluded: Flow<Boolean> = _isKeyguardOccluded
+
     private val _isDozing = MutableStateFlow(false)
     override val isDozing: Flow<Boolean> = _isDozing
 
     private val _isDreaming = MutableStateFlow(false)
     override val isDreaming: Flow<Boolean> = _isDreaming
+
+    private val _isDreamingWithOverlay = MutableStateFlow(false)
+    override val isDreamingWithOverlay: Flow<Boolean> = _isDreamingWithOverlay
 
     private val _dozeAmount = MutableStateFlow(0f)
     override val linearDozeAmount: Flow<Float> = _dozeAmount
@@ -112,8 +118,16 @@ class FakeKeyguardRepository : KeyguardRepository {
         _isKeyguardShowing.value = isShowing
     }
 
+    fun setKeyguardOccluded(isOccluded: Boolean) {
+        _isKeyguardOccluded.value = isOccluded
+    }
+
     fun setDozing(isDozing: Boolean) {
         _isDozing.value = isDozing
+    }
+
+    fun setDreamingWithOverlay(isDreaming: Boolean) {
+        _isDreamingWithOverlay.value = isDreaming
     }
 
     fun setDozeAmount(dozeAmount: Float) {
@@ -142,6 +156,10 @@ class FakeKeyguardRepository : KeyguardRepository {
 
     fun setFingerprintSensorLocation(location: Point?) {
         _fingerprintSensorLocation.tryEmit(location)
+    }
+
+    fun setDozeTransitionModel(model: DozeTransitionModel) {
+        _dozeTransitionModel.value = model
     }
 
     override fun isUdfpsSupported(): Boolean {

@@ -1805,6 +1805,7 @@ public class DisplayRotation {
             final int mHalfFoldSavedRotation;
             final boolean mInHalfFoldTransition;
             final DeviceStateController.FoldState mFoldState;
+            @Nullable final String mDisplayRotationCompatPolicySummary;
 
             Record(DisplayRotation dr, int fromRotation, int toRotation) {
                 mFromRotation = fromRotation;
@@ -1839,6 +1840,10 @@ public class DisplayRotation {
                     mInHalfFoldTransition = false;
                     mFoldState = DeviceStateController.FoldState.UNKNOWN;
                 }
+                mDisplayRotationCompatPolicySummary = dc.mDisplayRotationCompatPolicy == null
+                        ? null
+                        : dc.mDisplayRotationCompatPolicy
+                                .getSummaryForDisplayRotationHistoryRecord();
             }
 
             void dump(String prefix, PrintWriter pw) {
@@ -1860,6 +1865,9 @@ public class DisplayRotation {
                             + mHalfFoldSavedRotation
                             + " mInHalfFoldTransition=" + mInHalfFoldTransition
                             + " mFoldState=" + mFoldState);
+                }
+                if (mDisplayRotationCompatPolicySummary != null) {
+                    pw.println(prefix + mDisplayRotationCompatPolicySummary);
                 }
             }
         }

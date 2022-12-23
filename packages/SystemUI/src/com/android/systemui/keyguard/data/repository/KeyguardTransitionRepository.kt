@@ -131,6 +131,10 @@ class KeyguardTransitionRepositoryImpl @Inject constructor() : KeyguardTransitio
     }
 
     override fun startTransition(info: TransitionInfo): UUID? {
+        if (lastStep.from == info.from && lastStep.to == info.to) {
+            Log.i(TAG, "Duplicate call to start the transition, rejecting: $info")
+            return null
+        }
         if (lastStep.transitionState != TransitionState.FINISHED) {
             Log.i(TAG, "Transition still active: $lastStep, canceling")
         }
