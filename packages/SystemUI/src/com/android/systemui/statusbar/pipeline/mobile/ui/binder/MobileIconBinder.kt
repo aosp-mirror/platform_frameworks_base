@@ -30,7 +30,7 @@ import com.android.settingslib.graph.SignalDrawable
 import com.android.systemui.R
 import com.android.systemui.common.ui.binder.IconViewBinder
 import com.android.systemui.lifecycle.repeatWhenAttached
-import com.android.systemui.statusbar.pipeline.mobile.ui.viewmodel.MobileIconViewModel
+import com.android.systemui.statusbar.pipeline.mobile.ui.viewmodel.LocationBasedMobileViewModel
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.launch
 
@@ -39,7 +39,7 @@ object MobileIconBinder {
     @JvmStatic
     fun bind(
         view: ViewGroup,
-        viewModel: MobileIconViewModel,
+        viewModel: LocationBasedMobileViewModel,
     ) {
         val activityContainer = view.requireViewById<View>(R.id.inout_container)
         val activityIn = view.requireViewById<ImageView>(R.id.mobile_in)

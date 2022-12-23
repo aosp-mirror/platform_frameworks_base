@@ -14,17 +14,19 @@
  * limitations under the License.
  */
 
-@file:OptIn(InternalCoroutinesApi::class)
-
 package com.android.systemui.statusbar.pipeline.mobile.ui.viewmodel
 
+import androidx.annotation.VisibleForTesting
+import com.android.systemui.dagger.qualifiers.Application
+import com.android.systemui.statusbar.phone.StatusBarLocation
 import com.android.systemui.statusbar.pipeline.mobile.domain.interactor.MobileIconsInteractor
 import com.android.systemui.statusbar.pipeline.mobile.ui.view.ModernStatusBarMobileView
 import com.android.systemui.statusbar.pipeline.shared.ConnectivityConstants
 import com.android.systemui.statusbar.pipeline.shared.ConnectivityPipelineLogger
 import javax.inject.Inject
-import kotlinx.coroutines.InternalCoroutinesApi
+import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.launch
 
 /**
  * View model for describing the system's current mobile cellular connections. The result is a list
@@ -38,15 +40,33 @@ constructor(
     private val interactor: MobileIconsInteractor,
     private val logger: ConnectivityPipelineLogger,
     private val constants: ConnectivityConstants,
+    @Application private val scope: CoroutineScope,
 ) {
-    /** TODO: do we need to cache these? */
-    fun viewModelForSub(subId: Int): MobileIconViewModel =
-        MobileIconViewModel(
-            subId,
-            interactor.createMobileConnectionInteractorForSubId(subId),
-            logger,
-            constants,
-        )
+    @VisibleForTesting val mobileIconSubIdCache = mutableMapOf<Int, MobileIconViewModel>()
+
+    init {
+        scope.launch { subscriptionIdsFlow.collect { removeInvalidModelsFromCache(it) } }
+    }
+
+    fun viewModelForSub(subId: Int, location: StatusBarLocation): LocationBasedMobileViewModel {
+        val common =
+            mobileIconSubIdCache[subId]
+                ?: MobileIconViewModel(
+                        subId,
+                        interactor.createMobileConnectionInteractorForSubId(subId),
+                        logger,
+                        constants,
+                        scope,
+                    )
+                    .also { mobileIconSubIdCache[subId] = it }
+
+        return LocationBasedMobileViewModel.viewModelForLocation(common, logger, location)
+    }
+
+    private fun removeInvalidModelsFromCache(subIds: List<Int>) {
+        val subIdsToRemove = mobileIconSubIdCache.keys.filter { !subIds.contains(it) }
+        subIdsToRemove.forEach { mobileIconSubIdCache.remove(it) }
+    }
 
     class Factory
     @Inject
@@ -54,6 +74,7 @@ constructor(
         private val interactor: MobileIconsInteractor,
         private val logger: ConnectivityPipelineLogger,
         private val constants: ConnectivityConstants,
+        @Application private val scope: CoroutineScope,
     ) {
         fun create(subscriptionIdsFlow: StateFlow<List<Int>>): MobileIconsViewModel {
             return MobileIconsViewModel(
@@ -61,6 +82,7 @@ constructor(
                 interactor,
                 logger,
                 constants,
+                scope,
             )
         }
     }

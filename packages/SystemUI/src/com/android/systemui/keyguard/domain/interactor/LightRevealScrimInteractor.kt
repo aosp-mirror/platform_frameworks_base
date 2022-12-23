@@ -89,6 +89,7 @@ constructor(
                 KeyguardState.BOUNCER -> true
                 KeyguardState.LOCKSCREEN -> true
                 KeyguardState.GONE -> true
+                KeyguardState.OCCLUDED -> true
             }
         }
     }

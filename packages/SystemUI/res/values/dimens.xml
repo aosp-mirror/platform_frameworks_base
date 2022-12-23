@@ -1275,6 +1275,9 @@
     <!-- DREAMING -> LOCKSCREEN transition: Amount to shift lockscreen content on entering -->
     <dimen name="dreaming_to_lockscreen_transition_lockscreen_translation_y">40dp</dimen>
 
+    <!-- OCCLUDED -> LOCKSCREEN transition: Amount to shift lockscreen content on entering -->
+    <dimen name="occluded_to_lockscreen_transition_lockscreen_translation_y">40dp</dimen>
+
     <!-- The amount of vertical offset for the keyguard during the full shade transition. -->
     <dimen name="lockscreen_shade_keyguard_transition_vertical_offset">0dp</dimen>
 

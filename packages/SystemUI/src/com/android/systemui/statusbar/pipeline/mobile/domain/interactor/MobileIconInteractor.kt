@@ -19,6 +19,7 @@ package com.android.systemui.statusbar.pipeline.mobile.domain.interactor
 import android.telephony.CarrierConfigManager
 import com.android.settingslib.SignalIcon.MobileIconGroup
 import com.android.systemui.dagger.qualifiers.Application
+import com.android.systemui.log.table.TableLogBuffer
 import com.android.systemui.statusbar.pipeline.mobile.data.model.DataConnectionState.Connected
 import com.android.systemui.statusbar.pipeline.mobile.data.model.NetworkNameModel
 import com.android.systemui.statusbar.pipeline.mobile.data.repository.MobileConnectionRepository
@@ -35,6 +36,9 @@ import kotlinx.coroutines.flow.mapLatest
 import kotlinx.coroutines.flow.stateIn
 
 interface MobileIconInteractor {
+    /** The table log created for this connection */
+    val tableLogBuffer: TableLogBuffer
+
     /** The current mobile data activity */
     val activity: Flow<DataActivityModel>
 
@@ -96,6 +100,8 @@ class MobileIconInteractorImpl(
     connectionRepository: MobileConnectionRepository,
 ) : MobileIconInteractor {
     private val connectionInfo = connectionRepository.connectionInfo
+
+    override val tableLogBuffer: TableLogBuffer = connectionRepository.tableLogBuffer
 
     override val activity = connectionInfo.mapLatest { it.dataActivityDirection }
 

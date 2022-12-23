@@ -107,6 +107,7 @@ import com.android.systemui.keyguard.domain.interactor.KeyguardBottomAreaInterac
 import com.android.systemui.keyguard.domain.interactor.KeyguardTransitionInteractor;
 import com.android.systemui.keyguard.ui.viewmodel.DreamingToLockscreenTransitionViewModel;
 import com.android.systemui.keyguard.ui.viewmodel.KeyguardBottomAreaViewModel;
+import com.android.systemui.keyguard.ui.viewmodel.OccludedToLockscreenTransitionViewModel;
 import com.android.systemui.media.controls.pipeline.MediaDataManager;
 import com.android.systemui.media.controls.ui.KeyguardMediaController;
 import com.android.systemui.media.controls.ui.MediaHierarchyManager;
@@ -187,6 +188,8 @@ import org.mockito.stubbing.Answer;
 
 import java.util.List;
 import java.util.Optional;
+
+import kotlinx.coroutines.CoroutineDispatcher;
 
 @SmallTest
 @RunWith(AndroidTestingRunner.class)
@@ -289,7 +292,9 @@ public class NotificationPanelViewControllerTest extends SysuiTestCase {
     @Mock private KeyguardBottomAreaViewModel mKeyguardBottomAreaViewModel;
     @Mock private KeyguardBottomAreaInteractor mKeyguardBottomAreaInteractor;
     @Mock private DreamingToLockscreenTransitionViewModel mDreamingToLockscreenTransitionViewModel;
+    @Mock private OccludedToLockscreenTransitionViewModel mOccludedToLockscreenTransitionViewModel;
     @Mock private KeyguardTransitionInteractor mKeyguardTransitionInteractor;
+    @Mock private CoroutineDispatcher mMainDispatcher;
     @Mock private MotionEvent mDownMotionEvent;
     @Captor
     private ArgumentCaptor<NotificationStackScrollLayout.OnEmptySpaceClickListener>
@@ -507,6 +512,8 @@ public class NotificationPanelViewControllerTest extends SysuiTestCase {
                 mKeyguardBottomAreaViewModel,
                 mKeyguardBottomAreaInteractor,
                 mDreamingToLockscreenTransitionViewModel,
+                mOccludedToLockscreenTransitionViewModel,
+                mMainDispatcher,
                 mKeyguardTransitionInteractor,
                 mDumpManager);
         mNotificationPanelViewController.initDependencies(

@@ -20,26 +20,39 @@ import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.statusbar.policy.CallbackController
 import javax.inject.Inject
 
-/** Dream-related callback information */
+/** Dream overlay-related callback information */
 @SysUISingleton
-class DreamCallbackController @Inject constructor() :
-    CallbackController<DreamCallbackController.DreamCallback> {
+class DreamOverlayCallbackController @Inject constructor() :
+    CallbackController<DreamOverlayCallbackController.Callback> {
 
-    private val callbacks = mutableSetOf<DreamCallbackController.DreamCallback>()
+    private val callbacks = mutableSetOf<DreamOverlayCallbackController.Callback>()
 
-    override fun addCallback(callback: DreamCallbackController.DreamCallback) {
+    var isDreaming = false
+        private set
+
+    override fun addCallback(callback: DreamOverlayCallbackController.Callback) {
         callbacks.add(callback)
     }
 
-    override fun removeCallback(callback: DreamCallbackController.DreamCallback) {
+    override fun removeCallback(callback: DreamOverlayCallbackController.Callback) {
         callbacks.remove(callback)
     }
 
     fun onWakeUp() {
+        isDreaming = false
         callbacks.forEach { it.onWakeUp() }
     }
 
-    interface DreamCallback {
+    fun onStartDream() {
+        isDreaming = true
+        callbacks.forEach { it.onStartDream() }
+    }
+
+    interface Callback {
+        /** Dream overlay has ended */
         fun onWakeUp()
+
+        /** Dream overlay has started */
+        fun onStartDream()
     }
 }
