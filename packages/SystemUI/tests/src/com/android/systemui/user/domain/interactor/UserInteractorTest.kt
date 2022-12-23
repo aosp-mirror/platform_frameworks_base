@@ -42,6 +42,7 @@ import com.android.systemui.keyguard.data.repository.FakeKeyguardRepository
 import com.android.systemui.keyguard.domain.interactor.KeyguardInteractor
 import com.android.systemui.plugins.ActivityStarter
 import com.android.systemui.qs.user.UserSwitchDialogController
+import com.android.systemui.statusbar.CommandQueue
 import com.android.systemui.statusbar.policy.DeviceProvisionedController
 import com.android.systemui.telephony.data.repository.FakeTelephonyRepository
 import com.android.systemui.telephony.domain.interactor.TelephonyInteractor
@@ -90,6 +91,7 @@ class UserInteractorTest : SysuiTestCase() {
     @Mock private lateinit var dialogShower: UserSwitchDialogController.DialogShower
     @Mock private lateinit var resumeSessionReceiver: GuestResumeSessionReceiver
     @Mock private lateinit var resetOrExitSessionReceiver: GuestResetOrExitSessionReceiver
+    @Mock private lateinit var commandQueue: CommandQueue
 
     private lateinit var underTest: UserInteractor
 
@@ -132,6 +134,7 @@ class UserInteractorTest : SysuiTestCase() {
                 keyguardInteractor =
                     KeyguardInteractor(
                         repository = keyguardRepository,
+                        commandQueue = commandQueue,
                     ),
                 manager = manager,
                 applicationScope = testCoroutineScope,

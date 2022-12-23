@@ -30,6 +30,8 @@ import com.android.systemui.shade.data.repository.ShadeRepository
 import com.android.systemui.util.kotlin.sample
 import java.util.UUID
 import javax.inject.Inject
+import kotlin.time.Duration
+import kotlin.time.Duration.Companion.milliseconds
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.flow.combine
@@ -51,6 +53,7 @@ constructor(
     override fun start() {
         listenForLockscreenToGone()
         listenForLockscreenToOccluded()
+        listenForLockscreenToCamera()
         listenForLockscreenToAod()
         listenForLockscreenToBouncer()
         listenForLockscreenToDreaming()
@@ -69,7 +72,7 @@ constructor(
                                 name,
                                 KeyguardState.LOCKSCREEN,
                                 KeyguardState.DREAMING,
-                                getAnimator(),
+                                getAnimator(TO_DREAMING_DURATION),
                             )
                         )
                     }
@@ -184,17 +187,42 @@ constructor(
                     ),
                     ::toTriple
                 )
-                .collect { triple ->
-                    val (isOccluded, keyguardState, isDreaming) = triple
-                    // Occlusion signals come from the framework, and should interrupt any
-                    // existing transition
-                    if (isOccluded && !isDreaming) {
+                .collect { (isOccluded, keyguardState, isDreaming) ->
+                    if (isOccluded && !isDreaming && keyguardState == KeyguardState.LOCKSCREEN) {
                         keyguardTransitionRepository.startTransition(
                             TransitionInfo(
                                 name,
                                 keyguardState,
                                 KeyguardState.OCCLUDED,
-                                getAnimator(),
+                                getAnimator(TO_OCCLUDED_DURATION),
+                            )
+                        )
+                    }
+                }
+        }
+    }
+
+    /** This signal may come in before the occlusion signal, and can provide a custom transition */
+    private fun listenForLockscreenToCamera() {
+        scope.launch {
+            keyguardInteractor.onCameraLaunchDetected
+                .sample(keyguardTransitionInteractor.startedKeyguardTransitionStep, ::Pair)
+                .collect { (_, lastStartedStep) ->
+                    // DREAMING/AOD/OFF may trigger on the first power button push, so include this
+                    // state in order to cancel and correct the transition
+                    if (
+                        lastStartedStep.to == KeyguardState.LOCKSCREEN ||
+                            lastStartedStep.to == KeyguardState.DREAMING ||
+                            lastStartedStep.to == KeyguardState.DOZING ||
+                            lastStartedStep.to == KeyguardState.AOD ||
+                            lastStartedStep.to == KeyguardState.OFF
+                    ) {
+                        keyguardTransitionRepository.startTransition(
+                            TransitionInfo(
+                                name,
+                                KeyguardState.LOCKSCREEN,
+                                KeyguardState.OCCLUDED,
+                                getAnimator(TO_OCCLUDED_DURATION),
                             )
                         )
                     }
@@ -223,14 +251,16 @@ constructor(
         }
     }
 
-    private fun getAnimator(): ValueAnimator {
+    private fun getAnimator(duration: Duration = DEFAULT_DURATION): ValueAnimator {
         return ValueAnimator().apply {
             setInterpolator(Interpolators.LINEAR)
-            setDuration(TRANSITION_DURATION_MS)
+            setDuration(duration.inWholeMilliseconds)
         }
     }
 
     companion object {
-        private const val TRANSITION_DURATION_MS = 500L
+        private val DEFAULT_DURATION = 500.milliseconds
+        val TO_DREAMING_DURATION = 933.milliseconds
+        val TO_OCCLUDED_DURATION = 450.milliseconds
     }
 }

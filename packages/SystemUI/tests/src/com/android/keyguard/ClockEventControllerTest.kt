@@ -15,6 +15,7 @@
  */
 package com.android.keyguard
 
+import com.android.systemui.statusbar.CommandQueue
 import android.content.BroadcastReceiver
 import android.testing.AndroidTestingRunner
 import android.view.View
@@ -81,6 +82,7 @@ class ClockEventControllerTest : SysuiTestCase() {
     @Mock private lateinit var largeClockEvents: ClockFaceEvents
     @Mock private lateinit var parentView: View
     @Mock private lateinit var transitionRepository: KeyguardTransitionRepository
+    @Mock private lateinit var commandQueue: CommandQueue
     private lateinit var repository: FakeKeyguardRepository
     @Mock private lateinit var logBuffer: LogBuffer
     private lateinit var underTest: ClockEventController
@@ -99,7 +101,7 @@ class ClockEventControllerTest : SysuiTestCase() {
         repository = FakeKeyguardRepository()
 
         underTest = ClockEventController(
-            KeyguardInteractor(repository = repository),
+            KeyguardInteractor(repository = repository, commandQueue = commandQueue),
             KeyguardTransitionInteractor(repository = transitionRepository),
             broadcastDispatcher,
             batteryController,

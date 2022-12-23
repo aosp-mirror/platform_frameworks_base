@@ -51,6 +51,7 @@ import com.android.systemui.settings.UserFileManager
 import com.android.systemui.settings.UserTracker
 import com.android.systemui.shared.customization.data.content.CustomizationProviderContract as Contract
 import com.android.systemui.shared.keyguard.shared.model.KeyguardQuickAffordanceSlots
+import com.android.systemui.statusbar.CommandQueue
 import com.android.systemui.statusbar.policy.KeyguardStateController
 import com.android.systemui.util.FakeSharedPreferences
 import com.android.systemui.util.mockito.any
@@ -86,9 +87,9 @@ class CustomizationProviderTest : SysuiTestCase() {
     @Mock private lateinit var backgroundHandler: Handler
     @Mock private lateinit var previewSurfacePackage: SurfaceControlViewHost.SurfacePackage
     @Mock private lateinit var launchAnimator: DialogLaunchAnimator
+    @Mock private lateinit var commandQueue: CommandQueue
 
     private lateinit var underTest: CustomizationProvider
-
     private lateinit var testScope: TestScope
 
     @Before
@@ -160,6 +161,7 @@ class CustomizationProviderTest : SysuiTestCase() {
                 keyguardInteractor =
                     KeyguardInteractor(
                         repository = FakeKeyguardRepository(),
+                        commandQueue = commandQueue,
                     ),
                 registry = mock(),
                 lockPatternUtils = lockPatternUtils,
