@@ -17,6 +17,7 @@
 package android.media;
 
 import android.annotation.IntDef;
+import android.annotation.IntRange;
 import android.annotation.NonNull;
 import android.os.Parcel;
 import android.os.Parcelable;
@@ -198,19 +199,22 @@ public final class RouteListingPreference implements Parcelable {
         @NonNull private final String mRouteId;
         @Flags private final int mFlags;
         @DisableReason private final int mDisableReason;
+        private final int mSessionParticipantCount;
 
         private Item(@NonNull Builder builder) {
             mRouteId = builder.mRouteId;
             mFlags = builder.mFlags;
             mDisableReason = builder.mDisableReason;
+            mSessionParticipantCount = builder.mSessionParticipantCount;
         }
 
         private Item(Parcel in) {
-            String routeId = in.readString();
-            Preconditions.checkArgument(!TextUtils.isEmpty(routeId));
-            mRouteId = routeId;
+            mRouteId = in.readString();
+            Preconditions.checkArgument(!TextUtils.isEmpty(mRouteId));
             mFlags = in.readInt();
             mDisableReason = in.readInt();
+            mSessionParticipantCount = in.readInt();
+            Preconditions.checkArgument(mSessionParticipantCount >= 0);
         }
 
         /** Returns the id of the route that corresponds to this route listing preference item. */
@@ -244,6 +248,17 @@ public final class RouteListingPreference implements Parcelable {
             return mDisableReason;
         }
 
+        /**
+         * Returns a non-negative number of participants in the ongoing session (if any) on the
+         * corresponding route.
+         *
+         * <p>The system ignores this value if zero, or if {@link #getFlags()} does not include
+         * {@link #FLAG_ONGOING_SESSION}.
+         */
+        public int getSessionParticipantCount() {
+            return mSessionParticipantCount;
+        }
+
         // Item Parcelable implementation.
 
         @Override
@@ -256,6 +271,7 @@ public final class RouteListingPreference implements Parcelable {
             dest.writeString(mRouteId);
             dest.writeInt(mFlags);
             dest.writeInt(mDisableReason);
+            dest.writeInt(mSessionParticipantCount);
         }
 
         // Equals and hashCode.
@@ -271,12 +287,13 @@ public final class RouteListingPreference implements Parcelable {
             Item item = (Item) other;
             return mRouteId.equals(item.mRouteId)
                     && mFlags == item.mFlags
-                    && mDisableReason == item.mDisableReason;
+                    && mDisableReason == item.mDisableReason
+                    && mSessionParticipantCount == item.mSessionParticipantCount;
         }
 
         @Override
         public int hashCode() {
-            return Objects.hash(mRouteId, mFlags, mDisableReason);
+            return Objects.hash(mRouteId, mFlags, mDisableReason, mSessionParticipantCount);
         }
 
         /** Builder for {@link Item}. */
@@ -285,6 +302,7 @@ public final class RouteListingPreference implements Parcelable {
             private final String mRouteId;
             private int mFlags;
             private int mDisableReason;
+            private int mSessionParticipantCount;
 
             /**
              * Constructor.
@@ -308,6 +326,17 @@ public final class RouteListingPreference implements Parcelable {
             @NonNull
             public Builder setDisableReason(int disableReason) {
                 mDisableReason = disableReason;
+                return this;
+            }
+
+            /** See {@link Item#getSessionParticipantCount()}. */
+            @NonNull
+            public Builder setSessionParticipantCount(
+                    @IntRange(from = 0) int sessionParticipantCount) {
+                Preconditions.checkArgument(
+                        sessionParticipantCount >= 0,
+                        "sessionParticipantCount must be non-negative.");
+                mSessionParticipantCount = sessionParticipantCount;
                 return this;
             }
 
