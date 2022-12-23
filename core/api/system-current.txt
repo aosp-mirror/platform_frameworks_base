@@ -7781,6 +7781,7 @@ package android.media.tv.tuner.filter {
     field public static final int STATUS_DATA_READY = 1; // 0x1
     field public static final int STATUS_HIGH_WATER = 4; // 0x4
     field public static final int STATUS_LOW_WATER = 2; // 0x2
+    field public static final int STATUS_NO_DATA = 16; // 0x10
     field public static final int STATUS_OVERFLOW = 8; // 0x8
     field public static final int SUBTYPE_AUDIO = 3; // 0x3
     field public static final int SUBTYPE_DOWNLOAD = 5; // 0x5
