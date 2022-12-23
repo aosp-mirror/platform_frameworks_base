@@ -385,8 +385,10 @@ final class KeyboardLayoutManager implements InputManager.InputDeviceListener {
                                     R.styleable.KeyboardLayout_keyboardLayout,
                                     0);
                             String languageTags = a.getString(
-                                    R.styleable.KeyboardLayout_locale);
+                                    R.styleable.KeyboardLayout_keyboardLocale);
                             LocaleList locales = getLocalesFromLanguageTags(languageTags);
+                            int layoutType = a.getInt(R.styleable.KeyboardLayout_keyboardLayoutType,
+                                    0);
                             int vid = a.getInt(
                                     R.styleable.KeyboardLayout_vendorId, -1);
                             int pid = a.getInt(
@@ -403,7 +405,7 @@ final class KeyboardLayoutManager implements InputManager.InputDeviceListener {
                                 if (keyboardName == null || name.equals(keyboardName)) {
                                     KeyboardLayout layout = new KeyboardLayout(
                                             descriptor, label, collection, priority,
-                                            locales, vid, pid);
+                                            locales, layoutType, vid, pid);
                                     visitor.visitKeyboardLayout(
                                             resources, keyboardLayoutResId, layout);
                                 }

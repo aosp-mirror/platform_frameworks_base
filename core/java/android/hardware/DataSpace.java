@@ -521,9 +521,7 @@ public final class DataSpace {
     public static final int DATASPACE_BT2020_HLG = 168165376;
 
     /**
-     * ITU-R Recommendation 2020 (BT.2020)
-     *
-     * Ultra High-definition television.
+     * Perceptual Quantizer encoding.
      *
      * <p>Composed of the following -</p>
      * <pre>

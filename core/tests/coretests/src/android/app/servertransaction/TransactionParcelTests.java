@@ -25,53 +25,26 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 
 import android.app.ActivityOptions;
-import android.app.ContentProviderHolder;
-import android.app.IApplicationThread;
-import android.app.IInstrumentationWatcher;
-import android.app.IUiAutomationConnection;
-import android.app.ProfilerInfo;
 import android.app.servertransaction.TestUtils.LaunchActivityItemBuilder;
-import android.content.AutofillOptions;
-import android.content.ComponentName;
-import android.content.ContentCaptureOptions;
-import android.content.IIntentReceiver;
 import android.content.Intent;
 import android.content.pm.ActivityInfo;
 import android.content.pm.ApplicationInfo;
-import android.content.pm.ParceledListSlice;
-import android.content.pm.ProviderInfo;
-import android.content.pm.ProviderInfoList;
-import android.content.pm.ServiceInfo;
-import android.content.res.CompatibilityInfo;
 import android.content.res.Configuration;
 import android.os.Binder;
 import android.os.Bundle;
-import android.os.Debug;
-import android.os.IBinder;
 import android.os.Parcel;
-import android.os.ParcelFileDescriptor;
 import android.os.Parcelable;
 import android.os.PersistableBundle;
-import android.os.RemoteCallback;
-import android.os.RemoteException;
-import android.os.SharedMemory;
 import android.platform.test.annotations.Presubmit;
-import android.view.autofill.AutofillId;
-import android.view.translation.TranslationSpec;
-import android.view.translation.UiTranslationSpec;
 
 import androidx.test.filters.SmallTest;
 import androidx.test.runner.AndroidJUnit4;
-
-import com.android.internal.app.IVoiceInteractor;
 
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
 import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
 
 /**
  * Test parcelling and unparcelling of transactions and transaction items.
@@ -97,7 +70,7 @@ public class TransactionParcelTests {
     @Test
     public void testConfigurationChange() {
         // Write to parcel
-        ConfigurationChangeItem item = ConfigurationChangeItem.obtain(config());
+        ConfigurationChangeItem item = ConfigurationChangeItem.obtain(config(), 1 /* deviceId */);
         writeAndPrepareForReading(item);
 
         // Read from parcel and assert

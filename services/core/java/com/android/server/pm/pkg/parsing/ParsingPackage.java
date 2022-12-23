@@ -155,7 +155,7 @@ public interface ParsingPackage {
 
     ParsingPackage setUiOptions(int uiOptions);
 
-    ParsingPackage setBaseHardwareAccelerated(boolean baseHardwareAccelerated);
+    ParsingPackage setHardwareAccelerated(boolean hardwareAccelerated);
 
     ParsingPackage setResizeableActivity(Boolean resizeable);
 
@@ -255,13 +255,13 @@ public interface ParsingPackage {
 
     ParsingPackage setBackupAgentName(String backupAgentName);
 
-    ParsingPackage setBanner(int banner);
+    ParsingPackage setBannerRes(int banner);
 
     ParsingPackage setCategory(int category);
 
     ParsingPackage setClassLoaderName(String classLoaderName);
 
-    ParsingPackage setClassName(String className);
+    ParsingPackage setApplicationClassName(String className);
 
     ParsingPackage setCompatibleWidthLimitDp(int compatibleWidthLimitDp);
 
@@ -281,9 +281,9 @@ public interface ParsingPackage {
 
     ParsingPackage setCrossProfile(boolean crossProfile);
 
-    ParsingPackage setFullBackupContent(int fullBackupContent);
+    ParsingPackage setFullBackupContentRes(int fullBackupContentRes);
 
-    ParsingPackage setDataExtractionRules(int dataExtractionRules);
+    ParsingPackage setDataExtractionRulesRes(int dataExtractionRulesRes);
 
     ParsingPackage setHasDomainUrls(boolean hasDomainUrls);
 
@@ -292,13 +292,13 @@ public interface ParsingPackage {
     ParsingPackage setInstallLocation(int installLocation);
 
     /** @see R#styleable.AndroidManifest_sharedUserMaxSdkVersion */
-    ParsingPackage setLeavingSharedUid(boolean leavingSharedUid);
+    ParsingPackage setLeavingSharedUser(boolean leavingSharedUser);
 
     ParsingPackage setLabelRes(int labelRes);
 
     ParsingPackage setLargestWidthLimitDp(int largestWidthLimitDp);
 
-    ParsingPackage setLogo(int logo);
+    ParsingPackage setLogoRes(int logo);
 
     ParsingPackage setManageSpaceActivityName(String manageSpaceActivityName);
 
@@ -336,13 +336,13 @@ public interface ParsingPackage {
 
     ParsingPackage setRoundIconRes(int roundIconRes);
 
-    ParsingPackage setSharedUserLabel(int sharedUserLabel);
+    ParsingPackage setSharedUserLabelRes(int sharedUserLabelRes);
 
     ParsingPackage setSigningDetails(@NonNull SigningDetails signingDetails);
 
     ParsingPackage setSplitClassLoaderName(int splitIndex, String classLoaderName);
 
-    ParsingPackage setStaticSharedLibVersion(long staticSharedLibVersion);
+    ParsingPackage setStaticSharedLibraryVersion(long staticSharedLibraryVersion);
 
     ParsingPackage setSupportsLargeScreens(int supportsLargeScreens);
 
@@ -354,7 +354,7 @@ public interface ParsingPackage {
 
     ParsingPackage setTargetSandboxVersion(int targetSandboxVersion);
 
-    ParsingPackage setTheme(int theme);
+    ParsingPackage setThemeRes(int theme);
 
     ParsingPackage setRequestForegroundServiceExemption(boolean requestForegroundServiceExemption);
 
@@ -512,7 +512,7 @@ public interface ParsingPackage {
 
     boolean isAnyDensity();
 
-    boolean isBaseHardwareAccelerated();
+    boolean isHardwareAccelerated();
 
     boolean isCantSaveState();
 

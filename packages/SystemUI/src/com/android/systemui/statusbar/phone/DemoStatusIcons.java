@@ -42,6 +42,8 @@ import com.android.systemui.statusbar.phone.StatusBarSignalPolicy.MobileIconStat
 import com.android.systemui.statusbar.phone.StatusBarSignalPolicy.WifiIconState;
 import com.android.systemui.statusbar.pipeline.mobile.ui.view.ModernStatusBarMobileView;
 import com.android.systemui.statusbar.pipeline.mobile.ui.viewmodel.MobileIconsViewModel;
+import com.android.systemui.statusbar.pipeline.wifi.ui.view.ModernStatusBarWifiView;
+import com.android.systemui.statusbar.pipeline.wifi.ui.viewmodel.LocationBasedWifiViewModel;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -56,14 +58,17 @@ public class DemoStatusIcons extends StatusIconContainer implements DemoMode, Da
     private final int mIconSize;
 
     private StatusBarWifiView mWifiView;
+    private ModernStatusBarWifiView mModernWifiView;
     private boolean mDemoMode;
     private int mColor;
 
     private final MobileIconsViewModel mMobileIconsViewModel;
+    private final StatusBarLocation mLocation;
 
     public DemoStatusIcons(
             LinearLayout statusIcons,
             MobileIconsViewModel mobileIconsViewModel,
+            StatusBarLocation location,
             int iconSize
     ) {
         super(statusIcons.getContext());
@@ -71,6 +76,7 @@ public class DemoStatusIcons extends StatusIconContainer implements DemoMode, Da
         mIconSize = iconSize;
         mColor = DarkIconDispatcher.DEFAULT_ICON_TINT;
         mMobileIconsViewModel = mobileIconsViewModel;
+        mLocation = location;
 
         if (statusIcons instanceof StatusIconContainer) {
             setShouldRestrictIcons(((StatusIconContainer) statusIcons).isRestrictingIcons());
@@ -233,14 +239,14 @@ public class DemoStatusIcons extends StatusIconContainer implements DemoMode, Da
 
     public void addDemoWifiView(WifiIconState state) {
         Log.d(TAG, "addDemoWifiView: ");
-        // TODO(b/238425913): Migrate this view to {@code ModernStatusBarWifiView}.
         StatusBarWifiView view = StatusBarWifiView.fromContext(mContext, state.slot);
 
         int viewIndex = getChildCount();
         // If we have mobile views, put wifi before them
         for (int i = 0; i < getChildCount(); i++) {
             View child = getChildAt(i);
-            if (child instanceof StatusBarMobileView) {
+            if (child instanceof StatusBarMobileView
+                    || child instanceof ModernStatusBarMobileView) {
                 viewIndex = i;
                 break;
             }
@@ -287,12 +293,36 @@ public class DemoStatusIcons extends StatusIconContainer implements DemoMode, Da
         ModernStatusBarMobileView view = ModernStatusBarMobileView.constructAndBind(
                 mobileContext,
                 "mobile",
-                mMobileIconsViewModel.viewModelForSub(subId)
+                mMobileIconsViewModel.viewModelForSub(subId, mLocation)
         );
 
         // mobile always goes at the end
         mModernMobileViews.add(view);
         addView(view, getChildCount(), createLayoutParams());
+    }
+
+    /**
+     * Add a {@link ModernStatusBarWifiView}
+     */
+    public void addModernWifiView(LocationBasedWifiViewModel viewModel) {
+        Log.d(TAG, "addModernDemoWifiView: ");
+        ModernStatusBarWifiView view = ModernStatusBarWifiView
+                .constructAndBind(mContext, "wifi", viewModel);
+
+        int viewIndex = getChildCount();
+        // If we have mobile views, put wifi before them
+        for (int i = 0; i < getChildCount(); i++) {
+            View child = getChildAt(i);
+            if (child instanceof StatusBarMobileView
+                    || child instanceof ModernStatusBarMobileView) {
+                viewIndex = i;
+                break;
+            }
+        }
+
+        mModernWifiView = view;
+        mModernWifiView.setStaticDrawableColor(mColor);
+        addView(view, viewIndex, createLayoutParams());
     }
 
     /**
@@ -317,8 +347,14 @@ public class DemoStatusIcons extends StatusIconContainer implements DemoMode, Da
 
     public void onRemoveIcon(StatusIconDisplayable view) {
         if (view.getSlot().equals("wifi")) {
-            removeView(mWifiView);
-            mWifiView = null;
+            if (view instanceof StatusBarWifiView) {
+                removeView(mWifiView);
+                mWifiView = null;
+            } else if (view instanceof ModernStatusBarWifiView) {
+                Log.d(TAG, "onRemoveIcon: removing modern wifi view");
+                removeView(mModernWifiView);
+                mModernWifiView = null;
+            }
         } else if (view instanceof StatusBarMobileView) {
             StatusBarMobileView mobileView = matchingMobileView(view);
             if (mobileView != null) {
@@ -371,7 +407,13 @@ public class DemoStatusIcons extends StatusIconContainer implements DemoMode, Da
         if (mWifiView != null) {
             mWifiView.onDarkChanged(areas, darkIntensity, tint);
         }
+        if (mModernWifiView != null) {
+            mModernWifiView.onDarkChanged(areas, darkIntensity, tint);
+        }
         for (StatusBarMobileView view : mMobileViews) {
+            view.onDarkChanged(areas, darkIntensity, tint);
+        }
+        for (ModernStatusBarMobileView view : mModernMobileViews) {
             view.onDarkChanged(areas, darkIntensity, tint);
         }
     }

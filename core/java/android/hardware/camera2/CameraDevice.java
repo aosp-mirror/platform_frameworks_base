@@ -900,12 +900,26 @@ public abstract class CameraDevice implements AutoCloseable {
      * <tr> <td>{@code PRIV}</td><td id="rb">{@code PREVIEW}</td><td id="rb">{@code PREVIEW}</td> <td>{@code YUV / PRIV}</td><td id="rb">{@code RECORD}</td><td id="rb">{@code VIDEO_RECORD}</td> <td colspan="3" id="rb"></td> <td>Preview with video recording or in-app video processing</td> </tr>
      * <tr> <td>{@code PRIV}</td><td id="rb">{@code PREVIEW}</td><td id="rb">{@code PREVIEW}</td> <td>{@code YUV}</td><td id="rb">{@code PREVIEW}</td><td id="rb">{@code PREVIEW}</td> <td colspan="3" id="rb"></td> <td>Preview with in-application image processing</td> </tr>
      * <tr> <td>{@code PRIV}</td><td id="rb">{@code PREVIEW}</td><td id="rb">{@code PREVIEW}</td> <td>{@code YUV / PRIV}</td><td id="rb">{@code s1440p}</td><td id="rb">{@code VIDEO_CALL}</td> <td colspan="3" id="rb"></td> <td>Preview with video call</td> </tr>
-     * <tr> <td>{@code YUV / PRIV}</td><td id="rb">{@code s1440p}</td><td id="rb">{@code PREVIEW_VIDEO_STILL}</td> <td>{@code YUV / JPEG}</td><td id="rb">{@code MAXIMUM}</td><td id="rb">{@code STILL_CAPTURE}</td> <td colspan="3" id="rb"></td> <td>Multi-purpose stream with JPEG or YUV still capture</td> </tr>
+     * <tr> <td>{@code YUV / PRIV}</td><td id="rb">{@code s1440p}</td><td id="rb">{@code PREVIEW_VIDEO_STILL}</td> <td>{@code YUV / JPEG}</td><td id="rb">{@code MAXIMUM}</td><td id="rb">{@code STILL_CAPTURE}</td> <td colspan="3" id="rb"></td> <td>MultI-purpose stream with JPEG or YUV still capture</td> </tr>
      * <tr> <td>{@code YUV}</td><td id="rb">{@code PREVIEW}</td><td id="rb">{@code STILL_CAPTURE}</td> <td>{@code JPEG}</td><td id="rb">{@code MAXIMUM}</td><td id="rb">{@code STILL_CAPTURE}</td> <td colspan="3" id="rb"></td> <td>YUV and JPEG concurrent still image capture (for testing)</td> </tr>
      * <tr> <td>{@code PRIV}</td><td id="rb">{@code PREVIEW}</td><td id="rb">{@code PREVIEW}</td> <td>{@code YUV / PRIV}</td><td id="rb">{@code RECORD}</td><td id="rb">{@code VIDEO_RECORD}</td> <td>{@code YUV / JPEG}</td><td id="rb">{@code RECORD}</td><td id="rb">{@code STILL_CAPTURE}</td> <td>Preview, video record and JPEG or YUV video snapshot</td> </tr>
      * <tr> <td>{@code PRIV}</td><td id="rb">{@code PREVIEW}</td><td id="rb">{@code PREVIEW}</td> <td>{@code YUV}</td><td id="rb">{@code PREVIEW}</td><td id="rb">{@code PREVIEW}</td> <td>{@code YUV / JPEG}</td><td id="rb">{@code MAXIMUM}</td><td id="rb">{@code STILL_CAPTURE}</td> <td>Preview, in-application image processing, and JPEG or YUV still image capture</td> </tr>
      * </table><br>
      * </p>
+     *
+     * <p>Devices that include the {@link CameraMetadata#SCALER_AVAILABLE_STREAM_USE_CASES_CROPPED_RAW}
+     * stream use-case in {@link CameraCharacteristics#SCALER_AVAILABLE_STREAM_USE_CASES},
+     * support the additional stream combinations below:
+     *
+     * <table>
+     * <tr><th colspan="10">STREAM_USE_CASE_CROPPED_RAW capability additional guaranteed configurations</th></tr>
+     * <tr><th colspan="3" id="rb">Target 1</th><th colspan="3" id="rb">Target 2</th><th colspan="3" id="rb">Target 3</th> <th rowspan="2">Sample use case(s)</th> </tr>
+     * <tr><th>Type</th><th id="rb">Max size</th><th>Usecase</th><th>Type</th><th id="rb">Max size</th><th>Usecase</th><th>Type</th><th id="rb">Max size</th><th>Usecase</th> </tr>
+     * <tr> <td>{@code RAW}</td><td id="rb">{@code MAXIMUM}</td><td id="rb">{@code CROPPED_RAW}</td> <td colspan="3" id="rb"></td> <td colspan="3" id="rb"></td> <td>Cropped RAW still capture without preview</td> </tr>
+     * <tr> <td>{@code PRIV / YUV}</td><td id="rb">{@code PREVIEW}</td><td id="rb">{@code PREVIEW}</td> <td>{@code RAW}</td><td id="rb">{@code MAXIMUM}</td><td id="rb">{@code CROPPED_RAW}</td> <td colspan="3" id="rb"></td> <td>Preview with cropped RAW still capture</td> </tr>
+     * <tr> <td>{@code PRIV / YUV}</td><td id="rb">{@code PREVIEW}</td><td id="rb">{@code PREVIEW}</td> <td>{@code YUV / JPEG}</td><td id="rb">{@code MAXIMUM}</td><td id="rb">{@code STILL_CAPTURE}</td> <td>{@code RAW}</td><td id="rb">{@code MAXIMUM}</td><td id="rb">{@code CROPPED_RAW}</td> <td>Preview with YUV / JPEG and cropped RAW still capture</td> </tr>
+     * <tr> <td>{@code PRIV / YUV}</td><td id="rb">{@code PREVIEW}</td><td id="rb">{@code PREVIEW}</td> <td>{@code PRIV / YUV}</td><td id="rb">{@code PREVIEW}</td><td id="rb">{@code VIDEO_RECORD / PREVIEW}</td> <td>{@code RAW}</td><td id="rb">{@code MAXIMUM}</td><td id="rb">{@code CROPPED_RAW}</td> <td>Video recording with preview and cropped RAW still capture</td> </tr>
+     *
      *
      *<p> For devices where {@link CameraCharacteristics#CONTROL_AVAILABLE_VIDEO_STABILIZATION_MODES}
      * includes {@link CameraMetadata#CONTROL_VIDEO_STABILIZATION_MODE_PREVIEW_STABILIZATION},

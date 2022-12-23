@@ -16,6 +16,8 @@
 
 package com.android.server.locales;
 
+import static android.content.res.Configuration.GRAMMATICAL_GENDER_NOT_SPECIFIED;
+
 import static junit.framework.Assert.assertEquals;
 import static junit.framework.Assert.assertTrue;
 
@@ -168,7 +170,8 @@ public class SystemAppUpdateTrackerTest {
             /* isUpdatedSystemApp = */ true))
             .when(mMockPackageManager).getApplicationInfo(eq(DEFAULT_PACKAGE_NAME_1), any());
         doReturn(new ActivityTaskManagerInternal.PackageConfig(/* nightMode = */ 0,
-                DEFAULT_LOCALES)).when(mMockActivityTaskManager)
+                        DEFAULT_LOCALES, GRAMMATICAL_GENDER_NOT_SPECIFIED))
+                .when(mMockActivityTaskManager)
                 .getApplicationConfig(anyString(), anyInt());
 
         mPackageMonitor.onPackageUpdateFinished(DEFAULT_PACKAGE_NAME_1,
@@ -186,7 +189,8 @@ public class SystemAppUpdateTrackerTest {
             /* isUpdatedSystemApp = */ true))
             .when(mMockPackageManager).getApplicationInfo(eq(DEFAULT_PACKAGE_NAME_1), any());
         doReturn(new ActivityTaskManagerInternal.PackageConfig(/* nightMode = */ 0,
-                DEFAULT_LOCALES)).when(mMockActivityTaskManager)
+                        DEFAULT_LOCALES, GRAMMATICAL_GENDER_NOT_SPECIFIED))
+                .when(mMockActivityTaskManager)
                 .getApplicationConfig(anyString(), anyInt());
 
         // first update

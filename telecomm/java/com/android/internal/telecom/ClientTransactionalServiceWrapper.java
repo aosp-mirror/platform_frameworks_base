@@ -139,6 +139,7 @@ public class ClientTransactionalServiceWrapper {
         private static final String ON_ANSWER = "onAnswer";
         private static final String ON_REJECT = "onReject";
         private static final String ON_DISCONNECT = "onDisconnect";
+        private static final String ON_STREAMING_STARTED = "onStreamingStarted";
 
         private void handleCallEventCallback(String action, String callId, int code,
                 ResultReceiver ackResultReceiver) {
@@ -173,6 +174,9 @@ public class ClientTransactionalServiceWrapper {
                                 break;
                             case ON_ANSWER:
                                 callback.onAnswer(code, outcomeReceiverWrapper);
+                                break;
+                            case ON_STREAMING_STARTED:
+                                callback.onCallStreamingStarted(outcomeReceiverWrapper);
                                 break;
                         }
                     });
@@ -249,15 +253,31 @@ public class ClientTransactionalServiceWrapper {
             if (call != null) {
                 CallEventCallback callback = call.getCallEventCallback();
                 Executor executor = call.getExecutor();
-                executor.execute(() -> {
-                    callback.onCallAudioStateChanged(callAudioState);
-                });
+                executor.execute(() -> callback.onCallAudioStateChanged(callAudioState));
             }
         }
 
         @Override
         public void removeCallFromTransactionalServiceWrapper(String callId) {
             untrackCall(callId);
+        }
+
+        @Override
+        public void onCallStreamingStarted(String callId, ResultReceiver resultReceiver) {
+            handleCallEventCallback(ON_STREAMING_STARTED, callId, 0, resultReceiver);
+        }
+
+        @Override
+        public void onCallStreamingFailed(String callId, int reason) {
+            Log.i(TAG, TextUtils.formatSimple("onCallAudioStateChanged: callId=[%s], reason=[%s]",
+                    callId, reason));
+            // lookup the callEventCallback associated with the particular call
+            TransactionalCall call = mCallIdToTransactionalCall.get(callId);
+            if (call != null) {
+                CallEventCallback callback = call.getCallEventCallback();
+                Executor executor = call.getExecutor();
+                executor.execute(() -> callback.onCallStreamingFailed(reason));
+            }
         }
     };
 }

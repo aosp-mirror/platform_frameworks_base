@@ -273,7 +273,7 @@ public class ScanTests {
     public void installStaticSharedLibrary() throws Exception {
         final ParsedPackage pkg = ((ParsedPackage) createBasicPackage("static.lib.pkg")
                 .setStaticSharedLibraryName("static.lib")
-                .setStaticSharedLibVersion(123L)
+                .setStaticSharedLibraryVersion(123L)
                 .hideAsParsed())
                 .setPackageName("static.lib.pkg.123")
                 .setVersionCodeMajor(1)

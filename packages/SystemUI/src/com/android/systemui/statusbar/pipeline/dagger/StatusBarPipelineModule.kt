@@ -36,7 +36,7 @@ import com.android.systemui.statusbar.pipeline.mobile.util.MobileMappingsProxyIm
 import com.android.systemui.statusbar.pipeline.shared.data.repository.ConnectivityRepository
 import com.android.systemui.statusbar.pipeline.shared.data.repository.ConnectivityRepositoryImpl
 import com.android.systemui.statusbar.pipeline.wifi.data.repository.WifiRepository
-import com.android.systemui.statusbar.pipeline.wifi.data.repository.WifiRepositoryImpl
+import com.android.systemui.statusbar.pipeline.wifi.data.repository.WifiRepositorySwitcher
 import com.android.systemui.statusbar.pipeline.wifi.domain.interactor.WifiInteractor
 import com.android.systemui.statusbar.pipeline.wifi.domain.interactor.WifiInteractorImpl
 import dagger.Binds
@@ -56,7 +56,7 @@ abstract class StatusBarPipelineModule {
     @Binds
     abstract fun connectivityRepository(impl: ConnectivityRepositoryImpl): ConnectivityRepository
 
-    @Binds abstract fun wifiRepository(impl: WifiRepositoryImpl): WifiRepository
+    @Binds abstract fun wifiRepository(impl: WifiRepositorySwitcher): WifiRepository
 
     @Binds
     abstract fun wifiInteractor(impl: WifiInteractorImpl): WifiInteractor

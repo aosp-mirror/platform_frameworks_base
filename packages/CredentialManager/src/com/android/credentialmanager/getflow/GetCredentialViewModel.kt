@@ -182,7 +182,7 @@ private fun toProviderDisplayInfo(
   Preconditions.checkState(remoteEntryList.size <= 1)
 
   // Compose sortedUserNameToCredentialEntryList
-  val comparator = CredentialEntryInfoComparator()
+  val comparator = CredentialEntryInfoComparatorByTypeThenTimestamp()
   // Sort per username
   userNameToCredentialEntryMap.values.forEach {
     it.sortWith(comparator)
@@ -191,7 +191,7 @@ private fun toProviderDisplayInfo(
   val sortedUserNameToCredentialEntryList = userNameToCredentialEntryMap.map {
     PerUserNameCredentialEntryList(it.key, it.value)
   }.sortedWith(
-    compareBy(comparator) { it.sortedCredentialEntryList.first() }
+    compareByDescending{ it.sortedCredentialEntryList.first().lastUsedTimeMillis }
   )
 
   return ProviderDisplayInfo(
@@ -219,7 +219,7 @@ private fun toGetScreenState(
     GetScreenState.REMOTE_ONLY else GetScreenState.PRIMARY_SELECTION
 }
 
-internal class CredentialEntryInfoComparator : Comparator<CredentialEntryInfo> {
+internal class CredentialEntryInfoComparatorByTypeThenTimestamp : Comparator<CredentialEntryInfo> {
   override fun compare(p0: CredentialEntryInfo, p1: CredentialEntryInfo): Int {
     // First prefer passkey type for its security benefits
     if (p0.credentialType != p1.credentialType) {

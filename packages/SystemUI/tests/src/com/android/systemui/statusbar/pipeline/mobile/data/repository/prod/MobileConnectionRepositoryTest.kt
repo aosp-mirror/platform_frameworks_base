@@ -50,6 +50,7 @@ import android.telephony.TelephonyManager.NETWORK_TYPE_LTE
 import android.telephony.TelephonyManager.NETWORK_TYPE_UNKNOWN
 import androidx.test.filters.SmallTest
 import com.android.systemui.SysuiTestCase
+import com.android.systemui.log.table.TableLogBuffer
 import com.android.systemui.statusbar.pipeline.mobile.data.model.DataConnectionState
 import com.android.systemui.statusbar.pipeline.mobile.data.model.MobileConnectionModel
 import com.android.systemui.statusbar.pipeline.mobile.data.model.NetworkNameModel
@@ -87,20 +88,23 @@ import org.mockito.MockitoAnnotations
 @SmallTest
 class MobileConnectionRepositoryTest : SysuiTestCase() {
     private lateinit var underTest: MobileConnectionRepositoryImpl
+    private lateinit var connectionsRepo: FakeMobileConnectionsRepository
 
     @Mock private lateinit var telephonyManager: TelephonyManager
     @Mock private lateinit var logger: ConnectivityPipelineLogger
+    @Mock private lateinit var tableLogger: TableLogBuffer
 
     private val scope = CoroutineScope(IMMEDIATE)
     private val mobileMappings = FakeMobileMappingsProxy()
     private val globalSettings = FakeSettings()
-    private val connectionsRepo = FakeMobileConnectionsRepository(mobileMappings)
 
     @Before
     fun setUp() {
         MockitoAnnotations.initMocks(this)
         globalSettings.userId = UserHandle.USER_ALL
         whenever(telephonyManager.subscriptionId).thenReturn(SUB_1_ID)
+
+        connectionsRepo = FakeMobileConnectionsRepository(mobileMappings, tableLogger)
 
         underTest =
             MobileConnectionRepositoryImpl(
@@ -116,6 +120,7 @@ class MobileConnectionRepositoryTest : SysuiTestCase() {
                 mobileMappings,
                 IMMEDIATE,
                 logger,
+                tableLogger,
                 scope,
             )
     }

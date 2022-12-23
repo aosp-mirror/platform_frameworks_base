@@ -31,6 +31,7 @@ import static junit.framework.TestCase.fail;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.ArgumentMatchers.anyInt;
+import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.clearInvocations;
@@ -177,6 +178,8 @@ import com.android.systemui.volume.VolumeComponent;
 import com.android.wm.shell.bubbles.Bubbles;
 import com.android.wm.shell.startingsurface.StartingSurface;
 
+import dagger.Lazy;
+
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -188,8 +191,6 @@ import org.mockito.MockitoAnnotations;
 import java.io.ByteArrayOutputStream;
 import java.io.PrintWriter;
 import java.util.Optional;
-
-import dagger.Lazy;
 
 @SmallTest
 @RunWith(AndroidTestingRunner.class)
@@ -306,6 +307,7 @@ public class CentralSurfacesImplTest extends SysuiTestCase {
     @Mock private ViewRootImpl mViewRootImpl;
     @Mock private WindowOnBackInvokedDispatcher mOnBackInvokedDispatcher;
     @Captor private ArgumentCaptor<OnBackInvokedCallback> mOnBackInvokedCallback;
+    @Mock IPowerManager mPowerManagerService;
 
     private ShadeController mShadeController;
     private final FakeSystemClock mFakeSystemClock = new FakeSystemClock();
@@ -319,9 +321,8 @@ public class CentralSurfacesImplTest extends SysuiTestCase {
     public void setup() throws Exception {
         MockitoAnnotations.initMocks(this);
 
-        IPowerManager powerManagerService = mock(IPowerManager.class);
         IThermalService thermalService = mock(IThermalService.class);
-        mPowerManager = new PowerManager(mContext, powerManagerService, thermalService,
+        mPowerManager = new PowerManager(mContext, mPowerManagerService, thermalService,
                 Handler.createAsync(Looper.myLooper()));
 
         mNotificationInterruptStateProvider =
@@ -363,7 +364,7 @@ public class CentralSurfacesImplTest extends SysuiTestCase {
         when(mStackScrollerController.getView()).thenReturn(mStackScroller);
         when(mStackScroller.generateLayoutParams(any())).thenReturn(new LayoutParams(0, 0));
         when(mNotificationPanelView.getLayoutParams()).thenReturn(new LayoutParams(0, 0));
-        when(powerManagerService.isInteractive()).thenReturn(true);
+        when(mPowerManagerService.isInteractive()).thenReturn(true);
         when(mStackScroller.getActivatedChild()).thenReturn(null);
 
         doAnswer(invocation -> {
@@ -1190,6 +1191,34 @@ public class CentralSurfacesImplTest extends SysuiTestCase {
         verify(mStatusBarStateController).setState(SHADE);
     }
 
+    @Test
+    public void dozing_wakeUp() throws RemoteException {
+        // GIVEN can wakeup when dozing & is dozing
+        when(mScreenOffAnimationController.allowWakeUpIfDozing()).thenReturn(true);
+        setDozing(true);
+
+        // WHEN wakeup is requested
+        final int wakeReason = PowerManager.WAKE_REASON_TAP;
+        mCentralSurfaces.wakeUpIfDozing(0, null, "", wakeReason);
+
+        // THEN power manager receives wakeup
+        verify(mPowerManagerService).wakeUp(eq(0L), eq(wakeReason), anyString(), anyString());
+    }
+
+    @Test
+    public void notDozing_noWakeUp() throws RemoteException {
+        // GIVEN can wakeup when dozing and NOT dozing
+        when(mScreenOffAnimationController.allowWakeUpIfDozing()).thenReturn(true);
+        setDozing(false);
+
+        // WHEN wakeup is requested
+        final int wakeReason = PowerManager.WAKE_REASON_TAP;
+        mCentralSurfaces.wakeUpIfDozing(0, null, "", wakeReason);
+
+        // THEN power manager receives wakeup
+        verify(mPowerManagerService, never()).wakeUp(anyLong(), anyInt(), anyString(), anyString());
+    }
+
     /**
      * Configures the appropriate mocks and then calls {@link CentralSurfacesImpl#updateIsKeyguard}
      * to reconfigure the keyguard to reflect the requested showing/occluded states.
@@ -1224,6 +1253,13 @@ public class CentralSurfacesImplTest extends SysuiTestCase {
         mContext.getOrCreateTestableResources().addOverride(
                 com.android.internal.R.array.config_foldedDeviceStates,
                 states);
+    }
+
+    private void setDozing(boolean isDozing) {
+        ArgumentCaptor<StatusBarStateController.StateListener> callbackCaptor =
+                ArgumentCaptor.forClass(StatusBarStateController.StateListener.class);
+        verify(mStatusBarStateController).addCallback(callbackCaptor.capture(), anyInt());
+        callbackCaptor.getValue().onDozingChanged(isDozing);
     }
 
     public static class TestableNotificationInterruptStateProviderImpl extends

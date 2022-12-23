@@ -103,7 +103,7 @@ public class AndroidPackageUtils {
         return new SharedLibraryInfo(null, pkg.getPackageName(),
                 AndroidPackageUtils.getAllCodePaths(pkg),
                 pkg.getStaticSharedLibraryName(),
-                pkg.getStaticSharedLibVersion(),
+                pkg.getStaticSharedLibraryVersion(),
                 SharedLibraryInfo.TYPE_STATIC,
                 new VersionedPackage(pkg.getManifestPackageName(),
                         pkg.getLongVersionCode()),

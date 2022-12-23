@@ -101,13 +101,11 @@ constructor(
                             transitionViewModel.dreamOverlayTranslationY(it.translationYPx)
                         }
                         .collect { px ->
-                            setElementsTranslationYAtPosition(
-                                px,
-                                ComplicationLayoutParams.POSITION_TOP
-                            )
-                            setElementsTranslationYAtPosition(
-                                px,
-                                ComplicationLayoutParams.POSITION_BOTTOM
+                            ComplicationLayoutParams.iteratePositions(
+                                { position: Int ->
+                                    setElementsTranslationYAtPosition(px, position)
+                                },
+                                POSITION_TOP or POSITION_BOTTOM
                             )
                         }
                 }
@@ -115,15 +113,15 @@ constructor(
                 /* Alpha animations, when moving from DREAMING->LOCKSCREEN state */
                 launch {
                     transitionViewModel.dreamOverlayAlpha.collect { alpha ->
-                        setElementsAlphaAtPosition(
-                            alpha = alpha,
-                            position = ComplicationLayoutParams.POSITION_TOP,
-                            fadingOut = true,
-                        )
-                        setElementsAlphaAtPosition(
-                            alpha = alpha,
-                            position = ComplicationLayoutParams.POSITION_BOTTOM,
-                            fadingOut = true,
+                        ComplicationLayoutParams.iteratePositions(
+                            { position: Int ->
+                                setElementsAlphaAtPosition(
+                                    alpha = alpha,
+                                    position = position,
+                                    fadingOut = true,
+                                )
+                            },
+                            POSITION_TOP or POSITION_BOTTOM
                         )
                     }
                 }

@@ -448,6 +448,10 @@ public class ScreenshotController {
 
     // Any cleanup needed when the service is being destroyed.
     void onDestroy() {
+        if (mSaveInBgTask != null) {
+            // just log success/failure for the pre-existing screenshot
+            mSaveInBgTask.setActionsReadyListener(this::logSuccessOnActionsReady);
+        }
         removeWindow();
         releaseMediaPlayer();
         releaseContext();

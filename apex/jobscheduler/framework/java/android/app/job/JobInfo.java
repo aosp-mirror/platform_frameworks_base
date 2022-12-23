@@ -924,7 +924,8 @@ public class JobInfo implements Parcelable {
     @SuppressWarnings("UnsafeParcelApi")
     private JobInfo(Parcel in) {
         jobId = in.readInt();
-        extras = in.readPersistableBundle();
+        final PersistableBundle persistableExtras = in.readPersistableBundle();
+        extras = persistableExtras != null ? persistableExtras : PersistableBundle.EMPTY;
         transientExtras = in.readBundle();
         if (in.readInt() != 0) {
             clipData = ClipData.CREATOR.createFromParcel(in);

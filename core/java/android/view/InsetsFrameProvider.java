@@ -323,7 +323,8 @@ public class InsetsFrameProvider implements Parcelable {
         public String toString() {
             StringBuilder sb = new StringBuilder(32);
             sb.append("TypedInsetsSize: {");
-            sb.append("windowType=").append(windowType);
+            sb.append("windowType=").append(ViewDebug.intToString(
+                    WindowManager.LayoutParams.class, "type", windowType));
             sb.append(", insetsSize=").append(insetsSize);
             sb.append("}");
             return sb.toString();

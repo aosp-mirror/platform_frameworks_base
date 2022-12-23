@@ -16,6 +16,7 @@
 
 package android.view;
 
+import static android.os.Trace.TRACE_TAG_VIEW;
 import static android.view.ImeInsetsSourceConsumerProto.INSETS_SOURCE_CONSUMER;
 import static android.view.ImeInsetsSourceConsumerProto.IS_HIDE_ANIMATION_RUNNING;
 import static android.view.ImeInsetsSourceConsumerProto.IS_REQUESTED_VISIBLE_AWAITING_CONTROL;
@@ -23,11 +24,15 @@ import static android.view.ImeInsetsSourceConsumerProto.IS_SHOW_REQUESTED_DURING
 
 import android.annotation.Nullable;
 import android.os.IBinder;
+import android.os.Process;
+import android.os.Trace;
 import android.util.proto.ProtoOutputStream;
 import android.view.SurfaceControl.Transaction;
+import android.view.inputmethod.ImeTracker;
 import android.view.inputmethod.InputMethodManager;
 
 import com.android.internal.inputmethod.ImeTracing;
+import com.android.internal.inputmethod.SoftInputShowHideReason;
 
 import java.util.function.Supplier;
 
@@ -48,8 +53,8 @@ public final class ImeInsetsSourceConsumer extends InsetsSourceConsumer {
     /**
      * Tracks whether {@link WindowInsetsController#show(int)} or
      * {@link InputMethodManager#showSoftInput(View, int)} is called during IME hide animation.
-     * If it was called, we should not call {@link InputMethodManager#notifyImeHidden(IBinder)},
-     * because the IME is being shown.
+     * If it was called, we should not call {@link InputMethodManager#notifyImeHidden(IBinder,
+     * ImeTracker.Token)}, because the IME is being shown.
      */
     private boolean mIsShowRequestedDuringHideAnimation;
 
@@ -76,7 +81,7 @@ public final class ImeInsetsSourceConsumer extends InsetsSourceConsumer {
                 // Remove IME surface as IME has finished hide animation, if there is no pending
                 // show request.
                 if (!mIsShowRequestedDuringHideAnimation) {
-                    notifyHidden();
+                    notifyHidden(null /* statsToken */);
                     removeSurface();
                 }
             }
@@ -120,7 +125,8 @@ public final class ImeInsetsSourceConsumer extends InsetsSourceConsumer {
      * @return @see {@link android.view.InsetsSourceConsumer.ShowResult}.
      */
     @Override
-    public @ShowResult int requestShow(boolean fromIme) {
+    @ShowResult
+    public int requestShow(boolean fromIme, @Nullable ImeTracker.Token statsToken) {
         if (fromIme) {
             ImeTracing.getInstance().triggerClientDump(
                     "ImeInsetsSourceConsumer#requestShow",
@@ -129,6 +135,9 @@ public final class ImeInsetsSourceConsumer extends InsetsSourceConsumer {
 
         // TODO: ResultReceiver for IME.
         // TODO: Set mShowOnNextImeRender to automatically show IME and guard it with a flag.
+        ImeTracker.get().onProgress(statsToken,
+                ImeTracker.PHASE_CLIENT_INSETS_CONSUMER_REQUEST_SHOW);
+
         if (getControl() == null) {
             // If control is null, schedule to show IME when control is available.
             mIsRequestedVisibleAwaitingControl = true;
@@ -140,16 +149,32 @@ public final class ImeInsetsSourceConsumer extends InsetsSourceConsumer {
             return ShowResult.SHOW_IMMEDIATELY;
         }
 
-        return getImm().requestImeShow(mController.getHost().getWindowToken())
+        return getImm().requestImeShow(mController.getHost().getWindowToken(), statsToken)
                 ? ShowResult.IME_SHOW_DELAYED : ShowResult.IME_SHOW_FAILED;
     }
 
     /**
      * Notify {@link com.android.server.inputmethod.InputMethodManagerService} that
      * IME insets are hidden.
+     *
+     * @param statsToken the token tracking the current IME hide request or {@code null} otherwise.
      */
-    private void notifyHidden() {
-        getImm().notifyImeHidden(mController.getHost().getWindowToken());
+    private void notifyHidden(@Nullable ImeTracker.Token statsToken) {
+        // Create a new stats token to track the hide request when:
+        //  - we do not already have one, or
+        //  - we do already have one, but we have control and use the passed in token
+        //      for the insets animation already.
+        if (statsToken == null || getControl() != null) {
+            statsToken = ImeTracker.get().onRequestHide(null /* component */, Process.myUid(),
+                    ImeTracker.ORIGIN_CLIENT_HIDE_SOFT_INPUT,
+                    SoftInputShowHideReason.HIDE_SOFT_INPUT_BY_INSETS_API);
+        }
+
+        ImeTracker.get().onProgress(statsToken,
+                ImeTracker.PHASE_CLIENT_INSETS_CONSUMER_NOTIFY_HIDDEN);
+
+        getImm().notifyImeHidden(mController.getHost().getWindowToken(), statsToken);
+        Trace.asyncTraceEnd(TRACE_TAG_VIEW, "IC.hideRequestFromApi", 0);
     }
 
     @Override

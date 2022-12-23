@@ -72,15 +72,16 @@ class AppTaskImpl extends IAppTask.Stub {
         checkCallerOrSystemOrRoot();
 
         synchronized (mService.mGlobalLock) {
-            final long origId = Binder.clearCallingIdentity();
+            int origCallingUid = Binder.getCallingUid();
+            final long callingIdentity = Binder.clearCallingIdentity();
             try {
                 // We remove the task from recents to preserve backwards
                 if (!mService.mTaskSupervisor.removeTaskById(mTaskId, false,
-                        REMOVE_FROM_RECENTS, "finish-and-remove-task")) {
+                        REMOVE_FROM_RECENTS, "finish-and-remove-task", origCallingUid)) {
                     throw new IllegalArgumentException("Unable to find task ID " + mTaskId);
                 }
             } finally {
-                Binder.restoreCallingIdentity(origId);
+                Binder.restoreCallingIdentity(callingIdentity);
             }
         }
     }

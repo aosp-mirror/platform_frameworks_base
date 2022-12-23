@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2020 The Android Open Source Project
+ * Copyright (C) 2022 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,6 +18,9 @@ package com.android.server.backup;
 
 import static com.google.common.truth.Truth.assertThat;
 
+import static com.android.dx.mockito.inline.extended.ExtendedMockito.mockitoSession;
+import static com.android.dx.mockito.inline.extended.ExtendedMockito.verify;
+
 import static org.junit.Assert.fail;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyBoolean;
@@ -25,11 +28,11 @@ import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.never;
-import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import android.app.backup.BackupAgent;
 import android.app.backup.BackupAnnotations.BackupDestination;
+import android.app.backup.BackupRestoreEventLogger.DataTypeResult;
 import android.app.backup.IBackupManagerMonitor;
 import android.app.backup.IBackupObserver;
 import android.content.Context;
@@ -37,6 +40,7 @@ import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
 import android.platform.test.annotations.Presubmit;
+import android.util.FeatureFlagUtils;
 
 import androidx.test.filters.FlakyTest;
 import androidx.test.runner.AndroidJUnit4;
@@ -47,15 +51,21 @@ import com.android.server.backup.params.BackupParams;
 import com.android.server.backup.transport.BackupTransportClient;
 import com.android.server.backup.transport.TransportConnection;
 import com.android.server.backup.utils.BackupEligibilityRules;
+import com.android.server.backup.utils.BackupManagerMonitorUtils;
 
 import com.google.common.collect.ImmutableSet;
 
+import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
+import org.mockito.MockitoSession;
+import org.mockito.quality.Strictness;
 
+import java.util.Arrays;
+import java.util.List;
 import java.util.function.IntConsumer;
 
 @Presubmit
@@ -63,6 +73,7 @@ import java.util.function.IntConsumer;
 public class UserBackupManagerServiceTest {
     private static final String TEST_PACKAGE = "package1";
     private static final String[] TEST_PACKAGES = new String[] { TEST_PACKAGE };
+    private static final String TEST_TRANSPORT = "transport";
     private static final int WORKER_THREAD_TIMEOUT_MILLISECONDS = 1;
 
     @Mock Context mContext;
@@ -70,19 +81,36 @@ public class UserBackupManagerServiceTest {
     @Mock IBackupObserver mBackupObserver;
     @Mock PackageManager mPackageManager;
     @Mock TransportConnection mTransportConnection;
+    @Mock TransportManager mTransportManager;
     @Mock BackupTransportClient mBackupTransport;
     @Mock BackupEligibilityRules mBackupEligibilityRules;
     @Mock LifecycleOperationStorage mOperationStorage;
 
+    private MockitoSession mSession;
     private TestBackupService mService;
 
     @Before
     public void setUp() throws Exception {
+        mSession = mockitoSession()
+                .initMocks(this)
+                .mockStatic(BackupManagerMonitorUtils.class)
+                .mockStatic(FeatureFlagUtils.class)
+                // TODO(b/263239775): Remove unnecessary stubbing.
+                .strictness(Strictness.LENIENT)
+                .startMocking();
         MockitoAnnotations.initMocks(this);
 
-        mService = new TestBackupService(mContext, mPackageManager, mOperationStorage);
+        mService = new TestBackupService(mContext, mPackageManager, mOperationStorage,
+                mTransportManager);
         mService.setEnabled(true);
         mService.setSetupComplete(true);
+    }
+
+    @After
+    public void tearDown() {
+        if (mSession != null) {
+            mSession.finishMocking();
+        }
     }
 
     @Test
@@ -201,6 +229,26 @@ public class UserBackupManagerServiceTest {
                 .cancelOperation(anyInt(), anyBoolean(), any(IntConsumer.class));
     }
 
+    @Test
+    public void testReportDelayedRestoreResult_sendsLogsToMonitor() throws Exception {
+        PackageInfo packageInfo = getPackageInfo(TEST_PACKAGE);
+        when(mPackageManager.getPackageInfoAsUser(anyString(),
+                any(PackageManager.PackageInfoFlags.class), anyInt())).thenReturn(packageInfo);
+        when(mTransportManager.getCurrentTransportName()).thenReturn(TEST_TRANSPORT);
+        when(mTransportManager.getTransportClientOrThrow(eq(TEST_TRANSPORT), anyString()))
+                .thenReturn(mTransportConnection);
+        when(mTransportConnection.connectOrThrow(any())).thenReturn(mBackupTransport);
+        when(mBackupTransport.getBackupManagerMonitor()).thenReturn(mBackupManagerMonitor);
+
+
+        List<DataTypeResult> results = Arrays.asList(new DataTypeResult(/* dataType */ "type_1"),
+                new DataTypeResult(/* dataType */ "type_2"));
+        mService.reportDelayedRestoreResult(TEST_PACKAGE, results);
+
+        verify(() -> BackupManagerMonitorUtils.sendAgentLoggingResults(
+                eq(mBackupManagerMonitor), eq(packageInfo), eq(results)));
+    }
+
     private static PackageInfo getPackageInfo(String packageName) {
         PackageInfo packageInfo = new PackageInfo();
         packageInfo.applicationInfo = new ApplicationInfo();
@@ -215,8 +263,8 @@ public class UserBackupManagerServiceTest {
         private volatile Thread mWorkerThread = null;
 
         TestBackupService(Context context, PackageManager packageManager,
-                LifecycleOperationStorage operationStorage) {
-            super(context, packageManager, operationStorage);
+                LifecycleOperationStorage operationStorage, TransportManager transportManager) {
+            super(context, packageManager, operationStorage, transportManager);
         }
 
         @Override

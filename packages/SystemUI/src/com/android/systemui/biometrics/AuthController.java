@@ -164,6 +164,7 @@ public class AuthController implements CoreStartable,  CommandQueue.Callbacks,
     @NonNull private final SparseBooleanArray mSfpsEnrolledForUser;
     @NonNull private final SensorPrivacyManager mSensorPrivacyManager;
     private final WakefulnessLifecycle mWakefulnessLifecycle;
+    private final AuthDialogPanelInteractionDetector mPanelInteractionDetector;
     private boolean mAllFingerprintAuthenticatorsRegistered;
     @NonNull private final UserManager mUserManager;
     @NonNull private final LockPatternUtils mLockPatternUtils;
@@ -721,6 +722,7 @@ public class AuthController implements CoreStartable,  CommandQueue.Callbacks,
             Provider<SideFpsController> sidefpsControllerFactory,
             @NonNull DisplayManager displayManager,
             @NonNull WakefulnessLifecycle wakefulnessLifecycle,
+            @NonNull AuthDialogPanelInteractionDetector panelInteractionDetector,
             @NonNull UserManager userManager,
             @NonNull LockPatternUtils lockPatternUtils,
             @NonNull UdfpsLogger udfpsLogger,
@@ -767,6 +769,8 @@ public class AuthController implements CoreStartable,  CommandQueue.Callbacks,
                 });
 
         mWakefulnessLifecycle = wakefulnessLifecycle;
+        mPanelInteractionDetector = panelInteractionDetector;
+
 
         mFaceProps = mFaceManager != null ? mFaceManager.getSensorPropertiesInternal() : null;
         int[] faceAuthLocation = context.getResources().getIntArray(
@@ -1149,6 +1153,7 @@ public class AuthController implements CoreStartable,  CommandQueue.Callbacks,
                 requestId,
                 multiSensorConfig,
                 mWakefulnessLifecycle,
+                mPanelInteractionDetector,
                 mUserManager,
                 mLockPatternUtils);
 
@@ -1239,6 +1244,7 @@ public class AuthController implements CoreStartable,  CommandQueue.Callbacks,
             String opPackageName, boolean skipIntro, long operationId, long requestId,
             @BiometricMultiSensorMode int multiSensorConfig,
             @NonNull WakefulnessLifecycle wakefulnessLifecycle,
+            @NonNull AuthDialogPanelInteractionDetector panelInteractionDetector,
             @NonNull UserManager userManager,
             @NonNull LockPatternUtils lockPatternUtils) {
         return new AuthContainerView.Builder(mContext)
@@ -1253,8 +1259,9 @@ public class AuthController implements CoreStartable,  CommandQueue.Callbacks,
                 .setMultiSensorConfig(multiSensorConfig)
                 .setScaleFactorProvider(() -> getScaleFactor())
                 .build(bgExecutor, sensorIds, mFpProps, mFaceProps, wakefulnessLifecycle,
-                        userManager, lockPatternUtils, mInteractionJankMonitor,
-                        mBiometricPromptInteractor, mCredentialViewModelProvider);
+                        panelInteractionDetector, userManager, lockPatternUtils,
+                        mInteractionJankMonitor, mBiometricPromptInteractor,
+                        mCredentialViewModelProvider);
     }
 
     @Override

@@ -16,7 +16,14 @@
 
 package com.android.systemui.doze;
 
+import static android.os.PowerManager.WAKE_REASON_BIOMETRIC;
+import static android.os.PowerManager.WAKE_REASON_GESTURE;
+import static android.os.PowerManager.WAKE_REASON_LIFT;
+import static android.os.PowerManager.WAKE_REASON_PLUGGED_IN;
+import static android.os.PowerManager.WAKE_REASON_TAP;
+
 import android.annotation.IntDef;
+import android.os.PowerManager;
 import android.util.TimeUtils;
 
 import androidx.annotation.NonNull;
@@ -508,6 +515,25 @@ public class DozeLog implements Dumpable {
             case REASON_SENSOR_UDFPS_LONG_PRESS: return "udfps";
             case REASON_SENSOR_QUICK_PICKUP: return "quickPickup";
             default: throw new IllegalArgumentException("invalid reason: " + pulseReason);
+        }
+    }
+
+    /**
+     * Converts {@link Reason} to {@link PowerManager.WakeReason}.
+     */
+    public static @PowerManager.WakeReason int getPowerManagerWakeReason(@Reason int wakeReason) {
+        switch (wakeReason) {
+            case REASON_SENSOR_DOUBLE_TAP:
+            case REASON_SENSOR_TAP:
+                return WAKE_REASON_TAP;
+            case REASON_SENSOR_PICKUP:
+                return WAKE_REASON_LIFT;
+            case REASON_SENSOR_UDFPS_LONG_PRESS:
+                return WAKE_REASON_BIOMETRIC;
+            case PULSE_REASON_DOCKING:
+                return WAKE_REASON_PLUGGED_IN;
+            default:
+                return WAKE_REASON_GESTURE;
         }
     }
 

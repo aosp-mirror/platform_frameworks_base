@@ -46,9 +46,7 @@ import java.util.Objects;
  * -->
  *
  * @see OverlayManager#getOverlayInfosForTarget(String)
- * @hide
  */
-@SystemApi
 public final class OverlayInfo implements CriticalOverlayInfo, Parcelable {
 
     /** @hide */
@@ -59,7 +57,6 @@ public final class OverlayInfo implements CriticalOverlayInfo, Parcelable {
             STATE_DISABLED,
             STATE_ENABLED,
             STATE_ENABLED_IMMUTABLE,
-            // @Deprecated STATE_TARGET_IS_BEING_REPLACED,
             STATE_OVERLAY_IS_BEING_REPLACED,
             STATE_SYSTEM_UPDATE_UNINSTALL,
     })
@@ -312,7 +309,6 @@ public final class OverlayInfo implements CriticalOverlayInfo, Parcelable {
      * Get the overlay name from the registered fabricated overlay.
      *
      * @return the overlay name
-     * @hide
      */
     @Override
     @Nullable
@@ -324,10 +320,8 @@ public final class OverlayInfo implements CriticalOverlayInfo, Parcelable {
      * Returns the name of the target overlaid package.
      *
      * @return the target package name
-     * @hide
      */
     @Override
-    @SystemApi
     @NonNull
     public String getTargetPackageName() {
         return targetPackageName;
@@ -359,9 +353,7 @@ public final class OverlayInfo implements CriticalOverlayInfo, Parcelable {
      * Return the target overlayable name.
      *
      * @return the name of the target overlayable resources set
-     * @hide
      */
-    @SystemApi
     @Override
     @Nullable
     public String getTargetOverlayableName() {
@@ -394,7 +386,6 @@ public final class OverlayInfo implements CriticalOverlayInfo, Parcelable {
      *
      * @return an identifier representing the current overlay.
      * @see OverlayManagerTransaction.Builder#unregisterFabricatedOverlay(OverlayIdentifier)
-     * @hide
      */
     @Override
     @NonNull

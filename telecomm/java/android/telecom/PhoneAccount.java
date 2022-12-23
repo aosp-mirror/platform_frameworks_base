@@ -437,7 +437,15 @@ public final class PhoneAccount implements Parcelable {
      */
     public static final int CAPABILITY_SUPPORTS_TRANSACTIONAL_OPERATIONS = 0x40000;
 
-    /* NEXT CAPABILITY: [0x80000, 0x100000, 0x200000] */
+    /**
+     * Flag indicating that this voip app {@link PhoneAccount} supports the call streaming session
+     * to stream call audio to another remote device via streaming app.
+     *
+     * @see #getCapabilities
+     */
+    public static final int CAPABILITY_SUPPORTS_CALL_STREAMING = 0x80000;
+
+    /* NEXT CAPABILITY: [0x100000, 0x200000, 0x400000] */
 
     /**
      * URI scheme for telephone number URIs.

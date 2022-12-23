@@ -148,7 +148,7 @@ constructor(
 
     /** The wifi activity status. Null if we shouldn't display the activity status. */
     private val activity: Flow<DataActivityModel?> =
-        if (!wifiConstants.shouldShowActivityConfig) {
+        if (!connectivityConstants.shouldShowActivityConfig) {
             flowOf(null)
         } else {
             combine(interactor.activity, interactor.ssid) { activity, ssid ->

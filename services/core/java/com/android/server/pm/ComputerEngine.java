@@ -2045,7 +2045,8 @@ public class ComputerEngine implements Computer {
         }
 
         final SharedLibraryInfo libraryInfo = getSharedLibraryInfo(
-                ps.getPkg().getStaticSharedLibraryName(), ps.getPkg().getStaticSharedLibVersion());
+                ps.getPkg().getStaticSharedLibraryName(),
+                ps.getPkg().getStaticSharedLibraryVersion());
         if (libraryInfo == null) {
             return false;
         }

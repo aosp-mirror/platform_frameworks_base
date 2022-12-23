@@ -16,9 +16,14 @@
 
 package com.android.server.pm.pkg;
 
+import android.annotation.Dimension;
+import android.annotation.DrawableRes;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.annotation.StringRes;
+import android.annotation.StyleRes;
 import android.annotation.SystemApi;
+import android.annotation.XmlRes;
 import android.content.ComponentName;
 import android.content.Intent;
 import android.content.pm.ActivityInfo;
@@ -86,6 +91,109 @@ import java.util.UUID;
 public interface AndroidPackage {
 
     /**
+     * @see ApplicationInfo#className
+     * @see R.styleable#AndroidManifestApplication_name
+     */
+    @Nullable
+    String getApplicationClassName();
+
+    /**
+     * @see ApplicationInfo#appComponentFactory
+     * @see R.styleable#AndroidManifestApplication_appComponentFactory
+     */
+    @Nullable
+    String getAppComponentFactory();
+
+    /**
+     * @see ApplicationInfo#backupAgentName
+     * @see R.styleable#AndroidManifestApplication_backupAgent
+     */
+    @Nullable
+    String getBackupAgentName();
+
+    /**
+     * @see ApplicationInfo#banner
+     * @see R.styleable#AndroidManifestApplication_banner
+     */
+    @DrawableRes
+    int getBannerRes();
+
+    /**
+     * @see PackageInfo#baseRevisionCode
+     * @see R.styleable#AndroidManifest_revisionCode
+     */
+    int getBaseRevisionCode();
+
+    /**
+     * @see ApplicationInfo#category
+     * @see R.styleable#AndroidManifestApplication_appCategory
+     */
+    int getCategory();
+
+    /**
+     * @see ApplicationInfo#classLoaderName
+     * @see R.styleable#AndroidManifestApplication_classLoader
+     */
+    @Nullable
+    String getClassLoaderName();
+
+    /**
+     * @see ApplicationInfo#compatibleWidthLimitDp
+     * @see R.styleable#AndroidManifestSupportsScreens_compatibleWidthLimitDp
+     */
+    @Dimension(unit = Dimension.DP)
+    int getCompatibleWidthLimitDp();
+
+    /**
+     * @see ApplicationInfo#dataExtractionRulesRes
+     * @see R.styleable#AndroidManifestApplication_dataExtractionRules
+     */
+    @XmlRes
+    int getDataExtractionRulesRes();
+
+    /**
+     * @see ApplicationInfo#descriptionRes
+     * @see R.styleable#AndroidManifestApplication_description
+     */
+    @StringRes // This is actually format="reference"
+    int getDescriptionRes();
+
+    /**
+     * @see ApplicationInfo#fullBackupContent
+     * @see R.styleable#AndroidManifestApplication_fullBackupContent
+     */
+    @XmlRes
+    int getFullBackupContentRes();
+
+    /**
+     * @see ApplicationInfo#getGwpAsanMode()
+     * @see R.styleable#AndroidManifestApplication_gwpAsanMode
+     */
+    @ApplicationInfo.GwpAsanMode
+    int getGwpAsanMode();
+
+    /**
+     * @see ApplicationInfo#iconRes
+     * @see R.styleable#AndroidManifestApplication_icon
+     */
+    @DrawableRes
+    int getIconRes();
+
+    /**
+     * @see ApplicationInfo#labelRes
+     * @see R.styleable#AndroidManifestApplication_label
+     */
+    @StringRes
+    int getLabelRes();
+
+    /**
+     * @see ApplicationInfo#largestWidthLimitDp
+     * @see R.styleable#AndroidManifestSupportsScreens_largestWidthLimitDp
+     */
+    @Dimension(unit = Dimension.DP)
+    int getLargestWidthLimitDp();
+
+    /**
      * Library names this package is declared as, for use by other packages with "uses-library".
      *
      * @see R.styleable#AndroidManifestLibrary
@@ -94,10 +202,102 @@ public interface AndroidPackage {
     List<String> getLibraryNames();
 
     /**
+     * @see ApplicationInfo#logo
+     * @see R.styleable#AndroidManifestApplication_logo
+     */
+    @DrawableRes
+    int getLogoRes();
+
+    /**
+     * The resource ID used to provide the application's locales configuration.
+     *
+     * @see R.styleable#AndroidManifestApplication_localeConfig
+     */
+    @XmlRes
+    int getLocaleConfigRes();
+
+    /**
+     * @see PackageInfo#getLongVersionCode()
+     * @see R.styleable#AndroidManifest_versionCode
+     * @see R.styleable#AndroidManifest_versionCodeMajor
+     */
+    long getLongVersionCode();
+
+    /**
+     * @see ApplicationInfo#maxAspectRatio
+     * @see R.styleable#AndroidManifestApplication_maxAspectRatio
+     */
+    float getMaxAspectRatio();
+
+    /**
+     * @see ApplicationInfo#minAspectRatio
+     * @see R.styleable#AndroidManifestApplication_minAspectRatio
+     */
+    float getMinAspectRatio();
+
+    /**
+     * @see ApplicationInfo#getNativeHeapZeroInitialized()
+     * @see R.styleable#AndroidManifestApplication_nativeHeapZeroInitialized
+     */
+    @ApplicationInfo.NativeHeapZeroInitialized
+    int getNativeHeapZeroInitialized();
+
+    /**
+     * @see ApplicationInfo#networkSecurityConfigRes
+     * @see R.styleable#AndroidManifestApplication_networkSecurityConfig
+     */
+    @XmlRes
+    int getNetworkSecurityConfigRes();
+
+    /**
+     * @see PackageInfo#requiredAccountType
+     * @see R.styleable#AndroidManifestApplication_requiredAccountType
+     */
+    @Nullable
+    String getRequiredAccountType();
+
+    /**
+     * @see ApplicationInfo#requiresSmallestWidthDp
+     * @see R.styleable#AndroidManifestSupportsScreens_requiresSmallestWidthDp
+     */
+    @Dimension(unit = Dimension.DP)
+    int getRequiresSmallestWidthDp();
+
+    /**
+     * The restricted account authenticator type that is used by this application.
+     *
+     * @see PackageInfo#restrictedAccountType
+     * @see R.styleable#AndroidManifestApplication_restrictedAccountType
+     */
+    @Nullable
+    String getRestrictedAccountType();
+
+    /**
+     * @see ApplicationInfo#roundIconRes
+     * @see R.styleable#AndroidManifestApplication_roundIcon
+     */
+    @DrawableRes
+    int getRoundIconRes();
+
+    /**
      * @see R.styleable#AndroidManifestSdkLibrary_name
      */
     @Nullable
     String getSdkLibraryName();
+
+    /**
+     * @see PackageInfo#sharedUserId
+     * @see R.styleable#AndroidManifest_sharedUserId
+     */
+    @Nullable
+    String getSharedUserId();
+
+    /**
+     * @see PackageInfo#sharedUserLabel
+     * @see R.styleable#AndroidManifest_sharedUserLabel
+     */
+    @StringRes
+    int getSharedUserLabelRes();
 
     /**
      * @return List of all splits for a package. Note that base.apk is considered a
@@ -113,6 +313,12 @@ public interface AndroidPackage {
     String getStaticSharedLibraryName();
 
     /**
+     * @see R.styleable#AndroidManifestStaticLibrary_version
+     * @hide
+     */
+    long getStaticSharedLibraryVersion();
+
+    /**
      * @return The {@link UUID} for use with {@link StorageManager} APIs identifying where this
      * package was installed.
      */
@@ -126,10 +332,162 @@ public interface AndroidPackage {
     int getTargetSdkVersion();
 
     /**
+     * @see ApplicationInfo#theme
+     * @see R.styleable#AndroidManifestApplication_theme
+     */
+    @StyleRes
+    int getThemeRes();
+
+    /**
+     * @see ApplicationInfo#uiOptions
+     * @see R.styleable#AndroidManifestApplication_uiOptions
+     */
+    int getUiOptions();
+
+    /**
+     * @see PackageInfo#versionName
+     */
+    @Nullable
+    String getVersionName();
+
+    /**
+     * @see ApplicationInfo#zygotePreloadName
+     * @see R.styleable#AndroidManifestApplication_zygotePreloadName
+     */
+    @Nullable
+    String getZygotePreloadName();
+
+    /**
+     * @see ApplicationInfo#PRIVATE_FLAG_ALLOW_AUDIO_PLAYBACK_CAPTURE
+     * @see R.styleable#AndroidManifestApplication_allowAudioPlaybackCapture
+     */
+    boolean isAllowAudioPlaybackCapture();
+
+    /**
+     * @see ApplicationInfo#FLAG_ALLOW_BACKUP
+     * @see R.styleable#AndroidManifestApplication_allowBackup
+     */
+    boolean isAllowBackup();
+
+    /**
+     * @see ApplicationInfo#FLAG_ALLOW_CLEAR_USER_DATA
+     * @see R.styleable#AndroidManifestApplication_allowClearUserData
+     */
+    boolean isAllowClearUserData();
+
+    /**
+     * @see ApplicationInfo#PRIVATE_FLAG_ALLOW_CLEAR_USER_DATA_ON_FAILED_RESTORE
+     * @see R.styleable#AndroidManifestApplication_allowClearUserDataOnFailedRestore
+     */
+    boolean isAllowClearUserDataOnFailedRestore();
+
+    /**
+     * @see ApplicationInfo#PRIVATE_FLAG_ALLOW_NATIVE_HEAP_POINTER_TAGGING
+     * @see R.styleable#AndroidManifestApplication_allowNativeHeapPointerTagging
+     */
+    boolean isAllowNativeHeapPointerTagging();
+
+    /**
+     * @see ApplicationInfo#FLAG_ALLOW_TASK_REPARENTING
+     * @see R.styleable#AndroidManifestApplication_allowTaskReparenting
+     */
+    boolean isAllowTaskReparenting();
+
+    /**
+     * If omitted from manifest, returns true if {@link #getTargetSdkVersion()} >= {@link
+     * android.os.Build.VERSION_CODES#DONUT}.
+     *
+     * @see R.styleable#AndroidManifestSupportsScreens_anyDensity
+     * @see ApplicationInfo#FLAG_SUPPORTS_SCREEN_DENSITIES
+     */
+    boolean isAnyDensity();
+
+    /**
+     * @see ApplicationInfo#areAttributionsUserVisible()
+     * @see R.styleable#AndroidManifestApplication_attributionsAreUserVisible
+     */
+    boolean isAttributionsUserVisible();
+
+    /**
+     * @see ApplicationInfo#PRIVATE_FLAG_BACKUP_IN_FOREGROUND
+     * @see R.styleable#AndroidManifestApplication_backupInForeground
+     */
+    boolean isBackupInForeground();
+
+    /**
+     * @see ApplicationInfo#FLAG_HARDWARE_ACCELERATED
+     * @see R.styleable#AndroidManifestApplication_hardwareAccelerated
+     */
+    boolean isHardwareAccelerated();
+
+    /**
+     * @see ApplicationInfo#PRIVATE_FLAG_CANT_SAVE_STATE
+     * @see R.styleable#AndroidManifestApplication_cantSaveState
+     */
+    boolean isCantSaveState();
+
+    /**
+     * @see PackageInfo#coreApp
+     */
+    boolean isCoreApp();
+
+    /**
+     * @see ApplicationInfo#crossProfile
+     * @see R.styleable#AndroidManifestApplication_crossProfile
+     */
+    boolean isCrossProfile();
+
+    /**
      * @see ApplicationInfo#FLAG_DEBUGGABLE
      * @see R.styleable#AndroidManifestApplication_debuggable
      */
     boolean isDebuggable();
+
+    /**
+     * @see ApplicationInfo#PRIVATE_FLAG_DEFAULT_TO_DEVICE_PROTECTED_STORAGE
+     * @see R.styleable#AndroidManifestApplication_defaultToDeviceProtectedStorage
+     */
+    boolean isDefaultToDeviceProtectedStorage();
+
+    /**
+     * @see ApplicationInfo#PRIVATE_FLAG_DIRECT_BOOT_AWARE
+     * @see R.styleable#AndroidManifestApplication_directBootAware
+     */
+    boolean isDirectBootAware();
+
+    /**
+     * @see ApplicationInfo#FLAG_EXTRACT_NATIVE_LIBS
+     * @see R.styleable#AndroidManifestApplication_extractNativeLibs
+     */
+    boolean isExtractNativeLibs();
+
+    /**
+     * @see ApplicationInfo#FLAG_FACTORY_TEST
+     */
+    boolean isFactoryTest();
+
+    /**
+     * @see R.styleable#AndroidManifestApplication_forceQueryable
+     */
+    boolean isForceQueryable();
+
+    /**
+     * @see ApplicationInfo#FLAG_FULL_BACKUP_ONLY
+     * @see R.styleable#AndroidManifestApplication_fullBackupOnly
+     */
+    boolean isFullBackupOnly();
+
+    /**
+     * @see ApplicationInfo#FLAG_HAS_CODE
+     * @see R.styleable#AndroidManifestApplication_hasCode
+     */
+    boolean isHasCode();
+
+    /**
+     * @see ApplicationInfo#PRIVATE_FLAG_HAS_FRAGILE_USER_DATA
+     * @see R.styleable#AndroidManifestApplication_hasFragileUserData
+     */
+    boolean isHasFragileUserData();
 
     /**
      * @see ApplicationInfo#PRIVATE_FLAG_ISOLATED_SPLIT_LOADING
@@ -138,9 +496,153 @@ public interface AndroidPackage {
     boolean isIsolatedSplitLoading();
 
     /**
+     * @see ApplicationInfo#FLAG_KILL_AFTER_RESTORE
+     * @see R.styleable#AndroidManifestApplication_killAfterRestore
+     */
+    boolean isKillAfterRestore();
+
+    /**
+     * @see ApplicationInfo#FLAG_LARGE_HEAP
+     * @see R.styleable#AndroidManifestApplication_largeHeap
+     */
+    boolean isLargeHeap();
+
+    /**
+     * Returns true if R.styleable#AndroidManifest_sharedUserMaxSdkVersion is set to a value
+     * smaller than the current SDK version, indicating the package wants to leave its declared
+     * {@link #getSharedUserId()}. This only occurs on new installs, pretending the app never
+     * declared one.
+     *
+     * @see R.styleable#AndroidManifest_sharedUserMaxSdkVersion
+     */
+    boolean isLeavingSharedUser();
+
+    /**
+     * @see ApplicationInfo#FLAG_MULTIARCH
+     * @see R.styleable#AndroidManifestApplication_multiArch
+     */
+    boolean isMultiArch();
+
+    /**
+     * @see ApplicationInfo#nativeLibraryRootRequiresIsa
+     */
+    boolean isNativeLibraryRootRequiresIsa();
+
+    /**
+     * @see R.styleable#AndroidManifestApplication_enableOnBackInvokedCallback
+     */
+    boolean isOnBackInvokedCallbackEnabled();
+
+    /**
+     * @see ApplicationInfo#FLAG_PERSISTENT
+     * @see R.styleable#AndroidManifestApplication_persistent
+     */
+    boolean isPersistent();
+
+    /**
+     * @see ApplicationInfo#PRIVATE_FLAG_EXT_PROFILEABLE
+     * @see R.styleable#AndroidManifestProfileable
+     */
+    boolean isProfileable();
+
+    /**
+     * @see ApplicationInfo#PRIVATE_FLAG_PROFILEABLE_BY_SHELL
+     * @see R.styleable#AndroidManifestProfileable_shell
+     */
+    boolean isProfileableByShell();
+
+    /**
+     * @see ApplicationInfo#PRIVATE_FLAG_REQUEST_LEGACY_EXTERNAL_STORAGE
+     * @see R.styleable#AndroidManifestApplication_requestLegacyExternalStorage
+     */
+    boolean isRequestLegacyExternalStorage();
+
+    /**
+     * @see PackageInfo#requiredForAllUsers
+     * @see R.styleable#AndroidManifestApplication_requiredForAllUsers
+     */
+    boolean isRequiredForAllUsers();
+
+    /**
+     * Whether the enabled settings of components in the application should be reset to the default,
+     * when the application's user data is cleared.
+     *
+     * @see R.styleable#AndroidManifestApplication_resetEnabledSettingsOnAppDataCleared
+     */
+    boolean isResetEnabledSettingsOnAppDataCleared();
+
+    /**
+     * @see ApplicationInfo#FLAG_RESTORE_ANY_VERSION
+     * @see R.styleable#AndroidManifestApplication_restoreAnyVersion
+     */
+    boolean isRestoreAnyVersion();
+
+    /**
      * @see ApplicationInfo#PRIVATE_FLAG_SIGNED_WITH_PLATFORM_KEY
      */
     boolean isSignedWithPlatformKey();
+
+    /**
+     * If omitted from manifest, returns true if {@link #getTargetSdkVersion()} >= {@link
+     * android.os.Build.VERSION_CODES#GINGERBREAD}.
+     *
+     * @see R.styleable#AndroidManifestSupportsScreens_xlargeScreens
+     * @see ApplicationInfo#FLAG_SUPPORTS_XLARGE_SCREENS
+     */
+    boolean isSupportsExtraLargeScreens();
+
+    /**
+     * If omitted from manifest, returns true if {@link #getTargetSdkVersion()} >= {@link
+     * android.os.Build.VERSION_CODES#DONUT}.
+     *
+     * @see R.styleable#AndroidManifestSupportsScreens_largeScreens
+     * @see ApplicationInfo#FLAG_SUPPORTS_LARGE_SCREENS
+     */
+    boolean isSupportsLargeScreens();
+
+    /**
+     * If omitted from manifest, returns true.
+     *
+     * @see R.styleable#AndroidManifestSupportsScreens_normalScreens
+     * @see ApplicationInfo#FLAG_SUPPORTS_NORMAL_SCREENS
+     */
+    boolean isSupportsNormalScreens();
+
+    /**
+     * @see ApplicationInfo#FLAG_SUPPORTS_RTL
+     * @see R.styleable#AndroidManifestApplication_supportsRtl
+     */
+    boolean isSupportsRtl();
+
+    /**
+     * If omitted from manifest, returns true if {@link #getTargetSdkVersion()} >= {@link
+     * android.os.Build.VERSION_CODES#DONUT}.
+     *
+     * @see R.styleable#AndroidManifestSupportsScreens_smallScreens
+     * @see ApplicationInfo#FLAG_SUPPORTS_SMALL_SCREENS
+     */
+    boolean isSupportsSmallScreens();
+
+    /**
+     * @see ApplicationInfo#FLAG_TEST_ONLY
+     * @see R.styleable#AndroidManifestApplication_testOnly
+     */
+    boolean isTestOnly();
+
+    /**
+     * The install time abi override to choose 32bit abi's when multiple abi's are present. This is
+     * only meaningful for multiarch applications. The use32bitAbi attribute is ignored if
+     * cpuAbiOverride is also set.
+     *
+     * @see R.attr#use32bitAbi
+     */
+    boolean isUse32BitAbi();
+
+    /**
+     * @see ApplicationInfo#FLAG_USES_CLEARTEXT_TRAFFIC
+     * @see R.styleable#AndroidManifestApplication_usesCleartextTraffic
+     */
+    boolean isUsesCleartextTraffic();
 
     /**
      * @see ApplicationInfo#PRIVATE_FLAG_USE_EMBEDDED_DEX
@@ -161,14 +663,6 @@ public interface AndroidPackage {
     boolean isVmSafeMode();
 
     // Methods below this comment are not yet exposed as API
-
-    /**
-     * @see ApplicationInfo#areAttributionsUserVisible()
-     * @see R.styleable#AndroidManifestApplication_attributionsAreUserVisible
-     * @hide
-     */
-    @Nullable
-    boolean areAttributionsUserVisible();
 
     /**
      * Set of Activities parsed from the manifest.
@@ -207,14 +701,6 @@ public interface AndroidPackage {
     List<ParsedApexSystemService> getApexSystemServices();
 
     /**
-     * @see ApplicationInfo#appComponentFactory
-     * @see R.styleable#AndroidManifestApplication_appComponentFactory
-     * @hide
-     */
-    @Nullable
-    String getAppComponentFactory();
-
-    /**
      * @see R.styleable#AndroidManifestAttribution
      * @hide
      */
@@ -232,21 +718,6 @@ public interface AndroidPackage {
     int getAutoRevokePermissions();
 
     /**
-     * @see ApplicationInfo#backupAgentName
-     * @see R.styleable#AndroidManifestApplication_backupAgent
-     * @hide
-     */
-    @Nullable
-    String getBackupAgentName();
-
-    /**
-     * @see ApplicationInfo#banner
-     * @see R.styleable#AndroidManifestApplication_banner
-     * @hide
-     */
-    int getBanner();
-
-    /**
      * @see ApplicationInfo#sourceDir
      * @see ApplicationInfo#getBaseCodePath
      *
@@ -257,43 +728,6 @@ public interface AndroidPackage {
     @Deprecated
     @NonNull
     String getBaseApkPath();
-
-    /**
-     * @see PackageInfo#baseRevisionCode
-     * @see R.styleable#AndroidManifest_revisionCode
-     * @hide
-     */
-    int getBaseRevisionCode();
-
-    /**
-     * @see ApplicationInfo#category
-     * @see R.styleable#AndroidManifestApplication_appCategory
-     * @hide
-     */
-    int getCategory();
-
-    /**
-     * @see ApplicationInfo#classLoaderName
-     * @see R.styleable#AndroidManifestApplication_classLoader
-     * @hide
-     */
-    @Nullable
-    String getClassLoaderName();
-
-    /**
-     * @see ApplicationInfo#className
-     * @see R.styleable#AndroidManifestApplication_name
-     * @hide
-     */
-    @Nullable
-    String getClassName();
-
-    /**
-     * @see ApplicationInfo#compatibleWidthLimitDp
-     * @see R.styleable#AndroidManifestSupportsScreens_compatibleWidthLimitDp
-     * @hide
-     */
-    int getCompatibleWidthLimitDp();
 
     /**
      * @see ApplicationInfo#compileSdkVersion
@@ -320,20 +754,6 @@ public interface AndroidPackage {
     List<ConfigurationInfo> getConfigPreferences();
 
     /**
-     * @see ApplicationInfo#dataExtractionRulesRes
-     * @see R.styleable#AndroidManifestApplication_dataExtractionRules
-     * @hide
-     */
-    int getDataExtractionRules();
-
-    /**
-     * @see ApplicationInfo#descriptionRes
-     * @see R.styleable#AndroidManifestApplication_description
-     * @hide
-     */
-    int getDescriptionRes();
-
-    /**
      * @see PackageInfo#featureGroups
      * @see R.styleable#AndroidManifestUsesFeature
      * @hide
@@ -341,28 +761,6 @@ public interface AndroidPackage {
     @Immutable.Ignore
     @NonNull
     List<FeatureGroupInfo> getFeatureGroups();
-
-    /**
-     * @see ApplicationInfo#fullBackupContent
-     * @see R.styleable#AndroidManifestApplication_fullBackupContent
-     * @hide
-     */
-    int getFullBackupContent();
-
-    /**
-     * @see ApplicationInfo#getGwpAsanMode()
-     * @see R.styleable#AndroidManifestApplication_gwpAsanMode
-     * @hide
-     */
-    @ApplicationInfo.GwpAsanMode
-    int getGwpAsanMode();
-
-    /**
-     * @see ApplicationInfo#iconRes
-     * @see R.styleable#AndroidManifestApplication_icon
-     * @hide
-     */
-    int getIconRes();
 
     /**
      * Permissions requested but not in the manifest. These may have been split or migrated from
@@ -411,43 +809,6 @@ public interface AndroidPackage {
     Set<String> getKnownActivityEmbeddingCerts();
 
     /**
-     * @see ApplicationInfo#labelRes
-     * @see R.styleable#AndroidManifestApplication_label
-     * @hide
-     */
-    int getLabelRes();
-
-    /**
-     * @see ApplicationInfo#largestWidthLimitDp
-     * @see R.styleable#AndroidManifestSupportsScreens_largestWidthLimitDp
-     * @hide
-     */
-    int getLargestWidthLimitDp();
-
-    /**
-     * The resource ID used to provide the application's locales configuration.
-     *
-     * @see R.styleable#AndroidManifestApplication_localeConfig
-     * @hide
-     */
-    int getLocaleConfigRes();
-
-    /**
-     * @see ApplicationInfo#logo
-     * @see R.styleable#AndroidManifestApplication_logo
-     * @hide
-     */
-    int getLogo();
-
-    /**
-     * @see PackageInfo#getLongVersionCode()
-     * @see R.styleable#AndroidManifest_versionCode
-     * @see R.styleable#AndroidManifest_versionCodeMajor
-     * @hide
-     */
-    long getLongVersionCode();
-
-    /**
      * @see ApplicationInfo#manageSpaceActivityName
      * @see R.styleable#AndroidManifestApplication_manageSpaceActivity
      * @hide
@@ -462,13 +823,6 @@ public interface AndroidPackage {
      */
     @NonNull
     String getManifestPackageName();
-
-    /**
-     * @see ApplicationInfo#maxAspectRatio
-     * @see R.styleable#AndroidManifestApplication_maxAspectRatio
-     * @hide
-     */
-    float getMaxAspectRatio();
 
     /**
      * @see R.styleable#AndroidManifestUsesSdk_maxSdkVersion
@@ -501,13 +855,6 @@ public interface AndroidPackage {
     Set<String> getMimeGroups();
 
     /**
-     * @see ApplicationInfo#minAspectRatio
-     * @see R.styleable#AndroidManifestApplication_minAspectRatio
-     * @hide
-     */
-    float getMinAspectRatio();
-
-    /**
      * @see R.styleable#AndroidManifestExtensionSdk
      * @hide
      */
@@ -523,14 +870,6 @@ public interface AndroidPackage {
     int getMinSdkVersion();
 
     /**
-     * @see ApplicationInfo#getNativeHeapZeroInitialized()
-     * @see R.styleable#AndroidManifestApplication_nativeHeapZeroInitialized
-     * @hide
-     */
-    @ApplicationInfo.NativeHeapZeroInitialized
-    int getNativeHeapZeroInitialized();
-
-    /**
      * @see ApplicationInfo#nativeLibraryDir
      * @hide
      */
@@ -543,13 +882,6 @@ public interface AndroidPackage {
      */
     @Nullable
     String getNativeLibraryRootDir();
-
-    /**
-     * @see ApplicationInfo#networkSecurityConfigRes
-     * @see R.styleable#AndroidManifestApplication_networkSecurityConfig
-     * @hide
-     */
-    int getNetworkSecurityConfigRes();
 
     /**
      * If {@link R.styleable#AndroidManifestApplication_label} is a string literal, this is it.
@@ -787,21 +1119,6 @@ public interface AndroidPackage {
     List<String> getRequestedPermissions();
 
     /**
-     * @see PackageInfo#requiredAccountType
-     * @see R.styleable#AndroidManifestApplication_requiredAccountType
-     * @hide
-     */
-    @Nullable
-    String getRequiredAccountType();
-
-    /**
-     * @see ApplicationInfo#requiresSmallestWidthDp
-     * @see R.styleable#AndroidManifestSupportsScreens_requiresSmallestWidthDp
-     * @hide
-     */
-    int getRequiresSmallestWidthDp();
-
-    /**
      * Whether or not the app requested explicitly resizeable Activities. Null value means nothing
      * was explicitly requested.
      *
@@ -822,23 +1139,6 @@ public interface AndroidPackage {
     @Immutable.Ignore
     @Nullable
     byte[] getRestrictUpdateHash();
-
-    /**
-     * The restricted account authenticator type that is used by this application.
-     *
-     * @see PackageInfo#restrictedAccountType
-     * @see R.styleable#AndroidManifestApplication_restrictedAccountType
-     * @hide
-     */
-    @Nullable
-    String getRestrictedAccountType();
-
-    /**
-     * @see ApplicationInfo#roundIconRes
-     * @see R.styleable#AndroidManifestApplication_roundIcon
-     * @hide
-     */
-    int getRoundIconRes();
 
     /**
      * @see R.styleable#AndroidManifestSdkLibrary_versionMajor
@@ -870,21 +1170,6 @@ public interface AndroidPackage {
     @Immutable.Ignore
     @NonNull
     List<ParsedService> getServices();
-
-    /**
-     * @see PackageInfo#sharedUserId
-     * @see R.styleable#AndroidManifest_sharedUserId
-     * @hide
-     */
-    @Nullable
-    String getSharedUserId();
-
-    /**
-     * @see PackageInfo#sharedUserLabel
-     * @see R.styleable#AndroidManifest_sharedUserLabel
-     * @hide
-     */
-    int getSharedUserLabel();
 
     /**
      * The signature data of all APKs in this package, which must be exactly the same across the
@@ -949,12 +1234,6 @@ public interface AndroidPackage {
     int[] getSplitRevisionCodes();
 
     /**
-     * @see R.styleable#AndroidManifestStaticLibrary_version
-     * @hide
-     */
-    long getStaticSharedLibVersion();
-
-    /**
      * @see ApplicationInfo#targetSandboxVersion
      * @see R.styleable#AndroidManifest_targetSandboxVersion
      * @hide
@@ -968,20 +1247,6 @@ public interface AndroidPackage {
      */
     @Nullable
     String getTaskAffinity();
-
-    /**
-     * @see ApplicationInfo#theme
-     * @see R.styleable#AndroidManifestApplication_theme
-     * @hide
-     */
-    int getTheme();
-
-    /**
-     * @see ApplicationInfo#uiOptions
-     * @see R.styleable#AndroidManifestApplication_uiOptions
-     * @hide
-     */
-    int getUiOptions();
 
     /**
      * This is an appId, the {@link ApplicationInfo#uid} if the user ID is
@@ -1095,26 +1360,11 @@ public interface AndroidPackage {
     long[] getUsesStaticLibrariesVersions();
 
     /**
-     * @see PackageInfo#versionName
-     * @hide
-     */
-    @Nullable
-    String getVersionName();
-
-    /**
      * @see ApplicationInfo#volumeUuid
      * @hide
      */
     @Nullable
     String getVolumeUuid();
-
-    /**
-     * @see ApplicationInfo#zygotePreloadName
-     * @see R.styleable#AndroidManifestApplication_zygotePreloadName
-     * @hide
-     */
-    @Nullable
-    String getZygotePreloadName();
 
     /** @hide */
     boolean hasPreserveLegacyExternalStorage();
@@ -1133,108 +1383,8 @@ public interface AndroidPackage {
      */
     Boolean hasRequestRawExternalStorageAccess();
 
-    /**
-     * @see ApplicationInfo#PRIVATE_FLAG_ALLOW_AUDIO_PLAYBACK_CAPTURE
-     * @see R.styleable#AndroidManifestApplication_allowAudioPlaybackCapture
-     * @hide
-     */
-    boolean isAllowAudioPlaybackCapture();
-
-    /**
-     * @see ApplicationInfo#FLAG_ALLOW_BACKUP
-     * @see R.styleable#AndroidManifestApplication_allowBackup
-     * @hide
-     */
-    boolean isAllowBackup();
-
-    /**
-     * @see ApplicationInfo#FLAG_ALLOW_CLEAR_USER_DATA
-     * @see R.styleable#AndroidManifestApplication_allowClearUserData
-     * @hide
-     */
-    boolean isAllowClearUserData();
-
-    /**
-     * @see ApplicationInfo#PRIVATE_FLAG_ALLOW_CLEAR_USER_DATA_ON_FAILED_RESTORE
-     * @see R.styleable#AndroidManifestApplication_allowClearUserDataOnFailedRestore
-     * @hide
-     */
-    boolean isAllowClearUserDataOnFailedRestore();
-
-    /**
-     * @see ApplicationInfo#PRIVATE_FLAG_ALLOW_NATIVE_HEAP_POINTER_TAGGING
-     * @see R.styleable#AndroidManifestApplication_allowNativeHeapPointerTagging
-     * @hide
-     */
-    boolean isAllowNativeHeapPointerTagging();
-
-    /**
-     * @see ApplicationInfo#FLAG_ALLOW_TASK_REPARENTING
-     * @see R.styleable#AndroidManifestApplication_allowTaskReparenting
-     * @hide
-     */
-    boolean isAllowTaskReparenting();
-
-    /**
-     * If omitted from manifest, returns true if {@link #getTargetSdkVersion()} >= {@link
-     * android.os.Build.VERSION_CODES#DONUT}.
-     *
-     * @see R.styleable#AndroidManifestSupportsScreens_anyDensity
-     * @see ApplicationInfo#FLAG_SUPPORTS_SCREEN_DENSITIES
-     * @hide
-     */
-    boolean isAnyDensity();
-
     /** @hide */
     boolean isApex();
-
-    /**
-     * @see ApplicationInfo#PRIVATE_FLAG_BACKUP_IN_FOREGROUND
-     * @see R.styleable#AndroidManifestApplication_backupInForeground
-     * @hide
-     */
-    boolean isBackupInForeground();
-
-    /**
-     * @see ApplicationInfo#FLAG_HARDWARE_ACCELERATED
-     * @see R.styleable#AndroidManifestApplication_hardwareAccelerated
-     * @hide
-     */
-    boolean isBaseHardwareAccelerated();
-
-    /**
-     * @see ApplicationInfo#PRIVATE_FLAG_CANT_SAVE_STATE
-     * @see R.styleable#AndroidManifestApplication_cantSaveState
-     * @hide
-     */
-    boolean isCantSaveState();
-
-    /**
-     * @see PackageInfo#coreApp
-     * @hide
-     */
-    boolean isCoreApp();
-
-    /**
-     * @see ApplicationInfo#crossProfile
-     * @see R.styleable#AndroidManifestApplication_crossProfile
-     * @hide
-     */
-    boolean isCrossProfile();
-
-    /**
-     * @see ApplicationInfo#PRIVATE_FLAG_DEFAULT_TO_DEVICE_PROTECTED_STORAGE
-     * @see R.styleable#AndroidManifestApplication_defaultToDeviceProtectedStorage
-     * @hide
-     */
-    boolean isDefaultToDeviceProtectedStorage();
-
-    /**
-     * @see ApplicationInfo#PRIVATE_FLAG_DIRECT_BOOT_AWARE
-     * @see R.styleable#AndroidManifestApplication_directBootAware
-     * @hide
-     */
-    boolean isDirectBootAware();
 
     /**
      * @see ApplicationInfo#enabled
@@ -1250,32 +1400,6 @@ public interface AndroidPackage {
     boolean isExternalStorage();
 
     /**
-     * @see ApplicationInfo#FLAG_EXTRACT_NATIVE_LIBS
-     * @see R.styleable#AndroidManifestApplication_extractNativeLibs
-     * @hide
-     */
-    boolean isExtractNativeLibs();
-
-    /**
-     * @see ApplicationInfo#FLAG_FACTORY_TEST
-     * @hide
-     */
-    boolean isFactoryTest();
-
-    /**
-     * @see R.styleable#AndroidManifestApplication_forceQueryable
-     * @hide
-     */
-    boolean isForceQueryable();
-
-    /**
-     * @see ApplicationInfo#FLAG_FULL_BACKUP_ONLY
-     * @see R.styleable#AndroidManifestApplication_fullBackupOnly
-     * @hide
-     */
-    boolean isFullBackupOnly();
-
-    /**
      * @see ApplicationInfo#FLAG_IS_GAME
      * @see R.styleable#AndroidManifestApplication_isGame
      * @hide
@@ -1284,67 +1408,11 @@ public interface AndroidPackage {
     boolean isGame();
 
     /**
-     * @see ApplicationInfo#FLAG_HAS_CODE
-     * @see R.styleable#AndroidManifestApplication_hasCode
-     * @hide
-     */
-    boolean isHasCode();
-
-    /**
      * @see ApplicationInfo#PRIVATE_FLAG_HAS_DOMAIN_URLS
      * @see R.styleable#AndroidManifestIntentFilter
      * @hide
      */
     boolean isHasDomainUrls();
-
-    /**
-     * @see ApplicationInfo#PRIVATE_FLAG_HAS_FRAGILE_USER_DATA
-     * @see R.styleable#AndroidManifestApplication_hasFragileUserData
-     * @hide
-     */
-    boolean isHasFragileUserData();
-
-    /**
-     * @see ApplicationInfo#FLAG_KILL_AFTER_RESTORE
-     * @see R.styleable#AndroidManifestApplication_killAfterRestore
-     * @hide
-     */
-    boolean isKillAfterRestore();
-
-    /**
-     * @see ApplicationInfo#FLAG_LARGE_HEAP
-     * @see R.styleable#AndroidManifestApplication_largeHeap
-     * @hide
-     */
-    boolean isLargeHeap();
-
-    /**
-     * Returns true if R.styleable#AndroidManifest_sharedUserMaxSdkVersion is set to a value
-     * smaller than the current SDK version.
-     *
-     * @see R.styleable#AndroidManifest_sharedUserMaxSdkVersion
-     * @hide
-     */
-    boolean isLeavingSharedUid();
-
-    /**
-     * @see ApplicationInfo#FLAG_MULTIARCH
-     * @see R.styleable#AndroidManifestApplication_multiArch
-     * @hide
-     */
-    boolean isMultiArch();
-
-    /**
-     * @see ApplicationInfo#nativeLibraryRootRequiresIsa
-     * @hide
-     */
-    boolean isNativeLibraryRootRequiresIsa();
-
-    /**
-     * @see R.styleable#AndroidManifestApplication_enableOnBackInvokedCallback
-     * @hide
-     */
-    boolean isOnBackInvokedCallbackEnabled();
 
     /**
      * @see ApplicationInfo#PRIVATE_FLAG_IS_RESOURCE_OVERLAY
@@ -1371,50 +1439,6 @@ public interface AndroidPackage {
     boolean isPartiallyDirectBootAware();
 
     /**
-     * @see ApplicationInfo#FLAG_PERSISTENT
-     * @see R.styleable#AndroidManifestApplication_persistent
-     * @hide
-     */
-    boolean isPersistent();
-
-    /**
-     * @see ApplicationInfo#PRIVATE_FLAG_EXT_PROFILEABLE
-     * @see R.styleable#AndroidManifestProfileable
-     * @hide
-     */
-    boolean isProfileable();
-
-    /**
-     * @see ApplicationInfo#PRIVATE_FLAG_PROFILEABLE_BY_SHELL
-     * @see R.styleable#AndroidManifestProfileable_shell
-     * @hide
-     */
-    boolean isProfileableByShell();
-
-    /**
-     * @see ApplicationInfo#PRIVATE_FLAG_REQUEST_LEGACY_EXTERNAL_STORAGE
-     * @see R.styleable#AndroidManifestApplication_requestLegacyExternalStorage
-     * @hide
-     */
-    boolean isRequestLegacyExternalStorage();
-
-    /**
-     * @see PackageInfo#requiredForAllUsers
-     * @see R.styleable#AndroidManifestApplication_requiredForAllUsers
-     * @hide
-     */
-    boolean isRequiredForAllUsers();
-
-    /**
-     * Whether the enabled settings of components in the application should be reset to the default,
-     * when the application's user data is cleared.
-     *
-     * @see R.styleable#AndroidManifestApplication_resetEnabledSettingsOnAppDataCleared
-     * @hide
-     */
-    boolean isResetEnabledSettingsOnAppDataCleared();
-
-    /**
      * If omitted from manifest, returns true if {@link #getTargetSdkVersion()} >= {@link
      * android.os.Build.VERSION_CODES#DONUT}.
      *
@@ -1430,13 +1454,6 @@ public interface AndroidPackage {
      * @hide
      */
     boolean isResizeableActivityViaSdkVersion();
-
-    /**
-     * @see ApplicationInfo#FLAG_RESTORE_ANY_VERSION
-     * @see R.styleable#AndroidManifestApplication_restoreAnyVersion
-     * @hide
-     */
-    boolean isRestoreAnyVersion();
 
     /**
      * True means that this package/app contains an SDK library.
@@ -1457,76 +1474,6 @@ public interface AndroidPackage {
      * @hide
      */
     boolean isStub();
-
-    /**
-     * If omitted from manifest, returns true if {@link #getTargetSdkVersion()} >= {@link
-     * android.os.Build.VERSION_CODES#GINGERBREAD}.
-     *
-     * @see R.styleable#AndroidManifestSupportsScreens_xlargeScreens
-     * @see ApplicationInfo#FLAG_SUPPORTS_XLARGE_SCREENS
-     * @hide
-     */
-    boolean isSupportsExtraLargeScreens();
-
-    /**
-     * If omitted from manifest, returns true if {@link #getTargetSdkVersion()} >= {@link
-     * android.os.Build.VERSION_CODES#DONUT}.
-     *
-     * @see R.styleable#AndroidManifestSupportsScreens_largeScreens
-     * @see ApplicationInfo#FLAG_SUPPORTS_LARGE_SCREENS
-     * @hide
-     */
-    boolean isSupportsLargeScreens();
-
-    /**
-     * If omitted from manifest, returns true.
-     *
-     * @see R.styleable#AndroidManifestSupportsScreens_normalScreens
-     * @see ApplicationInfo#FLAG_SUPPORTS_NORMAL_SCREENS
-     * @hide
-     */
-    boolean isSupportsNormalScreens();
-
-    /**
-     * @see ApplicationInfo#FLAG_SUPPORTS_RTL
-     * @see R.styleable#AndroidManifestApplication_supportsRtl
-     * @hide
-     */
-    boolean isSupportsRtl();
-
-    /**
-     * If omitted from manifest, returns true if {@link #getTargetSdkVersion()} >= {@link
-     * android.os.Build.VERSION_CODES#DONUT}.
-     *
-     * @see R.styleable#AndroidManifestSupportsScreens_smallScreens
-     * @see ApplicationInfo#FLAG_SUPPORTS_SMALL_SCREENS
-     * @hide
-     */
-    boolean isSupportsSmallScreens();
-
-    /**
-     * @see ApplicationInfo#FLAG_TEST_ONLY
-     * @see R.styleable#AndroidManifestApplication_testOnly
-     * @hide
-     */
-    boolean isTestOnly();
-
-    /**
-     * The install time abi override to choose 32bit abi's when multiple abi's are present. This is
-     * only meaningful for multiarch applications. The use32bitAbi attribute is ignored if
-     * cpuAbiOverride is also set.
-     *
-     * @see R.attr#use32bitAbi
-     * @hide
-     */
-    boolean isUse32BitAbi();
-
-    /**
-     * @see ApplicationInfo#FLAG_USES_CLEARTEXT_TRAFFIC
-     * @see R.styleable#AndroidManifestApplication_usesCleartextTraffic
-     * @hide
-     */
-    boolean isUsesCleartextTraffic();
 
     /**
      * Set if the any of components are visible to instant applications.

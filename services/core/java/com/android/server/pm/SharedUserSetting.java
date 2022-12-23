@@ -253,7 +253,7 @@ public final class SharedUserSetting extends SettingBase implements SharedUserAp
         }
         if (mDisabledPackages.size() == 1) {
             final AndroidPackage pkg = mDisabledPackages.valueAt(0).getPkg();
-            return pkg != null && pkg.isLeavingSharedUid();
+            return pkg != null && pkg.isLeavingSharedUser();
         }
         return true;
     }

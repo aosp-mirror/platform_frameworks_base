@@ -51,6 +51,7 @@ import com.android.systemui.statusbar.pipeline.mobile.data.repository.MobileConn
 import com.android.systemui.statusbar.pipeline.mobile.data.repository.MobileConnectionsRepository
 import com.android.systemui.statusbar.pipeline.mobile.util.MobileMappingsProxy
 import com.android.systemui.statusbar.pipeline.shared.ConnectivityPipelineLogger
+import com.android.systemui.statusbar.pipeline.shared.ConnectivityPipelineLogger.Companion.logInputChange
 import com.android.systemui.util.settings.GlobalSettings
 import javax.inject.Inject
 import kotlinx.coroutines.CoroutineDispatcher
@@ -120,6 +121,7 @@ constructor(
                 awaitClose { subscriptionManager.removeOnSubscriptionsChangedListener(callback) }
             }
             .mapLatest { fetchSubscriptionsList().map { it.toSubscriptionModel() } }
+            .logInputChange(logger, "onSubscriptionsChanged")
             .onEach { infos -> dropUnusedReposFromCache(infos) }
             .stateIn(scope, started = SharingStarted.WhileSubscribed(), listOf())
 
@@ -136,6 +138,8 @@ constructor(
                 telephonyManager.registerTelephonyCallback(bgDispatcher.asExecutor(), callback)
                 awaitClose { telephonyManager.unregisterTelephonyCallback(callback) }
             }
+            .distinctUntilChanged()
+            .logInputChange(logger, "onActiveDataSubscriptionIdChanged")
             .stateIn(scope, started = SharingStarted.WhileSubscribed(), INVALID_SUBSCRIPTION_ID)
 
     private val defaultDataSubIdChangeEvent: MutableSharedFlow<Unit> =
@@ -149,6 +153,7 @@ constructor(
                 intent.getIntExtra(PhoneConstants.SUBSCRIPTION_KEY, INVALID_SUBSCRIPTION_ID)
             }
             .distinctUntilChanged()
+            .logInputChange(logger, "ACTION_DEFAULT_DATA_SUBSCRIPTION_CHANGED")
             .onEach { defaultDataSubIdChangeEvent.tryEmit(Unit) }
             .stateIn(
                 scope,
@@ -157,13 +162,15 @@ constructor(
             )
 
     private val carrierConfigChangedEvent =
-        broadcastDispatcher.broadcastFlow(
-            IntentFilter(CarrierConfigManager.ACTION_CARRIER_CONFIG_CHANGED)
-        )
+        broadcastDispatcher
+            .broadcastFlow(IntentFilter(CarrierConfigManager.ACTION_CARRIER_CONFIG_CHANGED))
+            .logInputChange(logger, "ACTION_CARRIER_CONFIG_CHANGED")
 
     override val defaultDataSubRatConfig: StateFlow<Config> =
         merge(defaultDataSubIdChangeEvent, carrierConfigChangedEvent)
             .mapLatest { Config.readConfig(context) }
+            .distinctUntilChanged()
+            .logInputChange(logger, "defaultDataSubRatConfig")
             .stateIn(
                 scope,
                 SharingStarted.WhileSubscribed(),
@@ -171,10 +178,16 @@ constructor(
             )
 
     override val defaultMobileIconMapping: Flow<Map<String, MobileIconGroup>> =
-        defaultDataSubRatConfig.map { mobileMappingsProxy.mapIconSets(it) }
+        defaultDataSubRatConfig
+            .map { mobileMappingsProxy.mapIconSets(it) }
+            .distinctUntilChanged()
+            .logInputChange(logger, "defaultMobileIconMapping")
 
     override val defaultMobileIconGroup: Flow<MobileIconGroup> =
-        defaultDataSubRatConfig.map { mobileMappingsProxy.getDefaultIcons(it) }
+        defaultDataSubRatConfig
+            .map { mobileMappingsProxy.getDefaultIcons(it) }
+            .distinctUntilChanged()
+            .logInputChange(logger, "defaultMobileIconGroup")
 
     override fun getRepoForSubId(subId: Int): MobileConnectionRepository {
         if (!isValidSubId(subId)) {
@@ -191,22 +204,24 @@ constructor(
      * In single-SIM devices, the [MOBILE_DATA] setting is phone-wide. For multi-SIM, the individual
      * connection repositories also observe the URI for [MOBILE_DATA] + subId.
      */
-    override val globalMobileDataSettingChangedEvent: Flow<Unit> = conflatedCallbackFlow {
-        val observer =
-            object : ContentObserver(null) {
-                override fun onChange(selfChange: Boolean) {
-                    trySend(Unit)
-                }
+    override val globalMobileDataSettingChangedEvent: Flow<Unit> =
+        conflatedCallbackFlow {
+                val observer =
+                    object : ContentObserver(null) {
+                        override fun onChange(selfChange: Boolean) {
+                            trySend(Unit)
+                        }
+                    }
+
+                globalSettings.registerContentObserver(
+                    globalSettings.getUriFor(MOBILE_DATA),
+                    true,
+                    observer
+                )
+
+                awaitClose { context.contentResolver.unregisterContentObserver(observer) }
             }
-
-        globalSettings.registerContentObserver(
-            globalSettings.getUriFor(MOBILE_DATA),
-            true,
-            observer
-        )
-
-        awaitClose { context.contentResolver.unregisterContentObserver(observer) }
-    }
+            .logInputChange(logger, "globalMobileDataSettingChangedEvent")
 
     @SuppressLint("MissingPermission")
     override val defaultMobileNetworkConnectivity: StateFlow<MobileConnectivityModel> =
@@ -236,6 +251,8 @@ constructor(
 
                 awaitClose { connectivityManager.unregisterNetworkCallback(callback) }
             }
+            .distinctUntilChanged()
+            .logInputChange(logger, "defaultMobileNetworkConnectivity")
             .stateIn(scope, SharingStarted.WhileSubscribed(), MobileConnectivityModel())
 
     private fun isValidSubId(subId: Int): Boolean {

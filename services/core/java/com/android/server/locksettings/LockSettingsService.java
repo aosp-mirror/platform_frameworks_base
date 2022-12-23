@@ -173,7 +173,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.NoSuchElementException;
 import java.util.Objects;
-import java.util.Random;
 import java.util.Set;
 import java.util.StringJoiner;
 import java.util.concurrent.CountDownLatch;
@@ -234,7 +233,6 @@ public class LockSettingsService extends ILockSettings.Stub {
     private final SynchronizedStrongAuthTracker mStrongAuthTracker;
     private final BiometricDeferredQueue mBiometricDeferredQueue;
     private final LongSparseArray<byte[]> mGatekeeperPasswords;
-    private final Random mRandom;
 
     private final NotificationManager mNotificationManager;
     protected final UserManager mUserManager;
@@ -348,23 +346,17 @@ public class LockSettingsService extends ILockSettings.Stub {
     }
 
     private LockscreenCredential generateRandomProfilePassword() {
-        byte[] randomLockSeed = new byte[] {};
-        try {
-            randomLockSeed = SecureRandom.getInstance("SHA1PRNG").generateSeed(40);
-            char[] newPasswordChars = HexEncoding.encode(randomLockSeed);
-            byte[] newPassword = new byte[newPasswordChars.length];
-            for (int i = 0; i < newPasswordChars.length; i++) {
-                newPassword[i] = (byte) newPasswordChars[i];
-            }
-            LockscreenCredential credential =
-                    LockscreenCredential.createManagedPassword(newPassword);
-            Arrays.fill(newPasswordChars, '\u0000');
-            Arrays.fill(newPassword, (byte) 0);
-            Arrays.fill(randomLockSeed, (byte) 0);
-            return credential;
-        } catch (NoSuchAlgorithmException e) {
-            throw new IllegalStateException("Fail to generate profile password", e);
+        byte[] randomLockSeed = SecureRandomUtils.randomBytes(40);
+        char[] newPasswordChars = HexEncoding.encode(randomLockSeed);
+        byte[] newPassword = new byte[newPasswordChars.length];
+        for (int i = 0; i < newPasswordChars.length; i++) {
+            newPassword[i] = (byte) newPasswordChars[i];
         }
+        LockscreenCredential credential = LockscreenCredential.createManagedPassword(newPassword);
+        Arrays.fill(newPasswordChars, '\u0000');
+        Arrays.fill(newPassword, (byte) 0);
+        Arrays.fill(randomLockSeed, (byte) 0);
+        return credential;
     }
 
     /**
@@ -597,7 +589,6 @@ public class LockSettingsService extends ILockSettings.Stub {
         mStrongAuthTracker = injector.getStrongAuthTracker();
         mStrongAuthTracker.register(mStrongAuth);
         mGatekeeperPasswords = new LongSparseArray<>();
-        mRandom = new SecureRandom();
 
         mSpManager = injector.getSyntheticPasswordManager(mStorage);
         mManagedProfilePasswordCache = injector.getManagedProfilePasswordCache(mJavaKeyStore);
@@ -1752,14 +1743,9 @@ public class LockSettingsService extends ILockSettings.Stub {
     private String getSalt(int userId) {
         long salt = getLong(LockPatternUtils.LOCK_PASSWORD_SALT_KEY, 0, userId);
         if (salt == 0) {
-            try {
-                salt = SecureRandom.getInstance("SHA1PRNG").nextLong();
-                setLong(LockPatternUtils.LOCK_PASSWORD_SALT_KEY, salt, userId);
-                Slog.v(TAG, "Initialized lock password salt for user: " + userId);
-            } catch (NoSuchAlgorithmException e) {
-                // Throw an exception rather than storing a password we'll never be able to recover
-                throw new IllegalStateException("Couldn't get SecureRandom number", e);
-            }
+            salt = SecureRandomUtils.randomLong();
+            setLong(LockPatternUtils.LOCK_PASSWORD_SALT_KEY, salt, userId);
+            Slog.v(TAG, "Initialized lock password salt for user: " + userId);
         }
         return Long.toHexString(salt);
     }
@@ -2644,7 +2630,7 @@ public class LockSettingsService extends ILockSettings.Stub {
 
         synchronized (mGatekeeperPasswords) {
             while (handle == 0L || mGatekeeperPasswords.get(handle) != null) {
-                handle = mRandom.nextLong();
+                handle = SecureRandomUtils.randomLong();
             }
             mGatekeeperPasswords.put(handle, gatekeeperPassword);
         }

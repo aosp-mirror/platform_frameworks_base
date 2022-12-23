@@ -40,6 +40,7 @@ import android.app.Activity;
 import android.app.ActivityManager;
 import android.app.BroadcastOptions;
 import android.app.GameManager;
+import android.app.GrammaticalInflectionManager;
 import android.app.IApplicationThread;
 import android.app.IServiceConnection;
 import android.app.VrManager;
@@ -3973,6 +3974,8 @@ public abstract class Context {
             CREDENTIAL_SERVICE,
             DEVICE_LOCK_SERVICE,
             VIRTUALIZATION_SERVICE,
+            GRAMMATICAL_INFLECTION_SERVICE,
+
     })
     @Retention(RetentionPolicy.SOURCE)
     public @interface ServiceName {}
@@ -5784,7 +5787,6 @@ public abstract class Context {
      *
      * @see #getSystemService(String)
      * @see android.content.om.OverlayManager
-     * @hide
      */
     public static final String OVERLAY_SERVICE = "overlay";
 
@@ -6168,6 +6170,14 @@ public abstract class Context {
      */
     @SystemApi
     public static final String VIRTUALIZATION_SERVICE = "virtualization";
+
+    /**
+     * Use with {@link #getSystemService(String)} to retrieve a
+     * {@link GrammaticalInflectionManager}.
+     *
+     * @see #getSystemService(String)
+     */
+    public static final String GRAMMATICAL_INFLECTION_SERVICE = "grammatical_inflection";
 
     /**
      * Determine whether the given permission is allowed for a particular
@@ -7281,7 +7291,9 @@ public abstract class Context {
      * Updates the device ID association of this Context. Since a Context created with
      * {@link #createDeviceContext} cannot change its device association, this method must
      * not be called for instances created with {@link #createDeviceContext}.
-     *
+     *<p>
+     * Note that updating the deviceId of the Context will not update its associated display.
+     *</p>
      * @param deviceId The new device ID to assign to this Context.
      * @throws UnsupportedOperationException if the method is called on an instance that was
      *         created with {@link Context#createDeviceContext(int)}

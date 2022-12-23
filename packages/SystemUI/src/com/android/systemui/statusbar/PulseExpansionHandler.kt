@@ -22,7 +22,6 @@ import android.animation.ValueAnimator
 import android.content.Context
 import android.content.res.Configuration
 import android.os.PowerManager
-import android.os.PowerManager.WAKE_REASON_GESTURE
 import android.os.SystemClock
 import android.util.IndentingPrintWriter
 import android.view.MotionEvent
@@ -249,7 +248,7 @@ constructor(
         }
         if (statusBarStateController.isDozing) {
             wakeUpCoordinator.willWakeUp = true
-            mPowerManager!!.wakeUp(SystemClock.uptimeMillis(), WAKE_REASON_GESTURE,
+            mPowerManager!!.wakeUp(SystemClock.uptimeMillis(), PowerManager.WAKE_REASON_GESTURE,
                     "com.android.systemui:PULSEDRAG")
         }
         lockscreenShadeTransitionController.goToLockedShade(startingChild,

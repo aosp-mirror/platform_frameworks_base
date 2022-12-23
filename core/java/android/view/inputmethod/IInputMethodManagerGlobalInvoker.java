@@ -40,6 +40,7 @@ import com.android.internal.inputmethod.InputBindResult;
 import com.android.internal.inputmethod.SoftInputShowHideReason;
 import com.android.internal.inputmethod.StartInputFlags;
 import com.android.internal.inputmethod.StartInputReason;
+import com.android.internal.view.IImeTracker;
 import com.android.internal.view.IInputMethodManager;
 
 import java.util.ArrayList;
@@ -60,6 +61,9 @@ import java.util.function.Consumer;
 final class IInputMethodManagerGlobalInvoker {
     @Nullable
     private static volatile IInputMethodManager sServiceCache = null;
+
+    @Nullable
+    private static volatile IImeTracker sTrackerServiceCache = null;
 
     /**
      * @return {@code true} if {@link IInputMethodManager} is available.
@@ -526,5 +530,138 @@ final class IInputMethodManagerGlobalInvoker {
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }
+    }
+
+    @AnyThread
+    @Nullable
+    static IBinder onRequestShow(int uid, @ImeTracker.Origin int origin,
+            @SoftInputShowHideReason int reason) {
+        final IImeTracker service = getImeTrackerService();
+        if (service == null) {
+            return null;
+        }
+        try {
+            return service.onRequestShow(uid, origin, reason);
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
+    @AnyThread
+    @Nullable
+    static IBinder onRequestHide(int uid, @ImeTracker.Origin int origin,
+            @SoftInputShowHideReason int reason) {
+        final IImeTracker service = getImeTrackerService();
+        if (service == null) {
+            return null;
+        }
+        try {
+            return service.onRequestHide(uid, origin, reason);
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
+    @AnyThread
+    static void onProgress(@NonNull IBinder statsToken, @ImeTracker.Phase int phase) {
+        final IImeTracker service = getImeTrackerService();
+        if (service == null) {
+            return;
+        }
+        try {
+            service.onProgress(statsToken, phase);
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
+    @AnyThread
+    static void onFailed(@NonNull IBinder statsToken, @ImeTracker.Phase int phase) {
+        final IImeTracker service = getImeTrackerService();
+        if (service == null) {
+            return;
+        }
+        try {
+            service.onFailed(statsToken, phase);
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
+    @AnyThread
+    static void onCancelled(@NonNull IBinder statsToken, @ImeTracker.Phase int phase) {
+        final IImeTracker service = getImeTrackerService();
+        if (service == null) {
+            return;
+        }
+        try {
+            service.onCancelled(statsToken, phase);
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
+    @AnyThread
+    static void onShown(@NonNull IBinder statsToken) {
+        final IImeTracker service = getImeTrackerService();
+        if (service == null) {
+            return;
+        }
+        try {
+            service.onShown(statsToken);
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
+    @AnyThread
+    static void onHidden(@NonNull IBinder statsToken) {
+        final IImeTracker service = getImeTrackerService();
+        if (service == null) {
+            return;
+        }
+        try {
+            service.onHidden(statsToken);
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
+    @AnyThread
+    @RequiresPermission(Manifest.permission.TEST_INPUT_METHOD)
+    static boolean hasPendingImeVisibilityRequests() {
+        final var service = getImeTrackerService();
+        if (service == null) {
+            return true;
+        }
+        try {
+            return service.hasPendingImeVisibilityRequests();
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
+    @AnyThread
+    @Nullable
+    private static IImeTracker getImeTrackerService() {
+        var trackerService = sTrackerServiceCache;
+        if (trackerService == null) {
+            final var service = getService();
+            if (service == null) {
+                return null;
+            }
+
+            try {
+                trackerService = service.getImeTrackerService();
+                if (trackerService == null) {
+                    return null;
+                }
+
+                sTrackerServiceCache = trackerService;
+            } catch (RemoteException e) {
+                throw e.rethrowFromSystemServer();
+            }
+        }
+        return trackerService;
     }
 }

@@ -24,10 +24,8 @@ import android.telephony.TelephonyManager.DATA_ACTIVITY_NONE
 import android.telephony.TelephonyManager.DATA_ACTIVITY_OUT
 import com.android.settingslib.SignalIcon.MobileIconGroup
 import com.android.settingslib.mobile.TelephonyIcons
-import com.android.systemui.common.coroutine.ConflatedCallbackFlow.conflatedCallbackFlow
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.dagger.qualifiers.Application
-import com.android.systemui.demomode.DemoMode
 import com.android.systemui.demomode.DemoMode.COMMAND_NETWORK
 import com.android.systemui.demomode.DemoModeController
 import com.android.systemui.statusbar.pipeline.mobile.data.repository.demo.model.FakeNetworkEventModel
@@ -35,8 +33,6 @@ import com.android.systemui.statusbar.pipeline.mobile.data.repository.demo.model
 import com.android.systemui.statusbar.pipeline.mobile.data.repository.demo.model.FakeNetworkEventModel.MobileDisabled
 import javax.inject.Inject
 import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.channels.awaitClose
-import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.shareIn
@@ -52,27 +48,7 @@ constructor(
     demoModeController: DemoModeController,
     @Application scope: CoroutineScope,
 ) {
-    private val demoCommandStream: Flow<Bundle> = conflatedCallbackFlow {
-        val callback =
-            object : DemoMode {
-                override fun demoCommands(): List<String> = listOf(COMMAND_NETWORK)
-
-                override fun dispatchDemoCommand(command: String, args: Bundle) {
-                    trySend(args)
-                }
-
-                override fun onDemoModeFinished() {
-                    // Handled elsewhere
-                }
-
-                override fun onDemoModeStarted() {
-                    // Handled elsewhere
-                }
-            }
-
-        demoModeController.addCallback(callback)
-        awaitClose { demoModeController.removeCallback(callback) }
-    }
+    private val demoCommandStream = demoModeController.demoFlowForCommand(COMMAND_NETWORK)
 
     // If the args contains "mobile", then all of the args are relevant. It's just the way demo mode
     // commands work and it's a little silly

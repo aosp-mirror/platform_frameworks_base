@@ -176,6 +176,7 @@ import com.android.internal.os.TransferPipe;
 import com.android.internal.util.ArrayUtils;
 import com.android.internal.util.ConcurrentUtils;
 import com.android.internal.util.DumpUtils;
+import com.android.internal.view.IImeTracker;
 import com.android.internal.view.IInputMethodManager;
 import com.android.server.AccessibilityManagerInternal;
 import com.android.server.EventLogTags;
@@ -198,11 +199,12 @@ import java.io.IOException;
 import java.io.PrintWriter;
 import java.lang.annotation.Retention;
 import java.security.InvalidParameterException;
-import java.text.SimpleDateFormat;
+import java.time.Instant;
+import java.time.ZoneId;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
-import java.util.Date;
 import java.util.List;
 import java.util.Locale;
 import java.util.Objects;
@@ -919,8 +921,9 @@ public final class InputMethodManagerService extends IInputMethodManager.Stub
         }
 
         void dump(@NonNull PrintWriter pw, @NonNull String prefix) {
-            final SimpleDateFormat dataFormat =
-                    new SimpleDateFormat("yyyy-MM-dd HH:mm:ss.SSS", Locale.US);
+            final DateTimeFormatter formatter =
+                    DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss.SSS", Locale.US)
+                            .withZone(ZoneId.systemDefault());
 
             for (int i = 0; i < mEntries.length; ++i) {
                 final Entry entry = mEntries[(i + mNextIndex) % mEntries.length];
@@ -931,7 +934,7 @@ public final class InputMethodManagerService extends IInputMethodManager.Stub
                 pw.println("SoftInputShowHideHistory #" + entry.mSequenceNumber + ":");
 
                 pw.print(prefix);
-                pw.println(" time=" + dataFormat.format(new Date(entry.mWallTime))
+                pw.println(" time=" + formatter.format(Instant.ofEpochMilli(entry.mWallTime))
                         + " (timestamp=" + entry.mTimestamp + ")");
 
                 pw.print(prefix);
@@ -999,7 +1002,7 @@ public final class InputMethodManagerService extends IInputMethodManager.Stub
         private static final int ENTRY_SIZE_FOR_HIGH_RAM_DEVICE = 32;
 
         /**
-         * Entry size for non low-RAM devices.
+         * Entry size for low-RAM devices.
          *
          * <p>TODO: Consider to follow what other system services have been doing to manage
          * constants (e.g. {@link android.provider.Settings.Global#ACTIVITY_MANAGER_CONSTANTS}).</p>
@@ -1015,7 +1018,7 @@ public final class InputMethodManagerService extends IInputMethodManager.Stub
         }
 
         /**
-         * Backing store for the ring bugger.
+         * Backing store for the ring buffer.
          */
         private final Entry[] mEntries = new Entry[getEntrySize()];
 
@@ -1095,8 +1098,9 @@ public final class InputMethodManagerService extends IInputMethodManager.Stub
         }
 
         void dump(@NonNull PrintWriter pw, @NonNull String prefix) {
-            final SimpleDateFormat dataFormat =
-                    new SimpleDateFormat("yyyy-MM-dd HH:mm:ss.SSS", Locale.US);
+            final DateTimeFormatter formatter =
+                    DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss.SSS", Locale.US)
+                            .withZone(ZoneId.systemDefault());
 
             for (int i = 0; i < mEntries.length; ++i) {
                 final Entry entry = mEntries[(i + mNextIndex) % mEntries.length];
@@ -1107,7 +1111,7 @@ public final class InputMethodManagerService extends IInputMethodManager.Stub
                 pw.println("StartInput #" + entry.mSequenceNumber + ":");
 
                 pw.print(prefix);
-                pw.println(" time=" + dataFormat.format(new Date(entry.mWallTime))
+                pw.println(" time=" + formatter.format(Instant.ofEpochMilli(entry.mWallTime))
                         + " (timestamp=" + entry.mTimestamp + ")"
                         + " reason="
                         + InputMethodDebug.startInputReasonToString(entry.mStartInputReason)
@@ -1148,6 +1152,9 @@ public final class InputMethodManagerService extends IInputMethodManager.Stub
     @NonNull
     private final SoftInputShowHideHistory mSoftInputShowHideHistory =
             new SoftInputShowHideHistory();
+
+    @NonNull
+    private final ImeTrackerService mImeTrackerService = new ImeTrackerService();
 
     class SettingsObserver extends ContentObserver {
         int mUserId;
@@ -3405,13 +3412,11 @@ public final class InputMethodManagerService extends IInputMethodManager.Stub
             ResultReceiver resultReceiver, @SoftInputShowHideReason int reason) {
         // Create statsToken is none exists.
         if (statsToken == null) {
-            String packageName = null;
-            if (mCurEditorInfo != null) {
-                packageName = mCurEditorInfo.packageName;
-            }
-            statsToken = new ImeTracker.Token(packageName);
-            ImeTracker.get().onRequestShow(statsToken, ImeTracker.ORIGIN_SERVER_START_INPUT,
-                    reason);
+            // TODO(b/261565259): to avoid using null, add package name in ClientState
+            final String packageName = (mCurEditorInfo != null) ? mCurEditorInfo.packageName : null;
+            final int uid = mCurClient != null ? mCurClient.mUid : -1;
+            statsToken = ImeTracker.get().onRequestShow(packageName, uid,
+                    ImeTracker.ORIGIN_SERVER_START_INPUT, reason);
         }
 
         mShowRequested = true;
@@ -3461,7 +3466,7 @@ public final class InputMethodManagerService extends IInputMethodManager.Stub
                             InputMethodDebug.softInputDisplayReasonToString(reason),
                             InputMethodDebug.softInputModeToString(mCurFocusedWindowSoftInputMode));
                 }
-                onShowHideSoftInputRequested(true /* show */, windowToken, reason);
+                onShowHideSoftInputRequested(true /* show */, windowToken, reason, statsToken);
             }
             mInputShown = true;
             return true;
@@ -3508,12 +3513,18 @@ public final class InputMethodManagerService extends IInputMethodManager.Stub
             int flags, ResultReceiver resultReceiver, @SoftInputShowHideReason int reason) {
         // Create statsToken is none exists.
         if (statsToken == null) {
-            String packageName = null;
-            if (mCurEditorInfo != null) {
-                packageName = mCurEditorInfo.packageName;
+            // TODO(b/261565259): to avoid using null, add package name in ClientState
+            final String packageName = (mCurEditorInfo != null) ? mCurEditorInfo.packageName : null;
+            final int uid;
+            if (mCurClient != null) {
+                uid = mCurClient.mUid;
+            } else if (mCurFocusedWindowClient != null) {
+                uid = mCurFocusedWindowClient.mUid;
+            } else {
+                uid = -1;
             }
-            statsToken = new ImeTracker.Token(packageName);
-            ImeTracker.get().onRequestHide(statsToken, ImeTracker.ORIGIN_SERVER_HIDE_INPUT, reason);
+            statsToken = ImeTracker.get().onRequestHide(packageName, uid,
+                    ImeTracker.ORIGIN_SERVER_HIDE_INPUT, reason);
         }
 
         if ((flags & InputMethodManager.HIDE_IMPLICIT_ONLY) != 0
@@ -3565,7 +3576,7 @@ public final class InputMethodManagerService extends IInputMethodManager.Stub
                             InputMethodDebug.softInputDisplayReasonToString(reason),
                             InputMethodDebug.softInputModeToString(mCurFocusedWindowSoftInputMode));
                 }
-                onShowHideSoftInputRequested(false /* show */, windowToken, reason);
+                onShowHideSoftInputRequested(false /* show */, windowToken, reason, statsToken);
             }
             res = true;
         } else {
@@ -4781,6 +4792,7 @@ public final class InputMethodManagerService extends IInputMethodManager.Stub
         Trace.traceBegin(TRACE_TAG_WINDOW_MANAGER, "IMMS.applyImeVisibility");
         synchronized (ImfLock.class) {
             if (!calledWithValidTokenLocked(token)) {
+                ImeTracker.get().onFailed(statsToken, ImeTracker.PHASE_SERVER_APPLY_IME_VISIBILITY);
                 return;
             }
             if (!setVisible) {
@@ -4846,7 +4858,7 @@ public final class InputMethodManagerService extends IInputMethodManager.Stub
     /** Called right after {@link com.android.internal.inputmethod.IInputMethod#showSoftInput}. */
     @GuardedBy("ImfLock.class")
     private void onShowHideSoftInputRequested(boolean show, IBinder requestToken,
-            @SoftInputShowHideReason int reason) {
+            @SoftInputShowHideReason int reason, @Nullable ImeTracker.Token statsToken) {
         final WindowManagerInternal.ImeTargetInfo info =
                 mWindowManagerInternal.onToggleImeRequested(
                         show, mCurFocusedWindow, requestToken, mCurTokenDisplayId);
@@ -4855,6 +4867,8 @@ public final class InputMethodManagerService extends IInputMethodManager.Stub
                 mCurFocusedWindowSoftInputMode, reason, mInFullscreenMode,
                 info.requestWindowName, info.imeControlTargetName, info.imeLayerTargetName,
                 info.imeSurfaceParentName));
+
+        mImeTrackerService.onImmsUpdate(statsToken.mBinder, info.requestWindowName);
     }
 
     @BinderThread
@@ -5994,6 +6008,9 @@ public final class InputMethodManagerService extends IInputMethodManager.Stub
 
             p.println("  mSoftInputShowHideHistory:");
             mSoftInputShowHideHistory.dump(pw, "   ");
+
+            p.println("  mImeTrackerService#History:");
+            mImeTrackerService.dump(pw, "   ");
         }
 
         // Exit here for critical dump, as remaining sections require IPCs to other processes.
@@ -6582,6 +6599,12 @@ public final class InputMethodManagerService extends IInputMethodManager.Stub
             return false;
         }
         return true;
+    }
+
+    /** @hide */
+    @Override
+    public IImeTracker getImeTrackerService() {
+        return mImeTrackerService;
     }
 
     private static final class InputMethodPrivilegedOperationsImpl

@@ -146,13 +146,19 @@ fun PrimarySelectionCard(
                 textAlign = TextAlign.Center,
                 style = MaterialTheme.typography.headlineSmall,
                 text = stringResource(
-                    if (sortedUserNameToCredentialEntryList.size == 1) {
-                        if (sortedUserNameToCredentialEntryList.first().sortedCredentialEntryList
-                                .first().credentialType
+                    if (sortedUserNameToCredentialEntryList
+                            .size == 1 && authenticationEntryList.isEmpty()
+                    ) {
+                        if (sortedUserNameToCredentialEntryList.first()
+                                .sortedCredentialEntryList.first().credentialType
                             == PublicKeyCredential.TYPE_PUBLIC_KEY_CREDENTIAL
-                        )
-                            R.string.get_dialog_title_use_passkey_for
+                        ) R.string.get_dialog_title_use_passkey_for
                         else R.string.get_dialog_title_use_sign_in_for
+                    } else if (
+                        sortedUserNameToCredentialEntryList
+                            .isEmpty() && authenticationEntryList.size == 1
+                    ) {
+                        R.string.get_dialog_title_use_sign_in_for
                     } else R.string.get_dialog_title_choose_sign_in_for,
                     requestDisplayInfo.appDomainName
                 ),
@@ -164,20 +170,46 @@ fun PrimarySelectionCard(
                     .padding(horizontal = 24.dp)
                     .align(alignment = Alignment.CenterHorizontally)
             ) {
+                val usernameForCredentialSize = sortedUserNameToCredentialEntryList
+                    .size
+                val authenticationEntrySize = authenticationEntryList.size
                 LazyColumn(
                     verticalArrangement = Arrangement.spacedBy(2.dp)
                 ) {
-                    items(sortedUserNameToCredentialEntryList) {
-                        CredentialEntryRow(
-                            credentialEntryInfo = it.sortedCredentialEntryList.first(),
-                            onEntrySelected = onEntrySelected,
-                        )
-                    }
-                    items(authenticationEntryList) {
-                        AuthenticationEntryRow(
-                            authenticationEntryInfo = it,
-                            onEntrySelected = onEntrySelected,
-                        )
+                    // Show max 4 entries in this primary page
+                    if (usernameForCredentialSize + authenticationEntrySize <= 4) {
+                        items(sortedUserNameToCredentialEntryList) {
+                            CredentialEntryRow(
+                                credentialEntryInfo = it.sortedCredentialEntryList.first(),
+                                onEntrySelected = onEntrySelected,
+                            )
+                        }
+                        items(authenticationEntryList) {
+                            AuthenticationEntryRow(
+                                authenticationEntryInfo = it,
+                                onEntrySelected = onEntrySelected,
+                            )
+                        }
+                    } else if (usernameForCredentialSize < 4) {
+                        items(sortedUserNameToCredentialEntryList) {
+                            CredentialEntryRow(
+                                credentialEntryInfo = it.sortedCredentialEntryList.first(),
+                                onEntrySelected = onEntrySelected,
+                            )
+                        }
+                        items(authenticationEntryList.take(4 - usernameForCredentialSize)) {
+                            AuthenticationEntryRow(
+                                authenticationEntryInfo = it,
+                                onEntrySelected = onEntrySelected,
+                            )
+                        }
+                    } else {
+                        items(sortedUserNameToCredentialEntryList.take(4)) {
+                            CredentialEntryRow(
+                                credentialEntryInfo = it.sortedCredentialEntryList.first(),
+                                onEntrySelected = onEntrySelected,
+                            )
+                        }
                     }
                 }
             }
@@ -257,7 +289,7 @@ fun AllSignInOptionCard(
                         )
                     }
                     // Locked password manager
-                    if (!authenticationEntryList.isEmpty()) {
+                    if (authenticationEntryList.isNotEmpty()) {
                         item {
                             LockedCredentials(
                                 authenticationEntryList = authenticationEntryList,

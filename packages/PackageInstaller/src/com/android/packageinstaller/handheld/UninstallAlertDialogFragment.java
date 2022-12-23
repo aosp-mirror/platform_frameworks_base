@@ -16,10 +16,10 @@
 
 package com.android.packageinstaller.handheld;
 
+import static android.os.UserManager.USER_TYPE_PROFILE_CLONE;
+import static android.os.UserManager.USER_TYPE_PROFILE_MANAGED;
 import static android.text.format.Formatter.formatFileSize;
 
-import android.annotation.NonNull;
-import android.annotation.Nullable;
 import android.app.AlertDialog;
 import android.app.Dialog;
 import android.app.DialogFragment;
@@ -29,7 +29,6 @@ import android.content.DialogInterface;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
-import android.content.pm.UserInfo;
 import android.os.Bundle;
 import android.os.Process;
 import android.os.UserHandle;
@@ -40,6 +39,9 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.CheckBox;
 import android.widget.TextView;
+
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 
 import com.android.packageinstaller.R;
 import com.android.packageinstaller.UninstallerActivity;
@@ -91,11 +93,11 @@ public class UninstallAlertDialogFragment extends DialogFragment implements
         long appDataSize = 0;
 
         if (user == null) {
-            List<UserInfo> users = userManager.getUsers();
+            List<UserHandle> userHandles = userManager.getUserHandles(true);
 
-            int numUsers = users.size();
+            int numUsers = userHandles.size();
             for (int i = 0; i < numUsers; i++) {
-                appDataSize += getAppDataSizeForUser(pkg, UserHandle.of(users.get(i).id));
+                appDataSize += getAppDataSizeForUser(pkg, userHandles.get(i));
             }
         } else {
             appDataSize = getAppDataSizeForUser(pkg, user);
@@ -128,7 +130,7 @@ public class UninstallAlertDialogFragment extends DialogFragment implements
         final boolean isUpdate =
                 ((dialogInfo.appInfo.flags & ApplicationInfo.FLAG_UPDATED_SYSTEM_APP) != 0);
         final UserHandle myUserHandle = Process.myUserHandle();
-        UserManager userManager = UserManager.get(getActivity());
+        UserManager userManager = getContext().getSystemService(UserManager.class);
         if (isUpdate) {
             if (isSingleUser(userManager)) {
                 messageBuilder.append(getString(R.string.uninstall_update_text));
@@ -139,20 +141,25 @@ public class UninstallAlertDialogFragment extends DialogFragment implements
             if (dialogInfo.allUsers && !isSingleUser(userManager)) {
                 messageBuilder.append(getString(R.string.uninstall_application_text_all_users));
             } else if (!dialogInfo.user.equals(myUserHandle)) {
-                UserInfo userInfo = userManager.getUserInfo(dialogInfo.user.getIdentifier());
-                if (userInfo.isManagedProfile()
-                        && userInfo.profileGroupId == myUserHandle.getIdentifier()) {
+                int userId = dialogInfo.user.getIdentifier();
+                UserManager customUserManager = getContext()
+                        .createContextAsUser(UserHandle.of(userId), 0)
+                        .getSystemService(UserManager.class);
+                String userName = customUserManager.getUserName();
+
+                if (customUserManager.isUserOfType(USER_TYPE_PROFILE_MANAGED)
+                        && customUserManager.isSameProfileGroup(dialogInfo.user, myUserHandle)) {
                     messageBuilder.append(
                             getString(R.string.uninstall_application_text_current_user_work_profile,
-                                    userInfo.name));
-                } else if (userInfo.isCloneProfile()
-                        && userInfo.profileGroupId == myUserHandle.getIdentifier()) {
+                                    userName));
+                } else if (customUserManager.isUserOfType(USER_TYPE_PROFILE_CLONE)
+                        && customUserManager.isSameProfileGroup(dialogInfo.user, myUserHandle)) {
                     isClonedApp = true;
                     messageBuilder.append(getString(
                             R.string.uninstall_application_text_current_user_clone_profile));
                 } else {
                     messageBuilder.append(
-                            getString(R.string.uninstall_application_text_user, userInfo.name));
+                            getString(R.string.uninstall_application_text_user, userName));
                 }
             } else if (isCloneProfile(myUserHandle)) {
                 isClonedApp = true;
@@ -238,8 +245,8 @@ public class UninstallAlertDialogFragment extends DialogFragment implements
         // Check if another instance of given package exists in clone user profile.
         if (cloneUser != null) {
             try {
-                if (getContext().getPackageManager()
-                        .getPackageUidAsUser(packageName, cloneUser.getIdentifier()) > 0) {
+                if (getContext().getPackageManager().getPackageUidAsUser(packageName,
+                        PackageManager.PackageInfoFlags.of(0), cloneUser.getIdentifier()) > 0) {
                     return true;
                 }
             } catch (PackageManager.NameNotFoundException e) {
@@ -273,7 +280,6 @@ public class UninstallAlertDialogFragment extends DialogFragment implements
      */
     private boolean isSingleUser(UserManager userManager) {
         final int userCount = userManager.getUserCount();
-        return userCount == 1
-                || (UserManager.isSplitSystemUser() && userCount == 2);
+        return userCount == 1 || (UserManager.isHeadlessSystemUserMode() && userCount == 2);
     }
 }

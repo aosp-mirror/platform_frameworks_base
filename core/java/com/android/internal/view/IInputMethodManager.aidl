@@ -27,6 +27,7 @@ import com.android.internal.inputmethod.IInputMethodClient;
 import com.android.internal.inputmethod.IRemoteAccessibilityInputConnection;
 import com.android.internal.inputmethod.IRemoteInputConnection;
 import com.android.internal.inputmethod.InputBindResult;
+import com.android.internal.view.IImeTracker;
 
 /**
  * Public interface to the global input method manager, used by all client
@@ -158,4 +159,10 @@ interface IInputMethodManager {
     @JavaPassthrough(annotation="@android.annotation.RequiresPermission(value = "
             + "android.Manifest.permission.TEST_INPUT_METHOD)")
     void setStylusWindowIdleTimeoutForTest(in IInputMethodClient client, long timeout);
+
+    /**
+     * Returns the singleton instance for the Ime Tracker Service.
+     * {@hide}
+     */
+    IImeTracker getImeTrackerService();
 }

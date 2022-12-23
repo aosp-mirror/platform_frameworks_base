@@ -172,11 +172,30 @@ public class BackupManagerMonitorUtilsTest {
                 .when(agent)
                 .getLoggerResults(any());
 
-        IBackupManagerMonitor result =
+        IBackupManagerMonitor monitor =
                 BackupManagerMonitorUtils.monitorAgentLoggingResults(
                         mMonitorMock, packageInfo, agent);
 
-        assertThat(result).isEqualTo(mMonitorMock);
+        assertCorrectBundleSentToMonitor(monitor);
+    }
+
+    @Test
+    public void sendAgentLoggingResults_fillsBundleCorrectly() throws Exception {
+        PackageInfo packageInfo = new PackageInfo();
+        packageInfo.packageName = "test.package";
+        List<BackupRestoreEventLogger.DataTypeResult> loggingResults = new ArrayList<>();
+        loggingResults.add(new BackupRestoreEventLogger.DataTypeResult("testLoggingResult"));
+
+        IBackupManagerMonitor monitor = BackupManagerMonitorUtils.sendAgentLoggingResults(
+                mMonitorMock, packageInfo, loggingResults);
+
+        assertCorrectBundleSentToMonitor(monitor);
+    }
+
+    private void assertCorrectBundleSentToMonitor(IBackupManagerMonitor monitor) throws Exception {
+
+
+        assertThat(monitor).isEqualTo(mMonitorMock);
         ArgumentCaptor<Bundle> bundleCaptor = ArgumentCaptor.forClass(Bundle.class);
         verify(mMonitorMock).onEvent(bundleCaptor.capture());
         Bundle eventBundle = bundleCaptor.getValue();

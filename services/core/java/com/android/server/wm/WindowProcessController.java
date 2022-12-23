@@ -52,6 +52,7 @@ import android.app.ActivityThread;
 import android.app.IApplicationThread;
 import android.app.ProfilerInfo;
 import android.app.servertransaction.ConfigurationChangeItem;
+import android.companion.virtual.VirtualDeviceManager;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.ActivityInfo;
@@ -206,6 +207,7 @@ public class WindowProcessController extends ConfigurationContainer<Configuratio
     /** Whether {@link #mLastReportedConfiguration} is deferred by the cached state. */
     private volatile boolean mHasCachedConfiguration;
 
+    private int mTopActivityDeviceId = VirtualDeviceManager.DEVICE_ID_DEFAULT;
     /**
      * Registered {@link DisplayArea} as a listener to override config changes. {@code null} if not
      * registered.
@@ -868,13 +870,13 @@ public class WindowProcessController extends ConfigurationContainer<Configuratio
     // TODO(b/199277729): Consider whether we need to add special casing for edge cases like
     //  activity-embeddings etc.
     void updateAppSpecificSettingsForAllActivitiesInPackage(String packageName, Integer nightMode,
-            LocaleList localesOverride) {
+            LocaleList localesOverride, @Configuration.GrammaticalGender int gender) {
         for (int i = mActivities.size() - 1; i >= 0; --i) {
             final ActivityRecord r = mActivities.get(i);
             // Activities from other packages could be sharing this process. Only propagate updates
             // to those activities that are part of the package whose app-specific settings changed
             if (packageName.equals(r.packageName)
-                    && r.applyAppSpecificConfig(nightMode, localesOverride)
+                    && r.applyAppSpecificConfig(nightMode, localesOverride, gender)
                     && r.isVisibleRequested()) {
                 r.ensureActivityConfiguration(0 /* globalChanges */, true /* preserveWindow */);
             }
@@ -1381,8 +1383,16 @@ public class WindowProcessController extends ConfigurationContainer<Configuratio
     @Override
     public void onConfigurationChanged(Configuration newGlobalConfig) {
         super.onConfigurationChanged(newGlobalConfig);
+
+        // If deviceId for the top-activity changed, schedule passing it to the app process.
+        boolean topActivityDeviceChanged = false;
+        int deviceId = getTopActivityDeviceId();
+        if (deviceId != mTopActivityDeviceId) {
+            topActivityDeviceChanged = true;
+        }
+
         final Configuration config = getConfiguration();
-        if (mLastReportedConfiguration.equals(config)) {
+        if (mLastReportedConfiguration.equals(config) & !topActivityDeviceChanged) {
             // Nothing changed.
             if (Build.IS_DEBUGGABLE && mHasImeService) {
                 // TODO (b/135719017): Temporary log for debugging IME service.
@@ -1396,7 +1406,34 @@ public class WindowProcessController extends ConfigurationContainer<Configuratio
             mHasPendingConfigurationChange = true;
             return;
         }
-        dispatchConfiguration(config);
+
+        // TODO(b/263402938): Add tests that capture the deviceId dispatch to the client.
+        mTopActivityDeviceId = deviceId;
+        dispatchConfiguration(config, topActivityDeviceChanged ? mTopActivityDeviceId
+                : VirtualDeviceManager.DEVICE_ID_INVALID);
+    }
+
+    private int getTopActivityDeviceId() {
+        ActivityRecord topActivity = getTopNonFinishingActivity();
+        int updatedDeviceId = mTopActivityDeviceId;
+        if (topActivity != null && topActivity.mDisplayContent != null) {
+            updatedDeviceId = mAtm.mTaskSupervisor.getDeviceIdForDisplayId(
+                    topActivity.mDisplayContent.mDisplayId);
+        }
+        return updatedDeviceId;
+    }
+
+    @Nullable
+    private ActivityRecord getTopNonFinishingActivity() {
+        if (mActivities.isEmpty()) {
+            return null;
+        }
+        for (int i = mActivities.size() - 1; i >= 0; i--) {
+            if (!mActivities.get(i).finishing) {
+                return mActivities.get(i);
+            }
+        }
+        return null;
     }
 
     @Override
@@ -1423,6 +1460,10 @@ public class WindowProcessController extends ConfigurationContainer<Configuratio
     }
 
     void dispatchConfiguration(Configuration config) {
+        dispatchConfiguration(config, getTopActivityDeviceId());
+    }
+
+    void dispatchConfiguration(Configuration config, int deviceId) {
         mHasPendingConfigurationChange = false;
         if (mThread == null) {
             if (Build.IS_DEBUGGABLE && mHasImeService) {
@@ -1449,10 +1490,16 @@ public class WindowProcessController extends ConfigurationContainer<Configuratio
             }
         }
 
-        scheduleConfigurationChange(mThread, config);
+        scheduleConfigurationChange(mThread, config, deviceId);
     }
 
     private void scheduleConfigurationChange(IApplicationThread thread, Configuration config) {
+        // By default send invalid deviceId as no-op signal so it's not updated on the client side.
+        scheduleConfigurationChange(thread, config, VirtualDeviceManager.DEVICE_ID_INVALID);
+    }
+
+    private void scheduleConfigurationChange(IApplicationThread thread, Configuration config,
+            int deviceId) {
         ProtoLog.v(WM_DEBUG_CONFIGURATION, "Sending to proc %s new config %s", mName,
                 config);
         if (Build.IS_DEBUGGABLE && mHasImeService) {
@@ -1462,7 +1509,7 @@ public class WindowProcessController extends ConfigurationContainer<Configuratio
         mHasCachedConfiguration = false;
         try {
             mAtm.getLifecycleManager().scheduleTransaction(thread,
-                    ConfigurationChangeItem.obtain(config));
+                    ConfigurationChangeItem.obtain(config, deviceId));
         } catch (Exception e) {
             Slog.e(TAG_CONFIGURATION, "Failed to schedule configuration change: " + mOwner, e);
         }

@@ -41,6 +41,7 @@ class AppOpsController(
     context: Context,
     private val app: ApplicationInfo,
     private val op: Int,
+    private val setModeByUid: Boolean = false,
 ) : IAppOpsController {
     private val appOpsManager = context.appOpsManager
 
@@ -49,7 +50,11 @@ class AppOpsController(
 
     override fun setAllowed(allowed: Boolean) {
         val mode = if (allowed) MODE_ALLOWED else MODE_ERRORED
-        appOpsManager.setMode(op, app.uid, app.packageName, mode)
+        if (setModeByUid) {
+            appOpsManager.setUidMode(op, app.uid, mode)
+        } else {
+            appOpsManager.setMode(op, app.uid, app.packageName, mode)
+        }
         _mode.postValue(mode)
     }
 

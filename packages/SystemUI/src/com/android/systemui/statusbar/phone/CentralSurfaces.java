@@ -25,6 +25,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.os.Bundle;
+import android.os.PowerManager;
 import android.os.UserHandle;
 import android.service.notification.StatusBarNotification;
 import android.view.KeyEvent;
@@ -205,7 +206,10 @@ public interface CentralSurfaces extends Dumpable, ActivityStarter, LifecycleOwn
     @Override
     Lifecycle getLifecycle();
 
-    void wakeUpIfDozing(long time, View where, String why);
+    /**
+     * Wakes up the device if the device was dozing.
+     */
+    void wakeUpIfDozing(long time, View where, String why, @PowerManager.WakeReason int wakeReason);
 
     NotificationShadeWindowView getNotificationShadeWindowView();
 

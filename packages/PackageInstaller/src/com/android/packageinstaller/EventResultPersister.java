@@ -16,8 +16,6 @@
 
 package com.android.packageinstaller;
 
-import android.annotation.NonNull;
-import android.annotation.Nullable;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageInstaller;
@@ -26,6 +24,9 @@ import android.util.AtomicFile;
 import android.util.Log;
 import android.util.SparseArray;
 import android.util.Xml;
+
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 
 import org.xmlpull.v1.XmlPullParser;
 import org.xmlpull.v1.XmlPullParserException;
@@ -40,17 +41,18 @@ import java.nio.charset.StandardCharsets;
 /**
  * Persists results of events and calls back observers when a matching result arrives.
  */
-class EventResultPersister {
+public class EventResultPersister {
     private static final String LOG_TAG = EventResultPersister.class.getSimpleName();
 
     /** Id passed to {@link #addObserver(int, EventResultObserver)} to generate new id */
-    static final int GENERATE_NEW_ID = Integer.MIN_VALUE;
+    public static final int GENERATE_NEW_ID = Integer.MIN_VALUE;
 
     /**
      * The extra with the id to set in the intent delivered to
      * {@link #onEventReceived(Context, Intent)}
      */
-    static final String EXTRA_ID = "EventResultPersister.EXTRA_ID";
+    public static final String EXTRA_ID = "EventResultPersister.EXTRA_ID";
+    public static final String EXTRA_SERVICE_ID = "EventResultPersister.EXTRA_SERVICE_ID";
 
     /** Persisted state of this object */
     private final AtomicFile mResultsFile;
@@ -89,8 +91,8 @@ class EventResultPersister {
     }
 
     /** Call back when a result is received. Observer is removed when onResult it called. */
-    interface EventResultObserver {
-        void onResult(int status, int legacyStatus, @Nullable String message);
+    public interface EventResultObserver {
+        void onResult(int status, int legacyStatus, @Nullable String message, int serviceId);
     }
 
     /**
@@ -153,12 +155,14 @@ class EventResultPersister {
                     int status = readIntAttribute(parser, "status");
                     int legacyStatus = readIntAttribute(parser, "legacyStatus");
                     String statusMessage = readStringAttribute(parser, "statusMessage");
+                    int serviceId = readIntAttribute(parser, "serviceId");
 
                     if (mResults.get(id) != null) {
                         throw new Exception("id " + id + " has two results");
                     }
 
-                    mResults.put(id, new EventResult(status, legacyStatus, statusMessage));
+                    mResults.put(id, new EventResult(status, legacyStatus, statusMessage,
+                            serviceId));
                 } else {
                     throw new Exception("unexpected tag");
                 }
@@ -190,6 +194,7 @@ class EventResultPersister {
         int id = intent.getIntExtra(EXTRA_ID, 0);
         String statusMessage = intent.getStringExtra(PackageInstaller.EXTRA_STATUS_MESSAGE);
         int legacyStatus = intent.getIntExtra(PackageInstaller.EXTRA_LEGACY_STATUS, 0);
+        int serviceId = intent.getIntExtra(EXTRA_SERVICE_ID, 0);
 
         EventResultObserver observerToCall = null;
         synchronized (mLock) {
@@ -204,9 +209,9 @@ class EventResultPersister {
             }
 
             if (observerToCall != null) {
-                observerToCall.onResult(status, legacyStatus, statusMessage);
+                observerToCall.onResult(status, legacyStatus, statusMessage, serviceId);
             } else {
-                mResults.put(id, new EventResult(status, legacyStatus, statusMessage));
+                mResults.put(id, new EventResult(status, legacyStatus, statusMessage, serviceId));
                 writeState();
             }
         }
@@ -258,6 +263,8 @@ class EventResultPersister {
                                     serializer.attribute(null, "statusMessage",
                                             results.valueAt(i).message);
                                 }
+                                serializer.attribute(null, "serviceId",
+                                        Integer.toString(results.valueAt(i).serviceId));
                                 serializer.endTag(null, "result");
                             }
 
@@ -311,7 +318,8 @@ class EventResultPersister {
             if (resultIndex >= 0) {
                 EventResult result = mResults.valueAt(resultIndex);
 
-                observer.onResult(result.status, result.legacyStatus, result.message);
+                observer.onResult(result.status, result.legacyStatus, result.message,
+                        result.serviceId);
                 mResults.removeAt(resultIndex);
                 writeState();
             } else {
@@ -341,13 +349,15 @@ class EventResultPersister {
         public final int status;
         public final int legacyStatus;
         @Nullable public final String message;
+        public final int serviceId;
 
-        private EventResult(int status, int legacyStatus, @Nullable String message) {
+        private EventResult(int status, int legacyStatus, @Nullable String message, int serviceId) {
             this.status = status;
             this.legacyStatus = legacyStatus;
             this.message = message;
+            this.serviceId = serviceId;
         }
     }
 
-    class OutOfIdsException extends Exception {}
+    public class OutOfIdsException extends Exception {}
 }

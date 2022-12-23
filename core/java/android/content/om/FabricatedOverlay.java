@@ -78,16 +78,14 @@ import java.util.Objects;
  *
  * @see OverlayManager
  * @see OverlayManagerTransaction
- * @hide
  */
 public class FabricatedOverlay {
 
     /**
      * Retrieves the identifier for this fabricated overlay.
      * @return the overlay identifier
-     *
-     * @hide
      */
+    @NonNull
     public OverlayIdentifier getIdentifier() {
         return new OverlayIdentifier(
                 mOverlay.packageName, TextUtils.nullIfEmpty(mOverlay.overlayName));
@@ -325,7 +323,6 @@ public class FabricatedOverlay {
      * @param overlayName a name used to uniquely identify the fabricated overlay owned by the
      *                   caller itself.
      * @param targetPackage the name of the package to be overlaid
-     * @hide
      */
     public FabricatedOverlay(@NonNull String overlayName, @NonNull String targetPackage) {
         this(generateFabricatedOverlayInternal(
@@ -344,7 +341,6 @@ public class FabricatedOverlay {
      * should specify which overlayable to be overlaid.
      *
      * @param targetOverlayable the overlayable name defined in target package.
-     * @hide
      */
     public void setTargetOverlayable(@Nullable String targetOverlayable) {
         mOverlay.targetOverlayable = TextUtils.emptyIfNull(targetOverlayable);
@@ -438,7 +434,6 @@ public class FabricatedOverlay {
      * @param value the integer representing the new value
      * @param configuration The string representation of the config this overlay is enabled for
      * @see android.util.TypedValue#TYPE_INT_COLOR_ARGB8 android.util.TypedValue#type
-     * @hide
      */
     @NonNull
     public void setResourceValue(
@@ -470,7 +465,6 @@ public class FabricatedOverlay {
      * @param value the string representing the new value
      * @param configuration The string representation of the config this overlay is enabled for
      * @see android.util.TypedValue#TYPE_STRING android.util.TypedValue#type
-     * @hide
      */
     @NonNull
     public void setResourceValue(
@@ -491,7 +485,6 @@ public class FabricatedOverlay {
      *     [package]:type/entry)
      * @param value the file descriptor whose contents are the value of the frro
      * @param configuration The string representation of the config this overlay is enabled for
-     * @hide
      */
     @NonNull
     public void setResourceValue(
