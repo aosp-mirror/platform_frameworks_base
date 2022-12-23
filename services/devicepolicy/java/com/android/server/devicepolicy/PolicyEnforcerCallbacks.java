@@ -18,17 +18,21 @@ package com.android.server.devicepolicy;
 
 import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.app.AppGlobals;
 import android.app.admin.DevicePolicyManager;
-import android.app.admin.PolicyUpdatesReceiver;
+import android.content.ComponentName;
 import android.content.Context;
+import android.content.IntentFilter;
+import android.content.pm.IPackageManager;
 import android.content.pm.PackageManager;
 import android.content.pm.PackageManagerInternal;
 import android.os.Binder;
-import android.os.Bundle;
+import android.os.RemoteException;
 import android.os.UserHandle;
 import android.permission.AdminPermissionControlParams;
 import android.permission.PermissionControllerManager;
 import android.provider.Settings;
+import android.util.Slog;
 
 import com.android.server.LocalServices;
 import com.android.server.utils.Slogf;
@@ -58,19 +62,15 @@ final class PolicyEnforcerCallbacks {
 
     static boolean setPermissionGrantState(
             @Nullable Integer grantState, @NonNull Context context, int userId,
-            @NonNull Bundle args) {
+            @NonNull PolicyKey policyKey) {
         return Boolean.TRUE.equals(Binder.withCleanCallingIdentity(() -> {
-            if (args == null
-                    || !args.containsKey(PolicyUpdatesReceiver.EXTRA_PACKAGE_NAME)
-                    || !args.containsKey(PolicyUpdatesReceiver.EXTRA_PERMISSION_NAME)) {
-                throw new IllegalArgumentException("Package name and permission name must be "
-                        + "provided as arguments.");
+            if (!(policyKey instanceof PermissionGrantStatePolicyKey)) {
+                throw new IllegalArgumentException("policyKey is not of type "
+                        + "PermissionGrantStatePolicyKey");
             }
-
-            String packageName = args.getString(PolicyUpdatesReceiver.EXTRA_PACKAGE_NAME);
-            String permissionName = args.getString(PolicyUpdatesReceiver.EXTRA_PERMISSION_NAME);
-            Objects.requireNonNull(packageName);
-            Objects.requireNonNull(permissionName);
+            PermissionGrantStatePolicyKey parsedKey = (PermissionGrantStatePolicyKey) policyKey;
+            Objects.requireNonNull(parsedKey.getPermissionName());
+            Objects.requireNonNull(parsedKey.getPackageName());
             Objects.requireNonNull(context);
 
             int value = grantState == null
@@ -81,7 +81,7 @@ final class PolicyEnforcerCallbacks {
             // TODO: remove canAdminGrantSensorPermissions once we expose a new method in
             //  permissionController that doesn't need it.
             AdminPermissionControlParams permissionParams = new AdminPermissionControlParams(
-                    packageName, permissionName, value,
+                    parsedKey.getPackageName(), parsedKey.getPermissionName(), value,
                     /* canAdminGrantSensorPermissions= */ true);
             getPermissionControllerManager(context, UserHandle.of(userId))
                     // TODO: remove callingPackage param and stop passing context.getPackageName()
@@ -148,6 +148,35 @@ final class PolicyEnforcerCallbacks {
                         .setOwnerProtectedPackages(
                                 userId,
                                 packages == null ? null : packages.stream().toList()));
+        return true;
+    }
+
+    static boolean addPersistentPreferredActivity(
+            @Nullable ComponentName preferredActivity, @NonNull Context context, int userId,
+            @NonNull PolicyKey policyKey) {
+        Binder.withCleanCallingIdentity(() -> {
+            try {
+                if (!(policyKey instanceof PersistentPreferredActivityPolicyKey)) {
+                    throw new IllegalArgumentException("policyKey is not of type "
+                            + "PersistentPreferredActivityPolicyKey");
+                }
+                PersistentPreferredActivityPolicyKey parsedKey =
+                        (PersistentPreferredActivityPolicyKey) policyKey;
+                IntentFilter filter = Objects.requireNonNull(parsedKey.getFilter());
+
+                IPackageManager packageManager = AppGlobals.getPackageManager();
+                if (preferredActivity != null) {
+                    packageManager.addPersistentPreferredActivity(
+                            filter, preferredActivity, userId);
+                } else {
+                    packageManager.clearPersistentPreferredActivity(filter, userId);
+                }
+                packageManager.flushPackageRestrictionsAsUser(userId);
+            } catch (RemoteException re) {
+                // Shouldn't happen
+                Slog.wtf(LOG_TAG, "Error adding/removing persistent preferred activity", re);
+            }
+        });
         return true;
     }
 }

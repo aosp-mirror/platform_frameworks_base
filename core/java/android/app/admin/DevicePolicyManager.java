@@ -4013,6 +4013,13 @@ public class DevicePolicyManager {
      */
     public static final String USER_CONTROL_DISABLED_PACKAGES = "userControlDisabledPackages";
 
+
+    // TODO: Expose this as SystemAPI once we add the query API
+    /**
+     * @hide
+     */
+    public static final String PERSISTENT_PREFERRED_ACTIVITY = "persistentPreferredActivity";
+
     /**
      * This object is a single place to tack on invalidation and disable calls.  All
      * binder caches in this class derive from this Config, so all can be invalidated or

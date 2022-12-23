@@ -8052,6 +8052,7 @@ package android.app.admin {
     method public final void onReceive(android.content.Context, android.content.Intent);
     field public static final String ACTION_DEVICE_POLICY_CHANGED = "android.app.admin.action.DEVICE_POLICY_CHANGED";
     field public static final String ACTION_DEVICE_POLICY_SET_RESULT = "android.app.admin.action.DEVICE_POLICY_SET_RESULT";
+    field public static final String EXTRA_INTENT_FILTER = "android.app.admin.extra.INTENT_FILTER";
     field public static final String EXTRA_PACKAGE_NAME = "android.app.admin.extra.PACKAGE_NAME";
     field public static final String EXTRA_PERMISSION_NAME = "android.app.admin.extra.PERMISSION_NAME";
     field public static final int POLICY_SET_RESULT_FAILURE = -1; // 0xffffffff

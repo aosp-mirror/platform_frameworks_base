@@ -17,8 +17,6 @@
 package com.android.server.devicepolicy;
 
 import static android.app.admin.PolicyUpdateReason.REASON_CONFLICTING_ADMIN_POLICY;
-import static android.app.admin.PolicyUpdatesReceiver.EXTRA_POLICY_BUNDLE_KEY;
-import static android.app.admin.PolicyUpdatesReceiver.EXTRA_POLICY_KEY;
 import static android.app.admin.PolicyUpdatesReceiver.EXTRA_POLICY_SET_RESULT_KEY;
 import static android.app.admin.PolicyUpdatesReceiver.EXTRA_POLICY_TARGET_USER_ID;
 import static android.app.admin.PolicyUpdatesReceiver.EXTRA_POLICY_UPDATE_REASON_KEY;
@@ -82,12 +80,12 @@ final class DevicePolicyEngine {
     /**
      * Map of <userId, Map<policyKey, policyState>>
      */
-    private final SparseArray<Map<String, PolicyState<?>>> mLocalPolicies;
+    private final SparseArray<Map<PolicyKey, PolicyState<?>>> mLocalPolicies;
 
     /**
      * Map of <policyKey, policyState>
      */
-    private final Map<String, PolicyState<?>> mGlobalPolicies;
+    private final Map<PolicyKey, PolicyState<?>> mGlobalPolicies;
 
     /**
      * Map containing the current set of admins in each user with active policies.
@@ -430,6 +428,42 @@ final class DevicePolicyEngine {
         }
     }
 
+    /**
+     * Returns the policies set by the given admin that share the same {@link PolicyKey#getKey()} as
+     * the provided {@code policyDefinition}.
+     *
+     * <p>For example, getLocalPolicyKeysSetByAdmin(PERMISSION_GRANT, admin) returns all permission
+     * grants set by the given admin.
+     *
+     * <p>Note that this will always return at most one item for policies that do not require
+     * additional params (e.g. {@link PolicyDefinition#LOCK_TASK} vs
+     * {@link PolicyDefinition#PERMISSION_GRANT(String, String)}).
+     *
+     */
+    @NonNull
+    <V> Set<PolicyKey> getLocalPolicyKeysSetByAdmin(
+            @NonNull PolicyDefinition<V> policyDefinition,
+            @NonNull EnforcingAdmin enforcingAdmin,
+            int userId) {
+        Objects.requireNonNull(policyDefinition);
+        Objects.requireNonNull(enforcingAdmin);
+
+        synchronized (mLock) {
+            if (policyDefinition.isGlobalOnlyPolicy() || !mLocalPolicies.contains(userId)) {
+                return Set.of();
+            }
+            Set<PolicyKey> keys = new HashSet<>();
+            for (PolicyKey key : mLocalPolicies.get(userId).keySet()) {
+                if (key.hasSameKeyAs(policyDefinition.getPolicyKey())
+                        && mLocalPolicies.get(userId).get(key).getPoliciesSetByAdmins()
+                        .containsKey(enforcingAdmin)) {
+                    keys.add(key);
+                }
+            }
+            return keys;
+        }
+    }
+
     private <V> boolean hasLocalPolicyLocked(PolicyDefinition<V> policyDefinition, int userId) {
         if (policyDefinition.isGlobalOnlyPolicy()) {
             return false;
@@ -501,7 +535,7 @@ final class DevicePolicyEngine {
     }
 
     private static <V> PolicyState<V> getPolicyState(
-            Map<String, PolicyState<?>> policies, PolicyDefinition<V> policyDefinition) {
+            Map<PolicyKey, PolicyState<?>> policies, PolicyDefinition<V> policyDefinition) {
         try {
             // This will not throw an exception because policyDefinition is of type V, so unless
             // we've created two policies with the same key but different types - we can only have
@@ -539,11 +573,7 @@ final class DevicePolicyEngine {
         }
 
         Bundle extras = new Bundle();
-        extras.putString(EXTRA_POLICY_KEY, policyDefinition.getPolicyDefinitionKey());
-        if (policyDefinition.getCallbackArgs() != null
-                && !policyDefinition.getCallbackArgs().isEmpty()) {
-            extras.putBundle(EXTRA_POLICY_BUNDLE_KEY, policyDefinition.getCallbackArgs());
-        }
+        policyDefinition.getPolicyKey().writeToBundle(extras);
         extras.putInt(
                 EXTRA_POLICY_TARGET_USER_ID,
                 getTargetUser(admin.getUserId(), userId));
@@ -592,11 +622,7 @@ final class DevicePolicyEngine {
         }
 
         Bundle extras = new Bundle();
-        extras.putString(EXTRA_POLICY_KEY, policyDefinition.getPolicyDefinitionKey());
-        if (policyDefinition.getCallbackArgs() != null
-                && !policyDefinition.getCallbackArgs().isEmpty()) {
-            extras.putBundle(EXTRA_POLICY_BUNDLE_KEY, policyDefinition.getCallbackArgs());
-        }
+        policyDefinition.getPolicyKey().writeToBundle(extras);
         extras.putInt(
                 EXTRA_POLICY_TARGET_USER_ID,
                 getTargetUser(admin.getUserId(), userId));
@@ -779,14 +805,14 @@ final class DevicePolicyEngine {
     }
 
     private boolean doesAdminHavePolicies(@NonNull EnforcingAdmin enforcingAdmin) {
-        for (String policy : mGlobalPolicies.keySet()) {
+        for (PolicyKey policy : mGlobalPolicies.keySet()) {
             PolicyState<?> policyState = mGlobalPolicies.get(policy);
             if (policyState.getPoliciesSetByAdmins().containsKey(enforcingAdmin)) {
                 return true;
             }
         }
         for (int i = 0; i < mLocalPolicies.size(); i++) {
-            for (String policy : mLocalPolicies.get(mLocalPolicies.keyAt(i)).keySet()) {
+            for (PolicyKey policy : mLocalPolicies.get(mLocalPolicies.keyAt(i)).keySet()) {
                 PolicyState<?> policyState = mLocalPolicies.get(
                         mLocalPolicies.keyAt(i)).get(policy);
                 if (policyState.getPoliciesSetByAdmins().containsKey(enforcingAdmin)) {
@@ -880,13 +906,12 @@ final class DevicePolicyEngine {
             if (mLocalPolicies != null) {
                 for (int i = 0; i < mLocalPolicies.size(); i++) {
                     int userId = mLocalPolicies.keyAt(i);
-                    for (Map.Entry<String, PolicyState<?>> policy : mLocalPolicies.get(
+                    for (Map.Entry<PolicyKey, PolicyState<?>> policy : mLocalPolicies.get(
                             userId).entrySet()) {
                         serializer.startTag(/* namespace= */ null, TAG_LOCAL_POLICY_ENTRY);
 
                         serializer.attributeInt(/* namespace= */ null, ATTR_USER_ID, userId);
-                        serializer.attribute(
-                                /* namespace= */ null, ATTR_POLICY_ID, policy.getKey());
+                        policy.getKey().saveToXml(serializer);
 
                         serializer.startTag(/* namespace= */ null, TAG_ADMINS_POLICY_ENTRY);
                         policy.getValue().saveToXml(serializer);
@@ -900,10 +925,10 @@ final class DevicePolicyEngine {
 
         private void writeGlobalPoliciesInner(TypedXmlSerializer serializer) throws IOException {
             if (mGlobalPolicies != null) {
-                for (Map.Entry<String, PolicyState<?>> policy : mGlobalPolicies.entrySet()) {
+                for (Map.Entry<PolicyKey, PolicyState<?>> policy : mGlobalPolicies.entrySet()) {
                     serializer.startTag(/* namespace= */ null, TAG_GLOBAL_POLICY_ENTRY);
 
-                    serializer.attribute(/* namespace= */ null, ATTR_POLICY_ID, policy.getKey());
+                    policy.getKey().saveToXml(serializer);
 
                     serializer.startTag(/* namespace= */ null, TAG_ADMINS_POLICY_ENTRY);
                     policy.getValue().saveToXml(serializer);
@@ -973,8 +998,7 @@ final class DevicePolicyEngine {
         private void readLocalPoliciesInner(TypedXmlPullParser parser)
                 throws XmlPullParserException, IOException {
             int userId = parser.getAttributeInt(/* namespace= */ null, ATTR_USER_ID);
-            String policyKey = parser.getAttributeValue(
-                    /* namespace= */ null, ATTR_POLICY_ID);
+            PolicyKey policyKey = PolicyDefinition.readPolicyKeyFromXml(parser);
             if (!mLocalPolicies.contains(userId)) {
                 mLocalPolicies.put(userId, new HashMap<>());
             }
@@ -989,7 +1013,7 @@ final class DevicePolicyEngine {
 
         private void readGlobalPoliciesInner(TypedXmlPullParser parser)
                 throws IOException, XmlPullParserException {
-            String policyKey = parser.getAttributeValue(/* namespace= */ null, ATTR_POLICY_ID);
+            PolicyKey policyKey = PolicyDefinition.readPolicyKeyFromXml(parser);
             PolicyState<?> adminsPolicy = parseAdminsPolicy(parser);
             if (adminsPolicy != null) {
                 mGlobalPolicies.put(policyKey, adminsPolicy);

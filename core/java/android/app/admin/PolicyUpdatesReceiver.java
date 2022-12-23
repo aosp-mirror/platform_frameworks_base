@@ -125,6 +125,14 @@ public abstract class PolicyUpdatesReceiver extends BroadcastReceiver {
             "android.app.admin.extra.PERMISSION_NAME";
 
     /**
+     * An {@link android.content.IntentFilter} extra holding the intent filter the policy relates
+     * to, (see {@link PolicyUpdatesReceiver#onPolicyChanged} and
+     * {@link PolicyUpdatesReceiver#onPolicySetResult})
+     */
+    public static final String EXTRA_INTENT_FILTER =
+            "android.app.admin.extra.INTENT_FILTER";
+
+    /**
      * @hide
      */
     public static final String EXTRA_POLICY_CHANGED_KEY =

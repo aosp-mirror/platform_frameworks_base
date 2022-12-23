@@ -10202,16 +10202,24 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
                 || isDefaultDeviceOwner(caller) || isFinancedDeviceOwner(caller));
 
         final int userHandle = caller.getUserId();
-        synchronized (getLockObject()) {
-            long id = mInjector.binderClearCallingIdentity();
-            try {
-                mIPackageManager.addPersistentPreferredActivity(filter, activity, userHandle);
-                mIPackageManager.flushPackageRestrictionsAsUser(userHandle);
-            } catch (RemoteException re) {
-                // Shouldn't happen
-                Slog.wtf(LOG_TAG, "Error adding persistent preferred activity", re);
-            } finally {
-                mInjector.binderRestoreCallingIdentity(id);
+        if (isCoexistenceEnabled(caller)) {
+            mDevicePolicyEngine.setLocalPolicy(
+                    PolicyDefinition.PERSISTENT_PREFERRED_ACTIVITY(filter),
+                    EnforcingAdmin.createEnterpriseEnforcingAdmin(who, userHandle),
+                    activity,
+                    userHandle);
+        } else {
+            synchronized (getLockObject()) {
+                long id = mInjector.binderClearCallingIdentity();
+                try {
+                    mIPackageManager.addPersistentPreferredActivity(filter, activity, userHandle);
+                    mIPackageManager.flushPackageRestrictionsAsUser(userHandle);
+                } catch (RemoteException re) {
+                    // Shouldn't happen
+                    Slog.wtf(LOG_TAG, "Error adding persistent preferred activity", re);
+                } finally {
+                    mInjector.binderRestoreCallingIdentity(id);
+                }
             }
         }
         final String activityPackage =
@@ -10231,17 +10239,61 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
                 || isDefaultDeviceOwner(caller) || isFinancedDeviceOwner(caller));
 
         final int userHandle = caller.getUserId();
-        synchronized (getLockObject()) {
-            long id = mInjector.binderClearCallingIdentity();
-            try {
-                mIPackageManager.clearPackagePersistentPreferredActivities(packageName, userHandle);
-                mIPackageManager.flushPackageRestrictionsAsUser(userHandle);
-            } catch (RemoteException re) {
-                // Shouldn't happen
-                Slogf.wtf(
-                        LOG_TAG, "Error when clearing package persistent preferred activities", re);
-            } finally {
-                mInjector.binderRestoreCallingIdentity(id);
+
+        if (isCoexistenceEnabled(caller)) {
+            clearPackagePersistentPreferredActivitiesFromPolicyEngine(
+                    EnforcingAdmin.createEnterpriseEnforcingAdmin(who, userHandle),
+                    packageName,
+                    userHandle);
+        } else {
+            synchronized (getLockObject()) {
+                long id = mInjector.binderClearCallingIdentity();
+                try {
+                    mIPackageManager.clearPackagePersistentPreferredActivities(packageName,
+                            userHandle);
+                    mIPackageManager.flushPackageRestrictionsAsUser(userHandle);
+                } catch (RemoteException re) {
+                    // Shouldn't happen
+                    Slogf.wtf(
+                            LOG_TAG, "Error when clearing package persistent preferred activities",
+                            re);
+                } finally {
+                    mInjector.binderRestoreCallingIdentity(id);
+                }
+            }
+        }
+    }
+
+    /**
+     * Remove all persistent intent handler preferences associated with the given package that were
+     * set by this admin, note that is doesn't remove preferences set by other admins for the same
+     * package.
+     */
+    private void clearPackagePersistentPreferredActivitiesFromPolicyEngine(
+            EnforcingAdmin admin, String packageName, int userId) {
+        Set<PolicyKey> keys = mDevicePolicyEngine.getLocalPolicyKeysSetByAdmin(
+                PolicyDefinition.GENERIC_PERSISTENT_PREFERRED_ACTIVITY,
+                admin,
+                userId);
+        for (PolicyKey key : keys) {
+            if (!(key instanceof PersistentPreferredActivityPolicyKey)) {
+                throw new IllegalStateException("PolicyKey for PERSISTENT_PREFERRED_ACTIVITY is not"
+                        + "of type PersistentPreferredActivityPolicyKey");
+            }
+            PersistentPreferredActivityPolicyKey parsedKey =
+                    (PersistentPreferredActivityPolicyKey) key;
+            IntentFilter filter = Objects.requireNonNull(parsedKey.getFilter());
+
+            ComponentName preferredActivity = mDevicePolicyEngine.getLocalPolicySetByAdmin(
+                    PolicyDefinition.PERSISTENT_PREFERRED_ACTIVITY(filter),
+                    admin,
+                    userId);
+            if (preferredActivity != null
+                    && preferredActivity.getPackageName().equals(packageName)) {
+                mDevicePolicyEngine.removeLocalPolicy(
+                        PolicyDefinition.PERSISTENT_PREFERRED_ACTIVITY(filter),
+                        admin,
+                        userId);
             }
         }
     }
