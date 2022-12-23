@@ -80,6 +80,7 @@ import java.io.PrintWriter;
 // SizeCompatTests and LetterboxTests but not all.
 // TODO(b/185264020): Consider making LetterboxUiController applicable to any level of the
 // hierarchy in addition to ActivityRecord (Task, DisplayArea, ...).
+// TODO(b/263021211): Consider renaming to more generic CompatUIController.
 final class LetterboxUiController {
 
     private static final String TAG = TAG_WITH_CLASS_NAME ? "LetterboxUiController" : TAG_ATM;
@@ -125,6 +126,11 @@ final class LetterboxUiController {
     @Nullable
     private Letterbox mLetterbox;
 
+    // Whether activity "refresh" was requested but not finished in
+    // ActivityRecord#activityResumedLocked following the camera compat force rotation in
+    // DisplayRotationCompatPolicy.
+    private boolean mIsRefreshAfterRotationRequested;
+
     LetterboxUiController(WindowManagerService wmService, ActivityRecord activityRecord) {
         mLetterboxConfiguration = wmService.mLetterboxConfiguration;
         // Given activityRecord may not be fully constructed since LetterboxUiController
@@ -145,6 +151,18 @@ final class LetterboxUiController {
         if (mLetterbox != null) {
             mLetterbox.onMovedToDisplay(displayId);
         }
+    }
+
+    /**
+     * Whether activity "refresh" was requested but not finished in {@link #activityResumedLocked}
+     * following the camera compat force rotation in {@link DisplayRotationCompatPolicy}.
+     */
+    boolean isRefreshAfterRotationRequested() {
+        return mIsRefreshAfterRotationRequested;
+    }
+
+    void setIsRefreshAfterRotationRequested(boolean isRequested) {
+        mIsRefreshAfterRotationRequested = isRequested;
     }
 
     boolean hasWallpaperBackgroundForLetterbox() {

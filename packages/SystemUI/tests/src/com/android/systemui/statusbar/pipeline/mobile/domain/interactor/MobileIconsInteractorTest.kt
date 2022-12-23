@@ -20,6 +20,7 @@ import android.telephony.SubscriptionManager.INVALID_SUBSCRIPTION_ID
 import androidx.test.filters.SmallTest
 import com.android.settingslib.mobile.MobileMappings
 import com.android.systemui.SysuiTestCase
+import com.android.systemui.log.table.TableLogBuffer
 import com.android.systemui.statusbar.pipeline.mobile.data.model.MobileConnectivityModel
 import com.android.systemui.statusbar.pipeline.mobile.data.model.SubscriptionModel
 import com.android.systemui.statusbar.pipeline.mobile.data.repository.FakeMobileConnectionRepository
@@ -28,6 +29,7 @@ import com.android.systemui.statusbar.pipeline.mobile.data.repository.FakeUserSe
 import com.android.systemui.statusbar.pipeline.mobile.util.FakeMobileMappingsProxy
 import com.android.systemui.util.CarrierConfigTracker
 import com.android.systemui.util.mockito.whenever
+import com.android.systemui.util.time.FakeSystemClock
 import com.google.common.truth.Truth.assertThat
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -44,9 +46,9 @@ import org.mockito.MockitoAnnotations
 @SmallTest
 class MobileIconsInteractorTest : SysuiTestCase() {
     private lateinit var underTest: MobileIconsInteractor
+    private lateinit var connectionsRepository: FakeMobileConnectionsRepository
     private val userSetupRepository = FakeUserSetupRepository()
     private val mobileMappingsProxy = FakeMobileMappingsProxy()
-    private val connectionsRepository = FakeMobileConnectionsRepository(mobileMappingsProxy)
     private val scope = CoroutineScope(IMMEDIATE)
 
     @Mock private lateinit var carrierConfigTracker: CarrierConfigTracker
@@ -55,6 +57,7 @@ class MobileIconsInteractorTest : SysuiTestCase() {
     fun setUp() {
         MockitoAnnotations.initMocks(this)
 
+        connectionsRepository = FakeMobileConnectionsRepository(mobileMappingsProxy, tableLogBuffer)
         connectionsRepository.setMobileConnectionRepositoryMap(
             mapOf(
                 SUB_1_ID to CONNECTION_1,
@@ -290,21 +293,23 @@ class MobileIconsInteractorTest : SysuiTestCase() {
 
     companion object {
         private val IMMEDIATE = Dispatchers.Main.immediate
+        private val tableLogBuffer =
+            TableLogBuffer(8, "MobileIconsInteractorTest", FakeSystemClock())
 
         private const val SUB_1_ID = 1
         private val SUB_1 = SubscriptionModel(subscriptionId = SUB_1_ID)
-        private val CONNECTION_1 = FakeMobileConnectionRepository(SUB_1_ID)
+        private val CONNECTION_1 = FakeMobileConnectionRepository(SUB_1_ID, tableLogBuffer)
 
         private const val SUB_2_ID = 2
         private val SUB_2 = SubscriptionModel(subscriptionId = SUB_2_ID)
-        private val CONNECTION_2 = FakeMobileConnectionRepository(SUB_2_ID)
+        private val CONNECTION_2 = FakeMobileConnectionRepository(SUB_2_ID, tableLogBuffer)
 
         private const val SUB_3_ID = 3
         private val SUB_3_OPP = SubscriptionModel(subscriptionId = SUB_3_ID, isOpportunistic = true)
-        private val CONNECTION_3 = FakeMobileConnectionRepository(SUB_3_ID)
+        private val CONNECTION_3 = FakeMobileConnectionRepository(SUB_3_ID, tableLogBuffer)
 
         private const val SUB_4_ID = 4
         private val SUB_4_OPP = SubscriptionModel(subscriptionId = SUB_4_ID, isOpportunistic = true)
-        private val CONNECTION_4 = FakeMobileConnectionRepository(SUB_4_ID)
+        private val CONNECTION_4 = FakeMobileConnectionRepository(SUB_4_ID, tableLogBuffer)
     }
 }

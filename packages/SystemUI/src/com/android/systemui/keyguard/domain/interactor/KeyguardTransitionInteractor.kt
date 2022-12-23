@@ -24,7 +24,9 @@ import com.android.systemui.keyguard.shared.model.KeyguardState
 import com.android.systemui.keyguard.shared.model.KeyguardState.AOD
 import com.android.systemui.keyguard.shared.model.KeyguardState.DREAMING
 import com.android.systemui.keyguard.shared.model.KeyguardState.LOCKSCREEN
+import com.android.systemui.keyguard.shared.model.KeyguardState.OCCLUDED
 import com.android.systemui.keyguard.shared.model.TransitionState
+import com.android.systemui.keyguard.shared.model.TransitionState.STARTED
 import com.android.systemui.keyguard.shared.model.TransitionStep
 import javax.inject.Inject
 import kotlin.time.Duration
@@ -49,6 +51,10 @@ constructor(
     /** DREAMING->LOCKSCREEN transition information. */
     val dreamingToLockscreenTransition: Flow<TransitionStep> =
         repository.transition(DREAMING, LOCKSCREEN)
+
+    /** OCCLUDED->LOCKSCREEN transition information. */
+    val occludedToLockscreenTransition: Flow<TransitionStep> =
+        repository.transition(OCCLUDED, LOCKSCREEN)
 
     /** (any)->AOD transition information */
     val anyStateToAodTransition: Flow<TransitionStep> =
@@ -93,7 +99,14 @@ constructor(
         val start = (params.startTime / totalDuration).toFloat()
         val chunks = (totalDuration / params.duration).toFloat()
         return flow
-            .map { step -> (step.value - start) * chunks }
+            // When starting, emit a value of 0f to give animations a chance to set initial state
+            .map { step ->
+                if (step.transitionState == STARTED) {
+                    0f
+                } else {
+                    (step.value - start) * chunks
+                }
+            }
             .filter { value -> value >= 0f && value <= 1f }
     }
 }

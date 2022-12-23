@@ -31,4 +31,6 @@ sealed class TransitionInteractor(val name: String) {
     abstract fun start()
 
     fun <A, B, C> toTriple(a: A, bc: Pair<B, C>) = Triple(a, bc.first, bc.second)
+
+    fun <A, B, C> toTriple(ab: Pair<A, B>, c: C) = Triple(ab.first, ab.second, c)
 }

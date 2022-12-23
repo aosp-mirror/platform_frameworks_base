@@ -884,7 +884,7 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener, Dumpab
         Assert.isMainThread();
         if (mWakeOnFingerprintAcquiredStart && acquireInfo == FINGERPRINT_ACQUIRED_START) {
             mPowerManager.wakeUp(
-                    SystemClock.uptimeMillis(), PowerManager.WAKE_REASON_GESTURE,
+                    SystemClock.uptimeMillis(), PowerManager.WAKE_REASON_BIOMETRIC,
                     "com.android.systemui.keyguard:FINGERPRINT_ACQUIRED_START");
         }
         for (int i = 0; i < mCallbacks.size(); i++) {

@@ -32,25 +32,25 @@ abstract class StartKeyguardTransitionModule {
 
     @Binds
     @IntoSet
-    abstract fun lockscreenBouncer(
-        impl: LockscreenBouncerTransitionInteractor
-    ): TransitionInteractor
+    abstract fun fromBouncer(impl: FromBouncerTransitionInteractor): TransitionInteractor
 
     @Binds
     @IntoSet
-    abstract fun aodLockscreen(impl: AodLockscreenTransitionInteractor): TransitionInteractor
+    abstract fun fromLockscreen(impl: FromLockscreenTransitionInteractor): TransitionInteractor
 
-    @Binds @IntoSet abstract fun goneAod(impl: GoneAodTransitionInteractor): TransitionInteractor
+    @Binds @IntoSet abstract fun fromAod(impl: FromAodTransitionInteractor): TransitionInteractor
 
-    @Binds @IntoSet abstract fun aodGone(impl: AodToGoneTransitionInteractor): TransitionInteractor
-
-    @Binds
-    @IntoSet
-    abstract fun bouncerGone(impl: BouncerToGoneTransitionInteractor): TransitionInteractor
+    @Binds @IntoSet abstract fun fromGone(impl: FromGoneTransitionInteractor): TransitionInteractor
 
     @Binds
     @IntoSet
-    abstract fun lockscreenGone(impl: LockscreenGoneTransitionInteractor): TransitionInteractor
+    abstract fun fromDreaming(impl: FromDreamingTransitionInteractor): TransitionInteractor
 
-    @Binds @IntoSet abstract fun dreaming(impl: DreamingTransitionInteractor): TransitionInteractor
+    @Binds
+    @IntoSet
+    abstract fun fromOccluded(impl: FromOccludedTransitionInteractor): TransitionInteractor
+
+    @Binds
+    @IntoSet
+    abstract fun fromDozing(impl: FromDozingTransitionInteractor): TransitionInteractor
 }

@@ -23,37 +23,41 @@ import com.android.systemui.dagger.qualifiers.Application
 import com.android.systemui.keyguard.data.repository.KeyguardTransitionRepository
 import com.android.systemui.keyguard.shared.model.KeyguardState
 import com.android.systemui.keyguard.shared.model.TransitionInfo
-import com.android.systemui.keyguard.shared.model.WakefulnessState
 import com.android.systemui.util.kotlin.sample
 import javax.inject.Inject
+import kotlin.time.Duration
+import kotlin.time.Duration.Companion.milliseconds
 import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.launch
 
 @SysUISingleton
-class GoneAodTransitionInteractor
+class FromOccludedTransitionInteractor
 @Inject
 constructor(
     @Application private val scope: CoroutineScope,
     private val keyguardInteractor: KeyguardInteractor,
     private val keyguardTransitionRepository: KeyguardTransitionRepository,
     private val keyguardTransitionInteractor: KeyguardTransitionInteractor,
-) : TransitionInteractor(GoneAodTransitionInteractor::class.simpleName!!) {
+) : TransitionInteractor(FromOccludedTransitionInteractor::class.simpleName!!) {
 
     override fun start() {
+        listenForOccludedToLockscreen()
+        listenForOccludedToDreaming()
+    }
+
+    private fun listenForOccludedToDreaming() {
         scope.launch {
-            keyguardInteractor.wakefulnessModel
-                .sample(keyguardTransitionInteractor.finishedKeyguardState, { a, b -> Pair(a, b) })
+            keyguardInteractor.isAbleToDream
+                .sample(keyguardTransitionInteractor.finishedKeyguardState, ::Pair)
                 .collect { pair ->
-                    val (wakefulnessState, keyguardState) = pair
-                    if (
-                        keyguardState == KeyguardState.GONE &&
-                            wakefulnessState.state == WakefulnessState.STARTING_TO_SLEEP
-                    ) {
+                    val (isAbleToDream, keyguardState) = pair
+                    if (isAbleToDream && keyguardState == KeyguardState.OCCLUDED) {
                         keyguardTransitionRepository.startTransition(
                             TransitionInfo(
                                 name,
-                                KeyguardState.GONE,
-                                KeyguardState.AOD,
+                                KeyguardState.OCCLUDED,
+                                KeyguardState.DREAMING,
                                 getAnimator(),
                             )
                         )
@@ -62,14 +66,37 @@ constructor(
         }
     }
 
-    private fun getAnimator(): ValueAnimator {
+    private fun listenForOccludedToLockscreen() {
+        scope.launch {
+            keyguardInteractor.isKeyguardOccluded
+                .sample(keyguardTransitionInteractor.startedKeyguardTransitionStep, ::Pair)
+                .collect { pair ->
+                    val (isOccluded, lastStartedKeyguardState) = pair
+                    // Occlusion signals come from the framework, and should interrupt any
+                    // existing transition
+                    if (!isOccluded && lastStartedKeyguardState.to == KeyguardState.OCCLUDED) {
+                        keyguardTransitionRepository.startTransition(
+                            TransitionInfo(
+                                name,
+                                KeyguardState.OCCLUDED,
+                                KeyguardState.LOCKSCREEN,
+                                getAnimator(TO_LOCKSCREEN_DURATION),
+                            )
+                        )
+                    }
+                }
+        }
+    }
+
+    private fun getAnimator(duration: Duration = DEFAULT_DURATION): ValueAnimator {
         return ValueAnimator().apply {
             setInterpolator(Interpolators.LINEAR)
-            setDuration(TRANSITION_DURATION_MS)
+            setDuration(duration.inWholeMilliseconds)
         }
     }
 
     companion object {
-        private const val TRANSITION_DURATION_MS = 500L
+        private val DEFAULT_DURATION = 500.milliseconds
+        val TO_LOCKSCREEN_DURATION = 933.milliseconds
     }
 }

@@ -58,6 +58,15 @@ public class ActivityClient {
         }
     }
 
+    /** Reports {@link android.app.servertransaction.RefreshCallbackItem} is executed. */
+    public void activityRefreshed(IBinder token) {
+        try {
+            getActivityClientController().activityRefreshed(token);
+        } catch (RemoteException e) {
+            e.rethrowFromSystemServer();
+        }
+    }
+
     /**
      * Reports after {@link Activity#onTopResumedActivityChanged(boolean)} is called for losing the
      * top most position.
