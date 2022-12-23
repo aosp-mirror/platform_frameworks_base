@@ -92,6 +92,20 @@ class StylusUsiPowerStartableTest : SysuiTestCase() {
     }
 
     @Test
+    fun onStylusAdded_internal_updatesNotificationSuppression() {
+        startable.onStylusAdded(STYLUS_DEVICE_ID)
+
+        verify(stylusUsiPowerUi, times(1)).updateSuppression(false)
+    }
+
+    @Test
+    fun onStylusAdded_external_noop() {
+        startable.onStylusAdded(EXTERNAL_DEVICE_ID)
+
+        verifyZeroInteractions(stylusUsiPowerUi)
+    }
+
+    @Test
     fun onStylusBluetoothConnected_refreshesNotification() {
         startable.onStylusBluetoothConnected(STYLUS_DEVICE_ID, "ANY")
 
