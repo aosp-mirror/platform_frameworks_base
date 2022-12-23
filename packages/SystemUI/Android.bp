@@ -31,6 +31,52 @@ license {
     ],
 }
 
+// Opt-in configuration for code depending on Jetpack Compose.
+soong_config_module_type {
+    name: "systemui_compose_java_defaults",
+    module_type: "java_defaults",
+    config_namespace: "ANDROID",
+    bool_variables: ["SYSTEMUI_USE_COMPOSE"],
+    properties: [
+        "srcs",
+        "static_libs",
+    ],
+}
+
+systemui_compose_java_defaults {
+    name: "SystemUI_compose_defaults",
+    soong_config_variables: {
+        SYSTEMUI_USE_COMPOSE: {
+            // Because files in compose/features/ depend on SystemUI
+            // code, we compile those files when compiling SystemUI-core.
+            // We also compile the ComposeFacade in
+            // compose/facade/enabled/.
+            srcs: [
+                "compose/features/src/**/*.kt",
+                "compose/facade/enabled/src/**/*.kt",
+            ],
+
+            // The dependencies needed by SystemUIComposeFeatures,
+            // except for SystemUI-core.
+            // Copied from compose/features/Android.bp.
+            static_libs: [
+                "SystemUIComposeCore",
+
+                "androidx.compose.runtime_runtime",
+                "androidx.compose.material3_material3",
+                "androidx.activity_activity-compose",
+            ],
+
+            // By default, Compose is disabled and we compile the ComposeFacade
+            // in compose/facade/disabled/.
+            conditions_default: {
+                srcs: ["compose/facade/disabled/src/**/*.kt"],
+                static_libs: [],
+            },
+        },
+    },
+}
+
 java_library {
     name: "SystemUI-proto",
 
@@ -68,6 +114,9 @@ filegroup {
 
 android_library {
     name: "SystemUI-core",
+    defaults: [
+        "SystemUI_compose_defaults",
+    ],
     srcs: [
         "src/**/*.kt",
         "src/**/*.java",
@@ -227,6 +276,9 @@ android_library {
 
 android_library {
     name: "SystemUI-tests",
+    defaults: [
+        "SystemUI_compose_defaults",
+    ],
     manifest: "tests/AndroidManifest-base.xml",
     additional_manifests: ["tests/AndroidManifest.xml"],
     srcs: [
