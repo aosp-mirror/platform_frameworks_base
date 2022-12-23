@@ -64,6 +64,7 @@ import android.os.RemoteException;
 import android.os.SystemClock;
 import android.os.UserHandle;
 import android.text.format.DateUtils;
+import android.util.ArraySet;
 import android.util.IndentingPrintWriter;
 import android.util.MathUtils;
 import android.util.Pair;
@@ -629,29 +630,25 @@ class BroadcastQueueModernImpl extends BroadcastQueue {
 
         applyDeliveryGroupPolicy(r);
 
-        if (r.isReplacePending()) {
-            // Leave the skipped broadcasts intact in queue, so that we can
-            // replace them at their current position during enqueue below
-            forEachMatchingBroadcast(QUEUE_PREDICATE_ANY, (testRecord, testIndex) -> {
-                // We only allow caller to replace broadcasts they enqueued
-                return (r.callingUid == testRecord.callingUid)
-                        && (r.userId == testRecord.userId)
-                        && r.intent.filterEquals(testRecord.intent);
-            }, mBroadcastConsumerSkipAndCanceled, false);
-        }
-
         r.enqueueTime = SystemClock.uptimeMillis();
         r.enqueueRealTime = SystemClock.elapsedRealtime();
         r.enqueueClockTime = System.currentTimeMillis();
 
+        final ArraySet<BroadcastRecord> replacedBroadcasts = new ArraySet<>();
+        final BroadcastConsumer replacedBroadcastConsumer =
+                (record, i) -> replacedBroadcasts.add(record);
         for (int i = 0; i < r.receivers.size(); i++) {
             final Object receiver = r.receivers.get(i);
             final BroadcastProcessQueue queue = getOrCreateProcessQueue(
                     getReceiverProcessName(receiver), getReceiverUid(receiver));
-            queue.enqueueOrReplaceBroadcast(r, i);
+            queue.enqueueOrReplaceBroadcast(r, i, replacedBroadcastConsumer);
             updateRunnableList(queue);
             enqueueUpdateRunningList();
         }
+
+        // Skip any broadcasts that have been replaced by newer broadcasts with
+        // FLAG_RECEIVER_REPLACE_PENDING.
+        skipAndCancelReplacedBroadcasts(replacedBroadcasts);
 
         // If nothing to dispatch, send any pending result immediately
         if (r.receivers.isEmpty()) {
@@ -660,6 +657,17 @@ class BroadcastQueueModernImpl extends BroadcastQueue {
         }
 
         traceEnd(cookie);
+    }
+
+    private void skipAndCancelReplacedBroadcasts(ArraySet<BroadcastRecord> replacedBroadcasts) {
+        for (int i = 0; i < replacedBroadcasts.size(); ++i) {
+            final BroadcastRecord r = replacedBroadcasts.valueAt(i);
+            r.resultCode = Activity.RESULT_CANCELED;
+            r.resultData = null;
+            r.resultExtras = null;
+            scheduleResultTo(r);
+            notifyFinishBroadcast(r);
+        }
     }
 
     private void applyDeliveryGroupPolicy(@NonNull BroadcastRecord r) {
