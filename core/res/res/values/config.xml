@@ -5344,6 +5344,11 @@
          TODO(b/255532890) Enable when ignoreOrientationRequest is set -->
     <bool name="config_letterboxIsEnabledForTranslucentActivities">false</bool>
 
+    <!-- Whether sending compat fake focus for split screen resumed activities is enabled.
+         Needed because some game engines wait to get focus before drawing the content of
+         the app which isn't guaranteed by default in multi-window modes. -->
+    <bool name="config_isCompatFakeFocusEnabled">false</bool>
+
     <!-- Whether camera compat treatment is enabled for issues caused by orientation mismatch
         between camera buffers and an app window. This includes force rotation of fixed
         orientation activities connected to the camera in fullscreen and showing a tooltip in
