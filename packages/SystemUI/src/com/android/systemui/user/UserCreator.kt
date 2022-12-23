@@ -87,7 +87,7 @@ constructor(
         userManager.setUserAdmin(userId)
     }
 
-    fun isHeadlessSystemUserMode(): Boolean {
-        return UserManager.isHeadlessSystemUserMode()
+    fun isMultipleAdminEnabled(): Boolean {
+        return UserManager.isMultipleAdminEnabled()
     }
 }
