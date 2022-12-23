@@ -575,6 +575,7 @@ interface IDevicePolicyManager {
     void resetStrings(in List<String> stringIds);
     ParcelableResource getString(String stringId);
 
+    void resetShouldAllowBypassingDevicePolicyManagementRoleQualificationState();
     boolean shouldAllowBypassingDevicePolicyManagementRoleQualification();
 
     List<UserHandle> getPolicyManagedProfiles(in UserHandle userHandle);
