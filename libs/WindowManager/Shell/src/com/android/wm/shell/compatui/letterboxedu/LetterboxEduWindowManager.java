@@ -37,6 +37,7 @@ import com.android.wm.shell.common.DisplayLayout;
 import com.android.wm.shell.common.DockStateReader;
 import com.android.wm.shell.common.SyncTransactionQueue;
 import com.android.wm.shell.compatui.CompatUIWindowManagerAbstract;
+import com.android.wm.shell.compatui.DialogAnimationController;
 import com.android.wm.shell.transition.Transitions;
 
 /**
@@ -63,7 +64,7 @@ public class LetterboxEduWindowManager extends CompatUIWindowManagerAbstract {
      */
     private final SharedPreferences mSharedPreferences;
 
-    private final LetterboxEduAnimationController mAnimationController;
+    private final DialogAnimationController<LetterboxEduDialogLayout> mAnimationController;
 
     private final Transitions mTransitions;
 
@@ -96,14 +97,17 @@ public class LetterboxEduWindowManager extends CompatUIWindowManagerAbstract {
             DisplayLayout displayLayout, Transitions transitions,
             Runnable onDismissCallback, DockStateReader dockStateReader) {
         this(context, taskInfo, syncQueue, taskListener, displayLayout, transitions,
-                onDismissCallback, new LetterboxEduAnimationController(context), dockStateReader);
+                onDismissCallback,
+                new DialogAnimationController<>(context, /* tag */ "LetterboxEduWindowManager"),
+                dockStateReader);
     }
 
     @VisibleForTesting
     LetterboxEduWindowManager(Context context, TaskInfo taskInfo,
             SyncTransactionQueue syncQueue, ShellTaskOrganizer.TaskListener taskListener,
             DisplayLayout displayLayout, Transitions transitions, Runnable onDismissCallback,
-            LetterboxEduAnimationController animationController, DockStateReader dockStateReader) {
+            DialogAnimationController<LetterboxEduDialogLayout> animationController,
+            DockStateReader dockStateReader) {
         super(context, taskInfo, syncQueue, taskListener, displayLayout);
         mTransitions = transitions;
         mOnDismissCallback = onDismissCallback;
@@ -160,7 +164,7 @@ public class LetterboxEduWindowManager extends CompatUIWindowManagerAbstract {
         if (mLayout == null) {
             return;
         }
-        final View dialogContainer = mLayout.getDialogContainer();
+        final View dialogContainer = mLayout.getDialogContainerView();
         MarginLayoutParams marginParams = (MarginLayoutParams) dialogContainer.getLayoutParams();
 
         final Rect taskBounds = getTaskBounds();
