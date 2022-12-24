@@ -97,10 +97,10 @@ final class RadioModule {
 
         public void onTuneFailed(int result, ProgramSelector programSelector) {
             fireLater(() -> {
+                android.hardware.radio.ProgramSelector csel =
+                        ConversionUtils.programSelectorFromHalProgramSelector(programSelector);
+                int tunerResult = ConversionUtils.halResultToTunerResult(result);
                 synchronized (mLock) {
-                    android.hardware.radio.ProgramSelector csel =
-                            ConversionUtils.programSelectorFromHalProgramSelector(programSelector);
-                    int tunerResult = ConversionUtils.halResultToTunerResult(result);
                     fanoutAidlCallbackLocked((cb, sdkVersion) -> {
                         if (csel != null && !ConversionUtils
                                 .programSelectorMeetsSdkVersionRequirement(csel, sdkVersion)) {
@@ -117,10 +117,12 @@ final class RadioModule {
         @Override
         public void onCurrentProgramInfoChanged(ProgramInfo halProgramInfo) {
             fireLater(() -> {
+                RadioManager.ProgramInfo currentProgramInfo =
+                        ConversionUtils.programInfoFromHalProgramInfo(halProgramInfo);
+                Objects.requireNonNull(currentProgramInfo,
+                        "Program info from AIDL HAL is invalid");
                 synchronized (mLock) {
-                    mCurrentProgramInfo =
-                            ConversionUtils.programInfoFromHalProgramInfo(halProgramInfo);
-                    RadioManager.ProgramInfo currentProgramInfo = mCurrentProgramInfo;
+                    mCurrentProgramInfo = currentProgramInfo;
                     fanoutAidlCallbackLocked((cb, sdkVersion) -> {
                         if (!ConversionUtils.programInfoMeetsSdkVersionRequirement(
                                 currentProgramInfo, sdkVersion)) {

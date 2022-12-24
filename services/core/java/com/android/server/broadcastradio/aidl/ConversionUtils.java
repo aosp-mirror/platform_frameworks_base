@@ -307,6 +307,9 @@ final class ConversionUtils {
     static ProgramIdentifier identifierToHalProgramIdentifier(ProgramSelector.Identifier id) {
         ProgramIdentifier hwId = new ProgramIdentifier();
         hwId.type = id.getType();
+        if (hwId.type == ProgramSelector.IDENTIFIER_TYPE_DAB_DMB_SID_EXT) {
+            hwId.type = IdentifierType.DAB_SID_EXT;
+        }
         hwId.value = id.getValue();
         return hwId;
     }
@@ -317,9 +320,49 @@ final class ConversionUtils {
         if (id.type == IdentifierType.INVALID) {
             return null;
         }
-        return new ProgramSelector.Identifier(id.type, id.value);
+        int idType;
+        if (id.type == IdentifierType.DAB_SID_EXT) {
+            idType = ProgramSelector.IDENTIFIER_TYPE_DAB_DMB_SID_EXT;
+        } else {
+            idType = id.type;
+        }
+        return new ProgramSelector.Identifier(idType, id.value);
     }
 
+    private static boolean isVendorIdentifierType(int idType) {
+        return idType >= IdentifierType.VENDOR_START && idType <= IdentifierType.VENDOR_END;
+    }
+
+    private static boolean isValidHalProgramSelector(
+            android.hardware.broadcastradio.ProgramSelector sel) {
+        if (sel.primaryId.type != IdentifierType.AMFM_FREQUENCY_KHZ
+                && sel.primaryId.type != IdentifierType.RDS_PI
+                && sel.primaryId.type != IdentifierType.HD_STATION_ID_EXT
+                && sel.primaryId.type != IdentifierType.DAB_SID_EXT
+                && sel.primaryId.type != IdentifierType.DRMO_SERVICE_ID
+                && sel.primaryId.type != IdentifierType.SXM_SERVICE_ID
+                && !isVendorIdentifierType(sel.primaryId.type)) {
+            return false;
+        }
+        if (sel.primaryId.type == IdentifierType.DAB_SID_EXT) {
+            boolean hasEnsemble = false;
+            boolean hasFrequency = false;
+            for (int i = 0; i < sel.secondaryIds.length; i++) {
+                if (sel.secondaryIds[i].type == IdentifierType.DAB_ENSEMBLE) {
+                    hasEnsemble = true;
+                } else if (sel.secondaryIds[i].type == IdentifierType.DAB_FREQUENCY_KHZ) {
+                    hasFrequency = true;
+                }
+                if (hasEnsemble && hasFrequency) {
+                    return true;
+                }
+            }
+            return false;
+        }
+        return true;
+    }
+
+    @Nullable
     static android.hardware.broadcastradio.ProgramSelector programSelectorToHalProgramSelector(
             ProgramSelector sel) {
         android.hardware.broadcastradio.ProgramSelector hwSel =
@@ -332,6 +375,9 @@ final class ConversionUtils {
             secondaryIdList.add(identifierToHalProgramIdentifier(secondaryIds[i]));
         }
         hwSel.secondaryIds = secondaryIdList.toArray(ProgramIdentifier[]::new);
+        if (!isValidHalProgramSelector(hwSel)) {
+            return null;
+        }
         return hwSel;
     }
 
@@ -344,7 +390,7 @@ final class ConversionUtils {
     @Nullable
     static ProgramSelector programSelectorFromHalProgramSelector(
             android.hardware.broadcastradio.ProgramSelector sel) {
-        if (isEmpty(sel)) {
+        if (isEmpty(sel) || !isValidHalProgramSelector(sel)) {
             return null;
         }
 
@@ -432,7 +478,34 @@ final class ConversionUtils {
         return builder.build();
     }
 
+    private static boolean isValidLogicallyTunedTo(ProgramIdentifier id) {
+        return id.type == IdentifierType.AMFM_FREQUENCY_KHZ || id.type == IdentifierType.RDS_PI
+                || id.type == IdentifierType.HD_STATION_ID_EXT
+                || id.type == IdentifierType.DAB_SID_EXT
+                || id.type == IdentifierType.DRMO_SERVICE_ID
+                || id.type == IdentifierType.SXM_SERVICE_ID
+                || isVendorIdentifierType(id.type);
+    }
+
+    private static boolean isValidPhysicallyTunedTo(ProgramIdentifier id) {
+        return id.type == IdentifierType.AMFM_FREQUENCY_KHZ
+                || id.type == IdentifierType.DAB_FREQUENCY_KHZ
+                || id.type == IdentifierType.DRMO_FREQUENCY_KHZ
+                || id.type == IdentifierType.SXM_CHANNEL
+                || isVendorIdentifierType(id.type);
+    }
+
+    private static boolean isValidHalProgramInfo(ProgramInfo info) {
+        return isValidHalProgramSelector(info.selector)
+                && isValidLogicallyTunedTo(info.logicallyTunedTo)
+                && isValidPhysicallyTunedTo(info.physicallyTunedTo);
+    }
+
+    @Nullable
     static RadioManager.ProgramInfo programInfoFromHalProgramInfo(ProgramInfo info) {
+        if (!isValidHalProgramInfo(info)) {
+            return null;
+        }
         Collection<ProgramSelector.Identifier> relatedContent = new ArrayList<>();
         if (info.relatedContent != null) {
             for (int i = 0; i < info.relatedContent.length; i++) {
@@ -485,7 +558,14 @@ final class ConversionUtils {
     static ProgramList.Chunk chunkFromHalProgramListChunk(ProgramListChunk chunk) {
         Set<RadioManager.ProgramInfo> modified = new ArraySet<>(chunk.modified.length);
         for (int i = 0; i < chunk.modified.length; i++) {
-            modified.add(programInfoFromHalProgramInfo(chunk.modified[i]));
+            RadioManager.ProgramInfo modifiedInfo =
+                    programInfoFromHalProgramInfo(chunk.modified[i]);
+            if (modifiedInfo == null) {
+                Slogf.w(TAG, "Program info %s in program list chunk is not valid",
+                        chunk.modified[i]);
+                continue;
+            }
+            modified.add(modifiedInfo);
         }
         Set<ProgramSelector.Identifier> removed = new ArraySet<>();
         if (chunk.removed != null) {
@@ -547,10 +627,22 @@ final class ConversionUtils {
         if (isAtLeastU(targetSdkVersion)) {
             return chunk;
         }
-        Set<RadioManager.ProgramInfo> modified = chunk.getModified();
-        modified.removeIf(info -> !programInfoMeetsSdkVersionRequirement(info, targetSdkVersion));
-        Set<ProgramSelector.Identifier> removed = chunk.getRemoved();
-        removed.removeIf(id -> isNewIdentifierInU(id));
+        Set<RadioManager.ProgramInfo> modified = new ArraySet<>();
+        Iterator<RadioManager.ProgramInfo> modifiedIterator = chunk.getModified().iterator();
+        while (modifiedIterator.hasNext()) {
+            RadioManager.ProgramInfo info = modifiedIterator.next();
+            if (programInfoMeetsSdkVersionRequirement(info, targetSdkVersion)) {
+                modified.add(info);
+            }
+        }
+        Set<ProgramSelector.Identifier> removed = new ArraySet<>();
+        Iterator<ProgramSelector.Identifier> removedIterator = chunk.getRemoved().iterator();
+        while (removedIterator.hasNext()) {
+            ProgramSelector.Identifier id = removedIterator.next();
+            if (!isNewIdentifierInU(id)) {
+                removed.add(id);
+            }
+        }
         return new ProgramList.Chunk(chunk.isPurge(), chunk.isComplete(), modified, removed);
     }
 
@@ -558,7 +650,7 @@ final class ConversionUtils {
             Announcement hwAnnouncement) {
         return new android.hardware.radio.Announcement(
                 Objects.requireNonNull(programSelectorFromHalProgramSelector(
-                        hwAnnouncement.selector)),
+                        hwAnnouncement.selector), "Program selector can not be null"),
                 hwAnnouncement.type,
                 vendorInfoFromHalVendorKeyValues(hwAnnouncement.vendorInfo)
         );

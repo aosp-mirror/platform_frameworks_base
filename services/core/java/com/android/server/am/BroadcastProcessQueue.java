@@ -42,6 +42,7 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.util.ArrayDeque;
 import java.util.Iterator;
+import java.util.List;
 import java.util.Objects;
 
 /**
@@ -122,6 +123,12 @@ class BroadcastProcessQueue {
      * {@link #mPending}.
      */
     private final ArrayDeque<SomeArgs> mPendingOffload = new ArrayDeque<>(4);
+
+    /**
+     * List of all queues holding broadcasts that are waiting to be dispatched.
+     */
+    private final List<ArrayDeque<SomeArgs>> mPendingQueues = List.of(
+            mPendingUrgent, mPending, mPendingOffload);
 
     /**
      * Broadcast actively being dispatched to this process.
@@ -218,11 +225,11 @@ class BroadcastProcessQueue {
      * given count of other receivers have reached a terminal state; typically
      * used for ordered broadcasts and priority traunches.
      */
-    public void enqueueOrReplaceBroadcast(@NonNull BroadcastRecord record, int recordIndex) {
+    public void enqueueOrReplaceBroadcast(@NonNull BroadcastRecord record, int recordIndex,
+            @NonNull BroadcastConsumer replacedBroadcastConsumer) {
         if (record.isReplacePending()) {
-            boolean didReplace = replaceBroadcastInQueue(mPending, record, recordIndex)
-                    || replaceBroadcastInQueue(mPendingUrgent, record, recordIndex)
-                    || replaceBroadcastInQueue(mPendingOffload, record, recordIndex);
+            final boolean didReplace = replaceBroadcast(record, recordIndex,
+                    replacedBroadcastConsumer);
             if (didReplace) {
                 return;
             }
@@ -243,6 +250,26 @@ class BroadcastProcessQueue {
     }
 
     /**
+     * Searches from newest to oldest in the pending broadcast queues, and at the first matching
+     * pending broadcast it finds, replaces it in-place and returns -- does not attempt to handle
+     * "duplicate" broadcasts in the queue.
+     * <p>
+     * @return {@code true} if it found and replaced an existing record in the queue;
+     * {@code false} otherwise.
+     */
+    private boolean replaceBroadcast(@NonNull BroadcastRecord record, int recordIndex,
+            @NonNull BroadcastConsumer replacedBroadcastConsumer) {
+        final int count = mPendingQueues.size();
+        for (int i = 0; i < count; ++i) {
+            final ArrayDeque<SomeArgs> queue = mPendingQueues.get(i);
+            if (replaceBroadcastInQueue(queue, record, recordIndex, replacedBroadcastConsumer)) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    /**
      * Searches from newest to oldest, and at the first matching pending broadcast
      * it finds, replaces it in-place and returns -- does not attempt to handle
      * "duplicate" broadcasts in the queue.
@@ -251,7 +278,8 @@ class BroadcastProcessQueue {
      * {@code false} otherwise.
      */
     private boolean replaceBroadcastInQueue(@NonNull ArrayDeque<SomeArgs> queue,
-            @NonNull BroadcastRecord record, int recordIndex) {
+            @NonNull BroadcastRecord record, int recordIndex,
+            @NonNull BroadcastConsumer replacedBroadcastConsumer) {
         final Iterator<SomeArgs> it = queue.descendingIterator();
         final Object receiver = record.receivers.get(recordIndex);
         while (it.hasNext()) {
@@ -262,12 +290,14 @@ class BroadcastProcessQueue {
             if ((record.callingUid == testRecord.callingUid)
                     && (record.userId == testRecord.userId)
                     && record.intent.filterEquals(testRecord.intent)
-                    && isReceiverEquals(receiver, testReceiver)) {
+                    && isReceiverEquals(receiver, testReceiver)
+                    && testRecord.allReceiversPending()) {
                 // Exact match found; perform in-place swap
                 args.arg1 = record;
                 args.argi1 = recordIndex;
                 onBroadcastDequeued(testRecord, testRecordIndex);
                 onBroadcastEnqueued(record, recordIndex);
+                replacedBroadcastConsumer.accept(testRecord, testRecordIndex);
                 return true;
             }
         }

@@ -154,6 +154,7 @@ public class BroadcastQueueTest {
 
     private ActivityManagerService mAms;
     private BroadcastQueue mQueue;
+    BroadcastConstants mConstants;
 
     /**
      * Desired behavior of the next
@@ -277,10 +278,9 @@ public class BroadcastQueueTest {
         }).when(mAms).getProcessRecordLocked(any(), anyInt());
         doNothing().when(mAms).appNotResponding(any(), any());
 
-        final BroadcastConstants constants = new BroadcastConstants(
-                Settings.Global.BROADCAST_FG_CONSTANTS);
-        constants.TIMEOUT = 100;
-        constants.ALLOW_BG_ACTIVITY_START_TIMEOUT = 0;
+        mConstants = new BroadcastConstants(Settings.Global.BROADCAST_FG_CONSTANTS);
+        mConstants.TIMEOUT = 100;
+        mConstants.ALLOW_BG_ACTIVITY_START_TIMEOUT = 0;
         final BroadcastSkipPolicy emptySkipPolicy = new BroadcastSkipPolicy(mAms) {
             public boolean shouldSkip(BroadcastRecord r, Object o) {
                 // Ignored
@@ -291,7 +291,7 @@ public class BroadcastQueueTest {
                 return null;
             }
         };
-        final BroadcastHistory emptyHistory = new BroadcastHistory(constants) {
+        final BroadcastHistory emptyHistory = new BroadcastHistory(mConstants) {
             public void addBroadcastToHistoryLocked(BroadcastRecord original) {
                 // Ignored
             }
@@ -299,13 +299,13 @@ public class BroadcastQueueTest {
 
         if (mImpl == Impl.DEFAULT) {
             var q = new BroadcastQueueImpl(mAms, mHandlerThread.getThreadHandler(), TAG,
-                    constants, emptySkipPolicy, emptyHistory, false,
+                    mConstants, emptySkipPolicy, emptyHistory, false,
                     ProcessList.SCHED_GROUP_DEFAULT);
             q.mReceiverBatch.mDeepReceiverCopy = true;
             mQueue = q;
         } else if (mImpl == Impl.MODERN) {
             var q = new BroadcastQueueModernImpl(mAms, mHandlerThread.getThreadHandler(),
-                    constants, constants, emptySkipPolicy, emptyHistory);
+                    mConstants, mConstants, emptySkipPolicy, emptyHistory);
             q.mReceiverBatch.mDeepReceiverCopy = true;
             mQueue = q;
         } else {
@@ -1700,6 +1700,28 @@ public class BroadcastQueueTest {
         inOrder.verify(blueThread).scheduleReceiverList(manifestReceiver(
                 filterEquals(airplane),
                 null, null, null, null, null, false, null, null));
+    }
+
+    @Test
+    public void testReplacePending_withPrioritizedBroadcasts() throws Exception {
+        mConstants.MAX_RUNNING_ACTIVE_BROADCASTS = 1;
+        final ProcessRecord callerApp = makeActiveProcessRecord(PACKAGE_GREEN);
+
+        final Intent userPresent = new Intent(Intent.ACTION_USER_PRESENT)
+                .addFlags(Intent.FLAG_RECEIVER_REPLACE_PENDING);
+
+        final List receivers = List.of(
+                withPriority(makeManifestReceiver(PACKAGE_GREEN, CLASS_GREEN), 100),
+                withPriority(makeManifestReceiver(PACKAGE_GREEN, CLASS_RED), 50),
+                withPriority(makeManifestReceiver(PACKAGE_GREEN, CLASS_YELLOW), 10),
+                withPriority(makeManifestReceiver(PACKAGE_GREEN, CLASS_BLUE), 0));
+
+        // Enqueue the broadcast a few times and verify that broadcast queues are not stuck
+        // and are emptied eventually.
+        for (int i = 0; i < 6; ++i) {
+            enqueueBroadcast(makeBroadcastRecord(userPresent, callerApp, receivers));
+        }
+        waitForIdle();
     }
 
     @Test

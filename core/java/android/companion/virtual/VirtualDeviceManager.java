@@ -775,13 +775,11 @@ public final class VirtualDeviceManager {
             final Point size = new Point();
             display.getDisplay().getSize(size);
             VirtualTouchscreenConfig touchscreenConfig =
-                    new VirtualTouchscreenConfig.Builder()
+                    new VirtualTouchscreenConfig.Builder(size.x, size.y)
                             .setVendorId(vendorId)
                             .setProductId(productId)
                             .setInputDeviceName(inputDeviceName)
                             .setAssociatedDisplayId(display.getDisplay().getDisplayId())
-                            .setWidthInPixels(size.x)
-                            .setHeightInPixels(size.y)
                             .build();
             return createVirtualTouchscreen(touchscreenConfig);
         }

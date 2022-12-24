@@ -24,6 +24,7 @@ import android.util.ArrayMap;
 import android.util.ArraySet;
 
 import com.android.internal.annotations.VisibleForTesting;
+import com.android.server.utils.Slogf;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -37,6 +38,7 @@ import java.util.Set;
  */
 final class ProgramInfoCache {
 
+    private static final String TAG = "BcRadioAidlSrv.cache";
     /**
      * Maximum number of {@link RadioManager#ProgramInfo} elements that will be put into a
      * ProgramList.Chunk.mModified array. Used to try to ensure a single ProgramList.Chunk
@@ -124,6 +126,10 @@ final class ProgramInfoCache {
         for (int i = 0; i < chunk.modified.length; i++) {
             RadioManager.ProgramInfo programInfo =
                     ConversionUtils.programInfoFromHalProgramInfo(chunk.modified[i]);
+            if (programInfo == null) {
+                Slogf.e(TAG, "Program info in program info %s in chunk is not valid",
+                        chunk.modified[i]);
+            }
             mProgramInfoMap.put(programInfo.getSelector().getPrimaryId(), programInfo);
         }
         if (chunk.removed != null) {

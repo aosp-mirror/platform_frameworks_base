@@ -22,9 +22,9 @@ import static android.app.admin.DevicePolicyManager.NEARBY_STREAMING_SAME_MANAGE
 import static android.view.WindowManager.LayoutParams.FLAG_SECURE;
 import static android.view.WindowManager.LayoutParams.SYSTEM_FLAG_HIDE_NON_SYSTEM_OVERLAY_WINDOWS;
 
+import android.annotation.EnforcePermission;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
-import android.annotation.RequiresPermission;
 import android.annotation.StringRes;
 import android.app.Activity;
 import android.app.ActivityOptions;
@@ -62,6 +62,7 @@ import android.os.Binder;
 import android.os.IBinder;
 import android.os.LocaleList;
 import android.os.Looper;
+import android.os.PermissionEnforcer;
 import android.os.PowerManager;
 import android.os.RemoteException;
 import android.os.ResultReceiver;
@@ -198,6 +199,7 @@ final class VirtualDeviceImpl extends IVirtualDevice.Stub
             IVirtualDeviceActivityListener activityListener,
             Consumer<ArraySet<Integer>> runningAppsChangedCallback,
             VirtualDeviceParams params) {
+        super(PermissionEnforcer.fromContext(context));
         UserHandle ownerUserHandle = UserHandle.getUserHandleForUid(ownerUid);
         mContext = context.createContextAsUser(ownerUserHandle, 0);
         mAssociationInfo = associationInfo;
@@ -337,11 +339,9 @@ final class VirtualDeviceImpl extends IVirtualDevice.Stub
     }
 
     @Override // Binder call
+    @EnforcePermission(android.Manifest.permission.CREATE_VIRTUAL_DEVICE)
     public void close() {
-        mContext.enforceCallingOrSelfPermission(
-                android.Manifest.permission.CREATE_VIRTUAL_DEVICE,
-                "Permission required to close the virtual device");
-
+        super.close_enforcePermission();
         synchronized (mVirtualDeviceLock) {
             if (!mPerDisplayWakelocks.isEmpty()) {
                 mPerDisplayWakelocks.forEach((displayId, wakeLock) -> {
@@ -389,14 +389,12 @@ final class VirtualDeviceImpl extends IVirtualDevice.Stub
         return mWindowPolicyControllers;
     }
 
-    @RequiresPermission(android.Manifest.permission.CREATE_VIRTUAL_DEVICE)
     @Override // Binder call
+    @EnforcePermission(android.Manifest.permission.CREATE_VIRTUAL_DEVICE)
     public void onAudioSessionStarting(int displayId,
             @NonNull IAudioRoutingCallback routingCallback,
             @Nullable IAudioConfigChangedCallback configChangedCallback) {
-        mContext.enforceCallingOrSelfPermission(
-                android.Manifest.permission.CREATE_VIRTUAL_DEVICE,
-                "Permission required to start audio session");
+        super.onAudioSessionStarting_enforcePermission();
         synchronized (mVirtualDeviceLock) {
             if (!mVirtualDisplayIds.contains(displayId)) {
                 throw new SecurityException(
@@ -413,12 +411,10 @@ final class VirtualDeviceImpl extends IVirtualDevice.Stub
         }
     }
 
-    @RequiresPermission(android.Manifest.permission.CREATE_VIRTUAL_DEVICE)
     @Override // Binder call
+    @EnforcePermission(android.Manifest.permission.CREATE_VIRTUAL_DEVICE)
     public void onAudioSessionEnded() {
-        mContext.enforceCallingOrSelfPermission(
-                android.Manifest.permission.CREATE_VIRTUAL_DEVICE,
-                "Permission required to stop audio session");
+        super.onAudioSessionEnded_enforcePermission();
         synchronized (mVirtualDeviceLock) {
             if (mVirtualAudioController != null) {
                 mVirtualAudioController.stopListening();
@@ -428,9 +424,9 @@ final class VirtualDeviceImpl extends IVirtualDevice.Stub
     }
 
     @Override // Binder call
+    @EnforcePermission(android.Manifest.permission.CREATE_VIRTUAL_DEVICE)
     public void createVirtualDpad(VirtualDpadConfig config, @NonNull IBinder deviceToken) {
-        mContext.enforceCallingOrSelfPermission(android.Manifest.permission.CREATE_VIRTUAL_DEVICE,
-                "Permission required to create a virtual dpad");
+        super.createVirtualDpad_enforcePermission();
         synchronized (mVirtualDeviceLock) {
             if (!mVirtualDisplayIds.contains(config.getAssociatedDisplayId())) {
                 throw new SecurityException(
@@ -448,9 +444,9 @@ final class VirtualDeviceImpl extends IVirtualDevice.Stub
     }
 
     @Override // Binder call
+    @EnforcePermission(android.Manifest.permission.CREATE_VIRTUAL_DEVICE)
     public void createVirtualKeyboard(VirtualKeyboardConfig config, @NonNull IBinder deviceToken) {
-        mContext.enforceCallingOrSelfPermission(android.Manifest.permission.CREATE_VIRTUAL_DEVICE,
-                "Permission required to create a virtual keyboard");
+        super.createVirtualKeyboard_enforcePermission();
         synchronized (mVirtualDeviceLock) {
             if (!mVirtualDisplayIds.contains(config.getAssociatedDisplayId())) {
                 throw new SecurityException(
@@ -470,9 +466,9 @@ final class VirtualDeviceImpl extends IVirtualDevice.Stub
     }
 
     @Override // Binder call
+    @EnforcePermission(android.Manifest.permission.CREATE_VIRTUAL_DEVICE)
     public void createVirtualMouse(VirtualMouseConfig config, @NonNull IBinder deviceToken) {
-        mContext.enforceCallingOrSelfPermission(android.Manifest.permission.CREATE_VIRTUAL_DEVICE,
-                "Permission required to create a virtual mouse");
+        super.createVirtualMouse_enforcePermission();
         synchronized (mVirtualDeviceLock) {
             if (!mVirtualDisplayIds.contains(config.getAssociatedDisplayId())) {
                 throw new SecurityException(
@@ -490,10 +486,10 @@ final class VirtualDeviceImpl extends IVirtualDevice.Stub
     }
 
     @Override // Binder call
+    @EnforcePermission(android.Manifest.permission.CREATE_VIRTUAL_DEVICE)
     public void createVirtualTouchscreen(VirtualTouchscreenConfig config,
             @NonNull IBinder deviceToken) {
-        mContext.enforceCallingOrSelfPermission(android.Manifest.permission.CREATE_VIRTUAL_DEVICE,
-                "Permission required to create a virtual touchscreen");
+        super.createVirtualTouchscreen_enforcePermission();
         synchronized (mVirtualDeviceLock) {
             if (!mVirtualDisplayIds.contains(config.getAssociatedDisplayId())) {
                 throw new SecurityException(
@@ -501,30 +497,29 @@ final class VirtualDeviceImpl extends IVirtualDevice.Stub
                                 + "this virtual device");
             }
         }
-        int screenHeightPixels = config.getHeightInPixels();
-        int screenWidthPixels = config.getWidthInPixels();
-        if (screenHeightPixels <= 0 || screenWidthPixels <= 0) {
+        int screenHeight = config.getHeight();
+        int screenWidth = config.getWidth();
+        if (screenHeight <= 0 || screenWidth <= 0) {
             throw new IllegalArgumentException(
                     "Cannot create a virtual touchscreen, screen dimensions must be positive. Got: "
-                            + "(" + screenWidthPixels + ", " + screenHeightPixels + ")");
+                            + "(" + screenWidth + ", " + screenHeight + ")");
         }
 
         final long ident = Binder.clearCallingIdentity();
         try {
             mInputController.createTouchscreen(config.getInputDeviceName(), config.getVendorId(),
                     config.getProductId(), deviceToken, config.getAssociatedDisplayId(),
-                    screenHeightPixels, screenWidthPixels);
+                    screenHeight, screenWidth);
         } finally {
             Binder.restoreCallingIdentity(ident);
         }
     }
 
     @Override // Binder call
+    @EnforcePermission(android.Manifest.permission.CREATE_VIRTUAL_DEVICE)
     public void createVirtualNavigationTouchpad(VirtualNavigationTouchpadConfig config,
             @NonNull IBinder deviceToken) {
-        mContext.enforceCallingOrSelfPermission(
-                android.Manifest.permission.CREATE_VIRTUAL_DEVICE,
-                "Permission required to create a virtual navigation touchpad");
+        super.createVirtualNavigationTouchpad_enforcePermission();
         synchronized (mVirtualDeviceLock) {
             if (!mVirtualDisplayIds.contains(config.getAssociatedDisplayId())) {
                 throw new SecurityException(
@@ -552,11 +547,9 @@ final class VirtualDeviceImpl extends IVirtualDevice.Stub
     }
 
     @Override // Binder call
+    @EnforcePermission(android.Manifest.permission.CREATE_VIRTUAL_DEVICE)
     public void unregisterInputDevice(IBinder token) {
-        mContext.enforceCallingOrSelfPermission(
-                android.Manifest.permission.CREATE_VIRTUAL_DEVICE,
-                "Permission required to unregister this input device");
-
+        super.unregisterInputDevice_enforcePermission();
         final long ident = Binder.clearCallingIdentity();
         try {
             mInputController.unregisterInputDevice(token);
@@ -577,7 +570,9 @@ final class VirtualDeviceImpl extends IVirtualDevice.Stub
 
 
     @Override // Binder call
+    @EnforcePermission(android.Manifest.permission.CREATE_VIRTUAL_DEVICE)
     public boolean sendDpadKeyEvent(IBinder token, VirtualKeyEvent event) {
+        super.sendDpadKeyEvent_enforcePermission();
         final long ident = Binder.clearCallingIdentity();
         try {
             return mInputController.sendDpadKeyEvent(token, event);
@@ -587,7 +582,9 @@ final class VirtualDeviceImpl extends IVirtualDevice.Stub
     }
 
     @Override // Binder call
+    @EnforcePermission(android.Manifest.permission.CREATE_VIRTUAL_DEVICE)
     public boolean sendKeyEvent(IBinder token, VirtualKeyEvent event) {
+        super.sendKeyEvent_enforcePermission();
         final long ident = Binder.clearCallingIdentity();
         try {
             return mInputController.sendKeyEvent(token, event);
@@ -597,7 +594,9 @@ final class VirtualDeviceImpl extends IVirtualDevice.Stub
     }
 
     @Override // Binder call
+    @EnforcePermission(android.Manifest.permission.CREATE_VIRTUAL_DEVICE)
     public boolean sendButtonEvent(IBinder token, VirtualMouseButtonEvent event) {
+        super.sendButtonEvent_enforcePermission();
         final long ident = Binder.clearCallingIdentity();
         try {
             return mInputController.sendButtonEvent(token, event);
@@ -607,7 +606,9 @@ final class VirtualDeviceImpl extends IVirtualDevice.Stub
     }
 
     @Override // Binder call
+    @EnforcePermission(android.Manifest.permission.CREATE_VIRTUAL_DEVICE)
     public boolean sendTouchEvent(IBinder token, VirtualTouchEvent event) {
+        super.sendTouchEvent_enforcePermission();
         final long ident = Binder.clearCallingIdentity();
         try {
             return mInputController.sendTouchEvent(token, event);
@@ -617,7 +618,9 @@ final class VirtualDeviceImpl extends IVirtualDevice.Stub
     }
 
     @Override // Binder call
+    @EnforcePermission(android.Manifest.permission.CREATE_VIRTUAL_DEVICE)
     public boolean sendRelativeEvent(IBinder token, VirtualMouseRelativeEvent event) {
+        super.sendRelativeEvent_enforcePermission();
         final long ident = Binder.clearCallingIdentity();
         try {
             return mInputController.sendRelativeEvent(token, event);
@@ -627,7 +630,9 @@ final class VirtualDeviceImpl extends IVirtualDevice.Stub
     }
 
     @Override // Binder call
+    @EnforcePermission(android.Manifest.permission.CREATE_VIRTUAL_DEVICE)
     public boolean sendScrollEvent(IBinder token, VirtualMouseScrollEvent event) {
+        super.sendScrollEvent_enforcePermission();
         final long ident = Binder.clearCallingIdentity();
         try {
             return mInputController.sendScrollEvent(token, event);
@@ -647,11 +652,9 @@ final class VirtualDeviceImpl extends IVirtualDevice.Stub
     }
 
     @Override // Binder call
+    @EnforcePermission(android.Manifest.permission.CREATE_VIRTUAL_DEVICE)
     public void setShowPointerIcon(boolean showPointerIcon) {
-        mContext.enforceCallingOrSelfPermission(
-                android.Manifest.permission.CREATE_VIRTUAL_DEVICE,
-                "Permission required to unregister this input device");
-
+        super.setShowPointerIcon_enforcePermission();
         final long ident = Binder.clearCallingIdentity();
         try {
             synchronized (mVirtualDeviceLock) {
@@ -666,12 +669,11 @@ final class VirtualDeviceImpl extends IVirtualDevice.Stub
     }
 
     @Override // Binder call
+    @EnforcePermission(android.Manifest.permission.CREATE_VIRTUAL_DEVICE)
     public void createVirtualSensor(
             @NonNull IBinder deviceToken,
             @NonNull VirtualSensorConfig config) {
-        mContext.enforceCallingOrSelfPermission(
-                android.Manifest.permission.CREATE_VIRTUAL_DEVICE,
-                "Permission required to create a virtual sensor");
+        super.createVirtualSensor_enforcePermission();
         Objects.requireNonNull(config);
         Objects.requireNonNull(deviceToken);
         final long ident = Binder.clearCallingIdentity();
@@ -683,10 +685,9 @@ final class VirtualDeviceImpl extends IVirtualDevice.Stub
     }
 
     @Override // Binder call
+    @EnforcePermission(android.Manifest.permission.CREATE_VIRTUAL_DEVICE)
     public void unregisterSensor(@NonNull IBinder token) {
-        mContext.enforceCallingOrSelfPermission(
-                android.Manifest.permission.CREATE_VIRTUAL_DEVICE,
-                "Permission required to unregister a virtual sensor");
+        super.unregisterSensor_enforcePermission();
         final long ident = Binder.clearCallingIdentity();
         try {
             mSensorController.unregisterSensor(token);
@@ -696,10 +697,9 @@ final class VirtualDeviceImpl extends IVirtualDevice.Stub
     }
 
     @Override // Binder call
+    @EnforcePermission(android.Manifest.permission.CREATE_VIRTUAL_DEVICE)
     public boolean sendSensorEvent(@NonNull IBinder token, @NonNull VirtualSensorEvent event) {
-        mContext.enforceCallingOrSelfPermission(
-                android.Manifest.permission.CREATE_VIRTUAL_DEVICE,
-                "Permission required to send a virtual sensor event");
+        super.sendSensorEvent_enforcePermission();
         final long ident = Binder.clearCallingIdentity();
         try {
             return mSensorController.sendSensorEvent(token, event);
@@ -709,25 +709,23 @@ final class VirtualDeviceImpl extends IVirtualDevice.Stub
     }
 
     @Override // Binder call
+    @EnforcePermission(android.Manifest.permission.CREATE_VIRTUAL_DEVICE)
     public void registerIntentInterceptor(IVirtualDeviceIntentInterceptor intentInterceptor,
             IntentFilter filter) {
+        super.registerIntentInterceptor_enforcePermission();
         Objects.requireNonNull(intentInterceptor);
         Objects.requireNonNull(filter);
-        mContext.enforceCallingOrSelfPermission(
-                android.Manifest.permission.CREATE_VIRTUAL_DEVICE,
-                "Permission required to register intent interceptor");
         synchronized (mVirtualDeviceLock) {
             mIntentInterceptors.put(intentInterceptor.asBinder(), filter);
         }
     }
 
     @Override // Binder call
+    @EnforcePermission(android.Manifest.permission.CREATE_VIRTUAL_DEVICE)
     public void unregisterIntentInterceptor(
             @NonNull IVirtualDeviceIntentInterceptor intentInterceptor) {
+        super.unregisterIntentInterceptor_enforcePermission();
         Objects.requireNonNull(intentInterceptor);
-        mContext.enforceCallingOrSelfPermission(
-                android.Manifest.permission.CREATE_VIRTUAL_DEVICE,
-                "Permission required to unregister intent interceptor");
         synchronized (mVirtualDeviceLock) {
             mIntentInterceptors.remove(intentInterceptor.asBinder());
         }

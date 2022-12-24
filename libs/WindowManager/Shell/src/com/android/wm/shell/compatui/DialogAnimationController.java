@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.android.wm.shell.compatui.letterboxedu;
+package com.android.wm.shell.compatui;
 
 import static com.android.internal.R.styleable.WindowAnimation_windowEnterAnimation;
 import static com.android.internal.R.styleable.WindowAnimation_windowExitAnimation;
@@ -38,10 +38,15 @@ import android.view.animation.Animation;
 import com.android.internal.policy.TransitionAnimation;
 
 /**
- * Controls the enter/exit animations of the letterbox education.
+ * Controls the enter/exit a dialog.
+ *
+ * @param <T> The {@link DialogContainerSupplier} to use
  */
-class LetterboxEduAnimationController {
-    private static final String TAG = "LetterboxEduAnimation";
+public class DialogAnimationController<T extends DialogContainerSupplier> {
+
+    // The alpha of a background is a number between 0 (fully transparent) to 255 (fully opaque).
+    // 204 is simply 255 * 0.8.
+    static final int BACKGROUND_DIM_ALPHA = 204;
 
     // If shell transitions are enabled, startEnterAnimation will be called after all transitions
     // have finished, and therefore the start delay should be shorter.
@@ -49,6 +54,7 @@ class LetterboxEduAnimationController {
 
     private final TransitionAnimation mTransitionAnimation;
     private final String mPackageName;
+    private final String mTag;
     @AnyRes
     private final int mAnimStyleResId;
 
@@ -57,23 +63,24 @@ class LetterboxEduAnimationController {
     @Nullable
     private Animator mBackgroundDimAnimator;
 
-    LetterboxEduAnimationController(Context context) {
-        mTransitionAnimation = new TransitionAnimation(context, /* debug= */ false, TAG);
+    public DialogAnimationController(Context context, String tag) {
+        mTransitionAnimation = new TransitionAnimation(context, /* debug= */ false, tag);
         mAnimStyleResId = (new ContextThemeWrapper(context,
                 android.R.style.ThemeOverlay_Material_Dialog).getTheme()).obtainStyledAttributes(
                 com.android.internal.R.styleable.Window).getResourceId(
                 com.android.internal.R.styleable.Window_windowAnimationStyle, 0);
         mPackageName = context.getPackageName();
+        mTag = tag;
     }
 
     /**
      * Starts both background dim fade-in animation and the dialog enter animation.
      */
-    void startEnterAnimation(@NonNull LetterboxEduDialogLayout layout, Runnable endCallback) {
+    public void startEnterAnimation(@NonNull T layout, Runnable endCallback) {
         // Cancel any previous animation if it's still running.
         cancelAnimation();
 
-        final View dialogContainer = layout.getDialogContainer();
+        final View dialogContainer = layout.getDialogContainerView();
         mDialogAnimation = loadAnimation(WindowAnimation_windowEnterAnimation);
         if (mDialogAnimation == null) {
             endCallback.run();
@@ -86,8 +93,8 @@ class LetterboxEduAnimationController {
                     endCallback.run();
                 }));
 
-        mBackgroundDimAnimator = getAlphaAnimator(layout.getBackgroundDim(),
-                /* endAlpha= */ LetterboxEduDialogLayout.BACKGROUND_DIM_ALPHA,
+        mBackgroundDimAnimator = getAlphaAnimator(layout.getBackgroundDimDrawable(),
+                /* endAlpha= */ BACKGROUND_DIM_ALPHA,
                 mDialogAnimation.getDuration());
         mBackgroundDimAnimator.addListener(getDimAnimatorListener());
 
@@ -101,11 +108,11 @@ class LetterboxEduAnimationController {
     /**
      * Starts both the background dim fade-out animation and the dialog exit animation.
      */
-    void startExitAnimation(@NonNull LetterboxEduDialogLayout layout, Runnable endCallback) {
+    public void startExitAnimation(@NonNull T layout, Runnable endCallback) {
         // Cancel any previous animation if it's still running.
         cancelAnimation();
 
-        final View dialogContainer = layout.getDialogContainer();
+        final View dialogContainer = layout.getDialogContainerView();
         mDialogAnimation = loadAnimation(WindowAnimation_windowExitAnimation);
         if (mDialogAnimation == null) {
             endCallback.run();
@@ -119,8 +126,8 @@ class LetterboxEduAnimationController {
                     endCallback.run();
                 }));
 
-        mBackgroundDimAnimator = getAlphaAnimator(layout.getBackgroundDim(), /* endAlpha= */ 0,
-                mDialogAnimation.getDuration());
+        mBackgroundDimAnimator = getAlphaAnimator(layout.getBackgroundDimDrawable(),
+                /* endAlpha= */ 0, mDialogAnimation.getDuration());
         mBackgroundDimAnimator.addListener(getDimAnimatorListener());
 
         dialogContainer.startAnimation(mDialogAnimation);
@@ -130,7 +137,7 @@ class LetterboxEduAnimationController {
     /**
      * Cancels all animations and resets the state of the controller.
      */
-    void cancelAnimation() {
+    public void cancelAnimation() {
         if (mDialogAnimation != null) {
             mDialogAnimation.cancel();
             mDialogAnimation = null;
@@ -145,7 +152,7 @@ class LetterboxEduAnimationController {
         Animation animation = mTransitionAnimation.loadAnimationAttr(mPackageName, mAnimStyleResId,
                 animAttr, /* translucent= */ false);
         if (animation == null) {
-            Log.e(TAG, "Failed to load animation " + animAttr);
+            Log.e(mTag, "Failed to load animation " + animAttr);
         }
         return animation;
     }

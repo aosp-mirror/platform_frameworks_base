@@ -19,6 +19,7 @@ import android.hardware.broadcastradio.IdentifierType;
 import android.hardware.broadcastradio.Metadata;
 import android.hardware.broadcastradio.ProgramIdentifier;
 import android.hardware.broadcastradio.ProgramInfo;
+import android.hardware.broadcastradio.ProgramListChunk;
 import android.hardware.broadcastradio.VendorKeyValue;
 import android.hardware.radio.ProgramSelector;
 import android.hardware.radio.RadioManager;
@@ -41,17 +42,25 @@ final class AidlTestUtils {
                 /* dabFrequencyTable= */ null, /* vendorInfo= */ null);
     }
 
-    static RadioManager.ProgramInfo makeProgramInfo(ProgramSelector selector, int signalQuality) {
+    static RadioManager.ProgramInfo makeProgramInfo(ProgramSelector selector,
+            ProgramSelector.Identifier logicallyTunedTo,
+            ProgramSelector.Identifier physicallyTunedTo, int signalQuality) {
         return new RadioManager.ProgramInfo(selector,
-                selector.getPrimaryId(), selector.getPrimaryId(), /* relatedContents= */ null,
+                logicallyTunedTo, physicallyTunedTo, /* relatedContents= */ null,
                 /* infoFlags= */ 0, signalQuality,
                 new RadioMetadata.Builder().build(), new ArrayMap<>());
     }
 
-    static RadioManager.ProgramInfo makeProgramInfo(int programType,
-            ProgramSelector.Identifier identifier, int signalQuality) {
-        ProgramSelector selector = makeProgramSelector(programType, identifier);
-        return makeProgramInfo(selector, signalQuality);
+    static RadioManager.ProgramInfo makeProgramInfo(ProgramSelector selector, int signalQuality) {
+        return makeProgramInfo(selector, selector.getPrimaryId(), selector.getPrimaryId(),
+                signalQuality);
+    }
+
+    static ProgramIdentifier makeHalIdentifier(@IdentifierType int type, long value) {
+        ProgramIdentifier halDabId = new ProgramIdentifier();
+        halDabId.type = type;
+        halDabId.value = value;
+        return halDabId;
     }
 
     static ProgramSelector makeFmSelector(long freq) {
@@ -67,42 +76,46 @@ final class AidlTestUtils {
     }
 
     static android.hardware.broadcastradio.ProgramSelector makeHalFmSelector(int freq) {
-        ProgramIdentifier halId = new ProgramIdentifier();
-        halId.type = IdentifierType.AMFM_FREQUENCY_KHZ;
-        halId.value = freq;
-
-        android.hardware.broadcastradio.ProgramSelector halSelector =
-                new android.hardware.broadcastradio.ProgramSelector();
-        halSelector.primaryId = halId;
-        halSelector.secondaryIds = new ProgramIdentifier[0];
-        return halSelector;
+        ProgramIdentifier halId = makeHalIdentifier(IdentifierType.AMFM_FREQUENCY_KHZ, freq);
+        return makeHalSelector(halId, /* secondaryIds= */ new ProgramIdentifier[0]);
     }
 
-    static ProgramInfo programInfoToHalProgramInfo(RadioManager.ProgramInfo info) {
-        // Note that because ConversionUtils does not by design provide functions for all
-        // conversions, this function only copies fields that are set by makeProgramInfo().
-        ProgramInfo hwInfo = new ProgramInfo();
-        hwInfo.selector = ConversionUtils.programSelectorToHalProgramSelector(info.getSelector());
-        hwInfo.logicallyTunedTo =
-                ConversionUtils.identifierToHalProgramIdentifier(info.getLogicallyTunedTo());
-        hwInfo.physicallyTunedTo =
-                ConversionUtils.identifierToHalProgramIdentifier(info.getPhysicallyTunedTo());
-        hwInfo.signalQuality = info.getSignalStrength();
-        hwInfo.relatedContent = new ProgramIdentifier[]{};
-        hwInfo.metadata = new Metadata[]{};
-        return hwInfo;
+    static android.hardware.broadcastradio.ProgramSelector makeHalSelector(
+            ProgramIdentifier primaryId, ProgramIdentifier[] secondaryIds) {
+        android.hardware.broadcastradio.ProgramSelector hwSelector =
+                new android.hardware.broadcastradio.ProgramSelector();
+        hwSelector.primaryId = primaryId;
+        hwSelector.secondaryIds = secondaryIds;
+        return hwSelector;
     }
 
     static ProgramInfo makeHalProgramInfo(
             android.hardware.broadcastradio.ProgramSelector hwSel, int hwSignalQuality) {
+        return makeHalProgramInfo(hwSel, hwSel.primaryId, hwSel.primaryId, hwSignalQuality);
+    }
+
+    static ProgramInfo makeHalProgramInfo(
+            android.hardware.broadcastradio.ProgramSelector hwSel,
+            ProgramIdentifier logicallyTunedTo, ProgramIdentifier physicallyTunedTo,
+            int hwSignalQuality) {
         ProgramInfo hwInfo = new ProgramInfo();
         hwInfo.selector = hwSel;
-        hwInfo.logicallyTunedTo = hwSel.primaryId;
-        hwInfo.physicallyTunedTo = hwSel.primaryId;
+        hwInfo.logicallyTunedTo = logicallyTunedTo;
+        hwInfo.physicallyTunedTo = physicallyTunedTo;
         hwInfo.signalQuality = hwSignalQuality;
         hwInfo.relatedContent = new ProgramIdentifier[]{};
         hwInfo.metadata = new Metadata[]{};
         return hwInfo;
+    }
+
+    static ProgramListChunk makeProgramListChunk(boolean purge, boolean complete,
+            ProgramInfo[] modified, ProgramIdentifier[] removed) {
+        ProgramListChunk halChunk = new ProgramListChunk();
+        halChunk.purge = purge;
+        halChunk.complete = complete;
+        halChunk.modified = modified;
+        halChunk.removed = removed;
+        return halChunk;
     }
 
     static VendorKeyValue makeVendorKeyValue(String vendorKey, String vendorValue) {

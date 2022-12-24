@@ -203,10 +203,15 @@ final class TunerSession extends ITuner.Stub {
             Slogf.w(TAG, "Cannot tune on AIDL HAL client from non-current user");
             return;
         }
+        android.hardware.broadcastradio.ProgramSelector hwSel =
+                ConversionUtils.programSelectorToHalProgramSelector(selector);
+        if (hwSel == null) {
+            throw new IllegalArgumentException("tune: INVALID_ARGUMENTS for program selector");
+        }
         synchronized (mLock) {
             checkNotClosedLocked();
             try {
-                mService.tune(ConversionUtils.programSelectorToHalProgramSelector(selector));
+                mService.tune(hwSel);
             } catch (RuntimeException ex) {
                 throw ConversionUtils.throwOnError(ex, /* action= */ "tune");
             }

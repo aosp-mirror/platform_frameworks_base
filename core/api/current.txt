@@ -19993,8 +19993,9 @@ package android.location {
     method public int describeContents();
     method @NonNull public android.location.GnssClock getClock();
     method @NonNull public java.util.Collection<android.location.GnssAutomaticGainControl> getGnssAutomaticGainControls();
-    method public boolean getIsFullTracking();
     method @NonNull public java.util.Collection<android.location.GnssMeasurement> getMeasurements();
+    method public boolean hasFullTracking();
+    method public boolean isFullTracking();
     method public void writeToParcel(android.os.Parcel, int);
     field @NonNull public static final android.os.Parcelable.Creator<android.location.GnssMeasurementsEvent> CREATOR;
   }
@@ -20003,9 +20004,10 @@ package android.location {
     ctor public GnssMeasurementsEvent.Builder();
     ctor public GnssMeasurementsEvent.Builder(@NonNull android.location.GnssMeasurementsEvent);
     method @NonNull public android.location.GnssMeasurementsEvent build();
+    method @NonNull public android.location.GnssMeasurementsEvent.Builder clearFullTracking();
     method @NonNull public android.location.GnssMeasurementsEvent.Builder setClock(@NonNull android.location.GnssClock);
+    method @NonNull public android.location.GnssMeasurementsEvent.Builder setFullTracking(boolean);
     method @NonNull public android.location.GnssMeasurementsEvent.Builder setGnssAutomaticGainControls(@NonNull java.util.Collection<android.location.GnssAutomaticGainControl>);
-    method @NonNull public android.location.GnssMeasurementsEvent.Builder setIsFullTracking(boolean);
     method @NonNull public android.location.GnssMeasurementsEvent.Builder setMeasurements(@NonNull java.util.Collection<android.location.GnssMeasurement>);
   }
 
@@ -24222,6 +24224,7 @@ package android.media {
     method public int getDisableReason();
     method public int getFlags();
     method @NonNull public String getRouteId();
+    method public int getSessionParticipantCount();
     method public void writeToParcel(@NonNull android.os.Parcel, int);
     field @NonNull public static final android.os.Parcelable.Creator<android.media.RouteListingPreference.Item> CREATOR;
     field public static final int DISABLE_REASON_AD = 3; // 0x3
@@ -24237,6 +24240,7 @@ package android.media {
     method @NonNull public android.media.RouteListingPreference.Item build();
     method @NonNull public android.media.RouteListingPreference.Item.Builder setDisableReason(int);
     method @NonNull public android.media.RouteListingPreference.Item.Builder setFlags(int);
+    method @NonNull public android.media.RouteListingPreference.Item.Builder setSessionParticipantCount(@IntRange(from=0) int);
   }
 
   public final class RoutingSessionInfo implements android.os.Parcelable {
