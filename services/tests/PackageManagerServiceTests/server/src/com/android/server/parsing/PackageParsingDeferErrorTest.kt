@@ -23,7 +23,8 @@ import com.android.server.pm.pkg.parsing.ParsingPackageUtils
 import android.content.pm.parsing.result.ParseResult
 import android.platform.test.annotations.Presubmit
 import androidx.test.InstrumentationRegistry
-import com.android.frameworks.servicestests.R
+import com.android.server.pm.parsing.pkg.ParsedPackage
+import com.android.server.pm.test.service.server.R
 import com.google.common.truth.Truth.assertThat
 import com.google.common.truth.Truth.assertWithMessage
 import org.junit.Rule
