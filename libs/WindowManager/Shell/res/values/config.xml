@@ -115,4 +115,10 @@
     <!-- Components support to launch multiple instances into split-screen -->
     <string-array name="config_appsSupportMultiInstancesSplit">
     </string-array>
+
+    <!-- Whether the extended restart dialog is enabled -->
+    <bool name="config_letterboxIsRestartDialogEnabled">false</bool>
+
+    <!-- Whether the additional education about reachability is enabled -->
+    <bool name="config_letterboxIsReachabilityEducationEnabled">false</bool>
 </resources>
