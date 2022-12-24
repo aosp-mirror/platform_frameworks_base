@@ -279,14 +279,27 @@ public class AudioSystemAdapter implements AudioSystem.RoutingUpdateCallback,
     }
 
     /**
-     * Same as {@link AudioSystem#removeDevicesRoleForStrategy(int, int)}
+     * Same as {@link AudioSystem#removeDevicesRoleForStrategy(int, int, List)}
+     * @param strategy
+     * @param role
+     * @param devices
+     * @return
+     */
+    public int removeDevicesRoleForStrategy(int strategy, int role,
+                                            @NonNull List<AudioDeviceAttributes> devices) {
+        invalidateRoutingCache();
+        return AudioSystem.removeDevicesRoleForStrategy(strategy, role, devices);
+    }
+
+    /**
+     * Same as {@link AudioSystem#clearDevicesRoleForStrategy(int, int)}
      * @param strategy
      * @param role
      * @return
      */
-    public int removeDevicesRoleForStrategy(int strategy, int role) {
+    public int clearDevicesRoleForStrategy(int strategy, int role) {
         invalidateRoutingCache();
-        return AudioSystem.removeDevicesRoleForStrategy(strategy, role);
+        return AudioSystem.clearDevicesRoleForStrategy(strategy, role);
     }
 
     /**
