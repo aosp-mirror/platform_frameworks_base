@@ -139,11 +139,20 @@ private fun PeopleScreenWithConversations(
                     bottom = PeopleSpacePadding,
                     start = 8.dp,
                     end = 8.dp,
-                )
+                ),
         ) {
-            ConversationList(R.string.priority_conversations, priorityTiles, onTileClicked)
-            item { Spacer(Modifier.height(35.dp)) }
-            ConversationList(R.string.recent_conversations, recentTiles, onTileClicked)
+            val hasPriorityConversations = priorityTiles.isNotEmpty()
+            if (hasPriorityConversations) {
+                ConversationList(R.string.priority_conversations, priorityTiles, onTileClicked)
+            }
+
+            if (recentTiles.isNotEmpty()) {
+                if (hasPriorityConversations) {
+                    item { Spacer(Modifier.height(35.dp)) }
+                }
+
+                ConversationList(R.string.recent_conversations, recentTiles, onTileClicked)
+            }
         }
     }
 }

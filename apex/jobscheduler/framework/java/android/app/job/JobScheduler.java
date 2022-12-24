@@ -38,6 +38,7 @@ import android.os.PersistableBundle;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.util.List;
+import java.util.Map;
 
 /**
  * This is an API for scheduling various types of jobs against the framework that will be executed
@@ -264,6 +265,31 @@ public abstract class JobScheduler {
     }
 
     /**
+     * Get a JobScheduler instance that is dedicated to a specific namespace. Any API calls using
+     * this instance will interact with jobs in that namespace, unless the API documentation says
+     * otherwise. Attempting to update a job scheduled in another namespace will not be possible
+     * but will instead create or update the job inside the current namespace. A JobScheduler
+     * instance dedicated to a namespace must be used to schedule or update jobs in that namespace.
+     * @see #getNamespace()
+     * @hide
+     */
+    @NonNull
+    public JobScheduler forNamespace(@NonNull String namespace) {
+        throw new RuntimeException("Not implemented. Must override in a subclass.");
+    }
+
+    /**
+     * Get the namespace this JobScheduler instance is operating in. A {@code null} value means
+     * that the app has not specified a namespace for this instance, and it is therefore using the
+     * default namespace.
+     * @hide
+     */
+    @Nullable
+    public String getNamespace() {
+        throw new RuntimeException("Not implemented. Must override in a subclass.");
+    }
+
+    /**
      * Schedule a job to be executed.  Will replace any currently scheduled job with the same
      * ID with the new information in the {@link JobInfo}.  If a job with the given ID is currently
      * running, it will be stopped.
@@ -311,13 +337,23 @@ public abstract class JobScheduler {
      * but there are situations where it may get this wrong and count the JobInfo as changing.
      * (That said, you should be relatively safe with a simple set of consistent data in these
      * fields.)  You should never use {@link JobInfo.Builder#setClipData(ClipData, int)} with
-     * work you are enqueue, since currently this will always be treated as a different JobInfo,
+     * work you are enqueuing, since currently this will always be treated as a different JobInfo,
      * even if the ClipData contents are exactly the same.</p>
      *
      * <p class="caution"><strong>Note:</strong> Scheduling a job can have a high cost, even if it's
      * rescheduling the same job and the job didn't execute, especially on platform versions before
      * version {@link android.os.Build.VERSION_CODES#Q}. As such, the system may throttle calls to
      * this API if calls are made too frequently in a short amount of time.
+     *
+     * <p class="caution"><strong>Note:</strong> Prior to Android version
+     * {@link android.os.Build.VERSION_CODES#UPSIDE_DOWN_CAKE}, JobWorkItems could not be persisted.
+     * Apps were not allowed to enqueue JobWorkItems with persisted jobs and the system would throw
+     * an {@link IllegalArgumentException} if they attempted to do so. Starting with
+     * {@link android.os.Build.VERSION_CODES#UPSIDE_DOWN_CAKE},
+     * JobWorkItems can be persisted alongside the hosting job.
+     * However, Intents cannot be persisted. Set a {@link PersistableBundle} using
+     * {@link JobWorkItem.Builder#setExtras(PersistableBundle)} for any information that needs
+     * to be persisted.
      *
      * <p>Note: The JobService component needs to be enabled in order to successfully schedule a
      * job.
@@ -364,12 +400,36 @@ public abstract class JobScheduler {
     public abstract void cancelAll();
 
     /**
+     * Cancel <em>all</em> jobs that have been scheduled by the calling application, regardless of
+     * namespace.
+     * @hide
+     */
+    public void cancelInAllNamespaces() {
+        throw new RuntimeException("Not implemented. Must override in a subclass.");
+    }
+
+    /**
      * Retrieve all jobs that have been scheduled by the calling application.
      *
      * @return a list of all of the app's scheduled jobs.  This includes jobs that are
      *     currently started as well as those that are still waiting to run.
      */
     public abstract @NonNull List<JobInfo> getAllPendingJobs();
+
+    /**
+     * Retrieve all jobs that have been scheduled by the calling application within the current
+     * namespace.
+     *
+     * @return a list of all of the app's scheduled jobs scheduled with the current namespace.
+     * If a namespace hasn't been explicitly set with {@link #forNamespace(String)},
+     * then this will return jobs in the default namespace.
+     * This includes jobs that are currently started as well as those that are still waiting to run.
+     * @hide
+     */
+    @NonNull
+    public Map<String, List<JobInfo>> getPendingJobsInAllNamespaces() {
+        throw new RuntimeException("Not implemented. Must override in a subclass.");
+    }
 
     /**
      * Look up the description of a scheduled job.
@@ -400,6 +460,8 @@ public abstract class JobScheduler {
      * Returns {@code true} if the app currently holds the
      * {@link android.Manifest.permission#RUN_LONG_JOBS} permission, allowing it to run long jobs.
      * @hide
+     * TODO(255371817): consider exposing this to apps who could call
+     * {@link #scheduleAsPackage(JobInfo, String, int, String)}
      */
     public boolean hasRunLongJobsPermission(@NonNull String packageName, @UserIdInt int userId) {
         return false;

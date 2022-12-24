@@ -601,7 +601,8 @@ class ContextImpl extends Context {
                             && !getSystemService(UserManager.class)
                                     .isUserUnlockingOrUnlocked(UserHandle.myUserId())) {
                         throw new IllegalStateException("SharedPreferences in credential encrypted "
-                                + "storage are not available until after user is unlocked");
+                                + "storage are not available until after user (id "
+                                + UserHandle.myUserId() + ") is unlocked");
                     }
                 }
                 sp = new SharedPreferencesImpl(file, mode);
@@ -2709,7 +2710,7 @@ class ContextImpl extends Context {
         context.setResources(createResources(mToken, mPackageInfo, mSplitName, displayId,
                 overrideConfig, display.getDisplayAdjustments().getCompatibilityInfo(),
                 mResources.getLoaders()));
-        context.mDisplay = display;
+        context.setDisplay(display);
         // Inherit context type if the container is from System or System UI context to bypass
         // UI context check.
         context.mContextType = mContextType == CONTEXT_TYPE_SYSTEM_OR_SYSTEM_UI
@@ -2723,6 +2724,13 @@ class ContextImpl extends Context {
         // anymore.
         context.mIsConfigurationBasedContext = false;
         return context;
+    }
+
+    private void setDisplay(Display display) {
+        mDisplay = display;
+        if (display != null) {
+            updateDeviceIdIfChanged(display.getDisplayId());
+        }
     }
 
     @Override
@@ -2862,8 +2870,8 @@ class ContextImpl extends Context {
         baseContext.setResources(windowContextResources);
         // Associate the display with window context resources so that configuration update from
         // the server side will also apply to the display's metrics.
-        baseContext.mDisplay = ResourcesManager.getInstance().getAdjustedDisplay(displayId,
-                windowContextResources);
+        baseContext.setDisplay(ResourcesManager.getInstance().getAdjustedDisplay(
+                displayId, windowContextResources));
 
         return baseContext;
     }
@@ -3007,11 +3015,24 @@ class ContextImpl extends Context {
 
     @Override
     public void updateDisplay(int displayId) {
-        mDisplay = mResourcesManager.getAdjustedDisplay(displayId, mResources);
+        setDisplay(mResourcesManager.getAdjustedDisplay(displayId, mResources));
         if (mContextType == CONTEXT_TYPE_NON_UI) {
             mContextType = CONTEXT_TYPE_DISPLAY_CONTEXT;
         }
-        // TODO(b/253201821): Update deviceId when display is updated.
+    }
+
+    private void updateDeviceIdIfChanged(int displayId) {
+        if (mIsExplicitDeviceId) {
+            return;
+        }
+        VirtualDeviceManager vdm = getSystemService(VirtualDeviceManager.class);
+        if (vdm != null) {
+            int deviceId = vdm.getDeviceIdForDisplayId(displayId);
+            if (deviceId != mDeviceId) {
+                mDeviceId = deviceId;
+                notifyOnDeviceChangedListeners(mDeviceId);
+            }
+        }
     }
 
     @Override
@@ -3306,8 +3327,8 @@ class ContextImpl extends Context {
                 classLoader,
                 packageInfo.getApplication() == null ? null
                         : packageInfo.getApplication().getResources().getLoaders()));
-        context.mDisplay = resourcesManager.getAdjustedDisplay(displayId,
-                context.getResources());
+        context.setDisplay(resourcesManager.getAdjustedDisplay(
+                displayId, context.getResources()));
         return context;
     }
 
@@ -3317,7 +3338,6 @@ class ContextImpl extends Context {
             @Nullable String splitName, @Nullable IBinder token, @Nullable UserHandle user,
             int flags, @Nullable ClassLoader classLoader, @Nullable String overrideOpPackageName) {
         mOuterContext = this;
-
         // If creator didn't specify which storage to use, use the default
         // location for application.
         if ((flags & (Context.CONTEXT_CREDENTIAL_PROTECTED_STORAGE

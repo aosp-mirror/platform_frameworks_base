@@ -190,7 +190,6 @@
             app:layout_constraintBottom_toBottomOf="parent"
             android:contentDescription="@string/screenshot_dismiss_work_profile">
             <ImageView
-                android:id="@+id/screenshot_dismiss_image"
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
                 android:layout_margin="@dimen/overlay_dismiss_button_margin"

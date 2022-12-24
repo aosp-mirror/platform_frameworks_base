@@ -92,8 +92,11 @@ import org.mockito.MockitoAnnotations;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.security.PublicKey;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.PriorityQueue;
@@ -141,10 +144,32 @@ public class PackageManagerSettingsTests {
 
     /** make sure our initialized KeySetManagerService metadata matches packages.xml */
     @Test
-    public void testReadKeySetSettings()
-            throws ReflectiveOperationException, IllegalAccessException {
+    public void testReadKeySetSettings() throws Exception {
         /* write out files and read */
         writeOldFiles();
+        Settings settings = makeSettings();
+        assertThat(settings.readLPw(computer, createFakeUsers()), is(true));
+        verifyKeySetMetaData(settings);
+    }
+
+    // Same as above but use the reserve copy.
+    @Test
+    public void testReadReserveCopyKeySetSettings() throws Exception {
+        /* write out files and read */
+        writeReserveCopyOldFiles();
+        Settings settings = makeSettings();
+        assertThat(settings.readLPw(computer, createFakeUsers()), is(true));
+        verifyKeySetMetaData(settings);
+    }
+
+    // Same as above but packages.xml is malformed.
+    @Test
+    public void testReadMalformedPackagesXmlKeySetSettings() throws Exception {
+        // write out files
+        writeReserveCopyOldFiles();
+        // write corrupted packages.xml
+        writeCorruptedPackagesXml();
+
         Settings settings = makeSettings();
         assertThat(settings.readLPw(computer, createFakeUsers()), is(true));
         verifyKeySetMetaData(settings);
@@ -161,6 +186,39 @@ public class PackageManagerSettingsTests {
 
         // write out, read back in and verify the same
         settings.writeLPr(computer, /*sync=*/true);
+        assertThat(settings.readLPw(computer, createFakeUsers()), is(true));
+        verifyKeySetMetaData(settings);
+    }
+
+    // Same as above, but corrupt the primary.xml in process.
+    @Test
+    public void testWriteCorruptReadKeySetSettings() throws Exception {
+        // write out files and read
+        writeOldFiles();
+        Settings settings = makeSettings();
+        assertThat(settings.readLPw(computer, createFakeUsers()), is(true));
+
+        // write out
+        settings.writeLPr(computer, /*sync=*/true);
+
+        File filesDir = InstrumentationRegistry.getContext().getFilesDir();
+        File packageXml = new File(filesDir, "system/packages.xml");
+        File packagesReserveCopyXml = new File(filesDir, "system/packages.xml.reservecopy");
+        // Primary.
+        assertTrue(packageXml.exists());
+        // Reserve copy.
+        assertTrue(packagesReserveCopyXml.exists());
+        // Temporary backup.
+        assertFalse(new File(filesDir, "packages-backup.xml").exists());
+
+        // compare two copies, make sure they are the same
+        assertTrue(Arrays.equals(Files.readAllBytes(Path.of(packageXml.getAbsolutePath())),
+                Files.readAllBytes(Path.of(packagesReserveCopyXml.getAbsolutePath()))));
+
+        // write corrupted packages.xml
+        writeCorruptedPackagesXml();
+
+        // read back in and verify the same
         assertThat(settings.readLPw(computer, createFakeUsers()), is(true));
         verifyKeySetMetaData(settings);
     }
@@ -1572,8 +1630,18 @@ public class PackageManagerSettingsTests {
         }
     }
 
-    private void writePackagesXml() {
+    private void writeCorruptedPackagesXml() {
         writeFile(new File(InstrumentationRegistry.getContext().getFilesDir(), "system/packages.xml"),
+                ("<?xml version='1.0' encoding='utf-8' standalone='yes' ?>"
+                        + "<packages>"
+                        + "<last-platform-version internal=\"15\" external=\"0\" />"
+                        + "<permission-trees>"
+                        + "<item name=\"com.google.android.permtree\""
+                ).getBytes());
+    }
+
+    private void writePackagesXml(String fileName) {
+        writeFile(new File(InstrumentationRegistry.getContext().getFilesDir(), fileName),
                 ("<?xml version='1.0' encoding='utf-8' standalone='yes' ?>"
                 + "<packages>"
                 + "<last-platform-version internal=\"15\" external=\"0\" fingerprint=\"foo\" />"
@@ -1715,7 +1783,14 @@ public class PackageManagerSettingsTests {
 
     private void writeOldFiles() {
         deleteSystemFolder();
-        writePackagesXml();
+        writePackagesXml("system/packages.xml");
+        writeStoppedPackagesXml();
+        writePackagesList();
+    }
+
+    private void writeReserveCopyOldFiles() {
+        deleteSystemFolder();
+        writePackagesXml("system/packages.xml.reservecopy");
         writeStoppedPackagesXml();
         writePackagesList();
     }

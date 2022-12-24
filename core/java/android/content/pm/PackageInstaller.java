@@ -26,6 +26,9 @@ import static android.content.pm.Checksum.TYPE_WHOLE_MERKLE_ROOT_4K_SHA256;
 import static android.content.pm.Checksum.TYPE_WHOLE_SHA1;
 import static android.content.pm.Checksum.TYPE_WHOLE_SHA256;
 import static android.content.pm.Checksum.TYPE_WHOLE_SHA512;
+import static android.content.pm.PackageInfo.INSTALL_LOCATION_AUTO;
+import static android.content.pm.PackageInfo.INSTALL_LOCATION_INTERNAL_ONLY;
+import static android.content.pm.PackageInfo.INSTALL_LOCATION_PREFER_EXTERNAL;
 
 import android.Manifest;
 import android.annotation.CallbackExecutor;
@@ -48,6 +51,10 @@ import android.content.IntentSender;
 import android.content.pm.PackageManager.DeleteFlags;
 import android.content.pm.PackageManager.InstallReason;
 import android.content.pm.PackageManager.InstallScenario;
+import android.content.pm.parsing.ApkLiteParseUtils;
+import android.content.pm.parsing.PackageLite;
+import android.content.pm.parsing.result.ParseResult;
+import android.content.pm.parsing.result.ParseTypeImpl;
 import android.graphics.Bitmap;
 import android.icu.util.ULocale;
 import android.net.Uri;
@@ -70,12 +77,14 @@ import android.text.TextUtils;
 import android.util.ArraySet;
 import android.util.ExceptionUtils;
 
+import com.android.internal.content.InstallLocationUtils;
 import com.android.internal.util.DataClass;
 import com.android.internal.util.IndentingPrintWriter;
 import com.android.internal.util.Preconditions;
 import com.android.internal.util.function.pooled.PooledLambda;
 
 import java.io.Closeable;
+import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
@@ -172,10 +181,22 @@ public class PackageInstaller {
     public static final String ACTION_SESSION_UPDATED =
             "android.content.pm.action.SESSION_UPDATED";
 
-    /** {@hide} */
+    /**
+     * Intent action to indicate that user action is required for current install. This action can
+     * be used only by system apps.
+     *
+     * @hide
+     */
+    @SystemApi
     public static final String ACTION_CONFIRM_INSTALL = "android.content.pm.action.CONFIRM_INSTALL";
 
-    /** @hide */
+    /**
+     * Activity Action: Intent sent to the installer when a session for requesting
+     * user pre-approval, and user needs to confirm the installation.
+     *
+     * @hide
+     */
+    @SystemApi
     public static final String ACTION_CONFIRM_PRE_APPROVAL =
             "android.content.pm.action.CONFIRM_PRE_APPROVAL";
 
@@ -272,11 +293,23 @@ public class PackageInstaller {
     @Deprecated
     public static final String EXTRA_PACKAGE_NAMES = "android.content.pm.extra.PACKAGE_NAMES";
 
-    /** {@hide} */
+    /**
+     * The status as used internally in the package manager. Refer to {@link PackageManager} for
+     * a list of all valid legacy statuses.
+     *
+     * @hide
+     */
+    @SystemApi
     public static final String EXTRA_LEGACY_STATUS = "android.content.pm.extra.LEGACY_STATUS";
     /** {@hide} */
     public static final String EXTRA_LEGACY_BUNDLE = "android.content.pm.extra.LEGACY_BUNDLE";
-    /** {@hide} */
+    /**
+     * The callback to execute once an uninstall is completed (used for both successful and
+     * unsuccessful uninstalls).
+     *
+     * @hide
+     */
+    @SystemApi
     public static final String EXTRA_CALLBACK = "android.content.pm.extra.CALLBACK";
 
     /**
@@ -291,6 +324,17 @@ public class PackageInstaller {
      */
     @SystemApi
     public static final String EXTRA_DATA_LOADER_TYPE = "android.content.pm.extra.DATA_LOADER_TYPE";
+
+    /**
+     * Path to the validated base APK for this session, which may point at an
+     * APK inside the session (when the session defines the base), or it may
+     * point at the existing base APK (when adding splits to an existing app).
+     *
+     * @hide
+     */
+    @SystemApi
+    public static final String EXTRA_RESOLVED_BASE_PATH =
+            "android.content.pm.extra.RESOLVED_BASE_PATH";
 
     /**
      * Streaming installation pending.
@@ -796,8 +840,6 @@ public class PackageInstaller {
      * @param statusReceiver Where to deliver the result of the operation indicated by the extra
      *                       {@link #EXTRA_STATUS}. Refer to the individual status codes
      *                       on how to handle them.
-     *
-     * @hide
      */
     @RequiresPermission(anyOf = {
             Manifest.permission.DELETE_PACKAGES,
@@ -1871,6 +1913,101 @@ public class PackageInstaller {
     }
 
     /**
+     * Parse a single APK or a directory of APKs to get install relevant information about
+     * the package wrapped in {@link InstallInfo}.
+     * @throws PackageParsingException if the package source file(s) provided is(are) not valid,
+     * or the parser isn't able to parse the supplied source(s).
+     * @hide
+     */
+    @SystemApi
+    @NonNull
+    public InstallInfo getInstallInfo(@NonNull File file, int flags)
+            throws PackageParsingException {
+        final ParseTypeImpl input = ParseTypeImpl.forDefaultParsing();
+        final ParseResult<PackageLite> result = ApkLiteParseUtils.parsePackageLite(
+                input.reset(), file, flags);
+        if (result.isError()) {
+            throw new PackageParsingException(result.getErrorCode(), result.getErrorMessage());
+        }
+        return new InstallInfo(result);
+    }
+
+    // (b/239722738) This class serves as a bridge between the PackageLite class, which
+    // is a hidden class, and the consumers of this class. (e.g. InstallInstalling.java)
+    // This is a part of an effort to remove dependency on hidden APIs and use SystemAPIs or
+    // public APIs.
+    /**
+     * Install related details from an APK or a folder of APK(s).
+     *
+     * @hide
+     */
+    @SystemApi
+    public static class InstallInfo {
+
+        /** @hide */
+        @IntDef(prefix = { "INSTALL_LOCATION_" }, value = {
+                INSTALL_LOCATION_AUTO,
+                INSTALL_LOCATION_INTERNAL_ONLY,
+                INSTALL_LOCATION_PREFER_EXTERNAL
+        })
+        @Retention(RetentionPolicy.SOURCE)
+        public @interface InstallLocation{}
+
+        private PackageLite mPkg;
+
+        InstallInfo(ParseResult<PackageLite> result) {
+            mPkg = result.getResult();
+        }
+
+        /**
+         * See {@link PackageLite#getPackageName()}
+         */
+        @NonNull
+        public String getPackageName() {
+            return mPkg.getPackageName();
+        }
+
+        /**
+         * @return The default install location defined by an application in
+         * {@link android.R.attr#installLocation} attribute.
+         */
+        public @InstallLocation int getInstallLocation() {
+            return mPkg.getInstallLocation();
+        }
+
+        /**
+         * @param params {@link SessionParams} of the installation
+         * @return Total disk space occupied by an application after installation.
+         * Includes the size of the raw APKs, possibly unpacked resources, raw dex metadata files,
+         * and all relevant native code.
+         * @throws IOException when size of native binaries cannot be calculated.
+         */
+        public long calculateInstalledSize(@NonNull SessionParams params) throws IOException {
+            return InstallLocationUtils.calculateInstalledSize(mPkg, params.abiOverride);
+        }
+    }
+
+    /**
+     * Generic exception class for using with parsing operations.
+     *
+     * @hide
+     */
+    @SystemApi
+    public static class PackageParsingException extends Exception {
+        private final int mErrorCode;
+
+        /** {@hide} */
+        public PackageParsingException(int errorCode, @Nullable String detailedMessage) {
+            super(detailedMessage);
+            mErrorCode = errorCode;
+        }
+
+        public int getErrorCode() {
+            return mErrorCode;
+        }
+    }
+
+    /**
      * Parameters for creating a new {@link PackageInstaller.Session}.
      */
     public static class SessionParams implements Parcelable {
@@ -2431,9 +2568,7 @@ public class PackageInstaller {
          * By default this is the app that created the {@link PackageInstaller} object.
          *
          * @param installerPackageName name of the installer package
-         * {@hide}
          */
-        @TestApi
         public void setInstallerPackageName(@Nullable String installerPackageName) {
             this.installerPackageName = installerPackageName;
         }
@@ -3430,8 +3565,6 @@ public class PackageInstaller {
 
         /**
          * Returns the Uid of the owner of the session.
-         *
-         * @hide
          */
         public int getInstallerUid() {
             return installerUid;
@@ -3443,6 +3576,13 @@ public class PackageInstaller {
          */
         public boolean isKeepApplicationEnabledSetting() {
             return keepApplicationEnabledSetting;
+        }
+
+        /**
+         * Returns whether this session has requested user pre-approval.
+         */
+        public @NonNull boolean getIsPreApprovalRequested() {
+            return isPreapprovalRequested;
         }
 
         @Override

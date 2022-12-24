@@ -132,6 +132,7 @@ import com.android.server.display.DisplayManagerService;
 import com.android.server.display.color.ColorDisplayService;
 import com.android.server.dreams.DreamManagerService;
 import com.android.server.emergency.EmergencyAffordanceService;
+import com.android.server.grammaticalinflection.GrammaticalInflectionService;
 import com.android.server.gpu.GpuService;
 import com.android.server.graphics.fonts.FontManagerService;
 import com.android.server.hdmi.HdmiControlService;
@@ -425,6 +426,8 @@ public final class SystemServer implements Dumpable {
             "com.android.server.sdksandbox.SdkSandboxManagerService$Lifecycle";
     private static final String AD_SERVICES_MANAGER_SERVICE_CLASS =
             "com.android.server.adservices.AdServicesManagerService$Lifecycle";
+    private static final String UPDATABLE_DEVICE_CONFIG_SERVICE_CLASS =
+            "com.android.server.deviceconfig.DeviceConfigInit$Lifecycle";
 
     private static final String TETHERING_CONNECTOR_CLASS = "android.net.ITetheringConnector";
 
@@ -1049,6 +1052,17 @@ public final class SystemServer implements Dumpable {
     private void startBootstrapServices(@NonNull TimingsTraceAndSlog t) {
         t.traceBegin("startBootstrapServices");
 
+        t.traceBegin("ArtModuleServiceInitializer");
+        // This needs to happen before DexUseManagerLocal init. We do it here to avoid colliding
+        // with a GC. ArtModuleServiceInitializer is a class from a separate dex file
+        // "service-art.jar", so referencing it involves the class linker. The class linker and the
+        // GC are mutually exclusive (b/263486535). Therefore, we do this here to force trigger the
+        // class linker earlier. If we did this later, especially after PackageManagerService init,
+        // the class linker would be consistently blocked by a GC because PackageManagerService
+        // allocates a lot of memory and almost certainly triggers a GC.
+        ArtModuleServiceInitializer.setArtModuleServiceManager(new ArtModuleServiceManager());
+        t.traceEnd();
+
         // Start the watchdog as early as possible so we can crash the system server
         // if we deadlock during early boot
         t.traceBegin("StartWatchdog");
@@ -1235,8 +1249,6 @@ public final class SystemServer implements Dumpable {
         t.traceBegin("DexUseManagerLocal");
         // DexUseManagerLocal needs to be loaded after PackageManagerLocal has been registered, but
         // before PackageManagerService starts processing binder calls to notifyDexLoad.
-        // DexUseManagerLocal may also call artd, so ensure ArtModuleServiceManager is instantiated.
-        ArtModuleServiceInitializer.setArtModuleServiceManager(new ArtModuleServiceManager());
         LocalManagerRegistry.addManager(
                 DexUseManagerLocal.class, DexUseManagerLocal.createInstance());
         t.traceEnd();
@@ -1512,6 +1524,8 @@ public final class SystemServer implements Dumpable {
 
             t.traceBegin("InstallSystemProviders");
             mActivityManagerService.getContentProviderHelper().installSystemProviders();
+            // Device configuration used to be part of System providers
+            mSystemServiceManager.startService(UPDATABLE_DEVICE_CONFIG_SERVICE_CLASS);
             // Now that SettingsProvider is ready, reactivate SQLiteCompatibilityWalFlags
             SQLiteCompatibilityWalFlags.reset();
             t.traceEnd();
@@ -1762,6 +1776,14 @@ public final class SystemServer implements Dumpable {
             mSystemServiceManager.startService(LocaleManagerService.class);
         } catch (Throwable e) {
             reportWtf("starting LocaleManagerService service", e);
+        }
+        t.traceEnd();
+
+        t.traceBegin("StartGrammarInflectionService");
+        try {
+            mSystemServiceManager.startService(GrammaticalInflectionService.class);
+        } catch (Throwable e) {
+            reportWtf("starting GrammarInflectionService service", e);
         }
         t.traceEnd();
 

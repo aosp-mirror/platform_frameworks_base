@@ -106,6 +106,10 @@ public class TelephonyCallback {
     /**
      * Event for changes to the network service state (cellular).
      *
+     * <p>Requires {@link Manifest.permission#ACCESS_FINE_LOCATION} or {@link
+     * Manifest.permission#ACCESS_COARSE_LOCATION} depending on the accuracy of the location info
+     * listeners want to get.
+     *
      * @hide
      * @see ServiceStateListener#onServiceStateChanged
      * @see ServiceState
@@ -485,8 +489,9 @@ public class TelephonyCallback {
      * <p>Requires permission {@link android.Manifest.permission#READ_PRECISE_PHONE_STATE} or
      * the calling app has carrier privileges (see {@link TelephonyManager#hasCarrierPrivileges}).
      *
-     * <p>Also requires the {@link Manifest.permission#ACCESS_FINE_LOCATION} permission, regardless
-     * of whether the calling app has carrier privileges.
+     * <p>Requires the {@link Manifest.permission#ACCESS_FINE_LOCATION} permission in case that
+     * listener want to get location info in {@link CellIdentity} regardless of whether the calling
+     * app has carrier privileges.
      *
      * @hide
      * @see RegistrationFailedListener#onRegistrationFailed
@@ -504,8 +509,9 @@ public class TelephonyCallback {
      * <p>Requires permission {@link android.Manifest.permission#READ_PRECISE_PHONE_STATE} or
      * the calling app has carrier privileges (see {@link TelephonyManager#hasCarrierPrivileges}).
      *
-     * <p>Also requires the {@link Manifest.permission#ACCESS_FINE_LOCATION} permission, regardless
-     * of whether the calling app has carrier privileges.
+     * <p>Requires the {@link Manifest.permission#ACCESS_FINE_LOCATION} permission in case that
+     * listener want to get {@link BarringInfo} which includes location info in {@link CellIdentity}
+     * regardless of whether the calling app has carrier privileges.
      *
      * @hide
      * @see BarringInfoListener#onBarringInfoChanged
@@ -691,10 +697,8 @@ public class TelephonyCallback {
          * Only apps holding the {@link Manifest.permission#ACCESS_FINE_LOCATION} permission will
          * receive all the information in {@link ServiceState}, otherwise the cellIdentity
          * will be null if apps only holding the {@link Manifest.permission#ACCESS_COARSE_LOCATION}
-         * permission.
-         * Network operator name in long/short alphanumeric format and numeric id will be null if
-         * apps holding neither {@link android.Manifest.permission#ACCESS_FINE_LOCATION} nor
-         * {@link android.Manifest.permission#ACCESS_COARSE_LOCATION}.
+         * permission. Network operator name in long/short alphanumeric format and numeric id will
+         * be null if apps holding neither {@link android.Manifest.permission#ACCESS_FINE_LOCATION}
          *
          * @see ServiceState#STATE_EMERGENCY_ONLY
          * @see ServiceState#STATE_IN_SERVICE
@@ -1284,6 +1288,9 @@ public class TelephonyCallback {
          * {@link android.Manifest.permission#READ_PRECISE_PHONE_STATE} and
          * {@link android.Manifest.permission#ACCESS_FINE_LOCATION}.
          *
+         * If the calling app doesn't have {@link android.Manifest.permission#ACCESS_FINE_LOCATION},
+         * it will receive {@link CellIdentity} without location-sensitive information included.
+         *
          * @param cellIdentity        the CellIdentity, which must include the globally unique
          *                            identifier
          *                            for the cell (for example, all components of the CGI or ECGI).
@@ -1461,6 +1468,10 @@ public class TelephonyCallback {
          * (see {@link TelephonyManager#hasCarrierPrivileges}) if it does not have the
          * {@link android.Manifest.permission#READ_PRECISE_PHONE_STATE} and
          * {@link android.Manifest.permission#ACCESS_FINE_LOCATION}.
+         *
+         * If the calling app doesn't have {@link android.Manifest.permission#ACCESS_FINE_LOCATION},
+         * it will receive {@link BarringInfo} including {@link CellIdentity} without
+         * location-sensitive information included.
          *
          * @param barringInfo for all services on the current cell.
          * @see android.telephony.BarringInfo

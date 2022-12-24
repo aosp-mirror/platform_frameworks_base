@@ -65,6 +65,7 @@ import static android.provider.Settings.Global.HIDE_ERROR_DIALOGS;
 import static android.provider.Settings.System.FONT_SCALE;
 import static android.view.Display.DEFAULT_DISPLAY;
 import static android.view.Display.INVALID_DISPLAY;
+import static android.view.WindowManager.TRANSIT_CHANGE;
 import static android.view.WindowManager.TRANSIT_PIP;
 import static android.view.WindowManagerPolicyConstants.KEYGUARD_GOING_AWAY_FLAG_TO_LAUNCHER_CLEAR_SNAPSHOT;
 
@@ -1878,7 +1879,7 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
         try {
             // Collect information about the target of the Intent.
             final ActivityInfo aInfo = resolveActivityInfoForIntent(intent, resolvedType, userId,
-                    callingUid);
+                    callingUid, callingPid);
 
             synchronized (mGlobalLock) {
                 return mTaskSupervisor.canPlaceEntityOnDisplay(displayId, callingPid, callingUid,
@@ -1890,11 +1891,11 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
     }
 
     ActivityInfo resolveActivityInfoForIntent(Intent intent, String resolvedType,
-            int userId, int callingUid) {
+            int userId, int callingUid, int callingPid) {
         ActivityInfo aInfo = mTaskSupervisor.resolveActivity(intent, resolvedType,
                 0 /* startFlags */, null /* profilerInfo */, userId,
                 ActivityStarter.computeResolveFilterUid(callingUid, callingUid,
-                        UserHandle.USER_NULL));
+                        UserHandle.USER_NULL), callingPid);
         return mAmInternal.getActivityInfoForUser(aInfo, userId);
     }
 
@@ -2843,7 +2844,7 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
     }
 
     @Override
-    public boolean resizeTask(int taskId, Rect bounds, int resizeMode) {
+    public void resizeTask(int taskId, Rect bounds, int resizeMode) {
         enforceTaskPermission("resizeTask()");
         final long ident = Binder.clearCallingIdentity();
         try {
@@ -2852,19 +2853,48 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
                         MATCH_ATTACHED_TASK_ONLY);
                 if (task == null) {
                     Slog.w(TAG, "resizeTask: taskId=" + taskId + " not found");
-                    return false;
+                    return;
                 }
                 if (!task.getWindowConfiguration().canResizeTask()) {
                     Slog.w(TAG, "resizeTask not allowed on task=" + task);
-                    return false;
+                    return;
                 }
 
                 // Reparent the task to the right root task if necessary
                 boolean preserveWindow = (resizeMode & RESIZE_MODE_PRESERVE_WINDOW) != 0;
 
-                // After reparenting (which only resizes the task to the root task bounds),
-                // resize the task to the actual bounds provided
-                return task.resize(bounds, resizeMode, preserveWindow);
+                if (!getTransitionController().isShellTransitionsEnabled()) {
+                    // After reparenting (which only resizes the task to the root task bounds),
+                    // resize the task to the actual bounds provided
+                    task.resize(bounds, resizeMode, preserveWindow);
+                    return;
+                }
+
+                final Transition transition = new Transition(TRANSIT_CHANGE, 0 /* flags */,
+                        getTransitionController(), mWindowManager.mSyncEngine);
+                if (mWindowManager.mSyncEngine.hasActiveSync()) {
+                    mWindowManager.mSyncEngine.queueSyncSet(
+                            () -> getTransitionController().moveToCollecting(transition),
+                            () -> {
+                                if (!task.getWindowConfiguration().canResizeTask()) {
+                                    Slog.w(TAG, "resizeTask not allowed on task=" + task);
+                                    transition.abort();
+                                    return;
+                                }
+                                getTransitionController().requestStartTransition(transition, task,
+                                        null /* remoteTransition */, null /* displayChange */);
+                                getTransitionController().collect(task);
+                                task.resize(bounds, resizeMode, preserveWindow);
+                                transition.setReady(task, true);
+                            });
+                } else {
+                    getTransitionController().moveToCollecting(transition);
+                    getTransitionController().requestStartTransition(transition, task,
+                            null /* remoteTransition */, null /* displayChange */);
+                    getTransitionController().collect(task);
+                    task.resize(bounds, resizeMode, preserveWindow);
+                    transition.setReady(task, true);
+                }
             }
         } finally {
             Binder.restoreCallingIdentity(ident);

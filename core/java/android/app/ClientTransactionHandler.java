@@ -139,6 +139,9 @@ public abstract class ClientTransactionHandler {
     /** Restart the activity after it was stopped. */
     public abstract void performRestartActivity(@NonNull ActivityClientRecord r, boolean start);
 
+     /** Report that activity was refreshed to server. */
+    public abstract void reportRefresh(@NonNull ActivityClientRecord r);
+
     /** Set pending activity configuration in case it will be updated by other transaction item. */
     public abstract void updatePendingActivityConfiguration(@NonNull IBinder token,
             Configuration overrideConfig);
@@ -181,8 +184,8 @@ public abstract class ClientTransactionHandler {
     /** Get package info. */
     public abstract LoadedApk getPackageInfoNoCheck(ApplicationInfo ai);
 
-    /** Deliver app configuration change notification. */
-    public abstract void handleConfigurationChanged(Configuration config);
+    /** Deliver app configuration change notification and device association. */
+    public abstract void handleConfigurationChanged(Configuration config, int deviceId);
 
     /**
      * Get {@link android.app.ActivityThread.ActivityClientRecord} instance that corresponds to the

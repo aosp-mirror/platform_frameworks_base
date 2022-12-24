@@ -33,12 +33,20 @@ import java.lang.annotation.RetentionPolicy;
 import java.util.Objects;
 
 /**
+ * An immutable information about an overlay.
+ *
+ * <p>Applications calling {@link OverlayManager#getOverlayInfosForTarget(String)} get the
+ * information list of the registered overlays. Each element in the list presents the information of
+ * the particular overlay.
+ *
+ * <!-- For OverlayManagerService, it isn't public part and hidden by HTML comment. -->
+ * <!--
  * Immutable overlay information about a package. All PackageInfos that
  * represent an overlay package will have a corresponding OverlayInfo.
+ * -->
  *
- * @hide
+ * @see OverlayManager#getOverlayInfosForTarget(String)
  */
-@SystemApi
 public final class OverlayInfo implements CriticalOverlayInfo, Parcelable {
 
     /** @hide */
@@ -49,7 +57,6 @@ public final class OverlayInfo implements CriticalOverlayInfo, Parcelable {
             STATE_DISABLED,
             STATE_ENABLED,
             STATE_ENABLED_IMMUTABLE,
-            // @Deprecated STATE_TARGET_IS_BEING_REPLACED,
             STATE_OVERLAY_IS_BEING_REPLACED,
             STATE_SYSTEM_UPDATE_UNINSTALL,
     })
@@ -174,14 +181,14 @@ public final class OverlayInfo implements CriticalOverlayInfo, Parcelable {
      *
      * @hide
      */
-    public final String targetOverlayableName;
+    @Nullable public final String targetOverlayableName;
 
     /**
      * Category of the overlay package
      *
      * @hide
      */
-    public final String category;
+    @Nullable public final String category;
 
     /**
      * Full path to the base APK for this overlay package
@@ -272,7 +279,7 @@ public final class OverlayInfo implements CriticalOverlayInfo, Parcelable {
     }
 
     /** @hide */
-    public OverlayInfo(Parcel source) {
+    public OverlayInfo(@NonNull Parcel source) {
         packageName = source.readString();
         overlayName = source.readString();
         targetPackageName = source.readString();
@@ -299,8 +306,9 @@ public final class OverlayInfo implements CriticalOverlayInfo, Parcelable {
     }
 
     /**
-     * {@inheritDoc}
-     * @hide
+     * Get the overlay name from the registered fabricated overlay.
+     *
+     * @return the overlay name
      */
     @Override
     @Nullable
@@ -309,11 +317,11 @@ public final class OverlayInfo implements CriticalOverlayInfo, Parcelable {
     }
 
     /**
-     * {@inheritDoc}
-     * @hide
+     * Returns the name of the target overlaid package.
+     *
+     * @return the target package name
      */
     @Override
-    @SystemApi
     @NonNull
     public String getTargetPackageName() {
         return targetPackageName;
@@ -342,11 +350,11 @@ public final class OverlayInfo implements CriticalOverlayInfo, Parcelable {
     }
 
     /**
-     * {@inheritDoc}
-     * @hide
+     * Return the target overlayable name.
+     *
+     * @return the name of the target overlayable resources set
      */
     @Override
-    @SystemApi
     @Nullable
     public String getTargetOverlayableName() {
         return targetOverlayableName;
@@ -366,13 +374,18 @@ public final class OverlayInfo implements CriticalOverlayInfo, Parcelable {
      *
      * @hide
      */
+    @NonNull
     public String getBaseCodePath() {
         return baseCodePath;
     }
 
     /**
-     * {@inheritDoc}
-     * @hide
+     * Get the unique identifier from the overlay information.
+     *
+     * <p>The return value of this function can be used to unregister the related overlay.
+     *
+     * @return an identifier representing the current overlay.
+     * @see OverlayManagerTransaction.Builder#unregisterFabricatedOverlay(OverlayIdentifier)
      */
     @Override
     @NonNull
@@ -415,7 +428,7 @@ public final class OverlayInfo implements CriticalOverlayInfo, Parcelable {
     }
 
     @Override
-    public void writeToParcel(Parcel dest, int flags) {
+    public void writeToParcel(@NonNull Parcel dest, int flags) {
         dest.writeString(packageName);
         dest.writeString(overlayName);
         dest.writeString(targetPackageName);
@@ -429,7 +442,7 @@ public final class OverlayInfo implements CriticalOverlayInfo, Parcelable {
         dest.writeBoolean(isFabricated);
     }
 
-    public static final @android.annotation.NonNull Parcelable.Creator<OverlayInfo> CREATOR =
+    public static final @NonNull Parcelable.Creator<OverlayInfo> CREATOR =
             new Parcelable.Creator<OverlayInfo>() {
         @Override
         public OverlayInfo createFromParcel(Parcel source) {
@@ -492,6 +505,11 @@ public final class OverlayInfo implements CriticalOverlayInfo, Parcelable {
         }
     }
 
+    /**
+     * {@inheritDoc}
+     *
+     * @hide
+     */
     @Override
     public int hashCode() {
         final int prime = 31;
@@ -508,6 +526,11 @@ public final class OverlayInfo implements CriticalOverlayInfo, Parcelable {
         return result;
     }
 
+    /**
+     * {@inheritDoc}
+     *
+     * @hide
+     */
     @Override
     public boolean equals(@Nullable Object obj) {
         if (this == obj) {
@@ -547,6 +570,11 @@ public final class OverlayInfo implements CriticalOverlayInfo, Parcelable {
         return true;
     }
 
+    /**
+     * {@inheritDoc}
+     *
+     * @hide
+     */
     @NonNull
     @Override
     public String toString() {

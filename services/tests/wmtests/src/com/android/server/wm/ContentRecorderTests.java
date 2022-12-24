@@ -16,7 +16,6 @@
 
 package com.android.server.wm;
 
-
 import static android.content.res.Configuration.ORIENTATION_PORTRAIT;
 import static android.hardware.display.DisplayManager.VIRTUAL_DISPLAY_FLAG_AUTO_MIRROR;
 import static android.view.Display.INVALID_DISPLAY;
@@ -278,6 +277,64 @@ public class ContentRecorderTests extends WindowTestsBase {
         // THEN the resize callback is notified.
         verify(mMediaProjectionManagerWrapper).notifyActiveProjectionCapturedContentResized(
                 recordedWidth, recordedHeight);
+    }
+
+    @Test
+    public void testStartRecording_notifiesCallback() {
+        // WHEN a recording is ongoing.
+        mContentRecorder.setContentRecordingSession(mTaskSession);
+        mContentRecorder.updateRecording();
+        assertThat(mContentRecorder.isCurrentlyRecording()).isTrue();
+
+        // THEN the visibility change callback is notified.
+        verify(mMediaProjectionManagerWrapper)
+                .notifyActiveProjectionCapturedContentVisibilityChanged(true);
+    }
+
+    @Test
+    public void testOnVisibleRequestedChanged_notifiesCallback() {
+        // WHEN a recording is ongoing.
+        mContentRecorder.setContentRecordingSession(mTaskSession);
+        mContentRecorder.updateRecording();
+        assertThat(mContentRecorder.isCurrentlyRecording()).isTrue();
+
+        // WHEN the child requests a visibility change.
+        boolean isVisibleRequested = true;
+        mContentRecorder.onVisibleRequestedChanged(isVisibleRequested);
+
+        // THEN the visibility change callback is notified.
+        verify(mMediaProjectionManagerWrapper, atLeastOnce())
+                .notifyActiveProjectionCapturedContentVisibilityChanged(isVisibleRequested);
+
+        // WHEN the child requests a visibility change.
+        isVisibleRequested = false;
+        mContentRecorder.onVisibleRequestedChanged(isVisibleRequested);
+
+        // THEN the visibility change callback is notified.
+        verify(mMediaProjectionManagerWrapper)
+                .notifyActiveProjectionCapturedContentVisibilityChanged(isVisibleRequested);
+    }
+
+    @Test
+    public void testOnVisibleRequestedChanged_noRecording_doesNotNotifyCallback() {
+        // WHEN a recording is not ongoing.
+        assertThat(mContentRecorder.isCurrentlyRecording()).isFalse();
+
+        // WHEN the child requests a visibility change.
+        boolean isVisibleRequested = true;
+        mContentRecorder.onVisibleRequestedChanged(isVisibleRequested);
+
+        // THEN the visibility change callback is not notified.
+        verify(mMediaProjectionManagerWrapper, never())
+                .notifyActiveProjectionCapturedContentVisibilityChanged(isVisibleRequested);
+
+        // WHEN the child requests a visibility change.
+        isVisibleRequested = false;
+        mContentRecorder.onVisibleRequestedChanged(isVisibleRequested);
+
+        // THEN the visibility change callback is not notified.
+        verify(mMediaProjectionManagerWrapper, never())
+                .notifyActiveProjectionCapturedContentVisibilityChanged(isVisibleRequested);
     }
 
     @Test

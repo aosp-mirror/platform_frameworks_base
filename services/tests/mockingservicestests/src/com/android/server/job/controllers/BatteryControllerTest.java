@@ -194,7 +194,7 @@ public class BatteryControllerTest {
     private JobStatus createJobStatus(String testTag, String packageName, int callingUid,
             JobInfo jobInfo) {
         JobStatus js = JobStatus.createFromJobInfo(
-                jobInfo, callingUid, packageName, SOURCE_USER_ID, testTag);
+                jobInfo, callingUid, packageName, SOURCE_USER_ID, "BCTest", testTag);
         js.serviceProcessName = "testProcess";
         // Make sure tests aren't passing just because the default bucket is likely ACTIVE.
         js.setStandbyBucket(FREQUENT_INDEX);

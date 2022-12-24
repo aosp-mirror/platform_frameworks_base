@@ -1,15 +1,44 @@
-# Android Framework Lint Checker
+# Android Lint Checks for AOSP
 
-Custom lint checks written here are going to be executed for modules that opt in to those (e.g. any
+Custom Android Lint checks are written here to be executed against java modules
+in AOSP. These checks are broken down into two subdirectories:
+
+1. [Global Checks](#android-global-lint-checker)
+2. [Framework Checks](#android-framework-lint-checker)
+
+# [Android Global Lint Checker](/global)
+Checks written here are executed for the entire tree. The `AndroidGlobalLintChecker`
+build target produces a jar file that is included in the overall build output
+(`AndroidGlobalLintChecker.jar`).  This file is then downloaded as a prebuilt under the
+`prebuilts/cmdline-tools` subproject, and included by soong with all invocations of lint.
+
+## How to add new global lint checks
+1. Write your detector with its issues and put it into
+   `global/checks/src/main/java/com/google/android/lint`.
+2. Add your detector's issues into `AndroidGlobalIssueRegistry`'s `issues`
+   field.
+3. Write unit tests for your detector in one file and put it into
+   `global/checks/test/java/com/google/android/lint`.
+4. Have your change reviewed and merged.  Once your change is merged,
+   obtain a build number from a successful build that includes your change.
+5. Run `prebuilts/cmdline-tools/update-android-global-lint-checker.sh
+   <build_number>`. The script will create a commit that you can upload for
+   approval to the `prebuilts/cmdline-tools` subproject.
+6. Done! Your lint check should be applied in lint report builds across the
+   entire tree!
+
+# [Android Framework Lint Checker](/framework)
+
+Checks written here are going to be executed for modules that opt in to those (e.g. any
 `services.XXX` module) and results will be automatically reported on CLs on gerrit.
 
-## How to add new lint checks
+## How to add new framework lint checks
 
 1. Write your detector with its issues and put it into
-   `checks/src/main/java/com/google/android/lint`.
+   `framework/checks/src/main/java/com/google/android/lint`.
 2. Add your detector's issues into `AndroidFrameworkIssueRegistry`'s `issues` field.
 3. Write unit tests for your detector in one file and put it into
-   `checks/test/java/com/google/android/lint`.
+   `framework/checks/test/java/com/google/android/lint`.
 4. Done! Your lint checks should be applied in lint report builds for modules that include
    `AndroidFrameworkLintChecker`.
 
@@ -44,11 +73,11 @@ m out/soong/.intermediates/frameworks/base/services/autofill/services.autofill/a
   environment variable with the id of the lint. For example:
   `ANDROID_LINT_CHECK=UnusedTokenOfOriginalCallingIdentity m out/[...]/lint-report.html`
 
-## How to apply automatic fixes suggested by lint
+# How to apply automatic fixes suggested by lint
 
 See [lint_fix](fix/README.md)
 
-## Create or update a baseline
+# Create or update a baseline
 
 Baseline files can be used to silence known errors (and warnings) that are deemed to be safe. When
 there is a lint-baseline.xml file in the root folder of the java library, soong will
@@ -79,7 +108,7 @@ locally change the soong code in
 [lint.go](http://cs/aosp-master/build/soong/java/lint.go;l=451;rcl=2e778d5bc4a8d1d77b4f4a3029a4a254ad57db75)
 adding `cmd.Flag("--nowarn")` and running lint again.
 
-## Documentation
+# Documentation
 
 - [Android Lint Docs](https://googlesamples.github.io/android-custom-lint-rules/)
 - [Lint Check Unit Testing](https://googlesamples.github.io/android-custom-lint-rules/api-guide/unit-testing.md.html)

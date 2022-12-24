@@ -753,7 +753,7 @@ public class PackageParserTest {
                 .setPVersionCode(pkg.getLongVersionCode())
                 .setPkgFlags(PackageInfoUtils.appInfoFlags(pkg, null))
                 .setPrivateFlags(PackageInfoUtils.appInfoPrivateFlags(pkg, null))
-                .setSharedUserId(pkg.getSharedUserLabel())
+                .setSharedUserId(pkg.getSharedUserLabelRes())
                 .build();
     }
 
@@ -761,9 +761,9 @@ public class PackageParserTest {
 
     public static void assertPackagesEqual(AndroidPackage a, AndroidPackage b) {
         assertEquals(a.getBaseRevisionCode(), b.getBaseRevisionCode());
-        assertEquals(a.isBaseHardwareAccelerated(), b.isBaseHardwareAccelerated());
+        assertEquals(a.isHardwareAccelerated(), b.isHardwareAccelerated());
         assertEquals(a.getLongVersionCode(), b.getLongVersionCode());
-        assertEquals(a.getSharedUserLabel(), b.getSharedUserLabel());
+        assertEquals(a.getSharedUserLabelRes(), b.getSharedUserLabelRes());
         assertEquals(a.getInstallLocation(), b.getInstallLocation());
         assertEquals(a.isCoreApp(), b.isCoreApp());
         assertEquals(a.isRequiredForAllUsers(), b.isRequiredForAllUsers());
@@ -1036,8 +1036,8 @@ public class PackageParserTest {
         permission.setParsedPermissionGroup(new ParsedPermissionGroupImpl());
 
         ((ParsedPackage) pkg.setBaseRevisionCode(100)
-                .setBaseHardwareAccelerated(true)
-                .setSharedUserLabel(100)
+                .setHardwareAccelerated(true)
+                .setSharedUserLabelRes(100)
                 .setInstallLocation(100)
                 .setRequiredForAllUsers(true)
                 .asSplit(
@@ -1062,7 +1062,7 @@ public class PackageParserTest {
                 .setSdkLibVersionMajor(42)
                 .addUsesSdkLibrary("sdk23", 200, new String[]{"digest2"})
                 .setStaticSharedLibraryName("foo23")
-                .setStaticSharedLibVersion(100)
+                .setStaticSharedLibraryVersion(100)
                 .addUsesStaticLibrary("foo23", 100, new String[]{"digest"})
                 .addLibraryName("foo10")
                 .addUsesLibrary("foo11")

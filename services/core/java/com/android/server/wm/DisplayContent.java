@@ -449,6 +449,7 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
     private final DisplayMetrics mDisplayMetrics = new DisplayMetrics();
     private final DisplayPolicy mDisplayPolicy;
     private final DisplayRotation mDisplayRotation;
+    @Nullable final DisplayRotationCompatPolicy mDisplayRotationCompatPolicy;
     DisplayFrames mDisplayFrames;
 
     private boolean mInTouchMode;
@@ -790,6 +791,12 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
         }
     };
 
+    /**
+     * A lambda function to find the focused window of the given window.
+     *
+     * <p>The lambda returns true if a focused window was found, false otherwise. If a focused
+     * window is found it will be stored in <code>mTmpWindow</code>.
+     */
     private final ToBooleanFunction<WindowState> mFindFocusedWindow = w -> {
         final ActivityRecord focusedApp = mFocusedApp;
         ProtoLog.v(WM_DEBUG_FOCUS, "Looking for focus: %s, flags=%d, canReceive=%b, reason=%s",
@@ -1140,7 +1147,7 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
         }
 
         mDisplayPolicy = new DisplayPolicy(mWmService, this);
-        mDisplayRotation = new DisplayRotation(mWmService, this);
+        mDisplayRotation = new DisplayRotation(mWmService, this, mDisplayInfo.address);
 
         mDeviceStateController = new DeviceStateController(mWmService.mContext, mWmService.mH,
                 newFoldState -> {
@@ -1171,6 +1178,13 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
         // Sets the display content for the children.
         onDisplayChanged(this);
         updateDisplayAreaOrganizers();
+
+        mDisplayRotationCompatPolicy =
+                // Not checking DeviceConfig value here to allow enabling via DeviceConfig
+                // without the need to restart the device.
+                mWmService.mLetterboxConfiguration.isCameraCompatTreatmentEnabled(
+                            /* checkDeviceConfig */ false)
+                        ? new DisplayRotationCompatPolicy(this) : null;
 
         mInputMonitor = new InputMonitor(mWmService, this);
         mInsetsPolicy = new InsetsPolicy(mInsetsStateController, this);
@@ -2750,6 +2764,14 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
             }
         }
 
+        if (mDisplayRotationCompatPolicy != null) {
+            int compatOrientation = mDisplayRotationCompatPolicy.getOrientation();
+            if (compatOrientation != SCREEN_ORIENTATION_UNSPECIFIED) {
+                mLastOrientationSource = null;
+                return compatOrientation;
+            }
+        }
+
         final int orientation = super.getOrientation();
 
         if (!handlesOrientationChangeFromDescendant(orientation)) {
@@ -3312,6 +3334,10 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
         // on the next traversal if it's removed from RootWindowContainer child list.
         getPendingTransaction().apply();
         mWmService.mWindowPlacerLocked.requestTraversal();
+
+        if (mDisplayRotationCompatPolicy != null) {
+            mDisplayRotationCompatPolicy.dispose();
+        }
     }
 
     /** Returns true if a removal action is still being deferred. */
@@ -3719,6 +3745,14 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
     }
 
     /**
+     * @see Display#FLAG_STEAL_TOP_FOCUS_DISABLED
+     * @return True if this display can become the top focused display, false otherwise.
+     */
+    boolean canStealTopFocus() {
+        return (mDisplayInfo.flags & Display.FLAG_STEAL_TOP_FOCUS_DISABLED) == 0;
+    }
+
+    /**
      * Looking for the focused window on this display if the top focused display hasn't been
      * found yet (topFocusedDisplayId is INVALID_DISPLAY) or per-display focused was allowed.
      *
@@ -3730,9 +3764,15 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
                     ? findFocusedWindow() : null;
     }
 
+    /**
+     * Find the focused window of this DisplayContent. The search takes the state of the display
+     * content into account
+     * @return The focused window, null if none was found.
+     */
     WindowState findFocusedWindow() {
         mTmpWindow = null;
 
+        // mFindFocusedWindow will populate mTmpWindow with the new focused window when found.
         forAllWindows(mFindFocusedWindow, true /* traverseTopToBottom */);
 
         if (mTmpWindow == null) {
@@ -6481,15 +6521,6 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
     @VisibleForTesting void pauseRecording() {
         if (mContentRecorder != null) {
             mContentRecorder.pauseRecording();
-        }
-    }
-
-    /**
-     * The MediaProjection instance is torn down.
-     */
-    @VisibleForTesting void stopMediaProjection() {
-        if (mContentRecorder != null) {
-            mContentRecorder.stopMediaProjection();
         }
     }
 

@@ -331,6 +331,7 @@ interface IActivityManager {
     @UnsupportedAppUsage
     void handleApplicationStrictModeViolation(in IBinder app, int penaltyMask,
             in StrictMode.ViolationInfo crashInfo);
+    void registerStrictModeCallback(in IBinder binder);
     boolean isTopActivityImmersive();
     void crashApplicationWithType(int uid, int initialPid, in String packageName, int userId,
             in String message, boolean force, int exceptionTypeId);
@@ -798,14 +799,14 @@ interface IActivityManager {
      */
     @JavaPassthrough(annotation=
             "@android.annotation.RequiresPermission(anyOf = {android.Manifest.permission.MANAGE_USERS, android.Manifest.permission.CREATE_USERS}, conditional = true)")
-    boolean startUserInBackgroundOnSecondaryDisplay(int userid, int displayId);
+    boolean startUserInBackgroundVisibleOnDisplay(int userid, int displayId);
 
     /**
-     * Gets the ids of displays that can be used on {@link #startUserInBackgroundOnSecondaryDisplay(int userId, int displayId)}.
+     * Gets the ids of displays that can be used on {@link #startUserInBackgroundVisibleOnDisplay(int userId, int displayId)}.
      *
      * <p>Typically used only by automotive builds when the vehicle has multiple displays.
      */
-    @nullable int[] getSecondaryDisplayIdsForStartingBackgroundUsers();
+    @nullable int[] getDisplayIdsForStartingVisibleBackgroundUsers();
 
     /** Returns if the service is a short-service is still "alive" and past the timeout. */
     boolean shouldServiceTimeOut(in ComponentName className, in IBinder token);

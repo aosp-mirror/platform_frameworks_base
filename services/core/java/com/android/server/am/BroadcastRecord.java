@@ -907,6 +907,17 @@ final class BroadcastRecord extends Binder {
         return record.options == null ? null : record.options.getDeliveryGroupMatchingFilter();
     }
 
+    /**
+     * Returns {@code true} if all the receivers are still waiting to receive the broadcast.
+     * Otherwise {@code false}.
+     */
+    boolean allReceiversPending() {
+        // We could also count the number of receivers with deliver state DELIVERY_PENDING, but
+        // checking how many receivers have finished (either skipped or cancelled) and whether or
+        // not the dispatch has been started should be sufficient.
+        return (terminalCount == 0 && dispatchTime <= 0);
+    }
+
     @Override
     public String toString() {
         if (mCachedToString == null) {

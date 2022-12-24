@@ -60,62 +60,73 @@ interface IVirtualDevice {
     /**
      * Closes the virtual device and frees all associated resources.
      */
+    @EnforcePermission("CREATE_VIRTUAL_DEVICE")
     void close();
 
     /**
      * Notifies of an audio session being started.
      */
+    @EnforcePermission("CREATE_VIRTUAL_DEVICE")
     void onAudioSessionStarting(
             int displayId,
             IAudioRoutingCallback routingCallback,
             IAudioConfigChangedCallback configChangedCallback);
 
+    @EnforcePermission("CREATE_VIRTUAL_DEVICE")
     void onAudioSessionEnded();
-    @JavaPassthrough(annotation="@android.annotation.RequiresPermission(android.Manifest.permission.CREATE_VIRTUAL_DEVICE)")
+
+    @EnforcePermission("CREATE_VIRTUAL_DEVICE")
     void createVirtualDpad(
             in VirtualDpadConfig config,
             IBinder token);
-    @JavaPassthrough(annotation="@android.annotation.RequiresPermission(android.Manifest.permission.CREATE_VIRTUAL_DEVICE)")
+    @EnforcePermission("CREATE_VIRTUAL_DEVICE")
     void createVirtualKeyboard(
             in VirtualKeyboardConfig config,
             IBinder token);
-    @JavaPassthrough(annotation="@android.annotation.RequiresPermission(android.Manifest.permission.CREATE_VIRTUAL_DEVICE)")
+    @EnforcePermission("CREATE_VIRTUAL_DEVICE")
     void createVirtualMouse(
             in VirtualMouseConfig config,
             IBinder token);
-    @JavaPassthrough(annotation="@android.annotation.RequiresPermission(android.Manifest.permission.CREATE_VIRTUAL_DEVICE)")
+    @EnforcePermission("CREATE_VIRTUAL_DEVICE")
     void createVirtualTouchscreen(
             in VirtualTouchscreenConfig config,
             IBinder token);
-    @JavaPassthrough(annotation="@android.annotation.RequiresPermission(android.Manifest.permission.CREATE_VIRTUAL_DEVICE)")
+    @EnforcePermission("CREATE_VIRTUAL_DEVICE")
     void createVirtualNavigationTouchpad(
             in VirtualNavigationTouchpadConfig config,
             IBinder token);
+    @EnforcePermission("CREATE_VIRTUAL_DEVICE")
     void unregisterInputDevice(IBinder token);
     int getInputDeviceId(IBinder token);
+    @EnforcePermission("CREATE_VIRTUAL_DEVICE")
     boolean sendDpadKeyEvent(IBinder token, in VirtualKeyEvent event);
+    @EnforcePermission("CREATE_VIRTUAL_DEVICE")
     boolean sendKeyEvent(IBinder token, in VirtualKeyEvent event);
+    @EnforcePermission("CREATE_VIRTUAL_DEVICE")
     boolean sendButtonEvent(IBinder token, in VirtualMouseButtonEvent event);
+    @EnforcePermission("CREATE_VIRTUAL_DEVICE")
     boolean sendRelativeEvent(IBinder token, in VirtualMouseRelativeEvent event);
+    @EnforcePermission("CREATE_VIRTUAL_DEVICE")
     boolean sendScrollEvent(IBinder token, in VirtualMouseScrollEvent event);
+    @EnforcePermission("CREATE_VIRTUAL_DEVICE")
     boolean sendTouchEvent(IBinder token, in VirtualTouchEvent event);
 
     /**
      * Creates a virtual sensor, capable of injecting sensor events into the system.
      */
-    @JavaPassthrough(annotation="@android.annotation.RequiresPermission(android.Manifest.permission.CREATE_VIRTUAL_DEVICE)")
+    @EnforcePermission("CREATE_VIRTUAL_DEVICE")
     void createVirtualSensor(IBinder tokenm, in VirtualSensorConfig config);
 
     /**
      * Removes the sensor corresponding to the given token from the system.
      */
-    @JavaPassthrough(annotation="@android.annotation.RequiresPermission(android.Manifest.permission.CREATE_VIRTUAL_DEVICE)")
+    @EnforcePermission("CREATE_VIRTUAL_DEVICE")
     void unregisterSensor(IBinder token);
 
     /**
      * Sends an event to the virtual sensor corresponding to the given token.
      */
-    @JavaPassthrough(annotation="@android.annotation.RequiresPermission(android.Manifest.permission.CREATE_VIRTUAL_DEVICE)")
+    @EnforcePermission("CREATE_VIRTUAL_DEVICE")
     boolean sendSensorEvent(IBinder token, in VirtualSensorEvent event);
 
     /**
@@ -126,6 +137,7 @@ interface IVirtualDevice {
     PointF getCursorPosition(IBinder token);
 
     /** Sets whether to show or hide the cursor while this virtual device is active. */
+    @EnforcePermission("CREATE_VIRTUAL_DEVICE")
     void setShowPointerIcon(boolean showPointerIcon);
 
     /**
@@ -133,9 +145,9 @@ interface IVirtualDevice {
      * when matching the provided IntentFilter and calls the callback with the intercepted
      * intent.
      */
-    @JavaPassthrough(annotation="@android.annotation.RequiresPermission(android.Manifest.permission.CREATE_VIRTUAL_DEVICE)")
+    @EnforcePermission("CREATE_VIRTUAL_DEVICE")
     void registerIntentInterceptor(
             in IVirtualDeviceIntentInterceptor intentInterceptor, in IntentFilter filter);
-    @JavaPassthrough(annotation="@android.annotation.RequiresPermission(android.Manifest.permission.CREATE_VIRTUAL_DEVICE)")
+    @EnforcePermission("CREATE_VIRTUAL_DEVICE")
     void unregisterIntentInterceptor(in IVirtualDeviceIntentInterceptor intentInterceptor);
 }

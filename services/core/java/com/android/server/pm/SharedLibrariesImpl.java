@@ -408,7 +408,7 @@ public final class SharedLibrariesImpl implements SharedLibrariesRead, Watchable
         final int versionCount = versionedLib.size();
         for (int i = 0; i < versionCount; i++) {
             final long libVersion = versionedLib.keyAt(i);
-            if (libVersion < pkg.getStaticSharedLibVersion()) {
+            if (libVersion < pkg.getStaticSharedLibraryVersion()) {
                 previousLibVersion = Math.max(previousLibVersion, libVersion);
             }
         }
@@ -468,7 +468,7 @@ public final class SharedLibrariesImpl implements SharedLibrariesRead, Watchable
                 }
             } else if (pkg.getStaticSharedLibraryName() != null) {
                 SharedLibraryInfo definedLibrary = getSharedLibraryInfo(
-                        pkg.getStaticSharedLibraryName(), pkg.getStaticSharedLibVersion());
+                        pkg.getStaticSharedLibraryName(), pkg.getStaticSharedLibraryVersion());
                 if (definedLibrary != null) {
                     action.accept(definedLibrary, libInfo);
                 }

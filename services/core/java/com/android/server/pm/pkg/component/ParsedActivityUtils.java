@@ -144,7 +144,7 @@ public class ParsedActivityUtils {
                                 | flag(ActivityInfo.FLAG_SYSTEM_USER_ONLY, R.styleable.AndroidManifestActivity_systemUserOnly, sa)));
 
             if (!receiver) {
-                activity.setFlags(activity.getFlags() | (flag(ActivityInfo.FLAG_HARDWARE_ACCELERATED, R.styleable.AndroidManifestActivity_hardwareAccelerated, pkg.isBaseHardwareAccelerated(), sa)
+                activity.setFlags(activity.getFlags() | (flag(ActivityInfo.FLAG_HARDWARE_ACCELERATED, R.styleable.AndroidManifestActivity_hardwareAccelerated, pkg.isHardwareAccelerated(), sa)
                                         | flag(ActivityInfo.FLAG_ALLOW_EMBEDDED, R.styleable.AndroidManifestActivity_allowEmbedded, sa)
                                         | flag(ActivityInfo.FLAG_ALWAYS_FOCUSABLE, R.styleable.AndroidManifestActivity_alwaysFocusable, sa)
                                         | flag(ActivityInfo.FLAG_AUTO_REMOVE_FROM_RECENTS, R.styleable.AndroidManifestActivity_autoRemoveFromRecents, sa)

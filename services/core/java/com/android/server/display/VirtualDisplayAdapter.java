@@ -28,6 +28,7 @@ import static android.hardware.display.DisplayManager.VIRTUAL_DISPLAY_FLAG_PUBLI
 import static android.hardware.display.DisplayManager.VIRTUAL_DISPLAY_FLAG_ROTATES_WITH_CONTENT;
 import static android.hardware.display.DisplayManager.VIRTUAL_DISPLAY_FLAG_SECURE;
 import static android.hardware.display.DisplayManager.VIRTUAL_DISPLAY_FLAG_SHOULD_SHOW_SYSTEM_DECORATIONS;
+import static android.hardware.display.DisplayManager.VIRTUAL_DISPLAY_FLAG_STEAL_TOP_FOCUS_DISABLED;
 import static android.hardware.display.DisplayManager.VIRTUAL_DISPLAY_FLAG_SUPPORTS_TOUCH;
 import static android.hardware.display.DisplayManager.VIRTUAL_DISPLAY_FLAG_TOUCH_FEEDBACK_DISABLED;
 import static android.hardware.display.DisplayManager.VIRTUAL_DISPLAY_FLAG_TRUSTED;
@@ -35,6 +36,7 @@ import static android.hardware.display.DisplayManager.VIRTUAL_DISPLAY_FLAG_TRUST
 import static com.android.server.display.DisplayDeviceInfo.FLAG_ALWAYS_UNLOCKED;
 import static com.android.server.display.DisplayDeviceInfo.FLAG_DEVICE_DISPLAY_GROUP;
 import static com.android.server.display.DisplayDeviceInfo.FLAG_OWN_DISPLAY_GROUP;
+import static com.android.server.display.DisplayDeviceInfo.FLAG_STEAL_TOP_FOCUS_DISABLED;
 import static com.android.server.display.DisplayDeviceInfo.FLAG_TOUCH_FEEDBACK_DISABLED;
 import static com.android.server.display.DisplayDeviceInfo.FLAG_TRUSTED;
 
@@ -526,6 +528,17 @@ public class VirtualDisplayAdapter extends DisplayAdapter {
                                 + "VIRTUAL_DISPLAY_FLAG_TRUSTED.");
                     }
                 }
+                if ((mFlags & VIRTUAL_DISPLAY_FLAG_STEAL_TOP_FOCUS_DISABLED) != 0) {
+                    if ((mFlags & VIRTUAL_DISPLAY_FLAG_TRUSTED) != 0
+                            && (mFlags & VIRTUAL_DISPLAY_FLAG_OWN_FOCUS) != 0) {
+                        mInfo.flags |= FLAG_STEAL_TOP_FOCUS_DISABLED;
+                    } else {
+                        Slog.w(TAG,
+                                "Ignoring VIRTUAL_DISPLAY_FLAG_STEAL_TOP_FOCUS_DISABLED as it "
+                                        + "requires VIRTUAL_DISPLAY_FLAG_OWN_FOCUS which requires "
+                                        + "VIRTUAL_DISPLAY_FLAG_TRUSTED.");
+                    }
+                }
 
                 mInfo.type = Display.TYPE_VIRTUAL;
                 mInfo.touch = ((mFlags & VIRTUAL_DISPLAY_FLAG_SUPPORTS_TOUCH) == 0) ?
@@ -607,6 +620,13 @@ public class VirtualDisplayAdapter extends DisplayAdapter {
             // We could only update the VirtualDisplay size, anyway (which the client wouldn't
             // expect), and there will still be letterboxing on the output content since the
             // Surface and VirtualDisplay would then have different aspect ratios.
+        }
+
+        @Override
+        public void onCapturedContentVisibilityChanged(boolean isVisible) {
+            // Do nothing when we tell the client that the content has a visibility change - it is
+            // up to them to decide to pause recording, and update their own UI, depending on their
+            // use case.
         }
     }
 

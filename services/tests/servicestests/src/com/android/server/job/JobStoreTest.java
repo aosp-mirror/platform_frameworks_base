@@ -6,6 +6,8 @@ import static android.net.NetworkCapabilities.TRANSPORT_WIFI;
 
 import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertThrows;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
@@ -15,6 +17,7 @@ import static org.mockito.Mockito.when;
 
 import android.app.job.JobInfo;
 import android.app.job.JobInfo.Builder;
+import android.app.job.JobWorkItem;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.pm.PackageManagerInternal;
@@ -31,6 +34,7 @@ import androidx.test.InstrumentationRegistry;
 import androidx.test.filters.SmallTest;
 import androidx.test.runner.AndroidJUnit4;
 
+import com.android.internal.util.ArrayUtils;
 import com.android.server.LocalServices;
 import com.android.server.job.JobStore.JobSet;
 import com.android.server.job.controllers.JobStatus;
@@ -43,6 +47,10 @@ import org.junit.runner.RunWith;
 import java.io.File;
 import java.time.Clock;
 import java.time.ZoneOffset;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Objects;
+import java.util.Set;
 
 /**
  * Test reading and writing correctly from file.
@@ -135,8 +143,8 @@ public class JobStoreTest {
                 .build();
         final int uid1 = SOME_UID;
         final int uid2 = uid1 + 1;
-        final JobStatus JobStatus1 = JobStatus.createFromJobInfo(task1, uid1, null, -1, null);
-        final JobStatus JobStatus2 = JobStatus.createFromJobInfo(task2, uid2, null, -1, null);
+        final JobStatus JobStatus1 = JobStatus.createFromJobInfo(task1, uid1, null, -1, null, null);
+        final JobStatus JobStatus2 = JobStatus.createFromJobInfo(task2, uid2, null, -1, null, null);
         runWritingJobsToDisk(JobStatus1, JobStatus2);
 
         // Remove 1 job
@@ -188,8 +196,8 @@ public class JobStoreTest {
                 .build();
         final int uid1 = SOME_UID;
         final int uid2 = uid1 + 1;
-        final JobStatus JobStatus1 = JobStatus.createFromJobInfo(task1, uid1, null, -1, null);
-        final JobStatus JobStatus2 = JobStatus.createFromJobInfo(task2, uid2, null, -1, null);
+        final JobStatus JobStatus1 = JobStatus.createFromJobInfo(task1, uid1, null, -1, null, null);
+        final JobStatus JobStatus2 = JobStatus.createFromJobInfo(task2, uid2, null, -1, null, null);
         runWritingJobsToDisk(JobStatus1, JobStatus2);
 
         // Remove all jobs
@@ -265,7 +273,7 @@ public class JobStoreTest {
                 .setMinimumLatency(runFromMillis)
                 .setPersisted(true)
                 .build();
-        final JobStatus ts = JobStatus.createFromJobInfo(task, SOME_UID, null, -1, null);
+        final JobStatus ts = JobStatus.createFromJobInfo(task, SOME_UID, null, -1, null, null);
         ts.addInternalFlags(JobStatus.INTERNAL_FLAG_HAS_FOREGROUND_EXEMPTION);
         mTaskStoreUnderTest.add(ts);
         waitForPendingIo();
@@ -308,8 +316,10 @@ public class JobStoreTest {
                 .build();
         final int uid1 = SOME_UID;
         final int uid2 = uid1 + 1;
-        final JobStatus taskStatus1 = JobStatus.createFromJobInfo(task1, uid1, null, -1, null);
-        final JobStatus taskStatus2 = JobStatus.createFromJobInfo(task2, uid2, null, -1, null);
+        final JobStatus taskStatus1 =
+                JobStatus.createFromJobInfo(task1, uid1, null, -1, null, null);
+        final JobStatus taskStatus2 =
+                JobStatus.createFromJobInfo(task2, uid2, null, -1, null, null);
 
         runWritingJobsToDisk(taskStatus1, taskStatus2);
     }
@@ -364,7 +374,7 @@ public class JobStoreTest {
         extras.putInt("into", 3);
         b.setExtras(extras);
         final JobInfo task = b.build();
-        JobStatus taskStatus = JobStatus.createFromJobInfo(task, SOME_UID, null, -1, null);
+        JobStatus taskStatus = JobStatus.createFromJobInfo(task, SOME_UID, null, -1, null, null);
 
         mTaskStoreUnderTest.add(taskStatus);
         waitForPendingIo();
@@ -384,7 +394,7 @@ public class JobStoreTest {
                 .setRequiresCharging(true)
                 .setPersisted(true);
         JobStatus taskStatus = JobStatus.createFromJobInfo(b.build(), SOME_UID,
-                "com.google.android.gms", 0, null);
+                "com.android.test.app", 0, null, null);
 
         mTaskStoreUnderTest.add(taskStatus);
         waitForPendingIo();
@@ -406,7 +416,8 @@ public class JobStoreTest {
                 .setPeriodic(5*60*60*1000, 1*60*60*1000)
                 .setRequiresCharging(true)
                 .setPersisted(true);
-        JobStatus taskStatus = JobStatus.createFromJobInfo(b.build(), SOME_UID, null, -1, null);
+        JobStatus taskStatus = JobStatus.createFromJobInfo(b.build(),
+                SOME_UID, null, -1, null, null);
 
         mTaskStoreUnderTest.add(taskStatus);
         waitForPendingIo();
@@ -435,7 +446,7 @@ public class JobStoreTest {
                 invalidLateRuntimeElapsedMillis - TWO_HOURS;  // Early is (late - period).
         final Pair<Long, Long> persistedExecutionTimesUTC = new Pair<>(rtcNow, rtcNow + ONE_HOUR);
         final JobStatus js = new JobStatus(b.build(), SOME_UID, "somePackage",
-                0 /* sourceUserId */, 0, "someTag",
+                0 /* sourceUserId */, 0, "someNamespace", "someTag",
                 invalidEarlyRuntimeElapsedMillis, invalidLateRuntimeElapsedMillis,
                 0 /* lastSuccessfulRunTime */, 0 /* lastFailedRunTime */,
                 persistedExecutionTimesUTC, 0 /* innerFlag */, 0 /* dynamicConstraints */);
@@ -464,7 +475,7 @@ public class JobStoreTest {
                 .setOverrideDeadline(5000)
                 .setBias(42)
                 .setPersisted(true);
-        final JobStatus js = JobStatus.createFromJobInfo(b.build(), SOME_UID, null, -1, null);
+        final JobStatus js = JobStatus.createFromJobInfo(b.build(), SOME_UID, null, -1, null, null);
         mTaskStoreUnderTest.add(js);
         waitForPendingIo();
 
@@ -475,13 +486,30 @@ public class JobStoreTest {
     }
 
     @Test
+    public void testNamespacePersisted() throws Exception {
+        final String namespace = "my.test.namespace";
+        JobInfo.Builder b = new Builder(93, mComponent)
+                .setRequiresBatteryNotLow(true)
+                .setPersisted(true);
+        final JobStatus js =
+                JobStatus.createFromJobInfo(b.build(), SOME_UID, null, -1, namespace, null);
+        mTaskStoreUnderTest.add(js);
+        waitForPendingIo();
+
+        final JobSet jobStatusSet = new JobSet();
+        mTaskStoreUnderTest.readJobMapFromDisk(jobStatusSet, true);
+        JobStatus loaded = jobStatusSet.getAllJobs().iterator().next();
+        assertEquals("Namespace not correctly persisted.", namespace, loaded.getNamespace());
+    }
+
+    @Test
     public void testPriorityPersisted() throws Exception {
         final JobInfo job = new Builder(92, mComponent)
                 .setOverrideDeadline(5000)
                 .setPriority(JobInfo.PRIORITY_MIN)
                 .setPersisted(true)
                 .build();
-        final JobStatus js = JobStatus.createFromJobInfo(job, SOME_UID, null, -1, null);
+        final JobStatus js = JobStatus.createFromJobInfo(job, SOME_UID, null, -1, null, null);
         mTaskStoreUnderTest.add(js);
         waitForPendingIo();
 
@@ -500,12 +528,14 @@ public class JobStoreTest {
         JobInfo.Builder b = new Builder(42, mComponent)
                 .setOverrideDeadline(10000)
                 .setPersisted(false);
-        JobStatus jsNonPersisted = JobStatus.createFromJobInfo(b.build(), SOME_UID, null, -1, null);
+        JobStatus jsNonPersisted = JobStatus.createFromJobInfo(b.build(),
+                SOME_UID, null, -1, null, null);
         mTaskStoreUnderTest.add(jsNonPersisted);
         b = new Builder(43, mComponent)
                 .setOverrideDeadline(10000)
                 .setPersisted(true);
-        JobStatus jsPersisted = JobStatus.createFromJobInfo(b.build(), SOME_UID, null, -1, null);
+        JobStatus jsPersisted = JobStatus.createFromJobInfo(b.build(),
+                SOME_UID, null, -1, null, null);
         mTaskStoreUnderTest.add(jsPersisted);
         waitForPendingIo();
 
@@ -593,7 +623,8 @@ public class JobStoreTest {
         JobInfo.Builder b = new Builder(8, mComponent)
                 .setRequiresDeviceIdle(true)
                 .setPersisted(true);
-        JobStatus taskStatus = JobStatus.createFromJobInfo(b.build(), SOME_UID, null, -1, null);
+        JobStatus taskStatus = JobStatus.createFromJobInfo(b.build(),
+                SOME_UID, null, -1, null, null);
 
         mTaskStoreUnderTest.add(taskStatus);
         waitForPendingIo();
@@ -612,7 +643,8 @@ public class JobStoreTest {
         JobInfo.Builder b = new Builder(8, mComponent)
                 .setRequiresCharging(true)
                 .setPersisted(true);
-        JobStatus taskStatus = JobStatus.createFromJobInfo(b.build(), SOME_UID, null, -1, null);
+        JobStatus taskStatus = JobStatus.createFromJobInfo(b.build(),
+                SOME_UID, null, -1, null, null);
 
         mTaskStoreUnderTest.add(taskStatus);
         waitForPendingIo();
@@ -631,7 +663,8 @@ public class JobStoreTest {
         JobInfo.Builder b = new Builder(8, mComponent)
                 .setRequiresStorageNotLow(true)
                 .setPersisted(true);
-        JobStatus taskStatus = JobStatus.createFromJobInfo(b.build(), SOME_UID, null, -1, null);
+        JobStatus taskStatus = JobStatus.createFromJobInfo(b.build(),
+                SOME_UID, null, -1, null, null);
 
         mTaskStoreUnderTest.add(taskStatus);
         waitForPendingIo();
@@ -650,7 +683,8 @@ public class JobStoreTest {
         JobInfo.Builder b = new Builder(8, mComponent)
                 .setRequiresBatteryNotLow(true)
                 .setPersisted(true);
-        JobStatus taskStatus = JobStatus.createFromJobInfo(b.build(), SOME_UID, null, -1, null);
+        JobStatus taskStatus = JobStatus.createFromJobInfo(b.build(),
+                SOME_UID, null, -1, null, null);
 
         mTaskStoreUnderTest.add(taskStatus);
         waitForPendingIo();
@@ -664,20 +698,46 @@ public class JobStoreTest {
                 taskStatus.getJob().isRequireBatteryNotLow());
     }
 
+    @Test
+    public void testJobWorkItems() throws Exception {
+        JobWorkItem item1 = new JobWorkItem.Builder().build();
+        item1.bumpDeliveryCount();
+        PersistableBundle bundle = new PersistableBundle();
+        bundle.putBoolean("test", true);
+        JobWorkItem item2 = new JobWorkItem.Builder().setExtras(bundle).build();
+        item2.bumpDeliveryCount();
+        JobWorkItem item3 = new JobWorkItem.Builder().setEstimatedNetworkBytes(1, 2).build();
+        JobWorkItem item4 = new JobWorkItem.Builder().setMinimumNetworkChunkBytes(3).build();
+        JobWorkItem item5 = new JobWorkItem.Builder().build();
+
+        JobInfo jobInfo = new JobInfo.Builder(0, mComponent)
+                .setPersisted(true)
+                .build();
+        JobStatus jobStatus =
+                JobStatus.createFromJobInfo(jobInfo, SOME_UID, null, -1, null, null);
+        jobStatus.executingWork = new ArrayList<>(List.of(item1, item2));
+        jobStatus.pendingWork = new ArrayList<>(List.of(item3, item4, item5));
+        assertPersistedEquals(jobStatus);
+    }
+
     /**
      * Helper function to kick a {@link JobInfo} through a persistence cycle and
      * assert that it's unchanged.
      */
     private void assertPersistedEquals(JobInfo firstInfo) throws Exception {
+        assertPersistedEquals(
+                JobStatus.createFromJobInfo(firstInfo, SOME_UID, null, -1, null, null));
+    }
+
+    private void assertPersistedEquals(JobStatus original) throws Exception {
         mTaskStoreUnderTest.clear();
-        JobStatus first = JobStatus.createFromJobInfo(firstInfo, SOME_UID, null, -1, null);
-        mTaskStoreUnderTest.add(first);
+        mTaskStoreUnderTest.add(original);
         waitForPendingIo();
 
         final JobSet jobStatusSet = new JobSet();
         mTaskStoreUnderTest.readJobMapFromDisk(jobStatusSet, true);
         final JobStatus second = jobStatusSet.getAllJobs().iterator().next();
-        assertJobsEqual(first, second);
+        assertJobsEqual(original, second);
     }
 
     /**
@@ -693,6 +753,8 @@ public class JobStoreTest {
         assertEquals("Calling UID not equal", expected.getUid(), actual.getUid());
         assertEquals("Calling user not equal", expected.getUserId(), actual.getUserId());
 
+        assertEquals(expected.getNamespace(), actual.getNamespace());
+
         assertEquals("Internal flags not equal",
                 expected.getInternalFlags(), actual.getInternalFlags());
 
@@ -701,6 +763,59 @@ public class JobStoreTest {
                 expected.getEarliestRunTime(), actual.getEarliestRunTime());
         compareTimestampsSubjectToIoLatency("Late run-times not the same after read.",
                 expected.getLatestRunTimeElapsed(), actual.getLatestRunTimeElapsed());
+
+        assertEquals(expected.hasWorkLocked(), actual.hasWorkLocked());
+        if (expected.hasWorkLocked()) {
+            List<JobWorkItem> allWork = new ArrayList<>();
+            if (expected.executingWork != null) {
+                allWork.addAll(expected.executingWork);
+            }
+            if (expected.pendingWork != null) {
+                allWork.addAll(expected.pendingWork);
+            }
+            // All work for freshly loaded Job will be pending.
+            assertNotNull(actual.pendingWork);
+            assertTrue(ArrayUtils.isEmpty(actual.executingWork));
+            assertEquals(allWork.size(), actual.pendingWork.size());
+            for (int i = 0; i < allWork.size(); ++i) {
+                JobWorkItem expectedItem = allWork.get(i);
+                JobWorkItem actualItem = actual.pendingWork.get(i);
+                assertJobWorkItemsEqual(expectedItem, actualItem);
+            }
+        }
+    }
+
+    private void assertJobWorkItemsEqual(JobWorkItem expected, JobWorkItem actual) {
+        if (expected == null) {
+            assertNull(actual);
+            return;
+        }
+        assertNotNull(actual);
+        assertEquals(expected.getDeliveryCount(), actual.getDeliveryCount());
+        assertEquals(expected.getEstimatedNetworkDownloadBytes(),
+                actual.getEstimatedNetworkDownloadBytes());
+        assertEquals(expected.getEstimatedNetworkUploadBytes(),
+                actual.getEstimatedNetworkUploadBytes());
+        assertEquals(expected.getMinimumNetworkChunkBytes(), actual.getMinimumNetworkChunkBytes());
+        if (expected.getIntent() == null) {
+            assertNull(actual.getIntent());
+        } else {
+            // filterEquals() just so happens to check almost everything that is persisted to disk.
+            assertTrue(expected.getIntent().filterEquals(actual.getIntent()));
+            assertEquals(expected.getIntent().getFlags(), actual.getIntent().getFlags());
+        }
+        assertEquals(expected.getGrants(), actual.getGrants());
+        PersistableBundle expectedExtras = expected.getExtras();
+        PersistableBundle actualExtras = actual.getExtras();
+        if (expectedExtras == null) {
+            assertNull(actualExtras);
+        } else {
+            assertEquals(expectedExtras.size(), actualExtras.size());
+            Set<String> keys = expectedExtras.keySet();
+            for (String key : keys) {
+                assertTrue(Objects.equals(expectedExtras.get(key), actualExtras.get(key)));
+            }
+        }
     }
 
     /**

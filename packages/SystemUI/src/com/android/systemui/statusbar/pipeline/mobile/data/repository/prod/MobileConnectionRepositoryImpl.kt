@@ -17,30 +17,39 @@
 package com.android.systemui.statusbar.pipeline.mobile.data.repository.prod
 
 import android.content.Context
+import android.content.IntentFilter
 import android.database.ContentObserver
 import android.provider.Settings.Global
 import android.telephony.CellSignalStrength
 import android.telephony.CellSignalStrengthCdma
 import android.telephony.ServiceState
 import android.telephony.SignalStrength
+import android.telephony.SubscriptionManager.INVALID_SUBSCRIPTION_ID
 import android.telephony.TelephonyCallback
 import android.telephony.TelephonyDisplayInfo
 import android.telephony.TelephonyDisplayInfo.OVERRIDE_NETWORK_TYPE_NONE
 import android.telephony.TelephonyManager
 import android.telephony.TelephonyManager.ERI_OFF
+import android.telephony.TelephonyManager.EXTRA_SUBSCRIPTION_ID
 import android.telephony.TelephonyManager.NETWORK_TYPE_UNKNOWN
+import com.android.systemui.broadcast.BroadcastDispatcher
 import com.android.systemui.common.coroutine.ConflatedCallbackFlow.conflatedCallbackFlow
 import com.android.systemui.dagger.qualifiers.Application
 import com.android.systemui.dagger.qualifiers.Background
+import com.android.systemui.log.table.TableLogBuffer
+import com.android.systemui.log.table.TableLogBufferFactory
+import com.android.systemui.log.table.logDiffsForTable
 import com.android.systemui.statusbar.pipeline.mobile.data.model.MobileConnectionModel
+import com.android.systemui.statusbar.pipeline.mobile.data.model.NetworkNameModel
 import com.android.systemui.statusbar.pipeline.mobile.data.model.ResolvedNetworkType.DefaultNetworkType
 import com.android.systemui.statusbar.pipeline.mobile.data.model.ResolvedNetworkType.OverrideNetworkType
 import com.android.systemui.statusbar.pipeline.mobile.data.model.ResolvedNetworkType.UnknownNetworkType
 import com.android.systemui.statusbar.pipeline.mobile.data.model.toDataConnectionType
+import com.android.systemui.statusbar.pipeline.mobile.data.model.toNetworkNameModel
 import com.android.systemui.statusbar.pipeline.mobile.data.repository.MobileConnectionRepository
 import com.android.systemui.statusbar.pipeline.mobile.util.MobileMappingsProxy
 import com.android.systemui.statusbar.pipeline.shared.ConnectivityPipelineLogger
-import com.android.systemui.statusbar.pipeline.shared.ConnectivityPipelineLogger.Companion.logOutputChange
+import com.android.systemui.statusbar.pipeline.shared.data.model.toMobileDataActivityModel
 import com.android.systemui.util.settings.GlobalSettings
 import javax.inject.Inject
 import kotlinx.coroutines.CoroutineDispatcher
@@ -52,6 +61,7 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.mapLatest
 import kotlinx.coroutines.flow.merge
 import kotlinx.coroutines.flow.onEach
@@ -62,13 +72,17 @@ import kotlinx.coroutines.flow.stateIn
 class MobileConnectionRepositoryImpl(
     private val context: Context,
     override val subId: Int,
+    defaultNetworkName: NetworkNameModel,
+    networkNameSeparator: String,
     private val telephonyManager: TelephonyManager,
     private val globalSettings: GlobalSettings,
+    broadcastDispatcher: BroadcastDispatcher,
     defaultDataSubId: StateFlow<Int>,
     globalMobileDataSettingChangedEvent: Flow<Unit>,
     mobileMappingsProxy: MobileMappingsProxy,
     bgDispatcher: CoroutineDispatcher,
     logger: ConnectivityPipelineLogger,
+    mobileLogger: TableLogBuffer,
     scope: CoroutineScope,
 ) : MobileConnectionRepository {
     init {
@@ -82,10 +96,11 @@ class MobileConnectionRepositoryImpl(
 
     private val telephonyCallbackEvent = MutableSharedFlow<Unit>(extraBufferCapacity = 1)
 
+    override val tableLogBuffer: TableLogBuffer = mobileLogger
+
     override val connectionInfo: StateFlow<MobileConnectionModel> = run {
         var state = MobileConnectionModel()
         conflatedCallbackFlow {
-                // TODO (b/240569788): log all of these into the connectivity logger
                 val callback =
                     object :
                         TelephonyCallback(),
@@ -96,15 +111,18 @@ class MobileConnectionRepositoryImpl(
                         TelephonyCallback.CarrierNetworkListener,
                         TelephonyCallback.DisplayInfoListener {
                         override fun onServiceStateChanged(serviceState: ServiceState) {
+                            logger.logOnServiceStateChanged(serviceState, subId)
                             state =
                                 state.copy(
                                     isEmergencyOnly = serviceState.isEmergencyOnly,
                                     isRoaming = serviceState.roaming,
+                                    operatorAlphaShort = serviceState.operatorAlphaShort,
                                 )
                             trySend(state)
                         }
 
                         override fun onSignalStrengthsChanged(signalStrength: SignalStrength) {
+                            logger.logOnSignalStrengthsChanged(signalStrength, subId)
                             val cdmaLevel =
                                 signalStrength
                                     .getCellSignalStrengths(CellSignalStrengthCdma::class.java)
@@ -131,17 +149,23 @@ class MobileConnectionRepositoryImpl(
                             dataState: Int,
                             networkType: Int
                         ) {
+                            logger.logOnDataConnectionStateChanged(dataState, networkType, subId)
                             state =
                                 state.copy(dataConnectionState = dataState.toDataConnectionType())
                             trySend(state)
                         }
 
                         override fun onDataActivity(direction: Int) {
-                            state = state.copy(dataActivityDirection = direction)
+                            logger.logOnDataActivity(direction, subId)
+                            state =
+                                state.copy(
+                                    dataActivityDirection = direction.toMobileDataActivityModel()
+                                )
                             trySend(state)
                         }
 
                         override fun onCarrierNetworkChange(active: Boolean) {
+                            logger.logOnCarrierNetworkChange(active, subId)
                             state = state.copy(carrierNetworkChangeActive = active)
                             trySend(state)
                         }
@@ -149,6 +173,7 @@ class MobileConnectionRepositoryImpl(
                         override fun onDisplayInfoChanged(
                             telephonyDisplayInfo: TelephonyDisplayInfo
                         ) {
+                            logger.logOnDisplayInfoChanged(telephonyDisplayInfo, subId)
 
                             val networkType =
                                 if (telephonyDisplayInfo.networkType == NETWORK_TYPE_UNKNOWN) {
@@ -179,7 +204,11 @@ class MobileConnectionRepositoryImpl(
                 awaitClose { telephonyManager.unregisterTelephonyCallback(callback) }
             }
             .onEach { telephonyCallbackEvent.tryEmit(Unit) }
-            .logOutputChange(logger, "MobileSubscriptionModel")
+            .logDiffsForTable(
+                mobileLogger,
+                columnPrefix = "MobileConnection ($subId)",
+                initialValue = state,
+            )
             .stateIn(scope, SharingStarted.WhileSubscribed(), state)
     }
 
@@ -218,46 +247,97 @@ class MobileConnectionRepositoryImpl(
             .mapLatest { telephonyManager.cdmaEnhancedRoamingIndicatorDisplayNumber != ERI_OFF }
             .stateIn(scope, SharingStarted.WhileSubscribed(), false)
 
-    override val dataEnabled: StateFlow<Boolean> =
+    override val networkName: StateFlow<NetworkNameModel> =
+        broadcastDispatcher
+            .broadcastFlow(IntentFilter(TelephonyManager.ACTION_SERVICE_PROVIDERS_UPDATED)) {
+                intent,
+                _ ->
+                if (intent.getIntExtra(EXTRA_SUBSCRIPTION_ID, INVALID_SUBSCRIPTION_ID) != subId) {
+                    defaultNetworkName
+                } else {
+                    intent.toNetworkNameModel(networkNameSeparator) ?: defaultNetworkName
+                }
+            }
+            .distinctUntilChanged()
+            .logDiffsForTable(
+                mobileLogger,
+                columnPrefix = "",
+                initialValue = defaultNetworkName,
+            )
+            .stateIn(scope, SharingStarted.WhileSubscribed(), defaultNetworkName)
+
+    override val dataEnabled: StateFlow<Boolean> = run {
+        val initial = dataConnectionAllowed()
         telephonyPollingEvent
             .mapLatest { dataConnectionAllowed() }
-            .stateIn(scope, SharingStarted.WhileSubscribed(), dataConnectionAllowed())
+            .distinctUntilChanged()
+            .logDiffsForTable(
+                mobileLogger,
+                columnPrefix = "",
+                columnName = "dataEnabled",
+                initialValue = initial,
+            )
+            .stateIn(scope, SharingStarted.WhileSubscribed(), initial)
+    }
 
     private fun dataConnectionAllowed(): Boolean = telephonyManager.isDataConnectionAllowed
 
-    override val isDefaultDataSubscription: StateFlow<Boolean> =
+    override val isDefaultDataSubscription: StateFlow<Boolean> = run {
+        val initialValue = defaultDataSubId.value == subId
         defaultDataSubId
             .mapLatest { it == subId }
-            .stateIn(scope, SharingStarted.WhileSubscribed(), defaultDataSubId.value == subId)
+            .distinctUntilChanged()
+            .logDiffsForTable(
+                mobileLogger,
+                columnPrefix = "",
+                columnName = "isDefaultDataSub",
+                initialValue = initialValue,
+            )
+            .stateIn(scope, SharingStarted.WhileSubscribed(), initialValue)
+    }
 
     class Factory
     @Inject
     constructor(
+        private val broadcastDispatcher: BroadcastDispatcher,
         private val context: Context,
         private val telephonyManager: TelephonyManager,
         private val logger: ConnectivityPipelineLogger,
         private val globalSettings: GlobalSettings,
         private val mobileMappingsProxy: MobileMappingsProxy,
+        private val logFactory: TableLogBufferFactory,
         @Background private val bgDispatcher: CoroutineDispatcher,
         @Application private val scope: CoroutineScope,
     ) {
         fun build(
             subId: Int,
+            defaultNetworkName: NetworkNameModel,
+            networkNameSeparator: String,
             defaultDataSubId: StateFlow<Int>,
             globalMobileDataSettingChangedEvent: Flow<Unit>,
         ): MobileConnectionRepository {
+            val mobileLogger = logFactory.create(tableBufferLogName(subId), 100)
+
             return MobileConnectionRepositoryImpl(
                 context,
                 subId,
+                defaultNetworkName,
+                networkNameSeparator,
                 telephonyManager.createForSubscriptionId(subId),
                 globalSettings,
+                broadcastDispatcher,
                 defaultDataSubId,
                 globalMobileDataSettingChangedEvent,
                 mobileMappingsProxy,
                 bgDispatcher,
                 logger,
+                mobileLogger,
                 scope,
             )
         }
+    }
+
+    companion object {
+        fun tableBufferLogName(subId: Int): String = "MobileConnectionLog [$subId]"
     }
 }

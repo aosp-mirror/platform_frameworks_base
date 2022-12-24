@@ -131,7 +131,7 @@ public class PackageInfoUtils {
         info.splitRevisionCodes = pkg.getSplitRevisionCodes();
         info.versionName = pkg.getVersionName();
         info.sharedUserId = pkg.getSharedUserId();
-        info.sharedUserLabel = pkg.getSharedUserLabel();
+        info.sharedUserLabel = pkg.getSharedUserLabelRes();
         info.applicationInfo = applicationInfo;
         info.installLocation = pkg.getInstallLocation();
         if ((info.applicationInfo.flags & ApplicationInfo.FLAG_SYSTEM) != 0
@@ -218,7 +218,7 @@ public class PackageInfoUtils {
                     }
                 }
             }
-            if (pkg.areAttributionsUserVisible()) {
+            if (pkg.isAttributionsUserVisible()) {
                 info.applicationInfo.privateFlagsExt
                         |= ApplicationInfo.PRIVATE_FLAG_EXT_ATTRIBUTIONS_ARE_USER_VISIBLE;
             } else {
@@ -869,7 +869,7 @@ public class PackageInfoUtils {
     public static int appInfoFlags(AndroidPackage pkg, @Nullable PackageStateInternal pkgSetting) {
         // @formatter:off
         int pkgWithoutStateFlags = flag(pkg.isExternalStorage(), ApplicationInfo.FLAG_EXTERNAL_STORAGE)
-                | flag(pkg.isBaseHardwareAccelerated(), ApplicationInfo.FLAG_HARDWARE_ACCELERATED)
+                | flag(pkg.isHardwareAccelerated(), ApplicationInfo.FLAG_HARDWARE_ACCELERATED)
                 | flag(pkg.isAllowBackup(), ApplicationInfo.FLAG_ALLOW_BACKUP)
                 | flag(pkg.isKillAfterRestore(), ApplicationInfo.FLAG_KILL_AFTER_RESTORE)
                 | flag(pkg.isRestoreAnyVersion(), ApplicationInfo.FLAG_RESTORE_ANY_VERSION)
@@ -972,7 +972,7 @@ public class PackageInfoUtils {
         // @formatter:off
         int pkgWithoutStateFlags = flag(pkg.isProfileable(), ApplicationInfo.PRIVATE_FLAG_EXT_PROFILEABLE)
                 | flag(pkg.hasRequestForegroundServiceExemption(), ApplicationInfo.PRIVATE_FLAG_EXT_REQUEST_FOREGROUND_SERVICE_EXEMPTION)
-                | flag(pkg.areAttributionsUserVisible(), ApplicationInfo.PRIVATE_FLAG_EXT_ATTRIBUTIONS_ARE_USER_VISIBLE)
+                | flag(pkg.isAttributionsUserVisible(), ApplicationInfo.PRIVATE_FLAG_EXT_ATTRIBUTIONS_ARE_USER_VISIBLE)
                 | flag(pkg.isOnBackInvokedCallbackEnabled(), ApplicationInfo.PRIVATE_FLAG_EXT_ENABLE_ON_BACK_INVOKED_CALLBACK)
                 | flag(isAllowlistedForHiddenApis, ApplicationInfo.PRIVATE_FLAG_EXT_ALLOWLISTED_FOR_HIDDEN_APIS);
         return appInfoPrivateFlagsExt(pkgWithoutStateFlags, pkgSetting);

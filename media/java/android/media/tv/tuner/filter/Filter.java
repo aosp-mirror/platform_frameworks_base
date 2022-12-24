@@ -154,7 +154,8 @@ public class Filter implements AutoCloseable {
 
     /** @hide */
     @IntDef(prefix = "STATUS_",
-            value = {STATUS_DATA_READY, STATUS_LOW_WATER, STATUS_HIGH_WATER, STATUS_OVERFLOW})
+            value = {STATUS_DATA_READY, STATUS_LOW_WATER, STATUS_HIGH_WATER, STATUS_OVERFLOW,
+                    STATUS_NO_DATA})
     @Retention(RetentionPolicy.SOURCE)
     public @interface Status {}
 
@@ -183,6 +184,10 @@ public class Filter implements AutoCloseable {
      * discarded.
      */
     public static final int STATUS_OVERFLOW = DemuxFilterStatus.OVERFLOW;
+    /**
+     * The status of a filter that the filter buffer is empty and no filtered data is coming.
+     */
+    public static final int STATUS_NO_DATA = DemuxFilterStatus.NO_DATA;
 
     /** @hide */
     @IntDef(prefix = "SCRAMBLING_STATUS_",

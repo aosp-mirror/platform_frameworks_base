@@ -41,13 +41,13 @@ import android.graphics.Rect;
 import android.os.CancellationSignal;
 import android.os.Handler;
 import android.os.IBinder;
+import android.os.Process;
 import android.os.Trace;
 import android.text.TextUtils;
 import android.util.ArraySet;
 import android.util.Log;
 import android.util.Pair;
 import android.util.SparseArray;
-import android.util.SparseIntArray;
 import android.util.proto.ProtoOutputStream;
 import android.view.InsetsSourceConsumer.ShowResult;
 import android.view.InsetsState.InternalInsetsType;
@@ -65,6 +65,7 @@ import android.view.inputmethod.InputMethodManager;
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.graphics.SfVsyncFrameCallbackProvider;
 import com.android.internal.inputmethod.ImeTracing;
+import com.android.internal.inputmethod.SoftInputShowHideReason;
 
 import java.io.PrintWriter;
 import java.lang.annotation.Retention;
@@ -978,7 +979,14 @@ public class InsetsController implements WindowInsetsController, InsetsAnimation
 
     @Override
     public void show(@InsetsType int types) {
-        show(types, false /* fromIme */, null /* statsToken */);
+        ImeTracker.Token statsToken = null;
+        if ((types & ime()) != 0) {
+            statsToken = ImeTracker.get().onRequestShow(null /* component */,
+                    Process.myUid(), ImeTracker.ORIGIN_CLIENT_SHOW_SOFT_INPUT,
+                    SoftInputShowHideReason.SHOW_SOFT_INPUT_BY_INSETS_API);
+        }
+
+        show(types, false /* fromIme */, statsToken);
     }
 
     @VisibleForTesting(visibility = VisibleForTesting.Visibility.PACKAGE)
@@ -1055,7 +1063,14 @@ public class InsetsController implements WindowInsetsController, InsetsAnimation
 
     @Override
     public void hide(@InsetsType int types) {
-        hide(types, false /* fromIme */, null /* statsToken */);
+        ImeTracker.Token statsToken = null;
+        if ((types & ime()) != 0) {
+            statsToken = ImeTracker.get().onRequestHide(null /* component */,
+                    Process.myUid(), ImeTracker.ORIGIN_CLIENT_HIDE_SOFT_INPUT,
+                    SoftInputShowHideReason.HIDE_SOFT_INPUT_BY_INSETS_API);
+        }
+
+        hide(types, false /* fromIme */, statsToken);
     }
 
     @VisibleForTesting
@@ -1165,13 +1180,17 @@ public class InsetsController implements WindowInsetsController, InsetsAnimation
             if (DEBUG) Log.d(TAG, "user animation disabled types: " + disabledTypes);
             types &= ~mDisabledUserAnimationInsetsTypes;
 
-            if (fromIme && (disabledTypes & ime()) != 0
-                    && !mState.getSource(mImeSourceConsumer.getId()).isVisible()) {
-                // We've requested IMM to show IME, but the IME is not controllable. We need to
-                // cancel the request.
-                setRequestedVisibleTypes(0 /* visibleTypes */, ime());
-                if (mImeSourceConsumer.onAnimationStateChanged(false /* running */)) {
-                    notifyVisibilityChanged();
+            if ((disabledTypes & ime()) != 0) {
+                ImeTracker.get().onFailed(statsToken,
+                        ImeTracker.PHASE_CLIENT_DISABLED_USER_ANIMATION);
+
+                if (fromIme && !mState.getSource(mImeSourceConsumer.getId()).isVisible()) {
+                    // We've requested IMM to show IME, but the IME is not controllable. We need to
+                    // cancel the request.
+                    setRequestedVisibleTypes(0 /* visibleTypes */, ime());
+                    if (mImeSourceConsumer.onAnimationStateChanged(false /* running */)) {
+                        notifyVisibilityChanged();
+                    }
                 }
             }
         }
@@ -1179,8 +1198,12 @@ public class InsetsController implements WindowInsetsController, InsetsAnimation
             // nothing to animate.
             listener.onCancelled(null);
             if (DEBUG) Log.d(TAG, "no types to animate in controlAnimationUnchecked");
+            Trace.asyncTraceEnd(TRACE_TAG_VIEW, "IC.showRequestFromApi", 0);
+            Trace.asyncTraceEnd(TRACE_TAG_VIEW, "IC.showRequestFromApiToImeReady", 0);
             return;
         }
+        ImeTracker.get().onProgress(statsToken, ImeTracker.PHASE_CLIENT_DISABLED_USER_ANIMATION);
+
         cancelExistingControllers(types);
         if (DEBUG) Log.d(TAG, "controlAnimation types: " + types);
         mLastStartedAnimTypes |= types;
@@ -1188,7 +1211,7 @@ public class InsetsController implements WindowInsetsController, InsetsAnimation
         final SparseArray<InsetsSourceControl> controls = new SparseArray<>();
 
         Pair<Integer, Boolean> typesReadyPair = collectSourceControls(
-                fromIme, types, controls, animationType);
+                fromIme, types, controls, animationType, statsToken);
         int typesReady = typesReadyPair.first;
         boolean imeReady = typesReadyPair.second;
         if (DEBUG) Log.d(TAG, String.format(
@@ -1218,12 +1241,20 @@ public class InsetsController implements WindowInsetsController, InsetsAnimation
             setRequestedVisibleTypes(mReportedRequestedVisibleTypes, types);
 
             Trace.asyncTraceEnd(TRACE_TAG_VIEW, "IC.showRequestFromApi", 0);
+            if (!fromIme) {
+                Trace.asyncTraceEnd(TRACE_TAG_VIEW, "IC.showRequestFromApiToImeReady", 0);
+            }
             return;
         }
 
         if (typesReady == 0) {
             if (DEBUG) Log.d(TAG, "No types ready. onCancelled()");
             listener.onCancelled(null);
+            reportRequestedVisibleTypes();
+            Trace.asyncTraceEnd(TRACE_TAG_VIEW, "IC.showRequestFromApi", 0);
+            if (!fromIme) {
+                Trace.asyncTraceEnd(TRACE_TAG_VIEW, "IC.showRequestFromApiToImeReady", 0);
+            }
             return;
         }
 
@@ -1279,7 +1310,10 @@ public class InsetsController implements WindowInsetsController, InsetsAnimation
      * @return Pair of (types ready to animate, IME ready to animate).
      */
     private Pair<Integer, Boolean> collectSourceControls(boolean fromIme, @InsetsType int types,
-            SparseArray<InsetsSourceControl> controls, @AnimationType int animationType) {
+            SparseArray<InsetsSourceControl> controls, @AnimationType int animationType,
+            @Nullable ImeTracker.Token statsToken) {
+        ImeTracker.get().onProgress(statsToken, ImeTracker.PHASE_CLIENT_COLLECT_SOURCE_CONTROLS);
+
         int typesReady = 0;
         boolean imeReady = true;
         for (int i = mSourceConsumers.size() - 1; i >= 0; i--) {
@@ -1292,7 +1326,7 @@ public class InsetsController implements WindowInsetsController, InsetsAnimation
             boolean canRun = true;
             if (show) {
                 // Show request
-                switch(consumer.requestShow(fromIme)) {
+                switch(consumer.requestShow(fromIme, statsToken)) {
                     case ShowResult.SHOW_IMMEDIATELY:
                         break;
                     case ShowResult.IME_SHOW_DELAYED:
@@ -1571,6 +1605,10 @@ public class InsetsController implements WindowInsetsController, InsetsAnimation
         if (types == 0) {
             // nothing to animate.
             if (DEBUG) Log.d(TAG, "applyAnimation, nothing to animate");
+            Trace.asyncTraceEnd(TRACE_TAG_VIEW, "IC.showRequestFromApi", 0);
+            if (!fromIme) {
+                Trace.asyncTraceEnd(TRACE_TAG_VIEW, "IC.showRequestFromApiToImeReady", 0);
+            }
             return;
         }
 

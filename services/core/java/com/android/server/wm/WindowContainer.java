@@ -1305,6 +1305,11 @@ class WindowContainer<E extends WindowContainer> extends ConfigurationContainer<
         if (parent != null) {
             parent.onChildVisibleRequestedChanged(this);
         }
+
+        // Notify listeners about visibility change.
+        for (int i = mListeners.size() - 1; i >= 0; --i) {
+            mListeners.get(i).onVisibleRequestedChanged(mVisibleRequested);
+        }
         return true;
     }
 

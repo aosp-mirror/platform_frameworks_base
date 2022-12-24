@@ -375,6 +375,8 @@ public final class MandatoryStreamCombination {
             CameraMetadata.SCALER_AVAILABLE_STREAM_USE_CASES_PREVIEW_VIDEO_STILL;
     private static final long STREAM_USE_CASE_VIDEO_CALL =
             CameraMetadata.SCALER_AVAILABLE_STREAM_USE_CASES_VIDEO_CALL;
+    private static final long STREAM_USE_CASE_CROPPED_RAW =
+            CameraMetadata.SCALER_AVAILABLE_STREAM_USE_CASES_CROPPED_RAW;
 
     /**
      * Create a new {@link MandatoryStreamCombination}.
@@ -1262,6 +1264,86 @@ public final class MandatoryStreamCombination {
                 "Preview, in-application image processing, and YUV still image capture"),
     };
 
+    private static StreamCombinationTemplate sCroppedRawStreamUseCaseCombinations[] = {
+        // Single stream combination
+        new StreamCombinationTemplate(new StreamTemplate [] {
+                new StreamTemplate(ImageFormat.RAW_SENSOR, SizeThreshold.MAXIMUM,
+                        STREAM_USE_CASE_CROPPED_RAW)},
+                "Cropped RAW still image capture without preview"),
+
+        // 2 Stream combinations
+        new StreamCombinationTemplate(new StreamTemplate [] {
+                new StreamTemplate(ImageFormat.PRIVATE, SizeThreshold.PREVIEW,
+                        STREAM_USE_CASE_PREVIEW),
+                new StreamTemplate(ImageFormat.RAW_SENSOR, SizeThreshold.MAXIMUM,
+                        STREAM_USE_CASE_CROPPED_RAW)},
+                "Cropped RAW still image capture with preview"),
+        new StreamCombinationTemplate(new StreamTemplate [] {
+                new StreamTemplate(ImageFormat.YUV_420_888, SizeThreshold.PREVIEW,
+                        STREAM_USE_CASE_PREVIEW),
+                new StreamTemplate(ImageFormat.RAW_SENSOR, SizeThreshold.MAXIMUM,
+                        STREAM_USE_CASE_CROPPED_RAW)},
+                "In-app image processing with cropped RAW still image capture"),
+
+        // 3 stream combinations
+        new StreamCombinationTemplate(new StreamTemplate [] {
+                new StreamTemplate(ImageFormat.PRIVATE, SizeThreshold.PREVIEW,
+                        STREAM_USE_CASE_PREVIEW),
+                new StreamTemplate(ImageFormat.YUV_420_888, SizeThreshold.MAXIMUM,
+                        STREAM_USE_CASE_STILL_CAPTURE),
+                new StreamTemplate(ImageFormat.RAW_SENSOR, SizeThreshold.MAXIMUM,
+                        STREAM_USE_CASE_CROPPED_RAW)},
+                "Preview with YUV and RAW still image capture"),
+        new StreamCombinationTemplate(new StreamTemplate [] {
+                new StreamTemplate(ImageFormat.YUV_420_888, SizeThreshold.PREVIEW,
+                        STREAM_USE_CASE_PREVIEW),
+                new StreamTemplate(ImageFormat.YUV_420_888, SizeThreshold.MAXIMUM,
+                        STREAM_USE_CASE_STILL_CAPTURE),
+                new StreamTemplate(ImageFormat.RAW_SENSOR, SizeThreshold.MAXIMUM,
+                        STREAM_USE_CASE_CROPPED_RAW)},
+                "In-app image processing with YUV and RAW still image capture"),
+        new StreamCombinationTemplate(new StreamTemplate [] {
+                new StreamTemplate(ImageFormat.PRIVATE, SizeThreshold.PREVIEW,
+                        STREAM_USE_CASE_PREVIEW),
+                new StreamTemplate(ImageFormat.JPEG, SizeThreshold.MAXIMUM,
+                        STREAM_USE_CASE_STILL_CAPTURE),
+                new StreamTemplate(ImageFormat.RAW_SENSOR, SizeThreshold.MAXIMUM,
+                        STREAM_USE_CASE_CROPPED_RAW)},
+                "Preview with JPEG and RAW still image capture"),
+        new StreamCombinationTemplate(new StreamTemplate [] {
+                new StreamTemplate(ImageFormat.YUV_420_888, SizeThreshold.PREVIEW,
+                        STREAM_USE_CASE_PREVIEW),
+                new StreamTemplate(ImageFormat.JPEG, SizeThreshold.MAXIMUM,
+                        STREAM_USE_CASE_STILL_CAPTURE),
+                new StreamTemplate(ImageFormat.RAW_SENSOR, SizeThreshold.MAXIMUM,
+                        STREAM_USE_CASE_CROPPED_RAW)},
+                "In-app image processing with JPEG and RAW still image capture"),
+        new StreamCombinationTemplate(new StreamTemplate [] {
+                new StreamTemplate(ImageFormat.PRIVATE, SizeThreshold.PREVIEW,
+                        STREAM_USE_CASE_PREVIEW),
+                new StreamTemplate(ImageFormat.PRIVATE, SizeThreshold.PREVIEW,
+                        STREAM_USE_CASE_RECORD),
+                new StreamTemplate(ImageFormat.RAW_SENSOR, SizeThreshold.MAXIMUM,
+                        STREAM_USE_CASE_CROPPED_RAW)},
+                "Preview with video recording and RAW snapshot"),
+        new StreamCombinationTemplate(new StreamTemplate [] {
+                new StreamTemplate(ImageFormat.PRIVATE, SizeThreshold.PREVIEW,
+                        STREAM_USE_CASE_PREVIEW),
+                new StreamTemplate(ImageFormat.YUV_420_888, SizeThreshold.PREVIEW,
+                        STREAM_USE_CASE_PREVIEW),
+                new StreamTemplate(ImageFormat.RAW_SENSOR, SizeThreshold.MAXIMUM,
+                        STREAM_USE_CASE_CROPPED_RAW)},
+                "Preview with in-app image processing and RAW still image capture"),
+        new StreamCombinationTemplate(new StreamTemplate [] {
+                new StreamTemplate(ImageFormat.YUV_420_888, SizeThreshold.PREVIEW,
+                        STREAM_USE_CASE_PREVIEW),
+                new StreamTemplate(ImageFormat.YUV_420_888, SizeThreshold.PREVIEW,
+                        STREAM_USE_CASE_PREVIEW),
+                new StreamTemplate(ImageFormat.RAW_SENSOR, SizeThreshold.MAXIMUM,
+                        STREAM_USE_CASE_CROPPED_RAW)},
+                "Two input in-app processing and RAW still image capture"),
+    };
+
     private static StreamCombinationTemplate sPreviewStabilizedStreamCombinations[] = {
         // 1 stream combinations
         new StreamCombinationTemplate(new StreamTemplate [] {
@@ -1317,7 +1399,8 @@ public final class MandatoryStreamCombination {
         private StreamConfigurationMap mStreamConfigMap;
         private StreamConfigurationMap mStreamConfigMapMaximumResolution;
         private boolean mIsHiddenPhysicalCamera;
-        private boolean mIsPreviewStabilizationSupported;
+        private boolean mIsPreviewStabilizationSupported = false;
+        private boolean mIsCroppedRawSupported = false;
 
         private final Size kPreviewSizeBound = new Size(1920, 1088);
 
@@ -1331,10 +1414,13 @@ public final class MandatoryStreamCombination {
          * @param sm The camera device stream configuration map.
          * @param smMaxResolution The camera device stream configuration map when it runs in max
          *                        resolution mode.
+         * @param previewStabilization The camera device supports preview stabilization.
+         * @param croppedRaw The camera device supports the cropped raw stream use case.
          */
         public Builder(int cameraId, int hwLevel, @NonNull Size displaySize,
                 @NonNull List<Integer> capabilities, @NonNull StreamConfigurationMap sm,
-                StreamConfigurationMap smMaxResolution, boolean previewStabilization) {
+                StreamConfigurationMap smMaxResolution, boolean previewStabilization,
+                boolean isCroppedRawSupported) {
             mCameraId = cameraId;
             mDisplaySize = displaySize;
             mCapabilities = capabilities;
@@ -1344,6 +1430,7 @@ public final class MandatoryStreamCombination {
             mIsHiddenPhysicalCamera =
                     CameraManager.isHiddenPhysicalCamera(Integer.toString(mCameraId));
             mIsPreviewStabilizationSupported = previewStabilization;
+            mIsCroppedRawSupported = isCroppedRawSupported;
         }
 
         private @Nullable List<MandatoryStreamCombination>
@@ -1483,10 +1570,23 @@ public final class MandatoryStreamCombination {
                 Log.e(TAG, "Available size enumeration failed!");
                 return null;
             }
+            ArrayList<StreamCombinationTemplate> availableTemplates =
+                    new ArrayList<StreamCombinationTemplate> ();
+            availableTemplates.addAll(Arrays.asList(sStreamUseCaseCombinations));
 
             ArrayList<MandatoryStreamCombination> availableStreamCombinations = new ArrayList<>();
-            availableStreamCombinations.ensureCapacity(sStreamUseCaseCombinations.length);
-            for (StreamCombinationTemplate combTemplate : sStreamUseCaseCombinations) {
+            int capacity = sStreamUseCaseCombinations.length;
+            if (mIsCroppedRawSupported) {
+                capacity += sCroppedRawStreamUseCaseCombinations.length;
+                availableStreamCombinations.ensureCapacity(capacity);
+                availableTemplates.addAll(Arrays.asList(sCroppedRawStreamUseCaseCombinations));
+            }
+             else {
+                availableStreamCombinations.ensureCapacity(capacity);
+             }
+
+
+            for (StreamCombinationTemplate combTemplate : availableTemplates) {
                 ArrayList<MandatoryStreamInformation> streamsInfo =
                         new ArrayList<MandatoryStreamInformation>();
                 streamsInfo.ensureCapacity(combTemplate.mStreamTemplates.length);
@@ -2012,6 +2112,7 @@ public final class MandatoryStreamCombination {
         private @Nullable HashMap<Pair<SizeThreshold, Integer>, List<Size>>
             enumerateAvailableSizes() {
             final int[] formats = {
+                ImageFormat.RAW_SENSOR,
                 ImageFormat.PRIVATE,
                 ImageFormat.YUV_420_888,
                 ImageFormat.JPEG,

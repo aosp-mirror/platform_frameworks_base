@@ -266,6 +266,27 @@ public class UserLifecycleTests {
         }
     }
 
+    /** Tests switching to an uninitialized user with wait times between iterations. */
+    @Test(timeout = TIMEOUT_MAX_TEST_TIME_MS)
+    public void switchUser_realistic() throws Exception {
+        while (mRunner.keepRunning()) {
+            mRunner.pauseTiming();
+            final int startUser = ActivityManager.getCurrentUser();
+            final int userId = createUserNoFlags();
+            waitCoolDownPeriod();
+            Log.d(TAG, "Starting timer");
+            mRunner.resumeTiming();
+
+            switchUser(userId);
+
+            mRunner.pauseTiming();
+            Log.d(TAG, "Stopping timer");
+            switchUserNoCheck(startUser);
+            removeUser(userId);
+            mRunner.resumeTimingForNextIteration();
+        }
+    }
+
     /** Tests switching to a previously-started, but no-longer-running, user. */
     @Test(timeout = TIMEOUT_MAX_TEST_TIME_MS)
     public void switchUser_stopped() throws RemoteException {
@@ -286,6 +307,30 @@ public class UserLifecycleTests {
         }
     }
 
+    /** Tests switching to a previously-started, but no-longer-running, user with wait
+     * times between iterations */
+    @Test(timeout = TIMEOUT_MAX_TEST_TIME_MS)
+    public void switchUser_stopped_realistic() throws RemoteException {
+        final int startUser = ActivityManager.getCurrentUser();
+        final int testUser = initializeNewUserAndSwitchBack(/* stopNewUser */ true);
+        while (mRunner.keepRunning()) {
+            mRunner.pauseTiming();
+            waitCoolDownPeriod();
+            Log.d(TAG, "Starting timer");
+            mRunner.resumeTiming();
+
+            switchUser(testUser);
+
+            mRunner.pauseTiming();
+            Log.d(TAG, "Stopping timer");
+            switchUserNoCheck(startUser);
+            stopUserAfterWaitingForBroadcastIdle(testUser, true);
+            attestFalse("Failed to stop user " + testUser, mAm.isUserRunning(testUser));
+            mRunner.resumeTimingForNextIteration();
+        }
+        removeUser(testUser);
+    }
+
     /** Tests switching to an already-created already-running non-owner background user. */
     @Test(timeout = TIMEOUT_MAX_TEST_TIME_MS)
     public void switchUser_running() throws RemoteException {
@@ -304,6 +349,29 @@ public class UserLifecycleTests {
             removeUser(testUser);
             mRunner.resumeTimingForNextIteration();
         }
+    }
+
+    /** Tests switching to an already-created already-running non-owner background user, with wait
+     * times between iterations */
+    @Test(timeout = TIMEOUT_MAX_TEST_TIME_MS)
+    public void switchUser_running_realistic() throws RemoteException {
+        final int startUser = ActivityManager.getCurrentUser();
+        final int testUser = initializeNewUserAndSwitchBack(/* stopNewUser */ false);
+        while (mRunner.keepRunning()) {
+            mRunner.pauseTiming();
+            waitCoolDownPeriod();
+            Log.d(TAG, "Starting timer");
+            mRunner.resumeTiming();
+
+            switchUser(testUser);
+
+            mRunner.pauseTiming();
+            Log.d(TAG, "Stopping timer");
+            waitForBroadcastIdle();
+            switchUserNoCheck(startUser);
+            mRunner.resumeTimingForNextIteration();
+        }
+        removeUser(testUser);
     }
 
     /** Tests stopping a background user. */
@@ -901,5 +969,19 @@ public class UserLifecycleTests {
 
     private void waitForBroadcastIdle() {
         ShellHelper.runShellCommand("am wait-for-broadcast-idle");
+    }
+
+    private void sleep(long ms) {
+        try {
+            Thread.sleep(ms);
+        } catch (InterruptedException e) {
+            // Ignore
+        }
+    }
+
+    private void waitCoolDownPeriod() {
+        final int tenSeconds = 1000 * 10;
+        waitForBroadcastIdle();
+        sleep(tenSeconds);
     }
 }

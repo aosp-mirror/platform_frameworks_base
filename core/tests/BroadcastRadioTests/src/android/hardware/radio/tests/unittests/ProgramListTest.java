@@ -72,9 +72,9 @@ public final class ProgramListTest {
                     /* value= */ 94300);
     private static final ProgramSelector.Identifier RDS_IDENTIFIER =
             new ProgramSelector.Identifier(ProgramSelector.IDENTIFIER_TYPE_RDS_PI, 15019);
-    private static final ProgramSelector.Identifier DAB_SID_EXT_IDENTIFIER =
-            new ProgramSelector.Identifier(ProgramSelector.IDENTIFIER_TYPE_DAB_SID_EXT,
-                    /* value= */ 0x10000111);
+    private static final ProgramSelector.Identifier DAB_DMB_SID_EXT_IDENTIFIER =
+            new ProgramSelector.Identifier(ProgramSelector.IDENTIFIER_TYPE_DAB_DMB_SID_EXT,
+                    /* value= */ 0xA000000111L);
     private static final ProgramSelector.Identifier DAB_ENSEMBLE_IDENTIFIER =
             new ProgramSelector.Identifier(ProgramSelector.IDENTIFIER_TYPE_DAB_ENSEMBLE,
                     /* value= */ 0x1013);
@@ -89,7 +89,7 @@ public final class ProgramListTest {
 
     private static final ProgramList.Chunk FM_RDS_ADD_CHUNK = new ProgramList.Chunk(IS_PURGE,
             IS_COMPLETE, Set.of(FM_PROGRAM_INFO, RDS_PROGRAM_INFO),
-            Set.of(DAB_SID_EXT_IDENTIFIER, DAB_ENSEMBLE_IDENTIFIER));
+            Set.of(DAB_DMB_SID_EXT_IDENTIFIER, DAB_ENSEMBLE_IDENTIFIER));
     private static final ProgramList.Chunk FM_ADD_INCOMPLETE_CHUNK = new ProgramList.Chunk(IS_PURGE,
             /* complete= */ false, Set.of(FM_PROGRAM_INFO), new ArraySet<>());
     private static final ProgramList.Filter TEST_FILTER = new ProgramList.Filter(
@@ -216,7 +216,7 @@ public final class ProgramListTest {
     public void isPurge_forChunk() {
         ProgramList.Chunk chunk = new ProgramList.Chunk(IS_PURGE, IS_COMPLETE,
                 Set.of(FM_PROGRAM_INFO, RDS_PROGRAM_INFO),
-                Set.of(DAB_SID_EXT_IDENTIFIER, DAB_ENSEMBLE_IDENTIFIER));
+                Set.of(DAB_DMB_SID_EXT_IDENTIFIER, DAB_ENSEMBLE_IDENTIFIER));
 
         assertWithMessage("Puring chunk").that(chunk.isPurge()).isEqualTo(IS_PURGE);
     }
@@ -225,7 +225,7 @@ public final class ProgramListTest {
     public void isComplete_forChunk() {
         ProgramList.Chunk chunk = new ProgramList.Chunk(IS_PURGE, IS_COMPLETE,
                 Set.of(FM_PROGRAM_INFO, RDS_PROGRAM_INFO),
-                Set.of(DAB_SID_EXT_IDENTIFIER, DAB_ENSEMBLE_IDENTIFIER));
+                Set.of(DAB_DMB_SID_EXT_IDENTIFIER, DAB_ENSEMBLE_IDENTIFIER));
 
         assertWithMessage("Complete chunk").that(chunk.isComplete()).isEqualTo(IS_COMPLETE);
     }
@@ -234,7 +234,7 @@ public final class ProgramListTest {
     public void getModified_forChunk() {
         ProgramList.Chunk chunk = new ProgramList.Chunk(IS_PURGE, IS_COMPLETE,
                 Set.of(FM_PROGRAM_INFO, RDS_PROGRAM_INFO),
-                Set.of(DAB_SID_EXT_IDENTIFIER, DAB_ENSEMBLE_IDENTIFIER));
+                Set.of(DAB_DMB_SID_EXT_IDENTIFIER, DAB_ENSEMBLE_IDENTIFIER));
 
         assertWithMessage("Modified program info in chunk")
                 .that(chunk.getModified()).containsExactly(FM_PROGRAM_INFO, RDS_PROGRAM_INFO);
@@ -244,10 +244,10 @@ public final class ProgramListTest {
     public void getRemoved_forChunk() {
         ProgramList.Chunk chunk = new ProgramList.Chunk(IS_PURGE, IS_COMPLETE,
                 Set.of(FM_PROGRAM_INFO, RDS_PROGRAM_INFO),
-                Set.of(DAB_SID_EXT_IDENTIFIER, DAB_ENSEMBLE_IDENTIFIER));
+                Set.of(DAB_DMB_SID_EXT_IDENTIFIER, DAB_ENSEMBLE_IDENTIFIER));
 
         assertWithMessage("Removed program identifiers in chunk").that(chunk.getRemoved())
-                .containsExactly(DAB_SID_EXT_IDENTIFIER, DAB_ENSEMBLE_IDENTIFIER);
+                .containsExactly(DAB_DMB_SID_EXT_IDENTIFIER, DAB_ENSEMBLE_IDENTIFIER);
     }
 
     @Test
@@ -273,6 +273,19 @@ public final class ProgramListTest {
         ProgramList.Chunk[] chunks = ProgramList.Chunk.CREATOR.newArray(CREATOR_ARRAY_SIZE);
 
         assertWithMessage("Chunks").that(chunks).hasLength(CREATOR_ARRAY_SIZE);
+    }
+
+    @Test
+    public void getProgramList_forTunerAdapterWhenServiceDied_fails() throws Exception {
+        Map<String, String> parameters = Map.of("ParameterKeyMock", "ParameterValueMock");
+        createRadioTuner();
+        doThrow(new RemoteException()).when(mTunerMock).startProgramListUpdates(any());
+
+        RuntimeException thrown = assertThrows(RuntimeException.class,
+                () -> mRadioTuner.getProgramList(parameters));
+
+        assertWithMessage("Exception for getting program list when service is dead")
+                .that(thrown).hasMessageThat().contains("Service died");
     }
 
     @Test

@@ -22,6 +22,7 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.os.PowerManager;
 import android.os.UserHandle;
+import android.provider.Settings;
 import android.provider.Settings.Global;
 import android.provider.Settings.Secure;
 import android.util.KeyValueListParser;
@@ -54,6 +55,10 @@ public class BatterySaverUtils {
      */
     public static final String EXTRA_POWER_SAVE_MODE_TRIGGER_LEVEL =
             "extra_power_save_mode_trigger_level";
+
+    /** Battery saver schedule keys. */
+    public static final String KEY_NO_SCHEDULE = "key_battery_saver_no_schedule";
+    public static final String KEY_PERCENTAGE = "key_battery_saver_percentage";
 
     private BatterySaverUtils() {
     }
@@ -108,7 +113,6 @@ public class BatterySaverUtils {
      * - If it's 4th time through 8th time, show the schedule suggestion notification.
      *
      * @param enable true to enable battery saver.
-     *
      * @return true if the request succeeded.
      */
     public static synchronized boolean setPowerSaveMode(Context context,
@@ -154,10 +158,10 @@ public class BatterySaverUtils {
      * Shows the battery saver confirmation warning if it hasn't been acknowledged by the user in
      * the past before. Various extras can be provided that will change the behavior of this
      * notification as well as the ui for it.
-     * @param context A valid context
-     * @param extras Any extras to include in the intent to trigger this confirmation that will
-     * help the system disambiguate what to show/do
      *
+     * @param context A valid context
+     * @param extras  Any extras to include in the intent to trigger this confirmation that will
+     *                help the system disambiguate what to show/do
      * @return True if it showed the notification because it has not been previously acknowledged.
      * @see #EXTRA_CONFIRM_TEXT_ONLY
      * @see #EXTRA_POWER_SAVE_MODE_TRIGGER
@@ -221,6 +225,7 @@ public class BatterySaverUtils {
 
     /**
      * Reverts battery saver schedule mode to none if routine mode is selected.
+     *
      * @param context a valid context
      */
     public static void revertScheduleToNoneIfNeeded(Context context) {
@@ -231,6 +236,52 @@ public class BatterySaverUtils {
             Global.putInt(resolver, Global.LOW_POWER_MODE_TRIGGER_LEVEL, 0);
             Global.putInt(resolver, Global.AUTOMATIC_POWER_SAVE_MODE,
                     PowerManager.POWER_SAVE_MODE_TRIGGER_PERCENTAGE);
+        }
+    }
+
+    /**
+     * Gets battery saver schedule mode.
+     *
+     * @param context a valid context
+     * @return battery saver schedule key
+     */
+    public static String getBatterySaverScheduleKey(Context context) {
+        final ContentResolver resolver = context.getContentResolver();
+        final int mode = Settings.Global.getInt(resolver, Global.AUTOMATIC_POWER_SAVE_MODE,
+                PowerManager.POWER_SAVE_MODE_TRIGGER_PERCENTAGE);
+        if (mode == PowerManager.POWER_SAVE_MODE_TRIGGER_PERCENTAGE) {
+            final int threshold =
+                    Settings.Global.getInt(resolver, Global.LOW_POWER_MODE_TRIGGER_LEVEL, 0);
+            return threshold <= 0 ? KEY_NO_SCHEDULE : KEY_PERCENTAGE;
+        }
+        revertScheduleToNoneIfNeeded(context);
+        return KEY_NO_SCHEDULE;
+    }
+
+    /**
+     * Sets battery saver schedule mode.
+     *
+     * @param context      a valid context
+     * @param scheduleKey  {@link #KEY_NO_SCHEDULE} and {@link #KEY_PERCENTAGE}
+     * @param triggerLevel for automatic battery saver trigger level
+     */
+    public static void setBatterySaverScheduleMode(Context context, String scheduleKey,
+            int triggerLevel) {
+        final ContentResolver resolver = context.getContentResolver();
+        switch (scheduleKey) {
+            case KEY_NO_SCHEDULE:
+                Settings.Global.putInt(resolver, Global.AUTOMATIC_POWER_SAVE_MODE,
+                        PowerManager.POWER_SAVE_MODE_TRIGGER_PERCENTAGE);
+                Settings.Global.putInt(resolver, Settings.Global.LOW_POWER_MODE_TRIGGER_LEVEL, 0);
+                break;
+            case KEY_PERCENTAGE:
+                Settings.Global.putInt(resolver, Global.AUTOMATIC_POWER_SAVE_MODE,
+                        PowerManager.POWER_SAVE_MODE_TRIGGER_PERCENTAGE);
+                Settings.Global.putInt(resolver,
+                        Settings.Global.LOW_POWER_MODE_TRIGGER_LEVEL, triggerLevel);
+                break;
+            default:
+                throw new IllegalStateException("Not a valid schedule key");
         }
     }
 }

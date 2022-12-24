@@ -25,6 +25,8 @@ import android.annotation.UserIdInt;
 import android.app.ActivityManager;
 import android.app.admin.DevicePolicyManager;
 import android.app.backup.BackupManager;
+import android.app.backup.BackupRestoreEventLogger;
+import android.app.backup.BackupRestoreEventLogger.DataTypeResult;
 import android.app.backup.IBackupManager;
 import android.app.backup.IBackupManagerMonitor;
 import android.app.backup.IBackupObserver;
@@ -1553,6 +1555,22 @@ public class BackupManagerService extends IBackupManager.Stub {
 
         if (userBackupManagerService != null) {
             userBackupManagerService.excludeKeysFromRestore(packageName, keys);
+        }
+    }
+
+    public void reportDelayedRestoreResult(String packageName, List<DataTypeResult> results) {
+        int userId = Binder.getCallingUserHandle().getIdentifier();
+        if (!isUserReadyForBackup(userId)) {
+            Slog.w(TAG, "Returning from reportDelayedRestoreResult as backup for user" + userId +
+                    " is not initialized yet");
+            return;
+        }
+        UserBackupManagerService userBackupManagerService =
+                getServiceForUserIfCallerHasPermission(userId,
+                        /* caller */ "reportDelayedRestoreResult()");
+
+        if (userBackupManagerService != null) {
+            userBackupManagerService.reportDelayedRestoreResult(packageName, results);
         }
     }
 

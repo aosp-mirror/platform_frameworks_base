@@ -100,7 +100,6 @@ import com.android.internal.app.AssistUtils;
 import com.android.internal.policy.IKeyguardDismissCallback;
 import com.android.internal.protolog.ProtoLogGroup;
 import com.android.internal.protolog.common.ProtoLog;
-import com.android.internal.util.FrameworkStatsLog;
 import com.android.server.LocalServices;
 import com.android.server.Watchdog;
 import com.android.server.pm.KnownPackages;
@@ -186,6 +185,15 @@ class ActivityClientController extends IActivityClientController.Stub {
         final long origId = Binder.clearCallingIdentity();
         synchronized (mGlobalLock) {
             ActivityRecord.activityResumedLocked(token, handleSplashScreenExit);
+        }
+        Binder.restoreCallingIdentity(origId);
+    }
+
+    @Override
+    public void activityRefreshed(IBinder token) {
+        final long origId = Binder.clearCallingIdentity();
+        synchronized (mGlobalLock) {
+            ActivityRecord.activityRefreshedLocked(token);
         }
         Binder.restoreCallingIdentity(origId);
     }
@@ -482,46 +490,13 @@ class ActivityClientController extends IActivityClientController.Stub {
                         finishTask == Activity.FINISH_TASK_WITH_ROOT_ACTIVITY;
                 if (finishTask == Activity.FINISH_TASK_WITH_ACTIVITY
                         || (finishWithRootActivity && r == rootR)) {
-                    ActivityRecord topActivity =
-                            r.getTask().getTopNonFinishingActivity();
-                    boolean passesAsmChecks = topActivity != null
-                            && topActivity.getUid() == r.getUid();
-                    if (!passesAsmChecks) {
-                        Slog.i(TAG, "Finishing task from background. r: " + r);
-                        FrameworkStatsLog.write(FrameworkStatsLog.ACTIVITY_ACTION_BLOCKED,
-                                /* caller_uid */
-                                r.getUid(),
-                                /* caller_activity_class_name */
-                                r.info.name,
-                                /* target_task_top_activity_uid */
-                                topActivity == null ? -1 : topActivity.getUid(),
-                                /* target_task_top_activity_class_name */
-                                topActivity == null ? null : topActivity.info.name,
-                                /* target_task_is_different */
-                                false,
-                                /* target_activity_uid */
-                                -1,
-                                /* target_activity_class_name */
-                                null,
-                                /* target_intent_action */
-                                null,
-                                /* target_intent_flags */
-                                0,
-                                /* action */
-                                FrameworkStatsLog.ACTIVITY_ACTION_BLOCKED__ACTION__FINISH_TASK,
-                                /* version */
-                                1,
-                                /* multi_window */
-                                false
-                        );
-                    }
                     // If requested, remove the task that is associated to this activity only if it
                     // was the root activity in the task. The result code and data is ignored
                     // because we don't support returning them across task boundaries. Also, to
                     // keep backwards compatibility we remove the task from recents when finishing
                     // task with root activity.
                     mTaskSupervisor.removeTask(tr, false /*killProcess*/,
-                            finishWithRootActivity, "finish-activity");
+                            finishWithRootActivity, "finish-activity", r.getUid(), r.info.name);
                     res = true;
                     // Explicitly dismissing the activity so reset its relaunch flag.
                     r.mRelaunchReason = RELAUNCH_REASON_NONE;

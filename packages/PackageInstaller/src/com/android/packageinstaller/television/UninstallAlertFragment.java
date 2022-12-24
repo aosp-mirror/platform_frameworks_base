@@ -16,10 +16,11 @@
 
 package com.android.packageinstaller.television;
 
+import static android.os.UserManager.USER_TYPE_PROFILE_MANAGED;
+
 import android.app.Activity;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageManager;
-import android.content.pm.UserInfo;
 import android.os.Bundle;
 import android.os.Process;
 import android.os.UserHandle;
@@ -63,7 +64,7 @@ public class UninstallAlertFragment extends GuidedStepFragment {
         final boolean isUpdate =
                 ((dialogInfo.appInfo.flags & ApplicationInfo.FLAG_UPDATED_SYSTEM_APP) != 0);
         final UserHandle myUserHandle = Process.myUserHandle();
-        UserManager userManager = UserManager.get(getActivity());
+        UserManager userManager = getContext().getSystemService(UserManager.class);
         if (isUpdate) {
             if (isSingleUser(userManager)) {
                 messageBuilder.append(getString(R.string.uninstall_update_text));
@@ -74,15 +75,21 @@ public class UninstallAlertFragment extends GuidedStepFragment {
             if (dialogInfo.allUsers && !isSingleUser(userManager)) {
                 messageBuilder.append(getString(R.string.uninstall_application_text_all_users));
             } else if (!dialogInfo.user.equals(myUserHandle)) {
-                UserInfo userInfo = userManager.getUserInfo(dialogInfo.user.getIdentifier());
-                if (userInfo.isManagedProfile()
-                        && userInfo.profileGroupId == myUserHandle.getIdentifier()) {
+                int userId = dialogInfo.user.getIdentifier();
+                UserManager customUserManager = getContext()
+                        .createContextAsUser(UserHandle.of(userId), 0)
+                        .getSystemService(UserManager.class);
+                String userName = customUserManager.getUserName();
+
+                if (customUserManager.isUserOfType(USER_TYPE_PROFILE_MANAGED)
+                        && customUserManager.isSameProfileGroup(dialogInfo.user, myUserHandle)) {
+
                     messageBuilder.append(
                             getString(R.string.uninstall_application_text_current_user_work_profile,
-                                    userInfo.name));
+                                    userName));
                 } else {
                     messageBuilder.append(
-                            getString(R.string.uninstall_application_text_user, userInfo.name));
+                            getString(R.string.uninstall_application_text_user, userName));
                 }
             } else {
                 messageBuilder.append(getString(R.string.uninstall_application_text));
@@ -126,7 +133,6 @@ public class UninstallAlertFragment extends GuidedStepFragment {
      */
     private boolean isSingleUser(UserManager userManager) {
         final int userCount = userManager.getUserCount();
-        return userCount == 1
-                || (UserManager.isSplitSystemUser() && userCount == 2);
+        return userCount == 1 || (UserManager.isHeadlessSystemUserMode() && userCount == 2);
     }
 }

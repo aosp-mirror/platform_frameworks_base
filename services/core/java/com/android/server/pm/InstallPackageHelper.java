@@ -297,7 +297,7 @@ final class InstallPackageHelper {
         SharedUserSetting sharedUserSetting = mPm.mSettings.getSharedUserSettingLPr(pkgSetting);
         if (sharedUserSetting != null) {
             sharedUserSetting.addPackage(pkgSetting);
-            if (parsedPackage.isLeavingSharedUid()
+            if (parsedPackage.isLeavingSharedUser()
                     && SharedUidMigration.applyStrategy(BEST_EFFORT)
                     && sharedUserSetting.isSingleUser()) {
                 // Attempt the transparent shared UID migration
@@ -1552,7 +1552,7 @@ final class InstallPackageHelper {
                     }
 
                     // APK should not re-join shared UID
-                    if (oldPackage.isLeavingSharedUid() && !parsedPackage.isLeavingSharedUid()) {
+                    if (oldPackage.isLeavingSharedUser() && !parsedPackage.isLeavingSharedUser()) {
                         throw new PrepareFailure(INSTALL_FAILED_UID_CHANGED,
                                 "Package " + parsedPackage.getPackageName()
                                         + " attempting to rejoin " + newSharedUid);
@@ -3801,7 +3801,7 @@ final class InstallPackageHelper {
             if (installedPkgSetting == null || !installedPkgSetting.hasSharedUser()) {
                 // Directly ignore sharedUserSetting for new installs, or if the app has
                 // already left shared UID
-                ignoreSharedUserId = parsedPackage.isLeavingSharedUid();
+                ignoreSharedUserId = parsedPackage.isLeavingSharedUser();
             }
 
             if (!ignoreSharedUserId && parsedPackage.getSharedUserId() != null) {
@@ -4324,10 +4324,10 @@ final class InstallPackageHelper {
                 SharedLibraryInfo libInfo = versionedLib.valueAt(i);
                 final long libVersionCode = libInfo.getDeclaringPackage()
                         .getLongVersionCode();
-                if (libInfo.getLongVersion() < pkg.getStaticSharedLibVersion()) {
+                if (libInfo.getLongVersion() < pkg.getStaticSharedLibraryVersion()) {
                     minVersionCode = Math.max(minVersionCode, libVersionCode + 1);
                 } else if (libInfo.getLongVersion()
-                        > pkg.getStaticSharedLibVersion()) {
+                        > pkg.getStaticSharedLibraryVersion()) {
                     maxVersionCode = Math.min(maxVersionCode, libVersionCode - 1);
                 } else {
                     minVersionCode = maxVersionCode = libVersionCode;

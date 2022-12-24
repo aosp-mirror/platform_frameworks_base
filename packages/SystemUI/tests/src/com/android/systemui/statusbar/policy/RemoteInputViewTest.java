@@ -55,6 +55,7 @@ import android.view.ViewRootImpl;
 import android.view.inputmethod.EditorInfo;
 import android.view.inputmethod.InputConnection;
 import android.widget.EditText;
+import android.widget.FrameLayout;
 import android.widget.ImageButton;
 import android.window.OnBackInvokedCallback;
 import android.window.OnBackInvokedDispatcher;
@@ -414,7 +415,9 @@ public class RemoteInputViewTest extends SysuiTestCase {
                 mDependency,
                 TestableLooper.get(this));
         ExpandableNotificationRow row = helper.createRow();
+        FrameLayout remoteInputViewParent = new FrameLayout(mContext);
         RemoteInputView view = RemoteInputView.inflate(mContext, null, row.getEntry(), mController);
+        remoteInputViewParent.addView(view);
         bindController(view, row.getEntry());
 
         // Start defocus animation

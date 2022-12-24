@@ -20,4 +20,5 @@ android_test {
     platform_apis: true,
     certificate: "platform",
     resource_dirs: ["res"],
+    test_suites: ["device-tests"],
 }

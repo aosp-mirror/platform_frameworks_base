@@ -83,6 +83,13 @@ public class BackupManagerTest {
                 () -> mBackupManager.getBackupRestoreEventLogger(agent));
     }
 
+    @Test
+    public void testGetDelayedRestoreLogger_returnsRestoreLogger() {
+        BackupRestoreEventLogger logger = mBackupManager.getDelayedRestoreLogger();
+
+        assertThat(logger.getOperationType()).isEqualTo(OperationType.RESTORE);
+    }
+
     private static BackupAgent getTestAgent() {
         return new BackupAgent() {
             @Override

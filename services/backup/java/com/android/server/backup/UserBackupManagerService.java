@@ -49,6 +49,7 @@ import android.app.backup.BackupAgent;
 import android.app.backup.BackupAnnotations.BackupDestination;
 import android.app.backup.BackupManager;
 import android.app.backup.BackupManagerMonitor;
+import android.app.backup.BackupRestoreEventLogger;
 import android.app.backup.FullBackup;
 import android.app.backup.IBackupManager;
 import android.app.backup.IBackupManagerMonitor;
@@ -505,13 +506,14 @@ public class UserBackupManagerService {
 
     @VisibleForTesting
     UserBackupManagerService(Context context, PackageManager packageManager,
-            LifecycleOperationStorage operationStorage) {
+            LifecycleOperationStorage operationStorage, TransportManager transportManager) {
         mContext = context;
 
         mUserId = 0;
         mRegisterTransportsRequestedTime = 0;
         mPackageManager = packageManager;
         mOperationStorage = operationStorage;
+        mTransportManager = transportManager;
 
         mBaseStateDir = null;
         mDataDir = null;
@@ -521,7 +523,6 @@ public class UserBackupManagerService {
         mRunInitReceiver = null;
         mRunInitIntent = null;
         mAgentTimeoutParameters = null;
-        mTransportManager = null;
         mActivityManagerInternal = null;
         mAlarmManager = null;
         mConstants = null;
@@ -3036,6 +3037,37 @@ public class UserBackupManagerService {
         mContext.enforceCallingOrSelfPermission(android.Manifest.permission.BACKUP,
                 "excludeKeysFromRestore");
         mBackupPreferences.addExcludedKeys(packageName, keys);
+    }
+
+    public void reportDelayedRestoreResult(String packageName,
+            List<BackupRestoreEventLogger.DataTypeResult> results) {
+        String transport = mTransportManager.getCurrentTransportName();
+        if (transport == null) {
+            Slog.w(TAG, "Failed to send delayed restore logs as no transport selected");
+            return;
+        }
+
+        TransportConnection transportConnection = null;
+        try {
+            PackageInfo packageInfo = getPackageManager().getPackageInfoAsUser(packageName,
+                    PackageManager.PackageInfoFlags.of(/* value */ 0), getUserId());
+
+            transportConnection = mTransportManager.getTransportClientOrThrow(
+                    transport, /* caller */"BMS.reportDelayedRestoreResult");
+            BackupTransportClient transportClient = transportConnection.connectOrThrow(
+                    /* caller */ "BMS.reportDelayedRestoreResult");
+
+            IBackupManagerMonitor monitor = transportClient.getBackupManagerMonitor();
+            BackupManagerMonitorUtils.sendAgentLoggingResults(monitor, packageInfo, results);
+        } catch (NameNotFoundException | TransportNotAvailableException
+                | TransportNotRegisteredException | RemoteException e) {
+            Slog.w(TAG, "Failed to send delayed restore logs: " + e);
+        } finally {
+            if (transportConnection != null) {
+                mTransportManager.disposeOfTransportClient(transportConnection,
+                        /* caller */"BMS.reportDelayedRestoreResult");
+            }
+        }
     }
 
     private boolean startConfirmationUi(int token, String action) {

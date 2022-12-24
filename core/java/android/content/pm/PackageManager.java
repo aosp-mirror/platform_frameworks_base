@@ -2250,6 +2250,7 @@ public abstract class PackageManager {
      *
      * @hide
      */
+    @SystemApi
     public static final int DELETE_KEEP_DATA = 0x00000001;
 
     /**
@@ -2258,6 +2259,7 @@ public abstract class PackageManager {
      *
      * @hide
      */
+    @SystemApi
     public static final int DELETE_ALL_USERS = 0x00000002;
 
     /**
@@ -2295,6 +2297,7 @@ public abstract class PackageManager {
      *
      * @hide
      */
+    @SystemApi
     public static final int DELETE_SUCCEEDED = 1;
 
     /**
@@ -2304,6 +2307,7 @@ public abstract class PackageManager {
      *
      * @hide
      */
+    @SystemApi
     public static final int DELETE_FAILED_INTERNAL_ERROR = -1;
 
     /**
@@ -2313,6 +2317,7 @@ public abstract class PackageManager {
      *
      * @hide
      */
+    @SystemApi
     public static final int DELETE_FAILED_DEVICE_POLICY_MANAGER = -2;
 
     /**
@@ -2332,9 +2337,11 @@ public abstract class PackageManager {
      *
      * @hide
      */
+    @SystemApi
     public static final int DELETE_FAILED_OWNER_BLOCKED = -4;
 
     /** {@hide} */
+    @SystemApi
     public static final int DELETE_FAILED_ABORTED = -5;
 
     /**
@@ -4090,6 +4097,17 @@ public abstract class PackageManager {
     public static final String FEATURE_IPSEC_TUNNELS = "android.software.ipsec_tunnels";
 
     /**
+     * Feature for {@link #getSystemAvailableFeatures} and {@link #hasSystemFeature}: The device has
+     * the requisite kernel support for migrating IPsec tunnels to new source/destination addresses.
+     *
+     * <p>This feature implies that the device supports XFRM Migration (CONFIG_XFRM_MIGRATE) and has
+     * the kernel fixes to support cross-address-family IPsec tunnel migration
+     */
+    @SdkConstant(SdkConstantType.FEATURE)
+    public static final String FEATURE_IPSEC_TUNNEL_MIGRATION =
+            "android.software.ipsec_tunnel_migration";
+
+    /**
      * Feature for {@link #getSystemAvailableFeatures} and
      * {@link #hasSystemFeature}: The device supports a system interface for the user to select
      * and bind device control services provided by applications.
@@ -5336,17 +5354,7 @@ public abstract class PackageManager {
             throws NameNotFoundException;
 
     /**
-     * Return the UID associated with the given package name.
-     * <p>
-     * Note that the same package will have different UIDs under different
-     * {@link UserHandle} on the same device.
-     *
-     * @param packageName The full name (i.e. com.google.apps.contacts) of the
-     *            desired package.
-     * @param userId The user handle identifier to look up the package under.
-     * @return Returns an integer UID who owns the given package name.
-     * @throws NameNotFoundException if no such package is available to the
-     *             caller.
+     * See {@link #getPackageUidAsUser(String, PackageInfoFlags, int)}.
      * @deprecated Use {@link #getPackageUidAsUser(String, PackageInfoFlags, int)} instead.
      * @hide
      */
@@ -5357,9 +5365,22 @@ public abstract class PackageManager {
             int flags, @UserIdInt int userId) throws NameNotFoundException;
 
     /**
-     * See {@link #getPackageUidAsUser(String, int, int)}.
+     * Return the UID associated with the given package name.
+     * <p>
+     * Note that the same package will have different UIDs under different
+     * {@link UserHandle} on the same device.
+     *
+     * @param packageName The full name (i.e. com.google.apps.contacts) of the
+     *            desired package.
+     * @param flags Additional option flags to modify the data returned.
+     * @param userId The user handle identifier to look up the package under.
+     * @return Returns an integer UID who owns the given package name.
+     * @throws NameNotFoundException if no such package is available to the
+     *             caller.
      * @hide
      */
+    @SystemApi
+    @RequiresPermission(android.Manifest.permission.INTERACT_ACROSS_USERS_FULL)
     public int getPackageUidAsUser(@NonNull String packageName, @NonNull PackageInfoFlags flags,
             @UserIdInt int userId) throws NameNotFoundException {
         throw new UnsupportedOperationException(
@@ -9805,6 +9826,83 @@ public abstract class PackageManager {
     }
 
     /**
+     * A parcelable class to pass as an intent extra to the PackageInstaller. When an uninstall is
+     * completed (both successfully or unsuccessfully), the result is sent to the uninstall
+     * initiators.
+     *
+     * @hide
+     */
+    @SystemApi
+    public static final class UninstallCompleteCallback implements Parcelable {
+        private IPackageDeleteObserver2 mBinder;
+
+        /** @hide */
+        @IntDef(prefix = { "DELETE_" }, value = {
+                DELETE_SUCCEEDED,
+                DELETE_FAILED_INTERNAL_ERROR,
+                DELETE_FAILED_DEVICE_POLICY_MANAGER,
+                DELETE_FAILED_USER_RESTRICTED,
+                DELETE_FAILED_OWNER_BLOCKED,
+                DELETE_FAILED_ABORTED,
+                DELETE_FAILED_USED_SHARED_LIBRARY,
+                DELETE_FAILED_APP_PINNED,
+        })
+        @Retention(RetentionPolicy.SOURCE)
+        public @interface DeleteStatus{}
+
+        /** @hide */
+        public UninstallCompleteCallback(@NonNull IBinder binder) {
+            mBinder = IPackageDeleteObserver2.Stub.asInterface(binder);
+        }
+
+        /** @hide */
+        private UninstallCompleteCallback(Parcel in) {
+            mBinder = IPackageDeleteObserver2.Stub.asInterface(in.readStrongBinder());
+        }
+
+        public static final @NonNull Parcelable.Creator<UninstallCompleteCallback> CREATOR =
+                new Parcelable.Creator<>() {
+                    public UninstallCompleteCallback createFromParcel(Parcel source) {
+                        return new UninstallCompleteCallback(source);
+                    }
+
+                    public UninstallCompleteCallback[] newArray(int size) {
+                        return new UninstallCompleteCallback[size];
+                    }
+                };
+
+        /**
+         * Called when an uninstallation is completed successfully or unsuccessfully.
+         *
+         * @param packageName The name of the package being uninstalled.
+         * @param resultCode Result code of the operation.
+         * @param errorMessage Error message if any.
+         *
+         * @hide */
+        @SystemApi
+        public void onUninstallComplete(@NonNull String packageName, @DeleteStatus int resultCode,
+                @Nullable String errorMessage) {
+            try {
+                mBinder.onPackageDeleted(packageName, resultCode, errorMessage);
+            } catch (RemoteException e) {
+                // no-op
+            }
+        }
+
+        /** @hide */
+        @Override
+        public int describeContents() {
+            return 0;
+        }
+
+        /** @hide */
+        @Override
+        public void writeToParcel(@NonNull Parcel dest, int flags) {
+            dest.writeStrongBinder(mBinder.asBinder());
+        }
+    }
+
+    /**
      * Return the install reason that was recorded when a package was first
      * installed for a specific user. Requesting the install reason for another
      * user will require the permission INTERACT_ACROSS_USERS_FULL.
@@ -10722,5 +10820,34 @@ public abstract class PackageManager {
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }
+    }
+
+    /**
+     * Checks if a package is blocked from uninstall for a particular user. A package can be
+     * blocked from being uninstalled by a device owner or profile owner.
+     * See {@link DevicePolicyManager#setUninstallBlocked(ComponentName, String, boolean)}.
+     *
+     * @param packageName Name of the package being uninstalled.
+     * @param user UserHandle who's ability to uninstall a package is being checked.
+     *
+     * @hide
+     */
+    @SystemApi
+    @NonNull
+    public boolean canUserUninstall(@NonNull String packageName, @NonNull UserHandle user){
+        throw new UnsupportedOperationException(
+                "canUserUninstall not implemented in subclass");
+    }
+
+    /**
+     * See {@link android.provider.Settings.Global#SHOW_NEW_APP_INSTALLED_NOTIFICATION_ENABLED}.
+     *
+     * @hide
+     */
+    @SystemApi
+    @NonNull
+    public boolean shouldShowNewAppInstalledNotification() {
+        throw new UnsupportedOperationException(
+                "isShowNewAppInstalledNotificationEnabled not implemented in subclass");
     }
 }

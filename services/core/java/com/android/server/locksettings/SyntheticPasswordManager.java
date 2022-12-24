@@ -59,8 +59,6 @@ import libcore.util.HexEncoding;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.nio.ByteBuffer;
-import java.security.NoSuchAlgorithmException;
-import java.security.SecureRandom;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashSet;
@@ -284,8 +282,10 @@ class SyntheticPasswordManager {
          */
         static SyntheticPassword create() {
             SyntheticPassword result = new SyntheticPassword(SYNTHETIC_PASSWORD_VERSION_V3);
-            byte[] escrowSplit0 = secureRandom(SYNTHETIC_PASSWORD_SECURITY_STRENGTH);
-            byte[] escrowSplit1 = secureRandom(SYNTHETIC_PASSWORD_SECURITY_STRENGTH);
+            byte[] escrowSplit0 =
+                    SecureRandomUtils.randomBytes(SYNTHETIC_PASSWORD_SECURITY_STRENGTH);
+            byte[] escrowSplit1 =
+                    SecureRandomUtils.randomBytes(SYNTHETIC_PASSWORD_SECURITY_STRENGTH);
             result.recreate(escrowSplit0, escrowSplit1);
             byte[] encrypteEscrowSplit0 = SyntheticPasswordCrypto.encrypt(result.mSyntheticPassword,
                     PERSONALIZATION_E0, escrowSplit0);
@@ -347,7 +347,7 @@ class SyntheticPasswordManager {
             result.scryptLogR = PASSWORD_SCRYPT_LOG_R;
             result.scryptLogP = PASSWORD_SCRYPT_LOG_P;
             result.credentialType = credentialType;
-            result.salt = secureRandom(PASSWORD_SALT_LENGTH);
+            result.salt = SecureRandomUtils.randomBytes(PASSWORD_SALT_LENGTH);
             return result;
         }
 
@@ -490,7 +490,7 @@ class SyntheticPasswordManager {
             android.hardware.weaver.V1_0.IWeaver hidlWeaver = getWeaverHidlService();
             if (hidlWeaver != null) {
                 Slog.i(TAG, "Using HIDL weaver service");
-                return new WeaverHidlWrapper(hidlWeaver);
+                return new WeaverHidlAdapter(hidlWeaver);
             }
         } catch (RemoteException e) {
             Slog.w(TAG, "Failed to get HIDL weaver service.", e);
@@ -552,7 +552,7 @@ class SyntheticPasswordManager {
             throw new IllegalArgumentException("Invalid key size for weaver");
         }
         if (value == null) {
-            value = secureRandom(mWeaverConfig.valueSize);
+            value = SecureRandomUtils.randomBytes(mWeaverConfig.valueSize);
         }
         try {
             mWeaver.write(slot, key, value);
@@ -900,7 +900,7 @@ class SyntheticPasswordManager {
             protectorSecret = transformUnderSecdiscardable(stretchedLskf,
                     createSecdiscardable(protectorId, userId));
             // No need to pass in quality since the credential type already encodes sufficient info
-            synchronizeFrpPassword(pwd, 0, userId);
+            synchronizeGatekeeperFrpPassword(pwd, 0, userId);
         }
         if (!credential.isNone()) {
             saveState(PASSWORD_DATA_NAME, pwd.toBytes(), protectorId, userId);
@@ -916,7 +916,7 @@ class SyntheticPasswordManager {
             LockscreenCredential userCredential,
             ICheckCredentialProgressCallback progressCallback) {
         PersistentData persistentData = mStorage.readPersistentDataBlock();
-        if (persistentData.type == PersistentData.TYPE_SP) {
+        if (persistentData.type == PersistentData.TYPE_SP_GATEKEEPER) {
             PasswordData pwd = PasswordData.fromBytes(persistentData.payload);
             byte[] stretchedLskf = stretchLskf(userCredential, pwd);
 
@@ -941,7 +941,7 @@ class SyntheticPasswordManager {
 
             return weaverVerify(weaverSlot, stretchedLskfToWeaverKey(stretchedLskf)).stripPayload();
         } else {
-            Slog.e(TAG, "persistentData.type must be TYPE_SP or TYPE_SP_WEAVER, but is "
+            Slog.e(TAG, "persistentData.type must be TYPE_SP_GATEKEEPER or TYPE_SP_WEAVER, but is "
                     + persistentData.type);
             return VerifyCredentialResponse.ERROR;
         }
@@ -960,7 +960,7 @@ class SyntheticPasswordManager {
             if (weaverSlot != INVALID_WEAVER_SLOT) {
                 synchronizeWeaverFrpPassword(pwd, requestedQuality, userInfo.id, weaverSlot);
             } else {
-                synchronizeFrpPassword(pwd, requestedQuality, userInfo.id);
+                synchronizeGatekeeperFrpPassword(pwd, requestedQuality, userInfo.id);
             }
         }
     }
@@ -994,13 +994,13 @@ class SyntheticPasswordManager {
         return true;
     }
 
-    private void synchronizeFrpPassword(@Nullable PasswordData pwd, int requestedQuality,
+    private void synchronizeGatekeeperFrpPassword(@Nullable PasswordData pwd, int requestedQuality,
             int userId) {
         if (shouldSynchronizeFrpCredential(pwd, userId)) {
             Slogf.d(TAG, "Syncing Gatekeeper-based FRP credential tied to user %d", userId);
             if (!isNoneCredential(pwd)) {
-                mStorage.writePersistentDataBlock(PersistentData.TYPE_SP, userId, requestedQuality,
-                        pwd.toBytes());
+                mStorage.writePersistentDataBlock(PersistentData.TYPE_SP_GATEKEEPER, userId,
+                        requestedQuality, pwd.toBytes());
             } else {
                 mStorage.writePersistentDataBlock(PersistentData.TYPE_NONE, userId, 0, null);
             }
@@ -1039,9 +1039,9 @@ class SyntheticPasswordManager {
         }
         TokenData tokenData = new TokenData();
         tokenData.mType = type;
-        final byte[] secdiscardable = secureRandom(SECDISCARDABLE_LENGTH);
+        final byte[] secdiscardable = SecureRandomUtils.randomBytes(SECDISCARDABLE_LENGTH);
         if (isWeaverAvailable()) {
-            tokenData.weaverSecret = secureRandom(mWeaverConfig.valueSize);
+            tokenData.weaverSecret = SecureRandomUtils.randomBytes(mWeaverConfig.valueSize);
             tokenData.secdiscardableOnDisk = SyntheticPasswordCrypto.encrypt(tokenData.weaverSecret,
                             PERSONALIZATION_WEAVER_TOKEN, secdiscardable);
         } else {
@@ -1224,7 +1224,7 @@ class SyntheticPasswordManager {
                             pwd.credentialType = credential.getType();
                             saveState(PASSWORD_DATA_NAME, pwd.toBytes(), protectorId, userId);
                             syncState(userId);
-                            synchronizeFrpPassword(pwd, 0, userId);
+                            synchronizeGatekeeperFrpPassword(pwd, 0, userId);
                         } else {
                             Slog.w(TAG, "Fail to re-enroll user password for user " + userId);
                             // continue the flow anyway
@@ -1510,7 +1510,7 @@ class SyntheticPasswordManager {
      * been created.
      */
     private byte[] createSecdiscardable(long protectorId, int userId) {
-        byte[] data = secureRandom(SECDISCARDABLE_LENGTH);
+        byte[] data = SecureRandomUtils.randomBytes(SECDISCARDABLE_LENGTH);
         saveSecdiscardable(protectorId, data, userId);
         return data;
     }
@@ -1624,26 +1624,17 @@ class SyntheticPasswordManager {
     }
 
     private static long generateProtectorId() {
-        SecureRandom rng = new SecureRandom();
-        long result;
-        do {
-            result = rng.nextLong();
-        } while (result == NULL_PROTECTOR_ID);
-        return result;
+        while (true) {
+            final long result = SecureRandomUtils.randomLong();
+            if (result != NULL_PROTECTOR_ID) {
+                return result;
+            }
+        }
     }
 
     @VisibleForTesting
     static int fakeUserId(int userId) {
         return 100000 + userId;
-    }
-
-    protected static byte[] secureRandom(int length) {
-        try {
-            return SecureRandom.getInstance("SHA1PRNG").generateSeed(length);
-        } catch (NoSuchAlgorithmException e) {
-            e.printStackTrace();
-            return null;
-        }
     }
 
     private String getProtectorKeyAlias(long protectorId) {

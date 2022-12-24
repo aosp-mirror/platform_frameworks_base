@@ -1547,6 +1547,7 @@ public final class SystemServiceRegistry {
                                 IAmbientContextManager.Stub.asInterface(iBinder);
                         return new AmbientContextManager(ctx.getOuterContext(), manager);
                     }});
+
         registerService(Context.WEARABLE_SENSING_SERVICE, WearableSensingManager.class,
                 new CachedServiceFetcher<WearableSensingManager>() {
                     @Override
@@ -1558,6 +1559,18 @@ public final class SystemServiceRegistry {
                                 IWearableSensingManager.Stub.asInterface(iBinder);
                         return new WearableSensingManager(ctx.getOuterContext(), manager);
                     }});
+
+        registerService(Context.GRAMMATICAL_INFLECTION_SERVICE, GrammaticalInflectionManager.class,
+                new CachedServiceFetcher<GrammaticalInflectionManager>() {
+                    @Override
+                    public GrammaticalInflectionManager createService(ContextImpl ctx)
+                            throws ServiceNotFoundException {
+                        return new GrammaticalInflectionManager(ctx,
+                                IGrammaticalInflectionManager.Stub.asInterface(
+                                        ServiceManager.getServiceOrThrow(
+                                                Context.GRAMMATICAL_INFLECTION_SERVICE)));
+                    }});
+
 
         sInitializing = true;
         try {

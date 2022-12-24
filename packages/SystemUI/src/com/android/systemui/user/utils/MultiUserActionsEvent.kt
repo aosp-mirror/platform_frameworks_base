@@ -23,7 +23,13 @@ enum class MultiUserActionsEvent(val value: Int) : UiEventLogger.UiEventEnum {
     @UiEvent(doc = "Add User tap from User Switcher.") CREATE_USER_FROM_USER_SWITCHER(1257),
     @UiEvent(doc = "Add Guest tap from User Switcher.") CREATE_GUEST_FROM_USER_SWITCHER(1258),
     @UiEvent(doc = "Add Restricted User tap from User Switcher.")
-    CREATE_RESTRICTED_USER_FROM_USER_SWITCHER(1259);
+    CREATE_RESTRICTED_USER_FROM_USER_SWITCHER(1259),
+    @UiEvent(doc = "Switch to   User tap from User Switcher.")
+    SWITCH_TO_USER_FROM_USER_SWITCHER(1266),
+    @UiEvent(doc = "Switch to  Guest User tap from User Switcher.")
+    SWITCH_TO_GUEST_FROM_USER_SWITCHER(1267),
+    @UiEvent(doc = "Switch to Restricted User tap from User Switcher.")
+    SWITCH_TO_RESTRICTED_USER_FROM_USER_SWITCHER(1268);
 
     override fun getId(): Int {
         return value

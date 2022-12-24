@@ -55,7 +55,7 @@ class CreateOptionInfo(
   pendingIntent: PendingIntent?,
   fillInIntent: Intent?,
   val userProviderDisplayName: String?,
-  val profileIcon: Drawable,
+  val profileIcon: Drawable?,
   val passwordCount: Int?,
   val passkeyCount: Int?,
   val totalCredentialCount: Int?,

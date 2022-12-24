@@ -35,6 +35,7 @@ android_library {
 
         "androidx.compose.runtime_runtime",
         "androidx.compose.material3_material3",
+        "androidx.activity_activity-compose",
     ],
 
     kotlincflags: ["-Xjvm-default=all"],

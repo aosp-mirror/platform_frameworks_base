@@ -18,7 +18,9 @@ package android.hardware.radio.tests.unittests;
 
 import static com.google.common.truth.Truth.assertWithMessage;
 
+import static org.junit.Assert.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.never;
@@ -105,17 +107,17 @@ public final class RadioManagerTest {
     private static final int INFO_FLAGS = 0b110001;
     private static final int SIGNAL_QUALITY = 2;
     private static final ProgramSelector.Identifier DAB_SID_EXT_IDENTIFIER =
-            new ProgramSelector.Identifier(ProgramSelector.IDENTIFIER_TYPE_DAB_SID_EXT,
-                    /* value= */ 0x10000111);
+            new ProgramSelector.Identifier(ProgramSelector.IDENTIFIER_TYPE_DAB_DMB_SID_EXT,
+                    /* value= */ 0xA000000111L);
     private static final ProgramSelector.Identifier DAB_SID_EXT_IDENTIFIER_RELATED =
-            new ProgramSelector.Identifier(ProgramSelector.IDENTIFIER_TYPE_DAB_SID_EXT,
-                    /* value= */ 0x10000113);
+            new ProgramSelector.Identifier(ProgramSelector.IDENTIFIER_TYPE_DAB_DMB_SID_EXT,
+                    /* value= */ 0xA000000113L);
     private static final ProgramSelector.Identifier DAB_ENSEMBLE_IDENTIFIER =
             new ProgramSelector.Identifier(ProgramSelector.IDENTIFIER_TYPE_DAB_ENSEMBLE,
                     /* value= */ 0x1013);
     private static final ProgramSelector.Identifier DAB_FREQUENCY_IDENTIFIER =
             new ProgramSelector.Identifier(ProgramSelector.IDENTIFIER_TYPE_DAB_FREQUENCY,
-                    /* value= */ 95500);
+                    /* value= */ 220352);
     private static final ProgramSelector DAB_SELECTOR =
             new ProgramSelector(ProgramSelector.PROGRAM_TYPE_DAB, DAB_SID_EXT_IDENTIFIER,
                     new ProgramSelector.Identifier[]{
@@ -859,13 +861,13 @@ public final class RadioManagerTest {
     @Test
     public void getLogicallyTunedTo_forProgramInfo() {
         assertWithMessage("Identifier logically tuned to in DAB program info")
-                .that(DAB_PROGRAM_INFO.getLogicallyTunedTo()).isEqualTo(DAB_FREQUENCY_IDENTIFIER);
+                .that(DAB_PROGRAM_INFO.getLogicallyTunedTo()).isEqualTo(DAB_SID_EXT_IDENTIFIER);
     }
 
     @Test
     public void getPhysicallyTunedTo_forProgramInfo() {
         assertWithMessage("Identifier physically tuned to DAB program info")
-                .that(DAB_PROGRAM_INFO.getPhysicallyTunedTo()).isEqualTo(DAB_SID_EXT_IDENTIFIER);
+                .that(DAB_PROGRAM_INFO.getPhysicallyTunedTo()).isEqualTo(DAB_FREQUENCY_IDENTIFIER);
     }
 
     @Test
@@ -1006,6 +1008,35 @@ public final class RadioManagerTest {
     }
 
     @Test
+    public void listModules_forRadioManagerWithNullListAsInput_fails() throws Exception {
+        createRadioManager();
+
+        assertWithMessage("Status when listing module with empty list input")
+                .that(mRadioManager.listModules(null)).isEqualTo(RadioManager.STATUS_BAD_VALUE);
+    }
+
+    @Test
+    public void listModules_withNullListFromService_fails() throws Exception {
+        createRadioManager();
+        when(mRadioServiceMock.listModules()).thenReturn(null);
+        List<RadioManager.ModuleProperties> modules = new ArrayList<>();
+
+        assertWithMessage("Status for listing module when getting null list from HAL client")
+                .that(mRadioManager.listModules(modules)).isEqualTo(RadioManager.STATUS_ERROR);
+    }
+
+    @Test
+    public void listModules_whenServiceDied_fails() throws Exception {
+        createRadioManager();
+        when(mRadioServiceMock.listModules()).thenThrow(new RemoteException());
+        List<RadioManager.ModuleProperties> modules = new ArrayList<>();
+
+        assertWithMessage("Status for listing module when HAL client service is dead")
+                .that(mRadioManager.listModules(modules))
+                .isEqualTo(RadioManager.STATUS_DEAD_OBJECT);
+    }
+
+    @Test
     public void openTuner_forRadioModule() throws Exception {
         createRadioManager();
         int moduleId = 0;
@@ -1016,6 +1047,18 @@ public final class RadioManagerTest {
 
         verify(mRadioServiceMock).openTuner(eq(moduleId), eq(FM_BAND_CONFIG), eq(withAudio), any(),
                 anyInt());
+    }
+
+    @Test
+    public void openTuner_whenServiceDied_returnsNull() throws Exception {
+        createRadioManager();
+        when(mRadioServiceMock.openTuner(anyInt(), any(), anyBoolean(), any(), anyInt()))
+                .thenThrow(new RemoteException());
+
+        RadioTuner nullTuner = mRadioManager.openTuner(/* moduleId= */ 0, FM_BAND_CONFIG,
+                /* withAudio= */ true, mCallbackMock, /* handler= */ null);
+
+        assertWithMessage("Radio tuner when service is dead").that(nullTuner).isNull();
     }
 
     @Test
@@ -1046,6 +1089,21 @@ public final class RadioManagerTest {
         mRadioManager.addAnnouncementListener(enableTypeSet, mEventListener);
 
         verify(mCloseHandleMock).close();
+    }
+
+    @Test
+    public void addAnnouncementListener_whenServiceDied_throwException() throws Exception {
+        createRadioManager();
+        String exceptionMessage = "service is dead";
+        when(mRadioServiceMock.addAnnouncementListener(any(), any()))
+                .thenThrow(new RemoteException(exceptionMessage));
+        Set<Integer> enableTypeSet = createAnnouncementTypeSet(EVENT_ANNOUNCEMENT_TYPE);
+
+        RuntimeException thrown = assertThrows(RuntimeException.class,
+                () -> mRadioManager.addAnnouncementListener(enableTypeSet, mEventListener));
+
+        assertWithMessage("Exception for adding announcement listener with dead service")
+                .that(thrown).hasMessageThat().contains(exceptionMessage);
     }
 
     @Test
@@ -1104,8 +1162,8 @@ public final class RadioManagerTest {
     }
 
     private static RadioManager.ProgramInfo createDabProgramInfo(ProgramSelector selector) {
-        return new RadioManager.ProgramInfo(selector, DAB_FREQUENCY_IDENTIFIER,
-                DAB_SID_EXT_IDENTIFIER, Arrays.asList(DAB_SID_EXT_IDENTIFIER_RELATED), INFO_FLAGS,
+        return new RadioManager.ProgramInfo(selector, DAB_SID_EXT_IDENTIFIER,
+                DAB_FREQUENCY_IDENTIFIER, Arrays.asList(DAB_SID_EXT_IDENTIFIER_RELATED), INFO_FLAGS,
                 SIGNAL_QUALITY, METADATA, /* vendorInfo= */ null);
     }
 

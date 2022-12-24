@@ -28,7 +28,7 @@ import android.content.ComponentName;
 import android.platform.test.annotations.LargeTest;
 import android.util.ArraySet;
 import android.util.Log;
-import android.util.SparseArray;
+import android.util.SparseArrayMap;
 import android.util.SparseBooleanArray;
 import android.util.SparseLongArray;
 
@@ -54,8 +54,13 @@ public class PendingJobQueueTest {
 
     private JobStatus createJobStatus(String testTag, JobInfo.Builder jobInfoBuilder,
             int callingUid) {
+        return createJobStatus(testTag, jobInfoBuilder, callingUid, "PJQTest");
+    }
+
+    private JobStatus createJobStatus(String testTag, JobInfo.Builder jobInfoBuilder,
+            int callingUid, String namespace) {
         return JobStatus.createFromJobInfo(
-                jobInfoBuilder.build(), callingUid, "com.android.test", 0, testTag);
+                jobInfoBuilder.build(), callingUid, "com.android.test", 0, namespace, testTag);
     }
 
     @Test
@@ -373,12 +378,12 @@ public class PendingJobQueueTest {
         jobQueue.add(rC10);
         jobQueue.add(eC11);
 
-        checkPendingJobInvariants(jobQueue);
         JobStatus job;
         final JobStatus[] expectedPureOrder = new JobStatus[]{
                 eC3, rD4, eE5, eB6, rB2, eA7, rA1, rH8, eF9, rF8, eC11, rC10, rG12, rG13, eE14};
         int idx = 0;
         jobQueue.setOptimizeIteration(false);
+        checkPendingJobInvariants(jobQueue);
         jobQueue.resetIterator();
         while ((job = jobQueue.next()) != null) {
             assertEquals("List wasn't correctly sorted @ index " + idx,
@@ -390,6 +395,93 @@ public class PendingJobQueueTest {
                 eC3, eC11, rD4, eE5, eE14, eB6, rB2, eA7, rA1, rH8, eF9, rF8, rC10, rG12, rG13};
         idx = 0;
         jobQueue.setOptimizeIteration(true);
+        checkPendingJobInvariants(jobQueue);
+        jobQueue.resetIterator();
+        while ((job = jobQueue.next()) != null) {
+            assertEquals("Optimized list wasn't correctly sorted @ index " + idx,
+                    expectedOptimizedOrder[idx].getJobId(), job.getJobId());
+            idx++;
+        }
+    }
+
+    @Test
+    public void testPendingJobSorting_namespacing() {
+        PendingJobQueue jobQueue = new PendingJobQueue();
+
+        // First letter in job variable name indicate regular (r) or expedited (e).
+        // Capital letters in job variable name indicate the app/UID.
+        // Third letter (x, y, z) indicates the namespace.
+        // Numbers in job variable name indicate the enqueue time.
+        // Expected sort order:
+        //   eCx3 > rDx4 > eBy6 > rBy2 > eAy7 > rAx1 > eCy8 > rEz9 > rEz5
+        // Intentions:
+        //   * A jobs test expedited is before regular, regardless of namespace
+        //   * B jobs test expedited is before regular, in the same namespace
+        //   * C jobs test sorting by priority with different namespaces
+        //   * E jobs test sorting by priority in the same namespace
+        final String namespaceX = null;
+        final String namespaceY = "y";
+        final String namespaceZ = "z";
+        JobStatus rAx1 = createJobStatus("testPendingJobSorting",
+                createJobInfo(1), 1, namespaceX);
+        JobStatus rBy2 = createJobStatus("testPendingJobSorting",
+                createJobInfo(2), 2, namespaceY);
+        JobStatus eCx3 = createJobStatus("testPendingJobSorting",
+                createJobInfo(3).setExpedited(true).setPriority(JobInfo.PRIORITY_HIGH),
+                3, namespaceX);
+        JobStatus rDx4 = createJobStatus("testPendingJobSorting",
+                createJobInfo(4), 4, namespaceX);
+        JobStatus rEz5 = createJobStatus("testPendingJobSorting",
+                createJobInfo(5).setPriority(JobInfo.PRIORITY_LOW), 5, namespaceZ);
+        JobStatus eBy6 = createJobStatus("testPendingJobSorting",
+                createJobInfo(6).setExpedited(true), 2, namespaceY);
+        JobStatus eAy7 = createJobStatus("testPendingJobSorting",
+                createJobInfo(7).setExpedited(true), 1, namespaceY);
+        JobStatus eCy8 = createJobStatus("testPendingJobSorting",
+                createJobInfo(8).setExpedited(true).setPriority(JobInfo.PRIORITY_MAX),
+                3, namespaceY);
+        JobStatus rEz9 = createJobStatus("testPendingJobSorting",
+                createJobInfo(9).setPriority(JobInfo.PRIORITY_HIGH), 5, namespaceZ);
+
+        rAx1.enqueueTime = 10;
+        rBy2.enqueueTime = 20;
+        eCx3.enqueueTime = 30;
+        rDx4.enqueueTime = 40;
+        rEz5.enqueueTime = 50;
+        eBy6.enqueueTime = 60;
+        eAy7.enqueueTime = 70;
+        eCy8.enqueueTime = 80;
+        rEz9.enqueueTime = 90;
+
+        // Add in random order so sorting is apparent.
+        jobQueue.add(rEz9);
+        jobQueue.add(eCy8);
+        jobQueue.add(rDx4);
+        jobQueue.add(rEz5);
+        jobQueue.add(rBy2);
+        jobQueue.add(rAx1);
+        jobQueue.add(eCx3);
+        jobQueue.add(eBy6);
+        jobQueue.add(eAy7);
+
+        JobStatus job;
+        final JobStatus[] expectedPureOrder = new JobStatus[]{
+                eCx3, rDx4, eBy6, rBy2, eAy7, rAx1, eCy8, rEz9, rEz5};
+        int idx = 0;
+        jobQueue.setOptimizeIteration(false);
+        checkPendingJobInvariants(jobQueue);
+        jobQueue.resetIterator();
+        while ((job = jobQueue.next()) != null) {
+            assertEquals("List wasn't correctly sorted @ index " + idx,
+                    expectedPureOrder[idx].getJobId(), job.getJobId());
+            idx++;
+        }
+
+        final JobStatus[] expectedOptimizedOrder = new JobStatus[]{
+                eCx3, eCy8, rDx4, eBy6, rBy2, eAy7, rAx1, rEz9, rEz5};
+        idx = 0;
+        jobQueue.setOptimizeIteration(true);
+        checkPendingJobInvariants(jobQueue);
         jobQueue.resetIterator();
         while ((job = jobQueue.next()) != null) {
             assertEquals("Optimized list wasn't correctly sorted @ index " + idx,
@@ -406,6 +498,22 @@ public class PendingJobQueueTest {
         for (int i = 0; i < 5000; ++i) {
             JobStatus job = createJobStatus("testPendingJobSorting_Random",
                     createJobInfo(i).setExpedited(random.nextBoolean()), random.nextInt(250));
+            job.enqueueTime = random.nextInt(1_000_000);
+            jobQueue.add(job);
+        }
+
+        checkPendingJobInvariants(jobQueue);
+    }
+
+    @Test
+    public void testPendingJobSorting_Random_namespacing() {
+        PendingJobQueue jobQueue = new PendingJobQueue();
+        Random random = new Random(1); // Always use the same series of pseudo random values.
+
+        for (int i = 0; i < 5000; ++i) {
+            JobStatus job = createJobStatus("testPendingJobSorting_Random",
+                    createJobInfo(i).setExpedited(random.nextBoolean()), random.nextInt(250),
+                    "namespace" + random.nextInt(5));
             job.enqueueTime = random.nextInt(1_000_000);
             jobQueue.add(job);
         }
@@ -546,10 +654,11 @@ public class PendingJobQueueTest {
 
     private void checkPendingJobInvariants(PendingJobQueue jobQueue) {
         final SparseBooleanArray regJobSeen = new SparseBooleanArray();
-        // Latest priority enqueue times seen for each priority for each app.
-        final SparseArray<SparseLongArray> latestPriorityRegEnqueueTimesPerUid =
-                new SparseArray<>();
-        final SparseArray<SparseLongArray> latestPriorityEjEnqueueTimesPerUid = new SparseArray<>();
+        // Latest priority enqueue times seen for each priority+namespace for each app.
+        final SparseArrayMap<String, SparseLongArray> latestPriorityRegEnqueueTimesPerUid =
+                new SparseArrayMap();
+        final SparseArrayMap<String, SparseLongArray> latestPriorityEjEnqueueTimesPerUid =
+                new SparseArrayMap<>();
         final int noEntry = -1;
         int prevOverrideState = noEntry;
 
@@ -579,11 +688,12 @@ public class PendingJobQueueTest {
             }
 
             final int priority = job.getEffectivePriority();
-            final SparseArray<SparseLongArray> latestPriorityEnqueueTimesPerUid =
+            final SparseArrayMap<String, SparseLongArray> latestPriorityEnqueueTimesPerUid =
                     job.isRequestedExpeditedJob()
                             ? latestPriorityEjEnqueueTimesPerUid
                             : latestPriorityRegEnqueueTimesPerUid;
-            SparseLongArray latestPriorityEnqueueTimes = latestPriorityEnqueueTimesPerUid.get(uid);
+            SparseLongArray latestPriorityEnqueueTimes =
+                    latestPriorityEnqueueTimesPerUid.get(uid, job.getNamespace());
             if (latestPriorityEnqueueTimes != null) {
                 // Invariant 2
                 for (int p = priority - 1; p >= JobInfo.PRIORITY_MIN; --p) {
@@ -603,7 +713,8 @@ public class PendingJobQueueTest {
                 }
             } else {
                 latestPriorityEnqueueTimes = new SparseLongArray();
-                latestPriorityEnqueueTimesPerUid.put(uid, latestPriorityEnqueueTimes);
+                latestPriorityEnqueueTimesPerUid.add(
+                        uid, job.getNamespace(), latestPriorityEnqueueTimes);
             }
             latestPriorityEnqueueTimes.put(priority, job.enqueueTime);
 
@@ -618,7 +729,7 @@ public class PendingJobQueueTest {
     }
 
     private static String testJobToString(JobStatus job) {
-        return "testJob " + job.getSourceUid() + "/" + job.getJobId()
+        return "testJob " + job.getSourceUid() + "/" + job.getNamespace() + "/" + job.getJobId()
                 + "/o" + job.overrideState
                 + "/p" + job.getEffectivePriority()
                 + "/b" + job.lastEvaluatedBias

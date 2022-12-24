@@ -177,19 +177,18 @@ public class StateMachine {
     }
 
     /**
-     * Process an event. Search handler for a given event and {@link Handler#handle(int)}. If the
-     * handler cannot handle the event, delegate it to a handler for a parent of the given state.
+     * Process an event. Search handler for a given event and {@link Handler#handle(int, Object)}.
+     * If the handler cannot handle the event, delegate it to a handler for a parent of the given
+     * state.
      *
      * @param event Type of an event.
      */
     public void handle(int event, @Nullable Object param) {
-        int state = mState;
-        while (state != 0) {
+        for (int state = mState;; state >>= 4) {
             final Handler h = mStateHandlers.get(state);
-            if (h != null && h.handle(event, param)) {
+            if ((h != null && h.handle(event, param)) || state == 0) {
                 return;
             }
-            state >>= 4;
         }
     }
 

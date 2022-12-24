@@ -442,10 +442,14 @@ class RootWindowContainer extends WindowContainer<DisplayContent>
         mDisplayOffTokenAcquirer = mService.new SleepTokenAcquirerImpl(DISPLAY_OFF_SLEEP_TOKEN_TAG);
     }
 
+    /**
+     * Updates the children's focused window and the top focused display if needed.
+     */
     boolean updateFocusedWindowLocked(int mode, boolean updateInputWindows) {
         mTopFocusedAppByProcess.clear();
         boolean changed = false;
         int topFocusedDisplayId = INVALID_DISPLAY;
+        // Go through the children in z-order starting at the top-most
         for (int i = mChildren.size() - 1; i >= 0; --i) {
             final DisplayContent dc = mChildren.get(i);
             changed |= dc.updateFocusedWindowLocked(mode, updateInputWindows, topFocusedDisplayId);
@@ -1478,7 +1482,7 @@ class RootWindowContainer extends WindowContainer<DisplayContent>
                 final String resolvedType =
                         homeIntent.resolveTypeIfNeeded(mService.mContext.getContentResolver());
                 final ResolveInfo info = mTaskSupervisor.resolveIntent(homeIntent, resolvedType,
-                        userId, flags, Binder.getCallingUid());
+                        userId, flags, Binder.getCallingUid(), Binder.getCallingPid());
                 if (info != null) {
                     aInfo = info.activityInfo;
                 }

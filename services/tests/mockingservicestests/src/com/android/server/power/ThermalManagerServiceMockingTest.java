@@ -18,6 +18,7 @@ package com.android.server.power;
 
 import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 
 import android.hardware.thermal.CoolingType;
@@ -84,6 +85,42 @@ public class ThermalManagerServiceMockingTest {
     }
 
     @Test
+    public void setCallback_illegalState_aidl() throws Exception {
+        Mockito.doThrow(new IllegalStateException()).when(
+                mAidlHalMock).registerThermalChangedCallback(Mockito.any());
+        verifyWrapperStatusOnCallbackError();
+    }
+
+    @Test
+    public void setCallback_illegalArgument_aidl() throws Exception {
+        Mockito.doThrow(new IllegalStateException()).when(
+                mAidlHalMock).registerThermalChangedCallback(Mockito.any());
+        verifyWrapperStatusOnCallbackError();
+    }
+
+
+    void verifyWrapperStatusOnCallbackError() throws RemoteException {
+        android.hardware.thermal.Temperature halT1 = new android.hardware.thermal.Temperature();
+        halT1.type = TemperatureType.MODEM;
+        halT1.name = "test1";
+        Mockito.when(mAidlHalMock.getTemperaturesWithType(Mockito.anyInt())).thenReturn(
+                new android.hardware.thermal.Temperature[]{
+                        halT1
+                });
+        List<Temperature> ret = mAidlWrapper.getCurrentTemperatures(true, TemperatureType.MODEM);
+        Mockito.verify(mAidlHalMock, Mockito.times(1)).getTemperaturesWithType(
+                TemperatureType.MODEM);
+        assertNotNull(ret);
+        Temperature expectedT1 = new Temperature(halT1.value, halT1.type, halT1.name,
+                halT1.throttlingStatus);
+        List<Temperature> expectedRet = List.of(expectedT1);
+        // test that even if the callback fails to register without hal connection error, the
+        // wrapper should still work
+        assertTrue("Got temperature list as " + ret + " with different values compared to "
+                + expectedRet, expectedRet.containsAll(ret));
+    }
+
+    @Test
     public void getCurrentTemperatures_withFilter_aidl() throws RemoteException {
         android.hardware.thermal.Temperature halT1 = new android.hardware.thermal.Temperature();
         halT1.type = TemperatureType.MODEM;
@@ -135,7 +172,42 @@ public class ThermalManagerServiceMockingTest {
         List<Temperature> expectedRet = List.of(
                 new Temperature(halTInvalid.value, halTInvalid.type, halTInvalid.name,
                         ThrottlingSeverity.NONE));
-        assertEquals(expectedRet, ret);
+        assertTrue("Got temperature list as " + ret + " with different values compared to "
+                + expectedRet, expectedRet.containsAll(ret));
+    }
+
+    @Test
+    public void getCurrentTemperatures_illegalArgument_aidl() throws RemoteException {
+        Mockito.when(mAidlHalMock.getTemperatures()).thenThrow(new IllegalArgumentException());
+        List<Temperature> ret = mAidlWrapper.getCurrentTemperatures(false, 0);
+        Mockito.verify(mAidlHalMock, Mockito.times(1)).getTemperatures();
+        assertNotNull(ret);
+        assertEquals(0, ret.size());
+
+        Mockito.when(mAidlHalMock.getTemperaturesWithType(TemperatureType.MODEM)).thenThrow(
+                new IllegalArgumentException());
+        ret = mAidlWrapper.getCurrentTemperatures(true, TemperatureType.MODEM);
+        Mockito.verify(mAidlHalMock, Mockito.times(1)).getTemperaturesWithType(
+                TemperatureType.MODEM);
+        assertNotNull(ret);
+        assertEquals(0, ret.size());
+    }
+
+    @Test
+    public void getCurrentTemperatures_illegalState_aidl() throws RemoteException {
+        Mockito.when(mAidlHalMock.getTemperatures()).thenThrow(new IllegalStateException());
+        List<Temperature> ret = mAidlWrapper.getCurrentTemperatures(false, 0);
+        Mockito.verify(mAidlHalMock, Mockito.times(1)).getTemperatures();
+        assertNotNull(ret);
+        assertEquals(0, ret.size());
+
+        Mockito.when(mAidlHalMock.getTemperaturesWithType(TemperatureType.MODEM)).thenThrow(
+                new IllegalStateException());
+        ret = mAidlWrapper.getCurrentTemperatures(true, TemperatureType.MODEM);
+        Mockito.verify(mAidlHalMock, Mockito.times(1)).getTemperaturesWithType(
+                TemperatureType.MODEM);
+        assertNotNull(ret);
+        assertEquals(0, ret.size());
     }
 
     @Test
@@ -187,6 +259,40 @@ public class ThermalManagerServiceMockingTest {
     }
 
     @Test
+    public void getCurrentCoolingDevices_illegalArgument_aidl() throws RemoteException {
+        Mockito.when(mAidlHalMock.getCoolingDevices()).thenThrow(new IllegalArgumentException());
+        List<CoolingDevice> ret = mAidlWrapper.getCurrentCoolingDevices(false, 0);
+        Mockito.verify(mAidlHalMock, Mockito.times(1)).getCoolingDevices();
+        assertNotNull(ret);
+        assertEquals(0, ret.size());
+
+        Mockito.when(mAidlHalMock.getCoolingDevicesWithType(Mockito.anyInt())).thenThrow(
+                new IllegalArgumentException());
+        ret = mAidlWrapper.getCurrentCoolingDevices(true, CoolingType.SPEAKER);
+        Mockito.verify(mAidlHalMock, Mockito.times(1)).getCoolingDevicesWithType(
+                CoolingType.SPEAKER);
+        assertNotNull(ret);
+        assertEquals(0, ret.size());
+    }
+
+    @Test
+    public void getCurrentCoolingDevices_illegalState_aidl() throws RemoteException {
+        Mockito.when(mAidlHalMock.getCoolingDevices()).thenThrow(new IllegalStateException());
+        List<CoolingDevice> ret = mAidlWrapper.getCurrentCoolingDevices(false, 0);
+        Mockito.verify(mAidlHalMock, Mockito.times(1)).getCoolingDevices();
+        assertNotNull(ret);
+        assertEquals(0, ret.size());
+
+        Mockito.when(mAidlHalMock.getCoolingDevicesWithType(Mockito.anyInt())).thenThrow(
+                new IllegalStateException());
+        ret = mAidlWrapper.getCurrentCoolingDevices(true, CoolingType.SPEAKER);
+        Mockito.verify(mAidlHalMock, Mockito.times(1)).getCoolingDevicesWithType(
+                CoolingType.SPEAKER);
+        assertNotNull(ret);
+        assertEquals(0, ret.size());
+    }
+
+    @Test
     public void getTemperatureThresholds_withFilter_aidl() throws RemoteException {
         TemperatureThreshold halT1 = new TemperatureThreshold();
         halT1.name = "test1";
@@ -214,5 +320,45 @@ public class ThermalManagerServiceMockingTest {
         assertEquals(halT1.type, threshold.type);
         assertArrayEquals(halT1.hotThrottlingThresholds, threshold.hotThrottlingThresholds, 0.1f);
         assertArrayEquals(halT1.coldThrottlingThresholds, threshold.coldThrottlingThresholds, 0.1f);
+    }
+
+    @Test
+    public void getTemperatureThresholds_illegalArgument_aidl() throws RemoteException {
+        Mockito.when(mAidlHalMock.getTemperatureThresholdsWithType(Mockito.anyInt())).thenThrow(
+                new IllegalArgumentException());
+        List<TemperatureThreshold> ret = mAidlWrapper.getTemperatureThresholds(true,
+                Temperature.TYPE_SOC);
+        Mockito.verify(mAidlHalMock, Mockito.times(1)).getTemperatureThresholdsWithType(
+                Temperature.TYPE_SOC);
+        assertNotNull(ret);
+        assertEquals(0, ret.size());
+
+        Mockito.when(mAidlHalMock.getTemperatureThresholds()).thenThrow(
+                new IllegalArgumentException());
+        ret = mAidlWrapper.getTemperatureThresholds(false,
+                Temperature.TYPE_SOC);
+        Mockito.verify(mAidlHalMock, Mockito.times(1)).getTemperatureThresholds();
+        assertNotNull(ret);
+        assertEquals(0, ret.size());
+    }
+
+    @Test
+    public void getTemperatureThresholds_illegalState_aidl() throws RemoteException {
+        Mockito.when(mAidlHalMock.getTemperatureThresholdsWithType(Mockito.anyInt())).thenThrow(
+                new IllegalStateException());
+        List<TemperatureThreshold> ret = mAidlWrapper.getTemperatureThresholds(true,
+                Temperature.TYPE_SOC);
+        Mockito.verify(mAidlHalMock, Mockito.times(1)).getTemperatureThresholdsWithType(
+                Temperature.TYPE_SOC);
+        assertNotNull(ret);
+        assertEquals(0, ret.size());
+
+        Mockito.when(mAidlHalMock.getTemperatureThresholds()).thenThrow(
+                new IllegalStateException());
+        ret = mAidlWrapper.getTemperatureThresholds(false,
+                Temperature.TYPE_SOC);
+        Mockito.verify(mAidlHalMock, Mockito.times(1)).getTemperatureThresholds();
+        assertNotNull(ret);
+        assertEquals(0, ret.size());
     }
 }

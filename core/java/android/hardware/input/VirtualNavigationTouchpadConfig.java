@@ -88,12 +88,17 @@ public final class VirtualNavigationTouchpadConfig extends VirtualInputDeviceCon
      * Builder for creating a {@link VirtualNavigationTouchpadConfig}.
      */
     public static final class Builder extends VirtualInputDeviceConfig.Builder<Builder> {
-
         private final int mHeight;
         private final int mWidth;
 
-        public Builder(@IntRange(from = 1) int touchpadHeight,
-                @IntRange(from = 1) int touchpadWidth) {
+        /**
+         * Creates a new instance for the given dimensions of the {@link VirtualNavigationTouchpad}.
+         *
+         * @param touchpadWidth The width of the touchpad.
+         * @param touchpadHeight The height of the touchpad.
+         */
+        public Builder(@IntRange(from = 1) int touchpadWidth,
+                @IntRange(from = 1) int touchpadHeight) {
             if (touchpadHeight <= 0 || touchpadWidth <= 0) {
                 throw new IllegalArgumentException(
                         "Cannot create a virtual navigation touchpad, touchpad dimensions must be "

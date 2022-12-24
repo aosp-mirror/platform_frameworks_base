@@ -16,7 +16,9 @@
 
 package com.android.server.hdmi;
 
+import android.hardware.hdmi.HdmiControlManager;
 import android.hardware.hdmi.HdmiDeviceInfo;
+import android.hardware.hdmi.IHdmiControlCallback;
 
 /**
  * Base feature action class for &lt;Request ARC Initiation&gt;/&lt;Request ARC Termination&gt;.
@@ -35,41 +37,19 @@ abstract class RequestArcAction extends HdmiCecFeatureAction {
      *
      * @param source {@link HdmiCecLocalDevice} instance
      * @param avrAddress address of AV receiver. It should be AUDIO_SYSTEM type
+     * @param callback callback to inform about the status of the action
      * @throws IllegalArgumentException if device type of sourceAddress and avrAddress
      *                      is invalid
      */
-    RequestArcAction(HdmiCecLocalDevice source, int avrAddress) {
-        super(source);
+    RequestArcAction(HdmiCecLocalDevice source, int avrAddress, IHdmiControlCallback callback) {
+        super(source, callback);
         HdmiUtils.verifyAddressType(getSourceAddress(), HdmiDeviceInfo.DEVICE_TV);
         HdmiUtils.verifyAddressType(avrAddress, HdmiDeviceInfo.DEVICE_AUDIO_SYSTEM);
         mAvrAddress = avrAddress;
     }
 
-    @Override
-    boolean processCommand(HdmiCecMessage cmd) {
-        if (mState != STATE_WATING_FOR_REQUEST_ARC_REQUEST_RESPONSE
-                || !HdmiUtils.checkCommandSource(cmd, mAvrAddress, TAG)) {
-            return false;
-        }
-        int opcode = cmd.getOpcode();
-        switch (opcode) {
-            // Handles only <Feature Abort> here and, both <Initiate ARC> and <Terminate ARC>
-            // are handled in HdmiControlService itself because both can be
-            // received without <Request ARC Initiation> or <Request ARC Termination>.
-            case Constants.MESSAGE_FEATURE_ABORT:
-                int originalOpcode = cmd.getParams()[0] & 0xFF;
-                if (originalOpcode == Constants.MESSAGE_REQUEST_ARC_TERMINATION) {
-                    disableArcTransmission();
-                    finish();
-                    return true;
-                } else if (originalOpcode == Constants.MESSAGE_REQUEST_ARC_INITIATION) {
-                    tv().disableArc();
-                    finish();
-                    return true;
-                }
-                return false;
-        }
-        return false;
+    RequestArcAction(HdmiCecLocalDevice source, int avrAddress) {
+        this(source, avrAddress, null);
     }
 
     protected final void disableArcTransmission() {
@@ -86,6 +66,6 @@ abstract class RequestArcAction extends HdmiCecFeatureAction {
         }
         HdmiLogger.debug("[T] RequestArcAction.");
         disableArcTransmission();
-        finish();
+        finishWithCallback(HdmiControlManager.RESULT_TIMEOUT);
     }
 }

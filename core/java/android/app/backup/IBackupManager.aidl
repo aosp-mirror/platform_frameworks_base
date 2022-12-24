@@ -16,6 +16,7 @@
 
 package android.app.backup;
 
+import android.app.backup.BackupRestoreEventLogger.DataTypeResult;
 import android.app.backup.IBackupObserver;
 import android.app.backup.IBackupManagerMonitor;
 import android.app.backup.IFullBackupRestoreObserver;
@@ -722,4 +723,6 @@ interface IBackupManager {
      * that have been excluded will be passed to the agent to make it aware of the exclusions.
      */
     void excludeKeysFromRestore(String packageName, in List<String> keys);
+
+    void reportDelayedRestoreResult(in String packageName, in List<DataTypeResult> results);
 }

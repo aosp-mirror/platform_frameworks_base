@@ -839,7 +839,7 @@ public final class JobConcurrencyManagerTest {
     private static JobStatus createJob(int uid, int jobId, @Nullable String sourcePackageName) {
         return JobStatus.createFromJobInfo(
                 new JobInfo.Builder(jobId, new ComponentName("foo", "bar")).build(), uid,
-                sourcePackageName, UserHandle.getUserId(uid), "JobConcurrencyManagerTest");
+                sourcePackageName, UserHandle.getUserId(uid), "JobConcurrencyManagerTest", null);
     }
 
     private static final class TypeConfig {

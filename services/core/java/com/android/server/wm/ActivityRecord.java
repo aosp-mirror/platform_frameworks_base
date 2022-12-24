@@ -736,7 +736,6 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
      */
     private boolean mWillCloseOrEnterPip;
 
-    @VisibleForTesting
     final LetterboxUiController mLetterboxUiController;
 
     /**
@@ -6076,6 +6075,19 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
         r.mDisplayContent.mUnknownAppVisibilityController.notifyAppResumedFinished(r);
     }
 
+    static void activityRefreshedLocked(IBinder token) {
+        final ActivityRecord r = ActivityRecord.forTokenLocked(token);
+        ProtoLog.i(WM_DEBUG_STATES, "Refreshed activity: %s", r);
+        if (r == null) {
+            // In case the record on server side has been removed (e.g. destroy timeout)
+            // and the token could be null.
+            return;
+        }
+        if (r.mDisplayContent.mDisplayRotationCompatPolicy != null) {
+            r.mDisplayContent.mDisplayRotationCompatPolicy.onActivityRefreshed(r);
+        }
+    }
+
     static void splashScreenAttachedLocked(IBinder token) {
         final ActivityRecord r = ActivityRecord.forTokenLocked(token);
         if (r == null) {
@@ -8149,7 +8161,7 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
     }
 
     /**
-     * Adjusts position of resolved bounds if they doesn't fill the parent using gravity
+     * Adjusts position of resolved bounds if they don't fill the parent using gravity
      * requested in the config or via an ADB command. For more context see {@link
      * LetterboxUiController#getHorizontalPositionMultiplier(Configuration)} and
      * {@link LetterboxUiController#getVerticalPositionMultiplier(Configuration)}
@@ -8168,9 +8180,8 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
         int offsetX = 0;
         if (parentBounds.width() != screenResolvedBounds.width()) {
             if (screenResolvedBounds.width() <= parentAppBounds.width()) {
-                float positionMultiplier =
-                        mLetterboxUiController.getHorizontalPositionMultiplier(
-                                newParentConfiguration);
+                float positionMultiplier = mLetterboxUiController.getHorizontalPositionMultiplier(
+                        newParentConfiguration);
                 offsetX = (int) Math.ceil((parentAppBounds.width() - screenResolvedBounds.width())
                         * positionMultiplier);
             }
@@ -8180,9 +8191,8 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
         int offsetY = 0;
         if (parentBounds.height() != screenResolvedBounds.height()) {
             if (screenResolvedBounds.height() <= parentAppBounds.height()) {
-                float positionMultiplier =
-                        mLetterboxUiController.getVerticalPositionMultiplier(
-                                newParentConfiguration);
+                float positionMultiplier = mLetterboxUiController.getVerticalPositionMultiplier(
+                        newParentConfiguration);
                 offsetY = (int) Math.ceil((parentAppBounds.height() - screenResolvedBounds.height())
                         * positionMultiplier);
             }
@@ -9153,6 +9163,8 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
             } else {
                 scheduleConfigurationChanged(newMergedOverrideConfig);
             }
+            notifyDisplayCompatPolicyAboutConfigurationChange(
+                    mLastReportedConfiguration.getMergedConfiguration(), mTmpConfig);
             return true;
         }
 
@@ -9221,9 +9233,22 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
         } else {
             scheduleConfigurationChanged(newMergedOverrideConfig);
         }
+        notifyDisplayCompatPolicyAboutConfigurationChange(
+                mLastReportedConfiguration.getMergedConfiguration(), mTmpConfig);
+
         stopFreezingScreenLocked(false);
 
         return true;
+    }
+
+    private void notifyDisplayCompatPolicyAboutConfigurationChange(
+            Configuration newConfig, Configuration lastReportedConfig) {
+        if (mDisplayContent.mDisplayRotationCompatPolicy == null
+                || !shouldBeResumed(/* activeActivity */ null)) {
+            return;
+        }
+        mDisplayContent.mDisplayRotationCompatPolicy.onActivityConfigurationChanging(
+                this, newConfig, lastReportedConfig);
     }
 
     /** Get process configuration, or global config if the process is not set. */
@@ -9537,7 +9562,7 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
 
         final ActivityTaskManagerService service = taskSupervisor.mService;
         final ActivityInfo aInfo = taskSupervisor.resolveActivity(intent, resolvedType, 0, null,
-                userId, Binder.getCallingUid());
+                userId, Binder.getCallingUid(), 0);
         if (aInfo == null) {
             throw new XmlPullParserException("restoreActivity resolver error. Intent=" + intent +
                     " resolvedType=" + resolvedType);

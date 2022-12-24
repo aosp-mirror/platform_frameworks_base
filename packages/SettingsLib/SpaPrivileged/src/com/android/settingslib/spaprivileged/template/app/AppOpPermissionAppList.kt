@@ -49,6 +49,13 @@ abstract class AppOpPermissionListModel(
     abstract val appOp: Int
     abstract val permission: String
 
+    /**
+     * Use AppOpsManager#setUidMode() instead of AppOpsManager#setMode() when set allowed.
+     *
+     * Security related app-ops should be set with setUidMode() instead of setMode().
+     */
+    open val setModeByUid = false
+
     /** These not changeable packages will also be hidden from app list. */
     private val notChangeablePackages =
         setOf("android", "com.android.systemui", context.packageName)
@@ -61,7 +68,7 @@ abstract class AppOpPermissionListModel(
                 AppOpPermissionRecord(
                     app = app,
                     hasRequestPermission = app.packageName in packageNames,
-                    appOpsController = AppOpsController(context = context, app = app, op = appOp),
+                    appOpsController = createAppOpsController(app),
                 )
             }
         }
@@ -69,7 +76,14 @@ abstract class AppOpPermissionListModel(
     override fun transformItem(app: ApplicationInfo) = AppOpPermissionRecord(
         app = app,
         hasRequestPermission = with(packageManagers) { app.hasRequestPermission(permission) },
-        appOpsController = AppOpsController(context = context, app = app, op = appOp),
+        appOpsController = createAppOpsController(app),
+    )
+
+    private fun createAppOpsController(app: ApplicationInfo) = AppOpsController(
+        context = context,
+        app = app,
+        op = appOp,
+        setModeByUid = setModeByUid,
     )
 
     override fun filter(userIdFlow: Flow<Int>, recordListFlow: Flow<List<AppOpPermissionRecord>>) =

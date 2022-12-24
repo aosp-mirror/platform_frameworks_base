@@ -153,6 +153,7 @@ public final class BatteryStatsService extends IBatteryStats.Stub
     private final Context mContext;
     private final BatteryExternalStatsWorker mWorker;
     private final BatteryUsageStatsProvider mBatteryUsageStatsProvider;
+    private volatile boolean mMonitorEnabled = true;
 
     private native void getRailEnergyPowerStats(RailStats railStats);
     private CharsetDecoder mDecoderStat = StandardCharsets.UTF_8
@@ -481,6 +482,9 @@ public final class BatteryStatsService extends IBatteryStats.Stub
 
     @Override
     public void monitor() {
+        if (!mMonitorEnabled) {
+            return;
+        }
         synchronized (mLock) {
         }
         synchronized (mStats) {
@@ -2602,6 +2606,19 @@ public final class BatteryStatsService extends IBatteryStats.Stub
 
     @Override
     protected void dump(FileDescriptor fd, PrintWriter pw, String[] args) {
+        // If the monitor() method is already holding a lock on mStats, no harm done: we will
+        // just wait for mStats in the dumpUnmonitored method below.  In fact, we would want
+        // Watchdog to catch the service in the act in that situation.  We just don't want the
+        // dump method itself to be blamed for holding the lock for too long.
+        mMonitorEnabled = false;
+        try {
+            dumpUnmonitored(fd, pw, args);
+        } finally {
+            mMonitorEnabled = true;
+        }
+    }
+
+    private void dumpUnmonitored(FileDescriptor fd, PrintWriter pw, String[] args) {
         if (!DumpUtils.checkDumpAndUsageStatsPermission(mContext, TAG, pw)) return;
 
         int flags = 0;

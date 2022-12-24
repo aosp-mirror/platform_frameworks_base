@@ -16,28 +16,26 @@
 
 package com.android.packageinstaller;
 
-import android.annotation.NonNull;
 import android.app.Notification;
 import android.app.NotificationChannel;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
-import android.app.admin.IDevicePolicyManager;
+import android.app.admin.DevicePolicyManager;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.ApplicationInfo;
-import android.content.pm.IPackageManager;
 import android.content.pm.PackageInstaller;
 import android.content.pm.PackageManager;
-import android.content.pm.UserInfo;
 import android.graphics.drawable.Icon;
-import android.os.RemoteException;
-import android.os.ServiceManager;
+import android.os.Process;
 import android.os.UserHandle;
 import android.os.UserManager;
 import android.provider.Settings;
 import android.util.Log;
 import android.widget.Toast;
+
+import androidx.annotation.NonNull;
 
 import java.util.List;
 
@@ -94,28 +92,24 @@ public class UninstallFinish extends BroadcastReceiver {
 
                 switch (legacyStatus) {
                     case PackageManager.DELETE_FAILED_DEVICE_POLICY_MANAGER: {
-                        IDevicePolicyManager dpm = IDevicePolicyManager.Stub.asInterface(
-                                ServiceManager.getService(Context.DEVICE_POLICY_SERVICE));
                         // Find out if the package is an active admin for some non-current user.
-                        int myUserId = UserHandle.myUserId();
-                        UserInfo otherBlockingUser = null;
-                        for (UserInfo user : userManager.getUsers()) {
+                        UserHandle myUserHandle = Process.myUserHandle();
+                        UserHandle otherBlockingUserHandle = null;
+                        for (UserHandle otherUserHandle : userManager.getUserHandles(true)) {
                             // We only catch the case when the user in question is neither the
                             // current user nor its profile.
-                            if (isProfileOfOrSame(userManager, myUserId, user.id)) {
+                            if (isProfileOfOrSame(userManager, myUserHandle, otherUserHandle)) {
                                 continue;
                             }
-
-                            try {
-                                if (dpm.packageHasActiveAdmins(appInfo.packageName, user.id)) {
-                                    otherBlockingUser = user;
-                                    break;
-                                }
-                            } catch (RemoteException e) {
-                                Log.e(LOG_TAG, "Failed to talk to package manager", e);
+                            DevicePolicyManager dpm =
+                                    context.createContextAsUser(otherUserHandle, 0)
+                                    .getSystemService(DevicePolicyManager.class);
+                            if (dpm.packageHasActiveAdmins(appInfo.packageName)) {
+                                otherBlockingUserHandle = otherUserHandle;
+                                break;
                             }
                         }
-                        if (otherBlockingUser == null) {
+                        if (otherBlockingUserHandle == null) {
                             Log.d(LOG_TAG, "Uninstall failed because " + appInfo.packageName
                                     + " is a device admin");
 
@@ -124,46 +118,41 @@ public class UninstallFinish extends BroadcastReceiver {
                                     R.string.uninstall_failed_device_policy_manager));
                         } else {
                             Log.d(LOG_TAG, "Uninstall failed because " + appInfo.packageName
-                                    + " is a device admin of user " + otherBlockingUser);
+                                    + " is a device admin of user " + otherBlockingUserHandle);
 
+                            String userName =
+                                    context.createContextAsUser(otherBlockingUserHandle, 0)
+                                            .getSystemService(UserManager.class).getUserName();
                             setBigText(uninstallFailedNotification, String.format(context.getString(
                                     R.string.uninstall_failed_device_policy_manager_of_user),
-                                    otherBlockingUser.name));
+                                    userName));
                         }
                         break;
                     }
                     case PackageManager.DELETE_FAILED_OWNER_BLOCKED: {
-                        IPackageManager packageManager = IPackageManager.Stub.asInterface(
-                                ServiceManager.getService("package"));
-
-                        List<UserInfo> users = userManager.getUsers();
-                        int blockingUserId = UserHandle.USER_NULL;
-                        for (int i = 0; i < users.size(); ++i) {
-                            final UserInfo user = users.get(i);
-                            try {
-                                if (packageManager.getBlockUninstallForUser(appInfo.packageName,
-                                        user.id)) {
-                                    blockingUserId = user.id;
-                                    break;
-                                }
-                            } catch (RemoteException e) {
-                                // Shouldn't happen.
-                                Log.e(LOG_TAG, "Failed to talk to package manager", e);
+                        PackageManager packageManager = context.getPackageManager();
+                        List<UserHandle> userHandles = userManager.getUserHandles(true);
+                        UserHandle otherBlockingUserHandle = null;
+                        for (int i = 0; i < userHandles.size(); ++i) {
+                            final UserHandle handle = userHandles.get(i);
+                            if (packageManager.canUserUninstall(appInfo.packageName, handle)) {
+                                otherBlockingUserHandle = handle;
+                                break;
                             }
                         }
 
-                        int myUserId = UserHandle.myUserId();
-                        if (isProfileOfOrSame(userManager, myUserId, blockingUserId)) {
+                        UserHandle myUserHandle = Process.myUserHandle();
+                        if (isProfileOfOrSame(userManager, myUserHandle, otherBlockingUserHandle)) {
                             addDeviceManagerButton(context, uninstallFailedNotification);
                         } else {
                             addManageUsersButton(context, uninstallFailedNotification);
                         }
 
-                        if (blockingUserId == UserHandle.USER_NULL) {
+                        if (otherBlockingUserHandle == null) {
                             Log.d(LOG_TAG,
                                     "Uninstall failed for " + appInfo.packageName + " with code "
                                             + returnCode + " no blocking user");
-                        } else if (blockingUserId == UserHandle.USER_SYSTEM) {
+                        } else if (otherBlockingUserHandle == UserHandle.SYSTEM) {
                             setBigText(uninstallFailedNotification,
                                     context.getString(R.string.uninstall_blocked_device_owner));
                         } else {
@@ -200,18 +189,18 @@ public class UninstallFinish extends BroadcastReceiver {
      * Is a profile part of a user?
      *
      * @param userManager The user manager
-     * @param userId The id of the user
-     * @param profileId The id of the profile
+     * @param userHandle The handle of the user
+     * @param profileHandle The handle of the profile
      *
      * @return If the profile is part of the user or the profile parent of the user
      */
-    private boolean isProfileOfOrSame(@NonNull UserManager userManager, int userId, int profileId) {
-        if (userId == profileId) {
+    private boolean isProfileOfOrSame(UserManager userManager, UserHandle userHandle,
+            UserHandle profileHandle) {
+        if (userHandle.equals(profileHandle)) {
             return true;
         }
-
-        UserInfo parentUser = userManager.getProfileParent(profileId);
-        return parentUser != null && parentUser.id == userId;
+        return userManager.getProfileParent(profileHandle) != null
+                && userManager.getProfileParent(profileHandle).equals(userHandle);
     }
 
     /**

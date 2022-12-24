@@ -37,10 +37,13 @@ import java.util.List;
  * Events are delivered to registered instances of {@link Callback}.
  */
 public final class GnssMeasurementsEvent implements Parcelable {
+    private final int mFlag;
     private final GnssClock mClock;
     private final List<GnssMeasurement> mMeasurements;
     private final List<GnssAutomaticGainControl> mGnssAgcs;
     private final boolean mIsFullTracking;
+
+    private static final int HAS_FULL_TRACKING = 1;
 
     /**
      * Used for receiving GNSS satellite measurements from the GNSS engine.
@@ -123,10 +126,12 @@ public final class GnssMeasurementsEvent implements Parcelable {
     /**
      * Create a {@link GnssMeasurementsEvent} instance with a full list of parameters.
      */
-    private GnssMeasurementsEvent(@NonNull GnssClock clock,
+    private GnssMeasurementsEvent(int flag,
+            @NonNull GnssClock clock,
             @NonNull List<GnssMeasurement> measurements,
             @NonNull List<GnssAutomaticGainControl> agcs,
             boolean isFullTracking) {
+        mFlag = flag;
         mMeasurements = measurements;
         mGnssAgcs = agcs;
         mClock = clock;
@@ -168,22 +173,32 @@ public final class GnssMeasurementsEvent implements Parcelable {
      *
      * False indicates that the GNSS chipset may optimize power via duty cycling, constellations and
      * frequency limits, etc.
+     *
+     * <p>The value is only available if {@link #hasFullTracking()} is {@code true}.
      */
-    public boolean getIsFullTracking() {
+    public boolean isFullTracking() {
         return mIsFullTracking;
+    }
+
+    /**
+     * Return {@code true} if {@link #isFullTracking()} is available, {@code false} otherwise.
+     */
+    public boolean hasFullTracking() {
+        return (mFlag & HAS_FULL_TRACKING) == HAS_FULL_TRACKING;
     }
 
     public static final @android.annotation.NonNull Creator<GnssMeasurementsEvent> CREATOR =
             new Creator<GnssMeasurementsEvent>() {
         @Override
         public GnssMeasurementsEvent createFromParcel(Parcel in) {
+            int flag = in.readInt();
             GnssClock clock = in.readParcelable(getClass().getClassLoader(),
                     android.location.GnssClock.class);
             List<GnssMeasurement> measurements = in.createTypedArrayList(GnssMeasurement.CREATOR);
             List<GnssAutomaticGainControl> agcs = in.createTypedArrayList(
                     GnssAutomaticGainControl.CREATOR);
             boolean isFullTracking = in.readBoolean();
-            return new GnssMeasurementsEvent(clock, measurements, agcs, isFullTracking);
+            return new GnssMeasurementsEvent(flag, clock, measurements, agcs, isFullTracking);
         }
 
         @Override
@@ -199,6 +214,7 @@ public final class GnssMeasurementsEvent implements Parcelable {
 
     @Override
     public void writeToParcel(Parcel parcel, int flags) {
+        parcel.writeInt(mFlag);
         parcel.writeParcelable(mClock, flags);
         parcel.writeTypedList(mMeasurements);
         parcel.writeTypedList(mGnssAgcs);
@@ -211,13 +227,16 @@ public final class GnssMeasurementsEvent implements Parcelable {
         builder.append(mClock);
         builder.append(' ').append(mMeasurements.toString());
         builder.append(' ').append(mGnssAgcs.toString());
-        builder.append(" isFullTracking=").append(mIsFullTracking);
+        if (hasFullTracking()) {
+            builder.append(" isFullTracking=").append(mIsFullTracking);
+        }
         builder.append("]");
         return builder.toString();
     }
 
     /** Builder for {@link GnssMeasurementsEvent} */
     public static final class Builder {
+        private int mFlag;
         private GnssClock mClock;
         private List<GnssMeasurement> mMeasurements;
         private List<GnssAutomaticGainControl> mGnssAgcs;
@@ -237,10 +256,11 @@ public final class GnssMeasurementsEvent implements Parcelable {
          * {@link GnssMeasurementsEvent}.
          */
         public Builder(@NonNull GnssMeasurementsEvent event) {
+            mFlag = event.mFlag;
             mClock = event.getClock();
             mMeasurements = (List<GnssMeasurement>) event.getMeasurements();
             mGnssAgcs = (List<GnssAutomaticGainControl>) event.getGnssAutomaticGainControls();
-            mIsFullTracking = event.getIsFullTracking();
+            mIsFullTracking = event.isFullTracking();
         }
 
         /**
@@ -313,15 +333,26 @@ public final class GnssMeasurementsEvent implements Parcelable {
          * and frequency limits, etc.
          */
         @NonNull
-        public Builder setIsFullTracking(boolean isFullTracking) {
+        public Builder setFullTracking(boolean isFullTracking) {
+            mFlag |= HAS_FULL_TRACKING;
             mIsFullTracking = isFullTracking;
+            return this;
+        }
+
+        /**
+         * Clears the full tracking mode indicator.
+         */
+        @NonNull
+        public Builder clearFullTracking() {
+            mFlag &= ~HAS_FULL_TRACKING;
             return this;
         }
 
         /** Builds a {@link GnssMeasurementsEvent} instance as specified by this builder. */
         @NonNull
         public GnssMeasurementsEvent build() {
-            return new GnssMeasurementsEvent(mClock, mMeasurements, mGnssAgcs, mIsFullTracking);
+            return new GnssMeasurementsEvent(mFlag, mClock, mMeasurements, mGnssAgcs,
+                    mIsFullTracking);
         }
     }
 }

@@ -807,6 +807,7 @@ public class ActivityInfo extends ComponentInfo implements Parcelable {
             CONFIG_LAYOUT_DIRECTION,
             CONFIG_COLOR_MODE,
             CONFIG_FONT_SCALE,
+            CONFIG_GRAMMATICAL_GENDER,
     })
     @Retention(RetentionPolicy.SOURCE)
     public @interface Config {}
@@ -917,6 +918,12 @@ public class ActivityInfo extends ComponentInfo implements Parcelable {
     public static final int CONFIG_COLOR_MODE = 0x4000;
     /**
      * Bit in {@link #configChanges} that indicates that the activity
+     * can itself handle the change to gender. Set from the
+     * {@link android.R.attr#configChanges} attribute.
+     */
+    public static final int CONFIG_GRAMMATICAL_GENDER = 0x8000;
+    /**
+     * Bit in {@link #configChanges} that indicates that the activity
      * can itself handle asset path changes.  Set from the {@link android.R.attr#configChanges}
      * attribute. This is not a core resource configuration, but a higher-level value, so its
      * constant starts at the high bits.
@@ -946,7 +953,6 @@ public class ActivityInfo extends ComponentInfo implements Parcelable {
      * not a core resource configuration, but a higher-level value, so its
      * constant starts at the high bits.
      */
-
     public static final int CONFIG_FONT_WEIGHT_ADJUSTMENT = 0x10000000;
 
     /** @hide

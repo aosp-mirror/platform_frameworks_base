@@ -191,7 +191,9 @@ public final class OutputConfiguration implements Parcelable {
      *
      * <p>The timestamps of the output images are in the time base as specified by {@link
      * CameraCharacteristics#SENSOR_INFO_TIMESTAMP_SOURCE}. The application can look up the
-     * corresponding result metadata for a particular output image using this timestamp.</p>
+     * corresponding result metadata by matching the timestamp with a {@link
+     * CameraCaptureSession.CaptureCallback#onCaptureStarted}, or with a {@link
+     * CameraCaptureSession.CaptureCallback#onReadoutStarted} if readout timestamp is used.</p>
      */
     public static final int TIMESTAMP_BASE_SENSOR = 1;
 
@@ -204,7 +206,8 @@ public final class OutputConfiguration implements Parcelable {
      *
      * <p>If the camera device's {@link CameraCharacteristics#SENSOR_INFO_TIMESTAMP_SOURCE} is
      * REALTIME, timestamps with this time base cannot directly match the timestamps in
-     * {@link CameraCaptureSession.CaptureCallback#onCaptureStarted} or the sensor timestamps in
+     * {@link CameraCaptureSession.CaptureCallback#onCaptureStarted}, {@link
+     * CameraCaptureSession.CaptureCallback#onReadoutStarted}, or the sensor timestamps in
      * {@link android.hardware.camera2.CaptureResult}.</p>
      */
     public static final int TIMESTAMP_BASE_MONOTONIC = 2;
@@ -218,7 +221,8 @@ public final class OutputConfiguration implements Parcelable {
      *
      * <p>If the camera device's {@link CameraCharacteristics#SENSOR_INFO_TIMESTAMP_SOURCE} is
      * UNKNOWN, timestamps with this time base cannot directly match the timestamps in
-     * {@link CameraCaptureSession.CaptureCallback#onCaptureStarted} or the sensor timestamps in
+     * {@link CameraCaptureSession.CaptureCallback#onCaptureStarted}, {@link
+     * CameraCaptureSession.CaptureCallback#onReadoutStarted}, or the sensor timestamps in
      * {@link android.hardware.camera2.CaptureResult}.</p>
      *
      * <p>If using a REALTIME timestamp base on a device that supports only
@@ -243,7 +247,8 @@ public final class OutputConfiguration implements Parcelable {
      * displayed right away.</p>
      *
      * <p>Timestamps with this time base cannot directly match the timestamps in
-     * {@link CameraCaptureSession.CaptureCallback#onCaptureStarted} or the sensor timestamps in
+     * {@link CameraCaptureSession.CaptureCallback#onCaptureStarted}, {@link
+     * CameraCaptureSession.CaptureCallback#onReadoutStarted}, or the sensor timestamps in
      * {@link android.hardware.camera2.CaptureResult}. This timestamp base shouldn't be used if the
      * timestamp needs to be used for audio-video synchronization.</p>
      */
@@ -252,18 +257,7 @@ public final class OutputConfiguration implements Parcelable {
     /**
      * Timestamp is the start of readout in the same time domain as TIMESTAMP_BASE_SENSOR.
      *
-     * <p>The start of the camera sensor readout after exposure. For a rolling shutter camera
-     * sensor, the timestamp is typically equal to the start of exposure time +
-     * exposure time + certain fixed offset. The fixed offset could be due to camera sensor
-     * level crop. The benefit of using readout time is that when camera runs in a fixed
-     * frame rate, the timestamp intervals between frames are constant.</p>
-     *
-     * <p>This timestamp is in the same time domain as in TIMESTAMP_BASE_SENSOR, with the exception
-     * that one is start of exposure, and the other is start of readout.</p>
-     *
-     * <p>This timestamp base is supported only if {@link
-     * CameraCharacteristics#SENSOR_READOUT_TIMESTAMP} is
-     * {@link CameraMetadata#SENSOR_READOUT_TIMESTAMP_HARDWARE}.</p>
+     * <p>NOTE: do not use! Use useReadoutTimestamp instead.</p>
      *
      * @hide
      */
@@ -295,7 +289,8 @@ public final class OutputConfiguration implements Parcelable {
          CameraMetadata.SCALER_AVAILABLE_STREAM_USE_CASES_STILL_CAPTURE,
          CameraMetadata.SCALER_AVAILABLE_STREAM_USE_CASES_VIDEO_RECORD,
          CameraMetadata.SCALER_AVAILABLE_STREAM_USE_CASES_PREVIEW_VIDEO_STILL,
-         CameraMetadata.SCALER_AVAILABLE_STREAM_USE_CASES_VIDEO_CALL})
+         CameraMetadata.SCALER_AVAILABLE_STREAM_USE_CASES_VIDEO_CALL,
+         CameraMetadata.SCALER_AVAILABLE_STREAM_USE_CASES_CROPPED_RAW})
     public @interface StreamUseCase {};
 
     /**
@@ -579,6 +574,8 @@ public final class OutputConfiguration implements Parcelable {
         mStreamUseCase = CameraMetadata.SCALER_AVAILABLE_STREAM_USE_CASES_DEFAULT;
         mTimestampBase = TIMESTAMP_BASE_DEFAULT;
         mMirrorMode = MIRROR_MODE_AUTO;
+        mUseReadoutTimestamp = false;
+        mIsReadoutSensorTimestampBase = false;
     }
 
     /**
@@ -679,6 +676,8 @@ public final class OutputConfiguration implements Parcelable {
         mDynamicRangeProfile = DynamicRangeProfiles.STANDARD;
         mColorSpace = ColorSpaceProfiles.UNSPECIFIED;
         mStreamUseCase = CameraMetadata.SCALER_AVAILABLE_STREAM_USE_CASES_DEFAULT;
+        mUseReadoutTimestamp = false;
+        mIsReadoutSensorTimestampBase = false;
     }
 
     /**
@@ -1000,7 +999,7 @@ public final class OutputConfiguration implements Parcelable {
      */
     public void setStreamUseCase(@StreamUseCase long streamUseCase) {
         // Verify that the value is in range
-        long maxUseCaseValue = CameraMetadata.SCALER_AVAILABLE_STREAM_USE_CASES_VIDEO_CALL;
+        long maxUseCaseValue = CameraMetadata.SCALER_AVAILABLE_STREAM_USE_CASES_CROPPED_RAW;
         if (streamUseCase > maxUseCaseValue &&
                 streamUseCase < CameraMetadata.SCALER_AVAILABLE_STREAM_USE_CASES_VENDOR_START) {
             throw new IllegalArgumentException("Not a valid stream use case value " +
@@ -1048,7 +1047,15 @@ public final class OutputConfiguration implements Parcelable {
             throw new IllegalArgumentException("Not a valid timestamp base value " +
                     timestampBase);
         }
-        mTimestampBase = timestampBase;
+
+        if (timestampBase == TIMESTAMP_BASE_READOUT_SENSOR) {
+            mTimestampBase = TIMESTAMP_BASE_SENSOR;
+            mUseReadoutTimestamp = true;
+            mIsReadoutSensorTimestampBase = true;
+        } else {
+            mTimestampBase = timestampBase;
+            mIsReadoutSensorTimestampBase = false;
+        }
     }
 
     /**
@@ -1060,7 +1067,11 @@ public final class OutputConfiguration implements Parcelable {
      * @return The currently set timestamp base
      */
     public @TimestampBase int getTimestampBase() {
-        return mTimestampBase;
+        if (mIsReadoutSensorTimestampBase) {
+            return TIMESTAMP_BASE_READOUT_SENSOR;
+        } else {
+            return mTimestampBase;
+        }
     }
 
     /**
@@ -1100,6 +1111,37 @@ public final class OutputConfiguration implements Parcelable {
     }
 
     /**
+     * Use the camera sensor's readout time for the image timestamp.
+     *
+     * <p>The start of the camera sensor readout after exposure. For a rolling shutter camera
+     * sensor, the timestamp is typically equal to {@code (the start of exposure time) +
+     * (exposure time) + (certain fixed offset)}. The fixed offset can vary per session, depending
+     * on the underlying sensor configuration. The benefit of using readout time is that when
+     * camera runs in a fixed frame rate, the timestamp intervals between frames are constant.</p>
+     *
+     * <p>Readout timestamp is supported only if {@link
+     * CameraCharacteristics#SENSOR_READOUT_TIMESTAMP} is
+     * {@link CameraMetadata#SENSOR_READOUT_TIMESTAMP_HARDWARE}.</p>
+     *
+     * <p>As long as readout timestamp is supported, if the timestamp base isi
+     * {@link #TIMESTAMP_BASE_CHOREOGRAPHER_SYNCED}, or if the timestamp base is DEFAULT for a
+     * SurfaceView output, the image timestamps for the output are always readout time regardless
+     * of whether this function is called.</p>
+     *
+     * @param on The output image timestamp is the start of exposure time if false, and
+     *           the start of readout time if true.
+     */
+    public void useReadoutTimestamp(boolean on) {
+        mUseReadoutTimestamp = on;
+    }
+
+    /** Whether readout timestamp is used for this OutputConfiguration.
+     */
+    public boolean isReadoutTimestampUsed() {
+        return mUseReadoutTimestamp;
+    }
+
+    /**
      * Create a new {@link OutputConfiguration} instance with another {@link OutputConfiguration}
      * instance.
      *
@@ -1130,6 +1172,7 @@ public final class OutputConfiguration implements Parcelable {
         this.mStreamUseCase = other.mStreamUseCase;
         this.mTimestampBase = other.mTimestampBase;
         this.mMirrorMode = other.mMirrorMode;
+        this.mUseReadoutTimestamp = other.mUseReadoutTimestamp;
     }
 
     /**
@@ -1157,6 +1200,7 @@ public final class OutputConfiguration implements Parcelable {
 
         int timestampBase = source.readInt();
         int mirrorMode = source.readInt();
+        boolean useReadoutTimestamp = source.readInt() == 1;
 
         mSurfaceGroupId = surfaceSetId;
         mRotation = rotation;
@@ -1185,6 +1229,7 @@ public final class OutputConfiguration implements Parcelable {
         mStreamUseCase = streamUseCase;
         mTimestampBase = timestampBase;
         mMirrorMode = mirrorMode;
+        mUseReadoutTimestamp = useReadoutTimestamp;
     }
 
     /**
@@ -1305,6 +1350,7 @@ public final class OutputConfiguration implements Parcelable {
         dest.writeLong(mStreamUseCase);
         dest.writeInt(mTimestampBase);
         dest.writeInt(mMirrorMode);
+        dest.writeInt(mUseReadoutTimestamp ? 1 : 0);
     }
 
     /**
@@ -1338,7 +1384,8 @@ public final class OutputConfiguration implements Parcelable {
                     mIsMultiResolution != other.mIsMultiResolution ||
                     mStreamUseCase != other.mStreamUseCase ||
                     mTimestampBase != other.mTimestampBase ||
-                    mMirrorMode != other.mMirrorMode)
+                    mMirrorMode != other.mMirrorMode ||
+                    mUseReadoutTimestamp != other.mUseReadoutTimestamp)
                 return false;
             if (mSensorPixelModesUsed.size() != other.mSensorPixelModesUsed.size()) {
                 return false;
@@ -1381,7 +1428,7 @@ public final class OutputConfiguration implements Parcelable {
                     mPhysicalCameraId == null ? 0 : mPhysicalCameraId.hashCode(),
                     mIsMultiResolution ? 1 : 0, mSensorPixelModesUsed.hashCode(),
                     mDynamicRangeProfile, mColorSpace, mStreamUseCase,
-                    mTimestampBase, mMirrorMode);
+                    mTimestampBase, mMirrorMode, mUseReadoutTimestamp ? 1 : 0);
         }
 
         return HashCodeHelpers.hashCode(
@@ -1391,7 +1438,7 @@ public final class OutputConfiguration implements Parcelable {
                 mPhysicalCameraId == null ? 0 : mPhysicalCameraId.hashCode(),
                 mIsMultiResolution ? 1 : 0, mSensorPixelModesUsed.hashCode(),
                 mDynamicRangeProfile, mColorSpace, mStreamUseCase, mTimestampBase,
-                mMirrorMode);
+                mMirrorMode, mUseReadoutTimestamp ? 1 : 0);
     }
 
     private static final String TAG = "OutputConfiguration";
@@ -1433,4 +1480,8 @@ public final class OutputConfiguration implements Parcelable {
     private int mTimestampBase;
     // Mirroring mode
     private int mMirrorMode;
+    // Use readout timestamp
+    private boolean mUseReadoutTimestamp;
+    // Whether the timestamp base is set to READOUT_SENSOR
+    private boolean mIsReadoutSensorTimestampBase;
 }

@@ -18,6 +18,7 @@ package android.media.tv;
 
 import android.graphics.Rect;
 import android.media.PlaybackParams;
+import android.media.tv.AdBuffer;
 import android.media.tv.AdRequest;
 import android.media.tv.BroadcastInfoRequest;
 import android.media.tv.TvTrackInfo;
@@ -71,4 +72,5 @@ oneway interface ITvInputSession {
 
     // For ad request
     void requestAd(in AdRequest request);
+    void notifyAdBuffer(in AdBuffer buffer);
 }
