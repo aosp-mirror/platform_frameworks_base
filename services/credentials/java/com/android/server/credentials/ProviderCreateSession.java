@@ -23,6 +23,7 @@ import android.app.PendingIntent;
 import android.content.Context;
 import android.content.Intent;
 import android.credentials.CreateCredentialException;
+import android.credentials.CreateCredentialResponse;
 import android.credentials.ui.CreateCredentialProviderData;
 import android.credentials.ui.Entry;
 import android.credentials.ui.ProviderPendingIntentResponse;
@@ -99,7 +100,7 @@ public final class ProviderCreateSession extends ProviderSession<
     private ProviderCreateSession(
             @NonNull Context context,
             @NonNull CredentialProviderInfo info,
-            @NonNull ProviderInternalCallback callbacks,
+            @NonNull ProviderInternalCallback<CreateCredentialResponse> callbacks,
             @UserIdInt int userId,
             @NonNull RemoteCredentialService remoteCredentialService,
             @NonNull BeginCreateCredentialRequest beginCreateRequest,
@@ -181,9 +182,7 @@ public final class ProviderCreateSession extends ProviderSession<
                     onSaveEntrySelected(providerPendingIntentResponse);
                 } else {
                     Log.i(TAG, "Unexpected save entry key");
-                    // TODO("Replace with no credentials error type");
-                    invokeCallbackWithError("unknown_type",
-                            "Issue while retrieving credential");
+                    invokeCallbackOnInternalInvalidState();
                 }
                 break;
             case REMOTE_ENTRY_KEY:
@@ -191,9 +190,7 @@ public final class ProviderCreateSession extends ProviderSession<
                     onRemoteEntrySelected(providerPendingIntentResponse);
                 } else {
                     Log.i(TAG, "Unexpected remote entry key");
-                    // TODO("Replace with unknown/no credentials exception")
-                    invokeCallbackWithError("unknown_type",
-                            "Issue while retrieving credential");
+                    invokeCallbackOnInternalInvalidState();
                 }
                 break;
             default:
@@ -250,15 +247,8 @@ public final class ProviderCreateSession extends ProviderSession<
         } else {
             Log.i(TAG, "onSaveEntrySelected - no response or error found in pending "
                     + "intent response");
-            invokeCallbackWithError(
-                    // TODO("Replace with unknown/no credentials exception")
-                    "unknown",
-                    "Issue encountered while retrieving the credential");
+            invokeCallbackOnInternalInvalidState();
         }
-    }
-
-    private void invokeCallbackWithError(String errorType, @Nullable String message) {
-        mCallbacks.onFinalErrorReceived(mComponentName, errorType, message);
     }
 
     @Nullable
@@ -266,7 +256,7 @@ public final class ProviderCreateSession extends ProviderSession<
             ProviderPendingIntentResponse pendingIntentResponse) {
         if (pendingIntentResponse == null) {
             Log.i(TAG, "pendingIntentResponse is null");
-            return null;
+            return new CreateCredentialException(CreateCredentialException.TYPE_NO_CREDENTIAL);
         }
         if (PendingIntentResultHandler.isValidResponse(pendingIntentResponse)) {
             CreateCredentialException exception = PendingIntentResultHandler
@@ -278,8 +268,19 @@ public final class ProviderCreateSession extends ProviderSession<
         } else {
             Log.i(TAG, "Pending intent result code not Activity.RESULT_OK");
             // TODO("Update with unknown exception when ready")
-            return new CreateCredentialException("unknown");
+            return new CreateCredentialException(CreateCredentialException.TYPE_NO_CREDENTIAL);
         }
         return null;
+    }
+
+    /**
+     * When an invalid state occurs, e.g. entry mismatch or no response from provider,
+     * we send back a TYPE_NO_CREDENTIAL error as to the developer, it is the same as not
+     * getting any credentials back.
+     */
+    private void invokeCallbackOnInternalInvalidState() {
+        mCallbacks.onFinalErrorReceived(mComponentName,
+                CreateCredentialException.TYPE_NO_CREDENTIAL,
+                null);
     }
 }

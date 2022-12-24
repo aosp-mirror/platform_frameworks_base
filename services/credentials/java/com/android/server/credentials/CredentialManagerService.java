@@ -26,7 +26,9 @@ import android.content.Context;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
 import android.credentials.ClearCredentialStateRequest;
+import android.credentials.CreateCredentialException;
 import android.credentials.CreateCredentialRequest;
+import android.credentials.GetCredentialException;
 import android.credentials.GetCredentialOption;
 import android.credentials.GetCredentialRequest;
 import android.credentials.IClearCredentialStateCallback;
@@ -235,8 +237,8 @@ public final class CredentialManagerService
 
             if (providerSessions.isEmpty()) {
                 try {
-                    // TODO("Replace with properly defined error type")
-                    callback.onError("unknown_type", "No providers available to fulfill request.");
+                    callback.onError(GetCredentialException.TYPE_NO_CREDENTIAL,
+                            "No credentials available on this device.");
                 } catch (RemoteException e) {
                     Log.i(
                             TAG,
@@ -284,8 +286,8 @@ public final class CredentialManagerService
 
             if (providerSessions.isEmpty()) {
                 try {
-                    // TODO("Replace with properly defined error type")
-                    callback.onError("unknown_type", "No providers available to fulfill request.");
+                    callback.onError(CreateCredentialException.TYPE_NO_CREDENTIAL,
+                            "No credentials available on this device.");
                 } catch (RemoteException e) {
                     Log.i(
                             TAG,
@@ -402,7 +404,8 @@ public final class CredentialManagerService
             if (providerSessions.isEmpty()) {
                 try {
                     // TODO("Replace with properly defined error type")
-                    callback.onError("unknown_type", "No providers available to fulfill request.");
+                    callback.onError("UNKNOWN", "No crdentials available on this "
+                            + "device");
                 } catch (RemoteException e) {
                     Log.i(
                             TAG,
