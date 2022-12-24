@@ -56,6 +56,8 @@ import static com.android.server.wm.ActivityRecord.State.RESTARTING_PROCESS;
 import static com.android.server.wm.ActivityRecord.State.RESUMED;
 import static com.android.server.wm.ActivityRecord.State.STOPPED;
 import static com.android.server.wm.DisplayContent.IME_TARGET_LAYERING;
+import static com.android.server.wm.LetterboxConfiguration.PROPERTY_COMPAT_FAKE_FOCUS_OPT_IN;
+import static com.android.server.wm.LetterboxConfiguration.PROPERTY_COMPAT_FAKE_FOCUS_OPT_OUT;
 import static com.android.server.wm.WindowContainer.POSITION_TOP;
 
 import static com.google.common.truth.Truth.assertThat;
@@ -3226,6 +3228,80 @@ public class SizeCompatTests extends WindowTestsBase {
 
         assertFitted();
         assertEquals(newDensity, mActivity.getConfiguration().densityDpi);
+    }
+
+    private ActivityRecord setUpActivityForCompatFakeFocusTest() {
+        final ActivityRecord activity = new ActivityBuilder(mAtm)
+                .setCreateTask(true)
+                .setOnTop(true)
+                // Set the component to be that of the test class in order to enable compat changes
+                .setComponent(ComponentName.createRelative(mContext,
+                        com.android.server.wm.SizeCompatTests.class.getName()))
+                .build();
+        final Task task = activity.getTask();
+        task.setWindowingMode(WINDOWING_MODE_MULTI_WINDOW);
+        spyOn(activity.mWmService.mLetterboxConfiguration);
+        doReturn(true).when(activity.mWmService.mLetterboxConfiguration)
+                .isCompatFakeFocusEnabledOnDevice();
+        return activity;
+    }
+
+    @Test
+    @EnableCompatChanges({ActivityInfo.OVERRIDE_ENABLE_COMPAT_FAKE_FOCUS})
+    public void testShouldSendFakeFocus_overrideEnabled_returnsTrue() {
+        ActivityRecord activity = setUpActivityForCompatFakeFocusTest();
+
+        assertTrue(activity.shouldSendCompatFakeFocus());
+    }
+
+    @Test
+    @DisableCompatChanges({ActivityInfo.OVERRIDE_ENABLE_COMPAT_FAKE_FOCUS})
+    public void testShouldSendFakeFocus_overrideDisabled_returnsFalse() {
+        ActivityRecord activity = setUpActivityForCompatFakeFocusTest();
+
+        assertFalse(activity.shouldSendCompatFakeFocus());
+    }
+
+    @Test
+    @EnableCompatChanges({ActivityInfo.OVERRIDE_ENABLE_COMPAT_FAKE_FOCUS})
+    public void testIsCompatFakeFocusEnabled_optOutPropertyAndOverrideEnabled_fakeFocusDisabled() {
+        ActivityRecord activity = setUpActivityForCompatFakeFocusTest();
+        doReturn(true).when(activity.mWmService.mLetterboxConfiguration)
+                .getPackageManagerProperty(any(), eq(PROPERTY_COMPAT_FAKE_FOCUS_OPT_OUT));
+
+        assertFalse(activity.mWmService.mLetterboxConfiguration
+                .isCompatFakeFocusEnabled(activity.info));
+    }
+
+    @Test
+    @DisableCompatChanges({ActivityInfo.OVERRIDE_ENABLE_COMPAT_FAKE_FOCUS})
+    public void testIsCompatFakeFocusEnabled_optInPropertyEnabled_noOverride_fakeFocusEnabled() {
+        ActivityRecord activity = setUpActivityForCompatFakeFocusTest();
+        doReturn(true).when(activity.mWmService.mLetterboxConfiguration)
+                .getPackageManagerProperty(any(), eq(PROPERTY_COMPAT_FAKE_FOCUS_OPT_IN));
+
+        assertTrue(activity.mWmService.mLetterboxConfiguration
+                .isCompatFakeFocusEnabled(activity.info));
+    }
+
+    @Test
+    public void testIsCompatFakeFocusEnabled_optOutPropertyEnabled_fakeFocusDisabled() {
+        ActivityRecord activity = setUpActivityForCompatFakeFocusTest();
+        doReturn(true).when(activity.mWmService.mLetterboxConfiguration)
+                .getPackageManagerProperty(any(), eq(PROPERTY_COMPAT_FAKE_FOCUS_OPT_OUT));
+
+        assertFalse(activity.mWmService.mLetterboxConfiguration
+                .isCompatFakeFocusEnabled(activity.info));
+    }
+
+    @Test
+    public void testIsCompatFakeFocusEnabled_optInPropertyEnabled_fakeFocusEnabled() {
+        ActivityRecord activity = setUpActivityForCompatFakeFocusTest();
+        doReturn(true).when(activity.mWmService.mLetterboxConfiguration)
+                .getPackageManagerProperty(any(), eq(PROPERTY_COMPAT_FAKE_FOCUS_OPT_IN));
+
+        assertTrue(activity.mWmService.mLetterboxConfiguration
+                .isCompatFakeFocusEnabled(activity.info));
     }
 
     private int getExpectedSplitSize(int dimensionToSplit) {
