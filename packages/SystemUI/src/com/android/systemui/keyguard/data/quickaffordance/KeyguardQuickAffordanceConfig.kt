@@ -22,7 +22,7 @@ import android.content.Intent
 import com.android.systemui.animation.Expandable
 import com.android.systemui.common.shared.model.Icon
 import com.android.systemui.keyguard.shared.quickaffordance.ActivationState
-import com.android.systemui.shared.quickaffordance.data.content.KeyguardQuickAffordanceProviderContract as Contract
+import com.android.systemui.shared.customization.data.content.CustomizationProviderContract as Contract
 import kotlinx.coroutines.flow.Flow
 
 /** Defines interface that can act as data source for a single quick affordance model. */
@@ -90,8 +90,9 @@ interface KeyguardQuickAffordanceConfig {
              * the user to be able to set up the quick affordance and make it enabled.
              *
              * This is either just an action for the `Intent` or a package name and action,
-             * separated by [Contract.AffordanceTable.COMPONENT_NAME_SEPARATOR] for convenience, you
-             * can use the [componentName] function.
+             * separated by
+             * [Contract.LockScreenQuickAffordances.AffordanceTable.COMPONENT_NAME_SEPARATOR] for
+             * convenience, you can use the [componentName] function.
              */
             val actionComponentName: String? = null,
         ) : PickerScreenState() {
@@ -145,8 +146,8 @@ interface KeyguardQuickAffordanceConfig {
 
         /**
          * Returning this as a result from the [onTriggered] method means that the implementation
-         * has _not_ taken care of the action and the system should show a Dialog using the
-         * given [AlertDialog] and [Expandable].
+         * has _not_ taken care of the action and the system should show a Dialog using the given
+         * [AlertDialog] and [Expandable].
          */
         data class ShowDialog(
             val dialog: AlertDialog,
@@ -162,7 +163,8 @@ interface KeyguardQuickAffordanceConfig {
             return when {
                 action.isNullOrEmpty() -> null
                 !packageName.isNullOrEmpty() ->
-                    "$packageName${Contract.AffordanceTable.COMPONENT_NAME_SEPARATOR}$action"
+                    "$packageName${Contract.LockScreenQuickAffordances.AffordanceTable
+                        .COMPONENT_NAME_SEPARATOR}$action"
                 else -> action
             }
         }

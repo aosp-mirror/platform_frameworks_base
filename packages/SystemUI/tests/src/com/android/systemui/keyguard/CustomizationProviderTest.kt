@@ -49,8 +49,8 @@ import com.android.systemui.keyguard.ui.preview.KeyguardRemotePreviewManager
 import com.android.systemui.plugins.ActivityStarter
 import com.android.systemui.settings.UserFileManager
 import com.android.systemui.settings.UserTracker
+import com.android.systemui.shared.customization.data.content.CustomizationProviderContract as Contract
 import com.android.systemui.shared.keyguard.shared.model.KeyguardQuickAffordanceSlots
-import com.android.systemui.shared.quickaffordance.data.content.KeyguardQuickAffordanceProviderContract as Contract
 import com.android.systemui.statusbar.policy.KeyguardStateController
 import com.android.systemui.util.FakeSharedPreferences
 import com.android.systemui.util.mockito.any
@@ -75,7 +75,7 @@ import org.mockito.MockitoAnnotations
 @SmallTest
 @RunWith(AndroidTestingRunner::class)
 @TestableLooper.RunWithLooper(setAsMainLooper = true)
-class KeyguardQuickAffordanceProviderTest : SysuiTestCase() {
+class CustomizationProviderTest : SysuiTestCase() {
 
     @Mock private lateinit var lockPatternUtils: LockPatternUtils
     @Mock private lateinit var keyguardStateController: KeyguardStateController
@@ -87,7 +87,7 @@ class KeyguardQuickAffordanceProviderTest : SysuiTestCase() {
     @Mock private lateinit var previewSurfacePackage: SurfaceControlViewHost.SurfacePackage
     @Mock private lateinit var launchAnimator: DialogLaunchAnimator
 
-    private lateinit var underTest: KeyguardQuickAffordanceProvider
+    private lateinit var underTest: CustomizationProvider
 
     private lateinit var testScope: TestScope
 
@@ -98,7 +98,7 @@ class KeyguardQuickAffordanceProviderTest : SysuiTestCase() {
         whenever(previewRendererFactory.create(any())).thenReturn(previewRenderer)
         whenever(backgroundHandler.looper).thenReturn(TestableLooper.get(this).looper)
 
-        underTest = KeyguardQuickAffordanceProvider()
+        underTest = CustomizationProvider()
         val testDispatcher = StandardTestDispatcher()
         testScope = TestScope(testDispatcher)
         val localUserSelectionManager =
@@ -205,19 +205,34 @@ class KeyguardQuickAffordanceProviderTest : SysuiTestCase() {
 
     @Test
     fun getType() {
-        assertThat(underTest.getType(Contract.AffordanceTable.URI))
+        assertThat(underTest.getType(Contract.LockScreenQuickAffordances.AffordanceTable.URI))
             .isEqualTo(
                 "vnd.android.cursor.dir/vnd." +
-                    "${Contract.AUTHORITY}.${Contract.AffordanceTable.TABLE_NAME}"
+                    "${Contract.AUTHORITY}." +
+                    Contract.LockScreenQuickAffordances.qualifiedTablePath(
+                        Contract.LockScreenQuickAffordances.AffordanceTable.TABLE_NAME
+                    )
             )
-        assertThat(underTest.getType(Contract.SlotTable.URI))
+        assertThat(underTest.getType(Contract.LockScreenQuickAffordances.SlotTable.URI))
             .isEqualTo(
-                "vnd.android.cursor.dir/vnd.${Contract.AUTHORITY}.${Contract.SlotTable.TABLE_NAME}"
+                "vnd.android.cursor.dir/vnd.${Contract.AUTHORITY}." +
+                    Contract.LockScreenQuickAffordances.qualifiedTablePath(
+                        Contract.LockScreenQuickAffordances.SlotTable.TABLE_NAME
+                    )
             )
-        assertThat(underTest.getType(Contract.SelectionTable.URI))
+        assertThat(underTest.getType(Contract.LockScreenQuickAffordances.SelectionTable.URI))
             .isEqualTo(
                 "vnd.android.cursor.dir/vnd." +
-                    "${Contract.AUTHORITY}.${Contract.SelectionTable.TABLE_NAME}"
+                    "${Contract.AUTHORITY}." +
+                    Contract.LockScreenQuickAffordances.qualifiedTablePath(
+                        Contract.LockScreenQuickAffordances.SelectionTable.TABLE_NAME
+                    )
+            )
+        assertThat(underTest.getType(Contract.FlagsTable.URI))
+            .isEqualTo(
+                "vnd.android.cursor.dir/vnd." +
+                    "${Contract.AUTHORITY}." +
+                    Contract.FlagsTable.TABLE_NAME
             )
     }
 
@@ -296,9 +311,10 @@ class KeyguardQuickAffordanceProviderTest : SysuiTestCase() {
             )
 
             context.contentResolver.delete(
-                Contract.SelectionTable.URI,
-                "${Contract.SelectionTable.Columns.SLOT_ID} = ? AND" +
-                    " ${Contract.SelectionTable.Columns.AFFORDANCE_ID} = ?",
+                Contract.LockScreenQuickAffordances.SelectionTable.URI,
+                "${Contract.LockScreenQuickAffordances.SelectionTable.Columns.SLOT_ID} = ? AND" +
+                    " ${Contract.LockScreenQuickAffordances.SelectionTable.Columns.AFFORDANCE_ID}" +
+                    " = ?",
                 arrayOf(
                     KeyguardQuickAffordanceSlots.SLOT_ID_BOTTOM_END,
                     AFFORDANCE_2,
@@ -330,8 +346,8 @@ class KeyguardQuickAffordanceProviderTest : SysuiTestCase() {
             )
 
             context.contentResolver.delete(
-                Contract.SelectionTable.URI,
-                Contract.SelectionTable.Columns.SLOT_ID,
+                Contract.LockScreenQuickAffordances.SelectionTable.URI,
+                Contract.LockScreenQuickAffordances.SelectionTable.Columns.SLOT_ID,
                 arrayOf(
                     KeyguardQuickAffordanceSlots.SLOT_ID_BOTTOM_END,
                 ),
@@ -371,10 +387,13 @@ class KeyguardQuickAffordanceProviderTest : SysuiTestCase() {
         affordanceId: String,
     ) {
         context.contentResolver.insert(
-            Contract.SelectionTable.URI,
+            Contract.LockScreenQuickAffordances.SelectionTable.URI,
             ContentValues().apply {
-                put(Contract.SelectionTable.Columns.SLOT_ID, slotId)
-                put(Contract.SelectionTable.Columns.AFFORDANCE_ID, affordanceId)
+                put(Contract.LockScreenQuickAffordances.SelectionTable.Columns.SLOT_ID, slotId)
+                put(
+                    Contract.LockScreenQuickAffordances.SelectionTable.Columns.AFFORDANCE_ID,
+                    affordanceId
+                )
             }
         )
     }
@@ -382,7 +401,7 @@ class KeyguardQuickAffordanceProviderTest : SysuiTestCase() {
     private fun querySelections(): List<Selection> {
         return context.contentResolver
             .query(
-                Contract.SelectionTable.URI,
+                Contract.LockScreenQuickAffordances.SelectionTable.URI,
                 null,
                 null,
                 null,
@@ -391,11 +410,18 @@ class KeyguardQuickAffordanceProviderTest : SysuiTestCase() {
             ?.use { cursor ->
                 buildList {
                     val slotIdColumnIndex =
-                        cursor.getColumnIndex(Contract.SelectionTable.Columns.SLOT_ID)
+                        cursor.getColumnIndex(
+                            Contract.LockScreenQuickAffordances.SelectionTable.Columns.SLOT_ID
+                        )
                     val affordanceIdColumnIndex =
-                        cursor.getColumnIndex(Contract.SelectionTable.Columns.AFFORDANCE_ID)
+                        cursor.getColumnIndex(
+                            Contract.LockScreenQuickAffordances.SelectionTable.Columns.AFFORDANCE_ID
+                        )
                     val affordanceNameColumnIndex =
-                        cursor.getColumnIndex(Contract.SelectionTable.Columns.AFFORDANCE_NAME)
+                        cursor.getColumnIndex(
+                            Contract.LockScreenQuickAffordances.SelectionTable.Columns
+                                .AFFORDANCE_NAME
+                        )
                     if (
                         slotIdColumnIndex == -1 ||
                             affordanceIdColumnIndex == -1 ||
@@ -421,7 +447,7 @@ class KeyguardQuickAffordanceProviderTest : SysuiTestCase() {
     private fun querySlots(): List<Slot> {
         return context.contentResolver
             .query(
-                Contract.SlotTable.URI,
+                Contract.LockScreenQuickAffordances.SlotTable.URI,
                 null,
                 null,
                 null,
@@ -429,9 +455,14 @@ class KeyguardQuickAffordanceProviderTest : SysuiTestCase() {
             )
             ?.use { cursor ->
                 buildList {
-                    val idColumnIndex = cursor.getColumnIndex(Contract.SlotTable.Columns.ID)
+                    val idColumnIndex =
+                        cursor.getColumnIndex(
+                            Contract.LockScreenQuickAffordances.SlotTable.Columns.ID
+                        )
                     val capacityColumnIndex =
-                        cursor.getColumnIndex(Contract.SlotTable.Columns.CAPACITY)
+                        cursor.getColumnIndex(
+                            Contract.LockScreenQuickAffordances.SlotTable.Columns.CAPACITY
+                        )
                     if (idColumnIndex == -1 || capacityColumnIndex == -1) {
                         return@buildList
                     }
@@ -452,7 +483,7 @@ class KeyguardQuickAffordanceProviderTest : SysuiTestCase() {
     private fun queryAffordances(): List<Affordance> {
         return context.contentResolver
             .query(
-                Contract.AffordanceTable.URI,
+                Contract.LockScreenQuickAffordances.AffordanceTable.URI,
                 null,
                 null,
                 null,
@@ -460,11 +491,18 @@ class KeyguardQuickAffordanceProviderTest : SysuiTestCase() {
             )
             ?.use { cursor ->
                 buildList {
-                    val idColumnIndex = cursor.getColumnIndex(Contract.AffordanceTable.Columns.ID)
+                    val idColumnIndex =
+                        cursor.getColumnIndex(
+                            Contract.LockScreenQuickAffordances.AffordanceTable.Columns.ID
+                        )
                     val nameColumnIndex =
-                        cursor.getColumnIndex(Contract.AffordanceTable.Columns.NAME)
+                        cursor.getColumnIndex(
+                            Contract.LockScreenQuickAffordances.AffordanceTable.Columns.NAME
+                        )
                     val iconColumnIndex =
-                        cursor.getColumnIndex(Contract.AffordanceTable.Columns.ICON)
+                        cursor.getColumnIndex(
+                            Contract.LockScreenQuickAffordances.AffordanceTable.Columns.ICON
+                        )
                     if (idColumnIndex == -1 || nameColumnIndex == -1 || iconColumnIndex == -1) {
                         return@buildList
                     }
