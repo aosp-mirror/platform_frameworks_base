@@ -2079,6 +2079,14 @@ public class PackageManagerService implements PackageSender, TestUtilityService 
             mInitAppsHelper.initNonSystemApps(packageParser, userIds, startTime);
             packageParser.close();
 
+            mRequiredVerifierPackages = getRequiredButNotReallyRequiredVerifiersLPr(computer);
+            mRequiredInstallerPackage = getRequiredInstallerLPr(computer);
+            mRequiredUninstallerPackage = getRequiredUninstallerLPr(computer);
+
+            // PermissionController hosts default permission granting and role management, so it's a
+            // critical part of the core system.
+            mRequiredPermissionControllerPackage = getRequiredPermissionControllerLPr(computer);
+
             // Resolve the storage manager.
             mStorageManagerPackage = getStorageManagerPackageName(computer);
 
@@ -2224,9 +2232,6 @@ public class PackageManagerService implements PackageSender, TestUtilityService 
             EventLog.writeEvent(EventLogTags.BOOT_PROGRESS_PMS_READY,
                     SystemClock.uptimeMillis());
 
-            mRequiredVerifierPackages = getRequiredButNotReallyRequiredVerifiersLPr(computer);
-            mRequiredInstallerPackage = getRequiredInstallerLPr(computer);
-            mRequiredUninstallerPackage = getRequiredUninstallerLPr(computer);
             ComponentName intentFilterVerifierComponent =
                     getIntentFilterVerifierComponentNameLPr(computer);
             ComponentName domainVerificationAgent =
@@ -2243,10 +2248,6 @@ public class PackageManagerService implements PackageSender, TestUtilityService 
             mSharedSystemSharedLibraryPackageName = getRequiredSharedLibrary(computer,
                     PackageManager.SYSTEM_SHARED_LIBRARY_SHARED,
                     SharedLibraryInfo.VERSION_UNDEFINED);
-
-            // PermissionController hosts default permission granting and role management, so it's a
-            // critical part of the core system.
-            mRequiredPermissionControllerPackage = getRequiredPermissionControllerLPr(computer);
 
             mSettings.setPermissionControllerVersion(
                     computer.getPackageInfo(mRequiredPermissionControllerPackage, 0,
