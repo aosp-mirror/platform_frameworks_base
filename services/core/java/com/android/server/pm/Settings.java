@@ -89,6 +89,7 @@ import android.util.proto.ProtoOutputStream;
 import com.android.internal.annotations.GuardedBy;
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.os.BackgroundThread;
+import com.android.internal.security.VerityUtils;
 import com.android.internal.util.ArrayUtils;
 import com.android.internal.util.CollectionUtils;
 import com.android.internal.util.IndentingPrintWriter;
@@ -370,6 +371,8 @@ public final class Settings implements Watchable, Snappable {
 
     // Current settings file.
     private final File mSettingsFilename;
+    // Reserve copy of the current settings file.
+    private final File mSettingsReserveCopyFilename;
     // Previous settings file.
     // Removed when the current settings file successfully stored.
     private final File mPreviousSettingsFilename;
@@ -640,6 +643,7 @@ public final class Settings implements Watchable, Snappable {
         mRuntimePermissionsPersistence = null;
         mPermissionDataProvider = null;
         mSettingsFilename = null;
+        mSettingsReserveCopyFilename = null;
         mPreviousSettingsFilename = null;
         mPackageListFilename = null;
         mStoppedPackagesFilename = null;
@@ -711,6 +715,7 @@ public final class Settings implements Watchable, Snappable {
                 |FileUtils.S_IROTH|FileUtils.S_IXOTH,
                 -1, -1);
         mSettingsFilename = new File(mSystemDir, "packages.xml");
+        mSettingsReserveCopyFilename = new File(mSystemDir, "packages.xml.reservecopy");
         mPreviousSettingsFilename = new File(mSystemDir, "packages-backup.xml");
         mPackageListFilename = new File(mSystemDir, "packages.list");
         FileUtils.setPermissions(mPackageListFilename, 0640, SYSTEM_UID, PACKAGE_INFO_GID);
@@ -752,6 +757,7 @@ public final class Settings implements Watchable, Snappable {
         mLock = null;
         mRuntimePermissionsPersistence = r.mRuntimePermissionsPersistence;
         mSettingsFilename = null;
+        mSettingsReserveCopyFilename = null;
         mPreviousSettingsFilename = null;
         mPackageListFilename = null;
         mStoppedPackagesFilename = null;
@@ -2681,11 +2687,24 @@ public final class Settings implements Watchable, Snappable {
 
             // New settings successfully written, old ones are no longer needed.
             mPreviousSettingsFilename.delete();
+            mSettingsReserveCopyFilename.delete();
 
             FileUtils.setPermissions(mSettingsFilename.toString(),
-                    FileUtils.S_IRUSR|FileUtils.S_IWUSR
-                    |FileUtils.S_IRGRP|FileUtils.S_IWGRP,
+                    FileUtils.S_IRUSR | FileUtils.S_IWUSR | FileUtils.S_IRGRP | FileUtils.S_IWGRP,
                     -1, -1);
+
+            try {
+                FileUtils.copy(mSettingsFilename, mSettingsReserveCopyFilename);
+            } catch (IOException e) {
+                Slog.e(TAG, "Failed to backup settings", e);
+            }
+
+            try {
+                VerityUtils.setUpFsverity(mSettingsFilename.getAbsolutePath());
+                VerityUtils.setUpFsverity(mSettingsReserveCopyFilename.getAbsolutePath());
+            } catch (IOException e) {
+                Slog.e(TAG, "Failed to verity-protect settings", e);
+            }
 
             writeKernelMappingLPr();
             writePackageListLPr();
@@ -3117,49 +3136,62 @@ public final class Settings implements Watchable, Snappable {
         }
     }
 
-    boolean readLPw(@NonNull Computer computer, @NonNull List<UserInfo> users) {
-        FileInputStream str = null;
-        if (mPreviousSettingsFilename.exists()) {
-            try {
-                str = new FileInputStream(mPreviousSettingsFilename);
-                mReadMessages.append("Reading from backup settings file\n");
-                PackageManagerService.reportSettingsProblem(Log.INFO,
-                        "Need to read from backup settings file");
-                if (mSettingsFilename.exists()) {
-                    // If both the previous and current settings files exist,
-                    // we ignore the current since it might have been corrupted.
-                    Slog.w(PackageManagerService.TAG, "Cleaning up settings file "
-                            + mSettingsFilename);
-                    mSettingsFilename.delete();
-                }
-            } catch (java.io.IOException e) {
-                // We'll try for the normal settings file.
-            }
-        }
-
+    boolean readSettingsLPw(@NonNull Computer computer, @NonNull List<UserInfo> users,
+            ArrayMap<String, Long> originalFirstInstallTimes) {
         mPendingPackages.clear();
         mPastSignatures.clear();
         mKeySetRefs.clear();
         mInstallerPackages.clear();
+        originalFirstInstallTimes.clear();
 
-        // If any user state doesn't have a first install time, e.g., after an OTA,
-        // use the pre OTA firstInstallTime timestamp. This is because we migrated from per package
-        // firstInstallTime to per user-state. Without this, OTA can cause this info to be lost.
-        final ArrayMap<String, Long> originalFirstInstallTimes = new ArrayMap<>();
+        File file = null;
+        FileInputStream str = null;
 
         try {
-            if (str == null) {
-                if (!mSettingsFilename.exists()) {
-                    mReadMessages.append("No settings file found\n");
+            // Check if the previous write was incomplete.
+            if (mPreviousSettingsFilename.exists()) {
+                try {
+                    file = mPreviousSettingsFilename;
+                    str = new FileInputStream(file);
+                    mReadMessages.append("Reading from backup settings file\n");
                     PackageManagerService.reportSettingsProblem(Log.INFO,
-                            "No settings file; creating initial state");
-                    // It's enough to just touch version details to create them
-                    // with default values
-                    findOrCreateVersion(StorageManager.UUID_PRIVATE_INTERNAL).forceCurrent();
-                    findOrCreateVersion(StorageManager.UUID_PRIMARY_PHYSICAL).forceCurrent();
-                    return false;
+                            "Need to read from backup settings file");
+                    if (mSettingsFilename.exists()) {
+                        // If both the previous and current settings files exist,
+                        // we ignore the current since it might have been corrupted.
+                        Slog.w(PackageManagerService.TAG, "Cleaning up settings file "
+                                + mSettingsFilename);
+                        mSettingsFilename.delete();
+                    }
+                    // Ignore reserve copy as well.
+                    mSettingsReserveCopyFilename.delete();
+                } catch (java.io.IOException e) {
+                    // We'll try for the normal settings file.
                 }
-                str = new FileInputStream(mSettingsFilename);
+            }
+            if (str == null) {
+                if (mSettingsFilename.exists()) {
+                    // Using packages.xml.
+                    file = mSettingsFilename;
+                    str = new FileInputStream(file);
+                } else if (mSettingsReserveCopyFilename.exists()) {
+                    // Using reserve copy.
+                    file = mSettingsReserveCopyFilename;
+                    str = new FileInputStream(file);
+                    mReadMessages.append("Reading from reserve copy settings file\n");
+                    PackageManagerService.reportSettingsProblem(Log.INFO,
+                            "Need to read from reserve copy settings file");
+                }
+            }
+            if (str == null) {
+                // No available data sources.
+                mReadMessages.append("No settings file found\n");
+                PackageManagerService.reportSettingsProblem(Log.INFO,
+                        "No settings file; creating initial state");
+                // Not necessary, but will avoid wtf-s in the "finally" section.
+                findOrCreateVersion(StorageManager.UUID_PRIVATE_INTERNAL).forceCurrent();
+                findOrCreateVersion(StorageManager.UUID_PRIMARY_PHYSICAL).forceCurrent();
+                return false;
             }
             final TypedXmlPullParser parser = Xml.resolvePullParser(str);
 
@@ -3280,6 +3312,33 @@ public final class Settings implements Watchable, Snappable {
             mReadMessages.append("Error reading: " + e.toString());
             PackageManagerService.reportSettingsProblem(Log.ERROR, "Error reading settings: " + e);
             Slog.wtf(PackageManagerService.TAG, "Error reading package manager settings", e);
+
+            // Remove corrupted file and retry.
+            Slog.e(TAG,
+                    "Error reading package manager settings, removing " + file + " and retrying.",
+                    e);
+            file.delete();
+
+            // Ignore the result to not mark this as a "first boot".
+            readSettingsLPw(computer, users, originalFirstInstallTimes);
+        }
+
+        return true;
+    }
+
+    /**
+     * @return false if settings file is missing (i.e. during first boot), true otherwise
+     */
+    boolean readLPw(@NonNull Computer computer, @NonNull List<UserInfo> users) {
+        // If any user state doesn't have a first install time, e.g., after an OTA,
+        // use the pre OTA firstInstallTime timestamp. This is because we migrated from per package
+        // firstInstallTime to per user-state. Without this, OTA can cause this info to be lost.
+        final ArrayMap<String, Long> originalFirstInstallTimes = new ArrayMap<>();
+
+        try {
+            if (!readSettingsLPw(computer, users, originalFirstInstallTimes)) {
+                return false;
+            }
         } finally {
             if (!mVersion.containsKey(StorageManager.UUID_PRIVATE_INTERNAL)) {
                 Slog.wtf(PackageManagerService.TAG,
