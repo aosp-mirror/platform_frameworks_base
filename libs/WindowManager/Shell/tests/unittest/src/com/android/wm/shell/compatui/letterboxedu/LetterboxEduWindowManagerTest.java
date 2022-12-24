@@ -56,6 +56,7 @@ import com.android.wm.shell.ShellTestCase;
 import com.android.wm.shell.common.DisplayLayout;
 import com.android.wm.shell.common.DockStateReader;
 import com.android.wm.shell.common.SyncTransactionQueue;
+import com.android.wm.shell.compatui.DialogAnimationController;
 import com.android.wm.shell.transition.Transitions;
 
 import org.junit.After;
@@ -98,7 +99,7 @@ public class LetterboxEduWindowManagerTest extends ShellTestCase {
     @Captor
     private ArgumentCaptor<Runnable> mRunOnIdleCaptor;
 
-    @Mock private LetterboxEduAnimationController mAnimationController;
+    @Mock private DialogAnimationController<LetterboxEduDialogLayout> mAnimationController;
     @Mock private SyncTransactionQueue mSyncTransactionQueue;
     @Mock private ShellTaskOrganizer.TaskListener mTaskListener;
     @Mock private SurfaceControlViewHost mViewHost;
@@ -366,7 +367,7 @@ public class LetterboxEduWindowManagerTest extends ShellTestCase {
         assertThat(params.width).isEqualTo(expectedWidth);
         assertThat(params.height).isEqualTo(expectedHeight);
         MarginLayoutParams dialogParams =
-                (MarginLayoutParams) layout.getDialogContainer().getLayoutParams();
+                (MarginLayoutParams) layout.getDialogContainerView().getLayoutParams();
         int verticalMargin = (int) mContext.getResources().getDimension(
                 R.dimen.letterbox_education_dialog_margin);
         assertThat(dialogParams.topMargin).isEqualTo(verticalMargin + expectedExtraTopMargin);
