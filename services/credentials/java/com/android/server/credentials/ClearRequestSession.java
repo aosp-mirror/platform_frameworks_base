@@ -24,6 +24,7 @@ import android.credentials.IClearCredentialStateCallback;
 import android.credentials.ui.ProviderData;
 import android.credentials.ui.RequestInfo;
 import android.os.RemoteException;
+import android.service.credentials.CallingAppInfo;
 import android.service.credentials.CredentialProviderInfo;
 import android.util.Log;
 
@@ -40,8 +41,8 @@ public final class ClearRequestSession extends RequestSession<ClearCredentialSta
 
     public ClearRequestSession(Context context, int userId,
             IClearCredentialStateCallback callback, ClearCredentialStateRequest request,
-            String callingPackage) {
-        super(context, userId, request, callback, RequestInfo.TYPE_UNDEFINED, callingPackage);
+            CallingAppInfo callingAppInfo) {
+        super(context, userId, request, callback, RequestInfo.TYPE_UNDEFINED, callingAppInfo);
     }
 
     /**

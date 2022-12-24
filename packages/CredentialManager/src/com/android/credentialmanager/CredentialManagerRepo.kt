@@ -16,14 +16,14 @@
 
 package com.android.credentialmanager
 
-import android.credentials.Credential.TYPE_PASSWORD_CREDENTIAL
 import android.app.PendingIntent
 import android.app.slice.Slice
 import android.app.slice.SliceSpec
 import android.content.Context
 import android.content.Intent
-import android.content.pm.Signature
+import android.content.pm.SigningInfo
 import android.credentials.CreateCredentialRequest
+import android.credentials.Credential.TYPE_PASSWORD_CREDENTIAL
 import android.credentials.GetCredentialOption
 import android.credentials.GetCredentialRequest
 import android.credentials.ui.Constants
@@ -41,10 +41,9 @@ import android.os.Binder
 import android.os.Bundle
 import android.os.ResultReceiver
 import android.service.credentials.CredentialProviderService
-import android.util.ArraySet
-import com.android.credentialmanager.createflow.RequestDisplayInfo
-import com.android.credentialmanager.createflow.EnabledProviderInfo
 import com.android.credentialmanager.createflow.DisabledProviderInfo
+import com.android.credentialmanager.createflow.EnabledProviderInfo
+import com.android.credentialmanager.createflow.RequestDisplayInfo
 import com.android.credentialmanager.getflow.GetCredentialUiState
 import com.android.credentialmanager.jetpack.developer.CreatePasswordRequest.Companion.toBundle
 import com.android.credentialmanager.jetpack.developer.CreatePublicKeyCredentialRequest
@@ -351,7 +350,7 @@ class CredentialManagerRepo(
                 or PendingIntent.FLAG_ONE_SHOT))
         val createPasswordRequest = android.service.credentials.CreateCredentialRequest(
                 android.service.credentials.CallingAppInfo(
-                        context.applicationInfo.packageName, ArraySet<Signature>()),
+                        context.applicationInfo.packageName, SigningInfo()),
                 TYPE_PASSWORD_CREDENTIAL,
                 toBundle("beckett-bakert@gmail.com", "password123")
         )

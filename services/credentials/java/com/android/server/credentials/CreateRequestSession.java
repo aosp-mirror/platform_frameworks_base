@@ -27,6 +27,7 @@ import android.credentials.ICreateCredentialCallback;
 import android.credentials.ui.ProviderData;
 import android.credentials.ui.RequestInfo;
 import android.os.RemoteException;
+import android.service.credentials.CallingAppInfo;
 import android.service.credentials.CredentialProviderInfo;
 import android.util.Log;
 
@@ -45,8 +46,8 @@ public final class CreateRequestSession extends RequestSession<CreateCredentialR
     CreateRequestSession(@NonNull Context context, int userId,
             CreateCredentialRequest request,
             ICreateCredentialCallback callback,
-            String callingPackage) {
-        super(context, userId, request, callback, RequestInfo.TYPE_CREATE, callingPackage);
+            CallingAppInfo callingAppInfo) {
+        super(context, userId, request, callback, RequestInfo.TYPE_CREATE, callingAppInfo);
     }
 
     /**
@@ -75,7 +76,8 @@ public final class CreateRequestSession extends RequestSession<CreateCredentialR
         try {
             mClientCallback.onPendingIntent(mCredentialManagerUi.createPendingIntent(
                     RequestInfo.newCreateRequestInfo(
-                            mRequestId, mClientRequest, mClientCallingPackage),
+                            mRequestId, mClientRequest,
+                            mClientAppInfo.getPackageName()),
                     providerDataList));
         } catch (RemoteException e) {
             Log.i(TAG, "Issue with invoking pending intent: " + e.getMessage());
