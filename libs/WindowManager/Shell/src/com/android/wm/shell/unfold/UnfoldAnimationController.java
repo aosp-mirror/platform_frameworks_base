@@ -16,8 +16,6 @@
 
 package com.android.wm.shell.unfold;
 
-import static android.app.WindowConfiguration.WINDOWING_MODE_PINNED;
-
 import android.annotation.NonNull;
 import android.app.ActivityManager.RunningTaskInfo;
 import android.app.TaskInfo;
@@ -55,6 +53,12 @@ public class UnfoldAnimationController implements UnfoldListener {
 
     private final SparseArray<SurfaceControl> mTaskSurfaces = new SparseArray<>();
     private final SparseArray<UnfoldTaskAnimator> mAnimatorsByTaskId = new SparseArray<>();
+
+    /**
+     * Indicates whether we're in stage change process. This should be set to {@code true} in
+     * {@link #onStateChangeStarted()} and {@code false} in {@link #onStateChangeFinished()}.
+     */
+    private boolean mIsInStageChange;
 
     public UnfoldAnimationController(
             @NonNull ShellInit shellInit,
@@ -123,7 +127,7 @@ public class UnfoldAnimationController implements UnfoldListener {
                 animator.onTaskChanged(taskInfo);
             } else {
                 // Became inapplicable
-                resetTask(animator, taskInfo);
+                maybeResetTask(animator, taskInfo);
                 animator.onTaskVanished(taskInfo);
                 mAnimatorsByTaskId.remove(taskInfo.taskId);
             }
@@ -154,7 +158,7 @@ public class UnfoldAnimationController implements UnfoldListener {
         final boolean isCurrentlyApplicable = animator != null;
 
         if (isCurrentlyApplicable) {
-            resetTask(animator, taskInfo);
+            maybeResetTask(animator, taskInfo);
             animator.onTaskVanished(taskInfo);
             mAnimatorsByTaskId.remove(taskInfo.taskId);
         }
@@ -166,6 +170,7 @@ public class UnfoldAnimationController implements UnfoldListener {
             return;
         }
 
+        mIsInStageChange = true;
         SurfaceControl.Transaction transaction = null;
         for (int i = 0; i < mAnimators.size(); i++) {
             final UnfoldTaskAnimator animator = mAnimators.get(i);
@@ -219,11 +224,12 @@ public class UnfoldAnimationController implements UnfoldListener {
         transaction.apply();
 
         mTransactionPool.release(transaction);
+        mIsInStageChange = false;
     }
 
-    private void resetTask(UnfoldTaskAnimator animator, TaskInfo taskInfo) {
-        if (taskInfo.getWindowingMode() == WINDOWING_MODE_PINNED) {
-            // PiP task has its own cleanup path, ignore surface reset to avoid conflict.
+    private void maybeResetTask(UnfoldTaskAnimator animator, TaskInfo taskInfo) {
+        if (!mIsInStageChange) {
+            // No need to resetTask if there is no ongoing state change.
             return;
         }
         final SurfaceControl.Transaction transaction = mTransactionPool.acquire();
