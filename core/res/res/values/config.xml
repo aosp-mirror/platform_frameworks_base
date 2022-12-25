@@ -5213,6 +5213,14 @@
          having a separating hinge. -->
     <bool name="config_isDisplayHingeAlwaysSeparating">false</bool>
 
+    <!-- Whether enabling rotation compat policy for immersive apps that prevents auto rotation
+         into non-optimal screen orientation while in fullscreen. This is needed because immersive
+         apps, such as games, are often not optimized for all orientations and can have a poor UX
+         when rotated. Additionally, some games rely on sensors for the gameplay so users can
+         trigger such rotations accidentally when auto rotation is on.
+         Applicable only if ignoreOrientationRequest is enabled. -->
+    <bool name="config_letterboxIsDisplayRotationImmersiveAppCompatPolicyEnabled">false</bool>
+
     <!-- Aspect ratio of letterboxing for fixed orientation. Values <= 1.0 will be ignored.
          Note: Activity min/max aspect ratio restrictions will still be respected.
          Therefore this override can control the maximum screen area that can be occupied by
