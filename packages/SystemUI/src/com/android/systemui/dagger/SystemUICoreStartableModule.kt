@@ -43,6 +43,7 @@ import com.android.systemui.shortcut.ShortcutKeyDispatcher
 import com.android.systemui.statusbar.notification.fsi.FsiChromeRepo
 import com.android.systemui.statusbar.notification.InstantAppNotifier
 import com.android.systemui.statusbar.notification.fsi.FsiChromeViewModelFactory
+import com.android.systemui.statusbar.notification.fsi.FsiChromeViewBinder
 import com.android.systemui.statusbar.phone.KeyguardLiftController
 import com.android.systemui.stylus.StylusUsiPowerStartable
 import com.android.systemui.temporarydisplay.chipbar.ChipbarCoordinator
@@ -92,6 +93,12 @@ abstract class SystemUICoreStartableModule {
     @IntoMap
     @ClassKey(FsiChromeViewModelFactory::class)
     abstract fun bindFSIChromeWindowViewModel(sysui: FsiChromeViewModelFactory): CoreStartable
+
+    /** Inject into FsiChromeWindowBinder.  */
+    @Binds
+    @IntoMap
+    @ClassKey(FsiChromeViewBinder::class)
+    abstract fun bindFsiChromeWindowBinder(sysui: FsiChromeViewBinder): CoreStartable
 
     /** Inject into GarbageMonitor.Service.  */
     @Binds
