@@ -21,6 +21,7 @@ import static android.content.Context.CREDENTIAL_SERVICE;
 import android.annotation.NonNull;
 import android.annotation.UserIdInt;
 import android.app.ActivityManager;
+import android.content.ComponentName;
 import android.content.Context;
 import android.content.pm.PackageManager;
 import android.credentials.ClearCredentialStateRequest;
@@ -42,10 +43,12 @@ import android.os.UserHandle;
 import android.provider.Settings;
 import android.service.credentials.BeginCreateCredentialRequest;
 import android.service.credentials.BeginGetCredentialRequest;
+import android.service.credentials.CredentialProviderInfo;
 import android.text.TextUtils;
 import android.util.Log;
 import android.util.Slog;
 
+import com.android.internal.annotations.GuardedBy;
 import com.android.server.infra.AbstractMasterSystemService;
 import com.android.server.infra.SecureSettingsServiceNameResolver;
 
@@ -120,6 +123,34 @@ public final class CredentialManagerService
             }
         }
         return serviceList;
+    }
+
+    @GuardedBy("mLock")
+    @SuppressWarnings("GuardedBy") // ErrorProne requires service.mLock which is the same
+    // this.mLock
+    protected void handlePackageRemovedMultiModeLocked(String packageName, int userId) {
+        List<CredentialManagerServiceImpl> services = peekServiceListForUserLocked(userId);
+        if (services == null) {
+            return;
+        }
+        CredentialManagerServiceImpl serviceToBeRemoved = null;
+        for (CredentialManagerServiceImpl service : services) {
+            if (service != null) {
+                CredentialProviderInfo credentialProviderInfo =
+                        service.getCredentialProviderInfo();
+                ComponentName componentName = credentialProviderInfo.getServiceInfo()
+                        .getComponentName();
+                if (packageName.equals(componentName.getPackageName())) {
+                    serviceToBeRemoved = service;
+                    removeServiceFromMultiModeSettings(componentName.flattenToString(), userId);
+                    break;
+                }
+            }
+        }
+        if (serviceToBeRemoved != null) {
+            removeServiceFromCache(serviceToBeRemoved, userId);
+        }
+        // TODO("Iterate over system services and remove if needed")
     }
 
     private void runForUser(@NonNull final Consumer<CredentialManagerServiceImpl> c) {

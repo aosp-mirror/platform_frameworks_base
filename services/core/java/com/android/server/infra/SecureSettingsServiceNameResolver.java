@@ -23,6 +23,7 @@ import android.text.TextUtils;
 import android.util.ArraySet;
 
 import java.io.PrintWriter;
+import java.util.List;
 import java.util.Set;
 
 /**
@@ -89,6 +90,22 @@ public final class SecureSettingsServiceNameResolver extends ServiceNameBaseReso
     public String readServiceName(int userId) {
         return Settings.Secure.getStringForUser(
                 mContext.getContentResolver(), mProperty, userId);
+    }
+
+    @Override
+    public void setServiceNameList(List<String> componentNames, int userId) {
+        if (componentNames == null || componentNames.isEmpty()) {
+            Settings.Secure.putStringForUser(
+                    mContext.getContentResolver(), mProperty, null, userId);
+            return;
+        }
+        StringBuilder builder = new StringBuilder(componentNames.get(0));
+        for (int i = 1; i < componentNames.size(); i++) {
+            builder.append(COMPONENT_NAME_SEPARATOR);
+            builder.append(componentNames.get(i));
+        }
+        Settings.Secure.putStringForUser(
+                mContext.getContentResolver(), mProperty, builder.toString(), userId);
     }
 
     private String[] parseColonDelimitedServiceNames(String serviceNames) {
