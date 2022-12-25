@@ -42,6 +42,7 @@ import android.media.IPreferredMixerAttributesDispatcher;
 import android.media.IRecordingConfigDispatcher;
 import android.media.IRingtonePlayer;
 import android.media.IStrategyPreferredDevicesDispatcher;
+import android.media.IStrategyNonDefaultDevicesDispatcher;
 import android.media.ISpatializerCallback;
 import android.media.ISpatializerHeadTrackerAvailableCallback;
 import android.media.ISpatializerHeadTrackingModeCallback;
@@ -330,13 +331,23 @@ interface IAudioService {
 
     boolean isCallScreeningModeSupported();
 
-    int setPreferredDevicesForStrategy(in int strategy, in List<AudioDeviceAttributes> device);
+    @EnforcePermission("MODIFY_AUDIO_ROUTING")
+    int setPreferredDevicesForStrategy(in int strategy, in List<AudioDeviceAttributes> devices);
 
     @EnforcePermission("MODIFY_AUDIO_ROUTING")
     int removePreferredDevicesForStrategy(in int strategy);
 
     @EnforcePermission("MODIFY_AUDIO_ROUTING")
     List<AudioDeviceAttributes> getPreferredDevicesForStrategy(in int strategy);
+
+    @EnforcePermission("MODIFY_AUDIO_ROUTING")
+    int setDeviceAsNonDefaultForStrategy(in int strategy, in AudioDeviceAttributes device);
+
+    @EnforcePermission("MODIFY_AUDIO_ROUTING")
+    int removeDeviceAsNonDefaultForStrategy(in int strategy, in AudioDeviceAttributes device);
+
+    @EnforcePermission("MODIFY_AUDIO_ROUTING")
+    List<AudioDeviceAttributes> getNonDefaultDevicesForStrategy(in int strategy);
 
     List<AudioDeviceAttributes> getDevicesForAttributes(in AudioAttributes attributes);
 
@@ -350,6 +361,12 @@ interface IAudioService {
 
     oneway void unregisterStrategyPreferredDevicesDispatcher(
             IStrategyPreferredDevicesDispatcher dispatcher);
+
+    void registerStrategyNonDefaultDevicesDispatcher(
+            IStrategyNonDefaultDevicesDispatcher dispatcher);
+
+    oneway void unregisterStrategyNonDefaultDevicesDispatcher(
+            IStrategyNonDefaultDevicesDispatcher dispatcher);
 
     oneway void setRttEnabled(in boolean rttEnabled);
 

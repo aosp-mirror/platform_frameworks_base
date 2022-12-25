@@ -75,7 +75,13 @@ public class NoOpAudioSystemAdapter extends AudioSystemAdapter {
     }
 
     @Override
-    public int removeDevicesRoleForStrategy(int strategy, int role) {
+    public int removeDevicesRoleForStrategy(int strategy, int role,
+            @NonNull List<AudioDeviceAttributes> devices) {
+        return AudioSystem.AUDIO_STATUS_OK;
+    }
+
+    @Override
+    public int clearDevicesRoleForStrategy(int strategy, int role) {
         return AudioSystem.AUDIO_STATUS_OK;
     }
 
