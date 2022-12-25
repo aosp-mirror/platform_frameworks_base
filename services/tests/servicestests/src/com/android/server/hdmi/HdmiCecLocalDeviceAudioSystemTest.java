@@ -209,6 +209,7 @@ public class HdmiCecLocalDeviceAudioSystemTest {
                 4, HdmiPortInfo.PORT_INPUT, HDMI_3_PHYSICAL_ADDRESS, true, false, false);
         mNativeWrapper.setPortInfo(mHdmiPortInfo);
         mHdmiControlService.initService();
+        mHdmiControlService.enableAllFeatureFlags();
         mHdmiControlService.onBootPhase(PHASE_SYSTEM_SERVICES_READY);
         mPowerManager = new FakePowerManagerWrapper(context);
         mHdmiControlService.setPowerManager(mPowerManager);

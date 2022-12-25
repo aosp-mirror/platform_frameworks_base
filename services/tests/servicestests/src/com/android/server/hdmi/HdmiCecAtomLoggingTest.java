@@ -122,6 +122,7 @@ public class HdmiCecAtomLoggingTest {
         mNativeWrapper.setPortConnectionStatus(1, true);
 
         mHdmiControlServiceSpy.initService();
+        mHdmiControlServiceSpy.enableAllFeatureFlags();
         mPowerManager = new FakePowerManagerWrapper(mContextSpy);
         mHdmiControlServiceSpy.setPowerManager(mPowerManager);
         mHdmiControlServiceSpy.onBootPhase(SystemService.PHASE_SYSTEM_SERVICES_READY);
