@@ -111,11 +111,11 @@ class MenuViewModel implements MenuInfoRepository.OnSettingsContentsChanged {
         return mTargetFeaturesData;
     }
 
-    void registerContentObservers() {
-        mInfoRepository.registerContentObservers();
+    void registerObserversAndCallbacks() {
+        mInfoRepository.registerObserversAndCallbacks();
     }
 
-    void unregisterContentObservers() {
-        mInfoRepository.unregisterContentObservers();
+    void unregisterObserversAndCallbacks() {
+        mInfoRepository.unregisterObserversAndCallbacks();
     }
 }

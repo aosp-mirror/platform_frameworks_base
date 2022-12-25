@@ -299,7 +299,7 @@ class MenuView extends FrameLayout implements
         mMenuViewModel.getSizeTypeData().observeForever(mSizeTypeObserver);
         mMenuViewModel.getMoveToTuckedData().observeForever(mMoveToTuckedObserver);
         setVisibility(VISIBLE);
-        mMenuViewModel.registerContentObservers();
+        mMenuViewModel.registerObserversAndCallbacks();
         getViewTreeObserver().addOnComputeInternalInsetsListener(this);
         getViewTreeObserver().addOnDrawListener(mSystemGestureExcludeUpdater);
     }
@@ -312,7 +312,7 @@ class MenuView extends FrameLayout implements
         mMenuViewModel.getTargetFeaturesData().removeObserver(mTargetFeaturesObserver);
         mMenuViewModel.getSizeTypeData().removeObserver(mSizeTypeObserver);
         mMenuViewModel.getMoveToTuckedData().removeObserver(mMoveToTuckedObserver);
-        mMenuViewModel.unregisterContentObservers();
+        mMenuViewModel.unregisterObserversAndCallbacks();
         getViewTreeObserver().removeOnComputeInternalInsetsListener(this);
         getViewTreeObserver().removeOnDrawListener(mSystemGestureExcludeUpdater);
     }

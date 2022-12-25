@@ -30,13 +30,20 @@ import static com.android.systemui.accessibility.floatingmenu.MenuViewAppearance
 
 import android.annotation.FloatRange;
 import android.annotation.IntDef;
+import android.content.ComponentCallbacks;
 import android.content.Context;
+import android.content.pm.ActivityInfo;
+import android.content.res.Configuration;
 import android.database.ContentObserver;
+import android.os.Build;
 import android.os.Handler;
 import android.os.Looper;
 import android.os.UserHandle;
 import android.provider.Settings;
 import android.text.TextUtils;
+import android.util.Log;
+
+import androidx.annotation.NonNull;
 
 import com.android.internal.accessibility.dialog.AccessibilityTarget;
 import com.android.internal.annotations.VisibleForTesting;
@@ -50,6 +57,9 @@ import java.util.List;
  * Stores and observe the settings contents for the menu view.
  */
 class MenuInfoRepository {
+    private static final String TAG = "MenuInfoRepository";
+    private static final boolean DEBUG = Log.isLoggable(TAG, Log.DEBUG) || Build.IS_DEBUGGABLE;
+
     @FloatRange(from = 0.0, to = 1.0)
     private static final float DEFAULT_MENU_POSITION_X_PERCENT = 1.0f;
 
@@ -60,6 +70,7 @@ class MenuInfoRepository {
     private static final int DEFAULT_MIGRATION_TOOLTIP_VALUE_PROMPT = MigrationPrompt.DISABLED;
 
     private final Context mContext;
+    private final Configuration mConfiguration;
     private final Handler mHandler = new Handler(Looper.getMainLooper());
     private final OnSettingsContentsChanged mSettingsContentsCallback;
     private Position mPercentagePosition;
@@ -102,8 +113,34 @@ class MenuInfoRepository {
                 }
             };
 
+    @VisibleForTesting
+    final ComponentCallbacks mComponentCallbacks = new ComponentCallbacks() {
+        @Override
+        public void onConfigurationChanged(@NonNull Configuration newConfig) {
+            final int diff = newConfig.diff(mConfiguration);
+
+            if (DEBUG) {
+                Log.d(TAG, "onConfigurationChanged = " + Configuration.configurationDiffToString(
+                        diff));
+            }
+
+            if ((diff & ActivityInfo.CONFIG_LOCALE) != 0) {
+                mSettingsContentsCallback.onTargetFeaturesChanged(
+                        getTargets(mContext, ACCESSIBILITY_BUTTON));
+            }
+
+            mConfiguration.setTo(newConfig);
+        }
+
+        @Override
+        public void onLowMemory() {
+            // Do nothing.
+        }
+    };
+
     MenuInfoRepository(Context context, OnSettingsContentsChanged settingsContentsChanged) {
         mContext = context;
+        mConfiguration = new Configuration(context.getResources().getConfiguration());
         mSettingsContentsCallback = settingsContentsChanged;
 
         mPercentagePosition = getStartPosition();
@@ -181,7 +218,7 @@ class MenuInfoRepository {
                 : Position.fromString(absolutePositionString);
     }
 
-    void registerContentObservers() {
+    void registerObserversAndCallbacks() {
         mContext.getContentResolver().registerContentObserver(
                 Settings.Secure.getUriFor(Settings.Secure.ACCESSIBILITY_BUTTON_TARGETS),
                 /* notifyForDescendants */ false, mMenuTargetFeaturesContentObserver,
@@ -202,12 +239,14 @@ class MenuInfoRepository {
                 Settings.Secure.getUriFor(ACCESSIBILITY_FLOATING_MENU_OPACITY),
                 /* notifyForDescendants */ false, mMenuFadeOutContentObserver,
                 UserHandle.USER_CURRENT);
+        mContext.registerComponentCallbacks(mComponentCallbacks);
     }
 
-    void unregisterContentObservers() {
+    void unregisterObserversAndCallbacks() {
         mContext.getContentResolver().unregisterContentObserver(mMenuTargetFeaturesContentObserver);
         mContext.getContentResolver().unregisterContentObserver(mMenuSizeContentObserver);
         mContext.getContentResolver().unregisterContentObserver(mMenuFadeOutContentObserver);
+        mContext.unregisterComponentCallbacks(mComponentCallbacks);
     }
 
     interface OnSettingsContentsChanged {

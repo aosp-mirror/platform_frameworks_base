@@ -20,6 +20,7 @@ import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.Mockito.any;
 import static org.mockito.Mockito.verify;
 
+import android.content.res.Configuration;
 import android.testing.AndroidTestingRunner;
 
 import androidx.test.filters.SmallTest;
@@ -33,6 +34,8 @@ import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnit;
 import org.mockito.junit.MockitoRule;
+
+import java.util.Locale;
 
 /** Tests for {@link MenuInfoRepository}. */
 @RunWith(AndroidTestingRunner.class)
@@ -63,5 +66,15 @@ public class MenuInfoRepositoryTest extends SysuiTestCase {
         mMenuInfoRepository.mMenuFadeOutContentObserver.onChange(true);
 
         verify(mMockSettingsContentsChanged).onFadeEffectInfoChanged(any(MenuFadeEffectInfo.class));
+    }
+
+    @Test
+    public void localeChange_verifyTargetFeaturesChanged() {
+        final Configuration configuration = new Configuration();
+        configuration.setLocale(Locale.TAIWAN);
+
+        mMenuInfoRepository.mComponentCallbacks.onConfigurationChanged(configuration);
+
+        verify(mMockSettingsContentsChanged).onTargetFeaturesChanged(any());
     }
 }
