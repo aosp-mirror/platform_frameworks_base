@@ -249,7 +249,8 @@ public class RotationButtonController {
     }
 
     public void setRotationLockedAtAngle(int rotationSuggestion) {
-        RotationPolicy.setRotationLockAtAngle(mContext, true, rotationSuggestion);
+        RotationPolicy.setRotationLockAtAngle(mContext, /* enabled= */ isRotationLocked(),
+                /* rotation= */ rotationSuggestion);
     }
 
     public boolean isRotationLocked() {
