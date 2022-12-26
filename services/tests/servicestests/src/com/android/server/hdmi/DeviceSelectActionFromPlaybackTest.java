@@ -133,6 +133,7 @@ public class DeviceSelectActionFromPlaybackTest {
         mHdmiControlService.setHdmiCecNetwork(mHdmiCecNetwork);
 
         mHdmiControlService.initService();
+        mHdmiControlService.enableAllFeatureFlags();
         mHdmiControlService.onBootPhase(PHASE_SYSTEM_SERVICES_READY);
         mNativeWrapper.setPhysicalAddress(0x0000);
         mPowerManager = new FakePowerManagerWrapper(context);

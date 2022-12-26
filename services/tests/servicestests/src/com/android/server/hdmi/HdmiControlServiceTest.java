@@ -141,6 +141,7 @@ public class HdmiControlServiceTest {
                 new HdmiPortInfo(4, HdmiPortInfo.PORT_INPUT, 0x3000, true, false, false, false);
         mNativeWrapper.setPortInfo(mHdmiPortInfo);
         mHdmiControlServiceSpy.initService();
+        mHdmiControlServiceSpy.enableAllFeatureFlags();
         mPowerManager = new FakePowerManagerWrapper(mContextSpy);
         mHdmiControlServiceSpy.setPowerManager(mPowerManager);
         mHdmiControlServiceSpy.allocateLogicalAddress(mLocalDevices, INITIATED_BY_ENABLE_CEC);
@@ -1203,6 +1204,7 @@ public class HdmiControlServiceTest {
         mTestLooper.dispatchAll();
         Mockito.clearInvocations(mHdmiControlServiceSpy);
         mHdmiControlServiceSpy.initService();
+        mHdmiControlServiceSpy.enableAllFeatureFlags();
         mTestLooper.dispatchAll();
         verify(mHdmiControlServiceSpy, times(1)).setEarcEnabledInHal(true, false);
         verify(mHdmiControlServiceSpy, times(0)).setEarcEnabledInHal(eq(false), anyBoolean());
@@ -1216,6 +1218,7 @@ public class HdmiControlServiceTest {
         mTestLooper.dispatchAll();
         Mockito.clearInvocations(mHdmiControlServiceSpy);
         mHdmiControlServiceSpy.initService();
+        mHdmiControlServiceSpy.enableAllFeatureFlags();
         mTestLooper.dispatchAll();
         verify(mHdmiControlServiceSpy, times(1)).setEarcEnabledInHal(false, false);
         verify(mHdmiControlServiceSpy, times(0)).setEarcEnabledInHal(eq(true), anyBoolean());
