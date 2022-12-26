@@ -64,7 +64,7 @@ public class LocaleConfig implements Parcelable {
     public static final String TAG_LOCALE_CONFIG = "locale-config";
     public static final String TAG_LOCALE = "locale";
     private LocaleList mLocales;
-    private int mStatus;
+    private int mStatus = STATUS_NOT_SPECIFIED;
 
     /**
      * succeeded reading the LocaleConfig structure stored in an XML file.
@@ -119,6 +119,7 @@ public class LocaleConfig implements Parcelable {
             LocaleManager localeManager = context.getSystemService(LocaleManager.class);
             if (localeManager == null) {
                 Slog.w(TAG, "LocaleManager is null, cannot get the override LocaleConfig");
+                mStatus = STATUS_NOT_SPECIFIED;
                 return;
             }
             LocaleConfig localeConfig = localeManager.getOverrideLocaleConfig();
