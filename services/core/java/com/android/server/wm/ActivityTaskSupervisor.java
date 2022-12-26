@@ -1450,6 +1450,7 @@ public class ActivityTaskSupervisor implements RecentTasks.Callbacks {
                 mUserLeaving = true;
             }
 
+            mService.deferWindowLayout();
             final Transition newTransition = task.mTransitionController.isShellTransitionsEnabled()
                     ? task.mTransitionController.isCollecting() ? null
                     : task.mTransitionController.createTransition(TRANSIT_TO_FRONT) : null;
@@ -1457,9 +1458,6 @@ public class ActivityTaskSupervisor implements RecentTasks.Callbacks {
             reason = reason + " findTaskToMoveToFront";
             boolean reparented = false;
             if (task.isResizeable() && canUseActivityOptionsLaunchBounds(options)) {
-                final Rect bounds = options.getLaunchBounds();
-                task.setBounds(bounds);
-
                 Task targetRootTask =
                         mRootWindowContainer.getOrCreateRootTask(null, options, task, ON_TOP);
 
@@ -1472,14 +1470,11 @@ public class ActivityTaskSupervisor implements RecentTasks.Callbacks {
                     // task.reparent() should already placed the task on top,
                     // still need moveTaskToFrontLocked() below for any transition settings.
                 }
-                if (targetRootTask.shouldResizeRootTaskWithLaunchBounds()) {
-                    targetRootTask.resize(bounds, !PRESERVE_WINDOWS, !DEFER_RESUME);
-                } else {
-                    // WM resizeTask must be done after the task is moved to the correct stack,
-                    // because Task's setBounds() also updates dim layer's bounds, but that has
-                    // dependency on the root task.
-                    task.resize(false /* relayout */, false /* forced */);
-                }
+                // The resizeTask must be done after the task is moved to the correct root task,
+                // because Task's setBounds() also updates dim layer's bounds, but that has
+                // dependency on the root task.
+                final Rect bounds = options.getLaunchBounds();
+                task.setBounds(bounds);
             }
 
             if (!reparented) {
@@ -1509,6 +1504,7 @@ public class ActivityTaskSupervisor implements RecentTasks.Callbacks {
             }
         } finally {
             mUserLeaving = false;
+            mService.continueWindowLayout();
         }
     }
 

@@ -265,14 +265,6 @@ class WindowContainer<E extends WindowContainer> extends ConfigurationContainer<
     }
 
     /**
-     * Callback which is triggered while changing the parent, after setting up the surface but
-     * before asking the parent to assign child layers.
-     */
-    interface PreAssignChildLayersCallback {
-        void onPreAssignChildLayers();
-    }
-
-    /**
      * True if this an AppWindowToken and the activity which created this was launched with
      * ActivityOptions.setLaunchTaskBehind.
      *
@@ -605,11 +597,6 @@ class WindowContainer<E extends WindowContainer> extends ConfigurationContainer<
      */
     @Override
     void onParentChanged(ConfigurationContainer newParent, ConfigurationContainer oldParent) {
-        onParentChanged(newParent, oldParent, null);
-    }
-
-    void onParentChanged(ConfigurationContainer newParent, ConfigurationContainer oldParent,
-            PreAssignChildLayersCallback callback) {
         super.onParentChanged(newParent, oldParent);
         if (mParent == null) {
             return;
@@ -627,13 +614,8 @@ class WindowContainer<E extends WindowContainer> extends ConfigurationContainer<
             reparentSurfaceControl(getSyncTransaction(), mParent.mSurfaceControl);
         }
 
-        if (callback != null) {
-            callback.onPreAssignChildLayers();
-        }
-
         // Either way we need to ask the parent to assign us a Z-order.
         mParent.assignChildLayers();
-        scheduleAnimation();
     }
 
     void createSurfaceControl(boolean force) {

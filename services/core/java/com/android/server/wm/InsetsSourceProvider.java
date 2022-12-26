@@ -33,7 +33,6 @@ import static com.android.server.wm.InsetsSourceProviderProto.SEAMLESS_ROTATING;
 import static com.android.server.wm.InsetsSourceProviderProto.SERVER_VISIBLE;
 import static com.android.server.wm.InsetsSourceProviderProto.SOURCE;
 import static com.android.server.wm.SurfaceAnimator.ANIMATION_TYPE_INSETS_CONTROL;
-import static com.android.server.wm.WindowManagerService.H.LAYOUT_AND_ASSIGN_WINDOW_LAYERS_IF_NEEDED;
 
 import android.annotation.NonNull;
 import android.annotation.Nullable;
@@ -508,11 +507,6 @@ abstract class InsetsSourceProvider {
             return;
         }
         mClientVisible = clientVisible;
-        if (!mDisplayContent.mLayoutAndAssignWindowLayersScheduled) {
-            mDisplayContent.mLayoutAndAssignWindowLayersScheduled = true;
-            mDisplayContent.mWmService.mH.obtainMessage(
-                    LAYOUT_AND_ASSIGN_WINDOW_LAYERS_IF_NEEDED, mDisplayContent).sendToTarget();
-        }
         updateVisibility();
     }
 
