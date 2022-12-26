@@ -154,7 +154,7 @@ class MenuViewLayer extends FrameLayout implements
         mAccessibilityManager = accessibilityManager;
         mFloatingMenu = floatingMenu;
 
-        mMenuViewModel = new MenuViewModel(context);
+        mMenuViewModel = new MenuViewModel(context, accessibilityManager);
         mMenuViewAppearance = new MenuViewAppearance(context, windowManager);
         mMenuView = new MenuView(context, mMenuViewModel, mMenuViewAppearance);
         mMenuAnimationController = mMenuView.getMenuAnimationController();

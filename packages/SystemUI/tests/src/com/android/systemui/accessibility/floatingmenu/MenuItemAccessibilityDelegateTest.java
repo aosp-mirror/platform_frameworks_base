@@ -29,6 +29,7 @@ import android.graphics.Rect;
 import android.testing.AndroidTestingRunner;
 import android.testing.TestableLooper;
 import android.view.WindowManager;
+import android.view.accessibility.AccessibilityManager;
 import android.view.accessibility.AccessibilityNodeInfo;
 
 import androidx.core.view.accessibility.AccessibilityNodeInfoCompat;
@@ -56,6 +57,9 @@ public class MenuItemAccessibilityDelegateTest extends SysuiTestCase {
     public MockitoRule mockito = MockitoJUnit.rule();
 
     @Mock
+    private AccessibilityManager mAccessibilityManager;
+
+    @Mock
     private DismissAnimationController.DismissCallback mStubDismissCallback;
 
     private RecyclerView mStubListView;
@@ -69,7 +73,7 @@ public class MenuItemAccessibilityDelegateTest extends SysuiTestCase {
         final WindowManager stubWindowManager = mContext.getSystemService(WindowManager.class);
         final MenuViewAppearance stubMenuViewAppearance = new MenuViewAppearance(mContext,
                 stubWindowManager);
-        final MenuViewModel stubMenuViewModel = new MenuViewModel(mContext);
+        final MenuViewModel stubMenuViewModel = new MenuViewModel(mContext, mAccessibilityManager);
 
         final int halfScreenHeight =
                 stubWindowManager.getCurrentWindowMetrics().getBounds().height() / 2;
