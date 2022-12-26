@@ -22,6 +22,8 @@ import static android.app.ActivityManager.START_VOICE_HIDDEN_SESSION;
 import static android.app.ActivityManager.START_VOICE_NOT_ACTIVE_SESSION;
 import static android.app.WindowConfiguration.ACTIVITY_TYPE_ASSISTANT;
 
+import static com.android.server.policy.PhoneWindowManager.SYSTEM_DIALOG_REASON_ASSIST;
+
 import android.Manifest;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
@@ -62,6 +64,7 @@ import android.service.voice.IVoiceInteractionSession;
 import android.service.voice.VoiceInteractionService;
 import android.service.voice.VoiceInteractionServiceInfo;
 import android.system.OsConstants;
+import android.text.TextUtils;
 import android.util.PrintWriterPrinter;
 import android.util.Slog;
 import android.view.IWindowManager;
@@ -118,7 +121,9 @@ class VoiceInteractionManagerServiceImpl implements VoiceInteractionSessionConne
         public void onReceive(Context context, Intent intent) {
             if (Intent.ACTION_CLOSE_SYSTEM_DIALOGS.equals(intent.getAction())) {
                 String reason = intent.getStringExtra("reason");
-                if (!CLOSE_REASON_VOICE_INTERACTION.equals(reason) && !"dream".equals(reason)) {
+                if (!CLOSE_REASON_VOICE_INTERACTION.equals(reason)
+                        && !TextUtils.equals("dream", reason)
+                        && !SYSTEM_DIALOG_REASON_ASSIST.equals(reason)) {
                     synchronized (mServiceStub) {
                         if (mActiveSession != null && mActiveSession.mSession != null) {
                             try {
