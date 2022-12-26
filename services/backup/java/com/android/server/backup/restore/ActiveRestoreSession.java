@@ -45,6 +45,7 @@ import com.android.server.backup.params.RestoreParams;
 import com.android.server.backup.transport.TransportConnection;
 import com.android.server.backup.utils.BackupEligibilityRules;
 
+import java.util.List;
 import java.util.function.BiFunction;
 
 /**
@@ -60,7 +61,7 @@ public class ActiveRestoreSession extends IRestoreSession.Stub {
     private final int mUserId;
     private final BackupEligibilityRules mBackupEligibilityRules;
     @Nullable private final String mPackageName;
-    public RestoreSet[] mRestoreSets = null;
+    public List<RestoreSet> mRestoreSets = null;
     boolean mEnded = false;
     boolean mTimedOut = false;
 
@@ -174,10 +175,10 @@ public class ActiveRestoreSession extends IRestoreSession.Stub {
         }
 
         synchronized (mBackupManagerService.getQueueLock()) {
-            for (int i = 0; i < mRestoreSets.length; i++) {
-                if (token == mRestoreSets[i].token) {
+            for (int i = 0; i < mRestoreSets.size(); i++) {
+                if (token == mRestoreSets.get(i).token) {
                     final long oldId = Binder.clearCallingIdentity();
-                    RestoreSet restoreSet = mRestoreSets[i];
+                    RestoreSet restoreSet = mRestoreSets.get(i);
                     try {
                         return sendRestoreToHandlerLocked(
                                 (transportClient, listener) ->
@@ -267,10 +268,10 @@ public class ActiveRestoreSession extends IRestoreSession.Stub {
         }
 
         synchronized (mBackupManagerService.getQueueLock()) {
-            for (int i = 0; i < mRestoreSets.length; i++) {
-                if (token == mRestoreSets[i].token) {
+            for (int i = 0; i < mRestoreSets.size(); i++) {
+                if (token == mRestoreSets.get(i).token) {
                     final long oldId = Binder.clearCallingIdentity();
-                    RestoreSet restoreSet = mRestoreSets[i];
+                    RestoreSet restoreSet = mRestoreSets.get(i);
                     try {
                         return sendRestoreToHandlerLocked(
                                 (transportClient, listener) ->
@@ -390,7 +391,7 @@ public class ActiveRestoreSession extends IRestoreSession.Stub {
         }
     }
 
-    public void setRestoreSets(RestoreSet[] restoreSets) {
+    public void setRestoreSets(List<RestoreSet> restoreSets) {
         mRestoreSets = restoreSets;
     }
 
