@@ -191,6 +191,11 @@ final class LetterboxConfiguration {
     // Allows to enable letterboxing strategy for translucent activities ignoring flags.
     private boolean mTranslucentLetterboxingOverrideEnabled;
 
+    // Whether sending compat fake focus is enabled for unfocused apps in splitscreen. Some game
+    // engines wait to get focus before drawing the content of the app so this needs to be used
+    // otherwise the apps get blacked out when they are resumed and do not have focus yet.
+    private boolean mIsCompatFakeFocusEnabled;
+
     // Whether camera compatibility treatment is enabled.
     // See DisplayRotationCompatPolicy for context.
     private final boolean mIsCameraCompatTreatmentEnabled;
@@ -259,6 +264,8 @@ final class LetterboxConfiguration {
                 R.bool.config_isWindowManagerCameraCompatTreatmentEnabled);
         mLetterboxConfigurationPersister = letterboxConfigurationPersister;
         mLetterboxConfigurationPersister.start();
+        mIsCompatFakeFocusEnabled = mContext.getResources()
+                .getBoolean(R.bool.config_isCompatFakeFocusEnabled);
     }
 
     /**
@@ -968,6 +975,13 @@ final class LetterboxConfiguration {
     static boolean isTranslucentLetterboxingAllowed() {
         return DeviceConfig.getBoolean(DeviceConfig.NAMESPACE_WINDOW_MANAGER,
                 "enable_translucent_activity_letterbox", false);
+    }
+
+    // TODO(b/262866240): Add listener to check for device config property
+    /** Whether fake sending focus is enabled for unfocused apps in splitscreen */
+    boolean isCompatFakeFocusEnabled() {
+        return mIsCompatFakeFocusEnabled && DeviceConfig.getBoolean(
+                DeviceConfig.NAMESPACE_WINDOW_MANAGER, "enable_compat_fake_focus", true);
     }
 
     /** Whether camera compatibility treatment is enabled. */
