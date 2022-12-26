@@ -1134,6 +1134,8 @@
     <dimen name="magnification_setting_image_button_padding_horizontal">24dp</dimen>
     <dimen name="magnification_setting_image_button_open_in_full_padding_vertical">16dp</dimen>
     <dimen name="magnification_setting_image_button_open_in_full_padding_horizontal">28dp</dimen>
+    <dimen name="magnification_setting_seekbar_icon_size">24dp</dimen>
+
 
     <!-- How far from the right edge of the screen you need to drag the window before the button
          repositions to the other side. -->

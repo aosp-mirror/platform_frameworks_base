@@ -15,6 +15,7 @@
     limitations under the License.
 -->
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+              xmlns:app="http://schemas.android.com/apk/res-auto"
     android:id="@+id/magnifier_panel_view"
     android:layout_width="wrap_content"
     android:layout_height="wrap_content"
@@ -145,13 +146,14 @@
         android:textAppearance="@style/TextAppearance.MagnificationSetting.Title"
         android:focusable="true" />
 
-    <SeekBar
-        android:id="@+id/magnifier_zoom_seekbar"
-        android:layout_height="wrap_content"
+    <com.android.systemui.common.ui.view.SeekBarWithIconButtonsView
+        android:id="@+id/magnifier_zoom_slider"
         android:layout_width="match_parent"
-        android:layout_marginTop="@dimen/magnification_setting_seekbar_margin"
-        android:progress="0"
-        android:max="6" />
+        android:layout_height="wrap_content"
+        app:max="6"
+        app:progress="0"
+        app:iconStartContentDescription="@string/accessibility_control_zoom_out"
+        app:iconEndContentDescription="@string/accessibility_control_zoom_in"/>
 
     <Button
         android:id="@+id/magnifier_done_button"

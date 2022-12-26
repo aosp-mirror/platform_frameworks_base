@@ -53,6 +53,7 @@ import android.widget.Switch;
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.graphics.SfVsyncFrameCallbackProvider;
 import com.android.systemui.R;
+import com.android.systemui.common.ui.view.SeekBarWithIconButtonsView;
 import com.android.systemui.util.settings.SecureSettings;
 
 import java.lang.annotation.Retention;
@@ -79,7 +80,7 @@ class WindowMagnificationSettings implements MagnificationGestureDetector.OnGest
     private final MagnificationGestureDetector mGestureDetector;
     private boolean mSingleTapDetected = false;
 
-    private SeekBar mZoomSeekbar;
+    private SeekBarWithIconButtonsView mZoomSeekbar;
     private Switch mAllowDiagonalScrollingSwitch;
     private LinearLayout mPanelView;
     private LinearLayout mSettingView;
@@ -393,7 +394,8 @@ class WindowMagnificationSettings implements MagnificationGestureDetector.OnGest
         mEditButton = mSettingView.findViewById(R.id.magnifier_edit_button);
         mChangeModeButton = mSettingView.findViewById(R.id.magnifier_full_button);
 
-        mZoomSeekbar = mSettingView.findViewById(R.id.magnifier_zoom_seekbar);
+        mZoomSeekbar = mSettingView.findViewById(R.id.magnifier_zoom_slider);
+
         mZoomSeekbar.setOnSeekBarChangeListener(new ZoomSeekbarChangeListener());
 
         float scale = mSecureSettings.getFloatForUser(
