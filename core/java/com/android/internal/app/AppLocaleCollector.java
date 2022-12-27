@@ -120,9 +120,11 @@ public class AppLocaleCollector implements LocalePickerWithRegion.LocaleCollecto
         List<InputMethodInfo> infoList = imm.getEnabledInputMethodList();
         String imeId = Settings.Secure.getStringForUser(mContext.getContentResolver(),
                 Settings.Secure.DEFAULT_INPUT_METHOD, mContext.getUserId());
-        for (InputMethodInfo method : infoList) {
-            if (method.getId().equals(imeId)) {
-                activeIme = method;
+        if (infoList != null && imeId != null) {
+            for (InputMethodInfo method : infoList) {
+                if (method.getId().equals(imeId)) {
+                    activeIme = method;
+                }
             }
         }
         return activeIme;
