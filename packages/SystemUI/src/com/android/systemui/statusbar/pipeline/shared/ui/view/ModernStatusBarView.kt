@@ -20,7 +20,6 @@ import android.content.Context
 import android.graphics.Rect
 import android.util.AttributeSet
 import android.view.Gravity
-import android.view.LayoutInflater
 import com.android.systemui.R
 import com.android.systemui.plugins.DarkIconDispatcher
 import com.android.systemui.statusbar.BaseStatusBarFrameLayout
@@ -28,17 +27,13 @@ import com.android.systemui.statusbar.StatusBarIconView
 import com.android.systemui.statusbar.StatusBarIconView.STATE_DOT
 import com.android.systemui.statusbar.StatusBarIconView.STATE_HIDDEN
 import com.android.systemui.statusbar.pipeline.shared.ui.binder.ModernStatusBarViewBinding
-import com.android.systemui.statusbar.pipeline.wifi.ui.binder.WifiViewBinder
-import com.android.systemui.statusbar.pipeline.wifi.ui.viewmodel.LocationBasedWifiViewModel
 
 /**
- * A new and more modern implementation of [com.android.systemui.statusbar.StatusBarWifiView] that
- * is updated by [WifiViewBinder].
+ * A new and more modern implementation of [BaseStatusBarFrameLayout] that gets updated by view
+ * binders communicating via [ModernStatusBarViewBinding].
  */
-class ModernStatusBarWifiView(
-    context: Context,
-    attrs: AttributeSet?
-) : BaseStatusBarFrameLayout(context, attrs) {
+open class ModernStatusBarView(context: Context, attrs: AttributeSet?) :
+    BaseStatusBarFrameLayout(context, attrs) {
 
     private lateinit var slot: String
     private lateinit var binding: ModernStatusBarViewBinding
@@ -82,50 +77,39 @@ class ModernStatusBarWifiView(
         return binding.getShouldIconBeVisible()
     }
 
-    private fun initView(
-        slotName: String,
-        wifiViewModel: LocationBasedWifiViewModel,
-    ) {
-        slot = slotName
+    /**
+     * Initializes this view.
+     *
+     * Creates a dot view, and uses [bindingCreator] to get and set the binding.
+     */
+    fun initView(slot: String, bindingCreator: () -> ModernStatusBarViewBinding) {
+        // The dot view requires [slot] to be set, and the [binding] may require an instantiated dot
+        // view. So, this is the required order.
+        this.slot = slot
         initDotView()
-        binding = WifiViewBinder.bind(this, wifiViewModel)
+        this.binding = bindingCreator.invoke()
     }
 
-    // Mostly duplicated from [com.android.systemui.statusbar.StatusBarWifiView].
+    /**
+     * Creates a [StatusBarIconView] that is always in DOT mode and adds it to this view.
+     *
+     * Mostly duplicated from [com.android.systemui.statusbar.StatusBarWifiView] and
+     * [com.android.systemui.statusbar.StatusBarMobileView].
+     */
     private fun initDotView() {
-        // TODO(b/238425913): Could we just have this dot view be part of
-        //   R.layout.new_status_bar_wifi_group with a dot drawable so we don't need to inflate it
-        //   manually? Would that not work with animations?
-        val dotView = StatusBarIconView(mContext, slot, null).also {
-            it.id = R.id.status_bar_dot
-            // Hard-code this view to always be in the DOT state so that whenever it's visible it
-            // will show a dot
-            it.visibleState = STATE_DOT
-        }
+        // TODO(b/238425913): Could we just have this dot view be part of the layout with a dot
+        //  drawable so we don't need to inflate it manually? Would that not work with animations?
+        val dotView =
+            StatusBarIconView(mContext, slot, null).also {
+                it.id = R.id.status_bar_dot
+                // Hard-code this view to always be in the DOT state so that whenever it's visible
+                // it will show a dot
+                it.visibleState = STATE_DOT
+            }
 
         val width = mContext.resources.getDimensionPixelSize(R.dimen.status_bar_icon_size)
         val lp = LayoutParams(width, width)
         lp.gravity = Gravity.CENTER_VERTICAL or Gravity.START
         addView(dotView, lp)
-    }
-
-    companion object {
-        /**
-         * Inflates a new instance of [ModernStatusBarWifiView], binds it to a view model, and
-         * returns it.
-         */
-        @JvmStatic
-        fun constructAndBind(
-            context: Context,
-            slot: String,
-            wifiViewModel: LocationBasedWifiViewModel,
-        ): ModernStatusBarWifiView {
-            return (
-                LayoutInflater.from(context).inflate(R.layout.new_status_bar_wifi_group, null)
-                    as ModernStatusBarWifiView
-                ).also {
-                    it.initView(slot, wifiViewModel)
-                }
-        }
     }
 }

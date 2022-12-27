@@ -55,7 +55,7 @@ import com.android.systemui.statusbar.pipeline.mobile.ui.binder.MobileIconsBinde
 import com.android.systemui.statusbar.pipeline.mobile.ui.view.ModernStatusBarMobileView;
 import com.android.systemui.statusbar.pipeline.mobile.ui.viewmodel.MobileIconsViewModel;
 import com.android.systemui.statusbar.pipeline.wifi.ui.WifiUiAdapter;
-import com.android.systemui.statusbar.pipeline.shared.ui.view.ModernStatusBarWifiView;
+import com.android.systemui.statusbar.pipeline.wifi.ui.view.ModernStatusBarWifiView;
 import com.android.systemui.statusbar.pipeline.wifi.ui.viewmodel.LocationBasedWifiViewModel;
 import com.android.systemui.util.Assert;
 
