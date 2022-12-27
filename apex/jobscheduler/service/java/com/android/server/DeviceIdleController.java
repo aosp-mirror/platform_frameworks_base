@@ -318,6 +318,10 @@ public class DeviceIdleController extends SystemService
     private Bundle mIdleIntentOptions;
     private Intent mLightIdleIntent;
     private Bundle mLightIdleIntentOptions;
+    private Intent mPowerSaveWhitelistChangedIntent;
+    private Bundle mPowerSaveWhitelistChangedOptions;
+    private Intent mPowerSaveTempWhitelistChangedIntent;
+    private Bundle mPowerSaveTempWhilelistChangedOptions;
     private AnyMotionDetector mAnyMotionDetector;
     private final AppStateTrackerImpl mAppStateTracker;
     @GuardedBy("this")
@@ -2532,15 +2536,26 @@ public class DeviceIdleController extends SystemService
 
                 mAppStateTracker.onSystemServicesReady();
 
+                final Bundle mostRecentDeliveryOptions = BroadcastOptions.makeBasic()
+                        .setDeliveryGroupPolicy(BroadcastOptions.DELIVERY_GROUP_POLICY_MOST_RECENT)
+                        .toBundle();
+
                 mIdleIntent = new Intent(PowerManager.ACTION_DEVICE_IDLE_MODE_CHANGED);
                 mIdleIntent.addFlags(Intent.FLAG_RECEIVER_REGISTERED_ONLY
                         | Intent.FLAG_RECEIVER_FOREGROUND);
                 mLightIdleIntent = new Intent(PowerManager.ACTION_LIGHT_DEVICE_IDLE_MODE_CHANGED);
                 mLightIdleIntent.addFlags(Intent.FLAG_RECEIVER_REGISTERED_ONLY
                         | Intent.FLAG_RECEIVER_FOREGROUND);
-                final BroadcastOptions options = BroadcastOptions.makeBasic();
-                options.setDeliveryGroupPolicy(BroadcastOptions.DELIVERY_GROUP_POLICY_MOST_RECENT);
-                mIdleIntentOptions = mLightIdleIntentOptions = options.toBundle();
+                mIdleIntentOptions = mLightIdleIntentOptions = mostRecentDeliveryOptions;
+
+                mPowerSaveWhitelistChangedIntent = new Intent(
+                        PowerManager.ACTION_POWER_SAVE_WHITELIST_CHANGED);
+                mPowerSaveWhitelistChangedIntent.addFlags(Intent.FLAG_RECEIVER_REGISTERED_ONLY);
+                mPowerSaveTempWhitelistChangedIntent = new Intent(
+                        PowerManager.ACTION_POWER_SAVE_TEMP_WHITELIST_CHANGED);
+                mPowerSaveTempWhitelistChangedIntent.addFlags(Intent.FLAG_RECEIVER_REGISTERED_ONLY);
+                mPowerSaveWhitelistChangedOptions = mostRecentDeliveryOptions;
+                mPowerSaveTempWhilelistChangedOptions = mostRecentDeliveryOptions;
 
                 IntentFilter filter = new IntentFilter();
                 filter.addAction(Intent.ACTION_BATTERY_CHANGED);
@@ -4350,17 +4365,17 @@ public class DeviceIdleController extends SystemService
     }
 
     private void reportPowerSaveWhitelistChangedLocked() {
-        Intent intent = new Intent(PowerManager.ACTION_POWER_SAVE_WHITELIST_CHANGED);
-        intent.addFlags(Intent.FLAG_RECEIVER_REGISTERED_ONLY);
-        getContext().sendBroadcastAsUser(intent, UserHandle.SYSTEM);
+        getContext().sendBroadcastAsUser(mPowerSaveWhitelistChangedIntent, UserHandle.SYSTEM,
+                null /* receiverPermission */,
+                mPowerSaveWhitelistChangedOptions);
     }
 
     private void reportTempWhitelistChangedLocked(final int uid, final boolean added) {
         mHandler.obtainMessage(MSG_REPORT_TEMP_APP_WHITELIST_CHANGED, uid, added ? 1 : 0)
                 .sendToTarget();
-        Intent intent = new Intent(PowerManager.ACTION_POWER_SAVE_TEMP_WHITELIST_CHANGED);
-        intent.addFlags(Intent.FLAG_RECEIVER_REGISTERED_ONLY);
-        getContext().sendBroadcastAsUser(intent, UserHandle.SYSTEM);
+        getContext().sendBroadcastAsUser(mPowerSaveTempWhitelistChangedIntent, UserHandle.SYSTEM,
+                null /* receiverPermission */,
+                mPowerSaveTempWhilelistChangedOptions);
     }
 
     private void passWhiteListsToForceAppStandbyTrackerLocked() {
