@@ -676,12 +676,6 @@ public final class ViewRootImpl implements ViewParent,
     private BLASTBufferQueue mBlastBufferQueue;
 
     /**
-     * Transaction object that can be used to synchronize child SurfaceControl changes with
-     * ViewRootImpl SurfaceControl changes by the server. The object is passed along with
-     * the SurfaceChangedCallback.
-     */
-    private final Transaction mSurfaceChangedTransaction = new Transaction();
-    /**
      * Child container layer of {@code mSurface} with the same bounds as its parent, and cropped to
      * the surface insets. This surface is created only if a client requests it via {@link
      * #getBoundsLayer()}. By parenting to this bounds surface, child surfaces can ensure they do
@@ -2142,9 +2136,9 @@ public final class ViewRootImpl implements ViewParent,
         mSurfaceChangedCallbacks.remove(c);
     }
 
-    private void notifySurfaceCreated() {
+    private void notifySurfaceCreated(Transaction t) {
         for (int i = 0; i < mSurfaceChangedCallbacks.size(); i++) {
-            mSurfaceChangedCallbacks.get(i).surfaceCreated(mSurfaceChangedTransaction);
+            mSurfaceChangedCallbacks.get(i).surfaceCreated(t);
         }
     }
 
@@ -2153,9 +2147,9 @@ public final class ViewRootImpl implements ViewParent,
      * called if a new surface is created, only if the valid surface has been replaced with another
      * valid surface.
      */
-    private void notifySurfaceReplaced() {
+    private void notifySurfaceReplaced(Transaction t) {
         for (int i = 0; i < mSurfaceChangedCallbacks.size(); i++) {
-            mSurfaceChangedCallbacks.get(i).surfaceReplaced(mSurfaceChangedTransaction);
+            mSurfaceChangedCallbacks.get(i).surfaceReplaced(t);
         }
     }
 
@@ -3511,15 +3505,22 @@ public final class ViewRootImpl implements ViewParent,
             }
         }
 
+        boolean didUseTransaction = false;
         // These callbacks will trigger SurfaceView SurfaceHolder.Callbacks and must be invoked
         // after the measure pass. If its invoked before the measure pass and the app modifies
         // the view hierarchy in the callbacks, we could leave the views in a broken state.
         if (surfaceCreated) {
-            notifySurfaceCreated();
+            notifySurfaceCreated(mTransaction);
+            didUseTransaction = true;
         } else if (surfaceReplaced) {
-            notifySurfaceReplaced();
+            notifySurfaceReplaced(mTransaction);
+            didUseTransaction = true;
         } else if (surfaceDestroyed)  {
             notifySurfaceDestroyed();
+        }
+
+        if (didUseTransaction) {
+            applyTransactionOnDraw(mTransaction);
         }
 
         if (triggerGlobalLayoutListener) {
@@ -3726,15 +3727,8 @@ public final class ViewRootImpl implements ViewParent,
         final int seqId = mSyncSeqId;
         mWmsRequestSyncGroupState = WMS_SYNC_PENDING;
         mWmsRequestSyncGroup = new SurfaceSyncGroup(t -> {
-            mWmsRequestSyncGroupState = WMS_SYNC_RETURNED;
-            // Callback will be invoked on executor thread so post to main thread.
-            mHandler.postAtFrontOfQueue(() -> {
-                if (t != null) {
-                    mSurfaceChangedTransaction.merge(t);
-                }
-                mWmsRequestSyncGroupState = WMS_SYNC_MERGED;
-                reportDrawFinished(seqId);
-            });
+            mWmsRequestSyncGroupState = WMS_SYNC_MERGED;
+            reportDrawFinished(t, seqId);
         });
         if (DEBUG_BLAST) {
             Log.d(mTag, "Setup new sync id=" + mWmsRequestSyncGroup);
@@ -4397,18 +4391,22 @@ public final class ViewRootImpl implements ViewParent,
         }
     }
 
-    private void reportDrawFinished(int seqId) {
+    private void reportDrawFinished(@Nullable Transaction t, int seqId) {
         if (DEBUG_BLAST) {
-            Log.d(mTag, "reportDrawFinished " + Debug.getCallers(5));
+            Log.d(mTag, "reportDrawFinished");
         }
 
         try {
-            mWindowSession.finishDrawing(mWindow, mSurfaceChangedTransaction, seqId);
+            mWindowSession.finishDrawing(mWindow, t, seqId);
         } catch (RemoteException e) {
             Log.e(mTag, "Unable to report draw finished", e);
-            mSurfaceChangedTransaction.apply();
+            if (t != null) {
+                t.apply();
+            }
         } finally {
-            mSurfaceChangedTransaction.clear();
+            if (t != null) {
+                t.clear();
+            }
         }
     }
 
@@ -11335,6 +11333,13 @@ public final class ViewRootImpl implements ViewParent,
             updateSyncInProgressCount(mActiveSurfaceSyncGroup);
             if (!mIsInTraversal && !mTraversalScheduled) {
                 scheduleTraversals();
+            }
+            if (DEBUG_BLAST) {
+                Log.d(mTag, "Creating new active sync group " + mActiveSurfaceSyncGroup);
+            }
+        } else {
+            if (DEBUG_BLAST) {
+                Log.d(mTag, "Return already created active sync group " + mActiveSurfaceSyncGroup);
             }
         }
         return mActiveSurfaceSyncGroup;

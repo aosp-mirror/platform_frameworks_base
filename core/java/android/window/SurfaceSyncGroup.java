@@ -115,6 +115,9 @@ public class SurfaceSyncGroup {
     public SurfaceSyncGroup() {
         this(transaction -> {
             if (transaction != null) {
+                if (DEBUG) {
+                    Log.d(TAG, "Applying transaction " + transaction);
+                }
                 transaction.apply();
             }
         });
@@ -133,6 +136,10 @@ public class SurfaceSyncGroup {
      */
     public SurfaceSyncGroup(Consumer<Transaction> transactionReadyCallback) {
         mTransactionReadyCallback = transaction -> {
+            if (DEBUG && transaction != null) {
+                Log.d(TAG,
+                        "Sending non null transaction " + transaction + " to callback for " + this);
+            }
             transactionReadyCallback.accept(transaction);
             synchronized (mLock) {
                 for (Pair<Executor, Runnable> callback : mSyncCompleteCallbacks) {
@@ -238,6 +245,10 @@ public class SurfaceSyncGroup {
         TransactionReadyCallback transactionReadyCallback = new TransactionReadyCallback() {
             @Override
             public void onTransactionReady(Transaction t) {
+                if (DEBUG) {
+                    Log.d(TAG, "onTransactionReady called for" + surfaceSyncGroup + " and sent to "
+                            + this);
+                }
                 synchronized (mLock) {
                     if (t != null) {
                         // When an older parent sync group is added due to a child syncGroup getting
@@ -262,7 +273,12 @@ public class SurfaceSyncGroup {
                 return false;
             }
             mPendingSyncs.add(transactionReadyCallback);
+            if (DEBUG) {
+                Log.d(TAG, "addToSync " + surfaceSyncGroup + " to " + this + " mSyncReady="
+                        + mSyncReady + " mPendingSyncs=" + mPendingSyncs.size());
+            }
         }
+
         surfaceSyncGroup.onAddedToSyncGroup(this, transactionReadyCallback);
         return true;
     }
@@ -316,7 +332,9 @@ public class SurfaceSyncGroup {
                 // from the original parent are also combined with the new parent SurfaceSyncGroup.
                 if (mParentSyncGroup != null && mParentSyncGroup != parentSyncGroup) {
                     if (DEBUG) {
-                        Log.d(TAG, "Already part of sync group " + mParentSyncGroup + " " + this);
+                        Log.d(TAG, "Trying to add to " + parentSyncGroup
+                                + " but already part of sync group " + mParentSyncGroup + " "
+                                + this);
                     }
                     parentSyncGroup.addToSync(mParentSyncGroup, true /* parentSyncGroupMerge */);
                 }
