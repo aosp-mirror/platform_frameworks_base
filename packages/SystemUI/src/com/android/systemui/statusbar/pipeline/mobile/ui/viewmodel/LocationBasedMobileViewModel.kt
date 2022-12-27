@@ -18,11 +18,7 @@ package com.android.systemui.statusbar.pipeline.mobile.ui.viewmodel
 
 import android.graphics.Color
 import com.android.systemui.statusbar.phone.StatusBarLocation
-import com.android.systemui.statusbar.pipeline.shared.ConnectivityPipelineLogger
-import com.android.systemui.statusbar.pipeline.shared.ConnectivityPipelineLogger.Companion.logOutputChange
-import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.distinctUntilChanged
-import kotlinx.coroutines.flow.flowOf
+import com.android.systemui.statusbar.pipeline.StatusBarPipelineFlags
 
 /**
  * A view model for an individual mobile icon that embeds the notion of a [StatusBarLocation]. This
@@ -33,50 +29,51 @@ import kotlinx.coroutines.flow.flowOf
  */
 abstract class LocationBasedMobileViewModel(
     val commonImpl: MobileIconViewModelCommon,
-    val logger: ConnectivityPipelineLogger,
+    statusBarPipelineFlags: StatusBarPipelineFlags,
+    debugTint: Int,
 ) : MobileIconViewModelCommon by commonImpl {
-    abstract val tint: Flow<Int>
+    val useDebugColoring: Boolean = statusBarPipelineFlags.useDebugColoring()
+
+    val defaultColor: Int =
+        if (useDebugColoring) {
+            debugTint
+        } else {
+            Color.WHITE
+        }
 
     companion object {
         fun viewModelForLocation(
             commonImpl: MobileIconViewModelCommon,
-            logger: ConnectivityPipelineLogger,
+            statusBarPipelineFlags: StatusBarPipelineFlags,
             loc: StatusBarLocation,
         ): LocationBasedMobileViewModel =
             when (loc) {
-                StatusBarLocation.HOME -> HomeMobileIconViewModel(commonImpl, logger)
-                StatusBarLocation.KEYGUARD -> KeyguardMobileIconViewModel(commonImpl, logger)
-                StatusBarLocation.QS -> QsMobileIconViewModel(commonImpl, logger)
+                StatusBarLocation.HOME ->
+                    HomeMobileIconViewModel(commonImpl, statusBarPipelineFlags)
+                StatusBarLocation.KEYGUARD ->
+                    KeyguardMobileIconViewModel(commonImpl, statusBarPipelineFlags)
+                StatusBarLocation.QS -> QsMobileIconViewModel(commonImpl, statusBarPipelineFlags)
             }
     }
 }
 
 class HomeMobileIconViewModel(
     commonImpl: MobileIconViewModelCommon,
-    logger: ConnectivityPipelineLogger,
-) : MobileIconViewModelCommon, LocationBasedMobileViewModel(commonImpl, logger) {
-    override val tint: Flow<Int> =
-        flowOf(Color.CYAN)
-            .distinctUntilChanged()
-            .logOutputChange(logger, "HOME tint(${commonImpl.subscriptionId})")
-}
+    statusBarPipelineFlags: StatusBarPipelineFlags,
+) :
+    MobileIconViewModelCommon,
+    LocationBasedMobileViewModel(commonImpl, statusBarPipelineFlags, debugTint = Color.CYAN)
 
 class QsMobileIconViewModel(
     commonImpl: MobileIconViewModelCommon,
-    logger: ConnectivityPipelineLogger,
-) : MobileIconViewModelCommon, LocationBasedMobileViewModel(commonImpl, logger) {
-    override val tint: Flow<Int> =
-        flowOf(Color.GREEN)
-            .distinctUntilChanged()
-            .logOutputChange(logger, "QS tint(${commonImpl.subscriptionId})")
-}
+    statusBarPipelineFlags: StatusBarPipelineFlags,
+) :
+    MobileIconViewModelCommon,
+    LocationBasedMobileViewModel(commonImpl, statusBarPipelineFlags, debugTint = Color.GREEN)
 
 class KeyguardMobileIconViewModel(
     commonImpl: MobileIconViewModelCommon,
-    logger: ConnectivityPipelineLogger,
-) : MobileIconViewModelCommon, LocationBasedMobileViewModel(commonImpl, logger) {
-    override val tint: Flow<Int> =
-        flowOf(Color.MAGENTA)
-            .distinctUntilChanged()
-            .logOutputChange(logger, "KEYGUARD tint(${commonImpl.subscriptionId})")
-}
+    statusBarPipelineFlags: StatusBarPipelineFlags,
+) :
+    MobileIconViewModelCommon,
+    LocationBasedMobileViewModel(commonImpl, statusBarPipelineFlags, debugTint = Color.MAGENTA)

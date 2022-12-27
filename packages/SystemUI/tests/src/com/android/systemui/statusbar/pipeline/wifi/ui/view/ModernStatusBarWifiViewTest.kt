@@ -198,7 +198,7 @@ class ModernStatusBarWifiViewTest : SysuiTestCase() {
     @Test
     @Ignore("b/262660044")
     fun onDarkChanged_iconHasNewColor() {
-        whenever(statusBarPipelineFlags.useWifiDebugColoring()).thenReturn(false)
+        whenever(statusBarPipelineFlags.useDebugColoring()).thenReturn(false)
         val view = ModernStatusBarWifiView.constructAndBind(context, SLOT_NAME, viewModel)
         ViewUtils.attachView(view)
         testableLooper.processAllMessages()
@@ -208,11 +208,13 @@ class ModernStatusBarWifiViewTest : SysuiTestCase() {
         testableLooper.processAllMessages()
 
         assertThat(view.getIconView().imageTintList).isEqualTo(ColorStateList.valueOf(color))
+
+        ViewUtils.detachView(view)
     }
 
     @Test
     fun setStaticDrawableColor_iconHasNewColor() {
-        whenever(statusBarPipelineFlags.useWifiDebugColoring()).thenReturn(false)
+        whenever(statusBarPipelineFlags.useDebugColoring()).thenReturn(false)
         val view = ModernStatusBarWifiView.constructAndBind(context, SLOT_NAME, viewModel)
         ViewUtils.attachView(view)
         testableLooper.processAllMessages()
@@ -222,6 +224,8 @@ class ModernStatusBarWifiViewTest : SysuiTestCase() {
         testableLooper.processAllMessages()
 
         assertThat(view.getIconView().imageTintList).isEqualTo(ColorStateList.valueOf(color))
+
+        ViewUtils.detachView(view)
     }
 
     private fun View.getIconGroupView(): View {
