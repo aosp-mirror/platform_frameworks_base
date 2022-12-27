@@ -10626,6 +10626,7 @@ package android.content {
     field public static final String EXTRA_CHANGED_COMPONENT_NAME_LIST = "android.intent.extra.changed_component_name_list";
     field public static final String EXTRA_CHANGED_PACKAGE_LIST = "android.intent.extra.changed_package_list";
     field public static final String EXTRA_CHANGED_UID_LIST = "android.intent.extra.changed_uid_list";
+    field public static final String EXTRA_CHOOSER_CUSTOM_ACTIONS = "android.intent.extra.CHOOSER_CUSTOM_ACTIONS";
     field public static final String EXTRA_CHOOSER_REFINEMENT_INTENT_SENDER = "android.intent.extra.CHOOSER_REFINEMENT_INTENT_SENDER";
     field public static final String EXTRA_CHOOSER_TARGETS = "android.intent.extra.CHOOSER_TARGETS";
     field public static final String EXTRA_CHOSEN_COMPONENT = "android.intent.extra.CHOSEN_COMPONENT";
@@ -39357,6 +39358,20 @@ package android.service.carrier {
 }
 
 package android.service.chooser {
+
+  public final class ChooserAction implements android.os.Parcelable {
+    method public int describeContents();
+    method @NonNull public android.app.PendingIntent getAction();
+    method @NonNull public android.graphics.drawable.Icon getIcon();
+    method @NonNull public CharSequence getLabel();
+    method public void writeToParcel(@NonNull android.os.Parcel, int);
+    field @NonNull public static final android.os.Parcelable.Creator<android.service.chooser.ChooserAction> CREATOR;
+  }
+
+  public static final class ChooserAction.Builder {
+    ctor public ChooserAction.Builder(@NonNull android.graphics.drawable.Icon, @NonNull CharSequence, @NonNull android.app.PendingIntent);
+    method @NonNull public android.service.chooser.ChooserAction build();
+  }
 
   @Deprecated public final class ChooserTarget implements android.os.Parcelable {
     ctor @Deprecated public ChooserTarget(CharSequence, android.graphics.drawable.Icon, float, android.content.ComponentName, @Nullable android.os.Bundle);

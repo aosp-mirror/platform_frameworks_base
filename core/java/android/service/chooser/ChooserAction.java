@@ -27,11 +27,9 @@ import java.util.Objects;
 
 /**
  * A ChooserAction is an app-defined action that can be provided to the Android Sharesheet to
- * be shown to the user when {@link android.content.Intent.ACTION_CHOOSER} is invoked.
+ * be shown to the user when {@link android.content.Intent#ACTION_CHOOSER} is invoked.
  *
- * @see android.content.Intent.EXTRA_CHOOSER_CUSTOM_ACTIONS
- * @see android.content.Intent.EXTRA_CHOOSER_PAYLOAD_RESELECTION_ACTION
- * @hide
+ * @see android.content.Intent#EXTRA_CHOOSER_CUSTOM_ACTIONS
  */
 public final class ChooserAction implements Parcelable {
     private final Icon mIcon;
@@ -88,6 +86,7 @@ public final class ChooserAction implements Parcelable {
         return "ChooserAction {" + "label=" + mLabel + ", intent=" + mAction + "}";
     }
 
+    @NonNull
     public static final Parcelable.Creator<ChooserAction> CREATOR =
             new Creator<ChooserAction>() {
                 @Override
@@ -137,6 +136,7 @@ public final class ChooserAction implements Parcelable {
          * object.
          * @return the built action
          */
+        @NonNull
         public ChooserAction build() {
             return new ChooserAction(mIcon, mLabel, mAction);
         }
