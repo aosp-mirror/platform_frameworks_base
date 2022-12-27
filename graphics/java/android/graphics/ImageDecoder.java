@@ -1682,11 +1682,16 @@ public final class ImageDecoder implements AutoCloseable {
      * {@link #decodeBitmap decodeBitmap} when setting a non-RGB color space
      * such as {@link ColorSpace.Named#CIE_LAB Lab}.</p>
      *
-     * <p class="note">The specified color space's transfer function must be
+     * <p class="note">Prior to {@link android.os.Build.VERSION_CODES#UPSIDE_DOWN_CAKE},
+     * the specified color space's transfer function must be
      * an {@link ColorSpace.Rgb.TransferParameters ICC parametric curve}. An
      * <code>IllegalArgumentException</code> will be thrown by the decode methods
      * if calling {@link ColorSpace.Rgb#getTransferParameters()} on the
-     * specified color space returns null.</p>
+     * specified color space returns null.
+     * Starting from {@link android.os.Build.VERSION_CODES#UPSIDE_DOWN_CAKE},
+     * the color spaces with non ICC parametric curve transfer function are allowed.
+     * E.g., {@link ColorSpace.Named#BT2020_HLG BT2020_HLG}.
+     * </p>
      *
      * <p>Like all setters on ImageDecoder, this must be called inside
      * {@link OnHeaderDecodedListener#onHeaderDecoded onHeaderDecoded}.</p>
