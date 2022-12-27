@@ -11880,6 +11880,7 @@ package android.service.notification {
     field @NonNull public static final android.os.Parcelable.Creator<android.service.notification.Adjustment> CREATOR;
     field public static final String KEY_CONTEXTUAL_ACTIONS = "key_contextual_actions";
     field public static final String KEY_IMPORTANCE = "key_importance";
+    field public static final String KEY_IMPORTANCE_PROPOSAL = "key_importance_proposal";
     field public static final String KEY_NOT_CONVERSATION = "key_not_conversation";
     field public static final String KEY_PEOPLE = "key_people";
     field public static final String KEY_RANKING_SCORE = "key_ranking_score";
@@ -11918,6 +11919,10 @@ package android.service.notification {
 
   public abstract class NotificationListenerService extends android.app.Service {
     method public void onNotificationRemoved(@NonNull android.service.notification.StatusBarNotification, @NonNull android.service.notification.NotificationListenerService.RankingMap, @NonNull android.service.notification.NotificationStats, int);
+  }
+
+  public static class NotificationListenerService.Ranking {
+    method public int getProposedImportance();
   }
 
   public final class NotificationStats implements android.os.Parcelable {
