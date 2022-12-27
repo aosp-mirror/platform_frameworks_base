@@ -619,8 +619,6 @@ final class Constants {
     })
     @interface HpdSignalType {}
 
-    static final String DEVICE_CONFIG_FEATURE_FLAG_SOUNDBAR_MODE = "soundbar_mode";
-
     private Constants() {
         /* cannot be instantiated */
     }

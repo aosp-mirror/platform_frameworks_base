@@ -127,7 +127,6 @@ public class HdmiCecControllerTest {
         localDevices.add(playbackDevice);
 
         mHdmiControlServiceSpy.initService();
-        mHdmiControlServiceSpy.enableAllFeatureFlags();
         mHdmiControlServiceSpy.allocateLogicalAddress(localDevices,
                 HdmiControlService.INITIATED_BY_ENABLE_CEC);
         mHdmiControlServiceSpy.onBootPhase(SystemService.PHASE_SYSTEM_SERVICES_READY);
