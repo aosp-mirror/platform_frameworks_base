@@ -353,6 +353,11 @@ public final class VcnCellUnderlyingNetworkTemplate extends VcnUnderlyingNetwork
         return mCapabilitiesMatchCriteria.get(NET_CAPABILITY_RCS);
     }
 
+    /** @hide */
+    public Map<Integer, Integer> getCapabilitiesMatchCriteria() {
+        return Collections.unmodifiableMap(new HashMap<>(mCapabilitiesMatchCriteria));
+    }
+
     @Override
     public int hashCode() {
         return Objects.hash(

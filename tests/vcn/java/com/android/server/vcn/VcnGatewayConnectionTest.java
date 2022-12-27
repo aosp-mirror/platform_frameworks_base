@@ -143,9 +143,9 @@ public class VcnGatewayConnectionTest extends VcnGatewayConnectionTestBase {
         capBuilder.setLinkDownstreamBandwidthKbps(TEST_DOWNSTREAM_BANDWIDTH);
         capBuilder.setAdministratorUids(new int[] {TEST_UID});
         final Network underlyingNetwork = mock(Network.class, CALLS_REAL_METHODS);
-        UnderlyingNetworkRecord record = new UnderlyingNetworkRecord(
-                underlyingNetwork,
-                capBuilder.build(), new LinkProperties(), false);
+        UnderlyingNetworkRecord record =
+                getTestNetworkRecord(
+                        underlyingNetwork, capBuilder.build(), new LinkProperties(), false);
         final NetworkCapabilities vcnCaps =
                 VcnGatewayConnection.buildNetworkCapabilities(
                         VcnGatewayConnectionConfigTest.buildTestConfig(),
@@ -211,7 +211,7 @@ public class VcnGatewayConnectionTest extends VcnGatewayConnectionTestBase {
         doReturn(TEST_DNS_ADDRESSES).when(childSessionConfig).getInternalDnsServers();
 
         UnderlyingNetworkRecord record =
-                new UnderlyingNetworkRecord(
+                getTestNetworkRecord(
                         mock(Network.class, CALLS_REAL_METHODS),
                         new NetworkCapabilities.Builder().build(),
                         underlyingLp,
