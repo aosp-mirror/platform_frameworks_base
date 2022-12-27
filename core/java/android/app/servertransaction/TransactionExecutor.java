@@ -226,7 +226,8 @@ public class TransactionExecutor {
                     break;
                 case ON_RESUME:
                     mTransactionHandler.handleResumeActivity(r, false /* finalStateRequest */,
-                            r.isForward, "LIFECYCLER_RESUME_ACTIVITY");
+                            r.isForward, false /* shouldSendCompatFakeFocus */,
+                            "LIFECYCLER_RESUME_ACTIVITY");
                     break;
                 case ON_PAUSE:
                     mTransactionHandler.handlePauseActivity(r, false /* finished */,
