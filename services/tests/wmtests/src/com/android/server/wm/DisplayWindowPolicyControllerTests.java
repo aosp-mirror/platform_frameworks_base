@@ -188,7 +188,7 @@ public class DisplayWindowPolicyControllerTests extends WindowTestsBase {
                 /* options */null,
                 /* inTask */null,
                 /* inTaskFragment */ null,
-                /* restrictedBgActivity */false,
+                /* balCode */ BackgroundActivityStartController.BAL_ALLOW_DEFAULT,
                 /* intentGrants */null);
 
         assertEquals(result, START_ABORTED);
@@ -212,7 +212,7 @@ public class DisplayWindowPolicyControllerTests extends WindowTestsBase {
                 /* options= */null,
                 /* inTask= */null,
                 /* inTaskFragment= */ null,
-                /* restrictedBgActivity= */false,
+                /* balCode= */ BackgroundActivityStartController.BAL_ALLOW_DEFAULT,
                 /* intentGrants= */null);
 
         assertEquals(result, START_ABORTED);

@@ -499,13 +499,22 @@ public class PackageManagerService implements PackageSender, TestUtilityService 
     private static final String PROPERTY_KNOWN_DIGESTERS_LIST = "known_digesters_list";
 
     /**
-     * Whether of not requesting the approval before committing sessions is available.
+     * Whether or not requesting the approval before committing sessions is available.
      *
      * Flag type: {@code boolean}
      * Namespace: NAMESPACE_PACKAGE_MANAGER_SERVICE
      */
     private static final String PROPERTY_IS_PRE_APPROVAL_REQUEST_AVAILABLE =
             "is_preapproval_available";
+
+    /**
+     * Whether or not the update ownership enforcement is available.
+     *
+     * Flag type: {@code boolean}
+     * Namespace: NAMESPACE_PACKAGE_MANAGER_SERVICE
+     */
+    private static final String PROPERTY_IS_UPDATE_OWNERSHIP_ENFORCEMENT_AVAILABLE =
+            "is_update_ownership_enforcement_available";
 
     /**
      * The default response for package verification timeout.
@@ -7069,6 +7078,16 @@ public class PackageManagerService implements PackageSender, TestUtilityService 
         try {
             return DeviceConfig.getBoolean(NAMESPACE_PACKAGE_MANAGER_SERVICE,
                     PROPERTY_IS_PRE_APPROVAL_REQUEST_AVAILABLE, true /* defaultValue */);
+        } finally {
+            Binder.restoreCallingIdentity(token);
+        }
+    }
+
+    static boolean isUpdateOwnershipEnforcementAvailable() {
+        final long token = Binder.clearCallingIdentity();
+        try {
+            return DeviceConfig.getBoolean(NAMESPACE_PACKAGE_MANAGER_SERVICE,
+                    PROPERTY_IS_UPDATE_OWNERSHIP_ENFORCEMENT_AVAILABLE, false /* defaultValue */);
         } finally {
             Binder.restoreCallingIdentity(token);
         }

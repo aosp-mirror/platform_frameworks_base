@@ -1082,6 +1082,7 @@ public class UsbPortManager {
 
     private void handlePortComplianceWarningLocked(PortInfo portInfo, IndentingPrintWriter pw) {
         logAndPrint(Log.INFO, pw, "USB port compliance warning changed: " + portInfo);
+        logToStatsdComplianceWarnings(portInfo);
         sendComplianceWarningBroadcastLocked(portInfo);
     }
 
@@ -1107,6 +1108,33 @@ public class UsbPortManager {
                 return ServiceProtoEnums.CONTAMINANT_STATUS_UNKNOWN;
         }
     }
+
+    // Constants have to be converted to stats-log constants
+    private static int[] toStatsLogConstant(@NonNull int[] complianceWarnings) {
+        IntArray complianceWarningsProto = new IntArray();
+        for (int warning : complianceWarnings) {
+            switch (warning) {
+                case UsbPortStatus.COMPLIANCE_WARNING_OTHER:
+                    complianceWarningsProto.add(FrameworkStatsLog
+                        .USB_COMPLIANCE_WARNINGS_REPORTED__COMPLIANCE_WARNINGS__COMPLIANCE_WARNING_OTHER);
+                    continue;
+                case UsbPortStatus.COMPLIANCE_WARNING_DEBUG_ACCESSORY:
+                    complianceWarningsProto.add(FrameworkStatsLog
+                        .USB_COMPLIANCE_WARNINGS_REPORTED__COMPLIANCE_WARNINGS__COMPLIANCE_WARNING_DEBUG_ACCESSORY);
+                    continue;
+                case UsbPortStatus.COMPLIANCE_WARNING_BC_1_2:
+                    complianceWarningsProto.add(FrameworkStatsLog
+                        .USB_COMPLIANCE_WARNINGS_REPORTED__COMPLIANCE_WARNINGS__COMPLIANCE_WARNING_BC_1_2);
+                    continue;
+                case UsbPortStatus.COMPLIANCE_WARNING_MISSING_RP:
+                    complianceWarningsProto.add(FrameworkStatsLog
+                        .USB_COMPLIANCE_WARNINGS_REPORTED__COMPLIANCE_WARNINGS__COMPLIANCE_WARNING_MISSING_RP);
+                    continue;
+            }
+        }
+        return complianceWarningsProto.toArray();
+    }
+
 
     private void sendPortChangedBroadcastLocked(PortInfo portInfo) {
         final Intent intent = new Intent(UsbManager.ACTION_USB_PORT_CHANGED);
@@ -1217,6 +1245,20 @@ public class UsbPortManager {
                     convertContaminantDetectionStatusToProto(
                             portInfo.mUsbPortStatus.getContaminantDetectionStatus()));
         }
+    }
+
+    // Need to create new version to prevent double counting existing stats due
+    // to new broadcast
+    private void logToStatsdComplianceWarnings(PortInfo portInfo) {
+        if (portInfo.mUsbPortStatus == null) {
+            FrameworkStatsLog.write(FrameworkStatsLog.USB_COMPLIANCE_WARNINGS_REPORTED,
+                portInfo.mUsbPort.getId(), new int[0]);
+            return;
+        }
+
+        FrameworkStatsLog.write(FrameworkStatsLog.USB_COMPLIANCE_WARNINGS_REPORTED,
+                portInfo.mUsbPort.getId(),
+                toStatsLogConstant(portInfo.mUsbPortStatus.getComplianceWarnings()));
     }
 
     public static void logAndPrint(int priority, IndentingPrintWriter pw, String msg) {

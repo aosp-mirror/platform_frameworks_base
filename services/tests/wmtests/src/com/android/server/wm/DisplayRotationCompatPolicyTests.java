@@ -398,7 +398,8 @@ public final class DisplayRotationCompatPolicyTests extends WindowTestsBase {
         final ClientTransaction transaction = ClientTransaction.obtain(
                 mActivity.app.getThread(), mActivity.token);
         transaction.addCallback(RefreshCallbackItem.obtain(cycleThroughStop ? ON_STOP : ON_PAUSE));
-        transaction.setLifecycleStateRequest(ResumeActivityItem.obtain(/* isForward */ false));
+        transaction.setLifecycleStateRequest(ResumeActivityItem.obtain(
+                /* isForward */ false, /* shouldSendCompatFakeFocus */ false));
 
         verify(mActivity.mAtmService.getLifecycleManager(), times(refreshRequested ? 1 : 0))
                 .scheduleTransaction(eq(transaction));

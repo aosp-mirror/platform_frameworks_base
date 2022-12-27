@@ -108,7 +108,8 @@ public abstract class ClientTransactionHandler {
      * @param reason Reason for performing this operation.
      */
     public abstract void handleResumeActivity(@NonNull ActivityClientRecord r,
-            boolean finalStateRequest, boolean isForward, String reason);
+            boolean finalStateRequest, boolean isForward, boolean shouldSendCompatFakeFocus,
+            String reason);
 
     /**
      * Notify the activity about top resumed state change.

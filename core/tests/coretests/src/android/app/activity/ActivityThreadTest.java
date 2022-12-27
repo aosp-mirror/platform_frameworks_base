@@ -775,7 +775,8 @@ public class ActivityThreadTest {
         final ClientTransactionItem callbackItem = ActivityRelaunchItem.obtain(null,
                 null, 0, new MergedConfiguration(), false /* preserveWindow */);
         final ResumeActivityItem resumeStateRequest =
-                ResumeActivityItem.obtain(true /* isForward */);
+                ResumeActivityItem.obtain(true /* isForward */,
+                        false /* shouldSendCompatFakeFocus*/);
 
         final ClientTransaction transaction = newTransaction(activity);
         transaction.addCallback(callbackItem);
@@ -786,7 +787,8 @@ public class ActivityThreadTest {
 
     private static ClientTransaction newResumeTransaction(Activity activity) {
         final ResumeActivityItem resumeStateRequest =
-                ResumeActivityItem.obtain(true /* isForward */);
+                ResumeActivityItem.obtain(true /* isForward */,
+                        false /* shouldSendCompatFakeFocus */);
 
         final ClientTransaction transaction = newTransaction(activity);
         transaction.setLifecycleStateRequest(resumeStateRequest);
