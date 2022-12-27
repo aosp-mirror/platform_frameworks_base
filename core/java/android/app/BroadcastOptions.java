@@ -28,7 +28,7 @@ import android.os.Bundle;
  * {@hide}
  */
 @SystemApi
-public class BroadcastOptions {
+public class BroadcastOptions extends ComponentOptions {
     private long mTemporaryAppWhitelistDuration;
     private int mMinManifestReceiverApiLevel = 0;
     private int mMaxManifestReceiverApiLevel = Build.VERSION_CODES.CUR_DEVELOPMENT;
@@ -72,10 +72,12 @@ public class BroadcastOptions {
     }
 
     private BroadcastOptions() {
+        super();
     }
 
     /** @hide */
     public BroadcastOptions(Bundle opts) {
+        super(opts);
         mTemporaryAppWhitelistDuration = opts.getLong(KEY_TEMPORARY_APP_WHITELIST_DURATION);
         mMinManifestReceiverApiLevel = opts.getInt(KEY_MIN_MANIFEST_RECEIVER_API_LEVEL, 0);
         mMaxManifestReceiverApiLevel = opts.getInt(KEY_MAX_MANIFEST_RECEIVER_API_LEVEL,
@@ -174,6 +176,24 @@ public class BroadcastOptions {
     }
 
     /**
+     * Set PendingIntent activity is allowed to be started in the background if the caller
+     * can start background activities.
+     * @hide
+     */
+    public void setPendingIntentBackgroundActivityLaunchAllowed(boolean allowed) {
+        super.setPendingIntentBackgroundActivityLaunchAllowed(allowed);
+    }
+
+    /**
+     * Get PendingIntent activity is allowed to be started in the background if the caller
+     * can start background activities.
+     * @hide
+     */
+    public boolean isPendingIntentBackgroundActivityLaunchAllowed() {
+        return super.isPendingIntentBackgroundActivityLaunchAllowed();
+    }
+
+    /**
      * Returns the created options as a Bundle, which can be passed to
      * {@link android.content.Context#sendBroadcast(android.content.Intent)
      * Context.sendBroadcast(Intent)} and related methods.
@@ -181,8 +201,9 @@ public class BroadcastOptions {
      * object; you must not modify it, but can supply it to the sendBroadcast
      * methods that take an options Bundle.
      */
+    @Override
     public Bundle toBundle() {
-        Bundle b = new Bundle();
+        Bundle b = super.toBundle();
         if (mTemporaryAppWhitelistDuration > 0) {
             b.putLong(KEY_TEMPORARY_APP_WHITELIST_DURATION, mTemporaryAppWhitelistDuration);
         }
