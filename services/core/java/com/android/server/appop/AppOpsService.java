@@ -956,6 +956,8 @@ public class AppOpsService extends IAppOpsService.Stub implements PersistenceSch
         }
         mAppOpsCheckingService =
                 new AppOpsCheckingServiceImpl(this, this, handler, context, mSwitchedOps);
+        //mAppOpsCheckingService = new AppOpsCheckingServiceLoggingDecorator(
+        //        LocalServices.getService(AppOpsCheckingServiceInterface.class));
         mAppOpsRestrictions = new AppOpsRestrictionsImpl(context, handler,
                 mAppOpsCheckingService);
 

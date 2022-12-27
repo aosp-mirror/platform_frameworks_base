@@ -157,7 +157,7 @@ data class Permission(
         if (areGidsPerUser) {
             IntArray(gids.size) { i -> UserHandle.getUid(userId, gids[i]) }
         } else {
-            gids.clone()
+            gids.copyOf()
         }
 
     companion object {

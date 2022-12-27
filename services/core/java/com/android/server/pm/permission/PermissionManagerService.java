@@ -119,7 +119,7 @@ public class PermissionManagerService extends IPermissionManager.Stub {
     private final AppOpsManager mAppOpsManager;
 
     private final Context mContext;
-    private final PermissionManagerServiceImpl mPermissionManagerServiceImpl;
+    private final PermissionManagerServiceInterface mPermissionManagerServiceImpl;
 
     @NonNull
     private final AttributionSourceRegistry mAttributionSourceRegistry;
@@ -152,6 +152,8 @@ public class PermissionManagerService extends IPermissionManager.Stub {
 
         mPermissionManagerServiceImpl = new PermissionManagerServiceImpl(context,
                 availableFeatures);
+        //mPermissionManagerServiceImpl = new PermissionManagerServiceLoggingDecorator(
+        //        LocalServices.getService(PermissionManagerServiceInterface.class));
     }
 
     /**
