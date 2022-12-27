@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.android.systemui.statusbar.pipeline.wifi.ui.view
+package com.android.systemui.statusbar.pipeline.shared.ui.view
 
 import android.content.Context
 import android.graphics.Rect

@@ -40,6 +40,7 @@ import com.android.systemui.statusbar.pipeline.airplane.ui.viewmodel.AirplaneMod
 import com.android.systemui.statusbar.pipeline.shared.ConnectivityConstants
 import com.android.systemui.statusbar.pipeline.shared.ConnectivityPipelineLogger
 import com.android.systemui.statusbar.pipeline.shared.data.repository.FakeConnectivityRepository
+import com.android.systemui.statusbar.pipeline.shared.ui.view.ModernStatusBarWifiView
 import com.android.systemui.statusbar.pipeline.wifi.data.model.WifiNetworkModel
 import com.android.systemui.statusbar.pipeline.wifi.data.repository.FakeWifiRepository
 import com.android.systemui.statusbar.pipeline.wifi.domain.interactor.WifiInteractor

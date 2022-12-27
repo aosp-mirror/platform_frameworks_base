@@ -42,7 +42,7 @@ import com.android.systemui.statusbar.phone.StatusBarSignalPolicy.MobileIconStat
 import com.android.systemui.statusbar.phone.StatusBarSignalPolicy.WifiIconState;
 import com.android.systemui.statusbar.pipeline.mobile.ui.view.ModernStatusBarMobileView;
 import com.android.systemui.statusbar.pipeline.mobile.ui.viewmodel.MobileIconsViewModel;
-import com.android.systemui.statusbar.pipeline.wifi.ui.view.ModernStatusBarWifiView;
+import com.android.systemui.statusbar.pipeline.shared.ui.view.ModernStatusBarWifiView;
 import com.android.systemui.statusbar.pipeline.wifi.ui.viewmodel.LocationBasedWifiViewModel;
 
 import java.util.ArrayList;
