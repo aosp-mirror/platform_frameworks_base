@@ -655,8 +655,7 @@ final class BroadcastRecord extends Binder {
         // TODO: migrate alarm-prioritization flag to BroadcastConstants
         return (isForeground()
                 || interactive
-                || alarm)
-                && receivers.size() == 1;
+                || alarm);
     }
 
     @NonNull String getHostingRecordTriggerType() {
