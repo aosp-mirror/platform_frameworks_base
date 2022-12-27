@@ -19,8 +19,10 @@ package com.google.android.lint
 import com.android.tools.lint.detector.api.getUMethod
 import org.jetbrains.uast.UAnnotation
 import org.jetbrains.uast.UCallExpression
+import org.jetbrains.uast.UElement
 import org.jetbrains.uast.UMethod
 import org.jetbrains.uast.UParameter
+import org.jetbrains.uast.UQualifiedReferenceExpression
 
 fun isPermissionMethodCall(callExpression: UCallExpression): Boolean {
     val method = callExpression.resolve()?.getUMethod() ?: return false
@@ -36,3 +38,15 @@ fun getPermissionMethodAnnotation(method: UMethod?): UAnnotation? = method?.uAnn
 fun hasPermissionNameAnnotation(parameter: UParameter) = parameter.annotations.any {
     it.hasQualifiedName(ANNOTATION_PERMISSION_NAME)
 }
+
+/**
+ * Attempts to return a CallExpression from a QualifiedReferenceExpression (or returns it directly if passed directly)
+ * @param callOrReferenceCall expected to be UCallExpression or UQualifiedReferenceExpression
+ * @return UCallExpression, if available
+ */
+fun findCallExpression(callOrReferenceCall: UElement?): UCallExpression? =
+        when (callOrReferenceCall) {
+            is UCallExpression -> callOrReferenceCall
+            is UQualifiedReferenceExpression -> callOrReferenceCall.selector as? UCallExpression
+            else -> null
+        }

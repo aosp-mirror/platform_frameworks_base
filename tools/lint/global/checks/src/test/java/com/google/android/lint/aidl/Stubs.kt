@@ -23,6 +23,8 @@ val contextStub: TestFile = java(
             public void enforceCallingPermission(@android.content.pm.PermissionName String permission, String message) {}
             @android.content.pm.PermissionMethod(orSelf = true)
             public int checkCallingOrSelfPermission(@android.content.pm.PermissionName String permission, String message) {}
+            @android.content.pm.PermissionMethod
+            public int checkCallingPermission(@android.content.pm.PermissionName String permission, String message) {}
         }
     """
 ).indented()

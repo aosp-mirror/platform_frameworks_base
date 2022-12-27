@@ -23,12 +23,11 @@ import com.android.tools.lint.detector.api.Issue
 import com.android.tools.lint.detector.api.JavaContext
 import com.android.tools.lint.detector.api.Scope
 import com.android.tools.lint.detector.api.Severity
+import com.google.android.lint.findCallExpression
 import org.jetbrains.uast.UBlockExpression
-import org.jetbrains.uast.UCallExpression
 import org.jetbrains.uast.UElement
 import org.jetbrains.uast.UIfExpression
 import org.jetbrains.uast.UMethod
-import org.jetbrains.uast.UQualifiedReferenceExpression
 import org.jetbrains.uast.skipParenthesizedExprDown
 
 /**
@@ -102,18 +101,13 @@ class SimpleManualPermissionEnforcementDetector : AidlImplementationDetector() {
      */
     private fun getPermissionCheckFix(startingExpression: UElement?, context: JavaContext):
             EnforcePermissionFix? {
-        return when (startingExpression) {
-            is UQualifiedReferenceExpression -> getPermissionCheckFix(
-                    startingExpression.selector, context
-            )
-
-            is UIfExpression -> getPermissionCheckFix(startingExpression.condition, context)
-
-            is UCallExpression -> return EnforcePermissionFix
-                    .fromCallExpression(context, startingExpression)
-
-            else -> null
+        if (startingExpression is UIfExpression) {
+            return EnforcePermissionFix.fromIfExpression(context, startingExpression)
         }
+        findCallExpression(startingExpression)?.let {
+            return EnforcePermissionFix.fromCallExpression(context, it)
+        }
+        return null
     }
 
     companion object {
