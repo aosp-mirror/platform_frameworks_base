@@ -27,6 +27,7 @@ import com.android.systemui.statusbar.BaseStatusBarFrameLayout
 import com.android.systemui.statusbar.StatusBarIconView
 import com.android.systemui.statusbar.StatusBarIconView.STATE_DOT
 import com.android.systemui.statusbar.StatusBarIconView.STATE_HIDDEN
+import com.android.systemui.statusbar.pipeline.shared.ui.binder.ModernStatusBarViewBinding
 import com.android.systemui.statusbar.pipeline.wifi.ui.binder.WifiViewBinder
 import com.android.systemui.statusbar.pipeline.wifi.ui.viewmodel.LocationBasedWifiViewModel
 
@@ -40,7 +41,7 @@ class ModernStatusBarWifiView(
 ) : BaseStatusBarFrameLayout(context, attrs) {
 
     private lateinit var slot: String
-    private lateinit var binding: WifiViewBinder.Binding
+    private lateinit var binding: ModernStatusBarViewBinding
 
     @StatusBarIconView.VisibleState
     private var iconVisibleState: Int = STATE_HIDDEN
