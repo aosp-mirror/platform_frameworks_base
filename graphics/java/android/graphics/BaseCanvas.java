@@ -673,8 +673,6 @@ public abstract class BaseCanvas {
      * @param mesh {@link Mesh} object that will be drawn to the screen
      * @param blendMode {@link BlendMode} used to blend mesh primitives with the Paint color/shader
      * @param paint {@link Paint} used to provide a color/shader/blend mode.
-     *
-     * @hide
      */
     public void drawMesh(@NonNull Mesh mesh, BlendMode blendMode, @NonNull Paint paint) {
         if (!isHardwareAccelerated() && onHwFeatureInSwMode()) {
