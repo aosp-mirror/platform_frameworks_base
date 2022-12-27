@@ -183,7 +183,6 @@ public class RoutingControlActionTest {
                         true, false, false);
         mNativeWrapper.setPortInfo(hdmiPortInfos);
         mHdmiControlService.initService();
-        mHdmiControlService.enableAllFeatureFlags();
         mHdmiControlService.onBootPhase(PHASE_SYSTEM_SERVICES_READY);
         mPowerManager = new FakePowerManagerWrapper(context);
         mHdmiControlService.setPowerManager(mPowerManager);
