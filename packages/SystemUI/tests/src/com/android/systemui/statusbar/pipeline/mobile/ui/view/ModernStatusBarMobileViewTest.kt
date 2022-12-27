@@ -41,7 +41,6 @@ import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.TestScope
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import org.junit.Before
-import org.junit.Ignore
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.mockito.Mock
@@ -143,7 +142,6 @@ class ModernStatusBarMobileViewTest : SysuiTestCase() {
     }
 
     @Test
-    @Ignore("b/262660044")
     fun onDarkChanged_iconHasNewColor() {
         whenever(statusBarPipelineFlags.useDebugColoring()).thenReturn(false)
         val view = ModernStatusBarMobileView.constructAndBind(context, SLOT_NAME, viewModel)

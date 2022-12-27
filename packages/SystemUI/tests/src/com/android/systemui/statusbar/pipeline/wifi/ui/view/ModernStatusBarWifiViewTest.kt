@@ -50,7 +50,6 @@ import com.google.common.truth.Truth.assertThat
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import org.junit.Before
-import org.junit.Ignore
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.mockito.Mock
@@ -196,7 +195,6 @@ class ModernStatusBarWifiViewTest : SysuiTestCase() {
     }
 
     @Test
-    @Ignore("b/262660044")
     fun onDarkChanged_iconHasNewColor() {
         whenever(statusBarPipelineFlags.useDebugColoring()).thenReturn(false)
         val view = ModernStatusBarWifiView.constructAndBind(context, SLOT_NAME, viewModel)
