@@ -946,6 +946,35 @@ public class BroadcastQueueModernImplTest {
                 List.of(musicVolumeChanged, alarmVolumeChanged, timeTick));
     }
 
+    @Test
+    public void testVerifyEnqueuedTime_withReplacePending() {
+        final Intent userPresent = new Intent(Intent.ACTION_USER_PRESENT);
+        userPresent.addFlags(Intent.FLAG_RECEIVER_REPLACE_PENDING);
+
+        // Halt all processing so that we get a consistent view
+        mHandlerThread.getLooper().getQueue().postSyncBarrier();
+
+        final BroadcastRecord userPresentRecord1 = makeBroadcastRecord(userPresent);
+        final BroadcastRecord userPresentRecord2 = makeBroadcastRecord(userPresent);
+
+        mImpl.enqueueBroadcastLocked(userPresentRecord1);
+        mImpl.enqueueBroadcastLocked(userPresentRecord2);
+
+        final BroadcastProcessQueue queue = mImpl.getProcessQueue(PACKAGE_GREEN,
+                getUidForPackage(PACKAGE_GREEN));
+        queue.makeActiveNextPending();
+
+        // Verify that there is only one record pending and its enqueueTime is
+        // same as that of userPresentRecord1.
+        final BroadcastRecord activeRecord = queue.getActive();
+        assertEquals(userPresentRecord1.enqueueTime, activeRecord.enqueueTime);
+        assertEquals(userPresentRecord1.enqueueRealTime, activeRecord.enqueueRealTime);
+        assertEquals(userPresentRecord1.enqueueClockTime, activeRecord.enqueueClockTime);
+        assertThat(activeRecord.originalEnqueueClockTime)
+                .isGreaterThan(activeRecord.enqueueClockTime);
+        assertTrue(queue.isEmpty());
+    }
+
     private Intent createPackageChangedIntent(int uid, List<String> componentNameList) {
         final Intent packageChangedIntent = new Intent(Intent.ACTION_PACKAGE_CHANGED);
         packageChangedIntent.putExtra(Intent.EXTRA_UID, uid);

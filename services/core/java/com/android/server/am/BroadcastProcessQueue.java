@@ -266,6 +266,7 @@ class BroadcastProcessQueue {
                 // Exact match found; perform in-place swap
                 args.arg1 = record;
                 args.argi1 = recordIndex;
+                record.copyEnqueueTimeFrom(testRecord);
                 onBroadcastDequeued(testRecord, testRecordIndex);
                 onBroadcastEnqueued(record, recordIndex);
                 return true;
