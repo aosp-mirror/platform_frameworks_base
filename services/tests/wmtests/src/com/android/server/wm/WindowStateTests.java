@@ -48,7 +48,6 @@ import static android.view.WindowManager.LayoutParams.TYPE_INPUT_METHOD;
 import static android.view.WindowManager.LayoutParams.TYPE_SECURE_SYSTEM_OVERLAY;
 import static android.view.WindowManager.LayoutParams.TYPE_TOAST;
 
-import static com.android.dx.mockito.inline.extended.ExtendedMockito.doNothing;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.doReturn;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.doThrow;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.mock;
@@ -103,7 +102,6 @@ import android.window.TaskFragmentOrganizer;
 
 import androidx.test.filters.SmallTest;
 
-import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
@@ -123,15 +121,6 @@ import java.util.List;
 @Presubmit
 @RunWith(WindowTestRunner.class)
 public class WindowStateTests extends WindowTestsBase {
-
-    @Before
-    public void setUp() {
-        // TODO: Let the insets source with new mode keep the visibility control, and remove this
-        // setup code. Now mTopFullscreenOpaqueWindowState will take back the control of insets
-        // visibility.
-        spyOn(mDisplayContent);
-        doNothing().when(mDisplayContent).layoutAndAssignWindowLayersIfNeeded();
-    }
 
     @Test
     public void testIsParentWindowHidden() {

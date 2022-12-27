@@ -566,7 +566,6 @@ class WindowContainer<E extends WindowContainer> extends ConfigurationContainer<
             onDisplayChanged(dc);
             prevDc.setLayoutNeeded();
         }
-        getDisplayContent().layoutAndAssignWindowLayersIfNeeded();
 
         // Send onParentChanged notification here is we disabled sending it in setParent for
         // reparenting case.
