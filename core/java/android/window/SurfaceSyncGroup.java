@@ -19,6 +19,7 @@ package android.window;
 import android.annotation.Nullable;
 import android.annotation.UiThread;
 import android.os.Debug;
+import android.os.Trace;
 import android.util.ArraySet;
 import android.util.Log;
 import android.util.Pair;
@@ -30,6 +31,7 @@ import com.android.internal.annotations.GuardedBy;
 
 import java.util.Set;
 import java.util.concurrent.Executor;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Consumer;
 import java.util.function.Supplier;
 
@@ -75,6 +77,10 @@ public class SurfaceSyncGroup {
     private static final String TAG = "SurfaceSyncGroup";
     private static final boolean DEBUG = false;
 
+    private static final int MAX_COUNT = 100;
+
+    private static final AtomicInteger sCounter = new AtomicInteger(0);
+
     private static Supplier<Transaction> sTransactionFactory = Transaction::new;
 
     /**
@@ -82,6 +88,8 @@ public class SurfaceSyncGroup {
      * a frame ready.
      */
     private final Object mLock = new Object();
+
+    private final String mName;
 
     @GuardedBy("mLock")
     private final Set<TransactionReadyCallback> mPendingSyncs = new ArraySet<>();
@@ -112,8 +120,8 @@ public class SurfaceSyncGroup {
     /**
      * Starts a sync and will automatically apply the final, merged transaction.
      */
-    public SurfaceSyncGroup() {
-        this(transaction -> {
+    public SurfaceSyncGroup(String name) {
+        this(name, transaction -> {
             if (transaction != null) {
                 if (DEBUG) {
                     Log.d(TAG, "Applying transaction " + transaction);
@@ -131,15 +139,27 @@ public class SurfaceSyncGroup {
      *                                 transaction with all the sync data merged. The Transaction
      *                                 passed back can be null.
      *
-     * NOTE: Only should be used by ViewRootImpl
+     *                                 NOTE: Only should be used by ViewRootImpl
      * @hide
      */
-    public SurfaceSyncGroup(Consumer<Transaction> transactionReadyCallback) {
+    public SurfaceSyncGroup(String name, Consumer<Transaction> transactionReadyCallback) {
+        // sCounter is a way to give the SurfaceSyncGroup a unique name even if the name passed in
+        // is not.
+        // Avoid letting the count get too big so just reset to 0. It's unlikely that we'll have
+        // more than MAX_COUNT active syncs that have overlapping names
+        if (sCounter.get() >= MAX_COUNT) {
+            sCounter.set(0);
+        }
+
+        mName = name + "#" + sCounter.getAndIncrement();
+
         mTransactionReadyCallback = transaction -> {
             if (DEBUG && transaction != null) {
-                Log.d(TAG,
-                        "Sending non null transaction " + transaction + " to callback for " + this);
+                Log.d(TAG, "Sending non null transaction " + transaction + " to callback for "
+                        + mName);
             }
+            Trace.instant(Trace.TRACE_TAG_VIEW,
+                    "Final TransactionCallback with " + transaction + " for " + mName);
             transactionReadyCallback.accept(transaction);
             synchronized (mLock) {
                 for (Pair<Executor, Runnable> callback : mSyncCompleteCallbacks) {
@@ -148,8 +168,10 @@ public class SurfaceSyncGroup {
             }
         };
 
+        Trace.instant(Trace.TRACE_TAG_VIEW, "new SurfaceSyncGroup " + mName);
+
         if (DEBUG) {
-            Log.d(TAG, "setupSync " + this + " " + Debug.getCallers(2));
+            Log.d(TAG, "setupSync " + mName + " " + Debug.getCallers(2));
         }
     }
 
@@ -178,9 +200,11 @@ public class SurfaceSyncGroup {
     /**
      * Similar to {@link #markSyncReady()}, but a transaction is passed in to merge with the
      * SurfaceSyncGroup.
+     *
      * @param t The transaction that merges into the main Transaction for the SurfaceSyncGroup.
      */
     public void onTransactionReady(@Nullable Transaction t) {
+        Trace.traceBegin(Trace.TRACE_TAG_VIEW, "markSyncReady " + mName);
         synchronized (mLock) {
             mSyncReady = true;
             if (t != null) {
@@ -188,6 +212,7 @@ public class SurfaceSyncGroup {
             }
             checkIfSyncIsComplete();
         }
+        Trace.traceEnd(Trace.TRACE_TAG_VIEW);
     }
 
     /**
@@ -205,7 +230,7 @@ public class SurfaceSyncGroup {
     @UiThread
     public boolean addToSync(SurfaceView surfaceView,
             Consumer<SurfaceViewFrameCallback> frameCallbackConsumer) {
-        SurfaceSyncGroup surfaceSyncGroup = new SurfaceSyncGroup();
+        SurfaceSyncGroup surfaceSyncGroup = new SurfaceSyncGroup(surfaceView.getName());
         if (addToSync(surfaceSyncGroup, false /* parentSyncGroupMerge */)) {
             frameCallbackConsumer.accept(
                     () -> surfaceView.syncNextFrame(surfaceSyncGroup::onTransactionReady));
@@ -242,12 +267,14 @@ public class SurfaceSyncGroup {
      * otherwise.
      */
     public boolean addToSync(SurfaceSyncGroup surfaceSyncGroup, boolean parentSyncGroupMerge) {
+        Trace.traceBegin(Trace.TRACE_TAG_VIEW,
+                "addToSync child=" + surfaceSyncGroup.mName + " parent=" + mName);
         TransactionReadyCallback transactionReadyCallback = new TransactionReadyCallback() {
             @Override
             public void onTransactionReady(Transaction t) {
                 if (DEBUG) {
-                    Log.d(TAG, "onTransactionReady called for" + surfaceSyncGroup + " and sent to "
-                            + this);
+                    Log.d(TAG, "onTransactionReady called for" + surfaceSyncGroup.mName
+                            + " and sent to " + mName);
                 }
                 synchronized (mLock) {
                     if (t != null) {
@@ -261,6 +288,9 @@ public class SurfaceSyncGroup {
                         mTransaction.merge(t);
                     }
                     mPendingSyncs.remove(this);
+                    Trace.instant(Trace.TRACE_TAG_VIEW,
+                            "onTransactionReady child=" + surfaceSyncGroup.mName + " parent="
+                                    + mName);
                     checkIfSyncIsComplete();
                 }
             }
@@ -268,18 +298,20 @@ public class SurfaceSyncGroup {
 
         synchronized (mLock) {
             if (mSyncReady) {
-                Log.e(TAG, "Sync " + this + " was already marked as ready. No more "
+                Log.e(TAG, "Sync " + mName + " was already marked as ready. No more "
                         + "SurfaceSyncGroups can be added.");
+                Trace.traceEnd(Trace.TRACE_TAG_VIEW);
                 return false;
             }
             mPendingSyncs.add(transactionReadyCallback);
             if (DEBUG) {
-                Log.d(TAG, "addToSync " + surfaceSyncGroup + " to " + this + " mSyncReady="
+                Log.d(TAG, "addToSync " + surfaceSyncGroup.mName + " to " + mName + " mSyncReady="
                         + mSyncReady + " mPendingSyncs=" + mPendingSyncs.size());
             }
         }
 
         surfaceSyncGroup.onAddedToSyncGroup(this, transactionReadyCallback);
+        Trace.traceEnd(Trace.TRACE_TAG_VIEW);
         return true;
     }
 
@@ -297,21 +329,25 @@ public class SurfaceSyncGroup {
     private void checkIfSyncIsComplete() {
         if (mFinished) {
             if (DEBUG) {
-                Log.d(TAG, "SurfaceSyncGroup=" + this + " is already complete");
+                Log.d(TAG, "SurfaceSyncGroup=" + mName + " is already complete");
             }
             return;
         }
 
+        Trace.instant(Trace.TRACE_TAG_VIEW,
+                "checkIfSyncIsComplete " + mName + " mSyncReady=" + mSyncReady + " mPendingSyncs="
+                        + mPendingSyncs.size());
         if (!mSyncReady || !mPendingSyncs.isEmpty()) {
             if (DEBUG) {
-                Log.d(TAG, "SurfaceSyncGroup=" + this + " is not complete. mSyncReady="
-                        + mSyncReady + " mPendingSyncs=" + mPendingSyncs.size());
+                Log.d(TAG,
+                        "SurfaceSyncGroup=" + mName + " is not complete. mSyncReady=" + mSyncReady
+                                + " mPendingSyncs=" + mPendingSyncs.size());
             }
             return;
         }
 
         if (DEBUG) {
-            Log.d(TAG, "Successfully finished sync id=" + this);
+            Log.d(TAG, "Successfully finished sync id=" + mName);
         }
         mTransactionReadyCallback.onTransactionReady(mTransaction);
         mFinished = true;
@@ -319,6 +355,8 @@ public class SurfaceSyncGroup {
 
     private void onAddedToSyncGroup(SurfaceSyncGroup parentSyncGroup,
             TransactionReadyCallback transactionReadyCallback) {
+        Trace.traceBegin(Trace.TRACE_TAG_VIEW,
+                "onAddedToSyncGroup child=" + mName + " parent=" + parentSyncGroup.mName);
         boolean finished = false;
         synchronized (mLock) {
             if (mFinished) {
@@ -332,9 +370,9 @@ public class SurfaceSyncGroup {
                 // from the original parent are also combined with the new parent SurfaceSyncGroup.
                 if (mParentSyncGroup != null && mParentSyncGroup != parentSyncGroup) {
                     if (DEBUG) {
-                        Log.d(TAG, "Trying to add to " + parentSyncGroup
-                                + " but already part of sync group " + mParentSyncGroup + " "
-                                + this);
+                        Log.d(TAG, "Trying to add to " + parentSyncGroup.mName
+                                + " but already part of sync group " + mParentSyncGroup.mName + " "
+                                + mName);
                     }
                     parentSyncGroup.addToSync(mParentSyncGroup, true /* parentSyncGroupMerge */);
                 }
@@ -347,8 +385,12 @@ public class SurfaceSyncGroup {
                 mParentSyncGroup = parentSyncGroup;
                 final TransactionReadyCallback lastCallback = mTransactionReadyCallback;
                 mTransactionReadyCallback = t -> {
+                    Trace.traceBegin(Trace.TRACE_TAG_VIEW,
+                            "transactionReadyCallback " + mName + " parent="
+                                    + parentSyncGroup.mName);
                     lastCallback.onTransactionReady(null);
                     transactionReadyCallback.onTransactionReady(t);
+                    Trace.traceEnd(Trace.TRACE_TAG_VIEW);
                 };
             }
         }
@@ -358,7 +400,13 @@ public class SurfaceSyncGroup {
         if (finished) {
             transactionReadyCallback.onTransactionReady(null);
         }
+        Trace.traceEnd(Trace.TRACE_TAG_VIEW);
     }
+
+    public String getName() {
+        return mName;
+    }
+
     /**
      * Interface so the SurfaceSyncer can know when it's safe to start and when everything has been
      * completed. The caller should invoke the calls when the rendering has started and finished a

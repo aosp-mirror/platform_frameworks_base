@@ -1062,6 +1062,15 @@ public class SurfaceView extends View implements ViewRootImpl.SurfaceChangedCall
     }
 
     /**
+     * @hide
+     */
+    public String getName() {
+        ViewRootImpl viewRoot = getViewRootImpl();
+        String viewRootName = viewRoot == null ? "detached" : viewRoot.getTitle().toString();
+        return "SurfaceView[" + viewRootName + "]";
+    }
+
+    /**
      * If SV is trying to be part of the VRI sync, we need to add SV to the VRI sync before
      * invoking the redrawNeeded call to the owner. This is to ensure we can set up the SV in
      * the sync before the SV owner knows it needs to draw a new frame.
@@ -1073,7 +1082,7 @@ public class SurfaceView extends View implements ViewRootImpl.SurfaceChangedCall
     private void handleSyncBufferCallback(SurfaceHolder.Callback[] callbacks,
             SyncBufferTransactionCallback syncBufferTransactionCallback) {
 
-        final SurfaceSyncGroup surfaceSyncGroup = new SurfaceSyncGroup();
+        final SurfaceSyncGroup surfaceSyncGroup = new SurfaceSyncGroup(getName());
         getViewRootImpl().addToSync(surfaceSyncGroup);
         redrawNeededAsync(callbacks, () -> {
             Transaction t = null;
@@ -1088,7 +1097,7 @@ public class SurfaceView extends View implements ViewRootImpl.SurfaceChangedCall
     }
 
     private void handleSyncNoBuffer(SurfaceHolder.Callback[] callbacks) {
-        final SurfaceSyncGroup surfaceSyncGroup = new SurfaceSyncGroup();
+        final SurfaceSyncGroup surfaceSyncGroup = new SurfaceSyncGroup(getName());
         synchronized (mSyncGroups) {
             mSyncGroups.add(surfaceSyncGroup);
         }
