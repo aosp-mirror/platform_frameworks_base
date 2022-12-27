@@ -61,12 +61,12 @@ import java.util.Optional;
 
 /**
  * View model for the window decoration with a caption and shadows. Works with
- * {@link CaptionWindowDecoration}.
+ * {@link DesktopModeWindowDecoration}.
  */
 
-public class CaptionWindowDecorViewModel implements WindowDecorViewModel {
-    private static final String TAG = "CaptionViewModel";
-    private final CaptionWindowDecoration.Factory mCaptionWindowDecorFactory;
+public class DesktopModeWindowDecorViewModel implements WindowDecorViewModel {
+    private static final String TAG = "DesktopModeWindowDecorViewModel";
+    private final DesktopModeWindowDecoration.Factory mDesktopModeWindowDecorFactory;
     private final ActivityTaskManager mActivityTaskManager;
     private final ShellTaskOrganizer mTaskOrganizer;
     private final Context mContext;
@@ -81,11 +81,12 @@ public class CaptionWindowDecorViewModel implements WindowDecorViewModel {
 
     private SparseArray<EventReceiver> mEventReceiversByDisplay = new SparseArray<>();
 
-    private final SparseArray<CaptionWindowDecoration> mWindowDecorByTaskId = new SparseArray<>();
+    private final SparseArray<DesktopModeWindowDecoration> mWindowDecorByTaskId =
+            new SparseArray<>();
     private final DragStartListenerImpl mDragStartListener = new DragStartListenerImpl();
     private InputMonitorFactory mInputMonitorFactory;
 
-    public CaptionWindowDecorViewModel(
+    public DesktopModeWindowDecorViewModel(
             Context context,
             Handler mainHandler,
             Choreographer mainChoreographer,
@@ -103,12 +104,12 @@ public class CaptionWindowDecorViewModel implements WindowDecorViewModel {
                 syncQueue,
                 desktopModeController,
                 desktopTasksController,
-                new CaptionWindowDecoration.Factory(),
+                new DesktopModeWindowDecoration.Factory(),
                 new InputMonitorFactory());
     }
 
     @VisibleForTesting
-    CaptionWindowDecorViewModel(
+    DesktopModeWindowDecorViewModel(
             Context context,
             Handler mainHandler,
             Choreographer mainChoreographer,
@@ -117,7 +118,7 @@ public class CaptionWindowDecorViewModel implements WindowDecorViewModel {
             SyncTransactionQueue syncQueue,
             Optional<DesktopModeController> desktopModeController,
             Optional<DesktopTasksController> desktopTasksController,
-            CaptionWindowDecoration.Factory captionWindowDecorFactory,
+            DesktopModeWindowDecoration.Factory desktopModeWindowDecorFactory,
             InputMonitorFactory inputMonitorFactory) {
         mContext = context;
         mMainHandler = mainHandler;
@@ -129,7 +130,7 @@ public class CaptionWindowDecorViewModel implements WindowDecorViewModel {
         mDesktopModeController = desktopModeController;
         mDesktopTasksController = desktopTasksController;
 
-        mCaptionWindowDecorFactory = captionWindowDecorFactory;
+        mDesktopModeWindowDecorFactory = desktopModeWindowDecorFactory;
         mInputMonitorFactory = inputMonitorFactory;
     }
 
@@ -151,7 +152,7 @@ public class CaptionWindowDecorViewModel implements WindowDecorViewModel {
 
     @Override
     public void onTaskInfoChanged(RunningTaskInfo taskInfo) {
-        final CaptionWindowDecoration decoration = mWindowDecorByTaskId.get(taskInfo.taskId);
+        final DesktopModeWindowDecoration decoration = mWindowDecorByTaskId.get(taskInfo.taskId);
 
         if (decoration == null) return;
 
@@ -170,7 +171,7 @@ public class CaptionWindowDecorViewModel implements WindowDecorViewModel {
             SurfaceControl taskSurface,
             SurfaceControl.Transaction startT,
             SurfaceControl.Transaction finishT) {
-        final CaptionWindowDecoration decoration = mWindowDecorByTaskId.get(taskInfo.taskId);
+        final DesktopModeWindowDecoration decoration = mWindowDecorByTaskId.get(taskInfo.taskId);
 
         if (!shouldShowWindowDecor(taskInfo)) {
             if (decoration != null) {
@@ -191,7 +192,7 @@ public class CaptionWindowDecorViewModel implements WindowDecorViewModel {
             RunningTaskInfo taskInfo,
             SurfaceControl.Transaction startT,
             SurfaceControl.Transaction finishT) {
-        final CaptionWindowDecoration decoration = mWindowDecorByTaskId.get(taskInfo.taskId);
+        final DesktopModeWindowDecoration decoration = mWindowDecorByTaskId.get(taskInfo.taskId);
         if (decoration == null) return;
 
         decoration.relayout(taskInfo, startT, finishT);
@@ -199,7 +200,7 @@ public class CaptionWindowDecorViewModel implements WindowDecorViewModel {
 
     @Override
     public void destroyWindowDecoration(RunningTaskInfo taskInfo) {
-        final CaptionWindowDecoration decoration =
+        final DesktopModeWindowDecoration decoration =
                 mWindowDecorByTaskId.removeReturnOld(taskInfo.taskId);
         if (decoration == null) return;
 
@@ -232,7 +233,7 @@ public class CaptionWindowDecorViewModel implements WindowDecorViewModel {
 
         @Override
         public void onClick(View v) {
-            CaptionWindowDecoration decoration = mWindowDecorByTaskId.get(mTaskId);
+            DesktopModeWindowDecoration decoration = mWindowDecorByTaskId.get(mTaskId);
             final int id = v.getId();
             if (id == R.id.close_window) {
                 WindowContainerTransaction wct = new WindowContainerTransaction();
@@ -373,7 +374,7 @@ public class CaptionWindowDecorViewModel implements WindowDecorViewModel {
             boolean handled = false;
             if (event instanceof MotionEvent) {
                 handled = true;
-                CaptionWindowDecorViewModel.this
+                DesktopModeWindowDecorViewModel.this
                         .handleReceivedMotionEvent((MotionEvent) event, mInputMonitor);
             }
             finishInputEvent(event, handled);
@@ -433,7 +434,7 @@ public class CaptionWindowDecorViewModel implements WindowDecorViewModel {
      */
     private void handleReceivedMotionEvent(MotionEvent ev, InputMonitor inputMonitor) {
         if (DesktopModeStatus.isProto2Enabled()) {
-            CaptionWindowDecoration focusedDecor = getFocusedDecor();
+            DesktopModeWindowDecoration focusedDecor = getFocusedDecor();
             if (focusedDecor == null
                     || focusedDecor.mTaskInfo.getWindowingMode() != WINDOWING_MODE_FREEFORM) {
                 handleCaptionThroughStatusBar(ev);
@@ -460,7 +461,7 @@ public class CaptionWindowDecorViewModel implements WindowDecorViewModel {
     private void handleEventOutsideFocusedCaption(MotionEvent ev) {
         int action = ev.getActionMasked();
         if (action == MotionEvent.ACTION_UP || action == MotionEvent.ACTION_CANCEL) {
-            CaptionWindowDecoration focusedDecor = getFocusedDecor();
+            DesktopModeWindowDecoration focusedDecor = getFocusedDecor();
             if (focusedDecor == null) {
                 return;
             }
@@ -480,7 +481,7 @@ public class CaptionWindowDecorViewModel implements WindowDecorViewModel {
         switch (ev.getActionMasked()) {
             case MotionEvent.ACTION_DOWN: {
                 // Begin drag through status bar if applicable.
-                CaptionWindowDecoration focusedDecor = getFocusedDecor();
+                DesktopModeWindowDecoration focusedDecor = getFocusedDecor();
                 if (focusedDecor != null) {
                     boolean dragFromStatusBarAllowed = false;
                     if (DesktopModeStatus.isProto2Enabled()) {
@@ -499,7 +500,7 @@ public class CaptionWindowDecorViewModel implements WindowDecorViewModel {
                 break;
             }
             case MotionEvent.ACTION_UP: {
-                CaptionWindowDecoration focusedDecor = getFocusedDecor();
+                DesktopModeWindowDecoration focusedDecor = getFocusedDecor();
                 if (focusedDecor == null) {
                     mTransitionDragActive = false;
                     return;
@@ -529,11 +530,11 @@ public class CaptionWindowDecorViewModel implements WindowDecorViewModel {
     }
 
     @Nullable
-    private CaptionWindowDecoration getFocusedDecor() {
+    private DesktopModeWindowDecoration getFocusedDecor() {
         int size = mWindowDecorByTaskId.size();
-        CaptionWindowDecoration focusedDecor = null;
+        DesktopModeWindowDecoration focusedDecor = null;
         for (int i = 0; i < size; i++) {
-            CaptionWindowDecoration decor = mWindowDecorByTaskId.valueAt(i);
+            DesktopModeWindowDecoration decor = mWindowDecorByTaskId.valueAt(i);
             if (decor != null && decor.isFocused()) {
                 focusedDecor = decor;
                 break;
@@ -571,13 +572,13 @@ public class CaptionWindowDecorViewModel implements WindowDecorViewModel {
             SurfaceControl taskSurface,
             SurfaceControl.Transaction startT,
             SurfaceControl.Transaction finishT) {
-        CaptionWindowDecoration oldDecoration = mWindowDecorByTaskId.get(taskInfo.taskId);
+        DesktopModeWindowDecoration oldDecoration = mWindowDecorByTaskId.get(taskInfo.taskId);
         if (oldDecoration != null) {
             // close the old decoration if it exists to avoid two window decorations being added
             oldDecoration.close();
         }
-        final CaptionWindowDecoration windowDecoration =
-                mCaptionWindowDecorFactory.create(
+        final DesktopModeWindowDecoration windowDecoration =
+                mDesktopModeWindowDecorFactory.create(
                         mContext,
                         mDisplayController,
                         mTaskOrganizer,
