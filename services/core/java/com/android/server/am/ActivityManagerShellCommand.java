@@ -2153,19 +2153,24 @@ final class ActivityManagerShellCommand extends ShellCommand {
         boolean success;
         String displaySuffix;
 
-        if (displayId == Display.INVALID_DISPLAY) {
-            success = mInterface.startUserInBackgroundWithListener(userId, waiter);
-            displaySuffix = "";
-        } else {
-            if (!UserManager.isVisibleBackgroundUsersEnabled()) {
-                pw.println("Not supported");
-                return -1;
+        Trace.traceBegin(Trace.TRACE_TAG_ACTIVITY_MANAGER, "shell_runStartUser" + userId);
+        try {
+            if (displayId == Display.INVALID_DISPLAY) {
+                success = mInterface.startUserInBackgroundWithListener(userId, waiter);
+                displaySuffix = "";
+            } else {
+                if (!UserManager.isVisibleBackgroundUsersEnabled()) {
+                    pw.println("Not supported");
+                    return -1;
+                }
+                success = mInterface.startUserInBackgroundVisibleOnDisplay(userId, displayId);
+                displaySuffix = " on display " + displayId;
             }
-            success = mInterface.startUserInBackgroundVisibleOnDisplay(userId, displayId);
-            displaySuffix = " on display " + displayId;
-        }
-        if (wait && success) {
-            success = waiter.waitForFinish(USER_OPERATION_TIMEOUT_MS);
+            if (wait && success) {
+                success = waiter.waitForFinish(USER_OPERATION_TIMEOUT_MS);
+            }
+        } finally {
+            Trace.traceEnd(Trace.TRACE_TAG_ACTIVITY_MANAGER);
         }
 
         if (success) {
