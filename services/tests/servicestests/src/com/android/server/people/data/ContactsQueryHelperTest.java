@@ -25,6 +25,7 @@ import static org.mockito.Mockito.when;
 
 import android.database.Cursor;
 import android.database.MatrixCursor;
+import android.database.sqlite.SQLiteException;
 import android.net.Uri;
 import android.provider.ContactsContract;
 import android.provider.ContactsContract.Contacts;
@@ -63,6 +64,7 @@ public final class ContactsQueryHelperTest {
     private MatrixCursor mContactsLookupCursor;
     private MatrixCursor mPhoneCursor;
     private ContactsQueryHelper mHelper;
+    private ContactsContentProvider contentProvider;
 
     @Before
     public void setUp() {
@@ -73,7 +75,7 @@ public final class ContactsQueryHelperTest {
         mPhoneCursor = new MatrixCursor(PHONE_COLUMNS);
 
         MockContentResolver contentResolver = new MockContentResolver();
-        ContactsContentProvider contentProvider = new ContactsContentProvider();
+        contentProvider = new ContactsContentProvider();
         contentProvider.registerCursor(Contacts.CONTENT_URI, mContactsCursor);
         contentProvider.registerCursor(
                 ContactsContract.PhoneLookup.CONTENT_FILTER_URI, mContactsLookupCursor);
@@ -86,6 +88,14 @@ public final class ContactsQueryHelperTest {
         when(mContext.getContentResolver()).thenReturn(contentResolver);
 
         mHelper = new ContactsQueryHelper(mContext);
+    }
+
+    @Test
+    public void testQueryException_returnsFalse() {
+        contentProvider.setThrowException(true);
+
+        Uri contactUri = Uri.withAppendedPath(Contacts.CONTENT_LOOKUP_URI, CONTACT_LOOKUP_KEY);
+        assertFalse(mHelper.query(contactUri.toString()));
     }
 
     @Test
@@ -168,16 +178,25 @@ public final class ContactsQueryHelperTest {
     private class ContactsContentProvider extends MockContentProvider {
 
         private Map<Uri, Cursor> mUriPrefixToCursorMap = new ArrayMap<>();
+        private boolean throwException = false;
 
         @Override
         public Cursor query(Uri uri, String[] projection, String selection, String[] selectionArgs,
                 String sortOrder) {
+            if (throwException) {
+                throw new SQLiteException();
+            }
+
             for (Uri prefixUri : mUriPrefixToCursorMap.keySet()) {
                 if (uri.isPathPrefixMatch(prefixUri)) {
                     return mUriPrefixToCursorMap.get(prefixUri);
                 }
             }
             return mUriPrefixToCursorMap.get(uri);
+        }
+
+        public void setThrowException(boolean throwException) {
+            this.throwException = throwException;
         }
 
         private void registerCursor(Uri uriPrefix, Cursor cursor) {

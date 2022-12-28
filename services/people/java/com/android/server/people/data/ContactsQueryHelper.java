@@ -21,6 +21,7 @@ import android.annotation.Nullable;
 import android.annotation.WorkerThread;
 import android.content.Context;
 import android.database.Cursor;
+import android.database.sqlite.SQLiteException;
 import android.net.Uri;
 import android.provider.ContactsContract;
 import android.provider.ContactsContract.Contacts;
@@ -149,6 +150,8 @@ class ContactsQueryHelper {
 
                 found = true;
             }
+        } catch (SQLiteException exception) {
+            Slog.w("SQLite exception when querying contacts.", exception);
         }
         if (found && lookupKey != null && hasPhoneNumber) {
             return queryPhoneNumber(lookupKey);
