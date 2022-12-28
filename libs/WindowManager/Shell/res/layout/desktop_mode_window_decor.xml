@@ -16,10 +16,10 @@
   -->
 <com.android.wm.shell.windowdecor.WindowDecorLinearLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
-    android:id="@+id/caption"
+    android:id="@+id/desktop_mode_caption"
     android:layout_width="wrap_content"
     android:layout_height="wrap_content"
-    android:background="@drawable/decor_caption_title">
+    android:background="@drawable/desktop_mode_decor_title">
     <Button
         style="@style/CaptionButtonStyle"
         android:id="@+id/back_button"
