@@ -141,7 +141,7 @@ class QrCodeScannerKeyguardQuickAffordanceConfigTest : SysuiTestCase() {
         whenever(controller.isAbleToOpenCameraApp).thenReturn(true)
 
         assertThat(underTest.getPickerScreenState())
-            .isEqualTo(KeyguardQuickAffordanceConfig.PickerScreenState.Default)
+            .isEqualTo(KeyguardQuickAffordanceConfig.PickerScreenState.Default())
     }
 
     @Test
