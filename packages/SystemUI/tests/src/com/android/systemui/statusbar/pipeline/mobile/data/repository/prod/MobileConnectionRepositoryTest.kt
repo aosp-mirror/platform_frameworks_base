@@ -117,7 +117,6 @@ class MobileConnectionRepositoryTest : SysuiTestCase() {
                 telephonyManager,
                 globalSettings,
                 fakeBroadcastDispatcher,
-                connectionsRepo.defaultDataSubId,
                 connectionsRepo.globalMobileDataSettingChangedEvent,
                 mobileMappings,
                 IMMEDIATE,
@@ -375,33 +374,6 @@ class MobileConnectionRepositoryTest : SysuiTestCase() {
             val job = underTest.dataEnabled.launchIn(this)
 
             assertThat(underTest.dataEnabled.value).isFalse()
-
-            job.cancel()
-        }
-
-    @Test
-    fun isDefaultDataSubscription_isDefault() =
-        runBlocking(IMMEDIATE) {
-            connectionsRepo.setDefaultDataSubId(SUB_1_ID)
-
-            var latest: Boolean? = null
-            val job = underTest.isDefaultDataSubscription.onEach { latest = it }.launchIn(this)
-
-            assertThat(latest).isTrue()
-
-            job.cancel()
-        }
-
-    @Test
-    fun isDefaultDataSubscription_isNotDefault() =
-        runBlocking(IMMEDIATE) {
-            // Our subId is SUB_1_ID
-            connectionsRepo.setDefaultDataSubId(123)
-
-            var latest: Boolean? = null
-            val job = underTest.isDefaultDataSubscription.onEach { latest = it }.launchIn(this)
-
-            assertThat(latest).isFalse()
 
             job.cancel()
         }

@@ -32,9 +32,6 @@ class FakeMobileConnectionRepository(
     private val _dataEnabled = MutableStateFlow(true)
     override val dataEnabled = _dataEnabled
 
-    private val _isDefaultDataSubscription = MutableStateFlow(true)
-    override val isDefaultDataSubscription = _isDefaultDataSubscription
-
     override val cdmaRoaming = MutableStateFlow(false)
 
     override val networkName =
@@ -46,9 +43,5 @@ class FakeMobileConnectionRepository(
 
     fun setDataEnabled(enabled: Boolean) {
         _dataEnabled.value = enabled
-    }
-
-    fun setIsDefaultDataSubscription(isDefault: Boolean) {
-        _isDefaultDataSubscription.value = isDefault
     }
 }

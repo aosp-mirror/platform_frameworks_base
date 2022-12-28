@@ -17,7 +17,6 @@
 package com.android.systemui.statusbar.pipeline.mobile.data.repository
 
 import android.telephony.SubscriptionInfo
-import android.telephony.SubscriptionManager
 import android.telephony.TelephonyCallback
 import android.telephony.TelephonyManager
 import com.android.systemui.log.table.TableLogBuffer
@@ -54,11 +53,6 @@ interface MobileConnectionRepository {
     val connectionInfo: Flow<MobileConnectionModel>
     /** Observable tracking [TelephonyManager.isDataConnectionAllowed] */
     val dataEnabled: StateFlow<Boolean>
-    /**
-     * True if this connection represents the default subscription per
-     * [SubscriptionManager.getDefaultDataSubscriptionId]
-     */
-    val isDefaultDataSubscription: StateFlow<Boolean>
 
     /**
      * See [TelephonyManager.getCdmaEnhancedRoamingIndicatorDisplayNumber]. This bit only matters if

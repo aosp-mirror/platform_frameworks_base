@@ -78,7 +78,6 @@ class MobileConnectionRepositoryImpl(
     private val telephonyManager: TelephonyManager,
     private val globalSettings: GlobalSettings,
     broadcastDispatcher: BroadcastDispatcher,
-    defaultDataSubId: StateFlow<Int>,
     globalMobileDataSettingChangedEvent: Flow<Unit>,
     mobileMappingsProxy: MobileMappingsProxy,
     bgDispatcher: CoroutineDispatcher,
@@ -284,20 +283,6 @@ class MobileConnectionRepositoryImpl(
 
     private fun dataConnectionAllowed(): Boolean = telephonyManager.isDataConnectionAllowed
 
-    override val isDefaultDataSubscription: StateFlow<Boolean> = run {
-        val initialValue = defaultDataSubId.value == subId
-        defaultDataSubId
-            .mapLatest { it == subId }
-            .distinctUntilChanged()
-            .logDiffsForTable(
-                mobileLogger,
-                columnPrefix = "",
-                columnName = "isDefaultDataSub",
-                initialValue = initialValue,
-            )
-            .stateIn(scope, SharingStarted.WhileSubscribed(), initialValue)
-    }
-
     class Factory
     @Inject
     constructor(
@@ -315,7 +300,6 @@ class MobileConnectionRepositoryImpl(
             subId: Int,
             defaultNetworkName: NetworkNameModel,
             networkNameSeparator: String,
-            defaultDataSubId: StateFlow<Int>,
             globalMobileDataSettingChangedEvent: Flow<Unit>,
         ): MobileConnectionRepository {
             val mobileLogger = logFactory.create(tableBufferLogName(subId), 100)
@@ -328,7 +312,6 @@ class MobileConnectionRepositoryImpl(
                 telephonyManager.createForSubscriptionId(subId),
                 globalSettings,
                 broadcastDispatcher,
-                defaultDataSubId,
                 globalMobileDataSettingChangedEvent,
                 mobileMappingsProxy,
                 bgDispatcher,

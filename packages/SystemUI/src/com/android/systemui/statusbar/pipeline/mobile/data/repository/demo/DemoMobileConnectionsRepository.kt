@@ -139,14 +139,6 @@ constructor(
 
     private fun <K, V> Map<K, V>.reverse() = entries.associateBy({ it.value }) { it.key }
 
-    // TODO(b/261029387): add a command for this value
-    override val defaultDataSubId =
-        activeMobileDataSubscriptionId.stateIn(
-            scope,
-            SharingStarted.WhileSubscribed(),
-            INVALID_SUBSCRIPTION_ID
-        )
-
     // TODO(b/261029387): not yet supported
     override val defaultMobileNetworkConnectivity = MutableStateFlow(MobileConnectivityModel())
 
@@ -199,7 +191,6 @@ constructor(
         val connection = getRepoForSubId(subId)
         // This is always true here, because we split out disabled states at the data-source level
         connection.dataEnabled.value = true
-        connection.isDefaultDataSubscription.value = state.dataType != null
         connection.networkName.value = NetworkNameModel.Derived(state.name)
 
         connection.cdmaRoaming.value = state.roaming
@@ -280,8 +271,6 @@ class DemoMobileConnectionRepository(
     override val connectionInfo = MutableStateFlow(MobileConnectionModel())
 
     override val dataEnabled = MutableStateFlow(true)
-
-    override val isDefaultDataSubscription = MutableStateFlow(true)
 
     override val cdmaRoaming = MutableStateFlow(false)
 
