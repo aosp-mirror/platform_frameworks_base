@@ -57,15 +57,9 @@ public final class RouteListingPreference implements Parcelable {
     @NonNull private final List<Item> mItems;
     private final boolean mUseSystemOrdering;
 
-    /**
-     * Creates an instance with the given values.
-     *
-     * @param items See {@link #getItems()}.
-     * @param useSystemOrdering See {@link #getUseSystemOrdering()}
-     */
-    public RouteListingPreference(@NonNull List<Item> items, boolean useSystemOrdering) {
-        mItems = List.copyOf(Objects.requireNonNull(items));
-        mUseSystemOrdering = useSystemOrdering;
+    private RouteListingPreference(Builder builder) {
+        mItems = builder.mItems;
+        mUseSystemOrdering = builder.mUseSystemOrdering;
     }
 
     private RouteListingPreference(Parcel in) {
@@ -126,6 +120,52 @@ public final class RouteListingPreference implements Parcelable {
     @Override
     public int hashCode() {
         return Objects.hash(mItems, mUseSystemOrdering);
+    }
+
+    /** Builder for {@link RouteListingPreference}. */
+    public static final class Builder {
+
+        private List<Item> mItems;
+        private boolean mUseSystemOrdering;
+
+        /** Creates a new instance with default values (documented in the setters). */
+        public Builder() {
+            mItems = List.of();
+        }
+
+        /**
+         * See {@link #getItems()}
+         *
+         * <p>The default value is an empty list.
+         */
+        @NonNull
+        public Builder setItems(@NonNull List<Item> items) {
+            mItems = List.copyOf(Objects.requireNonNull(items));
+            mUseSystemOrdering = true;
+            return this;
+        }
+
+        /**
+         * See {@link #getUseSystemOrdering()}
+         *
+         * <p>The default value is {@code true}.
+         */
+        // Lint requires "isUseSystemOrdering", but "getUseSystemOrdering" is a better name.
+        @SuppressWarnings("MissingGetterMatchingBuilder")
+        @NonNull
+        public Builder setUseSystemOrdering(boolean useSystemOrdering) {
+            mUseSystemOrdering = useSystemOrdering;
+            return this;
+        }
+
+        /**
+         * Creates and returns a new {@link RouteListingPreference} instance with the given
+         * parameters.
+         */
+        @NonNull
+        public RouteListingPreference build() {
+            return new RouteListingPreference(this);
+        }
     }
 
     /** Holds preference information for a specific route in a {@link RouteListingPreference}. */
