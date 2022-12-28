@@ -438,6 +438,11 @@ public abstract class IContextHubWrapper {
                     mCallback.handleTransactionResult(transactionId, success);
                 });
             }
+
+            public void handleNanSessionRequest(boolean enable) {
+                // TODO(229888878): Implement
+            }
+
             @Override
             public String getInterfaceHash() {
                 return android.hardware.contexthub.IContextHubCallback.HASH;
