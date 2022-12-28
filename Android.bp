@@ -404,7 +404,7 @@ java_defaults {
         "modules-utils-uieventlogger-interface",
         "framework-permission-aidl-java",
         "spatializer-aidl-java",
-        "audiopolicy-types-aidl-java",
+        "audiopolicy-aidl-java",
         "sounddose-aidl-java",
     ],
 }
