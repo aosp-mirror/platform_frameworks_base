@@ -2826,12 +2826,6 @@
     <string name="keyguard_affordance_enablement_dialog_action_template">Open <xliff:g id="appName" example="Wallet">%1$s</xliff:g></string>
 
     <!--
-    Template for a message shown right before a list of instructions that tell the user what to do
-    in order to enable a shortcut to a specific app. [CHAR LIMIT=NONE]
-    -->
-    <string name="keyguard_affordance_enablement_dialog_message">To add the <xliff:g id="appName" example="Wallet">%1$s</xliff:g> app as a shortcut, make sure</string>
-
-    <!--
     Requirement for the wallet app to be available for the user to use. This is shown as part of a
     bulleted list of requirements. When all requirements are met, the app can be accessed through a
     shortcut button on the lock screen. [CHAR LIMIT=NONE].
