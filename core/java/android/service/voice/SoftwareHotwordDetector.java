@@ -169,9 +169,12 @@ class SoftwareHotwordDetector extends AbstractDetector {
 
         /** Called when the detection fails due to an error. */
         @Override
-        public void onError() {
-            Slog.v(TAG, "BinderCallback#onError");
-            Binder.withCleanCallingIdentity(() -> mExecutor.execute(() -> mCallback.onError()));
+        public void onError(DetectorFailure detectorFailure) {
+            Slog.v(TAG, "BinderCallback#onError detectorFailure: " + detectorFailure);
+            Binder.withCleanCallingIdentity(() -> mExecutor.execute(() -> {
+                mCallback.onFailure(detectorFailure != null ? detectorFailure
+                        : new UnknownFailure("Error data is null"));
+            }));
         }
 
         @Override
@@ -222,6 +225,16 @@ class SoftwareHotwordDetector extends AbstractDetector {
             if (DEBUG) {
                 Slog.i(TAG, "Ignored #onError (" + status + ") event");
             }
+            // TODO: Check if we still need to implement this method with DetectorFailure mechanism.
+        }
+
+        @Override
+        public void onDetectionFailure(DetectorFailure detectorFailure) throws RemoteException {
+            Slog.v(TAG, "onDetectionFailure detectorFailure: " + detectorFailure);
+            Binder.withCleanCallingIdentity(() -> mExecutor.execute(() -> {
+                mCallback.onFailure(detectorFailure != null ? detectorFailure
+                        : new UnknownFailure("Error data is null"));
+            }));
         }
 
         @Override

@@ -13141,7 +13141,8 @@ package android.service.voice {
 
   public static interface HotwordDetector.Callback {
     method public void onDetected(@NonNull android.service.voice.AlwaysOnHotwordDetector.EventPayload);
-    method public void onError();
+    method @Deprecated public void onError();
+    method public default void onFailure(@NonNull android.service.voice.DetectorFailure);
     method public void onHotwordDetectionServiceInitialized(int);
     method public void onHotwordDetectionServiceRestarted();
     method public void onRecognitionPaused();
@@ -13202,7 +13203,7 @@ package android.service.voice {
   }
 
   public static interface VisualQueryDetector.Callback {
-    method public void onError();
+    method public void onFailure(@NonNull android.service.voice.DetectorFailure);
     method public void onQueryDetected(@NonNull String);
     method public void onQueryFinished();
     method public void onQueryRejected();
