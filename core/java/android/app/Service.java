@@ -724,7 +724,7 @@ public abstract class Service extends ContextWrapper implements ComponentCallbac
      * apps targeting SDK Version {@link android.os.Build.VERSION_CODES#S}
      * or higher are not allowed to start foreground services from the background.
      * See
-     * <a href="{@docRoot}/about/versions/12/behavior-changes-12">
+     * <a href="{@docRoot}about/versions/12/behavior-changes-12">
      * Behavior changes: Apps targeting Android 12
      * </a>
      * for more details.
@@ -738,7 +738,7 @@ public abstract class Service extends ContextWrapper implements ComponentCallbac
      * foreground service type in the manifest attribute
      * {@link android.R.attr#foregroundServiceType}.
      * See
-     * <a href="{@docRoot}/about/versions/14/behavior-changes-14">
+     * <a href="{@docRoot}about/versions/14/behavior-changes-14">
      * Behavior changes: Apps targeting Android 14
      * </a>
      * for more details.
@@ -802,7 +802,7 @@ public abstract class Service extends ContextWrapper implements ComponentCallbac
      * apps targeting SDK Version {@link android.os.Build.VERSION_CODES#S}
      * or higher are not allowed to start foreground services from the background.
      * See
-     * <a href="{@docRoot}/about/versions/12/behavior-changes-12">
+     * <a href="{@docRoot}about/versions/12/behavior-changes-12">
      * Behavior changes: Apps targeting Android 12
      * </a>
      * for more details.
@@ -817,7 +817,7 @@ public abstract class Service extends ContextWrapper implements ComponentCallbac
      * {@link android.R.attr#foregroundServiceType}, and the parameter {@code foregroundServiceType}
      * here must not be the {@link ServiceInfo#FOREGROUND_SERVICE_TYPE_NONE}.
      * See
-     * <a href="{@docRoot}/about/versions/14/behavior-changes-14">
+     * <a href="{@docRoot}about/versions/14/behavior-changes-14">
      * Behavior changes: Apps targeting Android 14
      * </a>
      * for more details.
