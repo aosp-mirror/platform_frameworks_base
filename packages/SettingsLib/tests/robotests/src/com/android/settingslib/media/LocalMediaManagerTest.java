@@ -242,49 +242,6 @@ public class LocalMediaManagerTest {
     }
 
     @Test
-    public void onDeviceAdded_addDevice() {
-        final MediaDevice device = mock(MediaDevice.class);
-
-        assertThat(mLocalMediaManager.mMediaDevices).isEmpty();
-        mLocalMediaManager.registerCallback(mCallback);
-        mLocalMediaManager.mMediaDeviceCallback.onDeviceAdded(device);
-
-        assertThat(mLocalMediaManager.mMediaDevices).hasSize(1);
-        verify(mCallback).onDeviceListUpdate(any());
-    }
-
-    @Test
-    public void onDeviceAdded_mediaDeviceNotExistAndPhoneDeviceExistInList_addMediaDevice() {
-        final MediaDevice device1 = mock(MediaDevice.class);
-        final MediaDevice device2 = mock(MediaDevice.class);
-        mLocalMediaManager.mPhoneDevice = mock(PhoneMediaDevice.class);
-        mLocalMediaManager.mMediaDevices.add(device1);
-        mLocalMediaManager.mMediaDevices.add(mLocalMediaManager.mPhoneDevice);
-
-        assertThat(mLocalMediaManager.mMediaDevices).hasSize(2);
-        mLocalMediaManager.registerCallback(mCallback);
-        mLocalMediaManager.mMediaDeviceCallback.onDeviceAdded(device2);
-
-        assertThat(mLocalMediaManager.mMediaDevices).hasSize(3);
-        verify(mCallback).onDeviceListUpdate(any());
-    }
-
-    @Test
-    public void onDeviceAdded_mediaDeviceAndPhoneDeviceExistInList_doNothing() {
-        final MediaDevice device1 = mock(MediaDevice.class);
-        mLocalMediaManager.mPhoneDevice = mock(PhoneMediaDevice.class);
-        mLocalMediaManager.mMediaDevices.add(device1);
-        mLocalMediaManager.mMediaDevices.add(mLocalMediaManager.mPhoneDevice);
-
-        assertThat(mLocalMediaManager.mMediaDevices).hasSize(2);
-        mLocalMediaManager.registerCallback(mCallback);
-        mLocalMediaManager.mMediaDeviceCallback.onDeviceAdded(device1);
-
-        assertThat(mLocalMediaManager.mMediaDevices).hasSize(2);
-        verify(mCallback, never()).onDeviceListUpdate(any());
-    }
-
-    @Test
     public void onDeviceListAdded_addDevicesList() {
         final List<MediaDevice> devices = new ArrayList<>();
         final MediaDevice device1 = mock(MediaDevice.class);
@@ -326,54 +283,6 @@ public class LocalMediaManagerTest {
 
         assertThat(mLocalMediaManager.mMediaDevices).hasSize(2);
         verify(mCallback).onDeviceListUpdate(any());
-    }
-
-    @Test
-    public void onDeviceRemoved_removeDevice() {
-        final MediaDevice device1 = mock(MediaDevice.class);
-        mLocalMediaManager.mPhoneDevice = mock(PhoneMediaDevice.class);
-        mLocalMediaManager.mMediaDevices.add(device1);
-        mLocalMediaManager.mMediaDevices.add(mLocalMediaManager.mPhoneDevice);
-
-        assertThat(mLocalMediaManager.mMediaDevices).hasSize(2);
-        mLocalMediaManager.registerCallback(mCallback);
-        mLocalMediaManager.mMediaDeviceCallback.onDeviceRemoved(device1);
-
-        assertThat(mLocalMediaManager.mMediaDevices).hasSize(1);
-        verify(mCallback).onDeviceListUpdate(any());
-    }
-
-    @Test
-    public void onDeviceRemoved_phoneDeviceNotLastDeviceAfterRemoveMediaDevice_removeMediaDevice() {
-        final MediaDevice device1 = mock(MediaDevice.class);
-        final MediaDevice device2 = mock(MediaDevice.class);
-        mLocalMediaManager.mPhoneDevice = mock(PhoneMediaDevice.class);
-        mLocalMediaManager.mMediaDevices.add(device1);
-        mLocalMediaManager.mMediaDevices.add(device2);
-        mLocalMediaManager.mMediaDevices.add(mLocalMediaManager.mPhoneDevice);
-
-        assertThat(mLocalMediaManager.mMediaDevices).hasSize(3);
-        mLocalMediaManager.registerCallback(mCallback);
-        mLocalMediaManager.mMediaDeviceCallback.onDeviceRemoved(device2);
-
-        assertThat(mLocalMediaManager.mMediaDevices).hasSize(2);
-        verify(mCallback).onDeviceListUpdate(any());
-    }
-
-    @Test
-    public void onDeviceRemoved_removeMediaDeviceNotInList_doNothing() {
-        final MediaDevice device1 = mock(MediaDevice.class);
-        final MediaDevice device2 = mock(MediaDevice.class);
-        mLocalMediaManager.mPhoneDevice = mock(PhoneMediaDevice.class);
-        mLocalMediaManager.mMediaDevices.add(device2);
-        mLocalMediaManager.mMediaDevices.add(mLocalMediaManager.mPhoneDevice);
-
-        assertThat(mLocalMediaManager.mMediaDevices).hasSize(2);
-        mLocalMediaManager.registerCallback(mCallback);
-        mLocalMediaManager.mMediaDeviceCallback.onDeviceRemoved(device1);
-
-        assertThat(mLocalMediaManager.mMediaDevices).hasSize(2);
-        verify(mCallback, never()).onDeviceListUpdate(any());
     }
 
     @Test
@@ -476,15 +385,6 @@ public class LocalMediaManagerTest {
     public void onConnectedDeviceChanged_nullConnectedDevice_noException() {
         mLocalMediaManager.registerCallback(mCallback);
         mLocalMediaManager.mMediaDeviceCallback.onConnectedDeviceChanged(TEST_DEVICE_ID_2);
-    }
-
-    @Test
-    public void onDeviceAttributesChanged_shouldDispatchDeviceListUpdate() {
-        mLocalMediaManager.registerCallback(mCallback);
-
-        mLocalMediaManager.mMediaDeviceCallback.onDeviceAttributesChanged();
-
-        verify(mCallback).onDeviceAttributesChanged();
     }
 
     @Test
