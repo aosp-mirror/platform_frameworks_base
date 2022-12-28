@@ -99,6 +99,8 @@ constructor(
             passpointProviderFriendlyName = null,
         )
 
+    // TODO(b/238425913): Add carrier merged support.
+
     companion object {
         private const val DEMO_NET_ID = 1234
     }

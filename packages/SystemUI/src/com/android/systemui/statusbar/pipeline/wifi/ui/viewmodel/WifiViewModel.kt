@@ -83,6 +83,7 @@ constructor(
     private fun WifiNetworkModel.icon(): WifiIcon {
         return when (this) {
             is WifiNetworkModel.Unavailable -> WifiIcon.Hidden
+            is WifiNetworkModel.Invalid -> WifiIcon.Hidden
             is WifiNetworkModel.CarrierMerged -> WifiIcon.Hidden
             is WifiNetworkModel.Inactive -> WifiIcon.Visible(
                 res = WIFI_NO_NETWORK,

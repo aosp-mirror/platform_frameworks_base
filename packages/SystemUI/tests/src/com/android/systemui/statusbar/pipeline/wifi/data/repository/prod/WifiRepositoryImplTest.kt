@@ -26,6 +26,7 @@ import android.net.vcn.VcnTransportInfo
 import android.net.wifi.WifiInfo
 import android.net.wifi.WifiManager
 import android.net.wifi.WifiManager.TrafficStateCallback
+import android.telephony.SubscriptionManager.INVALID_SUBSCRIPTION_ID
 import androidx.test.filters.SmallTest
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.broadcast.BroadcastDispatcher
@@ -340,7 +341,6 @@ class WifiRepositoryImplTest : SysuiTestCase() {
             .launchIn(this)
 
         val wifiInfo = mock<WifiInfo>().apply {
-            whenever(this.ssid).thenReturn(SSID)
             whenever(this.isPrimary).thenReturn(true)
             whenever(this.isCarrierMerged).thenReturn(true)
         }
@@ -351,6 +351,67 @@ class WifiRepositoryImplTest : SysuiTestCase() {
 
         job.cancel()
     }
+
+    @Test
+    fun wifiNetwork_carrierMergedButInvalidSubId_flowHasInvalid() =
+        runBlocking(IMMEDIATE) {
+            var latest: WifiNetworkModel? = null
+            val job = underTest
+                .wifiNetwork
+                .onEach { latest = it }
+                .launchIn(this)
+
+            val wifiInfo = mock<WifiInfo>().apply {
+                whenever(this.isPrimary).thenReturn(true)
+                whenever(this.isCarrierMerged).thenReturn(true)
+                whenever(this.subscriptionId).thenReturn(INVALID_SUBSCRIPTION_ID)
+            }
+
+            getNetworkCallback().onCapabilitiesChanged(
+                NETWORK,
+                createWifiNetworkCapabilities(wifiInfo),
+            )
+
+            assertThat(latest).isInstanceOf(WifiNetworkModel.Invalid::class.java)
+
+            job.cancel()
+        }
+
+    @Test
+    fun wifiNetwork_isCarrierMerged_getsCorrectValues() =
+        runBlocking(IMMEDIATE) {
+            var latest: WifiNetworkModel? = null
+            val job = underTest
+                .wifiNetwork
+                .onEach { latest = it }
+                .launchIn(this)
+
+            val rssi = -57
+            val wifiInfo = mock<WifiInfo>().apply {
+                whenever(this.isPrimary).thenReturn(true)
+                whenever(this.isCarrierMerged).thenReturn(true)
+                whenever(this.rssi).thenReturn(rssi)
+                whenever(this.subscriptionId).thenReturn(567)
+            }
+
+            whenever(wifiManager.calculateSignalLevel(rssi)).thenReturn(2)
+            whenever(wifiManager.maxSignalLevel).thenReturn(5)
+
+            getNetworkCallback().onCapabilitiesChanged(
+                NETWORK,
+                createWifiNetworkCapabilities(wifiInfo),
+            )
+
+            assertThat(latest is WifiNetworkModel.CarrierMerged).isTrue()
+            val latestCarrierMerged = latest as WifiNetworkModel.CarrierMerged
+            assertThat(latestCarrierMerged.networkId).isEqualTo(NETWORK_ID)
+            assertThat(latestCarrierMerged.subscriptionId).isEqualTo(567)
+            assertThat(latestCarrierMerged.level).isEqualTo(2)
+            // numberOfLevels = maxSignalLevel + 1
+            assertThat(latestCarrierMerged.numberOfLevels).isEqualTo(6)
+
+            job.cancel()
+        }
 
     @Test
     fun wifiNetwork_notValidated_networkNotValidated() = runBlocking(IMMEDIATE) {

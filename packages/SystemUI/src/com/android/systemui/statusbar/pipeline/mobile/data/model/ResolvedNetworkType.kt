@@ -17,6 +17,8 @@
 package com.android.systemui.statusbar.pipeline.mobile.data.model
 
 import android.telephony.Annotation.NetworkType
+import com.android.settingslib.SignalIcon
+import com.android.settingslib.mobile.TelephonyIcons
 import com.android.systemui.statusbar.pipeline.mobile.util.MobileMappingsProxy
 
 /**
@@ -38,4 +40,12 @@ sealed interface ResolvedNetworkType {
     data class OverrideNetworkType(
         override val lookupKey: String,
     ) : ResolvedNetworkType
+
+    /** Represents the carrier merged network. See [CarrierMergedConnectionRepository]. */
+    object CarrierMergedNetworkType : ResolvedNetworkType {
+        // Effectively unused since [iconGroupOverride] is used instead.
+        override val lookupKey: String = "cwf"
+
+        val iconGroupOverride: SignalIcon.MobileIconGroup = TelephonyIcons.CARRIER_MERGED_WIFI
+    }
 }

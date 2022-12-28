@@ -46,11 +46,12 @@ import com.android.systemui.dagger.qualifiers.Background
 import com.android.systemui.statusbar.pipeline.mobile.data.model.MobileConnectivityModel
 import com.android.systemui.statusbar.pipeline.mobile.data.model.NetworkNameModel
 import com.android.systemui.statusbar.pipeline.mobile.data.model.SubscriptionModel
-import com.android.systemui.statusbar.pipeline.mobile.data.repository.MobileConnectionRepository
 import com.android.systemui.statusbar.pipeline.mobile.data.repository.MobileConnectionsRepository
 import com.android.systemui.statusbar.pipeline.mobile.util.MobileMappingsProxy
 import com.android.systemui.statusbar.pipeline.shared.ConnectivityPipelineLogger
 import com.android.systemui.statusbar.pipeline.shared.ConnectivityPipelineLogger.Companion.logInputChange
+import com.android.systemui.statusbar.pipeline.wifi.data.model.WifiNetworkModel
+import com.android.systemui.statusbar.pipeline.wifi.data.repository.WifiRepository
 import com.android.systemui.util.settings.GlobalSettings
 import javax.inject.Inject
 import kotlinx.coroutines.CoroutineDispatcher
@@ -85,9 +86,14 @@ constructor(
     private val context: Context,
     @Background private val bgDispatcher: CoroutineDispatcher,
     @Application private val scope: CoroutineScope,
-    private val mobileConnectionRepositoryFactory: MobileConnectionRepositoryImpl.Factory
+    // Some "wifi networks" should be rendered as a mobile connection, which is why the wifi
+    // repository is an input to the mobile repository.
+    // See [CarrierMergedConnectionRepository] for details.
+    wifiRepository: WifiRepository,
+    private val fullMobileRepoFactory: FullMobileConnectionRepository.Factory,
 ) : MobileConnectionsRepository {
-    private var subIdRepositoryCache: MutableMap<Int, MobileConnectionRepository> = mutableMapOf()
+    private var subIdRepositoryCache: MutableMap<Int, FullMobileConnectionRepository> =
+        mutableMapOf()
 
     private val defaultNetworkName =
         NetworkNameModel.Default(
@@ -97,30 +103,43 @@ constructor(
     private val networkNameSeparator: String =
         context.getString(R.string.status_bar_network_name_separator)
 
+    private val carrierMergedSubId: StateFlow<Int?> =
+        wifiRepository.wifiNetwork
+            .mapLatest {
+                if (it is WifiNetworkModel.CarrierMerged) {
+                    it.subscriptionId
+                } else {
+                    null
+                }
+            }
+            .distinctUntilChanged()
+            .stateIn(scope, started = SharingStarted.WhileSubscribed(), null)
+
+    private val mobileSubscriptionsChangeEvent: Flow<Unit> = conflatedCallbackFlow {
+        val callback =
+            object : SubscriptionManager.OnSubscriptionsChangedListener() {
+                override fun onSubscriptionsChanged() {
+                    trySend(Unit)
+                }
+            }
+
+        subscriptionManager.addOnSubscriptionsChangedListener(
+            bgDispatcher.asExecutor(),
+            callback,
+        )
+
+        awaitClose { subscriptionManager.removeOnSubscriptionsChangedListener(callback) }
+    }
+
     /**
      * State flow that emits the set of mobile data subscriptions, each represented by its own
-     * [SubscriptionInfo]. We probably only need the [SubscriptionInfo.getSubscriptionId] of each
-     * info object, but for now we keep track of the infos themselves.
+     * [SubscriptionModel].
      */
     override val subscriptions: StateFlow<List<SubscriptionModel>> =
-        conflatedCallbackFlow {
-                val callback =
-                    object : SubscriptionManager.OnSubscriptionsChangedListener() {
-                        override fun onSubscriptionsChanged() {
-                            trySend(Unit)
-                        }
-                    }
-
-                subscriptionManager.addOnSubscriptionsChangedListener(
-                    bgDispatcher.asExecutor(),
-                    callback,
-                )
-
-                awaitClose { subscriptionManager.removeOnSubscriptionsChangedListener(callback) }
-            }
+        merge(mobileSubscriptionsChangeEvent, carrierMergedSubId)
             .mapLatest { fetchSubscriptionsList().map { it.toSubscriptionModel() } }
             .logInputChange(logger, "onSubscriptionsChanged")
-            .onEach { infos -> dropUnusedReposFromCache(infos) }
+            .onEach { infos -> updateRepos(infos) }
             .stateIn(scope, started = SharingStarted.WhileSubscribed(), listOf())
 
     /** StateFlow that keeps track of the current active mobile data subscription */
@@ -173,7 +192,7 @@ constructor(
             .distinctUntilChanged()
             .logInputChange(logger, "defaultMobileIconGroup")
 
-    override fun getRepoForSubId(subId: Int): MobileConnectionRepository {
+    override fun getRepoForSubId(subId: Int): FullMobileConnectionRepository {
         if (!isValidSubId(subId)) {
             throw IllegalArgumentException(
                 "subscriptionId $subId is not in the list of valid subscriptions"
@@ -251,13 +270,25 @@ constructor(
 
     @VisibleForTesting fun getSubIdRepoCache() = subIdRepositoryCache
 
-    private fun createRepositoryForSubId(subId: Int): MobileConnectionRepository {
-        return mobileConnectionRepositoryFactory.build(
+    private fun createRepositoryForSubId(subId: Int): FullMobileConnectionRepository {
+        return fullMobileRepoFactory.build(
             subId,
+            isCarrierMerged(subId),
             defaultNetworkName,
             networkNameSeparator,
             globalMobileDataSettingChangedEvent,
         )
+    }
+
+    private fun updateRepos(newInfos: List<SubscriptionModel>) {
+        dropUnusedReposFromCache(newInfos)
+        subIdRepositoryCache.forEach { (subId, repo) ->
+            repo.setIsCarrierMerged(isCarrierMerged(subId))
+        }
+    }
+
+    private fun isCarrierMerged(subId: Int): Boolean {
+        return subId == carrierMergedSubId.value
     }
 
     private fun dropUnusedReposFromCache(newInfos: List<SubscriptionModel>) {
