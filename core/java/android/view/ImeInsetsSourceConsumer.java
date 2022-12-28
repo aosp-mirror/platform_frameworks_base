@@ -17,10 +17,9 @@
 package android.view;
 
 import static android.os.Trace.TRACE_TAG_VIEW;
+import static android.view.ImeInsetsSourceConsumerProto.HAS_PENDING_REQUEST;
 import static android.view.ImeInsetsSourceConsumerProto.INSETS_SOURCE_CONSUMER;
-import static android.view.ImeInsetsSourceConsumerProto.IS_HIDE_ANIMATION_RUNNING;
 import static android.view.ImeInsetsSourceConsumerProto.IS_REQUESTED_VISIBLE_AWAITING_CONTROL;
-import static android.view.ImeInsetsSourceConsumerProto.IS_SHOW_REQUESTED_DURING_HIDE_ANIMATION;
 
 import android.annotation.Nullable;
 import android.os.IBinder;
@@ -43,20 +42,16 @@ import java.util.function.Supplier;
 public final class ImeInsetsSourceConsumer extends InsetsSourceConsumer {
 
     /**
+     * Tracks whether are requested to show during the hide animation or requested to hide during
+     * the show animation. If this is true, we should not remove the surface.
+     */
+    private boolean mHasPendingRequest;
+
+    /**
      * Tracks whether we have an outstanding request from the IME to show, but weren't able to
      * execute it because we didn't have control yet.
      */
     private boolean mIsRequestedVisibleAwaitingControl;
-
-    private boolean mIsHideAnimationRunning;
-
-    /**
-     * Tracks whether {@link WindowInsetsController#show(int)} or
-     * {@link InputMethodManager#showSoftInput(View, int)} is called during IME hide animation.
-     * If it was called, we should not call {@link InputMethodManager#notifyImeHidden(IBinder,
-     * ImeTracker.Token)}, because the IME is being shown.
-     */
-    private boolean mIsShowRequestedDuringHideAnimation;
 
     public ImeInsetsSourceConsumer(
             int id, InsetsState state, Supplier<Transaction> transactionSupplier,
@@ -72,27 +67,19 @@ public final class ImeInsetsSourceConsumer extends InsetsSourceConsumer {
                     mController.getHost().getInputMethodManager(), null /* icProto */);
         }
         final boolean insetsChanged = super.onAnimationStateChanged(running);
-        final boolean showRequested = (mController.getRequestedVisibleTypes() & getType()) != 0;
-        if (showRequested) {
-            onShowRequested();
-        } else {
+        if (!isShowRequested()) {
             mIsRequestedVisibleAwaitingControl = false;
-            if (!running) {
-                // Remove IME surface as IME has finished hide animation, if there is no pending
-                // show request.
-                if (!mIsShowRequestedDuringHideAnimation) {
-                    notifyHidden(null /* statsToken */);
-                    removeSurface();
-                }
+            if (!running && !mHasPendingRequest) {
+                notifyHidden(null /* statsToken */);
+                removeSurface();
             }
-            // Here is reached
-            // (1) before the hide animation starts.
-            // (2) after the hide animation ends.
-            // (3) if the IME is not controllable (animationFinished == true in this case).
-            // We should reset mIsShowRequestedDuringHideAnimation in all cases.
-            mIsHideAnimationRunning = running;
-            mIsShowRequestedDuringHideAnimation = false;
         }
+        // This method is called
+        // (1) after the animation starts.
+        // (2) after the animation ends (including the case of cancel).
+        // (3) if the IME is not controllable (running == false in this case).
+        // We should reset mHasPendingRequest in all cases.
+        mHasPendingRequest = false;
         return insetsChanged;
     }
 
@@ -132,6 +119,7 @@ public final class ImeInsetsSourceConsumer extends InsetsSourceConsumer {
                     "ImeInsetsSourceConsumer#requestShow",
                     mController.getHost().getInputMethodManager(), null /* icProto */);
         }
+        onShowRequested();
 
         // TODO: ResultReceiver for IME.
         // TODO: Set mShowOnNextImeRender to automatically show IME and guard it with a flag.
@@ -151,6 +139,17 @@ public final class ImeInsetsSourceConsumer extends InsetsSourceConsumer {
 
         return getImm().requestImeShow(mController.getHost().getWindowToken(), statsToken)
                 ? ShowResult.IME_SHOW_DELAYED : ShowResult.IME_SHOW_FAILED;
+    }
+
+    void requestHide(boolean fromIme, @Nullable ImeTracker.Token statsToken) {
+        if (!fromIme) {
+            // The insets might be controlled by a remote target. Let the server know we are
+            // requested to hide.
+            notifyHidden(statsToken);
+        }
+        if (mAnimationState == ANIMATION_STATE_SHOW) {
+            mHasPendingRequest = true;
+        }
     }
 
     /**
@@ -222,18 +221,17 @@ public final class ImeInsetsSourceConsumer extends InsetsSourceConsumer {
         final long token = proto.start(fieldId);
         super.dumpDebug(proto, INSETS_SOURCE_CONSUMER);
         proto.write(IS_REQUESTED_VISIBLE_AWAITING_CONTROL, mIsRequestedVisibleAwaitingControl);
-        proto.write(IS_HIDE_ANIMATION_RUNNING, mIsHideAnimationRunning);
-        proto.write(IS_SHOW_REQUESTED_DURING_HIDE_ANIMATION, mIsShowRequestedDuringHideAnimation);
+        proto.write(HAS_PENDING_REQUEST, mHasPendingRequest);
         proto.end(token);
     }
 
     /**
-     * Called when {@link #onAnimationStateChanged(boolean)} or
+     * Called when {@link #requestShow(boolean, ImeTracker.Token)} or
      * {@link InputMethodManager#showSoftInput(View, int)} is called.
      */
     public void onShowRequested() {
-        if (mIsHideAnimationRunning) {
-            mIsShowRequestedDuringHideAnimation = true;
+        if (mAnimationState == ANIMATION_STATE_HIDE) {
+            mHasPendingRequest = true;
         }
     }
 

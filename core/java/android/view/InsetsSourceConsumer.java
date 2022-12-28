@@ -19,6 +19,7 @@ package android.view;
 import static android.view.InsetsController.ANIMATION_TYPE_NONE;
 import static android.view.InsetsController.AnimationType;
 import static android.view.InsetsController.DEBUG;
+import static android.view.InsetsSourceConsumerProto.ANIMATION_STATE;
 import static android.view.InsetsSourceConsumerProto.HAS_WINDOW_FOCUS;
 import static android.view.InsetsSourceConsumerProto.INTERNAL_INSETS_TYPE;
 import static android.view.InsetsSourceConsumerProto.IS_REQUESTED_VISIBLE;
@@ -72,6 +73,12 @@ public class InsetsSourceConsumer {
          */
         int IME_SHOW_FAILED = 2;
     }
+
+    protected static final int ANIMATION_STATE_NONE = 0;
+    protected static final int ANIMATION_STATE_SHOW = 1;
+    protected static final int ANIMATION_STATE_HIDE = 2;
+
+    protected int mAnimationState = ANIMATION_STATE_NONE;
 
     protected final InsetsController mController;
     protected final InsetsState mState;
@@ -230,12 +237,29 @@ public class InsetsSourceConsumer {
             mPendingVisibleFrame = null;
         }
 
+        final boolean showRequested = isShowRequested();
+        final boolean cancelledForNewAnimation = !running && showRequested
+                ? mAnimationState == ANIMATION_STATE_HIDE
+                : mAnimationState == ANIMATION_STATE_SHOW;
+
+        mAnimationState = running
+                ? (showRequested ? ANIMATION_STATE_SHOW : ANIMATION_STATE_HIDE)
+                : ANIMATION_STATE_NONE;
+
         // We apply the visibility override after the animation is started. We don't do this before
         // that because we need to know the initial insets state while creating the animation.
         // We also need to apply the override after the animation is finished because the requested
         // visibility can be set when finishing the user animation.
-        insetsChanged |= applyLocalVisibilityOverride();
+        // If the animation is cancelled because we are going to play a new animation with an
+        // opposite direction, don't apply it now but after the new animation is started.
+        if (!cancelledForNewAnimation) {
+            insetsChanged |= applyLocalVisibilityOverride();
+        }
         return insetsChanged;
+    }
+
+    protected boolean isShowRequested() {
+        return (mController.getRequestedVisibleTypes() & getType()) != 0;
     }
 
     /**
@@ -298,6 +322,10 @@ public class InsetsSourceConsumer {
     @ShowResult
     public int requestShow(boolean fromController, @Nullable ImeTracker.Token statsToken) {
         return ShowResult.SHOW_IMMEDIATELY;
+    }
+
+    void requestHide(boolean fromController, @Nullable ImeTracker.Token statsToken) {
+        // no-op for types that always return ShowResult#SHOW_IMMEDIATELY.
     }
 
     /**
@@ -364,7 +392,7 @@ public class InsetsSourceConsumer {
         final long token = proto.start(fieldId);
         proto.write(INTERNAL_INSETS_TYPE, WindowInsets.Type.toString(mType));
         proto.write(HAS_WINDOW_FOCUS, mHasWindowFocus);
-        proto.write(IS_REQUESTED_VISIBLE, (mController.getRequestedVisibleTypes() & mType) != 0);
+        proto.write(IS_REQUESTED_VISIBLE, isShowRequested());
         if (mSourceControl != null) {
             mSourceControl.dumpDebug(proto, SOURCE_CONTROL);
         }
@@ -374,6 +402,7 @@ public class InsetsSourceConsumer {
         if (mPendingVisibleFrame != null) {
             mPendingVisibleFrame.dumpDebug(proto, PENDING_VISIBLE_FRAME);
         }
+        proto.write(ANIMATION_STATE, mAnimationState);
         proto.end(token);
     }
 }
