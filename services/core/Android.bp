@@ -101,6 +101,8 @@ java_library_static {
     defaults: ["platform_service_defaults"],
     srcs: [
         ":android.hardware.biometrics.face-V3-java-source",
+        ":android.hardware.tv.hdmi.connection-V1-java-source",
+        ":android.hardware.tv.hdmi.earc-V1-java-source",
         ":statslog-art-java-gen",
         ":statslog-contexthub-java-gen",
         ":services.core-sources",
@@ -160,6 +162,7 @@ java_library_static {
         "android.hardware.tv.cec-V1.1-java",
         "android.hardware.tv.hdmi.cec-V1-java",
         "android.hardware.tv.hdmi.connection-V1-java",
+        "android.hardware.tv.hdmi.earc-V1-java",
         "android.hardware.weaver-V1.0-java",
         "android.hardware.weaver-V2-java",
         "android.hardware.biometrics.face-V1.0-java",

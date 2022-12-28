@@ -19,6 +19,8 @@ package com.android.server.hdmi;
 import android.annotation.IntDef;
 import android.annotation.StringDef;
 import android.hardware.hdmi.HdmiDeviceInfo;
+import android.hardware.tv.hdmi.connection.HpdSignal;
+import android.hardware.tv.hdmi.earc.IEArcStatus;
 
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
@@ -599,10 +601,13 @@ final class Constants {
     })
     @interface RcProfileSource {}
 
-    static final int HDMI_EARC_STATUS_IDLE = 0;             // IDLE1
-    static final int HDMI_EARC_STATUS_EARC_PENDING = 1;     // DISC1 and DISC2
-    static final int HDMI_EARC_STATUS_ARC_PENDING = 2;      // IDLE2 for ARC
-    static final int HDMI_EARC_STATUS_EARC_CONNECTED = 3;   // eARC connected
+    static final int HDMI_EARC_STATUS_IDLE = IEArcStatus.STATUS_IDLE; // IDLE1
+    static final int HDMI_EARC_STATUS_EARC_PENDING =
+            IEArcStatus.STATUS_EARC_PENDING; // DISC1 and DISC2
+    static final int HDMI_EARC_STATUS_ARC_PENDING = IEArcStatus.STATUS_ARC_PENDING; // IDLE2 for ARC
+    static final int HDMI_EARC_STATUS_EARC_CONNECTED =
+            IEArcStatus.STATUS_EARC_CONNECTED; // eARC connected
+
     @IntDef({
             HDMI_EARC_STATUS_IDLE,
             HDMI_EARC_STATUS_EARC_PENDING,
@@ -611,8 +616,11 @@ final class Constants {
             })
     @interface EarcStatus {}
 
-    static final int HDMI_HPD_TYPE_PHYSICAL = 0;   // Default. Physical hotplug signal.
-    static final int HDMI_HPD_TYPE_STATUS_BIT = 1; // HDMI_HPD status bit.
+    static final int HDMI_HPD_TYPE_PHYSICAL =
+            HpdSignal.HDMI_HPD_PHYSICAL; // Default. Physical hotplug signal.
+    static final int HDMI_HPD_TYPE_STATUS_BIT =
+            HpdSignal.HDMI_HPD_STATUS_BIT; // HDMI_HPD status bit.
+
     @IntDef({
             HDMI_HPD_TYPE_PHYSICAL,
             HDMI_HPD_TYPE_STATUS_BIT
