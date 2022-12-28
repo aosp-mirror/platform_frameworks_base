@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.android.systemui.compose.layout.pager
+package com.android.compose.pager
 
 import androidx.annotation.FloatRange
 import androidx.annotation.IntRange
