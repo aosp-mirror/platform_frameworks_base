@@ -18,17 +18,17 @@
 package com.android.systemui.keyguard.data.quickaffordance
 
 import com.android.systemui.settings.UserTracker
-import com.android.systemui.shared.quickaffordance.data.content.FakeKeyguardQuickAffordanceProviderClient
-import com.android.systemui.shared.quickaffordance.data.content.KeyguardQuickAffordanceProviderClient
+import com.android.systemui.shared.customization.data.content.CustomizationProviderClient
+import com.android.systemui.shared.customization.data.content.FakeCustomizationProviderClient
 
 class FakeKeyguardQuickAffordanceProviderClientFactory(
     private val userTracker: UserTracker,
-    private val callback: (Int) -> KeyguardQuickAffordanceProviderClient = {
-        FakeKeyguardQuickAffordanceProviderClient()
+    private val callback: (Int) -> CustomizationProviderClient = {
+        FakeCustomizationProviderClient()
     },
 ) : KeyguardQuickAffordanceProviderClientFactory {
 
-    override fun create(): KeyguardQuickAffordanceProviderClient {
+    override fun create(): CustomizationProviderClient {
         return callback(userTracker.userId)
     }
 }
