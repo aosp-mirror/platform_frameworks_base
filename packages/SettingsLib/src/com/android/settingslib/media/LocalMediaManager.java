@@ -493,21 +493,6 @@ public class LocalMediaManager implements BluetoothCallback {
 
     class MediaDeviceCallback implements MediaManager.MediaDeviceCallback {
         @Override
-        public void onDeviceAdded(MediaDevice device) {
-            boolean isAdded = false;
-            synchronized (mMediaDevicesLock) {
-                if (!mMediaDevices.contains(device)) {
-                    mMediaDevices.add(device);
-                    isAdded = true;
-                }
-            }
-
-            if (isAdded) {
-                dispatchDeviceListUpdate();
-            }
-        }
-
-        @Override
         public void onDeviceListAdded(List<MediaDevice> devices) {
             synchronized (mMediaDevicesLock) {
                 mMediaDevices.clear();
@@ -629,20 +614,6 @@ public class LocalMediaManager implements BluetoothCallback {
         }
 
         @Override
-        public void onDeviceRemoved(MediaDevice device) {
-            boolean isRemoved = false;
-            synchronized (mMediaDevicesLock) {
-                if (mMediaDevices.contains(device)) {
-                    mMediaDevices.remove(device);
-                    isRemoved = true;
-                }
-            }
-            if (isRemoved) {
-                dispatchDeviceListUpdate();
-            }
-        }
-
-        @Override
         public void onDeviceListRemoved(List<MediaDevice> devices) {
             synchronized (mMediaDevicesLock) {
                 mMediaDevices.removeAll(devices);
@@ -663,11 +634,6 @@ public class LocalMediaManager implements BluetoothCallback {
                 dispatchSelectedDeviceStateChanged(mCurrentConnectedDevice,
                         MediaDeviceState.STATE_CONNECTED);
             }
-        }
-
-        @Override
-        public void onDeviceAttributesChanged() {
-            dispatchDeviceAttributesChanged();
         }
 
         @Override
