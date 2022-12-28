@@ -24,6 +24,7 @@ import android.media.tv.AdBuffer;
 import android.media.tv.AdResponse;
 import android.media.tv.BroadcastInfoResponse;
 import android.media.tv.TvContentRating;
+import android.media.tv.TvRecordingInfo;
 import android.media.tv.TvTrackInfo;
 import android.media.tv.interactive.TvInteractiveAppService.Session;
 import android.net.Uri;
@@ -85,6 +86,8 @@ public class ITvInteractiveAppSessionWrapper
     private static final int DO_NOTIFY_RECORDING_STARTED = 30;
     private static final int DO_NOTIFY_RECORDING_STOPPED = 31;
     private static final int DO_NOTIFY_AD_BUFFER_CONSUMED = 32;
+    private static final int DO_SEND_RECORDING_INFO = 33;
+    private static final int DO_SEND_RECORDING_INFO_LIST = 34;
 
     private final HandlerCaller mCaller;
     private Session mSessionImpl;
@@ -166,6 +169,14 @@ public class ITvInteractiveAppSessionWrapper
             }
             case DO_SEND_CURRENT_TV_INPUT_ID: {
                 mSessionImpl.sendCurrentTvInputId((String) msg.obj);
+                break;
+            }
+            case DO_SEND_RECORDING_INFO: {
+                mSessionImpl.sendTvRecordingInfo((TvRecordingInfo) msg.obj);
+                break;
+            }
+            case DO_SEND_RECORDING_INFO_LIST: {
+                mSessionImpl.sendTvRecordingInfoList((List<TvRecordingInfo>) msg.obj);
                 break;
             }
             case DO_NOTIFY_RECORDING_STARTED: {
@@ -335,6 +346,18 @@ public class ITvInteractiveAppSessionWrapper
     public void sendCurrentTvInputId(@Nullable String inputId) {
         mCaller.executeOrSendMessage(
                 mCaller.obtainMessageO(DO_SEND_CURRENT_TV_INPUT_ID, inputId));
+    }
+
+    @Override
+    public void sendTvRecordingInfo(@Nullable TvRecordingInfo recordingInfo) {
+        mCaller.executeOrSendMessage(
+                mCaller.obtainMessageO(DO_SEND_RECORDING_INFO, recordingInfo));
+    }
+
+    @Override
+    public void sendTvRecordingInfoList(@Nullable List<TvRecordingInfo> recordingInfoList) {
+        mCaller.executeOrSendMessage(
+                mCaller.obtainMessageO(DO_SEND_RECORDING_INFO_LIST, recordingInfoList));
     }
 
     @Override

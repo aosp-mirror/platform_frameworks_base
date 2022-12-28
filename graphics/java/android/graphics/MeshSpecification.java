@@ -38,8 +38,6 @@ import java.util.List;
  *
  * These should be kept in mind when generating a mesh specification, as exceeding them will
  * lead to errors.
- *
- * @hide
  */
 public class MeshSpecification {
     long mNativeMeshSpec;

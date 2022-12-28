@@ -14723,6 +14723,7 @@ package android.graphics {
     method public void drawLine(float, float, float, float, @NonNull android.graphics.Paint);
     method public void drawLines(@NonNull @Size(multiple=4) float[], int, int, @NonNull android.graphics.Paint);
     method public void drawLines(@NonNull @Size(multiple=4) float[], @NonNull android.graphics.Paint);
+    method public void drawMesh(@NonNull android.graphics.Mesh, android.graphics.BlendMode, @NonNull android.graphics.Paint);
     method public void drawOval(@NonNull android.graphics.RectF, @NonNull android.graphics.Paint);
     method public void drawOval(float, float, float, float, @NonNull android.graphics.Paint);
     method public void drawPaint(@NonNull android.graphics.Paint);
@@ -15300,6 +15301,49 @@ package android.graphics {
     enum_constant public static final android.graphics.Matrix.ScaleToFit START;
   }
 
+  public class Mesh {
+    method @NonNull public static android.graphics.Mesh make(@NonNull android.graphics.MeshSpecification, int, @NonNull java.nio.Buffer, int, @NonNull android.graphics.Rect);
+    method @NonNull public static android.graphics.Mesh makeIndexed(@NonNull android.graphics.MeshSpecification, int, @NonNull java.nio.Buffer, int, @NonNull java.nio.ShortBuffer, @NonNull android.graphics.Rect);
+    method public void setColorUniform(@NonNull String, int);
+    method public void setColorUniform(@NonNull String, long);
+    method public void setColorUniform(@NonNull String, @NonNull android.graphics.Color);
+    method public void setFloatUniform(@NonNull String, float);
+    method public void setFloatUniform(@NonNull String, float, float);
+    method public void setFloatUniform(@NonNull String, float, float, float);
+    method public void setFloatUniform(@NonNull String, float, float, float, float);
+    method public void setFloatUniform(@NonNull String, @NonNull float[]);
+    method public void setIntUniform(@NonNull String, int);
+    method public void setIntUniform(@NonNull String, int, int);
+    method public void setIntUniform(@NonNull String, int, int, int);
+    method public void setIntUniform(@NonNull String, int, int, int, int);
+    method public void setIntUniform(@NonNull String, @NonNull int[]);
+    field public static final int TRIANGLES = 0; // 0x0
+    field public static final int TRIANGLE_STRIP = 1; // 0x1
+  }
+
+  public class MeshSpecification {
+    method @NonNull public static android.graphics.MeshSpecification make(@NonNull java.util.List<android.graphics.MeshSpecification.Attribute>, int, @NonNull java.util.List<android.graphics.MeshSpecification.Varying>, @NonNull String, @NonNull String);
+    method @NonNull public static android.graphics.MeshSpecification make(@NonNull java.util.List<android.graphics.MeshSpecification.Attribute>, int, @NonNull java.util.List<android.graphics.MeshSpecification.Varying>, @NonNull String, @NonNull String, @NonNull android.graphics.ColorSpace);
+    method @NonNull public static android.graphics.MeshSpecification make(@NonNull java.util.List<android.graphics.MeshSpecification.Attribute>, int, @NonNull java.util.List<android.graphics.MeshSpecification.Varying>, @NonNull String, @NonNull String, @NonNull android.graphics.ColorSpace, int);
+    field public static final int FLOAT = 0; // 0x0
+    field public static final int FLOAT2 = 1; // 0x1
+    field public static final int FLOAT3 = 2; // 0x2
+    field public static final int FLOAT4 = 3; // 0x3
+    field public static final int OPAQUE = 1; // 0x1
+    field public static final int PREMUL = 2; // 0x2
+    field public static final int UBYTE4 = 4; // 0x4
+    field public static final int UNKNOWN = 0; // 0x0
+    field public static final int UNPREMULT = 3; // 0x3
+  }
+
+  public static class MeshSpecification.Attribute {
+    ctor public MeshSpecification.Attribute(int, int, @NonNull String);
+  }
+
+  public static class MeshSpecification.Varying {
+    ctor public MeshSpecification.Varying(int, @NonNull String);
+  }
+
   @Deprecated public class Movie {
     method @Deprecated public static android.graphics.Movie decodeByteArray(byte[], int, int);
     method @Deprecated public static android.graphics.Movie decodeFile(String);
@@ -15815,6 +15859,7 @@ package android.graphics {
   }
 
   public final class RecordingCanvas extends android.graphics.Canvas {
+    method public final void drawMesh(@NonNull android.graphics.Mesh, android.graphics.BlendMode, @NonNull android.graphics.Paint);
   }
 
   public final class Rect implements android.os.Parcelable {

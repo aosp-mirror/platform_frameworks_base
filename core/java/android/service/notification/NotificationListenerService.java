@@ -1730,6 +1730,8 @@ public abstract class NotificationListenerService extends Service {
         private ShortcutInfo mShortcutInfo;
         private @RankingAdjustment int mRankingAdjustment;
         private boolean mIsBubble;
+        // Notification assistant importance suggestion
+        private int mProposedImportance;
 
         private static final int PARCEL_VERSION = 2;
 
@@ -1767,6 +1769,7 @@ public abstract class NotificationListenerService extends Service {
             out.writeParcelable(mShortcutInfo, flags);
             out.writeInt(mRankingAdjustment);
             out.writeBoolean(mIsBubble);
+            out.writeInt(mProposedImportance);
         }
 
         /** @hide */
@@ -1805,6 +1808,7 @@ public abstract class NotificationListenerService extends Service {
             mShortcutInfo = in.readParcelable(cl, android.content.pm.ShortcutInfo.class);
             mRankingAdjustment = in.readInt();
             mIsBubble = in.readBoolean();
+            mProposedImportance = in.readInt();
         }
 
 
@@ -1894,6 +1898,23 @@ public abstract class NotificationListenerService extends Service {
          */
         public float getRankingScore() {
             return mRankingScore;
+        }
+
+        /**
+         * Returns the proposed importance provided by the {@link NotificationAssistantService}.
+         *
+         * This can be used to suggest that the user change the importance of this type of
+         * notification moving forward. A value of
+         * {@link NotificationManager#IMPORTANCE_UNSPECIFIED} means that the NAS has not recommended
+         * a change to the importance, and no UI should be shown to the user. See
+         * {@link Adjustment#KEY_IMPORTANCE_PROPOSAL}.
+         *
+         * @return the importance of the notification
+         * @hide
+         */
+        @SystemApi
+        public @NotificationManager.Importance int getProposedImportance() {
+            return mProposedImportance;
         }
 
         /**
@@ -2060,7 +2081,7 @@ public abstract class NotificationListenerService extends Service {
                 boolean noisy, ArrayList<Notification.Action> smartActions,
                 ArrayList<CharSequence> smartReplies, boolean canBubble,
                 boolean isTextChanged, boolean isConversation, ShortcutInfo shortcutInfo,
-                int rankingAdjustment, boolean isBubble) {
+                int rankingAdjustment, boolean isBubble, int proposedImportance) {
             mKey = key;
             mRank = rank;
             mIsAmbient = importance < NotificationManager.IMPORTANCE_LOW;
@@ -2086,6 +2107,7 @@ public abstract class NotificationListenerService extends Service {
             mShortcutInfo = shortcutInfo;
             mRankingAdjustment = rankingAdjustment;
             mIsBubble = isBubble;
+            mProposedImportance = proposedImportance;
         }
 
         /**
@@ -2126,7 +2148,8 @@ public abstract class NotificationListenerService extends Service {
                     other.mIsConversation,
                     other.mShortcutInfo,
                     other.mRankingAdjustment,
-                    other.mIsBubble);
+                    other.mIsBubble,
+                    other.mProposedImportance);
         }
 
         /**
@@ -2185,7 +2208,8 @@ public abstract class NotificationListenerService extends Service {
                     &&  Objects.equals((mShortcutInfo == null ? 0 : mShortcutInfo.getId()),
                     (other.mShortcutInfo == null ? 0 : other.mShortcutInfo.getId()))
                     && Objects.equals(mRankingAdjustment, other.mRankingAdjustment)
-                    && Objects.equals(mIsBubble, other.mIsBubble);
+                    && Objects.equals(mIsBubble, other.mIsBubble)
+                    && Objects.equals(mProposedImportance, other.mProposedImportance);
         }
     }
 

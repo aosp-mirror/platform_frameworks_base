@@ -102,7 +102,6 @@ public class HdmiCecPowerStatusControllerTest {
         mNativeWrapper.setPortInfo(hdmiPortInfos);
         mNativeWrapper.setPortConnectionStatus(1, true);
         mHdmiControlService.initService();
-        mHdmiControlService.enableAllFeatureFlags();
         mHdmiControlService.onBootPhase(PHASE_SYSTEM_SERVICES_READY);
         mPowerManager = new FakePowerManagerWrapper(contextSpy);
         mHdmiControlService.setPowerManager(mPowerManager);

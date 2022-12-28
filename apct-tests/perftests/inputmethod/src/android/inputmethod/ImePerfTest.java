@@ -411,6 +411,10 @@ public class ImePerfTest extends ImePerfTestBase
 
     private void addResultToState(ManualBenchmarkState state) {
         mTraceMethods.forAllSlices((key, slices) -> {
+            if (slices.size() < 2) {
+                Log.w(TAG, "No enough samples for: " + key);
+                return;
+            }
             for (TraceMarkSlice slice : slices) {
                 state.addExtraResult(key, (long) (slice.getDurationInSeconds() * NANOS_PER_S));
             }

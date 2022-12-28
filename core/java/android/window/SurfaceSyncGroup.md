@@ -59,7 +59,7 @@ As mentioned above, SurfaceViews are a special case because the buffers produced
 A simple example where you want to sync two windows and also include a transaction in the sync
 
 ```java
-SurfaceSyncGroup syncGroup = new SurfaceSyncGroup();
+SurfaceSyncGroup syncGroup = new SurfaceSyncGroup(NAME);
 SyncGroup.addSyncCompleteCallback(mMainThreadExecutor, () -> {
     Log.d(TAG, "syncComplete");
 };
@@ -73,7 +73,7 @@ A SurfaceView example:
 See `frameworks/base/tests/SurfaceViewSyncTest` for a working example
 
 ```java
-SurfaceSyncGroup syncGroup = new SurfaceSyncGroup();
+SurfaceSyncGroup syncGroup = new SurfaceSyncGroup(NAME);
 syncGroup.addSyncCompleteCallback(mMainThreadExecutor, () -> {
     Log.d(TAG, "syncComplete");
 };

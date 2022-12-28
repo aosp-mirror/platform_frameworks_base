@@ -60,14 +60,14 @@ import java.util.Optional;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 
-/** Tests of {@link CaptionWindowDecorViewModel} */
+/** Tests of {@link DesktopModeWindowDecorViewModel} */
 @SmallTest
-public class CaptionWindowDecorViewModelTests extends ShellTestCase {
+public class DesktopModeWindowDecorViewModelTests extends ShellTestCase {
 
-    private static final String TAG = "CaptionWindowDecorViewModelTests";
+    private static final String TAG = "DesktopModeWindowDecorViewModelTests";
 
-    @Mock private CaptionWindowDecoration mCaptionWindowDecoration;
-    @Mock private CaptionWindowDecoration.Factory mCaptionWindowDecorFactory;
+    @Mock private DesktopModeWindowDecoration mDesktopModeWindowDecoration;
+    @Mock private DesktopModeWindowDecoration.Factory mDesktopModeWindowDecorFactory;
 
     @Mock private Handler mMainHandler;
     @Mock private Choreographer mMainChoreographer;
@@ -79,17 +79,17 @@ public class CaptionWindowDecorViewModelTests extends ShellTestCase {
     @Mock private InputMonitor mInputMonitor;
     @Mock private InputManager mInputManager;
 
-    @Mock private CaptionWindowDecorViewModel.InputMonitorFactory mMockInputMonitorFactory;
+    @Mock private DesktopModeWindowDecorViewModel.InputMonitorFactory mMockInputMonitorFactory;
     private final List<InputManager> mMockInputManagers = new ArrayList<>();
 
-    private CaptionWindowDecorViewModel mCaptionWindowDecorViewModel;
+    private DesktopModeWindowDecorViewModel mDesktopModeWindowDecorViewModel;
 
     @Before
     public void setUp() {
         mMockInputManagers.add(mInputManager);
 
-        mCaptionWindowDecorViewModel =
-            new CaptionWindowDecorViewModel(
+        mDesktopModeWindowDecorViewModel =
+            new DesktopModeWindowDecorViewModel(
                 mContext,
                 mMainHandler,
                 mMainChoreographer,
@@ -98,12 +98,12 @@ public class CaptionWindowDecorViewModelTests extends ShellTestCase {
                 mSyncQueue,
                 Optional.of(mDesktopModeController),
                 Optional.of(mDesktopTasksController),
-                mCaptionWindowDecorFactory,
+                mDesktopModeWindowDecorFactory,
                 mMockInputMonitorFactory
             );
 
-        doReturn(mCaptionWindowDecoration)
-            .when(mCaptionWindowDecorFactory)
+        doReturn(mDesktopModeWindowDecoration)
+            .when(mDesktopModeWindowDecorFactory)
             .create(any(), any(), any(), any(), any(), any(), any(), any());
 
         when(mMockInputMonitorFactory.create(any(), any())).thenReturn(mInputMonitor);
@@ -123,13 +123,15 @@ public class CaptionWindowDecorViewModelTests extends ShellTestCase {
             final SurfaceControl.Transaction startT = mock(SurfaceControl.Transaction.class);
             final SurfaceControl.Transaction finishT = mock(SurfaceControl.Transaction.class);
 
-            mCaptionWindowDecorViewModel.onTaskOpening(taskInfo, surfaceControl, startT, finishT);
+            mDesktopModeWindowDecorViewModel.onTaskOpening(
+                    taskInfo, surfaceControl, startT, finishT);
 
             taskInfo.configuration.windowConfiguration.setWindowingMode(WINDOWING_MODE_UNDEFINED);
             taskInfo.configuration.windowConfiguration.setActivityType(ACTIVITY_TYPE_UNDEFINED);
-            mCaptionWindowDecorViewModel.onTaskChanging(taskInfo, surfaceControl, startT, finishT);
+            mDesktopModeWindowDecorViewModel.onTaskChanging(
+                    taskInfo, surfaceControl, startT, finishT);
         });
-        verify(mCaptionWindowDecorFactory)
+        verify(mDesktopModeWindowDecorFactory)
                 .create(
                         mContext,
                         mDisplayController,
@@ -139,7 +141,7 @@ public class CaptionWindowDecorViewModelTests extends ShellTestCase {
                         mMainHandler,
                         mMainChoreographer,
                         mSyncQueue);
-        verify(mCaptionWindowDecoration).close();
+        verify(mDesktopModeWindowDecoration).close();
     }
 
     @Test
@@ -153,14 +155,16 @@ public class CaptionWindowDecorViewModelTests extends ShellTestCase {
             final SurfaceControl.Transaction finishT = mock(SurfaceControl.Transaction.class);
             taskInfo.configuration.windowConfiguration.setActivityType(ACTIVITY_TYPE_UNDEFINED);
 
-            mCaptionWindowDecorViewModel.onTaskChanging(taskInfo, surfaceControl, startT, finishT);
+            mDesktopModeWindowDecorViewModel.onTaskChanging(
+                    taskInfo, surfaceControl, startT, finishT);
 
             taskInfo.configuration.windowConfiguration.setWindowingMode(WINDOWING_MODE_FREEFORM);
             taskInfo.configuration.windowConfiguration.setActivityType(ACTIVITY_TYPE_STANDARD);
 
-            mCaptionWindowDecorViewModel.onTaskChanging(taskInfo, surfaceControl, startT, finishT);
+            mDesktopModeWindowDecorViewModel.onTaskChanging(
+                    taskInfo, surfaceControl, startT, finishT);
         });
-        verify(mCaptionWindowDecorFactory, times(1))
+        verify(mDesktopModeWindowDecorFactory, times(1))
                 .create(
                         mContext,
                         mDisplayController,
@@ -183,9 +187,10 @@ public class CaptionWindowDecorViewModelTests extends ShellTestCase {
             final SurfaceControl.Transaction startT = mock(SurfaceControl.Transaction.class);
             final SurfaceControl.Transaction finishT = mock(SurfaceControl.Transaction.class);
 
-            mCaptionWindowDecorViewModel.onTaskOpening(taskInfo, surfaceControl, startT, finishT);
+            mDesktopModeWindowDecorViewModel.onTaskOpening(
+                    taskInfo, surfaceControl, startT, finishT);
 
-            mCaptionWindowDecorViewModel.destroyWindowDecoration(taskInfo);
+            mDesktopModeWindowDecorViewModel.destroyWindowDecoration(taskInfo);
         });
         verify(mMockInputMonitorFactory).create(any(), any());
         verify(mInputMonitor).dispose();
@@ -214,13 +219,14 @@ public class CaptionWindowDecorViewModelTests extends ShellTestCase {
             final SurfaceControl.Transaction startT = mock(SurfaceControl.Transaction.class);
             final SurfaceControl.Transaction finishT = mock(SurfaceControl.Transaction.class);
 
-            mCaptionWindowDecorViewModel.onTaskOpening(taskInfo, surfaceControl, startT, finishT);
-            mCaptionWindowDecorViewModel.onTaskOpening(secondTaskInfo, surfaceControl,
+            mDesktopModeWindowDecorViewModel.onTaskOpening(taskInfo, surfaceControl, startT,
+                    finishT);
+            mDesktopModeWindowDecorViewModel.onTaskOpening(secondTaskInfo, surfaceControl,
                     startT, finishT);
-            mCaptionWindowDecorViewModel.onTaskOpening(thirdTaskInfo, surfaceControl,
+            mDesktopModeWindowDecorViewModel.onTaskOpening(thirdTaskInfo, surfaceControl,
                     startT, finishT);
-            mCaptionWindowDecorViewModel.destroyWindowDecoration(thirdTaskInfo);
-            mCaptionWindowDecorViewModel.destroyWindowDecoration(taskInfo);
+            mDesktopModeWindowDecorViewModel.destroyWindowDecoration(thirdTaskInfo);
+            mDesktopModeWindowDecorViewModel.destroyWindowDecoration(taskInfo);
         });
         verify(mMockInputMonitorFactory, times(2)).create(any(), any());
         verify(mInputMonitor, times(1)).dispose();

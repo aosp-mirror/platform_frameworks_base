@@ -20,6 +20,7 @@ import android.graphics.Rect;
 import android.media.tv.AdBuffer;
 import android.media.tv.AdRequest;
 import android.media.tv.BroadcastInfoRequest;
+import android.media.tv.TvRecordingInfo;
 import android.net.Uri;
 import android.os.Bundle;
 import android.view.InputChannel;
@@ -48,6 +49,9 @@ oneway interface ITvInteractiveAppClient {
     void onRequestCurrentTvInputId(int seq);
     void onRequestStartRecording(in Uri programUri, int seq);
     void onRequestStopRecording(in String recordingId, int seq);
+    void onSetTvRecordingInfo(in String recordingId, in TvRecordingInfo recordingInfo, int seq);
+    void onRequestTvRecordingInfo(in String recordingId, int seq);
+    void onRequestTvRecordingInfoList(in int type, int seq);
     void onRequestSigning(
             in String id, in String algorithm, in String alias, in byte[] data, int seq);
     void onAdRequest(in AdRequest request, int Seq);

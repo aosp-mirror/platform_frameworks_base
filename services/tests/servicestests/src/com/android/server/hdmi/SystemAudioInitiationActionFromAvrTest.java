@@ -173,7 +173,6 @@ public class SystemAudioInitiationActionFromAvrTest {
                 hdmiControlService, nativeWrapper, hdmiControlService.getAtomWriter());
         hdmiControlService.setCecController(hdmiCecController);
         hdmiControlService.initService();
-        hdmiControlService.enableAllFeatureFlags();
         mPowerManager = new FakePowerManagerWrapper(context);
         hdmiControlService.setPowerManager(mPowerManager);
         mHdmiCecLocalDeviceAudioSystem =

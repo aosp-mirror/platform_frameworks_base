@@ -26,6 +26,7 @@ import android.graphics.PixelFormat;
 import android.graphics.Rect;
 import android.graphics.RectF;
 import android.media.tv.TvInputManager;
+import android.media.tv.TvRecordingInfo;
 import android.media.tv.TvTrackInfo;
 import android.media.tv.TvView;
 import android.media.tv.interactive.TvInteractiveAppManager.Session;
@@ -577,6 +578,36 @@ public class TvInteractiveAppView extends ViewGroup {
         }
         if (mSession != null) {
             mSession.sendCurrentTvInputId(inputId);
+        }
+    }
+
+    /**
+     * Sends the requested {@link android.media.tv.TvRecordingInfo}.
+     *
+     * @param recordingInfo The recording info requested {@code null} if no recording found.
+     * @hide
+     */
+    public void sendTvRecordingInfo(@Nullable TvRecordingInfo recordingInfo) {
+        if (DEBUG) {
+            Log.d(TAG, "sendTvRecordingInfo");
+        }
+        if (mSession != null) {
+            mSession.sendTvRecordingInfo(recordingInfo);
+        }
+    }
+
+    /**
+     * Sends the requested {@link android.media.tv.TvRecordingInfo}.
+     *
+     * @param recordingInfoList The list of recording info requested.
+     * @hide
+     */
+    public void sendTvRecordingInfoList(@Nullable List<TvRecordingInfo> recordingInfoList) {
+        if (DEBUG) {
+            Log.d(TAG, "sendTvRecordingInfoList");
+        }
+        if (mSession != null) {
+            mSession.sendTvRecordingInfoList(recordingInfoList);
         }
     }
 

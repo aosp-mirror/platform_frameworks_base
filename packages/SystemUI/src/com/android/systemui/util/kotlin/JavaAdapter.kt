@@ -21,6 +21,8 @@ import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.repeatOnLifecycle
 import com.android.systemui.lifecycle.repeatWhenAttached
 import java.util.function.Consumer
+import kotlin.coroutines.CoroutineContext
+import kotlin.coroutines.EmptyCoroutineContext
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.collect
 
@@ -34,7 +36,10 @@ fun <T> collectFlow(
     view: View,
     flow: Flow<T>,
     consumer: Consumer<T>,
+    coroutineContext: CoroutineContext = EmptyCoroutineContext,
     state: Lifecycle.State = Lifecycle.State.CREATED,
 ) {
-    view.repeatWhenAttached { repeatOnLifecycle(state) { flow.collect { consumer.accept(it) } } }
+    view.repeatWhenAttached(coroutineContext) {
+        repeatOnLifecycle(state) { flow.collect { consumer.accept(it) } }
+    }
 }

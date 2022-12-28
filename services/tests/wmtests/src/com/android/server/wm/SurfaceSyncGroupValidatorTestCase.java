@@ -132,7 +132,7 @@ public class SurfaceSyncGroupValidatorTestCase implements ISurfaceValidatorTestC
         mLastExpanded = !mLastExpanded;
 
         mRenderingThread.pauseRendering();
-        mSyncGroup = new SurfaceSyncGroup();
+        mSyncGroup = new SurfaceSyncGroup(TAG);
         mSyncGroup.addToSync(mParent.getRootSurfaceControl());
 
         ViewGroup.LayoutParams svParams = mSurfaceView.getLayoutParams();

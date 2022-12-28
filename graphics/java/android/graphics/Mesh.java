@@ -34,8 +34,6 @@ import java.nio.ShortBuffer;
  * detailing the mesh object, including a mode, vertex buffer, optional index buffer, and bounds
  * for the mesh. Once generated, a mesh object can be drawn through
  * {@link Canvas#drawMesh(Mesh, BlendMode, Paint)}
- *
- * @hide
  */
 public class Mesh {
     private long mNativeMeshWrapper;

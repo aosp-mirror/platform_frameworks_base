@@ -34,6 +34,7 @@ import android.media.tv.AdRequest;
 import android.media.tv.AdResponse;
 import android.media.tv.BroadcastInfoRequest;
 import android.media.tv.BroadcastInfoResponse;
+import android.media.tv.TvRecordingInfo;
 import android.media.tv.TvTrackInfo;
 import android.media.tv.interactive.AppLinkInfo;
 import android.media.tv.interactive.ITvInteractiveAppClient;
@@ -1369,6 +1370,58 @@ public class TvInteractiveAppManagerService extends SystemService {
         }
 
         @Override
+        public void sendTvRecordingInfo(IBinder sessionToken, TvRecordingInfo recordingInfo,
+                int userId) {
+            if (DEBUG) {
+                Slogf.d(TAG, "sendTvRecordingInfo(recordingInfo=%s)", recordingInfo);
+            }
+            final int callingUid = Binder.getCallingUid();
+            final int resolvedUserId = resolveCallingUserId(Binder.getCallingPid(), callingUid,
+                    userId, "sendTvRecordingInfo");
+            SessionState sessionState = null;
+            final long identity = Binder.clearCallingIdentity();
+            try {
+                synchronized (mLock) {
+                    try {
+                        sessionState = getSessionStateLocked(sessionToken, callingUid,
+                                resolvedUserId);
+                        getSessionLocked(sessionState).sendTvRecordingInfo(recordingInfo);
+                    } catch (RemoteException | SessionNotFoundException e) {
+                        Slogf.e(TAG, "error in sendTvRecordingInfo", e);
+                    }
+                }
+            } finally {
+                Binder.restoreCallingIdentity(identity);
+            }
+        }
+
+        @Override
+        public void sendTvRecordingInfoList(IBinder sessionToken,
+                List<TvRecordingInfo> recordingInfoList, int userId) {
+            if (DEBUG) {
+                Slogf.d(TAG, "sendTvRecordingInfoList(type=%s)", recordingInfoList);
+            }
+            final int callingUid = Binder.getCallingUid();
+            final int resolvedUserId = resolveCallingUserId(Binder.getCallingPid(), callingUid,
+                    userId, "sendTvRecordingInfoList");
+            SessionState sessionState = null;
+            final long identity = Binder.clearCallingIdentity();
+            try {
+                synchronized (mLock) {
+                    try {
+                        sessionState = getSessionStateLocked(sessionToken, callingUid,
+                                resolvedUserId);
+                        getSessionLocked(sessionState).sendTvRecordingInfoList(recordingInfoList);
+                    } catch (RemoteException | SessionNotFoundException e) {
+                        Slogf.e(TAG, "error in sendTvRecordingInfoList", e);
+                    }
+                }
+            } finally {
+                Binder.restoreCallingIdentity(identity);
+            }
+        }
+
+        @Override
         public void sendSigningResult(
                 IBinder sessionToken, String signingId, byte[] result, int userId) {
             if (DEBUG) {
@@ -2313,6 +2366,59 @@ public class TvInteractiveAppManagerService extends SystemService {
                 }
             }
         }
+
+        @Override
+        public void onSetTvRecordingInfo(String recordingId, TvRecordingInfo recordingInfo) {
+            synchronized (mLock) {
+                if (DEBUG) {
+                    Slogf.d(TAG, "onSetTvRecordingInfo");
+                }
+                if (mSessionState.mSession == null || mSessionState.mClient == null) {
+                    return;
+                }
+                try {
+                    mSessionState.mClient.onSetTvRecordingInfo(recordingId, recordingInfo,
+                            mSessionState.mSeq);
+                } catch (RemoteException e) {
+                    Slogf.e(TAG, "error in onSetTvRecordingInfo", e);
+                }
+            }
+        }
+
+        @Override
+        public void onRequestTvRecordingInfo(String recordingId) {
+            synchronized (mLock) {
+                if (DEBUG) {
+                    Slogf.d(TAG, "onRequestTvRecordingInfo");
+                }
+                if (mSessionState.mSession == null || mSessionState.mClient == null) {
+                    return;
+                }
+                try {
+                    mSessionState.mClient.onRequestTvRecordingInfo(recordingId, mSessionState.mSeq);
+                } catch (RemoteException e) {
+                    Slogf.e(TAG, "error in onRequestTvRecordingInfo", e);
+                }
+            }
+        }
+
+        @Override
+        public void onRequestTvRecordingInfoList(int type) {
+            synchronized (mLock) {
+                if (DEBUG) {
+                    Slogf.d(TAG, "onRequestTvRecordingInfoList");
+                }
+                if (mSessionState.mSession == null || mSessionState.mClient == null) {
+                    return;
+                }
+                try {
+                    mSessionState.mClient.onRequestTvRecordingInfoList(type, mSessionState.mSeq);
+                } catch (RemoteException e) {
+                    Slogf.e(TAG, "error in onRequestTvRecordingInfoList", e);
+                }
+            }
+        }
+
 
         @Override
         public void onRequestSigning(String id, String algorithm, String alias, byte[] data) {
