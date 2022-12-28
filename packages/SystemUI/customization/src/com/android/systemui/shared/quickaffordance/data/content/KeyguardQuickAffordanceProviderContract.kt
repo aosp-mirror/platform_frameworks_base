@@ -84,8 +84,7 @@ object KeyguardQuickAffordanceProviderContract {
             const val IS_ENABLED = "is_enabled"
             /**
              * String. List of strings, delimited by [ENABLEMENT_INSTRUCTIONS_DELIMITER] to be shown
-             * to the user if the affordance is disabled and the user selects the affordance. The
-             * first one is a title while the rest are the steps needed to re-enable the affordance.
+             * to the user if the affordance is disabled and the user selects the affordance.
              */
             const val ENABLEMENT_INSTRUCTIONS = "enablement_instructions"
             /**
