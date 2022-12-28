@@ -390,19 +390,27 @@ public class RemoteInputViewTest extends SysuiTestCase {
         bindController(view, row.getEntry());
         view.setVisibility(View.GONE);
 
-        View crossFadeView = new View(mContext);
+        View fadeOutView = new View(mContext);
+        fadeOutView.setId(com.android.internal.R.id.actions_container_layout);
+
+        FrameLayout parent = new FrameLayout(mContext);
+        parent.addView(view);
+        parent.addView(fadeOutView);
 
         // Start focus animation
-        view.focusAnimated(crossFadeView);
-
+        view.focusAnimated();
         assertTrue(view.isAnimatingAppearance());
 
-        // fast forward to end of animation
-        mAnimatorTestRule.advanceTimeBy(ANIMATION_DURATION_STANDARD);
+        // fast forward to 1 ms before end of animation and verify fadeOutView has alpha set to 0f
+        mAnimatorTestRule.advanceTimeBy(ANIMATION_DURATION_STANDARD - 1);
+        assertEquals(0f, fadeOutView.getAlpha());
 
-        // assert that crossFadeView's alpha is reset to 1f after the animation (hidden behind
+        // fast forward to end of animation
+        mAnimatorTestRule.advanceTimeBy(1);
+
+        // assert that fadeOutView's alpha is reset to 1f after the animation (hidden behind
         // RemoteInputView)
-        assertEquals(1f, crossFadeView.getAlpha());
+        assertEquals(1f, fadeOutView.getAlpha());
         assertFalse(view.isAnimatingAppearance());
         assertEquals(View.VISIBLE, view.getVisibility());
         assertEquals(1f, view.getAlpha());
@@ -415,20 +423,27 @@ public class RemoteInputViewTest extends SysuiTestCase {
                 mDependency,
                 TestableLooper.get(this));
         ExpandableNotificationRow row = helper.createRow();
-        FrameLayout remoteInputViewParent = new FrameLayout(mContext);
         RemoteInputView view = RemoteInputView.inflate(mContext, null, row.getEntry(), mController);
-        remoteInputViewParent.addView(view);
         bindController(view, row.getEntry());
 
+        View fadeInView = new View(mContext);
+        fadeInView.setId(com.android.internal.R.id.actions_container_layout);
+
+        FrameLayout parent = new FrameLayout(mContext);
+        parent.addView(view);
+        parent.addView(fadeInView);
+
         // Start defocus animation
-        view.onDefocus(true, false);
+        view.onDefocus(true /* animate */, false /* logClose */, null /* doAfterDefocus */);
         assertEquals(View.VISIBLE, view.getVisibility());
+        assertEquals(0f, fadeInView.getAlpha());
 
         // fast forward to end of animation
         mAnimatorTestRule.advanceTimeBy(ANIMATION_DURATION_STANDARD);
 
         // assert that RemoteInputView is no longer visible
         assertEquals(View.GONE, view.getVisibility());
+        assertEquals(1f, fadeInView.getAlpha());
     }
 
     // NOTE: because we're refactoring the RemoteInputView and moving logic into the
