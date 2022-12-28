@@ -16,6 +16,7 @@
 
 package android.view.inputmethod;
 
+import static android.os.Trace.TRACE_TAG_WINDOW_MANAGER;
 import static android.view.inputmethod.InputConnection.CURSOR_UPDATE_IMMEDIATE;
 import static android.view.inputmethod.InputConnection.CURSOR_UPDATE_MONITOR;
 import static android.view.inputmethod.InputMethodEditorTraceProto.InputMethodClientsTraceProto.ClientSideProto.DISPLAY_ID;
@@ -804,6 +805,7 @@ public final class InputMethodManager {
                 }
 
                 // ignore the result
+                Trace.traceBegin(TRACE_TAG_WINDOW_MANAGER, "IMM.startInputOrWindowGainedFocus");
                 IInputMethodManagerGlobalInvoker.startInputOrWindowGainedFocus(
                         StartInputReason.WINDOW_FOCUS_GAIN_REPORT_ONLY, mClient,
                         viewForWindowFocus.getWindowToken(), startInputFlags, softInputMode,
@@ -812,6 +814,7 @@ public final class InputMethodManager {
                         null, null,
                         mCurRootView.mContext.getApplicationInfo().targetSdkVersion,
                         UserHandle.myUserId(), mImeDispatcher);
+                Trace.traceEnd(TRACE_TAG_WINDOW_MANAGER);
             }
         }
 
@@ -2552,6 +2555,7 @@ public final class InputMethodManager {
             }
             final int targetUserId = editorInfo.targetInputMethodUser != null
                     ? editorInfo.targetInputMethodUser.getIdentifier() : UserHandle.myUserId();
+            Trace.traceBegin(TRACE_TAG_WINDOW_MANAGER, "IMM.startInputOrWindowGainedFocus");
             res = IInputMethodManagerGlobalInvoker.startInputOrWindowGainedFocus(
                     startInputReason, mClient, windowGainingFocus, startInputFlags,
                     softInputMode, windowFlags, editorInfo, servedInputConnection,
@@ -2559,6 +2563,7 @@ public final class InputMethodManager {
                             : servedInputConnection.asIRemoteAccessibilityInputConnection(),
                     view.getContext().getApplicationInfo().targetSdkVersion, targetUserId,
                     mImeDispatcher);
+            Trace.traceEnd(TRACE_TAG_WINDOW_MANAGER);
             if (DEBUG) Log.v(TAG, "Starting input: Bind result=" + res);
             if (res == null) {
                 Log.wtf(TAG, "startInputOrWindowGainedFocus must not return"
