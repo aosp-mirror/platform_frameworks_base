@@ -691,6 +691,8 @@
     <string name="permdesc_readMediaVideo" msgid="3846400073770403528">"Tillader, at appen læser videofiler fra din fælles lagerplads."</string>
     <string name="permlab_readMediaImages" msgid="4057590631020986789">"Læse billedfiler fra den delte lagerplads"</string>
     <string name="permdesc_readMediaImages" msgid="5836219373138469259">"Tillader, at appen læser billedfiler fra din delte lagerplads."</string>
+    <string name="permlab_readVisualUserSelect" msgid="5516204215354667586">"læse brugervalgte billed- og videofiler fra delt lagerplads"</string>
+    <string name="permdesc_readVisualUserSelect" msgid="8027174717714968217">"Tillader, at appen læser billed- og videofiler, som du vælger fra din delte lagerplads."</string>
     <string name="permlab_sdcardWrite" msgid="4863021819671416668">"ændre eller slette indholdet af din delte lagerplads"</string>
     <string name="permdesc_sdcardWrite" msgid="8376047679331387102">"Tillader, at appen kan skrive indholdet af din delte lagerplads."</string>
     <string name="permlab_use_sip" msgid="8250774565189337477">"foretage/modtage SIP-opkald"</string>

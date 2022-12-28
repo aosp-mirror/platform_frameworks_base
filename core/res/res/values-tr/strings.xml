@@ -691,6 +691,8 @@
     <string name="permdesc_readMediaVideo" msgid="3846400073770403528">"Uygulamaya, paylaşılan depolama alanınızdaki video dosyalarını okuma izni verir."</string>
     <string name="permlab_readMediaImages" msgid="4057590631020986789">"paylaşılan depolama alanınızdaki resim dosyalarını okuma"</string>
     <string name="permdesc_readMediaImages" msgid="5836219373138469259">"Uygulamaya, paylaşılan depolama alanınızdaki resim dosyalarını okuma izni verir."</string>
+    <string name="permlab_readVisualUserSelect" msgid="5516204215354667586">"kullanıcının, paylaşılan depolama alanından seçtiği resim ve video dosyalarını okuma"</string>
+    <string name="permdesc_readVisualUserSelect" msgid="8027174717714968217">"Uygulamaya, paylaşılan depolama alanınızdan seçtiğiniz resim ve video dosyalarını okuma izni verir."</string>
     <string name="permlab_sdcardWrite" msgid="4863021819671416668">"paylaşılan depolama alanımın içeriğini değiştir veya sil"</string>
     <string name="permdesc_sdcardWrite" msgid="8376047679331387102">"Uygulamanın paylaşılan depolama alanınıza içerik yazmasına izin verir."</string>
     <string name="permlab_use_sip" msgid="8250774565189337477">"SIP aramaları yapma/alma"</string>

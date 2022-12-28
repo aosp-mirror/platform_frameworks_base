@@ -298,7 +298,9 @@ public class ArtStatsLogUtils {
                     dexMetadataType,
                     apkType,
                     ISA_MAP.getOrDefault(isa,
-                            ArtStatsLog.ART_DATUM_REPORTED__ISA__ART_ISA_UNKNOWN));
+                            ArtStatsLog.ART_DATUM_REPORTED__ISA__ART_ISA_UNKNOWN),
+                    ArtStatsLog.ART_DATUM_REPORTED__GC__ART_GC_COLLECTOR_TYPE_UNKNOWN,
+                    ArtStatsLog.ART_DATUM_REPORTED__UFFD_SUPPORT__ART_UFFD_SUPPORT_UNKNOWN);
         }
     }
 

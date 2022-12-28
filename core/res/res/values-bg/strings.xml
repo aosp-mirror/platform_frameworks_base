@@ -691,6 +691,8 @@
     <string name="permdesc_readMediaVideo" msgid="3846400073770403528">"Разрешава на приложението да чете видеофайлове от споделеното ви хранилище."</string>
     <string name="permlab_readMediaImages" msgid="4057590631020986789">"да чете графични файлове от споделеното хранилище"</string>
     <string name="permdesc_readMediaImages" msgid="5836219373138469259">"Разрешава на приложението да чете графични файлове от споделеното ви хранилище."</string>
+    <string name="permlab_readVisualUserSelect" msgid="5516204215354667586">"да чете избраните от потребителя графични и видеофайлове от споделеното хранилище"</string>
+    <string name="permdesc_readVisualUserSelect" msgid="8027174717714968217">"Разрешава на приложението да чете графичните и видеофайловете, които сте избрали от споделеното си хранилище."</string>
     <string name="permlab_sdcardWrite" msgid="4863021819671416668">"промяна или изтрив. на съдърж. от сподел. ви хранил."</string>
     <string name="permdesc_sdcardWrite" msgid="8376047679331387102">"Разрешава на прил. да записва съдърж. от сподел. ви хранил."</string>
     <string name="permlab_use_sip" msgid="8250774565189337477">"извършване/получаване на обаждания чрез SIP"</string>

@@ -693,6 +693,8 @@
     <string name="permdesc_readMediaVideo" msgid="3846400073770403528">"Umožňuje aplikácii čítať videosúbory z vášho zdieľaného priestoru."</string>
     <string name="permlab_readMediaImages" msgid="4057590631020986789">"čítať súbory obrázka zo zdieľaného priestoru"</string>
     <string name="permdesc_readMediaImages" msgid="5836219373138469259">"Umožňuje aplikácii čítať súbory obrázka z vášho zdieľaného priestoru."</string>
+    <string name="permlab_readVisualUserSelect" msgid="5516204215354667586">"čítanie obrázkových súborov a videosúborov vybraných používateľom v zdieľanom ukladacom priestore"</string>
+    <string name="permdesc_readVisualUserSelect" msgid="8027174717714968217">"Umožňuje aplikácii čítať obrázkové súbory a videosúbory, ktoré vyberiete vo svojom zdieľanom ukladacom priestore."</string>
     <string name="permlab_sdcardWrite" msgid="4863021819671416668">"upravovanie alebo odstraňovanie obsahu zdieľaného úložiska"</string>
     <string name="permdesc_sdcardWrite" msgid="8376047679331387102">"Umožňuje aplikácii zapisovať obsah zdieľaného úložiska."</string>
     <string name="permlab_use_sip" msgid="8250774565189337477">"uskutočňovanie/príjem hovorov SIP"</string>
@@ -983,7 +985,7 @@
     <string name="keyguard_accessibility_user_selector" msgid="1466067610235696600">"Výber používateľa"</string>
     <string name="keyguard_accessibility_status" msgid="6792745049712397237">"Stav"</string>
     <string name="keyguard_accessibility_camera" msgid="7862557559464986528">"Fotoaparát"</string>
-    <string name="keygaurd_accessibility_media_controls" msgid="2267379779900620614">"Ovládacie prvky médií"</string>
+    <string name="keygaurd_accessibility_media_controls" msgid="2267379779900620614">"Ovládanie médií"</string>
     <string name="keyguard_accessibility_widget_reorder_start" msgid="7066213328912939191">"Zmena usporiadania miniaplikácií sa začala."</string>
     <string name="keyguard_accessibility_widget_reorder_end" msgid="1083806817600593490">"Zmena usporiadania miniaplikácií sa skončila."</string>
     <string name="keyguard_accessibility_widget_deleted" msgid="1509738950119878705">"Miniaplikácia <xliff:g id="WIDGET_INDEX">%1$s</xliff:g> bola odstránená."</string>

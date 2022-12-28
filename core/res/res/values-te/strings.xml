@@ -363,7 +363,7 @@
     <string name="permdesc_receiveMms" msgid="958102423732219710">"MMS మెసేజ్‌లను స్వీకరించడానికి, ప్రాసెస్ చేయడానికి యాప్‌ను అనుమతిస్తుంది. మీ డివైజ్‌కు వచ్చిన మెసేజ్‌లను మీకు చూపకుండానే యాప్ పర్యవేక్షించగలదని లేదా తొలగించగలదని దీని అర్థం."</string>
     <string name="permlab_bindCellBroadcastService" msgid="586746677002040651">"సెల్ ప్రసార మెసేజ్‌లను ఫార్వర్డ్ చేయడం"</string>
     <string name="permdesc_bindCellBroadcastService" msgid="6540910200973641606">"సెల్ ప్రసార మెసేజ్‌లను స్వీకరించినప్పుడు, వాటిని ఫార్వర్డ్ చేయడానికి సెల్ ప్రసార మాడ్యూల్‌కు కట్టుబడి ఉండేందుకు యాప్‌ను అనుమతిస్తుంది. ఎమర్జెన్సీ పరిస్థితుల గురించి మిమ్మల్ని హెచ్చరించడానికి కొన్ని లొకేషన్లలో సెల్ ప్రసార అలర్ట్‌లు డెలివరీ చేయబడతాయి. ఎమర్జెన్సీ సెల్ ప్రసార అలర్ట్‌ను స్వీకరించినప్పుడు హానికరమైన యాప్‌లు మీ పరికరం పనితీరుకు లేదా నిర్వహణకు ఆటంకం కలిగించే అవకాశం ఉంది."</string>
-    <string name="permlab_manageOngoingCalls" msgid="281244770664231782">"కొనసాగుతున్న కాల్స్‌ను మేనేజ్ చేయి"</string>
+    <string name="permlab_manageOngoingCalls" msgid="281244770664231782">"కొనసాగుతున్న కాల్స్‌ను మేనేజ్ చేయండి"</string>
     <string name="permdesc_manageOngoingCalls" msgid="7003138133829915265">"మీ పరికరంలో కొనసాగుతున్న కాల్స్‌ను చూడటానికి అలాగే వాటిని కంట్రోల్ చేయడానికి ఒక యాప్‌కు అనుమతిస్తోంది."</string>
     <string name="permlab_readCellBroadcasts" msgid="5869884450872137693">"సెల్ ప్రసార మెసేజ్‌లను చదవడం"</string>
     <string name="permdesc_readCellBroadcasts" msgid="672513437331980168">"మీ పరికరం స్వీకరించిన సెల్ ప్రసార మెసేజ్‌లను చదవడానికి యాప్‌ను అనుమతిస్తుంది. ఎమర్జెన్సీ పరిస్థితుల గురించి మిమ్మల్ని హెచ్చరించడానికి కొన్ని లొకేషన్లలో సెల్ ప్రసార అలర్ట్‌లు డెలివరీ చేయబడతాయి. ఎమర్జెన్సీ సెల్ ప్రసార అలర్ట్‌ను స్వీకరించినప్పుడు హానికరమైన యాప్‌లు మీ పరికరం పనితీరుకు లేదా నిర్వహణకు ఆటంకం కలిగించే అవకాశం ఉంది."</string>
@@ -691,6 +691,8 @@
     <string name="permdesc_readMediaVideo" msgid="3846400073770403528">"మీ షేర్ చేయబడిన స్టోరేజ్ నుండి వీడియో ఫైల్‌లను చదవడానికి యాప్‌ను అనుమతిస్తుంది."</string>
     <string name="permlab_readMediaImages" msgid="4057590631020986789">"షేర్ చేయబడిన స్టోరేజ్ నుండి ఇమేజ్ ఫైల్‌లను చదవండి"</string>
     <string name="permdesc_readMediaImages" msgid="5836219373138469259">"మీ షేర్ చేయబడిన స్టోరేజ్ నుండి ఇమేజ్ ఫైల్‌లను చదవడానికి యాప్‌ను అనుమతిస్తుంది."</string>
+    <string name="permlab_readVisualUserSelect" msgid="5516204215354667586">"షేర్ చేయబడిన స్టోరేజ్ నుండి యూజర్ ఎంచుకున్న ఇమేజ్ ఫైల్స్‌ను, వీడియో ఫైల్స్‌ను చదువుతుంది"</string>
+    <string name="permdesc_readVisualUserSelect" msgid="8027174717714968217">"మీరు మీ షేర్ చేయబడిన స్టోరేజ్ నుండి ఎంచుకున్న ఇమేజ్, వీడియో ఫైల్స్‌ను చదవడానికి యాప్‌ను అనుమతిస్తుంది."</string>
     <string name="permlab_sdcardWrite" msgid="4863021819671416668">"మీ షేర్ చేసిన నిల్వ యొక్క కంటెంట్‌లను ఎడిట్ చేయండి లేదా తొలగించండి"</string>
     <string name="permdesc_sdcardWrite" msgid="8376047679331387102">"మీ షేర్ చేసిన నిల్వ యొక్క కంటెంట్‌లను రాయడానికి యాప్‌ను అనుమతిస్తుంది."</string>
     <string name="permlab_use_sip" msgid="8250774565189337477">"SIP కాల్స్‌ను చేయడానికి/స్వీకరించడానికి"</string>
@@ -1135,11 +1137,11 @@
     <string name="delete" msgid="1514113991712129054">"తొలగించండి"</string>
     <string name="copyUrl" msgid="6229645005987260230">"URLని కాపీ చేయి"</string>
     <string name="selectTextMode" msgid="3225108910999318778">"వచనాన్ని ఎంచుకోండి"</string>
-    <string name="undo" msgid="3175318090002654673">"చర్య రద్దు చేయి"</string>
+    <string name="undo" msgid="3175318090002654673">"చర్య రద్దు చేయండి"</string>
     <string name="redo" msgid="7231448494008532233">"చర్యను రిపీట్‌ చేయి"</string>
     <string name="autofill" msgid="511224882647795296">"ఆటోఫిల్"</string>
     <string name="textSelectionCABTitle" msgid="5151441579532476940">"వచన ఎంపిక"</string>
-    <string name="addToDictionary" msgid="8041821113480950096">"నిఘంటువుకు జోడించు"</string>
+    <string name="addToDictionary" msgid="8041821113480950096">"నిఘంటువుకు జోడించండి"</string>
     <string name="deleteText" msgid="4200807474529938112">"తొలగించండి"</string>
     <string name="inputMethod" msgid="1784759500516314751">"ఇన్‌పుట్ పద్ధతి"</string>
     <string name="editTextMenuTitle" msgid="857666911134482176">"వచనానికి సంబంధించిన చర్యలు"</string>
@@ -1244,7 +1246,7 @@
     <string name="fp_power_button_enrollment_title" msgid="3574363228413259548">"సెటప్‌ను కొనసాగించాలా?"</string>
     <string name="fp_power_button_enrollment_message" msgid="5648173517663246140">"మీరు పవర్ బటన్‌ను నొక్కారు — ఇది సాధారణంగా స్క్రీన్‌ను ఆఫ్ చేస్తుంది.\n\nమీ వేలిముద్రను సెటప్ చేస్తున్నప్పుడు తేలికగా ట్యాప్ చేయడానికి ట్రై చేయండి."</string>
     <string name="fp_power_button_enrollment_positive_button" msgid="2095415838459356833">"స్క్రీన్‌ను ఆఫ్ చేయి"</string>
-    <string name="fp_power_button_enrollment_negative_button" msgid="6558436406362486747">"సెటప్‌ను కొనసాగించు"</string>
+    <string name="fp_power_button_enrollment_negative_button" msgid="6558436406362486747">"సెటప్‌ను కొనసాగించండి"</string>
     <string name="fp_power_button_bp_title" msgid="5585506104526820067">"మీ వేలిముద్ర వెరిఫై‌ను కొనసాగించాలా?"</string>
     <string name="fp_power_button_bp_message" msgid="2983163038168903393">"మీరు పవర్ బటన్‌ను నొక్కారు — ఇది సాధారణంగా స్క్రీన్‌ను ఆఫ్ చేస్తుంది.\n\nమీ వేలిముద్రను వెరిఫై చేయడానికి తేలికగా ట్యాప్ చేయడం ట్రై చేయండి."</string>
     <string name="fp_power_button_bp_positive_button" msgid="728945472408552251">"స్క్రీన్‌ను ఆఫ్ చేయి"</string>
@@ -1416,7 +1418,7 @@
     <string name="ext_media_unmounting_notification_title" msgid="4147986383917892162">"<xliff:g id="NAME">%s</xliff:g>ని తొలగిస్తోంది"</string>
     <string name="ext_media_unmounting_notification_message" msgid="5717036261538754203">"తీసివేయవద్దు"</string>
     <string name="ext_media_init_action" msgid="2312974060585056709">"సెటప్ చేయండి"</string>
-    <string name="ext_media_unmount_action" msgid="966992232088442745">"తొలగించు"</string>
+    <string name="ext_media_unmount_action" msgid="966992232088442745">"తొలగించండి"</string>
     <string name="ext_media_browse_action" msgid="344865351947079139">"విశ్లేషించు"</string>
     <string name="ext_media_seamless_action" msgid="8837030226009268080">"అవుట్‌పుట్ మార్చండి"</string>
     <string name="ext_media_missing_title" msgid="3209472091220515046">"<xliff:g id="NAME">%s</xliff:g> కనుగొనబడటం లేదు"</string>
@@ -1516,7 +1518,7 @@
     <string name="gpsVerifNo" msgid="1671201856091564741">"కాదు"</string>
     <string name="sync_too_many_deletes" msgid="6999440774578705300">"తొలగింపు పరిమితి మించిపోయింది"</string>
     <string name="sync_too_many_deletes_desc" msgid="7409327940303504440">"<xliff:g id="TYPE_OF_SYNC">%2$s</xliff:g>, ఖాతా <xliff:g id="ACCOUNT_NAME">%3$s</xliff:g>కి సంబంధించి <xliff:g id="NUMBER_OF_DELETED_ITEMS">%1$d</xliff:g> తొలగించబడే అంశాలు ఉన్నాయి. మీరు ఏమి చేయాలనుకుంటున్నారు?"</string>
-    <string name="sync_really_delete" msgid="5657871730315579051">"అంశాలను తొలగించు"</string>
+    <string name="sync_really_delete" msgid="5657871730315579051">"అంశాలను తొలగించండి"</string>
     <string name="sync_undo_deletes" msgid="5786033331266418896">"తొలగింపులను చర్య రద్దు చేయండి"</string>
     <string name="sync_do_nothing" msgid="4528734662446469646">"ఇప్పటికీ ఏమీ చేయవద్దు"</string>
     <string name="choose_account_label" msgid="5557833752759831548">"ఖాతాను ఎంచుకోండి"</string>
@@ -1690,7 +1692,7 @@
     <string name="accessibility_edit_shortcut_menu_button_title" msgid="239446795930436325">"యాక్సెసిబిలిటీ బటన్‌తో ఉపయోగించడానికి ఫీచర్లను ఎంచుకోండి"</string>
     <string name="accessibility_edit_shortcut_menu_volume_title" msgid="1077294237378645981">"వాల్యూమ్ కీ షార్ట్‌కట్‌తో ఉపయోగించడానికి ఫీచర్లను ఎంచుకోండి"</string>
     <string name="accessibility_uncheck_legacy_item_warning" msgid="8047830891064817447">"<xliff:g id="SERVICE_NAME">%s</xliff:g> ఆఫ్ చేయబడింది"</string>
-    <string name="edit_accessibility_shortcut_menu_button" msgid="8885752738733772935">"షార్ట్‌కట్‌లను ఎడిట్ చేయి"</string>
+    <string name="edit_accessibility_shortcut_menu_button" msgid="8885752738733772935">"షార్ట్‌కట్‌లను ఎడిట్ చేయండి"</string>
     <string name="done_accessibility_shortcut_menu_button" msgid="3668407723770815708">"పూర్తయింది"</string>
     <string name="disable_accessibility_shortcut" msgid="5806091378745232383">"షార్ట్‌కట్‌ను ఆఫ్ చేయి"</string>
     <string name="leave_accessibility_shortcut_on" msgid="6543362062336990814">"షార్ట్‌కట్‌ను ఉపయోగించు"</string>
