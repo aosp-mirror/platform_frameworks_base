@@ -392,6 +392,7 @@ object KeyguardBottomAreaViewBinder {
                                     }
                                     view.performClick()
                                     view.setOnClickListener(null)
+                                    cancel()
                                 }
                         true
                     } else {
