@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.android.systemui.compose.layout.pager
+package com.android.compose.pager
 
 import androidx.compose.animation.core.AnimationSpec
 import androidx.compose.animation.core.DecayAnimationSpec
@@ -40,7 +40,6 @@ import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.Velocity
 import androidx.compose.ui.unit.dp
-import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.flow.filter
 
 /** Library-wide switch to turn on debug logging. */

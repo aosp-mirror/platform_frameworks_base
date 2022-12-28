@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.android.systemui.compose.theme
+package com.android.compose.theme
 
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.material3.MaterialTheme
@@ -24,15 +24,15 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.remember
 import androidx.compose.ui.platform.LocalContext
-import com.android.systemui.compose.theme.typography.TypeScaleTokens
-import com.android.systemui.compose.theme.typography.TypefaceNames
-import com.android.systemui.compose.theme.typography.TypefaceTokens
-import com.android.systemui.compose.theme.typography.TypographyTokens
-import com.android.systemui.compose.theme.typography.systemUITypography
+import com.android.compose.theme.typography.TypeScaleTokens
+import com.android.compose.theme.typography.TypefaceNames
+import com.android.compose.theme.typography.TypefaceTokens
+import com.android.compose.theme.typography.TypographyTokens
+import com.android.compose.theme.typography.platformTypography
 
-/** The Material 3 theme that should wrap all SystemUI Composables. */
+/** The Material 3 theme that should wrap all Platform Composables. */
 @Composable
-fun SystemUITheme(
+fun PlatformTheme(
     isDarkTheme: Boolean = isSystemInDarkTheme(),
     content: @Composable () -> Unit,
 ) {
@@ -49,7 +49,7 @@ fun SystemUITheme(
     val typefaceNames = remember(context) { TypefaceNames.get(context) }
     val typography =
         remember(typefaceNames) {
-            systemUITypography(TypographyTokens(TypeScaleTokens(TypefaceTokens(typefaceNames))))
+            platformTypography(TypographyTokens(TypeScaleTokens(TypefaceTokens(typefaceNames))))
         }
 
     MaterialTheme(colorScheme, typography = typography) {

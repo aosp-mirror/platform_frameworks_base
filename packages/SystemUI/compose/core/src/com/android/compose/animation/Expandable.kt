@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.android.systemui.compose.animation
+package com.android.compose.animation
 
 import android.content.Context
 import android.view.View

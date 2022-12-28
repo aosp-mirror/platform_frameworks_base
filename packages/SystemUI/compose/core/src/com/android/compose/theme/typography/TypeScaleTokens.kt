@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.android.systemui.compose.theme.typography
+package com.android.compose.theme.typography
 
 import androidx.compose.ui.unit.sp
 

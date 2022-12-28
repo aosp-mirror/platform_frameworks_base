@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.android.systemui.compose.runtime
+package com.android.compose.runtime
 
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.InternalComposeApi
