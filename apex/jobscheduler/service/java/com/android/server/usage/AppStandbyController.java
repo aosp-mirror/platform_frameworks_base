@@ -2456,11 +2456,11 @@ public class AppStandbyController
         pw.print(mNoteResponseEventForAllBroadcastSessions);
         pw.println();
 
-        pw.print("  mBroadcastResponseExemptedRoles");
+        pw.print("  mBroadcastResponseExemptedRoles=");
         pw.print(mBroadcastResponseExemptedRoles);
         pw.println();
 
-        pw.print("  mBroadcastResponseExemptedPermissions");
+        pw.print("  mBroadcastResponseExemptedPermissions=");
         pw.print(mBroadcastResponseExemptedPermissions);
         pw.println();
 
