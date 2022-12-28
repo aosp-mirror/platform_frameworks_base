@@ -32,6 +32,7 @@ import android.telephony.TelephonyManager
 import android.telephony.TelephonyManager.ERI_OFF
 import android.telephony.TelephonyManager.EXTRA_SUBSCRIPTION_ID
 import android.telephony.TelephonyManager.NETWORK_TYPE_UNKNOWN
+import com.android.settingslib.Utils
 import com.android.systemui.broadcast.BroadcastDispatcher
 import com.android.systemui.common.coroutine.ConflatedCallbackFlow.conflatedCallbackFlow
 import com.android.systemui.dagger.qualifiers.Application
@@ -117,6 +118,7 @@ class MobileConnectionRepositoryImpl(
                                     isEmergencyOnly = serviceState.isEmergencyOnly,
                                     isRoaming = serviceState.roaming,
                                     operatorAlphaShort = serviceState.operatorAlphaShort,
+                                    isInService = Utils.isInService(serviceState),
                                 )
                             trySend(state)
                         }

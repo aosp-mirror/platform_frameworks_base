@@ -80,11 +80,17 @@ constructor(
 
     override val iconId: Flow<Int> = run {
         val initial = SignalDrawable.getEmptyState(iconInteractor.numberOfLevels.value)
-        combine(iconInteractor.level, iconInteractor.numberOfLevels, showExclamationMark) {
-                level,
-                numberOfLevels,
-                showExclamationMark ->
-                SignalDrawable.getState(level, numberOfLevels, showExclamationMark)
+        combine(
+                iconInteractor.level,
+                iconInteractor.numberOfLevels,
+                showExclamationMark,
+                iconInteractor.isInService,
+            ) { level, numberOfLevels, showExclamationMark, isInService ->
+                if (!isInService) {
+                    SignalDrawable.getEmptyState(numberOfLevels)
+                } else {
+                    SignalDrawable.getState(level, numberOfLevels, showExclamationMark)
+                }
             }
             .distinctUntilChanged()
             .logDiffsForTable(
