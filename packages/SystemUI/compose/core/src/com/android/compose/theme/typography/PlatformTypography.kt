@@ -14,18 +14,18 @@
  * limitations under the License.
  */
 
-package com.android.systemui.compose.theme.typography
+package com.android.compose.theme.typography
 
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Typography
 
 /**
- * The SystemUI typography.
+ * The typography for Platform Compose code.
  *
  * Do not use directly and call [MaterialTheme.typography] instead to access the different text
  * styles.
  */
-internal fun systemUITypography(typographyTokens: TypographyTokens): Typography {
+internal fun platformTypography(typographyTokens: TypographyTokens): Typography {
     return Typography(
         displayLarge = typographyTokens.displayLarge,
         displayMedium = typographyTokens.displayMedium,

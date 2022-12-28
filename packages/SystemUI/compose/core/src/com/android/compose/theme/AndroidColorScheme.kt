@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.android.systemui.compose.theme
+package com.android.compose.theme
 
 import android.annotation.ColorInt
 import android.content.Context
@@ -27,7 +27,7 @@ val LocalAndroidColorScheme =
     staticCompositionLocalOf<AndroidColorScheme> {
         throw IllegalStateException(
             "No AndroidColorScheme configured. Make sure to use LocalAndroidColorScheme in a " +
-                "Composable surrounded by a SystemUITheme {}."
+                "Composable surrounded by a PlatformTheme {}."
         )
     }
 

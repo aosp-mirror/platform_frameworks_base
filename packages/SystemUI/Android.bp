@@ -60,7 +60,7 @@ systemui_compose_java_defaults {
             // except for SystemUI-core.
             // Copied from compose/features/Android.bp.
             static_libs: [
-                "SystemUIComposeCore",
+                "PlatformComposeCore",
 
                 "androidx.compose.runtime_runtime",
                 "androidx.compose.material3_material3",

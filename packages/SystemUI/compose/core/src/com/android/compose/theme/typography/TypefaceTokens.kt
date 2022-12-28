@@ -16,7 +16,7 @@
 
 @file:OptIn(ExperimentalTextApi::class)
 
-package com.android.systemui.compose.theme.typography
+package com.android.compose.theme.typography
 
 import android.content.Context
 import androidx.compose.ui.text.ExperimentalTextApi

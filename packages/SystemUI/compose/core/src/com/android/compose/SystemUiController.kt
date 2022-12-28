@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.android.systemui.compose
+package com.android.compose
 
 import android.app.Activity
 import android.content.Context

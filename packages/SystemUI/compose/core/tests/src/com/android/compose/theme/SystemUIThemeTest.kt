@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.android.systemui.compose.theme
+package com.android.compose.theme
 
 import androidx.compose.material3.Text
 import androidx.compose.ui.test.assertIsDisplayed
@@ -32,7 +32,7 @@ class SystemUIThemeTest {
 
     @Test
     fun testThemeShowsContent() {
-        composeRule.setContent { SystemUITheme { Text("foo") } }
+        composeRule.setContent { PlatformTheme { Text("foo") } }
 
         composeRule.onNodeWithText("foo").assertIsDisplayed()
     }
@@ -40,7 +40,7 @@ class SystemUIThemeTest {
     @Test
     fun testAndroidColorsAreAvailableInsideTheme() {
         composeRule.setContent {
-            SystemUITheme { Text("foo", color = LocalAndroidColorScheme.current.colorAccent) }
+            PlatformTheme { Text("foo", color = LocalAndroidColorScheme.current.colorAccent) }
         }
 
         composeRule.onNodeWithText("foo").assertIsDisplayed()

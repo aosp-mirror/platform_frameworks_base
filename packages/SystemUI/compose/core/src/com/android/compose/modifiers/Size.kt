@@ -15,7 +15,7 @@
  *
  */
 
-package com.android.systemui.compose.modifiers
+package com.android.compose.modifiers
 
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.layout.IntrinsicMeasurable
