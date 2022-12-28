@@ -310,6 +310,25 @@ public final class PendingIntentRecord extends IIntentSender.Stub {
                 requiredPermission, null, null, 0, 0, 0, options);
     }
 
+    /**
+     * Return true if the activity options allows PendingIntent to use caller's BAL permission.
+     */
+    public static boolean isPendingIntentBalAllowedByCaller(
+            @Nullable ActivityOptions activityOptions) {
+        if (activityOptions == null) {
+            return ActivityOptions.PENDING_INTENT_BAL_ALLOWED_DEFAULT;
+        }
+        return isPendingIntentBalAllowedByCaller(activityOptions.toBundle());
+    }
+
+    private static boolean isPendingIntentBalAllowedByCaller(@Nullable Bundle options) {
+        if (options == null) {
+            return ActivityOptions.PENDING_INTENT_BAL_ALLOWED_DEFAULT;
+        }
+        return options.getBoolean(ActivityOptions.KEY_PENDING_INTENT_BACKGROUND_ACTIVITY_ALLOWED,
+                ActivityOptions.PENDING_INTENT_BAL_ALLOWED_DEFAULT);
+    }
+
     public int sendInner(int code, Intent intent, String resolvedType, IBinder allowlistToken,
             IIntentReceiver finishedReceiver, String requiredPermission, IBinder resultTo,
             String resultWho, int requestCode, int flagsMask, int flagsValues, Bundle options) {
@@ -436,7 +455,8 @@ public final class PendingIntentRecord extends IIntentSender.Stub {
             // temporarily allow receivers and services to open activities from background if the
             // PendingIntent.send() caller was foreground at the time of sendInner() call
             final boolean allowTrampoline = uid != callingUid
-                    && controller.mAtmInternal.isUidForeground(callingUid);
+                    && controller.mAtmInternal.isUidForeground(callingUid)
+                    && isPendingIntentBalAllowedByCaller(options);
 
             // note: we on purpose don't pass in the information about the PendingIntent's creator,
             // like pid or ProcessRecord, to the ActivityTaskManagerInternal calls below, because
