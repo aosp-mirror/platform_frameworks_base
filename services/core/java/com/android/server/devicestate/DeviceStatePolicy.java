@@ -20,6 +20,7 @@ import android.annotation.NonNull;
 import android.content.Context;
 import android.content.res.Resources;
 import android.text.TextUtils;
+import android.util.Slog;
 
 import com.android.server.policy.DeviceStatePolicyImpl;
 
@@ -61,7 +62,7 @@ public abstract class DeviceStatePolicy {
      * Provider for {@link DeviceStatePolicy} instances.
      *
      * <p>By implementing this interface and overriding the
-     * {@code config_deviceSpecificDeviceStatePolicyProvider}, a device-specific implementations
+     * {@code config_deviceStatePolicyProvider}, a device-specific implementations
      * of {@link DeviceStatePolicy} can be supplied.
      */
     public interface Provider {
@@ -75,7 +76,7 @@ public abstract class DeviceStatePolicy {
         /**
          * Instantiates the device-specific {@link DeviceStatePolicy.Provider}.
          *
-         * Checks the {@code config_deviceSpecificDeviceStatePolicyProvider} resource to see if
+         * Checks the {@code config_deviceStatePolicyProvider} resource to see if
          * a device specific policy provider has been supplied. If so, returns an instance of that
          * provider. If there is no value provided then the method returns the
          * {@link DeviceStatePolicy.DefaultProvider}.
@@ -85,18 +86,23 @@ public abstract class DeviceStatePolicy {
          */
         static Provider fromResources(@NonNull Resources res) {
             final String name = res.getString(
-                    com.android.internal.R.string.config_deviceSpecificDeviceStatePolicyProvider);
+                    com.android.internal.R.string.config_deviceStatePolicyProvider);
             if (TextUtils.isEmpty(name)) {
                 return new DeviceStatePolicy.DefaultProvider();
             }
 
             try {
                 return (DeviceStatePolicy.Provider) Class.forName(name).newInstance();
-            } catch (ReflectiveOperationException | ClassCastException e) {
+            } catch (ClassCastException e) {
                 throw new IllegalStateException("Couldn't instantiate class " + name
-                        + " for config_deviceSpecificDeviceStatePolicyProvider:"
+                        + " for config_deviceStatePolicyProvider:"
                         + " make sure it has a public zero-argument constructor"
-                        + " and implements DeviceStatePolicy.Provider", e);
+                        + " and implements DeviceStatePolicy.Provider");
+            } catch (ReflectiveOperationException e) {
+                Slog.e("DeviceStatePolicy", "Couldn't instantiate class " + name
+                        + " for config_deviceStatePolicyProvider:"
+                        + " using default provider", e);
+                return new DeviceStatePolicy.DefaultProvider();
             }
         }
     }
