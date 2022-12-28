@@ -63,11 +63,13 @@ import static com.android.keyguard.FaceAuthUiEvent.FACE_AUTH_UPDATED_KEYGUARD_RE
 import static com.android.keyguard.FaceAuthUiEvent.FACE_AUTH_UPDATED_KEYGUARD_VISIBILITY_CHANGED;
 import static com.android.keyguard.FaceAuthUiEvent.FACE_AUTH_UPDATED_ON_FACE_AUTHENTICATED;
 import static com.android.keyguard.FaceAuthUiEvent.FACE_AUTH_UPDATED_ON_KEYGUARD_INIT;
+import static com.android.keyguard.FaceAuthUiEvent.FACE_AUTH_UPDATED_POSTURE_CHANGED;
 import static com.android.keyguard.FaceAuthUiEvent.FACE_AUTH_UPDATED_PRIMARY_BOUNCER_SHOWN;
 import static com.android.keyguard.FaceAuthUiEvent.FACE_AUTH_UPDATED_STARTED_WAKING_UP;
 import static com.android.keyguard.FaceAuthUiEvent.FACE_AUTH_UPDATED_STRONG_AUTH_CHANGED;
 import static com.android.keyguard.FaceAuthUiEvent.FACE_AUTH_UPDATED_USER_SWITCHING;
 import static com.android.systemui.DejankUtils.whitelistIpcs;
+import static com.android.systemui.statusbar.policy.DevicePostureController.DEVICE_POSTURE_UNKNOWN;
 
 import android.annotation.AnyThread;
 import android.annotation.MainThread;
@@ -154,6 +156,7 @@ import com.android.systemui.shared.system.TaskStackChangeListener;
 import com.android.systemui.shared.system.TaskStackChangeListeners;
 import com.android.systemui.statusbar.StatusBarState;
 import com.android.systemui.statusbar.phone.KeyguardBypassController;
+import com.android.systemui.statusbar.policy.DevicePostureController;
 import com.android.systemui.telephony.TelephonyListenerManager;
 import com.android.systemui.util.Assert;
 import com.android.systemui.util.settings.SecureSettings;
@@ -357,6 +360,7 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener, Dumpab
     private final TrustManager mTrustManager;
     private final UserManager mUserManager;
     private final DevicePolicyManager mDevicePolicyManager;
+    private final DevicePostureController mPostureController;
     private final BroadcastDispatcher mBroadcastDispatcher;
     private final SecureSettings mSecureSettings;
     private final InteractionJankMonitor mInteractionJankMonitor;
@@ -374,6 +378,9 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener, Dumpab
     private final FaceManager mFaceManager;
     private final LockPatternUtils mLockPatternUtils;
     private final boolean mWakeOnFingerprintAcquiredStart;
+    @VisibleForTesting
+    @DevicePostureController.DevicePostureInt
+    protected int mConfigFaceAuthSupportedPosture;
 
     private KeyguardBypassController mKeyguardBypassController;
     private List<SubscriptionInfo> mSubscriptionInfo;
@@ -384,6 +391,7 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener, Dumpab
     private boolean mLogoutEnabled;
     private boolean mIsFaceEnrolled;
     private int mActiveMobileDataSubscription = SubscriptionManager.INVALID_SUBSCRIPTION_ID;
+    private int mPostureState = DEVICE_POSTURE_UNKNOWN;
 
     /**
      * Short delay before restarting fingerprint authentication after a successful try. This should
@@ -1784,6 +1792,17 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener, Dumpab
     };
 
     @VisibleForTesting
+    final DevicePostureController.Callback mPostureCallback =
+            new DevicePostureController.Callback() {
+                @Override
+                public void onPostureChanged(int posture) {
+                    mPostureState = posture;
+                    updateFaceListeningState(BIOMETRIC_ACTION_UPDATE,
+                            FACE_AUTH_UPDATED_POSTURE_CHANGED);
+                }
+            };
+
+    @VisibleForTesting
     CancellationSignal mFingerprintCancelSignal;
     @VisibleForTesting
     CancellationSignal mFaceCancelSignal;
@@ -2048,7 +2067,8 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener, Dumpab
             @Nullable FaceManager faceManager,
             @Nullable FingerprintManager fingerprintManager,
             @Nullable BiometricManager biometricManager,
-            FaceWakeUpTriggersConfig faceWakeUpTriggersConfig) {
+            FaceWakeUpTriggersConfig faceWakeUpTriggersConfig,
+            DevicePostureController devicePostureController) {
         mContext = context;
         mSubscriptionManager = subscriptionManager;
         mUserTracker = userTracker;
@@ -2077,6 +2097,7 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener, Dumpab
         mDreamManager = dreamManager;
         mTelephonyManager = telephonyManager;
         mDevicePolicyManager = devicePolicyManager;
+        mPostureController = devicePostureController;
         mPackageManager = packageManager;
         mFpm = fingerprintManager;
         mFaceManager = faceManager;
@@ -2088,6 +2109,8 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener, Dumpab
                         R.array.config_face_acquire_device_entry_ignorelist))
                 .boxed()
                 .collect(Collectors.toSet());
+        mConfigFaceAuthSupportedPosture = mContext.getResources().getInteger(
+                R.integer.config_face_auth_supported_posture);
         mFaceWakeUpTriggersConfig = faceWakeUpTriggersConfig;
 
         mHandler = new Handler(mainLooper) {
@@ -2278,6 +2301,9 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener, Dumpab
                         FACE_AUTH_TRIGGERED_ENROLLMENTS_CHANGED));
             }
         });
+        if (mConfigFaceAuthSupportedPosture != DEVICE_POSTURE_UNKNOWN) {
+            mPostureController.addCallback(mPostureCallback);
+        }
         updateBiometricListeningState(BIOMETRIC_ACTION_UPDATE, FACE_AUTH_UPDATED_ON_KEYGUARD_INIT);
 
         TaskStackChangeListeners.getInstance().registerTaskStackListener(mTaskStackListener);
@@ -2742,7 +2768,7 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener, Dumpab
                     user,
                     shouldListen,
                     biometricEnabledForUser,
-                        mPrimaryBouncerIsOrWillBeShowing,
+                    mPrimaryBouncerIsOrWillBeShowing,
                     userCanSkipBouncer,
                     mCredentialAttempted,
                     mDeviceInteractive,
@@ -2802,6 +2828,9 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener, Dumpab
         final boolean biometricEnabledForUser = mBiometricEnabledForUser.get(user);
         final boolean shouldListenForFaceAssistant = shouldListenForFaceAssistant();
         final boolean isUdfpsFingerDown = mAuthController.isUdfpsFingerDown();
+        final boolean isPostureAllowedForFaceAuth =
+                mConfigFaceAuthSupportedPosture == 0 /* DEVICE_POSTURE_UNKNOWN */ ? true
+                        : (mPostureState == mConfigFaceAuthSupportedPosture);
 
         // Only listen if this KeyguardUpdateMonitor belongs to the primary user. There is an
         // instance of KeyguardUpdateMonitor for each user but KeyguardUpdateMonitor is user-aware.
@@ -2818,7 +2847,8 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener, Dumpab
                 && faceAuthAllowedOrDetectionIsNeeded && mIsPrimaryUser
                 && (!mSecureCameraLaunched || mOccludingAppRequestingFace)
                 && faceAndFpNotAuthenticated
-                && !mGoingToSleep;
+                && !mGoingToSleep
+                && isPostureAllowedForFaceAuth;
 
         // Aggregate relevant fields for debug logging.
         logListenerModelData(
@@ -2838,6 +2868,7 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener, Dumpab
                     mKeyguardGoingAway,
                     shouldListenForFaceAssistant,
                     mOccludingAppRequestingFace,
+                    isPostureAllowedForFaceAuth,
                     mIsPrimaryUser,
                     mSecureCameraLaunched,
                     supportsDetect,
@@ -2923,7 +2954,7 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener, Dumpab
                 getKeyguardSessionId(),
                 faceAuthUiEvent.getExtraInfo()
         );
-
+        mLogger.logFaceUnlockPossible(unlockPossible);
         if (unlockPossible) {
             mFaceCancelSignal = new CancellationSignal();
 
