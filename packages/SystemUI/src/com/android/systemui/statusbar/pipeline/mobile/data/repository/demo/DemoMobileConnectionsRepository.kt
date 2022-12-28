@@ -34,6 +34,7 @@ import com.android.systemui.statusbar.pipeline.mobile.data.model.ResolvedNetwork
 import com.android.systemui.statusbar.pipeline.mobile.data.model.ResolvedNetworkType.DefaultNetworkType
 import com.android.systemui.statusbar.pipeline.mobile.data.model.SubscriptionModel
 import com.android.systemui.statusbar.pipeline.mobile.data.repository.MobileConnectionRepository
+import com.android.systemui.statusbar.pipeline.mobile.data.repository.MobileConnectionRepository.Companion.DEFAULT_NUM_LEVELS
 import com.android.systemui.statusbar.pipeline.mobile.data.repository.MobileConnectionsRepository
 import com.android.systemui.statusbar.pipeline.mobile.data.repository.demo.model.FakeNetworkEventModel
 import com.android.systemui.statusbar.pipeline.mobile.data.repository.demo.model.FakeNetworkEventModel.Mobile
@@ -269,6 +270,8 @@ class DemoMobileConnectionRepository(
     override val tableLogBuffer: TableLogBuffer,
 ) : MobileConnectionRepository {
     override val connectionInfo = MutableStateFlow(MobileConnectionModel())
+
+    override val numberOfLevels = MutableStateFlow(DEFAULT_NUM_LEVELS)
 
     override val dataEnabled = MutableStateFlow(true)
 

@@ -51,6 +51,10 @@ interface MobileConnectionRepository {
      * listener + model.
      */
     val connectionInfo: Flow<MobileConnectionModel>
+
+    /** The total number of levels. Used with [SignalDrawable]. */
+    val numberOfLevels: StateFlow<Int>
+
     /** Observable tracking [TelephonyManager.isDataConnectionAllowed] */
     val dataEnabled: StateFlow<Boolean>
 
@@ -64,4 +68,9 @@ interface MobileConnectionRepository {
 
     /** The service provider name for this network connection, or the default name */
     val networkName: StateFlow<NetworkNameModel>
+
+    companion object {
+        /** The default number of levels to use for [numberOfLevels]. */
+        const val DEFAULT_NUM_LEVELS = 4
+    }
 }

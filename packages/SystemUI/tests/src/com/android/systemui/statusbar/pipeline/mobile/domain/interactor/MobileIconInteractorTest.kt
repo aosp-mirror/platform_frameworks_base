@@ -178,6 +178,21 @@ class MobileIconInteractorTest : SysuiTestCase() {
         }
 
     @Test
+    fun numberOfLevels_comesFromRepo() =
+        runBlocking(IMMEDIATE) {
+            var latest: Int? = null
+            val job = underTest.numberOfLevels.onEach { latest = it }.launchIn(this)
+
+            connectionRepository.numberOfLevels.value = 5
+            assertThat(latest).isEqualTo(5)
+
+            connectionRepository.numberOfLevels.value = 4
+            assertThat(latest).isEqualTo(4)
+
+            job.cancel()
+        }
+
+    @Test
     fun iconGroup_three_g() =
         runBlocking(IMMEDIATE) {
             connectionRepository.setConnectionInfo(
