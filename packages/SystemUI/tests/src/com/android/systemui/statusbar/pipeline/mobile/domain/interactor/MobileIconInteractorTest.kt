@@ -300,6 +300,23 @@ class MobileIconInteractorTest : SysuiTestCase() {
         }
 
     @Test
+    fun `isInService - uses repository value`() =
+        runBlocking(IMMEDIATE) {
+            var latest: Boolean? = null
+            val job = underTest.isInService.onEach { latest = it }.launchIn(this)
+
+            connectionRepository.setConnectionInfo(MobileConnectionModel(isInService = true))
+
+            assertThat(latest).isTrue()
+
+            connectionRepository.setConnectionInfo(MobileConnectionModel(isInService = false))
+
+            assertThat(latest).isFalse()
+
+            job.cancel()
+        }
+
+    @Test
     fun `roaming - is gsm - uses connection model`() =
         runBlocking(IMMEDIATE) {
             var latest: Boolean? = null

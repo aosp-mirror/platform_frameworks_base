@@ -247,6 +247,7 @@ constructor(
         return MobileConnectionModel(
             isEmergencyOnly = false, // TODO(b/261029387): not yet supported
             isRoaming = roaming,
+            isInService = (level ?: 0) > 0,
             isGsm = false, // TODO(b/261029387): not yet supported
             cdmaLevel = level ?: 0,
             primaryLevel = level ?: 0,
