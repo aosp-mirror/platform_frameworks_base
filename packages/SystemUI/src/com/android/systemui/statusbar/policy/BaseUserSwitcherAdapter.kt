@@ -60,7 +60,7 @@ protected constructor(
      * animation to and from the parent dialog.
      */
     @JvmOverloads
-    open fun onUserListItemClicked(
+    fun onUserListItemClicked(
         record: UserRecord,
         dialogShower: DialogShower? = null,
     ) {

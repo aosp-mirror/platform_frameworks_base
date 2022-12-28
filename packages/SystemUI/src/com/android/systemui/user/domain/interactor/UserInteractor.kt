@@ -443,7 +443,8 @@ constructor(
                     )
                 )
             }
-            UserActionModel.ADD_SUPERVISED_USER ->
+            UserActionModel.ADD_SUPERVISED_USER -> {
+                dismissDialog()
                 activityStarter.startActivity(
                     Intent()
                         .setAction(UserManager.ACTION_CREATE_SUPERVISED_USER)
@@ -451,6 +452,7 @@ constructor(
                         .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK),
                     /* dismissShade= */ true,
                 )
+            }
             UserActionModel.NAVIGATE_TO_USER_MANAGEMENT ->
                 activityStarter.startActivity(
                     Intent(Settings.ACTION_USER_SETTINGS),
