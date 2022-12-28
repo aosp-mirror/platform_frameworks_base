@@ -21,6 +21,7 @@ import android.media.tv.AdBuffer;
 import android.media.tv.AdResponse;
 import android.media.tv.BroadcastInfoResponse;
 import android.media.tv.TvTrackInfo;
+import android.media.tv.TvRecordingInfo;
 import android.media.tv.interactive.AppLinkInfo;
 import android.media.tv.interactive.ITvInteractiveAppClient;
 import android.media.tv.interactive.ITvInteractiveAppManagerCallback;
@@ -52,6 +53,9 @@ interface ITvInteractiveAppManager {
     void sendCurrentTvInputId(in IBinder sessionToken, in String inputId, int userId);
     void sendSigningResult(in IBinder sessionToken, in String signingId, in byte[] result,
             int userId);
+    void sendTvRecordingInfo(in IBinder sessionToken, in TvRecordingInfo recordingInfo, int userId);
+    void sendTvRecordingInfoList(in IBinder sessionToken,
+            in List<TvRecordingInfo> recordingInfoList, int userId);
     void notifyError(in IBinder sessionToken, in String errMsg, in Bundle params, int userId);
     void createSession(in ITvInteractiveAppClient client, in String iAppServiceId, int type,
             int seq, int userId);
