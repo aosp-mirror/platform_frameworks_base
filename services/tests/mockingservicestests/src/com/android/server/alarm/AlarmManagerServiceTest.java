@@ -109,6 +109,7 @@ import static org.mockito.Mockito.times;
 
 import android.app.ActivityManager;
 import android.app.ActivityManagerInternal;
+import android.app.ActivityOptions;
 import android.app.AlarmManager;
 import android.app.AppOpsManager;
 import android.app.BroadcastOptions;
@@ -552,13 +553,23 @@ public class AlarmManagerServiceTest {
 
 
     private PendingIntent getNewMockPendingIntent() {
-        return getNewMockPendingIntent(TEST_CALLING_UID, TEST_CALLING_PACKAGE);
+        return getNewMockPendingIntent(false);
+    }
+
+    private PendingIntent getNewMockPendingIntent(boolean isActivity) {
+        return getNewMockPendingIntent(TEST_CALLING_UID, TEST_CALLING_PACKAGE, isActivity);
     }
 
     private PendingIntent getNewMockPendingIntent(int creatorUid, String creatorPackage) {
+        return getNewMockPendingIntent(creatorUid, creatorPackage, false);
+    }
+
+    private PendingIntent getNewMockPendingIntent(int creatorUid, String creatorPackage,
+            boolean isActivity) {
         final PendingIntent mockPi = mock(PendingIntent.class, Answers.RETURNS_DEEP_STUBS);
         when(mockPi.getCreatorUid()).thenReturn(creatorUid);
         when(mockPi.getCreatorPackage()).thenReturn(creatorPackage);
+        when(mockPi.isActivity()).thenReturn(isActivity);
         return mockPi;
     }
 
@@ -2801,21 +2812,53 @@ public class AlarmManagerServiceTest {
                 anyString()));
     }
 
-    @Test
-    public void idleOptionsSentOnExpiration() throws Exception {
+    private void optionsSentOnExpiration(boolean isActivity, Bundle idleOptions)
+            throws Exception {
         final long triggerTime = mNowElapsedTest + 5000;
-        final PendingIntent alarmPi = getNewMockPendingIntent();
-        final Bundle idleOptions = new Bundle();
-        idleOptions.putChar("TEST_CHAR_KEY", 'x');
-        idleOptions.putInt("TEST_INT_KEY", 53);
+        final PendingIntent alarmPi = getNewMockPendingIntent(isActivity);
         setTestAlarm(ELAPSED_REALTIME_WAKEUP, triggerTime, 0, alarmPi, 0, 0, TEST_CALLING_UID,
                 idleOptions);
 
         mNowElapsedTest = mTestTimer.getElapsed();
         mTestTimer.expire();
 
+        ArgumentCaptor<Bundle> bundleCaptor = ArgumentCaptor.forClass(Bundle.class);
         verify(alarmPi).send(eq(mMockContext), eq(0), any(Intent.class),
-                any(), any(Handler.class), isNull(), eq(idleOptions));
+                any(), any(Handler.class), isNull(), bundleCaptor.capture());
+        if (idleOptions != null) {
+            assertEquals(idleOptions, bundleCaptor.getValue());
+        } else {
+            assertFalse("BAL flag needs to be false in alarm manager",
+                    bundleCaptor.getValue().getBoolean(
+                            ActivityOptions.KEY_PENDING_INTENT_BACKGROUND_ACTIVITY_ALLOWED,
+                            true));
+        }
+    }
+
+    @Test
+    public void activityIdleOptionsSentOnExpiration() throws Exception {
+        final Bundle idleOptions = new Bundle();
+        idleOptions.putChar("TEST_CHAR_KEY", 'x');
+        idleOptions.putInt("TEST_INT_KEY", 53);
+        optionsSentOnExpiration(true, idleOptions);
+    }
+
+    @Test
+    public void broadcastIdleOptionsSentOnExpiration() throws Exception {
+        final Bundle idleOptions = new Bundle();
+        idleOptions.putChar("TEST_CHAR_KEY", 'x');
+        idleOptions.putInt("TEST_INT_KEY", 53);
+        optionsSentOnExpiration(false, idleOptions);
+    }
+
+    @Test
+    public void emptyActivityOptionsSentOnExpiration() throws Exception {
+        optionsSentOnExpiration(true, null);
+    }
+
+    @Test
+    public void emptyBroadcastOptionsSentOnExpiration() throws Exception {
+        optionsSentOnExpiration(false, null);
     }
 
     @Test
