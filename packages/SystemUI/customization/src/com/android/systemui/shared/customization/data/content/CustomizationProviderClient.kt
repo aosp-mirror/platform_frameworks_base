@@ -15,7 +15,7 @@
  *
  */
 
-package com.android.systemui.shared.quickaffordance.data.content
+package com.android.systemui.shared.customization.data.content
 
 import android.annotation.SuppressLint
 import android.content.ContentValues
@@ -25,7 +25,7 @@ import android.graphics.Color
 import android.graphics.drawable.Drawable
 import android.net.Uri
 import androidx.annotation.DrawableRes
-import com.android.systemui.shared.quickaffordance.data.content.KeyguardQuickAffordanceProviderContract as Contract
+import com.android.systemui.shared.customization.data.content.CustomizationProviderContract as Contract
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.channels.awaitClose
 import kotlinx.coroutines.flow.Flow
@@ -35,7 +35,7 @@ import kotlinx.coroutines.flow.onStart
 import kotlinx.coroutines.withContext
 
 /** Client for using a content provider implementing the [Contract]. */
-interface KeyguardQuickAffordanceProviderClient {
+interface CustomizationProviderClient {
 
     /**
      * Selects an affordance with the given ID for a slot on the lock screen with the given ID.
@@ -190,10 +190,10 @@ interface KeyguardQuickAffordanceProviderClient {
     )
 }
 
-class KeyguardQuickAffordanceProviderClientImpl(
+class CustomizationProviderClientImpl(
     private val context: Context,
     private val backgroundDispatcher: CoroutineDispatcher,
-) : KeyguardQuickAffordanceProviderClient {
+) : CustomizationProviderClient {
 
     override suspend fun insertSelection(
         slotId: String,
@@ -201,20 +201,23 @@ class KeyguardQuickAffordanceProviderClientImpl(
     ) {
         withContext(backgroundDispatcher) {
             context.contentResolver.insert(
-                Contract.SelectionTable.URI,
+                Contract.LockScreenQuickAffordances.SelectionTable.URI,
                 ContentValues().apply {
-                    put(Contract.SelectionTable.Columns.SLOT_ID, slotId)
-                    put(Contract.SelectionTable.Columns.AFFORDANCE_ID, affordanceId)
+                    put(Contract.LockScreenQuickAffordances.SelectionTable.Columns.SLOT_ID, slotId)
+                    put(
+                        Contract.LockScreenQuickAffordances.SelectionTable.Columns.AFFORDANCE_ID,
+                        affordanceId
+                    )
                 }
             )
         }
     }
 
-    override suspend fun querySlots(): List<KeyguardQuickAffordanceProviderClient.Slot> {
+    override suspend fun querySlots(): List<CustomizationProviderClient.Slot> {
         return withContext(backgroundDispatcher) {
             context.contentResolver
                 .query(
-                    Contract.SlotTable.URI,
+                    Contract.LockScreenQuickAffordances.SlotTable.URI,
                     null,
                     null,
                     null,
@@ -222,16 +225,21 @@ class KeyguardQuickAffordanceProviderClientImpl(
                 )
                 ?.use { cursor ->
                     buildList {
-                        val idColumnIndex = cursor.getColumnIndex(Contract.SlotTable.Columns.ID)
+                        val idColumnIndex =
+                            cursor.getColumnIndex(
+                                Contract.LockScreenQuickAffordances.SlotTable.Columns.ID
+                            )
                         val capacityColumnIndex =
-                            cursor.getColumnIndex(Contract.SlotTable.Columns.CAPACITY)
+                            cursor.getColumnIndex(
+                                Contract.LockScreenQuickAffordances.SlotTable.Columns.CAPACITY
+                            )
                         if (idColumnIndex == -1 || capacityColumnIndex == -1) {
                             return@buildList
                         }
 
                         while (cursor.moveToNext()) {
                             add(
-                                KeyguardQuickAffordanceProviderClient.Slot(
+                                CustomizationProviderClient.Slot(
                                     id = cursor.getString(idColumnIndex),
                                     capacity = cursor.getInt(capacityColumnIndex),
                                 )
@@ -243,7 +251,7 @@ class KeyguardQuickAffordanceProviderClientImpl(
             ?: emptyList()
     }
 
-    override suspend fun queryFlags(): List<KeyguardQuickAffordanceProviderClient.Flag> {
+    override suspend fun queryFlags(): List<CustomizationProviderClient.Flag> {
         return withContext(backgroundDispatcher) {
             context.contentResolver
                 .query(
@@ -265,7 +273,7 @@ class KeyguardQuickAffordanceProviderClientImpl(
 
                         while (cursor.moveToNext()) {
                             add(
-                                KeyguardQuickAffordanceProviderClient.Flag(
+                                CustomizationProviderClient.Flag(
                                     name = cursor.getString(nameColumnIndex),
                                     value = cursor.getInt(valueColumnIndex) == 1,
                                 )
@@ -277,20 +285,19 @@ class KeyguardQuickAffordanceProviderClientImpl(
             ?: emptyList()
     }
 
-    override fun observeSlots(): Flow<List<KeyguardQuickAffordanceProviderClient.Slot>> {
-        return observeUri(Contract.SlotTable.URI).map { querySlots() }
+    override fun observeSlots(): Flow<List<CustomizationProviderClient.Slot>> {
+        return observeUri(Contract.LockScreenQuickAffordances.SlotTable.URI).map { querySlots() }
     }
 
-    override fun observeFlags(): Flow<List<KeyguardQuickAffordanceProviderClient.Flag>> {
+    override fun observeFlags(): Flow<List<CustomizationProviderClient.Flag>> {
         return observeUri(Contract.FlagsTable.URI).map { queryFlags() }
     }
 
-    override suspend fun queryAffordances():
-        List<KeyguardQuickAffordanceProviderClient.Affordance> {
+    override suspend fun queryAffordances(): List<CustomizationProviderClient.Affordance> {
         return withContext(backgroundDispatcher) {
             context.contentResolver
                 .query(
-                    Contract.AffordanceTable.URI,
+                    Contract.LockScreenQuickAffordances.AffordanceTable.URI,
                     null,
                     null,
                     null,
@@ -299,24 +306,36 @@ class KeyguardQuickAffordanceProviderClientImpl(
                 ?.use { cursor ->
                     buildList {
                         val idColumnIndex =
-                            cursor.getColumnIndex(Contract.AffordanceTable.Columns.ID)
+                            cursor.getColumnIndex(
+                                Contract.LockScreenQuickAffordances.AffordanceTable.Columns.ID
+                            )
                         val nameColumnIndex =
-                            cursor.getColumnIndex(Contract.AffordanceTable.Columns.NAME)
+                            cursor.getColumnIndex(
+                                Contract.LockScreenQuickAffordances.AffordanceTable.Columns.NAME
+                            )
                         val iconColumnIndex =
-                            cursor.getColumnIndex(Contract.AffordanceTable.Columns.ICON)
+                            cursor.getColumnIndex(
+                                Contract.LockScreenQuickAffordances.AffordanceTable.Columns.ICON
+                            )
                         val isEnabledColumnIndex =
-                            cursor.getColumnIndex(Contract.AffordanceTable.Columns.IS_ENABLED)
+                            cursor.getColumnIndex(
+                                Contract.LockScreenQuickAffordances.AffordanceTable.Columns
+                                    .IS_ENABLED
+                            )
                         val enablementInstructionsColumnIndex =
                             cursor.getColumnIndex(
-                                Contract.AffordanceTable.Columns.ENABLEMENT_INSTRUCTIONS
+                                Contract.LockScreenQuickAffordances.AffordanceTable.Columns
+                                    .ENABLEMENT_INSTRUCTIONS
                             )
                         val enablementActionTextColumnIndex =
                             cursor.getColumnIndex(
-                                Contract.AffordanceTable.Columns.ENABLEMENT_ACTION_TEXT
+                                Contract.LockScreenQuickAffordances.AffordanceTable.Columns
+                                    .ENABLEMENT_ACTION_TEXT
                             )
                         val enablementComponentNameColumnIndex =
                             cursor.getColumnIndex(
-                                Contract.AffordanceTable.Columns.ENABLEMENT_COMPONENT_NAME
+                                Contract.LockScreenQuickAffordances.AffordanceTable.Columns
+                                    .ENABLEMENT_COMPONENT_NAME
                             )
                         if (
                             idColumnIndex == -1 ||
@@ -332,7 +351,7 @@ class KeyguardQuickAffordanceProviderClientImpl(
 
                         while (cursor.moveToNext()) {
                             add(
-                                KeyguardQuickAffordanceProviderClient.Affordance(
+                                CustomizationProviderClient.Affordance(
                                     id = cursor.getString(idColumnIndex),
                                     name = cursor.getString(nameColumnIndex),
                                     iconResourceId = cursor.getInt(iconColumnIndex),
@@ -341,7 +360,7 @@ class KeyguardQuickAffordanceProviderClientImpl(
                                         cursor
                                             .getString(enablementInstructionsColumnIndex)
                                             ?.split(
-                                                Contract.AffordanceTable
+                                                Contract.LockScreenQuickAffordances.AffordanceTable
                                                     .ENABLEMENT_INSTRUCTIONS_DELIMITER
                                             ),
                                     enablementActionText =
@@ -357,16 +376,17 @@ class KeyguardQuickAffordanceProviderClientImpl(
             ?: emptyList()
     }
 
-    override fun observeAffordances():
-        Flow<List<KeyguardQuickAffordanceProviderClient.Affordance>> {
-        return observeUri(Contract.AffordanceTable.URI).map { queryAffordances() }
+    override fun observeAffordances(): Flow<List<CustomizationProviderClient.Affordance>> {
+        return observeUri(Contract.LockScreenQuickAffordances.AffordanceTable.URI).map {
+            queryAffordances()
+        }
     }
 
-    override suspend fun querySelections(): List<KeyguardQuickAffordanceProviderClient.Selection> {
+    override suspend fun querySelections(): List<CustomizationProviderClient.Selection> {
         return withContext(backgroundDispatcher) {
             context.contentResolver
                 .query(
-                    Contract.SelectionTable.URI,
+                    Contract.LockScreenQuickAffordances.SelectionTable.URI,
                     null,
                     null,
                     null,
@@ -375,11 +395,19 @@ class KeyguardQuickAffordanceProviderClientImpl(
                 ?.use { cursor ->
                     buildList {
                         val slotIdColumnIndex =
-                            cursor.getColumnIndex(Contract.SelectionTable.Columns.SLOT_ID)
+                            cursor.getColumnIndex(
+                                Contract.LockScreenQuickAffordances.SelectionTable.Columns.SLOT_ID
+                            )
                         val affordanceIdColumnIndex =
-                            cursor.getColumnIndex(Contract.SelectionTable.Columns.AFFORDANCE_ID)
+                            cursor.getColumnIndex(
+                                Contract.LockScreenQuickAffordances.SelectionTable.Columns
+                                    .AFFORDANCE_ID
+                            )
                         val affordanceNameColumnIndex =
-                            cursor.getColumnIndex(Contract.SelectionTable.Columns.AFFORDANCE_NAME)
+                            cursor.getColumnIndex(
+                                Contract.LockScreenQuickAffordances.SelectionTable.Columns
+                                    .AFFORDANCE_NAME
+                            )
                         if (
                             slotIdColumnIndex == -1 ||
                                 affordanceIdColumnIndex == -1 ||
@@ -390,7 +418,7 @@ class KeyguardQuickAffordanceProviderClientImpl(
 
                         while (cursor.moveToNext()) {
                             add(
-                                KeyguardQuickAffordanceProviderClient.Selection(
+                                CustomizationProviderClient.Selection(
                                     slotId = cursor.getString(slotIdColumnIndex),
                                     affordanceId = cursor.getString(affordanceIdColumnIndex),
                                     affordanceName = cursor.getString(affordanceNameColumnIndex),
@@ -403,8 +431,10 @@ class KeyguardQuickAffordanceProviderClientImpl(
             ?: emptyList()
     }
 
-    override fun observeSelections(): Flow<List<KeyguardQuickAffordanceProviderClient.Selection>> {
-        return observeUri(Contract.SelectionTable.URI).map { querySelections() }
+    override fun observeSelections(): Flow<List<CustomizationProviderClient.Selection>> {
+        return observeUri(Contract.LockScreenQuickAffordances.SelectionTable.URI).map {
+            querySelections()
+        }
     }
 
     override suspend fun deleteSelection(
@@ -413,9 +443,10 @@ class KeyguardQuickAffordanceProviderClientImpl(
     ) {
         withContext(backgroundDispatcher) {
             context.contentResolver.delete(
-                Contract.SelectionTable.URI,
-                "${Contract.SelectionTable.Columns.SLOT_ID} = ? AND" +
-                    " ${Contract.SelectionTable.Columns.AFFORDANCE_ID} = ?",
+                Contract.LockScreenQuickAffordances.SelectionTable.URI,
+                "${Contract.LockScreenQuickAffordances.SelectionTable.Columns.SLOT_ID} = ? AND" +
+                    " ${Contract.LockScreenQuickAffordances.SelectionTable.Columns.AFFORDANCE_ID}" +
+                    " = ?",
                 arrayOf(
                     slotId,
                     affordanceId,
@@ -429,8 +460,8 @@ class KeyguardQuickAffordanceProviderClientImpl(
     ) {
         withContext(backgroundDispatcher) {
             context.contentResolver.delete(
-                Contract.SelectionTable.URI,
-                Contract.SelectionTable.Columns.SLOT_ID,
+                Contract.LockScreenQuickAffordances.SelectionTable.URI,
+                Contract.LockScreenQuickAffordances.SelectionTable.Columns.SLOT_ID,
                 arrayOf(
                     slotId,
                 ),

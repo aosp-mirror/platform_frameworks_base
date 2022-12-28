@@ -31,7 +31,7 @@ This section describes how to implement a potential picker, selector, or configu
 ### Accessing Quick Affordance Data
 Quick Affordances structured data are exposed to other applications through the `KeyguardQuickAffordanceProvider` content provider which is owned by the System UI process.
 
-To access this content provider, applications must have the `android.permission.ACCESS_KEYGUARD_QUICK_AFFORDANCES` permission which is a signature and privileged permission, limiting access to system apps or apps signed by the same signature as System UI. The `KeyguardQuickAffordanceProviderContract` file defines the content provider schema for consumers.
+To access this content provider, applications must have the `android.permission.CUSTOMIZE_SYSTEM_UI` permission which is a signature and privileged permission, limiting access to system apps or apps signed by the same signature as System UI. The `KeyguardQuickAffordanceProviderContract` file defines the content provider schema for consumers.
 
 Generally speaking, there are three important tables served by the content provider: `slots`, `affordances`, and `selections`. There is also a `flags` table, but that's not important and may be ignored.
 

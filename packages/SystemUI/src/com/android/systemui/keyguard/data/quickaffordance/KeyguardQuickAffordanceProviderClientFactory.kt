@@ -19,13 +19,13 @@ package com.android.systemui.keyguard.data.quickaffordance
 
 import com.android.systemui.dagger.qualifiers.Background
 import com.android.systemui.settings.UserTracker
-import com.android.systemui.shared.quickaffordance.data.content.KeyguardQuickAffordanceProviderClient
-import com.android.systemui.shared.quickaffordance.data.content.KeyguardQuickAffordanceProviderClientImpl
+import com.android.systemui.shared.customization.data.content.CustomizationProviderClient
+import com.android.systemui.shared.customization.data.content.CustomizationProviderClientImpl
 import javax.inject.Inject
 import kotlinx.coroutines.CoroutineDispatcher
 
 interface KeyguardQuickAffordanceProviderClientFactory {
-    fun create(): KeyguardQuickAffordanceProviderClient
+    fun create(): CustomizationProviderClient
 }
 
 class KeyguardQuickAffordanceProviderClientFactoryImpl
@@ -34,8 +34,8 @@ constructor(
     private val userTracker: UserTracker,
     @Background private val backgroundDispatcher: CoroutineDispatcher,
 ) : KeyguardQuickAffordanceProviderClientFactory {
-    override fun create(): KeyguardQuickAffordanceProviderClient {
-        return KeyguardQuickAffordanceProviderClientImpl(
+    override fun create(): CustomizationProviderClient {
+        return CustomizationProviderClientImpl(
             context = userTracker.userContext,
             backgroundDispatcher = backgroundDispatcher,
         )
