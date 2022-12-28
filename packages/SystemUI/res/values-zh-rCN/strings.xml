@@ -85,6 +85,8 @@
     <string name="screenshot_share_description" msgid="2861628935812656612">"分享屏幕截图"</string>
     <string name="screenshot_scroll_label" msgid="2930198809899329367">"截取更多内容"</string>
     <string name="screenshot_dismiss_description" msgid="4702341245899508786">"关闭屏幕截图"</string>
+    <!-- no translation found for screenshot_dismiss_work_profile (3101530842987697045) -->
+    <skip />
     <string name="screenshot_preview_description" msgid="7606510140714080474">"屏幕截图预览"</string>
     <string name="screenshot_top_boundary_pct" msgid="2520148599096479332">"顶部边界百分之 <xliff:g id="PERCENT">%1$d</xliff:g>"</string>
     <string name="screenshot_bottom_boundary_pct" msgid="3880821519814946478">"底部边界百分之 <xliff:g id="PERCENT">%1$d</xliff:g>"</string>
@@ -731,8 +733,7 @@
     <string name="wifi_is_off" msgid="5389597396308001471">"WLAN 已关闭"</string>
     <string name="bt_is_off" msgid="7436344904889461591">"蓝牙已关闭"</string>
     <string name="dnd_is_off" msgid="3185706903793094463">"“勿扰”模式已关闭"</string>
-    <!-- no translation found for dnd_is_on (7009368176361546279) -->
-    <skip />
+    <string name="dnd_is_on" msgid="7009368176361546279">"“勿扰”模式已开启"</string>
     <string name="qs_dnd_prompt_auto_rule" msgid="3535469468310002616">"某个自动规则（<xliff:g id="ID_1">%s</xliff:g>）已开启勿扰模式。"</string>
     <string name="qs_dnd_prompt_app" msgid="4027984447935396820">"某个应用（<xliff:g id="ID_1">%s</xliff:g>）已开启勿扰模式。"</string>
     <string name="qs_dnd_prompt_auto_rule_app" msgid="1841469944118486580">"某个自动规则或应用已开启勿扰模式。"</string>
@@ -875,6 +876,8 @@
     <string name="media_output_dialog_accessibility_title" msgid="4681741064190167888">"音频输出的可用设备。"</string>
     <string name="media_output_dialog_accessibility_seekbar" msgid="5332843993805568978">"音量"</string>
     <string name="media_output_dialog_volume_percentage" msgid="1613984910585111798">"<xliff:g id="PERCENTAGE">%1$d</xliff:g>%%"</string>
+    <!-- no translation found for media_output_group_title_speakers_and_displays (7169712332365659820) -->
+    <skip />
     <string name="media_output_first_broadcast_title" msgid="6292237789860753022">"广播的运作方式"</string>
     <string name="media_output_broadcast" msgid="3555580945878071543">"广播"</string>
     <string name="media_output_first_notify_broadcast_message" msgid="6353857724136398494">"附近使用兼容蓝牙设备的用户可以收听您广播的媒体内容"</string>
@@ -1004,8 +1007,7 @@
     <string name="keyguard_affordance_enablement_dialog_qr_scanner_instruction" msgid="5355839079232119791">"• 安装相机应用"</string>
     <string name="keyguard_affordance_enablement_dialog_home_instruction_1" msgid="8438311171750568633">"• 应用已设置完毕"</string>
     <string name="keyguard_affordance_enablement_dialog_home_instruction_2" msgid="8308525385889021652">"• 至少有一台设备可用"</string>
-    <!-- no translation found for keyguard_affordance_press_too_short (2687995216454987952) -->
-    <skip />
+    <string name="keyguard_affordance_press_too_short" msgid="2687995216454987952">"按住即可启用"</string>
     <string name="rear_display_bottom_sheet_cancel" msgid="3461468855493357248">"取消"</string>
     <string name="rear_display_bottom_sheet_confirm" msgid="4383356544661421206">"立即翻转"</string>
     <string name="rear_display_fold_bottom_sheet_title" msgid="6081542277622721548">"展开手机可拍出更好的自拍照"</string>
@@ -1014,6 +1016,5 @@
     <string name="rear_display_bottom_sheet_warning" msgid="800995919558238930"><b>"✱ 此屏幕将会关闭"</b></string>
     <string name="rear_display_accessibility_folded_animation" msgid="1538121649587978179">"正在展开可折叠设备"</string>
     <string name="rear_display_accessibility_unfolded_animation" msgid="1946153682258289040">"正在翻转可折叠设备"</string>
-    <!-- no translation found for stylus_battery_low (7134370101603167096) -->
-    <skip />
+    <string name="stylus_battery_low" msgid="7134370101603167096">"触控笔电池电量低"</string>
 </resources>

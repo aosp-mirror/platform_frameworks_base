@@ -85,6 +85,7 @@
     <string name="screenshot_share_description" msgid="2861628935812656612">"സ്‌ക്രീൻഷോട്ട് പങ്കിടുക"</string>
     <string name="screenshot_scroll_label" msgid="2930198809899329367">"കൂടുതൽ ക്യാപ്‌ചർ ചെയ്യുക"</string>
     <string name="screenshot_dismiss_description" msgid="4702341245899508786">"സ്ക്രീൻഷോട്ട് ഡിസ്‌മിസ് ചെയ്യുക"</string>
+    <string name="screenshot_dismiss_work_profile" msgid="3101530842987697045">"ഔദ്യോഗിക പ്രൊഫൈൽ സന്ദേശം ഡിസ്‌മിസ് ചെയ്യുക"</string>
     <string name="screenshot_preview_description" msgid="7606510140714080474">"സ്‌ക്രീൻഷോട്ട് പ്രിവ്യു"</string>
     <string name="screenshot_top_boundary_pct" msgid="2520148599096479332">"മുകളിലെ അതിർത്തി <xliff:g id="PERCENT">%1$d</xliff:g> ശതമാനം"</string>
     <string name="screenshot_bottom_boundary_pct" msgid="3880821519814946478">"താഴെയുള്ള അതിർത്തി <xliff:g id="PERCENT">%1$d</xliff:g> ശതമാനം"</string>
@@ -731,8 +732,7 @@
     <string name="wifi_is_off" msgid="5389597396308001471">"വൈഫൈ ഓഫാണ്"</string>
     <string name="bt_is_off" msgid="7436344904889461591">"Bluetooth ഓഫാണ്"</string>
     <string name="dnd_is_off" msgid="3185706903793094463">"\'ശല്യപ്പെടുത്തരുത്\' ഓഫാണ്"</string>
-    <!-- no translation found for dnd_is_on (7009368176361546279) -->
-    <skip />
+    <string name="dnd_is_on" msgid="7009368176361546279">"\'ശല്യപ്പെടുത്തരുത്\' ഓണാണ്"</string>
     <string name="qs_dnd_prompt_auto_rule" msgid="3535469468310002616">"സ്വയമേവയുള്ള ഒരു നയം (<xliff:g id="ID_1">%s</xliff:g>) \'ശല്യപ്പെടുത്തരുത്\' ഓണാക്കിയിരിക്കുന്നു."</string>
     <string name="qs_dnd_prompt_app" msgid="4027984447935396820">"ഒരു ആപ്പ് (<xliff:g id="ID_1">%s</xliff:g>) \'ശല്യപ്പെടുത്തരുത്\' ഓണാക്കിയിരിക്കുന്നു."</string>
     <string name="qs_dnd_prompt_auto_rule_app" msgid="1841469944118486580">"സ്വയമേവയുള്ള ഒരു നയമോ ആപ്പോ \'ശല്യപ്പെടുത്തരുത്\' ഓണാക്കിയിരിക്കുന്നു."</string>
@@ -875,6 +875,7 @@
     <string name="media_output_dialog_accessibility_title" msgid="4681741064190167888">"ഓഡിയോ ഔട്ട്‌പുട്ടിന് ലഭ്യമായ ഉപകരണങ്ങൾ."</string>
     <string name="media_output_dialog_accessibility_seekbar" msgid="5332843993805568978">"വോളിയം"</string>
     <string name="media_output_dialog_volume_percentage" msgid="1613984910585111798">"<xliff:g id="PERCENTAGE">%1$d</xliff:g>%%"</string>
+    <string name="media_output_group_title_speakers_and_displays" msgid="7169712332365659820">"സ്‌പീക്കറുകളും ഡിസ്പ്ലേകളും"</string>
     <string name="media_output_first_broadcast_title" msgid="6292237789860753022">"ബ്രോഡ്‌കാസ്‌റ്റ് എങ്ങനെയാണ് പ്രവർത്തിക്കുന്നത്"</string>
     <string name="media_output_broadcast" msgid="3555580945878071543">"ബ്രോഡ്‌കാസ്റ്റ്"</string>
     <string name="media_output_first_notify_broadcast_message" msgid="6353857724136398494">"അനുയോജ്യമായ Bluetooth ഉപകരണങ്ങളോടെ സമീപമുള്ള ആളുകൾക്ക് നിങ്ങൾ ബ്രോഡ്‌കാസ്‌റ്റ് ചെയ്യുന്ന മീഡിയ കേൾക്കാനാകും"</string>
@@ -1004,8 +1005,7 @@
     <string name="keyguard_affordance_enablement_dialog_qr_scanner_instruction" msgid="5355839079232119791">"• ഒരു ക്യാമറാ ആപ്പ് ഇൻസ്റ്റാൾ ചെയ്തിട്ടുണ്ട്"</string>
     <string name="keyguard_affordance_enablement_dialog_home_instruction_1" msgid="8438311171750568633">"• ആപ്പ് സജ്ജീകരിച്ചിട്ടുണ്ട്"</string>
     <string name="keyguard_affordance_enablement_dialog_home_instruction_2" msgid="8308525385889021652">"• ഒരു ഉപകരണമെങ്കിലും ലഭ്യമാണ്"</string>
-    <!-- no translation found for keyguard_affordance_press_too_short (2687995216454987952) -->
-    <skip />
+    <string name="keyguard_affordance_press_too_short" msgid="2687995216454987952">"സജീവമാക്കാൻ അമർത്തിപ്പിടിക്കുക"</string>
     <string name="rear_display_bottom_sheet_cancel" msgid="3461468855493357248">"റദ്ദാക്കുക"</string>
     <string name="rear_display_bottom_sheet_confirm" msgid="4383356544661421206">"ഇപ്പോൾ ഫ്ലിപ്പ് ചെയ്യൂ"</string>
     <string name="rear_display_fold_bottom_sheet_title" msgid="6081542277622721548">"കൂടുതൽ മികച്ച സെൽഫി ലഭിക്കാൻ ഫോൺ അൺഫോൾഡ് ചെയ്യൂ"</string>
@@ -1014,6 +1014,5 @@
     <string name="rear_display_bottom_sheet_warning" msgid="800995919558238930"><b>"✱ ഈ സ്ക്രീൻ ഓഫാകും"</b></string>
     <string name="rear_display_accessibility_folded_animation" msgid="1538121649587978179">"ഫോൾഡ് ചെയ്യാവുന്ന ഉപകരണം അൺഫോൾഡ് ആകുന്നു"</string>
     <string name="rear_display_accessibility_unfolded_animation" msgid="1946153682258289040">"ഫോൾഡ് ചെയ്യാവുന്ന ഉപകരണം, കറങ്ങുന്ന വിധത്തിൽ ഫ്ലിപ്പ് ആകുന്നു"</string>
-    <!-- no translation found for stylus_battery_low (7134370101603167096) -->
-    <skip />
+    <string name="stylus_battery_low" msgid="7134370101603167096">"സ്റ്റൈലസിന്റെ ബാറ്ററി ചാർജ് കുറവാണ്"</string>
 </resources>
