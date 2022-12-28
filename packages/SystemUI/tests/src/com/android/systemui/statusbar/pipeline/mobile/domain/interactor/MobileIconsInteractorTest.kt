@@ -291,6 +291,38 @@ class MobileIconsInteractorTest : SysuiTestCase() {
             job.cancel()
         }
 
+    @Test
+    fun alwaysUseCdmaLevel_configHasTrue() =
+        runBlocking(IMMEDIATE) {
+            var latest: Boolean? = null
+            val job = underTest.alwaysUseCdmaLevel.onEach { latest = it }.launchIn(this)
+
+            val config = MobileMappings.Config()
+            config.alwaysShowCdmaRssi = true
+            connectionsRepository.defaultDataSubRatConfig.value = config
+            yield()
+
+            assertThat(latest).isTrue()
+
+            job.cancel()
+        }
+
+    @Test
+    fun alwaysUseCdmaLevel_configHasFalse() =
+        runBlocking(IMMEDIATE) {
+            var latest: Boolean? = null
+            val job = underTest.alwaysUseCdmaLevel.onEach { latest = it }.launchIn(this)
+
+            val config = MobileMappings.Config()
+            config.alwaysShowCdmaRssi = false
+            connectionsRepository.defaultDataSubRatConfig.value = config
+            yield()
+
+            assertThat(latest).isFalse()
+
+            job.cancel()
+        }
+
     companion object {
         private val IMMEDIATE = Dispatchers.Main.immediate
         private val tableLogBuffer =
