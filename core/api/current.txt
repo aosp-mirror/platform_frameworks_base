@@ -44883,7 +44883,7 @@ package android.telephony {
     method public boolean isVoicemailVibrationEnabled(android.telecom.PhoneAccountHandle);
     method public boolean isWorldPhone();
     method @Deprecated public void listen(android.telephony.PhoneStateListener, int);
-    method @RequiresPermission(android.Manifest.permission.READ_BASIC_PHONE_STATE) public void purchasePremiumCapability(int, @NonNull java.util.concurrent.Executor, @NonNull java.util.function.Consumer<java.lang.Integer>);
+    method @RequiresPermission(allOf={android.Manifest.permission.READ_BASIC_PHONE_STATE, android.Manifest.permission.INTERNET}) public void purchasePremiumCapability(int, @NonNull java.util.concurrent.Executor, @NonNull java.util.function.Consumer<java.lang.Integer>);
     method @RequiresPermission(android.Manifest.permission.MODIFY_PHONE_STATE) public void rebootModem();
     method public void registerTelephonyCallback(@NonNull java.util.concurrent.Executor, @NonNull android.telephony.TelephonyCallback);
     method public void registerTelephonyCallback(int, @NonNull java.util.concurrent.Executor, @NonNull android.telephony.TelephonyCallback);
@@ -45064,7 +45064,7 @@ package android.telephony {
     field public static final int PURCHASE_PREMIUM_CAPABILITY_RESULT_FEATURE_NOT_SUPPORTED = 10; // 0xa
     field public static final int PURCHASE_PREMIUM_CAPABILITY_RESULT_NETWORK_NOT_AVAILABLE = 12; // 0xc
     field public static final int PURCHASE_PREMIUM_CAPABILITY_RESULT_NOT_DEFAULT_DATA_SUBSCRIPTION = 14; // 0xe
-    field public static final int PURCHASE_PREMIUM_CAPABILITY_RESULT_OVERRIDDEN = 5; // 0x5
+    field public static final int PURCHASE_PREMIUM_CAPABILITY_RESULT_NOT_FOREGROUND = 5; // 0x5
     field public static final int PURCHASE_PREMIUM_CAPABILITY_RESULT_PENDING_NETWORK_SETUP = 15; // 0xf
     field public static final int PURCHASE_PREMIUM_CAPABILITY_RESULT_REQUEST_FAILED = 11; // 0xb
     field public static final int PURCHASE_PREMIUM_CAPABILITY_RESULT_SUCCESS = 1; // 0x1
