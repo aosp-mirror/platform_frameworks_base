@@ -86,7 +86,7 @@ public class WindowAddRemovePerfTest extends WindowManagerPerfTestBase
         final WindowManager.LayoutParams mLayoutParams = new WindowManager.LayoutParams();
         final int mRequestedVisibleTypes = WindowInsets.Type.defaultVisible();
         final InsetsState mOutInsetsState = new InsetsState();
-        final InsetsSourceControl[] mOutControls = new InsetsSourceControl[0];
+        final InsetsSourceControl.Array mOutControls = new InsetsSourceControl.Array();
         final Rect mOutAttachedFrame = new Rect();
         final float[] mOutSizeCompatScale = { 1f };
 

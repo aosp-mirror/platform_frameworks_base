@@ -111,7 +111,7 @@ public class TaskSnapshotWindow {
         final SurfaceControl surfaceControl = new SurfaceControl();
         final ClientWindowFrames tmpFrames = new ClientWindowFrames();
 
-        final InsetsSourceControl[] tmpControls = new InsetsSourceControl[0];
+        final InsetsSourceControl.Array tmpControls = new InsetsSourceControl.Array();
         final MergedConfiguration tmpMergedConfiguration = new MergedConfiguration();
 
         final TaskDescription taskDescription;
