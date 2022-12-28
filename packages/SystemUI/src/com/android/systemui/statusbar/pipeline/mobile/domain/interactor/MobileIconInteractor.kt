@@ -48,6 +48,9 @@ interface MobileIconInteractor {
     /** True when telephony tells us that the data state is CONNECTED */
     val isDataConnected: StateFlow<Boolean>
 
+    /** True if we consider this connection to be in service, i.e. can make calls */
+    val isInService: StateFlow<Boolean>
+
     // TODO(b/256839546): clarify naming of default vs active
     /** True if we want to consider the data connection enabled */
     val isDefaultDataEnabled: StateFlow<Boolean>
@@ -174,5 +177,10 @@ class MobileIconInteractorImpl(
     override val isDataConnected: StateFlow<Boolean> =
         connectionInfo
             .mapLatest { connection -> connection.dataConnectionState == Connected }
+            .stateIn(scope, SharingStarted.WhileSubscribed(), false)
+
+    override val isInService =
+        connectionRepository.connectionInfo
+            .mapLatest { it.isInService }
             .stateIn(scope, SharingStarted.WhileSubscribed(), false)
 }

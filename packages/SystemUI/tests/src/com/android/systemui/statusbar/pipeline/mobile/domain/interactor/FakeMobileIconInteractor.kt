@@ -52,6 +52,8 @@ class FakeMobileIconInteractor(
 
     override val isDataConnected = MutableStateFlow(true)
 
+    override val isInService = MutableStateFlow(true)
+
     private val _isDataEnabled = MutableStateFlow(true)
     override val isDataEnabled = _isDataEnabled
 
