@@ -411,6 +411,8 @@ final class ActivityManagerShellCommand extends ShellCommand {
             public boolean handleOption(String opt, ShellCommand cmd) {
                 if (opt.equals("-D")) {
                     mStartFlags |= ActivityManager.START_FLAG_DEBUG;
+                } else if (opt.equals("--suspend")) {
+                    mStartFlags |= ActivityManager.START_FLAG_DEBUG_SUSPEND;
                 } else if (opt.equals("-N")) {
                     mStartFlags |= ActivityManager.START_FLAG_NATIVE_DEBUGGING;
                 } else if (opt.equals("-W")) {
