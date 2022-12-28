@@ -15,7 +15,7 @@
  *
  */
 
-package com.android.systemui.shared.quickaffordance.data.content
+package com.android.systemui.shared.customization.data.content
 
 import android.graphics.drawable.BitmapDrawable
 import android.graphics.drawable.Drawable
@@ -25,46 +25,46 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.combine
 
-class FakeKeyguardQuickAffordanceProviderClient(
-    slots: List<KeyguardQuickAffordanceProviderClient.Slot> =
+class FakeCustomizationProviderClient(
+    slots: List<CustomizationProviderClient.Slot> =
         listOf(
-            KeyguardQuickAffordanceProviderClient.Slot(
+            CustomizationProviderClient.Slot(
                 id = KeyguardQuickAffordanceSlots.SLOT_ID_BOTTOM_START,
                 capacity = 1,
             ),
-            KeyguardQuickAffordanceProviderClient.Slot(
+            CustomizationProviderClient.Slot(
                 id = KeyguardQuickAffordanceSlots.SLOT_ID_BOTTOM_END,
                 capacity = 1,
             ),
         ),
-    affordances: List<KeyguardQuickAffordanceProviderClient.Affordance> =
+    affordances: List<CustomizationProviderClient.Affordance> =
         listOf(
-            KeyguardQuickAffordanceProviderClient.Affordance(
+            CustomizationProviderClient.Affordance(
                 id = AFFORDANCE_1,
                 name = AFFORDANCE_1,
                 iconResourceId = 1,
             ),
-            KeyguardQuickAffordanceProviderClient.Affordance(
+            CustomizationProviderClient.Affordance(
                 id = AFFORDANCE_2,
                 name = AFFORDANCE_2,
                 iconResourceId = 2,
             ),
-            KeyguardQuickAffordanceProviderClient.Affordance(
+            CustomizationProviderClient.Affordance(
                 id = AFFORDANCE_3,
                 name = AFFORDANCE_3,
                 iconResourceId = 3,
             ),
         ),
-    flags: List<KeyguardQuickAffordanceProviderClient.Flag> =
+    flags: List<CustomizationProviderClient.Flag> =
         listOf(
-            KeyguardQuickAffordanceProviderClient.Flag(
+            CustomizationProviderClient.Flag(
                 name =
-                    KeyguardQuickAffordanceProviderContract.FlagsTable
+                    CustomizationProviderContract.FlagsTable
                         .FLAG_NAME_CUSTOM_LOCK_SCREEN_QUICK_AFFORDANCES_ENABLED,
                 value = true,
             )
         ),
-) : KeyguardQuickAffordanceProviderClient {
+) : CustomizationProviderClient {
 
     private val slots = MutableStateFlow(slots)
     private val affordances = MutableStateFlow(affordances)
@@ -85,37 +85,35 @@ class FakeKeyguardQuickAffordanceProviderClient(
         selections.value = selections.value.toMutableMap().apply { this[slotId] = affordances }
     }
 
-    override suspend fun querySlots(): List<KeyguardQuickAffordanceProviderClient.Slot> {
+    override suspend fun querySlots(): List<CustomizationProviderClient.Slot> {
         return slots.value
     }
 
-    override suspend fun queryFlags(): List<KeyguardQuickAffordanceProviderClient.Flag> {
+    override suspend fun queryFlags(): List<CustomizationProviderClient.Flag> {
         return flags.value
     }
 
-    override fun observeSlots(): Flow<List<KeyguardQuickAffordanceProviderClient.Slot>> {
+    override fun observeSlots(): Flow<List<CustomizationProviderClient.Slot>> {
         return slots.asStateFlow()
     }
 
-    override fun observeFlags(): Flow<List<KeyguardQuickAffordanceProviderClient.Flag>> {
+    override fun observeFlags(): Flow<List<CustomizationProviderClient.Flag>> {
         return flags.asStateFlow()
     }
 
-    override suspend fun queryAffordances():
-        List<KeyguardQuickAffordanceProviderClient.Affordance> {
+    override suspend fun queryAffordances(): List<CustomizationProviderClient.Affordance> {
         return affordances.value
     }
 
-    override fun observeAffordances():
-        Flow<List<KeyguardQuickAffordanceProviderClient.Affordance>> {
+    override fun observeAffordances(): Flow<List<CustomizationProviderClient.Affordance>> {
         return affordances.asStateFlow()
     }
 
-    override suspend fun querySelections(): List<KeyguardQuickAffordanceProviderClient.Selection> {
+    override suspend fun querySelections(): List<CustomizationProviderClient.Selection> {
         return toSelectionList(selections.value, affordances.value)
     }
 
-    override fun observeSelections(): Flow<List<KeyguardQuickAffordanceProviderClient.Selection>> {
+    override fun observeSelections(): Flow<List<CustomizationProviderClient.Selection>> {
         return combine(selections, affordances) { selections, affordances ->
             toSelectionList(selections, affordances)
         }
@@ -148,7 +146,7 @@ class FakeKeyguardQuickAffordanceProviderClient(
         flags.value =
             flags.value.toMutableList().apply {
                 removeIf { it.name == name }
-                add(KeyguardQuickAffordanceProviderClient.Flag(name = name, value = value))
+                add(CustomizationProviderClient.Flag(name = name, value = value))
             }
     }
 
@@ -157,29 +155,26 @@ class FakeKeyguardQuickAffordanceProviderClient(
             slots.value.toMutableList().apply {
                 val index = indexOfFirst { it.id == slotId }
                 check(index != -1) { "Slot with ID \"$slotId\" doesn't exist!" }
-                set(
-                    index,
-                    KeyguardQuickAffordanceProviderClient.Slot(id = slotId, capacity = capacity)
-                )
+                set(index, CustomizationProviderClient.Slot(id = slotId, capacity = capacity))
             }
     }
 
-    fun addAffordance(affordance: KeyguardQuickAffordanceProviderClient.Affordance): Int {
+    fun addAffordance(affordance: CustomizationProviderClient.Affordance): Int {
         affordances.value = affordances.value + listOf(affordance)
         return affordances.value.size - 1
     }
 
     private fun toSelectionList(
         selections: Map<String, List<String>>,
-        affordances: List<KeyguardQuickAffordanceProviderClient.Affordance>,
-    ): List<KeyguardQuickAffordanceProviderClient.Selection> {
+        affordances: List<CustomizationProviderClient.Affordance>,
+    ): List<CustomizationProviderClient.Selection> {
         return selections
             .map { (slotId, affordanceIds) ->
                 affordanceIds.map { affordanceId ->
                     val affordanceName =
                         affordances.find { it.id == affordanceId }?.name
                             ?: error("No affordance with ID of \"$affordanceId\"!")
-                    KeyguardQuickAffordanceProviderClient.Selection(
+                    CustomizationProviderClient.Selection(
                         slotId = slotId,
                         affordanceId = affordanceId,
                         affordanceName = affordanceName,

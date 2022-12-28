@@ -193,7 +193,7 @@
     <permission android:name="com.android.systemui.permission.FLAGS"
                 android:protectionLevel="signature" />
 
-    <permission android:name="android.permission.ACCESS_KEYGUARD_QUICK_AFFORDANCES"
+    <permission android:name="android.permission.CUSTOMIZE_SYSTEM_UI"
         android:protectionLevel="signature|privileged" />
 
     <!-- Adding Quick Settings tiles -->
@@ -1003,10 +1003,10 @@
         </receiver>
 
         <provider
-            android:authorities="com.android.systemui.keyguard.quickaffordance"
-            android:name="com.android.systemui.keyguard.KeyguardQuickAffordanceProvider"
+            android:authorities="com.android.systemui.customization"
+            android:name="com.android.systemui.keyguard.CustomizationProvider"
             android:exported="true"
-            android:permission="android.permission.ACCESS_KEYGUARD_QUICK_AFFORDANCES"
+            android:permission="android.permission.CUSTOMIZE_SYSTEM_UI"
             />
     </application>
 </manifest>

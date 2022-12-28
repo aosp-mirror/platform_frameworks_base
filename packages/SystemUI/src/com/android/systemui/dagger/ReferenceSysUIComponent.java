@@ -16,7 +16,7 @@
 
 package com.android.systemui.dagger;
 
-import com.android.systemui.keyguard.KeyguardQuickAffordanceProvider;
+import com.android.systemui.keyguard.CustomizationProvider;
 import com.android.systemui.statusbar.NotificationInsetsModule;
 import com.android.systemui.statusbar.QsFrameTranslateModule;
 
@@ -49,5 +49,5 @@ public interface ReferenceSysUIComponent extends SysUIComponent {
     /**
      * Member injection into the supplied argument.
      */
-    void inject(KeyguardQuickAffordanceProvider keyguardQuickAffordanceProvider);
+    void inject(CustomizationProvider customizationProvider);
 }
