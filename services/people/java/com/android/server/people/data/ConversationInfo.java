@@ -424,6 +424,7 @@ public class ConversationInfo {
                 case (int) ConversationInfoProto.CREATION_TIMESTAMP:
                     builder.setCreationTimestamp(protoInputStream.readLong(
                             ConversationInfoProto.CREATION_TIMESTAMP));
+                    break;
                 case (int) ConversationInfoProto.SHORTCUT_FLAGS:
                     builder.setShortcutFlags(protoInputStream.readInt(
                             ConversationInfoProto.SHORTCUT_FLAGS));

@@ -43,12 +43,12 @@ import com.android.wm.shell.desktopmode.DesktopModeStatus;
 
 /**
  * Defines visuals and behaviors of a window decoration of a caption bar and shadows. It works with
- * {@link CaptionWindowDecorViewModel}. The caption bar contains a handle, back button, and close
- * button.
+ * {@link DesktopModeWindowDecorViewModel}. The caption bar contains a handle, back button, and
+ * close button.
  *
  * The shadow's thickness is 20dp when the window is in focus and 5dp when the window isn't.
  */
-public class CaptionWindowDecoration extends WindowDecoration<WindowDecorLinearLayout> {
+public class DesktopModeWindowDecoration extends WindowDecoration<WindowDecorLinearLayout> {
     private final Handler mHandler;
     private final Choreographer mChoreographer;
     private final SyncTransactionQueue mSyncQueue;
@@ -69,7 +69,7 @@ public class CaptionWindowDecoration extends WindowDecoration<WindowDecorLinearL
 
     private AdditionalWindow mHandleMenu;
 
-    CaptionWindowDecoration(
+    DesktopModeWindowDecoration(
             Context context,
             DisplayController displayController,
             ShellTaskOrganizer taskOrganizer,
@@ -424,7 +424,7 @@ public class CaptionWindowDecoration extends WindowDecoration<WindowDecorLinearL
 
     static class Factory {
 
-        CaptionWindowDecoration create(
+        DesktopModeWindowDecoration create(
                 Context context,
                 DisplayController displayController,
                 ShellTaskOrganizer taskOrganizer,
@@ -433,7 +433,7 @@ public class CaptionWindowDecoration extends WindowDecoration<WindowDecorLinearL
                 Handler handler,
                 Choreographer choreographer,
                 SyncTransactionQueue syncQueue) {
-            return new CaptionWindowDecoration(
+            return new DesktopModeWindowDecoration(
                     context,
                     displayController,
                     taskOrganizer,
