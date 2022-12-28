@@ -1456,8 +1456,7 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
                 updatePictureInPictureMode(null, false);
             } else {
                 mLastReportedMultiWindowMode = inMultiWindowMode;
-                ensureActivityConfiguration(0 /* globalChanges */, PRESERVE_WINDOWS,
-                        false /* ignoreVisibility */);
+                ensureActivityConfiguration(0 /* globalChanges */, PRESERVE_WINDOWS);
             }
         }
     }
@@ -3988,6 +3987,7 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
     }
 
     void finishRelaunching() {
+        mLetterboxUiController.setRelauchingAfterRequestedOrientationChanged(false);
         mTaskSupervisor.getActivityMetricsLogger().notifyActivityRelaunched(this);
 
         if (mPendingRelaunchCount > 0) {
@@ -7745,13 +7745,17 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
     }
 
     void setRequestedOrientation(int requestedOrientation) {
+        if (mLetterboxUiController.shouldIgnoreRequestedOrientation(requestedOrientation)) {
+            return;
+        }
         setOrientation(requestedOrientation, this);
 
         // Push the new configuration to the requested app in case where it's not pushed, e.g. when
         // the request is handled at task level with letterbox.
         if (!getMergedOverrideConfiguration().equals(
                 mLastReportedConfiguration.getMergedConfiguration())) {
-            ensureActivityConfiguration(0 /* globalChanges */, false /* preserveWindow */);
+            ensureActivityConfiguration(0 /* globalChanges */, false /* preserveWindow */,
+                    false /* ignoreVisibility */, true /* isRequestedOrientationChanged */);
         }
 
         mAtmService.getTaskChangeNotificationController().notifyActivityRequestedOrientationChanged(
@@ -9052,7 +9056,13 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
 
     boolean ensureActivityConfiguration(int globalChanges, boolean preserveWindow) {
         return ensureActivityConfiguration(globalChanges, preserveWindow,
-                false /* ignoreVisibility */);
+                false /* ignoreVisibility */, false /* isRequestedOrientationChanged */);
+    }
+
+    boolean ensureActivityConfiguration(int globalChanges, boolean preserveWindow,
+            boolean ignoreVisibility) {
+        return ensureActivityConfiguration(globalChanges, preserveWindow, ignoreVisibility,
+                false /* isRequestedOrientationChanged */);
     }
 
     /**
@@ -9066,11 +9076,13 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
      *                         (stopped state). This is useful for the case where we know the
      *                         activity will be visible soon and we want to ensure its configuration
      *                         before we make it visible.
+     * @param isRequestedOrientationChanged whether this is triggered in response to an app calling
+     *                                      {@link android.app.Activity#setRequestedOrientation}.
      * @return False if the activity was relaunched and true if it wasn't relaunched because we
      *         can't or the app handles the specific configuration that is changing.
      */
     boolean ensureActivityConfiguration(int globalChanges, boolean preserveWindow,
-            boolean ignoreVisibility) {
+            boolean ignoreVisibility, boolean isRequestedOrientationChanged) {
         final Task rootTask = getRootTask();
         if (rootTask.mConfigWillChange) {
             ProtoLog.v(WM_DEBUG_CONFIGURATION, "Skipping config check "
@@ -9193,6 +9205,9 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
                         : RELAUNCH_REASON_WINDOWING_MODE_RESIZE;
             } else {
                 mRelaunchReason = RELAUNCH_REASON_NONE;
+            }
+            if (isRequestedOrientationChanged) {
+                mLetterboxUiController.setRelauchingAfterRequestedOrientationChanged(true);
             }
             if (mState == PAUSING) {
                 // A little annoying: we are waiting for this activity to finish pausing. Let's not
