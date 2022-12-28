@@ -29,7 +29,6 @@ import android.net.NetworkRequest
 import android.net.wifi.WifiInfo
 import android.net.wifi.WifiManager
 import android.net.wifi.WifiManager.TrafficStateCallback
-import android.util.Log
 import com.android.settingslib.Utils
 import com.android.systemui.broadcast.BroadcastDispatcher
 import com.android.systemui.common.coroutine.ConflatedCallbackFlow.conflatedCallbackFlow
@@ -40,11 +39,11 @@ import com.android.systemui.log.table.TableLogBuffer
 import com.android.systemui.log.table.logDiffsForTable
 import com.android.systemui.statusbar.pipeline.dagger.WifiTableLog
 import com.android.systemui.statusbar.pipeline.shared.ConnectivityPipelineLogger
-import com.android.systemui.statusbar.pipeline.shared.ConnectivityPipelineLogger.Companion.SB_LOGGING_TAG
 import com.android.systemui.statusbar.pipeline.shared.ConnectivityPipelineLogger.Companion.logInputChange
 import com.android.systemui.statusbar.pipeline.shared.data.model.DataActivityModel
 import com.android.systemui.statusbar.pipeline.shared.data.model.toWifiDataActivityModel
 import com.android.systemui.statusbar.pipeline.wifi.data.model.WifiNetworkModel
+import com.android.systemui.statusbar.pipeline.wifi.data.repository.RealWifiRepository
 import com.android.systemui.statusbar.pipeline.wifi.data.repository.WifiRepository
 import java.util.concurrent.Executor
 import javax.inject.Inject
@@ -53,12 +52,9 @@ import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.channels.awaitClose
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableSharedFlow
-import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.distinctUntilChanged
-import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.mapLatest
 import kotlinx.coroutines.flow.merge
 import kotlinx.coroutines.flow.stateIn
@@ -75,8 +71,8 @@ class WifiRepositoryImpl @Inject constructor(
     @WifiTableLog wifiTableLogBuffer: TableLogBuffer,
     @Main mainExecutor: Executor,
     @Application scope: CoroutineScope,
-    wifiManager: WifiManager?,
-) : WifiRepository {
+    wifiManager: WifiManager,
+) : RealWifiRepository {
 
     private val wifiStateChangeEvents: Flow<Unit> = broadcastDispatcher.broadcastFlow(
         IntentFilter(WifiManager.WIFI_STATE_CHANGED_ACTION)
@@ -86,28 +82,24 @@ class WifiRepositoryImpl @Inject constructor(
     private val wifiNetworkChangeEvents: MutableSharedFlow<Unit> =
         MutableSharedFlow(extraBufferCapacity = 1)
 
+    // Because [WifiManager] doesn't expose a wifi enabled change listener, we do it
+    // internally by fetching [WifiManager.isWifiEnabled] whenever we think the state may
+    // have changed.
     override val isWifiEnabled: StateFlow<Boolean> =
-        if (wifiManager == null) {
-            MutableStateFlow(false).asStateFlow()
-        } else {
-            // Because [WifiManager] doesn't expose a wifi enabled change listener, we do it
-            // internally by fetching [WifiManager.isWifiEnabled] whenever we think the state may
-            // have changed.
-            merge(wifiNetworkChangeEvents, wifiStateChangeEvents)
-                .mapLatest { wifiManager.isWifiEnabled }
-                .distinctUntilChanged()
-                .logDiffsForTable(
-                    wifiTableLogBuffer,
-                    columnPrefix = "",
-                    columnName = "isWifiEnabled",
-                    initialValue = wifiManager.isWifiEnabled,
-                )
-                .stateIn(
-                    scope = scope,
-                    started = SharingStarted.WhileSubscribed(),
-                    initialValue = wifiManager.isWifiEnabled
-                )
-        }
+        merge(wifiNetworkChangeEvents, wifiStateChangeEvents)
+            .mapLatest { wifiManager.isWifiEnabled }
+            .distinctUntilChanged()
+            .logDiffsForTable(
+                wifiTableLogBuffer,
+                columnPrefix = "",
+                columnName = "isWifiEnabled",
+                initialValue = wifiManager.isWifiEnabled,
+            )
+            .stateIn(
+                scope = scope,
+                started = SharingStarted.WhileSubscribed(),
+                initialValue = wifiManager.isWifiEnabled,
+            )
 
     override val isWifiDefault: StateFlow<Boolean> = conflatedCallbackFlow {
         // Note: This callback doesn't do any logging because we already log every network change
@@ -217,29 +209,24 @@ class WifiRepositoryImpl @Inject constructor(
         )
 
     override val wifiActivity: StateFlow<DataActivityModel> =
-            if (wifiManager == null) {
-                Log.w(SB_LOGGING_TAG, "Null WifiManager; skipping activity callback")
-                flowOf(ACTIVITY_DEFAULT)
-            } else {
-                conflatedCallbackFlow {
-                    val callback = TrafficStateCallback { state ->
-                        logger.logInputChange("onTrafficStateChange", prettyPrintActivity(state))
-                        trySend(state.toWifiDataActivityModel())
-                    }
-                    wifiManager.registerTrafficStateCallback(mainExecutor, callback)
-                    awaitClose { wifiManager.unregisterTrafficStateCallback(callback) }
+        conflatedCallbackFlow {
+                val callback = TrafficStateCallback { state ->
+                    logger.logInputChange("onTrafficStateChange", prettyPrintActivity(state))
+                    trySend(state.toWifiDataActivityModel())
                 }
+                wifiManager.registerTrafficStateCallback(mainExecutor, callback)
+                awaitClose { wifiManager.unregisterTrafficStateCallback(callback) }
             }
-                .logDiffsForTable(
-                    wifiTableLogBuffer,
-                    columnPrefix = ACTIVITY_PREFIX,
-                    initialValue = ACTIVITY_DEFAULT,
-                )
-                .stateIn(
-                    scope,
-                    started = SharingStarted.WhileSubscribed(),
-                    initialValue = ACTIVITY_DEFAULT
-                )
+            .logDiffsForTable(
+                wifiTableLogBuffer,
+                columnPrefix = ACTIVITY_PREFIX,
+                initialValue = ACTIVITY_DEFAULT,
+            )
+            .stateIn(
+                scope,
+                started = SharingStarted.WhileSubscribed(),
+                initialValue = ACTIVITY_DEFAULT,
+            )
 
     companion object {
         private const val ACTIVITY_PREFIX = "wifiActivity"
@@ -271,19 +258,19 @@ class WifiRepositoryImpl @Inject constructor(
             wifiInfo: WifiInfo,
             network: Network,
             networkCapabilities: NetworkCapabilities,
-            wifiManager: WifiManager?,
+            wifiManager: WifiManager,
         ): WifiNetworkModel {
             return if (wifiInfo.isCarrierMerged) {
                 WifiNetworkModel.CarrierMerged
             } else {
                 WifiNetworkModel.Active(
-                        network.getNetId(),
-                        isValidated = networkCapabilities.hasCapability(NET_CAPABILITY_VALIDATED),
-                        level = wifiManager?.calculateSignalLevel(wifiInfo.rssi),
-                        wifiInfo.ssid,
-                        wifiInfo.isPasspointAp,
-                        wifiInfo.isOsuAp,
-                        wifiInfo.passpointProviderFriendlyName
+                    network.getNetId(),
+                    isValidated = networkCapabilities.hasCapability(NET_CAPABILITY_VALIDATED),
+                    level = wifiManager.calculateSignalLevel(wifiInfo.rssi),
+                    wifiInfo.ssid,
+                    wifiInfo.isPasspointAp,
+                    wifiInfo.isOsuAp,
+                    wifiInfo.passpointProviderFriendlyName
                 )
             }
         }
@@ -307,5 +294,29 @@ class WifiRepositoryImpl @Inject constructor(
                 .build()
 
         private const val WIFI_NETWORK_CALLBACK_NAME = "wifiNetworkModel"
+    }
+
+    @SysUISingleton
+    class Factory
+    @Inject
+    constructor(
+        private val broadcastDispatcher: BroadcastDispatcher,
+        private val connectivityManager: ConnectivityManager,
+        private val logger: ConnectivityPipelineLogger,
+        @WifiTableLog private val wifiTableLogBuffer: TableLogBuffer,
+        @Main private val mainExecutor: Executor,
+        @Application private val scope: CoroutineScope,
+    ) {
+        fun create(wifiManager: WifiManager): WifiRepositoryImpl {
+            return WifiRepositoryImpl(
+                broadcastDispatcher,
+                connectivityManager,
+                logger,
+                wifiTableLogBuffer,
+                mainExecutor,
+                scope,
+                wifiManager,
+            )
+        }
     }
 }

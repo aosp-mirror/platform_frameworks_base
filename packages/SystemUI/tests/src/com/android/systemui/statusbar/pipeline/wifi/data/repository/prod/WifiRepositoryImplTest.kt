@@ -33,7 +33,6 @@ import com.android.systemui.log.table.TableLogBuffer
 import com.android.systemui.statusbar.pipeline.shared.ConnectivityPipelineLogger
 import com.android.systemui.statusbar.pipeline.shared.data.model.DataActivityModel
 import com.android.systemui.statusbar.pipeline.wifi.data.model.WifiNetworkModel
-import com.android.systemui.statusbar.pipeline.wifi.data.repository.prod.WifiRepositoryImpl.Companion.ACTIVITY_DEFAULT
 import com.android.systemui.statusbar.pipeline.wifi.data.repository.prod.WifiRepositoryImpl.Companion.WIFI_NETWORK_DEFAULT
 import com.android.systemui.util.concurrency.FakeExecutor
 import com.android.systemui.util.mockito.any
@@ -95,13 +94,6 @@ class WifiRepositoryImplTest : SysuiTestCase() {
     @After
     fun tearDown() {
         scope.cancel()
-    }
-
-    @Test
-    fun isWifiEnabled_nullWifiManager_getsFalse() = runBlocking(IMMEDIATE) {
-        underTest = createRepo(wifiManagerToUse = null)
-
-        assertThat(underTest.isWifiEnabled.value).isFalse()
     }
 
     @Test
@@ -721,21 +713,6 @@ class WifiRepositoryImplTest : SysuiTestCase() {
     }
 
     @Test
-    fun wifiActivity_nullWifiManager_receivesDefault() = runBlocking(IMMEDIATE) {
-        underTest = createRepo(wifiManagerToUse = null)
-
-        var latest: DataActivityModel? = null
-        val job = underTest
-                .wifiActivity
-                .onEach { latest = it }
-                .launchIn(this)
-
-        assertThat(latest).isEqualTo(ACTIVITY_DEFAULT)
-
-        job.cancel()
-    }
-
-    @Test
     fun wifiActivity_callbackGivesNone_activityFlowHasNone() = runBlocking(IMMEDIATE) {
         var latest: DataActivityModel? = null
         val job = underTest
@@ -801,7 +778,7 @@ class WifiRepositoryImplTest : SysuiTestCase() {
         job.cancel()
     }
 
-    private fun createRepo(wifiManagerToUse: WifiManager? = wifiManager): WifiRepositoryImpl {
+    private fun createRepo(): WifiRepositoryImpl {
         return WifiRepositoryImpl(
             broadcastDispatcher,
             connectivityManager,
@@ -809,7 +786,7 @@ class WifiRepositoryImplTest : SysuiTestCase() {
             tableLogger,
             executor,
             scope,
-            wifiManagerToUse,
+            wifiManager,
         )
     }
 
