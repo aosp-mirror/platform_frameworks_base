@@ -2773,13 +2773,6 @@ public abstract class Window {
     public abstract void onPictureInPictureModeChanged(boolean isInPictureInPictureMode);
 
     /**
-     * Called when the activity just relaunched.
-     * @hide
-     */
-    @SuppressWarnings("HiddenAbstractMethod")
-    public abstract void reportActivityRelaunched();
-
-    /**
      * @return The {@link WindowInsetsController} associated with this window
      * @see View#getWindowInsetsController()
      */
