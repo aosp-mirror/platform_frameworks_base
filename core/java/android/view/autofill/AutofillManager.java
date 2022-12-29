@@ -1088,6 +1088,42 @@ public final class AutofillManager {
     }
 
     /**
+     * Called when the virtual views are ready to the user for autofill.
+     *
+     * This method is used to notify autofill system the views are ready to the user. And then
+     * Autofill can do initialization if needed before the user starts to input. For example, do
+     * a pre-fill request for the
+     * <a href="/reference/android/service/autofill/Dataset.html#FillDialogUI">fill dialog</a>.
+     *
+     * @param view the host view that holds a virtual view hierarchy.
+     * @param infos extra information for the virtual views. The key is virtual id which represents
+     *             the virtual view in the host view.
+     *
+     * @throws IllegalArgumentException if the {@code infos} was empty
+     */
+    public void notifyVirtualViewsReady(
+            @NonNull View view, @NonNull SparseArray<VirtualViewFillInfo> infos) {
+        Objects.requireNonNull(infos);
+        if (infos.size() == 0) {
+            throw new IllegalArgumentException("No VirtualViewInfo found");
+        }
+        if (AutofillFeatureFlags.isFillDialogDisabledForCredentialManager()
+                && view.isCredential()) {
+            if (sDebug) {
+                Log.d(TAG, "Ignoring Fill Dialog request since important for credMan:"
+                        + view.getAutofillId().toString());
+            }
+            return;
+        }
+        for (int i = 0; i < infos.size(); i++) {
+            final VirtualViewFillInfo info = infos.valueAt(i);
+            final int virtualId = infos.indexOfKey(i);
+            notifyViewReadyInner(getAutofillId(view, virtualId),
+                    (info == null) ? null : info.getAutofillHints());
+        }
+    }
+
+    /**
      * The {@link AutofillFeatureFlags#DEVICE_CONFIG_AUTOFILL_DIALOG_ENABLED} is {@code true} or
      * the view have the allowed autofill hints, performs a fill request to know there is any field
      * supported fill dialog.
@@ -1098,15 +1134,19 @@ public final class AutofillManager {
         if (sDebug) {
             Log.d(TAG, "notifyViewEnteredForFillDialog:" + v.getAutofillId());
         }
-        if (!hasAutofillFeature()) {
-            return;
-        }
         if (AutofillFeatureFlags.isFillDialogDisabledForCredentialManager()
                 && v.isCredential()) {
             if (sDebug) {
                 Log.d(TAG, "Ignoring Fill Dialog request since important for credMan:"
                         + v.getAutofillId().toString());
             }
+            return;
+        }
+        notifyViewReadyInner(v.getAutofillId(), v.getAutofillHints());
+    }
+
+    private void notifyViewReadyInner(AutofillId id, String[] autofillHints) {
+        if (!hasAutofillFeature()) {
             return;
         }
 
@@ -1116,7 +1156,7 @@ public final class AutofillManager {
                 // different pages but in the same Activity. We need to reset the
                 // mIsFillRequested flag to allow asking for a new FillRequest when
                 // user switches to other page
-                mTrackedViews.checkViewState(v.getAutofillId());
+                mTrackedViews.checkViewState(id);
             }
         }
 
@@ -1126,9 +1166,9 @@ public final class AutofillManager {
         }
 
         if (mIsFillDialogEnabled
-                || ArrayUtils.containsAny(v.getAutofillHints(), mFillDialogEnabledHints)) {
+                || ArrayUtils.containsAny(autofillHints, mFillDialogEnabledHints)) {
             if (sDebug) {
-                Log.d(TAG, "Trigger fill request at view entered");
+                Log.d(TAG, "Trigger fill request when the view is ready.");
             }
 
             int flags = FLAG_SUPPORTS_FILL_DIALOG;
