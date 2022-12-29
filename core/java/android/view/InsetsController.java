@@ -552,7 +552,7 @@ public class InsetsController implements WindowInsetsController, InsetsAnimation
             this.useInsetsAnimationThread = useInsetsAnimationThread;
         }
 
-        final @InsetsType int types;
+        @InsetsType int types;
         final WindowInsetsAnimationControlListener listener;
         final long durationMs;
         final Interpolator interpolator;
@@ -1006,19 +1006,7 @@ public class InsetsController implements WindowInsetsController, InsetsAnimation
         }
         // Handle pending request ready in case there was one set.
         if (fromIme && mPendingImeControlRequest != null) {
-            PendingControlRequest pendingRequest = mPendingImeControlRequest;
-            mPendingImeControlRequest = null;
-            mHandler.removeCallbacks(mPendingControlTimeout);
-
-            // We are about to playing the default animation. Passing a null frame indicates the
-            // controlled types should be animated regardless of the frame.
-            controlAnimationUnchecked(
-                    pendingRequest.types, pendingRequest.cancellationSignal,
-                    pendingRequest.listener, null /* frame */,
-                    true /* fromIme */, pendingRequest.durationMs, pendingRequest.interpolator,
-                    pendingRequest.animationType,
-                    pendingRequest.layoutInsetsDuringAnimation,
-                    pendingRequest.useInsetsAnimationThread, statsToken);
+            handlePendingControlRequest(statsToken);
             return;
         }
 
@@ -1061,6 +1049,27 @@ public class InsetsController implements WindowInsetsController, InsetsAnimation
         applyAnimation(typesReady, true /* show */, fromIme, statsToken);
     }
 
+    /**
+     * Handle the {@link #mPendingImeControlRequest} when
+     * - The IME insets is ready to show.
+     * - The IME insets has being requested invisible.
+     */
+    private void handlePendingControlRequest(@Nullable ImeTracker.Token statsToken) {
+        PendingControlRequest pendingRequest = mPendingImeControlRequest;
+        mPendingImeControlRequest = null;
+        mHandler.removeCallbacks(mPendingControlTimeout);
+
+        // We are about to playing the default animation. Passing a null frame indicates the
+        // controlled types should be animated regardless of the frame.
+        controlAnimationUnchecked(
+                pendingRequest.types, pendingRequest.cancellationSignal,
+                pendingRequest.listener, null /* frame */,
+                true /* fromIme */, pendingRequest.durationMs, pendingRequest.interpolator,
+                pendingRequest.animationType,
+                pendingRequest.layoutInsetsDuringAnimation,
+                pendingRequest.useInsetsAnimationThread, statsToken);
+    }
+
     @Override
     public void hide(@InsetsType int types) {
         ImeTracker.Token statsToken = null;
@@ -1084,6 +1093,8 @@ public class InsetsController implements WindowInsetsController, InsetsAnimation
             Trace.asyncTraceBegin(TRACE_TAG_VIEW, "IC.hideRequestFromApi", 0);
         }
         int typesReady = 0;
+        boolean hasImeRequestedHidden = false;
+        final boolean hadPendingImeControlRequest = mPendingImeControlRequest != null;
         for (int type = FIRST; type <= LAST; type = type << 1) {
             if ((types & type) == 0) {
                 continue;
@@ -1091,6 +1102,22 @@ public class InsetsController implements WindowInsetsController, InsetsAnimation
             @AnimationType final int animationType = getAnimationType(type);
             final boolean requestedVisible = (type & mRequestedVisibleTypes) != 0;
             final boolean isImeAnimation = type == ime();
+            if (mPendingImeControlRequest != null && !requestedVisible) {
+                // Remove the hide insets type from the pending show request.
+                mPendingImeControlRequest.types &= ~type;
+                if (mPendingImeControlRequest.types == 0) {
+                    abortPendingImeControlRequest();
+                }
+            }
+            if (isImeAnimation && !requestedVisible && animationType == ANIMATION_TYPE_NONE) {
+                hasImeRequestedHidden = true;
+                // Ensure to request hide IME in case there is any pending requested visible
+                // being applied from setControl when receiving the insets control.
+                if (hadPendingImeControlRequest
+                        || getImeSourceConsumer().isRequestedVisibleAwaitingControl()) {
+                    getImeSourceConsumer().requestHide(fromIme, statsToken);
+                }
+            }
             if (!requestedVisible && animationType == ANIMATION_TYPE_NONE
                     || animationType == ANIMATION_TYPE_HIDE) {
                 // no-op: already hidden or animating out (because window visibility is
@@ -1105,6 +1132,12 @@ public class InsetsController implements WindowInsetsController, InsetsAnimation
                 ImeTracker.get().onProgress(statsToken, ImeTracker.PHASE_CLIENT_APPLY_ANIMATION);
             }
             typesReady |= type;
+        }
+        if (hasImeRequestedHidden && mPendingImeControlRequest != null) {
+            // Handle the pending show request for other insets types since the IME insets has being
+            // requested hidden.
+            handlePendingControlRequest(statsToken);
+            getImeSourceConsumer().removeSurface();
         }
         applyAnimation(typesReady, false /* show */, fromIme, statsToken);
     }
