@@ -31,6 +31,7 @@ import com.android.systemui.unfold.updates.hinge.FULLY_OPEN_DEGREES
 import com.android.systemui.unfold.updates.hinge.HingeAngleProvider
 import com.android.systemui.unfold.updates.screen.ScreenStatusProvider
 import com.android.systemui.unfold.util.CurrentActivityTypeProvider
+import com.android.systemui.unfold.util.UnfoldKeyguardVisibilityProvider
 import java.util.concurrent.Executor
 import javax.inject.Inject
 
@@ -42,6 +43,7 @@ constructor(
     private val screenStatusProvider: ScreenStatusProvider,
     private val foldProvider: FoldProvider,
     private val activityTypeProvider: CurrentActivityTypeProvider,
+    private val unfoldKeyguardVisibilityProvider: UnfoldKeyguardVisibilityProvider,
     private val rotationChangeProvider: RotationChangeProvider,
     @UnfoldMain private val mainExecutor: Executor,
     @UnfoldMain private val handler: Handler
@@ -152,12 +154,13 @@ constructor(
      */
     private fun getClosingThreshold(): Int? {
         val isHomeActivity = activityTypeProvider.isHomeActivity ?: return null
+        val isKeyguardVisible = unfoldKeyguardVisibilityProvider.isKeyguardVisible == true
 
         if (DEBUG) {
-            Log.d(TAG, "isHomeActivity=$isHomeActivity")
+            Log.d(TAG, "isHomeActivity=$isHomeActivity, isOnKeyguard=$isKeyguardVisible")
         }
 
-        return if (isHomeActivity) {
+        return if (isHomeActivity || isKeyguardVisible) {
             null
         } else {
             START_CLOSING_ON_APPS_THRESHOLD_DEGREES
@@ -257,7 +260,7 @@ fun @receiver:FoldUpdate Int.name() =
     }
 
 private const val TAG = "DeviceFoldProvider"
-private const val DEBUG = false
+private val DEBUG = Log.isLoggable(TAG, Log.DEBUG)
 
 /** Threshold after which we consider the device fully unfolded. */
 @VisibleForTesting const val FULLY_OPEN_THRESHOLD_DEGREES = 15f
