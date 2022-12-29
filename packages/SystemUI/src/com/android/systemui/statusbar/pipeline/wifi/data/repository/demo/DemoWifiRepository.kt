@@ -66,6 +66,7 @@ constructor(
     private fun processEvent(event: FakeWifiEventModel) =
         when (event) {
             is FakeWifiEventModel.Wifi -> processEnabledWifiState(event)
+            is FakeWifiEventModel.CarrierMerged -> processCarrierMergedWifiState(event)
             is FakeWifiEventModel.WifiDisabled -> processDisabledWifiState()
         }
 
@@ -85,6 +86,14 @@ constructor(
         _wifiNetwork.value = event.toWifiNetworkModel()
     }
 
+    private fun processCarrierMergedWifiState(event: FakeWifiEventModel.CarrierMerged) {
+        _isWifiEnabled.value = true
+        _isWifiDefault.value = true
+        // TODO(b/238425913): Support activity in demo mode.
+        _wifiActivity.value = DataActivityModel(hasActivityIn = false, hasActivityOut = false)
+        _wifiNetwork.value = event.toCarrierMergedModel()
+    }
+
     private fun FakeWifiEventModel.Wifi.toWifiNetworkModel(): WifiNetworkModel =
         WifiNetworkModel.Active(
             networkId = DEMO_NET_ID,
@@ -99,7 +108,13 @@ constructor(
             passpointProviderFriendlyName = null,
         )
 
-    // TODO(b/238425913): Add carrier merged support.
+    private fun FakeWifiEventModel.CarrierMerged.toCarrierMergedModel(): WifiNetworkModel =
+        WifiNetworkModel.CarrierMerged(
+            networkId = DEMO_NET_ID,
+            subscriptionId = subscriptionId,
+            level = level,
+            numberOfLevels = numberOfLevels,
+        )
 
     companion object {
         private const val DEMO_NET_ID = 1234

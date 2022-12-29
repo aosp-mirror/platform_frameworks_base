@@ -29,6 +29,8 @@ import com.android.systemui.statusbar.pipeline.mobile.data.model.MobileConnectio
 import com.android.systemui.statusbar.pipeline.mobile.data.model.NetworkNameModel
 import com.android.systemui.statusbar.pipeline.mobile.data.repository.demo.model.FakeNetworkEventModel
 import com.android.systemui.statusbar.pipeline.shared.data.model.toMobileDataActivityModel
+import com.android.systemui.statusbar.pipeline.wifi.data.repository.demo.DemoModeWifiDataSource
+import com.android.systemui.statusbar.pipeline.wifi.data.repository.demo.model.FakeWifiEventModel
 import com.android.systemui.util.mockito.mock
 import com.android.systemui.util.mockito.whenever
 import com.android.systemui.util.time.FakeSystemClock
@@ -63,10 +65,12 @@ internal class DemoMobileConnectionParameterizedTest(private val testCase: TestC
     private val testScope = TestScope(testDispatcher)
 
     private val fakeNetworkEventFlow = MutableStateFlow<FakeNetworkEventModel?>(null)
+    private val fakeWifiEventFlow = MutableStateFlow<FakeWifiEventModel?>(null)
 
     private lateinit var connectionsRepo: DemoMobileConnectionsRepository
     private lateinit var underTest: DemoMobileConnectionRepository
     private lateinit var mockDataSource: DemoModeMobileConnectionDataSource
+    private lateinit var mockWifiDataSource: DemoModeWifiDataSource
 
     @Before
     fun setUp() {
@@ -75,10 +79,15 @@ internal class DemoMobileConnectionParameterizedTest(private val testCase: TestC
             mock<DemoModeMobileConnectionDataSource>().also {
                 whenever(it.mobileEvents).thenReturn(fakeNetworkEventFlow)
             }
+        mockWifiDataSource =
+            mock<DemoModeWifiDataSource>().also {
+                whenever(it.wifiEvents).thenReturn(fakeWifiEventFlow)
+            }
 
         connectionsRepo =
             DemoMobileConnectionsRepository(
-                dataSource = mockDataSource,
+                mobileDataSource = mockDataSource,
+                wifiDataSource = mockWifiDataSource,
                 scope = testScope.backgroundScope,
                 context = context,
                 logFactory = logFactory,
