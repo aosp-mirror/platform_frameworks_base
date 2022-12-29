@@ -16,72 +16,68 @@
 
 package android.window;
 
-import android.annotation.IntDef;
+import android.annotation.FloatRange;
 import android.annotation.NonNull;
+import android.annotation.Nullable;
 import android.os.Parcel;
 import android.os.Parcelable;
-
-import java.lang.annotation.Retention;
-import java.lang.annotation.RetentionPolicy;
+import android.view.RemoteAnimationTarget;
 
 /**
- * Represents an event that is sent out by the system during back navigation gesture.
- * Holds information about the touch event, swipe direction and overall progress of the gesture
- * interaction.
+ * Object used to report back gesture progress. Holds information about a {@link BackEvent} plus
+ * any {@link RemoteAnimationTarget} the gesture manipulates.
  *
+ * @see BackEvent
  * @hide
  */
-public class BackEvent implements Parcelable {
-    /** Indicates that the edge swipe starts from the left edge of the screen */
-    public static final int EDGE_LEFT = 0;
-    /** Indicates that the edge swipe starts from the right edge of the screen */
-    public static final int EDGE_RIGHT = 1;
-
-    @IntDef({
-            EDGE_LEFT,
-            EDGE_RIGHT,
-    })
-    @Retention(RetentionPolicy.SOURCE)
-    public @interface SwipeEdge{}
-
+public final class BackMotionEvent implements Parcelable {
     private final float mTouchX;
     private final float mTouchY;
     private final float mProgress;
 
-    @SwipeEdge
+    @BackEvent.SwipeEdge
     private final int mSwipeEdge;
+    @Nullable
+    private final RemoteAnimationTarget mDepartingAnimationTarget;
 
     /**
-     * Creates a new {@link BackEvent} instance.
+     * Creates a new {@link BackMotionEvent} instance.
      *
      * @param touchX Absolute X location of the touch point of this event.
      * @param touchY Absolute Y location of the touch point of this event.
      * @param progress Value between 0 and 1 on how far along the back gesture is.
      * @param swipeEdge Indicates which edge the swipe starts from.
+     * @param departingAnimationTarget The remote animation target of the departing
+     *                                 application window.
      */
-    public BackEvent(float touchX, float touchY, float progress, @SwipeEdge int swipeEdge) {
+    public BackMotionEvent(float touchX, float touchY, float progress,
+            @BackEvent.SwipeEdge int swipeEdge,
+            @Nullable RemoteAnimationTarget departingAnimationTarget) {
         mTouchX = touchX;
         mTouchY = touchY;
         mProgress = progress;
         mSwipeEdge = swipeEdge;
+        mDepartingAnimationTarget = departingAnimationTarget;
     }
 
-    private BackEvent(@NonNull Parcel in) {
+    private BackMotionEvent(@NonNull Parcel in) {
         mTouchX = in.readFloat();
         mTouchY = in.readFloat();
         mProgress = in.readFloat();
         mSwipeEdge = in.readInt();
+        mDepartingAnimationTarget = in.readTypedObject(RemoteAnimationTarget.CREATOR);
     }
 
-    public static final Creator<BackEvent> CREATOR = new Creator<BackEvent>() {
+    @NonNull
+    public static final Creator<BackMotionEvent> CREATOR = new Creator<BackMotionEvent>() {
         @Override
-        public BackEvent createFromParcel(Parcel in) {
-            return new BackEvent(in);
+        public BackMotionEvent createFromParcel(Parcel in) {
+            return new BackMotionEvent(in);
         }
 
         @Override
-        public BackEvent[] newArray(int size) {
-            return new BackEvent[size];
+        public BackMotionEvent[] newArray(int size) {
+            return new BackMotionEvent[size];
         }
     };
 
@@ -96,11 +92,15 @@ public class BackEvent implements Parcelable {
         dest.writeFloat(mTouchY);
         dest.writeFloat(mProgress);
         dest.writeInt(mSwipeEdge);
+        dest.writeTypedObject(mDepartingAnimationTarget, flags);
     }
 
     /**
-     * Returns a value between 0 and 1 on how far along the back gesture is.
+     * Returns the progress of a {@link BackEvent}.
+     *
+     * @see BackEvent#getProgress()
      */
+    @FloatRange(from = 0, to = 1)
     public float getProgress() {
         return mProgress;
     }
@@ -122,17 +122,29 @@ public class BackEvent implements Parcelable {
     /**
      * Returns the screen edge that the swipe starts from.
      */
+    @BackEvent.SwipeEdge
     public int getSwipeEdge() {
         return mSwipeEdge;
     }
 
+    /**
+     * Returns the {@link RemoteAnimationTarget} of the top departing application window,
+     * or {@code null} if the top window should not be moved for the current type of back
+     * destination.
+     */
+    @Nullable
+    public RemoteAnimationTarget getDepartingAnimationTarget() {
+        return mDepartingAnimationTarget;
+    }
+
     @Override
     public String toString() {
-        return "BackEvent{"
+        return "BackMotionEvent{"
                 + "mTouchX=" + mTouchX
                 + ", mTouchY=" + mTouchY
                 + ", mProgress=" + mProgress
                 + ", mSwipeEdge" + mSwipeEdge
+                + ", mDepartingAnimationTarget" + mDepartingAnimationTarget
                 + "}";
     }
 }
