@@ -22,6 +22,7 @@ import android.annotation.UserIdInt;
 import android.app.PendingIntent;
 import android.content.Context;
 import android.content.Intent;
+import android.content.pm.Signature;
 import android.credentials.GetCredentialException;
 import android.credentials.GetCredentialOption;
 import android.credentials.GetCredentialResponse;
@@ -78,7 +79,8 @@ public final class ProviderGetSession extends ProviderSession<BeginGetCredential
     private Pair<String, Action> mUiAuthenticationAction = null;
 
     /** The complete request to be used in the second round. */
-    private final GetCredentialRequest mCompleteRequest;
+    private final android.credentials.GetCredentialRequest mCompleteRequest;
+    private final CallingAppInfo mCallingAppInfo;
 
     private GetCredentialException mProviderException;
 
@@ -89,36 +91,42 @@ public final class ProviderGetSession extends ProviderSession<BeginGetCredential
             CredentialProviderInfo providerInfo,
             GetRequestSession getRequestSession,
             RemoteCredentialService remoteCredentialService) {
-        GetCredentialRequest completeRequest =
-                createProviderRequest(providerInfo.getCapabilities(),
-                        getRequestSession.mClientRequest,
-                        getRequestSession.mClientCallingPackage);
-        if (completeRequest != null) {
-            // TODO: Update to using query data when ready
-            BeginGetCredentialRequest beginGetCredentialRequest =
-                    new BeginGetCredentialRequest.Builder(
-                            completeRequest.getCallingAppInfo())
-                            .setBeginGetCredentialOptions(
-                                    completeRequest.getGetCredentialOptions().stream().map(
-                                            option -> {
-                                                //TODO : Replace with option.getCandidateQueryData
-                                                // when ready
-                                                return new BeginGetCredentialOption(
-                                                    option.getType(),
-                                                        option.getCandidateQueryData());
-                                            }).collect(Collectors.toList()))
-                            .build();
+        android.credentials.GetCredentialRequest filteredRequest =
+                filterOptions(providerInfo.getCapabilities(),
+                        getRequestSession.mClientRequest);
+        if (filteredRequest != null) {
+            BeginGetCredentialRequest beginGetCredentialRequest = constructQueryPhaseRequest(
+                    filteredRequest, getRequestSession.mClientCallingPackage);
+
             return new ProviderGetSession(context, providerInfo, getRequestSession, userId,
-                    remoteCredentialService, beginGetCredentialRequest, completeRequest);
+                    remoteCredentialService, beginGetCredentialRequest, filteredRequest);
         }
         Log.i(TAG, "Unable to create provider session");
         return null;
     }
 
+    private static BeginGetCredentialRequest constructQueryPhaseRequest(
+            android.credentials.GetCredentialRequest filteredRequest,
+            String clientCallingPackage
+    ) {
+        return new BeginGetCredentialRequest.Builder(
+                new CallingAppInfo(clientCallingPackage,
+                        new ArraySet<Signature>()))
+                .setBeginGetCredentialOptions(
+                        filteredRequest.getGetCredentialOptions().stream().map(
+                                option -> {
+                                    return new BeginGetCredentialOption(
+                                            option.getType(),
+                                            option.getCandidateQueryData());
+                                }).collect(Collectors.toList()))
+                .build();
+    }
+
     @Nullable
-    private static GetCredentialRequest createProviderRequest(List<String> providerCapabilities,
-            android.credentials.GetCredentialRequest clientRequest,
-            String clientCallingPackage) {
+    private static android.credentials.GetCredentialRequest filterOptions(
+            List<String> providerCapabilities,
+            android.credentials.GetCredentialRequest clientRequest
+    ) {
         List<GetCredentialOption> filteredOptions = new ArrayList<>();
         for (GetCredentialOption option : clientRequest.getGetCredentialOptions()) {
             if (providerCapabilities.contains(option.getType())) {
@@ -131,10 +139,10 @@ public final class ProviderGetSession extends ProviderSession<BeginGetCredential
             }
         }
         if (!filteredOptions.isEmpty()) {
-            return new GetCredentialRequest.Builder(
-                    new CallingAppInfo(clientCallingPackage,
-                            new ArraySet<>())).setGetCredentialOptions(
-                    filteredOptions).build();
+            return new android.credentials.GetCredentialRequest
+                    .Builder(clientRequest.getData())
+                    .setGetCredentialOptions(
+                            filteredOptions).build();
         }
         Log.i(TAG, "In createProviderRequest - returning null");
         return null;
@@ -145,9 +153,10 @@ public final class ProviderGetSession extends ProviderSession<BeginGetCredential
             ProviderInternalCallback callbacks,
             int userId, RemoteCredentialService remoteCredentialService,
             BeginGetCredentialRequest beginGetRequest,
-            GetCredentialRequest completeGetRequest) {
+            android.credentials.GetCredentialRequest completeGetRequest) {
         super(context, info, beginGetRequest, callbacks, userId, remoteCredentialService);
         mCompleteRequest = completeGetRequest;
+        mCallingAppInfo = beginGetRequest.getCallingAppInfo();
         setStatus(Status.PENDING);
     }
 
@@ -303,7 +312,8 @@ public final class ProviderGetSession extends ProviderSession<BeginGetCredential
             if (credentialEntry.getPendingIntent() != null) {
                 credentialUiEntries.add(new Entry(CREDENTIAL_ENTRY_KEY, entryId,
                         credentialEntry.getSlice(), credentialEntry.getPendingIntent(),
-                        /*fillInIntent=*/setUpFillInIntent(credentialEntry.getPendingIntent())));
+                        setUpFillInIntent(credentialEntry.getPendingIntent(),
+                                credentialEntry.getType())));
             } else {
                 Log.i(TAG, "No pending intent. Should not happen.");
             }
@@ -311,12 +321,17 @@ public final class ProviderGetSession extends ProviderSession<BeginGetCredential
         return credentialUiEntries;
     }
 
-    private Intent setUpFillInIntent(PendingIntent pendingIntent) {
+    private Intent setUpFillInIntent(PendingIntent pendingIntent, String type) {
         Intent intent = pendingIntent.getIntent();
-        intent.putExtra(
-                CredentialProviderService
-                        .EXTRA_GET_CREDENTIAL_REQUEST,
-                mCompleteRequest);
+        for (GetCredentialOption option : mCompleteRequest.getGetCredentialOptions()) {
+            if (option.getType().equals(type)) {
+                intent.putExtra(
+                        CredentialProviderService
+                                .EXTRA_GET_CREDENTIAL_REQUEST,
+                        new GetCredentialRequest(mCallingAppInfo, option));
+                return intent;
+            }
+        }
         return intent;
     }
 
