@@ -33,4 +33,5 @@ message InsetsSourceConsumerProto {
     optional InsetsSourceControlProto source_control = 4;
     optional .android.graphics.RectProto pending_frame = 5;
     optional .android.graphics.RectProto pending_visible_frame = 6;
+    optional int32 animation_state = 7;
 }

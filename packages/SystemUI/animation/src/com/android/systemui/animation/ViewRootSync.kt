@@ -28,7 +28,7 @@ object ViewRootSync {
             return
         }
 
-        val syncGroup = SurfaceSyncGroup()
+        val syncGroup = SurfaceSyncGroup("SysUIAnimation")
         syncGroup.addSyncCompleteCallback(view.context.mainExecutor) { then() }
         syncGroup.addToSync(view.rootSurfaceControl)
         syncGroup.addToSync(otherView.rootSurfaceControl)

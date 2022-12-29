@@ -66,24 +66,6 @@ public class MediaManagerTest {
     }
 
     @Test
-    public void dispatchDeviceAdded_registerCallback_shouldDispatchCallback() {
-        mMediaManager.registerCallback(mCallback);
-
-        mMediaManager.dispatchDeviceAdded(mDevice);
-
-        verify(mCallback).onDeviceAdded(mDevice);
-    }
-
-    @Test
-    public void dispatchDeviceRemoved_registerCallback_shouldDispatchCallback() {
-        mMediaManager.registerCallback(mCallback);
-
-        mMediaManager.dispatchDeviceRemoved(mDevice);
-
-        verify(mCallback).onDeviceRemoved(mDevice);
-    }
-
-    @Test
     public void dispatchDeviceListAdded_registerCallback_shouldDispatchCallback() {
         mMediaManager.registerCallback(mCallback);
 
@@ -108,15 +90,6 @@ public class MediaManagerTest {
         mMediaManager.dispatchConnectedDeviceChanged(TEST_ID);
 
         verify(mCallback).onConnectedDeviceChanged(TEST_ID);
-    }
-
-    @Test
-    public void dispatchDataChanged_registerCallback_shouldDispatchCallback() {
-        mMediaManager.registerCallback(mCallback);
-
-        mMediaManager.dispatchDataChanged();
-
-        verify(mCallback).onDeviceAttributesChanged();
     }
 
     @Test

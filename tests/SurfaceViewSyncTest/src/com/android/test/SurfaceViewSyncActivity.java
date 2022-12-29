@@ -89,7 +89,7 @@ public class SurfaceViewSyncActivity extends Activity implements SurfaceHolder.C
         mLastExpanded = !mLastExpanded;
 
         if (mEnableSyncSwitch.isChecked()) {
-            mSyncGroup = new SurfaceSyncGroup();
+            mSyncGroup = new SurfaceSyncGroup(TAG);
             mSyncGroup.addToSync(container.getRootSurfaceControl());
         }
 

@@ -275,7 +275,15 @@ public class LeAudioProfile implements LocalBluetoothProfile {
     }
 
     public int getDrawableResource(BluetoothClass btClass) {
-        return R.drawable.ic_bt_le_audio;
+        switch (btClass.getDeviceClass()) {
+            case BluetoothClass.Device.AUDIO_VIDEO_UNCATEGORIZED:
+            case BluetoothClass.Device.AUDIO_VIDEO_WEARABLE_HEADSET:
+            case BluetoothClass.Device.AUDIO_VIDEO_MICROPHONE:
+            case BluetoothClass.Device.AUDIO_VIDEO_HEADPHONES:
+                return R.drawable.ic_bt_le_audio;
+            default:
+                return R.drawable.ic_bt_le_audio_speakers;
+        }
     }
 
     public int getAudioLocation(BluetoothDevice device) {

@@ -2761,6 +2761,7 @@ public class Activity extends ContextThemeWrapper
             getOnBackInvokedDispatcher().unregisterOnBackInvokedCallback(mDefaultBackCallback);
             mDefaultBackCallback = null;
         }
+
         if (mCallbacksController != null) {
             mCallbacksController.clearCallbacks();
         }
@@ -8338,6 +8339,7 @@ public class Activity extends ContextThemeWrapper
         attachBaseContext(context);
 
         mFragments.attachHost(null /*parent*/);
+        mActivityInfo = info;
 
         mWindow = new PhoneWindow(this, window, activityConfigCallback);
         mWindow.setWindowControllerCallback(mWindowControllerCallback);
@@ -8362,7 +8364,6 @@ public class Activity extends ContextThemeWrapper
         mIntent = intent;
         mReferrer = referrer;
         mComponent = intent.getComponent();
-        mActivityInfo = info;
         mTitle = title;
         mParent = parent;
         mEmbeddedID = id;

@@ -20,7 +20,10 @@ import android.content.Intent
 import android.os.UserHandle
 import android.provider.Settings
 import android.telephony.CellSignalStrengthCdma
+import android.telephony.NetworkRegistrationInfo
 import android.telephony.ServiceState
+import android.telephony.ServiceState.STATE_IN_SERVICE
+import android.telephony.ServiceState.STATE_OUT_OF_SERVICE
 import android.telephony.SignalStrength
 import android.telephony.SubscriptionInfo
 import android.telephony.TelephonyCallback
@@ -47,7 +50,6 @@ import android.telephony.TelephonyManager.EXTRA_SHOW_SPN
 import android.telephony.TelephonyManager.EXTRA_SPN
 import android.telephony.TelephonyManager.EXTRA_SUBSCRIPTION_ID
 import android.telephony.TelephonyManager.NETWORK_TYPE_LTE
-import android.telephony.TelephonyManager.NETWORK_TYPE_UNKNOWN
 import androidx.test.filters.SmallTest
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.log.table.TableLogBuffer
@@ -302,7 +304,6 @@ class MobileConnectionRepositoryTest : SysuiTestCase() {
             var latest: MobileConnectionModel? = null
             val job = underTest.connectionInfo.onEach { latest = it }.launchIn(this)
 
-            val type = NETWORK_TYPE_UNKNOWN
             val expected = UnknownNetworkType
 
             assertThat(latest?.resolvedNetworkType).isEqualTo(expected)
@@ -586,6 +587,56 @@ class MobileConnectionRepositoryTest : SysuiTestCase() {
             getTelephonyCallbackForType<ServiceStateListener>().onServiceStateChanged(serviceState)
 
             assertThat(latest).isEqualTo(shortName)
+
+            job.cancel()
+        }
+
+    @Test
+    fun `connection model - isInService - not iwlan`() =
+        runBlocking(IMMEDIATE) {
+            var latest: Boolean? = null
+            val job = underTest.connectionInfo.onEach { latest = it.isInService }.launchIn(this)
+
+            val serviceState = ServiceState()
+            serviceState.voiceRegState = STATE_IN_SERVICE
+            serviceState.dataRegState = STATE_IN_SERVICE
+
+            getTelephonyCallbackForType<ServiceStateListener>().onServiceStateChanged(serviceState)
+
+            assertThat(latest).isTrue()
+
+            serviceState.voiceRegState = STATE_OUT_OF_SERVICE
+            getTelephonyCallbackForType<ServiceStateListener>().onServiceStateChanged(serviceState)
+            assertThat(latest).isTrue()
+
+            serviceState.dataRegState = STATE_OUT_OF_SERVICE
+            getTelephonyCallbackForType<ServiceStateListener>().onServiceStateChanged(serviceState)
+            assertThat(latest).isFalse()
+
+            job.cancel()
+        }
+
+    @Test
+    fun `connection model - isInService - is iwlan - voice out of service - data in service`() =
+        runBlocking(IMMEDIATE) {
+            var latest: Boolean? = null
+            val job = underTest.connectionInfo.onEach { latest = it.isInService }.launchIn(this)
+
+            // Mock the service state here so we can make it specifically IWLAN
+            val serviceState: ServiceState = mock()
+            whenever(serviceState.state).thenReturn(STATE_OUT_OF_SERVICE)
+            whenever(serviceState.dataRegistrationState).thenReturn(STATE_IN_SERVICE)
+
+            // See [com.android.settingslib.Utils.isInService] for more info. This is one way to
+            // make the network look like IWLAN
+            val networkRegWlan: NetworkRegistrationInfo = mock()
+            whenever(serviceState.getNetworkRegistrationInfo(any(), any()))
+                .thenReturn(networkRegWlan)
+            whenever(networkRegWlan.registrationState)
+                .thenReturn(NetworkRegistrationInfo.REGISTRATION_STATE_HOME)
+
+            getTelephonyCallbackForType<ServiceStateListener>().onServiceStateChanged(serviceState)
+            assertThat(latest).isFalse()
 
             job.cancel()
         }

@@ -133,7 +133,6 @@ import android.widget.TextView.Drawables;
 import android.widget.TextView.OnEditorActionListener;
 import android.window.OnBackInvokedCallback;
 import android.window.OnBackInvokedDispatcher;
-import android.window.WindowOnBackInvokedDispatcher;
 
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.inputmethod.EditableInputConnection;
@@ -770,8 +769,7 @@ public class Editor {
         }
         ViewRootImpl viewRootImpl = getTextView().getViewRootImpl();
         if (viewRootImpl != null
-                && WindowOnBackInvokedDispatcher.isOnBackInvokedCallbackEnabled(
-                        viewRootImpl.mContext)) {
+                && viewRootImpl.getOnBackInvokedDispatcher().isOnBackInvokedCallbackEnabled()) {
             viewRootImpl.getOnBackInvokedDispatcher()
                     .unregisterOnBackInvokedCallback(mBackCallback);
             mBackCallbackRegistered = false;
@@ -784,8 +782,7 @@ public class Editor {
         }
         ViewRootImpl viewRootImpl = mTextView.getViewRootImpl();
         if (viewRootImpl != null
-                && WindowOnBackInvokedDispatcher.isOnBackInvokedCallbackEnabled(
-                        viewRootImpl.mContext)) {
+                && viewRootImpl.getOnBackInvokedDispatcher().isOnBackInvokedCallbackEnabled()) {
             viewRootImpl.getOnBackInvokedDispatcher().registerOnBackInvokedCallback(
                     OnBackInvokedDispatcher.PRIORITY_DEFAULT, mBackCallback);
             mBackCallbackRegistered = true;

@@ -1810,10 +1810,15 @@ public final class Bitmap implements Parcelable {
      * {@code ColorSpace}.</p>
      *
      * @throws IllegalArgumentException If the specified color space is {@code null}, not
-     *         {@link ColorSpace.Model#RGB RGB}, has a transfer function that is not an
-     *         {@link ColorSpace.Rgb.TransferParameters ICC parametric curve}, or whose
-     *         components min/max values reduce the numerical range compared to the
-     *         previously assigned color space.
+     *         {@link ColorSpace.Model#RGB RGB}, or whose components min/max values reduce
+     *         the numerical range compared to the previously assigned color space.
+     *         Prior to {@link android.os.Build.VERSION_CODES#UPSIDE_DOWN_CAKE},
+     *         <code>IllegalArgumentException</code> will also be thrown
+     *         if the specified color space has a transfer function that is not an
+     *         {@link ColorSpace.Rgb.TransferParameters ICC parametric curve}. Starting from
+     *         {@link android.os.Build.VERSION_CODES#UPSIDE_DOWN_CAKE}, the color spaces with non
+     *         ICC parametric curve transfer function are allowed.
+     *         E.g., {@link ColorSpace.Named#BT2020_HLG BT2020_HLG}.
      *
      * @throws IllegalArgumentException If the {@code Config} (returned by {@link #getConfig()})
      *         is {@link Config#ALPHA_8}.

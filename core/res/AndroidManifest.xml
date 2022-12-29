@@ -4650,7 +4650,8 @@
          <p>Apps need to target API {@link android.os.Build.VERSION_CODES#S} or above to be able to
          request this permission. Note that apps targeting lower API levels do not need this
          permission to use exact alarm APIs.
-         <p>Apps that hold this permission, always stay in the
+         <p>Apps that hold this permission and target API
+         {@link android.os.Build.VERSION_CODES#TIRAMISU} and below always stay in the
          {@link android.app.usage.UsageStatsManager#STANDBY_BUCKET_WORKING_SET WORKING_SET} or
          lower standby bucket.
          <p>If your app relies on exact alarms for core functionality, it can instead request
@@ -4676,7 +4677,7 @@
          <p> Apps need to target API {@link android.os.Build.VERSION_CODES#TIRAMISU} or above to be
          able to request this permission. Note that only one of {@code USE_EXACT_ALARM} or
          {@code SCHEDULE_EXACT_ALARM} should be requested on a device. If your app is already using
-         {@code SCHEDULE_EXACT_ALARM} on older SDKs but need {@code USE_EXACT_ALARM} on SDK 33 and
+         {@code SCHEDULE_EXACT_ALARM} on older SDKs but needs {@code USE_EXACT_ALARM} on SDK 33 and
          above, then {@code SCHEDULE_EXACT_ALARM} should be declared with a max-sdk attribute, like:
          <pre>
          &lt;uses-permission android:name="android.permission.SCHEDULE_EXACT_ALARM"

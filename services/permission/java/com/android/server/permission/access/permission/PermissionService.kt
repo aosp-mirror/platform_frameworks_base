@@ -137,6 +137,7 @@ class PermissionService(
         userManagerService = UserManagerService.getInstance()
 
         handlerThread = ServiceThread(LOG_TAG, Process.THREAD_PRIORITY_BACKGROUND, true)
+            .apply { start() }
         handler = Handler(handlerThread.looper)
         onPermissionsChangeListeners = OnPermissionsChangeListeners(FgThread.get().looper)
         onPermissionFlagsChangedListener = OnPermissionFlagsChangedListener()
@@ -578,7 +579,7 @@ class PermissionService(
             // more consistent with the pre-S-refactor behavior. This is also because we are now
             // actively trimming the per-UID objects when empty.
             val permissionFlags = with(policy) { getUidPermissionFlags(appId, userId) }
-                ?: return globalGids.clone()
+                ?: return globalGids.copyOf()
 
             val gids = GrowingIntArray.wrap(globalGids)
             permissionFlags.forEachIndexed { _, permissionName, flags ->
@@ -654,6 +655,11 @@ class PermissionService(
             )
         }
 
+        if (!userManagerInternal.exists(userId)) {
+            Log.w(LOG_TAG, "$methodName: Unknown user $userId")
+            return
+        }
+
         enforceCallingOrSelfCrossUserPermission(
             userId, enforceFullPermission = true, enforceShellRestriction = true, methodName
         )
@@ -663,11 +669,6 @@ class PermissionService(
             Manifest.permission.REVOKE_RUNTIME_PERMISSIONS
         }
         context.enforceCallingOrSelfPermission(enforcedPermissionName, methodName)
-
-        if (!userManagerInternal.exists(userId)) {
-            Log.w(LOG_TAG, "$methodName: Unknown user $userId")
-            return
-        }
 
         val packageState: PackageState?
         val permissionControllerPackageName = packageManagerInternal.getKnownPackageNames(
@@ -870,6 +871,11 @@ class PermissionService(
     }
 
     override fun getPermissionFlags(packageName: String, permissionName: String, userId: Int): Int {
+        if (!userManagerInternal.exists(userId)) {
+            Log.w(LOG_TAG, "getPermissionFlags: Unknown user $userId")
+            return 0
+        }
+
         enforceCallingOrSelfCrossUserPermission(
             userId, enforceFullPermission = true, enforceShellRestriction = false,
             "getPermissionFlags"
@@ -879,11 +885,6 @@ class PermissionService(
             Manifest.permission.REVOKE_RUNTIME_PERMISSIONS,
             Manifest.permission.GET_RUNTIME_PERMISSIONS
         )
-
-        if (!userManagerInternal.exists(userId)) {
-            Log.w(LOG_TAG, "getPermissionFlags: Unknown user $userId")
-            return 0
-        }
 
         val packageState = packageManagerLocal.withFilteredSnapshot()
             .use { it.getPackageState(packageName) }
@@ -910,15 +911,15 @@ class PermissionService(
         permissionName: String,
         userId: Int
     ): Boolean {
-        enforceCallingOrSelfCrossUserPermission(
-            userId, enforceFullPermission = true, enforceShellRestriction = false,
-            "isPermissionRevokedByPolicy"
-        )
-
         if (!userManagerInternal.exists(userId)) {
             Log.w(LOG_TAG, "isPermissionRevokedByPolicy: Unknown user $userId")
             return false
         }
+
+        enforceCallingOrSelfCrossUserPermission(
+            userId, enforceFullPermission = true, enforceShellRestriction = false,
+            "isPermissionRevokedByPolicy"
+        )
 
         val packageState = packageManagerLocal.withFilteredSnapshot(Binder.getCallingUid(), userId)
             .use { it.getPackageState(packageName) } ?: return false
@@ -954,15 +955,15 @@ class PermissionService(
         permissionName: String,
         userId: Int
     ): Boolean {
-        enforceCallingOrSelfCrossUserPermission(
-            userId, enforceFullPermission = true, enforceShellRestriction = false,
-            "shouldShowRequestPermissionRationale"
-        )
-
         if (!userManagerInternal.exists(userId)) {
             Log.w(LOG_TAG, "shouldShowRequestPermissionRationale: Unknown user $userId")
             return false
         }
+
+        enforceCallingOrSelfCrossUserPermission(
+            userId, enforceFullPermission = true, enforceShellRestriction = false,
+            "shouldShowRequestPermissionRationale"
+        )
 
         val callingUid = Binder.getCallingUid()
         val packageState = packageManagerLocal.withFilteredSnapshot(callingUid, userId)
@@ -1030,6 +1031,11 @@ class PermissionService(
             )
         }
 
+        if (!userManagerInternal.exists(userId)) {
+            Log.w(LOG_TAG, "updatePermissionFlags: Unknown user $userId")
+            return
+        }
+
         enforceCallingOrSelfCrossUserPermission(
             userId, enforceFullPermission = true, enforceShellRestriction = true,
             "updatePermissionFlags"
@@ -1060,11 +1066,6 @@ class PermissionService(
                     }
                 }
             }
-        }
-
-        if (!userManagerInternal.exists(userId)) {
-            Log.w(LOG_TAG, "updatePermissionFlags: Unknown user $userId")
-            return
         }
 
         // Using PackageManagerInternal instead of PackageManagerLocal for now due to need to access
@@ -1124,6 +1125,11 @@ class PermissionService(
             )
         }
 
+        if (!userManagerInternal.exists(userId)) {
+            Log.w(LOG_TAG, "updatePermissionFlagsForAllApps: Unknown user $userId")
+            return
+        }
+
         enforceCallingOrSelfCrossUserPermission(
             userId, enforceFullPermission = true, enforceShellRestriction = true,
             "updatePermissionFlagsForAllApps"
@@ -1132,11 +1138,6 @@ class PermissionService(
             "updatePermissionFlagsForAllApps", Manifest.permission.GRANT_RUNTIME_PERMISSIONS,
             Manifest.permission.REVOKE_RUNTIME_PERMISSIONS
         )
-
-        if (!userManagerInternal.exists(userId)) {
-            Log.w(LOG_TAG, "updatePermissionFlagsForAllApps: Unknown user $userId")
-            return
-        }
 
         val packageStates = packageManagerLocal.withUnfilteredSnapshot()
             .use { it.packageStates }
@@ -1229,15 +1230,15 @@ class PermissionService(
         Preconditions.checkFlagsArgument(allowlistedFlags, PERMISSION_ALLOWLIST_MASK)
         Preconditions.checkArgumentNonnegative(userId, "userId cannot be null")
 
-        enforceCallingOrSelfCrossUserPermission(
-            userId, enforceFullPermission = false, enforceShellRestriction = false,
-            "getAllowlistedRestrictedPermissions"
-        )
-
         if (!userManagerInternal.exists(userId)) {
             Log.w(LOG_TAG, "AllowlistedRestrictedPermission api: Unknown user $userId")
             return null
         }
+
+        enforceCallingOrSelfCrossUserPermission(
+            userId, enforceFullPermission = false, enforceShellRestriction = false,
+            "getAllowlistedRestrictedPermissions"
+        )
 
         val callingUid = Binder.getCallingUid()
         val packageState = packageManagerLocal.withFilteredSnapshot(callingUid, userId)
@@ -1517,11 +1518,11 @@ class PermissionService(
     }
 
     override fun resetRuntimePermissions(androidPackage: AndroidPackage, userId: Int) {
-        TODO("Not yet implemented")
+        // TODO("Not yet implemented")
     }
 
     override fun resetRuntimePermissionsForUser(userId: Int) {
-        TODO("Not yet implemented")
+        // TODO("Not yet implemented")
     }
 
     override fun addOnPermissionsChangeListener(listener: IOnPermissionsChangeListener) {
@@ -1657,33 +1658,36 @@ class PermissionService(
     override fun getPermissionTEMP(
         permissionName: String
     ): com.android.server.pm.permission.Permission? {
-        TODO("Not yet implemented")
+        // TODO("Not yet implemented")
+        return null
     }
 
     override fun getLegacyPermissions(): List<LegacyPermission> {
-        TODO("Not yet implemented")
+        // TODO("Not yet implemented")
+        return emptyList()
     }
 
     override fun readLegacyPermissionsTEMP(legacyPermissionSettings: LegacyPermissionSettings) {
         // Package settings has been read when this method is called.
         service.initialize()
-        TODO("Not yet implemented")
+        // TODO("Not yet implemented")
     }
 
     override fun writeLegacyPermissionsTEMP(legacyPermissionSettings: LegacyPermissionSettings) {
-        TODO("Not yet implemented")
+        // TODO("Not yet implemented")
     }
 
     override fun getLegacyPermissionState(appId: Int): LegacyPermissionState {
-        TODO("Not yet implemented")
+        // TODO("Not yet implemented")
+        return LegacyPermissionState()
     }
 
     override fun readLegacyPermissionStateTEMP() {
-        TODO("Not yet implemented")
+        // TODO("Not yet implemented")
     }
 
     override fun writeLegacyPermissionStateTEMP() {
-        TODO("Not yet implemented")
+        // TODO("Not yet implemented")
     }
 
     override fun onSystemReady() {

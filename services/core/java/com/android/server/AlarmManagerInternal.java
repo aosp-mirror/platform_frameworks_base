@@ -47,11 +47,11 @@ public interface AlarmManagerInternal {
     void remove(PendingIntent rec);
 
     /**
-     * Returns if the given package in the given user holds
-     * {@link android.Manifest.permission#SCHEDULE_EXACT_ALARM} or
-     * {@link android.Manifest.permission#USE_EXACT_ALARM}.
+     * Returns {@code true} if the given package in the given uid holds
+     * {@link android.Manifest.permission#USE_EXACT_ALARM} or
+     * {@link android.Manifest.permission#SCHEDULE_EXACT_ALARM} for apps targeting T or lower.
      */
-    boolean hasExactAlarmPermission(String packageName, int uid);
+    boolean shouldGetBucketElevation(String packageName, int uid);
 
     /**
      * Sets the device's current time zone and time zone confidence.

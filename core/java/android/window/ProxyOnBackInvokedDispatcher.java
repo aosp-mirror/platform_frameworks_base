@@ -18,6 +18,7 @@ package android.window;
 
 import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.content.Context;
 import android.util.Log;
 import android.util.Pair;
 import android.window.WindowOnBackInvokedDispatcher.Checker;
@@ -53,8 +54,8 @@ public class ProxyOnBackInvokedDispatcher implements OnBackInvokedDispatcher {
     private ImeOnBackInvokedDispatcher mImeDispatcher;
     private final Checker mChecker;
 
-    public ProxyOnBackInvokedDispatcher(boolean applicationCallBackEnabled) {
-        mChecker = new Checker(applicationCallBackEnabled);
+    public ProxyOnBackInvokedDispatcher(@NonNull Context context) {
+        mChecker = new Checker(context);
     }
 
     @Override

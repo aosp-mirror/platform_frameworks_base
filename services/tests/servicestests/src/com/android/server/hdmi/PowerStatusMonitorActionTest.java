@@ -106,7 +106,6 @@ public class PowerStatusMonitorActionTest {
                 new HdmiPortInfo(2, HdmiPortInfo.PORT_INPUT, 0x2000, true, false, false);
         mNativeWrapper.setPortInfo(hdmiPortInfo);
         mHdmiControlService.initService();
-        mHdmiControlService.enableAllFeatureFlags();
         mHdmiControlService.onBootPhase(PHASE_SYSTEM_SERVICES_READY);
         mPowerManager = new FakePowerManagerWrapper(mContextSpy);
         mHdmiControlService.setPowerManager(mPowerManager);

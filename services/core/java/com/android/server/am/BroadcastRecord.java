@@ -106,6 +106,10 @@ final class BroadcastRecord extends Binder {
     @UptimeMillisLong       long enqueueTime;        // when broadcast enqueued
     @ElapsedRealtimeLong    long enqueueRealTime;    // when broadcast enqueued
     @CurrentTimeMillisLong  long enqueueClockTime;   // when broadcast enqueued
+    // When broadcast is originally enqueued. Only used in case of replacing broadcasts
+    // with FLAG_RECEIVER_REPLACE_PENDING. If it is 0, then 'enqueueClockTime' is the original
+    // enqueue time.
+    @UptimeMillisLong       long originalEnqueueClockTime;
     @UptimeMillisLong       long dispatchTime;       // when broadcast dispatch started
     @ElapsedRealtimeLong    long dispatchRealTime;   // when broadcast dispatch started
     @CurrentTimeMillisLong  long dispatchClockTime;  // when broadcast dispatch started
@@ -252,7 +256,12 @@ final class BroadcastRecord extends Binder {
         pw.print(prefix); pw.print("enqueueClockTime=");
                 pw.print(sdf.format(new Date(enqueueClockTime)));
                 pw.print(" dispatchClockTime=");
-                pw.println(sdf.format(new Date(dispatchClockTime)));
+                pw.print(sdf.format(new Date(dispatchClockTime)));
+        if (originalEnqueueClockTime > 0) {
+            pw.print(" originalEnqueueClockTime=");
+            pw.print(sdf.format(new Date(originalEnqueueClockTime)));
+        }
+        pw.println();
         pw.print(prefix); pw.print("dispatchTime=");
                 TimeUtils.formatDuration(dispatchTime, now, pw);
                 pw.print(" (");
@@ -615,6 +624,13 @@ final class BroadcastRecord extends Binder {
         return delivery[index];
     }
 
+    void copyEnqueueTimeFrom(@NonNull BroadcastRecord replacedBroadcast) {
+        originalEnqueueClockTime = enqueueClockTime;
+        enqueueTime = replacedBroadcast.enqueueTime;
+        enqueueRealTime = replacedBroadcast.enqueueRealTime;
+        enqueueClockTime = replacedBroadcast.enqueueClockTime;
+    }
+
     boolean isForeground() {
         return (intent.getFlags() & Intent.FLAG_RECEIVER_FOREGROUND) != 0;
     }
@@ -639,8 +655,7 @@ final class BroadcastRecord extends Binder {
         // TODO: migrate alarm-prioritization flag to BroadcastConstants
         return (isForeground()
                 || interactive
-                || alarm)
-                && receivers.size() == 1;
+                || alarm);
     }
 
     @NonNull String getHostingRecordTriggerType() {

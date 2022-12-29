@@ -2704,9 +2704,11 @@ public class AlarmManagerService extends SystemService {
         }
 
         @Override
-        public boolean hasExactAlarmPermission(String packageName, int uid) {
-            return hasScheduleExactAlarmInternal(packageName, uid)
-                    || hasUseExactAlarmInternal(packageName, uid);
+        public boolean shouldGetBucketElevation(String packageName, int uid) {
+            return hasUseExactAlarmInternal(packageName, uid) || (!CompatChanges.isChangeEnabled(
+                    AlarmManager.SCHEDULE_EXACT_ALARM_DOES_NOT_ELEVATE_BUCKET, packageName,
+                    UserHandle.getUserHandleForUid(uid)) && hasScheduleExactAlarmInternal(
+                    packageName, uid));
         }
 
         @Override

@@ -295,7 +295,7 @@ public class AppStandbyControllerTests {
         }
 
         @Override
-        boolean hasExactAlarmPermission(String packageName, int uid) {
+        boolean shouldGetExactAlarmBucketElevation(String packageName, int uid) {
             return mClockApps.contains(Pair.create(packageName, uid));
         }
 

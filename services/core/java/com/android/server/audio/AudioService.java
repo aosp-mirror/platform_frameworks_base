@@ -146,6 +146,7 @@ import android.os.HwBinder;
 import android.os.IBinder;
 import android.os.Looper;
 import android.os.Message;
+import android.os.PermissionEnforcer;
 import android.os.PersistableBundle;
 import android.os.PowerManager;
 import android.os.Process;
@@ -249,6 +250,7 @@ public class AudioService extends IAudioService.Stub
     private final AudioSystemAdapter mAudioSystem;
     private final SystemServerAdapter mSystemServer;
     private final SettingsAdapter mSettings;
+    private final AudioPolicyFacade mAudioPolicy;
 
     /** Debug audio mode */
     protected static final boolean DEBUG_MODE = false;
@@ -923,7 +925,13 @@ public class AudioService extends IAudioService.Stub
 
         public Lifecycle(Context context) {
             super(context);
-            mService = new AudioService(context);
+            mService = new AudioService(context,
+                              AudioSystemAdapter.getDefaultAdapter(),
+                              SystemServerAdapter.getDefaultAdapter(context),
+                              SettingsAdapter.getDefaultAdapter(),
+                              new DefaultAudioPolicyFacade(),
+                              null);
+
         }
 
         @Override
@@ -976,14 +984,6 @@ public class AudioService extends IAudioService.Stub
     // Construction
     ///////////////////////////////////////////////////////////////////////////
 
-    /** @hide */
-    public AudioService(Context context) {
-        this(context,
-                AudioSystemAdapter.getDefaultAdapter(),
-                SystemServerAdapter.getDefaultAdapter(context),
-                SettingsAdapter.getDefaultAdapter(),
-                null);
-    }
 
     /**
      * @param context
@@ -994,9 +994,11 @@ public class AudioService extends IAudioService.Stub
      *               {@link AudioSystemThread} is created as the messaging thread instead.
      */
     public AudioService(Context context, AudioSystemAdapter audioSystem,
-            SystemServerAdapter systemServer, SettingsAdapter settings, @Nullable Looper looper) {
-        this (context, audioSystem, systemServer, settings, looper,
-                context.getSystemService(AppOpsManager.class));
+            SystemServerAdapter systemServer, SettingsAdapter settings,
+            AudioPolicyFacade audioPolicy, @Nullable Looper looper) {
+        this (context, audioSystem, systemServer, settings, audioPolicy, looper,
+                context.getSystemService(AppOpsManager.class),
+                PermissionEnforcer.fromContext(context));
     }
 
     /**
@@ -1009,8 +1011,10 @@ public class AudioService extends IAudioService.Stub
      */
     @RequiresPermission(Manifest.permission.READ_DEVICE_CONFIG)
     public AudioService(Context context, AudioSystemAdapter audioSystem,
-            SystemServerAdapter systemServer, SettingsAdapter settings, @Nullable Looper looper,
-            AppOpsManager appOps) {
+            SystemServerAdapter systemServer, SettingsAdapter settings,
+            AudioPolicyFacade audioPolicy, @Nullable Looper looper, AppOpsManager appOps,
+            @NonNull PermissionEnforcer enforcer) {
+        super(enforcer);
         sLifecycleLogger.enqueue(new EventLogger.StringEvent("AudioService()"));
         mContext = context;
         mContentResolver = context.getContentResolver();
@@ -1019,7 +1023,7 @@ public class AudioService extends IAudioService.Stub
         mAudioSystem = audioSystem;
         mSystemServer = systemServer;
         mSettings = settings;
-
+        mAudioPolicy = audioPolicy;
         mPlatformType = AudioSystem.getPlatformType(context);
 
         mIsSingleVolume = AudioSystem.isSingleVolume(context);
@@ -3954,6 +3958,20 @@ public class AudioService extends IAudioService.Stub
 
         return AudioSystem.isUltrasoundSupported();
     }
+
+    /** @see AudioManager#isHotwordStreamSupported() */
+    @android.annotation.EnforcePermission(android.Manifest.permission.CAPTURE_AUDIO_HOTWORD)
+    public boolean isHotwordStreamSupported(boolean lookbackAudio) {
+        super.isHotwordStreamSupported_enforcePermission();
+        try {
+            return mAudioPolicy.isHotwordStreamSupported(lookbackAudio);
+        } catch (IllegalStateException e) {
+            // Suppress connection failure to APM, since the method is purely informative
+            Log.e(TAG, "Suppressing exception calling into AudioPolicy", e);
+            return false;
+        }
+    }
+
 
     private boolean canChangeAccessibilityVolume() {
         synchronized (mAccessibilityServiceUidsLock) {
