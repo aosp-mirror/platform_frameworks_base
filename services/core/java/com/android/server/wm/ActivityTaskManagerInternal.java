@@ -437,8 +437,6 @@ public abstract class ActivityTaskManagerInternal {
             boolean allowInstrumenting, boolean fromHomeKey);
     /** Start home activities on all displays that support system decorations. */
     public abstract boolean startHomeOnAllDisplays(int userId, String reason);
-    /** @return true if the given process is the factory test process. */
-    public abstract boolean isFactoryTestProcess(WindowProcessController wpc);
     public abstract void updateTopComponentForFactoryTest();
     public abstract void handleAppDied(WindowProcessController wpc, boolean restarting,
             Runnable finishInstrumentationCallback);

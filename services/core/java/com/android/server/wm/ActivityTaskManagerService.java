@@ -41,7 +41,6 @@ import static android.app.sdksandbox.SdkSandboxManager.ACTION_START_SANDBOXED_AC
 import static android.content.Intent.FLAG_ACTIVITY_EXCLUDE_FROM_RECENTS;
 import static android.content.Intent.FLAG_ACTIVITY_NEW_TASK;
 import static android.content.pm.ActivityInfo.RESIZE_MODE_UNRESIZEABLE;
-import static android.content.pm.ApplicationInfo.FLAG_FACTORY_TEST;
 import static android.content.pm.ConfigurationInfo.GL_ES_VERSION_UNDEFINED;
 import static android.content.pm.PackageManager.FEATURE_ACTIVITIES_ON_SECONDARY_DISPLAYS;
 import static android.content.pm.PackageManager.FEATURE_CANT_SAVE_STATE;
@@ -50,9 +49,7 @@ import static android.content.pm.PackageManager.FEATURE_FREEFORM_WINDOW_MANAGEME
 import static android.content.pm.PackageManager.FEATURE_LEANBACK;
 import static android.content.pm.PackageManager.FEATURE_PICTURE_IN_PICTURE;
 import static android.content.pm.PackageManager.PERMISSION_GRANTED;
-import static android.os.FactoryTest.FACTORY_TEST_HIGH_LEVEL;
 import static android.os.FactoryTest.FACTORY_TEST_LOW_LEVEL;
-import static android.os.FactoryTest.FACTORY_TEST_OFF;
 import static android.os.InputConstants.DEFAULT_DISPATCHING_TIMEOUT_MILLIS;
 import static android.os.Process.FIRST_APPLICATION_UID;
 import static android.os.Process.SYSTEM_UID;
@@ -6085,22 +6082,6 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
         public boolean startHomeOnAllDisplays(int userId, String reason) {
             synchronized (mGlobalLock) {
                 return mRootWindowContainer.startHomeOnAllDisplays(userId, reason);
-            }
-        }
-
-        @HotPath(caller = HotPath.PROCESS_CHANGE)
-        @Override
-        public boolean isFactoryTestProcess(WindowProcessController wpc) {
-            synchronized (mGlobalLockWithoutBoost) {
-                if (mFactoryTest == FACTORY_TEST_OFF) {
-                    return false;
-                }
-                if (mFactoryTest == FACTORY_TEST_LOW_LEVEL && mTopComponent != null
-                        && wpc.mName.equals(mTopComponent.getPackageName())) {
-                    return true;
-                }
-                return mFactoryTest == FACTORY_TEST_HIGH_LEVEL
-                        && (wpc.mInfo.flags & FLAG_FACTORY_TEST) != 0;
             }
         }
 
