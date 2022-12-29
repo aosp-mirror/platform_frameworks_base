@@ -18,7 +18,7 @@ package com.android.systemui.compose
 
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
-import com.android.systemui.compose.theme.SystemUITheme
+import com.android.compose.theme.PlatformTheme
 import com.android.systemui.people.ui.compose.PeopleScreen
 import com.android.systemui.people.ui.viewmodel.PeopleViewModel
 
@@ -31,6 +31,6 @@ object ComposeFacade : BaseComposeFacade {
         viewModel: PeopleViewModel,
         onResult: (PeopleViewModel.Result) -> Unit,
     ) {
-        activity.setContent { SystemUITheme { PeopleScreen(viewModel, onResult) } }
+        activity.setContent { PlatformTheme { PeopleScreen(viewModel, onResult) } }
     }
 }

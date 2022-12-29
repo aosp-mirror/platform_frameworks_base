@@ -51,6 +51,16 @@ data class MobileConnectionModel(
      */
     val operatorAlphaShort: String? = null,
 
+    /**
+     * TODO (b/263167683): Clarify this field
+     *
+     * This check comes from [com.android.settingslib.Utils.isInService]. It is intended to be a
+     * mapping from a ServiceState to a notion of connectivity. Notably, it will consider a
+     * connection to be in-service if either the voice registration state is IN_SERVICE or the data
+     * registration state is IN_SERVICE and NOT IWLAN.
+     */
+    val isInService: Boolean = false,
+
     /** Fields below from [SignalStrengthsListener.onSignalStrengthsChanged] */
     val isGsm: Boolean = false,
     @IntRange(from = 0, to = 4)
@@ -99,6 +109,10 @@ data class MobileConnectionModel(
             row.logChange(COL_OPERATOR, operatorAlphaShort)
         }
 
+        if (prevVal.isInService != isInService) {
+            row.logChange(COL_IS_IN_SERVICE, isInService)
+        }
+
         if (prevVal.isGsm != isGsm) {
             row.logChange(COL_IS_GSM, isGsm)
         }
@@ -129,6 +143,7 @@ data class MobileConnectionModel(
         row.logChange(COL_EMERGENCY, isEmergencyOnly)
         row.logChange(COL_ROAMING, isRoaming)
         row.logChange(COL_OPERATOR, operatorAlphaShort)
+        row.logChange(COL_IS_IN_SERVICE, isInService)
         row.logChange(COL_IS_GSM, isGsm)
         row.logChange(COL_CDMA_LEVEL, cdmaLevel)
         row.logChange(COL_PRIMARY_LEVEL, primaryLevel)
@@ -141,6 +156,7 @@ data class MobileConnectionModel(
         const val COL_EMERGENCY = "EmergencyOnly"
         const val COL_ROAMING = "Roaming"
         const val COL_OPERATOR = "OperatorName"
+        const val COL_IS_IN_SERVICE = "IsInService"
         const val COL_IS_GSM = "IsGsm"
         const val COL_CDMA_LEVEL = "CdmaLevel"
         const val COL_PRIMARY_LEVEL = "PrimaryLevel"

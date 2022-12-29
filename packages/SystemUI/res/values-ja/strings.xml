@@ -85,6 +85,7 @@
     <string name="screenshot_share_description" msgid="2861628935812656612">"スクリーンショットを共有"</string>
     <string name="screenshot_scroll_label" msgid="2930198809899329367">"キャプチャ範囲を拡大"</string>
     <string name="screenshot_dismiss_description" msgid="4702341245899508786">"スクリーンショットを閉じます"</string>
+    <string name="screenshot_dismiss_work_profile" msgid="3101530842987697045">"仕事用プロファイルのメッセージを閉じます"</string>
     <string name="screenshot_preview_description" msgid="7606510140714080474">"スクリーンショットのプレビュー"</string>
     <string name="screenshot_top_boundary_pct" msgid="2520148599096479332">"上部の境界線 <xliff:g id="PERCENT">%1$d</xliff:g> パーセント"</string>
     <string name="screenshot_bottom_boundary_pct" msgid="3880821519814946478">"下部の境界線 <xliff:g id="PERCENT">%1$d</xliff:g> パーセント"</string>
@@ -731,8 +732,7 @@
     <string name="wifi_is_off" msgid="5389597396308001471">"Wi-Fi は OFF です"</string>
     <string name="bt_is_off" msgid="7436344904889461591">"Bluetooth は OFF です"</string>
     <string name="dnd_is_off" msgid="3185706903793094463">"サイレント モードは OFF です"</string>
-    <!-- no translation found for dnd_is_on (7009368176361546279) -->
-    <skip />
+    <string name="dnd_is_on" msgid="7009368176361546279">"サイレント モード ON"</string>
     <string name="qs_dnd_prompt_auto_rule" msgid="3535469468310002616">"サイレント モードが自動ルール（<xliff:g id="ID_1">%s</xliff:g>）によって ON になりました。"</string>
     <string name="qs_dnd_prompt_app" msgid="4027984447935396820">"サイレント モードがアプリ（<xliff:g id="ID_1">%s</xliff:g>）によって ON になりました。"</string>
     <string name="qs_dnd_prompt_auto_rule_app" msgid="1841469944118486580">"サイレント モードが自動ルールまたはアプリによって ON になりました。"</string>
@@ -875,6 +875,7 @@
     <string name="media_output_dialog_accessibility_title" msgid="4681741064190167888">"音声出力ができるデバイスです。"</string>
     <string name="media_output_dialog_accessibility_seekbar" msgid="5332843993805568978">"音量"</string>
     <string name="media_output_dialog_volume_percentage" msgid="1613984910585111798">"<xliff:g id="PERCENTAGE">%1$d</xliff:g>%%"</string>
+    <string name="media_output_group_title_speakers_and_displays" msgid="7169712332365659820">"スピーカーとディスプレイ"</string>
     <string name="media_output_first_broadcast_title" msgid="6292237789860753022">"ブロードキャストの仕組み"</string>
     <string name="media_output_broadcast" msgid="3555580945878071543">"ブロードキャスト"</string>
     <string name="media_output_first_notify_broadcast_message" msgid="6353857724136398494">"Bluetooth 対応デバイスを持っている付近のユーザーは、あなたがブロードキャストしているメディアを聴けます"</string>

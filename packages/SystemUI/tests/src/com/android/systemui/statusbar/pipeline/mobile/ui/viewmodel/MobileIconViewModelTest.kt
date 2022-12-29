@@ -98,6 +98,30 @@ class MobileIconViewModelTest : SysuiTestCase() {
         }
 
     @Test
+    fun `icon - uses empty state - when not in service`() =
+        testScope.runTest {
+            var latest: Int? = null
+            val job = underTest.iconId.onEach { latest = it }.launchIn(this)
+
+            interactor.isInService.value = false
+
+            var expected = emptySignal()
+
+            assertThat(latest).isEqualTo(expected)
+
+            // Changing the level doesn't overwrite the disabled state
+            interactor.level.value = 2
+            assertThat(latest).isEqualTo(expected)
+
+            // Once back in service, the regular icon appears
+            interactor.isInService.value = true
+            expected = defaultSignal(level = 2)
+            assertThat(latest).isEqualTo(expected)
+
+            job.cancel()
+        }
+
+    @Test
     fun networkType_dataEnabled_groupIsRepresented() =
         testScope.runTest {
             val expected =
@@ -375,5 +399,7 @@ class MobileIconViewModelTest : SysuiTestCase() {
         ): Int {
             return SignalDrawable.getState(level, /* numLevels */ 4, !connected)
         }
+
+        fun emptySignal(): Int = SignalDrawable.getEmptyState(4)
     }
 }

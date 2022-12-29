@@ -29,6 +29,8 @@ class FakeMobileIconInteractor(
 ) : MobileIconInteractor {
     override val alwaysShowDataRatIcon = MutableStateFlow(false)
 
+    override val alwaysUseCdmaLevel = MutableStateFlow(false)
+
     override val activity =
         MutableStateFlow(
             DataActivityModel(
@@ -51,6 +53,8 @@ class FakeMobileIconInteractor(
     override val isDefaultConnectionFailed = _isFailedConnection
 
     override val isDataConnected = MutableStateFlow(true)
+
+    override val isInService = MutableStateFlow(true)
 
     private val _isDataEnabled = MutableStateFlow(true)
     override val isDataEnabled = _isDataEnabled
