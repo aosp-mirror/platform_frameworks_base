@@ -195,6 +195,15 @@ public class ParsedActivityUtils {
                             sa.getFloat(R.styleable.AndroidManifestActivity_minAspectRatio,
                                     0 /*default*/));
                 }
+
+                if (sa.hasValue(R.styleable.AndroidManifestActivity_enableOnBackInvokedCallback)) {
+                    boolean enable = sa.getBoolean(
+                            R.styleable.AndroidManifestActivity_enableOnBackInvokedCallback,
+                            false);
+                    activity.setPrivateFlags(activity.getPrivateFlags()
+                            | (enable ? ActivityInfo.PRIVATE_FLAG_ENABLE_ON_BACK_INVOKED_CALLBACK
+                                    : ActivityInfo.PRIVATE_FLAG_DISABLE_ON_BACK_INVOKED_CALLBACK));
+                }
             } else {
                 activity.setLaunchMode(ActivityInfo.LAUNCH_MULTIPLE)
                         .setConfigChanges(0)

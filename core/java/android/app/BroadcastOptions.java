@@ -268,7 +268,11 @@ public class BroadcastOptions extends ComponentOptions {
         return opts;
     }
 
-    /** {@hide} */
+    /**
+     * {@hide}
+     * @deprecated use {@link #setDeliveryGroupMatchingFilter(IntentFilter)} instead.
+     */
+    @Deprecated
     public static @NonNull BroadcastOptions makeRemovingMatchingFilter(
             @NonNull IntentFilter removeMatchingFilter) {
         BroadcastOptions opts = new BroadcastOptions();
@@ -703,7 +707,9 @@ public class BroadcastOptions extends ComponentOptions {
      * to remove any pending {@link Intent#ACTION_SCREEN_OFF} broadcasts.
      *
      * @hide
+     * @deprecated use {@link #setDeliveryGroupMatchingFilter(IntentFilter)} instead.
      */
+    @Deprecated
     public void setRemoveMatchingFilter(@NonNull IntentFilter removeMatchingFilter) {
         mRemoveMatchingFilter = Objects.requireNonNull(removeMatchingFilter);
     }

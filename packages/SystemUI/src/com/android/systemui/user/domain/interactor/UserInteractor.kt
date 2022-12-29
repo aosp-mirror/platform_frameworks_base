@@ -455,6 +455,7 @@ constructor(
             }
             UserActionModel.ADD_SUPERVISED_USER -> {
                 uiEventLogger.log(MultiUserActionsEvent.CREATE_RESTRICTED_USER_FROM_USER_SWITCHER)
+                dismissDialog()
                 activityStarter.startActivity(
                     Intent()
                         .setAction(UserManager.ACTION_CREATE_SUPERVISED_USER)

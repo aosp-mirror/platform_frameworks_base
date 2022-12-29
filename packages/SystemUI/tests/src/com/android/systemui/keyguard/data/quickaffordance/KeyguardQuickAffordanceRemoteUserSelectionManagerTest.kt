@@ -22,8 +22,8 @@ import android.os.UserHandle
 import androidx.test.filters.SmallTest
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.settings.FakeUserTracker
+import com.android.systemui.shared.customization.data.content.FakeCustomizationProviderClient
 import com.android.systemui.shared.keyguard.shared.model.KeyguardQuickAffordanceSlots
-import com.android.systemui.shared.quickaffordance.data.content.FakeKeyguardQuickAffordanceProviderClient
 import com.android.systemui.util.mockito.whenever
 import com.google.common.truth.Truth.assertThat
 import kotlinx.coroutines.ExperimentalCoroutinesApi
@@ -54,16 +54,16 @@ class KeyguardQuickAffordanceRemoteUserSelectionManagerTest : SysuiTestCase() {
     private lateinit var testScope: TestScope
     private lateinit var testDispatcher: TestDispatcher
     private lateinit var userTracker: FakeUserTracker
-    private lateinit var client1: FakeKeyguardQuickAffordanceProviderClient
-    private lateinit var client2: FakeKeyguardQuickAffordanceProviderClient
+    private lateinit var client1: FakeCustomizationProviderClient
+    private lateinit var client2: FakeCustomizationProviderClient
 
     @Before
     fun setUp() {
         MockitoAnnotations.initMocks(this)
         whenever(userHandle.identifier).thenReturn(UserHandle.USER_SYSTEM)
         whenever(userHandle.isSystem).thenReturn(true)
-        client1 = FakeKeyguardQuickAffordanceProviderClient()
-        client2 = FakeKeyguardQuickAffordanceProviderClient()
+        client1 = FakeCustomizationProviderClient()
+        client2 = FakeCustomizationProviderClient()
 
         userTracker = FakeUserTracker()
         userTracker.set(
@@ -122,11 +122,11 @@ class KeyguardQuickAffordanceRemoteUserSelectionManagerTest : SysuiTestCase() {
 
             client1.insertSelection(
                 slotId = KeyguardQuickAffordanceSlots.SLOT_ID_BOTTOM_START,
-                affordanceId = FakeKeyguardQuickAffordanceProviderClient.AFFORDANCE_1,
+                affordanceId = FakeCustomizationProviderClient.AFFORDANCE_1,
             )
             client2.insertSelection(
                 slotId = KeyguardQuickAffordanceSlots.SLOT_ID_BOTTOM_END,
-                affordanceId = FakeKeyguardQuickAffordanceProviderClient.AFFORDANCE_2,
+                affordanceId = FakeCustomizationProviderClient.AFFORDANCE_2,
             )
 
             userTracker.set(
@@ -139,7 +139,7 @@ class KeyguardQuickAffordanceRemoteUserSelectionManagerTest : SysuiTestCase() {
                     mapOf(
                         KeyguardQuickAffordanceSlots.SLOT_ID_BOTTOM_START to
                             listOf(
-                                FakeKeyguardQuickAffordanceProviderClient.AFFORDANCE_1,
+                                FakeCustomizationProviderClient.AFFORDANCE_1,
                             ),
                     )
                 )
@@ -154,7 +154,7 @@ class KeyguardQuickAffordanceRemoteUserSelectionManagerTest : SysuiTestCase() {
                     mapOf(
                         KeyguardQuickAffordanceSlots.SLOT_ID_BOTTOM_END to
                             listOf(
-                                FakeKeyguardQuickAffordanceProviderClient.AFFORDANCE_2,
+                                FakeCustomizationProviderClient.AFFORDANCE_2,
                             ),
                     )
                 )
@@ -174,7 +174,7 @@ class KeyguardQuickAffordanceRemoteUserSelectionManagerTest : SysuiTestCase() {
 
             client1.insertSelection(
                 slotId = KeyguardQuickAffordanceSlots.SLOT_ID_BOTTOM_START,
-                affordanceId = FakeKeyguardQuickAffordanceProviderClient.AFFORDANCE_1,
+                affordanceId = FakeCustomizationProviderClient.AFFORDANCE_1,
             )
             userTracker.set(
                 userInfos = userTracker.userProfiles,
@@ -197,7 +197,7 @@ class KeyguardQuickAffordanceRemoteUserSelectionManagerTest : SysuiTestCase() {
 
             underTest.setSelections(
                 slotId = KeyguardQuickAffordanceSlots.SLOT_ID_BOTTOM_START,
-                affordanceIds = listOf(FakeKeyguardQuickAffordanceProviderClient.AFFORDANCE_1),
+                affordanceIds = listOf(FakeCustomizationProviderClient.AFFORDANCE_1),
             )
             runCurrent()
 
@@ -206,7 +206,7 @@ class KeyguardQuickAffordanceRemoteUserSelectionManagerTest : SysuiTestCase() {
                     mapOf(
                         KeyguardQuickAffordanceSlots.SLOT_ID_BOTTOM_START to
                             listOf(
-                                FakeKeyguardQuickAffordanceProviderClient.AFFORDANCE_1,
+                                FakeCustomizationProviderClient.AFFORDANCE_1,
                             ),
                     )
                 )

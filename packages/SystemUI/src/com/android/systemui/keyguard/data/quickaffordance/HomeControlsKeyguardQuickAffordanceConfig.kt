@@ -81,10 +81,6 @@ constructor(
                 instructions =
                     listOf(
                         context.getString(
-                            R.string.keyguard_affordance_enablement_dialog_message,
-                            pickerName,
-                        ),
-                        context.getString(
                             R.string.keyguard_affordance_enablement_dialog_home_instruction_1
                         ),
                         context.getString(

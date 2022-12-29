@@ -3204,6 +3204,16 @@
              letters.
          -->
         <attr name="requiredDisplayCategory" format="string"/>
+        <!-- If false, {@link android.view.KeyEvent#KEYCODE_BACK KEYCODE_BACK} and
+             {@link android.app.Activity#onBackPressed Activity.onBackPressed()}
+             and related event will be forwarded to the Activity and its views.
+
+             <p> If true, those events will be replaced by a call to
+             {@link android.window.OnBackInvokedCallback#onBackInvoked} on the focused window.
+
+             <p> By default, the behavior is configured by the same attribute in application.
+        -->
+        <attr name="enableOnBackInvokedCallback" format="boolean"/>
     </declare-styleable>
 
     <!-- The <code>activity-alias</code> tag declares a new

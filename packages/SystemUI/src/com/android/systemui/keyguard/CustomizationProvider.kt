@@ -33,11 +33,11 @@ import com.android.systemui.SystemUIAppComponentFactoryBase
 import com.android.systemui.SystemUIAppComponentFactoryBase.ContextAvailableCallback
 import com.android.systemui.keyguard.domain.interactor.KeyguardQuickAffordanceInteractor
 import com.android.systemui.keyguard.ui.preview.KeyguardRemotePreviewManager
-import com.android.systemui.shared.quickaffordance.data.content.KeyguardQuickAffordanceProviderContract as Contract
+import com.android.systemui.shared.customization.data.content.CustomizationProviderContract as Contract
 import javax.inject.Inject
 import kotlinx.coroutines.runBlocking
 
-class KeyguardQuickAffordanceProvider :
+class CustomizationProvider :
     ContentProvider(), SystemUIAppComponentFactoryBase.ContextInitializer {
 
     @Inject lateinit var interactor: KeyguardQuickAffordanceInteractor
@@ -49,17 +49,23 @@ class KeyguardQuickAffordanceProvider :
         UriMatcher(UriMatcher.NO_MATCH).apply {
             addURI(
                 Contract.AUTHORITY,
-                Contract.SlotTable.TABLE_NAME,
+                Contract.LockScreenQuickAffordances.qualifiedTablePath(
+                    Contract.LockScreenQuickAffordances.SlotTable.TABLE_NAME,
+                ),
                 MATCH_CODE_ALL_SLOTS,
             )
             addURI(
                 Contract.AUTHORITY,
-                Contract.AffordanceTable.TABLE_NAME,
+                Contract.LockScreenQuickAffordances.qualifiedTablePath(
+                    Contract.LockScreenQuickAffordances.AffordanceTable.TABLE_NAME,
+                ),
                 MATCH_CODE_ALL_AFFORDANCES,
             )
             addURI(
                 Contract.AUTHORITY,
-                Contract.SelectionTable.TABLE_NAME,
+                Contract.LockScreenQuickAffordances.qualifiedTablePath(
+                    Contract.LockScreenQuickAffordances.SelectionTable.TABLE_NAME,
+                ),
                 MATCH_CODE_ALL_SELECTIONS,
             )
             addURI(
@@ -94,9 +100,18 @@ class KeyguardQuickAffordanceProvider :
 
         val tableName =
             when (uriMatcher.match(uri)) {
-                MATCH_CODE_ALL_SLOTS -> Contract.SlotTable.TABLE_NAME
-                MATCH_CODE_ALL_AFFORDANCES -> Contract.AffordanceTable.TABLE_NAME
-                MATCH_CODE_ALL_SELECTIONS -> Contract.SelectionTable.TABLE_NAME
+                MATCH_CODE_ALL_SLOTS ->
+                    Contract.LockScreenQuickAffordances.qualifiedTablePath(
+                        Contract.LockScreenQuickAffordances.SlotTable.TABLE_NAME,
+                    )
+                MATCH_CODE_ALL_AFFORDANCES ->
+                    Contract.LockScreenQuickAffordances.qualifiedTablePath(
+                        Contract.LockScreenQuickAffordances.AffordanceTable.TABLE_NAME,
+                    )
+                MATCH_CODE_ALL_SELECTIONS ->
+                    Contract.LockScreenQuickAffordances.qualifiedTablePath(
+                        Contract.LockScreenQuickAffordances.SelectionTable.TABLE_NAME,
+                    )
                 MATCH_CODE_ALL_FLAGS -> Contract.FlagsTable.TABLE_NAME
                 else -> null
             }
@@ -174,22 +189,34 @@ class KeyguardQuickAffordanceProvider :
             throw IllegalArgumentException("Cannot insert selection, no values passed in!")
         }
 
-        if (!values.containsKey(Contract.SelectionTable.Columns.SLOT_ID)) {
+        if (
+            !values.containsKey(Contract.LockScreenQuickAffordances.SelectionTable.Columns.SLOT_ID)
+        ) {
             throw IllegalArgumentException(
                 "Cannot insert selection, " +
-                    "\"${Contract.SelectionTable.Columns.SLOT_ID}\" not specified!"
+                    "\"${Contract.LockScreenQuickAffordances.SelectionTable.Columns.SLOT_ID}\"" +
+                    " not specified!"
             )
         }
 
-        if (!values.containsKey(Contract.SelectionTable.Columns.AFFORDANCE_ID)) {
+        if (
+            !values.containsKey(
+                Contract.LockScreenQuickAffordances.SelectionTable.Columns.AFFORDANCE_ID
+            )
+        ) {
             throw IllegalArgumentException(
                 "Cannot insert selection, " +
-                    "\"${Contract.SelectionTable.Columns.AFFORDANCE_ID}\" not specified!"
+                    "\"${Contract.LockScreenQuickAffordances
+                        .SelectionTable.Columns.AFFORDANCE_ID}\" not specified!"
             )
         }
 
-        val slotId = values.getAsString(Contract.SelectionTable.Columns.SLOT_ID)
-        val affordanceId = values.getAsString(Contract.SelectionTable.Columns.AFFORDANCE_ID)
+        val slotId =
+            values.getAsString(Contract.LockScreenQuickAffordances.SelectionTable.Columns.SLOT_ID)
+        val affordanceId =
+            values.getAsString(
+                Contract.LockScreenQuickAffordances.SelectionTable.Columns.AFFORDANCE_ID
+            )
 
         if (slotId.isNullOrEmpty()) {
             throw IllegalArgumentException("Cannot insert selection, slot ID was empty!")
@@ -207,8 +234,10 @@ class KeyguardQuickAffordanceProvider :
 
         return if (success) {
             Log.d(TAG, "Successfully selected $affordanceId for slot $slotId")
-            context?.contentResolver?.notifyChange(Contract.SelectionTable.URI, null)
-            Contract.SelectionTable.URI
+            context
+                ?.contentResolver
+                ?.notifyChange(Contract.LockScreenQuickAffordances.SelectionTable.URI, null)
+            Contract.LockScreenQuickAffordances.SelectionTable.URI
         } else {
             Log.d(TAG, "Failed to select $affordanceId for slot $slotId")
             null
@@ -218,9 +247,9 @@ class KeyguardQuickAffordanceProvider :
     private suspend fun querySelections(): Cursor {
         return MatrixCursor(
                 arrayOf(
-                    Contract.SelectionTable.Columns.SLOT_ID,
-                    Contract.SelectionTable.Columns.AFFORDANCE_ID,
-                    Contract.SelectionTable.Columns.AFFORDANCE_NAME,
+                    Contract.LockScreenQuickAffordances.SelectionTable.Columns.SLOT_ID,
+                    Contract.LockScreenQuickAffordances.SelectionTable.Columns.AFFORDANCE_ID,
+                    Contract.LockScreenQuickAffordances.SelectionTable.Columns.AFFORDANCE_NAME,
                 )
             )
             .apply {
@@ -243,13 +272,16 @@ class KeyguardQuickAffordanceProvider :
     private suspend fun queryAffordances(): Cursor {
         return MatrixCursor(
                 arrayOf(
-                    Contract.AffordanceTable.Columns.ID,
-                    Contract.AffordanceTable.Columns.NAME,
-                    Contract.AffordanceTable.Columns.ICON,
-                    Contract.AffordanceTable.Columns.IS_ENABLED,
-                    Contract.AffordanceTable.Columns.ENABLEMENT_INSTRUCTIONS,
-                    Contract.AffordanceTable.Columns.ENABLEMENT_ACTION_TEXT,
-                    Contract.AffordanceTable.Columns.ENABLEMENT_COMPONENT_NAME,
+                    Contract.LockScreenQuickAffordances.AffordanceTable.Columns.ID,
+                    Contract.LockScreenQuickAffordances.AffordanceTable.Columns.NAME,
+                    Contract.LockScreenQuickAffordances.AffordanceTable.Columns.ICON,
+                    Contract.LockScreenQuickAffordances.AffordanceTable.Columns.IS_ENABLED,
+                    Contract.LockScreenQuickAffordances.AffordanceTable.Columns
+                        .ENABLEMENT_INSTRUCTIONS,
+                    Contract.LockScreenQuickAffordances.AffordanceTable.Columns
+                        .ENABLEMENT_ACTION_TEXT,
+                    Contract.LockScreenQuickAffordances.AffordanceTable.Columns
+                        .ENABLEMENT_COMPONENT_NAME,
                 )
             )
             .apply {
@@ -261,7 +293,8 @@ class KeyguardQuickAffordanceProvider :
                             representation.iconResourceId,
                             if (representation.isEnabled) 1 else 0,
                             representation.instructions?.joinToString(
-                                Contract.AffordanceTable.ENABLEMENT_INSTRUCTIONS_DELIMITER
+                                Contract.LockScreenQuickAffordances.AffordanceTable
+                                    .ENABLEMENT_INSTRUCTIONS_DELIMITER
                             ),
                             representation.actionText,
                             representation.actionComponentName,
@@ -274,8 +307,8 @@ class KeyguardQuickAffordanceProvider :
     private fun querySlots(): Cursor {
         return MatrixCursor(
                 arrayOf(
-                    Contract.SlotTable.Columns.ID,
-                    Contract.SlotTable.Columns.CAPACITY,
+                    Contract.LockScreenQuickAffordances.SlotTable.Columns.ID,
+                    Contract.LockScreenQuickAffordances.SlotTable.Columns.CAPACITY,
                 )
             )
             .apply {

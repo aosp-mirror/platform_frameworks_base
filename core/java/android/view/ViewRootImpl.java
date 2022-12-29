@@ -994,8 +994,7 @@ public final class ViewRootImpl implements ViewParent,
         mFastScrollSoundEffectsEnabled = audioManager.areNavigationRepeatSoundEffectsEnabled();
 
         mScrollCaptureRequestTimeout = SCROLL_CAPTURE_REQUEST_TIMEOUT_MILLIS;
-        mOnBackInvokedDispatcher = new WindowOnBackInvokedDispatcher(
-                context.getApplicationInfo().isOnBackInvokedCallbackEnabled());
+        mOnBackInvokedDispatcher = new WindowOnBackInvokedDispatcher(context);
     }
 
     public static void addFirstDrawHandler(Runnable callback) {
@@ -1301,14 +1300,6 @@ public final class ViewRootImpl implements ViewParent,
                         mTmpFrames);
                 setFrame(mTmpFrames.frame);
                 registerBackCallbackOnWindow();
-                if (!WindowOnBackInvokedDispatcher.isOnBackInvokedCallbackEnabled(mContext)) {
-                    // For apps requesting legacy back behavior, we add a compat callback that
-                    // dispatches {@link KeyEvent#KEYCODE_BACK} to their root views.
-                    // This way from system point of view, these apps are providing custom
-                    // {@link OnBackInvokedCallback}s, and will not play system back animations
-                    // for them.
-                    registerCompatOnBackInvokedCallback();
-                }
                 if (DEBUG_LAYOUT) Log.v(mTag, "Added window " + mWindow);
                 if (res < WindowManagerGlobal.ADD_OKAY) {
                     mAttachInfo.mRootView = null;
@@ -2901,6 +2892,14 @@ public final class ViewRootImpl implements ViewParent,
             host.dispatchAttachedToWindow(mAttachInfo, 0);
             mAttachInfo.mTreeObserver.dispatchOnWindowAttachedChange(true);
             dispatchApplyInsets(host);
+            if (!mOnBackInvokedDispatcher.isOnBackInvokedCallbackEnabled()) {
+                // For apps requesting legacy back behavior, we add a compat callback that
+                // dispatches {@link KeyEvent#KEYCODE_BACK} to their root views.
+                // This way from system point of view, these apps are providing custom
+                // {@link OnBackInvokedCallback}s, and will not play system back animations
+                // for them.
+                registerCompatOnBackInvokedCallback();
+            }
         } else {
             desiredWindowWidth = frame.width();
             desiredWindowHeight = frame.height();
@@ -6363,7 +6362,7 @@ public final class ViewRootImpl implements ViewParent,
                 // view tree or IME, and invoke the appropriate {@link OnBackInvokedCallback}.
                 if (isBack(event)
                         && mContext != null
-                        && WindowOnBackInvokedDispatcher.isOnBackInvokedCallbackEnabled(mContext)) {
+                        && mOnBackInvokedDispatcher.isOnBackInvokedCallbackEnabled()) {
                     OnBackInvokedCallback topCallback =
                             getOnBackInvokedDispatcher().getTopCallback();
                     if (event.getAction() == KeyEvent.ACTION_UP) {

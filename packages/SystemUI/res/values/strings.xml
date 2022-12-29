@@ -2826,12 +2826,6 @@
     <string name="keyguard_affordance_enablement_dialog_action_template">Open <xliff:g id="appName" example="Wallet">%1$s</xliff:g></string>
 
     <!--
-    Template for a message shown right before a list of instructions that tell the user what to do
-    in order to enable a shortcut to a specific app. [CHAR LIMIT=NONE]
-    -->
-    <string name="keyguard_affordance_enablement_dialog_message">To add the <xliff:g id="appName" example="Wallet">%1$s</xliff:g> app as a shortcut, make sure</string>
-
-    <!--
     Requirement for the wallet app to be available for the user to use. This is shown as part of a
     bulleted list of requirements. When all requirements are met, the app can be accessed through a
     shortcut button on the lock screen. [CHAR LIMIT=NONE].
@@ -2867,10 +2861,10 @@
     <string name="keyguard_affordance_enablement_dialog_home_instruction_2">&#8226; At least one device is available</string>
 
     <!--
-    Error message shown when a button should be pressed and held to activate it, usually shown when
-    the user attempted to tap the button or held it for too short a time. [CHAR LIMIT=32].
+    Error message shown when a shortcut must be pressed and held to activate it, usually shown when
+    the user tried to tap the shortcut or held it for too short a time. [CHAR LIMIT=32].
     -->
-    <string name="keyguard_affordance_press_too_short">Touch &amp; hold to open</string>
+    <string name="keyguard_affordance_press_too_short">Touch &amp; hold shortcut</string>
 
     <!-- Text for education page of cancel button to hide the page. [CHAR_LIMIT=NONE] -->
     <string name="rear_display_bottom_sheet_cancel">Cancel</string>

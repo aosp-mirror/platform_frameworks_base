@@ -24,7 +24,7 @@ import com.android.systemui.common.coroutine.ConflatedCallbackFlow.conflatedCall
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.dagger.qualifiers.Application
 import com.android.systemui.settings.UserTracker
-import com.android.systemui.shared.quickaffordance.data.content.KeyguardQuickAffordanceProviderClient
+import com.android.systemui.shared.customization.data.content.CustomizationProviderClient
 import javax.inject.Inject
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.ExperimentalCoroutinesApi
@@ -69,7 +69,7 @@ constructor(
         awaitClose { userTracker.removeCallback(callback) }
     }
 
-    private val clientOrNull: StateFlow<KeyguardQuickAffordanceProviderClient?> =
+    private val clientOrNull: StateFlow<CustomizationProviderClient?> =
         userId
             .distinctUntilChanged()
             .map { selectedUserId ->

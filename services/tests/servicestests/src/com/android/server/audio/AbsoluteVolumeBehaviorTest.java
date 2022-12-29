@@ -64,6 +64,8 @@ public class AbsoluteVolumeBehaviorTest {
     private IAudioDeviceVolumeDispatcher.Stub mMockDispatcher =
             mock(IAudioDeviceVolumeDispatcher.Stub.class);
 
+    private AudioPolicyFacade mMockAudioPolicy = mock(AudioPolicyFacade.class);
+
     @Before
     public void setUp() throws Exception {
         mTestLooper = new TestLooper();
@@ -74,7 +76,7 @@ public class AbsoluteVolumeBehaviorTest {
         mSystemServer = new NoOpSystemServerAdapter();
         mSettingsAdapter = new NoOpSettingsAdapter();
         mAudioService = new AudioService(mContext, mSpyAudioSystem, mSystemServer,
-                mSettingsAdapter, mTestLooper.getLooper()) {
+                mSettingsAdapter, mMockAudioPolicy, mTestLooper.getLooper()) {
             @Override
             public int getDeviceForStream(int stream) {
                 return AudioSystem.DEVICE_OUT_SPEAKER;
