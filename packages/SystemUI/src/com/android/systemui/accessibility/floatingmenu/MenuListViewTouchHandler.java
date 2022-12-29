@@ -111,6 +111,7 @@ class MenuListViewTouchHandler implements RecyclerView.OnItemTouchListener {
                     return true;
                 }
 
+                mMenuAnimationController.fadeOutIfEnabled();
                 break;
             default: // Do nothing
         }

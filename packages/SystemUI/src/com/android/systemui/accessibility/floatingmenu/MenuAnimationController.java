@@ -403,7 +403,7 @@ class MenuAnimationController {
         }
 
         cancelAndRemoveCallbacksAndMessages();
-        mHandler.post(() -> mMenuView.setAlpha(COMPLETELY_OPAQUE));
+        mMenuView.setAlpha(COMPLETELY_OPAQUE);
     }
 
     void fadeOutIfEnabled() {
