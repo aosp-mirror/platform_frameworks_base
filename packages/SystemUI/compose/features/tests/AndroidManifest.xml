@@ -35,7 +35,7 @@
             android:enabled="false"
             tools:replace="android:authorities"
             tools:node="remove" />
-        <provider android:name="com.android.systemui.keyguard.KeyguardQuickAffordanceProvider"
+        <provider android:name="com.android.systemui.keyguard.CustomizationProvider"
             android:authorities="com.android.systemui.test.keyguard.quickaffordance.disabled"
             android:enabled="false"
             tools:replace="android:authorities"

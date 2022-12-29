@@ -32,8 +32,8 @@ import com.android.systemui.keyguard.shared.model.KeyguardQuickAffordancePickerR
 import com.android.systemui.keyguard.shared.model.KeyguardSlotPickerRepresentation
 import com.android.systemui.settings.FakeUserTracker
 import com.android.systemui.settings.UserFileManager
+import com.android.systemui.shared.customization.data.content.FakeCustomizationProviderClient
 import com.android.systemui.shared.keyguard.shared.model.KeyguardQuickAffordanceSlots
-import com.android.systemui.shared.quickaffordance.data.content.FakeKeyguardQuickAffordanceProviderClient
 import com.android.systemui.util.FakeSharedPreferences
 import com.android.systemui.util.mockito.mock
 import com.android.systemui.util.mockito.whenever
@@ -63,19 +63,13 @@ class KeyguardQuickAffordanceRepositoryTest : SysuiTestCase() {
     private lateinit var config1: FakeKeyguardQuickAffordanceConfig
     private lateinit var config2: FakeKeyguardQuickAffordanceConfig
     private lateinit var userTracker: FakeUserTracker
-    private lateinit var client1: FakeKeyguardQuickAffordanceProviderClient
-    private lateinit var client2: FakeKeyguardQuickAffordanceProviderClient
+    private lateinit var client1: FakeCustomizationProviderClient
+    private lateinit var client2: FakeCustomizationProviderClient
 
     @Before
     fun setUp() {
-        config1 =
-            FakeKeyguardQuickAffordanceConfig(
-                FakeKeyguardQuickAffordanceProviderClient.AFFORDANCE_1
-            )
-        config2 =
-            FakeKeyguardQuickAffordanceConfig(
-                FakeKeyguardQuickAffordanceProviderClient.AFFORDANCE_2
-            )
+        config1 = FakeKeyguardQuickAffordanceConfig(FakeCustomizationProviderClient.AFFORDANCE_1)
+        config2 = FakeKeyguardQuickAffordanceConfig(FakeCustomizationProviderClient.AFFORDANCE_2)
         val scope = CoroutineScope(IMMEDIATE)
         userTracker = FakeUserTracker()
         val localUserSelectionManager =
@@ -95,8 +89,8 @@ class KeyguardQuickAffordanceRepositoryTest : SysuiTestCase() {
                 userTracker = userTracker,
                 broadcastDispatcher = fakeBroadcastDispatcher,
             )
-        client1 = FakeKeyguardQuickAffordanceProviderClient()
-        client2 = FakeKeyguardQuickAffordanceProviderClient()
+        client1 = FakeCustomizationProviderClient()
+        client2 = FakeCustomizationProviderClient()
         val remoteUserSelectionManager =
             KeyguardQuickAffordanceRemoteUserSelectionManager(
                 scope = scope,
@@ -256,7 +250,7 @@ class KeyguardQuickAffordanceRepositoryTest : SysuiTestCase() {
             )
             client2.insertSelection(
                 slotId = KeyguardQuickAffordanceSlots.SLOT_ID_BOTTOM_START,
-                affordanceId = FakeKeyguardQuickAffordanceProviderClient.AFFORDANCE_2,
+                affordanceId = FakeCustomizationProviderClient.AFFORDANCE_2,
             )
             val observed = mutableListOf<Map<String, List<KeyguardQuickAffordanceConfig>>>()
             val job = underTest.selections.onEach { observed.add(it) }.launchIn(this)

@@ -85,6 +85,8 @@
     <string name="screenshot_share_description" msgid="2861628935812656612">"स्क्रीनशॉट शेयर करें"</string>
     <string name="screenshot_scroll_label" msgid="2930198809899329367">"ज़्यादा कॉन्टेंट कैप्चर करें"</string>
     <string name="screenshot_dismiss_description" msgid="4702341245899508786">"स्क्रीनशॉट को खारिज करें"</string>
+    <!-- no translation found for screenshot_dismiss_work_profile (3101530842987697045) -->
+    <skip />
     <string name="screenshot_preview_description" msgid="7606510140714080474">"स्क्रीनशॉट की झलक"</string>
     <string name="screenshot_top_boundary_pct" msgid="2520148599096479332">"ऊपरी किनारे से <xliff:g id="PERCENT">%1$d</xliff:g> प्रतिशत"</string>
     <string name="screenshot_bottom_boundary_pct" msgid="3880821519814946478">"निचले किनारे से <xliff:g id="PERCENT">%1$d</xliff:g> प्रतिशत"</string>
@@ -731,8 +733,7 @@
     <string name="wifi_is_off" msgid="5389597396308001471">"वाई-फ़ाई बंद है"</string>
     <string name="bt_is_off" msgid="7436344904889461591">"ब्लूटूथ बंद है"</string>
     <string name="dnd_is_off" msgid="3185706903793094463">"परेशान न करें बंद है"</string>
-    <!-- no translation found for dnd_is_on (7009368176361546279) -->
-    <skip />
+    <string name="dnd_is_on" msgid="7009368176361546279">"\'परेशान न करें\' सुविधा चालू है"</string>
     <string name="qs_dnd_prompt_auto_rule" msgid="3535469468310002616">"एक ऑटोमैटिक नियम (<xliff:g id="ID_1">%s</xliff:g>) ने परेशान न करें को चालू कर दिया था."</string>
     <string name="qs_dnd_prompt_app" msgid="4027984447935396820">"एक ऐप्लिकेशन (<xliff:g id="ID_1">%s</xliff:g>) ने परेशान न करें को चालू कर दिया था."</string>
     <string name="qs_dnd_prompt_auto_rule_app" msgid="1841469944118486580">"एक ऑटोमैटिक नियम या ऐप्लिकेशन ने परेशान न करें को चालू कर दिया था."</string>
@@ -875,6 +876,8 @@
     <string name="media_output_dialog_accessibility_title" msgid="4681741064190167888">"ऑडियो आउटपुट के लिए उपलब्ध डिवाइस."</string>
     <string name="media_output_dialog_accessibility_seekbar" msgid="5332843993805568978">"वॉल्यूम"</string>
     <string name="media_output_dialog_volume_percentage" msgid="1613984910585111798">"<xliff:g id="PERCENTAGE">%1$d</xliff:g>%%"</string>
+    <!-- no translation found for media_output_group_title_speakers_and_displays (7169712332365659820) -->
+    <skip />
     <string name="media_output_first_broadcast_title" msgid="6292237789860753022">"ब्रॉडकास्ट करने की सुविधा कैसे काम करती है"</string>
     <string name="media_output_broadcast" msgid="3555580945878071543">"ब्रॉडकास्ट करें"</string>
     <string name="media_output_first_notify_broadcast_message" msgid="6353857724136398494">"आपके आस-पास मौजूद लोग, ब्रॉडकास्ट किए जा रहे मीडिया को सुन सकते हैं. हालांकि, इसके लिए उनके पास ऐसे ब्लूटूथ डिवाइस होने चाहिए जिन पर मीडिया चलाया जा सके"</string>
@@ -1004,8 +1007,7 @@
     <string name="keyguard_affordance_enablement_dialog_qr_scanner_instruction" msgid="5355839079232119791">"• कैमरा ऐप्लिकेशन इंस्टॉल किया गया है"</string>
     <string name="keyguard_affordance_enablement_dialog_home_instruction_1" msgid="8438311171750568633">"• ऐप्लिकेशन को सेट अप किया गया है"</string>
     <string name="keyguard_affordance_enablement_dialog_home_instruction_2" msgid="8308525385889021652">"• कम से कम एक डिवाइस उपलब्ध है"</string>
-    <!-- no translation found for keyguard_affordance_press_too_short (2687995216454987952) -->
-    <skip />
+    <string name="keyguard_affordance_press_too_short" msgid="2687995216454987952">"चालू करने के लिए दबाकर रखें"</string>
     <string name="rear_display_bottom_sheet_cancel" msgid="3461468855493357248">"रद्द करें"</string>
     <string name="rear_display_bottom_sheet_confirm" msgid="4383356544661421206">"कैमरा अभी स्विच करें"</string>
     <string name="rear_display_fold_bottom_sheet_title" msgid="6081542277622721548">"बेहतर सेल्फ़ी के लिए फ़ोन को अनफ़ोल्ड करें"</string>
@@ -1014,6 +1016,5 @@
     <string name="rear_display_bottom_sheet_warning" msgid="800995919558238930"><b>"✱ यह स्क्रीन बंद हो जाएगी"</b></string>
     <string name="rear_display_accessibility_folded_animation" msgid="1538121649587978179">"फ़ोल्ड किया जा सकने वाला डिवाइस अनफ़ोल्ड किया जा रहा है"</string>
     <string name="rear_display_accessibility_unfolded_animation" msgid="1946153682258289040">"फ़ोल्ड किया जा सकने वाला डिवाइस पलटा जा रहा है"</string>
-    <!-- no translation found for stylus_battery_low (7134370101603167096) -->
-    <skip />
+    <string name="stylus_battery_low" msgid="7134370101603167096">"स्टाइलस की बैटरी कम है"</string>
 </resources>

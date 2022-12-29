@@ -85,6 +85,8 @@
     <string name="screenshot_share_description" msgid="2861628935812656612">"Partagez la capture d\'écran"</string>
     <string name="screenshot_scroll_label" msgid="2930198809899329367">"Capturer plus"</string>
     <string name="screenshot_dismiss_description" msgid="4702341245899508786">"Fermer la capture d\'écran"</string>
+    <!-- no translation found for screenshot_dismiss_work_profile (3101530842987697045) -->
+    <skip />
     <string name="screenshot_preview_description" msgid="7606510140714080474">"Aperçu de la capture d\'écran"</string>
     <string name="screenshot_top_boundary_pct" msgid="2520148599096479332">"Limite supérieure : <xliff:g id="PERCENT">%1$d</xliff:g> %%"</string>
     <string name="screenshot_bottom_boundary_pct" msgid="3880821519814946478">"Limite inférieure : <xliff:g id="PERCENT">%1$d</xliff:g> %%"</string>
@@ -731,8 +733,7 @@
     <string name="wifi_is_off" msgid="5389597396308001471">"Le Wi-Fi est désactivé"</string>
     <string name="bt_is_off" msgid="7436344904889461591">"Le Bluetooth est désactivé"</string>
     <string name="dnd_is_off" msgid="3185706903793094463">"Le mode Ne pas déranger est désactivé"</string>
-    <!-- no translation found for dnd_is_on (7009368176361546279) -->
-    <skip />
+    <string name="dnd_is_on" msgid="7009368176361546279">"Mode Ne pas déranger activé"</string>
     <string name="qs_dnd_prompt_auto_rule" msgid="3535469468310002616">"Le mode Ne pas déranger a été activé par une règle automatique (<xliff:g id="ID_1">%s</xliff:g>)."</string>
     <string name="qs_dnd_prompt_app" msgid="4027984447935396820">"Le mode Ne pas déranger a été activé par une application (<xliff:g id="ID_1">%s</xliff:g>)."</string>
     <string name="qs_dnd_prompt_auto_rule_app" msgid="1841469944118486580">"Le mode Ne pas déranger a été activé par une règle automatique ou une application."</string>
@@ -875,6 +876,8 @@
     <string name="media_output_dialog_accessibility_title" msgid="4681741064190167888">"Appareils disponibles pour la sortie audio."</string>
     <string name="media_output_dialog_accessibility_seekbar" msgid="5332843993805568978">"Volume"</string>
     <string name="media_output_dialog_volume_percentage" msgid="1613984910585111798">"<xliff:g id="PERCENTAGE">%1$d</xliff:g> %%"</string>
+    <!-- no translation found for media_output_group_title_speakers_and_displays (7169712332365659820) -->
+    <skip />
     <string name="media_output_first_broadcast_title" msgid="6292237789860753022">"Fonctionnement de la diffusion"</string>
     <string name="media_output_broadcast" msgid="3555580945878071543">"Diffusion"</string>
     <string name="media_output_first_notify_broadcast_message" msgid="6353857724136398494">"Les personnes à proximité disposant d\'appareils Bluetooth compatibles peuvent écouter le contenu multimédia que vous diffusez"</string>
@@ -1004,8 +1007,7 @@
     <string name="keyguard_affordance_enablement_dialog_qr_scanner_instruction" msgid="5355839079232119791">"• qu\'une application de caméra est installée;"</string>
     <string name="keyguard_affordance_enablement_dialog_home_instruction_1" msgid="8438311171750568633">"• que cette application est configurée;"</string>
     <string name="keyguard_affordance_enablement_dialog_home_instruction_2" msgid="8308525385889021652">"• qu\'au moins un appareil est utilisable;"</string>
-    <!-- no translation found for keyguard_affordance_press_too_short (2687995216454987952) -->
-    <skip />
+    <string name="keyguard_affordance_press_too_short" msgid="2687995216454987952">"Maintenir le doigt pour activer"</string>
     <string name="rear_display_bottom_sheet_cancel" msgid="3461468855493357248">"Annuler"</string>
     <string name="rear_display_bottom_sheet_confirm" msgid="4383356544661421206">"Retourner maintenant"</string>
     <string name="rear_display_fold_bottom_sheet_title" msgid="6081542277622721548">"Déplier le téléphone pour un meilleur égoportrait"</string>
@@ -1014,6 +1016,5 @@
     <string name="rear_display_bottom_sheet_warning" msgid="800995919558238930"><b>"* Cet écran va s\'éteindre"</b></string>
     <string name="rear_display_accessibility_folded_animation" msgid="1538121649587978179">"Appareil pliable en cours de dépliage"</string>
     <string name="rear_display_accessibility_unfolded_animation" msgid="1946153682258289040">"Appareil pliable en train d\'être retourné"</string>
-    <!-- no translation found for stylus_battery_low (7134370101603167096) -->
-    <skip />
+    <string name="stylus_battery_low" msgid="7134370101603167096">"Pile du stylet faible"</string>
 </resources>

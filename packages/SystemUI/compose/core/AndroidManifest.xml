@@ -16,7 +16,7 @@
 -->
 
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
-    package="com.android.systemui.compose.core">
+    package="com.android.compose.core">
 
 
 </manifest>

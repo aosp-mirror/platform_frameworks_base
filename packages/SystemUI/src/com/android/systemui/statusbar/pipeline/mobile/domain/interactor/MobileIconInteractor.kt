@@ -48,6 +48,9 @@ interface MobileIconInteractor {
     /** True when telephony tells us that the data state is CONNECTED */
     val isDataConnected: StateFlow<Boolean>
 
+    /** True if we consider this connection to be in service, i.e. can make calls */
+    val isInService: StateFlow<Boolean>
+
     // TODO(b/256839546): clarify naming of default vs active
     /** True if we want to consider the data connection enabled */
     val isDefaultDataEnabled: StateFlow<Boolean>
@@ -57,6 +60,9 @@ interface MobileIconInteractor {
 
     /** True if the RAT icon should always be displayed and false otherwise. */
     val alwaysShowDataRatIcon: StateFlow<Boolean>
+
+    /** True if the CDMA level should be preferred over the primary level. */
+    val alwaysUseCdmaLevel: StateFlow<Boolean>
 
     /** Observable for RAT type (network type) indicator */
     val networkTypeIconGroup: StateFlow<MobileIconGroup>
@@ -94,6 +100,7 @@ class MobileIconInteractorImpl(
     @Application scope: CoroutineScope,
     defaultSubscriptionHasDataEnabled: StateFlow<Boolean>,
     override val alwaysShowDataRatIcon: StateFlow<Boolean>,
+    override val alwaysUseCdmaLevel: StateFlow<Boolean>,
     defaultMobileIconMapping: StateFlow<Map<String, MobileIconGroup>>,
     defaultMobileIconGroup: StateFlow<MobileIconGroup>,
     override val isDefaultConnectionFailed: StateFlow<Boolean>,
@@ -154,13 +161,12 @@ class MobileIconInteractorImpl(
             .stateIn(scope, SharingStarted.WhileSubscribed(), false)
 
     override val level: StateFlow<Int> =
-        connectionInfo
-            .mapLatest { connection ->
-                // TODO: incorporate [MobileMappings.Config.alwaysShowCdmaRssi]
-                if (connection.isGsm) {
-                    connection.primaryLevel
-                } else {
-                    connection.cdmaLevel
+        combine(connectionInfo, alwaysUseCdmaLevel) { connection, alwaysUseCdmaLevel ->
+                when {
+                    // GSM connections should never use the CDMA level
+                    connection.isGsm -> connection.primaryLevel
+                    alwaysUseCdmaLevel -> connection.cdmaLevel
+                    else -> connection.primaryLevel
                 }
             }
             .stateIn(scope, SharingStarted.WhileSubscribed(), 0)
@@ -174,5 +180,10 @@ class MobileIconInteractorImpl(
     override val isDataConnected: StateFlow<Boolean> =
         connectionInfo
             .mapLatest { connection -> connection.dataConnectionState == Connected }
+            .stateIn(scope, SharingStarted.WhileSubscribed(), false)
+
+    override val isInService =
+        connectionRepository.connectionInfo
+            .mapLatest { it.isInService }
             .stateIn(scope, SharingStarted.WhileSubscribed(), false)
 }
