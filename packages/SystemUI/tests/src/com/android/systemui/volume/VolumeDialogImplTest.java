@@ -16,6 +16,7 @@
 
 package com.android.systemui.volume;
 
+import static com.android.systemui.volume.Events.DISMISS_REASON_UNKNOWN;
 import static com.android.systemui.volume.VolumeDialogControllerImpl.STREAMS;
 
 import static junit.framework.Assert.assertEquals;
@@ -340,6 +341,15 @@ public class VolumeDialogImplTest extends SysuiTestCase {
 
         assertEquals(mDialog.mVolumeRingerIconDrawableId, R.drawable.ic_volume_ringer);
         assertEquals(mDialog.mVolumeRingerMuteIconDrawableId, R.drawable.ic_volume_ringer_mute);
+    }
+
+    @Test
+    public void testDialogDismissAnimation_notifyVisibleIsNotCalledBeforeAnimation() {
+        mDialog.dismissH(DISMISS_REASON_UNKNOWN);
+        // notifyVisible(false) should not be called immediately but only after the dismiss
+        // animation has ended.
+        verify(mVolumeDialogController, times(0)).notifyVisible(false);
+        mDialog.getDialogView().animate().cancel();
     }
 
 /*

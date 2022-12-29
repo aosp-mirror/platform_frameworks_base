@@ -1487,6 +1487,7 @@ public class VolumeDialogImpl implements VolumeDialog, Dumpable,
                 .setDuration(mDialogHideAnimationDurationMs)
                 .setInterpolator(new SystemUIInterpolators.LogAccelerateInterpolator())
                 .withEndAction(() -> mHandler.postDelayed(() -> {
+                    mController.notifyVisible(false);
                     mDialog.dismiss();
                     tryToRemoveCaptionsTooltip();
                     mIsAnimatingDismiss = false;
@@ -1497,7 +1498,6 @@ public class VolumeDialogImpl implements VolumeDialog, Dumpable,
         animator.setListener(getJankListener(getDialogView(), TYPE_DISMISS,
                 mDialogHideAnimationDurationMs)).start();
         checkODICaptionsTooltip(true);
-        mController.notifyVisible(false);
         synchronized (mSafetyWarningLock) {
             if (mSafetyWarning != null) {
                 if (D.BUG) Log.d(TAG, "SafetyWarning dismissed");
