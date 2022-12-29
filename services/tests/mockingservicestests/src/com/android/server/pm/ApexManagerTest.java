@@ -518,6 +518,7 @@ public class ApexManagerTest {
         apexInfo.isActive = isActive;
         apexInfo.isFactory = isFactory;
         apexInfo.modulePath = apexFile.getPath();
+        apexInfo.preinstalledModulePath = apexFile.getPath();
         return apexInfo;
     }
 

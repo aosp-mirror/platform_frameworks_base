@@ -5052,6 +5052,7 @@ public final class Settings implements Watchable, Snappable {
         pw.print(prefix); pw.print("  privatePkgFlags="); printFlags(pw, ps.getPrivateFlags(),
                 PRIVATE_FLAG_DUMP_SPEC);
         pw.println();
+        pw.print(prefix); pw.print("  apexModuleName="); pw.println(ps.getApexModuleName());
 
         if (pkg != null && pkg.getOverlayTarget() != null) {
             pw.print(prefix); pw.print("  overlayTarget="); pw.println(pkg.getOverlayTarget());
@@ -5263,7 +5264,8 @@ public final class Settings implements Watchable, Snappable {
                     && !packageName.equals(ps.getPackageName())) {
                 continue;
             }
-            if (ps.getPkg() != null && ps.getPkg().isApex()) {
+            if (ps.getPkg() != null && ps.getPkg().isApex()
+                    && !dumpState.isOptionEnabled(DumpState.OPTION_INCLUDE_APEX)) {
                 // Filter APEX packages which will be dumped in the APEX section
                 continue;
             }
@@ -5319,7 +5321,8 @@ public final class Settings implements Watchable, Snappable {
                         && !packageName.equals(ps.getPackageName())) {
                     continue;
                 }
-                if (ps.getPkg() != null && ps.getPkg().isApex()) {
+                if (ps.getPkg() != null && ps.getPkg().isApex()
+                        && !dumpState.isOptionEnabled(DumpState.OPTION_INCLUDE_APEX)) {
                     // Filter APEX packages which will be dumped in the APEX section
                     continue;
                 }

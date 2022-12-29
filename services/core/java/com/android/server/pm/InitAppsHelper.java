@@ -21,11 +21,9 @@ import static android.os.Trace.TRACE_TAG_PACKAGE_MANAGER;
 import static com.android.internal.util.FrameworkStatsLog.BOOT_TIME_EVENT_DURATION__EVENT__OTA_PACKAGE_MANAGER_DATA_APP_AVG_SCAN_TIME;
 import static com.android.internal.util.FrameworkStatsLog.BOOT_TIME_EVENT_DURATION__EVENT__OTA_PACKAGE_MANAGER_SYSTEM_APP_AVG_SCAN_TIME;
 import static com.android.server.pm.PackageManagerService.SCAN_AS_APK_IN_APEX;
-import static com.android.server.pm.PackageManagerService.SCAN_AS_FACTORY;
 import static com.android.server.pm.PackageManagerService.SCAN_AS_PRIVILEGED;
 import static com.android.server.pm.PackageManagerService.SCAN_AS_SYSTEM;
 import static com.android.server.pm.PackageManagerService.SCAN_BOOTING;
-import static com.android.server.pm.PackageManagerService.SCAN_DROP_CACHE;
 import static com.android.server.pm.PackageManagerService.SCAN_FIRST_BOOT_OR_UPGRADE;
 import static com.android.server.pm.PackageManagerService.SCAN_INITIAL;
 import static com.android.server.pm.PackageManagerService.SCAN_NO_DEX;
@@ -147,14 +145,7 @@ final class InitAppsHelper {
                     sp.getFolder().getAbsolutePath())
                     || apexInfo.preInstalledApexPath.getAbsolutePath().startsWith(
                     sp.getFolder().getAbsolutePath() + File.separator)) {
-                int additionalScanFlag = SCAN_AS_APK_IN_APEX;
-                if (apexInfo.isFactory) {
-                    additionalScanFlag |= SCAN_AS_FACTORY;
-                }
-                if (apexInfo.activeApexChanged) {
-                    additionalScanFlag |= SCAN_DROP_CACHE;
-                }
-                return new ScanPartition(apexInfo.apexDirectory, sp, additionalScanFlag);
+                return new ScanPartition(apexInfo.apexDirectory, sp, apexInfo);
             }
         }
         return null;
@@ -266,7 +257,7 @@ final class InitAppsHelper {
         }
 
         scanDirTracedLI(mPm.getAppInstallDir(), 0,
-                mScanFlags | SCAN_REQUIRE_KNOWN, packageParser, mExecutorService);
+                mScanFlags | SCAN_REQUIRE_KNOWN, packageParser, mExecutorService, null);
 
         List<Runnable> unfinishedTasks = mExecutorService.shutdownNow();
         if (!unfinishedTasks.isEmpty()) {
@@ -335,12 +326,12 @@ final class InitAppsHelper {
             }
             scanDirTracedLI(partition.getOverlayFolder(),
                     mSystemParseFlags, mSystemScanFlags | partition.scanFlag,
-                    packageParser, executorService);
+                    packageParser, executorService, partition.apexInfo);
         }
 
         scanDirTracedLI(frameworkDir,
                 mSystemParseFlags, mSystemScanFlags | SCAN_NO_DEX | SCAN_AS_PRIVILEGED,
-                packageParser, executorService);
+                packageParser, executorService, null);
         if (!mPm.mPackages.containsKey("android")) {
             throw new IllegalStateException(
                     "Failed to load frameworks package; check log for warnings");
@@ -352,11 +343,11 @@ final class InitAppsHelper {
                 scanDirTracedLI(partition.getPrivAppFolder(),
                         mSystemParseFlags,
                         mSystemScanFlags | SCAN_AS_PRIVILEGED | partition.scanFlag,
-                        packageParser, executorService);
+                        packageParser, executorService, partition.apexInfo);
             }
             scanDirTracedLI(partition.getAppFolder(),
                     mSystemParseFlags, mSystemScanFlags | partition.scanFlag,
-                    packageParser, executorService);
+                    packageParser, executorService, partition.apexInfo);
         }
     }
 
@@ -373,7 +364,8 @@ final class InitAppsHelper {
 
     @GuardedBy({"mPm.mInstallLock", "mPm.mLock"})
     private void scanDirTracedLI(File scanDir, int parseFlags, int scanFlags,
-            PackageParser2 packageParser, ExecutorService executorService) {
+            PackageParser2 packageParser, ExecutorService executorService,
+            @Nullable ApexManager.ActiveApexInfo apexInfo) {
         Trace.traceBegin(TRACE_TAG_PACKAGE_MANAGER, "scanDir [" + scanDir.getAbsolutePath() + "]");
         try {
             if ((scanFlags & SCAN_AS_APK_IN_APEX) != 0) {
@@ -381,7 +373,7 @@ final class InitAppsHelper {
                 parseFlags |= PARSE_APK_IN_APEX;
             }
             mInstallPackageHelper.installPackagesFromDir(scanDir, parseFlags,
-                    scanFlags, packageParser, executorService);
+                    scanFlags, packageParser, executorService, apexInfo);
         } finally {
             Trace.traceEnd(TRACE_TAG_PACKAGE_MANAGER);
         }

@@ -44,6 +44,7 @@ import android.util.Slog;
 
 import com.android.server.pm.parsing.pkg.ParsedPackage;
 import com.android.server.pm.pkg.AndroidPackage;
+import com.android.server.pm.pkg.PackageState;
 import com.android.server.pm.pkg.PackageStateInternal;
 import com.android.server.pm.pkg.parsing.ParsingPackageUtils;
 
@@ -106,6 +107,12 @@ final class InstallRequest {
     // The ApexInfo returned by ApexManager#installPackage, used by rebootless APEX install
     @Nullable
     private ApexInfo mApexInfo;
+
+    /**
+     * For tracking {@link PackageState#getApexModuleName()}.
+     */
+    @Nullable
+    private String mApexModuleName;
 
     @Nullable
     private ScanResult mScanResult;
@@ -345,6 +352,11 @@ final class InstallRequest {
     @Nullable
     public ApexInfo getApexInfo() {
         return mApexInfo;
+    }
+
+    @Nullable
+    public String getApexModuleName() {
+        return mApexModuleName;
     }
 
     @Nullable
@@ -642,6 +654,10 @@ final class InstallRequest {
 
     public void setApexInfo(ApexInfo apexInfo) {
         mApexInfo = apexInfo;
+    }
+
+    public void setApexModuleName(@Nullable String apexModuleName) {
+        mApexModuleName = apexModuleName;
     }
 
     public void setPkg(AndroidPackage pkg) {
