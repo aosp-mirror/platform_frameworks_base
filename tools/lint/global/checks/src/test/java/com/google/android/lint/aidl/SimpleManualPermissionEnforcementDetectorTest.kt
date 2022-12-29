@@ -51,10 +51,10 @@ class SimpleManualPermissionEnforcementDetectorTest : LintDetectorTest() {
             .run()
             .expect(
                 """
-                src/Foo.java:7: Error: ITest permission check should be converted to @EnforcePermission annotation [SimpleManualPermissionEnforcement]
+                src/Foo.java:7: Warning: ITest permission check should be converted to @EnforcePermission annotation [SimpleManualPermissionEnforcement]
                         mContext.enforceCallingOrSelfPermission("android.permission.READ_CONTACTS", "foo");
                         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-                1 errors, 0 warnings
+                0 errors, 1 warnings
                 """
             )
             .expectFixDiffs(
@@ -64,6 +64,7 @@ class SimpleManualPermissionEnforcementDetectorTest : LintDetectorTest() {
                 +     @android.annotation.EnforcePermission("android.permission.READ_CONTACTS")
                 @@ -7 +8
                 -         mContext.enforceCallingOrSelfPermission("android.permission.READ_CONTACTS", "foo");
+                +         test_enforcePermission();
                 """
             )
     }
@@ -101,6 +102,7 @@ class SimpleManualPermissionEnforcementDetectorTest : LintDetectorTest() {
                     +     @android.annotation.EnforcePermission("android.permission.READ_CONTACTS")
                     @@ -7 +8
                     -         mContext.enforceCallingPermission("android.permission.READ_CONTACTS", "foo");
+                    +         test_enforcePermission();
                     """
                 )
     }
@@ -138,6 +140,7 @@ class SimpleManualPermissionEnforcementDetectorTest : LintDetectorTest() {
                     +     @android.annotation.EnforcePermission("android.permission.READ_CONTACTS")
                     @@ -7 +8
                     -         mContext.checkCallingOrSelfPermission("android.permission.READ_CONTACTS", "foo");
+                    +         test_enforcePermission();
                     """
                 )
     }
@@ -165,10 +168,10 @@ class SimpleManualPermissionEnforcementDetectorTest : LintDetectorTest() {
             .run()
             .expect(
                 """
-                src/Foo.java:8: Error: ITest permission check should be converted to @EnforcePermission annotation [SimpleManualPermissionEnforcement]
+                src/Foo.java:8: Warning: ITest permission check should be converted to @EnforcePermission annotation [SimpleManualPermissionEnforcement]
                             mContext.enforceCallingOrSelfPermission(
                             ^
-                1 errors, 0 warnings
+                0 errors, 1 warnings
                 """
             )
             .expectFixDiffs(
@@ -179,6 +182,7 @@ class SimpleManualPermissionEnforcementDetectorTest : LintDetectorTest() {
                 @@ -8 +9
                 -             mContext.enforceCallingOrSelfPermission(
                 -                 "android.permission.READ_CONTACTS", "foo");
+                +             test_enforcePermission();
                 """
             )
     }
@@ -205,19 +209,20 @@ class SimpleManualPermissionEnforcementDetectorTest : LintDetectorTest() {
             .run()
             .expect(
                 """
-                src/Foo.java:8: Error: ITest permission check should be converted to @EnforcePermission annotation [SimpleManualPermissionEnforcement]
+                src/Foo.java:8: Warning: ITest permission check should be converted to @EnforcePermission annotation [SimpleManualPermissionEnforcement]
                         mContext.enforceCallingOrSelfPermission(android.Manifest.permission.READ_CONTACTS, "foo");
                         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-                1 errors, 0 warnings
+                0 errors, 1 warnings
                 """
             )
             .expectFixDiffs(
                 """
-                Fix for src/Foo.java line 7: Annotate with @EnforcePermission:
+                Fix for src/Foo.java line 8: Annotate with @EnforcePermission:
                 @@ -6 +6
                 +     @android.annotation.EnforcePermission("android.permission.READ_CONTACTS")
                 @@ -8 +9
                 -         mContext.enforceCallingOrSelfPermission(android.Manifest.permission.READ_CONTACTS, "foo");
+                +         test_enforcePermission();
                 """
             )
     }
@@ -247,10 +252,10 @@ class SimpleManualPermissionEnforcementDetectorTest : LintDetectorTest() {
             .run()
             .expect(
                 """
-                src/Foo.java:10: Error: ITest permission check should be converted to @EnforcePermission annotation [SimpleManualPermissionEnforcement]
+                src/Foo.java:10: Warning: ITest permission check should be converted to @EnforcePermission annotation [SimpleManualPermissionEnforcement]
                             mContext.enforceCallingOrSelfPermission(
                             ^
-                1 errors, 0 warnings
+                0 errors, 1 warnings
                 """
             )
             .expectFixDiffs(
@@ -263,98 +268,101 @@ class SimpleManualPermissionEnforcementDetectorTest : LintDetectorTest() {
                 -                 "android.permission.READ_CONTACTS", "foo");
                 -             mContext.enforceCallingOrSelfPermission(
                 -                 "android.permission.WRITE_CONTACTS", "foo");
+                +             test_enforcePermission();
                 """
             )
     }
 
     fun testAllOf_mixedOrSelf_warning() {
         lint().files(
-                java(
-                    """
-                    import android.content.Context;
-                    import android.test.ITest;
-                    public class Foo {
-                        private Context mContext;
-                        private ITest itest = new ITest.Stub() {
-                            @Override
-                            public void test() throws android.os.RemoteException {
-                                mContext.enforceCallingOrSelfPermission(
-                                    "android.permission.READ_CONTACTS", "foo");
-                                mContext.enforceCallingPermission(
-                                    "android.permission.WRITE_CONTACTS", "foo");
-                            }
-                        };
-                    }
-                    """
-                ).indented(),
-                *stubs
+            java(
+                """
+                import android.content.Context;
+                import android.test.ITest;
+                public class Foo {
+                    private Context mContext;
+                    private ITest itest = new ITest.Stub() {
+                        @Override
+                        public void test() throws android.os.RemoteException {
+                            mContext.enforceCallingOrSelfPermission(
+                                "android.permission.READ_CONTACTS", "foo");
+                            mContext.enforceCallingPermission(
+                                "android.permission.WRITE_CONTACTS", "foo");
+                        }
+                    };
+                }
+                """
+            ).indented(),
+            *stubs
         )
-                .run()
-                .expect(
-                    """
-                    src/Foo.java:10: Warning: ITest permission check can be converted to @EnforcePermission annotation [SimpleManualPermissionEnforcement]
-                                mContext.enforceCallingPermission(
-                                ^
-                    0 errors, 1 warnings
-                    """
-                )
-                .expectFixDiffs(
-                    """
-                    Fix for src/Foo.java line 10: Annotate with @EnforcePermission:
-                    @@ -6 +6
-                    +         @android.annotation.EnforcePermission(allOf={"android.permission.READ_CONTACTS", "android.permission.WRITE_CONTACTS"})
-                    @@ -8 +9
-                    -             mContext.enforceCallingOrSelfPermission(
-                    -                 "android.permission.READ_CONTACTS", "foo");
-                    -             mContext.enforceCallingPermission(
-                    -                 "android.permission.WRITE_CONTACTS", "foo");
-                    """
-                )
+            .run()
+            .expect(
+                """
+                src/Foo.java:10: Warning: ITest permission check can be converted to @EnforcePermission annotation [SimpleManualPermissionEnforcement]
+                            mContext.enforceCallingPermission(
+                            ^
+                0 errors, 1 warnings
+                """
+            )
+            .expectFixDiffs(
+                """
+                Fix for src/Foo.java line 10: Annotate with @EnforcePermission:
+                @@ -6 +6
+                +         @android.annotation.EnforcePermission(allOf={"android.permission.READ_CONTACTS", "android.permission.WRITE_CONTACTS"})
+                @@ -8 +9
+                -             mContext.enforceCallingOrSelfPermission(
+                -                 "android.permission.READ_CONTACTS", "foo");
+                -             mContext.enforceCallingPermission(
+                -                 "android.permission.WRITE_CONTACTS", "foo");
+                +             test_enforcePermission();
+                """
+            )
     }
 
     fun testAllOf_mixedEnforces_warning() {
         lint().files(
-                java(
-                    """
-                    import android.content.Context;
-                    import android.test.ITest;
-                    public class Foo {
-                        private Context mContext;
-                        private ITest itest = new ITest.Stub() {
-                            @Override
-                            public void test() throws android.os.RemoteException {
-                                mContext.enforceCallingOrSelfPermission(
-                                    "android.permission.READ_CONTACTS", "foo");
-                                mContext.checkCallingOrSelfPermission(
-                                    "android.permission.WRITE_CONTACTS", "foo");
-                            }
-                        };
-                    }
-                    """
-                ).indented(),
-                *stubs
+            java(
+                """
+                import android.content.Context;
+                import android.test.ITest;
+                public class Foo {
+                    private Context mContext;
+                    private ITest itest = new ITest.Stub() {
+                        @Override
+                        public void test() throws android.os.RemoteException {
+                            mContext.enforceCallingOrSelfPermission(
+                                "android.permission.READ_CONTACTS", "foo");
+                            mContext.checkCallingOrSelfPermission(
+                                "android.permission.WRITE_CONTACTS", "foo");
+                        }
+                    };
+                }
+                """
+            ).indented(),
+            *stubs
         )
-                .run()
-                .expect(
-                    """
-                    src/Foo.java:10: Warning: ITest permission check can be converted to @EnforcePermission annotation [SimpleManualPermissionEnforcement]
-                                mContext.checkCallingOrSelfPermission(
-                                ^
-                    0 errors, 1 warnings
-                    """
-                )
-                .expectFixDiffs(
-                    """
-                    Fix for src/Foo.java line 10: Annotate with @EnforcePermission:
-                    @@ -6 +6
-                    +         @android.annotation.EnforcePermission(allOf={"android.permission.READ_CONTACTS", "android.permission.WRITE_CONTACTS"})
-                    @@ -8 +9
-                    -             mContext.enforceCallingOrSelfPermission(
-                    -                 "android.permission.READ_CONTACTS", "foo");
-                    -             mContext.checkCallingOrSelfPermission(
-                    -                 "android.permission.WRITE_CONTACTS", "foo");
-                    """
-                )
+            .run()
+            .expect(
+                """
+                src/Foo.java:10: Warning: ITest permission check can be converted to @EnforcePermission annotation [SimpleManualPermissionEnforcement]
+                            mContext.checkCallingOrSelfPermission(
+                            ^
+                0 errors, 1 warnings
+                """
+            )
+            .expectFixDiffs(
+                """
+                Fix for src/Foo.java line 10: Annotate with @EnforcePermission:
+                @@ -6 +6
+                +         @android.annotation.EnforcePermission(allOf={"android.permission.READ_CONTACTS", "android.permission.WRITE_CONTACTS"})
+                @@ -8 +9
+                -             mContext.enforceCallingOrSelfPermission(
+                -                 "android.permission.READ_CONTACTS", "foo");
+                -             mContext.checkCallingOrSelfPermission(
+                -                 "android.permission.WRITE_CONTACTS", "foo");
+                +             test_enforcePermission();
+                """
+            )
     }
 
     fun testPrecedingExpressions() {
@@ -406,10 +414,10 @@ class SimpleManualPermissionEnforcementDetectorTest : LintDetectorTest() {
             .run()
             .expect(
                 """
-                src/Foo.java:14: Error: ITest permission check should be converted to @EnforcePermission annotation [SimpleManualPermissionEnforcement]
+                src/Foo.java:14: Warning: ITest permission check should be converted to @EnforcePermission annotation [SimpleManualPermissionEnforcement]
                         helper();
                         ~~~~~~~~~
-                1 errors, 0 warnings
+                0 errors, 1 warnings
                 """
             )
             .expectFixDiffs(
@@ -419,6 +427,7 @@ class SimpleManualPermissionEnforcementDetectorTest : LintDetectorTest() {
                 +     @android.annotation.EnforcePermission("android.permission.READ_CONTACTS")
                 @@ -14 +15
                 -         helper();
+                +         test_enforcePermission();
                 """
             )
     }
@@ -463,6 +472,7 @@ class SimpleManualPermissionEnforcementDetectorTest : LintDetectorTest() {
                     +     @android.annotation.EnforcePermission("android.permission.READ_CONTACTS")
                     @@ -14 +15
                     -         helper();
+                    +         test_enforcePermission();
                     """
                 )
     }
@@ -496,10 +506,10 @@ class SimpleManualPermissionEnforcementDetectorTest : LintDetectorTest() {
             .run()
             .expect(
                 """
-                src/Foo.java:16: Error: ITest permission check should be converted to @EnforcePermission annotation [SimpleManualPermissionEnforcement]
+                src/Foo.java:16: Warning: ITest permission check should be converted to @EnforcePermission annotation [SimpleManualPermissionEnforcement]
                         mContext.enforceCallingOrSelfPermission("FOO", "foo");
                         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-                1 errors, 0 warnings
+                0 errors, 1 warnings
                 """
             )
             .expectFixDiffs(
@@ -510,6 +520,7 @@ class SimpleManualPermissionEnforcementDetectorTest : LintDetectorTest() {
                 @@ -15 +16
                 -         helper();
                 -         mContext.enforceCallingOrSelfPermission("FOO", "foo");
+                +         test_enforcePermission();
                 """
             )
     }
@@ -547,10 +558,10 @@ class SimpleManualPermissionEnforcementDetectorTest : LintDetectorTest() {
             .run()
             .expect(
                 """
-                src/Foo.java:19: Error: ITest permission check should be converted to @EnforcePermission annotation [SimpleManualPermissionEnforcement]
+                src/Foo.java:19: Warning: ITest permission check should be converted to @EnforcePermission annotation [SimpleManualPermissionEnforcement]
                         helperHelper();
                         ~~~~~~~~~~~~~~~
-                1 errors, 0 warnings
+                0 errors, 1 warnings
                 """
             )
             .expectFixDiffs(
@@ -560,6 +571,7 @@ class SimpleManualPermissionEnforcementDetectorTest : LintDetectorTest() {
                 +     @android.annotation.EnforcePermission(allOf={"android.permission.WRITE_CONTACTS", "android.permission.READ_CONTACTS"})
                 @@ -19 +20
                 -         helperHelper();
+                +         test_enforcePermission();
                 """
             )
     }
@@ -587,10 +599,10 @@ class SimpleManualPermissionEnforcementDetectorTest : LintDetectorTest() {
                 .run()
                 .expect(
                     """
-                    src/Foo.java:7: Error: ITest permission check should be converted to @EnforcePermission annotation [SimpleManualPermissionEnforcement]
+                    src/Foo.java:7: Warning: ITest permission check should be converted to @EnforcePermission annotation [SimpleManualPermissionEnforcement]
                             if (mContext.checkCallingOrSelfPermission("android.permission.READ_CONTACTS", "foo")
                             ^
-                    1 errors, 0 warnings
+                    0 errors, 1 warnings
                     """
                 )
                 .expectFixDiffs(
@@ -603,76 +615,78 @@ class SimpleManualPermissionEnforcementDetectorTest : LintDetectorTest() {
                     -                 != PackageManager.PERMISSION_GRANTED) {
                     -             throw new SecurityException("yikes!");
                     -         }
+                    +         test_enforcePermission();
                     """
                 )
     }
 
     fun testIfExpression_orSelfFalse_warning() {
         lint().files(
-                java(
-                    """
-                    import android.content.Context;
-                    import android.test.ITest;
-                    public class Foo extends ITest.Stub {
-                        private Context mContext;
-                        @Override
-                        public void test() throws android.os.RemoteException {
-                            if (mContext.checkCallingPermission("android.permission.READ_CONTACTS", "foo")
-                                    != PackageManager.PERMISSION_GRANTED) {
-                                throw new SecurityException("yikes!");
-                            }
+            java(
+                """
+                import android.content.Context;
+                import android.test.ITest;
+                public class Foo extends ITest.Stub {
+                    private Context mContext;
+                    @Override
+                    public void test() throws android.os.RemoteException {
+                        if (mContext.checkCallingPermission("android.permission.READ_CONTACTS", "foo")
+                                != PackageManager.PERMISSION_GRANTED) {
+                            throw new SecurityException("yikes!");
                         }
                     }
-                    """
-                ).indented(),
-                *stubs
+                }
+                """
+            ).indented(),
+            *stubs
         )
-                .run()
-                .expect(
-                    """
-                    src/Foo.java:7: Warning: ITest permission check can be converted to @EnforcePermission annotation [SimpleManualPermissionEnforcement]
-                            if (mContext.checkCallingPermission("android.permission.READ_CONTACTS", "foo")
-                            ^
-                    0 errors, 1 warnings
-                    """
-                )
-                .expectFixDiffs(
-                    """
-                    Fix for src/Foo.java line 7: Annotate with @EnforcePermission:
-                    @@ -5 +5
-                    +     @android.annotation.EnforcePermission("android.permission.READ_CONTACTS")
-                    @@ -7 +8
-                    -         if (mContext.checkCallingPermission("android.permission.READ_CONTACTS", "foo")
-                    -                 != PackageManager.PERMISSION_GRANTED) {
-                    -             throw new SecurityException("yikes!");
-                    -         }
-                    """
-                )
+            .run()
+            .expect(
+                """
+                src/Foo.java:7: Warning: ITest permission check can be converted to @EnforcePermission annotation [SimpleManualPermissionEnforcement]
+                        if (mContext.checkCallingPermission("android.permission.READ_CONTACTS", "foo")
+                        ^
+                0 errors, 1 warnings
+                """
+            )
+            .expectFixDiffs(
+                """
+                Fix for src/Foo.java line 7: Annotate with @EnforcePermission:
+                @@ -5 +5
+                +     @android.annotation.EnforcePermission("android.permission.READ_CONTACTS")
+                @@ -7 +8
+                -         if (mContext.checkCallingPermission("android.permission.READ_CONTACTS", "foo")
+                -                 != PackageManager.PERMISSION_GRANTED) {
+                -             throw new SecurityException("yikes!");
+                -         }
+                +         test_enforcePermission();
+                """
+            )
     }
 
     fun testIfExpression_otherSideEffect_ignored() {
         lint().files(
-                java(
-                    """
-                    import android.content.Context;
-                    import android.test.ITest;
-                    public class Foo extends ITest.Stub {
-                        private Context mContext;
-                        @Override
-                        public void test() throws android.os.RemoteException {
-                            if (mContext.checkCallingPermission("android.permission.READ_CONTACTS", "foo")
-                                    != PackageManager.PERMISSION_GRANTED) {
-                                doSomethingElse();
-                                throw new SecurityException("yikes!");
-                            }
+            java(
+                """
+                import android.content.Context;
+                import android.test.ITest;
+                public class Foo extends ITest.Stub {
+                    private Context mContext;
+                    @Override
+                    public void test() throws android.os.RemoteException {
+                        if (mContext.checkCallingPermission("android.permission.READ_CONTACTS", "foo")
+                                != PackageManager.PERMISSION_GRANTED) {
+                            doSomethingElse();
+                            throw new SecurityException("yikes!");
                         }
                     }
-                    """
-                ).indented(),
-                *stubs
+                }
+                """
+            ).indented(),
+            *stubs
         )
-                .run()
-                .expectClean()
+            .run()
+            .expectClean()
     }
 
     fun testAnyOf_hardCodedAndVarArgs() {
@@ -718,6 +732,7 @@ class SimpleManualPermissionEnforcementDetectorTest : LintDetectorTest() {
                     +     @android.annotation.EnforcePermission(anyOf={"BAZ", "BUZZ", "FOO", "BAR"})
                     @@ -17 +18
                     -         helperHelper();
+                    +         test_enforcePermission();
                     """
                 )
     }

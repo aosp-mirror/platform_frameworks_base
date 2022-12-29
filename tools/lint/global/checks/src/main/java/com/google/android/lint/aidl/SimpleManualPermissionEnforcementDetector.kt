@@ -46,7 +46,7 @@ class SimpleManualPermissionEnforcementDetector : AidlImplementationDetector() {
             body: UBlockExpression
     ) {
         val enforcePermissionFix = accumulateSimplePermissionCheckFixes(body, context) ?: return
-        val lintFix = enforcePermissionFix.toLintFix(context.getLocation(node))
+        val lintFix = enforcePermissionFix.toLintFix(context, node)
         val message =
                 "$interfaceName permission check ${
                     if (enforcePermissionFix.errorLevel) "should" else "can"
@@ -54,14 +54,15 @@ class SimpleManualPermissionEnforcementDetector : AidlImplementationDetector() {
 
         val incident = Incident(
                 ISSUE_SIMPLE_MANUAL_PERMISSION_ENFORCEMENT,
-                enforcePermissionFix.locations.last(),
+                enforcePermissionFix.manualCheckLocations.last(),
                 message,
                 lintFix
         )
 
-        if (enforcePermissionFix.errorLevel) {
-            incident.overrideSeverity(Severity.ERROR)
-        }
+        // TODO(b/265014041): turn on errors once all code that would cause one is fixed
+        // if (enforcePermissionFix.errorLevel) {
+        //     incident.overrideSeverity(Severity.ERROR)
+        // }
 
         context.report(incident)
     }
@@ -142,7 +143,6 @@ class SimpleManualPermissionEnforcementDetector : AidlImplementationDetector() {
                         SimpleManualPermissionEnforcementDetector::class.java,
                         Scope.JAVA_FILE_SCOPE
                 ),
-                enabledByDefault = false, // TODO: enable once b/241171714 is resolved
         )
     }
 }
