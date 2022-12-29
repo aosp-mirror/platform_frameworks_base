@@ -36,7 +36,8 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.view.ViewRootImpl;
 import android.view.WindowManagerGlobal;
-import android.window.OnBackInvokedCallback;
+import android.window.BackEvent;
+import android.window.OnBackAnimationCallback;
 import android.window.OnBackInvokedDispatcher;
 
 import androidx.annotation.NonNull;
@@ -198,11 +199,38 @@ public class StatusBarKeyguardViewManager implements RemoteInputController.Callb
             }
     };
 
-    private final OnBackInvokedCallback mOnBackInvokedCallback = () -> {
-        if (DEBUG) {
-            Log.d(TAG, "onBackInvokedCallback() called, invoking onBackPressed()");
+    private final OnBackAnimationCallback mOnBackInvokedCallback = new OnBackAnimationCallback() {
+        @Override
+        public void onBackInvoked() {
+            if (DEBUG) {
+                Log.d(TAG, "onBackInvokedCallback() called, invoking onBackPressed()");
+            }
+            onBackPressed();
+            if (shouldPlayBackAnimation()) {
+                mPrimaryBouncerView.getDelegate().getBackCallback().onBackInvoked();
+            }
         }
-        onBackPressed();
+
+        @Override
+        public void onBackProgressed(BackEvent event) {
+            if (shouldPlayBackAnimation()) {
+                mPrimaryBouncerView.getDelegate().getBackCallback().onBackProgressed(event);
+            }
+        }
+
+        @Override
+        public void onBackCancelled() {
+            if (shouldPlayBackAnimation()) {
+                mPrimaryBouncerView.getDelegate().getBackCallback().onBackCancelled();
+            }
+        }
+
+        @Override
+        public void onBackStarted(BackEvent event) {
+            if (shouldPlayBackAnimation()) {
+                mPrimaryBouncerView.getDelegate().getBackCallback().onBackStarted(event);
+            }
+        }
     };
     private boolean mIsBackCallbackRegistered = false;
 
@@ -256,6 +284,7 @@ public class StatusBarKeyguardViewManager implements RemoteInputController.Callb
     private boolean mIsModernBouncerEnabled;
     private boolean mIsUnoccludeTransitionFlagEnabled;
     private boolean mIsModernAlternateBouncerEnabled;
+    private boolean mIsBackAnimationEnabled;
 
     private OnDismissAction mAfterKeyguardGoneAction;
     private Runnable mKeyguardGoneCancelAction;
@@ -337,6 +366,8 @@ public class StatusBarKeyguardViewManager implements RemoteInputController.Callb
         mIsUnoccludeTransitionFlagEnabled = featureFlags.isEnabled(Flags.UNOCCLUSION_TRANSITION);
         mIsModernAlternateBouncerEnabled = featureFlags.isEnabled(Flags.MODERN_ALTERNATE_BOUNCER);
         mAlternateBouncerInteractor = alternateBouncerInteractor;
+        mIsBackAnimationEnabled =
+                featureFlags.isEnabled(Flags.WM_ENABLE_PREDICTIVE_BACK_BOUNCER_ANIM);
     }
 
     @Override
@@ -470,6 +501,11 @@ public class StatusBarKeyguardViewManager implements RemoteInputController.Callb
                 Log.d(TAG, "prevented unregistering back callback twice");
             }
         }
+    }
+
+    private boolean shouldPlayBackAnimation() {
+        // Suppress back animation when bouncer shouldn't be dismissed on back invocation.
+        return !needsFullscreenBouncer() && mIsBackAnimationEnabled;
     }
 
     @Override
