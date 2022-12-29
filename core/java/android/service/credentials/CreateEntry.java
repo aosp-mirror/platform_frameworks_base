@@ -17,6 +17,7 @@
 package android.service.credentials;
 
 import android.annotation.NonNull;
+import android.annotation.SuppressLint;
 import android.app.PendingIntent;
 import android.app.slice.Slice;
 import android.os.Parcel;
@@ -25,8 +26,14 @@ import android.os.Parcelable;
 /**
  * An entry to be shown on the UI. This entry represents where the credential to be created will
  * be stored. Examples include user's account, family group etc.
+ *
+ * <p>Any class that derives this class must only add extra field values to the {@code slice}
+ * object passed into the constructor. Any other field will not be parceled through. If the
+ * derived class has custom parceling implementation, this class will not be able to unpack
+ * the parcel without having access to that implementation.
  */
-public final class CreateEntry implements Parcelable {
+@SuppressLint("ParcelNotFinal")
+public class CreateEntry implements Parcelable {
     private final @NonNull Slice mSlice;
     private final @NonNull PendingIntent mPendingIntent;
 

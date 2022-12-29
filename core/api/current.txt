@@ -39711,7 +39711,7 @@ package android.service.controls.templates {
 
 package android.service.credentials {
 
-  public final class Action implements android.os.Parcelable {
+  public class Action implements android.os.Parcelable {
     ctor public Action(@NonNull android.app.slice.Slice, @NonNull android.app.PendingIntent);
     method public int describeContents();
     method @NonNull public android.app.PendingIntent getPendingIntent();
@@ -39720,7 +39720,7 @@ package android.service.credentials {
     field @NonNull public static final android.os.Parcelable.Creator<android.service.credentials.Action> CREATOR;
   }
 
-  public final class BeginCreateCredentialRequest implements android.os.Parcelable {
+  public class BeginCreateCredentialRequest implements android.os.Parcelable {
     ctor public BeginCreateCredentialRequest(@NonNull android.service.credentials.CallingAppInfo, @NonNull String, @NonNull android.os.Bundle);
     method public int describeContents();
     method @NonNull public android.service.credentials.CallingAppInfo getCallingAppInfo();
@@ -39746,7 +39746,7 @@ package android.service.credentials {
     method @NonNull public android.service.credentials.BeginCreateCredentialResponse.Builder setRemoteCreateEntry(@Nullable android.service.credentials.CreateEntry);
   }
 
-  public final class BeginGetCredentialOption implements android.os.Parcelable {
+  public class BeginGetCredentialOption implements android.os.Parcelable {
     ctor public BeginGetCredentialOption(@NonNull String, @NonNull android.os.Bundle);
     method public int describeContents();
     method @NonNull public android.os.Bundle getCandidateQueryData();
@@ -39808,7 +39808,7 @@ package android.service.credentials {
     field @NonNull public static final android.os.Parcelable.Creator<android.service.credentials.CreateCredentialRequest> CREATOR;
   }
 
-  public final class CreateEntry implements android.os.Parcelable {
+  public class CreateEntry implements android.os.Parcelable {
     ctor public CreateEntry(@NonNull android.app.slice.Slice, @NonNull android.app.PendingIntent);
     method public int describeContents();
     method @NonNull public android.app.PendingIntent getPendingIntent();
@@ -39817,7 +39817,8 @@ package android.service.credentials {
     field @NonNull public static final android.os.Parcelable.Creator<android.service.credentials.CreateEntry> CREATOR;
   }
 
-  public final class CredentialEntry implements android.os.Parcelable {
+  public class CredentialEntry implements android.os.Parcelable {
+    ctor public CredentialEntry(@NonNull String, @NonNull android.app.slice.Slice, @NonNull android.app.PendingIntent, boolean);
     method public int describeContents();
     method @NonNull public android.app.PendingIntent getPendingIntent();
     method @NonNull public android.app.slice.Slice getSlice();
@@ -39825,12 +39826,6 @@ package android.service.credentials {
     method public boolean isAutoSelectAllowed();
     method public void writeToParcel(@NonNull android.os.Parcel, int);
     field @NonNull public static final android.os.Parcelable.Creator<android.service.credentials.CredentialEntry> CREATOR;
-  }
-
-  public static final class CredentialEntry.Builder {
-    ctor public CredentialEntry.Builder(@NonNull String, @NonNull android.app.slice.Slice, @NonNull android.app.PendingIntent);
-    method @NonNull public android.service.credentials.CredentialEntry build();
-    method @NonNull public android.service.credentials.CredentialEntry.Builder setAutoSelectAllowed(@NonNull boolean);
   }
 
   public abstract class CredentialProviderService extends android.app.Service {
