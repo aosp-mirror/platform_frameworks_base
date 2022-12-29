@@ -66,6 +66,7 @@ import com.android.server.utils.EventLogger;
 import java.io.PrintWriter;
 import java.lang.ref.WeakReference;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashSet;
@@ -2173,8 +2174,7 @@ class MediaRouter2ServiceImpl {
 
             // For system provider, notify all routers.
             if (provider == mSystemProvider) {
-                MediaRouter2ServiceImpl service = mServiceRef.get();
-                if (service == null) {
+                if (mServiceRef.get() == null) {
                     return;
                 }
                 notifySessionInfoChangedToRouters(getRouters(true), sessionInfo);
@@ -2189,7 +2189,7 @@ class MediaRouter2ServiceImpl {
                         + sessionInfo);
                 return;
             }
-            notifySessionInfoChangedToRouter(routerRecord, sessionInfo);
+            notifySessionInfoChangedToRouters(Arrays.asList(routerRecord.mRouter), sessionInfo);
         }
 
         private void onSessionReleasedOnHandler(@NonNull MediaRoute2Provider provider,
@@ -2280,16 +2280,6 @@ class MediaRouter2ServiceImpl {
             }
         }
 
-        private void notifySessionInfoChangedToRouter(@NonNull RouterRecord routerRecord,
-                @NonNull RoutingSessionInfo sessionInfo) {
-            try {
-                routerRecord.mRouter.notifySessionInfoChanged(sessionInfo);
-            } catch (RemoteException ex) {
-                Slog.w(TAG, "Failed to notify router of the session info change."
-                        + " Router probably died.", ex);
-            }
-        }
-
         private void notifySessionReleasedToRouter(@NonNull RouterRecord routerRecord,
                 @NonNull RoutingSessionInfo sessionInfo) {
             try {
@@ -2298,20 +2288,6 @@ class MediaRouter2ServiceImpl {
                 Slog.w(TAG, "Failed to notify router of the session release."
                         + " Router probably died.", ex);
             }
-        }
-
-        private List<IMediaRouter2> getAllRouters() {
-            final List<IMediaRouter2> routers = new ArrayList<>();
-            MediaRouter2ServiceImpl service = mServiceRef.get();
-            if (service == null) {
-                return routers;
-            }
-            synchronized (service.mLock) {
-                for (RouterRecord routerRecord : mUserRecord.mRouterRecords) {
-                    routers.add(routerRecord.mRouter);
-                }
-            }
-            return routers;
         }
 
         private List<IMediaRouter2> getRouters(boolean hasModifyAudioRoutingPermission) {
