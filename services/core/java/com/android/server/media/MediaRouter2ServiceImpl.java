@@ -596,7 +596,7 @@ class MediaRouter2ServiceImpl {
 
     // Start of methods that implements operations for both MediaRouter2 and MediaRouter2Manager.
 
-    @NonNull
+    @Nullable
     public RoutingSessionInfo getSystemSessionInfo(
             @Nullable String packageName, boolean setDeviceRouteSelected) {
         final int uid = Binder.getCallingUid();
