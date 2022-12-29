@@ -687,6 +687,34 @@ public final class DataManagerTest {
     }
 
     @Test
+    public void testGetConversation_unsyncedShortcut() {
+        mDataManager.onUserUnlocked(USER_ID_PRIMARY);
+        ShortcutInfo shortcut = buildShortcutInfo(TEST_PKG_NAME, USER_ID_PRIMARY, TEST_SHORTCUT_ID,
+                buildPerson());
+        shortcut.setCached(ShortcutInfo.FLAG_PINNED);
+        mDataManager.addOrUpdateConversationInfo(shortcut);
+        assertThat(mDataManager.getConversation(TEST_PKG_NAME, USER_ID_PRIMARY,
+                TEST_SHORTCUT_ID)).isNotNull();
+        assertThat(mDataManager.getPackage(TEST_PKG_NAME, USER_ID_PRIMARY)
+                .getConversationStore()
+                .getConversation(TEST_SHORTCUT_ID)).isNotNull();
+
+        when(mShortcutServiceInternal.getShortcuts(
+                anyInt(), anyString(), anyLong(), anyString(), anyList(), any(), any(),
+                anyInt(), anyInt(), anyInt(), anyInt()))
+                .thenReturn(Collections.emptyList());
+        assertThat(mDataManager.getConversation(TEST_PKG_NAME, USER_ID_PRIMARY,
+                TEST_SHORTCUT_ID)).isNull();
+
+        // Conversation is removed from store as there is no matching shortcut in ShortcutManager
+        assertThat(mDataManager.getPackage(TEST_PKG_NAME, USER_ID_PRIMARY)
+                .getConversationStore()
+                .getConversation(TEST_SHORTCUT_ID)).isNull();
+        verify(mNotificationManagerInternal)
+                .onConversationRemoved(TEST_PKG_NAME, TEST_PKG_UID, Set.of(TEST_SHORTCUT_ID));
+    }
+
+    @Test
     public void testOnNotificationChannelModified() {
         mDataManager.onUserUnlocked(USER_ID_PRIMARY);
         assertThat(mDataManager.getConversation(TEST_PKG_NAME, USER_ID_PRIMARY,
