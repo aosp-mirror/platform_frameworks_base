@@ -29,6 +29,9 @@ import android.view.View;
 import android.view.View.OnKeyListener;
 import android.view.ViewTreeObserver;
 import android.widget.FrameLayout;
+import android.window.OnBackAnimationCallback;
+
+import androidx.annotation.NonNull;
 
 import com.android.keyguard.KeyguardSecurityContainer.SecurityCallback;
 import com.android.keyguard.KeyguardSecurityModel.SecurityMode;
@@ -391,6 +394,14 @@ public class KeyguardHostViewController extends ViewController<KeyguardHostView>
             return true;
         }
         return false;
+    }
+
+    /**
+     * @return the {@link OnBackAnimationCallback} to animate this view during a back gesture.
+     */
+    @NonNull
+    public OnBackAnimationCallback getBackCallback() {
+        return mKeyguardSecurityContainerController.getBackCallback();
     }
 
     /**
