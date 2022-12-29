@@ -3229,8 +3229,7 @@ public final class PowerManagerService extends SystemService
             }
             final PowerGroup powerGroup = mPowerGroups.get(groupId);
             wakefulness = powerGroup.getWakefulnessLocked();
-            if ((wakefulness == WAKEFULNESS_DREAMING || wakefulness == WAKEFULNESS_DOZING) &&
-                    powerGroup.isSandmanSummonedLocked() && powerGroup.isReadyLocked()) {
+            if (powerGroup.isSandmanSummonedLocked() && powerGroup.isReadyLocked()) {
                 startDreaming = canDreamLocked(powerGroup) || canDozeLocked(powerGroup);
                 powerGroup.setSandmanSummonedLocked(/* isSandmanSummoned= */ false);
             } else {
