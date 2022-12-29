@@ -25,12 +25,14 @@ import com.android.tools.lint.detector.api.JavaContext
 import com.android.tools.lint.detector.api.Scope
 import com.android.tools.lint.detector.api.Severity
 import com.android.tools.lint.detector.api.SourceCodeScanner
+import com.google.android.lint.findCallExpression
 import com.intellij.psi.PsiElement
 import org.jetbrains.uast.UBlockExpression
 import org.jetbrains.uast.UDeclarationsExpression
 import org.jetbrains.uast.UElement
 import org.jetbrains.uast.UExpression
 import org.jetbrains.uast.UMethod
+import org.jetbrains.uast.skipParenthesizedExprDown
 
 class EnforcePermissionHelperDetector : Detector(), SourceCodeScanner {
     override fun getApplicableUastTypes(): List<Class<out UElement?>> =
@@ -43,34 +45,35 @@ class EnforcePermissionHelperDetector : Detector(), SourceCodeScanner {
             if (context.evaluator.isAbstract(node)) return
             if (!node.hasAnnotation(ANNOTATION_ENFORCE_PERMISSION)) return
 
-            val targetExpression = "super.${node.name}$HELPER_SUFFIX()"
+            val targetExpression = "${node.name}$HELPER_SUFFIX()"
+            val message = "Method must start with $targetExpression or super.${node.name}()"
 
-            val body = node.uastBody as? UBlockExpression
-            if (body == null) {
-                context.report(
-                        ISSUE_ENFORCE_PERMISSION_HELPER,
-                        context.getLocation(node),
-                        "Method must start with $targetExpression",
-                )
-                return
-            }
+            val firstExpression = (node.uastBody as? UBlockExpression)
+                    ?.expressions?.firstOrNull()
 
-            val firstExpression = body.expressions.firstOrNull()
             if (firstExpression == null) {
                 context.report(
                     ISSUE_ENFORCE_PERMISSION_HELPER,
                     context.getLocation(node),
-                    "Method must start with $targetExpression",
+                    message,
                 )
                 return
             }
 
-            val firstExpressionSource = firstExpression.asSourceString()
-                    .filterNot(Char::isWhitespace)
+            val firstExpressionSource = firstExpression.skipParenthesizedExprDown()
+              .asSourceString()
+              .filterNot(Char::isWhitespace)
 
-            if (firstExpressionSource != targetExpression) {
+            if (firstExpressionSource != targetExpression &&
+                  firstExpressionSource != "super.$targetExpression") {
+                // calling super.<methodName>() is also legal
+                val directSuper = context.evaluator.getSuperMethod(node)
+                val firstCall = findCallExpression(firstExpression)?.resolve()
+                if (directSuper != null && firstCall == directSuper) return
+
                 val locationTarget = getLocationTarget(firstExpression)
                 val expressionLocation = context.getLocation(locationTarget)
+
                 val indent = " ".repeat(expressionLocation.start?.column ?: 0)
 
                 val fix = fix()
@@ -85,7 +88,7 @@ class EnforcePermissionHelperDetector : Detector(), SourceCodeScanner {
                 context.report(
                     ISSUE_ENFORCE_PERMISSION_HELPER,
                     context.getLocation(node),
-                    "Method must start with $targetExpression",
+                    message,
                     fix
                 )
             }
@@ -99,7 +102,8 @@ class EnforcePermissionHelperDetector : Detector(), SourceCodeScanner {
             When @EnforcePermission is applied, the AIDL compiler generates a Stub method to do the
             permission check called yourMethodName$HELPER_SUFFIX.
 
-            You must call this method as the first expression in your implementation.
+            yourMethodName$HELPER_SUFFIX must be executed before any other operation. To do that, you can
+            either call it directly or indirectly via super.yourMethodName().
             """
 
         val ISSUE_ENFORCE_PERMISSION_HELPER: Issue = Issue.create(
