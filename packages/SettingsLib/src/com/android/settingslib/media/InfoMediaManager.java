@@ -58,7 +58,9 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.Executor;
 import java.util.concurrent.Executors;
 import java.util.stream.Collectors;
@@ -82,6 +84,8 @@ public class InfoMediaManager extends MediaManager {
 
     private MediaDevice mCurrentConnectedDevice;
     private LocalBluetoothManager mBluetoothManager;
+    private final Map<String, RouteListingPreference.Item> mPreferenceItemMap =
+            new ConcurrentHashMap<>();
 
     public InfoMediaManager(Context context, String packageName, Notification notification,
             LocalBluetoothManager localBluetoothManager) {
@@ -248,7 +252,7 @@ public class InfoMediaManager extends MediaManager {
         if (info != null) {
             for (MediaRoute2Info route : mRouterManager.getSelectableRoutes(info)) {
                 deviceList.add(new InfoMediaDevice(mContext, mRouterManager,
-                        route, mPackageName));
+                        route, mPackageName, mPreferenceItemMap.get(route.getId())));
             }
             return deviceList;
         }
@@ -275,7 +279,7 @@ public class InfoMediaManager extends MediaManager {
         if (info != null) {
             for (MediaRoute2Info route : mRouterManager.getDeselectableRoutes(info)) {
                 deviceList.add(new InfoMediaDevice(mContext, mRouterManager,
-                        route, mPackageName));
+                        route, mPackageName, mPreferenceItemMap.get(route.getId())));
                 Log.d(TAG, route.getName() + " is deselectable for " + mPackageName);
             }
             return deviceList;
@@ -302,7 +306,7 @@ public class InfoMediaManager extends MediaManager {
         if (info != null) {
             for (MediaRoute2Info route : mRouterManager.getSelectedRoutes(info)) {
                 deviceList.add(new InfoMediaDevice(mContext, mRouterManager,
-                        route, mPackageName));
+                        route, mPackageName, mPreferenceItemMap.get(route.getId())));
             }
             return deviceList;
         }
@@ -510,7 +514,7 @@ public class InfoMediaManager extends MediaManager {
             case TYPE_GROUP:
                 //TODO(b/148765806): use correct device type once api is ready.
                 mediaDevice = new InfoMediaDevice(mContext, mRouterManager, route,
-                        mPackageName);
+                        mPackageName, mPreferenceItemMap.get(route.getId()));
                 if (!TextUtils.isEmpty(mPackageName)
                         && getRoutingSessionInfo().getSelectedRoutes().contains(route.getId())) {
                     mediaDevice.setState(STATE_SELECTED);
@@ -601,6 +605,16 @@ public class InfoMediaManager extends MediaManager {
         public void onSessionUpdated(RoutingSessionInfo sessionInfo) {
             refreshDevices();
         }
+
+        @Override
+        public void onRouteListingPreferenceUpdated(
+                String packageName,
+                RouteListingPreference routeListingPreference) {
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.UPSIDE_DOWN_CAKE) {
+                Api34Impl.onRouteListingPreferenceUpdated(packageName, routeListingPreference,
+                        mPreferenceItemMap);
+            }
+        }
     }
 
     @RequiresApi(34)
@@ -665,6 +679,19 @@ public class InfoMediaManager extends MediaManager {
                     mediaRouter2Manager.getRouteListingPreference(packageName);
             return routeListingPreference != null
                     && !routeListingPreference.getUseSystemOrdering();
+        }
+
+        @DoNotInline
+        static void onRouteListingPreferenceUpdated(
+                String packageName,
+                RouteListingPreference routeListingPreference,
+                Map<String, RouteListingPreference.Item> preferenceItemMap) {
+            preferenceItemMap.clear();
+            if (routeListingPreference != null) {
+                routeListingPreference.getItems().forEach((item) -> {
+                    preferenceItemMap.put(item.getRouteId(), item);
+                });
+            }
         }
     }
 }
