@@ -35162,7 +35162,7 @@ package android.provider {
   }
 
   public static final class ContactsContract.CommonDataKinds.Email implements android.provider.ContactsContract.CommonDataKinds.CommonColumns android.provider.ContactsContract.DataColumnsWithJoins {
-    method public static CharSequence getTypeLabel(android.content.res.Resources, int, CharSequence);
+    method public static CharSequence getTypeLabel(android.content.res.Resources, int, @Nullable CharSequence);
     method public static int getTypeLabelResource(int);
     field public static final String ADDRESS = "data1";
     field public static final android.net.Uri CONTENT_FILTER_URI;
@@ -35183,7 +35183,7 @@ package android.provider {
   }
 
   public static final class ContactsContract.CommonDataKinds.Event implements android.provider.ContactsContract.CommonDataKinds.CommonColumns android.provider.ContactsContract.DataColumnsWithJoins {
-    method public static CharSequence getTypeLabel(android.content.res.Resources, int, CharSequence);
+    method public static CharSequence getTypeLabel(android.content.res.Resources, int, @Nullable CharSequence);
     method public static int getTypeResource(Integer);
     field public static final String CONTENT_ITEM_TYPE = "vnd.android.cursor.item/contact_event";
     field public static final String EXTRA_ADDRESS_BOOK_INDEX = "android.provider.extra.ADDRESS_BOOK_INDEX";
@@ -35216,7 +35216,7 @@ package android.provider {
   public static final class ContactsContract.CommonDataKinds.Im implements android.provider.ContactsContract.CommonDataKinds.CommonColumns android.provider.ContactsContract.DataColumnsWithJoins {
     method public static CharSequence getProtocolLabel(android.content.res.Resources, int, CharSequence);
     method public static int getProtocolLabelResource(int);
-    method public static CharSequence getTypeLabel(android.content.res.Resources, int, CharSequence);
+    method public static CharSequence getTypeLabel(android.content.res.Resources, int, @Nullable CharSequence);
     method public static int getTypeLabelResource(int);
     field public static final String CONTENT_ITEM_TYPE = "vnd.android.cursor.item/im";
     field public static final String CUSTOM_PROTOCOL = "data6";
@@ -35262,7 +35262,7 @@ package android.provider {
   }
 
   public static final class ContactsContract.CommonDataKinds.Organization implements android.provider.ContactsContract.CommonDataKinds.CommonColumns android.provider.ContactsContract.DataColumnsWithJoins {
-    method public static CharSequence getTypeLabel(android.content.res.Resources, int, CharSequence);
+    method public static CharSequence getTypeLabel(android.content.res.Resources, int, @Nullable CharSequence);
     method public static int getTypeLabelResource(int);
     field public static final String COMPANY = "data1";
     field public static final String CONTENT_ITEM_TYPE = "vnd.android.cursor.item/organization";
@@ -35281,7 +35281,7 @@ package android.provider {
   }
 
   public static final class ContactsContract.CommonDataKinds.Phone implements android.provider.ContactsContract.CommonDataKinds.CommonColumns android.provider.ContactsContract.DataColumnsWithJoins {
-    method public static CharSequence getTypeLabel(android.content.res.Resources, int, CharSequence);
+    method public static CharSequence getTypeLabel(android.content.res.Resources, int, @Nullable CharSequence);
     method public static int getTypeLabelResource(int);
     field public static final android.net.Uri CONTENT_FILTER_URI;
     field public static final String CONTENT_ITEM_TYPE = "vnd.android.cursor.item/phone_v2";
@@ -35328,7 +35328,7 @@ package android.provider {
   }
 
   public static final class ContactsContract.CommonDataKinds.Relation implements android.provider.ContactsContract.CommonDataKinds.CommonColumns android.provider.ContactsContract.DataColumnsWithJoins {
-    method public static CharSequence getTypeLabel(android.content.res.Resources, int, CharSequence);
+    method public static CharSequence getTypeLabel(android.content.res.Resources, int, @Nullable CharSequence);
     method public static int getTypeLabelResource(int);
     field public static final String CONTENT_ITEM_TYPE = "vnd.android.cursor.item/relation";
     field public static final String EXTRA_ADDRESS_BOOK_INDEX = "android.provider.extra.ADDRESS_BOOK_INDEX";
@@ -35352,7 +35352,7 @@ package android.provider {
   }
 
   public static final class ContactsContract.CommonDataKinds.SipAddress implements android.provider.ContactsContract.CommonDataKinds.CommonColumns android.provider.ContactsContract.DataColumnsWithJoins {
-    method public static CharSequence getTypeLabel(android.content.res.Resources, int, CharSequence);
+    method public static CharSequence getTypeLabel(android.content.res.Resources, int, @Nullable CharSequence);
     method public static int getTypeLabelResource(int);
     field public static final String CONTENT_ITEM_TYPE = "vnd.android.cursor.item/sip_address";
     field public static final String EXTRA_ADDRESS_BOOK_INDEX = "android.provider.extra.ADDRESS_BOOK_INDEX";
@@ -35383,7 +35383,7 @@ package android.provider {
   }
 
   public static final class ContactsContract.CommonDataKinds.StructuredPostal implements android.provider.ContactsContract.CommonDataKinds.CommonColumns android.provider.ContactsContract.DataColumnsWithJoins {
-    method public static CharSequence getTypeLabel(android.content.res.Resources, int, CharSequence);
+    method public static CharSequence getTypeLabel(android.content.res.Resources, int, @Nullable CharSequence);
     method public static int getTypeLabelResource(int);
     field public static final String CITY = "data7";
     field public static final String CONTENT_ITEM_TYPE = "vnd.android.cursor.item/postal-address_v2";
