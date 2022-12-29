@@ -25,6 +25,7 @@ import static android.view.ViewRootImpl.CAPTION_ON_SHELL;
 import static android.view.WindowInsets.Type.FIRST;
 import static android.view.WindowInsets.Type.LAST;
 import static android.view.WindowInsets.Type.all;
+import static android.view.WindowInsets.Type.captionBar;
 import static android.view.WindowInsets.Type.ime;
 
 import android.animation.AnimationHandler;
@@ -44,13 +45,12 @@ import android.os.IBinder;
 import android.os.Process;
 import android.os.Trace;
 import android.text.TextUtils;
-import android.util.ArraySet;
+import android.util.IntArray;
 import android.util.Log;
 import android.util.Pair;
 import android.util.SparseArray;
 import android.util.proto.ProtoOutputStream;
 import android.view.InsetsSourceConsumer.ShowResult;
-import android.view.InsetsState.InternalInsetsType;
 import android.view.SurfaceControl.Transaction;
 import android.view.WindowInsets.Type;
 import android.view.WindowInsets.Type.InsetsType;
@@ -621,6 +621,79 @@ public class InsetsController implements WindowInsetsController, InsetsAnimation
     private final Runnable mInvokeControllableInsetsChangedListeners =
             this::invokeControllableInsetsChangedListeners;
 
+    private final InsetsState.OnTraverseCallbacks mRemoveGoneSources =
+            new InsetsState.OnTraverseCallbacks() {
+
+                private final IntArray mPendingRemoveIndexes = new IntArray();
+
+                @Override
+                public void onIdNotFoundInState2(int index1, InsetsSource source1) {
+                    if (!CAPTION_ON_SHELL && source1.getType() == captionBar()) {
+                        return;
+                    }
+
+                    // Don't change the indexes of the sources while traversing. Remove it later.
+                    mPendingRemoveIndexes.add(index1);
+
+                    // Remove the consumer as well except the IME one. IME consumer should always
+                    // be there since we need to communicate with InputMethodManager no matter we
+                    // have the source or not.
+                    if (source1.getType() != ime()) {
+                        mSourceConsumers.remove(source1.getId());
+                    }
+                }
+
+                @Override
+                public void onFinish(InsetsState state1, InsetsState state2) {
+                    for (int i = mPendingRemoveIndexes.size() - 1; i >= 0; i--) {
+                        state1.removeSourceAt(mPendingRemoveIndexes.get(i));
+                    }
+                    mPendingRemoveIndexes.clear();
+                }
+            };
+
+    private final InsetsState.OnTraverseCallbacks mStartResizingAnimationIfNeeded =
+            new InsetsState.OnTraverseCallbacks() {
+
+                private @InsetsType int mTypes;
+                private InsetsState mToState;
+
+                @Override
+                public void onStart(InsetsState state1, InsetsState state2) {
+                    mTypes = 0;
+                    mToState = null;
+                }
+
+                @Override
+                public void onIdMatch(InsetsSource source1, InsetsSource source2) {
+                    final @InsetsType int type = source1.getType();
+                    if ((type & Type.systemBars()) == 0
+                            || !source1.isVisible() || !source2.isVisible()
+                            || source1.getFrame().equals(source2.getFrame())
+                            || !(Rect.intersects(mFrame, source1.getFrame())
+                                    || Rect.intersects(mFrame, source2.getFrame()))) {
+                        return;
+                    }
+                    mTypes |= type;
+                    if (mToState == null) {
+                        mToState = new InsetsState();
+                    }
+                    mToState.addSource(new InsetsSource(source2));
+                }
+
+                @Override
+                public void onFinish(InsetsState state1, InsetsState state2) {
+                    if (mTypes == 0) {
+                        return;
+                    }
+                    cancelExistingControllers(mTypes);
+                    final InsetsAnimationControlRunner runner = new InsetsResizeAnimationRunner(
+                            mFrame, state1, mToState, RESIZE_INTERPOLATOR,
+                            ANIMATION_DURATION_RESIZE, mTypes, InsetsController.this);
+                    mRunningAnimations.add(new RunningAnimation(runner, runner.getAnimationType()));
+                }
+            };
+
     public InsetsController(Host host) {
         this(host, (controller, source) -> {
             if (source.getType() == ime()) {
@@ -739,29 +812,21 @@ public class InsetsController implements WindowInsetsController, InsetsAnimation
                 true /* excludeInvisibleIme */)) {
             if (DEBUG) Log.d(TAG, "onStateChanged, notifyInsetsChanged");
             mHost.notifyInsetsChanged();
-            startResizingAnimationIfNeeded(lastState);
+            if (lastState.getDisplayFrame().equals(mState.getDisplayFrame())) {
+                InsetsState.traverse(lastState, mState, mStartResizingAnimationIfNeeded);
+            }
         }
         return true;
     }
 
     private void updateState(InsetsState newState) {
         mState.set(newState, 0 /* types */);
-        for (int i = mSourceConsumers.size() - 1; i >= 0; i--) {
-            final InsetsSourceConsumer consumer = mSourceConsumers.valueAt(i);
-            final InsetsSource source = newState.peekSource(consumer.getId());
-            if (source == null && consumer != mImeSourceConsumer) {
-                // IME source consumer should always be there since we need to communicate with
-                // InputMethodManager no matter we have the source or not.
-                mSourceConsumers.removeAt(i);
-            }
-        }
         @InsetsType int existingTypes = 0;
         @InsetsType int visibleTypes = 0;
         @InsetsType int disabledUserAnimationTypes = 0;
         @InsetsType int[] cancelledUserAnimationTypes = {0};
-        for (int i = 0; i < InsetsState.SIZE; i++) {
-            InsetsSource source = newState.peekSource(i);
-            if (source == null) continue;
+        for (int i = 0, size = newState.sourceSize(); i < size; i++) {
+            final InsetsSource source = newState.sourceAt(i);
             @InsetsType int type = source.getType();
             @AnimationType int animationType = getAnimationType(type);
             if (!source.isUserControllable()) {
@@ -789,15 +854,7 @@ public class InsetsController implements WindowInsetsController, InsetsAnimation
             }
             mVisibleTypes = visibleTypes;
         }
-        for (@InternalInsetsType int type = 0; type < InsetsState.SIZE; type++) {
-            // Only update the server side insets here.
-            if (!CAPTION_ON_SHELL && type == ITYPE_CAPTION_BAR) continue;
-            InsetsSource source = mState.peekSource(type);
-            if (source == null) continue;
-            if (newState.peekSource(type) == null) {
-                mState.removeSource(type);
-            }
-        }
+        InsetsState.traverse(mState, newState, mRemoveGoneSources);
 
         updateDisabledUserAnimationTypes(disabledUserAnimationTypes);
 
@@ -825,50 +882,15 @@ public class InsetsController implements WindowInsetsController, InsetsAnimation
         if (CAPTION_ON_SHELL) {
             return false;
         }
-        if (mState.peekSource(ITYPE_CAPTION_BAR) == null
-                && mCaptionInsetsHeight == 0) {
+        final InsetsSource source = mState.peekSource(ITYPE_CAPTION_BAR);
+        if (source == null && mCaptionInsetsHeight == 0) {
             return false;
         }
-        if (mState.peekSource(ITYPE_CAPTION_BAR) != null
-                && mCaptionInsetsHeight
-                == mState.peekSource(ITYPE_CAPTION_BAR).getFrame().height()) {
+        if (source != null && mCaptionInsetsHeight == source.getFrame().height()) {
             return false;
         }
 
         return true;
-    }
-
-    private void startResizingAnimationIfNeeded(InsetsState fromState) {
-        if (!fromState.getDisplayFrame().equals(mState.getDisplayFrame())) {
-            return;
-        }
-        @InsetsType int types = 0;
-        InsetsState toState = null;
-        final ArraySet<Integer> internalTypes = InsetsState.toInternalType(Type.systemBars());
-        for (int i = internalTypes.size() - 1; i >= 0; i--) {
-            final @InternalInsetsType int type = internalTypes.valueAt(i);
-            final InsetsSource fromSource = fromState.peekSource(type);
-            final InsetsSource toSource = mState.peekSource(type);
-            if (fromSource != null && toSource != null
-                    && fromSource.isVisible() && toSource.isVisible()
-                    && !fromSource.getFrame().equals(toSource.getFrame())
-                    && (Rect.intersects(mFrame, fromSource.getFrame())
-                            || Rect.intersects(mFrame, toSource.getFrame()))) {
-                types |= toSource.getType();
-                if (toState == null) {
-                    toState = new InsetsState();
-                }
-                toState.addSource(new InsetsSource(toSource));
-            }
-        }
-        if (types == 0) {
-            return;
-        }
-        cancelExistingControllers(types);
-        final InsetsAnimationControlRunner runner = new InsetsResizeAnimationRunner(
-                mFrame, fromState, toState, RESIZE_INTERPOLATOR, ANIMATION_DURATION_RESIZE, types,
-                this);
-        mRunningAnimations.add(new RunningAnimation(runner, runner.getAnimationType()));
     }
 
     /**
@@ -1217,7 +1239,8 @@ public class InsetsController implements WindowInsetsController, InsetsAnimation
                 ImeTracker.get().onFailed(statsToken,
                         ImeTracker.PHASE_CLIENT_DISABLED_USER_ANIMATION);
 
-                if (fromIme && !mState.getSource(mImeSourceConsumer.getId()).isVisible()) {
+                if (fromIme
+                        && !mState.isSourceOrDefaultVisible(mImeSourceConsumer.getId(), ime())) {
                     // We've requested IMM to show IME, but the IME is not controllable. We need to
                     // cancel the request.
                     setRequestedVisibleTypes(0 /* visibleTypes */, ime());
@@ -1757,8 +1780,8 @@ public class InsetsController implements WindowInsetsController, InsetsAnimation
         if (mCaptionInsetsHeight != height) {
             mCaptionInsetsHeight = height;
             if (mCaptionInsetsHeight != 0) {
-                mState.getSource(ITYPE_CAPTION_BAR).setFrame(mFrame.left, mFrame.top,
-                        mFrame.right, mFrame.top + mCaptionInsetsHeight);
+                mState.getOrCreateSource(ITYPE_CAPTION_BAR, captionBar()).setFrame(
+                        mFrame.left, mFrame.top, mFrame.right, mFrame.top + mCaptionInsetsHeight);
             } else {
                 mState.removeSource(ITYPE_CAPTION_BAR);
             }

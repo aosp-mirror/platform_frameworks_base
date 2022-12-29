@@ -25,6 +25,7 @@ import static android.view.InsetsState.ITYPE_IME;
 import static android.view.InsetsState.ITYPE_NAVIGATION_BAR;
 import static android.view.InsetsState.ITYPE_STATUS_BAR;
 import static android.view.WindowInsets.Type.ime;
+import static android.view.WindowInsets.Type.statusBars;
 import static android.view.WindowManager.LayoutParams.FLAG_ALT_FOCUSABLE_IM;
 import static android.view.WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE;
 import static android.view.WindowManager.LayoutParams.TYPE_APPLICATION;
@@ -140,13 +141,11 @@ public class InsetsStateControllerTest extends WindowTestsBase {
         final WindowState app1 = createWindow(null, TYPE_APPLICATION, "app1");
         final WindowState app2 = createWindow(null, TYPE_APPLICATION, "app2");
 
-        app1.mAboveInsetsState.addSource(getController().getRawInsetsState().getSource(ITYPE_IME));
+        app1.mAboveInsetsState.addSource(getController().getRawInsetsState().peekSource(ITYPE_IME));
 
         getController().getRawInsetsState().setSourceVisible(ITYPE_IME, true);
-        assertFalse(app2.getInsetsState().getSource(ITYPE_IME)
-                .isVisible());
-        assertTrue(app1.getInsetsState().getSource(ITYPE_IME)
-                .isVisible());
+        assertFalse(app2.getInsetsState().isSourceOrDefaultVisible(ITYPE_IME, ime()));
+        assertTrue(app1.getInsetsState().isSourceOrDefaultVisible(ITYPE_IME, ime()));
     }
 
     @SetupWindows(addWindows = W_INPUT_METHOD)
@@ -155,11 +154,12 @@ public class InsetsStateControllerTest extends WindowTestsBase {
         getController().getSourceProvider(ITYPE_IME).setWindowContainer(mImeWindow, null, null);
 
         final WindowState app = createWindow(null, TYPE_APPLICATION, "app");
-        app.mAboveInsetsState.getSource(ITYPE_IME).setVisible(true);
-        app.mAboveInsetsState.getSource(ITYPE_IME).setFrame(mImeWindow.getFrame());
+        app.mAboveInsetsState.getOrCreateSource(ITYPE_IME, ime())
+                .setVisible(true)
+                .setFrame(mImeWindow.getFrame());
 
         getController().getRawInsetsState().setSourceVisible(ITYPE_IME, true);
-        assertTrue(app.getInsetsState().getSource(ITYPE_IME).isVisible());
+        assertTrue(app.getInsetsState().isSourceOrDefaultVisible(ITYPE_IME, ime()));
     }
 
     @SetupWindows(addWindows = W_INPUT_METHOD)
@@ -170,8 +170,7 @@ public class InsetsStateControllerTest extends WindowTestsBase {
         final WindowState app = createWindow(null, TYPE_APPLICATION, "app");
 
         getController().getRawInsetsState().setSourceVisible(ITYPE_IME, true);
-        assertFalse(app.getInsetsState().getSource(ITYPE_IME)
-                .isVisible());
+        assertFalse(app.getInsetsState().isSourceOrDefaultVisible(ITYPE_IME, ime()));
     }
 
     @SetupWindows(addWindows = W_INPUT_METHOD)
@@ -205,9 +204,8 @@ public class InsetsStateControllerTest extends WindowTestsBase {
         mDisplayContent.applySurfaceChangesTransaction();
 
         // app won't get visible IME insets while above IME even when IME is visible.
-        assertTrue(getController().getRawInsetsState().getSourceOrDefaultVisibility(ITYPE_IME));
-        assertFalse(app.getInsetsState().getSource(ITYPE_IME)
-                .isVisible());
+        assertTrue(getController().getRawInsetsState().isSourceOrDefaultVisible(ITYPE_IME, ime()));
+        assertFalse(app.getInsetsState().isSourceOrDefaultVisible(ITYPE_IME, ime()));
 
         // Reset invocation counter.
         clearInvocations(app);
@@ -216,14 +214,15 @@ public class InsetsStateControllerTest extends WindowTestsBase {
         app.mAttrs.flags &= ~FLAG_NOT_FOCUSABLE;
         mDisplayContent.computeImeTarget(true);
         mDisplayContent.applySurfaceChangesTransaction();
-        app.mAboveInsetsState.getSource(ITYPE_IME).setVisible(true);
-        app.mAboveInsetsState.getSource(ITYPE_IME).setFrame(mImeWindow.getFrame());
+        app.mAboveInsetsState.getOrCreateSource(ITYPE_IME, ime())
+                .setVisible(true)
+                .setFrame(mImeWindow.getFrame());
 
         // Make sure app got notified.
         verify(app, atLeastOnce()).notifyInsetsChanged();
 
         // app will get visible IME insets while below IME.
-        assertTrue(app.getInsetsState().getSource(ITYPE_IME).isVisible());
+        assertTrue(app.getInsetsState().isSourceOrDefaultVisible(ITYPE_IME, ime()));
     }
 
     @SetupWindows(addWindows = W_INPUT_METHOD)
@@ -242,9 +241,8 @@ public class InsetsStateControllerTest extends WindowTestsBase {
         mDisplayContent.applySurfaceChangesTransaction();
 
         getController().getRawInsetsState().setSourceVisible(ITYPE_IME, true);
-        assertTrue(app.getInsetsState().getSource(ITYPE_IME).isVisible());
-        assertFalse(child.getInsetsState().getSource(ITYPE_IME)
-                .isVisible());
+        assertTrue(app.getInsetsState().isSourceOrDefaultVisible(ITYPE_IME, ime()));
+        assertFalse(child.getInsetsState().isSourceOrDefaultVisible(ITYPE_IME, ime()));
     }
 
     @SetupWindows(addWindows = W_INPUT_METHOD)
@@ -263,9 +261,8 @@ public class InsetsStateControllerTest extends WindowTestsBase {
         mDisplayContent.applySurfaceChangesTransaction();
 
         getController().getRawInsetsState().setSourceVisible(ITYPE_IME, true);
-        assertTrue(app.getInsetsState().getSource(ITYPE_IME).isVisible());
-        assertFalse(child.getInsetsState().getSource(ITYPE_IME)
-                .isVisible());
+        assertTrue(app.getInsetsState().isSourceOrDefaultVisible(ITYPE_IME, ime()));
+        assertFalse(child.getInsetsState().isSourceOrDefaultVisible(ITYPE_IME, ime()));
     }
 
     @Test
@@ -290,7 +287,7 @@ public class InsetsStateControllerTest extends WindowTestsBase {
         statusBarProvider.onPostLayout();
 
         final InsetsState state = ime.getInsetsState();
-        assertEquals(new Rect(0, 1, 2, 3), state.getSource(ITYPE_STATUS_BAR).getFrame());
+        assertEquals(new Rect(0, 1, 2, 3), state.peekSource(ITYPE_STATUS_BAR).getFrame());
     }
 
     @Test
@@ -348,16 +345,17 @@ public class InsetsStateControllerTest extends WindowTestsBase {
 
         final InsetsState rotatedState = new InsetsState(app.getInsetsState(),
                 true /* copySources */);
+        rotatedState.getOrCreateSource(ITYPE_STATUS_BAR, statusBars());
         spyOn(app.mToken);
         doReturn(rotatedState).when(app.mToken).getFixedRotationTransformInsetsState();
-        assertTrue(rotatedState.getSource(ITYPE_STATUS_BAR).isVisible());
+        assertTrue(rotatedState.isSourceOrDefaultVisible(ITYPE_STATUS_BAR, statusBars()));
 
         provider.getSource().setVisible(false);
         mDisplayContent.getInsetsPolicy().showTransient(new int[] { ITYPE_STATUS_BAR },
                 true /* isGestureOnSystemBar */);
 
         assertTrue(mDisplayContent.getInsetsPolicy().isTransient(ITYPE_STATUS_BAR));
-        assertFalse(app.getInsetsState().getSource(ITYPE_STATUS_BAR).isVisible());
+        assertFalse(app.getInsetsState().isSourceOrDefaultVisible(ITYPE_STATUS_BAR, statusBars()));
     }
 
     @Test

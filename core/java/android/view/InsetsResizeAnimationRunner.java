@@ -33,7 +33,6 @@ import android.graphics.Insets;
 import android.graphics.Rect;
 import android.util.SparseArray;
 import android.util.proto.ProtoOutputStream;
-import android.view.InsetsState.InternalInsetsType;
 import android.view.WindowInsets.Type.InsetsType;
 import android.view.WindowInsetsAnimation.Bounds;
 import android.view.animation.Interpolator;
@@ -142,24 +141,23 @@ public class InsetsResizeAnimationRunner implements InsetsAnimationControlRunner
             return false;
         }
         final float fraction = mAnimation.getInterpolatedFraction();
-        for (@InternalInsetsType int type = 0; type < InsetsState.SIZE; type++) {
-            final InsetsSource fromSource = mFromState.peekSource(type);
-            final InsetsSource toSource = mToState.peekSource(type);
-            if (fromSource == null || toSource == null) {
-                continue;
+        InsetsState.traverse(mFromState, mToState, new InsetsState.OnTraverseCallbacks() {
+            @Override
+            public void onIdMatch(InsetsSource fromSource, InsetsSource toSource) {
+                final Rect fromFrame = fromSource.getFrame();
+                final Rect toFrame = toSource.getFrame();
+                final Rect frame = new Rect(
+                        (int) (fromFrame.left + fraction * (toFrame.left - fromFrame.left)),
+                        (int) (fromFrame.top + fraction * (toFrame.top - fromFrame.top)),
+                        (int) (fromFrame.right + fraction * (toFrame.right - fromFrame.right)),
+                        (int) (fromFrame.bottom + fraction * (toFrame.bottom - fromFrame.bottom)));
+                final InsetsSource source =
+                        new InsetsSource(fromSource.getId(), fromSource.getType());
+                source.setFrame(frame);
+                source.setVisible(toSource.isVisible());
+                outState.addSource(source);
             }
-            final Rect fromFrame = fromSource.getFrame();
-            final Rect toFrame = toSource.getFrame();
-            final Rect frame = new Rect(
-                    (int) (fromFrame.left + fraction * (toFrame.left - fromFrame.left)),
-                    (int) (fromFrame.top + fraction * (toFrame.top - fromFrame.top)),
-                    (int) (fromFrame.right + fraction * (toFrame.right - fromFrame.right)),
-                    (int) (fromFrame.bottom + fraction * (toFrame.bottom - fromFrame.bottom)));
-            final InsetsSource source = new InsetsSource(type, fromSource.getType());
-            source.setFrame(frame);
-            source.setVisible(toSource.isVisible());
-            outState.addSource(source);
-        }
+        });
         if (mFinished) {
             mController.notifyFinished(this, true /* shown */);
         }

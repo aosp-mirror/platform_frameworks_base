@@ -18,6 +18,8 @@ package android.view;
 
 import static android.view.InsetsState.ITYPE_NAVIGATION_BAR;
 import static android.view.InsetsState.ITYPE_STATUS_BAR;
+import static android.view.WindowInsets.Type.navigationBars;
+import static android.view.WindowInsets.Type.statusBars;
 import static android.view.WindowInsets.Type.systemBars;
 
 import static org.junit.Assert.assertEquals;
@@ -87,8 +89,10 @@ public class InsetsAnimationControlImplTest {
                 .setName("testSurface")
                 .build();
         mInsetsState = new InsetsState();
-        mInsetsState.getSource(ITYPE_STATUS_BAR).setFrame(new Rect(0, 0, 500, 100));
-        mInsetsState.getSource(ITYPE_NAVIGATION_BAR).setFrame(new Rect(400, 0, 500, 500));
+        mInsetsState.getOrCreateSource(ITYPE_STATUS_BAR, statusBars())
+                .setFrame(new Rect(0, 0, 500, 100));
+        mInsetsState.getOrCreateSource(ITYPE_NAVIGATION_BAR, navigationBars())
+                .setFrame(new Rect(400, 0, 500, 500));
         InsetsSourceConsumer topConsumer = new InsetsSourceConsumer(ITYPE_STATUS_BAR,
                 WindowInsets.Type.statusBars(), mInsetsState,
                 () -> mMockTransaction, mMockController);

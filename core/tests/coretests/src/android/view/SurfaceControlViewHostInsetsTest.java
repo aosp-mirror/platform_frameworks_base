@@ -16,34 +16,25 @@
 
 package android.view;
 
+import static android.view.InsetsState.ITYPE_STATUS_BAR;
+
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNotEquals;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
-
-import static android.view.InsetsState.ITYPE_STATUS_BAR;
 
 import android.app.Instrumentation;
 import android.content.Context;
 import android.graphics.Insets;
-import android.graphics.Point;
 import android.graphics.Rect;
 import android.os.Binder;
 import android.platform.test.annotations.Presubmit;
-import android.view.InsetsState.InternalInsetsType;
-import android.view.SurfaceControlViewHost;
-import android.view.View;
-import android.view.WindowInsets;
-import android.view.WindowInsets.Type;
+
+import androidx.test.ext.junit.runners.AndroidJUnit4;
+import androidx.test.platform.app.InstrumentationRegistry;
 
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-
-import androidx.test.platform.app.InstrumentationRegistry;
-import androidx.test.ext.junit.runners.AndroidJUnit4;
 
 @Presubmit
 @RunWith(AndroidJUnit4.class)
@@ -79,8 +70,9 @@ public class SurfaceControlViewHostInsetsTest {
     private InsetsState statusBarState(boolean visible) {
         final InsetsState insetsState = new InsetsState();
         insetsState.setDisplayFrame(new Rect(0, 0, 1000, 1000));
-        insetsState.getSource(ITYPE_STATUS_BAR).setVisible(visible);
-        insetsState.getSource(ITYPE_STATUS_BAR).setFrame(new Rect(0, 0, 100, 10));
+        insetsState.getOrCreateSource(ITYPE_STATUS_BAR, WindowInsets.Type.statusBars())
+                .setVisible(visible)
+                .setFrame(new Rect(0, 0, 100, 10));
         return insetsState;
     }
 

@@ -20,6 +20,7 @@ import static android.view.InsetsStateProto.DISPLAY_CUTOUT;
 import static android.view.InsetsStateProto.DISPLAY_FRAME;
 import static android.view.InsetsStateProto.SOURCES;
 import static android.view.View.SYSTEM_UI_FLAG_LAYOUT_STABLE;
+import static android.view.WindowInsets.Type.captionBar;
 import static android.view.WindowInsets.Type.displayCutout;
 import static android.view.WindowInsets.Type.ime;
 import static android.view.WindowInsets.Type.indexOf;
@@ -42,6 +43,7 @@ import android.graphics.Rect;
 import android.os.Parcel;
 import android.os.Parcelable;
 import android.util.ArraySet;
+import android.util.SparseArray;
 import android.util.SparseIntArray;
 import android.util.proto.ProtoOutputStream;
 import android.view.WindowInsets.Type;
@@ -53,7 +55,6 @@ import com.android.internal.annotations.VisibleForTesting;
 import java.io.PrintWriter;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
-import java.util.Arrays;
 import java.util.Objects;
 import java.util.StringJoiner;
 
@@ -105,9 +106,7 @@ public class InsetsState implements Parcelable {
      */
     public static final int ITYPE_INVALID = -1;
 
-    static final int FIRST_TYPE = 0;
-
-    public static final int ITYPE_STATUS_BAR = FIRST_TYPE;
+    public static final int ITYPE_STATUS_BAR = 0;
     public static final int ITYPE_NAVIGATION_BAR = 1;
     public static final int ITYPE_CAPTION_BAR = 2;
 
@@ -144,14 +143,6 @@ public class InsetsState implements Parcelable {
     public static final int ITYPE_RIGHT_GENERIC_OVERLAY = 24;
     public static final int ITYPE_BOTTOM_GENERIC_OVERLAY = 25;
 
-    static final int LAST_TYPE = ITYPE_BOTTOM_GENERIC_OVERLAY;
-    public static final int SIZE = LAST_TYPE + 1;
-
-    // Derived types
-
-    /** A shelf is the same as the navigation bar. */
-    public static final int ITYPE_SHELF = ITYPE_NAVIGATION_BAR;
-
     @Retention(RetentionPolicy.SOURCE)
     @IntDef(prefix = "IINSETS_SIDE", value = {
             ISIDE_LEFT,
@@ -169,7 +160,7 @@ public class InsetsState implements Parcelable {
     static final int ISIDE_FLOATING = 4;
     static final int ISIDE_UNKNOWN = 5;
 
-    private final InsetsSource[] mSources = new InsetsSource[SIZE];
+    private final SparseArray<InsetsSource> mSources;
 
     /**
      * The frame of the display these sources are relative to.
@@ -201,13 +192,15 @@ public class InsetsState implements Parcelable {
     private DisplayShape mDisplayShape = DisplayShape.NONE;
 
     public InsetsState() {
+        mSources = new SparseArray<>();
     }
 
     public InsetsState(InsetsState copy) {
-        set(copy);
+        this(copy, false /* copySources */);
     }
 
     public InsetsState(InsetsState copy, boolean copySources) {
+        mSources = new SparseArray<>(copy.mSources.size());
         set(copy, copySources);
     }
 
@@ -230,15 +223,8 @@ public class InsetsState implements Parcelable {
         boolean[] typeVisibilityMap = new boolean[Type.SIZE];
         final Rect relativeFrame = new Rect(frame);
         final Rect relativeFrameMax = new Rect(frame);
-        for (int type = FIRST_TYPE; type <= LAST_TYPE; type++) {
-            InsetsSource source = mSources[type];
-            if (source == null) {
-                int index = indexOf(toPublicType(type));
-                if (typeInsetsMap[index] == null) {
-                    typeInsetsMap[index] = Insets.NONE;
-                }
-                continue;
-            }
+        for (int i = mSources.size() - 1; i >= 0; i--) {
+            final InsetsSource source = mSources.valueAt(i);
 
             processSource(source, relativeFrame, false /* ignoreVisibility */, typeInsetsMap,
                     typeSideMap, typeVisibilityMap);
@@ -247,7 +233,7 @@ public class InsetsState implements Parcelable {
             // target.
             if (source.getType() != WindowInsets.Type.ime()) {
                 InsetsSource ignoringVisibilitySource = ignoringVisibilityState != null
-                        ? ignoringVisibilityState.getSource(type)
+                        ? ignoringVisibilityState.peekSource(source.getId())
                         : source;
                 if (ignoringVisibilitySource == null) {
                     continue;
@@ -306,8 +292,9 @@ public class InsetsState implements Parcelable {
         // If mRoundedCornerFrame is set, we should calculate the new RoundedCorners based on this
         // frame.
         final Rect roundedCornerFrame = new Rect(mRoundedCornerFrame);
-        for (InsetsSource source : mSources) {
-            if (source != null && source.getInsetsRoundedCornerFrame()) {
+        for (int i = mSources.size() - 1; i >= 0; i--) {
+            final InsetsSource source = mSources.valueAt(i);
+            if (source.getInsetsRoundedCornerFrame()) {
                 final Insets insets = source.calculateInsets(roundedCornerFrame, false);
                 roundedCornerFrame.inset(insets);
             }
@@ -351,13 +338,9 @@ public class InsetsState implements Parcelable {
 
     public Insets calculateInsets(Rect frame, @InsetsType int types, boolean ignoreVisibility) {
         Insets insets = Insets.NONE;
-        for (int type = FIRST_TYPE; type <= LAST_TYPE; type++) {
-            InsetsSource source = mSources[type];
-            if (source == null) {
-                continue;
-            }
-            int publicType = InsetsState.toPublicType(type);
-            if ((publicType & types) == 0) {
+        for (int i = mSources.size() - 1; i >= 0; i--) {
+            final InsetsSource source = mSources.valueAt(i);
+            if ((source.getType() & types) == 0) {
                 continue;
             }
             insets = Insets.max(source.calculateInsets(frame, ignoreVisibility), insets);
@@ -368,13 +351,9 @@ public class InsetsState implements Parcelable {
     public Insets calculateInsets(Rect frame, @InsetsType int types,
             @InsetsType int requestedVisibleTypes) {
         Insets insets = Insets.NONE;
-        for (int type = FIRST_TYPE; type <= LAST_TYPE; type++) {
-            InsetsSource source = mSources[type];
-            if (source == null) {
-                continue;
-            }
-            int publicType = InsetsState.toPublicType(type);
-            if ((publicType & types & requestedVisibleTypes) == 0) {
+        for (int i = mSources.size() - 1; i >= 0; i--) {
+            final InsetsSource source = mSources.valueAt(i);
+            if ((source.getType() & types & requestedVisibleTypes) == 0) {
                 continue;
             }
             insets = Insets.max(source.calculateInsets(frame, true), insets);
@@ -392,13 +371,9 @@ public class InsetsState implements Parcelable {
                 ? systemBars() | ime()
                 : systemBars();
         Insets insets = Insets.NONE;
-        for (int type = FIRST_TYPE; type <= LAST_TYPE; type++) {
-            InsetsSource source = mSources[type];
-            if (source == null) {
-                continue;
-            }
-            final int publicType = InsetsState.toPublicType(type);
-            if ((publicType & visibleInsetsTypes) == 0) {
+        for (int i = mSources.size() - 1; i >= 0; i--) {
+            final InsetsSource source = mSources.valueAt(i);
+            if ((source.getType() & visibleInsetsTypes) == 0) {
                 continue;
             }
             insets = Insets.max(source.calculateVisibleInsets(frame), insets);
@@ -416,13 +391,10 @@ public class InsetsState implements Parcelable {
     @InsetsType
     public int calculateUncontrollableInsetsFromFrame(Rect frame) {
         int blocked = 0;
-        for (int type = FIRST_TYPE; type <= LAST_TYPE; type++) {
-            InsetsSource source = mSources[type];
-            if (source == null) {
-                continue;
-            }
+        for (int i = mSources.size() - 1; i >= 0; i--) {
+            final InsetsSource source = mSources.valueAt(i);
             if (!canControlSource(frame, source)) {
-                blocked |= toPublicType(type);
+                blocked |= source.getType();
             }
         }
         return blocked;
@@ -514,31 +486,60 @@ public class InsetsState implements Parcelable {
         return ISIDE_UNKNOWN;
     }
 
-    public InsetsSource getSource(@InternalInsetsType int type) {
-        InsetsSource source = mSources[type];
+    /**
+     * Gets the source mapped from the ID, or creates one if no such mapping has been made.
+     */
+    public InsetsSource getOrCreateSource(int id, int type) {
+        InsetsSource source = mSources.get(id);
         if (source != null) {
             return source;
         }
-        source = new InsetsSource(type, toPublicType(type));
-        mSources[type] = source;
+        source = new InsetsSource(id, type);
+        mSources.put(id, source);
         return source;
     }
 
-    public @Nullable InsetsSource peekSource(@InternalInsetsType int type) {
-        return mSources[type];
+    /**
+     * Gets the source mapped from the ID, or <code>null</code> if no such mapping has been made.
+     */
+    public @Nullable InsetsSource peekSource(int id) {
+        return mSources.get(id);
     }
 
     /**
-     * Returns the source visibility or the default visibility if the source doesn't exist. This is
-     * useful if when treating this object as a request.
+     * Given an index in the range <code>0...sourceSize()-1</code>, returns the source ID from the
+     * <code>index</code>th ID-source mapping that this state stores.
+     */
+    public int sourceIdAt(int index) {
+        return mSources.keyAt(index);
+    }
+
+    /**
+     * Given an index in the range <code>0...sourceSize()-1</code>, returns the source from the
+     * <code>index</code>th ID-source mapping that this state stores.
+     */
+    public InsetsSource sourceAt(int index) {
+        return mSources.valueAt(index);
+    }
+
+    /**
+     * Returns the amount of the sources.
+     */
+    public int sourceSize() {
+        return mSources.size();
+    }
+
+    /**
+     * Returns if the source is visible or the type is default visible and the source doesn't exist.
      *
-     * @param type The {@link InternalInsetsType} to query.
+     * @param id The ID of the source.
+     * @param type The {@link InsetsType} to see if it is default visible.
      * @return {@code true} if the source is visible or the type is default visible and the source
      *         doesn't exist.
      */
-    public boolean getSourceOrDefaultVisibility(@InternalInsetsType int type) {
-        final InsetsSource source = mSources[type];
-        return source != null ? source.isVisible() : getDefaultVisibility(type);
+    public boolean isSourceOrDefaultVisible(int id, @InsetsType int type) {
+        final InsetsSource source = mSources.get(id);
+        return source != null ? source.isVisible() : (type & Type.defaultVisible()) != 0;
     }
 
     public void setDisplayFrame(Rect frame) {
@@ -612,28 +613,31 @@ public class InsetsState implements Parcelable {
     }
 
     /**
-     * Modifies the state of this class to exclude a certain type to make it ready for dispatching
-     * to the client.
+     * Removes the source which has the ID from this state, if there was any.
      *
-     * @param type The {@link InternalInsetsType} of the source to remove
-     * @return {@code true} if this InsetsState was modified; {@code false} otherwise.
+     * @param id The ID of the source to remove.
      */
-    public boolean removeSource(@InternalInsetsType int type) {
-        if (mSources[type] == null) {
-            return false;
-        }
-        mSources[type] = null;
-        return true;
+    public void removeSource(int id) {
+        mSources.delete(id);
+    }
+
+    /**
+     * Removes the source at the specified index.
+     *
+     * @param index The index of the source to remove.
+     */
+    public void removeSourceAt(int index) {
+        mSources.removeAt(index);
     }
 
     /**
      * A shortcut for setting the visibility of the source.
      *
-     * @param type The {@link InternalInsetsType} of the source to set the visibility
+     * @param id The ID of the source to set the visibility
      * @param visible {@code true} for visible
      */
-    public void setSourceVisible(@InternalInsetsType int type, boolean visible) {
-        InsetsSource source = mSources[type];
+    public void setSourceVisible(int id, boolean visible) {
+        final InsetsSource source = mSources.get(id);
         if (source != null) {
             source.setVisible(visible);
         }
@@ -651,14 +655,12 @@ public class InsetsState implements Parcelable {
         mRoundedCornerFrame.scale(scale);
         mPrivacyIndicatorBounds = mPrivacyIndicatorBounds.scale(scale);
         mDisplayShape = mDisplayShape.setScale(scale);
-        for (int i = 0; i < SIZE; i++) {
-            final InsetsSource source = mSources[i];
-            if (source != null) {
-                source.getFrame().scale(scale);
-                final Rect visibleFrame = source.getVisibleFrame();
-                if (visibleFrame != null) {
-                    visibleFrame.scale(scale);
-                }
+        for (int i = mSources.size() - 1; i >= 0; i--) {
+            final InsetsSource source = mSources.valueAt(i);
+            source.getFrame().scale(scale);
+            final Rect visibleFrame = source.getVisibleFrame();
+            if (visibleFrame != null) {
+                visibleFrame.scale(scale);
             }
         }
     }
@@ -674,15 +676,12 @@ public class InsetsState implements Parcelable {
         mRoundedCornerFrame.set(other.mRoundedCornerFrame);
         mPrivacyIndicatorBounds = other.getPrivacyIndicatorBounds();
         mDisplayShape = other.getDisplayShape();
-        if (copySources) {
-            for (int i = 0; i < SIZE; i++) {
-                InsetsSource source = other.mSources[i];
-                mSources[i] = source != null ? new InsetsSource(source) : null;
-            }
-        } else {
-            for (int i = 0; i < SIZE; i++) {
-                mSources[i] = other.mSources[i];
-            }
+        mSources.clear();
+        for (int i = 0, size = other.mSources.size(); i < size; i++) {
+            final InsetsSource otherSource = other.mSources.valueAt(i);
+            mSources.append(otherSource.getId(), copySources
+                    ? new InsetsSource(otherSource)
+                    : otherSource);
         }
     }
 
@@ -700,15 +699,25 @@ public class InsetsState implements Parcelable {
         mRoundedCornerFrame.set(other.mRoundedCornerFrame);
         mPrivacyIndicatorBounds = other.getPrivacyIndicatorBounds();
         mDisplayShape = other.getDisplayShape();
-        final ArraySet<Integer> t = toInternalType(types);
-        for (int i = t.size() - 1; i >= 0; i--) {
-            final int type = t.valueAt(i);
-            mSources[type] = other.mSources[type];
+        if (types == 0) {
+            return;
+        }
+        for (int i = mSources.size() - 1; i >= 0; i--) {
+            final InsetsSource source = mSources.valueAt(i);
+            if ((source.getType() & types) != 0) {
+                mSources.removeAt(i);
+            }
+        }
+        for (int i = other.mSources.size() - 1; i >= 0; i--) {
+            final InsetsSource otherSource = other.mSources.valueAt(i);
+            if ((otherSource.getType() & types) != 0) {
+                mSources.put(otherSource.getId(), otherSource);
+            }
         }
     }
 
     public void addSource(InsetsSource source) {
-        mSources[source.getId()] = source;
+        mSources.put(source.getId(), source);
     }
 
     public static boolean clearsCompatInsets(int windowType, int windowFlags, int windowingMode) {
@@ -807,10 +816,6 @@ public class InsetsState implements Parcelable {
         }
     }
 
-    public static boolean getDefaultVisibility(@InternalInsetsType int type) {
-        return type != ITYPE_IME;
-    }
-
     public static boolean containsType(@InternalInsetsType int[] types,
             @InternalInsetsType int type) {
         if (types == null) {
@@ -833,16 +838,14 @@ public class InsetsState implements Parcelable {
         pw.println(newPrefix + "mRoundedCornerFrame=" + mRoundedCornerFrame);
         pw.println(newPrefix + "mPrivacyIndicatorBounds=" + mPrivacyIndicatorBounds);
         pw.println(newPrefix + "mDisplayShape=" + mDisplayShape);
-        for (int i = 0; i < SIZE; i++) {
-            InsetsSource source = mSources[i];
-            if (source == null) continue;
-            source.dump(newPrefix + "  ", pw);
+        for (int i = 0, size = mSources.size(); i < size; i++) {
+            mSources.valueAt(i).dump(newPrefix + "  ", pw);
         }
     }
 
     void dumpDebug(ProtoOutputStream proto, long fieldId) {
         final long token = proto.start(fieldId);
-        InsetsSource source = mSources[ITYPE_IME];
+        final InsetsSource source = mSources.get(ITYPE_IME);
         if (source != null) {
             source.dumpDebug(proto, SOURCES);
         }
@@ -941,38 +944,56 @@ public class InsetsState implements Parcelable {
                 || !mDisplayShape.equals(state.mDisplayShape)) {
             return false;
         }
-        for (int i = 0; i < SIZE; i++) {
-            if (excludingCaptionInsets) {
-                if (i == ITYPE_CAPTION_BAR) continue;
+
+        final SparseArray<InsetsSource> thisSources = mSources;
+        final SparseArray<InsetsSource> thatSources = state.mSources;
+        if (!excludingCaptionInsets && !excludeInvisibleImeFrames) {
+            return thisSources.contentEquals(thatSources);
+        } else {
+            final int thisSize = thisSources.size();
+            final int thatSize = thatSources.size();
+            int thisIndex = 0;
+            int thatIndex = 0;
+            while (thisIndex < thisSize && thatIndex < thatSize) {
+                // Seek to the next non-excluding source of ours.
+                InsetsSource thisSource = thisSources.valueAt(thisIndex);
+                while (thisSource != null
+                        && (excludingCaptionInsets && thisSource.getType() == captionBar()
+                                || excludeInvisibleImeFrames && thisSource.getType() == ime()
+                                        && !thisSource.isVisible())) {
+                    thisIndex++;
+                    thisSource = thisIndex < thisSize ? thisSources.valueAt(thisIndex) : null;
+                }
+
+                // Seek to the next non-excluding source of theirs.
+                InsetsSource thatSource = thatSources.valueAt(thatIndex);
+                while (thatSource != null
+                        && (excludingCaptionInsets && thatSource.getType() == captionBar()
+                                || excludeInvisibleImeFrames && thatSource.getType() == ime()
+                                        && !thatSource.isVisible())) {
+                    thatIndex++;
+                    thatSource = thatIndex < thatSize ? thatSources.valueAt(thatIndex) : null;
+                }
+
+                if (!Objects.equals(thisSource, thatSource)) {
+                    return false;
+                }
+
+                thisIndex++;
+                thatIndex++;
             }
-            InsetsSource source = mSources[i];
-            InsetsSource otherSource = state.mSources[i];
-            if (source == null && otherSource == null) {
-                continue;
-            }
-            if (excludeInvisibleImeFrames && i == ITYPE_IME
-                    && ((source == null && !otherSource.isVisible())
-                            || (otherSource == null && !source.isVisible()))) {
-                continue;
-            }
-            if (source == null || otherSource == null) {
-                return false;
-            }
-            if (!otherSource.equals(source, excludeInvisibleImeFrames)) {
-                return false;
-            }
+            return thisIndex >= thisSize && thatIndex >= thatSize;
         }
-        return true;
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(mDisplayFrame, mDisplayCutout, Arrays.hashCode(mSources),
+        return Objects.hash(mDisplayFrame, mDisplayCutout, mSources.contentHashCode(),
                 mRoundedCorners, mPrivacyIndicatorBounds, mRoundedCornerFrame, mDisplayShape);
     }
 
     public InsetsState(Parcel in) {
-        readFromParcel(in);
+        mSources = readFromParcel(in);
     }
 
     @Override
@@ -984,14 +1005,18 @@ public class InsetsState implements Parcelable {
     public void writeToParcel(Parcel dest, int flags) {
         mDisplayFrame.writeToParcel(dest, flags);
         mDisplayCutout.writeToParcel(dest, flags);
-        dest.writeTypedArray(mSources, 0 /* parcelableFlags */);
         dest.writeTypedObject(mRoundedCorners, flags);
         mRoundedCornerFrame.writeToParcel(dest, flags);
         dest.writeTypedObject(mPrivacyIndicatorBounds, flags);
         dest.writeTypedObject(mDisplayShape, flags);
+        final int size = mSources.size();
+        dest.writeInt(size);
+        for (int i = 0; i < size; i++) {
+            dest.writeTypedObject(mSources.valueAt(i), flags);
+        }
     }
 
-    public static final @NonNull Creator<InsetsState> CREATOR = new Creator<InsetsState>() {
+    public static final @NonNull Creator<InsetsState> CREATOR = new Creator<>() {
 
         public InsetsState createFromParcel(Parcel in) {
             return new InsetsState(in);
@@ -1002,24 +1027,34 @@ public class InsetsState implements Parcelable {
         }
     };
 
-    public void readFromParcel(Parcel in) {
+    public SparseArray<InsetsSource> readFromParcel(Parcel in) {
         mDisplayFrame.readFromParcel(in);
         mDisplayCutout.readFromParcel(in);
-        in.readTypedArray(mSources, InsetsSource.CREATOR);
         mRoundedCorners = in.readTypedObject(RoundedCorners.CREATOR);
         mRoundedCornerFrame.readFromParcel(in);
         mPrivacyIndicatorBounds = in.readTypedObject(PrivacyIndicatorBounds.CREATOR);
         mDisplayShape = in.readTypedObject(DisplayShape.CREATOR);
+        final int size = in.readInt();
+        final SparseArray<InsetsSource> sources;
+        if (mSources == null) {
+            // We are constructing this InsetsState.
+            sources = new SparseArray<>(size);
+        } else {
+            sources = mSources;
+            sources.clear();
+        }
+        for (int i = 0; i < size; i++) {
+            final InsetsSource source = in.readTypedObject(InsetsSource.CREATOR);
+            sources.append(source.getId(), source);
+        }
+        return sources;
     }
 
     @Override
     public String toString() {
-        StringJoiner joiner = new StringJoiner(", ");
-        for (int i = 0; i < SIZE; i++) {
-            InsetsSource source = mSources[i];
-            if (source != null) {
-                joiner.add(source.toString());
-            }
+        final StringJoiner joiner = new StringJoiner(", ");
+        for (int i = 0, size = mSources.size(); i < size; i++) {
+            joiner.add(mSources.valueAt(i).toString());
         }
         return "InsetsState: {"
                 + "mDisplayFrame=" + mDisplayFrame
@@ -1030,6 +1065,113 @@ public class InsetsState implements Parcelable {
                 + ", mDisplayShape=" + mDisplayShape
                 + ", mSources= { " + joiner
                 + " }";
+    }
+
+    /**
+     * Traverses sources in two {@link InsetsState}s and calls back when events defined in
+     * {@link OnTraverseCallbacks} happen. This is optimized for {@link SparseArray} that we avoid
+     * triggering the binary search while getting the key or the value.
+     *
+     * This can be used to copy attributes of sources from one InsetsState to the other one, or to
+     * remove sources existing in one InsetsState but not in the other one.
+     *
+     * @param state1 The first {@link InsetsState} to be traversed.
+     * @param state2 The second {@link InsetsState} to be traversed.
+     * @param cb The {@link OnTraverseCallbacks} to call back to the caller.
+     */
+    public static void traverse(InsetsState state1, InsetsState state2, OnTraverseCallbacks cb) {
+        cb.onStart(state1, state2);
+        final int size1 = state1.sourceSize();
+        final int size2 = state2.sourceSize();
+        int index1 = 0;
+        int index2 = 0;
+        while (index1 < size1 && index2 < size2) {
+            int id1 = state1.sourceIdAt(index1);
+            int id2 = state2.sourceIdAt(index2);
+            while (id1 != id2) {
+                if (id1 < id2) {
+                    cb.onIdNotFoundInState2(index1, state1.sourceAt(index1));
+                    index1++;
+                    if (index1 < size1) {
+                        id1 = state1.sourceIdAt(index1);
+                    } else {
+                        break;
+                    }
+                } else {
+                    cb.onIdNotFoundInState1(index2, state2.sourceAt(index2));
+                    index2++;
+                    if (index2 < size2) {
+                        id2 = state2.sourceIdAt(index2);
+                    } else {
+                        break;
+                    }
+                }
+            }
+            if (index1 >= size1 || index2 >= size2) {
+                break;
+            }
+            final InsetsSource source1 = state1.sourceAt(index1);
+            final InsetsSource source2 = state2.sourceAt(index2);
+            cb.onIdMatch(source1, source2);
+            index1++;
+            index2++;
+        }
+        while (index2 < size2) {
+            cb.onIdNotFoundInState1(index2, state2.sourceAt(index2));
+            index2++;
+        }
+        while (index1 < size1) {
+            cb.onIdNotFoundInState2(index1, state1.sourceAt(index1));
+            index1++;
+        }
+        cb.onFinish(state1, state2);
+    }
+
+    /**
+     * Used with {@link #traverse(InsetsState, InsetsState, OnTraverseCallbacks)} to call back when
+     * certain events happen.
+     */
+    public interface OnTraverseCallbacks {
+
+        /**
+         * Called at the beginning of the traverse.
+         *
+         * @param state1 same as the state1 supplied to {@link #traverse}
+         * @param state2 same as the state2 supplied to {@link #traverse}
+         */
+        default void onStart(InsetsState state1, InsetsState state2) { }
+
+        /**
+         * Called when finding two IDs from two InsetsStates are the same.
+         *
+         * @param source1 the source in state1.
+         * @param source2 the source in state2.
+         */
+        default void onIdMatch(InsetsSource source1, InsetsSource source2) { }
+
+        /**
+         * Called when finding an ID in state2 but not in state1.
+         *
+         * @param index2 the index of the ID in state2.
+         * @param source2 the source which has the ID in state2.
+         */
+        default void onIdNotFoundInState1(int index2, InsetsSource source2) { }
+
+        /**
+         * Called when finding an ID in state1 but not in state2.
+         *
+         * @param index1 the index of the ID in state1.
+         * @param source1 the source which has the ID in state1.
+         */
+        default void onIdNotFoundInState2(int index1, InsetsSource source1) { }
+
+        /**
+         * Called at the end of the traverse.
+         *
+         * @param state1 same as the state1 supplied to {@link #traverse}
+         * @param state2 same as the state2 supplied to {@link #traverse}
+         */
+        default void onFinish(InsetsState state1, InsetsState state2) { }
     }
 }
 

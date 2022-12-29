@@ -20,6 +20,7 @@ import static android.view.InsetsState.ITYPE_BOTTOM_DISPLAY_CUTOUT;
 import static android.view.InsetsState.ITYPE_LEFT_DISPLAY_CUTOUT;
 import static android.view.InsetsState.ITYPE_RIGHT_DISPLAY_CUTOUT;
 import static android.view.InsetsState.ITYPE_TOP_DISPLAY_CUTOUT;
+import static android.view.WindowInsets.Type.displayCutout;
 
 import android.annotation.NonNull;
 import android.graphics.Rect;
@@ -97,25 +98,25 @@ public class DisplayFrames {
         state.setDisplayShape(displayShape);
         state.getDisplayCutoutSafe(safe);
         if (safe.left > unrestricted.left) {
-            state.getSource(ITYPE_LEFT_DISPLAY_CUTOUT).setFrame(
+            state.getOrCreateSource(ITYPE_LEFT_DISPLAY_CUTOUT, displayCutout()).setFrame(
                     unrestricted.left, unrestricted.top, safe.left, unrestricted.bottom);
         } else {
             state.removeSource(ITYPE_LEFT_DISPLAY_CUTOUT);
         }
         if (safe.top > unrestricted.top) {
-            state.getSource(ITYPE_TOP_DISPLAY_CUTOUT).setFrame(
+            state.getOrCreateSource(ITYPE_TOP_DISPLAY_CUTOUT, displayCutout()).setFrame(
                     unrestricted.left, unrestricted.top, unrestricted.right, safe.top);
         } else {
             state.removeSource(ITYPE_TOP_DISPLAY_CUTOUT);
         }
         if (safe.right < unrestricted.right) {
-            state.getSource(ITYPE_RIGHT_DISPLAY_CUTOUT).setFrame(
+            state.getOrCreateSource(ITYPE_RIGHT_DISPLAY_CUTOUT, displayCutout()).setFrame(
                     safe.right, unrestricted.top, unrestricted.right, unrestricted.bottom);
         } else {
             state.removeSource(ITYPE_RIGHT_DISPLAY_CUTOUT);
         }
         if (safe.bottom < unrestricted.bottom) {
-            state.getSource(ITYPE_BOTTOM_DISPLAY_CUTOUT).setFrame(
+            state.getOrCreateSource(ITYPE_BOTTOM_DISPLAY_CUTOUT, displayCutout()).setFrame(
                     unrestricted.left, safe.bottom, unrestricted.right, unrestricted.bottom);
         } else {
             state.removeSource(ITYPE_BOTTOM_DISPLAY_CUTOUT);

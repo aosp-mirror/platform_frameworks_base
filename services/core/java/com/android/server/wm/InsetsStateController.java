@@ -23,10 +23,13 @@ import static android.view.InsetsState.ITYPE_IME;
 import static android.view.InsetsState.ITYPE_NAVIGATION_BAR;
 import static android.view.InsetsState.ITYPE_STATUS_BAR;
 import static android.view.WindowInsets.Type.displayCutout;
+import static android.view.WindowInsets.Type.ime;
 import static android.view.WindowInsets.Type.mandatorySystemGestures;
 import static android.view.WindowInsets.Type.systemGestures;
 
 import static com.android.internal.protolog.ProtoLogGroup.WM_DEBUG_IME;
+import static com.android.server.wm.DisplayContentProto.IME_INSETS_SOURCE_PROVIDER;
+import static com.android.server.wm.DisplayContentProto.INSETS_SOURCE_PROVIDERS;
 
 import android.annotation.NonNull;
 import android.annotation.Nullable;
@@ -34,6 +37,7 @@ import android.os.Trace;
 import android.util.ArrayMap;
 import android.util.ArraySet;
 import android.util.SparseArray;
+import android.util.proto.ProtoOutputStream;
 import android.view.InsetsSource;
 import android.view.InsetsSourceControl;
 import android.view.InsetsState;
@@ -94,7 +98,8 @@ class InsetsStateController {
     InsetsStateController(DisplayContent displayContent) {
         mDisplayContent = displayContent;
         mSourceProviderFunc = type -> {
-            final InsetsSource source = mState.getSource(type);
+            final InsetsSource source = mState.getOrCreateSource(
+                    type, InsetsState.toPublicType(type));
             if (type == ITYPE_IME) {
                 return new ImeInsetsSourceProvider(source, this, mDisplayContent);
             }
@@ -384,6 +389,17 @@ class InsetsStateController {
         pw.println(prefix + "InsetsSourceProviders:");
         for (int i = mProviders.size() - 1; i >= 0; i--) {
             mProviders.valueAt(i).dump(pw, prefix + "  ");
+        }
+    }
+
+    void dumpDebug(ProtoOutputStream proto, @WindowTraceLogLevel int logLevel) {
+        for (int i = mProviders.size() - 1; i >= 0; i--) {
+            final InsetsSourceProvider provider = mProviders.valueAt(i);
+            provider.dumpDebug(proto,
+                    provider.getSource().getType() == ime()
+                            ? IME_INSETS_SOURCE_PROVIDER
+                            : INSETS_SOURCE_PROVIDERS,
+                    logLevel);
         }
     }
 }

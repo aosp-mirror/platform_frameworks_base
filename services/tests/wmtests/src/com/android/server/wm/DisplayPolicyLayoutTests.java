@@ -270,9 +270,9 @@ public class DisplayPolicyLayoutTests extends DisplayPolicyTestsBase {
                 .rotationForActivityInDifferentOrientation(eq(mWindow.mActivityRecord));
         mWindow.mAboveInsetsState.set(
                 mDisplayContent.getInsetsStateController().getRawInsetsState());
-        final Rect frame = mWindow.getInsetsState().getSource(ITYPE_STATUS_BAR).getFrame();
+        final Rect frame = mWindow.getInsetsState().peekSource(ITYPE_STATUS_BAR).getFrame();
         mDisplayContent.rotateInDifferentOrientationIfNeeded(mWindow.mActivityRecord);
-        final Rect rotatedFrame = mWindow.getInsetsState().getSource(ITYPE_STATUS_BAR).getFrame();
+        final Rect rotatedFrame = mWindow.getInsetsState().peekSource(ITYPE_STATUS_BAR).getFrame();
 
         assertEquals(DISPLAY_WIDTH, frame.width());
         assertEquals(DISPLAY_HEIGHT, rotatedFrame.width());

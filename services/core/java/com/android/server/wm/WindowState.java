@@ -225,7 +225,6 @@ import android.view.InputEventReceiver;
 import android.view.InputWindowHandle;
 import android.view.InsetsSource;
 import android.view.InsetsState;
-import android.view.InsetsState.InternalInsetsType;
 import android.view.Surface;
 import android.view.Surface.Rotation;
 import android.view.SurfaceControl;
@@ -1696,14 +1695,12 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
      * Returns the insets state for the window and applies the requested visibility.
      */
     InsetsState getInsetsStateWithVisibilityOverride() {
-        final InsetsState state = new InsetsState(getInsetsState());
-        for (@InternalInsetsType int type = 0; type < InsetsState.SIZE; type++) {
-            final boolean requestedVisible = isRequestedVisible(InsetsState.toPublicType(type));
-            InsetsSource source = state.peekSource(type);
-            if (source != null && source.isVisible() != requestedVisible) {
-                source = new InsetsSource(source);
+        final InsetsState state = new InsetsState(getInsetsState(), true /* copySources */);
+        for (int i = state.sourceSize() - 1; i >= 0; i--) {
+            final InsetsSource source = state.sourceAt(i);
+            final boolean requestedVisible = isRequestedVisible(source.getType());
+            if (source.isVisible() != requestedVisible) {
                 source.setVisible(requestedVisible);
-                state.addSource(source);
             }
         }
         return state;

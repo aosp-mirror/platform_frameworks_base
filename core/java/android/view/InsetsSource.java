@@ -83,20 +83,24 @@ public class InsetsSource implements Parcelable {
         mInsetsRoundedCornerFrame = other.mInsetsRoundedCornerFrame;
     }
 
-    public void setFrame(int left, int top, int right, int bottom) {
+    public InsetsSource setFrame(int left, int top, int right, int bottom) {
         mFrame.set(left, top, right, bottom);
+        return this;
     }
 
-    public void setFrame(Rect frame) {
+    public InsetsSource setFrame(Rect frame) {
         mFrame.set(frame);
+        return this;
     }
 
-    public void setVisibleFrame(@Nullable Rect visibleFrame) {
+    public InsetsSource setVisibleFrame(@Nullable Rect visibleFrame) {
         mVisibleFrame = visibleFrame != null ? new Rect(visibleFrame) : null;
+        return this;
     }
 
-    public void setVisible(boolean visible) {
+    public InsetsSource setVisible(boolean visible) {
         mVisible = visible;
+        return this;
     }
 
     public int getId() {
@@ -128,8 +132,9 @@ public class InsetsSource implements Parcelable {
         return mInsetsRoundedCornerFrame;
     }
 
-    public void setInsetsRoundedCornerFrame(boolean insetsRoundedCornerFrame) {
+    public InsetsSource setInsetsRoundedCornerFrame(boolean insetsRoundedCornerFrame) {
         mInsetsRoundedCornerFrame = insetsRoundedCornerFrame;
+        return this;
     }
 
     /**

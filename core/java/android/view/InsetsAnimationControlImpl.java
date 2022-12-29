@@ -417,7 +417,7 @@ public class InsetsAnimationControlImpl implements InternalInsetsAnimationContro
                 // control may be null if it got revoked.
                 continue;
             }
-            state.getSource(control.getId()).setVisible(shown);
+            state.setSourceVisible(control.getId(), shown);
         }
         return getInsetsFromState(state, frame, typeSideMap);
     }
@@ -435,7 +435,8 @@ public class InsetsAnimationControlImpl implements InternalInsetsAnimationContro
                 // control may be null if it got revoked.
                 continue;
             }
-            if (state == null || state.getSource(control.getId()).isVisible()) {
+            if (state == null
+                    || state.isSourceOrDefaultVisible(control.getId(), control.getType())) {
                 insets = Insets.max(insets, control.getInsetsHint());
             }
         }
@@ -465,20 +466,23 @@ public class InsetsAnimationControlImpl implements InternalInsetsAnimationContro
         // TODO: Implement behavior when inset spans over multiple types
         for (int i = controls.size() - 1; i >= 0; i--) {
             final InsetsSourceControl control = controls.valueAt(i);
-            final InsetsSource source = mInitialInsetsState.getSource(control.getId());
+            final InsetsSource source = mInitialInsetsState.peekSource(control.getId());
             final SurfaceControl leash = control.getLeash();
 
             mTmpMatrix.setTranslate(control.getSurfacePosition().x, control.getSurfacePosition().y);
-            mTmpFrame.set(source.getFrame());
+            if (source != null) {
+                mTmpFrame.set(source.getFrame());
+            }
             addTranslationToMatrix(side, offset, mTmpMatrix, mTmpFrame);
 
             final boolean visible = mHasZeroInsetsIme && side == ISIDE_BOTTOM
                     ? (mAnimationType == ANIMATION_TYPE_SHOW || !mFinished)
                     : inset != 0;
 
-            if (outState != null) {
-                outState.getSource(source.getId()).setVisible(visible);
-                outState.getSource(source.getId()).setFrame(mTmpFrame);
+            if (outState != null && source != null) {
+                outState.getOrCreateSource(source.getId(), source.getType())
+                        .setVisible(visible)
+                        .setFrame(mTmpFrame);
             }
 
             // If the system is controlling the insets source, the leash can be null.
