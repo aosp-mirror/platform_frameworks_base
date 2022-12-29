@@ -13500,12 +13500,17 @@ public class ActivityManagerService extends IActivityManager.Stub
     public Intent registerReceiverWithFeature(IApplicationThread caller, String callerPackage,
             String callerFeatureId, String receiverId, IIntentReceiver receiver,
             IntentFilter filter, String permission, int userId, int flags) {
+        enforceNotIsolatedCaller("registerReceiver");
+
         // Allow Sandbox process to register only unexported receivers.
-        if ((flags & Context.RECEIVER_NOT_EXPORTED) != 0) {
-            enforceNotIsolatedCaller("registerReceiver");
-        } else if (mSdkSandboxSettings.isBroadcastReceiverRestrictionsEnforced()) {
-            enforceNotIsolatedOrSdkSandboxCaller("registerReceiver");
+        boolean unexported = (flags & Context.RECEIVER_NOT_EXPORTED) != 0;
+        if (mSdkSandboxSettings.isBroadcastReceiverRestrictionsEnforced()
+                && Process.isSdkSandboxUid(Binder.getCallingUid())
+                && !unexported) {
+            throw new SecurityException("SDK sandbox process not allowed to call "
+                + "registerReceiver");
         }
+
         ArrayList<Intent> stickyIntents = null;
         ProcessRecord callerApp = null;
         final boolean visibleToInstantApps
