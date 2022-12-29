@@ -85,6 +85,7 @@
     <string name="screenshot_share_description" msgid="2861628935812656612">"ეკრანის ანაბეჭდის გაზიარება"</string>
     <string name="screenshot_scroll_label" msgid="2930198809899329367">"მეტის აღბეჭდვა"</string>
     <string name="screenshot_dismiss_description" msgid="4702341245899508786">"ეკრანის ანაბეჭდის დახურვა"</string>
+    <string name="screenshot_dismiss_work_profile" msgid="3101530842987697045">"თქვენი სამსახურის პროფილის შეტყობინების უარყოფა"</string>
     <string name="screenshot_preview_description" msgid="7606510140714080474">"ეკრანის ანაბეჭდის გადახედვა"</string>
     <string name="screenshot_top_boundary_pct" msgid="2520148599096479332">"ზედა ზღვარი: <xliff:g id="PERCENT">%1$d</xliff:g> პროცენტი"</string>
     <string name="screenshot_bottom_boundary_pct" msgid="3880821519814946478">"ქვედა ზღვარი: <xliff:g id="PERCENT">%1$d</xliff:g> პროცენტი"</string>
@@ -731,8 +732,7 @@
     <string name="wifi_is_off" msgid="5389597396308001471">"Wi-Fi გამორთულია"</string>
     <string name="bt_is_off" msgid="7436344904889461591">"Bluetooth გამორთულია"</string>
     <string name="dnd_is_off" msgid="3185706903793094463">"„არ შემაწუხოთ“ რეჟიმი გამორთულია"</string>
-    <!-- no translation found for dnd_is_on (7009368176361546279) -->
-    <skip />
+    <string name="dnd_is_on" msgid="7009368176361546279">"„არ შემაწუხოთ“ ჩართულია"</string>
     <string name="qs_dnd_prompt_auto_rule" msgid="3535469468310002616">"„არ შემაწუხოთ“ ჩაირთო ავტომატური წესის მიხედვით (<xliff:g id="ID_1">%s</xliff:g>)."</string>
     <string name="qs_dnd_prompt_app" msgid="4027984447935396820">"„არ შემაწუხოთ“ ჩაირთო აპის მიერ (<xliff:g id="ID_1">%s</xliff:g>)."</string>
     <string name="qs_dnd_prompt_auto_rule_app" msgid="1841469944118486580">"„არ შემაწუხოთ“ ჩაირთო ავტომატური წესის მიხედვით ან აპის მიერ."</string>
@@ -875,6 +875,7 @@
     <string name="media_output_dialog_accessibility_title" msgid="4681741064190167888">"ხელმისაწვდომი მოწყობილობები გამომავალი აუდიოსთვის."</string>
     <string name="media_output_dialog_accessibility_seekbar" msgid="5332843993805568978">"ხმა"</string>
     <string name="media_output_dialog_volume_percentage" msgid="1613984910585111798">"<xliff:g id="PERCENTAGE">%1$d</xliff:g>%%"</string>
+    <string name="media_output_group_title_speakers_and_displays" msgid="7169712332365659820">"დინამიკები და დისპლეები"</string>
     <string name="media_output_first_broadcast_title" msgid="6292237789860753022">"ტრანსლირების მუშაობის პრინციპი"</string>
     <string name="media_output_broadcast" msgid="3555580945878071543">"ტრანსლაცია"</string>
     <string name="media_output_first_notify_broadcast_message" msgid="6353857724136398494">"თქვენთან ახლოს მყოფ ხალხს თავსებადი Bluetooth მოწყობილობით შეუძლიათ თქვენ მიერ ტრანსლირებული მედიის მოსმენა"</string>
@@ -1004,8 +1005,7 @@
     <string name="keyguard_affordance_enablement_dialog_qr_scanner_instruction" msgid="5355839079232119791">"• დააინსტალირეთ კამერის აპი"</string>
     <string name="keyguard_affordance_enablement_dialog_home_instruction_1" msgid="8438311171750568633">"• აპი დაყენებულია"</string>
     <string name="keyguard_affordance_enablement_dialog_home_instruction_2" msgid="8308525385889021652">"• ხელმისაწვდომია მინიმუმ ერთი მოწყობილობა"</string>
-    <!-- no translation found for keyguard_affordance_press_too_short (2687995216454987952) -->
-    <skip />
+    <string name="keyguard_affordance_press_too_short" msgid="2687995216454987952">"აქტივაციისთვის დააჭირეთ და გეკავოთ"</string>
     <string name="rear_display_bottom_sheet_cancel" msgid="3461468855493357248">"გაუქმება"</string>
     <string name="rear_display_bottom_sheet_confirm" msgid="4383356544661421206">"გადაატრიალეთ ახლა"</string>
     <string name="rear_display_fold_bottom_sheet_title" msgid="6081542277622721548">"გაშალეთ ტელეფონი უკეთესი სელფისთვის"</string>
@@ -1014,6 +1014,5 @@
     <string name="rear_display_bottom_sheet_warning" msgid="800995919558238930"><b>"✱ ეს ეკრანი გამოირთვება"</b></string>
     <string name="rear_display_accessibility_folded_animation" msgid="1538121649587978179">"დასაკეცი მოწყობილობა იხსნება"</string>
     <string name="rear_display_accessibility_unfolded_animation" msgid="1946153682258289040">"დასაკეცი მოწყობილობა ტრიალებს"</string>
-    <!-- no translation found for stylus_battery_low (7134370101603167096) -->
-    <skip />
+    <string name="stylus_battery_low" msgid="7134370101603167096">"სტილუსის ბატარეა დაცლის პირასაა"</string>
 </resources>

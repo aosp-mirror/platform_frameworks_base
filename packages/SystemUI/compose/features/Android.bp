@@ -31,7 +31,7 @@ android_library {
 
     static_libs: [
         "SystemUI-core",
-        "SystemUIComposeCore",
+        "PlatformComposeCore",
 
         "androidx.compose.runtime_runtime",
         "androidx.compose.material3_material3",

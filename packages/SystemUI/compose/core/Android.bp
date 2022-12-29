@@ -22,7 +22,7 @@ package {
 }
 
 android_library {
-    name: "SystemUIComposeCore",
+    name: "PlatformComposeCore",
     manifest: "AndroidManifest.xml",
 
     srcs: [

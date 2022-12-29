@@ -23,6 +23,8 @@ import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.content.Context;
+import android.content.pm.ActivityInfo;
+import android.content.pm.PackageManager;
 import android.graphics.Color;
 import android.provider.DeviceConfig;
 import android.util.Slog;
@@ -38,6 +40,10 @@ import java.util.function.Function;
 final class LetterboxConfiguration {
 
     private static final String TAG = TAG_WITH_CLASS_NAME ? "LetterboxConfiguration" : TAG_ATM;
+
+    @VisibleForTesting
+    static final String DEVICE_CONFIG_KEY_ENABLE_COMPAT_FAKE_FOCUS =
+            "enable_compat_fake_focus";
 
     /**
      * Override of aspect ratio for fixed orientation letterboxing that is set via ADB with
@@ -107,6 +113,12 @@ final class LetterboxConfiguration {
 
     /** Letterboxed app window is aligned to the right side. */
     static final int LETTERBOX_VERTICAL_REACHABILITY_POSITION_BOTTOM = 2;
+
+    @VisibleForTesting
+    static final String PROPERTY_COMPAT_FAKE_FOCUS_OPT_IN = "com.android.COMPAT_FAKE_FOCUS_OPT_IN";
+    @VisibleForTesting
+    static final String PROPERTY_COMPAT_FAKE_FOCUS_OPT_OUT =
+            "com.android.COMPAT_FAKE_FOCUS_OPT_OUT";
 
     final Context mContext;
 
@@ -977,11 +989,49 @@ final class LetterboxConfiguration {
                 "enable_translucent_activity_letterbox", false);
     }
 
-    // TODO(b/262866240): Add listener to check for device config property
+    @VisibleForTesting
+    boolean getPackageManagerProperty(PackageManager pm, String property) {
+        boolean enabled = false;
+        try {
+            final PackageManager.Property p = pm.getProperty(property, mContext.getPackageName());
+            enabled = p.getBoolean();
+        } catch (PackageManager.NameNotFoundException e) {
+            // Property not found
+        }
+        return enabled;
+    }
+
+    @VisibleForTesting
+    boolean isCompatFakeFocusEnabled(ActivityInfo info) {
+        if (!isCompatFakeFocusEnabledOnDevice()) {
+            return false;
+        }
+        // See if the developer has chosen to opt in / out of treatment
+        PackageManager pm = mContext.getPackageManager();
+        if (getPackageManagerProperty(pm, PROPERTY_COMPAT_FAKE_FOCUS_OPT_OUT)) {
+            return false;
+        } else if (getPackageManagerProperty(pm, PROPERTY_COMPAT_FAKE_FOCUS_OPT_IN)) {
+            return true;
+        }
+        if (info.isChangeEnabled(ActivityInfo.OVERRIDE_ENABLE_COMPAT_FAKE_FOCUS)) {
+            return true;
+        }
+        return false;
+    }
+
     /** Whether fake sending focus is enabled for unfocused apps in splitscreen */
-    boolean isCompatFakeFocusEnabled() {
-        return mIsCompatFakeFocusEnabled && DeviceConfig.getBoolean(
-                DeviceConfig.NAMESPACE_WINDOW_MANAGER, "enable_compat_fake_focus", true);
+    boolean isCompatFakeFocusEnabledOnDevice() {
+        return mIsCompatFakeFocusEnabled
+                && DeviceConfig.getBoolean(DeviceConfig.NAMESPACE_WINDOW_MANAGER,
+                        DEVICE_CONFIG_KEY_ENABLE_COMPAT_FAKE_FOCUS, true);
+    }
+
+    /**
+     * Overrides whether fake sending focus is enabled for unfocused apps in splitscreen
+     */
+    @VisibleForTesting
+    void setIsCompatFakeFocusEnabled(boolean enabled) {
+        mIsCompatFakeFocusEnabled = enabled;
     }
 
     /** Whether camera compatibility treatment is enabled. */
