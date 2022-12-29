@@ -19,7 +19,6 @@ package com.android.server.credentials;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.UserIdInt;
-import android.app.PendingIntent;
 import android.content.Context;
 import android.content.Intent;
 import android.credentials.CreateCredentialException;
@@ -211,14 +210,13 @@ public final class ProviderCreateSession extends ProviderSession<
             mUiSaveEntries.put(entryId, createEntry);
             Log.i(TAG, "in prepareUiProviderData creating ui entry with id " + entryId);
             uiSaveEntries.add(new Entry(SAVE_ENTRY_KEY, entryId, createEntry.getSlice(),
-                    createEntry.getPendingIntent(), setUpFillInIntent(
-                            createEntry.getPendingIntent())));
+                    setUpFillInIntent()));
         }
         return uiSaveEntries;
     }
 
-    private Intent setUpFillInIntent(PendingIntent pendingIntent) {
-        Intent intent = pendingIntent.getIntent();
+    private Intent setUpFillInIntent() {
+        Intent intent = new Intent();
         intent.putExtra(CredentialProviderService.EXTRA_CREATE_CREDENTIAL_REQUEST,
                 mCompleteRequest);
         return intent;
