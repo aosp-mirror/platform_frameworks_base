@@ -67,6 +67,7 @@ import com.android.server.testing.shadows.ShadowBinder;
 import com.android.server.testing.shadows.ShadowKeyValueBackupJob;
 import com.android.server.testing.shadows.ShadowKeyValueBackupTask;
 import com.android.server.testing.shadows.ShadowSystemServiceRegistry;
+import com.android.server.testing.shadows.ShadowUserManager;
 
 import org.junit.After;
 import org.junit.Before;
@@ -101,7 +102,8 @@ import java.util.List;
         shadows = {
             ShadowBackupEligibilityRules.class,
             ShadowApplicationPackageManager.class,
-            ShadowSystemServiceRegistry.class
+            ShadowSystemServiceRegistry.class,
+            ShadowUserManager.class
         })
 @Presubmit
 public class UserBackupManagerServiceTest {
