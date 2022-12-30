@@ -85,8 +85,7 @@
     <string name="screenshot_share_description" msgid="2861628935812656612">"แชร์ภาพหน้าจอ"</string>
     <string name="screenshot_scroll_label" msgid="2930198809899329367">"จับภาพได้มากขึ้น"</string>
     <string name="screenshot_dismiss_description" msgid="4702341245899508786">"ปิดภาพหน้าจอ"</string>
-    <!-- no translation found for screenshot_dismiss_work_profile (3101530842987697045) -->
-    <skip />
+    <string name="screenshot_dismiss_work_profile" msgid="3101530842987697045">"ปิดข้อความจากโปรไฟล์งาน"</string>
     <string name="screenshot_preview_description" msgid="7606510140714080474">"ตัวอย่างภาพหน้าจอ"</string>
     <string name="screenshot_top_boundary_pct" msgid="2520148599096479332">"ขอบเขตด้านบน <xliff:g id="PERCENT">%1$d</xliff:g> เปอร์เซ็นต์"</string>
     <string name="screenshot_bottom_boundary_pct" msgid="3880821519814946478">"ขอบเขตด้านล่าง <xliff:g id="PERCENT">%1$d</xliff:g> เปอร์เซ็นต์"</string>
@@ -876,8 +875,7 @@
     <string name="media_output_dialog_accessibility_title" msgid="4681741064190167888">"อุปกรณ์ที่พร้อมใช้งานสำหรับเอาต์พุตเสียง"</string>
     <string name="media_output_dialog_accessibility_seekbar" msgid="5332843993805568978">"ระดับเสียง"</string>
     <string name="media_output_dialog_volume_percentage" msgid="1613984910585111798">"<xliff:g id="PERCENTAGE">%1$d</xliff:g>%%"</string>
-    <!-- no translation found for media_output_group_title_speakers_and_displays (7169712332365659820) -->
-    <skip />
+    <string name="media_output_group_title_speakers_and_displays" msgid="7169712332365659820">"ลำโพงและจอแสดงผล"</string>
     <string name="media_output_first_broadcast_title" msgid="6292237789860753022">"วิธีการทำงานของการออกอากาศ"</string>
     <string name="media_output_broadcast" msgid="3555580945878071543">"ประกาศ"</string>
     <string name="media_output_first_notify_broadcast_message" msgid="6353857724136398494">"ผู้ที่อยู่ใกล้คุณและมีอุปกรณ์บลูทูธที่รองรับสามารถรับฟังสื่อที่คุณกำลังออกอากาศได้"</string>
@@ -1001,13 +999,13 @@
     <string name="dream_time_complication_12_hr_time_format" msgid="4691197486690291529">"HH:mm"</string>
     <string name="dream_time_complication_24_hr_time_format" msgid="6248280719733640813">"kk:mm"</string>
     <string name="keyguard_affordance_enablement_dialog_action_template" msgid="8164857863036314664">"เปิด <xliff:g id="APPNAME">%1$s</xliff:g>"</string>
-    <string name="keyguard_affordance_enablement_dialog_message" msgid="2790910660524887941">"หากต้องการเพิ่มแอป <xliff:g id="APPNAME">%1$s</xliff:g> เป็นทางลัด โปรดตรวจสอบดังต่อไปนี้"</string>
     <string name="keyguard_affordance_enablement_dialog_wallet_instruction_1" msgid="8439655049139819278">"• แอปได้รับการตั้งค่าแล้ว"</string>
     <string name="keyguard_affordance_enablement_dialog_wallet_instruction_2" msgid="4321089250629477835">"• มีการเพิ่มบัตรลงใน Wallet อย่างน้อย 1 รายการ"</string>
     <string name="keyguard_affordance_enablement_dialog_qr_scanner_instruction" msgid="5355839079232119791">"• ติดตั้งแอปกล้อง"</string>
     <string name="keyguard_affordance_enablement_dialog_home_instruction_1" msgid="8438311171750568633">"• แอปได้รับการตั้งค่าแล้ว"</string>
     <string name="keyguard_affordance_enablement_dialog_home_instruction_2" msgid="8308525385889021652">"• มีอุปกรณ์พร้อมใช้งานอย่างน้อย 1 รายการ"</string>
-    <string name="keyguard_affordance_press_too_short" msgid="2687995216454987952">"กดค้างเพื่อเปิดใช้งาน"</string>
+    <!-- no translation found for keyguard_affordance_press_too_short (8145437175134998864) -->
+    <skip />
     <string name="rear_display_bottom_sheet_cancel" msgid="3461468855493357248">"ยกเลิก"</string>
     <string name="rear_display_bottom_sheet_confirm" msgid="4383356544661421206">"พลิกเลย"</string>
     <string name="rear_display_fold_bottom_sheet_title" msgid="6081542277622721548">"กางโทรศัพท์เพื่อเซลฟีที่ดียิ่งขึ้น"</string>

@@ -85,8 +85,7 @@
     <string name="screenshot_share_description" msgid="2861628935812656612">"Bendrinti ekrano kopiją"</string>
     <string name="screenshot_scroll_label" msgid="2930198809899329367">"Fiksuoti daugiau"</string>
     <string name="screenshot_dismiss_description" msgid="4702341245899508786">"Praleisti ekrano kopiją"</string>
-    <!-- no translation found for screenshot_dismiss_work_profile (3101530842987697045) -->
-    <skip />
+    <string name="screenshot_dismiss_work_profile" msgid="3101530842987697045">"Atsisakyti darbo profilio pranešimo"</string>
     <string name="screenshot_preview_description" msgid="7606510140714080474">"Ekrano kopijos peržiūra"</string>
     <string name="screenshot_top_boundary_pct" msgid="2520148599096479332">"Viršutinė riba – <xliff:g id="PERCENT">%1$d</xliff:g> proc."</string>
     <string name="screenshot_bottom_boundary_pct" msgid="3880821519814946478">"Apatinė riba – <xliff:g id="PERCENT">%1$d</xliff:g> proc."</string>
@@ -876,8 +875,7 @@
     <string name="media_output_dialog_accessibility_title" msgid="4681741064190167888">"Pasiekiami garso išvesties įrenginiai."</string>
     <string name="media_output_dialog_accessibility_seekbar" msgid="5332843993805568978">"Garsumas"</string>
     <string name="media_output_dialog_volume_percentage" msgid="1613984910585111798">"<xliff:g id="PERCENTAGE">%1$d</xliff:g> %%"</string>
-    <!-- no translation found for media_output_group_title_speakers_and_displays (7169712332365659820) -->
-    <skip />
+    <string name="media_output_group_title_speakers_and_displays" msgid="7169712332365659820">"Garsiakalbiai ir ekranai"</string>
     <string name="media_output_first_broadcast_title" msgid="6292237789860753022">"Kaip veikia transliacija"</string>
     <string name="media_output_broadcast" msgid="3555580945878071543">"Transliacija"</string>
     <string name="media_output_first_notify_broadcast_message" msgid="6353857724136398494">"Netoliese esantys žmonės, turintys suderinamus „Bluetooth“ įrenginius, gali klausyti jūsų transliuojamos medijos"</string>
@@ -1001,13 +999,13 @@
     <string name="dream_time_complication_12_hr_time_format" msgid="4691197486690291529">"h:mm"</string>
     <string name="dream_time_complication_24_hr_time_format" msgid="6248280719733640813">"kk:mm"</string>
     <string name="keyguard_affordance_enablement_dialog_action_template" msgid="8164857863036314664">"Atidaryti „<xliff:g id="APPNAME">%1$s</xliff:g>“"</string>
-    <string name="keyguard_affordance_enablement_dialog_message" msgid="2790910660524887941">"Jei norite pridėti programą „<xliff:g id="APPNAME">%1$s</xliff:g>“ kaip šaukinį, įsitikinkite, kad atitinkate reikalavimus."</string>
     <string name="keyguard_affordance_enablement_dialog_wallet_instruction_1" msgid="8439655049139819278">"• Programa nustatyta"</string>
     <string name="keyguard_affordance_enablement_dialog_wallet_instruction_2" msgid="4321089250629477835">"• Prie „Wallet“ pridėta bent viena kortelė"</string>
     <string name="keyguard_affordance_enablement_dialog_qr_scanner_instruction" msgid="5355839079232119791">"• Įdiekite Fotoaparato programą"</string>
     <string name="keyguard_affordance_enablement_dialog_home_instruction_1" msgid="8438311171750568633">"• Programa nustatyta"</string>
     <string name="keyguard_affordance_enablement_dialog_home_instruction_2" msgid="8308525385889021652">"• Pasiekiamas bent vienas įrenginys"</string>
-    <string name="keyguard_affordance_press_too_short" msgid="2687995216454987952">"Suaktyvinkite paspaudę ir palaikę"</string>
+    <!-- no translation found for keyguard_affordance_press_too_short (8145437175134998864) -->
+    <skip />
     <string name="rear_display_bottom_sheet_cancel" msgid="3461468855493357248">"Atšaukti"</string>
     <string name="rear_display_bottom_sheet_confirm" msgid="4383356544661421206">"Apversti dabar"</string>
     <string name="rear_display_fold_bottom_sheet_title" msgid="6081542277622721548">"Užfiksuokite geresnę asmenukę atlenkę telefoną"</string>
