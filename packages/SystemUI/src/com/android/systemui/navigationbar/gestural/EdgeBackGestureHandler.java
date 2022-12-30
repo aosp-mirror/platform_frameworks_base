@@ -18,6 +18,8 @@ package com.android.systemui.navigationbar.gestural;
 import static android.view.WindowManager.LayoutParams.PRIVATE_FLAG_EXCLUDE_FROM_SCREEN_MAGNIFICATION;
 
 import static com.android.systemui.classifier.Classifier.BACK_GESTURE;
+import static com.android.systemui.navigationbar.gestural.Utilities.getTrackpadScale;
+import static com.android.systemui.navigationbar.gestural.Utilities.isTrackpadMotionEvent;
 
 import android.annotation.NonNull;
 import android.app.ActivityManager;
@@ -241,6 +243,7 @@ public class EdgeBackGestureHandler implements PluginListener<NavigationEdgeBack
     private boolean mIsBackGestureAllowed;
     private boolean mGestureBlockingActivityRunning;
     private boolean mIsNewBackAffordanceEnabled;
+    private boolean mIsTrackpadGestureBackEnabled;
     private boolean mIsButtonForceVisible;
 
     private InputMonitor mInputMonitor;
@@ -269,6 +272,7 @@ public class EdgeBackGestureHandler implements PluginListener<NavigationEdgeBack
     private LogArray mGestureLogOutsideInsets = new LogArray(MAX_NUM_LOGGED_GESTURES);
 
     private final GestureNavigationSettingsObserver mGestureNavigationSettingsObserver;
+    private final MotionEventsHandler mMotionEventsHandler;
 
     private final NavigationEdgeBackPlugin.BackCallback mBackCallback =
             new NavigationEdgeBackPlugin.BackCallback() {
@@ -401,6 +405,7 @@ public class EdgeBackGestureHandler implements PluginListener<NavigationEdgeBack
 
         mGestureNavigationSettingsObserver = new GestureNavigationSettingsObserver(
                 mContext.getMainThreadHandler(), mContext, this::onNavigationSettingsChanged);
+        mMotionEventsHandler = new MotionEventsHandler(featureFlags, getTrackpadScale(context));
 
         updateCurrentUserResources();
     }
@@ -578,6 +583,7 @@ public class EdgeBackGestureHandler implements PluginListener<NavigationEdgeBack
 
             // Add a nav bar panel window
             mIsNewBackAffordanceEnabled = mFeatureFlags.isEnabled(Flags.NEW_BACK_AFFORDANCE);
+            mIsTrackpadGestureBackEnabled = mFeatureFlags.isEnabled(Flags.TRACKPAD_GESTURE_BACK);
             resetEdgeBackPlugin();
             mPluginManager.addPluginListener(
                     this, NavigationEdgeBackPlugin.class, /*allowMultiple=*/ false);
@@ -611,6 +617,7 @@ public class EdgeBackGestureHandler implements PluginListener<NavigationEdgeBack
         }
         mEdgeBackPlugin = edgeBackPlugin;
         mEdgeBackPlugin.setBackCallback(mBackCallback);
+        mEdgeBackPlugin.setMotionEventsHandler(mMotionEventsHandler);
         mEdgeBackPlugin.setLayoutParams(createLayoutParams());
         updateDisplaySize();
     }
@@ -854,6 +861,7 @@ public class EdgeBackGestureHandler implements PluginListener<NavigationEdgeBack
     }
 
     private void onMotionEvent(MotionEvent ev) {
+        mMotionEventsHandler.onMotionEvent(ev);
         int action = ev.getActionMasked();
         if (action == MotionEvent.ACTION_DOWN) {
             if (DEBUG_MISSING_GESTURE) {
@@ -863,15 +871,24 @@ public class EdgeBackGestureHandler implements PluginListener<NavigationEdgeBack
             // Verify if this is in within the touch region and we aren't in immersive mode, and
             // either the bouncer is showing or the notification panel is hidden
             mInputEventReceiver.setBatchingEnabled(false);
-            mIsOnLeftEdge = ev.getX() <= mEdgeWidthLeft + mLeftInset;
+            boolean isTrackpadEvent = isTrackpadMotionEvent(mIsTrackpadGestureBackEnabled, ev);
+            if (isTrackpadEvent) {
+                // TODO: show the back arrow based on the direction of the swipe.
+                mIsOnLeftEdge = false;
+            } else {
+                mIsOnLeftEdge = ev.getX() <= mEdgeWidthLeft + mLeftInset;
+            }
             mMLResults = 0;
             mLogGesture = false;
             mInRejectedExclusion = false;
             boolean isWithinInsets = isWithinInsets((int) ev.getX(), (int) ev.getY());
-            mAllowGesture = !mDisabledForQuickstep && mIsBackGestureAllowed && isWithinInsets
+            // Trackpad back gestures don't have zones, so we don't need to check if the down event
+            // is within insets.
+            mAllowGesture = !mDisabledForQuickstep && mIsBackGestureAllowed
+                    && (isTrackpadEvent || isWithinInsets)
                     && !mGestureBlockingActivityRunning
                     && !QuickStepContract.isBackGestureDisabled(mSysUiFlags)
-                    && isWithinTouchRegion((int) ev.getX(), (int) ev.getY());
+                    && (isTrackpadEvent || isWithinTouchRegion((int) ev.getX(), (int) ev.getY()));
             if (mAllowGesture) {
                 mEdgeBackPlugin.setIsLeftPanel(mIsOnLeftEdge);
                 mEdgeBackPlugin.onMotionEvent(ev);
@@ -885,8 +902,8 @@ public class EdgeBackGestureHandler implements PluginListener<NavigationEdgeBack
 
             // For debugging purposes, only log edge points
             (isWithinInsets ? mGestureLogInsideInsets : mGestureLogOutsideInsets).log(String.format(
-                    "Gesture [%d,alw=%B,%B,%B,%B,disp=%s,wl=%d,il=%d,wr=%d,ir=%d,excl=%s]",
-                    System.currentTimeMillis(), mAllowGesture, mIsOnLeftEdge,
+                    "Gesture [%d,alw=%B,%B,%B,%B,%B,disp=%s,wl=%d,il=%d,wr=%d,ir=%d,excl=%s]",
+                    System.currentTimeMillis(), isTrackpadEvent, mAllowGesture, mIsOnLeftEdge,
                     mIsBackGestureAllowed,
                     QuickStepContract.isBackGestureDisabled(mSysUiFlags), mDisplaySize,
                     mEdgeWidthLeft, mLeftInset, mEdgeWidthRight, mRightInset, mExcludeRegion));
@@ -920,8 +937,8 @@ public class EdgeBackGestureHandler implements PluginListener<NavigationEdgeBack
                         mLogGesture = false;
                         return;
                     }
-                    float dx = Math.abs(ev.getX() - mDownPoint.x);
-                    float dy = Math.abs(ev.getY() - mDownPoint.y);
+                    float dx = Math.abs(mMotionEventsHandler.getDisplacementX(ev));
+                    float dy = Math.abs(mMotionEventsHandler.getDisplacementY(ev));
                     if (dy > dx && dy > mTouchSlop) {
                         if (mAllowGesture) {
                             logGesture(SysUiStatsLog.BACK_GESTURE__TYPE__INCOMPLETE_VERTICAL_MOVE);
@@ -1055,6 +1072,7 @@ public class EdgeBackGestureHandler implements PluginListener<NavigationEdgeBack
         pw.println("  mGestureLogInsideInsets=" + String.join("\n", mGestureLogInsideInsets));
         pw.println("  mGestureLogOutsideInsets=" + String.join("\n", mGestureLogOutsideInsets));
         pw.println("  mEdgeBackPlugin=" + mEdgeBackPlugin);
+        pw.println("  mMotionEventsHandler=" + mMotionEventsHandler);
         if (mEdgeBackPlugin != null) {
             mEdgeBackPlugin.dump(pw);
         }
