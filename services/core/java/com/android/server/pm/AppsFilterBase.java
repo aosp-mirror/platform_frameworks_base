@@ -399,6 +399,24 @@ public abstract class AppsFilterBase implements AppsFilterSnapshot {
                 Slog.wtf(TAG, "No setting found for non system uid " + callingUid);
                 return true;
             }
+
+            if (DEBUG_TRACING) {
+                Trace.traceBegin(TRACE_TAG_PACKAGE_MANAGER, "getAppId");
+            }
+            final int callingAppId = UserHandle.getAppId(callingUid);
+            final int targetAppId = targetPkgSetting.getAppId();
+            if (DEBUG_TRACING) {
+                Trace.traceEnd(TRACE_TAG_PACKAGE_MANAGER);
+            }
+            if (callingAppId == targetAppId
+                    || callingAppId < Process.FIRST_APPLICATION_UID
+                    || targetAppId < Process.FIRST_APPLICATION_UID) {
+                if (DEBUG_LOGGING) {
+                    log(callingSetting, targetPkgSetting, "same app id or core app id");
+                }
+                return false;
+            }
+
             final PackageStateInternal callingPkgSetting;
             if (DEBUG_TRACING) {
                 Trace.traceBegin(TRACE_TAG_PACKAGE_MANAGER, "callingSetting instanceof");
@@ -444,27 +462,6 @@ public abstract class AppsFilterBase implements AppsFilterSnapshot {
                         return false;
                     }
                 }
-            }
-
-            if (DEBUG_TRACING) {
-                Trace.traceBegin(TRACE_TAG_PACKAGE_MANAGER, "getAppId");
-            }
-            final int callingAppId;
-            if (callingPkgSetting != null) {
-                callingAppId = callingPkgSetting.getAppId();
-            } else {
-                // all should be the same
-                callingAppId = callingSharedPkgSettings.valueAt(0).getAppId();
-            }
-            final int targetAppId = targetPkgSetting.getAppId();
-            if (DEBUG_TRACING) {
-                Trace.traceEnd(TRACE_TAG_PACKAGE_MANAGER);
-            }
-            if (callingAppId == targetAppId) {
-                if (DEBUG_LOGGING) {
-                    log(callingSetting, targetPkgSetting, "same app id");
-                }
-                return false;
             }
 
             try {
