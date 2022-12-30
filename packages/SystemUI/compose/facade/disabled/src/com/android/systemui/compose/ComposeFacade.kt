@@ -17,8 +17,12 @@
 
 package com.android.systemui.compose
 
+import android.content.Context
+import android.view.View
 import androidx.activity.ComponentActivity
+import androidx.lifecycle.LifecycleOwner
 import com.android.systemui.people.ui.viewmodel.PeopleViewModel
+import com.android.systemui.qs.footer.ui.viewmodel.FooterActionsViewModel
 
 /** The Compose facade, when Compose is *not* available. */
 object ComposeFacade : BaseComposeFacade {
@@ -33,6 +37,14 @@ object ComposeFacade : BaseComposeFacade {
         viewModel: PeopleViewModel,
         onResult: (PeopleViewModel.Result) -> Unit,
     ) {
+        throwComposeUnavailableError()
+    }
+
+    override fun createFooterActionsView(
+        context: Context,
+        viewModel: FooterActionsViewModel,
+        qsVisibilityLifecycleOwner: LifecycleOwner
+    ): View {
         throwComposeUnavailableError()
     }
 

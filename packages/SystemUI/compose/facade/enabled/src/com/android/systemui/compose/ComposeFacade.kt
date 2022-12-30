@@ -16,11 +16,17 @@
 
 package com.android.systemui.compose
 
+import android.content.Context
+import android.view.View
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
+import androidx.compose.ui.platform.ComposeView
+import androidx.lifecycle.LifecycleOwner
 import com.android.compose.theme.PlatformTheme
 import com.android.systemui.people.ui.compose.PeopleScreen
 import com.android.systemui.people.ui.viewmodel.PeopleViewModel
+import com.android.systemui.qs.footer.ui.compose.FooterActions
+import com.android.systemui.qs.footer.ui.viewmodel.FooterActionsViewModel
 
 /** The Compose facade, when Compose is available. */
 object ComposeFacade : BaseComposeFacade {
@@ -34,5 +40,15 @@ object ComposeFacade : BaseComposeFacade {
         onResult: (PeopleViewModel.Result) -> Unit,
     ) {
         activity.setContent { PlatformTheme { PeopleScreen(viewModel, onResult) } }
+    }
+
+    override fun createFooterActionsView(
+        context: Context,
+        viewModel: FooterActionsViewModel,
+        qsVisibilityLifecycleOwner: LifecycleOwner,
+    ): View {
+        return ComposeView(context).apply {
+            setContent { PlatformTheme { FooterActions(viewModel, qsVisibilityLifecycleOwner) } }
+        }
     }
 }

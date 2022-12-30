@@ -17,8 +17,12 @@
 
 package com.android.systemui.compose
 
+import android.content.Context
+import android.view.View
 import androidx.activity.ComponentActivity
+import androidx.lifecycle.LifecycleOwner
 import com.android.systemui.people.ui.viewmodel.PeopleViewModel
+import com.android.systemui.qs.footer.ui.viewmodel.FooterActionsViewModel
 
 /**
  * A facade to interact with Compose, when it is available.
@@ -46,4 +50,11 @@ interface BaseComposeFacade {
         viewModel: PeopleViewModel,
         onResult: (PeopleViewModel.Result) -> Unit,
     )
+
+    /** Create a [View] to represent [viewModel] on screen. */
+    fun createFooterActionsView(
+        context: Context,
+        viewModel: FooterActionsViewModel,
+        qsVisibilityLifecycleOwner: LifecycleOwner,
+    ): View
 }
