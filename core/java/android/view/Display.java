@@ -2497,5 +2497,24 @@ public final class Display {
                     + ", mMaxAverageLuminance=" + mMaxAverageLuminance
                     + ", mMinLuminance=" + mMinLuminance + '}';
         }
+
+        /**
+         * @hide
+         */
+        @NonNull
+        public static String hdrTypeToString(int hdrType) {
+            switch (hdrType) {
+                case HDR_TYPE_DOLBY_VISION:
+                    return "HDR_TYPE_DOLBY_VISION";
+                case HDR_TYPE_HDR10:
+                    return "HDR_TYPE_HDR10";
+                case HDR_TYPE_HLG:
+                    return "HDR_TYPE_HLG";
+                case HDR_TYPE_HDR10_PLUS:
+                    return "HDR_TYPE_HDR10_PLUS";
+                default:
+                    return "HDR_TYPE_INVALID";
+            }
+        }
     }
 }

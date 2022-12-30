@@ -18,6 +18,7 @@ package android.hardware.display;
 
 import android.annotation.IntDef;
 import android.annotation.NonNull;
+import android.annotation.Nullable;
 import android.annotation.TestApi;
 import android.os.Parcel;
 import android.os.Parcelable;
@@ -118,5 +119,41 @@ public final class HdrConversionMode implements Parcelable {
     public void writeToParcel(@NonNull Parcel dest, int flags) {
         dest.writeInt(mConversionMode);
         dest.writeInt(mPreferredHdrOutputType);
+    }
+
+    @Override
+    public boolean equals(@Nullable Object o) {
+        return o instanceof HdrConversionMode && equals((HdrConversionMode) o);
+    }
+
+    @Override
+    public int hashCode() {
+        return 0; // don't care
+    }
+
+    @Override
+    public String toString() {
+        return "HdrConversionMode{ConversionMode=" + hdrConversionModeString(getConversionMode())
+                + ", PreferredHdrOutputType="
+                + Display.HdrCapabilities.hdrTypeToString(getPreferredHdrOutputType()) + "}";
+    }
+
+    private boolean equals(HdrConversionMode other) {
+        return other != null
+                && mConversionMode == other.getConversionMode()
+                && mPreferredHdrOutputType == other.getPreferredHdrOutputType();
+    }
+
+    private static String hdrConversionModeString(int hdrConversionMode) {
+        switch (hdrConversionMode) {
+            case HDR_CONVERSION_PASSTHROUGH:
+                return "HDR_CONVERSION_PASSTHROUGH";
+            case HDR_CONVERSION_SYSTEM:
+                return "HDR_CONVERSION_SYSTEM";
+            case HDR_CONVERSION_FORCE:
+                return "HDR_CONVERSION_FORCE";
+            default:
+                return "HDR_CONVERSION_UNKNOWN";
+        }
     }
 }
