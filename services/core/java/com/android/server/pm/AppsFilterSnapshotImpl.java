@@ -77,6 +77,6 @@ public final class AppsFilterSnapshotImpl extends AppsFilterBase {
         mCacheEnabled = orig.mCacheEnabled;
         mShouldFilterCacheSnapshot = new SnapshotCache.Sealed<>();
 
-        mBackgroundHandler = null;
+        mHandler = null;
     }
 }

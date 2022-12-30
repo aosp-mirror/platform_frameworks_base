@@ -17,6 +17,7 @@
 package android.service.credentials;
 
 import android.annotation.NonNull;
+import android.annotation.SuppressLint;
 import android.app.PendingIntent;
 import android.app.slice.Slice;
 import android.os.Parcel;
@@ -27,8 +28,14 @@ import java.util.Objects;
 /**
  * An action defined by the provider that intents into the provider's app for specific
  * user actions.
+ *
+ * <p>Any class that derives this class must only add extra field values to the {@code slice}
+ * object passed into the constructor. Any other field will not be parceled through. If the
+ * derived class has custom parceling implementation, this class will not be able to unpack
+ * the parcel without having access to that implementation.
  */
-public final class Action implements Parcelable {
+@SuppressLint("ParcelNotFinal")
+public class Action implements Parcelable {
     /** Slice object containing display content to be displayed with this action on the UI. */
     private final @NonNull Slice mSlice;
     /** The pending intent to be invoked when the user selects this action. */
