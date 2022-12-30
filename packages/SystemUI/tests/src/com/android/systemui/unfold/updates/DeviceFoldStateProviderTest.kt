@@ -29,6 +29,7 @@ import com.android.systemui.unfold.updates.RotationChangeProvider.RotationListen
 import com.android.systemui.unfold.updates.hinge.HingeAngleProvider
 import com.android.systemui.unfold.updates.screen.ScreenStatusProvider
 import com.android.systemui.unfold.updates.screen.ScreenStatusProvider.ScreenListener
+import com.android.systemui.unfold.util.UnfoldKeyguardVisibilityProvider
 import com.android.systemui.util.mockito.any
 import com.android.systemui.util.mockito.capture
 import com.google.common.truth.Truth.assertThat
@@ -55,6 +56,9 @@ class DeviceFoldStateProviderTest : SysuiTestCase() {
 
     @Mock
     private lateinit var rotationChangeProvider: RotationChangeProvider
+
+    @Mock
+    private lateinit var unfoldKeyguardVisibilityProvider: UnfoldKeyguardVisibilityProvider
 
     @Captor
     private lateinit var rotationListener: ArgumentCaptor<RotationListener>
@@ -87,6 +91,7 @@ class DeviceFoldStateProviderTest : SysuiTestCase() {
                 screenOnStatusProvider,
                 foldProvider,
                 activityTypeProvider,
+                unfoldKeyguardVisibilityProvider,
                 rotationChangeProvider,
                 context.mainExecutor,
                 handler
@@ -380,6 +385,47 @@ class DeviceFoldStateProviderTest : SysuiTestCase() {
     }
 
     @Test
+    fun startClosingEvent_whileNotOnKeyguardAndNotOnLauncher_doesNotTriggerBeforeThreshold() {
+        setKeyguardVisibility(visible = false)
+        setupForegroundActivityType(isHomeActivity = false)
+        sendHingeAngleEvent(180)
+
+        sendHingeAngleEvent(START_CLOSING_ON_APPS_THRESHOLD_DEGREES + 1)
+
+        assertThat(foldUpdates).isEmpty()
+    }
+
+    @Test
+    fun startClosingEvent_whileKeyguardStateNotAvailable_triggerBeforeThreshold() {
+        setKeyguardVisibility(visible = null)
+        sendHingeAngleEvent(180)
+
+        sendHingeAngleEvent(START_CLOSING_ON_APPS_THRESHOLD_DEGREES + 1)
+
+        assertThat(foldUpdates).containsExactly(FOLD_UPDATE_START_CLOSING)
+    }
+
+    @Test
+    fun startClosingEvent_whileonKeyguard_doesTriggerBeforeThreshold() {
+        setKeyguardVisibility(visible = true)
+        sendHingeAngleEvent(180)
+
+        sendHingeAngleEvent(START_CLOSING_ON_APPS_THRESHOLD_DEGREES + 1)
+
+        assertThat(foldUpdates).containsExactly(FOLD_UPDATE_START_CLOSING)
+    }
+
+    @Test
+    fun startClosingEvent_whileNotOnKeyguard_triggersAfterThreshold() {
+        setKeyguardVisibility(visible = false)
+        sendHingeAngleEvent(START_CLOSING_ON_APPS_THRESHOLD_DEGREES)
+
+        sendHingeAngleEvent(START_CLOSING_ON_APPS_THRESHOLD_DEGREES - 1)
+
+        assertThat(foldUpdates).containsExactly(FOLD_UPDATE_START_CLOSING)
+    }
+
+    @Test
     fun screenOff_whileFolded_hingeAngleProviderRemainsOff() {
         setFoldState(folded = true)
         assertThat(testHingeAngleProvider.isStarted).isFalse()
@@ -443,6 +489,10 @@ class DeviceFoldStateProviderTest : SysuiTestCase() {
 
     private fun setupForegroundActivityType(isHomeActivity: Boolean?) {
         whenever(activityTypeProvider.isHomeActivity).thenReturn(isHomeActivity)
+    }
+
+    private fun setKeyguardVisibility(visible: Boolean?) {
+        whenever(unfoldKeyguardVisibilityProvider.isKeyguardVisible).thenReturn(visible)
     }
 
     private fun simulateTimeout(waitTime: Long = HALF_OPENED_TIMEOUT_MILLIS) {
