@@ -611,7 +611,7 @@ class MediaRouter2ServiceImpl {
 
     // Start of methods that implements operations for both MediaRouter2 and MediaRouter2Manager.
 
-    @NonNull
+    @Nullable
     public RoutingSessionInfo getSystemSessionInfo(
             @Nullable String packageName, boolean setDeviceRouteSelected) {
         final int uid = Binder.getCallingUid();
@@ -2153,17 +2153,17 @@ class MediaRouter2ServiceImpl {
                         + "session=" + matchingRequest.mOldSession);
             }
 
-            // Succeeded
+            mSessionToRouterMap.put(sessionInfo.getId(), matchingRequest.mRouterRecord);
             if (sessionInfo.isSystemSession()
                     && !matchingRequest.mRouterRecord.mHasModifyAudioRoutingPermission) {
-                notifySessionCreatedToRouter(matchingRequest.mRouterRecord,
-                        toOriginalRequestId(uniqueRequestId),
-                        mSystemProvider.getDefaultSessionInfo());
-            } else {
-                notifySessionCreatedToRouter(matchingRequest.mRouterRecord,
-                        toOriginalRequestId(uniqueRequestId), sessionInfo);
+                // The router lacks permission to modify system routing, so we hide system routing
+                // session info from them.
+                sessionInfo = mSystemProvider.getDefaultSessionInfo();
             }
-            mSessionToRouterMap.put(sessionInfo.getId(), matchingRequest.mRouterRecord);
+            notifySessionCreatedToRouter(
+                    matchingRequest.mRouterRecord,
+                    toOriginalRequestId(uniqueRequestId),
+                    sessionInfo);
         }
 
         private void onSessionInfoChangedOnHandler(@NonNull MediaRoute2Provider provider,
