@@ -22,49 +22,49 @@
     xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
   <string-array name="wifi_status">
     <item msgid="1596683495752107015"></item>
-    <item msgid="3288373008277313483">"Скенирање..."</item>
-    <item msgid="6050951078202663628">"Повезивање…"</item>
-    <item msgid="8356618438494652335">"Потврђује се аутентичност..."</item>
-    <item msgid="2837871868181677206">"Преузимање IP адресе..."</item>
-    <item msgid="4613015005934755724">"Повезано"</item>
-    <item msgid="3763530049995655072">"Обустављено"</item>
-    <item msgid="7852381437933824454">"Прекидање везе..."</item>
-    <item msgid="5046795712175415059">"Веза је прекинута"</item>
-    <item msgid="2473654476624070462">"Неуспешно"</item>
-    <item msgid="9146847076036105115">"Блокирано"</item>
-    <item msgid="4543924085816294893">"Привремено избегавање лоше везе"</item>
+    <item msgid="3288373008277313483">"Skeniranje..."</item>
+    <item msgid="6050951078202663628">"Povezivanje…"</item>
+    <item msgid="8356618438494652335">"Potvrđuje se autentičnost..."</item>
+    <item msgid="2837871868181677206">"Preuzimanje IP adrese..."</item>
+    <item msgid="4613015005934755724">"Povezano"</item>
+    <item msgid="3763530049995655072">"Obustavljeno"</item>
+    <item msgid="7852381437933824454">"Prekidanje veze..."</item>
+    <item msgid="5046795712175415059">"Veza je prekinuta"</item>
+    <item msgid="2473654476624070462">"Neuspešno"</item>
+    <item msgid="9146847076036105115">"Blokirano"</item>
+    <item msgid="4543924085816294893">"Privremeno izbegavanje loše veze"</item>
   </string-array>
   <string-array name="wifi_status_with_ssid">
     <item msgid="5969842512724979061"></item>
-    <item msgid="1818677602615822316">"Скенирање..."</item>
-    <item msgid="8339720953594087771">"Повезивање са мрежом <xliff:g id="NETWORK_NAME">%1$s</xliff:g>…"</item>
-    <item msgid="3028983857109369308">"Проверавање идентитета мреже <xliff:g id="NETWORK_NAME">%1$s</xliff:g>..."</item>
-    <item msgid="4287401332778341890">"Добијање IP адресе од мреже <xliff:g id="NETWORK_NAME">%1$s</xliff:g>…"</item>
-    <item msgid="1043944043827424501">"Повезано са мрежом <xliff:g id="NETWORK_NAME">%1$s</xliff:g>"</item>
-    <item msgid="7445993821842009653">"Обустављено"</item>
-    <item msgid="1175040558087735707">"Прекидање везе са мрежом <xliff:g id="NETWORK_NAME">%1$s</xliff:g>…"</item>
-    <item msgid="699832486578171722">"Веза је прекинута"</item>
-    <item msgid="522383512264986901">"Неуспешно"</item>
-    <item msgid="3602596701217484364">"Блокирано"</item>
-    <item msgid="1999413958589971747">"Привремено избегавање лоше везе"</item>
+    <item msgid="1818677602615822316">"Skeniranje..."</item>
+    <item msgid="8339720953594087771">"Povezivanje sa mrežom <xliff:g id="NETWORK_NAME">%1$s</xliff:g>…"</item>
+    <item msgid="3028983857109369308">"Proveravanje identiteta mreže <xliff:g id="NETWORK_NAME">%1$s</xliff:g>..."</item>
+    <item msgid="4287401332778341890">"Dobijanje IP adrese od mreže <xliff:g id="NETWORK_NAME">%1$s</xliff:g>…"</item>
+    <item msgid="1043944043827424501">"Povezano sa mrežom <xliff:g id="NETWORK_NAME">%1$s</xliff:g>"</item>
+    <item msgid="7445993821842009653">"Obustavljeno"</item>
+    <item msgid="1175040558087735707">"Prekidanje veze sa mrežom <xliff:g id="NETWORK_NAME">%1$s</xliff:g>…"</item>
+    <item msgid="699832486578171722">"Veza je prekinuta"</item>
+    <item msgid="522383512264986901">"Neuspešno"</item>
+    <item msgid="3602596701217484364">"Blokirano"</item>
+    <item msgid="1999413958589971747">"Privremeno izbegavanje loše veze"</item>
   </string-array>
   <string-array name="hdcp_checking_titles">
-    <item msgid="2377230797542526134">"Никад не проверавај"</item>
-    <item msgid="3919638466823112484">"Потражи само DRM садржај"</item>
-    <item msgid="9048424957228926377">"Увек проверавај"</item>
+    <item msgid="2377230797542526134">"Nikad ne proveravaj"</item>
+    <item msgid="3919638466823112484">"Potraži samo DRM sadržaj"</item>
+    <item msgid="9048424957228926377">"Uvek proveravaj"</item>
   </string-array>
   <string-array name="hdcp_checking_summaries">
-    <item msgid="4045840870658484038">"Никада не користи HDCP проверу"</item>
-    <item msgid="8254225038262324761">"Користи HDCP проверу само за DRM садржај"</item>
-    <item msgid="6421717003037072581">"Увек користи HDCP проверу"</item>
+    <item msgid="4045840870658484038">"Nikada ne koristi HDCP proveru"</item>
+    <item msgid="8254225038262324761">"Koristi HDCP proveru samo za DRM sadržaj"</item>
+    <item msgid="6421717003037072581">"Uvek koristi HDCP proveru"</item>
   </string-array>
   <string-array name="bt_hci_snoop_log_entries">
-    <item msgid="695678520785580527">"Онемогућено"</item>
-    <item msgid="6336372935919715515">"Омогућено филтрирано"</item>
-    <item msgid="2779123106632690576">"Омогућено"</item>
+    <item msgid="695678520785580527">"Onemogućeno"</item>
+    <item msgid="6336372935919715515">"Omogućeno filtrirano"</item>
+    <item msgid="2779123106632690576">"Omogućeno"</item>
   </string-array>
   <string-array name="bluetooth_avrcp_versions">
-    <item msgid="6603880723315236832">"AVRCP 1.5 (подразумевано)"</item>
+    <item msgid="6603880723315236832">"AVRCP 1.5 (podrazumevano)"</item>
     <item msgid="1637054408779685086">"AVRCP 1.3"</item>
     <item msgid="5896162189744596291">"AVRCP 1.4"</item>
     <item msgid="7556896992111771426">"AVRCP 1.6"</item>
@@ -76,7 +76,7 @@
     <item msgid="1963366694959681026">"avrcp16"</item>
   </string-array>
   <string-array name="bluetooth_map_versions">
-    <item msgid="8786402640610987099">"MAP 1.2 (подразумевано)"</item>
+    <item msgid="8786402640610987099">"MAP 1.2 (podrazumevano)"</item>
     <item msgid="6817922176194686449">"MAP 1.3"</item>
     <item msgid="3423518690032737851">"MAP 1.4"</item>
   </string-array>
@@ -86,81 +86,81 @@
     <item msgid="8147982633566548515">"map14"</item>
   </string-array>
   <string-array name="bluetooth_a2dp_codec_titles">
-    <item msgid="2494959071796102843">"Користи избор система (подразумевано)"</item>
+    <item msgid="2494959071796102843">"Koristi izbor sistema (podrazumevano)"</item>
     <item msgid="4055460186095649420">"SBC"</item>
     <item msgid="720249083677397051">"AAC"</item>
-    <item msgid="1049450003868150455">"<xliff:g id="QUALCOMM">Qualcomm®</xliff:g> <xliff:g id="APTX">aptX™</xliff:g> аудио"</item>
-    <item msgid="2908219194098827570">"<xliff:g id="QUALCOMM">Qualcomm®</xliff:g> <xliff:g id="APTX_HD">aptX™ HD</xliff:g> аудио"</item>
+    <item msgid="1049450003868150455">"<xliff:g id="QUALCOMM">Qualcomm®</xliff:g> <xliff:g id="APTX">aptX™</xliff:g> audio"</item>
+    <item msgid="2908219194098827570">"<xliff:g id="QUALCOMM">Qualcomm®</xliff:g> <xliff:g id="APTX_HD">aptX™ HD</xliff:g> audio"</item>
     <item msgid="3825367753087348007">"LDAC"</item>
     <item msgid="328951785723550863">"LC3"</item>
     <item msgid="506175145534048710">"Opus"</item>
   </string-array>
   <string-array name="bluetooth_a2dp_codec_summaries">
-    <item msgid="8868109554557331312">"Користи избор система (подразумевано)"</item>
+    <item msgid="8868109554557331312">"Koristi izbor sistema (podrazumevano)"</item>
     <item msgid="9024885861221697796">"SBC"</item>
     <item msgid="4688890470703790013">"AAC"</item>
-    <item msgid="8627333814413492563">"<xliff:g id="QUALCOMM">Qualcomm®</xliff:g> <xliff:g id="APTX">aptX™</xliff:g> аудио"</item>
-    <item msgid="3517061573669307965">"<xliff:g id="QUALCOMM">Qualcomm®</xliff:g> <xliff:g id="APTX_HD">aptX™ HD</xliff:g> аудио"</item>
+    <item msgid="8627333814413492563">"<xliff:g id="QUALCOMM">Qualcomm®</xliff:g> <xliff:g id="APTX">aptX™</xliff:g> audio"</item>
+    <item msgid="3517061573669307965">"<xliff:g id="QUALCOMM">Qualcomm®</xliff:g> <xliff:g id="APTX_HD">aptX™ HD</xliff:g> audio"</item>
     <item msgid="2553206901068987657">"LDAC"</item>
     <item msgid="3940992993241040716">"LC3"</item>
     <item msgid="7940970833006181407">"Opus"</item>
   </string-array>
   <string-array name="bluetooth_a2dp_codec_sample_rate_titles">
-    <item msgid="926809261293414607">"Користи избор система (подразумевано)"</item>
+    <item msgid="926809261293414607">"Koristi izbor sistema (podrazumevano)"</item>
     <item msgid="8003118270854840095">"44,1 kHz"</item>
     <item msgid="3208896645474529394">"48,0 kHz"</item>
     <item msgid="8420261949134022577">"88,2 kHz"</item>
     <item msgid="8887519571067543785">"96,0 kHz"</item>
   </string-array>
   <string-array name="bluetooth_a2dp_codec_sample_rate_summaries">
-    <item msgid="2284090879080331090">"Користи избор система (подразумевано)"</item>
+    <item msgid="2284090879080331090">"Koristi izbor sistema (podrazumevano)"</item>
     <item msgid="1872276250541651186">"44,1 kHz"</item>
     <item msgid="8736780630001704004">"48,0 kHz"</item>
     <item msgid="7698585706868856888">"88,2 kHz"</item>
     <item msgid="8946330945963372966">"96,0 kHz"</item>
   </string-array>
   <string-array name="bluetooth_a2dp_codec_bits_per_sample_titles">
-    <item msgid="2574107108483219051">"Користи избор система (подразумевано)"</item>
-    <item msgid="4671992321419011165">"16 битова по узорку"</item>
-    <item msgid="1933898806184763940">"24 бита по узорку"</item>
-    <item msgid="1212577207279552119">"32 бита по узорку"</item>
+    <item msgid="2574107108483219051">"Koristi izbor sistema (podrazumevano)"</item>
+    <item msgid="4671992321419011165">"16 bitova po uzorku"</item>
+    <item msgid="1933898806184763940">"24 bita po uzorku"</item>
+    <item msgid="1212577207279552119">"32 bita po uzorku"</item>
   </string-array>
   <string-array name="bluetooth_a2dp_codec_bits_per_sample_summaries">
-    <item msgid="9196208128729063711">"Користи избор система (подразумевано)"</item>
-    <item msgid="1084497364516370912">"16 битова по узорку"</item>
-    <item msgid="2077889391457961734">"24 бита по узорку"</item>
-    <item msgid="3836844909491316925">"32 бита по узорку"</item>
+    <item msgid="9196208128729063711">"Koristi izbor sistema (podrazumevano)"</item>
+    <item msgid="1084497364516370912">"16 bitova po uzorku"</item>
+    <item msgid="2077889391457961734">"24 bita po uzorku"</item>
+    <item msgid="3836844909491316925">"32 bita po uzorku"</item>
   </string-array>
   <string-array name="bluetooth_a2dp_codec_channel_mode_titles">
-    <item msgid="3014194562841654656">"Користи избор система (подразумевано)"</item>
-    <item msgid="5982952342181788248">"Моно"</item>
-    <item msgid="927546067692441494">"Стерео"</item>
+    <item msgid="3014194562841654656">"Koristi izbor sistema (podrazumevano)"</item>
+    <item msgid="5982952342181788248">"Mono"</item>
+    <item msgid="927546067692441494">"Stereo"</item>
   </string-array>
   <string-array name="bluetooth_a2dp_codec_channel_mode_summaries">
-    <item msgid="1997302811102880485">"Користи избор система (подразумевано)"</item>
-    <item msgid="8005696114958453588">"Моно"</item>
-    <item msgid="1333279807604675720">"Стерео"</item>
+    <item msgid="1997302811102880485">"Koristi izbor sistema (podrazumevano)"</item>
+    <item msgid="8005696114958453588">"Mono"</item>
+    <item msgid="1333279807604675720">"Stereo"</item>
   </string-array>
   <string-array name="bluetooth_a2dp_codec_ldac_playback_quality_titles">
-    <item msgid="1241278021345116816">"Оптимизовано за квалитет звука (990 kb/s/909 kb/s)"</item>
-    <item msgid="3523665555859696539">"Уједначен квалитет звука и везе (660 kb/s/606 kb/s)"</item>
-    <item msgid="886408010459747589">"Оптимизовано за квалитет везе (330 kb/s/303 kb/s)"</item>
-    <item msgid="3808414041654351577">"Најбоље могуће (прилагодљива брзина преноса)"</item>
+    <item msgid="1241278021345116816">"Optimizovano za kvalitet zvuka (990 kb/s/909 kb/s)"</item>
+    <item msgid="3523665555859696539">"Ujednačen kvalitet zvuka i veze (660 kb/s/606 kb/s)"</item>
+    <item msgid="886408010459747589">"Optimizovano za kvalitet veze (330 kb/s/303 kb/s)"</item>
+    <item msgid="3808414041654351577">"Najbolje moguće (prilagodljiva brzina prenosa)"</item>
   </string-array>
   <string-array name="bluetooth_a2dp_codec_ldac_playback_quality_summaries">
-    <item msgid="804499336721569838">"Оптимизовано за квалитет звука"</item>
-    <item msgid="7451422070435297462">"Уједначен квалитет звука и везе"</item>
-    <item msgid="6173114545795428901">"Оптимизовано за квалитет везе"</item>
-    <item msgid="4349908264188040530">"Најбоље могуће (прилагодљива брзина преноса)"</item>
+    <item msgid="804499336721569838">"Optimizovano za kvalitet zvuka"</item>
+    <item msgid="7451422070435297462">"Ujednačen kvalitet zvuka i veze"</item>
+    <item msgid="6173114545795428901">"Optimizovano za kvalitet veze"</item>
+    <item msgid="4349908264188040530">"Najbolje moguće (prilagodljiva brzina prenosa)"</item>
   </string-array>
   <string-array name="bluetooth_audio_active_device_summaries">
     <item msgid="8019740759207729126"></item>
-    <item msgid="204248102837117183">", активан"</item>
-    <item msgid="253388653486517049">", активан (медијски)"</item>
-    <item msgid="5001852592115448348">", активан (телефон)"</item>
+    <item msgid="204248102837117183">", aktivan"</item>
+    <item msgid="253388653486517049">", aktivan (medijski)"</item>
+    <item msgid="5001852592115448348">", aktivan (telefon)"</item>
   </string-array>
   <string-array name="select_logd_size_titles">
-    <item msgid="1191094707770726722">"Искључено"</item>
+    <item msgid="1191094707770726722">"Isključeno"</item>
     <item msgid="7839165897132179888">"64 kB"</item>
     <item msgid="2715700596495505626">"256 kB"</item>
     <item msgid="7099386891713159947">"1 MB"</item>
@@ -168,107 +168,107 @@
     <item msgid="6078203297886482480">"8 MB"</item>
   </string-array>
   <string-array name="select_logd_size_lowram_titles">
-    <item msgid="1145807928339101085">"Искључено"</item>
+    <item msgid="1145807928339101085">"Isključeno"</item>
     <item msgid="4064786181089783077">"64 kB"</item>
     <item msgid="3052710745383602630">"256 kB"</item>
     <item msgid="3691785423374588514">"1 MB"</item>
   </string-array>
   <string-array name="select_logd_size_summaries">
-    <item msgid="409235464399258501">"Искључено"</item>
-    <item msgid="4195153527464162486">"64 kB по међумеморији евиденције"</item>
-    <item msgid="7464037639415220106">"256 kB по међумеморији евиденције"</item>
-    <item msgid="8539423820514360724">"1 MB по међумеморији евиденције"</item>
-    <item msgid="1984761927103140651">"4 MB по међумеморији евиденције"</item>
-    <item msgid="2983219471251787208">"8 MB по међумеморији евиденције"</item>
+    <item msgid="409235464399258501">"Isključeno"</item>
+    <item msgid="4195153527464162486">"64 kB po međumemoriji evidencije"</item>
+    <item msgid="7464037639415220106">"256 kB po međumemoriji evidencije"</item>
+    <item msgid="8539423820514360724">"1 MB po međumemoriji evidencije"</item>
+    <item msgid="1984761927103140651">"4 MB po međumemoriji evidencije"</item>
+    <item msgid="2983219471251787208">"8 MB po međumemoriji evidencije"</item>
   </string-array>
   <string-array name="select_logpersist_titles">
-    <item msgid="704720725704372366">"Искључено"</item>
-    <item msgid="6014837961827347618">"Све"</item>
-    <item msgid="7387060437894578132">"Све сeм радија"</item>
-    <item msgid="7300881231043255746">"само језгро"</item>
+    <item msgid="704720725704372366">"Isključeno"</item>
+    <item msgid="6014837961827347618">"Sve"</item>
+    <item msgid="7387060437894578132">"Sve sem radija"</item>
+    <item msgid="7300881231043255746">"samo jezgro"</item>
   </string-array>
   <string-array name="select_logpersist_summaries">
-    <item msgid="97587758561106269">"Искључено"</item>
-    <item msgid="7126170197336963369">"Све међумеморије евиденција"</item>
-    <item msgid="7167543126036181392">"Све осим међумеморија евиденција за радио"</item>
-    <item msgid="5135340178556563979">"само међумеморија евиденције језгра"</item>
+    <item msgid="97587758561106269">"Isključeno"</item>
+    <item msgid="7126170197336963369">"Sve međumemorije evidencija"</item>
+    <item msgid="7167543126036181392">"Sve osim međumemorija evidencija za radio"</item>
+    <item msgid="5135340178556563979">"samo međumemorija evidencije jezgra"</item>
   </string-array>
   <string-array name="window_animation_scale_entries">
-    <item msgid="2675263395797191850">"Анимација је искључена"</item>
-    <item msgid="5790132543372767872">"Размера анимације 0,5x"</item>
-    <item msgid="2529692189302148746">"Размера анимације 1x"</item>
-    <item msgid="8072785072237082286">"Размера анимације 1,5x"</item>
-    <item msgid="3531560925718232560">"Размера анимације 2x"</item>
-    <item msgid="4542853094898215187">"Размера анимације 5x"</item>
-    <item msgid="5643881346223901195">"Размера анимације 10x"</item>
+    <item msgid="2675263395797191850">"Animacija je isključena"</item>
+    <item msgid="5790132543372767872">"Razmera animacije 0,5x"</item>
+    <item msgid="2529692189302148746">"Razmera animacije 1x"</item>
+    <item msgid="8072785072237082286">"Razmera animacije 1,5x"</item>
+    <item msgid="3531560925718232560">"Razmera animacije 2x"</item>
+    <item msgid="4542853094898215187">"Razmera animacije 5x"</item>
+    <item msgid="5643881346223901195">"Razmera animacije 10x"</item>
   </string-array>
   <string-array name="transition_animation_scale_entries">
-    <item msgid="3376676813923486384">"Анимација је искључена"</item>
-    <item msgid="753422683600269114">"Размера анимације 0,5x"</item>
-    <item msgid="3695427132155563489">"Размера анимације 1x"</item>
-    <item msgid="9032615844198098981">"Размера анимације 1,5x"</item>
-    <item msgid="8473868962499332073">"Размера анимације 2x"</item>
-    <item msgid="4403482320438668316">"Размера анимације 5x"</item>
-    <item msgid="169579387974966641">"Размера анимације 10x"</item>
+    <item msgid="3376676813923486384">"Animacija je isključena"</item>
+    <item msgid="753422683600269114">"Razmera animacije 0,5x"</item>
+    <item msgid="3695427132155563489">"Razmera animacije 1x"</item>
+    <item msgid="9032615844198098981">"Razmera animacije 1,5x"</item>
+    <item msgid="8473868962499332073">"Razmera animacije 2x"</item>
+    <item msgid="4403482320438668316">"Razmera animacije 5x"</item>
+    <item msgid="169579387974966641">"Razmera animacije 10x"</item>
   </string-array>
   <string-array name="animator_duration_scale_entries">
-    <item msgid="6416998593844817378">"Анимација је искључена"</item>
-    <item msgid="875345630014338616">"Размера анимације 0,5x"</item>
-    <item msgid="2753729231187104962">"Размера анимације 1x"</item>
-    <item msgid="1368370459723665338">"Размера анимације 1,5x"</item>
-    <item msgid="5768005350534383389">"Размера анимације 2x"</item>
-    <item msgid="3728265127284005444">"Размера анимације 5x"</item>
-    <item msgid="2464080977843960236">"Размера анимације 10x"</item>
+    <item msgid="6416998593844817378">"Animacija je isključena"</item>
+    <item msgid="875345630014338616">"Razmera animacije 0,5x"</item>
+    <item msgid="2753729231187104962">"Razmera animacije 1x"</item>
+    <item msgid="1368370459723665338">"Razmera animacije 1,5x"</item>
+    <item msgid="5768005350534383389">"Razmera animacije 2x"</item>
+    <item msgid="3728265127284005444">"Razmera animacije 5x"</item>
+    <item msgid="2464080977843960236">"Razmera animacije 10x"</item>
   </string-array>
   <string-array name="overlay_display_devices_entries">
-    <item msgid="4497393944195787240">"Ништа"</item>
-    <item msgid="8461943978957133391">"480 пиксела"</item>
-    <item msgid="6923083594932909205">"480 пиксела (безбедно)"</item>
-    <item msgid="1226941831391497335">"720 пиксела"</item>
-    <item msgid="7051983425968643928">"720 пиксела (безбедно)"</item>
-    <item msgid="7765795608738980305">"1080 пиксела"</item>
-    <item msgid="8084293856795803592">"1080 пиксела (безбедно)"</item>
+    <item msgid="4497393944195787240">"Ništa"</item>
+    <item msgid="8461943978957133391">"480 piksela"</item>
+    <item msgid="6923083594932909205">"480 piksela (bezbedno)"</item>
+    <item msgid="1226941831391497335">"720 piksela"</item>
+    <item msgid="7051983425968643928">"720 piksela (bezbedno)"</item>
+    <item msgid="7765795608738980305">"1080 piksela"</item>
+    <item msgid="8084293856795803592">"1080 piksela (bezbedno)"</item>
     <item msgid="938784192903353277">"4K"</item>
-    <item msgid="8612549335720461635">"4K (безбедно)"</item>
-    <item msgid="7322156123728520872">"4K (увећана резолуција)"</item>
-    <item msgid="7735692090314849188">"4K (увећана резолуција, безбедно)"</item>
-    <item msgid="7346816300608639624">"720 пиксела, 1080 пикс. (2 екрана)"</item>
+    <item msgid="8612549335720461635">"4K (bezbedno)"</item>
+    <item msgid="7322156123728520872">"4K (uvećana rezolucija)"</item>
+    <item msgid="7735692090314849188">"4K (uvećana rezolucija, bezbedno)"</item>
+    <item msgid="7346816300608639624">"720 piksela, 1080 piks. (2 ekrana)"</item>
   </string-array>
   <string-array name="enable_opengl_traces_entries">
-    <item msgid="4433736508877934305">"Ниједан"</item>
+    <item msgid="4433736508877934305">"Nijedan"</item>
     <item msgid="9140053004929079158">"Logcat"</item>
-    <item msgid="3866871644917859262">"Systrace (графика)"</item>
-    <item msgid="7345673972166571060">"Групно позивање функције glGetError"</item>
+    <item msgid="3866871644917859262">"Systrace (grafika)"</item>
+    <item msgid="7345673972166571060">"Grupno pozivanje funkcije glGetError"</item>
   </string-array>
   <string-array name="show_non_rect_clip_entries">
-    <item msgid="2482978351289846212">"Искључено"</item>
-    <item msgid="3405519300199774027">"Нацртај област за исецање која није правоугаоног облика плавом бојом"</item>
-    <item msgid="1212561935004167943">"Истакни зеленом тестиране команде за цртање"</item>
+    <item msgid="2482978351289846212">"Isključeno"</item>
+    <item msgid="3405519300199774027">"Nacrtaj oblast za isecanje koja nije pravougaonog oblika plavom bojom"</item>
+    <item msgid="1212561935004167943">"Istakni zelenom testirane komande za crtanje"</item>
   </string-array>
   <string-array name="track_frame_time_entries">
-    <item msgid="634406443901014984">"Искључено"</item>
-    <item msgid="1288760936356000927">"На екрану у виду трака"</item>
-    <item msgid="5023908510820531131">"У <xliff:g id="AS_TYPED_COMMAND">adb shell dumpsys gfxinfo</xliff:g>"</item>
+    <item msgid="634406443901014984">"Isključeno"</item>
+    <item msgid="1288760936356000927">"Na ekranu u vidu traka"</item>
+    <item msgid="5023908510820531131">"U <xliff:g id="AS_TYPED_COMMAND">adb shell dumpsys gfxinfo</xliff:g>"</item>
   </string-array>
   <string-array name="debug_hw_overdraw_entries">
-    <item msgid="1968128556747588800">"Искључи"</item>
-    <item msgid="3033215374382962216">"Прикажи области преклапања"</item>
-    <item msgid="3474333938380896988">"Прикажи области за деутераномалију"</item>
+    <item msgid="1968128556747588800">"Isključi"</item>
+    <item msgid="3033215374382962216">"Prikaži oblasti preklapanja"</item>
+    <item msgid="3474333938380896988">"Prikaži oblasti za deuteranomaliju"</item>
   </string-array>
   <string-array name="app_process_limit_entries">
-    <item msgid="794656271086646068">"Стандардно ограничење"</item>
-    <item msgid="8628438298170567201">"Без позадинских процеса"</item>
-    <item msgid="915752993383950932">"Највише један процес"</item>
-    <item msgid="8554877790859095133">"Највише два процеса"</item>
-    <item msgid="9060830517215174315">"Највише три процеса"</item>
-    <item msgid="6506681373060736204">"Највише четири процеса"</item>
+    <item msgid="794656271086646068">"Standardno ograničenje"</item>
+    <item msgid="8628438298170567201">"Bez pozadinskih procesa"</item>
+    <item msgid="915752993383950932">"Najviše jedan proces"</item>
+    <item msgid="8554877790859095133">"Najviše dva procesa"</item>
+    <item msgid="9060830517215174315">"Najviše tri procesa"</item>
+    <item msgid="6506681373060736204">"Najviše četiri procesa"</item>
   </string-array>
   <string-array name="usb_configuration_titles">
-    <item msgid="3358668781763928157">"Пуни се"</item>
-    <item msgid="7804797564616858506">"MTP (протокол за трансфер медија)"</item>
-    <item msgid="910925519184248772">"PTP (протокол за пренос слика)"</item>
-    <item msgid="3825132913289380004">"RNDIS (USB етернет)"</item>
-    <item msgid="8828567335701536560">"Извор звука"</item>
+    <item msgid="3358668781763928157">"Puni se"</item>
+    <item msgid="7804797564616858506">"MTP (protokol za transfer medija)"</item>
+    <item msgid="910925519184248772">"PTP (protokol za prenos slika)"</item>
+    <item msgid="3825132913289380004">"RNDIS (USB eternet)"</item>
+    <item msgid="8828567335701536560">"Izvor zvuka"</item>
     <item msgid="8688681727755534982">"MIDI"</item>
   </string-array>
   <string-array name="avatar_image_descriptions">
