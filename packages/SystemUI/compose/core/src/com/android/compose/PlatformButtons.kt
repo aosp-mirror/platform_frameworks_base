@@ -15,7 +15,7 @@
  *
  */
 
-package com.android.systemui.compose
+package com.android.compose
 
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.layout.PaddingValues
@@ -27,10 +27,10 @@ import androidx.compose.material3.ButtonDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
-import com.android.systemui.compose.theme.LocalAndroidColorScheme
+import com.android.compose.theme.LocalAndroidColorScheme
 
 @Composable
-fun SysUiButton(
+fun PlatformButton(
     onClick: () -> Unit,
     modifier: Modifier = Modifier,
     enabled: Boolean = true,
@@ -48,7 +48,7 @@ fun SysUiButton(
 }
 
 @Composable
-fun SysUiOutlinedButton(
+fun PlatformOutlinedButton(
     onClick: () -> Unit,
     modifier: Modifier = Modifier,
     enabled: Boolean = true,
@@ -67,7 +67,7 @@ fun SysUiOutlinedButton(
 }
 
 @Composable
-fun SysUiTextButton(
+fun PlatformTextButton(
     onClick: () -> Unit,
     modifier: Modifier = Modifier,
     enabled: Boolean = true,
