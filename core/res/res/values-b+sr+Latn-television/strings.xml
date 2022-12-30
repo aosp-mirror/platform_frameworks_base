@@ -17,6 +17,6 @@
 
 <resources xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
-    <string name="sensor_privacy_start_use_mic_notification_content_title" msgid="7002619958660406548">"Микрофон је блокиран"</string>
-    <string name="sensor_privacy_start_use_camera_notification_content_title" msgid="2131954635322568179">"Камера је блокирана"</string>
+    <string name="sensor_privacy_start_use_mic_notification_content_title" msgid="7002619958660406548">"Mikrofon je blokiran"</string>
+    <string name="sensor_privacy_start_use_camera_notification_content_title" msgid="2131954635322568179">"Kamera je blokirana"</string>
 </resources>
