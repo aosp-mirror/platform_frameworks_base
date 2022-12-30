@@ -572,11 +572,14 @@ public final class BackgroundDexOptService {
             size += getDirectorySize(path);
             if (!ArrayUtils.isEmpty(info.applicationInfo.splitSourceDirs)) {
                 for (String splitSourceDir : info.applicationInfo.splitSourceDirs) {
-                    path = Paths.get(splitSourceDir).toFile();
-                    if (path.isFile()) {
-                        path = path.getParentFile();
+                    File pathSplitSourceDir = Paths.get(splitSourceDir).toFile();
+                    if (pathSplitSourceDir.isFile()) {
+                        pathSplitSourceDir = pathSplitSourceDir.getParentFile();
                     }
-                    size += getDirectorySize(path);
+                    if (path.getAbsolutePath().equals(pathSplitSourceDir.getAbsolutePath())) {
+                        continue;
+                    }
+                    size += getDirectorySize(pathSplitSourceDir);
                 }
             }
             return size;
