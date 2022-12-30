@@ -10866,4 +10866,16 @@ public abstract class PackageManager {
         throw new UnsupportedOperationException(
                 "isShowNewAppInstalledNotificationEnabled not implemented in subclass");
     }
+
+    /**
+     * Attempt to relinquish the update ownership of the given package. Only the current
+     * update owner of the given package can use this API or a SecurityException will be
+     * thrown.
+     *
+     * @param targetPackage The installed package whose update owner will be changed.
+     */
+    public void relinquishUpdateOwnership(@NonNull String targetPackage) {
+        throw new UnsupportedOperationException(
+                "relinquishUpdateOwnership not implemented in subclass");
+    }
 }

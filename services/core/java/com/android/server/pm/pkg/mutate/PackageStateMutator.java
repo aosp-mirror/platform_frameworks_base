@@ -291,6 +291,15 @@ public class PackageStateMutator {
             return this;
         }
 
+        @NonNull
+        @Override
+        public PackageStateWrite setUpdateOwner(@NonNull String updateOwnerPackageName) {
+            if (mState != null) {
+                mState.setUpdateOwnerPackage(updateOwnerPackageName);
+            }
+            return this;
+        }
+
         private static class UserStateWriteWrapper implements PackageUserStateWrite {
 
             @Nullable

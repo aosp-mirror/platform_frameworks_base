@@ -12258,6 +12258,7 @@ package android.content.pm {
     method @NonNull public java.util.List<android.content.pm.PackageManager.Property> queryProviderProperty(@NonNull String);
     method @NonNull public java.util.List<android.content.pm.PackageManager.Property> queryReceiverProperty(@NonNull String);
     method @NonNull public java.util.List<android.content.pm.PackageManager.Property> queryServiceProperty(@NonNull String);
+    method public void relinquishUpdateOwnership(@NonNull String);
     method @Deprecated public abstract void removePackageFromPreferred(@NonNull String);
     method public abstract void removePermission(@NonNull String);
     method @RequiresPermission(value="android.permission.WHITELIST_RESTRICTED_PERMISSIONS", conditional=true) public boolean removeWhitelistedRestrictedPermission(@NonNull String, @NonNull String, int);
