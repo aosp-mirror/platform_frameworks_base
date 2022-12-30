@@ -22,7 +22,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.platform.ViewRootForTest
 import androidx.compose.ui.test.junit4.createAndroidComposeRule
 import androidx.compose.ui.test.onRoot
-import com.android.systemui.compose.theme.SystemUITheme
+import com.android.compose.theme.PlatformTheme
 import com.android.systemui.testing.screenshot.ScreenshotActivity
 import com.android.systemui.testing.screenshot.SystemUIGoldenImagePathManager
 import com.android.systemui.testing.screenshot.UnitTestBitmapMatcher
@@ -79,7 +79,7 @@ class ComposeScreenshotTestRule(
         // Set the content using the AndroidComposeRule to make sure that the Activity is set up
         // correctly.
         composeRule.setContent {
-            SystemUITheme {
+            PlatformTheme {
                 Surface(
                     color = MaterialTheme.colorScheme.background,
                 ) {

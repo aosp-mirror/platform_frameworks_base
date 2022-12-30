@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.android.systemui.compose.theme
+package com.android.compose.theme
 
 import android.annotation.AttrRes
 import androidx.compose.runtime.Composable
