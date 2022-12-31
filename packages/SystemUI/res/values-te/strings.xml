@@ -85,8 +85,7 @@
     <string name="screenshot_share_description" msgid="2861628935812656612">"స్క్రీన్‌షాట్‌ను షేర్ చేయండి"</string>
     <string name="screenshot_scroll_label" msgid="2930198809899329367">"మరిన్ని క్యాప్చర్ చేయండి"</string>
     <string name="screenshot_dismiss_description" msgid="4702341245899508786">"స్క్రీన్‌షాట్‌ను విస్మరించు"</string>
-    <!-- no translation found for screenshot_dismiss_work_profile (3101530842987697045) -->
-    <skip />
+    <string name="screenshot_dismiss_work_profile" msgid="3101530842987697045">"వర్క్ ప్రొఫైల్ మెసేజ్‌ను విస్మరిస్తుంది"</string>
     <string name="screenshot_preview_description" msgid="7606510140714080474">"స్క్రీన్‌షాట్ ప్రివ్యూ"</string>
     <string name="screenshot_top_boundary_pct" msgid="2520148599096479332">"ఎగువ సరిహద్దు <xliff:g id="PERCENT">%1$d</xliff:g> శాతం"</string>
     <string name="screenshot_bottom_boundary_pct" msgid="3880821519814946478">"దిగువ సరిహద్దు <xliff:g id="PERCENT">%1$d</xliff:g> శాతం"</string>
@@ -641,7 +640,7 @@
     <item msgid="7453955063378349599">"ఎడమవైపుకు వాలుగా"</item>
     <item msgid="5874146774389433072">"కుడివైపుకు వాలుగా"</item>
   </string-array>
-    <string name="save" msgid="3392754183673848006">"సేవ్ చేయి"</string>
+    <string name="save" msgid="3392754183673848006">"సేవ్ చేయండి"</string>
     <string name="reset" msgid="8715144064608810383">"రీసెట్ చేయండి"</string>
     <string name="clipboard" msgid="8517342737534284617">"క్లిప్‌బోర్డ్"</string>
     <string name="accessibility_key" msgid="3471162841552818281">"అనుకూల నావిగేషన్ బటన్"</string>
@@ -876,8 +875,7 @@
     <string name="media_output_dialog_accessibility_title" msgid="4681741064190167888">"ఆడియో అవుట్‌పుట్ కోసం అందుబాటులో ఉన్న పరికరాలు."</string>
     <string name="media_output_dialog_accessibility_seekbar" msgid="5332843993805568978">"వాల్యూమ్"</string>
     <string name="media_output_dialog_volume_percentage" msgid="1613984910585111798">"<xliff:g id="PERCENTAGE">%1$d</xliff:g>%%"</string>
-    <!-- no translation found for media_output_group_title_speakers_and_displays (7169712332365659820) -->
-    <skip />
+    <string name="media_output_group_title_speakers_and_displays" msgid="7169712332365659820">"స్పీకర్‌లు &amp; డిస్‌ప్లేలు"</string>
     <string name="media_output_first_broadcast_title" msgid="6292237789860753022">"ప్రసారం కావడం అనేది ఎలా పని చేస్తుంది"</string>
     <string name="media_output_broadcast" msgid="3555580945878071543">"ప్రసారం"</string>
     <string name="media_output_first_notify_broadcast_message" msgid="6353857724136398494">"మీకు సమీపంలో ఉన్న వ్యక్తులు అనుకూలత ఉన్న బ్లూటూత్ పరికరాలతో మీరు ప్రసారం చేస్తున్న మీడియాను వినగలరు"</string>
@@ -1001,13 +999,13 @@
     <string name="dream_time_complication_12_hr_time_format" msgid="4691197486690291529">"h:mm"</string>
     <string name="dream_time_complication_24_hr_time_format" msgid="6248280719733640813">"kk:mm"</string>
     <string name="keyguard_affordance_enablement_dialog_action_template" msgid="8164857863036314664">"<xliff:g id="APPNAME">%1$s</xliff:g>‌ను తెరవండి"</string>
-    <string name="keyguard_affordance_enablement_dialog_message" msgid="2790910660524887941">"<xliff:g id="APPNAME">%1$s</xliff:g> యాప్‌ను షార్ట్‌కట్‌గా జోడించడానికి, వీటిని నిర్ధారించుకోండి"</string>
     <string name="keyguard_affordance_enablement_dialog_wallet_instruction_1" msgid="8439655049139819278">"• యాప్ సెటప్ చేయబడి ఉందని"</string>
     <string name="keyguard_affordance_enablement_dialog_wallet_instruction_2" msgid="4321089250629477835">"• Walletకు కనీసం ఒక కార్డ్ అయినా జోడించబడి ఉందని"</string>
     <string name="keyguard_affordance_enablement_dialog_qr_scanner_instruction" msgid="5355839079232119791">"• కెమెరా యాప్ ఇన్‌స్టాల్ చేసి ఉందని"</string>
     <string name="keyguard_affordance_enablement_dialog_home_instruction_1" msgid="8438311171750568633">"• యాప్ సెటప్ చేయబడి ఉందని"</string>
     <string name="keyguard_affordance_enablement_dialog_home_instruction_2" msgid="8308525385889021652">"• కనీసం ఒక పరికరమైనా అందుబాటులో ఉందని"</string>
-    <string name="keyguard_affordance_press_too_short" msgid="2687995216454987952">"యాక్టివేట్ చేయడానికి నొక్కి, పట్టుకోండి"</string>
+    <!-- no translation found for keyguard_affordance_press_too_short (8145437175134998864) -->
+    <skip />
     <string name="rear_display_bottom_sheet_cancel" msgid="3461468855493357248">"రద్దు చేయండి"</string>
     <string name="rear_display_bottom_sheet_confirm" msgid="4383356544661421206">"ఇప్పుడే తిప్పండి"</string>
     <string name="rear_display_fold_bottom_sheet_title" msgid="6081542277622721548">"మెరుగైన సెల్ఫీ కోసం ఫోన్‌ను అన్‌ఫోల్డ్ చేయండి"</string>
