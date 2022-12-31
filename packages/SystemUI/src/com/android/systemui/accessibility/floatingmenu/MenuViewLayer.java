@@ -25,6 +25,7 @@ import static com.android.internal.accessibility.common.ShortcutConstants.Access
 import static com.android.internal.accessibility.util.AccessibilityUtils.getAccessibilityServiceFragmentType;
 import static com.android.internal.accessibility.util.AccessibilityUtils.setAccessibilityServiceState;
 import static com.android.systemui.accessibility.floatingmenu.MenuMessageView.Index;
+import static com.android.systemui.util.PluralMessageFormaterKt.icuMessageFormat;
 
 import android.accessibilityservice.AccessibilityServiceInfo;
 import android.annotation.IntDef;
@@ -33,12 +34,12 @@ import android.annotation.SuppressLint;
 import android.content.Context;
 import android.content.Intent;
 import android.content.res.Configuration;
+import android.content.res.Resources;
 import android.graphics.Rect;
 import android.os.Handler;
 import android.os.Looper;
 import android.os.UserHandle;
 import android.provider.Settings;
-import android.util.PluralsMessageFormatter;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewTreeObserver;
@@ -61,9 +62,7 @@ import com.android.wm.shell.common.magnetictarget.MagnetizedObject;
 
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.Optional;
 
 /**
@@ -218,11 +217,16 @@ class MenuViewLayer extends FrameLayout implements
         Preconditions.checkArgument(newTargetFeatures.size() > 0,
                 "The list should at least have one feature.");
 
-        final Map<String, Object> arguments = new HashMap<>();
-        arguments.put("count", newTargetFeatures.size());
-        arguments.put("label", newTargetFeatures.get(0).getLabel());
-        return PluralsMessageFormatter.format(getResources(), arguments,
-                R.string.accessibility_floating_button_undo_message_text);
+        final int featuresSize = newTargetFeatures.size();
+        final Resources resources = getResources();
+        if (featuresSize == 1) {
+            return resources.getString(
+                    R.string.accessibility_floating_button_undo_message_label_text,
+                    newTargetFeatures.get(0).getLabel());
+        }
+
+        return icuMessageFormat(resources,
+                R.string.accessibility_floating_button_undo_message_number_text, featuresSize);
     }
 
     @Override
