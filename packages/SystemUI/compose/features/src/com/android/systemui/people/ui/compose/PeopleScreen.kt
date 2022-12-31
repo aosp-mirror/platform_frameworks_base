@@ -49,8 +49,8 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.repeatOnLifecycle
+import com.android.compose.theme.LocalAndroidColorScheme
 import com.android.systemui.R
-import com.android.systemui.compose.theme.LocalAndroidColorScheme
 import com.android.systemui.people.ui.viewmodel.PeopleTileViewModel
 import com.android.systemui.people.ui.viewmodel.PeopleViewModel
 

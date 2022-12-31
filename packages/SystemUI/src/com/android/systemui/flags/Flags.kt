@@ -418,6 +418,9 @@ object Flags {
     val WM_ENABLE_PREDICTIVE_BACK_SYSUI =
         unreleasedFlag(1204, "persist.wm.debug.predictive_back_sysui_enable", teamfood = true)
 
+    // TODO(b/255697805): Tracking Bug
+    @JvmField val TRACKPAD_GESTURE_BACK = unreleasedFlag(1205, "trackpad_gesture_back", teamfood = false)
+
     // 1300 - screenshots
     // TODO(b/254512719): Tracking Bug
     @JvmField val SCREENSHOT_REQUEST_PROCESSOR = releasedFlag(1300, "screenshot_request_processor")

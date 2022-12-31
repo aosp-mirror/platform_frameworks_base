@@ -33,7 +33,6 @@ import android.content.Intent;
 import android.hardware.soundtrigger.SoundTrigger;
 import android.media.AudioFormat;
 import android.media.AudioSystem;
-import android.os.Bundle;
 import android.os.IBinder;
 import android.os.IRemoteCallback;
 import android.os.ParcelFileDescriptor;
@@ -72,21 +71,12 @@ import java.util.function.IntConsumer;
  * @hide
  */
 @SystemApi
-public abstract class HotwordDetectionService extends Service {
+public abstract class HotwordDetectionService extends Service
+        implements SandboxedDetectionServiceBase {
     private static final String TAG = "HotwordDetectionService";
     private static final boolean DBG = false;
 
     private static final long UPDATE_TIMEOUT_MILLIS = 20000;
-
-    /** @hide */
-    public static final String KEY_INITIALIZATION_STATUS = "initialization_status";
-
-    /**
-     * The maximum number of initialization status for some application specific failed reasons.
-     *
-     * @hide
-     */
-    public static final int MAXIMUM_NUMBER_OF_INITIALIZATION_STATUS_CUSTOM_ERROR = 2;
 
     /**
      * Feature flag for Attention Service.
@@ -98,14 +88,22 @@ public abstract class HotwordDetectionService extends Service {
 
     /**
      * Indicates that the updated status is successful.
+     *
+     * @deprecated Replaced with {@link SandboxedDetectionServiceBase#INITIALIZATION_STATUS_SUCCESS}
      */
-    public static final int INITIALIZATION_STATUS_SUCCESS = 0;
+    @Deprecated
+    public static final int INITIALIZATION_STATUS_SUCCESS =
+            SandboxedDetectionServiceBase.INITIALIZATION_STATUS_SUCCESS;
 
     /**
      * Indicates that the callback wasn’t invoked within the timeout.
      * This is used by system.
+     *
+     * @deprecated Replaced with {@link SandboxedDetectionServiceBase#INITIALIZATION_STATUS_UNKNOWN}
      */
-    public static final int INITIALIZATION_STATUS_UNKNOWN = 100;
+    @Deprecated
+    public static final int INITIALIZATION_STATUS_UNKNOWN =
+            SandboxedDetectionServiceBase.INITIALIZATION_STATUS_UNKNOWN;
 
     /**
      * Source for the given audio stream.
@@ -254,8 +252,11 @@ public abstract class HotwordDetectionService extends Service {
      * Note: The value 0 is reserved for success.
      *
      * @hide
+     * @deprecated Replaced with
+     * {@link SandboxedDetectionServiceBase#getMaxCustomInitializationStatus()}
      */
     @SystemApi
+    @Deprecated
     public static int getMaxCustomInitializationStatus() {
         return MAXIMUM_NUMBER_OF_INITIALIZATION_STATUS_CUSTOM_ERROR;
     }
@@ -305,21 +306,10 @@ public abstract class HotwordDetectionService extends Service {
      * {@link AlwaysOnHotwordDetector#updateState(PersistableBundle, SharedMemory)} requests an
      * update of the hotword detection parameters.
      *
-     * @param options Application configuration data to provide to the
-     * {@link HotwordDetectionService}. PersistableBundle does not allow any remotable objects or
-     * other contents that can be used to communicate with other processes.
-     * @param sharedMemory The unrestricted data blob to provide to the
-     * {@link HotwordDetectionService}. Use this to provide the hotword models data or other
-     * such data to the trusted process.
-     * @param callbackTimeoutMillis Timeout in milliseconds for the operation to invoke the
-     * statusCallback.
-     * @param statusCallback Use this to return the updated result; the allowed values are
-     * {@link #INITIALIZATION_STATUS_SUCCESS}, 1<->{@link #getMaxCustomInitializationStatus()}.
-     * This is non-null only when the {@link HotwordDetectionService} is being initialized; and it
-     * is null if the state is updated after that.
-     *
+     * {@inheritDoc}
      * @hide
      */
+    @Override
     @SystemApi
     public void onUpdateState(
             @Nullable PersistableBundle options,
@@ -371,23 +361,8 @@ public abstract class HotwordDetectionService extends Service {
 
     private void onUpdateStateInternal(@Nullable PersistableBundle options,
             @Nullable SharedMemory sharedMemory, IRemoteCallback callback) {
-        IntConsumer intConsumer = null;
-        if (callback != null) {
-            intConsumer =
-                    value -> {
-                        if (value > getMaxCustomInitializationStatus()) {
-                            throw new IllegalArgumentException(
-                                    "The initialization status is invalid for " + value);
-                        }
-                        try {
-                            Bundle status = new Bundle();
-                            status.putInt(KEY_INITIALIZATION_STATUS, value);
-                            callback.sendResult(status);
-                        } catch (RemoteException e) {
-                            throw e.rethrowFromSystemServer();
-                        }
-                    };
-        }
+        IntConsumer intConsumer =
+                SandboxedDetectionServiceBase.createInitializationStatusConsumer(callback);
         onUpdateState(options, sharedMemory, UPDATE_TIMEOUT_MILLIS, intConsumer);
     }
 

@@ -35,7 +35,7 @@ import android.util.AndroidException;
 import java.io.PrintWriter;
 
 /**
- * Basic functionality for hotword detectors.
+ * Basic functionality for sandboxed detectors.
  *
  * @hide
  */
@@ -81,7 +81,7 @@ public interface HotwordDetector {
     int DETECTOR_TYPE_TRUSTED_HOTWORD_SOFTWARE = 2;
 
     /**
-     * Starts hotword recognition.
+     * Starts sandboxed detection recognition.
      * <p>
      * On calling this, the system streams audio from the device microphone to this application's
      * {@link HotwordDetectionService}. Audio is streamed until {@link #stopRecognition()} is
@@ -107,7 +107,7 @@ public interface HotwordDetector {
     boolean startRecognition() throws IllegalDetectorStateException;
 
     /**
-     * Stops hotword recognition.
+     * Stops sandboxed detection recognition.
      *
      * @return {@code true} if the request to stop recognition succeeded
      * @throws IllegalDetectorStateException Thrown when a caller has a target SDK of API level 33
@@ -142,14 +142,13 @@ public interface HotwordDetector {
             @Nullable PersistableBundle options) throws IllegalDetectorStateException;
 
     /**
-     * Set configuration and pass read-only data to hotword detection service.
+     * Set configuration and pass read-only data to sandboxed detection service.
      *
-     * @param options Application configuration data to provide to the
-     *         {@link HotwordDetectionService}. PersistableBundle does not allow any remotable
-     *         objects or other contents that can be used to communicate with other processes.
-     * @param sharedMemory The unrestricted data blob to provide to the
-     *         {@link HotwordDetectionService}. Use this to provide the hotword models data or other
-     *         such data to the trusted process.
+     * @param options Application configuration data to provide to sandboxed detection services.
+     * PersistableBundle does not allow any remotable objects or other contents that can be used to
+     * communicate with other processes.
+     * @param sharedMemory The unrestricted data blob to provide to sandboxed detection services.
+     * Use this to provide model data or other such data to the trusted process.
      * @throws IllegalDetectorStateException Thrown when a caller has a target SDK of API level 33
      *         or above and the detector is not able to perform the operation based on the
      *         underlying state. This can be thrown even if the state has been checked before
@@ -157,19 +156,19 @@ public interface HotwordDetector {
      *         and the state of the detector can change concurrently to the caller calling this
      *         method.
      * @throws IllegalStateException if this HotwordDetector wasn't specified to use a
-     *         {@link HotwordDetectionService} when it was created.
+     *         sandboxed detection service when it was created.
      */
     void updateState(@Nullable PersistableBundle options, @Nullable SharedMemory sharedMemory)
             throws IllegalDetectorStateException;
 
     /**
-     * Invalidates this hotword detector so that any future calls to this result
+     * Invalidates this detector so that any future calls to this result
      * in an {@link IllegalStateException} when a caller has a target SDK below API level 33
      * or an {@link IllegalDetectorStateException} when a caller has a target SDK of API level 33
      * or above.
      *
      * <p>If there are no other {@link HotwordDetector} instances linked to the
-     * {@link HotwordDetectionService}, the service will be shutdown.
+     * sandboxed detection service, the service will be shutdown.
      */
     default void destroy() {
         throw new UnsupportedOperationException("Not implemented. Must override in a subclass.");
@@ -249,9 +248,9 @@ public interface HotwordDetector {
          * short amount of time to report its initialization state.
          *
          * @param status Info about initialization state of {@link HotwordDetectionService}; the
-         * allowed values are {@link HotwordDetectionService#INITIALIZATION_STATUS_SUCCESS},
-         * 1<->{@link HotwordDetectionService#getMaxCustomInitializationStatus()},
-         * {@link HotwordDetectionService#INITIALIZATION_STATUS_UNKNOWN}.
+         * allowed values are {@link SandboxedDetectionServiceBase#INITIALIZATION_STATUS_SUCCESS},
+         * 1<->{@link SandboxedDetectionServiceBase#getMaxCustomInitializationStatus()},
+         * {@link SandboxedDetectionServiceBase#INITIALIZATION_STATUS_UNKNOWN}.
          */
         void onHotwordDetectionServiceInitialized(int status);
 
