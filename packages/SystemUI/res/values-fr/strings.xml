@@ -114,7 +114,7 @@
     <string name="accessibility_menu" msgid="2701163794470513040">"Menu"</string>
     <string name="accessibility_accessibility_button" msgid="4089042473497107709">"Accessibilité"</string>
     <string name="accessibility_rotate_button" msgid="1238584767612362586">"Faire pivoter l\'écran"</string>
-    <string name="accessibility_recent" msgid="901641734769533575">"Aperçu"</string>
+    <string name="accessibility_recent" msgid="901641734769533575">"Récents"</string>
     <string name="accessibility_camera_button" msgid="2938898391716647247">"Appareil photo"</string>
     <string name="accessibility_phone_button" msgid="4256353121703100427">"Téléphoner"</string>
     <string name="accessibility_voice_assist_button" msgid="6497706615649754510">"Assistance vocale"</string>
@@ -304,7 +304,7 @@
     <string name="sensor_privacy_camera_unblocked_toast_content" msgid="7843105715964332311">"Caméra accessible"</string>
     <string name="sensor_privacy_mic_camera_unblocked_toast_content" msgid="7339355093282661115">"Micro et caméra accessibles"</string>
     <string name="media_seamless_other_device" msgid="4654849800789196737">"Autre appareil"</string>
-    <string name="quick_step_accessibility_toggle_overview" msgid="7908949976727578403">"Activer/Désactiver l\'aperçu"</string>
+    <string name="quick_step_accessibility_toggle_overview" msgid="7908949976727578403">"Activer/Désactiver l\'écran Récents"</string>
     <string name="zen_priority_introduction" msgid="3159291973383796646">"Vous ne serez dérangé par aucun son ni aucune vibration, hormis ceux des alarmes, des rappels, des événements et des appels des contacts de votre choix. Le son continuera de fonctionner notamment pour la musique, les vidéos et les jeux."</string>
     <string name="zen_alarms_introduction" msgid="3987266042682300470">"Vous ne serez dérangé par aucun son ni aucune vibration, hormis ceux des alarmes. Le son continuera de fonctionner notamment pour la musique, les vidéos et les jeux."</string>
     <string name="zen_priority_customize_button" msgid="4119213187257195047">"Personnaliser"</string>
@@ -421,14 +421,14 @@
     <string name="volume_odi_captions_hint_enable" msgid="2073091194012843195">"activer"</string>
     <string name="volume_odi_captions_hint_disable" msgid="2518846326748183407">"désactiver"</string>
     <string name="screen_pinning_title" msgid="9058007390337841305">"L\'application est épinglée"</string>
-    <string name="screen_pinning_description" msgid="8699395373875667743">"Elle restera visible jusqu\'à ce que vous la retiriez. Pour la retirer, appuyez de manière prolongée sur les boutons Retour et Aperçu."</string>
+    <string name="screen_pinning_description" msgid="8699395373875667743">"Elle restera visible jusqu\'à ce que vous la retiriez. Pour la retirer, appuyez de manière prolongée sur les boutons Retour et Récents."</string>
     <string name="screen_pinning_description_recents_invisible" msgid="4564466648700390037">"Elle restera visible jusqu\'à ce que vous la retiriez. Pour la retirer, appuyez de manière prolongée sur les boutons Retour et Accueil."</string>
     <string name="screen_pinning_description_gestural" msgid="7246323931831232068">"Elle restera visible jusqu\'à ce que vous la retiriez. Pour la retirer, balayez-la vers le haut et gardez le doigt appuyé."</string>
-    <string name="screen_pinning_description_accessible" msgid="7386449191953535332">"Elle restera visible jusqu\'à ce que vous la retiriez. Pour la retirer, appuyez de manière prolongée sur le bouton Aperçu."</string>
+    <string name="screen_pinning_description_accessible" msgid="7386449191953535332">"Elle restera visible jusqu\'à ce que vous la retiriez. Pour la retirer, appuyez de manière prolongée sur le bouton Récents."</string>
     <string name="screen_pinning_description_recents_invisible_accessible" msgid="2857071808674481986">"Elle restera visible jusqu\'à ce que vous la retiriez. Pour la retirer, appuyez de manière prolongée sur le bouton Accueil."</string>
     <string name="screen_pinning_exposes_personal_data" msgid="8189852022981524789">"Des données à caractère personnel, comme des contacts et le contenu d\'e-mails, peuvent être accessibles."</string>
     <string name="screen_pinning_can_open_other_apps" msgid="7529756813231421455">"D\'autres applications peuvent être ouvertes depuis une application épinglée."</string>
-    <string name="screen_pinning_toast" msgid="8177286912533744328">"Pour que l\'appli ne soit plus épinglée, appuyez de manière prolongée sur les boutons Retour et Aperçu"</string>
+    <string name="screen_pinning_toast" msgid="8177286912533744328">"Pour que l\'appli ne soit plus épinglée, appuyez de manière prolongée sur les boutons Retour et Récents"</string>
     <string name="screen_pinning_toast_recents_invisible" msgid="6850978077443052594">"Pour que l\'appli ne soit plus épinglée, appuyez de manière prolongée sur les boutons Retour et Accueil"</string>
     <string name="screen_pinning_toast_gesture_nav" msgid="170699893395336705">"Pour que l\'appli ne soit plus épinglée, balayez-la vers le haut et maintenez le doigt appuyé"</string>
     <string name="screen_pinning_positive" msgid="3285785989665266984">"OK"</string>

@@ -138,9 +138,9 @@
     <string name="biometric_dialog_tap_confirm" msgid="9166350738859143358">"పూర్తి చేయడానికి \"నిర్ధారించు\" నొక్కండి"</string>
     <string name="biometric_dialog_tap_confirm_with_face" msgid="1092050545851021991">"ముఖం ద్వారా అన్‌లాక్ చేయబడింది. కొనసాగించడానికి అన్‌లాక్ చిహ్నాన్ని నొక్కండి."</string>
     <string name="biometric_dialog_authenticated" msgid="7337147327545272484">"ప్రామాణీకరించబడింది"</string>
-    <string name="biometric_dialog_use_pin" msgid="8385294115283000709">"పిన్‌ను ఉపయోగించు"</string>
-    <string name="biometric_dialog_use_pattern" msgid="2315593393167211194">"ఆకృతిని ఉపయోగించు"</string>
-    <string name="biometric_dialog_use_password" msgid="3445033859393474779">"పాస్‌వర్డ్‌ను ఉపయోగించు"</string>
+    <string name="biometric_dialog_use_pin" msgid="8385294115283000709">"పిన్‌ను ఉపయోగించండి"</string>
+    <string name="biometric_dialog_use_pattern" msgid="2315593393167211194">"ఆకృతిని ఉపయోగించండి"</string>
+    <string name="biometric_dialog_use_password" msgid="3445033859393474779">"పాస్‌వర్డ్‌ను ఉపయోగించండి"</string>
     <string name="biometric_dialog_wrong_pin" msgid="1878539073972762803">"పిన్ తప్పు"</string>
     <string name="biometric_dialog_wrong_pattern" msgid="8954812279840889029">"ఆకృతి తప్పు"</string>
     <string name="biometric_dialog_wrong_password" msgid="69477929306843790">"పాస్‌వర్డ్ తప్పు"</string>
@@ -615,7 +615,7 @@
     <item msgid="7453955063378349599">"ఎడమవైపుకు వాలుగా"</item>
     <item msgid="5874146774389433072">"కుడివైపుకు వాలుగా"</item>
   </string-array>
-    <string name="save" msgid="3392754183673848006">"సేవ్ చేయి"</string>
+    <string name="save" msgid="3392754183673848006">"సేవ్ చేయండి"</string>
     <string name="reset" msgid="8715144064608810383">"రీసెట్ చేయండి"</string>
     <string name="clipboard" msgid="8517342737534284617">"క్లిప్‌బోర్డ్"</string>
     <string name="accessibility_key" msgid="3471162841552818281">"అనుకూల నావిగేషన్ బటన్"</string>
