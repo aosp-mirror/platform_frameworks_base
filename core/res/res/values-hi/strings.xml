@@ -1623,7 +1623,7 @@
     <string name="media_route_status_connecting" msgid="5845597961412010540">"कनेक्ट हो रहा है..."</string>
     <string name="media_route_status_available" msgid="1477537663492007608">"मौजूद"</string>
     <string name="media_route_status_not_available" msgid="480912417977515261">"उपलब्‍ध नहीं"</string>
-    <string name="media_route_status_in_use" msgid="6684112905244944724">"उपयोग में"</string>
+    <string name="media_route_status_in_use" msgid="6684112905244944724">"इस्तेमाल में है"</string>
     <string name="display_manager_built_in_display_name" msgid="1015775198829722440">"अंतर्निहित स्क्रीन"</string>
     <string name="display_manager_hdmi_display_name" msgid="1022758026251534975">"HDMI स्क्रीन"</string>
     <string name="display_manager_overlay_display_name" msgid="5306088205181005861">"ओवरले #<xliff:g id="ID">%1$d</xliff:g>"</string>
