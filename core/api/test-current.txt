@@ -2561,7 +2561,7 @@ package android.service.voice {
     method @NonNull public android.service.voice.AlwaysOnHotwordDetector.EventPayload.Builder setKeyphraseRecognitionExtras(@NonNull java.util.List<android.hardware.soundtrigger.SoundTrigger.KeyphraseRecognitionExtra>);
   }
 
-  public abstract class HotwordDetectionService extends android.app.Service {
+  public abstract class HotwordDetectionService extends android.app.Service implements android.service.voice.SandboxedDetectionServiceBase {
     field public static final boolean ENABLE_PROXIMITY_RESULT = true;
   }
 

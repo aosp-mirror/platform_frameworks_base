@@ -260,7 +260,8 @@ public class BluetoothUtils {
                 BluetoothDevice.METADATA_DEVICE_TYPE);
         if (TextUtils.equals(deviceType, BluetoothDevice.DEVICE_TYPE_UNTETHERED_HEADSET)
                 || TextUtils.equals(deviceType, BluetoothDevice.DEVICE_TYPE_WATCH)
-                || TextUtils.equals(deviceType, BluetoothDevice.DEVICE_TYPE_DEFAULT)) {
+                || TextUtils.equals(deviceType, BluetoothDevice.DEVICE_TYPE_DEFAULT)
+                || TextUtils.equals(deviceType, BluetoothDevice.DEVICE_TYPE_STYLUS)) {
             Log.d(TAG, "isAdvancedDetailsHeader: deviceType is " + deviceType);
             return true;
         }

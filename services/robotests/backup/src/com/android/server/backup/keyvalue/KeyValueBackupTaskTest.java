@@ -128,6 +128,7 @@ import com.android.server.testing.shadows.ShadowBackupDataInput;
 import com.android.server.testing.shadows.ShadowBackupDataOutput;
 import com.android.server.testing.shadows.ShadowEventLog;
 import com.android.server.testing.shadows.ShadowSystemServiceRegistry;
+import com.android.server.testing.shadows.ShadowUserManager;
 
 import com.google.common.base.Charsets;
 import com.google.common.truth.IterableSubject;
@@ -175,7 +176,8 @@ import java.util.stream.Stream;
             ShadowBackupDataOutput.class,
             ShadowEventLog.class,
             ShadowQueuedWork.class,
-            ShadowSystemServiceRegistry.class
+            ShadowSystemServiceRegistry.class,
+            ShadowUserManager.class
         })
 @Presubmit
 public class KeyValueBackupTaskTest  {

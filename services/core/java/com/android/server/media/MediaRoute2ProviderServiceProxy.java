@@ -398,21 +398,21 @@ final class MediaRoute2ProviderServiceProxy extends MediaRoute2Provider
         }
     }
 
-    private void onSessionReleased(Connection connection, RoutingSessionInfo releaedSession) {
+    private void onSessionReleased(Connection connection, RoutingSessionInfo releasedSession) {
         if (mActiveConnection != connection) {
             return;
         }
-        if (releaedSession == null) {
+        if (releasedSession == null) {
             Slog.w(TAG, "onSessionReleased: Ignoring null session sent from " + mComponentName);
             return;
         }
 
-        releaedSession = assignProviderIdForSession(releaedSession);
+        releasedSession = assignProviderIdForSession(releasedSession);
 
         boolean found = false;
         synchronized (mLock) {
             for (RoutingSessionInfo session : mSessionInfos) {
-                if (TextUtils.equals(session.getId(), releaedSession.getId())) {
+                if (TextUtils.equals(session.getId(), releasedSession.getId())) {
                     mSessionInfos.remove(session);
                     found = true;
                     break;
@@ -420,7 +420,7 @@ final class MediaRoute2ProviderServiceProxy extends MediaRoute2Provider
             }
             if (!found) {
                 for (RoutingSessionInfo session : mReleasingSessions) {
-                    if (TextUtils.equals(session.getId(), releaedSession.getId())) {
+                    if (TextUtils.equals(session.getId(), releasedSession.getId())) {
                         mReleasingSessions.remove(session);
                         return;
                     }
@@ -433,7 +433,7 @@ final class MediaRoute2ProviderServiceProxy extends MediaRoute2Provider
             return;
         }
 
-        mCallback.onSessionReleased(this, releaedSession);
+        mCallback.onSessionReleased(this, releasedSession);
     }
 
     private void dispatchSessionCreated(long requestId, RoutingSessionInfo session) {

@@ -55,6 +55,8 @@ import com.android.settingslib.Utils;
 import com.android.systemui.R;
 import com.android.systemui.animation.Interpolators;
 import com.android.systemui.dagger.qualifiers.Background;
+import com.android.systemui.flags.FeatureFlags;
+import com.android.systemui.plugins.MotionEventsHandlerBase;
 import com.android.systemui.plugins.NavigationEdgeBackPlugin;
 import com.android.systemui.shared.navigationbar.RegionSamplingHelper;
 import com.android.systemui.statusbar.VibratorHelper;
@@ -200,8 +202,6 @@ public class NavigationBarEdgePanel extends View implements NavigationEdgeBackPl
      */
     private boolean mIsLeftPanel;
 
-    private float mStartX;
-    private float mStartY;
     private float mCurrentAngle;
     /**
      * The current translation of the arrow
@@ -231,6 +231,8 @@ public class NavigationBarEdgePanel extends View implements NavigationEdgeBackPl
 
     private final Handler mHandler = new Handler();
     private final Runnable mFailsafeRunnable = this::onFailsafe;
+
+    private MotionEventsHandlerBase mMotionEventsHandler;
 
     private DynamicAnimation.OnAnimationEndListener mSetGoneEndListener
             = new DynamicAnimation.OnAnimationEndListener() {
@@ -437,6 +439,11 @@ public class NavigationBarEdgePanel extends View implements NavigationEdgeBackPl
         mWindowManager.addView(this, mLayoutParams);
     }
 
+    @Override
+    public void setMotionEventsHandler(MotionEventsHandlerBase motionEventsHandler) {
+        mMotionEventsHandler = motionEventsHandler;
+    }
+
     /**
      * Adjusts the sampling rect to conform to the actual visible bounding box of the arrow.
      */
@@ -481,8 +488,6 @@ public class NavigationBarEdgePanel extends View implements NavigationEdgeBackPl
             case MotionEvent.ACTION_DOWN:
                 mDragSlopPassed = false;
                 resetOnDown();
-                mStartX = event.getX();
-                mStartY = event.getY();
                 setVisibility(VISIBLE);
                 updatePosition(event.getY());
                 mRegionSamplingHelper.start(mSamplingRect);
@@ -726,10 +731,9 @@ public class NavigationBarEdgePanel extends View implements NavigationEdgeBackPl
     }
 
     private void handleMoveEvent(MotionEvent event) {
-        float x = event.getX();
-        float y = event.getY();
-        float touchTranslation = MathUtils.abs(x - mStartX);
-        float yOffset = y - mStartY;
+        float xOffset = mMotionEventsHandler.getDisplacementX(event);
+        float touchTranslation = MathUtils.abs(xOffset);
+        float yOffset = mMotionEventsHandler.getDisplacementY(event);
         float delta = touchTranslation - mPreviousTouchTranslation;
         if (Math.abs(delta) > 0) {
             if (Math.signum(delta) == Math.signum(mTotalTouchDelta)) {
@@ -790,16 +794,14 @@ public class NavigationBarEdgePanel extends View implements NavigationEdgeBackPl
         }
 
         // Last if the direction in Y is bigger than X * 2 we also abort
-        if (Math.abs(yOffset) > Math.abs(x - mStartX) * 2) {
+        if (Math.abs(yOffset) > Math.abs(xOffset) * 2) {
             triggerBack = false;
         }
         if (DEBUG_MISSING_GESTURE && mTriggerBack != triggerBack) {
             Log.d(DEBUG_MISSING_GESTURE_TAG, "set mTriggerBack=" + triggerBack
                     + ", mTotalTouchDelta=" + mTotalTouchDelta
                     + ", mMinDeltaForSwitch=" + mMinDeltaForSwitch
-                    + ", yOffset=" + yOffset
-                    + ", x=" + x
-                    + ", mStartX=" + mStartX);
+                    + ", yOffset=" + yOffset + mMotionEventsHandler.dump());
         }
         setTriggerBack(triggerBack, true /* animated */);
 

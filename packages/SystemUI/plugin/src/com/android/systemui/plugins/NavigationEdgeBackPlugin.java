@@ -48,6 +48,9 @@ public interface NavigationEdgeBackPlugin extends Plugin {
     /** Sets the base LayoutParams for the UI. */
     void setLayoutParams(WindowManager.LayoutParams layoutParams);
 
+    /** Sets the motion events handler for the plugin. */
+    default void setMotionEventsHandler(MotionEventsHandlerBase motionEventsHandler) {}
+
     /** Updates the UI based on the motion events passed in device coordinates. */
     void onMotionEvent(MotionEvent motionEvent);
 

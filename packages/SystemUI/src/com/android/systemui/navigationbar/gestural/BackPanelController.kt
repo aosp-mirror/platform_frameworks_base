@@ -38,6 +38,7 @@ import androidx.dynamicanimation.animation.DynamicAnimation
 import androidx.dynamicanimation.animation.SpringForce
 import com.android.internal.util.LatencyTracker
 import com.android.systemui.dagger.qualifiers.Main
+import com.android.systemui.plugins.MotionEventsHandlerBase
 import com.android.systemui.plugins.NavigationEdgeBackPlugin
 import com.android.systemui.statusbar.VibratorHelper
 import com.android.systemui.statusbar.policy.ConfigurationController
@@ -496,6 +497,10 @@ class BackPanelController private constructor(
     override fun setLayoutParams(layoutParams: WindowManager.LayoutParams) {
         this.layoutParams = layoutParams
         windowManager.addView(mView, layoutParams)
+    }
+
+    override fun setMotionEventsHandler(motionEventsHandler: MotionEventsHandlerBase?) {
+        TODO("Not yet implemented")
     }
 
     private fun isFlung() = velocityTracker!!.run {
