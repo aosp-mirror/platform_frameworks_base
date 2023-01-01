@@ -85,8 +85,7 @@
     <string name="screenshot_share_description" msgid="2861628935812656612">"Compartir captura de pantalla"</string>
     <string name="screenshot_scroll_label" msgid="2930198809899329367">"Capturar máis"</string>
     <string name="screenshot_dismiss_description" msgid="4702341245899508786">"Ignorar a captura de pantalla"</string>
-    <!-- no translation found for screenshot_dismiss_work_profile (3101530842987697045) -->
-    <skip />
+    <string name="screenshot_dismiss_work_profile" msgid="3101530842987697045">"Pechar a mensaxe do perfil de traballo"</string>
     <string name="screenshot_preview_description" msgid="7606510140714080474">"Vista previa da captura de pantalla"</string>
     <string name="screenshot_top_boundary_pct" msgid="2520148599096479332">"Bordo superior: <xliff:g id="PERCENT">%1$d</xliff:g> %%"</string>
     <string name="screenshot_bottom_boundary_pct" msgid="3880821519814946478">"Bordo inferior: <xliff:g id="PERCENT">%1$d</xliff:g> %%"</string>
@@ -876,8 +875,7 @@
     <string name="media_output_dialog_accessibility_title" msgid="4681741064190167888">"Dispositivos dispoñibles para a saída de audio."</string>
     <string name="media_output_dialog_accessibility_seekbar" msgid="5332843993805568978">"Volume"</string>
     <string name="media_output_dialog_volume_percentage" msgid="1613984910585111798">"<xliff:g id="PERCENTAGE">%1$d</xliff:g> %%"</string>
-    <!-- no translation found for media_output_group_title_speakers_and_displays (7169712332365659820) -->
-    <skip />
+    <string name="media_output_group_title_speakers_and_displays" msgid="7169712332365659820">"Altofalantes e pantallas"</string>
     <string name="media_output_first_broadcast_title" msgid="6292237789860753022">"Como funcionan as difusións?"</string>
     <string name="media_output_broadcast" msgid="3555580945878071543">"Difusión"</string>
     <string name="media_output_first_notify_broadcast_message" msgid="6353857724136398494">"As persoas que estean preto de ti e que dispoñan de dispositivos Bluetooth compatibles poden escoitar o contido multimedia que difundas"</string>
@@ -1001,13 +999,13 @@
     <string name="dream_time_complication_12_hr_time_format" msgid="4691197486690291529">"h:mm"</string>
     <string name="dream_time_complication_24_hr_time_format" msgid="6248280719733640813">"kk:mm"</string>
     <string name="keyguard_affordance_enablement_dialog_action_template" msgid="8164857863036314664">"Abrir <xliff:g id="APPNAME">%1$s</xliff:g>"</string>
-    <string name="keyguard_affordance_enablement_dialog_message" msgid="2790910660524887941">"Para engadir a aplicación <xliff:g id="APPNAME">%1$s</xliff:g> como atallo, asegúrate de que se cumpra o seguinte:"</string>
     <string name="keyguard_affordance_enablement_dialog_wallet_instruction_1" msgid="8439655049139819278">"• A aplicación debe estar configurada"</string>
     <string name="keyguard_affordance_enablement_dialog_wallet_instruction_2" msgid="4321089250629477835">"• Ten que haber polo menos unha tarxeta engadida a Wallet"</string>
     <string name="keyguard_affordance_enablement_dialog_qr_scanner_instruction" msgid="5355839079232119791">"• Debes instalar a aplicación de cámara"</string>
     <string name="keyguard_affordance_enablement_dialog_home_instruction_1" msgid="8438311171750568633">"• A aplicación debe estar configurada"</string>
     <string name="keyguard_affordance_enablement_dialog_home_instruction_2" msgid="8308525385889021652">"• Ten que haber polo menos un dispositivo dispoñible"</string>
-    <string name="keyguard_affordance_press_too_short" msgid="2687995216454987952">"Manteno premido para activalo"</string>
+    <!-- no translation found for keyguard_affordance_press_too_short (8145437175134998864) -->
+    <skip />
     <string name="rear_display_bottom_sheet_cancel" msgid="3461468855493357248">"Cancelar"</string>
     <string name="rear_display_bottom_sheet_confirm" msgid="4383356544661421206">"Voltear agora"</string>
     <string name="rear_display_fold_bottom_sheet_title" msgid="6081542277622721548">"Desprega o teléfono para unha autofoto mellor"</string>

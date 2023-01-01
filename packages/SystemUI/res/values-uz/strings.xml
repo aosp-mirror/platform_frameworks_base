@@ -85,8 +85,7 @@
     <string name="screenshot_share_description" msgid="2861628935812656612">"Skrinshot yuborish"</string>
     <string name="screenshot_scroll_label" msgid="2930198809899329367">"Skrinshot sohasini kengaytirish"</string>
     <string name="screenshot_dismiss_description" msgid="4702341245899508786">"Skrinshotni yopish"</string>
-    <!-- no translation found for screenshot_dismiss_work_profile (3101530842987697045) -->
-    <skip />
+    <string name="screenshot_dismiss_work_profile" msgid="3101530842987697045">"Ish profili xabarini yopish"</string>
     <string name="screenshot_preview_description" msgid="7606510140714080474">"Skrinshotga razm solish"</string>
     <string name="screenshot_top_boundary_pct" msgid="2520148599096479332">"Yuqori chegara <xliff:g id="PERCENT">%1$d</xliff:g> foiz"</string>
     <string name="screenshot_bottom_boundary_pct" msgid="3880821519814946478">"Quyi chegara <xliff:g id="PERCENT">%1$d</xliff:g> foiz"</string>
@@ -876,8 +875,7 @@
     <string name="media_output_dialog_accessibility_title" msgid="4681741064190167888">"Audio chiqish uchun mavjud qurilmalar."</string>
     <string name="media_output_dialog_accessibility_seekbar" msgid="5332843993805568978">"Tovush balandligi"</string>
     <string name="media_output_dialog_volume_percentage" msgid="1613984910585111798">"<xliff:g id="PERCENTAGE">%1$d</xliff:g>%%"</string>
-    <!-- no translation found for media_output_group_title_speakers_and_displays (7169712332365659820) -->
-    <skip />
+    <string name="media_output_group_title_speakers_and_displays" msgid="7169712332365659820">"Karnaylar va displeylar"</string>
     <string name="media_output_first_broadcast_title" msgid="6292237789860753022">"Translatsiya qanday ishlaydi"</string>
     <string name="media_output_broadcast" msgid="3555580945878071543">"Translatsiya"</string>
     <string name="media_output_first_notify_broadcast_message" msgid="6353857724136398494">"Atrofingizdagi mos Bluetooth qurilmasiga ega foydalanuvchilar siz translatsiya qilayotgan mediani tinglay olishadi"</string>
@@ -1001,13 +999,13 @@
     <string name="dream_time_complication_12_hr_time_format" msgid="4691197486690291529">"s:dd"</string>
     <string name="dream_time_complication_24_hr_time_format" msgid="6248280719733640813">"kk:mm"</string>
     <string name="keyguard_affordance_enablement_dialog_action_template" msgid="8164857863036314664">"Ochish: <xliff:g id="APPNAME">%1$s</xliff:g>"</string>
-    <string name="keyguard_affordance_enablement_dialog_message" msgid="2790910660524887941">"<xliff:g id="APPNAME">%1$s</xliff:g> ilovasini yorliq sifatida qoʻshish uchun"</string>
     <string name="keyguard_affordance_enablement_dialog_wallet_instruction_1" msgid="8439655049139819278">"• Ilova sozlangan"</string>
     <string name="keyguard_affordance_enablement_dialog_wallet_instruction_2" msgid="4321089250629477835">"• Kamida bitta kartochka Wallet xizmatiga qoʻshilgan"</string>
     <string name="keyguard_affordance_enablement_dialog_qr_scanner_instruction" msgid="5355839079232119791">"• Kamera ilovasini oʻrnating"</string>
     <string name="keyguard_affordance_enablement_dialog_home_instruction_1" msgid="8438311171750568633">"• Ilova sozlangan"</string>
     <string name="keyguard_affordance_enablement_dialog_home_instruction_2" msgid="8308525385889021652">"• Kamida bitta qurilma mavjud"</string>
-    <string name="keyguard_affordance_press_too_short" msgid="2687995216454987952">"Yoqish uchun bosib turing"</string>
+    <!-- no translation found for keyguard_affordance_press_too_short (8145437175134998864) -->
+    <skip />
     <string name="rear_display_bottom_sheet_cancel" msgid="3461468855493357248">"Bekor qilish"</string>
     <string name="rear_display_bottom_sheet_confirm" msgid="4383356544661421206">"Hozir aylantirish"</string>
     <string name="rear_display_fold_bottom_sheet_title" msgid="6081542277622721548">"Yaxshiroq selfi olish uchun telefonni yoying"</string>

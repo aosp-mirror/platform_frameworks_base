@@ -1178,7 +1178,7 @@
     <string name="whichApplicationLabel" msgid="7852182961472531728">"ಕ್ರಿಯೆಯನ್ನು ಪೂರ್ಣಗೊಳಿಸಿ"</string>
     <string name="whichViewApplication" msgid="5733194231473132945">"ಇದರ ಮೂಲಕ ತೆರೆಯಿರಿ"</string>
     <string name="whichViewApplicationNamed" msgid="415164730629690105">"%1$s ಜೊತೆಗೆ ತೆರೆಯಿರಿ"</string>
-    <string name="whichViewApplicationLabel" msgid="7367556735684742409">"ತೆರೆ"</string>
+    <string name="whichViewApplicationLabel" msgid="7367556735684742409">"ತೆರೆಯಿರಿ"</string>
     <string name="whichOpenHostLinksWith" msgid="7645631470199397485">"ಇವುಗಳ ಮೂಲಕ <xliff:g id="HOST">%1$s</xliff:g> ಲಿಂಕ್‌ಗಳನ್ನು ತೆರೆಯಿರಿ"</string>
     <string name="whichOpenLinksWith" msgid="1120936181362907258">"ಇವುಗಳ ಮೂಲಕ ಲಿಂಕ್‌ಗಳನ್ನು ತೆರೆಯಿರಿ"</string>
     <string name="whichOpenLinksWithApp" msgid="6917864367861910086">"<xliff:g id="APPLICATION">%1$s</xliff:g> ಮೂಲಕ ಲಿಂಕ್‌ಗಳನ್ನು ತೆರೆಯಿರಿ"</string>
