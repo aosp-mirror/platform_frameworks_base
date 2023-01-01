@@ -999,13 +999,13 @@
     <string name="dream_time_complication_12_hr_time_format" msgid="4691197486690291529">"h:mm"</string>
     <string name="dream_time_complication_24_hr_time_format" msgid="6248280719733640813">"kk:mm"</string>
     <string name="keyguard_affordance_enablement_dialog_action_template" msgid="8164857863036314664">"Отворете ја <xliff:g id="APPNAME">%1$s</xliff:g>"</string>
-    <string name="keyguard_affordance_enablement_dialog_message" msgid="2790910660524887941">"За да ја додадете апликацијата <xliff:g id="APPNAME">%1$s</xliff:g> како кратенка, треба да бидат исполнети следниве услови"</string>
     <string name="keyguard_affordance_enablement_dialog_wallet_instruction_1" msgid="8439655049139819278">"• апликацијата е поставена"</string>
     <string name="keyguard_affordance_enablement_dialog_wallet_instruction_2" msgid="4321089250629477835">"• најмалку една картичка е додадена во Wallet"</string>
     <string name="keyguard_affordance_enablement_dialog_qr_scanner_instruction" msgid="5355839079232119791">"• инсталирана е апликација за камера"</string>
     <string name="keyguard_affordance_enablement_dialog_home_instruction_1" msgid="8438311171750568633">"• апликацијата е поставена"</string>
     <string name="keyguard_affordance_enablement_dialog_home_instruction_2" msgid="8308525385889021652">"• достапен е најмалку еден уред"</string>
-    <string name="keyguard_affordance_press_too_short" msgid="2687995216454987952">"Притисни и задржи за активирање"</string>
+    <!-- no translation found for keyguard_affordance_press_too_short (8145437175134998864) -->
+    <skip />
     <string name="rear_display_bottom_sheet_cancel" msgid="3461468855493357248">"Откажи"</string>
     <string name="rear_display_bottom_sheet_confirm" msgid="4383356544661421206">"Префрли сега"</string>
     <string name="rear_display_fold_bottom_sheet_title" msgid="6081542277622721548">"Отворете го телефонот за подобро селфи"</string>
