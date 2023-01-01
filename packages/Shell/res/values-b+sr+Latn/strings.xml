@@ -17,31 +17,31 @@
 <resources xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
     <string name="app_label" msgid="3701846017049540910">"Shell"</string>
-    <string name="bugreport_notification_channel" msgid="2574150205913861141">"Извештаји о грешкама"</string>
-    <string name="bugreport_in_progress_title" msgid="4311705936714972757">"Извештај о грешци <xliff:g id="ID">#%d</xliff:g> се генерише"</string>
-    <string name="bugreport_finished_title" msgid="4429132808670114081">"Извештај о грешци <xliff:g id="ID">#%d</xliff:g> је снимљен"</string>
-    <string name="bugreport_updating_title" msgid="4423539949559634214">"Додају се детаљи у извештај о грешци"</string>
-    <string name="bugreport_updating_wait" msgid="3322151947853929470">"Сачекајте..."</string>
-    <string name="bugreport_finished_text" product="watch" msgid="1223616207145252689">"Извештај о грешци ће се ускоро појавити на телефону"</string>
-    <string name="bugreport_finished_text" product="tv" msgid="5758325479058638893">"Изаберите да бисте делили извештај о грешци"</string>
-    <string name="bugreport_finished_text" product="default" msgid="8353769438382138847">"Додирните да бисте делили извештај о грешци"</string>
-    <string name="bugreport_finished_pending_screenshot_text" product="tv" msgid="2343263822812016950">"Изаберите да бисте делили извештај о грешци без снимка екрана или сачекајте да се направи снимак екрана"</string>
-    <string name="bugreport_finished_pending_screenshot_text" product="watch" msgid="1474435374470177193">"Додирните за дељење извештаја о грешци без снимка екрана или сачекајте да се направи снимак екрана"</string>
-    <string name="bugreport_finished_pending_screenshot_text" product="default" msgid="1474435374470177193">"Додирните за дељење извештаја о грешци без снимка екрана или сачекајте да се направи снимак екрана"</string>
-    <string name="bugreport_confirm" msgid="5917407234515812495">"Извештаји о грешкама садрже податке из различитих системских датотека евиденције, који обухватају личне и приватне податке (попут коришћења апликацијa и података о локацији). Делите извештаје о грешкама само са апликацијама и људима у које имате поверења."</string>
-    <string name="bugreport_confirm_dont_repeat" msgid="6179945398364357318">"Не приказуј поново"</string>
-    <string name="bugreport_storage_title" msgid="5332488144740527109">"Извештаји о грешкама"</string>
-    <string name="bugreport_unreadable_text" msgid="586517851044535486">"Датотека извештаја о грешци не може да се прочита"</string>
-    <string name="bugreport_add_details_to_zip_failed" msgid="1302931926486712371">"Додавање детаља извештаја о грешци у zip датотеку није успело"</string>
-    <string name="bugreport_unnamed" msgid="2800582406842092709">"неименовано"</string>
-    <string name="bugreport_info_action" msgid="2158204228510576227">"Детаљи"</string>
-    <string name="bugreport_screenshot_action" msgid="8677781721940614995">"Снимци екрана"</string>
-    <string name="bugreport_screenshot_taken" msgid="5684211273096253120">"Снимак екрана је направљен."</string>
-    <string name="bugreport_screenshot_failed" msgid="5853049140806834601">"Снимање екрана није успело."</string>
-    <string name="bugreport_info_dialog_title" msgid="1355948594292983332">"Детаљи извештаја о грешци <xliff:g id="ID">#%d</xliff:g>"</string>
-    <string name="bugreport_info_name" msgid="4414036021935139527">"Назив датотеке"</string>
-    <string name="bugreport_info_title" msgid="2306030793918239804">"Наслов грешке"</string>
-    <string name="bugreport_info_description" msgid="5072835127481627722">"Резиме грешке"</string>
-    <string name="save" msgid="4781509040564835759">"Сачувај"</string>
-    <string name="bugreport_intent_chooser_title" msgid="7605709494790894076">"Дели извештај о грешци"</string>
+    <string name="bugreport_notification_channel" msgid="2574150205913861141">"Izveštaji o greškama"</string>
+    <string name="bugreport_in_progress_title" msgid="4311705936714972757">"Izveštaj o grešci <xliff:g id="ID">#%d</xliff:g> se generiše"</string>
+    <string name="bugreport_finished_title" msgid="4429132808670114081">"Izveštaj o grešci <xliff:g id="ID">#%d</xliff:g> je snimljen"</string>
+    <string name="bugreport_updating_title" msgid="4423539949559634214">"Dodaju se detalji u izveštaj o grešci"</string>
+    <string name="bugreport_updating_wait" msgid="3322151947853929470">"Sačekajte..."</string>
+    <string name="bugreport_finished_text" product="watch" msgid="1223616207145252689">"Izveštaj o grešci će se uskoro pojaviti na telefonu"</string>
+    <string name="bugreport_finished_text" product="tv" msgid="5758325479058638893">"Izaberite da biste delili izveštaj o grešci"</string>
+    <string name="bugreport_finished_text" product="default" msgid="8353769438382138847">"Dodirnite da biste delili izveštaj o grešci"</string>
+    <string name="bugreport_finished_pending_screenshot_text" product="tv" msgid="2343263822812016950">"Izaberite da biste delili izveštaj o grešci bez snimka ekrana ili sačekajte da se napravi snimak ekrana"</string>
+    <string name="bugreport_finished_pending_screenshot_text" product="watch" msgid="1474435374470177193">"Dodirnite za deljenje izveštaja o grešci bez snimka ekrana ili sačekajte da se napravi snimak ekrana"</string>
+    <string name="bugreport_finished_pending_screenshot_text" product="default" msgid="1474435374470177193">"Dodirnite za deljenje izveštaja o grešci bez snimka ekrana ili sačekajte da se napravi snimak ekrana"</string>
+    <string name="bugreport_confirm" msgid="5917407234515812495">"Izveštaji o greškama sadrže podatke iz različitih sistemskih datoteka evidencije, koji obuhvataju lične i privatne podatke (poput korišćenja aplikacija i podataka o lokaciji). Delite izveštaje o greškama samo sa aplikacijama i ljudima u koje imate poverenja."</string>
+    <string name="bugreport_confirm_dont_repeat" msgid="6179945398364357318">"Ne prikazuj ponovo"</string>
+    <string name="bugreport_storage_title" msgid="5332488144740527109">"Izveštaji o greškama"</string>
+    <string name="bugreport_unreadable_text" msgid="586517851044535486">"Datoteka izveštaja o grešci ne može da se pročita"</string>
+    <string name="bugreport_add_details_to_zip_failed" msgid="1302931926486712371">"Dodavanje detalja izveštaja o grešci u zip datoteku nije uspelo"</string>
+    <string name="bugreport_unnamed" msgid="2800582406842092709">"neimenovano"</string>
+    <string name="bugreport_info_action" msgid="2158204228510576227">"Detalji"</string>
+    <string name="bugreport_screenshot_action" msgid="8677781721940614995">"Snimci ekrana"</string>
+    <string name="bugreport_screenshot_taken" msgid="5684211273096253120">"Snimak ekrana je napravljen."</string>
+    <string name="bugreport_screenshot_failed" msgid="5853049140806834601">"Snimanje ekrana nije uspelo."</string>
+    <string name="bugreport_info_dialog_title" msgid="1355948594292983332">"Detalji izveštaja o grešci <xliff:g id="ID">#%d</xliff:g>"</string>
+    <string name="bugreport_info_name" msgid="4414036021935139527">"Naziv datoteke"</string>
+    <string name="bugreport_info_title" msgid="2306030793918239804">"Naslov greške"</string>
+    <string name="bugreport_info_description" msgid="5072835127481627722">"Rezime greške"</string>
+    <string name="save" msgid="4781509040564835759">"Sačuvaj"</string>
+    <string name="bugreport_intent_chooser_title" msgid="7605709494790894076">"Deli izveštaj o grešci"</string>
 </resources>
