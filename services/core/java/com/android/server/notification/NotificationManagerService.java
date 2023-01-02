@@ -7978,6 +7978,13 @@ public class NotificationManagerService extends SystemService {
                             }
                         }
                     }
+
+                    // Try to start flash notification event whenever an audible and non-suppressed
+                    // notification is received
+                    mAccessibilityManager.startFlashNotificationEvent(getContext(),
+                            AccessibilityManager.FLASH_REASON_NOTIFICATION,
+                            record.getSbn().getPackageName());
+
                 } else if ((record.getFlags() & Notification.FLAG_INSISTENT) != 0) {
                     hasValidSound = false;
                 }
