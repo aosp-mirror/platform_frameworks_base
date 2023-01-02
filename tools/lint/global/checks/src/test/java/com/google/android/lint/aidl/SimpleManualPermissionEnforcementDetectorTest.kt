@@ -397,7 +397,7 @@ class SimpleManualPermissionEnforcementDetectorTest : LintDetectorTest() {
                 public class Foo extends ITest.Stub {
                     private Context mContext;
 
-                    @android.content.pm.PermissionMethod(orSelf = true)
+                    @android.annotation.PermissionMethod(orSelf = true)
                     private void helper() {
                         mContext.enforceCallingOrSelfPermission("android.permission.READ_CONTACTS", "foo");
                     }
@@ -442,7 +442,7 @@ class SimpleManualPermissionEnforcementDetectorTest : LintDetectorTest() {
                     public class Foo extends ITest.Stub {
                         private Context mContext;
 
-                        @android.content.pm.PermissionMethod
+                        @android.annotation.PermissionMethod
                     private void helper() {
                         mContext.enforceCallingOrSelfPermission("android.permission.READ_CONTACTS", "foo");
                     }
@@ -487,7 +487,7 @@ class SimpleManualPermissionEnforcementDetectorTest : LintDetectorTest() {
                 public class Foo extends ITest.Stub {
                     private Context mContext;
 
-                    @android.content.pm.PermissionMethod(orSelf = true)
+                    @android.annotation.PermissionMethod(orSelf = true)
                     private void helper() {
                         mContext.enforceCallingOrSelfPermission("android.permission.READ_CONTACTS", "foo");
                         mContext.enforceCallingOrSelfPermission("android.permission.WRITE_CONTACTS", "foo");
@@ -536,13 +536,13 @@ class SimpleManualPermissionEnforcementDetectorTest : LintDetectorTest() {
                 public class Foo extends ITest.Stub {
                     private Context mContext;
 
-                    @android.content.pm.PermissionMethod(orSelf = true)
+                    @android.annotation.PermissionMethod(orSelf = true)
                     private void helperHelper() {
                         helper("android.permission.WRITE_CONTACTS");
                     }
 
-                    @android.content.pm.PermissionMethod(orSelf = true)
-                    private void helper(@android.content.pm.PermissionName String extraPermission) {
+                    @android.annotation.PermissionMethod(orSelf = true)
+                    private void helper(@android.annotation.PermissionName String extraPermission) {
                         mContext.enforceCallingOrSelfPermission("android.permission.READ_CONTACTS", "foo");
                     }
 
@@ -689,6 +689,34 @@ class SimpleManualPermissionEnforcementDetectorTest : LintDetectorTest() {
             .expectClean()
     }
 
+    fun testIfExpression_inlinedWithSideEffect_ignored() {
+        lint().files(
+            java(
+                """
+                import android.content.Context;
+                import android.test.ITest;
+                public class Foo extends ITest.Stub {
+                    private Context mContext;
+                    @Override
+                    public void test() throws android.os.RemoteException {
+                        if (somethingElse() && mContext.checkCallingPermission("android.permission.READ_CONTACTS", "foo")
+                                != PackageManager.PERMISSION_GRANTED) {
+                            throw new SecurityException("yikes!");
+                        }
+                    }
+
+                    private boolean somethingElse() {
+                        return true;
+                    }
+                }
+                """
+            ).indented(),
+            *stubs
+        )
+            .run()
+            .expectClean()
+    }
+
     fun testAnyOf_hardCodedAndVarArgs() {
         lint().files(
                 java(
@@ -699,13 +727,13 @@ class SimpleManualPermissionEnforcementDetectorTest : LintDetectorTest() {
                     public class Foo extends ITest.Stub {
                         private Context mContext;
 
-                        @android.content.pm.PermissionMethod(anyOf = true)
+                        @android.annotation.PermissionMethod(anyOf = true)
                         private void helperHelper() {
                             helper("FOO", "BAR");
                         }
 
-                        @android.content.pm.PermissionMethod(anyOf = true, value = {"BAZ", "BUZZ"})
-                        private void helper(@android.content.pm.PermissionName String... extraPermissions) {}
+                        @android.annotation.PermissionMethod(anyOf = true, value = {"BAZ", "BUZZ"})
+                        private void helper(@android.annotation.PermissionName String... extraPermissions) {}
 
                         @Override
                         public void test() throws android.os.RemoteException {
@@ -748,13 +776,13 @@ class SimpleManualPermissionEnforcementDetectorTest : LintDetectorTest() {
                     public class Foo extends ITest.Stub {
                         private Context mContext;
 
-                        @android.content.pm.PermissionMethod
+                        @android.annotation.PermissionMethod
                         private void allOfhelper() {
                             mContext.enforceCallingOrSelfPermission("FOO");
                             mContext.enforceCallingOrSelfPermission("BAR");
                         }
 
-                        @android.content.pm.PermissionMethod(anyOf = true, permissions = {"BAZ", "BUZZ"})
+                        @android.annotation.PermissionMethod(anyOf = true, permissions = {"BAZ", "BUZZ"})
                         private void anyOfHelper() {}
 
                         @Override
@@ -776,17 +804,18 @@ class SimpleManualPermissionEnforcementDetectorTest : LintDetectorTest() {
                 java(
                     """
                     import android.content.Context;
-                    import android.content.pm.PermissionName;import android.test.ITest;
+                    import android.annotation.PermissionName;
+                    import android.test.ITest;
 
                     public class Foo extends ITest.Stub {
                         private Context mContext;
 
-                        @android.content.pm.PermissionMethod(anyOf = true)
+                        @android.annotation.PermissionMethod(anyOf = true)
                         private void anyOfCheck(@PermissionName String... permissions) {
                             allOfCheck("BAZ", "BUZZ");
                         }
 
-                        @android.content.pm.PermissionMethod
+                        @android.annotation.PermissionMethod
                         private void allOfCheck(@PermissionName String... permissions) {}
 
                         @Override

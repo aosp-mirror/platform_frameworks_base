@@ -98,6 +98,48 @@ data class EnforcePermissionFix(
 
     companion object {
         /**
+         * Walks the expressions in a block, looking for simple permission checks.
+         *
+         * As soon as something other than a permission check is encountered, stop looking,
+         * as some other business logic is happening that prevents an automated fix.
+         */
+        fun fromBlockExpression(
+            context: JavaContext,
+            blockExpression: UBlockExpression
+        ): EnforcePermissionFix? {
+            try {
+                val singleFixes = mutableListOf<EnforcePermissionFix>()
+                for (expression in blockExpression.expressions) {
+                    val fix = fromExpression(context, expression) ?: break
+                    singleFixes.add(fix)
+                }
+                return compose(singleFixes)
+            } catch (e: AnyOfAllOfException) {
+                return null
+            }
+        }
+
+        /**
+         * Conditionally constructs EnforcePermissionFix from any UExpression
+         *
+         * @return EnforcePermissionFix if the expression boils down to a permission check,
+         * else null
+         */
+        fun fromExpression(
+            context: JavaContext,
+            expression: UExpression
+        ): EnforcePermissionFix? {
+            val trimmedExpression = expression.skipParenthesizedExprDown()
+            if (trimmedExpression is UIfExpression) {
+                return fromIfExpression(context, trimmedExpression)
+            }
+            findCallExpression(trimmedExpression)?.let {
+                return fromCallExpression(context, it)
+            }
+            return null
+        }
+
+        /**
          * Conditionally constructs EnforcePermissionFix from a UCallExpression
          *
          * @return EnforcePermissionFix if the called method is annotated with @PermissionMethod, else null
@@ -183,7 +225,8 @@ data class EnforcePermissionFix(
         }
 
 
-        fun compose(individuals: List<EnforcePermissionFix>): EnforcePermissionFix {
+        fun compose(individuals: List<EnforcePermissionFix>): EnforcePermissionFix? {
+            if (individuals.isEmpty()) return null
             val anyOfs = individuals.filter(EnforcePermissionFix::anyOf)
             // anyOf/allOf should be consistent.  If we encounter some @PermissionMethods that are anyOf
             // and others that aren't, we don't know what to do.
