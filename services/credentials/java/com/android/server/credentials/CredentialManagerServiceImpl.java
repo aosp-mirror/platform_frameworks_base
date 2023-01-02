@@ -53,6 +53,11 @@ public final class CredentialManagerServiceImpl extends
         }
     }
 
+    @GuardedBy("mLock")
+    public ComponentName getComponentName() {
+        return mInfo.getServiceInfo().getComponentName();
+    }
+
     @Override // from PerUserSystemService
     @GuardedBy("mLock")
     protected ServiceInfo newServiceInfoLocked(@NonNull ComponentName serviceComponent)

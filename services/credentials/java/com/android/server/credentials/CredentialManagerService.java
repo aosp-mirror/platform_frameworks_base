@@ -247,6 +247,8 @@ public final class CredentialManagerService
             return cancelTransport;
         }
 
+	@SuppressWarnings("GuardedBy") // ErrorProne requires listEnabledProviders
+        // to be guarded by 'service.mLock', which is the same as mLock.
         @Override
         public ICancellationSignal listEnabledProviders(IListEnabledProvidersCallback callback) {
             Log.i(TAG, "listEnabledProviders");
@@ -256,7 +258,7 @@ public final class CredentialManagerService
             runForUser(
                     (service) -> {
                         enabledProviders.add(
-                                service.getServiceInfo().getComponentName().flattenToString());
+                                service.getComponentName().flattenToString());
                     });
 
             // Call the callback.
