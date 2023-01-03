@@ -149,11 +149,22 @@ public abstract class EconomicPolicy {
          * the action unless a modifier lowers the cost to produce.
          */
         public final long basePrice;
+        /**
+         * Whether the remaining stock limit affects an app's ability to perform this action.
+         * If {@code false}, then the action can be performed, even if the cost is higher
+         * than the remaining stock. This does not affect checking against an app's balance.
+         */
+        public final boolean respectsStockLimit;
 
         Action(int id, long costToProduce, long basePrice) {
+            this(id, costToProduce, basePrice, true);
+        }
+
+        Action(int id, long costToProduce, long basePrice, boolean respectsStockLimit) {
             this.id = id;
             this.costToProduce = costToProduce;
             this.basePrice = basePrice;
+            this.respectsStockLimit = respectsStockLimit;
         }
     }
 

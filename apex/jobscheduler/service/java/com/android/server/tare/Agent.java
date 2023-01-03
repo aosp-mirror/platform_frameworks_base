@@ -164,8 +164,9 @@ class Agent {
     }
 
     @GuardedBy("mLock")
-    private boolean isAffordableLocked(long balance, long price, long ctp) {
-        return balance >= price && mScribe.getRemainingConsumableCakesLocked() >= ctp;
+    private boolean isAffordableLocked(long balance, long price, long stockLimitHonoringCtp) {
+        return balance >= price
+                && mScribe.getRemainingConsumableCakesLocked() >= stockLimitHonoringCtp;
     }
 
     @GuardedBy("mLock")
@@ -303,7 +304,8 @@ class Agent {
                         note.recalculateCosts(economicPolicy, userId, pkgName);
                         final boolean isAffordable = isVip
                                 || isAffordableLocked(newBalance,
-                                        note.getCachedModifiedPrice(), note.getCtp());
+                                        note.getCachedModifiedPrice(),
+                                        note.getStockLimitHonoringCtp());
                         if (note.isCurrentlyAffordable() != isAffordable) {
                             note.setNewAffordability(isAffordable);
                             mIrs.postAffordabilityChanged(userId, pkgName, note);
@@ -339,7 +341,7 @@ class Agent {
                 note.recalculateCosts(economicPolicy, userId, pkgName);
                 final boolean isAffordable = isVip
                         || isAffordableLocked(newBalance,
-                        note.getCachedModifiedPrice(), note.getCtp());
+                        note.getCachedModifiedPrice(), note.getStockLimitHonoringCtp());
                 if (note.isCurrentlyAffordable() != isAffordable) {
                     note.setNewAffordability(isAffordable);
                     mIrs.postAffordabilityChanged(userId, pkgName, note);
@@ -403,7 +405,8 @@ class Agent {
                         note.recalculateCosts(economicPolicy, userId, pkgName);
                         final boolean isAffordable = isVip
                                 || isAffordableLocked(newBalance,
-                                        note.getCachedModifiedPrice(), note.getCtp());
+                                        note.getCachedModifiedPrice(),
+                                        note.getStockLimitHonoringCtp());
                         if (note.isCurrentlyAffordable() != isAffordable) {
                             note.setNewAffordability(isAffordable);
                             mIrs.postAffordabilityChanged(userId, pkgName, note);
@@ -541,7 +544,7 @@ class Agent {
                     final ActionAffordabilityNote note = actionAffordabilityNotes.valueAt(i);
                     final boolean isAffordable = isVip
                             || isAffordableLocked(newBalance,
-                                    note.getCachedModifiedPrice(), note.getCtp());
+                                    note.getCachedModifiedPrice(), note.getStockLimitHonoringCtp());
                     if (note.isCurrentlyAffordable() != isAffordable) {
                         note.setNewAffordability(isAffordable);
                         mIrs.postAffordabilityChanged(userId, pkgName, note);
@@ -882,7 +885,7 @@ class Agent {
                         mUpperThreshold = (mUpperThreshold == Long.MIN_VALUE)
                                 ? price : Math.min(mUpperThreshold, price);
                     }
-                    final long ctp = note.getCtp();
+                    final long ctp = note.getStockLimitHonoringCtp();
                     if (ctp <= mRemainingConsumableCredits) {
                         mCtpThreshold = Math.max(mCtpThreshold, ctp);
                     }
@@ -1119,7 +1122,7 @@ class Agent {
             note.recalculateCosts(economicPolicy, userId, pkgName);
             note.setNewAffordability(isVip
                     || isAffordableLocked(getBalanceLocked(userId, pkgName),
-                            note.getCachedModifiedPrice(), note.getCtp()));
+                            note.getCachedModifiedPrice(), note.getStockLimitHonoringCtp()));
             mIrs.postAffordabilityChanged(userId, pkgName, note);
             // Update ongoing alarm
             scheduleBalanceCheckLocked(userId, pkgName);
@@ -1146,7 +1149,7 @@ class Agent {
     static final class ActionAffordabilityNote {
         private final EconomyManagerInternal.ActionBill mActionBill;
         private final EconomyManagerInternal.AffordabilityChangeListener mListener;
-        private long mCtp;
+        private long mStockLimitHonoringCtp;
         private long mModifiedPrice;
         private boolean mIsAffordable;
 
@@ -1185,29 +1188,34 @@ class Agent {
             return mModifiedPrice;
         }
 
-        private long getCtp() {
-            return mCtp;
+        /** Returns the cumulative CTP of actions in this note that respect the stock limit. */
+        private long getStockLimitHonoringCtp() {
+            return mStockLimitHonoringCtp;
         }
 
         @VisibleForTesting
         void recalculateCosts(@NonNull EconomicPolicy economicPolicy,
                 int userId, @NonNull String pkgName) {
             long modifiedPrice = 0;
-            long ctp = 0;
+            long stockLimitHonoringCtp = 0;
             final List<EconomyManagerInternal.AnticipatedAction> anticipatedActions =
                     mActionBill.getAnticipatedActions();
             for (int i = 0; i < anticipatedActions.size(); ++i) {
                 final EconomyManagerInternal.AnticipatedAction aa = anticipatedActions.get(i);
+                final EconomicPolicy.Action action = economicPolicy.getAction(aa.actionId);
 
                 final EconomicPolicy.Cost actionCost =
                         economicPolicy.getCostOfAction(aa.actionId, userId, pkgName);
                 modifiedPrice += actionCost.price * aa.numInstantaneousCalls
                         + actionCost.price * (aa.ongoingDurationMs / 1000);
-                ctp += actionCost.costToProduce * aa.numInstantaneousCalls
-                        + actionCost.costToProduce * (aa.ongoingDurationMs / 1000);
+                if (action.respectsStockLimit) {
+                    stockLimitHonoringCtp +=
+                            actionCost.costToProduce * aa.numInstantaneousCalls
+                                    + actionCost.costToProduce * (aa.ongoingDurationMs / 1000);
+                }
             }
             mModifiedPrice = modifiedPrice;
-            mCtp = ctp;
+            mStockLimitHonoringCtp = stockLimitHonoringCtp;
         }
 
         boolean isCurrentlyAffordable() {
@@ -1267,7 +1275,8 @@ class Agent {
                                 final ActionAffordabilityNote note =
                                         actionAffordabilityNotes.valueAt(i);
                                 final boolean isAffordable = isVip || isAffordableLocked(
-                                        newBalance, note.getCachedModifiedPrice(), note.getCtp());
+                                        newBalance, note.getCachedModifiedPrice(),
+                                        note.getStockLimitHonoringCtp());
                                 if (note.isCurrentlyAffordable() != isAffordable) {
                                     note.setNewAffordability(isAffordable);
                                     mIrs.postAffordabilityChanged(userId, pkgName, note);
