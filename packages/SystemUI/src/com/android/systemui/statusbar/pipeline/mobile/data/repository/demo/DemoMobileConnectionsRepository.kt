@@ -253,15 +253,13 @@ constructor(
 
     private fun SignalIcon.MobileIconGroup?.toResolvedNetworkType(): ResolvedNetworkType {
         val key = mobileMappingsReverseLookup.value[this] ?: "dis"
-        return DefaultNetworkType(DEMO_NET_TYPE, key)
+        return DefaultNetworkType(key)
     }
 
     companion object {
         private const val TAG = "DemoMobileConnectionsRepo"
 
         private const val DEFAULT_SUB_ID = 1
-
-        private const val DEMO_NET_TYPE = 1234
     }
 }
 

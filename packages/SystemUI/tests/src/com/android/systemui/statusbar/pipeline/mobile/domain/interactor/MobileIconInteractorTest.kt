@@ -17,7 +17,6 @@
 package com.android.systemui.statusbar.pipeline.mobile.domain.interactor
 
 import android.telephony.CellSignalStrength
-import android.telephony.SubscriptionInfo
 import android.telephony.TelephonyManager.NETWORK_TYPE_UNKNOWN
 import androidx.test.filters.SmallTest
 import com.android.settingslib.SignalIcon.MobileIconGroup
@@ -34,7 +33,6 @@ import com.android.systemui.statusbar.pipeline.mobile.domain.interactor.FakeMobi
 import com.android.systemui.statusbar.pipeline.mobile.domain.interactor.FakeMobileIconsInteractor.Companion.THREE_G
 import com.android.systemui.statusbar.pipeline.mobile.util.FakeMobileMappingsProxy
 import com.android.systemui.util.mockito.mock
-import com.android.systemui.util.mockito.whenever
 import com.google.common.truth.Truth.assertThat
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -197,8 +195,7 @@ class MobileIconInteractorTest : SysuiTestCase() {
         runBlocking(IMMEDIATE) {
             connectionRepository.setConnectionInfo(
                 MobileConnectionModel(
-                    resolvedNetworkType =
-                        DefaultNetworkType(THREE_G, mobileMappingsProxy.toIconKey(THREE_G))
+                    resolvedNetworkType = DefaultNetworkType(mobileMappingsProxy.toIconKey(THREE_G))
                 ),
             )
 
@@ -215,8 +212,7 @@ class MobileIconInteractorTest : SysuiTestCase() {
         runBlocking(IMMEDIATE) {
             connectionRepository.setConnectionInfo(
                 MobileConnectionModel(
-                    resolvedNetworkType =
-                        DefaultNetworkType(THREE_G, mobileMappingsProxy.toIconKey(THREE_G))
+                    resolvedNetworkType = DefaultNetworkType(mobileMappingsProxy.toIconKey(THREE_G))
                 ),
             )
 
@@ -227,7 +223,6 @@ class MobileIconInteractorTest : SysuiTestCase() {
                 MobileConnectionModel(
                     resolvedNetworkType =
                         DefaultNetworkType(
-                            FOUR_G,
                             mobileMappingsProxy.toIconKey(FOUR_G),
                         ),
                 ),
@@ -245,10 +240,7 @@ class MobileIconInteractorTest : SysuiTestCase() {
             connectionRepository.setConnectionInfo(
                 MobileConnectionModel(
                     resolvedNetworkType =
-                        OverrideNetworkType(
-                            FIVE_G_OVERRIDE,
-                            mobileMappingsProxy.toIconKeyOverride(FIVE_G_OVERRIDE)
-                        )
+                        OverrideNetworkType(mobileMappingsProxy.toIconKeyOverride(FIVE_G_OVERRIDE))
                 ),
             )
 
@@ -266,10 +258,7 @@ class MobileIconInteractorTest : SysuiTestCase() {
             connectionRepository.setConnectionInfo(
                 MobileConnectionModel(
                     resolvedNetworkType =
-                        DefaultNetworkType(
-                            NETWORK_TYPE_UNKNOWN,
-                            mobileMappingsProxy.toIconKey(NETWORK_TYPE_UNKNOWN)
-                        ),
+                        DefaultNetworkType(mobileMappingsProxy.toIconKey(NETWORK_TYPE_UNKNOWN)),
                 ),
             )
 
@@ -524,8 +513,6 @@ class MobileIconInteractorTest : SysuiTestCase() {
         private const val CDMA_LEVEL = 2
 
         private const val SUB_1_ID = 1
-        private val SUB_1 =
-            mock<SubscriptionInfo>().also { whenever(it.subscriptionId).thenReturn(SUB_1_ID) }
 
         private val DEFAULT_NAME = NetworkNameModel.Default("test default name")
         private val DERIVED_NAME = NetworkNameModel.Derived("test derived name")

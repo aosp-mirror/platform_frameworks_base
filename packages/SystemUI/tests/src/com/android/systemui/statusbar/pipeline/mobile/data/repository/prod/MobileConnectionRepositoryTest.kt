@@ -319,7 +319,7 @@ class MobileConnectionRepositoryTest : SysuiTestCase() {
 
             val callback = getTelephonyCallbackForType<TelephonyCallback.DisplayInfoListener>()
             val type = NETWORK_TYPE_LTE
-            val expected = DefaultNetworkType(type, mobileMappings.toIconKey(type))
+            val expected = DefaultNetworkType(mobileMappings.toIconKey(type))
             val ti = mock<TelephonyDisplayInfo>().also { whenever(it.networkType).thenReturn(type) }
             callback.onDisplayInfoChanged(ti)
 
@@ -336,7 +336,7 @@ class MobileConnectionRepositoryTest : SysuiTestCase() {
 
             val callback = getTelephonyCallbackForType<TelephonyCallback.DisplayInfoListener>()
             val type = OVERRIDE_NETWORK_TYPE_LTE_CA
-            val expected = OverrideNetworkType(type, mobileMappings.toIconKeyOverride(type))
+            val expected = OverrideNetworkType(mobileMappings.toIconKeyOverride(type))
             val ti =
                 mock<TelephonyDisplayInfo>().also {
                     whenever(it.networkType).thenReturn(type)

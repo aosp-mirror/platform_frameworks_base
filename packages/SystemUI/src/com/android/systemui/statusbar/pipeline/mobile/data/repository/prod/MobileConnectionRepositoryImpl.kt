@@ -186,14 +186,12 @@ class MobileConnectionRepositoryImpl(
                                         OVERRIDE_NETWORK_TYPE_NONE
                                 ) {
                                     DefaultNetworkType(
-                                        telephonyDisplayInfo.networkType,
                                         mobileMappingsProxy.toIconKey(
                                             telephonyDisplayInfo.networkType
                                         )
                                     )
                                 } else {
                                     OverrideNetworkType(
-                                        telephonyDisplayInfo.overrideNetworkType,
                                         mobileMappingsProxy.toIconKeyOverride(
                                             telephonyDisplayInfo.overrideNetworkType
                                         )
