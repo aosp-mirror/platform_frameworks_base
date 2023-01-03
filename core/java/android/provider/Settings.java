@@ -8659,6 +8659,12 @@ public final class Settings {
         public static final String BACKUP_AUTO_RESTORE = "backup_auto_restore";
 
         /**
+         * Controls whether framework backup scheduling is enabled.
+         * @hide
+         */
+        public static final String BACKUP_SCHEDULING_ENABLED = "backup_scheduling_enabled";
+
+        /**
          * Indicates whether settings backup has been fully provisioned.
          * Type: int ( 0 = unprovisioned, 1 = fully provisioned )
          * @hide
