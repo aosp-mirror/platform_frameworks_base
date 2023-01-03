@@ -23,12 +23,14 @@ import com.android.systemui.dagger.qualifiers.Application
 import com.android.systemui.keyguard.data.repository.KeyguardTransitionRepository
 import com.android.systemui.keyguard.shared.model.KeyguardState
 import com.android.systemui.keyguard.shared.model.TransitionInfo
+import com.android.systemui.keyguard.shared.model.WakefulnessState
 import com.android.systemui.util.kotlin.sample
 import javax.inject.Inject
 import kotlin.time.Duration
 import kotlin.time.Duration.Companion.milliseconds
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.collect
+import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.launch
 
 @SysUISingleton
@@ -44,6 +46,7 @@ constructor(
     override fun start() {
         listenForOccludedToLockscreen()
         listenForOccludedToDreaming()
+        listenForOccludedToAodOrDozing()
     }
 
     private fun listenForOccludedToDreaming() {
@@ -70,8 +73,7 @@ constructor(
         scope.launch {
             keyguardInteractor.isKeyguardOccluded
                 .sample(keyguardTransitionInteractor.startedKeyguardTransitionStep, ::Pair)
-                .collect { pair ->
-                    val (isOccluded, lastStartedKeyguardState) = pair
+                .collect { (isOccluded, lastStartedKeyguardState) ->
                     // Occlusion signals come from the framework, and should interrupt any
                     // existing transition
                     if (!isOccluded && lastStartedKeyguardState.to == KeyguardState.OCCLUDED) {
@@ -81,6 +83,39 @@ constructor(
                                 KeyguardState.OCCLUDED,
                                 KeyguardState.LOCKSCREEN,
                                 getAnimator(TO_LOCKSCREEN_DURATION),
+                            )
+                        )
+                    }
+                }
+        }
+    }
+
+    private fun listenForOccludedToAodOrDozing() {
+        scope.launch {
+            keyguardInteractor.wakefulnessModel
+                .sample(
+                    combine(
+                        keyguardTransitionInteractor.startedKeyguardTransitionStep,
+                        keyguardInteractor.isAodAvailable,
+                        ::Pair
+                    ),
+                    ::toTriple
+                )
+                .collect { (wakefulnessState, lastStartedStep, isAodAvailable) ->
+                    if (
+                        lastStartedStep.to == KeyguardState.OCCLUDED &&
+                            wakefulnessState.state == WakefulnessState.STARTING_TO_SLEEP
+                    ) {
+                        keyguardTransitionRepository.startTransition(
+                            TransitionInfo(
+                                name,
+                                KeyguardState.OCCLUDED,
+                                if (isAodAvailable) {
+                                    KeyguardState.AOD
+                                } else {
+                                    KeyguardState.DOZING
+                                },
+                                getAnimator(),
                             )
                         )
                     }

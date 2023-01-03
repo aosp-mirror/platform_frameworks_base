@@ -52,6 +52,9 @@ class FakeKeyguardRepository : KeyguardRepository {
     private val _isDozing = MutableStateFlow(false)
     override val isDozing: Flow<Boolean> = _isDozing
 
+    private val _isAodAvailable = MutableStateFlow(false)
+    override val isAodAvailable: Flow<Boolean> = _isAodAvailable
+
     private val _isDreaming = MutableStateFlow(false)
     override val isDreaming: Flow<Boolean> = _isDreaming
 
@@ -124,6 +127,10 @@ class FakeKeyguardRepository : KeyguardRepository {
 
     fun setDozing(isDozing: Boolean) {
         _isDozing.value = isDozing
+    }
+
+    fun setAodAvailable(isAodAvailable: Boolean) {
+        _isAodAvailable.value = isAodAvailable
     }
 
     fun setDreamingWithOverlay(isDreaming: Boolean) {

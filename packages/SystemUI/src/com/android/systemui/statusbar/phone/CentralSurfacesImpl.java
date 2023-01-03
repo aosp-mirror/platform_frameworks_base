@@ -4262,8 +4262,7 @@ public class CentralSurfacesImpl implements CoreStartable, CentralSurfaces {
 
                 @Override
                 public void onDozeAmountChanged(float linear, float eased) {
-                    if (mFeatureFlags.isEnabled(Flags.LOCKSCREEN_ANIMATIONS)
-                            && !mFeatureFlags.isEnabled(Flags.LIGHT_REVEAL_MIGRATION)
+                    if (!mFeatureFlags.isEnabled(Flags.LIGHT_REVEAL_MIGRATION)
                             && !(mLightRevealScrim.getRevealEffect() instanceof CircleReveal)) {
                         mLightRevealScrim.setRevealAmount(1f - linear);
                     }
