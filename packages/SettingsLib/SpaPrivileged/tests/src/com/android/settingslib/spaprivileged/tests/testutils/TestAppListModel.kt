@@ -28,11 +28,8 @@ data class TestAppRecord(
 ) : AppRecord
 
 class TestAppListModel(
-    private val options: List<String> = emptyList(),
     private val enableGrouping: Boolean = false,
 ) : AppListModel<TestAppRecord> {
-    override fun getSpinnerOptions() = options
-
     override fun transform(userIdFlow: Flow<Int>, appListFlow: Flow<List<ApplicationInfo>>) =
         appListFlow.mapItem(::TestAppRecord)
 

@@ -17,6 +17,7 @@
 package com.android.settingslib.spa.screenshot
 
 import com.android.settingslib.spa.widget.ui.Spinner
+import com.android.settingslib.spa.widget.ui.SpinnerOption
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -43,9 +44,9 @@ class SpinnerScreenshotTest(emulationSpec: DeviceEmulationSpec) {
     fun test() {
         screenshotRule.screenshotTest("spinner") {
             Spinner(
-                options = (1..3).map { "Option $it" },
-                selectedIndex = 0,
-                setIndex = {},
+                options = (1..3).map { SpinnerOption(id = it, text = "Option $it") },
+                selectedId = 1,
+                setId = {},
             )
         }
     }
