@@ -175,6 +175,7 @@ public class RoutingControlActionTest {
         mNativeWrapper = new FakeNativeWrapper();
         mHdmiCecController = HdmiCecController.createWithNativeWrapper(
                 mHdmiControlService, mNativeWrapper, mHdmiControlService.getAtomWriter());
+        mHdmiControlService.setDeviceConfig(new FakeDeviceConfigWrapper());
         mHdmiControlService.setCecController(mHdmiCecController);
         mHdmiControlService.setHdmiMhlController(HdmiMhlControllerStub.create(mHdmiControlService));
         HdmiPortInfo[] hdmiPortInfos = new HdmiPortInfo[1];

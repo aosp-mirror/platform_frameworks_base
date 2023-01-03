@@ -114,6 +114,7 @@ public class HdmiCecAtomLoggingTest {
         mHdmiCecNetwork = new HdmiCecNetwork(mHdmiControlServiceSpy,
                 mHdmiCecController, mHdmiMhlControllerStub);
         mHdmiControlServiceSpy.setHdmiCecNetwork(mHdmiCecNetwork);
+        mHdmiControlServiceSpy.setDeviceConfig(new FakeDeviceConfigWrapper());
 
         HdmiPortInfo[] hdmiPortInfos = new HdmiPortInfo[1];
         hdmiPortInfos[0] =
