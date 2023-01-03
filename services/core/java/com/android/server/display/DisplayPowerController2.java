@@ -267,10 +267,12 @@ final class DisplayPowerController2 implements AutomaticBrightnessController.Cal
     // Must only be accessed on the handler thread.
     private DisplayPowerState mPowerState;
 
+
+
     // The currently active screen on unblocker.  This field is non-null whenever
     // we are waiting for a callback to release it and unblock the screen.
-    private WindowManagerPolicy.ScreenOnListener mPendingScreenOnUnblocker;
-    private WindowManagerPolicy.ScreenOffListener mPendingScreenOffUnblocker;
+    private ScreenOnUnblocker mPendingScreenOnUnblocker;
+    private ScreenOffUnblocker mPendingScreenOffUnblocker;
 
     // True if we were in the process of turning off the screen.
     // This allows us to recover more gracefully from situations where we abort
@@ -1756,9 +1758,7 @@ final class DisplayPowerController2 implements AutomaticBrightnessController.Cal
     private void blockScreenOn() {
         if (mPendingScreenOnUnblocker == null) {
             Trace.asyncTraceBegin(Trace.TRACE_TAG_POWER, SCREEN_ON_BLOCKED_TRACE_NAME, 0);
-            mPendingScreenOnUnblocker =  () -> {
-                mHandler.obtainMessage(MSG_SCREEN_ON_UNBLOCKED, this).sendToTarget();
-            };
+            mPendingScreenOnUnblocker = new ScreenOnUnblocker();
             mScreenOnBlockStartRealTime = SystemClock.elapsedRealtime();
             Slog.i(mTag, "Blocking screen on until initial contents have been drawn.");
         }
@@ -1776,9 +1776,7 @@ final class DisplayPowerController2 implements AutomaticBrightnessController.Cal
     private void blockScreenOff() {
         if (mPendingScreenOffUnblocker == null) {
             Trace.asyncTraceBegin(Trace.TRACE_TAG_POWER, SCREEN_OFF_BLOCKED_TRACE_NAME, 0);
-            mPendingScreenOffUnblocker = () -> {
-                mHandler.obtainMessage(MSG_SCREEN_ON_UNBLOCKED, this).sendToTarget();
-            };
+            mPendingScreenOffUnblocker = new ScreenOffUnblocker();
             mScreenOffBlockStartRealTime = SystemClock.elapsedRealtime();
             Slog.i(mTag, "Blocking screen off");
         }
@@ -2559,6 +2557,22 @@ final class DisplayPowerController2 implements AutomaticBrightnessController.Cal
             } else {
                 handleSettingsChange(false /* userSwitch */);
             }
+        }
+    }
+
+    private final class ScreenOnUnblocker implements WindowManagerPolicy.ScreenOnListener {
+        @Override
+        public void onScreenOn() {
+            Message msg = mHandler.obtainMessage(MSG_SCREEN_ON_UNBLOCKED, this);
+            mHandler.sendMessage(msg);
+        }
+    }
+
+    private final class ScreenOffUnblocker implements WindowManagerPolicy.ScreenOffListener {
+        @Override
+        public void onScreenOff() {
+            Message msg = mHandler.obtainMessage(MSG_SCREEN_OFF_UNBLOCKED, this);
+            mHandler.sendMessage(msg);
         }
     }
 
