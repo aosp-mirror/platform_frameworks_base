@@ -714,6 +714,18 @@ public class CompanionDeviceManagerService extends SystemService {
         }
 
         @Override
+        public void enableSystemDataSync(int associationId, int flags) {
+            getAssociationWithCallerChecks(associationId);
+            mAssociationRequestsProcessor.enableSystemDataSync(associationId, flags);
+        }
+
+        @Override
+        public void disableSystemDataSync(int associationId, int flags) {
+            getAssociationWithCallerChecks(associationId);
+            mAssociationRequestsProcessor.disableSystemDataSync(associationId, flags);
+        }
+
+        @Override
         public void notifyDeviceAppeared(int associationId) {
             if (DEBUG) Log.i(TAG, "notifyDevice_Appeared() id=" + associationId);
 
