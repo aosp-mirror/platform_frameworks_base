@@ -178,6 +178,7 @@ public class DisplayResolveInfo implements TargetInfo {
         if (ENABLE_CHOOSER_DELEGATE) {
             return activity.startAsCallerImpl(mResolvedIntent, options, false, userId);
         } else {
+            TargetInfo.prepareIntentForCrossProfileLaunch(mResolvedIntent, userId);
             activity.startActivityAsCaller(mResolvedIntent, options, null, false, userId);
             return true;
         }
@@ -185,6 +186,7 @@ public class DisplayResolveInfo implements TargetInfo {
 
     @Override
     public boolean startAsUser(Activity activity, Bundle options, UserHandle user) {
+        TargetInfo.prepareIntentForCrossProfileLaunch(mResolvedIntent, user.getIdentifier());
         activity.startActivityAsUser(mResolvedIntent, options, user);
         return false;
     }
