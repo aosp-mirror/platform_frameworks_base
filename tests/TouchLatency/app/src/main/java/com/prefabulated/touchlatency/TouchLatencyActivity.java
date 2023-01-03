@@ -37,7 +37,7 @@ import com.google.android.material.slider.RangeSlider.OnChangeListener;
 
 public class TouchLatencyActivity extends AppCompatActivity {
     private static final int REFRESH_RATE_SLIDER_MIN = 20;
-    private static final int REFRESH_RATE_SLIDER_STEP = 5;
+    private static final int REFRESH_RATE_SLIDER_STEP = 1;
 
     private Menu mMenu;
     private Mode[] mDisplayModes;
