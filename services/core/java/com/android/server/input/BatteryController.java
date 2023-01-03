@@ -378,13 +378,14 @@ final class BatteryController {
         }
     }
 
-    private void handleBluetoothBatteryLevelChange(long eventTime, String address) {
+    private void handleBluetoothBatteryLevelChange(long eventTime, String address,
+            int batteryLevel) {
         synchronized (mLock) {
             final DeviceMonitor monitor = findIf(mDeviceMonitors, (m) ->
                     (m.mBluetoothDevice != null
                             && address.equals(m.mBluetoothDevice.getAddress())));
             if (monitor != null) {
-                monitor.onBluetoothBatteryChanged(eventTime);
+                monitor.onBluetoothBatteryChanged(eventTime, batteryLevel);
             }
         }
     }
@@ -514,18 +515,6 @@ final class BatteryController {
                 isPresent ? mNative.getBatteryCapacity(deviceId) / 100.f : Float.NaN);
     }
 
-    // Queries the battery state of an input device from Bluetooth.
-    private State queryBatteryStateFromBluetooth(int deviceId, long updateTime,
-            @NonNull BluetoothDevice bluetoothDevice) {
-        final int level = mBluetoothBatteryManager.getBatteryLevel(bluetoothDevice.getAddress());
-        if (level == BluetoothDevice.BATTERY_LEVEL_BLUETOOTH_OFF
-                || level == BluetoothDevice.BATTERY_LEVEL_UNKNOWN) {
-            return new State(deviceId);
-        }
-        return new State(deviceId, updateTime, true /*isPresent*/, BatteryState.STATUS_UNKNOWN,
-                level / 100.f);
-    }
-
     private void updateBluetoothMonitoring() {
         synchronized (mLock) {
             if (anyOf(mDeviceMonitors, (m) -> m.mBluetoothDevice != null)) {
@@ -533,12 +522,12 @@ final class BatteryController {
                 if (mBluetoothBatteryListener == null) {
                     if (DEBUG) Slog.d(TAG, "Registering bluetooth battery listener");
                     mBluetoothBatteryListener = this::handleBluetoothBatteryLevelChange;
-                    mBluetoothBatteryManager.addListener(mBluetoothBatteryListener);
+                    mBluetoothBatteryManager.addBatteryListener(mBluetoothBatteryListener);
                 }
             } else if (mBluetoothBatteryListener != null) {
                 // No Bluetooth input devices are monitored, so remove the registered listener.
                 if (DEBUG) Slog.d(TAG, "Unregistering bluetooth battery listener");
-                mBluetoothBatteryManager.removeListener(mBluetoothBatteryListener);
+                mBluetoothBatteryManager.removeBatteryListener(mBluetoothBatteryListener);
                 mBluetoothBatteryListener = null;
             }
         }
@@ -550,16 +539,16 @@ final class BatteryController {
         // Represents whether the input device has a sysfs battery node.
         protected boolean mHasBattery = false;
 
-        protected final State mBluetoothState;
         @Nullable
         private BluetoothDevice mBluetoothDevice;
+        int mBluetoothBatteryLevel = BluetoothDevice.BATTERY_LEVEL_UNKNOWN;
+        long mBluetoothEventTime = 0;
 
         @Nullable
         private UEventBatteryListener mUEventBatteryListener;
 
         DeviceMonitor(int deviceId) {
             mState = new State(deviceId);
-            mBluetoothState = new State(deviceId);
 
             // Load the initial battery state and start monitoring.
             final long eventTime = SystemClock.uptimeMillis();
@@ -570,7 +559,7 @@ final class BatteryController {
             final State oldState = getBatteryStateForReporting();
             changes.accept(eventTime);
             final State newState = getBatteryStateForReporting();
-            if (!oldState.equals(newState)) {
+            if (!oldState.equalsIgnoringUpdateTime(newState)) {
                 notifyAllListenersForDevice(newState);
             }
         }
@@ -600,7 +589,14 @@ final class BatteryController {
                 }
                 mBluetoothDevice = bluetoothDevice;
                 updateBluetoothMonitoring();
-                updateBatteryStateFromBluetooth(eventTime);
+                mBluetoothEventTime = eventTime;
+
+                if (mBluetoothDevice != null) {
+                    mBluetoothBatteryLevel = mBluetoothBatteryManager.getBatteryLevel(
+                            mBluetoothDevice.getAddress());
+                } else {
+                    mBluetoothBatteryLevel = BluetoothDevice.BATTERY_LEVEL_UNKNOWN;
+                }
             }
         }
 
@@ -644,13 +640,6 @@ final class BatteryController {
                     queryBatteryStateFromNative(mState.deviceId, eventTime, mHasBattery));
         }
 
-        protected void updateBatteryStateFromBluetooth(long eventTime) {
-            final State bluetoothState = mBluetoothDevice == null ? new State(mState.deviceId)
-                    : queryBatteryStateFromBluetooth(mState.deviceId, eventTime,
-                            mBluetoothDevice);
-            mBluetoothState.updateIfChanged(bluetoothState);
-        }
-
         public void onPoll(long eventTime) {
             processChangesAndNotify(eventTime, this::updateBatteryStateFromNative);
         }
@@ -659,8 +648,11 @@ final class BatteryController {
             processChangesAndNotify(eventTime, this::updateBatteryStateFromNative);
         }
 
-        public void onBluetoothBatteryChanged(long eventTime) {
-            processChangesAndNotify(eventTime, this::updateBatteryStateFromBluetooth);
+        public void onBluetoothBatteryChanged(long eventTime, int bluetoothBatteryLevel) {
+            processChangesAndNotify(eventTime, (time) -> {
+                mBluetoothBatteryLevel = bluetoothBatteryLevel;
+                mBluetoothEventTime = time;
+            });
         }
 
         public boolean requiresPolling() {
@@ -677,11 +669,18 @@ final class BatteryController {
 
         // Returns the current battery state that can be used to notify listeners BatteryController.
         public State getBatteryStateForReporting() {
-            // Give precedence to the Bluetooth battery state if it's present.
-            if (mBluetoothState.isPresent) {
-                return new State(mBluetoothState);
+            // Give precedence to the Bluetooth battery state, and fall back to the native state.
+            return Objects.requireNonNullElseGet(resolveBluetoothBatteryState(),
+                    () -> new State(mState));
+        }
+
+        @Nullable
+        protected State resolveBluetoothBatteryState() {
+            if (mBluetoothBatteryLevel < 0 || mBluetoothBatteryLevel > 100) {
+                return null;
             }
-            return new State(mState);
+            return new State(mState.deviceId, mBluetoothEventTime, true,
+                    BatteryState.STATUS_UNKNOWN, mBluetoothBatteryLevel / 100.f);
         }
 
         @Override
@@ -690,7 +689,7 @@ final class BatteryController {
                     + ", Name='" + getInputDeviceName(mState.deviceId) + "'"
                     + ", NativeBattery=" + mState
                     + ", UEventListener=" + (mUEventBatteryListener != null ? "added" : "none")
-                    + ", BluetoothBattery=" + mBluetoothState;
+                    + ", BluetoothState=" + resolveBluetoothBatteryState();
         }
     }
 
@@ -775,12 +774,10 @@ final class BatteryController {
 
         @Override
         public State getBatteryStateForReporting() {
-            // Give precedence to the Bluetooth battery state if it's present.
-            if (mBluetoothState.isPresent) {
-                return new State(mBluetoothState);
-            }
-            return mValidityTimeoutCallback != null
-                    ? new State(mState) : new State(mState.deviceId);
+            // Give precedence to the Bluetooth battery state, and fall back to the native state.
+            return Objects.requireNonNullElseGet(resolveBluetoothBatteryState(),
+                    () -> mValidityTimeoutCallback != null
+                            ? new State(mState) : new State(mState.deviceId));
         }
 
         @Override
@@ -844,10 +841,10 @@ final class BatteryController {
     interface BluetoothBatteryManager {
         @VisibleForTesting
         interface BluetoothBatteryListener {
-            void onBluetoothBatteryChanged(long eventTime, String address);
+            void onBluetoothBatteryChanged(long eventTime, String address, int batteryLevel);
         }
-        void addListener(BluetoothBatteryListener listener);
-        void removeListener(BluetoothBatteryListener listener);
+        void addBatteryListener(BluetoothBatteryListener listener);
+        void removeBatteryListener(BluetoothBatteryListener listener);
         int getBatteryLevel(String address);
     }
 
@@ -868,13 +865,13 @@ final class BatteryController {
                 if (bluetoothDevice == null) {
                     return;
                 }
-                // We do not use the EXTRA_LEVEL value. Instead, the battery level will be queried
-                // from BluetoothDevice later so that we use a single source for the battery level.
+                final int batteryLevel = intent.getIntExtra(BluetoothDevice.EXTRA_BATTERY_LEVEL,
+                        BluetoothDevice.BATTERY_LEVEL_UNKNOWN);
                 synchronized (mBroadcastReceiver) {
                     if (mRegisteredListener != null) {
                         final long eventTime = SystemClock.uptimeMillis();
                         mRegisteredListener.onBluetoothBatteryChanged(
-                                eventTime, bluetoothDevice.getAddress());
+                                eventTime, bluetoothDevice.getAddress(), batteryLevel);
                     }
                 }
             }
@@ -885,7 +882,7 @@ final class BatteryController {
         }
 
         @Override
-        public void addListener(BluetoothBatteryListener listener) {
+        public void addBatteryListener(BluetoothBatteryListener listener) {
             synchronized (mBroadcastReceiver) {
                 if (mRegisteredListener != null) {
                     throw new IllegalStateException(
@@ -898,7 +895,7 @@ final class BatteryController {
         }
 
         @Override
-        public void removeListener(BluetoothBatteryListener listener) {
+        public void removeBatteryListener(BluetoothBatteryListener listener) {
             synchronized (mBroadcastReceiver) {
                 if (!listener.equals(mRegisteredListener)) {
                     throw new IllegalStateException("Listener is not registered.");
@@ -954,7 +951,7 @@ final class BatteryController {
             this.capacity = capacity;
         }
 
-        private boolean equalsIgnoringUpdateTime(IInputDeviceBatteryState other) {
+        public boolean equalsIgnoringUpdateTime(IInputDeviceBatteryState other) {
             long updateTime = this.updateTime;
             this.updateTime = other.updateTime;
             boolean eq = this.equals(other);

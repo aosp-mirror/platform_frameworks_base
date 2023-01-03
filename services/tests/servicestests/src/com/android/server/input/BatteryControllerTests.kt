@@ -657,28 +657,28 @@ class BatteryControllerTests {
         testLooper.dispatchNext()
 
         // Ensure that a BT battery listener is not added when there are no monitored BT devices.
-        verify(bluetoothBatteryManager, never()).addListener(any())
+        verify(bluetoothBatteryManager, never()).addBatteryListener(any())
 
         val bluetoothListener = ArgumentCaptor.forClass(BluetoothBatteryListener::class.java)
         val listener = createMockListener()
 
         // The BT battery listener is added when the first BT input device is monitored.
         batteryController.registerBatteryListener(BT_DEVICE_ID, listener, PID)
-        verify(bluetoothBatteryManager).addListener(bluetoothListener.capture())
+        verify(bluetoothBatteryManager).addBatteryListener(bluetoothListener.capture())
 
         // The BT listener is only added once for all BT devices.
         batteryController.registerBatteryListener(SECOND_BT_DEVICE_ID, listener, PID)
-        verify(bluetoothBatteryManager, times(1)).addListener(any())
+        verify(bluetoothBatteryManager, times(1)).addBatteryListener(any())
 
         // The BT listener is only removed when there are no monitored BT devices.
         batteryController.unregisterBatteryListener(BT_DEVICE_ID, listener, PID)
-        verify(bluetoothBatteryManager, never()).removeListener(any())
+        verify(bluetoothBatteryManager, never()).removeBatteryListener(any())
 
         `when`(iInputManager.getInputDeviceBluetoothAddress(SECOND_BT_DEVICE_ID))
             .thenReturn(null)
         notifyDeviceChanged(SECOND_BT_DEVICE_ID)
         testLooper.dispatchNext()
-        verify(bluetoothBatteryManager).removeListener(bluetoothListener.value)
+        verify(bluetoothBatteryManager).removeBatteryListener(bluetoothListener.value)
     }
 
     @Test
@@ -690,15 +690,14 @@ class BatteryControllerTests {
         val bluetoothListener = ArgumentCaptor.forClass(BluetoothBatteryListener::class.java)
         val listener = createMockListener()
         batteryController.registerBatteryListener(BT_DEVICE_ID, listener, PID)
-        verify(bluetoothBatteryManager).addListener(bluetoothListener.capture())
+        verify(bluetoothBatteryManager).addBatteryListener(bluetoothListener.capture())
         listener.verifyNotified(BT_DEVICE_ID, capacity = 0.21f)
 
         // When the state has not changed, the listener is not notified again.
-        bluetoothListener.value!!.onBluetoothBatteryChanged(TIMESTAMP, "AA:BB:CC:DD:EE:FF")
+        bluetoothListener.value!!.onBluetoothBatteryChanged(TIMESTAMP, "AA:BB:CC:DD:EE:FF", 21)
         listener.verifyNotified(BT_DEVICE_ID, mode = times(1), capacity = 0.21f)
 
-        `when`(bluetoothBatteryManager.getBatteryLevel(eq("AA:BB:CC:DD:EE:FF"))).thenReturn(25)
-        bluetoothListener.value!!.onBluetoothBatteryChanged(TIMESTAMP, "AA:BB:CC:DD:EE:FF")
+        bluetoothListener.value!!.onBluetoothBatteryChanged(TIMESTAMP, "AA:BB:CC:DD:EE:FF", 25)
         listener.verifyNotified(BT_DEVICE_ID, capacity = 0.25f)
     }
 
@@ -717,7 +716,7 @@ class BatteryControllerTests {
         // When the device is first monitored and both native and BT battery is available,
         // the latter is used.
         batteryController.registerBatteryListener(BT_DEVICE_ID, listener, PID)
-        verify(bluetoothBatteryManager).addListener(bluetoothListener.capture())
+        verify(bluetoothBatteryManager).addBatteryListener(bluetoothListener.capture())
         verify(uEventManager).addListener(uEventListener.capture(), any())
         listener.verifyNotified(BT_DEVICE_ID, capacity = 0.21f)
         assertThat("battery state matches", batteryController.getBatteryState(BT_DEVICE_ID),
@@ -744,25 +743,22 @@ class BatteryControllerTests {
         val uEventListener = ArgumentCaptor.forClass(UEventBatteryListener::class.java)
 
         batteryController.registerBatteryListener(BT_DEVICE_ID, listener, PID)
-        verify(bluetoothBatteryManager).addListener(bluetoothListener.capture())
+        verify(bluetoothBatteryManager).addBatteryListener(bluetoothListener.capture())
         verify(uEventManager).addListener(uEventListener.capture(), any())
         listener.verifyNotified(BT_DEVICE_ID, capacity = 0.21f)
 
         // Fall back to the native state when BT is off.
-        `when`(bluetoothBatteryManager.getBatteryLevel(eq("AA:BB:CC:DD:EE:FF")))
-            .thenReturn(BluetoothDevice.BATTERY_LEVEL_BLUETOOTH_OFF)
-        bluetoothListener.value!!.onBluetoothBatteryChanged(TIMESTAMP, "AA:BB:CC:DD:EE:FF")
+        bluetoothListener.value!!.onBluetoothBatteryChanged(TIMESTAMP, "AA:BB:CC:DD:EE:FF",
+            BluetoothDevice.BATTERY_LEVEL_BLUETOOTH_OFF)
         listener.verifyNotified(BT_DEVICE_ID, capacity = 0.98f)
 
-        `when`(bluetoothBatteryManager.getBatteryLevel(eq("AA:BB:CC:DD:EE:FF"))).thenReturn(22)
-        bluetoothListener.value!!.onBluetoothBatteryChanged(TIMESTAMP, "AA:BB:CC:DD:EE:FF")
-        verify(bluetoothBatteryManager).addListener(bluetoothListener.capture())
+        bluetoothListener.value!!.onBluetoothBatteryChanged(TIMESTAMP, "AA:BB:CC:DD:EE:FF", 22)
+        verify(bluetoothBatteryManager).addBatteryListener(bluetoothListener.capture())
         listener.verifyNotified(BT_DEVICE_ID, capacity = 0.22f)
 
         // Fall back to the native state when BT battery is unknown.
-        `when`(bluetoothBatteryManager.getBatteryLevel(eq("AA:BB:CC:DD:EE:FF")))
-            .thenReturn(BluetoothDevice.BATTERY_LEVEL_UNKNOWN)
-        bluetoothListener.value!!.onBluetoothBatteryChanged(TIMESTAMP, "AA:BB:CC:DD:EE:FF")
+        bluetoothListener.value!!.onBluetoothBatteryChanged(TIMESTAMP, "AA:BB:CC:DD:EE:FF",
+            BluetoothDevice.BATTERY_LEVEL_UNKNOWN)
         listener.verifyNotified(BT_DEVICE_ID, mode = times(2), capacity = 0.98f)
     }
 }
