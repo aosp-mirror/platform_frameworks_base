@@ -609,6 +609,7 @@ void FilterClientCallbackImpl::getSectionEvent(jobjectArray &arr, const int size
     jobject obj = env->NewObject(eventClazz, eventInit, tableId, version, sectionNum, dataLength);
     env->SetObjectArrayElement(arr, size, obj);
     env->DeleteLocalRef(obj);
+    env->DeleteLocalRef(eventClazz);
 }
 
 void FilterClientCallbackImpl::getMediaEvent(jobjectArray &arr, const int size,
@@ -639,6 +640,7 @@ void FilterClientCallbackImpl::getMediaEvent(jobjectArray &arr, const int size,
 
         audioDescriptor = env->NewObject(adClazz, adInit, adFade, adPan, versionTextTag,
                                          adGainCenter, adGainFront, adGainSurround);
+        env->DeleteLocalRef(adClazz);
     }
 
     jlong dataLength = mediaEvent.dataLength;
@@ -685,6 +687,7 @@ void FilterClientCallbackImpl::getMediaEvent(jobjectArray &arr, const int size,
         env->DeleteLocalRef(audioDescriptor);
     }
     env->DeleteLocalRef(obj);
+    env->DeleteLocalRef(eventClazz);
 }
 
 void FilterClientCallbackImpl::getPesEvent(jobjectArray &arr, const int size,
@@ -701,6 +704,7 @@ void FilterClientCallbackImpl::getPesEvent(jobjectArray &arr, const int size,
     jobject obj = env->NewObject(eventClazz, eventInit, streamId, dataLength, mpuSequenceNumber);
     env->SetObjectArrayElement(arr, size, obj);
     env->DeleteLocalRef(obj);
+    env->DeleteLocalRef(eventClazz);
 }
 
 void FilterClientCallbackImpl::getTsRecordEvent(jobjectArray &arr, const int size,
@@ -741,6 +745,7 @@ void FilterClientCallbackImpl::getTsRecordEvent(jobjectArray &arr, const int siz
             env->NewObject(eventClazz, eventInit, jpid, ts, sc, byteNumber, pts, firstMbInSlice);
     env->SetObjectArrayElement(arr, size, obj);
     env->DeleteLocalRef(obj);
+    env->DeleteLocalRef(eventClazz);
 }
 
 void FilterClientCallbackImpl::getMmtpRecordEvent(jobjectArray &arr, const int size,
@@ -762,6 +767,7 @@ void FilterClientCallbackImpl::getMmtpRecordEvent(jobjectArray &arr, const int s
                                  mpuSequenceNumber, pts, firstMbInSlice, tsIndexMask);
     env->SetObjectArrayElement(arr, size, obj);
     env->DeleteLocalRef(obj);
+    env->DeleteLocalRef(eventClazz);
 }
 
 void FilterClientCallbackImpl::getDownloadEvent(jobjectArray &arr, const int size,
@@ -782,6 +788,7 @@ void FilterClientCallbackImpl::getDownloadEvent(jobjectArray &arr, const int siz
                                  itemFragmentIndex, lastItemFragmentIndex, dataLength);
     env->SetObjectArrayElement(arr, size, obj);
     env->DeleteLocalRef(obj);
+    env->DeleteLocalRef(eventClazz);
 }
 
 void FilterClientCallbackImpl::getIpPayloadEvent(jobjectArray &arr, const int size,
@@ -795,6 +802,7 @@ void FilterClientCallbackImpl::getIpPayloadEvent(jobjectArray &arr, const int si
     jobject obj = env->NewObject(eventClazz, eventInit, dataLength);
     env->SetObjectArrayElement(arr, size, obj);
     env->DeleteLocalRef(obj);
+    env->DeleteLocalRef(eventClazz);
 }
 
 void FilterClientCallbackImpl::getTemiEvent(jobjectArray &arr, const int size,
@@ -815,6 +823,7 @@ void FilterClientCallbackImpl::getTemiEvent(jobjectArray &arr, const int size,
     env->SetObjectArrayElement(arr, size, obj);
     env->DeleteLocalRef(array);
     env->DeleteLocalRef(obj);
+    env->DeleteLocalRef(eventClazz);
 }
 
 void FilterClientCallbackImpl::getScramblingStatusEvent(jobjectArray &arr, const int size,
@@ -829,6 +838,7 @@ void FilterClientCallbackImpl::getScramblingStatusEvent(jobjectArray &arr, const
     jobject obj = env->NewObject(eventClazz, eventInit, scramblingStatus);
     env->SetObjectArrayElement(arr, size, obj);
     env->DeleteLocalRef(obj);
+    env->DeleteLocalRef(eventClazz);
 }
 
 void FilterClientCallbackImpl::getIpCidChangeEvent(jobjectArray &arr, const int size,
@@ -842,6 +852,7 @@ void FilterClientCallbackImpl::getIpCidChangeEvent(jobjectArray &arr, const int 
     jobject obj = env->NewObject(eventClazz, eventInit, cid);
     env->SetObjectArrayElement(arr, size, obj);
     env->DeleteLocalRef(obj);
+    env->DeleteLocalRef(eventClazz);
 }
 
 void FilterClientCallbackImpl::getRestartEvent(jobjectArray &arr, const int size,
@@ -854,6 +865,7 @@ void FilterClientCallbackImpl::getRestartEvent(jobjectArray &arr, const int size
     jobject obj = env->NewObject(eventClazz, eventInit, startId);
     env->SetObjectArrayElement(arr, size, obj);
     env->DeleteLocalRef(obj);
+    env->DeleteLocalRef(eventClazz);
 }
 
 void FilterClientCallbackImpl::onFilterEvent(const vector<DemuxFilterEvent> &events) {
@@ -952,6 +964,7 @@ void FilterClientCallbackImpl::onFilterEvent(const vector<DemuxFilterEvent> &eve
               "Filter object has been freed. Ignoring callback.");
     }
     env->DeleteLocalRef(array);
+    env->DeleteLocalRef(eventClazz);
 }
 
 void FilterClientCallbackImpl::onFilterStatus(const DemuxFilterStatus status) {
@@ -1058,6 +1071,7 @@ void FrontendClientCallbackImpl::onScanMessage(
         executeOnScanMessage(env, clazz, frontend, type, message);
         env->DeleteLocalRef(frontend);
     }
+    env->DeleteLocalRef(clazz);
 }
 
 void FrontendClientCallbackImpl::executeOnScanMessage(
@@ -1184,6 +1198,7 @@ void FrontendClientCallbackImpl::executeOnScanMessage(
                                                  "Atsc3PlpInfo;)V"),
                                 array);
             env->DeleteLocalRef(array);
+            env->DeleteLocalRef(plpClazz);
             break;
         }
         case FrontendScanMessageType::MODULATION: {
@@ -2195,6 +2210,7 @@ jobject JTuner::getFrontendStatus(jintArray types) {
                                        static_cast<long>(s.get<FrontendStatus::Tag::innerFec>()));
                 env->SetObjectField(statusObj, field, newLongObj);
                 env->DeleteLocalRef(newLongObj);
+                env->DeleteLocalRef(longClazz);
                 break;
             }
             case FrontendStatus::Tag::modulationStatus: {
@@ -2360,6 +2376,7 @@ jobject JTuner::getFrontendStatus(jintArray types) {
 
                 env->SetObjectField(statusObj, field, valObj);
                 env->DeleteLocalRef(valObj);
+                env->DeleteLocalRef(plpClazz);
                 break;
             }
             case FrontendStatus::Tag::modulations: {
@@ -2770,6 +2787,7 @@ jobject JTuner::getFrontendStatus(jintArray types) {
 
                 env->SetObjectField(statusObj, field, valObj);
                 env->DeleteLocalRef(valObj);
+                env->DeleteLocalRef(plpClazz);
                 break;
             }
         }
