@@ -4558,7 +4558,11 @@ public final class ActivityThread extends ClientTransactionHandler
             service.attach(context, this, data.info.name, data.token, app,
                     ActivityManager.getService());
             if (!service.isUiContext()) { // WindowProviderService is a UI Context.
-                service.updateDeviceId(mLastReportedDeviceId);
+                VirtualDeviceManager vdm = context.getSystemService(VirtualDeviceManager.class);
+                if (mLastReportedDeviceId == VirtualDeviceManager.DEVICE_ID_DEFAULT
+                        || vdm.isValidVirtualDeviceId(mLastReportedDeviceId)) {
+                    service.updateDeviceId(mLastReportedDeviceId);
+                }
             }
             service.onCreate();
             mServicesData.put(data.token, data);
