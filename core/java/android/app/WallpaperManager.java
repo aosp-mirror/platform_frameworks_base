@@ -753,6 +753,19 @@ public class WallpaperManager {
     }
 
     /**
+     * Temporary method for project b/197814683
+     * Starting from U, this will return true if the new wallpaper logic is enabled,
+     * i.e. if the lockscreen wallpaper always uses a wallpaperService and not a static image.
+     * In T, this is just a stub method that always return false.
+     *
+     * @return false
+     * @hide
+     */
+    public boolean isLockscreenLiveWallpaperEnabled() {
+        return false;
+    }
+
+    /**
      * Indicate whether wcg (Wide Color Gamut) should be enabled.
      * <p>
      * Some devices lack of capability of mixed color spaces composition,
