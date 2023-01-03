@@ -173,9 +173,16 @@ open class ChipbarCoordinator @Inject constructor(
         } else {
             ""
         }
+        val endItemDesc =
+            if (newInfo.endItem is ChipbarEndItem.Loading) {
+                ". ${context.resources.getString(R.string.media_transfer_loading)}."
+            } else {
+                ""
+            }
 
         val chipInnerView = currentView.getInnerView()
-        chipInnerView.contentDescription = "$loadedIconDesc${newInfo.text.loadText(context)}"
+        chipInnerView.contentDescription =
+            "$loadedIconDesc${newInfo.text.loadText(context)}$endItemDesc"
         chipInnerView.accessibilityLiveRegion = ACCESSIBILITY_LIVE_REGION_ASSERTIVE
         maybeGetAccessibilityFocus(newInfo, currentView)
 
