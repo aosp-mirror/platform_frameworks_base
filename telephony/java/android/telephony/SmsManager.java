@@ -2014,7 +2014,7 @@ public final class SmsManager {
      * @see #disableCellBroadcastRange(int, int, int)
      *
      * @throws IllegalArgumentException if endMessageId < startMessageId
-     * @deprecated Use {@link TelephonyManager#setCellBroadcastRanges} instead.
+     * @deprecated Use {@link TelephonyManager#setCellBroadcastIdRanges} instead.
      * {@hide}
      */
     @Deprecated
@@ -2076,7 +2076,7 @@ public final class SmsManager {
      * @see #enableCellBroadcastRange(int, int, int)
      *
      * @throws IllegalArgumentException if endMessageId < startMessageId
-     * @deprecated Use {@link TelephonyManager#setCellBroadcastRanges} instead.
+     * @deprecated Use {@link TelephonyManager#setCellBroadcastIdRanges} instead.
      * {@hide}
      */
     @Deprecated
@@ -3486,7 +3486,7 @@ public final class SmsManager {
 
     /**
      * Reset all cell broadcast ranges. Previously enabled ranges will become invalid after this.
-     * @deprecated Use {@link TelephonyManager#resetAllCellBroadcastRanges} instead
+     * @deprecated Use {@link TelephonyManager#setCellBroadcastIdRanges} with empty list instead
      * @hide
      */
     @Deprecated
