@@ -273,6 +273,13 @@ class PendingJobQueue {
                 return Integer.compare(job2.overrideState, job1.overrideState);
             }
 
+            final boolean job1UI = job1.getJob().isUserInitiated();
+            final boolean job2UI = job2.getJob().isUserInitiated();
+            if (job1UI != job2UI) {
+                // Attempt to run user-initiated jobs ahead of all other jobs.
+                return job1UI ? -1 : 1;
+            }
+
             final boolean job1EJ = job1.isRequestedExpeditedJob();
             final boolean job2EJ = job2.isRequestedExpeditedJob();
             if (job1EJ != job2EJ) {
