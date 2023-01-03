@@ -38,7 +38,7 @@ class StylusManager
 @Inject
 constructor(
     private val inputManager: InputManager,
-    private val bluetoothAdapter: BluetoothAdapter,
+    private val bluetoothAdapter: BluetoothAdapter?,
     @Background private val handler: Handler,
     @Background private val executor: Executor,
 ) : InputManager.InputDeviceListener, BluetoothAdapter.OnMetadataChangedListener {
@@ -141,7 +141,7 @@ constructor(
     }
 
     private fun onStylusBluetoothConnected(btAddress: String) {
-        val device: BluetoothDevice = bluetoothAdapter.getRemoteDevice(btAddress) ?: return
+        val device: BluetoothDevice = bluetoothAdapter?.getRemoteDevice(btAddress) ?: return
         try {
             bluetoothAdapter.addOnMetadataChangedListener(device, executor, this)
         } catch (e: IllegalArgumentException) {
@@ -150,7 +150,7 @@ constructor(
     }
 
     private fun onStylusBluetoothDisconnected(btAddress: String) {
-        val device: BluetoothDevice = bluetoothAdapter.getRemoteDevice(btAddress) ?: return
+        val device: BluetoothDevice = bluetoothAdapter?.getRemoteDevice(btAddress) ?: return
         try {
             bluetoothAdapter.removeOnMetadataChangedListener(device, this)
         } catch (e: IllegalArgumentException) {
