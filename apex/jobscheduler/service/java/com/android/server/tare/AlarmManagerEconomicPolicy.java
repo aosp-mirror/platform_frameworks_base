@@ -262,12 +262,17 @@ public class AlarmManagerEconomicPolicy extends EconomicPolicy {
                 KEY_AM_ACTION_ALARM_ALLOW_WHILE_IDLE_EXACT_WAKEUP_BASE_PRICE,
                 DEFAULT_AM_ACTION_ALARM_ALLOW_WHILE_IDLE_EXACT_WAKEUP_BASE_PRICE_CAKES);
 
+        // Apps must hold the SCHEDULE_EXACT_ALARM or USE_EXACT_ALARMS permission in order to use
+        // exact alarms. Since the user has the option of granting/revoking the permission, we can
+        // be a little lenient on the action cost checks and only stop the action if the app has
+        // run out of credits, and not when the system has run out of stock.
         mActions.put(ACTION_ALARM_WAKEUP_EXACT_ALLOW_WHILE_IDLE,
                 new Action(ACTION_ALARM_WAKEUP_EXACT_ALLOW_WHILE_IDLE,
                         getConstantAsCake(mParser, properties,
                                 KEY_AM_ACTION_ALARM_ALLOW_WHILE_IDLE_EXACT_WAKEUP_CTP,
                                 DEFAULT_AM_ACTION_ALARM_ALLOW_WHILE_IDLE_EXACT_WAKEUP_CTP_CAKES),
-                        exactAllowWhileIdleWakeupBasePrice));
+                        exactAllowWhileIdleWakeupBasePrice,
+                        /* respectsStockLimit */ false));
         mActions.put(ACTION_ALARM_WAKEUP_EXACT,
                 new Action(ACTION_ALARM_WAKEUP_EXACT,
                         getConstantAsCake(mParser, properties,
@@ -275,7 +280,8 @@ public class AlarmManagerEconomicPolicy extends EconomicPolicy {
                                 DEFAULT_AM_ACTION_ALARM_EXACT_WAKEUP_CTP_CAKES),
                         getConstantAsCake(mParser, properties,
                                 KEY_AM_ACTION_ALARM_EXACT_WAKEUP_BASE_PRICE,
-                                DEFAULT_AM_ACTION_ALARM_EXACT_WAKEUP_BASE_PRICE_CAKES)));
+                                DEFAULT_AM_ACTION_ALARM_EXACT_WAKEUP_BASE_PRICE_CAKES),
+                        /* respectsStockLimit */ false));
 
         final long inexactAllowWhileIdleWakeupBasePrice =
                 getConstantAsCake(mParser, properties,
@@ -287,7 +293,8 @@ public class AlarmManagerEconomicPolicy extends EconomicPolicy {
                         getConstantAsCake(mParser, properties,
                                 KEY_AM_ACTION_ALARM_ALLOW_WHILE_IDLE_INEXACT_WAKEUP_CTP,
                                 DEFAULT_AM_ACTION_ALARM_ALLOW_WHILE_IDLE_INEXACT_WAKEUP_CTP_CAKES),
-                        inexactAllowWhileIdleWakeupBasePrice));
+                        inexactAllowWhileIdleWakeupBasePrice,
+                        /* respectsStockLimit */ false));
         mActions.put(ACTION_ALARM_WAKEUP_INEXACT,
                 new Action(ACTION_ALARM_WAKEUP_INEXACT,
                         getConstantAsCake(mParser, properties,
@@ -295,7 +302,8 @@ public class AlarmManagerEconomicPolicy extends EconomicPolicy {
                                 DEFAULT_AM_ACTION_ALARM_INEXACT_WAKEUP_CTP_CAKES),
                         getConstantAsCake(mParser, properties,
                                 KEY_AM_ACTION_ALARM_INEXACT_WAKEUP_BASE_PRICE,
-                                DEFAULT_AM_ACTION_ALARM_INEXACT_WAKEUP_BASE_PRICE_CAKES)));
+                                DEFAULT_AM_ACTION_ALARM_INEXACT_WAKEUP_BASE_PRICE_CAKES),
+                        /* respectsStockLimit */ false));
 
         final long exactAllowWhileIdleNonWakeupBasePrice = getConstantAsCake(mParser, properties,
                 KEY_AM_ACTION_ALARM_ALLOW_WHILE_IDLE_EXACT_NONWAKEUP_BASE_PRICE,
@@ -305,7 +313,8 @@ public class AlarmManagerEconomicPolicy extends EconomicPolicy {
                         getConstantAsCake(mParser, properties,
                                 KEY_AM_ACTION_ALARM_ALLOW_WHILE_IDLE_EXACT_NONWAKEUP_CTP,
                                 DEFAULT_AM_ACTION_ALARM_ALLOW_WHILE_IDLE_EXACT_NONWAKEUP_CTP_CAKES),
-                        exactAllowWhileIdleNonWakeupBasePrice));
+                        exactAllowWhileIdleNonWakeupBasePrice,
+                        /* respectsStockLimit */ false));
 
         mActions.put(ACTION_ALARM_NONWAKEUP_EXACT,
                 new Action(ACTION_ALARM_NONWAKEUP_EXACT,
@@ -314,7 +323,8 @@ public class AlarmManagerEconomicPolicy extends EconomicPolicy {
                                 DEFAULT_AM_ACTION_ALARM_EXACT_NONWAKEUP_CTP_CAKES),
                         getConstantAsCake(mParser, properties,
                                 KEY_AM_ACTION_ALARM_EXACT_NONWAKEUP_BASE_PRICE,
-                                DEFAULT_AM_ACTION_ALARM_EXACT_NONWAKEUP_BASE_PRICE_CAKES)));
+                                DEFAULT_AM_ACTION_ALARM_EXACT_NONWAKEUP_BASE_PRICE_CAKES),
+                        /* respectsStockLimit */ false));
 
         final long inexactAllowWhileIdleNonWakeupBasePrice = getConstantAsCake(mParser, properties,
                 KEY_AM_ACTION_ALARM_ALLOW_WHILE_IDLE_INEXACT_NONWAKEUP_BASE_PRICE,
@@ -342,7 +352,8 @@ public class AlarmManagerEconomicPolicy extends EconomicPolicy {
                                 DEFAULT_AM_ACTION_ALARM_ALARMCLOCK_CTP_CAKES),
                         getConstantAsCake(mParser, properties,
                                 KEY_AM_ACTION_ALARM_ALARMCLOCK_BASE_PRICE,
-                                DEFAULT_AM_ACTION_ALARM_ALARMCLOCK_BASE_PRICE_CAKES)));
+                                DEFAULT_AM_ACTION_ALARM_ALARMCLOCK_BASE_PRICE_CAKES),
+                        /* respectsStockLimit */ false));
 
         mRewards.put(REWARD_TOP_ACTIVITY, new Reward(REWARD_TOP_ACTIVITY,
                 getConstantAsCake(mParser, properties,
