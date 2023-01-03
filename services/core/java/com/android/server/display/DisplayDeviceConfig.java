@@ -2643,6 +2643,9 @@ public class DisplayDeviceConfig {
         }
     }
 
+    /**
+     * Uniquely identifies a Sensor, with the combination of Type and Name.
+     */
     static class SensorData {
         public String type;
         public String name;
