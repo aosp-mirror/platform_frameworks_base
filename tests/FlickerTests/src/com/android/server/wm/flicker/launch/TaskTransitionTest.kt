@@ -18,6 +18,7 @@ package com.android.server.wm.flicker.launch
 
 import android.app.Instrumentation
 import android.app.WallpaperManager
+import android.content.res.Resources
 import android.platform.test.annotations.FlakyTest
 import android.platform.test.annotations.Postsubmit
 import android.platform.test.annotations.Presubmit
@@ -29,8 +30,8 @@ import com.android.server.wm.flicker.FlickerTestFactory
 import com.android.server.wm.flicker.helpers.NewTasksAppHelper
 import com.android.server.wm.flicker.helpers.SimpleAppHelper
 import com.android.server.wm.flicker.helpers.WindowUtils
-import com.android.server.wm.flicker.junit.FlickerParametersRunnerFactory
 import com.android.server.wm.flicker.helpers.isShellTransitionsEnabled
+import com.android.server.wm.flicker.junit.FlickerParametersRunnerFactory
 import com.android.server.wm.traces.common.ComponentNameMatcher
 import com.android.server.wm.traces.common.ComponentNameMatcher.Companion.DEFAULT_TASK_DISPLAY_AREA
 import com.android.server.wm.traces.common.ComponentNameMatcher.Companion.SPLASH_SCREEN
@@ -64,9 +65,7 @@ import org.junit.runners.Parameterized
 class TaskTransitionTest(flicker: FlickerTest) : BaseTest(flicker) {
     private val launchNewTaskApp = NewTasksAppHelper(instrumentation)
     private val simpleApp = SimpleAppHelper(instrumentation)
-    private val wallpaper by lazy {
-        getWallpaperPackage(instrumentation) ?: error("Unable to obtain wallpaper")
-    }
+    private val wallpaper by lazy { getWallpaperPackage(instrumentation) }
 
     /** {@inheritDoc} */
     override val transition: FlickerBuilder.() -> Unit = {
@@ -143,8 +142,7 @@ class TaskTransitionTest(flicker: FlickerTest) : BaseTest(flicker) {
 
         val displayBounds = WindowUtils.getDisplayBounds(flicker.scenario.startRotation)
         flicker.assertLayers {
-            this
-                .invoke("LAUNCH_NEW_TASK_ACTIVITY coversExactly displayBounds") {
+            this.invoke("LAUNCH_NEW_TASK_ACTIVITY coversExactly displayBounds") {
                     it.visibleRegion(launchNewTaskApp.componentMatcher).coversExactly(displayBounds)
                 }
                 .isInvisible(backgroundColorLayer)
@@ -159,7 +157,7 @@ class TaskTransitionTest(flicker: FlickerTest) : BaseTest(flicker) {
                     "SIMPLE_ACTIVITY's splashscreen coversExactly displayBounds",
                     isOptional = true
                 ) {
-                    it.visibleRegion(ComponentSplashScreenMatcher( simpleApp.componentMatcher))
+                    it.visibleRegion(ComponentSplashScreenMatcher(simpleApp.componentMatcher))
                         .coversExactly(displayBounds)
                 }
                 .invoke("SIMPLE_ACTIVITY coversExactly displayBounds") {
@@ -178,7 +176,8 @@ class TaskTransitionTest(flicker: FlickerTest) : BaseTest(flicker) {
                     isOptional = true
                 ) {
                     it.visibleRegion(
-                            ComponentSplashScreenMatcher(launchNewTaskApp.componentMatcher))
+                            ComponentSplashScreenMatcher(launchNewTaskApp.componentMatcher)
+                        )
                         .coversExactly(displayBounds)
                 }
                 .invoke("LAUNCH_NEW_TASK_ACTIVITY coversExactly displayBounds") {
@@ -215,10 +214,20 @@ class TaskTransitionTest(flicker: FlickerTest) : BaseTest(flicker) {
     override fun navBarLayerPositionAtStartAndEnd() = super.navBarLayerPositionAtStartAndEnd()
 
     companion object {
-        private fun getWallpaperPackage(instrumentation: Instrumentation): IComponentMatcher? {
+        private fun getWallpaperPackage(instrumentation: Instrumentation): IComponentMatcher {
             val wallpaperManager = WallpaperManager.getInstance(instrumentation.targetContext)
 
             return wallpaperManager.wallpaperInfo?.component?.toFlickerComponent()
+                ?: getStaticWallpaperPackage(instrumentation)
+        }
+
+        private fun getStaticWallpaperPackage(instrumentation: Instrumentation): IComponentMatcher {
+            val resourceId =
+                Resources.getSystem()
+                    .getIdentifier("image_wallpaper_component", "string", "android")
+            return ComponentNameMatcher.unflattenFromString(
+                instrumentation.targetContext.resources.getString(resourceId)
+            )
         }
 
         @Parameterized.Parameters(name = "{0}")
