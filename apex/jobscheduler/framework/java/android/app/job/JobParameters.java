@@ -330,7 +330,6 @@ public class JobParameters implements Parcelable {
      * @see JobScheduler#forNamespace(String)
      * @return The namespace this job was scheduled in. Will be {@code null} if there was no
      * explicit namespace set and this job is therefore in the default namespace.
-     * @hide
      */
     @Nullable
     public String getJobNamespace() {
