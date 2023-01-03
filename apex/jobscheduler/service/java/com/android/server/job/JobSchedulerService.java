@@ -4303,14 +4303,13 @@ public class JobSchedulerService extends com.android.server.SystemService
 
     int getStorageSeq() {
         synchronized (mLock) {
-            return mStorageController != null ? mStorageController.getTracker().getSeq() : -1;
+            return mStorageController.getTracker().getSeq();
         }
     }
 
     boolean getStorageNotLow() {
         synchronized (mLock) {
-            return mStorageController != null
-                    ? mStorageController.getTracker().isStorageNotLow() : false;
+            return mStorageController.getTracker().isStorageNotLow();
         }
     }
 
