@@ -383,7 +383,10 @@ public class CachedBluetoothDeviceManager {
         Log.d(TAG, "Bond " + device.getAnonymizedAddress() + " by CSIP");
         mOngoingSetMemberPair = device;
         syncConfigFromMainDevice(device, groupId);
-        device.createBond(BluetoothDevice.TRANSPORT_LE);
+        if (!device.createBond(BluetoothDevice.TRANSPORT_LE)) {
+            Log.d(TAG, "Bonding could not be started");
+            mOngoingSetMemberPair = null;
+        }
     }
 
     private void syncConfigFromMainDevice(BluetoothDevice device, int groupId) {
