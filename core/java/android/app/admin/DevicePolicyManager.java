@@ -3314,13 +3314,16 @@ public class DevicePolicyManager {
      * A {@code boolean} flag that indicates whether the screen should be on throughout the
      * provisioning flow.
      *
-     * <p>The default value is {@code false}.
-     *
      * <p>This extra can either be passed as an extra to the {@link
      * #ACTION_PROVISION_MANAGED_PROFILE} intent, or it can be returned by the
      * admin app when performing the admin-integrated provisioning flow as a result of the
      * {@link #ACTION_GET_PROVISIONING_MODE} activity.
+     *
+     * @deprecated from {@link android.os.Build.VERSION_CODES#UPSIDE_DOWN_CAKE}, the flag wouldn't
+     * be functional. The screen is kept on throughout the provisioning flow.
      */
+
+    @Deprecated
     public static final String EXTRA_PROVISIONING_KEEP_SCREEN_ON =
             "android.app.extra.PROVISIONING_KEEP_SCREEN_ON";
 
