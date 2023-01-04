@@ -48,6 +48,7 @@ import android.view.SurfaceControlViewHost;
 import android.view.View;
 import android.view.ViewRootImpl;
 import android.view.WindowManager.LayoutParams;
+import android.window.TaskConstants;
 import android.window.WindowContainerTransaction;
 
 import androidx.test.filters.SmallTest;
@@ -232,7 +233,8 @@ public class WindowDecorationTests extends ShellTestCase {
         verify(mMockSurfaceControlStartT)
                 .setColor(taskBackgroundSurface, new float[] {1.f, 1.f, 0.f});
         verify(mMockSurfaceControlStartT).setShadowRadius(taskBackgroundSurface, 10);
-        verify(mMockSurfaceControlStartT).setLayer(taskBackgroundSurface, -1);
+        verify(mMockSurfaceControlStartT).setLayer(taskBackgroundSurface,
+                TaskConstants.TASK_CHILD_LAYER_TASK_BACKGROUND);
         verify(mMockSurfaceControlStartT).show(taskBackgroundSurface);
 
         verify(captionContainerSurfaceBuilder).setParent(decorContainerSurface);
