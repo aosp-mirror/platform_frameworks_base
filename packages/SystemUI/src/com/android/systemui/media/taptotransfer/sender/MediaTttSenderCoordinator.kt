@@ -150,7 +150,12 @@ constructor(
         logger: MediaTttLogger<ChipbarInfo>,
     ): ChipbarInfo {
         val packageName = routeInfo.clientPackageName
-        val otherDeviceName = routeInfo.name.toString()
+        val otherDeviceName =
+            if (routeInfo.name.isBlank()) {
+                context.getString(R.string.media_ttt_default_device_type)
+            } else {
+                routeInfo.name.toString()
+            }
 
         return ChipbarInfo(
             // Display the app's icon as the start icon
