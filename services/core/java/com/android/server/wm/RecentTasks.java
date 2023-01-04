@@ -962,7 +962,7 @@ class RecentTasks {
                 continue;
             }
 
-            res.add(createRecentTaskInfo(task, true /* stripExtras */, getTasksAllowed));
+            res.add(createRecentTaskInfo(task, true /* stripExtras */));
         }
         return res;
     }
@@ -1834,16 +1834,12 @@ class RecentTasks {
     /**
      * Creates a new RecentTaskInfo from a Task.
      */
-    ActivityManager.RecentTaskInfo createRecentTaskInfo(Task tr, boolean stripExtras,
-            boolean getTasksAllowed) {
+    ActivityManager.RecentTaskInfo createRecentTaskInfo(Task tr, boolean stripExtras) {
         ActivityManager.RecentTaskInfo rti = new ActivityManager.RecentTaskInfo();
         tr.fillTaskInfo(rti, stripExtras);
         // Fill in some deprecated values
         rti.id = rti.isRunning ? rti.taskId : INVALID_TASK_ID;
         rti.persistentId = rti.taskId;
-        if (!getTasksAllowed) {
-            Task.trimIneffectiveInfo(tr, rti);
-        }
         return rti;
     }
 
