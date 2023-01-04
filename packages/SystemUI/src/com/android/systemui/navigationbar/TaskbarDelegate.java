@@ -112,8 +112,9 @@ public class TaskbarDelegate implements CommandQueue.Callbacks,
                 }
 
                 @Override
-                public void updateAssistantAvailable(boolean available) {
-                    updateAssistantAvailability(available);
+                public void updateAssistantAvailable(boolean available,
+                        boolean longPressHomeEnabled) {
+                    updateAssistantAvailability(available, longPressHomeEnabled);
                 }
             };
     private int mDisabledFlags;
@@ -309,13 +310,15 @@ public class TaskbarDelegate implements CommandQueue.Callbacks,
         return (mSysUiState.getFlags() & View.STATUS_BAR_DISABLE_RECENT) == 0;
     }
 
-    private void updateAssistantAvailability(boolean assistantAvailable) {
+    private void updateAssistantAvailability(boolean assistantAvailable,
+            boolean longPressHomeEnabled) {
         if (mOverviewProxyService.getProxy() == null) {
             return;
         }
 
         try {
-            mOverviewProxyService.getProxy().onAssistantAvailable(assistantAvailable);
+            mOverviewProxyService.getProxy().onAssistantAvailable(assistantAvailable,
+                    longPressHomeEnabled);
         } catch (RemoteException e) {
             Log.e(TAG, "onAssistantAvailable() failed, available: " + assistantAvailable, e);
         }
