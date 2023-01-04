@@ -48,12 +48,12 @@ import static android.view.Display.DEFAULT_DISPLAY;
 import static android.view.Display.INVALID_DISPLAY;
 import static android.view.WindowManager.DISPLAY_IME_POLICY_HIDE;
 import static android.view.WindowManager.DISPLAY_IME_POLICY_LOCAL;
+import static android.view.inputmethod.ImeTracker.DEBUG_IME_VISIBILITY;
 
 import static com.android.server.EventLogTags.IMF_HIDE_IME;
 import static com.android.server.EventLogTags.IMF_SHOW_IME;
 import static com.android.server.inputmethod.InputMethodBindingController.TIME_TO_RECONNECT;
 import static com.android.server.inputmethod.InputMethodUtils.isSoftInputModeStateVisibleAllowed;
-import static com.android.server.wm.WindowManagerDebugConfig.DEBUG_IME_VISIBILITY;
 
 import static java.lang.annotation.RetentionPolicy.SOURCE;
 
