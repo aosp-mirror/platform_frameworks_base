@@ -17,12 +17,7 @@
 package android.hardware;
 
 import static android.system.OsConstants.EACCES;
-import static android.system.OsConstants.EBUSY;
-import static android.system.OsConstants.EINVAL;
 import static android.system.OsConstants.ENODEV;
-import static android.system.OsConstants.ENOSYS;
-import static android.system.OsConstants.EOPNOTSUPP;
-import static android.system.OsConstants.EUSERS;
 
 import android.annotation.Nullable;
 import android.annotation.SdkConstant;
