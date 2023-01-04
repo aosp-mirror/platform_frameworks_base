@@ -4321,7 +4321,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
             // from windowmanager. Currently, we need to ensure the setInputWindows completes,
             // which would force the focus event to be queued before the current key event.
             // TODO(b/70668286): post call to 'moveDisplayToTop' to mHandler instead
-            Log.i(TAG, "Moving non-focused display " + displayId + " to top "
+            Log.i(TAG, "Attempting to move non-focused display " + displayId + " to top "
                     + "because a key is targeting it");
             mWindowManagerFuncs.moveDisplayToTopIfAllowed(displayId);
         }
