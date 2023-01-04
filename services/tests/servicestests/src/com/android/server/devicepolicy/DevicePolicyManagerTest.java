@@ -132,7 +132,6 @@ import android.os.IpcDataCache;
 import android.os.Process;
 import android.os.UserHandle;
 import android.os.UserManager;
-import android.platform.test.annotations.FlakyTest;
 import android.platform.test.annotations.Presubmit;
 import android.provider.Settings;
 import android.security.KeyChain;
@@ -144,6 +143,7 @@ import android.util.ArraySet;
 import android.util.Log;
 import android.util.Pair;
 
+import androidx.test.filters.FlakyTest;
 import androidx.test.filters.SmallTest;
 
 import com.android.internal.R;
@@ -4782,6 +4782,7 @@ public class DevicePolicyManagerTest extends DpmTestBase {
     }
 
     @Test
+    @FlakyTest(bugId = 260145949)
     public void testLockTaskPolicyForProfileOwner() throws Exception {
         mockPolicyExemptApps();
         mockVendorPolicyExemptApps();
@@ -4817,6 +4818,7 @@ public class DevicePolicyManagerTest extends DpmTestBase {
     }
 
     @Test
+    @FlakyTest(bugId = 260145949)
     public void testLockTaskFeatures_IllegalArgumentException() throws Exception {
         // Setup a device owner.
         mContext.binder.callingUid = DpmMockContext.CALLER_SYSTEM_USER_UID;
@@ -7812,6 +7814,7 @@ public class DevicePolicyManagerTest extends DpmTestBase {
     }
 
     @Test
+    @FlakyTest(bugId = 260145949)
     public void testSetLockTaskFeatures_financeDo_validLockTaskFeatures_lockTaskFeaturesSet()
             throws Exception {
         int validLockTaskFeatures = LOCK_TASK_FEATURE_SYSTEM_INFO | LOCK_TASK_FEATURE_KEYGUARD
@@ -7827,6 +7830,7 @@ public class DevicePolicyManagerTest extends DpmTestBase {
     }
 
     @Test
+    @FlakyTest(bugId = 260145949)
     public void testSetLockTaskFeatures_financeDo_invalidLockTaskFeatures_throwsException()
             throws Exception {
         int invalidLockTaskFeatures = LOCK_TASK_FEATURE_NONE | LOCK_TASK_FEATURE_OVERVIEW
@@ -7843,6 +7847,7 @@ public class DevicePolicyManagerTest extends DpmTestBase {
     }
 
     @Test
+    @FlakyTest(bugId = 260145949)
     public void testIsUninstallBlocked_financeDo_success() throws Exception {
         String packageName = "com.android.foo.package";
         setDeviceOwner();
@@ -7943,6 +7948,7 @@ public class DevicePolicyManagerTest extends DpmTestBase {
     }
 
     @Test
+    @FlakyTest(bugId = 260145949)
     public void testSetLockTaskPackages_financeDo_success() throws Exception {
         String[] packages = {"com.android.foo.package"};
         mockEmptyPolicyExemptApps();

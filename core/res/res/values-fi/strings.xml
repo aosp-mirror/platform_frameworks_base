@@ -691,6 +691,8 @@
     <string name="permdesc_readMediaVideo" msgid="3846400073770403528">"Sallii sovelluksen lukea jaetun tallennustilan videotiedostoja."</string>
     <string name="permlab_readMediaImages" msgid="4057590631020986789">"lue jaetun tallennustilan kuvatiedostoja"</string>
     <string name="permdesc_readMediaImages" msgid="5836219373138469259">"Sallii sovelluksen lukea jaetun tallennustilan kuvatiedostoja."</string>
+    <string name="permlab_readVisualUserSelect" msgid="5516204215354667586">"lukulupa jaetun tallennustilan kuva- ja videotiedostoihin, jotka käyttäjä on valinnut"</string>
+    <string name="permdesc_readVisualUserSelect" msgid="8027174717714968217">"Sallii sovelluksen lukea kuva- ja videotiedostoja, joita valitset jaetusta tallennustilasta."</string>
     <string name="permlab_sdcardWrite" msgid="4863021819671416668">"muokata tai poistaa jaetun tallennustilan sisältöä"</string>
     <string name="permdesc_sdcardWrite" msgid="8376047679331387102">"Antaa sovelluksen kirjoittaa jaetun tallennustilan sisällön."</string>
     <string name="permlab_use_sip" msgid="8250774565189337477">"soita/vastaanota SIP-puheluja"</string>
