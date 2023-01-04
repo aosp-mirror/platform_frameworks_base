@@ -691,6 +691,8 @@
     <string name="permdesc_readMediaVideo" msgid="3846400073770403528">"ઍપને તમારા શેર કરાયેલા સ્ટોરેજમાંથી વીડિયો ફાઇલો વાંચવાની મંજૂરી આપે છે."</string>
     <string name="permlab_readMediaImages" msgid="4057590631020986789">"શેર કરાયેલા સ્ટોરેજમાંથી છબી ફાઇલો વાંચવા માટે"</string>
     <string name="permdesc_readMediaImages" msgid="5836219373138469259">"ઍપને તમારા શેર કરાયેલા સ્ટોરેજમાંથી છબી ફાઇલો વાંચવાની મંજૂરી આપે છે."</string>
+    <string name="permlab_readVisualUserSelect" msgid="5516204215354667586">"શેર કરેલા સ્ટોરેજમાંથી વપરાશકર્તા દ્વારા પસંદ કરેલી છબી અને વીડિયો ફાઇલો વાંચો"</string>
+    <string name="permdesc_readVisualUserSelect" msgid="8027174717714968217">"ઍપને તમારા શેર કરેલા સ્ટોરેજમાંથી તમે પસંદ કરેલી છબી અને વીડિયો ફાઇલો વાંચવાની મંજૂરી આપે છે."</string>
     <string name="permlab_sdcardWrite" msgid="4863021819671416668">"શેર કરેલા સ્ટોરેજ કન્ટેન્ટમાં ફેરફાર કરો/ડિલીટ કરો"</string>
     <string name="permdesc_sdcardWrite" msgid="8376047679331387102">"શેર કરેલા સ્ટોરેજ કન્ટેન્ટમાં લખવાની મંજૂરી આપે છે."</string>
     <string name="permlab_use_sip" msgid="8250774565189337477">"SIP કૉલ્સ કરો/પ્રાપ્ત કરો"</string>

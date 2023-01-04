@@ -692,6 +692,8 @@
     <string name="permdesc_readMediaVideo" msgid="3846400073770403528">"Omogućava aplikaciji da čita fajlove videozapisa iz vaše dijeljene pohrane."</string>
     <string name="permlab_readMediaImages" msgid="4057590631020986789">"čitanje fajlova slika iz dijeljene pohrane"</string>
     <string name="permdesc_readMediaImages" msgid="5836219373138469259">"Omogućava aplikaciji da čita fajlove slika iz vaše dijeljene pohrane."</string>
+    <string name="permlab_readVisualUserSelect" msgid="5516204215354667586">"čitanje fajlova slika i videozapisa iz dijeljene pohrane koje je odabrao korisnik"</string>
+    <string name="permdesc_readVisualUserSelect" msgid="8027174717714968217">"Omogućava aplikaciji da čita fajlove slika i videozapisa koje odaberete iz vaše dijeljene pohrane."</string>
     <string name="permlab_sdcardWrite" msgid="4863021819671416668">"mijenja ili briše sadržaj vaše dijeljene pohrane"</string>
     <string name="permdesc_sdcardWrite" msgid="8376047679331387102">"Omogućava aplikaciji da piše sadržaj vaše dijeljene pohrane."</string>
     <string name="permlab_use_sip" msgid="8250774565189337477">"Uputi/primi SIP pozive"</string>
@@ -1521,7 +1523,7 @@
     <string name="sync_undo_deletes" msgid="5786033331266418896">"Poništiti brisanje"</string>
     <string name="sync_do_nothing" msgid="4528734662446469646">"Ne radi ništa za sada"</string>
     <string name="choose_account_label" msgid="5557833752759831548">"Odaberite račun"</string>
-    <string name="add_account_label" msgid="4067610644298737417">"Dodaj račun"</string>
+    <string name="add_account_label" msgid="4067610644298737417">"Dodajte račun"</string>
     <string name="add_account_button_label" msgid="322390749416414097">"Dodajte račun"</string>
     <string name="number_picker_increment_button" msgid="7621013714795186298">"Povećaj"</string>
     <string name="number_picker_decrement_button" msgid="5116948444762708204">"Smanji"</string>

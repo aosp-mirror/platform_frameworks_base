@@ -564,12 +564,12 @@
     <string name="permdesc_manageFingerprint" msgid="2025616816437339865">"Aztarna digitalaren txantiloiak gehitzeko eta ezabatzeko metodoei dei egitea baimentzen die aplikazioei."</string>
     <string name="permlab_useFingerprint" msgid="1001421069766751922">"erabili hatz-marken hardwarea"</string>
     <string name="permdesc_useFingerprint" msgid="412463055059323742">"Autentifikatzeko hatz-marken hardwarea erabiltzeko baimena ematen die aplikazioei."</string>
-    <string name="permlab_audioWrite" msgid="8501705294265669405">"musika-bilduma aldatu"</string>
-    <string name="permdesc_audioWrite" msgid="8057399517013412431">"Musika-bilduma aldatzeko baimena ematen die aplikazioei."</string>
-    <string name="permlab_videoWrite" msgid="5940738769586451318">"bideo-bilduma aldatu"</string>
-    <string name="permdesc_videoWrite" msgid="6124731210613317051">"Bideo-bilduma aldatzeko baimena ematen die aplikazioei."</string>
-    <string name="permlab_imagesWrite" msgid="1774555086984985578">"argazki-bilduma aldatu"</string>
-    <string name="permdesc_imagesWrite" msgid="5195054463269193317">"Argazki-bilduma aldatzeko baimena ematen die aplikazioei."</string>
+    <string name="permlab_audioWrite" msgid="8501705294265669405">"musika bilduma aldatu"</string>
+    <string name="permdesc_audioWrite" msgid="8057399517013412431">"Musika bilduma aldatzeko baimena ematen die aplikazioei."</string>
+    <string name="permlab_videoWrite" msgid="5940738769586451318">"bideo bilduma aldatu"</string>
+    <string name="permdesc_videoWrite" msgid="6124731210613317051">"Bideo bilduma aldatzeko baimena ematen die aplikazioei."</string>
+    <string name="permlab_imagesWrite" msgid="1774555086984985578">"argazki bilduma aldatu"</string>
+    <string name="permdesc_imagesWrite" msgid="5195054463269193317">"Argazki bilduma aldatzeko baimena ematen die aplikazioei."</string>
     <string name="permlab_mediaLocation" msgid="7368098373378598066">"multimedia-edukien bildumako kokapena irakurri"</string>
     <string name="permdesc_mediaLocation" msgid="597912899423578138">"Multimedia-edukien bildumako kokapena irakurtzeko baimena ematen die aplikazioei."</string>
     <string name="biometric_app_setting_name" msgid="3339209978734534457">"Erabili sistema biometrikoak"</string>
@@ -691,6 +691,8 @@
     <string name="permdesc_readMediaVideo" msgid="3846400073770403528">"Biltegi partekatuko bideo-fitxategiak irakurtzeko baimena ematen die aplikazioei."</string>
     <string name="permlab_readMediaImages" msgid="4057590631020986789">"irakurri biltegi partekatuko irudi-fitxategiak"</string>
     <string name="permdesc_readMediaImages" msgid="5836219373138469259">"Biltegi partekatuko irudi-fitxategiak irakurtzeko baimena ematen die aplikazioei."</string>
+    <string name="permlab_readVisualUserSelect" msgid="5516204215354667586">"irakurri biltegi partekatuko irudi- eta bideo-fitxategiak"</string>
+    <string name="permdesc_readVisualUserSelect" msgid="8027174717714968217">"Biltegi partekatuko irudi- eta bideo-fitxategiak irakurtzeko baimena ematen die aplikazioei."</string>
     <string name="permlab_sdcardWrite" msgid="4863021819671416668">"aldatu edo ezabatu biltegi partekatuko edukia"</string>
     <string name="permdesc_sdcardWrite" msgid="8376047679331387102">"Biltegi partekatuko edukian idazteko baimena ematen die aplikazioei."</string>
     <string name="permlab_use_sip" msgid="8250774565189337477">"egin/jaso SIP deiak"</string>

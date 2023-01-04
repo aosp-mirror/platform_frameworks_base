@@ -691,6 +691,8 @@
     <string name="permdesc_readMediaVideo" msgid="3846400073770403528">"Laat die program toe om videolêers in jou gedeelde berging te lees."</string>
     <string name="permlab_readMediaImages" msgid="4057590631020986789">"lees prentlêers in gedeelde berging"</string>
     <string name="permdesc_readMediaImages" msgid="5836219373138469259">"Laat die program toe om prentlêers in jou gedeelde berging te lees."</string>
+    <string name="permlab_readVisualUserSelect" msgid="5516204215354667586">"lees prent- en videolêers wat gebruiker in gedeelde berging kies"</string>
+    <string name="permdesc_readVisualUserSelect" msgid="8027174717714968217">"Laat die app toe om prent- en videolêers te lees wat jy in jou gedeelde berging kies."</string>
     <string name="permlab_sdcardWrite" msgid="4863021819671416668">"verander of vee jou gedeelde berging se inhoud uit"</string>
     <string name="permdesc_sdcardWrite" msgid="8376047679331387102">"Laat die program toe om jou gedeelde berging se inhoud te skryf."</string>
     <string name="permlab_use_sip" msgid="8250774565189337477">"maak en/of ontvang SIP-oproepe"</string>

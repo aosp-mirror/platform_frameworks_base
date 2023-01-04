@@ -46,15 +46,7 @@ import java.nio.charset.Charset;
 import java.util.Arrays;
 import java.util.Collections;
 
-/**
- * <p>Run with:<pre>
- * m FrameworksServicesTests &&
- * adb install \
- * -r out/target/product/hammerhead/data/app/FrameworksServicesTests/FrameworksServicesTests.apk &&
- * adb shell am instrument -e class com.android.server.pm.UserDataPreparerTest \
- * -w com.android.frameworks.servicestests/androidx.test.runner.AndroidJUnitRunner
- * </pre>
- */
+// atest PackageManagerServiceTest:com.android.server.pm.UserDataPreparerTest
 @RunWith(AndroidJUnit4.class)
 @Presubmit
 @SmallTest
