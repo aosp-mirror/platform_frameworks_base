@@ -38,6 +38,8 @@ import com.android.server.permission.access.collection.* // ktlint-disable no-wi
 import com.android.server.permission.access.util.andInv
 import com.android.server.permission.access.util.hasAnyBit
 import com.android.server.permission.access.util.hasBits
+import com.android.server.permission.access.util.isInternal
+import com.android.server.permission.access.util.isRuntime
 import com.android.server.pm.KnownPackages
 import com.android.server.pm.parsing.PackageInfoUtils
 import com.android.server.pm.permission.CompatibilityPermissionInfo
@@ -131,8 +133,6 @@ class UidPermissionPolicy : SchemePolicy() {
         volumeUuid: String?,
         isSystemUpdated: Boolean
     ) {
-        // TODO: STOPSHIP: Either make addPermissionGroups() favor system packages
-        // like addPermissions(), or sort system packages before non-system packages for this loop.
         val changedPermissionNames = IndexedSet<String>()
         newState.systemState.packageStates.forEach { (_, packageState) ->
             val androidPackage = packageState.androidPackage
@@ -328,12 +328,33 @@ class UidPermissionPolicy : SchemePolicy() {
             val oldPermissionGroup = newState.systemState.permissionGroups[permissionGroupName]
             if (oldPermissionGroup != null &&
                 newPermissionGroup.packageName != oldPermissionGroup.packageName) {
+                val newPackageName = newPermissionGroup.packageName
+                val oldPackageName = oldPermissionGroup.packageName
+                // Different from the old implementation, which defines permission group on
+                // a first-come-first-serve basis, and relies on system apps being scanned before
+                // non-system apps, we now allow system apps to override permission groups similar
+                // to permissions so that we no longer need to rely on the scan order.
+                if (!packageState.isSystem) {
+                    Log.w(
+                        LOG_TAG, "Ignoring permission group $permissionGroupName declared in" +
+                            " package $newPackageName: already declared in another" +
+                            " package $oldPackageName"
+                    )
+                    return@forEachIndexed
+                }
+                if (newState.systemState.packageStates[oldPackageName]?.isSystem == true) {
+                    Log.w(
+                        LOG_TAG, "Ignoring permission group $permissionGroupName declared in" +
+                            " system package $newPackageName: already declared in another" +
+                            " system package $oldPackageName"
+                    )
+                    return@forEachIndexed
+                }
                 Log.w(
-                    LOG_TAG, "Ignoring permission group $permissionGroupName declared in package" +
-                        " ${newPermissionGroup.packageName}: already declared in another package" +
-                        " ${oldPermissionGroup.packageName}"
+                    LOG_TAG, "Overriding permission group $permissionGroupName with" +
+                        " new declaration in system package $newPackageName: originally" +
+                        " declared in another package $oldPackageName"
                 )
-                return@forEachIndexed
             }
             newState.systemState.permissionGroups[permissionGroupName] = newPermissionGroup
         }
@@ -421,7 +442,42 @@ class UidPermissionPolicy : SchemePolicy() {
                     return@forEachIndexed
                 }
             } else {
-                // TODO: STOPSHIP: Clear permission state on type or group change.
+                if (oldPermission != null) {
+                    val isPermissionGroupChanged = newPermissionInfo.isRuntime &&
+                        newPermissionInfo.group != null &&
+                        newPermissionInfo.group != oldPermission.groupName
+                    val isPermissionTypeChanged = oldPermission.type != Permission.TYPE_CONFIG && (
+                        (newPermissionInfo.isRuntime && !oldPermission.isRuntime) ||
+                            (newPermissionInfo.isInternal && !oldPermission.isInternal)
+                    )
+                    if (isPermissionGroupChanged || isPermissionTypeChanged) {
+                        systemState.userIds.forEachIndexed { _, userId ->
+                            systemState.appIds.forEachKeyIndexed { _, appId ->
+                                if (isPermissionGroupChanged) {
+                                    // We might auto-grant permissions if any permission of
+                                    // the group is already granted. Hence if the group of
+                                    // a granted permission changes we need to revoke it to
+                                    // avoid having permissions of the new group auto-granted.
+                                    Log.w(
+                                        LOG_TAG, "Revoking runtime permission $permissionName for" +
+                                            " appId $appId and userId $userId as the permission" +
+                                            " group changed from ${oldPermission.groupName}" +
+                                            " to ${newPermissionInfo.group}"
+                                    )
+                                }
+                                if (isPermissionTypeChanged) {
+                                    Log.w(
+                                        LOG_TAG, "Revoking permission $permissionName for" +
+                                            " appId $appId and userId $userId as the permission" +
+                                            " type changed."
+                                    )
+                                }
+                                setPermissionFlags(appId, userId, permissionName, 0)
+                            }
+                        }
+                    }
+                }
+
                 // Different from the old implementation, which doesn't update the permission
                 // definition upon app update, but does update it on the next boot, we now
                 // consistently update the permission definition upon app update.
