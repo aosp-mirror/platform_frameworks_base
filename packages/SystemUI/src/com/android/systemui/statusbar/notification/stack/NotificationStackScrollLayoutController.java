@@ -1902,8 +1902,10 @@ public class NotificationStackScrollLayoutController {
             }
             if (ev.getActionMasked() == MotionEvent.ACTION_UP) {
                 // Ensure the falsing manager records the touch. we don't do anything with it
-                // at the moment.
-                mFalsingManager.isFalseTouch(Classifier.SHADE_DRAG);
+                // at the moment, but it may trigger a global falsing event.
+                if (!horizontalSwipeWantsIt) {
+                    mFalsingManager.isFalseTouch(Classifier.SHADE_DRAG);
+                }
                 mView.setCheckForLeaveBehind(true);
             }
             traceJankOnTouchEvent(ev.getActionMasked(), scrollerWantsIt);
