@@ -1109,12 +1109,12 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
                 * mDisplayMetrics.densityDpi / DENSITY_DEFAULT;
         isDefaultDisplay = mDisplayId == DEFAULT_DISPLAY;
         mInsetsStateController = new InsetsStateController(this);
+        initializeDisplayBaseInfo();
         mDisplayFrames = new DisplayFrames(mInsetsStateController.getRawInsetsState(),
                 mDisplayInfo, calculateDisplayCutoutForRotation(mDisplayInfo.rotation),
                 calculateRoundedCornersForRotation(mDisplayInfo.rotation),
                 calculatePrivacyIndicatorBoundsForRotation(mDisplayInfo.rotation),
                 calculateDisplayShapeForRotation(mDisplayInfo.rotation));
-        initializeDisplayBaseInfo();
 
         mHoldScreenWakeLock = mWmService.mPowerManager.newWakeLock(
                 PowerManager.SCREEN_BRIGHT_WAKE_LOCK | PowerManager.ON_AFTER_RELEASE,
