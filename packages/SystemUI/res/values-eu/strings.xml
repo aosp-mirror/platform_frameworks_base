@@ -85,6 +85,7 @@
     <string name="screenshot_share_description" msgid="2861628935812656612">"Partekatu pantaila-argazkia"</string>
     <string name="screenshot_scroll_label" msgid="2930198809899329367">"Kapturatu eduki gehiago"</string>
     <string name="screenshot_dismiss_description" msgid="4702341245899508786">"Baztertu pantaila-argazkia"</string>
+    <string name="screenshot_dismiss_work_profile" msgid="3101530842987697045">"Baztertu laneko profilean jasotako mezua"</string>
     <string name="screenshot_preview_description" msgid="7606510140714080474">"Pantaila-argazkiaren aurrebista"</string>
     <string name="screenshot_top_boundary_pct" msgid="2520148599096479332">"Goiko ertza: ehuneko <xliff:g id="PERCENT">%1$d</xliff:g>"</string>
     <string name="screenshot_bottom_boundary_pct" msgid="3880821519814946478">"Beheko ertza: ehuneko <xliff:g id="PERCENT">%1$d</xliff:g>"</string>
@@ -317,8 +318,7 @@
     <string name="sensor_privacy_camera_unblocked_dialog_content" msgid="7847190103011782278">"Aplikazio eta zerbitzu guztiek kamera erabil dezakete."</string>
     <string name="sensor_privacy_camera_blocked_dialog_content" msgid="3182428709314874616">"Kamera erabiltzeko baimena desgaituta dago aplikazio eta zerbitzu guztietarako."</string>
     <string name="sensor_privacy_htt_blocked_dialog_content" msgid="3333321592997666441">"Mikrofonoaren botoia erabiltzeko, gaitu mikrofonoa erabiltzeko baimena ezarpenetan."</string>
-    <!-- no translation found for sensor_privacy_dialog_open_settings (5635865896053011859) -->
-    <skip />
+    <string name="sensor_privacy_dialog_open_settings" msgid="5635865896053011859">"Ireki Ezarpenak"</string>
     <string name="media_seamless_other_device" msgid="4654849800789196737">"Beste gailu bat"</string>
     <string name="quick_step_accessibility_toggle_overview" msgid="7908949976727578403">"Aldatu ikuspegi orokorra"</string>
     <string name="zen_priority_introduction" msgid="3159291973383796646">"Gailuak ez du egingo ez soinurik ez dardararik, baina alarmak, gertaera eta abisuen tonuak, eta aukeratzen dituzun deitzaileen dei-tonuak joko ditu. Bestalde, zuk erreproduzitutako guztia entzungo duzu, besteak beste, musika, bideoak eta jokoak."</string>
@@ -435,9 +435,9 @@
     <string name="monitoring_description_named_management" msgid="505833016545056036">"Gailu hau <xliff:g id="ORGANIZATION_NAME">%1$s</xliff:g> erakundearena da.\n\nIKT saileko administratzaileak gainbegiratu eta kudeatu egin ditzake ezarpenak, enpresa-sarbidea, aplikazioak, gailuarekin erlazionatutako datuak eta gailuaren kokapen-informazioa.\n\nInformazio gehiago lortzeko, jarri IKT saileko administratzailearekin harremanetan."</string>
     <string name="monitoring_financed_description_named_management" msgid="6108439201399938668">"Baliteke <xliff:g id="ORGANIZATION_NAME_0">%1$s</xliff:g> erakundeak gailu honekin erlazionatutako datuak atzitu, aplikazioak kudeatu eta gailuaren ezarpenak aldatu ahal izatea.\n\nGalderarik baduzu, jarri harremanetan <xliff:g id="ORGANIZATION_NAME_1">%2$s</xliff:g> erakundearekin."</string>
     <string name="monitoring_description_management" msgid="4308879039175729014">"Gailu hau zure erakundearena da.\n\nIKT saileko administratzaileak gainbegiratu eta kudeatu egin ditzake ezarpenak, enpresa-sarbidea, aplikazioak, gailuarekin erlazionatutako datuak eta gailuaren kokapen-informazioa.\n\nInformazio gehiago lortzeko, jarri IKT saileko administratzailearekin harremanetan."</string>
-    <string name="monitoring_description_management_ca_certificate" msgid="7785013130658110130">"Erakundeak ziurtagiri-emaile bat instalatu du gailuan. Baliteke sareko trafiko segurua gainbegiratzea edo aldatzea."</string>
-    <string name="monitoring_description_managed_profile_ca_certificate" msgid="7904323416598435647">"Erakundeak ziurtagiri-emaile bat instalatu dizu laneko profilean. Baliteke sareko trafiko segurua gainbegiratzea edo aldatzea."</string>
-    <string name="monitoring_description_ca_certificate" msgid="448923057059097497">"Ziurtagiri-emaile bat dago instalatuta gailuan. Baliteke sareko trafiko segurua gainbegiratzea edo aldatzea."</string>
+    <string name="monitoring_description_management_ca_certificate" msgid="7785013130658110130">"Erakundeak autoritate ziurtagiri-emaile bat instalatu du gailuan. Baliteke sareko trafiko segurua gainbegiratzea edo aldatzea."</string>
+    <string name="monitoring_description_managed_profile_ca_certificate" msgid="7904323416598435647">"Erakundeak autoritate ziurtagiri-emaile bat instalatu dizu laneko profilean. Baliteke sareko trafiko segurua gainbegiratzea edo aldatzea."</string>
+    <string name="monitoring_description_ca_certificate" msgid="448923057059097497">"Autoritate ziurtagiri-emaile bat dago instalatuta gailuan. Baliteke sareko trafiko segurua gainbegiratzea edo aldatzea."</string>
     <string name="monitoring_description_management_network_logging" msgid="216983105036994771">"Administratzaileak sarearen erregistroak aktibatu ditu; horrela, zure gailuko trafikoa gainbegira dezake."</string>
     <string name="monitoring_description_managed_profile_network_logging" msgid="6932303843097006037">"Administratzaileak sarearen erregistroak aktibatu ditu; horrela, zure laneko profileko trafikoa gainbegira dezake, baina ez zure profil pertsonalekoa."</string>
     <string name="monitoring_description_named_vpn" msgid="7502657784155456414">"Gailua <xliff:g id="VPN_APP">%1$s</xliff:g> bidez dago konektatuta Internetera. IKT saileko administratzaileak laneko aplikazioen bidez egiten dituzun sareko jarduerak (mezu elektronikoak eta arakatze-datuak barne) ikusi ahalko ditu."</string>
@@ -743,6 +743,7 @@
     <string name="wifi_is_off" msgid="5389597396308001471">"Wifi-konexioa desaktibatuta dago"</string>
     <string name="bt_is_off" msgid="7436344904889461591">"Bluetooth bidezko konexioa desaktibatuta dago"</string>
     <string name="dnd_is_off" msgid="3185706903793094463">"Ez molestatzeko modua desaktibatuta dago"</string>
+    <string name="dnd_is_on" msgid="7009368176361546279">"Aktibatuta dago ez molestatzeko modua"</string>
     <string name="qs_dnd_prompt_auto_rule" msgid="3535469468310002616">"Ez molestatzeko modua aktibatu du arau automatiko batek (<xliff:g id="ID_1">%s</xliff:g>)."</string>
     <string name="qs_dnd_prompt_app" msgid="4027984447935396820">"Ez molestatzeko modua aktibatu du aplikazio batek (<xliff:g id="ID_1">%s</xliff:g>)."</string>
     <string name="qs_dnd_prompt_auto_rule_app" msgid="1841469944118486580">"Ez molestatzeko modua aktibatu du arau automatiko edo aplikazio batek."</string>
@@ -815,7 +816,7 @@
     <string name="accessibility_floating_button_migration_tooltip" msgid="5217151214439341902">"Erabilerraztasun-eginbideak irekitzeko, sakatu hau. Ezarpenetan pertsonalizatu edo ordez dezakezu botoia.\n\n"<annotation id="link">"Ikusi ezarpenak"</annotation></string>
     <string name="accessibility_floating_button_docking_tooltip" msgid="6814897496767461517">"Eraman botoia ertzera aldi baterako ezkutatzeko"</string>
     <string name="accessibility_floating_button_undo" msgid="511112888715708241">"Desegin"</string>
-    <string name="accessibility_floating_button_undo_message_text" msgid="3044079592757099698">"{count,plural, =1{{label} lasterbide kendu da}other{# lasterbide kendu dira}}"</string>
+    <string name="accessibility_floating_button_undo_message_text" msgid="3044079592757099698">"{count,plural, =1{{label} eginbidearen lasterbidea kendu da}other{# eginbideren lasterbideak kendu dira}}"</string>
     <string name="accessibility_floating_button_action_move_top_left" msgid="6253520703618545705">"Eraman goialdera, ezkerretara"</string>
     <string name="accessibility_floating_button_action_move_top_right" msgid="6106225581993479711">"Eraman goialdera, eskuinetara"</string>
     <string name="accessibility_floating_button_action_move_bottom_left" msgid="8063394111137429725">"Eraman behealdera, ezkerretara"</string>
@@ -905,6 +906,7 @@
     <string name="media_output_dialog_accessibility_title" msgid="4681741064190167888">"Audio-irteerarako gailu erabilgarriak."</string>
     <string name="media_output_dialog_accessibility_seekbar" msgid="5332843993805568978">"Bolumena"</string>
     <string name="media_output_dialog_volume_percentage" msgid="1613984910585111798">"%% <xliff:g id="PERCENTAGE">%1$d</xliff:g>"</string>
+    <string name="media_output_group_title_speakers_and_displays" msgid="7169712332365659820">"Bozgorailuak eta pantailak"</string>
     <string name="media_output_first_broadcast_title" msgid="6292237789860753022">"Nola funtzionatzen dute iragarpenek?"</string>
     <string name="media_output_broadcast" msgid="3555580945878071543">"Iragarri"</string>
     <string name="media_output_first_notify_broadcast_message" msgid="6353857724136398494">"Bluetooth bidezko gailu bateragarriak dituzten inguruko pertsonek iragartzen ari zaren multimedia-edukia entzun dezakete"</string>
@@ -1032,20 +1034,19 @@
     <string name="log_access_confirmation_deny" msgid="2389461495803585795">"Ez eman baimenik"</string>
     <string name="log_access_confirmation_body" msgid="6883031912003112634">"Gailuko erregistroetan gailuan gertatzen den guztia gordetzen da. Arazoak bilatu eta konpontzeko erabil ditzakete aplikazioek erregistro horiek.\n\nBaliteke erregistro batzuek kontuzko informazioa edukitzea. Beraz, eman gailuko erregistro guztiak atzitzeko baimena fidagarritzat jotzen dituzun aplikazioei bakarrik. \n\nNahiz eta gailuko erregistro guztiak atzitzeko baimena ez eman aplikazio honi, aplikazioak hari dagozkion erregistroak atzitu ahalko ditu. Gainera, baliteke gailuaren fabrikatzaileak gailuko erregistro edo datu batzuk atzitu ahal izatea."</string>
     <string name="keyguard_affordance_enablement_dialog_action_template" msgid="8164857863036314664">"Ireki <xliff:g id="APPNAME">%1$s</xliff:g>"</string>
-    <string name="keyguard_affordance_enablement_dialog_message" msgid="2790910660524887941">"<xliff:g id="APPNAME">%1$s</xliff:g> aplikazioa lasterbide gisa gehitzeko, ziurtatu hauek betetzen direla:"</string>
     <string name="keyguard_affordance_enablement_dialog_wallet_instruction_1" msgid="8439655049139819278">"• Aplikazioa konfiguratuta dago."</string>
     <string name="keyguard_affordance_enablement_dialog_wallet_instruction_2" msgid="4321089250629477835">"• Diru-zorroa zerbitzuan gutxienez txartel bat gehitu da."</string>
     <string name="keyguard_affordance_enablement_dialog_qr_scanner_instruction" msgid="5355839079232119791">"• Kamera-aplikazio bat instalatu da."</string>
     <string name="keyguard_affordance_enablement_dialog_home_instruction_1" msgid="8438311171750568633">"• Aplikazioa konfiguratuta dago."</string>
     <string name="keyguard_affordance_enablement_dialog_home_instruction_2" msgid="8308525385889021652">"• Gutxienez gailu bat erabilgarri dago."</string>
+    <string name="keyguard_affordance_press_too_short" msgid="8145437175134998864">"Eduki sakatuta lasterbidea"</string>
     <string name="rear_display_bottom_sheet_cancel" msgid="3461468855493357248">"Utzi"</string>
     <string name="rear_display_bottom_sheet_confirm" msgid="4383356544661421206">"Irauli"</string>
     <string name="rear_display_fold_bottom_sheet_title" msgid="6081542277622721548">"Ireki telefonoa autoargazki hobeak ateratzeko"</string>
     <string name="rear_display_unfold_bottom_sheet_title" msgid="2137403802960396357">"Telefonoa irauli nahi duzu autoargazki hobeak ateratzeko?"</string>
     <string name="rear_display_bottom_sheet_description" msgid="1852662982816810352">"Erabili atzeko kamera kalitate handiagoko argazki zabalago bat ateratzeko."</string>
     <string name="rear_display_bottom_sheet_warning" msgid="800995919558238930"><b>"✱ Pantaila itzali egingo da"</b></string>
-    <!-- no translation found for rear_display_accessibility_folded_animation (1538121649587978179) -->
-    <skip />
-    <!-- no translation found for rear_display_accessibility_unfolded_animation (1946153682258289040) -->
-    <skip />
+    <string name="rear_display_accessibility_folded_animation" msgid="1538121649587978179">"Gailu tolesgarria zabaltzen"</string>
+    <string name="rear_display_accessibility_unfolded_animation" msgid="1946153682258289040">"Gailu tolesgarria biratzen"</string>
+    <string name="stylus_battery_low" msgid="7134370101603167096">"Arkatzak bateria gutxi du"</string>
 </resources>

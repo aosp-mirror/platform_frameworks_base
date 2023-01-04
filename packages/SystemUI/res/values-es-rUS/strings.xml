@@ -85,6 +85,7 @@
     <string name="screenshot_share_description" msgid="2861628935812656612">"Compartir captura"</string>
     <string name="screenshot_scroll_label" msgid="2930198809899329367">"Capturar más"</string>
     <string name="screenshot_dismiss_description" msgid="4702341245899508786">"Descartar captura de pantalla"</string>
+    <string name="screenshot_dismiss_work_profile" msgid="3101530842987697045">"Descartar mensaje del perfil de trabajo"</string>
     <string name="screenshot_preview_description" msgid="7606510140714080474">"Vista previa de la captura de pantalla"</string>
     <string name="screenshot_top_boundary_pct" msgid="2520148599096479332">"Límite superior: <xliff:g id="PERCENT">%1$d</xliff:g> por ciento"</string>
     <string name="screenshot_bottom_boundary_pct" msgid="3880821519814946478">"Límite inferior: <xliff:g id="PERCENT">%1$d</xliff:g> por ciento"</string>
@@ -317,8 +318,7 @@
     <string name="sensor_privacy_camera_unblocked_dialog_content" msgid="7847190103011782278">"Se habilitó la cámara para todos los servicios y las apps."</string>
     <string name="sensor_privacy_camera_blocked_dialog_content" msgid="3182428709314874616">"El acceso a la cámara está inhabilitado para todos los servicios y las apps."</string>
     <string name="sensor_privacy_htt_blocked_dialog_content" msgid="3333321592997666441">"Para habilitar el botón de micrófono, habilita su acceso en Configuración."</string>
-    <!-- no translation found for sensor_privacy_dialog_open_settings (5635865896053011859) -->
-    <skip />
+    <string name="sensor_privacy_dialog_open_settings" msgid="5635865896053011859">"Abrir Configuración"</string>
     <string name="media_seamless_other_device" msgid="4654849800789196737">"Otro dispositivo"</string>
     <string name="quick_step_accessibility_toggle_overview" msgid="7908949976727578403">"Ocultar o mostrar Recientes"</string>
     <string name="zen_priority_introduction" msgid="3159291973383796646">"No te molestarán los sonidos ni las vibraciones, excepto las alarmas, los recordatorios, los eventos y las llamadas de los emisores que especifiques. Podrás escuchar el contenido que reproduzcas, como música, videos y juegos."</string>
@@ -743,6 +743,7 @@
     <string name="wifi_is_off" msgid="5389597396308001471">"Wi-Fi desactivado"</string>
     <string name="bt_is_off" msgid="7436344904889461591">"Bluetooth desactivado"</string>
     <string name="dnd_is_off" msgid="3185706903793094463">"No interrumpir desactivado"</string>
+    <string name="dnd_is_on" msgid="7009368176361546279">"No interrumpir está activado"</string>
     <string name="qs_dnd_prompt_auto_rule" msgid="3535469468310002616">"Se activó el modo No interrumpir con una regla automática (<xliff:g id="ID_1">%s</xliff:g>)."</string>
     <string name="qs_dnd_prompt_app" msgid="4027984447935396820">"Se activó el modo No interrumpir con una app (<xliff:g id="ID_1">%s</xliff:g>)."</string>
     <string name="qs_dnd_prompt_auto_rule_app" msgid="1841469944118486580">"Se activó el modo No interrumpir con una app o regla automática."</string>
@@ -815,7 +816,7 @@
     <string name="accessibility_floating_button_migration_tooltip" msgid="5217151214439341902">"Presiona para abrir las funciones de accesibilidad. Personaliza o cambia botón en Config.\n\n"<annotation id="link">"Ver config"</annotation></string>
     <string name="accessibility_floating_button_docking_tooltip" msgid="6814897496767461517">"Mueve el botón hacia el borde para ocultarlo temporalmente"</string>
     <string name="accessibility_floating_button_undo" msgid="511112888715708241">"Deshacer"</string>
-    <string name="accessibility_floating_button_undo_message_text" msgid="3044079592757099698">"{count,plural, =1{Se quitó el acceso directo {label}}many{Se quitaron # de accesos directos}other{Se quitaron # accesos directos}}"</string>
+    <string name="accessibility_floating_button_undo_message_text" msgid="3044079592757099698">"{count,plural, =1{Se quitó el acceso directo de {label}}many{Se quitaron # de accesos directos}other{Se quitaron # accesos directos}}"</string>
     <string name="accessibility_floating_button_action_move_top_left" msgid="6253520703618545705">"Mover arriba a la izquierda"</string>
     <string name="accessibility_floating_button_action_move_top_right" msgid="6106225581993479711">"Mover arriba a la derecha"</string>
     <string name="accessibility_floating_button_action_move_bottom_left" msgid="8063394111137429725">"Mover abajo a la izquierda"</string>
@@ -905,6 +906,7 @@
     <string name="media_output_dialog_accessibility_title" msgid="4681741064190167888">"Dispositivos disponibles para salida de audio."</string>
     <string name="media_output_dialog_accessibility_seekbar" msgid="5332843993805568978">"Volumen"</string>
     <string name="media_output_dialog_volume_percentage" msgid="1613984910585111798">"<xliff:g id="PERCENTAGE">%1$d</xliff:g>%%"</string>
+    <string name="media_output_group_title_speakers_and_displays" msgid="7169712332365659820">"Bocinas y pantallas"</string>
     <string name="media_output_first_broadcast_title" msgid="6292237789860753022">"Cómo funciona la transmisión"</string>
     <string name="media_output_broadcast" msgid="3555580945878071543">"Transmisión"</string>
     <string name="media_output_first_notify_broadcast_message" msgid="6353857724136398494">"Las personas cercanas con dispositivos Bluetooth compatibles pueden escuchar el contenido multimedia que transmites"</string>
@@ -1032,20 +1034,19 @@
     <string name="log_access_confirmation_deny" msgid="2389461495803585795">"No permitir"</string>
     <string name="log_access_confirmation_body" msgid="6883031912003112634">"Los registros del dispositivo permiten documentar lo que sucede en él. Las apps pueden usar estos registros para encontrar y solucionar problemas.\n\nEs posible que algunos registros del dispositivo contengan información sensible, por lo que solo permitimos que accedan a todos ellos apps de tu confianza. \n\nSi no permites que esta app acceda a todos los registros del dispositivo, aún puede acceder a sus propios registros. Además, es posible que el fabricante del dispositivo acceda a algunos registros o información en tu dispositivo."</string>
     <string name="keyguard_affordance_enablement_dialog_action_template" msgid="8164857863036314664">"Abrir <xliff:g id="APPNAME">%1$s</xliff:g>"</string>
-    <string name="keyguard_affordance_enablement_dialog_message" msgid="2790910660524887941">"Para agregar la app <xliff:g id="APPNAME">%1$s</xliff:g> como acceso directo, asegúrate que se cumplan los siguientes requisitos:"</string>
     <string name="keyguard_affordance_enablement_dialog_wallet_instruction_1" msgid="8439655049139819278">"• Se configuró la app."</string>
     <string name="keyguard_affordance_enablement_dialog_wallet_instruction_2" msgid="4321089250629477835">"• Se agregó al menos una tarjeta a la Billetera."</string>
     <string name="keyguard_affordance_enablement_dialog_qr_scanner_instruction" msgid="5355839079232119791">"• Se instaló la app de Cámara."</string>
     <string name="keyguard_affordance_enablement_dialog_home_instruction_1" msgid="8438311171750568633">"• Se configuró la app."</string>
     <string name="keyguard_affordance_enablement_dialog_home_instruction_2" msgid="8308525385889021652">"• Hay al menos un dispositivo disponible."</string>
+    <string name="keyguard_affordance_press_too_short" msgid="8145437175134998864">"Mantener presionado atajo"</string>
     <string name="rear_display_bottom_sheet_cancel" msgid="3461468855493357248">"Cancelar"</string>
     <string name="rear_display_bottom_sheet_confirm" msgid="4383356544661421206">"Girar ahora"</string>
     <string name="rear_display_fold_bottom_sheet_title" msgid="6081542277622721548">"Despliega el teléfono para tomar una selfie mejor"</string>
     <string name="rear_display_unfold_bottom_sheet_title" msgid="2137403802960396357">"¿Cambiar a pantalla frontal para mejores selfies?"</string>
     <string name="rear_display_bottom_sheet_description" msgid="1852662982816810352">"Usa la cámara trasera para tomar una foto más amplia y con mejor resolución."</string>
     <string name="rear_display_bottom_sheet_warning" msgid="800995919558238930"><b>"✱ Esta pantalla se apagará"</b></string>
-    <!-- no translation found for rear_display_accessibility_folded_animation (1538121649587978179) -->
-    <skip />
-    <!-- no translation found for rear_display_accessibility_unfolded_animation (1946153682258289040) -->
-    <skip />
+    <string name="rear_display_accessibility_folded_animation" msgid="1538121649587978179">"Dispositivo plegable siendo desplegado"</string>
+    <string name="rear_display_accessibility_unfolded_animation" msgid="1946153682258289040">"Dispositivo plegable siendo girado"</string>
+    <string name="stylus_battery_low" msgid="7134370101603167096">"La pluma stylus tiene poca batería"</string>
 </resources>

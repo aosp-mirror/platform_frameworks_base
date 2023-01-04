@@ -72,8 +72,7 @@
     <string name="global_action_smart_lock_disabled" msgid="9097102067802412936">"Smart Lock ተሰናክሏል"</string>
     <string name="remote_input_image_insertion_text" msgid="4850791636452521123">"ምስል ተልኳል"</string>
     <string name="screenshot_saving_title" msgid="2298349784913287333">"ቅጽበታዊ ገጽ እይታ በማስቀመጥ ላይ..."</string>
-    <!-- no translation found for screenshot_saving_work_profile_title (5332829607308450880) -->
-    <skip />
+    <string name="screenshot_saving_work_profile_title" msgid="5332829607308450880">"ቅጽበታዊ ገጽ እይታን ወደ የስራ መገለጫ በማስቀመጥ ላይ…"</string>
     <string name="screenshot_saved_title" msgid="8893267638659083153">"ቅጽበታዊ ገጽ እይታ ተቀምጧል"</string>
     <string name="screenshot_failed_title" msgid="3259148215671936891">"ቅጽበታዊ ገጽ ዕይታን ማስቀመጥ አልተቻለም"</string>
     <string name="screenshot_failed_to_save_user_locked_text" msgid="6156607948256936920">"ቅጽበታዊ ገጽ እይታ ከመቀመጡ በፊት መሣሪያ መከፈት አለበት"</string>
@@ -86,6 +85,7 @@
     <string name="screenshot_share_description" msgid="2861628935812656612">"ቅጽበታዊ ገጽ እይታን ያጋሩ"</string>
     <string name="screenshot_scroll_label" msgid="2930198809899329367">"ተጨማሪ ይቅረጹ"</string>
     <string name="screenshot_dismiss_description" msgid="4702341245899508786">"ቅጽበታዊ ገጽ ዕይታን አሰናብት"</string>
+    <string name="screenshot_dismiss_work_profile" msgid="3101530842987697045">"የስራ መገለጫ መልዕክትን ያሰናብታል"</string>
     <string name="screenshot_preview_description" msgid="7606510140714080474">"የቅጽበታዊ ገጽ ዕይታ ቅድመ-ዕይታ"</string>
     <string name="screenshot_top_boundary_pct" msgid="2520148599096479332">"የላይ ወሰን <xliff:g id="PERCENT">%1$d</xliff:g> በመቶ"</string>
     <string name="screenshot_bottom_boundary_pct" msgid="3880821519814946478">"የታች ወሰን <xliff:g id="PERCENT">%1$d</xliff:g> በመቶ"</string>
@@ -318,8 +318,7 @@
     <string name="sensor_privacy_camera_unblocked_dialog_content" msgid="7847190103011782278">"ካሜራ ለሁሉም መተግበሪያዎች እና አገልግሎቶች ነቅቷል።"</string>
     <string name="sensor_privacy_camera_blocked_dialog_content" msgid="3182428709314874616">"የካሜራ መዳረሻ ለሁሉም መተግበሪያዎች እና አገልግሎቶች ተሰናክሏል።"</string>
     <string name="sensor_privacy_htt_blocked_dialog_content" msgid="3333321592997666441">"የማይክሮፎን አዝራርን ለመጠቀም በቅንብሮች ውስጥ የማይክሮፎን መዳረሻን ያንቁ።"</string>
-    <!-- no translation found for sensor_privacy_dialog_open_settings (5635865896053011859) -->
-    <skip />
+    <string name="sensor_privacy_dialog_open_settings" msgid="5635865896053011859">"ቅንብሮችን ክፈት"</string>
     <string name="media_seamless_other_device" msgid="4654849800789196737">"ሌላ መሣሪያ"</string>
     <string name="quick_step_accessibility_toggle_overview" msgid="7908949976727578403">"አጠቃላይ እይታን ቀያይር"</string>
     <string name="zen_priority_introduction" msgid="3159291973383796646">"እርስዎ ከወሰንዋቸው ማንቂያዎች፣ አስታዋሾች፣ ክስተቶች እና ደዋዮች በስተቀር፣ በድምጾች እና ንዝረቶች አይረበሹም። ሙዚቃ፣ ቪዲዮዎች እና ጨዋታዎች ጨምሮ ለመጫወት የሚመርጡትን ማንኛውም ነገር አሁንም ይሰማሉ።"</string>
@@ -406,10 +405,8 @@
     <string name="dnd_suppressing_shade_text" msgid="5588252250634464042">"ማሳወቂያዎች በአትረብሽ ባሉበት ቆመዋል"</string>
     <string name="media_projection_action_text" msgid="3634906766918186440">"አሁን ጀምር"</string>
     <string name="empty_shade_text" msgid="8935967157319717412">"ምንም ማሳወቂያ የለም"</string>
-    <!-- no translation found for no_unseen_notif_text (395512586119868682) -->
-    <skip />
-    <!-- no translation found for unlock_to_see_notif_text (7439033907167561227) -->
-    <skip />
+    <string name="no_unseen_notif_text" msgid="395512586119868682">"ምንም አዲስ ማሳወቂያዎች የሉም"</string>
+    <string name="unlock_to_see_notif_text" msgid="7439033907167561227">"የቆዩ ማሳወቂያዎችን ለማየት ይክፈቱ"</string>
     <string name="quick_settings_disclosure_parental_controls" msgid="2114102871438223600">"ይህ መሣሪያ በእርስዎ ወላጅ የሚተዳደር ነው።"</string>
     <string name="quick_settings_disclosure_management_monitoring" msgid="8231336875820702180">"የእርስዎ ድርጅት የዚህ መሣሪያ ባለቤት ነው፣ እና የአውታረ መረብ ትራፊክን ሊከታተል ይችላል"</string>
     <string name="quick_settings_disclosure_named_management_monitoring" msgid="2831423806103479812">"<xliff:g id="ORGANIZATION_NAME">%1$s</xliff:g> የዚህ መሣሪያ ባለቤት ነው፣ እና የአውታረ መረብ ትራፊክን ሊከታተል ይችላል"</string>
@@ -746,6 +743,7 @@
     <string name="wifi_is_off" msgid="5389597396308001471">"Wi-Fi ጠፍቷል"</string>
     <string name="bt_is_off" msgid="7436344904889461591">"ብሉቱዝ ጠፍቷል"</string>
     <string name="dnd_is_off" msgid="3185706903793094463">"አትረብሽ ጠፍቷል"</string>
+    <string name="dnd_is_on" msgid="7009368176361546279">"አትረብሽ በርቷል"</string>
     <string name="qs_dnd_prompt_auto_rule" msgid="3535469468310002616">"አትረብሽ በአንድ ራስ-ሰር ደንብ (<xliff:g id="ID_1">%s</xliff:g>) በርቷል።"</string>
     <string name="qs_dnd_prompt_app" msgid="4027984447935396820">"አትረብሽ በአንድ መተግበሪያ (<xliff:g id="ID_1">%s</xliff:g>) በርቷል።"</string>
     <string name="qs_dnd_prompt_auto_rule_app" msgid="1841469944118486580">"አትረብሽ በአንድ ራስ-ሰር ደንብ ወይም መተግበሪያ በርቷል።"</string>
@@ -907,8 +905,8 @@
     <string name="media_output_dialog_button_stop_casting" msgid="6581379537930199189">"Cast ማድረግ አቁም"</string>
     <string name="media_output_dialog_accessibility_title" msgid="4681741064190167888">"ለኦዲዮ ውጽዓት ተገኚ የሆኑ መሣሪያዎች"</string>
     <string name="media_output_dialog_accessibility_seekbar" msgid="5332843993805568978">"የድምጽ መጠን"</string>
-    <!-- no translation found for media_output_dialog_volume_percentage (1613984910585111798) -->
-    <skip />
+    <string name="media_output_dialog_volume_percentage" msgid="1613984910585111798">"<xliff:g id="PERCENTAGE">%1$d</xliff:g>%%"</string>
+    <string name="media_output_group_title_speakers_and_displays" msgid="7169712332365659820">"ድምጽ ማውጫዎች እና ማሳያዎች"</string>
     <string name="media_output_first_broadcast_title" msgid="6292237789860753022">"ማሰራጨት እንዴት እንደሚሠራ"</string>
     <string name="media_output_broadcast" msgid="3555580945878071543">"ስርጭት"</string>
     <string name="media_output_first_notify_broadcast_message" msgid="6353857724136398494">"ተኳሃኝ የብሉቱዝ መሣሪያዎች ያላቸው በአቅራቢያዎ ያሉ ሰዎች እርስዎ እያሰራጩት ያሉትን ሚዲያ ማዳመጥ ይችላሉ"</string>
@@ -1022,8 +1020,7 @@
     <string name="dream_overlay_status_bar_camera_mic_off" msgid="3199425257833773569">"ካሜራ እና ማይክሮፎን ጠፍተዋል"</string>
     <string name="dream_overlay_status_bar_notification_indicator" msgid="8091389255691081711">"{count,plural, =1{# ማሳወቂያ}one{# ማሳወቂያዎች}other{# ማሳወቂያዎች}}"</string>
     <string name="dream_overlay_weather_complication_desc" msgid="824503662089783824">"<xliff:g id="WEATHER_CONDITION">%1$s</xliff:g>፣ <xliff:g id="TEMPERATURE">%2$s</xliff:g>"</string>
-    <!-- no translation found for note_task_button_label (8718616095800343136) -->
-    <skip />
+    <string name="note_task_button_label" msgid="8718616095800343136">"Notetaking"</string>
     <string name="broadcasting_description_is_broadcasting" msgid="765627502786404290">"በማሰራጨት ላይ"</string>
     <string name="bt_le_audio_broadcast_dialog_title" msgid="3605428497924077811">"<xliff:g id="APP_NAME">%1$s</xliff:g>ን ማሰራጨት ይቁም?"</string>
     <string name="bt_le_audio_broadcast_dialog_sub_title" msgid="7889684551194225793">"<xliff:g id="SWITCHAPP">%1$s</xliff:g>ን ካሰራጩ ወይም ውፅዓትን ከቀየሩ የአሁኑ ስርጭትዎ ይቆማል"</string>
@@ -1037,20 +1034,19 @@
     <string name="log_access_confirmation_deny" msgid="2389461495803585795">"አትፍቀድ"</string>
     <string name="log_access_confirmation_body" msgid="6883031912003112634">"የመሣሪያ ምዝግብ ማስታወሻዎች በመሣሪያዎ ላይ ምን እንደሚከሰት ይመዘግባሉ። መተግበሪያዎች ችግሮችን ለማግኘት እና ለማስተካከል እነዚህን ምዝግብ ማስታወሻዎች መጠቀም ይችላሉ።\n\nአንዳንድ ምዝግብ ማስታወሻዎች ልዩ ጥንቃቄ የሚያስፈልገው መረጃ ሊይዙ ይችላሉ ስለዚህ ለሚያምኗቸው መተግበሪያዎች ብቻ ሁሉንም የመሣሪያ ምዝግብ ማስታወሻዎች እንዲደርሱ ይፍቀዱላቸው። \n\nይህ መተግበሪያ ሁሉንም የመሣሪያ ምዝግብ ማስታወሻዎች እንዲደርስ ካልፈቀዱለት አሁንም የራሱን ምዝግብ ማስታወሻዎች መድረስ ይችላል። የእርስዎ መሣሪያ አምራች አሁንም በመሣሪያዎ ላይ አንዳንድ ምዝግብ ማስታወሻዎችን ወይም መረጃዎችን ሊደርስ ይችላል።"</string>
     <string name="keyguard_affordance_enablement_dialog_action_template" msgid="8164857863036314664">"<xliff:g id="APPNAME">%1$s</xliff:g> ይክፈቱ"</string>
-    <string name="keyguard_affordance_enablement_dialog_message" msgid="2790910660524887941">"የ<xliff:g id="APPNAME">%1$s</xliff:g> መተግበሪያን እንደ አቋራጭ ለማከል የሚከተሉትን ማድረግዎን እርግጠኛ ይሁኑ"</string>
     <string name="keyguard_affordance_enablement_dialog_wallet_instruction_1" msgid="8439655049139819278">"• መተግበሪያው ተዋቅሯል"</string>
     <string name="keyguard_affordance_enablement_dialog_wallet_instruction_2" msgid="4321089250629477835">"• ቢያንስ አንድ ካርድ ወደ Wallet ታክሏል"</string>
     <string name="keyguard_affordance_enablement_dialog_qr_scanner_instruction" msgid="5355839079232119791">"• የካሜራ መተግበሪያ ይጫኑ"</string>
     <string name="keyguard_affordance_enablement_dialog_home_instruction_1" msgid="8438311171750568633">"• መተግበሪያው ተዋቅሯል"</string>
     <string name="keyguard_affordance_enablement_dialog_home_instruction_2" msgid="8308525385889021652">"• ቢያንስ አንድ መሣሪያ ይገኛል"</string>
+    <string name="keyguard_affordance_press_too_short" msgid="8145437175134998864">"የይንኩ እና ይያዙ አቋራጭ"</string>
     <string name="rear_display_bottom_sheet_cancel" msgid="3461468855493357248">"ይቅር"</string>
     <string name="rear_display_bottom_sheet_confirm" msgid="4383356544661421206">"አሁን ገልበጥ"</string>
     <string name="rear_display_fold_bottom_sheet_title" msgid="6081542277622721548">"ለተሻለ የራስ ፎቶ ስልክን ይዘርጉ"</string>
     <string name="rear_display_unfold_bottom_sheet_title" msgid="2137403802960396357">"ለተሻለ የራስ ፎቶ ወደፊት ማሳያ ይገልበጥ?"</string>
     <string name="rear_display_bottom_sheet_description" msgid="1852662982816810352">"ከፍተኛ ጥራት ላለው ሰፊ ፎቶ የኋለኛውን ካሜራ ይጠቀሙ።"</string>
     <string name="rear_display_bottom_sheet_warning" msgid="800995919558238930"><b>"✱ ይህ ማያ ገጽ ይጠፋል"</b></string>
-    <!-- no translation found for rear_display_accessibility_folded_animation (1538121649587978179) -->
-    <skip />
-    <!-- no translation found for rear_display_accessibility_unfolded_animation (1946153682258289040) -->
-    <skip />
+    <string name="rear_display_accessibility_folded_animation" msgid="1538121649587978179">"መታጠፍ የሚችል መሣሪያ እየተዘረጋ ነው"</string>
+    <string name="rear_display_accessibility_unfolded_animation" msgid="1946153682258289040">"መታጠፍ የሚችል መሣሪያ እየተገለበጠ ነው"</string>
+    <string name="stylus_battery_low" msgid="7134370101603167096">"የብሮስፌ ባትሪ ዝቅተኛ ነው"</string>
 </resources>

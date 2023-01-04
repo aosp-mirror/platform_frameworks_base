@@ -85,6 +85,7 @@
     <string name="screenshot_share_description" msgid="2861628935812656612">"Skrinşotu paylaşın"</string>
     <string name="screenshot_scroll_label" msgid="2930198809899329367">"Genişləndirin"</string>
     <string name="screenshot_dismiss_description" msgid="4702341245899508786">"Ekran şəklini ötürün"</string>
+    <string name="screenshot_dismiss_work_profile" msgid="3101530842987697045">"İş profili mesajını qapadın"</string>
     <string name="screenshot_preview_description" msgid="7606510140714080474">"Ekran şəklinə önbaxış"</string>
     <string name="screenshot_top_boundary_pct" msgid="2520148599096479332">"Yuxarı sərhəd <xliff:g id="PERCENT">%1$d</xliff:g> faiz"</string>
     <string name="screenshot_bottom_boundary_pct" msgid="3880821519814946478">"Aşağı sərhəd <xliff:g id="PERCENT">%1$d</xliff:g> faiz"</string>
@@ -742,6 +743,7 @@
     <string name="wifi_is_off" msgid="5389597396308001471">"Wi-Fi deaktivdir"</string>
     <string name="bt_is_off" msgid="7436344904889461591">"Bluetooth deaktivdir"</string>
     <string name="dnd_is_off" msgid="3185706903793094463">"\"Narahat Etməyin\" deaktivdir"</string>
+    <string name="dnd_is_on" msgid="7009368176361546279">"\"Narahat Etməyin\" rejimi aktivdir"</string>
     <string name="qs_dnd_prompt_auto_rule" msgid="3535469468310002616">"\"Narahat etməyin\" rejimi (<xliff:g id="ID_1">%s</xliff:g>) avtomatik qaydası tərəfindən aktiv edildi."</string>
     <string name="qs_dnd_prompt_app" msgid="4027984447935396820">"\"Narahat etməyin\" rejimi (<xliff:g id="ID_1">%s</xliff:g>) tətbiqi tərəfindən aktiv edildi."</string>
     <string name="qs_dnd_prompt_auto_rule_app" msgid="1841469944118486580">"\"Narahat etməyin\" rejimi avtomatik qayda və ya tətbiq tərəfindən aktiv edildi."</string>
@@ -904,6 +906,7 @@
     <string name="media_output_dialog_accessibility_title" msgid="4681741064190167888">"Audio çıxış üçün əlçatan cihazlar."</string>
     <string name="media_output_dialog_accessibility_seekbar" msgid="5332843993805568978">"Səs"</string>
     <string name="media_output_dialog_volume_percentage" msgid="1613984910585111798">"<xliff:g id="PERCENTAGE">%1$d</xliff:g>%%"</string>
+    <string name="media_output_group_title_speakers_and_displays" msgid="7169712332365659820">"Dinamiklər &amp; Displeylər"</string>
     <string name="media_output_first_broadcast_title" msgid="6292237789860753022">"Yayım necə işləyir"</string>
     <string name="media_output_broadcast" msgid="3555580945878071543">"Yayım"</string>
     <string name="media_output_first_notify_broadcast_message" msgid="6353857724136398494">"Uyğun Bluetooth cihazları olan yaxınlığınızdakı insanlar yayımladığınız medianı dinləyə bilər"</string>
@@ -1031,12 +1034,12 @@
     <string name="log_access_confirmation_deny" msgid="2389461495803585795">"İcazə verməyin"</string>
     <string name="log_access_confirmation_body" msgid="6883031912003112634">"Cihaz qeydləri cihazınızda baş verənləri qeyd edir. Tətbiqlər problemləri tapmaq və həll etmək üçün bu qeydlərdən istifadə edə bilər.\n\nBəzi qeydlərdə həssas məlumatlar ola bilər, ona görə də yalnız etibar etdiyiniz tətbiqlərin bütün cihaz qeydlərinə giriş etməsinə icazə verin. \n\nBu tətbiqin bütün cihaz qeydlərinə girişinə icazə verməsəniz, o, hələ də öz qeydlərinə giriş edə bilər. Cihaz istehsalçınız hələ də cihazınızda bəzi qeydlərə və ya məlumatlara giriş edə bilər."</string>
     <string name="keyguard_affordance_enablement_dialog_action_template" msgid="8164857863036314664">"<xliff:g id="APPNAME">%1$s</xliff:g> tətbiqini açın"</string>
-    <string name="keyguard_affordance_enablement_dialog_message" msgid="2790910660524887941">"<xliff:g id="APPNAME">%1$s</xliff:g> tətbiqini qısayol kimi əlavə etmək üçün bunları təmin edin:"</string>
     <string name="keyguard_affordance_enablement_dialog_wallet_instruction_1" msgid="8439655049139819278">"• Tətbiq ayarlanmalıdır"</string>
     <string name="keyguard_affordance_enablement_dialog_wallet_instruction_2" msgid="4321089250629477835">"• Pulqabına ən azı bir kart əlavə edilməlidir"</string>
     <string name="keyguard_affordance_enablement_dialog_qr_scanner_instruction" msgid="5355839079232119791">"• Kamera tətbiqini quraşdırın"</string>
     <string name="keyguard_affordance_enablement_dialog_home_instruction_1" msgid="8438311171750568633">"• Tətbiq ayarlanmalıdır"</string>
     <string name="keyguard_affordance_enablement_dialog_home_instruction_2" msgid="8308525385889021652">"• Ən azı bir cihaz əlçatandır"</string>
+    <string name="keyguard_affordance_press_too_short" msgid="8145437175134998864">"Qısayola toxunub saxlayın"</string>
     <string name="rear_display_bottom_sheet_cancel" msgid="3461468855493357248">"Ləğv edin"</string>
     <string name="rear_display_bottom_sheet_confirm" msgid="4383356544661421206">"İndi fırladın"</string>
     <string name="rear_display_fold_bottom_sheet_title" msgid="6081542277622721548">"Daha yaxşı selfi üçün telefonu açın"</string>
@@ -1045,4 +1048,5 @@
     <string name="rear_display_bottom_sheet_warning" msgid="800995919558238930"><b>"✱ Bu ekran deaktiv ediləcək"</b></string>
     <string name="rear_display_accessibility_folded_animation" msgid="1538121649587978179">"Qatlana bilən cihaz açılır"</string>
     <string name="rear_display_accessibility_unfolded_animation" msgid="1946153682258289040">"Qatlana bilən cihaz fırladılır"</string>
+    <string name="stylus_battery_low" msgid="7134370101603167096">"Qələm enerjisi azdır"</string>
 </resources>

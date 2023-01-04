@@ -85,6 +85,7 @@
     <string name="screenshot_share_description" msgid="2861628935812656612">"ចែករំលែករូបថតអេក្រង់"</string>
     <string name="screenshot_scroll_label" msgid="2930198809899329367">"ថត​ច្រើនទៀត"</string>
     <string name="screenshot_dismiss_description" msgid="4702341245899508786">"ច្រានចោល​រូបថត​អេក្រង់"</string>
+    <string name="screenshot_dismiss_work_profile" msgid="3101530842987697045">"ច្រានចោល​សារ​កម្រងព័ត៌មានការងារ"</string>
     <string name="screenshot_preview_description" msgid="7606510140714080474">"ការមើល​រូបថត​អេក្រង់​សាកល្បង"</string>
     <string name="screenshot_top_boundary_pct" msgid="2520148599096479332">"បន្ទាត់បែងចែក​ខាងលើ <xliff:g id="PERCENT">%1$d</xliff:g> ភាគរយ"</string>
     <string name="screenshot_bottom_boundary_pct" msgid="3880821519814946478">"បន្ទាត់បែងចែក​ខាងក្រោម <xliff:g id="PERCENT">%1$d</xliff:g> ភាគរយ"</string>
@@ -317,8 +318,7 @@
     <string name="sensor_privacy_camera_unblocked_dialog_content" msgid="7847190103011782278">"កាមេរ៉ាត្រូវបានបើកសម្រាប់កម្មវិធី និងសេវាកម្មទាំងអស់។"</string>
     <string name="sensor_privacy_camera_blocked_dialog_content" msgid="3182428709314874616">"សិទ្ធិចូលប្រើប្រាស់កាមេរ៉ាត្រូវបានបិទសម្រាប់កម្មវិធី និងសេវាកម្មទាំងអស់។"</string>
     <string name="sensor_privacy_htt_blocked_dialog_content" msgid="3333321592997666441">"ដើម្បីប្រើប្រាស់ប៊ូតុងមីក្រូហ្វូន សូមបើកសិទ្ធិចូលប្រើប្រាស់មីក្រូហ្វូននៅក្នុងការកំណត់។"</string>
-    <!-- no translation found for sensor_privacy_dialog_open_settings (5635865896053011859) -->
-    <skip />
+    <string name="sensor_privacy_dialog_open_settings" msgid="5635865896053011859">"បើកការកំណត់"</string>
     <string name="media_seamless_other_device" msgid="4654849800789196737">"ឧបករណ៍ផ្សេងទៀត"</string>
     <string name="quick_step_accessibility_toggle_overview" msgid="7908949976727578403">"បិទ/បើក​ទិដ្ឋភាពរួម"</string>
     <string name="zen_priority_introduction" msgid="3159291973383796646">"សំឡេង និងរំញ័រនឹងមិន​រំខានដល់អ្នកឡើយ លើកលែងតែម៉ោងរោទ៍ ការរំលឹក ព្រឹត្តិការណ៍ និងអ្នកហៅទូរសព្ទដែលអ្នកបញ្ជាក់ប៉ុណ្ណោះ។ អ្នកនឹងនៅតែឮសំឡេងសកម្មភាពគ្រប់យ៉ាងដែលអ្នកលេងដដែល រួមទាំងតន្រ្តី វីដេអូ និងហ្គេម។"</string>
@@ -743,6 +743,7 @@
     <string name="wifi_is_off" msgid="5389597396308001471">"Wi-Fi បាន​បិទ"</string>
     <string name="bt_is_off" msgid="7436344904889461591">"ប៊្លូធូស​បាន​បិទ"</string>
     <string name="dnd_is_off" msgid="3185706903793094463">"មុខងារ​កុំរំខាន​បាន​បិទ"</string>
+    <string name="dnd_is_on" msgid="7009368176361546279">"មុខងារកុំរំខាន​ត្រូវបានបើក"</string>
     <string name="qs_dnd_prompt_auto_rule" msgid="3535469468310002616">"មុខងារ​កុំ​រំខាន​ត្រូវបាន​បើកដោយច្បាប់​ស្វ័យ​ប្រវត្តិ (<xliff:g id="ID_1">%s</xliff:g>)។"</string>
     <string name="qs_dnd_prompt_app" msgid="4027984447935396820">"មុខងារ​កុំ​រំខាន​ត្រូវបាន​បើកដោយកម្មវិធី (<xliff:g id="ID_1">%s</xliff:g>)។"</string>
     <string name="qs_dnd_prompt_auto_rule_app" msgid="1841469944118486580">"មុខងារ​កុំ​រំខាន​ត្រូវបាន​បើកដោយច្បាប់​ស្វ័យ​ប្រវត្តិ ឬ​កម្មវិធី។"</string>
@@ -815,7 +816,7 @@
     <string name="accessibility_floating_button_migration_tooltip" msgid="5217151214439341902">"ចុចដើម្បីបើក​មុខងារ​ភាពងាយស្រួល។ ប្ដូរ ឬប្ដូរ​ប៊ូតុងនេះ​តាមបំណង​នៅក្នុង​ការកំណត់។\n\n"<annotation id="link">"មើល​ការកំណត់"</annotation></string>
     <string name="accessibility_floating_button_docking_tooltip" msgid="6814897496767461517">"ផ្លាស់ទី​ប៊ូតុង​ទៅគែម ដើម្បីលាក់វា​ជាបណ្ដោះអាសន្ន"</string>
     <string name="accessibility_floating_button_undo" msgid="511112888715708241">"ត្រឡប់វិញ"</string>
-    <string name="accessibility_floating_button_undo_message_text" msgid="3044079592757099698">"{count,plural, =1{បានដក​ផ្លូវកាត់ {label} ចេញ}other{បាន​ដក​ផ្លូវ​កាត់ # ចេញ}}"</string>
+    <string name="accessibility_floating_button_undo_message_text" msgid="3044079592757099698">"{count,plural, =1{បានដក​ផ្លូវកាត់ \"{label}\" ចេញ}other{បាន​ដក​ផ្លូវ​កាត់ # ចេញ}}"</string>
     <string name="accessibility_floating_button_action_move_top_left" msgid="6253520703618545705">"ផ្លាស់ទីទៅខាងលើផ្នែកខាងឆ្វេង"</string>
     <string name="accessibility_floating_button_action_move_top_right" msgid="6106225581993479711">"ផ្លាស់ទីទៅខាងលើផ្នែកខាងស្ដាំ"</string>
     <string name="accessibility_floating_button_action_move_bottom_left" msgid="8063394111137429725">"ផ្លាស់ទីទៅខាងក្រោមផ្នែកខាងឆ្វេង​"</string>
@@ -905,6 +906,7 @@
     <string name="media_output_dialog_accessibility_title" msgid="4681741064190167888">"ឧបករណ៍​ដែលអាច​ប្រើបាន​សម្រាប់ឧបករណ៍​បញ្ចេញ​សំឡេង។"</string>
     <string name="media_output_dialog_accessibility_seekbar" msgid="5332843993805568978">"កម្រិតសំឡេង"</string>
     <string name="media_output_dialog_volume_percentage" msgid="1613984910585111798">"<xliff:g id="PERCENTAGE">%1$d</xliff:g>%%"</string>
+    <string name="media_output_group_title_speakers_and_displays" msgid="7169712332365659820">"ឧបករណ៍បំពងសំឡេង និងផ្ទាំងអេក្រង់"</string>
     <string name="media_output_first_broadcast_title" msgid="6292237789860753022">"របៀបដែលការផ្សាយដំណើរការ"</string>
     <string name="media_output_broadcast" msgid="3555580945878071543">"ការ​ផ្សាយ"</string>
     <string name="media_output_first_notify_broadcast_message" msgid="6353857724136398494">"មនុស្សនៅជិត​អ្នកដែលមាន​ឧបករណ៍ប៊្លូធូស​ត្រូវគ្នា​អាចស្តាប់​មេឌៀ​ដែលអ្នកកំពុងផ្សាយបាន"</string>
@@ -1032,20 +1034,19 @@
     <string name="log_access_confirmation_deny" msgid="2389461495803585795">"មិនអនុញ្ញាត"</string>
     <string name="log_access_confirmation_body" msgid="6883031912003112634">"កំណត់ហេតុឧបករណ៍កត់ត្រាអ្វីដែលកើតឡើងនៅលើឧបករណ៍របស់អ្នក។ កម្មវិធីអាចប្រើកំណត់ហេតុទាំងនេះ ដើម្បីស្វែងរក និងដោះស្រាយបញ្ហាបាន។\n\nកំណត់ហេតុមួយចំនួនអាចមានព័ត៌មានរសើប ដូច្នេះសូមអនុញ្ញាតឱ្យចូលប្រើកំណត់ហេតុឧបករណ៍ទាំងអស់សម្រាប់តែកម្មវិធីដែលអ្នកទុកចិត្តប៉ុណ្ណោះ។ \n\nប្រសិនបើអ្នកមិនអនុញ្ញាតឱ្យកម្មវិធីនេះចូលប្រើកំណត់ហេតុឧបករណ៍ទាំងអស់ទេ កម្មវិធីនេះនៅតែអាចចូលប្រើកំណត់ហេតុរបស់ខ្លួនផ្ទាល់បាន។ ក្រុមហ៊ុន​ផលិត​ឧបករណ៍របស់អ្នក​ប្រហែលជា​នៅតែអាចចូលប្រើ​កំណត់ហេតុ ឬព័ត៌មានមួយចំនួន​នៅលើឧបករណ៍​របស់អ្នក​បានដដែល។"</string>
     <string name="keyguard_affordance_enablement_dialog_action_template" msgid="8164857863036314664">"បើក <xliff:g id="APPNAME">%1$s</xliff:g>"</string>
-    <string name="keyguard_affordance_enablement_dialog_message" msgid="2790910660524887941">"ដើម្បីបញ្ចូលកម្មវិធី <xliff:g id="APPNAME">%1$s</xliff:g> ជាផ្លូវកាត់ សូមប្រាកដថា"</string>
     <string name="keyguard_affordance_enablement_dialog_wallet_instruction_1" msgid="8439655049139819278">"• កម្មវិធីត្រូវបានរៀបចំ"</string>
     <string name="keyguard_affordance_enablement_dialog_wallet_instruction_2" msgid="4321089250629477835">"• កាតយ៉ាងតិចមួយត្រូវបានបញ្ចូលទៅក្នុង Wallet"</string>
     <string name="keyguard_affordance_enablement_dialog_qr_scanner_instruction" msgid="5355839079232119791">"• ដំឡើងកម្មវិធីកាមេរ៉ា"</string>
     <string name="keyguard_affordance_enablement_dialog_home_instruction_1" msgid="8438311171750568633">"• កម្មវិធីត្រូវបានរៀបចំ"</string>
     <string name="keyguard_affordance_enablement_dialog_home_instruction_2" msgid="8308525385889021652">"• ឧបករណ៍យ៉ាងតិចមួយអាចប្រើបាន"</string>
+    <string name="keyguard_affordance_press_too_short" msgid="8145437175134998864">"ចុចឱ្យជាប់លើផ្លូវកាត់"</string>
     <string name="rear_display_bottom_sheet_cancel" msgid="3461468855493357248">"បោះបង់"</string>
     <string name="rear_display_bottom_sheet_confirm" msgid="4383356544661421206">"ត្រឡប់ឥឡូវនេះ"</string>
     <string name="rear_display_fold_bottom_sheet_title" msgid="6081542277622721548">"លាតទូរសព្ទ ដើម្បីសែលហ្វីកាន់តែប្រសើរ"</string>
     <string name="rear_display_unfold_bottom_sheet_title" msgid="2137403802960396357">"ត្រឡប់ទៅផ្ទាំងអេក្រង់ខាងមុខ​ ដើម្បី​ថត​សែលហ្វីកាន់តែបានល្អឬ?"</string>
     <string name="rear_display_bottom_sheet_description" msgid="1852662982816810352">"ប្រើកាមេរ៉ាខាងក្រោយ ដើម្បីទទួលបានរូបថតកាន់តែធំជាមួយនឹងកម្រិតគុណភាពកាន់តែខ្ពស់។"</string>
     <string name="rear_display_bottom_sheet_warning" msgid="800995919558238930"><b>"✱ អេក្រង់នេះនឹងបិទ"</b></string>
-    <!-- no translation found for rear_display_accessibility_folded_animation (1538121649587978179) -->
-    <skip />
-    <!-- no translation found for rear_display_accessibility_unfolded_animation (1946153682258289040) -->
-    <skip />
+    <string name="rear_display_accessibility_folded_animation" msgid="1538121649587978179">"ឧបករណ៍អាច​បត់បានកំពុងត្រូវបានលា"</string>
+    <string name="rear_display_accessibility_unfolded_animation" msgid="1946153682258289040">"ឧបករណ៍អាច​បត់បានកំពុងត្រូវបានលា"</string>
+    <string name="stylus_battery_low" msgid="7134370101603167096">"ថ្មប៊ិកនៅសល់តិច"</string>
 </resources>

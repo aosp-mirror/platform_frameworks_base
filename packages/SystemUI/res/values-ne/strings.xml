@@ -85,6 +85,7 @@
     <string name="screenshot_share_description" msgid="2861628935812656612">"स्क्रिनसट सेयर गर्नुहोस्"</string>
     <string name="screenshot_scroll_label" msgid="2930198809899329367">"अन्य कुराहरू खिच्नुहोस्"</string>
     <string name="screenshot_dismiss_description" msgid="4702341245899508786">"स्क्रिनसट हटाउनुहोस्"</string>
+    <string name="screenshot_dismiss_work_profile" msgid="3101530842987697045">"कार्य प्रोफाइलमा प्राप्त भएको म्यासेज हटाउनुहोस्"</string>
     <string name="screenshot_preview_description" msgid="7606510140714080474">"स्क्रिनसटको पूर्वावलोकन"</string>
     <string name="screenshot_top_boundary_pct" msgid="2520148599096479332">"सिरानबाट <xliff:g id="PERCENT">%1$d</xliff:g> प्रतिशत"</string>
     <string name="screenshot_bottom_boundary_pct" msgid="3880821519814946478">"फेदबाट <xliff:g id="PERCENT">%1$d</xliff:g> प्रतिशत"</string>
@@ -317,8 +318,7 @@
     <string name="sensor_privacy_camera_unblocked_dialog_content" msgid="7847190103011782278">"सबै एप तथा सेवाहरूलाई क्यामेरा प्रयोग गर्ने अनुमति दिइएको छ।"</string>
     <string name="sensor_privacy_camera_blocked_dialog_content" msgid="3182428709314874616">"कुनै पनि एप तथा सेवालाई क्यामेरा प्रयोग गर्ने अनुमति दिइएको छैन।"</string>
     <string name="sensor_privacy_htt_blocked_dialog_content" msgid="3333321592997666441">"तपाईं माइक्रोफोन बटन प्रयोग गर्न चाहनुहुन्छ भने सेटिङमा गई माइक्रोफोन प्रयोग गर्ने अनुमति दिनुहोस्।"</string>
-    <!-- no translation found for sensor_privacy_dialog_open_settings (5635865896053011859) -->
-    <skip />
+    <string name="sensor_privacy_dialog_open_settings" msgid="5635865896053011859">"सेटिङ खोल्नुहोस्"</string>
     <string name="media_seamless_other_device" msgid="4654849800789196737">"अर्को डिभाइड"</string>
     <string name="quick_step_accessibility_toggle_overview" msgid="7908949976727578403">"परिदृश्य टगल गर्नुहोस्"</string>
     <string name="zen_priority_introduction" msgid="3159291973383796646">"तपाईंलाई अलार्म, रिमाइन्डर, कार्यक्रम र तपाईंले निर्दिष्ट गर्नुभएका कलरहरू बाहेकका ध्वनि र कम्पनहरूले बाधा पुऱ्याउने छैनन्। तपाईंले अझै सङ्गीत, भिडियो र खेलहरू लगायत आफूले प्ले गर्न छनौट गरेका जुनसुकै कुरा सुन्न सक्नुहुनेछ।"</string>
@@ -743,6 +743,7 @@
     <string name="wifi_is_off" msgid="5389597396308001471">"Wi‑Fi अफ छ"</string>
     <string name="bt_is_off" msgid="7436344904889461591">"ब्लुटुथ निष्क्रिय छ"</string>
     <string name="dnd_is_off" msgid="3185706903793094463">"बाधा नपुर्‍याउनुहोस् नामक विकल्प निष्क्रिय छ"</string>
+    <string name="dnd_is_on" msgid="7009368176361546279">"Do Not Disturb अन छ"</string>
     <string name="qs_dnd_prompt_auto_rule" msgid="3535469468310002616">"कुनै स्वचालित नियमले बाधा नपुऱ्याउनुहोस् नामक विकल्पलाई सक्रियो गऱ्यो (<xliff:g id="ID_1">%s</xliff:g>)।"</string>
     <string name="qs_dnd_prompt_app" msgid="4027984447935396820">"कुनै अनुप्रयोगले बाधा नपुऱ्याउनुहोस् नामक विकल्पलाई सक्रिय गऱ्यो (<xliff:g id="ID_1">%s</xliff:g>)।"</string>
     <string name="qs_dnd_prompt_auto_rule_app" msgid="1841469944118486580">"कुनै स्वचालित नियम वा अनुप्रयोगले बाधा नपुऱ्याउनुहोस् नामक विकल्पलाई सक्रिय गऱ्यो।"</string>
@@ -815,7 +816,7 @@
     <string name="accessibility_floating_button_migration_tooltip" msgid="5217151214439341902">"सर्वसुलभता कायम गर्ने सुविधा खोल्न ट्याप गर्नुहोस्। सेटिङमा गई यो बटन कस्टमाइज गर्नुहोस् वा बदल्नुहोस्।\n\n"<annotation id="link">"सेटिङ हेर्नुहोस्"</annotation></string>
     <string name="accessibility_floating_button_docking_tooltip" msgid="6814897496767461517">"यो बटन केही बेर नदेखिने पार्न किनारातिर सार्नुहोस्"</string>
     <string name="accessibility_floating_button_undo" msgid="511112888715708241">"अन्डू गर्नुहोस्"</string>
-    <string name="accessibility_floating_button_undo_message_text" msgid="3044079592757099698">"{count,plural, =1{{label} वटा सर्टकट हटाइयो}other{# वटा सर्टकट हटाइयो}}"</string>
+    <string name="accessibility_floating_button_undo_message_text" msgid="3044079592757099698">"{count,plural, =1{{label} सर्टकट हटाइयो}other{# सर्टकटहरू हटाइए}}"</string>
     <string name="accessibility_floating_button_action_move_top_left" msgid="6253520703618545705">"सिरानको बायाँतिर सार्नुहोस्"</string>
     <string name="accessibility_floating_button_action_move_top_right" msgid="6106225581993479711">"सिरानको दायाँतिर सार्नुहोस्"</string>
     <string name="accessibility_floating_button_action_move_bottom_left" msgid="8063394111137429725">"पुछारको बायाँतिर सार्नुहोस्"</string>
@@ -905,6 +906,7 @@
     <string name="media_output_dialog_accessibility_title" msgid="4681741064190167888">"अडियो आउटपुटका लागि उपलब्ध डिभाइसहरू।"</string>
     <string name="media_output_dialog_accessibility_seekbar" msgid="5332843993805568978">"भोल्युम"</string>
     <string name="media_output_dialog_volume_percentage" msgid="1613984910585111798">"<xliff:g id="PERCENTAGE">%1$d</xliff:g>%%"</string>
+    <string name="media_output_group_title_speakers_and_displays" msgid="7169712332365659820">"स्पिकर तथा डिस्प्लेहरू"</string>
     <string name="media_output_first_broadcast_title" msgid="6292237789860753022">"प्रसारण गर्ने सुविधाले कसरी काम गर्छ"</string>
     <string name="media_output_broadcast" msgid="3555580945878071543">"प्रसारण"</string>
     <string name="media_output_first_notify_broadcast_message" msgid="6353857724136398494">"कम्प्याटिबल ब्लुटुथ डिभाइस भएका नजिकैका मान्छेहरू तपाईंले प्रसारण गरिरहनुभएको मिडिया सुन्न सक्छन्"</string>
@@ -1032,20 +1034,19 @@
     <string name="log_access_confirmation_deny" msgid="2389461495803585795">"अनुमति नदिनुहोस्"</string>
     <string name="log_access_confirmation_body" msgid="6883031912003112634">"डिभाइसका लगले तपाईंको डिभाइसमा भएका विभिन्न गतिविधिको अभिलेख राख्छन्। एपहरू यी लगका आधारमा समस्या पत्ता लगाउन र तिनको समाधान गर्न सक्छन्।\n\nकेही लगहरूमा संवेदनशील जानकारी समावेश हुन सक्ने भएकाले आफूले भरोसा गर्ने एपलाई मात्र डिभाइसका सबै लग हेर्ने अनुमति दिनुहोस्। \n\nतपाईंले यो एपलाई डिभाइसका सबै लग हेर्ने अनुमति दिनुभएन भने पनि यसले आफ्नै लग भने हेर्न सक्छ। तपाईंको डिभाइसका उत्पादकले पनि तपाईंको डिभाइसमा भएका केही लग वा जानकारी हेर्न सक्ने सम्भावना हुन्छ।"</string>
     <string name="keyguard_affordance_enablement_dialog_action_template" msgid="8164857863036314664">"<xliff:g id="APPNAME">%1$s</xliff:g> खोल्नुहोस्"</string>
-    <string name="keyguard_affordance_enablement_dialog_message" msgid="2790910660524887941">"<xliff:g id="APPNAME">%1$s</xliff:g> एपलाई सर्टकटका रूपमा हाल्न, निम्न कुराको सुनिश्चित गर्नुहोस्:"</string>
     <string name="keyguard_affordance_enablement_dialog_wallet_instruction_1" msgid="8439655049139819278">"• एप सेटअप गरिएको छ"</string>
     <string name="keyguard_affordance_enablement_dialog_wallet_instruction_2" msgid="4321089250629477835">"• Wallet मा कम्तीमा एउटा कार्ड हालिएको छ"</string>
     <string name="keyguard_affordance_enablement_dialog_qr_scanner_instruction" msgid="5355839079232119791">"• क्यामेरा एप इन्स्टल गरिएको छ"</string>
     <string name="keyguard_affordance_enablement_dialog_home_instruction_1" msgid="8438311171750568633">"• एप सेटअप गरिएको छ"</string>
     <string name="keyguard_affordance_enablement_dialog_home_instruction_2" msgid="8308525385889021652">"• कम्तीमा एउटा डिभाइस उपलब्ध छ"</string>
+    <string name="keyguard_affordance_press_too_short" msgid="8145437175134998864">"सर्टकट थिचिराख्नुहोस्"</string>
     <string name="rear_display_bottom_sheet_cancel" msgid="3461468855493357248">"रद्द गर्नुहोस्"</string>
     <string name="rear_display_bottom_sheet_confirm" msgid="4383356544661421206">"अहिले नै फ्लिप गर्नुहोस्"</string>
     <string name="rear_display_fold_bottom_sheet_title" msgid="6081542277622721548">"अझ राम्रो सेल्फी खिच्न फोन अनफोल्ड गर्नुहोस्"</string>
     <string name="rear_display_unfold_bottom_sheet_title" msgid="2137403802960396357">"अझ राम्रो सेल्फी खिच्न फ्लिप गरी अगाडिपट्टिको डिस्प्ले प्रयोग गर्ने हो?"</string>
     <string name="rear_display_bottom_sheet_description" msgid="1852662982816810352">"अझ बढी रिजोल्युसन भएको फराकिलो फोटो खिच्न पछाडिपट्टिको क्यामेरा प्रयोग गर्नुहोस्।"</string>
     <string name="rear_display_bottom_sheet_warning" msgid="800995919558238930"><b>"✱ यो स्क्रिन अफ हुने छ"</b></string>
-    <!-- no translation found for rear_display_accessibility_folded_animation (1538121649587978179) -->
-    <skip />
-    <!-- no translation found for rear_display_accessibility_unfolded_animation (1946153682258289040) -->
-    <skip />
+    <string name="rear_display_accessibility_folded_animation" msgid="1538121649587978179">"फोल्ड गर्न मिल्ने डिभाइस अनफोल्ड गरेको देखाइएको एनिमेसन"</string>
+    <string name="rear_display_accessibility_unfolded_animation" msgid="1946153682258289040">"फोल्ड गर्न मिल्ने डिभाइस यताउता पल्टाएर देखाइएको एनिमेसन"</string>
+    <string name="stylus_battery_low" msgid="7134370101603167096">"स्टाइलसको ब्याट्री लो छ"</string>
 </resources>

@@ -85,6 +85,7 @@
     <string name="screenshot_share_description" msgid="2861628935812656612">"Jaa kuvakaappaus"</string>
     <string name="screenshot_scroll_label" msgid="2930198809899329367">"Kuvaa enemmän"</string>
     <string name="screenshot_dismiss_description" msgid="4702341245899508786">"Hylkää kuvakaappaus"</string>
+    <string name="screenshot_dismiss_work_profile" msgid="3101530842987697045">"Hylkää työprofiiliviesti"</string>
     <string name="screenshot_preview_description" msgid="7606510140714080474">"Kuvakaappauksen esikatselu"</string>
     <string name="screenshot_top_boundary_pct" msgid="2520148599096479332">"Yläreuna <xliff:g id="PERCENT">%1$d</xliff:g> prosenttia"</string>
     <string name="screenshot_bottom_boundary_pct" msgid="3880821519814946478">"Alareuna <xliff:g id="PERCENT">%1$d</xliff:g> prosenttia"</string>
@@ -317,8 +318,7 @@
     <string name="sensor_privacy_camera_unblocked_dialog_content" msgid="7847190103011782278">"Kameran käyttö on sallittu kaikille sovelluksille ja palveluille."</string>
     <string name="sensor_privacy_camera_blocked_dialog_content" msgid="3182428709314874616">"Pääsy kameraan on estetty kaikilta sovelluksilta ja palveluilta."</string>
     <string name="sensor_privacy_htt_blocked_dialog_content" msgid="3333321592997666441">"Jos haluat käyttää mikrofonipainiketta, salli pääsy mikrofoniin asetuksista."</string>
-    <!-- no translation found for sensor_privacy_dialog_open_settings (5635865896053011859) -->
-    <skip />
+    <string name="sensor_privacy_dialog_open_settings" msgid="5635865896053011859">"Avaa Asetukset"</string>
     <string name="media_seamless_other_device" msgid="4654849800789196737">"Muu laite"</string>
     <string name="quick_step_accessibility_toggle_overview" msgid="7908949976727578403">"Näytä/piilota viimeisimmät"</string>
     <string name="zen_priority_introduction" msgid="3159291973383796646">"Äänet ja värinät eivät häiritse sinua, paitsi jos ne ovat hälytyksiä, muistutuksia, tapahtumia tai määrittämiäsi soittajia. Kuulet edelleen kaiken valitsemasi sisällön, kuten musiikin, videot ja pelit."</string>
@@ -743,6 +743,7 @@
     <string name="wifi_is_off" msgid="5389597396308001471">"Wi-Fi on pois päältä"</string>
     <string name="bt_is_off" msgid="7436344904889461591">"Bluetooth ei ole käytössä"</string>
     <string name="dnd_is_off" msgid="3185706903793094463">"Älä häiritse ‑tila on pois päältä"</string>
+    <string name="dnd_is_on" msgid="7009368176361546279">"Älä häiritse ‑tila on käytössä"</string>
     <string name="qs_dnd_prompt_auto_rule" msgid="3535469468310002616">"Automaattinen sääntö otti käyttöön Älä häiritse ‑tilan (<xliff:g id="ID_1">%s</xliff:g>)."</string>
     <string name="qs_dnd_prompt_app" msgid="4027984447935396820">"Sovellus otti käyttöön Älä häiritse ‑tilan (<xliff:g id="ID_1">%s</xliff:g>)."</string>
     <string name="qs_dnd_prompt_auto_rule_app" msgid="1841469944118486580">"Automaattinen sääntö tai sovellus otti käyttöön Älä häiritse ‑tilan."</string>
@@ -905,6 +906,7 @@
     <string name="media_output_dialog_accessibility_title" msgid="4681741064190167888">"Käytettävissä olevat audiolaitteet"</string>
     <string name="media_output_dialog_accessibility_seekbar" msgid="5332843993805568978">"Äänenvoimakkuus"</string>
     <string name="media_output_dialog_volume_percentage" msgid="1613984910585111798">"<xliff:g id="PERCENTAGE">%1$d</xliff:g> %%"</string>
+    <string name="media_output_group_title_speakers_and_displays" msgid="7169712332365659820">"Kaiuttimet ja näytöt"</string>
     <string name="media_output_first_broadcast_title" msgid="6292237789860753022">"Miten lähetys toimii"</string>
     <string name="media_output_broadcast" msgid="3555580945878071543">"Lähetys"</string>
     <string name="media_output_first_notify_broadcast_message" msgid="6353857724136398494">"Lähistöllä olevat ihmiset, joilla on yhteensopiva Bluetooth-laite, voivat kuunnella lähettämääsi mediaa"</string>
@@ -1032,20 +1034,19 @@
     <string name="log_access_confirmation_deny" msgid="2389461495803585795">"Älä salli"</string>
     <string name="log_access_confirmation_body" msgid="6883031912003112634">"Laitteen tapahtumat tallentuvat laitelokeihin. Niiden avulla sovellukset voivat löytää ja korjata ongelmia.\n\nJotkin lokit voivat sisältää arkaluontoista tietoa, joten salli pääsy kaikkiin laitelokeihin vain sovelluksille, joihin luotat. \n\nJos et salli tälle sovellukselle pääsyä kaikkiin laitelokeihin, sillä on kuitenkin pääsy sen omiin lokeihin. Laitteen valmistajalla voi olla pääsy joihinkin lokeihin tai tietoihin laitteella."</string>
     <string name="keyguard_affordance_enablement_dialog_action_template" msgid="8164857863036314664">"Avaa <xliff:g id="APPNAME">%1$s</xliff:g>"</string>
-    <string name="keyguard_affordance_enablement_dialog_message" msgid="2790910660524887941">"Jos haluat, että <xliff:g id="APPNAME">%1$s</xliff:g> lisätään pikakuvakkeeksi, varmista nämä:"</string>
     <string name="keyguard_affordance_enablement_dialog_wallet_instruction_1" msgid="8439655049139819278">"• Sovellus on otettu käyttöön"</string>
     <string name="keyguard_affordance_enablement_dialog_wallet_instruction_2" msgid="4321089250629477835">"• Ainakin yksi kortti on lisätty Walletiin"</string>
     <string name="keyguard_affordance_enablement_dialog_qr_scanner_instruction" msgid="5355839079232119791">"• Asenna kamerasovellus"</string>
     <string name="keyguard_affordance_enablement_dialog_home_instruction_1" msgid="8438311171750568633">"• Sovellus on otettu käyttöön"</string>
     <string name="keyguard_affordance_enablement_dialog_home_instruction_2" msgid="8308525385889021652">"• Ainakin yksi laite on käytettävissä"</string>
+    <string name="keyguard_affordance_press_too_short" msgid="8145437175134998864">"Kosketa pikakuvaketta pitkään"</string>
     <string name="rear_display_bottom_sheet_cancel" msgid="3461468855493357248">"Peru"</string>
     <string name="rear_display_bottom_sheet_confirm" msgid="4383356544661421206">"Käännä nyt"</string>
     <string name="rear_display_fold_bottom_sheet_title" msgid="6081542277622721548">"Saat paremman selfien, kun levität puhelimen"</string>
     <string name="rear_display_unfold_bottom_sheet_title" msgid="2137403802960396357">"Käännä etunäytölle, jotta saat paremman selfien?"</string>
     <string name="rear_display_bottom_sheet_description" msgid="1852662982816810352">"Voit ottaa laajemman kuvan korkeammalla resoluutiolla, kun käytät takakameraa."</string>
     <string name="rear_display_bottom_sheet_warning" msgid="800995919558238930"><b>"✱ Tämä näyttö sammutetaan"</b></string>
-    <!-- no translation found for rear_display_accessibility_folded_animation (1538121649587978179) -->
-    <skip />
-    <!-- no translation found for rear_display_accessibility_unfolded_animation (1946153682258289040) -->
-    <skip />
+    <string name="rear_display_accessibility_folded_animation" msgid="1538121649587978179">"Taitettava laite taitetaan"</string>
+    <string name="rear_display_accessibility_unfolded_animation" msgid="1946153682258289040">"Taitettava laite käännetään ympäri"</string>
+    <string name="stylus_battery_low" msgid="7134370101603167096">"Näyttökynän akku vähissä"</string>
 </resources>

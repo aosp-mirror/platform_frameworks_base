@@ -85,6 +85,7 @@
     <string name="screenshot_share_description" msgid="2861628935812656612">"Partilhar captura de ecrã"</string>
     <string name="screenshot_scroll_label" msgid="2930198809899329367">"Capturar mais"</string>
     <string name="screenshot_dismiss_description" msgid="4702341245899508786">"Ignorar captura de ecrã"</string>
+    <string name="screenshot_dismiss_work_profile" msgid="3101530842987697045">"Ignore a mensagem do perfil de trabalho"</string>
     <string name="screenshot_preview_description" msgid="7606510140714080474">"Pré-visualização da captura de ecrã"</string>
     <string name="screenshot_top_boundary_pct" msgid="2520148599096479332">"Limite superior de <xliff:g id="PERCENT">%1$d</xliff:g> por cento"</string>
     <string name="screenshot_bottom_boundary_pct" msgid="3880821519814946478">"Limite inferior de <xliff:g id="PERCENT">%1$d</xliff:g> por cento"</string>
@@ -317,8 +318,7 @@
     <string name="sensor_privacy_camera_unblocked_dialog_content" msgid="7847190103011782278">"A câmara está ativada para todas as apps e serviços."</string>
     <string name="sensor_privacy_camera_blocked_dialog_content" msgid="3182428709314874616">"O acesso à câmara está desativado para todas as apps e serviços."</string>
     <string name="sensor_privacy_htt_blocked_dialog_content" msgid="3333321592997666441">"Para usar o botão do microfone, ative o acesso do microfone nas Definições."</string>
-    <!-- no translation found for sensor_privacy_dialog_open_settings (5635865896053011859) -->
-    <skip />
+    <string name="sensor_privacy_dialog_open_settings" msgid="5635865896053011859">"Abrir definições"</string>
     <string name="media_seamless_other_device" msgid="4654849800789196737">"Outro dispositivo"</string>
     <string name="quick_step_accessibility_toggle_overview" msgid="7908949976727578403">"Ativar/desativar Vista geral"</string>
     <string name="zen_priority_introduction" msgid="3159291973383796646">"Não é incomodado por sons e vibrações, exceto de alarmes, lembretes, eventos e autores de chamadas que especificar. Continua a ouvir tudo o que optar por reproduzir, incluindo música, vídeos e jogos."</string>
@@ -743,6 +743,7 @@
     <string name="wifi_is_off" msgid="5389597396308001471">"Wi-Fi desativado"</string>
     <string name="bt_is_off" msgid="7436344904889461591">"Bluetooth desativado"</string>
     <string name="dnd_is_off" msgid="3185706903793094463">"Não incomodar desativado"</string>
+    <string name="dnd_is_on" msgid="7009368176361546279">"Modo Não incomodar ativado"</string>
     <string name="qs_dnd_prompt_auto_rule" msgid="3535469468310002616">"O modo Não incomodar foi ativado por uma regra automática (<xliff:g id="ID_1">%s</xliff:g>)."</string>
     <string name="qs_dnd_prompt_app" msgid="4027984447935396820">"O modo Não incomodar foi ativado por uma app (<xliff:g id="ID_1">%s</xliff:g>)."</string>
     <string name="qs_dnd_prompt_auto_rule_app" msgid="1841469944118486580">"O modo Não incomodar foi ativado por uma regra automática ou por uma app."</string>
@@ -905,6 +906,7 @@
     <string name="media_output_dialog_accessibility_title" msgid="4681741064190167888">"Dispositivos disponíveis para a saída de áudio."</string>
     <string name="media_output_dialog_accessibility_seekbar" msgid="5332843993805568978">"Volume"</string>
     <string name="media_output_dialog_volume_percentage" msgid="1613984910585111798">"<xliff:g id="PERCENTAGE">%1$d</xliff:g>%%"</string>
+    <string name="media_output_group_title_speakers_and_displays" msgid="7169712332365659820">"Altifalantes e ecrãs"</string>
     <string name="media_output_first_broadcast_title" msgid="6292237789860753022">"Como funciona a transmissão"</string>
     <string name="media_output_broadcast" msgid="3555580945878071543">"Transmissão"</string>
     <string name="media_output_first_notify_broadcast_message" msgid="6353857724136398494">"As pessoas próximas de si com dispositivos Bluetooth compatíveis podem ouvir o conteúdo multimédia que está a transmitir"</string>
@@ -1032,20 +1034,19 @@
     <string name="log_access_confirmation_deny" msgid="2389461495803585795">"Não permitir"</string>
     <string name="log_access_confirmation_body" msgid="6883031912003112634">"Os registos do dispositivo documentam o que ocorre no seu dispositivo. As apps podem usar esses registos para detetar e corrigir problemas.\n\nAlguns registos podem conter informações confidenciais e, por isso, o acesso a todos os registos do dispositivo só deve ser permitido às apps nas quais confia. \n\nSe não permitir o acesso desta app a todos os registos do dispositivo, esta pode ainda assim aceder aos próprios registos. O fabricante do dispositivo pode continuar a aceder a alguns registos ou informações no seu dispositivo."</string>
     <string name="keyguard_affordance_enablement_dialog_action_template" msgid="8164857863036314664">"Abrir <xliff:g id="APPNAME">%1$s</xliff:g>"</string>
-    <string name="keyguard_affordance_enablement_dialog_message" msgid="2790910660524887941">"Para adicionar a app <xliff:g id="APPNAME">%1$s</xliff:g> como um atalho, garanta"</string>
     <string name="keyguard_affordance_enablement_dialog_wallet_instruction_1" msgid="8439655049139819278">"• A app está configurada"</string>
     <string name="keyguard_affordance_enablement_dialog_wallet_instruction_2" msgid="4321089250629477835">"• Foi adicionado, pelo menos, um cartão à Carteira"</string>
     <string name="keyguard_affordance_enablement_dialog_qr_scanner_instruction" msgid="5355839079232119791">"• Instale uma app de câmara"</string>
     <string name="keyguard_affordance_enablement_dialog_home_instruction_1" msgid="8438311171750568633">"• A app está configurada"</string>
     <string name="keyguard_affordance_enablement_dialog_home_instruction_2" msgid="8308525385889021652">"• Está disponível, pelo menos, um dispositivo"</string>
+    <string name="keyguard_affordance_press_too_short" msgid="8145437175134998864">"Toque sem soltar no atalho"</string>
     <string name="rear_display_bottom_sheet_cancel" msgid="3461468855493357248">"Cancelar"</string>
     <string name="rear_display_bottom_sheet_confirm" msgid="4383356544661421206">"Inverter agora"</string>
     <string name="rear_display_fold_bottom_sheet_title" msgid="6081542277622721548">"Desdobre o telemóvel para uma selfie melhor"</string>
     <string name="rear_display_unfold_bottom_sheet_title" msgid="2137403802960396357">"Inverter para ecrã frontal para uma selfie melhor?"</string>
     <string name="rear_display_bottom_sheet_description" msgid="1852662982816810352">"Use a câmara traseira para uma foto mais ampla com uma resolução superior."</string>
     <string name="rear_display_bottom_sheet_warning" msgid="800995919558238930"><b>"✱ Este ecrã vai ser desligado"</b></string>
-    <!-- no translation found for rear_display_accessibility_folded_animation (1538121649587978179) -->
-    <skip />
-    <!-- no translation found for rear_display_accessibility_unfolded_animation (1946153682258289040) -->
-    <skip />
+    <string name="rear_display_accessibility_folded_animation" msgid="1538121649587978179">"Dispositivo dobrável a ser desdobrado"</string>
+    <string name="rear_display_accessibility_unfolded_animation" msgid="1946153682258289040">"Dispositivo dobrável a ser virado ao contrário"</string>
+    <string name="stylus_battery_low" msgid="7134370101603167096">"Bateria da caneta stylus fraca"</string>
 </resources>

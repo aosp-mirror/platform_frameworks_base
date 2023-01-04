@@ -85,6 +85,7 @@
     <string name="screenshot_share_description" msgid="2861628935812656612">"Скриншотты бөлісу"</string>
     <string name="screenshot_scroll_label" msgid="2930198809899329367">"Тағы суретке түсіру"</string>
     <string name="screenshot_dismiss_description" msgid="4702341245899508786">"Скриншотты жабу"</string>
+    <string name="screenshot_dismiss_work_profile" msgid="3101530842987697045">"Жұмыс профилі хабарын жабу"</string>
     <string name="screenshot_preview_description" msgid="7606510140714080474">"Скриншотты алдын ала көру"</string>
     <string name="screenshot_top_boundary_pct" msgid="2520148599096479332">"Жоғарғы шектік сызық: <xliff:g id="PERCENT">%1$d</xliff:g> пайыз"</string>
     <string name="screenshot_bottom_boundary_pct" msgid="3880821519814946478">"Төменгі шектік сызық: <xliff:g id="PERCENT">%1$d</xliff:g> пайыз"</string>
@@ -301,28 +302,27 @@
     <string name="sensor_privacy_start_use_mic_blocked_dialog_title" msgid="2640140287496469689">"Микрофон бөгелген"</string>
     <string name="sensor_privacy_start_use_camera_blocked_dialog_title" msgid="7398084286822440384">"Камера бөгелген"</string>
     <string name="sensor_privacy_start_use_mic_camera_blocked_dialog_title" msgid="195236134743281973">"Микрофон мен камера бөгелген"</string>
-    <string name="sensor_privacy_start_use_mic_blocked_dialog_content" msgid="2138318880682877747">"Бөгеуді алу үшін құрылғыдағы құпиялылық ауыстырғышын микрофонға жылжытыңыз, оның қалпы микрофонды пайдалануға мүмкіндік беруі тиіс. Құрылғыдағы құпиялылық ауыстырғышының орналасқан жерін құрылғы нұсқаулығынан қараңыз."</string>
-    <string name="sensor_privacy_start_use_camera_blocked_dialog_content" msgid="7216015168047965948">"Бөгеуді алу үшін құрылғыдағы құпиялылық ауыстырғышын камераға жылжытыңыз, оның қалпы камераны пайдалануға мүмкіндік беруі тиіс. Құрылғыдағы құпиялылық ауыстырғышының орналасқан жерін құрылғы нұсқаулығынан қараңыз."</string>
-    <string name="sensor_privacy_start_use_mic_camera_blocked_dialog_content" msgid="3960837827570483762">"Оның бөгеуін алу үшін құрылғыдағы құпиялылық ауыстырғышын ашық қалыпқа жылжытып, пайдалану мүмкіндігін қамтамасыз етіңіз. Құрылғыдағы құпиялылық ауыстырғышының орналасқан жерін құрылғы нұсқаулығынан қараңыз."</string>
+    <string name="sensor_privacy_start_use_mic_blocked_dialog_content" msgid="2138318880682877747">"Бөгеуді алу үшін құрылғыдағы құпиялық ауыстырғышын микрофонға жылжытыңыз, оның қалпы микрофонды пайдалануға мүмкіндік беруі тиіс. Құрылғыдағы құпиялық ауыстырғышының орналасқан жерін құрылғы нұсқаулығынан қараңыз."</string>
+    <string name="sensor_privacy_start_use_camera_blocked_dialog_content" msgid="7216015168047965948">"Бөгеуді алу үшін құрылғыдағы құпиялық ауыстырғышын камераға жылжытыңыз, оның қалпы камераны пайдалануға мүмкіндік беруі тиіс. Құрылғыдағы құпиялық ауыстырғышының орналасқан жерін құрылғы нұсқаулығынан қараңыз."</string>
+    <string name="sensor_privacy_start_use_mic_camera_blocked_dialog_content" msgid="3960837827570483762">"Оның бөгеуін алу үшін құрылғыдағы құпиялық ауыстырғышын ашық қалыпқа жылжытып, пайдалану мүмкіндігін қамтамасыз етіңіз. Құрылғыдағы құпиялық ауыстырғышының орналасқан жерін құрылғы нұсқаулығынан қараңыз."</string>
     <string name="sensor_privacy_mic_unblocked_toast_content" msgid="306555320557065068">"Микрофон қолжетімді"</string>
     <string name="sensor_privacy_camera_unblocked_toast_content" msgid="7843105715964332311">"Камера қолжетімді"</string>
     <string name="sensor_privacy_mic_camera_unblocked_toast_content" msgid="7339355093282661115">"Микрофон мен камера қолжетімді"</string>
     <string name="sensor_privacy_mic_turned_on_dialog_title" msgid="6348853159838376513">"Микрофон қосулы"</string>
     <string name="sensor_privacy_mic_turned_off_dialog_title" msgid="5760464281790732849">"Микрофон өшірулі"</string>
     <string name="sensor_privacy_mic_unblocked_dialog_content" msgid="4889961886199270224">"Микрофон барлық қолданба мен қызмет үшін қосулы."</string>
-    <string name="sensor_privacy_mic_blocked_no_exception_dialog_content" msgid="5864898470772965394">"Микрофон пайдалану рұқсаты барлық қолданба мен қызмет үшін өшірулі. Микрофон пайдалану рұқсатын \"Параметрлер&gt; Құпиялылық &gt; Микрофон\" тармағынан қоса аласыз."</string>
-    <string name="sensor_privacy_mic_blocked_with_exception_dialog_content" msgid="810289713700437896">"Микрофон пайдалану рұқсаты барлық қолданба мен қызмет үшін өшірулі. Мұны \"Параметрлер &gt; Құпиялылық &gt; Микрофон\" тармағынан өзгерте аласыз."</string>
+    <string name="sensor_privacy_mic_blocked_no_exception_dialog_content" msgid="5864898470772965394">"Микрофон пайдалану рұқсаты барлық қолданба мен қызмет үшін өшірулі. Микрофон пайдалану рұқсатын \"Параметрлер&gt; Құпиялық &gt; Микрофон\" тармағынан қоса аласыз."</string>
+    <string name="sensor_privacy_mic_blocked_with_exception_dialog_content" msgid="810289713700437896">"Микрофон пайдалану рұқсаты барлық қолданба мен қызмет үшін өшірулі. Мұны \"Параметрлер &gt; Құпиялық &gt; Микрофон\" тармағынан өзгерте аласыз."</string>
     <string name="sensor_privacy_camera_turned_on_dialog_title" msgid="8039095295100075952">"Камера қосулы"</string>
     <string name="sensor_privacy_camera_turned_off_dialog_title" msgid="1936603903120742696">"Камера өшірулі"</string>
     <string name="sensor_privacy_camera_unblocked_dialog_content" msgid="7847190103011782278">"Камера барлық қолданба мен қызмет үшін қосулы."</string>
     <string name="sensor_privacy_camera_blocked_dialog_content" msgid="3182428709314874616">"Камера пайдалану рұқсаты барлық қолданба мен қызмет үшін өшірулі."</string>
     <string name="sensor_privacy_htt_blocked_dialog_content" msgid="3333321592997666441">"Микрофон түймесін пайдалану үшін параметрлерден микрофон пайдалану рұқсатын қосыңыз."</string>
-    <!-- no translation found for sensor_privacy_dialog_open_settings (5635865896053011859) -->
-    <skip />
+    <string name="sensor_privacy_dialog_open_settings" msgid="5635865896053011859">"Параметрлерді ашу"</string>
     <string name="media_seamless_other_device" msgid="4654849800789196737">"Басқа құрылғы"</string>
     <string name="quick_step_accessibility_toggle_overview" msgid="7908949976727578403">"Шолуды қосу/өшіру"</string>
     <string name="zen_priority_introduction" msgid="3159291973383796646">"Оятқыш, еске салғыш, іс-шара мен өзіңіз көрсеткен контактілердің қоңырауларынан басқа дыбыстар мен дірілдер мазаламайтын болады. Музыка, бейне және ойын сияқты медиафайлдарды қоссаңыз, оларды естисіз."</string>
-    <string name="zen_alarms_introduction" msgid="3987266042682300470">"Дабылдардан басқа ешқандай дыбыстар мен дірілдер мазаламайтын болады. Музыка, бейне және ойындар сияқты ойнатылатын мазмұндарды ести алатын боласыз."</string>
+    <string name="zen_alarms_introduction" msgid="3987266042682300470">"Дабылдардан басқа ешқандай дыбыстар мен дірілдер мазаламайтын болады. Музыка, бейне және ойындар сияқты ойнатылатын контентті ести алатын боласыз."</string>
     <string name="zen_priority_customize_button" msgid="4119213187257195047">"Реттеу"</string>
     <string name="zen_silence_introduction_voice" msgid="853573681302712348">"Дабыл, музыка, бейнелер мен ойындарды қоса алғанда, барлық дыбыстар мен дірілдер бөгелетін болады. Қоңырау шала беруіңізге болады."</string>
     <string name="zen_silence_introduction" msgid="6117517737057344014">"БАРЛЫҚ, соның ішінде дабылдардың, музыканың, бейнелердің және ойындардың дыбыстары мен дірілдері өшіріледі."</string>
@@ -743,6 +743,7 @@
     <string name="wifi_is_off" msgid="5389597396308001471">"Wi-Fi өшірулі"</string>
     <string name="bt_is_off" msgid="7436344904889461591">"Bluetooth өшірулі"</string>
     <string name="dnd_is_off" msgid="3185706903793094463">"Мазаламау режимі өшірулі"</string>
+    <string name="dnd_is_on" msgid="7009368176361546279">"Мазаламау режимі қосулы"</string>
     <string name="qs_dnd_prompt_auto_rule" msgid="3535469468310002616">"Мазаламау режимі (<xliff:g id="ID_1">%s</xliff:g>) автоматты ережесі арқылы қосылды."</string>
     <string name="qs_dnd_prompt_app" msgid="4027984447935396820">"Мазаламау режимі (<xliff:g id="ID_1">%s</xliff:g>) қолданбасы арқылы қосылды."</string>
     <string name="qs_dnd_prompt_auto_rule_app" msgid="1841469944118486580">"Мазаламау режимі автоматты ереже немесе қолданба арқылы қосылды."</string>
@@ -905,6 +906,7 @@
     <string name="media_output_dialog_accessibility_title" msgid="4681741064190167888">"Аудио шығыс үшін қолжетімді құрылғылар бар."</string>
     <string name="media_output_dialog_accessibility_seekbar" msgid="5332843993805568978">"Дыбыс деңгейі"</string>
     <string name="media_output_dialog_volume_percentage" msgid="1613984910585111798">"<xliff:g id="PERCENTAGE">%1$d</xliff:g>%%"</string>
+    <string name="media_output_group_title_speakers_and_displays" msgid="7169712332365659820">"Динамиктер мен дисплейлер"</string>
     <string name="media_output_first_broadcast_title" msgid="6292237789860753022">"Тарату қалай жүзеге асады"</string>
     <string name="media_output_broadcast" msgid="3555580945878071543">"Тарату"</string>
     <string name="media_output_first_notify_broadcast_message" msgid="6353857724136398494">"Үйлесімді Bluetooth құрылғылары бар маңайдағы адамдар сіз таратып жатқан медиамазмұнды тыңдай алады."</string>
@@ -944,7 +946,7 @@
     <string name="game_status" msgid="1340694320630973259">"Ойнатылуда"</string>
     <string name="empty_user_name" msgid="3389155775773578300">"Достар"</string>
     <string name="empty_status" msgid="5938893404951307749">"Кешке чатта сөйлесейік!"</string>
-    <string name="status_before_loading" msgid="1500477307859631381">"Мазмұн жақында көрсетіледі."</string>
+    <string name="status_before_loading" msgid="1500477307859631381">"Контент жақында көрсетіледі."</string>
     <string name="missed_call" msgid="4228016077700161689">"Өткізіп алған қоңырау"</string>
     <string name="messages_count_overflow_indicator" msgid="7850934067082006043">"<xliff:g id="NUMBER">%d</xliff:g>+"</string>
     <string name="people_tile_description" msgid="8154966188085545556">"Соңғы хабарлар, өткізіп алған қоңыраулар мен статустың жаңаруы көрсетіледі."</string>
@@ -1002,7 +1004,7 @@
     <string name="clipboard_text_hidden" msgid="7926899867471812305">"Көру үшін түртіңіз."</string>
     <string name="clipboard_text_copied" msgid="5100836834278976679">"Мәтін көшірілді."</string>
     <string name="clipboard_image_copied" msgid="3793365360174328722">"Сурет көшірілді."</string>
-    <string name="clipboard_content_copied" msgid="144452398567828145">"Мазмұн көшірілді."</string>
+    <string name="clipboard_content_copied" msgid="144452398567828145">"Контент көшірілді."</string>
     <string name="clipboard_editor" msgid="2971197550401892843">"Буфер редакторы"</string>
     <string name="clipboard_overlay_window_name" msgid="6450043652167357664">"Буфер"</string>
     <string name="clipboard_image_preview" msgid="2156475174343538128">"Суретті алдын ала көру"</string>
@@ -1032,20 +1034,19 @@
     <string name="log_access_confirmation_deny" msgid="2389461495803585795">"Рұқсат бермеу"</string>
     <string name="log_access_confirmation_body" msgid="6883031912003112634">"Журналдарға құрылғыда не болып жатқаны жазылады. Қолданбалар бұл журналдарды қате тауып, түзету үшін пайдаланады.\n\nКейбір журналдарда құпия ақпарат болуы мүмкін. Сондықтан құрылғының барлық журналын пайдалану рұқсаты тек сенімді қолданбаларға берілуі керек. \n\nБұл қолданбаға құрылғының барлық журналын пайдалануға рұқсат бермесеңіз де, ол өзінің журналдарын пайдалана береді. Құрылғы өндірушісі де құрылғыдағы кейбір журналдарды немесе ақпаратты пайдалануы мүмкін."</string>
     <string name="keyguard_affordance_enablement_dialog_action_template" msgid="8164857863036314664">"<xliff:g id="APPNAME">%1$s</xliff:g> ашу"</string>
-    <string name="keyguard_affordance_enablement_dialog_message" msgid="2790910660524887941">"<xliff:g id="APPNAME">%1$s</xliff:g> қолданбасын таңбаша ретінде қосу үшін келесі әрекеттерді орындауды ұмытпаңыз:"</string>
     <string name="keyguard_affordance_enablement_dialog_wallet_instruction_1" msgid="8439655049139819278">"• Қолданба реттелген"</string>
     <string name="keyguard_affordance_enablement_dialog_wallet_instruction_2" msgid="4321089250629477835">"• Wallet-ке кемінде бір карта қосылған"</string>
     <string name="keyguard_affordance_enablement_dialog_qr_scanner_instruction" msgid="5355839079232119791">"• Камера қолданбасын орнатыңыз"</string>
     <string name="keyguard_affordance_enablement_dialog_home_instruction_1" msgid="8438311171750568633">"• Қолданба реттелген"</string>
     <string name="keyguard_affordance_enablement_dialog_home_instruction_2" msgid="8308525385889021652">"• Кемінде бір құрылғы қолжетімді"</string>
+    <string name="keyguard_affordance_press_too_short" msgid="8145437175134998864">"Таңбашаны басып тұрыңыз."</string>
     <string name="rear_display_bottom_sheet_cancel" msgid="3461468855493357248">"Бас тарту"</string>
     <string name="rear_display_bottom_sheet_confirm" msgid="4383356544661421206">"Айналдыру"</string>
     <string name="rear_display_fold_bottom_sheet_title" msgid="6081542277622721548">"Жақсырақ селфи түсіру үшін телефонды жазыңыз"</string>
     <string name="rear_display_unfold_bottom_sheet_title" msgid="2137403802960396357">"Жақсырақ селфи үшін алдыңғы экранға ауысасыз ба?"</string>
     <string name="rear_display_bottom_sheet_description" msgid="1852662982816810352">"Ажыратымдылығы жоғары кеңірек фотосурет түсіру үшін артқы камераны пайдаланыңыз."</string>
     <string name="rear_display_bottom_sheet_warning" msgid="800995919558238930"><b>"✱ Бұл экран өшіріледі."</b></string>
-    <!-- no translation found for rear_display_accessibility_folded_animation (1538121649587978179) -->
-    <skip />
-    <!-- no translation found for rear_display_accessibility_unfolded_animation (1946153682258289040) -->
-    <skip />
+    <string name="rear_display_accessibility_folded_animation" msgid="1538121649587978179">"Бүктемелі құрылғы ашылып жатыр."</string>
+    <string name="rear_display_accessibility_unfolded_animation" msgid="1946153682258289040">"Бүктемелі құрылғы аударылып жатыр."</string>
+    <string name="stylus_battery_low" msgid="7134370101603167096">"Стилус батареясының заряды аз"</string>
 </resources>
