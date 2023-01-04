@@ -90,7 +90,7 @@
     <string name="kg_prompt_reason_device_admin" msgid="6961159596224055685">"Құрылғыны әкімші құлыптаған"</string>
     <string name="kg_prompt_reason_user_request" msgid="6015774877733717904">"Құрылғы қолмен құлыпталды"</string>
     <string name="kg_face_not_recognized" msgid="7903950626744419160">"Танылмады"</string>
-    <string name="kg_face_sensor_privacy_enabled" msgid="6513157891227284806">"Face Unlock функциясын пайдалану үшін \"Параметрлер &gt; Құпиялылық\" бөлімінен "<b>"Камераны пайдалану рұқсатын"</b>" қосыңыз."</string>
+    <string name="kg_face_sensor_privacy_enabled" msgid="6513157891227284806">"Face Unlock функциясын пайдалану үшін \"Параметрлер &gt; Құпиялық\" бөлімінен "<b>"Камераны пайдалану рұқсатын"</b>" қосыңыз."</string>
     <plurals name="kg_password_default_pin_message" formatted="false" msgid="7730152526369857818">
       <item quantity="other">SIM PIN кодын енгізіңіз. <xliff:g id="NUMBER_1">%d</xliff:g> мүмкіндік қалды, одан кейін оператордан SIM картасының құлпын ашуды сұрауға тура келеді.</item>
       <item quantity="one">SIM PIN кодын енгізіңіз. <xliff:g id="NUMBER_0">%d</xliff:g> мүмкіндік қалды, одан кейін оператордан SIM картасының құлпын ашуды сұрауға тура келеді.</item>
