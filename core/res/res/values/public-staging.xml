@@ -139,6 +139,8 @@
   <staging-public-group type="string" first-id="0x01cb0000">
     <!-- @hide @SystemApi -->
     <public name="config_systemWearHealthService" />
+    <!-- @hide @SystemApi -->
+    <public name="config_defaultNotes" />
   </staging-public-group>
 
   <staging-public-group type="dimen" first-id="0x01ca0000">
@@ -182,6 +184,10 @@
   <staging-public-group type="bool" first-id="0x01be0000">
     <!-- @hide @SystemApi -->
     <public name="config_safetyProtectionEnabled" />
+    <!-- @hide @SystemApi -->
+    <public name="config_enableDefaultNotes" />
+    <!-- @hide @SystemApi -->
+    <public name="config_enableDefaultNotesForWorkProfile" />
   </staging-public-group>
 
   <staging-public-group type="fraction" first-id="0x01bd0000">

@@ -5855,6 +5855,117 @@ public class AudioManager {
         }
     }
 
+    // Each listener corresponds to a unique callback stub because each listener can subscribe to
+    // different AudioAttributes.
+    private final ConcurrentHashMap<OnDevicesForAttributesChangedListener,
+            IDevicesForAttributesCallbackStub> mDevicesForAttributesListenerToStub =
+                    new ConcurrentHashMap<>();
+
+    private static final class IDevicesForAttributesCallbackStub
+            extends IDevicesForAttributesCallback.Stub {
+        ListenerInfo<OnDevicesForAttributesChangedListener> mInfo;
+
+        IDevicesForAttributesCallbackStub(@NonNull OnDevicesForAttributesChangedListener listener,
+                @NonNull Executor executor) {
+            mInfo = new ListenerInfo<>(listener, executor);
+        }
+
+        public void register(boolean register, AudioAttributes attributes) {
+            try {
+                if (register) {
+                    getService().addOnDevicesForAttributesChangedListener(attributes, this);
+                } else {
+                    getService().removeOnDevicesForAttributesChangedListener(this);
+                }
+            } catch (RemoteException e) {
+                throw e.rethrowFromSystemServer();
+            }
+        }
+
+        @Override
+        public void onDevicesForAttributesChanged(AudioAttributes attributes, boolean forVolume,
+                List<AudioDeviceAttributes> devices) {
+            // forVolume is ignored. The case where it is `true` is not handled.
+            mInfo.mExecutor.execute(() ->
+                    mInfo.mListener.onDevicesForAttributesChanged(
+                            attributes, devices));
+        }
+    }
+
+    /**
+     * @hide
+     * Interface to be notified of when routing changes for the registered audio attributes.
+     */
+    @SystemApi
+    public interface OnDevicesForAttributesChangedListener {
+        /**
+         * Called on the listener to indicate that the audio devices for the given audio
+         * attributes have changed.
+         * @param attributes the {@link AudioAttributes} whose routing changed
+         * @param devices a list of newly routed audio devices
+         */
+        void onDevicesForAttributesChanged(@NonNull AudioAttributes attributes,
+                @NonNull List<AudioDeviceAttributes> devices);
+    }
+
+    /**
+     * @hide
+     * Adds a listener for being notified of routing changes for the given {@link AudioAttributes}.
+     * @param attributes the {@link AudioAttributes} to listen for routing changes
+     * @param executor
+     * @param listener
+     */
+    @SystemApi
+    @RequiresPermission(anyOf = {
+            android.Manifest.permission.MODIFY_AUDIO_ROUTING,
+            android.Manifest.permission.QUERY_AUDIO_STATE
+    })
+    public void addOnDevicesForAttributesChangedListener(@NonNull AudioAttributes attributes,
+            @NonNull @CallbackExecutor Executor executor,
+            @NonNull OnDevicesForAttributesChangedListener listener) {
+        Objects.requireNonNull(attributes);
+        Objects.requireNonNull(executor);
+        Objects.requireNonNull(listener);
+
+        synchronized (mDevicesForAttributesListenerToStub) {
+            IDevicesForAttributesCallbackStub callbackStub =
+                    mDevicesForAttributesListenerToStub.get(listener);
+
+            if (callbackStub == null) {
+                callbackStub = new IDevicesForAttributesCallbackStub(listener, executor);
+                mDevicesForAttributesListenerToStub.put(listener, callbackStub);
+            }
+
+            callbackStub.register(true, attributes);
+        }
+    }
+
+    /**
+     * @hide
+     * Removes a previously registered listener for being notified of routing changes for the given
+     * {@link AudioAttributes}.
+     * @param listener
+     */
+    @SystemApi
+    @RequiresPermission(anyOf = {
+            android.Manifest.permission.MODIFY_AUDIO_ROUTING,
+            android.Manifest.permission.QUERY_AUDIO_STATE
+    })
+    public void removeOnDevicesForAttributesChangedListener(
+            @NonNull OnDevicesForAttributesChangedListener listener) {
+        Objects.requireNonNull(listener);
+
+        synchronized (mDevicesForAttributesListenerToStub) {
+            IDevicesForAttributesCallbackStub callbackStub =
+                    mDevicesForAttributesListenerToStub.get(listener);
+            if (callbackStub != null) {
+                callbackStub.register(false, null /* attributes */);
+            }
+
+            mDevicesForAttributesListenerToStub.remove(listener);
+        }
+    }
+
     /**
      * Get the audio devices that would be used for the routing of the given audio attributes.
      * These are the devices anticipated to play sound from an {@link AudioTrack} created with

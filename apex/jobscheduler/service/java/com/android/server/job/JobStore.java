@@ -832,8 +832,8 @@ public final class JobStore {
         private void writeConstraintsToXml(TypedXmlSerializer out, JobStatus jobStatus)
                 throws IOException {
             out.startTag(null, XML_TAG_PARAMS_CONSTRAINTS);
+            final JobInfo job = jobStatus.getJob();
             if (jobStatus.hasConnectivityConstraint()) {
-                final JobInfo job = jobStatus.getJob();
                 final NetworkRequest network = jobStatus.getJob().getRequiredNetwork();
                 out.attribute(null, "net-capabilities-csv", intArrayToString(
                         network.getCapabilities()));
@@ -854,16 +854,16 @@ public final class JobStore {
                             job.getMinimumNetworkChunkBytes());
                 }
             }
-            if (jobStatus.hasIdleConstraint()) {
+            if (job.isRequireDeviceIdle()) {
                 out.attribute(null, "idle", Boolean.toString(true));
             }
-            if (jobStatus.hasChargingConstraint()) {
+            if (job.isRequireCharging()) {
                 out.attribute(null, "charging", Boolean.toString(true));
             }
-            if (jobStatus.hasBatteryNotLowConstraint()) {
+            if (job.isRequireBatteryNotLow()) {
                 out.attribute(null, "battery-not-low", Boolean.toString(true));
             }
-            if (jobStatus.hasStorageNotLowConstraint()) {
+            if (job.isRequireStorageNotLow()) {
                 out.attribute(null, "storage-not-low", Boolean.toString(true));
             }
             out.endTag(null, XML_TAG_PARAMS_CONSTRAINTS);

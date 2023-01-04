@@ -54,6 +54,7 @@ public final class ShutdownCheckPoints {
     private static final int MAX_DUMP_FILES = 20;
     private static final SimpleDateFormat DATE_FORMAT =
             new SimpleDateFormat("yyyy-MM-dd HH:mm:ss.SSS z");
+    private static final File[] EMPTY_FILE_ARRAY = {};
 
     private final ArrayList<CheckPoint> mCheckPoints;
     private final Injector mInjector;
@@ -381,6 +382,9 @@ public final class ShutdownCheckPoints {
                     return true;
                 }
             });
+            if (files == null) {
+                return EMPTY_FILE_ARRAY;
+            }
             Arrays.sort(files);
             return files;
         }
