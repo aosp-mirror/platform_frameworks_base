@@ -16,6 +16,9 @@
 
 package android.app.admin;
 
+import static android.Manifest.permission.QUERY_ADMIN_POLICY;
+import static android.Manifest.permission.SET_TIME;
+import static android.Manifest.permission.SET_TIME_ZONE;
 import static android.content.Intent.LOCAL_FLAG_FROM_SYSTEM;
 import static android.net.NetworkCapabilities.NET_ENTERPRISE_ID_1;
 
@@ -8466,8 +8469,10 @@ public class DevicePolicyManager {
     }
 
     /**
-     * Called by a device owner, a profile owner for the primary user or a profile
-     * owner of an organization-owned managed profile to turn auto time on and off.
+     * Called by a device owner, a profile owner for the primary user, a profile
+     * owner of an organization-owned managed profile or, starting from Android
+     * {@link android.os.Build.VERSION_CODES#UPSIDE_DOWN_CAKE}, holders of the permission
+     * {@link android.Manifest.permission#SET_TIME} to turn auto time on and off.
      * Callers are recommended to use {@link UserManager#DISALLOW_CONFIG_DATE_TIME}
      * to prevent the user from changing this setting.
      * <p>
@@ -8478,8 +8483,10 @@ public class DevicePolicyManager {
      * @param admin Which {@link DeviceAdminReceiver} this request is associated with.
      * @param enabled Whether time should be obtained automatically from the network or not.
      * @throws SecurityException if caller is not a device owner, a profile owner for the
-     * primary user, or a profile owner of an organization-owned managed profile.
+     * primary user, or a profile owner of an organization-owned managed profile or a holder of the
+     * permission {@link android.Manifest.permission#SET_TIME}.
      */
+    @RequiresPermission(value = SET_TIME, conditional = true)
     public void setAutoTimeEnabled(@NonNull ComponentName admin, boolean enabled) {
         if (mService != null) {
             try {
@@ -8491,10 +8498,18 @@ public class DevicePolicyManager {
     }
 
     /**
+     * Returns true if auto time is enabled on the device.
+     *
+     * <p> Starting from Android {@link android.os.Build.VERSION_CODES#UPSIDE_DOWN_CAKE}, callers
+     * are also able to call this method if they hold the permission
+     *{@link android.Manifest.permission#SET_TIME}.
+     *
      * @return true if auto time is enabled on the device.
-     * @throws SecurityException if caller is not a device owner, a profile owner for the
-     * primary user, or a profile owner of an organization-owned managed profile.
+     * @throws SecurityException if the caller is not a device owner, a profile
+     * owner for the primary user, or a profile owner of an organization-owned managed profile or a
+     * holder of the permission {@link android.Manifest.permission#SET_TIME}.
      */
+    @RequiresPermission(anyOf = {SET_TIME, QUERY_ADMIN_POLICY}, conditional = true)
     public boolean getAutoTimeEnabled(@NonNull ComponentName admin) {
         if (mService != null) {
             try {
@@ -8507,8 +8522,10 @@ public class DevicePolicyManager {
     }
 
     /**
-     * Called by a device owner, a profile owner for the primary user or a profile
-     * owner of an organization-owned managed profile to turn auto time zone on and off.
+     * Called by a device owner, a profile owner for the primary user, a profile
+     * owner of an organization-owned managed profile or, starting from Android
+     * {@link android.os.Build.VERSION_CODES#UPSIDE_DOWN_CAKE}, holders of the permission
+     * {@link android.Manifest.permission#SET_TIME} to turn auto time zone on and off.
      * Callers are recommended to use {@link UserManager#DISALLOW_CONFIG_DATE_TIME}
      * to prevent the user from changing this setting.
      * <p>
@@ -8519,8 +8536,10 @@ public class DevicePolicyManager {
      * @param admin Which {@link DeviceAdminReceiver} this request is associated with.
      * @param enabled Whether time zone should be obtained automatically from the network or not.
      * @throws SecurityException if caller is not a device owner, a profile owner for the
-     * primary user, or a profile owner of an organization-owned managed profile.
+     * primary user, or a profile owner of an organization-owned managed profile or a holder of the
+     * permission {@link android.Manifest.permission#SET_TIME_ZONE}.
      */
+    @RequiresPermission(value = SET_TIME_ZONE, conditional = true)
     public void setAutoTimeZoneEnabled(@NonNull ComponentName admin, boolean enabled) {
         throwIfParentInstance("setAutoTimeZone");
         if (mService != null) {
@@ -8533,10 +8552,18 @@ public class DevicePolicyManager {
     }
 
     /**
+     * Returns true if auto time zone is enabled on the device.
+     *
+     * <p> Starting from Android {@link android.os.Build.VERSION_CODES#UPSIDE_DOWN_CAKE}, callers
+     * are also able to call this method if they hold the permission
+     *{@link android.Manifest.permission#SET_TIME}.
+     *
      * @return true if auto time zone is enabled on the device.
-     * @throws SecurityException if caller is not a device owner, a profile owner for the
-     * primary user, or a profile owner of an organization-owned managed profile.
+     * @throws SecurityException if the caller is not a device owner, a profile
+     * owner for the primary user, or a profile owner of an organization-owned managed profile or a
+     * holder of the permission {@link android.Manifest.permission#SET_TIME_ZONE}.
      */
+    @RequiresPermission(anyOf = {SET_TIME_ZONE, QUERY_ADMIN_POLICY}, conditional = true)
     public boolean getAutoTimeZoneEnabled(@NonNull ComponentName admin) {
         throwIfParentInstance("getAutoTimeZone");
         if (mService != null) {
@@ -11875,17 +11902,21 @@ public class DevicePolicyManager {
     }
 
     /**
-     * Called by a device owner or a profile owner of an organization-owned managed
-     * profile to set the system wall clock time. This only takes effect if called when
-     * {@link android.provider.Settings.Global#AUTO_TIME} is 0, otherwise {@code false}
-     * will be returned.
+     * Called by a device owner, a profile owner of an organization-owned managed
+     * profile or, starting from Android {@link android.os.Build.VERSION_CODES#UPSIDE_DOWN_CAKE},
+     * holders of the permission {@link android.Manifest.permission#SET_TIME} to set the system wall
+     * clock time. This only takes effect if called when
+     * {@link android.provider.Settings.Global#AUTO_TIME} is 0, otherwise {@code false} will be
+     * returned.
      *
      * @param admin Which {@link DeviceAdminReceiver} this request is associated with
      * @param millis time in milliseconds since the Epoch
      * @return {@code true} if set time succeeded, {@code false} otherwise.
      * @throws SecurityException if {@code admin} is not a device owner or a profile owner
-     * of an organization-owned managed profile.
+     * of an organization-owned managed profile or a holder of the permission
+     * {@link android.Manifest.permission#SET_TIME}.
      */
+    @RequiresPermission(value = SET_TIME, conditional = true)
     public boolean setTime(@NonNull ComponentName admin, long millis) {
         throwIfParentInstance("setTime");
         if (mService != null) {
@@ -11899,10 +11930,12 @@ public class DevicePolicyManager {
     }
 
     /**
-     * Called by a device owner or a profile owner of an organization-owned managed
-     * profile to set the system's persistent default time zone. This only takes
-     * effect if called when {@link android.provider.Settings.Global#AUTO_TIME_ZONE}
-     * is 0, otherwise {@code false} will be returned.
+     * Called by a device owner, a profile owner of an organization-owned managed
+     * profile or, starting from Android {@link android.os.Build.VERSION_CODES#UPSIDE_DOWN_CAKE},
+     * holders of the permission {@link android.Manifest.permission#SET_TIME_ZONE} to set the
+     * system's persistent default time zone. This only take effect if called when
+     * {@link android.provider.Settings.Global#AUTO_TIME_ZONE} is 0, otherwise {@code false} will be
+     * returned.
      *
      * @see android.app.AlarmManager#setTimeZone(String)
      * @param admin Which {@link DeviceAdminReceiver} this request is associated with
@@ -11910,8 +11943,10 @@ public class DevicePolicyManager {
      *     {@link java.util.TimeZone#getAvailableIDs}
      * @return {@code true} if set timezone succeeded, {@code false} otherwise.
      * @throws SecurityException if {@code admin} is not a device owner or a profile owner
-     * of an organization-owned managed profile.
+     * of an organization-owned managed profile or a holder of the permissions
+     * {@link android.Manifest.permission#SET_TIME_ZONE}.
      */
+    @RequiresPermission(value = SET_TIME_ZONE, conditional = true)
     public boolean setTimeZone(@NonNull ComponentName admin, String timeZone) {
         throwIfParentInstance("setTimeZone");
         if (mService != null) {

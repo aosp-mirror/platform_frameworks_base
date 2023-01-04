@@ -18,7 +18,13 @@ package com.android.server.devicepolicy;
 
 import static android.Manifest.permission.BIND_DEVICE_ADMIN;
 import static android.Manifest.permission.MANAGE_CA_CERTIFICATES;
+import static android.Manifest.permission.MANAGE_DEVICE_POLICY_ACROSS_USERS;
+import static android.Manifest.permission.MANAGE_DEVICE_POLICY_ACROSS_USERS_FULL;
+import static android.Manifest.permission.MANAGE_DEVICE_POLICY_ACROSS_USERS_SECURITY_CRITICAL;
+import static android.Manifest.permission.QUERY_ADMIN_POLICY;
 import static android.Manifest.permission.REQUEST_PASSWORD_COMPLEXITY;
+import static android.Manifest.permission.SET_TIME;
+import static android.Manifest.permission.SET_TIME_ZONE;
 import static android.accessibilityservice.AccessibilityServiceInfo.FEEDBACK_ALL_MASK;
 import static android.app.ActivityManager.LOCK_TASK_MODE_NONE;
 import static android.app.AppOpsManager.MODE_ALLOWED;
@@ -137,6 +143,7 @@ import static android.content.Intent.FLAG_ACTIVITY_NEW_TASK;
 import static android.content.pm.PackageManager.MATCH_DIRECT_BOOT_AWARE;
 import static android.content.pm.PackageManager.MATCH_DIRECT_BOOT_UNAWARE;
 import static android.content.pm.PackageManager.MATCH_UNINSTALLED_PACKAGES;
+import static android.content.pm.PackageManager.PERMISSION_GRANTED;
 import static android.net.ConnectivityManager.PROFILE_NETWORK_PREFERENCE_DEFAULT;
 import static android.net.ConnectivityManager.PROFILE_NETWORK_PREFERENCE_ENTERPRISE;
 import static android.net.ConnectivityManager.PROFILE_NETWORK_PREFERENCE_ENTERPRISE_NO_FALLBACK;
@@ -715,7 +722,10 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
                     + "management app's authentication policy";
     private static final String NOT_SYSTEM_CALLER_MSG = "Only the system can %s";
 
+    private static final String PERMISSION_BASED_ACCESS_EXPERIMENT_FLAG =
+            "enable_permission_based_access";
     private static final String ENABLE_COEXISTENCE_FLAG = "enable_coexistence";
+    private static final boolean DEFAULT_VALUE_PERMISSION_BASED_ACCESS_FLAG = false;
     private static final boolean DEFAULT_ENABLE_COEXISTENCE_FLAG = false;
 
     // TODO(b/258425381) remove the flag after rollout.
@@ -8033,9 +8043,15 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
         Objects.requireNonNull(who, "ComponentName is null");
 
         final CallerIdentity caller = getCallerIdentity(who);
-        Preconditions.checkCallAuthorization(isProfileOwnerOnUser0(caller)
-                || isProfileOwnerOfOrganizationOwnedDevice(caller) || isDefaultDeviceOwner(caller));
 
+        if (isPermissionCheckFlagEnabled()) {
+            // The effect of this policy is device-wide.
+            enforcePermission(SET_TIME, UserHandle.USER_ALL);
+        } else {
+            Preconditions.checkCallAuthorization(isProfileOwnerOnUser0(caller)
+                    || isProfileOwnerOfOrganizationOwnedDevice(caller) || isDefaultDeviceOwner(
+                    caller));
+        }
         mInjector.binderWithCleanCallingIdentity(() ->
                 mInjector.settingsGlobalPutInt(Settings.Global.AUTO_TIME, enabled ? 1 : 0));
 
@@ -8057,8 +8073,14 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
         Objects.requireNonNull(who, "ComponentName is null");
 
         final CallerIdentity caller = getCallerIdentity(who);
-        Preconditions.checkCallAuthorization(isProfileOwnerOnUser0(caller)
-                || isProfileOwnerOfOrganizationOwnedDevice(caller) || isDefaultDeviceOwner(caller));
+
+        if (isPermissionCheckFlagEnabled()) {
+            enforceCanQuery(SET_TIME, UserHandle.USER_ALL);
+        } else {
+            Preconditions.checkCallAuthorization(isProfileOwnerOnUser0(caller)
+                    || isProfileOwnerOfOrganizationOwnedDevice(caller) || isDefaultDeviceOwner(
+                    caller));
+        }
 
         return mInjector.settingsGlobalGetInt(Global.AUTO_TIME, 0) > 0;
     }
@@ -8074,8 +8096,15 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
         Objects.requireNonNull(who, "ComponentName is null");
 
         final CallerIdentity caller = getCallerIdentity(who);
-        Preconditions.checkCallAuthorization(isProfileOwnerOnUser0(caller)
-                || isProfileOwnerOfOrganizationOwnedDevice(caller) || isDefaultDeviceOwner(caller));
+
+        if (isPermissionCheckFlagEnabled()) {
+            // The effect of this policy is device-wide.
+            enforcePermission(SET_TIME_ZONE, UserHandle.USER_ALL);
+        } else {
+            Preconditions.checkCallAuthorization(isProfileOwnerOnUser0(caller)
+                    || isProfileOwnerOfOrganizationOwnedDevice(caller) || isDefaultDeviceOwner(
+                    caller));
+        }
 
         if (isCoexistenceEnabled(caller)) {
             mDevicePolicyEngine.setGlobalPolicy(
@@ -8107,8 +8136,15 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
         Objects.requireNonNull(who, "ComponentName is null");
 
         final CallerIdentity caller = getCallerIdentity(who);
-        Preconditions.checkCallAuthorization(isProfileOwnerOnUser0(caller)
-                || isProfileOwnerOfOrganizationOwnedDevice(caller) || isDefaultDeviceOwner(caller));
+
+        if (isPermissionCheckFlagEnabled()) {
+            // The effect of this policy is device-wide.
+            enforceCanQuery(SET_TIME_ZONE, UserHandle.USER_ALL);
+        } else {
+            Preconditions.checkCallAuthorization(isProfileOwnerOnUser0(caller)
+                    || isProfileOwnerOfOrganizationOwnedDevice(caller) || isDefaultDeviceOwner(
+                    caller));
+        }
 
         return mInjector.settingsGlobalGetInt(Global.AUTO_TIME_ZONE, 0) > 0;
     }
@@ -13031,8 +13067,14 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
         Objects.requireNonNull(who, "ComponentName is null");
 
         final CallerIdentity caller = getCallerIdentity(who);
-        Preconditions.checkCallAuthorization(
-                isDefaultDeviceOwner(caller) || isProfileOwnerOfOrganizationOwnedDevice(caller));
+        if (isPermissionCheckFlagEnabled()) {
+            // This is a global action.
+            enforcePermission(SET_TIME, UserHandle.USER_ALL);
+        } else {
+            Preconditions.checkCallAuthorization(
+                    isDefaultDeviceOwner(caller)
+                            || isProfileOwnerOfOrganizationOwnedDevice(caller));
+        }
 
         // Don't allow set time when auto time is on.
         if (mInjector.settingsGlobalGetInt(Global.AUTO_TIME, 0) == 1) {
@@ -13051,8 +13093,14 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
         Objects.requireNonNull(who, "ComponentName is null");
 
         final CallerIdentity caller = getCallerIdentity(who);
-        Preconditions.checkCallAuthorization(
-                isDefaultDeviceOwner(caller) || isProfileOwnerOfOrganizationOwnedDevice(caller));
+        if (isPermissionCheckFlagEnabled()) {
+            // This is a global action.
+            enforcePermission(SET_TIME_ZONE, UserHandle.USER_ALL);
+        } else {
+            Preconditions.checkCallAuthorization(
+                    isDefaultDeviceOwner(caller)
+                            || isProfileOwnerOfOrganizationOwnedDevice(caller));
+        }
 
         // Don't allow set timezone when auto timezone is on.
         if (mInjector.settingsGlobalGetInt(Global.AUTO_TIME_ZONE, 0) == 1) {
@@ -13655,6 +13703,16 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
             broadcastIntentToCrossProfileManifestReceivers(
                     intent, parentHandle, requiresPermission);
             broadcastIntentToDevicePolicyManagerRoleHolder(intent, parentHandle);
+        }
+
+        @Override
+        public void enforcePermission(String permission, int targetUserId) {
+            DevicePolicyManagerService.this.enforcePermission(permission, targetUserId);
+        }
+
+        @Override
+        public boolean hasPermission(String permission, int targetUserId) {
+            return DevicePolicyManagerService.this.hasPermission(permission, targetUserId);
         }
 
         private void broadcastIntentToCrossProfileManifestReceivers(
@@ -18408,14 +18466,25 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
         }
     }
 
+
     private String getDevicePolicyManagementRoleHolderPackageName(Context context) {
         RoleManager roleManager = context.getSystemService(RoleManager.class);
-        List<String> roleHolders =
-                roleManager.getRoleHolders(RoleManager.ROLE_DEVICE_POLICY_MANAGEMENT);
-        if (roleHolders.isEmpty()) {
-            return null;
-        }
-        return roleHolders.get(0);
+
+        // Calling identity needs to be cleared as this method is used in the permissions checks.
+        return mInjector.binderWithCleanCallingIdentity(() -> {
+            List<String> roleHolders =
+                    roleManager.getRoleHolders(RoleManager.ROLE_DEVICE_POLICY_MANAGEMENT);
+            if (roleHolders.isEmpty()) {
+                return null;
+            }
+            return roleHolders.get(0);
+        });
+    }
+
+    private boolean isDevicePolicyManagementRoleHolder(CallerIdentity caller) {
+        String devicePolicyManagementRoleHolderPackageName =
+                getDevicePolicyManagementRoleHolderPackageName(mContext);
+        return caller.getPackageName().equals(devicePolicyManagementRoleHolderPackageName);
     }
 
     private void resetInteractAcrossProfilesAppOps() {
@@ -19511,6 +19580,192 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
             }
             return result;
         });
+    }
+
+    // DPC types
+    private static final int DEFAULT_DEVICE_OWNER = 0;
+    private static final int FINANCED_DEVICE_OWNER = 1;
+    private static final int PROFILE_OWNER_OF_ORGANIZATION_OWNED_DEVICE = 2;
+    private static final int PROFILE_OWNER_ON_USER_0 = 3;
+    private static final int PROFILE_OWNER = 4;
+
+    // Permissions of existing DPC types.
+    private static final List<String> DEFAULT_DEVICE_OWNER_PERMISSIONS = List.of(
+            MANAGE_DEVICE_POLICY_ACROSS_USERS_FULL,
+            MANAGE_DEVICE_POLICY_ACROSS_USERS,
+            MANAGE_DEVICE_POLICY_ACROSS_USERS_SECURITY_CRITICAL,
+            SET_TIME,
+            SET_TIME_ZONE);
+    private static final List<String> FINANCED_DEVICE_OWNER_PERMISSIONS = List.of(
+            MANAGE_DEVICE_POLICY_ACROSS_USERS_FULL,
+            MANAGE_DEVICE_POLICY_ACROSS_USERS,
+            MANAGE_DEVICE_POLICY_ACROSS_USERS_SECURITY_CRITICAL);
+    private static final List<String> PROFILE_OWNER_OF_ORGANIZATION_OWNED_DEVICE_PERMISSIONS =
+            List.of(
+                MANAGE_DEVICE_POLICY_ACROSS_USERS,
+                MANAGE_DEVICE_POLICY_ACROSS_USERS_SECURITY_CRITICAL,
+                SET_TIME,
+                SET_TIME_ZONE);
+    private static final List<String> PROFILE_OWNER_ON_USER_0_PERMISSIONS  = List.of(
+            SET_TIME,
+            SET_TIME_ZONE);
+    private static final List<String> PROFILE_OWNER_PERMISSIONS  = List.of(
+            MANAGE_DEVICE_POLICY_ACROSS_USERS_SECURITY_CRITICAL);
+
+    private static final HashMap<Integer, List<String>> DPC_PERMISSIONS = new HashMap<>();
+    {
+        DPC_PERMISSIONS.put(DEFAULT_DEVICE_OWNER, DEFAULT_DEVICE_OWNER_PERMISSIONS);
+        DPC_PERMISSIONS.put(FINANCED_DEVICE_OWNER, FINANCED_DEVICE_OWNER_PERMISSIONS);
+        DPC_PERMISSIONS.put(PROFILE_OWNER_OF_ORGANIZATION_OWNED_DEVICE,
+                PROFILE_OWNER_OF_ORGANIZATION_OWNED_DEVICE_PERMISSIONS);
+        DPC_PERMISSIONS.put(PROFILE_OWNER_ON_USER_0, PROFILE_OWNER_ON_USER_0_PERMISSIONS);
+        DPC_PERMISSIONS.put(PROFILE_OWNER, PROFILE_OWNER_PERMISSIONS);
+    }
+
+    //TODO(b/254253251) Fill this map in as new permissions are added for policies.
+    private static final HashMap<String, Integer> ACTIVE_ADMIN_POLICIES = new HashMap<>();
+
+    private static final HashMap<String, String> CROSS_USER_PERMISSIONS =
+            new HashMap<>();
+    {
+        // Auto time is intrinsically global so there is no cross-user permission.
+        CROSS_USER_PERMISSIONS.put(SET_TIME, null);
+        CROSS_USER_PERMISSIONS.put(SET_TIME_ZONE, null);
+    }
+
+    /**
+     * Checks if the calling process has been granted permission to apply a device policy on a
+     * specific user.
+     * The given permission will be checked along with its associated cross-user permission if it
+     * exists and the target user is different to the calling user.
+     *
+     * @param permission The name of the permission being checked.
+     * @param targetUserId The userId of the user which the caller needs permission to act on.
+     * @throws SecurityException if the caller has not been granted the given permission,
+     * the associtated cross-user permission if the caller's user is different to the target user.
+     */
+    private void enforcePermission(String permission, int targetUserId)
+            throws SecurityException {
+        if (!hasPermission(permission, targetUserId)) {
+            throw new SecurityException("Caller does not have the required permissions for "
+                    + "this user. Permissions required: {"
+                    + permission
+                    + ", "
+                    + CROSS_USER_PERMISSIONS.get(permission)
+                    + "}");
+        }
+    }
+
+    /**
+     * Return whether the calling process has been granted permission to query a device policy on
+     * a specific user.
+     *
+     * @param permission The name of the permission being checked.
+     * @param targetUserId The userId of the user which the caller needs permission to act on.
+     * @throws SecurityException if the caller has not been granted the given permission,
+     * the associatated cross-user permission if the caller's user is different to the target user
+     * and if the user has not been granted {@link QUERY_ADMIN_POLICY}.
+     */
+    private void enforceCanQuery(String permission, int targetUserId) throws SecurityException {
+        if (hasPermission(QUERY_ADMIN_POLICY)) {
+            return;
+        }
+        enforcePermission(permission, targetUserId);
+    }
+
+    /**
+     * Return whether the calling process has been granted permission to apply a device policy on
+     * a specific user.
+     *
+     * @param permission The name of the permission being checked.
+     * @param targetUserId The userId of the user which the caller needs permission to act on.
+     */
+    private boolean hasPermission(String permission, int targetUserId) {
+        boolean hasPermissionOnOwnUser = hasPermission(permission);
+        boolean hasPermissionOnTargetUser = true;
+        if (hasPermissionOnOwnUser & getCallerIdentity().getUserId() != targetUserId) {
+            hasPermissionOnTargetUser = hasPermission(CROSS_USER_PERMISSIONS.get(permission));
+        }
+        return hasPermissionOnOwnUser && hasPermissionOnTargetUser;
+    }
+
+    /**
+     * Return whether the calling process has been granted the given permission.
+     *
+     * @param permission The name of the permission being checked.
+     */
+    private boolean hasPermission(String permission) {
+        if (permission == null) {
+            return true;
+        }
+
+        CallerIdentity caller = getCallerIdentity();
+
+        // Check if the caller holds the permission
+        if (mContext.checkCallingOrSelfPermission(permission) == PERMISSION_GRANTED) {
+            return true;
+        }
+        // Check the permissions of DPCs
+        if (isDefaultDeviceOwner(caller)) {
+            return DPC_PERMISSIONS.get(DEFAULT_DEVICE_OWNER).contains(permission);
+        }
+        if (isFinancedDeviceOwner(caller)) {
+            return DPC_PERMISSIONS.get(FINANCED_DEVICE_OWNER).contains(permission);
+        }
+        if (isProfileOwnerOfOrganizationOwnedDevice(caller)) {
+            return DPC_PERMISSIONS.get(PROFILE_OWNER_OF_ORGANIZATION_OWNED_DEVICE).contains(
+                    permission);
+        }
+        if (isProfileOwnerOnUser0(caller)) {
+            return DPC_PERMISSIONS.get(PROFILE_OWNER_ON_USER_0).contains(permission);
+        }
+        if (isProfileOwner(caller)) {
+            return DPC_PERMISSIONS.get(PROFILE_OWNER).contains(permission);
+        }
+        // Check the permission for the role-holder
+        if (isDevicePolicyManagementRoleHolder(caller)) {
+            return anyDpcHasPermission(permission, mContext.getUserId());
+        }
+        // Check if the caller is an active admin that uses a certain policy.
+        if (ACTIVE_ADMIN_POLICIES.containsKey(permission)) {
+            return getActiveAdminForCallerLocked(
+                    null, ACTIVE_ADMIN_POLICIES.get(permission), false) != null;
+        }
+
+        return false;
+    }
+
+    /**
+     * Returns whether there is a DPC on the given user that has been granted the given permission.
+     *
+     * @param permission The name of the permission being checked.
+     * @param userId The id of the user to check.
+     */
+    private boolean anyDpcHasPermission(String permission, int userId) {
+        if (mOwners.isDefaultDeviceOwnerUserId(userId)) {
+            return DPC_PERMISSIONS.get(DEFAULT_DEVICE_OWNER).contains(permission);
+        }
+        if (mOwners.isFinancedDeviceOwnerUserId(userId)) {
+            return DPC_PERMISSIONS.get(FINANCED_DEVICE_OWNER).contains(permission);
+        }
+        if (mOwners.isProfileOwnerOfOrganizationOwnedDevice(userId)) {
+            return DPC_PERMISSIONS.get(PROFILE_OWNER_OF_ORGANIZATION_OWNED_DEVICE).contains(
+                    permission);
+        }
+        if (userId == 0 && mOwners.hasProfileOwner(0)) {
+            return DPC_PERMISSIONS.get(PROFILE_OWNER_ON_USER_0).contains(permission);
+        }
+        if (mOwners.hasProfileOwner(userId)) {
+            return DPC_PERMISSIONS.get(PROFILE_OWNER).contains(permission);
+        }
+        return false;
+    }
+
+    private boolean isPermissionCheckFlagEnabled() {
+        return DeviceConfig.getBoolean(
+                NAMESPACE_DEVICE_POLICY_MANAGER,
+                PERMISSION_BASED_ACCESS_EXPERIMENT_FLAG,
+                DEFAULT_VALUE_PERMISSION_BASED_ACCESS_FLAG);
     }
 
     // TODO(b/260560985): properly gate coexistence changes
