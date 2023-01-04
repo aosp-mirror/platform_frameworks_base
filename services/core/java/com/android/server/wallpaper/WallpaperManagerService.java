@@ -883,7 +883,10 @@ public class WallpaperManagerService extends IWallpaperManager.Stub
      */
     private final SparseArray<SparseArray<RemoteCallbackList<IWallpaperManagerCallback>>>
             mColorsChangedListeners;
+    // The currently bound home or home+lock wallpaper
     protected WallpaperData mLastWallpaper;
+    // The currently bound lock screen only wallpaper, or null if none
+    protected WallpaperData mLastLockWallpaper;
     private IWallpaperManagerCallback mKeyguardListener;
     private boolean mWaitingForUnlock;
     private boolean mShuttingDown;
@@ -3096,14 +3099,19 @@ public class WallpaperManagerService extends IWallpaperManager.Stub
                 Slog.w(TAG, msg);
                 return false;
             }
-            if (wallpaper.userId == mCurrentUserId && mLastWallpaper != null
+            if (mEnableSeparateLockScreenEngine) {
+                maybeDetachLastWallpapers(wallpaper);
+            } else if (wallpaper.userId == mCurrentUserId && mLastWallpaper != null
                     && !wallpaper.equals(mFallbackWallpaper)) {
                 detachWallpaperLocked(mLastWallpaper);
             }
             wallpaper.wallpaperComponent = componentName;
             wallpaper.connection = newConn;
             newConn.mReply = reply;
-            if (wallpaper.userId == mCurrentUserId && !wallpaper.equals(mFallbackWallpaper)) {
+            if (mEnableSeparateLockScreenEngine) {
+                updateCurrentWallpapers(wallpaper);
+            } else if (wallpaper.userId == mCurrentUserId && !wallpaper.equals(
+                    mFallbackWallpaper)) {
                 mLastWallpaper = wallpaper;
             }
             updateFallbackConnection();
@@ -3118,6 +3126,40 @@ public class WallpaperManagerService extends IWallpaperManager.Stub
             t.traceEnd();
         }
         return true;
+    }
+
+    // Updates tracking of the currently bound wallpapers. Assumes mEnableSeparateLockScreenEngine
+    // is true.
+    private void updateCurrentWallpapers(WallpaperData newWallpaper) {
+        if (newWallpaper.userId == mCurrentUserId && !newWallpaper.equals(mFallbackWallpaper)) {
+            if (newWallpaper.mWhich == (FLAG_SYSTEM | FLAG_LOCK)) {
+                mLastWallpaper = newWallpaper;
+                mLastLockWallpaper = null;
+            } else if (newWallpaper.mWhich == FLAG_SYSTEM) {
+                mLastWallpaper = newWallpaper;
+            } else if (newWallpaper.mWhich == FLAG_LOCK) {
+                mLastLockWallpaper = newWallpaper;
+            }
+        }
+    }
+
+    // Detaches previously bound wallpapers if no longer in use. Assumes
+    // mEnableSeparateLockScreenEngine is true.
+    private void maybeDetachLastWallpapers(WallpaperData newWallpaper) {
+        if (newWallpaper.userId != mCurrentUserId || newWallpaper.equals(mFallbackWallpaper)) {
+            return;
+        }
+        boolean homeUpdated = (newWallpaper.mWhich & FLAG_SYSTEM) != 0;
+        boolean lockUpdated = (newWallpaper.mWhich & FLAG_LOCK) != 0;
+        // This is the case where a home+lock wallpaper was changed to home-only, and the old
+        // home+lock became (static) or will become (live) lock-only.
+        boolean lockNeedsHomeWallpaper = mLastLockWallpaper == null && !lockUpdated;
+        if (mLastWallpaper != null && homeUpdated && !lockNeedsHomeWallpaper) {
+            detachWallpaperLocked(mLastWallpaper);
+        }
+        if (mLastLockWallpaper != null && lockUpdated) {
+            detachWallpaperLocked(mLastLockWallpaper);
+        }
     }
 
     private void detachWallpaperLocked(WallpaperData wallpaper) {
@@ -3150,7 +3192,12 @@ public class WallpaperManagerService extends IWallpaperManager.Stub
                     wallpaper.connection.mTryToRebindRunnable);
 
             wallpaper.connection = null;
-            if (wallpaper == mLastWallpaper) mLastWallpaper = null;
+            if (wallpaper == mLastWallpaper) {
+                mLastWallpaper = null;
+            }
+            if (wallpaper == mLastLockWallpaper) {
+                mLastLockWallpaper = null;
+            }
         }
     }
 
