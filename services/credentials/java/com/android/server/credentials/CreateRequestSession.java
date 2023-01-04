@@ -75,7 +75,7 @@ public final class CreateRequestSession extends RequestSession<CreateCredentialR
         try {
             mClientCallback.onPendingIntent(mCredentialManagerUi.createPendingIntent(
                     RequestInfo.newCreateRequestInfo(
-                            mRequestId, mClientRequest, mIsFirstUiTurn, mClientCallingPackage),
+                            mRequestId, mClientRequest, mClientCallingPackage),
                     providerDataList));
         } catch (RemoteException e) {
             Log.i(TAG, "Issue with invoking pending intent: " + e.getMessage());

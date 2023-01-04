@@ -48,7 +48,6 @@ abstract class RequestSession<T, U> implements CredentialManagerUi.CredentialMan
     @NonNull protected final CredentialManagerUi mCredentialManagerUi;
     @NonNull protected final String mRequestType;
     @NonNull protected final Handler mHandler;
-    @NonNull protected boolean mIsFirstUiTurn = true;
     @UserIdInt protected final int mUserId;
     @NonNull protected final String mClientCallingPackage;
 

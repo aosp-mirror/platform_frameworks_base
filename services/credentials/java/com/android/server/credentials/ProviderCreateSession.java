@@ -232,7 +232,6 @@ public final class ProviderCreateSession extends ProviderSession<
         return new CreateCredentialProviderData.Builder(
                 mComponentName.flattenToString())
                 .setSaveEntries(saveEntries)
-                .setIsDefaultProvider(isDefaultProvider)
                 .build();
     }
 
