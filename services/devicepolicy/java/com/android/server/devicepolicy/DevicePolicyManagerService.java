@@ -1091,13 +1091,13 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
                 // (ACTION_DATE_CHANGED), or when manual clock adjustment is made
                 // (ACTION_TIME_CHANGED)
                 updateSystemUpdateFreezePeriodsRecord(/* saveIfChanged */ true);
-                final int userId = getManagedUserId(UserHandle.USER_SYSTEM);
+                final int userId = getManagedUserId(mUserManager.getMainUser().getIdentifier());
                 if (userId >= 0) {
                     updatePersonalAppsSuspension(userId, mUserManager.isUserUnlocked(userId));
                 }
             } else if (ACTION_PROFILE_OFF_DEADLINE.equals(action)) {
                 Slogf.i(LOG_TAG, "Profile off deadline alarm was triggered");
-                final int userId = getManagedUserId(UserHandle.USER_SYSTEM);
+                final int userId = getManagedUserId(mUserManager.getMainUser().getIdentifier());
                 if (userId >= 0) {
                     updatePersonalAppsSuspension(userId, mUserManager.isUserUnlocked(userId));
                 } else {
@@ -18188,8 +18188,10 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
                         .addAction(turnProfileOnButton)
                         .addExtras(extras)
                         .build();
-        mInjector.getNotificationManager().notify(
-                SystemMessage.NOTE_PERSONAL_APPS_SUSPENDED, notification);
+
+        mInjector.getNotificationManager().notifyAsUser(
+                null, SystemMessage.NOTE_PERSONAL_APPS_SUSPENDED, notification,
+                UserHandle.of(getProfileParentId(profileUserId)));
     }
 
     private String getPersonalAppSuspensionButtonText() {
