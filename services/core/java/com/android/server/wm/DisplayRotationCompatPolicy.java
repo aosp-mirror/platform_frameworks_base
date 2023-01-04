@@ -203,8 +203,11 @@ final class DisplayRotationCompatPolicy {
                 || !shouldRefreshActivity(activity, newConfig, lastReportedConfig)) {
             return;
         }
-        boolean cycleThroughStop = mWmService.mLetterboxConfiguration
-                .isCameraCompatRefreshCycleThroughStopEnabled();
+        boolean cycleThroughStop =
+                mWmService.mLetterboxConfiguration
+                        .isCameraCompatRefreshCycleThroughStopEnabled()
+                && !activity.mLetterboxUiController
+                        .shouldRefreshActivityViaPauseForCameraCompat();
         try {
             activity.mLetterboxUiController.setIsRefreshAfterRotationRequested(true);
             ProtoLog.v(WM_DEBUG_STATES,
@@ -255,7 +258,8 @@ final class DisplayRotationCompatPolicy {
             Configuration lastReportedConfig) {
         return newConfig.windowConfiguration.getDisplayRotation()
                         != lastReportedConfig.windowConfiguration.getDisplayRotation()
-                && isTreatmentEnabledForActivity(activity);
+                && isTreatmentEnabledForActivity(activity)
+                && activity.mLetterboxUiController.shouldRefreshActivityForCameraCompat();
     }
 
     /**
@@ -294,7 +298,8 @@ final class DisplayRotationCompatPolicy {
                 // handle dynamic changes so we shouldn't force rotate them.
                 && activity.getRequestedOrientation() != SCREEN_ORIENTATION_NOSENSOR
                 && activity.getRequestedOrientation() != SCREEN_ORIENTATION_LOCKED
-                && mCameraIdPackageBiMap.containsPackageName(activity.packageName);
+                && mCameraIdPackageBiMap.containsPackageName(activity.packageName)
+                && activity.mLetterboxUiController.shouldForceRotateForCameraCompat();
     }
 
     private synchronized void notifyCameraOpened(
