@@ -691,6 +691,8 @@
     <string name="permdesc_readMediaVideo" msgid="3846400073770403528">"អនុញ្ញាតឱ្យ​កម្មវិធី​អានឯកសារវីដេអូពីទំហំផ្ទុករួមរបស់អ្នក។"</string>
     <string name="permlab_readMediaImages" msgid="4057590631020986789">"អានឯកសាររូបភាពពីទំហំ​ផ្ទុករួម"</string>
     <string name="permdesc_readMediaImages" msgid="5836219373138469259">"អនុញ្ញាតឱ្យ​កម្មវិធី​អានឯកសាររូបភាពពីទំហំផ្ទុករួមរបស់អ្នក។"</string>
+    <string name="permlab_readVisualUserSelect" msgid="5516204215354667586">"អានឯកសាររូបភាព និងវីដេអូដែលអ្នកប្រើប្រាស់ជ្រើសរើសពីទំហំផ្ទុករួម"</string>
+    <string name="permdesc_readVisualUserSelect" msgid="8027174717714968217">"អនុញ្ញាតឱ្យកម្មវិធីអានឯកសាររូបភាព និងវីដេអូដែលអ្នកជ្រើសរើសពីទំហំផ្ទុករួមរបស់អ្នក។"</string>
     <string name="permlab_sdcardWrite" msgid="4863021819671416668">"កែប្រែ ឬលុប​ខ្លឹមសារនៃ​ទំហំផ្ទុករួម​របស់អ្នក"</string>
     <string name="permdesc_sdcardWrite" msgid="8376047679331387102">"អនុញ្ញាតឱ្យ​កម្មវិធី​សរសេរខ្លឹមសារនៃ​ទំហំផ្ទុករួម​របស់អ្នក។"</string>
     <string name="permlab_use_sip" msgid="8250774565189337477">"បង្កើត/ទទួល ការ​ហៅ SIP"</string>

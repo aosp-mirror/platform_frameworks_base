@@ -623,7 +623,7 @@
     <string name="right_keycode" msgid="2480715509844798438">"Højre tastekode"</string>
     <string name="left_icon" msgid="5036278531966897006">"Venstre ikon"</string>
     <string name="right_icon" msgid="1103955040645237425">"Højre ikon"</string>
-    <string name="drag_to_add_tiles" msgid="8933270127508303672">"Tilføj felter ved at holde dem nede og trække"</string>
+    <string name="drag_to_add_tiles" msgid="8933270127508303672">"Tilføj felter ved at holde dem nede og trække dem"</string>
     <string name="drag_to_rearrange_tiles" msgid="2143204300089638620">"Flyt rundt på felterne ved at holde dem nede og trække"</string>
     <string name="drag_to_remove_tiles" msgid="4682194717573850385">"Træk herhen for at fjerne"</string>
     <string name="drag_to_remove_disabled" msgid="933046987838658850">"Du skal bruge mindst <xliff:g id="MIN_NUM_TILES">%1$d</xliff:g> felter"</string>

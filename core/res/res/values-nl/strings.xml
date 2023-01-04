@@ -691,6 +691,8 @@
     <string name="permdesc_readMediaVideo" msgid="3846400073770403528">"Hiermee kan de app videobestanden in je gedeelde opslag lezen."</string>
     <string name="permlab_readMediaImages" msgid="4057590631020986789">"afbeeldingsbestanden in gedeelde opslag lezen"</string>
     <string name="permdesc_readMediaImages" msgid="5836219373138469259">"Hiermee kan de app afbeeldingsbestanden in je gedeelde opslag lezen."</string>
+    <string name="permlab_readVisualUserSelect" msgid="5516204215354667586">"door de gebruiker geselecteerde afbeeldings- en videobestanden in de gedeelde opslag lezen"</string>
+    <string name="permdesc_readVisualUserSelect" msgid="8027174717714968217">"Hiermee kan de app afbeeldings- en videobestanden lezen die je selecteert in je gedeelde opslag."</string>
     <string name="permlab_sdcardWrite" msgid="4863021819671416668">"de content van je gedeelde opslag aanpassen of verwijderen"</string>
     <string name="permdesc_sdcardWrite" msgid="8376047679331387102">"Hiermee kan de app de content van je gedeelde opslag schrijven."</string>
     <string name="permlab_use_sip" msgid="8250774565189337477">"Bellen of gebeld worden via SIP"</string>
