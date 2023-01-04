@@ -1446,6 +1446,9 @@ public final class SystemServer implements Dumpable {
         boolean isArc = context.getPackageManager().hasSystemFeature(
                 "org.chromium.arc");
 
+        boolean isTv = context.getPackageManager().hasSystemFeature(
+                PackageManager.FEATURE_LEANBACK);
+
         boolean enableVrService = context.getPackageManager().hasSystemFeature(
                 PackageManager.FEATURE_VR_MODE_HIGH_PERFORMANCE);
 
