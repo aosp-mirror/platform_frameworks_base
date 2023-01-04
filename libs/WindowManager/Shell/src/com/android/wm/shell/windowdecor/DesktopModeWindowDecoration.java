@@ -132,7 +132,7 @@ public class DesktopModeWindowDecoration extends WindowDecoration<WindowDecorLin
 
         mRelayoutParams.reset();
         mRelayoutParams.mRunningTaskInfo = taskInfo;
-        mRelayoutParams.mLayoutResId = R.layout.caption_window_decoration;
+        mRelayoutParams.mLayoutResId = R.layout.desktop_mode_window_decor;
         mRelayoutParams.mCaptionHeightId = R.dimen.freeform_decor_caption_height;
         mRelayoutParams.mCaptionWidthId = R.dimen.freeform_decor_caption_width;
         mRelayoutParams.mShadowRadiusId = shadowRadiusID;
@@ -212,7 +212,7 @@ public class DesktopModeWindowDecoration extends WindowDecoration<WindowDecorLin
      * Sets up listeners when a new root view is created.
      */
     private void setupRootView() {
-        View caption = mResult.mRootView.findViewById(R.id.caption);
+        View caption = mResult.mRootView.findViewById(R.id.desktop_mode_caption);
         caption.setOnTouchListener(mOnCaptionTouchListener);
         View close = caption.findViewById(R.id.close_window);
         close.setOnClickListener(mOnCaptionButtonClickListener);
@@ -243,7 +243,7 @@ public class DesktopModeWindowDecoration extends WindowDecoration<WindowDecorLin
      */
     private void setCaptionVisibility(boolean visible) {
         int v = visible ? View.VISIBLE : View.GONE;
-        View captionView = mResult.mRootView.findViewById(R.id.caption);
+        View captionView = mResult.mRootView.findViewById(R.id.desktop_mode_caption);
         captionView.setVisibility(v);
         if (!visible) closeHandleMenu();
     }
@@ -265,7 +265,7 @@ public class DesktopModeWindowDecoration extends WindowDecoration<WindowDecorLin
      */
     void setButtonVisibility(boolean visible) {
         int visibility = visible ? View.VISIBLE : View.GONE;
-        View caption = mResult.mRootView.findViewById(R.id.caption);
+        View caption = mResult.mRootView.findViewById(R.id.desktop_mode_caption);
         View back = caption.findViewById(R.id.back_button);
         View close = caption.findViewById(R.id.close_window);
         back.setVisibility(visibility);
@@ -304,7 +304,7 @@ public class DesktopModeWindowDecoration extends WindowDecoration<WindowDecorLin
         int width = loadDimensionPixelSize(resources, mRelayoutParams.mCaptionWidthId);
         int height = loadDimensionPixelSize(resources, mRelayoutParams.mCaptionHeightId);
         String namePrefix = "Caption Menu";
-        mHandleMenu = addWindow(R.layout.caption_handle_menu, namePrefix, t,
+        mHandleMenu = addWindow(R.layout.desktop_mode_decor_handle_menu, namePrefix, t,
                 x - mResult.mDecorContainerOffsetX, y - mResult.mDecorContainerOffsetY,
                 width, height);
         mSyncQueue.runInSync(transaction -> {
@@ -336,7 +336,7 @@ public class DesktopModeWindowDecoration extends WindowDecoration<WindowDecorLin
      */
     void closeHandleMenuIfNeeded(MotionEvent ev) {
         if (isHandleMenuActive()) {
-            if (!checkEventInCaptionView(ev, R.id.caption)) {
+            if (!checkEventInCaptionView(ev, R.id.desktop_mode_caption)) {
                 closeHandleMenu();
             }
         }
@@ -389,7 +389,7 @@ public class DesktopModeWindowDecoration extends WindowDecoration<WindowDecorLin
      */
     void checkClickEvent(MotionEvent ev) {
         if (mResult.mRootView == null) return;
-        View caption = mResult.mRootView.findViewById(R.id.caption);
+        View caption = mResult.mRootView.findViewById(R.id.desktop_mode_caption);
         PointF inputPoint = offsetCaptionLocation(ev);
         if (!isHandleMenuActive()) {
             View handle = caption.findViewById(R.id.caption_handle);

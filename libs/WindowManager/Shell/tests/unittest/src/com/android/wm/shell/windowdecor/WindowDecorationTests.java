@@ -560,7 +560,8 @@ public class WindowDecorationTests extends ShellTestCase {
             int height = loadDimensionPixelSize(resources, mRelayoutParams.mCaptionHeightId);
             String name = "Test Window";
             WindowDecoration.AdditionalWindow additionalWindow =
-                    addWindow(R.layout.caption_handle_menu, name, mMockSurfaceControlAddWindowT,
+                    addWindow(R.layout.desktop_mode_decor_handle_menu, name,
+                            mMockSurfaceControlAddWindowT,
                             x - mRelayoutResult.mDecorContainerOffsetX,
                             y - mRelayoutResult.mDecorContainerOffsetY,
                             width, height);
