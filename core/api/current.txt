@@ -4673,7 +4673,7 @@ package android.app {
     method @RequiresPermission(android.Manifest.permission.SCHEDULE_EXACT_ALARM) public void setAlarmClock(@NonNull android.app.AlarmManager.AlarmClockInfo, @NonNull android.app.PendingIntent);
     method public void setAndAllowWhileIdle(int, long, @NonNull android.app.PendingIntent);
     method @RequiresPermission(value=android.Manifest.permission.SCHEDULE_EXACT_ALARM, conditional=true) public void setExact(int, long, @NonNull android.app.PendingIntent);
-    method @RequiresPermission(value=android.Manifest.permission.SCHEDULE_EXACT_ALARM, conditional=true) public void setExact(int, long, @Nullable String, @NonNull android.app.AlarmManager.OnAlarmListener, @Nullable android.os.Handler);
+    method public void setExact(int, long, @Nullable String, @NonNull android.app.AlarmManager.OnAlarmListener, @Nullable android.os.Handler);
     method @RequiresPermission(value=android.Manifest.permission.SCHEDULE_EXACT_ALARM, conditional=true) public void setExactAndAllowWhileIdle(int, long, @NonNull android.app.PendingIntent);
     method public void setInexactRepeating(int, long, long, @NonNull android.app.PendingIntent);
     method public void setRepeating(int, long, long, @NonNull android.app.PendingIntent);

@@ -47,9 +47,11 @@ import static com.android.server.alarm.Alarm.BATTERY_SAVER_POLICY_INDEX;
 import static com.android.server.alarm.Alarm.DEVICE_IDLE_POLICY_INDEX;
 import static com.android.server.alarm.Alarm.EXACT_ALLOW_REASON_ALLOW_LIST;
 import static com.android.server.alarm.Alarm.EXACT_ALLOW_REASON_COMPAT;
+import static com.android.server.alarm.Alarm.EXACT_ALLOW_REASON_LISTENER;
 import static com.android.server.alarm.Alarm.EXACT_ALLOW_REASON_NOT_APPLICABLE;
 import static com.android.server.alarm.Alarm.EXACT_ALLOW_REASON_PERMISSION;
 import static com.android.server.alarm.Alarm.EXACT_ALLOW_REASON_POLICY_PERMISSION;
+import static com.android.server.alarm.Alarm.EXACT_ALLOW_REASON_PRIORITIZED;
 import static com.android.server.alarm.Alarm.REQUESTER_POLICY_INDEX;
 import static com.android.server.alarm.Alarm.TARE_POLICY_INDEX;
 import static com.android.server.alarm.AlarmManagerService.RemovedAlarm.REMOVE_REASON_ALARM_CANCELLED;
@@ -2890,12 +2892,23 @@ public class AlarmManagerService extends SystemService {
                 // The API doesn't allow using both together.
                 flags &= ~FLAG_ALLOW_WHILE_IDLE;
                 // Prioritized alarms don't need any extra permission to be exact.
+                if (exact) {
+                    exactAllowReason = EXACT_ALLOW_REASON_PRIORITIZED;
+                }
             } else if (exact || allowWhileIdle) {
                 final boolean needsPermission;
                 boolean lowerQuota;
                 if (isExactAlarmChangeEnabled(callingPackage, callingUserId)) {
-                    needsPermission = exact;
-                    lowerQuota = !exact;
+                    if (directReceiver == null) {
+                        needsPermission = exact;
+                        lowerQuota = !exact;
+                    } else {
+                        needsPermission = false;
+                        lowerQuota = allowWhileIdle;
+                        if (exact) {
+                            exactAllowReason = EXACT_ALLOW_REASON_LISTENER;
+                        }
+                    }
                     if (exact) {
                         idleOptions = (alarmClock != null) ? mOptsWithFgsForAlarmClock.toBundle()
                                 : mOptsWithFgs.toBundle();
@@ -2931,11 +2944,9 @@ public class AlarmManagerService extends SystemService {
                             throw new SecurityException(errorMessage);
                         }
                         // If the app is on the full system power allow-list (not except-idle),
-                        // or the user-elected allow-list, or we're in a soft failure mode, we still
-                        // allow the alarms.
-                        // In both cases, ALLOW_WHILE_IDLE alarms get a lower quota equivalent to
-                        // what pre-S apps got. Note that user-allow-listed apps don't use the flag
-                        // ALLOW_WHILE_IDLE.
+                        // or the user-elected allow-list, we allow exact alarms.
+                        // ALLOW_WHILE_IDLE alarms get a lower quota equivalent to what pre-S apps
+                        // got. Note that user-allow-listed apps don't use FLAG_ALLOW_WHILE_IDLE.
                         // We grant temporary allow-list to allow-while-idle alarms but without FGS
                         // capability. AlarmClock alarms do not get the temporary allow-list.
                         // This is consistent with pre-S behavior. Note that apps that are in
