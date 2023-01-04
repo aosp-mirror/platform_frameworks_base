@@ -23,10 +23,8 @@
     <string name="dock_alignment_not_charging" product="default" msgid="3980752926226749808">"ୱାୟାର୍‌ଲେସ୍ ଭାବେ ଚାର୍ଜ କରିବାକୁ ଫୋନ୍‌କୁ ଠିକ୍ ଭାବରେ ରଖନ୍ତୁ"</string>
     <string name="inattentive_sleep_warning_message" product="tv" msgid="6844464574089665063">"Android TV ଡିଭାଇସ୍ ଶୀଘ୍ର ବନ୍ଦ ହୋଇଯିବ; ଏହା ଚାଲୁ ରଖିବା ପାଇଁ ଏକ ବଟନ୍ ଦବାନ୍ତୁ।"</string>
     <string name="inattentive_sleep_warning_message" product="default" msgid="5693904520452332224">"ଡିଭାଇସ୍‌ଟି ଶୀଘ୍ର ବନ୍ଦ ହୋଇଯିବ; ଏହାକୁ ଚାଲୁ ରଖିବା ପାଇଁ ଦବାନ୍ତୁ।"</string>
-    <!-- no translation found for keyguard_missing_sim_message (408124574073032188) -->
-    <skip />
-    <!-- no translation found for keyguard_missing_sim_message (2605468359948247208) -->
-    <skip />
+    <string name="keyguard_missing_sim_message" product="tablet" msgid="408124574073032188">"ଟାବଲେଟରେ କୌଣସି SIM ନାହିଁ।"</string>
+    <string name="keyguard_missing_sim_message" product="default" msgid="2605468359948247208">"ଫୋନରେ କୌଣସି SIM ନାହିଁ।"</string>
     <string name="kg_invalid_confirm_pin_hint" product="default" msgid="6278551068943958651">"PIN କୋଡ୍‌ଗୁଡ଼ିକ ମେଳ ଖାଉନାହିଁ"</string>
     <string name="kg_failed_attempts_almost_at_wipe" product="tablet" msgid="302165994845009232">"ଆପଣ ଟାବ୍‌ଲେଟ୍‌କୁ ଅନ୍‌ଲକ୍ କରିବାକୁ <xliff:g id="NUMBER_0">%1$d</xliff:g>ଥର ଭୁଲ ପ୍ରୟାସ କରିଛନ୍ତି। ଆଉ <xliff:g id="NUMBER_1">%2$d</xliff:g>ଟି ଭୁଲ୍ ପ୍ରୟାସ ପରେ, ଏହି ଟାବ୍‌ଲେଟ୍‌କୁ ରିସେଟ୍ କରିଦିଆଯିବ, ଯାହାଦ୍ୱାରା ଏହାର ସମସ୍ତ ଡାଟା ଡିଲିଟ୍ ହେବ।"</string>
     <string name="kg_failed_attempts_almost_at_wipe" product="default" msgid="2594813176164266847">"ଆପଣ ଫୋନ୍‌କୁ ଅନ୍‌ଲକ୍ କରିବାକୁ <xliff:g id="NUMBER_0">%1$d</xliff:g>ଥର ଭୁଲ ପ୍ରୟାସ କରିଛନ୍ତି। ଆଉ <xliff:g id="NUMBER_1">%2$d</xliff:g>ଟି ଭୁଲ୍ ପ୍ରୟାସ ପରେ, ଏହି ଫୋନ୍‌କୁ ରିସେଟ୍ କରିଦିଆଯିବ, ଯାହାଦ୍ୱାରା ଏହାର ସମସ୍ତ ଡାଟା ଡିଲିଟ୍ ହେବ।"</string>

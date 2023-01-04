@@ -23,10 +23,8 @@
     <string name="dock_alignment_not_charging" product="default" msgid="3980752926226749808">"Lijn de telefoon opnieuw uit om draadloos op te laden"</string>
     <string name="inattentive_sleep_warning_message" product="tv" msgid="6844464574089665063">"Het Android TV-apparaat wordt binnenkort uitgezet. Druk op een knop om het aan te laten."</string>
     <string name="inattentive_sleep_warning_message" product="default" msgid="5693904520452332224">"Het apparaat wordt binnenkort uitgezet. Druk om het aan te laten."</string>
-    <!-- no translation found for keyguard_missing_sim_message (408124574073032188) -->
-    <skip />
-    <!-- no translation found for keyguard_missing_sim_message (2605468359948247208) -->
-    <skip />
+    <string name="keyguard_missing_sim_message" product="tablet" msgid="408124574073032188">"Geen simkaart in tablet."</string>
+    <string name="keyguard_missing_sim_message" product="default" msgid="2605468359948247208">"Geen simkaart in telefoon."</string>
     <string name="kg_invalid_confirm_pin_hint" product="default" msgid="6278551068943958651">"Pincodes komen niet overeen"</string>
     <string name="kg_failed_attempts_almost_at_wipe" product="tablet" msgid="302165994845009232">"Je hebt <xliff:g id="NUMBER_0">%1$d</xliff:g> mislukte pogingen ondernomen om de tablet te ontgrendelen. Na nog eens <xliff:g id="NUMBER_1">%2$d</xliff:g> mislukte pogingen wordt deze tablet gereset, waardoor alle gegevens worden verwijderd."</string>
     <string name="kg_failed_attempts_almost_at_wipe" product="default" msgid="2594813176164266847">"Je hebt <xliff:g id="NUMBER_0">%1$d</xliff:g> mislukte pogingen ondernomen om de telefoon te ontgrendelen. Na nog eens <xliff:g id="NUMBER_1">%2$d</xliff:g> mislukte pogingen wordt deze telefoon gereset, waardoor alle gegevens worden verwijderd."</string>

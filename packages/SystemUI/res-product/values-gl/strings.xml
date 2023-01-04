@@ -23,10 +23,8 @@
     <string name="dock_alignment_not_charging" product="default" msgid="3980752926226749808">"Aliña de novo o teléfono para cargalo sen fíos"</string>
     <string name="inattentive_sleep_warning_message" product="tv" msgid="6844464574089665063">"Pronto se apagará o dispositivo Android TV. Preme un botón para mantelo acendido."</string>
     <string name="inattentive_sleep_warning_message" product="default" msgid="5693904520452332224">"Pronto se apagará o teléfono. Tócao para mantelo acendido."</string>
-    <!-- no translation found for keyguard_missing_sim_message (408124574073032188) -->
-    <skip />
-    <!-- no translation found for keyguard_missing_sim_message (2605468359948247208) -->
-    <skip />
+    <string name="keyguard_missing_sim_message" product="tablet" msgid="408124574073032188">"Non hai ningunha SIM na tableta."</string>
+    <string name="keyguard_missing_sim_message" product="default" msgid="2605468359948247208">"Non hai ningunha SIM no teléfono."</string>
     <string name="kg_invalid_confirm_pin_hint" product="default" msgid="6278551068943958651">"Os códigos PIN non coinciden"</string>
     <string name="kg_failed_attempts_almost_at_wipe" product="tablet" msgid="302165994845009232">"Tentaches desbloquear a tableta <xliff:g id="NUMBER_0">%1$d</xliff:g> veces de forma incorrecta. Se realizas <xliff:g id="NUMBER_1">%2$d</xliff:g> intentos incorrectos máis, restablecerase a tableta e, por conseguinte, eliminaranse todos os seus datos."</string>
     <string name="kg_failed_attempts_almost_at_wipe" product="default" msgid="2594813176164266847">"Tentaches desbloquear o teléfono <xliff:g id="NUMBER_0">%1$d</xliff:g> veces de forma incorrecta. Se realizas <xliff:g id="NUMBER_1">%2$d</xliff:g> intentos incorrectos máis, restablecerase o teléfono e, por conseguinte, eliminaranse todos os seus datos."</string>
