@@ -379,11 +379,16 @@ public final class PendingIntentRecord extends IIntentSender.Stub {
                 resolvedType = key.requestResolvedType;
             }
 
-            // Apply any launch flags from the ActivityOptions. This is to ensure that the caller
-            // can specify a consistent launch mode even if the PendingIntent is immutable
+            // Apply any launch flags from the ActivityOptions. This is used only by SystemUI
+            // to ensure that we can launch the pending intent with a consistent launch mode even
+            // if the provided PendingIntent is immutable (ie. to force an activity to launch into
+            // a new task, or to launch multiple instances if supported by the app)
             final ActivityOptions opts = ActivityOptions.fromBundle(options);
             if (opts != null) {
-                finalIntent.addFlags(opts.getPendingIntentLaunchFlags());
+                // TODO(b/254490217): Move this check into SafeActivityOptions
+                if (controller.mAtmInternal.isCallerRecents(Binder.getCallingUid())) {
+                    finalIntent.addFlags(opts.getPendingIntentLaunchFlags());
+                }
             }
 
             // Extract options before clearing calling identity
