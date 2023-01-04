@@ -1004,8 +1004,7 @@
     <string name="keyguard_affordance_enablement_dialog_qr_scanner_instruction" msgid="5355839079232119791">"• ഒരു ക്യാമറാ ആപ്പ് ഇൻസ്റ്റാൾ ചെയ്തിട്ടുണ്ട്"</string>
     <string name="keyguard_affordance_enablement_dialog_home_instruction_1" msgid="8438311171750568633">"• ആപ്പ് സജ്ജീകരിച്ചിട്ടുണ്ട്"</string>
     <string name="keyguard_affordance_enablement_dialog_home_instruction_2" msgid="8308525385889021652">"• ഒരു ഉപകരണമെങ്കിലും ലഭ്യമാണ്"</string>
-    <!-- no translation found for keyguard_affordance_press_too_short (8145437175134998864) -->
-    <skip />
+    <string name="keyguard_affordance_press_too_short" msgid="8145437175134998864">"സ്പർശിച്ച് പിടിക്കുക കുറുക്കുവഴി"</string>
     <string name="rear_display_bottom_sheet_cancel" msgid="3461468855493357248">"റദ്ദാക്കുക"</string>
     <string name="rear_display_bottom_sheet_confirm" msgid="4383356544661421206">"ഇപ്പോൾ ഫ്ലിപ്പ് ചെയ്യൂ"</string>
     <string name="rear_display_fold_bottom_sheet_title" msgid="6081542277622721548">"കൂടുതൽ മികച്ച സെൽഫി ലഭിക്കാൻ ഫോൺ അൺഫോൾഡ് ചെയ്യൂ"</string>
