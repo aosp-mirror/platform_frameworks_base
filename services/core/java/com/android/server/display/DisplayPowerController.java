@@ -860,6 +860,10 @@ final class DisplayPowerController implements AutomaticBrightnessController.Call
                 mAutomaticBrightnessController.stop();
             }
 
+            if (mScreenOffBrightnessSensorController != null) {
+                mScreenOffBrightnessSensorController.stop();
+            }
+
             if (mBrightnessSetting != null) {
                 mBrightnessSetting.unregisterListener(mBrightnessSettingListener);
             }
@@ -1104,6 +1108,9 @@ final class DisplayPowerController implements AutomaticBrightnessController.Call
             mBrightnessEventRingBuffer =
                     new RingBuffer<>(BrightnessEvent.class, RINGBUFFER_MAX);
 
+            if (mScreenOffBrightnessSensorController != null) {
+                mScreenOffBrightnessSensorController.stop();
+            }
             loadScreenOffBrightnessSensor();
             int[] sensorValueToLux = mDisplayDeviceConfig.getScreenOffBrightnessSensorValueToLux();
             if (mScreenOffBrightnessSensor != null && sensorValueToLux != null) {
