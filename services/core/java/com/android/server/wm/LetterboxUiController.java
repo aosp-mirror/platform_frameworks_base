@@ -17,10 +17,13 @@
 package com.android.server.wm;
 
 import static android.app.WindowConfiguration.WINDOWING_MODE_FULLSCREEN;
+import static android.content.pm.ActivityInfo.OVERRIDE_ENABLE_COMPAT_IGNORE_REQUESTED_ORIENTATION;
 import static android.content.pm.ActivityInfo.SCREEN_ORIENTATION_UNSPECIFIED;
+import static android.content.pm.ActivityInfo.screenOrientationToString;
 import static android.content.res.Configuration.ORIENTATION_LANDSCAPE;
 import static android.content.res.Configuration.ORIENTATION_PORTRAIT;
 import static android.view.WindowManager.LayoutParams.FLAG_SHOW_WALLPAPER;
+import static android.view.WindowManager.PROPERTY_COMPAT_IGNORE_REQUESTED_ORIENTATION;
 
 import static com.android.internal.util.FrameworkStatsLog.APP_COMPAT_STATE_CHANGED__LETTERBOX_POSITION__BOTTOM;
 import static com.android.internal.util.FrameworkStatsLog.APP_COMPAT_STATE_CHANGED__LETTERBOX_POSITION__CENTER;
@@ -55,6 +58,8 @@ import static com.android.server.wm.LetterboxConfiguration.letterboxBackgroundTy
 
 import android.annotation.Nullable;
 import android.app.ActivityManager.TaskDescription;
+import android.content.pm.ActivityInfo.ScreenOrientation;
+import android.content.pm.PackageManager;
 import android.content.res.Configuration;
 import android.content.res.Resources;
 import android.graphics.Color;
@@ -74,6 +79,7 @@ import com.android.internal.statusbar.LetterboxDetails;
 import com.android.server.wm.LetterboxConfiguration.LetterboxBackgroundType;
 
 import java.io.PrintWriter;
+import java.util.function.BooleanSupplier;
 
 /** Controls behaviour of the letterbox UI for {@link mActivityRecord}. */
 // TODO(b/185262487): Improve test coverage of this class. Parts of it are tested in
@@ -131,12 +137,37 @@ final class LetterboxUiController {
     // DisplayRotationCompatPolicy.
     private boolean mIsRefreshAfterRotationRequested;
 
+    @Nullable
+    private final Boolean mBooleanPropertyIgnoreRequestedOrientation;
+
+    private boolean mIsRelauchingAfterRequestedOrientationChanged;
+
     LetterboxUiController(WindowManagerService wmService, ActivityRecord activityRecord) {
         mLetterboxConfiguration = wmService.mLetterboxConfiguration;
         // Given activityRecord may not be fully constructed since LetterboxUiController
         // is created in its constructor. It shouldn't be used in this constructor but it's safe
         // to use it after since controller is only used in ActivityRecord.
         mActivityRecord = activityRecord;
+
+        PackageManager packageManager = wmService.mContext.getPackageManager();
+        mBooleanPropertyIgnoreRequestedOrientation =
+                readComponentProperty(packageManager, mActivityRecord.packageName,
+                        mLetterboxConfiguration::isPolicyForIgnoringRequestedOrientationEnabled,
+                        PROPERTY_COMPAT_IGNORE_REQUESTED_ORIENTATION);
+    }
+
+    @Nullable
+    private static Boolean readComponentProperty(PackageManager packageManager, String packageName,
+            BooleanSupplier gatingCondition, String propertyName) {
+        if (!gatingCondition.getAsBoolean()) {
+            return null;
+        }
+        try {
+            return packageManager.getProperty(propertyName, packageName).getBoolean();
+        } catch (PackageManager.NameNotFoundException e) {
+            // No such property name.
+        }
+        return null;
     }
 
     /** Cleans up {@link Letterbox} if it exists.*/
@@ -151,6 +182,72 @@ final class LetterboxUiController {
         if (mLetterbox != null) {
             mLetterbox.onMovedToDisplay(displayId);
         }
+    }
+
+    /**
+     * Whether should ignore app requested orientation in response to an app
+     * calling {@link android.app.Activity#setRequestedOrientation}.
+     *
+     * <p>This is needed to avoid getting into {@link android.app.Activity#setRequestedOrientation}
+     * loop when {@link DisplayContent#getIgnoreOrientationRequest} is enabled or device has
+     * landscape natural orientation which app developers don't expect. For example, the loop can
+     * look like this:
+     * <ol>
+     *     <li>App sets default orientation to "unspecified" at runtime
+     *     <li>App requests to "portrait" after checking some condition (e.g. display rotation).
+     *     <li>(2) leads to fullscreen -> letterboxed bounds change and activity relaunch because
+     *     app can't handle the corresponding config changes.
+     *     <li>Loop goes back to (1)
+     * </ol>
+     *
+     * <p>This treatment is enabled when the following conditions are met:
+     * <ul>
+     *     <li>Flag gating the treatment is enabled
+     *     <li>Opt-out component property isn't enabled
+     *     <li>Opt-in component property or per-app override are enabled
+     *     <li>Activity is relaunched after {@link android.app.Activity#setRequestedOrientation}
+     *     call from an app or camera compat force rotation treatment is active for the activity.
+     * </ul>
+     */
+    boolean shouldIgnoreRequestedOrientation(@ScreenOrientation int requestedOrientation) {
+        if (!mLetterboxConfiguration.isPolicyForIgnoringRequestedOrientationEnabled()) {
+            return false;
+        }
+        if (Boolean.FALSE.equals(mBooleanPropertyIgnoreRequestedOrientation)) {
+            return false;
+        }
+        if (!Boolean.TRUE.equals(mBooleanPropertyIgnoreRequestedOrientation)
+                && !mActivityRecord.info.isChangeEnabled(
+                        OVERRIDE_ENABLE_COMPAT_IGNORE_REQUESTED_ORIENTATION)) {
+            return false;
+        }
+        if (mIsRelauchingAfterRequestedOrientationChanged) {
+            Slog.w(TAG, "Ignoring orientation update to "
+                    + screenOrientationToString(requestedOrientation)
+                    + " due to relaunching after setRequestedOrientation for " + mActivityRecord);
+            return true;
+        }
+        DisplayContent displayContent = mActivityRecord.mDisplayContent;
+        if (displayContent == null) {
+            return false;
+        }
+        if (displayContent.mDisplayRotationCompatPolicy != null
+                && displayContent.mDisplayRotationCompatPolicy
+                        .isTreatmentEnabledForActivity(mActivityRecord)) {
+            Slog.w(TAG, "Ignoring orientation update to "
+                    + screenOrientationToString(requestedOrientation)
+                    + " due to camera compat treatment for " + mActivityRecord);
+            return true;
+        }
+        return false;
+    }
+
+    /**
+     * Sets whether an activity is relaunching after the app has called {@link
+     * android.app.Activity#setRequestedOrientation}.
+     */
+    void setRelauchingAfterRequestedOrientationChanged(boolean isRelaunching) {
+        mIsRelauchingAfterRequestedOrientationChanged = isRelaunching;
     }
 
     /**
