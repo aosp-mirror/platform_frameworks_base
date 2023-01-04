@@ -1938,12 +1938,12 @@ class MediaRouter2ServiceImpl {
                 @NonNull RoutingSessionInfo oldSession, @NonNull MediaRoute2Info route) {
             try {
                 if (route.isSystemRoute() && !routerRecord.mHasModifyAudioRoutingPermission) {
-                    routerRecord.mRouter.requestCreateSessionByManager(uniqueRequestId,
-                            oldSession, mSystemProvider.getDefaultRoute());
-                } else {
-                    routerRecord.mRouter.requestCreateSessionByManager(uniqueRequestId,
-                            oldSession, route);
+                    // The router lacks permission to modify system routing, so we hide system
+                    // route info from them.
+                    route = mSystemProvider.getDefaultRoute();
                 }
+                routerRecord.mRouter.requestCreateSessionByManager(
+                        uniqueRequestId, oldSession, route);
             } catch (RemoteException ex) {
                 Slog.w(TAG, "getSessionHintsForCreatingSessionOnHandler: "
                         + "Failed to request. Router probably died.", ex);
