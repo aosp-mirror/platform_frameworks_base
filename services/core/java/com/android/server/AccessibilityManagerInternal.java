@@ -50,6 +50,9 @@ public abstract class AccessibilityManagerInternal {
             IRemoteAccessibilityInputConnection remoteAccessibilityInputConnection,
             EditorInfo editorInfo, boolean restarting);
 
+    /** Trigger a system action with the provided {@code actionId}. */
+    public abstract void performSystemAction(int actionId);
+
     /**
      * Queries whether touch-exploration mode is enabled or not for the specified user.
      *
@@ -85,6 +88,10 @@ public abstract class AccessibilityManagerInternal {
         @Override
         public boolean isTouchExplorationEnabled(int userId) {
             return false;
+        }
+
+        @Override
+        public void performSystemAction(int actionId) {
         }
     };
 
