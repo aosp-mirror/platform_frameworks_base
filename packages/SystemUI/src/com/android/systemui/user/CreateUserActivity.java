@@ -31,10 +31,12 @@ import android.window.OnBackInvokedDispatcher;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 
+import com.android.internal.logging.UiEventLogger;
 import com.android.settingslib.users.EditUserInfoController;
 import com.android.settingslib.users.GrantAdminDialogController;
 import com.android.systemui.R;
 import com.android.systemui.plugins.ActivityStarter;
+import com.android.systemui.user.utils.MultiUserActionsEvent;
 
 import javax.inject.Inject;
 
@@ -60,7 +62,7 @@ public class CreateUserActivity extends Activity {
     private final EditUserInfoController mEditUserInfoController;
     private final IActivityManager mActivityManager;
     private final ActivityStarter mActivityStarter;
-
+    private final UiEventLogger mUiEventLogger;
     private Dialog mGrantAdminDialog;
     private Dialog mSetupUserDialog;
     private final OnBackInvokedCallback mBackCallback = this::onBackInvoked;
@@ -68,11 +70,12 @@ public class CreateUserActivity extends Activity {
     @Inject
     public CreateUserActivity(UserCreator userCreator,
             EditUserInfoController editUserInfoController, IActivityManager activityManager,
-            ActivityStarter activityStarter) {
+            ActivityStarter activityStarter, UiEventLogger uiEventLogger) {
         mUserCreator = userCreator;
         mEditUserInfoController = editUserInfoController;
         mActivityManager = activityManager;
         mActivityStarter = activityStarter;
+        mUiEventLogger = uiEventLogger;
     }
 
     @Override
@@ -128,12 +131,22 @@ public class CreateUserActivity extends Activity {
         );
     }
 
+    /**
+     * Returns dialog that allows to grant user admin rights.
+     */
     private Dialog buildGrantAdminDialog() {
         return new GrantAdminDialogController().createDialog(
                 this,
                 (grantAdminRights) -> {
                     mGrantAdminDialog.dismiss();
                     mGrantAdminRights = grantAdminRights;
+                    if (mGrantAdminRights) {
+                        mUiEventLogger.log(MultiUserActionsEvent
+                                        .GRANT_ADMIN_FROM_USER_SWITCHER_CREATION_DIALOG);
+                    } else {
+                        mUiEventLogger.log(MultiUserActionsEvent
+                                        .NOT_GRANT_ADMIN_FROM_USER_SWITCHER_CREATION_DIALOG);
+                    }
                     mSetupUserDialog = createDialog();
                     mSetupUserDialog.show();
                 },
