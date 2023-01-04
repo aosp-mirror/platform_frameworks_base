@@ -23,8 +23,7 @@
     <string name="summary_watch" msgid="4085794790142204006">"Энэ апп таны <xliff:g id="DEVICE_NAME">%1$s</xliff:g>-г удирдахад шаардлагатай. <xliff:g id="APP_NAME">%2$s</xliff:g>-д таны мэдэгдэлтэй харилцан үйлдэл хийж, Утас, SMS, Харилцагчид, Календарь, Дуудлагын жагсаалт болон Ойролцоох төхөөрөмжүүдийн зөвшөөрөлд хандахыг зөвшөөрнө."</string>
     <string name="summary_watch_single_device" msgid="1523091550243476756">"Энэ апп таны <xliff:g id="DEVICE_NAME">%1$s</xliff:g>-г удирдахад шаардлагатай. <xliff:g id="APP_NAME">%2$s</xliff:g>-д эдгээр зөвшөөрөлтэй харилцан үйлдэл хийхийг зөвшөөрнө:"</string>
     <string name="profile_name_glasses" msgid="8488394059007275998">"нүдний шил"</string>
-    <!-- no translation found for summary_glasses (8987925853224595628) -->
-    <skip />
+    <string name="summary_glasses" msgid="8987925853224595628">"Энэ апп таны <xliff:g id="DEVICE_NAME">%1$s</xliff:g>-г удирдахад шаардлагатай. <xliff:g id="APP_NAME">%2$s</xliff:g>-г таны мэдэгдлүүдтэй харилцаж, мөн таны утас, SMS, харилцагчид, микрофон болон ойролцоох төхөөрөмжүүдийн зөвшөөрөлд хандахыг зөвшөөрнө."</string>
     <string name="summary_glasses_single_device" msgid="5725890636605211803">"Энэ апп таны <xliff:g id="DEVICE_NAME">%1$s</xliff:g>-г удирдахад шаардлагатай. <xliff:g id="APP_NAME">%2$s</xliff:g>-д эдгээр зөвшөөрөлтэй харилцан үйлдэл хийхийг зөвшөөрнө:"</string>
     <string name="title_app_streaming" msgid="2270331024626446950">"&lt;strong&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/strong&gt;-д таны утаснаас энэ мэдээлэлд хандахыг зөвшөөрнө үү"</string>
     <string name="helper_title_app_streaming" msgid="4151687003439969765">"Төхөөрөмж хоорондын үйлчилгээ"</string>

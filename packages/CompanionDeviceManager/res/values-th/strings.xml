@@ -23,8 +23,7 @@
     <string name="summary_watch" msgid="4085794790142204006">"ต้องใช้แอปนี้ในการจัดการ<xliff:g id="DEVICE_NAME">%1$s</xliff:g> <xliff:g id="APP_NAME">%2$s</xliff:g> จะได้รับอนุญาตให้โต้ตอบกับการแจ้งเตือนและได้รับสิทธิ์เข้าถึงโทรศัพท์, SMS, รายชื่อติดต่อ, ปฏิทิน, บันทึกการโทร และอุปกรณ์ที่อยู่ใกล้เคียง"</string>
     <string name="summary_watch_single_device" msgid="1523091550243476756">"ต้องใช้แอปนี้ในการจัดการ<xliff:g id="DEVICE_NAME">%1$s</xliff:g> <xliff:g id="APP_NAME">%2$s</xliff:g> จะได้รับอนุญาตให้โต้ตอบกับสิทธิ์เหล่านี้"</string>
     <string name="profile_name_glasses" msgid="8488394059007275998">"แว่นตา"</string>
-    <!-- no translation found for summary_glasses (8987925853224595628) -->
-    <skip />
+    <string name="summary_glasses" msgid="8987925853224595628">"ต้องใช้แอปนี้ในการจัดการ <xliff:g id="DEVICE_NAME">%1$s</xliff:g> <xliff:g id="APP_NAME">%2$s</xliff:g> จะได้รับอนุญาตให้โต้ตอบกับการแจ้งเตือนและได้รับสิทธิ์เข้าถึงโทรศัพท์, SMS, รายชื่อติดต่อ, ไมโครโฟน และอุปกรณ์ที่อยู่ใกล้เคียง"</string>
     <string name="summary_glasses_single_device" msgid="5725890636605211803">"ต้องใช้แอปนี้ในการจัดการ <xliff:g id="DEVICE_NAME">%1$s</xliff:g> <xliff:g id="APP_NAME">%2$s</xliff:g> จะได้รับอนุญาตให้โต้ตอบกับสิทธิ์เหล่านี้"</string>
     <string name="title_app_streaming" msgid="2270331024626446950">"อนุญาตให้ &lt;strong&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/strong&gt; เข้าถึงข้อมูลนี้จากโทรศัพท์ของคุณ"</string>
     <string name="helper_title_app_streaming" msgid="4151687003439969765">"บริการหลายอุปกรณ์"</string>

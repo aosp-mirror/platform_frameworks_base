@@ -23,8 +23,7 @@
     <string name="summary_watch" msgid="4085794790142204006">"需要使用此应用，才能管理您的<xliff:g id="DEVICE_NAME">%1$s</xliff:g>。<xliff:g id="APP_NAME">%2$s</xliff:g>将能与通知交互，并可获得电话、短信、通讯录、日历、通话记录和附近设备的访问权限。"</string>
     <string name="summary_watch_single_device" msgid="1523091550243476756">"需要使用此应用，才能管理您的<xliff:g id="DEVICE_NAME">%1$s</xliff:g>。<xliff:g id="APP_NAME">%2$s</xliff:g>可与以下权限交互："</string>
     <string name="profile_name_glasses" msgid="8488394059007275998">"眼镜"</string>
-    <!-- no translation found for summary_glasses (8987925853224595628) -->
-    <skip />
+    <string name="summary_glasses" msgid="8987925853224595628">"需要使用此应用才能管理您的设备“<xliff:g id="DEVICE_NAME">%1$s</xliff:g>”。<xliff:g id="APP_NAME">%2$s</xliff:g>将能与您收到的通知交互，并可获权访问/使用您的电话、短信、通讯录、麦克风和附近的设备。"</string>
     <string name="summary_glasses_single_device" msgid="5725890636605211803">"需要使用此应用，才能管理您的“<xliff:g id="DEVICE_NAME">%1$s</xliff:g>”。“<xliff:g id="APP_NAME">%2$s</xliff:g>”将可使用以下权限："</string>
     <string name="title_app_streaming" msgid="2270331024626446950">"允许“<xliff:g id="APP_NAME">%1$s</xliff:g>”&lt;strong&gt;&lt;/strong&gt;访问您手机中的这项信息"</string>
     <string name="helper_title_app_streaming" msgid="4151687003439969765">"跨设备服务"</string>
