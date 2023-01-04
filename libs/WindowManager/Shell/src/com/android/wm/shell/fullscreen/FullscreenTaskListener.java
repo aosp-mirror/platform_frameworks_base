@@ -114,7 +114,9 @@ public class FullscreenTaskListener implements ShellTaskOrganizer.TaskListener {
                 t.setPosition(leash, positionInParent.x, positionInParent.y);
                 t.setAlpha(leash, 1f);
                 t.setMatrix(leash, 1, 0, 0, 1);
-                t.show(leash);
+                if (taskInfo.isVisible) {
+                    t.show(leash);
+                }
             });
         }
     }
