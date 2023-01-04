@@ -30,25 +30,17 @@
     <string name="keyguard_plugged_in" msgid="8169926454348380863">"<xliff:g id="PERCENTAGE">%s</xliff:g> • 充電中"</string>
     <string name="keyguard_plugged_in_charging_fast" msgid="4386594091107340426">"<xliff:g id="PERCENTAGE">%s</xliff:g> • 快速充電中"</string>
     <string name="keyguard_plugged_in_charging_slowly" msgid="217655355424210">"<xliff:g id="PERCENTAGE">%s</xliff:g> • 慢速充電中"</string>
-    <string name="keyguard_plugged_in_charging_limited" msgid="1657547879230699837">"<xliff:g id="PERCENTAGE">%s</xliff:g> • 暫停充電以保護電池"</string>
+    <string name="keyguard_plugged_in_charging_limited" msgid="1053130519456324630">"<xliff:g id="PERCENTAGE">%s</xliff:g> • 為保護電池，充電效能已最佳化"</string>
     <string name="keyguard_instructions_when_pattern_disabled" msgid="8448804180089936954">"按選單鍵解鎖。"</string>
     <string name="keyguard_network_locked_message" msgid="407096292844868608">"網路已鎖定"</string>
-    <!-- no translation found for keyguard_missing_sim_message_short (685029586173458728) -->
-    <skip />
-    <!-- no translation found for keyguard_missing_sim_instructions (7735360104844653246) -->
-    <skip />
-    <!-- no translation found for keyguard_missing_sim_instructions_long (3451467338947610268) -->
-    <skip />
-    <!-- no translation found for keyguard_permanent_disabled_sim_message_short (3955052454216046100) -->
-    <skip />
-    <!-- no translation found for keyguard_permanent_disabled_sim_instructions (5034635040020685428) -->
-    <skip />
-    <!-- no translation found for keyguard_sim_locked_message (7095293254587575270) -->
-    <skip />
-    <!-- no translation found for keyguard_sim_puk_locked_message (2503428315518592542) -->
-    <skip />
-    <!-- no translation found for keyguard_sim_unlock_progress_dialog_message (8489092646014631659) -->
-    <skip />
+    <string name="keyguard_missing_sim_message_short" msgid="685029586173458728">"沒有 SIM 卡"</string>
+    <string name="keyguard_missing_sim_instructions" msgid="7735360104844653246">"請新增 SIM 卡。"</string>
+    <string name="keyguard_missing_sim_instructions_long" msgid="3451467338947610268">"找不到 SIM 卡或 SIM 卡無法讀取，請新增 SIM 卡。"</string>
+    <string name="keyguard_permanent_disabled_sim_message_short" msgid="3955052454216046100">"SIM 卡無法使用。"</string>
+    <string name="keyguard_permanent_disabled_sim_instructions" msgid="5034635040020685428">"SIM 卡已永久停用。\n 請向無線服務供應商索取其他 SIM 卡。"</string>
+    <string name="keyguard_sim_locked_message" msgid="7095293254587575270">"SIM 卡已鎖定。"</string>
+    <string name="keyguard_sim_puk_locked_message" msgid="2503428315518592542">"SIM 卡已使用 PUK 碼鎖定。"</string>
+    <string name="keyguard_sim_unlock_progress_dialog_message" msgid="8489092646014631659">"正在解鎖 SIM 卡…"</string>
     <string name="keyguard_accessibility_pin_area" msgid="7403009340414014734">"PIN 區"</string>
     <string name="keyguard_accessibility_password" msgid="3524161948484801450">"裝置密碼"</string>
     <string name="keyguard_accessibility_sim_pin_area" msgid="6272116591533888062">"SIM 卡 PIN 區"</string>
@@ -69,8 +61,7 @@
     <string name="kg_puk_enter_puk_hint_multi" msgid="4876780689904862943">"SIM 卡「<xliff:g id="CARRIER">%1$s</xliff:g>」現已遭停用，輸入 PUK 碼即可繼續使用。如需瞭解詳情，請與電信業者聯絡。"</string>
     <string name="kg_puk_enter_pin_hint" msgid="6028432138916150399">"輸入所需的 PIN 碼"</string>
     <string name="kg_enter_confirm_pin_hint" msgid="4261064020391799132">"確認所需的 PIN 碼"</string>
-    <!-- no translation found for kg_sim_unlock_progress_dialog_message (1123048780346295748) -->
-    <skip />
+    <string name="kg_sim_unlock_progress_dialog_message" msgid="1123048780346295748">"正在解鎖 SIM 卡…"</string>
     <string name="kg_invalid_sim_pin_hint" msgid="2762202646949552978">"請輸入 4 到 8 碼的 PIN 碼。"</string>
     <string name="kg_invalid_sim_puk_hint" msgid="5319756880543857694">"PUK 碼至少必須為 8 碼。"</string>
     <string name="kg_too_many_failed_pin_attempts_dialog_message" msgid="544687656831558971">"你已輸入錯誤的 PIN 碼 <xliff:g id="NUMBER_0">%1$d</xliff:g> 次。\n\n請在 <xliff:g id="NUMBER_1">%2$d</xliff:g> 秒後再試一次。"</string>

@@ -30,7 +30,7 @@
     <string name="keyguard_plugged_in" msgid="8169926454348380863">"<xliff:g id="PERCENTAGE">%s</xliff:g> • Nagcha-charge"</string>
     <string name="keyguard_plugged_in_charging_fast" msgid="4386594091107340426">"<xliff:g id="PERCENTAGE">%s</xliff:g> • Mabilis na nagcha-charge"</string>
     <string name="keyguard_plugged_in_charging_slowly" msgid="217655355424210">"<xliff:g id="PERCENTAGE">%s</xliff:g> • Mabagal na nagcha-charge"</string>
-    <string name="keyguard_plugged_in_charging_limited" msgid="1657547879230699837">"<xliff:g id="PERCENTAGE">%s</xliff:g> • Na-pause ang pag-charge para protektahan ang baterya"</string>
+    <string name="keyguard_plugged_in_charging_limited" msgid="1053130519456324630">"<xliff:g id="PERCENTAGE">%s</xliff:g> • Naka-optimize ang pag-charge para protektahan ang baterya"</string>
     <string name="keyguard_instructions_when_pattern_disabled" msgid="8448804180089936954">"Pindutin ang Menu upang i-unlock."</string>
     <string name="keyguard_network_locked_message" msgid="407096292844868608">"Naka-lock ang network"</string>
     <string name="keyguard_missing_sim_message_short" msgid="685029586173458728">"Walang SIM"</string>
