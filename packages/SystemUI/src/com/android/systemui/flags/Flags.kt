@@ -419,7 +419,13 @@ object Flags {
         unreleasedFlag(1204, "persist.wm.debug.predictive_back_sysui_enable", teamfood = true)
 
     // TODO(b/255697805): Tracking Bug
-    @JvmField val TRACKPAD_GESTURE_BACK = unreleasedFlag(1205, "trackpad_gesture_back", teamfood = false)
+    @JvmField
+    val TRACKPAD_GESTURE_BACK = unreleasedFlag(1205, "trackpad_gesture_back", teamfood = false)
+
+    // TODO(b/263826204): Tracking Bug
+    @JvmField
+    val WM_ENABLE_PREDICTIVE_BACK_BOUNCER_ANIM =
+        unreleasedFlag(1206, "persist.wm.debug.predictive_back_bouncer_anim", teamfood = true)
 
     // 1300 - screenshots
     // TODO(b/254512719): Tracking Bug
