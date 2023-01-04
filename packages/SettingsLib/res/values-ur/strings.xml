@@ -564,6 +564,8 @@
     <string name="user_add_user_title" msgid="5457079143694924885">"نیا صارف شامل کریں؟"</string>
     <string name="user_add_user_message_long" msgid="1527434966294733380">"‏آپ اضافی صارفین تخلیق کر کے دوسرے لوگوں کے ساتھ اس آلہ کا اشتراک کر سکتے ہیں۔ ہر صارف کے پاس اپنی جگہ ہوتی ہے، جسے وہ ایپس، وال پیپر وغیرہ کے ساتھ حسب ضرورت بنا سکتا ہے۔ صارفین Wi‑Fi جیسی آلے کی ترتیبات کو ایڈجسٹ بھی کر سکتے ہیں جس کا اثر ہر کسی پر ہوتا ہے۔\n\nجب آپ ایک نیا صارف شامل کرتے ہیں، تو اسے اپنی جگہ سیٹ اپ کرنا پڑتی ہے۔\n\nکوئی بھی صارف دیگر تمام صارفین کیلئے ایپس اپ ڈیٹ کر سکتا ہے۔ رسائی کی ترتیبات اور سروسز کو نئے صارف کو منتقل نہیں کیا جا سکتا۔"</string>
     <string name="user_add_user_message_short" msgid="3295959985795716166">"جب آپ ایک نیا صارف شامل کرتے ہیں تو اس شخص کو اپنی جگہ کو ترتیب دینے کی ضرورت ہوتی ہے\n\nکوئی بھی صارف دیگر سبھی صارفین کیلئے ایپس کو اپ ڈیٹ کر سکتا ہے۔"</string>
+    <string name="user_grant_admin_title" msgid="5565796912475193314">"اس صارف کو منتظم کی مراعات دیں؟"</string>
+    <string name="user_grant_admin_message" msgid="7925257971286380976">"بطور منتظم وہ دیگر صارفین کا نظم، آلہ کی ترتیبات میں ترمیم اور آلہ کو فیکٹری ری سیٹ کر پائیں گے۔"</string>
     <string name="user_setup_dialog_title" msgid="8037342066381939995">"صارف کو ابھی سیٹ اپ کریں؟"</string>
     <string name="user_setup_dialog_message" msgid="269931619868102841">"یقینی بنائیں کہ وہ شخص آلہ لینے اور اپنی جگہ کو سیٹ اپ کرنے کیلئے دستیاب ہے"</string>
     <string name="user_setup_profile_dialog_message" msgid="4788197052296962620">"پروفائل کو ابھی ترتیب دیں؟"</string>
@@ -595,6 +597,8 @@
     <string name="guest_reset_and_restart_dialog_message" msgid="2764425635305200790">"اس سے ایک نیا مہمان سیشن شروع ہو گا اور موجودہ سیشن سے تمام ایپس اور ڈیٹا حذف ہو جائے گا"</string>
     <string name="guest_exit_dialog_title" msgid="1846494656849381804">"مہمان وضع سے باہر نکلیں؟"</string>
     <string name="guest_exit_dialog_message" msgid="1743218864242719783">"یہ موجودہ مہمان سیشن سے ایپس اور ڈیٹا کو حذف کر دے گا"</string>
+    <string name="grant_admin" msgid="4273077214151417783">"اس صارف کو منتظم کی مراعات دیں"</string>
+    <string name="not_grant_admin" msgid="6985027675930546850">"صارف کو منتظم کی مراعات نہ دیں"</string>
     <string name="guest_exit_dialog_button" msgid="1736401897067442044">"باہر نکلیں"</string>
     <string name="guest_exit_dialog_title_non_ephemeral" msgid="7675327443743162986">"مہمان کی سرگرمی محفوظ کریں؟"</string>
     <string name="guest_exit_dialog_message_non_ephemeral" msgid="223385323235719442">"آپ موجودہ سیشن سے سرگرمی کو محفوظ یا تمام ایپس اور ڈیٹا کو حذف کر سکتے ہیں"</string>

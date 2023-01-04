@@ -564,6 +564,8 @@
     <string name="user_add_user_title" msgid="5457079143694924885">"Add new user?"</string>
     <string name="user_add_user_message_long" msgid="1527434966294733380">"You can share this device with other people by creating additional users. Each user has their own space, which they can customize with apps, wallpaper, and so on. Users can also adjust device settings like Wi‑Fi that affect everyone.\n\nWhen you add a new user, that person needs to set up their space.\n\nAny user can update apps for all other users. Accessibility settings and services may not transfer to the new user."</string>
     <string name="user_add_user_message_short" msgid="3295959985795716166">"When you add a new user, that person needs to set up their space.\n\nAny user can update apps for all other users."</string>
+    <string name="user_grant_admin_title" msgid="5565796912475193314">"Give this user admin privileges?"</string>
+    <string name="user_grant_admin_message" msgid="7925257971286380976">"As an admin, they will be able to manage other users, modify device settings and factory reset the device."</string>
     <string name="user_setup_dialog_title" msgid="8037342066381939995">"Set up user now?"</string>
     <string name="user_setup_dialog_message" msgid="269931619868102841">"Make sure the person is available to take the device and set up their space"</string>
     <string name="user_setup_profile_dialog_message" msgid="4788197052296962620">"Set up profile now?"</string>
@@ -595,6 +597,8 @@
     <string name="guest_reset_and_restart_dialog_message" msgid="2764425635305200790">"This will start a new guest session and delete all apps and data from the current session"</string>
     <string name="guest_exit_dialog_title" msgid="1846494656849381804">"Exit guest mode?"</string>
     <string name="guest_exit_dialog_message" msgid="1743218864242719783">"This will delete apps and data from the current guest session"</string>
+    <string name="grant_admin" msgid="4273077214151417783">"Give this user admin privileges"</string>
+    <string name="not_grant_admin" msgid="6985027675930546850">"Do not give user admin privileges"</string>
     <string name="guest_exit_dialog_button" msgid="1736401897067442044">"Exit"</string>
     <string name="guest_exit_dialog_title_non_ephemeral" msgid="7675327443743162986">"Save guest activity?"</string>
     <string name="guest_exit_dialog_message_non_ephemeral" msgid="223385323235719442">"You can save activity from the current session or delete all apps and data"</string>

@@ -564,6 +564,8 @@
     <string name="user_add_user_title" msgid="5457079143694924885">"新增使用者？"</string>
     <string name="user_add_user_message_long" msgid="1527434966294733380">"您可以建立其他使用者，與他人共用這部裝置。每位使用者都有屬於自己的空間，並可以自訂應用程式、桌布等等。此外，使用者也可以調整會影響所有人的裝置設定，例如 Wi‑Fi 設定。\n\n新加入的使用者需要自行設定個人空間。\n\n任何使用者都可以為所有其他使用者更新應用程式。無障礙功能設定和服務則未必適用於新的使用者。"</string>
     <string name="user_add_user_message_short" msgid="3295959985795716166">"新增的使用者需要自行設定個人空間。\n\n任何使用者都可以為其他所有使用者更新應用程式。"</string>
+    <string name="user_grant_admin_title" msgid="5565796912475193314">"要向此使用者授予管理員權限嗎？"</string>
+    <string name="user_grant_admin_message" msgid="7925257971286380976">"管理員將可管理其他使用者、修改裝置設定，以及將裝置回復原廠設定。"</string>
     <string name="user_setup_dialog_title" msgid="8037342066381939995">"立即設定使用者？"</string>
     <string name="user_setup_dialog_message" msgid="269931619868102841">"請確保對方現在可以在裝置上設定自己的空間"</string>
     <string name="user_setup_profile_dialog_message" msgid="4788197052296962620">"立即設定個人檔案？"</string>
@@ -595,6 +597,8 @@
     <string name="guest_reset_and_restart_dialog_message" msgid="2764425635305200790">"此操作會開始新的訪客工作階段，並刪除目前工作階段的所有應用程式和資料"</string>
     <string name="guest_exit_dialog_title" msgid="1846494656849381804">"要結束訪客模式嗎？"</string>
     <string name="guest_exit_dialog_message" msgid="1743218864242719783">"此操作會刪除目前訪客工作階段中的所有應用程式和資料"</string>
+    <string name="grant_admin" msgid="4273077214151417783">"向此使用者授予管理員權限"</string>
+    <string name="not_grant_admin" msgid="6985027675930546850">"不要向使用者授予管理員權限"</string>
     <string name="guest_exit_dialog_button" msgid="1736401897067442044">"結束"</string>
     <string name="guest_exit_dialog_title_non_ephemeral" msgid="7675327443743162986">"要儲存訪客活動嗎？"</string>
     <string name="guest_exit_dialog_message_non_ephemeral" msgid="223385323235719442">"您可儲存目前工作階段中的活動或刪除所有應用程式和資料"</string>

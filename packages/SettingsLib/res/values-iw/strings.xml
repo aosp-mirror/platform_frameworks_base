@@ -564,6 +564,8 @@
     <string name="user_add_user_title" msgid="5457079143694924885">"להוסיף משתמש חדש?"</string>
     <string name="user_add_user_message_long" msgid="1527434966294733380">"‏ניתן לשתף מכשיר זה עם אנשים אחרים על ידי יצירת משתמשים נוספים. לכל משתמש מרחב משלו, שאותו אפשר להתאים אישית בעזרת אפליקציות, טפט ופריטים נוספים. המשתמשים יכולים גם להתאים הגדרות של המכשיר כגון Wi‑Fi, שמשפיעות על כולם.\n\nכשמוסיפים משתמש חדש, על משתמש זה להגדיר את המרחב שלו.\n\nכל אחד מהמשתמשים יכול לעדכן אפליקציות לכל שאר המשתמשים. ייתכן שהגדרות ושירותים של נגישות לא יועברו למשתמש החדש."</string>
     <string name="user_add_user_message_short" msgid="3295959985795716166">"כשמוסיפים משתמש חדש, המשתמש הזה צריך להגדיר את המרחב שלו.\n\nכל משתמש יכול לעדכן אפליקציות עבור כל המשתמשים האחרים."</string>
+    <string name="user_grant_admin_title" msgid="5565796912475193314">"לתת למשתמש הזה הרשאות אדמין?"</string>
+    <string name="user_grant_admin_message" msgid="7925257971286380976">"בתור אדמין, המשתמש יוכל לנהל משתמשים אחרים, לשנות את הגדרות המכשיר ולאפס את המכשיר להגדרות המקוריות."</string>
     <string name="user_setup_dialog_title" msgid="8037342066381939995">"האם להגדיר משתמש עכשיו?"</string>
     <string name="user_setup_dialog_message" msgid="269931619868102841">"כדאי לוודא שהמשתמש זמין ויכול לקחת את המכשיר ולהגדיר את המרחב שלו"</string>
     <string name="user_setup_profile_dialog_message" msgid="4788197052296962620">"האם להגדיר פרופיל עכשיו?"</string>
@@ -595,6 +597,8 @@
     <string name="guest_reset_and_restart_dialog_message" msgid="2764425635305200790">"הפעולה הזו תתחיל גלישה חדשה כאורח ותמחק את כל האפליקציות והנתונים מהסשן הנוכחי"</string>
     <string name="guest_exit_dialog_title" msgid="1846494656849381804">"לצאת ממצב אורח?"</string>
     <string name="guest_exit_dialog_message" msgid="1743218864242719783">"הפעולה הזו תמחק את האפליקציות והנתונים מהגלישה הנוכחית כאורח"</string>
+    <string name="grant_admin" msgid="4273077214151417783">"אני רוצה לתת הרשאות אדמין למשתמש הזה"</string>
+    <string name="not_grant_admin" msgid="6985027675930546850">"אני לא רוצה לתת הרשאות אדמין למשתמש הזה"</string>
     <string name="guest_exit_dialog_button" msgid="1736401897067442044">"יציאה"</string>
     <string name="guest_exit_dialog_title_non_ephemeral" msgid="7675327443743162986">"לשמור את פעילות האורח?"</string>
     <string name="guest_exit_dialog_message_non_ephemeral" msgid="223385323235719442">"אפשר לשמור את הפעילות מהסשן הנוכחי או למחוק את כל האפליקציות והנתונים"</string>

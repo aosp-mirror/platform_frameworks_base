@@ -564,6 +564,8 @@
     <string name="user_add_user_title" msgid="5457079143694924885">"Ajouter un utilisateur ?"</string>
     <string name="user_add_user_message_long" msgid="1527434966294733380">"Vous pouvez partager cet appareil avec d\'autres personnes en ajoutant des utilisateurs. Chaque utilisateur dispose de son propre espace où il peut personnaliser ses applications et son fond d\'écran, entre autres. Chaque utilisateur peut également modifier les paramètres de l\'appareil qui s\'appliquent à tous, tels que le Wi-Fi.\n\nLorsque vous ajoutez un utilisateur, celui-ci doit configurer son espace.\n\nN\'importe quel utilisateur peut mettre à jour les applications pour tous les autres. Toutefois, il est possible que les services et les paramètres d\'accessibilité ne soient pas transférés vers le nouvel utilisateur."</string>
     <string name="user_add_user_message_short" msgid="3295959985795716166">"Lorsque vous ajoutez un utilisateur, celui-ci doit configurer son espace.\n\nN\'importe quel utilisateur peut mettre à jour les applications pour tous les autres utilisateurs."</string>
+    <string name="user_grant_admin_title" msgid="5565796912475193314">"Droits admin à l\'utilisateur ?"</string>
+    <string name="user_grant_admin_message" msgid="7925257971286380976">"En tant qu\'administrateur, il pourra gérer d\'autres utilisateurs, modifier les paramètres et rétablir la configuration d\'usine de l\'appareil."</string>
     <string name="user_setup_dialog_title" msgid="8037342066381939995">"Configurer l\'utilisateur ?"</string>
     <string name="user_setup_dialog_message" msgid="269931619868102841">"Assurez-vous que la personne est prête à utiliser l\'appareil et à configurer son espace."</string>
     <string name="user_setup_profile_dialog_message" msgid="4788197052296962620">"Configurer le profil maintenant ?"</string>
@@ -595,6 +597,8 @@
     <string name="guest_reset_and_restart_dialog_message" msgid="2764425635305200790">"Cette action lancera une nouvelle session Invité et supprimera toutes les applis et données de la session actuelle"</string>
     <string name="guest_exit_dialog_title" msgid="1846494656849381804">"Quitter le mode Invité ?"</string>
     <string name="guest_exit_dialog_message" msgid="1743218864242719783">"Cette action supprimera les applis et données de la session Invité actuelle."</string>
+    <string name="grant_admin" msgid="4273077214151417783">"Accordez des droits d\'administrateur à cet utilisateur"</string>
+    <string name="not_grant_admin" msgid="6985027675930546850">"N\'accordez pas de droits d\'administrateur à l\'utilisateur"</string>
     <string name="guest_exit_dialog_button" msgid="1736401897067442044">"Quitter"</string>
     <string name="guest_exit_dialog_title_non_ephemeral" msgid="7675327443743162986">"Enregistrer l\'activité ?"</string>
     <string name="guest_exit_dialog_message_non_ephemeral" msgid="223385323235719442">"Enregistrez l\'activité de la session actuelle ou supprimez les applis et données"</string>

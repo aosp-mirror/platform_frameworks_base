@@ -564,6 +564,8 @@
     <string name="user_add_user_title" msgid="5457079143694924885">"Lisätäänkö uusi käyttäjä?"</string>
     <string name="user_add_user_message_long" msgid="1527434966294733380">"Voit jakaa tämän laitteen muiden kanssa luomalla lisää käyttäjiä. Kullakin käyttäjällä on oma tilansa, jota he voivat muokata esimerkiksi omilla sovelluksilla ja taustakuvilla. Käyttäjät voivat myös muokata laiteasetuksia, kuten Wi‑Fi-asetuksia, jotka vaikuttavat laitteen kaikkiin käyttäjiin.\n\nKun lisäät uuden käyttäjän, hänen tulee määrittää oman tilansa asetukset.\n\nKaikki käyttäjät voivat päivittää muiden käyttäjien sovelluksia. Esteettömyysominaisuuksia tai ‑palveluita ei välttämättä siirretä uudelle käyttäjälle."</string>
     <string name="user_add_user_message_short" msgid="3295959985795716166">"Kun lisäät uuden käyttäjän, hänen tulee määrittää oman tilansa asetukset.\n\nKaikki käyttäjät voivat päivittää sovelluksia muille käyttäjille."</string>
+    <string name="user_grant_admin_title" msgid="5565796912475193314">"Annetaanko käyttäjälle järjestelmänvalvojan oikeudet?"</string>
+    <string name="user_grant_admin_message" msgid="7925257971286380976">"Järjestelmänvalvoja voi ylläpitää muita käyttäjiä, muuttaa laitteen asetuksia ja palauttaa laitteen tehdasasetukset."</string>
     <string name="user_setup_dialog_title" msgid="8037342066381939995">"Lisätäänkö käyttäjä nyt?"</string>
     <string name="user_setup_dialog_message" msgid="269931619868102841">"Varmista, että käyttäjä voi ottaa laitteen nyt ja määrittää oman tilansa."</string>
     <string name="user_setup_profile_dialog_message" msgid="4788197052296962620">"Määritetäänkö profiilin asetukset nyt?"</string>
@@ -595,6 +597,8 @@
     <string name="guest_reset_and_restart_dialog_message" msgid="2764425635305200790">"Tämä aloittaa uuden vierailija-käyttökerran ja kaikki nykyisen istunnon sovellukset ja data poistetaan"</string>
     <string name="guest_exit_dialog_title" msgid="1846494656849381804">"Poistutaanko vierastilasta?"</string>
     <string name="guest_exit_dialog_message" msgid="1743218864242719783">"Tämä poistaa nykyisen vierailija-käyttökerran sovellukset ja datan"</string>
+    <string name="grant_admin" msgid="4273077214151417783">"Anna tälle käyttäjälle järjestelmänvalvojan oikeudet"</string>
+    <string name="not_grant_admin" msgid="6985027675930546850">"Älä anna käyttäjälle järjestelmänvalvojan oikeuksia"</string>
     <string name="guest_exit_dialog_button" msgid="1736401897067442044">"Sulje"</string>
     <string name="guest_exit_dialog_title_non_ephemeral" msgid="7675327443743162986">"Tallennetaanko vierastoiminta?"</string>
     <string name="guest_exit_dialog_message_non_ephemeral" msgid="223385323235719442">"Voit tallentaa tämän istunnon toimintaa tai poistaa kaikki sovellukset ja datan"</string>

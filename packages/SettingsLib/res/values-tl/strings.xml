@@ -56,7 +56,7 @@
     <string name="wifi_disabled_password_failure" msgid="6892387079613226738">"Problema sa pag-authenticate"</string>
     <string name="wifi_cant_connect" msgid="5718417542623056783">"Hindi makakonekta"</string>
     <string name="wifi_cant_connect_to_ap" msgid="3099667989279700135">"Hindi makakonekta sa \'<xliff:g id="AP_NAME">%1$s</xliff:g>\'"</string>
-    <string name="wifi_check_password_try_again" msgid="8817789642851605628">"Suriin ang password at subukang muli"</string>
+    <string name="wifi_check_password_try_again" msgid="8817789642851605628">"Suriin ang password at subukan ulit"</string>
     <string name="wifi_not_in_range" msgid="1541760821805777772">"Wala sa sakop"</string>
     <string name="wifi_no_internet_no_reconnect" msgid="821591791066497347">"Hindi awtomatikong kokonekta"</string>
     <string name="wifi_no_internet" msgid="1774198889176926299">"Walang access sa internet"</string>
@@ -74,7 +74,7 @@
     <string name="osu_opening_provider" msgid="4318105381295178285">"Binubuksan ang <xliff:g id="PASSPOINTPROVIDER">%1$s</xliff:g>"</string>
     <string name="osu_connect_failed" msgid="9107873364807159193">"Hindi makakonekta"</string>
     <string name="osu_completing_sign_up" msgid="8412636665040390901">"Kinukumpleto ang pag-sign up…"</string>
-    <string name="osu_sign_up_failed" msgid="5605453599586001793">"Hindi makumpleto ang pag-sign up. I-tap para subukang muli."</string>
+    <string name="osu_sign_up_failed" msgid="5605453599586001793">"Hindi makumpleto ang pag-sign up. I-tap para subukan ulit."</string>
     <string name="osu_sign_up_complete" msgid="7640183358878916847">"Kumpleto na ang pag-sign up. Kumokonekta…"</string>
     <string name="speed_label_slow" msgid="6069917670665664161">"Mabagal"</string>
     <string name="speed_label_okay" msgid="1253594383880810424">"OK"</string>
@@ -564,6 +564,8 @@
     <string name="user_add_user_title" msgid="5457079143694924885">"Magdagdag ng bagong user?"</string>
     <string name="user_add_user_message_long" msgid="1527434966294733380">"Puwede mong ibahagi ang device na ito sa ibang tao sa pamamagitan ng paggawa ng mga karagdagang user. May sariling espasyo ang bawat user na maaari nilang i-customize gamit ang mga app, wallpaper, at iba pa. Puwede ring isaayos ng mga user ang mga setting ng device tulad ng Wi‑Fi na nakakaapekto sa lahat.\n\nKapag nagdagdag ka ng bagong user, kailangang i-set up ng taong iyon ang kanyang espasyo.\n\nMaaaring mag-update ng mga app ang sinumang user para sa lahat ng iba pang user. Maaaring hindi malipat sa bagong user ang mga setting at serbisyo sa pagiging naa-access."</string>
     <string name="user_add_user_message_short" msgid="3295959985795716166">"Kapag nagdagdag ka ng bagong user, kailangang i-set up ng taong iyon ang kanyang espasyo.\n\nAng sinumang user ay puwedeng mag-update ng mga app para sa lahat ng iba pang user."</string>
+    <string name="user_grant_admin_title" msgid="5565796912475193314">"Bigyan ang user na ito ng mga pribilehiyo ng admin?"</string>
+    <string name="user_grant_admin_message" msgid="7925257971286380976">"Bilang admin, magagawa niyang pamahalaan ang iba pang user, baguhin ang mga setting ng device, at i-factory reset ang device."</string>
     <string name="user_setup_dialog_title" msgid="8037342066381939995">"I-set up ang user ngayon?"</string>
     <string name="user_setup_dialog_message" msgid="269931619868102841">"Tiyaking available ang tao na kunin ang device at i-set up ang kanyang space"</string>
     <string name="user_setup_profile_dialog_message" msgid="4788197052296962620">"Mag-set up ng profile ngayon?"</string>
@@ -595,6 +597,8 @@
     <string name="guest_reset_and_restart_dialog_message" msgid="2764425635305200790">"Magsisimula ito ng bagong session ng bisita at made-delete ang lahat ng app at data mula sa kasalukuyang session"</string>
     <string name="guest_exit_dialog_title" msgid="1846494656849381804">"Umalis sa guest mode?"</string>
     <string name="guest_exit_dialog_message" msgid="1743218864242719783">"Ide-delete nito ang mga app at data mula sa kasalukuyang session ng bisita"</string>
+    <string name="grant_admin" msgid="4273077214151417783">"Bigyan ang user na ito ng mga pribilehiyo ng admin"</string>
+    <string name="not_grant_admin" msgid="6985027675930546850">"Huwag bigyan ang user ng mga pribilehiyo ng admin"</string>
     <string name="guest_exit_dialog_button" msgid="1736401897067442044">"Umalis"</string>
     <string name="guest_exit_dialog_title_non_ephemeral" msgid="7675327443743162986">"I-save ang aktibidad ng bisita?"</string>
     <string name="guest_exit_dialog_message_non_ephemeral" msgid="223385323235719442">"Puwedeng i-save ang aktibidad ng session ngayon o i-delete lahat ng app at data"</string>

@@ -564,6 +564,8 @@
     <string name="user_add_user_title" msgid="5457079143694924885">"¿Agregar usuario nuevo?"</string>
     <string name="user_add_user_message_long" msgid="1527434966294733380">"Para compartir este dispositivo, crea más usuarios. Cada uno tendrá su propio espacio y podrá personalizarlo con apps, un fondo de pantalla y mucho más. Los usuarios también podrán ajustar algunas opciones del dispositivo, como la conexión Wi‑Fi, que afectan a todos los usuarios.\n\nCuando agregues un nuevo usuario, esa persona deberá configurar su espacio.\n\nCualquier usuario podrá actualizar las apps de otras personas. Es posible que no se transfieran los servicios ni las opciones de accesibilidad al nuevo usuario."</string>
     <string name="user_add_user_message_short" msgid="3295959985795716166">"Cuando agregas un nuevo usuario, esa persona debe configurar su espacio.\n\nCualquier usuario puede actualizar las aplicaciones del resto de los usuarios."</string>
+    <string name="user_grant_admin_title" msgid="5565796912475193314">"¿Dar privilegios de admin.?"</string>
+    <string name="user_grant_admin_message" msgid="7925257971286380976">"Como administrador, podrá controlar a otros usuarios, modificar la configuración de dispositivos y restablecer su configuración de fábrica."</string>
     <string name="user_setup_dialog_title" msgid="8037342066381939995">"¿Configurar el usuario ahora?"</string>
     <string name="user_setup_dialog_message" msgid="269931619868102841">"Asegúrate de que la persona pueda acceder al dispositivo y configurar su espacio."</string>
     <string name="user_setup_profile_dialog_message" msgid="4788197052296962620">"¿Quieres configurar tu perfil ahora?"</string>
@@ -595,6 +597,8 @@
     <string name="guest_reset_and_restart_dialog_message" msgid="2764425635305200790">"Esta acción comenzará una nueva sesión de invitado y borrará todas las apps y los datos de la sesión actual"</string>
     <string name="guest_exit_dialog_title" msgid="1846494656849381804">"¿Salir del modo de invitado?"</string>
     <string name="guest_exit_dialog_message" msgid="1743218864242719783">"Esta acción borrará todas las apps y los datos de la sesión de invitado actual"</string>
+    <string name="grant_admin" msgid="4273077214151417783">"Otorgar privilegios de administrador a este usuario"</string>
+    <string name="not_grant_admin" msgid="6985027675930546850">"No otorgar privilegios de administrador a este usuario"</string>
     <string name="guest_exit_dialog_button" msgid="1736401897067442044">"Salir"</string>
     <string name="guest_exit_dialog_title_non_ephemeral" msgid="7675327443743162986">"¿Guardar actividad de invitado?"</string>
     <string name="guest_exit_dialog_message_non_ephemeral" msgid="223385323235719442">"Puedes guardar la actividad de la sesión actual o borrar las apps y los datos"</string>

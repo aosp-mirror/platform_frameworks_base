@@ -564,6 +564,8 @@
     <string name="user_add_user_title" msgid="5457079143694924885">"Yeni istifadəçi əlavə edilsin?"</string>
     <string name="user_add_user_message_long" msgid="1527434966294733380">"Əlavə istifadəçilər yaratmaqla bu cihazı digərləri ilə paylaşa bilərsiniz. Hər bir istifadəçinin tətbiq, divar kağızı və daha çoxu ilə fərdiləşdirə biləcəyi fərdi məkanları olacaq. İstifadəçilər hər kəsə təsir edən Wi‑Fi kimi cihaz ayarlarını da tənzimləyə biləcək.\n\nYeni istifadəçi əlavə etdiyiniz zaman həmin istifadəçi öz məkanını ayarlamalıdır.\n\nİstənilən istifadəçi tətbiqləri digər bütün istifadəçilər üçün güncəlləyə bilər. Əlçatımlılıq ayarları və xidmətlər yeni istifadəçiyə transfer edilməyə bilər."</string>
     <string name="user_add_user_message_short" msgid="3295959985795716166">"Yeni istifadəçi əlavə etdiyiniz zaman həmin şəxs öz yerini quraşdırmalıdır.\n\nİstənilən istifadəçi bütün digər istifadəçilərdən olan tətbiqləri güncəlləşdirə bilər."</string>
+    <string name="user_grant_admin_title" msgid="5565796912475193314">"Bu istifadəçiyə admin imtiyazları verilsin?"</string>
+    <string name="user_grant_admin_message" msgid="7925257971286380976">"Admin olaraq o, digər istifadəçiləri idarə edə, cihaz ayarlarını dəyişdirə və cihazı zavod ayarlarına sıfırlaya biləcək."</string>
     <string name="user_setup_dialog_title" msgid="8037342066381939995">"İstifadəçi indi ayarlansın?"</string>
     <string name="user_setup_dialog_message" msgid="269931619868102841">"Şəxsin cihazı götürə bilməsinə və yerini quraşdıra bilməsinə əmin olun"</string>
     <string name="user_setup_profile_dialog_message" msgid="4788197052296962620">"Profil indi quraşdırılsın?"</string>
@@ -595,6 +597,8 @@
     <string name="guest_reset_and_restart_dialog_message" msgid="2764425635305200790">"Bu, yeni qonaq sessiyası başladacaq və cari sessiyadan bütün tətbiqləri və datanı siləcək"</string>
     <string name="guest_exit_dialog_title" msgid="1846494656849381804">"Qonaq rejimindən çıxılsın?"</string>
     <string name="guest_exit_dialog_message" msgid="1743218864242719783">"Bununla cari qonaq sessiyasındakı bütün tətbiqlər və data silinəcək"</string>
+    <string name="grant_admin" msgid="4273077214151417783">"Bu istifadəçiyə admin imtiyazları verin"</string>
+    <string name="not_grant_admin" msgid="6985027675930546850">"İstifadəçiyə admin imtiyazları verməyin"</string>
     <string name="guest_exit_dialog_button" msgid="1736401897067442044">"Çıxın"</string>
     <string name="guest_exit_dialog_title_non_ephemeral" msgid="7675327443743162986">"Qonaq fəaliyyəti saxlansın?"</string>
     <string name="guest_exit_dialog_message_non_ephemeral" msgid="223385323235719442">"Cari sessiyadakı fəaliyyəti saxlaya və ya bütün tətbiq və datanı silə bilərsiniz"</string>
