@@ -48,6 +48,7 @@ import android.util.AttributeSet;
 import android.util.SparseArray;
 import android.util.TypedValue;
 import android.util.Xml;
+import android.view.InputDevice;
 import android.view.View;
 import android.view.accessibility.AccessibilityEvent;
 import android.view.accessibility.AccessibilityNodeInfo;
@@ -612,9 +613,29 @@ public class AccessibilityServiceInfo implements Parcelable {
     private boolean mIsAccessibilityTool = false;
 
     /**
+     * {@link InputDevice} sources which may send {@link android.view.MotionEvent}s.
+     * @see #setMotionEventSources(int)
+     * @hide
+     */
+    @IntDef(flag = true, prefix = { "SOURCE_" }, value = {
+            InputDevice.SOURCE_MOUSE,
+            InputDevice.SOURCE_STYLUS,
+            InputDevice.SOURCE_BLUETOOTH_STYLUS,
+            InputDevice.SOURCE_TRACKBALL,
+            InputDevice.SOURCE_MOUSE_RELATIVE,
+            InputDevice.SOURCE_TOUCHPAD,
+            InputDevice.SOURCE_TOUCH_NAVIGATION,
+            InputDevice.SOURCE_ROTARY_ENCODER,
+            InputDevice.SOURCE_JOYSTICK,
+            InputDevice.SOURCE_SENSOR
+    })
+    public @interface MotionEventSources {}
+
+    /**
      * The bit mask of {@link android.view.InputDevice} sources that the accessibility
      * service wants to listen to for generic {@link android.view.MotionEvent}s.
      */
+    @MotionEventSources
     private int mMotionEventSources = 0;
 
     /**
@@ -966,6 +987,7 @@ public class AccessibilityServiceInfo implements Parcelable {
      * Returns the bit mask of {@link android.view.InputDevice} sources that the accessibility
      * service wants to listen to for generic {@link android.view.MotionEvent}s.
      */
+    @MotionEventSources
     public int getMotionEventSources() {
         return mMotionEventSources;
     }
@@ -975,28 +997,29 @@ public class AccessibilityServiceInfo implements Parcelable {
      * service wants to listen to for generic {@link android.view.MotionEvent}s.
      *
      * <p>
-     * Note: including an {@link android.view.InputDevice} source that does not send
+     * Including an {@link android.view.InputDevice} source that does not send
      * {@link android.view.MotionEvent}s is effectively a no-op for that source, since you will
      * not receive any events from that source.
      * </p>
+     *
      * <p>
-     * Allowed sources include:
-     * <li>{@link android.view.InputDevice#SOURCE_MOUSE}</li>
-     * <li>{@link android.view.InputDevice#SOURCE_STYLUS}</li>
-     * <li>{@link android.view.InputDevice#SOURCE_BLUETOOTH_STYLUS}</li>
-     * <li>{@link android.view.InputDevice#SOURCE_TRACKBALL}</li>
-     * <li>{@link android.view.InputDevice#SOURCE_MOUSE_RELATIVE}</li>
-     * <li>{@link android.view.InputDevice#SOURCE_TOUCHPAD}</li>
-     * <li>{@link android.view.InputDevice#SOURCE_TOUCH_NAVIGATION}</li>
-     * <li>{@link android.view.InputDevice#SOURCE_ROTARY_ENCODER}</li>
-     * <li>{@link android.view.InputDevice#SOURCE_JOYSTICK}</li>
-     * <li>{@link android.view.InputDevice#SOURCE_SENSOR}</li>
+     * See {@link android.view.InputDevice} for complete source definitions.
+     * Many input devices send {@link android.view.InputEvent}s from more than one type of source so
+     * you may need to include multiple {@link android.view.MotionEvent} sources here, in addition
+     * to using {@link AccessibilityService#onKeyEvent} to listen to {@link android.view.KeyEvent}s.
+     * </p>
+     *
+     * <p>
+     * <strong>Note:</strong> {@link android.view.InputDevice} sources contain source class bits
+     * that complicate bitwise flag removal operations. To remove a specific source you should
+     * rebuild the entire value using bitwise OR operations on the individual source constants.
      * </p>
      *
      * @param motionEventSources A bit mask of {@link android.view.InputDevice} sources.
      * @see AccessibilityService#onMotionEvent
+     * @see MotionEventSources
      */
-    public void setMotionEventSources(int motionEventSources) {
+    public void setMotionEventSources(@MotionEventSources int motionEventSources) {
         mMotionEventSources = motionEventSources;
     }
 
