@@ -39,28 +39,23 @@ import org.junit.Test
 import org.junit.runner.RunWith
 import org.mockito.Mock
 import org.mockito.Mockito.verify
+import org.mockito.Mockito.`when` as whenever
 import org.mockito.Spy
 import org.mockito.junit.MockitoJUnit
 import org.mockito.junit.MockitoRule
-import org.mockito.Mockito.`when` as whenever
 
 @OptIn(ExperimentalCoroutinesApi::class)
 @RunWith(AndroidJUnit4::class)
 class AppOpPermissionAppListTest {
-    @get:Rule
-    val mockito: MockitoRule = MockitoJUnit.rule()
+    @get:Rule val mockito: MockitoRule = MockitoJUnit.rule()
 
-    @get:Rule
-    val composeTestRule = createComposeRule()
+    @get:Rule val composeTestRule = createComposeRule()
 
-    @Spy
-    private val context: Context = ApplicationProvider.getApplicationContext()
+    @Spy private val context: Context = ApplicationProvider.getApplicationContext()
 
-    @Mock
-    private lateinit var packageManagers: IPackageManagers
+    @Mock private lateinit var packageManagers: IPackageManagers
 
-    @Mock
-    private lateinit var appOpsManager: AppOpsManager
+    @Mock private lateinit var appOpsManager: AppOpsManager
 
     private lateinit var listModel: TestAppOpPermissionAppListModel
 
@@ -79,9 +74,7 @@ class AppOpPermissionAppListTest {
 
     @Test
     fun transformItem_hasRequestPermission() = runTest {
-        with(packageManagers) {
-            whenever(APP.hasRequestPermission(PERMISSION)).thenReturn(true)
-        }
+        with(packageManagers) { whenever(APP.hasRequestPermission(PERMISSION)).thenReturn(true) }
 
         val record = listModel.transformItem(APP)
 
@@ -90,8 +83,30 @@ class AppOpPermissionAppListTest {
 
     @Test
     fun transformItem_notRequestPermission() = runTest {
+        with(packageManagers) { whenever(APP.hasRequestPermission(PERMISSION)).thenReturn(false) }
+
+        val record = listModel.transformItem(APP)
+
+        assertThat(record.hasRequestPermission).isFalse()
+    }
+
+    @Test
+    fun transformItem_hasRequestBroaderPermission() = runTest {
+        listModel.broaderPermission = BROADER_PERMISSION
         with(packageManagers) {
-            whenever(APP.hasRequestPermission(PERMISSION)).thenReturn(false)
+            whenever(APP.hasRequestPermission(BROADER_PERMISSION)).thenReturn(true)
+        }
+
+        val record = listModel.transformItem(APP)
+
+        assertThat(record.hasRequestBroaderPermission).isTrue()
+    }
+
+    @Test
+    fun transformItem_notRequestBroaderPermission() = runTest {
+        listModel.broaderPermission = BROADER_PERMISSION
+        with(packageManagers) {
+            whenever(APP.hasRequestPermission(BROADER_PERMISSION)).thenReturn(false)
         }
 
         val record = listModel.transformItem(APP)
@@ -101,14 +116,14 @@ class AppOpPermissionAppListTest {
 
     @Test
     fun filter() = runTest {
-        with(packageManagers) {
-            whenever(APP.hasRequestPermission(PERMISSION)).thenReturn(false)
-        }
-        val record = AppOpPermissionRecord(
-            app = APP,
-            hasRequestPermission = false,
-            appOpsController = FakeAppOpsController(fakeMode = AppOpsManager.MODE_DEFAULT),
-        )
+        with(packageManagers) { whenever(APP.hasRequestPermission(PERMISSION)).thenReturn(false) }
+        val record =
+            AppOpPermissionRecord(
+                app = APP,
+                hasRequestBroaderPermission = false,
+                hasRequestPermission = false,
+                appOpsController = FakeAppOpsController(fakeMode = AppOpsManager.MODE_DEFAULT),
+            )
 
         val recordListFlow = listModel.filter(flowOf(USER_ID), flowOf(listOf(record)))
 
@@ -118,11 +133,13 @@ class AppOpPermissionAppListTest {
 
     @Test
     fun isAllowed_allowed() {
-        val record = AppOpPermissionRecord(
-            app = APP,
-            hasRequestPermission = true,
-            appOpsController = FakeAppOpsController(fakeMode = AppOpsManager.MODE_ALLOWED),
-        )
+        val record =
+            AppOpPermissionRecord(
+                app = APP,
+                hasRequestBroaderPermission = false,
+                hasRequestPermission = true,
+                appOpsController = FakeAppOpsController(fakeMode = AppOpsManager.MODE_ALLOWED),
+            )
 
         val isAllowed = getIsAllowed(record)
 
@@ -131,14 +148,14 @@ class AppOpPermissionAppListTest {
 
     @Test
     fun isAllowed_defaultAndHasGrantPermission() {
-        with(packageManagers) {
-            whenever(APP.hasGrantPermission(PERMISSION)).thenReturn(true)
-        }
-        val record = AppOpPermissionRecord(
-            app = APP,
-            hasRequestPermission = true,
-            appOpsController = FakeAppOpsController(fakeMode = AppOpsManager.MODE_DEFAULT),
-        )
+        with(packageManagers) { whenever(APP.hasGrantPermission(PERMISSION)).thenReturn(true) }
+        val record =
+            AppOpPermissionRecord(
+                app = APP,
+                hasRequestBroaderPermission = false,
+                hasRequestPermission = true,
+                appOpsController = FakeAppOpsController(fakeMode = AppOpsManager.MODE_DEFAULT),
+            )
 
         val isAllowed = getIsAllowed(record)
 
@@ -147,14 +164,14 @@ class AppOpPermissionAppListTest {
 
     @Test
     fun isAllowed_defaultAndNotGrantPermission() {
-        with(packageManagers) {
-            whenever(APP.hasGrantPermission(PERMISSION)).thenReturn(false)
-        }
-        val record = AppOpPermissionRecord(
-            app = APP,
-            hasRequestPermission = true,
-            appOpsController = FakeAppOpsController(fakeMode = AppOpsManager.MODE_DEFAULT),
-        )
+        with(packageManagers) { whenever(APP.hasGrantPermission(PERMISSION)).thenReturn(false) }
+        val record =
+            AppOpPermissionRecord(
+                app = APP,
+                hasRequestBroaderPermission = false,
+                hasRequestPermission = true,
+                appOpsController = FakeAppOpsController(fakeMode = AppOpsManager.MODE_DEFAULT),
+            )
 
         val isAllowed = getIsAllowed(record)
 
@@ -162,12 +179,34 @@ class AppOpPermissionAppListTest {
     }
 
     @Test
+    fun isAllowed_broaderPermissionTrumps() {
+        listModel.broaderPermission = BROADER_PERMISSION
+        with(packageManagers) {
+            whenever(APP.hasGrantPermission(PERMISSION)).thenReturn(false)
+            whenever(APP.hasGrantPermission(BROADER_PERMISSION)).thenReturn(true)
+        }
+        val record =
+            AppOpPermissionRecord(
+                app = APP,
+                hasRequestBroaderPermission = true,
+                hasRequestPermission = false,
+                appOpsController = FakeAppOpsController(fakeMode = AppOpsManager.MODE_ERRORED),
+            )
+
+        val isAllowed = getIsAllowed(record)
+
+        assertThat(isAllowed).isTrue()
+    }
+
+    @Test
     fun isAllowed_notAllowed() {
-        val record = AppOpPermissionRecord(
-            app = APP,
-            hasRequestPermission = true,
-            appOpsController = FakeAppOpsController(fakeMode = AppOpsManager.MODE_ERRORED),
-        )
+        val record =
+            AppOpPermissionRecord(
+                app = APP,
+                hasRequestBroaderPermission = false,
+                hasRequestPermission = true,
+                appOpsController = FakeAppOpsController(fakeMode = AppOpsManager.MODE_ERRORED),
+            )
 
         val isAllowed = getIsAllowed(record)
 
@@ -176,11 +215,13 @@ class AppOpPermissionAppListTest {
 
     @Test
     fun isChangeable_notRequestPermission() {
-        val record = AppOpPermissionRecord(
-            app = APP,
-            hasRequestPermission = false,
-            appOpsController = FakeAppOpsController(fakeMode = AppOpsManager.MODE_DEFAULT),
-        )
+        val record =
+            AppOpPermissionRecord(
+                app = APP,
+                hasRequestBroaderPermission = false,
+                hasRequestPermission = false,
+                appOpsController = FakeAppOpsController(fakeMode = AppOpsManager.MODE_DEFAULT),
+            )
 
         val isChangeable = listModel.isChangeable(record)
 
@@ -189,11 +230,13 @@ class AppOpPermissionAppListTest {
 
     @Test
     fun isChangeable_notChangeablePackages() {
-        val record = AppOpPermissionRecord(
-            app = NOT_CHANGEABLE_APP,
-            hasRequestPermission = true,
-            appOpsController = FakeAppOpsController(fakeMode = AppOpsManager.MODE_DEFAULT),
-        )
+        val record =
+            AppOpPermissionRecord(
+                app = NOT_CHANGEABLE_APP,
+                hasRequestBroaderPermission = false,
+                hasRequestPermission = true,
+                appOpsController = FakeAppOpsController(fakeMode = AppOpsManager.MODE_DEFAULT),
+            )
 
         val isChangeable = listModel.isChangeable(record)
 
@@ -202,11 +245,13 @@ class AppOpPermissionAppListTest {
 
     @Test
     fun isChangeable_hasRequestPermissionAndChangeable() {
-        val record = AppOpPermissionRecord(
-            app = APP,
-            hasRequestPermission = true,
-            appOpsController = FakeAppOpsController(fakeMode = AppOpsManager.MODE_DEFAULT),
-        )
+        val record =
+            AppOpPermissionRecord(
+                app = APP,
+                hasRequestBroaderPermission = false,
+                hasRequestPermission = true,
+                appOpsController = FakeAppOpsController(fakeMode = AppOpsManager.MODE_DEFAULT),
+            )
 
         val isChangeable = listModel.isChangeable(record)
 
@@ -214,13 +259,31 @@ class AppOpPermissionAppListTest {
     }
 
     @Test
+    fun isChangeable_broaderPermissionTrumps() {
+        listModel.broaderPermission = BROADER_PERMISSION
+        val record =
+            AppOpPermissionRecord(
+                app = APP,
+                hasRequestBroaderPermission = true,
+                hasRequestPermission = true,
+                appOpsController = FakeAppOpsController(fakeMode = AppOpsManager.MODE_DEFAULT),
+            )
+
+        val isChangeable = listModel.isChangeable(record)
+
+        assertThat(isChangeable).isFalse()
+    }
+
+    @Test
     fun setAllowed() {
         val appOpsController = FakeAppOpsController(fakeMode = AppOpsManager.MODE_DEFAULT)
-        val record = AppOpPermissionRecord(
-            app = APP,
-            hasRequestPermission = true,
-            appOpsController = appOpsController,
-        )
+        val record =
+            AppOpPermissionRecord(
+                app = APP,
+                hasRequestBroaderPermission = false,
+                hasRequestPermission = true,
+                appOpsController = appOpsController,
+            )
 
         listModel.setAllowed(record = record, newAllowed = true)
 
@@ -239,9 +302,7 @@ class AppOpPermissionAppListTest {
 
     private fun getIsAllowed(record: AppOpPermissionRecord): Boolean? {
         lateinit var isAllowedState: State<Boolean?>
-        composeTestRule.setContent {
-            isAllowedState = listModel.isAllowed(record)
-        }
+        composeTestRule.setContent { isAllowedState = listModel.isAllowed(record) }
         return isAllowedState.value
     }
 
@@ -250,8 +311,12 @@ class AppOpPermissionAppListTest {
         override val pageTitleResId = R.string.test_app_op_permission_title
         override val switchTitleResId = R.string.test_app_op_permission_switch_title
         override val footerResId = R.string.test_app_op_permission_footer
+
         override val appOp = AppOpsManager.OP_MANAGE_MEDIA
         override val permission = PERMISSION
+        override val permissionHasAppopFlag = true
+        override var broaderPermission: String? = null
+
         override var setModeByUid = false
     }
 
@@ -259,12 +324,9 @@ class AppOpPermissionAppListTest {
         const val USER_ID = 0
         const val PACKAGE_NAME = "package.name"
         const val PERMISSION = "PERMISSION"
-        val APP = ApplicationInfo().apply {
-            packageName = PACKAGE_NAME
-        }
-        val NOT_CHANGEABLE_APP = ApplicationInfo().apply {
-            packageName = "android"
-        }
+        const val BROADER_PERMISSION = "BROADER_PERMISSION"
+        val APP = ApplicationInfo().apply { packageName = PACKAGE_NAME }
+        val NOT_CHANGEABLE_APP = ApplicationInfo().apply { packageName = "android" }
     }
 }
 
