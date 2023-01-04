@@ -60,10 +60,8 @@
     <string name="uninstall_update_text" msgid="863648314632448705">"이 앱을 초기 버전으로 바꾸시겠습니까? 모든 데이터가 삭제됩니다."</string>
     <string name="uninstall_update_text_multiuser" msgid="8992883151333057227">"이 앱을 초기 버전으로 바꾸시겠습니까? 모든 데이터가 삭제되며 직장 프로필 사용자를 포함해 이 기기의 모든 사용자에게 영향을 미칩니다."</string>
     <string name="uninstall_keep_data" msgid="7002379587465487550">"앱 데이터 크기를 <xliff:g id="SIZE">%1$s</xliff:g>로 유지합니다."</string>
-    <!-- no translation found for uninstall_application_text_current_user_clone_profile (835170400160011636) -->
-    <skip />
-    <!-- no translation found for uninstall_application_text_with_clone_instance (6944473334273349036) -->
-    <skip />
+    <string name="uninstall_application_text_current_user_clone_profile" msgid="835170400160011636">"이 앱을 삭제하시겠습니까?"</string>
+    <string name="uninstall_application_text_with_clone_instance" msgid="6944473334273349036">"이 앱을 제거하시겠습니까? <xliff:g id="PACKAGE_LABEL">%1$s</xliff:g> 클론도 삭제됩니다."</string>
     <string name="uninstalling_notification_channel" msgid="840153394325714653">"실행 중인 제거 작업"</string>
     <string name="uninstall_failure_notification_channel" msgid="1136405866767576588">"실패한 제거 작업"</string>
     <string name="uninstalling" msgid="8709566347688966845">"제거 중..."</string>
@@ -72,8 +70,7 @@
     <string name="uninstall_done_app" msgid="4588850984473605768">"<xliff:g id="PACKAGE_LABEL">%1$s</xliff:g>를 제거했습니다."</string>
     <string name="uninstall_failed" msgid="1847750968168364332">"제거하지 못했습니다."</string>
     <string name="uninstall_failed_app" msgid="5506028705017601412">"<xliff:g id="PACKAGE_LABEL">%1$s</xliff:g>을(를) 제거하지 못했습니다."</string>
-    <!-- no translation found for uninstalling_cloned_app (1826380164974984870) -->
-    <skip />
+    <string name="uninstalling_cloned_app" msgid="1826380164974984870">"<xliff:g id="PACKAGE_LABEL">%1$s</xliff:g> 클론 삭제 중…"</string>
     <string name="uninstall_failed_device_policy_manager" msgid="785293813665540305">"활성 상태의 기기 관리자 앱을 제거할 수 없습니다."</string>
     <string name="uninstall_failed_device_policy_manager_of_user" msgid="4813104025494168064">"<xliff:g id="USERNAME">%1$s</xliff:g>의 활성 상태의 기기 관리자 앱을 제거할 수 없습니다."</string>
     <string name="uninstall_all_blocked_profile_owner" msgid="2009393666026751501">"이 앱은 일부 사용자 또는 프로필에 필요하며 다른 사용자에 대해서는 제거되었습니다."</string>
@@ -94,8 +91,7 @@
     <string name="anonymous_source_warning" product="default" msgid="2784902545920822500">"휴대전화와 개인 데이터는 알 수 없는 앱의 공격에 더욱 취약합니다. 이 앱을 설치하면 앱 사용으로 인해 발생할 수 있는 모든 휴대전화 손상이나 데이터 손실에 사용자가 책임을 진다는 것에 동의하게 됩니다."</string>
     <string name="anonymous_source_warning" product="tablet" msgid="3939101621438855516">"태블릿과 개인 데이터는 알 수 없는 앱의 공격에 더욱 취약합니다. 이 앱을 설치하면 앱 사용으로 인해 발생할 수 있는 모든 태블릿 손상이나 데이터 손실에 사용자가 책임을 진다는 것에 동의하게 됩니다."</string>
     <string name="anonymous_source_warning" product="tv" msgid="5599483539528168566">"TV와 개인 데이터는 알 수 없는 앱의 공격에 더욱 취약합니다. 이 앱을 설치하면 앱 사용으로 인해 발생할 수 있는 모든 TV 손상이나 데이터 손실에 사용자가 책임을 진다는 것에 동의하게 됩니다."</string>
-    <!-- no translation found for cloned_app_label (7503612829833756160) -->
-    <skip />
+    <string name="cloned_app_label" msgid="7503612829833756160">"<xliff:g id="PACKAGE_LABEL">%1$s</xliff:g> 클론"</string>
     <string name="anonymous_source_continue" msgid="4375745439457209366">"계속"</string>
     <string name="external_sources_settings" msgid="4046964413071713807">"설정"</string>
     <string name="wear_app_channel" msgid="1960809674709107850">"Wear 앱 설치/제거"</string>

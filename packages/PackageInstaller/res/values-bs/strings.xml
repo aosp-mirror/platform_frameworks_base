@@ -60,10 +60,8 @@
     <string name="uninstall_update_text" msgid="863648314632448705">"Želite li ovu aplikaciju zamijeniti s fabričkom verzijom? Svi podaci će biti uklonjeni."</string>
     <string name="uninstall_update_text_multiuser" msgid="8992883151333057227">"Želite li ovu aplikaciju zamijeniti s fabričkom verzijom? Svi podaci će biti uklonjeni. To će uticati na sve korisnike uređaja, uključujući i one s radnim profilima."</string>
     <string name="uninstall_keep_data" msgid="7002379587465487550">"Zadržati <xliff:g id="SIZE">%1$s</xliff:g> podataka aplikacije."</string>
-    <!-- no translation found for uninstall_application_text_current_user_clone_profile (835170400160011636) -->
-    <skip />
-    <!-- no translation found for uninstall_application_text_with_clone_instance (6944473334273349036) -->
-    <skip />
+    <string name="uninstall_application_text_current_user_clone_profile" msgid="835170400160011636">"Želite li izbrisati ovu aplikaciju?"</string>
+    <string name="uninstall_application_text_with_clone_instance" msgid="6944473334273349036">"Želite li deinstalirati ovu aplikaciju? Izbrisat će se i klon aplikacije <xliff:g id="PACKAGE_LABEL">%1$s</xliff:g>."</string>
     <string name="uninstalling_notification_channel" msgid="840153394325714653">"Tekuća deinstaliranja"</string>
     <string name="uninstall_failure_notification_channel" msgid="1136405866767576588">"Neuspjela deinstaliranja"</string>
     <string name="uninstalling" msgid="8709566347688966845">"Deinstaliranje..."</string>
@@ -72,8 +70,7 @@
     <string name="uninstall_done_app" msgid="4588850984473605768">"Deinstalirana je aplikacija <xliff:g id="PACKAGE_LABEL">%1$s</xliff:g>"</string>
     <string name="uninstall_failed" msgid="1847750968168364332">"Deinstaliranje nije uspjelo."</string>
     <string name="uninstall_failed_app" msgid="5506028705017601412">"Paket <xliff:g id="PACKAGE_LABEL">%1$s</xliff:g> nije uspješno deinstaliran."</string>
-    <!-- no translation found for uninstalling_cloned_app (1826380164974984870) -->
-    <skip />
+    <string name="uninstalling_cloned_app" msgid="1826380164974984870">"Brisanje klona aplikacije <xliff:g id="PACKAGE_LABEL">%1$s</xliff:g>…"</string>
     <string name="uninstall_failed_device_policy_manager" msgid="785293813665540305">"Nije moguće deinstalirati aktivnu aplikaciju administratora uređaja"</string>
     <string name="uninstall_failed_device_policy_manager_of_user" msgid="4813104025494168064">"Nije moguće deinstalirati aktivnu aplikaciju administratora uređaja za korisnika <xliff:g id="USERNAME">%1$s</xliff:g>"</string>
     <string name="uninstall_all_blocked_profile_owner" msgid="2009393666026751501">"Ova aplikacija je neophodna nekim korisnicima ili profilima, a za ostale je deinstalirana"</string>
@@ -94,8 +91,7 @@
     <string name="anonymous_source_warning" product="default" msgid="2784902545920822500">"Vaši podaci na telefonu i vaši lični podaci izloženiji su napadima nepoznatih aplikacija. Instaliranjem ove aplikacije, prihvatate odgovornost za bilo kakvu štetu na telefonu ili gubitak podataka do kojih može doći korištenjem aplikacije."</string>
     <string name="anonymous_source_warning" product="tablet" msgid="3939101621438855516">"Vaši podaci na tabletu i vaši lični podaci izloženiji su napadima nepoznatih aplikacija. Instaliranjem ove aplikacije, prihvatate odgovornost za bilo kakvu štetu na tabletu ili gubitak podataka do kojih može doći korištenjem aplikacije."</string>
     <string name="anonymous_source_warning" product="tv" msgid="5599483539528168566">"Vaši podaci na TV-u i vaši lični podaci izloženiji su napadima nepoznatih aplikacija. Instaliranjem ove aplikacije, prihvatate odgovornost za bilo kakvu štetu na TV-u ili gubitak podataka do kojih može doći korištenjem aplikacije."</string>
-    <!-- no translation found for cloned_app_label (7503612829833756160) -->
-    <skip />
+    <string name="cloned_app_label" msgid="7503612829833756160">"Klon aplikacije <xliff:g id="PACKAGE_LABEL">%1$s</xliff:g>"</string>
     <string name="anonymous_source_continue" msgid="4375745439457209366">"Nastavi"</string>
     <string name="external_sources_settings" msgid="4046964413071713807">"Postavke"</string>
     <string name="wear_app_channel" msgid="1960809674709107850">"Instaliranje/deinstaliranje Wear aplik."</string>

@@ -60,10 +60,8 @@
     <string name="uninstall_update_text" msgid="863648314632448705">"要將應用程式換成原廠版本嗎？這麼做會移除所有資料。"</string>
     <string name="uninstall_update_text_multiuser" msgid="8992883151333057227">"要將應用程式換成原廠版本嗎？這麼做會移除所有資料。凡是這個裝置的使用者 (包括設置工作資料夾的使用者)，皆會受到影響。"</string>
     <string name="uninstall_keep_data" msgid="7002379587465487550">"保留 <xliff:g id="SIZE">%1$s</xliff:g> 的應用程式資料。"</string>
-    <!-- no translation found for uninstall_application_text_current_user_clone_profile (835170400160011636) -->
-    <skip />
-    <!-- no translation found for uninstall_application_text_with_clone_instance (6944473334273349036) -->
-    <skip />
+    <string name="uninstall_application_text_current_user_clone_profile" msgid="835170400160011636">"要刪除這個應用程式嗎？"</string>
+    <string name="uninstall_application_text_with_clone_instance" msgid="6944473334273349036">"要解除安裝這個應用程式嗎？系統也會一併刪除「<xliff:g id="PACKAGE_LABEL">%1$s</xliff:g>」副本。"</string>
     <string name="uninstalling_notification_channel" msgid="840153394325714653">"執行中的解除安裝作業"</string>
     <string name="uninstall_failure_notification_channel" msgid="1136405866767576588">"失敗的解除安裝作業"</string>
     <string name="uninstalling" msgid="8709566347688966845">"解除安裝中…"</string>
@@ -72,8 +70,7 @@
     <string name="uninstall_done_app" msgid="4588850984473605768">"已解除安裝「<xliff:g id="PACKAGE_LABEL">%1$s</xliff:g>」"</string>
     <string name="uninstall_failed" msgid="1847750968168364332">"無法解除安裝。"</string>
     <string name="uninstall_failed_app" msgid="5506028705017601412">"無法解除安裝「<xliff:g id="PACKAGE_LABEL">%1$s</xliff:g>」。"</string>
-    <!-- no translation found for uninstalling_cloned_app (1826380164974984870) -->
-    <skip />
+    <string name="uninstalling_cloned_app" msgid="1826380164974984870">"正在刪除「<xliff:g id="PACKAGE_LABEL">%1$s</xliff:g>」副本…"</string>
     <string name="uninstall_failed_device_policy_manager" msgid="785293813665540305">"無法解除安裝使用中的裝置管理員應用程式"</string>
     <string name="uninstall_failed_device_policy_manager_of_user" msgid="4813104025494168064">"無法為 <xliff:g id="USERNAME">%1$s</xliff:g> 解除安裝使用中的裝置管理員應用程式"</string>
     <string name="uninstall_all_blocked_profile_owner" msgid="2009393666026751501">"部分使用者或設定檔需要用到這個應用程式，因此無法完全解除安裝"</string>
@@ -94,8 +91,7 @@
     <string name="anonymous_source_warning" product="default" msgid="2784902545920822500">"來歷不明的應用程式可能會損害你的手機和個人資料。如因安裝及使用這個應用程式，導致你的手機受損或資料遺失，請自行負責。"</string>
     <string name="anonymous_source_warning" product="tablet" msgid="3939101621438855516">"來歷不明的應用程式可能會損害你的平板電腦和個人資料。如因安裝及使用這個應用程式，導致你的平板電腦受損或資料遺失，請自行負責。"</string>
     <string name="anonymous_source_warning" product="tv" msgid="5599483539528168566">"來歷不明的應用程式可能會損害你的電視和個人資料。如因安裝及使用這個應用程式，導致你的電視受損或資料遺失，請自行負責。"</string>
-    <!-- no translation found for cloned_app_label (7503612829833756160) -->
-    <skip />
+    <string name="cloned_app_label" msgid="7503612829833756160">"「<xliff:g id="PACKAGE_LABEL">%1$s</xliff:g>」副本"</string>
     <string name="anonymous_source_continue" msgid="4375745439457209366">"繼續"</string>
     <string name="external_sources_settings" msgid="4046964413071713807">"設定"</string>
     <string name="wear_app_channel" msgid="1960809674709107850">"安裝/解除安裝中的 Wear 應用程式"</string>

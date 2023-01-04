@@ -60,10 +60,8 @@
     <string name="uninstall_update_text" msgid="863648314632448705">"Haluatko korvata tämän sovelluksen tehdasversiolla? Kaikki data poistetaan."</string>
     <string name="uninstall_update_text_multiuser" msgid="8992883151333057227">"Haluatko korvata tämän sovelluksen tehdasversiolla? Kaikki data poistetaan. Tämä vaikuttaa kaikkiin laitteen käyttäjiin, myös työprofiileihin."</string>
     <string name="uninstall_keep_data" msgid="7002379587465487550">"Säilytä <xliff:g id="SIZE">%1$s</xliff:g> sovellusdataa"</string>
-    <!-- no translation found for uninstall_application_text_current_user_clone_profile (835170400160011636) -->
-    <skip />
-    <!-- no translation found for uninstall_application_text_with_clone_instance (6944473334273349036) -->
-    <skip />
+    <string name="uninstall_application_text_current_user_clone_profile" msgid="835170400160011636">"Haluatko poistaa tämän sovelluksen?"</string>
+    <string name="uninstall_application_text_with_clone_instance" msgid="6944473334273349036">"Haluatko poistaa tämän sovelluksen? Myös klooni (<xliff:g id="PACKAGE_LABEL">%1$s</xliff:g>) poistetaan."</string>
     <string name="uninstalling_notification_channel" msgid="840153394325714653">"Käynnissä olevat poistot"</string>
     <string name="uninstall_failure_notification_channel" msgid="1136405866767576588">"Epäonnistuneet poistot"</string>
     <string name="uninstalling" msgid="8709566347688966845">"Poistetaan…"</string>
@@ -72,8 +70,7 @@
     <string name="uninstall_done_app" msgid="4588850984473605768">"<xliff:g id="PACKAGE_LABEL">%1$s</xliff:g> poistettu"</string>
     <string name="uninstall_failed" msgid="1847750968168364332">"Poisto epäonnistui."</string>
     <string name="uninstall_failed_app" msgid="5506028705017601412">"<xliff:g id="PACKAGE_LABEL">%1$s</xliff:g> on poistettu."</string>
-    <!-- no translation found for uninstalling_cloned_app (1826380164974984870) -->
-    <skip />
+    <string name="uninstalling_cloned_app" msgid="1826380164974984870">"Poistetaan kloonia (<xliff:g id="PACKAGE_LABEL">%1$s</xliff:g>)…"</string>
     <string name="uninstall_failed_device_policy_manager" msgid="785293813665540305">"Aktiivista laitteenhallintasovellusta ei voi poistaa käytöstä."</string>
     <string name="uninstall_failed_device_policy_manager_of_user" msgid="4813104025494168064">"Käyttäjän <xliff:g id="USERNAME">%1$s</xliff:g> aktiivista laitteenhallintasovellusta ei voi poistaa käytöstä."</string>
     <string name="uninstall_all_blocked_profile_owner" msgid="2009393666026751501">"Jotkin käyttäjät tai profiilit tarvitsevat tätä sovellusta, ja se poistettiin muilta."</string>
@@ -94,8 +91,7 @@
     <string name="anonymous_source_warning" product="default" msgid="2784902545920822500">"Tuntemattomat sovellukset voivat helpommin kaapata puhelimesi ja henkilökohtaiset tietosi. Lataamalla sovelluksia tästä lähteestä hyväksyt, että olet itse vastuussa puhelimellesi aiheutuvista vahingoista tai tietojen menetyksestä, jotka voivat johtua sovellusten käytöstä."</string>
     <string name="anonymous_source_warning" product="tablet" msgid="3939101621438855516">"Tuntemattomat sovellukset voivat helpommin kaapata tablettisi ja henkilökohtaiset tietosi. Lataamalla sovelluksia tästä lähteestä hyväksyt, että olet itse vastuussa tabletillesi aiheutuvista vahingoista tai tietojen menetyksestä, jotka voivat johtua sovellusten käytöstä."</string>
     <string name="anonymous_source_warning" product="tv" msgid="5599483539528168566">"Tuntemattomat sovellukset voivat helpommin kaapata televisiosi ja henkilökohtaiset tietosi. Lataamalla sovelluksen hyväksyt, että olet itse vastuussa mahdollisista televisiolle aiheutuvista vahingoista tai tietojen menetyksestä, jotka voivat johtua sovellusten käytöstä."</string>
-    <!-- no translation found for cloned_app_label (7503612829833756160) -->
-    <skip />
+    <string name="cloned_app_label" msgid="7503612829833756160">"Klooni: <xliff:g id="PACKAGE_LABEL">%1$s</xliff:g>"</string>
     <string name="anonymous_source_continue" msgid="4375745439457209366">"Jatka"</string>
     <string name="external_sources_settings" msgid="4046964413071713807">"Asetukset"</string>
     <string name="wear_app_channel" msgid="1960809674709107850">"Wear-sovellusten asennus/poistaminen"</string>

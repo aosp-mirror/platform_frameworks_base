@@ -60,10 +60,8 @@
     <string name="uninstall_update_text" msgid="863648314632448705">"اس ایپ کو فیکٹری ورژن سے تبدیل کریں؟ تمام ڈیٹا ہٹا دیا جائے گا۔"</string>
     <string name="uninstall_update_text_multiuser" msgid="8992883151333057227">"اس ایپ کو فیکٹری ورژن سے تبدیل کریں؟ تمام ڈیٹا ہٹا دیا جائے گا۔ اس سے دفتری پروفائلز کے حاملین سمیت اس آلہ کے تمام صارفین متاثر ہوں گے۔"</string>
     <string name="uninstall_keep_data" msgid="7002379587465487550">"ایپ ڈیٹا کا <xliff:g id="SIZE">%1$s</xliff:g> رکھیں۔"</string>
-    <!-- no translation found for uninstall_application_text_current_user_clone_profile (835170400160011636) -->
-    <skip />
-    <!-- no translation found for uninstall_application_text_with_clone_instance (6944473334273349036) -->
-    <skip />
+    <string name="uninstall_application_text_current_user_clone_profile" msgid="835170400160011636">"کیا آپ یہ ایپ حذف کرنا چاہتے ہیں؟"</string>
+    <string name="uninstall_application_text_with_clone_instance" msgid="6944473334273349036">"کیا آپ یہ ایپ اَن انسٹال کرنا چاہتے ہیں؟ <xliff:g id="PACKAGE_LABEL">%1$s</xliff:g> کلون کو بھی حذف کر دیا جائے گا۔"</string>
     <string name="uninstalling_notification_channel" msgid="840153394325714653">"چل رہے اَن انسٹالز"</string>
     <string name="uninstall_failure_notification_channel" msgid="1136405866767576588">"ناکام اَن انسٹالز"</string>
     <string name="uninstalling" msgid="8709566347688966845">"اَن انسٹال ہو رہا ہے…"</string>
@@ -72,8 +70,7 @@
     <string name="uninstall_done_app" msgid="4588850984473605768">"<xliff:g id="PACKAGE_LABEL">%1$s</xliff:g> اَن انسٹال ہو گیا"</string>
     <string name="uninstall_failed" msgid="1847750968168364332">"اَن انسٹال ناکام ہو گیا۔"</string>
     <string name="uninstall_failed_app" msgid="5506028705017601412">"<xliff:g id="PACKAGE_LABEL">%1$s</xliff:g> کو ان انسٹال کرنا ناکام ہو گیا۔"</string>
-    <!-- no translation found for uninstalling_cloned_app (1826380164974984870) -->
-    <skip />
+    <string name="uninstalling_cloned_app" msgid="1826380164974984870">"<xliff:g id="PACKAGE_LABEL">%1$s</xliff:g> کلون کو حذف کیا جا رہا ہے…"</string>
     <string name="uninstall_failed_device_policy_manager" msgid="785293813665540305">"فعال آلہ کے منتظم کی ایپ کو اَن انسٹال نہیں کیا جا سکتا"</string>
     <string name="uninstall_failed_device_policy_manager_of_user" msgid="4813104025494168064">"<xliff:g id="USERNAME">%1$s</xliff:g> کی فعال آلہ کے منتظم کی ایپ کو اَن انسٹال نہیں کیا جا سکتا"</string>
     <string name="uninstall_all_blocked_profile_owner" msgid="2009393666026751501">"یہ ایپ کچھ صارفین یا پروفائلز کیلئے درکار ہے اور دیگر کیلئے اَن انسٹال کر دی گئی"</string>
@@ -94,8 +91,7 @@
     <string name="anonymous_source_warning" product="default" msgid="2784902545920822500">"آپ کے فون اور ذاتی ڈیٹا کو نامعلوم ایپس کی جانب سے حملے کا زیادہ خطرہ ہے۔ اس ایپ کو انسٹال کر کے، آپ اس بات سے اتفاق کرتے ہیں کہ آپ اس سے اپنے فون کو ہونے والے کسی بھی نقصان یا ڈیٹا کے نقصان کے لئے خود ذمہ دار ہیں۔"</string>
     <string name="anonymous_source_warning" product="tablet" msgid="3939101621438855516">"آپ کے ٹیبلیٹ اور ذاتی ڈیٹا کو نامعلوم ایپس کی جانب سے حملے کا زیادہ خطرہ ہے۔ اس ایپ کو انسٹال کر کے، آپ اس بات سے اتفاق کرتے ہیں کہ آپ اس سے اپنے ٹیبلیٹ کو ہونے والے کسی بھی نقصان یا ڈیٹا کے نقصان کے لئے خود ذمہ دار ہیں۔"</string>
     <string name="anonymous_source_warning" product="tv" msgid="5599483539528168566">"‏آپ کے TV اور ذاتی ڈیٹا کو نامعلوم ایپس کی جانب سے حملے کا زیادہ خطرہ ہے۔ اس ایپ کو انسٹال کر کے، آپ اس بات سے اتفاق کرتے ہیں کہ آپ اس سے اپنے TV کو ہونے والے کسی بھی نقصان یا ڈیٹا کے نقصان کے لئے خود ذمہ دار ہیں۔"</string>
-    <!-- no translation found for cloned_app_label (7503612829833756160) -->
-    <skip />
+    <string name="cloned_app_label" msgid="7503612829833756160">"<xliff:g id="PACKAGE_LABEL">%1$s</xliff:g> کلون"</string>
     <string name="anonymous_source_continue" msgid="4375745439457209366">"جاری رکھیں"</string>
     <string name="external_sources_settings" msgid="4046964413071713807">"ترتیبات"</string>
     <string name="wear_app_channel" msgid="1960809674709107850">"‏wear ایپس کو انسٹال/اَن انسٹال کرنا"</string>

@@ -60,10 +60,8 @@
     <string name="uninstall_update_text" msgid="863648314632448705">"要将此应用替换为出厂版本吗？这样会移除所有数据。"</string>
     <string name="uninstall_update_text_multiuser" msgid="8992883151333057227">"要将此应用替换为出厂版本吗？这样会移除所有数据，并会影响此设备的所有用户（包括已设置工作资料的用户）。"</string>
     <string name="uninstall_keep_data" msgid="7002379587465487550">"保留 <xliff:g id="SIZE">%1$s</xliff:g> 的应用数据。"</string>
-    <!-- no translation found for uninstall_application_text_current_user_clone_profile (835170400160011636) -->
-    <skip />
-    <!-- no translation found for uninstall_application_text_with_clone_instance (6944473334273349036) -->
-    <skip />
+    <string name="uninstall_application_text_current_user_clone_profile" msgid="835170400160011636">"要删除此应用吗？"</string>
+    <string name="uninstall_application_text_with_clone_instance" msgid="6944473334273349036">"要卸载此应用吗？<xliff:g id="PACKAGE_LABEL">%1$s</xliff:g> 克隆应用也会被删除。"</string>
     <string name="uninstalling_notification_channel" msgid="840153394325714653">"正在进行卸载操作"</string>
     <string name="uninstall_failure_notification_channel" msgid="1136405866767576588">"卸载操作失败"</string>
     <string name="uninstalling" msgid="8709566347688966845">"正在卸载…"</string>
@@ -72,8 +70,7 @@
     <string name="uninstall_done_app" msgid="4588850984473605768">"已卸载<xliff:g id="PACKAGE_LABEL">%1$s</xliff:g>"</string>
     <string name="uninstall_failed" msgid="1847750968168364332">"卸载失败。"</string>
     <string name="uninstall_failed_app" msgid="5506028705017601412">"卸载<xliff:g id="PACKAGE_LABEL">%1$s</xliff:g>失败。"</string>
-    <!-- no translation found for uninstalling_cloned_app (1826380164974984870) -->
-    <skip />
+    <string name="uninstalling_cloned_app" msgid="1826380164974984870">"正在删除 <xliff:g id="PACKAGE_LABEL">%1$s</xliff:g> 克隆应用…"</string>
     <string name="uninstall_failed_device_policy_manager" msgid="785293813665540305">"无法卸载正在使用中的设备管理应用"</string>
     <string name="uninstall_failed_device_policy_manager_of_user" msgid="4813104025494168064">"无法为<xliff:g id="USERNAME">%1$s</xliff:g>卸载正在使用中的设备管理应用"</string>
     <string name="uninstall_all_blocked_profile_owner" msgid="2009393666026751501">"部分用户或个人资料需要此应用，故无法卸载；已为其他用户或个人资料卸载此应用"</string>
@@ -94,8 +91,7 @@
     <string name="anonymous_source_warning" product="default" msgid="2784902545920822500">"来历不明的应用很可能会损害您的手机和个人数据。安装该应用即表示，您同意对于因使用该应用可能导致的任何手机损坏或数据丢失情况，您负有全部责任。"</string>
     <string name="anonymous_source_warning" product="tablet" msgid="3939101621438855516">"来历不明的应用很可能会损害您的平板电脑和个人数据。安装该应用即表示，您同意对于因使用该应用可能导致的任何平板电脑损坏或数据丢失情况，您负有全部责任。"</string>
     <string name="anonymous_source_warning" product="tv" msgid="5599483539528168566">"来历不明的应用很可能会损害您的电视和个人数据。安装该应用即表示，您同意对于因使用该应用可能导致的任何电视损坏或数据丢失情况，您负有全部责任。"</string>
-    <!-- no translation found for cloned_app_label (7503612829833756160) -->
-    <skip />
+    <string name="cloned_app_label" msgid="7503612829833756160">"<xliff:g id="PACKAGE_LABEL">%1$s</xliff:g> 克隆应用"</string>
     <string name="anonymous_source_continue" msgid="4375745439457209366">"继续"</string>
     <string name="external_sources_settings" msgid="4046964413071713807">"设置"</string>
     <string name="wear_app_channel" msgid="1960809674709107850">"正在安装/卸载 Wear 应用"</string>
