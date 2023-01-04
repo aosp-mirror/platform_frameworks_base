@@ -2437,40 +2437,6 @@ class TaskRecord extends ConfigurationContainer {
     }
 
     /**
-     * Removes the activity info if the activity belongs to a different uid, which is
-     * different from the app that hosts the task.
-     */
-    static void trimIneffectiveInfo(TaskRecord task, TaskInfo info) {
-        int topActivityUid = task.effectiveUid;
-        for (int i = task.mActivities.size() - 1; i >= 0; --i) {
-            final ActivityRecord r = task.mActivities.get(i);
-            if (r.finishing || r.isState(ActivityState.INITIALIZING)) {
-                continue;
-            }
-            topActivityUid = r.info.applicationInfo.uid;
-            break;
-        }
-
-        if (task.effectiveUid != topActivityUid) {
-            info.topActivity = null;
-        }
-
-        int baseActivityUid = task.effectiveUid;
-        for (int i = 0; i < task.mActivities.size(); ++i) {
-            final ActivityRecord r = task.mActivities.get(i);
-            if (r.finishing) {
-                continue;
-            }
-            baseActivityUid = r.info.applicationInfo.uid;
-            break;
-        }
-
-        if (task.effectiveUid != baseActivityUid) {
-            info.baseActivity = null;
-        }
-    }
-
-    /**
      * Returns a  {@link TaskInfo} with information from this task.
      */
     ActivityManager.RunningTaskInfo getTaskInfo() {
