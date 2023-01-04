@@ -4,49 +4,49 @@
     <string name="app_name" msgid="4539824758261855508">"Správce oprávnění"</string>
     <string name="string_cancel" msgid="6369133483981306063">"Zrušit"</string>
     <string name="string_continue" msgid="1346732695941131882">"Pokračovat"</string>
+    <string name="string_more_options" msgid="7990658711962795124">"Další možnosti"</string>
     <string name="string_create_in_another_place" msgid="1033635365843437603">"Vytvořit na jiném místě"</string>
     <string name="string_save_to_another_place" msgid="7590325934591079193">"Uložit na jiné místo"</string>
     <string name="string_use_another_device" msgid="8754514926121520445">"Použít jiné zařízení"</string>
     <string name="string_save_to_another_device" msgid="1959562542075194458">"Uložit do jiného zařízení"</string>
     <string name="passkey_creation_intro_title" msgid="4251037543787718844">"Přístupové klíče zvyšují bezpečnost"</string>
-    <string name="passkey_creation_intro_body_password" msgid="312712407571126228">"Není potřeba vytvářet a pamatovat si složitá hesla"</string>
-    <string name="passkey_creation_intro_body_fingerprint" msgid="691816235541508203">"Vytvořte si pomocí otisku prstu, obličeje nebo zámku obrazovky jedinečný přístupový klíč"</string>
-    <string name="passkey_creation_intro_body_device" msgid="477121861162321129">"Přístupové klíče se ukládají do správce hesel, takže se můžete přihlásit na jiných zařízeních"</string>
+    <string name="passkey_creation_intro_body_password" msgid="8825872426579958200">"S přístupovými klíči si nemusíte vytvářet ani pamatovat složitá hesla"</string>
+    <string name="passkey_creation_intro_body_fingerprint" msgid="7331338631826254055">"Přístupové klíče jsou šifrované digitální klíče, které vytvoříte pomocí otisku prstu, obličeje nebo zámku obrazovky"</string>
+    <string name="passkey_creation_intro_body_device" msgid="1203796455762131631">"Přístupové klíče se ukládají do správce hesel, takže se můžete přihlásit na jiných zařízeních"</string>
     <string name="choose_provider_title" msgid="7245243990139698508">"Zvolte, kde <xliff:g id="CREATETYPES">%1$s</xliff:g>"</string>
     <string name="create_your_passkeys" msgid="8901224153607590596">"vytvářet přístupové klíče"</string>
     <string name="save_your_password" msgid="6597736507991704307">"uložte si heslo"</string>
     <string name="save_your_sign_in_info" msgid="7213978049817076882">"uložte své přihlašovací údaje"</string>
-    <string name="choose_provider_body" msgid="8045759834416308059">"Nastavte si výchozího správce hesel, do kterého si budete ukládat hesla a přístupové klíče za účelem rychlejšího přihlašování."</string>
-    <string name="choose_create_option_passkey_title" msgid="4146408187146573131">"Vytvořit přístupový klíč v <xliff:g id="PROVIDERINFODISPLAYNAME">%1$s</xliff:g>?"</string>
-    <string name="choose_create_option_password_title" msgid="8812546498357380545">"Uložit heslo do <xliff:g id="PROVIDERINFODISPLAYNAME">%1$s</xliff:g>?"</string>
-    <string name="choose_create_option_sign_in_title" msgid="6318246378475961834">"Uložit přihlašovací údaje do <xliff:g id="PROVIDERINFODISPLAYNAME">%1$s</xliff:g>?"</string>
-    <string name="choose_create_option_description" msgid="4419171903963100257">"Svoje <xliff:g id="APPDOMAINNAME">%1$s</xliff:g> <xliff:g id="TYPE">%2$s</xliff:g> můžete používat na libovolném zařízení. Ukládá se do <xliff:g id="PROVIDERINFODISPLAYNAME">%3$s</xliff:g> pro <xliff:g id="CREATEINFODISPLAYNAME">%4$s</xliff:g>"</string>
+    <string name="choose_provider_body" msgid="4384188171872005547">"Vyberte správce hesel k uložení svých údajů, abyste se příště mohli přihlásit rychleji."</string>
+    <string name="choose_create_option_passkey_title" msgid="5220979185879006862">"Vytvořit přístupový klíč pro aplikaci <xliff:g id="APPNAME">%1$s</xliff:g>?"</string>
+    <string name="choose_create_option_password_title" msgid="7097275038523578687">"Uložit heslo pro aplikaci <xliff:g id="APPNAME">%1$s</xliff:g>?"</string>
+    <string name="choose_create_option_sign_in_title" msgid="4124872317613421249">"Uložit přihlašovací údaje pro aplikaci <xliff:g id="APPNAME">%1$s</xliff:g>?"</string>
+    <string name="choose_create_option_description" msgid="5531335144879100664">"Své identifikační údaje typu <xliff:g id="CREDENTIALTYPES">%2$s</xliff:g> pro aplikaci <xliff:g id="APPDOMAINNAME">%1$s</xliff:g> můžete používat na libovolném zařízení. Ukládá se do <xliff:g id="PROVIDERINFODISPLAYNAME">%3$s</xliff:g> pro uživatele <xliff:g id="CREATEINFODISPLAYNAME">%4$s</xliff:g>"</string>
     <string name="passkey" msgid="632353688396759522">"přístupový klíč"</string>
     <string name="password" msgid="6738570945182936667">"heslo"</string>
     <string name="sign_ins" msgid="4710739369149469208">"přihlášení"</string>
-    <string name="create_passkey_in_title" msgid="2714306562710897785">"Vytvořit přístupový klíč v"</string>
-    <string name="save_password_to_title" msgid="3450480045270186421">"Uložit heslo do účtu"</string>
-    <string name="save_sign_in_to_title" msgid="8328143607671760232">"Uložit přihlášení do"</string>
+    <string name="sign_in_info" msgid="2627704710674232328">"přihlašovací údaje"</string>
+    <string name="save_credential_to_title" msgid="3172811692275634301">"Uložit <xliff:g id="CREDENTIALTYPES">%1$s</xliff:g> do"</string>
     <string name="create_passkey_in_other_device_title" msgid="6372952459932674632">"Vytvořit přístupový klíč v jiném zařízení?"</string>
     <string name="use_provider_for_all_title" msgid="4201020195058980757">"Používat <xliff:g id="PROVIDERINFODISPLAYNAME">%1$s</xliff:g> pro všechna přihlášení?"</string>
     <string name="use_provider_for_all_description" msgid="6560593199974037820">"Tento správce hesel bude ukládat vaše hesla a přístupové klíče, abyste se mohli snadno přihlásit."</string>
     <string name="set_as_default" msgid="4415328591568654603">"Nastavit jako výchozí"</string>
     <string name="use_once" msgid="9027366575315399714">"Použít jednou"</string>
-    <string name="more_options_usage_passwords_passkeys" msgid="4794903978126339473">"Počet hesel: <xliff:g id="PASSWORDSNUMBER">%1$s</xliff:g>, počet přístupových klíčů: <xliff:g id="PASSKEYSNUMBER">%2$s</xliff:g>"</string>
+    <string name="more_options_usage_passwords_passkeys" msgid="3470113942332934279">"Hesla: <xliff:g id="PASSWORDSNUMBER">%1$s</xliff:g> • Přístupové klíče: <xliff:g id="PASSKEYSNUMBER">%2$s</xliff:g>"</string>
     <string name="more_options_usage_passwords" msgid="1632047277723187813">"Počet hesel: <xliff:g id="PASSWORDSNUMBER">%1$s</xliff:g>"</string>
     <string name="more_options_usage_passkeys" msgid="5390320437243042237">"Počet přístupových klíčů: <xliff:g id="PASSKEYSNUMBER">%1$s</xliff:g>"</string>
+    <string name="more_options_usage_credentials" msgid="1785697001787193984">"<xliff:g id="TOTALCREDENTIALSNUMBER">%1$s</xliff:g> – identifikační údaje"</string>
     <string name="passkey_before_subtitle" msgid="2448119456208647444">"Přístupový klíč"</string>
     <string name="another_device" msgid="5147276802037801217">"Jiné zařízení"</string>
     <string name="other_password_manager" msgid="565790221427004141">"Další správci hesel"</string>
     <string name="close_sheet" msgid="1393792015338908262">"Zavřít list"</string>
     <string name="accessibility_back_arrow_button" msgid="3233198183497842492">"Zpět na předchozí stránku"</string>
-    <!-- no translation found for accessibility_close_button (2953807735590034688) -->
-    <skip />
+    <string name="accessibility_close_button" msgid="2953807735590034688">"Zavřít návrh akce Správce oprávnění zobrazený ve spodní části obrazovky"</string>
     <string name="get_dialog_title_use_passkey_for" msgid="6236608872708021767">"Použít uložený přístupový klíč pro aplikaci <xliff:g id="APP_NAME">%1$s</xliff:g>?"</string>
     <string name="get_dialog_title_use_sign_in_for" msgid="5283099528915572980">"Použít uložené přihlášení pro aplikaci <xliff:g id="APP_NAME">%1$s</xliff:g>?"</string>
     <string name="get_dialog_title_choose_sign_in_for" msgid="1361715440877613701">"Vyberte uložené přihlášení pro <xliff:g id="APP_NAME">%1$s</xliff:g>"</string>
     <string name="get_dialog_use_saved_passkey_for" msgid="4618100798664888512">"Přihlásit se jinak"</string>
-    <string name="get_dialog_button_label_no_thanks" msgid="8114363019023838533">"Ne, díky"</string>
+    <string name="snackbar_action" msgid="37373514216505085">"Zobrazit možnosti"</string>
     <string name="get_dialog_button_label_continue" msgid="6446201694794283870">"Pokračovat"</string>
     <string name="get_dialog_title_sign_in_options" msgid="2092876443114893618">"Možnosti přihlašování"</string>
     <string name="get_dialog_heading_for_username" msgid="3456868514554204776">"Pro uživatele <xliff:g id="USERNAME">%1$s</xliff:g>"</string>

@@ -4,49 +4,49 @@
     <string name="app_name" msgid="4539824758261855508">"Мениджър на идентификационни данни"</string>
     <string name="string_cancel" msgid="6369133483981306063">"Отказ"</string>
     <string name="string_continue" msgid="1346732695941131882">"Напред"</string>
+    <string name="string_more_options" msgid="7990658711962795124">"Още опции"</string>
     <string name="string_create_in_another_place" msgid="1033635365843437603">"Създаване другаде"</string>
     <string name="string_save_to_another_place" msgid="7590325934591079193">"Запазване на друго място"</string>
     <string name="string_use_another_device" msgid="8754514926121520445">"Използване на друго устройство"</string>
     <string name="string_save_to_another_device" msgid="1959562542075194458">"Запазване на друго устройство"</string>
     <string name="passkey_creation_intro_title" msgid="4251037543787718844">"По-сигурно с помощта на кодове за достъп"</string>
-    <string name="passkey_creation_intro_body_password" msgid="312712407571126228">"Не е необходимо да създавате, нито да помните сложни пароли"</string>
-    <string name="passkey_creation_intro_body_fingerprint" msgid="691816235541508203">"Използвайте отпечатъка, лицето или опцията си за заключване на екрана, за да създадете уникален код за достъп"</string>
-    <string name="passkey_creation_intro_body_device" msgid="477121861162321129">"Кодовете за достъп се запазват в мениджър на пароли, за да можете да влизате в профила си на други устройства"</string>
+    <string name="passkey_creation_intro_body_password" msgid="8825872426579958200">"Когато използвате кодове за достъп, не е необходимо да създавате, нито да помните сложни пароли"</string>
+    <string name="passkey_creation_intro_body_fingerprint" msgid="7331338631826254055">"Кодовете за достъп са шифровани дигитални ключове, които създавате посредством отпечатъка, лицето си или опцията си за заключване на екрана"</string>
+    <string name="passkey_creation_intro_body_device" msgid="1203796455762131631">"Данните се запазват в мениджър на пароли, за да можете да влизате в профила си на други устройства"</string>
     <string name="choose_provider_title" msgid="7245243990139698508">"Изберете място за <xliff:g id="CREATETYPES">%1$s</xliff:g>"</string>
     <string name="create_your_passkeys" msgid="8901224153607590596">"създаване на кодовете ви за достъп"</string>
     <string name="save_your_password" msgid="6597736507991704307">"запазване на паролата ви"</string>
     <string name="save_your_sign_in_info" msgid="7213978049817076882">"запазване на данните ви за вход"</string>
-    <string name="choose_provider_body" msgid="8045759834416308059">"Задайте основен мениджър на пароли, за да запазвате своите пароли и кодове за достъп, така че следващия път да влезете по-бързо в профила си."</string>
-    <string name="choose_create_option_passkey_title" msgid="4146408187146573131">"Да се създаде ли код за достъп в(ъв) <xliff:g id="PROVIDERINFODISPLAYNAME">%1$s</xliff:g>?"</string>
-    <string name="choose_create_option_password_title" msgid="8812546498357380545">"Искате ли да запазите паролата си в(ъв) <xliff:g id="PROVIDERINFODISPLAYNAME">%1$s</xliff:g>?"</string>
-    <string name="choose_create_option_sign_in_title" msgid="6318246378475961834">"Искате ли да запазите данните си за вход в(ъв) <xliff:g id="PROVIDERINFODISPLAYNAME">%1$s</xliff:g>?"</string>
-    <string name="choose_create_option_description" msgid="4419171903963100257">"Можете да използвате <xliff:g id="TYPE">%2$s</xliff:g> за <xliff:g id="APPDOMAINNAME">%1$s</xliff:g> на всяко устройство. Тези данни се запазват в(ъв) <xliff:g id="PROVIDERINFODISPLAYNAME">%3$s</xliff:g> за <xliff:g id="CREATEINFODISPLAYNAME">%4$s</xliff:g>"</string>
+    <string name="choose_provider_body" msgid="4384188171872005547">"Изберете мениджър на пароли, в който да се запазят данните ви, така че следващия път да влезете по-бързо в профила си."</string>
+    <string name="choose_create_option_passkey_title" msgid="5220979185879006862">"Да се създаде ли код за достъп за <xliff:g id="APPNAME">%1$s</xliff:g>?"</string>
+    <string name="choose_create_option_password_title" msgid="7097275038523578687">"Да се запази ли паролата за <xliff:g id="APPNAME">%1$s</xliff:g>?"</string>
+    <string name="choose_create_option_sign_in_title" msgid="4124872317613421249">"Да се запазят ли данните за вход за <xliff:g id="APPNAME">%1$s</xliff:g>?"</string>
+    <string name="choose_create_option_description" msgid="5531335144879100664">"Можете да използвате <xliff:g id="CREDENTIALTYPES">%2$s</xliff:g> за <xliff:g id="APPDOMAINNAME">%1$s</xliff:g> на всяко устройство. Тези данни се запазват в(ъв) <xliff:g id="PROVIDERINFODISPLAYNAME">%3$s</xliff:g> за <xliff:g id="CREATEINFODISPLAYNAME">%4$s</xliff:g>"</string>
     <string name="passkey" msgid="632353688396759522">"код за достъп"</string>
     <string name="password" msgid="6738570945182936667">"парола"</string>
     <string name="sign_ins" msgid="4710739369149469208">"данни за вход"</string>
-    <string name="create_passkey_in_title" msgid="2714306562710897785">"Създаване на код за достъп в(ъв)"</string>
-    <string name="save_password_to_title" msgid="3450480045270186421">"Запазване на паролата в(ъв)"</string>
-    <string name="save_sign_in_to_title" msgid="8328143607671760232">"Запазване на данните за вход в(ъв)"</string>
+    <string name="sign_in_info" msgid="2627704710674232328">"данните за вход"</string>
+    <string name="save_credential_to_title" msgid="3172811692275634301">"Запазване на <xliff:g id="CREDENTIALTYPES">%1$s</xliff:g> във:"</string>
     <string name="create_passkey_in_other_device_title" msgid="6372952459932674632">"Да се създаде ли код за достъп на друго устройство?"</string>
     <string name="use_provider_for_all_title" msgid="4201020195058980757">"Да се използва ли <xliff:g id="PROVIDERINFODISPLAYNAME">%1$s</xliff:g> за всичките ви данни за вход?"</string>
     <string name="use_provider_for_all_description" msgid="6560593199974037820">"Този мениджър на пароли ще съхранява вашите пароли и кодове за достъп, за да влизате лесно в профила си."</string>
     <string name="set_as_default" msgid="4415328591568654603">"Задаване като основно"</string>
     <string name="use_once" msgid="9027366575315399714">"Еднократно използване"</string>
-    <string name="more_options_usage_passwords_passkeys" msgid="4794903978126339473">"<xliff:g id="PASSWORDSNUMBER">%1$s</xliff:g> пароли, <xliff:g id="PASSKEYSNUMBER">%2$s</xliff:g> кода за достъп"</string>
+    <string name="more_options_usage_passwords_passkeys" msgid="3470113942332934279">"<xliff:g id="PASSWORDSNUMBER">%1$s</xliff:g> пароли • <xliff:g id="PASSKEYSNUMBER">%2$s</xliff:g> кода за достъп"</string>
     <string name="more_options_usage_passwords" msgid="1632047277723187813">"<xliff:g id="PASSWORDSNUMBER">%1$s</xliff:g> пароли"</string>
     <string name="more_options_usage_passkeys" msgid="5390320437243042237">"<xliff:g id="PASSKEYSNUMBER">%1$s</xliff:g> кода за достъп"</string>
+    <string name="more_options_usage_credentials" msgid="1785697001787193984">"Идентификационни данни: <xliff:g id="TOTALCREDENTIALSNUMBER">%1$s</xliff:g>"</string>
     <string name="passkey_before_subtitle" msgid="2448119456208647444">"Код за достъп"</string>
     <string name="another_device" msgid="5147276802037801217">"Друго устройство"</string>
     <string name="other_password_manager" msgid="565790221427004141">"Други мениджъри на пароли"</string>
     <string name="close_sheet" msgid="1393792015338908262">"Затваряне на таблицата"</string>
     <string name="accessibility_back_arrow_button" msgid="3233198183497842492">"Назад към предишната страница"</string>
-    <!-- no translation found for accessibility_close_button (2953807735590034688) -->
-    <skip />
+    <string name="accessibility_close_button" msgid="2953807735590034688">"Затваряне на предложението за действие от мениджъра за идентификационни данни, което се показва в долната част на екрана"</string>
     <string name="get_dialog_title_use_passkey_for" msgid="6236608872708021767">"Да се използва ли запазеният ви код за достъп за <xliff:g id="APP_NAME">%1$s</xliff:g>?"</string>
     <string name="get_dialog_title_use_sign_in_for" msgid="5283099528915572980">"Да се използват ли запазените ви данни за вход за <xliff:g id="APP_NAME">%1$s</xliff:g>?"</string>
     <string name="get_dialog_title_choose_sign_in_for" msgid="1361715440877613701">"Изберете запазени данни за вход за <xliff:g id="APP_NAME">%1$s</xliff:g>"</string>
     <string name="get_dialog_use_saved_passkey_for" msgid="4618100798664888512">"Влизане в профила по друг начин"</string>
-    <string name="get_dialog_button_label_no_thanks" msgid="8114363019023838533">"Не, благодаря"</string>
+    <string name="snackbar_action" msgid="37373514216505085">"Преглед на опциите"</string>
     <string name="get_dialog_button_label_continue" msgid="6446201694794283870">"Напред"</string>
     <string name="get_dialog_title_sign_in_options" msgid="2092876443114893618">"Опции за влизане в профила"</string>
     <string name="get_dialog_heading_for_username" msgid="3456868514554204776">"За <xliff:g id="USERNAME">%1$s</xliff:g>"</string>

@@ -4,49 +4,49 @@
     <string name="app_name" msgid="4539824758261855508">"የመግቢያ ማስረጃ አስተዳዳሪ"</string>
     <string name="string_cancel" msgid="6369133483981306063">"ይቅር"</string>
     <string name="string_continue" msgid="1346732695941131882">"ቀጥል"</string>
+    <string name="string_more_options" msgid="7990658711962795124">"ተጨማሪ አማራጮች"</string>
     <string name="string_create_in_another_place" msgid="1033635365843437603">"በሌላ ቦታ ውስጥ ይፍጠሩ"</string>
     <string name="string_save_to_another_place" msgid="7590325934591079193">"ወደ ሌላ ቦታ ያስቀምጡ"</string>
     <string name="string_use_another_device" msgid="8754514926121520445">"ሌላ መሣሪያ ይጠቀሙ"</string>
     <string name="string_save_to_another_device" msgid="1959562542075194458">"ወደ ሌላ መሣሪያ ያስቀምጡ"</string>
     <string name="passkey_creation_intro_title" msgid="4251037543787718844">"በይለፍ ቃል ይበልጥ ደህንነቱ የተጠበቀ"</string>
-    <string name="passkey_creation_intro_body_password" msgid="312712407571126228">"ውስብስብ የይለፍ ቃላትን መፍጠር ወይም ማስታወስ አያስፈልግም"</string>
-    <string name="passkey_creation_intro_body_fingerprint" msgid="691816235541508203">"ልዩ የይለፍ ቁልፍ ለመፍጠር የእርስዎን የጣት አሻራ፣ ፊት ወይም ማያ ገጽ መቆለፊያ ይጠቀሙ"</string>
-    <string name="passkey_creation_intro_body_device" msgid="477121861162321129">"የይለፍ ቁልፎች የይለፍ ቃል አስተዳዳሪ ላይ ይቀመጣሉ፣ ስለዚህ በሌሎች መሣሪያዎች ላይ መግባት ይችላሉ"</string>
+    <string name="passkey_creation_intro_body_password" msgid="8825872426579958200">"በይለፍ ቁልፎች ውስብስብ የይለፍ ቁልፎችን መፍጠር ወይም ማስታወስ አያስፈልግዎትም"</string>
+    <string name="passkey_creation_intro_body_fingerprint" msgid="7331338631826254055">"የይለፍ ቁልፎች የእርስዎን የጣት አሻራ፣ መልክ ወይም የማያ ገጽ መቆለፊያ በመጠቀም የሚፈጥሯቸው የተመሰጠሩ ዲጂታል ቆልፎች ናቸው"</string>
+    <string name="passkey_creation_intro_body_device" msgid="1203796455762131631">"በሌሎች መሣሪያዎች ላይ መግባት እንዲችሉ በሚስጥር ቁልፍ አስተዳዳሪ ላይ ይቀመጣሉ"</string>
     <string name="choose_provider_title" msgid="7245243990139698508">"የት <xliff:g id="CREATETYPES">%1$s</xliff:g> እንደሚሆን ይምረጡ"</string>
     <string name="create_your_passkeys" msgid="8901224153607590596">"የይለፍ ቁልፎችዎን ይፍጠሩ"</string>
     <string name="save_your_password" msgid="6597736507991704307">"የይለፍ ቃልዎን ያስቀምጡ"</string>
     <string name="save_your_sign_in_info" msgid="7213978049817076882">"የመግቢያ መረጃዎን ያስቀምጡ"</string>
-    <string name="choose_provider_body" msgid="8045759834416308059">"የእርስዎን የይለፍ ቃላት እና የይለፍ ቁልፎች ለማስቀመጥ እና በሚቀጥለው ጊዜ በበለጠ ፍጥነት ለመግባት ነባሪ የሚስጥር ቁልፍ አስተዳዳሪ ያቀናብሩ።"</string>
-    <string name="choose_create_option_passkey_title" msgid="4146408187146573131">"በ<xliff:g id="PROVIDERINFODISPLAYNAME">%1$s</xliff:g> ውስጥ የይለፍ ቁልፍ ይፈጠር?"</string>
-    <string name="choose_create_option_password_title" msgid="8812546498357380545">"የይለፍ ቃልዎ ወደ <xliff:g id="PROVIDERINFODISPLAYNAME">%1$s</xliff:g> ይቀመጥ?"</string>
-    <string name="choose_create_option_sign_in_title" msgid="6318246378475961834">"የመግቢያ መረጃዎ ወደ <xliff:g id="PROVIDERINFODISPLAYNAME">%1$s</xliff:g> ይቀመጥ?"</string>
-    <string name="choose_create_option_description" msgid="4419171903963100257">"የእርስዎን <xliff:g id="APPDOMAINNAME">%1$s</xliff:g> <xliff:g id="TYPE">%2$s</xliff:g> በማንኛውም መሣሪያ ላይ መጠቀም ይችላሉ። ለ<xliff:g id="CREATEINFODISPLAYNAME">%4$s</xliff:g> ወደ <xliff:g id="PROVIDERINFODISPLAYNAME">%3$s</xliff:g> ተቀምጧል"</string>
+    <string name="choose_provider_body" msgid="4384188171872005547">"መረጃዎን ለማስቀመጥ እና በሚቀጥለው ጊዜ በፍጥነት ለመግባት የሚስጥር ቁልፍ አስተዳዳሪን ይጠቀሙ።"</string>
+    <string name="choose_create_option_passkey_title" msgid="5220979185879006862">"ለ<xliff:g id="APPNAME">%1$s</xliff:g> የይለፍ ቁልፍ ይፈጠር?"</string>
+    <string name="choose_create_option_password_title" msgid="7097275038523578687">"ለ<xliff:g id="APPNAME">%1$s</xliff:g> የይለፍ ቃል ይቀመጥ?"</string>
+    <string name="choose_create_option_sign_in_title" msgid="4124872317613421249">"ለ<xliff:g id="APPNAME">%1$s</xliff:g> የመግቢያ መረጃ ይቀመጥ?"</string>
+    <string name="choose_create_option_description" msgid="5531335144879100664">"የእርስዎን <xliff:g id="APPDOMAINNAME">%1$s</xliff:g> <xliff:g id="CREDENTIALTYPES">%2$s</xliff:g> በማንኛውም መሣሪያ ላይ መጠቀም ይችላሉ። ለ<xliff:g id="CREATEINFODISPLAYNAME">%4$s</xliff:g> ወደ <xliff:g id="PROVIDERINFODISPLAYNAME">%3$s</xliff:g> ተቀምጧል።"</string>
     <string name="passkey" msgid="632353688396759522">"የይለፍ ቁልፍ"</string>
     <string name="password" msgid="6738570945182936667">"የይለፍ ቃል"</string>
     <string name="sign_ins" msgid="4710739369149469208">"መግቢያዎች"</string>
-    <string name="create_passkey_in_title" msgid="2714306562710897785">"በሚከተለው ውስጥ የይለፍ ቁልፍ ይፈጠሩ"</string>
-    <string name="save_password_to_title" msgid="3450480045270186421">"የይለፍ ቃል አስቀምጥ ወደ"</string>
-    <string name="save_sign_in_to_title" msgid="8328143607671760232">"መግቢያን አስቀምጥ ወደ"</string>
+    <string name="sign_in_info" msgid="2627704710674232328">"የመግቢያ መረጃ"</string>
+    <string name="save_credential_to_title" msgid="3172811692275634301">"<xliff:g id="CREDENTIALTYPES">%1$s</xliff:g>ን አስቀምጥ ወደ"</string>
     <string name="create_passkey_in_other_device_title" msgid="6372952459932674632">"በሌላ መሣሪያ የይለፍ ቁልፍ ይፈጠር?"</string>
     <string name="use_provider_for_all_title" msgid="4201020195058980757">"ለሁሉም መግቢያዎችዎ <xliff:g id="PROVIDERINFODISPLAYNAME">%1$s</xliff:g>ን ይጠቀሙ?"</string>
     <string name="use_provider_for_all_description" msgid="6560593199974037820">"ይህ የይለፍ ቃል አስተዳዳሪ በቀላሉ እንዲገቡ ለማገዝ የእርስዎን የይለፍ ቃሎች እና የይለፍ ቁልፎች ያከማቻል።"</string>
     <string name="set_as_default" msgid="4415328591568654603">"እንደ ነባሪ ያዋቅሩ"</string>
     <string name="use_once" msgid="9027366575315399714">"አንዴ ይጠቀሙ"</string>
-    <string name="more_options_usage_passwords_passkeys" msgid="4794903978126339473">"<xliff:g id="PASSWORDSNUMBER">%1$s</xliff:g> የይለፍ ቃሎች፣ <xliff:g id="PASSKEYSNUMBER">%2$s</xliff:g> የይለፍ ቁልፎች"</string>
+    <string name="more_options_usage_passwords_passkeys" msgid="3470113942332934279">"<xliff:g id="PASSWORDSNUMBER">%1$s</xliff:g> የይለፍ ቃሎች • <xliff:g id="PASSKEYSNUMBER">%2$s</xliff:g> የይለፍ ቁልፎች"</string>
     <string name="more_options_usage_passwords" msgid="1632047277723187813">"<xliff:g id="PASSWORDSNUMBER">%1$s</xliff:g> የይለፍ ቃሎች"</string>
     <string name="more_options_usage_passkeys" msgid="5390320437243042237">"<xliff:g id="PASSKEYSNUMBER">%1$s</xliff:g> የይለፍ ቁልፎች"</string>
+    <string name="more_options_usage_credentials" msgid="1785697001787193984">"<xliff:g id="TOTALCREDENTIALSNUMBER">%1$s</xliff:g> የመግቢያ ማስረጃዎች"</string>
     <string name="passkey_before_subtitle" msgid="2448119456208647444">"የይለፍ ቁልፍ"</string>
     <string name="another_device" msgid="5147276802037801217">"ሌላ መሣሪያ"</string>
     <string name="other_password_manager" msgid="565790221427004141">"ሌሎች የይለፍ ቃል አስተዳዳሪዎች"</string>
     <string name="close_sheet" msgid="1393792015338908262">"ሉህን ዝጋ"</string>
     <string name="accessibility_back_arrow_button" msgid="3233198183497842492">"ወደ ቀዳሚው ገፅ ይመለሱ"</string>
-    <!-- no translation found for accessibility_close_button (2953807735590034688) -->
-    <skip />
+    <string name="accessibility_close_button" msgid="2953807735590034688">"በማያ ገጹ ግርጌ ላይ የሚታየውን የመግቢያ ማስረጃ አስተዳዳሪ የእርምጃ ጥቆማን ዝጋ"</string>
     <string name="get_dialog_title_use_passkey_for" msgid="6236608872708021767">"የተቀመጠ የይለፍ ቁልፍዎን ለ<xliff:g id="APP_NAME">%1$s</xliff:g> ይጠቀሙ?"</string>
     <string name="get_dialog_title_use_sign_in_for" msgid="5283099528915572980">"የተቀመጠ መግቢያዎን ለ<xliff:g id="APP_NAME">%1$s</xliff:g> ይጠቀሙ?"</string>
     <string name="get_dialog_title_choose_sign_in_for" msgid="1361715440877613701">"ለ<xliff:g id="APP_NAME">%1$s</xliff:g> የተቀመጠ መግቢያ ይጠቀሙ"</string>
     <string name="get_dialog_use_saved_passkey_for" msgid="4618100798664888512">"በሌላ መንገድ ይግቡ"</string>
-    <string name="get_dialog_button_label_no_thanks" msgid="8114363019023838533">"አይ አመሰግናለሁ"</string>
+    <string name="snackbar_action" msgid="37373514216505085">"አማራጮችን አሳይ"</string>
     <string name="get_dialog_button_label_continue" msgid="6446201694794283870">"ቀጥል"</string>
     <string name="get_dialog_title_sign_in_options" msgid="2092876443114893618">"የመግቢያ አማራጮች"</string>
     <string name="get_dialog_heading_for_username" msgid="3456868514554204776">"ለ<xliff:g id="USERNAME">%1$s</xliff:g>"</string>
