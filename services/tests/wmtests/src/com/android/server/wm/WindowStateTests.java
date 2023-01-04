@@ -544,7 +544,12 @@ public class WindowStateTests extends WindowTestsBase {
         win.applyWithNextDraw(t -> handledT[0] = t);
         assertTrue(win.useBLASTSync());
         final SurfaceControl.Transaction drawT = new StubTransaction();
+        final SurfaceControl.Transaction currT = win.getSyncTransaction();
+        clearInvocations(currT);
+        win.mWinAnimator.mLastHidden = true;
         assertTrue(win.finishDrawing(drawT, Integer.MAX_VALUE));
+        // The draw transaction should be merged to current transaction even if the state is hidden.
+        verify(currT).merge(eq(drawT));
         assertEquals(drawT, handledT[0]);
         assertFalse(win.useBLASTSync());
 
