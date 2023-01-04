@@ -61,7 +61,6 @@ import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.runTest
 import org.junit.Before
-import org.junit.Ignore
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.mockito.ArgumentCaptor
@@ -107,7 +106,6 @@ class MediaCarouselControllerTest : SysuiTestCase() {
     @Captor lateinit var listener: ArgumentCaptor<MediaDataManager.Listener>
     @Captor
     lateinit var configListener: ArgumentCaptor<ConfigurationController.ConfigurationListener>
-    @Captor lateinit var newConfig: ArgumentCaptor<Configuration>
     @Captor lateinit var visualStabilityCallback: ArgumentCaptor<OnReorderingAllowedListener>
     @Captor lateinit var keyguardCallback: ArgumentCaptor<KeyguardUpdateMonitorCallback>
 
@@ -150,7 +148,6 @@ class MediaCarouselControllerTest : SysuiTestCase() {
         MediaPlayerData.clear()
     }
 
-    @Ignore("b/253229241")
     @Test
     fun testPlayerOrdering() {
         // Test values: key, data, last active time
@@ -327,7 +324,6 @@ class MediaCarouselControllerTest : SysuiTestCase() {
         }
     }
 
-    @Ignore("b/253229241")
     @Test
     fun testOrderWithSmartspace_prioritized() {
         testPlayerOrdering()
@@ -335,7 +331,7 @@ class MediaCarouselControllerTest : SysuiTestCase() {
         // If smartspace is prioritized
         MediaPlayerData.addMediaRecommendation(
             SMARTSPACE_KEY,
-            EMPTY_SMARTSPACE_MEDIA_DATA,
+            EMPTY_SMARTSPACE_MEDIA_DATA.copy(isActive = true),
             panel,
             true,
             clock
@@ -345,7 +341,6 @@ class MediaCarouselControllerTest : SysuiTestCase() {
         assertTrue(MediaPlayerData.playerKeys().elementAt(2).isSsMediaRec)
     }
 
-    @Ignore("b/253229241")
     @Test
     fun testOrderWithSmartspace_prioritized_updatingVisibleMediaPlayers() {
         testPlayerOrdering()
@@ -362,7 +357,6 @@ class MediaCarouselControllerTest : SysuiTestCase() {
         assertTrue(MediaPlayerData.visiblePlayerKeys().elementAt(2).isSsMediaRec)
     }
 
-    @Ignore("b/253229241")
     @Test
     fun testOrderWithSmartspace_notPrioritized() {
         testPlayerOrdering()
@@ -370,7 +364,7 @@ class MediaCarouselControllerTest : SysuiTestCase() {
         // If smartspace is not prioritized
         MediaPlayerData.addMediaRecommendation(
             SMARTSPACE_KEY,
-            EMPTY_SMARTSPACE_MEDIA_DATA,
+            EMPTY_SMARTSPACE_MEDIA_DATA.copy(isActive = true),
             panel,
             false,
             clock
@@ -381,7 +375,6 @@ class MediaCarouselControllerTest : SysuiTestCase() {
         assertTrue(MediaPlayerData.playerKeys().elementAt(idx).isSsMediaRec)
     }
 
-    @Ignore("b/253229241")
     @Test
     fun testPlayingExistingMediaPlayerFromCarousel_visibleMediaPlayersNotUpdated() {
         testPlayerOrdering()
@@ -419,7 +412,6 @@ class MediaCarouselControllerTest : SysuiTestCase() {
         )
     }
 
-    @Ignore("b/253229241")
     @Test
     fun testSwipeDismiss_logged() {
         mediaCarouselController.mediaCarouselScrollHandler.dismissCallback.invoke()
@@ -427,7 +419,6 @@ class MediaCarouselControllerTest : SysuiTestCase() {
         verify(logger).logSwipeDismiss()
     }
 
-    @Ignore("b/253229241")
     @Test
     fun testSettingsButton_logged() {
         mediaCarouselController.settingsButton.callOnClick()
@@ -435,18 +426,16 @@ class MediaCarouselControllerTest : SysuiTestCase() {
         verify(logger).logCarouselSettings()
     }
 
-    @Ignore("b/253229241")
     @Test
     fun testLocationChangeQs_logged() {
         mediaCarouselController.onDesiredLocationChanged(
-            MediaHierarchyManager.LOCATION_QS,
+            LOCATION_QS,
             mediaHostState,
             animate = false
         )
-        verify(logger).logCarouselPosition(MediaHierarchyManager.LOCATION_QS)
+        verify(logger).logCarouselPosition(LOCATION_QS)
     }
 
-    @Ignore("b/253229241")
     @Test
     fun testLocationChangeQqs_logged() {
         mediaCarouselController.onDesiredLocationChanged(
@@ -457,7 +446,6 @@ class MediaCarouselControllerTest : SysuiTestCase() {
         verify(logger).logCarouselPosition(MediaHierarchyManager.LOCATION_QQS)
     }
 
-    @Ignore("b/253229241")
     @Test
     fun testLocationChangeLockscreen_logged() {
         mediaCarouselController.onDesiredLocationChanged(
@@ -468,7 +456,6 @@ class MediaCarouselControllerTest : SysuiTestCase() {
         verify(logger).logCarouselPosition(MediaHierarchyManager.LOCATION_LOCKSCREEN)
     }
 
-    @Ignore("b/253229241")
     @Test
     fun testLocationChangeDream_logged() {
         mediaCarouselController.onDesiredLocationChanged(
@@ -479,7 +466,6 @@ class MediaCarouselControllerTest : SysuiTestCase() {
         verify(logger).logCarouselPosition(MediaHierarchyManager.LOCATION_DREAM_OVERLAY)
     }
 
-    @Ignore("b/253229241")
     @Test
     fun testRecommendationRemoved_logged() {
         val packageName = "smartspace package"
@@ -493,7 +479,6 @@ class MediaCarouselControllerTest : SysuiTestCase() {
         verify(logger).logRecommendationRemoved(eq(packageName), eq(instanceId!!))
     }
 
-    @Ignore("b/253229241")
     @Test
     fun testMediaLoaded_ScrollToActivePlayer() {
         listener.value.onMediaDataLoaded(
@@ -551,7 +536,6 @@ class MediaCarouselControllerTest : SysuiTestCase() {
         )
     }
 
-    @Ignore("b/253229241")
     @Test
     fun testMediaLoadedFromRecommendationCard_ScrollToActivePlayer() {
         listener.value.onSmartspaceMediaDataLoaded(
@@ -595,7 +579,6 @@ class MediaCarouselControllerTest : SysuiTestCase() {
         assertEquals(playerIndex, 0)
     }
 
-    @Ignore("b/253229241")
     @Test
     fun testRecommendationRemovedWhileNotVisible_updateHostVisibility() {
         var result = false
@@ -607,7 +590,6 @@ class MediaCarouselControllerTest : SysuiTestCase() {
         assertEquals(true, result)
     }
 
-    @Ignore("b/253229241")
     @Test
     fun testRecommendationRemovedWhileVisible_thenReorders_updateHostVisibility() {
         var result = false
@@ -621,7 +603,6 @@ class MediaCarouselControllerTest : SysuiTestCase() {
         assertEquals(true, result)
     }
 
-    @Ignore("b/253229241")
     @Test
     fun testGetCurrentVisibleMediaContentIntent() {
         val clickIntent1 = mock(PendingIntent::class.java)
@@ -668,7 +649,6 @@ class MediaCarouselControllerTest : SysuiTestCase() {
         assertEquals(mediaCarouselController.getCurrentVisibleMediaContentIntent(), clickIntent2)
     }
 
-    @Ignore("b/253229241")
     @Test
     fun testSetCurrentState_UpdatePageIndicatorAlphaWhenSquish() {
         val delta = 0.0001F
@@ -690,7 +670,6 @@ class MediaCarouselControllerTest : SysuiTestCase() {
         verify(pageIndicator).alpha = floatThat { abs(it - 1.0F) < delta }
     }
 
-    @Ignore("b/253229241")
     @Test
     fun testOnConfigChanged_playersAreAddedBack() {
         listener.value.onMediaDataLoaded(
@@ -716,7 +695,7 @@ class MediaCarouselControllerTest : SysuiTestCase() {
 
         val playersSize = MediaPlayerData.players().size
 
-        configListener.value.onConfigChanged(capture(newConfig))
+        configListener.value.onConfigChanged(Configuration())
 
         assertEquals(playersSize, MediaPlayerData.players().size)
         assertEquals(
