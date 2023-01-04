@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2021 The Android Open Source Project
+ * Copyright (C) 2022 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -24,31 +24,39 @@ import android.view.ViewGroup;
 import android.widget.Toolbar;
 
 import androidx.annotation.Nullable;
-import androidx.fragment.app.FragmentActivity;
+import androidx.appcompat.app.AppCompatActivity;
 
 import com.android.settingslib.utils.BuildCompatUtils;
 import com.android.settingslib.widget.R;
 
 import com.google.android.material.appbar.AppBarLayout;
 import com.google.android.material.appbar.CollapsingToolbarLayout;
+import com.google.android.material.color.DynamicColors;
 
 /**
  * A base Activity that has a collapsing toolbar layout is used for the activities intending to
  * enable the collapsing toolbar function.
  */
-public class CollapsingToolbarBaseActivity extends FragmentActivity {
+public class CollapsingToolbarAppCompatActivity extends AppCompatActivity {
 
     private class DelegateCallback implements CollapsingToolbarDelegate.HostCallback {
         @Nullable
         @Override
         public ActionBar setActionBar(Toolbar toolbar) {
-            CollapsingToolbarBaseActivity.super.setActionBar(toolbar);
-            return CollapsingToolbarBaseActivity.super.getActionBar();
+            return null;
+        }
+
+        @Nullable
+        @Override
+        public androidx.appcompat.app.ActionBar setActionBar(
+                androidx.appcompat.widget.Toolbar toolbar) {
+            CollapsingToolbarAppCompatActivity.super.setSupportActionBar(toolbar);
+            return CollapsingToolbarAppCompatActivity.super.getSupportActionBar();
         }
 
         @Override
         public void setOuterTitle(CharSequence title) {
-            CollapsingToolbarBaseActivity.super.setTitle(title);
+            CollapsingToolbarAppCompatActivity.super.setTitle(title);
         }
     }
 
@@ -59,12 +67,17 @@ public class CollapsingToolbarBaseActivity extends FragmentActivity {
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        if (BuildCompatUtils.isAtLeastS()) {
+            DynamicColors.applyToActivityIfAvailable(this);
+        }
+        setTheme(R.style.Theme_SubSettingsBase);
+
         if (mCustomizeLayoutResId > 0 && !BuildCompatUtils.isAtLeastS()) {
             super.setContentView(mCustomizeLayoutResId);
             return;
         }
 
-        View view = getToolbarDelegate().onCreateView(getLayoutInflater(), null);
+        View view = getToolbarDelegate().onCreateView(getLayoutInflater(), null, this);
         super.setContentView(view);
     }
 
@@ -116,7 +129,7 @@ public class CollapsingToolbarBaseActivity extends FragmentActivity {
     }
 
     @Override
-    public boolean onNavigateUp() {
+    public boolean onSupportNavigateUp() {
         if (getSupportFragmentManager().getBackStackEntryCount() > 0) {
             getSupportFragmentManager().popBackStackImmediate();
         }
