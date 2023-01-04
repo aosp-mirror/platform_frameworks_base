@@ -30,10 +30,13 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import static java.lang.Integer.MAX_VALUE;
+
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.pm.PackageManager;
 import android.content.res.Configuration;
+import android.graphics.Point;
 import android.graphics.Rect;
 import android.os.RemoteException;
 import android.test.suitebuilder.annotation.SmallTest;
@@ -135,12 +138,12 @@ public class PipControllerTest extends ShellTestCase {
 
     @Test
     public void instantiatePipController_addInitCallback() {
-        verify(mShellInit, times(1)).addInitCallback(any(), any());
+        verify(mShellInit, times(1)).addInitCallback(any(), eq(mPipController));
     }
 
     @Test
     public void instantiateController_registerDumpCallback() {
-        verify(mMockShellCommandHandler, times(1)).addDumpCallback(any(), any());
+        verify(mMockShellCommandHandler, times(1)).addDumpCallback(any(), eq(mPipController));
     }
 
     @Test
@@ -156,7 +159,7 @@ public class PipControllerTest extends ShellTestCase {
     @Test
     public void instantiatePipController_registerExternalInterface() {
         verify(mShellController, times(1)).addExternalInterface(
-                eq(ShellSharedConstants.KEY_EXTRA_SHELL_PIP), any(), any());
+                eq(ShellSharedConstants.KEY_EXTRA_SHELL_PIP), any(), eq(mPipController));
     }
 
     @Test
@@ -252,6 +255,10 @@ public class PipControllerTest extends ShellTestCase {
         final int displayId = 1;
         final Rect bounds = new Rect(0, 0, 10, 10);
         when(mMockPipBoundsAlgorithm.getDefaultBounds()).thenReturn(bounds);
+        when(mMockPipBoundsState.getBounds()).thenReturn(bounds);
+        when(mMockPipBoundsState.getMinSize()).thenReturn(new Point(1, 1));
+        when(mMockPipBoundsState.getMaxSize()).thenReturn(new Point(MAX_VALUE, MAX_VALUE));
+        when(mMockPipBoundsState.getBounds()).thenReturn(bounds);
         when(mMockPipBoundsState.getDisplayId()).thenReturn(displayId);
         when(mMockPipBoundsState.getDisplayLayout()).thenReturn(mMockDisplayLayout1);
         when(mMockDisplayController.getDisplayLayout(displayId)).thenReturn(mMockDisplayLayout2);

@@ -936,7 +936,7 @@ public class ShellTransitionTests extends ShellTestCase {
         TransitionInfoBuilder addChange(@WindowManager.TransitionType int mode,
                 RunningTaskInfo taskInfo) {
             final TransitionInfo.Change change =
-                    new TransitionInfo.Change(null /* token */, null /* leash */);
+                    new TransitionInfo.Change(null /* token */, createMockSurface(true));
             change.setMode(mode);
             change.setTaskInfo(taskInfo);
             mInfo.addChange(change);
@@ -961,7 +961,7 @@ public class ShellTransitionTests extends ShellTestCase {
         final TransitionInfo.Change mChange;
 
         ChangeBuilder(@WindowManager.TransitionType int mode) {
-            mChange = new TransitionInfo.Change(null /* token */, null /* leash */);
+            mChange = new TransitionInfo.Change(null /* token */, createMockSurface(true));
             mChange.setMode(mode);
         }
 
