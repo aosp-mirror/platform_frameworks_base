@@ -26,6 +26,8 @@ import com.android.systemui.people.ui.viewmodel.PeopleViewModel
 object ComposeFacade : BaseComposeFacade {
     override fun isComposeAvailable(): Boolean = true
 
+    override fun composeInitializer(): ComposeInitializer = ComposeInitializerImpl
+
     override fun setPeopleSpaceActivityContent(
         activity: ComponentActivity,
         viewModel: PeopleViewModel,

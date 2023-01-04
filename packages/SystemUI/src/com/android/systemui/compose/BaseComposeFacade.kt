@@ -35,6 +35,11 @@ interface BaseComposeFacade {
      */
     fun isComposeAvailable(): Boolean
 
+    /**
+     * Return the [ComposeInitializer] to make Compose usable in windows outside normal activities.
+     */
+    fun composeInitializer(): ComposeInitializer
+
     /** Bind the content of [activity] to [viewModel]. */
     fun setPeopleSpaceActivityContent(
         activity: ComponentActivity,

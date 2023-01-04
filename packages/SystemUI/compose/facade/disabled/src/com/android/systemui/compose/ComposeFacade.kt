@@ -24,6 +24,10 @@ import com.android.systemui.people.ui.viewmodel.PeopleViewModel
 object ComposeFacade : BaseComposeFacade {
     override fun isComposeAvailable(): Boolean = false
 
+    override fun composeInitializer(): ComposeInitializer {
+        throwComposeUnavailableError()
+    }
+
     override fun setPeopleSpaceActivityContent(
         activity: ComponentActivity,
         viewModel: PeopleViewModel,
@@ -32,7 +36,7 @@ object ComposeFacade : BaseComposeFacade {
         throwComposeUnavailableError()
     }
 
-    private fun throwComposeUnavailableError() {
+    private fun throwComposeUnavailableError(): Nothing {
         error(
             "Compose is not available. Make sure to check isComposeAvailable() before calling any" +
                 " other function on ComposeFacade."
