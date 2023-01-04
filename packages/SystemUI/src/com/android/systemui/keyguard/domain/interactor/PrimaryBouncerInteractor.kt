@@ -77,6 +77,7 @@ constructor(
 
     /** Runnable to show the primary bouncer. */
     val showRunnable = Runnable {
+        repository.setPrimaryVisible(true)
         repository.setPrimaryShow(
             KeyguardBouncerModel(
                 promptReason = repository.bouncerPromptReason ?: 0,
@@ -85,7 +86,6 @@ constructor(
             )
         )
         repository.setPrimaryShowingSoon(false)
-        repository.setPrimaryVisible(true)
         primaryBouncerCallbackInteractor.dispatchVisibilityChanged(View.VISIBLE)
     }
 
