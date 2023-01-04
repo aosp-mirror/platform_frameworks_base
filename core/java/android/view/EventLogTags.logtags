@@ -44,6 +44,12 @@ option java_package android.view
 32007 imf_ime_anim_finish (token|3),(animation type|1),(alpha|5),(shown|1),(insets|3)
 # IME animation is canceled.
 32008 imf_ime_anim_cancel (token|3),(animation type|1),(pending insets|3)
+# IME remote animation is started.
+32009 imf_ime_remote_anim_start (token|3),(displayId|1),(direction|1),(alpha|5),(startY|5),(endY|5),(leash|3),(insets|3),(surface position|3),(ime frame|3)
+# IME remote animation is end.
+32010 imf_ime_remote_anim_end (token|3),(displayId|1),(direction|1),(endY|5),(leash|3),(insets|3),(surface position|3),(ime frame|3)
+# IME remote animation is canceled.
+32011 imf_ime_remote_anim_cancel (token|3),(displayId|1),(insets|3)
 
 # 62000 - 62199 reserved for inputflinger
 
