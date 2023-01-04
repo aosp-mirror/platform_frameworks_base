@@ -35,6 +35,7 @@ import android.content.pm.PackageManager;
 import android.content.pm.ProviderInfo;
 import android.content.pm.ResolveInfo;
 import android.content.pm.ServiceInfo;
+import android.os.UserHandle;
 import android.util.ArrayMap;
 import android.util.ArraySet;
 import android.util.DebugUtils;
@@ -1197,6 +1198,7 @@ public class ComponentResolver extends ComponentResolverLocked implements
             res.iconResourceId = info.getIcon();
             res.system = res.activityInfo.applicationInfo.isSystemApp();
             res.isInstantAppAvailable = userState.isInstantApp();
+            res.userHandle = UserHandle.of(userId);
             return res;
         }
 
