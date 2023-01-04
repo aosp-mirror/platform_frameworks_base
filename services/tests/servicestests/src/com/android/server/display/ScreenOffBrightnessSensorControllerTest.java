@@ -35,6 +35,7 @@ import androidx.test.runner.AndroidJUnit4;
 
 import com.android.server.testutils.OffsettableClock;
 
+import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -71,6 +72,15 @@ public class ScreenOffBrightnessSensorControllerTest {
                 SENSOR_TO_LUX,
                 mBrightnessMappingStrategy
         );
+    }
+
+    @After
+    public void tearDown() {
+        if (mController != null) {
+            // Stop the update Brightness loop.
+            mController.stop();
+            mController = null;
+        }
     }
 
     @Test
