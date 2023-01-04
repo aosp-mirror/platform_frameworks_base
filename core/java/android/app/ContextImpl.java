@@ -2028,6 +2028,13 @@ class ContextImpl extends Context {
     }
 
     /** @hide */
+    @NonNull
+    @Override
+    public IBinder getIApplicationThreadBinder() {
+        return getIApplicationThread().asBinder();
+    }
+
+    /** @hide */
     @Override
     public Handler getMainThreadHandler() {
         return mMainThread.getHandler();

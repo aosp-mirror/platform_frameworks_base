@@ -1277,6 +1277,14 @@ public class ContextWrapper extends Context {
      * @hide
      */
     @Override
+    public IBinder getIApplicationThreadBinder() {
+        return mBase.getIApplicationThreadBinder();
+    }
+
+    /**
+     * @hide
+     */
+    @Override
     public Handler getMainThreadHandler() {
         return mBase.getMainThreadHandler();
     }

@@ -16958,6 +16958,20 @@ public class ActivityManagerService extends IActivityManager.Stub
         }
 
         @Override
+        public void killSdkSandboxClientAppProcess(IBinder clientApplicationThreadBinder) {
+            synchronized (ActivityManagerService.this) {
+                ProcessRecord r = getRecordForAppLOSP(clientApplicationThreadBinder);
+                if (r != null) {
+                    r.killLocked(
+                            "sdk sandbox died",
+                            ApplicationExitInfo.REASON_DEPENDENCY_DIED,
+                            ApplicationExitInfo.SUBREASON_SDK_SANDBOX_DIED,
+                            true);
+                }
+            }
+        }
+
+        @Override
         public void onUserRemoved(@UserIdInt int userId) {
             // Clean up any ActivityTaskManager state (by telling it the user is stopped)
             mAtmInternal.onUserStopped(userId);
