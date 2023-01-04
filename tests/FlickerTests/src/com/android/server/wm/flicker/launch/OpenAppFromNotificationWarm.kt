@@ -19,9 +19,9 @@ package com.android.server.wm.flicker.launch
 import android.platform.test.annotations.FlakyTest
 import android.platform.test.annotations.Postsubmit
 import android.platform.test.annotations.Presubmit
-import android.platform.test.annotations.RequiresDevice
 import android.view.WindowInsets
 import android.view.WindowManager
+import androidx.test.filters.RequiresDevice
 import androidx.test.uiautomator.By
 import androidx.test.uiautomator.Until
 import com.android.server.wm.flicker.FlickerBuilder

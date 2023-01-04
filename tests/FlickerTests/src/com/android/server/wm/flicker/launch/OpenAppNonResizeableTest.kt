@@ -19,7 +19,7 @@ package com.android.server.wm.flicker.launch
 import android.platform.test.annotations.FlakyTest
 import android.platform.test.annotations.Postsubmit
 import android.platform.test.annotations.Presubmit
-import android.platform.test.annotations.RequiresDevice
+import androidx.test.filters.RequiresDevice
 import com.android.server.wm.flicker.FlickerTest
 import com.android.server.wm.flicker.FlickerTestFactory
 import com.android.server.wm.flicker.annotation.FlickerServiceCompatible
