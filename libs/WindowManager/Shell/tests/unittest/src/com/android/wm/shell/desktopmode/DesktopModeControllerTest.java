@@ -279,7 +279,7 @@ public class DesktopModeControllerTest extends ShellTestCase {
     }
 
     @Test
-    public void testShowDesktopApps_appsAlreadyVisible_doesNothing() {
+    public void testShowDesktopApps_appsAlreadyVisible_bringsToFront() {
         final RunningTaskInfo task1 = createFreeformTask();
         mDesktopModeTaskRepository.addActiveTask(task1.taskId);
         mDesktopModeTaskRepository.addOrMoveFreeformTaskToTop(task1.taskId);
@@ -294,8 +294,17 @@ public class DesktopModeControllerTest extends ShellTestCase {
         mController.showDesktopApps();
 
         final WindowContainerTransaction wct = getBringAppsToFrontTransaction();
-        // No reordering needed.
-        assertThat(wct.getHierarchyOps()).isEmpty();
+        // Check wct has reorder calls
+        assertThat(wct.getHierarchyOps()).hasSize(2);
+        // Task 1 appeared first, must be first reorder to top.
+        HierarchyOp op1 = wct.getHierarchyOps().get(0);
+        assertThat(op1.getType()).isEqualTo(HIERARCHY_OP_TYPE_REORDER);
+        assertThat(op1.getContainer()).isEqualTo(task1.token.asBinder());
+
+        // Task 2 appeared last, must be last reorder to top.
+        HierarchyOp op2 = wct.getHierarchyOps().get(1);
+        assertThat(op2.getType()).isEqualTo(HIERARCHY_OP_TYPE_REORDER);
+        assertThat(op2.getContainer()).isEqualTo(task2.token.asBinder());
     }
 
     @Test
