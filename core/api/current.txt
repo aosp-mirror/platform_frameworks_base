@@ -40320,17 +40320,24 @@ package android.service.quickaccesswallet {
     method @NonNull public String getCardId();
     method @NonNull public android.graphics.drawable.Icon getCardImage();
     method @Nullable public CharSequence getCardLabel();
+    method @NonNull public int getCardType();
     method @NonNull public CharSequence getContentDescription();
     method @NonNull public android.app.PendingIntent getPendingIntent();
+    method @Nullable public android.graphics.drawable.Icon getValuableCardSecondaryImage();
     method public void writeToParcel(@NonNull android.os.Parcel, int);
+    field public static final int CARD_TYPE_PAYMENT = 1; // 0x1
+    field public static final int CARD_TYPE_UNKNOWN = 0; // 0x0
+    field public static final int CARD_TYPE_VALUABLE = 2; // 0x2
     field @NonNull public static final android.os.Parcelable.Creator<android.service.quickaccesswallet.WalletCard> CREATOR;
   }
 
   public static final class WalletCard.Builder {
+    ctor public WalletCard.Builder(@NonNull String, @NonNull int, @NonNull android.graphics.drawable.Icon, @NonNull CharSequence, @NonNull android.app.PendingIntent);
     ctor public WalletCard.Builder(@NonNull String, @NonNull android.graphics.drawable.Icon, @NonNull CharSequence, @NonNull android.app.PendingIntent);
     method @NonNull public android.service.quickaccesswallet.WalletCard build();
     method @NonNull public android.service.quickaccesswallet.WalletCard.Builder setCardIcon(@Nullable android.graphics.drawable.Icon);
     method @NonNull public android.service.quickaccesswallet.WalletCard.Builder setCardLabel(@Nullable CharSequence);
+    method @NonNull public android.service.quickaccesswallet.WalletCard.Builder setValuableCardSecondaryImage(@Nullable android.graphics.drawable.Icon);
   }
 
   public final class WalletServiceEvent implements android.os.Parcelable {
