@@ -228,6 +228,20 @@ public class ActivityThreadTest {
             InstrumentationRegistry.getInstrumentation().waitForIdleSync();
 
             assertScreenScale(scale, activity, originalActivityConfig, originalActivityMetrics);
+
+            // Execute a local relaunch item with current scaled config (e.g. simulate recreate),
+            // the config should not be scaled again.
+            final Configuration currentConfig = activity.getResources().getConfiguration();
+            final ClientTransaction localTransaction =
+                    newTransaction(activityThread, activity.getActivityToken());
+            localTransaction.addCallback(ActivityRelaunchItem.obtain(
+                    null /* pendingResults */, null /* pendingIntents */, 0 /* configChanges */,
+                    new MergedConfiguration(currentConfig, currentConfig),
+                    true /* preserveWindow */));
+            InstrumentationRegistry.getInstrumentation().runOnMainSync(
+                    () -> activityThread.executeTransaction(localTransaction));
+
+            assertScreenScale(scale, activity, originalActivityConfig, originalActivityMetrics);
         } finally {
             CompatibilityInfo.setOverrideInvertedScale(originalScale);
             InstrumentationRegistry.getInstrumentation().runOnMainSync(
