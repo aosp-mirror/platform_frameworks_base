@@ -93,14 +93,17 @@ public class GameManagerShellCommand extends ShellCommand {
 
     private int runListGameModes(PrintWriter pw) throws ServiceNotFoundException, RemoteException {
         final String packageName = getNextArgRequired();
+        final int userId = ActivityManager.getCurrentUser();
         final GameManagerService gameManagerService = (GameManagerService)
                 ServiceManager.getService(Context.GAME_SERVICE);
+        final String currentMode = gameModeIntToString(
+                gameManagerService.getGameMode(packageName, userId));
         final StringJoiner sj = new StringJoiner(",");
-        for (int mode : gameManagerService.getAvailableGameModes(packageName,
-                ActivityManager.getCurrentUser())) {
+        for (int mode : gameManagerService.getAvailableGameModes(packageName, userId)) {
             sj.add(gameModeIntToString(mode));
         }
-        pw.println(packageName + " has available game modes: [" + sj + "]");
+        pw.println(packageName + " current mode: " + currentMode + ", available game modes: [" + sj
+                + "]");
         return 0;
     }
 
@@ -360,7 +363,7 @@ public class GameManagerShellCommand extends ShellCommand {
         pw.println("  list-configs <PACKAGE_NAME>");
         pw.println("      Lists the current intervention configs of an app.");
         pw.println("  list-modes <PACKAGE_NAME>");
-        pw.println("      Lists the current available game modes of an app.");
+        pw.println("      Lists the current selected and available game modes of an app.");
         pw.println("  mode [--user <USER_ID>] [1|2|3|4|standard|performance|battery|custom] "
                 + "<PACKAGE_NAME>");
         pw.println("      Set app to run in the specified game mode, if supported.");
