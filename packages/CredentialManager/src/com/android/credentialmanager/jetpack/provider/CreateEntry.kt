@@ -36,7 +36,8 @@ class CreateEntry internal constructor(
         val pendingIntent: PendingIntent?,
         val icon: Icon?,
         val lastUsedTimeMillis: Long,
-        val credentialCountInformationList: List<CredentialCountInformation>
+        val credentialCountInformationList: List<CredentialCountInformation>,
+        val footerDescription: CharSequence?,
 ) {
 
   init {
@@ -61,6 +62,7 @@ class CreateEntry internal constructor(
             mutableListOf()
     private var icon: Icon? = null
     private var lastUsedTimeMillis: Long = 0
+    private var footerDescription: CharSequence? = null
 
     /** Adds a [CredentialCountInformation] denoting a given credential
      * type and the count of credentials that the provider has stored for that
@@ -99,6 +101,12 @@ class CreateEntry internal constructor(
       return this
     }
 
+    /** Sets the footer description of this */
+    fun setFooterDescription(footerDescription: CharSequence): Builder {
+      this.footerDescription = footerDescription
+      return this
+    }
+
     /**
      * Builds an instance of [CreateEntry]
      *
@@ -106,7 +114,7 @@ class CreateEntry internal constructor(
      */
     fun build(): CreateEntry {
       return CreateEntry(accountName, pendingIntent, icon, lastUsedTimeMillis,
-              credentialCountInformationList)
+              credentialCountInformationList, footerDescription)
     }
   }
 
@@ -122,6 +130,8 @@ class CreateEntry internal constructor(
             "androidx.credentials.provider.createEntry.SLICE_HINT_LAST_USED_TIME_MILLIS"
     internal const val SLICE_HINT_PENDING_INTENT =
             "androidx.credentials.provider.createEntry.SLICE_HINT_PENDING_INTENT"
+    internal const val SLICE_HINT_FOOTER_DESCRIPTION =
+            "androidx.credentials.provider.createEntry.SLICE_HINT_FOOTER_DESCRIPTION"
 
     @JvmStatic
     fun toSlice(createEntry: CreateEntry): Slice {
@@ -150,6 +160,10 @@ class CreateEntry internal constructor(
                         .build(),
                 /*subType=*/null)
       }
+      if (createEntry.footerDescription != null) {
+        sliceBuilder.addText(createEntry.footerDescription, /*subType=*/null,
+                listOf(SLICE_HINT_FOOTER_DESCRIPTION))
+      }
       return sliceBuilder.build()
     }
 
@@ -167,6 +181,7 @@ class CreateEntry internal constructor(
       var pendingIntent: PendingIntent? = null
       var credentialCountInfo: List<CredentialCountInformation> = listOf()
       var lastUsedTimeMillis: Long = 0
+      var footerDescription: CharSequence? = null
 
       slice.items.forEach {
         if (it.hasHint(SLICE_HINT_ACCOUNT_NAME)) {
@@ -179,12 +194,14 @@ class CreateEntry internal constructor(
           credentialCountInfo = convertBundleToCredentialCountInfo(it.bundle)
         } else if (it.hasHint(SLICE_HINT_LAST_USED_TIME_MILLIS)) {
           lastUsedTimeMillis = it.long
+        } else if (it.hasHint(SLICE_HINT_FOOTER_DESCRIPTION)) {
+          footerDescription = it.text
         }
       }
 
       return try {
         CreateEntry(accountName, pendingIntent, icon,
-                lastUsedTimeMillis, credentialCountInfo)
+                lastUsedTimeMillis, credentialCountInfo, footerDescription)
       } catch (e: Exception) {
         Log.i(TAG, "fromSlice failed with: " + e.message)
         null

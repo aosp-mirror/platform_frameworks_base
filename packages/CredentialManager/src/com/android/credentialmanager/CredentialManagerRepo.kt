@@ -176,9 +176,11 @@ class CredentialManagerRepo(
               .setSaveEntries(
                   listOf<Entry>(
                       newCreateEntry("key1", "subkey-1", "elisa.beckett@gmail.com",
-                          20, 7, 27, 10L),
+                          20, 7, 27, 10L,
+                          "Optional footer description"),
                       newCreateEntry("key1", "subkey-2", "elisa.work@google.com",
-                          20, 7, 27, 12L),
+                          20, 7, 27, 12L,
+                      null),
                   )
               )
               .setRemoteEntry(
@@ -190,9 +192,11 @@ class CredentialManagerRepo(
               .setSaveEntries(
                   listOf<Entry>(
                       newCreateEntry("key1", "subkey-3", "elisa.beckett@dashlane.com",
-                          20, 7, 27, 11L),
+                          20, 7, 27, 11L,
+                          null),
                       newCreateEntry("key1", "subkey-4", "elisa.work@dashlane.com",
-                          20, 7, 27, 14L),
+                          20, 7, 27, 14L,
+                          null),
                   )
               )
               .build(),
@@ -337,6 +341,7 @@ class CredentialManagerRepo(
             passkeyCount: Int,
             totalCredentialCount: Int,
             lastUsedTimeMillis: Long,
+            footerDescription: String?,
     ): Entry {
         val intent = Intent("com.androidauth.androidvault.CONFIRM_PASSWORD")
                 .setPackage("com.androidauth.androidvault")
@@ -360,7 +365,7 @@ class CredentialManagerRepo(
                 listOf(
                         CredentialCountInformation.createPasswordCountInformation(passwordCount),
                         CredentialCountInformation.createPublicKeyCountInformation(passkeyCount),
-                ))
+                ), footerDescription)
         return Entry(
                 key,
                 subkey,
