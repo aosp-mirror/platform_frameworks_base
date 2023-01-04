@@ -636,6 +636,7 @@ public class FrameworkServicesModule {
 
     @Provides
     @Singleton
+    @Nullable
     static BluetoothAdapter provideBluetoothAdapter(BluetoothManager bluetoothManager) {
         return bluetoothManager.getAdapter();
     }
