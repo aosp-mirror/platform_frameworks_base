@@ -892,7 +892,7 @@ public class AppTransitionController {
      *
      * TODO(b/213312721): Remove this predicate and its callers once ShellTransition is enabled.
      */
-    private static boolean isTaskViewTask(WindowContainer wc) {
+    static boolean isTaskViewTask(WindowContainer wc) {
         // We use Task#mRemoveWithTaskOrganizer to identify an embedded Task, but this is a hack and
         // it is not guaranteed to work this logic in the future version.
         return wc instanceof Task && ((Task) wc).mRemoveWithTaskOrganizer;
