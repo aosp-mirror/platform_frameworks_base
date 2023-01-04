@@ -23,7 +23,12 @@ import static android.view.WindowManager.TRANSIT_CHANGE;
 import static android.view.WindowManager.TRANSIT_CLOSE;
 import static android.view.WindowManager.TRANSIT_NONE;
 import static android.view.WindowManager.TRANSIT_OPEN;
+import static android.window.TaskFragmentOperation.OP_TYPE_CREATE_TASK_FRAGMENT;
+import static android.window.TaskFragmentOperation.OP_TYPE_DELETE_TASK_FRAGMENT;
+import static android.window.TaskFragmentOperation.OP_TYPE_REPARENT_ACTIVITY_TO_TASK_FRAGMENT;
+import static android.window.TaskFragmentOperation.OP_TYPE_SET_ADJACENT_TASK_FRAGMENTS;
 import static android.window.TaskFragmentOperation.OP_TYPE_SET_ANIMATION_PARAMS;
+import static android.window.TaskFragmentOperation.OP_TYPE_START_ACTIVITY_IN_TASK_FRAGMENT;
 import static android.window.TaskFragmentOrganizer.KEY_ERROR_CALLBACK_OP_TYPE;
 import static android.window.TaskFragmentOrganizer.KEY_ERROR_CALLBACK_THROWABLE;
 import static android.window.TaskFragmentOrganizer.TASK_FRAGMENT_TRANSIT_CHANGE;
@@ -36,13 +41,6 @@ import static android.window.TaskFragmentTransaction.TYPE_TASK_FRAGMENT_ERROR;
 import static android.window.TaskFragmentTransaction.TYPE_TASK_FRAGMENT_INFO_CHANGED;
 import static android.window.TaskFragmentTransaction.TYPE_TASK_FRAGMENT_PARENT_INFO_CHANGED;
 import static android.window.TaskFragmentTransaction.TYPE_TASK_FRAGMENT_VANISHED;
-import static android.window.WindowContainerTransaction.HierarchyOp.HIERARCHY_OP_TYPE_CREATE_TASK_FRAGMENT;
-import static android.window.WindowContainerTransaction.HierarchyOp.HIERARCHY_OP_TYPE_DELETE_TASK_FRAGMENT;
-import static android.window.WindowContainerTransaction.HierarchyOp.HIERARCHY_OP_TYPE_REPARENT_ACTIVITY_TO_TASK_FRAGMENT;
-import static android.window.WindowContainerTransaction.HierarchyOp.HIERARCHY_OP_TYPE_REPARENT_CHILDREN;
-import static android.window.WindowContainerTransaction.HierarchyOp.HIERARCHY_OP_TYPE_SET_ADJACENT_ROOTS;
-import static android.window.WindowContainerTransaction.HierarchyOp.HIERARCHY_OP_TYPE_SET_ADJACENT_TASK_FRAGMENTS;
-import static android.window.WindowContainerTransaction.HierarchyOp.HIERARCHY_OP_TYPE_START_ACTIVITY_IN_TASK_FRAGMENT;
 
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.doNothing;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.doReturn;
@@ -339,11 +337,11 @@ public class TaskFragmentOrganizerControllerTest extends WindowTestsBase {
         final Throwable exception = new IllegalArgumentException("Test exception");
 
         mController.onTaskFragmentError(mTaskFragment.getTaskFragmentOrganizer(),
-                mErrorToken, null /* taskFragment */, HIERARCHY_OP_TYPE_SET_ADJACENT_ROOTS,
+                mErrorToken, null /* taskFragment */, OP_TYPE_SET_ADJACENT_TASK_FRAGMENTS,
                 exception);
         mController.dispatchPendingEvents();
 
-        assertTaskFragmentErrorTransaction(HIERARCHY_OP_TYPE_SET_ADJACENT_ROOTS,
+        assertTaskFragmentErrorTransaction(OP_TYPE_SET_ADJACENT_TASK_FRAGMENTS,
                 exception.getClass());
     }
 
@@ -519,50 +517,20 @@ public class TaskFragmentOrganizerControllerTest extends WindowTestsBase {
     @Test
     public void testApplyTransaction_enforceHierarchyChange_deleteTaskFragment() {
         doReturn(true).when(mTaskFragment).isAttached();
-
-        // Throw exception if the transaction is trying to change a window that is not organized by
-        // the organizer.
-        mTransaction.deleteTaskFragment(mFragmentWindowToken);
-
-        assertApplyTransactionDisallowed(mTransaction);
-
-        // Allow transaction to change a TaskFragment created by the organizer.
-        mTaskFragment.setTaskFragmentOrganizer(mOrganizerToken, 10 /* uid */,
-                "Test:TaskFragmentOrganizer" /* processName */);
-        clearInvocations(mAtm.mRootWindowContainer);
-
-        assertApplyTransactionAllowed(mTransaction);
-
-        // No lifecycle update when the TaskFragment is not recorded.
-        verify(mAtm.mRootWindowContainer, never()).resumeFocusedTasksTopActivities();
-
         mWindowOrganizerController.mLaunchTaskFragments.put(mFragmentToken, mTaskFragment);
-        assertApplyTransactionAllowed(mTransaction);
-
-        verify(mAtm.mRootWindowContainer).resumeFocusedTasksTopActivities();
-    }
-
-    @Test
-    public void testApplyTransaction_enforceHierarchyChange_setAdjacentRoots() {
-        final TaskFragment taskFragment2 =
-                new TaskFragment(mAtm, new Binder(), true /* createdByOrganizer */);
-        final WindowContainerToken token2 = taskFragment2.mRemoteToken.toWindowContainerToken();
 
         // Throw exception if the transaction is trying to change a window that is not organized by
         // the organizer.
-        mTransaction.setAdjacentRoots(mFragmentWindowToken, token2);
+        mTransaction.deleteTaskFragment(mFragmentToken);
 
         assertApplyTransactionDisallowed(mTransaction);
 
         // Allow transaction to change a TaskFragment created by the organizer.
         mTaskFragment.setTaskFragmentOrganizer(mOrganizerToken, 10 /* uid */,
                 "Test:TaskFragmentOrganizer" /* processName */);
-        taskFragment2.setTaskFragmentOrganizer(mOrganizerToken, 10 /* uid */,
-                "Test:TaskFragmentOrganizer" /* processName */);
         clearInvocations(mAtm.mRootWindowContainer);
 
         assertApplyTransactionAllowed(mTransaction);
-
         verify(mAtm.mRootWindowContainer).resumeFocusedTasksTopActivities();
     }
 
@@ -693,7 +661,7 @@ public class TaskFragmentOrganizerControllerTest extends WindowTestsBase {
     }
 
     @Test
-    public void testApplyTransaction_enforceTaskFragmentOrganized_setTaskFragmentOperation() {
+    public void testApplyTransaction_enforceTaskFragmentOrganized_addTaskFragmentOperation() {
         final Task task = createTask(mDisplayContent);
         mTaskFragment = new TaskFragmentBuilder(mAtm)
                 .setParentTask(task)
@@ -704,7 +672,7 @@ public class TaskFragmentOrganizerControllerTest extends WindowTestsBase {
                 OP_TYPE_SET_ANIMATION_PARAMS)
                 .setAnimationParams(TaskFragmentAnimationParams.DEFAULT)
                 .build();
-        mTransaction.setTaskFragmentOperation(mFragmentToken, operation);
+        mTransaction.addTaskFragmentOperation(mFragmentToken, operation);
         mOrganizer.applyTransaction(mTransaction, TASK_FRAGMENT_TRANSIT_CHANGE,
                 false /* shouldApplyIndependently */);
 
@@ -718,7 +686,7 @@ public class TaskFragmentOrganizerControllerTest extends WindowTestsBase {
     }
 
     @Test
-    public void testSetTaskFragmentOperation() {
+    public void testAddTaskFragmentOperation() {
         final Task task = createTask(mDisplayContent);
         mTaskFragment = new TaskFragmentBuilder(mAtm)
                 .setParentTask(task)
@@ -736,7 +704,7 @@ public class TaskFragmentOrganizerControllerTest extends WindowTestsBase {
                 OP_TYPE_SET_ANIMATION_PARAMS)
                 .setAnimationParams(animationParams)
                 .build();
-        mTransaction.setTaskFragmentOperation(mFragmentToken, operation);
+        mTransaction.addTaskFragmentOperation(mFragmentToken, operation);
         mOrganizer.applyTransaction(mTransaction, TASK_FRAGMENT_TRANSIT_CHANGE,
                 false /* shouldApplyIndependently */);
         assertApplyTransactionAllowed(mTransaction);
@@ -842,26 +810,6 @@ public class TaskFragmentOrganizerControllerTest extends WindowTestsBase {
         // The top TaskFragment should remain on top.
         assertEquals(task.mChildren.indexOf(taskFragment) + 1,
                 task.mChildren.indexOf(mTaskFragment));
-    }
-
-    @Test
-    public void testApplyTransaction_enforceHierarchyChange_reparentChildren() {
-        doReturn(true).when(mTaskFragment).isAttached();
-
-        // Throw exception if the transaction is trying to change a window that is not organized by
-        // the organizer.
-        mTransaction.reparentChildren(mFragmentWindowToken, null /* newParent */);
-
-        assertApplyTransactionDisallowed(mTransaction);
-
-        // Allow transaction to change a TaskFragment created by the organizer.
-        mTaskFragment.setTaskFragmentOrganizer(mOrganizerToken, 10 /* uid */,
-                "Test:TaskFragmentOrganizer" /* processName */);
-        clearInvocations(mAtm.mRootWindowContainer);
-
-        assertApplyTransactionAllowed(mTransaction);
-
-        verify(mAtm.mRootWindowContainer).resumeFocusedTasksTopActivities();
     }
 
     @Test
@@ -1040,7 +988,7 @@ public class TaskFragmentOrganizerControllerTest extends WindowTestsBase {
                 any(), any(), anyInt(), anyInt(), any());
         verify(mWindowOrganizerController).sendTaskFragmentOperationFailure(eq(mIOrganizer),
                 eq(mErrorToken), eq(mTaskFragment),
-                eq(HIERARCHY_OP_TYPE_START_ACTIVITY_IN_TASK_FRAGMENT),
+                eq(OP_TYPE_START_ACTIVITY_IN_TASK_FRAGMENT),
                 any(IllegalArgumentException.class));
     }
 
@@ -1057,7 +1005,7 @@ public class TaskFragmentOrganizerControllerTest extends WindowTestsBase {
 
         verify(mWindowOrganizerController).sendTaskFragmentOperationFailure(eq(mIOrganizer),
                 eq(mErrorToken), eq(mTaskFragment),
-                eq(HIERARCHY_OP_TYPE_REPARENT_ACTIVITY_TO_TASK_FRAGMENT),
+                eq(OP_TYPE_REPARENT_ACTIVITY_TO_TASK_FRAGMENT),
                 any(IllegalArgumentException.class));
         assertNull(activity.getOrganizedTaskFragment());
     }
@@ -1074,8 +1022,7 @@ public class TaskFragmentOrganizerControllerTest extends WindowTestsBase {
         assertApplyTransactionAllowed(mTransaction);
 
         verify(mWindowOrganizerController).sendTaskFragmentOperationFailure(eq(mIOrganizer),
-                eq(mErrorToken), eq(mTaskFragment),
-                eq(HIERARCHY_OP_TYPE_SET_ADJACENT_TASK_FRAGMENTS),
+                eq(mErrorToken), eq(mTaskFragment), eq(OP_TYPE_SET_ADJACENT_TASK_FRAGMENTS),
                 any(IllegalArgumentException.class));
         verify(mTaskFragment, never()).setAdjacentTaskFragment(any());
     }
@@ -1094,7 +1041,7 @@ public class TaskFragmentOrganizerControllerTest extends WindowTestsBase {
         assertApplyTransactionAllowed(mTransaction);
 
         verify(mWindowOrganizerController).sendTaskFragmentOperationFailure(eq(mIOrganizer),
-                eq(mErrorToken), eq(null), eq(HIERARCHY_OP_TYPE_CREATE_TASK_FRAGMENT),
+                eq(mErrorToken), eq(null), eq(OP_TYPE_CREATE_TASK_FRAGMENT),
                 any(IllegalArgumentException.class));
         assertNull(mWindowOrganizerController.getTaskFragment(fragmentToken));
     }
@@ -1105,12 +1052,12 @@ public class TaskFragmentOrganizerControllerTest extends WindowTestsBase {
         spyOn(mWindowOrganizerController);
 
         // Not allow to delete a TaskFragment that is in a PIP Task.
-        mTransaction.deleteTaskFragment(mFragmentWindowToken)
+        mTransaction.deleteTaskFragment(mFragmentToken)
                 .setErrorCallbackToken(mErrorToken);
         assertApplyTransactionAllowed(mTransaction);
 
         verify(mWindowOrganizerController).sendTaskFragmentOperationFailure(eq(mIOrganizer),
-                eq(mErrorToken), eq(mTaskFragment), eq(HIERARCHY_OP_TYPE_DELETE_TASK_FRAGMENT),
+                eq(mErrorToken), eq(mTaskFragment), eq(OP_TYPE_DELETE_TASK_FRAGMENT),
                 any(IllegalArgumentException.class));
         assertNotNull(mWindowOrganizerController.getTaskFragment(mFragmentToken));
 
@@ -1423,43 +1370,7 @@ public class TaskFragmentOrganizerControllerTest extends WindowTestsBase {
         // The pending event will be dispatched on the handler (from requestTraversal).
         waitHandlerIdle(mWm.mAnimationHandler);
 
-        assertTaskFragmentErrorTransaction(HIERARCHY_OP_TYPE_REPARENT_ACTIVITY_TO_TASK_FRAGMENT,
-                SecurityException.class);
-    }
-
-    @Test
-    public void testMinDimensionViolation_ReparentChildren() {
-        final Task task = createTask(mDisplayContent);
-        final IBinder oldFragToken = new Binder();
-        final TaskFragment oldTaskFrag = new TaskFragmentBuilder(mAtm)
-                .setParentTask(task)
-                .createActivityCount(1)
-                .setFragmentToken(oldFragToken)
-                .setOrganizer(mOrganizer)
-                .build();
-        final ActivityRecord activity = oldTaskFrag.getTopMostActivity();
-        // Make minWidth/minHeight exceeds mTaskFragment bounds.
-        activity.info.windowLayout = new ActivityInfo.WindowLayout(
-                0, 0, 0, 0, 0, mTaskFragBounds.width() + 10, mTaskFragBounds.height() + 10);
-        mTaskFragment = new TaskFragmentBuilder(mAtm)
-                .setParentTask(task)
-                .setFragmentToken(mFragmentToken)
-                .setOrganizer(mOrganizer)
-                .setBounds(mTaskFragBounds)
-                .build();
-        mWindowOrganizerController.mLaunchTaskFragments.put(oldFragToken, oldTaskFrag);
-        mWindowOrganizerController.mLaunchTaskFragments.put(mFragmentToken, mTaskFragment);
-
-        // Reparent oldTaskFrag's children to mTaskFragment, which is smaller than activity's
-        // minimum dimensions.
-        mTransaction.reparentChildren(oldTaskFrag.mRemoteToken.toWindowContainerToken(),
-                        mTaskFragment.mRemoteToken.toWindowContainerToken())
-                .setErrorCallbackToken(mErrorToken);
-        assertApplyTransactionAllowed(mTransaction);
-        // The pending event will be dispatched on the handler (from requestTraversal).
-        waitHandlerIdle(mWm.mAnimationHandler);
-
-        assertTaskFragmentErrorTransaction(HIERARCHY_OP_TYPE_REPARENT_CHILDREN,
+        assertTaskFragmentErrorTransaction(OP_TYPE_REPARENT_ACTIVITY_TO_TASK_FRAGMENT,
                 SecurityException.class);
     }
 
@@ -1634,7 +1545,8 @@ public class TaskFragmentOrganizerControllerTest extends WindowTestsBase {
     }
 
     /** Asserts that there will be a transaction for TaskFragment error. */
-    private void assertTaskFragmentErrorTransaction(int opType, @NonNull Class<?> exceptionClass) {
+    private void assertTaskFragmentErrorTransaction(@TaskFragmentOperation.OperationType int opType,
+            @NonNull Class<?> exceptionClass) {
         verify(mOrganizer).onTransactionReady(mTransactionCaptor.capture());
         final TaskFragmentTransaction transaction = mTransactionCaptor.getValue();
         final List<TaskFragmentTransaction.Change> changes = transaction.getChanges();
