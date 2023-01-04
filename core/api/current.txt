@@ -12984,9 +12984,9 @@ package android.content.res {
     field @NonNull public static final android.os.Parcelable.Creator<android.content.res.Configuration> CREATOR;
     field public static final int DENSITY_DPI_UNDEFINED = 0; // 0x0
     field public static final int FONT_WEIGHT_ADJUSTMENT_UNDEFINED = 2147483647; // 0x7fffffff
-    field public static final int GRAMMATICAL_GENDER_FEMININE = 3; // 0x3
-    field public static final int GRAMMATICAL_GENDER_MASCULINE = 4; // 0x4
-    field public static final int GRAMMATICAL_GENDER_NEUTRAL = 2; // 0x2
+    field public static final int GRAMMATICAL_GENDER_FEMININE = 2; // 0x2
+    field public static final int GRAMMATICAL_GENDER_MASCULINE = 3; // 0x3
+    field public static final int GRAMMATICAL_GENDER_NEUTRAL = 1; // 0x1
     field public static final int GRAMMATICAL_GENDER_NOT_SPECIFIED = 0; // 0x0
     field public static final int HARDKEYBOARDHIDDEN_NO = 1; // 0x1
     field public static final int HARDKEYBOARDHIDDEN_UNDEFINED = 0; // 0x0

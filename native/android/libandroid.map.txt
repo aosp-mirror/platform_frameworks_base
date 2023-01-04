@@ -42,6 +42,7 @@ LIBANDROID {
     AConfiguration_fromAssetManager;
     AConfiguration_getCountry;
     AConfiguration_getDensity;
+    AConfiguration_getGrammaticalGender; # introduced=UpsideDownCake
     AConfiguration_getKeyboard;
     AConfiguration_getKeysHidden;
     AConfiguration_getLanguage;
@@ -66,6 +67,7 @@ LIBANDROID {
     AConfiguration_new;
     AConfiguration_setCountry;
     AConfiguration_setDensity;
+    AConfiguration_setGrammaticalGender; # introduced=UpsideDownCake
     AConfiguration_setKeyboard;
     AConfiguration_setKeysHidden;
     AConfiguration_setLanguage;

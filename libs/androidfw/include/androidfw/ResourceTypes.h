@@ -1071,15 +1071,32 @@ struct ResTable_config
         NAVHIDDEN_NO = ACONFIGURATION_NAVHIDDEN_NO << SHIFT_NAVHIDDEN,
         NAVHIDDEN_YES = ACONFIGURATION_NAVHIDDEN_YES << SHIFT_NAVHIDDEN,
     };
-    
-    union {
-        struct {
-            uint8_t keyboard;
-            uint8_t navigation;
-            uint8_t inputFlags;
-            uint8_t inputPad0;
+
+    enum {
+        GRAMMATICAL_GENDER_ANY = ACONFIGURATION_GRAMMATICAL_GENDER_ANY,
+        GRAMMATICAL_GENDER_NEUTER = ACONFIGURATION_GRAMMATICAL_GENDER_NEUTER,
+        GRAMMATICAL_GENDER_FEMININE = ACONFIGURATION_GRAMMATICAL_GENDER_FEMININE,
+        GRAMMATICAL_GENDER_MASCULINE = ACONFIGURATION_GRAMMATICAL_GENDER_MASCULINE,
+        GRAMMATICAL_INFLECTION_GENDER_MASK = 0b11,
+    };
+
+    struct {
+        union {
+            struct {
+                uint8_t keyboard;
+                uint8_t navigation;
+                uint8_t inputFlags;
+                uint8_t inputFieldPad0;
+            };
+            struct {
+                uint32_t input : 24;
+                uint32_t inputFullPad0 : 8;
+            };
+            struct {
+                uint8_t grammaticalInflectionPad0[3];
+                uint8_t grammaticalInflection;
+            };
         };
-        uint32_t input;
     };
     
     enum {
@@ -1263,6 +1280,7 @@ struct ResTable_config
         CONFIG_LAYOUTDIR = ACONFIGURATION_LAYOUTDIR,
         CONFIG_SCREEN_ROUND = ACONFIGURATION_SCREEN_ROUND,
         CONFIG_COLOR_MODE = ACONFIGURATION_COLOR_MODE,
+        CONFIG_GRAMMATICAL_GENDER = ACONFIGURATION_GRAMMATICAL_GENDER,
     };
     
     // Compare two configuration, returning CONFIG_* flags set for each value

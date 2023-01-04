@@ -998,6 +998,7 @@ public class ActivityInfo extends ComponentInfo implements Parcelable {
         Configuration.NATIVE_CONFIG_DENSITY,                // DENSITY
         Configuration.NATIVE_CONFIG_LAYOUTDIR,              // LAYOUT DIRECTION
         Configuration.NATIVE_CONFIG_COLOR_MODE,             // COLOR_MODE
+        Configuration.NATIVE_CONFIG_GRAMMATICAL_GENDER,
     };
 
     /**
@@ -1267,8 +1268,8 @@ public class ActivityInfo extends ComponentInfo implements Parcelable {
      * {@link #CONFIG_LOCALE}, {@link #CONFIG_TOUCHSCREEN},
      * {@link #CONFIG_KEYBOARD}, {@link #CONFIG_NAVIGATION},
      * {@link #CONFIG_ORIENTATION}, {@link #CONFIG_SCREEN_LAYOUT},
-     * {@link #CONFIG_DENSITY}, {@link #CONFIG_LAYOUT_DIRECTION} and
-     * {@link #CONFIG_COLOR_MODE}.
+     * {@link #CONFIG_DENSITY}, {@link #CONFIG_LAYOUT_DIRECTION},
+     * {@link #CONFIG_COLOR_MODE}, and {link #CONFIG_GRAMMATICAL_GENDER}.
      * Set from the {@link android.R.attr#configChanges} attribute.
      */
     public int configChanges;

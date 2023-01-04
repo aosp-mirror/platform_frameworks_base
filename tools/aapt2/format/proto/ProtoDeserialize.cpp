@@ -354,6 +354,7 @@ bool DeserializeConfigFromPb(const pb::Configuration& pb_config, ConfigDescripti
   out_config->screenWidth = static_cast<uint16_t>(pb_config.screen_width());
   out_config->screenHeight = static_cast<uint16_t>(pb_config.screen_height());
   out_config->sdkVersion = static_cast<uint16_t>(pb_config.sdk_version());
+  out_config->grammaticalInflection = pb_config.grammatical_gender();
   return true;
 }
 

@@ -251,7 +251,11 @@ class ConfigDescriptionBuilder {
     return *this;
   }
   ConfigDescriptionBuilder& setInputPad0(uint8_t inputPad0) {
-    config_.inputPad0 = inputPad0;
+    config_.inputFieldPad0 = inputPad0;
+    return *this;
+  }
+  ConfigDescriptionBuilder& setGrammaticalInflection(uint8_t value) {
+    config_.grammaticalInflection = value;
     return *this;
   }
   ConfigDescriptionBuilder& setScreenWidth(uint16_t screenWidth) {
