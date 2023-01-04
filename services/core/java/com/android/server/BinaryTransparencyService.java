@@ -273,7 +273,7 @@ public class BinaryTransparencyService extends SystemService {
                     String[] signerDigestHexStrings = computePackageSignerSha256Digests(
                             packageInfo.signingInfo);
 
-                    // log to Westworld
+                    // log to statsd
                     FrameworkStatsLog.write(FrameworkStatsLog.APEX_INFO_GATHERED,
                                             packageInfo.packageName,
                                             packageInfo.getLongVersionCode(),
