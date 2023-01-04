@@ -141,7 +141,7 @@ public class DisplayImeController implements DisplayController.OnDisplaysChanged
         if (pd == null) {
             return false;
         }
-        final InsetsSource imeSource = pd.mInsetsState.peekSource(InsetsState.ITYPE_IME);
+        final InsetsSource imeSource = pd.mInsetsState.peekSource(InsetsSource.ID_IME);
         return imeSource != null && pd.mImeSourceControl != null && imeSource.isVisible();
     }
 
@@ -245,13 +245,13 @@ public class DisplayImeController implements DisplayController.OnDisplaysChanged
                 return;
             }
 
-            updateImeVisibility(insetsState.isSourceOrDefaultVisible(InsetsState.ITYPE_IME,
+            updateImeVisibility(insetsState.isSourceOrDefaultVisible(InsetsSource.ID_IME,
                     WindowInsets.Type.ime()));
 
-            final InsetsSource newSource = insetsState.peekSource(InsetsState.ITYPE_IME);
+            final InsetsSource newSource = insetsState.peekSource(InsetsSource.ID_IME);
             final Rect newFrame = newSource != null ? newSource.getFrame() : null;
             final boolean newSourceVisible = newSource != null && newSource.isVisible();
-            final InsetsSource oldSource = mInsetsState.peekSource(InsetsState.ITYPE_IME);
+            final InsetsSource oldSource = mInsetsState.peekSource(InsetsSource.ID_IME);
             final Rect oldFrame = oldSource != null ? oldSource.getFrame() : null;
 
             mInsetsState.set(insetsState, true /* copySources */);
@@ -354,7 +354,7 @@ public class DisplayImeController implements DisplayController.OnDisplaysChanged
          * Sends the local visibility state back to window manager. Needed for legacy adjustForIme.
          */
         private void setVisibleDirectly(boolean visible) {
-            mInsetsState.setSourceVisible(InsetsState.ITYPE_IME, visible);
+            mInsetsState.setSourceVisible(InsetsSource.ID_IME, visible);
             mRequestedVisibleTypes = visible
                     ? mRequestedVisibleTypes | WindowInsets.Type.ime()
                     : mRequestedVisibleTypes & ~WindowInsets.Type.ime();
@@ -385,7 +385,7 @@ public class DisplayImeController implements DisplayController.OnDisplaysChanged
 
         private void startAnimation(final boolean show, final boolean forceRestart,
                 @Nullable ImeTracker.Token statsToken) {
-            final InsetsSource imeSource = mInsetsState.peekSource(InsetsState.ITYPE_IME);
+            final InsetsSource imeSource = mInsetsState.peekSource(InsetsSource.ID_IME);
             if (imeSource == null || mImeSourceControl == null) {
                 ImeTracker.get().onFailed(statsToken, ImeTracker.PHASE_WM_ANIMATION_CREATE);
                 return;

@@ -1879,8 +1879,8 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
             return false;
         }
         for (int i = mProvidedInsetsSources.size() - 1; i >= 0; i--) {
-            final int type = mProvidedInsetsSources.keyAt(i);
-            if ((InsetsState.toPublicType(type) & WindowInsets.Type.navigationBars()) != 0) {
+            final InsetsSource source = mProvidedInsetsSources.valueAt(i);
+            if (source.getType() == WindowInsets.Type.navigationBars()) {
                 return true;
             }
         }

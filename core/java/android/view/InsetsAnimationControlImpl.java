@@ -33,12 +33,12 @@ import static android.view.InsetsController.AnimationType;
 import static android.view.InsetsController.DEBUG;
 import static android.view.InsetsController.LAYOUT_INSETS_DURING_ANIMATION_SHOWN;
 import static android.view.InsetsController.LayoutInsetsDuringAnimation;
+import static android.view.InsetsSource.ID_IME;
 import static android.view.InsetsState.ISIDE_BOTTOM;
 import static android.view.InsetsState.ISIDE_FLOATING;
 import static android.view.InsetsState.ISIDE_LEFT;
 import static android.view.InsetsState.ISIDE_RIGHT;
 import static android.view.InsetsState.ISIDE_TOP;
-import static android.view.InsetsState.ITYPE_IME;
 import static android.view.WindowInsets.Type.ime;
 import static android.view.WindowManager.LayoutParams.TYPE_APPLICATION;
 import static android.view.inputmethod.ImeTracker.DEBUG_IME_VISIBILITY;
@@ -132,19 +132,19 @@ public class InsetsAnimationControlImpl implements InternalInsetsAnimationContro
         mController = controller;
         mInitialInsetsState = new InsetsState(state, true /* copySources */);
         if (frame != null) {
-            final SparseIntArray typeSideMap = new SparseIntArray();
-            mCurrentInsets = getInsetsFromState(mInitialInsetsState, frame, null /* typeSideMap */);
+            final SparseIntArray idSideMap = new SparseIntArray();
+            mCurrentInsets = getInsetsFromState(mInitialInsetsState, frame, null /* idSideMap */);
             mHiddenInsets = calculateInsets(mInitialInsetsState, frame, controls, false /* shown */,
-                    null /* typeSideMap */);
+                    null /* idSideMap */);
             mShownInsets = calculateInsets(mInitialInsetsState, frame, controls, true /* shown */,
-                    typeSideMap);
+                    idSideMap);
             mHasZeroInsetsIme = mShownInsets.bottom == 0 && controlsType(WindowInsets.Type.ime());
             if (mHasZeroInsetsIme) {
                 // IME has shownInsets of ZERO, and can't map to a side by default.
                 // Map zero insets IME to bottom, making it a special case of bottom insets.
-                typeSideMap.put(ITYPE_IME, ISIDE_BOTTOM);
+                idSideMap.put(ID_IME, ISIDE_BOTTOM);
             }
-            buildSideControlsMap(typeSideMap, mSideControlsMap, controls);
+            buildSideControlsMap(idSideMap, mSideControlsMap, controls);
         } else {
             // Passing a null frame indicates the caller wants to play the insets animation anyway,
             // no matter the source provides insets to the frame or not.
@@ -399,18 +399,18 @@ public class InsetsAnimationControlImpl implements InternalInsetsAnimationContro
     }
 
     private Insets getInsetsFromState(InsetsState state, Rect frame,
-            @Nullable @InternalInsetsSide SparseIntArray typeSideMap) {
+            @Nullable @InternalInsetsSide SparseIntArray idSideMap) {
         return state.calculateInsets(frame, null /* ignoringVisibilityState */,
                 false /* isScreenRound */, false /* alwaysConsumeSystemBars */,
                 LayoutParams.SOFT_INPUT_ADJUST_RESIZE /* legacySoftInputMode*/,
                 0 /* legacyWindowFlags */, 0 /* legacySystemUiFlags */, TYPE_APPLICATION,
-                WINDOWING_MODE_UNDEFINED, typeSideMap).getInsets(mTypes);
+                WINDOWING_MODE_UNDEFINED, idSideMap).getInsets(mTypes);
     }
 
     /** Computes the insets relative to the given frame. */
     private Insets calculateInsets(InsetsState state, Rect frame,
             SparseArray<InsetsSourceControl> controls, boolean shown,
-            @Nullable @InternalInsetsSide SparseIntArray typeSideMap) {
+            @Nullable @InternalInsetsSide SparseIntArray idSideMap) {
         for (int i = controls.size() - 1; i >= 0; i--) {
             final InsetsSourceControl control  = controls.valueAt(i);
             if (control == null) {
@@ -419,7 +419,7 @@ public class InsetsAnimationControlImpl implements InternalInsetsAnimationContro
             }
             state.setSourceVisible(control.getId(), shown);
         }
-        return getInsetsFromState(state, frame, typeSideMap);
+        return getInsetsFromState(state, frame, idSideMap);
     }
 
     /** Computes the insets from the insets hints of controls. */
@@ -521,12 +521,12 @@ public class InsetsAnimationControlImpl implements InternalInsetsAnimationContro
         }
     }
 
-    private static void buildSideControlsMap(SparseIntArray typeSideMap,
+    private static void buildSideControlsMap(SparseIntArray idSideMap,
             SparseSetArray<InsetsSourceControl> sideControlsMap,
             SparseArray<InsetsSourceControl> controls) {
-        for (int i = typeSideMap.size() - 1; i >= 0; i--) {
-            final int type = typeSideMap.keyAt(i);
-            final int side = typeSideMap.valueAt(i);
+        for (int i = idSideMap.size() - 1; i >= 0; i--) {
+            final int type = idSideMap.keyAt(i);
+            final int side = idSideMap.valueAt(i);
             final InsetsSourceControl control = controls.get(type);
             if (control == null) {
                 // If the types that we are controlling are less than the types that the system has,

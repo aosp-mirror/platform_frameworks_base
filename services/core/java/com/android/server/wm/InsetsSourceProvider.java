@@ -16,7 +16,7 @@
 
 package com.android.server.wm;
 
-import static android.view.InsetsState.ITYPE_IME;
+import static android.view.InsetsSource.ID_IME;
 
 import static com.android.internal.protolog.ProtoLogGroup.WM_DEBUG_WINDOW_INSETS;
 import static com.android.server.wm.InsetsSourceProviderProto.CAPTURED_LEASH;
@@ -541,7 +541,7 @@ abstract class InsetsSourceProvider {
             return false;
         }
         for (int i = 0; i < providers.length; i++) {
-            if (providers[i].type == ITYPE_IME) {
+            if (providers[i].type == ID_IME) {
                 return true;
             }
         }

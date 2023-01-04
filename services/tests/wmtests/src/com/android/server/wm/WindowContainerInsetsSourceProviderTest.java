@@ -16,7 +16,7 @@
 
 package com.android.server.wm;
 
-import static android.view.InsetsState.ITYPE_IME;
+import static android.view.InsetsSource.ID_IME;
 import static android.view.InsetsState.ITYPE_STATUS_BAR;
 import static android.view.WindowInsets.Type.ime;
 import static android.view.WindowInsets.Type.statusBars;
@@ -47,7 +47,7 @@ public class WindowContainerInsetsSourceProviderTest extends WindowTestsBase {
 
     private InsetsSource mSource = new InsetsSource(ITYPE_STATUS_BAR, statusBars());
     private WindowContainerInsetsSourceProvider mProvider;
-    private InsetsSource mImeSource = new InsetsSource(ITYPE_IME, ime());
+    private InsetsSource mImeSource = new InsetsSource(ID_IME, ime());
     private WindowContainerInsetsSourceProvider mImeProvider;
 
     @Before

@@ -19,8 +19,7 @@ package android.view;
 import static android.os.Trace.TRACE_TAG_VIEW;
 import static android.view.InsetsControllerProto.CONTROL;
 import static android.view.InsetsControllerProto.STATE;
-import static android.view.InsetsState.ITYPE_CAPTION_BAR;
-import static android.view.InsetsState.ITYPE_IME;
+import static android.view.InsetsSource.ID_IME;
 import static android.view.ViewRootImpl.CAPTION_ON_SHELL;
 import static android.view.WindowInsets.Type.FIRST;
 import static android.view.WindowInsets.Type.LAST;
@@ -248,6 +247,9 @@ public class InsetsController implements WindowInsetsController, InsetsAnimation
 
     /** The amount IME will move up/down when animating in floating mode. */
     private static final int FLOATING_IME_BOTTOM_INSET_DP = -80;
+
+    private static final int ID_CAPTION_BAR =
+            InsetsSource.createId(null /* owner */, 0 /* index */, captionBar());
 
     static final boolean DEBUG = false;
     static final boolean WARN = false;
@@ -744,7 +746,7 @@ public class InsetsController implements WindowInsetsController, InsetsAnimation
             WindowInsets insets = state.calculateInsets(mFrame, mState /* ignoringVisibilityState*/,
                     mLastInsets.isRound(), mLastInsets.shouldAlwaysConsumeSystemBars(),
                     mLastLegacySoftInputMode, mLastLegacyWindowFlags, mLastLegacySystemUiFlags,
-                    mWindowType, mLastWindowingMode, null /* typeSideMap */);
+                    mWindowType, mLastWindowingMode, null /* idSideMap */);
             mHost.dispatchWindowInsetsAnimationProgress(insets,
                     Collections.unmodifiableList(runningAnimations));
             if (DEBUG) {
@@ -760,7 +762,7 @@ public class InsetsController implements WindowInsetsController, InsetsAnimation
         };
 
         // Make mImeSourceConsumer always non-null.
-        mImeSourceConsumer = getSourceConsumer(new InsetsSource(ITYPE_IME, ime()));
+        mImeSourceConsumer = getSourceConsumer(new InsetsSource(ID_IME, ime()));
     }
 
     @VisibleForTesting
@@ -882,7 +884,7 @@ public class InsetsController implements WindowInsetsController, InsetsAnimation
         if (CAPTION_ON_SHELL) {
             return false;
         }
-        final InsetsSource source = mState.peekSource(ITYPE_CAPTION_BAR);
+        final InsetsSource source = mState.peekSource(ID_CAPTION_BAR);
         if (source == null && mCaptionInsetsHeight == 0) {
             return false;
         }
@@ -908,7 +910,7 @@ public class InsetsController implements WindowInsetsController, InsetsAnimation
         mLastLegacySystemUiFlags = legacySystemUiFlags;
         mLastInsets = mState.calculateInsets(mFrame, null /* ignoringVisibilityState*/,
                 isScreenRound, alwaysConsumeSystemBars, legacySoftInputMode, legacyWindowFlags,
-                legacySystemUiFlags, windowType, windowingMode, null /* typeSideMap */);
+                legacySystemUiFlags, windowType, windowingMode, null /* idSideMap */);
         return mLastInsets;
     }
 
@@ -1780,10 +1782,10 @@ public class InsetsController implements WindowInsetsController, InsetsAnimation
         if (mCaptionInsetsHeight != height) {
             mCaptionInsetsHeight = height;
             if (mCaptionInsetsHeight != 0) {
-                mState.getOrCreateSource(ITYPE_CAPTION_BAR, captionBar()).setFrame(
+                mState.getOrCreateSource(ID_CAPTION_BAR, captionBar()).setFrame(
                         mFrame.left, mFrame.top, mFrame.right, mFrame.top + mCaptionInsetsHeight);
             } else {
-                mState.removeSource(ITYPE_CAPTION_BAR);
+                mState.removeSource(ID_CAPTION_BAR);
             }
             mHost.notifyInsetsChanged();
         }

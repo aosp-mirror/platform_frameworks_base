@@ -86,11 +86,6 @@ public class InsetsState implements Parcelable {
             ITYPE_TOP_TAPPABLE_ELEMENT,
             ITYPE_RIGHT_TAPPABLE_ELEMENT,
             ITYPE_BOTTOM_TAPPABLE_ELEMENT,
-            ITYPE_LEFT_DISPLAY_CUTOUT,
-            ITYPE_TOP_DISPLAY_CUTOUT,
-            ITYPE_RIGHT_DISPLAY_CUTOUT,
-            ITYPE_BOTTOM_DISPLAY_CUTOUT,
-            ITYPE_IME,
             ITYPE_CLIMATE_BAR,
             ITYPE_EXTRA_NAVIGATION_BAR,
             ITYPE_LEFT_GENERIC_OVERLAY,
@@ -99,12 +94,6 @@ public class InsetsState implements Parcelable {
             ITYPE_BOTTOM_GENERIC_OVERLAY
     })
     public @interface InternalInsetsType {}
-
-    /**
-     * Special value to be used to by methods returning an {@link InternalInsetsType} to indicate
-     * that the objects/parameters aren't associated with an {@link InternalInsetsType}
-     */
-    public static final int ITYPE_INVALID = -1;
 
     public static final int ITYPE_STATUS_BAR = 0;
     public static final int ITYPE_NAVIGATION_BAR = 1;
@@ -120,18 +109,10 @@ public class InsetsState implements Parcelable {
     public static final int ITYPE_LEFT_MANDATORY_GESTURES = 9;
     public static final int ITYPE_RIGHT_MANDATORY_GESTURES = 10;
 
-    public static final int ITYPE_LEFT_DISPLAY_CUTOUT = 11;
-    public static final int ITYPE_TOP_DISPLAY_CUTOUT = 12;
-    public static final int ITYPE_RIGHT_DISPLAY_CUTOUT = 13;
-    public static final int ITYPE_BOTTOM_DISPLAY_CUTOUT = 14;
-
     public static final int ITYPE_LEFT_TAPPABLE_ELEMENT = 15;
     public static final int ITYPE_TOP_TAPPABLE_ELEMENT = 16;
     public static final int ITYPE_RIGHT_TAPPABLE_ELEMENT = 17;
     public static final int ITYPE_BOTTOM_TAPPABLE_ELEMENT = 18;
-
-    /** Input method window. */
-    public static final int ITYPE_IME = 19;
 
     /** Additional system decorations inset type. */
     public static final int ITYPE_CLIMATE_BAR = 20;
@@ -144,7 +125,7 @@ public class InsetsState implements Parcelable {
     public static final int ITYPE_BOTTOM_GENERIC_OVERLAY = 25;
 
     @Retention(RetentionPolicy.SOURCE)
-    @IntDef(prefix = "IINSETS_SIDE", value = {
+    @IntDef(prefix = "ISIDE", value = {
             ISIDE_LEFT,
             ISIDE_TOP,
             ISIDE_RIGHT,
@@ -217,7 +198,7 @@ public class InsetsState implements Parcelable {
             boolean isScreenRound, boolean alwaysConsumeSystemBars,
             int legacySoftInputMode, int legacyWindowFlags, int legacySystemUiFlags,
             int windowType, @WindowConfiguration.WindowingMode int windowingMode,
-            @Nullable @InternalInsetsSide SparseIntArray typeSideMap) {
+            @Nullable @InternalInsetsSide SparseIntArray idSideMap) {
         Insets[] typeInsetsMap = new Insets[Type.SIZE];
         Insets[] typeMaxInsetsMap = new Insets[Type.SIZE];
         boolean[] typeVisibilityMap = new boolean[Type.SIZE];
@@ -227,7 +208,7 @@ public class InsetsState implements Parcelable {
             final InsetsSource source = mSources.valueAt(i);
 
             processSource(source, relativeFrame, false /* ignoreVisibility */, typeInsetsMap,
-                    typeSideMap, typeVisibilityMap);
+                    idSideMap, typeVisibilityMap);
 
             // IME won't be reported in max insets as the size depends on the EditorInfo of the IME
             // target.
@@ -239,7 +220,7 @@ public class InsetsState implements Parcelable {
                     continue;
                 }
                 processSource(ignoringVisibilitySource, relativeFrameMax,
-                        true /* ignoreVisibility */, typeMaxInsetsMap, null /* typeSideMap */,
+                        true /* ignoreVisibility */, typeMaxInsetsMap, null /* idSideMap */,
                         null /* typeVisibilityMap */);
             }
         }
@@ -410,12 +391,12 @@ public class InsetsState implements Parcelable {
     }
 
     private void processSource(InsetsSource source, Rect relativeFrame, boolean ignoreVisibility,
-            Insets[] typeInsetsMap, @Nullable @InternalInsetsSide SparseIntArray typeSideMap,
+            Insets[] typeInsetsMap, @Nullable @InternalInsetsSide SparseIntArray idSideMap,
             @Nullable boolean[] typeVisibilityMap) {
         Insets insets = source.calculateInsets(relativeFrame, ignoreVisibility);
 
         final int type = source.getType();
-        processSourceAsPublicType(source, typeInsetsMap, typeSideMap, typeVisibilityMap,
+        processSourceAsPublicType(source, typeInsetsMap, idSideMap, typeVisibilityMap,
                 insets, type);
 
         if (type == Type.MANDATORY_SYSTEM_GESTURES) {
@@ -424,24 +405,24 @@ public class InsetsState implements Parcelable {
             //       Type.systemGestureInsets() as NORMAL | MANDATORY, but then we lose the
             //       ability to set systemGestureInsets() independently from
             //       mandatorySystemGestureInsets() in the Builder.
-            processSourceAsPublicType(source, typeInsetsMap, typeSideMap, typeVisibilityMap,
+            processSourceAsPublicType(source, typeInsetsMap, idSideMap, typeVisibilityMap,
                     insets, Type.SYSTEM_GESTURES);
         }
         if (type == Type.CAPTION_BAR) {
             // Caption should also be gesture and tappable elements. This should not be needed when
             // the caption is added from the shell, as the shell can add other types at the same
             // time.
-            processSourceAsPublicType(source, typeInsetsMap, typeSideMap, typeVisibilityMap,
+            processSourceAsPublicType(source, typeInsetsMap, idSideMap, typeVisibilityMap,
                     insets, Type.SYSTEM_GESTURES);
-            processSourceAsPublicType(source, typeInsetsMap, typeSideMap, typeVisibilityMap,
+            processSourceAsPublicType(source, typeInsetsMap, idSideMap, typeVisibilityMap,
                     insets, Type.MANDATORY_SYSTEM_GESTURES);
-            processSourceAsPublicType(source, typeInsetsMap, typeSideMap, typeVisibilityMap,
+            processSourceAsPublicType(source, typeInsetsMap, idSideMap, typeVisibilityMap,
                     insets, Type.TAPPABLE_ELEMENT);
         }
     }
 
     private void processSourceAsPublicType(InsetsSource source, Insets[] typeInsetsMap,
-            @InternalInsetsSide @Nullable SparseIntArray typeSideMap,
+            @InternalInsetsSide @Nullable SparseIntArray idSideMap,
             @Nullable boolean[] typeVisibilityMap, Insets insets, int type) {
         int index = indexOf(type);
         Insets existing = typeInsetsMap[index];
@@ -455,10 +436,10 @@ public class InsetsState implements Parcelable {
             typeVisibilityMap[index] = source.isVisible();
         }
 
-        if (typeSideMap != null) {
+        if (idSideMap != null) {
             @InternalInsetsSide int insetSide = getInsetSide(insets);
             if (insetSide != ISIDE_UNKNOWN) {
-                typeSideMap.put(source.getId(), insetSide);
+                idSideMap.put(source.getId(), insetSide);
             }
         }
     }
@@ -757,15 +738,6 @@ public class InsetsState implements Parcelable {
             result.add(ITYPE_RIGHT_MANDATORY_GESTURES);
             result.add(ITYPE_BOTTOM_MANDATORY_GESTURES);
         }
-        if ((types & Type.DISPLAY_CUTOUT) != 0) {
-            result.add(ITYPE_LEFT_DISPLAY_CUTOUT);
-            result.add(ITYPE_TOP_DISPLAY_CUTOUT);
-            result.add(ITYPE_RIGHT_DISPLAY_CUTOUT);
-            result.add(ITYPE_BOTTOM_DISPLAY_CUTOUT);
-        }
-        if ((types & Type.IME) != 0) {
-            result.add(ITYPE_IME);
-        }
         return result;
     }
 
@@ -789,8 +761,6 @@ public class InsetsState implements Parcelable {
                 return Type.SYSTEM_OVERLAYS;
             case ITYPE_CAPTION_BAR:
                 return Type.CAPTION_BAR;
-            case ITYPE_IME:
-                return Type.IME;
             case ITYPE_TOP_MANDATORY_GESTURES:
             case ITYPE_BOTTOM_MANDATORY_GESTURES:
             case ITYPE_LEFT_MANDATORY_GESTURES:
@@ -806,11 +776,6 @@ public class InsetsState implements Parcelable {
             case ITYPE_RIGHT_TAPPABLE_ELEMENT:
             case ITYPE_BOTTOM_TAPPABLE_ELEMENT:
                 return Type.TAPPABLE_ELEMENT;
-            case ITYPE_LEFT_DISPLAY_CUTOUT:
-            case ITYPE_TOP_DISPLAY_CUTOUT:
-            case ITYPE_RIGHT_DISPLAY_CUTOUT:
-            case ITYPE_BOTTOM_DISPLAY_CUTOUT:
-                return Type.DISPLAY_CUTOUT;
             default:
                 throw new IllegalArgumentException("Unknown type: " + type);
         }
@@ -845,7 +810,7 @@ public class InsetsState implements Parcelable {
 
     void dumpDebug(ProtoOutputStream proto, long fieldId) {
         final long token = proto.start(fieldId);
-        final InsetsSource source = mSources.get(ITYPE_IME);
+        final InsetsSource source = mSources.get(InsetsSource.ID_IME);
         if (source != null) {
             source.dumpDebug(proto, SOURCES);
         }
@@ -886,16 +851,6 @@ public class InsetsState implements Parcelable {
                 return "ITYPE_RIGHT_TAPPABLE_ELEMENT";
             case ITYPE_BOTTOM_TAPPABLE_ELEMENT:
                 return "ITYPE_BOTTOM_TAPPABLE_ELEMENT";
-            case ITYPE_LEFT_DISPLAY_CUTOUT:
-                return "ITYPE_LEFT_DISPLAY_CUTOUT";
-            case ITYPE_TOP_DISPLAY_CUTOUT:
-                return "ITYPE_TOP_DISPLAY_CUTOUT";
-            case ITYPE_RIGHT_DISPLAY_CUTOUT:
-                return "ITYPE_RIGHT_DISPLAY_CUTOUT";
-            case ITYPE_BOTTOM_DISPLAY_CUTOUT:
-                return "ITYPE_BOTTOM_DISPLAY_CUTOUT";
-            case ITYPE_IME:
-                return "ITYPE_IME";
             case ITYPE_CLIMATE_BAR:
                 return "ITYPE_CLIMATE_BAR";
             case ITYPE_EXTRA_NAVIGATION_BAR:
@@ -924,8 +879,8 @@ public class InsetsState implements Parcelable {
      * excluded.
      * @param excludingCaptionInsets {@code true} if we want to compare two InsetsState objects but
      *                                           ignore the caption insets source value.
-     * @param excludeInvisibleImeFrames If {@link #ITYPE_IME} frames should be ignored when IME is
-     *                                  not visible.
+     * @param excludeInvisibleImeFrames If {@link WindowInsets.Type#ime()} frames should be ignored
+     *                                  when IME is not visible.
      * @return {@code true} if the two InsetsState objects are equal, {@code false} otherwise.
      */
     @VisibleForTesting

@@ -205,8 +205,7 @@ public class InsetsSourceControl implements Parcelable {
 
     @Override
     public String toString() {
-        return "InsetsSourceControl: {"
-                + "mId=" + mId
+        return "InsetsSourceControl: {" + Integer.toHexString(mId)
                 + " mType=" + WindowInsets.Type.toString(mType)
                 + (mInitiallyVisible ? " initiallyVisible" : "")
                 + " mSurfacePosition=" + mSurfacePosition
@@ -217,7 +216,7 @@ public class InsetsSourceControl implements Parcelable {
 
     public void dump(String prefix, PrintWriter pw) {
         pw.print(prefix);
-        pw.print("InsetsSourceControl mId="); pw.print(mId);
+        pw.print("InsetsSourceControl mId="); pw.print(Integer.toHexString(mId));
         pw.print(" mType="); pw.print(WindowInsets.Type.toString(mType));
         pw.print(" mLeash="); pw.print(mLeash);
         pw.print(" mInitiallyVisible="); pw.print(mInitiallyVisible);

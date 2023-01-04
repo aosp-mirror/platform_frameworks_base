@@ -43,6 +43,7 @@ import android.graphics.Rect;
 import android.platform.test.annotations.Presubmit;
 import android.view.DisplayInfo;
 import android.view.InsetsFrameProvider;
+import android.view.InsetsSource;
 import android.view.InsetsState;
 import android.view.PrivacyIndicatorBounds;
 import android.view.RoundedCorners;
@@ -255,7 +256,7 @@ public class DisplayPolicyLayoutTests extends DisplayPolicyTestsBase {
                 mDisplayContent.getInsetsStateController().getRawInsetsState());
         // Exclude comparing IME insets because currently the simulated layout only focuses on the
         // insets from status bar and navigation bar.
-        realInsetsState.removeSource(InsetsState.ITYPE_IME);
+        realInsetsState.removeSource(InsetsSource.ID_IME);
         realInsetsState.removeSource(InsetsState.ITYPE_CAPTION_BAR);
 
         assertEquals(new ToStringComparatorWrapper<>(realInsetsState),

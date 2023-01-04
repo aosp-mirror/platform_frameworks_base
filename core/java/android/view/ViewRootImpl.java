@@ -22,7 +22,7 @@ import static android.os.IInputConstants.INVALID_INPUT_EVENT_ID;
 import static android.view.Display.DEFAULT_DISPLAY;
 import static android.view.Display.INVALID_DISPLAY;
 import static android.view.InputDevice.SOURCE_CLASS_NONE;
-import static android.view.InsetsState.ITYPE_IME;
+import static android.view.InsetsSource.ID_IME;
 import static android.view.View.PFLAG_DRAW_ANIMATION;
 import static android.view.View.SYSTEM_UI_FLAG_FULLSCREEN;
 import static android.view.View.SYSTEM_UI_FLAG_HIDE_NAVIGATION;
@@ -8957,7 +8957,7 @@ public final class ViewRootImpl implements ViewParent,
         if (mTranslator != null) {
             mTranslator.translateInsetsStateInScreenToAppWindow(insetsState);
         }
-        if (insetsState.isSourceOrDefaultVisible(ITYPE_IME, Type.ime())) {
+        if (insetsState.isSourceOrDefaultVisible(ID_IME, Type.ime())) {
             ImeTracing.getInstance().triggerClientDump("ViewRootImpl#dispatchResized",
                     getInsetsController().getHost().getInputMethodManager(), null /* icProto */);
         }
@@ -8989,7 +8989,7 @@ public final class ViewRootImpl implements ViewParent,
             mTranslator.translateInsetsStateInScreenToAppWindow(insetsState);
             mTranslator.translateSourceControlsInScreenToAppWindow(activeControls);
         }
-        if (insetsState != null && insetsState.isSourceOrDefaultVisible(ITYPE_IME, Type.ime())) {
+        if (insetsState != null && insetsState.isSourceOrDefaultVisible(ID_IME, Type.ime())) {
             ImeTracing.getInstance().triggerClientDump("ViewRootImpl#dispatchInsetsControlChanged",
                     getInsetsController().getHost().getInputMethodManager(), null /* icProto */);
         }

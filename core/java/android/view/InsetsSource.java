@@ -21,7 +21,9 @@ import static android.view.InsetsSourceProto.TYPE;
 import static android.view.InsetsSourceProto.VISIBLE;
 import static android.view.InsetsSourceProto.VISIBLE_FRAME;
 import static android.view.ViewRootImpl.CAPTION_ON_SHELL;
+import static android.view.WindowInsets.Type.ime;
 
+import android.annotation.IntRange;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.graphics.Insets;
@@ -39,6 +41,9 @@ import java.util.Objects;
  * @hide
  */
 public class InsetsSource implements Parcelable {
+
+    /** The insets source ID of IME */
+    public static final int ID_IME = createId(null, 0, ime());
 
     /**
      * An unique integer to identify this source across processes.
@@ -228,6 +233,29 @@ public class InsetsSource implements Parcelable {
     }
 
     /**
+     * Creates an identifier of an {@link InsetsSource}.
+     *
+     * @param owner An object owned by the owner. Only the owner can modify its own sources.
+     * @param index An owner may have multiple sources with the same type. For example, the system
+     *              server might have multiple display cutout sources. This is used to identify
+     *              which one is which. The value must be in a range of [0, 2047].
+     * @param type The {@link WindowInsets.Type.InsetsType type} of the source.
+     * @return a unique integer as the identifier.
+     */
+    public static int createId(Object owner, @IntRange(from = 0, to = 2047) int index,
+            @InsetsType int type) {
+        if (index < 0 || index >= 2048) {
+            throw new IllegalArgumentException();
+        }
+        // owner takes top 16 bits;
+        // index takes 11 bits since the 6th bit;
+        // type takes bottom 5 bits.
+        return (((owner != null ? owner.hashCode() : 1) % (1 << 16)) << 16)
+                + (index << 5)
+                + WindowInsets.Type.indexOf(type);
+    }
+
+    /**
      * Export the state of {@link InsetsSource} into a protocol buffer output stream.
      *
      * @param proto   Stream to write the state to
@@ -246,7 +274,7 @@ public class InsetsSource implements Parcelable {
 
     public void dump(String prefix, PrintWriter pw) {
         pw.print(prefix);
-        pw.print("InsetsSource id="); pw.print(mId);
+        pw.print("InsetsSource id="); pw.print(Integer.toHexString(mId));
         pw.print(" type="); pw.print(WindowInsets.Type.toString(mType));
         pw.print(" frame="); pw.print(mFrame.toShortString());
         if (mVisibleFrame != null) {
@@ -263,7 +291,7 @@ public class InsetsSource implements Parcelable {
     }
 
     /**
-     * @param excludeInvisibleImeFrames If {@link InsetsState#ITYPE_IME} frames should be ignored
+     * @param excludeInvisibleImeFrames If {@link WindowInsets.Type#ime()} frames should be ignored
      *                                  when IME is not visible.
      */
     public boolean equals(@Nullable Object o, boolean excludeInvisibleImeFrames) {
@@ -321,8 +349,7 @@ public class InsetsSource implements Parcelable {
 
     @Override
     public String toString() {
-        return "InsetsSource: {"
-                + "mId=" + mId
+        return "InsetsSource: {" + Integer.toHexString(mId)
                 + " mType=" + WindowInsets.Type.toString(mType)
                 + " mFrame=" + mFrame.toShortString()
                 + " mVisible=" + mVisible
