@@ -182,6 +182,7 @@ class LargeScreenShadeHeaderControllerCombinedTest : SysuiTestCase() {
             null
         }
         whenever(view.visibility).thenAnswer { _ -> viewVisibility }
+        whenever(view.alpha).thenReturn(1f)
 
         whenever(iconManagerFactory.create(any(), any())).thenReturn(iconManager)
 
