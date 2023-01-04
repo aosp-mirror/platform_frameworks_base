@@ -36,6 +36,7 @@ import android.media.IAudioServerStateDispatcher;
 import android.media.ICapturePresetDevicesRoleDispatcher;
 import android.media.ICommunicationDeviceDispatcher;
 import android.media.IDeviceVolumeBehaviorDispatcher;
+import android.media.IDevicesForAttributesCallback;
 import android.media.IMuteAwaitConnectionCallback;
 import android.media.IPlaybackConfigDispatcher;
 import android.media.IPreferredMixerAttributesDispatcher;
@@ -355,6 +356,12 @@ interface IAudioService {
     List<AudioDeviceAttributes> getDevicesForAttributes(in AudioAttributes attributes);
 
     List<AudioDeviceAttributes> getDevicesForAttributesUnprotected(in AudioAttributes attributes);
+
+    void addOnDevicesForAttributesChangedListener(in AudioAttributes attributes,
+            in IDevicesForAttributesCallback callback);
+
+    oneway void removeOnDevicesForAttributesChangedListener(
+            in IDevicesForAttributesCallback callback);
 
     int setAllowedCapturePolicy(in int capturePolicy);
 

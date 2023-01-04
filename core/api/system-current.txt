@@ -393,6 +393,8 @@ package android {
   }
 
   public static final class R.bool {
+    field public static final int config_enableDefaultNotes;
+    field public static final int config_enableDefaultNotesForWorkProfile;
     field public static final int config_enableQrCodeScannerOnLockScreen = 17891336; // 0x1110008
     field public static final int config_safetyProtectionEnabled;
     field public static final int config_sendPackageName = 17891328; // 0x1110000
@@ -429,6 +431,7 @@ package android {
     field public static final int config_defaultCallRedirection = 17039397; // 0x1040025
     field public static final int config_defaultCallScreening = 17039398; // 0x1040026
     field public static final int config_defaultDialer = 17039395; // 0x1040023
+    field public static final int config_defaultNotes;
     field public static final int config_defaultSms = 17039396; // 0x1040024
     field public static final int config_devicePolicyManagement = 17039421; // 0x104003d
     field public static final int config_feedbackIntentExtraKey = 17039391; // 0x104001f
@@ -6604,6 +6607,7 @@ package android.media {
   public class AudioManager {
     method @Deprecated public int abandonAudioFocus(android.media.AudioManager.OnAudioFocusChangeListener, android.media.AudioAttributes);
     method @RequiresPermission(android.Manifest.permission.MODIFY_AUDIO_ROUTING) public void addAssistantServicesUids(@NonNull int[]);
+    method @RequiresPermission(anyOf={android.Manifest.permission.MODIFY_AUDIO_ROUTING, "android.permission.QUERY_AUDIO_STATE"}) public void addOnDevicesForAttributesChangedListener(@NonNull android.media.AudioAttributes, @NonNull java.util.concurrent.Executor, @NonNull android.media.AudioManager.OnDevicesForAttributesChangedListener);
     method @RequiresPermission(android.Manifest.permission.MODIFY_AUDIO_ROUTING) public void addOnNonDefaultDevicesForStrategyChangedListener(@NonNull java.util.concurrent.Executor, @NonNull android.media.AudioManager.OnNonDefaultDevicesForStrategyChangedListener) throws java.lang.SecurityException;
     method @Deprecated @RequiresPermission(android.Manifest.permission.MODIFY_AUDIO_ROUTING) public void addOnPreferredDeviceForStrategyChangedListener(@NonNull java.util.concurrent.Executor, @NonNull android.media.AudioManager.OnPreferredDeviceForStrategyChangedListener) throws java.lang.SecurityException;
     method @RequiresPermission(android.Manifest.permission.MODIFY_AUDIO_ROUTING) public void addOnPreferredDevicesForCapturePresetChangedListener(@NonNull java.util.concurrent.Executor, @NonNull android.media.AudioManager.OnPreferredDevicesForCapturePresetChangedListener) throws java.lang.SecurityException;
@@ -6644,6 +6648,7 @@ package android.media {
     method public void registerVolumeGroupCallback(@NonNull java.util.concurrent.Executor, @NonNull android.media.AudioManager.VolumeGroupCallback);
     method @RequiresPermission(android.Manifest.permission.MODIFY_AUDIO_ROUTING) public void removeAssistantServicesUids(@NonNull int[]);
     method @RequiresPermission(android.Manifest.permission.MODIFY_AUDIO_ROUTING) public boolean removeDeviceAsNonDefaultForStrategy(@NonNull android.media.audiopolicy.AudioProductStrategy, @NonNull android.media.AudioDeviceAttributes);
+    method @RequiresPermission(anyOf={android.Manifest.permission.MODIFY_AUDIO_ROUTING, "android.permission.QUERY_AUDIO_STATE"}) public void removeOnDevicesForAttributesChangedListener(@NonNull android.media.AudioManager.OnDevicesForAttributesChangedListener);
     method @RequiresPermission(android.Manifest.permission.MODIFY_AUDIO_ROUTING) public void removeOnNonDefaultDevicesForStrategyChangedListener(@NonNull android.media.AudioManager.OnNonDefaultDevicesForStrategyChangedListener);
     method @Deprecated @RequiresPermission(android.Manifest.permission.MODIFY_AUDIO_ROUTING) public void removeOnPreferredDeviceForStrategyChangedListener(@NonNull android.media.AudioManager.OnPreferredDeviceForStrategyChangedListener);
     method @RequiresPermission(android.Manifest.permission.MODIFY_AUDIO_ROUTING) public void removeOnPreferredDevicesForCapturePresetChangedListener(@NonNull android.media.AudioManager.OnPreferredDevicesForCapturePresetChangedListener);
@@ -6699,6 +6704,10 @@ package android.media {
     field public static final int EVENT_CANCEL = 3; // 0x3
     field public static final int EVENT_CONNECTION = 1; // 0x1
     field public static final int EVENT_TIMEOUT = 2; // 0x2
+  }
+
+  public static interface AudioManager.OnDevicesForAttributesChangedListener {
+    method public void onDevicesForAttributesChanged(@NonNull android.media.AudioAttributes, @NonNull java.util.List<android.media.AudioDeviceAttributes>);
   }
 
   public static interface AudioManager.OnNonDefaultDevicesForStrategyChangedListener {

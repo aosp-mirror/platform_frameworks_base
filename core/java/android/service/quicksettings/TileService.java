@@ -15,6 +15,7 @@
  */
 package android.service.quicksettings;
 
+import android.annotation.NonNull;
 import android.annotation.SdkConstant;
 import android.annotation.SdkConstant.SdkConstantType;
 import android.annotation.SystemApi;
@@ -40,6 +41,8 @@ import android.view.View.OnAttachStateChangeListener;
 import android.view.WindowManager;
 
 import com.android.internal.R;
+
+import java.util.Objects;
 
 /**
  * A TileService provides the user a tile that can be added to Quick Settings.
@@ -341,9 +344,9 @@ public class TileService extends Service {
      * Will collapse Quick Settings after launching.
      *
      * @param pendingIntent A PendingIntent for an Activity to be launched immediately.
-     * @hide
      */
-    public void startActivityAndCollapse(PendingIntent pendingIntent) {
+    public final void startActivityAndCollapse(@NonNull PendingIntent pendingIntent) {
+        Objects.requireNonNull(pendingIntent);
         try {
             mService.startActivity(mTileToken, pendingIntent);
         } catch (RemoteException e) {

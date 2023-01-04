@@ -6,6 +6,7 @@ import static android.net.NetworkCapabilities.TRANSPORT_WIFI;
 
 import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertThrows;
@@ -206,6 +207,34 @@ public class JobStoreTest {
         JobSet jobStatusSet = new JobSet();
         mTaskStoreUnderTest.readJobMapFromDisk(jobStatusSet, true);
         assertEquals("Incorrect # of persisted tasks.", 0, jobStatusSet.size());
+    }
+
+    /**
+     * Test that dynamic constraints aren't written to disk.
+     */
+    @Test
+    public void testDynamicConstraintsNotPersisted() throws Exception {
+        JobInfo.Builder b = new Builder(42, mComponent).setPersisted(true);
+        JobStatus js = JobStatus.createFromJobInfo(b.build(), SOME_UID, null, -1, null, null);
+        js.addDynamicConstraints(JobStatus.CONSTRAINT_BATTERY_NOT_LOW
+                | JobStatus.CONSTRAINT_CHARGING
+                | JobStatus.CONSTRAINT_IDLE
+                | JobStatus.CONSTRAINT_STORAGE_NOT_LOW);
+        assertTrue(js.hasBatteryNotLowConstraint());
+        assertTrue(js.hasChargingConstraint());
+        assertTrue(js.hasIdleConstraint());
+        assertTrue(js.hasStorageNotLowConstraint());
+        mTaskStoreUnderTest.add(js);
+        waitForPendingIo();
+
+        final JobSet jobStatusSet = new JobSet();
+        mTaskStoreUnderTest.readJobMapFromDisk(jobStatusSet, true);
+        assertEquals("Job count is incorrect.", 1, jobStatusSet.size());
+        JobStatus loaded = jobStatusSet.getAllJobs().iterator().next();
+        assertFalse(loaded.hasBatteryNotLowConstraint());
+        assertFalse(loaded.hasChargingConstraint());
+        assertFalse(loaded.hasIdleConstraint());
+        assertFalse(loaded.hasStorageNotLowConstraint());
     }
 
     @Test

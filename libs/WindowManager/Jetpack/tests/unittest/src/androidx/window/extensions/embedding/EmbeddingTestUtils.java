@@ -34,11 +34,9 @@ import android.content.res.Resources;
 import android.graphics.Point;
 import android.graphics.Rect;
 import android.util.Pair;
-import android.view.WindowMetrics;
 import android.window.TaskFragmentInfo;
 import android.window.WindowContainerToken;
 
-import androidx.window.extensions.core.util.function.Predicate;
 import androidx.window.extensions.embedding.SplitAttributes.SplitType;
 import androidx.window.extensions.layout.DisplayFeature;
 import androidx.window.extensions.layout.FoldingFeature;
@@ -109,7 +107,7 @@ public class EmbeddingTestUtils {
     static SplitRule createSplitRule(@NonNull Activity primaryActivity,
             @NonNull Intent secondaryIntent, boolean clearTop) {
         final Pair<Activity, Intent> targetPair = new Pair<>(primaryActivity, secondaryIntent);
-        return createSplitPairRuleBuilder(
+        return new SplitPairRule.Builder(
                 activityPair -> false,
                 targetPair::equals,
                 w -> true)
@@ -146,7 +144,7 @@ public class EmbeddingTestUtils {
             @NonNull Activity secondaryActivity, int finishPrimaryWithSecondary,
             int finishSecondaryWithPrimary, boolean clearTop) {
         final Pair<Activity, Activity> targetPair = new Pair<>(primaryActivity, secondaryActivity);
-        return createSplitPairRuleBuilder(
+        return new SplitPairRule.Builder(
                 targetPair::equals,
                 activityIntentPair -> false,
                 w -> true)
@@ -224,27 +222,5 @@ public class EmbeddingTestUtils {
         final List<DisplayFeature> displayFeatures = new ArrayList<>();
         displayFeatures.add(foldingFeature);
         return new WindowLayoutInfo(displayFeatures);
-    }
-
-    static ActivityRule.Builder createActivityBuilder(
-            @NonNull Predicate<Activity> activityPredicate,
-            @NonNull Predicate<Intent> intentPredicate) {
-        return new ActivityRule.Builder(activityPredicate, intentPredicate);
-    }
-
-    static SplitPairRule.Builder createSplitPairRuleBuilder(
-            @NonNull Predicate<Pair<Activity, Activity>> activitiesPairPredicate,
-            @NonNull Predicate<Pair<Activity, Intent>> activityIntentPairPredicate,
-            @NonNull Predicate<WindowMetrics> windowMetricsPredicate) {
-        return new SplitPairRule.Builder(activitiesPairPredicate, activityIntentPairPredicate,
-                windowMetricsPredicate);
-    }
-
-    static SplitPlaceholderRule.Builder createSplitPlaceholderRuleBuilder(
-            @NonNull Intent placeholderIntent, @NonNull Predicate<Activity> activityPredicate,
-            @NonNull Predicate<Intent> intentPredicate,
-            @NonNull Predicate<WindowMetrics> windowMetricsPredicate) {
-        return new SplitPlaceholderRule.Builder(placeholderIntent, activityPredicate,
-                intentPredicate, windowMetricsPredicate);
     }
 }
