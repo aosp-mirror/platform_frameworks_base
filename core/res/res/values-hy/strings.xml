@@ -691,6 +691,8 @@
     <string name="permdesc_readMediaVideo" msgid="3846400073770403528">"Հավելվածին թույլ է տալիս կարդալ ձեր սարքի ընդհանուր հիշողության մեջ պահված վիդեո ֆայլերը։"</string>
     <string name="permlab_readMediaImages" msgid="4057590631020986789">"կարդալ ձեր սարքի ընդհանուր հիշողության մեջ պահված գրաֆիկական ֆայլերը"</string>
     <string name="permdesc_readMediaImages" msgid="5836219373138469259">"Հավելվածին թույլ է տալիս կարդալ ձեր սարքի ընդհանուր հիշողության մեջ պահված գրաֆիկական ֆայլերը։"</string>
+    <string name="permlab_readVisualUserSelect" msgid="5516204215354667586">"կարդալ օգտատիրոջ ընտրած գրաֆիկական և վիդեո ֆայլերն ընդհանուր պահոցից"</string>
+    <string name="permdesc_readVisualUserSelect" msgid="8027174717714968217">"Հավելվածին թույլ է տալիս կարդալ գրաֆիկական և վիդեո ֆայլերը, որոնք ընտրել եք ընդհանուր պահոցից։"</string>
     <string name="permlab_sdcardWrite" msgid="4863021819671416668">"փոփոխել կամ ջնջել ձեր ընդհանուր հիշողության բովանդակությունը"</string>
     <string name="permdesc_sdcardWrite" msgid="8376047679331387102">"Հավելվածին թույլ է տալիս փոփոխել ձեր ընդհանուր հիշողության պարունակությունը:"</string>
     <string name="permlab_use_sip" msgid="8250774565189337477">"կատարել կամ ստանալ SIP զանգեր"</string>
