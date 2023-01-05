@@ -36,6 +36,7 @@ import android.credentials.ui.RequestInfo
 import android.credentials.ui.BaseDialogResult
 import android.credentials.ui.ProviderPendingIntentResponse
 import android.credentials.ui.UserSelectionDialogResult
+import android.net.Uri
 import android.os.Binder
 import android.os.Bundle
 import android.os.ResultReceiver
@@ -294,7 +295,7 @@ class CredentialManagerRepo(
             credentialType: String,
     ): Entry {
         val slice = Slice.Builder(
-                Entry.CREDENTIAL_MANAGER_ENTRY_URI, SliceSpec(credentialType, 1)
+                Uri.EMPTY, SliceSpec(credentialType, 1)
         )
         return Entry(
                 key,
@@ -382,7 +383,7 @@ class CredentialManagerRepo(
       key,
       subkey,
       Slice.Builder(
-        Entry.CREDENTIAL_MANAGER_ENTRY_URI, SliceSpec(Entry.VERSION, 1)
+        Uri.EMPTY, SliceSpec("type", 1)
       ).build()
     )
   }
@@ -432,7 +433,6 @@ class CredentialManagerRepo(
         /*candidateQueryData=*/ Bundle(),
         /*requireSystemProvider=*/ false
       ),
-      /*isFirstUsage=*/false,
       "tribank"
     )
   }
@@ -448,7 +448,6 @@ class CredentialManagerRepo(
         /*candidateQueryData=*/ Bundle(),
         /*requireSystemProvider=*/ false
       ),
-      /*isFirstUsage=*/false,
       "tribank"
     )
   }
@@ -463,7 +462,6 @@ class CredentialManagerRepo(
         /*candidateQueryData=*/ Bundle(),
         /*requireSystemProvider=*/ false
       ),
-      /*isFirstUsage=*/false,
       "tribank"
     )
   }
@@ -479,7 +477,6 @@ class CredentialManagerRepo(
             TYPE_PUBLIC_KEY_CREDENTIAL, Bundle(), Bundle(), /*requireSystemProvider=*/ false)
         )
         .build(),
-      /*isFirstUsage=*/false,
       "tribank.us"
     )
   }

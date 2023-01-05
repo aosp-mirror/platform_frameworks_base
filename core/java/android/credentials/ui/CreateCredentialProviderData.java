@@ -18,6 +18,7 @@ package android.credentials.ui;
 
 import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.annotation.TestApi;
 import android.os.Parcel;
 import android.os.Parcelable;
 
@@ -31,19 +32,18 @@ import java.util.List;
  *
  * @hide
  */
-public class CreateCredentialProviderData extends ProviderData implements Parcelable {
+@TestApi
+public final class CreateCredentialProviderData extends ProviderData implements Parcelable {
     @NonNull
     private final List<Entry> mSaveEntries;
-    private final boolean mIsDefaultProvider;
     @Nullable
     private final Entry mRemoteEntry;
 
     public CreateCredentialProviderData(
             @NonNull String providerFlattenedComponentName, @NonNull List<Entry> saveEntries,
-            boolean isDefaultProvider, @Nullable Entry remoteEntry) {
+            @Nullable Entry remoteEntry) {
         super(providerFlattenedComponentName);
         mSaveEntries = saveEntries;
-        mIsDefaultProvider = isDefaultProvider;
         mRemoteEntry = remoteEntry;
     }
 
@@ -52,24 +52,18 @@ public class CreateCredentialProviderData extends ProviderData implements Parcel
         return mSaveEntries;
     }
 
-    public boolean isDefaultProvider() {
-        return mIsDefaultProvider;
-    }
-
     @Nullable
     public Entry getRemoteEntry() {
         return mRemoteEntry;
     }
 
-    protected CreateCredentialProviderData(@NonNull Parcel in) {
+    private CreateCredentialProviderData(@NonNull Parcel in) {
         super(in);
 
         List<Entry> credentialEntries = new ArrayList<>();
         in.readTypedList(credentialEntries, Entry.CREATOR);
         mSaveEntries = credentialEntries;
         AnnotationValidations.validate(NonNull.class, null, mSaveEntries);
-
-        mIsDefaultProvider = in.readBoolean();
 
         Entry remoteEntry = in.readTypedObject(Entry.CREATOR);
         mRemoteEntry = remoteEntry;
@@ -79,7 +73,6 @@ public class CreateCredentialProviderData extends ProviderData implements Parcel
     public void writeToParcel(@NonNull Parcel dest, int flags) {
         super.writeToParcel(dest, flags);
         dest.writeTypedList(mSaveEntries);
-        dest.writeBoolean(isDefaultProvider());
         dest.writeTypedObject(mRemoteEntry, flags);
     }
 
@@ -88,29 +81,30 @@ public class CreateCredentialProviderData extends ProviderData implements Parcel
         return 0;
     }
 
-    public static final @NonNull Creator<CreateCredentialProviderData> CREATOR =
-            new Creator<CreateCredentialProviderData>() {
-        @Override
-        public CreateCredentialProviderData createFromParcel(@NonNull Parcel in) {
-            return new CreateCredentialProviderData(in);
-        }
+    @NonNull
+    public static final Creator<CreateCredentialProviderData> CREATOR =
+            new Creator<>() {
+                @Override
+                public CreateCredentialProviderData createFromParcel(@NonNull Parcel in) {
+                    return new CreateCredentialProviderData(in);
+                }
 
-        @Override
-        public CreateCredentialProviderData[] newArray(int size) {
-            return new CreateCredentialProviderData[size];
-        }
-    };
+                @Override
+                public CreateCredentialProviderData[] newArray(int size) {
+                    return new CreateCredentialProviderData[size];
+                }
+            };
 
     /**
      * Builder for {@link CreateCredentialProviderData}.
      *
      * @hide
      */
-    public static class Builder {
-        private @NonNull String mProviderFlattenedComponentName;
-        private @NonNull List<Entry> mSaveEntries = new ArrayList<>();
-        private boolean mIsDefaultProvider = false;
-        private @Nullable Entry mRemoteEntry = null;
+    @TestApi
+    public static final class Builder {
+        @NonNull private String mProviderFlattenedComponentName;
+        @NonNull private List<Entry> mSaveEntries = new ArrayList<>();
+        @Nullable private Entry mRemoteEntry = null;
 
         /** Constructor with required properties. */
         public Builder(@NonNull String providerFlattenedComponentName) {
@@ -121,13 +115,6 @@ public class CreateCredentialProviderData extends ProviderData implements Parcel
         @NonNull
         public Builder setSaveEntries(@NonNull List<Entry> credentialEntries) {
             mSaveEntries = credentialEntries;
-            return this;
-        }
-
-        /** Sets whether this provider is the user's selected default provider. */
-        @NonNull
-        public Builder setIsDefaultProvider(boolean isDefaultProvider) {
-            mIsDefaultProvider = isDefaultProvider;
             return this;
         }
 
@@ -142,7 +129,7 @@ public class CreateCredentialProviderData extends ProviderData implements Parcel
         @NonNull
         public CreateCredentialProviderData build() {
             return new CreateCredentialProviderData(mProviderFlattenedComponentName,
-                    mSaveEntries, mIsDefaultProvider, mRemoteEntry);
+                    mSaveEntries, mRemoteEntry);
         }
     }
 }

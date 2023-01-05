@@ -907,6 +907,8 @@ PackageLayering: android.util.FeatureFlagUtils:
     Method parameter type `android.content.Context` violates package layering: nothing in `package android.util` should depend on `package android.content`
 
 
+ParcelConstructor: android.credentials.ui.ProviderData#ProviderData(android.os.Parcel):
+    Parcelable inflation is exposed through CREATOR, not raw constructors, in android.credentials.ui.ProviderData
 ParcelConstructor: android.os.StrictMode.ViolationInfo#ViolationInfo(android.os.Parcel):
     Parcelable inflation is exposed through CREATOR, not raw constructors, in android.os.StrictMode.ViolationInfo
 ParcelConstructor: android.os.health.HealthStatsParceler#HealthStatsParceler(android.os.Parcel):

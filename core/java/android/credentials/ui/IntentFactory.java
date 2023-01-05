@@ -16,6 +16,9 @@
 
 package android.credentials.ui;
 
+import android.annotation.NonNull;
+import android.annotation.SuppressLint;
+import android.annotation.TestApi;
 import android.content.ComponentName;
 import android.content.Intent;
 import android.content.res.Resources;
@@ -29,13 +32,17 @@ import java.util.ArrayList;
  *
  * @hide
  */
+@TestApi
 public class IntentFactory {
-    /** Generate a new launch intent to the . */
-    public static Intent newIntent(
-            RequestInfo requestInfo,
-            ArrayList<ProviderData> enabledProviderDataList,
-            ArrayList<DisabledProviderData> disabledProviderDataList,
-            ResultReceiver resultReceiver) {
+    /** Generate a new launch intent to the Credential Selector UI. */
+    @NonNull
+    public static Intent createCredentialSelectorIntent(
+            @NonNull RequestInfo requestInfo,
+            @SuppressLint("ConcreteCollection") // Concrete collection needed for marshalling.
+            @NonNull ArrayList<ProviderData> enabledProviderDataList,
+            @SuppressLint("ConcreteCollection") // Concrete collection needed for marshalling.
+            @NonNull ArrayList<DisabledProviderData> disabledProviderDataList,
+            @NonNull ResultReceiver resultReceiver) {
         Intent intent = new Intent();
         ComponentName componentName = ComponentName.unflattenFromString(
                 Resources.getSystem().getString(

@@ -17,6 +17,8 @@
 package android.credentials.ui;
 
 import android.annotation.NonNull;
+import android.annotation.SuppressLint;
+import android.annotation.TestApi;
 import android.os.Parcel;
 import android.os.Parcelable;
 
@@ -27,6 +29,8 @@ import com.android.internal.util.AnnotationValidations;
  *
  * @hide
  */
+@TestApi
+@SuppressLint({"ParcelCreator", "ParcelNotFinal"})
 public abstract class ProviderData implements Parcelable {
 
     /**
