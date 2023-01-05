@@ -185,7 +185,7 @@ public final class NavBarHelper implements
     public void registerNavTaskStateUpdater(NavbarTaskbarStateUpdater listener) {
         mA11yEventListeners.add(listener);
         listener.updateAccessibilityServicesState();
-        listener.updateAssistantAvailable(mAssistantAvailable);
+        listener.updateAssistantAvailable(mAssistantAvailable, mLongPressHomeEnabled);
     }
 
     public void removeNavTaskStateUpdater(NavbarTaskbarStateUpdater listener) {
@@ -198,9 +198,10 @@ public final class NavBarHelper implements
         }
     }
 
-    private void dispatchAssistantEventUpdate(boolean assistantAvailable) {
+    private void dispatchAssistantEventUpdate(boolean assistantAvailable,
+            boolean longPressHomeEnabled) {
         for (NavbarTaskbarStateUpdater listener : mA11yEventListeners) {
-            listener.updateAssistantAvailable(assistantAvailable);
+            listener.updateAssistantAvailable(assistantAvailable, longPressHomeEnabled);
         }
     }
 
@@ -311,7 +312,7 @@ public final class NavBarHelper implements
         mAssistantAvailable = assistantAvailableForUser
                 && mAssistantTouchGestureEnabled
                 && QuickStepContract.isGesturalMode(mNavBarMode);
-        dispatchAssistantEventUpdate(mAssistantAvailable);
+        dispatchAssistantEventUpdate(mAssistantAvailable, mLongPressHomeEnabled);
     }
 
     public boolean getLongPressHomeEnabled() {
@@ -366,7 +367,7 @@ public final class NavBarHelper implements
      */
     public interface NavbarTaskbarStateUpdater {
         void updateAccessibilityServicesState();
-        void updateAssistantAvailable(boolean available);
+        void updateAssistantAvailable(boolean available, boolean longPressHomeEnabled);
     }
 
     /** Data class to help Taskbar/Navbar initiate state correctly when switching between the two.*/
