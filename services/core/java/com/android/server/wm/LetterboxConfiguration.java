@@ -1061,7 +1061,7 @@ final class LetterboxConfiguration {
     // DeviceConfig.OnPropertiesChangedListener
     private static boolean isCameraCompatTreatmentAllowed() {
         return DeviceConfig.getBoolean(DeviceConfig.NAMESPACE_WINDOW_MANAGER,
-                "enable_camera_compat_treatment", false);
+                "enable_compat_camera_treatment", true);
     }
 
     /** Whether camera compatibility refresh is enabled. */
