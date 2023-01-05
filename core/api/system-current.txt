@@ -16499,6 +16499,7 @@ package android.view.accessibility {
 
   public abstract class AccessibilityDisplayProxy {
     ctor public AccessibilityDisplayProxy(int, @NonNull java.util.concurrent.Executor, @NonNull java.util.List<android.accessibilityservice.AccessibilityServiceInfo>);
+    method @Nullable public android.view.accessibility.AccessibilityNodeInfo findFocus(int);
     method public int getDisplayId();
     method @NonNull public final java.util.List<android.accessibilityservice.AccessibilityServiceInfo> getInstalledAndEnabledServices();
     method @NonNull public java.util.List<android.view.accessibility.AccessibilityWindowInfo> getWindows();

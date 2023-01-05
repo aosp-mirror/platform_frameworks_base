@@ -921,8 +921,6 @@ public final class AccessibilityInteractionClient
      *
      * @param connectionId The id of a connection for interacting with the system.
      * @param accessibilityWindowId A unique window id. Use
-     *     {@link AccessibilityWindowInfo#ACTIVE_WINDOW_ID}
-     *     to query the currently active window. Use
      *     {@link AccessibilityWindowInfo#ANY_WINDOW_ID} to query all
      *     windows
      * @param accessibilityNodeId A unique view id or virtual descendant id from
