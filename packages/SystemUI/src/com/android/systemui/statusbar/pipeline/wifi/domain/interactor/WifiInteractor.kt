@@ -65,6 +65,7 @@ class WifiInteractorImpl @Inject constructor(
 
     override val ssid: Flow<String?> = wifiRepository.wifiNetwork.map { info ->
         when (info) {
+            is WifiNetworkModel.Unavailable -> null
             is WifiNetworkModel.Inactive -> null
             is WifiNetworkModel.CarrierMerged -> null
             is WifiNetworkModel.Active -> when {

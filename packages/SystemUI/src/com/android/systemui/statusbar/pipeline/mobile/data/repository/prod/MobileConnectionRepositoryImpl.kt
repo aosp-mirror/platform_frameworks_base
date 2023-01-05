@@ -48,6 +48,7 @@ import com.android.systemui.statusbar.pipeline.mobile.data.model.ResolvedNetwork
 import com.android.systemui.statusbar.pipeline.mobile.data.model.toDataConnectionType
 import com.android.systemui.statusbar.pipeline.mobile.data.model.toNetworkNameModel
 import com.android.systemui.statusbar.pipeline.mobile.data.repository.MobileConnectionRepository
+import com.android.systemui.statusbar.pipeline.mobile.data.repository.MobileConnectionRepository.Companion.DEFAULT_NUM_LEVELS
 import com.android.systemui.statusbar.pipeline.mobile.util.MobileMappingsProxy
 import com.android.systemui.statusbar.pipeline.shared.ConnectivityPipelineLogger
 import com.android.systemui.statusbar.pipeline.shared.data.model.toMobileDataActivityModel
@@ -63,6 +64,7 @@ import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.distinctUntilChanged
+import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.mapLatest
 import kotlinx.coroutines.flow.merge
 import kotlinx.coroutines.flow.onEach
@@ -78,7 +80,6 @@ class MobileConnectionRepositoryImpl(
     private val telephonyManager: TelephonyManager,
     private val globalSettings: GlobalSettings,
     broadcastDispatcher: BroadcastDispatcher,
-    defaultDataSubId: StateFlow<Int>,
     globalMobileDataSettingChangedEvent: Flow<Unit>,
     mobileMappingsProxy: MobileMappingsProxy,
     bgDispatcher: CoroutineDispatcher,
@@ -185,14 +186,12 @@ class MobileConnectionRepositoryImpl(
                                         OVERRIDE_NETWORK_TYPE_NONE
                                 ) {
                                     DefaultNetworkType(
-                                        telephonyDisplayInfo.networkType,
                                         mobileMappingsProxy.toIconKey(
                                             telephonyDisplayInfo.networkType
                                         )
                                     )
                                 } else {
                                     OverrideNetworkType(
-                                        telephonyDisplayInfo.overrideNetworkType,
                                         mobileMappingsProxy.toIconKeyOverride(
                                             telephonyDisplayInfo.overrideNetworkType
                                         )
@@ -213,6 +212,12 @@ class MobileConnectionRepositoryImpl(
             )
             .stateIn(scope, SharingStarted.WhileSubscribed(), state)
     }
+
+    // This will become variable based on [CarrierConfigManager.KEY_INFLATE_SIGNAL_STRENGTH_BOOL]
+    // once it's wired up inside of [CarrierConfigTracker].
+    override val numberOfLevels: StateFlow<Int> =
+        flowOf(DEFAULT_NUM_LEVELS)
+            .stateIn(scope, SharingStarted.WhileSubscribed(), DEFAULT_NUM_LEVELS)
 
     /** Produces whenever the mobile data setting changes for this subId */
     private val localMobileDataSettingChangedEvent: Flow<Unit> = conflatedCallbackFlow {
@@ -284,20 +289,6 @@ class MobileConnectionRepositoryImpl(
 
     private fun dataConnectionAllowed(): Boolean = telephonyManager.isDataConnectionAllowed
 
-    override val isDefaultDataSubscription: StateFlow<Boolean> = run {
-        val initialValue = defaultDataSubId.value == subId
-        defaultDataSubId
-            .mapLatest { it == subId }
-            .distinctUntilChanged()
-            .logDiffsForTable(
-                mobileLogger,
-                columnPrefix = "",
-                columnName = "isDefaultDataSub",
-                initialValue = initialValue,
-            )
-            .stateIn(scope, SharingStarted.WhileSubscribed(), initialValue)
-    }
-
     class Factory
     @Inject
     constructor(
@@ -315,7 +306,6 @@ class MobileConnectionRepositoryImpl(
             subId: Int,
             defaultNetworkName: NetworkNameModel,
             networkNameSeparator: String,
-            defaultDataSubId: StateFlow<Int>,
             globalMobileDataSettingChangedEvent: Flow<Unit>,
         ): MobileConnectionRepository {
             val mobileLogger = logFactory.create(tableBufferLogName(subId), 100)
@@ -328,7 +318,6 @@ class MobileConnectionRepositoryImpl(
                 telephonyManager.createForSubscriptionId(subId),
                 globalSettings,
                 broadcastDispatcher,
-                defaultDataSubId,
                 globalMobileDataSettingChangedEvent,
                 mobileMappingsProxy,
                 bgDispatcher,
