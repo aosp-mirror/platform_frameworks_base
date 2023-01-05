@@ -1089,6 +1089,7 @@
          (112 - 40) / 2 = 36dp -->
     <dimen name="media_ttt_generic_icon_padding">36dp</dimen>
     <dimen name="media_ttt_receiver_vert_translation">40dp</dimen>
+    <dimen name="media_ttt_receiver_icon_bottom_margin">10dp</dimen>
 
     <!-- Window magnification -->
     <dimen name="magnification_border_drag_size">35dp</dimen>
