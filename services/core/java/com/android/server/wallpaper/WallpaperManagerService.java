@@ -2874,8 +2874,8 @@ public class WallpaperManagerService extends IWallpaperManager.Stub
         setWallpaperComponent(name, UserHandle.getCallingUserId(), FLAG_SYSTEM);
     }
 
-    private void setWallpaperComponent(ComponentName name, @SetWallpaperFlags int which,
-            int userId) {
+    @VisibleForTesting
+    void setWallpaperComponent(ComponentName name, @SetWallpaperFlags int which, int userId) {
         userId = ActivityManager.handleIncomingUser(getCallingPid(), getCallingUid(), userId,
                 false /* all */, true /* full */, "changing live wallpaper", null /* pkg */);
         checkPermission(android.Manifest.permission.SET_WALLPAPER_COMPONENT);
