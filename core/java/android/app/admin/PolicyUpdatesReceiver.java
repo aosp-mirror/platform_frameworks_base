@@ -17,9 +17,7 @@
 package android.app.admin;
 
 import android.annotation.BroadcastBehavior;
-import android.annotation.IntDef;
 import android.annotation.NonNull;
-import android.annotation.Nullable;
 import android.annotation.SdkConstant;
 import android.content.BroadcastReceiver;
 import android.content.Context;
@@ -27,8 +25,6 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.util.Log;
 
-import java.lang.annotation.Retention;
-import java.lang.annotation.RetentionPolicy;
 import java.util.Objects;
 
 /**
@@ -48,31 +44,6 @@ import java.util.Objects;
  */
 public abstract class PolicyUpdatesReceiver extends BroadcastReceiver {
     private static String TAG = "PolicyUpdatesReceiver";
-
-    /**
-     * Result code passed in to {@link #onPolicySetResult} to indicate that the policy has been
-     * set successfully.
-     */
-    public static final int POLICY_SET_RESULT_SUCCESS = 0;
-
-    /**
-     * Result code passed in to {@link #onPolicySetResult} to indicate that the policy has NOT been
-     * set, a {@link PolicyUpdateReason} will be passed in to {@link #onPolicySetResult} to indicate
-     * the reason.
-     */
-    public static final int POLICY_SET_RESULT_FAILURE = -1;
-
-    /**
-     * Result codes passed in to {@link #onPolicySetResult}.
-     *
-     * @hide
-     */
-    @Retention(RetentionPolicy.SOURCE)
-    @IntDef(flag = true, prefix = { "POLICY_SET_RESULT_" }, value = {
-            POLICY_SET_RESULT_SUCCESS,
-            POLICY_SET_RESULT_FAILURE,
-    })
-    public @interface ResultCode {}
 
     /**
      * Action for a broadcast sent to admins to communicate back the result of setting a policy in
@@ -152,14 +123,8 @@ public abstract class PolicyUpdatesReceiver extends BroadcastReceiver {
     /**
      * @hide
      */
-    public static final String EXTRA_POLICY_SET_RESULT_KEY =
-            "android.app.admin.extra.POLICY_SET_RESULT_KEY";
-
-    /**
-     * @hide
-     */
-    public static final String EXTRA_POLICY_UPDATE_REASON_KEY =
-            "android.app.admin.extra.POLICY_UPDATE_REASON_KEY";
+    public static final String EXTRA_POLICY_UPDATE_RESULT_KEY =
+            "android.app.admin.extra.POLICY_UPDATE_RESULT_KEY";
 
     /**
      * @hide
@@ -180,7 +145,7 @@ public abstract class PolicyUpdatesReceiver extends BroadcastReceiver {
             case ACTION_DEVICE_POLICY_SET_RESULT:
                 Log.i(TAG, "Received ACTION_DEVICE_POLICY_SET_RESULT");
                 onPolicySetResult(context, getPolicyKey(intent), getPolicyExtraBundle(intent),
-                        getTargetUser(intent), getPolicyResult(intent), getFailureReason(intent));
+                        getTargetUser(intent), getPolicyChangedReason(intent));
                 break;
             case ACTION_DEVICE_POLICY_CHANGED:
                 Log.i(TAG, "Received ACTION_DEVICE_POLICY_CHANGED");
@@ -205,17 +170,6 @@ public abstract class PolicyUpdatesReceiver extends BroadcastReceiver {
     /**
      * @hide
      */
-    @ResultCode
-    static int getPolicyResult(Intent intent) {
-        if (!intent.hasExtra(EXTRA_POLICY_SET_RESULT_KEY)) {
-            throw new IllegalArgumentException("Result has to be provided.");
-        }
-        return intent.getIntExtra(EXTRA_POLICY_SET_RESULT_KEY, POLICY_SET_RESULT_FAILURE);
-    }
-
-    /**
-     * @hide
-     */
     @NonNull
     static Bundle getPolicyExtraBundle(Intent intent) {
         Bundle bundle = intent.getBundleExtra(EXTRA_POLICY_BUNDLE_KEY);
@@ -225,22 +179,14 @@ public abstract class PolicyUpdatesReceiver extends BroadcastReceiver {
     /**
      * @hide
      */
-    @Nullable
-    static PolicyUpdateReason getFailureReason(Intent intent) {
-        if (getPolicyResult(intent) != POLICY_SET_RESULT_FAILURE) {
-            return null;
-        }
-        return getPolicyChangedReason(intent);
-    }
-
-    /**
-     * @hide
-     */
     @NonNull
-    static PolicyUpdateReason getPolicyChangedReason(Intent intent) {
+    static PolicyUpdateResult getPolicyChangedReason(Intent intent) {
+        if (!intent.hasExtra(EXTRA_POLICY_UPDATE_RESULT_KEY)) {
+            throw new IllegalArgumentException("PolicyUpdateResult has to be provided.");
+        }
         int reasonCode = intent.getIntExtra(
-                EXTRA_POLICY_UPDATE_REASON_KEY, PolicyUpdateReason.REASON_UNKNOWN);
-        return new PolicyUpdateReason(reasonCode);
+                EXTRA_POLICY_UPDATE_RESULT_KEY, PolicyUpdateResult.RESULT_FAILURE_UNKNOWN);
+        return new PolicyUpdateResult(reasonCode);
     }
 
     /**
@@ -276,19 +222,18 @@ public abstract class PolicyUpdatesReceiver extends BroadcastReceiver {
      *                               Each policy will document the required additional params if
      *                               needed.
      * @param targetUser The {@link TargetUser} which this policy relates to.
-     * @param result Indicates whether the policy has been set successfully,
-     *               (see {@link PolicyUpdatesReceiver#POLICY_SET_RESULT_SUCCESS} and
-     *               {@link PolicyUpdatesReceiver#POLICY_SET_RESULT_FAILURE}).
-     * @param reason Indicates the reason the policy failed to apply, {@code null} if the policy was
-     *               applied successfully.
+     * @param policyUpdateResult Indicates whether the policy has been set successfully
+     *                           ({@link PolicyUpdateResult#RESULT_SUCCESS}) or the reason it
+     *                           failed to apply (e.g.
+     *                           {@link PolicyUpdateResult#RESULT_FAILURE_CONFLICTING_ADMIN_POLICY},
+     *                           etc).
      */
     public void onPolicySetResult(
             @NonNull Context context,
             @NonNull String policyKey,
             @NonNull Bundle additionalPolicyParams,
             @NonNull TargetUser targetUser,
-            @ResultCode int result,
-            @Nullable PolicyUpdateReason reason) {}
+            @NonNull PolicyUpdateResult policyUpdateResult) {}
 
     // TODO(b/260847505): Add javadocs to explain which DPM APIs are supported
     // TODO(b/261430877): Add javadocs to explain when will this get triggered
@@ -310,12 +255,17 @@ public abstract class PolicyUpdatesReceiver extends BroadcastReceiver {
      *                               Each policy will document the required additional params if
      *                               needed.
      * @param targetUser The {@link TargetUser} which this policy relates to.
-     * @param reason Indicates the reason the policy value has changed.
+     * @param policyUpdateResult Indicates the reason the policy value has changed
+     *                           (e.g. {@link PolicyUpdateResult#RESULT_SUCCESS} if the policy has
+     *                           changed to the value set by the admin,
+     *                           {@link PolicyUpdateResult#RESULT_FAILURE_CONFLICTING_ADMIN_POLICY}
+     *                           if the policy has changed because another admin has set a
+     *                           conflicting policy, etc)
      */
     public void onPolicyChanged(
             @NonNull Context context,
             @NonNull String policyKey,
             @NonNull Bundle additionalPolicyParams,
             @NonNull TargetUser targetUser,
-            @NonNull PolicyUpdateReason reason) {}
+            @NonNull PolicyUpdateResult policyUpdateResult) {}
 }

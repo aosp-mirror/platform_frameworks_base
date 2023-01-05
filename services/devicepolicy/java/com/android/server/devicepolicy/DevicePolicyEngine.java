@@ -16,12 +16,10 @@
 
 package com.android.server.devicepolicy;
 
-import static android.app.admin.PolicyUpdateReason.REASON_CONFLICTING_ADMIN_POLICY;
-import static android.app.admin.PolicyUpdatesReceiver.EXTRA_POLICY_SET_RESULT_KEY;
+import static android.app.admin.PolicyUpdateResult.RESULT_FAILURE_CONFLICTING_ADMIN_POLICY;
+import static android.app.admin.PolicyUpdateResult.RESULT_SUCCESS;
 import static android.app.admin.PolicyUpdatesReceiver.EXTRA_POLICY_TARGET_USER_ID;
-import static android.app.admin.PolicyUpdatesReceiver.EXTRA_POLICY_UPDATE_REASON_KEY;
-import static android.app.admin.PolicyUpdatesReceiver.POLICY_SET_RESULT_FAILURE;
-import static android.app.admin.PolicyUpdatesReceiver.POLICY_SET_RESULT_SUCCESS;
+import static android.app.admin.PolicyUpdatesReceiver.EXTRA_POLICY_UPDATE_RESULT_KEY;
 
 import android.Manifest;
 import android.annotation.NonNull;
@@ -144,9 +142,8 @@ final class DevicePolicyEngine {
             sendPolicyResultToAdmin(
                     enforcingAdmin,
                     policyDefinition,
-                    policyEnforced,
                     // TODO: we're always sending this for now, should properly handle errors.
-                    REASON_CONFLICTING_ADMIN_POLICY,
+                    policyEnforced ? RESULT_SUCCESS : RESULT_FAILURE_CONFLICTING_ADMIN_POLICY,
                     userId);
 
             updateDeviceAdminServiceOnPolicyAddLocked(enforcingAdmin);
@@ -192,9 +189,8 @@ final class DevicePolicyEngine {
             sendPolicyResultToAdmin(
                     enforcingAdmin,
                     policyDefinition,
-                    policyEnforced,
                     // TODO: we're always sending this for now, should properly handle errors.
-                    REASON_CONFLICTING_ADMIN_POLICY,
+                    policyEnforced ? RESULT_SUCCESS : RESULT_FAILURE_CONFLICTING_ADMIN_POLICY,
                     userId);
 
             if (localPolicyState.getPoliciesSetByAdmins().isEmpty()) {
@@ -221,7 +217,7 @@ final class DevicePolicyEngine {
 
         // Send policy updates to admins who've set it locally
         sendPolicyChangedToAdmins(
-                localPolicyState.getPoliciesSetByAdmins().keySet(),
+                localPolicyState,
                 enforcingAdmin,
                 policyDefinition,
                 // This policy change is only relevant to a single user, not the global
@@ -232,7 +228,7 @@ final class DevicePolicyEngine {
         if (hasGlobalPolicyLocked(policyDefinition)) {
             PolicyState<V> globalPolicyState = getGlobalPolicyStateLocked(policyDefinition);
             sendPolicyChangedToAdmins(
-                    globalPolicyState.getPoliciesSetByAdmins().keySet(),
+                    globalPolicyState,
                     enforcingAdmin,
                     policyDefinition,
                     userId);
@@ -264,13 +260,13 @@ final class DevicePolicyEngine {
                     policyDefinition, enforcingAdmin, value);
             boolean policyEnforcedGlobally = Objects.equals(
                     globalPolicyState.getCurrentResolvedPolicy(), value);
+            boolean policyEnforced = policyEnforcedGlobally && policyEnforcedOnAllUsers;
 
             sendPolicyResultToAdmin(
                     enforcingAdmin,
                     policyDefinition,
-                    policyEnforcedGlobally && policyEnforcedOnAllUsers,
                     // TODO: we're always sending this for now, should properly handle errors.
-                    REASON_CONFLICTING_ADMIN_POLICY,
+                    policyEnforced ? RESULT_SUCCESS : RESULT_FAILURE_CONFLICTING_ADMIN_POLICY,
                     UserHandle.USER_ALL);
 
             updateDeviceAdminServiceOnPolicyAddLocked(enforcingAdmin);
@@ -303,13 +299,13 @@ final class DevicePolicyEngine {
                     policyDefinition, enforcingAdmin, /* value= */ null);
             // For a removePolicy to be enforced, it means no current policy exists
             boolean policyEnforcedGlobally = policyState.getCurrentResolvedPolicy() == null;
+            boolean policyEnforced = policyEnforcedGlobally && policyEnforcedOnAllUsers;
 
             sendPolicyResultToAdmin(
                     enforcingAdmin,
                     policyDefinition,
-                    policyEnforcedGlobally && policyEnforcedOnAllUsers,
                     // TODO: we're always sending this for now, should properly handle errors.
-                    REASON_CONFLICTING_ADMIN_POLICY,
+                    policyEnforced ? RESULT_SUCCESS : RESULT_FAILURE_CONFLICTING_ADMIN_POLICY,
                     UserHandle.USER_ALL);
 
             if (policyState.getPoliciesSetByAdmins().isEmpty()) {
@@ -334,7 +330,7 @@ final class DevicePolicyEngine {
                 UserHandle.USER_ALL);
 
         sendPolicyChangedToAdmins(
-                policyState.getPoliciesSetByAdmins().keySet(),
+                policyState,
                 enforcingAdmin,
                 policyDefinition,
                 UserHandle.USER_ALL);
@@ -374,7 +370,7 @@ final class DevicePolicyEngine {
                 enforcePolicy(
                         policyDefinition, localPolicyState.getCurrentResolvedPolicy(), userId);
                 sendPolicyChangedToAdmins(
-                        localPolicyState.getPoliciesSetByAdmins().keySet(),
+                        localPolicyState,
                         enforcingAdmin,
                         policyDefinition,
                         // Even though this is caused by a global policy change, admins who've set
@@ -557,8 +553,7 @@ final class DevicePolicyEngine {
     }
 
     private <V> void sendPolicyResultToAdmin(
-            EnforcingAdmin admin, PolicyDefinition<V> policyDefinition, boolean success,
-            int reason, int userId) {
+            EnforcingAdmin admin, PolicyDefinition<V> policyDefinition, int result, int userId) {
         Intent intent = new Intent(PolicyUpdatesReceiver.ACTION_DEVICE_POLICY_SET_RESULT);
         intent.setPackage(admin.getPackageName());
 
@@ -578,12 +573,9 @@ final class DevicePolicyEngine {
                 EXTRA_POLICY_TARGET_USER_ID,
                 getTargetUser(admin.getUserId(), userId));
         extras.putInt(
-                EXTRA_POLICY_SET_RESULT_KEY,
-                success ? POLICY_SET_RESULT_SUCCESS : POLICY_SET_RESULT_FAILURE);
+                EXTRA_POLICY_UPDATE_RESULT_KEY,
+                result);
 
-        if (!success) {
-            extras.putInt(EXTRA_POLICY_UPDATE_REASON_KEY, reason);
-        }
         intent.putExtras(extras);
 
         maybeSendIntentToAdminReceivers(intent, UserHandle.of(admin.getUserId()), receivers);
@@ -591,17 +583,21 @@ final class DevicePolicyEngine {
 
     // TODO(b/261430877): Finalise the decision on which admins to send the updates to.
     private <V> void sendPolicyChangedToAdmins(
-            Set<EnforcingAdmin> admins,
+            PolicyState<V> policyState,
             EnforcingAdmin callingAdmin,
             PolicyDefinition<V> policyDefinition,
             int userId) {
-        for (EnforcingAdmin admin: admins) {
+        for (EnforcingAdmin admin: policyState.getPoliciesSetByAdmins().keySet()) {
             // We're sending a separate broadcast for the calling admin with the result.
             if (admin.equals(callingAdmin)) {
                 continue;
             }
+            int result = Objects.equals(
+                    policyState.getPoliciesSetByAdmins().get(admin),
+                    policyState.getCurrentResolvedPolicy())
+                    ? RESULT_SUCCESS : RESULT_FAILURE_CONFLICTING_ADMIN_POLICY;
             maybeSendOnPolicyChanged(
-                    admin, policyDefinition, REASON_CONFLICTING_ADMIN_POLICY, userId);
+                    admin, policyDefinition, result, userId);
         }
     }
 
@@ -626,7 +622,7 @@ final class DevicePolicyEngine {
         extras.putInt(
                 EXTRA_POLICY_TARGET_USER_ID,
                 getTargetUser(admin.getUserId(), userId));
-        extras.putInt(EXTRA_POLICY_UPDATE_REASON_KEY, reason);
+        extras.putInt(EXTRA_POLICY_UPDATE_RESULT_KEY, reason);
         intent.putExtras(extras);
         intent.addFlags(Intent.FLAG_RECEIVER_FOREGROUND);
 
