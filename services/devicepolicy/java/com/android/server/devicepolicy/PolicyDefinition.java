@@ -47,6 +47,9 @@ final class PolicyDefinition<V> {
     private static final MostRestrictive<Boolean> FALSE_MORE_RESTRICTIVE = new MostRestrictive<>(
             List.of(false, true));
 
+    private static final MostRestrictive<Boolean> TRUE_MORE_RESTRICTIVE = new MostRestrictive<>(
+            List.of(true, false));
+
     static PolicyDefinition<Boolean> AUTO_TIMEZONE = new PolicyDefinition<>(
             new DefaultPolicyKey(DevicePolicyManager.AUTO_TIMEZONE_POLICY),
             // auto timezone is enabled by default, hence disabling it is more restrictive.
@@ -102,7 +105,7 @@ final class PolicyDefinition<V> {
             new LockTaskPolicy.LockTaskPolicySerializer());
 
     static PolicyDefinition<Set<String>> USER_CONTROLLED_DISABLED_PACKAGES = new PolicyDefinition<>(
-            new DefaultPolicyKey(DevicePolicyManager.USER_CONTROL_DISABLED_PACKAGES),
+            new DefaultPolicyKey(DevicePolicyManager.USER_CONTROL_DISABLED_PACKAGES_POLICY),
             new SetUnion<>(),
             (Set<String> value, Context context, Integer userId, PolicyKey policyKey) ->
                     PolicyEnforcerCallbacks.setUserControlDisabledPackages(value, userId),
@@ -114,7 +117,7 @@ final class PolicyDefinition<V> {
     static PolicyDefinition<ComponentName> GENERIC_PERSISTENT_PREFERRED_ACTIVITY =
             new PolicyDefinition<>(
                     new PersistentPreferredActivityPolicyKey(
-                            DevicePolicyManager.PERSISTENT_PREFERRED_ACTIVITY),
+                            DevicePolicyManager.PERSISTENT_PREFERRED_ACTIVITY_POLICY),
             new TopPriority<>(List.of(
                     // TODO(b/258166155): add correct device lock role name
                     EnforcingAdmin.getRoleAuthorityOf("DeviceLock"),
@@ -134,15 +137,44 @@ final class PolicyDefinition<V> {
         }
         return GENERIC_PERSISTENT_PREFERRED_ACTIVITY.createPolicyDefinition(
                 new PersistentPreferredActivityPolicyKey(
-                        DevicePolicyManager.PERSISTENT_PREFERRED_ACTIVITY, intentFilter));
+                        DevicePolicyManager.PERSISTENT_PREFERRED_ACTIVITY_POLICY, intentFilter));
+    }
+
+    // This is saved in the static map sPolicyDefinitions so that we're able to reconstruct the
+    // actual uninstall blocked policy with the correct arguments (i.e. packageName)
+    // when reading the policies from xml.
+    static PolicyDefinition<Boolean> GENERIC_PACKAGE_UNINSTALL_BLOCKED =
+            new PolicyDefinition<>(
+                    new PackageSpecificPolicyKey(
+                            DevicePolicyManager.PACKAGE_UNINSTALL_BLOCKED_POLICY),
+                    TRUE_MORE_RESTRICTIVE,
+                    POLICY_FLAG_LOCAL_ONLY_POLICY,
+                    PolicyEnforcerCallbacks::setUninstallBlocked,
+                    new BooleanPolicySerializer());
+
+    /**
+     * Passing in {@code null} for {@code packageName} will return
+     * {@link #GENERIC_PACKAGE_UNINSTALL_BLOCKED}.
+     */
+    static PolicyDefinition<Boolean> PACKAGE_UNINSTALL_BLOCKED(
+            String packageName) {
+        if (packageName == null) {
+            return GENERIC_PACKAGE_UNINSTALL_BLOCKED;
+        }
+        return GENERIC_PACKAGE_UNINSTALL_BLOCKED.createPolicyDefinition(
+                new PackageSpecificPolicyKey(
+                        DevicePolicyManager.PACKAGE_UNINSTALL_BLOCKED_POLICY, packageName));
     }
 
     private static final Map<String, PolicyDefinition<?>> sPolicyDefinitions = Map.of(
             DevicePolicyManager.AUTO_TIMEZONE_POLICY, AUTO_TIMEZONE,
             DevicePolicyManager.PERMISSION_GRANT_POLICY_KEY, GENERIC_PERMISSION_GRANT,
             DevicePolicyManager.LOCK_TASK_POLICY, LOCK_TASK,
-            DevicePolicyManager.USER_CONTROL_DISABLED_PACKAGES, USER_CONTROLLED_DISABLED_PACKAGES,
-            DevicePolicyManager.PERSISTENT_PREFERRED_ACTIVITY, GENERIC_PERSISTENT_PREFERRED_ACTIVITY
+            DevicePolicyManager.USER_CONTROL_DISABLED_PACKAGES_POLICY,
+            USER_CONTROLLED_DISABLED_PACKAGES,
+            DevicePolicyManager.PERSISTENT_PREFERRED_ACTIVITY_POLICY,
+            GENERIC_PERSISTENT_PREFERRED_ACTIVITY,
+            DevicePolicyManager.PACKAGE_UNINSTALL_BLOCKED_POLICY, GENERIC_PACKAGE_UNINSTALL_BLOCKED
     );
 
 

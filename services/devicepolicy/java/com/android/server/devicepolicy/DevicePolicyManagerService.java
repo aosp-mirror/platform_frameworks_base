@@ -12219,30 +12219,66 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
                 || isFinancedDeviceOwner(caller)))
                 || (caller.hasPackage() && isCallerDelegate(caller, DELEGATION_BLOCK_UNINSTALL)));
 
-        final int userId = caller.getUserId();
-        synchronized (getLockObject()) {
-            long id = mInjector.binderClearCallingIdentity();
-            try {
-                mIPackageManager.setBlockUninstallForUser(packageName, uninstallBlocked, userId);
-            } catch (RemoteException re) {
-                // Shouldn't happen.
-                Slogf.e(LOG_TAG, "Failed to setBlockUninstallForUser", re);
-            } finally {
-                mInjector.binderRestoreCallingIdentity(id);
+        if (isCoexistenceEnabled(caller)) {
+            // TODO(b/260573124): Add correct enforcing admin when permission changes are
+            //  merged, and don't forget to handle delegates! Enterprise admins assume
+            //  component name isn't null.
+            EnforcingAdmin admin = EnforcingAdmin.createEnterpriseEnforcingAdmin(
+                    who != null ? who : new ComponentName(callerPackage, "delegate"),
+                    caller.getUserId());
+            mDevicePolicyEngine.setLocalPolicy(
+                    PolicyDefinition.PACKAGE_UNINSTALL_BLOCKED(packageName),
+                    admin,
+                    uninstallBlocked,
+                    caller.getUserId());
+        } else {
+            final int userId = caller.getUserId();
+            synchronized (getLockObject()) {
+                long id = mInjector.binderClearCallingIdentity();
+                try {
+                    mIPackageManager.setBlockUninstallForUser(
+                            packageName, uninstallBlocked, userId);
+                } catch (RemoteException re) {
+                    // Shouldn't happen.
+                    Slogf.e(LOG_TAG, "Failed to setBlockUninstallForUser", re);
+                } finally {
+                    mInjector.binderRestoreCallingIdentity(id);
+                }
+            }
+            if (uninstallBlocked) {
+                final PackageManagerInternal pmi = mInjector.getPackageManagerInternal();
+                pmi.removeNonSystemPackageSuspensions(packageName, userId);
+                pmi.removeDistractingPackageRestrictions(packageName, userId);
+                pmi.flushPackageRestrictions(userId);
             }
         }
-        if (uninstallBlocked) {
-            final PackageManagerInternal pmi = mInjector.getPackageManagerInternal();
-            pmi.removeNonSystemPackageSuspensions(packageName, userId);
-            pmi.removeDistractingPackageRestrictions(packageName, userId);
-            pmi.flushPackageRestrictions(userId);
-        }
+
         DevicePolicyEventLogger
                 .createEvent(DevicePolicyEnums.SET_UNINSTALL_BLOCKED)
                 .setAdmin(caller.getPackageName())
                 .setBoolean(/* isDelegate */ who == null)
                 .setStrings(packageName)
                 .write();
+    }
+
+    static void setUninstallBlockedUnchecked(
+            String packageName, boolean uninstallBlocked, int userId) {
+        Binder.withCleanCallingIdentity(() -> {
+            try {
+                AppGlobals.getPackageManager().setBlockUninstallForUser(
+                        packageName, uninstallBlocked, userId);
+            } catch (RemoteException re) {
+                // Shouldn't happen.
+                Slogf.e(LOG_TAG, "Failed to setBlockUninstallForUser", re);
+            }
+        });
+        if (uninstallBlocked) {
+            final PackageManagerInternal pmi = LocalServices.getService(
+                    PackageManagerInternal.class);
+            pmi.removeNonSystemPackageSuspensions(packageName, userId);
+            pmi.removeDistractingPackageRestrictions(packageName, userId);
+            pmi.flushPackageRestrictions(userId);
+        }
     }
 
     @Override

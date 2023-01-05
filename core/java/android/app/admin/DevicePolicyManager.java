@@ -3985,6 +3985,7 @@ public class DevicePolicyManager {
      */
     public static final String AUTO_TIMEZONE_POLICY = "autoTimezone";
 
+    // TODO: Expose this as SystemAPI once we add the query API
     /**
      * @hide
      */
@@ -4011,14 +4012,22 @@ public class DevicePolicyManager {
     /**
      * @hide
      */
-    public static final String USER_CONTROL_DISABLED_PACKAGES = "userControlDisabledPackages";
+    public static final String USER_CONTROL_DISABLED_PACKAGES_POLICY =
+            "userControlDisabledPackages";
 
 
     // TODO: Expose this as SystemAPI once we add the query API
     /**
      * @hide
      */
-    public static final String PERSISTENT_PREFERRED_ACTIVITY = "persistentPreferredActivity";
+    public static final String PERSISTENT_PREFERRED_ACTIVITY_POLICY =
+            "persistentPreferredActivity";
+
+    // TODO: Expose this as SystemAPI once we add the query API
+    /**
+     * @hide
+     */
+    public static final String PACKAGE_UNINSTALL_BLOCKED_POLICY = "packageUninstallBlocked";
 
     /**
      * This object is a single place to tack on invalidation and disable calls.  All

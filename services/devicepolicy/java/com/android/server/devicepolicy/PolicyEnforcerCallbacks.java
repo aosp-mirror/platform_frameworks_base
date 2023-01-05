@@ -179,4 +179,22 @@ final class PolicyEnforcerCallbacks {
         });
         return true;
     }
+
+    static boolean setUninstallBlocked(
+            @Nullable Boolean uninstallBlocked, @NonNull Context context, int userId,
+            @NonNull PolicyKey policyKey) {
+        return Boolean.TRUE.equals(Binder.withCleanCallingIdentity(() -> {
+            if (!(policyKey instanceof PackageSpecificPolicyKey)) {
+                throw new IllegalArgumentException("policyKey is not of type "
+                        + "PackageSpecificPolicyKey");
+            }
+            PackageSpecificPolicyKey parsedKey = (PackageSpecificPolicyKey) policyKey;
+            String packageName = Objects.requireNonNull(parsedKey.getPackageName());
+            DevicePolicyManagerService.setUninstallBlockedUnchecked(
+                    packageName,
+                    uninstallBlocked != null && uninstallBlocked,
+                    userId);
+            return true;
+        }));
+    }
 }
