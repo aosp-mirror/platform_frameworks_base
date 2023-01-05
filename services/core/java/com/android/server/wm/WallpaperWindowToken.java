@@ -100,7 +100,7 @@ class WallpaperWindowToken extends WindowToken {
     }
 
     /** Returns {@code true} if visibility is changed. */
-    boolean updateWallpaperWindows(boolean visible) {
+    void updateWallpaperWindows(boolean visible) {
         boolean changed = false;
         if (mVisibleRequested != visible) {
             ProtoLog.d(WM_DEBUG_WALLPAPER, "Wallpaper token %s visible=%b",
@@ -117,7 +117,6 @@ class WallpaperWindowToken extends WindowToken {
                     linkFixedRotationTransform(wallpaperTarget.mToken);
                 }
             }
-            return changed;
         }
 
         final WindowState wallpaperTarget =
@@ -143,7 +142,6 @@ class WallpaperWindowToken extends WindowToken {
         }
 
         setVisible(visible);
-        return changed;
     }
 
     private void setVisible(boolean visible) {

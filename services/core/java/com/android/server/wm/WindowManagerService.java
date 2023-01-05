@@ -5358,7 +5358,6 @@ public class WindowManagerService extends IWindowManager.Stub
         public static final int ANIMATION_FAILSAFE = 60;
         public static final int RECOMPUTE_FOCUS = 61;
         public static final int ON_POINTER_DOWN_OUTSIDE_FOCUS = 62;
-        public static final int LAYOUT_AND_ASSIGN_WINDOW_LAYERS_IF_NEEDED = 63;
         public static final int WINDOW_STATE_BLAST_SYNC_TIMEOUT = 64;
         public static final int REPARENT_TASK_TO_DEFAULT_DISPLAY = 65;
         public static final int INSETS_CHANGED = 66;
@@ -5632,14 +5631,6 @@ public class WindowManagerService extends IWindowManager.Stub
                     synchronized (mGlobalLock) {
                         final IBinder touchedToken = (IBinder) msg.obj;
                         onPointerDownOutsideFocusLocked(touchedToken);
-                    }
-                    break;
-                }
-                case LAYOUT_AND_ASSIGN_WINDOW_LAYERS_IF_NEEDED: {
-                    synchronized (mGlobalLock) {
-                        final DisplayContent displayContent = (DisplayContent) msg.obj;
-                        displayContent.mLayoutAndAssignWindowLayersScheduled = false;
-                        displayContent.layoutAndAssignWindowLayersIfNeeded();
                     }
                     break;
                 }
