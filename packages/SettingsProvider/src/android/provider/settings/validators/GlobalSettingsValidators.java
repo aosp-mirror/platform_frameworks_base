@@ -132,6 +132,7 @@ public class GlobalSettingsValidators {
                 new DiscreteValueValidator(new String[] {"0", "1"}));
         VALIDATORS.put(Global.LOW_POWER_MODE_TRIGGER_LEVEL, PERCENTAGE_INTEGER_VALIDATOR);
         VALIDATORS.put(Global.LOW_POWER_MODE_TRIGGER_LEVEL_MAX, PERCENTAGE_INTEGER_VALIDATOR);
+        VALIDATORS.put(Global.LOW_POWER_MODE_REMINDER_ENABLED, BOOLEAN_VALIDATOR);
         VALIDATORS.put(
                 Global.AUTOMATIC_POWER_SAVE_MODE,
                 new DiscreteValueValidator(new String[] {"0", "1"}));
