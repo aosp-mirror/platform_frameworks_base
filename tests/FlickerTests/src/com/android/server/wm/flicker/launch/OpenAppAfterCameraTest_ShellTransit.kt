@@ -17,7 +17,7 @@
 package com.android.server.wm.flicker.launch
 
 import android.platform.test.annotations.FlakyTest
-import android.platform.test.annotations.RequiresDevice
+import androidx.test.filters.RequiresDevice
 import com.android.server.wm.flicker.FlickerTest
 import com.android.server.wm.flicker.helpers.isShellTransitionsEnabled
 import com.android.server.wm.flicker.junit.FlickerParametersRunnerFactory

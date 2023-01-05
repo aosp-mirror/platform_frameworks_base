@@ -19,8 +19,8 @@ package com.android.server.wm.flicker.rotation
 import android.platform.test.annotations.FlakyTest
 import android.platform.test.annotations.IwTest
 import android.platform.test.annotations.Presubmit
-import android.platform.test.annotations.RequiresDevice
 import android.view.WindowManager
+import androidx.test.filters.RequiresDevice
 import com.android.server.wm.flicker.FlickerBuilder
 import com.android.server.wm.flicker.FlickerTest
 import com.android.server.wm.flicker.FlickerTestFactory
@@ -253,7 +253,7 @@ open class SeamlessAppRotationTest(flicker: FlickerTest) : RotationTransition(fl
          * from [FlickerTestFactory.rotationTests], but adding a flag (
          * [ActivityOptions.SeamlessRotation.EXTRA_STARVE_UI_THREAD]) to indicate if the app should
          * starve the UI thread of not
-        */
+         */
         @Parameterized.Parameters(name = "{0}")
         @JvmStatic
         fun getParams(): Collection<FlickerTest> {

@@ -17,7 +17,7 @@
 package com.android.server.wm.flicker.ime
 
 import android.platform.test.annotations.Presubmit
-import android.platform.test.annotations.RequiresDevice
+import androidx.test.filters.RequiresDevice
 import com.android.server.wm.flicker.BaseTest
 import com.android.server.wm.flicker.FlickerBuilder
 import com.android.server.wm.flicker.FlickerTest
