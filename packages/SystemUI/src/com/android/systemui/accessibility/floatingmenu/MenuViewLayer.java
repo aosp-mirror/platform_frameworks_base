@@ -150,6 +150,9 @@ class MenuViewLayer extends FrameLayout implements
             AccessibilityManager accessibilityManager, IAccessibilityFloatingMenu floatingMenu) {
         super(context);
 
+        // Simplifies the translation positioning and animations
+        setLayoutDirection(LAYOUT_DIRECTION_LTR);
+
         mWindowManager = windowManager;
         mAccessibilityManager = accessibilityManager;
         mFloatingMenu = floatingMenu;
