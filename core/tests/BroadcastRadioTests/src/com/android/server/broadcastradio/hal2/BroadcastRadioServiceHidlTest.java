@@ -167,6 +167,18 @@ public final class BroadcastRadioServiceHidlTest extends ExtendedRadioMockitoTes
     }
 
     @Test
+    public void openSession_withoutAudio_fails() throws Exception {
+        createBroadcastRadioService();
+
+        IllegalArgumentException thrown = assertThrows(IllegalArgumentException.class,
+                () -> mBroadcastRadioService.openSession(FM_RADIO_MODULE_ID,
+                        /* legacyConfig= */ null, /* withAudio= */ false, mTunerCallbackMock));
+
+        assertWithMessage("Exception for opening session without audio")
+                .that(thrown).hasMessageThat().contains("not supported");
+    }
+
+    @Test
     public void addAnnouncementListener_addsOnAllRadioModules() throws Exception {
         createBroadcastRadioService();
         when(mAnnouncementListenerMock.asBinder()).thenReturn(mBinderMock);

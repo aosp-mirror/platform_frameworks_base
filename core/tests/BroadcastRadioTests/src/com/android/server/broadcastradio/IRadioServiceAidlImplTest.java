@@ -20,6 +20,7 @@ import static com.android.dx.mockito.inline.extended.ExtendedMockito.doReturn;
 
 import static com.google.common.truth.Truth.assertWithMessage;
 
+import static org.junit.Assert.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.ArgumentMatchers.anyInt;
@@ -121,6 +122,16 @@ public final class IRadioServiceAidlImplTest extends ExtendedRadioMockitoTestCas
 
         assertWithMessage("Tuner opened in AIDL HAL")
                 .that(tuner).isEqualTo(mTunerMock);
+    }
+
+    @Test
+    public void openTuner_withNullCallbackForAidlImpl_fails() throws Exception {
+        IllegalArgumentException thrown = assertThrows(IllegalArgumentException.class,
+                () -> mAidlImpl.openTuner(/* moduleId= */ 0, mBandConfigMock,
+                        /* withAudio= */ true, /* callback= */ null, TARGET_SDK_VERSION));
+
+        assertWithMessage("Exception for opening tuner with null callback")
+                .that(thrown).hasMessageThat().contains("Callback must not be null");
     }
 
     @Test

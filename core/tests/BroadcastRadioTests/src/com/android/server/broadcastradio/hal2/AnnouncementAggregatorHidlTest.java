@@ -18,9 +18,11 @@ package com.android.server.broadcastradio.hal2;
 
 import static com.google.common.truth.Truth.assertWithMessage;
 
+import static org.junit.Assert.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -106,6 +108,33 @@ public final class AnnouncementAggregatorHidlTest {
                     announcementsCaptor.getValue(), index + 1)
                     .that(announcementsCaptor.getValue().size()).isEqualTo(index + 1);
         }
+    }
+
+    @Test
+    public void onListUpdated_afterClosed_notUpdated() throws Exception {
+        ArgumentCaptor<IAnnouncementListener> moduleWatcherCaptor =
+                ArgumentCaptor.forClass(IAnnouncementListener.class);
+        watchModules(/* moduleNumber= */ 1);
+        verify(mRadioModuleMocks[0]).addAnnouncementListener(any(), moduleWatcherCaptor.capture());
+        mAnnouncementAggregator.close();
+
+        moduleWatcherCaptor.getValue().onListUpdated(Arrays.asList(mAnnouncementMocks[0]));
+
+        verify(mListenerMock, never()).onListUpdated(any());
+    }
+
+    @Test
+    public void watchModule_afterClosed_throwsException() throws Exception {
+        watchModules(/* moduleNumber= */ 1);
+        mAnnouncementAggregator.close();
+
+        IllegalStateException thrown = assertThrows(IllegalStateException.class,
+                () -> mAnnouncementAggregator.watchModule(mRadioModuleMocks[0],
+                        TEST_ENABLED_TYPES));
+
+        assertWithMessage("Exception for watching module after aggregator has been closed")
+                .that(thrown).hasMessageThat()
+                .contains("announcement aggregator has already been closed");
     }
 
     @Test

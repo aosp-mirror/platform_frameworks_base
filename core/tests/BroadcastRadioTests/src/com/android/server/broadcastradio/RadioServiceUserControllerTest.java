@@ -17,6 +17,7 @@
 package com.android.server.broadcastradio;
 
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.doReturn;
+import static com.android.dx.mockito.inline.extended.ExtendedMockito.doThrow;
 
 import static com.google.common.truth.Truth.assertWithMessage;
 
@@ -77,5 +78,13 @@ public final class RadioServiceUserControllerTest extends ExtendedRadioMockitoTe
 
         assertWithMessage("System user")
                 .that(RadioServiceUserController.isCurrentOrSystemUser()).isTrue();
+    }
+
+    @Test
+    public void isCurrentUser_withActivityManagerFails_returnsFalse() {
+        doThrow(new RuntimeException()).when(() -> ActivityManager.getCurrentUser());
+
+        assertWithMessage("User when activity manager fails")
+                .that(RadioServiceUserController.isCurrentOrSystemUser()).isFalse();
     }
 }
