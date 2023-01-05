@@ -402,6 +402,8 @@ public class DisplayDeviceConfig {
     private static final String STABLE_ID_SUFFIX_FORMAT = "id_%d";
     private static final String NO_SUFFIX_FORMAT = "%d";
     private static final long STABLE_FLAG = 1L << 62;
+    private static final int DEFAULT_PEAK_REFRESH_RATE = 0;
+    private static final int DEFAULT_REFRESH_RATE = 60;
     private static final int DEFAULT_LOW_REFRESH_RATE = 60;
     private static final int DEFAULT_HIGH_REFRESH_RATE = 0;
     private static final int[] DEFAULT_BRIGHTNESS_THRESHOLDS = new int[]{};
@@ -570,17 +572,29 @@ public class DisplayDeviceConfig {
      * using higher refresh rates, even if display modes with higher refresh rates are available
      * from hardware composer. Only has an effect if the value is non-zero.
      */
-    private int mDefaultHighRefreshRate = DEFAULT_HIGH_REFRESH_RATE;
+    private int mDefaultPeakRefreshRate = DEFAULT_PEAK_REFRESH_RATE;
 
     /**
      * The default refresh rate for a given device. This value sets the higher default
      * refresh rate. If the hardware composer on the device supports display modes with
      * a higher refresh rate than the default value specified here, the framework may use those
      * higher refresh rate modes if an app chooses one by setting preferredDisplayModeId or calling
-     * setFrameRate(). We have historically allowed fallback to mDefaultHighRefreshRate if
-     * mDefaultLowRefreshRate is set to 0, but this is not supported anymore.
+     * setFrameRate(). We have historically allowed fallback to mDefaultPeakRefreshRate if
+     * mDefaultRefreshRate is set to 0, but this is not supported anymore.
      */
-    private int mDefaultLowRefreshRate = DEFAULT_LOW_REFRESH_RATE;
+    private int mDefaultRefreshRate = DEFAULT_REFRESH_RATE;
+
+    /**
+     * Default refresh rate in the high zone defined by brightness and ambient thresholds.
+     * If non-positive, then the refresh rate is unchanged even if thresholds are configured.
+     */
+    private int mDefaultHighBlockingZoneRefreshRate = DEFAULT_HIGH_REFRESH_RATE;
+
+    /**
+     * Default refresh rate in the zone defined by brightness and ambient thresholds.
+     * If non-positive, then the refresh rate is unchanged even if thresholds are configured.
+     */
+    private int mDefaultLowBlockingZoneRefreshRate = DEFAULT_LOW_REFRESH_RATE;
 
     /**
      * The display uses different gamma curves for different refresh rates. It's hard for panel
@@ -1296,15 +1310,29 @@ public class DisplayDeviceConfig {
     /**
      * @return Default peak refresh rate of the associated display
      */
-    public int getDefaultHighRefreshRate() {
-        return mDefaultHighRefreshRate;
+    public int getDefaultPeakRefreshRate() {
+        return mDefaultPeakRefreshRate;
     }
 
     /**
      * @return Default refresh rate of the associated display
      */
-    public int getDefaultLowRefreshRate() {
-        return mDefaultLowRefreshRate;
+    public int getDefaultRefreshRate() {
+        return mDefaultRefreshRate;
+    }
+
+    /**
+     * @return Default refresh rate in the higher blocking zone of the associated display
+     */
+    public int getDefaultHighBlockingZoneRefreshRate() {
+        return mDefaultHighBlockingZoneRefreshRate;
+    }
+
+    /**
+     * @return Default refresh rate in the lower blocking zone of the associated display
+     */
+    public int getDefaultLowBlockingZoneRefreshRate() {
+        return mDefaultLowBlockingZoneRefreshRate;
     }
 
     /**
@@ -1442,8 +1470,10 @@ public class DisplayDeviceConfig {
                 + ", mDdcAutoBrightnessAvailable= " + mDdcAutoBrightnessAvailable
                 + ", mAutoBrightnessAvailable= " + mAutoBrightnessAvailable
                 + "\n"
-                + ", mDefaultRefreshRate= " + mDefaultLowRefreshRate
-                + ", mDefaultPeakRefreshRate= " + mDefaultHighRefreshRate
+                + ", mDefaultLowBlockingZoneRefreshRate= " + mDefaultLowBlockingZoneRefreshRate
+                + ", mDefaultHighBlockingZoneRefreshRate= " + mDefaultHighBlockingZoneRefreshRate
+                + ", mDefaultPeakRefreshRate= " + mDefaultPeakRefreshRate
+                + ", mDefaultRefreshRate= " + mDefaultRefreshRate
                 + ", mLowDisplayBrightnessThresholds= "
                 + Arrays.toString(mLowDisplayBrightnessThresholds)
                 + ", mLowAmbientBrightnessThresholds= "
@@ -1757,10 +1787,31 @@ public class DisplayDeviceConfig {
         BlockingZoneConfig higherBlockingZoneConfig =
                 (refreshRateConfigs == null) ? null
                         : refreshRateConfigs.getHigherBlockingZoneConfigs();
+        loadPeakDefaultRefreshRate(refreshRateConfigs);
+        loadDefaultRefreshRate(refreshRateConfigs);
         loadLowerRefreshRateBlockingZones(lowerBlockingZoneConfig);
         loadHigherRefreshRateBlockingZones(higherBlockingZoneConfig);
     }
 
+    private void loadPeakDefaultRefreshRate(RefreshRateConfigs refreshRateConfigs) {
+        if (refreshRateConfigs == null || refreshRateConfigs.getDefaultPeakRefreshRate() == null) {
+            mDefaultPeakRefreshRate = mContext.getResources().getInteger(
+                R.integer.config_defaultPeakRefreshRate);
+        } else {
+            mDefaultPeakRefreshRate =
+                refreshRateConfigs.getDefaultPeakRefreshRate().intValue();
+        }
+    }
+
+    private void loadDefaultRefreshRate(RefreshRateConfigs refreshRateConfigs) {
+        if (refreshRateConfigs == null || refreshRateConfigs.getDefaultRefreshRate() == null) {
+            mDefaultRefreshRate = mContext.getResources().getInteger(
+                R.integer.config_defaultRefreshRate);
+        } else {
+            mDefaultRefreshRate =
+                refreshRateConfigs.getDefaultRefreshRate().intValue();
+        }
+    }
 
     /**
      * Loads the refresh rate configurations pertaining to the upper blocking zones.
@@ -1785,10 +1836,10 @@ public class DisplayDeviceConfig {
     private void loadHigherBlockingZoneDefaultRefreshRate(
                 BlockingZoneConfig upperBlockingZoneConfig) {
         if (upperBlockingZoneConfig == null) {
-            mDefaultHighRefreshRate = mContext.getResources().getInteger(
-                com.android.internal.R.integer.config_defaultPeakRefreshRate);
+            mDefaultHighBlockingZoneRefreshRate = mContext.getResources().getInteger(
+                com.android.internal.R.integer.config_fixedRefreshRateInHighZone);
         } else {
-            mDefaultHighRefreshRate =
+            mDefaultHighBlockingZoneRefreshRate =
                 upperBlockingZoneConfig.getDefaultRefreshRate().intValue();
         }
     }
@@ -1800,10 +1851,10 @@ public class DisplayDeviceConfig {
     private void loadLowerBlockingZoneDefaultRefreshRate(
                 BlockingZoneConfig lowerBlockingZoneConfig) {
         if (lowerBlockingZoneConfig == null) {
-            mDefaultLowRefreshRate = mContext.getResources().getInteger(
-                com.android.internal.R.integer.config_defaultRefreshRate);
+            mDefaultLowBlockingZoneRefreshRate = mContext.getResources().getInteger(
+                com.android.internal.R.integer.config_defaultRefreshRateInZone);
         } else {
-            mDefaultLowRefreshRate =
+            mDefaultLowBlockingZoneRefreshRate =
                 lowerBlockingZoneConfig.getDefaultRefreshRate().intValue();
         }
     }

@@ -51,6 +51,8 @@ import java.nio.file.Path;
 public final class DisplayDeviceConfigTest {
     private static final int DEFAULT_PEAK_REFRESH_RATE = 75;
     private static final int DEFAULT_REFRESH_RATE = 120;
+    private static final int DEFAULT_HIGH_BLOCKING_ZONE_REFRESH_RATE = 55;
+    private static final int DEFAULT_LOW_BLOCKING_ZONE_REFRESH_RATE = 95;
     private static final int[] LOW_BRIGHTNESS_THRESHOLD_OF_PEAK_REFRESH_RATE = new int[]{10, 30};
     private static final int[] LOW_AMBIENT_THRESHOLD_OF_PEAK_REFRESH_RATE = new int[]{1, 21};
     private static final int[] HIGH_BRIGHTNESS_THRESHOLD_OF_PEAK_REFRESH_RATE = new int[]{160};
@@ -150,8 +152,10 @@ public final class DisplayDeviceConfigTest {
 
         assertEquals("ProximitySensor123", mDisplayDeviceConfig.getProximitySensor().name);
         assertEquals("prox_type_1", mDisplayDeviceConfig.getProximitySensor().type);
-        assertEquals(75, mDisplayDeviceConfig.getDefaultLowRefreshRate());
-        assertEquals(90, mDisplayDeviceConfig.getDefaultHighRefreshRate());
+        assertEquals(75, mDisplayDeviceConfig.getDefaultLowBlockingZoneRefreshRate());
+        assertEquals(90, mDisplayDeviceConfig.getDefaultHighBlockingZoneRefreshRate());
+        assertEquals(85, mDisplayDeviceConfig.getDefaultPeakRefreshRate());
+        assertEquals(45, mDisplayDeviceConfig.getDefaultRefreshRate());
         assertArrayEquals(new int[]{45, 55},
                 mDisplayDeviceConfig.getLowDisplayBrightnessThresholds());
         assertArrayEquals(new int[]{50, 60},
@@ -230,8 +234,12 @@ public final class DisplayDeviceConfigTest {
                 mDisplayDeviceConfig.getAmbientDarkeningLevelsIdle(), ZERO_DELTA);
         assertArrayEquals(new float[]{29, 30, 31},
                 mDisplayDeviceConfig.getAmbientDarkeningPercentagesIdle(), ZERO_DELTA);
-        assertEquals(mDisplayDeviceConfig.getDefaultLowRefreshRate(), DEFAULT_REFRESH_RATE);
-        assertEquals(mDisplayDeviceConfig.getDefaultHighRefreshRate(), DEFAULT_PEAK_REFRESH_RATE);
+        assertEquals(mDisplayDeviceConfig.getDefaultLowBlockingZoneRefreshRate(),
+                DEFAULT_LOW_BLOCKING_ZONE_REFRESH_RATE);
+        assertEquals(mDisplayDeviceConfig.getDefaultHighBlockingZoneRefreshRate(),
+                DEFAULT_HIGH_BLOCKING_ZONE_REFRESH_RATE);
+        assertEquals(mDisplayDeviceConfig.getDefaultPeakRefreshRate(), DEFAULT_PEAK_REFRESH_RATE);
+        assertEquals(mDisplayDeviceConfig.getDefaultRefreshRate(), DEFAULT_REFRESH_RATE);
         assertArrayEquals(mDisplayDeviceConfig.getLowDisplayBrightnessThresholds(),
                 LOW_BRIGHTNESS_THRESHOLD_OF_PEAK_REFRESH_RATE);
         assertArrayEquals(mDisplayDeviceConfig.getLowAmbientBrightnessThresholds(),
@@ -449,6 +457,8 @@ public final class DisplayDeviceConfigTest {
                 +       "<type>prox_type_1</type>\n"
                 +   "</proxSensor>\n"
                 +   "<refreshRate>\n"
+                +       "<defaultRefreshRate>45</defaultRefreshRate>\n"
+                +       "<defaultPeakRefreshRate>85</defaultPeakRefreshRate>\n"
                 +       "<lowerBlockingZoneConfigs>\n"
                 +           "<defaultRefreshRate>75</defaultRefreshRate>\n"
                 +           "<blockingZoneThreshold>\n"
@@ -550,10 +560,14 @@ public final class DisplayDeviceConfigTest {
                 .thenReturn(new int[]{370, 380, 390});
 
         // Configs related to refresh rates and blocking zones
-        when(mResources.getInteger(com.android.internal.R.integer.config_defaultPeakRefreshRate))
+        when(mResources.getInteger(R.integer.config_defaultPeakRefreshRate))
                 .thenReturn(DEFAULT_PEAK_REFRESH_RATE);
-        when(mResources.getInteger(com.android.internal.R.integer.config_defaultRefreshRate))
+        when(mResources.getInteger(R.integer.config_defaultRefreshRate))
                 .thenReturn(DEFAULT_REFRESH_RATE);
+        when(mResources.getInteger(R.integer.config_fixedRefreshRateInHighZone))
+            .thenReturn(DEFAULT_HIGH_BLOCKING_ZONE_REFRESH_RATE);
+        when(mResources.getInteger(R.integer.config_defaultRefreshRateInZone))
+            .thenReturn(DEFAULT_LOW_BLOCKING_ZONE_REFRESH_RATE);
         when(mResources.getIntArray(R.array.config_brightnessThresholdsOfPeakRefreshRate))
                 .thenReturn(LOW_BRIGHTNESS_THRESHOLD_OF_PEAK_REFRESH_RATE);
         when(mResources.getIntArray(R.array.config_ambientThresholdsOfPeakRefreshRate))
