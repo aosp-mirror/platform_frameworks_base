@@ -2952,6 +2952,30 @@ static jint android_media_AudioSystem_getDirectProfilesForAttributes(JNIEnv *env
     return jStatus;
 }
 
+static jboolean android_media_AudioSystem_supportsBluetoothVariableLatency(JNIEnv *env,
+                                                                           jobject thiz) {
+    bool supports;
+    if (AudioSystem::supportsBluetoothVariableLatency(&supports) != NO_ERROR) {
+        supports = false;
+    }
+    return supports;
+}
+
+static int android_media_AudioSystem_setBluetoothVariableLatencyEnabled(JNIEnv *env, jobject thiz,
+                                                                        jboolean enabled) {
+    return (jint)check_AudioSystem_Command(
+            AudioSystem::setBluetoothVariableLatencyEnabled(enabled));
+}
+
+static jboolean android_media_AudioSystem_isBluetoothVariableLatencyEnabled(JNIEnv *env,
+                                                                            jobject thiz) {
+    bool enabled;
+    if (AudioSystem::isBluetoothVariableLatencyEnabled(&enabled) != NO_ERROR) {
+        enabled = false;
+    }
+    return enabled;
+}
+
 // ----------------------------------------------------------------------------
 
 static const JNINativeMethod gMethods[] =
@@ -3104,7 +3128,13 @@ static const JNINativeMethod gMethods[] =
           (void *)android_media_AudioSystem_getDirectPlaybackSupport},
          {"getDirectProfilesForAttributes",
           "(Landroid/media/AudioAttributes;Ljava/util/ArrayList;)I",
-          (void *)android_media_AudioSystem_getDirectProfilesForAttributes}};
+          (void *)android_media_AudioSystem_getDirectProfilesForAttributes},
+         {"supportsBluetoothVariableLatency", "()Z",
+          (void *)android_media_AudioSystem_supportsBluetoothVariableLatency},
+         {"setBluetoothVariableLatencyEnabled", "(Z)I",
+          (void *)android_media_AudioSystem_setBluetoothVariableLatencyEnabled},
+         {"isBluetoothVariableLatencyEnabled", "()Z",
+          (void *)android_media_AudioSystem_isBluetoothVariableLatencyEnabled}};
 
 static const JNINativeMethod gEventHandlerMethods[] = {
     {"native_setup",
