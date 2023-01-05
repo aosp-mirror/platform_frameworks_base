@@ -5328,6 +5328,11 @@
         If given value is outside of this range, the option 0 (top) is assummed. -->
     <integer name="config_letterboxDefaultPositionForTabletopModeReachability">0</integer>
 
+    <!-- Whether should ignore app requested orientation in response to an app
+         calling Activity#setRequestedOrientation. See
+         LetterboxUiController#shouldIgnoreRequestedOrientation for details. -->
+    <bool name="config_letterboxIsPolicyForIgnoringRequestedOrientationEnabled">false</bool>
+
     <!-- Whether displaying letterbox education is enabled for letterboxed fullscreen apps. -->
     <bool name="config_letterboxIsEducationEnabled">false</bool>
 

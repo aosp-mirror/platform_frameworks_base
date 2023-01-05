@@ -34,6 +34,7 @@ import androidx.test.filters.SmallTest;
 import androidx.test.platform.app.InstrumentationRegistry;
 
 import com.android.wm.shell.ShellTestCase;
+import com.android.wm.shell.TestShellExecutor;
 import com.android.wm.shell.common.ExternalInterfaceBinder;
 import com.android.wm.shell.common.ShellExecutor;
 
@@ -61,10 +62,9 @@ public class ShellControllerTest extends ShellTestCase {
     @Mock
     private ShellCommandHandler mShellCommandHandler;
     @Mock
-    private ShellExecutor mExecutor;
-    @Mock
     private Context mTestUserContext;
 
+    private TestShellExecutor mExecutor;
     private ShellController mController;
     private TestConfigurationChangeListener mConfigChangeListener;
     private TestKeyguardChangeListener mKeyguardChangeListener;
@@ -77,6 +77,7 @@ public class ShellControllerTest extends ShellTestCase {
         mKeyguardChangeListener = new TestKeyguardChangeListener();
         mConfigChangeListener = new TestConfigurationChangeListener();
         mUserChangeListener = new TestUserChangeListener();
+        mExecutor = new TestShellExecutor();
         mController = new ShellController(mShellInit, mShellCommandHandler, mExecutor);
         mController.onConfigurationChanged(getConfigurationCopy());
     }
@@ -104,6 +105,7 @@ public class ShellControllerTest extends ShellTestCase {
 
         Bundle b = new Bundle();
         mController.asShell().createExternalInterfaces(b);
+        mExecutor.flushAll();
         assertTrue(b.getIBinder(EXTRA_TEST_BINDER) == callback);
     }
 
