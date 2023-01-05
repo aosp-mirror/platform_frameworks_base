@@ -179,6 +179,21 @@ public class UserLifecycleTests {
         }
     }
 
+    /** Tests creating a new user, with wait times between iterations. */
+    @Test(timeout = TIMEOUT_MAX_TEST_TIME_MS)
+    public void createUser_realistic() throws RemoteException {
+        while (mRunner.keepRunning()) {
+            Log.i(TAG, "Starting timer");
+            final int userId = createUserNoFlags();
+
+            mRunner.pauseTiming();
+            Log.i(TAG, "Stopping timer");
+            removeUser(userId);
+            waitCoolDownPeriod();
+            mRunner.resumeTimingForNextIteration();
+        }
+    }
+
     /** Tests creating and starting a new user. */
     @Test(timeout = TIMEOUT_MAX_TEST_TIME_MS)
     public void createAndStartUser() throws RemoteException {
