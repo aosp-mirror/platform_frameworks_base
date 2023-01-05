@@ -117,8 +117,7 @@
     <string name="permission_sync_confirmation_title">Give apps on &lt;strong&gt;<xliff:g id="companion_device_name" example="Galaxy Watch 5">%1$s</xliff:g>&lt;/strong&gt; the same permissions as on &lt;strong&gt;<xliff:g id="primary_device_name" example="Pixel 6">%2$s</xliff:g>&lt;/strong&gt;?</string>
 
     <!-- Text of the permission sync explanation in the confirmation dialog. [CHAR LIMIT=NONE] -->
-    <string name="permission_sync_summary">&lt;p&gt;This may include Microphone, Camera, and Location access, and other sensitive permissions on &lt;strong&gt;<xliff:g id="companion_device_name" example="Galaxy Watch 5">%1$s</xliff:g>&lt;/strong&gt;.&lt;/p&gt;
-        &lt;p&gt;You can change these permissions any time in your Settings on &lt;strong&gt;<xliff:g id="companion_device_name" example="Galaxy Watch 5">%1$s</xliff:g>&lt;/strong&gt;.&lt;/p&gt;</string>
+    <string name="permission_sync_summary">This may include &lt;strong&gt;Microphone&lt;/strong&gt;, &lt;strong&gt;Camera&lt;/strong&gt;, and &lt;strong&gt;Location access&lt;/strong&gt;, and other sensitive permissions on &lt;strong&gt;<xliff:g id="companion_device_name" example="My Watch">%1$s</xliff:g>&lt;/strong&gt;. &lt;br/&gt;&lt;br/&gt;You can change these permissions any time in your Settings on &lt;strong&gt;<xliff:g id="companion_device_name" example="My Watch">%1$s</xliff:g>&lt;/strong&gt;.</string>
 
     <!--Description for vendor icon [CHAR LIMIT=30]-->
     <string name="vendor_icon_description">App Icon</string>
