@@ -58,7 +58,7 @@ import kotlinx.coroutines.flow.stateIn
 class WifiRepositorySwitcher
 @Inject
 constructor(
-    private val realImpl: WifiRepositoryImpl,
+    private val realImpl: RealWifiRepository,
     private val demoImpl: DemoWifiRepository,
     private val demoModeController: DemoModeController,
     @Application scope: CoroutineScope,
