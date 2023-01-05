@@ -204,6 +204,7 @@ import com.android.server.pm.Settings.VersionInfo;
 import com.android.server.pm.dex.ArtManagerService;
 import com.android.server.pm.dex.ArtUtils;
 import com.android.server.pm.dex.DexManager;
+import com.android.server.pm.dex.DynamicCodeLogger;
 import com.android.server.pm.dex.ViewCompiler;
 import com.android.server.pm.local.PackageManagerLocalImpl;
 import com.android.server.pm.parsing.PackageInfoUtils;
@@ -793,6 +794,7 @@ public class PackageManagerService implements PackageSender, TestUtilityService 
     // DexManager handles the usage of dex files (e.g. secondary files, whether or not a package
     // is used by other apps).
     private final DexManager mDexManager;
+    private final DynamicCodeLogger mDynamicCodeLogger;
 
     final ViewCompiler mViewCompiler;
 
@@ -1529,7 +1531,8 @@ public class PackageManagerService implements PackageSender, TestUtilityService 
                 (i, pm) -> new PackageDexOptimizer(i.getInstaller(), i.getInstallLock(),
                         i.getContext(), "*dexopt*"),
                 (i, pm) -> new DexManager(i.getContext(), i.getPackageDexOptimizer(),
-                        i.getInstaller(), i.getInstallLock()),
+                        i.getInstaller(), i.getInstallLock(), i.getDynamicCodeLogger()),
+                (i, pm) -> new DynamicCodeLogger(i.getInstaller()),
                 (i, pm) -> new ArtManagerService(i.getContext(), i.getInstaller(),
                         i.getInstallLock()),
                 (i, pm) -> ApexManager.getInstance(),
@@ -1711,6 +1714,7 @@ public class PackageManagerService implements PackageSender, TestUtilityService 
         mDefaultAppProvider = testParams.defaultAppProvider;
         mLegacyPermissionManager = testParams.legacyPermissionManagerInternal;
         mDexManager = testParams.dexManager;
+        mDynamicCodeLogger = testParams.dynamicCodeLogger;
         mFactoryTest = testParams.factoryTest;
         mIncrementalManager = testParams.incrementalManager;
         mInstallerService = testParams.installerService;
@@ -1889,6 +1893,7 @@ public class PackageManagerService implements PackageSender, TestUtilityService 
 
         mPackageDexOptimizer = injector.getPackageDexOptimizer();
         mDexManager = injector.getDexManager();
+        mDynamicCodeLogger = injector.getDynamicCodeLogger();
         mBackgroundDexOptService = injector.getBackgroundDexOptService();
         mArtManagerService = injector.getArtManagerService();
         mMoveCallbacks = new MovePackageHelper.MoveCallbacks(FgThread.get().getLooper());
@@ -2316,6 +2321,7 @@ public class PackageManagerService implements PackageSender, TestUtilityService 
                         .getList());
             }
             mDexManager.load(userPackages);
+            mDynamicCodeLogger.load(userPackages);
             if (mIsUpgrade) {
                 FrameworkStatsLog.write(
                         FrameworkStatsLog.BOOT_TIME_EVENT_DURATION_REPORTED,
@@ -2980,9 +2986,14 @@ public class PackageManagerService implements PackageSender, TestUtilityService 
         return mDexManager;
     }
 
+    /*package*/ DynamicCodeLogger getDynamicCodeLogger() {
+        return mDynamicCodeLogger;
+    }
+
     public void shutdown() {
         mCompilerStats.writeNow();
         mDexManager.writePackageDexUsageNow();
+        mDynamicCodeLogger.writeNow();
         PackageWatchdog.getInstance(mContext).writeNow();
 
         synchronized (mLock) {
@@ -6344,6 +6355,12 @@ public class PackageManagerService implements PackageSender, TestUtilityService 
         @Override
         protected DexManager getDexManager() {
             return mDexManager;
+        }
+
+        @NonNull
+        @Override
+        public DynamicCodeLogger getDynamicCodeLogger() {
+            return mDynamicCodeLogger;
         }
 
         @Override

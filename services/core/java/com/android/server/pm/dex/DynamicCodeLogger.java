@@ -43,6 +43,9 @@ import libcore.util.HexEncoding;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
@@ -64,7 +67,7 @@ public class DynamicCodeLogger {
     private final PackageDynamicCodeLoading mPackageDynamicCodeLoading;
     private final Installer mInstaller;
 
-    DynamicCodeLogger(Installer installer) {
+    public DynamicCodeLogger(Installer installer) {
         mInstaller = installer;
         mPackageDynamicCodeLoading = new PackageDynamicCodeLoading();
     }
@@ -274,7 +277,39 @@ public class DynamicCodeLogger {
         mPackageDynamicCodeLoading.syncData(packageToUsersMap);
     }
 
-    void writeNow() {
+    /** Writes the in-memory dynamic code information to disk right away. */
+    public void writeNow() {
         mPackageDynamicCodeLoading.writeNow();
+    }
+
+    /** Reads the dynamic code information from disk. */
+    public void load(Map<Integer, List<PackageInfo>> userToPackagesMap) {
+        // Compute a reverse map.
+        Map<String, Set<Integer>> packageToUsersMap = new HashMap<>();
+        for (Map.Entry<Integer, List<PackageInfo>> entry : userToPackagesMap.entrySet()) {
+            List<PackageInfo> packageInfoList = entry.getValue();
+            int userId = entry.getKey();
+            for (PackageInfo pi : packageInfoList) {
+                Set<Integer> users =
+                        packageToUsersMap.computeIfAbsent(pi.packageName, k -> new HashSet<>());
+                users.add(userId);
+            }
+        }
+
+        readAndSync(packageToUsersMap);
+    }
+
+    /**
+     * Notifies that the user {@code userId} data for package {@code packageName} was destroyed.
+     * This will remove all dynamic code information associated with the package for the given user.
+     * {@code userId} is allowed to be {@code UserHandle.USER_ALL} in which case
+     * all dynamic code information for the package will be removed.
+     */
+    public void notifyPackageDataDestroyed(String packageName, int userId) {
+        if (userId == UserHandle.USER_ALL) {
+            removePackage(packageName);
+        } else {
+            removeUserPackage(packageName, userId);
+        }
     }
 }

@@ -63,6 +63,7 @@ import com.android.server.SystemServerInitThreadPool
 import com.android.server.compat.PlatformCompat
 import com.android.server.extendedtestutils.wheneverStatic
 import com.android.server.pm.dex.DexManager
+import com.android.server.pm.dex.DynamicCodeLogger
 import com.android.server.pm.parsing.PackageParser2
 import com.android.server.pm.parsing.pkg.PackageImpl
 import com.android.server.pm.parsing.pkg.ParsedPackage
@@ -208,6 +209,7 @@ class MockSystem(withSession: (StaticMockitoSessionBuilder) -> Unit = {}) {
             whenever(snapshot()) { appsFilterSnapshot }
         }
         val dexManager: DexManager = mock()
+        val dynamicCodeLogger: DynamicCodeLogger = mock()
         val installer: Installer = mock()
         val displayMetrics: DisplayMetrics = mock()
         val domainVerificationManagerInternal: DomainVerificationManagerInternal = mock()
@@ -285,6 +287,7 @@ class MockSystem(withSession: (StaticMockitoSessionBuilder) -> Unit = {}) {
         whenever(mocks.injector.crossProfileIntentFilterHelper)
                 .thenReturn(mocks.crossProfileIntentFilterHelper)
         whenever(mocks.injector.dexManager).thenReturn(mocks.dexManager)
+        whenever(mocks.injector.dynamicCodeLogger).thenReturn(mocks.dynamicCodeLogger)
         whenever(mocks.injector.systemConfig).thenReturn(mocks.systemConfig)
         whenever(mocks.injector.apexManager).thenReturn(mocks.apexManager)
         whenever(mocks.injector.scanningCachingPackageParser).thenReturn(mocks.packageParser)
