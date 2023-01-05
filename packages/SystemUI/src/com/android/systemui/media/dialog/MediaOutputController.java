@@ -757,6 +757,10 @@ public class MediaOutputController implements LocalMediaManager.DeviceCallback,
         return mFeatureFlags.isEnabled(Flags.OUTPUT_SWITCHER_ROUTES_PROCESSING);
     }
 
+    public boolean isSubStatusSupported() {
+        return mFeatureFlags.isEnabled(Flags.OUTPUT_SWITCHER_DEVICE_STATUS);
+    }
+
     List<MediaDevice> getGroupMediaDevices() {
         final List<MediaDevice> selectedDevices = getSelectedMediaDevice();
         final List<MediaDevice> selectableDevices = getSelectableMediaDevice();
