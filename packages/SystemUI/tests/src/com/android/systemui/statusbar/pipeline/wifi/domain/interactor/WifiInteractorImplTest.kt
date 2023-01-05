@@ -52,6 +52,22 @@ class WifiInteractorImplTest : SysuiTestCase() {
     }
 
     @Test
+    fun ssid_unavailableNetwork_outputsNull() =
+        runBlocking(IMMEDIATE) {
+            wifiRepository.setWifiNetwork(WifiNetworkModel.Unavailable)
+
+            var latest: String? = "default"
+            val job = underTest
+                .ssid
+                .onEach { latest = it }
+                .launchIn(this)
+
+            assertThat(latest).isNull()
+
+            job.cancel()
+        }
+
+    @Test
     fun ssid_inactiveNetwork_outputsNull() = runBlocking(IMMEDIATE) {
         wifiRepository.setWifiNetwork(WifiNetworkModel.Inactive)
 
@@ -85,6 +101,7 @@ class WifiInteractorImplTest : SysuiTestCase() {
     fun ssid_isPasspointAccessPoint_outputsPasspointName() = runBlocking(IMMEDIATE) {
         wifiRepository.setWifiNetwork(WifiNetworkModel.Active(
             networkId = 1,
+            level = 1,
             isPasspointAccessPoint = true,
             passpointProviderFriendlyName = "friendly",
         ))
@@ -104,6 +121,7 @@ class WifiInteractorImplTest : SysuiTestCase() {
     fun ssid_isOnlineSignUpForPasspoint_outputsPasspointName() = runBlocking(IMMEDIATE) {
         wifiRepository.setWifiNetwork(WifiNetworkModel.Active(
             networkId = 1,
+            level = 1,
             isOnlineSignUpForPasspointAccessPoint = true,
             passpointProviderFriendlyName = "friendly",
         ))
@@ -123,6 +141,7 @@ class WifiInteractorImplTest : SysuiTestCase() {
     fun ssid_unknownSsid_outputsNull() = runBlocking(IMMEDIATE) {
         wifiRepository.setWifiNetwork(WifiNetworkModel.Active(
             networkId = 1,
+            level = 1,
             ssid = WifiManager.UNKNOWN_SSID,
         ))
 
@@ -141,6 +160,7 @@ class WifiInteractorImplTest : SysuiTestCase() {
     fun ssid_validSsid_outputsSsid() = runBlocking(IMMEDIATE) {
         wifiRepository.setWifiNetwork(WifiNetworkModel.Active(
             networkId = 1,
+            level = 1,
             ssid = "MyAwesomeWifiNetwork",
         ))
 

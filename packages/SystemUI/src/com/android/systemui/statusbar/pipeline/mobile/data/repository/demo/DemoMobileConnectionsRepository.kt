@@ -34,6 +34,7 @@ import com.android.systemui.statusbar.pipeline.mobile.data.model.ResolvedNetwork
 import com.android.systemui.statusbar.pipeline.mobile.data.model.ResolvedNetworkType.DefaultNetworkType
 import com.android.systemui.statusbar.pipeline.mobile.data.model.SubscriptionModel
 import com.android.systemui.statusbar.pipeline.mobile.data.repository.MobileConnectionRepository
+import com.android.systemui.statusbar.pipeline.mobile.data.repository.MobileConnectionRepository.Companion.DEFAULT_NUM_LEVELS
 import com.android.systemui.statusbar.pipeline.mobile.data.repository.MobileConnectionsRepository
 import com.android.systemui.statusbar.pipeline.mobile.data.repository.demo.model.FakeNetworkEventModel
 import com.android.systemui.statusbar.pipeline.mobile.data.repository.demo.model.FakeNetworkEventModel.Mobile
@@ -139,14 +140,6 @@ constructor(
 
     private fun <K, V> Map<K, V>.reverse() = entries.associateBy({ it.value }) { it.key }
 
-    // TODO(b/261029387): add a command for this value
-    override val defaultDataSubId =
-        activeMobileDataSubscriptionId.stateIn(
-            scope,
-            SharingStarted.WhileSubscribed(),
-            INVALID_SUBSCRIPTION_ID
-        )
-
     // TODO(b/261029387): not yet supported
     override val defaultMobileNetworkConnectivity = MutableStateFlow(MobileConnectivityModel())
 
@@ -199,7 +192,6 @@ constructor(
         val connection = getRepoForSubId(subId)
         // This is always true here, because we split out disabled states at the data-source level
         connection.dataEnabled.value = true
-        connection.isDefaultDataSubscription.value = state.dataType != null
         connection.networkName.value = NetworkNameModel.Derived(state.name)
 
         connection.cdmaRoaming.value = state.roaming
@@ -261,15 +253,13 @@ constructor(
 
     private fun SignalIcon.MobileIconGroup?.toResolvedNetworkType(): ResolvedNetworkType {
         val key = mobileMappingsReverseLookup.value[this] ?: "dis"
-        return DefaultNetworkType(DEMO_NET_TYPE, key)
+        return DefaultNetworkType(key)
     }
 
     companion object {
         private const val TAG = "DemoMobileConnectionsRepo"
 
         private const val DEFAULT_SUB_ID = 1
-
-        private const val DEMO_NET_TYPE = 1234
     }
 }
 
@@ -279,9 +269,9 @@ class DemoMobileConnectionRepository(
 ) : MobileConnectionRepository {
     override val connectionInfo = MutableStateFlow(MobileConnectionModel())
 
-    override val dataEnabled = MutableStateFlow(true)
+    override val numberOfLevels = MutableStateFlow(DEFAULT_NUM_LEVELS)
 
-    override val isDefaultDataSubscription = MutableStateFlow(true)
+    override val dataEnabled = MutableStateFlow(true)
 
     override val cdmaRoaming = MutableStateFlow(false)
 
