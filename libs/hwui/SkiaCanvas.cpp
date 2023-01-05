@@ -16,23 +16,12 @@
 
 #include "SkiaCanvas.h"
 
-#include "CanvasProperty.h"
-#include "NinePatchUtils.h"
-#include "SkBlendMode.h"
-#include "VectorDrawable.h"
-#include "hwui/Bitmap.h"
-#include "hwui/MinikinUtils.h"
-#include "hwui/PaintFilter.h"
-#include "pipeline/skia/AnimatedDrawables.h"
-#include "pipeline/skia/HolePunch.h"
-
 #include <SkAndroidFrameworkUtils.h>
 #include <SkAnimatedImage.h>
 #include <SkBitmap.h>
 #include <SkCanvasPriv.h>
 #include <SkCanvasStateUtils.h>
 #include <SkColorFilter.h>
-#include <SkDeque.h>
 #include <SkDrawable.h>
 #include <SkFont.h>
 #include <SkGraphics.h>
@@ -41,8 +30,8 @@
 #include <SkMatrix.h>
 #include <SkPaint.h>
 #include <SkPicture.h>
-#include <SkRSXform.h>
 #include <SkRRect.h>
+#include <SkRSXform.h>
 #include <SkRect.h>
 #include <SkRefCnt.h>
 #include <SkShader.h>
@@ -53,6 +42,16 @@
 #include <memory>
 #include <optional>
 #include <utility>
+
+#include "CanvasProperty.h"
+#include "NinePatchUtils.h"
+#include "SkBlendMode.h"
+#include "VectorDrawable.h"
+#include "hwui/Bitmap.h"
+#include "hwui/MinikinUtils.h"
+#include "hwui/PaintFilter.h"
+#include "pipeline/skia/AnimatedDrawables.h"
+#include "pipeline/skia/HolePunch.h"
 
 namespace android {
 
@@ -176,7 +175,7 @@ int SkiaCanvas::save(SaveFlags::Flags flags) {
 // operation. It does this by explicitly saving off the clip & matrix state
 // when requested and playing it back after the SkCanvas::restore.
 void SkiaCanvas::restore() {
-    const auto* rec = this->currentSaveRec();
+    const SaveRec* rec = this->currentSaveRec();
     if (!rec) {
         // Fast path - no record for this frame.
         mCanvas->restore();
@@ -245,7 +244,9 @@ void SkiaCanvas::restoreUnclippedLayer(int restoreCount, const Paint& paint) {
 }
 
 const SkiaCanvas::SaveRec* SkiaCanvas::currentSaveRec() const {
-    const SaveRec* rec = mSaveStack ? static_cast<const SaveRec*>(mSaveStack->back()) : nullptr;
+    const SaveRec* rec = (mSaveStack && !mSaveStack->empty())
+                                 ? static_cast<const SaveRec*>(&mSaveStack->back())
+                                 : nullptr;
     int currentSaveCount = mCanvas->getSaveCount();
     SkASSERT(!rec || currentSaveCount >= rec->saveCount);
 
@@ -277,13 +278,12 @@ void SkiaCanvas::recordPartialSave(SaveFlags::Flags flags) {
     }
 
     if (!mSaveStack) {
-        mSaveStack.reset(new SkDeque(sizeof(struct SaveRec), 8));
+        mSaveStack.reset(new std::deque<SaveRec>());
     }
 
-    SaveRec* rec = static_cast<SaveRec*>(mSaveStack->push_back());
-    rec->saveCount = mCanvas->getSaveCount();
-    rec->saveFlags = flags;
-    rec->clipIndex = mClipStack.size();
+    mSaveStack->emplace_back(mCanvas->getSaveCount(),  // saveCount
+                             flags,                    // saveFlags
+                             mClipStack.size());       // clipIndex
 }
 
 template <typename T>
@@ -314,7 +314,7 @@ void SkiaCanvas::applyPersistentClips(size_t clipStartIndex) {
     // If the current/post-restore save rec is also persisting clips, we
     // leave them on the stack to be reapplied part of the next restore().
     // Otherwise we're done and just pop them.
-    const auto* rec = this->currentSaveRec();
+    const SaveRec* rec = this->currentSaveRec();
     if (!rec || (rec->saveFlags & SaveFlags::Clip)) {
         mClipStack.erase(begin, end);
     }
