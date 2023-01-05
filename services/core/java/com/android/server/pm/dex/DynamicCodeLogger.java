@@ -223,8 +223,12 @@ public class DynamicCodeLogger {
         EventLog.writeEvent(SNET_TAG, subtag, uid, message);
     }
 
-    void recordDex(int loaderUserId, String dexPath, String owningPackageName,
-            String loadingPackageName) {
+    /**
+     * Records that an app running in the specified uid has executed dex code from the file at
+     * {@code path}.
+     */
+    public void recordDex(
+            int loaderUserId, String dexPath, String owningPackageName, String loadingPackageName) {
         if (mPackageDynamicCodeLoading.record(owningPackageName, dexPath,
                 FILE_TYPE_DEX, loaderUserId, loadingPackageName)) {
             mPackageDynamicCodeLoading.maybeWriteAsync();
@@ -232,8 +236,8 @@ public class DynamicCodeLogger {
     }
 
     /**
-     * Record that an app running in the specified uid has executed native code from the file at
-     * {@param path}.
+     * Records that an app running in the specified uid has executed native code from the file at
+     * {@code path}.
      */
     public void recordNative(int loadingUid, String path) {
         String[] packages;
