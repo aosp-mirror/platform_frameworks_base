@@ -2753,6 +2753,10 @@ final class DisplayPowerController implements AutomaticBrightnessController.Call
             dumpBrightnessEvents(pw);
         }
 
+        if (mScreenOffBrightnessSensorController != null) {
+            mScreenOffBrightnessSensorController.dump(pw);
+        }
+
         if (mHbmController != null) {
             mHbmController.dump(pw);
         }
