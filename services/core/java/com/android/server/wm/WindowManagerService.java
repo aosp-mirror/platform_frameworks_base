@@ -3174,7 +3174,8 @@ public class WindowManagerService extends IWindowManager.Stub
 
     /**
      * Moves the given display to the top. If it cannot be moved to the top this method does
-     * nothing.
+     * nothing (e.g. if the display has the flag FLAG_STEAL_TOP_FOCUS_DISABLED set).
+     * @param displayId The display to move to the top.
      */
     void moveDisplayToTopInternal(int displayId) {
         synchronized (mGlobalLock) {
@@ -3186,14 +3187,6 @@ public class WindowManagerService extends IWindowManager.Stub
                             "Not moving display (displayId=%d) to top. Top focused displayId=%d. "
                                     + "Reason: FLAG_STEAL_TOP_FOCUS_DISABLED",
                             displayId, mRoot.getTopFocusedDisplayContent().getDisplayId());
-                    return;
-                }
-
-                if (mPerDisplayFocusEnabled) {
-                    ProtoLog.i(WM_DEBUG_FOCUS_LIGHT,
-                            "Not moving display (displayId=%d) to top. Top focused displayId=%d. "
-                                    + "Reason: config_perDisplayFocusEnabled", displayId,
-                            mRoot.getTopFocusedDisplayContent().getDisplayId());
                     return;
                 }
 
