@@ -29,6 +29,7 @@ import android.Manifest;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.app.ActivityManager;
+import android.app.ActivityThread;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
@@ -51,6 +52,7 @@ import android.os.Looper;
 import android.os.PowerManager;
 import android.os.RemoteException;
 import android.os.UserHandle;
+import android.provider.DeviceConfig;
 import android.text.TextUtils;
 import android.util.ArrayMap;
 import android.util.Log;
@@ -89,9 +91,18 @@ class MediaRouter2ServiceImpl {
     // TODO: (In Android S or later) if we add callback methods for generic failures
     //       in MediaRouter2, remove this constant and replace the usages with the real request IDs.
     private static final long DUMMY_REQUEST_ID = -1;
-    private static final int PACKAGE_IMPORTANCE_FOR_DISCOVERY = IMPORTANCE_FOREGROUND_SERVICE;
 
     private static final int DUMP_EVENTS_MAX_COUNT = 70;
+
+    private static final String MEDIA_BETTER_TOGETHER_NAMESPACE = "media_better_together";
+
+    private static final String KEY_SCANNING_PACKAGE_MINIMUM_IMPORTANCE =
+            "scanning_package_minimum_importance";
+
+    private static int sPackageImportanceForScanning = DeviceConfig.getInt(
+            MEDIA_BETTER_TOGETHER_NAMESPACE,
+            /* name */ KEY_SCANNING_PACKAGE_MINIMUM_IMPORTANCE,
+            /* defaultValue */ IMPORTANCE_FOREGROUND_SERVICE);
 
     private final Context mContext;
     private final UserManagerInternal mUserManagerInternal;
@@ -140,7 +151,7 @@ class MediaRouter2ServiceImpl {
         mContext = context;
         mActivityManager = mContext.getSystemService(ActivityManager.class);
         mActivityManager.addOnUidImportanceListener(mOnUidImportanceListener,
-                PACKAGE_IMPORTANCE_FOR_DISCOVERY);
+                sPackageImportanceForScanning);
         mPowerManager = mContext.getSystemService(PowerManager.class);
         mUserManagerInternal = LocalServices.getService(UserManagerInternal.class);
 
@@ -149,6 +160,10 @@ class MediaRouter2ServiceImpl {
         screenOnOffIntentFilter.addAction(ACTION_SCREEN_OFF);
 
         mContext.registerReceiver(mScreenOnOffReceiver, screenOnOffIntentFilter);
+
+        DeviceConfig.addOnPropertiesChangedListener(MEDIA_BETTER_TOGETHER_NAMESPACE,
+                ActivityThread.currentApplication().getMainExecutor(),
+                this::onDeviceConfigChange);
     }
 
     // Start of methods that implement MediaRouter2 operations.
@@ -1386,6 +1401,12 @@ class MediaRouter2ServiceImpl {
 
     // End of locked methods that are used by both MediaRouter2 and MediaRouter2Manager.
 
+    private void onDeviceConfigChange(@NonNull DeviceConfig.Properties properties) {
+        sPackageImportanceForScanning = properties.getInt(
+                /* name */ KEY_SCANNING_PACKAGE_MINIMUM_IMPORTANCE,
+                /* defaultValue */ IMPORTANCE_FOREGROUND_SERVICE);
+    }
+
     static long toUniqueRequestId(int requesterId, int originalRequestId) {
         return ((long) requesterId << 32) | originalRequestId;
     }
@@ -2563,7 +2584,7 @@ class MediaRouter2ServiceImpl {
                 isManagerScanning = managerRecords.stream().anyMatch(manager ->
                         manager.mIsScanning && service.mActivityManager
                                 .getPackageImportance(manager.mPackageName)
-                                <= PACKAGE_IMPORTANCE_FOR_DISCOVERY);
+                                <= sPackageImportanceForScanning);
 
                 if (isManagerScanning) {
                     discoveryPreferences = routerRecords.stream()
@@ -2572,7 +2593,7 @@ class MediaRouter2ServiceImpl {
                 } else {
                     discoveryPreferences = routerRecords.stream().filter(record ->
                             service.mActivityManager.getPackageImportance(record.mPackageName)
-                                    <= PACKAGE_IMPORTANCE_FOR_DISCOVERY)
+                                    <= sPackageImportanceForScanning)
                             .map(record -> record.mDiscoveryPreference)
                             .collect(Collectors.toList());
                 }
