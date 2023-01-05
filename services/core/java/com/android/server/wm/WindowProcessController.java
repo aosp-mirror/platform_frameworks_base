@@ -210,7 +210,7 @@ public class WindowProcessController extends ConfigurationContainer<Configuratio
     /** Whether {@link #mLastReportedConfiguration} is deferred by the cached state. */
     private volatile boolean mHasCachedConfiguration;
 
-    private int mTopActivityDeviceId = Context.DEVICE_ID_DEFAULT;
+    private int mLastTopActivityDeviceId = Context.DEVICE_ID_DEFAULT;
     /**
      * Registered {@link DisplayArea} as a listener to override config changes. {@code null} if not
      * registered.
@@ -1411,8 +1411,9 @@ public class WindowProcessController extends ConfigurationContainer<Configuratio
         // If deviceId for the top-activity changed, schedule passing it to the app process.
         boolean topActivityDeviceChanged = false;
         int deviceId = getTopActivityDeviceId();
-        if (deviceId != mTopActivityDeviceId) {
+        if (deviceId != mLastTopActivityDeviceId) {
             topActivityDeviceChanged = true;
+            mLastTopActivityDeviceId = deviceId;
         }
 
         final Configuration config = getConfiguration();
@@ -1431,15 +1432,13 @@ public class WindowProcessController extends ConfigurationContainer<Configuratio
             return;
         }
 
-        // TODO(b/263402938): Add tests that capture the deviceId dispatch to the client.
-        mTopActivityDeviceId = deviceId;
-        dispatchConfiguration(config, topActivityDeviceChanged ? mTopActivityDeviceId
+        dispatchConfiguration(config, topActivityDeviceChanged ? mLastTopActivityDeviceId
                 : Context.DEVICE_ID_INVALID);
     }
 
     private int getTopActivityDeviceId() {
         ActivityRecord topActivity = getTopNonFinishingActivity();
-        int updatedDeviceId = mTopActivityDeviceId;
+        int updatedDeviceId = Context.DEVICE_ID_DEFAULT;
         if (topActivity != null && topActivity.mDisplayContent != null) {
             updatedDeviceId = mAtm.mTaskSupervisor.getDeviceIdForDisplayId(
                     topActivity.mDisplayContent.mDisplayId);
