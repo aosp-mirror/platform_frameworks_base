@@ -2957,6 +2957,7 @@ public final class PowerManager {
      */
     @IntDef(prefix = { "LOW_POWER_STANDBY_ALLOWED_REASON_" }, flag = true, value = {
             LOW_POWER_STANDBY_ALLOWED_REASON_VOICE_INTERACTION,
+            LOW_POWER_STANDBY_ALLOWED_REASON_TEMP_POWER_SAVE_ALLOWLIST,
     })
     @Retention(RetentionPolicy.SOURCE)
     public @interface LowPowerStandbyAllowedReason {
@@ -2969,6 +2970,13 @@ public final class PowerManager {
      */
     public static final int LOW_POWER_STANDBY_ALLOWED_REASON_VOICE_INTERACTION = 1 << 0;
 
+    /**
+     * Exempts apps on the temporary powersave allowlist.
+     *
+     * @see #isAllowedInLowPowerStandby(int)
+     */
+    public static final int LOW_POWER_STANDBY_ALLOWED_REASON_TEMP_POWER_SAVE_ALLOWLIST = 1 << 1;
+
     /** @hide */
     public static String lowPowerStandbyAllowedReasonsToString(
             @LowPowerStandbyAllowedReason int allowedReasons) {
@@ -2976,6 +2984,10 @@ public final class PowerManager {
         if ((allowedReasons & LOW_POWER_STANDBY_ALLOWED_REASON_VOICE_INTERACTION) != 0) {
             allowedStrings.add("ALLOWED_REASON_VOICE_INTERACTION");
             allowedReasons &= ~LOW_POWER_STANDBY_ALLOWED_REASON_VOICE_INTERACTION;
+        }
+        if ((allowedReasons & LOW_POWER_STANDBY_ALLOWED_REASON_TEMP_POWER_SAVE_ALLOWLIST) != 0) {
+            allowedStrings.add("ALLOWED_REASON_TEMP_POWER_SAVE_ALLOWLIST");
+            allowedReasons &= ~LOW_POWER_STANDBY_ALLOWED_REASON_TEMP_POWER_SAVE_ALLOWLIST;
         }
         if (allowedReasons != 0) {
             allowedStrings.add(String.valueOf(allowedReasons));

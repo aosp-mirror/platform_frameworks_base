@@ -16,6 +16,7 @@
 
 package com.android.server.power;
 
+import static android.os.PowerManager.LOW_POWER_STANDBY_ALLOWED_REASON_TEMP_POWER_SAVE_ALLOWLIST;
 import static android.os.PowerManager.lowPowerStandbyAllowedReasonsToString;
 
 import android.Manifest;
@@ -59,6 +60,7 @@ import com.android.internal.annotations.VisibleForTesting;
 import com.android.modules.utils.TypedXmlPullParser;
 import com.android.modules.utils.TypedXmlSerializer;
 import com.android.server.LocalServices;
+import com.android.server.PowerAllowlistInternal;
 import com.android.server.net.NetworkPolicyManagerInternal;
 
 import org.xmlpull.v1.XmlPullParser;
@@ -134,7 +136,7 @@ public class LowPowerStandbyController {
     @GuardedBy("mLock")
     private boolean mEnableCustomPolicy;
 
-    private final BroadcastReceiver mIdleBroadcastReceiver = new BroadcastReceiver() {
+    private final BroadcastReceiver mBroadcastReceiver = new BroadcastReceiver() {
         @Override
         public void onReceive(Context context, Intent intent) {
             switch (intent.getAction()) {
@@ -150,6 +152,8 @@ public class LowPowerStandbyController {
             }
         }
     };
+    private final TempAllowlistChangeListener mTempAllowlistChangeListener =
+            new TempAllowlistChangeListener();
 
     private final BroadcastReceiver mPackageBroadcastReceiver = new BroadcastReceiver() {
         @Override
@@ -318,7 +322,7 @@ public class LowPowerStandbyController {
             updateSettingsLocked();
 
             if (mIsEnabled) {
-                registerBroadcastReceiver();
+                registerListeners();
             }
         }
 
@@ -594,7 +598,7 @@ public class LowPowerStandbyController {
             onNonInteractive();
         }
 
-        registerBroadcastReceiver();
+        registerListeners();
     }
 
     @GuardedBy("mLock")
@@ -604,7 +608,7 @@ public class LowPowerStandbyController {
         }
 
         cancelStandbyTimeoutAlarmLocked();
-        unregisterBroadcastReceiver();
+        unregisterListeners();
         updateActiveLocked();
     }
 
@@ -629,13 +633,13 @@ public class LowPowerStandbyController {
         }
     }
 
-    private void registerBroadcastReceiver() {
+    private void registerListeners() {
         IntentFilter intentFilter = new IntentFilter();
         intentFilter.addAction(PowerManager.ACTION_DEVICE_IDLE_MODE_CHANGED);
         intentFilter.addAction(Intent.ACTION_SCREEN_ON);
         intentFilter.addAction(Intent.ACTION_SCREEN_OFF);
 
-        mContext.registerReceiver(mIdleBroadcastReceiver, intentFilter);
+        mContext.registerReceiver(mBroadcastReceiver, intentFilter);
 
         IntentFilter packageFilter = new IntentFilter();
         packageFilter.addDataScheme(IntentFilter.SCHEME_PACKAGE);
@@ -648,12 +652,18 @@ public class LowPowerStandbyController {
         userFilter.addAction(Intent.ACTION_USER_ADDED);
         userFilter.addAction(Intent.ACTION_USER_REMOVED);
         mContext.registerReceiver(mUserReceiver, userFilter, null, mHandler);
+
+        PowerAllowlistInternal pai = LocalServices.getService(PowerAllowlistInternal.class);
+        pai.registerTempAllowlistChangeListener(mTempAllowlistChangeListener);
     }
 
-    private void unregisterBroadcastReceiver() {
-        mContext.unregisterReceiver(mIdleBroadcastReceiver);
+    private void unregisterListeners() {
+        mContext.unregisterReceiver(mBroadcastReceiver);
         mContext.unregisterReceiver(mPackageBroadcastReceiver);
         mContext.unregisterReceiver(mUserReceiver);
+
+        PowerAllowlistInternal pai = LocalServices.getService(PowerAllowlistInternal.class);
+        pai.unregisterTempAllowlistChangeListener(mTempAllowlistChangeListener);
     }
 
     @GuardedBy("mLock")
@@ -1195,6 +1205,20 @@ public class LowPowerStandbyController {
         @Override
         public void onChange(boolean selfChange, Uri uri) {
             onSettingsChanged();
+        }
+    }
+
+    final class TempAllowlistChangeListener implements
+            PowerAllowlistInternal.TempAllowlistChangeListener {
+        @Override
+        public void onAppAdded(int uid) {
+            addToAllowlistInternal(uid, LOW_POWER_STANDBY_ALLOWED_REASON_TEMP_POWER_SAVE_ALLOWLIST);
+        }
+
+        @Override
+        public void onAppRemoved(int uid) {
+            removeFromAllowlistInternal(uid,
+                    LOW_POWER_STANDBY_ALLOWED_REASON_TEMP_POWER_SAVE_ALLOWLIST);
         }
     }
 }

@@ -32859,6 +32859,7 @@ package android.os {
     field public static final int LOCATION_MODE_GPS_DISABLED_WHEN_SCREEN_OFF = 1; // 0x1
     field public static final int LOCATION_MODE_NO_CHANGE = 0; // 0x0
     field public static final int LOCATION_MODE_THROTTLE_REQUESTS_WHEN_SCREEN_OFF = 4; // 0x4
+    field public static final int LOW_POWER_STANDBY_ALLOWED_REASON_TEMP_POWER_SAVE_ALLOWLIST = 2; // 0x2
     field public static final int LOW_POWER_STANDBY_ALLOWED_REASON_VOICE_INTERACTION = 1; // 0x1
     field public static final String LOW_POWER_STANDBY_FEATURE_WAKE_ON_LAN = "com.android.lowpowerstandby.WAKE_ON_LAN";
     field public static final int ON_AFTER_RELEASE = 536870912; // 0x20000000
