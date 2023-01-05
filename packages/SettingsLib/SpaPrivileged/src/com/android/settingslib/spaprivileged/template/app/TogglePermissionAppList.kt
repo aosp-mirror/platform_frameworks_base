@@ -93,6 +93,14 @@ interface TogglePermissionAppListProvider {
     fun getAppListRoute(): String =
         TogglePermissionAppListPageProvider.getRoute(permissionType)
 
+    /**
+     * Gets the route prefix to the toggle permission App Info page.
+     *
+     * Expose route prefix to enable enter from non-SPA pages.
+     */
+    fun getAppInfoRoutePrefix(): String =
+        TogglePermissionAppInfoPageProvider.getRoutePrefix(permissionType)
+
     @Composable
     fun InfoPageEntryItem(app: ApplicationInfo) {
         val listModel = rememberContext(::createModel)

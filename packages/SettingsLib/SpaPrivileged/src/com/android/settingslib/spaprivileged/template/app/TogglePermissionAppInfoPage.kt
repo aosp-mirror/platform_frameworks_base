@@ -81,6 +81,13 @@ internal class TogglePermissionAppInfoPageProvider(
             navArgument(USER_ID) { type = NavType.IntType },
         )
 
+        /**
+         * Gets the route prefix to this page.
+         *
+         * Expose route prefix to enable enter from non-SPA pages.
+         */
+        fun getRoutePrefix(permissionType: String) = "$PAGE_NAME/$permissionType"
+
         @Composable
         fun navigator(permissionType: String, app: ApplicationInfo) =
             navigator(route = "$PAGE_NAME/$permissionType/${app.toRoute()}")
