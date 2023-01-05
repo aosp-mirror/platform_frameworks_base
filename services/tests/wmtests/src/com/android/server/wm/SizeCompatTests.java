@@ -2568,7 +2568,7 @@ public class SizeCompatTests extends WindowTestsBase {
         mActivity.mRootWindowContainer.performSurfacePlacement();
 
         final ArgumentCaptor<Rect> cropCapturer = ArgumentCaptor.forClass(Rect.class);
-        verify(mTransaction, times(2)).setWindowCrop(
+        verify(mTransaction, times(2)).setCrop(
                 eq(w1.getSurfaceControl()),
                 cropCapturer.capture()
         );
