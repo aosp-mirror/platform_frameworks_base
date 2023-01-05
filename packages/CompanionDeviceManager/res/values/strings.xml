@@ -143,7 +143,10 @@
     <!-- Microphone permission will be granted to corresponding profile [CHAR LIMIT=30] -->
     <string name="permission_microphone">Microphone</string>
 
-    <!-- Nearby devices permission will be granted of corresponding profile [CHAR LIMIT=30] -->
+    <!-- Call logs permission will be granted to the corresponding profile [CHAR LIMIT=30] -->
+    <string name="permission_call_logs">Call logs</string>
+
+    <!-- Nearby devices' permission will be granted of corresponding profile [CHAR LIMIT=30] -->
     <string name="permission_nearby_devices">Nearby devices</string>
 
     <!-- Storage permission will be granted of corresponding profile [CHAR LIMIT=30] -->
@@ -159,26 +162,26 @@
     <string name="permission_nearby_device_streaming">Nearby Device Streaming</string>
 
     <!-- Description of phone permission of corresponding profile [CHAR LIMIT=NONE] -->
-    <string name="permission_phone_summary">Can access your phone number and network info. Required for making calls and VoIP, voicemail, call redirect, and editing call logs</string>
+    <string name="permission_phone_summary">Can make and manage phone calls</string>
+
+    <!-- Description of Call logs permission of corresponding profile [CHAR LIMIT=NONE] -->
+    <string name="permission_call_logs_summary">Can read and write phone call log</string>
 
     <!-- Description of SMS permission of corresponding profile [CHAR LIMIT=NONE] -->
-    <!-- TODO(b/253644212) Need the description for sms permission  -->
-    <string name="permission_sms_summary"></string>
+    <string name="permission_sms_summary">Can send and view SMS messages</string>
 
     <!-- Description of contacts permission of corresponding profile [CHAR LIMIT=NONE] -->
-    <string name="permission_contacts_summary">Can read, create, or edit our contact list, as well as access the list of all accounts used on your device</string>
+    <string name="permission_contacts_summary">Can access your contacts</string>
 
     <!-- Description of calendar permission of corresponding profile [CHAR LIMIT=NONE] -->
-    <!-- TODO(b/253644212) Need the description for calendar permission  -->
-    <string name="permission_calendar_summary"></string>
+    <string name="permission_calendar_summary">Can access your calendar</string>
 
     <!-- Description of microphone permission of corresponding profile [CHAR LIMIT=NONE] -->
     <!-- TODO(b/256140614) Need the description for microphone permission  -->
     <string name="permission_microphone_summary">Can record audio using the microphone</string>
 
     <!-- Description of nearby devices' permission of corresponding profile [CHAR LIMIT=NONE] -->
-    <!-- TODO(b/253644212) Need the description for nearby devices' permission  -->
-    <string name="permission_nearby_devices_summary"></string>
+    <string name="permission_nearby_devices_summary">Can find, connect to, and determine the relative position of nearby devices</string>
 
     <!-- Description of notification permission of corresponding profile [CHAR LIMIT=NONE] -->
     <string name="permission_notification_summary">Can read all notifications, including information like contacts, messages, and photos</string>
