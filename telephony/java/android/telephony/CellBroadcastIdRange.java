@@ -15,6 +15,7 @@
  */
 package android.telephony;
 
+import android.annotation.IntRange;
 import android.annotation.NonNull;
 import android.annotation.SystemApi;
 import android.os.Parcel;
@@ -29,7 +30,9 @@ import java.util.Objects;
 @SystemApi
 public final class CellBroadcastIdRange implements Parcelable {
 
+    @IntRange(from = 0, to = 0xFFFF)
     private int mStartId;
+    @IntRange(from = 0, to = 0xFFFF)
     private int mEndId;
     private int mType;
     private boolean mIsEnabled;
@@ -38,18 +41,19 @@ public final class CellBroadcastIdRange implements Parcelable {
      * Create a new CellBroacastRange
      *
      * @param startId first message identifier as specified in TS 23.041 (3GPP)
-     * or C.R1001-G (3GPP2)
+     * or C.R1001-G (3GPP2). The value must be between 0 and 0xFFFF.
      * @param endId last message identifier as specified in TS 23.041 (3GPP)
-     * or C.R1001-G (3GPP2)
+     * or C.R1001-G (3GPP2). The value must be between 0 and 0xFFFF.
      * @param type the message format as defined in {@link SmsCbMessage}
      * @param isEnabled whether the range is enabled
      *
      * @throws IllegalArgumentException if endId < startId or invalid value
      */
-    public CellBroadcastIdRange(int startId, int endId,
+    public CellBroadcastIdRange(@IntRange(from = 0, to = 0xFFFF) int startId,
+            @IntRange(from = 0, to = 0xFFFF) int endId,
             @android.telephony.SmsCbMessage.MessageFormat int type, boolean isEnabled)
             throws IllegalArgumentException {
-        if (startId < 0 || endId < 0) {
+        if (startId < 0 || endId < 0 || startId > 0xFFFF || endId > 0xFFFF) {
             throw new IllegalArgumentException("invalid id");
         }
         if (endId < startId) {
@@ -65,6 +69,7 @@ public final class CellBroadcastIdRange implements Parcelable {
      * Return the first message identifier of this range as specified in TS 23.041 (3GPP)
      * or C.R1001-G (3GPP2)
      */
+    @IntRange(from = 0, to = 0xFFFF)
     public int getStartId() {
         return mStartId;
     }
@@ -73,6 +78,7 @@ public final class CellBroadcastIdRange implements Parcelable {
      * Return the last message identifier of this range as specified in TS 23.041 (3GPP)
      * or C.R1001-G (3GPP2)
      */
+    @IntRange(from = 0, to = 0xFFFF)
     public int getEndId() {
         return mEndId;
     }
