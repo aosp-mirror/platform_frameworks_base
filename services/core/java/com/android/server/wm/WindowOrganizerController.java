@@ -21,6 +21,7 @@ import static android.app.ActivityManager.isStartResultSuccessful;
 import static android.app.WindowConfiguration.WINDOWING_MODE_UNDEFINED;
 import static android.app.WindowConfiguration.WINDOW_CONFIG_BOUNDS;
 import static android.view.Display.DEFAULT_DISPLAY;
+import static android.window.TaskFragmentOperation.OP_TYPE_SET_ANIMATION_PARAMS;
 import static android.window.WindowContainerTransaction.HierarchyOp.HIERARCHY_OP_TYPE_ADD_RECT_INSETS_PROVIDER;
 import static android.window.WindowContainerTransaction.HierarchyOp.HIERARCHY_OP_TYPE_CHILDREN_TASKS_REPARENT;
 import static android.window.WindowContainerTransaction.HierarchyOp.HIERARCHY_OP_TYPE_CREATE_TASK_FRAGMENT;
@@ -43,6 +44,7 @@ import static android.window.WindowContainerTransaction.HierarchyOp.HIERARCHY_OP
 import static android.window.WindowContainerTransaction.HierarchyOp.HIERARCHY_OP_TYPE_SET_LAUNCH_ADJACENT_FLAG_ROOT;
 import static android.window.WindowContainerTransaction.HierarchyOp.HIERARCHY_OP_TYPE_SET_LAUNCH_ROOT;
 import static android.window.WindowContainerTransaction.HierarchyOp.HIERARCHY_OP_TYPE_SET_REPARENT_LEAF_TASK_IF_RELAUNCH;
+import static android.window.WindowContainerTransaction.HierarchyOp.HIERARCHY_OP_TYPE_SET_TASK_FRAGMENT_OPERATION;
 import static android.window.WindowContainerTransaction.HierarchyOp.HIERARCHY_OP_TYPE_START_ACTIVITY_IN_TASK_FRAGMENT;
 import static android.window.WindowContainerTransaction.HierarchyOp.HIERARCHY_OP_TYPE_START_SHORTCUT;
 
@@ -88,7 +90,9 @@ import android.window.ITransitionMetricsReporter;
 import android.window.ITransitionPlayer;
 import android.window.IWindowContainerTransactionCallback;
 import android.window.IWindowOrganizerController;
+import android.window.TaskFragmentAnimationParams;
 import android.window.TaskFragmentCreationParams;
+import android.window.TaskFragmentOperation;
 import android.window.WindowContainerTransaction;
 
 import com.android.internal.annotations.VisibleForTesting;
@@ -1142,6 +1146,10 @@ class WindowOrganizerController extends IWindowOrganizerController.Stub
                 fragment.setCompanionTaskFragment(companion);
                 break;
             }
+            case HIERARCHY_OP_TYPE_SET_TASK_FRAGMENT_OPERATION: {
+                effects |= applyTaskFragmentOperation(hop, errorCallbackToken, organizer);
+                break;
+            }
             default: {
                 // The other operations may change task order so they are skipped while in lock
                 // task mode. The above operations are still allowed because they don't move
@@ -1272,6 +1280,47 @@ class WindowOrganizerController extends IWindowOrganizerController.Stub
             }
         }
         return effects;
+    }
+
+    /** Applies change set through {@link WindowContainerTransaction#setTaskFragmentOperation}. */
+    private int applyTaskFragmentOperation(@NonNull WindowContainerTransaction.HierarchyOp hop,
+            @Nullable IBinder errorCallbackToken, @Nullable ITaskFragmentOrganizer organizer) {
+        final IBinder fragmentToken = hop.getContainer();
+        final TaskFragment taskFragment = mLaunchTaskFragments.get(fragmentToken);
+        final TaskFragmentOperation operation = hop.getTaskFragmentOperation();
+        if (operation == null) {
+            final Throwable exception = new IllegalArgumentException(
+                    "TaskFragmentOperation must be non-null");
+            sendTaskFragmentOperationFailure(organizer, errorCallbackToken, taskFragment,
+                    HIERARCHY_OP_TYPE_SET_TASK_FRAGMENT_OPERATION, exception);
+            return 0;
+        }
+        final int opType = operation.getOpType();
+        if (taskFragment == null || !taskFragment.isAttached()) {
+            final Throwable exception = new IllegalArgumentException(
+                    "Not allowed to apply operation on invalid fragment tokens opType=" + opType);
+            sendTaskFragmentOperationFailure(organizer, errorCallbackToken, taskFragment,
+                    HIERARCHY_OP_TYPE_SET_TASK_FRAGMENT_OPERATION, exception);
+            return 0;
+        }
+
+        int effect = 0;
+        switch (opType) {
+            case OP_TYPE_SET_ANIMATION_PARAMS: {
+                final TaskFragmentAnimationParams animationParams = operation.getAnimationParams();
+                if (animationParams == null) {
+                    final Throwable exception = new IllegalArgumentException(
+                            "TaskFragmentAnimationParams must be non-null");
+                    sendTaskFragmentOperationFailure(organizer, errorCallbackToken, taskFragment,
+                            HIERARCHY_OP_TYPE_SET_TASK_FRAGMENT_OPERATION, exception);
+                    break;
+                }
+                taskFragment.setAnimationParams(animationParams);
+                break;
+            }
+            // TODO(b/263436063): move other TaskFragment related operation here.
+        }
+        return effect;
     }
 
     /** A helper method to send minimum dimension violation error to the client. */
@@ -1681,6 +1730,7 @@ class WindowOrganizerController extends IWindowOrganizerController.Stub
                     break;
                 case HIERARCHY_OP_TYPE_START_ACTIVITY_IN_TASK_FRAGMENT:
                 case HIERARCHY_OP_TYPE_REQUEST_FOCUS_ON_TASK_FRAGMENT:
+                case HIERARCHY_OP_TYPE_SET_TASK_FRAGMENT_OPERATION:
                     enforceTaskFragmentOrganized(func, hop.getContainer(), organizer);
                     break;
                 case HIERARCHY_OP_TYPE_REPARENT_ACTIVITY_TO_TASK_FRAGMENT:
