@@ -2590,9 +2590,9 @@ class ActivityStarter {
 
         if (differentTopTask && !mAvoidMoveToFront) {
             mStartActivity.intent.addFlags(Intent.FLAG_ACTIVITY_BROUGHT_TO_FRONT);
-            if (mSourceRecord == null || (mSourceRootTask.getTopNonFinishingActivity() != null
-                    && mSourceRootTask.getTopNonFinishingActivity().getTask()
-                            == mSourceRecord.getTask())) {
+            // TODO(b/264487981): Consider using BackgroundActivityStartController to determine
+            //  whether to bring the launching activity to the front.
+            if (mSourceRecord == null || inTopNonFinishingTask(mSourceRecord)) {
                 // We really do want to push this one into the user's face, right now.
                 if (mLaunchTaskBehind && mSourceRecord != null) {
                     intentActivity.setTaskToAffiliateWith(mSourceRecord.getTask());
@@ -2649,6 +2649,20 @@ class ActivityStarter {
         mTargetRootTask = intentActivity.getRootTask();
         mSupervisor.handleNonResizableTaskIfNeeded(intentTask, WINDOWING_MODE_UNDEFINED,
                 mRootWindowContainer.getDefaultTaskDisplayArea(), mTargetRootTask);
+    }
+
+    private boolean inTopNonFinishingTask(ActivityRecord r) {
+        if (r == null || r.getTask() == null) {
+            return false;
+        }
+
+        final Task rTask = r.getTask();
+        final Task parent = rTask.getCreatedByOrganizerTask() != null
+                ? rTask.getCreatedByOrganizerTask() : r.getRootTask();
+        final ActivityRecord topNonFinishingActivity = parent != null
+                ? parent.getTopNonFinishingActivity() : null;
+
+        return topNonFinishingActivity != null && topNonFinishingActivity.getTask() == rTask;
     }
 
     private void resumeTargetRootTaskIfNeeded() {
