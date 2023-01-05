@@ -92,6 +92,10 @@ public class ScreenOffBrightnessSensorController implements SensorEventListener 
         }
     }
 
+    void stop() {
+        setLightSensorEnabled(false);
+    }
+
     float getAutomaticScreenBrightness() {
         if (mLastSensorValue < 0 || mLastSensorValue >= mSensorValueToLux.length
                 || (!mRegistered
