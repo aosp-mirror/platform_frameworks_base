@@ -17946,7 +17946,7 @@ package android.hardware.camera2 {
     method public int capture(@NonNull android.hardware.camera2.CaptureRequest, @NonNull java.util.concurrent.Executor, @NonNull android.hardware.camera2.CameraExtensionSession.ExtensionCaptureCallback) throws android.hardware.camera2.CameraAccessException;
     method public void close() throws android.hardware.camera2.CameraAccessException;
     method @NonNull public android.hardware.camera2.CameraDevice getDevice();
-    method @Nullable public android.util.Pair<java.lang.Long,java.lang.Long> getRealtimeStillCaptureLatency() throws android.hardware.camera2.CameraAccessException;
+    method @Nullable public android.hardware.camera2.CameraExtensionSession.StillCaptureLatency getRealtimeStillCaptureLatency() throws android.hardware.camera2.CameraAccessException;
     method public int setRepeatingRequest(@NonNull android.hardware.camera2.CaptureRequest, @NonNull java.util.concurrent.Executor, @NonNull android.hardware.camera2.CameraExtensionSession.ExtensionCaptureCallback) throws android.hardware.camera2.CameraAccessException;
     method public void stopRepeating() throws android.hardware.camera2.CameraAccessException;
   }
@@ -17967,6 +17967,12 @@ package android.hardware.camera2 {
     method public void onClosed(@NonNull android.hardware.camera2.CameraExtensionSession);
     method public abstract void onConfigureFailed(@NonNull android.hardware.camera2.CameraExtensionSession);
     method public abstract void onConfigured(@NonNull android.hardware.camera2.CameraExtensionSession);
+  }
+
+  public static final class CameraExtensionSession.StillCaptureLatency {
+    ctor public CameraExtensionSession.StillCaptureLatency(long, long);
+    method public long getCaptureLatency();
+    method public long getProcessingLatency();
   }
 
   public final class CameraManager {
