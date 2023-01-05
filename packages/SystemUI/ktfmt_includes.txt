@@ -485,7 +485,6 @@
 -packages/SystemUI/src/com/android/systemui/statusbar/window/StatusBarWindowStateController.kt
 -packages/SystemUI/src/com/android/systemui/temporarydisplay/TemporaryViewInfo.kt
 -packages/SystemUI/src/com/android/systemui/temporarydisplay/TemporaryViewDisplayController.kt
--packages/SystemUI/src/com/android/systemui/temporarydisplay/chipbar/ChipbarCoordinator.kt
 -packages/SystemUI/src/com/android/systemui/temporarydisplay/chipbar/ChipbarRootView.kt
 -packages/SystemUI/src/com/android/systemui/toast/ToastDefaultAnimation.kt
 -packages/SystemUI/src/com/android/systemui/toast/ToastLogger.kt
