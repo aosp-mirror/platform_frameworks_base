@@ -17,12 +17,13 @@
 package com.android.keyguard.logging
 
 import com.android.systemui.log.dagger.KeyguardLog
+import com.android.systemui.plugins.log.ConstantStringsLogger
+import com.android.systemui.plugins.log.ConstantStringsLoggerImpl
 import com.android.systemui.plugins.log.LogBuffer
 import com.android.systemui.plugins.log.LogLevel.DEBUG
 import com.android.systemui.plugins.log.LogLevel.ERROR
 import com.android.systemui.plugins.log.LogLevel.INFO
 import com.android.systemui.plugins.log.LogLevel.VERBOSE
-import com.android.systemui.plugins.log.LogLevel.WARNING
 import com.google.errorprone.annotations.CompileTimeConstant
 import javax.inject.Inject
 
@@ -33,14 +34,8 @@ private const val TAG = "KeyguardLog"
  * temporary logs or logs for smaller classes when creating whole new [LogBuffer] wrapper might be
  * an overkill.
  */
-class KeyguardLogger @Inject constructor(@KeyguardLog private val buffer: LogBuffer) {
-    fun d(@CompileTimeConstant msg: String) = buffer.log(TAG, DEBUG, msg)
-
-    fun e(@CompileTimeConstant msg: String) = buffer.log(TAG, ERROR, msg)
-
-    fun v(@CompileTimeConstant msg: String) = buffer.log(TAG, VERBOSE, msg)
-
-    fun w(@CompileTimeConstant msg: String) = buffer.log(TAG, WARNING, msg)
+class KeyguardLogger @Inject constructor(@KeyguardLog private val buffer: LogBuffer) :
+    ConstantStringsLogger by ConstantStringsLoggerImpl(buffer, TAG) {
 
     fun logException(ex: Exception, @CompileTimeConstant logMsg: String) {
         buffer.log(TAG, ERROR, {}, { logMsg }, exception = ex)
