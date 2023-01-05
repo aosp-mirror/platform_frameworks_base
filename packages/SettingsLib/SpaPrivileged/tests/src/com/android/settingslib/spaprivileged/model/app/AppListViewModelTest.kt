@@ -118,7 +118,8 @@ private class TestAppListModel : AppListModel<TestAppRecord> {
     override fun transform(userIdFlow: Flow<Int>, appListFlow: Flow<List<ApplicationInfo>>) =
         appListFlow.mapItem(::TestAppRecord)
 
-    override suspend fun onFirstLoaded(recordList: List<TestAppRecord>) {
+    override suspend fun onFirstLoaded(recordList: List<TestAppRecord>): Boolean {
         onFirstLoadedCalled = true
+        return false
     }
 }

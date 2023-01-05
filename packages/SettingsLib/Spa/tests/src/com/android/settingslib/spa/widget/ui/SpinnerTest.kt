@@ -36,28 +36,28 @@ class SpinnerTest {
 
     @Test
     fun spinner_initialState() {
-        var selectedIndex by mutableStateOf(0)
+        var selectedId by mutableStateOf(1)
         composeTestRule.setContent {
             Spinner(
-                options = (1..3).map { "Option $it" },
-                selectedIndex = selectedIndex,
-                setIndex = { selectedIndex = it },
+                options = (1..3).map { SpinnerOption(id = it, text = "Option $it") },
+                selectedId = selectedId,
+                setId = { selectedId = it },
             )
         }
 
         composeTestRule.onNodeWithText("Option 1").assertIsDisplayed()
         composeTestRule.onNodeWithText("Option 2").assertDoesNotExist()
-        assertThat(selectedIndex).isEqualTo(0)
+        assertThat(selectedId).isEqualTo(1)
     }
 
     @Test
     fun spinner_canChangeState() {
-        var selectedIndex by mutableStateOf(0)
+        var selectedId by mutableStateOf(1)
         composeTestRule.setContent {
             Spinner(
-                options = (1..3).map { "Option $it" },
-                selectedIndex = selectedIndex,
-                setIndex = { selectedIndex = it },
+                options = (1..3).map { SpinnerOption(id = it, text = "Option $it") },
+                selectedId = selectedId,
+                setId = { selectedId = it },
             )
         }
 
@@ -66,6 +66,6 @@ class SpinnerTest {
 
         composeTestRule.onNodeWithText("Option 1").assertDoesNotExist()
         composeTestRule.onNodeWithText("Option 2").assertIsDisplayed()
-        assertThat(selectedIndex).isEqualTo(1)
+        assertThat(selectedId).isEqualTo(2)
     }
 }
