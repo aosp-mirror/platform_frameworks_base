@@ -25,6 +25,7 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotEquals;
 import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyBoolean;
@@ -805,12 +806,25 @@ public class BroadcastQueueTest {
                     null, null, null, null, null, null, userId, null));
     }
 
+    private void verifyScheduleReceiver(VerificationMode mode, ProcessRecord app,
+            int userId) throws Exception {
+        verify(app.getThread(), mode).scheduleReceiverList(
+                manifestReceiver(null,
+                        null, null, null, null, null, null, userId, null));
+    }
+
     private void verifyScheduleRegisteredReceiver(ProcessRecord app,
-            Intent intent)
-            throws Exception {
+            Intent intent) throws Exception {
         verify(app.getThread()).scheduleReceiverList(
             registeredReceiver(null, filterEqualsIgnoringComponent(intent),
                     null, null, null, null, null, UserHandle.USER_SYSTEM, null));
+    }
+
+    private void verifyScheduleRegisteredReceiver(VerificationMode mode, ProcessRecord app,
+            int userId) throws Exception {
+        verify(app.getThread(), mode).scheduleReceiverList(
+                registeredReceiver(null, null,
+                        null, null, null, null, null, userId, null));
     }
 
     static final int USER_GUEST = 11;
@@ -1220,6 +1234,45 @@ public class BroadcastQueueTest {
                 new ComponentName(PACKAGE_GREEN, CLASS_GREEN));
         verifyScheduleReceiver(times(1), receiverApp, airplane,
                 new ComponentName(PACKAGE_GREEN, CLASS_BLUE));
+    }
+
+    @Test
+    public void testCleanup_userRemoved() throws Exception {
+        final ProcessRecord callerApp = makeActiveProcessRecord(
+                PACKAGE_RED, PACKAGE_RED, ProcessBehavior.NORMAL,
+                USER_GUEST);
+
+        final Intent airplane = new Intent(Intent.ACTION_AIRPLANE_MODE_CHANGED);
+        final Intent timeZone = new Intent(Intent.ACTION_TIMEZONE_CHANGED);
+        try (SyncBarrier b = new SyncBarrier()) {
+            enqueueBroadcast(makeBroadcastRecord(airplane, callerApp, USER_GUEST, new ArrayList<>(
+                    List.of(makeRegisteredReceiver(callerApp),
+                            makeManifestReceiver(PACKAGE_GREEN, CLASS_RED, USER_GUEST),
+                            makeManifestReceiver(PACKAGE_BLUE, CLASS_GREEN, USER_GUEST),
+                            makeManifestReceiver(PACKAGE_YELLOW, CLASS_BLUE, USER_GUEST)))));
+            enqueueBroadcast(makeBroadcastRecord(timeZone, callerApp, USER_GUEST, new ArrayList<>(
+                    List.of(makeRegisteredReceiver(callerApp),
+                            makeManifestReceiver(PACKAGE_GREEN, CLASS_RED, USER_GUEST),
+                            makeManifestReceiver(PACKAGE_BLUE, CLASS_GREEN, USER_GUEST),
+                            makeManifestReceiver(PACKAGE_YELLOW, CLASS_BLUE, USER_GUEST)))));
+
+            synchronized (mAms) {
+                mQueue.cleanupDisabledPackageReceiversLocked(null, null, USER_GUEST);
+            }
+        }
+
+        waitForIdle();
+        // Legacy stack does not remove registered receivers as part of
+        // cleanUpDisabledPackageReceiversLocked() call, so verify this only on modern queue.
+        if (mImpl == Impl.MODERN) {
+            verifyScheduleReceiver(never(), callerApp, USER_GUEST);
+            verifyScheduleRegisteredReceiver(never(), callerApp, USER_GUEST);
+        }
+        for (String pkg : new String[] {
+                PACKAGE_GREEN, PACKAGE_BLUE, PACKAGE_YELLOW
+        }) {
+            assertNull(mAms.getProcessRecordLocked(pkg, getUidForPackage(pkg, USER_GUEST)));
+        }
     }
 
     /**
