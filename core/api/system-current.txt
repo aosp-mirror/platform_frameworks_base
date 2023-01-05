@@ -204,6 +204,7 @@ package android {
     field public static final String MANAGE_WIFI_COUNTRY_CODE = "android.permission.MANAGE_WIFI_COUNTRY_CODE";
     field public static final String MARK_DEVICE_ORGANIZATION_OWNED = "android.permission.MARK_DEVICE_ORGANIZATION_OWNED";
     field public static final String MEDIA_RESOURCE_OVERRIDE_PID = "android.permission.MEDIA_RESOURCE_OVERRIDE_PID";
+    field public static final String MIGRATE_HEALTH_CONNECT_DATA = "android.permission.MIGRATE_HEALTH_CONNECT_DATA";
     field public static final String MODIFY_APPWIDGET_BIND_PERMISSIONS = "android.permission.MODIFY_APPWIDGET_BIND_PERMISSIONS";
     field public static final String MODIFY_AUDIO_ROUTING = "android.permission.MODIFY_AUDIO_ROUTING";
     field public static final String MODIFY_CELL_BROADCASTS = "android.permission.MODIFY_CELL_BROADCASTS";
