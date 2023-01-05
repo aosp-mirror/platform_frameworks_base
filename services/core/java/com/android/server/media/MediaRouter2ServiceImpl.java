@@ -169,29 +169,22 @@ class MediaRouter2ServiceImpl {
     // Start of methods that implement MediaRouter2 operations.
 
     @NonNull
-    public boolean verifyPackageName(@NonNull String clientPackageName) {
-        final long token = Binder.clearCallingIdentity();
-
-        try {
-            PackageManager pm = mContext.getPackageManager();
-            pm.getPackageInfo(clientPackageName, PackageManager.PackageInfoFlags.of(0));
-            return true;
-        } catch (PackageManager.NameNotFoundException ex) {
-            return false;
-        } finally {
-            Binder.restoreCallingIdentity(token);
-        }
-    }
-
-    @NonNull
-    public void enforceMediaContentControlPermission() {
+    public boolean verifyPackageExists(@NonNull String clientPackageName) {
         final int pid = Binder.getCallingPid();
         final int uid = Binder.getCallingUid();
         final long token = Binder.clearCallingIdentity();
 
         try {
-            mContext.enforcePermission(Manifest.permission.MEDIA_CONTENT_CONTROL, pid, uid,
+            mContext.enforcePermission(
+                    Manifest.permission.MEDIA_CONTENT_CONTROL,
+                    pid,
+                    uid,
                     "Must hold MEDIA_CONTENT_CONTROL permission.");
+            PackageManager pm = mContext.getPackageManager();
+            pm.getPackageInfo(clientPackageName, PackageManager.PackageInfoFlags.of(0));
+            return true;
+        } catch (PackageManager.NameNotFoundException ex) {
+            return false;
         } finally {
             Binder.restoreCallingIdentity(token);
         }
@@ -1959,12 +1952,12 @@ class MediaRouter2ServiceImpl {
                 @NonNull RoutingSessionInfo oldSession, @NonNull MediaRoute2Info route) {
             try {
                 if (route.isSystemRoute() && !routerRecord.mHasModifyAudioRoutingPermission) {
-                    routerRecord.mRouter.requestCreateSessionByManager(uniqueRequestId,
-                            oldSession, mSystemProvider.getDefaultRoute());
-                } else {
-                    routerRecord.mRouter.requestCreateSessionByManager(uniqueRequestId,
-                            oldSession, route);
+                    // The router lacks permission to modify system routing, so we hide system
+                    // route info from them.
+                    route = mSystemProvider.getDefaultRoute();
                 }
+                routerRecord.mRouter.requestCreateSessionByManager(
+                        uniqueRequestId, oldSession, route);
             } catch (RemoteException ex) {
                 Slog.w(TAG, "getSessionHintsForCreatingSessionOnHandler: "
                         + "Failed to request. Router probably died.", ex);

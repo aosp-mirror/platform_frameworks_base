@@ -208,9 +208,9 @@ public final class MediaRouter2 {
                 IMediaRouterService.Stub.asInterface(
                         ServiceManager.getService(Context.MEDIA_ROUTER_SERVICE));
         try {
-            // SecurityException will be thrown if there's no permission.
-            serviceBinder.enforceMediaContentControlPermission();
-            if (!serviceBinder.verifyPackageName(clientPackageName)) {
+            // verifyPackageExists throws SecurityException if the caller doesn't hold
+            // MEDIA_CONTENT_CONTROL permission.
+            if (!serviceBinder.verifyPackageExists(clientPackageName)) {
                 Log.e(TAG, "Package " + clientPackageName + " not found. Ignoring.");
                 return null;
             }
