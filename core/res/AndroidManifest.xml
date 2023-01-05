@@ -3353,6 +3353,120 @@
     <permission android:name="android.permission.MANAGE_DEVICE_POLICY_DEFAULT_SMS"
                 android:protectionLevel="internal|role" />
 
+    <!-- Allows an application to set policy related to profiles.
+        <p>{@link Manifest.permission#MANAGE_DEVICE_POLICY_ACROSS_USERS_FULL} is
+        required to call APIs protected by this permission on users different to the calling user.
+    -->
+    <permission android:name="android.permission.MANAGE_DEVICE_POLICY_PROFILES"
+                android:protectionLevel="internal|role" />
+
+    <!-- Allows an application to set policy related to interacting with profiles (e.g. Disallowing
+    cross-profile copy and paste).
+        <p>{@link Manifest.permission#MANAGE_DEVICE_POLICY_ACROSS_USERS_FULL} is
+        required to call APIs protected by this permission on users different to the calling user.
+    -->
+    <permission android:name="android.permission.MANAGE_DEVICE_POLICY_PROFILE_INTERACTION"
+                android:protectionLevel="internal|role" />
+
+    <!-- Allows an application to set policy related to VPNs.
+        <p>{@link Manifest.permission#MANAGE_DEVICE_POLICY_ACROSS_USERS_FULL} is
+        required to call APIs protected by this permission on users different to the calling user.
+    -->
+    <permission android:name="android.permission.MANAGE_DEVICE_POLICY_VPN"
+                android:protectionLevel="internal|role" />
+
+    <!-- Allows an application to set policy related to audio output.
+        <p>{@link Manifest.permission#MANAGE_DEVICE_POLICY_ACROSS_USERS_FULL} is
+        required to call APIs protected by this permission on users different to the calling user.
+    -->
+    <permission android:name="android.permission.MANAGE_DEVICE_POLICY_AUDIO_OUTPUT"
+                android:protectionLevel="internal|role" />
+
+    <!-- Allows an application to set policy related to the display.
+        <p>{@link Manifest.permission#MANAGE_DEVICE_POLICY_ACROSS_USERS_FULL} is
+        required to call APIs protected by this permission on users different to the calling user.
+    -->
+    <permission android:name="android.permission.MANAGE_DEVICE_POLICY_DISPLAY"
+                android:protectionLevel="internal|role" />
+
+    <!-- Allows an application to set policy related to location.
+        <p>{@link Manifest.permission#MANAGE_DEVICE_POLICY_ACROSS_USERS_FULL} is
+        required to call APIs protected by this permission on users different to the calling user.
+    -->
+    <permission android:name="android.permission.MANAGE_DEVICE_POLICY_LOCATION"
+                android:protectionLevel="internal|role" />
+
+    <!-- Allows an application to set policy related to factory reset.
+        <p>{@link Manifest.permission#MANAGE_DEVICE_POLICY_ACROSS_USERS_FULL} is
+        required to call APIs protected by this permission on users different to the calling user.
+    -->
+    <permission android:name="android.permission.MANAGE_DEVICE_POLICY_FACTORY_RESET"
+                android:protectionLevel="internal|role" />
+
+    <!-- Allows an application to set policy related to the wallpaper.
+        <p>{@link Manifest.permission#MANAGE_DEVICE_POLICY_ACROSS_USERS_FULL} is
+        required to call APIs protected by this permission on users different to the calling user.
+    -->
+    <permission android:name="android.permission.MANAGE_DEVICE_POLICY_WALLPAPER"
+                android:protectionLevel="internal|role" />
+
+    <!-- Allows an application to set policy related to the usage of the contents of the screen.
+        <p>{@link Manifest.permission#MANAGE_DEVICE_POLICY_ACROSS_USERS_FULL} is
+        required to call APIs protected by this permission on users different to the calling user.
+    -->
+    <permission android:name="android.permission.MANAGE_DEVICE_POLICY_SCREEN_CONTENT"
+                android:protectionLevel="internal|role" />
+
+    <!-- Allows an application to set policy related to system dialogs.
+        <p>{@link Manifest.permission#MANAGE_DEVICE_POLICY_ACROSS_USERS_FULL} is
+        required to call APIs protected by this permission on users different to the calling user.
+    -->
+    <permission android:name="android.permission.MANAGE_DEVICE_POLICY_SYSTEM_DIALOGS"
+                android:protectionLevel="internal|role" />
+
+    <!-- Allows an application to set policy related to users running in the background.
+        <p>{@link Manifest.permission#MANAGE_DEVICE_POLICY_ACROSS_USERS_FULL} is
+        required to call APIs protected by this permission on users different to the calling user.
+    -->
+    <permission android:name="android.permission.MANAGE_DEVICE_POLICY_RUN_IN_BACKGROUND"
+                android:protectionLevel="internal|role" />
+
+    <!-- Allows an application to set policy related to printing.
+        <p>{@link Manifest.permission#MANAGE_DEVICE_POLICY_ACROSS_USERS_FULL} is
+        required to call APIs protected by this permission on users different to the calling user.
+    -->
+    <permission android:name="android.permission.MANAGE_DEVICE_POLICY_PRINTING"
+                android:protectionLevel="internal|role" />
+
+    <!-- Allows an application to set policy related to nearby communications (e.g. Beam and
+    nearby streaming).
+        <p>{@link Manifest.permission#MANAGE_DEVICE_POLICY_ACROSS_USERS_FULL} is
+        required to call APIs protected by this permission on users different to the calling user.
+    -->
+    <permission android:name="android.permission.MANAGE_DEVICE_POLICY_NEARBY_COMMUNICATION"
+                android:protectionLevel="internal|role" />
+
+    <!-- Allows an application to set policy related to windows.
+        <p>{@link Manifest.permission#MANAGE_DEVICE_POLICY_ACROSS_USERS_FULL} is
+        required to call APIs protected by this permission on users different to the calling user.
+    -->
+    <permission android:name="android.permission.MANAGE_DEVICE_POLICY_WINDOWS"
+                android:protectionLevel="internal|role" />
+
+    <!-- Allows an application to set policy related to locale.
+        <p>{@link Manifest.permission#MANAGE_DEVICE_POLICY_ACROSS_USERS_FULL} is
+        required to call APIs protected by this permission on users different to the calling user.
+    -->
+    <permission android:name="android.permission.MANAGE_DEVICE_POLICY_LOCALE"
+                android:protectionLevel="internal|role" />
+
+    <!-- Allows an application to set policy related to autofill.
+        <p>{@link Manifest.permission#MANAGE_DEVICE_POLICY_ACROSS_USERS_FULL} is
+        required to call APIs protected by this permission on users different to the calling user.
+    -->
+    <permission android:name="android.permission.MANAGE_DEVICE_POLICY_AUTOFILL"
+                android:protectionLevel="internal|role" />
+
     <!-- Allows an application to set device policies outside the current user
         that are critical for securing data within the current user.
         <p>Holding this permission allows the use of other held MANAGE_DEVICE_POLICY_*
