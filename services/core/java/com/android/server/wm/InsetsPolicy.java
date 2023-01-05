@@ -19,7 +19,6 @@ package com.android.server.wm;
 import static android.app.StatusBarManager.WINDOW_STATE_HIDDEN;
 import static android.app.StatusBarManager.WINDOW_STATE_SHOWING;
 import static android.app.WindowConfiguration.ACTIVITY_TYPE_STANDARD;
-import static android.app.WindowConfiguration.WINDOWING_MODE_FULLSCREEN;
 import static android.app.WindowConfiguration.WINDOWING_MODE_MULTI_WINDOW;
 import static android.app.WindowConfiguration.WINDOWING_MODE_PINNED;
 import static android.view.InsetsController.ANIMATION_TYPE_HIDE;
@@ -42,7 +41,6 @@ import android.app.StatusBarManager;
 import android.app.WindowConfiguration;
 import android.content.ComponentName;
 import android.content.res.Resources;
-import android.graphics.Rect;
 import android.util.ArrayMap;
 import android.util.IntArray;
 import android.util.SparseArray;
@@ -276,21 +274,22 @@ class InsetsPolicy {
     /**
      * @see WindowState#getInsetsState()
      */
-    InsetsState getInsetsForWindowMetrics(@NonNull WindowManager.LayoutParams attrs) {
-        final WindowToken token = mDisplayContent.getWindowToken(attrs.token);
-        if (token != null) {
-            final InsetsState rotatedState = token.getFixedRotationTransformInsetsState();
-            if (rotatedState != null) {
-                return rotatedState;
+    void getInsetsForWindowMetrics(@Nullable WindowToken token,
+            @NonNull InsetsState outInsetsState) {
+        final InsetsState srcState = token != null && token.isFixedRotationTransforming()
+                ? token.getFixedRotationTransformInsetsState()
+                : mStateController.getRawInsetsState();
+        outInsetsState.set(srcState, true /* copySources */);
+        for (int i = mShowingTransientTypes.size() - 1; i >= 0; i--) {
+            final InsetsSource source = outInsetsState.peekSource(mShowingTransientTypes.get(i));
+            if (source != null) {
+                source.setVisible(false);
             }
         }
-        final boolean alwaysOnTop = token != null && token.isAlwaysOnTop();
-        // Always use windowing mode fullscreen when get insets for window metrics to make sure it
-        // contains all insets types.
-        final InsetsState originalState = enforceInsetsPolicyForTarget(attrs,
-                WINDOWING_MODE_FULLSCREEN, alwaysOnTop, mStateController.getRawInsetsState());
-        InsetsState state = adjustVisibilityForTransientTypes(originalState);
-        return adjustInsetsForRoundedCorners(token, state, state == originalState);
+        adjustInsetsForRoundedCorners(token, outInsetsState, false /* copyState */);
+        if (token != null && token.hasSizeCompatBounds()) {
+            outInsetsState.scale(1f / token.getCompatScale());
+        }
     }
 
     /**
@@ -423,10 +422,9 @@ class InsetsPolicy {
             final Task task = activityRecord != null ? activityRecord.getTask() : null;
             if (task != null && !task.getWindowConfiguration().tasksAreFloating()) {
                 // Use task bounds to calculating rounded corners if the task is not floating.
-                final Rect roundedCornerFrame = new Rect(task.getBounds());
                 final InsetsState state = copyState ? new InsetsState(originalState)
                         : originalState;
-                state.setRoundedCornerFrame(roundedCornerFrame);
+                state.setRoundedCornerFrame(task.getBounds());
                 return state;
             }
         }
