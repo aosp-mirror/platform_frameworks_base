@@ -26,6 +26,11 @@ toddke@google.com
 tsuji@google.com
 yamasani@google.com
 
+# WindowManager team
+# TODO(262451702): Move WindowManager configs out of config.xml in a separate file
+per-file core/res/res/values/config.xml = file:/services/core/java/com/android/server/wm/OWNERS
+per-file core/res/res/values/symbols.xml = file:/services/core/java/com/android/server/wm/OWNERS
+
 # Resources finalization
 per-file res/xml/public-staging.xml = file:/tools/aapt2/OWNERS
 per-file res/xml/public-final.xml = file:/tools/aapt2/OWNERS
