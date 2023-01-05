@@ -1423,9 +1423,9 @@ public class WindowManagerService extends IWindowManager.Stub
     public int addWindow(Session session, IWindow client, LayoutParams attrs, int viewVisibility,
             int displayId, int requestUserId, @InsetsType int requestedVisibleTypes,
             InputChannel outInputChannel, InsetsState outInsetsState,
-            InsetsSourceControl[] outActiveControls, Rect outAttachedFrame,
+            InsetsSourceControl.Array outActiveControls, Rect outAttachedFrame,
             float[] outSizeCompatScale) {
-        Arrays.fill(outActiveControls, null);
+        outActiveControls.set(null);
         int[] appOp = new int[1];
         final boolean isRoundedCornerOverlay = (attrs.privateFlags
                 & PRIVATE_FLAG_IS_ROUNDED_CORNERS_OVERLAY) != 0;
@@ -2215,10 +2215,10 @@ public class WindowManagerService extends IWindowManager.Stub
             int requestedWidth, int requestedHeight, int viewVisibility, int flags, int seq,
             int lastSyncSeqId, ClientWindowFrames outFrames,
             MergedConfiguration outMergedConfiguration, SurfaceControl outSurfaceControl,
-            InsetsState outInsetsState, InsetsSourceControl[] outActiveControls,
+            InsetsState outInsetsState, InsetsSourceControl.Array outActiveControls,
             Bundle outSyncIdBundle) {
         if (outActiveControls != null) {
-            Arrays.fill(outActiveControls, null);
+            outActiveControls.set(null);
         }
         int result = 0;
         boolean configChanged = false;
@@ -2590,11 +2590,12 @@ public class WindowManagerService extends IWindowManager.Stub
         return result;
     }
 
-    private void getInsetsSourceControls(WindowState win, InsetsSourceControl[] outControls) {
+    private void getInsetsSourceControls(WindowState win, InsetsSourceControl.Array outArray) {
         final InsetsSourceControl[] controls =
                 win.getDisplayContent().getInsetsStateController().getControlsForDispatch(win);
         if (controls != null) {
-            final int length = Math.min(controls.length, outControls.length);
+            final int length = controls.length;
+            final InsetsSourceControl[] outControls = new InsetsSourceControl[length];
             for (int i = 0; i < length; i++) {
                 // We will leave the critical section before returning the leash to the client,
                 // so we need to copy the leash to prevent others release the one that we are
@@ -2607,6 +2608,7 @@ public class WindowManagerService extends IWindowManager.Stub
                     outControls[i].setParcelableFlags(PARCELABLE_WRITE_RETURN_VALUE);
                 }
             }
+            outArray.set(outControls);
         }
     }
 
