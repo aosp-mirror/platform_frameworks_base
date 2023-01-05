@@ -2566,13 +2566,13 @@ public class ActivityTaskSupervisor implements RecentTasks.Callbacks {
                 : null;
         boolean moveHomeTaskForward = true;
         synchronized (mService.mGlobalLock) {
+            final boolean isCallerRecents = mRecentTasks.isCallerRecents(callingUid);
             int activityType = ACTIVITY_TYPE_UNDEFINED;
             if (activityOptions != null) {
                 activityType = activityOptions.getLaunchActivityType();
-                final int windowingMode = activityOptions.getLaunchWindowingMode();
-                if (activityOptions.freezeRecentTasksReordering()
-                        && mService.checkPermission(MANAGE_ACTIVITY_TASKS, callingPid, callingUid)
-                                == PERMISSION_GRANTED) {
+                if (activityOptions.freezeRecentTasksReordering() && (isCallerRecents
+                        || ActivityTaskManagerService.checkPermission(MANAGE_ACTIVITY_TASKS,
+                                callingPid, callingUid) == PERMISSION_GRANTED)) {
                     mRecentTasks.setFreezeTaskListReordering();
                 }
                 if (activityOptions.getLaunchRootTask() != null) {
@@ -2615,7 +2615,9 @@ public class ActivityTaskSupervisor implements RecentTasks.Callbacks {
                     mRootWindowContainer.startPowerModeLaunchIfNeeded(
                             true /* forceSend */, targetActivity);
                     final LaunchingState launchingState =
-                            mActivityMetricsLogger.notifyActivityLaunching(task.intent);
+                            mActivityMetricsLogger.notifyActivityLaunching(task.intent,
+                                    // Recents always has a new launching state (not combinable).
+                                    null /* caller */, isCallerRecents ? INVALID_UID : callingUid);
                     try {
                         mService.moveTaskToFrontLocked(null /* appThread */,
                                 null /* callingPackage */, task.mTaskId, 0, options);
