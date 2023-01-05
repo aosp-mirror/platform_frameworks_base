@@ -271,6 +271,31 @@ public abstract class DevicePolicyManagerInternal {
     public abstract void resetOp(int op, String packageName, @UserIdInt int userId);
 
     /**
+     * Checks if the calling process has been granted permission to apply a device policy on a
+     * specific user.
+     *
+     * The given permission will be checked along with its associated cross-user permission, if it
+     * exists and the target user is different to the calling user.
+     *
+     * @param permission The name of the permission being checked.
+     * @param targetUserId The userId of the user which the caller needs permission to act on.
+     * @throws SecurityException If the calling process has not been granted the permission.
+     */
+    public abstract void enforcePermission(String permission, int targetUserId);
+
+    /**
+     * Return whether the calling process has been granted permission to apply a device policy on
+     * a specific user.
+     *
+     * The given permission will be checked along with its associated cross-user
+     * permission, if it exists and the target user is different to the calling user.
+     *
+     * @param permission The name of the permission being checked.
+     * @param targetUserId The userId of the user which the caller needs permission to act on.
+     */
+    public abstract boolean hasPermission(String permission, int targetUserId);
+
+    /**
      * Returns whether new "turn off work" behavior is enabled via feature flag.
      */
     public abstract boolean isKeepProfilesRunningEnabled();

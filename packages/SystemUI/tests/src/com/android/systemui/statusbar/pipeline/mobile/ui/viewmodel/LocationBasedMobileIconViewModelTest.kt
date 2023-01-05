@@ -20,6 +20,7 @@ import androidx.test.filters.SmallTest
 import com.android.settingslib.mobile.TelephonyIcons
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.log.table.TableLogBuffer
+import com.android.systemui.statusbar.pipeline.StatusBarPipelineFlags
 import com.android.systemui.statusbar.pipeline.mobile.domain.interactor.FakeMobileIconInteractor
 import com.android.systemui.statusbar.pipeline.mobile.ui.viewmodel.MobileIconViewModelTest.Companion.defaultSignal
 import com.android.systemui.statusbar.pipeline.shared.ConnectivityConstants
@@ -45,6 +46,7 @@ class LocationBasedMobileIconViewModelTest : SysuiTestCase() {
     private lateinit var qsIcon: QsMobileIconViewModel
     private lateinit var keyguardIcon: KeyguardMobileIconViewModel
     private lateinit var interactor: FakeMobileIconInteractor
+    @Mock private lateinit var statusBarPipelineFlags: StatusBarPipelineFlags
     @Mock private lateinit var logger: ConnectivityPipelineLogger
     @Mock private lateinit var constants: ConnectivityConstants
     @Mock private lateinit var tableLogBuffer: TableLogBuffer
@@ -68,9 +70,9 @@ class LocationBasedMobileIconViewModelTest : SysuiTestCase() {
         commonImpl =
             MobileIconViewModel(SUB_1_ID, interactor, logger, constants, testScope.backgroundScope)
 
-        homeIcon = HomeMobileIconViewModel(commonImpl, logger)
-        qsIcon = QsMobileIconViewModel(commonImpl, logger)
-        keyguardIcon = KeyguardMobileIconViewModel(commonImpl, logger)
+        homeIcon = HomeMobileIconViewModel(commonImpl, statusBarPipelineFlags)
+        qsIcon = QsMobileIconViewModel(commonImpl, statusBarPipelineFlags)
+        keyguardIcon = KeyguardMobileIconViewModel(commonImpl, statusBarPipelineFlags)
     }
 
     @Test

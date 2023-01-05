@@ -47,7 +47,7 @@ abstract class LocationBasedWifiViewModel(
     /** True if the airplane spacer view should be visible. */
     val isAirplaneSpacerVisible: Flow<Boolean>,
 ) {
-    val useDebugColoring: Boolean = statusBarPipelineFlags.useWifiDebugColoring()
+    val useDebugColoring: Boolean = statusBarPipelineFlags.useDebugColoring()
 
     val defaultColor: Int =
         if (useDebugColoring) {

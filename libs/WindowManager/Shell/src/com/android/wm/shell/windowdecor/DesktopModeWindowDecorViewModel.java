@@ -282,7 +282,7 @@ public class DesktopModeWindowDecorViewModel implements WindowDecorViewModel {
         public boolean onTouch(View v, MotionEvent e) {
             boolean isDrag = false;
             int id = v.getId();
-            if (id != R.id.caption_handle && id != R.id.caption) {
+            if (id != R.id.caption_handle && id != R.id.desktop_mode_caption) {
                 return false;
             }
             if (id == R.id.caption_handle) {

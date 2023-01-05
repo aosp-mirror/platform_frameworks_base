@@ -23,6 +23,7 @@ import android.annotation.SystemApi;
 import android.content.Context;
 import android.content.Intent;
 import android.content.ServiceConnection;
+import android.os.IBinder;
 import android.os.RemoteException;
 
 /**
@@ -93,6 +94,15 @@ public interface ActivityManagerLocal {
             int clientAppUid, @NonNull String clientAppPackage, @NonNull String processName,
             @Context.BindServiceFlags int flags)
             throws RemoteException;
+
+    /**
+     * Kill an app process associated with an SDK sandbox.
+     *
+     * @param clientApplicationThreadBinder binder value of the
+     *        {@link android.app.IApplicationThread} of a client app process associated with a
+     *        sandbox. This is obtained using {@link Context#getIApplicationThreadBinder()}.
+     */
+    void killSdkSandboxClientAppProcess(@NonNull IBinder clientApplicationThreadBinder);
 
     /**
      * Start a foreground service delegate.

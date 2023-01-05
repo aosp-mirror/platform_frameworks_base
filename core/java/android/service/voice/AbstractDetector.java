@@ -41,9 +41,17 @@ import com.android.internal.app.IVoiceInteractionManagerService;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.function.Consumer;
 
-/** Base implementation of {@link HotwordDetector}. */
-abstract class AbstractHotwordDetector implements HotwordDetector {
-    private static final String TAG = AbstractHotwordDetector.class.getSimpleName();
+/** Base implementation of {@link HotwordDetector}.
+ *
+ * This class provides methods to manage the detector lifecycle for both
+ * {@link HotwordDetectionService} and {@link VisualQueryDetectionService}. We keep the name of the
+ * interface {@link HotwordDetector} since {@link VisualQueryDetectionService} can be logically
+ * treated as a visual activation hotword detection and also because of the existing public
+ * interface. To avoid confusion on the naming between the trusted hotword framework and the actual
+ * isolated {@link HotwordDetectionService}, the hotword from the names is removed.
+ */
+abstract class AbstractDetector implements HotwordDetector {
+    private static final String TAG = AbstractDetector.class.getSimpleName();
     private static final boolean DEBUG = false;
 
     protected final Object mLock = new Object();
@@ -51,14 +59,14 @@ abstract class AbstractHotwordDetector implements HotwordDetector {
     private final IVoiceInteractionManagerService mManagerService;
     private final Handler mHandler;
     private final HotwordDetector.Callback mCallback;
-    private Consumer<AbstractHotwordDetector> mOnDestroyListener;
+    private Consumer<AbstractDetector> mOnDestroyListener;
     private final AtomicBoolean mIsDetectorActive;
     /**
      * A token which is used by voice interaction system service to identify different detectors.
      */
     private final IBinder mToken = new Binder();
 
-    AbstractHotwordDetector(
+    AbstractDetector(
             IVoiceInteractionManagerService managerService,
             HotwordDetector.Callback callback) {
         mManagerService = managerService;
@@ -139,7 +147,7 @@ abstract class AbstractHotwordDetector implements HotwordDetector {
         }
     }
 
-    void registerOnDestroyListener(Consumer<AbstractHotwordDetector> onDestroyListener) {
+    void registerOnDestroyListener(Consumer<AbstractDetector> onDestroyListener) {
         synchronized (mLock) {
             if (mOnDestroyListener != null) {
                 throw new IllegalStateException("only one destroy listener can be registered");

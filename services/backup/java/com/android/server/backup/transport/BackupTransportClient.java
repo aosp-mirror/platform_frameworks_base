@@ -180,11 +180,11 @@ public class BackupTransportClient {
     /**
      * See {@link IBackupTransport#getAvailableRestoreSets()}
      */
-    public RestoreSet[] getAvailableRestoreSets() throws RemoteException {
+    public List<RestoreSet> getAvailableRestoreSets() throws RemoteException {
         AndroidFuture<List<RestoreSet>> resultFuture = mTransportFutures.newFuture();
         mTransportBinder.getAvailableRestoreSets(resultFuture);
         List<RestoreSet> result = getFutureResult(resultFuture);
-        return result == null ? null : result.toArray(new RestoreSet[] {});
+        return result;
     }
 
     /**

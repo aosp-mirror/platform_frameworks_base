@@ -93,21 +93,27 @@ import java.util.concurrent.TimeoutException;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 /**
- * A class that provides trusted hotword detector to communicate with the {@link
- * HotwordDetectionService}.
+ * A class that provides sandboxed detector to communicate with the {@link
+ * HotwordDetectionService} and {@link VisualQueryDetectionService}.
  *
- * This class provides the methods to do initialization with the {@link HotwordDetectionService}
- * and handle external source detection. It also provides the methods to check if we can egress
- * the data from the {@link HotwordDetectionService}.
+ * Trusted hotword detectors such as {@link SoftwareHotwordDetector} and
+ * {@link AlwaysOnHotwordDetector} will leverage this class to communitcate with
+ * {@link HotwordDetectionService}; similarly, {@link VisualQueryDetector} will communicate with
+ * {@link VisualQueryDetectionService}.
+ *
+ * This class provides the methods to do initialization with the {@link HotwordDetectionService} and
+ * {@link VisualQueryDetectionService} handles external source detection for
+ * {@link HotwordDetectionService}. It also provides the methods to check if we can egress the data
+ * from the {@link HotwordDetectionService} and {@link VisualQueryDetectionService}.
  *
  * The subclass should override the {@link #informRestartProcessLocked()} to handle the trusted
  * process restart.
  */
-abstract class HotwordDetectorSession {
-    private static final String TAG = "HotwordDetectorSession";
+abstract class DetectorSession {
+    private static final String TAG = "DetectorSession";
     static final boolean DEBUG = false;
 
-    private static final String OP_MESSAGE =
+    private static final String HOTWORD_DETECTION_OP_MESSAGE =
             "Providing hotword detection result to VoiceInteractionService";
 
     // The error codes are used for onError callback
@@ -173,7 +179,7 @@ abstract class HotwordDetectorSession {
     @GuardedBy("mLock")
     ParcelFileDescriptor mCurrentAudioSink;
     @GuardedBy("mLock")
-    @NonNull HotwordDetectionConnection.ServiceConnection mRemoteHotwordDetectionService;
+    @NonNull HotwordDetectionConnection.ServiceConnection mRemoteDetectionService;
     boolean mDebugHotwordLogging = false;
     @GuardedBy("mLock")
     private double mProximityMeters = PROXIMITY_UNKNOWN;
@@ -185,13 +191,13 @@ abstract class HotwordDetectorSession {
     boolean mPerformingExternalSourceHotwordDetection;
     @NonNull final IBinder mToken;
 
-    HotwordDetectorSession(
-            @NonNull HotwordDetectionConnection.ServiceConnection remoteHotwordDetectionService,
+    DetectorSession(
+            @NonNull HotwordDetectionConnection.ServiceConnection remoteDetectionService,
             @NonNull Object lock, @NonNull Context context, @NonNull IBinder token,
             @NonNull IHotwordRecognitionStatusCallback callback, int voiceInteractionServiceUid,
             Identity voiceInteractorIdentity,
             @NonNull ScheduledExecutorService scheduledExecutorService, boolean logging) {
-        mRemoteHotwordDetectionService = remoteHotwordDetectionService;
+        mRemoteDetectionService = remoteDetectionService;
         mLock = lock;
         mContext = context;
         mToken = token;
@@ -219,7 +225,7 @@ abstract class HotwordDetectorSession {
         if (DEBUG) {
             Slog.d(TAG, "updateStateAfterProcessStartLocked");
         }
-        AndroidFuture<Void> voidFuture = mRemoteHotwordDetectionService.postAsync(service -> {
+        AndroidFuture<Void> voidFuture = mRemoteDetectionService.postAsync(service -> {
             AndroidFuture<Void> future = new AndroidFuture<>();
             IRemoteCallback statusCallback = new IRemoteCallback.Stub() {
                 @Override
@@ -319,7 +325,7 @@ abstract class HotwordDetectorSession {
             Slog.v(TAG, "call updateStateAfterProcessStartLocked");
             updateStateAfterProcessStartLocked(options, sharedMemory);
         } else {
-            mRemoteHotwordDetectionService.run(
+            mRemoteDetectionService.run(
                     service -> service.updateState(options, sharedMemory, /* callback= */ null));
         }
     }
@@ -407,7 +413,7 @@ abstract class HotwordDetectorSession {
 
         // TODO: handle cancellations well
         // TODO: what if we cancelled and started a new one?
-        mRemoteHotwordDetectionService.run(
+        mRemoteDetectionService.run(
                 service -> {
                     service.detectFromMicrophoneSource(
                             serviceAudioSource,
@@ -512,7 +518,7 @@ abstract class HotwordDetectorSession {
     void destroyLocked() {
         mDestroyed = true;
         mDebugHotwordLogging = false;
-        mRemoteHotwordDetectionService = null;
+        mRemoteDetectionService = null;
         if (mAttentionManagerInternal != null) {
             mAttentionManagerInternal.onStopProximityUpdates(mProximityCallbackInternal);
         }
@@ -524,9 +530,9 @@ abstract class HotwordDetectorSession {
     }
 
     @SuppressWarnings("GuardedBy")
-    void updateRemoteHotwordDetectionServiceLocked(
-            @NonNull HotwordDetectionConnection.ServiceConnection remoteHotwordDetectionService) {
-        mRemoteHotwordDetectionService = remoteHotwordDetectionService;
+    void updateRemoteSandboxedDetectionServiceLocked(
+            @NonNull HotwordDetectionConnection.ServiceConnection remoteDetectionService) {
+        mRemoteDetectionService = remoteDetectionService;
     }
 
     void reportErrorLocked(int status) {
@@ -628,9 +634,9 @@ abstract class HotwordDetectorSession {
                 int hotwordOp = AppOpsManager.strOpToOp(AppOpsManager.OPSTR_RECORD_AUDIO_HOTWORD);
                 mAppOpsManager.noteOpNoThrow(hotwordOp,
                         mVoiceInteractorIdentity.uid, mVoiceInteractorIdentity.packageName,
-                        mVoiceInteractorIdentity.attributionTag, OP_MESSAGE);
+                        mVoiceInteractorIdentity.attributionTag, HOTWORD_DETECTION_OP_MESSAGE);
                 enforcePermissionForDataDelivery(mContext, mVoiceInteractorIdentity,
-                        CAPTURE_AUDIO_HOTWORD, OP_MESSAGE);
+                        CAPTURE_AUDIO_HOTWORD, HOTWORD_DETECTION_OP_MESSAGE);
             }
         });
     }

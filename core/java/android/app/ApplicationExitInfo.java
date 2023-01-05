@@ -416,6 +416,15 @@ public final class ApplicationExitInfo implements Parcelable {
      */
     public static final int SUBREASON_UNDELIVERED_BROADCAST = 26;
 
+    /**
+     * The process was killed because its associated SDK sandbox process (where it had loaded SDKs)
+     * had died; this would be set only when the reason is {@link #REASON_DEPENDENCY_DIED}.
+     *
+     * For internal use only.
+     * @hide
+     */
+    public static final int SUBREASON_SDK_SANDBOX_DIED = 27;
+
     // If there is any OEM code which involves additional app kill reasons, it should
     // be categorized in {@link #REASON_OTHER}, with subreason code starting from 1000.
 
