@@ -39,14 +39,19 @@ public class IntentFactory {
     public static Intent createCredentialSelectorIntent(
             @NonNull RequestInfo requestInfo,
             @SuppressLint("ConcreteCollection") // Concrete collection needed for marshalling.
-            @NonNull ArrayList<ProviderData> enabledProviderDataList,
+                    @NonNull
+                    ArrayList<ProviderData> enabledProviderDataList,
             @SuppressLint("ConcreteCollection") // Concrete collection needed for marshalling.
-            @NonNull ArrayList<DisabledProviderData> disabledProviderDataList,
+                    @NonNull
+                    ArrayList<DisabledProviderData> disabledProviderDataList,
             @NonNull ResultReceiver resultReceiver) {
         Intent intent = new Intent();
-        ComponentName componentName = ComponentName.unflattenFromString(
-                Resources.getSystem().getString(
-                        com.android.internal.R.string.config_credentialManagerDialogComponent));
+        ComponentName componentName =
+                ComponentName.unflattenFromString(
+                        Resources.getSystem()
+                                .getString(
+                                        com.android.internal.R.string
+                                                .config_credentialManagerDialogComponent));
         intent.setComponent(componentName);
 
         intent.putParcelableArrayListExtra(
@@ -54,17 +59,35 @@ public class IntentFactory {
         intent.putParcelableArrayListExtra(
                 ProviderData.EXTRA_DISABLED_PROVIDER_DATA_LIST, disabledProviderDataList);
         intent.putExtra(RequestInfo.EXTRA_REQUEST_INFO, requestInfo);
-        intent.putExtra(Constants.EXTRA_RESULT_RECEIVER,
-                toIpcFriendlyResultReceiver(resultReceiver));
+        intent.putExtra(
+                Constants.EXTRA_RESULT_RECEIVER, toIpcFriendlyResultReceiver(resultReceiver));
 
         return intent;
     }
 
     /**
-    * Convert an instance of a "locally-defined" ResultReceiver to an instance of
-    * {@link android.os.ResultReceiver} itself, which the receiving process will be able to
-    * unmarshall.
-    */
+     * Notify the UI that providers have been enabled/disabled.
+     *
+     * @hide
+     */
+    @NonNull
+    public static Intent createProviderUpdateIntent() {
+        Intent intent = new Intent();
+        ComponentName componentName =
+                ComponentName.unflattenFromString(
+                        Resources.getSystem()
+                                .getString(
+                                        com.android.internal.R.string
+                                                .config_credentialManagerDialogComponent));
+        intent.setComponent(componentName);
+        intent.setAction(Constants.CREDMAN_ENABLED_PROVIDERS_UPDATED);
+        return intent;
+    }
+
+    /**
+     * Convert an instance of a "locally-defined" ResultReceiver to an instance of {@link
+     * android.os.ResultReceiver} itself, which the receiving process will be able to unmarshall.
+     */
     private static <T extends ResultReceiver> ResultReceiver toIpcFriendlyResultReceiver(
             T resultReceiver) {
         final Parcel parcel = Parcel.obtain();

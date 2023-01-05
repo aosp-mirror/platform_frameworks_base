@@ -34,6 +34,7 @@ import android.credentials.IGetCredentialCallback;
 import android.credentials.IListEnabledProvidersCallback;
 import android.credentials.ISetEnabledProvidersCallback;
 import android.credentials.ListEnabledProvidersResponse;
+import android.credentials.ui.IntentFactory;
 import android.os.Binder;
 import android.os.CancellationSignal;
 import android.os.ICancellationSignal;
@@ -112,9 +113,8 @@ public final class CredentialManagerService
                 continue;
             }
             try {
-                serviceList.add(new CredentialManagerServiceImpl(this, mLock,
-                        resolvedUserId,
-                        serviceName));
+                serviceList.add(
+                        new CredentialManagerServiceImpl(this, mLock, resolvedUserId, serviceName));
             } catch (PackageManager.NameNotFoundException | SecurityException e) {
                 Log.i(TAG, "Unable to add serviceInfo : " + e.getMessage());
             }
@@ -144,15 +144,17 @@ public final class CredentialManagerService
             RequestSession session, List<String> requestOptions) {
         List<ProviderSession> providerSessions = new ArrayList<>();
         // Invoke all services of a user to initiate a provider session
-        runForUser((service) -> {
-            synchronized (mLock) {
-                ProviderSession providerSession = service
-                        .initiateProviderSessionForRequestLocked(session, requestOptions);
-                if (providerSession != null) {
-                    providerSessions.add(providerSession);
-                }
-            }
-        });
+        runForUser(
+                (service) -> {
+                    synchronized (mLock) {
+                        ProviderSession providerSession =
+                                service.initiateProviderSessionForRequestLocked(
+                                        session, requestOptions);
+                        if (providerSession != null) {
+                            providerSessions.add(providerSession);
+                        }
+                    }
+                });
         return providerSessions;
     }
 
@@ -177,27 +179,35 @@ public final class CredentialManagerService
 
             // Initiate all provider sessions
             List<ProviderSession> providerSessions =
-                    initiateProviderSessions(session, request.getGetCredentialOptions()
-                            .stream().map(GetCredentialOption::getType)
-                            .collect(Collectors.toList()));
+                    initiateProviderSessions(
+                            session,
+                            request.getGetCredentialOptions().stream()
+                                    .map(GetCredentialOption::getType)
+                                    .collect(Collectors.toList()));
 
             if (providerSessions.isEmpty()) {
                 try {
                     // TODO("Replace with properly defined error type")
-                    callback.onError("unknown_type",
-                            "No providers available to fulfill request.");
+                    callback.onError("unknown_type", "No providers available to fulfill request.");
                 } catch (RemoteException e) {
-                    Log.i(TAG, "Issue invoking onError on IGetCredentialCallback "
-                            + "callback: " + e.getMessage());
+                    Log.i(
+                            TAG,
+                            "Issue invoking onError on IGetCredentialCallback "
+                                    + "callback: "
+                                    + e.getMessage());
                 }
             }
 
             // Iterate over all provider sessions and invoke the request
-            providerSessions.forEach(providerGetSession -> {
-                providerGetSession.getRemoteCredentialService().onBeginGetCredential(
-                        (BeginGetCredentialRequest) providerGetSession.getProviderRequest(),
-                        /*callback=*/providerGetSession);
-            });
+            providerSessions.forEach(
+                    providerGetSession -> {
+                        providerGetSession
+                                .getRemoteCredentialService()
+                                .onBeginGetCredential(
+                                        (BeginGetCredentialRequest)
+                                                providerGetSession.getProviderRequest(),
+                                        /* callback= */ providerGetSession);
+                    });
             return cancelTransport;
         }
 
@@ -226,11 +236,13 @@ public final class CredentialManagerService
             if (providerSessions.isEmpty()) {
                 try {
                     // TODO("Replace with properly defined error type")
-                    callback.onError("unknown_type",
-                            "No providers available to fulfill request.");
+                    callback.onError("unknown_type", "No providers available to fulfill request.");
                 } catch (RemoteException e) {
-                    Log.i(TAG, "Issue invoking onError on ICreateCredentialCallback "
-                            + "callback: " + e.getMessage());
+                    Log.i(
+                            TAG,
+                            "Issue invoking onError on ICreateCredentialCallback "
+                                    + "callback: "
+                                    + e.getMessage());
                 }
             }
 
@@ -247,7 +259,7 @@ public final class CredentialManagerService
             return cancelTransport;
         }
 
-	@SuppressWarnings("GuardedBy") // ErrorProne requires listEnabledProviders
+        @SuppressWarnings("GuardedBy") // ErrorProne requires listEnabledProviders
         // to be guarded by 'service.mLock', which is the same as mLock.
         @Override
         public ICancellationSignal listEnabledProviders(IListEnabledProvidersCallback callback) {
@@ -257,8 +269,7 @@ public final class CredentialManagerService
             List<String> enabledProviders = new ArrayList<>();
             runForUser(
                     (service) -> {
-                        enabledProviders.add(
-                                service.getComponentName().flattenToString());
+                        enabledProviders.add(service.getComponentName().flattenToString());
                     });
 
             // Call the callback.
@@ -300,7 +311,7 @@ public final class CredentialManagerService
                             "Failed to store setting containing enabled providers");
                 } catch (RemoteException e) {
                     Log.i(TAG, "Issue with invoking error response: " + e.getMessage());
-                    // TODO: Propagate failure
+                    return;
                 }
             }
 
@@ -311,11 +322,16 @@ public final class CredentialManagerService
                 Log.i(TAG, "Issue with invoking response: " + e.getMessage());
                 // TODO: Propagate failure
             }
+
+            // Send an intent to the UI that we have new enabled providers.
+            getContext().sendBroadcast(IntentFactory.createProviderUpdateIntent());
         }
 
         @Override
-        public ICancellationSignal clearCredentialState(ClearCredentialStateRequest request,
-                IClearCredentialStateCallback callback, String callingPackage) {
+        public ICancellationSignal clearCredentialState(
+                ClearCredentialStateRequest request,
+                IClearCredentialStateCallback callback,
+                String callingPackage) {
             Log.i(TAG, "starting clearCredentialState with callingPackage: " + callingPackage);
             // TODO : Implement cancellation
             ICancellationSignal cancelTransport = CancellationSignal.createTransport();
@@ -331,17 +347,18 @@ public final class CredentialManagerService
 
             // Initiate all provider sessions
             // TODO: Determine if provider needs to have clear capability in their manifest
-            List<ProviderSession> providerSessions =
-                    initiateProviderSessions(session, List.of());
+            List<ProviderSession> providerSessions = initiateProviderSessions(session, List.of());
 
             if (providerSessions.isEmpty()) {
                 try {
                     // TODO("Replace with properly defined error type")
-                    callback.onError("unknown_type",
-                            "No providers available to fulfill request.");
+                    callback.onError("unknown_type", "No providers available to fulfill request.");
                 } catch (RemoteException e) {
-                    Log.i(TAG, "Issue invoking onError on IClearCredentialStateCallback "
-                            + "callback: " + e.getMessage());
+                    Log.i(
+                            TAG,
+                            "Issue invoking onError on IClearCredentialStateCallback "
+                                    + "callback: "
+                                    + e.getMessage());
                 }
             }
 
