@@ -151,7 +151,7 @@ public class QSFragmentTest extends SysuiBaseFragmentTest {
     @Test
     public void transitionToFullShade_setsAlphaUsingShadeInterpolator() {
         QSFragment fragment = resumeAndGetFragment();
-        setStatusBarState(StatusBarState.SHADE);
+        setStatusBarCurrentAndUpcomingState(StatusBarState.SHADE);
         boolean isTransitioningToFullShade = true;
         float transitionProgress = 0.5f;
         float squishinessFraction = 0.5f;
@@ -167,7 +167,7 @@ public class QSFragmentTest extends SysuiBaseFragmentTest {
     public void
             transitionToFullShade_onKeyguard_noBouncer_setsAlphaUsingLinearInterpolator() {
         QSFragment fragment = resumeAndGetFragment();
-        setStatusBarState(KEYGUARD);
+        setStatusBarCurrentAndUpcomingState(KEYGUARD);
         when(mQSPanelController.isBouncerInTransit()).thenReturn(false);
         boolean isTransitioningToFullShade = true;
         float transitionProgress = 0.5f;
@@ -183,7 +183,7 @@ public class QSFragmentTest extends SysuiBaseFragmentTest {
     public void
             transitionToFullShade_onKeyguard_bouncerActive_setsAlphaUsingBouncerInterpolator() {
         QSFragment fragment = resumeAndGetFragment();
-        setStatusBarState(KEYGUARD);
+        setStatusBarCurrentAndUpcomingState(KEYGUARD);
         when(mQSPanelController.isBouncerInTransit()).thenReturn(true);
         boolean isTransitioningToFullShade = true;
         float transitionProgress = 0.5f;
@@ -482,6 +482,15 @@ public class QSFragmentTest extends SysuiBaseFragmentTest {
         assertEquals(175, mediaHostClip.bottom);
     }
 
+    @Test
+    public void testQsUpdatesQsAnimatorWithUpcomingState() {
+        QSFragment fragment = resumeAndGetFragment();
+        setStatusBarCurrentAndUpcomingState(SHADE);
+        fragment.onUpcomingStateChanged(KEYGUARD);
+
+        verify(mQSAnimator).setOnKeyguard(true);
+    }
+
     @Override
     protected Fragment instantiate(Context context, String className, Bundle arguments) {
         MockitoAnnotations.initMocks(this);
@@ -591,8 +600,9 @@ public class QSFragmentTest extends SysuiBaseFragmentTest {
         return getFragment();
     }
 
-    private void setStatusBarState(int statusBarState) {
+    private void setStatusBarCurrentAndUpcomingState(int statusBarState) {
         when(mStatusBarStateController.getState()).thenReturn(statusBarState);
+        when(mStatusBarStateController.getCurrentOrUpcomingState()).thenReturn(statusBarState);
         getFragment().onStateChanged(statusBarState);
     }
 
