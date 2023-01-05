@@ -68,6 +68,10 @@ android_test {
         "android.test.runner",
     ],
 
+    defaults: [
+        "modules-utils-testable-device-config-defaults",
+    ],
+
     // These are not normally accessible from apps so they must be explicitly included.
     jni_libs: [
         "libdexmakerjvmtiagent",
