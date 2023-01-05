@@ -234,7 +234,11 @@ open class SeamlessAppRotationTest(flicker: FlickerTest) : RotationTransition(fl
                 getConfigValue<Boolean>(ActivityOptions.SeamlessRotation.EXTRA_STARVE_UI_THREAD)
                     ?: false
 
-        private fun createConfig(sourceConfig: FlickerTest, starveUiThread: Boolean): FlickerTest {
+        @JvmStatic
+        protected fun createConfig(
+            sourceConfig: FlickerTest,
+            starveUiThread: Boolean
+        ): FlickerTest {
             val originalScenario = sourceConfig.initialize("createConfig")
             val nameExt = if (starveUiThread) "_BUSY_UI_THREAD" else ""
             val newConfig =
