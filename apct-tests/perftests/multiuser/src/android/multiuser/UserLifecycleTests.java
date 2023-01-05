@@ -225,6 +225,32 @@ public class UserLifecycleTests {
     }
 
     /**
+     * Tests starting an uninitialized user, with wait times in between iterations.
+     * Measures the time until ACTION_USER_STARTED is received.
+     */
+    @Test(timeout = TIMEOUT_MAX_TEST_TIME_MS)
+    public void startUser_realistic() throws RemoteException {
+        while (mRunner.keepRunning()) {
+            mRunner.pauseTiming();
+            final int userId = createUserNoFlags();
+
+            waitForBroadcastIdle();
+            runThenWaitForBroadcasts(userId, () -> {
+                mRunner.resumeTiming();
+                Log.i(TAG, "Starting timer");
+
+                mIam.startUserInBackground(userId);
+            }, Intent.ACTION_USER_STARTED);
+
+            mRunner.pauseTiming();
+            Log.i(TAG, "Stopping timer");
+            removeUser(userId);
+            waitCoolDownPeriod();
+            mRunner.resumeTimingForNextIteration();
+        }
+    }
+
+    /**
      * Tests starting & unlocking an uninitialized user.
      * Measures the time until unlock listener is triggered and user is unlocked.
      */
