@@ -19,6 +19,7 @@ package com.android.server.companion.virtual;
 import static android.hardware.camera2.CameraInjectionSession.InjectionStatusCallback.ERROR_INJECTION_UNSUPPORTED;
 
 import android.annotation.NonNull;
+import android.annotation.UserIdInt;
 import android.content.Context;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageManager;
@@ -92,6 +93,23 @@ class CameraAccessController extends CameraManager.AvailabilityCallback implemen
         mCameraManager = mContext.getSystemService(CameraManager.class);
         mPackageManager = mContext.getPackageManager();
         mUserManager = mContext.getSystemService(UserManager.class);
+    }
+
+    /**
+     * Returns the userId for which the camera access should be blocked.
+     */
+    @UserIdInt
+    public int getUserId() {
+        return mContext.getUserId();
+    }
+
+    /**
+     * Returns the number of observers currently relying on this controller.
+     */
+    public int getObserverCount() {
+        synchronized (mLock) {
+            return mObserverCount;
+        }
     }
 
     /**

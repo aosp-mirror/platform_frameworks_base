@@ -18,6 +18,8 @@ package com.android.server.companion.virtual;
 
 import static android.hardware.camera2.CameraInjectionSession.InjectionStatusCallback.ERROR_INJECTION_UNSUPPORTED;
 
+import static com.google.common.truth.Truth.assertThat;
+
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.anyString;
@@ -113,6 +115,11 @@ public class CameraAccessControllerTest {
                 anyInt())).thenReturn(mOtherAppInfo);
         when(mUserManager.getAliveUsers()).thenReturn(mAliveUsers);
         mController.startObservingIfNeeded();
+    }
+
+    @Test
+    public void getUserId_returnsCorrectId() {
+        assertThat(mController.getUserId()).isEqualTo(mContext.getUserId());
     }
 
     @Test
