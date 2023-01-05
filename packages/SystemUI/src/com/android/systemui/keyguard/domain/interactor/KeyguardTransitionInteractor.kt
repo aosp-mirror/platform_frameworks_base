@@ -22,6 +22,7 @@ import com.android.systemui.keyguard.data.repository.KeyguardTransitionRepositor
 import com.android.systemui.keyguard.shared.model.AnimationParams
 import com.android.systemui.keyguard.shared.model.KeyguardState
 import com.android.systemui.keyguard.shared.model.KeyguardState.AOD
+import com.android.systemui.keyguard.shared.model.KeyguardState.BOUNCER
 import com.android.systemui.keyguard.shared.model.KeyguardState.DREAMING
 import com.android.systemui.keyguard.shared.model.KeyguardState.GONE
 import com.android.systemui.keyguard.shared.model.KeyguardState.LOCKSCREEN
@@ -30,9 +31,9 @@ import com.android.systemui.keyguard.shared.model.TransitionState
 import com.android.systemui.keyguard.shared.model.TransitionState.STARTED
 import com.android.systemui.keyguard.shared.model.TransitionStep
 import javax.inject.Inject
-import kotlin.time.Duration
 import kotlin.math.max
 import kotlin.math.min
+import kotlin.time.Duration
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.flow.map
@@ -61,6 +62,10 @@ constructor(
 
     /** LOCKSCREEN->AOD transition information. */
     val lockscreenToAodTransition: Flow<TransitionStep> = repository.transition(LOCKSCREEN, AOD)
+
+    /** LOCKSCREEN->BOUNCER transition information. */
+    val lockscreenToBouncerTransition: Flow<TransitionStep> =
+        repository.transition(LOCKSCREEN, BOUNCER)
 
     /** LOCKSCREEN->DREAMING transition information. */
     val lockscreenToDreamingTransition: Flow<TransitionStep> =
