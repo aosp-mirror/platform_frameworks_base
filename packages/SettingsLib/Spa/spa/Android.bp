@@ -27,6 +27,7 @@ android_library {
         "androidx.slice_slice-builders",
         "androidx.slice_slice-core",
         "androidx.slice_slice-view",
+        "androidx.compose.animation_animation",
         "androidx.compose.material3_material3",
         "androidx.compose.material_material-icons-extended",
         "androidx.compose.runtime_runtime",
