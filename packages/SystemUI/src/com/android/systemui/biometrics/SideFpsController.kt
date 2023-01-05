@@ -110,6 +110,9 @@ constructor(
     private val animationDuration =
         context.resources.getInteger(android.R.integer.config_mediumAnimTime).toLong()
 
+    private val isReverseDefaultRotation =
+        context.getResources().getBoolean(com.android.internal.R.bool.config_reverseDefaultRotation)
+
     private var overlayHideAnimator: ViewPropertyAnimator? = null
 
     private var overlayView: View? = null
@@ -217,8 +220,17 @@ constructor(
         overlayOffsets = offsets
 
         val lottie = view.findViewById(R.id.sidefps_animation) as LottieAnimationView
-        view.rotation = display.asSideFpsAnimationRotation(offsets.isYAligned())
-        lottie.setAnimation(display.asSideFpsAnimation(offsets.isYAligned()))
+        view.rotation =
+            display.asSideFpsAnimationRotation(
+                offsets.isYAligned(),
+                getRotationFromDefault(display.rotation)
+            )
+        lottie.setAnimation(
+            display.asSideFpsAnimation(
+                offsets.isYAligned(),
+                getRotationFromDefault(display.rotation)
+            )
+        )
         lottie.addLottieOnCompositionLoadedListener {
             // Check that view is not stale, and that overlayView has not been hidden/removed
             if (overlayView != null && overlayView == view) {
@@ -253,11 +265,13 @@ constructor(
     @VisibleForTesting
     internal fun updateOverlayParams(display: Display, bounds: Rect) {
         val isNaturalOrientation = display.isNaturalOrientation()
+        val isDefaultOrientation =
+            if (isReverseDefaultRotation) !isNaturalOrientation else isNaturalOrientation
         val size = windowManager.maximumWindowMetrics.bounds
-        val displayWidth = if (isNaturalOrientation) size.width() else size.height()
-        val displayHeight = if (isNaturalOrientation) size.height() else size.width()
-        val boundsWidth = if (isNaturalOrientation) bounds.width() else bounds.height()
-        val boundsHeight = if (isNaturalOrientation) bounds.height() else bounds.width()
+        val displayWidth = if (isDefaultOrientation) size.width() else size.height()
+        val displayHeight = if (isDefaultOrientation) size.height() else size.width()
+        val boundsWidth = if (isDefaultOrientation) bounds.width() else bounds.height()
+        val boundsHeight = if (isDefaultOrientation) bounds.height() else bounds.width()
         val sensorBounds =
             if (overlayOffsets.isYAligned()) {
                 Rect(
@@ -278,7 +292,7 @@ constructor(
         RotationUtils.rotateBounds(
             sensorBounds,
             Rect(0, 0, displayWidth, displayHeight),
-            display.rotation
+            getRotationFromDefault(display.rotation)
         )
 
         overlayViewParams.x = sensorBounds.left
@@ -319,6 +333,9 @@ constructor(
             view.visibility = View.VISIBLE
         }
     }
+
+    private fun getRotationFromDefault(rotation: Int): Int =
+        if (isReverseDefaultRotation) (rotation + 1) % 4 else rotation
 }
 
 private val FingerprintManager?.sideFpsSensorProperties: FingerprintSensorPropertiesInternal?
@@ -344,15 +361,15 @@ private fun ActivityTaskManager.topClass(): String =
     getTasks(1).firstOrNull()?.topActivity?.className ?: ""
 
 @RawRes
-private fun Display.asSideFpsAnimation(yAligned: Boolean): Int =
-    when (rotation) {
+private fun Display.asSideFpsAnimation(yAligned: Boolean, rotationFromDefault: Int): Int =
+    when (rotationFromDefault) {
         Surface.ROTATION_0 -> if (yAligned) R.raw.sfps_pulse else R.raw.sfps_pulse_landscape
         Surface.ROTATION_180 -> if (yAligned) R.raw.sfps_pulse else R.raw.sfps_pulse_landscape
         else -> if (yAligned) R.raw.sfps_pulse_landscape else R.raw.sfps_pulse
     }
 
-private fun Display.asSideFpsAnimationRotation(yAligned: Boolean): Float =
-    when (rotation) {
+private fun Display.asSideFpsAnimationRotation(yAligned: Boolean, rotationFromDefault: Int): Float =
+    when (rotationFromDefault) {
         Surface.ROTATION_90 -> if (yAligned) 0f else 180f
         Surface.ROTATION_180 -> 180f
         Surface.ROTATION_270 -> if (yAligned) 180f else 0f
