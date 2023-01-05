@@ -94,6 +94,7 @@ import android.view.DisplayInfo;
 import android.view.RemoteAnimationTarget;
 import android.view.SurfaceControl;
 import android.window.ITaskFragmentOrganizer;
+import android.window.TaskFragmentAnimationParams;
 import android.window.TaskFragmentInfo;
 import android.window.TaskFragmentOrganizerToken;
 
@@ -304,6 +305,10 @@ class TaskFragment extends WindowContainer<WindowContainer> {
     @Nullable
     private final IBinder mFragmentToken;
 
+    /** The animation override params for animation running on this TaskFragment. */
+    @NonNull
+    private TaskFragmentAnimationParams mAnimationParams = TaskFragmentAnimationParams.DEFAULT;
+
     /**
      * The bounds of the embedded TaskFragment relative to the parent Task.
      * {@code null} if it is not {@link #mIsEmbedded}
@@ -452,6 +457,15 @@ class TaskFragment extends WindowContainer<WindowContainer> {
     boolean hasTaskFragmentOrganizer(ITaskFragmentOrganizer organizer) {
         return organizer != null && mTaskFragmentOrganizer != null
                 && organizer.asBinder().equals(mTaskFragmentOrganizer.asBinder());
+    }
+
+    void setAnimationParams(@NonNull TaskFragmentAnimationParams animationParams) {
+        mAnimationParams = animationParams;
+    }
+
+    @NonNull
+    TaskFragmentAnimationParams getAnimationParams() {
+        return mAnimationParams;
     }
 
     TaskFragment getAdjacentTaskFragment() {
