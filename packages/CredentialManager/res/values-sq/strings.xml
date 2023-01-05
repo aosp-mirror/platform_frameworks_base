@@ -4,49 +4,49 @@
     <string name="app_name" msgid="4539824758261855508">"Menaxheri i kredencialeve"</string>
     <string name="string_cancel" msgid="6369133483981306063">"Anulo"</string>
     <string name="string_continue" msgid="1346732695941131882">"Vazhdo"</string>
+    <string name="string_more_options" msgid="7990658711962795124">"Opsione të tjera"</string>
     <string name="string_create_in_another_place" msgid="1033635365843437603">"Krijo në një vend tjetër"</string>
     <string name="string_save_to_another_place" msgid="7590325934591079193">"Ruaj në një vend tjetër"</string>
     <string name="string_use_another_device" msgid="8754514926121520445">"Përdor një pajisje tjetër"</string>
     <string name="string_save_to_another_device" msgid="1959562542075194458">"Ruaj në një pajisje tjetër"</string>
     <string name="passkey_creation_intro_title" msgid="4251037543787718844">"Më e sigurt me çelësat e kalimit"</string>
-    <string name="passkey_creation_intro_body_password" msgid="312712407571126228">"Nuk ka nevojë të krijosh ose të mbash mend fjalëkalime të ndërlikuara"</string>
-    <string name="passkey_creation_intro_body_fingerprint" msgid="691816235541508203">"Përdor gjurmën e gishtit, fytyrën, ose kyçjen e ekranit për të krijuar një çelës unik kalimi"</string>
-    <string name="passkey_creation_intro_body_device" msgid="477121861162321129">"Çelësat e kalimit janë të ruajtur te një menaxher i fjalëkalimeve, kështu që mund të identifikohesh në pajisje të tjera"</string>
+    <string name="passkey_creation_intro_body_password" msgid="8825872426579958200">"Me çelësat e kalimit, nuk ka nevojë të krijosh ose të mbash mend fjalëkalime të ndërlikuara"</string>
+    <string name="passkey_creation_intro_body_fingerprint" msgid="7331338631826254055">"Çelësat e kalimit kanë çelësa dixhitalë të enkriptuar që ti i krijon duke përdorur gjurmën e gishtit, fytyrën ose kyçjen e ekranit"</string>
+    <string name="passkey_creation_intro_body_device" msgid="1203796455762131631">"Ata ruhen te një menaxher fjalëkalimesh, në mënyrë që mund të identifikohesh në pajisje të tjera"</string>
     <string name="choose_provider_title" msgid="7245243990139698508">"Zgjidh se ku të <xliff:g id="CREATETYPES">%1$s</xliff:g>"</string>
     <string name="create_your_passkeys" msgid="8901224153607590596">"do t\'i krijosh çelësat e tu të kalimit"</string>
     <string name="save_your_password" msgid="6597736507991704307">"ruaj fjalëkalimin"</string>
     <string name="save_your_sign_in_info" msgid="7213978049817076882">"ruaj informacionet e tua të identifikimit"</string>
-    <string name="choose_provider_body" msgid="8045759834416308059">"Cakto një menaxher të parazgjedhur të fjalëkalimeve për të ruajtur fjalëkalimet dhe çelësat e kalimit dhe për t\'u identifikuar më shpejt herën tjetër."</string>
-    <string name="choose_create_option_passkey_title" msgid="4146408187146573131">"Të krijohet një çelës kalimi në <xliff:g id="PROVIDERINFODISPLAYNAME">%1$s</xliff:g>?"</string>
-    <string name="choose_create_option_password_title" msgid="8812546498357380545">"Të ruhet fjalëkalimi në <xliff:g id="PROVIDERINFODISPLAYNAME">%1$s</xliff:g>?"</string>
-    <string name="choose_create_option_sign_in_title" msgid="6318246378475961834">"Të ruhen informacionet e tua të identifikimit në <xliff:g id="PROVIDERINFODISPLAYNAME">%1$s</xliff:g>?"</string>
-    <string name="choose_create_option_description" msgid="4419171903963100257">"Mund të përdorësh <xliff:g id="TYPE">%2$s</xliff:g> të <xliff:g id="APPDOMAINNAME">%1$s</xliff:g> në çdo pajisje. Ai është i ruajtur te <xliff:g id="PROVIDERINFODISPLAYNAME">%3$s</xliff:g> për <xliff:g id="CREATEINFODISPLAYNAME">%4$s</xliff:g>"</string>
+    <string name="choose_provider_body" msgid="4384188171872005547">"Zgjidh një menaxher fjalëkalimesh për të ruajtur informacionet e tua dhe për t\'u identifikuar më shpejt herën tjetër."</string>
+    <string name="choose_create_option_passkey_title" msgid="5220979185879006862">"Të krijohet çelësi i kalimit për <xliff:g id="APPNAME">%1$s</xliff:g>?"</string>
+    <string name="choose_create_option_password_title" msgid="7097275038523578687">"Të ruhet fjalëkalimi për <xliff:g id="APPNAME">%1$s</xliff:g>?"</string>
+    <string name="choose_create_option_sign_in_title" msgid="4124872317613421249">"Të ruhen informacionet e identifikimit për <xliff:g id="APPNAME">%1$s</xliff:g>?"</string>
+    <string name="choose_create_option_description" msgid="5531335144879100664">"Mund të përdorësh <xliff:g id="CREDENTIALTYPES">%2$s</xliff:g> të <xliff:g id="APPDOMAINNAME">%1$s</xliff:g> në çdo pajisje. Ai është i ruajtur te \"<xliff:g id="PROVIDERINFODISPLAYNAME">%3$s</xliff:g>\" për <xliff:g id="CREATEINFODISPLAYNAME">%4$s</xliff:g>."</string>
     <string name="passkey" msgid="632353688396759522">"çelësi i kalimit"</string>
     <string name="password" msgid="6738570945182936667">"fjalëkalimi"</string>
     <string name="sign_ins" msgid="4710739369149469208">"identifikimet"</string>
-    <string name="create_passkey_in_title" msgid="2714306562710897785">"Krijo çelësin e kalimit te"</string>
-    <string name="save_password_to_title" msgid="3450480045270186421">"Ruaj fjalëkalimin në"</string>
-    <string name="save_sign_in_to_title" msgid="8328143607671760232">"Ruaj identifikimin në"</string>
+    <string name="sign_in_info" msgid="2627704710674232328">"informacionet e identifikimit"</string>
+    <string name="save_credential_to_title" msgid="3172811692275634301">"Ruaj <xliff:g id="CREDENTIALTYPES">%1$s</xliff:g> te"</string>
     <string name="create_passkey_in_other_device_title" msgid="6372952459932674632">"Të krijohet një çelës kalimi në një pajisje tjetër?"</string>
     <string name="use_provider_for_all_title" msgid="4201020195058980757">"Të përdoret <xliff:g id="PROVIDERINFODISPLAYNAME">%1$s</xliff:g> për të gjitha identifikimet?"</string>
     <string name="use_provider_for_all_description" msgid="6560593199974037820">"Ky menaxher i fjalëkalimeve do të ruajë fjalëkalimet dhe çelësat e kalimit për të të ndihmuar të identifikohesh me lehtësi."</string>
     <string name="set_as_default" msgid="4415328591568654603">"Cakto si parazgjedhje"</string>
     <string name="use_once" msgid="9027366575315399714">"Përdor një herë"</string>
-    <string name="more_options_usage_passwords_passkeys" msgid="4794903978126339473">"<xliff:g id="PASSWORDSNUMBER">%1$s</xliff:g> fjalëkalime, <xliff:g id="PASSKEYSNUMBER">%2$s</xliff:g> çelësa kalimi"</string>
+    <string name="more_options_usage_passwords_passkeys" msgid="3470113942332934279">"<xliff:g id="PASSWORDSNUMBER">%1$s</xliff:g> fjalëkalime • <xliff:g id="PASSKEYSNUMBER">%2$s</xliff:g> çelësa kalimi"</string>
     <string name="more_options_usage_passwords" msgid="1632047277723187813">"<xliff:g id="PASSWORDSNUMBER">%1$s</xliff:g> fjalëkalime"</string>
     <string name="more_options_usage_passkeys" msgid="5390320437243042237">"<xliff:g id="PASSKEYSNUMBER">%1$s</xliff:g> çelësa kalimi"</string>
+    <string name="more_options_usage_credentials" msgid="1785697001787193984">"<xliff:g id="TOTALCREDENTIALSNUMBER">%1$s</xliff:g> kredenciale"</string>
     <string name="passkey_before_subtitle" msgid="2448119456208647444">"Çelësi i kalimit"</string>
     <string name="another_device" msgid="5147276802037801217">"Një pajisje tjetër"</string>
     <string name="other_password_manager" msgid="565790221427004141">"Menaxherët e tjerë të fjalëkalimeve"</string>
     <string name="close_sheet" msgid="1393792015338908262">"Mbyll fletën"</string>
     <string name="accessibility_back_arrow_button" msgid="3233198183497842492">"Kthehu te faqja e mëparshme"</string>
-    <!-- no translation found for accessibility_close_button (2953807735590034688) -->
-    <skip />
+    <string name="accessibility_close_button" msgid="2953807735590034688">"Mbyll sugjerimin për veprimin e \"Menaxherit të kredencialeve\" që shfaqet në fund të ekranit"</string>
     <string name="get_dialog_title_use_passkey_for" msgid="6236608872708021767">"Të përdoret fjalëkalimi yt i ruajtur për <xliff:g id="APP_NAME">%1$s</xliff:g>?"</string>
     <string name="get_dialog_title_use_sign_in_for" msgid="5283099528915572980">"Të përdoret identifikimi yt i ruajtur për <xliff:g id="APP_NAME">%1$s</xliff:g>?"</string>
     <string name="get_dialog_title_choose_sign_in_for" msgid="1361715440877613701">"Zgjidh një identifikim të ruajtur për <xliff:g id="APP_NAME">%1$s</xliff:g>"</string>
     <string name="get_dialog_use_saved_passkey_for" msgid="4618100798664888512">"Identifikohu me një mënyrë tjetër"</string>
-    <string name="get_dialog_button_label_no_thanks" msgid="8114363019023838533">"Jo, faleminderit"</string>
+    <string name="snackbar_action" msgid="37373514216505085">"Shiko opsionet"</string>
     <string name="get_dialog_button_label_continue" msgid="6446201694794283870">"Vazhdo"</string>
     <string name="get_dialog_title_sign_in_options" msgid="2092876443114893618">"Opsionet e identifikimit"</string>
     <string name="get_dialog_heading_for_username" msgid="3456868514554204776">"Për <xliff:g id="USERNAME">%1$s</xliff:g>"</string>

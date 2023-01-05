@@ -4,37 +4,38 @@
     <string name="app_name" msgid="4539824758261855508">"Pengelola Kredensial"</string>
     <string name="string_cancel" msgid="6369133483981306063">"Batal"</string>
     <string name="string_continue" msgid="1346732695941131882">"Lanjutkan"</string>
+    <string name="string_more_options" msgid="7990658711962795124">"Opsi lainnya"</string>
     <string name="string_create_in_another_place" msgid="1033635365843437603">"Buat di tempat lain"</string>
     <string name="string_save_to_another_place" msgid="7590325934591079193">"Simpan ke tempat lain"</string>
     <string name="string_use_another_device" msgid="8754514926121520445">"Gunakan perangkat lain"</string>
     <string name="string_save_to_another_device" msgid="1959562542075194458">"Simpan ke perangkat lain"</string>
     <string name="passkey_creation_intro_title" msgid="4251037543787718844">"Lebih aman dengan kunci sandi"</string>
-    <string name="passkey_creation_intro_body_password" msgid="312712407571126228">"Tidak perlu membuat atau mengingat sandi yang rumit"</string>
-    <string name="passkey_creation_intro_body_fingerprint" msgid="691816235541508203">"Gunakan sidik jari, wajah, atau kunci layar untuk membuat kunci sandi unik"</string>
-    <string name="passkey_creation_intro_body_device" msgid="477121861162321129">"Kunci sandi disimpan ke pengelola sandi, sehingga Anda dapat login di perangkat lainnya"</string>
+    <string name="passkey_creation_intro_body_password" msgid="8825872426579958200">"Dengan kunci sandi, Anda tidak perlu membuat atau mengingat sandi yang rumit"</string>
+    <string name="passkey_creation_intro_body_fingerprint" msgid="7331338631826254055">"Kunci sandi adalah kunci digital terenkripsi yang Anda buat menggunakan sidik jari, wajah, atau kunci layar"</string>
+    <string name="passkey_creation_intro_body_device" msgid="1203796455762131631">"Kunci sandi disimpan ke pengelola sandi, sehingga Anda dapat login di perangkat lainnya"</string>
     <string name="choose_provider_title" msgid="7245243990139698508">"Pilih tempat untuk <xliff:g id="CREATETYPES">%1$s</xliff:g>"</string>
     <string name="create_your_passkeys" msgid="8901224153607590596">"membuat kunci sandi Anda"</string>
     <string name="save_your_password" msgid="6597736507991704307">"menyimpan sandi Anda"</string>
     <string name="save_your_sign_in_info" msgid="7213978049817076882">"menyimpan info login Anda"</string>
-    <string name="choose_provider_body" msgid="8045759834416308059">"Setel pengelola sandi default untuk menyimpan sandi dan kunci sandi sehingga nantinya Anda dapat login lebih cepat."</string>
-    <string name="choose_create_option_passkey_title" msgid="4146408187146573131">"Buat kunci sandi di <xliff:g id="PROVIDERINFODISPLAYNAME">%1$s</xliff:g>?"</string>
-    <string name="choose_create_option_password_title" msgid="8812546498357380545">"Simpan sandi ke <xliff:g id="PROVIDERINFODISPLAYNAME">%1$s</xliff:g>?"</string>
-    <string name="choose_create_option_sign_in_title" msgid="6318246378475961834">"Simpan info login ke <xliff:g id="PROVIDERINFODISPLAYNAME">%1$s</xliff:g>?"</string>
-    <string name="choose_create_option_description" msgid="4419171903963100257">"Anda dapat menggunakan <xliff:g id="APPDOMAINNAME">%1$s</xliff:g> <xliff:g id="TYPE">%2$s</xliff:g> di perangkat mana pun. Disimpan ke <xliff:g id="PROVIDERINFODISPLAYNAME">%3$s</xliff:g> untuk <xliff:g id="CREATEINFODISPLAYNAME">%4$s</xliff:g>"</string>
+    <string name="choose_provider_body" msgid="4384188171872005547">"Pilih pengelola sandi untuk menyimpan info Anda dan login lebih cepat pada waktu berikutnya."</string>
+    <string name="choose_create_option_passkey_title" msgid="5220979185879006862">"Buat kunci sandi untuk <xliff:g id="APPNAME">%1$s</xliff:g>?"</string>
+    <string name="choose_create_option_password_title" msgid="7097275038523578687">"Simpan sandi untuk <xliff:g id="APPNAME">%1$s</xliff:g>?"</string>
+    <string name="choose_create_option_sign_in_title" msgid="4124872317613421249">"Simpan info login untuk <xliff:g id="APPNAME">%1$s</xliff:g>?"</string>
+    <string name="choose_create_option_description" msgid="5531335144879100664">"Anda dapat menggunakan <xliff:g id="CREDENTIALTYPES">%2$s</xliff:g> <xliff:g id="APPDOMAINNAME">%1$s</xliff:g> di perangkat mana pun. Disimpan ke <xliff:g id="PROVIDERINFODISPLAYNAME">%3$s</xliff:g> untuk <xliff:g id="CREATEINFODISPLAYNAME">%4$s</xliff:g>."</string>
     <string name="passkey" msgid="632353688396759522">"kunci sandi"</string>
     <string name="password" msgid="6738570945182936667">"sandi"</string>
     <string name="sign_ins" msgid="4710739369149469208">"login"</string>
-    <string name="create_passkey_in_title" msgid="2714306562710897785">"Buat kunci sandi di"</string>
-    <string name="save_password_to_title" msgid="3450480045270186421">"Simpan sandi ke"</string>
-    <string name="save_sign_in_to_title" msgid="8328143607671760232">"Simpan info login ke"</string>
+    <string name="sign_in_info" msgid="2627704710674232328">"info login"</string>
+    <string name="save_credential_to_title" msgid="3172811692275634301">"Simpan <xliff:g id="CREDENTIALTYPES">%1$s</xliff:g> ke"</string>
     <string name="create_passkey_in_other_device_title" msgid="6372952459932674632">"Buat kunci sandi di perangkat lain?"</string>
     <string name="use_provider_for_all_title" msgid="4201020195058980757">"Gunakan <xliff:g id="PROVIDERINFODISPLAYNAME">%1$s</xliff:g> untuk semua info login Anda?"</string>
     <string name="use_provider_for_all_description" msgid="6560593199974037820">"Pengelola sandi ini akan menyimpan sandi dan kunci sandi untuk membantu Anda login dengan mudah."</string>
     <string name="set_as_default" msgid="4415328591568654603">"Setel sebagai default"</string>
     <string name="use_once" msgid="9027366575315399714">"Gunakan sekali"</string>
-    <string name="more_options_usage_passwords_passkeys" msgid="4794903978126339473">"<xliff:g id="PASSWORDSNUMBER">%1$s</xliff:g> sandi, <xliff:g id="PASSKEYSNUMBER">%2$s</xliff:g> kunci sandi"</string>
+    <string name="more_options_usage_passwords_passkeys" msgid="3470113942332934279">"<xliff:g id="PASSWORDSNUMBER">%1$s</xliff:g> sandi • <xliff:g id="PASSKEYSNUMBER">%2$s</xliff:g> kunci sandi"</string>
     <string name="more_options_usage_passwords" msgid="1632047277723187813">"<xliff:g id="PASSWORDSNUMBER">%1$s</xliff:g> sandi"</string>
     <string name="more_options_usage_passkeys" msgid="5390320437243042237">"<xliff:g id="PASSKEYSNUMBER">%1$s</xliff:g> kunci sandi"</string>
+    <string name="more_options_usage_credentials" msgid="1785697001787193984">"<xliff:g id="TOTALCREDENTIALSNUMBER">%1$s</xliff:g> kredensial"</string>
     <string name="passkey_before_subtitle" msgid="2448119456208647444">"Kunci sandi"</string>
     <string name="another_device" msgid="5147276802037801217">"Perangkat lain"</string>
     <string name="other_password_manager" msgid="565790221427004141">"Pengelola sandi lainnya"</string>
@@ -45,7 +46,7 @@
     <string name="get_dialog_title_use_sign_in_for" msgid="5283099528915572980">"Gunakan info login tersimpan untuk <xliff:g id="APP_NAME">%1$s</xliff:g>?"</string>
     <string name="get_dialog_title_choose_sign_in_for" msgid="1361715440877613701">"Pilih info login tersimpan untuk <xliff:g id="APP_NAME">%1$s</xliff:g>"</string>
     <string name="get_dialog_use_saved_passkey_for" msgid="4618100798664888512">"Login dengan cara lain"</string>
-    <string name="get_dialog_button_label_no_thanks" msgid="8114363019023838533">"Lain kali"</string>
+    <string name="snackbar_action" msgid="37373514216505085">"Lihat opsi"</string>
     <string name="get_dialog_button_label_continue" msgid="6446201694794283870">"Lanjutkan"</string>
     <string name="get_dialog_title_sign_in_options" msgid="2092876443114893618">"Opsi login"</string>
     <string name="get_dialog_heading_for_username" msgid="3456868514554204776">"Untuk <xliff:g id="USERNAME">%1$s</xliff:g>"</string>

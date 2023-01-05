@@ -4,37 +4,38 @@
     <string name="app_name" msgid="4539824758261855508">"Loginstyring"</string>
     <string name="string_cancel" msgid="6369133483981306063">"Annuller"</string>
     <string name="string_continue" msgid="1346732695941131882">"Fortsæt"</string>
+    <string name="string_more_options" msgid="7990658711962795124">"Flere valgmuligheder"</string>
     <string name="string_create_in_another_place" msgid="1033635365843437603">"Opret et andet sted"</string>
     <string name="string_save_to_another_place" msgid="7590325934591079193">"Gem et andet sted"</string>
     <string name="string_use_another_device" msgid="8754514926121520445">"Brug en anden enhed"</string>
     <string name="string_save_to_another_device" msgid="1959562542075194458">"Gem på en anden enhed"</string>
     <string name="passkey_creation_intro_title" msgid="4251037543787718844">"Øget beskyttelse med adgangsnøgler"</string>
-    <string name="passkey_creation_intro_body_password" msgid="312712407571126228">"Du behøver ikke at oprette eller huske komplekse adgangskoder"</string>
-    <string name="passkey_creation_intro_body_fingerprint" msgid="691816235541508203">"Brug dit fingeraftryk, dit ansigt eller din skærmlås til at oprette en unik adgangsnøgle"</string>
-    <string name="passkey_creation_intro_body_device" msgid="477121861162321129">"Adgangsnøgler gemmes i en adgangskodeadministrator, så du kan logge ind på andre enheder"</string>
+    <string name="passkey_creation_intro_body_password" msgid="8825872426579958200">"Når du bruger adgangsnøgler, behøver du ikke at oprette eller huske avancerede adgangskoder"</string>
+    <string name="passkey_creation_intro_body_fingerprint" msgid="7331338631826254055">"Adgangsnøgler er krypterede digitale nøgler, som du opretter ved hjælp af fingeraftryk, ansigtsgenkendelse eller skærmlås"</string>
+    <string name="passkey_creation_intro_body_device" msgid="1203796455762131631">"Disse gemmes i en adgangskodeadministrator, så du kan logge ind på andre enheder"</string>
     <string name="choose_provider_title" msgid="7245243990139698508">"Vælg, hvor du vil <xliff:g id="CREATETYPES">%1$s</xliff:g>"</string>
     <string name="create_your_passkeys" msgid="8901224153607590596">"oprette dine adgangsnøgler"</string>
     <string name="save_your_password" msgid="6597736507991704307">"gem din adgangskode"</string>
     <string name="save_your_sign_in_info" msgid="7213978049817076882">"gem dine loginoplysninger"</string>
-    <string name="choose_provider_body" msgid="8045759834416308059">"Angiv en standardadgangskodeadministrator for at gemme dine adgangskoder og adgangsnøgler og logge hurtigere ind næste gang."</string>
-    <string name="choose_create_option_passkey_title" msgid="4146408187146573131">"Vil du oprette en adgangsnøgle i <xliff:g id="PROVIDERINFODISPLAYNAME">%1$s</xliff:g>?"</string>
-    <string name="choose_create_option_password_title" msgid="8812546498357380545">"Vil du gemme din adgangskode i <xliff:g id="PROVIDERINFODISPLAYNAME">%1$s</xliff:g>?"</string>
-    <string name="choose_create_option_sign_in_title" msgid="6318246378475961834">"Vil du gemme dine loginoplysninger i <xliff:g id="PROVIDERINFODISPLAYNAME">%1$s</xliff:g>?"</string>
-    <string name="choose_create_option_description" msgid="4419171903963100257">"Du kan bruge din <xliff:g id="APPDOMAINNAME">%1$s</xliff:g> <xliff:g id="TYPE">%2$s</xliff:g> på enhver enhed. Den gemmes i <xliff:g id="PROVIDERINFODISPLAYNAME">%3$s</xliff:g> for <xliff:g id="CREATEINFODISPLAYNAME">%4$s</xliff:g>"</string>
+    <string name="choose_provider_body" msgid="4384188171872005547">"Vælg en adgangskodeadministrator for at gemme dine oplysninger, så du kan logge ind hurtigere næste gang."</string>
+    <string name="choose_create_option_passkey_title" msgid="5220979185879006862">"Vil du oprette en adgangsnøgle til <xliff:g id="APPNAME">%1$s</xliff:g>?"</string>
+    <string name="choose_create_option_password_title" msgid="7097275038523578687">"Vil du gemme adgangskoden til <xliff:g id="APPNAME">%1$s</xliff:g>?"</string>
+    <string name="choose_create_option_sign_in_title" msgid="4124872317613421249">"Vil du gemme loginoplysningerne til <xliff:g id="APPNAME">%1$s</xliff:g>?"</string>
+    <string name="choose_create_option_description" msgid="5531335144879100664">"Du kan bruge din <xliff:g id="APPDOMAINNAME">%1$s</xliff:g>-<xliff:g id="CREDENTIALTYPES">%2$s</xliff:g> på enhver enhed. Den gemmes i <xliff:g id="PROVIDERINFODISPLAYNAME">%3$s</xliff:g> for <xliff:g id="CREATEINFODISPLAYNAME">%4$s</xliff:g>."</string>
     <string name="passkey" msgid="632353688396759522">"adgangsnøgle"</string>
     <string name="password" msgid="6738570945182936667">"adgangskode"</string>
     <string name="sign_ins" msgid="4710739369149469208">"loginmetoder"</string>
-    <string name="create_passkey_in_title" msgid="2714306562710897785">"Opret adgangsnøgle i"</string>
-    <string name="save_password_to_title" msgid="3450480045270186421">"Gem adgangskode i"</string>
-    <string name="save_sign_in_to_title" msgid="8328143607671760232">"Gem loginmetode i"</string>
+    <string name="sign_in_info" msgid="2627704710674232328">"loginoplysninger"</string>
+    <string name="save_credential_to_title" msgid="3172811692275634301">"Gem <xliff:g id="CREDENTIALTYPES">%1$s</xliff:g> her:"</string>
     <string name="create_passkey_in_other_device_title" msgid="6372952459932674632">"Vil du oprette en adgangsnøgle i en anden enhed?"</string>
     <string name="use_provider_for_all_title" msgid="4201020195058980757">"Vil du bruge <xliff:g id="PROVIDERINFODISPLAYNAME">%1$s</xliff:g> til alle dine loginmetoder?"</string>
     <string name="use_provider_for_all_description" msgid="6560593199974037820">"Denne adgangskodeadministrator gemmer dine adgangskoder og adgangsnøgler for at hjælpe dig med nemt at logge ind."</string>
     <string name="set_as_default" msgid="4415328591568654603">"Angiv som standard"</string>
     <string name="use_once" msgid="9027366575315399714">"Brug én gang"</string>
-    <string name="more_options_usage_passwords_passkeys" msgid="4794903978126339473">"<xliff:g id="PASSWORDSNUMBER">%1$s</xliff:g> adgangskoder, <xliff:g id="PASSKEYSNUMBER">%2$s</xliff:g> adgangsnøgler"</string>
+    <string name="more_options_usage_passwords_passkeys" msgid="3470113942332934279">"<xliff:g id="PASSWORDSNUMBER">%1$s</xliff:g> adgangskoder • <xliff:g id="PASSKEYSNUMBER">%2$s</xliff:g> adgangsnøgler"</string>
     <string name="more_options_usage_passwords" msgid="1632047277723187813">"<xliff:g id="PASSWORDSNUMBER">%1$s</xliff:g> adgangskoder"</string>
     <string name="more_options_usage_passkeys" msgid="5390320437243042237">"<xliff:g id="PASSKEYSNUMBER">%1$s</xliff:g> adgangsnøgler"</string>
+    <string name="more_options_usage_credentials" msgid="1785697001787193984">"Antal loginoplysninger: <xliff:g id="TOTALCREDENTIALSNUMBER">%1$s</xliff:g>"</string>
     <string name="passkey_before_subtitle" msgid="2448119456208647444">"Adgangsnøgle"</string>
     <string name="another_device" msgid="5147276802037801217">"En anden enhed"</string>
     <string name="other_password_manager" msgid="565790221427004141">"Andre adgangskodeadministratorer"</string>
@@ -45,7 +46,7 @@
     <string name="get_dialog_title_use_sign_in_for" msgid="5283099528915572980">"Vil du bruge din gemte loginmetode til <xliff:g id="APP_NAME">%1$s</xliff:g>?"</string>
     <string name="get_dialog_title_choose_sign_in_for" msgid="1361715440877613701">"Vælg en gemt loginmetode til <xliff:g id="APP_NAME">%1$s</xliff:g>"</string>
     <string name="get_dialog_use_saved_passkey_for" msgid="4618100798664888512">"Log ind på en anden måde"</string>
-    <string name="get_dialog_button_label_no_thanks" msgid="8114363019023838533">"Nej tak"</string>
+    <string name="snackbar_action" msgid="37373514216505085">"Se valgmuligheder"</string>
     <string name="get_dialog_button_label_continue" msgid="6446201694794283870">"Fortsæt"</string>
     <string name="get_dialog_title_sign_in_options" msgid="2092876443114893618">"Valgmuligheder for login"</string>
     <string name="get_dialog_heading_for_username" msgid="3456868514554204776">"For <xliff:g id="USERNAME">%1$s</xliff:g>"</string>
