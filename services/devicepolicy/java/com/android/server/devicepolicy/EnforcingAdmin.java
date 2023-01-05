@@ -69,16 +69,18 @@ final class EnforcingAdmin {
         return new EnforcingAdmin(packageName, userId);
     }
 
-    static EnforcingAdmin createEnterpriseEnforcingAdmin(@NonNull ComponentName componentName) {
+    static EnforcingAdmin createEnterpriseEnforcingAdmin(
+            @NonNull ComponentName componentName, int userId) {
         Objects.requireNonNull(componentName);
         return new EnforcingAdmin(
-                componentName.getPackageName(), componentName, Set.of(DPC_AUTHORITY));
+                componentName.getPackageName(), componentName, Set.of(DPC_AUTHORITY), userId);
     }
 
-    static EnforcingAdmin createDeviceAdminEnforcingAdmin(ComponentName componentName) {
+    static EnforcingAdmin createDeviceAdminEnforcingAdmin(ComponentName componentName, int userId) {
         Objects.requireNonNull(componentName);
         return new EnforcingAdmin(
-                componentName.getPackageName(), componentName, Set.of(DEVICE_ADMIN_AUTHORITY));
+                componentName.getPackageName(), componentName, Set.of(DEVICE_ADMIN_AUTHORITY),
+                userId);
     }
 
     static String getRoleAuthorityOf(String roleName) {
@@ -86,7 +88,7 @@ final class EnforcingAdmin {
     }
 
     private EnforcingAdmin(
-            String packageName, ComponentName componentName, Set<String> authorities) {
+            String packageName, ComponentName componentName, Set<String> authorities, int userId) {
         Objects.requireNonNull(packageName);
         Objects.requireNonNull(componentName);
         Objects.requireNonNull(authorities);
@@ -96,7 +98,7 @@ final class EnforcingAdmin {
         mPackageName = packageName;
         mComponentName = componentName;
         mAuthorities = new HashSet<>(authorities);
-        mUserId = -1; // not needed for non role authorities
+        mUserId = userId;
     }
 
     private EnforcingAdmin(String packageName, int userId) {
@@ -145,6 +147,15 @@ final class EnforcingAdmin {
         return getAuthorities().contains(authority);
     }
 
+    @NonNull
+    String getPackageName() {
+        return mPackageName;
+    }
+
+    int getUserId() {
+        return mUserId;
+    }
+
     /**
      * For two EnforcingAdmins to be equal they must:
      *
@@ -188,11 +199,11 @@ final class EnforcingAdmin {
     void saveToXml(TypedXmlSerializer serializer) throws IOException {
         serializer.attribute(/* namespace= */ null, ATTR_PACKAGE_NAME, mPackageName);
         serializer.attributeBoolean(/* namespace= */ null, ATTR_IS_ROLE, mIsRoleAuthority);
-        if (mIsRoleAuthority) {
-            serializer.attributeInt(/* namespace= */ null, ATTR_USER_ID, mUserId);
-        } else {
+        serializer.attributeInt(/* namespace= */ null, ATTR_USER_ID, mUserId);
+        if (!mIsRoleAuthority) {
             serializer.attribute(
                     /* namespace= */ null, ATTR_CLASS_NAME, mComponentName.getClassName());
+            // Role authorities get recomputed on load so no need to save them.
             serializer.attribute(
                     /* namespace= */ null,
                     ATTR_AUTHORITIES,
@@ -205,15 +216,15 @@ final class EnforcingAdmin {
         String packageName = parser.getAttributeValue(/* namespace= */ null, ATTR_PACKAGE_NAME);
         boolean isRoleAuthority = parser.getAttributeBoolean(/* namespace= */ null, ATTR_IS_ROLE);
         String authoritiesStr = parser.getAttributeValue(/* namespace= */ null, ATTR_AUTHORITIES);
+        int userId = parser.getAttributeInt(/* namespace= */ null, ATTR_USER_ID);
 
         if (isRoleAuthority) {
-            int userId = parser.getAttributeInt(/* namespace= */ null, ATTR_USER_ID);
             return new EnforcingAdmin(packageName, userId);
         } else {
             String className = parser.getAttributeValue(/* namespace= */ null, ATTR_CLASS_NAME);
             ComponentName componentName = new ComponentName(packageName, className);
             Set<String> authorities = Set.of(authoritiesStr.split(ATTR_AUTHORITIES_SEPARATOR));
-            return new EnforcingAdmin(packageName, componentName, authorities);
+            return new EnforcingAdmin(packageName, componentName, authorities, userId);
         }
     }
 }
