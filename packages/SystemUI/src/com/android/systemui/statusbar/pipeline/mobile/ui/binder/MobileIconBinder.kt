@@ -19,6 +19,7 @@ package com.android.systemui.statusbar.pipeline.mobile.ui.binder
 import android.content.res.ColorStateList
 import android.view.View
 import android.view.View.GONE
+import android.view.View.INVISIBLE
 import android.view.View.VISIBLE
 import android.view.ViewGroup
 import android.widget.ImageView
@@ -30,7 +31,13 @@ import com.android.settingslib.graph.SignalDrawable
 import com.android.systemui.R
 import com.android.systemui.common.ui.binder.IconViewBinder
 import com.android.systemui.lifecycle.repeatWhenAttached
+import com.android.systemui.statusbar.StatusBarIconView
+import com.android.systemui.statusbar.StatusBarIconView.STATE_DOT
+import com.android.systemui.statusbar.StatusBarIconView.STATE_HIDDEN
+import com.android.systemui.statusbar.StatusBarIconView.STATE_ICON
 import com.android.systemui.statusbar.pipeline.mobile.ui.viewmodel.LocationBasedMobileViewModel
+import com.android.systemui.statusbar.pipeline.shared.ui.binder.ModernStatusBarViewBinding
+import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.launch
 
@@ -40,7 +47,8 @@ object MobileIconBinder {
     fun bind(
         view: ViewGroup,
         viewModel: LocationBasedMobileViewModel,
-    ) {
+    ): ModernStatusBarViewBinding {
+        val mobileGroupView = view.requireViewById<ViewGroup>(R.id.mobile_group)
         val activityContainer = view.requireViewById<View>(R.id.inout_container)
         val activityIn = view.requireViewById<ImageView>(R.id.mobile_in)
         val activityOut = view.requireViewById<ImageView>(R.id.mobile_out)
@@ -49,12 +57,39 @@ object MobileIconBinder {
         val mobileDrawable = SignalDrawable(view.context).also { iconView.setImageDrawable(it) }
         val roamingView = view.requireViewById<ImageView>(R.id.mobile_roaming)
         val roamingSpace = view.requireViewById<Space>(R.id.mobile_roaming_space)
+        val dotView = view.requireViewById<StatusBarIconView>(R.id.status_bar_dot)
 
         view.isVisible = true
         iconView.isVisible = true
 
+        // TODO(b/238425913): We should log this visibility state.
+        @StatusBarIconView.VisibleState
+        val visibilityState: MutableStateFlow<Int> = MutableStateFlow(STATE_HIDDEN)
+
+        val iconTint: MutableStateFlow<Int> = MutableStateFlow(viewModel.defaultColor)
+        val decorTint: MutableStateFlow<Int> = MutableStateFlow(viewModel.defaultColor)
+
         view.repeatWhenAttached {
             repeatOnLifecycle(Lifecycle.State.STARTED) {
+                launch {
+                    visibilityState.collect { state ->
+                        when (state) {
+                            STATE_ICON -> {
+                                mobileGroupView.visibility = VISIBLE
+                                dotView.visibility = GONE
+                            }
+                            STATE_DOT -> {
+                                mobileGroupView.visibility = INVISIBLE
+                                dotView.visibility = VISIBLE
+                            }
+                            STATE_HIDDEN -> {
+                                mobileGroupView.visibility = INVISIBLE
+                                dotView.visibility = INVISIBLE
+                            }
+                        }
+                    }
+                }
+
                 // Set the icon for the triangle
                 launch {
                     viewModel.iconId.distinctUntilChanged().collect { iconId ->
@@ -89,15 +124,43 @@ object MobileIconBinder {
 
                 // Set the tint
                 launch {
-                    viewModel.tint.collect { tint ->
+                    iconTint.collect { tint ->
                         val tintList = ColorStateList.valueOf(tint)
                         iconView.imageTintList = tintList
                         networkTypeView.imageTintList = tintList
                         roamingView.imageTintList = tintList
                         activityIn.imageTintList = tintList
                         activityOut.imageTintList = tintList
+                        dotView.setDecorColor(tint)
                     }
                 }
+
+                launch { decorTint.collect { tint -> dotView.setDecorColor(tint) } }
+            }
+        }
+
+        return object : ModernStatusBarViewBinding {
+            override fun getShouldIconBeVisible(): Boolean {
+                // If this view model exists, then the icon should be visible.
+                return true
+            }
+
+            override fun onVisibilityStateChanged(@StatusBarIconView.VisibleState state: Int) {
+                visibilityState.value = state
+            }
+
+            override fun onIconTintChanged(newTint: Int) {
+                if (viewModel.useDebugColoring) {
+                    return
+                }
+                iconTint.value = newTint
+            }
+
+            override fun onDecorTintChanged(newTint: Int) {
+                if (viewModel.useDebugColoring) {
+                    return
+                }
+                decorTint.value = newTint
             }
         }
     }

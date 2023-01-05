@@ -13953,7 +13953,7 @@ public class ActivityManagerService extends IActivityManager.Stub
                     }
                 } else {
                     BroadcastFilter bf = (BroadcastFilter)target;
-                    if (bf.requiredPermission == null) {
+                    if (bf.exported && bf.requiredPermission == null) {
                         allProtected = false;
                         break;
                     }
@@ -16955,6 +16955,20 @@ public class ActivityManagerService extends IActivityManager.Stub
                     service.resolveTypeIfNeeded(mContext.getContentResolver()), sd, flags,
                     processName, /*isSdkSandboxService*/ true, clientAppUid, clientAppPackage,
                     mContext.getOpPackageName(), UserHandle.getUserId(clientAppUid)) != 0;
+        }
+
+        @Override
+        public void killSdkSandboxClientAppProcess(IBinder clientApplicationThreadBinder) {
+            synchronized (ActivityManagerService.this) {
+                ProcessRecord r = getRecordForAppLOSP(clientApplicationThreadBinder);
+                if (r != null) {
+                    r.killLocked(
+                            "sdk sandbox died",
+                            ApplicationExitInfo.REASON_DEPENDENCY_DIED,
+                            ApplicationExitInfo.SUBREASON_SDK_SANDBOX_DIED,
+                            true);
+                }
+            }
         }
 
         @Override

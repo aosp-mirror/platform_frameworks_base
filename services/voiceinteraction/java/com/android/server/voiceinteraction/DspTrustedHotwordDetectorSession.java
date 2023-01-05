@@ -32,7 +32,6 @@ import android.os.IBinder;
 import android.os.PersistableBundle;
 import android.os.RemoteException;
 import android.os.SharedMemory;
-import android.service.voice.AlwaysOnHotwordDetector;
 import android.service.voice.HotwordDetectedResult;
 import android.service.voice.HotwordDetectionService;
 import android.service.voice.HotwordDetector;
@@ -59,7 +58,7 @@ import java.util.concurrent.atomic.AtomicBoolean;
  * {@link android.service.voice.VoiceInteractionService#createAlwaysOnHotwordDetector(String,
  * Locale, PersistableBundle, SharedMemory, AlwaysOnHotwordDetector.Callback)}.
  */
-final class DspTrustedHotwordDetectorSession extends HotwordDetectorSession {
+final class DspTrustedHotwordDetectorSession extends DetectorSession {
     private static final String TAG = "DspTrustedHotwordDetectorSession";
 
     // The validation timeout value is 3 seconds for onDetect of DSP trigger event.
@@ -182,7 +181,7 @@ final class DspTrustedHotwordDetectorSession extends HotwordDetectorSession {
         };
 
         mValidatingDspTrigger = true;
-        mRemoteHotwordDetectionService.run(service -> {
+        mRemoteDetectionService.run(service -> {
             // We use the VALIDATION_TIMEOUT_MILLIS to inform that the client needs to invoke
             // the callback before timeout value. In order to reduce the latency impact between
             // server side and client side, we need to use another timeout value

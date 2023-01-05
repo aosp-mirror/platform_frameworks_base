@@ -287,7 +287,7 @@ final class DisplayRotationCompatPolicy {
      *     <li>The activity has fixed orientation but not "locked" or "nosensor" one.
      * </ul>
      */
-    private boolean isTreatmentEnabledForActivity(@Nullable ActivityRecord activity) {
+    boolean isTreatmentEnabledForActivity(@Nullable ActivityRecord activity) {
         return activity != null && !activity.inMultiWindowMode()
                 && activity.getRequestedConfigurationOrientation() != ORIENTATION_UNDEFINED
                 // "locked" and "nosensor" values are often used by camera apps that can't

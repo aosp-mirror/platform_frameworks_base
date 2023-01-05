@@ -7491,6 +7491,18 @@ public abstract class Context {
     }
 
     /**
+     * Get the binder object associated with the IApplicationThread of this Context.
+     *
+     * This can be used by a mainline module to uniquely identify a specific app process.
+     * @hide
+     */
+    @NonNull
+    @SystemApi(client = SystemApi.Client.MODULE_LIBRARIES)
+    public IBinder getIApplicationThreadBinder() {
+        throw new RuntimeException("Not implemented. Must override in a subclass.");
+    }
+
+    /**
      * @hide
      */
     public Handler getMainThreadHandler() {

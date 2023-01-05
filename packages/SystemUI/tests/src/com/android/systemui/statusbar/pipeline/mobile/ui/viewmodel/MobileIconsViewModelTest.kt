@@ -19,6 +19,7 @@ package com.android.systemui.statusbar.pipeline.mobile.ui.viewmodel
 import androidx.test.filters.SmallTest
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.statusbar.phone.StatusBarLocation
+import com.android.systemui.statusbar.pipeline.StatusBarPipelineFlags
 import com.android.systemui.statusbar.pipeline.mobile.data.model.SubscriptionModel
 import com.android.systemui.statusbar.pipeline.mobile.domain.interactor.FakeMobileIconsInteractor
 import com.android.systemui.statusbar.pipeline.mobile.util.FakeMobileMappingsProxy
@@ -45,6 +46,7 @@ class MobileIconsViewModelTest : SysuiTestCase() {
     private lateinit var underTest: MobileIconsViewModel
     private val interactor = FakeMobileIconsInteractor(FakeMobileMappingsProxy(), mock())
 
+    @Mock private lateinit var statusBarPipelineFlags: StatusBarPipelineFlags
     @Mock private lateinit var logger: ConnectivityPipelineLogger
     @Mock private lateinit var constants: ConnectivityConstants
 
@@ -67,6 +69,7 @@ class MobileIconsViewModelTest : SysuiTestCase() {
                 logger,
                 constants,
                 testScope.backgroundScope,
+                statusBarPipelineFlags,
             )
 
         interactor.filteredSubscriptions.value = listOf(SUB_1, SUB_2)

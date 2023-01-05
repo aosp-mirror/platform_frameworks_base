@@ -2028,6 +2028,13 @@ class ContextImpl extends Context {
     }
 
     /** @hide */
+    @NonNull
+    @Override
+    public IBinder getIApplicationThreadBinder() {
+        return getIApplicationThread().asBinder();
+    }
+
+    /** @hide */
     @Override
     public Handler getMainThreadHandler() {
         return mMainThread.getHandler();
@@ -3039,7 +3046,8 @@ class ContextImpl extends Context {
     public void updateDeviceId(int updatedDeviceId) {
         if (!isValidDeviceId(updatedDeviceId)) {
             throw new IllegalArgumentException(
-                    "Not a valid ID of the default device or any virtual device: " + mDeviceId);
+                    "Not a valid ID of the default device or any virtual device: "
+                            + updatedDeviceId);
         }
         if (mIsExplicitDeviceId) {
             throw new UnsupportedOperationException(

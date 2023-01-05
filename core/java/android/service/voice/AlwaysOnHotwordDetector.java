@@ -81,7 +81,7 @@ import java.util.Set;
  *                    mark and track it as such.
  */
 @SystemApi
-public class AlwaysOnHotwordDetector extends AbstractHotwordDetector {
+public class AlwaysOnHotwordDetector extends AbstractDetector {
     //---- States of Keyphrase availability. Return codes for onAvailabilityChanged() ----//
     /**
      * Indicates that this hotword detector is no longer valid for any recognition

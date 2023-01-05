@@ -56,7 +56,4 @@ public class WindowManagerDebugConfig {
     static final boolean SHOW_STACK_CRAWLS = false;
     static final boolean DEBUG_WINDOW_CROP = false;
     static final boolean DEBUG_UNKNOWN_APP_VISIBILITY = false;
-
-    // TODO(b/239501597) : Have a system property to control this flag.
-    public static final boolean DEBUG_IME_VISIBILITY = false;
 }

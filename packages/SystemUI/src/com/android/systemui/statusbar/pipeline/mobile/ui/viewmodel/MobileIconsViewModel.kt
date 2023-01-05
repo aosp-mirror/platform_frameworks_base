@@ -19,6 +19,7 @@ package com.android.systemui.statusbar.pipeline.mobile.ui.viewmodel
 import androidx.annotation.VisibleForTesting
 import com.android.systemui.dagger.qualifiers.Application
 import com.android.systemui.statusbar.phone.StatusBarLocation
+import com.android.systemui.statusbar.pipeline.StatusBarPipelineFlags
 import com.android.systemui.statusbar.pipeline.mobile.domain.interactor.MobileIconsInteractor
 import com.android.systemui.statusbar.pipeline.mobile.ui.view.ModernStatusBarMobileView
 import com.android.systemui.statusbar.pipeline.shared.ConnectivityConstants
@@ -41,6 +42,7 @@ constructor(
     private val logger: ConnectivityPipelineLogger,
     private val constants: ConnectivityConstants,
     @Application private val scope: CoroutineScope,
+    private val statusBarPipelineFlags: StatusBarPipelineFlags,
 ) {
     @VisibleForTesting val mobileIconSubIdCache = mutableMapOf<Int, MobileIconViewModel>()
 
@@ -60,7 +62,11 @@ constructor(
                     )
                     .also { mobileIconSubIdCache[subId] = it }
 
-        return LocationBasedMobileViewModel.viewModelForLocation(common, logger, location)
+        return LocationBasedMobileViewModel.viewModelForLocation(
+            common,
+            statusBarPipelineFlags,
+            location,
+        )
     }
 
     private fun removeInvalidModelsFromCache(subIds: List<Int>) {
@@ -75,6 +81,7 @@ constructor(
         private val logger: ConnectivityPipelineLogger,
         private val constants: ConnectivityConstants,
         @Application private val scope: CoroutineScope,
+        private val statusBarPipelineFlags: StatusBarPipelineFlags,
     ) {
         fun create(subscriptionIdsFlow: StateFlow<List<Int>>): MobileIconsViewModel {
             return MobileIconsViewModel(
@@ -83,6 +90,7 @@ constructor(
                 logger,
                 constants,
                 scope,
+                statusBarPipelineFlags,
             )
         }
     }

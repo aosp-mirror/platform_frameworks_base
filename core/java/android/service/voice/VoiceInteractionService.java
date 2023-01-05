@@ -168,7 +168,7 @@ public class VoiceInteractionService extends Service {
 
     private KeyphraseEnrollmentInfo mKeyphraseEnrollmentInfo;
 
-    private final Set<HotwordDetector> mActiveHotwordDetectors = new ArraySet<>();
+    private final Set<HotwordDetector> mActiveDetectors = new ArraySet<>();
 
     /**
      * Called when a user has activated an affordance to launch voice assist from the Keyguard.
@@ -319,7 +319,7 @@ public class VoiceInteractionService extends Service {
     private void onSoundModelsChangedInternal() {
         synchronized (this) {
             // TODO: Stop recognition if a sound model that was being recognized gets deleted.
-            mActiveHotwordDetectors.forEach(detector -> {
+            mActiveDetectors.forEach(detector -> {
                 if (detector instanceof AlwaysOnHotwordDetector) {
                     ((AlwaysOnHotwordDetector) detector).onSoundModelsChanged();
                 }
@@ -429,7 +429,7 @@ public class VoiceInteractionService extends Service {
                 // Allow only one concurrent recognition via the APIs.
                 safelyShutdownAllHotwordDetectors();
             } else {
-                for (HotwordDetector detector : mActiveHotwordDetectors) {
+                for (HotwordDetector detector : mActiveDetectors) {
                     if (detector.isUsingSandboxedDetectionService()
                             != supportHotwordDetectionService) {
                         throw new IllegalStateException(
@@ -447,13 +447,13 @@ public class VoiceInteractionService extends Service {
                     callback, mKeyphraseEnrollmentInfo, mSystemService,
                     getApplicationContext().getApplicationInfo().targetSdkVersion,
                     supportHotwordDetectionService);
-            mActiveHotwordDetectors.add(dspDetector);
+            mActiveDetectors.add(dspDetector);
 
             try {
                 dspDetector.registerOnDestroyListener(this::onHotwordDetectorDestroyed);
                 dspDetector.initialize(options, sharedMemory);
             } catch (Exception e) {
-                mActiveHotwordDetectors.remove(dspDetector);
+                mActiveDetectors.remove(dspDetector);
                 dspDetector.destroy();
                 throw e;
             }
@@ -512,7 +512,7 @@ public class VoiceInteractionService extends Service {
                 // Allow only one concurrent recognition via the APIs.
                 safelyShutdownAllHotwordDetectors();
             } else {
-                for (HotwordDetector detector : mActiveHotwordDetectors) {
+                for (HotwordDetector detector : mActiveDetectors) {
                     if (!detector.isUsingSandboxedDetectionService()) {
                         throw new IllegalStateException(
                                 "It disallows to create trusted and non-trusted detectors "
@@ -528,14 +528,14 @@ public class VoiceInteractionService extends Service {
             SoftwareHotwordDetector softwareHotwordDetector =
                     new SoftwareHotwordDetector(
                             mSystemService, null, callback);
-            mActiveHotwordDetectors.add(softwareHotwordDetector);
+            mActiveDetectors.add(softwareHotwordDetector);
 
             try {
                 softwareHotwordDetector.registerOnDestroyListener(
                         this::onHotwordDetectorDestroyed);
                 softwareHotwordDetector.initialize(options, sharedMemory);
             } catch (Exception e) {
-                mActiveHotwordDetectors.remove(softwareHotwordDetector);
+                mActiveDetectors.remove(softwareHotwordDetector);
                 softwareHotwordDetector.destroy();
                 throw e;
             }
@@ -586,7 +586,7 @@ public class VoiceInteractionService extends Service {
 
     private void safelyShutdownAllHotwordDetectors() {
         synchronized (mLock) {
-            mActiveHotwordDetectors.forEach(detector -> {
+            mActiveDetectors.forEach(detector -> {
                 try {
                     detector.destroy();
                 } catch (Exception ex) {
@@ -598,13 +598,13 @@ public class VoiceInteractionService extends Service {
 
     private void onHotwordDetectorDestroyed(@NonNull HotwordDetector detector) {
         synchronized (mLock) {
-            mActiveHotwordDetectors.remove(detector);
+            mActiveDetectors.remove(detector);
             shutdownHotwordDetectionServiceIfRequiredLocked();
         }
     }
 
     private void shutdownHotwordDetectionServiceIfRequiredLocked() {
-        for (HotwordDetector detector : mActiveHotwordDetectors) {
+        for (HotwordDetector detector : mActiveDetectors) {
             if (detector.isUsingSandboxedDetectionService()) {
                 return;
             }
@@ -638,11 +638,11 @@ public class VoiceInteractionService extends Service {
     protected void dump(FileDescriptor fd, PrintWriter pw, String[] args) {
         pw.println("VOICE INTERACTION");
         synchronized (mLock) {
-            pw.println("  HotwordDetector(s)");
-            if (mActiveHotwordDetectors.size() == 0) {
+            pw.println("  Sandboxed Detector(s)");
+            if (mActiveDetectors.size() == 0) {
                 pw.println("    NULL");
             } else {
-                mActiveHotwordDetectors.forEach(detector -> {
+                mActiveDetectors.forEach(detector -> {
                     detector.dump("    ", pw);
                     pw.println();
                 });

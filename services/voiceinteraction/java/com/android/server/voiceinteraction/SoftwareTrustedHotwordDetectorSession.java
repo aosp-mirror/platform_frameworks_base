@@ -55,7 +55,7 @@ import java.util.concurrent.ScheduledExecutorService;
  * {@link android.service.voice.VoiceInteractionService#createHotwordDetector(PersistableBundle,
  * SharedMemory, HotwordDetector.Callback)}.
  */
-final class SoftwareTrustedHotwordDetectorSession extends HotwordDetectorSession {
+final class SoftwareTrustedHotwordDetectorSession extends DetectorSession {
     private static final String TAG = "SoftwareTrustedHotwordDetectorSession";
 
     private IMicrophoneHotwordDetectionVoiceInteractionCallback mSoftwareCallback;
@@ -155,7 +155,7 @@ final class SoftwareTrustedHotwordDetectorSession extends HotwordDetectorSession
             }
         };
 
-        mRemoteHotwordDetectionService.run(
+        mRemoteDetectionService.run(
                 service -> service.detectFromMicrophoneSource(
                         null,
                         AUDIO_SOURCE_MICROPHONE,
@@ -179,7 +179,7 @@ final class SoftwareTrustedHotwordDetectorSession extends HotwordDetectorSession
         }
         mPerformingSoftwareHotwordDetection = false;
 
-        mRemoteHotwordDetectionService.run(ISandboxedDetectionService::stopDetection);
+        mRemoteDetectionService.run(ISandboxedDetectionService::stopDetection);
 
         closeExternalAudioStreamLocked("stopping requested");
     }

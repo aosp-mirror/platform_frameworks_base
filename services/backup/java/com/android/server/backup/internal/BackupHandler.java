@@ -375,7 +375,7 @@ public class BackupHandler extends Handler {
 
             case MSG_RUN_GET_RESTORE_SETS: {
                 // Like other async operations, this is entered with the wakelock held
-                RestoreSet[] sets = null;
+                List<RestoreSet> sets = null;
                 RestoreGetSetsParams params = (RestoreGetSetsParams) msg.obj;
                 String callerLogString = "BH/MSG_RUN_GET_RESTORE_SETS";
                 try {
@@ -394,7 +394,12 @@ public class BackupHandler extends Handler {
                 } finally {
                     if (params.observer != null) {
                         try {
-                            params.observer.restoreSetsAvailable(sets);
+                            if (sets == null) {
+                                params.observer.restoreSetsAvailable(null);
+                            } else {
+                                params.observer.restoreSetsAvailable(
+                                        sets.toArray(new RestoreSet[0]));
+                            }
                         } catch (RemoteException re) {
                             Slog.e(TAG, "Unable to report listing to observer");
                         } catch (Exception e) {

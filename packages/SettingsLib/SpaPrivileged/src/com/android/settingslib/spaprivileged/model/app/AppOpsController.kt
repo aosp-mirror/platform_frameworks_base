@@ -17,7 +17,6 @@
 package com.android.settingslib.spaprivileged.model.app
 
 import android.app.AppOpsManager.MODE_ALLOWED
-import android.app.AppOpsManager.MODE_ERRORED
 import android.app.AppOpsManager.Mode
 import android.content.Context
 import android.content.pm.ApplicationInfo
@@ -33,14 +32,14 @@ interface IAppOpsController {
 
     fun setAllowed(allowed: Boolean)
 
-    @Mode
-    fun getMode(): Int
+    @Mode fun getMode(): Int
 }
 
 class AppOpsController(
     context: Context,
     private val app: ApplicationInfo,
     private val op: Int,
+    private val modeForNotAllowed: Int,
     private val setModeByUid: Boolean = false,
 ) : IAppOpsController {
     private val appOpsManager = context.appOpsManager
@@ -49,7 +48,7 @@ class AppOpsController(
         get() = _mode
 
     override fun setAllowed(allowed: Boolean) {
-        val mode = if (allowed) MODE_ALLOWED else MODE_ERRORED
+        val mode = if (allowed) MODE_ALLOWED else modeForNotAllowed
         if (setModeByUid) {
             appOpsManager.setUidMode(op, app.uid, mode)
         } else {
@@ -58,12 +57,12 @@ class AppOpsController(
         _mode.postValue(mode)
     }
 
-    @Mode
-    override fun getMode(): Int = appOpsManager.checkOpNoThrow(op, app.uid, app.packageName)
+    @Mode override fun getMode(): Int = appOpsManager.checkOpNoThrow(op, app.uid, app.packageName)
 
-    private val _mode = object : MutableLiveData<Int>() {
-        override fun onActive() {
-            postValue(getMode())
+    private val _mode =
+        object : MutableLiveData<Int>() {
+            override fun onActive() {
+                postValue(getMode())
+            }
         }
-    }
 }

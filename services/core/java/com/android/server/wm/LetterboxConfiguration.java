@@ -222,6 +222,11 @@ final class LetterboxConfiguration {
     // See RefreshCallbackItem for context.
     private boolean mIsCameraCompatRefreshCycleThroughStopEnabled = true;
 
+    // Whether should ignore app requested orientation in response to an app
+    // calling Activity#setRequestedOrientation. See
+    // LetterboxUiController#shouldIgnoreRequestedOrientation for details.
+    private final boolean mIsPolicyForIgnoringRequestedOrientationEnabled;
+
     LetterboxConfiguration(Context systemUiContext) {
         this(systemUiContext, new LetterboxConfigurationPersister(systemUiContext,
                 () -> readLetterboxHorizontalReachabilityPositionFromConfig(systemUiContext,
@@ -274,10 +279,13 @@ final class LetterboxConfiguration {
                 R.bool.config_letterboxIsEnabledForTranslucentActivities);
         mIsCameraCompatTreatmentEnabled = mContext.getResources().getBoolean(
                 R.bool.config_isWindowManagerCameraCompatTreatmentEnabled);
+        mIsCompatFakeFocusEnabled = mContext.getResources().getBoolean(
+                R.bool.config_isCompatFakeFocusEnabled);
+        mIsPolicyForIgnoringRequestedOrientationEnabled = mContext.getResources().getBoolean(
+                R.bool.config_letterboxIsPolicyForIgnoringRequestedOrientationEnabled);
+
         mLetterboxConfigurationPersister = letterboxConfigurationPersister;
         mLetterboxConfigurationPersister.start();
-        mIsCompatFakeFocusEnabled = mContext.getResources()
-                .getBoolean(R.bool.config_isCompatFakeFocusEnabled);
     }
 
     /**
@@ -1032,6 +1040,15 @@ final class LetterboxConfiguration {
     @VisibleForTesting
     void setIsCompatFakeFocusEnabled(boolean enabled) {
         mIsCompatFakeFocusEnabled = enabled;
+    }
+
+    /**
+     * Whether should ignore app requested orientation in response to an app calling
+     * {@link android.app.Activity#setRequestedOrientation}. See {@link
+     * LetterboxUiController#shouldIgnoreRequestedOrientation} for details.
+     */
+    boolean isPolicyForIgnoringRequestedOrientationEnabled() {
+        return mIsPolicyForIgnoringRequestedOrientationEnabled;
     }
 
     /** Whether camera compatibility treatment is enabled. */

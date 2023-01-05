@@ -374,8 +374,6 @@ public class Transitions implements RemoteCallable<Transitions> {
                         // If this is a transferred starting window, we want it immediately visible.
                         && (change.getFlags() & FLAG_STARTING_WINDOW_TRANSFER_RECIPIENT) == 0) {
                     t.setAlpha(leash, 0.f);
-                    // fix alpha in finish transaction in case the animator itself no-ops.
-                    finishT.setAlpha(leash, 1.f);
                 }
             } else if (mode == TRANSIT_CLOSE || mode == TRANSIT_TO_BACK) {
                 finishT.hide(leash);
