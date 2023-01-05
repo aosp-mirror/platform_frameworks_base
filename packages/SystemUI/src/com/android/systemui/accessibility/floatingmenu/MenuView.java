@@ -19,6 +19,7 @@ package com.android.systemui.accessibility.floatingmenu;
 import static android.view.ViewGroup.LayoutParams.WRAP_CONTENT;
 
 import android.annotation.SuppressLint;
+import android.content.ComponentCallbacks;
 import android.content.Context;
 import android.content.res.Configuration;
 import android.graphics.PointF;
@@ -46,7 +47,7 @@ import java.util.List;
  */
 @SuppressLint("ViewConstructor")
 class MenuView extends FrameLayout implements
-        ViewTreeObserver.OnComputeInternalInsetsListener {
+        ViewTreeObserver.OnComputeInternalInsetsListener, ComponentCallbacks {
     private static final int INDEX_MENU_ITEM = 0;
     private final List<AccessibilityTarget> mTargetFeatures = new ArrayList<>();
     private final AccessibilityTargetAdapter mAdapter;
@@ -106,12 +107,29 @@ class MenuView extends FrameLayout implements
     }
 
     @Override
-    protected void onConfigurationChanged(Configuration newConfig) {
-        super.onConfigurationChanged(newConfig);
-
+    public void onConfigurationChanged(@NonNull Configuration newConfig) {
         loadLayoutResources();
 
         mTargetFeaturesView.setOverScrollMode(mMenuViewAppearance.getMenuScrollMode());
+    }
+
+    @Override
+    public void onLowMemory() {
+        // Do nothing.
+    }
+
+    @Override
+    protected void onAttachedToWindow() {
+        super.onAttachedToWindow();
+
+        getContext().registerComponentCallbacks(this);
+    }
+
+    @Override
+    protected void onDetachedFromWindow() {
+        super.onDetachedFromWindow();
+
+        getContext().unregisterComponentCallbacks(this);
     }
 
     void setOnTargetFeaturesChangeListener(OnTargetFeaturesChangeListener listener) {

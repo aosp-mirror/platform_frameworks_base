@@ -31,6 +31,7 @@ import android.accessibilityservice.AccessibilityServiceInfo;
 import android.annotation.IntDef;
 import android.annotation.StringDef;
 import android.annotation.SuppressLint;
+import android.content.ComponentCallbacks;
 import android.content.Context;
 import android.content.Intent;
 import android.content.res.Configuration;
@@ -73,7 +74,7 @@ import java.util.Optional;
  */
 @SuppressLint("ViewConstructor")
 class MenuViewLayer extends FrameLayout implements
-        ViewTreeObserver.OnComputeInternalInsetsListener, View.OnClickListener {
+        ViewTreeObserver.OnComputeInternalInsetsListener, View.OnClickListener, ComponentCallbacks {
     private static final int SHOW_MESSAGE_DELAY_MS = 3000;
 
     private final WindowManager mWindowManager;
@@ -136,8 +137,8 @@ class MenuViewLayer extends FrameLayout implements
                             AccessibilityServiceInfo.FEEDBACK_ALL_MASK);
             serviceInfoList.forEach(info -> {
                 if (getAccessibilityServiceFragmentType(info) == INVISIBLE_TOGGLE) {
-                    setAccessibilityServiceState(mContext, info.getComponentName(), /* enabled= */
-                            false);
+                    setAccessibilityServiceState(getContext(),
+                            info.getComponentName(), /* enabled= */ false);
                 }
             });
 
@@ -211,9 +212,14 @@ class MenuViewLayer extends FrameLayout implements
     }
 
     @Override
-    protected void onConfigurationChanged(Configuration newConfig) {
-        super.onConfigurationChanged(newConfig);
+    public void onConfigurationChanged(@NonNull Configuration newConfig) {
         mDismissView.updateResources();
+        mDismissAnimationController.updateResources();
+    }
+
+    @Override
+    public void onLowMemory() {
+        // Do nothing.
     }
 
     private String getMessageText(List<AccessibilityTarget> newTargetFeatures) {
@@ -253,7 +259,7 @@ class MenuViewLayer extends FrameLayout implements
         mMenuViewModel.getMigrationTooltipVisibilityData().observeForever(
                 mMigrationTooltipObserver);
         mMessageView.setUndoListener(view -> undo());
-        mContext.registerComponentCallbacks(mDismissAnimationController);
+        getContext().registerComponentCallbacks(this);
     }
 
     @Override
@@ -268,7 +274,7 @@ class MenuViewLayer extends FrameLayout implements
         mMenuViewModel.getMigrationTooltipVisibilityData().removeObserver(
                 mMigrationTooltipObserver);
         mHandler.removeCallbacksAndMessages(/* token= */ null);
-        mContext.unregisterComponentCallbacks(mDismissAnimationController);
+        getContext().unregisterComponentCallbacks(this);
     }
 
     @Override
