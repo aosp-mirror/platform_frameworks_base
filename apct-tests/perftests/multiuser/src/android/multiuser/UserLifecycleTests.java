@@ -397,6 +397,32 @@ public class UserLifecycleTests {
         }
     }
 
+    /** Tests stopping a background user, with wait times between iterations. The hypothesis is
+     * that the effects of the user creation could impact the measured times, so in this variant we
+     * create one user per run, instead of one per iteration */
+    @Test(timeout = TIMEOUT_MAX_TEST_TIME_MS)
+    public void stopUser_realistic() throws RemoteException {
+        final int userId = createUserNoFlags();
+        waitCoolDownPeriod();
+        while (mRunner.keepRunning()) {
+            mRunner.pauseTiming();
+            runThenWaitForBroadcasts(userId, ()-> {
+                mIam.startUserInBackground(userId);
+            }, Intent.ACTION_USER_STARTED, Intent.ACTION_MEDIA_MOUNTED);
+            waitCoolDownPeriod();
+            Log.d(TAG, "Starting timer");
+            mRunner.resumeTiming();
+
+            stopUser(userId, false);
+
+            mRunner.pauseTiming();
+            Log.d(TAG, "Stopping timer");
+
+            mRunner.resumeTimingForNextIteration();
+        }
+        removeUser(userId);
+    }
+
     /** Tests reaching LOOKED_BOOT_COMPLETE when switching to uninitialized user. */
     @Test(timeout = TIMEOUT_MAX_TEST_TIME_MS)
     public void lockedBootCompleted() throws RemoteException {
