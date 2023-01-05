@@ -520,4 +520,16 @@ interface IAudioService {
             boolean handlesvolumeAdjustment);
 
     AudioHalVersionInfo getHalVersion();
+
+    @EnforcePermission("MODIFY_AUDIO_ROUTING")
+    @JavaPassthrough(annotation="@android.annotation.RequiresPermission(android.Manifest.permission.MODIFY_AUDIO_ROUTING)")
+    boolean supportsBluetoothVariableLatency();
+
+    @EnforcePermission("MODIFY_AUDIO_ROUTING")
+    @JavaPassthrough(annotation="@android.annotation.RequiresPermission(android.Manifest.permission.MODIFY_AUDIO_ROUTING)")
+    void setBluetoothVariableLatencyEnabled(boolean enabled);
+
+    @EnforcePermission("MODIFY_AUDIO_ROUTING")
+    @JavaPassthrough(annotation="@android.annotation.RequiresPermission(android.Manifest.permission.MODIFY_AUDIO_ROUTING)")
+    boolean isBluetoothVariableLatencyEnabled();
 }

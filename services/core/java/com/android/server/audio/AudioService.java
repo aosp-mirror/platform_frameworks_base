@@ -127,6 +127,8 @@ import android.media.audiopolicy.AudioPolicyConfig;
 import android.media.audiopolicy.AudioProductStrategy;
 import android.media.audiopolicy.AudioVolumeGroup;
 import android.media.audiopolicy.IAudioPolicyCallback;
+import android.media.permission.ClearCallingIdentityContext;
+import android.media.permission.SafeCloseable;
 import android.media.projection.IMediaProjection;
 import android.media.projection.IMediaProjectionCallback;
 import android.media.projection.IMediaProjectionManager;
@@ -11186,6 +11188,33 @@ public class AudioService extends IAudioService.Stub
     public boolean hasRegisteredDynamicPolicy() {
         synchronized (mAudioPolicies) {
             return !mAudioPolicies.isEmpty();
+        }
+    }
+
+    /** @see AudioManager#supportsBluetoothVariableLatency() */
+    @android.annotation.EnforcePermission(android.Manifest.permission.MODIFY_AUDIO_ROUTING)
+    public boolean supportsBluetoothVariableLatency() {
+        super.supportsBluetoothVariableLatency_enforcePermission();
+        try (SafeCloseable ignored = ClearCallingIdentityContext.create()) {
+            return AudioSystem.supportsBluetoothVariableLatency();
+        }
+    }
+
+    /** @see AudioManager#setBluetoothVariableLatencyEnabled(boolean) */
+    @android.annotation.EnforcePermission(android.Manifest.permission.MODIFY_AUDIO_ROUTING)
+    public void setBluetoothVariableLatencyEnabled(boolean enabled) {
+        super.setBluetoothVariableLatencyEnabled_enforcePermission();
+        try (SafeCloseable ignored = ClearCallingIdentityContext.create()) {
+            AudioSystem.setBluetoothVariableLatencyEnabled(enabled);
+        }
+    }
+
+    /** @see AudioManager#isBluetoothVariableLatencyEnabled(boolean) */
+    @android.annotation.EnforcePermission(android.Manifest.permission.MODIFY_AUDIO_ROUTING)
+    public boolean isBluetoothVariableLatencyEnabled() {
+        super.isBluetoothVariableLatencyEnabled_enforcePermission();
+        try (SafeCloseable ignored = ClearCallingIdentityContext.create()) {
+            return AudioSystem.isBluetoothVariableLatencyEnabled();
         }
     }
 
