@@ -364,7 +364,7 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
     boolean mHidden = true;    // Used to determine if to show child windows.
     private boolean mDragResizing;
     private boolean mDragResizingChangeReported = true;
-    private boolean mRedrawForSyncReported;
+    private boolean mRedrawForSyncReported = true;
 
     /**
      * Used to assosciate a given set of state changes sent from MSG_RESIZED
@@ -5956,8 +5956,11 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
         mSyncSeqId++;
         if (getSyncMethod() == BLASTSyncEngine.METHOD_BLAST) {
             mPrepareSyncSeqId = mSyncSeqId;
+            requestRedrawForSync();
+        } else if (mHasSurface && mWinAnimator.mDrawState != DRAW_PENDING) {
+            // Only need to request redraw if the window has reported draw.
+            requestRedrawForSync();
         }
-        requestRedrawForSync();
         return true;
     }
 
