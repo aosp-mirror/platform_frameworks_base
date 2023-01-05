@@ -795,6 +795,9 @@
     <!-- Permission required for CTS test - CtsPackageInstallTestCases-->
     <uses-permission android:name="android.permission.GET_APP_METADATA" />
 
+    <uses-permission android:name="android.permission.FOREGROUND_SERVICE"/>
+    <uses-permission android:name="android.permission.FOREGROUND_SERVICE_SYSTEM_EXEMPTED"/>
+
     <application android:label="@string/app_label"
                 android:theme="@android:style/Theme.DeviceDefault.DayNight"
                 android:defaultToDeviceProtectedStorage="true"
@@ -872,6 +875,7 @@
 
         <service
             android:name=".BugreportProgressService"
+            android:foregroundServiceType="systemExempted"
             android:exported="false"/>
     </application>
 </manifest>
