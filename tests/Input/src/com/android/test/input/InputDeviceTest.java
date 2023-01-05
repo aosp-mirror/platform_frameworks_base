@@ -18,7 +18,6 @@ package android.view;
 
 import static org.junit.Assert.assertEquals;
 
-import android.hardware.input.InputDeviceCountryCode;
 import android.os.Parcel;
 
 import androidx.test.ext.junit.runners.AndroidJUnit4;
@@ -55,7 +54,6 @@ public class InputDeviceTest {
         assertEquals(device.isExternal(), outDevice.isExternal());
         assertEquals(device.getSources(), outDevice.getSources());
         assertEquals(device.getKeyboardType(), outDevice.getKeyboardType());
-        assertEquals(device.getCountryCode(), outDevice.getCountryCode());
         assertEquals(device.getKeyboardLanguageTag(), outDevice.getKeyboardLanguageTag());
         assertEquals(device.getKeyboardLayoutType(), outDevice.getKeyboardLayoutType());
         assertEquals(device.getMotionRanges().size(), outDevice.getMotionRanges().size());
@@ -88,7 +86,6 @@ public class InputDeviceTest {
                 .setHasButtonUnderPad(true)
                 .setHasSensor(true)
                 .setHasBattery(true)
-                .setCountryCode(InputDeviceCountryCode.INTERNATIONAL)
                 .setKeyboardLanguageTag("en-US")
                 .setKeyboardLayoutType("qwerty")
                 .setSupportsUsi(true)

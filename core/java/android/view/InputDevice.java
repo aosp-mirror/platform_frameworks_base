@@ -26,7 +26,6 @@ import android.compat.annotation.UnsupportedAppUsage;
 import android.content.Context;
 import android.hardware.BatteryState;
 import android.hardware.SensorManager;
-import android.hardware.input.InputDeviceCountryCode;
 import android.hardware.input.InputDeviceIdentifier;
 import android.hardware.input.InputManager;
 import android.hardware.lights.LightsManager;
@@ -75,8 +74,6 @@ public final class InputDevice implements Parcelable {
     private final int mSources;
     private final int mKeyboardType;
     private final KeyCharacterMap mKeyCharacterMap;
-    @InputDeviceCountryCode
-    private final int mCountryCode;
     @Nullable
     private final String mKeyboardLanguageTag;
     @Nullable
@@ -468,10 +465,9 @@ public final class InputDevice implements Parcelable {
      */
     private InputDevice(int id, int generation, int controllerNumber, String name, int vendorId,
             int productId, String descriptor, boolean isExternal, int sources, int keyboardType,
-            KeyCharacterMap keyCharacterMap, @InputDeviceCountryCode int countryCode,
-            @Nullable String keyboardLanguageTag, @Nullable String keyboardLayoutType,
-            boolean hasVibrator, boolean hasMicrophone, boolean hasButtonUnderPad,
-            boolean hasSensor, boolean hasBattery, boolean supportsUsi) {
+            KeyCharacterMap keyCharacterMap, @Nullable String keyboardLanguageTag,
+            @Nullable String keyboardLayoutType, boolean hasVibrator, boolean hasMicrophone,
+            boolean hasButtonUnderPad, boolean hasSensor, boolean hasBattery, boolean supportsUsi) {
         mId = id;
         mGeneration = generation;
         mControllerNumber = controllerNumber;
@@ -483,7 +479,6 @@ public final class InputDevice implements Parcelable {
         mSources = sources;
         mKeyboardType = keyboardType;
         mKeyCharacterMap = keyCharacterMap;
-        mCountryCode = countryCode;
         if (keyboardLanguageTag != null) {
             mKeyboardLanguageTag = ULocale
                     .createCanonical(ULocale.forLanguageTag(keyboardLanguageTag))
@@ -513,7 +508,6 @@ public final class InputDevice implements Parcelable {
         mIsExternal = in.readInt() != 0;
         mSources = in.readInt();
         mKeyboardType = in.readInt();
-        mCountryCode = in.readInt();
         mKeyboardLanguageTag = in.readString8();
         mKeyboardLayoutType = in.readString8();
         mHasVibrator = in.readInt() != 0;
@@ -558,8 +552,6 @@ public final class InputDevice implements Parcelable {
         private boolean mHasButtonUnderPad = false;
         private boolean mHasSensor = false;
         private boolean mHasBattery = false;
-        @InputDeviceCountryCode
-        private int mCountryCode = InputDeviceCountryCode.INVALID;
         private String mKeyboardLanguageTag = null;
         private String mKeyboardLayoutType = null;
         private boolean mSupportsUsi = false;
@@ -660,12 +652,6 @@ public final class InputDevice implements Parcelable {
             return this;
         }
 
-        /** @see InputDevice#getCountryCode() */
-        public Builder setCountryCode(@InputDeviceCountryCode int countryCode) {
-            mCountryCode = countryCode;
-            return this;
-        }
-
         /** @see InputDevice#getKeyboardLanguageTag() */
         public Builder setKeyboardLanguageTag(String keyboardLanguageTag) {
             mKeyboardLanguageTag = keyboardLanguageTag;
@@ -688,8 +674,8 @@ public final class InputDevice implements Parcelable {
         public InputDevice build() {
             return new InputDevice(mId, mGeneration, mControllerNumber, mName, mVendorId,
                     mProductId, mDescriptor, mIsExternal, mSources, mKeyboardType, mKeyCharacterMap,
-                    mCountryCode, mKeyboardLanguageTag, mKeyboardLayoutType, mHasVibrator,
-                    mHasMicrophone, mHasButtonUnderPad, mHasSensor, mHasBattery, mSupportsUsi);
+                    mKeyboardLanguageTag, mKeyboardLayoutType, mHasVibrator, mHasMicrophone,
+                    mHasButtonUnderPad, mHasSensor, mHasBattery, mSupportsUsi);
         }
     }
 
@@ -906,16 +892,6 @@ public final class InputDevice implements Parcelable {
      */
     public KeyCharacterMap getKeyCharacterMap() {
         return mKeyCharacterMap;
-    }
-
-    /**
-     * Gets Country code associated with the device
-     *
-     * @hide
-     */
-    @InputDeviceCountryCode
-    public int getCountryCode() {
-        return mCountryCode;
     }
 
     /**
@@ -1393,7 +1369,6 @@ public final class InputDevice implements Parcelable {
         out.writeInt(mIsExternal ? 1 : 0);
         out.writeInt(mSources);
         out.writeInt(mKeyboardType);
-        out.writeInt(mCountryCode);
         out.writeString8(mKeyboardLanguageTag);
         out.writeString8(mKeyboardLayoutType);
         out.writeInt(mHasVibrator ? 1 : 0);
@@ -1445,8 +1420,6 @@ public final class InputDevice implements Parcelable {
         }
         description.append("\n");
 
-        description.append("  Country Code: ").append(mCountryCode).append("\n");
-
         description.append("  Has Vibrator: ").append(mHasVibrator).append("\n");
 
         description.append("  Has Sensor: ").append(mHasSensor).append("\n");
@@ -1456,6 +1429,15 @@ public final class InputDevice implements Parcelable {
         description.append("  Has mic: ").append(mHasMicrophone).append("\n");
 
         description.append("  Supports USI: ").append(mSupportsUsi).append("\n");
+
+        if (mKeyboardLanguageTag != null) {
+            description.append(" Keyboard language tag: ").append(mKeyboardLanguageTag).append(
+                    "\n");
+        }
+
+        if (mKeyboardLayoutType != null) {
+            description.append(" Keyboard layout type: ").append(mKeyboardLayoutType).append("\n");
+        }
 
         description.append("  Sources: 0x").append(Integer.toHexString(mSources)).append(" (");
         appendSourceDescriptionIfApplicable(description, SOURCE_KEYBOARD, "keyboard");
