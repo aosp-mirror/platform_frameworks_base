@@ -21,7 +21,6 @@
 #include "include/core/SkTypes.h"
 #include "include/private/SkFixed.h"
 #include "include/private/SkMalloc.h"
-#include "include/private/SkTo.h"
 #include "src/core/SkTSearch.h"
 
 typedef int Dot14;
@@ -93,7 +92,6 @@ static float SkUnitCubicInterp(float value, float bx, float by, float cx, float 
 SkiaInterpolatorBase::SkiaInterpolatorBase() {
     fStorage = nullptr;
     fTimes = nullptr;
-    SkDEBUGCODE(fTimesArray = nullptr;)
 }
 
 SkiaInterpolatorBase::~SkiaInterpolatorBase() {
@@ -104,14 +102,13 @@ SkiaInterpolatorBase::~SkiaInterpolatorBase() {
 
 void SkiaInterpolatorBase::reset(int elemCount, int frameCount) {
     fFlags = 0;
-    fElemCount = SkToU8(elemCount);
-    fFrameCount = SkToS16(frameCount);
+    fElemCount = static_cast<uint8_t>(elemCount);
+    fFrameCount = static_cast<int16_t>(frameCount);
     fRepeat = SK_Scalar1;
     if (fStorage) {
         sk_free(fStorage);
         fStorage = nullptr;
         fTimes = nullptr;
-        SkDEBUGCODE(fTimesArray = nullptr);
     }
 }
 
@@ -207,7 +204,6 @@ SkiaInterpolatorBase::Result SkiaInterpolatorBase::timeToT(SkMSec time, float* T
 SkiaInterpolator::SkiaInterpolator() {
     INHERITED::reset(0, 0);
     fValues = nullptr;
-    SkDEBUGCODE(fScalarsArray = nullptr;)
 }
 
 SkiaInterpolator::SkiaInterpolator(int elemCount, int frameCount) {
@@ -220,10 +216,6 @@ void SkiaInterpolator::reset(int elemCount, int frameCount) {
     fStorage = sk_malloc_throw((sizeof(float) * elemCount + sizeof(SkTimeCode)) * frameCount);
     fTimes = (SkTimeCode*)fStorage;
     fValues = (float*)((char*)fStorage + sizeof(SkTimeCode) * frameCount);
-#ifdef SK_DEBUG
-    fTimesArray = (SkTimeCode(*)[10])fTimes;
-    fScalarsArray = (float(*)[10])fValues;
-#endif
 }
 
 #define SK_Fixed1Third (SK_Fixed1 / 3)
