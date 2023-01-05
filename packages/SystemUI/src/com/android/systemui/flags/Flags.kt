@@ -94,8 +94,7 @@ object Flags {
         unreleasedFlag(259217907, "notification_group_dismissal_animation", teamfood = true)
 
     // TODO(b/257506350): Tracking Bug
-    @JvmField
-    val FSI_CHROME = unreleasedFlag(117, "fsi_chrome")
+    @JvmField val FSI_CHROME = unreleasedFlag(117, "fsi_chrome")
 
     @JvmField
     val SIMPLIFIED_APPEAR_FRACTION =
@@ -185,6 +184,10 @@ object Flags {
     val SMARTSPACE_SHARED_ELEMENT_TRANSITION_ENABLED =
         releasedFlag(401, "smartspace_shared_element_transition_enabled")
     val SMARTSPACE = resourceBooleanFlag(402, R.bool.flag_smartspace, "smartspace")
+
+    // TODO(b/258517050): Clean up after the feature is launched.
+    @JvmField
+    val SMARTSPACE_DATE_WEATHER_DECOUPLED = unreleasedFlag(403, "smartspace_date_weather_decoupled")
 
     // 500 - quick settings
 
