@@ -25,7 +25,6 @@ import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.atLeastOnce;
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.doReturn;
-import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.reset;
 import static org.mockito.Mockito.spy;
@@ -40,7 +39,6 @@ import android.graphics.Point;
 import android.graphics.Rect;
 import android.os.Bundle;
 import android.os.Handler;
-import android.os.IBinder;
 import android.os.RemoteCallback;
 import android.os.RemoteException;
 import android.provider.Settings;
@@ -341,8 +339,7 @@ public class BackAnimationControllerTest extends ShellTestCase {
         mController.setTriggerBack(true);   // Fake trigger back
 
         // In case the focus has been changed.
-        IBinder token = mock(IBinder.class);
-        mController.mFocusObserver.focusLost(token);
+        mController.mNavigationObserver.sendResult(null);
         mShellExecutor.flushAll();
         verify(mAnimatorCallback).onBackCancelled();
 

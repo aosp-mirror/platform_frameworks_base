@@ -17,8 +17,11 @@
 package com.android.server.wm;
 
 import static android.app.ActivityOptions.ANIM_SCENE_TRANSITION;
+import static android.app.WindowConfiguration.ACTIVITY_TYPE_STANDARD;
+import static android.app.WindowConfiguration.WINDOWING_MODE_MULTI_WINDOW;
 import static android.content.pm.ApplicationInfo.PRIVATE_FLAG_EXT_ENABLE_ON_BACK_INVOKED_CALLBACK;
 import static android.view.WindowManager.LayoutParams.FIRST_APPLICATION_WINDOW;
+import static android.view.WindowManager.LayoutParams.TYPE_APPLICATION_OVERLAY;
 import static android.view.WindowManager.LayoutParams.TYPE_BASE_APPLICATION;
 import static android.window.BackNavigationInfo.typeToString;
 
@@ -42,8 +45,10 @@ import android.app.ActivityOptions;
 import android.content.Context;
 import android.content.pm.ApplicationInfo;
 import android.os.Bundle;
+import android.os.RemoteCallback;
 import android.os.RemoteException;
 import android.platform.test.annotations.Presubmit;
+import android.util.ArraySet;
 import android.view.WindowManager;
 import android.window.BackAnimationAdapter;
 import android.window.BackMotionEvent;
@@ -320,6 +325,64 @@ public class BackNavigationControllerTests extends WindowTestsBase {
         assertThat(backNavigationInfo).isNull();
     }
 
+    @Test
+    public void testTransitionHappensCancelNavigation() {
+        // Create a floating task and a fullscreen task, then navigating on fullscreen task.
+        // The navigation should not been cancelled when transition happens on floating task, and
+        // only be cancelled when transition happens on the navigating task.
+        final Task floatingTask = createTask(mDisplayContent, WINDOWING_MODE_MULTI_WINDOW,
+                ACTIVITY_TYPE_STANDARD);
+        final ActivityRecord baseFloatingActivity = createActivityRecord(floatingTask);
+
+        final Task fullscreenTask = createTopTaskWithActivity();
+        withSystemCallback(fullscreenTask);
+        final ActivityRecord baseFullscreenActivity = fullscreenTask.getTopMostActivity();
+
+        final CountDownLatch navigationObserver = new CountDownLatch(1);
+        startBackNavigation(navigationObserver);
+
+        final ArraySet<ActivityRecord> opening = new ArraySet<>();
+        final ArraySet<ActivityRecord> closing = new ArraySet<>();
+        final ActivityRecord secondFloatingActivity = createActivityRecord(floatingTask);
+        opening.add(secondFloatingActivity);
+        closing.add(baseFloatingActivity);
+        mBackNavigationController.removeIfContainsBackAnimationTargets(opening, closing);
+        assertEquals("Transition happen on an irrelevant task, callback should not been called",
+                1, navigationObserver.getCount());
+
+        // Create a new activity above navigation target, the transition should cancel navigation.
+        final ActivityRecord topFullscreenActivity = createActivityRecord(fullscreenTask);
+        opening.clear();
+        closing.clear();
+        opening.add(topFullscreenActivity);
+        closing.add(baseFullscreenActivity);
+        mBackNavigationController.removeIfContainsBackAnimationTargets(opening, closing);
+        assertEquals("Transition happen on navigation task, callback should have been called",
+                0, navigationObserver.getCount());
+    }
+
+    @Test
+    public void testWindowFocusChangeCancelNavigation() {
+        Task task = createTopTaskWithActivity();
+        withSystemCallback(task);
+        WindowState focusWindow = task.getTopVisibleAppMainWindow();
+        final CountDownLatch navigationObserver = new CountDownLatch(1);
+        startBackNavigation(navigationObserver);
+
+        mBackNavigationController.onFocusChanged(null);
+        assertEquals("change focus to null, callback should not have been called",
+                1, navigationObserver.getCount());
+        mBackNavigationController.onFocusChanged(focusWindow);
+        assertEquals("change focus back, callback should not have been called",
+                1, navigationObserver.getCount());
+
+        WindowState newWindow = createWindow(null, TYPE_APPLICATION_OVERLAY, "overlayWindow");
+        addToWindowMap(newWindow, true);
+        mBackNavigationController.onFocusChanged(newWindow);
+        assertEquals("Focus change, callback should have been called",
+                0, navigationObserver.getCount());
+    }
+
     private IOnBackInvokedCallback withSystemCallback(Task task) {
         IOnBackInvokedCallback callback = createOnBackInvokedCallback();
         task.getTopMostActivity().getTopChild().setOnBackInvokedCallbackInfo(
@@ -336,7 +399,14 @@ public class BackNavigationControllerTests extends WindowTestsBase {
 
     @Nullable
     private BackNavigationInfo startBackNavigation() {
-        return mBackNavigationController.startBackNavigation(null, mBackAnimationAdapter);
+        return mBackNavigationController.startBackNavigation(
+                createNavigationObserver(null), mBackAnimationAdapter);
+    }
+
+    @Nullable
+    private BackNavigationInfo startBackNavigation(CountDownLatch navigationObserverLatch) {
+        return mBackNavigationController.startBackNavigation(
+                createNavigationObserver(navigationObserverLatch), mBackAnimationAdapter);
     }
 
     @NonNull
@@ -369,6 +439,14 @@ public class BackNavigationControllerTests extends WindowTestsBase {
                 }
             }
         };
+    }
+
+    private RemoteCallback createNavigationObserver(CountDownLatch latch) {
+        return new RemoteCallback(result -> {
+            if (latch != null) {
+                latch.countDown();
+            }
+        });
     }
 
     private Task initHomeActivity() {

@@ -41,7 +41,6 @@ import android.os.SystemProperties;
 import android.util.ArraySet;
 import android.util.Slog;
 import android.util.proto.ProtoOutputStream;
-import android.view.IWindowFocusObserver;
 import android.view.RemoteAnimationTarget;
 import android.view.SurfaceControl;
 import android.view.WindowInsets;
@@ -66,11 +65,11 @@ import java.util.function.Consumer;
 class BackNavigationController {
     private static final String TAG = "BackNavigationController";
     private WindowManagerService mWindowManagerService;
-    private IWindowFocusObserver mFocusObserver;
     private boolean mBackAnimationInProgress;
     private @BackNavigationInfo.BackTargetType int mLastBackType;
     private boolean mShowWallpaper;
     private Runnable mPendingAnimation;
+    private final NavigationMonitor mNavigationMonitor = new NavigationMonitor();
 
     private AnimationHandler mAnimationHandler;
     private final ArrayList<WindowContainer> mTmpOpenApps = new ArrayList<>();
@@ -86,6 +85,11 @@ class BackNavigationController {
         return SystemProperties.getInt("persist.wm.debug.predictive_back_screenshot", 0) != 0;
     }
 
+    // Notify focus window changed
+    void onFocusChanged(WindowState newFocus) {
+        mNavigationMonitor.onFocusWindowChanged(newFocus);
+    }
+
     /**
      * Set up the necessary leashes and build a {@link BackNavigationInfo} instance for an upcoming
      * back gesture animation.
@@ -96,13 +100,12 @@ class BackNavigationController {
      */
     @VisibleForTesting
     @Nullable
-    BackNavigationInfo startBackNavigation(
-            IWindowFocusObserver observer, BackAnimationAdapter adapter) {
+    BackNavigationInfo startBackNavigation(@NonNull RemoteCallback navigationObserver,
+            BackAnimationAdapter adapter) {
         if (!sPredictBackEnable) {
             return null;
         }
         final WindowManagerService wmService = mWindowManagerService;
-        mFocusObserver = observer;
 
         int backType = BackNavigationInfo.TYPE_UNDEFINED;
 
@@ -202,9 +205,7 @@ class BackNavigationController {
                     backType = BackNavigationInfo.TYPE_CALLBACK;
                 }
                 infoBuilder.setOnBackInvokedCallback(callbackInfo.getCallback());
-                if (mFocusObserver != null) {
-                    window.registerFocusObserver(mFocusObserver);
-                }
+                mNavigationMonitor.startMonitor(window, navigationObserver);
             }
 
             ProtoLog.d(WM_DEBUG_BACK_PREVIEW, "startBackNavigation currentTask=%s, "
@@ -228,10 +229,8 @@ class BackNavigationController {
                     || currentActivity.isActivityTypeHome()
                     || currentActivity.mHasSceneTransition) {
                 infoBuilder.setType(BackNavigationInfo.TYPE_CALLBACK);
-                final WindowState finalFocusedWindow = window;
                 infoBuilder.setOnBackNavigationDone(new RemoteCallback(result ->
-                        onBackNavigationDone(result, finalFocusedWindow,
-                                BackNavigationInfo.TYPE_CALLBACK)));
+                        onBackNavigationDone(result, BackNavigationInfo.TYPE_CALLBACK)));
                 mLastBackType = BackNavigationInfo.TYPE_CALLBACK;
                 return infoBuilder.build();
             }
@@ -334,16 +333,19 @@ class BackNavigationController {
         WindowContainer<?> finalRemovedWindowContainer = removedWindowContainer;
         if (finalRemovedWindowContainer != null) {
             final int finalBackType = backType;
-            final WindowState finalFocusedWindow = window;
             RemoteCallback onBackNavigationDone = new RemoteCallback(result -> onBackNavigationDone(
-                    result, finalFocusedWindow, finalBackType));
+                    result, finalBackType));
             infoBuilder.setOnBackNavigationDone(onBackNavigationDone);
         }
         mLastBackType = backType;
         return infoBuilder.build();
     }
 
-    boolean isWaitBackTransition() {
+    boolean isMonitoringTransition() {
+        return isWaitBackTransition() || mNavigationMonitor.isMonitoring();
+    }
+
+    private boolean isWaitBackTransition() {
         return mAnimationHandler.mComposed && mAnimationHandler.mWaitTransition;
     }
 
@@ -363,11 +365,23 @@ class BackNavigationController {
      */
     boolean removeIfContainsBackAnimationTargets(ArraySet<ActivityRecord> openApps,
             ArraySet<ActivityRecord> closeApps) {
-        if (!isWaitBackTransition()) {
+        if (!isMonitoringTransition()) {
             return false;
         }
         mTmpCloseApps.addAll(closeApps);
-        boolean result = false;
+        final boolean matchAnimationTargets = removeIfWaitForBackTransition(openApps, closeApps);
+        if (!matchAnimationTargets) {
+            mNavigationMonitor.onTransitionReadyWhileNavigate(mTmpOpenApps, mTmpCloseApps);
+        }
+        mTmpCloseApps.clear();
+        return matchAnimationTargets;
+    }
+
+    boolean removeIfWaitForBackTransition(ArraySet<ActivityRecord> openApps,
+            ArraySet<ActivityRecord> closeApps) {
+        if (!isWaitBackTransition()) {
+            return false;
+        }
         // Note: TmpOpenApps is empty. Unlike shell transition, the open apps will be removed from
         // mOpeningApps if there is no visibility change.
         if (mAnimationHandler.containsBackAnimationTargets(mTmpOpenApps, mTmpCloseApps)) {
@@ -386,10 +400,76 @@ class BackNavigationController {
                     closeApps.removeAt(i);
                 }
             }
-            result = true;
+            return true;
         }
-        mTmpCloseApps.clear();
-        return result;
+        return false;
+    }
+
+    private static class NavigationMonitor {
+        // The window which triggering the back navigation.
+        private WindowState mNavigatingWindow;
+        private RemoteCallback mObserver;
+
+        void startMonitor(@NonNull WindowState window, @NonNull RemoteCallback observer) {
+            mNavigatingWindow = window;
+            mObserver = observer;
+        }
+
+        void stopMonitor() {
+            mNavigatingWindow = null;
+            mObserver = null;
+        }
+
+        boolean isMonitoring() {
+            return mNavigatingWindow != null && mObserver != null;
+        }
+
+        /**
+         * Notify focus window changed during back navigation. This will cancel the gesture for
+         * scenarios like: a system window popup, or when an activity add a new window.
+         *
+         * This method should only be used to check window-level change, otherwise it may cause
+         * misjudgment in multi-window mode. For example: in split-screen, when user is
+         * navigating on the top task, bottom task can start a new task, which will gain focus for
+         * a short time, but we should not cancel the navigation.
+         */
+        private void onFocusWindowChanged(WindowState newFocus) {
+            if (!isMonitoring() || !atSameDisplay(newFocus)) {
+                return;
+            }
+            // Keep navigating if either new focus == navigating window or null.
+            if (newFocus != null && newFocus != mNavigatingWindow
+                    && (newFocus.mActivityRecord == null
+                    || (newFocus.mActivityRecord == mNavigatingWindow.mActivityRecord))) {
+                EventLogTags.writeWmBackNaviCanceled("focusWindowChanged");
+                mObserver.sendResult(null /* result */);
+            }
+        }
+
+        /**
+         * Notify an unexpected transition has happened during back navigation.
+         */
+        private void onTransitionReadyWhileNavigate(ArrayList<WindowContainer> opening,
+                ArrayList<WindowContainer> closing) {
+            if (!isMonitoring()) {
+                return;
+            }
+            final ArrayList<WindowContainer> all = new ArrayList<>(opening);
+            all.addAll(closing);
+            for (WindowContainer app : all) {
+                if (app.hasChild(mNavigatingWindow)) {
+                    EventLogTags.writeWmBackNaviCanceled("transitionHappens");
+                    mObserver.sendResult(null /* result */);
+                    break;
+                }
+            }
+
+        }
+
+        private boolean atSameDisplay(WindowState newFocus) {
+            final int navigatingDisplayId = mNavigatingWindow.getDisplayId();
+            return newFocus == null || newFocus.getDisplayId() == navigatingDisplayId;
+        }
     }
 
     // For shell transition
@@ -403,8 +483,7 @@ class BackNavigationController {
      *  animations, and shouldn't join next transition.
      */
     boolean containsBackAnimationTargets(Transition transition) {
-        if (!mAnimationHandler.mComposed
-                || (transition.mType != TRANSIT_CLOSE && transition.mType != TRANSIT_TO_BACK)) {
+        if (!isMonitoringTransition()) {
             return false;
         }
         final ArraySet<WindowContainer> targets = transition.mParticipants;
@@ -420,19 +499,19 @@ class BackNavigationController {
                 mTmpCloseApps.add(wc);
             }
         }
-        final boolean result = mAnimationHandler.containsBackAnimationTargets(
-                mTmpOpenApps, mTmpCloseApps);
-        if (result) {
-            mAnimationHandler.mOpenTransitionTargetMatch =
-                    mAnimationHandler.containTarget(mTmpOpenApps, true);
+        final boolean matchAnimationTargets = isWaitBackTransition()
+                && (transition.mType == TRANSIT_CLOSE || transition.mType == TRANSIT_TO_BACK)
+                && mAnimationHandler.containsBackAnimationTargets(mTmpOpenApps, mTmpCloseApps);
+        if (!matchAnimationTargets) {
+            mNavigationMonitor.onTransitionReadyWhileNavigate(mTmpOpenApps, mTmpCloseApps);
         }
         mTmpOpenApps.clear();
         mTmpCloseApps.clear();
-        return result;
+        return matchAnimationTargets;
     }
 
     boolean isMonitorTransitionTarget(WindowContainer wc) {
-        if (!mAnimationHandler.mComposed || !mAnimationHandler.mWaitTransition) {
+        if (!isWaitBackTransition()) {
             return false;
         }
         return mAnimationHandler.isTarget(wc, wc.isVisibleRequested() /* open */);
@@ -951,16 +1030,13 @@ class BackNavigationController {
         }
     }
 
-    private void onBackNavigationDone(Bundle result, WindowState focusedWindow, int backType) {
+    private void onBackNavigationDone(Bundle result, int backType) {
         boolean triggerBack = result != null && result.getBoolean(
                 BackNavigationInfo.KEY_TRIGGER_BACK);
         ProtoLog.d(WM_DEBUG_BACK_PREVIEW, "onBackNavigationDone backType=%s, "
                 + "triggerBack=%b", backType, triggerBack);
 
-        if (mFocusObserver != null) {
-            focusedWindow.unregisterFocusObserver(mFocusObserver);
-            mFocusObserver = null;
-        }
+        mNavigationMonitor.stopMonitor();
         mBackAnimationInProgress = false;
         mShowWallpaper = false;
     }
