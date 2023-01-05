@@ -64,7 +64,7 @@ public class CreateUserActivity extends Activity {
     private Dialog mGrantAdminDialog;
     private Dialog mSetupUserDialog;
     private final OnBackInvokedCallback mBackCallback = this::onBackInvoked;
-    private Boolean mGrantAdminRights;
+    private boolean mGrantAdminRights;
     @Inject
     public CreateUserActivity(UserCreator userCreator,
             EditUserInfoController editUserInfoController, IActivityManager activityManager,
@@ -83,8 +83,7 @@ public class CreateUserActivity extends Activity {
         if (savedInstanceState != null) {
             mEditUserInfoController.onRestoreInstanceState(savedInstanceState);
         }
-
-        if (mUserCreator.isHeadlessSystemUserMode()) {
+        if (mUserCreator.isMultipleAdminEnabled()) {
             mGrantAdminDialog = buildGrantAdminDialog();
             mGrantAdminDialog.show();
         } else {

@@ -2095,6 +2095,15 @@ public class UserManager {
     }
 
     /**
+     * Returns whether multiple admins are enabled on the device
+     * @hide
+     */
+    public static boolean isMultipleAdminEnabled() {
+        return Resources.getSystem()
+                .getBoolean(com.android.internal.R.bool.config_enableMultipleAdmins);
+    }
+
+    /**
      * Checks whether the device is running in a headless system user mode.
      *
      * <p>Headless system user mode means the {@link #isSystemUser() system user} runs system
