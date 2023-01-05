@@ -1004,8 +1004,7 @@
     <string name="keyguard_affordance_enablement_dialog_qr_scanner_instruction" msgid="5355839079232119791">"• 카메라 앱이 설치되어 있습니다."</string>
     <string name="keyguard_affordance_enablement_dialog_home_instruction_1" msgid="8438311171750568633">"• 앱이 설정되어 있습니다."</string>
     <string name="keyguard_affordance_enablement_dialog_home_instruction_2" msgid="8308525385889021652">"• 1대 이상의 기기를 사용할 수 있습니다."</string>
-    <!-- no translation found for keyguard_affordance_press_too_short (8145437175134998864) -->
-    <skip />
+    <string name="keyguard_affordance_press_too_short" msgid="8145437175134998864">"바로가기를 길게 터치하세요."</string>
     <string name="rear_display_bottom_sheet_cancel" msgid="3461468855493357248">"취소"</string>
     <string name="rear_display_bottom_sheet_confirm" msgid="4383356544661421206">"지금 뒤집기"</string>
     <string name="rear_display_fold_bottom_sheet_title" msgid="6081542277622721548">"휴대전화를 열어서 더 나은 셀카를 찍어보세요"</string>
