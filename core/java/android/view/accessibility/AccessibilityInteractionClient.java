@@ -275,7 +275,8 @@ public final class AccessibilityInteractionClient
      *
      * @param connection The ViewRootImpl's {@link IAccessibilityInteractionConnection}.
      */
-    public static int addDirectConnection(IAccessibilityInteractionConnection connection) {
+    public static int addDirectConnection(IAccessibilityInteractionConnection connection,
+            AccessibilityManager accessibilityManager) {
         synchronized (sConnectionCache) {
             int connectionId = sDirectConnectionIdCounter++;
             if (getConnection(connectionId) != null) {
@@ -283,7 +284,7 @@ public final class AccessibilityInteractionClient
                         "Cannot add direct connection with existing id " + connectionId);
             }
             DirectAccessibilityConnection directAccessibilityConnection =
-                    new DirectAccessibilityConnection(connection);
+                    new DirectAccessibilityConnection(connection, accessibilityManager);
             sConnectionCache.put(connectionId, directAccessibilityConnection);
             sDirectConnectionCount++;
             // Do not use AccessibilityCache for this connection, since there is no corresponding

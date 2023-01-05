@@ -29,6 +29,7 @@ import android.view.accessibility.AccessibilityWindowAttributes;
 import android.view.accessibility.IWindowMagnificationConnection;
 import android.view.InputEvent;
 import android.view.IWindow;
+import android.view.MagnificationSpec;
 
 /**
  * Interface implemented by the AccessibilityManagerService called by
@@ -124,4 +125,10 @@ interface IAccessibilityManager {
     boolean startFlashNotificationSequence(String opPkg, int reason, IBinder token);
     boolean stopFlashNotificationSequence(String opPkg);
     boolean startFlashNotificationEvent(String opPkg, int reason, String reasonPkg);
+
+    parcelable WindowTransformationSpec {
+        float[] transformationMatrix;
+        MagnificationSpec magnificationSpec;
+    }
+    WindowTransformationSpec getWindowTransformationSpec(int windowId);
 }
