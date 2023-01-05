@@ -37,7 +37,7 @@ import com.android.internal.util.ArrayUtils;
 import com.android.server.LocalServices;
 
 import java.util.ArrayList;
-import java.util.Collection;
+import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
 
@@ -159,13 +159,21 @@ public class AppStateHelper {
         return false;
     }
 
-    private static boolean containsAny(Collection<String> list, Collection<String> which) {
-        if (list.isEmpty()) {
-            return false;
-        }
-        for (var element : which) {
-            if (list.contains(element)) {
+    /**
+     * True if {@code arr} contains any element in {@code which}.
+     * Both {@code arr} and {@code which} must be sorted in advance.
+     */
+    private static boolean containsAny(String[] arr, List<String> which) {
+        int s1 = arr.length;
+        int s2 = which.size();
+        for (int i = 0, j = 0; i < s1 && j < s2; ) {
+            int val = arr[i].compareTo(which.get(j));
+            if (val == 0) {
                 return true;
+            } else if (val < 0) {
+                ++i;
+            } else {
+                ++j;
             }
         }
         return false;
@@ -174,9 +182,9 @@ public class AppStateHelper {
     private void addLibraryDependency(ArraySet<String> results, List<String> libPackageNames) {
         var pmInternal = LocalServices.getService(PackageManagerInternal.class);
 
-        var libraryNames = new ArraySet<String>();
-        var staticSharedLibraryNames = new ArraySet<String>();
-        var sdkLibraryNames = new ArraySet<String>();
+        var libraryNames = new ArrayList<String>();
+        var staticSharedLibraryNames = new ArrayList<String>();
+        var sdkLibraryNames = new ArrayList<String>();
         for (var packageName : libPackageNames) {
             var pkg = pmInternal.getAndroidPackage(packageName);
             if (pkg == null) {
@@ -199,11 +207,19 @@ public class AppStateHelper {
             return;
         }
 
-        pmInternal.forEachPackage(pkg -> {
-            if (containsAny(pkg.getUsesLibraries(), libraryNames)
-                    || containsAny(pkg.getUsesOptionalLibraries(), libraryNames)
-                    || containsAny(pkg.getUsesStaticLibraries(), staticSharedLibraryNames)
-                    || containsAny(pkg.getUsesSdkLibraries(), sdkLibraryNames)) {
+        Collections.sort(libraryNames);
+        Collections.sort(sdkLibraryNames);
+        Collections.sort(staticSharedLibraryNames);
+
+        pmInternal.forEachPackageState(pkgState -> {
+            var pkg = pkgState.getPkg();
+            if (pkg == null) {
+                return;
+            }
+            if (containsAny(pkg.getUsesLibrariesSorted(), libraryNames)
+                    || containsAny(pkg.getUsesOptionalLibrariesSorted(), libraryNames)
+                    || containsAny(pkg.getUsesStaticLibrariesSorted(), staticSharedLibraryNames)
+                    || containsAny(pkg.getUsesSdkLibrariesSorted(), sdkLibraryNames)) {
                 results.add(pkg.getPackageName());
             }
         });

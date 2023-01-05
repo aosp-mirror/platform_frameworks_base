@@ -89,6 +89,10 @@ class AndroidPackageTest : ParcelableComponentTest(AndroidPackage::class, Packag
         "sortReceivers",
         "sortServices",
         "setAllComponentsDirectBootAware",
+        "getUsesLibrariesSorted",
+        "getUsesOptionalLibrariesSorted",
+        "getUsesSdkLibrariesSorted",
+        "getUsesStaticLibrariesSorted",
         // Tested through setting minor/major manually
         "setLongVersionCode",
         "getLongVersionCode",

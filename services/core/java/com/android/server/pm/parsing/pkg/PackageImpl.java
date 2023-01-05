@@ -93,6 +93,7 @@ import libcore.util.EmptyArray;
 import java.io.File;
 import java.security.PublicKey;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
@@ -403,6 +404,15 @@ public class PackageImpl implements ParsedPackage, AndroidPackageInternal,
     private int mLocaleConfigRes;
 
     private List<AndroidPackageSplit> mSplits;
+
+    @NonNull
+    private String[] mUsesLibrariesSorted;
+    @NonNull
+    private String[] mUsesOptionalLibrariesSorted;
+    @NonNull
+    private String[] mUsesSdkLibrariesSorted;
+    @NonNull
+    private String[] mUsesStaticLibrariesSorted;
 
     @NonNull
     public static PackageImpl forParsing(@NonNull String packageName, @NonNull String baseCodePath,
@@ -1379,6 +1389,19 @@ public class PackageImpl implements ParsedPackage, AndroidPackageInternal,
 
     @NonNull
     @Override
+    public String[] getUsesLibrariesSorted() {
+        if (mUsesLibrariesSorted == null) {
+            // Note lazy-sorting here doesn't break immutability because it always
+            // return the same content. In the case of multi-threading, data race in accessing
+            // mUsesLibrariesSorted might result in unnecessary creation of sorted copies
+            // which is OK because the case is quite rare.
+            mUsesLibrariesSorted = sortLibraries(usesLibraries);
+        }
+        return mUsesLibrariesSorted;
+    }
+
+    @NonNull
+    @Override
     public List<String> getUsesNativeLibraries() {
         return usesNativeLibraries;
     }
@@ -1387,6 +1410,15 @@ public class PackageImpl implements ParsedPackage, AndroidPackageInternal,
     @Override
     public List<String> getUsesOptionalLibraries() {
         return usesOptionalLibraries;
+    }
+
+    @NonNull
+    @Override
+    public String[] getUsesOptionalLibrariesSorted() {
+        if (mUsesOptionalLibrariesSorted == null) {
+            mUsesOptionalLibrariesSorted = sortLibraries(usesOptionalLibraries);
+        }
+        return mUsesOptionalLibrariesSorted;
     }
 
     @NonNull
@@ -1405,6 +1437,15 @@ public class PackageImpl implements ParsedPackage, AndroidPackageInternal,
     @Override
     public List<String> getUsesSdkLibraries() { return usesSdkLibraries; }
 
+    @NonNull
+    @Override
+    public String[] getUsesSdkLibrariesSorted() {
+        if (mUsesSdkLibrariesSorted == null) {
+            mUsesSdkLibrariesSorted = sortLibraries(usesSdkLibraries);
+        }
+        return mUsesSdkLibrariesSorted;
+    }
+
     @Nullable
     @Override
     public String[][] getUsesSdkLibrariesCertDigests() { return usesSdkLibrariesCertDigests; }
@@ -1417,6 +1458,15 @@ public class PackageImpl implements ParsedPackage, AndroidPackageInternal,
     @Override
     public List<String> getUsesStaticLibraries() {
         return usesStaticLibraries;
+    }
+
+    @NonNull
+    @Override
+    public String[] getUsesStaticLibrariesSorted() {
+        if (mUsesStaticLibrariesSorted == null) {
+            mUsesStaticLibrariesSorted = sortLibraries(usesStaticLibraries);
+        }
+        return mUsesStaticLibrariesSorted;
     }
 
     @Nullable
@@ -2648,6 +2698,16 @@ public class PackageImpl implements ParsedPackage, AndroidPackageInternal,
         assignDerivedFields2();
         makeImmutable();
         return this;
+    }
+
+    private static String[] sortLibraries(List<String> libraryNames) {
+        int size = libraryNames.size();
+        if (size == 0) {
+            return EmptyArray.STRING;
+        }
+        var arr = libraryNames.toArray(EmptyArray.STRING);
+        Arrays.sort(arr);
+        return arr;
     }
 
     private void assignDerivedFields2() {
