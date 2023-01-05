@@ -124,7 +124,7 @@ class KeyguardUnlockAnimationControllerTest : SysuiTestCase() {
 
         // Also expect we've immediately asked the keyguard view mediator to finish the remote
         // animation.
-        verify(keyguardViewMediator, times(1)).onKeyguardExitRemoteAnimationFinished(
+        verify(keyguardViewMediator, times(1)).exitKeyguardAndFinishSurfaceBehindRemoteAnimation(
             false /* cancelled */)
 
         verifyNoMoreInteractions(surfaceTransactionApplier)
@@ -144,7 +144,7 @@ class KeyguardUnlockAnimationControllerTest : SysuiTestCase() {
         )
 
         // Since the animation is running, we should not have finished the remote animation.
-        verify(keyguardViewMediator, times(0)).onKeyguardExitRemoteAnimationFinished(
+        verify(keyguardViewMediator, times(0)).exitKeyguardAndFinishSurfaceBehindRemoteAnimation(
             false /* cancelled */)
     }
 
@@ -272,7 +272,7 @@ class KeyguardUnlockAnimationControllerTest : SysuiTestCase() {
         assertTrue(remainingTargets.isEmpty())
 
         // Since the animation is running, we should not have finished the remote animation.
-        verify(keyguardViewMediator, times(0)).onKeyguardExitRemoteAnimationFinished(
+        verify(keyguardViewMediator, times(0)).exitKeyguardAndFinishSurfaceBehindRemoteAnimation(
                 false /* cancelled */)
     }
 }
