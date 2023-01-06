@@ -3383,6 +3383,11 @@ public class InputManagerService extends IInputManager.Stub
         public void removeKeyboardLayoutAssociation(@NonNull String inputPort) {
             InputManagerService.this.removeKeyboardLayoutAssociation(inputPort);
         }
+
+        @Override
+        public void setStylusButtonMotionEventsEnabled(boolean enabled) {
+            mNative.setStylusButtonMotionEventsEnabled(enabled);
+        }
     }
 
     @Override
