@@ -488,7 +488,8 @@ public class SmartReplyViewTest extends SysuiTestCase {
     private SmartReplyView.SmartReplies createSmartReplies(CharSequence[] choices,
             boolean fromAssistant) {
         PendingIntent pendingIntent =
-                PendingIntent.getBroadcast(mContext, 0, new Intent(TEST_ACTION),
+                PendingIntent.getBroadcast(mContext, 0,
+                        new Intent(TEST_ACTION).setPackage(mContext.getPackageName()),
                         PendingIntent.FLAG_MUTABLE);
         RemoteInput input = new RemoteInput.Builder(TEST_RESULT_KEY).setChoices(choices).build();
         return new SmartReplyView.SmartReplies(
@@ -505,7 +506,8 @@ public class SmartReplyViewTest extends SysuiTestCase {
 
     private Notification.Action createAction(String actionTitle) {
         PendingIntent pendingIntent = PendingIntent.getBroadcast(mContext, 0,
-                new Intent(TEST_ACTION), PendingIntent.FLAG_MUTABLE);
+                new Intent(TEST_ACTION).setPackage(mContext.getPackageName()),
+                PendingIntent.FLAG_MUTABLE);
         return new Notification.Action.Builder(mActionIcon, actionTitle, pendingIntent).build();
     }
 
