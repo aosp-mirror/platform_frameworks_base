@@ -18,6 +18,7 @@ package com.android.server.wm;
 
 import static com.android.server.wm.ActivityTaskManagerDebugConfig.TAG_ATM;
 import static com.android.server.wm.ActivityTaskManagerDebugConfig.TAG_WITH_CLASS_NAME;
+import static com.android.server.wm.LetterboxConfigurationDeviceConfig.KEY_ENABLE_DISPLAY_ROTATION_IMMERSIVE_APP_COMPAT_POLICY;
 
 import android.annotation.IntDef;
 import android.annotation.NonNull;
@@ -227,23 +228,35 @@ final class LetterboxConfiguration {
     // LetterboxUiController#shouldIgnoreRequestedOrientation for details.
     private final boolean mIsPolicyForIgnoringRequestedOrientationEnabled;
 
-    LetterboxConfiguration(Context systemUiContext) {
-        this(systemUiContext, new LetterboxConfigurationPersister(systemUiContext,
-                () -> readLetterboxHorizontalReachabilityPositionFromConfig(systemUiContext,
-                        /* forBookMode */ false),
-                () -> readLetterboxVerticalReachabilityPositionFromConfig(systemUiContext,
-                        /* forTabletopMode */ false),
-                () -> readLetterboxHorizontalReachabilityPositionFromConfig(systemUiContext,
-                        /* forBookMode */ true),
-                () -> readLetterboxVerticalReachabilityPositionFromConfig(systemUiContext,
-                        /* forTabletopMode */ true)
-        ));
+    // Whether enabling rotation compat policy for immersive apps that prevents auto rotation
+    // into non-optimal screen orientation while in fullscreen. This is needed because immersive
+    // apps, such as games, are often not optimized for all orientations and can have a poor UX
+    // when rotated. Additionally, some games rely on sensors for the gameplay so users can trigger
+    // such rotations accidentally when auto rotation is on.
+    private final boolean mIsDisplayRotationImmersiveAppCompatPolicyEnabled;
+
+    // Flags dynamically updated with {@link android.provider.DeviceConfig}.
+    @NonNull private final LetterboxConfigurationDeviceConfig mDeviceConfig;
+
+    LetterboxConfiguration(@NonNull final Context systemUiContext) {
+        this(systemUiContext,
+                new LetterboxConfigurationPersister(systemUiContext,
+                        () -> readLetterboxHorizontalReachabilityPositionFromConfig(
+                                systemUiContext, /* forBookMode */ false),
+                        () -> readLetterboxVerticalReachabilityPositionFromConfig(
+                                systemUiContext, /* forTabletopMode */ false),
+                        () -> readLetterboxHorizontalReachabilityPositionFromConfig(
+                                systemUiContext, /* forBookMode */ true),
+                        () -> readLetterboxVerticalReachabilityPositionFromConfig(
+                                systemUiContext, /* forTabletopMode */ true)));
     }
 
     @VisibleForTesting
-    LetterboxConfiguration(Context systemUiContext,
-            LetterboxConfigurationPersister letterboxConfigurationPersister) {
+    LetterboxConfiguration(@NonNull final Context systemUiContext,
+            @NonNull final LetterboxConfigurationPersister letterboxConfigurationPersister) {
         mContext = systemUiContext;
+        mDeviceConfig = new LetterboxConfigurationDeviceConfig(systemUiContext.getMainExecutor());
+
         mFixedOrientationLetterboxAspectRatio = mContext.getResources().getFloat(
                 R.dimen.config_fixedOrientationLetterboxAspectRatio);
         mLetterboxActivityCornersRadius = mContext.getResources().getInteger(
@@ -283,6 +296,12 @@ final class LetterboxConfiguration {
                 R.bool.config_isCompatFakeFocusEnabled);
         mIsPolicyForIgnoringRequestedOrientationEnabled = mContext.getResources().getBoolean(
                 R.bool.config_letterboxIsPolicyForIgnoringRequestedOrientationEnabled);
+
+        mIsDisplayRotationImmersiveAppCompatPolicyEnabled = mContext.getResources().getBoolean(
+                R.bool.config_letterboxIsDisplayRotationImmersiveAppCompatPolicyEnabled);
+        mDeviceConfig.updateFlagActiveStatus(
+                /* isActive */ mIsDisplayRotationImmersiveAppCompatPolicyEnabled,
+                /* key */ KEY_ENABLE_DISPLAY_ROTATION_IMMERSIVE_APP_COMPAT_POLICY);
 
         mLetterboxConfigurationPersister = letterboxConfigurationPersister;
         mLetterboxConfigurationPersister.start();
@@ -1103,6 +1122,22 @@ final class LetterboxConfiguration {
      */
     void resetCameraCompatRefreshCycleThroughStopEnabled() {
         mIsCameraCompatRefreshCycleThroughStopEnabled = true;
+    }
+
+    /**
+     * Checks whether rotation compat policy for immersive apps that prevents auto rotation
+     * into non-optimal screen orientation while in fullscreen is enabled.
+     *
+     * <p>This is needed because immersive apps, such as games, are often not optimized for all
+     * orientations and can have a poor UX when rotated. Additionally, some games rely on sensors
+     * for the gameplay so users can trigger such rotations accidentally when auto rotation is on.
+     *
+     * @param checkDeviceConfig whether should check both static config and a dynamic property
+     *        from {@link DeviceConfig} or only static value.
+     */
+    boolean isDisplayRotationImmersiveAppCompatPolicyEnabled(final boolean checkDeviceConfig) {
+        return mIsDisplayRotationImmersiveAppCompatPolicyEnabled && (!checkDeviceConfig
+                || mDeviceConfig.getFlag(KEY_ENABLE_DISPLAY_ROTATION_IMMERSIVE_APP_COMPAT_POLICY));
     }
 
 }
