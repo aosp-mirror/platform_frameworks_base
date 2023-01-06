@@ -66,7 +66,7 @@ public class A11yMenuViewPager {
         public static final int LARGE_GRID_COLUMN_COUNT = 2;
 
         /** Temporary measure to test both item types. */
-        private static final boolean USE_LARGE_ITEMS = true;
+        private static final boolean USE_LARGE_ITEMS = false;
 
         /**
          * Returns the number of items in the grid view.
