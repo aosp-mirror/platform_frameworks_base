@@ -347,15 +347,16 @@ public class NavigationBar extends ViewController<NavigationBarView> implements 
                 }
 
                 @Override
-                public void updateAssistantAvailable(boolean available) {
+                public void updateAssistantAvailable(boolean available,
+                        boolean longPressHomeEnabled) {
                     // TODO(b/198002034): Content observers currently can still be called back after
                     //  being unregistered, and in this case we can ignore the change if the nav bar
                     //  has been destroyed already
                     if (mView == null) {
                         return;
                     }
-                    mLongPressHomeEnabled = mNavBarHelper.getLongPressHomeEnabled();
-                    updateAssistantEntrypoints(available);
+                    mLongPressHomeEnabled = longPressHomeEnabled;
+                    updateAssistantEntrypoints(available, longPressHomeEnabled);
                 }
             };
 
@@ -1500,10 +1501,12 @@ public class NavigationBar extends ViewController<NavigationBarView> implements 
                 .commitUpdate(mDisplayId);
     }
 
-    private void updateAssistantEntrypoints(boolean assistantAvailable) {
+    private void updateAssistantEntrypoints(boolean assistantAvailable,
+            boolean longPressHomeEnabled) {
         if (mOverviewProxyService.getProxy() != null) {
             try {
-                mOverviewProxyService.getProxy().onAssistantAvailable(assistantAvailable);
+                mOverviewProxyService.getProxy().onAssistantAvailable(assistantAvailable,
+                        longPressHomeEnabled);
             } catch (RemoteException e) {
                 Log.w(TAG, "Unable to send assistant availability data to launcher");
             }
