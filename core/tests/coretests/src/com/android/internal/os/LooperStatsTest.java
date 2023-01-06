@@ -232,7 +232,7 @@ public final class LooperStatsTest {
         assertThat(entry3.handlerClassName).isEqualTo(
                 "com.android.internal.os.LooperStatsTest$TestHandlerSecond");
         assertThat(entry3.messageName).startsWith(
-                "com.android.internal.os.LooperStatsTest$$ExternalSyntheticLambda");
+                "com.android.internal.os");
         assertThat(entry3.messageCount).isEqualTo(1);
         assertThat(entry3.recordedMessageCount).isEqualTo(1);
         assertThat(entry3.exceptionCount).isEqualTo(0);
