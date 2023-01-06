@@ -74,7 +74,7 @@ public abstract class SegmentFinder {
     /**
      * The default {@link SegmentFinder} implementation based on given segment ranges.
      */
-    public static class DefaultSegmentFinder extends SegmentFinder {
+    public static class PrescribedSegmentFinder extends SegmentFinder {
         private final int[] mSegments;
 
         /**
@@ -87,7 +87,7 @@ public abstract class SegmentFinder {
          * @throws IllegalArgumentException if the given segments array's length is not even; the
          * given segments are not sorted or there are segments overlap with others.
          */
-        public DefaultSegmentFinder(@NonNull int[] segments) {
+        public PrescribedSegmentFinder(@NonNull int[] segments) {
             checkSegmentsValid(segments);
             mSegments = segments;
         }

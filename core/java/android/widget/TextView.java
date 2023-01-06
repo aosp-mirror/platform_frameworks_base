@@ -13245,7 +13245,7 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
      * Creates the {@link TextBoundsInfo} for the text lines that intersects with the {@code rectF}.
      * @hide
      */
-    public TextBoundsInfo getTextBoundsInfo(@NonNull RectF rectF) {
+    public TextBoundsInfo getTextBoundsInfo(@NonNull RectF bounds) {
         final Layout layout = getLayout();
         if (layout == null) {
             // No valid text layout, return null.
@@ -13268,19 +13268,18 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
         final float layoutLeft = viewportToContentHorizontalOffset();
         final float layoutTop = viewportToContentVerticalOffset();
 
-        final RectF localRectF = new RectF(rectF);
-        globalToLocalMatrix.mapRect(localRectF);
-        localRectF.offset(-layoutLeft, -layoutTop);
+        final RectF localBounds = new RectF(bounds);
+        globalToLocalMatrix.mapRect(localBounds);
+        localBounds.offset(-layoutLeft, -layoutTop);
 
         // Text length is 0. There is no character bounds, return empty TextBoundsInfo.
         // rectF doesn't intersect with the layout, return empty TextBoundsInfo.
-        if (!localRectF.intersects(0f, 0f, layout.getWidth(), layout.getHeight())
+        if (!localBounds.intersects(0f, 0f, layout.getWidth(), layout.getHeight())
                 || text.length() == 0) {
-            final TextBoundsInfo.Builder builder = new TextBoundsInfo.Builder();
+            final TextBoundsInfo.Builder builder = new TextBoundsInfo.Builder(0, 0);
             final SegmentFinder emptySegmentFinder =
-                    new SegmentFinder.DefaultSegmentFinder(new int[0]);
-            builder.setStartAndEnd(0, 0)
-                    .setMatrix(localToGlobalMatrix)
+                    new SegmentFinder.PrescribedSegmentFinder(new int[0]);
+            builder.setMatrix(localToGlobalMatrix)
                     .setCharacterBounds(new float[0])
                     .setCharacterBidiLevel(new int[0])
                     .setCharacterFlags(new int[0])
@@ -13290,8 +13289,8 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
             return  builder.build();
         }
 
-        final int startLine = layout.getLineForVertical((int) Math.floor(localRectF.top));
-        final int endLine = layout.getLineForVertical((int) Math.floor(localRectF.bottom));
+        final int startLine = layout.getLineForVertical((int) Math.floor(localBounds.top));
+        final int endLine = layout.getLineForVertical((int) Math.floor(localBounds.bottom));
         final int start = layout.getLineStart(startLine);
         final int end = layout.getLineEnd(endLine);
 
@@ -13349,18 +13348,18 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
             lineRanges[2 * offset] = layout.getLineStart(line);
             lineRanges[2 * offset + 1] = layout.getLineEnd(line);
         }
-        final SegmentFinder lineSegmentFinder = new SegmentFinder.DefaultSegmentFinder(lineRanges);
+        final SegmentFinder lineSegmentFinder =
+                new SegmentFinder.PrescribedSegmentFinder(lineRanges);
 
-        final TextBoundsInfo.Builder builder = new TextBoundsInfo.Builder();
-        builder.setStartAndEnd(start, end)
+        return new TextBoundsInfo.Builder(start, end)
                 .setMatrix(localToGlobalMatrix)
                 .setCharacterBounds(characterBounds)
                 .setCharacterBidiLevel(characterBidiLevels)
                 .setCharacterFlags(characterFlags)
                 .setGraphemeSegmentFinder(graphemeSegmentFinder)
                 .setLineSegmentFinder(lineSegmentFinder)
-                .setWordSegmentFinder(wordSegmentFinder);
-        return  builder.build();
+                .setWordSegmentFinder(wordSegmentFinder)
+                .build();
     }
 
     /**

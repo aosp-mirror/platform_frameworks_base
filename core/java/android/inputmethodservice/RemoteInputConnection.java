@@ -476,9 +476,9 @@ final class RemoteInputConnection implements InputConnection {
 
     @AnyThread
     public void requestTextBoundsInfo(
-            @NonNull RectF rectF, @NonNull @CallbackExecutor Executor executor,
+            @NonNull RectF bounds, @NonNull @CallbackExecutor Executor executor,
             @NonNull Consumer<TextBoundsInfoResult> consumer) {
-        mInvoker.requestTextBoundsInfo(rectF, executor, consumer);
+        mInvoker.requestTextBoundsInfo(bounds, executor, consumer);
     }
 
     @AnyThread

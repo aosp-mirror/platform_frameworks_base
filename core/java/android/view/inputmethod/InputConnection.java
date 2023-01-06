@@ -1262,13 +1262,13 @@ public interface InputConnection {
 
     /**
      * Called by input method to request the {@link TextBoundsInfo} for a range of text which is
-     * covered by or in vicinity of the given {@code RectF}. It can be used as a supplementary
+     * covered by or in vicinity of the given {@code bounds}. It can be used as a supplementary
      * method to implement the handwriting gesture API -
      * {@link #performHandwritingGesture(HandwritingGesture, Executor, IntConsumer)}.
      *
      * <p><strong>Editor authors</strong>: It's preferred that the editor returns a
      * {@link TextBoundsInfo} of all the text lines whose bounds intersect with the given
-     * {@code rectF}.
+     * {@code bounds}.
      * </p>
      *
      * <p><strong>IME authors</strong>: This method is expensive when the text is long. Please
@@ -1276,7 +1276,7 @@ public interface InputConnection {
      * consuming. It's preferable to only request text bounds in smaller areas.
      * </p>
      *
-     * @param rectF the interested area where the text bounds are requested, in the screen
+     * @param bounds the interested area where the text bounds are requested, in the screen
      *              coordinates.
      * @param executor the executor to run the callback.
      * @param consumer the callback invoked by editor to return the result. It must return a
@@ -1286,7 +1286,7 @@ public interface InputConnection {
      * @see android.view.inputmethod.TextBoundsInfoResult
      */
     default void requestTextBoundsInfo(
-            @NonNull RectF rectF, @NonNull @CallbackExecutor Executor executor,
+            @NonNull RectF bounds, @NonNull @CallbackExecutor Executor executor,
             @NonNull Consumer<TextBoundsInfoResult> consumer) {
         Objects.requireNonNull(executor);
         Objects.requireNonNull(consumer);
