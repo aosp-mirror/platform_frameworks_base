@@ -24,6 +24,7 @@ import static android.service.notification.NotificationListenerService.REASON_AP
 import static android.service.notification.NotificationListenerService.REASON_GROUP_SUMMARY_CANCELED;
 
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.spyOn;
+import static com.android.wm.shell.bubbles.Bubble.KEY_APP_BUBBLE;
 
 import static com.google.common.truth.Truth.assertThat;
 
@@ -227,6 +228,8 @@ public class BubblesTest extends SysuiTestCase {
     private BubbleEntry mBubbleEntryUser11;
     private BubbleEntry mBubbleEntry2User11;
 
+    private Intent mAppBubbleIntent;
+
     @Mock
     private ShellInit mShellInit;
     @Mock
@@ -318,6 +321,9 @@ public class BubblesTest extends SysuiTestCase {
                 mNotificationTestHelper.createBubble(handle));
         mBubbleEntry2User11 = BubblesManager.notifToBubbleEntry(
                 mNotificationTestHelper.createBubble(handle));
+
+        mAppBubbleIntent = new Intent(mContext, BubblesTestActivity.class);
+        mAppBubbleIntent.setPackage(mContext.getPackageName());
 
         mZenModeConfig.suppressedVisualEffects = 0;
         when(mZenModeController.getConfig()).thenReturn(mZenModeConfig);
@@ -1624,6 +1630,62 @@ public class BubblesTest extends SysuiTestCase {
         // Check that it wasn't inflated (1 because it would've been inflated via onEntryAdded)
         verify(mBubbleController, times(1)).inflateAndAdd(
                 any(Bubble.class), anyBoolean(), anyBoolean());
+    }
+
+    @Test
+    public void testShowOrHideAppBubble_addsAndExpand() {
+        assertThat(mBubbleController.isStackExpanded()).isFalse();
+        assertThat(mBubbleData.getBubbleInStackWithKey(KEY_APP_BUBBLE)).isNull();
+
+        mBubbleController.showOrHideAppBubble(mAppBubbleIntent);
+
+        verify(mBubbleController).inflateAndAdd(any(Bubble.class), /* suppressFlyout= */ eq(true),
+                /* showInShade= */ eq(false));
+        assertThat(mBubbleData.getSelectedBubble().getKey()).isEqualTo(KEY_APP_BUBBLE);
+        assertThat(mBubbleController.isStackExpanded()).isTrue();
+    }
+
+    @Test
+    public void testShowOrHideAppBubble_expandIfCollapsed() {
+        mBubbleController.showOrHideAppBubble(mAppBubbleIntent);
+        mBubbleController.updateBubble(mBubbleEntry);
+        mBubbleController.collapseStack();
+        assertThat(mBubbleController.isStackExpanded()).isFalse();
+
+        // Calling this while collapsed will expand the app bubble
+        mBubbleController.showOrHideAppBubble(mAppBubbleIntent);
+
+        assertThat(mBubbleData.getSelectedBubble().getKey()).isEqualTo(KEY_APP_BUBBLE);
+        assertThat(mBubbleController.isStackExpanded()).isTrue();
+        assertThat(mBubbleData.getBubbles().size()).isEqualTo(2);
+    }
+
+    @Test
+    public void testShowOrHideAppBubble_collapseIfSelected() {
+        mBubbleController.showOrHideAppBubble(mAppBubbleIntent);
+        assertThat(mBubbleData.getSelectedBubble().getKey()).isEqualTo(KEY_APP_BUBBLE);
+        assertThat(mBubbleController.isStackExpanded()).isTrue();
+
+        // Calling this while the app bubble is expanded should collapse the stack
+        mBubbleController.showOrHideAppBubble(mAppBubbleIntent);
+
+        assertThat(mBubbleData.getSelectedBubble().getKey()).isEqualTo(KEY_APP_BUBBLE);
+        assertThat(mBubbleController.isStackExpanded()).isFalse();
+        assertThat(mBubbleData.getBubbles().size()).isEqualTo(1);
+    }
+
+    @Test
+    public void testShowOrHideAppBubble_selectIfNotSelected() {
+        mBubbleController.showOrHideAppBubble(mAppBubbleIntent);
+        mBubbleController.updateBubble(mBubbleEntry);
+        mBubbleController.expandStackAndSelectBubble(mBubbleEntry);
+        assertThat(mBubbleData.getSelectedBubble().getKey()).isEqualTo(mBubbleEntry.getKey());
+        assertThat(mBubbleController.isStackExpanded()).isTrue();
+
+        mBubbleController.showOrHideAppBubble(mAppBubbleIntent);
+        assertThat(mBubbleData.getSelectedBubble().getKey()).isEqualTo(KEY_APP_BUBBLE);
+        assertThat(mBubbleController.isStackExpanded()).isTrue();
+        assertThat(mBubbleData.getBubbles().size()).isEqualTo(2);
     }
 
     /** Creates a bubble using the userId and package. */
