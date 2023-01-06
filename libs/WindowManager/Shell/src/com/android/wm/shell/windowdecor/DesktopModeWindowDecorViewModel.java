@@ -153,12 +153,11 @@ public class DesktopModeWindowDecorViewModel implements WindowDecorViewModel {
     @Override
     public void onTaskInfoChanged(RunningTaskInfo taskInfo) {
         final DesktopModeWindowDecoration decoration = mWindowDecorByTaskId.get(taskInfo.taskId);
-
         if (decoration == null) return;
+        final RunningTaskInfo oldTaskInfo = decoration.mTaskInfo;
 
-        int oldDisplayId = decoration.mDisplay.getDisplayId();
-        if (taskInfo.displayId != oldDisplayId) {
-            removeTaskFromEventReceiver(oldDisplayId);
+        if (taskInfo.displayId != oldTaskInfo.displayId) {
+            removeTaskFromEventReceiver(oldTaskInfo.displayId);
             incrementEventReceiverTasks(taskInfo.displayId);
         }
 

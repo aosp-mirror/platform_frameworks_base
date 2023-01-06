@@ -129,11 +129,11 @@ public class FreeformTaskListener implements ShellTaskOrganizer.TaskListener,
     @Override
     public void onTaskInfoChanged(RunningTaskInfo taskInfo) {
         final State state = mTasks.get(taskInfo.taskId);
-        state.mTaskInfo = taskInfo;
+
         ProtoLog.v(ShellProtoLogGroup.WM_SHELL_TASK_ORG, "Freeform Task Info Changed: #%d",
                 taskInfo.taskId);
-        mWindowDecorationViewModel.onTaskInfoChanged(state.mTaskInfo);
-
+        mWindowDecorationViewModel.onTaskInfoChanged(taskInfo);
+        state.mTaskInfo = taskInfo;
         if (DesktopModeStatus.isAnyEnabled()) {
             mDesktopModeTaskRepository.ifPresent(repository -> {
                 if (taskInfo.isVisible) {

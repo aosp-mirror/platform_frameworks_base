@@ -123,10 +123,11 @@ public class FullscreenTaskListener implements ShellTaskOrganizer.TaskListener {
     public void onTaskInfoChanged(RunningTaskInfo taskInfo) {
         final State state = mTasks.get(taskInfo.taskId);
         final Point oldPositionInParent = state.mTaskInfo.positionInParent;
-        state.mTaskInfo = taskInfo;
+
         if (mWindowDecorViewModelOptional.isPresent()) {
-            mWindowDecorViewModelOptional.get().onTaskInfoChanged(state.mTaskInfo);
+            mWindowDecorViewModelOptional.get().onTaskInfoChanged(taskInfo);
         }
+        state.mTaskInfo = taskInfo;
         if (Transitions.ENABLE_SHELL_TRANSITIONS) return;
         updateRecentsForVisibleFullscreenTask(taskInfo);
 
