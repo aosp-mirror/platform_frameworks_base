@@ -95,6 +95,9 @@ public class TvPipActionProviderTest extends ShellTestCase {
 
     @Before
     public void setUp() {
+        if (!isTelevision()) {
+            return;
+        }
         MockitoAnnotations.initMocks(this);
         mActionsProvider = new TvPipActionsProvider(mContext, mMockPipMediaController,
                 mMockSystemActionsHandler);
