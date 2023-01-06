@@ -558,7 +558,7 @@
     <string name="permdesc_requestPasswordComplexity" msgid="1130556896836258567">"ఇది మీ స్క్రీన్ లాక్ పాస్‌వర్డ్‌ సంక్లిష్టత స్థాయి (తీవ్రంగా ఉండాలా, ఓ మోస్తరుగా ఉండాలా, తక్కువ తీవ్రంగా ఉండాలా లేదా అస్సలు తీవ్రత ఉండకూడదా) తెలుసుకోవడానికి యాప్‌ను అనుమతిస్తుంది, అంటే పొడుగు ఎంత ఉండాలి, ఏ రకమైన స్క్రీన్ లాక్ పధ్ధతి అనుసరించాలో సూచిస్తుంది. అలాగే, స్క్రీన్ లాక్‌ పాస్‌వర్డ్‌ సంక్లిష్టతను ఏ స్థాయికి సెట్ చేసుకుంటే బాగుంటుందో కూడా వినియోగదారులకు యాప్ సూచించగలదు, కానీ వినియోగదారులు నిరభ్యంతరంగా ఆ సూచనలను పట్టించుకోకుండా వారి ఇష్టం మేరకు చక్కగా సెట్ చేసుకోవచ్చు. ఇంకో ముఖ్య విషయం, స్క్రీన్ లాక్‌ అన్నది సాదా వచన రూపంలో నిల్వ చేయబడదు, కనుక ఖచ్చితమైన పాస్‌వర్డ్‌ ఏమిటనేది యాప్‌కు తెలియదు."</string>
     <string name="permlab_postNotification" msgid="4875401198597803658">"నోటిఫికేషన్‌లను చూపండి"</string>
     <string name="permdesc_postNotification" msgid="5974977162462877075">"నోటిఫికేషన్‌లను చూపించడానికి యాప్‌ను అనుమతించండి"</string>
-    <string name="permlab_useBiometric" msgid="6314741124749633786">"బయోమెట్రిక్ హార్డ్‌వేర్‌ని ఉపయోగించు"</string>
+    <string name="permlab_useBiometric" msgid="6314741124749633786">"బయోమెట్రిక్ హార్డ్‌వేర్‌ని ఉపయోగించండి"</string>
     <string name="permdesc_useBiometric" msgid="7502858732677143410">"ప్రమాణీకరణ కోసం బయోమెట్రిక్ హార్డ్‌వేర్‌ను ఉపయోగించడానికి యాప్‌ని అనుమతిస్తుంది"</string>
     <string name="permlab_manageFingerprint" msgid="7432667156322821178">"వేలిముద్ర హార్డ్‌వేర్‌ని మేనేజ్ చేయడానికి అనుమతి"</string>
     <string name="permdesc_manageFingerprint" msgid="2025616816437339865">"వినియోగం కోసం వేలిముద్ర టెంప్లేట్‌లను జోడించే, తొలగించే పద్ధతులను అమలు చేయడానికి యాప్‌ను అనుమతిస్తుంది."</string>
@@ -1509,8 +1509,8 @@
     <string name="share" msgid="4157615043345227321">"షేర్"</string>
     <string name="find" msgid="5015737188624767706">"కనుగొనండి"</string>
     <string name="websearch" msgid="5624340204512793290">"వెబ్ సెర్చ్"</string>
-    <string name="find_next" msgid="5341217051549648153">"తదుపరిదాన్ని కనుగొను"</string>
-    <string name="find_previous" msgid="4405898398141275532">"మునుపటిదాన్ని కనుగొను"</string>
+    <string name="find_next" msgid="5341217051549648153">"తదుపరిదాన్ని కనుగొనండి"</string>
+    <string name="find_previous" msgid="4405898398141275532">"మునుపటిదాన్ని కనుగొనండి"</string>
     <string name="gpsNotifTicker" msgid="3207361857637620780">"<xliff:g id="NAME">%s</xliff:g> నుండి లొకేషన్ రిక్వెస్ట్‌"</string>
     <string name="gpsNotifTitle" msgid="1590033371665669570">"లొకేషన్ రిక్వెస్ట్‌"</string>
     <string name="gpsNotifMessage" msgid="7346649122793758032">"<xliff:g id="NAME">%1$s</xliff:g> (<xliff:g id="SERVICE">%2$s</xliff:g>) ద్వారా రిక్వెస్ట్ చేయబడింది"</string>
@@ -1695,7 +1695,7 @@
     <string name="edit_accessibility_shortcut_menu_button" msgid="8885752738733772935">"షార్ట్‌కట్‌లను ఎడిట్ చేయండి"</string>
     <string name="done_accessibility_shortcut_menu_button" msgid="3668407723770815708">"పూర్తయింది"</string>
     <string name="disable_accessibility_shortcut" msgid="5806091378745232383">"షార్ట్‌కట్‌ను ఆఫ్ చేయి"</string>
-    <string name="leave_accessibility_shortcut_on" msgid="6543362062336990814">"షార్ట్‌కట్‌ను ఉపయోగించు"</string>
+    <string name="leave_accessibility_shortcut_on" msgid="6543362062336990814">"షార్ట్‌కట్‌ను ఉపయోగించండి"</string>
     <string name="color_inversion_feature_name" msgid="326050048927789012">"కలర్ మార్పిడి"</string>
     <string name="color_correction_feature_name" msgid="3655077237805422597">"కలర్ కరెక్షన్"</string>
     <string name="one_handed_mode_feature_name" msgid="2334330034828094891">"వన్-హ్యాండెడ్ మోడ్"</string>
@@ -2001,7 +2001,7 @@
     <string name="autofill_update_title_with_type" msgid="5264152633488495704">"<xliff:g id="TYPE">%1$s</xliff:g>ని "<b>"<xliff:g id="LABEL">%2$s</xliff:g>"</b>"లో అప్‌డేట్ చేయాలా?"</string>
     <string name="autofill_update_title_with_2types" msgid="1797514386321086273">"<xliff:g id="TYPE_0">%1$s</xliff:g> మరియు <xliff:g id="TYPE_1">%2$s</xliff:g>ని "<b>"<xliff:g id="LABEL">%3$s</xliff:g>"</b>"లో అప్‌డేట్ చేయాలా?"</string>
     <string name="autofill_update_title_with_3types" msgid="1312232153076212291">"ఈ అంశాలను "<b>"<xliff:g id="LABEL">%4$s</xliff:g>"</b>"లో అప్‌డేట్ చేయాలా: <xliff:g id="TYPE_0">%1$s</xliff:g>, <xliff:g id="TYPE_1">%2$s</xliff:g> మరియు <xliff:g id="TYPE_2">%3$s</xliff:g> ?"</string>
-    <string name="autofill_save_yes" msgid="8035743017382012850">"సేవ్ చేయి"</string>
+    <string name="autofill_save_yes" msgid="8035743017382012850">"సేవ్ చేయండి"</string>
     <string name="autofill_save_no" msgid="9212826374207023544">"వద్దు, ధన్యవాదాలు"</string>
     <string name="autofill_save_notnow" msgid="2853932672029024195">"ఇప్పుడు కాదు"</string>
     <string name="autofill_save_never" msgid="6821841919831402526">"ఎప్పుడూ వద్దు"</string>
@@ -2146,8 +2146,8 @@
     <string name="resolver_no_personal_apps_available" msgid="6284837227019594881">"వ్యక్తిగత యాప్‌లు లేవు"</string>
     <string name="miniresolver_open_in_personal" msgid="3874522693661065566">"<xliff:g id="APP">%s</xliff:g>ను మీ వ్యక్తిగత ప్రొఫైల్‌లో తెరవాలా?"</string>
     <string name="miniresolver_open_in_work" msgid="4415223793669536559">"<xliff:g id="APP">%s</xliff:g>ను మీ వర్క్ ప్రొఫైల్‌లో తెరవాలా?"</string>
-    <string name="miniresolver_use_personal_browser" msgid="776072682871133308">"వ్యక్తిగత బ్రౌజర్‌ను ఉపయోగించు"</string>
-    <string name="miniresolver_use_work_browser" msgid="543575306251952994">"వర్క్ బ్రౌజర్‌ను ఉపయోగించు"</string>
+    <string name="miniresolver_use_personal_browser" msgid="776072682871133308">"వ్యక్తిగత బ్రౌజర్‌ను ఉపయోగించండి"</string>
+    <string name="miniresolver_use_work_browser" msgid="543575306251952994">"వర్క్ బ్రౌజర్‌ను ఉపయోగించండి"</string>
     <string name="PERSOSUBSTATE_SIM_NETWORK_ENTRY" msgid="8050953231914637819">"SIM నెట్‌వర్క్ అన్‌లాక్ పిన్‌"</string>
     <string name="PERSOSUBSTATE_SIM_NETWORK_SUBSET_ENTRY" msgid="7164399703751688214">"SIM నెట్‌వర్క్ సబ్‌సెట్ అన్‌లాక్ పిన్"</string>
     <string name="PERSOSUBSTATE_SIM_CORPORATE_ENTRY" msgid="4447629474818217364">"SIM కార్పొరేట్ అన్‌లాక్ పిన్"</string>
