@@ -210,6 +210,15 @@ public class LocalMediaManager implements BluetoothCallback {
     }
 
     /**
+     * Returns if media app establishes a preferred route listing order.
+     *
+     * @return True if route list ordering exist and not using system ordering, false otherwise.
+     */
+    public boolean isPreferenceRouteListingExist() {
+        return mInfoMediaManager.preferRouteListingOrdering();
+    }
+
+    /**
      * Start scan connected MediaDevice
      */
     public void startScan() {
