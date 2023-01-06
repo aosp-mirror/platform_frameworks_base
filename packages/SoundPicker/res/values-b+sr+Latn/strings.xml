@@ -16,14 +16,14 @@
 
 <resources xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
-    <string name="ringtone_default" msgid="798836092118824500">"Подразумевани звук звона"</string>
-    <string name="notification_sound_default" msgid="8133121186242636840">"Подразумевани звук обавештења"</string>
-    <string name="alarm_sound_default" msgid="4787646764557462649">"Подразумевани звук аларма"</string>
-    <string name="add_ringtone_text" msgid="6642389991738337529">"Додај мелодију звона"</string>
-    <string name="add_alarm_text" msgid="3545497316166999225">"Додајте аларм"</string>
-    <string name="add_notification_text" msgid="4431129543300614788">"Додајте обавештење"</string>
-    <string name="delete_ringtone_text" msgid="201443984070732499">"Избриши"</string>
-    <string name="unable_to_add_ringtone" msgid="4583511263449467326">"Додавање прилагођене мелодије звона није успело"</string>
-    <string name="unable_to_delete_ringtone" msgid="6792301380142859496">"Брисање прилагођене мелодије звона није успело"</string>
-    <string name="app_label" msgid="3091611356093417332">"Звукови"</string>
+    <string name="ringtone_default" msgid="798836092118824500">"Podrazumevani zvuk zvona"</string>
+    <string name="notification_sound_default" msgid="8133121186242636840">"Podrazumevani zvuk obaveštenja"</string>
+    <string name="alarm_sound_default" msgid="4787646764557462649">"Podrazumevani zvuk alarma"</string>
+    <string name="add_ringtone_text" msgid="6642389991738337529">"Dodaj melodiju zvona"</string>
+    <string name="add_alarm_text" msgid="3545497316166999225">"Dodajte alarm"</string>
+    <string name="add_notification_text" msgid="4431129543300614788">"Dodajte obaveštenje"</string>
+    <string name="delete_ringtone_text" msgid="201443984070732499">"Izbriši"</string>
+    <string name="unable_to_add_ringtone" msgid="4583511263449467326">"Dodavanje prilagođene melodije zvona nije uspelo"</string>
+    <string name="unable_to_delete_ringtone" msgid="6792301380142859496">"Brisanje prilagođene melodije zvona nije uspelo"</string>
+    <string name="app_label" msgid="3091611356093417332">"Zvukovi"</string>
 </resources>
