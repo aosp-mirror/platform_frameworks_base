@@ -110,6 +110,28 @@ class SinglePointerTouchProcessorTest(val testCase: TestCase) : SysuiTestCase() 
                         expectedInteractionEvent = InteractionEvent.UP,
                         expectedPointerOnSensorId = INVALID_POINTER_ID,
                     ),
+                    // MotionEvent.ACTION_HOVER_ENTER
+                    genPositiveTestCases(
+                        motionEventAction = MotionEvent.ACTION_HOVER_ENTER,
+                        previousPointerOnSensorId = INVALID_POINTER_ID,
+                        currentPointers = listOf(TestPointer(id = POINTER_ID_1, onSensor = true)),
+                        expectedInteractionEvent = InteractionEvent.DOWN,
+                        expectedPointerOnSensorId = POINTER_ID_1,
+                    ),
+                    genPositiveTestCases(
+                        motionEventAction = MotionEvent.ACTION_HOVER_ENTER,
+                        previousPointerOnSensorId = INVALID_POINTER_ID,
+                        currentPointers = listOf(TestPointer(id = POINTER_ID_1, onSensor = false)),
+                        expectedInteractionEvent = InteractionEvent.UNCHANGED,
+                        expectedPointerOnSensorId = INVALID_POINTER_ID,
+                    ),
+                    genPositiveTestCases(
+                        motionEventAction = MotionEvent.ACTION_HOVER_ENTER,
+                        previousPointerOnSensorId = POINTER_ID_1,
+                        currentPointers = listOf(TestPointer(id = POINTER_ID_1, onSensor = false)),
+                        expectedInteractionEvent = InteractionEvent.UP,
+                        expectedPointerOnSensorId = INVALID_POINTER_ID,
+                    ),
                     // MotionEvent.ACTION_MOVE
                     genPositiveTestCases(
                         motionEventAction = MotionEvent.ACTION_MOVE,
@@ -161,6 +183,35 @@ class SinglePointerTouchProcessorTest(val testCase: TestCase) : SysuiTestCase() 
                         expectedInteractionEvent = InteractionEvent.UNCHANGED,
                         expectedPointerOnSensorId = POINTER_ID_2,
                     ),
+                    // MotionEvent.ACTION_HOVER_MOVE
+                    genPositiveTestCases(
+                        motionEventAction = MotionEvent.ACTION_HOVER_MOVE,
+                        previousPointerOnSensorId = INVALID_POINTER_ID,
+                        currentPointers = listOf(TestPointer(id = POINTER_ID_1, onSensor = true)),
+                        expectedInteractionEvent = InteractionEvent.DOWN,
+                        expectedPointerOnSensorId = POINTER_ID_1,
+                    ),
+                    genPositiveTestCases(
+                        motionEventAction = MotionEvent.ACTION_HOVER_MOVE,
+                        previousPointerOnSensorId = POINTER_ID_1,
+                        currentPointers = listOf(TestPointer(id = POINTER_ID_1, onSensor = true)),
+                        expectedInteractionEvent = InteractionEvent.UNCHANGED,
+                        expectedPointerOnSensorId = POINTER_ID_1,
+                    ),
+                    genPositiveTestCases(
+                        motionEventAction = MotionEvent.ACTION_HOVER_MOVE,
+                        previousPointerOnSensorId = INVALID_POINTER_ID,
+                        currentPointers = listOf(TestPointer(id = POINTER_ID_1, onSensor = false)),
+                        expectedInteractionEvent = InteractionEvent.UNCHANGED,
+                        expectedPointerOnSensorId = INVALID_POINTER_ID,
+                    ),
+                    genPositiveTestCases(
+                        motionEventAction = MotionEvent.ACTION_HOVER_MOVE,
+                        previousPointerOnSensorId = POINTER_ID_1,
+                        currentPointers = listOf(TestPointer(id = POINTER_ID_1, onSensor = false)),
+                        expectedInteractionEvent = InteractionEvent.UP,
+                        expectedPointerOnSensorId = INVALID_POINTER_ID,
+                    ),
                     // MotionEvent.ACTION_UP
                     genPositiveTestCases(
                         motionEventAction = MotionEvent.ACTION_UP,
@@ -178,6 +229,28 @@ class SinglePointerTouchProcessorTest(val testCase: TestCase) : SysuiTestCase() 
                     ),
                     genPositiveTestCases(
                         motionEventAction = MotionEvent.ACTION_UP,
+                        previousPointerOnSensorId = INVALID_POINTER_ID,
+                        currentPointers = listOf(TestPointer(id = POINTER_ID_1, onSensor = false)),
+                        expectedInteractionEvent = InteractionEvent.UNCHANGED,
+                        expectedPointerOnSensorId = INVALID_POINTER_ID,
+                    ),
+                    // MotionEvent.ACTION_HOVER_EXIT
+                    genPositiveTestCases(
+                        motionEventAction = MotionEvent.ACTION_HOVER_EXIT,
+                        previousPointerOnSensorId = INVALID_POINTER_ID,
+                        currentPointers = listOf(TestPointer(id = POINTER_ID_1, onSensor = true)),
+                        expectedInteractionEvent = InteractionEvent.UP,
+                        expectedPointerOnSensorId = INVALID_POINTER_ID,
+                    ),
+                    genPositiveTestCases(
+                        motionEventAction = MotionEvent.ACTION_HOVER_EXIT,
+                        previousPointerOnSensorId = POINTER_ID_1,
+                        currentPointers = listOf(TestPointer(id = POINTER_ID_1, onSensor = true)),
+                        expectedInteractionEvent = InteractionEvent.UP,
+                        expectedPointerOnSensorId = INVALID_POINTER_ID,
+                    ),
+                    genPositiveTestCases(
+                        motionEventAction = MotionEvent.ACTION_HOVER_EXIT,
                         previousPointerOnSensorId = INVALID_POINTER_ID,
                         currentPointers = listOf(TestPointer(id = POINTER_ID_1, onSensor = false)),
                         expectedInteractionEvent = InteractionEvent.UNCHANGED,
@@ -315,13 +388,7 @@ class SinglePointerTouchProcessorTest(val testCase: TestCase) : SysuiTestCase() 
                         expectedPointerOnSensorId = POINTER_ID_2
                     )
                 )
-                .flatten() +
-                listOf(
-                        genTestCasesForUnsupportedAction(MotionEvent.ACTION_HOVER_ENTER),
-                        genTestCasesForUnsupportedAction(MotionEvent.ACTION_HOVER_MOVE),
-                        genTestCasesForUnsupportedAction(MotionEvent.ACTION_HOVER_EXIT)
-                    )
-                    .flatten()
+                .flatten()
     }
 }
 
