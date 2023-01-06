@@ -41,8 +41,8 @@ public final class HearingAidStatsLogUtils {
     }
 
     /**
-     * Logs hearing aid device information to westworld, including device mode, device side, and
-     * entry page id where the binding(connecting) process starts.
+     * Logs hearing aid device information to statsd, including device mode, device side, and entry
+     * page id where the binding(connecting) process starts.
      *
      * Only logs the info once after hearing aid is bonded(connected). Clears the map entry of this
      * device when logging is completed.

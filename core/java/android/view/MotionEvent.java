@@ -1491,11 +1491,23 @@ public final class MotionEvent extends InputEvent implements Parcelable {
      */
     public static final int CLASSIFICATION_TWO_FINGER_SWIPE = 3;
 
+    /**
+     * Classification constant: multi-finger swipe.
+     *
+     * The current event stream represents the user swiping with three or more fingers on a
+     * touchpad. Unlike two-finger swipes, these are only to be handled by the system UI, which is
+     * why they have a separate constant from two-finger swipes.
+     *
+     * @see #getClassification
+     * @hide
+     */
+    public static final int CLASSIFICATION_MULTI_FINGER_SWIPE = 4;
+
     /** @hide */
     @Retention(SOURCE)
     @IntDef(prefix = { "CLASSIFICATION" }, value = {
             CLASSIFICATION_NONE, CLASSIFICATION_AMBIGUOUS_GESTURE, CLASSIFICATION_DEEP_PRESS,
-            CLASSIFICATION_TWO_FINGER_SWIPE})
+            CLASSIFICATION_TWO_FINGER_SWIPE, CLASSIFICATION_MULTI_FINGER_SWIPE})
     public @interface Classification {};
 
     /**
@@ -3941,7 +3953,8 @@ public final class MotionEvent extends InputEvent implements Parcelable {
                 return "DEEP_PRESS";
             case CLASSIFICATION_TWO_FINGER_SWIPE:
                 return "TWO_FINGER_SWIPE";
-
+            case CLASSIFICATION_MULTI_FINGER_SWIPE:
+                return "MULTI_FINGER_SWIPE";
         }
         return "UNKNOWN";
     }

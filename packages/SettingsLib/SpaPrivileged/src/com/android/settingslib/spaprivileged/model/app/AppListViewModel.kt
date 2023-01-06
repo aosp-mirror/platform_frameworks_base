@@ -25,9 +25,11 @@ import androidx.lifecycle.viewModelScope
 import com.android.settingslib.spa.framework.util.StateFlowBridge
 import com.android.settingslib.spa.framework.util.asyncMapItem
 import com.android.settingslib.spa.framework.util.waitFirst
+import com.android.settingslib.spa.widget.ui.SpinnerOption
 import java.util.concurrent.ConcurrentHashMap
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.combine
@@ -48,6 +50,12 @@ internal data class AppListData<T : AppRecord>(
         AppListData(appEntries.filter(predicate), option)
 }
 
+internal interface IAppListViewModel<T : AppRecord> {
+    val option: StateFlowBridge<Int?>
+    val spinnerOptionsFlow: Flow<List<SpinnerOption>>
+    val appListDataFlow: Flow<AppListData<T>>
+}
+
 internal class AppListViewModel<T : AppRecord>(
     application: Application,
 ) : AppListViewModelImpl<T>(application)
@@ -57,11 +65,11 @@ internal open class AppListViewModelImpl<T : AppRecord>(
     application: Application,
     appListRepositoryFactory: (Context) -> AppListRepository = ::AppListRepositoryImpl,
     appRepositoryFactory: (Context) -> AppRepository = ::AppRepositoryImpl,
-) : AndroidViewModel(application) {
+) : AndroidViewModel(application), IAppListViewModel<T> {
     val appListConfig = StateFlowBridge<AppListConfig>()
     val listModel = StateFlowBridge<AppListModel<T>>()
     val showSystem = StateFlowBridge<Boolean>()
-    val option = StateFlowBridge<Int>()
+    final override val option = StateFlowBridge<Int?>()
     val searchQuery = StateFlowBridge<String>()
 
     private val appListRepository = appListRepositoryFactory(application)
@@ -84,7 +92,12 @@ internal open class AppListViewModelImpl<T : AppRecord>(
                 recordList.filter { showAppPredicate(it.app) }
             }
 
-    val appListDataFlow = option.flow.flatMapLatest(::filterAndSort)
+    override val spinnerOptionsFlow =
+        recordListFlow.combine(listModel.flow) { recordList, listModel ->
+            listModel.getSpinnerOptions(recordList)
+        }
+
+    override val appListDataFlow = option.flow.flatMapLatest(::filterAndSort)
         .combine(searchQuery.flow) { appListData, searchQuery ->
             appListData.filter {
                 it.label.contains(other = searchQuery, ignoreCase = true)
@@ -97,7 +110,7 @@ internal open class AppListViewModelImpl<T : AppRecord>(
     }
 
     fun reloadApps() {
-        viewModelScope.launch {
+        scope.launch {
             appsStateFlow.value = appListRepository.loadApps(appListConfig.flow.first())
         }
     }
@@ -124,17 +137,16 @@ internal open class AppListViewModelImpl<T : AppRecord>(
         recordListFlow
             .waitFirst(appListDataFlow)
             .combine(listModel.flow) { recordList, listModel ->
-                listModel.maybePreFetchLabels(recordList)
-                listModel.onFirstLoaded(recordList)
+                if (listModel.onFirstLoaded(recordList)) {
+                    preFetchLabels(recordList)
+                }
             }
             .launchIn(scope)
     }
 
-    private fun AppListModel<T>.maybePreFetchLabels(recordList: List<T>) {
-        if (getSpinnerOptions().isNotEmpty()) {
-            for (record in recordList) {
-                getLabel(record.app)
-            }
+    private fun preFetchLabels(recordList: List<T>) {
+        for (record in recordList) {
+            getLabel(record.app)
         }
     }
 

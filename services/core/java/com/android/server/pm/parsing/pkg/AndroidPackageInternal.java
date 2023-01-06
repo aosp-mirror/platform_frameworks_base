@@ -16,6 +16,8 @@
 
 package com.android.server.pm.parsing.pkg;
 
+import android.annotation.NonNull;
+
 import com.android.internal.content.om.OverlayConfig;
 import com.android.server.pm.pkg.AndroidPackage;
 
@@ -31,5 +33,15 @@ import com.android.server.pm.pkg.AndroidPackage;
  */
 public interface AndroidPackageInternal extends AndroidPackage,
         OverlayConfig.PackageProvider.Package {
+    @NonNull
+    String[] getUsesLibrariesSorted();
 
+    @NonNull
+    String[] getUsesOptionalLibrariesSorted();
+
+    @NonNull
+    String[] getUsesSdkLibrariesSorted();
+
+    @NonNull
+    String[] getUsesStaticLibrariesSorted();
 }

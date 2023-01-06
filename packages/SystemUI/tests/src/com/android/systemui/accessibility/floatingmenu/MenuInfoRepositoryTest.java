@@ -16,16 +16,23 @@
 
 package com.android.systemui.accessibility.floatingmenu;
 
+import static com.android.internal.accessibility.AccessibilityShortcutController.MAGNIFICATION_CONTROLLER_NAME;
+
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.Mockito.any;
+import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.verify;
 
+import android.content.Context;
+import android.content.res.Configuration;
 import android.testing.AndroidTestingRunner;
+import android.view.accessibility.AccessibilityManager;
 
 import androidx.test.filters.SmallTest;
 
 import com.android.systemui.SysuiTestCase;
 
+import org.junit.After;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
@@ -33,6 +40,10 @@ import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnit;
 import org.mockito.junit.MockitoRule;
+
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Locale;
 
 /** Tests for {@link MenuInfoRepository}. */
 @RunWith(AndroidTestingRunner.class)
@@ -42,13 +53,28 @@ public class MenuInfoRepositoryTest extends SysuiTestCase {
     public MockitoRule mockito = MockitoJUnit.rule();
 
     @Mock
+    private AccessibilityManager mAccessibilityManager;
+
+    @Mock
     private MenuInfoRepository.OnSettingsContentsChanged mMockSettingsContentsChanged;
 
     private MenuInfoRepository mMenuInfoRepository;
+    private final List<String> mShortcutTargets = new ArrayList<>();
 
     @Before
     public void setUp() {
-        mMenuInfoRepository = new MenuInfoRepository(mContext, mMockSettingsContentsChanged);
+        mContext.addMockSystemService(Context.ACCESSIBILITY_SERVICE, mAccessibilityManager);
+        mShortcutTargets.add(MAGNIFICATION_CONTROLLER_NAME);
+        doReturn(mShortcutTargets).when(mAccessibilityManager).getAccessibilityShortcutTargets(
+                anyInt());
+
+        mMenuInfoRepository = new MenuInfoRepository(mContext, mAccessibilityManager,
+                mMockSettingsContentsChanged);
+    }
+
+    @After
+    public void tearDown() {
+        mShortcutTargets.clear();
     }
 
     @Test
@@ -63,5 +89,15 @@ public class MenuInfoRepositoryTest extends SysuiTestCase {
         mMenuInfoRepository.mMenuFadeOutContentObserver.onChange(true);
 
         verify(mMockSettingsContentsChanged).onFadeEffectInfoChanged(any(MenuFadeEffectInfo.class));
+    }
+
+    @Test
+    public void localeChange_verifyTargetFeaturesChanged() {
+        final Configuration configuration = new Configuration();
+        configuration.setLocale(Locale.TAIWAN);
+
+        mMenuInfoRepository.mComponentCallbacks.onConfigurationChanged(configuration);
+
+        verify(mMockSettingsContentsChanged).onTargetFeaturesChanged(any());
     }
 }

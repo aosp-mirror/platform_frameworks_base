@@ -18,6 +18,7 @@ package com.android.server.security;
 
 import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.annotation.SystemApi;
 import android.app.AppOpsManager;
 import android.content.Context;
 import android.content.pm.PackageManager;
@@ -59,6 +60,7 @@ import java.util.ArrayList;
  * A {@link SystemService} that provides file integrity related operations.
  * @hide
  */
+@SystemApi(client = SystemApi.Client.SYSTEM_SERVER)
 public class FileIntegrityService extends SystemService {
     private static final String TAG = "FileIntegrityService";
 
@@ -71,7 +73,10 @@ public class FileIntegrityService extends SystemService {
     private final ArrayList<X509Certificate> mTrustedCertificates =
             new ArrayList<X509Certificate>();
 
-    /** Gets the instance of the service */
+    /**
+     * Gets the instance of the service.
+     * @hide
+     */
     public static FileIntegrityService getService() {
         return LocalServices.getService(FileIntegrityService.class);
     }
@@ -139,6 +144,7 @@ public class FileIntegrityService extends SystemService {
         }
     };
 
+    /** @hide */
     public FileIntegrityService(final Context context) {
         super(context);
         try {
@@ -149,6 +155,7 @@ public class FileIntegrityService extends SystemService {
         LocalServices.addService(FileIntegrityService.class, this);
     }
 
+    /** @hide */
     @Override
     public void onStart() {
         loadAllCertificates();
@@ -158,6 +165,7 @@ public class FileIntegrityService extends SystemService {
     /**
      * Returns whether the signature over the file's fs-verity digest can be verified by one of the
      * known certiticates.
+     * @hide
      */
     public boolean verifyPkcs7DetachedSignature(String signaturePath, String filePath)
             throws IOException {
@@ -181,6 +189,16 @@ public class FileIntegrityService extends SystemService {
             }
         }
         return false;
+    }
+
+    /**
+     * Enables fs-verity, if supported by the filesystem.
+     * @see <a href="https://www.kernel.org/doc/html/latest/filesystems/fsverity.html">
+     * @hide
+     */
+    @SystemApi(client = SystemApi.Client.SYSTEM_SERVER)
+    public static void setUpFsVerity(@NonNull String filePath) throws IOException {
+        VerityUtils.setUpFsverity(filePath);
     }
 
     private void loadAllCertificates() {

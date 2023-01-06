@@ -110,6 +110,7 @@ final class VirtualDeviceImpl extends IVirtualDevice.Stub
     private final int mDeviceId;
     private final InputController mInputController;
     private final SensorController mSensorController;
+    private final CameraAccessController mCameraAccessController;
     private VirtualAudioController mVirtualAudioController;
     @VisibleForTesting
     final Set<Integer> mVirtualDisplayIds = new ArraySet<>();
@@ -165,6 +166,7 @@ final class VirtualDeviceImpl extends IVirtualDevice.Stub
             IBinder token,
             int ownerUid,
             int deviceId,
+            CameraAccessController cameraAccessController,
             OnDeviceCloseListener onDeviceCloseListener,
             PendingTrampolineCallback pendingTrampolineCallback,
             IVirtualDeviceActivityListener activityListener,
@@ -178,6 +180,7 @@ final class VirtualDeviceImpl extends IVirtualDevice.Stub
                 deviceId,
                 /* inputController= */ null,
                 /* sensorController= */ null,
+                cameraAccessController,
                 onDeviceCloseListener,
                 pendingTrampolineCallback,
                 activityListener,
@@ -194,6 +197,7 @@ final class VirtualDeviceImpl extends IVirtualDevice.Stub
             int deviceId,
             InputController inputController,
             SensorController sensorController,
+            CameraAccessController cameraAccessController,
             OnDeviceCloseListener onDeviceCloseListener,
             PendingTrampolineCallback pendingTrampolineCallback,
             IVirtualDeviceActivityListener activityListener,
@@ -223,6 +227,8 @@ final class VirtualDeviceImpl extends IVirtualDevice.Stub
         } else {
             mSensorController = sensorController;
         }
+        mCameraAccessController = cameraAccessController;
+        mCameraAccessController.startObservingIfNeeded();
         mOnDeviceCloseListener = onDeviceCloseListener;
         try {
             token.linkToDeath(this, 0);
@@ -241,6 +247,11 @@ final class VirtualDeviceImpl extends IVirtualDevice.Stub
             flags |= DisplayManager.VIRTUAL_DISPLAY_FLAG_ALWAYS_UNLOCKED;
         }
         return flags;
+    }
+
+    /** Returns the camera access controller of this device. */
+    CameraAccessController getCameraAccessController() {
+        return mCameraAccessController;
     }
 
     /** Returns the device display name. */
@@ -359,6 +370,7 @@ final class VirtualDeviceImpl extends IVirtualDevice.Stub
         }
         mOnDeviceCloseListener.onClose(mDeviceId);
         mAppToken.unlinkToDeath(this, 0);
+        mCameraAccessController.stopObservingIfNeeded();
 
         final long ident = Binder.clearCallingIdentity();
         try {
@@ -376,6 +388,7 @@ final class VirtualDeviceImpl extends IVirtualDevice.Stub
 
     @Override
     public void onRunningAppsChanged(ArraySet<Integer> runningUids) {
+        mCameraAccessController.blockCameraAccessIfNeeded(runningUids);
         mRunningAppsChangedCallback.accept(runningUids);
     }
 

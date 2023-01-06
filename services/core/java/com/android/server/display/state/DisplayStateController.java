@@ -98,7 +98,7 @@ public class DisplayStateController {
      */
     public void dumpsys(PrintWriter pw) {
         pw.println();
-        pw.println("DisplayPowerProximityStateController:");
+        pw.println("DisplayStateController:");
         pw.println("  mPerformScreenOffTransition:" + mPerformScreenOffTransition);
         IndentingPrintWriter ipw = new IndentingPrintWriter(pw, " ");
         if (mDisplayPowerProximityStateController != null) {

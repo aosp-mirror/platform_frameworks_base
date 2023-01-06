@@ -93,7 +93,8 @@ class DragDividerToResize(flicker: FlickerTest) : SplitScreenBase(flicker) {
     }
 
     @FlakyTest(bugId = 263213649)
-    @Test fun primaryAppLayerKeepVisible_ShellTransit() {
+    @Test
+    fun primaryAppLayerKeepVisible_ShellTransit() {
         Assume.assumeTrue(isShellTransitionsEnabled)
         flicker.layerKeepVisible(primaryApp)
     }

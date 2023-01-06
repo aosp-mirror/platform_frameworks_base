@@ -23,6 +23,33 @@ import com.android.systemui.log.table.Diffable
 /** Provides information about the current wifi network. */
 sealed class WifiNetworkModel : Diffable<WifiNetworkModel> {
 
+    /**
+     * A model representing that we couldn't fetch any wifi information.
+     *
+     * This is only used with [DisabledWifiRepository], where [WifiManager] is null.
+     */
+    object Unavailable : WifiNetworkModel() {
+        override fun toString() = "WifiNetwork.Unavailable"
+        override fun logDiffs(prevVal: WifiNetworkModel, row: TableRowLogger) {
+            if (prevVal is Unavailable) {
+                return
+            }
+
+            logFull(row)
+        }
+
+        override fun logFull(row: TableRowLogger) {
+            row.logChange(COL_NETWORK_TYPE, TYPE_UNAVAILABLE)
+            row.logChange(COL_NETWORK_ID, NETWORK_ID_DEFAULT)
+            row.logChange(COL_VALIDATED, false)
+            row.logChange(COL_LEVEL, LEVEL_DEFAULT)
+            row.logChange(COL_SSID, null)
+            row.logChange(COL_PASSPOINT_ACCESS_POINT, false)
+            row.logChange(COL_ONLINE_SIGN_UP, false)
+            row.logChange(COL_PASSPOINT_NAME, null)
+        }
+    }
+
     /** A model representing that we have no active wifi network. */
     object Inactive : WifiNetworkModel() {
         override fun toString() = "WifiNetwork.Inactive"
@@ -87,13 +114,8 @@ sealed class WifiNetworkModel : Diffable<WifiNetworkModel> {
 
         /**
          * The wifi signal level, guaranteed to be 0 <= level <= 4.
-         *
-         * Null if we couldn't fetch the level for some reason.
-         *
-         * TODO(b/238425913): The level will only be null if we have a null WifiManager. Is there a
-         *   way we can guarantee a non-null WifiManager?
          */
-        val level: Int? = null,
+        val level: Int,
 
         /** See [android.net.wifi.WifiInfo.ssid]. */
         val ssid: String? = null,
@@ -108,7 +130,7 @@ sealed class WifiNetworkModel : Diffable<WifiNetworkModel> {
         val passpointProviderFriendlyName: String? = null,
     ) : WifiNetworkModel() {
         init {
-            require(level == null || level in MIN_VALID_LEVEL..MAX_VALID_LEVEL) {
+            require(level in MIN_VALID_LEVEL..MAX_VALID_LEVEL) {
                 "0 <= wifi level <= 4 required; level was $level"
             }
         }
@@ -125,11 +147,7 @@ sealed class WifiNetworkModel : Diffable<WifiNetworkModel> {
                 row.logChange(COL_VALIDATED, isValidated)
             }
             if (prevVal !is Active || prevVal.level != level) {
-                if (level != null) {
-                    row.logChange(COL_LEVEL, level)
-                } else {
-                    row.logChange(COL_LEVEL, LEVEL_DEFAULT)
-                }
+                row.logChange(COL_LEVEL, level)
             }
             if (prevVal !is Active || prevVal.ssid != ssid) {
                 row.logChange(COL_SSID, ssid)
@@ -190,6 +208,7 @@ sealed class WifiNetworkModel : Diffable<WifiNetworkModel> {
 }
 
 const val TYPE_CARRIER_MERGED = "CarrierMerged"
+const val TYPE_UNAVAILABLE = "Unavailable"
 const val TYPE_INACTIVE = "Inactive"
 const val TYPE_ACTIVE = "Active"
 

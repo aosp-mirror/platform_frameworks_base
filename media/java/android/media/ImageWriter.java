@@ -431,17 +431,15 @@ public class ImageWriter implements AutoCloseable {
      * @see Image#close
      */
     public Image dequeueInputImage() {
-        synchronized (mCloseLock) {
-            if (mDequeuedImages.size() >= mMaxImages) {
-                throw new IllegalStateException(
-                        "Already dequeued max number of Images " + mMaxImages);
-            }
-            WriterSurfaceImage newImage = new WriterSurfaceImage(this);
-            nativeDequeueInputImage(mNativeContext, newImage);
-            mDequeuedImages.add(newImage);
-            newImage.mIsImageValid = true;
-            return newImage;
+        if (mDequeuedImages.size() >= mMaxImages) {
+            throw new IllegalStateException(
+                    "Already dequeued max number of Images " + mMaxImages);
         }
+        WriterSurfaceImage newImage = new WriterSurfaceImage(this);
+        nativeDequeueInputImage(mNativeContext, newImage);
+        mDequeuedImages.add(newImage);
+        newImage.mIsImageValid = true;
+        return newImage;
     }
 
     /**
@@ -500,52 +498,50 @@ public class ImageWriter implements AutoCloseable {
             throw new IllegalArgumentException("image shouldn't be null");
         }
 
-        synchronized (mCloseLock) {
-            boolean ownedByMe = isImageOwnedByMe(image);
-            if (ownedByMe && !(((WriterSurfaceImage) image).mIsImageValid)) {
-                throw new IllegalStateException("Image from ImageWriter is invalid");
+        boolean ownedByMe = isImageOwnedByMe(image);
+        if (ownedByMe && !(((WriterSurfaceImage) image).mIsImageValid)) {
+            throw new IllegalStateException("Image from ImageWriter is invalid");
+        }
+
+        // For images from other components that have non-null owner, need to detach first,
+        // then attach. Images without owners must already be attachable.
+        if (!ownedByMe) {
+            if ((image.getOwner() instanceof ImageReader)) {
+                ImageReader prevOwner = (ImageReader) image.getOwner();
+
+                prevOwner.detachImage(image);
+            } else if (image.getOwner() != null) {
+                throw new IllegalArgumentException(
+                        "Only images from ImageReader can be queued to"
+                                + " ImageWriter, other image source is not supported yet!");
             }
 
-            // For images from other components that have non-null owner, need to detach first,
-            // then attach. Images without owners must already be attachable.
-            if (!ownedByMe) {
-                if ((image.getOwner() instanceof ImageReader)) {
-                    ImageReader prevOwner = (ImageReader) image.getOwner();
+            attachAndQueueInputImage(image);
+            // This clears the native reference held by the original owner.
+            // When this Image is detached later by this ImageWriter, the
+            // native memory won't be leaked.
+            image.close();
+            return;
+        }
 
-                    prevOwner.detachImage(image);
-                } else if (image.getOwner() != null) {
-                    throw new IllegalArgumentException(
-                            "Only images from ImageReader can be queued to"
-                                    + " ImageWriter, other image source is not supported yet!");
-                }
+        Rect crop = image.getCropRect();
+        nativeQueueInputImage(mNativeContext, image, image.getTimestamp(), image.getDataSpace(),
+                crop.left, crop.top, crop.right, crop.bottom, image.getTransform(),
+                image.getScalingMode());
 
-                attachAndQueueInputImage(image);
-                // This clears the native reference held by the original owner.
-                // When this Image is detached later by this ImageWriter, the
-                // native memory won't be leaked.
-                image.close();
-                return;
-            }
-
-            Rect crop = image.getCropRect();
-            nativeQueueInputImage(mNativeContext, image, image.getTimestamp(), image.getDataSpace(),
-                    crop.left, crop.top, crop.right, crop.bottom, image.getTransform(),
-                    image.getScalingMode());
-
-            /**
-             * Only remove and cleanup the Images that are owned by this
-             * ImageWriter. Images detached from other owners are only temporarily
-             * owned by this ImageWriter and will be detached immediately after they
-             * are released by downstream consumers, so there is no need to keep
-             * track of them in mDequeuedImages.
-             */
-            if (ownedByMe) {
-                mDequeuedImages.remove(image);
-                // Do not call close here, as close is essentially cancel image.
-                WriterSurfaceImage wi = (WriterSurfaceImage) image;
-                wi.clearSurfacePlanes();
-                wi.mIsImageValid = false;
-            }
+        /**
+         * Only remove and cleanup the Images that are owned by this
+         * ImageWriter. Images detached from other owners are only temporarily
+         * owned by this ImageWriter and will be detached immediately after they
+         * are released by downstream consumers, so there is no need to keep
+         * track of them in mDequeuedImages.
+         */
+        if (ownedByMe) {
+            mDequeuedImages.remove(image);
+            // Do not call close here, as close is essentially cancel image.
+            WriterSurfaceImage wi = (WriterSurfaceImage) image;
+            wi.clearSurfacePlanes();
+            wi.mIsImageValid = false;
         }
     }
 
@@ -681,11 +677,11 @@ public class ImageWriter implements AutoCloseable {
      */
     @Override
     public void close() {
+        setOnImageReleasedListener(null, null);
         synchronized (mCloseLock) {
             if (!mIsWriterValid) {
                 return;
             }
-            setOnImageReleasedListener(null, null);
             for (Image image : mDequeuedImages) {
                 image.close();
             }
@@ -817,14 +813,12 @@ public class ImageWriter implements AutoCloseable {
         }
 
         final Handler handler;
-        final boolean isWriterValid;
         synchronized (iw.mListenerLock) {
             handler = iw.mListenerHandler;
         }
-        synchronized (iw.mCloseLock) {
-            isWriterValid = iw.mIsWriterValid;
-        }
-        if (handler != null && isWriterValid) {
+
+        if (handler != null) {
+            // The ListenerHandler will take care of ensuring that the parent ImageWriter is valid
             handler.sendEmptyMessage(0);
         }
     }

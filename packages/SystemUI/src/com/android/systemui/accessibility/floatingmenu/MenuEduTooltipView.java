@@ -21,6 +21,7 @@ import static android.view.View.MeasureSpec.AT_MOST;
 import static android.view.View.MeasureSpec.UNSPECIFIED;
 
 import android.annotation.SuppressLint;
+import android.content.ComponentCallbacks;
 import android.content.Context;
 import android.content.res.Configuration;
 import android.content.res.Resources;
@@ -48,7 +49,7 @@ import com.android.systemui.recents.TriangleShape;
  * . It's just shown on the left or right of the anchor view.
  */
 @SuppressLint("ViewConstructor")
-class MenuEduTooltipView extends FrameLayout {
+class MenuEduTooltipView extends FrameLayout implements ComponentCallbacks {
     private int mFontSize;
     private int mTextViewMargin;
     private int mTextViewPadding;
@@ -73,14 +74,31 @@ class MenuEduTooltipView extends FrameLayout {
     }
 
     @Override
-    protected void onConfigurationChanged(Configuration newConfig) {
-        super.onConfigurationChanged(newConfig);
-
+    public void onConfigurationChanged(@NonNull Configuration newConfig) {
         updateResources();
         updateMessageView();
         updateArrowView();
 
         updateLocationAndVisibility();
+    }
+
+    @Override
+    public void onLowMemory() {
+        // Do nothing.
+    }
+
+    @Override
+    protected void onAttachedToWindow() {
+        super.onAttachedToWindow();
+
+        getContext().registerComponentCallbacks(this);
+    }
+
+    @Override
+    protected void onDetachedFromWindow() {
+        super.onDetachedFromWindow();
+
+        getContext().unregisterComponentCallbacks(this);
     }
 
     void show(CharSequence message) {

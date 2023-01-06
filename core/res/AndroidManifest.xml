@@ -6855,6 +6855,12 @@
     <permission android:name="android.permission.REMAP_MODIFIER_KEYS"
                 android:protectionLevel="signature" />
 
+    <!-- Allows low-level access to monitor keyboard backlight changes.
+         <p>Not for use by third-party applications.
+         @hide -->
+    <permission android:name="android.permission.MONITOR_KEYBOARD_BACKLIGHT"
+                android:protectionLevel="signature" />
+
     <uses-permission android:name="android.permission.HANDLE_QUERY_PACKAGE_RESTART" />
 
     <!-- Allows financed device kiosk apps to perform actions on the Device Lock service
@@ -6892,6 +6898,12 @@
         @hide -->
     <permission android:name="android.permission.GET_APP_METADATA"
                 android:protectionLevel="signature" />
+
+    <!-- @SystemApi Allows the holder to call health connect migration APIs.
+        @hide -->
+    <permission android:name="android.permission.MIGRATE_HEALTH_CONNECT_DATA"
+        android:protectionLevel="signature|knownSigner"
+        android:knownCerts="@array/config_healthConnectMigrationKnownSigners" />
 
     <!-- Attribution for Geofencing service. -->
     <attribution android:tag="GeofencingService" android:label="@string/geofencing_service"/>

@@ -18,6 +18,7 @@ package com.android.server.broadcastradio;
 
 import static com.google.common.truth.Truth.assertWithMessage;
 
+import static org.junit.Assert.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.ArgumentMatchers.anyInt;
@@ -118,6 +119,16 @@ public final class IRadioServiceHidlImplTest {
 
         assertWithMessage("Tuner opened in HAL 2")
                 .that(tuner).isEqualTo(mHal2TunerMock);
+    }
+
+    @Test
+    public void openTuner_withNullCallbackForHidlImpl_fails() throws Exception {
+        NullPointerException thrown = assertThrows(NullPointerException.class,
+                () -> mHidlImpl.openTuner(/* moduleId= */ 0, mBandConfigMock,
+                        /* withAudio= */ true, /* callback= */ null, TARGET_SDK_VERSION));
+
+        assertWithMessage("Exception for opening tuner with null callback")
+                .that(thrown).hasMessageThat().contains("Callback must not be null");
     }
 
     @Test

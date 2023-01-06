@@ -27,7 +27,6 @@ import android.annotation.SuppressLint;
 import android.app.ActivityOptions;
 import android.companion.AssociationInfo;
 import android.companion.CompanionDeviceManager;
-import android.companion.CompanionDeviceManager.OnAssociationsChangedListener;
 import android.companion.virtual.IVirtualDevice;
 import android.companion.virtual.IVirtualDeviceActivityListener;
 import android.companion.virtual.IVirtualDeviceManager;
@@ -70,6 +69,7 @@ import java.util.List;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.function.Consumer;
 
 
 @SuppressLint("LongLogTag")
@@ -87,20 +87,6 @@ public class VirtualDeviceManagerService extends SystemService {
             VirtualDeviceManager.DEVICE_ID_DEFAULT + 1);
 
     /**
-     * Mapping from user IDs to CameraAccessControllers.
-     */
-    @GuardedBy("mVirtualDeviceManagerLock")
-    private final SparseArray<CameraAccessController> mCameraAccessControllers =
-            new SparseArray<>();
-
-    /**
-     * Mapping from device IDs to CameraAccessControllers.
-     */
-    @GuardedBy("mVirtualDeviceManagerLock")
-    private final SparseArray<CameraAccessController> mCameraAccessControllersByDeviceId =
-            new SparseArray<>();
-
-    /**
      * Mapping from device IDs to virtual devices.
      */
     @GuardedBy("mVirtualDeviceManagerLock")
@@ -111,21 +97,6 @@ public class VirtualDeviceManagerService extends SystemService {
      */
     @GuardedBy("mVirtualDeviceManagerLock")
     private final SparseArray<ArraySet<Integer>> mAppsOnVirtualDevices = new SparseArray<>();
-
-    /**
-     * Mapping from user ID to CDM associations. The associations come from
-     * {@link CompanionDeviceManager#getAllAssociations()}, which contains associations across all
-     * packages.
-     */
-    private final ConcurrentHashMap<Integer, List<AssociationInfo>> mAllAssociations =
-            new ConcurrentHashMap<>();
-
-    /**
-     * Mapping from user ID to its change listener. The listeners are added when the user is
-     * started and removed when the user stops.
-     */
-    private final SparseArray<OnAssociationsChangedListener> mOnAssociationsChangedListeners =
-            new SparseArray<>();
 
     public VirtualDeviceManagerService(Context context) {
         super(context);
@@ -177,54 +148,9 @@ public class VirtualDeviceManagerService extends SystemService {
         }
     }
 
-    @Override
-    public void onUserStarting(@NonNull TargetUser user) {
-        super.onUserStarting(user);
-        Context userContext = getContext().createContextAsUser(user.getUserHandle(), 0);
-        synchronized (mVirtualDeviceManagerLock) {
-            final CompanionDeviceManager cdm =
-                    userContext.getSystemService(CompanionDeviceManager.class);
-            final int userId = user.getUserIdentifier();
-            mAllAssociations.put(userId, cdm.getAllAssociations());
-            OnAssociationsChangedListener listener =
-                    associations -> mAllAssociations.put(userId, associations);
-            mOnAssociationsChangedListeners.put(userId, listener);
-            cdm.addOnAssociationsChangedListener(Runnable::run, listener);
-            CameraAccessController cameraAccessController = new CameraAccessController(
-                    userContext, mLocalService, this::onCameraAccessBlocked);
-            mCameraAccessControllers.put(user.getUserIdentifier(), cameraAccessController);
-        }
-    }
-
-    @Override
-    public void onUserStopping(@NonNull TargetUser user) {
-        super.onUserStopping(user);
-        synchronized (mVirtualDeviceManagerLock) {
-            int userId = user.getUserIdentifier();
-            mAllAssociations.remove(userId);
-            final CompanionDeviceManager cdm = getContext().createContextAsUser(
-                    user.getUserHandle(), 0)
-                    .getSystemService(CompanionDeviceManager.class);
-            OnAssociationsChangedListener listener = mOnAssociationsChangedListeners.get(userId);
-            if (listener != null) {
-                cdm.removeOnAssociationsChangedListener(listener);
-                mOnAssociationsChangedListeners.remove(userId);
-            }
-            CameraAccessController cameraAccessController = mCameraAccessControllers.get(
-                    user.getUserIdentifier());
-            if (cameraAccessController != null) {
-                cameraAccessController.close();
-                mCameraAccessControllers.remove(user.getUserIdentifier());
-            } else {
-                Slog.w(TAG, "Cannot unregister cameraAccessController for user " + user);
-            }
-        }
-    }
-
     void onCameraAccessBlocked(int appUid) {
         synchronized (mVirtualDeviceManagerLock) {
-            int size = mVirtualDevices.size();
-            for (int i = 0; i < size; i++) {
+            for (int i = 0; i < mVirtualDevices.size(); i++) {
                 CharSequence deviceName = mVirtualDevices.valueAt(i).getDisplayName();
                 mVirtualDevices.valueAt(i).showToastWhereUidIsRunning(appUid,
                         getContext().getString(
@@ -233,6 +159,21 @@ public class VirtualDeviceManagerService extends SystemService {
                         Toast.LENGTH_LONG, Looper.myLooper());
             }
         }
+    }
+
+    CameraAccessController getCameraAccessController(UserHandle userHandle) {
+        int userId = userHandle.getIdentifier();
+        synchronized (mVirtualDeviceManagerLock) {
+            for (int i = 0; i < mVirtualDevices.size(); i++) {
+                final CameraAccessController cameraAccessController =
+                        mVirtualDevices.valueAt(i).getCameraAccessController();
+                if (cameraAccessController.getUserId() == userId) {
+                    return cameraAccessController;
+                }
+            }
+        }
+        Context userContext = getContext().createContextAsUser(userHandle, 0);
+        return new CameraAccessController(userContext, mLocalService, this::onCameraAccessBlocked);
     }
 
     @VisibleForTesting
@@ -255,8 +196,34 @@ public class VirtualDeviceManagerService extends SystemService {
         }
     }
 
-    class VirtualDeviceManagerImpl extends IVirtualDeviceManager.Stub implements
-            VirtualDeviceImpl.PendingTrampolineCallback {
+    @VisibleForTesting
+    void removeVirtualDevice(int deviceId) {
+        synchronized (mVirtualDeviceManagerLock) {
+            mAppsOnVirtualDevices.remove(deviceId);
+            mVirtualDevices.remove(deviceId);
+        }
+    }
+
+    class VirtualDeviceManagerImpl extends IVirtualDeviceManager.Stub {
+
+        private final VirtualDeviceImpl.PendingTrampolineCallback mPendingTrampolineCallback =
+                new VirtualDeviceImpl.PendingTrampolineCallback() {
+            @Override
+            public void startWaitingForPendingTrampoline(PendingTrampoline pendingTrampoline) {
+                PendingTrampoline existing = mPendingTrampolines.put(
+                        pendingTrampoline.mPendingIntent.getCreatorPackage(),
+                        pendingTrampoline);
+                if (existing != null) {
+                    existing.mResultReceiver.send(
+                            VirtualDeviceManager.LAUNCH_FAILURE_NO_ACTIVITY, null);
+                }
+            }
+
+            @Override
+            public void stopWaitingForPendingTrampoline(PendingTrampoline pendingTrampoline) {
+                mPendingTrampolines.remove(pendingTrampoline.mPendingIntent.getCreatorPackage());
+            }
+        };
 
         @Override // Binder call
         public IVirtualDevice createVirtualDevice(
@@ -279,25 +246,16 @@ public class VirtualDeviceManagerService extends SystemService {
                 throw new IllegalArgumentException("No association with ID " + associationId);
             }
             synchronized (mVirtualDeviceManagerLock) {
-                final int userId = UserHandle.getUserId(callingUid);
+                final UserHandle userHandle = getCallingUserHandle();
                 final CameraAccessController cameraAccessController =
-                        mCameraAccessControllers.get(userId);
+                        getCameraAccessController(userHandle);
                 final int deviceId = sNextUniqueIndex.getAndIncrement();
+                final Consumer<ArraySet<Integer>> runningAppsChangedCallback =
+                        runningUids -> notifyRunningAppsChanged(deviceId, runningUids);
                 VirtualDeviceImpl virtualDevice = new VirtualDeviceImpl(getContext(),
-                        associationInfo, token, callingUid, deviceId,
-                        /* onDeviceCloseListener= */ this::onDeviceClosed,
-                        this, activityListener,
-                        runningUids -> {
-                            cameraAccessController.blockCameraAccessIfNeeded(runningUids);
-                            notifyRunningAppsChanged(deviceId, runningUids);
-                        },
-                        params);
-                if (cameraAccessController != null) {
-                    cameraAccessController.startObservingIfNeeded();
-                    mCameraAccessControllersByDeviceId.put(deviceId, cameraAccessController);
-                } else {
-                    Slog.w(TAG, "cameraAccessController not found for user " + userId);
-                }
+                        associationInfo, token, callingUid, deviceId, cameraAccessController,
+                        this::onDeviceClosed, mPendingTrampolineCallback, activityListener,
+                        runningAppsChangedCallback, params);
                 mVirtualDevices.put(deviceId, virtualDevice);
                 return virtualDevice;
             }
@@ -409,8 +367,18 @@ public class VirtualDeviceManagerService extends SystemService {
 
         @Nullable
         private AssociationInfo getAssociationInfo(String packageName, int associationId) {
-            final int callingUserId = getCallingUserHandle().getIdentifier();
-            final List<AssociationInfo> associations = mAllAssociations.get(callingUserId);
+            final UserHandle userHandle = getCallingUserHandle();
+            final CompanionDeviceManager cdm =
+                    getContext().createContextAsUser(userHandle, 0)
+                            .getSystemService(CompanionDeviceManager.class);
+            List<AssociationInfo> associations;
+            final long identity = Binder.clearCallingIdentity();
+            try {
+                associations = cdm.getAllAssociations();
+            } finally {
+                Binder.restoreCallingIdentity(identity);
+            }
+            final int callingUserId = userHandle.getIdentifier();
             if (associations != null) {
                 final int associationSize = associations.size();
                 for (int i = 0; i < associationSize; i++) {
@@ -427,25 +395,15 @@ public class VirtualDeviceManagerService extends SystemService {
         }
 
         private void onDeviceClosed(int deviceId) {
-            synchronized (mVirtualDeviceManagerLock) {
-                mVirtualDevices.remove(deviceId);
-                Intent i = new Intent(VirtualDeviceManager.ACTION_VIRTUAL_DEVICE_REMOVED);
-                i.putExtra(VirtualDeviceManager.EXTRA_VIRTUAL_DEVICE_ID, deviceId);
-                i.setFlags(Intent.FLAG_RECEIVER_REGISTERED_ONLY);
-                final long identity = Binder.clearCallingIdentity();
-                try {
-                    getContext().sendBroadcastAsUser(i, UserHandle.ALL);
-                } finally {
-                    Binder.restoreCallingIdentity(identity);
-                }
-                mAppsOnVirtualDevices.remove(deviceId);
-                final CameraAccessController cameraAccessController =
-                        mCameraAccessControllersByDeviceId.removeReturnOld(deviceId);
-                if (cameraAccessController != null) {
-                    cameraAccessController.stopObservingIfNeeded();
-                } else {
-                    Slog.w(TAG, "cameraAccessController not found for device Id " + deviceId);
-                }
+            removeVirtualDevice(deviceId);
+            Intent i = new Intent(VirtualDeviceManager.ACTION_VIRTUAL_DEVICE_REMOVED);
+            i.putExtra(VirtualDeviceManager.EXTRA_VIRTUAL_DEVICE_ID, deviceId);
+            i.setFlags(Intent.FLAG_RECEIVER_REGISTERED_ONLY);
+            final long identity = Binder.clearCallingIdentity();
+            try {
+                getContext().sendBroadcastAsUser(i, UserHandle.ALL);
+            } finally {
+                Binder.restoreCallingIdentity(identity);
             }
         }
 
@@ -473,22 +431,6 @@ public class VirtualDeviceManagerService extends SystemService {
                     mVirtualDevices.valueAt(i).dump(fd, fout, args);
                 }
             }
-        }
-
-        @Override
-        public void startWaitingForPendingTrampoline(PendingTrampoline pendingTrampoline) {
-            PendingTrampoline existing = mPendingTrampolines.put(
-                    pendingTrampoline.mPendingIntent.getCreatorPackage(),
-                    pendingTrampoline);
-            if (existing != null) {
-                existing.mResultReceiver.send(
-                        VirtualDeviceManager.LAUNCH_FAILURE_NO_ACTIVITY, null);
-            }
-        }
-
-        @Override
-        public void stopWaitingForPendingTrampoline(PendingTrampoline pendingTrampoline) {
-            mPendingTrampolines.remove(pendingTrampoline.mPendingIntent.getCreatorPackage());
         }
     }
 

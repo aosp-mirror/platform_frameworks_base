@@ -364,7 +364,7 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
     boolean mHidden = true;    // Used to determine if to show child windows.
     private boolean mDragResizing;
     private boolean mDragResizingChangeReported = true;
-    private boolean mRedrawForSyncReported;
+    private boolean mRedrawForSyncReported = true;
 
     /**
      * Used to assosciate a given set of state changes sent from MSG_RESIZED
@@ -1276,24 +1276,15 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
      * @see ActivityRecord#hasSizeCompatBounds()
      */
     boolean hasCompatScale() {
-        return hasCompatScale(mAttrs, mActivityRecord, mOverrideScale);
-    }
-
-    /**
-     * @return {@code true} if the application runs in size compatibility mode.
-     * @see android.content.res.CompatibilityInfo#supportsScreen
-     * @see ActivityRecord#hasSizeCompatBounds()
-     */
-    static boolean hasCompatScale(WindowManager.LayoutParams attrs, WindowToken token,
-            float overrideScale) {
-        if ((attrs.privateFlags & PRIVATE_FLAG_COMPATIBLE_WINDOW) != 0) {
+        if ((mAttrs.privateFlags & PRIVATE_FLAG_COMPATIBLE_WINDOW) != 0) {
             return true;
         }
-        if (attrs.type == TYPE_APPLICATION_STARTING) {
+        if (mAttrs.type == TYPE_APPLICATION_STARTING) {
             // Exclude starting window because it is not displayed by the application.
             return false;
         }
-        return token != null && token.hasSizeCompatBounds() || overrideScale != 1f;
+        return mActivityRecord != null && mActivityRecord.hasSizeCompatBounds()
+                || mOverrideScale != 1f;
     }
 
     /**
@@ -5956,8 +5947,11 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
         mSyncSeqId++;
         if (getSyncMethod() == BLASTSyncEngine.METHOD_BLAST) {
             mPrepareSyncSeqId = mSyncSeqId;
+            requestRedrawForSync();
+        } else if (mHasSurface && mWinAnimator.mDrawState != DRAW_PENDING) {
+            // Only need to request redraw if the window has reported draw.
+            requestRedrawForSync();
         }
-        requestRedrawForSync();
         return true;
     }
 

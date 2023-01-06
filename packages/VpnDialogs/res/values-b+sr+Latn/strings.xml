@@ -16,24 +16,24 @@
 
 <resources xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
-    <string name="prompt" msgid="3183836924226407828">"Захтев за повезивање"</string>
-    <string name="warning" msgid="809658604548412033">"<xliff:g id="APP">%s</xliff:g> жели да подеси VPN везу која омогућава праћење саобраћаја на мрежи. Прихватите само ако верујете извору. &lt;br /&gt; &lt;br /&gt; &lt;img src=vpn_icon /&gt; се приказује у врху екрана када је VPN активан."</string>
-    <string name="warning" product="tv" msgid="5188957997628124947">"Апликација <xliff:g id="APP">%s</xliff:g> жели да подеси VPN везу која јој омогућава да прати мрежни саобраћај. Прихватите ово само ако имате поверења у извор. &lt;br /&gt; &lt;br /&gt; &lt;img src=vpn_icon /&gt; се приказује на екрану када је VPN активан."</string>
-    <string name="legacy_title" msgid="192936250066580964">"VPN је повезан"</string>
-    <string name="session" msgid="6470628549473641030">"Сесија:"</string>
-    <string name="duration" msgid="3584782459928719435">"Трајање:"</string>
-    <string name="data_transmitted" msgid="7988167672982199061">"Послато:"</string>
-    <string name="data_received" msgid="4062776929376067820">"Примљенo:"</string>
-    <string name="data_value_format" msgid="2192466557826897580">"<xliff:g id="NUMBER_0">%1$s</xliff:g> бајт(ов)а / <xliff:g id="NUMBER_1">%2$s</xliff:g> пакета"</string>
-    <string name="always_on_disconnected_title" msgid="1906740176262776166">"Повезивање са увек укљученим VPN-ом није успело"</string>
-    <string name="always_on_disconnected_message" msgid="555634519845992917">"Мрежа <xliff:g id="VPN_APP_0">%1$s</xliff:g> је подешена да буде увек повезана, али тренутно не може да успостави везу. Телефон ће користити јавну мрежу док се поново не повеже са <xliff:g id="VPN_APP_1">%1$s</xliff:g>."</string>
-    <string name="always_on_disconnected_message_lockdown" msgid="4232225539869452120">"Мрежа <xliff:g id="VPN_APP">%1$s</xliff:g> је подешена да буде увек повезана, али тренутно не може да успостави везу. Нећете имати везу док се VPN поново не повеже."</string>
+    <string name="prompt" msgid="3183836924226407828">"Zahtev za povezivanje"</string>
+    <string name="warning" msgid="809658604548412033">"<xliff:g id="APP">%s</xliff:g> želi da podesi VPN vezu koja omogućava praćenje saobraćaja na mreži. Prihvatite samo ako verujete izvoru. &lt;br /&gt; &lt;br /&gt; &lt;img src=vpn_icon /&gt; se prikazuje u vrhu ekrana kada je VPN aktivan."</string>
+    <string name="warning" product="tv" msgid="5188957997628124947">"Aplikacija <xliff:g id="APP">%s</xliff:g> želi da podesi VPN vezu koja joj omogućava da prati mrežni saobraćaj. Prihvatite ovo samo ako imate poverenja u izvor. &lt;br /&gt; &lt;br /&gt; &lt;img src=vpn_icon /&gt; se prikazuje na ekranu kada je VPN aktivan."</string>
+    <string name="legacy_title" msgid="192936250066580964">"VPN je povezan"</string>
+    <string name="session" msgid="6470628549473641030">"Sesija:"</string>
+    <string name="duration" msgid="3584782459928719435">"Trajanje:"</string>
+    <string name="data_transmitted" msgid="7988167672982199061">"Poslato:"</string>
+    <string name="data_received" msgid="4062776929376067820">"Primljeno:"</string>
+    <string name="data_value_format" msgid="2192466557826897580">"<xliff:g id="NUMBER_0">%1$s</xliff:g> bajt(ov)a / <xliff:g id="NUMBER_1">%2$s</xliff:g> paketa"</string>
+    <string name="always_on_disconnected_title" msgid="1906740176262776166">"Povezivanje sa uvek uključenim VPN-om nije uspelo"</string>
+    <string name="always_on_disconnected_message" msgid="555634519845992917">"Mreža <xliff:g id="VPN_APP_0">%1$s</xliff:g> je podešena da bude uvek povezana, ali trenutno ne može da uspostavi vezu. Telefon će koristiti javnu mrežu dok se ponovo ne poveže sa <xliff:g id="VPN_APP_1">%1$s</xliff:g>."</string>
+    <string name="always_on_disconnected_message_lockdown" msgid="4232225539869452120">"Mreža <xliff:g id="VPN_APP">%1$s</xliff:g> je podešena da bude uvek povezana, ali trenutno ne može da uspostavi vezu. Nećete imati vezu dok se VPN ponovo ne poveže."</string>
     <string name="always_on_disconnected_message_separator" msgid="3310614409322581371">" "</string>
-    <string name="always_on_disconnected_message_settings_link" msgid="6172280302829992412">"Промени подешавања VPN-а"</string>
-    <string name="configure" msgid="4905518375574791375">"Конфигуриши"</string>
-    <string name="disconnect" msgid="971412338304200056">"Прекини везу"</string>
-    <string name="open_app" msgid="3717639178595958667">"Отвори апликацију"</string>
-    <string name="dismiss" msgid="6192859333764711227">"Одбаци"</string>
+    <string name="always_on_disconnected_message_settings_link" msgid="6172280302829992412">"Promeni podešavanja VPN-a"</string>
+    <string name="configure" msgid="4905518375574791375">"Konfiguriši"</string>
+    <string name="disconnect" msgid="971412338304200056">"Prekini vezu"</string>
+    <string name="open_app" msgid="3717639178595958667">"Otvori aplikaciju"</string>
+    <string name="dismiss" msgid="6192859333764711227">"Odbaci"</string>
     <string name="sanitized_vpn_label_with_ellipsis" msgid="7014327474633422235">"<xliff:g id="SANITIZED_VPN_LABEL_WITH_ELLIPSIS_0">%1$s</xliff:g>… ( <xliff:g id="SANITIZED_VPN_LABEL_WITH_ELLIPSIS_1">%2$s</xliff:g>)"</string>
     <string name="sanitized_vpn_label" msgid="1877415015009794766">"<xliff:g id="SANITIZED_VPN_LABEL_0">%1$s</xliff:g> ( <xliff:g id="SANITIZED_VPN_LABEL_1">%2$s</xliff:g>)"</string>
 </resources>

@@ -17851,12 +17851,12 @@ public class TelephonyManager {
 
     /** @hide */
     @Retention(RetentionPolicy.SOURCE)
-    @IntDef(prefix = {"CELLBROADCAST_RESULT_"}, value = {
-            CELLBROADCAST_RESULT_UNKNOWN,
-            CELLBROADCAST_RESULT_SUCCESS,
-            CELLBROADCAST_RESULT_UNSUPPORTED,
-            CELLBROADCAST_RESULT_FAIL_CONFIG,
-            CELLBROADCAST_RESULT_FAIL_ACTIVATION})
+    @IntDef(prefix = {"CELL_BROADCAST_RESULT_"}, value = {
+            CELL_BROADCAST_RESULT_UNKNOWN,
+            CELL_BROADCAST_RESULT_SUCCESS,
+            CELL_BROADCAST_RESULT_UNSUPPORTED,
+            CELL_BROADCAST_RESULT_FAIL_CONFIG,
+            CELL_BROADCAST_RESULT_FAIL_ACTIVATION})
     public @interface CellBroadcastResult {}
 
     /**
@@ -17864,35 +17864,35 @@ public class TelephonyManager {
      * @hide
      */
     @SystemApi
-    public static final int CELLBROADCAST_RESULT_UNKNOWN = -1;
+    public static final int CELL_BROADCAST_RESULT_UNKNOWN = -1;
 
     /**
      * The cell broadcast request is successful.
      * @hide
      */
     @SystemApi
-    public static final int CELLBROADCAST_RESULT_SUCCESS = 0;
+    public static final int CELL_BROADCAST_RESULT_SUCCESS = 0;
 
     /**
      * The cell broadcast request is not supported.
      * @hide
      */
     @SystemApi
-    public static final int CELLBROADCAST_RESULT_UNSUPPORTED = 1;
+    public static final int CELL_BROADCAST_RESULT_UNSUPPORTED = 1;
 
     /**
      * The cell broadcast request is failed due to the error to set config
      * @hide
      */
     @SystemApi
-    public static final int CELLBROADCAST_RESULT_FAIL_CONFIG = 2;
+    public static final int CELL_BROADCAST_RESULT_FAIL_CONFIG = 2;
 
     /**
      * The cell broadcast request is failed due to the error to set activation
      * @hide
      */
     @SystemApi
-    public static final int CELLBROADCAST_RESULT_FAIL_ACTIVATION = 3;
+    public static final int CELL_BROADCAST_RESULT_FAIL_ACTIVATION = 3;
 
     /**
      * Set reception of cell broadcast messages with the list of the given ranges

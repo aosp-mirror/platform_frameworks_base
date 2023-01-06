@@ -22,6 +22,8 @@ import android.hardware.input.KeyboardLayout;
 import android.hardware.input.IInputDevicesChangedListener;
 import android.hardware.input.IInputDeviceBatteryListener;
 import android.hardware.input.IInputDeviceBatteryState;
+import android.hardware.input.IKeyboardBacklightListener;
+import android.hardware.input.IKeyboardBacklightState;
 import android.hardware.input.ITabletModeChangedListener;
 import android.hardware.input.TouchCalibration;
 import android.os.CombinedVibration;
@@ -221,4 +223,14 @@ interface IInputManager {
     @JavaPassthrough(annotation="@android.annotation.RequiresPermission(value = "
             + "android.Manifest.permission.MONITOR_INPUT)")
     void pilferPointers(IBinder inputChannelToken);
+
+    @EnforcePermission("MONITOR_KEYBOARD_BACKLIGHT")
+    @JavaPassthrough(annotation="@android.annotation.RequiresPermission(value = "
+            + "android.Manifest.permission.MONITOR_KEYBOARD_BACKLIGHT)")
+    void registerKeyboardBacklightListener(IKeyboardBacklightListener listener);
+
+    @EnforcePermission("MONITOR_KEYBOARD_BACKLIGHT")
+    @JavaPassthrough(annotation="@android.annotation.RequiresPermission(value = "
+            + "android.Manifest.permission.MONITOR_KEYBOARD_BACKLIGHT)")
+    void unregisterKeyboardBacklightListener(IKeyboardBacklightListener listener);
 }

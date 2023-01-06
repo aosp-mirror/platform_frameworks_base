@@ -16,7 +16,7 @@
 
 package com.android.wm.shell.flicker.bubble
 
-import android.platform.test.annotations.RequiresDevice
+import androidx.test.filters.RequiresDevice
 import androidx.test.uiautomator.By
 import androidx.test.uiautomator.Until
 import com.android.server.wm.flicker.FlickerBuilder

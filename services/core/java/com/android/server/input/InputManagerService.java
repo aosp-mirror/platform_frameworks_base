@@ -44,6 +44,7 @@ import android.hardware.input.IInputDeviceBatteryState;
 import android.hardware.input.IInputDevicesChangedListener;
 import android.hardware.input.IInputManager;
 import android.hardware.input.IInputSensorEventListener;
+import android.hardware.input.IKeyboardBacklightListener;
 import android.hardware.input.ITabletModeChangedListener;
 import android.hardware.input.InputDeviceIdentifier;
 import android.hardware.input.InputManager;
@@ -2224,6 +2225,24 @@ public class InputManagerService extends IInputManager.Stub
 
         Objects.requireNonNull(inputChannelToken);
         mNative.pilferPointers(inputChannelToken);
+    }
+
+    @Override
+    @EnforcePermission(Manifest.permission.MONITOR_KEYBOARD_BACKLIGHT)
+    public void registerKeyboardBacklightListener(IKeyboardBacklightListener listener) {
+        super.registerKeyboardBacklightListener_enforcePermission();
+        Objects.requireNonNull(listener);
+        mKeyboardBacklightController.registerKeyboardBacklightListener(listener,
+                Binder.getCallingPid());
+    }
+
+    @Override
+    @EnforcePermission(Manifest.permission.MONITOR_KEYBOARD_BACKLIGHT)
+    public void unregisterKeyboardBacklightListener(IKeyboardBacklightListener listener) {
+        super.unregisterKeyboardBacklightListener_enforcePermission();
+        Objects.requireNonNull(listener);
+        mKeyboardBacklightController.unregisterKeyboardBacklightListener(listener,
+                Binder.getCallingPid());
     }
 
     @Override

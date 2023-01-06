@@ -1411,5 +1411,8 @@ class ActiveAdmin {
 
         pw.print("mtePolicy=");
         pw.println(mtePolicy);
+
+        pw.print("accountTypesWithManagementDisabled=");
+        pw.println(accountTypesWithManagementDisabled);
     }
 }

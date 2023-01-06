@@ -167,7 +167,7 @@ public class UserLifecycleTests {
 
     /** Tests creating a new user. */
     @Test(timeout = TIMEOUT_MAX_TEST_TIME_MS)
-    public void createUser() {
+    public void createUser() throws RemoteException {
         while (mRunner.keepRunning()) {
             Log.i(TAG, "Starting timer");
             final int userId = createUserNoFlags();
@@ -229,7 +229,7 @@ public class UserLifecycleTests {
      * Measures the time until unlock listener is triggered and user is unlocked.
      */
     @Test(timeout = TIMEOUT_MAX_TEST_TIME_MS)
-    public void startAndUnlockUser() {
+    public void startAndUnlockUser() throws RemoteException {
         while (mRunner.keepRunning()) {
             mRunner.pauseTiming();
             final int userId = createUserNoFlags();
@@ -451,7 +451,7 @@ public class UserLifecycleTests {
 
     /** Tests creating a new profile. */
     @Test(timeout = TIMEOUT_MAX_TEST_TIME_MS)
-    public void managedProfileCreate() {
+    public void managedProfileCreate() throws RemoteException {
         assumeTrue(mHasManagedUserFeature);
 
         while (mRunner.keepRunning()) {
@@ -468,7 +468,7 @@ public class UserLifecycleTests {
 
     /** Tests starting (unlocking) an uninitialized profile. */
     @Test(timeout = TIMEOUT_MAX_TEST_TIME_MS)
-    public void managedProfileUnlock() {
+    public void managedProfileUnlock() throws RemoteException {
         assumeTrue(mHasManagedUserFeature);
 
         while (mRunner.keepRunning()) {
@@ -639,7 +639,7 @@ public class UserLifecycleTests {
     // TODO: This is just a POC. Do this properly and add more.
     /** Tests starting (unlocking) a newly-created profile using the user-type-pkg-whitelist. */
     @Test(timeout = TIMEOUT_MAX_TEST_TIME_MS)
-    public void managedProfileUnlock_usingWhitelist() {
+    public void managedProfileUnlock_usingWhitelist() throws RemoteException {
         assumeTrue(mHasManagedUserFeature);
         final int origMode = getUserTypePackageWhitelistMode();
         setUserTypePackageWhitelistMode(USER_TYPE_PACKAGE_WHITELIST_MODE_ENFORCE
@@ -665,7 +665,7 @@ public class UserLifecycleTests {
     }
     /** Tests starting (unlocking) a newly-created profile NOT using the user-type-pkg-whitelist. */
     @Test(timeout = TIMEOUT_MAX_TEST_TIME_MS)
-    public void managedProfileUnlock_notUsingWhitelist() {
+    public void managedProfileUnlock_notUsingWhitelist() throws RemoteException {
         assumeTrue(mHasManagedUserFeature);
         final int origMode = getUserTypePackageWhitelistMode();
         setUserTypePackageWhitelistMode(USER_TYPE_PACKAGE_WHITELIST_MODE_DISABLE);
@@ -908,10 +908,8 @@ public class UserLifecycleTests {
                 result != null && result.contains("Failed"));
     }
 
-    private void removeUser(int userId) {
-        if (mBroadcastWaiter.hasActionBeenReceivedForUser(Intent.ACTION_USER_STARTED, userId)) {
-            mBroadcastWaiter.waitActionForUserIfNotReceivedYet(Intent.ACTION_MEDIA_MOUNTED, userId);
-        }
+    private void removeUser(int userId) throws RemoteException {
+        stopUserAfterWaitingForBroadcastIdle(userId, true);
         try {
             mUm.removeUser(userId);
             final long startTime = System.currentTimeMillis();

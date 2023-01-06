@@ -56,7 +56,6 @@ class AppListPageTest {
 
         val state = inputState!!.state
         assertThat(state.showSystem.value).isFalse()
-        assertThat(state.option.value).isEqualTo(0)
         assertThat(state.searchQuery.value).isEqualTo("")
     }
 
@@ -89,38 +88,14 @@ class AppListPageTest {
             .assertIsDisplayed()
     }
 
-    @Test
-    fun whenHasOptions_firstOptionDisplayed() {
-        val inputState by setContent(options = listOf(OPTION_0, OPTION_1))
-
-        composeTestRule.onNodeWithText(OPTION_0).assertIsDisplayed()
-        composeTestRule.onNodeWithText(OPTION_1).assertDoesNotExist()
-        val state = inputState!!.state
-        assertThat(state.option.value).isEqualTo(0)
-    }
-
-    @Test
-    fun whenHasOptions_couldSwitchOption() {
-        val inputState by setContent(options = listOf(OPTION_0, OPTION_1))
-
-        composeTestRule.onNodeWithText(OPTION_0).performClick()
-        composeTestRule.onNodeWithText(OPTION_1).performClick()
-
-        composeTestRule.onNodeWithText(OPTION_1).assertIsDisplayed()
-        composeTestRule.onNodeWithText(OPTION_0).assertDoesNotExist()
-        val state = inputState!!.state
-        assertThat(state.option.value).isEqualTo(1)
-    }
-
     private fun setContent(
-        options: List<String> = emptyList(),
         header: @Composable () -> Unit = {},
     ): State<AppListInput<TestAppRecord>?> {
         val appListState = mutableStateOf<AppListInput<TestAppRecord>?>(null)
         composeTestRule.setContent {
             AppListPage(
                 title = TITLE,
-                listModel = TestAppListModel(options),
+                listModel = TestAppListModel(),
                 header = header,
                 appList = { appListState.value = this },
             )
@@ -130,7 +105,5 @@ class AppListPageTest {
 
     private companion object {
         const val TITLE = "Title"
-        const val OPTION_0 = "Option 1"
-        const val OPTION_1 = "Option 2"
     }
 }

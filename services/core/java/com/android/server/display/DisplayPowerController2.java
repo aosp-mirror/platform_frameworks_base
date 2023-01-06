@@ -2330,6 +2330,11 @@ final class DisplayPowerController2 implements AutomaticBrightnessController.Cal
         if (mDisplayBrightnessController != null) {
             mDisplayBrightnessController.dump(pw);
         }
+
+        pw.println();
+        if (mDisplayStateController != null) {
+            mDisplayStateController.dumpsys(pw);
+        }
     }
 
 

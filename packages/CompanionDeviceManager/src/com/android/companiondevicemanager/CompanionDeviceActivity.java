@@ -16,12 +16,6 @@
 
 package com.android.companiondevicemanager;
 
-import static android.companion.AssociationRequest.DEVICE_PROFILE_APP_STREAMING;
-import static android.companion.AssociationRequest.DEVICE_PROFILE_AUTOMOTIVE_PROJECTION;
-import static android.companion.AssociationRequest.DEVICE_PROFILE_COMPUTER;
-import static android.companion.AssociationRequest.DEVICE_PROFILE_GLASSES;
-import static android.companion.AssociationRequest.DEVICE_PROFILE_NEARBY_DEVICE_STREAMING;
-import static android.companion.AssociationRequest.DEVICE_PROFILE_WATCH;
 import static android.companion.CompanionDeviceManager.REASON_CANCELED;
 import static android.companion.CompanionDeviceManager.REASON_DISCOVERY_TIMEOUT;
 import static android.companion.CompanionDeviceManager.REASON_INTERNAL_ERROR;
@@ -33,16 +27,14 @@ import static android.view.WindowManager.LayoutParams.SYSTEM_FLAG_HIDE_NON_SYSTE
 
 import static com.android.companiondevicemanager.CompanionDeviceDiscoveryService.DiscoveryState;
 import static com.android.companiondevicemanager.CompanionDeviceDiscoveryService.DiscoveryState.FINISHED_TIMEOUT;
-import static com.android.companiondevicemanager.PermissionListAdapter.PERMISSION_APP_STREAMING;
-import static com.android.companiondevicemanager.PermissionListAdapter.PERMISSION_CALENDAR;
-import static com.android.companiondevicemanager.PermissionListAdapter.PERMISSION_CONTACTS;
-import static com.android.companiondevicemanager.PermissionListAdapter.PERMISSION_MICROPHONE;
-import static com.android.companiondevicemanager.PermissionListAdapter.PERMISSION_NEARBY_DEVICES;
-import static com.android.companiondevicemanager.PermissionListAdapter.PERMISSION_NEARBY_DEVICE_STREAMING;
-import static com.android.companiondevicemanager.PermissionListAdapter.PERMISSION_NOTIFICATION;
-import static com.android.companiondevicemanager.PermissionListAdapter.PERMISSION_PHONE;
-import static com.android.companiondevicemanager.PermissionListAdapter.PERMISSION_SMS;
-import static com.android.companiondevicemanager.PermissionListAdapter.PERMISSION_STORAGE;
+import static com.android.companiondevicemanager.CompanionDeviceResources.MULTI_DEVICES_SUMMARIES;
+import static com.android.companiondevicemanager.CompanionDeviceResources.PERMISSION_TYPES;
+import static com.android.companiondevicemanager.CompanionDeviceResources.PROFILES_NAME;
+import static com.android.companiondevicemanager.CompanionDeviceResources.PROFILE_ICON;
+import static com.android.companiondevicemanager.CompanionDeviceResources.SUMMARIES;
+import static com.android.companiondevicemanager.CompanionDeviceResources.SUPPORTED_PROFILES;
+import static com.android.companiondevicemanager.CompanionDeviceResources.SUPPORTED_SELF_MANAGED_PROFILES;
+import static com.android.companiondevicemanager.CompanionDeviceResources.TITLES;
 import static com.android.companiondevicemanager.Utils.getApplicationLabel;
 import static com.android.companiondevicemanager.Utils.getHtmlFromResources;
 import static com.android.companiondevicemanager.Utils.getIcon;
@@ -92,7 +84,6 @@ import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 
 /**
@@ -470,6 +461,10 @@ public class CompanionDeviceActivity extends FragmentActivity implements
         int nightModeFlags = getResources().getConfiguration().uiMode
                 & Configuration.UI_MODE_NIGHT_MASK;
 
+        if (!SUPPORTED_SELF_MANAGED_PROFILES.contains(deviceProfile)) {
+            throw new RuntimeException("Unsupported profile " + deviceProfile);
+        }
+
         mPermissionTypes = new ArrayList<>();
 
         try {
@@ -488,32 +483,8 @@ public class CompanionDeviceActivity extends FragmentActivity implements
             return;
         }
 
-        // TODO(b/253644212): Add maps for profile -> title, summary, permissions
-        switch (deviceProfile) {
-            case DEVICE_PROFILE_APP_STREAMING:
-                title = getHtmlFromResources(this, R.string.title_app_streaming, deviceName);
-                mPermissionTypes.add(PERMISSION_APP_STREAMING);
-                break;
-
-            case DEVICE_PROFILE_AUTOMOTIVE_PROJECTION:
-                title = getHtmlFromResources(
-                        this, R.string.title_automotive_projection, deviceName);
-                break;
-
-            case DEVICE_PROFILE_COMPUTER:
-                title = getHtmlFromResources(this, R.string.title_computer, deviceName);
-                mPermissionTypes.addAll(Arrays.asList(PERMISSION_NOTIFICATION, PERMISSION_STORAGE));
-                break;
-
-            case DEVICE_PROFILE_NEARBY_DEVICE_STREAMING:
-                title = getHtmlFromResources(this, R.string.title_nearby_device_streaming,
-                        deviceName);
-                mPermissionTypes.add(PERMISSION_NEARBY_DEVICE_STREAMING);
-                break;
-
-            default:
-                throw new RuntimeException("Unsupported profile " + deviceProfile);
-        }
+        title = getHtmlFromResources(this, TITLES.get(deviceProfile), deviceName);
+        mPermissionTypes.addAll(PERMISSION_TYPES.get(deviceProfile));
 
         // Summary is not needed for selfManaged dialog.
         mSummary.setVisibility(View.GONE);
@@ -566,45 +537,27 @@ public class CompanionDeviceActivity extends FragmentActivity implements
         }
 
         final String deviceName = mSelectedDevice.getDisplayName();
-        final String profileName;
         final Spanned title;
         final Spanned summary;
         final Drawable profileIcon;
 
+        if (!SUPPORTED_PROFILES.contains(deviceProfile)) {
+            throw new RuntimeException("Unsupported profile " + deviceProfile);
+        }
+
         if (deviceProfile == null) {
-            title = getHtmlFromResources(this, R.string.confirmation_title, appLabel, deviceName);
-            summary = getHtmlFromResources(this, R.string.summary_generic);
-            profileIcon = getIcon(this, R.drawable.ic_device_other);
             // Summary is not needed for null profile.
             mSummary.setVisibility(View.GONE);
             mConstraintList.setVisibility(View.GONE);
-        } else if (deviceProfile.equals(DEVICE_PROFILE_WATCH)) {
-            profileName = getString(R.string.profile_name_watch);
-            title = getHtmlFromResources(this, R.string.confirmation_title, appLabel, deviceName);
-            summary = getHtmlFromResources(
-                    this, R.string.summary_watch_single_device, profileName, appLabel);
-            profileIcon = getIcon(this, R.drawable.ic_watch);
-
-            mPermissionTypes.addAll(Arrays.asList(
-                    PERMISSION_NOTIFICATION, PERMISSION_PHONE, PERMISSION_SMS, PERMISSION_CONTACTS,
-                    PERMISSION_CALENDAR, PERMISSION_NEARBY_DEVICES));
-
-            setupPermissionList();
-        } else if (deviceProfile.equals(DEVICE_PROFILE_GLASSES)) {
-            profileName = getString(R.string.profile_name_glasses);
-            title = getHtmlFromResources(this, R.string.confirmation_title, appLabel, deviceName);
-            summary = getHtmlFromResources(
-                    this, R.string.summary_glasses_single_device, profileName, appLabel);
-            profileIcon = getIcon(this, R.drawable.ic_glasses);
-
-            mPermissionTypes.addAll(Arrays.asList(
-                    PERMISSION_NOTIFICATION, PERMISSION_PHONE, PERMISSION_SMS, PERMISSION_CONTACTS,
-                    PERMISSION_MICROPHONE, PERMISSION_NEARBY_DEVICES));
-
-            setupPermissionList();
         } else {
-            throw new RuntimeException("Unsupported profile " + deviceProfile);
+            mPermissionTypes.addAll(PERMISSION_TYPES.get(deviceProfile));
+            setupPermissionList();
         }
+
+        title = getHtmlFromResources(this, TITLES.get(deviceProfile), appLabel, deviceName);
+        summary = getHtmlFromResources(this, SUMMARIES.get(deviceProfile),
+                getString(PROFILES_NAME.get(deviceProfile)), appLabel);
+        profileIcon = getIcon(this, PROFILE_ICON.get(deviceProfile));
 
         mTitle.setText(title);
         mSummary.setText(summary);
@@ -621,22 +574,23 @@ public class CompanionDeviceActivity extends FragmentActivity implements
         final String profileName;
         final Spanned summary;
         final Drawable profileIcon;
-        if (deviceProfile == null) {
-            profileName = getString(R.string.profile_name_generic);
-            summary = getHtmlFromResources(this, R.string.summary_generic);
-            profileIcon = getIcon(this, R.drawable.ic_device_other);
-            mSummary.setVisibility(View.GONE);
-        } else if (deviceProfile.equals(DEVICE_PROFILE_WATCH)) {
-            profileName = getString(R.string.profile_name_watch);
-            summary = getHtmlFromResources(this, R.string.summary_watch, profileName, appLabel);
-            profileIcon = getIcon(this, R.drawable.ic_watch);
-        } else if (deviceProfile.equals(DEVICE_PROFILE_GLASSES)) {
-            profileName = getString(R.string.profile_name_glasses);
-            summary = getHtmlFromResources(this, R.string.summary_glasses, profileName, appLabel);
-            profileIcon = getIcon(this, R.drawable.ic_glasses);
-        } else {
+        final int summaryResourceId;
+
+        if (!SUPPORTED_PROFILES.contains(deviceProfile)) {
             throw new RuntimeException("Unsupported profile " + deviceProfile);
         }
+
+        profileName = getString(PROFILES_NAME.get(deviceProfile));
+        profileIcon = getIcon(this, PROFILE_ICON.get(deviceProfile));
+        summaryResourceId = MULTI_DEVICES_SUMMARIES.get(deviceProfile);
+
+        if (deviceProfile == null) {
+            summary = getHtmlFromResources(this, summaryResourceId);
+            mSummary.setVisibility(View.GONE);
+        } else {
+            summary = getHtmlFromResources(this, summaryResourceId, profileName, appLabel);
+        }
+
         final Spanned title = getHtmlFromResources(
                 this, R.string.chooser_title, profileName, appLabel);
 

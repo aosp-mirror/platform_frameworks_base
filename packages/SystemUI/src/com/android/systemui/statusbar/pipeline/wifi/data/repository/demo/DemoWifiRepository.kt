@@ -89,7 +89,7 @@ constructor(
         WifiNetworkModel.Active(
             networkId = DEMO_NET_ID,
             isValidated = validated ?: true,
-            level = level,
+            level = level ?: 0,
             ssid = ssid,
 
             // These fields below aren't supported in demo mode, since they aren't needed to satisfy

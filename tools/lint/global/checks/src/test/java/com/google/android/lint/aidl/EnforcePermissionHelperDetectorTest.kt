@@ -47,7 +47,7 @@ class EnforcePermissionHelperDetectorTest : LintDetectorTest() {
             .run()
             .expect(
                 """
-                src/Foo.java:5: Error: Method must start with super.test_enforcePermission() [MissingEnforcePermissionHelper]
+                src/Foo.java:5: Error: Method must start with test_enforcePermission() or super.test() [MissingEnforcePermissionHelper]
                     @Override
                     ^
                 1 errors, 0 warnings
@@ -85,7 +85,7 @@ class EnforcePermissionHelperDetectorTest : LintDetectorTest() {
             .run()
             .expect(
                 """
-                src/Foo.java:5: Error: Method must start with super.test_enforcePermission() [MissingEnforcePermissionHelper]
+                src/Foo.java:5: Error: Method must start with test_enforcePermission() or super.test() [MissingEnforcePermissionHelper]
                     @Override
                     ^
                 1 errors, 0 warnings
@@ -120,7 +120,7 @@ class EnforcePermissionHelperDetectorTest : LintDetectorTest() {
             .run()
             .expect(
                 """
-                src/Foo.java:5: Error: Method must start with super.test_enforcePermission() [MissingEnforcePermissionHelper]
+                src/Foo.java:5: Error: Method must start with test_enforcePermission() or super.test() [MissingEnforcePermissionHelper]
                     @Override
                     ^
                 1 errors, 0 warnings
@@ -150,6 +150,28 @@ class EnforcePermissionHelperDetectorTest : LintDetectorTest() {
             .expectClean()
     }
 
+    fun testHelperWithoutSuperPrefix_Okay() {
+        lint().files(
+            java(
+                """
+                import android.content.Context;
+                import android.test.ITest;
+                public class Foo extends ITest.Stub {
+                    private Context mContext;
+                    @Override
+                    @android.annotation.EnforcePermission("android.Manifest.permission.READ_CONTACTS")
+                    public void test() throws android.os.RemoteException {
+                        test_enforcePermission();
+                    }
+                }
+                """
+            ).indented(),
+            *stubs
+        )
+            .run()
+            .expectClean()
+    }
+
     fun testInterfaceDefaultMethod_wouldStillReport() {
         lint().files(
                 java(
@@ -167,12 +189,222 @@ class EnforcePermissionHelperDetectorTest : LintDetectorTest() {
                 .run()
                 .expect(
                     """
-                    src/IProtected.java:2: Error: Method must start with super.PermissionProtected_enforcePermission() [MissingEnforcePermissionHelper]
+                    src/IProtected.java:2: Error: Method must start with super.PermissionProtected_enforcePermission() or super.PermissionProtected() [MissingEnforcePermissionHelper]
                         @android.annotation.EnforcePermission(android.Manifest.permission.READ_PHONE_STATE)
                         ^
                     1 errors, 0 warnings
                     """
                 )
+    }
+
+    fun testInheritance_callSuper_okay() {
+        lint().files(
+            java(
+                """
+                package test;
+                import android.content.Context;
+                import android.test.ITest;
+                public class Foo extends ITest.Stub {
+                    private Context mContext;
+                    @Override
+                    @android.annotation.EnforcePermission("android.Manifest.permission.READ_CONTACTS")
+                    public void test() throws android.os.RemoteException {
+                        super.test_enforcePermission();
+                    }
+                }
+                """
+            ).indented(),
+            java(
+                """
+                package test;
+                import test.Foo;
+                public class Bar extends Foo {
+                    @Override
+                    @android.annotation.EnforcePermission("android.Manifest.permission.READ_CONTACTS")
+                    public void test() throws android.os.RemoteException {
+                        super.test();
+                    }
+                }
+                """
+            ).indented(),
+            java(
+                """
+                package test;
+                import test.Bar;
+                public class Baz extends Bar {
+                    @Override
+                    @android.annotation.EnforcePermission("android.Manifest.permission.READ_CONTACTS")
+                    public void test() throws android.os.RemoteException {
+                        super.test();
+                    }
+                }
+                """
+            ).indented(),
+            *stubs
+        )
+            .run()
+            .expectClean()
+    }
+
+    fun testInheritance_callHelper_okay() {
+        lint().files(
+            java(
+                """
+                package test;
+                import android.content.Context;
+                import android.test.ITest;
+                public class Foo extends ITest.Stub {
+                    private Context mContext;
+                    @Override
+                    @android.annotation.EnforcePermission("android.Manifest.permission.READ_CONTACTS")
+                    public void test() throws android.os.RemoteException {
+                        super.test_enforcePermission();
+                    }
+                }
+                """
+            ).indented(),
+            java(
+                """
+                package test;
+                import test.Foo;
+                public class Bar extends Foo {
+                    @Override
+                    @android.annotation.EnforcePermission("android.Manifest.permission.READ_CONTACTS")
+                    public void test() throws android.os.RemoteException {
+                        super.test();
+                    }
+                }
+                """
+            ).indented(),
+            java(
+                """
+                package test;
+                import test.Bar;
+                public class Baz extends Bar {
+                    @Override
+                    @android.annotation.EnforcePermission("android.Manifest.permission.READ_CONTACTS")
+                    public void test() throws android.os.RemoteException {
+                        super.test_enforcePermission();
+                    }
+                }
+                """
+            ).indented(),
+            *stubs
+        )
+            .run()
+            .expectClean()
+    }
+
+    fun testInheritance_missingCallInChain_error() {
+        lint().files(
+            java(
+                """
+                package test;
+                import android.content.Context;
+                import android.test.ITest;
+                public class Foo extends ITest.Stub {
+                    private Context mContext;
+                    @Override
+                    @android.annotation.EnforcePermission("android.Manifest.permission.READ_CONTACTS")
+                    public void test() throws android.os.RemoteException {
+                        super.test_enforcePermission();
+                    }
+                }
+                """
+            ).indented(),
+            java(
+                """
+                package test;
+                import test.Foo;
+                public class Bar extends Foo {
+                    @Override
+                    @android.annotation.EnforcePermission("android.Manifest.permission.READ_CONTACTS")
+                    public void test() throws android.os.RemoteException {
+                        doStuff();
+                    }
+                }
+                """
+            ).indented(),
+            java(
+                """
+                package test;
+                import test.Bar;
+                public class Baz extends Bar {
+                    @Override
+                    @android.annotation.EnforcePermission("android.Manifest.permission.READ_CONTACTS")
+                    public void test() throws android.os.RemoteException {
+                        super.test();
+                    }
+                }
+                """
+            ).indented(),
+            *stubs
+        )
+            .run()
+            .expect(
+                """
+                src/test/Bar.java:4: Error: Method must start with test_enforcePermission() or super.test() [MissingEnforcePermissionHelper]
+                    @Override
+                    ^
+                1 errors, 0 warnings
+                """
+            )
+    }
+
+    fun testInheritance_missingCall_error() {
+        lint().files(
+            java(
+                """
+                package test;
+                import android.content.Context;
+                import android.test.ITest;
+                public class Foo extends ITest.Stub {
+                    private Context mContext;
+                    @Override
+                    @android.annotation.EnforcePermission("android.Manifest.permission.READ_CONTACTS")
+                    public void test() throws android.os.RemoteException {
+                        super.test_enforcePermission();
+                    }
+                }
+                """
+            ).indented(),
+            java(
+                """
+                package test;
+                import test.Foo;
+                public class Bar extends Foo {
+                    @Override
+                    @android.annotation.EnforcePermission("android.Manifest.permission.READ_CONTACTS")
+                    public void test() throws android.os.RemoteException {
+                        super.test();
+                    }
+                }
+                """
+            ).indented(),
+            java(
+                """
+                package test;
+                import test.Bar;
+                public class Baz extends Bar {
+                    @Override
+                    @android.annotation.EnforcePermission("android.Manifest.permission.READ_CONTACTS")
+                    public void test() throws android.os.RemoteException {
+                        doStuff();
+                    }
+                }
+                """
+            ).indented(),
+            *stubs
+        )
+            .run()
+            .expect(
+                """
+                src/test/Baz.java:4: Error: Method must start with test_enforcePermission() or super.test() [MissingEnforcePermissionHelper]
+                    @Override
+                    ^
+                1 errors, 0 warnings
+                """
+            )
     }
 
     companion object {

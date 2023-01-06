@@ -24,17 +24,21 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.junit4.createComposeRule
 import androidx.compose.ui.test.onNodeWithText
+import androidx.compose.ui.test.performClick
 import androidx.compose.ui.unit.dp
 import androidx.test.core.app.ApplicationProvider
 import androidx.test.ext.junit.runners.AndroidJUnit4
-import com.android.settingslib.spa.framework.compose.stateOf
 import com.android.settingslib.spa.framework.compose.toState
+import com.android.settingslib.spa.framework.util.StateFlowBridge
+import com.android.settingslib.spa.widget.ui.SpinnerOption
 import com.android.settingslib.spaprivileged.R
 import com.android.settingslib.spaprivileged.model.app.AppEntry
 import com.android.settingslib.spaprivileged.model.app.AppListConfig
 import com.android.settingslib.spaprivileged.model.app.AppListData
+import com.android.settingslib.spaprivileged.model.app.IAppListViewModel
 import com.android.settingslib.spaprivileged.tests.testutils.TestAppListModel
 import com.android.settingslib.spaprivileged.tests.testutils.TestAppRecord
+import kotlinx.coroutines.flow.flowOf
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -45,6 +49,25 @@ class AppListTest {
     val composeTestRule = createComposeRule()
 
     private val context: Context = ApplicationProvider.getApplicationContext()
+
+    @Test
+    fun whenHasOptions_firstOptionDisplayed() {
+        setContent(options = listOf(OPTION_0, OPTION_1))
+
+        composeTestRule.onNodeWithText(OPTION_0).assertIsDisplayed()
+        composeTestRule.onNodeWithText(OPTION_1).assertDoesNotExist()
+    }
+
+    @Test
+    fun whenHasOptions_couldSwitchOption() {
+        setContent(options = listOf(OPTION_0, OPTION_1))
+
+        composeTestRule.onNodeWithText(OPTION_0).performClick()
+        composeTestRule.onNodeWithText(OPTION_1).performClick()
+
+        composeTestRule.onNodeWithText(OPTION_1).assertIsDisplayed()
+        composeTestRule.onNodeWithText(OPTION_0).assertDoesNotExist()
+    }
 
     @Test
     fun whenNoApps() {
@@ -85,28 +108,37 @@ class AppListTest {
     }
 
     private fun setContent(
-        appEntries: List<AppEntry<TestAppRecord>>,
+        options: List<String> = emptyList(),
+        appEntries: List<AppEntry<TestAppRecord>> = emptyList(),
         header: @Composable () -> Unit = {},
         enableGrouping: Boolean = false,
     ) {
         composeTestRule.setContent {
-            val appListInput = AppListInput(
+            AppListInput(
                 config = AppListConfig(userId = USER_ID, showInstantApps = false),
                 listModel = TestAppListModel(enableGrouping = enableGrouping),
                 state = AppListState(
                     showSystem = false.toState(),
-                    option = 0.toState(),
                     searchQuery = "".toState(),
                 ),
                 header = header,
                 bottomPadding = 0.dp,
-            )
-            appListInput.AppListImpl { stateOf(AppListData(appEntries, option = 0)) }
+            ).AppListImpl {
+                object : IAppListViewModel<TestAppRecord> {
+                    override val option: StateFlowBridge<Int?> = StateFlowBridge()
+                    override val spinnerOptionsFlow = flowOf(options.mapIndexed { index, option ->
+                        SpinnerOption(id = index, text = option)
+                    })
+                    override val appListDataFlow = flowOf(AppListData(appEntries, option = 0))
+                }
+            }
         }
     }
 
     private companion object {
         const val USER_ID = 0
+        const val OPTION_0 = "Option 1"
+        const val OPTION_1 = "Option 2"
         const val HEADER = "Header"
         const val GROUP_A = "Group A"
         const val GROUP_B = "Group B"

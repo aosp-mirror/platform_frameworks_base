@@ -1423,9 +1423,9 @@ public class WindowManagerService extends IWindowManager.Stub
     public int addWindow(Session session, IWindow client, LayoutParams attrs, int viewVisibility,
             int displayId, int requestUserId, @InsetsType int requestedVisibleTypes,
             InputChannel outInputChannel, InsetsState outInsetsState,
-            InsetsSourceControl[] outActiveControls, Rect outAttachedFrame,
+            InsetsSourceControl.Array outActiveControls, Rect outAttachedFrame,
             float[] outSizeCompatScale) {
-        Arrays.fill(outActiveControls, null);
+        outActiveControls.set(null);
         int[] appOp = new int[1];
         final boolean isRoundedCornerOverlay = (attrs.privateFlags
                 & PRIVATE_FLAG_IS_ROUNDED_CORNERS_OVERLAY) != 0;
@@ -2215,10 +2215,10 @@ public class WindowManagerService extends IWindowManager.Stub
             int requestedWidth, int requestedHeight, int viewVisibility, int flags, int seq,
             int lastSyncSeqId, ClientWindowFrames outFrames,
             MergedConfiguration outMergedConfiguration, SurfaceControl outSurfaceControl,
-            InsetsState outInsetsState, InsetsSourceControl[] outActiveControls,
+            InsetsState outInsetsState, InsetsSourceControl.Array outActiveControls,
             Bundle outSyncIdBundle) {
         if (outActiveControls != null) {
-            Arrays.fill(outActiveControls, null);
+            outActiveControls.set(null);
         }
         int result = 0;
         boolean configChanged = false;
@@ -2590,11 +2590,12 @@ public class WindowManagerService extends IWindowManager.Stub
         return result;
     }
 
-    private void getInsetsSourceControls(WindowState win, InsetsSourceControl[] outControls) {
+    private void getInsetsSourceControls(WindowState win, InsetsSourceControl.Array outArray) {
         final InsetsSourceControl[] controls =
                 win.getDisplayContent().getInsetsStateController().getControlsForDispatch(win);
         if (controls != null) {
-            final int length = Math.min(controls.length, outControls.length);
+            final int length = controls.length;
+            final InsetsSourceControl[] outControls = new InsetsSourceControl[length];
             for (int i = 0; i < length; i++) {
                 // We will leave the critical section before returning the leash to the client,
                 // so we need to copy the leash to prevent others release the one that we are
@@ -2607,6 +2608,7 @@ public class WindowManagerService extends IWindowManager.Stub
                     outControls[i].setParcelableFlags(PARCELABLE_WRITE_RETURN_VALUE);
                 }
             }
+            outArray.set(outControls);
         }
     }
 
@@ -5358,7 +5360,6 @@ public class WindowManagerService extends IWindowManager.Stub
         public static final int ANIMATION_FAILSAFE = 60;
         public static final int RECOMPUTE_FOCUS = 61;
         public static final int ON_POINTER_DOWN_OUTSIDE_FOCUS = 62;
-        public static final int LAYOUT_AND_ASSIGN_WINDOW_LAYERS_IF_NEEDED = 63;
         public static final int WINDOW_STATE_BLAST_SYNC_TIMEOUT = 64;
         public static final int REPARENT_TASK_TO_DEFAULT_DISPLAY = 65;
         public static final int INSETS_CHANGED = 66;
@@ -5632,14 +5633,6 @@ public class WindowManagerService extends IWindowManager.Stub
                     synchronized (mGlobalLock) {
                         final IBinder touchedToken = (IBinder) msg.obj;
                         onPointerDownOutsideFocusLocked(touchedToken);
-                    }
-                    break;
-                }
-                case LAYOUT_AND_ASSIGN_WINDOW_LAYERS_IF_NEEDED: {
-                    synchronized (mGlobalLock) {
-                        final DisplayContent displayContent = (DisplayContent) msg.obj;
-                        displayContent.mLayoutAndAssignWindowLayersScheduled = false;
-                        displayContent.layoutAndAssignWindowLayersIfNeeded();
                     }
                     break;
                 }
@@ -8924,28 +8917,17 @@ public class WindowManagerService extends IWindowManager.Stub
     }
 
     @Override
-    public boolean getWindowInsets(WindowManager.LayoutParams attrs, int displayId,
-            InsetsState outInsetsState) {
-        final int uid = Binder.getCallingUid();
+    public boolean getWindowInsets(int displayId, IBinder token, InsetsState outInsetsState) {
         final long origId = Binder.clearCallingIdentity();
         try {
             synchronized (mGlobalLock) {
-                final DisplayContent dc = getDisplayContentOrCreate(displayId, attrs.token);
+                final DisplayContent dc = getDisplayContentOrCreate(displayId, token);
                 if (dc == null) {
                     throw new WindowManager.InvalidDisplayException("Display#" + displayId
                             + "could not be found!");
                 }
-                final WindowToken token = dc.getWindowToken(attrs.token);
-                final float overrideScale = mAtmService.mCompatModePackages.getCompatScale(
-                        attrs.packageName, uid);
-                final InsetsState state = dc.getInsetsPolicy().getInsetsForWindowMetrics(attrs);
-                outInsetsState.set(state, true /* copySources */);
-                if (WindowState.hasCompatScale(attrs, token, overrideScale)) {
-                    final float compatScale = token != null && token.hasSizeCompatBounds()
-                            ? token.getCompatScale() * overrideScale
-                            : overrideScale;
-                    outInsetsState.scale(1f / compatScale);
-                }
+                final WindowToken winToken = dc.getWindowToken(token);
+                dc.getInsetsPolicy().getInsetsForWindowMetrics(winToken, outInsetsState);
                 return dc.getDisplayPolicy().areSystemBarsForcedConsumedLw();
             }
         } finally {

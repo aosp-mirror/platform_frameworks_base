@@ -16,6 +16,7 @@
 
 package com.android.systemui.statusbar.pipeline.dagger
 
+import android.net.wifi.WifiManager
 import com.android.systemui.CoreStartable
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.log.table.TableLogBuffer
@@ -35,8 +36,11 @@ import com.android.systemui.statusbar.pipeline.mobile.util.MobileMappingsProxy
 import com.android.systemui.statusbar.pipeline.mobile.util.MobileMappingsProxyImpl
 import com.android.systemui.statusbar.pipeline.shared.data.repository.ConnectivityRepository
 import com.android.systemui.statusbar.pipeline.shared.data.repository.ConnectivityRepositoryImpl
+import com.android.systemui.statusbar.pipeline.wifi.data.repository.RealWifiRepository
 import com.android.systemui.statusbar.pipeline.wifi.data.repository.WifiRepository
 import com.android.systemui.statusbar.pipeline.wifi.data.repository.WifiRepositorySwitcher
+import com.android.systemui.statusbar.pipeline.wifi.data.repository.prod.DisabledWifiRepository
+import com.android.systemui.statusbar.pipeline.wifi.data.repository.prod.WifiRepositoryImpl
 import com.android.systemui.statusbar.pipeline.wifi.domain.interactor.WifiInteractor
 import com.android.systemui.statusbar.pipeline.wifi.domain.interactor.WifiInteractorImpl
 import dagger.Binds
@@ -78,9 +82,23 @@ abstract class StatusBarPipelineModule {
     @ClassKey(MobileUiAdapter::class)
     abstract fun bindFeature(impl: MobileUiAdapter): CoreStartable
 
-    @Module
     companion object {
-        @JvmStatic
+        @Provides
+        @SysUISingleton
+        fun provideRealWifiRepository(
+            wifiManager: WifiManager?,
+            disabledWifiRepository: DisabledWifiRepository,
+            wifiRepositoryImplFactory: WifiRepositoryImpl.Factory,
+        ): RealWifiRepository {
+            // If we have a null [WifiManager], then the wifi repository should be permanently
+            // disabled.
+            return if (wifiManager == null) {
+                disabledWifiRepository
+            } else {
+                wifiRepositoryImplFactory.create(wifiManager)
+            }
+        }
+
         @Provides
         @SysUISingleton
         @WifiTableLog
@@ -88,7 +106,6 @@ abstract class StatusBarPipelineModule {
             return factory.create("WifiTableLog", 100)
         }
 
-        @JvmStatic
         @Provides
         @SysUISingleton
         @AirplaneTableLog

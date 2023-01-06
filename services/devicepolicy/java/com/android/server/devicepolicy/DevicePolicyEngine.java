@@ -16,9 +16,25 @@
 
 package com.android.server.devicepolicy;
 
+import static android.app.admin.PolicyUpdateReason.REASON_CONFLICTING_ADMIN_POLICY;
+import static android.app.admin.PolicyUpdatesReceiver.EXTRA_POLICY_BUNDLE_KEY;
+import static android.app.admin.PolicyUpdatesReceiver.EXTRA_POLICY_KEY;
+import static android.app.admin.PolicyUpdatesReceiver.EXTRA_POLICY_SET_RESULT_KEY;
+import static android.app.admin.PolicyUpdatesReceiver.EXTRA_POLICY_TARGET_USER_ID;
+import static android.app.admin.PolicyUpdatesReceiver.EXTRA_POLICY_UPDATE_REASON_KEY;
+import static android.app.admin.PolicyUpdatesReceiver.POLICY_SET_RESULT_FAILURE;
+import static android.app.admin.PolicyUpdatesReceiver.POLICY_SET_RESULT_SUCCESS;
+
+import android.Manifest;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.app.admin.PolicyUpdatesReceiver;
+import android.app.admin.TargetUser;
 import android.content.Context;
+import android.content.Intent;
+import android.content.pm.PackageManager;
+import android.content.pm.ResolveInfo;
+import android.os.Bundle;
 import android.os.Environment;
 import android.os.UserHandle;
 import android.util.AtomicFile;
@@ -39,8 +55,10 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.Set;
 
 /**
  * Class responsible for setting, resolving, and enforcing policies set by multiple management
@@ -56,7 +74,7 @@ final class DevicePolicyEngine {
     /**
      * Map of <userId, Map<policyKey, policyState>>
      */
-    private final SparseArray<Map<String, PolicyState<?>>> mUserPolicies;
+    private final SparseArray<Map<String, PolicyState<?>>> mLocalPolicies;
 
     /**
      * Map of <policyKey, policyState>
@@ -65,7 +83,7 @@ final class DevicePolicyEngine {
 
     DevicePolicyEngine(@NonNull Context context) {
         mContext = Objects.requireNonNull(context);
-        mUserPolicies = new SparseArray<>();
+        mLocalPolicies = new SparseArray<>();
         mGlobalPolicies = new HashMap<>();
     }
 
@@ -92,8 +110,28 @@ final class DevicePolicyEngine {
             boolean policyChanged = policyState.setPolicy(enforcingAdmin, value);
 
             if (policyChanged) {
-                enforcePolicy(policyDefinition, policyState.getCurrentResolvedPolicy(), userId);
+                enforcePolicy(
+                        policyDefinition, policyState.getCurrentResolvedPolicy(), userId);
+                sendPolicyChangedToAdmins(
+                        policyState.getPoliciesSetByAdmins().keySet(),
+                        enforcingAdmin,
+                        policyDefinition,
+                        userId == enforcingAdmin.getUserId()
+                                ? TargetUser.LOCAL_USER_ID : TargetUser.PARENT_USER_ID);
+
             }
+            boolean wasAdminPolicyEnforced = Objects.equals(
+                    policyState.getCurrentResolvedPolicy(), value);
+            sendPolicyResultToAdmin(
+                    enforcingAdmin,
+                    policyDefinition,
+                    wasAdminPolicyEnforced,
+                    // TODO: we're always sending this for now, should properly handle errors.
+                    REASON_CONFLICTING_ADMIN_POLICY,
+                    userId == enforcingAdmin.getUserId()
+                            ? TargetUser.LOCAL_USER_ID : TargetUser.PARENT_USER_ID);
+
+            write();
             return policyChanged;
         }
     }
@@ -117,12 +155,28 @@ final class DevicePolicyEngine {
         synchronized (mLock) {
             PolicyState<V> policyState = getGlobalPolicyStateLocked(policyDefinition);
 
-            boolean policyChanged = policyState.setPolicy(enforcingAdmin, value);
 
+            boolean policyChanged = policyState.setPolicy(enforcingAdmin, value);
             if (policyChanged) {
                 enforcePolicy(policyDefinition, policyState.getCurrentResolvedPolicy(),
                         UserHandle.USER_ALL);
+                sendPolicyChangedToAdmins(
+                        policyState.getPoliciesSetByAdmins().keySet(),
+                        enforcingAdmin,
+                        policyDefinition,
+                        TargetUser.GLOBAL_USER_ID);
             }
+            boolean wasAdminPolicyEnforced = Objects.equals(
+                    policyState.getCurrentResolvedPolicy(), value);
+            sendPolicyResultToAdmin(
+                    enforcingAdmin,
+                    policyDefinition,
+                    wasAdminPolicyEnforced,
+                    // TODO: we're always sending this for now, should properly handle errors.
+                    REASON_CONFLICTING_ADMIN_POLICY,
+                    TargetUser.GLOBAL_USER_ID);
+
+            write();
             return policyChanged;
         }
     }
@@ -148,8 +202,26 @@ final class DevicePolicyEngine {
             boolean policyChanged = policyState.removePolicy(enforcingAdmin);
 
             if (policyChanged) {
-                enforcePolicy(policyDefinition, policyState.getCurrentResolvedPolicy(), userId);
+                enforcePolicy(
+                        policyDefinition, policyState.getCurrentResolvedPolicy(), userId);
+                sendPolicyChangedToAdmins(
+                        policyState.getPoliciesSetByAdmins().keySet(),
+                        enforcingAdmin,
+                        policyDefinition,
+                        userId == enforcingAdmin.getUserId()
+                                ? TargetUser.LOCAL_USER_ID : TargetUser.PARENT_USER_ID);
             }
+            // for a remove policy to be enforced, it means no current policy exists
+            boolean wasAdminPolicyEnforced = policyState.getCurrentResolvedPolicy() == null;
+            sendPolicyResultToAdmin(
+                    enforcingAdmin,
+                    policyDefinition,
+                    wasAdminPolicyEnforced,
+                    // TODO: we're always sending this for now, should properly handle errors.
+                    REASON_CONFLICTING_ADMIN_POLICY,
+                    userId == enforcingAdmin.getUserId()
+                            ? TargetUser.LOCAL_USER_ID : TargetUser.PARENT_USER_ID);
+
             write();
             return policyChanged;
         }
@@ -176,7 +248,23 @@ final class DevicePolicyEngine {
             if (policyChanged) {
                 enforcePolicy(policyDefinition, policyState.getCurrentResolvedPolicy(),
                         UserHandle.USER_ALL);
+
+                sendPolicyChangedToAdmins(
+                        policyState.getPoliciesSetByAdmins().keySet(),
+                        enforcingAdmin,
+                        policyDefinition,
+                        TargetUser.GLOBAL_USER_ID);
             }
+            // for a remove policy to be enforced, it means no current policy exists
+            boolean wasAdminPolicyEnforced = policyState.getCurrentResolvedPolicy() == null;
+            sendPolicyResultToAdmin(
+                    enforcingAdmin,
+                    policyDefinition,
+                    wasAdminPolicyEnforced,
+                    // TODO: we're always sending this for now, should properly handle errors.
+                    REASON_CONFLICTING_ADMIN_POLICY,
+                    TargetUser.GLOBAL_USER_ID);
+
             write();
             return policyChanged;
         }
@@ -215,19 +303,18 @@ final class DevicePolicyEngine {
                     + policyDefinition.getPolicyKey() + " locally.");
         }
 
-        if (!mUserPolicies.contains(userId)) {
-            mUserPolicies.put(userId, new HashMap<>());
+        if (!mLocalPolicies.contains(userId)) {
+            mLocalPolicies.put(userId, new HashMap<>());
         }
-        if (!mUserPolicies.get(userId).containsKey(policyDefinition.getPolicyKey())) {
-            mUserPolicies.get(userId).put(
+        if (!mLocalPolicies.get(userId).containsKey(policyDefinition.getPolicyKey())) {
+            mLocalPolicies.get(userId).put(
                     policyDefinition.getPolicyKey(), new PolicyState<>(policyDefinition));
         }
-        return getPolicyState(mUserPolicies.get(userId), policyDefinition);
+        return getPolicyState(mLocalPolicies.get(userId), policyDefinition);
     }
 
     @NonNull
     private <V> PolicyState<V> getGlobalPolicyStateLocked(PolicyDefinition<V> policyDefinition) {
-
         if (policyDefinition.isLocalOnlyPolicy()) {
             throw new IllegalArgumentException("Can't set local policy "
                     + policyDefinition.getPolicyKey() + " globally.");
@@ -260,9 +347,104 @@ final class DevicePolicyEngine {
         // TODO: null policyValue means remove any enforced policies, ensure callbacks handle this
         //  properly
         policyDefinition.enforcePolicy(policyValue, mContext, userId);
-        // TODO: send broadcast or call callback to notify admins of policy change
-        // TODO: notify calling admin of result (e.g. success, runtime failure, policy set by
-        //  a different admin)
+    }
+
+    private <V> void sendPolicyResultToAdmin(
+            EnforcingAdmin admin, PolicyDefinition<V> policyDefinition, boolean success,
+            int reason, int targetUserId) {
+        Intent intent = new Intent(PolicyUpdatesReceiver.ACTION_DEVICE_POLICY_SET_RESULT);
+        intent.setPackage(admin.getPackageName());
+
+        List<ResolveInfo> receivers = mContext.getPackageManager().queryBroadcastReceiversAsUser(
+                intent,
+                PackageManager.ResolveInfoFlags.of(PackageManager.GET_RECEIVERS),
+                admin.getUserId());
+        if (receivers.isEmpty()) {
+            Log.i(TAG, "Couldn't find any receivers that handle ACTION_DEVICE_POLICY_SET_RESULT"
+                    + "in package " + admin.getPackageName());
+            return;
+        }
+
+        Bundle extras = new Bundle();
+        extras.putString(EXTRA_POLICY_KEY, policyDefinition.getPolicyDefinitionKey());
+        extras.putInt(EXTRA_POLICY_TARGET_USER_ID, targetUserId);
+
+        if (policyDefinition.getCallbackArgs() != null
+                && !policyDefinition.getCallbackArgs().isEmpty()) {
+            extras.putBundle(EXTRA_POLICY_BUNDLE_KEY, policyDefinition.getCallbackArgs());
+        }
+        extras.putInt(
+                EXTRA_POLICY_SET_RESULT_KEY,
+                success ? POLICY_SET_RESULT_SUCCESS : POLICY_SET_RESULT_FAILURE);
+
+        if (!success) {
+            extras.putInt(EXTRA_POLICY_UPDATE_REASON_KEY, reason);
+        }
+
+        intent.putExtras(extras);
+        maybeSendIntentToAdminReceivers(intent, UserHandle.of(admin.getUserId()), receivers);
+    }
+
+    // TODO(b/261430877): Finalise the decision on which admins to send the updates to.
+    private <V> void sendPolicyChangedToAdmins(
+            Set<EnforcingAdmin> admins, EnforcingAdmin callingAdmin,
+            PolicyDefinition<V> policyDefinition,
+            int targetUserId) {
+        for (EnforcingAdmin admin: admins) {
+            // We're sending a separate broadcast for the calling admin with the result.
+            if (admin.equals(callingAdmin)) {
+                continue;
+            }
+            maybeSendOnPolicyChanged(
+                    admin, policyDefinition, REASON_CONFLICTING_ADMIN_POLICY, targetUserId);
+        }
+    }
+
+    private <V> void maybeSendOnPolicyChanged(
+            EnforcingAdmin admin, PolicyDefinition<V> policyDefinition, int reason,
+            int targetUserId) {
+        Intent intent = new Intent(PolicyUpdatesReceiver.ACTION_DEVICE_POLICY_CHANGED);
+        intent.setPackage(admin.getPackageName());
+
+        List<ResolveInfo> receivers = mContext.getPackageManager().queryBroadcastReceiversAsUser(
+                intent,
+                PackageManager.ResolveInfoFlags.of(PackageManager.GET_RECEIVERS),
+                admin.getUserId());
+        if (receivers.isEmpty()) {
+            Log.i(TAG, "Couldn't find any receivers that handle ACTION_DEVICE_POLICY_CHANGED"
+                    + "in package " + admin.getPackageName());
+            return;
+        }
+
+        Bundle extras = new Bundle();
+        extras.putString(EXTRA_POLICY_KEY, policyDefinition.getPolicyDefinitionKey());
+        extras.putInt(EXTRA_POLICY_TARGET_USER_ID, targetUserId);
+
+        if (policyDefinition.getCallbackArgs() != null
+                && !policyDefinition.getCallbackArgs().isEmpty()) {
+            extras.putBundle(EXTRA_POLICY_BUNDLE_KEY, policyDefinition.getCallbackArgs());
+        }
+        extras.putInt(EXTRA_POLICY_UPDATE_REASON_KEY, reason);
+        intent.putExtras(extras);
+        maybeSendIntentToAdminReceivers(
+                intent, UserHandle.of(admin.getUserId()), receivers);
+    }
+
+    private void maybeSendIntentToAdminReceivers(
+            Intent intent, UserHandle userHandle, List<ResolveInfo> receivers) {
+        for (ResolveInfo resolveInfo : receivers) {
+            if (!Manifest.permission.BIND_DEVICE_ADMIN.equals(
+                    resolveInfo.activityInfo.permission)) {
+                Log.w(TAG, "Receiver " + resolveInfo.activityInfo + " is not protected by"
+                        + "BIND_DEVICE_ADMIN permission!");
+                continue;
+            }
+            // TODO: If admins are always bound to, do I still need to set
+            //  "BroadcastOptions.setBackgroundActivityStartsAllowed"?
+            // TODO: maybe protect it with a permission that is granted to the role so that we
+            //  don't accidentally send a broadcast to an admin that no longer holds the role.
+            mContext.sendBroadcastAsUser(intent, userHandle);
+        }
     }
 
     private void write() {
@@ -283,14 +465,14 @@ final class DevicePolicyEngine {
     private void clear() {
         synchronized (mLock) {
             mGlobalPolicies.clear();
-            mUserPolicies.clear();
+            mLocalPolicies.clear();
         }
     }
 
     private class DevicePoliciesReaderWriter {
         private static final String DEVICE_POLICIES_XML = "device_policies.xml";
-        private static final String TAG_USER_POLICY_ENTRY = "user-policy-entry";
-        private static final String TAG_DEVICE_POLICY_ENTRY = "device-policy-entry";
+        private static final String TAG_LOCAL_POLICY_ENTRY = "local-policy-entry";
+        private static final String TAG_GLOBAL_POLICY_ENTRY = "global-policy-entry";
         private static final String TAG_ADMINS_POLICY_ENTRY = "admins-policy-entry";
         private static final String ATTR_USER_ID = "user-id";
         private static final String ATTR_POLICY_ID = "policy-id";
@@ -332,17 +514,17 @@ final class DevicePolicyEngine {
 
         // TODO(b/256846294): Add versioning to read/write
         void writeInner(TypedXmlSerializer serializer) throws IOException {
-            writeUserPoliciesInner(serializer);
-            writeDevicePoliciesInner(serializer);
+            writeLocalPoliciesInner(serializer);
+            writeGlobalPoliciesInner(serializer);
         }
 
-        private void writeUserPoliciesInner(TypedXmlSerializer serializer) throws IOException {
-            if (mUserPolicies != null) {
-                for (int i = 0; i < mUserPolicies.size(); i++) {
-                    int userId = mUserPolicies.keyAt(i);
-                    for (Map.Entry<String, PolicyState<?>> policy : mUserPolicies.get(
+        private void writeLocalPoliciesInner(TypedXmlSerializer serializer) throws IOException {
+            if (mLocalPolicies != null) {
+                for (int i = 0; i < mLocalPolicies.size(); i++) {
+                    int userId = mLocalPolicies.keyAt(i);
+                    for (Map.Entry<String, PolicyState<?>> policy : mLocalPolicies.get(
                             userId).entrySet()) {
-                        serializer.startTag(/* namespace= */ null, TAG_USER_POLICY_ENTRY);
+                        serializer.startTag(/* namespace= */ null, TAG_LOCAL_POLICY_ENTRY);
 
                         serializer.attributeInt(/* namespace= */ null, ATTR_USER_ID, userId);
                         serializer.attribute(
@@ -352,16 +534,16 @@ final class DevicePolicyEngine {
                         policy.getValue().saveToXml(serializer);
                         serializer.endTag(/* namespace= */ null, TAG_ADMINS_POLICY_ENTRY);
 
-                        serializer.endTag(/* namespace= */ null, TAG_USER_POLICY_ENTRY);
+                        serializer.endTag(/* namespace= */ null, TAG_LOCAL_POLICY_ENTRY);
                     }
                 }
             }
         }
 
-        private void writeDevicePoliciesInner(TypedXmlSerializer serializer) throws IOException {
+        private void writeGlobalPoliciesInner(TypedXmlSerializer serializer) throws IOException {
             if (mGlobalPolicies != null) {
                 for (Map.Entry<String, PolicyState<?>> policy : mGlobalPolicies.entrySet()) {
-                    serializer.startTag(/* namespace= */ null, TAG_DEVICE_POLICY_ENTRY);
+                    serializer.startTag(/* namespace= */ null, TAG_GLOBAL_POLICY_ENTRY);
 
                     serializer.attribute(/* namespace= */ null, ATTR_POLICY_ID, policy.getKey());
 
@@ -369,7 +551,7 @@ final class DevicePolicyEngine {
                     policy.getValue().saveToXml(serializer);
                     serializer.endTag(/* namespace= */ null, TAG_ADMINS_POLICY_ENTRY);
 
-                    serializer.endTag(/* namespace= */ null, TAG_DEVICE_POLICY_ENTRY);
+                    serializer.endTag(/* namespace= */ null, TAG_GLOBAL_POLICY_ENTRY);
                 }
             }
         }
@@ -402,11 +584,11 @@ final class DevicePolicyEngine {
             while (XmlUtils.nextElementWithin(parser, outerDepth)) {
                 String tag = parser.getName();
                 switch (tag) {
-                    case TAG_USER_POLICY_ENTRY:
-                        readUserPoliciesInner(parser);
+                    case TAG_LOCAL_POLICY_ENTRY:
+                        readLocalPoliciesInner(parser);
                         break;
-                    case TAG_DEVICE_POLICY_ENTRY:
-                        readDevicePoliciesInner(parser);
+                    case TAG_GLOBAL_POLICY_ENTRY:
+                        readGlobalPoliciesInner(parser);
                         break;
                     default:
                         Log.e(TAG, "Unknown tag " + tag);
@@ -414,24 +596,24 @@ final class DevicePolicyEngine {
             }
         }
 
-        private void readUserPoliciesInner(TypedXmlPullParser parser)
+        private void readLocalPoliciesInner(TypedXmlPullParser parser)
                 throws XmlPullParserException, IOException {
             int userId = parser.getAttributeInt(/* namespace= */ null, ATTR_USER_ID);
             String policyKey = parser.getAttributeValue(
                     /* namespace= */ null, ATTR_POLICY_ID);
-            if (!mUserPolicies.contains(userId)) {
-                mUserPolicies.put(userId, new HashMap<>());
+            if (!mLocalPolicies.contains(userId)) {
+                mLocalPolicies.put(userId, new HashMap<>());
             }
             PolicyState<?> adminsPolicy = parseAdminsPolicy(parser);
             if (adminsPolicy != null) {
-                mUserPolicies.get(userId).put(policyKey, adminsPolicy);
+                mLocalPolicies.get(userId).put(policyKey, adminsPolicy);
             } else {
                 Log.e(TAG, "Error parsing file, " + policyKey + "doesn't have an "
                         + "AdminsPolicy.");
             }
         }
 
-        private void readDevicePoliciesInner(TypedXmlPullParser parser)
+        private void readGlobalPoliciesInner(TypedXmlPullParser parser)
                 throws IOException, XmlPullParserException {
             String policyKey = parser.getAttributeValue(/* namespace= */ null, ATTR_POLICY_ID);
             PolicyState<?> adminsPolicy = parseAdminsPolicy(parser);
