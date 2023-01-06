@@ -100,6 +100,8 @@ public class DisplayRotation {
     private final DisplayWindowSettings mDisplayWindowSettings;
     private final Context mContext;
     private final Object mLock;
+    @Nullable
+    private final DisplayRotationImmersiveAppCompatPolicy mCompatPolicyForImmersiveApps;
 
     public final boolean isDefaultDisplay;
     private final boolean mSupportAutoRotation;
@@ -205,7 +207,7 @@ public class DisplayRotation {
 
     /**
      * A flag to indicate if the display rotation should be fixed to user specified rotation
-     * regardless of all other states (including app requrested orientation). {@code true} the
+     * regardless of all other states (including app requested orientation). {@code true} the
      * display rotation should be fixed to user specified rotation, {@code false} otherwise.
      */
     private int mFixedToUserRotation = IWindowManager.FIXED_TO_USER_ROTATION_DEFAULT;
@@ -232,6 +234,7 @@ public class DisplayRotation {
         mContext = context;
         mLock = lock;
         isDefaultDisplay = displayContent.isDefaultDisplay;
+        mCompatPolicyForImmersiveApps = initImmersiveAppCompatPolicy(service, displayContent);
 
         mSupportAutoRotation =
                 mContext.getResources().getBoolean(R.bool.config_supportAutoRotation);
@@ -253,6 +256,14 @@ public class DisplayRotation {
                 mFoldController = new FoldController();
             }
         }
+    }
+
+    @VisibleForTesting
+    @Nullable
+    DisplayRotationImmersiveAppCompatPolicy initImmersiveAppCompatPolicy(
+                WindowManagerService service, DisplayContent displayContent) {
+        return DisplayRotationImmersiveAppCompatPolicy.createIfNeeded(
+                service.mLetterboxConfiguration, this, displayContent);
     }
 
     // Change the default value to the value specified in the sysprop
@@ -1305,11 +1316,11 @@ public class DisplayRotation {
         return mAllowAllRotations;
     }
 
-    private boolean isLandscapeOrSeascape(int rotation) {
+    boolean isLandscapeOrSeascape(@Surface.Rotation final int rotation) {
         return rotation == mLandscapeRotation || rotation == mSeascapeRotation;
     }
 
-    private boolean isAnyPortrait(int rotation) {
+    boolean isAnyPortrait(@Surface.Rotation final int rotation) {
         return rotation == mPortraitRotation || rotation == mUpsideDownRotation;
     }
 
@@ -1348,9 +1359,16 @@ public class DisplayRotation {
         return mFoldController != null && mFoldController.overrideFrozenRotation();
     }
 
-    private boolean isRotationChoicePossible(int orientation) {
-        // Rotation choice is only shown when the user is in locked mode.
-        if (mUserRotationMode != WindowManagerPolicy.USER_ROTATION_LOCKED) return false;
+    private boolean isRotationChoiceAllowed(@Surface.Rotation final int proposedRotation) {
+        final boolean isRotationLockEnforced = mCompatPolicyForImmersiveApps != null
+                && mCompatPolicyForImmersiveApps.isRotationLockEnforced(proposedRotation);
+
+        // Don't show rotation choice button if
+        if (!isRotationLockEnforced // not enforcing locked rotation
+                // and the screen rotation is not locked by the user.
+                && mUserRotationMode != WindowManagerPolicy.USER_ROTATION_LOCKED) {
+            return false;
+        }
 
         // Don't show rotation choice if we are in tabletop or book modes.
         if (isTabletopAutoRotateOverrideEnabled()) return false;
@@ -1402,7 +1420,7 @@ public class DisplayRotation {
         }
 
         // Ensure that some rotation choice is possible for the given orientation.
-        switch (orientation) {
+        switch (mCurrentAppOrientation) {
             case ActivityInfo.SCREEN_ORIENTATION_FULL_USER:
             case ActivityInfo.SCREEN_ORIENTATION_USER:
             case ActivityInfo.SCREEN_ORIENTATION_UNSPECIFIED:
@@ -1719,11 +1737,11 @@ public class DisplayRotation {
 
 
         @Override
-        public void onProposedRotationChanged(int rotation) {
+        public void onProposedRotationChanged(@Surface.Rotation int rotation) {
             ProtoLog.v(WM_DEBUG_ORIENTATION, "onProposedRotationChanged, rotation=%d", rotation);
             // Send interaction power boost to improve redraw performance.
             mService.mPowerManagerInternal.setPowerBoost(Boost.INTERACTION, 0);
-            if (isRotationChoicePossible(mCurrentAppOrientation)) {
+            if (isRotationChoiceAllowed(rotation)) {
                 final boolean isValid = isValidRotationChoice(rotation);
                 sendProposedRotationChangeToStatusBarInternal(rotation, isValid);
             } else {
