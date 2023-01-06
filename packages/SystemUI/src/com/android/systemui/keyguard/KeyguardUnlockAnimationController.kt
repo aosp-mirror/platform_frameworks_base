@@ -344,7 +344,7 @@ class KeyguardUnlockAnimationController @Inject constructor(
                 override fun onAnimationEnd(animation: Animator) {
                     Log.d(TAG, "surfaceBehindEntryAnimator#onAnimationEnd")
                     playingCannedUnlockAnimation = false
-                    keyguardViewMediator.get().onKeyguardExitRemoteAnimationFinished(
+                    keyguardViewMediator.get().exitKeyguardAndFinishSurfaceBehindRemoteAnimation(
                         false /* cancelled */
                     )
                 }
@@ -579,7 +579,7 @@ class KeyguardUnlockAnimationController @Inject constructor(
             biometricUnlockControllerLazy.get().isWakeAndUnlock -> {
                 Log.d(TAG, "playCannedUnlockAnimation, isWakeAndUnlock")
                 setSurfaceBehindAppearAmount(1f)
-                keyguardViewMediator.get().onKeyguardExitRemoteAnimationFinished(
+                keyguardViewMediator.get().exitKeyguardAndFinishSurfaceBehindRemoteAnimation(
                     false /* cancelled */)
             }
 
@@ -627,7 +627,7 @@ class KeyguardUnlockAnimationController @Inject constructor(
                 return@postDelayed
             }
 
-            keyguardViewMediator.get().onKeyguardExitRemoteAnimationFinished(
+            keyguardViewMediator.get().exitKeyguardAndFinishSurfaceBehindRemoteAnimation(
                 false /* cancelled */)
         }, CANNED_UNLOCK_START_DELAY)
     }
@@ -740,7 +740,8 @@ class KeyguardUnlockAnimationController @Inject constructor(
                         !keyguardStateController.isFlingingToDismissKeyguardDuringSwipeGesture &&
                         dismissAmount >= DISMISS_AMOUNT_EXIT_KEYGUARD_THRESHOLD)) {
             setSurfaceBehindAppearAmount(1f)
-            keyguardViewMediator.get().onKeyguardExitRemoteAnimationFinished(false /* cancelled */)
+            keyguardViewMediator.get().exitKeyguardAndFinishSurfaceBehindRemoteAnimation(
+                    false /* cancelled */)
         }
     }
 
