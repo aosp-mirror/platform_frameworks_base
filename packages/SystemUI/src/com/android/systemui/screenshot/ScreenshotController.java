@@ -416,10 +416,11 @@ public class ScreenshotController {
         }
 
         boolean showFlash = false;
-        if (!aspectRatiosMatch(screenshot, visibleInsets, screenshotScreenBounds)) {
+        if (screenshotScreenBounds == null
+                || !aspectRatiosMatch(screenshot, visibleInsets, screenshotScreenBounds)) {
             showFlash = true;
             visibleInsets = Insets.NONE;
-            screenshotScreenBounds.set(0, 0, screenshot.getWidth(), screenshot.getHeight());
+            screenshotScreenBounds = new Rect(0, 0, screenshot.getWidth(), screenshot.getHeight());
         }
         mCurrentRequestCallback = requestCallback;
         saveScreenshot(screenshot, finisher, screenshotScreenBounds, visibleInsets, topComponent,
