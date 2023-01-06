@@ -29,6 +29,7 @@ fun AppInfoPage(
     packageName: String,
     userId: Int,
     footerText: String,
+    footerContent: (@Composable () -> Unit)?,
     packageManagers: IPackageManagers,
     content: @Composable PackageInfo.() -> Unit,
 ) {
@@ -40,6 +41,10 @@ fun AppInfoPage(
 
         packageInfo.content()
 
-        Footer(footerText)
+        if (footerContent != null) {
+            Footer(footerContent)
+        } else {
+            Footer(footerText)
+        }
     }
 }
