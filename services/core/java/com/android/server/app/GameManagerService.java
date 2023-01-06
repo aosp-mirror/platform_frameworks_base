@@ -1762,7 +1762,9 @@ public final class GameManagerService extends IGameManagerService.Stub {
     /**
      * Returns the string listing all the interventions currently set to a game.
      */
+    @RequiresPermission(Manifest.permission.QUERY_ALL_PACKAGES)
     public String getInterventionList(String packageName, int userId) {
+        checkPermission(Manifest.permission.QUERY_ALL_PACKAGES);
         final GamePackageConfiguration packageConfig = getConfig(packageName, userId);
         final StringBuilder listStrSb = new StringBuilder();
         if (packageConfig == null) {

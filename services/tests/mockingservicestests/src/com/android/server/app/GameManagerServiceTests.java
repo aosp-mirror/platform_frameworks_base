@@ -262,6 +262,16 @@ public class GameManagerServiceTests {
         mTestLooper.dispatchAll();
     }
 
+    private void mockQueryAllPackageGranted() {
+        mMockContext.setPermission(Manifest.permission.QUERY_ALL_PACKAGES,
+                PackageManager.PERMISSION_GRANTED);
+    }
+
+    private void mockQueryAllPackageDenied() {
+        mMockContext.setPermission(Manifest.permission.QUERY_ALL_PACKAGES,
+                PackageManager.PERMISSION_DENIED);
+    }
+
     private void mockManageUsersGranted() {
         mMockContext.setPermission(Manifest.permission.MANAGE_USERS,
                 PackageManager.PERMISSION_GRANTED);
@@ -2179,5 +2189,23 @@ public class GameManagerServiceTests {
         gameManagerService.notifyGraphicsEnvironmentSetup(someGamePkg, USER_ID_1);
         verify(mMockPowerManager, never()).setPowerMode(anyInt(), anyBoolean());
         assertFalse(gameManagerService.mHandler.hasMessages(CANCEL_GAME_LOADING_MODE));
+    }
+
+    @Test
+    public void testGetInterventionList_permissionDenied() throws Exception {
+        String configString = "mode=2,downscaleFactor=0.5";
+        when(DeviceConfig.getProperty(anyString(), anyString()))
+                .thenReturn(configString);
+        mockQueryAllPackageDenied();
+        GameManagerService gameManagerService = createServiceAndStartUser(USER_ID_1);
+        assertThrows(SecurityException.class,
+                () -> gameManagerService.getInterventionList(mPackageName, USER_ID_1));
+
+        mockQueryAllPackageGranted();
+        String expectedInterventionListOutput = "\n[Name:" + mPackageName
+                 + " Modes: {2=[Game Mode:2,Scaling:0.5,Use Angle:false,"
+                 + "Fps:,Loading Boost Duration:-1]}]";
+        assertEquals(expectedInterventionListOutput,
+                gameManagerService.getInterventionList(mPackageName, USER_ID_1));
     }
 }
