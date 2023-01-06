@@ -60,10 +60,8 @@
     <string name="uninstall_update_text" msgid="863648314632448705">"ይህ መተግበሪያ በፋብሪካው ስሪት ይተካ? ሁሉም ውሂብ ይወገዳል።"</string>
     <string name="uninstall_update_text_multiuser" msgid="8992883151333057227">"ይህ መተግበሪያ በፋብሪካው ስሪት ይተካ? ሁሉም ውሂብ ይወገዳል። እነዚያን የሥራ መገለጫዎች ያላቸውን ጨምሮ ሁሉንም በዚህ መሣሪያ ላይ ባሉ ተጠቃሚዎች ላይ ተጽዕኖ ያሳርፍባቸዋል።"</string>
     <string name="uninstall_keep_data" msgid="7002379587465487550">"ከመተግበሪያ ውሂብ <xliff:g id="SIZE">%1$s</xliff:g> አቆይ።"</string>
-    <!-- no translation found for uninstall_application_text_current_user_clone_profile (835170400160011636) -->
-    <skip />
-    <!-- no translation found for uninstall_application_text_with_clone_instance (6944473334273349036) -->
-    <skip />
+    <string name="uninstall_application_text_current_user_clone_profile" msgid="835170400160011636">"ይህን መተግበሪያ መሰረዝ ይፈልጋሉ?"</string>
+    <string name="uninstall_application_text_with_clone_instance" msgid="6944473334273349036">"ይህን መተግበሪያ ማራገፍ ይፈልጋሉ? የተባዛውም <xliff:g id="PACKAGE_LABEL">%1$s</xliff:g> ይሰረዛል።"</string>
     <string name="uninstalling_notification_channel" msgid="840153394325714653">"በማሄድ ላይ ያሉ ማራገፎች"</string>
     <string name="uninstall_failure_notification_channel" msgid="1136405866767576588">"ያልተሳኩ ማራገፎች"</string>
     <string name="uninstalling" msgid="8709566347688966845">"በማራገፍ ላይ…"</string>
@@ -72,8 +70,7 @@
     <string name="uninstall_done_app" msgid="4588850984473605768">"<xliff:g id="PACKAGE_LABEL">%1$s</xliff:g> ተራግፏል"</string>
     <string name="uninstall_failed" msgid="1847750968168364332">"ማራገፍ አልተሳካም።"</string>
     <string name="uninstall_failed_app" msgid="5506028705017601412">"<xliff:g id="PACKAGE_LABEL">%1$s</xliff:g>ን ማራገፍ ስኬታማ አልነበረም።"</string>
-    <!-- no translation found for uninstalling_cloned_app (1826380164974984870) -->
-    <skip />
+    <string name="uninstalling_cloned_app" msgid="1826380164974984870">"የተባዛ <xliff:g id="PACKAGE_LABEL">%1$s</xliff:g>ን በመሰረዝ ላይ…"</string>
     <string name="uninstall_failed_device_policy_manager" msgid="785293813665540305">"ገቢር የመሣሪያ አስተዳደር መተግበሪያን ማራገፍ አይቻልም"</string>
     <string name="uninstall_failed_device_policy_manager_of_user" msgid="4813104025494168064">"ለ<xliff:g id="USERNAME">%1$s</xliff:g> ገቢር የመሣሪያ አስተዳደር መተግበሪያን ማራገፍ አይቻልም"</string>
     <string name="uninstall_all_blocked_profile_owner" msgid="2009393666026751501">"ይህ መተግበሪያ ለአንዳንድ ተጠቃሚዎች ወይም መገለጫዎች የሚያስፈልግ ሲሆን ለሌሎች ተራግፏል"</string>
@@ -94,8 +91,7 @@
     <string name="anonymous_source_warning" product="default" msgid="2784902545920822500">"የእርስዎ ስልክ እና የግል ውሂብ በማይታወቁ መተግበሪያዎች ለሚደርሱ ጥቃቶች በይልበልጥ ተጋላጭ ናቸው። ይህን መተግበሪያ በመጫንዎ በእርስዎ ስልክ ላይ ለሚደርስ ማናቸውም ጉዳት ወይም መተግበሪያውን በመጠቀም ለሚከሰት የውሂብ መጥፋት ኃላፊነቱን እንደሚወስዱ ተስማምተዋል።"</string>
     <string name="anonymous_source_warning" product="tablet" msgid="3939101621438855516">"የእርስዎ ጡባዊ እና የግል ውሂብ በማይታወቁ መተግበሪያዎች ለሚደርሱ ጥቃቶች በይበልጥ ተጋላጭ ናቸው። ይህን መተግበሪያ በመጫንዎ በእርስዎ ጡባዊ ላይ ለሚደርስ ማናቸውም ጉዳት ወይም መተግበሪያውን በመጠቀም ለሚከሰት የውሂብ መጥፋት ኃላፊነቱን እንደሚወስዱ ተስማምተዋል።"</string>
     <string name="anonymous_source_warning" product="tv" msgid="5599483539528168566">"የእርስዎ ቴሌቪዥን እና የግል ውሂብ በማይታወቁ መተግበሪያዎች ለሚደርሱ ጥቃቶች በይበልጥ ተጋላጭ ናቸው። ይህን መተግበሪያ በመጫንዎ በእርስዎ ቴሌቪዥን ላይ ለሚደርስ ማናቸውም ጉዳት ወይም መተግበሪያውን በመጠቀም ለሚከሰት የውሂብ መጥፋት ኃላፊነቱን እንደሚወስዱ ተስማምተዋል።"</string>
-    <!-- no translation found for cloned_app_label (7503612829833756160) -->
-    <skip />
+    <string name="cloned_app_label" msgid="7503612829833756160">"የተባዛ <xliff:g id="PACKAGE_LABEL">%1$s</xliff:g>"</string>
     <string name="anonymous_source_continue" msgid="4375745439457209366">"ቀጥል"</string>
     <string name="external_sources_settings" msgid="4046964413071713807">"ቅንብሮች"</string>
     <string name="wear_app_channel" msgid="1960809674709107850">"የWear መተግበሪያዎችን መጫን/ማራገፍ"</string>

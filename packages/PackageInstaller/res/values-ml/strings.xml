@@ -60,10 +60,8 @@
     <string name="uninstall_update_text" msgid="863648314632448705">"ഫാക്‌ടറി പതിപ്പ് ഉപയോഗിച്ച് ഈ ആപ്പിന് പകരം വയ്ക്കണോ? എല്ലാ ഡാറ്റയും നീക്കം ചെയ്യപ്പെടും."</string>
     <string name="uninstall_update_text_multiuser" msgid="8992883151333057227">"ഫാക്‌ടറി പതിപ്പ് ഉപയോഗിച്ച് ഈ ആപ്പിന് പകരം വയ്ക്കണോ? എല്ലാ ഡാറ്റയും നീക്കം ചെയ്യപ്പെടും. ഔദ്യോഗിക പ്രൊഫൈലുകൾ ഉള്ളവർ ഉൾപ്പെടെ, ഈ ഉപകരണത്തിന്റെ എല്ലാ ഉപയോക്താക്കളെയും ഇത് ബാധിക്കും."</string>
     <string name="uninstall_keep_data" msgid="7002379587465487550">"<xliff:g id="SIZE">%1$s</xliff:g> ആപ്പ് ഡാറ്റ വയ്ക്കുക."</string>
-    <!-- no translation found for uninstall_application_text_current_user_clone_profile (835170400160011636) -->
-    <skip />
-    <!-- no translation found for uninstall_application_text_with_clone_instance (6944473334273349036) -->
-    <skip />
+    <string name="uninstall_application_text_current_user_clone_profile" msgid="835170400160011636">"ഈ ആപ്പ് ഇല്ലാതാക്കണോ?"</string>
+    <string name="uninstall_application_text_with_clone_instance" msgid="6944473334273349036">"ഈ ആപ്പ് അൺഇൻസ്റ്റാൾ ചെയ്യണോ? <xliff:g id="PACKAGE_LABEL">%1$s</xliff:g> ക്ലോൺ ചെയ്യലും ഇല്ലാതാക്കും."</string>
     <string name="uninstalling_notification_channel" msgid="840153394325714653">"നിലവിൽ അൺഇൻസ്‌റ്റാൾ ചെയ്യുന്നവ"</string>
     <string name="uninstall_failure_notification_channel" msgid="1136405866767576588">"അൺ ഇൻസ്‌റ്റാൾ ചെയ്യാൻ കഴിയാഞ്ഞവ"</string>
     <string name="uninstalling" msgid="8709566347688966845">"അണ്‍‌ ഇൻസ്‌റ്റാൾ ചെയ്യുന്നു..."</string>
@@ -72,8 +70,7 @@
     <string name="uninstall_done_app" msgid="4588850984473605768">"<xliff:g id="PACKAGE_LABEL">%1$s</xliff:g> അൺ ഇൻസ്‌റ്റാൾ ചെയ്‌തു"</string>
     <string name="uninstall_failed" msgid="1847750968168364332">"അൺ ഇൻസ്‌റ്റാൾ ചെയ്യാനായില്ല."</string>
     <string name="uninstall_failed_app" msgid="5506028705017601412">"<xliff:g id="PACKAGE_LABEL">%1$s</xliff:g> അൺ ഇൻസ്‌റ്റാൾ ചെയ്യാനായില്ല."</string>
-    <!-- no translation found for uninstalling_cloned_app (1826380164974984870) -->
-    <skip />
+    <string name="uninstalling_cloned_app" msgid="1826380164974984870">"<xliff:g id="PACKAGE_LABEL">%1$s</xliff:g> ക്ലോൺ ചെയ്യൽ ഇല്ലാതാക്കുന്നു…"</string>
     <string name="uninstall_failed_device_policy_manager" msgid="785293813665540305">"സജീവ ഉപകരണ അഡ്‌മിൻ ആപ്പ് അൺ ഇൻസ്‌റ്റാൾ ചെയ്യാനാവില്ല"</string>
     <string name="uninstall_failed_device_policy_manager_of_user" msgid="4813104025494168064">"<xliff:g id="USERNAME">%1$s</xliff:g> എന്ന ഉപയോക്താവിനായി, സജീവ ഉപകരണ അഡ്‌മിൻ ആപ്പ് അൺ ഇൻസ്‌റ്റാൾ ചെയ്യാനാവില്ല"</string>
     <string name="uninstall_all_blocked_profile_owner" msgid="2009393666026751501">"ചില ഉപയോക്താക്കൾക്കോ പ്രൊഫൈലുകൾക്കോ ഈ ആപ്പ് ആവശ്യമുണ്ട്, മറ്റുള്ളവർക്ക് അത് അൺ ഇൻസ്‌റ്റാൾ ചെയ്‌തു"</string>
@@ -94,8 +91,7 @@
     <string name="anonymous_source_warning" product="default" msgid="2784902545920822500">"അജ്ഞാതമായ ആപ്പുകളാൽ നിങ്ങളുടെ ഫോണും വ്യക്തിഗത ഡാറ്റയും ആക്രമിക്കപ്പെടാനുള്ള സാധ്യത വളരെ കൂടുതലാണ്. ഈ ആപ്പ് ഇൻസ്‌റ്റാൾ ചെയ്യുന്നതിലൂടെ, ഇത് ഉപയോഗിക്കുന്നതിനാൽ നിങ്ങളുടെ ഫോണിന് സംഭവിച്ചേക്കാവുന്ന ഏത് നാശനഷ്‌ടത്തിന്റെയും അല്ലെങ്കിൽ ഡാറ്റാ നഷ്‌ടത്തിന്റെയും ഉത്തരവാദിത്തം നിങ്ങൾക്കായിരിക്കുമെന്ന് അംഗീകരിക്കുന്നു."</string>
     <string name="anonymous_source_warning" product="tablet" msgid="3939101621438855516">"അജ്ഞാതമായ ആപ്പുകളാൽ നിങ്ങളുടെ ടാബ്‌ലെറ്റും വ്യക്തിഗത ഡാറ്റയും ആക്രമിക്കപ്പെടാനുള്ള സാധ്യത വളരെ കൂടുതലാണ്. ഈ ആപ്പ് ഇൻസ്‌റ്റാൾ ചെയ്യുന്നതിലൂടെ, ഇത് ഉപയോഗിക്കുന്നതിനാൽ നിങ്ങളുടെ ടാബ്‌ലെറ്റിന് സംഭവിച്ചേക്കാവുന്ന ഏത് നാശനഷ്‌ടത്തിന്റെയും അല്ലെങ്കിൽ ഡാറ്റാ നഷ്‌ടത്തിന്റെയും ഉത്തരവാദിത്തം നിങ്ങൾക്കായിരിക്കുമെന്ന് അംഗീകരിക്കുന്നു."</string>
     <string name="anonymous_source_warning" product="tv" msgid="5599483539528168566">"അജ്ഞാതമായ ആപ്പുകളാൽ നിങ്ങളുടെ ടിവിയും വ്യക്തിഗത ഡാറ്റയും ആക്രമിക്കപ്പെടാനുള്ള സാധ്യത വളരെ കൂടുതലാണ്. ഈ ആപ്പ് ഇൻസ്‌റ്റാൾ ചെയ്യുന്നതിലൂടെ, ഇത് ഉപയോഗിക്കുന്നതിനാൽ നിങ്ങളുടെ ടിവിക്ക് സംഭവിച്ചേക്കാവുന്ന ഏത് നാശനഷ്‌ടത്തിന്റെയും അല്ലെങ്കിൽ ഡാറ്റാ നഷ്‌ടത്തിന്റെയും ഉത്തരവാദിത്തം നിങ്ങൾക്കായിരിക്കുമെന്ന് അംഗീകരിക്കുന്നു."</string>
-    <!-- no translation found for cloned_app_label (7503612829833756160) -->
-    <skip />
+    <string name="cloned_app_label" msgid="7503612829833756160">"<xliff:g id="PACKAGE_LABEL">%1$s</xliff:g> ക്ലോൺ ചെയ്യൽ"</string>
     <string name="anonymous_source_continue" msgid="4375745439457209366">"തുടരുക"</string>
     <string name="external_sources_settings" msgid="4046964413071713807">"ക്രമീകരണം"</string>
     <string name="wear_app_channel" msgid="1960809674709107850">"Wear ആപ്പ് ഇൻസ്‌റ്റാൾ/അൺ ഇൻസ്‌റ്റാൾ ചെയ്യുന്നു"</string>

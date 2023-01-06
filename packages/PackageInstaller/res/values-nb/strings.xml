@@ -60,10 +60,8 @@
     <string name="uninstall_update_text" msgid="863648314632448705">"Vil du erstatte denne appen med den opprinnelige versjonen? Alle dataene fjernes."</string>
     <string name="uninstall_update_text_multiuser" msgid="8992883151333057227">"Vil du erstatte denne appen med den opprinnelige versjonen? Alle dataene fjernes. Dette påvirker alle som bruker denne enheten – også personer med jobbprofiler."</string>
     <string name="uninstall_keep_data" msgid="7002379587465487550">"Behold <xliff:g id="SIZE">%1$s</xliff:g> med appdata."</string>
-    <!-- no translation found for uninstall_application_text_current_user_clone_profile (835170400160011636) -->
-    <skip />
-    <!-- no translation found for uninstall_application_text_with_clone_instance (6944473334273349036) -->
-    <skip />
+    <string name="uninstall_application_text_current_user_clone_profile" msgid="835170400160011636">"Vil du slette denne appen?"</string>
+    <string name="uninstall_application_text_with_clone_instance" msgid="6944473334273349036">"Vil du avinstallere denne appen? <xliff:g id="PACKAGE_LABEL">%1$s</xliff:g>-klonen slettes også."</string>
     <string name="uninstalling_notification_channel" msgid="840153394325714653">"Avinstalleringer som er i gang"</string>
     <string name="uninstall_failure_notification_channel" msgid="1136405866767576588">"Mislykkede avinstalleringer"</string>
     <string name="uninstalling" msgid="8709566347688966845">"Avinstallerer …"</string>
@@ -72,8 +70,7 @@
     <string name="uninstall_done_app" msgid="4588850984473605768">"Avinstallerte <xliff:g id="PACKAGE_LABEL">%1$s</xliff:g>"</string>
     <string name="uninstall_failed" msgid="1847750968168364332">"Avinstalleringen mislyktes."</string>
     <string name="uninstall_failed_app" msgid="5506028705017601412">"Kunne ikke avinstallere <xliff:g id="PACKAGE_LABEL">%1$s</xliff:g>."</string>
-    <!-- no translation found for uninstalling_cloned_app (1826380164974984870) -->
-    <skip />
+    <string name="uninstalling_cloned_app" msgid="1826380164974984870">"Sletter <xliff:g id="PACKAGE_LABEL">%1$s</xliff:g>-klonen …"</string>
     <string name="uninstall_failed_device_policy_manager" msgid="785293813665540305">"Kan ikke avinstallere den aktive appen for enhetsadministrator"</string>
     <string name="uninstall_failed_device_policy_manager_of_user" msgid="4813104025494168064">"Kan ikke avinstallere den aktive appen for enhetsadministrator for <xliff:g id="USERNAME">%1$s</xliff:g>"</string>
     <string name="uninstall_all_blocked_profile_owner" msgid="2009393666026751501">"Appen er nødvendig for noen brukere eller profiler, og er avinstallert for andre"</string>
@@ -94,8 +91,7 @@
     <string name="anonymous_source_warning" product="default" msgid="2784902545920822500">"Telefonen din og de personlige dataene dine er mer sårbare for angrep fra ukjente apper. Når du installerer denne appen, samtykker du i at du er ansvarlig for eventuelle skader på telefonen eller tap av data som kan skyldes bruk av appen"</string>
     <string name="anonymous_source_warning" product="tablet" msgid="3939101621438855516">"Nettbrettet ditt og de personlige dataene dine er mer sårbare for angrep fra ukjente apper. Når du installerer denne appen, samtykker du i at du er ansvarlig for eventuelle skader på nettbrettet eller tap av data som kan skyldes bruk av appen."</string>
     <string name="anonymous_source_warning" product="tv" msgid="5599483539528168566">"TV-en din og de personlige dataene dine er mer sårbare for angrep fra ukjente apper. Når du installerer denne appen, samtykker du i at du er ansvarlig for eventuelle skader på TV-en eller tap av data som kan skyldes bruk av appen."</string>
-    <!-- no translation found for cloned_app_label (7503612829833756160) -->
-    <skip />
+    <string name="cloned_app_label" msgid="7503612829833756160">"<xliff:g id="PACKAGE_LABEL">%1$s</xliff:g>-klon"</string>
     <string name="anonymous_source_continue" msgid="4375745439457209366">"Fortsett"</string>
     <string name="external_sources_settings" msgid="4046964413071713807">"Innstillinger"</string>
     <string name="wear_app_channel" msgid="1960809674709107850">"Installerer/avinstallerer Wear-apper"</string>

@@ -60,10 +60,8 @@
     <string name="uninstall_update_text" msgid="863648314632448705">"ແທນທີ່ແອັບນີ້ດ້ວຍເວີຊັນທີ່ມາຈາກໂຮງງານບໍ? ຂໍ້ມູນທັງໝົດຈະຖືກລຶບອອກ."</string>
     <string name="uninstall_update_text_multiuser" msgid="8992883151333057227">"ແທນທີ່ແອັບນີ້ດ້ວຍເວີຊັນທີ່ມາຈາກໂຮງງານບໍ? ຂໍ້ມູນທັງໝົດຈະຖືກລຶບອອກ ເຊິ່ງມີຜົນກັບຜູ້ໃຊ້ອຸປະກອນນີ້ທຸກຄົນ ຮວມທັງຄົນທີ່ມີໂປຣໄຟລ໌ບ່ອນເຮັດວຽກນຳ."</string>
     <string name="uninstall_keep_data" msgid="7002379587465487550">"ຮັກສາຂະໜາດຂໍ້ມູນແອັບ <xliff:g id="SIZE">%1$s</xliff:g> ໄວ້."</string>
-    <!-- no translation found for uninstall_application_text_current_user_clone_profile (835170400160011636) -->
-    <skip />
-    <!-- no translation found for uninstall_application_text_with_clone_instance (6944473334273349036) -->
-    <skip />
+    <string name="uninstall_application_text_current_user_clone_profile" msgid="835170400160011636">"ທ່ານຕ້ອງການລຶບແອັບນີ້ບໍ?"</string>
+    <string name="uninstall_application_text_with_clone_instance" msgid="6944473334273349036">"ທ່ານຕ້ອງການຖອນການຕິດຕັ້ງແອັບນີ້ບໍ່? <xliff:g id="PACKAGE_LABEL">%1$s</xliff:g> ໂຄລນຈະຖືກລຶບນຳ."</string>
     <string name="uninstalling_notification_channel" msgid="840153394325714653">"ກຳລັງຖອນການຕິດຕັ້ງ"</string>
     <string name="uninstall_failure_notification_channel" msgid="1136405866767576588">"ຖອນການຕິດຕັ້ງບໍ່ສຳເລັດ"</string>
     <string name="uninstalling" msgid="8709566347688966845">"ກຳລັງຖອນການຕິດຕັ້ງ..."</string>
@@ -72,8 +70,7 @@
     <string name="uninstall_done_app" msgid="4588850984473605768">"ຖອນການຕິດຕັ້ງ <xliff:g id="PACKAGE_LABEL">%1$s</xliff:g> ແລ້ວ"</string>
     <string name="uninstall_failed" msgid="1847750968168364332">"ຖອນການຕິດຕັ້ງບໍ່ສຳເລັດ."</string>
     <string name="uninstall_failed_app" msgid="5506028705017601412">"ຖອນການຕິດຕັ້ງ <xliff:g id="PACKAGE_LABEL">%1$s</xliff:g> ບໍ່ສຳເລັດ."</string>
-    <!-- no translation found for uninstalling_cloned_app (1826380164974984870) -->
-    <skip />
+    <string name="uninstalling_cloned_app" msgid="1826380164974984870">"ກຳລັງລຶບ <xliff:g id="PACKAGE_LABEL">%1$s</xliff:g> ໂຄລນ…"</string>
     <string name="uninstall_failed_device_policy_manager" msgid="785293813665540305">"ບໍ່ສາມາດຖອນການຕິດຕັ້ງແອັບອຸປະກອນທີ່ເຮັດວຽກຢູ່ໄດ້"</string>
     <string name="uninstall_failed_device_policy_manager_of_user" msgid="4813104025494168064">"ບໍ່ສາມາດຖອນການຕິດຕັ້ງແອັບຜູ້ເບິ່ງແຍງລະບົບທີ່ເຮັດວຽກຢູ່ສຳລັບ <xliff:g id="USERNAME">%1$s</xliff:g> ໄດ້"</string>
     <string name="uninstall_all_blocked_profile_owner" msgid="2009393666026751501">"ແອັບນີ້ຈຳເປັນສຳລັບບາງຜູ້ໃຊ້ ຫຼື ບາງໂປຣໄຟລ໌ ແລະ ຖືກຖອນການຕິດຕັ້ງສຳລັບຄົນອື່ນແລ້ວ"</string>
@@ -94,8 +91,7 @@
     <string name="anonymous_source_warning" product="default" msgid="2784902545920822500">"ໂທລະສັບ ແລະ ຂໍ້ມູນສ່ວນຕົວຂອງທ່ານອາດຖືກໂຈມຕີໄດ້ໂດຍແອັບທີ່ບໍ່ຮູ້ຈັກ. ໂດຍການຕິດຕັ້ງແອັບນີ້, ແມ່ນທ່ານຍອມຮັບວ່າທ່ານຈະຮັບຜິດຊອບຕໍ່ຄວາມເສຍຫາຍໃດໆກໍຕາມທີ່ເກີດຂຶ້ນຕໍ່ໂທລະທັດຂອງທ່ານ ຫຼື ການສູນເສຍຂໍ້ມູນທີ່ອາດເກີດຈາກການນຳໃຊ້ມັນ."</string>
     <string name="anonymous_source_warning" product="tablet" msgid="3939101621438855516">"ແທັບເລັດ ແລະ ຂໍ້ມູນສ່ວນຕົວຂອງທ່ານອາດຖືກໂຈມຕີໄດ້ໂດຍແອັບທີ່ບໍ່ຮູ້ຈັກ. ໂດຍການຕິດຕັ້ງແອັບນີ້, ແມ່ນທ່ານຍອມຮັບວ່າທ່ານຈະຮັບຜິດຊອບຕໍ່ຄວາມເສຍຫາຍໃດໆກໍຕາມທີ່ເກີດຂຶ້ນຕໍ່ໂທລະທັດຂອງທ່ານ ຫຼື ການສູນເສຍຂໍ້ມູນທີ່ອາດເກີດຈາກການນຳໃຊ້ມັນ."</string>
     <string name="anonymous_source_warning" product="tv" msgid="5599483539528168566">"ໂທລະທັດ ແລະ ຂໍ້ມູນສ່ວນຕົວຂອງທ່ານອາດຖືກໂຈມຕີໄດ້ໂດຍແອັບທີ່ບໍ່ຮູ້ຈັກ. ໂດຍການຕິດຕັ້ງແອັບນີ້, ແມ່ນທ່ານຍອມຮັບວ່າທ່ານຈະຮັບຜິດຊອບຕໍ່ຄວາມເສຍຫາຍໃດໆກໍຕາມທີ່ເກີດຂຶ້ນຕໍ່ໂທລະທັດຂອງທ່ານ ຫຼື ການສູນເສຍຂໍ້ມູນທີ່ອາດເກີດຈາກການນຳໃຊ້ມັນ."</string>
-    <!-- no translation found for cloned_app_label (7503612829833756160) -->
-    <skip />
+    <string name="cloned_app_label" msgid="7503612829833756160">"<xliff:g id="PACKAGE_LABEL">%1$s</xliff:g> ໂຄລນ"</string>
     <string name="anonymous_source_continue" msgid="4375745439457209366">"ສືບຕໍ່"</string>
     <string name="external_sources_settings" msgid="4046964413071713807">"ການຕັ້ງຄ່າ"</string>
     <string name="wear_app_channel" msgid="1960809674709107850">"ການຕິດຕັ້ງ/ຖອນການຕິດຕັ້ງແອັບ Wear"</string>

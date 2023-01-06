@@ -60,10 +60,8 @@
     <string name="uninstall_update_text" msgid="863648314632448705">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‎‎‏‎‏‏‏‏‏‏‏‏‎‎‎‏‎‎‏‎‏‏‏‎‎‏‎‎‎‎‏‏‏‏‏‏‎‎‏‎‎‎‏‎‎‎‎‎‏‎‏‎‏‎‏‏‎‎‎‎‎‏‎Replace this app with the factory version? All data will be removed.‎‏‎‎‏‎"</string>
     <string name="uninstall_update_text_multiuser" msgid="8992883151333057227">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‏‏‏‏‏‏‏‎‎‏‏‎‎‏‏‎‏‎‎‏‎‎‎‏‏‏‎‎‏‎‏‎‎‎‏‏‎‏‏‎‏‏‏‎‎‏‏‎‏‎‏‏‎‎‎‏‎‏‏‎‎‏‎‏‏‎Replace this app with the factory version? All data will be removed. This affects all users of this device, including those with work profiles.‎‏‎‎‏‎"</string>
     <string name="uninstall_keep_data" msgid="7002379587465487550">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‏‏‏‏‎‎‎‎‏‎‎‏‎‏‏‎‏‎‏‏‏‎‎‏‏‎‎‏‎‎‎‏‎‎‏‏‏‎‏‎‏‎‏‎‏‎‎‏‏‏‎‏‎‎‏‎‎‏‎‏‏‏‏‏‎‎Keep ‎‏‎‎‏‏‎<xliff:g id="SIZE">%1$s</xliff:g>‎‏‎‎‏‏‏‎ of app data.‎‏‎‎‏‎"</string>
-    <!-- no translation found for uninstall_application_text_current_user_clone_profile (835170400160011636) -->
-    <skip />
-    <!-- no translation found for uninstall_application_text_with_clone_instance (6944473334273349036) -->
-    <skip />
+    <string name="uninstall_application_text_current_user_clone_profile" msgid="835170400160011636">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‎‎‏‎‏‏‏‎‎‏‎‏‏‏‎‎‎‏‏‏‏‏‎‎‎‎‏‏‎‏‏‏‎‏‎‏‎‎‎‏‏‏‎‏‎‏‎‏‎‏‎‏‎‏‎‏‏‏‎‏‎‎‎Do you want to delete this app?‎‏‎‎‏‎"</string>
+    <string name="uninstall_application_text_with_clone_instance" msgid="6944473334273349036">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‏‏‏‏‎‎‎‎‎‎‏‎‏‏‏‏‏‏‎‏‏‏‎‎‏‏‎‏‏‎‏‎‎‎‏‎‎‎‎‎‏‏‎‎‎‏‎‎‏‎‎‎‏‎‏‎‏‏‎‏‎‏‏‎‎‎Do you want to uninstall this app? ‎‏‎‎‏‏‎<xliff:g id="PACKAGE_LABEL">%1$s</xliff:g>‎‏‎‎‏‏‏‎ clone will also be deleted.‎‏‎‎‏‎"</string>
     <string name="uninstalling_notification_channel" msgid="840153394325714653">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‎‎‏‎‏‏‏‎‏‎‏‎‎‎‏‏‎‏‎‎‏‏‎‎‎‎‏‏‏‏‏‎‎‏‎‎‎‏‏‎‎‏‏‏‏‏‎‏‏‏‎‏‏‎‏‏‎‏‏‏‎‏‎Running uninstalls‎‏‎‎‏‎"</string>
     <string name="uninstall_failure_notification_channel" msgid="1136405866767576588">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‎‎‏‏‏‏‏‏‎‎‎‏‎‏‎‏‎‏‎‎‏‏‎‎‎‏‏‏‎‏‎‏‏‎‏‎‎‏‎‏‎‏‏‎‎‏‏‏‏‎‏‏‏‎‎‎‎‎‏‏‎‎‎Failed uninstalls‎‏‎‎‏‎"</string>
     <string name="uninstalling" msgid="8709566347688966845">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‏‏‏‏‏‏‎‎‎‏‏‎‏‏‏‏‎‏‎‎‏‏‎‎‎‎‏‏‏‎‎‏‎‏‎‏‎‏‏‎‏‏‎‏‏‎‎‏‎‎‏‏‏‏‎‏‎‏‎‏‏‏‏‎‏‎Uninstalling…‎‏‎‎‏‎"</string>
@@ -72,8 +70,7 @@
     <string name="uninstall_done_app" msgid="4588850984473605768">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‏‎‏‏‏‏‏‏‏‎‏‎‏‏‏‎‏‏‎‏‏‏‏‏‏‎‏‎‏‎‎‎‎‏‎‏‏‎‎‎‏‏‎‎‎‎‎‎‎‎‏‏‎‏‏‎‏‎‎‎‏‎‎‎‎Uninstalled ‎‏‎‎‏‏‎<xliff:g id="PACKAGE_LABEL">%1$s</xliff:g>‎‏‎‎‏‏‏‎‎‏‎‎‏‎"</string>
     <string name="uninstall_failed" msgid="1847750968168364332">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‎‏‏‏‎‎‏‏‎‏‎‎‏‎‎‏‎‎‎‎‏‏‏‏‎‏‏‎‏‏‏‎‎‏‏‏‎‏‏‎‎‎‎‏‏‏‏‎‎‏‏‏‎‎‏‎‎‏‎‏‏‎‎‎Uninstall unsuccessful.‎‏‎‎‏‎"</string>
     <string name="uninstall_failed_app" msgid="5506028705017601412">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‏‏‏‎‎‏‏‎‎‎‏‏‎‏‎‎‏‎‏‎‏‎‏‏‏‏‏‏‎‏‏‏‏‎‏‎‏‏‏‎‏‏‎‏‎‏‏‎‏‏‎‎‏‏‏‎‏‏‎‎‎‎‏‎‎‎Uninstalling ‎‏‎‎‏‏‎<xliff:g id="PACKAGE_LABEL">%1$s</xliff:g>‎‏‎‎‏‏‏‎ unsuccessful.‎‏‎‎‏‎"</string>
-    <!-- no translation found for uninstalling_cloned_app (1826380164974984870) -->
-    <skip />
+    <string name="uninstalling_cloned_app" msgid="1826380164974984870">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‎‏‏‏‎‎‏‎‏‎‏‏‎‎‎‏‎‎‏‏‎‏‏‎‎‎‏‎‏‎‏‎‏‎‏‏‏‏‎‎‎‏‎‎‏‏‏‎‎‏‏‏‏‏‎‏‎‏‎‎‏‏‎‎Deleting ‎‏‎‎‏‏‎<xliff:g id="PACKAGE_LABEL">%1$s</xliff:g>‎‏‎‎‏‏‏‎ clone…‎‏‎‎‏‎"</string>
     <string name="uninstall_failed_device_policy_manager" msgid="785293813665540305">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‎‎‏‎‏‎‏‏‏‎‎‏‎‏‏‏‏‎‏‏‎‎‏‎‎‏‎‎‎‎‎‎‎‏‎‏‏‏‏‏‎‏‏‎‎‎‏‎‏‎‏‎‎‎‏‏‎‏‎‎‎‏‎Can\'t uninstall active device admin app‎‏‎‎‏‎"</string>
     <string name="uninstall_failed_device_policy_manager_of_user" msgid="4813104025494168064">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‏‏‏‎‎‎‎‏‎‏‏‎‎‏‎‏‏‏‎‎‏‎‏‎‎‏‎‎‏‏‏‎‎‎‎‏‏‏‎‏‎‏‎‎‏‎‏‎‏‎‎‏‎‎‎‏‎‎‎‎‎‎‎‎‎‎Can\'t uninstall active device admin app for ‎‏‎‎‏‏‎<xliff:g id="USERNAME">%1$s</xliff:g>‎‏‎‎‏‏‏‎‎‏‎‎‏‎"</string>
     <string name="uninstall_all_blocked_profile_owner" msgid="2009393666026751501">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‎‏‏‏‎‏‏‏‏‏‎‎‎‏‎‏‏‎‎‏‏‎‎‏‏‏‎‎‏‎‎‏‎‎‏‏‏‎‏‎‏‏‏‎‎‎‏‏‏‎‎‎‏‏‎‎‎‎‎‏‏‎‏‎This app is required for some users or profiles and was uninstalled for others‎‏‎‎‏‎"</string>
@@ -94,8 +91,7 @@
     <string name="anonymous_source_warning" product="default" msgid="2784902545920822500">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‏‎‏‎‎‏‏‎‏‎‏‎‎‏‎‏‏‏‏‏‎‏‏‎‎‎‎‏‏‏‎‎‎‏‎‎‎‏‏‏‏‎‏‏‎‎‎‏‎‎‎‎‏‏‎‎‏‏‏‎‎‏‎‎‎Your phone and personal data are more vulnerable to attack by unknown apps. By installing this app, you agree that you are responsible for any damage to your phone or loss of data that may result from its use.‎‏‎‎‏‎"</string>
     <string name="anonymous_source_warning" product="tablet" msgid="3939101621438855516">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‏‎‏‏‎‏‏‎‏‎‏‎‏‎‏‎‏‎‎‎‎‎‎‎‎‎‎‎‏‏‎‏‏‏‏‏‎‎‎‎‎‎‎‎‎‏‏‏‎‎‏‏‏‎‎‏‎‏‎‏‏‏‎‎‎Your tablet and personal data are more vulnerable to attack by unknown apps. By installing this app, you agree that you are responsible for any damage to your tablet or loss of data that may result from its use.‎‏‎‎‏‎"</string>
     <string name="anonymous_source_warning" product="tv" msgid="5599483539528168566">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‏‏‏‎‎‏‏‎‏‏‎‏‏‎‏‎‏‎‏‎‏‏‏‎‎‏‎‎‏‏‏‎‎‏‎‏‎‎‎‏‏‎‎‏‏‏‎‎‏‎‎‏‏‎‏‎‎‎‏‏‏‎‏‏‎‎Your TV and personal data are more vulnerable to attack by unknown apps. By installing this app, you agree that you are responsible for any damage to your TV or loss of data that may result from its use.‎‏‎‎‏‎"</string>
-    <!-- no translation found for cloned_app_label (7503612829833756160) -->
-    <skip />
+    <string name="cloned_app_label" msgid="7503612829833756160">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‏‏‏‏‎‏‎‎‎‎‎‏‎‎‎‏‎‎‎‏‏‎‎‎‎‎‎‎‏‏‏‎‎‏‏‏‎‎‏‏‎‎‏‎‎‏‏‎‏‏‏‏‏‏‏‏‎‎‎‎‎‎‎‎‎‎‎‏‎‎‏‏‎<xliff:g id="PACKAGE_LABEL">%1$s</xliff:g>‎‏‎‎‏‏‏‎ Clone‎‏‎‎‏‎"</string>
     <string name="anonymous_source_continue" msgid="4375745439457209366">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‏‎‏‏‏‏‎‎‏‎‏‏‏‎‎‏‏‏‎‎‎‏‎‏‎‏‎‎‏‎‏‏‎‎‏‎‎‎‏‎‎‏‏‎‎‎‎‏‏‏‏‎‏‏‎‎‎‎‎‏‎‏‏‎‎Continue‎‏‎‎‏‎"</string>
     <string name="external_sources_settings" msgid="4046964413071713807">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‏‎‏‏‏‎‎‎‎‎‏‎‏‎‎‏‏‎‏‏‎‏‎‎‏‎‏‏‎‎‎‏‎‎‏‎‎‎‏‏‏‏‎‎‏‎‎‏‎‏‏‎‎‏‏‎‎‎‎‎‏‏‏‏‎Settings‎‏‎‎‏‎"</string>
     <string name="wear_app_channel" msgid="1960809674709107850">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‎‏‏‏‎‏‏‎‎‏‏‎‏‏‎‎‎‏‏‎‎‏‎‎‎‎‎‎‎‏‎‏‎‏‎‎‏‎‏‎‎‏‎‏‏‏‏‏‎‎‎‎‏‎‎‏‎‎‎‏‎‏‎‎Installing/uninstalling wear apps‎‏‎‎‏‎"</string>

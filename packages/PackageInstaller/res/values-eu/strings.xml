@@ -60,10 +60,8 @@
     <string name="uninstall_update_text" msgid="863648314632448705">"Aplikazio hau jatorrizko bertsioarekin ordeztu nahi duzu? Datu guztiak ezabatuko dira."</string>
     <string name="uninstall_update_text_multiuser" msgid="8992883151333057227">"Aplikazio hau jatorrizko bertsioarekin ordeztu nahi duzu? Datu guztiak ezabatuko dira. Gailuaren erabiltzaile guztiengan izango du eragina, laneko profilak dituztenak barne."</string>
     <string name="uninstall_keep_data" msgid="7002379587465487550">"Mantendu aplikazioetako datuen <xliff:g id="SIZE">%1$s</xliff:g>."</string>
-    <!-- no translation found for uninstall_application_text_current_user_clone_profile (835170400160011636) -->
-    <skip />
-    <!-- no translation found for uninstall_application_text_with_clone_instance (6944473334273349036) -->
-    <skip />
+    <string name="uninstall_application_text_current_user_clone_profile" msgid="835170400160011636">"Aplikazioa ezabatu nahi duzu?"</string>
+    <string name="uninstall_application_text_with_clone_instance" msgid="6944473334273349036">"Aplikazioa desinstalatu nahi duzu? <xliff:g id="PACKAGE_LABEL">%1$s</xliff:g> aplikazioaren klona ere ezabatuko da."</string>
     <string name="uninstalling_notification_channel" msgid="840153394325714653">"Abian diren desinstalatze-eragiketak"</string>
     <string name="uninstall_failure_notification_channel" msgid="1136405866767576588">"Desinstalatu ezin izan direnak"</string>
     <string name="uninstalling" msgid="8709566347688966845">"Desinstalatzen…"</string>
@@ -72,8 +70,7 @@
     <string name="uninstall_done_app" msgid="4588850984473605768">"Desinstalatu da <xliff:g id="PACKAGE_LABEL">%1$s</xliff:g>"</string>
     <string name="uninstall_failed" msgid="1847750968168364332">"Ezin izan da desinstalatu."</string>
     <string name="uninstall_failed_app" msgid="5506028705017601412">"Ezin izan da desinstalatu <xliff:g id="PACKAGE_LABEL">%1$s</xliff:g>."</string>
-    <!-- no translation found for uninstalling_cloned_app (1826380164974984870) -->
-    <skip />
+    <string name="uninstalling_cloned_app" msgid="1826380164974984870">"<xliff:g id="PACKAGE_LABEL">%1$s</xliff:g> aplikazioaren klona ezabatzen…"</string>
     <string name="uninstall_failed_device_policy_manager" msgid="785293813665540305">"Ezin da desinstalatu gailua administratzeko aplikazio aktiboa"</string>
     <string name="uninstall_failed_device_policy_manager_of_user" msgid="4813104025494168064">"Ezin da desinstalatu <xliff:g id="USERNAME">%1$s</xliff:g> erabiltzailearen gailua administratzeko aplikazio aktiboa"</string>
     <string name="uninstall_all_blocked_profile_owner" msgid="2009393666026751501">"Erabiltzaile edo profil batzuek aplikazio hau behar dute, baina desinstalatu egin da gainerakoentzat"</string>
@@ -94,8 +91,7 @@
     <string name="anonymous_source_warning" product="default" msgid="2784902545920822500">"Baliteke telefonoak eta datu pertsonalek aplikazio ezezagunen erasoak jasatea. Aplikazio hau instalatzen baduzu, onartu egingo duzu zeu zarela hura erabiltzeagatik telefonoari agian gertatuko zaizkion kalteen edo datu-galeren erantzulea."</string>
     <string name="anonymous_source_warning" product="tablet" msgid="3939101621438855516">"Baliteke tabletak eta datu pertsonalek aplikazio ezezagunen erasoak jasatea. Aplikazio hau instalatzen baduzu, onartu egingo duzu hura erabiltzeagatik tabletari agian gertatuko zaizkion kalteen edo datu-galeren erantzulea zeu izango zarela."</string>
     <string name="anonymous_source_warning" product="tv" msgid="5599483539528168566">"Baliteke telebistak eta datu pertsonalek aplikazio ezezagunen erasoak jasatea. Aplikazio hau instalatzen baduzu, onartu egingo duzu hura erabiltzeagatik telebistari agian gertatuko zaizkion kalteen edo datu-galeren erantzulea zeu izango zarela."</string>
-    <!-- no translation found for cloned_app_label (7503612829833756160) -->
-    <skip />
+    <string name="cloned_app_label" msgid="7503612829833756160">"<xliff:g id="PACKAGE_LABEL">%1$s</xliff:g> aplikazioaren klona"</string>
     <string name="anonymous_source_continue" msgid="4375745439457209366">"Egin aurrera"</string>
     <string name="external_sources_settings" msgid="4046964413071713807">"Ezarpenak"</string>
     <string name="wear_app_channel" msgid="1960809674709107850">"Wear aplikazioak instalatzea/desinstalatzea"</string>

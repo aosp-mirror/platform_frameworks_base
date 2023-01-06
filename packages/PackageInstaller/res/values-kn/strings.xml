@@ -60,10 +60,8 @@
     <string name="uninstall_update_text" msgid="863648314632448705">"ಈ ಆ್ಯಪ್‌ ಬದಲಿಗೆ ಫ್ಯಾಕ್ಟರಿ ಆವೃತ್ತಿಯನ್ನು ಬದಲಾಯಿಸುವುದೇ? ಎಲ್ಲಾ ಡೇಟಾ ತೆಗೆದುಹಾಕಲಾಗುತ್ತದೆ."</string>
     <string name="uninstall_update_text_multiuser" msgid="8992883151333057227">"ಈ ಆ್ಯಪ್‌ ಬದಲಿಗೆ ಫ್ಯಾಕ್ಟರಿ ಆವೃತ್ತಿಯನ್ನು ಬದಲಾಯಿಸುವುದೇ? ಎಲ್ಲಾ ಡೇಟಾ ತೆಗೆದುಹಾಕಲಾಗುತ್ತದೆ. ಕೆಲಸದ ಪ್ರೊಫೈಲ್‌ಗಳನ್ನು ಹೊಂದಿರುವವುಗಳನ್ನು ಒಳಗೊಂಡಂತೆ ಈ ಸಾಧನದ ಎಲ್ಲಾ ಬಳಕೆದಾರರಿಗೆ ಇದು ಪರಿಣಾಮ ಬೀರುತ್ತದೆ."</string>
     <string name="uninstall_keep_data" msgid="7002379587465487550">"ಆ್ಯಪ್ ಡೇಟಾದಲ್ಲಿ <xliff:g id="SIZE">%1$s</xliff:g> ಇರಿಸಿಕೊಳ್ಳಿ."</string>
-    <!-- no translation found for uninstall_application_text_current_user_clone_profile (835170400160011636) -->
-    <skip />
-    <!-- no translation found for uninstall_application_text_with_clone_instance (6944473334273349036) -->
-    <skip />
+    <string name="uninstall_application_text_current_user_clone_profile" msgid="835170400160011636">"ನೀವು ಈ ಆ್ಯಪ್ ಅನ್ನು ಅಳಿಸಲು ಬಯಸುತ್ತೀರಾ?"</string>
+    <string name="uninstall_application_text_with_clone_instance" msgid="6944473334273349036">"ನೀವು ಈ ಆ್ಯಪ್ ಅನ್ನು ಅನ್‌ಇನ್‌ಸ್ಟಾಲ್ ಮಾಡಲು ಬಯಸುತ್ತೀರಾ? <xliff:g id="PACKAGE_LABEL">%1$s</xliff:g> ಕ್ಲೋನ್ ಅನ್ನು ಸಹ ಅಳಿಸಲಾಗುತ್ತದೆ."</string>
     <string name="uninstalling_notification_channel" msgid="840153394325714653">"ಚಾಲನೆಯಲ್ಲಿರುವ ಅನ್‌ಇನ್‌ಸ್ಟಾಲ್‌ಗಳು"</string>
     <string name="uninstall_failure_notification_channel" msgid="1136405866767576588">"ವಿಫಲಗೊಂಡ ಅನ್‌ಇನ್‌ಸ್ಟಾಲ್‌ಗಳು"</string>
     <string name="uninstalling" msgid="8709566347688966845">"ಅನ್‌ಇನ್‌ಸ್ಟಾಲ್‌ ಮಾಡಲಾಗುತ್ತಿದೆ..."</string>
@@ -72,8 +70,7 @@
     <string name="uninstall_done_app" msgid="4588850984473605768">"<xliff:g id="PACKAGE_LABEL">%1$s</xliff:g> ಅನ್‌ಇನ್‌ಸ್ಟಾಲ್‌ ಮಾಡಲಾಗಿದೆ"</string>
     <string name="uninstall_failed" msgid="1847750968168364332">"ಅನ್‌ಇನ್‌ಸ್ಟಾಲ್ ವಿಫಲವಾಗಿದೆ."</string>
     <string name="uninstall_failed_app" msgid="5506028705017601412">"<xliff:g id="PACKAGE_LABEL">%1$s</xliff:g> ಅನ್‌ಇನ್‌ಸ್ಟಾಲ್‌ ಮಾಡುವಿಕೆ ಯಶಸ್ವಿಯಾಗಿಲ್ಲ."</string>
-    <!-- no translation found for uninstalling_cloned_app (1826380164974984870) -->
-    <skip />
+    <string name="uninstalling_cloned_app" msgid="1826380164974984870">"<xliff:g id="PACKAGE_LABEL">%1$s</xliff:g> ಕ್ಲೋನ್ ಅನ್ನು ಅಳಿಸಲಾಗುತ್ತಿದೆ…"</string>
     <string name="uninstall_failed_device_policy_manager" msgid="785293813665540305">"ಸಕ್ರಿಯ ಸಾಧನ ನಿರ್ವಹಣೆ ಆ್ಯಪ್‌ ಅನ್‌ಇನ್‌ಸ್ಟಾಲ್‌ ಮಾಡಲು ಸಾಧ್ಯವಿಲ್ಲ"</string>
     <string name="uninstall_failed_device_policy_manager_of_user" msgid="4813104025494168064">"<xliff:g id="USERNAME">%1$s</xliff:g> ಗಾಗಿ ಸಕ್ರಿಯ ಸಾಧನ ನಿರ್ವಹಣೆ ಆ್ಯಪ್‌ ಅನ್‌ಇನ್‌ಸ್ಟಾಲ್‌ ಮಾಡಲು ಸಾಧ್ಯವಿಲ್ಲ"</string>
     <string name="uninstall_all_blocked_profile_owner" msgid="2009393666026751501">"ಕೆಲವು ಬಳಕೆದಾರರು ಅಥವಾ ಪ್ರೊಫೈಲ್‌ಗಳಿಗೆ ಈ ಆ್ಯಪ್‌ ಅಗತ್ಯ ಮತ್ತು ಇತರರ ಸಾಧನದಿಂದ ಅನ್‌ಇನ್‌ಸ್ಟಾಲ್‌ ಮಾಡಲಾಗಿದೆ"</string>
@@ -94,8 +91,7 @@
     <string name="anonymous_source_warning" product="default" msgid="2784902545920822500">"ನಿಮ್ಮ ಫೋನ್ ಹಾಗೂ ವೈಯಕ್ತಿಕ ಡೇಟಾ, ಅಪರಿಚಿತ ಆ್ಯಪ್‌ಗಳ ದಾಳಿಗೆ ತುತ್ತಾಗುವ ಸಾಧ್ಯತೆ ಹೆಚ್ಚಾಗಿದೆ. ಈ ಆ್ಯಪ್‌ ಅನ್ನು ಇನ್‌ಸ್ಟಾಲ್‌ ಮಾಡುವ ಮೂಲಕ, ನಿಮ್ಮ ಫೋನ್‌ಗೆ ಯಾವುದೇ ಹಾನಿ ಉಂಟಾದರೆ ಅಥವಾ ಅದರ ಬಳಕೆಯಿಂದ ಡೇಟಾ ನಷ್ಟವಾದರೆ, ಅದಕ್ಕೆ ನೀವೇ ಜವಾಬ್ದಾರರು ಎನ್ನುವುದನ್ನು ಒಪ್ಪಿಕೊಳ್ಳುತ್ತೀರಿ."</string>
     <string name="anonymous_source_warning" product="tablet" msgid="3939101621438855516">"ನಿಮ್ಮ ಟ್ಯಾಬ್ಲೆಟ್ ಹಾಗೂ ವೈಯಕ್ತಿಕ ಡೇಟಾ, ಅಪರಿಚಿತ ಆ್ಯಪ್‌ಗಳ ದಾಳಿಗೆ ತುತ್ತಾಗುವ ಸಾಧ್ಯತೆ ಹೆಚ್ಚಾಗಿದೆ. ಈ ಆ್ಯಪ್‌ ಅನ್ನು ಇನ್‌ಸ್ಟಾಲ್‌ ಮಾಡುವ ಮೂಲಕ, ನಿಮ್ಮ ಫೋನ್‌ಗೆ ಯಾವುದೇ ಹಾನಿ ಉಂಟಾದರೆ ಅಥವಾ ಅದರ ಬಳಕೆಯಿಂದ ಡೇಟಾ ನಷ್ಟವಾದರೆ, ಅದಕ್ಕೆ ನೀವೇ ಜವಾಬ್ದಾರರು ಎನ್ನುವುದನ್ನು ಒಪ್ಪಿಕೊಳ್ಳುತ್ತೀರಿ."</string>
     <string name="anonymous_source_warning" product="tv" msgid="5599483539528168566">"ನಿಮ್ಮ ಟಿವಿ ಹಾಗೂ ವೈಯಕ್ತಿಕ ಡೇಟಾ, ಅಪರಿಚಿತ ಆ್ಯಪ್‌ಗಳ ದಾಳಿಗೆ ತುತ್ತಾಗುವ ಸಾಧ್ಯತೆ ಹೆಚ್ಚಾಗಿದೆ. ಈ ಆ್ಯಪ್‌ ಅನ್ನು ಇನ್‌ಸ್ಟಾಲ್‌ ಮಾಡುವ ಮೂಲಕ, ನಿಮ್ಮ ಟಿವಿಗೆ ಯಾವುದೇ ಹಾನಿ ಉಂಟಾದರೆ ಅಥವಾ ಅದರ ಬಳಕೆಯಿಂದ ಡೇಟಾ ನಷ್ಟವಾದರೆ, ಅದಕ್ಕೆ ನೀವೇ ಜವಾಬ್ದಾರರು ಎನ್ನುವುದನ್ನು ಒಪ್ಪಿಕೊಳ್ಳುತ್ತೀರಿ."</string>
-    <!-- no translation found for cloned_app_label (7503612829833756160) -->
-    <skip />
+    <string name="cloned_app_label" msgid="7503612829833756160">"<xliff:g id="PACKAGE_LABEL">%1$s</xliff:g> ಕ್ಲೋನ್"</string>
     <string name="anonymous_source_continue" msgid="4375745439457209366">"ಮುಂದುವರಿಸಿ"</string>
     <string name="external_sources_settings" msgid="4046964413071713807">"ಸೆಟ್ಟಿಂಗ್‌ಗಳು"</string>
     <string name="wear_app_channel" msgid="1960809674709107850">"wear ಆ್ಯಪ್‌ಗಳನ್ನು ಇನ್‌ಸ್ಟಾಲ್‌/ಅನ್‌ಇನ್‌ಸ್ಟಾಲ್‌ ಮಾಡಲಾಗುತ್ತಿದೆ"</string>

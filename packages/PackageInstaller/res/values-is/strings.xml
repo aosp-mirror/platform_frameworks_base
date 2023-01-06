@@ -60,10 +60,8 @@
     <string name="uninstall_update_text" msgid="863648314632448705">"Viltu skipta þessu forriti út fyrir verksmiðjuútgáfuna? Öll gögn verða fjarlægð."</string>
     <string name="uninstall_update_text_multiuser" msgid="8992883151333057227">"Viltu skipta þessu forriti út fyrir verksmiðjuútgáfuna? Öll gögn verða fjarlægð. Þetta hefur áhrif á alla notendur tækisins, þar á meðal þá sem eru með vinnusnið."</string>
     <string name="uninstall_keep_data" msgid="7002379587465487550">"Halda <xliff:g id="SIZE">%1$s</xliff:g> af forritagögnum."</string>
-    <!-- no translation found for uninstall_application_text_current_user_clone_profile (835170400160011636) -->
-    <skip />
-    <!-- no translation found for uninstall_application_text_with_clone_instance (6944473334273349036) -->
-    <skip />
+    <string name="uninstall_application_text_current_user_clone_profile" msgid="835170400160011636">"Viltu eyða þessu forriti?"</string>
+    <string name="uninstall_application_text_with_clone_instance" msgid="6944473334273349036">"Viltu fjarlægja þetta forrit? Afriti af <xliff:g id="PACKAGE_LABEL">%1$s</xliff:g> verður einnig eytt."</string>
     <string name="uninstalling_notification_channel" msgid="840153394325714653">"Fjarlægingar í gangi"</string>
     <string name="uninstall_failure_notification_channel" msgid="1136405866767576588">"Fjarlægingar sem mistókust"</string>
     <string name="uninstalling" msgid="8709566347688966845">"Fjarlægir…"</string>
@@ -72,8 +70,7 @@
     <string name="uninstall_done_app" msgid="4588850984473605768">"Fjarlægði <xliff:g id="PACKAGE_LABEL">%1$s</xliff:g>"</string>
     <string name="uninstall_failed" msgid="1847750968168364332">"Ekki tókst að fjarlægja forritið."</string>
     <string name="uninstall_failed_app" msgid="5506028705017601412">"Ekki tókst að fjarlægja <xliff:g id="PACKAGE_LABEL">%1$s</xliff:g>."</string>
-    <!-- no translation found for uninstalling_cloned_app (1826380164974984870) -->
-    <skip />
+    <string name="uninstalling_cloned_app" msgid="1826380164974984870">"Eyðir afriti af <xliff:g id="PACKAGE_LABEL">%1$s</xliff:g>…"</string>
     <string name="uninstall_failed_device_policy_manager" msgid="785293813665540305">"Ekki er hægt að fjarlægja virkt forrit tækjastjóra"</string>
     <string name="uninstall_failed_device_policy_manager_of_user" msgid="4813104025494168064">"Ekki er hægt að fjarlægja virkt forrit tækjastjóra fyrir <xliff:g id="USERNAME">%1$s</xliff:g>"</string>
     <string name="uninstall_all_blocked_profile_owner" msgid="2009393666026751501">"Þessa forrits er krafist hjá sumum notendum eða sniðum en það var fjarlægt hjá öðrum"</string>
@@ -94,8 +91,7 @@
     <string name="anonymous_source_warning" product="default" msgid="2784902545920822500">"Síminn þinn og persónuleg gögn eru berskjaldaðri fyrir árásum forrita af óþekktum uppruna. Með uppsetningu þessa forrits samþykkirðu að bera fulla ábyrgð á hverju því tjóni sem verða kann á símanum eða gagnatapi sem leiða kann af notkun þess."</string>
     <string name="anonymous_source_warning" product="tablet" msgid="3939101621438855516">"Spjaldtölvan þín og persónuleg gögn eru berskjaldaðri fyrir árásum forrita af óþekktum uppruna. Með uppsetningu þessa forrits samþykkirðu að bera fulla ábyrgð á hverju því tjóni sem verða kann á spjaldtölvunni eða gagnatapi sem leiða kann af notkun þess."</string>
     <string name="anonymous_source_warning" product="tv" msgid="5599483539528168566">"Sjónvarpið þitt og persónuleg gögn eru berskjaldaðri fyrir árásum forrita af óþekktum uppruna. Með uppsetningu þessa forrits samþykkirðu að bera fulla ábyrgð á hverju því tjóni sem verða kann á sjónvarpinu eða gagnatapi sem leiða kann af notkun þess."</string>
-    <!-- no translation found for cloned_app_label (7503612829833756160) -->
-    <skip />
+    <string name="cloned_app_label" msgid="7503612829833756160">"Afrit af <xliff:g id="PACKAGE_LABEL">%1$s</xliff:g>"</string>
     <string name="anonymous_source_continue" msgid="4375745439457209366">"Áfram"</string>
     <string name="external_sources_settings" msgid="4046964413071713807">"Stillingar"</string>
     <string name="wear_app_channel" msgid="1960809674709107850">"Uppsetning/fjarlæging Wear forrita"</string>
