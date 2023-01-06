@@ -1079,10 +1079,9 @@ public class PhoneWindowManager implements WindowManagerPolicy {
         // a tendency to hit the power button immediately when they pick up their device, and we
         // don't want to put the device back to sleep in those cases.
         final PowerManager.WakeData lastWakeUp = mPowerManagerInternal.getLastWakeup();
-        if (lastWakeUp != null && lastWakeUp.wakeReason == PowerManager.WAKE_REASON_GESTURE) {
-            final int gestureDelayMillis = Settings.Global.getInt(mContext.getContentResolver(),
-                    Settings.Global.POWER_BUTTON_SUPPRESSION_DELAY_AFTER_GESTURE_WAKE,
-                    POWER_BUTTON_SUPPRESSION_DELAY_DEFAULT_MILLIS);
+        if (lastWakeUp != null && (lastWakeUp.wakeReason == PowerManager.WAKE_REASON_GESTURE
+                || lastWakeUp.wakeReason == PowerManager.WAKE_REASON_LIFT
+                || lastWakeUp.wakeReason == PowerManager.WAKE_REASON_BIOMETRIC)) {
             final long now = SystemClock.uptimeMillis();
             if (mPowerButtonSuppressionDelayMillis > 0
                     && (now < lastWakeUp.wakeTime + mPowerButtonSuppressionDelayMillis)) {
