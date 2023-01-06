@@ -17,18 +17,18 @@
 
 <resources xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
-    <string name="notification_channel_tv_pip" msgid="2576686079160402435">"Слика у слици"</string>
-    <string name="pip_notification_unknown_title" msgid="2729870284350772311">"(Програм без наслова)"</string>
-    <string name="pip_close" msgid="2955969519031223530">"Затвори"</string>
-    <string name="pip_fullscreen" msgid="7278047353591302554">"Цео екран"</string>
-    <string name="pip_move" msgid="158770205886688553">"Премести"</string>
-    <string name="pip_expand" msgid="1051966011679297308">"Прошири"</string>
-    <string name="pip_collapse" msgid="3903295106641385962">"Скупи"</string>
-    <string name="pip_edu_text" msgid="7930546669915337998">"Двапут притисните "<annotation icon="home_icon">" HOME "</annotation>" за контроле"</string>
-    <string name="a11y_pip_menu_entered" msgid="5106343214776801614">"Мени Слика у слици."</string>
-    <string name="a11y_action_pip_move_left" msgid="6612980937817141583">"Померите налево"</string>
-    <string name="a11y_action_pip_move_right" msgid="1119409122645529936">"Померите надесно"</string>
-    <string name="a11y_action_pip_move_up" msgid="98502616918621959">"Померите нагоре"</string>
-    <string name="a11y_action_pip_move_down" msgid="3858802832725159740">"Померите надоле"</string>
-    <string name="a11y_action_pip_move_done" msgid="1486845365134416210">"Готово"</string>
+    <string name="notification_channel_tv_pip" msgid="2576686079160402435">"Slika u slici"</string>
+    <string name="pip_notification_unknown_title" msgid="2729870284350772311">"(Program bez naslova)"</string>
+    <string name="pip_close" msgid="2955969519031223530">"Zatvori"</string>
+    <string name="pip_fullscreen" msgid="7278047353591302554">"Ceo ekran"</string>
+    <string name="pip_move" msgid="158770205886688553">"Premesti"</string>
+    <string name="pip_expand" msgid="1051966011679297308">"Proširi"</string>
+    <string name="pip_collapse" msgid="3903295106641385962">"Skupi"</string>
+    <string name="pip_edu_text" msgid="7930546669915337998">"Dvaput pritisnite "<annotation icon="home_icon">" HOME "</annotation>" za kontrole"</string>
+    <string name="a11y_pip_menu_entered" msgid="5106343214776801614">"Meni Slika u slici."</string>
+    <string name="a11y_action_pip_move_left" msgid="6612980937817141583">"Pomerite nalevo"</string>
+    <string name="a11y_action_pip_move_right" msgid="1119409122645529936">"Pomerite nadesno"</string>
+    <string name="a11y_action_pip_move_up" msgid="98502616918621959">"Pomerite nagore"</string>
+    <string name="a11y_action_pip_move_down" msgid="3858802832725159740">"Pomerite nadole"</string>
+    <string name="a11y_action_pip_move_done" msgid="1486845365134416210">"Gotovo"</string>
 </resources>
