@@ -32,6 +32,7 @@ import android.annotation.Nullable;
 import android.app.ActivityManager;
 import android.app.ActivityOptions;
 import android.app.BackgroundStartPrivileges;
+import android.app.ComponentOptions;
 import android.content.ComponentName;
 import android.content.Intent;
 import android.content.pm.PackageManager;
@@ -166,7 +167,8 @@ public class BackgroundActivityStartController {
         final boolean useCallingUidState =
                 originatingPendingIntent == null
                         || checkedOptions == null
-                        || !checkedOptions.getIgnorePendingIntentCreatorForegroundState();
+                        || checkedOptions.getPendingIntentCreatorBackgroundActivityStartMode()
+                                != ComponentOptions.MODE_BACKGROUND_ACTIVITY_START_DENIED;
         if (useCallingUidState) {
             if (callingUid == Process.ROOT_UID
                     || callingAppId == Process.SYSTEM_UID

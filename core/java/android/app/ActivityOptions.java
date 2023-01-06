@@ -387,8 +387,8 @@ public class ActivityOptions extends ComponentOptions {
     /** See {@link #setDismissKeyguard()}. */
     private static final String KEY_DISMISS_KEYGUARD = "android.activity.dismissKeyguard";
 
-    private static final String KEY_IGNORE_PENDING_INTENT_CREATOR_FOREGROUND_STATE =
-            "android.activity.ignorePendingIntentCreatorForegroundState";
+    private static final String KEY_PENDING_INTENT_CREATOR_BACKGROUND_ACTIVITY_START_MODE =
+            "android.activity.pendingIntentCreatorBackgroundActivityStartMode";
 
     /**
      * @see #setLaunchCookie
@@ -489,7 +489,9 @@ public class ActivityOptions extends ComponentOptions {
     private boolean mTransientLaunch;
     private PictureInPictureParams mLaunchIntoPipParams;
     private boolean mDismissKeyguard;
-    private boolean mIgnorePendingIntentCreatorForegroundState;
+    @BackgroundActivityStartMode
+    private int mPendingIntentCreatorBackgroundActivityStartMode =
+            MODE_BACKGROUND_ACTIVITY_START_SYSTEM_DEFINED;
     private boolean mDisableStartingWindow;
 
     /**
@@ -1297,8 +1299,9 @@ public class ActivityOptions extends ComponentOptions {
         mIsEligibleForLegacyPermissionPrompt =
                 opts.getBoolean(KEY_LEGACY_PERMISSION_PROMPT_ELIGIBLE);
         mDismissKeyguard = opts.getBoolean(KEY_DISMISS_KEYGUARD);
-        mIgnorePendingIntentCreatorForegroundState = opts.getBoolean(
-                KEY_IGNORE_PENDING_INTENT_CREATOR_FOREGROUND_STATE);
+        mPendingIntentCreatorBackgroundActivityStartMode = opts.getInt(
+                KEY_PENDING_INTENT_CREATOR_BACKGROUND_ACTIVITY_START_MODE,
+                MODE_BACKGROUND_ACTIVITY_START_SYSTEM_DEFINED);
         mDisableStartingWindow = opts.getBoolean(KEY_DISABLE_STARTING_WINDOW);
     }
 
@@ -1999,19 +2002,38 @@ public class ActivityOptions extends ComponentOptions {
      * Sets background activity launch logic won't use pending intent creator foreground state.
      *
      * @hide
+     * @deprecated use {@link #setPendingIntentCreatorBackgroundActivityStartMode(int)} instead
      */
-    public ActivityOptions setIgnorePendingIntentCreatorForegroundState(boolean state) {
-        mIgnorePendingIntentCreatorForegroundState = state;
+    @Deprecated
+    public ActivityOptions setIgnorePendingIntentCreatorForegroundState(boolean ignore) {
+        mPendingIntentCreatorBackgroundActivityStartMode = ignore
+                ? MODE_BACKGROUND_ACTIVITY_START_DENIED : MODE_BACKGROUND_ACTIVITY_START_ALLOWED;
         return this;
     }
 
     /**
-     * @return whether background activity launch logic should use pending intent creator
-     * foreground state.
-     * @hide
+     * Allow a {@link PendingIntent} to use the privilege of its creator to start background
+     * activities.
+     *
+     * @param mode the {@link android.app.ComponentOptions.BackgroundActivityStartMode} being set
+     * @throws IllegalArgumentException is the value is not a valid
+     * {@link android.app.ComponentOptions.BackgroundActivityStartMode}
      */
-    public boolean getIgnorePendingIntentCreatorForegroundState() {
-        return mIgnorePendingIntentCreatorForegroundState;
+    @NonNull
+    public ActivityOptions setPendingIntentCreatorBackgroundActivityStartMode(
+            @BackgroundActivityStartMode int mode) {
+        mPendingIntentCreatorBackgroundActivityStartMode = mode;
+        return this;
+    }
+
+    /**
+     * Returns the mode to start background activities granted by the creator of the
+     * {@link PendingIntent}.
+     *
+     * @return the {@link android.app.ComponentOptions.BackgroundActivityStartMode} currently set
+     */
+    public @BackgroundActivityStartMode int getPendingIntentCreatorBackgroundActivityStartMode() {
+        return mPendingIntentCreatorBackgroundActivityStartMode;
     }
 
     /**
@@ -2285,9 +2307,10 @@ public class ActivityOptions extends ComponentOptions {
         if (mDismissKeyguard) {
             b.putBoolean(KEY_DISMISS_KEYGUARD, mDismissKeyguard);
         }
-        if (mIgnorePendingIntentCreatorForegroundState) {
-            b.putBoolean(KEY_IGNORE_PENDING_INTENT_CREATOR_FOREGROUND_STATE,
-                    mIgnorePendingIntentCreatorForegroundState);
+        if (mPendingIntentCreatorBackgroundActivityStartMode
+                != MODE_BACKGROUND_ACTIVITY_START_SYSTEM_DEFINED) {
+            b.putInt(KEY_PENDING_INTENT_CREATOR_BACKGROUND_ACTIVITY_START_MODE,
+                    mPendingIntentCreatorBackgroundActivityStartMode);
         }
         if (mDisableStartingWindow) {
             b.putBoolean(KEY_DISABLE_STARTING_WINDOW, mDisableStartingWindow);
