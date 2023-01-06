@@ -204,6 +204,11 @@ object Flags {
     @JvmField
     val UNOCCLUSION_TRANSITION = unreleasedFlag(223, "unocclusion_transition", teamfood = false)
 
+    // flag for controlling auto pin confirmation and material u shapes in bouncer
+    @JvmField
+    val AUTO_PIN_CONFIRMATION =
+        unreleasedFlag(224, "auto_pin_confirmation", "auto_pin_confirmation")
+
     // 300 - power menu
     // TODO(b/254512600): Tracking Bug
     @JvmField val POWER_MENU_LITE = releasedFlag(300, "power_menu_lite")
