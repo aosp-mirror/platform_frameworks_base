@@ -103,8 +103,8 @@ public class LocaleManagerService extends SystemService {
     private final PackageMonitor mPackageMonitor;
 
     private final Object mWriteLock = new Object();
-
-    public static final boolean DEBUG = false;
+    // TODO(b/262713398): Set to false when stable
+    public static final boolean DEBUG = true;
 
     public LocaleManagerService(Context context) {
         super(context);
