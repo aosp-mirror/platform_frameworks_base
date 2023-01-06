@@ -41,4 +41,7 @@ interface IDreamOverlay {
 
     /** Called when the dream is waking, to do any exit animations */
     void wakeUp();
+
+    /** Called when the dream has ended. */
+    void endDream();
 }
