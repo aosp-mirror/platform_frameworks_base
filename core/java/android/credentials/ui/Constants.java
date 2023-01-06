@@ -24,9 +24,12 @@ package android.credentials.ui;
 public class Constants {
 
     /**
-    * The intent extra key for the {@code ResultReceiver} object when launching the UX
-    * activities.
-    */
+     * The intent extra key for the {@code ResultReceiver} object when launching the UX activities.
+     */
     public static final String EXTRA_RESULT_RECEIVER =
             "android.credentials.ui.extra.RESULT_RECEIVER";
+
+    /** The intent action for when the enabled Credential Manager providers has been updated. */
+    public static final String CREDMAN_ENABLED_PROVIDERS_UPDATED =
+            "android.credentials.ui.action.CREDMAN_ENABLED_PROVIDERS_UPDATED";
 }
