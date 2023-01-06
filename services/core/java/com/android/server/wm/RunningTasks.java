@@ -69,7 +69,7 @@ class RunningTasks {
             }
 
             final TaskRecord task = iter.next();
-            list.add(createRunningTaskInfo(task, allowed));
+            list.add(createRunningTaskInfo(task));
             maxNum--;
         }
     }
@@ -77,15 +77,11 @@ class RunningTasks {
     /**
      * Constructs a {@link RunningTaskInfo} from a given {@param task}.
      */
-    private RunningTaskInfo createRunningTaskInfo(TaskRecord task, boolean allowed) {
+    private RunningTaskInfo createRunningTaskInfo(TaskRecord task) {
         final RunningTaskInfo rti = new RunningTaskInfo();
         task.fillTaskInfo(rti);
         // Fill in some deprecated values
         rti.id = rti.taskId;
-
-        if (!allowed) {
-            TaskRecord.trimIneffectiveInfo(task, rti);
-        }
         return rti;
     }
 }
