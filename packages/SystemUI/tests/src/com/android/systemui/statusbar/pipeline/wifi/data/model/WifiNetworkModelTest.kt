@@ -34,12 +34,6 @@ class WifiNetworkModelTest : SysuiTestCase() {
         }
     }
 
-    @Test
-    fun active_levelNull_noException() {
-        WifiNetworkModel.Active(NETWORK_ID, level = null)
-        // No assert, just need no crash
-    }
-
     @Test(expected = IllegalArgumentException::class)
     fun active_levelNegative_exceptionThrown() {
         WifiNetworkModel.Active(NETWORK_ID, level = MIN_VALID_LEVEL - 1)

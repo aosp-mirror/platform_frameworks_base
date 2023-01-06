@@ -35,7 +35,6 @@ import android.telephony.TelephonyCallback
 import android.telephony.TelephonyCallback.ActiveDataSubscriptionIdListener
 import android.telephony.TelephonyManager
 import androidx.annotation.VisibleForTesting
-import com.android.internal.telephony.PhoneConstants
 import com.android.settingslib.SignalIcon.MobileIconGroup
 import com.android.settingslib.mobile.MobileMappings.Config
 import com.android.systemui.R
@@ -60,7 +59,6 @@ import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.asExecutor
 import kotlinx.coroutines.channels.awaitClose
 import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.distinctUntilChanged
@@ -142,24 +140,10 @@ constructor(
             .logInputChange(logger, "onActiveDataSubscriptionIdChanged")
             .stateIn(scope, started = SharingStarted.WhileSubscribed(), INVALID_SUBSCRIPTION_ID)
 
-    private val defaultDataSubIdChangeEvent: MutableSharedFlow<Unit> =
-        MutableSharedFlow(extraBufferCapacity = 1)
-
-    override val defaultDataSubId: StateFlow<Int> =
+    private val defaultDataSubIdChangedEvent =
         broadcastDispatcher
-            .broadcastFlow(
-                IntentFilter(TelephonyManager.ACTION_DEFAULT_DATA_SUBSCRIPTION_CHANGED)
-            ) { intent, _ ->
-                intent.getIntExtra(PhoneConstants.SUBSCRIPTION_KEY, INVALID_SUBSCRIPTION_ID)
-            }
-            .distinctUntilChanged()
+            .broadcastFlow(IntentFilter(TelephonyManager.ACTION_DEFAULT_DATA_SUBSCRIPTION_CHANGED))
             .logInputChange(logger, "ACTION_DEFAULT_DATA_SUBSCRIPTION_CHANGED")
-            .onEach { defaultDataSubIdChangeEvent.tryEmit(Unit) }
-            .stateIn(
-                scope,
-                SharingStarted.WhileSubscribed(),
-                SubscriptionManager.getDefaultDataSubscriptionId()
-            )
 
     private val carrierConfigChangedEvent =
         broadcastDispatcher
@@ -167,7 +151,7 @@ constructor(
             .logInputChange(logger, "ACTION_CARRIER_CONFIG_CHANGED")
 
     override val defaultDataSubRatConfig: StateFlow<Config> =
-        merge(defaultDataSubIdChangeEvent, carrierConfigChangedEvent)
+        merge(defaultDataSubIdChangedEvent, carrierConfigChangedEvent)
             .mapLatest { Config.readConfig(context) }
             .distinctUntilChanged()
             .logInputChange(logger, "defaultDataSubRatConfig")
@@ -272,7 +256,6 @@ constructor(
             subId,
             defaultNetworkName,
             networkNameSeparator,
-            defaultDataSubId,
             globalMobileDataSettingChangedEvent,
         )
     }

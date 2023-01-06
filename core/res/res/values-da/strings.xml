@@ -586,11 +586,11 @@
     <string name="biometric_error_generic" msgid="6784371929985434439">"Der opstod fejl i forbindelse med godkendelse"</string>
     <string name="screen_lock_app_setting_name" msgid="6054944352976789228">"Brug skærmlås"</string>
     <string name="screen_lock_dialog_default_subtitle" msgid="120359538048533695">"Angiv din skærmlås for at fortsætte"</string>
-    <string name="fingerprint_acquired_partial" msgid="4323789264604479684">"Hold fingeren nede på sensoren"</string>
+    <string name="fingerprint_acquired_partial" msgid="4323789264604479684">"Hold fingeren på sensoren"</string>
     <string name="fingerprint_acquired_insufficient" msgid="623888149088216458">"Fingeraftrykket kan ikke genkendes. Prøv igen."</string>
     <string name="fingerprint_acquired_imager_dirty" msgid="1770676120848224250">"Rengør fingeraftrykssensoren, og prøv igen"</string>
     <string name="fingerprint_acquired_imager_dirty_alt" msgid="9169582140486372897">"Rengør sensoren, og prøv igen"</string>
-    <string name="fingerprint_acquired_too_fast" msgid="1628459767349116104">"Hold fingeren nede på sensoren"</string>
+    <string name="fingerprint_acquired_too_fast" msgid="1628459767349116104">"Hold fingeren på sensoren"</string>
     <string name="fingerprint_acquired_too_slow" msgid="6683510291554497580">"Du bevægede fingeren for langsomt. Prøv igen."</string>
     <string name="fingerprint_acquired_already_enrolled" msgid="2285166003936206785">"Prøv med et andet fingeraftryk"</string>
     <string name="fingerprint_acquired_too_bright" msgid="3863560181670915607">"Der er for lyst"</string>

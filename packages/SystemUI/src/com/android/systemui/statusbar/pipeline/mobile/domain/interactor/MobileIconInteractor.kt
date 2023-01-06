@@ -23,12 +23,11 @@ import com.android.systemui.log.table.TableLogBuffer
 import com.android.systemui.statusbar.pipeline.mobile.data.model.DataConnectionState.Connected
 import com.android.systemui.statusbar.pipeline.mobile.data.model.NetworkNameModel
 import com.android.systemui.statusbar.pipeline.mobile.data.repository.MobileConnectionRepository
+import com.android.systemui.statusbar.pipeline.mobile.data.repository.MobileConnectionRepository.Companion.DEFAULT_NUM_LEVELS
 import com.android.systemui.statusbar.pipeline.shared.data.model.DataActivityModel
-import com.android.systemui.util.CarrierConfigTracker
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.combine
@@ -171,11 +170,12 @@ class MobileIconInteractorImpl(
             }
             .stateIn(scope, SharingStarted.WhileSubscribed(), 0)
 
-    /**
-     * This will become variable based on [CarrierConfigManager.KEY_INFLATE_SIGNAL_STRENGTH_BOOL]
-     * once it's wired up inside of [CarrierConfigTracker]
-     */
-    override val numberOfLevels: StateFlow<Int> = MutableStateFlow(4)
+    override val numberOfLevels: StateFlow<Int> =
+        connectionRepository.numberOfLevels.stateIn(
+            scope,
+            SharingStarted.WhileSubscribed(),
+            connectionRepository.numberOfLevels.value,
+        )
 
     override val isDataConnected: StateFlow<Boolean> =
         connectionInfo

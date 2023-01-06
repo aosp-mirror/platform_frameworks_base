@@ -58,6 +58,7 @@ import com.android.systemui.plugins.statusbar.NotificationMenuRowPlugin;
 import com.android.systemui.plugins.statusbar.StatusBarStateController;
 import com.android.systemui.statusbar.notification.AboveShelfChangedListener;
 import com.android.systemui.statusbar.notification.FeedbackIcon;
+import com.android.systemui.statusbar.notification.SourceType;
 import com.android.systemui.statusbar.notification.collection.NotificationEntry;
 import com.android.systemui.statusbar.notification.row.ExpandableView.OnHeightChangedListener;
 import com.android.systemui.statusbar.notification.stack.NotificationChildrenContainer;
@@ -533,5 +534,29 @@ public class ExpandableNotificationRowTest extends SysuiTestCase {
                 /*child=*/ any(),
                 /*oldParent=*/ any()
         );
+    }
+
+    @Test
+    public void applyRoundnessAndInv_should_be_immediately_applied_on_childrenContainer_legacy() {
+        mGroupRow.useRoundnessSourceTypes(false);
+        Assert.assertEquals(0f, mGroupRow.getBottomRoundness(), 0.001f);
+        Assert.assertEquals(0f, mGroupRow.getChildrenContainer().getBottomRoundness(), 0.001f);
+
+        mGroupRow.requestBottomRoundness(1f, SourceType.from(""), false);
+
+        Assert.assertEquals(1f, mGroupRow.getBottomRoundness(), 0.001f);
+        Assert.assertEquals(1f, mGroupRow.getChildrenContainer().getBottomRoundness(), 0.001f);
+    }
+
+    @Test
+    public void applyRoundnessAndInvalidate_should_be_immediately_applied_on_childrenContainer() {
+        mGroupRow.useRoundnessSourceTypes(true);
+        Assert.assertEquals(0f, mGroupRow.getBottomRoundness(), 0.001f);
+        Assert.assertEquals(0f, mGroupRow.getChildrenContainer().getBottomRoundness(), 0.001f);
+
+        mGroupRow.requestBottomRoundness(1f, SourceType.from(""), false);
+
+        Assert.assertEquals(1f, mGroupRow.getBottomRoundness(), 0.001f);
+        Assert.assertEquals(1f, mGroupRow.getChildrenContainer().getBottomRoundness(), 0.001f);
     }
 }
