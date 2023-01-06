@@ -3185,14 +3185,26 @@ class WindowContainer<E extends WindowContainer> extends ConfigurationContainer<
                     // which if set originates from a call to overridePendingAppTransition.
                     backgroundColorForTransition = adapter.getBackgroundColor();
                 } else {
-                    // Otherwise default to the window's background color if provided through
-                    // the theme as the background color for the animation - the top most window
-                    // with a valid background color and showBackground set takes precedence.
-                    final Task parentTask = activityRecord != null
-                            ? activityRecord.getTask()
-                            : taskFragment.getTask();
-                    backgroundColorForTransition = ColorUtils.setAlphaComponent(
-                            parentTask.getTaskDescription().getBackgroundColor(), 255);
+                    final TaskFragment organizedTf = activityRecord != null
+                            ? activityRecord.getOrganizedTaskFragment()
+                            : taskFragment.getOrganizedTaskFragment();
+                    if (organizedTf != null && organizedTf.getAnimationParams()
+                            .getAnimationBackgroundColor() != 0) {
+                        // This window is embedded and has an animation background color set on the
+                        // TaskFragment. Pass this color with this window, so the handler can use it
+                        // as the animation background color if needed,
+                        backgroundColorForTransition = organizedTf.getAnimationParams()
+                                .getAnimationBackgroundColor();
+                    } else {
+                        // Otherwise default to the window's background color if provided through
+                        // the theme as the background color for the animation - the top most window
+                        // with a valid background color and showBackground set takes precedence.
+                        final Task parentTask = activityRecord != null
+                                ? activityRecord.getTask()
+                                : taskFragment.getTask();
+                        backgroundColorForTransition = ColorUtils.setAlphaComponent(
+                                parentTask.getTaskDescription().getBackgroundColor(), 255);
+                    }
                 }
                 animationRunnerBuilder.setTaskBackgroundColor(backgroundColorForTransition);
             }
