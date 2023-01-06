@@ -135,7 +135,7 @@ private fun PeopleScreenWithConversations(
         }
 
         LazyColumn(
-            Modifier.fillMaxWidth(),
+            Modifier.fillMaxWidth().sysuiResTag("scroll_view"),
             contentPadding =
                 PaddingValues(
                     top = 16.dp,
