@@ -7938,6 +7938,8 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
         // The smallest screen width is the short side of screen bounds. Because the bounds
         // and density won't be changed, smallestScreenWidthDp is also fixed.
         overrideConfig.smallestScreenWidthDp = fullConfig.smallestScreenWidthDp;
+        // TODO(b/264276741): Check whether the runtime orietnation request is fixed rather than
+        // the manifest orientation which may be obsolete.
         if (info.isFixedOrientation()) {
             // lock rotation too. When in size-compat, onConfigurationChanged will watch for and
             // apply runtime rotation changes.
@@ -8051,8 +8053,24 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
             updateResolvedBoundsPosition(newParentConfiguration);
         }
 
-        if (mVisibleRequested) {
-            updateCompatDisplayInsets();
+        boolean isIgnoreOrientationRequest = mDisplayContent != null
+                && mDisplayContent.getIgnoreOrientationRequest();
+        if (mCompatDisplayInsets == null // for size compat mode set in updateCompatDisplayInsets
+                // Fixed orientation letterboxing is possible on both large screen devices
+                // with ignoreOrientationRequest enabled and on phones in split screen even with
+                // ignoreOrientationRequest disabled.
+                && (mLetterboxBoundsForFixedOrientationAndAspectRatio != null
+                        // Limiting check for aspect ratio letterboxing to devices with enabled
+                        // ignoreOrientationRequest. This avoids affecting phones where apps may
+                        // not expect the change of smallestScreenWidthDp after rotation which is
+                        // possible with this logic. Not having smallestScreenWidthDp completely
+                        // accurate on phones shouldn't make the big difference and is expected
+                        // to be already well-tested by apps.
+                        || (isIgnoreOrientationRequest && mIsAspectRatioApplied))) {
+            // TODO(b/264034555): Use mDisplayContent to calculate smallestScreenWidthDp from all
+            // rotations and only re-calculate if parent bounds have non-orientation size change.
+            resolvedConfig.smallestScreenWidthDp =
+                    Math.min(resolvedConfig.screenWidthDp, resolvedConfig.screenHeightDp);
         }
 
         // Assign configuration sequence number into hierarchy because there is a different way than
@@ -8448,7 +8466,7 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
         // Calculate app bounds using fixed orientation bounds because they will be needed later
         // for comparison with size compat app bounds in {@link resolveSizeCompatModeConfiguration}.
         getTaskFragment().computeConfigResourceOverrides(getResolvedOverrideConfiguration(),
-                newParentConfig);
+                newParentConfig, mCompatDisplayInsets);
         mLetterboxBoundsForFixedOrientationAndAspectRatio = new Rect(resolvedBounds);
     }
 
@@ -9127,6 +9145,18 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
             mLastReportedDisplayId = newDisplayId;
         }
 
+        // Calling from here rather than from onConfigurationChanged because it's possible that
+        // onConfigurationChanged was called before mVisibleRequested became true and
+        // mCompatDisplayInsets may not be called again when mVisibleRequested changes. And we
+        // don't want to save mCompatDisplayInsets in onConfigurationChanged without visibility
+        // check to avoid remembering obsolete configuration which can lead to unnecessary
+        // size-compat mode.
+        if (mVisibleRequested) {
+            // Calling from here rather than resolveOverrideConfiguration to ensure that this is
+            // called after full config is updated in ConfigurationContainer#onConfigurationChanged.
+            updateCompatDisplayInsets();
+        }
+
         // Short circuit: if the two full configurations are equal (the common case), then there is
         // nothing to do.  We test the full configuration instead of the global and merged override
         // configurations because there are cases (like moving a task to the root pinned task) where
@@ -9135,12 +9165,6 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
         if (getConfiguration().equals(mTmpConfig) && !forceNewConfig && !displayChanged) {
             ProtoLog.v(WM_DEBUG_CONFIGURATION, "Configuration & display "
                     + "unchanged in %s", this);
-            // It's possible that resolveOverrideConfiguration was called before mVisibleRequested
-            // became true and mCompatDisplayInsets may not have been created so ensure
-            // that mCompatDisplayInsets is created here.
-            if (mVisibleRequested) {
-                updateCompatDisplayInsets();
-            }
             return true;
         }
 
