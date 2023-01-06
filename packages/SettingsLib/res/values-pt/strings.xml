@@ -564,6 +564,8 @@
     <string name="user_add_user_title" msgid="5457079143694924885">"Adicionar novo usuário?"</string>
     <string name="user_add_user_message_long" msgid="1527434966294733380">"Você pode compartilhar este dispositivo com outras pessoas, adicionando usuários. Cada usuário tem o próprio espaço, que pode ser personalizado com apps, planos de fundo, etc. Os usuários também podem ajustar as configurações do dispositivo, como o Wi‑Fi, que afetam a todos.\n\nQuando você adiciona um novo usuário, essa pessoa precisa configurar o próprio espaço.\n\nQualquer usuário pode atualizar apps para todos os outros. Serviços e configurações de acessibilidade podem não ser transferidos para novos usuários."</string>
     <string name="user_add_user_message_short" msgid="3295959985795716166">"Quando você adiciona um novo usuário, essa pessoa precisa configurar o próprio espaço.\n\nQualquer usuário pode atualizar apps para os demais usuários."</string>
+    <string name="user_grant_admin_title" msgid="5565796912475193314">"Dar privilégios de administrador ao usuário?"</string>
+    <string name="user_grant_admin_message" msgid="7925257971286380976">"Como administrador, essa pessoa poderá gerenciar outros usuários, modificar as configurações e redefinir o dispositivo para a configuração original."</string>
     <string name="user_setup_dialog_title" msgid="8037342066381939995">"Configurar o usuário agora?"</string>
     <string name="user_setup_dialog_message" msgid="269931619868102841">"Certifique-se de que a pessoa está disponível para acessar o dispositivo e fazer as próprias configurações"</string>
     <string name="user_setup_profile_dialog_message" msgid="4788197052296962620">"Configurar perfil agora?"</string>
@@ -595,6 +597,8 @@
     <string name="guest_reset_and_restart_dialog_message" msgid="2764425635305200790">"Essa ação vai iniciar uma nova Sessão de visitante e excluir todos os apps e dados da sessão atual"</string>
     <string name="guest_exit_dialog_title" msgid="1846494656849381804">"Sair do modo visitante?"</string>
     <string name="guest_exit_dialog_message" msgid="1743218864242719783">"Essa ação vai excluir apps e dados da Sessão de visitante atual"</string>
+    <string name="grant_admin" msgid="4273077214151417783">"Dar privilégios de administrador ao usuário"</string>
+    <string name="not_grant_admin" msgid="6985027675930546850">"Não dar privilégios de administrador ao usuário"</string>
     <string name="guest_exit_dialog_button" msgid="1736401897067442044">"Sair"</string>
     <string name="guest_exit_dialog_title_non_ephemeral" msgid="7675327443743162986">"Salvar a atividade do visitante?"</string>
     <string name="guest_exit_dialog_message_non_ephemeral" msgid="223385323235719442">"Você pode salvar a atividade da sessão atual ou excluir todos os apps e dados"</string>

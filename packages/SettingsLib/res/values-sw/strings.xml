@@ -172,7 +172,7 @@
     <string name="unknown" msgid="3544487229740637809">"Haijulikani"</string>
     <string name="running_process_item_user_label" msgid="3988506293099805796">"Mtumiaji: <xliff:g id="USER_NAME">%1$s</xliff:g>"</string>
     <string name="launch_defaults_some" msgid="3631650616557252926">"Baadhi ya chaguomsingi zimewekwa"</string>
-    <string name="launch_defaults_none" msgid="8049374306261262709">"Hakuna chaguo-misingi zilizowekwa"</string>
+    <string name="launch_defaults_none" msgid="8049374306261262709">"Hakuna machaguomsingi yaliyowekwa"</string>
     <string name="tts_settings" msgid="8130616705989351312">"Mipangilio ya kusoma maandishi kwa sauti"</string>
     <string name="tts_settings_title" msgid="7602210956640483039">"Kusoma maandishi kwa sauti"</string>
     <string name="tts_default_rate_title" msgid="3964187817364304022">"Kasi ya kutamka"</string>
@@ -564,6 +564,8 @@
     <string name="user_add_user_title" msgid="5457079143694924885">"Ungependa kuongeza mtumiaji?"</string>
     <string name="user_add_user_message_long" msgid="1527434966294733380">"Unaweza kutumia kifaa hiki pamoja na watu wengine kwa kuongeza watumiaji wa ziada. Kila mtumiaji ana nafasi yake mwenyewe, ambayo anaweza kuweka programu, mandhari na vipengee vingine anavyopenda. Watumiaji pia wanaweza kurekebisha mipangilio ya kifaa inayoathiri kila mtu kama vile Wi-Fi.\n\nUnapomwongeza mtumiaji mpya, mtu huyo anahitaji kujitayarishia nafasi yake.\n\nMtumiaji yeyote anaweza kuwasasishia watumiaji wengine wote programu. Huenda mipangilio na huduma za ufikivu zisihamishiwe mtumiaji mgeni."</string>
     <string name="user_add_user_message_short" msgid="3295959985795716166">"Mtumiaji mpya utakayemwongeza atahitaji kujitayarishia nafasi yake.\n\nMtumiaji yoyote anaweza kusasisha programu kwa niaba ya wengine wote."</string>
+    <string name="user_grant_admin_title" msgid="5565796912475193314">"Ungependa kumpatia mtumiaji huyu haki za msimamizi?"</string>
+    <string name="user_grant_admin_message" msgid="7925257971286380976">"Akiwa msimamizi, ataweza kusimamia watumiaji wengine, kurekebisha mipangilio ya kifaa na kurejesha mipangilio ambayo kifaa kiIitoka nayo kiwandani."</string>
     <string name="user_setup_dialog_title" msgid="8037342066381939995">"Mtumiaji aongezwe sasa?"</string>
     <string name="user_setup_dialog_message" msgid="269931619868102841">"Hakikisha kuwa mtu huyu anaweza kuchukua kifaa na kujitayarishia nafasi yake"</string>
     <string name="user_setup_profile_dialog_message" msgid="4788197052296962620">"Ungependa kuweka wasifu sasa?"</string>
@@ -595,6 +597,8 @@
     <string name="guest_reset_and_restart_dialog_message" msgid="2764425635305200790">"Hatua hii itaanzisha upya kipindi cha mgeni na kufuta programu na data yote kwenye kipindi cha sasa"</string>
     <string name="guest_exit_dialog_title" msgid="1846494656849381804">"Utafunga matumizi ya wageni?"</string>
     <string name="guest_exit_dialog_message" msgid="1743218864242719783">"Hatua hii itafuta programu na data kutoka kwenye kipindi cha mgeni cha sasa"</string>
+    <string name="grant_admin" msgid="4273077214151417783">"Mpatie mtumiaji huyu haki za msimamizi"</string>
+    <string name="not_grant_admin" msgid="6985027675930546850">"Usimpatie mtumiaji haki za msimamizi"</string>
     <string name="guest_exit_dialog_button" msgid="1736401897067442044">"Funga"</string>
     <string name="guest_exit_dialog_title_non_ephemeral" msgid="7675327443743162986">"Utahifadhi shughuli za mgeni?"</string>
     <string name="guest_exit_dialog_message_non_ephemeral" msgid="223385323235719442">"Unaweza kuhifadhi shughuli kutoka kipindi cha sasa au kufuta programu na data yote"</string>

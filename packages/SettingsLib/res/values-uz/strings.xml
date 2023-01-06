@@ -234,7 +234,7 @@
     <string name="adb_pair_method_qrcode_summary" msgid="7130694277228970888">"QR kod skaneri yordamida yangi qurilmalarni ulang"</string>
     <string name="adb_pair_method_code_title" msgid="1122590300445142904">"Qurilmani ulanish kodi orqali ulash"</string>
     <string name="adb_pair_method_code_summary" msgid="6370414511333685185">"Olti xonali kod yordamida yangi qurilmalarni ulash mumkin"</string>
-    <string name="adb_paired_devices_title" msgid="5268997341526217362">"Ulangan qurilmalar"</string>
+    <string name="adb_paired_devices_title" msgid="5268997341526217362">"Juftlangan qurilmalar"</string>
     <string name="adb_wireless_device_connected_summary" msgid="3039660790249148713">"Hozirda ulangan"</string>
     <string name="adb_wireless_device_details_title" msgid="7129369670526565786">"Qurilma tafsilotlari"</string>
     <string name="adb_device_forget" msgid="193072400783068417">"Olib tashlash"</string>
@@ -467,8 +467,8 @@
     <string name="power_charging" msgid="6727132649743436802">"<xliff:g id="LEVEL">%1$s</xliff:g> – <xliff:g id="STATE">%2$s</xliff:g>"</string>
     <string name="power_remaining_charging_duration_only" msgid="8085099012811384899">"Toʻlishiga <xliff:g id="TIME">%1$s</xliff:g> qoldi"</string>
     <string name="power_charging_duration" msgid="6127154952524919719">"<xliff:g id="LEVEL">%1$s</xliff:g> – Toʻlishiga <xliff:g id="TIME">%2$s</xliff:g> qoldi"</string>
-    <string name="power_charging_limited" msgid="8202147604844938236">"<xliff:g id="LEVEL">%1$s</xliff:g> - Quvvatlash optimallandi"</string>
-    <string name="power_charging_future_paused" msgid="4730177778538118032">"<xliff:g id="LEVEL">%1$s</xliff:g> - Quvvatlash optimallandi"</string>
+    <string name="power_charging_limited" msgid="8202147604844938236">"<xliff:g id="LEVEL">%1$s</xliff:g> - Quvvatlash optimallashtirildi"</string>
+    <string name="power_charging_future_paused" msgid="4730177778538118032">"<xliff:g id="LEVEL">%1$s</xliff:g> - Quvvatlash optimallashtirildi"</string>
     <string name="battery_info_status_unknown" msgid="268625384868401114">"Noma’lum"</string>
     <string name="battery_info_status_charging" msgid="4279958015430387405">"Quvvat olmoqda"</string>
     <string name="battery_info_status_charging_fast" msgid="8027559755902954885">"Tezkor quvvat olmoqda"</string>
@@ -564,6 +564,8 @@
     <string name="user_add_user_title" msgid="5457079143694924885">"Foydalanuvchi qo‘shilsinmi?"</string>
     <string name="user_add_user_message_long" msgid="1527434966294733380">"Bu qurilmadan bir necha kishi alohida foydalanuvchilar qo‘shib foydalanishi mumkin. Har bir foydalanuvchiga diskda joy ajratiladi, tayinlangan hajm ilovalar, ekran foni rasmi, va hokazolarga taqsimlanishi mumkin. Foydalanuvchilar Wi-Fi kabi sozlamalarni o‘zgartirsa, qolganlarda ham aks etishi mumkin. \n\nYangi profil qo‘shilgach, uni sozlash lozim.\n\nQurilmaning istalgan foydalanuvchisi ilovalarni barcha hisoblar uchun yangilashi mumkin. Maxsus imkoniyatlar sozlamalari va xizmatlar yangi foydalanuvchiga o‘tkazilmasligi mumkin."</string>
     <string name="user_add_user_message_short" msgid="3295959985795716166">"Yangi profil qo‘shilgach, uni sozlash lozim.\n\nQurilmaning istalgan foydalanuvchisi ilovalarni barcha hisoblar uchun yangilashi mumkin."</string>
+    <string name="user_grant_admin_title" msgid="5565796912475193314">"Foydalanuvchiga admin huquqi berilsinmi?"</string>
+    <string name="user_grant_admin_message" msgid="7925257971286380976">"Administrator sifatida ular boshqa foydalanuvchilarni boshqarish, qurilma sozlamalarini oʻzgartirish va qurilmani zavod sozlamalariga qaytarish huquqiga ega boʻladi."</string>
     <string name="user_setup_dialog_title" msgid="8037342066381939995">"Profil hozir sozlansinmi?"</string>
     <string name="user_setup_dialog_message" msgid="269931619868102841">"Agar foydalanuvchi profilini hozir sozlay olmasa, keyinroq ham sozlab olishi mumkin."</string>
     <string name="user_setup_profile_dialog_message" msgid="4788197052296962620">"Profil hozir sozlansinmi?"</string>
@@ -595,6 +597,8 @@
     <string name="guest_reset_and_restart_dialog_message" msgid="2764425635305200790">"Bunda yangi mehmon seansi ishga tushadi va joriy seans ilova va maʼlumotlari tozalanadi"</string>
     <string name="guest_exit_dialog_title" msgid="1846494656849381804">"Mehmon rejimidan chiqasizmi?"</string>
     <string name="guest_exit_dialog_message" msgid="1743218864242719783">"Bunda joriy mehmon seansidagi ilova va ularning maʼlumotlari tozalanadi"</string>
+    <string name="grant_admin" msgid="4273077214151417783">"Bu foydalanuvchiga admin huquqlarini berish"</string>
+    <string name="not_grant_admin" msgid="6985027675930546850">"Foydalanuvchiga admin huquqlari berilmasin"</string>
     <string name="guest_exit_dialog_button" msgid="1736401897067442044">"Chiqish"</string>
     <string name="guest_exit_dialog_title_non_ephemeral" msgid="7675327443743162986">"Mehmon faoliyati saqlansinmi?"</string>
     <string name="guest_exit_dialog_message_non_ephemeral" msgid="223385323235719442">"Joriy seansdagi faoliyatni saqlash yoki barcha ilova va maʼlumotlarni oʻchirib tashlashingiz mumkin"</string>

@@ -467,10 +467,8 @@
     <string name="power_charging" msgid="6727132649743436802">"<xliff:g id="LEVEL">%1$s</xliff:g> - ‏<xliff:g id="STATE">%2$s</xliff:g>"</string>
     <string name="power_remaining_charging_duration_only" msgid="8085099012811384899">"<xliff:g id="TIME">%1$s</xliff:g> تا شارژ کامل باقی مانده است"</string>
     <string name="power_charging_duration" msgid="6127154952524919719">"<xliff:g id="LEVEL">%1$s</xliff:g> - <xliff:g id="TIME">%2$s</xliff:g> تا شارژ کامل باقی مانده است"</string>
-    <!-- no translation found for power_charging_limited (8202147604844938236) -->
-    <skip />
-    <!-- no translation found for power_charging_future_paused (4730177778538118032) -->
-    <skip />
+    <string name="power_charging_limited" msgid="8202147604844938236">"<xliff:g id="LEVEL">%1$s</xliff:g> - شارژ بهینه شده است"</string>
+    <string name="power_charging_future_paused" msgid="4730177778538118032">"<xliff:g id="LEVEL">%1$s</xliff:g> - شارژ بهینه شده است"</string>
     <string name="battery_info_status_unknown" msgid="268625384868401114">"ناشناس"</string>
     <string name="battery_info_status_charging" msgid="4279958015430387405">"در حال شارژ شدن"</string>
     <string name="battery_info_status_charging_fast" msgid="8027559755902954885">"درحال شارژ شدن سریع"</string>
@@ -566,6 +564,8 @@
     <string name="user_add_user_title" msgid="5457079143694924885">"کاربر جدیدی اضافه می‌کنید؟"</string>
     <string name="user_add_user_message_long" msgid="1527434966294733380">"‏با ایجاد کاربران بیشتر، می‌توانید این دستگاه را با دیگران به‌اشتراک بگذارید. هر کاربر فضای مخصوص به خودش را دارد که می‌تواند آن را با برنامه‌ها، کاغذدیواری و موارد دیگر سفارشی کند. همچنین کاربران می‌توانند تنظیماتی در دستگاه ایجاد کنند، مانند تنظیمات Wi-Fi، که بر تنظیمات بقیه اثر دارد.\n\nوقتی کاربر جدیدی اضافه می‌کنید، آن شخص باید فضای خودش را تنظیم کند.\n\nهر کاربر می‌تواند برنامه‌ها را برای سایر کاربران به‌روزرسانی کند. دسترس‌پذیری، تنظیمات، و سرویس‌ها قابل‌انتقال به کاربر جدید نیستند."</string>
     <string name="user_add_user_message_short" msgid="3295959985795716166">"وقتی کاربر جدیدی اضافه می‌کنید آن فرد باید فضای خودش را تنظیم کند.\n\nهر کاربری می‌تواند برنامه‌ها را برای همه کاربران دیگر به‌روزرسانی کند."</string>
+    <string name="user_grant_admin_title" msgid="5565796912475193314">"امتیازهای سرپرست به این کاربر اعطا شود؟"</string>
+    <string name="user_grant_admin_message" msgid="7925257971286380976">"به‌عنوان سرپرست، این فرد می‌تواند کاربران دیگر را مدیریت کند، تنظیمات دستگاه را تغییر دهد، و دستگاه را بازنشانی کارخانه‌ای کند."</string>
     <string name="user_setup_dialog_title" msgid="8037342066381939995">"هم اکنون کاربر تنظیم شود؟"</string>
     <string name="user_setup_dialog_message" msgid="269931619868102841">"مطمئن شوید شخص در دسترس است تا دستگاه را بگیرد و فضایش را تنظیم کند"</string>
     <string name="user_setup_profile_dialog_message" msgid="4788197052296962620">"اکنون نمایه را تنظیم می‌کنید؟"</string>
@@ -597,6 +597,8 @@
     <string name="guest_reset_and_restart_dialog_message" msgid="2764425635305200790">"با این کار، جلسه مهمان جدیدی شروع خواهد شد و همه برنامه‌ها و داده‌ها از جلسه کنونی حذف خواهند شد"</string>
     <string name="guest_exit_dialog_title" msgid="1846494656849381804">"از حالت مهمان خارج می‌شوید؟"</string>
     <string name="guest_exit_dialog_message" msgid="1743218864242719783">"با این کار، برنامه‌ها و داده‌ها از جلسه مهمان کنونی حذف خواهند شد."</string>
+    <string name="grant_admin" msgid="4273077214151417783">"امتیازهای سرپرست به این کاربر اعطا شود"</string>
+    <string name="not_grant_admin" msgid="6985027675930546850">"امتیازهای سرپرست به کاربر اعطا نشود"</string>
     <string name="guest_exit_dialog_button" msgid="1736401897067442044">"خروج"</string>
     <string name="guest_exit_dialog_title_non_ephemeral" msgid="7675327443743162986">"فعالیت مهمان ذخیره شود؟"</string>
     <string name="guest_exit_dialog_message_non_ephemeral" msgid="223385323235719442">"می‌توانید فعالیت جلسه کنونی را ذخیره کنید یا همه برنامه و داده‌ها را حذف کنید"</string>

@@ -564,6 +564,8 @@
     <string name="user_add_user_title" msgid="5457079143694924885">"Želite dodati uporabnika?"</string>
     <string name="user_add_user_message_long" msgid="1527434966294733380">"To napravo lahko delite z drugimi tako, da ustvarite dodatne uporabnike. Vsak ima svoj prostor, ki ga lahko prilagodi z aplikacijami, ozadji in drugim. Uporabniki lahko tudi prilagodijo nastavitve naprave, ki vplivajo na vse, na primer nastavitve omrežja Wi-Fi.\n\nKo dodate novega uporabnika, mora ta nastaviti svoj prostor.\n\nVsak uporabnik lahko posodobi aplikacije za vse druge uporabnike. Nastavitve in storitve funkcij za ljudi s posebnimi potrebami morda ne bodo prenesene v prostor novega uporabnika."</string>
     <string name="user_add_user_message_short" msgid="3295959985795716166">"Ko dodate novega uporabnika, mora ta nastaviti svoj prostor.\n\nVsak uporabnik lahko posodobi aplikacije za vse druge uporabnike."</string>
+    <string name="user_grant_admin_title" msgid="5565796912475193314">"Naj ta uporabnik dobi skrbniške pravice?"</string>
+    <string name="user_grant_admin_message" msgid="7925257971286380976">"Skrbniške pravice omogočajo upravljanje drugih uporabnikov, spreminjanje nastavitev naprave in ponastavitev naprave na tovarniške nastavitve."</string>
     <string name="user_setup_dialog_title" msgid="8037342066381939995">"Želite uporabnika nastaviti zdaj?"</string>
     <string name="user_setup_dialog_message" msgid="269931619868102841">"Prepričajte se, da ima oseba čas za nastavitev svojega prostora."</string>
     <string name="user_setup_profile_dialog_message" msgid="4788197052296962620">"Želite zdaj nastaviti profil?"</string>
@@ -595,6 +597,8 @@
     <string name="guest_reset_and_restart_dialog_message" msgid="2764425635305200790">"S tem boste začeli novo sejo gosta ter izbrisali vse aplikacije in podatke v trenutni seji."</string>
     <string name="guest_exit_dialog_title" msgid="1846494656849381804">"Želite zapreti način za goste?"</string>
     <string name="guest_exit_dialog_message" msgid="1743218864242719783">"S tem boste izbrisali aplikacije in podatke v trenutni seji gosta."</string>
+    <string name="grant_admin" msgid="4273077214151417783">"Temu uporabniku podeli skrbniške pravice"</string>
+    <string name="not_grant_admin" msgid="6985027675930546850">"Uporabniku ne podeli skrbniških pravic"</string>
     <string name="guest_exit_dialog_button" msgid="1736401897067442044">"Zapri"</string>
     <string name="guest_exit_dialog_title_non_ephemeral" msgid="7675327443743162986">"Želite shraniti dejavnost gosta?"</string>
     <string name="guest_exit_dialog_message_non_ephemeral" msgid="223385323235719442">"Lahko shranite dejavnost v trenutni seji ali izbrišete vse aplikacije in podatke."</string>

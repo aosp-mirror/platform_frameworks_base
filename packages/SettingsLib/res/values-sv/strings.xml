@@ -564,6 +564,8 @@
     <string name="user_add_user_title" msgid="5457079143694924885">"Lägga till ny användare?"</string>
     <string name="user_add_user_message_long" msgid="1527434966294733380">"Du kan dela enheten med andra om du skapar flera användare. Alla användare får sitt eget utrymme som de kan anpassa som de vill med appar, bakgrund och så vidare. Användarna kan även ändra enhetsinställningar som påverkar alla, till exempel wifi.\n\nNär du lägger till en ny användare måste han eller hon konfigurera sitt utrymme.\n\nAlla användare kan uppdatera appar för samtliga användares räkning. Tillgänglighetsinställningar och tjänster kanske inte överförs till den nya användaren."</string>
     <string name="user_add_user_message_short" msgid="3295959985795716166">"När du lägger till en ny användare måste den personen konfigurera sitt utrymme.\n\nAlla användare kan uppdatera appar för samtliga användares räkning."</string>
+    <string name="user_grant_admin_title" msgid="5565796912475193314">"Ge administratörsbehörigheter?"</string>
+    <string name="user_grant_admin_message" msgid="7925257971286380976">"Som administratör kan användaren hantera andra användare, ändra enhetsinställningar och återställa enhetens standardinställningar"</string>
     <string name="user_setup_dialog_title" msgid="8037342066381939995">"Konfigurera användare nu?"</string>
     <string name="user_setup_dialog_message" msgid="269931619868102841">"Kontrollera att personen finns tillgänglig för att konfigurera sitt utrymme på enheten"</string>
     <string name="user_setup_profile_dialog_message" msgid="4788197052296962620">"Vill du konfigurera en profil nu?"</string>
@@ -595,6 +597,8 @@
     <string name="guest_reset_and_restart_dialog_message" msgid="2764425635305200790">"En ny gästsession startas och alla appar och all data från den pågående sessionen raderas"</string>
     <string name="guest_exit_dialog_title" msgid="1846494656849381804">"Vill du avsluta gästläget?"</string>
     <string name="guest_exit_dialog_message" msgid="1743218864242719783">"Appar och data från den pågående gästsessionen raderas"</string>
+    <string name="grant_admin" msgid="4273077214151417783">"Ge den här användaren administratörsbehörigheter"</string>
+    <string name="not_grant_admin" msgid="6985027675930546850">"Ge inte administratörsbehörigheter"</string>
     <string name="guest_exit_dialog_button" msgid="1736401897067442044">"Avsluta"</string>
     <string name="guest_exit_dialog_title_non_ephemeral" msgid="7675327443743162986">"Vill du spara gästaktivitet?"</string>
     <string name="guest_exit_dialog_message_non_ephemeral" msgid="223385323235719442">"Du kan spara aktivitet från den pågående sessionen eller radera appar och data"</string>

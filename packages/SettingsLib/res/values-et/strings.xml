@@ -564,6 +564,8 @@
     <string name="user_add_user_title" msgid="5457079143694924885">"Kas lisada uus kasutaja?"</string>
     <string name="user_add_user_message_long" msgid="1527434966294733380">"Võite jagada seda seadet teiste inimestega, luues uusi kasutajaid. Igal kasutajal on oma ruum, mida saab kohandada rakenduste, taustapildi ja muuga. Kasutajad saavad kohandada ka seadme seadeid, näiteks WiFi-valikuid, mis mõjutavad kõiki kasutajaid.\n\nKui lisate uue kasutaja, siis peab ta seadistama oma ruumi.\n\nIga kasutaja saab rakendusi kõigi kasutajate jaoks värskendada. Juurdepääsetavuse seadeid ja teenuseid ei pruugita uuele kasutajale üle kanda."</string>
     <string name="user_add_user_message_short" msgid="3295959985795716166">"Kui lisate uue kasutaja, siis peab ta seadistama oma ruumi.\n\nIga kasutaja saab värskendada rakendusi kõigi kasutajate jaoks."</string>
+    <string name="user_grant_admin_title" msgid="5565796912475193314">"Kas anda kasutajale administraatoriõigused?"</string>
+    <string name="user_grant_admin_message" msgid="7925257971286380976">"Administraatorina saab ta hallata teisi kasutajaid, muuta seadme seadeid ja lähtestada seadme tehaseseadetele."</string>
     <string name="user_setup_dialog_title" msgid="8037342066381939995">"Kas seadistada kasutaja kohe?"</string>
     <string name="user_setup_dialog_message" msgid="269931619868102841">"Veenduge, et isik saaks seadet kasutada ja oma ruumi seadistada"</string>
     <string name="user_setup_profile_dialog_message" msgid="4788197052296962620">"Kas soovite kohe profiili seadistada?"</string>
@@ -595,6 +597,8 @@
     <string name="guest_reset_and_restart_dialog_message" msgid="2764425635305200790">"See alustab uut külastajaseanssi ning kustutab kõik praeguse seansi rakendused ja andmed."</string>
     <string name="guest_exit_dialog_title" msgid="1846494656849381804">"Kas väljuda külalisrežiimist?"</string>
     <string name="guest_exit_dialog_message" msgid="1743218864242719783">"See kustutab praeguse külastajaseansi rakendused ja andmed"</string>
+    <string name="grant_admin" msgid="4273077214151417783">"Anna sellele kasutajale administraatoriõigused"</string>
+    <string name="not_grant_admin" msgid="6985027675930546850">"Ära anna kasutajale administraatoriõiguseid"</string>
     <string name="guest_exit_dialog_button" msgid="1736401897067442044">"Välju"</string>
     <string name="guest_exit_dialog_title_non_ephemeral" msgid="7675327443743162986">"Kas salvestada külalise tegevus?"</string>
     <string name="guest_exit_dialog_message_non_ephemeral" msgid="223385323235719442">"Võite selle seansi tegevused salvestada või kustutada kõik rakendused ja andmed."</string>

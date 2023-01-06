@@ -467,10 +467,8 @@
     <string name="power_charging" msgid="6727132649743436802">"<xliff:g id="LEVEL">%1$s</xliff:g> - <xliff:g id="STATE">%2$s</xliff:g>"</string>
     <string name="power_remaining_charging_duration_only" msgid="8085099012811384899">"يتبقّى <xliff:g id="TIME">%1$s</xliff:g> حتى اكتمال شحن البطارية."</string>
     <string name="power_charging_duration" msgid="6127154952524919719">"<xliff:g id="LEVEL">%1$s</xliff:g> - يتبقّى <xliff:g id="TIME">%2$s</xliff:g> حتى اكتمال شحن البطارية."</string>
-    <!-- no translation found for power_charging_limited (8202147604844938236) -->
-    <skip />
-    <!-- no translation found for power_charging_future_paused (4730177778538118032) -->
-    <skip />
+    <string name="power_charging_limited" msgid="8202147604844938236">"<xliff:g id="LEVEL">%1$s</xliff:g> - تم تحسين الشحن"</string>
+    <string name="power_charging_future_paused" msgid="4730177778538118032">"<xliff:g id="LEVEL">%1$s</xliff:g> - تم تحسين الشحن"</string>
     <string name="battery_info_status_unknown" msgid="268625384868401114">"غير معروف"</string>
     <string name="battery_info_status_charging" msgid="4279958015430387405">"جارٍ الشحن"</string>
     <string name="battery_info_status_charging_fast" msgid="8027559755902954885">"جارٍ الشحن سريعًا"</string>
@@ -566,6 +564,8 @@
     <string name="user_add_user_title" msgid="5457079143694924885">"هل تريد إضافة مستخدم جديد؟"</string>
     <string name="user_add_user_message_long" msgid="1527434966294733380">"‏يمكنك مشاركة هذا الجهاز مع أشخاص آخرين من خلال إنشاء حسابات لمستخدمين إضافيين. وسيحصل كل مستخدم على مساحته الخاصة التي يمكنه تخصيصها بتطبيقاته وخلفياته التي يريدها وغير ذلك. ويمكن أيضًا للمستخدمين ضبط إعدادات الجهاز مثل Wi-Fi والتي تؤثر في جميع المستخدمين.\n\nعند إضافة مستخدم جديد، عليه إعداد مساحته.\n\nيمكن لأي مستخدم تحديث التطبيقات لجميع المستخدمين الآخرين. وقد لا يتم نقل إعدادات وخدمات \"سهولة الاستخدام\" إلى المستخدم الجديد."</string>
     <string name="user_add_user_message_short" msgid="3295959985795716166">"عند إضافة مستخدم جديد، عليه إعداد مساحته.\n\nويمكن لأي مستخدم تحديث التطبيقات لجميع المستخدمين الآخرين."</string>
+    <string name="user_grant_admin_title" msgid="5565796912475193314">"أتريد منح هذا المستخدم امتيازات مشرف؟"</string>
+    <string name="user_grant_admin_message" msgid="7925257971286380976">"بصفته مشرفًا، سيتمكن من إدارة المستخدمين الآخرين وتعديل إعدادات الجهاز وإعادة ضبط الجهاز على الإعدادات الأصلية."</string>
     <string name="user_setup_dialog_title" msgid="8037342066381939995">"هل تريد إعداد المستخدم الآن؟"</string>
     <string name="user_setup_dialog_message" msgid="269931619868102841">"يُرجى التأكّد من أن الشخص يمكنه استخدام الجهاز الآن وإعداد مساحته."</string>
     <string name="user_setup_profile_dialog_message" msgid="4788197052296962620">"هل ترغب في إعداد ملف شخصي الآن؟"</string>
@@ -597,6 +597,8 @@
     <string name="guest_reset_and_restart_dialog_message" msgid="2764425635305200790">"ستؤدي إعادة الضبط إلى بدء جلسة ضيف جديدة وحذف جميع التطبيقات والبيانات من الجلسة الحالية."</string>
     <string name="guest_exit_dialog_title" msgid="1846494656849381804">"هل تريد الخروج من وضع الضيف؟"</string>
     <string name="guest_exit_dialog_message" msgid="1743218864242719783">"سيؤدي الخروج من وضع الضيف إلى حذف التطبيقات والبيانات من جلسة الضيف الحالية."</string>
+    <string name="grant_admin" msgid="4273077214151417783">"منح هذا المستخدم امتيازات المشرف"</string>
+    <string name="not_grant_admin" msgid="6985027675930546850">"عدم منح هذا المستخدم امتيازات المشرف"</string>
     <string name="guest_exit_dialog_button" msgid="1736401897067442044">"خروج"</string>
     <string name="guest_exit_dialog_title_non_ephemeral" msgid="7675327443743162986">"هل تريد حفظ النشاط في وضع الضيف؟"</string>
     <string name="guest_exit_dialog_message_non_ephemeral" msgid="223385323235719442">"يمكنك حفظ نشاط من الجلسة الحالية أو حذف كلّ التطبيقات والبيانات."</string>

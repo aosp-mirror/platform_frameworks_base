@@ -467,10 +467,8 @@
     <string name="power_charging" msgid="6727132649743436802">"<xliff:g id="LEVEL">%1$s</xliff:g> - <xliff:g id="STATE">%2$s</xliff:g>"</string>
     <string name="power_remaining_charging_duration_only" msgid="8085099012811384899">"<xliff:g id="TIME">%1$s</xliff:g> para completar a carga"</string>
     <string name="power_charging_duration" msgid="6127154952524919719">"<xliff:g id="LEVEL">%1$s</xliff:g> (<xliff:g id="TIME">%2$s</xliff:g> para completar a carga)"</string>
-    <!-- no translation found for power_charging_limited (8202147604844938236) -->
-    <skip />
-    <!-- no translation found for power_charging_future_paused (4730177778538118032) -->
-    <skip />
+    <string name="power_charging_limited" msgid="8202147604844938236">"<xliff:g id="LEVEL">%1$s</xliff:g> (carga optimizada)"</string>
+    <string name="power_charging_future_paused" msgid="4730177778538118032">"<xliff:g id="LEVEL">%1$s</xliff:g> (carga optimizada)"</string>
     <string name="battery_info_status_unknown" msgid="268625384868401114">"Descoñecido"</string>
     <string name="battery_info_status_charging" msgid="4279958015430387405">"Cargando"</string>
     <string name="battery_info_status_charging_fast" msgid="8027559755902954885">"Cargando rapidamente"</string>
@@ -566,6 +564,8 @@
     <string name="user_add_user_title" msgid="5457079143694924885">"Engadir un usuario novo?"</string>
     <string name="user_add_user_message_long" msgid="1527434966294733380">"Podes compartir este dispositivo con outras persoas a través da creación de usuarios adicionais. Cada usuario ten o seu propio espazo que pode personalizar coas súas propias aplicacións, fondos de pantalla etc. Os usuarios tamén poden modificar as opcións de configuración do dispositivo, como a rede wifi, que afectan a todo o mundo.\n\nCando engadas un usuario novo, este deberá configurar o seu espazo.\n\nCalquera usuario pode actualizar as aplicacións para todos os demais usuarios. Non se poden transferir ao novo usuario os servizos nin a configuración de accesibilidade."</string>
     <string name="user_add_user_message_short" msgid="3295959985795716166">"Cando engadas un usuario novo, este deberá configurar o seu espazo.\n\nCalquera usuario pode actualizar as aplicacións para todos os demais usuarios."</string>
+    <string name="user_grant_admin_title" msgid="5565796912475193314">"Privilexios de administrador?"</string>
+    <string name="user_grant_admin_message" msgid="7925257971286380976">"Como administrador, poderá xestionar outros usuarios, modificar a configuración dos dispositivos e restablecer a configuración de fábrica."</string>
     <string name="user_setup_dialog_title" msgid="8037342066381939995">"Configurar o usuario agora?"</string>
     <string name="user_setup_dialog_message" msgid="269931619868102841">"Asegúrate de que a persoa está dispoñible para acceder ao dispositivo e configurar o seu espazo"</string>
     <string name="user_setup_profile_dialog_message" msgid="4788197052296962620">"Configurar o perfil agora?"</string>
@@ -597,6 +597,8 @@
     <string name="guest_reset_and_restart_dialog_message" msgid="2764425635305200790">"Iniciarase unha nova sesión de convidado e eliminaranse todas as aplicacións e datos desta sesión"</string>
     <string name="guest_exit_dialog_title" msgid="1846494656849381804">"Saír do modo de convidado?"</string>
     <string name="guest_exit_dialog_message" msgid="1743218864242719783">"Eliminaranse as aplicacións e os datos da sesión de convidado actual"</string>
+    <string name="grant_admin" msgid="4273077214151417783">"Dar a este usuario privilexios de administrador"</string>
+    <string name="not_grant_admin" msgid="6985027675930546850">"Non dar a este usuario privilexios de administrador"</string>
     <string name="guest_exit_dialog_button" msgid="1736401897067442044">"Saír"</string>
     <string name="guest_exit_dialog_title_non_ephemeral" msgid="7675327443743162986">"Gardar actividade do convidado?"</string>
     <string name="guest_exit_dialog_message_non_ephemeral" msgid="223385323235719442">"Podes gardar a actividade da sesión ou eliminar todas as aplicacións e datos"</string>

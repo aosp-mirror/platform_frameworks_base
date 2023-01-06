@@ -564,6 +564,8 @@
     <string name="user_add_user_title" msgid="5457079143694924885">"Vai pievienot jaunu lietotāju?"</string>
     <string name="user_add_user_message_long" msgid="1527434966294733380">"Varat koplietot šo ierīci ar citām personām, izveidojot papildu lietotājus. Katram lietotājam ir sava vide, kas ir pielāgojama, izmantojot lietotnes, fona tapetes u.c. Lietotāji var pielāgot arī ierīces iestatījumus, kas attiecas uz visiem lietotājiem, piemēram, Wi‑Fi.\n\nKad pievienosiet jaunu lietotāju, viņam būs jāizveido sava vide.\n\nIkviens lietotājs var atjaunināt lietotnes citu lietotāju vietā. Pieejamības iestatījumi un pakalpojumi var netikt pārsūtīti jaunajam lietotājam."</string>
     <string name="user_add_user_message_short" msgid="3295959985795716166">"Kad pievienosiet jaunu lietotāju, viņam būs jāizveido sava vide.\n\nIkviens lietotājs var atjaunināt lietotnes citu lietotāju vietā."</string>
+    <string name="user_grant_admin_title" msgid="5565796912475193314">"Vai piešķirt šim lietotājam administratora atļaujas?"</string>
+    <string name="user_grant_admin_message" msgid="7925257971286380976">"Kā administrators šis lietotājs varēs pārvaldīt citus lietotājus, mainīt ierīces iestatījumus un atiestatīt ierīcē rūpnīcas datus."</string>
     <string name="user_setup_dialog_title" msgid="8037342066381939995">"Iestatīt kontu tūlīt?"</string>
     <string name="user_setup_dialog_message" msgid="269931619868102841">"Pārliecinieties, ka persona var izmantot ierīci un iestatīt savu vidi."</string>
     <string name="user_setup_profile_dialog_message" msgid="4788197052296962620">"Vai iestatīt profilu tūlīt?"</string>
@@ -595,6 +597,8 @@
     <string name="guest_reset_and_restart_dialog_message" msgid="2764425635305200790">"Tādējādi tiks sākta jauna viesa sesijas un visas pašreizējās sesijas lietotnes un dati tiks dzēsti"</string>
     <string name="guest_exit_dialog_title" msgid="1846494656849381804">"Vai iziet no viesa režīma?"</string>
     <string name="guest_exit_dialog_message" msgid="1743218864242719783">"Tādējādi tiks dzēstas pašreizējās viesa sesijas lietotnes un dati."</string>
+    <string name="grant_admin" msgid="4273077214151417783">"Piešķirt šim lietotājam administratora atļaujas"</string>
+    <string name="not_grant_admin" msgid="6985027675930546850">"Nepiešķirt lietotājam administratora atļaujas"</string>
     <string name="guest_exit_dialog_button" msgid="1736401897067442044">"Iziet"</string>
     <string name="guest_exit_dialog_title_non_ephemeral" msgid="7675327443743162986">"Vai saglabāt viesa darbības?"</string>
     <string name="guest_exit_dialog_message_non_ephemeral" msgid="223385323235719442">"Varat saglabāt pašreizējās sesijas darbības vai dzēst visas lietotnes un datus"</string>
