@@ -3548,6 +3548,75 @@
     <permission android:name="android.permission.MANAGE_DEVICE_POLICY_KEEP_UNINSTALLED_PACKAGES"
                 android:protectionLevel="internal|role" />
 
+    <!-- Allows an application to manage policy related to accessibility.
+   <p>{@link Manifest.permission#MANAGE_DEVICE_POLICY_ACROSS_USERS_FULL} is required to call
+   APIs protected by this permission on users different to the calling user.
+    -->
+    <permission android:name="android.permission.MANAGE_DEVICE_POLICY_ACCESSIBILITY"
+                android:protectionLevel="internal|role" />
+
+    <!-- Allows an application to manage policy related to common criteria mode.
+        <p>{@link Manifest.permission#MANAGE_DEVICE_POLICY_ACROSS_USERS_FULL} is required to call
+        APIs protected by this permission on users different to the calling user.
+    -->
+    <permission android:name="android.permission.MANAGE_DEVICE_POLICY_COMMON_CRITERIA_MODE"
+                android:protectionLevel="internal|role" />
+
+    <!-- Allows an application to manage policy related to metered data.
+        <p>{@link Manifest.permission#MANAGE_DEVICE_POLICY_ACROSS_USERS_FULL} is required to call
+        APIs protected by this permission on users different to the calling user.
+    -->
+    <permission android:name="android.permission.MANAGE_DEVICE_POLICY_METERED_DATA"
+                android:protectionLevel="internal|role" />
+
+    <!-- Allows an application to set a network-independent global HTTP proxy.
+        <p>{@link Manifest.permission#MANAGE_DEVICE_POLICY_ACROSS_USERS_FULL} is required to call
+        APIs protected by this permission on users different to the calling user.
+    -->
+    <permission android:name="android.permission.MANAGE_DEVICE_POLICY_PROXY"
+                android:protectionLevel="internal|role" />
+
+    <!-- Allows an application to request bugreports with user consent.
+        <p>{@link Manifest.permission#MANAGE_DEVICE_POLICY_ACROSS_USERS_FULL} is required to call
+        APIs protected by this permission on users different to the calling user.
+    -->
+    <permission android:name="android.permission.MANAGE_DEVICE_POLICY_BUGREPORT"
+                android:protectionLevel="internal|role" />
+
+    <!-- Allows an application to manage policy related to application user data.
+        <p>{@link Manifest.permission#MANAGE_DEVICE_POLICY_ACROSS_USERS_FULL} is required to call
+        APIs protected by this permission on users different to the calling user.
+    -->
+    <permission android:name="android.permission.MANAGE_DEVICE_POLICY_APP_USER_DATA"
+                android:protectionLevel="internal|role" />
+
+    <!-- Allows an application to lock a profile or the device with the appropriate cross-user
+    permission.
+        <p>{@link Manifest.permission#MANAGE_DEVICE_POLICY_ACROSS_USERS_FULL} is required to call
+        APIs protected by this permission on users different to the calling user.
+    -->
+    <permission android:name="android.permission.MANAGE_DEVICE_POLICY_LOCK"
+                android:protectionLevel="internal|role" />
+
+    <!-- Allows an application to manage policy related to system apps.
+        <p>{@link Manifest.permission#MANAGE_DEVICE_POLICY_ACROSS_USERS_FULL} is required to call
+        APIs protected by this permission on users different to the calling user.
+    -->
+    <permission android:name="android.permission.MANAGE_DEVICE_POLICY_SYSTEM_APPS"
+                android:protectionLevel="internal|role" />
+
+    <!-- Allows an application to manage policy related to wiping data.
+        <p>{@link Manifest.permission#MANAGE_DEVICE_POLICY_ACROSS_USERS} is required to call
+        APIs protected by this permission on users different to the calling user.
+    -->
+    <permission android:name="android.permission.MANAGE_DEVICE_POLICY_WIPE_DATA"
+                android:protectionLevel="internal|role" />
+
+    <!-- Allows an application to manage policy related to the Memory Tagging Extension (MTE).
+    -->
+    <permission android:name="android.permission.MANAGE_DEVICE_POLICY_MTE"
+                android:protectionLevel="internal|role" />
+
     <!-- Allows an application to set device policies outside the current user
         that are critical for securing data within the current user.
         <p>Holding this permission allows the use of other held MANAGE_DEVICE_POLICY_*
