@@ -24,6 +24,7 @@ import android.os.test.TestLooper
 import android.testing.AndroidTestingRunner
 
 import com.android.wm.shell.R
+import com.android.wm.shell.ShellTestCase
 import com.android.wm.shell.pip.PipBoundsState.STASH_TYPE_RIGHT
 import com.android.wm.shell.pip.tv.TvPipBoundsController.POSITION_DEBOUNCE_TIMEOUT_MILLIS
 import com.android.wm.shell.pip.tv.TvPipKeepClearAlgorithm.Placement
@@ -43,7 +44,7 @@ import org.mockito.Mockito.verify
 import org.mockito.MockitoAnnotations
 
 @RunWith(AndroidTestingRunner::class)
-class TvPipBoundsControllerTest {
+class TvPipBoundsControllerTest : ShellTestCase() {
     val ANIMATION_DURATION = 100
     val STASH_DURATION = 5000
     val FAR_FUTURE = 60 * 60000L
@@ -71,7 +72,7 @@ class TvPipBoundsControllerTest {
     var inMoveMode = false
 
     @Mock
-    lateinit var context: Context
+    lateinit var mockContext: Context
     @Mock
     lateinit var resources: Resources
     @Mock
@@ -91,13 +92,13 @@ class TvPipBoundsControllerTest {
         testLooper = TestLooper { time }
         mainHandler = Handler(testLooper.getLooper())
 
-        whenever(context.resources).thenReturn(resources)
+        whenever(mockContext.resources).thenReturn(resources)
         whenever(resources.getInteger(R.integer.config_pipStashDuration)).thenReturn(STASH_DURATION)
         whenever(tvPipBoundsAlgorithm.adjustBoundsForTemporaryDecor(any()))
                 .then(returnsFirstArg<Rect>())
 
         boundsController = TvPipBoundsController(
-                context,
+                mockContext,
                 { time },
                 mainHandler,
                 tvPipBoundsState,
@@ -107,6 +108,7 @@ class TvPipBoundsControllerTest {
 
     @Test
     fun testPlacement_MovedAfterDebounceTimeout() {
+        assumeTelevision()
         triggerPlacement(MOVED_PLACEMENT)
         assertMovementAt(POSITION_DEBOUNCE_TIMEOUT_MILLIS, MOVED_BOUNDS)
         assertNoMovementUpTo(time + FAR_FUTURE)
@@ -114,6 +116,7 @@ class TvPipBoundsControllerTest {
 
     @Test
     fun testStashedPlacement_MovedAfterDebounceTimeout_Unstashes() {
+        assumeTelevision()
         triggerPlacement(STASHED_PLACEMENT_RESTASH)
         assertMovementAt(POSITION_DEBOUNCE_TIMEOUT_MILLIS, STASHED_BOUNDS)
         assertMovementAt(POSITION_DEBOUNCE_TIMEOUT_MILLIS + STASH_DURATION, ANCHOR_BOUNDS)
@@ -121,6 +124,7 @@ class TvPipBoundsControllerTest {
 
     @Test
     fun testDebounceSamePlacement_MovesDebounceTimeoutAfterFirstPlacement() {
+        assumeTelevision()
         triggerPlacement(MOVED_PLACEMENT)
         advanceTimeTo(POSITION_DEBOUNCE_TIMEOUT_MILLIS / 2)
         triggerPlacement(MOVED_PLACEMENT)
@@ -130,6 +134,7 @@ class TvPipBoundsControllerTest {
 
     @Test
     fun testNoMovementUntilPlacementStabilizes() {
+        assumeTelevision()
         triggerPlacement(ANCHOR_PLACEMENT)
         advanceTimeTo(time + POSITION_DEBOUNCE_TIMEOUT_MILLIS / 10)
         triggerPlacement(MOVED_PLACEMENT)
@@ -143,6 +148,7 @@ class TvPipBoundsControllerTest {
 
     @Test
     fun testUnstashIfStashNoLongerNecessary() {
+        assumeTelevision()
         triggerPlacement(STASHED_PLACEMENT_RESTASH)
         assertMovementAt(POSITION_DEBOUNCE_TIMEOUT_MILLIS, STASHED_BOUNDS)
 
@@ -152,6 +158,7 @@ class TvPipBoundsControllerTest {
 
     @Test
     fun testRestashingPlacementDelaysUnstash() {
+        assumeTelevision()
         triggerPlacement(STASHED_PLACEMENT_RESTASH)
         assertMovementAt(POSITION_DEBOUNCE_TIMEOUT_MILLIS, STASHED_BOUNDS)
 
@@ -163,6 +170,7 @@ class TvPipBoundsControllerTest {
 
     @Test
     fun testNonRestashingPlacementDoesNotDelayUnstash() {
+        assumeTelevision()
         triggerPlacement(STASHED_PLACEMENT_RESTASH)
         assertMovementAt(POSITION_DEBOUNCE_TIMEOUT_MILLIS, STASHED_BOUNDS)
 
@@ -173,6 +181,7 @@ class TvPipBoundsControllerTest {
 
     @Test
     fun testImmediatePlacement() {
+        assumeTelevision()
         triggerImmediatePlacement(STASHED_PLACEMENT_RESTASH)
         assertMovement(STASHED_BOUNDS)
         assertMovementAt(time + STASH_DURATION, ANCHOR_BOUNDS)
@@ -180,6 +189,7 @@ class TvPipBoundsControllerTest {
 
     @Test
     fun testImmediatePlacement_DoNotStashIfAlreadyUnstashed() {
+        assumeTelevision()
         triggerImmediatePlacement(STASHED_PLACEMENT_RESTASH)
         assertMovement(STASHED_BOUNDS)
         assertMovementAt(time + STASH_DURATION, ANCHOR_BOUNDS)
@@ -190,6 +200,7 @@ class TvPipBoundsControllerTest {
 
     @Test
     fun testInMoveMode_KeepAtAnchor() {
+        assumeTelevision()
         startMoveMode()
         triggerImmediatePlacement(STASHED_MOVED_PLACEMENT_RESTASH)
         assertMovement(ANCHOR_BOUNDS)
@@ -198,6 +209,7 @@ class TvPipBoundsControllerTest {
 
     @Test
     fun testInMenu_Unstashed() {
+        assumeTelevision()
         openPipMenu()
         triggerImmediatePlacement(STASHED_MOVED_PLACEMENT_RESTASH)
         assertMovement(MOVED_BOUNDS)
@@ -206,6 +218,7 @@ class TvPipBoundsControllerTest {
 
     @Test
     fun testCloseMenu_DoNotRestash() {
+        assumeTelevision()
         openPipMenu()
         triggerImmediatePlacement(STASHED_MOVED_PLACEMENT_RESTASH)
         assertMovement(MOVED_BOUNDS)
