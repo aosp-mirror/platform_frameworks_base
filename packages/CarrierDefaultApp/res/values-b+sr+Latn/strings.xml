@@ -2,22 +2,22 @@
 <resources xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
     <string name="app_name" msgid="5247871339820894594">"CarrierDefaultApp"</string>
-    <string name="android_system_label" msgid="2797790869522345065">"Мобилни оператер"</string>
-    <string name="portal_notification_id" msgid="5155057562457079297">"Мобилни подаци су потрошени"</string>
-    <string name="no_data_notification_id" msgid="668400731803969521">"Мобилни подаци су деактивирани"</string>
-    <string name="portal_notification_detail" msgid="2295729385924660881">"Додирните да бисте посетили веб-сајт %s"</string>
-    <string name="no_data_notification_detail" msgid="3112125343857014825">"Контактирајте добављача услуге %s"</string>
-    <string name="no_mobile_data_connection_title" msgid="7449525772416200578">"Нема везе за пренос података преко мобилног оператера"</string>
-    <string name="no_mobile_data_connection" msgid="544980465184147010">"Додајте податке или пакет за роминг преко оператера %s"</string>
-    <string name="mobile_data_status_notification_channel_name" msgid="833999690121305708">"Статус мобилних података"</string>
-    <string name="action_bar_label" msgid="4290345990334377177">"Пријавите се на мобилну мрежу"</string>
-    <string name="ssl_error_warning" msgid="3127935140338254180">"Мрежа којој покушавате да се придружите има безбедносних проблема."</string>
-    <string name="ssl_error_example" msgid="6188711843183058764">"На пример, страница за пријављивање можда не припада приказаној организацији."</string>
-    <string name="ssl_error_continue" msgid="1138548463994095584">"Ипак настави преко прегледача"</string>
-    <string name="network_boost_notification_channel" msgid="5430986172506159199">"Појачање мреже"</string>
-    <string name="network_boost_notification_title" msgid="8226368121348880044">"%s препоручује повећање података"</string>
-    <string name="network_boost_notification_detail" msgid="3812434025544196192">"Купите појачање мреже за бољи учинак"</string>
-    <string name="network_boost_notification_button_not_now" msgid="4129218252146702688">"Не сада"</string>
-    <string name="network_boost_notification_button_manage" msgid="1511552684142641182">"Управљајте"</string>
-    <string name="slice_purchase_app_label" msgid="915654761797446390">"Купите појачање мреже."</string>
+    <string name="android_system_label" msgid="2797790869522345065">"Mobilni operater"</string>
+    <string name="portal_notification_id" msgid="5155057562457079297">"Mobilni podaci su potrošeni"</string>
+    <string name="no_data_notification_id" msgid="668400731803969521">"Mobilni podaci su deaktivirani"</string>
+    <string name="portal_notification_detail" msgid="2295729385924660881">"Dodirnite da biste posetili veb-sajt %s"</string>
+    <string name="no_data_notification_detail" msgid="3112125343857014825">"Kontaktirajte dobavljača usluge %s"</string>
+    <string name="no_mobile_data_connection_title" msgid="7449525772416200578">"Nema veze za prenos podataka preko mobilnog operatera"</string>
+    <string name="no_mobile_data_connection" msgid="544980465184147010">"Dodajte podatke ili paket za roming preko operatera %s"</string>
+    <string name="mobile_data_status_notification_channel_name" msgid="833999690121305708">"Status mobilnih podataka"</string>
+    <string name="action_bar_label" msgid="4290345990334377177">"Prijavite se na mobilnu mrežu"</string>
+    <string name="ssl_error_warning" msgid="3127935140338254180">"Mreža kojoj pokušavate da se pridružite ima bezbednosnih problema."</string>
+    <string name="ssl_error_example" msgid="6188711843183058764">"Na primer, stranica za prijavljivanje možda ne pripada prikazanoj organizaciji."</string>
+    <string name="ssl_error_continue" msgid="1138548463994095584">"Ipak nastavi preko pregledača"</string>
+    <string name="performance_boost_notification_channel" msgid="3475440855635538592">"Poboljšanje učinka"</string>
+    <string name="performance_boost_notification_title" msgid="5017421773334474875">"%s preporučuje poboljšanje učinka"</string>
+    <string name="performance_boost_notification_detail" msgid="7216286153533321852">"Kupite poboljšanje učinka za mrežu"</string>
+    <string name="performance_boost_notification_button_not_now" msgid="6459755324243683785">"Ne sada"</string>
+    <string name="performance_boost_notification_button_manage" msgid="4976836444046497973">"Upravljaj"</string>
+    <string name="slice_purchase_app_label" msgid="7170191659233241166">"Kupite poboljšanje učinka."</string>
 </resources>

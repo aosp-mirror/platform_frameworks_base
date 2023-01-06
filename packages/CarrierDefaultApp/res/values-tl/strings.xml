@@ -14,10 +14,10 @@
     <string name="ssl_error_warning" msgid="3127935140338254180">"May mga isyu sa seguridad ang network na sinusubukan mong salihan."</string>
     <string name="ssl_error_example" msgid="6188711843183058764">"Halimbawa, maaaring hindi pag-aari ng ipinapakitang organisasyon ang page ng login."</string>
     <string name="ssl_error_continue" msgid="1138548463994095584">"Magpatuloy pa rin sa pamamagitan ng browser"</string>
-    <string name="network_boost_notification_channel" msgid="5430986172506159199">"Network boost"</string>
-    <string name="network_boost_notification_title" msgid="8226368121348880044">"Nagrerekomenda ng data boost ang %s"</string>
-    <string name="network_boost_notification_detail" msgid="3812434025544196192">"Bumili ng network boost para sa mas mahusay na performance"</string>
-    <string name="network_boost_notification_button_not_now" msgid="4129218252146702688">"Huwag muna"</string>
-    <string name="network_boost_notification_button_manage" msgid="1511552684142641182">"Pamahalaan"</string>
-    <string name="slice_purchase_app_label" msgid="915654761797446390">"Bumili ng network boost."</string>
+    <string name="performance_boost_notification_channel" msgid="3475440855635538592">"Pag-boost ng performance"</string>
+    <string name="performance_boost_notification_title" msgid="5017421773334474875">"Inirerekomenda ng %s ang pag-boost ng performance"</string>
+    <string name="performance_boost_notification_detail" msgid="7216286153533321852">"Bumili ng pang-boost ng performance para sa mas mahusay na performance ng network"</string>
+    <string name="performance_boost_notification_button_not_now" msgid="6459755324243683785">"Huwag muna"</string>
+    <string name="performance_boost_notification_button_manage" msgid="4976836444046497973">"Pamahalaan"</string>
+    <string name="slice_purchase_app_label" msgid="7170191659233241166">"Bumili ng pang-boost ng performance."</string>
 </resources>
