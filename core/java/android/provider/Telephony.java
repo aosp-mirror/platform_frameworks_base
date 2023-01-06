@@ -4803,6 +4803,13 @@ public final class Telephony {
                 "phone_number_source_ims";
 
         /**
+         * TelephonyProvider column name for last used TP - message Reference
+         *
+         * @hide
+         */
+        public static final String COLUMN_TP_MESSAGE_REF = "tp_message_ref";
+
+        /**
          * TelephonyProvider column name for the device's preferred usage setting.
          *
          * @hide
