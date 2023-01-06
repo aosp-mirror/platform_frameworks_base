@@ -277,7 +277,7 @@ public class QSPanelControllerBaseTest extends SysuiTestCase {
 
         // Then the layout changes
         assertThat(mController.shouldUseHorizontalLayout()).isTrue();
-        verify(mHorizontalLayoutListener).run(); // not invoked
+        verify(mHorizontalLayoutListener).run();
 
         // When it is rotated back to portrait
         mConfiguration.orientation = Configuration.ORIENTATION_PORTRAIT;
@@ -299,5 +299,25 @@ public class QSPanelControllerBaseTest extends SysuiTestCase {
         mController.refreshAllTiles();
         verify(mQSTile).refreshState();
         verify(mOtherTile, never()).refreshState();
+    }
+
+    @Test
+    public void configurationChange_onlySplitShadeConfigChanges_horizontalLayoutStatusUpdated() {
+        // Preconditions for horizontal layout
+        when(mMediaHost.getVisible()).thenReturn(true);
+        when(mResources.getBoolean(R.bool.config_use_split_notification_shade)).thenReturn(false);
+        mConfiguration.orientation = Configuration.ORIENTATION_LANDSCAPE;
+        mController.setUsingHorizontalLayoutChangeListener(mHorizontalLayoutListener);
+        mController.mOnConfigurationChangedListener.onConfigurationChange(mConfiguration);
+        assertThat(mController.shouldUseHorizontalLayout()).isTrue();
+        reset(mHorizontalLayoutListener);
+
+        // Only split shade status changes
+        when(mResources.getBoolean(R.bool.config_use_split_notification_shade)).thenReturn(true);
+        mController.mOnConfigurationChangedListener.onConfigurationChange(mConfiguration);
+
+        // Horizontal layout is updated accordingly.
+        assertThat(mController.shouldUseHorizontalLayout()).isFalse();
+        verify(mHorizontalLayoutListener).run();
     }
 }
