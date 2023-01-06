@@ -71,7 +71,6 @@ import com.android.systemui.statusbar.policy.KeyguardStateController;
 import java.io.PrintWriter;
 import java.lang.ref.Reference;
 import java.lang.ref.WeakReference;
-import java.lang.reflect.Field;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
@@ -96,6 +95,7 @@ public class NotificationShadeWindowControllerImpl implements NotificationShadeW
     private final IActivityManager mActivityManager;
     private final DozeParameters mDozeParameters;
     private final KeyguardStateController mKeyguardStateController;
+    private final ShadeWindowLogger mLogger;
     private final LayoutParams mLpChanged;
     private final long mLockScreenDisplayTimeout;
     private final float mKeyguardPreferredRefreshRate; // takes precedence over max
@@ -137,12 +137,14 @@ public class NotificationShadeWindowControllerImpl implements NotificationShadeW
             KeyguardStateController keyguardStateController,
             ScreenOffAnimationController screenOffAnimationController,
             AuthController authController,
-            ShadeExpansionStateManager shadeExpansionStateManager) {
+            ShadeExpansionStateManager shadeExpansionStateManager,
+            ShadeWindowLogger logger) {
         mContext = context;
         mWindowManager = windowManager;
         mActivityManager = activityManager;
         mDozeParameters = dozeParameters;
         mKeyguardStateController = keyguardStateController;
+        mLogger = logger;
         mScreenBrightnessDoze = mDozeParameters.getScreenBrightnessDoze();
         mLpChanged = new LayoutParams();
         mKeyguardViewMediator = keyguardViewMediator;
@@ -396,11 +398,13 @@ public class NotificationShadeWindowControllerImpl implements NotificationShadeW
 
     private void applyVisibility(State state) {
         boolean visible = isExpanded(state);
+        mLogger.logApplyVisibility(visible);
         if (state.mForcePluginOpen) {
             if (mListener != null) {
                 mListener.setWouldOtherwiseCollapse(visible);
             }
             visible = true;
+            mLogger.d("Visibility forced to be true");
         }
         if (mNotificationShadeView != null) {
             if (visible) {
@@ -463,6 +467,7 @@ public class NotificationShadeWindowControllerImpl implements NotificationShadeW
 
     private void applyWindowLayoutParams() {
         if (mDeferWindowLayoutParams == 0 && mLp != null && mLp.copyFrom(mLpChanged) != 0) {
+            mLogger.logApplyingWindowLayoutParams(mLp);
             Trace.beginSection("updateViewLayout");
             mWindowManager.updateViewLayout(mNotificationShadeView, mLp);
             Trace.endSection();
@@ -478,6 +483,7 @@ public class NotificationShadeWindowControllerImpl implements NotificationShadeW
     }
 
     private void apply(State state) {
+        mLogger.logNewState(state);
         applyKeyguardFlags(state);
         applyFocusableFlag(state);
         applyForceShowNavigationFlag(state);
@@ -587,6 +593,7 @@ public class NotificationShadeWindowControllerImpl implements NotificationShadeW
                 && mCurrentState.mNotificationShadeFocusable == visible) {
             return;
         }
+        mLogger.logShadeVisibleAndFocusable(visible);
         mCurrentState.mPanelVisible = visible;
         mCurrentState.mNotificationShadeFocusable = visible;
         apply(mCurrentState);
@@ -594,6 +601,7 @@ public class NotificationShadeWindowControllerImpl implements NotificationShadeW
 
     @Override
     public void setNotificationShadeFocusable(boolean focusable) {
+        mLogger.logShadeFocusable(focusable);
         mCurrentState.mNotificationShadeFocusable = focusable;
         apply(mCurrentState);
     }
@@ -730,16 +738,15 @@ public class NotificationShadeWindowControllerImpl implements NotificationShadeW
         apply(mCurrentState);
     }
 
-    private final Set<Object> mForceOpenTokens = new HashSet<>();
     @Override
     public void setForcePluginOpen(boolean forceOpen, Object token) {
         if (forceOpen) {
-            mForceOpenTokens.add(token);
+            mCurrentState.mForceOpenTokens.add(token);
         } else {
-            mForceOpenTokens.remove(token);
+            mCurrentState.mForceOpenTokens.remove(token);
         }
         final boolean previousForceOpenState = mCurrentState.mForcePluginOpen;
-        mCurrentState.mForcePluginOpen = !mForceOpenTokens.isEmpty();
+        mCurrentState.mForcePluginOpen = !mCurrentState.mForceOpenTokens.isEmpty();
         if (previousForceOpenState != mCurrentState.mForcePluginOpen) {
             apply(mCurrentState);
             if (mForcePluginOpenListener != null) {
@@ -864,6 +871,7 @@ public class NotificationShadeWindowControllerImpl implements NotificationShadeW
         boolean mWallpaperSupportsAmbientMode;
         boolean mNotTouchable;
         Set<String> mComponentsForcingTopUi = new HashSet<>();
+        Set<Object> mForceOpenTokens = new HashSet<>();
 
         /**
          * The status bar state from {@link CentralSurfaces}.
@@ -882,28 +890,37 @@ public class NotificationShadeWindowControllerImpl implements NotificationShadeW
 
         @Override
         public String toString() {
-            StringBuilder result = new StringBuilder();
-            String newLine = "\n";
-            result.append("Window State {");
-            result.append(newLine);
-
-            Field[] fields = this.getClass().getDeclaredFields();
-
-            // Print field names paired with their values
-            for (Field field : fields) {
-                result.append("  ");
-                try {
-                    result.append(field.getName());
-                    result.append(": ");
-                    //requires access to private field:
-                    result.append(field.get(this));
-                } catch (IllegalAccessException ex) {
-                }
-                result.append(newLine);
-            }
-            result.append("}");
-
-            return result.toString();
+            return new StringBuilder()
+                    .append("State{")
+                    .append("  mKeyguardShowing=").append(mKeyguardShowing)
+                    .append(", mKeyguardOccluded=").append(mKeyguardOccluded)
+                    .append(", mKeyguardNeedsInput=").append(mKeyguardNeedsInput)
+                    .append(", mPanelVisible=").append(mPanelVisible)
+                    .append(", mPanelExpanded=").append(mPanelExpanded)
+                    .append(", mNotificationShadeFocusable=").append(mNotificationShadeFocusable)
+                    .append(", mBouncerShowing=").append(mBouncerShowing)
+                    .append(", mKeyguardFadingAway=").append(mKeyguardFadingAway)
+                    .append(", mKeyguardGoingAway=").append(mKeyguardGoingAway)
+                    .append(", mQsExpanded=").append(mQsExpanded)
+                    .append(", mHeadsUpShowing=").append(mHeadsUpShowing)
+                    .append(", mLightRevealScrimOpaque=").append(mLightRevealScrimOpaque)
+                    .append(", mForceCollapsed=").append(mForceCollapsed)
+                    .append(", mForceDozeBrightness=").append(mForceDozeBrightness)
+                    .append(", mForceUserActivity=").append(mForceUserActivity)
+                    .append(", mLaunchingActivity=").append(mLaunchingActivity)
+                    .append(", mBackdropShowing=").append(mBackdropShowing)
+                    .append(", mWallpaperSupportsAmbientMode=")
+                    .append(mWallpaperSupportsAmbientMode)
+                    .append(", mNotTouchable=").append(mNotTouchable)
+                    .append(", mComponentsForcingTopUi=").append(mComponentsForcingTopUi)
+                    .append(", mForceOpenTokens=").append(mForceOpenTokens)
+                    .append(", mStatusBarState=").append(mStatusBarState)
+                    .append(", mRemoteInputActive=").append(mRemoteInputActive)
+                    .append(", mForcePluginOpen=").append(mForcePluginOpen)
+                    .append(", mDozing=").append(mDozing)
+                    .append(", mScrimsVisibility=").append(mScrimsVisibility)
+                    .append(", mBackgroundBlurRadius=").append(mBackgroundBlurRadius)
+                    .append('}').toString();
         }
     }
 
