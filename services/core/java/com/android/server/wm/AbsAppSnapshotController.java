@@ -140,6 +140,7 @@ abstract class AbsAppSnapshotController<TYPE extends WindowContainer,
      *
      * This is only used for testing so the snapshot content can be verified.
      */
+    // TODO(b/264551777): clean up the "snapshotHome" argument
     @VisibleForTesting
     TaskSnapshot captureSnapshot(TYPE source, boolean snapshotHome) {
         final TaskSnapshot snapshot;
