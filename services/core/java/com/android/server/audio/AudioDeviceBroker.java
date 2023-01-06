@@ -85,6 +85,7 @@ import java.util.concurrent.atomic.AtomicBoolean;
 
     private final @NonNull AudioService mAudioService;
     private final @NonNull Context mContext;
+    private final @NonNull AudioSystemAdapter mAudioSystem;
 
     /** ID for Communication strategy retrieved form audio policy manager */
     private int mCommunicationStrategyId = -1;
@@ -159,12 +160,14 @@ import java.util.concurrent.atomic.AtomicBoolean;
     public static final long USE_SET_COMMUNICATION_DEVICE = 243827847L;
 
     //-------------------------------------------------------------------
-    /*package*/ AudioDeviceBroker(@NonNull Context context, @NonNull AudioService service) {
+    /*package*/ AudioDeviceBroker(@NonNull Context context, @NonNull AudioService service,
+            @NonNull AudioSystemAdapter audioSystem) {
         mContext = context;
         mAudioService = service;
         mBtHelper = new BtHelper(this);
         mDeviceInventory = new AudioDeviceInventory(this);
         mSystemServer = SystemServerAdapter.getDefaultAdapter(mContext);
+        mAudioSystem = audioSystem;
 
         init();
     }
@@ -173,12 +176,14 @@ import java.util.concurrent.atomic.AtomicBoolean;
      *  in system_server */
     AudioDeviceBroker(@NonNull Context context, @NonNull AudioService service,
                       @NonNull AudioDeviceInventory mockDeviceInventory,
-                      @NonNull SystemServerAdapter mockSystemServer) {
+                      @NonNull SystemServerAdapter mockSystemServer,
+                      @NonNull AudioSystemAdapter audioSystem) {
         mContext = context;
         mAudioService = service;
         mBtHelper = new BtHelper(this);
         mDeviceInventory = mockDeviceInventory;
         mSystemServer = mockSystemServer;
+        mAudioSystem = audioSystem;
 
         init();
     }
@@ -540,7 +545,7 @@ import java.util.concurrent.atomic.AtomicBoolean;
             AudioAttributes attr =
                     AudioProductStrategy.getAudioAttributesForStrategyWithLegacyStreamType(
                             AudioSystem.STREAM_VOICE_CALL);
-            List<AudioDeviceAttributes> devices = AudioSystem.getDevicesForAttributes(
+            List<AudioDeviceAttributes> devices = mAudioSystem.getDevicesForAttributes(
                     attr, false /* forVolume */);
             if (devices.isEmpty()) {
                 if (mAudioService.isPlatformVoice()) {
@@ -1493,7 +1498,7 @@ import java.util.concurrent.atomic.AtomicBoolean;
             Log.v(TAG, "onSetForceUse(useCase<" + useCase + ">, config<" + config + ">, fromA2dp<"
                     + fromA2dp + ">, eventSource<" + eventSource + ">)");
         }
-        AudioSystem.setForceUse(useCase, config);
+        mAudioSystem.setForceUse(useCase, config);
     }
 
     private void onSendBecomingNoisyIntent() {
