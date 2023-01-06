@@ -85,6 +85,7 @@
     <string name="screenshot_share_description" msgid="2861628935812656612">"Ibahagi ang screenshot"</string>
     <string name="screenshot_scroll_label" msgid="2930198809899329367">"Mag-capture pa"</string>
     <string name="screenshot_dismiss_description" msgid="4702341245899508786">"I-dismiss ang screenshot"</string>
+    <string name="screenshot_dismiss_work_profile" msgid="3101530842987697045">"I-dismiss ang mensahe sa profile sa trabaho"</string>
     <string name="screenshot_preview_description" msgid="7606510140714080474">"Preview ng screenshot"</string>
     <string name="screenshot_top_boundary_pct" msgid="2520148599096479332">"<xliff:g id="PERCENT">%1$d</xliff:g> (na) porsyento sa hangganan sa itaas"</string>
     <string name="screenshot_bottom_boundary_pct" msgid="3880821519814946478">"<xliff:g id="PERCENT">%1$d</xliff:g> (na) porsyento sa hangganan sa ibaba"</string>
@@ -317,8 +318,7 @@
     <string name="sensor_privacy_camera_unblocked_dialog_content" msgid="7847190103011782278">"Naka-enable para sa lahat ng app at serbisyo ang camera."</string>
     <string name="sensor_privacy_camera_blocked_dialog_content" msgid="3182428709314874616">"Naka-disable para sa lahat ng app at serbisyo ang access sa camera."</string>
     <string name="sensor_privacy_htt_blocked_dialog_content" msgid="3333321592997666441">"Para gamitin ang button ng mikropono, i-enable ang access sa mikropono sa Mga Setting."</string>
-    <!-- no translation found for sensor_privacy_dialog_open_settings (5635865896053011859) -->
-    <skip />
+    <string name="sensor_privacy_dialog_open_settings" msgid="5635865896053011859">"Buksan ang Mga Setting"</string>
     <string name="media_seamless_other_device" msgid="4654849800789196737">"Iba pang device"</string>
     <string name="quick_step_accessibility_toggle_overview" msgid="7908949976727578403">"I-toggle ang Overview"</string>
     <string name="zen_priority_introduction" msgid="3159291973383796646">"Hindi ka maiistorbo ng mga tunog at pag-vibrate, maliban mula sa mga alarm, paalala, event, at tumatawag na tutukuyin mo. Maririnig mo pa rin ang kahit na anong piliin mong i-play kabilang ang mga musika, video, at laro."</string>
@@ -743,6 +743,7 @@
     <string name="wifi_is_off" msgid="5389597396308001471">"Naka-off ang Wi-Fi"</string>
     <string name="bt_is_off" msgid="7436344904889461591">"Naka-off ang Bluetooth"</string>
     <string name="dnd_is_off" msgid="3185706903793094463">"Naka-off ang Huwag Istorbohin"</string>
+    <string name="dnd_is_on" msgid="7009368176361546279">"Naka-on ang Huwag Istorbohin"</string>
     <string name="qs_dnd_prompt_auto_rule" msgid="3535469468310002616">"Na-on ang Huwag Istorbohin dahil sa isang awtomatikong panuntunan (<xliff:g id="ID_1">%s</xliff:g>)."</string>
     <string name="qs_dnd_prompt_app" msgid="4027984447935396820">"Na-on ang Huwag Istorbohin dahil sa isang app (<xliff:g id="ID_1">%s</xliff:g>)."</string>
     <string name="qs_dnd_prompt_auto_rule_app" msgid="1841469944118486580">"Na-on ang Huwag Istorbohin dahil sa isang awtomatikong panuntunan o app."</string>
@@ -905,6 +906,7 @@
     <string name="media_output_dialog_accessibility_title" msgid="4681741064190167888">"Mga available na device para sa audio output."</string>
     <string name="media_output_dialog_accessibility_seekbar" msgid="5332843993805568978">"Volume"</string>
     <string name="media_output_dialog_volume_percentage" msgid="1613984910585111798">"<xliff:g id="PERCENTAGE">%1$d</xliff:g>%%"</string>
+    <string name="media_output_group_title_speakers_and_displays" msgid="7169712332365659820">"Mga Speaker at Display"</string>
     <string name="media_output_first_broadcast_title" msgid="6292237789860753022">"Paano gumagana ang pag-broadcast"</string>
     <string name="media_output_broadcast" msgid="3555580945878071543">"Broadcast"</string>
     <string name="media_output_first_notify_broadcast_message" msgid="6353857724136398494">"Makakapakinig ang mga taong malapit sa iyo na may mga compatible na Bluetooth device sa media na bino-broadcast mo"</string>
@@ -1032,20 +1034,19 @@
     <string name="log_access_confirmation_deny" msgid="2389461495803585795">"Huwag payagan"</string>
     <string name="log_access_confirmation_body" msgid="6883031912003112634">"Nire-record ng mga log ng device kung ano ang nangyayari sa iyong device. Magagamit ng mga app ang mga log na ito para maghanap at mag-ayos ng mga isyu.\n\nPosibleng maglaman ang ilang log ng sensitibong impormasyon, kaya ang mga app lang na pinagkakatiwalaan mo ang payagang maka-access sa lahat ng log ng device. \n\nKung hindi mo papayagan ang app na ito na i-access ang lahat ng log ng device, maa-access pa rin nito ang mga sarili nitong log. Posible pa ring ma-access ng manufacturer ng iyong device ang ilang log o impormasyon sa device mo."</string>
     <string name="keyguard_affordance_enablement_dialog_action_template" msgid="8164857863036314664">"Buksan ang <xliff:g id="APPNAME">%1$s</xliff:g>"</string>
-    <string name="keyguard_affordance_enablement_dialog_message" msgid="2790910660524887941">"Para idagdag ang <xliff:g id="APPNAME">%1$s</xliff:g> app bilang shortcut, siguraduhing"</string>
     <string name="keyguard_affordance_enablement_dialog_wallet_instruction_1" msgid="8439655049139819278">"• Na-set up ang app"</string>
     <string name="keyguard_affordance_enablement_dialog_wallet_instruction_2" msgid="4321089250629477835">"• May kahit isang card na idinagdag sa Wallet"</string>
     <string name="keyguard_affordance_enablement_dialog_qr_scanner_instruction" msgid="5355839079232119791">"• Mag-install ng camera app"</string>
     <string name="keyguard_affordance_enablement_dialog_home_instruction_1" msgid="8438311171750568633">"• Na-set up ang app"</string>
     <string name="keyguard_affordance_enablement_dialog_home_instruction_2" msgid="8308525385889021652">"• May kahit isang device na available"</string>
+    <string name="keyguard_affordance_press_too_short" msgid="8145437175134998864">"Pindutin nang matagal: shortcut"</string>
     <string name="rear_display_bottom_sheet_cancel" msgid="3461468855493357248">"Kanselahin"</string>
     <string name="rear_display_bottom_sheet_confirm" msgid="4383356544661421206">"I-flip na ngayon"</string>
     <string name="rear_display_fold_bottom_sheet_title" msgid="6081542277622721548">"I-unfold ang telepono para sa mas magandang selfie"</string>
     <string name="rear_display_unfold_bottom_sheet_title" msgid="2137403802960396357">"I-flip sa front display para sa magandang selfie?"</string>
     <string name="rear_display_bottom_sheet_description" msgid="1852662982816810352">"Gamitin ang camera sa harap para sa mas malawak na larawan na may mas mataas na resolution."</string>
     <string name="rear_display_bottom_sheet_warning" msgid="800995919558238930"><b>"✱ Mag-o-off ang screen na ito"</b></string>
-    <!-- no translation found for rear_display_accessibility_folded_animation (1538121649587978179) -->
-    <skip />
-    <!-- no translation found for rear_display_accessibility_unfolded_animation (1946153682258289040) -->
-    <skip />
+    <string name="rear_display_accessibility_folded_animation" msgid="1538121649587978179">"Ina-unfold na foldable na device"</string>
+    <string name="rear_display_accessibility_unfolded_animation" msgid="1946153682258289040">"Fini-flip na foldable na device"</string>
+    <string name="stylus_battery_low" msgid="7134370101603167096">"Paubos na ang baterya ng stylus"</string>
 </resources>

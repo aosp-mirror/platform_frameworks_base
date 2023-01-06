@@ -85,6 +85,7 @@
     <string name="screenshot_share_description" msgid="2861628935812656612">"Deel skermskoot"</string>
     <string name="screenshot_scroll_label" msgid="2930198809899329367">"Vang meer vas"</string>
     <string name="screenshot_dismiss_description" msgid="4702341245899508786">"Maak skermkiekie toe"</string>
+    <string name="screenshot_dismiss_work_profile" msgid="3101530842987697045">"Maak werkprofielboodskap toe"</string>
     <string name="screenshot_preview_description" msgid="7606510140714080474">"Skermkiekievoorskou"</string>
     <string name="screenshot_top_boundary_pct" msgid="2520148599096479332">"Bogrens <xliff:g id="PERCENT">%1$d</xliff:g> persent"</string>
     <string name="screenshot_bottom_boundary_pct" msgid="3880821519814946478">"Ondergrens <xliff:g id="PERCENT">%1$d</xliff:g> persent"</string>
@@ -317,8 +318,7 @@
     <string name="sensor_privacy_camera_unblocked_dialog_content" msgid="7847190103011782278">"Kamera is vir alle apps en dienste geaktiveer."</string>
     <string name="sensor_privacy_camera_blocked_dialog_content" msgid="3182428709314874616">"Kameratoegang is vir alle apps en dienste gedeaktiveer."</string>
     <string name="sensor_privacy_htt_blocked_dialog_content" msgid="3333321592997666441">"Aktiveer mikrofoontoegang in Instellings om die mikrofoonknoppie te gebruik."</string>
-    <!-- no translation found for sensor_privacy_dialog_open_settings (5635865896053011859) -->
-    <skip />
+    <string name="sensor_privacy_dialog_open_settings" msgid="5635865896053011859">"Maak Instellings oop"</string>
     <string name="media_seamless_other_device" msgid="4654849800789196737">"Ander toestel"</string>
     <string name="quick_step_accessibility_toggle_overview" msgid="7908949976727578403">"Wissel oorsig"</string>
     <string name="zen_priority_introduction" msgid="3159291973383796646">"Jy sal nie deur geluide en vibrasies gepla word nie, behalwe deur wekkers, herinneringe, geleenthede en bellers wat jy spesifiseer. Jy sal steeds enigiets hoor wat jy kies om te speel, insluitend musiek, video\'s en speletjies."</string>
@@ -743,6 +743,7 @@
     <string name="wifi_is_off" msgid="5389597396308001471">"Wi-Fi is af"</string>
     <string name="bt_is_off" msgid="7436344904889461591">"Bluetooth is af"</string>
     <string name="dnd_is_off" msgid="3185706903793094463">"Moenie Steur Nie is af"</string>
+    <string name="dnd_is_on" msgid="7009368176361546279">"Moenie Steur Nie is aan"</string>
     <string name="qs_dnd_prompt_auto_rule" msgid="3535469468310002616">"\'n Outomatiese reël (<xliff:g id="ID_1">%s</xliff:g>) het Moenie Steur Nie aangeskakel."</string>
     <string name="qs_dnd_prompt_app" msgid="4027984447935396820">"\'n Program (<xliff:g id="ID_1">%s</xliff:g>) het Moenie Steur Nie aangeskakel."</string>
     <string name="qs_dnd_prompt_auto_rule_app" msgid="1841469944118486580">"\'n Outomatiese reël of program het Moenie Steur Nie aangeskakel."</string>
@@ -815,7 +816,7 @@
     <string name="accessibility_floating_button_migration_tooltip" msgid="5217151214439341902">"Tik om toeganklikheidkenmerke oop te maak Pasmaak of vervang knoppie in Instellings.\n\n"<annotation id="link">"Bekyk instellings"</annotation></string>
     <string name="accessibility_floating_button_docking_tooltip" msgid="6814897496767461517">"Skuif knoppie na kant om dit tydelik te versteek"</string>
     <string name="accessibility_floating_button_undo" msgid="511112888715708241">"Ontdoen"</string>
-    <string name="accessibility_floating_button_undo_message_text" msgid="3044079592757099698">"{count,plural, =1{{label} kortpad is verwyder}other{# kortpaaie is verwyder}}"</string>
+    <string name="accessibility_floating_button_undo_message_text" msgid="3044079592757099698">"{count,plural, =1{{label}-kortpad is verwyder}other{# kortpaaie is verwyder}}"</string>
     <string name="accessibility_floating_button_action_move_top_left" msgid="6253520703618545705">"Beweeg na links bo"</string>
     <string name="accessibility_floating_button_action_move_top_right" msgid="6106225581993479711">"Beweeg na regs bo"</string>
     <string name="accessibility_floating_button_action_move_bottom_left" msgid="8063394111137429725">"Beweeg na links onder"</string>
@@ -905,6 +906,7 @@
     <string name="media_output_dialog_accessibility_title" msgid="4681741064190167888">"Beskikbare toestelle vir oudio-uitsette."</string>
     <string name="media_output_dialog_accessibility_seekbar" msgid="5332843993805568978">"Volume"</string>
     <string name="media_output_dialog_volume_percentage" msgid="1613984910585111798">"<xliff:g id="PERCENTAGE">%1$d</xliff:g>%%"</string>
+    <string name="media_output_group_title_speakers_and_displays" msgid="7169712332365659820">"Luidsprekers en skerms"</string>
     <string name="media_output_first_broadcast_title" msgid="6292237789860753022">"Hoe uitsaai werk"</string>
     <string name="media_output_broadcast" msgid="3555580945878071543">"Saai uit"</string>
     <string name="media_output_first_notify_broadcast_message" msgid="6353857724136398494">"Mense in jou omtrek met versoenbare Bluetooth-toestelle kan na die media luister wat jy uitsaai"</string>
@@ -1032,20 +1034,19 @@
     <string name="log_access_confirmation_deny" msgid="2389461495803585795">"Moenie toelaat nie"</string>
     <string name="log_access_confirmation_body" msgid="6883031912003112634">"Toestelloglêers teken aan wat op jou toestel gebeur. Apps kan hierdie loglêers gebruik om kwessies op te spoor en reg te stel.\n\nSommige loglêers bevat dalk sensitiewe inligting, en daarom moet jy toegang tot alle toestelloglêers net gee aan apps wat jy vertrou. \n\nHierdie app het steeds toegang tot sy eie loglêers as jy nie vir hierdie app toegang tot alle toestelloglêers gee nie. Jou toestelvervaardiger het dalk steeds toegang tot sommige loglêers of inligting op jou toestel."</string>
     <string name="keyguard_affordance_enablement_dialog_action_template" msgid="8164857863036314664">"Maak <xliff:g id="APPNAME">%1$s</xliff:g> oop"</string>
-    <string name="keyguard_affordance_enablement_dialog_message" msgid="2790910660524887941">"Om die <xliff:g id="APPNAME">%1$s</xliff:g>-app as ’n kortpad by te voeg, moet jy seker maak dat"</string>
     <string name="keyguard_affordance_enablement_dialog_wallet_instruction_1" msgid="8439655049139819278">"• Die app opgestel is"</string>
     <string name="keyguard_affordance_enablement_dialog_wallet_instruction_2" msgid="4321089250629477835">"• Minstens een kaart by Wallet gevoeg is"</string>
     <string name="keyguard_affordance_enablement_dialog_qr_scanner_instruction" msgid="5355839079232119791">"• Installeer ’n kamera-app"</string>
     <string name="keyguard_affordance_enablement_dialog_home_instruction_1" msgid="8438311171750568633">"• Die app opgestel is"</string>
     <string name="keyguard_affordance_enablement_dialog_home_instruction_2" msgid="8308525385889021652">"• Minstens een toestel beskikbaar is"</string>
+    <string name="keyguard_affordance_press_too_short" msgid="8145437175134998864">"Raak en hou kortpad"</string>
     <string name="rear_display_bottom_sheet_cancel" msgid="3461468855493357248">"Kanselleer"</string>
     <string name="rear_display_bottom_sheet_confirm" msgid="4383356544661421206">"Draai nou om"</string>
     <string name="rear_display_fold_bottom_sheet_title" msgid="6081542277622721548">"Vou foon oop vir ’n beter selfie"</string>
     <string name="rear_display_unfold_bottom_sheet_title" msgid="2137403802960396357">"Draai om na voorste skerm vir ’n beter selfie?"</string>
     <string name="rear_display_bottom_sheet_description" msgid="1852662982816810352">"Gebruik die agterste kamera vir ’n breër foto met ’n hoër resolusie."</string>
     <string name="rear_display_bottom_sheet_warning" msgid="800995919558238930"><b>"✱ Hierdie skerm sal afskakel"</b></string>
-    <!-- no translation found for rear_display_accessibility_folded_animation (1538121649587978179) -->
-    <skip />
-    <!-- no translation found for rear_display_accessibility_unfolded_animation (1946153682258289040) -->
-    <skip />
+    <string name="rear_display_accessibility_folded_animation" msgid="1538121649587978179">"Voubare toestel word ontvou"</string>
+    <string name="rear_display_accessibility_unfolded_animation" msgid="1946153682258289040">"Voubare toestel word omgekeer"</string>
+    <string name="stylus_battery_low" msgid="7134370101603167096">"Stilus se battery is amper pap"</string>
 </resources>

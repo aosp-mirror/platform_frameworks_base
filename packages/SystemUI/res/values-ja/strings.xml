@@ -85,6 +85,7 @@
     <string name="screenshot_share_description" msgid="2861628935812656612">"スクリーンショットを共有"</string>
     <string name="screenshot_scroll_label" msgid="2930198809899329367">"キャプチャ範囲を拡大"</string>
     <string name="screenshot_dismiss_description" msgid="4702341245899508786">"スクリーンショットを閉じます"</string>
+    <string name="screenshot_dismiss_work_profile" msgid="3101530842987697045">"仕事用プロファイルのメッセージを閉じます"</string>
     <string name="screenshot_preview_description" msgid="7606510140714080474">"スクリーンショットのプレビュー"</string>
     <string name="screenshot_top_boundary_pct" msgid="2520148599096479332">"上部の境界線 <xliff:g id="PERCENT">%1$d</xliff:g> パーセント"</string>
     <string name="screenshot_bottom_boundary_pct" msgid="3880821519814946478">"下部の境界線 <xliff:g id="PERCENT">%1$d</xliff:g> パーセント"</string>
@@ -317,8 +318,7 @@
     <string name="sensor_privacy_camera_unblocked_dialog_content" msgid="7847190103011782278">"カメラはすべてのアプリとサービスで有効になっています。"</string>
     <string name="sensor_privacy_camera_blocked_dialog_content" msgid="3182428709314874616">"カメラへのアクセスは、すべてのアプリとサービスで無効になっています。"</string>
     <string name="sensor_privacy_htt_blocked_dialog_content" msgid="3333321592997666441">"マイクボタンを使用するには、[設定] でマイクへのアクセスを有効にしてください。"</string>
-    <!-- no translation found for sensor_privacy_dialog_open_settings (5635865896053011859) -->
-    <skip />
+    <string name="sensor_privacy_dialog_open_settings" msgid="5635865896053011859">"設定を開く"</string>
     <string name="media_seamless_other_device" msgid="4654849800789196737">"その他のデバイス"</string>
     <string name="quick_step_accessibility_toggle_overview" msgid="7908949976727578403">"概要を切り替え"</string>
     <string name="zen_priority_introduction" msgid="3159291973383796646">"アラーム、リマインダー、予定、指定した人からの着信以外の音やバイブレーションに煩わされることはありません。音楽、動画、ゲームなど再生対象として選択したコンテンツは引き続き再生されます。"</string>
@@ -743,6 +743,7 @@
     <string name="wifi_is_off" msgid="5389597396308001471">"Wi-Fi は OFF です"</string>
     <string name="bt_is_off" msgid="7436344904889461591">"Bluetooth は OFF です"</string>
     <string name="dnd_is_off" msgid="3185706903793094463">"サイレント モードは OFF です"</string>
+    <string name="dnd_is_on" msgid="7009368176361546279">"サイレント モード ON"</string>
     <string name="qs_dnd_prompt_auto_rule" msgid="3535469468310002616">"サイレント モードが自動ルール（<xliff:g id="ID_1">%s</xliff:g>）によって ON になりました。"</string>
     <string name="qs_dnd_prompt_app" msgid="4027984447935396820">"サイレント モードがアプリ（<xliff:g id="ID_1">%s</xliff:g>）によって ON になりました。"</string>
     <string name="qs_dnd_prompt_auto_rule_app" msgid="1841469944118486580">"サイレント モードが自動ルールまたはアプリによって ON になりました。"</string>
@@ -905,6 +906,7 @@
     <string name="media_output_dialog_accessibility_title" msgid="4681741064190167888">"音声出力ができるデバイスです。"</string>
     <string name="media_output_dialog_accessibility_seekbar" msgid="5332843993805568978">"音量"</string>
     <string name="media_output_dialog_volume_percentage" msgid="1613984910585111798">"<xliff:g id="PERCENTAGE">%1$d</xliff:g>%%"</string>
+    <string name="media_output_group_title_speakers_and_displays" msgid="7169712332365659820">"スピーカーとディスプレイ"</string>
     <string name="media_output_first_broadcast_title" msgid="6292237789860753022">"ブロードキャストの仕組み"</string>
     <string name="media_output_broadcast" msgid="3555580945878071543">"ブロードキャスト"</string>
     <string name="media_output_first_notify_broadcast_message" msgid="6353857724136398494">"Bluetooth 対応デバイスを持っている付近のユーザーは、あなたがブロードキャストしているメディアを聴けます"</string>
@@ -1032,20 +1034,19 @@
     <string name="log_access_confirmation_deny" msgid="2389461495803585795">"許可しない"</string>
     <string name="log_access_confirmation_body" msgid="6883031912003112634">"デバイスのログに、このデバイスで発生したことが記録されます。アプリは問題を検出、修正するためにこれらのログを使用することができます。\n\nログによっては機密性の高い情報が含まれている可能性があるため、すべてのデバイスログへのアクセスは信頼できるアプリにのみ許可してください。\n\nすべてのデバイスログへのアクセスを許可しなかった場合も、このアプリはアプリ独自のログにアクセスできます。また、デバイスのメーカーもデバイスの一部のログや情報にアクセスできる可能性があります。"</string>
     <string name="keyguard_affordance_enablement_dialog_action_template" msgid="8164857863036314664">"<xliff:g id="APPNAME">%1$s</xliff:g> を開く"</string>
-    <string name="keyguard_affordance_enablement_dialog_message" msgid="2790910660524887941">"<xliff:g id="APPNAME">%1$s</xliff:g> アプリをショートカットとして追加するための手順"</string>
     <string name="keyguard_affordance_enablement_dialog_wallet_instruction_1" msgid="8439655049139819278">"• アプリが設定されている"</string>
     <string name="keyguard_affordance_enablement_dialog_wallet_instruction_2" msgid="4321089250629477835">"• ウォーレットに追加されているカードが 1 枚以上ある"</string>
     <string name="keyguard_affordance_enablement_dialog_qr_scanner_instruction" msgid="5355839079232119791">"• カメラアプリをインストールする"</string>
     <string name="keyguard_affordance_enablement_dialog_home_instruction_1" msgid="8438311171750568633">"• アプリが設定されている"</string>
     <string name="keyguard_affordance_enablement_dialog_home_instruction_2" msgid="8308525385889021652">"• 利用できるデバイスが 1 台以上ある"</string>
+    <string name="keyguard_affordance_press_too_short" msgid="8145437175134998864">"ショートカットの長押しが必要です"</string>
     <string name="rear_display_bottom_sheet_cancel" msgid="3461468855493357248">"キャンセル"</string>
     <string name="rear_display_bottom_sheet_confirm" msgid="4383356544661421206">"切り替えましょう"</string>
     <string name="rear_display_fold_bottom_sheet_title" msgid="6081542277622721548">"高画質で撮るにはスマートフォンを開いてください"</string>
     <string name="rear_display_unfold_bottom_sheet_title" msgid="2137403802960396357">"前面ディスプレイに切り替えて綺麗に撮りましょう"</string>
     <string name="rear_display_bottom_sheet_description" msgid="1852662982816810352">"高解像度で広い範囲を撮影するには、背面カメラを使用してください。"</string>
     <string name="rear_display_bottom_sheet_warning" msgid="800995919558238930"><b>"✱この画面は OFF になります"</b></string>
-    <!-- no translation found for rear_display_accessibility_folded_animation (1538121649587978179) -->
-    <skip />
-    <!-- no translation found for rear_display_accessibility_unfolded_animation (1946153682258289040) -->
-    <skip />
+    <string name="rear_display_accessibility_folded_animation" msgid="1538121649587978179">"折りたたみ式デバイスが広げられている"</string>
+    <string name="rear_display_accessibility_unfolded_animation" msgid="1946153682258289040">"折りたたみ式デバイスがひっくり返されている"</string>
+    <string name="stylus_battery_low" msgid="7134370101603167096">"タッチペンのバッテリー残量が少なくなっています"</string>
 </resources>

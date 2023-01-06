@@ -85,6 +85,7 @@
     <string name="screenshot_share_description" msgid="2861628935812656612">"স্ক্ৰীনশ্বট শ্বেয়াৰ কৰক"</string>
     <string name="screenshot_scroll_label" msgid="2930198809899329367">"অধিক কেপচাৰ কৰক"</string>
     <string name="screenshot_dismiss_description" msgid="4702341245899508786">"স্ক্ৰীনশ্বট অগ্ৰাহ্য কৰক"</string>
+    <string name="screenshot_dismiss_work_profile" msgid="3101530842987697045">"কৰ্মস্থানৰ প্ৰ’ফাইলৰ বাৰ্তা অগ্ৰাহ্য কৰক"</string>
     <string name="screenshot_preview_description" msgid="7606510140714080474">"স্ক্ৰীনশ্বটৰ পূৰ্বদৰ্শন"</string>
     <string name="screenshot_top_boundary_pct" msgid="2520148599096479332">"শীৰ্ষৰ সীমা <xliff:g id="PERCENT">%1$d</xliff:g> শতাংশ"</string>
     <string name="screenshot_bottom_boundary_pct" msgid="3880821519814946478">"তলৰ সীমা <xliff:g id="PERCENT">%1$d</xliff:g> শতাংশ"</string>
@@ -317,8 +318,7 @@
     <string name="sensor_privacy_camera_unblocked_dialog_content" msgid="7847190103011782278">"আটাইবোৰ এপ্ আৰু সেৱাৰ বাবে কেমেৰা সক্ষম কৰা হৈছে।"</string>
     <string name="sensor_privacy_camera_blocked_dialog_content" msgid="3182428709314874616">"আটাইবোৰ এপ্ আৰু সেৱাৰ বাবে কেমেৰাৰ এক্সেছ অক্ষম কৰা হৈছে।"</string>
     <string name="sensor_privacy_htt_blocked_dialog_content" msgid="3333321592997666441">"মাইক্ৰ’ফ’নৰ বুটামটো ব্যৱহাৰ কৰিবলৈ, ছেটিঙত মাইক্ৰ’ফ’নৰ এক্সেছ সক্ষম কৰক।"</string>
-    <!-- no translation found for sensor_privacy_dialog_open_settings (5635865896053011859) -->
-    <skip />
+    <string name="sensor_privacy_dialog_open_settings" msgid="5635865896053011859">"ছেটিং খোলক"</string>
     <string name="media_seamless_other_device" msgid="4654849800789196737">"অন্য ডিভাইচ"</string>
     <string name="quick_step_accessibility_toggle_overview" msgid="7908949976727578403">"অৱলোকন ট’গল কৰক"</string>
     <string name="zen_priority_introduction" msgid="3159291973383796646">"আপুনি নিৰ্দিষ্ট কৰা এলাৰ্ম, ৰিমাইণ্ডাৰ, ইভেন্ট আৰু কল কৰোঁতাৰ বাহিৰে আন কোনো শব্দৰ পৰা আপুনি অসুবিধা নাপাব। কিন্তু, সংগীত, ভিডিঅ\' আৰু খেলসমূহকে ধৰি আপুনি প্লে কৰিব খোজা যিকোনো বস্তু তথাপি শুনিব পাৰিব।"</string>
@@ -743,6 +743,7 @@
     <string name="wifi_is_off" msgid="5389597396308001471">"ৱাই-ফাই অফ অৱস্থাত আছে"</string>
     <string name="bt_is_off" msgid="7436344904889461591">"ব্লুটুথ অফ অৱস্থাত আছে"</string>
     <string name="dnd_is_off" msgid="3185706903793094463">"অসুবিধা নিদিব অফ অৱস্থাত আছে"</string>
+    <string name="dnd_is_on" msgid="7009368176361546279">"অসুবিধা নিদিব অন অৱস্থাত আছে"</string>
     <string name="qs_dnd_prompt_auto_rule" msgid="3535469468310002616">"অসুবিধা নিদিব-ক এটা স্বয়ংক্ৰিয় নিয়ম (<xliff:g id="ID_1">%s</xliff:g>)এ অন কৰিলে।"</string>
     <string name="qs_dnd_prompt_app" msgid="4027984447935396820">"অসুবিধা নিদিব-ক কোনো এপ্ (<xliff:g id="ID_1">%s</xliff:g>)এ অন কৰিলে।"</string>
     <string name="qs_dnd_prompt_auto_rule_app" msgid="1841469944118486580">"অসুবিধা নিদিব-ক এটা স্বয়ংক্ৰিয় নিয়ম বা এপে অন কৰিলে।"</string>
@@ -815,7 +816,7 @@
     <string name="accessibility_floating_button_migration_tooltip" msgid="5217151214439341902">"সাধ্য সুবিধাসমূহ খুলিবলৈ টিপক। ছেটিঙত এই বুটামটো কাষ্টমাইজ অথবা সলনি কৰক।\n\n"<annotation id="link">"ছেটিং চাওক"</annotation></string>
     <string name="accessibility_floating_button_docking_tooltip" msgid="6814897496767461517">"বুটামটোক সাময়িকভাৱে লুকুৱাবলৈ ইয়াক একেবাৰে কাষলৈ লৈ যাওক"</string>
     <string name="accessibility_floating_button_undo" msgid="511112888715708241">"আনডু কৰক"</string>
-    <string name="accessibility_floating_button_undo_message_text" msgid="3044079592757099698">"{count,plural, =1{{label} টা শ্বৰ্টকাট আঁতৰোৱা হ’ল}one{# টা শ্বৰ্টকাট আঁতৰোৱা হ’ল}other{# টা শ্বৰ্টকাট আঁতৰোৱা হ’ল}}"</string>
+    <string name="accessibility_floating_button_undo_message_text" msgid="3044079592757099698">"{count,plural, =1{{label}ৰ শ্বৰ্টকাট আঁতৰোৱা হ’ল}one{# টা শ্বৰ্টকাট আঁতৰোৱা হ’ল}other{# টা শ্বৰ্টকাট আঁতৰোৱা হ’ল}}"</string>
     <string name="accessibility_floating_button_action_move_top_left" msgid="6253520703618545705">"শীৰ্ষৰ বাওঁফালে নিয়ক"</string>
     <string name="accessibility_floating_button_action_move_top_right" msgid="6106225581993479711">"শীৰ্ষৰ সোঁফালে নিয়ক"</string>
     <string name="accessibility_floating_button_action_move_bottom_left" msgid="8063394111137429725">"তলৰ বাওঁফালে নিয়ক"</string>
@@ -905,6 +906,7 @@
     <string name="media_output_dialog_accessibility_title" msgid="4681741064190167888">"অডিঅ\' আউটপুটৰ বাবে উপলব্ধ ডিভাইচ।"</string>
     <string name="media_output_dialog_accessibility_seekbar" msgid="5332843993805568978">"ভলিউম"</string>
     <string name="media_output_dialog_volume_percentage" msgid="1613984910585111798">"<xliff:g id="PERCENTAGE">%1$d</xliff:g>%%"</string>
+    <string name="media_output_group_title_speakers_and_displays" msgid="7169712332365659820">"স্পীকাৰ আৰু ডিছপ্লে’"</string>
     <string name="media_output_first_broadcast_title" msgid="6292237789860753022">"সম্প্ৰচাৰ কৰাটোৱে কেনেকৈ কাম কৰে"</string>
     <string name="media_output_broadcast" msgid="3555580945878071543">"সম্প্ৰচাৰ"</string>
     <string name="media_output_first_notify_broadcast_message" msgid="6353857724136398494">"সমিল ব্লুটুথ ডিভাইচৰ সৈতে আপোনাৰ নিকটৱৰ্তী স্থানত থকা লোকসকলে আপুনি সম্প্ৰচাৰ কৰা মিডিয়াটো শুনিব পাৰে"</string>
@@ -1032,20 +1034,19 @@
     <string name="log_access_confirmation_deny" msgid="2389461495803585795">"অনুমতি নিদিব"</string>
     <string name="log_access_confirmation_body" msgid="6883031912003112634">"আপোনাৰ ডিভাইচত কি কি ঘটে সেয়া ডিভাইচ লগে ৰেকৰ্ড কৰে। এপ্‌সমূহে সমস্যা বিচাৰিবলৈ আৰু সমাধান কৰিবলৈ এই লগসমূহ ব্যৱহাৰ কৰিব পাৰে।\n\nকিছুমান লগত সংবেদনশীল তথ্য থাকিব পাৰে, গতিকে কেৱল আপুনি বিশ্বাস কৰা এপকহে আটাইবোৰ ডিভাইচ লগ এক্সেছ কৰাৰ অনুমতি দিয়ক। \n\nআপুনি যদি এই এপ্‌টোক আটাইবোৰ ডিভাইচ লগ এক্সেছ কৰাৰ অনুমতি নিদিয়ে, তথাপিও ই নিজৰ লগসমূহ এক্সেছ কৰিব পাৰিব। আপোনাৰ ডিভাইচৰ নিৰ্মাতাই তথাপিও হয়তো আপোনাৰ ডিভাইচটোত থকা কিছু লগ অথবা তথ্য এক্সেছ কৰিব পাৰিব।"</string>
     <string name="keyguard_affordance_enablement_dialog_action_template" msgid="8164857863036314664">"<xliff:g id="APPNAME">%1$s</xliff:g> খোলক"</string>
-    <string name="keyguard_affordance_enablement_dialog_message" msgid="2790910660524887941">"<xliff:g id="APPNAME">%1$s</xliff:g> এপ্‌টোক এটা শ্বৰ্টকাট হিচাপে যোগ দিবলৈ, এইকেইটা কথা নিশ্চিত কৰক"</string>
     <string name="keyguard_affordance_enablement_dialog_wallet_instruction_1" msgid="8439655049139819278">"• এপ্‌টো ছেট আপ কৰা হৈছে"</string>
     <string name="keyguard_affordance_enablement_dialog_wallet_instruction_2" msgid="4321089250629477835">"• Walletত অতি কমেও এখন কাৰ্ড যোগ দিয়া হৈছে"</string>
     <string name="keyguard_affordance_enablement_dialog_qr_scanner_instruction" msgid="5355839079232119791">"• এটা কেমেৰা এপ্ ইনষ্টল কৰক"</string>
     <string name="keyguard_affordance_enablement_dialog_home_instruction_1" msgid="8438311171750568633">"• এপ্‌টো ছেট আপ কৰা হৈছে"</string>
     <string name="keyguard_affordance_enablement_dialog_home_instruction_2" msgid="8308525385889021652">"• অতি কমেও এটা ডিভাইচ উপলব্ধ"</string>
+    <string name="keyguard_affordance_press_too_short" msgid="8145437175134998864">"শ্বৰ্টকাটটোত স্পৰ্শ কৰি ধৰি ৰাখক"</string>
     <string name="rear_display_bottom_sheet_cancel" msgid="3461468855493357248">"বাতিল কৰক"</string>
     <string name="rear_display_bottom_sheet_confirm" msgid="4383356544661421206">"এতিয়াই লুটিয়াই দিয়ক"</string>
     <string name="rear_display_fold_bottom_sheet_title" msgid="6081542277622721548">"উন্নত ছেল্ফিৰ বাবে ফ’নটো আনফ’ল্ড কৰক"</string>
     <string name="rear_display_unfold_bottom_sheet_title" msgid="2137403802960396357">"উন্নত ছেল্ফিৰ বাবে সন্মুখৰ ডিছপ্লে’ লুটিয়াই দিবনে?"</string>
     <string name="rear_display_bottom_sheet_description" msgid="1852662982816810352">"অধিক ৰিজ’লিউশ্বনৰ বহল ফট’ৰ বাবে পিছফালে থকা কেমেৰাটো ব্যৱহাৰ কৰক।"</string>
     <string name="rear_display_bottom_sheet_warning" msgid="800995919558238930"><b>"✱ ই স্ক্ৰীনখন অফ হ’ব"</b></string>
-    <!-- no translation found for rear_display_accessibility_folded_animation (1538121649587978179) -->
-    <skip />
-    <!-- no translation found for rear_display_accessibility_unfolded_animation (1946153682258289040) -->
-    <skip />
+    <string name="rear_display_accessibility_folded_animation" msgid="1538121649587978179">"জপাব পৰা ডিভাইচৰ জাপ খুলি থকা হৈছে"</string>
+    <string name="rear_display_accessibility_unfolded_animation" msgid="1946153682258289040">"জপাব পৰা ডিভাইচৰ ওলোটাই থকা হৈছে"</string>
+    <string name="stylus_battery_low" msgid="7134370101603167096">"ষ্টাইলাছৰ বেটাৰী কম আছে"</string>
 </resources>

@@ -85,6 +85,7 @@
     <string name="screenshot_share_description" msgid="2861628935812656612">"Compartilhar captura de tela"</string>
     <string name="screenshot_scroll_label" msgid="2930198809899329367">"Capturar mais"</string>
     <string name="screenshot_dismiss_description" msgid="4702341245899508786">"Dispensar captura de tela"</string>
+    <string name="screenshot_dismiss_work_profile" msgid="3101530842987697045">"Dispensar mensagem do perfil de trabalho"</string>
     <string name="screenshot_preview_description" msgid="7606510140714080474">"Visualização de captura de tela"</string>
     <string name="screenshot_top_boundary_pct" msgid="2520148599096479332">"Borda superior em <xliff:g id="PERCENT">%1$d</xliff:g> por cento"</string>
     <string name="screenshot_bottom_boundary_pct" msgid="3880821519814946478">"Borda inferior em <xliff:g id="PERCENT">%1$d</xliff:g> por cento"</string>
@@ -742,6 +743,7 @@
     <string name="wifi_is_off" msgid="5389597396308001471">"O Wi-Fi está desativado"</string>
     <string name="bt_is_off" msgid="7436344904889461591">"Bluetooth desativado"</string>
     <string name="dnd_is_off" msgid="3185706903793094463">"O recurso Não perturbe está desativado"</string>
+    <string name="dnd_is_on" msgid="7009368176361546279">"O \"Não perturbe\" está ativado"</string>
     <string name="qs_dnd_prompt_auto_rule" msgid="3535469468310002616">"O recurso Não perturbe foi ativado por uma regra automática (<xliff:g id="ID_1">%s</xliff:g>)."</string>
     <string name="qs_dnd_prompt_app" msgid="4027984447935396820">"O recurso Não perturbe foi ativado por um app (<xliff:g id="ID_1">%s</xliff:g>)."</string>
     <string name="qs_dnd_prompt_auto_rule_app" msgid="1841469944118486580">"O recurso Não perturbe foi ativado por uma regra automática ou app."</string>
@@ -814,7 +816,7 @@
     <string name="accessibility_floating_button_migration_tooltip" msgid="5217151214439341902">"Toque para abrir os recursos de acessibilidade. Personalize ou substitua o botão nas Configurações.\n\n"<annotation id="link">"Ver configurações"</annotation></string>
     <string name="accessibility_floating_button_docking_tooltip" msgid="6814897496767461517">"Mova o botão para a borda para ocultá-lo temporariamente"</string>
     <string name="accessibility_floating_button_undo" msgid="511112888715708241">"Desfazer"</string>
-    <string name="accessibility_floating_button_undo_message_text" msgid="3044079592757099698">"{count,plural, =1{{label} atalho removido}one{# atalho removido}many{# de atalhos removidos}other{# atalhos removidos}}"</string>
+    <string name="accessibility_floating_button_undo_message_text" msgid="3044079592757099698">"{count,plural, =1{Atalho de {label} removido}one{# atalho removido}many{# de atalhos removidos}other{# atalhos removidos}}"</string>
     <string name="accessibility_floating_button_action_move_top_left" msgid="6253520703618545705">"Mover para o canto superior esquerdo"</string>
     <string name="accessibility_floating_button_action_move_top_right" msgid="6106225581993479711">"Mover para o canto superior direito"</string>
     <string name="accessibility_floating_button_action_move_bottom_left" msgid="8063394111137429725">"Mover para o canto inferior esquerdo"</string>
@@ -904,6 +906,7 @@
     <string name="media_output_dialog_accessibility_title" msgid="4681741064190167888">"Dispositivos disponíveis para saída de áudio."</string>
     <string name="media_output_dialog_accessibility_seekbar" msgid="5332843993805568978">"Volume"</string>
     <string name="media_output_dialog_volume_percentage" msgid="1613984910585111798">"<xliff:g id="PERCENTAGE">%1$d</xliff:g>%%"</string>
+    <string name="media_output_group_title_speakers_and_displays" msgid="7169712332365659820">"Alto-falantes e telas"</string>
     <string name="media_output_first_broadcast_title" msgid="6292237789860753022">"Como funciona a transmissão"</string>
     <string name="media_output_broadcast" msgid="3555580945878071543">"Transmitir"</string>
     <string name="media_output_first_notify_broadcast_message" msgid="6353857724136398494">"As pessoas próximas a você com dispositivos Bluetooth compatíveis podem ouvir a mídia que você está transmitindo"</string>
@@ -1031,12 +1034,12 @@
     <string name="log_access_confirmation_deny" msgid="2389461495803585795">"Não permitir"</string>
     <string name="log_access_confirmation_body" msgid="6883031912003112634">"Os registros do dispositivo gravam o que acontece nele. Os apps podem usar esses registros para encontrar e corrigir problemas.\n\nAlguns registros podem conter informações sensíveis, então autorize o acesso a eles apenas para os apps em que você confia. \n\nSe você não permitir que esse app acesse todos os registros do dispositivo, ele ainda vai poder acessar os próprios. O fabricante do dispositivo também pode ter acesso a alguns registros ou informações."</string>
     <string name="keyguard_affordance_enablement_dialog_action_template" msgid="8164857863036314664">"Abrir <xliff:g id="APPNAME">%1$s</xliff:g>"</string>
-    <string name="keyguard_affordance_enablement_dialog_message" msgid="2790910660524887941">"Para adicionar o app <xliff:g id="APPNAME">%1$s</xliff:g> como um atalho, verifique se:"</string>
     <string name="keyguard_affordance_enablement_dialog_wallet_instruction_1" msgid="8439655049139819278">"• O app está disponível"</string>
     <string name="keyguard_affordance_enablement_dialog_wallet_instruction_2" msgid="4321089250629477835">"• Pelo menos um cartão foi adicionado à Carteira"</string>
     <string name="keyguard_affordance_enablement_dialog_qr_scanner_instruction" msgid="5355839079232119791">"• Um app de câmera está instalado"</string>
     <string name="keyguard_affordance_enablement_dialog_home_instruction_1" msgid="8438311171750568633">"• O app está disponível"</string>
     <string name="keyguard_affordance_enablement_dialog_home_instruction_2" msgid="8308525385889021652">"• Pelo menos um dispositivo está disponível"</string>
+    <string name="keyguard_affordance_press_too_short" msgid="8145437175134998864">"Mantenha o atalho pressionado"</string>
     <string name="rear_display_bottom_sheet_cancel" msgid="3461468855493357248">"Cancelar"</string>
     <string name="rear_display_bottom_sheet_confirm" msgid="4383356544661421206">"Virar agora"</string>
     <string name="rear_display_fold_bottom_sheet_title" msgid="6081542277622721548">"Abra o smartphone para tirar uma selfie melhor"</string>
@@ -1045,4 +1048,5 @@
     <string name="rear_display_bottom_sheet_warning" msgid="800995919558238930"><b>"✱ Esta tela vai ser desativada"</b></string>
     <string name="rear_display_accessibility_folded_animation" msgid="1538121649587978179">"Dispositivo dobrável sendo aberto"</string>
     <string name="rear_display_accessibility_unfolded_animation" msgid="1946153682258289040">"Dispositivo dobrável sendo virado"</string>
+    <string name="stylus_battery_low" msgid="7134370101603167096">"Bateria da stylus fraca"</string>
 </resources>
