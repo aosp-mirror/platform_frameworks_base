@@ -40,7 +40,7 @@ public final class CredentialManagerServiceImpl extends
 
     // TODO(b/210531) : Make final when update flow is fixed
     @GuardedBy("mLock")
-    private CredentialProviderInfo mInfo;
+    @NonNull private CredentialProviderInfo mInfo;
 
     CredentialManagerServiceImpl(
             @NonNull CredentialManagerService master,
@@ -112,5 +112,28 @@ public final class CredentialManagerServiceImpl extends
             }
         }
         return false;
+    }
+
+    @GuardedBy("mLock")
+    public CredentialProviderInfo getCredentialProviderInfo() {
+        return mInfo;
+    }
+
+    /**
+     * Callback called when an app has been updated.
+     *
+     * @param packageName package of the app being updated.
+     */
+    @GuardedBy("mLock")
+    protected void handlePackageUpdateLocked(@NonNull String packageName) {
+        if (mInfo != null && mInfo.getServiceInfo() != null
+                && mInfo.getServiceInfo().getComponentName()
+                .getPackageName().equals(packageName)) {
+            try {
+                newServiceInfoLocked(mInfo.getServiceInfo().getComponentName());
+            } catch (PackageManager.NameNotFoundException e) {
+                Log.i(TAG, "Issue while updating serviceInfo: " + e.getMessage());
+            }
+        }
     }
 }
