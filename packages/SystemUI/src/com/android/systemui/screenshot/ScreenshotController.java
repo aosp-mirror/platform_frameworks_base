@@ -685,8 +685,8 @@ public class ScreenshotController {
                 });
 
         if (mFlags.isEnabled(SCREENSHOT_WORK_PROFILE_POLICY)) {
-            mScreenshotView.badgeScreenshot(
-                    mContext.getPackageManager().getUserBadgeForDensity(owner, 0));
+            mScreenshotView.badgeScreenshot(mContext.getPackageManager().getUserBadgedIcon(
+                    mContext.getDrawable(R.drawable.overlay_badge_background), owner));
         }
         mScreenshotView.setScreenshot(mScreenBitmap, screenInsets);
         if (DEBUG_WINDOW) {
@@ -784,9 +784,9 @@ public class ScreenshotController {
             mLongScreenshotHolder.setLongScreenshot(longScreenshot);
             mLongScreenshotHolder.setTransitionDestinationCallback(
                     (transitionDestination, onTransitionEnd) -> {
-                            mScreenshotView.startLongScreenshotTransition(
-                                    transitionDestination, onTransitionEnd,
-                                    longScreenshot);
+                        mScreenshotView.startLongScreenshotTransition(
+                                transitionDestination, onTransitionEnd,
+                                longScreenshot);
                         // TODO: Do this via ActionIntentExecutor instead.
                         mContext.sendBroadcast(new Intent(Intent.ACTION_CLOSE_SYSTEM_DIALOGS));
                     }
