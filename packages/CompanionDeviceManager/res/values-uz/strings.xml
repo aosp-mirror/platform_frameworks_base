@@ -23,8 +23,7 @@
     <string name="summary_watch" msgid="4085794790142204006">"Ilova <xliff:g id="DEVICE_NAME">%1$s</xliff:g> profilini boshqarish uchun kerak. <xliff:g id="APP_NAME">%2$s</xliff:g> ilovasiga bildirishnomalar bilan ishlash va telefon, SMS, kontaktlar, taqvim, chaqiruvlar jurnali va yaqin-atrofdagi qurilmalarga kirishga ruxsat beriladi."</string>
     <string name="summary_watch_single_device" msgid="1523091550243476756">"Ilova <xliff:g id="DEVICE_NAME">%1$s</xliff:g> profilini boshqarish uchun kerak. <xliff:g id="APP_NAME">%2$s</xliff:g> ilovasiga quyidagi ruxsatlar bilan ishlashga ruxsat beriladi:"</string>
     <string name="profile_name_glasses" msgid="8488394059007275998">"koʻzoynak"</string>
-    <!-- no translation found for summary_glasses (8987925853224595628) -->
-    <skip />
+    <string name="summary_glasses" msgid="8987925853224595628">"Bu ilova <xliff:g id="DEVICE_NAME">%1$s</xliff:g> profilini boshqarish uchun kerak. <xliff:g id="APP_NAME">%2$s</xliff:g> ilovasiga bildirishnomalar bilan ishlash va telefon, SMS, kontaktlar, mikrofon va yaqin-atrofdagi qurilmalarga kirishga ruxsat beriladi."</string>
     <string name="summary_glasses_single_device" msgid="5725890636605211803">"Ilova <xliff:g id="DEVICE_NAME">%1$s</xliff:g> profilini boshqarish uchun kerak. <xliff:g id="APP_NAME">%2$s</xliff:g> ilovasiga quyidagi ruxsatlar bilan ishlashga ruxsat beriladi:"</string>
     <string name="title_app_streaming" msgid="2270331024626446950">"&lt;strong&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/strong&gt; ilovasiga telefondagi ushbu maʼlumot uchun ruxsat bering"</string>
     <string name="helper_title_app_streaming" msgid="4151687003439969765">"Qurilmalararo xizmatlar"</string>

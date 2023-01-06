@@ -23,8 +23,7 @@
     <string name="summary_watch" msgid="4085794790142204006">"Қолданба <xliff:g id="DEVICE_NAME">%1$s</xliff:g> құрылғысын басқару үшін қажет. <xliff:g id="APP_NAME">%2$s</xliff:g> қолданбасына хабарландыруларға қатысты әрекет жасау, телефон, SMS, контактілер, күнтізбе, қоңырау журналдары қолданбаларын және маңайдағы құрылғыларды пайдалану рұқсаттары беріледі."</string>
     <string name="summary_watch_single_device" msgid="1523091550243476756">"Қолданба <xliff:g id="DEVICE_NAME">%1$s</xliff:g> құрылғысын басқару үшін қажет. <xliff:g id="APP_NAME">%2$s</xliff:g> қолданбасына осы рұқсаттар беріледі:"</string>
     <string name="profile_name_glasses" msgid="8488394059007275998">"көзілдірік"</string>
-    <!-- no translation found for summary_glasses (8987925853224595628) -->
-    <skip />
+    <string name="summary_glasses" msgid="8987925853224595628">"Бұл қолданба <xliff:g id="DEVICE_NAME">%1$s</xliff:g> құрылғысын басқару үшін қажет. <xliff:g id="APP_NAME">%2$s</xliff:g> қолданбасына хабарландыруларды оқуға, телефонды, хабарларды, контактілерді, микрофон мен маңайдағы құрылғыларды пайдалануға рұқсат беріледі."</string>
     <string name="summary_glasses_single_device" msgid="5725890636605211803">"Қолданба <xliff:g id="DEVICE_NAME">%1$s</xliff:g> құрылғысын басқару үшін қажет. <xliff:g id="APP_NAME">%2$s</xliff:g> қолданбасына осы рұқсаттар беріледі:"</string>
     <string name="title_app_streaming" msgid="2270331024626446950">"&lt;strong&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/strong&gt; қолданбасына телефоныңыздағы осы ақпаратты пайдалануға рұқсат беріңіз."</string>
     <string name="helper_title_app_streaming" msgid="4151687003439969765">"Аралық құрылғы қызметтері"</string>
@@ -37,7 +36,7 @@
     <string name="helper_summary_computer" msgid="9050724687678157852">"<xliff:g id="APP_NAME">%1$s</xliff:g> қолданбасы <xliff:g id="DEVICE_TYPE">%2$s</xliff:g> атынан телефондағы фотосуреттерді, медиафайлдар мен хабарландыруларды пайдалану үшін рұқсат сұрайды."</string>
     <string name="title_nearby_device_streaming" msgid="179278282547719200">"&lt;strong&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/strong&gt; қолданбасына осы әрекетті телефоныңыздан орындауға рұқсат беріңіз."</string>
     <string name="helper_title_nearby_device_streaming" msgid="6124438217620593669">"Аралық құрылғы қызметтері"</string>
-    <string name="helper_summary_nearby_device_streaming" msgid="5538329403511524333">"<xliff:g id="APP_NAME">%1$s</xliff:g> қолданбасы маңайдағы құрылғыларға <xliff:g id="DEVICE_TYPE">%2$s</xliff:g> атынан мазмұн трансляциялау үшін рұқсат сұрайды."</string>
+    <string name="helper_summary_nearby_device_streaming" msgid="5538329403511524333">"<xliff:g id="APP_NAME">%1$s</xliff:g> қолданбасы маңайдағы құрылғыларға <xliff:g id="DEVICE_TYPE">%2$s</xliff:g> атынан контент трансляциялау үшін рұқсат сұрайды."</string>
     <string name="profile_name_generic" msgid="6851028682723034988">"құрылғы"</string>
     <string name="summary_generic" msgid="2346762210105903720"></string>
     <string name="consent_yes" msgid="8344487259618762872">"Рұқсат беру"</string>
@@ -66,5 +65,5 @@
     <string name="permission_notification_summary" msgid="884075314530071011">"Барлық хабарландыруды, соның ішінде контактілер, хабарлар және фотосуреттер сияқты ақпаратты оқи алады."</string>
     <string name="permission_app_streaming_summary" msgid="606923325679670624">"Телефон қолданбаларын трансляциялайды."</string>
     <string name="permission_storage_summary" msgid="3918240895519506417"></string>
-    <string name="permission_nearby_device_streaming_summary" msgid="5776807830582725074">"Маңайдағы құрылғыға мазмұн трансляциялайды."</string>
+    <string name="permission_nearby_device_streaming_summary" msgid="5776807830582725074">"Маңайдағы құрылғыға контент трансляциялайды."</string>
 </resources>
