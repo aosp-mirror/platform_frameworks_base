@@ -6004,11 +6004,15 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
 
     @Override
     boolean isSyncFinished() {
-        if (mSyncState == SYNC_STATE_WAITING_FOR_DRAW && mViewVisibility != View.VISIBLE
-                && !isVisibleRequested()) {
+        if (!isVisibleRequested()) {
             // Don't wait for invisible windows. However, we don't alter the state in case the
             // window becomes visible while the sync group is still active.
             return true;
+        }
+        if (mSyncState == SYNC_STATE_WAITING_FOR_DRAW && mWinAnimator.mDrawState == HAS_DRAWN
+                && !mRedrawForSyncReported && !mWmService.mResizingWindows.contains(this)) {
+            // Complete the sync state immediately for a drawn window that doesn't need to redraw.
+            onSyncFinishedDrawing();
         }
         return super.isSyncFinished();
     }
@@ -6060,6 +6064,7 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
         final boolean hasSyncHandlers = executeDrawHandlers(postDrawTransaction, syncSeqId);
 
         boolean skipLayout = false;
+        boolean layoutNeeded = false;
         // Control the timing to switch the appearance of window with different rotations.
         final AsyncRotationController asyncRotationController =
                 mDisplayContent.getAsyncRotationController();
@@ -6072,7 +6077,7 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
         } else if (syncActive) {
             // Currently in a Sync that is using BLAST.
             if (!syncStillPending) {
-                onSyncFinishedDrawing();
+                layoutNeeded = onSyncFinishedDrawing();
             }
             if (postDrawTransaction != null) {
                 mSyncTransaction.merge(postDrawTransaction);
@@ -6081,10 +6086,10 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
             }
         } else if (useBLASTSync()) {
             // Sync that is not using BLAST
-            onSyncFinishedDrawing();
+            layoutNeeded = onSyncFinishedDrawing();
         }
 
-        final boolean layoutNeeded =
+        layoutNeeded |=
                 mWinAnimator.finishDrawingLocked(postDrawTransaction, mClientWasDrawingForSync);
         mClientWasDrawingForSync = false;
         // We always want to force a traversal after a finish draw for blast sync.
