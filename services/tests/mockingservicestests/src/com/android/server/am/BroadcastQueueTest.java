@@ -75,6 +75,8 @@ import android.os.PowerExemptionManager;
 import android.os.SystemClock;
 import android.os.UserHandle;
 import android.provider.Settings;
+import android.util.ArrayMap;
+import android.util.ArraySet;
 import android.util.Log;
 import android.util.Pair;
 import android.util.SparseArray;
@@ -156,6 +158,7 @@ public class BroadcastQueueTest {
     private ActivityManagerService mAms;
     private BroadcastQueue mQueue;
     BroadcastConstants mConstants;
+    private TestBroadcastSkipPolicy mSkipPolicy;
 
     /**
      * Desired behavior of the next
@@ -282,16 +285,8 @@ public class BroadcastQueueTest {
         mConstants = new BroadcastConstants(Settings.Global.BROADCAST_FG_CONSTANTS);
         mConstants.TIMEOUT = 100;
         mConstants.ALLOW_BG_ACTIVITY_START_TIMEOUT = 0;
-        final BroadcastSkipPolicy emptySkipPolicy = new BroadcastSkipPolicy(mAms) {
-            public boolean shouldSkip(BroadcastRecord r, Object o) {
-                // Ignored
-                return false;
-            }
-            public String shouldSkipMessage(BroadcastRecord r, Object o) {
-                // Ignored
-                return null;
-            }
-        };
+        mSkipPolicy = new TestBroadcastSkipPolicy(mAms);
+
         final BroadcastHistory emptyHistory = new BroadcastHistory(mConstants) {
             public void addBroadcastToHistoryLocked(BroadcastRecord original) {
                 // Ignored
@@ -300,13 +295,13 @@ public class BroadcastQueueTest {
 
         if (mImpl == Impl.DEFAULT) {
             var q = new BroadcastQueueImpl(mAms, mHandlerThread.getThreadHandler(), TAG,
-                    mConstants, emptySkipPolicy, emptyHistory, false,
+                    mConstants, mSkipPolicy, emptyHistory, false,
                     ProcessList.SCHED_GROUP_DEFAULT);
             q.mReceiverBatch.mDeepReceiverCopy = true;
             mQueue = q;
         } else if (mImpl == Impl.MODERN) {
             var q = new BroadcastQueueModernImpl(mAms, mHandlerThread.getThreadHandler(),
-                    mConstants, mConstants, emptySkipPolicy, emptyHistory);
+                    mConstants, mConstants, mSkipPolicy, emptyHistory);
             q.mReceiverBatch.mDeepReceiverCopy = true;
             mQueue = q;
         } else {
@@ -324,6 +319,43 @@ public class BroadcastQueueTest {
                     app.mReceivers.numberOfCurReceivers());
             assertEquals(app.toShortString(), ProcessList.SCHED_GROUP_UNDEFINED,
                     mQueue.getPreferredSchedulingGroupLocked(app));
+        }
+    }
+
+    private static class TestBroadcastSkipPolicy extends BroadcastSkipPolicy {
+        private final ArrayMap<String, ArraySet> mReceiversToSkip = new ArrayMap<>();
+
+        TestBroadcastSkipPolicy(ActivityManagerService service) {
+            super(service);
+        }
+
+        public String shouldSkipMessage(BroadcastRecord r, Object o) {
+            if (shouldSkipReceiver(r.intent.getAction(), o)) {
+                return "test skipped receiver";
+            }
+            return null;
+        }
+
+        private boolean shouldSkipReceiver(String action, Object o) {
+            final ArraySet<Object> receiversToSkip = mReceiversToSkip.get(action);
+            if (receiversToSkip == null) {
+                return false;
+            }
+            for (int i = 0; i < receiversToSkip.size(); ++i) {
+                if (BroadcastRecord.isReceiverEquals(o, receiversToSkip.valueAt(i))) {
+                    return true;
+                }
+            }
+            return false;
+        }
+
+        public void setSkipReceiver(String action, Object o) {
+            ArraySet<Object> receiversToSkip = mReceiversToSkip.get(action);
+            if (receiversToSkip == null) {
+                receiversToSkip = new ArraySet<>();
+                mReceiversToSkip.put(action, receiversToSkip);
+            }
+            receiversToSkip.add(o);
         }
     }
 
@@ -835,6 +867,7 @@ public class BroadcastQueueTest {
     static final String PACKAGE_GREEN = "com.example.green";
     static final String PACKAGE_BLUE = "com.example.blue";
     static final String PACKAGE_YELLOW = "com.example.yellow";
+    static final String PACKAGE_ORANGE = "com.example.orange";
 
     static final String PROCESS_SYSTEM = "system";
 
@@ -842,6 +875,7 @@ public class BroadcastQueueTest {
     static final String CLASS_GREEN = "com.example.green.Green";
     static final String CLASS_BLUE = "com.example.blue.Blue";
     static final String CLASS_YELLOW = "com.example.yellow.Yellow";
+    static final String CLASS_ORANGE = "com.example.orange.Orange";
 
     static int getUidForPackage(@NonNull String packageName) {
         switch (packageName) {
@@ -851,6 +885,7 @@ public class BroadcastQueueTest {
             case PACKAGE_GREEN: return android.os.Process.FIRST_APPLICATION_UID + 2;
             case PACKAGE_BLUE: return android.os.Process.FIRST_APPLICATION_UID + 3;
             case PACKAGE_YELLOW: return android.os.Process.FIRST_APPLICATION_UID + 4;
+            case PACKAGE_ORANGE: return android.os.Process.FIRST_APPLICATION_UID + 5;
             default: throw new IllegalArgumentException();
         }
     }
@@ -1872,5 +1907,39 @@ public class BroadcastQueueTest {
         verify(mAms).notifyBroadcastFinishedLocked(eq(record));
         verify(mAms).addBroadcastStatLocked(eq(Intent.ACTION_TIMEZONE_CHANGED), eq(PACKAGE_RED),
                 eq(1), eq(0), anyLong());
+    }
+
+    /**
+     * Verify that we skip broadcasts if {@link BroadcastSkipPolicy} decides it should be skipped.
+     */
+    @Test
+    public void testSkipPolicy() throws Exception {
+        final ProcessRecord callerApp = makeActiveProcessRecord(PACKAGE_RED);
+        final ProcessRecord receiverGreenApp = makeActiveProcessRecord(PACKAGE_GREEN);
+        final ProcessRecord receiverBlueApp = makeActiveProcessRecord(PACKAGE_BLUE);
+
+        final Intent airplane = new Intent(Intent.ACTION_AIRPLANE_MODE_CHANGED);
+        try (SyncBarrier b = new SyncBarrier()) {
+            final Object greenReceiver = makeRegisteredReceiver(receiverGreenApp);
+            final Object blueReceiver = makeRegisteredReceiver(receiverBlueApp);
+            final Object yellowReceiver = makeManifestReceiver(PACKAGE_YELLOW, CLASS_YELLOW);
+            final Object orangeReceiver = makeManifestReceiver(PACKAGE_ORANGE, CLASS_ORANGE);
+            enqueueBroadcast(makeBroadcastRecord(airplane, callerApp,
+                    List.of(greenReceiver, blueReceiver, yellowReceiver, orangeReceiver)));
+
+            mSkipPolicy.setSkipReceiver(airplane.getAction(), greenReceiver);
+            mSkipPolicy.setSkipReceiver(airplane.getAction(), orangeReceiver);
+        }
+
+        waitForIdle();
+        // Verify that only blue and yellow receiver apps received the broadcast.
+        verifyScheduleRegisteredReceiver(never(), receiverGreenApp, USER_SYSTEM);
+        verifyScheduleRegisteredReceiver(receiverBlueApp, airplane);
+        final ProcessRecord receiverYellowApp = mAms.getProcessRecordLocked(PACKAGE_YELLOW,
+                getUidForPackage(PACKAGE_YELLOW));
+        verifyScheduleReceiver(receiverYellowApp, airplane);
+        final ProcessRecord receiverOrangeApp = mAms.getProcessRecordLocked(PACKAGE_ORANGE,
+                getUidForPackage(PACKAGE_ORANGE));
+        assertNull(receiverOrangeApp);
     }
 }

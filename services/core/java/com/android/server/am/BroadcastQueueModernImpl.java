@@ -731,6 +731,11 @@ class BroadcastQueueModernImpl extends BroadcastQueue {
             return;
         }
 
+        if (maybeSkipReceiver(queue, null, r, index)) {
+            mRunningColdStart = null;
+            return;
+        }
+
         final ApplicationInfo info = ((ResolveInfo) receiver).activityInfo.applicationInfo;
         final ComponentName component = ((ResolveInfo) receiver).activityInfo.getComponentName();
 
@@ -790,41 +795,53 @@ class BroadcastQueueModernImpl extends BroadcastQueue {
      * skipped (and therefore no more work is required).
      */
     private boolean maybeSkipReceiver(@NonNull BroadcastProcessQueue queue,
-            @NonNull BroadcastReceiverBatch batch, @NonNull BroadcastRecord r, int index) {
+            @Nullable BroadcastReceiverBatch batch, @NonNull BroadcastRecord r, int index) {
+        final String reason = shouldSkipReceiver(queue, r, index);
+        if (reason != null) {
+            if (batch == null) {
+                enqueueFinishReceiver(queue, r, index, BroadcastRecord.DELIVERY_SKIPPED, reason);
+            } else {
+                batch.finish(r, index, BroadcastRecord.DELIVERY_SKIPPED, reason);
+            }
+            return true;
+        }
+        return false;
+    }
+
+    /**
+     * Consults {@link BroadcastSkipPolicy} and the receiver process state to decide whether or
+     * not the broadcast to a receiver can be skipped.
+     */
+    private String shouldSkipReceiver(@NonNull BroadcastProcessQueue queue,
+            @NonNull BroadcastRecord r, int index) {
         final int oldDeliveryState = getDeliveryState(r, index);
         final ProcessRecord app = queue.app;
         final Object receiver = r.receivers.get(index);
 
         // If someone already finished this broadcast, finish immediately
         if (isDeliveryStateTerminal(oldDeliveryState)) {
-            batch.finish(r, index, oldDeliveryState, "already terminal state");
-            return true;
+            return "already terminal state";
         }
 
         // Consider additional cases where we'd want to finish immediately
-        if (app.isInFullBackup()) {
-            batch.finish(r, index, BroadcastRecord.DELIVERY_SKIPPED, "isInFullBackup");
-            return true;
+        if (app != null && app.isInFullBackup()) {
+            return "isInFullBackup";
         }
         if (mSkipPolicy.shouldSkip(r, receiver)) {
-            batch.finish(r, index, BroadcastRecord.DELIVERY_SKIPPED, "mSkipPolicy");
-            return true;
+            return "mSkipPolicy";
         }
         final Intent receiverIntent = r.getReceiverIntent(receiver);
         if (receiverIntent == null) {
-            batch.finish(r, index, BroadcastRecord.DELIVERY_SKIPPED, "getReceiverIntent");
-            return true;
+            return "getReceiverIntent";
         }
 
         // Ignore registered receivers from a previous PID
         if ((receiver instanceof BroadcastFilter)
                 && ((BroadcastFilter) receiver).receiverList.pid != app.getPid()) {
-            batch.finish(r, index, BroadcastRecord.DELIVERY_SKIPPED,
-                    "BroadcastFilter for mismatched PID");
-            return true;
+            return "BroadcastFilter for mismatched PID";
         }
         // The receiver was not handled in this method.
-        return false;
+        return null;
     }
 
     /**
