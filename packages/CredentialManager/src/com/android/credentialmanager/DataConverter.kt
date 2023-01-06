@@ -230,9 +230,15 @@ class CreateFlowUtils {
       // TODO: get from the actual service info
       val packageManager = context.packageManager
       return providerDataList?.map {
+        val componentName = ComponentName.unflattenFromString(it.providerFlattenedComponentName)
+        var packageName = componentName?.packageName
+        if (componentName == null) {
+          // TODO: Remove once test data is fixed
+          packageName = it.providerFlattenedComponentName
+        }
         val pkgInfo = packageManager
-          .getPackageInfo(it.providerFlattenedComponentName,
-            PackageManager.PackageInfoFlags.of(0))
+                .getPackageInfo(packageName,
+                        PackageManager.PackageInfoFlags.of(0))
         DisabledProviderInfo(
           icon = pkgInfo.applicationInfo.loadIcon(packageManager)!!,
           name = it.providerFlattenedComponentName,

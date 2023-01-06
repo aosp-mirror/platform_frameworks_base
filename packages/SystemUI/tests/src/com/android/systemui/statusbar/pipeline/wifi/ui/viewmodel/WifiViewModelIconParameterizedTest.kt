@@ -379,6 +379,12 @@ internal class WifiViewModelIconParameterizedTest(private val testCase: TestCase
                     expected = null,
                 ),
 
+                // network = Unavailable => not shown
+                TestCase(
+                    network = WifiNetworkModel.Unavailable,
+                    expected = null,
+                ),
+
                 // network = Active & validated = false => not shown
                 TestCase(
                     network = WifiNetworkModel.Active(NETWORK_ID, isValidated = false, level = 3),
@@ -396,12 +402,6 @@ internal class WifiViewModelIconParameterizedTest(private val testCase: TestCase
                             },
                             description = "Full internet level 4 icon",
                         ),
-                ),
-
-                // network has null level => not shown
-                TestCase(
-                    network = WifiNetworkModel.Active(NETWORK_ID, isValidated = true, level = null),
-                    expected = null,
                 ),
             )
     }

@@ -52,6 +52,7 @@ class PermissionListAdapter extends RecyclerView.Adapter<PermissionListAdapter.V
     static final int PERMISSION_NEARBY_DEVICES = 7;
     static final int PERMISSION_NEARBY_DEVICE_STREAMING = 8;
     static final int PERMISSION_MICROPHONE = 9;
+    static final int PERMISSION_CALL_LOGS = 10;
 
     private static final Map<Integer, Integer> sTitleMap;
     static {
@@ -66,6 +67,7 @@ class PermissionListAdapter extends RecyclerView.Adapter<PermissionListAdapter.V
         map.put(PERMISSION_NEARBY_DEVICES, R.string.permission_nearby_devices);
         map.put(PERMISSION_NEARBY_DEVICE_STREAMING, R.string.permission_nearby_device_streaming);
         map.put(PERMISSION_MICROPHONE, R.string.permission_microphone);
+        map.put(PERMISSION_CALL_LOGS, R.string.permission_call_logs);
         sTitleMap = unmodifiableMap(map);
     }
 
@@ -83,6 +85,7 @@ class PermissionListAdapter extends RecyclerView.Adapter<PermissionListAdapter.V
         map.put(PERMISSION_NEARBY_DEVICE_STREAMING,
                 R.string.permission_nearby_device_streaming_summary);
         map.put(PERMISSION_MICROPHONE, R.string.permission_microphone_summary);
+        map.put(PERMISSION_CALL_LOGS, R.string.permission_call_logs_summary);
         sSummaryMap = unmodifiableMap(map);
     }
 
@@ -100,6 +103,7 @@ class PermissionListAdapter extends RecyclerView.Adapter<PermissionListAdapter.V
         map.put(PERMISSION_NEARBY_DEVICE_STREAMING,
                 R.drawable.ic_permission_nearby_device_streaming);
         map.put(PERMISSION_MICROPHONE, R.drawable.ic_permission_microphone);
+        map.put(PERMISSION_CALL_LOGS, R.drawable.ic_permission_call_logs);
         sIconMap = unmodifiableMap(map);
     }
 

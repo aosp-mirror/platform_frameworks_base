@@ -16,18 +16,13 @@
 
 package com.android.settingslib.spaprivileged.template.app
 
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSaveable
-import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import com.android.settingslib.spa.widget.scaffold.MoreOptionsAction
 import com.android.settingslib.spa.widget.scaffold.MoreOptionsScope
 import com.android.settingslib.spa.widget.scaffold.SearchScaffold
-import com.android.settingslib.spa.widget.ui.Spinner
 import com.android.settingslib.spaprivileged.R
 import com.android.settingslib.spaprivileged.model.app.AppListConfig
 import com.android.settingslib.spaprivileged.model.app.AppListModel
@@ -61,27 +56,21 @@ fun <T : AppRecord> AppListPage(
         },
     ) { bottomPadding, searchQuery ->
         WorkProfilePager(primaryUserOnly) { userInfo ->
-            Column(Modifier.fillMaxSize()) {
-                val options = remember { listModel.getSpinnerOptions() }
-                val selectedOption = rememberSaveable { mutableStateOf(0) }
-                Spinner(options, selectedOption.value) { selectedOption.value = it }
-                val appListInput = AppListInput(
-                    config = AppListConfig(
-                        userId = userInfo.id,
-                        showInstantApps = showInstantApps,
-                    ),
-                    listModel = listModel,
-                    state = AppListState(
-                        showSystem = showSystem,
-                        option = selectedOption,
-                        searchQuery = searchQuery,
-                    ),
-                    header = header,
-                    bottomPadding = bottomPadding,
-                    noItemMessage = noItemMessage,
-                )
-                appList(appListInput)
-            }
+            val appListInput = AppListInput(
+                config = AppListConfig(
+                    userId = userInfo.id,
+                    showInstantApps = showInstantApps,
+                ),
+                listModel = listModel,
+                state = AppListState(
+                    showSystem = showSystem,
+                    searchQuery = searchQuery,
+                ),
+                header = header,
+                bottomPadding = bottomPadding,
+                noItemMessage = noItemMessage,
+            )
+            appList(appListInput)
         }
     }
 }

@@ -23,7 +23,9 @@ import android.content.pm.PackageManager
 import android.content.pm.PackageManager.ApplicationInfoFlags
 import android.content.pm.PackageManager.ResolveInfoFlags
 import android.content.pm.ResolveInfo
+import android.content.res.Resources
 import androidx.test.ext.junit.runners.AndroidJUnit4
+import com.android.internal.R
 import com.google.common.truth.Truth.assertThat
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.first
@@ -51,12 +53,18 @@ class AppListRepositoryTest {
     private lateinit var context: Context
 
     @Mock
+    private lateinit var resources: Resources
+
+    @Mock
     private lateinit var packageManager: PackageManager
 
     private lateinit var repository: AppListRepository
 
     @Before
     fun setUp() {
+        whenever(context.resources).thenReturn(resources)
+        whenever(resources.getStringArray(R.array.config_hideWhenDisabled_packageNames))
+            .thenReturn(emptyArray())
         whenever(context.packageManager).thenReturn(packageManager)
         whenever(packageManager.getInstalledModules(anyInt())).thenReturn(emptyList())
         whenever(
@@ -93,11 +101,60 @@ class AppListRepositoryTest {
     }
 
     @Test
-    fun loadApps_isDisabledUntilUsed() = runTest {
+    fun loadApps_isHideWhenDisabledPackageAndDisabled() = runTest {
         val app = ApplicationInfo().apply {
-            packageName = "is.disabled.until.used"
+            packageName = "is.hide.when.disabled"
             enabled = false
+        }
+        whenever(resources.getStringArray(R.array.config_hideWhenDisabled_packageNames))
+            .thenReturn(arrayOf(app.packageName))
+        mockInstalledApplications(listOf(app))
+        val appListConfig = AppListConfig(userId = USER_ID, showInstantApps = false)
+
+        val appListFlow = repository.loadApps(appListConfig)
+
+        assertThat(appListFlow).isEmpty()
+    }
+
+    @Test
+    fun loadApps_isHideWhenDisabledPackageAndDisabledUntilUsed() = runTest {
+        val app = ApplicationInfo().apply {
+            packageName = "is.hide.when.disabled"
+            enabled = true
             enabledSetting = PackageManager.COMPONENT_ENABLED_STATE_DISABLED_UNTIL_USED
+        }
+        whenever(resources.getStringArray(R.array.config_hideWhenDisabled_packageNames))
+            .thenReturn(arrayOf(app.packageName))
+        mockInstalledApplications(listOf(app))
+        val appListConfig = AppListConfig(userId = USER_ID, showInstantApps = false)
+
+        val appListFlow = repository.loadApps(appListConfig)
+
+        assertThat(appListFlow).isEmpty()
+    }
+
+    @Test
+    fun loadApps_isHideWhenDisabledPackageAndEnabled() = runTest {
+        val app = ApplicationInfo().apply {
+            packageName = "is.hide.when.disabled"
+            enabled = true
+        }
+        whenever(resources.getStringArray(R.array.config_hideWhenDisabled_packageNames))
+            .thenReturn(arrayOf(app.packageName))
+        mockInstalledApplications(listOf(app))
+        val appListConfig = AppListConfig(userId = USER_ID, showInstantApps = false)
+
+        val appListFlow = repository.loadApps(appListConfig)
+
+        assertThat(appListFlow).containsExactly(app)
+    }
+
+    @Test
+    fun loadApps_disabledByUser() = runTest {
+        val app = ApplicationInfo().apply {
+            packageName = "disabled.by.user"
+            enabled = false
+            enabledSetting = PackageManager.COMPONENT_ENABLED_STATE_DISABLED_USER
         }
         mockInstalledApplications(listOf(app))
         val appListConfig = AppListConfig(userId = USER_ID, showInstantApps = false)
@@ -108,7 +165,7 @@ class AppListRepositoryTest {
     }
 
     @Test
-    fun loadApps_disabled() = runTest {
+    fun loadApps_disabledButNotByUser() = runTest {
         val app = ApplicationInfo().apply {
             packageName = "disabled"
             enabled = false

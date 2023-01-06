@@ -61,21 +61,20 @@ class Convert {
     }
 
     static void throwOnError(String action, int result) {
+        String errorString = action + ": " + Result.toString(result);
         switch (result) {
             case Result.OK:
                 return;
             case Result.UNKNOWN_ERROR:
-                throw new ParcelableException(new RuntimeException(action + ": UNKNOWN_ERROR"));
             case Result.INTERNAL_ERROR:
-                throw new ParcelableException(new RuntimeException(action + ": INTERNAL_ERROR"));
-            case Result.INVALID_ARGUMENTS:
-                throw new IllegalArgumentException(action + ": INVALID_ARGUMENTS");
-            case Result.INVALID_STATE:
-                throw new IllegalStateException(action + ": INVALID_STATE");
-            case Result.NOT_SUPPORTED:
-                throw new UnsupportedOperationException(action + ": NOT_SUPPORTED");
             case Result.TIMEOUT:
-                throw new ParcelableException(new RuntimeException(action + ": TIMEOUT"));
+                throw new ParcelableException(new RuntimeException(errorString));
+            case Result.INVALID_ARGUMENTS:
+                throw new IllegalArgumentException(errorString);
+            case Result.INVALID_STATE:
+                throw new IllegalStateException(errorString);
+            case Result.NOT_SUPPORTED:
+                throw new UnsupportedOperationException(errorString);
             default:
                 throw new ParcelableException(new RuntimeException(
                         action + ": unknown error (" + result + ")"));

@@ -76,9 +76,10 @@ public final class GnssMeasurementRequest implements Parcelable {
      * <p>If true, GNSS chipset switches off duty cycling. In such a mode, no clock
      * discontinuities are expected, and when supported, carrier phase should be continuous in
      * good signal conditions. All non-blocklisted, healthy constellations, satellites and
-     * frequency bands that the chipset supports must be reported in this mode. The GNSS chipset
-     * will consume more power in full tracking mode than in duty cycling mode. If false, GNSS
-     * chipset optimizes power via duty cycling, constellations and frequency limits, etc.
+     * frequency bands that are meaningful to positioning accuracy must be tracked and reported in
+     * this mode. The GNSS chipset will consume more power in full tracking mode than in duty
+     * cycling mode. If false, GNSS chipset optimizes power via duty cycling, constellations and
+     * frequency limits, etc.
      *
      * <p>Full GNSS tracking mode affects GnssMeasurement and other GNSS functionalities
      * including GNSS location.

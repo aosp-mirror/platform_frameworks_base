@@ -20,6 +20,8 @@ import android.content.Context
 import android.content.ContextWrapper
 import android.graphics.Color
 import android.hardware.input.IInputManager
+import android.hardware.input.IKeyboardBacklightListener
+import android.hardware.input.IKeyboardBacklightState
 import android.hardware.input.InputManager
 import android.hardware.lights.Light
 import android.os.test.TestLooper
@@ -27,10 +29,6 @@ import android.platform.test.annotations.Presubmit
 import android.view.InputDevice
 import androidx.test.core.app.ApplicationProvider
 import com.android.server.input.KeyboardBacklightController.BRIGHTNESS_LEVELS
-import java.io.FileNotFoundException
-import java.io.FileOutputStream
-import java.io.IOException
-import java.io.InputStream
 import org.junit.After
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertNotNull
@@ -45,6 +43,10 @@ import org.mockito.Mockito.eq
 import org.mockito.Mockito.spy
 import org.mockito.Mockito.`when`
 import org.mockito.junit.MockitoJUnit
+import java.io.FileNotFoundException
+import java.io.FileOutputStream
+import java.io.IOException
+import java.io.InputStream
 
 private fun createKeyboard(deviceId: Int): InputDevice =
     InputDevice.Builder()
@@ -90,6 +92,7 @@ class KeyboardBacklightControllerTests {
     private lateinit var dataStore: PersistentDataStore
     private lateinit var testLooper: TestLooper
     private var lightColorMap: HashMap<Int, Int> = HashMap()
+    private var lastBacklightState: KeyboardBacklightState? = null
 
     @Before
     fun setup() {
@@ -310,4 +313,75 @@ class KeyboardBacklightControllerTests {
             lightColorMap[LIGHT_ID]
         )
     }
+
+    @Test
+    fun testKeyboardBacklightT_registerUnregisterListener() {
+        val keyboardWithBacklight = createKeyboard(DEVICE_ID)
+        val keyboardBacklight = createLight(LIGHT_ID, Light.LIGHT_TYPE_KEYBOARD_BACKLIGHT)
+        `when`(iInputManager.getInputDevice(DEVICE_ID)).thenReturn(keyboardWithBacklight)
+        `when`(iInputManager.getLights(DEVICE_ID)).thenReturn(listOf(keyboardBacklight))
+        keyboardBacklightController.onInputDeviceAdded(DEVICE_ID)
+        // Initially backlight is at min
+        lightColorMap[LIGHT_ID] = Color.argb(BRIGHTNESS_LEVELS.first(), 0, 0, 0)
+
+        // Register backlight listener
+        val listener = KeyboardBacklightListener()
+        keyboardBacklightController.registerKeyboardBacklightListener(listener, 0)
+
+        lastBacklightState = null
+        keyboardBacklightController.incrementKeyboardBacklight(DEVICE_ID)
+        testLooper.dispatchNext()
+
+        assertEquals(
+            "Backlight state device Id should be $DEVICE_ID",
+            DEVICE_ID,
+            lastBacklightState!!.deviceId
+        )
+        assertEquals(
+            "Backlight state brightnessLevel should be " + 1,
+            1,
+            lastBacklightState!!.brightnessLevel
+        )
+        assertEquals(
+            "Backlight state maxBrightnessLevel should be " + (BRIGHTNESS_LEVELS.size - 1),
+            (BRIGHTNESS_LEVELS.size - 1),
+            lastBacklightState!!.maxBrightnessLevel
+        )
+        assertEquals(
+            "Backlight state isTriggeredByKeyPress should be true",
+            true,
+            lastBacklightState!!.isTriggeredByKeyPress
+        )
+
+        // Unregister listener
+        keyboardBacklightController.unregisterKeyboardBacklightListener(listener, 0)
+
+        lastBacklightState = null
+        keyboardBacklightController.incrementKeyboardBacklight(DEVICE_ID)
+        testLooper.dispatchNext()
+
+        assertNull("Listener should not receive any updates", lastBacklightState)
+    }
+
+    inner class KeyboardBacklightListener : IKeyboardBacklightListener.Stub() {
+        override fun onBrightnessChanged(
+            deviceId: Int,
+            state: IKeyboardBacklightState,
+            isTriggeredByKeyPress: Boolean
+        ) {
+            lastBacklightState = KeyboardBacklightState(
+                deviceId,
+                state.brightnessLevel,
+                state.maxBrightnessLevel,
+                isTriggeredByKeyPress
+            )
+        }
+    }
+
+    class KeyboardBacklightState(
+        val deviceId: Int,
+        val brightnessLevel: Int,
+        val maxBrightnessLevel: Int,
+        val isTriggeredByKeyPress: Boolean
+    )
 }

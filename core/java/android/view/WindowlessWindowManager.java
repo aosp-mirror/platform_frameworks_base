@@ -148,7 +148,7 @@ public class WindowlessWindowManager implements IWindowSession {
     public int addToDisplay(IWindow window, WindowManager.LayoutParams attrs,
             int viewVisibility, int displayId, @InsetsType int requestedVisibleTypes,
             InputChannel outInputChannel, InsetsState outInsetsState,
-            InsetsSourceControl[] outActiveControls, Rect outAttachedFrame,
+            InsetsSourceControl.Array outActiveControls, Rect outAttachedFrame,
             float[] outSizeCompatScale) {
         final SurfaceControl.Builder b = new SurfaceControl.Builder(mSurfaceSession)
                 .setFormat(attrs.format)
@@ -200,7 +200,7 @@ public class WindowlessWindowManager implements IWindowSession {
     public int addToDisplayAsUser(IWindow window, WindowManager.LayoutParams attrs,
             int viewVisibility, int displayId, int userId, @InsetsType int requestedVisibleTypes,
             InputChannel outInputChannel, InsetsState outInsetsState,
-            InsetsSourceControl[] outActiveControls, Rect outAttachedFrame,
+            InsetsSourceControl.Array outActiveControls, Rect outAttachedFrame,
             float[] outSizeCompatScale) {
         return addToDisplay(window, attrs, viewVisibility, displayId, requestedVisibleTypes,
                 outInputChannel, outInsetsState, outActiveControls, outAttachedFrame,
@@ -290,7 +290,7 @@ public class WindowlessWindowManager implements IWindowSession {
             int requestedWidth, int requestedHeight, int viewFlags, int flags, int seq,
             int lastSyncSeqId, ClientWindowFrames outFrames,
             MergedConfiguration outMergedConfiguration, SurfaceControl outSurfaceControl,
-            InsetsState outInsetsState, InsetsSourceControl[] outActiveControls,
+            InsetsState outInsetsState, InsetsSourceControl.Array outActiveControls,
             Bundle outSyncSeqIdBundle) {
         final State state;
         synchronized (this) {

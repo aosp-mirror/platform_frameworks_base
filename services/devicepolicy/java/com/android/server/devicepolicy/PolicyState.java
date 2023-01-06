@@ -119,10 +119,13 @@ final class PolicyState<V> {
 
     static <V> PolicyState<V> readFromXml(TypedXmlPullParser parser)
             throws IOException, XmlPullParserException {
+
         PolicyDefinition<V> policyDefinition = PolicyDefinition.readFromXml(parser);
-        LinkedHashMap<EnforcingAdmin, V> adminsPolicy = new LinkedHashMap<>();
+
         V currentResolvedPolicy = policyDefinition.readPolicyValueFromXml(
                 parser, ATTR_RESOLVED_POLICY);
+
+        LinkedHashMap<EnforcingAdmin, V> policiesSetByAdmins = new LinkedHashMap<>();
         int outerDepth = parser.getDepth();
         while (XmlUtils.nextElementWithin(parser, outerDepth)) {
             String tag = parser.getName();
@@ -134,12 +137,12 @@ final class PolicyState<V> {
                 if (XmlUtils.nextElementWithin(parser, adminPolicyDepth)
                         && parser.getName().equals(TAG_ENFORCING_ADMIN_ENTRY)) {
                     admin = EnforcingAdmin.readFromXml(parser);
-                    adminsPolicy.put(admin, value);
+                    policiesSetByAdmins.put(admin, value);
                 }
             } else {
                 Log.e(DevicePolicyEngine.TAG, "Unknown tag: " + tag);
             }
         }
-        return new PolicyState<V>(policyDefinition, adminsPolicy, currentResolvedPolicy);
+        return new PolicyState<V>(policyDefinition, policiesSetByAdmins, currentResolvedPolicy);
     }
 }

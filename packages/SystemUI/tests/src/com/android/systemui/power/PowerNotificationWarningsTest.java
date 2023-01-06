@@ -41,6 +41,7 @@ import android.os.BatteryManager;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.UserHandle;
+import android.provider.Settings;
 import android.test.suitebuilder.annotation.SmallTest;
 import android.testing.AndroidTestingRunner;
 import android.testing.TestableLooper;
@@ -55,6 +56,8 @@ import com.android.systemui.broadcast.BroadcastSender;
 import com.android.systemui.plugins.ActivityStarter;
 import com.android.systemui.statusbar.policy.BatteryController;
 import com.android.systemui.util.NotificationChannels;
+import com.android.systemui.util.settings.FakeSettings;
+import com.android.systemui.util.settings.GlobalSettings;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -73,6 +76,7 @@ public class PowerNotificationWarningsTest extends SysuiTestCase {
     public static final String FORMATTED_45M = "0h 45m";
     public static final String FORMATTED_HOUR = "1h 0m";
     private final NotificationManager mMockNotificationManager = mock(NotificationManager.class);
+    private final GlobalSettings mGlobalSettings = new FakeSettings();
     private PowerNotificationWarnings mPowerNotificationWarnings;
 
     @Mock
@@ -104,7 +108,8 @@ public class PowerNotificationWarningsTest extends SysuiTestCase {
         ActivityStarter starter = mDependency.injectMockDependency(ActivityStarter.class);
         BroadcastSender broadcastSender = mDependency.injectMockDependency(BroadcastSender.class);
         mPowerNotificationWarnings = new PowerNotificationWarnings(wrapper, starter,
-                broadcastSender, () -> mBatteryController, mDialogLaunchAnimator, mUiEventLogger);
+                broadcastSender, () -> mBatteryController, mDialogLaunchAnimator, mUiEventLogger,
+                mGlobalSettings);
         BatteryStateSnapshot snapshot = new BatteryStateSnapshot(100, false, false, 1,
                 BatteryManager.BATTERY_HEALTH_GOOD, 5, 15);
         mPowerNotificationWarnings.updateSnapshot(snapshot);
@@ -143,6 +148,16 @@ public class PowerNotificationWarningsTest extends SysuiTestCase {
         mPowerNotificationWarnings.dismissInvalidChargerWarning();
         verify(mMockNotificationManager, times(1)).cancelAsUser(anyString(),
                 eq(SystemMessage.NOTE_BAD_CHARGER), any());
+    }
+
+    @Test
+    public void testDisableLowBatteryReminder_noNotification() {
+        mGlobalSettings.putInt(Settings.Global.LOW_POWER_MODE_REMINDER_ENABLED, 0);
+
+        mPowerNotificationWarnings.showLowBatteryWarning(false);
+
+        verify(mMockNotificationManager, times(0))
+                .notifyAsUser(anyString(), eq(SystemMessage.NOTE_POWER_LOW), any(), any());
     }
 
     @Test

@@ -42,6 +42,8 @@ import java.util.Map;
  */
 public abstract class ClientTransactionHandler {
 
+    private boolean mIsExecutingLocalTransaction;
+
     // Schedule phase related logic and handlers.
 
     /** Prepare and schedule transaction for execution. */
@@ -56,9 +58,19 @@ public abstract class ClientTransactionHandler {
      */
     @VisibleForTesting
     public void executeTransaction(ClientTransaction transaction) {
-        transaction.preExecute(this);
-        getTransactionExecutor().execute(transaction);
-        transaction.recycle();
+        mIsExecutingLocalTransaction = true;
+        try {
+            transaction.preExecute(this);
+            getTransactionExecutor().execute(transaction);
+        } finally {
+            mIsExecutingLocalTransaction = false;
+            transaction.recycle();
+        }
+    }
+
+    /** Returns {@code true} if the current executing ClientTransaction is from local request. */
+    public boolean isExecutingLocalTransaction() {
+        return mIsExecutingLocalTransaction;
     }
 
     /**

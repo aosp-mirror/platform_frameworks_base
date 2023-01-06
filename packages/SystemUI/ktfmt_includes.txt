@@ -460,7 +460,6 @@
 -packages/SystemUI/src/com/android/systemui/statusbar/pipeline/shared/ConnectivityPipelineLogger.kt
 -packages/SystemUI/src/com/android/systemui/statusbar/pipeline/wifi/data/model/WifiActivityModel.kt
 -packages/SystemUI/src/com/android/systemui/statusbar/pipeline/wifi/data/model/WifiNetworkModel.kt
--packages/SystemUI/src/com/android/systemui/statusbar/pipeline/wifi/data/repository/prod/WifiRepositoryImpl.kt
 -packages/SystemUI/src/com/android/systemui/statusbar/pipeline/wifi/domain/interactor/WifiInteractor.kt
 -packages/SystemUI/src/com/android/systemui/statusbar/pipeline/wifi/shared/WifiConstants.kt
 -packages/SystemUI/src/com/android/systemui/statusbar/pipeline/wifi/ui/view/ModernStatusBarWifiView.kt
@@ -486,7 +485,6 @@
 -packages/SystemUI/src/com/android/systemui/statusbar/window/StatusBarWindowStateController.kt
 -packages/SystemUI/src/com/android/systemui/temporarydisplay/TemporaryViewInfo.kt
 -packages/SystemUI/src/com/android/systemui/temporarydisplay/TemporaryViewDisplayController.kt
--packages/SystemUI/src/com/android/systemui/temporarydisplay/chipbar/ChipbarCoordinator.kt
 -packages/SystemUI/src/com/android/systemui/temporarydisplay/chipbar/ChipbarRootView.kt
 -packages/SystemUI/src/com/android/systemui/toast/ToastDefaultAnimation.kt
 -packages/SystemUI/src/com/android/systemui/toast/ToastLogger.kt

@@ -59,7 +59,6 @@ import android.util.Log;
 import android.util.Size;
 import android.view.Display;
 
-import com.android.internal.annotations.GuardedBy;
 import com.android.internal.util.ArrayUtils;
 
 import java.lang.ref.WeakReference;

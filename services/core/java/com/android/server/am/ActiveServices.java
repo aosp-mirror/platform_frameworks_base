@@ -54,6 +54,7 @@ import static android.os.PowerExemptionManager.REASON_INSTR_BACKGROUND_FGS_PERMI
 import static android.os.PowerExemptionManager.REASON_OPT_OUT_REQUESTED;
 import static android.os.PowerExemptionManager.REASON_OP_ACTIVATE_PLATFORM_VPN;
 import static android.os.PowerExemptionManager.REASON_OP_ACTIVATE_VPN;
+import static android.os.PowerExemptionManager.REASON_PACKAGE_INSTALLER;
 import static android.os.PowerExemptionManager.REASON_PROC_STATE_PERSISTENT;
 import static android.os.PowerExemptionManager.REASON_PROC_STATE_PERSISTENT_UI;
 import static android.os.PowerExemptionManager.REASON_PROC_STATE_TOP;
@@ -194,6 +195,7 @@ import com.android.internal.notification.SystemNotificationChannels;
 import com.android.internal.os.SomeArgs;
 import com.android.internal.os.TimeoutRecord;
 import com.android.internal.os.TransferPipe;
+import com.android.internal.util.ArrayUtils;
 import com.android.internal.util.DumpUtils;
 import com.android.internal.util.FastPrintWriter;
 import com.android.internal.util.FrameworkStatsLog;
@@ -202,6 +204,7 @@ import com.android.server.LocalServices;
 import com.android.server.SystemService;
 import com.android.server.am.ActivityManagerService.ItemMatcher;
 import com.android.server.am.LowMemDetector.MemFactor;
+import com.android.server.pm.KnownPackages;
 import com.android.server.uri.NeededUriGrants;
 import com.android.server.wm.ActivityServiceConnectionsHolder;
 
@@ -2382,6 +2385,13 @@ public final class ActiveServices {
                             .getPotentialUserAllowedExemptionReason(callerUid, packageName);
                 }
             }
+            if (reason == REASON_DENIED) {
+                if (ArrayUtils.contains(mAm.getPackageManagerInternal().getKnownPackageNames(
+                        KnownPackages.PACKAGE_INSTALLER, UserHandle.USER_SYSTEM), packageName)) {
+                    reason = REASON_PACKAGE_INSTALLER;
+                }
+            }
+
             switch (reason) {
                 case REASON_SYSTEM_UID:
                 case REASON_SYSTEM_ALLOW_LISTED:
@@ -2397,6 +2407,7 @@ public final class ActiveServices {
                 case REASON_ACTIVE_DEVICE_ADMIN:
                 case REASON_ROLE_EMERGENCY:
                 case REASON_ALLOWLISTED_PACKAGE:
+                case REASON_PACKAGE_INSTALLER:
                     return PERMISSION_GRANTED;
                 default:
                     return PERMISSION_DENIED;

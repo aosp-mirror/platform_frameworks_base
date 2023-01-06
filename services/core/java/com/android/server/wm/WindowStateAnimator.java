@@ -428,10 +428,6 @@ class WindowStateAnimator {
         mShownAlpha = mAlpha;
     }
 
-    private boolean isInBlastSync() {
-        return mService.useBLASTSync() && mWin.useBLASTSync();
-    }
-
     void prepareSurfaceLocked(SurfaceControl.Transaction t) {
         final WindowState w = mWin;
         if (!hasSurface()) {

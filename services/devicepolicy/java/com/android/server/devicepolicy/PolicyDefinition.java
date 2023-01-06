@@ -19,11 +19,15 @@ package com.android.server.devicepolicy;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.app.admin.DevicePolicyManager;
+import android.app.admin.PolicyUpdatesReceiver;
 import android.content.Context;
+import android.os.Bundle;
 
 import com.android.internal.util.function.QuadFunction;
 import com.android.modules.utils.TypedXmlPullParser;
 import com.android.modules.utils.TypedXmlSerializer;
+
+import org.xmlpull.v1.XmlPullParserException;
 
 import java.io.IOException;
 import java.util.LinkedHashMap;
@@ -44,8 +48,9 @@ final class PolicyDefinition<V> {
 
     private static final String ATTR_POLICY_KEY = "policy-key";
     private static final String ATTR_POLICY_DEFINITION_KEY = "policy-type-key";
-    private static final String ATTR_CALLBACK_ARGS = "callback-args";
-    private static final String ATTR_CALLBACK_ARGS_SEPARATOR = ";";
+    private static final String ATTR_CALLBACK_ARGS_SIZE = "size";
+    private static final String ATTR_CALLBACK_ARGS_KEY = "key";
+    private static final String ATTR_CALLBACK_ARGS_VALUE = "value";
 
 
     static PolicyDefinition<Boolean> AUTO_TIMEZONE = new PolicyDefinition<>(
@@ -53,7 +58,7 @@ final class PolicyDefinition<V> {
             // auto timezone is enabled by default, hence disabling it is more restrictive.
             FALSE_MORE_RESTRICTIVE,
             POLICY_FLAG_GLOBAL_ONLY_POLICY,
-            (Boolean value, Context context, Integer userId, String[] args) ->
+            (Boolean value, Context context, Integer userId, Bundle args) ->
                     PolicyEnforcerCallbacks.setAutoTimezoneEnabled(value, context),
             new BooleanPolicySerializer());
 
@@ -75,9 +80,11 @@ final class PolicyDefinition<V> {
 
     static PolicyDefinition<Integer> PERMISSION_GRANT(
             @NonNull String packageName, @NonNull String permission) {
+        Bundle callbackArgs = new Bundle();
+        callbackArgs.putString(PolicyUpdatesReceiver.EXTRA_PACKAGE_NAME, packageName);
+        callbackArgs.putString(PolicyUpdatesReceiver.EXTRA_PERMISSION_NAME, permission);
         return PERMISSION_GRANT_NO_ARGS.setArgs(
-                DevicePolicyManager.PERMISSION_GRANT_POLICY(packageName, permission),
-                new String[]{packageName, permission});
+                DevicePolicyManager.PERMISSION_GRANT_POLICY(packageName, permission), callbackArgs);
     }
 
     static PolicyDefinition<LockTaskPolicy> LOCK_TASK = new PolicyDefinition<>(
@@ -87,13 +94,14 @@ final class PolicyDefinition<V> {
                     EnforcingAdmin.getRoleAuthorityOf("DeviceLock"),
                     EnforcingAdmin.DPC_AUTHORITY)),
             POLICY_FLAG_LOCAL_ONLY_POLICY,
-            (LockTaskPolicy value, Context context, Integer userId, String[] args) ->
+            (LockTaskPolicy value, Context context, Integer userId, Bundle args) ->
                     PolicyEnforcerCallbacks.setLockTask(value, context, userId),
             new LockTaskPolicy.LockTaskPolicySerializer());
 
     private static Map<String, PolicyDefinition<?>> sPolicyDefinitions = Map.of(
             DevicePolicyManager.AUTO_TIMEZONE_POLICY, AUTO_TIMEZONE,
-            DevicePolicyManager.PERMISSION_GRANT_POLICY_KEY, PERMISSION_GRANT_NO_ARGS
+            DevicePolicyManager.PERMISSION_GRANT_POLICY_KEY, PERMISSION_GRANT_NO_ARGS,
+            DevicePolicyManager.LOCK_TASK_POLICY, LOCK_TASK
     );
 
 
@@ -103,17 +111,28 @@ final class PolicyDefinition<V> {
     private final int mPolicyFlags;
     // A function that accepts  policy to apple, context, userId, callback arguments, and returns
     // true if the policy has been enforced successfully.
-    private final QuadFunction<V, Context, Integer, String[], Boolean> mPolicyEnforcerCallback;
-    private final String[] mCallbackArgs;
+    private final QuadFunction<V, Context, Integer, Bundle, Boolean> mPolicyEnforcerCallback;
+    private final Bundle mCallbackArgs;
     private final PolicySerializer<V> mPolicySerializer;
 
-    private PolicyDefinition<V> setArgs(String key, String[] callbackArgs) {
+    private PolicyDefinition<V> setArgs(String key, Bundle callbackArgs) {
         return new PolicyDefinition<>(key, mPolicyDefinitionKey, mResolutionMechanism,
                 mPolicyFlags, mPolicyEnforcerCallback, mPolicySerializer, callbackArgs);
     }
 
+    @NonNull
     String getPolicyKey() {
         return mPolicyKey;
+    }
+
+    @NonNull
+    String getPolicyDefinitionKey() {
+        return mPolicyDefinitionKey;
+    }
+
+    @Nullable
+    Bundle getCallbackArgs() {
+        return mCallbackArgs;
     }
 
     /**
@@ -146,7 +165,7 @@ final class PolicyDefinition<V> {
     private PolicyDefinition(
             String key,
             ResolutionMechanism<V> resolutionMechanism,
-            QuadFunction<V, Context, Integer, String[], Boolean> policyEnforcerCallback,
+            QuadFunction<V, Context, Integer, Bundle, Boolean> policyEnforcerCallback,
             PolicySerializer<V> policySerializer) {
         this(key, resolutionMechanism, POLICY_FLAG_NONE, policyEnforcerCallback, policySerializer);
     }
@@ -159,7 +178,7 @@ final class PolicyDefinition<V> {
             String key,
             ResolutionMechanism<V> resolutionMechanism,
             int policyFlags,
-            QuadFunction<V, Context, Integer, String[], Boolean> policyEnforcerCallback,
+            QuadFunction<V, Context, Integer, Bundle, Boolean> policyEnforcerCallback,
             PolicySerializer<V> policySerializer) {
         this(key, key, resolutionMechanism, policyFlags, policyEnforcerCallback,
                 policySerializer, /* callbackArs= */ null);
@@ -174,9 +193,9 @@ final class PolicyDefinition<V> {
             String policyDefinitionKey,
             ResolutionMechanism<V> resolutionMechanism,
             int policyFlags,
-            QuadFunction<V, Context, Integer, String[], Boolean> policyEnforcerCallback,
+            QuadFunction<V, Context, Integer, Bundle, Boolean> policyEnforcerCallback,
             PolicySerializer<V> policySerializer,
-            String[] callbackArgs) {
+            Bundle callbackArgs) {
         mPolicyKey = policyKey;
         mPolicyDefinitionKey = policyDefinitionKey;
         mResolutionMechanism = resolutionMechanism;
@@ -193,24 +212,39 @@ final class PolicyDefinition<V> {
         serializer.attribute(/* namespace= */ null, ATTR_POLICY_KEY, mPolicyKey);
         serializer.attribute(
                 /* namespace= */ null, ATTR_POLICY_DEFINITION_KEY, mPolicyDefinitionKey);
+        serializer.attributeInt(
+                /* namespace= */ null, ATTR_CALLBACK_ARGS_SIZE,
+                mCallbackArgs == null ? 0 : mCallbackArgs.size());
         if (mCallbackArgs != null) {
-            serializer.attribute(/* namespace= */ null, ATTR_CALLBACK_ARGS,
-                    String.join(ATTR_CALLBACK_ARGS_SEPARATOR, mCallbackArgs));
+            int i = 0;
+            for (String key : mCallbackArgs.keySet()) {
+                serializer.attribute(/* namespace= */ null,
+                        ATTR_CALLBACK_ARGS_KEY + i, key);
+                serializer.attribute(/* namespace= */ null,
+                        ATTR_CALLBACK_ARGS_VALUE + i, mCallbackArgs.getString(key));
+                i++;
+            }
         }
     }
 
-    static <V> PolicyDefinition<V> readFromXml(TypedXmlPullParser parser) {
+    static <V> PolicyDefinition<V> readFromXml(TypedXmlPullParser parser)
+            throws XmlPullParserException, IOException {
         String policyKey = parser.getAttributeValue(/* namespace= */ null, ATTR_POLICY_KEY);
         String policyDefinitionKey = parser.getAttributeValue(
                 /* namespace= */ null, ATTR_POLICY_DEFINITION_KEY);
-        String callbackArgsStr = parser.getAttributeValue(
-                /* namespace= */ null, ATTR_CALLBACK_ARGS);
-        String[] callbackArgs = callbackArgsStr == null
-                ? null
-                : callbackArgsStr.split(ATTR_CALLBACK_ARGS_SEPARATOR);
+        int size = parser.getAttributeInt(/* namespace= */ null, ATTR_CALLBACK_ARGS_SIZE);
+        Bundle callbackArgs = new Bundle();
+
+        for (int i = 0; i < size; i++) {
+            String key = parser.getAttributeValue(
+                    /* namespace= */ null, ATTR_CALLBACK_ARGS_KEY + i);
+            String value = parser.getAttributeValue(
+                    /* namespace= */ null, ATTR_CALLBACK_ARGS_VALUE + i);
+            callbackArgs.putString(key, value);
+        }
 
         // TODO: can we avoid casting?
-        if (callbackArgs == null) {
+        if (callbackArgs.isEmpty()) {
             return (PolicyDefinition<V>) sPolicyDefinitions.get(policyDefinitionKey);
         } else {
             return (PolicyDefinition<V>) sPolicyDefinitions.get(policyDefinitionKey).setArgs(

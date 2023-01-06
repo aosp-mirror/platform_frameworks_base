@@ -71,6 +71,7 @@ import com.android.systemui.plugins.ActivityStarter;
 import com.android.systemui.statusbar.phone.SystemUIDialog;
 import com.android.systemui.statusbar.policy.BatteryController;
 import com.android.systemui.util.NotificationChannels;
+import com.android.systemui.util.settings.GlobalSettings;
 import com.android.systemui.volume.Events;
 
 import java.io.PrintWriter;
@@ -175,6 +176,7 @@ public class PowerNotificationWarnings implements PowerUI.WarningsUI {
     private ActivityStarter mActivityStarter;
     private final BroadcastSender mBroadcastSender;
     private final UiEventLogger mUiEventLogger;
+    private GlobalSettings mGlobalSettings;
 
     private final Lazy<BatteryController> mBatteryControllerLazy;
     private final DialogLaunchAnimator mDialogLaunchAnimator;
@@ -184,7 +186,8 @@ public class PowerNotificationWarnings implements PowerUI.WarningsUI {
     @Inject
     public PowerNotificationWarnings(Context context, ActivityStarter activityStarter,
             BroadcastSender broadcastSender, Lazy<BatteryController> batteryControllerLazy,
-            DialogLaunchAnimator dialogLaunchAnimator, UiEventLogger uiEventLogger) {
+            DialogLaunchAnimator dialogLaunchAnimator, UiEventLogger uiEventLogger,
+            GlobalSettings globalSettings) {
         mContext = context;
         mNoMan = mContext.getSystemService(NotificationManager.class);
         mPowerMan = (PowerManager) context.getSystemService(Context.POWER_SERVICE);
@@ -196,6 +199,7 @@ public class PowerNotificationWarnings implements PowerUI.WarningsUI {
         mDialogLaunchAnimator = dialogLaunchAnimator;
         mUseSevereDialog = mContext.getResources().getBoolean(R.bool.config_severe_battery_dialog);
         mUiEventLogger = uiEventLogger;
+        mGlobalSettings = globalSettings;
     }
 
     @Override
@@ -281,6 +285,9 @@ public class PowerNotificationWarnings implements PowerUI.WarningsUI {
     }
 
     protected void showWarningNotification() {
+        if (mGlobalSettings.getInt(Global.LOW_POWER_MODE_REMINDER_ENABLED, 1) == 0) {
+            return;
+        }
         if (showSevereLowBatteryDialog()) {
             mBroadcastSender.sendBroadcast(new Intent(ACTION_ENABLE_SEVERE_BATTERY_DIALOG)
                     .setPackage(mContext.getPackageName())

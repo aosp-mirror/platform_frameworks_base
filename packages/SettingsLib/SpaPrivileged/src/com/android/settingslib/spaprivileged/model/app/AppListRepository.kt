@@ -21,6 +21,7 @@ import android.content.Intent
 import android.content.pm.ApplicationInfo
 import android.content.pm.PackageManager
 import android.content.pm.ResolveInfo
+import com.android.internal.R
 import kotlinx.coroutines.async
 import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.flow.Flow
@@ -49,7 +50,7 @@ internal interface AppListRepository {
 }
 
 
-internal class AppListRepositoryImpl(context: Context) : AppListRepository {
+internal class AppListRepositoryImpl(private val context: Context) : AppListRepository {
     private val packageManager = context.packageManager
 
     override suspend fun loadApps(config: AppListConfig): List<ApplicationInfo> = coroutineScope {
@@ -59,6 +60,9 @@ internal class AppListRepositoryImpl(context: Context) : AppListRepository {
                 .map { it.packageName }
                 .toSet()
         }
+        val hideWhenDisabledPackagesDeferred = async {
+            context.resources.getStringArray(R.array.config_hideWhenDisabled_packageNames)
+        }
         val flags = PackageManager.ApplicationInfoFlags.of(
             (PackageManager.MATCH_DISABLED_COMPONENTS or
                 PackageManager.MATCH_DISABLED_UNTIL_USED_COMPONENTS).toLong()
@@ -67,8 +71,9 @@ internal class AppListRepositoryImpl(context: Context) : AppListRepository {
             packageManager.getInstalledApplicationsAsUser(flags, config.userId)
 
         val hiddenSystemModules = hiddenSystemModulesDeferred.await()
+        val hideWhenDisabledPackages = hideWhenDisabledPackagesDeferred.await()
         installedApplicationsAsUser.filter { app ->
-            app.isInAppList(config.showInstantApps, hiddenSystemModules)
+            app.isInAppList(config.showInstantApps, hiddenSystemModules, hideWhenDisabledPackages)
         }
     }
 
@@ -116,12 +121,13 @@ internal class AppListRepositoryImpl(context: Context) : AppListRepository {
         private fun ApplicationInfo.isInAppList(
             showInstantApps: Boolean,
             hiddenSystemModules: Set<String>,
+            hideWhenDisabledPackages: Array<String>,
         ) = when {
             !showInstantApps && isInstantApp -> false
             packageName in hiddenSystemModules -> false
+            packageName in hideWhenDisabledPackages -> enabled && !isDisabledUntilUsed
             enabled -> true
-            isDisabledUntilUsed -> true
-            else -> false
+            else -> enabledSetting == PackageManager.COMPONENT_ENABLED_STATE_DISABLED_USER
         }
     }
 }

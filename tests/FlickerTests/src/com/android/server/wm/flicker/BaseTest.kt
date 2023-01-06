@@ -102,8 +102,8 @@ constructor(
     }
 
     /**
-     * Checks that the [ComponentNameMatcher.NAV_BAR] window is visible at the start and end of
-     * the transition
+     * Checks that the [ComponentNameMatcher.NAV_BAR] window is visible at the start and end of the
+     * transition
      *
      * Note: Phones only
      */

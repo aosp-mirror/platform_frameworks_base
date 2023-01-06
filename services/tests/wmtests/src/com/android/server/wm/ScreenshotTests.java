@@ -48,7 +48,6 @@ import android.view.IWindowManager;
 import android.view.PointerIcon;
 import android.view.SurfaceControl;
 import android.view.cts.surfacevalidator.BitmapPixelChecker;
-import android.view.cts.surfacevalidator.PixelColor;
 import android.view.cts.surfacevalidator.SaveBitmapHelper;
 import android.window.ScreenCapture;
 import android.window.ScreenCapture.ScreenCaptureListener;
@@ -132,7 +131,7 @@ public class ScreenshotTests {
         Bitmap swBitmap = screenshot.copy(Bitmap.Config.ARGB_8888, false);
         screenshot.recycle();
 
-        BitmapPixelChecker bitmapPixelChecker = new BitmapPixelChecker(PixelColor.RED);
+        BitmapPixelChecker bitmapPixelChecker = new BitmapPixelChecker(Color.RED);
         Rect bounds = new Rect(0, 0, swBitmap.getWidth(), swBitmap.getHeight());
         int numMatchingPixels = bitmapPixelChecker.getNumMatchingPixels(swBitmap, bounds);
         int sizeOfBitmap = bounds.width() * bounds.height();
@@ -182,7 +181,7 @@ public class ScreenshotTests {
         Bitmap swBitmap = screenshot.copy(Bitmap.Config.ARGB_8888, false);
         screenshot.recycle();
 
-        BitmapPixelChecker bitmapPixelChecker = new BitmapPixelChecker(PixelColor.RED);
+        BitmapPixelChecker bitmapPixelChecker = new BitmapPixelChecker(Color.RED);
         Rect bounds = new Rect(point.x, point.y, BUFFER_WIDTH + point.x, BUFFER_HEIGHT + point.y);
         int numMatchingPixels = bitmapPixelChecker.getNumMatchingPixels(swBitmap, bounds);
         int pixelMatchSize = bounds.width() * bounds.height();

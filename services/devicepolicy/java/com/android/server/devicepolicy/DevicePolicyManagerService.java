@@ -8111,7 +8111,8 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
                     PolicyDefinition.AUTO_TIMEZONE,
                     // TODO(b/260573124): add correct enforcing admin when permission changes are
                     //  merged.
-                    EnforcingAdmin.createEnterpriseEnforcingAdmin(caller.getComponentName()),
+                    EnforcingAdmin.createEnterpriseEnforcingAdmin(
+                            caller.getComponentName(), caller.getUserId()),
                     enabled);
         } else {
             mInjector.binderWithCleanCallingIdentity(() ->
@@ -12635,7 +12636,8 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
         }
 
         if (isCoexistenceEnabled(caller)) {
-            EnforcingAdmin admin = EnforcingAdmin.createEnterpriseEnforcingAdmin(who);
+            EnforcingAdmin admin = EnforcingAdmin.createEnterpriseEnforcingAdmin(
+                    who, caller.getUserId());
             if (packages.length == 0) {
                 mDevicePolicyEngine.removeLocalPolicy(
                         PolicyDefinition.LOCK_TASK,
@@ -12655,7 +12657,7 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
 
                 mDevicePolicyEngine.setLocalPolicy(
                         PolicyDefinition.LOCK_TASK,
-                        EnforcingAdmin.createEnterpriseEnforcingAdmin(who),
+                        EnforcingAdmin.createEnterpriseEnforcingAdmin(who, caller.getUserId()),
                         policy,
                         caller.getUserId());
             }
@@ -12751,7 +12753,7 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
             checkCanExecuteOrThrowUnsafe(DevicePolicyManager.OPERATION_SET_LOCK_TASK_FEATURES);
         }
         if (isCoexistenceEnabled(caller)) {
-            EnforcingAdmin admin = EnforcingAdmin.createEnterpriseEnforcingAdmin(who);
+            EnforcingAdmin admin = EnforcingAdmin.createEnterpriseEnforcingAdmin(who, userHandle);
             LockTaskPolicy currentPolicy = mDevicePolicyEngine.getLocalPolicy(
                     PolicyDefinition.LOCK_TASK,
                     caller.getUserId()).getPoliciesSetByAdmins().get(admin);
@@ -12764,7 +12766,7 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
 
             mDevicePolicyEngine.setLocalPolicy(
                     PolicyDefinition.LOCK_TASK,
-                    EnforcingAdmin.createEnterpriseEnforcingAdmin(who),
+                    EnforcingAdmin.createEnterpriseEnforcingAdmin(who, userHandle),
                     policy,
                     caller.getUserId());
         } else {
@@ -14420,7 +14422,8 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
                     // TODO(b/260573124): Add correct enforcing admin when permission changes are
                     //  merged, and don't forget to handle delegates! Enterprise admins assume
                     //  component name isn't null.
-                    EnforcingAdmin.createEnterpriseEnforcingAdmin(caller.getComponentName()),
+                    EnforcingAdmin.createEnterpriseEnforcingAdmin(
+                            caller.getComponentName(), caller.getUserId()),
                     grantState,
                     caller.getUserId());
             // TODO: update javadoc to reflect that callback no longer return success/failure

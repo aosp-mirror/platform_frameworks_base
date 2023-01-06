@@ -25,20 +25,22 @@ import static com.android.internal.accessibility.common.ShortcutConstants.Access
 import static com.android.internal.accessibility.util.AccessibilityUtils.getAccessibilityServiceFragmentType;
 import static com.android.internal.accessibility.util.AccessibilityUtils.setAccessibilityServiceState;
 import static com.android.systemui.accessibility.floatingmenu.MenuMessageView.Index;
+import static com.android.systemui.util.PluralMessageFormaterKt.icuMessageFormat;
 
 import android.accessibilityservice.AccessibilityServiceInfo;
 import android.annotation.IntDef;
 import android.annotation.StringDef;
 import android.annotation.SuppressLint;
+import android.content.ComponentCallbacks;
 import android.content.Context;
 import android.content.Intent;
 import android.content.res.Configuration;
+import android.content.res.Resources;
 import android.graphics.Rect;
 import android.os.Handler;
 import android.os.Looper;
 import android.os.UserHandle;
 import android.provider.Settings;
-import android.util.PluralsMessageFormatter;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewTreeObserver;
@@ -61,9 +63,7 @@ import com.android.wm.shell.common.magnetictarget.MagnetizedObject;
 
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.Optional;
 
 /**
@@ -74,7 +74,7 @@ import java.util.Optional;
  */
 @SuppressLint("ViewConstructor")
 class MenuViewLayer extends FrameLayout implements
-        ViewTreeObserver.OnComputeInternalInsetsListener, View.OnClickListener {
+        ViewTreeObserver.OnComputeInternalInsetsListener, View.OnClickListener, ComponentCallbacks {
     private static final int SHOW_MESSAGE_DELAY_MS = 3000;
 
     private final WindowManager mWindowManager;
@@ -137,8 +137,8 @@ class MenuViewLayer extends FrameLayout implements
                             AccessibilityServiceInfo.FEEDBACK_ALL_MASK);
             serviceInfoList.forEach(info -> {
                 if (getAccessibilityServiceFragmentType(info) == INVISIBLE_TOGGLE) {
-                    setAccessibilityServiceState(mContext, info.getComponentName(), /* enabled= */
-                            false);
+                    setAccessibilityServiceState(getContext(),
+                            info.getComponentName(), /* enabled= */ false);
                 }
             });
 
@@ -150,11 +150,14 @@ class MenuViewLayer extends FrameLayout implements
             AccessibilityManager accessibilityManager, IAccessibilityFloatingMenu floatingMenu) {
         super(context);
 
+        // Simplifies the translation positioning and animations
+        setLayoutDirection(LAYOUT_DIRECTION_LTR);
+
         mWindowManager = windowManager;
         mAccessibilityManager = accessibilityManager;
         mFloatingMenu = floatingMenu;
 
-        mMenuViewModel = new MenuViewModel(context);
+        mMenuViewModel = new MenuViewModel(context, accessibilityManager);
         mMenuViewAppearance = new MenuViewAppearance(context, windowManager);
         mMenuView = new MenuView(context, mMenuViewModel, mMenuViewAppearance);
         mMenuAnimationController = mMenuView.getMenuAnimationController();
@@ -209,20 +212,30 @@ class MenuViewLayer extends FrameLayout implements
     }
 
     @Override
-    protected void onConfigurationChanged(Configuration newConfig) {
-        super.onConfigurationChanged(newConfig);
+    public void onConfigurationChanged(@NonNull Configuration newConfig) {
         mDismissView.updateResources();
+        mDismissAnimationController.updateResources();
+    }
+
+    @Override
+    public void onLowMemory() {
+        // Do nothing.
     }
 
     private String getMessageText(List<AccessibilityTarget> newTargetFeatures) {
         Preconditions.checkArgument(newTargetFeatures.size() > 0,
                 "The list should at least have one feature.");
 
-        final Map<String, Object> arguments = new HashMap<>();
-        arguments.put("count", newTargetFeatures.size());
-        arguments.put("label", newTargetFeatures.get(0).getLabel());
-        return PluralsMessageFormatter.format(getResources(), arguments,
-                R.string.accessibility_floating_button_undo_message_text);
+        final int featuresSize = newTargetFeatures.size();
+        final Resources resources = getResources();
+        if (featuresSize == 1) {
+            return resources.getString(
+                    R.string.accessibility_floating_button_undo_message_label_text,
+                    newTargetFeatures.get(0).getLabel());
+        }
+
+        return icuMessageFormat(resources,
+                R.string.accessibility_floating_button_undo_message_number_text, featuresSize);
     }
 
     @Override
@@ -246,7 +259,7 @@ class MenuViewLayer extends FrameLayout implements
         mMenuViewModel.getMigrationTooltipVisibilityData().observeForever(
                 mMigrationTooltipObserver);
         mMessageView.setUndoListener(view -> undo());
-        mContext.registerComponentCallbacks(mDismissAnimationController);
+        getContext().registerComponentCallbacks(this);
     }
 
     @Override
@@ -261,7 +274,7 @@ class MenuViewLayer extends FrameLayout implements
         mMenuViewModel.getMigrationTooltipVisibilityData().removeObserver(
                 mMigrationTooltipObserver);
         mHandler.removeCallbacksAndMessages(/* token= */ null);
-        mContext.unregisterComponentCallbacks(mDismissAnimationController);
+        getContext().unregisterComponentCallbacks(this);
     }
 
     @Override

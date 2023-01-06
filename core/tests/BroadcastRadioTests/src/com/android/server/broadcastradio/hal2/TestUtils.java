@@ -25,7 +25,6 @@ import android.hardware.radio.RadioMetadata;
 import android.util.ArrayMap;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 
 final class TestUtils {
 
@@ -43,19 +42,24 @@ final class TestUtils {
                 /* dabFrequencyTable= */ null, /* vendorInfo= */ null);
     }
 
-    static RadioManager.ProgramInfo makeProgramInfo(ProgramSelector selector, int signalQuality) {
+    static RadioManager.ProgramInfo makeProgramInfo(ProgramSelector selector,
+            ProgramSelector.Identifier logicallyTunedTo,
+            ProgramSelector.Identifier physicallyTunedTo, int signalQuality) {
         return new RadioManager.ProgramInfo(selector,
-                selector.getPrimaryId(), selector.getPrimaryId(), /* relatedContents= */ null,
+                logicallyTunedTo, physicallyTunedTo, /* relatedContents= */ null,
                 /* infoFlags= */ 0, signalQuality,
                 new RadioMetadata.Builder().build(), new ArrayMap<>());
     }
 
+    static RadioManager.ProgramInfo makeProgramInfo(ProgramSelector selector, int signalQuality) {
+        return makeProgramInfo(selector, selector.getPrimaryId(), selector.getPrimaryId(),
+                signalQuality);
+    }
+
     static RadioManager.ProgramInfo makeProgramInfo(int programType,
             ProgramSelector.Identifier identifier, int signalQuality) {
-        // Note: If you set new fields, check if programInfoToHal() needs to be updated as well.
-        return new RadioManager.ProgramInfo(makeProgramSelector(programType, identifier), null,
-                null, null, 0, signalQuality, new RadioMetadata.Builder().build(),
-                new HashMap<String, String>());
+        return makeProgramInfo(makeProgramSelector(programType, identifier),
+                /* logicallyTunedTo= */ null, /* physicallyTunedTo= */ null, signalQuality);
     }
 
     static ProgramSelector makeFmSelector(long freq) {

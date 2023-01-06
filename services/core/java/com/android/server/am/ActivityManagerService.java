@@ -84,7 +84,6 @@ import static android.os.Process.ZYGOTE_POLICY_FLAG_LATENCY_SENSITIVE;
 import static android.os.Process.ZYGOTE_POLICY_FLAG_SYSTEM_PROCESS;
 import static android.os.Process.ZYGOTE_PROCESS;
 import static android.os.Process.getTotalMemory;
-import static android.os.Process.isSdkSandboxUid;
 import static android.os.Process.isThreadInProcess;
 import static android.os.Process.killProcess;
 import static android.os.Process.killProcessQuiet;
@@ -259,8 +258,10 @@ import android.content.pm.ProviderInfo;
 import android.content.pm.ProviderInfoList;
 import android.content.pm.ResolveInfo;
 import android.content.pm.ServiceInfo;
+import android.content.pm.SharedLibraryInfo;
 import android.content.pm.TestUtilityService;
 import android.content.pm.UserInfo;
+import android.content.pm.VersionedPackage;
 import android.content.res.CompatibilityInfo;
 import android.content.res.Configuration;
 import android.content.res.Resources;
@@ -9040,37 +9041,53 @@ public class ActivityManagerService extends IActivityManager.Stub
                 sb.append("Instant-App: true\n");
             }
 
-            if (isSdkSandboxUid(process.uid)) {
-                final int appUid = Process.getAppUidForSdkSandboxUid(process.uid);
+            if (process.isSdkSandbox) {
+                final String clientPackage = process.sdkSandboxClientAppPackage;
                 try {
-                    String[] clientPackages = pm.getPackagesForUid(appUid);
-                    // In shared UID case, don't add the package information
-                    if (clientPackages.length == 1) {
-                        appendSdkSandboxClientPackageHeader(sb, clientPackages[0], callingUserId);
+                    final PackageInfo pi = pm.getPackageInfo(clientPackage,
+                            PackageManager.GET_SHARED_LIBRARY_FILES, callingUserId);
+                    if (pi != null) {
+                        appendSdkSandboxClientPackageHeader(sb, pi);
+                        appendSdkSandboxLibraryHeaders(sb, pi);
+                    } else {
+                        Slog.e(TAG,
+                                "PackageInfo is null for SDK sandbox client: " + clientPackage);
                     }
                 } catch (RemoteException e) {
-                    Slog.e(TAG, "Error getting packages for client app uid: " + appUid, e);
+                    Slog.e(TAG,
+                            "Error getting package info for SDK sandbox client: " + clientPackage,
+                            e);
                 }
                 sb.append("SdkSandbox: true\n");
             }
         }
     }
 
-    private void appendSdkSandboxClientPackageHeader(StringBuilder sb, String pkg, int userId) {
-        final IPackageManager pm = AppGlobals.getPackageManager();
-        sb.append("SdkSandbox-Client-Package: ").append(pkg);
-        try {
-            final PackageInfo pi = pm.getPackageInfo(pkg, 0, userId);
-            if (pi != null) {
-                sb.append(" v").append(pi.getLongVersionCode());
-                if (pi.versionName != null) {
-                    sb.append(" (").append(pi.versionName).append(")");
-                }
-            }
-        } catch (RemoteException e) {
-            Slog.e(TAG, "Error getting package info for SDK sandbox client: " + pkg, e);
+    private void appendSdkSandboxClientPackageHeader(StringBuilder sb,
+            PackageInfo clientPackageInfo) {
+        sb.append("SdkSandbox-Client-Package: ").append(clientPackageInfo.packageName);
+        sb.append(" v").append(clientPackageInfo.getLongVersionCode());
+        if (clientPackageInfo.versionName != null) {
+            sb.append(" (").append(clientPackageInfo.versionName).append(")");
         }
         sb.append("\n");
+    }
+
+    private void appendSdkSandboxLibraryHeaders(StringBuilder sb,
+            PackageInfo clientPackageInfo) {
+        final ApplicationInfo info = clientPackageInfo.applicationInfo;
+        final List<SharedLibraryInfo> sharedLibraries = info.getSharedLibraryInfos();
+        for (int j = 0, size = sharedLibraries.size(); j < size; j++) {
+            final SharedLibraryInfo sharedLibrary = sharedLibraries.get(j);
+            if (!sharedLibrary.isSdk()) {
+                continue;
+            }
+
+            sb.append("SdkSandbox-Library: ").append(sharedLibrary.getPackageName());
+            final VersionedPackage versionedPackage = sharedLibrary.getDeclaringPackage();
+            sb.append(" v").append(versionedPackage.getLongVersionCode());
+            sb.append("\n");
+        }
     }
 
     private static String processClass(ProcessRecord process) {

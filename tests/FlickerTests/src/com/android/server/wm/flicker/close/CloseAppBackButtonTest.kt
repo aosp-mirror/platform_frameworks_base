@@ -69,7 +69,7 @@ import org.junit.runners.Parameterized
 @RunWith(Parameterized::class)
 @Parameterized.UseParametersRunnerFactory(FlickerParametersRunnerFactory::class)
 @FixMethodOrder(MethodSorters.NAME_ASCENDING)
-class CloseAppBackButtonTest(flicker: FlickerTest) : CloseAppTransition(flicker) {
+open class CloseAppBackButtonTest(flicker: FlickerTest) : CloseAppTransition(flicker) {
     /** {@inheritDoc} */
     override val transition: FlickerBuilder.() -> Unit
         get() = {

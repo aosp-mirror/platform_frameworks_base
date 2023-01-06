@@ -214,7 +214,7 @@ public class WindowManagerServiceTests extends WindowTestsBase {
         final MergedConfiguration outConfig = new MergedConfiguration();
         final SurfaceControl outSurfaceControl = new SurfaceControl();
         final InsetsState outInsetsState = new InsetsState();
-        final InsetsSourceControl[] outControls = new InsetsSourceControl[0];
+        final InsetsSourceControl.Array outControls = new InsetsSourceControl.Array();
         final Bundle outBundle = new Bundle();
         mWm.relayoutWindow(win.mSession, win.mClient, win.mAttrs, w, h, View.GONE, 0, 0, 0,
                 outFrames, outConfig, outSurfaceControl, outInsetsState, outControls, outBundle);
@@ -351,7 +351,7 @@ public class WindowManagerServiceTests extends WindowTestsBase {
 
         mWm.addWindow(session, new TestIWindow(), params, View.VISIBLE, DEFAULT_DISPLAY,
                 UserHandle.USER_SYSTEM, WindowInsets.Type.defaultVisible(), null, new InsetsState(),
-                new InsetsSourceControl[0], new Rect(), new float[1]);
+                new InsetsSourceControl.Array(), new Rect(), new float[1]);
 
         verify(mWm.mWindowContextListenerController, never()).registerWindowContainerListener(any(),
                 any(), anyInt(), anyInt(), any());

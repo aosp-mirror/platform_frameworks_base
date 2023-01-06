@@ -182,9 +182,9 @@ public class AccessibilityFloatingMenuController implements
         if (mFloatingMenu == null) {
             if (mFeatureFlags.isEnabled(A11Y_FLOATING_MENU_FLING_SPRING_ANIMATIONS)) {
                 final Display defaultDisplay = mDisplayManager.getDisplay(DEFAULT_DISPLAY);
-                mFloatingMenu = new MenuViewLayerController(
-                        mContext.createWindowContext(defaultDisplay,
-                                TYPE_NAVIGATION_BAR_PANEL, /* options= */ null), mWindowManager,
+                final Context windowContext = mContext.createWindowContext(defaultDisplay,
+                        TYPE_NAVIGATION_BAR_PANEL, /* options= */ null);
+                mFloatingMenu = new MenuViewLayerController(windowContext, mWindowManager,
                         mAccessibilityManager);
             } else {
                 mFloatingMenu = new AccessibilityFloatingMenu(mContext);

@@ -628,7 +628,6 @@ public final class DisplayManagerService extends SystemService {
             recordTopInsetLocked(mLogicalDisplayMapper.getDisplayLocked(Display.DEFAULT_DISPLAY));
 
             updateSettingsLocked();
-
             updateUserDisabledHdrTypesFromSettingsLocked();
             updateUserPreferredDisplayModeSettingsLocked();
         }
@@ -852,6 +851,15 @@ public final class DisplayManagerService extends SystemService {
                 for (int i = 0; i < userDisabledHdrTypeStrings.length; i++) {
                     mUserDisabledHdrTypes[i] = Integer.parseInt(userDisabledHdrTypeStrings[i]);
                 }
+
+                if (!mAreUserDisabledHdrTypesAllowed) {
+                    mLogicalDisplayMapper.forEachLocked(
+                            display -> {
+                                display.setUserDisabledHdrTypes(mUserDisabledHdrTypes);
+                                handleLogicalDisplayChangedLocked(display);
+                            });
+                }
+
             } catch (NumberFormatException e) {
                 Slog.e(TAG, "Failed to parse USER_DISABLED_HDR_FORMATS. "
                         + "Clearing the setting.", e);
@@ -879,6 +887,15 @@ public final class DisplayManagerService extends SystemService {
                 Settings.Global.USER_PREFERRED_RESOLUTION_WIDTH, Display.INVALID_DISPLAY_WIDTH);
         Display.Mode mode = new Display.Mode(width, height, refreshRate);
         mUserPreferredMode = isResolutionAndRefreshRateValid(mode) ? mode : null;
+        if (mUserPreferredMode != null) {
+            mDisplayDeviceRepo.forEachLocked((DisplayDevice device) -> {
+                device.setUserPreferredDisplayModeLocked(mode);
+            });
+        } else {
+            mLogicalDisplayMapper.forEachLocked((LogicalDisplay display) -> {
+                configurePreferredDisplayModeLocked(display);
+            });
+        }
     }
 
     private DisplayInfo getDisplayInfoForFrameRateOverride(DisplayEventReceiver.FrameRateOverride[]

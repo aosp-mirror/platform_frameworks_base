@@ -18,6 +18,8 @@
     <uses-permission android:name="android.permission.PACKAGE_USAGE_STATS" />
     <uses-permission android:name="android.permission.QUERY_ALL_PACKAGES" />
     <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
+    <uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
+    <uses-permission android:name="android.permission.FOREGROUND_SERVICE_SYSTEM_EXEMPTED" />
 
     <uses-permission android:name="com.google.android.permission.INSTALL_WEARABLE_PACKAGES" />
 
@@ -140,6 +142,7 @@
         <!-- Wearable Components -->
         <service android:name=".wear.WearPackageInstallerService"
                  android:permission="com.google.android.permission.INSTALL_WEARABLE_PACKAGES"
+                 android:foregroundServiceType="systemExempted"
                  android:exported="true"/>
 
         <provider android:name=".wear.WearPackageIconProvider"

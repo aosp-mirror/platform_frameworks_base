@@ -257,4 +257,52 @@ public class InsetsSourceControl implements Parcelable {
         }
         proto.end(token);
     }
+
+    /**
+     * Used to obtain the array from the argument of a binder call. In this way, the length of the
+     * array can be dynamic.
+     */
+    public static class Array implements Parcelable {
+
+        private @Nullable InsetsSourceControl[] mControls;
+
+        public Array() {
+        }
+
+        public Array(Parcel in) {
+            readFromParcel(in);
+        }
+
+        public void set(@Nullable InsetsSourceControl[] controls) {
+            mControls = controls;
+        }
+
+        public @Nullable InsetsSourceControl[] get() {
+            return mControls;
+        }
+
+        @Override
+        public int describeContents() {
+            return 0;
+        }
+
+        public void readFromParcel(Parcel in) {
+            mControls = in.createTypedArray(InsetsSourceControl.CREATOR);
+        }
+
+        @Override
+        public void writeToParcel(Parcel out, int flags) {
+            out.writeTypedArray(mControls, flags);
+        }
+
+        public static final @NonNull Creator<Array> CREATOR = new Creator<>() {
+            public Array createFromParcel(Parcel in) {
+                return new Array(in);
+            }
+
+            public Array[] newArray(int size) {
+                return new Array[size];
+            }
+        };
+    }
 }

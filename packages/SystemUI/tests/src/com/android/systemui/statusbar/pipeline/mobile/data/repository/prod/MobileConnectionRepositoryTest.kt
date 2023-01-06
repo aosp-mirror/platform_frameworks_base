@@ -61,6 +61,7 @@ import com.android.systemui.statusbar.pipeline.mobile.data.model.ResolvedNetwork
 import com.android.systemui.statusbar.pipeline.mobile.data.model.ResolvedNetworkType.UnknownNetworkType
 import com.android.systemui.statusbar.pipeline.mobile.data.model.toNetworkNameModel
 import com.android.systemui.statusbar.pipeline.mobile.data.repository.FakeMobileConnectionsRepository
+import com.android.systemui.statusbar.pipeline.mobile.data.repository.MobileConnectionRepository.Companion.DEFAULT_NUM_LEVELS
 import com.android.systemui.statusbar.pipeline.mobile.util.FakeMobileMappingsProxy
 import com.android.systemui.statusbar.pipeline.shared.ConnectivityPipelineLogger
 import com.android.systemui.statusbar.pipeline.shared.data.model.DataActivityModel
@@ -117,7 +118,6 @@ class MobileConnectionRepositoryTest : SysuiTestCase() {
                 telephonyManager,
                 globalSettings,
                 fakeBroadcastDispatcher,
-                connectionsRepo.defaultDataSubId,
                 connectionsRepo.globalMobileDataSettingChangedEvent,
                 mobileMappings,
                 IMMEDIATE,
@@ -319,7 +319,7 @@ class MobileConnectionRepositoryTest : SysuiTestCase() {
 
             val callback = getTelephonyCallbackForType<TelephonyCallback.DisplayInfoListener>()
             val type = NETWORK_TYPE_LTE
-            val expected = DefaultNetworkType(type, mobileMappings.toIconKey(type))
+            val expected = DefaultNetworkType(mobileMappings.toIconKey(type))
             val ti = mock<TelephonyDisplayInfo>().also { whenever(it.networkType).thenReturn(type) }
             callback.onDisplayInfoChanged(ti)
 
@@ -336,7 +336,7 @@ class MobileConnectionRepositoryTest : SysuiTestCase() {
 
             val callback = getTelephonyCallbackForType<TelephonyCallback.DisplayInfoListener>()
             val type = OVERRIDE_NETWORK_TYPE_LTE_CA
-            val expected = OverrideNetworkType(type, mobileMappings.toIconKeyOverride(type))
+            val expected = OverrideNetworkType(mobileMappings.toIconKeyOverride(type))
             val ti =
                 mock<TelephonyDisplayInfo>().also {
                     whenever(it.networkType).thenReturn(type)
@@ -380,33 +380,6 @@ class MobileConnectionRepositoryTest : SysuiTestCase() {
         }
 
     @Test
-    fun isDefaultDataSubscription_isDefault() =
-        runBlocking(IMMEDIATE) {
-            connectionsRepo.setDefaultDataSubId(SUB_1_ID)
-
-            var latest: Boolean? = null
-            val job = underTest.isDefaultDataSubscription.onEach { latest = it }.launchIn(this)
-
-            assertThat(latest).isTrue()
-
-            job.cancel()
-        }
-
-    @Test
-    fun isDefaultDataSubscription_isNotDefault() =
-        runBlocking(IMMEDIATE) {
-            // Our subId is SUB_1_ID
-            connectionsRepo.setDefaultDataSubId(123)
-
-            var latest: Boolean? = null
-            val job = underTest.isDefaultDataSubscription.onEach { latest = it }.launchIn(this)
-
-            assertThat(latest).isFalse()
-
-            job.cancel()
-        }
-
-    @Test
     fun isDataConnectionAllowed_subIdSettingUpdate_valueUpdated() =
         runBlocking(IMMEDIATE) {
             val subIdSettingName = "${Settings.Global.MOBILE_DATA}$SUB_1_ID"
@@ -426,6 +399,17 @@ class MobileConnectionRepositoryTest : SysuiTestCase() {
             whenever(telephonyManager.isDataConnectionAllowed).thenReturn(false)
             globalSettings.putInt(subIdSettingName, 0)
             assertThat(latest).isFalse()
+
+            job.cancel()
+        }
+
+    @Test
+    fun numberOfLevels_isDefault() =
+        runBlocking(IMMEDIATE) {
+            var latest: Int? = null
+            val job = underTest.numberOfLevels.onEach { latest = it }.launchIn(this)
+
+            assertThat(latest).isEqualTo(DEFAULT_NUM_LEVELS)
 
             job.cancel()
         }

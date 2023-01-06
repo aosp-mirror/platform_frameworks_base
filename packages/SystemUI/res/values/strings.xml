@@ -2301,13 +2301,13 @@
     <string name="accessibility_floating_button_docking_tooltip">Move button to the edge to hide it temporarily</string>
     <!-- Text for the undo action button of the message view of the accessibility floating menu to perform undo operation. [CHAR LIMIT=30]-->
     <string name="accessibility_floating_button_undo">Undo</string>
-
+    <!-- Text for the message view with undo action of the accessibility floating menu to show which feature shortcut was removed. [CHAR LIMIT=30]-->
+    <string name="accessibility_floating_button_undo_message_label_text"><xliff:g id="feature name" example="Magnification">%s</xliff:g> shortcut removed</string>
     <!-- Text for the message view with undo action of the accessibility floating menu to show how many features shortcuts were removed. [CHAR LIMIT=30]-->
-    <string name="accessibility_floating_button_undo_message_text">{count, plural,
-        =1 {{label} shortcut removed}
+    <string name="accessibility_floating_button_undo_message_number_text">{count, plural,
+        =1 {# shortcut removed}
         other {# shortcuts removed}
     }</string>
-
     <!-- Action in accessibility menu to move the accessibility floating button to the top left of the screen. [CHAR LIMIT=30] -->
     <string name="accessibility_floating_button_action_move_top_left">Move top left</string>
     <!-- Action in accessibility menu to move the accessibility floating button to the top right of the screen. [CHAR LIMIT=30] -->
@@ -2466,6 +2466,8 @@
     <string name="media_transfer_playing_different_device">Playing on <xliff:g id="deviceName" example="My Tablet">%1$s</xliff:g></string>
     <!-- Text informing the user that the media transfer has failed because something went wrong. [CHAR LIsMIT=50] -->
     <string name="media_transfer_failed">Something went wrong. Try again.</string>
+    <!-- Text to indicate that a media transfer is currently in-progress, aka loading. [CHAR LIMIT=NONE] -->
+    <string name="media_transfer_loading">Loading</string>
 
     <!-- Error message indicating that a control timed out while waiting for an update [CHAR_LIMIT=30] -->
     <string name="controls_error_timeout">Inactive, check app</string>

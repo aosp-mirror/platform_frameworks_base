@@ -31,6 +31,7 @@ import android.testing.AndroidTestingRunner;
 import android.testing.TestableLooper;
 import android.view.MotionEvent;
 import android.view.WindowManager;
+import android.view.accessibility.AccessibilityManager;
 
 import androidx.recyclerview.widget.RecyclerView;
 import androidx.test.filters.SmallTest;
@@ -42,8 +43,12 @@ import com.android.wm.shell.bubbles.DismissView;
 
 import org.junit.After;
 import org.junit.Before;
+import org.junit.Rule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.mockito.Mock;
+import org.mockito.junit.MockitoJUnit;
+import org.mockito.junit.MockitoRule;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -64,10 +69,16 @@ public class MenuListViewTouchHandlerTest extends SysuiTestCase {
     private RecyclerView mStubListView;
     private DismissView mDismissView;
 
+    @Rule
+    public MockitoRule mockito = MockitoJUnit.rule();
+
+    @Mock
+    private AccessibilityManager mAccessibilityManager;
+
     @Before
     public void setUp() throws Exception {
         final WindowManager windowManager = mContext.getSystemService(WindowManager.class);
-        final MenuViewModel stubMenuViewModel = new MenuViewModel(mContext);
+        final MenuViewModel stubMenuViewModel = new MenuViewModel(mContext, mAccessibilityManager);
         final MenuViewAppearance stubMenuViewAppearance = new MenuViewAppearance(mContext,
                 windowManager);
         mStubMenuView = new MenuView(mContext, stubMenuViewModel, stubMenuViewAppearance);

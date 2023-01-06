@@ -19,9 +19,11 @@ package com.android.settingslib.spa.gallery.ui
 import android.os.Bundle
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.derivedStateOf
+import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.tooling.preview.Preview
 import com.android.settingslib.spa.framework.common.SettingsEntryBuilder
 import com.android.settingslib.spa.framework.common.SettingsPage
@@ -32,6 +34,7 @@ import com.android.settingslib.spa.widget.preference.Preference
 import com.android.settingslib.spa.widget.preference.PreferenceModel
 import com.android.settingslib.spa.widget.scaffold.RegularScaffold
 import com.android.settingslib.spa.widget.ui.Spinner
+import com.android.settingslib.spa.widget.ui.SpinnerOption
 
 private const val TITLE = "Sample Spinner"
 
@@ -55,16 +58,16 @@ object SpinnerPageProvider : SettingsPageProvider {
     @Composable
     override fun Page(arguments: Bundle?) {
         RegularScaffold(title = getTitle(arguments)) {
-            val selectedIndex = rememberSaveable { mutableStateOf(0) }
+            var selectedId by rememberSaveable { mutableStateOf(1) }
             Spinner(
-                options = (1..3).map { "Option $it" },
-                selectedIndex = selectedIndex.value,
-                setIndex = { selectedIndex.value = it },
+                options = (1..3).map { SpinnerOption(id = it, text = "Option $it") },
+                selectedId = selectedId,
+                setId = { selectedId = it },
             )
             Preference(object : PreferenceModel {
-                override val title = "Selected index"
+                override val title = "Selected id"
                 override val summary = remember {
-                    derivedStateOf { selectedIndex.value.toString() }
+                    derivedStateOf { selectedId.toString() }
                 }
             })
         }
