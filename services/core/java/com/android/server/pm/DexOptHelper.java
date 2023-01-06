@@ -416,17 +416,22 @@ public final class DexOptHelper {
             return true;
         }
 
+        @DexOptResult int dexoptStatus;
         if (options.isDexoptOnlySecondaryDex()) {
-            // TODO(b/251903639): Call into ART Service.
-            try {
-                return mPm.getDexManager().dexoptSecondaryDex(options);
-            } catch (LegacyDexoptDisabledException e) {
-                throw new RuntimeException(e);
+            Optional<Integer> artSrvRes = performDexOptWithArtService(options, 0 /* extraFlags */);
+            if (artSrvRes.isPresent()) {
+                dexoptStatus = artSrvRes.get();
+            } else {
+                try {
+                    return mPm.getDexManager().dexoptSecondaryDex(options);
+                } catch (LegacyDexoptDisabledException e) {
+                    throw new RuntimeException(e);
+                }
             }
         } else {
-            int dexoptStatus = performDexOptWithStatus(options);
-            return dexoptStatus != PackageDexOptimizer.DEX_OPT_FAILED;
+            dexoptStatus = performDexOptWithStatus(options);
         }
+        return dexoptStatus != PackageDexOptimizer.DEX_OPT_FAILED;
     }
 
     /**
@@ -455,7 +460,8 @@ public final class DexOptHelper {
     // if the package can now be considered up to date for the given filter.
     @DexOptResult
     private int performDexOptInternal(DexoptOptions options) {
-        Optional<Integer> artSrvRes = performDexOptWithArtService(options);
+        Optional<Integer> artSrvRes =
+                performDexOptWithArtService(options, ArtFlags.FLAG_SHOULD_INCLUDE_DEPENDENCIES);
         if (artSrvRes.isPresent()) {
             return artSrvRes.get();
         }
@@ -492,7 +498,8 @@ public final class DexOptHelper {
      * @return a {@link DexOptResult}, or empty if the request isn't supported so that it is
      *     necessary to fall back to the legacy code paths.
      */
-    private Optional<Integer> performDexOptWithArtService(DexoptOptions options) {
+    private Optional<Integer> performDexOptWithArtService(DexoptOptions options,
+            /*@OptimizeFlags*/ int extraFlags) {
         ArtManagerLocal artManager = getArtManagerLocal();
         if (artManager == null) {
             return Optional.empty();
@@ -511,12 +518,6 @@ public final class DexOptHelper {
             if (oap.isApex()) {
                 return Optional.of(PackageDexOptimizer.DEX_OPT_SKIPPED);
             }
-
-            // TODO(b/245301593): Delete the conditional when ART Service supports
-            // FLAG_SHOULD_INCLUDE_DEPENDENCIES and we can just set it unconditionally.
-            /*@OptimizeFlags*/ int extraFlags = ops.getUsesLibraries().isEmpty()
-                    ? 0
-                    : ArtFlags.FLAG_SHOULD_INCLUDE_DEPENDENCIES;
 
             OptimizeParams params = options.convertToOptimizeParams(extraFlags);
             if (params == null) {
@@ -628,7 +629,8 @@ public final class DexOptHelper {
         // performDexOptWithArtService ignores the snapshot and takes its own, so it can race with
         // the package checks above, but at worst the effect is only a bit less friendly error
         // below.
-        Optional<Integer> artSrvRes = performDexOptWithArtService(options);
+        Optional<Integer> artSrvRes =
+                performDexOptWithArtService(options, ArtFlags.FLAG_SHOULD_INCLUDE_DEPENDENCIES);
         int res;
         if (artSrvRes.isPresent()) {
             res = artSrvRes.get();
