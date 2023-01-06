@@ -42,7 +42,6 @@ import android.view.IWindowManager;
 import android.view.InputDevice;
 import android.view.KeyCharacterMap;
 import android.view.KeyEvent;
-import android.view.WindowManager;
 import android.view.WindowManagerGlobal;
 import android.view.accessibility.AccessibilityManager;
 
@@ -343,6 +342,7 @@ public class SystemActions implements CoreStartable {
 
     /**
      * Register a system action.
+     *
      * @param actionId the action ID to register.
      */
     public void register(int actionId) {
@@ -440,6 +440,7 @@ public class SystemActions implements CoreStartable {
 
     /**
      * Unregister a system action.
+     *
      * @param actionId the action ID to unregister.
      */
     public void unregister(int actionId) {
@@ -475,7 +476,8 @@ public class SystemActions implements CoreStartable {
     }
 
     private void handleNotifications() {
-        mCentralSurfacesOptionalLazy.get().ifPresent(CentralSurfaces::animateExpandNotificationsPanel);
+        mCentralSurfacesOptionalLazy.get().ifPresent(
+                CentralSurfaces::animateExpandNotificationsPanel);
     }
 
     private void handleQuickSettings() {
@@ -507,7 +509,7 @@ public class SystemActions implements CoreStartable {
 
     private void handleTakeScreenshot() {
         ScreenshotHelper screenshotHelper = new ScreenshotHelper(mContext);
-        screenshotHelper.takeScreenshot(WindowManager.TAKE_SCREENSHOT_FULLSCREEN,
+        screenshotHelper.takeScreenshot(
                 SCREENSHOT_ACCESSIBILITY_ACTIONS, new Handler(Looper.getMainLooper()), null);
     }
 

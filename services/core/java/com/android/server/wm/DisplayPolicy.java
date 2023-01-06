@@ -129,6 +129,7 @@ import com.android.internal.policy.ScreenDecorationsUtils;
 import com.android.internal.protolog.common.ProtoLog;
 import com.android.internal.statusbar.LetterboxDetails;
 import com.android.internal.util.ScreenshotHelper;
+import com.android.internal.util.ScreenshotRequest;
 import com.android.internal.util.function.TriConsumer;
 import com.android.internal.view.AppearanceRegion;
 import com.android.internal.widget.PointerLocationView;
@@ -2451,8 +2452,9 @@ public class DisplayPolicy {
      */
     public void takeScreenshot(int screenshotType, int source) {
         if (mScreenshotHelper != null) {
-            mScreenshotHelper.takeScreenshot(screenshotType,
-                    source, mHandler, null /* completionConsumer */);
+            ScreenshotRequest request =
+                    new ScreenshotRequest.Builder(screenshotType, source).build();
+            mScreenshotHelper.takeScreenshot(request, mHandler, null /* completionConsumer */);
         }
     }
 

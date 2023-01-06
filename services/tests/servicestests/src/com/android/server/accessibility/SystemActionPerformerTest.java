@@ -17,7 +17,6 @@
 package com.android.server.accessibility;
 
 import static android.view.WindowManager.ScreenshotSource.SCREENSHOT_ACCESSIBILITY_ACTIONS;
-import static android.view.WindowManager.TAKE_SCREENSHOT_FULLSCREEN;
 
 import static org.hamcrest.Matchers.hasItem;
 import static org.hamcrest.Matchers.is;
@@ -305,9 +304,7 @@ public class SystemActionPerformerTest {
         mSystemActionPerformer.performSystemAction(
                 AccessibilityService.GLOBAL_ACTION_TAKE_SCREENSHOT);
         verify(mMockScreenshotHelper).takeScreenshot(
-                eq(TAKE_SCREENSHOT_FULLSCREEN),
-                eq(SCREENSHOT_ACCESSIBILITY_ACTIONS),
-                any(Handler.class), any());
+                eq(SCREENSHOT_ACCESSIBILITY_ACTIONS), any(Handler.class), any());
     }
 
     // PendingIntent is a final class and cannot be mocked. So we are using this
