@@ -23,10 +23,8 @@
     <string name="dock_alignment_not_charging" product="default" msgid="3980752926226749808">"তাঁৰৰ অবিহনে চাৰ্জ কৰিবলৈ ফ’নটো পুনৰ সংৰেখিত কৰক"</string>
     <string name="inattentive_sleep_warning_message" product="tv" msgid="6844464574089665063">"Android TV ডিভাইচটো সোনকালেই অফ হ’ব, এইটো অন কৰি ৰাখিবলৈ এটা বুটাম টিপক।"</string>
     <string name="inattentive_sleep_warning_message" product="default" msgid="5693904520452332224">"এই ডিভাইচটো সোনকালেই অফ হ’ব; এইটো অন কৰি ৰাখিবলৈ টিপক।"</string>
-    <!-- no translation found for keyguard_missing_sim_message (408124574073032188) -->
-    <skip />
-    <!-- no translation found for keyguard_missing_sim_message (2605468359948247208) -->
-    <skip />
+    <string name="keyguard_missing_sim_message" product="tablet" msgid="408124574073032188">"টেবলেটত কোনো ছিম নাই।"</string>
+    <string name="keyguard_missing_sim_message" product="default" msgid="2605468359948247208">"ফ’নত কোনো ছিম নাই।"</string>
     <string name="kg_invalid_confirm_pin_hint" product="default" msgid="6278551068943958651">"পিন ক’ড মিলা নাই"</string>
     <string name="kg_failed_attempts_almost_at_wipe" product="tablet" msgid="302165994845009232">"আপুনি টেবলেটটো আনলক কৰিবলৈ <xliff:g id="NUMBER_0">%1$d</xliff:g> বাৰ ভুলকৈ প্ৰয়াস কৰিছে। আৰু <xliff:g id="NUMBER_1">%2$d</xliff:g> বাৰ ভুলকৈ প্ৰয়াস কৰাৰ পাছত এই টেবলেটটো ৰিছেট কৰা হ’ব, যিয়ে ইয়াৰ আটাইবোৰ ডেটা মচি পেলাব।"</string>
     <string name="kg_failed_attempts_almost_at_wipe" product="default" msgid="2594813176164266847">"আপুনি ফ’নটো আনলক কৰিবলৈ <xliff:g id="NUMBER_0">%1$d</xliff:g> বাৰ ভুলকৈ প্ৰয়াস কৰিছে। আৰু <xliff:g id="NUMBER_1">%2$d</xliff:g> বাৰ ভুলকৈ প্ৰয়াস কৰাৰ পাছত এই ফ’নটো ৰিছেট কৰা হ’ব, যিয়ে ইয়াৰ আটাইবোৰ ডেটা মচি পেলাব।"</string>

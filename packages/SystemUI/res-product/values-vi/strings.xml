@@ -23,10 +23,8 @@
     <string name="dock_alignment_not_charging" product="default" msgid="3980752926226749808">"Điều chỉnh lại vị trí điện thoại để sạc không dây"</string>
     <string name="inattentive_sleep_warning_message" product="tv" msgid="6844464574089665063">"Thiết bị Android TV sắp tắt. Hãy nhấn vào một nút để duy trì trạng thái bật."</string>
     <string name="inattentive_sleep_warning_message" product="default" msgid="5693904520452332224">"Thiết bị sắp tắt. Hãy nhấn vào một nút để duy trì trạng thái bật."</string>
-    <!-- no translation found for keyguard_missing_sim_message (408124574073032188) -->
-    <skip />
-    <!-- no translation found for keyguard_missing_sim_message (2605468359948247208) -->
-    <skip />
+    <string name="keyguard_missing_sim_message" product="tablet" msgid="408124574073032188">"Không có SIM nào trong máy tính bảng."</string>
+    <string name="keyguard_missing_sim_message" product="default" msgid="2605468359948247208">"Không có SIM nào trong điện thoại."</string>
     <string name="kg_invalid_confirm_pin_hint" product="default" msgid="6278551068943958651">"Mã PIN không khớp"</string>
     <string name="kg_failed_attempts_almost_at_wipe" product="tablet" msgid="302165994845009232">"Bạn đã mở khóa máy tính bảng sai <xliff:g id="NUMBER_0">%1$d</xliff:g> lần. Sau <xliff:g id="NUMBER_1">%2$d</xliff:g> lần mở khóa không thành công nữa, máy tính bảng này sẽ được đặt lại, tức là tất cả dữ liệu của máy tính bảng sẽ bị xóa."</string>
     <string name="kg_failed_attempts_almost_at_wipe" product="default" msgid="2594813176164266847">"Bạn đã mở khóa điện thoại sai <xliff:g id="NUMBER_0">%1$d</xliff:g> lần. Sau <xliff:g id="NUMBER_1">%2$d</xliff:g> lần mở khóa không thành công nữa, điện thoại này sẽ được đặt lại, tức là tất cả dữ liệu của điện thoại sẽ bị xóa."</string>

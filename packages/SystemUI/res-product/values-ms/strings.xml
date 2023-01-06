@@ -23,10 +23,8 @@
     <string name="dock_alignment_not_charging" product="default" msgid="3980752926226749808">"Jajarkan semula telefon untuk mengecas secara wayarles"</string>
     <string name="inattentive_sleep_warning_message" product="tv" msgid="6844464574089665063">"Peranti Android TV akan mati tidak lama lagi; tekan butang untuk memastikan peranti terus hidup."</string>
     <string name="inattentive_sleep_warning_message" product="default" msgid="5693904520452332224">"Peranti akan mati tidak lama lagi; tekan untuk memastikan peranti terus hidup."</string>
-    <!-- no translation found for keyguard_missing_sim_message (408124574073032188) -->
-    <skip />
-    <!-- no translation found for keyguard_missing_sim_message (2605468359948247208) -->
-    <skip />
+    <string name="keyguard_missing_sim_message" product="tablet" msgid="408124574073032188">"Tiada SIM dalam tablet."</string>
+    <string name="keyguard_missing_sim_message" product="default" msgid="2605468359948247208">"Tiada SIM dalam telefon."</string>
     <string name="kg_invalid_confirm_pin_hint" product="default" msgid="6278551068943958651">"Kod PIN tidak sepadan"</string>
     <string name="kg_failed_attempts_almost_at_wipe" product="tablet" msgid="302165994845009232">"Anda telah salah membuka kunci tablet sebanyak <xliff:g id="NUMBER_0">%1$d</xliff:g> kali. Selepas <xliff:g id="NUMBER_1">%2$d</xliff:g> lagi percubaan yang gagal, tablet ini akan ditetapkan semula sekali gus memadamkan semua data."</string>
     <string name="kg_failed_attempts_almost_at_wipe" product="default" msgid="2594813176164266847">"Anda telah salah membuka kunci telefon sebanyak <xliff:g id="NUMBER_0">%1$d</xliff:g> kali. Selepas <xliff:g id="NUMBER_1">%2$d</xliff:g> lagi percubaan yang gagal, telefon ini akan ditetapkan semula sekali gus memadamkan semua data."</string>

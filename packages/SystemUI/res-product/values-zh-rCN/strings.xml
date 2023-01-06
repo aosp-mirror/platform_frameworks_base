@@ -23,10 +23,8 @@
     <string name="dock_alignment_not_charging" product="default" msgid="3980752926226749808">"请调整手机位置以便进行无线充电"</string>
     <string name="inattentive_sleep_warning_message" product="tv" msgid="6844464574089665063">"Android TV 设备即将关闭；按一下相应的按钮即可让设备保持开启状态。"</string>
     <string name="inattentive_sleep_warning_message" product="default" msgid="5693904520452332224">"设备即将关闭；按一下即可让设备保持开启状态。"</string>
-    <!-- no translation found for keyguard_missing_sim_message (408124574073032188) -->
-    <skip />
-    <!-- no translation found for keyguard_missing_sim_message (2605468359948247208) -->
-    <skip />
+    <string name="keyguard_missing_sim_message" product="tablet" msgid="408124574073032188">"平板电脑中没有 SIM 卡。"</string>
+    <string name="keyguard_missing_sim_message" product="default" msgid="2605468359948247208">"手机中没有 SIM 卡。"</string>
     <string name="kg_invalid_confirm_pin_hint" product="default" msgid="6278551068943958651">"PIN 码不匹配"</string>
     <string name="kg_failed_attempts_almost_at_wipe" product="tablet" msgid="302165994845009232">"您尝试解锁平板电脑后失败的次数已达 <xliff:g id="NUMBER_0">%1$d</xliff:g> 次。如果再尝试 <xliff:g id="NUMBER_1">%2$d</xliff:g> 次后仍不成功，平板电脑将会被重置，而这将删除其中的所有数据。"</string>
     <string name="kg_failed_attempts_almost_at_wipe" product="default" msgid="2594813176164266847">"您尝试解锁手机后失败的次数已达 <xliff:g id="NUMBER_0">%1$d</xliff:g> 次。如果再尝试 <xliff:g id="NUMBER_1">%2$d</xliff:g> 次后仍不成功，手机将会被重置，而这将删除其中的所有数据。"</string>

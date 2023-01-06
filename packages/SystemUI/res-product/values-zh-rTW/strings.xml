@@ -23,10 +23,8 @@
     <string name="dock_alignment_not_charging" product="default" msgid="3980752926226749808">"請調整手機位置，即可無線充電"</string>
     <string name="inattentive_sleep_warning_message" product="tv" msgid="6844464574089665063">"Android TV 裝置即將關閉。如要讓裝置保持開啟狀態，請按下任一按鈕。"</string>
     <string name="inattentive_sleep_warning_message" product="default" msgid="5693904520452332224">"裝置即將關閉。如要讓裝置保持開啟狀態，請輕觸螢幕或按下任一按鈕。"</string>
-    <!-- no translation found for keyguard_missing_sim_message (408124574073032188) -->
-    <skip />
-    <!-- no translation found for keyguard_missing_sim_message (2605468359948247208) -->
-    <skip />
+    <string name="keyguard_missing_sim_message" product="tablet" msgid="408124574073032188">"平板電腦中沒有 SIM 卡。"</string>
+    <string name="keyguard_missing_sim_message" product="default" msgid="2605468359948247208">"手機中沒有 SIM 卡。"</string>
     <string name="kg_invalid_confirm_pin_hint" product="default" msgid="6278551068943958651">"PIN 碼不符"</string>
     <string name="kg_failed_attempts_almost_at_wipe" product="tablet" msgid="302165994845009232">"你嘗試解鎖平板電腦已失敗 <xliff:g id="NUMBER_0">%1$d</xliff:g> 次，目前還剩 <xliff:g id="NUMBER_1">%2$d</xliff:g> 次機會。如果失敗次數超過限制，系統會將這部平板電腦恢復原廠設定，其中的所有資料也會一併遭到刪除。"</string>
     <string name="kg_failed_attempts_almost_at_wipe" product="default" msgid="2594813176164266847">"你嘗試解鎖手機已失敗 <xliff:g id="NUMBER_0">%1$d</xliff:g> 次，目前還剩 <xliff:g id="NUMBER_1">%2$d</xliff:g> 次機會。如果失敗次數超過限制，系統會將這支手機恢復原廠設定，其中的所有資料也會一併遭到刪除。"</string>

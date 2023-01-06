@@ -23,10 +23,8 @@
     <string name="dock_alignment_not_charging" product="default" msgid="3980752926226749808">"ကြိုးမဲ့အားသွင်းရန် ဖုန်းကို ပြန်၍ချိန်ပါ"</string>
     <string name="inattentive_sleep_warning_message" product="tv" msgid="6844464574089665063">"Android TV စက်သည် မကြာမီ ပိတ်သွားပါမည်၊ ဆက်ဖွင့်ထားရန် ခလုတ်တစ်ခုကို နှိပ်ပါ။"</string>
     <string name="inattentive_sleep_warning_message" product="default" msgid="5693904520452332224">"စက်သည် မကြာမီ ပိတ်သွားပါမည်၊ ဆက်ဖွင့်ထားရန် နှိပ်ပါ။"</string>
-    <!-- no translation found for keyguard_missing_sim_message (408124574073032188) -->
-    <skip />
-    <!-- no translation found for keyguard_missing_sim_message (2605468359948247208) -->
-    <skip />
+    <string name="keyguard_missing_sim_message" product="tablet" msgid="408124574073032188">"တက်ဘလက်တွင် ဆင်းမ်မရှိပါ။"</string>
+    <string name="keyguard_missing_sim_message" product="default" msgid="2605468359948247208">"ဖုန်းတွင် ဆင်းမ်မရှိပါ။"</string>
     <string name="kg_invalid_confirm_pin_hint" product="default" msgid="6278551068943958651">"ပင်နံပါတ် ကိုက်ညီမှု မရှိပါ"</string>
     <string name="kg_failed_attempts_almost_at_wipe" product="tablet" msgid="302165994845009232">"တက်ဘလက်ကို <xliff:g id="NUMBER_0">%1$d</xliff:g> ကြိမ် မှားယွင်းစွာ လော့ခ်ဖွင့်ရန် ကြိုးစားခဲ့ပါသည်။ <xliff:g id="NUMBER_1">%2$d</xliff:g> ကြိမ် ထပ်မံမှားယွင်းခဲ့လျှင် ဤတက်ဘလက်ကို ပြင်ဆင်သတ်မှတ်လိုက်မည် ဖြစ်ပြီး ၎င်းအတွင်းရှိ ဒေတာအားလုံးကိုလည်း ဖျက်လိုက်ပါမည်။"</string>
     <string name="kg_failed_attempts_almost_at_wipe" product="default" msgid="2594813176164266847">"ဖုန်းကို <xliff:g id="NUMBER_0">%1$d</xliff:g> ကြိမ် မှားယွင်းစွာ လော့ခ်ဖွင့်ရန် ကြိုးစားခဲ့ပါသည်။ <xliff:g id="NUMBER_1">%2$d</xliff:g> ကြိမ် ထပ်မံမှားယွင်းခဲ့လျှင် ဤဖုန်းကို ပြင်ဆင်သတ်မှတ်လိုက်မည် ဖြစ်ပြီး ၎င်းအတွင်းရှိ ဒေတာအားလုံးကိုလည်း ဖျက်လိုက်ပါမည်။"</string>
