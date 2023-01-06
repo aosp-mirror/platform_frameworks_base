@@ -16,13 +16,12 @@
 
 #pragma once
 
+#include "SkRefCnt.h"
 #include "SkiaPipeline.h"
+#include "renderstate/RenderState.h"
+#include "renderthread/HardwareBufferRenderParams.h"
 #include "renderthread/VulkanManager.h"
 #include "renderthread/VulkanSurface.h"
-
-#include "renderstate/RenderState.h"
-
-#include "SkRefCnt.h"
 
 class SkBitmap;
 struct SkRect;
@@ -38,18 +37,18 @@ public:
 
     renderthread::MakeCurrentResult makeCurrent() override;
     renderthread::Frame getFrame() override;
-    renderthread::IRenderPipeline::DrawResult draw(const renderthread::Frame& frame,
-                                                   const SkRect& screenDirty, const SkRect& dirty,
-                                                   const LightGeometry& lightGeometry,
-                                                   LayerUpdateQueue* layerUpdateQueue,
-                                                   const Rect& contentDrawBounds, bool opaque,
-                                                   const LightInfo& lightInfo,
-                                                   const std::vector<sp<RenderNode> >& renderNodes,
-                                                   FrameInfoVisualizer* profiler) override;
+    renderthread::IRenderPipeline::DrawResult draw(
+            const renderthread::Frame& frame, const SkRect& screenDirty, const SkRect& dirty,
+            const LightGeometry& lightGeometry, LayerUpdateQueue* layerUpdateQueue,
+            const Rect& contentDrawBounds, bool opaque, const LightInfo& lightInfo,
+            const std::vector<sp<RenderNode> >& renderNodes, FrameInfoVisualizer* profiler,
+            const renderthread::HardwareBufferRenderParams& bufferParams) override;
     GrSurfaceOrigin getSurfaceOrigin() override { return kTopLeft_GrSurfaceOrigin; }
     bool swapBuffers(const renderthread::Frame& frame, bool drew, const SkRect& screenDirty,
                      FrameInfo* currentFrameInfo, bool* requireSwap) override;
     DeferredLayerUpdater* createTextureLayer() override;
+    [[nodiscard]] android::base::unique_fd flush() override;
+
     bool setSurface(ANativeWindow* surface, renderthread::SwapBehavior swapBehavior) override;
     void onStop() override;
     bool isSurfaceReady() override;
@@ -64,7 +63,6 @@ protected:
 
 private:
     renderthread::VulkanManager& vulkanManager();
-
     renderthread::VulkanSurface* mVkSurface = nullptr;
     sp<ANativeWindow> mNativeWindow;
 };

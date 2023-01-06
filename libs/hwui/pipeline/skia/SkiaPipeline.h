@@ -20,9 +20,11 @@
 #include <SkDocument.h>
 #include <SkMultiPictureDocument.h>
 #include <SkSurface.h>
+
 #include "Lighting.h"
 #include "hwui/AnimatedImageDrawable.h"
 #include "renderthread/CanvasContext.h"
+#include "renderthread/HardwareBufferRenderParams.h"
 #include "renderthread/IRenderPipeline.h"
 
 class SkFILEWStream;
@@ -73,10 +75,19 @@ public:
         mCaptureMode = callback ? CaptureMode::CallbackAPI : CaptureMode::None;
     }
 
+    virtual void setHardwareBuffer(AHardwareBuffer* buffer) override;
+    bool hasHardwareBuffer() override { return mHardwareBuffer != nullptr; }
+
 protected:
+    sk_sp<SkSurface> getBufferSkSurface(
+            const renderthread::HardwareBufferRenderParams& bufferParams);
     void dumpResourceCacheUsage() const;
 
     renderthread::RenderThread& mRenderThread;
+
+    AHardwareBuffer* mHardwareBuffer = nullptr;
+    sk_sp<SkSurface> mBufferSurface = nullptr;
+    sk_sp<SkColorSpace> mBufferColorSpace = nullptr;
 
     ColorMode mColorMode = ColorMode::Default;
     SkColorType mSurfaceColorType;

@@ -85,6 +85,18 @@ void RenderProxy::setName(const char* name) {
     mRenderThread.queue().runSync([this, name]() { mContext->setName(std::string(name)); });
 }
 
+void RenderProxy::setHardwareBuffer(AHardwareBuffer* buffer) {
+    if (buffer) {
+        AHardwareBuffer_acquire(buffer);
+    }
+    mRenderThread.queue().post([this, hardwareBuffer = buffer]() mutable {
+        mContext->setHardwareBuffer(hardwareBuffer);
+        if (hardwareBuffer) {
+            AHardwareBuffer_release(hardwareBuffer);
+        }
+    });
+}
+
 void RenderProxy::setSurface(ANativeWindow* window, bool enableTimeout) {
     if (window) { ANativeWindow_acquire(window); }
     mRenderThread.queue().post([this, win = window, enableTimeout]() mutable {
@@ -322,6 +334,10 @@ void RenderProxy::drawRenderNode(RenderNode* node) {
 
 void RenderProxy::setContentDrawBounds(int left, int top, int right, int bottom) {
     mDrawFrameTask.setContentDrawBounds(left, top, right, bottom);
+}
+
+void RenderProxy::setHardwareBufferRenderParams(const HardwareBufferRenderParams& params) {
+    mDrawFrameTask.setHardwareBufferRenderParams(params);
 }
 
 void RenderProxy::setPictureCapturedCallback(
