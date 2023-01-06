@@ -14,3 +14,4 @@ per-file LocusId* = file:/core/java/android/service/contentcapture/OWNERS
 per-file ComponentCallbacksController = file:/services/core/java/com/android/server/wm/OWNERS
 per-file ComponentCallbacksController = charlesccchen@google.com
 per-file AttributionSource* = file:/core/java/android/permission/OWNERS
+per-file Broadcast* = file:/BROADCASTS_OWNERS
