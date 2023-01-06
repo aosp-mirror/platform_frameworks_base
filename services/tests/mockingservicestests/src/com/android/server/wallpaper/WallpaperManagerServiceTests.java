@@ -81,7 +81,6 @@ import com.android.internal.R;
 import com.android.modules.utils.TypedXmlPullParser;
 import com.android.modules.utils.TypedXmlSerializer;
 import com.android.server.LocalServices;
-import com.android.server.wallpaper.WallpaperManagerService.WallpaperData;
 import com.android.server.wm.WindowManagerInternal;
 
 import org.hamcrest.CoreMatchers;
