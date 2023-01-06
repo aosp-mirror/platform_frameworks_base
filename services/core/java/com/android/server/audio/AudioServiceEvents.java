@@ -147,19 +147,42 @@ public class AudioServiceEvents {
         }
     }
 
+    static final class VolChangedBroadcastEvent extends AudioEventLogger.Event {
+        final int mStreamType;
+        final int mAliasStreamType;
+        final int mIndex;
+
+        VolChangedBroadcastEvent(int stream, int alias, int index) {
+            mStreamType = stream;
+            mAliasStreamType = alias;
+            mIndex = index;
+        }
+
+        @Override
+        public String eventToString() {
+            return new StringBuilder("sending VOLUME_CHANGED stream:")
+                    .append(AudioSystem.streamToString(mStreamType))
+                    .append(" index:").append(mIndex)
+                    .append(" alias:").append(AudioSystem.streamToString(mAliasStreamType))
+                    .toString();
+        }
+    }
+
     static final class DeviceVolumeEvent extends AudioEventLogger.Event {
         final int mStream;
         final int mVolIndex;
         final String mDeviceNativeType;
         final String mDeviceAddress;
         final String mCaller;
+        final int mDeviceForStream;
 
         DeviceVolumeEvent(int streamType, int index, @NonNull AudioDeviceAttributes device,
-                String callingPackage) {
+                int deviceForStream, String callingPackage) {
             mStream = streamType;
             mVolIndex = index;
             mDeviceNativeType = "0x" + Integer.toHexString(device.getInternalType());
             mDeviceAddress = device.getAddress();
+            mDeviceForStream = deviceForStream;
             mCaller = callingPackage;
             // log metrics
             new MediaMetrics.Item(MediaMetrics.Name.AUDIO_VOLUME_EVENT)
@@ -180,7 +203,9 @@ public class AudioServiceEvents {
                     .append(" index:").append(mVolIndex)
                     .append(" device:").append(mDeviceNativeType)
                     .append(" addr:").append(mDeviceAddress)
-                    .append(") from ").append(mCaller).toString();
+                    .append(") from ").append(mCaller)
+                    .append(" currDevForStream:Ox").append(Integer.toHexString(mDeviceForStream))
+                    .toString();
         }
     }
 
