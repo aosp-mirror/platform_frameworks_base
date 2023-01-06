@@ -721,8 +721,6 @@
 
     <item type="fraction" name="docked_stack_divider_fixed_ratio">34.15%</item>
 
-    <dimen name="resize_shadow_size">5dp</dimen>
-
     <!-- The default minimal size of a resizable task, in both dimensions. -->
     <dimen name="default_minimal_size_resizable_task">220dp</dimen>
 

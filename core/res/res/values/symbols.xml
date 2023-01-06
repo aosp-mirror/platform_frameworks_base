@@ -1695,9 +1695,6 @@
   <java-symbol type="fraction" name="docked_stack_divider_fixed_ratio" />
   <java-symbol type="fraction" name="thumbnail_fullscreen_scale" />
   <java-symbol type="integer" name="thumbnail_width_tv" />
-  <java-symbol type="dimen" name="resize_shadow_size" />
-  <java-symbol type="color" name="resize_shadow_start_color" />
-  <java-symbol type="color" name="resize_shadow_end_color" />
   <java-symbol type="dimen" name="navigation_bar_height" />
   <java-symbol type="dimen" name="navigation_bar_height_landscape" />
   <java-symbol type="dimen" name="navigation_bar_width" />
