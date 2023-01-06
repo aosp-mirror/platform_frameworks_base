@@ -75,8 +75,8 @@ import androidx.annotation.GuardedBy;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.window.common.CommonFoldingFeature;
+import androidx.window.common.DeviceStateManagerFoldingFeatureProducer;
 import androidx.window.common.EmptyLifecycleCallbacksAdapter;
-import androidx.window.extensions.WindowExtensionsProvider;
 import androidx.window.extensions.embedding.TransactionManager.TransactionRecord;
 import androidx.window.extensions.layout.WindowLayoutComponentImpl;
 
@@ -145,19 +145,12 @@ public class SplitController implements JetpackTaskFragmentOrganizer.TaskFragmen
     private final Handler mHandler;
     final Object mLock = new Object();
     private final ActivityStartMonitor mActivityStartMonitor;
-    @NonNull
-    final WindowLayoutComponentImpl mWindowLayoutComponent;
 
-    public SplitController() {
-        this((WindowLayoutComponentImpl) Objects.requireNonNull(WindowExtensionsProvider
-                .getWindowExtensions().getWindowLayoutComponent()));
-    }
-
-    @VisibleForTesting
-    SplitController(@NonNull WindowLayoutComponentImpl windowLayoutComponent) {
+    public SplitController(@NonNull WindowLayoutComponentImpl windowLayoutComponent,
+            @NonNull DeviceStateManagerFoldingFeatureProducer foldingFeatureProducer) {
         final MainThreadExecutor executor = new MainThreadExecutor();
         mHandler = executor.mHandler;
-        mPresenter = new SplitPresenter(executor, this);
+        mPresenter = new SplitPresenter(executor, windowLayoutComponent, this);
         mTransactionManager = new TransactionManager(mPresenter);
         final ActivityThread activityThread = ActivityThread.currentActivityThread();
         final Application application = activityThread.getApplication();
@@ -168,8 +161,7 @@ public class SplitController implements JetpackTaskFragmentOrganizer.TaskFragmen
 
         mActivityStartMonitor = new ActivityStartMonitor();
         instrumentation.addMonitor(mActivityStartMonitor);
-        mWindowLayoutComponent = windowLayoutComponent;
-        mWindowLayoutComponent.addFoldingStateChangedCallback(new FoldingFeatureListener());
+        foldingFeatureProducer.addDataChangedCallback(new FoldingFeatureListener());
     }
 
     private class FoldingFeatureListener implements Consumer<List<CommonFoldingFeature>> {

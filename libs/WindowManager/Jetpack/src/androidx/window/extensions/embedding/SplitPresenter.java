@@ -51,6 +51,7 @@ import androidx.window.extensions.embedding.SplitAttributesCalculator.SplitAttri
 import androidx.window.extensions.embedding.TaskContainer.TaskProperties;
 import androidx.window.extensions.layout.DisplayFeature;
 import androidx.window.extensions.layout.FoldingFeature;
+import androidx.window.extensions.layout.WindowLayoutComponentImpl;
 import androidx.window.extensions.layout.WindowLayoutInfo;
 
 import com.android.internal.annotations.VisibleForTesting;
@@ -137,10 +138,14 @@ class SplitPresenter extends JetpackTaskFragmentOrganizer {
             .setSplitType(new ExpandContainersSplitType())
             .build();
 
+    private final WindowLayoutComponentImpl mWindowLayoutComponent;
     private final SplitController mController;
 
-    SplitPresenter(@NonNull Executor executor, @NonNull SplitController controller) {
+    SplitPresenter(@NonNull Executor executor,
+            @NonNull WindowLayoutComponentImpl windowLayoutComponent,
+            @NonNull SplitController controller) {
         super(executor, controller);
+        mWindowLayoutComponent = windowLayoutComponent;
         mController = controller;
         registerOrganizer();
         if (!SplitController.ENABLE_SHELL_TRANSITIONS) {
@@ -556,7 +561,7 @@ class SplitPresenter extends JetpackTaskFragmentOrganizer {
             return sanitizeSplitAttributes(taskProperties, defaultSplitAttributes,
                     minDimensionsPair);
         }
-        final WindowLayoutInfo windowLayoutInfo = mController.mWindowLayoutComponent
+        final WindowLayoutInfo windowLayoutInfo = mWindowLayoutComponent
                 .getCurrentWindowLayoutInfo(taskProperties.getDisplayId(),
                         taskConfiguration.windowConfiguration);
         final SplitAttributesCalculatorParams params = new SplitAttributesCalculatorParams(
@@ -838,7 +843,7 @@ class SplitPresenter extends JetpackTaskFragmentOrganizer {
         final int displayId = taskProperties.getDisplayId();
         final WindowConfiguration windowConfiguration = taskProperties.getConfiguration()
                 .windowConfiguration;
-        final WindowLayoutInfo info = mController.mWindowLayoutComponent
+        final WindowLayoutInfo info = mWindowLayoutComponent
                 .getCurrentWindowLayoutInfo(displayId, windowConfiguration);
         final List<DisplayFeature> displayFeatures = info.getDisplayFeatures();
         if (displayFeatures.isEmpty()) {
