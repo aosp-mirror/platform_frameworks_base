@@ -30,25 +30,17 @@
     <string name="keyguard_plugged_in" msgid="8169926454348380863">"<xliff:g id="PERCENTAGE">%s</xliff:g> • Wird geladen"</string>
     <string name="keyguard_plugged_in_charging_fast" msgid="4386594091107340426">"<xliff:g id="PERCENTAGE">%s</xliff:g> • Wird schnell geladen"</string>
     <string name="keyguard_plugged_in_charging_slowly" msgid="217655355424210">"<xliff:g id="PERCENTAGE">%s</xliff:g> • Wird langsam geladen"</string>
-    <string name="keyguard_plugged_in_charging_limited" msgid="1657547879230699837">"<xliff:g id="PERCENTAGE">%s</xliff:g> • Ladevorgang pausiert, um den Akku zu schonen"</string>
+    <string name="keyguard_plugged_in_charging_limited" msgid="1053130519456324630">"<xliff:g id="PERCENTAGE">%s</xliff:g> • Optimiertes Laden zur Akkuschonung"</string>
     <string name="keyguard_instructions_when_pattern_disabled" msgid="8448804180089936954">"Zum Entsperren die Menütaste drücken."</string>
     <string name="keyguard_network_locked_message" msgid="407096292844868608">"Netzwerk gesperrt"</string>
-    <!-- no translation found for keyguard_missing_sim_message_short (685029586173458728) -->
-    <skip />
-    <!-- no translation found for keyguard_missing_sim_instructions (7735360104844653246) -->
-    <skip />
-    <!-- no translation found for keyguard_missing_sim_instructions_long (3451467338947610268) -->
-    <skip />
-    <!-- no translation found for keyguard_permanent_disabled_sim_message_short (3955052454216046100) -->
-    <skip />
-    <!-- no translation found for keyguard_permanent_disabled_sim_instructions (5034635040020685428) -->
-    <skip />
-    <!-- no translation found for keyguard_sim_locked_message (7095293254587575270) -->
-    <skip />
-    <!-- no translation found for keyguard_sim_puk_locked_message (2503428315518592542) -->
-    <skip />
-    <!-- no translation found for keyguard_sim_unlock_progress_dialog_message (8489092646014631659) -->
-    <skip />
+    <string name="keyguard_missing_sim_message_short" msgid="685029586173458728">"Keine SIM-Karte"</string>
+    <string name="keyguard_missing_sim_instructions" msgid="7735360104844653246">"Lege eine SIM-Karte ein."</string>
+    <string name="keyguard_missing_sim_instructions_long" msgid="3451467338947610268">"SIM-Karte fehlt oder ist nicht lesbar. Lege eine SIM-Karte ein."</string>
+    <string name="keyguard_permanent_disabled_sim_message_short" msgid="3955052454216046100">"SIM-Karte ist nicht nutzbar."</string>
+    <string name="keyguard_permanent_disabled_sim_instructions" msgid="5034635040020685428">"Deine SIM-Karte wurde dauerhaft deaktiviert.\n Wende dich an deinen Mobilfunkanbieter, um eine andere SIM-Karte zu erhalten."</string>
+    <string name="keyguard_sim_locked_message" msgid="7095293254587575270">"SIM-Karte ist gesperrt."</string>
+    <string name="keyguard_sim_puk_locked_message" msgid="2503428315518592542">"SIM-Karte ist mit einem PUK gesperrt."</string>
+    <string name="keyguard_sim_unlock_progress_dialog_message" msgid="8489092646014631659">"SIM-Karte wird entsperrt…"</string>
     <string name="keyguard_accessibility_pin_area" msgid="7403009340414014734">"PIN-Bereich"</string>
     <string name="keyguard_accessibility_password" msgid="3524161948484801450">"Gerätepasswort"</string>
     <string name="keyguard_accessibility_sim_pin_area" msgid="6272116591533888062">"SIM-PIN-Bereich"</string>
@@ -69,8 +61,7 @@
     <string name="kg_puk_enter_puk_hint_multi" msgid="4876780689904862943">"Die SIM-Karte \"<xliff:g id="CARRIER">%1$s</xliff:g>\" ist jetzt deaktiviert. Gib den PUK-Code ein, um fortzufahren. Weitere Informationen erhältst du von deinem Mobilfunkanbieter."</string>
     <string name="kg_puk_enter_pin_hint" msgid="6028432138916150399">"Gewünschten PIN-Code eingeben"</string>
     <string name="kg_enter_confirm_pin_hint" msgid="4261064020391799132">"Gewünschten PIN-Code bestätigen"</string>
-    <!-- no translation found for kg_sim_unlock_progress_dialog_message (1123048780346295748) -->
-    <skip />
+    <string name="kg_sim_unlock_progress_dialog_message" msgid="1123048780346295748">"SIM-Karte wird entsperrt…"</string>
     <string name="kg_invalid_sim_pin_hint" msgid="2762202646949552978">"Gib eine 4- bis 8-stellige PIN ein."</string>
     <string name="kg_invalid_sim_puk_hint" msgid="5319756880543857694">"Der PUK-Code muss mindestens 8 Ziffern aufweisen."</string>
     <string name="kg_too_many_failed_pin_attempts_dialog_message" msgid="544687656831558971">"Du hast deine PIN <xliff:g id="NUMBER_0">%1$d</xliff:g>-mal falsch eingegeben.\n\nBitte versuche es in <xliff:g id="NUMBER_1">%2$d</xliff:g> Sekunden noch einmal."</string>
