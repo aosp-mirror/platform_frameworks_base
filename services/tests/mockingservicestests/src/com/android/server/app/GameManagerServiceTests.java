@@ -537,7 +537,7 @@ public class GameManagerServiceTests {
     }
 
     /**
-     * Test permission.MANAGE_GAME_MODE is checked
+     * Test invalid package name is queried
      */
     @Test
     public void testGetGameModeInvalidPackageName() {
@@ -546,16 +546,16 @@ public class GameManagerServiceTests {
 
         startUser(gameManagerService, USER_ID_1);
         try {
+            when(mMockPackageManager.getApplicationInfoAsUser(anyString(), anyInt(), anyInt()))
+                    .thenThrow(new PackageManager.NameNotFoundException());
             assertEquals(GameManager.GAME_MODE_UNSUPPORTED,
                     gameManagerService.getGameMode(PACKAGE_NAME_INVALID,
                             USER_ID_1));
-
-            fail("GameManagerService failed to generate SecurityException when "
-                    + "permission.MANAGE_GAME_MODE is not granted.");
-        } catch (SecurityException ignored) {
+        } catch (PackageManager.NameNotFoundException e) {
+            // should never get here as isPackageGame() catches this exception
+            // fail this test if we ever get here
+            fail("Unexpected NameNotFoundException caught.");
         }
-
-        // The test should throw an exception, so the test is passing if we get here.
     }
 
     /**
