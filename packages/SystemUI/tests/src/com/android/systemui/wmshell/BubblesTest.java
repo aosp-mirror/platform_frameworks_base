@@ -94,6 +94,7 @@ import com.android.systemui.shade.NotificationShadeWindowControllerImpl;
 import com.android.systemui.shade.NotificationShadeWindowView;
 import com.android.systemui.shade.ShadeController;
 import com.android.systemui.shade.ShadeExpansionStateManager;
+import com.android.systemui.shade.ShadeWindowLogger;
 import com.android.systemui.shared.system.QuickStepContract;
 import com.android.systemui.statusbar.NotificationLockscreenUserManager;
 import com.android.systemui.statusbar.RankingBuilder;
@@ -273,6 +274,8 @@ public class BubblesTest extends SysuiTestCase {
     private Optional<OneHandedController> mOneHandedOptional;
     @Mock
     private UserManager mUserManager;
+    @Mock
+    private ShadeWindowLogger mShadeWindowLogger;
 
     private TestableBubblePositioner mPositioner;
 
@@ -297,7 +300,8 @@ public class BubblesTest extends SysuiTestCase {
                 mWindowManager, mActivityManager, mDozeParameters, mStatusBarStateController,
                 mConfigurationController, mKeyguardViewMediator, mKeyguardBypassController,
                 mColorExtractor, mDumpManager, mKeyguardStateController,
-                mScreenOffAnimationController, mAuthController, mShadeExpansionStateManager);
+                mScreenOffAnimationController, mAuthController, mShadeExpansionStateManager,
+                mShadeWindowLogger);
         mNotificationShadeWindowController.setNotificationShadeView(mNotificationShadeWindowView);
         mNotificationShadeWindowController.attach();
 

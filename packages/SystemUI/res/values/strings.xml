@@ -2362,6 +2362,8 @@
     <string name="media_transfer_playing_different_device">Playing on <xliff:g id="deviceName" example="My Tablet">%1$s</xliff:g></string>
     <!-- Text informing the user that the media transfer has failed because something went wrong. [CHAR LIsMIT=50] -->
     <string name="media_transfer_failed">Something went wrong. Try again.</string>
+    <!-- Text to indicate that a media transfer is currently in-progress, aka loading. [CHAR LIMIT=NONE] -->
+    <string name="media_transfer_loading">Loading</string>
 
     <!-- Error message indicating that a control timed out while waiting for an update [CHAR_LIMIT=30] -->
     <string name="controls_error_timeout">Inactive, check app</string>

@@ -367,7 +367,7 @@ public class NotificationChildrenContainer extends ViewGroup
         }
 
         if (mUseRoundnessSourceTypes) {
-            row.requestRoundnessReset(FROM_PARENT);
+            row.requestRoundnessReset(FROM_PARENT, /* animate = */ false);
             applyRoundnessAndInvalidate();
         }
     }
@@ -1440,7 +1440,8 @@ public class NotificationChildrenContainer extends ViewGroup
                 child.requestRoundness(
                         /* top = */ 0f,
                         /* bottom = */ last ? getBottomRoundness() : 0f,
-                        FROM_PARENT);
+                        /* sourceType = */ FROM_PARENT,
+                        /* animate = */ false);
             } else {
                 child.requestRoundness(
                         /* top = */ 0f,

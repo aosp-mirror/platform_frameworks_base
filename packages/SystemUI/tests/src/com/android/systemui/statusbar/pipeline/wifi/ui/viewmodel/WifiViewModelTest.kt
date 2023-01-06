@@ -228,7 +228,7 @@ class WifiViewModelTest : SysuiTestCase() {
         whenever(connectivityConstants.shouldShowActivityConfig).thenReturn(true)
         createAndSetViewModel()
 
-        wifiRepository.setWifiNetwork(WifiNetworkModel.Active(NETWORK_ID, ssid = null))
+        wifiRepository.setWifiNetwork(WifiNetworkModel.Active(NETWORK_ID, ssid = null, level = 1))
 
         var activityIn: Boolean? = null
         val activityInJob = underTest
@@ -553,7 +553,8 @@ class WifiViewModelTest : SysuiTestCase() {
 
     companion object {
         private const val NETWORK_ID = 2
-        private val ACTIVE_VALID_WIFI_NETWORK = WifiNetworkModel.Active(NETWORK_ID, ssid = "AB")
+        private val ACTIVE_VALID_WIFI_NETWORK =
+            WifiNetworkModel.Active(NETWORK_ID, ssid = "AB", level = 1)
     }
 }
 

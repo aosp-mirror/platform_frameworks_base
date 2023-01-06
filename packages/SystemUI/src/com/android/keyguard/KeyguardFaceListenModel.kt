@@ -39,7 +39,6 @@ data class KeyguardFaceListenModel(
     var keyguardGoingAway: Boolean = false,
     var listeningForFaceAssistant: Boolean = false,
     var occludingAppRequestingFaceAuth: Boolean = false,
-    val postureAllowsListening: Boolean = false,
     var primaryUser: Boolean = false,
     var secureCameraLaunched: Boolean = false,
     var supportsDetect: Boolean = false,

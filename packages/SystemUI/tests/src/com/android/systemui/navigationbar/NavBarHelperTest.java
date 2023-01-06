@@ -146,7 +146,7 @@ public class NavBarHelperTest extends SysuiTestCase {
         verify(mNavbarTaskbarStateUpdater, times(1))
                 .updateAccessibilityServicesState();
         verify(mNavbarTaskbarStateUpdater, times(1))
-                .updateAssistantAvailable(anyBoolean());
+                .updateAssistantAvailable(anyBoolean(), anyBoolean());
     }
 
     @Test
@@ -160,14 +160,14 @@ public class NavBarHelperTest extends SysuiTestCase {
         verify(mNavbarTaskbarStateUpdater, times(1))
                 .updateAccessibilityServicesState();
         verify(mNavbarTaskbarStateUpdater, times(1))
-                .updateAssistantAvailable(anyBoolean());
+                .updateAssistantAvailable(anyBoolean(), anyBoolean());
 
         mNavBarHelper.onConnectionChanged(true);
         // assert no more callbacks fired
         verify(mNavbarTaskbarStateUpdater, times(1))
                 .updateAccessibilityServicesState();
         verify(mNavbarTaskbarStateUpdater, times(2))
-                .updateAssistantAvailable(anyBoolean());
+                .updateAssistantAvailable(anyBoolean(), anyBoolean());
     }
 
     @Test
@@ -180,7 +180,7 @@ public class NavBarHelperTest extends SysuiTestCase {
         verify(mNavbarTaskbarStateUpdater, times(2))
                 .updateAccessibilityServicesState();
         verify(mNavbarTaskbarStateUpdater, times(1))
-                .updateAssistantAvailable(anyBoolean());
+                .updateAssistantAvailable(anyBoolean(), anyBoolean());
     }
 
     @Test
@@ -193,7 +193,7 @@ public class NavBarHelperTest extends SysuiTestCase {
         verify(mNavbarTaskbarStateUpdater, times(1))
                 .updateAccessibilityServicesState();
         verify(mNavbarTaskbarStateUpdater, times(2))
-                .updateAssistantAvailable(anyBoolean());
+                .updateAssistantAvailable(anyBoolean(), anyBoolean());
     }
 
     @Test
@@ -212,7 +212,7 @@ public class NavBarHelperTest extends SysuiTestCase {
         verify(mNavbarTaskbarStateUpdater, times(1))
                 .updateAccessibilityServicesState();
         verify(mNavbarTaskbarStateUpdater, times(1))
-                .updateAssistantAvailable(anyBoolean());
+                .updateAssistantAvailable(anyBoolean(), anyBoolean());
     }
 
     @Test
