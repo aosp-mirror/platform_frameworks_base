@@ -724,7 +724,7 @@
     <string name="instant_apps_title" msgid="8942706782103036910">"<xliff:g id="APP">%1$s</xliff:g> on käynnissä"</string>
     <string name="instant_apps_message" msgid="6112428971833011754">"Sovellus avattiin ilman asennusta."</string>
     <string name="instant_apps_message_with_help" msgid="1816952263531203932">"Sovellus avattiin ilman asennusta. Katso lisätietoja napauttamalla."</string>
-    <string name="app_info" msgid="5153758994129963243">"Sovelluksen tiedot"</string>
+    <string name="app_info" msgid="5153758994129963243">"Sovellustiedot"</string>
     <string name="go_to_web" msgid="636673528981366511">"Siirry selaimeen"</string>
     <string name="mobile_data" msgid="4564407557775397216">"Mobiilidata"</string>
     <string name="mobile_data_text_format" msgid="6806501540022589786">"<xliff:g id="ID_1">%1$s</xliff:g> – <xliff:g id="ID_2">%2$s</xliff:g>"</string>
@@ -853,6 +853,8 @@
     <string name="media_move_closer_to_end_cast" msgid="6495907340926563656">"Siirrä <xliff:g id="DEVICENAME">%1$s</xliff:g> lähemmäs toistaaksesi täällä"</string>
     <string name="media_transfer_playing_different_device" msgid="7186806382609785610">"Toistetaan: <xliff:g id="DEVICENAME">%1$s</xliff:g>"</string>
     <string name="media_transfer_failed" msgid="7955354964610603723">"Jotain meni pieleen. Yritä uudelleen."</string>
+    <!-- no translation found for media_transfer_loading (5544017127027152422) -->
+    <skip />
     <string name="controls_error_timeout" msgid="794197289772728958">"Epäaktiivinen, tarkista sovellus"</string>
     <string name="controls_error_removed" msgid="6675638069846014366">"Ei löydy"</string>
     <string name="controls_error_removed_title" msgid="1207794911208047818">"Ohjain ei ole käytettävissä"</string>

@@ -853,6 +853,8 @@
     <string name="media_move_closer_to_end_cast" msgid="6495907340926563656">"Наблизьтеся до пристрою <xliff:g id="DEVICENAME">%1$s</xliff:g>, щоб відтворити медіафайли на ньому"</string>
     <string name="media_transfer_playing_different_device" msgid="7186806382609785610">"Відтворюється на пристрої <xliff:g id="DEVICENAME">%1$s</xliff:g>"</string>
     <string name="media_transfer_failed" msgid="7955354964610603723">"Сталася помилка. Повторіть спробу."</string>
+    <!-- no translation found for media_transfer_loading (5544017127027152422) -->
+    <skip />
     <string name="controls_error_timeout" msgid="794197289772728958">"Неактивно, перейдіть у додаток"</string>
     <string name="controls_error_removed" msgid="6675638069846014366">"Не знайдено"</string>
     <string name="controls_error_removed_title" msgid="1207794911208047818">"Елемент керування недоступний"</string>
@@ -1004,8 +1006,7 @@
     <string name="keyguard_affordance_enablement_dialog_qr_scanner_instruction" msgid="5355839079232119791">"• Встановлено додаток для камери"</string>
     <string name="keyguard_affordance_enablement_dialog_home_instruction_1" msgid="8438311171750568633">"• Додаток налаштовано"</string>
     <string name="keyguard_affordance_enablement_dialog_home_instruction_2" msgid="8308525385889021652">"• Принаймні один пристрій доступний"</string>
-    <!-- no translation found for keyguard_affordance_press_too_short (8145437175134998864) -->
-    <skip />
+    <string name="keyguard_affordance_press_too_short" msgid="8145437175134998864">"Натисніть і утримуйте ярлик"</string>
     <string name="rear_display_bottom_sheet_cancel" msgid="3461468855493357248">"Скасувати"</string>
     <string name="rear_display_bottom_sheet_confirm" msgid="4383356544661421206">"Перевернути"</string>
     <string name="rear_display_fold_bottom_sheet_title" msgid="6081542277622721548">"Розгорніть телефон, щоб зробити краще селфі"</string>
