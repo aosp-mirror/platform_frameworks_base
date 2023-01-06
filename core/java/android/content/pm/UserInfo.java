@@ -436,11 +436,7 @@ public class UserInfo implements Parcelable {
         if (isProfile() || isGuest() || isRestricted()) {
             return false;
         }
-        if (UserManager.isHeadlessSystemUserMode()) {
-            return id != UserHandle.USER_SYSTEM;
-        } else {
-            return id == UserHandle.USER_SYSTEM;
-        }
+        return isMain();
     }
 
     // TODO(b/142482943): Get rid of this (after removing it from all tests) if feasible.
