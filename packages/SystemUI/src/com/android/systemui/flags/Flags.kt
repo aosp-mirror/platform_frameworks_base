@@ -208,6 +208,10 @@ object Flags {
         releasedFlag(401, "smartspace_shared_element_transition_enabled")
     val SMARTSPACE = resourceBooleanFlag(402, R.bool.flag_smartspace, "smartspace")
 
+    // TODO(b/258517050): Clean up after the feature is launched.
+    @JvmField
+    val SMARTSPACE_DATE_WEATHER_DECOUPLED = unreleasedFlag(403, "smartspace_date_weather_decoupled")
+
     // 500 - quick settings
 
     // TODO(b/254512321): Tracking Bug
