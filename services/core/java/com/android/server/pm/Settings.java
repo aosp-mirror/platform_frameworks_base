@@ -2272,7 +2272,7 @@ public final class Settings implements Watchable, Snappable {
                                 ustate.getInstallReason());
                     }
                     serializer.attributeLongHex(null, ATTR_FIRST_INSTALL_TIME,
-                            ustate.getFirstInstallTime());
+                            ustate.getFirstInstallTimeMillis());
                     if (ustate.getUninstallReason() != PackageManager.UNINSTALL_REASON_UNKNOWN) {
                         serializer.attributeInt(null, ATTR_UNINSTALL_REASON,
                                 ustate.getUninstallReason());
@@ -4773,7 +4773,7 @@ public final class Settings implements Watchable, Snappable {
                 pw.print(",");
                 pw.print(lastDisabledAppCaller != null ? lastDisabledAppCaller : "?");
                 pw.print(",");
-                pw.print(ps.readUserState(user.id).getFirstInstallTime());
+                pw.print(ps.readUserState(user.id).getFirstInstallTimeMillis());
                 pw.print(",");
                 pw.println();
             }
@@ -5122,7 +5122,7 @@ public final class Settings implements Watchable, Snappable {
 
             final PackageUserStateInternal pus = ps.readUserState(user.id);
             pw.print("      firstInstallTime=");
-            date.setTime(pus.getFirstInstallTime());
+            date.setTime(pus.getFirstInstallTimeMillis());
             pw.println(sdf.format(date));
 
             pw.print("      uninstallReason=");

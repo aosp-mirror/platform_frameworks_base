@@ -16,6 +16,7 @@
 
 package com.android.server.pm.pkg;
 
+import android.annotation.CurrentTimeMillisLong;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.SystemApi;
@@ -49,6 +50,16 @@ public interface PackageUserState {
      * @return whether the package is marked as installed
      */
     boolean isInstalled();
+
+    /**
+     * In epoch milliseconds. The timestamp of the first install of the app of the particular user
+     * on the device, surviving past app updates. Different users might have a different first
+     * install time.
+     * <p/>
+     * This does not survive full removal of the app (i.e., uninstalls for all users).
+     */
+    @CurrentTimeMillisLong
+    long getFirstInstallTimeMillis();
 
     // Methods below this comment are not yet exposed as API
 
@@ -206,15 +217,4 @@ public interface PackageUserState {
      */
     @Nullable
     String getSplashScreenTheme();
-
-    /**
-     * In epoch milliseconds. The timestamp of the first install of the app of the particular user
-     * on the device, surviving past app updates. Different users might have a different first
-     * install time.
-     * <p/>
-     * This does not survive full removal of the app (i.e., uninstalls for all users).
-     *
-     * @hide
-     */
-    long getFirstInstallTime();
 }

@@ -236,13 +236,13 @@ class OverlayReferenceMapperTests {
         whenever(packageName) { "$TARGET_PACKAGE_NAME$increment" }
         whenever(overlayables) { mapOf("overlayableName$increment" to ACTOR_NAME) }
         whenever(toString()) { "Package{$packageName}" }
-        whenever(isOverlay) { false }
+        whenever(isResourceOverlay) { false }
     }
 
     private fun mockOverlay(increment: Int = 0) = mockThrowOnUnmocked<AndroidPackage> {
         whenever(packageName) { "$OVERLAY_PACKAGE_NAME$increment" }
         whenever(overlayables) { emptyMap<String, String>() }
         whenever(toString()) { "Package{$packageName}" }
-        whenever(isOverlay) { true }
+        whenever(isResourceOverlay) { true }
     }
 }

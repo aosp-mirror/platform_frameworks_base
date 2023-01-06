@@ -301,9 +301,10 @@ public class PackageStateImpl implements PackageState {
     }
 
     @Override
-    public int getSharedUserAppId() {
-        return mSharedUserAppId;
+    public boolean isApex() {
+        return getAndroidPackage() != null && getAndroidPackage().isApex();
     }
+
     /**
      * @hide
      */
@@ -372,7 +373,7 @@ public class PackageStateImpl implements PackageState {
         private final int mUninstallReason;
         @Nullable
         private final String mSplashScreenTheme;
-        private final long mFirstInstallTime;
+        private final long mFirstInstallTimeMillis;
 
         private UserStateImpl(@NonNull PackageUserState userState) {
             mCeDataInode = userState.getCeDataInode();
@@ -394,7 +395,7 @@ public class PackageStateImpl implements PackageState {
             setBoolean(Booleans.STOPPED, userState.isStopped());
             setBoolean(Booleans.SUSPENDED, userState.isSuspended());
             setBoolean(Booleans.VIRTUAL_PRELOAD, userState.isVirtualPreload());
-            mFirstInstallTime = userState.getFirstInstallTime();
+            mFirstInstallTimeMillis = userState.getFirstInstallTimeMillis();
         }
 
         @Override
@@ -538,8 +539,8 @@ public class PackageStateImpl implements PackageState {
         }
 
         @DataClass.Generated.Member
-        public long getFirstInstallTime() {
-            return mFirstInstallTime;
+        public long getFirstInstallTimeMillis() {
+            return mFirstInstallTimeMillis;
         }
 
         @DataClass.Generated.Member
@@ -549,10 +550,10 @@ public class PackageStateImpl implements PackageState {
         }
 
         @DataClass.Generated(
-                time = 1666719622708L,
+                time = 1671671043891L,
                 codegenVersion = "1.0.23",
                 sourceFile = "frameworks/base/services/core/java/com/android/server/pm/pkg/PackageStateImpl.java",
-                inputSignatures = "private  int mBooleans\nprivate final  long mCeDataInode\nprivate final @android.annotation.NonNull android.util.ArraySet<java.lang.String> mDisabledComponents\nprivate final @android.content.pm.PackageManager.DistractionRestriction int mDistractionFlags\nprivate final @android.annotation.NonNull android.util.ArraySet<java.lang.String> mEnabledComponents\nprivate final  int mEnabledState\nprivate final @android.annotation.Nullable java.lang.String mHarmfulAppWarning\nprivate final @android.content.pm.PackageManager.InstallReason int mInstallReason\nprivate final @android.annotation.Nullable java.lang.String mLastDisableAppCaller\nprivate final @android.annotation.NonNull android.content.pm.overlay.OverlayPaths mOverlayPaths\nprivate final @android.annotation.NonNull java.util.Map<java.lang.String,android.content.pm.overlay.OverlayPaths> mSharedLibraryOverlayPaths\nprivate final @android.content.pm.PackageManager.UninstallReason int mUninstallReason\nprivate final @android.annotation.Nullable java.lang.String mSplashScreenTheme\nprivate final  long mFirstInstallTime\npublic static  com.android.server.pm.pkg.PackageUserState copy(com.android.server.pm.pkg.PackageUserState)\nprivate  void setBoolean(int,boolean)\nprivate  boolean getBoolean(int)\npublic @java.lang.Override boolean isHidden()\npublic @java.lang.Override boolean isInstalled()\npublic @java.lang.Override boolean isInstantApp()\npublic @java.lang.Override boolean isNotLaunched()\npublic @java.lang.Override boolean isStopped()\npublic @java.lang.Override boolean isSuspended()\npublic @java.lang.Override boolean isVirtualPreload()\npublic @java.lang.Override boolean isComponentEnabled(java.lang.String)\npublic @java.lang.Override boolean isComponentDisabled(java.lang.String)\npublic @java.lang.Override android.content.pm.overlay.OverlayPaths getAllOverlayPaths()\nclass UserStateImpl extends java.lang.Object implements [com.android.server.pm.pkg.PackageUserState]\nprivate static final  int HIDDEN\nprivate static final  int INSTALLED\nprivate static final  int INSTANT_APP\nprivate static final  int NOT_LAUNCHED\nprivate static final  int STOPPED\nprivate static final  int SUSPENDED\nprivate static final  int VIRTUAL_PRELOAD\nclass Booleans extends java.lang.Object implements []\n@com.android.internal.util.DataClass(genConstructor=false)")
+                inputSignatures = "private  int mBooleans\nprivate final  long mCeDataInode\nprivate final @android.annotation.NonNull android.util.ArraySet<java.lang.String> mDisabledComponents\nprivate final @android.content.pm.PackageManager.DistractionRestriction int mDistractionFlags\nprivate final @android.annotation.NonNull android.util.ArraySet<java.lang.String> mEnabledComponents\nprivate final  int mEnabledState\nprivate final @android.annotation.Nullable java.lang.String mHarmfulAppWarning\nprivate final @android.content.pm.PackageManager.InstallReason int mInstallReason\nprivate final @android.annotation.Nullable java.lang.String mLastDisableAppCaller\nprivate final @android.annotation.NonNull android.content.pm.overlay.OverlayPaths mOverlayPaths\nprivate final @android.annotation.NonNull java.util.Map<java.lang.String,android.content.pm.overlay.OverlayPaths> mSharedLibraryOverlayPaths\nprivate final @android.content.pm.PackageManager.UninstallReason int mUninstallReason\nprivate final @android.annotation.Nullable java.lang.String mSplashScreenTheme\nprivate final  long mFirstInstallTimeMillis\npublic static  com.android.server.pm.pkg.PackageUserState copy(com.android.server.pm.pkg.PackageUserState)\nprivate  void setBoolean(int,boolean)\nprivate  boolean getBoolean(int)\npublic @java.lang.Override boolean isHidden()\npublic @java.lang.Override boolean isInstalled()\npublic @java.lang.Override boolean isInstantApp()\npublic @java.lang.Override boolean isNotLaunched()\npublic @java.lang.Override boolean isStopped()\npublic @java.lang.Override boolean isSuspended()\npublic @java.lang.Override boolean isVirtualPreload()\npublic @java.lang.Override boolean isComponentEnabled(java.lang.String)\npublic @java.lang.Override boolean isComponentDisabled(java.lang.String)\npublic @java.lang.Override android.content.pm.overlay.OverlayPaths getAllOverlayPaths()\nclass UserStateImpl extends java.lang.Object implements [com.android.server.pm.pkg.PackageUserState]\nprivate static final  int HIDDEN\nprivate static final  int INSTALLED\nprivate static final  int INSTANT_APP\nprivate static final  int NOT_LAUNCHED\nprivate static final  int STOPPED\nprivate static final  int SUSPENDED\nprivate static final  int VIRTUAL_PRELOAD\nclass Booleans extends java.lang.Object implements []\n@com.android.internal.util.DataClass(genConstructor=false)")
         @Deprecated
         private void __metadata() {}
 
@@ -663,6 +664,11 @@ public class PackageStateImpl implements PackageState {
     }
 
     @DataClass.Generated.Member
+    public int getSharedUserAppId() {
+        return mSharedUserAppId;
+    }
+
+    @DataClass.Generated.Member
     public @NonNull String[] getUsesSdkLibraries() {
         return mUsesSdkLibraries;
     }
@@ -714,10 +720,10 @@ public class PackageStateImpl implements PackageState {
     }
 
     @DataClass.Generated(
-            time = 1666719622749L,
+            time = 1671671043929L,
             codegenVersion = "1.0.23",
             sourceFile = "frameworks/base/services/core/java/com/android/server/pm/pkg/PackageStateImpl.java",
-            inputSignatures = "private  int mBooleans\nprivate final @android.annotation.Nullable com.android.server.pm.pkg.AndroidPackage mAndroidPackage\nprivate final @android.annotation.NonNull java.lang.String mPackageName\nprivate final @android.annotation.Nullable java.lang.String mVolumeUuid\nprivate final  int mAppId\nprivate final  int mCategoryOverride\nprivate final @android.annotation.Nullable java.lang.String mCpuAbiOverride\nprivate final @android.content.pm.ApplicationInfo.HiddenApiEnforcementPolicy int mHiddenApiEnforcementPolicy\nprivate final  long mLastModifiedTime\nprivate final  long mLastUpdateTime\nprivate final  long mLongVersionCode\nprivate final @android.annotation.NonNull java.util.Map<java.lang.String,java.util.Set<java.lang.String>> mMimeGroups\nprivate final @android.annotation.NonNull java.io.File mPath\nprivate final @android.annotation.Nullable java.lang.String mPrimaryCpuAbi\nprivate final @android.annotation.Nullable java.lang.String mSecondaryCpuAbi\nprivate final @android.annotation.Nullable java.lang.String mSeInfo\nprivate final  boolean mHasSharedUser\nprivate final  int mSharedUserAppId\nprivate final @android.annotation.NonNull java.lang.String[] mUsesSdkLibraries\nprivate final @android.annotation.NonNull long[] mUsesSdkLibrariesVersionsMajor\nprivate final @android.annotation.NonNull java.lang.String[] mUsesStaticLibraries\nprivate final @android.annotation.NonNull long[] mUsesStaticLibrariesVersions\nprivate final @android.annotation.NonNull java.util.List<com.android.server.pm.pkg.SharedLibrary> mUsesLibraries\nprivate final @android.annotation.NonNull java.util.List<java.lang.String> mUsesLibraryFiles\nprivate final @android.annotation.NonNull long[] mLastPackageUsageTime\nprivate final @android.annotation.NonNull android.content.pm.SigningInfo mSigningInfo\nprivate final @android.annotation.NonNull android.util.SparseArray<com.android.server.pm.pkg.PackageUserState> mUserStates\npublic static  com.android.server.pm.pkg.PackageState copy(com.android.server.pm.pkg.PackageStateInternal)\nprivate  void setBoolean(int,boolean)\nprivate  boolean getBoolean(int)\npublic @android.annotation.NonNull @java.lang.Override com.android.server.pm.pkg.PackageUserState getStateForUser(android.os.UserHandle)\npublic @java.lang.Override boolean isExternalStorage()\npublic @java.lang.Override boolean isForceQueryableOverride()\npublic @java.lang.Override boolean isHiddenUntilInstalled()\npublic @java.lang.Override boolean isInstallPermissionsFixed()\npublic @java.lang.Override boolean isOdm()\npublic @java.lang.Override boolean isOem()\npublic @java.lang.Override boolean isPrivileged()\npublic @java.lang.Override boolean isProduct()\npublic @java.lang.Override boolean isRequiredForSystemUser()\npublic @java.lang.Override boolean isSystem()\npublic @java.lang.Override boolean isSystemExt()\npublic @java.lang.Override boolean isUpdateAvailable()\npublic @java.lang.Override boolean isUpdatedSystemApp()\npublic @java.lang.Override boolean isApkInUpdatedApex()\npublic @java.lang.Override boolean isVendor()\npublic @java.lang.Override long getVersionCode()\npublic @java.lang.Override boolean hasSharedUser()\npublic @java.lang.Override int getSharedUserAppId()\nclass PackageStateImpl extends java.lang.Object implements [com.android.server.pm.pkg.PackageState]\nprivate static final  int SYSTEM\nprivate static final  int EXTERNAL_STORAGE\nprivate static final  int PRIVILEGED\nprivate static final  int OEM\nprivate static final  int VENDOR\nprivate static final  int PRODUCT\nprivate static final  int SYSTEM_EXT\nprivate static final  int REQUIRED_FOR_SYSTEM_USER\nprivate static final  int ODM\nprivate static final  int FORCE_QUERYABLE_OVERRIDE\nprivate static final  int HIDDEN_UNTIL_INSTALLED\nprivate static final  int INSTALL_PERMISSIONS_FIXED\nprivate static final  int UPDATE_AVAILABLE\nprivate static final  int UPDATED_SYSTEM_APP\nprivate static final  int APK_IN_UPDATED_APEX\nclass Booleans extends java.lang.Object implements []\n@com.android.internal.util.DataClass(genConstructor=false)")
+            inputSignatures = "private  int mBooleans\nprivate final @android.annotation.Nullable com.android.server.pm.pkg.AndroidPackage mAndroidPackage\nprivate final @android.annotation.NonNull java.lang.String mPackageName\nprivate final @android.annotation.Nullable java.lang.String mVolumeUuid\nprivate final  int mAppId\nprivate final  int mCategoryOverride\nprivate final @android.annotation.Nullable java.lang.String mCpuAbiOverride\nprivate final @android.content.pm.ApplicationInfo.HiddenApiEnforcementPolicy int mHiddenApiEnforcementPolicy\nprivate final  long mLastModifiedTime\nprivate final  long mLastUpdateTime\nprivate final  long mLongVersionCode\nprivate final @android.annotation.NonNull java.util.Map<java.lang.String,java.util.Set<java.lang.String>> mMimeGroups\nprivate final @android.annotation.NonNull java.io.File mPath\nprivate final @android.annotation.Nullable java.lang.String mPrimaryCpuAbi\nprivate final @android.annotation.Nullable java.lang.String mSecondaryCpuAbi\nprivate final @android.annotation.Nullable java.lang.String mSeInfo\nprivate final  boolean mHasSharedUser\nprivate final  int mSharedUserAppId\nprivate final @android.annotation.NonNull java.lang.String[] mUsesSdkLibraries\nprivate final @android.annotation.NonNull long[] mUsesSdkLibrariesVersionsMajor\nprivate final @android.annotation.NonNull java.lang.String[] mUsesStaticLibraries\nprivate final @android.annotation.NonNull long[] mUsesStaticLibrariesVersions\nprivate final @android.annotation.NonNull java.util.List<com.android.server.pm.pkg.SharedLibrary> mUsesLibraries\nprivate final @android.annotation.NonNull java.util.List<java.lang.String> mUsesLibraryFiles\nprivate final @android.annotation.NonNull long[] mLastPackageUsageTime\nprivate final @android.annotation.NonNull android.content.pm.SigningInfo mSigningInfo\nprivate final @android.annotation.NonNull android.util.SparseArray<com.android.server.pm.pkg.PackageUserState> mUserStates\npublic static  com.android.server.pm.pkg.PackageState copy(com.android.server.pm.pkg.PackageStateInternal)\nprivate  void setBoolean(int,boolean)\nprivate  boolean getBoolean(int)\npublic @android.annotation.NonNull @java.lang.Override com.android.server.pm.pkg.PackageUserState getStateForUser(android.os.UserHandle)\npublic @java.lang.Override boolean isExternalStorage()\npublic @java.lang.Override boolean isForceQueryableOverride()\npublic @java.lang.Override boolean isHiddenUntilInstalled()\npublic @java.lang.Override boolean isInstallPermissionsFixed()\npublic @java.lang.Override boolean isOdm()\npublic @java.lang.Override boolean isOem()\npublic @java.lang.Override boolean isPrivileged()\npublic @java.lang.Override boolean isProduct()\npublic @java.lang.Override boolean isRequiredForSystemUser()\npublic @java.lang.Override boolean isSystem()\npublic @java.lang.Override boolean isSystemExt()\npublic @java.lang.Override boolean isUpdateAvailable()\npublic @java.lang.Override boolean isUpdatedSystemApp()\npublic @java.lang.Override boolean isApkInUpdatedApex()\npublic @java.lang.Override boolean isVendor()\npublic @java.lang.Override long getVersionCode()\npublic @java.lang.Override boolean hasSharedUser()\npublic @java.lang.Override boolean isApex()\nclass PackageStateImpl extends java.lang.Object implements [com.android.server.pm.pkg.PackageState]\nprivate static final  int SYSTEM\nprivate static final  int EXTERNAL_STORAGE\nprivate static final  int PRIVILEGED\nprivate static final  int OEM\nprivate static final  int VENDOR\nprivate static final  int PRODUCT\nprivate static final  int SYSTEM_EXT\nprivate static final  int REQUIRED_FOR_SYSTEM_USER\nprivate static final  int ODM\nprivate static final  int FORCE_QUERYABLE_OVERRIDE\nprivate static final  int HIDDEN_UNTIL_INSTALLED\nprivate static final  int INSTALL_PERMISSIONS_FIXED\nprivate static final  int UPDATE_AVAILABLE\nprivate static final  int UPDATED_SYSTEM_APP\nprivate static final  int APK_IN_UPDATED_APEX\nclass Booleans extends java.lang.Object implements []\n@com.android.internal.util.DataClass(genConstructor=false)")
     @Deprecated
     private void __metadata() {}
 
