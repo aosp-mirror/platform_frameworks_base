@@ -328,6 +328,7 @@ class WindowMagnificationSettings implements MagnificationGestureDetector.OnGest
         }
 
         mContext.unregisterReceiver(mScreenOffReceiver);
+        mCallback.onSettingsPanelVisibilityChanged(/* shown= */ false);
     }
 
     public void showSettingPanel() {
@@ -362,6 +363,7 @@ class WindowMagnificationSettings implements MagnificationGestureDetector.OnGest
             // Exclude magnification switch button from system gesture area.
             setSystemGestureExclusion();
             mIsVisible = true;
+            mCallback.onSettingsPanelVisibilityChanged(/* shown= */ true);
         }
         mContext.registerReceiver(mScreenOffReceiver, new IntentFilter(Intent.ACTION_SCREEN_OFF));
     }
