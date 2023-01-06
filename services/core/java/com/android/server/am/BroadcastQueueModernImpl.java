@@ -1341,7 +1341,7 @@ class BroadcastQueueModernImpl extends BroadcastQueue {
             @NonNull BroadcastPredicate broadcastPredicate,
             @NonNull BroadcastConsumer broadcastConsumer, boolean andRemove) {
         boolean didSomething = false;
-        for (int i = 0; i < mProcessQueues.size(); i++) {
+        for (int i = mProcessQueues.size() - 1; i >= 0; i--) {
             BroadcastProcessQueue leaf = mProcessQueues.valueAt(i);
             while (leaf != null) {
                 if (queuePredicate.test(leaf)) {
@@ -1363,7 +1363,7 @@ class BroadcastQueueModernImpl extends BroadcastQueue {
     private void forEachMatchingQueue(
             @NonNull Predicate<BroadcastProcessQueue> queuePredicate,
             @NonNull Consumer<BroadcastProcessQueue> queueConsumer) {
-        for (int i = 0; i < mProcessQueues.size(); i++) {
+        for (int i = mProcessQueues.size() - 1; i >= 0; i--) {
             BroadcastProcessQueue leaf = mProcessQueues.valueAt(i);
             while (leaf != null) {
                 if (queuePredicate.test(leaf)) {
