@@ -189,6 +189,7 @@ public class WallpaperManagerService extends IWallpaperManager.Stub
     }
 
     private final Object mLock = new Object();
+    private final boolean mEnableSeparateLockScreenEngine;
 
     /**
      * Minimum time between crashes of a wallpaper service for us to consider
@@ -1758,6 +1759,9 @@ public class WallpaperManagerService extends IWallpaperManager.Stub
         mActivityManager = mContext.getSystemService(ActivityManager.class);
         mMonitor = new MyPackageMonitor();
         mColorsChangedListeners = new SparseArray<>();
+
+        mEnableSeparateLockScreenEngine = mContext.getResources().getBoolean(
+                R.bool.config_independentLockscreenLiveWallpaper);
 
         LocalServices.addService(WallpaperManagerInternal.class, new LocalService());
     }
