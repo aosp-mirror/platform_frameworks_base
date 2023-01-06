@@ -208,6 +208,13 @@ public class DreamOverlayService extends android.service.dreams.DreamOverlayServ
         });
     }
 
+    @Override
+    public void onEndDream() {
+        mExecutor.execute(() -> {
+            resetCurrentDreamOverlayLocked();
+        });
+    }
+
     private Lifecycle.State getCurrentStateLocked() {
         return mLifecycleRegistry.getCurrentState();
     }
@@ -291,6 +298,7 @@ public class DreamOverlayService extends android.service.dreams.DreamOverlayServ
         mDreamOverlayContainerViewController = null;
         mDreamOverlayTouchMonitor = null;
 
+        mWindow = null;
         mStarted = false;
     }
 }

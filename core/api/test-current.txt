@@ -2412,6 +2412,7 @@ package android.service.dreams {
   public abstract class DreamOverlayService extends android.app.Service {
     ctor public DreamOverlayService();
     method @Nullable public final android.os.IBinder onBind(@NonNull android.content.Intent);
+    method public void onEndDream();
     method public abstract void onStartDream(@NonNull android.view.WindowManager.LayoutParams);
     method public final void requestExit();
     method public final boolean shouldShowComplications();
