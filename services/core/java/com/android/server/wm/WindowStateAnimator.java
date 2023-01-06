@@ -329,8 +329,8 @@ class WindowStateAnimator {
 
             mSurfaceController = new WindowSurfaceController(attrs.getTitle().toString(), format,
                     flags, this, attrs.type);
-            mSurfaceController.setColorSpaceAgnostic((attrs.privateFlags
-                    & WindowManager.LayoutParams.PRIVATE_FLAG_COLOR_SPACE_AGNOSTIC) != 0);
+            mSurfaceController.setColorSpaceAgnostic(w.getPendingTransaction(),
+                    (attrs.privateFlags & LayoutParams.PRIVATE_FLAG_COLOR_SPACE_AGNOSTIC) != 0);
 
             w.setHasSurface(true);
             // The surface instance is changed. Make sure the input info can be applied to the
@@ -531,7 +531,7 @@ class WindowStateAnimator {
         if (mSurfaceController == null) {
             return;
         }
-        mSurfaceController.setColorSpaceAgnostic(agnostic);
+        mSurfaceController.setColorSpaceAgnostic(mWin.getPendingTransaction(), agnostic);
     }
 
     /**

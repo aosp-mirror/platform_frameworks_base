@@ -236,24 +236,13 @@ class WindowSurfaceController {
         }
     }
 
-    void setColorSpaceAgnostic(boolean agnostic) {
+    void setColorSpaceAgnostic(SurfaceControl.Transaction t, boolean agnostic) {
         ProtoLog.i(WM_SHOW_TRANSACTIONS, "SURFACE isColorSpaceAgnostic=%b: %s", agnostic, title);
 
         if (mSurfaceControl == null) {
             return;
         }
-        if (SHOW_LIGHT_TRANSACTIONS) {
-            Slog.i(TAG, ">>> OPEN TRANSACTION setColorSpaceAgnosticLocked");
-        }
-        mService.openSurfaceTransaction();
-        try {
-            getGlobalTransaction().setColorSpaceAgnostic(mSurfaceControl, agnostic);
-        } finally {
-            mService.closeSurfaceTransaction("setColorSpaceAgnostic");
-            if (SHOW_LIGHT_TRANSACTIONS) {
-                Slog.i(TAG, "<<< CLOSE TRANSACTION setColorSpaceAgnosticLocked");
-            }
-        }
+        t.setColorSpaceAgnostic(mSurfaceControl, agnostic);
     }
 
     boolean showRobustly(SurfaceControl.Transaction t) {
