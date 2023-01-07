@@ -501,6 +501,17 @@ public class LockIconViewController extends ViewController<LockIconView> impleme
                 }
 
                 @Override
+                public void onBiometricsCleared() {
+                    final boolean wasUserUnlockedWithBiometric = mUserUnlockedWithBiometric;
+                    mUserUnlockedWithBiometric =
+                            mKeyguardUpdateMonitor.getUserUnlockedWithBiometric(
+                                    KeyguardUpdateMonitor.getCurrentUser());
+                    if (wasUserUnlockedWithBiometric != mUserUnlockedWithBiometric) {
+                        updateVisibility();
+                    }
+                }
+
+                @Override
                 public void onBiometricRunningStateChanged(boolean running,
                         BiometricSourceType biometricSourceType) {
                     final boolean wasRunningFps = mRunningFPS;

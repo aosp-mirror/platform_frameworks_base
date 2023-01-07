@@ -35,6 +35,8 @@ import android.graphics.Rect;
 import android.os.Bundle;
 import android.os.IBinder;
 import android.util.ArrayMap;
+import android.view.WindowManager;
+import android.window.TaskFragmentOrganizer;
 
 import androidx.annotation.GuardedBy;
 import androidx.annotation.NonNull;
@@ -43,13 +45,13 @@ import androidx.annotation.UiContext;
 import androidx.window.common.CommonFoldingFeature;
 import androidx.window.common.DeviceStateManagerFoldingFeatureProducer;
 import androidx.window.common.EmptyLifecycleCallbacksAdapter;
-import androidx.window.common.RawFoldingFeatureProducer;
 import androidx.window.util.DataProducer;
 
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Set;
 import java.util.function.Consumer;
 
@@ -80,13 +82,16 @@ public class WindowLayoutComponentImpl implements WindowLayoutComponent {
     private final Map<IBinder, ConfigurationChangeListener> mConfigurationChangeListeners =
             new ArrayMap<>();
 
-    public WindowLayoutComponentImpl(@NonNull Context context) {
+    private final TaskFragmentOrganizer mTaskFragmentOrganizer;
+
+    public WindowLayoutComponentImpl(@NonNull Context context,
+            @NonNull TaskFragmentOrganizer taskFragmentOrganizer,
+            @NonNull DeviceStateManagerFoldingFeatureProducer foldingFeatureProducer) {
         ((Application) context.getApplicationContext())
                 .registerActivityLifecycleCallbacks(new NotifyOnConfigurationChanged());
-        RawFoldingFeatureProducer foldingFeatureProducer = new RawFoldingFeatureProducer(context);
-        mFoldingFeatureProducer = new DeviceStateManagerFoldingFeatureProducer(context,
-                foldingFeatureProducer);
+        mFoldingFeatureProducer = foldingFeatureProducer;
         mFoldingFeatureProducer.addDataChangedCallback(this::onDisplayFeaturesChanged);
+        mTaskFragmentOrganizer = taskFragmentOrganizer;
     }
 
     /** Registers to listen to {@link CommonFoldingFeature} changes */
@@ -182,7 +187,7 @@ public class WindowLayoutComponentImpl implements WindowLayoutComponent {
 
     @GuardedBy("mLock")
     private boolean isListeningForLayoutChanges(IBinder token) {
-        for (Context context: getContextsListeningForLayoutChanges()) {
+        for (Context context : getContextsListeningForLayoutChanges()) {
             if (token.equals(Context.getToken(context))) {
                 return true;
             }
@@ -230,8 +235,9 @@ public class WindowLayoutComponentImpl implements WindowLayoutComponent {
     /**
      * Translates the {@link DisplayFeature} into a {@link WindowLayoutInfo} when a
      * valid state is found.
+     *
      * @param context a proxy for the {@link android.view.Window} that contains the
-     * {@link DisplayFeature}.
+     *                {@link DisplayFeature}.
      */
     private WindowLayoutInfo getWindowLayoutInfo(@NonNull @UiContext Context context,
             List<CommonFoldingFeature> storedFeatures) {
@@ -243,7 +249,7 @@ public class WindowLayoutComponentImpl implements WindowLayoutComponent {
      * Gets the current {@link WindowLayoutInfo} computed with passed {@link WindowConfiguration}.
      *
      * @return current {@link WindowLayoutInfo} on the default display. Returns
-     *   empty {@link WindowLayoutInfo} on secondary displays.
+     * empty {@link WindowLayoutInfo} on secondary displays.
      */
     @NonNull
     public WindowLayoutInfo getCurrentWindowLayoutInfo(int displayId,
@@ -254,7 +260,7 @@ public class WindowLayoutComponentImpl implements WindowLayoutComponent {
         }
     }
 
-    /** @see #getWindowLayoutInfo(Context, List)  */
+    /** @see #getWindowLayoutInfo(Context, List) */
     private WindowLayoutInfo getWindowLayoutInfo(int displayId,
             @NonNull WindowConfiguration windowConfiguration,
             List<CommonFoldingFeature> storedFeatures) {
@@ -278,7 +284,8 @@ public class WindowLayoutComponentImpl implements WindowLayoutComponent {
      *
      * @param context a proxy for the {@link android.view.Window} that contains the
      * {@link DisplayFeature}.
-     * are within the {@link android.view.Window} of the {@link Activity}
+     * @return a {@link List}  of {@link DisplayFeature}s that are within the
+     * {@link android.view.Window} of the {@link Activity}
      */
     private List<DisplayFeature> getDisplayFeatures(
             @NonNull @UiContext Context context, List<CommonFoldingFeature> storedFeatures) {
@@ -317,8 +324,11 @@ public class WindowLayoutComponentImpl implements WindowLayoutComponent {
     }
 
     /**
-     * Checks whether display features should be reported for the activity.
+     * Calculates if the display features should be reported for the UI Context. The calculation
+     * uses the task information because that is accurate for Activities in ActivityEmbedding mode.
      * TODO(b/238948678): Support reporting display features in all windowing modes.
+     *
+     * @return true if the display features should be reported for the UI Context, false otherwise.
      */
     private boolean shouldReportDisplayFeatures(@NonNull @UiContext Context context) {
         int displayId = context.getDisplay().getDisplayId();
@@ -337,7 +347,27 @@ public class WindowLayoutComponentImpl implements WindowLayoutComponent {
                 // bounds in this case can't be computed correctly, so we should skip.
                 return false;
             }
-            windowingMode = taskConfig.windowConfiguration.getWindowingMode();
+            final Rect taskBounds = taskConfig.windowConfiguration.getBounds();
+            final WindowManager windowManager = Objects.requireNonNull(
+                    context.getSystemService(WindowManager.class));
+            final Rect currentBounds = windowManager.getCurrentWindowMetrics().getBounds();
+            final Rect maxBounds = windowManager.getMaximumWindowMetrics().getBounds();
+            boolean isTaskExpanded = maxBounds.equals(taskBounds);
+            boolean isActivityExpanded = maxBounds.equals(currentBounds);
+            /*
+             * We need to proxy being in full screen because when a user enters PiP and exits PiP
+             * the task windowingMode will report multi-window/pinned until the transition is
+             * finished in WM Shell.
+             * maxBounds == taskWindowBounds is a proxy check to verify the window is full screen
+             * For tasks that are letterboxed, we use currentBounds == maxBounds to filter these
+             * out.
+             */
+            // TODO(b/262900133) remove currentBounds check when letterboxed apps report bounds.
+            // currently we don't want to report to letterboxed apps since they do not update the
+            // window bounds when the Activity is moved.  An inaccurate fold will be reported so
+            // we skip.
+            return isTaskExpanded && (isActivityExpanded
+                    || mTaskFragmentOrganizer.isActivityEmbedded(activityToken));
         } else {
             // TODO(b/242674941): use task windowing mode for window context that associates with
             //  activity.
@@ -390,6 +420,7 @@ public class WindowLayoutComponentImpl implements WindowLayoutComponent {
         }
 
         @Override
-        public void onLowMemory() {}
+        public void onLowMemory() {
+        }
     }
 }

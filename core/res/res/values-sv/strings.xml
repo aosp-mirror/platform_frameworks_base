@@ -1173,7 +1173,7 @@
     <string name="selected" msgid="6614607926197755875">"valt"</string>
     <string name="not_selected" msgid="410652016565864475">"inte valt"</string>
     <string name="in_progress" msgid="2149208189184319441">"pågår"</string>
-    <string name="whichApplication" msgid="5432266899591255759">"Slutför åtgärd genom att använda"</string>
+    <string name="whichApplication" msgid="5432266899591255759">"Slutför åtgärd med"</string>
     <string name="whichApplicationNamed" msgid="6969946041713975681">"Slutför åtgärden med %1$s"</string>
     <string name="whichApplicationLabel" msgid="7852182961472531728">"Slutför åtgärd"</string>
     <string name="whichViewApplication" msgid="5733194231473132945">"Öppna med"</string>
