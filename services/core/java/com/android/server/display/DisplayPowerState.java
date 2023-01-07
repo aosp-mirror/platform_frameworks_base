@@ -340,12 +340,20 @@ final class DisplayPowerState {
     }
 
     /**
-     * Resets the screen state to unknown. Useful when the underlying display-device changes for the
-     * LogicalDisplay and we do not know the last state that was sent to it.
+     * Resets the screen state to {@link Display#STATE_OFF}. Even though we do not know the last
+     * state that was sent to the underlying display-device, we assume it is off.
+     *
+     * We do not set the screen state to {@link Display#STATE_UNKNOWN} to avoid getting in the state
+     * where PhotonicModulator holds onto the lock. This happens because we currently try to keep
+     * the mScreenState and mPendingState in sync, however if the screenState is set to
+     * {@link Display#STATE_UNKNOWN} here, mPendingState will get progressed to this, which will
+     * force the PhotonicModulator thread to wait onto the lock to take it out of that state.
+     * b/262294651 for more info.
      */
     void resetScreenState() {
-        mScreenState = Display.STATE_UNKNOWN;
+        mScreenState = Display.STATE_OFF;
         mScreenReady = false;
+        scheduleScreenUpdate();
     }
 
     private void scheduleScreenUpdate() {
