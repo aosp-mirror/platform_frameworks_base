@@ -14,10 +14,10 @@
     <string name="ssl_error_warning" msgid="3127935140338254180">"আপুনি সংযোগ কৰিবলৈ বিচৰা নেটৱৰ্কটোত সুৰক্ষাজনিত সমস্যা আছে।"</string>
     <string name="ssl_error_example" msgid="6188711843183058764">"উদাহৰণস্বৰূপে, আপোনাক দেখুওৱা লগ ইনৰ পৃষ্ঠাটো প্ৰতিষ্ঠানটোৰ নিজা নহ\'বও পাৰে।"</string>
     <string name="ssl_error_continue" msgid="1138548463994095584">"তথাপিও ব্ৰাউজাৰৰ জৰিয়তে অব্যাহত ৰাখক"</string>
-    <string name="network_boost_notification_channel" msgid="5430986172506159199">"নেটৱৰ্ক পৰিৱৰ্ধন"</string>
-    <string name="network_boost_notification_title" msgid="8226368121348880044">"%sএ এটা ডেটা পৰিৱৰ্ধনৰ চুপাৰিছ কৰিছে"</string>
-    <string name="network_boost_notification_detail" msgid="3812434025544196192">"উন্নত পাৰদৰ্শিতা পাবলৈ এটা নেটৱৰ্ক পৰিৱৰ্ধন ক্ৰয় কৰক"</string>
-    <string name="network_boost_notification_button_not_now" msgid="4129218252146702688">"এতিয়া নহয়"</string>
-    <string name="network_boost_notification_button_manage" msgid="1511552684142641182">"পৰিচালনা কৰক"</string>
-    <string name="slice_purchase_app_label" msgid="915654761797446390">"এটা নেটৱৰ্ক পৰিৱৰ্ধন ক্ৰয় কৰক।"</string>
+    <string name="performance_boost_notification_channel" msgid="3475440855635538592">"কাৰ্যক্ষমতা পৰিৱৰ্ধন"</string>
+    <string name="performance_boost_notification_title" msgid="5017421773334474875">"%sএ এটা কাৰ্যক্ষমতা পৰিৱৰ্ধনৰ চুপাৰিছ কৰিছে"</string>
+    <string name="performance_boost_notification_detail" msgid="7216286153533321852">"নেটৱৰ্কৰ উন্নত কাৰ্যক্ষমতা পাবলৈ কাৰ্যক্ষমতা পৰিৱৰ্ধন ক্ৰয় কৰক"</string>
+    <string name="performance_boost_notification_button_not_now" msgid="6459755324243683785">"এতিয়া নহয়"</string>
+    <string name="performance_boost_notification_button_manage" msgid="4976836444046497973">"পৰিচালনা কৰক"</string>
+    <string name="slice_purchase_app_label" msgid="7170191659233241166">"এটা কাৰ্যক্ষমতা পৰিৱৰ্ধন ক্ৰয় কৰক।"</string>
 </resources>

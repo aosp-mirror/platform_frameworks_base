@@ -18,10 +18,11 @@ package android.credentials.ui;
 
 import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.annotation.SuppressLint;
+import android.annotation.TestApi;
 import android.app.PendingIntent;
 import android.app.slice.Slice;
 import android.content.Intent;
-import android.net.Uri;
 import android.os.Parcel;
 import android.os.Parcelable;
 
@@ -32,58 +33,24 @@ import com.android.internal.util.AnnotationValidations;
  *
  * @hide
  */
-public class Entry implements Parcelable {
-    // TODO: these constants should go to jetpack.
-    public static final String VERSION = "v1";
-    public static final Uri CREDENTIAL_MANAGER_ENTRY_URI = Uri.parse("credentialmanager.slice");
-    // TODO: remove these hint constants and use the credential entry & action ones defined below.
-    public static final String HINT_TITLE = "HINT_TITLE";
-    public static final String HINT_SUBTITLE = "HINT_SUBTITLE";
-    public static final String HINT_ICON = "HINT_ICON";
-    /**
-     * 1. CREDENTIAL ENTRY CONSTANTS
-     */
-    // User profile picture associated with this credential entry.
-    public static final String HINT_PROFILE_ICON = "HINT_PROFILE_ICON";
-    public static final String HINT_CREDENTIAL_TYPE_ICON = "HINT_CREDENTIAL_TYPE_ICON";
-     // The user account name of this provider app associated with this entry.
-     // Note: this is independent from the request app.
-    public static final String HINT_USER_PROVIDER_ACCOUNT_NAME = "HINT_USER_PROVIDER_ACCOUNT_NAME";
-    public static final String HINT_PASSWORD_COUNT = "HINT_PASSWORD_COUNT";
-    public static final String HINT_PASSKEY_COUNT = "HINT_PASSKEY_COUNT";
-    public static final String HINT_TOTAL_CREDENTIAL_COUNT = "HINT_TOTAL_CREDENTIAL_COUNT";
-    public static final String HINT_LAST_USED_TIME_MILLIS = "HINT_LAST_USED_TIME_MILLIS";
-    /** Below are only available for get flows. */
-    public static final String HINT_NOTE = "HINT_NOTE";
-    public static final String HINT_USER_NAME = "HINT_USER_NAME";
-    public static final String HINT_CREDENTIAL_TYPE_DISPLAY_NAME =
-            "HINT_CREDENTIAL_TYPE_DISPLAY_NAME";
-    public static final String HINT_PASSKEY_USER_DISPLAY_NAME = "HINT_PASSKEY_USER_DISPLAY_NAME";
-    public static final String HINT_PASSWORD_VALUE = "HINT_PASSWORD_VALUE";
-
-    /**
-     * 2. ACTION CONSTANTS
-     */
-    public static final String HINT_ACTION_TITLE = "HINT_ACTION_TITLE";
-    public static final String HINT_ACTION_SUBTEXT = "HINT_ACTION_SUBTEXT";
-    public static final String HINT_ACTION_ICON = "HINT_ACTION_ICON";
-
+@TestApi
+public final class Entry implements Parcelable {
     /**
     * The intent extra key for the action chip {@code Entry} list when launching the UX activities.
     */
-    public static final String EXTRA_ENTRY_LIST_ACTION_CHIP =
+    @NonNull public static final String EXTRA_ENTRY_LIST_ACTION_CHIP =
             "android.credentials.ui.extra.ENTRY_LIST_ACTION_CHIP";
     /**
     * The intent extra key for the credential / save {@code Entry} list when launching the UX
     * activities.
     */
-    public static final String EXTRA_ENTRY_LIST_CREDENTIAL =
+    @NonNull public static final String EXTRA_ENTRY_LIST_CREDENTIAL =
             "android.credentials.ui.extra.ENTRY_LIST_CREDENTIAL";
     /**
     * The intent extra key for the authentication action {@code Entry} when launching the UX
     * activities.
     */
-    public static final String EXTRA_ENTRY_AUTHENTICATION_ACTION =
+    @NonNull public static final String EXTRA_ENTRY_AUTHENTICATION_ACTION =
             "android.credentials.ui.extra.ENTRY_AUTHENTICATION_ACTION";
 
     @NonNull private final String mKey;
@@ -94,7 +61,7 @@ public class Entry implements Parcelable {
     @NonNull
     private final Slice mSlice;
 
-    protected Entry(@NonNull Parcel in) {
+    private Entry(@NonNull Parcel in) {
         String key = in.readString8();
         String subkey = in.readString8();
         Slice slice = in.readTypedObject(Slice.CREATOR);
@@ -159,6 +126,7 @@ public class Entry implements Parcelable {
     }
 
     @Nullable
+    @SuppressLint("IntentBuilderName") // Not building a new intent.
     public Intent getFrameworkExtrasIntent() {
         return mFrameworkExtrasIntent;
     }

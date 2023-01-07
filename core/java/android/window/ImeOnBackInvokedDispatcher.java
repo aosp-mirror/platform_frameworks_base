@@ -226,8 +226,8 @@ public class ImeOnBackInvokedDispatcher implements OnBackInvokedDispatcher, Parc
                 previous.getOnBackInvokedDispatcher().unregisterOnBackInvokedCallback(imeCallback);
             }
             if (current != null) {
-                current.getOnBackInvokedDispatcher().registerOnBackInvokedCallback(
-                        imeCallback.mPriority, imeCallback);
+                current.getOnBackInvokedDispatcher().registerOnBackInvokedCallbackUnchecked(
+                        imeCallback, imeCallback.mPriority);
             }
         }
     }

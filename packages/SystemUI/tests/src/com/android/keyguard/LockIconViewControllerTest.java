@@ -264,6 +264,26 @@ public class LockIconViewControllerTest extends LockIconViewControllerBaseTest {
         // THEN the view is updated to NO translation (no burn-in offsets anymore)
         verify(mLockIconView).setTranslationY(0);
         verify(mLockIconView).setTranslationX(0);
+    }
 
+    @Test
+    public void lockIconShows_afterBiometricsCleared() {
+        // GIVEN lock icon controller is initialized and view is attached
+        init(/* useMigrationFlag= */false);
+        captureKeyguardUpdateMonitorCallback();
+
+        // GIVEN user has unlocked with a biometric auth (ie: face auth)
+        // and biometric running state changes
+        when(mKeyguardUpdateMonitor.getUserUnlockedWithBiometric(anyInt())).thenReturn(true);
+        mKeyguardUpdateMonitorCallback.onBiometricRunningStateChanged(false,
+                BiometricSourceType.FACE);
+        reset(mLockIconView);
+
+        // WHEN biometrics are cleared
+        when(mKeyguardUpdateMonitor.getUserUnlockedWithBiometric(anyInt())).thenReturn(false);
+        mKeyguardUpdateMonitorCallback.onBiometricsCleared();
+
+        // THEN the lock icon is shown
+        verify(mLockIconView).setContentDescription(LOCKED_LABEL);
     }
 }

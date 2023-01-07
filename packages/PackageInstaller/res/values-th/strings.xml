@@ -60,10 +60,8 @@
     <string name="uninstall_update_text" msgid="863648314632448705">"แทนที่แอปนี้ด้วยเวอร์ชันเริ่มต้นไหม ระบบจะนำข้อมูลทั้งหมดออก"</string>
     <string name="uninstall_update_text_multiuser" msgid="8992883151333057227">"แทนที่แอปนี้ด้วยเวอร์ชันเริ่มต้นไหม ระบบจะนำข้อมูลทั้งหมดออก วิธีนี้จะส่งผลต่อผู้ใช้ทุกคนที่ใช้อุปกรณ์เครื่องนี้ รวมทั้งผู้ที่มีโปรไฟล์งาน"</string>
     <string name="uninstall_keep_data" msgid="7002379587465487550">"เก็บข้อมูลแอปไว้ <xliff:g id="SIZE">%1$s</xliff:g>"</string>
-    <!-- no translation found for uninstall_application_text_current_user_clone_profile (835170400160011636) -->
-    <skip />
-    <!-- no translation found for uninstall_application_text_with_clone_instance (6944473334273349036) -->
-    <skip />
+    <string name="uninstall_application_text_current_user_clone_profile" msgid="835170400160011636">"ต้องการลบแอปนี้ไหม"</string>
+    <string name="uninstall_application_text_with_clone_instance" msgid="6944473334273349036">"ต้องการถอนการติดตั้งแอปนี้ไหม ระบบจะลบโคลนของ <xliff:g id="PACKAGE_LABEL">%1$s</xliff:g> ด้วย"</string>
     <string name="uninstalling_notification_channel" msgid="840153394325714653">"กำลังเรียกใช้การถอนการติดตั้ง"</string>
     <string name="uninstall_failure_notification_channel" msgid="1136405866767576588">"ถอนการติดตั้งไม่สำเร็จ"</string>
     <string name="uninstalling" msgid="8709566347688966845">"กำลังถอนการติดตั้ง…"</string>
@@ -72,8 +70,7 @@
     <string name="uninstall_done_app" msgid="4588850984473605768">"ถอนการติดตั้ง <xliff:g id="PACKAGE_LABEL">%1$s</xliff:g> แล้ว"</string>
     <string name="uninstall_failed" msgid="1847750968168364332">"ถอนการติดตั้งไม่สำเร็จ"</string>
     <string name="uninstall_failed_app" msgid="5506028705017601412">"ถอนการติดตั้ง <xliff:g id="PACKAGE_LABEL">%1$s</xliff:g> ไม่สำเร็จ"</string>
-    <!-- no translation found for uninstalling_cloned_app (1826380164974984870) -->
-    <skip />
+    <string name="uninstalling_cloned_app" msgid="1826380164974984870">"กำลังลบโคลนของ <xliff:g id="PACKAGE_LABEL">%1$s</xliff:g>…"</string>
     <string name="uninstall_failed_device_policy_manager" msgid="785293813665540305">"ถอนการติดตั้งแอปผู้ดูแลระบบอุปกรณ์ที่มีการใช้งานไม่ได้"</string>
     <string name="uninstall_failed_device_policy_manager_of_user" msgid="4813104025494168064">"ถอนการติดตั้งแอปผู้ดูแลระบบอุปกรณ์ที่มีการใช้งานสำหรับ <xliff:g id="USERNAME">%1$s</xliff:g> ไม่ได้"</string>
     <string name="uninstall_all_blocked_profile_owner" msgid="2009393666026751501">"แอปนี้จำเป็นสำหรับผู้ใช้หรือโปรไฟล์บางส่วน และถอนการติดตั้งไปแล้วสำหรับส่วนอื่น"</string>
@@ -94,8 +91,7 @@
     <string name="anonymous_source_warning" product="default" msgid="2784902545920822500">"โทรศัพท์และข้อมูลส่วนตัวของคุณมีความเสี่ยงมากขึ้นที่จะถูกโจมตีจากแอปที่ไม่รู้จัก การติดตั้งแอปนี้แสดงว่าคุณยอมรับว่าจะรับผิดชอบต่อความเสียหายใดๆ ที่จะเกิดขึ้นกับโทรศัพท์หรือการสูญเสียข้อมูลที่อาจเกิดจากการใช้งานแอปดังกล่าว"</string>
     <string name="anonymous_source_warning" product="tablet" msgid="3939101621438855516">"แท็บเล็ตและข้อมูลส่วนตัวของคุณมีความเสี่ยงมากขึ้นที่จะถูกโจมตีจากแอปที่ไม่รู้จัก การติดตั้งแอปนี้แสดงว่าคุณยอมรับว่าจะรับผิดชอบต่อความเสียหายใดๆ ที่จะเกิดขึ้นกับแท็บเล็ตหรือการสูญเสียข้อมูลที่อาจเกิดจากการใช้งานแอปดังกล่าว"</string>
     <string name="anonymous_source_warning" product="tv" msgid="5599483539528168566">"ทีวีและข้อมูลส่วนตัวของคุณมีความเสี่ยงมากขึ้นที่จะถูกโจมตีจากแอปที่ไม่รู้จัก การติดตั้งแอปนี้แสดงว่าคุณยอมรับว่าจะรับผิดชอบต่อความเสียหายใดๆ ที่จะเกิดขึ้นกับทีวีหรือการสูญเสียข้อมูลที่อาจเกิดจากการใช้งานแอปดังกล่าว"</string>
-    <!-- no translation found for cloned_app_label (7503612829833756160) -->
-    <skip />
+    <string name="cloned_app_label" msgid="7503612829833756160">"โคลนของ <xliff:g id="PACKAGE_LABEL">%1$s</xliff:g>"</string>
     <string name="anonymous_source_continue" msgid="4375745439457209366">"ดำเนินการต่อ"</string>
     <string name="external_sources_settings" msgid="4046964413071713807">"การตั้งค่า"</string>
     <string name="wear_app_channel" msgid="1960809674709107850">"กำลังติดตั้ง/ถอนการติดตั้งแอป Wear"</string>

@@ -60,10 +60,8 @@
     <string name="uninstall_update_text" msgid="863648314632448705">"ଏହି ଆପ୍‍ ଫ୍ୟାକ୍ଟୋରୀ ଭର୍ସନ୍‍‍ ସହ ବଦଳାଇବେ? ସମସ୍ତ ଡାଟା କାଢ଼ିଦିଆଯିବ।"</string>
     <string name="uninstall_update_text_multiuser" msgid="8992883151333057227">"ଏହି ଆପ୍‍ ଫ୍ୟାକ୍ଟୋରୀ ଭର୍ସନ୍‍‍ ସହ ବଦଳାଇବେ? ସମସ୍ତ ଡାଟା ବାହାର କରିଦିଆଯିବ। ୱର୍କ ପ୍ରୋଫାଇଲ୍‍ ଥିବା ସମେତ, ଏହାଦ୍ୱାରା ଡିଭାଇସରେ ଥିବା ସମସ୍ତ ୟୁଜର୍‌ ପ୍ରଭାବିତ ହେବେ।"</string>
     <string name="uninstall_keep_data" msgid="7002379587465487550">"<xliff:g id="SIZE">%1$s</xliff:g> ଆକାରର ଆପ୍‍ ଡାଟା ରଖନ୍ତୁୁ।"</string>
-    <!-- no translation found for uninstall_application_text_current_user_clone_profile (835170400160011636) -->
-    <skip />
-    <!-- no translation found for uninstall_application_text_with_clone_instance (6944473334273349036) -->
-    <skip />
+    <string name="uninstall_application_text_current_user_clone_profile" msgid="835170400160011636">"ଆପଣ ଏହି ଆପକୁ ଡିଲିଟ କରିବାକୁ ଚାହୁଁଛନ୍ତି?"</string>
+    <string name="uninstall_application_text_with_clone_instance" msgid="6944473334273349036">"ଆପଣ ଏହି ଆପକୁ ଅନଇନଷ୍ଟଲ କରିବାକୁ ଚାହୁଁଛନ୍ତି? <xliff:g id="PACKAGE_LABEL">%1$s</xliff:g> କ୍ଲୋନକୁ ମଧ୍ୟ ଡିଲିଟ କରାଯିବ।"</string>
     <string name="uninstalling_notification_channel" msgid="840153394325714653">"ଅନଇନଷ୍ଟଲ୍‌ ଚାଲୁଛି"</string>
     <string name="uninstall_failure_notification_channel" msgid="1136405866767576588">"ବିଫଳ ହୋଇଥିବା ଅନଇନଷ୍ଟଲ୍‌"</string>
     <string name="uninstalling" msgid="8709566347688966845">"ଅନ୍‌ଇନଷ୍ଟଲ୍‌ କରାଯାଉଛି…"</string>
@@ -72,8 +70,7 @@
     <string name="uninstall_done_app" msgid="4588850984473605768">"<xliff:g id="PACKAGE_LABEL">%1$s</xliff:g>କୁ ଅନଇନଷ୍ଟଲ୍‌ କରାଗଲା"</string>
     <string name="uninstall_failed" msgid="1847750968168364332">"ଅନଇନଷ୍ଟଲ୍‌ କରିହେଲା ନାହିଁ।"</string>
     <string name="uninstall_failed_app" msgid="5506028705017601412">"<xliff:g id="PACKAGE_LABEL">%1$s</xliff:g> ଅନଇନଷ୍ଟଲ୍‍ କରିବା ସଫଳ ହେଲାନାହିଁ।"</string>
-    <!-- no translation found for uninstalling_cloned_app (1826380164974984870) -->
-    <skip />
+    <string name="uninstalling_cloned_app" msgid="1826380164974984870">"<xliff:g id="PACKAGE_LABEL">%1$s</xliff:g> କ୍ଲୋନକୁ ଡିଲିଟ କରାଯାଉଛି…"</string>
     <string name="uninstall_failed_device_policy_manager" msgid="785293813665540305">"ସକ୍ରିୟ ଡିଭାଇସ୍‍ ଆପ୍‍ ଅନଇନଷ୍ଟଲ୍‌ କରିହେବ ନାହିଁ"</string>
     <string name="uninstall_failed_device_policy_manager_of_user" msgid="4813104025494168064">"<xliff:g id="USERNAME">%1$s</xliff:g>ଙ୍କ ପାଇଁ ସକ୍ରିୟ ଡିଭାଇସ୍‍ ଆଡମିନ୍‍ ଆପ୍‍ ଅନଇନଷ୍ଟଲ୍‍ କରାଯାଇପାରିବ ନାହିଁ"</string>
     <string name="uninstall_all_blocked_profile_owner" msgid="2009393666026751501">"କିଛି ୟୁଜର୍‌ କିମ୍ବା ପ୍ରୋଫାଇଲ୍‍ ପାଇଁ ଏହି ଆପ୍‍ ଆବଶ୍ୟକ ଏବଂ ଅନ୍ୟ ସମସ୍ତଙ୍କ ପାଇଁ ଅନଇନଷ୍ଟଲ୍‍ କରାଯାଇଥିଲା"</string>
@@ -94,8 +91,7 @@
     <string name="anonymous_source_warning" product="default" msgid="2784902545920822500">"ଅଜଣା ଆପ୍‌ ଦ୍ୱାରା ଆପଣଙ୍କ ଫୋନ୍‍ ଏବଂ ବ୍ୟକ୍ତିଗତ ଡାଟାକୁ ନଷ୍ଟ କରାଯାଇପାରିବାର ସମ୍ଭାବନା ବହୁତ ଅଧିକ। ଏହି ଆପ୍‌କୁ ଇନଷ୍ଟଲ୍‌ କରିବାର ଅର୍ଥ ହେଉଛି ଆପଣଙ୍କ ଫୋନ୍‌ରେ ଘଟିବା କୌଣସି ପ୍ରକାର କ୍ଷତି କିମ୍ବା ସେଗୁଡ଼ିକର ବ୍ୟବହାରରୁ ହେବା କୌଣସି ପ୍ରକାର ଡାଟାର ହାନୀ ପାଇଁ ଆପଣ ଦାୟୀ ରହିବାକୁ ରାଜି ହୁଅନ୍ତି।"</string>
     <string name="anonymous_source_warning" product="tablet" msgid="3939101621438855516">"ଅଜଣା ଆପ୍‌ ଦ୍ୱାରା ଆପଣଙ୍କ ଟାବଲେଟ୍‍ ଏବଂ ବ୍ୟକ୍ତିଗତ ଡାଟାକୁ ନଷ୍ଟ କରାଯାଇପାରିବାର ସମ୍ଭାବନା ବହୁତ ଅଧିକ। ଏହି ଆପ୍‌କୁ ଇନଷ୍ଟଲ୍‌ କରିବାର ଅର୍ଥ ହେଉଛି ଆପଣଙ୍କ ଟାବ୍‌ଲେଟ୍‌ରେ ଘଟିବା କୌଣସି ପ୍ରକାର କ୍ଷତି କିମ୍ବା ସେଗୁଡ଼ିକର ବ୍ୟବହାରରୁ ହେବା କୌଣସି ପ୍ରକାର ଡାଟାର ହାନୀ ପାଇଁ ଆପଣ ଦାୟୀ ରହିବାକୁ ରାଜି ହୁଅନ୍ତି।"</string>
     <string name="anonymous_source_warning" product="tv" msgid="5599483539528168566">"ଅଜଣା ଆପ୍‌ ଦ୍ୱାରା ଆପଣଙ୍କ ଟିଭି ଏବଂ ବ୍ୟକ୍ତିଗତ ଡାଟାକୁ ନଷ୍ଟ କରାଯାଇପାରିବାର ସମ୍ଭାବନା ବହୁତ ଅଧିକ। ଏହି ଆପ୍‌କୁ ଇନଷ୍ଟଲ୍‌ କରିବାର ଅର୍ଥ ହେଉଛି ଆପଣଙ୍କ ଟିଭିରେ ଘଟିବା କୌଣସି ପ୍ରକାର କ୍ଷତି କିମ୍ବା ସେଗୁଡ଼ିକର ବ୍ୟବହାରରୁ ହେବା କୌଣସି ପ୍ରକାର ଡାଟାର ହାନୀ ପାଇଁ ଆପଣ ଦାୟୀ ରହିବାକୁ ରାଜି ହୁଅନ୍ତି।"</string>
-    <!-- no translation found for cloned_app_label (7503612829833756160) -->
-    <skip />
+    <string name="cloned_app_label" msgid="7503612829833756160">"<xliff:g id="PACKAGE_LABEL">%1$s</xliff:g> କ୍ଲୋନ"</string>
     <string name="anonymous_source_continue" msgid="4375745439457209366">"ଜାରି ରଖନ୍ତୁ"</string>
     <string name="external_sources_settings" msgid="4046964413071713807">"ସେଟିଂସ"</string>
     <string name="wear_app_channel" msgid="1960809674709107850">"ୱିଅର୍‍ ଆପ୍‍ ଇନଷ୍ଟଲ୍‌/ଅନଇନଷ୍ଟଲ୍‍ କରାଯାଉଛି"</string>

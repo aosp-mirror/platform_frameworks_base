@@ -23,10 +23,8 @@
     <string name="dock_alignment_not_charging" product="default" msgid="3980752926226749808">"Col·loca bé el telèfon per carregar-lo sense fil"</string>
     <string name="inattentive_sleep_warning_message" product="tv" msgid="6844464574089665063">"El dispositiu Android TV s\'apagarà aviat; prem un botó per mantenir-lo encès."</string>
     <string name="inattentive_sleep_warning_message" product="default" msgid="5693904520452332224">"El dispositiu s\'apagarà aviat; prem per mantenir-lo encès."</string>
-    <!-- no translation found for keyguard_missing_sim_message (408124574073032188) -->
-    <skip />
-    <!-- no translation found for keyguard_missing_sim_message (2605468359948247208) -->
-    <skip />
+    <string name="keyguard_missing_sim_message" product="tablet" msgid="408124574073032188">"No hi ha cap SIM a la tauleta."</string>
+    <string name="keyguard_missing_sim_message" product="default" msgid="2605468359948247208">"No hi ha cap SIM al telèfon."</string>
     <string name="kg_invalid_confirm_pin_hint" product="default" msgid="6278551068943958651">"Els PIN no coincideixen"</string>
     <string name="kg_failed_attempts_almost_at_wipe" product="tablet" msgid="302165994845009232">"Has provat de desbloquejar la tauleta <xliff:g id="NUMBER_0">%1$d</xliff:g> vegades de manera incorrecta. Si falles <xliff:g id="NUMBER_1">%2$d</xliff:g> vegades més, la tauleta es restablirà i se\'n suprimiran totes les dades."</string>
     <string name="kg_failed_attempts_almost_at_wipe" product="default" msgid="2594813176164266847">"Has provat de desbloquejar el telèfon <xliff:g id="NUMBER_0">%1$d</xliff:g> vegades de manera incorrecta. Si falles <xliff:g id="NUMBER_1">%2$d</xliff:g> vegades més, el telèfon es restablirà i se\'n suprimiran totes les dades."</string>

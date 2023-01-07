@@ -630,10 +630,11 @@ public class MediaOutputController implements LocalMediaManager.DeviceCallback,
 
     private void buildMediaItems(List<MediaDevice> devices) {
         synchronized (mMediaDevicesLock) {
-            //TODO(b/257851968): do the organization only when there's no suggested sorted order
-            // we get from application
-            attachRangeInfo(devices);
-            Collections.sort(devices, Comparator.naturalOrder());
+            if (!isRouteProcessSupported() || (isRouteProcessSupported()
+                    && !mLocalMediaManager.isPreferenceRouteListingExist())) {
+                attachRangeInfo(devices);
+                Collections.sort(devices, Comparator.naturalOrder());
+            }
             // For the first time building list, to make sure the top device is the connected
             // device.
             if (mMediaItemList.isEmpty()) {
@@ -749,6 +750,10 @@ public class MediaOutputController implements LocalMediaManager.DeviceCallback,
 
     public boolean isAdvancedLayoutSupported() {
         return mFeatureFlags.isEnabled(Flags.OUTPUT_SWITCHER_ADVANCED_LAYOUT);
+    }
+
+    public boolean isRouteProcessSupported() {
+        return mFeatureFlags.isEnabled(Flags.OUTPUT_SWITCHER_ROUTES_PROCESSING);
     }
 
     List<MediaDevice> getGroupMediaDevices() {

@@ -38,6 +38,7 @@ import com.intellij.psi.PsiMethod
 import org.jetbrains.uast.UAnnotation
 import org.jetbrains.uast.UElement
 import org.jetbrains.uast.UMethod
+import org.jetbrains.uast.toUElement
 
 /**
  * Lint Detector that ensures that any method overriding a method annotated
@@ -54,9 +55,6 @@ import org.jetbrains.uast.UMethod
  *     Java method without the corresponding annotation on the AIDL interface.
  */
 class EnforcePermissionDetector : Detector(), SourceCodeScanner {
-
-    val BINDER_CLASS = "android.os.Binder"
-    val JAVA_OBJECT = "java.lang.Object"
 
     override fun applicableAnnotations(): List<String> {
         return listOf(ANNOTATION_ENFORCE_PERMISSION)
@@ -123,6 +121,11 @@ class EnforcePermissionDetector : Detector(), SourceCodeScanner {
         overriddenMethod: PsiMethod,
         checkEquivalence: Boolean = true
     ) {
+        // If method is not from a Stub subclass, this method shouldn't use @EP at all.
+        // This is handled by EnforcePermissionHelperDetector.
+        if (!isContainedInSubclassOfStub(context, overridingMethod.toUElement() as? UMethod)) {
+            return
+        }
         val overridingAnnotation = overridingMethod.getAnnotation(ANNOTATION_ENFORCE_PERMISSION)
         val overriddenAnnotation = overriddenMethod.getAnnotation(ANNOTATION_ENFORCE_PERMISSION)
         val location = context.getLocation(element)
@@ -131,13 +134,6 @@ class EnforcePermissionDetector : Detector(), SourceCodeScanner {
         val overridingName = "${overridingClass.name}.${overridingMethod.name}"
         val overriddenName = "${overriddenClass.name}.${overriddenMethod.name}"
         if (overridingAnnotation == null) {
-            if (shouldIgnoreGeneratedMethod(
-                            context,
-                            overriddenClass = overriddenClass,
-                            overridingClass = overridingClass)
-            ) {
-                return
-            }
             val msg = "The method $overridingName overrides the method $overriddenName which " +
                 "is annotated with @EnforcePermission. The same annotation must be used " +
                 "on $overridingName"
@@ -177,53 +173,18 @@ class EnforcePermissionDetector : Detector(), SourceCodeScanner {
                 if (node.qualifiedName != ANNOTATION_ENFORCE_PERMISSION) {
                     return
                 }
-                val method = node.uastParent as? UMethod
-                if (method != null) {
-                    val overridingMethod = method as PsiMethod
-                    val parents = overridingMethod.findSuperMethods()
-                    for (overriddenMethod in parents) {
-                        // The equivalence check can be skipped, if both methods are
-                        // annotated, it will be verified by visitAnnotationUsage.
-                        compareMethods(context, method, overridingMethod,
-                            overriddenMethod, checkEquivalence = false)
-                    }
+                val method = node.uastParent as? UMethod ?: return
+                val overridingMethod = method as PsiMethod
+                val parents = overridingMethod.findSuperMethods()
+                for (overriddenMethod in parents) {
+                    // The equivalence check can be skipped, if both methods are
+                    // annotated, it will be verified by visitAnnotationUsage.
+                    compareMethods(context, method, overridingMethod,
+                        overriddenMethod, checkEquivalence = false)
                 }
             }
         }
     }
-
-    /**
-     * since this lint runs globally, it will also run against generated
-     * test code e.g.
-     * system/tools/aidl/tests/golden_output/aidl-test-interface-permission-java-source/gen/android/aidl/tests/permission/IProtected.java
-     * system/tools/aidl/tests/golden_output/aidl-test-interface-permission-java-source/gen/android/aidl/tests/permission/IProtectedInterface.java
-     * we do not want to report errors against generated `Stub` and `Proxy` classes in those files
-     */
-    private fun shouldIgnoreGeneratedMethod(
-            context: JavaContext,
-            overriddenClass: PsiClass,
-            overridingClass: PsiClass,
-
-    ): Boolean {
-        if (isInterfaceAndExtendsIInterface(overriddenClass) &&
-                context.evaluator.isStatic(overridingClass)) {
-            if (overridingClass.name == "Default") return true
-            if (overridingClass.name == "Proxy") {
-                val shouldBeStub = overridingClass.parent as? PsiClass ?: return false
-                return shouldBeStub.name == "Stub" &&
-                        context.evaluator.isAbstract(shouldBeStub) &&
-                        context.evaluator.isStatic(shouldBeStub) &&
-                        shouldBeStub.extendsList?.referenceElements
-                        ?.any { it.qualifiedName == BINDER_CLASS } == true
-            }
-        }
-        return false
-    }
-
-    private fun isInterfaceAndExtendsIInterface(overriddenClass: PsiClass): Boolean =
-            overriddenClass.isInterface &&
-                    overriddenClass.extendsList?.referenceElements
-                    ?.any { it.qualifiedName == IINTERFACE_INTERFACE } == true
 
     companion object {
         val EXPLANATION = """

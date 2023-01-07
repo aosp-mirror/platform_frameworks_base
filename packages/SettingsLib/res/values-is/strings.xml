@@ -467,8 +467,8 @@
     <string name="power_charging" msgid="6727132649743436802">"<xliff:g id="LEVEL">%1$s</xliff:g> – <xliff:g id="STATE">%2$s</xliff:g>"</string>
     <string name="power_remaining_charging_duration_only" msgid="8085099012811384899">"<xliff:g id="TIME">%1$s</xliff:g> fram að fullri hleðslu"</string>
     <string name="power_charging_duration" msgid="6127154952524919719">"<xliff:g id="LEVEL">%1$s</xliff:g> - <xliff:g id="TIME">%2$s</xliff:g> fram að fullri hleðslu"</string>
-    <string name="power_charging_limited" msgid="8202147604844938236">"<xliff:g id="LEVEL">%1$s</xliff:g> - Hleðsla fínstillt"</string>
-    <string name="power_charging_future_paused" msgid="4730177778538118032">"<xliff:g id="LEVEL">%1$s</xliff:g> - Hleðsla fínstillt"</string>
+    <string name="power_charging_limited" msgid="8202147604844938236">"<xliff:g id="LEVEL">%1$s</xliff:g> – Hleðsla fínstillt"</string>
+    <string name="power_charging_future_paused" msgid="4730177778538118032">"<xliff:g id="LEVEL">%1$s</xliff:g> – Hleðsla fínstillt"</string>
     <string name="battery_info_status_unknown" msgid="268625384868401114">"Óþekkt"</string>
     <string name="battery_info_status_charging" msgid="4279958015430387405">"Í hleðslu"</string>
     <string name="battery_info_status_charging_fast" msgid="8027559755902954885">"Hröð hleðsla"</string>
@@ -564,6 +564,8 @@
     <string name="user_add_user_title" msgid="5457079143694924885">"Bæta nýjum notanda við?"</string>
     <string name="user_add_user_message_long" msgid="1527434966294733380">"Þú getur búið til fleiri notendur til að deila þessu tæki með öðrum. Hver notandi hefur sitt eigið svæði sem viðkomandi getur sérsniðið með forritum, veggfóðri o.s.frv. Notendur geta einnig breytt þeim stillingum tækisins sem hafa áhrif á alla notendur, t.d. Wi-Fi.\n\nÞegar þú bætir nýjum notanda við þarf sá notandi að setja upp svæðið sitt.\n\nHvaða notandi sem er getur uppfært forrit fyrir alla aðra notendur. Ekki er tryggt að stillingar á aðgengi og þjónustu flytjist yfir á nýja notandann."</string>
     <string name="user_add_user_message_short" msgid="3295959985795716166">"Þegar þú bætir nýjum notanda við þarf sá notandi að setja upp svæðið sitt.\n\nHvaða notandi sem er getur uppfært forrit fyrir alla aðra notendur."</string>
+    <string name="user_grant_admin_title" msgid="5565796912475193314">"Viltu veita þessum notanda stjórnandaheimildir?"</string>
+    <string name="user_grant_admin_message" msgid="7925257971286380976">"Sem stjórnandi getur viðkomandi stjórnað öðrum notendum, breytt tækjastillingum og núllstillt tækið."</string>
     <string name="user_setup_dialog_title" msgid="8037342066381939995">"Setja notanda upp núna?"</string>
     <string name="user_setup_dialog_message" msgid="269931619868102841">"Gakktu úr skugga um að notandinn geti tekið tækið og sett upp sitt svæði"</string>
     <string name="user_setup_profile_dialog_message" msgid="4788197052296962620">"Setja upp snið núna?"</string>
@@ -595,6 +597,8 @@
     <string name="guest_reset_and_restart_dialog_message" msgid="2764425635305200790">"Þetta opnar nýja gestalotu og eyðir öllum forritum og gögnum úr núverandi lotu"</string>
     <string name="guest_exit_dialog_title" msgid="1846494656849381804">"Loka gestastillingu?"</string>
     <string name="guest_exit_dialog_message" msgid="1743218864242719783">"Þetta eyðir forritum og gögnum úr núverandi gestalotu"</string>
+    <string name="grant_admin" msgid="4273077214151417783">"Veita þessum notanda stjórnandaheimildir"</string>
+    <string name="not_grant_admin" msgid="6985027675930546850">"Ekki veita þessum notanda stjórnandaheimildir"</string>
     <string name="guest_exit_dialog_button" msgid="1736401897067442044">"Hætta"</string>
     <string name="guest_exit_dialog_title_non_ephemeral" msgid="7675327443743162986">"Vista aðgerðir úr gestalotu?"</string>
     <string name="guest_exit_dialog_message_non_ephemeral" msgid="223385323235719442">"Þú getur vistað aðgerðir úr núverandi lotu eða eytt öllum forritum og gögnum"</string>

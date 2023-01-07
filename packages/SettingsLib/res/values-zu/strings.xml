@@ -467,10 +467,8 @@
     <string name="power_charging" msgid="6727132649743436802">"<xliff:g id="LEVEL">%1$s</xliff:g> - <xliff:g id="STATE">%2$s</xliff:g>"</string>
     <string name="power_remaining_charging_duration_only" msgid="8085099012811384899">"<xliff:g id="TIME">%1$s</xliff:g> okusele kuze kugcwale"</string>
     <string name="power_charging_duration" msgid="6127154952524919719">"<xliff:g id="LEVEL">%1$s</xliff:g> - <xliff:g id="TIME">%2$s</xliff:g> okusele kuze kugcwale"</string>
-    <!-- no translation found for power_charging_limited (8202147604844938236) -->
-    <skip />
-    <!-- no translation found for power_charging_future_paused (4730177778538118032) -->
-    <skip />
+    <string name="power_charging_limited" msgid="8202147604844938236">"<xliff:g id="LEVEL">%1$s</xliff:g> - Ukushaja kuthuthukisiwe"</string>
+    <string name="power_charging_future_paused" msgid="4730177778538118032">"<xliff:g id="LEVEL">%1$s</xliff:g> - Ukushaja kuthuthukisiwe"</string>
     <string name="battery_info_status_unknown" msgid="268625384868401114">"Akwaziwa"</string>
     <string name="battery_info_status_charging" msgid="4279958015430387405">"Iyashaja"</string>
     <string name="battery_info_status_charging_fast" msgid="8027559755902954885">"Ishaja ngokushesha"</string>
@@ -566,6 +564,8 @@
     <string name="user_add_user_title" msgid="5457079143694924885">"Engeza umsebenzisi omusha?"</string>
     <string name="user_add_user_message_long" msgid="1527434966294733380">"Manje ungabelana ngale divayisi nabanye abantu ngokudala abasebenzisi abangeziwe. Umsebenzisi ngamunye unesikhala sakhe, angakwazi ukusenza ngendlela ayifisayo ngezinhlelo zokusebenza, isithombe sangemuva, njalo njalo. Abasebenzisi bangalungisa izilungiselelo zedivayisi ezifana ne-Wi-Fi ezithinta wonke umuntu.\n\nUma ungeza umsebenzisi omusha, loyo muntu kumele asethe isikhala sakhe.\n\nNoma imuphi umsebenzisi angabuyekeza izinhlelo zokusebenza kubo bonke abanye abasebenzisi. Izilungiselelo zokufinyelela kungenzeka zingadluliselwa kumsebenzisi omusha."</string>
     <string name="user_add_user_message_short" msgid="3295959985795716166">"Uma ungeza umsebenzisi omusha, loyo muntu udinga ukusetha isikhala sakhe.\n\nNoma yimuphi umsebenzisi angabuyekeza izinhlelo zokusebenza kubo bonke abasebenzisi."</string>
+    <string name="user_grant_admin_title" msgid="5565796912475193314">"Nika umsebenzi ilungelo lokuphatha"</string>
+    <string name="user_grant_admin_message" msgid="7925257971286380976">"Njengomphathi, bazokwazi ukuphatha abanye abasebenzisi, balungise amasethingi edivayisi futhi basethe kabusha njengasekuqaleni idivayisi."</string>
     <string name="user_setup_dialog_title" msgid="8037342066381939995">"Setha umsebenzisi manje?"</string>
     <string name="user_setup_dialog_message" msgid="269931619868102841">"Qinisekisa ukuthi umuntu uyatholakala ukuze athathe idivayisi futhi asethe isikhala sakhe"</string>
     <string name="user_setup_profile_dialog_message" msgid="4788197052296962620">"Setha iphrofayela manje?"</string>
@@ -597,6 +597,8 @@
     <string name="guest_reset_and_restart_dialog_message" msgid="2764425635305200790">"Lokhu kuzoqala isikhathi sesihambeli esisha futhi kusule wonke ama-app nedatha kusuka esikhathini samanje"</string>
     <string name="guest_exit_dialog_title" msgid="1846494656849381804">"Phuma kumodi yesihambeli?"</string>
     <string name="guest_exit_dialog_message" msgid="1743218864242719783">"Lokhu kuzosula ama-app nedatha kusuka esikhathini sesihambeli samanje"</string>
+    <string name="grant_admin" msgid="4273077214151417783">"Nikeza lo msebenzisi amalungelo okuphatha"</string>
+    <string name="not_grant_admin" msgid="6985027675930546850">"Unganiki umsebenzisi amalungelo okuphatha"</string>
     <string name="guest_exit_dialog_button" msgid="1736401897067442044">"Phuma"</string>
     <string name="guest_exit_dialog_title_non_ephemeral" msgid="7675327443743162986">"Londoloza umsebenzi wesihambeli?"</string>
     <string name="guest_exit_dialog_message_non_ephemeral" msgid="223385323235719442">"Ungalondoloza umsebenzi kusuka esikhathini samanje noma usule wonke ama-app nedatha"</string>

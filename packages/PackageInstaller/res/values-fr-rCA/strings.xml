@@ -60,10 +60,8 @@
     <string name="uninstall_update_text" msgid="863648314632448705">"Remplacer cette application par la version d\'usine? Toutes les données seront supprimées."</string>
     <string name="uninstall_update_text_multiuser" msgid="8992883151333057227">"Remplacer cette application par la version d\'usine? Toutes les données seront supprimées. Cela touchera tous les utilisateurs de cet appareil, y compris ceux qui utilisent un profil professionnel."</string>
     <string name="uninstall_keep_data" msgid="7002379587465487550">"Garder <xliff:g id="SIZE">%1$s</xliff:g> de données d\'application."</string>
-    <!-- no translation found for uninstall_application_text_current_user_clone_profile (835170400160011636) -->
-    <skip />
-    <!-- no translation found for uninstall_application_text_with_clone_instance (6944473334273349036) -->
-    <skip />
+    <string name="uninstall_application_text_current_user_clone_profile" msgid="835170400160011636">"Voulez-vous supprimer cette application?"</string>
+    <string name="uninstall_application_text_with_clone_instance" msgid="6944473334273349036">"Voulez-vous désinstaller cette application? Le clone <xliff:g id="PACKAGE_LABEL">%1$s</xliff:g> sera aussi supprimé."</string>
     <string name="uninstalling_notification_channel" msgid="840153394325714653">"Désinstallations en cours…"</string>
     <string name="uninstall_failure_notification_channel" msgid="1136405866767576588">"Désinstallations échouées"</string>
     <string name="uninstalling" msgid="8709566347688966845">"Désinstallation en cours…"</string>
@@ -72,8 +70,7 @@
     <string name="uninstall_done_app" msgid="4588850984473605768">"L\'application <xliff:g id="PACKAGE_LABEL">%1$s</xliff:g> a bien été désinstallée"</string>
     <string name="uninstall_failed" msgid="1847750968168364332">"Échec de la désinstallation."</string>
     <string name="uninstall_failed_app" msgid="5506028705017601412">"La désinstallation de <xliff:g id="PACKAGE_LABEL">%1$s</xliff:g> n\'a pas réussi."</string>
-    <!-- no translation found for uninstalling_cloned_app (1826380164974984870) -->
-    <skip />
+    <string name="uninstalling_cloned_app" msgid="1826380164974984870">"Suppression du clone <xliff:g id="PACKAGE_LABEL">%1$s</xliff:g>…"</string>
     <string name="uninstall_failed_device_policy_manager" msgid="785293813665540305">"Impossible de désinstaller une application d\'administration de l\'appareil active"</string>
     <string name="uninstall_failed_device_policy_manager_of_user" msgid="4813104025494168064">"Impossible de désinstaller une application d\'administration de l\'appareil active pour <xliff:g id="USERNAME">%1$s</xliff:g>"</string>
     <string name="uninstall_all_blocked_profile_owner" msgid="2009393666026751501">"Cette application est nécessaire pour certains utilisateurs ou profils, et elle a été désinstallée pour d\'autres"</string>
@@ -94,8 +91,7 @@
     <string name="anonymous_source_warning" product="default" msgid="2784902545920822500">"Votre téléphone et vos données personnelles sont plus vulnérables aux attaques provenant d\'applications inconnues. En installant cette application, vous acceptez d\'être le seul responsable de tout dommage causé à votre téléphone ou de toute perte de données pouvant découler de l\'utilisation de telles applications."</string>
     <string name="anonymous_source_warning" product="tablet" msgid="3939101621438855516">"Votre tablette et vos données personnelles sont plus vulnérables aux attaques provenant d\'applications inconnues. En installant cette application, vous acceptez d\'être le seul responsable de tout dommage causé à votre tablette ou de toute perte de données pouvant découler de l\'utilisation de telles applications."</string>
     <string name="anonymous_source_warning" product="tv" msgid="5599483539528168566">"Votre téléviseur et vos données personnelles sont plus vulnérables aux attaques d\'applications inconnues. En installant cette application, vous acceptez d\'être le seul responsable de tout dommage causé à votre téléviseur ou de toute perte de données pouvant découler de son utilisation."</string>
-    <!-- no translation found for cloned_app_label (7503612829833756160) -->
-    <skip />
+    <string name="cloned_app_label" msgid="7503612829833756160">"Clone <xliff:g id="PACKAGE_LABEL">%1$s</xliff:g>"</string>
     <string name="anonymous_source_continue" msgid="4375745439457209366">"Continuer"</string>
     <string name="external_sources_settings" msgid="4046964413071713807">"Paramètres"</string>
     <string name="wear_app_channel" msgid="1960809674709107850">"Installer/désinstaller applis Google Wear"</string>

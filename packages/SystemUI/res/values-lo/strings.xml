@@ -85,6 +85,7 @@
     <string name="screenshot_share_description" msgid="2861628935812656612">"ແບ່ງປັນຮູບໜ້າຈໍ"</string>
     <string name="screenshot_scroll_label" msgid="2930198809899329367">"ຖ່າຍຮູບເພີ່ມເຕີມ"</string>
     <string name="screenshot_dismiss_description" msgid="4702341245899508786">"ປິດຮູບໜ້າຈໍ"</string>
+    <string name="screenshot_dismiss_work_profile" msgid="3101530842987697045">"ປິດຂໍ້ຄວາມໂປຣໄຟລ໌ບ່ອນເຮັດວຽກໄວ້"</string>
     <string name="screenshot_preview_description" msgid="7606510140714080474">"ຕົວຢ່າງຮູບໜ້າຈໍ"</string>
     <string name="screenshot_top_boundary_pct" msgid="2520148599096479332">"ຂອບເຂດທາງເທິງ <xliff:g id="PERCENT">%1$d</xliff:g> ເປີເຊັນ"</string>
     <string name="screenshot_bottom_boundary_pct" msgid="3880821519814946478">"ຂອບເຂດທາງລຸ່ມ <xliff:g id="PERCENT">%1$d</xliff:g> ເປີເຊັນ"</string>
@@ -317,8 +318,7 @@
     <string name="sensor_privacy_camera_unblocked_dialog_content" msgid="7847190103011782278">"ເປີດການນຳໃຊ້ກ້ອງຖ່າຍຮູບສຳລັບແອັບ ແລະ ບໍລິການທັງໝົດແລ້ວ."</string>
     <string name="sensor_privacy_camera_blocked_dialog_content" msgid="3182428709314874616">"ສິດເຂົ້າເຖິງກ້ອງຖ່າຍຮູບຖືກປິດການນຳໃຊ້ສຳລັບແອັບ ແລະ ບໍລິການທັງໝົດແລ້ວ."</string>
     <string name="sensor_privacy_htt_blocked_dialog_content" msgid="3333321592997666441">"ເພື່ອໃຊ້ປຸ່ມໄມໂຄຣໂຟນ, ໃຫ້ເປີດການນຳໃຊ້ສິດເຂົ້າເຖິງໄມໂຄຣໂຟນໃນການຕັ້ງຄ່າກ່ອນ."</string>
-    <!-- no translation found for sensor_privacy_dialog_open_settings (5635865896053011859) -->
-    <skip />
+    <string name="sensor_privacy_dialog_open_settings" msgid="5635865896053011859">"ເປີດການຕັ້ງຄ່າ"</string>
     <string name="media_seamless_other_device" msgid="4654849800789196737">"ອຸປະກອນອື່ນໆ"</string>
     <string name="quick_step_accessibility_toggle_overview" msgid="7908949976727578403">"ສະຫຼັບພາບຮວມ"</string>
     <string name="zen_priority_introduction" msgid="3159291973383796646">"ທ່ານຈະບໍ່ໄດ້ຮັບການລົບກວນຈາກສຽງ ແລະ ການສັ່ນເຕືອນ, ຍົກເວັ້ນໃນເວລາໂມງປຸກດັງ, ມີການແຈ້ງເຕືອນ ຫຼື ມີສາຍໂທເຂົ້າຈາກຜູ້ໂທທີ່ທ່ານລະບຸໄວ້. ທ່ານອາດຍັງຄົງໄດ້ຍິນຫາກທ່ານເລືອກຫຼິ້ນເພງ, ວິດີໂອ ແລະ ເກມ."</string>
@@ -743,6 +743,7 @@
     <string name="wifi_is_off" msgid="5389597396308001471">"Wi-Fi ປິດຢູ່"</string>
     <string name="bt_is_off" msgid="7436344904889461591">"Bluetooth ປິດຢູ່"</string>
     <string name="dnd_is_off" msgid="3185706903793094463">"ຫ້າມລົບກວນ ປິດຢູ່"</string>
+    <string name="dnd_is_on" msgid="7009368176361546279">"ເປີດໂໝດຫ້າມລົບກວນແລ້ວ"</string>
     <string name="qs_dnd_prompt_auto_rule" msgid="3535469468310002616">"ໂໝດຫ້າມລົບກວນຖືກເປີດໃຊ້ໂດຍກົດອັດຕະໂນມັດ (<xliff:g id="ID_1">%s</xliff:g>)."</string>
     <string name="qs_dnd_prompt_app" msgid="4027984447935396820">"ມີແອັບເປີດໃຊ້ໂໝດຫ້າມລົບກວນ (<xliff:g id="ID_1">%s</xliff:g>)."</string>
     <string name="qs_dnd_prompt_auto_rule_app" msgid="1841469944118486580">"ໂໝດຫ້າມລົບກວນຖືກເປີດໃຊ້ໂດຍກົດອັດຕະໂນມັດ ຫຼື ແອັບໃດໜຶ່ງ."</string>
@@ -905,6 +906,7 @@
     <string name="media_output_dialog_accessibility_title" msgid="4681741064190167888">"ອຸປະກອນທີ່ສາມາດໃຊ້ໄດ້ສຳລັບເອົ້າພຸດສຽງ."</string>
     <string name="media_output_dialog_accessibility_seekbar" msgid="5332843993805568978">"ລະດັບສຽງ"</string>
     <string name="media_output_dialog_volume_percentage" msgid="1613984910585111798">"<xliff:g id="PERCENTAGE">%1$d</xliff:g>%%"</string>
+    <string name="media_output_group_title_speakers_and_displays" msgid="7169712332365659820">"ລຳໂພງ ແລະ ຈໍສະແດງຜົນ"</string>
     <string name="media_output_first_broadcast_title" msgid="6292237789860753022">"ການອອກອາກາດເຮັດວຽກແນວໃດ"</string>
     <string name="media_output_broadcast" msgid="3555580945878071543">"ອອກອາກາດ"</string>
     <string name="media_output_first_notify_broadcast_message" msgid="6353857724136398494">"ຄົນທີ່ຢູ່ໃກ້ທ່ານທີ່ມີອຸປະກອນ Bluetooth ທີ່ເຂົ້າກັນໄດ້ຈະສາມາດຟັງມີເດຍທີ່ທ່ານກຳລັງອອກອາກາດຢູ່ໄດ້"</string>
@@ -1032,20 +1034,19 @@
     <string name="log_access_confirmation_deny" msgid="2389461495803585795">"ບໍ່ອະນຸຍາດ"</string>
     <string name="log_access_confirmation_body" msgid="6883031912003112634">"ບັນທຶກຂອງອຸປະກອນຈະບັນທຶກສິ່ງທີ່ເກີດຂຶ້ນຢູ່ອຸປະກອນຂອງທ່ານ. ແອັບສາມາດໃຊ້ບັນທຶກເຫຼົ່ານີ້ເພື່ອຊອກຫາ ແລະ ແກ້ໄຂບັນຫາໄດ້.\n\nບັນທຶກບາງຢ່າງອາດມີຂໍ້ມູນທີ່ລະອຽດອ່ອນ, ດັ່ງນັ້ນໃຫ້ອະນຸຍາດສະເພາະແອັບທີ່ທ່ານເຊື່ອຖືໄດ້ໃຫ້ເຂົ້າເຖິງບັນທຶກທັງໝົດຂອງອຸປະກອນເທົ່ານັ້ນ. \n\nຫາກທ່ານບໍ່ອະນຸຍາດໃຫ້ແອັບນີ້ເຂົ້າເຖິງບັນທຶກທັງໝົດຂອງອຸປະກອນ, ມັນຈະຍັງຄົງສາມາດເຂົ້າເຖິງບັນທຶກຂອງຕົວມັນເອງໄດ້ຢູ່. ຜູ້ຜະລິດອຸປະກອນຂອງທ່ານອາດຍັງຄົງສາມາດເຂົ້າເຖິງບັນທຶກ ຫຼື ຂໍ້ມູນບາງຢ່າງຢູ່ອຸປະກອນຂອງທ່ານໄດ້."</string>
     <string name="keyguard_affordance_enablement_dialog_action_template" msgid="8164857863036314664">"ເປີດ <xliff:g id="APPNAME">%1$s</xliff:g>"</string>
-    <string name="keyguard_affordance_enablement_dialog_message" msgid="2790910660524887941">"ເພື່ອເພີ່ມແອັບ <xliff:g id="APPNAME">%1$s</xliff:g> ເປັນທາງລັດ, ກະລຸນາກວດສອບໃຫ້ແນ່ໃຈວ່າ"</string>
     <string name="keyguard_affordance_enablement_dialog_wallet_instruction_1" msgid="8439655049139819278">"• ແອັບໄດ້ຮັບການຕັ້ງຄ່າແລ້ວ"</string>
     <string name="keyguard_affordance_enablement_dialog_wallet_instruction_2" msgid="4321089250629477835">"• ມີການເພີ່ມຢ່າງໜ້ອຍ 1 ບັດໃສ່ໃນ Wallet"</string>
     <string name="keyguard_affordance_enablement_dialog_qr_scanner_instruction" msgid="5355839079232119791">"• ຕິດຕັ້ງແອັບກ້ອງຖ່າຍຮູບ"</string>
     <string name="keyguard_affordance_enablement_dialog_home_instruction_1" msgid="8438311171750568633">"• ແອັບໄດ້ຮັບການຕັ້ງຄ່າແລ້ວ"</string>
     <string name="keyguard_affordance_enablement_dialog_home_instruction_2" msgid="8308525385889021652">"• ມີຢ່າງໜ້ອຍ 1 ອຸປະກອນພ້ອມໃຫ້ນຳໃຊ້"</string>
+    <string name="keyguard_affordance_press_too_short" msgid="8145437175134998864">"ແຕະທາງລັດຄ້າງໄວ້"</string>
     <string name="rear_display_bottom_sheet_cancel" msgid="3461468855493357248">"ຍົກເລີກ"</string>
     <string name="rear_display_bottom_sheet_confirm" msgid="4383356544661421206">"ປີ້ນດຽວນີ້"</string>
     <string name="rear_display_fold_bottom_sheet_title" msgid="6081542277622721548">"ກາງໂທລະສັບອອກເພື່ອການຖ່າຍເຊວຟີທີ່ດີຂຶ້ນ"</string>
     <string name="rear_display_unfold_bottom_sheet_title" msgid="2137403802960396357">"ປີ້ນເປັນຈໍສະແດງຜົນດ້ານໜ້າເພື່ອການຖ່າຍເຊວຟີທີ່ດີຂຶ້ນບໍ?"</string>
     <string name="rear_display_bottom_sheet_description" msgid="1852662982816810352">"ໃຊ້ກ້ອງຫຼັງເພື່ອການຖ່າຍຮູບທີ່ກວ້າງຂຶ້ນດ້ວຍຄວາມລະອຽດສູງຂຶ້ນ."</string>
     <string name="rear_display_bottom_sheet_warning" msgid="800995919558238930"><b>"✱ ໜ້າຈໍນີ້ຈະປິດ"</b></string>
-    <!-- no translation found for rear_display_accessibility_folded_animation (1538121649587978179) -->
-    <skip />
-    <!-- no translation found for rear_display_accessibility_unfolded_animation (1946153682258289040) -->
-    <skip />
+    <string name="rear_display_accessibility_folded_animation" msgid="1538121649587978179">"ອຸປະກອນທີ່ພັບໄດ້ກຳລັງກາງອອກ"</string>
+    <string name="rear_display_accessibility_unfolded_animation" msgid="1946153682258289040">"ອຸປະກອນທີ່ພັກໄດ້ກຳລັງປີ້ນໄປມາ"</string>
+    <string name="stylus_battery_low" msgid="7134370101603167096">"ແບັດເຕີຣີປາກກາເຫຼືອໜ້ອຍ"</string>
 </resources>

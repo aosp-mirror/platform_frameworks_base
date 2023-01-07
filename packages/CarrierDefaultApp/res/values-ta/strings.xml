@@ -14,10 +14,10 @@
     <string name="ssl_error_warning" msgid="3127935140338254180">"நீங்கள் சேர முயலும் நெட்வொர்க்கில் பாதுகாப்புச் சிக்கல்கள் உள்ளன."</string>
     <string name="ssl_error_example" msgid="6188711843183058764">"எடுத்துக்காட்டாக, உள்நுழைவுப் பக்கமானது காட்டப்படும் அமைப்பிற்குச் சொந்தமானதாக இல்லாமல் இருக்கலாம்."</string>
     <string name="ssl_error_continue" msgid="1138548463994095584">"பரவாயில்லை, உலாவி வழியாகத் தொடர்க"</string>
-    <string name="network_boost_notification_channel" msgid="5430986172506159199">"நெட்வொர்க் பூஸ்ட்"</string>
-    <string name="network_boost_notification_title" msgid="8226368121348880044">"டேட்டா பூஸ்ட்டை %s பரிந்துரைக்கிறது"</string>
-    <string name="network_boost_notification_detail" msgid="3812434025544196192">"சிறப்பான செயல்திறனுக்கு நெட்வொர்க் பூஸ்ட்டை வாங்கவும்"</string>
-    <string name="network_boost_notification_button_not_now" msgid="4129218252146702688">"இப்போது வேண்டாம்"</string>
-    <string name="network_boost_notification_button_manage" msgid="1511552684142641182">"நிர்வகியுங்கள்"</string>
-    <string name="slice_purchase_app_label" msgid="915654761797446390">"நெட்வொர்க் பூஸ்ட்டை வாங்குங்கள்."</string>
+    <string name="performance_boost_notification_channel" msgid="3475440855635538592">"பெர்ஃபார்மென்ஸ் பூஸ்ட்"</string>
+    <string name="performance_boost_notification_title" msgid="5017421773334474875">"%s பெர்ஃபார்மென்ஸ் பூஸ்ட்டைப் பரிந்துரைக்கிறது"</string>
+    <string name="performance_boost_notification_detail" msgid="7216286153533321852">"சிறந்த நெட்வொர்க் செயல்திறனுக்குப் பெர்ஃபார்மென்ஸ் பூஸ்ட்டை வாங்குங்கள்"</string>
+    <string name="performance_boost_notification_button_not_now" msgid="6459755324243683785">"இப்போது வேண்டாம்"</string>
+    <string name="performance_boost_notification_button_manage" msgid="4976836444046497973">"நிர்வகியுங்கள்"</string>
+    <string name="slice_purchase_app_label" msgid="7170191659233241166">"ஒரு பெர்ஃபார்மென்ஸ் பூஸ்ட்டைப் பர்ச்சேஸ் செய்யுங்கள்."</string>
 </resources>

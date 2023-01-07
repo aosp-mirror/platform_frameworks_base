@@ -85,6 +85,7 @@
     <string name="screenshot_share_description" msgid="2861628935812656612">"分享螢幕截圖"</string>
     <string name="screenshot_scroll_label" msgid="2930198809899329367">"擴大螢幕截圖範圍"</string>
     <string name="screenshot_dismiss_description" msgid="4702341245899508786">"關閉螢幕截圖"</string>
+    <string name="screenshot_dismiss_work_profile" msgid="3101530842987697045">"關閉工作資料夾訊息"</string>
     <string name="screenshot_preview_description" msgid="7606510140714080474">"螢幕截圖預覽"</string>
     <string name="screenshot_top_boundary_pct" msgid="2520148599096479332">"上方邊界百分之 <xliff:g id="PERCENT">%1$d</xliff:g>"</string>
     <string name="screenshot_bottom_boundary_pct" msgid="3880821519814946478">"下方邊界百分之 <xliff:g id="PERCENT">%1$d</xliff:g>"</string>
@@ -317,8 +318,7 @@
     <string name="sensor_privacy_camera_unblocked_dialog_content" msgid="7847190103011782278">"所有應用程式和服務的相機存取權皆已啟用。"</string>
     <string name="sensor_privacy_camera_blocked_dialog_content" msgid="3182428709314874616">"所有應用程式和服務的相機存取權皆已停用。"</string>
     <string name="sensor_privacy_htt_blocked_dialog_content" msgid="3333321592997666441">"如要使用麥克風按鈕，請前往「設定」啟用麥克風存取權。"</string>
-    <!-- no translation found for sensor_privacy_dialog_open_settings (5635865896053011859) -->
-    <skip />
+    <string name="sensor_privacy_dialog_open_settings" msgid="5635865896053011859">"開啟「設定」"</string>
     <string name="media_seamless_other_device" msgid="4654849800789196737">"其他裝置"</string>
     <string name="quick_step_accessibility_toggle_overview" msgid="7908949976727578403">"切換總覽"</string>
     <string name="zen_priority_introduction" msgid="3159291973383796646">"裝置不會發出音效或震動造成干擾，但是會保留與鬧鐘、提醒、活動和指定來電者有關的設定。如果你選擇播放音樂、影片和遊戲等內容，還是可以聽見相關音訊。"</string>
@@ -743,6 +743,7 @@
     <string name="wifi_is_off" msgid="5389597396308001471">"Wi-Fi 已關閉"</string>
     <string name="bt_is_off" msgid="7436344904889461591">"藍牙已關閉"</string>
     <string name="dnd_is_off" msgid="3185706903793094463">"零打擾模式已關閉"</string>
+    <string name="dnd_is_on" msgid="7009368176361546279">"已開啟零打擾模式"</string>
     <string name="qs_dnd_prompt_auto_rule" msgid="3535469468310002616">"「<xliff:g id="ID_1">%s</xliff:g>」自動規則已將零打擾模式開啟。"</string>
     <string name="qs_dnd_prompt_app" msgid="4027984447935396820">"「<xliff:g id="ID_1">%s</xliff:g>」應用程式已將零打擾模式開啟。"</string>
     <string name="qs_dnd_prompt_auto_rule_app" msgid="1841469944118486580">"某個自動規則或應用程式已將零打擾模式開啟。"</string>
@@ -815,7 +816,7 @@
     <string name="accessibility_floating_button_migration_tooltip" msgid="5217151214439341902">"輕觸即可開啟無障礙功能。你可以前往「設定」自訂或更換這個按鈕。\n\n"<annotation id="link">"查看設定"</annotation></string>
     <string name="accessibility_floating_button_docking_tooltip" msgid="6814897496767461517">"將按鈕移到邊緣處即可暫時隱藏"</string>
     <string name="accessibility_floating_button_undo" msgid="511112888715708241">"復原"</string>
-    <string name="accessibility_floating_button_undo_message_text" msgid="3044079592757099698">"{count,plural, =1{已移除 {label} 個捷徑}other{已移除 # 個捷徑}}"</string>
+    <string name="accessibility_floating_button_undo_message_text" msgid="3044079592757099698">"{count,plural, =1{已移除 {label} 個快速鍵}other{已移除 # 個快速鍵}}"</string>
     <string name="accessibility_floating_button_action_move_top_left" msgid="6253520703618545705">"移到左上方"</string>
     <string name="accessibility_floating_button_action_move_top_right" msgid="6106225581993479711">"移到右上方"</string>
     <string name="accessibility_floating_button_action_move_bottom_left" msgid="8063394111137429725">"移到左下方"</string>
@@ -905,6 +906,7 @@
     <string name="media_output_dialog_accessibility_title" msgid="4681741064190167888">"可用於輸出音訊的裝置。"</string>
     <string name="media_output_dialog_accessibility_seekbar" msgid="5332843993805568978">"音量"</string>
     <string name="media_output_dialog_volume_percentage" msgid="1613984910585111798">"<xliff:g id="PERCENTAGE">%1$d</xliff:g>%%"</string>
+    <string name="media_output_group_title_speakers_and_displays" msgid="7169712332365659820">"喇叭和螢幕"</string>
     <string name="media_output_first_broadcast_title" msgid="6292237789860753022">"廣播功能的運作方式"</string>
     <string name="media_output_broadcast" msgid="3555580945878071543">"廣播"</string>
     <string name="media_output_first_notify_broadcast_message" msgid="6353857724136398494">"如果附近的人有相容的藍牙裝置，就可以聽到你正在廣播的媒體內容"</string>
@@ -1032,20 +1034,19 @@
     <string name="log_access_confirmation_deny" msgid="2389461495803585795">"不允許"</string>
     <string name="log_access_confirmation_body" msgid="6883031912003112634">"系統會透過裝置記錄記下裝置上的活動。應用程式可以根據這些記錄找出問題並修正。\n\n某些記錄可能含有機密資訊，因此請勿讓不信任的應用程式存取所有裝置記錄。\n\n即使你不允許這個應用程式存取所有裝置記錄，這個應用程式仍能存取自己的記錄，而且裝置製造商或許仍可存取裝置的某些記錄或資訊。"</string>
     <string name="keyguard_affordance_enablement_dialog_action_template" msgid="8164857863036314664">"開啟「<xliff:g id="APPNAME">%1$s</xliff:g>」"</string>
-    <string name="keyguard_affordance_enablement_dialog_message" msgid="2790910660524887941">"如要將「<xliff:g id="APPNAME">%1$s</xliff:g>」應用程式新增為捷徑，必須滿足以下條件"</string>
     <string name="keyguard_affordance_enablement_dialog_wallet_instruction_1" msgid="8439655049139819278">"• 完成應用程式設定"</string>
     <string name="keyguard_affordance_enablement_dialog_wallet_instruction_2" msgid="4321089250629477835">"• 錢包中至少要有一張卡片"</string>
     <string name="keyguard_affordance_enablement_dialog_qr_scanner_instruction" msgid="5355839079232119791">"• 安裝相機應用程式"</string>
     <string name="keyguard_affordance_enablement_dialog_home_instruction_1" msgid="8438311171750568633">"• 完成應用程式設定"</string>
     <string name="keyguard_affordance_enablement_dialog_home_instruction_2" msgid="8308525385889021652">"• 至少要有一部可用裝置"</string>
+    <string name="keyguard_affordance_press_too_short" msgid="8145437175134998864">"按住快速鍵"</string>
     <string name="rear_display_bottom_sheet_cancel" msgid="3461468855493357248">"取消"</string>
     <string name="rear_display_bottom_sheet_confirm" msgid="4383356544661421206">"立即翻轉"</string>
     <string name="rear_display_fold_bottom_sheet_title" msgid="6081542277622721548">"打開手機自拍效果較佳"</string>
     <string name="rear_display_unfold_bottom_sheet_title" msgid="2137403802960396357">"要翻轉到前螢幕拍攝更優質的自拍照嗎？"</string>
     <string name="rear_display_bottom_sheet_description" msgid="1852662982816810352">"使用後置鏡頭可拍攝視角較寬廣、解析度較高的相片。"</string>
     <string name="rear_display_bottom_sheet_warning" msgid="800995919558238930"><b>"✱ 這麼做會關閉這個螢幕"</b></string>
-    <!-- no translation found for rear_display_accessibility_folded_animation (1538121649587978179) -->
-    <skip />
-    <!-- no translation found for rear_display_accessibility_unfolded_animation (1946153682258289040) -->
-    <skip />
+    <string name="rear_display_accessibility_folded_animation" msgid="1538121649587978179">"正在展開的折疊式裝置"</string>
+    <string name="rear_display_accessibility_unfolded_animation" msgid="1946153682258289040">"正在翻轉折疊式裝置"</string>
+    <string name="stylus_battery_low" msgid="7134370101603167096">"觸控筆電力不足"</string>
 </resources>

@@ -23,10 +23,8 @@
     <string name="dock_alignment_not_charging" product="default" msgid="3980752926226749808">"Repoziționează telefonul pentru încărcarea wireless"</string>
     <string name="inattentive_sleep_warning_message" product="tv" msgid="6844464574089665063">"Dispozitivul Android TV se va opri în curând. Apasă un buton pentru a-l menține pornit."</string>
     <string name="inattentive_sleep_warning_message" product="default" msgid="5693904520452332224">"Dispozitivul se va opri în curând. Apasă pentru a-l menține pornit."</string>
-    <!-- no translation found for keyguard_missing_sim_message (408124574073032188) -->
-    <skip />
-    <!-- no translation found for keyguard_missing_sim_message (2605468359948247208) -->
-    <skip />
+    <string name="keyguard_missing_sim_message" product="tablet" msgid="408124574073032188">"Nu există card SIM în tabletă."</string>
+    <string name="keyguard_missing_sim_message" product="default" msgid="2605468359948247208">"Nu există card SIM în telefon."</string>
     <string name="kg_invalid_confirm_pin_hint" product="default" msgid="6278551068943958651">"Codurile PIN nu coincid"</string>
     <string name="kg_failed_attempts_almost_at_wipe" product="tablet" msgid="302165994845009232">"Ai făcut <xliff:g id="NUMBER_0">%1$d</xliff:g> încercări incorecte de deblocare a tabletei. După încă <xliff:g id="NUMBER_1">%2$d</xliff:g> încercări nereușite, tableta va fi resetată, iar toate datele vor fi șterse."</string>
     <string name="kg_failed_attempts_almost_at_wipe" product="default" msgid="2594813176164266847">"Ai făcut <xliff:g id="NUMBER_0">%1$d</xliff:g> încercări incorecte de deblocare a telefonului. După încă <xliff:g id="NUMBER_1">%2$d</xliff:g> încercări nereușite, acest telefon va fi resetat, iar toate datele acestuia vor fi șterse."</string>

@@ -26,6 +26,7 @@ val AIDL_PERMISSION_ANNOTATIONS = listOf(
         ANNOTATION_PERMISSION_MANUALLY_ENFORCED
 )
 
+const val BINDER_CLASS = "android.os.Binder"
 const val IINTERFACE_INTERFACE = "android.os.IInterface"
 
 /**

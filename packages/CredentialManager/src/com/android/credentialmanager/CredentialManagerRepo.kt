@@ -16,14 +16,14 @@
 
 package com.android.credentialmanager
 
-import android.credentials.Credential.TYPE_PASSWORD_CREDENTIAL
 import android.app.PendingIntent
 import android.app.slice.Slice
 import android.app.slice.SliceSpec
 import android.content.Context
 import android.content.Intent
-import android.content.pm.Signature
+import android.content.pm.SigningInfo
 import android.credentials.CreateCredentialRequest
+import android.credentials.Credential.TYPE_PASSWORD_CREDENTIAL
 import android.credentials.GetCredentialOption
 import android.credentials.GetCredentialRequest
 import android.credentials.ui.Constants
@@ -36,14 +36,14 @@ import android.credentials.ui.RequestInfo
 import android.credentials.ui.BaseDialogResult
 import android.credentials.ui.ProviderPendingIntentResponse
 import android.credentials.ui.UserSelectionDialogResult
+import android.net.Uri
 import android.os.Binder
 import android.os.Bundle
 import android.os.ResultReceiver
 import android.service.credentials.CredentialProviderService
-import android.util.ArraySet
-import com.android.credentialmanager.createflow.RequestDisplayInfo
-import com.android.credentialmanager.createflow.EnabledProviderInfo
 import com.android.credentialmanager.createflow.DisabledProviderInfo
+import com.android.credentialmanager.createflow.EnabledProviderInfo
+import com.android.credentialmanager.createflow.RequestDisplayInfo
 import com.android.credentialmanager.getflow.GetCredentialUiState
 import com.android.credentialmanager.jetpack.developer.CreatePasswordRequest.Companion.toBundle
 import com.android.credentialmanager.jetpack.developer.CreatePublicKeyCredentialRequest
@@ -294,7 +294,7 @@ class CredentialManagerRepo(
             credentialType: String,
     ): Entry {
         val slice = Slice.Builder(
-                Entry.CREDENTIAL_MANAGER_ENTRY_URI, SliceSpec(credentialType, 1)
+                Uri.EMPTY, SliceSpec(credentialType, 1)
         )
         return Entry(
                 key,
@@ -350,7 +350,7 @@ class CredentialManagerRepo(
                 or PendingIntent.FLAG_ONE_SHOT))
         val createPasswordRequest = android.service.credentials.CreateCredentialRequest(
                 android.service.credentials.CallingAppInfo(
-                        context.applicationInfo.packageName, ArraySet<Signature>()),
+                        context.applicationInfo.packageName, SigningInfo()),
                 TYPE_PASSWORD_CREDENTIAL,
                 toBundle("beckett-bakert@gmail.com", "password123")
         )
@@ -382,7 +382,7 @@ class CredentialManagerRepo(
       key,
       subkey,
       Slice.Builder(
-        Entry.CREDENTIAL_MANAGER_ENTRY_URI, SliceSpec(Entry.VERSION, 1)
+        Uri.EMPTY, SliceSpec("type", 1)
       ).build()
     )
   }
@@ -432,7 +432,6 @@ class CredentialManagerRepo(
         /*candidateQueryData=*/ Bundle(),
         /*requireSystemProvider=*/ false
       ),
-      /*isFirstUsage=*/false,
       "tribank"
     )
   }
@@ -448,7 +447,6 @@ class CredentialManagerRepo(
         /*candidateQueryData=*/ Bundle(),
         /*requireSystemProvider=*/ false
       ),
-      /*isFirstUsage=*/false,
       "tribank"
     )
   }
@@ -463,7 +461,6 @@ class CredentialManagerRepo(
         /*candidateQueryData=*/ Bundle(),
         /*requireSystemProvider=*/ false
       ),
-      /*isFirstUsage=*/false,
       "tribank"
     )
   }
@@ -479,7 +476,6 @@ class CredentialManagerRepo(
             TYPE_PUBLIC_KEY_CREDENTIAL, Bundle(), Bundle(), /*requireSystemProvider=*/ false)
         )
         .build(),
-      /*isFirstUsage=*/false,
       "tribank.us"
     )
   }

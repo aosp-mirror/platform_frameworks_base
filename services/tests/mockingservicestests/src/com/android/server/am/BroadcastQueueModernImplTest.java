@@ -25,7 +25,10 @@ import static com.android.server.am.BroadcastProcessQueue.REASON_CONTAINS_PRIORI
 import static com.android.server.am.BroadcastProcessQueue.REASON_CONTAINS_RESULT_TO;
 import static com.android.server.am.BroadcastProcessQueue.insertIntoRunnableList;
 import static com.android.server.am.BroadcastProcessQueue.removeFromRunnableList;
+import static com.android.server.am.BroadcastQueueTest.CLASS_BLUE;
 import static com.android.server.am.BroadcastQueueTest.CLASS_GREEN;
+import static com.android.server.am.BroadcastQueueTest.CLASS_RED;
+import static com.android.server.am.BroadcastQueueTest.CLASS_YELLOW;
 import static com.android.server.am.BroadcastQueueTest.PACKAGE_BLUE;
 import static com.android.server.am.BroadcastQueueTest.PACKAGE_GREEN;
 import static com.android.server.am.BroadcastQueueTest.PACKAGE_RED;
@@ -979,6 +982,40 @@ public class BroadcastQueueModernImplTest {
         assertThat(activeRecord.originalEnqueueClockTime)
                 .isGreaterThan(activeRecord.enqueueClockTime);
         assertTrue(queue.isEmpty());
+    }
+
+    @Test
+    public void testCleanupDisabledPackageReceiversLocked() {
+        final Intent userPresent = new Intent(Intent.ACTION_USER_PRESENT);
+        final Intent timeTick = new Intent(Intent.ACTION_TIME_TICK);
+
+        final BroadcastRecord record1 = makeBroadcastRecord(userPresent, List.of(
+                makeManifestReceiver(PACKAGE_GREEN, CLASS_GREEN),
+                makeManifestReceiver(PACKAGE_RED, CLASS_BLUE),
+                makeManifestReceiver(PACKAGE_YELLOW, CLASS_RED),
+                makeManifestReceiver(PACKAGE_BLUE, CLASS_GREEN)
+        ));
+        final BroadcastRecord record2 = makeBroadcastRecord(timeTick, List.of(
+                makeManifestReceiver(PACKAGE_GREEN, CLASS_GREEN),
+                makeManifestReceiver(PACKAGE_RED, CLASS_RED),
+                makeManifestReceiver(PACKAGE_YELLOW, CLASS_YELLOW)
+        ));
+
+        // Halt all processing so that we get a consistent view
+        mHandlerThread.getLooper().getQueue().postSyncBarrier();
+        mImpl.enqueueBroadcastLocked(record1);
+        mImpl.enqueueBroadcastLocked(record2);
+
+        mImpl.cleanupDisabledPackageReceiversLocked(null, null, UserHandle.USER_SYSTEM);
+
+        // Verify that all receivers have been marked as "skipped".
+        for (BroadcastRecord record : new BroadcastRecord[] {record1, record2}) {
+            for (int i = 0; i < record.receivers.size(); ++i) {
+                final String errMsg = "Unexpected delivery state for record:" + record
+                        + "; receiver=" + record.receivers.get(i);
+                assertEquals(errMsg, BroadcastRecord.DELIVERY_SKIPPED, record.getDeliveryState(i));
+            }
+        }
     }
 
     private Intent createPackageChangedIntent(int uid, List<String> componentNameList) {

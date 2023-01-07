@@ -179,6 +179,21 @@ public class UserLifecycleTests {
         }
     }
 
+    /** Tests creating a new user, with wait times between iterations. */
+    @Test(timeout = TIMEOUT_MAX_TEST_TIME_MS)
+    public void createUser_realistic() throws RemoteException {
+        while (mRunner.keepRunning()) {
+            Log.i(TAG, "Starting timer");
+            final int userId = createUserNoFlags();
+
+            mRunner.pauseTiming();
+            Log.i(TAG, "Stopping timer");
+            removeUser(userId);
+            waitCoolDownPeriod();
+            mRunner.resumeTimingForNextIteration();
+        }
+    }
+
     /** Tests creating and starting a new user. */
     @Test(timeout = TIMEOUT_MAX_TEST_TIME_MS)
     public void createAndStartUser() throws RemoteException {
@@ -220,6 +235,32 @@ public class UserLifecycleTests {
             mRunner.pauseTiming();
             Log.i(TAG, "Stopping timer");
             removeUser(userId);
+            mRunner.resumeTimingForNextIteration();
+        }
+    }
+
+    /**
+     * Tests starting an uninitialized user, with wait times in between iterations.
+     * Measures the time until ACTION_USER_STARTED is received.
+     */
+    @Test(timeout = TIMEOUT_MAX_TEST_TIME_MS)
+    public void startUser_realistic() throws RemoteException {
+        while (mRunner.keepRunning()) {
+            mRunner.pauseTiming();
+            final int userId = createUserNoFlags();
+
+            waitForBroadcastIdle();
+            runThenWaitForBroadcasts(userId, () -> {
+                mRunner.resumeTiming();
+                Log.i(TAG, "Starting timer");
+
+                mIam.startUserInBackground(userId);
+            }, Intent.ACTION_USER_STARTED);
+
+            mRunner.pauseTiming();
+            Log.i(TAG, "Stopping timer");
+            removeUser(userId);
+            waitCoolDownPeriod();
             mRunner.resumeTimingForNextIteration();
         }
     }
@@ -395,6 +436,32 @@ public class UserLifecycleTests {
             removeUser(userId);
             mRunner.resumeTimingForNextIteration();
         }
+    }
+
+    /** Tests stopping a background user, with wait times between iterations. The hypothesis is
+     * that the effects of the user creation could impact the measured times, so in this variant we
+     * create one user per run, instead of one per iteration */
+    @Test(timeout = TIMEOUT_MAX_TEST_TIME_MS)
+    public void stopUser_realistic() throws RemoteException {
+        final int userId = createUserNoFlags();
+        waitCoolDownPeriod();
+        while (mRunner.keepRunning()) {
+            mRunner.pauseTiming();
+            runThenWaitForBroadcasts(userId, ()-> {
+                mIam.startUserInBackground(userId);
+            }, Intent.ACTION_USER_STARTED, Intent.ACTION_MEDIA_MOUNTED);
+            waitCoolDownPeriod();
+            Log.d(TAG, "Starting timer");
+            mRunner.resumeTiming();
+
+            stopUser(userId, false);
+
+            mRunner.pauseTiming();
+            Log.d(TAG, "Stopping timer");
+
+            mRunner.resumeTimingForNextIteration();
+        }
+        removeUser(userId);
     }
 
     /** Tests reaching LOOKED_BOOT_COMPLETE when switching to uninitialized user. */

@@ -23,10 +23,8 @@
     <string name="dock_alignment_not_charging" product="default" msgid="3980752926226749808">"Räta upp telefonen för att ladda trådlöst"</string>
     <string name="inattentive_sleep_warning_message" product="tv" msgid="6844464574089665063">"Android TV-enheten stängs snart av. Tryck på en knapp för att behålla den på."</string>
     <string name="inattentive_sleep_warning_message" product="default" msgid="5693904520452332224">"Enheten stängs snart av. Tryck för att behålla den på."</string>
-    <!-- no translation found for keyguard_missing_sim_message (408124574073032188) -->
-    <skip />
-    <!-- no translation found for keyguard_missing_sim_message (2605468359948247208) -->
-    <skip />
+    <string name="keyguard_missing_sim_message" product="tablet" msgid="408124574073032188">"Inget SIM-kort i surfplattan."</string>
+    <string name="keyguard_missing_sim_message" product="default" msgid="2605468359948247208">"Inget SIM-kort i telefonen."</string>
     <string name="kg_invalid_confirm_pin_hint" product="default" msgid="6278551068943958651">"Pinkoderna stämmer inte överens"</string>
     <string name="kg_failed_attempts_almost_at_wipe" product="tablet" msgid="302165994845009232">"Du har försökt låsa upp surfplattan på ett felaktigt sätt <xliff:g id="NUMBER_0">%1$d</xliff:g> gånger. Efter ytterligare <xliff:g id="NUMBER_1">%2$d</xliff:g> försök återställs surfplattan och all data raderas."</string>
     <string name="kg_failed_attempts_almost_at_wipe" product="default" msgid="2594813176164266847">"Du har försökt låsa upp telefonen på ett felaktigt sätt <xliff:g id="NUMBER_0">%1$d</xliff:g> gånger. Efter ytterligare <xliff:g id="NUMBER_1">%2$d</xliff:g> försök återställs telefonen och all data raderas."</string>

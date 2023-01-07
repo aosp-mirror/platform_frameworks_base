@@ -4,49 +4,49 @@
     <string name="app_name" msgid="4539824758261855508">"क्रिडेन्सियल म्यानेजर"</string>
     <string name="string_cancel" msgid="6369133483981306063">"रद्द गर्नुहोस्"</string>
     <string name="string_continue" msgid="1346732695941131882">"जारी राख्नुहोस्"</string>
+    <string name="string_more_options" msgid="7990658711962795124">"थप विकल्पहरू"</string>
     <string name="string_create_in_another_place" msgid="1033635365843437603">"अर्को ठाउँमा बनाउनुहोस्"</string>
     <string name="string_save_to_another_place" msgid="7590325934591079193">"अर्को ठाउँमा सेभ गर्नुहोस्"</string>
     <string name="string_use_another_device" msgid="8754514926121520445">"अर्को डिभाइस प्रयोग गर्नुहोस्"</string>
     <string name="string_save_to_another_device" msgid="1959562542075194458">"अर्को डिभाइसमा सेभ गर्नुहोस्"</string>
     <string name="passkey_creation_intro_title" msgid="4251037543787718844">"पासकीका सहायताले सुरक्षित रहनुहोस्"</string>
-    <string name="passkey_creation_intro_body_password" msgid="312712407571126228">"जटिल पासवर्डहरू बनाउनु वा सम्झनु पर्दैन"</string>
-    <string name="passkey_creation_intro_body_fingerprint" msgid="691816235541508203">"अद्वितीय पासकी बनाउन आफ्नो फिंगरप्रिन्ट, फेस वा स्क्रिन लक प्रयोग गर्नुहोस्"</string>
-    <string name="passkey_creation_intro_body_device" msgid="477121861162321129">"तपाईं अन्य डिभाइसहरूमा साइन इन गर्न सक्नुहोस् भन्नाका लागि पासकीहरू पासवर्ड म्यानेजरमा सेभ गरिन्छन्"</string>
+    <string name="passkey_creation_intro_body_password" msgid="8825872426579958200">"तपाईंले पासकी बनाउनुभयो भने तपाईंले जटिल पासवर्ड बनाउनु वा तिनलाई याद गरिराख्नु पर्दैन"</string>
+    <string name="passkey_creation_intro_body_fingerprint" msgid="7331338631826254055">"पासकी भनेको तपाईंले आफ्नो फिंगरप्रिन्ट, अनुहार वा स्क्रिन लक प्रयोग गरेर बनाएको इन्क्रिप्ट गरिएको डिजिटल की हो"</string>
+    <string name="passkey_creation_intro_body_device" msgid="1203796455762131631">"तपाईं अन्य डिभाइसहरूमा साइन इन गर्न सक्नुहोस् भन्नाका लागि तिनलाई पासवर्ड म्यानेजरमा सेभ गरिन्छन्"</string>
     <string name="choose_provider_title" msgid="7245243990139698508">"<xliff:g id="CREATETYPES">%1$s</xliff:g> सेभ गर्ने ठाउँ छनौट गर्नुहोस्"</string>
     <string name="create_your_passkeys" msgid="8901224153607590596">"आफ्ना पासकीहरू बाउनुहोस्"</string>
     <string name="save_your_password" msgid="6597736507991704307">"आफ्नो पासवर्ड सेभ गर्नुहोस्"</string>
     <string name="save_your_sign_in_info" msgid="7213978049817076882">"आफ्नो साइन इनसम्बन्धी जानकारी सेभ गर्नुहोस्"</string>
-    <string name="choose_provider_body" msgid="8045759834416308059">"आफ्ना पासवर्ड तथा पासकीहरू सेभ गर्न र अर्को पटक अझ छिटो साइन इन गर्न डिफल्ट पासवर्ड म्यानेजर सेट गर्नुहोस्।"</string>
-    <string name="choose_create_option_passkey_title" msgid="4146408187146573131">"<xliff:g id="PROVIDERINFODISPLAYNAME">%1$s</xliff:g> मा पासकी बनाउने हो?"</string>
-    <string name="choose_create_option_password_title" msgid="8812546498357380545">"तपाईंको पासवर्ड <xliff:g id="PROVIDERINFODISPLAYNAME">%1$s</xliff:g> मा सेभ गर्ने हो?"</string>
-    <string name="choose_create_option_sign_in_title" msgid="6318246378475961834">"तपाईंको साइन इनसम्बन्धी जानकारी <xliff:g id="PROVIDERINFODISPLAYNAME">%1$s</xliff:g> मा सेभ गर्ने हो?"</string>
-    <string name="choose_create_option_description" msgid="4419171903963100257">"तपाईं जुनसुकै डिभाइसमा आफ्नो <xliff:g id="APPDOMAINNAME">%1$s</xliff:g> <xliff:g id="TYPE">%2$s</xliff:g> प्रयोग गर्न सक्नुहुन्छ। यसलाई <xliff:g id="CREATEINFODISPLAYNAME">%4$s</xliff:g> का लागि <xliff:g id="PROVIDERINFODISPLAYNAME">%3$s</xliff:g> मा सेभ गरिएको छ"</string>
+    <string name="choose_provider_body" msgid="4384188171872005547">"तपाईंको जानकारी सेभ गर्न कुनै पासवर्ड म्यानेजर चयन गर्नुहोस् र अर्को टपक अझ चाँडो साइन एन गर्नुहोस्।"</string>
+    <string name="choose_create_option_passkey_title" msgid="5220979185879006862">"<xliff:g id="APPNAME">%1$s</xliff:g> को पासकी बनाउने हो?"</string>
+    <string name="choose_create_option_password_title" msgid="7097275038523578687">"<xliff:g id="APPNAME">%1$s</xliff:g> को पासवर्ड सेभ गर्ने हो?"</string>
+    <string name="choose_create_option_sign_in_title" msgid="4124872317613421249">"<xliff:g id="APPNAME">%1$s</xliff:g> मा साइन गर्न प्रयोग गरिनु पर्ने जानकारी सेभ गर्ने हो?"</string>
+    <string name="choose_create_option_description" msgid="5531335144879100664">"तपाईं जुनसुकै डिभाइसमा आफ्नो <xliff:g id="APPDOMAINNAME">%1$s</xliff:g> <xliff:g id="CREDENTIALTYPES">%2$s</xliff:g> प्रयोग गर्न सक्नुहुन्छ। यो क्रिडेन्सियल <xliff:g id="CREATEINFODISPLAYNAME">%4$s</xliff:g> का लागि <xliff:g id="PROVIDERINFODISPLAYNAME">%3$s</xliff:g> मा सेभ गरिएको छ।"</string>
     <string name="passkey" msgid="632353688396759522">"पासकी"</string>
     <string name="password" msgid="6738570945182936667">"पासवर्ड"</string>
     <string name="sign_ins" msgid="4710739369149469208">"साइन इनसम्बन्धी जानकारी"</string>
-    <string name="create_passkey_in_title" msgid="2714306562710897785">"यसमा पासकी बनाउनुहोस्:"</string>
-    <string name="save_password_to_title" msgid="3450480045270186421">"यसमा पासवर्ड सेभ गर्नुहोस्:"</string>
-    <string name="save_sign_in_to_title" msgid="8328143607671760232">"यसमा साइन इनसम्बन्धी जानकारी सेभ गर्नुहोस्:"</string>
+    <string name="sign_in_info" msgid="2627704710674232328">"साइन इन गर्न प्रयोग गरिने जानकारी"</string>
+    <string name="save_credential_to_title" msgid="3172811692275634301">"<xliff:g id="CREDENTIALTYPES">%1$s</xliff:g> यहाँ सेभ गर्नुहोस्:"</string>
     <string name="create_passkey_in_other_device_title" msgid="6372952459932674632">"अर्को डिभाइसमा पासकी बनाउने हो?"</string>
     <string name="use_provider_for_all_title" msgid="4201020195058980757">"तपाईंले साइन इन गर्ने सबै डिभाइसहरूमा <xliff:g id="PROVIDERINFODISPLAYNAME">%1$s</xliff:g> प्रयोग गर्ने हो?"</string>
     <string name="use_provider_for_all_description" msgid="6560593199974037820">"तपाईं सजिलै साइन इन गर्न सक्नुहोस् भन्नाका लागि यो पासवर्ड म्यानेजरले तपाईंका पासवर्ड तथा पासकीहरू सेभ गर्ने छ।"</string>
     <string name="set_as_default" msgid="4415328591568654603">"डिफल्ट जानकारीका रूपमा सेट गर्नुहोस्"</string>
     <string name="use_once" msgid="9027366575315399714">"एक पटक प्रयोग गर्नुहोस्"</string>
-    <string name="more_options_usage_passwords_passkeys" msgid="4794903978126339473">"<xliff:g id="PASSWORDSNUMBER">%1$s</xliff:g> वटा पासवर्ड, <xliff:g id="PASSKEYSNUMBER">%2$s</xliff:g> वटा पासकी"</string>
+    <string name="more_options_usage_passwords_passkeys" msgid="3470113942332934279">"<xliff:g id="PASSWORDSNUMBER">%1$s</xliff:g> वटा पासवर्ड • <xliff:g id="PASSKEYSNUMBER">%2$s</xliff:g> वटा पासकी"</string>
     <string name="more_options_usage_passwords" msgid="1632047277723187813">"<xliff:g id="PASSWORDSNUMBER">%1$s</xliff:g> वटा पासवर्ड"</string>
     <string name="more_options_usage_passkeys" msgid="5390320437243042237">"<xliff:g id="PASSKEYSNUMBER">%1$s</xliff:g> वटा पासकी"</string>
+    <string name="more_options_usage_credentials" msgid="1785697001787193984">"<xliff:g id="TOTALCREDENTIALSNUMBER">%1$s</xliff:g> वटा क्रिडेन्सियल"</string>
     <string name="passkey_before_subtitle" msgid="2448119456208647444">"पासकी"</string>
     <string name="another_device" msgid="5147276802037801217">"अर्को डिभाइस"</string>
     <string name="other_password_manager" msgid="565790221427004141">"अन्य पासवर्ड म्यानेजरहरू"</string>
     <string name="close_sheet" msgid="1393792015338908262">"पाना बन्द गर्नुहोस्"</string>
     <string name="accessibility_back_arrow_button" msgid="3233198183497842492">"अघिल्लो पेजमा फर्कनुहोस्"</string>
-    <!-- no translation found for accessibility_close_button (2953807735590034688) -->
-    <skip />
+    <string name="accessibility_close_button" msgid="2953807735590034688">"स्क्रिनको फेदमा देखिएको क्रिडेन्सियल म्यानेजरको कारबाहीसम्बन्धी सुझाव बन्द गर्नुहोस्"</string>
     <string name="get_dialog_title_use_passkey_for" msgid="6236608872708021767">"आफूले सेभ गरेको पासकी प्रयोग गरी <xliff:g id="APP_NAME">%1$s</xliff:g> मा साइन इन गर्ने हो?"</string>
     <string name="get_dialog_title_use_sign_in_for" msgid="5283099528915572980">"आफूले सेभ गरेको साइन इनसम्बन्धी जानकारी प्रयोग गरी <xliff:g id="APP_NAME">%1$s</xliff:g> मा साइन इन गर्ने हो?"</string>
     <string name="get_dialog_title_choose_sign_in_for" msgid="1361715440877613701">"<xliff:g id="APP_NAME">%1$s</xliff:g> मा साइन इन गर्नका लागि सेभ गरिएका साइन इनसम्बन्धी जानकारी छनौट गर्नुहोस्"</string>
     <string name="get_dialog_use_saved_passkey_for" msgid="4618100798664888512">"अर्कै विधि प्रयोग गरी साइन इन गर्नुहोस्"</string>
-    <string name="get_dialog_button_label_no_thanks" msgid="8114363019023838533">"पर्दैन, धन्यवाद"</string>
+    <string name="snackbar_action" msgid="37373514216505085">"विकल्पहरू हेर्नुहोस्"</string>
     <string name="get_dialog_button_label_continue" msgid="6446201694794283870">"जारी राख्नुहोस्"</string>
     <string name="get_dialog_title_sign_in_options" msgid="2092876443114893618">"साइन‍ इनसम्बन्धी विकल्पहरू"</string>
     <string name="get_dialog_heading_for_username" msgid="3456868514554204776">"<xliff:g id="USERNAME">%1$s</xliff:g> का लागि"</string>

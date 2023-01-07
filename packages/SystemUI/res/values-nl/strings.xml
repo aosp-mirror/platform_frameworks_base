@@ -85,6 +85,7 @@
     <string name="screenshot_share_description" msgid="2861628935812656612">"Screenshot delen"</string>
     <string name="screenshot_scroll_label" msgid="2930198809899329367">"Meer opnemen"</string>
     <string name="screenshot_dismiss_description" msgid="4702341245899508786">"Screenshot sluiten"</string>
+    <string name="screenshot_dismiss_work_profile" msgid="3101530842987697045">"Bericht over werkprofiel sluiten"</string>
     <string name="screenshot_preview_description" msgid="7606510140714080474">"Voorbeeld van screenshot"</string>
     <string name="screenshot_top_boundary_pct" msgid="2520148599096479332">"Bovengrens <xliff:g id="PERCENT">%1$d</xliff:g> procent"</string>
     <string name="screenshot_bottom_boundary_pct" msgid="3880821519814946478">"Ondergrens <xliff:g id="PERCENT">%1$d</xliff:g> procent"</string>
@@ -317,8 +318,7 @@
     <string name="sensor_privacy_camera_unblocked_dialog_content" msgid="7847190103011782278">"Camera staat aan voor alle apps en services."</string>
     <string name="sensor_privacy_camera_blocked_dialog_content" msgid="3182428709314874616">"Cameratoegang staat uit voor alle apps en services."</string>
     <string name="sensor_privacy_htt_blocked_dialog_content" msgid="3333321592997666441">"Als je de microfoonknop wilt gebruiken, zet je microfoontoegang aan via Instellingen."</string>
-    <!-- no translation found for sensor_privacy_dialog_open_settings (5635865896053011859) -->
-    <skip />
+    <string name="sensor_privacy_dialog_open_settings" msgid="5635865896053011859">"Instellingen openen"</string>
     <string name="media_seamless_other_device" msgid="4654849800789196737">"Ander apparaat"</string>
     <string name="quick_step_accessibility_toggle_overview" msgid="7908949976727578403">"Overzicht aan- of uitzetten"</string>
     <string name="zen_priority_introduction" msgid="3159291973383796646">"Je wordt niet gestoord door geluiden en trillingen, behalve bij wekkers, herinneringen, afspraken en specifieke bellers die je selecteert. Je kunt nog steeds alles horen wat je wilt afspelen, waaronder muziek, video\'s en games."</string>
@@ -743,6 +743,7 @@
     <string name="wifi_is_off" msgid="5389597396308001471">"Wifi staat uit"</string>
     <string name="bt_is_off" msgid="7436344904889461591">"Bluetooth staat uit"</string>
     <string name="dnd_is_off" msgid="3185706903793094463">"Niet storen staat uit"</string>
+    <string name="dnd_is_on" msgid="7009368176361546279">"Niet storen staat aan"</string>
     <string name="qs_dnd_prompt_auto_rule" msgid="3535469468310002616">"Niet storen is aangezet door een automatische regel (<xliff:g id="ID_1">%s</xliff:g>)."</string>
     <string name="qs_dnd_prompt_app" msgid="4027984447935396820">"Niet storen is aangezet door een app (<xliff:g id="ID_1">%s</xliff:g>)."</string>
     <string name="qs_dnd_prompt_auto_rule_app" msgid="1841469944118486580">"Niet storen is aangezet door een automatische regel of app."</string>
@@ -905,6 +906,7 @@
     <string name="media_output_dialog_accessibility_title" msgid="4681741064190167888">"Beschikbare apparaten voor audio-uitvoer."</string>
     <string name="media_output_dialog_accessibility_seekbar" msgid="5332843993805568978">"Volume"</string>
     <string name="media_output_dialog_volume_percentage" msgid="1613984910585111798">"<xliff:g id="PERCENTAGE">%1$d</xliff:g>%%"</string>
+    <string name="media_output_group_title_speakers_and_displays" msgid="7169712332365659820">"Speakers en schermen"</string>
     <string name="media_output_first_broadcast_title" msgid="6292237789860753022">"Hoe uitzenden werkt"</string>
     <string name="media_output_broadcast" msgid="3555580945878071543">"Uitzending"</string>
     <string name="media_output_first_notify_broadcast_message" msgid="6353857724136398494">"Mensen bij jou in de buurt met geschikte bluetooth-apparaten kunnen luisteren naar de media die je uitzendt"</string>
@@ -1032,20 +1034,19 @@
     <string name="log_access_confirmation_deny" msgid="2389461495803585795">"Niet toestaan"</string>
     <string name="log_access_confirmation_body" msgid="6883031912003112634">"Apparaatlogboeken leggen vast wat er op je apparaat gebeurt. Apps kunnen deze logboeken gebruiken om problemen op te sporen en te verhelpen.\n\nSommige logboeken kunnen gevoelige informatie bevatten, dus geef alleen apps die je vertrouwt toegang tot alle apparaatlogboeken. \n\nAls je deze app geen toegang tot alle apparaatlogboeken geeft, heeft de app nog wel toegang tot de eigen logboeken. De fabrikant van je apparaat heeft misschien nog steeds toegang tot bepaalde logboeken of informatie op je apparaat."</string>
     <string name="keyguard_affordance_enablement_dialog_action_template" msgid="8164857863036314664">"<xliff:g id="APPNAME">%1$s</xliff:g> openen"</string>
-    <string name="keyguard_affordance_enablement_dialog_message" msgid="2790910660524887941">"Zorg voor het volgende om de <xliff:g id="APPNAME">%1$s</xliff:g>-app toe te voegen als snelkoppeling:"</string>
     <string name="keyguard_affordance_enablement_dialog_wallet_instruction_1" msgid="8439655049139819278">"• De app is ingesteld"</string>
     <string name="keyguard_affordance_enablement_dialog_wallet_instruction_2" msgid="4321089250629477835">"• Er is ten minste één kaart aan Wallet toegevoegd"</string>
     <string name="keyguard_affordance_enablement_dialog_qr_scanner_instruction" msgid="5355839079232119791">"• Er moet een camera-app zijn geïnstalleerd"</string>
     <string name="keyguard_affordance_enablement_dialog_home_instruction_1" msgid="8438311171750568633">"• De app is ingesteld"</string>
     <string name="keyguard_affordance_enablement_dialog_home_instruction_2" msgid="8308525385889021652">"• Er is ten minste één apparaat beschikbaar"</string>
+    <string name="keyguard_affordance_press_too_short" msgid="8145437175134998864">"Houd de sneltoets ingedrukt"</string>
     <string name="rear_display_bottom_sheet_cancel" msgid="3461468855493357248">"Annuleren"</string>
     <string name="rear_display_bottom_sheet_confirm" msgid="4383356544661421206">"Nu omkeren"</string>
     <string name="rear_display_fold_bottom_sheet_title" msgid="6081542277622721548">"Klap de telefoon open voor een betere selfie"</string>
     <string name="rear_display_unfold_bottom_sheet_title" msgid="2137403802960396357">"Omkeren naar scherm voorkant voor een betere selfie?"</string>
     <string name="rear_display_bottom_sheet_description" msgid="1852662982816810352">"Gebruik de camera aan de achterzijde voor een bredere foto met hogere resolutie."</string>
     <string name="rear_display_bottom_sheet_warning" msgid="800995919558238930"><b>"✱ Dit scherm gaat uit"</b></string>
-    <!-- no translation found for rear_display_accessibility_folded_animation (1538121649587978179) -->
-    <skip />
-    <!-- no translation found for rear_display_accessibility_unfolded_animation (1946153682258289040) -->
-    <skip />
+    <string name="rear_display_accessibility_folded_animation" msgid="1538121649587978179">"Opvouwbaar apparaat wordt uitgevouwen"</string>
+    <string name="rear_display_accessibility_unfolded_animation" msgid="1946153682258289040">"Opvouwbaar apparaat wordt gedraaid"</string>
+    <string name="stylus_battery_low" msgid="7134370101603167096">"Batterij van stylus bijna leeg"</string>
 </resources>

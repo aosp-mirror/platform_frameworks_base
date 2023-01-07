@@ -23,10 +23,8 @@
     <string name="dock_alignment_not_charging" product="default" msgid="3980752926226749808">"ხელახლა შეუერთეთ ტელეფონი უსადენოდ დასამუხტად"</string>
     <string name="inattentive_sleep_warning_message" product="tv" msgid="6844464574089665063">"Android TV მოწყობილობა მალე გამოირთვება, დააჭირეთ ღილაკს, რომ ჩართული დარჩეს."</string>
     <string name="inattentive_sleep_warning_message" product="default" msgid="5693904520452332224">"მოწყობილობა მალე გამოირთვება, დააჭირეთ, რომ ჩართული დარჩეს."</string>
-    <!-- no translation found for keyguard_missing_sim_message (408124574073032188) -->
-    <skip />
-    <!-- no translation found for keyguard_missing_sim_message (2605468359948247208) -->
-    <skip />
+    <string name="keyguard_missing_sim_message" product="tablet" msgid="408124574073032188">"ტაბლეტში SIM არ არის."</string>
+    <string name="keyguard_missing_sim_message" product="default" msgid="2605468359948247208">"ტელეფონში SIM არ არის."</string>
     <string name="kg_invalid_confirm_pin_hint" product="default" msgid="6278551068943958651">"PIN-კოდები არ ემთხვევა"</string>
     <string name="kg_failed_attempts_almost_at_wipe" product="tablet" msgid="302165994845009232">"თქვენ არასწორად ცადეთ ტაბლეტის განბლოკვა <xliff:g id="NUMBER_0">%1$d</xliff:g>-ჯერ. კიდევ <xliff:g id="NUMBER_1">%2$d</xliff:g> წარუმატებელი მცდელობის შემდეგ, ეს ტაბლეტი გადაყენდება, რაც მისი მონაცემების მთლიანად წაშლას გამოიწვევს."</string>
     <string name="kg_failed_attempts_almost_at_wipe" product="default" msgid="2594813176164266847">"თქვენ არასწორად ცადეთ ტელეფონის განბლოკვა <xliff:g id="NUMBER_0">%1$d</xliff:g>-ჯერ. კიდევ <xliff:g id="NUMBER_1">%2$d</xliff:g> წარუმატებელი მცდელობის შემდეგ, ეს ტელეფონი გადაყენდება, რაც მისი მონაცემების მთლიანად წაშლას გამოიწვევს."</string>

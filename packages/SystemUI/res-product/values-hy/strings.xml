@@ -23,10 +23,8 @@
     <string name="dock_alignment_not_charging" product="default" msgid="3980752926226749808">"Կարգավորեք հեռախոսը` առանց լարի լիցքավորելու համար"</string>
     <string name="inattentive_sleep_warning_message" product="tv" msgid="6844464574089665063">"Android TV սարքը շուտով կանջատվի: Սեղմեք որևէ կոճակ՝ միացրած թողնելու համար:"</string>
     <string name="inattentive_sleep_warning_message" product="default" msgid="5693904520452332224">"Սարքը շուտով կանջատվի: Սեղմեք՝ միացրած թողնելու համար:"</string>
-    <!-- no translation found for keyguard_missing_sim_message (408124574073032188) -->
-    <skip />
-    <!-- no translation found for keyguard_missing_sim_message (2605468359948247208) -->
-    <skip />
+    <string name="keyguard_missing_sim_message" product="tablet" msgid="408124574073032188">"Պլանշետում SIM քարտ չկա։"</string>
+    <string name="keyguard_missing_sim_message" product="default" msgid="2605468359948247208">"Հեռախոսում SIM քարտ չկա։"</string>
     <string name="kg_invalid_confirm_pin_hint" product="default" msgid="6278551068943958651">"PIN կոդերը չեն համընկնում"</string>
     <string name="kg_failed_attempts_almost_at_wipe" product="tablet" msgid="302165994845009232">"Դուք կատարել եք պլանշետն ապակողպելու <xliff:g id="NUMBER_0">%1$d</xliff:g> անհաջող փորձ: Եվս <xliff:g id="NUMBER_1">%2$d</xliff:g> անհաջող փորձից հետո այս պլանշետը կվերակայվի և բոլոր տվյալները կջնջվեն:"</string>
     <string name="kg_failed_attempts_almost_at_wipe" product="default" msgid="2594813176164266847">"Դուք կատարել եք հեռախոսն ապակողպելու <xliff:g id="NUMBER_0">%1$d</xliff:g> անհաջող փորձ: Եվս <xliff:g id="NUMBER_1">%2$d</xliff:g> անհաջող փորձից հետո այս հեռախոսի կարգավորումները կզրոյացվեն, և բոլոր տվյալները կջնջվեն:"</string>

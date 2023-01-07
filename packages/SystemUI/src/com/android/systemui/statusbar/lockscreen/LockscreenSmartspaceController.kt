@@ -239,6 +239,7 @@ class LockscreenSmartspaceController @Inject constructor(
         }
 
         val ssView = plugin.getView(parent)
+        ssView.setUiSurface(BcSmartspaceDataPlugin.UI_SURFACE_LOCK_SCREEN_AOD)
         ssView.registerDataProvider(plugin)
 
         ssView.setIntentStarter(object : BcSmartspaceDataPlugin.IntentStarter {
@@ -282,8 +283,10 @@ class LockscreenSmartspaceController @Inject constructor(
         }
 
         val newSession = smartspaceManager.createSmartspaceSession(
-                SmartspaceConfig.Builder(context, "lockscreen").build())
-        Log.d(TAG, "Starting smartspace session for lockscreen")
+                SmartspaceConfig.Builder(
+                        context, BcSmartspaceDataPlugin.UI_SURFACE_LOCK_SCREEN_AOD).build())
+        Log.d(TAG, "Starting smartspace session for " +
+                BcSmartspaceDataPlugin.UI_SURFACE_LOCK_SCREEN_AOD)
         newSession.addOnTargetsAvailableListener(uiExecutor, sessionListener)
         this.session = newSession
 

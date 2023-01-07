@@ -35,6 +35,7 @@ import android.content.pm.InstallSourceInfo;
 import android.content.pm.ModuleInfo;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
+import android.content.pm.PackageManagerInternal;
 import android.content.pm.ParceledListSlice;
 import android.content.pm.SharedLibraryInfo;
 import android.content.pm.Signature;
@@ -76,6 +77,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.Executors;
+import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.stream.Collectors;
 
 /**
@@ -127,6 +129,7 @@ public class BinaryTransparencyService extends SystemService {
     private String mVbmetaDigest;
     // the system time (in ms) the last measurement was taken
     private long mMeasurementsLastRecordedMs;
+    private PackageManagerInternal mPackageManagerInternal;
 
     /**
      * Guards whether or not measurements of MBA to be performed. When this change is enabled,
@@ -1016,6 +1019,7 @@ public class BinaryTransparencyService extends SystemService {
         mServiceImpl = new BinaryTransparencyServiceImpl();
         mVbmetaDigest = VBMETA_DIGEST_UNINITIALIZED;
         mMeasurementsLastRecordedMs = 0;
+        mPackageManagerInternal = LocalServices.getService(PackageManagerInternal.class);
     }
 
     /**
@@ -1030,6 +1034,38 @@ public class BinaryTransparencyService extends SystemService {
         } catch (Throwable t) {
             Slog.e(TAG, "Failed to start BinaryTransparencyService.", t);
         }
+
+        // register a package observer to detect updates to preloads
+        mPackageManagerInternal.getPackageList(new PackageManagerInternal.PackageListObserver() {
+            @Override
+            public void onPackageAdded(String packageName, int uid) {
+
+            }
+
+            @Override
+            public void onPackageChanged(String packageName, int uid) {
+                // check if the updated package is a preloaded app.
+                PackageManager pm = mContext.getPackageManager();
+                try {
+                    pm.getPackageInfo(packageName, PackageManager.PackageInfoFlags.of(
+                            PackageManager.MATCH_FACTORY_ONLY));
+                } catch (PackageManager.NameNotFoundException e) {
+                    // this means that this package is not a preloaded app
+                    return;
+                }
+
+                Slog.d(TAG, "Preload " + packageName + " was updated. Scheduling measurement...");
+                UpdateMeasurementsJobService.scheduleBinaryMeasurements(mContext,
+                        BinaryTransparencyService.this);
+            }
+
+            @Override
+            public void onPackageRemoved(String packageName, int uid) {
+
+            }
+        });
+
+        // TODO(b/264428429): Register observer for updates to APEXs.
     }
 
     /**
@@ -1059,6 +1095,8 @@ public class BinaryTransparencyService extends SystemService {
      * JobService to measure all covered binaries and record result to Westworld.
      */
     public static class UpdateMeasurementsJobService extends JobService {
+        private static AtomicBoolean sScheduled = new AtomicBoolean();
+        private static long sTimeLastRanMs = 0;
         private static final int DO_BINARY_MEASUREMENTS_JOB_ID =
                 UpdateMeasurementsJobService.class.hashCode();
 
@@ -1085,6 +1123,8 @@ public class BinaryTransparencyService extends SystemService {
                     Slog.e(TAG, "Taking binary measurements was interrupted.", e);
                     return;
                 }
+                sTimeLastRanMs = System.currentTimeMillis();
+                sScheduled.set(false);
                 jobFinished(params, false);
             }).start();
 
@@ -1105,16 +1145,33 @@ public class BinaryTransparencyService extends SystemService {
                 return;
             }
 
+            if (sScheduled.get()) {
+                Slog.d(TAG, "A measurement job has already been scheduled.");
+                return;
+            }
+
+            long minWaitingPeriodMs = 0;
+            if (sTimeLastRanMs != 0) {
+                minWaitingPeriodMs = RECORD_MEASUREMENTS_COOLDOWN_MS
+                        - (System.currentTimeMillis() - sTimeLastRanMs);
+                // bound the range of minWaitingPeriodMs in the case where > 24h has elapsed
+                minWaitingPeriodMs = Math.max(0,
+                        Math.min(minWaitingPeriodMs, RECORD_MEASUREMENTS_COOLDOWN_MS));
+                Slog.d(TAG, "Scheduling the next measurement to be done at least "
+                        + minWaitingPeriodMs + "ms from now.");
+            }
+
             final JobInfo jobInfo = new JobInfo.Builder(DO_BINARY_MEASUREMENTS_JOB_ID,
                     new ComponentName(context, UpdateMeasurementsJobService.class))
                     .setRequiresDeviceIdle(true)
                     .setRequiresCharging(true)
-                    .setPeriodic(RECORD_MEASUREMENTS_COOLDOWN_MS)
+                    .setMinimumLatency(minWaitingPeriodMs)
                     .build();
             if (jobScheduler.schedule(jobInfo) != JobScheduler.RESULT_SUCCESS) {
                 Slog.e(TAG, "Failed to schedule job to measure binaries.");
                 return;
             }
+            sScheduled.set(true);
             Slog.d(TAG, TextUtils.formatSimple(
                     "Job %d to measure binaries was scheduled successfully.",
                     DO_BINARY_MEASUREMENTS_JOB_ID));

@@ -87,7 +87,7 @@ public class PackageStateUtils {
         }
         long earliestFirstInstallTime = Long.MAX_VALUE;
         for (int i = 0; i < userStatesInternal.size(); i++) {
-            final long firstInstallTime = userStatesInternal.valueAt(i).getFirstInstallTime();
+            final long firstInstallTime = userStatesInternal.valueAt(i).getFirstInstallTimeMillis();
             if (firstInstallTime != 0 && firstInstallTime < earliestFirstInstallTime) {
                 earliestFirstInstallTime = firstInstallTime;
             }

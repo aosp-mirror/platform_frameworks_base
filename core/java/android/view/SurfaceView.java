@@ -1122,14 +1122,15 @@ public class SurfaceView extends View implements ViewRootImpl.SurfaceChangedCall
      * @hide
      */
     @Override
-    public void surfaceSyncStarted() {
+    public void vriDrawStarted(boolean isWmSync) {
         ViewRootImpl viewRoot = getViewRootImpl();
-        if (viewRoot != null) {
-            synchronized (mSyncGroups) {
+        synchronized (mSyncGroups) {
+            if (isWmSync && viewRoot != null) {
                 for (SurfaceSyncGroup syncGroup : mSyncGroups) {
                     viewRoot.addToSync(syncGroup);
                 }
             }
+            mSyncGroups.clear();
         }
     }
 

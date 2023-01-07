@@ -85,8 +85,7 @@ object Flags {
     // TODO(b/259559750): Tracking Bug
     val SEMI_STABLE_SORT = releasedFlag(115, "semi_stable_sort")
 
-    @JvmField
-    val USE_ROUNDNESS_SOURCETYPES = unreleasedFlag(116, "use_roundness_sourcetype", teamfood = true)
+    @JvmField val USE_ROUNDNESS_SOURCETYPES = releasedFlag(116, "use_roundness_sourcetype")
 
     // TODO(b/259217907)
     @JvmField
@@ -205,6 +204,11 @@ object Flags {
     @JvmField
     val UNOCCLUSION_TRANSITION = unreleasedFlag(223, "unocclusion_transition", teamfood = false)
 
+    // flag for controlling auto pin confirmation and material u shapes in bouncer
+    @JvmField
+    val AUTO_PIN_CONFIRMATION =
+        unreleasedFlag(224, "auto_pin_confirmation", "auto_pin_confirmation")
+
     // 300 - power menu
     // TODO(b/254512600): Tracking Bug
     @JvmField val POWER_MENU_LITE = releasedFlag(300, "power_menu_lite")
@@ -215,6 +219,10 @@ object Flags {
     val SMARTSPACE_SHARED_ELEMENT_TRANSITION_ENABLED =
         releasedFlag(401, "smartspace_shared_element_transition_enabled")
     val SMARTSPACE = resourceBooleanFlag(402, R.bool.flag_smartspace, "smartspace")
+
+    // TODO(b/258517050): Clean up after the feature is launched.
+    @JvmField
+    val SMARTSPACE_DATE_WEATHER_DECOUPLED = unreleasedFlag(403, "smartspace_date_weather_decoupled")
 
     // 500 - quick settings
 

@@ -6460,7 +6460,7 @@ public class PackageManagerService implements PackageSender, TestUtilityService 
             List<String> targetPackages = new ArrayList<>();
             PackageManagerService.this.forEachPackageState(snapshot(), packageState -> {
                 final AndroidPackage pkg = packageState.getPkg();
-                if (pkg != null && !pkg.isOverlay()) {
+                if (pkg != null && !pkg.isResourceOverlay()) {
                     targetPackages.add(pkg.getPackageName());
                 }
             });

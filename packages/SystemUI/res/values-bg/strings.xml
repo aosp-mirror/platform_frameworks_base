@@ -85,6 +85,7 @@
     <string name="screenshot_share_description" msgid="2861628935812656612">"Споделяне на екранната снимка"</string>
     <string name="screenshot_scroll_label" msgid="2930198809899329367">"Заснемане на още"</string>
     <string name="screenshot_dismiss_description" msgid="4702341245899508786">"Отхвърляне на екранната снимка"</string>
+    <string name="screenshot_dismiss_work_profile" msgid="3101530842987697045">"Отхвърляне на съобщението за служебния потребителски профил"</string>
     <string name="screenshot_preview_description" msgid="7606510140714080474">"Визуализация на екранната снимка"</string>
     <string name="screenshot_top_boundary_pct" msgid="2520148599096479332">"Горна граница: <xliff:g id="PERCENT">%1$d</xliff:g>%%"</string>
     <string name="screenshot_bottom_boundary_pct" msgid="3880821519814946478">"Долна граница: <xliff:g id="PERCENT">%1$d</xliff:g>%%"</string>
@@ -317,8 +318,7 @@
     <string name="sensor_privacy_camera_unblocked_dialog_content" msgid="7847190103011782278">"Достъпът до камерата е активиран за всички приложения и услуги."</string>
     <string name="sensor_privacy_camera_blocked_dialog_content" msgid="3182428709314874616">"Достъпът до камерата е деактивиран за всички приложения и услуги."</string>
     <string name="sensor_privacy_htt_blocked_dialog_content" msgid="3333321592997666441">"Активирайте достъпа до микрофона, за да използвате съответния бутон."</string>
-    <!-- no translation found for sensor_privacy_dialog_open_settings (5635865896053011859) -->
-    <skip />
+    <string name="sensor_privacy_dialog_open_settings" msgid="5635865896053011859">"Към настройките"</string>
     <string name="media_seamless_other_device" msgid="4654849800789196737">"Друго устройство"</string>
     <string name="quick_step_accessibility_toggle_overview" msgid="7908949976727578403">"Превключване на общия преглед"</string>
     <string name="zen_priority_introduction" msgid="3159291973383796646">"Няма да бъдете обезпокоявани от звуци и вибрирания освен от будилници, напомняния, събития и обаждания от посочени от вас контакти. Пак ще чувате всичко, което изберете да се пусне, включително музика, видеоклипове и игри."</string>
@@ -743,6 +743,7 @@
     <string name="wifi_is_off" msgid="5389597396308001471">"Функцията за Wi‑Fi е изключена"</string>
     <string name="bt_is_off" msgid="7436344904889461591">"Функцията за Bluetooth е изключена"</string>
     <string name="dnd_is_off" msgid="3185706903793094463">"Режимът „Не безпокойте“ е изключен"</string>
+    <string name="dnd_is_on" msgid="7009368176361546279">"Режимът „Не безпокойте“ е включен"</string>
     <string name="qs_dnd_prompt_auto_rule" msgid="3535469468310002616">"Режимът „Не безпокойте“ бе включен от автоматично правило (<xliff:g id="ID_1">%s</xliff:g>)."</string>
     <string name="qs_dnd_prompt_app" msgid="4027984447935396820">"Режимът „Не безпокойте“ бе включен от приложение (<xliff:g id="ID_1">%s</xliff:g>)."</string>
     <string name="qs_dnd_prompt_auto_rule_app" msgid="1841469944118486580">"Режимът „Не безпокойте“ бе включен от автоматично правило или от приложение."</string>
@@ -815,7 +816,7 @@
     <string name="accessibility_floating_button_migration_tooltip" msgid="5217151214439341902">"Докоснете, за да отворите функциите за достъпност. Персон./заменете бутона от настройките.\n\n"<annotation id="link">"Преглед на настройките"</annotation></string>
     <string name="accessibility_floating_button_docking_tooltip" msgid="6814897496767461517">"Преместете бутона до края, за да го скриете временно"</string>
     <string name="accessibility_floating_button_undo" msgid="511112888715708241">"Отмяна"</string>
-    <string name="accessibility_floating_button_undo_message_text" msgid="3044079592757099698">"{count,plural, =1{{label} пряк път бе премахнат}other{# преки пътя бяха премахнати}}"</string>
+    <string name="accessibility_floating_button_undo_message_text" msgid="3044079592757099698">"{count,plural, =1{Прекият път за „{label}“ бе премахнат}other{# преки пътя бяха премахнати}}"</string>
     <string name="accessibility_floating_button_action_move_top_left" msgid="6253520703618545705">"Преместване горе вляво"</string>
     <string name="accessibility_floating_button_action_move_top_right" msgid="6106225581993479711">"Преместване горе вдясно"</string>
     <string name="accessibility_floating_button_action_move_bottom_left" msgid="8063394111137429725">"Преместване долу вляво"</string>
@@ -905,6 +906,7 @@
     <string name="media_output_dialog_accessibility_title" msgid="4681741064190167888">"Налични устройства за аудиоизход."</string>
     <string name="media_output_dialog_accessibility_seekbar" msgid="5332843993805568978">"Сила на звука"</string>
     <string name="media_output_dialog_volume_percentage" msgid="1613984910585111798">"<xliff:g id="PERCENTAGE">%1$d</xliff:g>%%"</string>
+    <string name="media_output_group_title_speakers_and_displays" msgid="7169712332365659820">"Високоговорители и екрани"</string>
     <string name="media_output_first_broadcast_title" msgid="6292237789860753022">"Как работи предаването"</string>
     <string name="media_output_broadcast" msgid="3555580945878071543">"Предаване"</string>
     <string name="media_output_first_notify_broadcast_message" msgid="6353857724136398494">"Хората в близост със съвместими устройства с Bluetooth могат да слушат мултимедията, която предавате"</string>
@@ -1032,20 +1034,19 @@
     <string name="log_access_confirmation_deny" msgid="2389461495803585795">"Забраняване"</string>
     <string name="log_access_confirmation_body" msgid="6883031912003112634">"В регистрационните файлове за устройството се записва какво се извършва на него. Приложенията могат да използват тези регистрационни файлове, за да откриват и отстраняват проблеми.\n\nНякои регистрационни файлове за устройството може да съдържат поверителна информация, затова разрешавайте достъп до всички тях само на приложения, на които имате доверие. \n\nАко не разрешите на това приложение достъп до всички регистрационни файлове за устройството, то пак може да осъществява достъп до собствените си регистрационни файлове. Възможно е производителят на устройството да продължи да има достъп до някои регистрационни файлове или информация на устройството ви."</string>
     <string name="keyguard_affordance_enablement_dialog_action_template" msgid="8164857863036314664">"Отваряне на <xliff:g id="APPNAME">%1$s</xliff:g>"</string>
-    <string name="keyguard_affordance_enablement_dialog_message" msgid="2790910660524887941">"За да добавите пряк път към приложението <xliff:g id="APPNAME">%1$s</xliff:g>, трябва да се уверите в следното:"</string>
     <string name="keyguard_affordance_enablement_dialog_wallet_instruction_1" msgid="8439655049139819278">"• Приложението е настроено."</string>
     <string name="keyguard_affordance_enablement_dialog_wallet_instruction_2" msgid="4321089250629477835">"• В Wallet е добавена поне една карта."</string>
     <string name="keyguard_affordance_enablement_dialog_qr_scanner_instruction" msgid="5355839079232119791">"• Инсталирано е приложение за камера."</string>
     <string name="keyguard_affordance_enablement_dialog_home_instruction_1" msgid="8438311171750568633">"• Приложението е настроено."</string>
     <string name="keyguard_affordance_enablement_dialog_home_instruction_2" msgid="8308525385889021652">"• Налице е поне едно устройство."</string>
+    <string name="keyguard_affordance_press_too_short" msgid="8145437175134998864">"Докоснете и задръжте прекия път"</string>
     <string name="rear_display_bottom_sheet_cancel" msgid="3461468855493357248">"Отказ"</string>
     <string name="rear_display_bottom_sheet_confirm" msgid="4383356544661421206">"Обръщане сега"</string>
     <string name="rear_display_fold_bottom_sheet_title" msgid="6081542277622721548">"Отворете телефона за по-добро селфи"</string>
     <string name="rear_display_unfold_bottom_sheet_title" msgid="2137403802960396357">"Да се ползва ли предната камера за по-добро селфи?"</string>
     <string name="rear_display_bottom_sheet_description" msgid="1852662982816810352">"Използвайте задната камера за по-широка снимка с по-висока разделителна способност."</string>
     <string name="rear_display_bottom_sheet_warning" msgid="800995919558238930"><b>"✱ Този екран ще се изключи"</b></string>
-    <!-- no translation found for rear_display_accessibility_folded_animation (1538121649587978179) -->
-    <skip />
-    <!-- no translation found for rear_display_accessibility_unfolded_animation (1946153682258289040) -->
-    <skip />
+    <string name="rear_display_accessibility_folded_animation" msgid="1538121649587978179">"Разгъване на сгъваемо устройство"</string>
+    <string name="rear_display_accessibility_unfolded_animation" msgid="1946153682258289040">"Обръщане на сгъваемо устройство"</string>
+    <string name="stylus_battery_low" msgid="7134370101603167096">"Батерията на писалката е изтощена"</string>
 </resources>

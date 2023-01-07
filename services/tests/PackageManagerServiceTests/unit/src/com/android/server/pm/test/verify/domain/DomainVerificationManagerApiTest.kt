@@ -30,7 +30,6 @@ import android.os.Process
 import android.util.ArraySet
 import android.util.SparseArray
 import com.android.server.pm.parsing.pkg.AndroidPackageInternal
-import com.android.server.pm.pkg.AndroidPackage
 import com.android.server.pm.pkg.PackageStateInternal
 import com.android.server.pm.pkg.PackageUserStateInternal
 import com.android.server.pm.pkg.component.ParsedActivityImpl
@@ -301,7 +300,7 @@ class DomainVerificationManagerApiTest {
                 whenever(isInstalled) { true }
                 whenever(isSuspended) { false }
                 whenever(isInstantApp) { false }
-                whenever(firstInstallTime) {0L}
+                whenever(firstInstallTimeMillis) {0L}
             }
         })
         val pkg2 = mockPkgState(PKG_TWO, UUID_TWO, listOf(DOMAIN_1, DOMAIN_2))

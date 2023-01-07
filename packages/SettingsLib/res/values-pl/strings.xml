@@ -564,6 +564,8 @@
     <string name="user_add_user_title" msgid="5457079143694924885">"Dodać nowego użytkownika?"</string>
     <string name="user_add_user_message_long" msgid="1527434966294733380">"Z tego urządzenia możesz korzystać wraz z innymi osobami, dodając na nim konta użytkowników. Każdy użytkownik ma własne miejsce na swoje aplikacje, tapety i inne dane. Może też zmieniać ustawienia, które wpływają na wszystkich użytkowników urządzenia (np. Wi‑Fi).\n\nGdy dodasz nowego użytkownika, musi on skonfigurować swoje miejsce na dane.\n\nKażdy użytkownik może aktualizować aplikacje w imieniu wszystkich pozostałych użytkowników. Ułatwienia dostępu i usługi mogą nie zostać przeniesione na konto nowego użytkownika."</string>
     <string name="user_add_user_message_short" msgid="3295959985795716166">"Gdy dodasz nowego użytkownika, musi on skonfigurować swoją przestrzeń.\n\nKażdy użytkownik może aktualizować aplikacje wszystkich innych użytkowników."</string>
+    <string name="user_grant_admin_title" msgid="5565796912475193314">"Nadać uprawnienia administratora?"</string>
+    <string name="user_grant_admin_message" msgid="7925257971286380976">"Administrator będzie mógł zarządzać innymi użytkownikami, zmieniać ustawienia urządzenia i przywracać urządzenie do ustawień fabrycznych."</string>
     <string name="user_setup_dialog_title" msgid="8037342066381939995">"Skonfigurować ustawienia dla użytkownika?"</string>
     <string name="user_setup_dialog_message" msgid="269931619868102841">"Upewnij się, że ta osoba jest w pobliżu i może skonfigurować swój profil"</string>
     <string name="user_setup_profile_dialog_message" msgid="4788197052296962620">"Skonfigurować teraz profil?"</string>
@@ -595,6 +597,8 @@
     <string name="guest_reset_and_restart_dialog_message" msgid="2764425635305200790">"Zostanie uruchomiona nowa sesja gościa. Wszystkie aplikacje i dane z obecnej sesji zostaną usunięte."</string>
     <string name="guest_exit_dialog_title" msgid="1846494656849381804">"Zamknąć tryb gościa?"</string>
     <string name="guest_exit_dialog_message" msgid="1743218864242719783">"Wszystkie aplikacje i dane z obecnej sesji gościa zostaną usunięte."</string>
+    <string name="grant_admin" msgid="4273077214151417783">"Nadaj temu użytkownikowi uprawnienia administratora"</string>
+    <string name="not_grant_admin" msgid="6985027675930546850">"Nie nadawaj uprawnień administratora"</string>
     <string name="guest_exit_dialog_button" msgid="1736401897067442044">"Zamknij"</string>
     <string name="guest_exit_dialog_title_non_ephemeral" msgid="7675327443743162986">"Zapisać aktywność gościa?"</string>
     <string name="guest_exit_dialog_message_non_ephemeral" msgid="223385323235719442">"Możesz zapisać aktywność z obecnej sesji lub usunąć wszystkie aplikacje i dane"</string>

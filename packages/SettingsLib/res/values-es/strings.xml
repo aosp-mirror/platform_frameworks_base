@@ -172,7 +172,7 @@
     <string name="unknown" msgid="3544487229740637809">"Desconocido"</string>
     <string name="running_process_item_user_label" msgid="3988506293099805796">"Usuario: <xliff:g id="USER_NAME">%1$s</xliff:g>"</string>
     <string name="launch_defaults_some" msgid="3631650616557252926">"Se han establecido algunos valores predeterminados"</string>
-    <string name="launch_defaults_none" msgid="8049374306261262709">"No se han establecido opciones predeterminadas"</string>
+    <string name="launch_defaults_none" msgid="8049374306261262709">"No se han establecido valores predeterminados"</string>
     <string name="tts_settings" msgid="8130616705989351312">"Ajustes de conversión de texto a voz"</string>
     <string name="tts_settings_title" msgid="7602210956640483039">"Salida de conversión de texto a voz"</string>
     <string name="tts_default_rate_title" msgid="3964187817364304022">"Velocidad de la voz"</string>
@@ -564,6 +564,8 @@
     <string name="user_add_user_title" msgid="5457079143694924885">"¿Añadir nuevo usuario?"</string>
     <string name="user_add_user_message_long" msgid="1527434966294733380">"Puedes compartir este dispositivo si creas más usuarios. Cada uno tendrá su propio espacio y podrá personalizarlo con aplicaciones, un fondo de pantalla y mucho más. Los usuarios también pueden ajustar opciones del dispositivo, como la conexión Wi‑Fi, que afectan a todos los usuarios.\n\nCuando añadas un usuario, tendrá que configurar su espacio.\n\nCualquier usuario puede actualizar aplicaciones de todos los usuarios. Es posible que no se transfieran los servicios y opciones de accesibilidad al nuevo usuario."</string>
     <string name="user_add_user_message_short" msgid="3295959985795716166">"Al añadir un nuevo usuario, dicha persona debe configurar su espacio.\n\nCualquier usuario puede actualizar las aplicaciones del resto de usuarios."</string>
+    <string name="user_grant_admin_title" msgid="5565796912475193314">"¿Dar privilegios de administrador al usuario?"</string>
+    <string name="user_grant_admin_message" msgid="7925257971286380976">"Como administrador, podrá gestionar otros usuarios, así como modificar los ajustes y restablecer el estado de fábrica del dispositivo."</string>
     <string name="user_setup_dialog_title" msgid="8037342066381939995">"¿Configurar usuario ahora?"</string>
     <string name="user_setup_dialog_message" msgid="269931619868102841">"Asegúrate de que la persona está disponible en este momento para usar el dispositivo y configurar su espacio."</string>
     <string name="user_setup_profile_dialog_message" msgid="4788197052296962620">"¿Quieres configurar un perfil ahora?"</string>
@@ -595,6 +597,8 @@
     <string name="guest_reset_and_restart_dialog_message" msgid="2764425635305200790">"Se iniciará una nueva sesión de invitado y se borrarán todas las aplicaciones y datos de esta sesión"</string>
     <string name="guest_exit_dialog_title" msgid="1846494656849381804">"¿Salir del modo Invitado?"</string>
     <string name="guest_exit_dialog_message" msgid="1743218864242719783">"Se eliminarán todas las aplicaciones y datos de la sesión de invitado actual"</string>
+    <string name="grant_admin" msgid="4273077214151417783">"Dar privilegios de administrador a este usuario"</string>
+    <string name="not_grant_admin" msgid="6985027675930546850">"No dar privilegios de administrador a este usuario"</string>
     <string name="guest_exit_dialog_button" msgid="1736401897067442044">"Salir"</string>
     <string name="guest_exit_dialog_title_non_ephemeral" msgid="7675327443743162986">"¿Guardar actividad de invitado?"</string>
     <string name="guest_exit_dialog_message_non_ephemeral" msgid="223385323235719442">"Puedes guardar la actividad de esta sesión o eliminar todas las aplicaciones y datos"</string>

@@ -14,10 +14,10 @@
     <string name="ssl_error_warning" msgid="3127935140338254180">"Le réseau auquel vous essayez de vous connecter présente des problèmes de sécurité."</string>
     <string name="ssl_error_example" msgid="6188711843183058764">"Par exemple, la page de connexion peut ne pas appartenir à l\'organisation représentée."</string>
     <string name="ssl_error_continue" msgid="1138548463994095584">"Continuer quand même dans le navigateur"</string>
-    <string name="network_boost_notification_channel" msgid="5430986172506159199">"Boost réseau"</string>
-    <string name="network_boost_notification_title" msgid="8226368121348880044">"%s recommande de booster les données"</string>
-    <string name="network_boost_notification_detail" msgid="3812434025544196192">"Achetez un boost réseau pour améliorer les performances"</string>
-    <string name="network_boost_notification_button_not_now" msgid="4129218252146702688">"Pas maintenant"</string>
-    <string name="network_boost_notification_button_manage" msgid="1511552684142641182">"Gérer"</string>
-    <string name="slice_purchase_app_label" msgid="915654761797446390">"Acheter un boost réseau."</string>
+    <string name="performance_boost_notification_channel" msgid="3475440855635538592">"Amélioration des performances"</string>
+    <string name="performance_boost_notification_title" msgid="5017421773334474875">"%s recommande d\'améliorer les performances"</string>
+    <string name="performance_boost_notification_detail" msgid="7216286153533321852">"Achetez une amélioration pour booster les performances du réseau"</string>
+    <string name="performance_boost_notification_button_not_now" msgid="6459755324243683785">"Pas maintenant"</string>
+    <string name="performance_boost_notification_button_manage" msgid="4976836444046497973">"Gérer"</string>
+    <string name="slice_purchase_app_label" msgid="7170191659233241166">"Achetez une amélioration des performances."</string>
 </resources>

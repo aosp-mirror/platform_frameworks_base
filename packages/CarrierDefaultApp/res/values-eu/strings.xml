@@ -14,10 +14,10 @@
     <string name="ssl_error_warning" msgid="3127935140338254180">"Erabili nahi duzun sareak segurtasun-arazoak ditu."</string>
     <string name="ssl_error_example" msgid="6188711843183058764">"Adibidez, baliteke saioa hasteko orria adierazitako erakundearena ez izatea."</string>
     <string name="ssl_error_continue" msgid="1138548463994095584">"Jarraitu arakatzailearen bidez, halere"</string>
-    <string name="network_boost_notification_channel" msgid="5430986172506159199">"Sarearen hobekuntza"</string>
-    <string name="network_boost_notification_title" msgid="8226368121348880044">"%s zerbitzuak datuak hobetzeko gomendatzen du"</string>
-    <string name="network_boost_notification_detail" msgid="3812434025544196192">"Errendimendua areagotzeko, erosi sarearen hobekuntza bat"</string>
-    <string name="network_boost_notification_button_not_now" msgid="4129218252146702688">"Orain ez"</string>
-    <string name="network_boost_notification_button_manage" msgid="1511552684142641182">"Kudeatu"</string>
-    <string name="slice_purchase_app_label" msgid="915654761797446390">"Erosi sarearen hobekuntza bat."</string>
+    <string name="performance_boost_notification_channel" msgid="3475440855635538592">"Errendimendu-hobekuntza"</string>
+    <string name="performance_boost_notification_title" msgid="5017421773334474875">"%s zerbitzuak errendimendu-hobekuntza bat erostea gomendatzen du"</string>
+    <string name="performance_boost_notification_detail" msgid="7216286153533321852">"Erosi errendimendu-hobekuntza bat sareko errendimendua hobetzeko"</string>
+    <string name="performance_boost_notification_button_not_now" msgid="6459755324243683785">"Orain ez"</string>
+    <string name="performance_boost_notification_button_manage" msgid="4976836444046497973">"Kudeatu"</string>
+    <string name="slice_purchase_app_label" msgid="7170191659233241166">"Erosi errendimendu-hobekuntza bat."</string>
 </resources>

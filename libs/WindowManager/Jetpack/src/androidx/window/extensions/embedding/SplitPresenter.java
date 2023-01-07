@@ -43,14 +43,15 @@ import android.window.WindowContainerTransaction;
 import androidx.annotation.IntDef;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import androidx.window.extensions.core.util.function.Function;
 import androidx.window.extensions.embedding.SplitAttributes.SplitType;
 import androidx.window.extensions.embedding.SplitAttributes.SplitType.ExpandContainersSplitType;
 import androidx.window.extensions.embedding.SplitAttributes.SplitType.HingeSplitType;
 import androidx.window.extensions.embedding.SplitAttributes.SplitType.RatioSplitType;
-import androidx.window.extensions.embedding.SplitAttributesCalculator.SplitAttributesCalculatorParams;
 import androidx.window.extensions.embedding.TaskContainer.TaskProperties;
 import androidx.window.extensions.layout.DisplayFeature;
 import androidx.window.extensions.layout.FoldingFeature;
+import androidx.window.extensions.layout.WindowLayoutComponentImpl;
 import androidx.window.extensions.layout.WindowLayoutInfo;
 
 import com.android.internal.annotations.VisibleForTesting;
@@ -137,10 +138,14 @@ class SplitPresenter extends JetpackTaskFragmentOrganizer {
             .setSplitType(new ExpandContainersSplitType())
             .build();
 
+    private final WindowLayoutComponentImpl mWindowLayoutComponent;
     private final SplitController mController;
 
-    SplitPresenter(@NonNull Executor executor, @NonNull SplitController controller) {
+    SplitPresenter(@NonNull Executor executor,
+            @NonNull WindowLayoutComponentImpl windowLayoutComponent,
+            @NonNull SplitController controller) {
         super(executor, controller);
+        mWindowLayoutComponent = windowLayoutComponent;
         mController = controller;
         registerOrganizer();
         if (!SplitController.ENABLE_SHELL_TRANSITIONS) {
@@ -546,7 +551,8 @@ class SplitPresenter extends JetpackTaskFragmentOrganizer {
             @NonNull SplitRule rule, @Nullable Pair<Size, Size> minDimensionsPair) {
         final Configuration taskConfiguration = taskProperties.getConfiguration();
         final WindowMetrics taskWindowMetrics = getTaskWindowMetrics(taskConfiguration);
-        final SplitAttributesCalculator calculator = mController.getSplitAttributesCalculator();
+        final Function<SplitAttributesCalculatorParams, SplitAttributes> calculator =
+                mController.getSplitAttributesCalculator();
         final SplitAttributes defaultSplitAttributes = rule.getDefaultSplitAttributes();
         final boolean isDefaultMinSizeSatisfied = rule.checkParentMetrics(taskWindowMetrics);
         if (calculator == null) {
@@ -556,13 +562,13 @@ class SplitPresenter extends JetpackTaskFragmentOrganizer {
             return sanitizeSplitAttributes(taskProperties, defaultSplitAttributes,
                     minDimensionsPair);
         }
-        final WindowLayoutInfo windowLayoutInfo = mController.mWindowLayoutComponent
+        final WindowLayoutInfo windowLayoutInfo = mWindowLayoutComponent
                 .getCurrentWindowLayoutInfo(taskProperties.getDisplayId(),
                         taskConfiguration.windowConfiguration);
         final SplitAttributesCalculatorParams params = new SplitAttributesCalculatorParams(
                 taskWindowMetrics, taskConfiguration, defaultSplitAttributes,
                 isDefaultMinSizeSatisfied, windowLayoutInfo, rule.getTag());
-        final SplitAttributes splitAttributes = calculator.computeSplitAttributesForParams(params);
+        final SplitAttributes splitAttributes = calculator.apply(params);
         return sanitizeSplitAttributes(taskProperties, splitAttributes, minDimensionsPair);
     }
 
@@ -838,7 +844,7 @@ class SplitPresenter extends JetpackTaskFragmentOrganizer {
         final int displayId = taskProperties.getDisplayId();
         final WindowConfiguration windowConfiguration = taskProperties.getConfiguration()
                 .windowConfiguration;
-        final WindowLayoutInfo info = mController.mWindowLayoutComponent
+        final WindowLayoutInfo info = mWindowLayoutComponent
                 .getCurrentWindowLayoutInfo(displayId, windowConfiguration);
         final List<DisplayFeature> displayFeatures = info.getDisplayFeatures();
         if (displayFeatures.isEmpty()) {

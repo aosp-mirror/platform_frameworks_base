@@ -23,10 +23,8 @@
     <string name="dock_alignment_not_charging" product="default" msgid="3980752926226749808">"Riallinea il telefono per caricarlo in modalità wireless"</string>
     <string name="inattentive_sleep_warning_message" product="tv" msgid="6844464574089665063">"Presto il dispositivo Android TV si spegnerà. Premi un pulsante per tenerlo acceso."</string>
     <string name="inattentive_sleep_warning_message" product="default" msgid="5693904520452332224">"Presto il dispositivo si spegnerà. Premi per tenerlo acceso."</string>
-    <!-- no translation found for keyguard_missing_sim_message (408124574073032188) -->
-    <skip />
-    <!-- no translation found for keyguard_missing_sim_message (2605468359948247208) -->
-    <skip />
+    <string name="keyguard_missing_sim_message" product="tablet" msgid="408124574073032188">"Nessuna SIM presente nel tablet."</string>
+    <string name="keyguard_missing_sim_message" product="default" msgid="2605468359948247208">"Nessuna SIM presente nel telefono."</string>
     <string name="kg_invalid_confirm_pin_hint" product="default" msgid="6278551068943958651">"I codici PIN non corrispondono"</string>
     <string name="kg_failed_attempts_almost_at_wipe" product="tablet" msgid="302165994845009232">"Hai tentato di sbloccare il tablet senza riuscirci per <xliff:g id="NUMBER_0">%1$d</xliff:g> volte. Dopo altri <xliff:g id="NUMBER_1">%2$d</xliff:g> tentativi falliti, il tablet verrà ripristinato e verranno quindi eliminati tutti i relativi dati."</string>
     <string name="kg_failed_attempts_almost_at_wipe" product="default" msgid="2594813176164266847">"Hai tentato di sbloccare il telefono senza riuscirci per <xliff:g id="NUMBER_0">%1$d</xliff:g> volte. Dopo altri <xliff:g id="NUMBER_1">%2$d</xliff:g> tentativi falliti, il telefono verrà ripristinato e verranno quindi eliminati tutti i relativi dati."</string>

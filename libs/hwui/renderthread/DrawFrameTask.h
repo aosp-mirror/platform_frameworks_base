@@ -27,8 +27,16 @@
 #include "../Rect.h"
 #include "../TreeInfo.h"
 #include "RenderTask.h"
+#include "SkColorSpace.h"
+#include "SwapBehavior.h"
+#include "utils/TimeUtils.h"
+#ifdef __ANDROID__  // Layoutlib does not support hardware acceleration
+#include <android/hardware_buffer.h>
+#endif
+#include "HardwareBufferRenderParams.h"
 
 namespace android {
+
 namespace uirenderer {
 
 class DeferredLayerUpdater;
@@ -88,6 +96,10 @@ public:
 
     void forceDrawNextFrame() { mForceDrawFrame = true; }
 
+    void setHardwareBufferRenderParams(const HardwareBufferRenderParams& params) {
+        mHardwareBufferParams = params;
+    }
+
 private:
     void postAndWait();
     bool syncFrameState(TreeInfo& info);
@@ -111,6 +123,7 @@ private:
 
     int64_t mFrameInfo[UI_THREAD_FRAME_INFO_SIZE];
 
+    HardwareBufferRenderParams mHardwareBufferParams;
     std::function<std::function<void(bool)>(int32_t, int64_t)> mFrameCallback;
     std::function<void(bool)> mFrameCommitCallback;
     std::function<void()> mFrameCompleteCallback;

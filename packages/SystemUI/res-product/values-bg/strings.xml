@@ -23,10 +23,8 @@
     <string name="dock_alignment_not_charging" product="default" msgid="3980752926226749808">"Подравнете отново телефона за безжично зареждане"</string>
     <string name="inattentive_sleep_warning_message" product="tv" msgid="6844464574089665063">"Устройството с Android TV скоро ще се изключи. Натиснете бутон, за да остане включено."</string>
     <string name="inattentive_sleep_warning_message" product="default" msgid="5693904520452332224">"Устройството скоро ще се изключи. Натиснете, за да остане включено."</string>
-    <!-- no translation found for keyguard_missing_sim_message (408124574073032188) -->
-    <skip />
-    <!-- no translation found for keyguard_missing_sim_message (2605468359948247208) -->
-    <skip />
+    <string name="keyguard_missing_sim_message" product="tablet" msgid="408124574073032188">"В таблета няма SIM карта."</string>
+    <string name="keyguard_missing_sim_message" product="default" msgid="2605468359948247208">"В телефона няма SIM карта."</string>
     <string name="kg_invalid_confirm_pin_hint" product="default" msgid="6278551068943958651">"ПИН кодовете не съвпадат"</string>
     <string name="kg_failed_attempts_almost_at_wipe" product="tablet" msgid="302165994845009232">"Опитахте да отключите таблета и сбъркахте <xliff:g id="NUMBER_0">%1$d</xliff:g> пъти. След още <xliff:g id="NUMBER_1">%2$d</xliff:g> неуспешни опита той ще бъде нулиран, при което ще се изтрият всичките му данни."</string>
     <string name="kg_failed_attempts_almost_at_wipe" product="default" msgid="2594813176164266847">"Опитахте да отключите телефона и сбъркахте <xliff:g id="NUMBER_0">%1$d</xliff:g> пъти. След още <xliff:g id="NUMBER_1">%2$d</xliff:g> неуспешни опита той ще бъде нулиран, при което ще се изтрият всичките му данни."</string>

@@ -22,12 +22,9 @@
     <string name="chooser_title" msgid="2262294130493605839">"በ&lt;strong&gt;<xliff:g id="APP_NAME">%2$s</xliff:g>&lt;/strong&gt; የሚተዳደር <xliff:g id="PROFILE_NAME">%1$s</xliff:g> ይምረጡ"</string>
     <string name="summary_watch" msgid="4085794790142204006">"የእርስዎን <xliff:g id="DEVICE_NAME">%1$s</xliff:g> ለማስተዳደር መተግበሪያው ያስፈልጋል። <xliff:g id="APP_NAME">%2$s</xliff:g> ከማሳወቂያዎችዎ ጋር መስተጋብር እንዲፈጥር እና የእርስዎን ስልክ፣ ኤስኤምኤስ፣ ዕውቂያዎች፣ የቀን መቁጠሪያ፣ የጥሪ ምዝገባ ማስታወሻዎች እና በአቅራቢያ ያሉ የመሣሪያዎች ፈቃዶች እንዲደርስ ይፈቀድለታል።"</string>
     <string name="summary_watch_single_device" msgid="1523091550243476756">"የእርስዎን <xliff:g id="DEVICE_NAME">%1$s</xliff:g> ለማስተዳደር መተግበሪያው ያስፈልጋል። <xliff:g id="APP_NAME">%2$s</xliff:g> ከእነዚህ ፈቃዶች ጋር መስተጋብር እንዲፈጥር ይፈቀድለታል፦"</string>
-    <!-- no translation found for profile_name_glasses (8488394059007275998) -->
-    <skip />
-    <!-- no translation found for summary_glasses (8987925853224595628) -->
-    <skip />
-    <!-- no translation found for summary_glasses_single_device (5725890636605211803) -->
-    <skip />
+    <string name="profile_name_glasses" msgid="8488394059007275998">"መነጽሮች"</string>
+    <string name="summary_glasses" msgid="8987925853224595628">"የእርስዎን <xliff:g id="DEVICE_NAME">%1$s</xliff:g> ለማስተዳደር ይህ መተግበሪያ ያስፈልጋል። <xliff:g id="APP_NAME">%2$s</xliff:g> ከማሳወቂያዎችዎ ጋር መስተጋብር እንዲፈጥር እና የእርስዎን ስልክ፣ ኤስኤምኤስ፣ ዕውቂያዎች፣ ማይክሮፎን እና በአቅራቢያ ያሉ መሣሪያዎች ፈቃዶችን እንዲደርስ ይፈቀድለታል።"</string>
+    <string name="summary_glasses_single_device" msgid="5725890636605211803">"የእርስዎን <xliff:g id="DEVICE_NAME">%1$s</xliff:g> ለማስተዳደር መተግበሪያው ያስፈልጋል። <xliff:g id="APP_NAME">%2$s</xliff:g> ከእነዚህ ፈቃዶች ጋር መስተጋብር እንዲፈጥር ይፈቀድለታል፦"</string>
     <string name="title_app_streaming" msgid="2270331024626446950">"&lt;strong&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/strong&gt; ይህን መረጃ ከስልክዎ እንዲደርስበት ይፍቀዱለት"</string>
     <string name="helper_title_app_streaming" msgid="4151687003439969765">"መሣሪያ ተሻጋሪ አገልግሎቶች"</string>
     <string name="helper_summary_app_streaming" msgid="5977509499890099">"<xliff:g id="APP_NAME">%1$s</xliff:g> በእርስዎ መሣሪያዎች መካከል መተግበሪያዎችን በዥረት ለመልቀቅ የእርስዎን <xliff:g id="DEVICE_TYPE">%2$s</xliff:g> ወክሎ ፈቃድ እየጠየቀ ነው"</string>
@@ -37,12 +34,9 @@
     <string name="summary_computer" msgid="3798467601598297062"></string>
     <string name="helper_title_computer" msgid="4671071173916176037">"የGoogle Play አገልግሎቶች"</string>
     <string name="helper_summary_computer" msgid="9050724687678157852">"<xliff:g id="APP_NAME">%1$s</xliff:g> የስልክዎን ፎቶዎች፣ ሚዲያ እና ማሳወቂያዎች ለመድረስ የእርስዎን <xliff:g id="DEVICE_TYPE">%2$s</xliff:g> ወክሎ ፈቃድ እየጠየቀ ነው"</string>
-    <!-- no translation found for title_nearby_device_streaming (179278282547719200) -->
-    <skip />
-    <!-- no translation found for helper_title_nearby_device_streaming (6124438217620593669) -->
-    <skip />
-    <!-- no translation found for helper_summary_nearby_device_streaming (5538329403511524333) -->
-    <skip />
+    <string name="title_nearby_device_streaming" msgid="179278282547719200">"&lt;strong&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/strong&gt; ይህን እርምጃ ከስልክዎ እንዲያከናውን ይፍቀዱ"</string>
+    <string name="helper_title_nearby_device_streaming" msgid="6124438217620593669">"መሣሪያ ተሻጋሪ አገልግሎቶች"</string>
+    <string name="helper_summary_nearby_device_streaming" msgid="5538329403511524333">"<xliff:g id="APP_NAME">%1$s</xliff:g> በአቅራቢያ ወዳሉ መሣሪያዎች ይዘትን በዥረት ለመልቀቅ የእርስዎን <xliff:g id="DEVICE_TYPE">%2$s</xliff:g> ወክሎ ፈቃድ እየጠየቀ ነው"</string>
     <string name="profile_name_generic" msgid="6851028682723034988">"መሣሪያ"</string>
     <string name="summary_generic" msgid="2346762210105903720"></string>
     <string name="consent_yes" msgid="8344487259618762872">"ፍቀድ"</string>
@@ -56,24 +50,20 @@
     <string name="permission_sms" msgid="6337141296535774786">"ኤስኤምኤስ"</string>
     <string name="permission_contacts" msgid="3858319347208004438">"ዕውቂያዎች"</string>
     <string name="permission_calendar" msgid="6805668388691290395">"ቀን መቁጠሪያ"</string>
-    <!-- no translation found for permission_microphone (2152206421428732949) -->
-    <skip />
+    <string name="permission_microphone" msgid="2152206421428732949">"ማይክሮፎን"</string>
     <string name="permission_nearby_devices" msgid="7530973297737123481">"በአቅራቢያ ያሉ መሣሪያዎች"</string>
     <string name="permission_storage" msgid="6831099350839392343">"ፎቶዎች እና ሚዲያ"</string>
     <string name="permission_notification" msgid="693762568127741203">"ማሳወቂያዎች"</string>
     <string name="permission_app_streaming" msgid="6009695219091526422">"መተግበሪያዎች"</string>
-    <!-- no translation found for permission_nearby_device_streaming (5868108148065023161) -->
-    <skip />
+    <string name="permission_nearby_device_streaming" msgid="5868108148065023161">"በአቅራቢያ ያለ መሣሪያ በዥረት መልቀቅ"</string>
     <string name="permission_phone_summary" msgid="6154198036705702389">"የእርስዎን ስልክ ቁጥር እና የአውታረ መረብ መረጃ መድረስ ይችላል። ጥሪዎችን ለማድረግ እና VoIP፣ የድምፅ መልዕክት፣ የጥሪ ማዘዋወር እና የጥሪ ምዝገባ ማስታወሻዎችን ለማርትዕ ያስፈልጋል"</string>
     <string name="permission_sms_summary" msgid="5107174184224165570"></string>
     <string name="permission_contacts_summary" msgid="7850901746005070792">"የእኛን የዕውቂያ ዝርዝር ማንበብ፣ መፍጠር ወይም ማርትዕ እንዲሁም በመሣሪያዎ ላይ ጥቅም ላይ የዋሉትን ሁሉንም መለያዎች ዝርዝር መድረስ ይችላል"</string>
     <string name="permission_calendar_summary" msgid="9070743747408808156"></string>
-    <!-- no translation found for permission_microphone_summary (4241354865859396558) -->
-    <skip />
+    <string name="permission_microphone_summary" msgid="4241354865859396558">"ማይክሮፎኑን በመጠቀም ኦዲዮ መቅዳት ይችላል"</string>
     <string name="permission_nearby_devices_summary" msgid="8587497797301075494"></string>
     <string name="permission_notification_summary" msgid="884075314530071011">"እንደ እውቂያዎች፣ መልዕክቶች እና ፎቶዎች ያሉ መረጃዎችን ጨምሮ ሁሉንም ማሳወቂያዎች ማንበብ ይችላል"</string>
     <string name="permission_app_streaming_summary" msgid="606923325679670624">"የስልክዎን መተግበሪያዎች በዥረት ይልቀቁ"</string>
     <string name="permission_storage_summary" msgid="3918240895519506417"></string>
-    <!-- no translation found for permission_nearby_device_streaming_summary (5776807830582725074) -->
-    <skip />
+    <string name="permission_nearby_device_streaming_summary" msgid="5776807830582725074">"ይዘትን በአቅራቢያ ወዳለ መሣሪያ በዥረት ይልቀቁ"</string>
 </resources>

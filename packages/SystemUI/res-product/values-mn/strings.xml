@@ -23,10 +23,8 @@
     <string name="dock_alignment_not_charging" product="default" msgid="3980752926226749808">"Утасгүйгээр цэнэглэхийн тулд утсыг дахин байрлуулна уу"</string>
     <string name="inattentive_sleep_warning_message" product="tv" msgid="6844464574089665063">"Android TV төхөөрөмж удахгүй унтрах тул асаалттай хэвээр байлгахын тулд товчлуурыг дарна уу."</string>
     <string name="inattentive_sleep_warning_message" product="default" msgid="5693904520452332224">"Төхөөрөмж удахгүй унтрах тул асаалттай хэвээр байлгахын тулд дарна уу."</string>
-    <!-- no translation found for keyguard_missing_sim_message (408124574073032188) -->
-    <skip />
-    <!-- no translation found for keyguard_missing_sim_message (2605468359948247208) -->
-    <skip />
+    <string name="keyguard_missing_sim_message" product="tablet" msgid="408124574073032188">"Таблетад SIM байхгүй байна."</string>
+    <string name="keyguard_missing_sim_message" product="default" msgid="2605468359948247208">"Утсанд SIM байхгүй байна."</string>
     <string name="kg_invalid_confirm_pin_hint" product="default" msgid="6278551068943958651">"ПИН код тохирохгүй байна"</string>
     <string name="kg_failed_attempts_almost_at_wipe" product="tablet" msgid="302165994845009232">"Та таблетын түгжээг тайлах оролдлогыг <xliff:g id="NUMBER_0">%1$d</xliff:g> удаа буруу хийсэн байна. Дахин <xliff:g id="NUMBER_1">%2$d</xliff:g> удаа буруу хийсний дараа энэ таблетыг шинэчлэх бөгөөд ингэснээр бүх өгөгдлийг нь устгах болно."</string>
     <string name="kg_failed_attempts_almost_at_wipe" product="default" msgid="2594813176164266847">"Та утасны түгжээг тайлах оролдлогыг <xliff:g id="NUMBER_0">%1$d</xliff:g> удаа буруу хийсэн байна. Дахин <xliff:g id="NUMBER_1">%2$d</xliff:g> удаа буруу хийсний дараа энэ утсыг шинэчлэх бөгөөд ингэснээр бүх өгөгдлийг нь устгах болно."</string>

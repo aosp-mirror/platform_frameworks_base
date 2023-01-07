@@ -30,7 +30,7 @@ import com.android.internal.util.AnnotationValidations;
  *
  * @hide
  */
-public class UserSelectionDialogResult extends BaseDialogResult implements Parcelable {
+public final class UserSelectionDialogResult extends BaseDialogResult implements Parcelable {
     /** Parses and returns a UserSelectionDialogResult from the given resultData. */
     @Nullable
     public static UserSelectionDialogResult fromResultData(@NonNull Bundle resultData) {

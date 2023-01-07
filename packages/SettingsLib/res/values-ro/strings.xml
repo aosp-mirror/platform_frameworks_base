@@ -564,6 +564,8 @@
     <string name="user_add_user_title" msgid="5457079143694924885">"Adaugi un utilizator nou?"</string>
     <string name="user_add_user_message_long" msgid="1527434966294733380">"Poți să permiți accesul la acest dispozitiv altor persoane creând utilizatori suplimentari. Fiecare utilizator are propriul spațiu, pe care îl poate personaliza cu aplicații, imagini de fundal etc. De asemenea, utilizatorii pot ajusta setările dispozitivului, cum ar fi setările pentru Wi-Fi, care îi afectează pe toți ceilalți utilizatori.\n\nDupă ce adaugi un utilizator nou, acesta trebuie să-și configureze spațiul.\n\nOricare dintre utilizatori poate actualiza aplicațiile pentru toți ceilalți utilizatori. Este posibil ca setările de accesibilitate și serviciile să nu se transfere la noul utilizator."</string>
     <string name="user_add_user_message_short" msgid="3295959985795716166">"Când adaugi un utilizator nou, acesta trebuie să-și configureze spațiul.\n\nOrice utilizator poate actualiza aplicațiile pentru toți ceilalți utilizatori."</string>
+    <string name="user_grant_admin_title" msgid="5565796912475193314">"Acorzi utilizatorului privilegii de administrator?"</string>
+    <string name="user_grant_admin_message" msgid="7925257971286380976">"Ca administrator, va putea să gestioneze alți utilizatori, să modifice setările dispozitivului și să revină la setările din fabrică ale dispozitivului."</string>
     <string name="user_setup_dialog_title" msgid="8037342066381939995">"Configurezi utilizatorul acum?"</string>
     <string name="user_setup_dialog_message" msgid="269931619868102841">"Asigură-te că utilizatorul are posibilitatea de a prelua dispozitivul și de a-și configura spațiul"</string>
     <string name="user_setup_profile_dialog_message" msgid="4788197052296962620">"Configurezi profilul acum?"</string>
@@ -595,6 +597,8 @@
     <string name="guest_reset_and_restart_dialog_message" msgid="2764425635305200790">"Astfel, va începe o nouă sesiune pentru invitați și se vor șterge toate aplicațiile și datele din sesiunea actuală"</string>
     <string name="guest_exit_dialog_title" msgid="1846494656849381804">"Ieși din modul pentru invitați?"</string>
     <string name="guest_exit_dialog_message" msgid="1743218864242719783">"Se vor șterge toate aplicațiile și datele din sesiunea pentru invitați actuală"</string>
+    <string name="grant_admin" msgid="4273077214151417783">"Acordă-i utilizatorului privilegii de administrator"</string>
+    <string name="not_grant_admin" msgid="6985027675930546850">"Nu îi acorda utilizatorului privilegii de administrator"</string>
     <string name="guest_exit_dialog_button" msgid="1736401897067442044">"Ieși"</string>
     <string name="guest_exit_dialog_title_non_ephemeral" msgid="7675327443743162986">"Salvezi activitatea invitatului?"</string>
     <string name="guest_exit_dialog_message_non_ephemeral" msgid="223385323235719442">"Salvează activitatea din sesiunea actuală sau șterge aplicațiile și datele"</string>

@@ -326,7 +326,7 @@ class EnforcePermissionDetectorTest : LintDetectorTest() {
     // A service with permission annotation on the method.
     private val interfaceIFooMethodStub: TestFile = java(
         """
-        public interface IFooMethod {
+        public interface IFooMethod extends android.os.IInterface {
          public static abstract class Stub extends android.os.Binder implements IFooMethod {
             @Override
             @android.annotation.EnforcePermission(android.Manifest.permission.READ_PHONE_STATE)
@@ -361,7 +361,7 @@ class EnforcePermissionDetectorTest : LintDetectorTest() {
     // A service without any permission annotation.
     private val interfaceIBarStub: TestFile = java(
         """
-        public interface IBar {
+        public interface IBar extends android.os.IInterface {
          public static abstract class Stub extends android.os.Binder implements IBar {
             @Override
             public void testMethod() {}

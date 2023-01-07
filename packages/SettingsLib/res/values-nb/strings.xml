@@ -564,6 +564,8 @@
     <string name="user_add_user_title" msgid="5457079143694924885">"Vil du legge til en ny bruker?"</string>
     <string name="user_add_user_message_long" msgid="1527434966294733380">"Du kan dele denne enheten med andre folk ved å opprette flere brukere. Hver bruker har sin egen plass de kan tilpasse med apper, bakgrunner og annet. Brukere kan også justere enhetsinnstillinger, for eksempel Wifi, som påvirker alle.\n\nNår du legger til en ny bruker, må vedkommende angi innstillinger for plassen sin.\n\nAlle brukere kan oppdatere apper for alle andre brukere. Innstillinger og tjenester for tilgjengelighet overføres kanskje ikke til den nye brukeren."</string>
     <string name="user_add_user_message_short" msgid="3295959985795716166">"Når du legger til en ny bruker, må hen konfigurere sitt eget område.\n\nAlle brukere kan oppdatere apper for alle andre brukere."</string>
+    <string name="user_grant_admin_title" msgid="5565796912475193314">"Gi administratorrettigheter?"</string>
+    <string name="user_grant_admin_message" msgid="7925257971286380976">"Som administrator kan hen administrere andre brukere, endre enhetsinnstillinger og tilbakestille enheten til fabrikkstandard."</string>
     <string name="user_setup_dialog_title" msgid="8037342066381939995">"Konfigurere brukeren nå?"</string>
     <string name="user_setup_dialog_message" msgid="269931619868102841">"Sørg for at brukeren er tilgjengelig for å konfigurere området sitt på enheten"</string>
     <string name="user_setup_profile_dialog_message" msgid="4788197052296962620">"Vil du konfigurere profilen nå?"</string>
@@ -595,6 +597,8 @@
     <string name="guest_reset_and_restart_dialog_message" msgid="2764425635305200790">"Dette starter en ny gjesteøkt og sletter alle apper og data fra den gjeldende økten"</string>
     <string name="guest_exit_dialog_title" msgid="1846494656849381804">"Vil du avslutte gjestemodus?"</string>
     <string name="guest_exit_dialog_message" msgid="1743218864242719783">"Dette sletter apper og data fra den gjeldende gjesteøkten"</string>
+    <string name="grant_admin" msgid="4273077214151417783">"Gi denne brukeren administratorrettigheter"</string>
+    <string name="not_grant_admin" msgid="6985027675930546850">"Ikke gi brukeren administratorrettigheter"</string>
     <string name="guest_exit_dialog_button" msgid="1736401897067442044">"Avslutt"</string>
     <string name="guest_exit_dialog_title_non_ephemeral" msgid="7675327443743162986">"Vil du lagre gjesteaktivitet?"</string>
     <string name="guest_exit_dialog_message_non_ephemeral" msgid="223385323235719442">"Du kan lagre aktivitet fra den gjeldende økten eller slette alle apper og data"</string>

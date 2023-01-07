@@ -1095,8 +1095,6 @@ final class HdmiCecController {
                 HdmiPortInfo[] hdmiPortInfo = new HdmiPortInfo[hdmiPortInfos.length];
                 int i = 0;
                 for (android.hardware.tv.hdmi.HdmiPortInfo portInfo : hdmiPortInfos) {
-                    // TODO: the earc argument is stubbed for now.
-                    // To be replaced by portInfo.earcSupported.
                     hdmiPortInfo[i] =
                             new HdmiPortInfo(
                                     portInfo.portId,

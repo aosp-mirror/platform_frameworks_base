@@ -14,10 +14,10 @@
     <string name="ssl_error_warning" msgid="3127935140338254180">"तपाईंले सामेल हुने प्रयास गरिरहनु भएको नेटवर्कमा सुरक्षा सम्बन्धी समस्याहरू छन्।"</string>
     <string name="ssl_error_example" msgid="6188711843183058764">"उदाहरणका लागि, लग इन पृष्ठ देखाइएको संस्थाको नहुन सक्छ।"</string>
     <string name="ssl_error_continue" msgid="1138548463994095584">"जे भए पनि ब्राउजर मार्फत जारी राख्नुहोस्"</string>
-    <string name="network_boost_notification_channel" msgid="5430986172506159199">"नेटवर्क बुस्ट"</string>
-    <string name="network_boost_notification_title" msgid="8226368121348880044">"%s ले डेटा बुस्ट किन्न सिफारिस गर्छ"</string>
-    <string name="network_boost_notification_detail" msgid="3812434025544196192">"अझ राम्रो पर्फर्मेन्सका लागि नेटवर्क बुस्ट किन्नुहोस्"</string>
-    <string name="network_boost_notification_button_not_now" msgid="4129218252146702688">"अहिले होइन"</string>
-    <string name="network_boost_notification_button_manage" msgid="1511552684142641182">"व्यवस्थापन गर्नुहोस्"</string>
-    <string name="slice_purchase_app_label" msgid="915654761797446390">"नेटवर्क बुस्ट किन्नुहोस्।"</string>
+    <string name="performance_boost_notification_channel" msgid="3475440855635538592">"पर्फर्मेन्स बुस्ट"</string>
+    <string name="performance_boost_notification_title" msgid="5017421773334474875">"%s पर्फर्मेन्स बुस्ट किन्न सिफारिस गर्छ"</string>
+    <string name="performance_boost_notification_detail" msgid="7216286153533321852">"नेटवर्कको पर्फर्मेन्स अझ राम्रो बनाउन पर्फर्मेन्स बुस्ट किन्नुहोस्"</string>
+    <string name="performance_boost_notification_button_not_now" msgid="6459755324243683785">"अहिले होइन"</string>
+    <string name="performance_boost_notification_button_manage" msgid="4976836444046497973">"व्यवस्थापन गर्नुहोस्"</string>
+    <string name="slice_purchase_app_label" msgid="7170191659233241166">"पर्फर्मेन्स बुस्ट किन्नुहोस्।"</string>
 </resources>

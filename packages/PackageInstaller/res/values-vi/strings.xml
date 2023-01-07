@@ -60,10 +60,8 @@
     <string name="uninstall_update_text" msgid="863648314632448705">"Thay thế ứng dụng này bằng phiên bản gốc? Tất cả dữ liệu sẽ bị xóa."</string>
     <string name="uninstall_update_text_multiuser" msgid="8992883151333057227">"Thay thế ứng dụng này bằng phiên bản gốc? Tất cả dữ liệu sẽ bị xóa. Điều này ảnh hưởng đến tất cả người dùng thiết bị này, bao gồm cả những người có hồ sơ công việc."</string>
     <string name="uninstall_keep_data" msgid="7002379587465487550">"Giữ lại <xliff:g id="SIZE">%1$s</xliff:g> dữ liệu ứng dụng."</string>
-    <!-- no translation found for uninstall_application_text_current_user_clone_profile (835170400160011636) -->
-    <skip />
-    <!-- no translation found for uninstall_application_text_with_clone_instance (6944473334273349036) -->
-    <skip />
+    <string name="uninstall_application_text_current_user_clone_profile" msgid="835170400160011636">"Bạn có muốn xoá ứng dụng này không?"</string>
+    <string name="uninstall_application_text_with_clone_instance" msgid="6944473334273349036">"Bạn có muốn gỡ cài đặt ứng dụng này không? Bản sao của <xliff:g id="PACKAGE_LABEL">%1$s</xliff:g> cũng sẽ bị xoá."</string>
     <string name="uninstalling_notification_channel" msgid="840153394325714653">"Các quá trình gỡ cài đặt đang chạy"</string>
     <string name="uninstall_failure_notification_channel" msgid="1136405866767576588">"Gỡ cài đặt không thành công"</string>
     <string name="uninstalling" msgid="8709566347688966845">"Đang gỡ cài đặt..."</string>
@@ -72,8 +70,7 @@
     <string name="uninstall_done_app" msgid="4588850984473605768">"Đã gỡ cài đặt <xliff:g id="PACKAGE_LABEL">%1$s</xliff:g>"</string>
     <string name="uninstall_failed" msgid="1847750968168364332">"Gỡ cài đặt không thành công."</string>
     <string name="uninstall_failed_app" msgid="5506028705017601412">"Gỡ cài đặt <xliff:g id="PACKAGE_LABEL">%1$s</xliff:g> không thành công."</string>
-    <!-- no translation found for uninstalling_cloned_app (1826380164974984870) -->
-    <skip />
+    <string name="uninstalling_cloned_app" msgid="1826380164974984870">"Đang xoá bản sao của <xliff:g id="PACKAGE_LABEL">%1$s</xliff:g>…"</string>
     <string name="uninstall_failed_device_policy_manager" msgid="785293813665540305">"Không thể gỡ cài đặt ứng dụng quản trị thiết bị đang hoạt động"</string>
     <string name="uninstall_failed_device_policy_manager_of_user" msgid="4813104025494168064">"Không thể gỡ cài đặt ứng dụng quản trị thiết bị đang hoạt động cho <xliff:g id="USERNAME">%1$s</xliff:g>"</string>
     <string name="uninstall_all_blocked_profile_owner" msgid="2009393666026751501">"Ứng dụng này bắt buộc với một số người dùng hoặc hồ sơ và được gỡ cài đặt cho người khác"</string>
@@ -94,8 +91,7 @@
     <string name="anonymous_source_warning" product="default" msgid="2784902545920822500">"Điện thoại và dữ liệu cá nhân của bạn dễ bị các ứng dụng không xác định tấn công hơn. Bằng cách cài đặt ứng dụng này, bạn đồng ý tự chịu trách nhiệm cho mọi hỏng hóc đối với điện thoại của mình hoặc mất mát dữ liệu có thể phát sinh do sử dụng ứng dụng này."</string>
     <string name="anonymous_source_warning" product="tablet" msgid="3939101621438855516">"Máy tính bảng và dữ liệu cá nhân của bạn dễ bị các ứng dụng không xác định tấn công hơn. Bằng cách cài đặt ứng dụng này, bạn đồng ý tự chịu trách nhiệm cho mọi hỏng hóc đối với máy tính bảng của mình hoặc mất mát dữ liệu có thể phát sinh do sử dụng ứng dụng này."</string>
     <string name="anonymous_source_warning" product="tv" msgid="5599483539528168566">"TV và dữ liệu cá nhân của bạn dễ bị các ứng dụng không xác định tấn công hơn. Bằng cách cài đặt ứng dụng này, bạn đồng ý tự chịu trách nhiệm cho mọi hỏng hóc đối với TV của mình hoặc mất mát dữ liệu có thể phát sinh do sử dụng ứng dụng này."</string>
-    <!-- no translation found for cloned_app_label (7503612829833756160) -->
-    <skip />
+    <string name="cloned_app_label" msgid="7503612829833756160">"Bản sao của <xliff:g id="PACKAGE_LABEL">%1$s</xliff:g>"</string>
     <string name="anonymous_source_continue" msgid="4375745439457209366">"Tiếp tục"</string>
     <string name="external_sources_settings" msgid="4046964413071713807">"Cài đặt"</string>
     <string name="wear_app_channel" msgid="1960809674709107850">"Cài đặt/gỡ cài đặt ứng dụng Wear"</string>

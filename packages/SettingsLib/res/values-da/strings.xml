@@ -564,6 +564,8 @@
     <string name="user_add_user_title" msgid="5457079143694924885">"Vil du tilføje en ny bruger?"</string>
     <string name="user_add_user_message_long" msgid="1527434966294733380">"Du kan dele denne enhed med andre ved at oprette ekstra brugere. Hver bruger har sit personlige område, som kan tilpasses med apps, baggrund osv. Brugerne kan også justere enhedsindstillinger, som for eksempel Wi-Fi, som påvirker alle.\n\nNår du tilføjer en ny bruger, skal vedkommende konfigurere sit område.\n\nAlle brugere kan opdatere apps for alle andre brugere. Indstillinger og tjenester for hjælpefunktioner overføres muligvis ikke til den nye bruger."</string>
     <string name="user_add_user_message_short" msgid="3295959985795716166">"Når du tilføjer en ny bruger, skal personen konfigurere sit rum.\n\nAlle brugere kan opdatere apps for alle de andre brugere."</string>
+    <string name="user_grant_admin_title" msgid="5565796912475193314">"Giv bruger admin.rettigheder?"</string>
+    <string name="user_grant_admin_message" msgid="7925257971286380976">"Når brugeren er administrator, kan vedkommende administrere andre brugere, ændre enhedsindstillingerne og gendanne fabriksindstillingerne på enheden."</string>
     <string name="user_setup_dialog_title" msgid="8037342066381939995">"Vil du konfigurere brugeren nu?"</string>
     <string name="user_setup_dialog_message" msgid="269931619868102841">"Sørg for, at brugeren har mulighed for at tage enheden og konfigurere sit eget rum"</string>
     <string name="user_setup_profile_dialog_message" msgid="4788197052296962620">"Vil du oprette en profil nu?"</string>
@@ -595,6 +597,8 @@
     <string name="guest_reset_and_restart_dialog_message" msgid="2764425635305200790">"Denne handling starter en ny gæstesession og sletter alle apps og data fra den aktuelle session"</string>
     <string name="guest_exit_dialog_title" msgid="1846494656849381804">"Vil du afslutte gæstetilstanden?"</string>
     <string name="guest_exit_dialog_message" msgid="1743218864242719783">"Denne handling sletter apps og data fra den aktuelle gæstesession."</string>
+    <string name="grant_admin" msgid="4273077214151417783">"Giv denne bruger administratorrettigheder"</string>
+    <string name="not_grant_admin" msgid="6985027675930546850">"Giv ikke brugeren administratorrettigheder"</string>
     <string name="guest_exit_dialog_button" msgid="1736401897067442044">"Luk"</string>
     <string name="guest_exit_dialog_title_non_ephemeral" msgid="7675327443743162986">"Vil du gemme gæsteaktiviteten?"</string>
     <string name="guest_exit_dialog_message_non_ephemeral" msgid="223385323235719442">"Du kan gemme aktivitet fra den aktuelle session eller slette alle apps og data"</string>

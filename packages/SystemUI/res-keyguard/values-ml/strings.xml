@@ -30,25 +30,17 @@
     <string name="keyguard_plugged_in" msgid="8169926454348380863">"<xliff:g id="PERCENTAGE">%s</xliff:g> • ചാർജ് ചെയ്യുന്നു"</string>
     <string name="keyguard_plugged_in_charging_fast" msgid="4386594091107340426">"<xliff:g id="PERCENTAGE">%s</xliff:g> • വേഗത്തിൽ ചാർജ് ചെയ്യുന്നു"</string>
     <string name="keyguard_plugged_in_charging_slowly" msgid="217655355424210">"<xliff:g id="PERCENTAGE">%s</xliff:g> • പതുക്കെ ചാർജ് ചെയ്യുന്നു"</string>
-    <string name="keyguard_plugged_in_charging_limited" msgid="1657547879230699837">"<xliff:g id="PERCENTAGE">%s</xliff:g> • ബാറ്ററി പരിരക്ഷിക്കുന്നതിന്, ചാർജ് ചെയ്യൽ താൽക്കാലികമായി നിർത്തി"</string>
+    <string name="keyguard_plugged_in_charging_limited" msgid="1053130519456324630">"<xliff:g id="PERCENTAGE">%s</xliff:g> • ബാറ്ററി പരിരക്ഷിക്കാൻ ചാർജിംഗ് ഒപ്റ്റിമൈസ് ചെയ്തു"</string>
     <string name="keyguard_instructions_when_pattern_disabled" msgid="8448804180089936954">"അൺലോക്കുചെയ്യാൻ മെനു അമർത്തുക."</string>
     <string name="keyguard_network_locked_message" msgid="407096292844868608">"നെറ്റ്‌വർക്ക് ലോക്കുചെയ്‌തു"</string>
-    <!-- no translation found for keyguard_missing_sim_message_short (685029586173458728) -->
-    <skip />
-    <!-- no translation found for keyguard_missing_sim_instructions (7735360104844653246) -->
-    <skip />
-    <!-- no translation found for keyguard_missing_sim_instructions_long (3451467338947610268) -->
-    <skip />
-    <!-- no translation found for keyguard_permanent_disabled_sim_message_short (3955052454216046100) -->
-    <skip />
-    <!-- no translation found for keyguard_permanent_disabled_sim_instructions (5034635040020685428) -->
-    <skip />
-    <!-- no translation found for keyguard_sim_locked_message (7095293254587575270) -->
-    <skip />
-    <!-- no translation found for keyguard_sim_puk_locked_message (2503428315518592542) -->
-    <skip />
-    <!-- no translation found for keyguard_sim_unlock_progress_dialog_message (8489092646014631659) -->
-    <skip />
+    <string name="keyguard_missing_sim_message_short" msgid="685029586173458728">"സിം ഇല്ല"</string>
+    <string name="keyguard_missing_sim_instructions" msgid="7735360104844653246">"സിം ചേർക്കുക."</string>
+    <string name="keyguard_missing_sim_instructions_long" msgid="3451467338947610268">"സിം കാണുന്നില്ല അല്ലെങ്കിൽ റീഡ് ചെയ്യാനായില്ല. സിം ചേർക്കുക."</string>
+    <string name="keyguard_permanent_disabled_sim_message_short" msgid="3955052454216046100">"ഉപയോഗശൂന്യമായ സിം."</string>
+    <string name="keyguard_permanent_disabled_sim_instructions" msgid="5034635040020685428">"നിങ്ങളുടെ സിം ശാശ്വതമായി നിഷ്ക്രിയമാക്കി.\n മറ്റൊരു സിമ്മിന് നിങ്ങളുടെ വയർലെസ് സേവന ദാതാവിനെ ബന്ധപ്പെടുക."</string>
+    <string name="keyguard_sim_locked_message" msgid="7095293254587575270">"സിം ലോക്ക് ചെയ്തു."</string>
+    <string name="keyguard_sim_puk_locked_message" msgid="2503428315518592542">"സിം PUK ലോക്ക് ചെയ്തു."</string>
+    <string name="keyguard_sim_unlock_progress_dialog_message" msgid="8489092646014631659">"സിം അൺലോക്ക് ചെയ്യുന്നു…"</string>
     <string name="keyguard_accessibility_pin_area" msgid="7403009340414014734">"പിൻ ഏരിയ"</string>
     <string name="keyguard_accessibility_password" msgid="3524161948484801450">"ഉപകരണ പാസ്‌വേഡ്"</string>
     <string name="keyguard_accessibility_sim_pin_area" msgid="6272116591533888062">"സിം ‌പിൻ ഏരിയ"</string>
@@ -69,8 +61,7 @@
     <string name="kg_puk_enter_puk_hint_multi" msgid="4876780689904862943">"\"<xliff:g id="CARRIER">%1$s</xliff:g>\" സിം ഇപ്പോൾ പ്രവർത്തനരഹിതമാക്കി. തുടരുന്നതിന് PUK കോഡ് നൽകുക. വിശദാംശങ്ങൾക്ക് കാരിയറെ ബന്ധപ്പെടുക."</string>
     <string name="kg_puk_enter_pin_hint" msgid="6028432138916150399">"താൽപ്പര്യപ്പെടുന്ന പിൻ കോഡ് നൽകുക"</string>
     <string name="kg_enter_confirm_pin_hint" msgid="4261064020391799132">"താൽപ്പര്യപ്പെടുന്ന പിൻകോ‌ഡ് സ്ഥിരീകരിക്കുക"</string>
-    <!-- no translation found for kg_sim_unlock_progress_dialog_message (1123048780346295748) -->
-    <skip />
+    <string name="kg_sim_unlock_progress_dialog_message" msgid="1123048780346295748">"സിം അൺലോക്ക് ചെയ്യുന്നു…"</string>
     <string name="kg_invalid_sim_pin_hint" msgid="2762202646949552978">"4 മുതൽ 8 വരെ അക്കങ്ങളുള്ള ഒരു പിൻ ടൈപ്പുചെയ്യുക."</string>
     <string name="kg_invalid_sim_puk_hint" msgid="5319756880543857694">"PUK കോഡിൽ 8 അല്ലെങ്കിൽ അതിലധികം സംഖ്യകൾ ഉണ്ടായിരിക്കണം."</string>
     <string name="kg_too_many_failed_pin_attempts_dialog_message" msgid="544687656831558971">"നിങ്ങൾ <xliff:g id="NUMBER_0">%1$d</xliff:g> തവണ പിൻ ‌തെറ്റായി ‌ടൈപ്പുചെയ്തു. \n\n <xliff:g id="NUMBER_1">%2$d</xliff:g> സെക്കന്റിനു‌ശേഷം വീണ്ടും ശ്രമിക്കുക."</string>

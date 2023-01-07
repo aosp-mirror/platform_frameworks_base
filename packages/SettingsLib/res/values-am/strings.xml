@@ -564,6 +564,8 @@
     <string name="user_add_user_title" msgid="5457079143694924885">"አዲስ ተጠቃሚ ይታከል?"</string>
     <string name="user_add_user_message_long" msgid="1527434966294733380">"ተጨማሪ ተጠቃሚዎችን በመፍጠር ይህን መሣሪያ ለሌሎች ሰዎች ማጋራት ይችላሉ። እያንዳንዱ ተጠቃሚ በራሱ መተግበሪያዎች፣ ልጣፍ እና በመሳሰሉ ነገሮች ሊያበጀው የሚችል የራሱ ቦታ አለው። ተጠቃሚዎችም እንዲሁ እንደ Wi‑Fi ያሉ በሁሉም ሰው ላይ ተጽዕኖ ሊኖራቸው የሚችሉ የመሣሪያ ቅንብሮችን ማስተካከል ይችላሉ። \n\nእርስዎ አንድ አዲስ ተጠቃሚ ሲያክሉ ያ ሰው የራሱ ቦታ ማዘጋጀት አለበት።\n\nማንኛውም ተጠቃሚ መተግበሪያዎችን ለሌሎች ተጠቃሚዎች ሁሉ ሊያዘምኑ ይችላሉ።"</string>
     <string name="user_add_user_message_short" msgid="3295959985795716166">"እርስዎ አንድ አዲስ ተጠቃሚ ሲያክሉ ያ ሰው የራሱ ቦታ ማዘጋጀት አለበት።\n\nማንኛውም ተጠቃሚ መተግበሪያዎችን ለሌሎች ተጠቃሚዎች ሁሉ ሊያዘምን ይችላል።"</string>
+    <string name="user_grant_admin_title" msgid="5565796912475193314">"ለዚህ ተጠቃሚ የአስተዳዳሪ መብቶች ይሰጣቸው?"</string>
+    <string name="user_grant_admin_message" msgid="7925257971286380976">"እንደ አስተዳዳሪ ሌሎች ተጠቃሚዎችን ማስተዳደር፣ የመሣሪያ ቅንብሮችን ማሻሻል እና መሣሪያውን የፋብሪካ ዳግም ማስጀመር ይችላሉ።"</string>
     <string name="user_setup_dialog_title" msgid="8037342066381939995">"ተጠቃሚ አሁን ይዋቀር?"</string>
     <string name="user_setup_dialog_message" msgid="269931619868102841">"ግለሰቡ መሣሪያውን ወስደው ቦታቸውን ለማዋቀር እንደሚገኙ ያረጋግጡ"</string>
     <string name="user_setup_profile_dialog_message" msgid="4788197052296962620">"መገለጫ አሁን ይዋቀር?"</string>
@@ -595,6 +597,8 @@
     <string name="guest_reset_and_restart_dialog_message" msgid="2764425635305200790">"ይህ አዲስ የእንግዳ ክፍለ-ጊዜ ይጀምራል እና ሁሉንም መተግበሪያዎች እና ውሂብ አሁን ካለው ክፍለ-ጊዜ ይሰርዛል"</string>
     <string name="guest_exit_dialog_title" msgid="1846494656849381804">"ከእንግዳ ሁኔታ ይውጣ?"</string>
     <string name="guest_exit_dialog_message" msgid="1743218864242719783">"ይህ አሁን ካለው የእንግዳ ክፍለ-ጊዜ መተግበሪያዎችን እና ውሂብን ይሰርዛል"</string>
+    <string name="grant_admin" msgid="4273077214151417783">"ለዚህ ተጠቃሚ የአስተዳዳሪ መብቶችን ይስጡ"</string>
+    <string name="not_grant_admin" msgid="6985027675930546850">"ለዚህ ተጠቃሚ የአስተዳዳሪ መብቶችን አይስጡ"</string>
     <string name="guest_exit_dialog_button" msgid="1736401897067442044">"ውጣ"</string>
     <string name="guest_exit_dialog_title_non_ephemeral" msgid="7675327443743162986">"የእንግዳ እንቅስቃሴ ይቀመጥ?"</string>
     <string name="guest_exit_dialog_message_non_ephemeral" msgid="223385323235719442">"እንቅስቃሴን አሁን ካለው ክፍለ-ጊዜ ማስቀመጥ ወይም ሁሉንም መተግበሪያዎች እና ውሂብ መሰረዝ ይችላሉ"</string>

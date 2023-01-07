@@ -14,10 +14,10 @@
     <string name="ssl_error_warning" msgid="3127935140338254180">"Мрежа којој покушавате да се придружите има безбедносних проблема."</string>
     <string name="ssl_error_example" msgid="6188711843183058764">"На пример, страница за пријављивање можда не припада приказаној организацији."</string>
     <string name="ssl_error_continue" msgid="1138548463994095584">"Ипак настави преко прегледача"</string>
-    <string name="network_boost_notification_channel" msgid="5430986172506159199">"Појачање мреже"</string>
-    <string name="network_boost_notification_title" msgid="8226368121348880044">"%s препоручује повећање података"</string>
-    <string name="network_boost_notification_detail" msgid="3812434025544196192">"Купите појачање мреже за бољи учинак"</string>
-    <string name="network_boost_notification_button_not_now" msgid="4129218252146702688">"Не сада"</string>
-    <string name="network_boost_notification_button_manage" msgid="1511552684142641182">"Управљајте"</string>
-    <string name="slice_purchase_app_label" msgid="915654761797446390">"Купите појачање мреже."</string>
+    <string name="performance_boost_notification_channel" msgid="3475440855635538592">"Побољшање учинка"</string>
+    <string name="performance_boost_notification_title" msgid="5017421773334474875">"%s препоручује побољшање учинка"</string>
+    <string name="performance_boost_notification_detail" msgid="7216286153533321852">"Купите побољшање учинка за мрежу"</string>
+    <string name="performance_boost_notification_button_not_now" msgid="6459755324243683785">"Не сада"</string>
+    <string name="performance_boost_notification_button_manage" msgid="4976836444046497973">"Управљај"</string>
+    <string name="slice_purchase_app_label" msgid="7170191659233241166">"Купите побољшање учинка."</string>
 </resources>

@@ -2828,7 +2828,7 @@ public class ParsingPackageUtils {
                 return input.skip(message);
             }
 
-            return input.success(pkg.setOverlay(true)
+            return input.success(pkg.setResourceOverlay(true)
                     .setOverlayTarget(target)
                     .setOverlayPriority(priority)
                     .setOverlayTargetOverlayableName(

@@ -17,6 +17,7 @@
 package android.credentials.ui;
 
 import android.annotation.NonNull;
+import android.annotation.TestApi;
 import android.os.Parcel;
 import android.os.Parcelable;
 
@@ -25,14 +26,15 @@ import android.os.Parcelable;
  *
  * @hide
  */
-public class DisabledProviderData extends ProviderData implements Parcelable {
+@TestApi
+public final class DisabledProviderData extends ProviderData implements Parcelable {
 
     public DisabledProviderData(
             @NonNull String providerFlattenedComponentName) {
         super(providerFlattenedComponentName);
     }
 
-    protected DisabledProviderData(@NonNull Parcel in) {
+    private DisabledProviderData(@NonNull Parcel in) {
         super(in);
     }
 

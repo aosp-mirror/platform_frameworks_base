@@ -182,6 +182,11 @@ public class InfoMediaManager extends MediaManager {
         return false;
     }
 
+    boolean preferRouteListingOrdering() {
+        return Build.VERSION.SDK_INT >= Build.VERSION_CODES.UPSIDE_DOWN_CAKE
+                && Api34Impl.preferRouteListingOrdering(mRouterManager, mPackageName);
+    }
+
     /**
      * Remove a {@code device} from current media.
      *
@@ -616,7 +621,6 @@ public class InfoMediaManager extends MediaManager {
             return finalizedItemList;
         }
 
-
         @DoNotInline
         static synchronized List<MediaRoute2Info> filterDuplicatedIds(List<MediaRoute2Info> infos) {
             List<MediaRoute2Info> filteredInfos = new ArrayList<>();
@@ -652,6 +656,15 @@ public class InfoMediaManager extends MediaManager {
                         MediaRoute2Info::isSystemRoute).collect(Collectors.toList()));
             }
             return sortedInfoList;
+        }
+
+        @DoNotInline
+        static boolean preferRouteListingOrdering(MediaRouter2Manager mediaRouter2Manager,
+                String packageName) {
+            RouteListingPreference routeListingPreference =
+                    mediaRouter2Manager.getRouteListingPreference(packageName);
+            return routeListingPreference != null
+                    && !routeListingPreference.getUseSystemOrdering();
         }
     }
 }

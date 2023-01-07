@@ -85,6 +85,7 @@
     <string name="screenshot_share_description" msgid="2861628935812656612">"স্ক্রিনশট শেয়ার করুন"</string>
     <string name="screenshot_scroll_label" msgid="2930198809899329367">"আরও বেশি ক্যাপচার করুন"</string>
     <string name="screenshot_dismiss_description" msgid="4702341245899508786">"স্ক্রিনশট বাতিল করুন"</string>
+    <string name="screenshot_dismiss_work_profile" msgid="3101530842987697045">"অফিস প্রোফাইল সংক্রান্ত মেসেজ বাতিল করুন"</string>
     <string name="screenshot_preview_description" msgid="7606510140714080474">"স্ক্রিনশটের প্রিভিউ"</string>
     <string name="screenshot_top_boundary_pct" msgid="2520148599096479332">"উপরের প্রান্ত থেকে <xliff:g id="PERCENT">%1$d</xliff:g> শতাংশ"</string>
     <string name="screenshot_bottom_boundary_pct" msgid="3880821519814946478">"নিচের প্রান্ত থেকে <xliff:g id="PERCENT">%1$d</xliff:g> শতাংশ"</string>
@@ -317,8 +318,7 @@
     <string name="sensor_privacy_camera_unblocked_dialog_content" msgid="7847190103011782278">"সব অ্যাপ ও পরিষেবার জন্য ক্যামেরার অ্যাক্সেস চালু করা হয়েছে।"</string>
     <string name="sensor_privacy_camera_blocked_dialog_content" msgid="3182428709314874616">"সব অ্যাপ ও পরিষেবার জন্য ক্যামেরার অ্যাক্সেস বন্ধ করা হয়েছে।"</string>
     <string name="sensor_privacy_htt_blocked_dialog_content" msgid="3333321592997666441">"মাইক্রোফোনের বোতাম ব্যবহার করতে, সেটিংস থেকে মাইক্রোফোনের অ্যাক্সেস চালু করুন।"</string>
-    <!-- no translation found for sensor_privacy_dialog_open_settings (5635865896053011859) -->
-    <skip />
+    <string name="sensor_privacy_dialog_open_settings" msgid="5635865896053011859">"সেটিংস খুলুন"</string>
     <string name="media_seamless_other_device" msgid="4654849800789196737">"অন্য ডিভাইস"</string>
     <string name="quick_step_accessibility_toggle_overview" msgid="7908949976727578403">"\'এক নজরে\' বৈশিষ্ট্যটি চালু বা বন্ধ করুন"</string>
     <string name="zen_priority_introduction" msgid="3159291973383796646">"অ্যালার্ম, রিমাইন্ডার, ইভেন্ট, এবং আপনার নির্দিষ্ট করে দেওয়া ব্যক্তিদের কল ছাড়া অন্য কোনও আওয়াজ বা ভাইব্রেশন হবে না। তবে সঙ্গীত, ভিডিও, এবং গেম সহ আপনি যা কিছু চালাবেন তার আওয়াজ শুনতে পাবেন।"</string>
@@ -743,6 +743,7 @@
     <string name="wifi_is_off" msgid="5389597396308001471">"ওয়াই ফাই বন্ধ আছে"</string>
     <string name="bt_is_off" msgid="7436344904889461591">"ব্লুটুথ বন্ধ আছে"</string>
     <string name="dnd_is_off" msgid="3185706903793094463">"বিরক্ত করবে না বিকল্পটি বন্ধ আছে"</string>
+    <string name="dnd_is_on" msgid="7009368176361546279">"\'বিরক্ত করবে না\' মোড চালু আছে"</string>
     <string name="qs_dnd_prompt_auto_rule" msgid="3535469468310002616">"বিরক্ত করবে না বিকল্পটি একটি স্বয়ংক্রিয় নিয়ম <xliff:g id="ID_1">%s</xliff:g> এর দ্বারা চালু করা হয়েছে।"</string>
     <string name="qs_dnd_prompt_app" msgid="4027984447935396820">"বিরক্ত করবে না বিকল্পটি একটি অ্যাপ <xliff:g id="ID_1">%s</xliff:g> এর দ্বারা চালু করা হয়েছে।"</string>
     <string name="qs_dnd_prompt_auto_rule_app" msgid="1841469944118486580">"বিরক্ত করবে না বিকল্পটি একটি স্বয়ংক্রিয় নিয়ম বা অ্যাপের দ্বারা চালু করা হয়েছে।"</string>
@@ -815,7 +816,7 @@
     <string name="accessibility_floating_button_migration_tooltip" msgid="5217151214439341902">"অ্যাক্সেসিবিলিটি ফিচার খুলতে ট্যাপ করুন। কাস্টমাইজ করুন বা সেটিংসে এই বোতামটি সরিয়ে দিন।\n\n"<annotation id="link">"সেটিংস দেখুন"</annotation></string>
     <string name="accessibility_floating_button_docking_tooltip" msgid="6814897496767461517">"এটি অস্থায়ীভাবে লুকাতে বোতামটি কোণে সরান"</string>
     <string name="accessibility_floating_button_undo" msgid="511112888715708241">"আগের অবস্থায় ফিরুন"</string>
-    <string name="accessibility_floating_button_undo_message_text" msgid="3044079592757099698">"{count,plural, =1{{label}টি শর্টকাট সরানো হয়েছে}one{#টি শর্টকাট সরানো হয়েছে}other{#টি শর্টকাট সরানো হয়েছে}}"</string>
+    <string name="accessibility_floating_button_undo_message_text" msgid="3044079592757099698">"{count,plural, =1{{label} শর্টকাট সরানো হয়েছে}one{#টি শর্টকাট সরানো হয়েছে}other{#টি শর্টকাট সরানো হয়েছে}}"</string>
     <string name="accessibility_floating_button_action_move_top_left" msgid="6253520703618545705">"উপরে বাঁদিকে সরান"</string>
     <string name="accessibility_floating_button_action_move_top_right" msgid="6106225581993479711">"উপরে ডানদিকে সরান"</string>
     <string name="accessibility_floating_button_action_move_bottom_left" msgid="8063394111137429725">"নিচে বাঁদিকে সরান"</string>
@@ -905,6 +906,7 @@
     <string name="media_output_dialog_accessibility_title" msgid="4681741064190167888">"অডিও আউটপুটের জন্য উপলভ্য ডিভাইস।"</string>
     <string name="media_output_dialog_accessibility_seekbar" msgid="5332843993805568978">"ভলিউম"</string>
     <string name="media_output_dialog_volume_percentage" msgid="1613984910585111798">"<xliff:g id="PERCENTAGE">%1$d</xliff:g>%%"</string>
+    <string name="media_output_group_title_speakers_and_displays" msgid="7169712332365659820">"স্পিকার &amp; ডিসপ্লে"</string>
     <string name="media_output_first_broadcast_title" msgid="6292237789860753022">"ব্রডকাস্ট কীভাবে কাজ করে"</string>
     <string name="media_output_broadcast" msgid="3555580945878071543">"সম্প্রচার করুন"</string>
     <string name="media_output_first_notify_broadcast_message" msgid="6353857724136398494">"আশপাশে লোকজন যাদের মানানসই ব্লুটুথ ডিভাইস আছে, তারা আপনার ব্রডকাস্ট করা মিডিয়া শুনতে পারবেন"</string>
@@ -1032,20 +1034,19 @@
     <string name="log_access_confirmation_deny" msgid="2389461495803585795">"অনুমতি দেবেন না"</string>
     <string name="log_access_confirmation_body" msgid="6883031912003112634">"ডিভাইস লগে আপনার ডিভাইসে করা অ্যাক্টিভিটি রেকর্ড করা হয়। অ্যাপ সমস্যা খুঁজে তা সমাধান করতে এইসব লগ ব্যবহার করতে পারে।\n\nকিছু লগে সংবেদনশীল তথ্য থাকতে পারে, তাই বিশ্বাস করেন শুধুমাত্র এমন অ্যাপকেই সব ডিভাইসের লগ অ্যাক্সেসের অনুমতি দিন। \n\nআপনি এই অ্যাপকে ডিভাইসের সব লগ অ্যাক্সেস করার অনুমতি না দিলেও, এটি নিজে লগ অ্যাক্সেস করতে পারবে। ডিভাইস প্রস্তুতকারকও আপনার ডিভাইসের কিছু লগ বা তথ্য হয়ত অ্যাক্সেস করতে পারবে।"</string>
     <string name="keyguard_affordance_enablement_dialog_action_template" msgid="8164857863036314664">"<xliff:g id="APPNAME">%1$s</xliff:g> খুলুন"</string>
-    <string name="keyguard_affordance_enablement_dialog_message" msgid="2790910660524887941">"শর্টকাট হিসেবে <xliff:g id="APPNAME">%1$s</xliff:g> অ্যাপ যোগ করতে, এই বিষয়গুলি নিশ্চিত করুন"</string>
     <string name="keyguard_affordance_enablement_dialog_wallet_instruction_1" msgid="8439655049139819278">"• অ্যাপ সেট-আপ করা হয়ে গেছে"</string>
     <string name="keyguard_affordance_enablement_dialog_wallet_instruction_2" msgid="4321089250629477835">"• অন্তত একটি কার্ড Wallet-এ যোগ করা হয়েছে"</string>
     <string name="keyguard_affordance_enablement_dialog_qr_scanner_instruction" msgid="5355839079232119791">"• ক্যামেরা অ্যাপ ইনস্টল করুন"</string>
     <string name="keyguard_affordance_enablement_dialog_home_instruction_1" msgid="8438311171750568633">"• অ্যাপ সেট-আপ করা হয়ে গেছে"</string>
     <string name="keyguard_affordance_enablement_dialog_home_instruction_2" msgid="8308525385889021652">"• অন্তত একটি ডিভাইস উপলভ্য"</string>
+    <string name="keyguard_affordance_press_too_short" msgid="8145437175134998864">"শর্টকাট টাচ করে ধরে রাখুন"</string>
     <string name="rear_display_bottom_sheet_cancel" msgid="3461468855493357248">"বাতিল করুন"</string>
     <string name="rear_display_bottom_sheet_confirm" msgid="4383356544661421206">"এখনই উল্টান"</string>
     <string name="rear_display_fold_bottom_sheet_title" msgid="6081542277622721548">"আরও ভাল সেলফির জন্য ফোন আনফোল্ড করা"</string>
     <string name="rear_display_unfold_bottom_sheet_title" msgid="2137403802960396357">"আরও ভাল সেলফির জন্য সামনের ক্যামেরায় পাল্টাতে চান?"</string>
     <string name="rear_display_bottom_sheet_description" msgid="1852662982816810352">"আরও ভাল রেজোলিউশন সহ আরও বেশি ওয়াইড ছবির জন্য ব্যাক-ক্যামেরা ব্যবহার করুন।"</string>
     <string name="rear_display_bottom_sheet_warning" msgid="800995919558238930"><b>"✱ এই স্ক্রিন বন্ধ হয়ে যাবে"</b></string>
-    <!-- no translation found for rear_display_accessibility_folded_animation (1538121649587978179) -->
-    <skip />
-    <!-- no translation found for rear_display_accessibility_unfolded_animation (1946153682258289040) -->
-    <skip />
+    <string name="rear_display_accessibility_folded_animation" msgid="1538121649587978179">"ফোল্ড করা যায় এমন ডিভাইস খোলা হচ্ছে"</string>
+    <string name="rear_display_accessibility_unfolded_animation" msgid="1946153682258289040">"ফোল্ড করা যায় এমন ডিভাইস উল্টানো হচ্ছে"</string>
+    <string name="stylus_battery_low" msgid="7134370101603167096">"স্টাইলাস ব্যাটারিতে চার্জ কম আছে"</string>
 </resources>

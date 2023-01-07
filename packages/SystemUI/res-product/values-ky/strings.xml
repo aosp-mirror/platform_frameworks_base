@@ -23,10 +23,8 @@
     <string name="dock_alignment_not_charging" product="default" msgid="3980752926226749808">"Телефонду зымсыз кубаттоо үчүн туура коюңуз"</string>
     <string name="inattentive_sleep_warning_message" product="tv" msgid="6844464574089665063">"Android TV түзмөгү жакында өчүрүлөт, аны күйүк боюнча калтыруу үчүн баскычты басыңыз."</string>
     <string name="inattentive_sleep_warning_message" product="default" msgid="5693904520452332224">"Түзмөк жакында өчүрүлөт, күйүк боюнча калтыруу үчүн басып коюңуз."</string>
-    <!-- no translation found for keyguard_missing_sim_message (408124574073032188) -->
-    <skip />
-    <!-- no translation found for keyguard_missing_sim_message (2605468359948247208) -->
-    <skip />
+    <string name="keyguard_missing_sim_message" product="tablet" msgid="408124574073032188">"Планшетте SIM карта жок."</string>
+    <string name="keyguard_missing_sim_message" product="default" msgid="2605468359948247208">"Телефондо SIM карта жок."</string>
     <string name="kg_invalid_confirm_pin_hint" product="default" msgid="6278551068943958651">"PIN-коддор дал келген жок"</string>
     <string name="kg_failed_attempts_almost_at_wipe" product="tablet" msgid="302165994845009232">"Планшеттин кулпусун <xliff:g id="NUMBER_0">%1$d</xliff:g> жолу туура эмес ачууга аракет жасадыңыз. Дагы <xliff:g id="NUMBER_1">%2$d</xliff:g> жолу ийгиликсиз аракет кылсаңыз, бул планшет баштапкы абалга келтирилип, андагы бардык нерселер өчүрүлөт."</string>
     <string name="kg_failed_attempts_almost_at_wipe" product="default" msgid="2594813176164266847">"Телефондун кулпусун <xliff:g id="NUMBER_0">%1$d</xliff:g> жолу туура эмес ачууга аракет жасадыңыз. Дагы <xliff:g id="NUMBER_1">%2$d</xliff:g> жолу ийгиликсиз аракет кылсаңыз, бул телефон баштапкы абалга келтирилип, андагы бардык нерселер өчүрүлөт."</string>

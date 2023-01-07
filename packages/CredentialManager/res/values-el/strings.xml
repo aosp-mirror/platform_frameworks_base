@@ -4,37 +4,38 @@
     <string name="app_name" msgid="4539824758261855508">"Credential Manager"</string>
     <string name="string_cancel" msgid="6369133483981306063">"Ακύρωση"</string>
     <string name="string_continue" msgid="1346732695941131882">"Συνέχεια"</string>
+    <string name="string_more_options" msgid="7990658711962795124">"Περισσότερες επιλογές"</string>
     <string name="string_create_in_another_place" msgid="1033635365843437603">"Δημιουργία σε άλλη θέση"</string>
     <string name="string_save_to_another_place" msgid="7590325934591079193">"Αποθήκευση σε άλλη θέση"</string>
     <string name="string_use_another_device" msgid="8754514926121520445">"Χρήση άλλης συσκευής"</string>
     <string name="string_save_to_another_device" msgid="1959562542075194458">"Αποθήκευση σε άλλη συσκευή"</string>
     <string name="passkey_creation_intro_title" msgid="4251037543787718844">"Μεγαλύτερη ασφάλεια με κλειδιά πρόσβασης"</string>
-    <string name="passkey_creation_intro_body_password" msgid="312712407571126228">"Δεν χρειάζεται να δημιουργείτε ή να θυμάστε σύνθετους κωδικούς πρόσβασης."</string>
-    <string name="passkey_creation_intro_body_fingerprint" msgid="691816235541508203">"Χρησιμοποιήστε το δακτυλικό σας αποτύπωμα, το πρόσωπο ή το κλείδωμα οθόνης για να δημιουργήσετε ένα μοναδικό κλειδί πρόσβασης."</string>
-    <string name="passkey_creation_intro_body_device" msgid="477121861162321129">"Τα κλειδιά πρόσβασης αποθηκεύονται σε ένα πρόγραμμα διαχείρισης κωδικών πρόσβασης, για να μπορείτε να συνδέεστε από άλλες συσκευές."</string>
+    <string name="passkey_creation_intro_body_password" msgid="8825872426579958200">"Με τα κλειδιά πρόσβασης, δεν χρειάζεται να δημιουργείτε ή να θυμάστε σύνθετους κωδικούς πρόσβασης."</string>
+    <string name="passkey_creation_intro_body_fingerprint" msgid="7331338631826254055">"Τα κλειδιά πρόσβασης είναι κρυπτογραφημένα ψηφιακά κλειδιά που δημιουργείτε χρησιμοποιώντας το δακτυλικό σας αποτύπωμα, το πρόσωπο ή το κλείδωμα οθόνης."</string>
+    <string name="passkey_creation_intro_body_device" msgid="1203796455762131631">"Αποθηκεύονται σε ένα πρόγραμμα διαχείρισης κωδικών πρόσβασης, για να μπορείτε να συνδέεστε από άλλες συσκευές."</string>
     <string name="choose_provider_title" msgid="7245243990139698508">"Επιλέξτε θέση για <xliff:g id="CREATETYPES">%1$s</xliff:g>"</string>
     <string name="create_your_passkeys" msgid="8901224153607590596">"δημιουργήστε τα κλειδιά πρόσβασής σας"</string>
     <string name="save_your_password" msgid="6597736507991704307">"αποθήκευση του κωδικού πρόσβασής σας"</string>
     <string name="save_your_sign_in_info" msgid="7213978049817076882">"αποθήκευση των στοιχείων σύνδεσής σας"</string>
-    <string name="choose_provider_body" msgid="8045759834416308059">"Για να συνδέεστε πιο γρήγορα, ορίστε ένα προεπιλεγμένο πρόγραμμα διαχείρισης κωδικών πρόσβασης για να αποθηκεύετε τους κωδικούς και τα κλειδιά πρόσβασής σας."</string>
-    <string name="choose_create_option_passkey_title" msgid="4146408187146573131">"Να δημιουργηθει κλειδί πρόσβασης στο <xliff:g id="PROVIDERINFODISPLAYNAME">%1$s</xliff:g>;"</string>
-    <string name="choose_create_option_password_title" msgid="8812546498357380545">"Να αποθηκευτεί ο κωδικός πρόσβασής σας στο <xliff:g id="PROVIDERINFODISPLAYNAME">%1$s</xliff:g>;"</string>
-    <string name="choose_create_option_sign_in_title" msgid="6318246378475961834">"Να αποθηκευτούν τα στοιχεία σύνδεσής σας στο <xliff:g id="PROVIDERINFODISPLAYNAME">%1$s</xliff:g>;"</string>
-    <string name="choose_create_option_description" msgid="4419171903963100257">"Μπορείτε να χρησιμοποιήσετε το στοιχείο τύπου <xliff:g id="TYPE">%2$s</xliff:g> του τομέα <xliff:g id="APPDOMAINNAME">%1$s</xliff:g> σε οποιαδήποτε συσκευή. Αποθηκεύτηκε στο <xliff:g id="PROVIDERINFODISPLAYNAME">%3$s</xliff:g> για <xliff:g id="CREATEINFODISPLAYNAME">%4$s</xliff:g>"</string>
+    <string name="choose_provider_body" msgid="4384188171872005547">"Επιλέξτε ένα πρόγραμμα διαχείρισης κωδικών πρόσβασης για να αποθηκεύσετε τα στοιχεία σας και να συνδεθείτε πιο γρήγορα την επόμενη φορά."</string>
+    <string name="choose_create_option_passkey_title" msgid="5220979185879006862">"Δημιουργία κλειδιού πρόσβασης για <xliff:g id="APPNAME">%1$s</xliff:g>;"</string>
+    <string name="choose_create_option_password_title" msgid="7097275038523578687">"Αποθήκευση κωδικού πρόσβασης για <xliff:g id="APPNAME">%1$s</xliff:g>;"</string>
+    <string name="choose_create_option_sign_in_title" msgid="4124872317613421249">"Αποθήκευση στοιχείων σύνδεσης για <xliff:g id="APPNAME">%1$s</xliff:g>;"</string>
+    <string name="choose_create_option_description" msgid="5531335144879100664">"Μπορείτε να χρησιμοποιήσετε το στοιχείο τύπου <xliff:g id="CREDENTIALTYPES">%2$s</xliff:g> του τομέα <xliff:g id="APPDOMAINNAME">%1$s</xliff:g> σε οποιαδήποτε συσκευή. Αποθηκεύτηκε στο <xliff:g id="PROVIDERINFODISPLAYNAME">%3$s</xliff:g> για τον χρήστη <xliff:g id="CREATEINFODISPLAYNAME">%4$s</xliff:g>."</string>
     <string name="passkey" msgid="632353688396759522">"κλειδί πρόσβασης"</string>
     <string name="password" msgid="6738570945182936667">"κωδικός πρόσβασης"</string>
     <string name="sign_ins" msgid="4710739369149469208">"στοιχεία σύνδεσης"</string>
-    <string name="create_passkey_in_title" msgid="2714306562710897785">"Δημιουργία κλειδιού πρόσβασης σε"</string>
-    <string name="save_password_to_title" msgid="3450480045270186421">"Αποθήκευση κωδικού πρόσβασης σε"</string>
-    <string name="save_sign_in_to_title" msgid="8328143607671760232">"Αποθήκευση στοιχείων σύνδεσης σε"</string>
+    <string name="sign_in_info" msgid="2627704710674232328">"στοιχεία σύνδεσης"</string>
+    <string name="save_credential_to_title" msgid="3172811692275634301">"Αποθήκευση <xliff:g id="CREDENTIALTYPES">%1$s</xliff:g> σε"</string>
     <string name="create_passkey_in_other_device_title" msgid="6372952459932674632">"Δημιουργία κλειδιού πρόσβασης σε άλλη συσκευή;"</string>
     <string name="use_provider_for_all_title" msgid="4201020195058980757">"Να χρησιμοποιηθεί το <xliff:g id="PROVIDERINFODISPLAYNAME">%1$s</xliff:g> για όλες τις συνδέσεις σας;"</string>
     <string name="use_provider_for_all_description" msgid="6560593199974037820">"Αυτός ο διαχειριστής κωδικών πρόσβασης θα αποθηκεύει τους κωδικούς πρόσβασης και τα κλειδιά πρόσβασης, για να συνδέεστε εύκολα."</string>
     <string name="set_as_default" msgid="4415328591568654603">"Ορισμός ως προεπιλογής"</string>
     <string name="use_once" msgid="9027366575315399714">"Χρήση μία φορά"</string>
-    <string name="more_options_usage_passwords_passkeys" msgid="4794903978126339473">"<xliff:g id="PASSWORDSNUMBER">%1$s</xliff:g> κωδικοί πρόσβασης, <xliff:g id="PASSKEYSNUMBER">%2$s</xliff:g> κλειδιά πρόσβασης"</string>
+    <string name="more_options_usage_passwords_passkeys" msgid="3470113942332934279">"<xliff:g id="PASSWORDSNUMBER">%1$s</xliff:g> κωδικοί πρόσβασης • <xliff:g id="PASSKEYSNUMBER">%2$s</xliff:g> κλειδιά πρόσβασης"</string>
     <string name="more_options_usage_passwords" msgid="1632047277723187813">"<xliff:g id="PASSWORDSNUMBER">%1$s</xliff:g> κωδικοί πρόσβασης"</string>
     <string name="more_options_usage_passkeys" msgid="5390320437243042237">"<xliff:g id="PASSKEYSNUMBER">%1$s</xliff:g> κλειδιά πρόσβασης"</string>
+    <string name="more_options_usage_credentials" msgid="1785697001787193984">"Διαπιστευτήρια <xliff:g id="TOTALCREDENTIALSNUMBER">%1$s</xliff:g>"</string>
     <string name="passkey_before_subtitle" msgid="2448119456208647444">"Κλειδί πρόσβασης"</string>
     <string name="another_device" msgid="5147276802037801217">"Άλλη συσκευή"</string>
     <string name="other_password_manager" msgid="565790221427004141">"Άλλοι διαχειριστές κωδικών πρόσβασης"</string>
@@ -45,7 +46,7 @@
     <string name="get_dialog_title_use_sign_in_for" msgid="5283099528915572980">"Να χρησιμοποιηθούν τα αποθηκευμένα στοιχεία σύνδεσης για την εφαρμογή <xliff:g id="APP_NAME">%1$s</xliff:g>;"</string>
     <string name="get_dialog_title_choose_sign_in_for" msgid="1361715440877613701">"Επιλογή αποθηκευμένων στοιχείων σύνδεσης για την εφαρμογή <xliff:g id="APP_NAME">%1$s</xliff:g>"</string>
     <string name="get_dialog_use_saved_passkey_for" msgid="4618100798664888512">"Σύνδεση με άλλον τρόπο"</string>
-    <string name="get_dialog_button_label_no_thanks" msgid="8114363019023838533">"Όχι, ευχαριστώ"</string>
+    <string name="snackbar_action" msgid="37373514216505085">"Προβολή επιλογών"</string>
     <string name="get_dialog_button_label_continue" msgid="6446201694794283870">"Συνέχεια"</string>
     <string name="get_dialog_title_sign_in_options" msgid="2092876443114893618">"Επιλογές σύνδεσης"</string>
     <string name="get_dialog_heading_for_username" msgid="3456868514554204776">"Για τον χρήστη <xliff:g id="USERNAME">%1$s</xliff:g>"</string>

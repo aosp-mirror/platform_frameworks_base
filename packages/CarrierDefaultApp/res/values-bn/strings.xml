@@ -14,10 +14,10 @@
     <string name="ssl_error_warning" msgid="3127935140338254180">"আপনি যে নেটওয়ার্কে যোগ দেওয়ার চেষ্টা করছেন সেটিতে নিরাপত্তাজনিত সমস্যা আছে।"</string>
     <string name="ssl_error_example" msgid="6188711843183058764">"যেমন, লগ-ইন পৃষ্ঠাটি যে প্রতিষ্ঠানের পৃষ্ঠা বলে দেখানো আছে, আসলে তা নাও হতে পারে৷"</string>
     <string name="ssl_error_continue" msgid="1138548463994095584">"যাই হোক, ব্রাউজারের মাধ্যমে চালিয়ে যান"</string>
-    <string name="network_boost_notification_channel" msgid="5430986172506159199">"নেটওয়ার্ক বুস্ট"</string>
-    <string name="network_boost_notification_title" msgid="8226368121348880044">"%s ডেটা বুস্ট করার জন্য সাজেস্ট করে"</string>
-    <string name="network_boost_notification_detail" msgid="3812434025544196192">"আরও ভাল পারফর্ম্যান্সের জন্য নেটওয়ার্ক বুস্ট কিনুন"</string>
-    <string name="network_boost_notification_button_not_now" msgid="4129218252146702688">"এখন নয়"</string>
-    <string name="network_boost_notification_button_manage" msgid="1511552684142641182">"ম্যানেজ করুন"</string>
-    <string name="slice_purchase_app_label" msgid="915654761797446390">"নেটওয়ার্ক বুস্ট কিনুন।"</string>
+    <string name="performance_boost_notification_channel" msgid="3475440855635538592">"পারফর্ম্যান্স বুস্ট"</string>
+    <string name="performance_boost_notification_title" msgid="5017421773334474875">"%s পারফর্ম্যান্স বুস্ট ব্যবহার করার সাজেশন দেয়"</string>
+    <string name="performance_boost_notification_detail" msgid="7216286153533321852">"আরও ভাল নেটওয়ার্ক পারফর্ম্যান্সের জন্য পারফর্ম্যান্স বুস্ট সংক্রান্ত ফিচার কিনুন"</string>
+    <string name="performance_boost_notification_button_not_now" msgid="6459755324243683785">"এখন নয়"</string>
+    <string name="performance_boost_notification_button_manage" msgid="4976836444046497973">"ম্যানেজ করুন"</string>
+    <string name="slice_purchase_app_label" msgid="7170191659233241166">"পারফর্ম্যান্স বুস্ট সংক্রান্ত ফিচার কিনুন।"</string>
 </resources>

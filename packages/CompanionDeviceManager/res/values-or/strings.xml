@@ -23,8 +23,7 @@
     <string name="summary_watch" msgid="4085794790142204006">"ଆପଣଙ୍କ <xliff:g id="DEVICE_NAME">%1$s</xliff:g>କୁ ପରିଚାଳନା କରିବା ପାଇଁ ଆପ ଆବଶ୍ୟକ। ଆପଣଙ୍କ ବିଜ୍ଞପ୍ତିଗୁଡ଼ିକ ସହ ଇଣ୍ଟରାକ୍ଟ କରିବା ଏବଂ ଆପଣଙ୍କର ଫୋନ, SMS, କଣ୍ଟାକ୍ଟ, କେଲେଣ୍ଡର, କଲ ଲଗ ଓ ଆଖପାଖର ଡିଭାଇସ ଅନୁମତିଗୁଡ଼ିକୁ ଆକ୍ସେସ କରିବା ପାଇଁ <xliff:g id="APP_NAME">%2$s</xliff:g>କୁ ଅନୁମତି ଦିଆଯିବ।"</string>
     <string name="summary_watch_single_device" msgid="1523091550243476756">"ଆପଣଙ୍କ <xliff:g id="DEVICE_NAME">%1$s</xliff:g>କୁ ପରିଚାଳନା କରିବା ପାଇଁ ଆପ ଆବଶ୍ୟକ। ଏହି ଅନୁମତିଗୁଡ଼ିକ ସହ ଇଣ୍ଟରାକ୍ଟ କରିବା ପାଇଁ <xliff:g id="APP_NAME">%2$s</xliff:g>କୁ ଅନୁମତି ଦିଆଯିବ:"</string>
     <string name="profile_name_glasses" msgid="8488394059007275998">"ଚଷମା"</string>
-    <!-- no translation found for summary_glasses (8987925853224595628) -->
-    <skip />
+    <string name="summary_glasses" msgid="8987925853224595628">"ଆପଣଙ୍କ <xliff:g id="DEVICE_NAME">%1$s</xliff:g>କୁ ପରିଚାଳନା କରିବା ପାଇଁ ଏହି ଆପ ଆବଶ୍ୟକ। ଆପଣଙ୍କ ବିଜ୍ଞପ୍ତିଗୁଡ଼ିକ ସହ ଇଣ୍ଟରାକ୍ଟ କରିବା ଏବଂ ଆପଣଙ୍କର ଫୋନ, SMS, କଣ୍ଟାକ୍ଟ, ମାଇକ୍ରୋଫୋନ ଓ ଆଖପାଖର ଡିଭାଇସ ଅନୁମତିଗୁଡ଼ିକୁ ଆକ୍ସେସ କରିବା ପାଇଁ <xliff:g id="APP_NAME">%2$s</xliff:g>କୁ ଅନୁମତି ଦିଆଯିବ।"</string>
     <string name="summary_glasses_single_device" msgid="5725890636605211803">"ଆପଣଙ୍କ <xliff:g id="DEVICE_NAME">%1$s</xliff:g>କୁ ପରିଚାଳନା କରିବା ପାଇଁ ଆପ ଆବଶ୍ୟକ। ଏହି ଅନୁମତିଗୁଡ଼ିକ ସହ ଇଣ୍ଟରାକ୍ଟ କରିବା ପାଇଁ <xliff:g id="APP_NAME">%2$s</xliff:g>କୁ ଅନୁମତି ଦିଆଯିବ:"</string>
     <string name="title_app_streaming" msgid="2270331024626446950">"ଆପଣଙ୍କ ଫୋନରୁ ଏହି ସୂଚନାକୁ ଆକ୍ସେସ କରିବା ପାଇଁ &lt;strong&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/strong&gt;କୁ ଅନୁମତି ଦିଅନ୍ତୁ"</string>
     <string name="helper_title_app_streaming" msgid="4151687003439969765">"କ୍ରସ-ଡିଭାଇସ ସେବାଗୁଡ଼ିକ"</string>

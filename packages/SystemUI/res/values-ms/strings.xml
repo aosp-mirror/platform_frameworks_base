@@ -85,6 +85,7 @@
     <string name="screenshot_share_description" msgid="2861628935812656612">"Kongsi tangkapan skrin"</string>
     <string name="screenshot_scroll_label" msgid="2930198809899329367">"Tangkap lebih banyak"</string>
     <string name="screenshot_dismiss_description" msgid="4702341245899508786">"Ketepikan tangkapan skrin"</string>
+    <string name="screenshot_dismiss_work_profile" msgid="3101530842987697045">"Ketepikan mesej profil kerja"</string>
     <string name="screenshot_preview_description" msgid="7606510140714080474">"Pratonton tangkapan skrin"</string>
     <string name="screenshot_top_boundary_pct" msgid="2520148599096479332">"Sempadan atas <xliff:g id="PERCENT">%1$d</xliff:g> peratus"</string>
     <string name="screenshot_bottom_boundary_pct" msgid="3880821519814946478">"Sempadan bawah <xliff:g id="PERCENT">%1$d</xliff:g> peratus"</string>
@@ -317,8 +318,7 @@
     <string name="sensor_privacy_camera_unblocked_dialog_content" msgid="7847190103011782278">"Kamera didayakan untuk semua apl dan perkhidmatan."</string>
     <string name="sensor_privacy_camera_blocked_dialog_content" msgid="3182428709314874616">"Akses kamera dilumpuhkan untuk semua apl dan perkhidmatan."</string>
     <string name="sensor_privacy_htt_blocked_dialog_content" msgid="3333321592997666441">"Untuk menggunakan butang mikrofon, dayakan akses mikrofon dalam Tetapan."</string>
-    <!-- no translation found for sensor_privacy_dialog_open_settings (5635865896053011859) -->
-    <skip />
+    <string name="sensor_privacy_dialog_open_settings" msgid="5635865896053011859">"Buka Tetapan"</string>
     <string name="media_seamless_other_device" msgid="4654849800789196737">"Peranti lain"</string>
     <string name="quick_step_accessibility_toggle_overview" msgid="7908949976727578403">"Togol Ikhtisar"</string>
     <string name="zen_priority_introduction" msgid="3159291973383796646">"Anda tidak akan diganggu oleh bunyi dan getaran, kecuali daripada penggera, peringatan, acara dan pemanggil yang anda tetapkan. Anda masih mendengar item lain yang anda pilih untuk dimainkan termasuk muzik, video dan permainan."</string>
@@ -743,6 +743,7 @@
     <string name="wifi_is_off" msgid="5389597396308001471">"Wi-Fi dimatikan"</string>
     <string name="bt_is_off" msgid="7436344904889461591">"Bluetooth dimatikan"</string>
     <string name="dnd_is_off" msgid="3185706903793094463">"Jangan Ganggu dimatikan"</string>
+    <string name="dnd_is_on" msgid="7009368176361546279">"Jangan Ganggu dihidupkan"</string>
     <string name="qs_dnd_prompt_auto_rule" msgid="3535469468310002616">"Jangan Ganggu dihidupkan oleh peraturan automatik (<xliff:g id="ID_1">%s</xliff:g>)."</string>
     <string name="qs_dnd_prompt_app" msgid="4027984447935396820">"Jangan Ganggu dihidupkan oleh apl (<xliff:g id="ID_1">%s</xliff:g>)."</string>
     <string name="qs_dnd_prompt_auto_rule_app" msgid="1841469944118486580">"Jangan Ganggu dihidupkan oleh peraturan automatik atau apl."</string>
@@ -905,6 +906,7 @@
     <string name="media_output_dialog_accessibility_title" msgid="4681741064190167888">"Peranti tersedia untuk audio output."</string>
     <string name="media_output_dialog_accessibility_seekbar" msgid="5332843993805568978">"Kelantangan"</string>
     <string name="media_output_dialog_volume_percentage" msgid="1613984910585111798">"<xliff:g id="PERCENTAGE">%1$d</xliff:g>%%"</string>
+    <string name="media_output_group_title_speakers_and_displays" msgid="7169712332365659820">"Pembesar Suara &amp; Paparan"</string>
     <string name="media_output_first_broadcast_title" msgid="6292237789860753022">"Cara siaran berfungsi"</string>
     <string name="media_output_broadcast" msgid="3555580945878071543">"Siarkan"</string>
     <string name="media_output_first_notify_broadcast_message" msgid="6353857724136398494">"Orang berdekatan anda dengan peranti Bluetooth yang serasi boleh mendengar media yang sedang anda siarkan"</string>
@@ -1032,20 +1034,19 @@
     <string name="log_access_confirmation_deny" msgid="2389461495803585795">"Jangan benarkan"</string>
     <string name="log_access_confirmation_body" msgid="6883031912003112634">"Log peranti merekodkan perkara yang berlaku pada peranti anda. Apl boleh menggunakan log ini untuk menemukan dan membetulkan masalah.\n\nSesetengah log mungkin mengandungi maklumat sensitif, jadi hanya benarkan apl yang anda percaya untuk mengakses semua log peranti. \n\nJika anda tidak membenarkan apl ini mengakses semua log peranti, apl ini masih boleh mengakses log sendiri. Pengilang peranti anda mungkin masih dapat mengakses sesetengah log atau maklumat pada peranti anda."</string>
     <string name="keyguard_affordance_enablement_dialog_action_template" msgid="8164857863036314664">"Buka <xliff:g id="APPNAME">%1$s</xliff:g>"</string>
-    <string name="keyguard_affordance_enablement_dialog_message" msgid="2790910660524887941">"Untuk menambahkan apl <xliff:g id="APPNAME">%1$s</xliff:g> sebagai pintasan, pastikan"</string>
     <string name="keyguard_affordance_enablement_dialog_wallet_instruction_1" msgid="8439655049139819278">"• Apl disediakan"</string>
     <string name="keyguard_affordance_enablement_dialog_wallet_instruction_2" msgid="4321089250629477835">"• Sekurang-kurangnya satu kad telah ditambahkan pada Wallet"</string>
     <string name="keyguard_affordance_enablement_dialog_qr_scanner_instruction" msgid="5355839079232119791">"• Pasang apl kamera"</string>
     <string name="keyguard_affordance_enablement_dialog_home_instruction_1" msgid="8438311171750568633">"• Apl disediakan"</string>
     <string name="keyguard_affordance_enablement_dialog_home_instruction_2" msgid="8308525385889021652">"• Sekurang-kurangnya satu peranti tersedia"</string>
+    <string name="keyguard_affordance_press_too_short" msgid="8145437175134998864">"Pintasan sentuh &amp; tahan"</string>
     <string name="rear_display_bottom_sheet_cancel" msgid="3461468855493357248">"Batal"</string>
     <string name="rear_display_bottom_sheet_confirm" msgid="4383356544661421206">"Balikkan sekarang"</string>
     <string name="rear_display_fold_bottom_sheet_title" msgid="6081542277622721548">"Buka telefon untuk swafoto yang lebih baik"</string>
     <string name="rear_display_unfold_bottom_sheet_title" msgid="2137403802960396357">"Balikkan ke paparan depan utk swafoto lebih baik?"</string>
     <string name="rear_display_bottom_sheet_description" msgid="1852662982816810352">"Gunakan kamera menghadap belakang untuk mendapatkan foto yang lebih luas dengan resolusi yang lebih tinggi."</string>
     <string name="rear_display_bottom_sheet_warning" msgid="800995919558238930"><b>"✱ Skrin ini akan dimatikan"</b></string>
-    <!-- no translation found for rear_display_accessibility_folded_animation (1538121649587978179) -->
-    <skip />
-    <!-- no translation found for rear_display_accessibility_unfolded_animation (1946153682258289040) -->
-    <skip />
+    <string name="rear_display_accessibility_folded_animation" msgid="1538121649587978179">"Peranti boleh lipat dibuka"</string>
+    <string name="rear_display_accessibility_unfolded_animation" msgid="1946153682258289040">"Peranti boleh lipat diterbalikkan"</string>
+    <string name="stylus_battery_low" msgid="7134370101603167096">"Bateri stilus lemah"</string>
 </resources>

@@ -467,10 +467,8 @@
     <string name="power_charging" msgid="6727132649743436802">"<xliff:g id="LEVEL">%1$s</xliff:g> – <xliff:g id="STATE">%2$s</xliff:g>"</string>
     <string name="power_remaining_charging_duration_only" msgid="8085099012811384899">"<xliff:g id="TIME">%1$s</xliff:g> a teljes töltöttségig"</string>
     <string name="power_charging_duration" msgid="6127154952524919719">"<xliff:g id="LEVEL">%1$s</xliff:g> – <xliff:g id="TIME">%2$s</xliff:g> a teljes töltöttségig"</string>
-    <!-- no translation found for power_charging_limited (8202147604844938236) -->
-    <skip />
-    <!-- no translation found for power_charging_future_paused (4730177778538118032) -->
-    <skip />
+    <string name="power_charging_limited" msgid="8202147604844938236">"<xliff:g id="LEVEL">%1$s</xliff:g> – Optimalizált töltés"</string>
+    <string name="power_charging_future_paused" msgid="4730177778538118032">"<xliff:g id="LEVEL">%1$s</xliff:g> – Optimalizált töltés"</string>
     <string name="battery_info_status_unknown" msgid="268625384868401114">"Ismeretlen"</string>
     <string name="battery_info_status_charging" msgid="4279958015430387405">"Töltés"</string>
     <string name="battery_info_status_charging_fast" msgid="8027559755902954885">"Gyorstöltés"</string>
@@ -566,6 +564,8 @@
     <string name="user_add_user_title" msgid="5457079143694924885">"Hozzáad új felhasználót?"</string>
     <string name="user_add_user_message_long" msgid="1527434966294733380">"További felhasználók létrehozásával megoszthatja ezt az eszközt másokkal. Minden felhasználó saját felülettel rendelkezik, amelyet személyre szabhat saját alkalmazásaival, háttérképével stb. A felhasználók módosíthatják az eszköz beállításait is, például a Wi‑Fi használatát, amely mindenkit érint.\n\nHa új felhasználót ad hozzá, az illetőnek be kell állítania saját felületét.\n\nBármely felhasználó frissítheti az alkalmazásokat valamennyi felhasználó számára. Előfordulhat, hogy a kisegítő lehetőségekkel kapcsolatos beállításokat és szolgáltatásokat nem viszi át a rendszer az új felhasználóhoz."</string>
     <string name="user_add_user_message_short" msgid="3295959985795716166">"Ha új felhasználót ad hozzá, az illetőnek be kell állítania saját tárterületét.\n\nBármely felhasználó frissítheti az alkalmazásokat valamennyi felhasználó számára."</string>
+    <string name="user_grant_admin_title" msgid="5565796912475193314">"Ad adminisztrátori jogosultságokat?"</string>
+    <string name="user_grant_admin_message" msgid="7925257971286380976">"Adminisztrátorként más felhasználókat kezelhet, módosíthatja az eszközbeállításokat és visszaállíthatja az eszköz gyári beállításait."</string>
     <string name="user_setup_dialog_title" msgid="8037342066381939995">"Beállít most egy felhasználót?"</string>
     <string name="user_setup_dialog_message" msgid="269931619868102841">"Győződjön meg arról, hogy a személy hozzá tud férni az eszközhöz, hogy beállíthassa a területét"</string>
     <string name="user_setup_profile_dialog_message" msgid="4788197052296962620">"Létrehoz most egy profilt?"</string>
@@ -597,6 +597,8 @@
     <string name="guest_reset_and_restart_dialog_message" msgid="2764425635305200790">"A művelettel új vendégmunkamenetet indít, valamint az összes alkalmazást és adatot törli az aktuális munkamenetből"</string>
     <string name="guest_exit_dialog_title" msgid="1846494656849381804">"Kilép a vendég módból?"</string>
     <string name="guest_exit_dialog_message" msgid="1743218864242719783">"A művelettel törlődnek az aktuális vendégmunkamenet alkalmazásai és adatai"</string>
+    <string name="grant_admin" msgid="4273077214151417783">"Adminisztrátori jogosultságok megadása a felhasználónak"</string>
+    <string name="not_grant_admin" msgid="6985027675930546850">"Ne kapjon a felhasználó adminisztrátori jogosultságokat"</string>
     <string name="guest_exit_dialog_button" msgid="1736401897067442044">"Kilépés"</string>
     <string name="guest_exit_dialog_title_non_ephemeral" msgid="7675327443743162986">"Menti a vendégtevékenységeket?"</string>
     <string name="guest_exit_dialog_message_non_ephemeral" msgid="223385323235719442">"Tevékenységeket menthet az aktuális munkamenetből, vagy minden appot és adatot törölhet"</string>

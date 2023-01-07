@@ -60,10 +60,8 @@
     <string name="uninstall_update_text" msgid="863648314632448705">"Pretende substituir esta app pela versão de fábrica? Todos os dados são removidos."</string>
     <string name="uninstall_update_text_multiuser" msgid="8992883151333057227">"Pretende substituir esta app pela versão de fábrica? Todos os dados são removidos. Esta ação afeta todos os utilizadores deste dispositivo, incluindo os que têm perfis de trabalho."</string>
     <string name="uninstall_keep_data" msgid="7002379587465487550">"Manter <xliff:g id="SIZE">%1$s</xliff:g> de dados da app."</string>
-    <!-- no translation found for uninstall_application_text_current_user_clone_profile (835170400160011636) -->
-    <skip />
-    <!-- no translation found for uninstall_application_text_with_clone_instance (6944473334273349036) -->
-    <skip />
+    <string name="uninstall_application_text_current_user_clone_profile" msgid="835170400160011636">"Quer apagar esta app?"</string>
+    <string name="uninstall_application_text_with_clone_instance" msgid="6944473334273349036">"Quer desinstalar esta app? O clone de <xliff:g id="PACKAGE_LABEL">%1$s</xliff:g> também vai ser apagado."</string>
     <string name="uninstalling_notification_channel" msgid="840153394325714653">"Desinstalações em execução"</string>
     <string name="uninstall_failure_notification_channel" msgid="1136405866767576588">"Desinstalações com falha"</string>
     <string name="uninstalling" msgid="8709566347688966845">"A desinstalar…"</string>
@@ -72,8 +70,7 @@
     <string name="uninstall_done_app" msgid="4588850984473605768">"A app <xliff:g id="PACKAGE_LABEL">%1$s</xliff:g> foi desinstalada"</string>
     <string name="uninstall_failed" msgid="1847750968168364332">"Desinstalação sem êxito."</string>
     <string name="uninstall_failed_app" msgid="5506028705017601412">"Falha ao desinstalar a app <xliff:g id="PACKAGE_LABEL">%1$s</xliff:g>."</string>
-    <!-- no translation found for uninstalling_cloned_app (1826380164974984870) -->
-    <skip />
+    <string name="uninstalling_cloned_app" msgid="1826380164974984870">"A apagar o clone de <xliff:g id="PACKAGE_LABEL">%1$s</xliff:g>…"</string>
     <string name="uninstall_failed_device_policy_manager" msgid="785293813665540305">"Não é possível desinstalar a app de administração de dispositivos ativa."</string>
     <string name="uninstall_failed_device_policy_manager_of_user" msgid="4813104025494168064">"Não é possível desinstalar a app de administração de dispositivos ativa para <xliff:g id="USERNAME">%1$s</xliff:g>."</string>
     <string name="uninstall_all_blocked_profile_owner" msgid="2009393666026751501">"Esta app é necessária para alguns utilizadores ou perfis e foi desinstalada para outros."</string>
@@ -94,8 +91,7 @@
     <string name="anonymous_source_warning" product="default" msgid="2784902545920822500">"O seu telemóvel e os dados pessoais estão mais vulneráveis a ataques por parte de aplicações desconhecidas. Ao instalar esta app, concorda que é responsável por quaisquer danos causados ao telemóvel ou pelas perdas de dados que possam resultar da utilização da mesma."</string>
     <string name="anonymous_source_warning" product="tablet" msgid="3939101621438855516">"O seu tablet e os dados pessoais estão mais vulneráveis a ataques por parte de aplicações desconhecidas. Ao instalar esta app, concorda que é responsável por quaisquer danos causados ao tablet ou pelas perdas de dados que possam resultar da utilização da mesma."</string>
     <string name="anonymous_source_warning" product="tv" msgid="5599483539528168566">"A sua TV e os dados pessoais estão mais vulneráveis a ataques por parte de aplicações desconhecidas. Ao instalar esta app, concorda que é responsável por quaisquer danos causados à TV ou pelas perdas de dados que possam resultar da utilização da mesma."</string>
-    <!-- no translation found for cloned_app_label (7503612829833756160) -->
-    <skip />
+    <string name="cloned_app_label" msgid="7503612829833756160">"Clone de <xliff:g id="PACKAGE_LABEL">%1$s</xliff:g>"</string>
     <string name="anonymous_source_continue" msgid="4375745439457209366">"Continuar"</string>
     <string name="external_sources_settings" msgid="4046964413071713807">"Definições"</string>
     <string name="wear_app_channel" msgid="1960809674709107850">"Instalar/desinstalar aplicações Wear"</string>

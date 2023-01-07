@@ -15080,6 +15080,29 @@ package android.graphics {
     ctor @Deprecated public EmbossMaskFilter(float[], float, float, float);
   }
 
+  public class HardwareBufferRenderer implements java.lang.AutoCloseable {
+    ctor public HardwareBufferRenderer(@NonNull android.hardware.HardwareBuffer);
+    method public void close();
+    method public boolean isClosed();
+    method @NonNull public android.graphics.HardwareBufferRenderer.RenderRequest obtainRenderRequest();
+    method public void setContentRoot(@Nullable android.graphics.RenderNode);
+    method public void setLightSourceAlpha(@FloatRange(from=0.0f, to=1.0f) float, @FloatRange(from=0.0f, to=1.0f) float);
+    method public void setLightSourceGeometry(float, float, @FloatRange(from=0.0f) float, @FloatRange(from=0.0f) float);
+  }
+
+  public final class HardwareBufferRenderer.RenderRequest {
+    method public void draw(@NonNull java.util.concurrent.Executor, @NonNull java.util.function.Consumer<android.graphics.HardwareBufferRenderer.RenderResult>);
+    method @NonNull public android.graphics.HardwareBufferRenderer.RenderRequest setBufferTransform(int);
+    method @NonNull public android.graphics.HardwareBufferRenderer.RenderRequest setColorSpace(@Nullable android.graphics.ColorSpace);
+  }
+
+  public static final class HardwareBufferRenderer.RenderResult {
+    method @NonNull public android.hardware.SyncFence getFence();
+    method public int getStatus();
+    field public static final int ERROR_UNKNOWN = 1; // 0x1
+    field public static final int SUCCESS = 0; // 0x0
+  }
+
   public class HardwareRenderer {
     ctor public HardwareRenderer();
     method public void clearContent();
@@ -39811,10 +39834,10 @@ package android.service.credentials {
   }
 
   public final class CallingAppInfo implements android.os.Parcelable {
-    ctor public CallingAppInfo(@NonNull String, @NonNull java.util.Set<android.content.pm.Signature>);
+    ctor public CallingAppInfo(@NonNull String, @NonNull android.content.pm.SigningInfo);
     method public int describeContents();
     method @NonNull public String getPackageName();
-    method @NonNull public java.util.Set<android.content.pm.Signature> getSignatures();
+    method @NonNull public android.content.pm.SigningInfo getSigningInfo();
     method public void writeToParcel(@NonNull android.os.Parcel, int);
     field @NonNull public static final android.os.Parcelable.Creator<android.service.credentials.CallingAppInfo> CREATOR;
   }

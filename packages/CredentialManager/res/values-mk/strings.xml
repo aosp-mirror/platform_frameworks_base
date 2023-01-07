@@ -4,37 +4,38 @@
     <string name="app_name" msgid="4539824758261855508">"Управник на акредитиви"</string>
     <string name="string_cancel" msgid="6369133483981306063">"Откажи"</string>
     <string name="string_continue" msgid="1346732695941131882">"Продолжи"</string>
+    <string name="string_more_options" msgid="7990658711962795124">"Повеќе опции"</string>
     <string name="string_create_in_another_place" msgid="1033635365843437603">"Создајте на друго место"</string>
     <string name="string_save_to_another_place" msgid="7590325934591079193">"Зачувајте на друго место"</string>
     <string name="string_use_another_device" msgid="8754514926121520445">"Употребете друг уред"</string>
     <string name="string_save_to_another_device" msgid="1959562542075194458">"Зачувајте на друг уред"</string>
     <string name="passkey_creation_intro_title" msgid="4251037543787718844">"Побезбедно со криптографски клучеви"</string>
-    <string name="passkey_creation_intro_body_password" msgid="312712407571126228">"Нема потреба да создавате или помните сложени лозинки"</string>
-    <string name="passkey_creation_intro_body_fingerprint" msgid="691816235541508203">"Користете го отпечатокот, ликот или заклучувањето екран за да создадете единствен криптографски клуч."</string>
-    <string name="passkey_creation_intro_body_device" msgid="477121861162321129">"Криптографските клучеви се зачувуваат во управник со лозинки за да може да се најавувате на други уреди"</string>
+    <string name="passkey_creation_intro_body_password" msgid="8825872426579958200">"Со криптографските клучеви нема потреба да создавате или да помните сложени лозинки"</string>
+    <string name="passkey_creation_intro_body_fingerprint" msgid="7331338631826254055">"Криптографските клучеви се шифрирани дигитални клучеви што ги создавате со вашиот отпечаток, лик или заклучување екран"</string>
+    <string name="passkey_creation_intro_body_device" msgid="1203796455762131631">"Се зачувуваат во управник со лозинки за да може да се најавувате на други уреди"</string>
     <string name="choose_provider_title" msgid="7245243990139698508">"Изберете каде да <xliff:g id="CREATETYPES">%1$s</xliff:g>"</string>
     <string name="create_your_passkeys" msgid="8901224153607590596">"создајте криптографски клучеви"</string>
     <string name="save_your_password" msgid="6597736507991704307">"се зачува лозинката"</string>
     <string name="save_your_sign_in_info" msgid="7213978049817076882">"се зачуваат податоците за најавување"</string>
-    <string name="choose_provider_body" msgid="8045759834416308059">"Поставете стандарден управник со лозинки за да ги складира вашите лозинки и криптографски клучеви и најавете се побрзо следниот пат."</string>
-    <string name="choose_create_option_passkey_title" msgid="4146408187146573131">"Да се создаде криптографски клуч во <xliff:g id="PROVIDERINFODISPLAYNAME">%1$s</xliff:g>?"</string>
-    <string name="choose_create_option_password_title" msgid="8812546498357380545">"Да се зачува вашата лозинка во <xliff:g id="PROVIDERINFODISPLAYNAME">%1$s</xliff:g>?"</string>
-    <string name="choose_create_option_sign_in_title" msgid="6318246378475961834">"Да се зачуваат вашите податоци за најавување во <xliff:g id="PROVIDERINFODISPLAYNAME">%1$s</xliff:g>?"</string>
-    <string name="choose_create_option_description" msgid="4419171903963100257">"Вашиот <xliff:g id="APPDOMAINNAME">%1$s</xliff:g> од типот <xliff:g id="TYPE">%2$s</xliff:g> може да го користите на секој уред. Зачуван е на <xliff:g id="PROVIDERINFODISPLAYNAME">%3$s</xliff:g> за <xliff:g id="CREATEINFODISPLAYNAME">%4$s</xliff:g>"</string>
+    <string name="choose_provider_body" msgid="4384188171872005547">"Изберете управник со лозинки за да ги зачувате податоците и да се најавите побрзо следниот пат."</string>
+    <string name="choose_create_option_passkey_title" msgid="5220979185879006862">"Да се создаде криптографски клуч за <xliff:g id="APPNAME">%1$s</xliff:g>?"</string>
+    <string name="choose_create_option_password_title" msgid="7097275038523578687">"Дали да се зачува лозинката за <xliff:g id="APPNAME">%1$s</xliff:g>?"</string>
+    <string name="choose_create_option_sign_in_title" msgid="4124872317613421249">"Да се зачуваат податоците за најавување за <xliff:g id="APPNAME">%1$s</xliff:g>?"</string>
+    <string name="choose_create_option_description" msgid="5531335144879100664">"Може да го користите вашиот <xliff:g id="CREDENTIALTYPES">%2$s</xliff:g> за <xliff:g id="APPDOMAINNAME">%1$s</xliff:g> на секој уред. Зачуван е во <xliff:g id="PROVIDERINFODISPLAYNAME">%3$s</xliff:g> за <xliff:g id="CREATEINFODISPLAYNAME">%4$s</xliff:g>."</string>
     <string name="passkey" msgid="632353688396759522">"криптографски клуч"</string>
     <string name="password" msgid="6738570945182936667">"лозинка"</string>
     <string name="sign_ins" msgid="4710739369149469208">"најавувања"</string>
-    <string name="create_passkey_in_title" msgid="2714306562710897785">"Создајте криптографски клуч во"</string>
-    <string name="save_password_to_title" msgid="3450480045270186421">"Зачувајте ја лозинката во"</string>
-    <string name="save_sign_in_to_title" msgid="8328143607671760232">"Зачувајте го најавувањето во"</string>
+    <string name="sign_in_info" msgid="2627704710674232328">"податоци за најавување"</string>
+    <string name="save_credential_to_title" msgid="3172811692275634301">"Зачувајте <xliff:g id="CREDENTIALTYPES">%1$s</xliff:g> во"</string>
     <string name="create_passkey_in_other_device_title" msgid="6372952459932674632">"Да се создаде криптографски клуч во друг уред?"</string>
     <string name="use_provider_for_all_title" msgid="4201020195058980757">"Да се користи <xliff:g id="PROVIDERINFODISPLAYNAME">%1$s</xliff:g> за сите ваши најавувања?"</string>
     <string name="use_provider_for_all_description" msgid="6560593199974037820">"Овој управник со лозинки ќе ги складира вашите лозинки и криптографски клучеви за да ви помогне лесно да се најавите."</string>
     <string name="set_as_default" msgid="4415328591568654603">"Постави како стандардна опција"</string>
     <string name="use_once" msgid="9027366575315399714">"Употребете еднаш"</string>
-    <string name="more_options_usage_passwords_passkeys" msgid="4794903978126339473">"<xliff:g id="PASSWORDSNUMBER">%1$s</xliff:g> лозинки, <xliff:g id="PASSKEYSNUMBER">%2$s</xliff:g> криптографски клучеви"</string>
+    <string name="more_options_usage_passwords_passkeys" msgid="3470113942332934279">"Лозинки: <xliff:g id="PASSWORDSNUMBER">%1$s</xliff:g> • Криптографски клучеви: <xliff:g id="PASSKEYSNUMBER">%2$s</xliff:g>"</string>
     <string name="more_options_usage_passwords" msgid="1632047277723187813">"<xliff:g id="PASSWORDSNUMBER">%1$s</xliff:g> лозинки"</string>
     <string name="more_options_usage_passkeys" msgid="5390320437243042237">"<xliff:g id="PASSKEYSNUMBER">%1$s</xliff:g> криптографски клучеви"</string>
+    <string name="more_options_usage_credentials" msgid="1785697001787193984">"Акредитиви: <xliff:g id="TOTALCREDENTIALSNUMBER">%1$s</xliff:g>"</string>
     <string name="passkey_before_subtitle" msgid="2448119456208647444">"Криптографски клуч"</string>
     <string name="another_device" msgid="5147276802037801217">"Друг уред"</string>
     <string name="other_password_manager" msgid="565790221427004141">"Други управници со лозинки"</string>
@@ -45,7 +46,7 @@
     <string name="get_dialog_title_use_sign_in_for" msgid="5283099528915572980">"Да се користи вашето зачувано најавување за <xliff:g id="APP_NAME">%1$s</xliff:g>?"</string>
     <string name="get_dialog_title_choose_sign_in_for" msgid="1361715440877613701">"Изберете зачувано најавување за <xliff:g id="APP_NAME">%1$s</xliff:g>"</string>
     <string name="get_dialog_use_saved_passkey_for" msgid="4618100798664888512">"Најавете се на друг начин"</string>
-    <string name="get_dialog_button_label_no_thanks" msgid="8114363019023838533">"Не, фала"</string>
+    <string name="snackbar_action" msgid="37373514216505085">"Прикажи ги опциите"</string>
     <string name="get_dialog_button_label_continue" msgid="6446201694794283870">"Продолжи"</string>
     <string name="get_dialog_title_sign_in_options" msgid="2092876443114893618">"Опции за најавување"</string>
     <string name="get_dialog_heading_for_username" msgid="3456868514554204776">"За <xliff:g id="USERNAME">%1$s</xliff:g>"</string>

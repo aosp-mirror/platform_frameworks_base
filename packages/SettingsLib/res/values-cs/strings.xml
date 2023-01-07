@@ -564,6 +564,8 @@
     <string name="user_add_user_title" msgid="5457079143694924885">"Přidat nového uživatele?"</string>
     <string name="user_add_user_message_long" msgid="1527434966294733380">"Vytvořením dalších uživatelů můžete toto zařízení sdílet s jinými lidmi. Každý uživatel má svůj prostor, který si může přizpůsobit instalací aplikací, přidáním tapety apod. Uživatelé také mohou upravit nastavení zařízení (např. Wi-Fi), která ovlivní všechny uživatele.\n\nKaždý nově přidaný uživatel si musí nastavit vlastní prostor.\n\nKaždý uživatel může aktualizovat aplikace všech ostatních uživatelů."</string>
     <string name="user_add_user_message_short" msgid="3295959985795716166">"Když přidáte nového uživatele, musí si nastavit vlastní prostor.\n\nJakýkoli uživatel může aktualizovat aplikace všech ostatních uživatelů."</string>
+    <string name="user_grant_admin_title" msgid="5565796912475193314">"Udělit tomuto uživateli administrátorská práva?"</string>
+    <string name="user_grant_admin_message" msgid="7925257971286380976">"Jako administrátor bude moci spravovat ostatní uživatele, upravovat nastavení zařízení a resetovat zařízení do továrního nastavení."</string>
     <string name="user_setup_dialog_title" msgid="8037342066381939995">"Nastavit uživatele?"</string>
     <string name="user_setup_dialog_message" msgid="269931619868102841">"Ujistěte se, že je uživatel k dispozici a může si v zařízení nastavit svůj prostor"</string>
     <string name="user_setup_profile_dialog_message" msgid="4788197052296962620">"Nastavit profil?"</string>
@@ -595,6 +597,8 @@
     <string name="guest_reset_and_restart_dialog_message" msgid="2764425635305200790">"Tímto zahájíte novou relaci hosta a smažete všechny aplikace a data z aktuální relace"</string>
     <string name="guest_exit_dialog_title" msgid="1846494656849381804">"Ukončit režim hosta?"</string>
     <string name="guest_exit_dialog_message" msgid="1743218864242719783">"Tímto smažete aplikace a data z aktuální relace hosta"</string>
+    <string name="grant_admin" msgid="4273077214151417783">"Udělit tomuto uživateli administrátorská práva"</string>
+    <string name="not_grant_admin" msgid="6985027675930546850">"Neudělovat uživateli administrátorská práva"</string>
     <string name="guest_exit_dialog_button" msgid="1736401897067442044">"Ukončit"</string>
     <string name="guest_exit_dialog_title_non_ephemeral" msgid="7675327443743162986">"Uložit aktivitu hosta?"</string>
     <string name="guest_exit_dialog_message_non_ephemeral" msgid="223385323235719442">"Aktivitu z aktuální relace můžete uložit, nebo všechny aplikace a data smazat"</string>

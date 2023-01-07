@@ -85,6 +85,7 @@
     <string name="screenshot_share_description" msgid="2861628935812656612">"Делите снимак екрана"</string>
     <string name="screenshot_scroll_label" msgid="2930198809899329367">"Снимите још"</string>
     <string name="screenshot_dismiss_description" msgid="4702341245899508786">"Одбаците снимак екрана"</string>
+    <string name="screenshot_dismiss_work_profile" msgid="3101530842987697045">"Одбаци поруку пословног профила"</string>
     <string name="screenshot_preview_description" msgid="7606510140714080474">"Преглед снимка екрана"</string>
     <string name="screenshot_top_boundary_pct" msgid="2520148599096479332">"Горња ивица <xliff:g id="PERCENT">%1$d</xliff:g> посто"</string>
     <string name="screenshot_bottom_boundary_pct" msgid="3880821519814946478">"Доња ивица <xliff:g id="PERCENT">%1$d</xliff:g> посто"</string>
@@ -317,8 +318,7 @@
     <string name="sensor_privacy_camera_unblocked_dialog_content" msgid="7847190103011782278">"Камера је омогућена за све апликације и услуге."</string>
     <string name="sensor_privacy_camera_blocked_dialog_content" msgid="3182428709314874616">"Приступ камери је онемогућен за све апликације и услуге."</string>
     <string name="sensor_privacy_htt_blocked_dialog_content" msgid="3333321592997666441">"Да бисте користили дугме микрофона, омогућите приступ микрофону у Подешавањима."</string>
-    <!-- no translation found for sensor_privacy_dialog_open_settings (5635865896053011859) -->
-    <skip />
+    <string name="sensor_privacy_dialog_open_settings" msgid="5635865896053011859">"Отвори Подешавања"</string>
     <string name="media_seamless_other_device" msgid="4654849800789196737">"Други уређај"</string>
     <string name="quick_step_accessibility_toggle_overview" msgid="7908949976727578403">"Укључи/искључи преглед"</string>
     <string name="zen_priority_introduction" msgid="3159291973383796646">"Неће вас узнемиравати звукови и вибрације осим за аларме, подсетнике, догађаје и позиваоце које наведете. И даље ћете чути све што одаберете да пустите, укључујући музику, видео снимке и игре."</string>
@@ -743,6 +743,7 @@
     <string name="wifi_is_off" msgid="5389597396308001471">"WiFi је искључен"</string>
     <string name="bt_is_off" msgid="7436344904889461591">"Bluetooth је искључен"</string>
     <string name="dnd_is_off" msgid="3185706903793094463">"Режим Не узнемиравај је искључен"</string>
+    <string name="dnd_is_on" msgid="7009368176361546279">"Режим Не узнемиравај је укључен"</string>
     <string name="qs_dnd_prompt_auto_rule" msgid="3535469468310002616">"Аутоматско правило (<xliff:g id="ID_1">%s</xliff:g>) је укључило режим Не узнемиравај."</string>
     <string name="qs_dnd_prompt_app" msgid="4027984447935396820">"Апликација (<xliff:g id="ID_1">%s</xliff:g>) је укључила режим Не узнемиравај."</string>
     <string name="qs_dnd_prompt_auto_rule_app" msgid="1841469944118486580">"Аутоматско правило или апликација су укључили режим Не узнемиравај."</string>
@@ -814,7 +815,7 @@
     <string name="accessibility_magnification_magnifier_window_settings" msgid="2834685072221468434">"Подешавања прозора за увећање"</string>
     <string name="accessibility_floating_button_migration_tooltip" msgid="5217151214439341902">"Додирните за функције приступачности. Прилагодите или замените ово дугме у Подешавањима.\n\n"<annotation id="link">"Подешавања"</annotation></string>
     <string name="accessibility_floating_button_docking_tooltip" msgid="6814897496767461517">"Померите дугме до ивице да бисте га привремено сакрили"</string>
-    <string name="accessibility_floating_button_undo" msgid="511112888715708241">"Опозовите"</string>
+    <string name="accessibility_floating_button_undo" msgid="511112888715708241">"Опозови"</string>
     <string name="accessibility_floating_button_undo_message_text" msgid="3044079592757099698">"{count,plural, =1{{label} пречица је уклоњена}one{# пречица је уклоњена}few{# пречице су уклоњене}other{# пречица је уклоњено}}"</string>
     <string name="accessibility_floating_button_action_move_top_left" msgid="6253520703618545705">"Премести горе лево"</string>
     <string name="accessibility_floating_button_action_move_top_right" msgid="6106225581993479711">"Премести горе десно"</string>
@@ -822,7 +823,7 @@
     <string name="accessibility_floating_button_action_move_bottom_right" msgid="6196904373227440500">"Премести доле десно"</string>
     <string name="accessibility_floating_button_action_move_to_edge_and_hide_to_half" msgid="662401168245782658">"Премести до ивице и сакриј"</string>
     <string name="accessibility_floating_button_action_move_out_edge_and_show" msgid="8354760891651663326">"Премести изван ивице и прикажи"</string>
-    <string name="accessibility_floating_button_action_remove_menu" msgid="6730432848162552135">"Уклоните"</string>
+    <string name="accessibility_floating_button_action_remove_menu" msgid="6730432848162552135">"Уклони"</string>
     <string name="accessibility_floating_button_action_double_tap_to_toggle" msgid="7976492639670692037">"укључите/искључите"</string>
     <string name="quick_controls_title" msgid="6839108006171302273">"Контроле уређаја"</string>
     <string name="controls_providers_title" msgid="6879775889857085056">"Одаберите апликацију за додавање контрола"</string>
@@ -905,6 +906,7 @@
     <string name="media_output_dialog_accessibility_title" msgid="4681741064190167888">"Доступни уређаји за аудио излаз."</string>
     <string name="media_output_dialog_accessibility_seekbar" msgid="5332843993805568978">"Звук"</string>
     <string name="media_output_dialog_volume_percentage" msgid="1613984910585111798">"<xliff:g id="PERCENTAGE">%1$d</xliff:g>%%"</string>
+    <string name="media_output_group_title_speakers_and_displays" msgid="7169712332365659820">"Звучници и екрани"</string>
     <string name="media_output_first_broadcast_title" msgid="6292237789860753022">"Како функционише емитовање"</string>
     <string name="media_output_broadcast" msgid="3555580945878071543">"Емитовање"</string>
     <string name="media_output_first_notify_broadcast_message" msgid="6353857724136398494">"Људи у близини са компатибилним Bluetooth уређајима могу да слушају медијски садржај који емитујете"</string>
@@ -1032,20 +1034,19 @@
     <string name="log_access_confirmation_deny" msgid="2389461495803585795">"Не дозволи"</string>
     <string name="log_access_confirmation_body" msgid="6883031912003112634">"Евиденције уређаја региструју шта се дешава на уређају. Апликације могу да користе те евиденције да би пронашле и решиле проблеме.\n\nНеке евиденције могу да садрже осетљиве информације, па приступ свим евиденцијама уређаја треба да дозвољавате само апликацијама у које имате поверења. \n\nАко не дозволите овој апликацији да приступа свим евиденцијама уређаја, она и даље може да приступа сопственим евиденцијама. Произвођач уређаја ће можда и даље моћи да приступа неким евиденцијама или информацијама на уређају."</string>
     <string name="keyguard_affordance_enablement_dialog_action_template" msgid="8164857863036314664">"Отворите: <xliff:g id="APPNAME">%1$s</xliff:g>"</string>
-    <string name="keyguard_affordance_enablement_dialog_message" msgid="2790910660524887941">"Да бисте додали апликацију <xliff:g id="APPNAME">%1$s</xliff:g> као пречицу, уверите се:"</string>
     <string name="keyguard_affordance_enablement_dialog_wallet_instruction_1" msgid="8439655049139819278">"• да је апликација подешена"</string>
     <string name="keyguard_affordance_enablement_dialog_wallet_instruction_2" msgid="4321089250629477835">"• да је у Новчаник додата барем једна картица"</string>
     <string name="keyguard_affordance_enablement_dialog_qr_scanner_instruction" msgid="5355839079232119791">"• да сте инсталирали апликацију за камеру"</string>
     <string name="keyguard_affordance_enablement_dialog_home_instruction_1" msgid="8438311171750568633">"• да је апликација подешена"</string>
     <string name="keyguard_affordance_enablement_dialog_home_instruction_2" msgid="8308525385889021652">"• да је доступан барем један уређај"</string>
+    <string name="keyguard_affordance_press_too_short" msgid="8145437175134998864">"Додирните и задржите пречицу"</string>
     <string name="rear_display_bottom_sheet_cancel" msgid="3461468855493357248">"Откажи"</string>
     <string name="rear_display_bottom_sheet_confirm" msgid="4383356544661421206">"Обрните"</string>
     <string name="rear_display_fold_bottom_sheet_title" msgid="6081542277622721548">"Отворите телефон за бољи селфи"</string>
     <string name="rear_display_unfold_bottom_sheet_title" msgid="2137403802960396357">"Желите да обрнете на предњи екран за бољи селфи?"</string>
     <string name="rear_display_bottom_sheet_description" msgid="1852662982816810352">"Користите задњу камеру да бисте снимили ширу слику са вишом резолуцијом."</string>
     <string name="rear_display_bottom_sheet_warning" msgid="800995919558238930"><b>"✱ Овај екран ће се искључити"</b></string>
-    <!-- no translation found for rear_display_accessibility_folded_animation (1538121649587978179) -->
-    <skip />
-    <!-- no translation found for rear_display_accessibility_unfolded_animation (1946153682258289040) -->
-    <skip />
+    <string name="rear_display_accessibility_folded_animation" msgid="1538121649587978179">"Уређај на преклоп се отвара"</string>
+    <string name="rear_display_accessibility_unfolded_animation" msgid="1946153682258289040">"Уређај на преклоп се обрће"</string>
+    <string name="stylus_battery_low" msgid="7134370101603167096">"Низак ниво батерије писаљке"</string>
 </resources>

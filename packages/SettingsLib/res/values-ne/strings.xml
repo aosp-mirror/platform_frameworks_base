@@ -85,7 +85,7 @@
     <string name="bluetooth_disconnected" msgid="7739366554710388701">"विच्छेदन गरियो"</string>
     <string name="bluetooth_disconnecting" msgid="7638892134401574338">"जडान हटाइँदै ..."</string>
     <string name="bluetooth_connecting" msgid="5871702668260192755">"जडान हुँदै..."</string>
-    <string name="bluetooth_connected" msgid="8065345572198502293">"<xliff:g id="ACTIVE_DEVICE">%1$s</xliff:g> सँग जडान गरियो"</string>
+    <string name="bluetooth_connected" msgid="8065345572198502293">"<xliff:g id="ACTIVE_DEVICE">%1$s</xliff:g> सँग कनेक्ट भएको छ"</string>
     <string name="bluetooth_pairing" msgid="4269046942588193600">"कनेक्ट गरिँदै छ..."</string>
     <string name="bluetooth_connected_no_headset" msgid="2224101138659967604">"जडान गरियो (फोनबाहेेक) <xliff:g id="ACTIVE_DEVICE">%1$s</xliff:g>"</string>
     <string name="bluetooth_connected_no_a2dp" msgid="8566874395813947092">"जडान गरियो (मिडियाबाहेक) <xliff:g id="ACTIVE_DEVICE">%1$s</xliff:g>"</string>
@@ -172,7 +172,7 @@
     <string name="unknown" msgid="3544487229740637809">"अज्ञात"</string>
     <string name="running_process_item_user_label" msgid="3988506293099805796">"प्रयोगकर्ता: <xliff:g id="USER_NAME">%1$s</xliff:g>"</string>
     <string name="launch_defaults_some" msgid="3631650616557252926">"केही पूर्वनिर्धारितहरू सेट गरिएका छन्"</string>
-    <string name="launch_defaults_none" msgid="8049374306261262709">"कुनै डिफल्ट सेट गरिएको छैन"</string>
+    <string name="launch_defaults_none" msgid="8049374306261262709">"कुनै डिफल्ट मान सेट गरिएको छैन"</string>
     <string name="tts_settings" msgid="8130616705989351312">"पाठ-वाचन सेटिङहरू"</string>
     <string name="tts_settings_title" msgid="7602210956640483039">"टेक्स्ट टु स्पिच आउटपुट"</string>
     <string name="tts_default_rate_title" msgid="3964187817364304022">"बोलीको गति"</string>
@@ -564,6 +564,8 @@
     <string name="user_add_user_title" msgid="5457079143694924885">"नयाँ प्रयोगकर्ता थप्ने हो?"</string>
     <string name="user_add_user_message_long" msgid="1527434966294733380">"तपाईं थप प्रयोगकर्ताहरू सिर्जना गरेर ती प्रयोगकर्तालाई यो डिभाइस प्रयोग गर्न दिन सक्नुहुन्छ। हरेक प्रयोगकर्ताको आफ्नै ठाउँ हुन्छ। उनीहरू यो ठाउँमा आफ्नै एप, वालपेपर आदिका लागि प्रयोग गर्न सक्छन्। उनीहरू सबैजनालाई असर पार्ने Wi-Fi जस्ता डिभाइसका सेटिङहरू पनि परिवर्तन गर्न सक्छन्।\n\nतपाईंले नयाँ प्रयोगकर्ता थप्दा उक्त व्यक्तिले आफ्नो ठाउँ सेटअप गर्नु पर्ने हुन्छ।\n\nसबै प्रयोगकर्ता अन्य सबै प्रयोगकर्ताले प्रयोग गर्ने एपहरू अद्यावधिक गर्न सक्छन्। तर पहुँचसम्बन्धी सेटिङ तथा सेवाहरू नयाँ प्रयोगकर्तामा नसर्न सक्छ।"</string>
     <string name="user_add_user_message_short" msgid="3295959985795716166">"तपाईंले नयाँ प्रयोगकर्ता थप्नुभयो भने ती प्रयोगकर्ताले आफ्नो स्पेस सेट गर्नु पर्ने हुन्छ।\n\nसबै प्रयोगकर्ताले अरू प्रयोगकर्ताका एपहरू अपडेट गर्न सक्छन्।"</string>
+    <string name="user_grant_admin_title" msgid="5565796912475193314">"यी प्रयोगकर्तालाई एड्मिनले पाउने विशेषाधिकार दिने हो?"</string>
+    <string name="user_grant_admin_message" msgid="7925257971286380976">"उहाँ एड्मिनका हैसियतले अन्य प्रयोगकर्ताहरू व्यवस्थापन गर्न, डिभाइसका सेटिङ बदल्न र डिभाइस फ्याक्ट्री रिसेट गर्न सक्नु हुने छ।"</string>
     <string name="user_setup_dialog_title" msgid="8037342066381939995">"अहिले प्रयोगकर्ता सेटअप गर्ने हो?"</string>
     <string name="user_setup_dialog_message" msgid="269931619868102841">"यी व्यक्ति यन्त्र यो डिभाइस चलाउन र आफ्नो ठाउँ सेट गर्न उपलब्ध छन् भन्ने कुरा सुनिश्चित गर्नुहोस्"</string>
     <string name="user_setup_profile_dialog_message" msgid="4788197052296962620">"अहिले प्रोफाइल सेटअप गर्ने हो?"</string>
@@ -595,6 +597,8 @@
     <string name="guest_reset_and_restart_dialog_message" msgid="2764425635305200790">"यसो गर्नाले नयाँ अतिथि सत्र सुरु हुने छ र हालको अतिथि सत्रका सबै एप तथा डेटा मेटिने छ"</string>
     <string name="guest_exit_dialog_title" msgid="1846494656849381804">"अतिथि मोडबाट बाहिरिने हो?"</string>
     <string name="guest_exit_dialog_message" msgid="1743218864242719783">"यसो गर्नाले हालको अतिथि सत्रका एप तथा डेटा मेटिने छ"</string>
+    <string name="grant_admin" msgid="4273077214151417783">"यी प्रयोगकर्तालाई एड्मिनले पाउने विशेषाधिकार दिनुहोस्"</string>
+    <string name="not_grant_admin" msgid="6985027675930546850">"यी प्रयोगकर्तालाई एड्मिनले पाउने विशेषाधिकार नदिनुहोस्"</string>
     <string name="guest_exit_dialog_button" msgid="1736401897067442044">"बाहिरिनुहोस्"</string>
     <string name="guest_exit_dialog_title_non_ephemeral" msgid="7675327443743162986">"अतिथि सत्रमा गरिएका क्रियाकलाप सेभ गर्ने हो?"</string>
     <string name="guest_exit_dialog_message_non_ephemeral" msgid="223385323235719442">"तपाईं हालको सत्रमा गरिएका क्रियाकलाप सेभ गर्न वा सबै एप तथा डेटा मेटाउन सक्नुहुन्छ"</string>

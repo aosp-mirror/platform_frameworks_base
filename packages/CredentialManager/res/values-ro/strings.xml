@@ -4,37 +4,38 @@
     <string name="app_name" msgid="4539824758261855508">"Manager de date de conectare"</string>
     <string name="string_cancel" msgid="6369133483981306063">"Anulează"</string>
     <string name="string_continue" msgid="1346732695941131882">"Continuă"</string>
+    <string name="string_more_options" msgid="7990658711962795124">"Mai multe opțiuni"</string>
     <string name="string_create_in_another_place" msgid="1033635365843437603">"Creează în alt loc"</string>
     <string name="string_save_to_another_place" msgid="7590325934591079193">"Salvează în alt loc"</string>
     <string name="string_use_another_device" msgid="8754514926121520445">"Folosește alt dispozitiv"</string>
     <string name="string_save_to_another_device" msgid="1959562542075194458">"Salvează pe alt dispozitiv"</string>
     <string name="passkey_creation_intro_title" msgid="4251037543787718844">"Mai în siguranță cu chei de acces"</string>
-    <string name="passkey_creation_intro_body_password" msgid="312712407571126228">"Nu este nevoie să creezi sau să reții parole complexe"</string>
-    <string name="passkey_creation_intro_body_fingerprint" msgid="691816235541508203">"Folosește-ți amprenta, fața sau blocarea ecranului pentru a crea o cheie de acces unică"</string>
-    <string name="passkey_creation_intro_body_device" msgid="477121861162321129">"Cheile de acces sunt salvate într-un manager de parole, ca să te poți conecta pe alte dispozitive"</string>
+    <string name="passkey_creation_intro_body_password" msgid="8825872426579958200">"Dacă folosești chei de acces, nu este nevoie să creezi sau să reții parole complexe"</string>
+    <string name="passkey_creation_intro_body_fingerprint" msgid="7331338631826254055">"Cheile de acces sunt chei digitale criptate pe care le creezi folosindu-ți amprenta, fața sau blocarea ecranului"</string>
+    <string name="passkey_creation_intro_body_device" msgid="1203796455762131631">"Acestea sunt salvate într-un manager de parole, ca să te poți conecta pe alte dispozitive"</string>
     <string name="choose_provider_title" msgid="7245243990139698508">"Alege unde <xliff:g id="CREATETYPES">%1$s</xliff:g>"</string>
     <string name="create_your_passkeys" msgid="8901224153607590596">"creează cheile de acces"</string>
     <string name="save_your_password" msgid="6597736507991704307">"salvează parola"</string>
     <string name="save_your_sign_in_info" msgid="7213978049817076882">"salvează informațiile de conectare"</string>
-    <string name="choose_provider_body" msgid="8045759834416308059">"Setează un manager de parole implicit pentru a salva parolele și cheile de acces și a te conecta mai rapid data viitoare."</string>
-    <string name="choose_create_option_passkey_title" msgid="4146408187146573131">"Creezi o cheie de acces în <xliff:g id="PROVIDERINFODISPLAYNAME">%1$s</xliff:g>?"</string>
-    <string name="choose_create_option_password_title" msgid="8812546498357380545">"Salvezi parola în <xliff:g id="PROVIDERINFODISPLAYNAME">%1$s</xliff:g>?"</string>
-    <string name="choose_create_option_sign_in_title" msgid="6318246378475961834">"Salvezi informațiile de conectare în <xliff:g id="PROVIDERINFODISPLAYNAME">%1$s</xliff:g>?"</string>
-    <string name="choose_create_option_description" msgid="4419171903963100257">"Poți folosi <xliff:g id="TYPE">%2$s</xliff:g> <xliff:g id="APPDOMAINNAME">%1$s</xliff:g> pe orice dispozitiv. Se salvează în <xliff:g id="PROVIDERINFODISPLAYNAME">%3$s</xliff:g> pentru <xliff:g id="CREATEINFODISPLAYNAME">%4$s</xliff:g>"</string>
+    <string name="choose_provider_body" msgid="4384188171872005547">"Selectează un manager de parole pentru a salva informațiile și a te conecta mai rapid data viitoare."</string>
+    <string name="choose_create_option_passkey_title" msgid="5220979185879006862">"Creezi o cheie de acces pentru <xliff:g id="APPNAME">%1$s</xliff:g>?"</string>
+    <string name="choose_create_option_password_title" msgid="7097275038523578687">"Salvezi parola pentru <xliff:g id="APPNAME">%1$s</xliff:g>?"</string>
+    <string name="choose_create_option_sign_in_title" msgid="4124872317613421249">"Salvezi informațiile de conectare pentru <xliff:g id="APPNAME">%1$s</xliff:g>?"</string>
+    <string name="choose_create_option_description" msgid="5531335144879100664">"Poți folosi <xliff:g id="CREDENTIALTYPES">%2$s</xliff:g> <xliff:g id="APPDOMAINNAME">%1$s</xliff:g> pe orice dispozitiv. Se salvează în <xliff:g id="PROVIDERINFODISPLAYNAME">%3$s</xliff:g> pentru <xliff:g id="CREATEINFODISPLAYNAME">%4$s</xliff:g>."</string>
     <string name="passkey" msgid="632353688396759522">"cheie de acces"</string>
     <string name="password" msgid="6738570945182936667">"parolă"</string>
     <string name="sign_ins" msgid="4710739369149469208">"date de conectare"</string>
-    <string name="create_passkey_in_title" msgid="2714306562710897785">"Creează o cheie de acces în"</string>
-    <string name="save_password_to_title" msgid="3450480045270186421">"Salvează parola în"</string>
-    <string name="save_sign_in_to_title" msgid="8328143607671760232">"Salvează datele de conectare în"</string>
+    <string name="sign_in_info" msgid="2627704710674232328">"informațiile de conectare"</string>
+    <string name="save_credential_to_title" msgid="3172811692275634301">"Salvează <xliff:g id="CREDENTIALTYPES">%1$s</xliff:g> în"</string>
     <string name="create_passkey_in_other_device_title" msgid="6372952459932674632">"Creezi o cheie de acces în alt dispozitiv?"</string>
     <string name="use_provider_for_all_title" msgid="4201020195058980757">"Folosești <xliff:g id="PROVIDERINFODISPLAYNAME">%1$s</xliff:g> pentru toate conectările?"</string>
     <string name="use_provider_for_all_description" msgid="6560593199974037820">"Managerul de parole îți va stoca parolele și cheile de acces, pentru a te ajuta să te conectezi cu ușurință."</string>
     <string name="set_as_default" msgid="4415328591568654603">"Setează ca prestabilite"</string>
     <string name="use_once" msgid="9027366575315399714">"Folosește o dată"</string>
-    <string name="more_options_usage_passwords_passkeys" msgid="4794903978126339473">"<xliff:g id="PASSWORDSNUMBER">%1$s</xliff:g> parole, <xliff:g id="PASSKEYSNUMBER">%2$s</xliff:g> chei de acces"</string>
+    <string name="more_options_usage_passwords_passkeys" msgid="3470113942332934279">"<xliff:g id="PASSWORDSNUMBER">%1$s</xliff:g> parole • <xliff:g id="PASSKEYSNUMBER">%2$s</xliff:g> chei de acces"</string>
     <string name="more_options_usage_passwords" msgid="1632047277723187813">"<xliff:g id="PASSWORDSNUMBER">%1$s</xliff:g> parole"</string>
     <string name="more_options_usage_passkeys" msgid="5390320437243042237">"<xliff:g id="PASSKEYSNUMBER">%1$s</xliff:g> chei de acces"</string>
+    <string name="more_options_usage_credentials" msgid="1785697001787193984">"<xliff:g id="TOTALCREDENTIALSNUMBER">%1$s</xliff:g> date de conectare"</string>
     <string name="passkey_before_subtitle" msgid="2448119456208647444">"Cheie de acces"</string>
     <string name="another_device" msgid="5147276802037801217">"Alt dispozitiv"</string>
     <string name="other_password_manager" msgid="565790221427004141">"Alți manageri de parole"</string>
@@ -45,7 +46,7 @@
     <string name="get_dialog_title_use_sign_in_for" msgid="5283099528915572980">"Folosești datele de conectare salvate pentru <xliff:g id="APP_NAME">%1$s</xliff:g>?"</string>
     <string name="get_dialog_title_choose_sign_in_for" msgid="1361715440877613701">"Alege o conectare salvată pentru <xliff:g id="APP_NAME">%1$s</xliff:g>"</string>
     <string name="get_dialog_use_saved_passkey_for" msgid="4618100798664888512">"Conectează-te altfel"</string>
-    <string name="get_dialog_button_label_no_thanks" msgid="8114363019023838533">"Nu, mulțumesc"</string>
+    <string name="snackbar_action" msgid="37373514216505085">"Afișează opțiunile"</string>
     <string name="get_dialog_button_label_continue" msgid="6446201694794283870">"Continuă"</string>
     <string name="get_dialog_title_sign_in_options" msgid="2092876443114893618">"Opțiuni de conectare"</string>
     <string name="get_dialog_heading_for_username" msgid="3456868514554204776">"Pentru <xliff:g id="USERNAME">%1$s</xliff:g>"</string>

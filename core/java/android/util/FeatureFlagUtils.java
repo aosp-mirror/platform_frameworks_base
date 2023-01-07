@@ -141,6 +141,13 @@ public class FeatureFlagUtils {
     public static final String SETTINGS_ACCESSIBILITY_HEARING_AID_PAGE =
             "settings_accessibility_hearing_aid_page";
 
+    /**
+     * Flag to enable/disable preferring the AccessibilityMenu service in the system.
+     * @hide
+     */
+    public static final String SETTINGS_PREFER_ACCESSIBILITY_MENU_IN_SYSTEM =
+            "settings_prefer_accessibility_menu_in_system";
+
     /** Flag to enable/disable audio routing change
      *  @hide
      */
@@ -188,6 +195,7 @@ public class FeatureFlagUtils {
         DEFAULT_FLAGS.put(SETTINGS_SHOW_STYLUS_PREFERENCES, "false");
         DEFAULT_FLAGS.put(SETTINGS_BIOMETRICS2_ENROLLMENT, "false");
         DEFAULT_FLAGS.put(SETTINGS_ACCESSIBILITY_HEARING_AID_PAGE, "false");
+        DEFAULT_FLAGS.put(SETTINGS_PREFER_ACCESSIBILITY_MENU_IN_SYSTEM, "false");
         DEFAULT_FLAGS.put(SETTINGS_AUDIO_ROUTING, "false");
         DEFAULT_FLAGS.put(SETTINGS_FLASH_ALERTS, "false");
     }
@@ -207,6 +215,7 @@ public class FeatureFlagUtils {
         PERSISTENT_FLAGS.add(SETTINGS_NEW_KEYBOARD_TRACKPAD);
         PERSISTENT_FLAGS.add(SETTINGS_NEW_KEYBOARD_TRACKPAD_GESTURE);
         PERSISTENT_FLAGS.add(SETTINGS_ENABLE_SPA);
+        PERSISTENT_FLAGS.add(SETTINGS_PREFER_ACCESSIBILITY_MENU_IN_SYSTEM);
     }
 
     /**

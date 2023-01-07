@@ -14664,7 +14664,7 @@ package android.telephony.euicc {
     field public static final int RESULT_EUICC_NOT_FOUND = -2; // 0xfffffffe
     field public static final int RESULT_OK = 0; // 0x0
     field public static final int RESULT_PROFILE_DOES_NOT_EXIST = -4; // 0xfffffffc
-    field @Deprecated public static final int RESULT_PROFILE_NOT_FOUND = 1; // 0x1
+    field public static final int RESULT_PROFILE_NOT_FOUND = 1; // 0x1
     field public static final int RESULT_UNKNOWN_ERROR = -1; // 0xffffffff
   }
 

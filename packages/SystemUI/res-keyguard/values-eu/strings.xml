@@ -30,25 +30,17 @@
     <string name="keyguard_plugged_in" msgid="8169926454348380863">"<xliff:g id="PERCENTAGE">%s</xliff:g> • Kargatzen"</string>
     <string name="keyguard_plugged_in_charging_fast" msgid="4386594091107340426">"<xliff:g id="PERCENTAGE">%s</xliff:g> • Bizkor kargatzen"</string>
     <string name="keyguard_plugged_in_charging_slowly" msgid="217655355424210">"<xliff:g id="PERCENTAGE">%s</xliff:g> • Mantso kargatzen"</string>
-    <string name="keyguard_plugged_in_charging_limited" msgid="1657547879230699837">"<xliff:g id="PERCENTAGE">%s</xliff:g> • Bateria babesteko pausatu da kargatze-prozesua"</string>
+    <string name="keyguard_plugged_in_charging_limited" msgid="1053130519456324630">"<xliff:g id="PERCENTAGE">%s</xliff:g> • Kargatzea optimizatu da bateria ez kaltetzeko"</string>
     <string name="keyguard_instructions_when_pattern_disabled" msgid="8448804180089936954">"Desblokeatzeko, sakatu Menua."</string>
     <string name="keyguard_network_locked_message" msgid="407096292844868608">"Sarea blokeatuta dago"</string>
-    <!-- no translation found for keyguard_missing_sim_message_short (685029586173458728) -->
-    <skip />
-    <!-- no translation found for keyguard_missing_sim_instructions (7735360104844653246) -->
-    <skip />
-    <!-- no translation found for keyguard_missing_sim_instructions_long (3451467338947610268) -->
-    <skip />
-    <!-- no translation found for keyguard_permanent_disabled_sim_message_short (3955052454216046100) -->
-    <skip />
-    <!-- no translation found for keyguard_permanent_disabled_sim_instructions (5034635040020685428) -->
-    <skip />
-    <!-- no translation found for keyguard_sim_locked_message (7095293254587575270) -->
-    <skip />
-    <!-- no translation found for keyguard_sim_puk_locked_message (2503428315518592542) -->
-    <skip />
-    <!-- no translation found for keyguard_sim_unlock_progress_dialog_message (8489092646014631659) -->
-    <skip />
+    <string name="keyguard_missing_sim_message_short" msgid="685029586173458728">"Ez dago SIMik"</string>
+    <string name="keyguard_missing_sim_instructions" msgid="7735360104844653246">"Gehitu SIM bat."</string>
+    <string name="keyguard_missing_sim_instructions_long" msgid="3451467338947610268">"SIMa falta da, edo ezin da irakurri. Gehitu SIM bat."</string>
+    <string name="keyguard_permanent_disabled_sim_message_short" msgid="3955052454216046100">"Ezin da erabili SIMa."</string>
+    <string name="keyguard_permanent_disabled_sim_instructions" msgid="5034635040020685428">"Betiko desaktibatu da SIMa.\n Jarri harremanetan operadorearekin beste SIM bat eskuratzeko."</string>
+    <string name="keyguard_sim_locked_message" msgid="7095293254587575270">"SIMa blokeatuta dago."</string>
+    <string name="keyguard_sim_puk_locked_message" msgid="2503428315518592542">"SIMa PUKaren bidez desblokeatu behar da."</string>
+    <string name="keyguard_sim_unlock_progress_dialog_message" msgid="8489092646014631659">"SIMa desblokeatzen…"</string>
     <string name="keyguard_accessibility_pin_area" msgid="7403009340414014734">"PIN kodearen eremua"</string>
     <string name="keyguard_accessibility_password" msgid="3524161948484801450">"Gailuaren pasahitza"</string>
     <string name="keyguard_accessibility_sim_pin_area" msgid="6272116591533888062">"SIM txartelaren PIN kodearen eremua"</string>
@@ -69,8 +61,7 @@
     <string name="kg_puk_enter_puk_hint_multi" msgid="4876780689904862943">"Desgaitu egin da \"<xliff:g id="CARRIER">%1$s</xliff:g>\" operadorearen SIM txartela. Aurrera egiteko, idatzi PUK kodea. Xehetasunak jakiteko, jarri operadorearekin harremanetan."</string>
     <string name="kg_puk_enter_pin_hint" msgid="6028432138916150399">"Idatzi erabili nahi duzun PIN kodea"</string>
     <string name="kg_enter_confirm_pin_hint" msgid="4261064020391799132">"Berretsi erabili nahi duzun PIN kodea"</string>
-    <!-- no translation found for kg_sim_unlock_progress_dialog_message (1123048780346295748) -->
-    <skip />
+    <string name="kg_sim_unlock_progress_dialog_message" msgid="1123048780346295748">"SIMa desblokeatzen…"</string>
     <string name="kg_invalid_sim_pin_hint" msgid="2762202646949552978">"Idatzi 4 eta 8 zenbaki bitarteko PIN bat."</string>
     <string name="kg_invalid_sim_puk_hint" msgid="5319756880543857694">"PUK kodeak 8 zenbaki izan behar ditu gutxienez."</string>
     <string name="kg_too_many_failed_pin_attempts_dialog_message" msgid="544687656831558971">"<xliff:g id="NUMBER_0">%1$d</xliff:g> aldiz idatzi duzu PINa, baina huts egin duzu denetan. \n\nSaiatu berriro <xliff:g id="NUMBER_1">%2$d</xliff:g> segundo barru."</string>

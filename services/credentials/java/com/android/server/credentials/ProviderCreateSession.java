@@ -22,7 +22,6 @@ import android.annotation.UserIdInt;
 import android.app.PendingIntent;
 import android.content.Context;
 import android.content.Intent;
-import android.content.pm.Signature;
 import android.credentials.CreateCredentialException;
 import android.credentials.ui.CreateCredentialProviderData;
 import android.credentials.ui.Entry;
@@ -34,7 +33,6 @@ import android.service.credentials.CreateCredentialRequest;
 import android.service.credentials.CreateEntry;
 import android.service.credentials.CredentialProviderInfo;
 import android.service.credentials.CredentialProviderService;
-import android.util.ArraySet;
 import android.util.Log;
 import android.util.Slog;
 
@@ -71,8 +69,7 @@ public final class ProviderCreateSession extends ProviderSession<
         CreateCredentialRequest providerCreateRequest =
                 createProviderRequest(providerInfo.getCapabilities(),
                         createRequestSession.mClientRequest,
-                        new CallingAppInfo(createRequestSession.mClientCallingPackage,
-                                new ArraySet<Signature>()));
+                        createRequestSession.mClientAppInfo);
         if (providerCreateRequest != null) {
             BeginCreateCredentialRequest providerBeginCreateRequest =
                     new BeginCreateCredentialRequest(
@@ -232,7 +229,6 @@ public final class ProviderCreateSession extends ProviderSession<
         return new CreateCredentialProviderData.Builder(
                 mComponentName.flattenToString())
                 .setSaveEntries(saveEntries)
-                .setIsDefaultProvider(isDefaultProvider)
                 .build();
     }
 

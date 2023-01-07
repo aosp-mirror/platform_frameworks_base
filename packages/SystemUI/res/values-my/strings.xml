@@ -85,6 +85,7 @@
     <string name="screenshot_share_description" msgid="2861628935812656612">"ဖန်သားပြင်ဓာတ်ပုံကို မျှဝေနိုင်သည်"</string>
     <string name="screenshot_scroll_label" msgid="2930198809899329367">"နောက်ထပ် ရိုက်ကူးရန်"</string>
     <string name="screenshot_dismiss_description" msgid="4702341245899508786">"ဖန်သားပြင်ဓာတ်ပုံကို ပယ်သည်"</string>
+    <string name="screenshot_dismiss_work_profile" msgid="3101530842987697045">"အလုပ်ပရိုဖိုင်မက်ဆေ့ဂျ်ကို ပယ်ရန်"</string>
     <string name="screenshot_preview_description" msgid="7606510140714080474">"ဖန်သားပြင်ဓာတ်ပုံ အစမ်းကြည့်ရှုခြင်း"</string>
     <string name="screenshot_top_boundary_pct" msgid="2520148599096479332">"ထိပ်ပိုင်းအနားသတ် <xliff:g id="PERCENT">%1$d</xliff:g> ရာခိုင်နှုန်း"</string>
     <string name="screenshot_bottom_boundary_pct" msgid="3880821519814946478">"အောက်ခြေအနားသတ် <xliff:g id="PERCENT">%1$d</xliff:g> ရာခိုင်နှုန်း"</string>
@@ -317,8 +318,7 @@
     <string name="sensor_privacy_camera_unblocked_dialog_content" msgid="7847190103011782278">"အက်ပ်နှင့် ဝန်ဆောင်မှုအားလုံးအတွက် ကင်မရာကို ဖွင့်ထားသည်။"</string>
     <string name="sensor_privacy_camera_blocked_dialog_content" msgid="3182428709314874616">"အက်ပ်နှင့် ဝန်ဆောင်မှုအားလုံးအတွက် ကင်မရာသုံးခွင့်ကို ပိတ်ထားသည်။"</string>
     <string name="sensor_privacy_htt_blocked_dialog_content" msgid="3333321592997666441">"မိုက်ခရိုဖုန်းခလုတ် အသုံးပြုရန် ဆက်တင်များတွင် မိုက်ခရိုဖုန်းသုံးခွင့်ကို ဖွင့်ပါ။"</string>
-    <!-- no translation found for sensor_privacy_dialog_open_settings (5635865896053011859) -->
-    <skip />
+    <string name="sensor_privacy_dialog_open_settings" msgid="5635865896053011859">"ဆက်တင်များဖွင့်ရန်"</string>
     <string name="media_seamless_other_device" msgid="4654849800789196737">"အခြားစက်ပစ္စည်း"</string>
     <string name="quick_step_accessibility_toggle_overview" msgid="7908949976727578403">"ဖွင့်၊ ပိတ် အနှစ်ချုပ်"</string>
     <string name="zen_priority_introduction" msgid="3159291973383796646">"နှိုးစက်သံ၊ သတိပေးချက်အသံများ၊ ပွဲစဉ်သတိပေးသံများနှင့် သင်ခွင့်ပြုထားသူများထံမှ ဖုန်းခေါ်မှုများမှလွဲ၍ အခြားအသံများနှင့် တုန်ခါမှုများက သင့်ကို အနှောင့်အယှက်ပြုမည် မဟုတ်ပါ။ သို့သော်လည်း သီချင်း၊ ဗီဒီယိုနှင့် ဂိမ်းများအပါအဝင် သင်ကရွေးချယ်ဖွင့်ထားသည့် အရာတိုင်း၏ အသံကိုမူ ကြားနေရဆဲဖြစ်ပါလိမ့်မည်။"</string>
@@ -405,10 +405,8 @@
     <string name="dnd_suppressing_shade_text" msgid="5588252250634464042">"အကြောင်းကြားချက်များကို \'မနှောင့်ယှက်ရ\' က ခေတ္တရပ်ထားသည်"</string>
     <string name="media_projection_action_text" msgid="3634906766918186440">"ယခု စတင်ပါ"</string>
     <string name="empty_shade_text" msgid="8935967157319717412">"အကြောင်းကြားချက်များ မရှိ"</string>
-    <!-- no translation found for no_unseen_notif_text (395512586119868682) -->
-    <skip />
-    <!-- no translation found for unlock_to_see_notif_text (7439033907167561227) -->
-    <skip />
+    <string name="no_unseen_notif_text" msgid="395512586119868682">"အကြောင်းကြားချက်သစ် မရှိပါ"</string>
+    <string name="unlock_to_see_notif_text" msgid="7439033907167561227">"အကြောင်းကြားချက်ဟောင်းကြည့်ရန် လော့ခ်ဖွင့်ပါ"</string>
     <string name="quick_settings_disclosure_parental_controls" msgid="2114102871438223600">"ဤစက်ပစ္စည်းကို သင့်မိဘက စီမံခန့်ခွဲသည်"</string>
     <string name="quick_settings_disclosure_management_monitoring" msgid="8231336875820702180">"ဤစက်ကို သင့်အဖွဲ့အစည်းကပိုင်ဆိုင်ပြီး ကွန်ရက်ဒေတာ စီးဆင်းမှုကို စောင့်ကြည့်နိုင်ပါသည်"</string>
     <string name="quick_settings_disclosure_named_management_monitoring" msgid="2831423806103479812">"ဤစက်ကို <xliff:g id="ORGANIZATION_NAME">%1$s</xliff:g> က ပိုင်ဆိုင်ပြီး ကွန်ရက်ဒေတာ စီးဆင်းမှုကို စောင့်ကြည့်နိုင်ပါသည်"</string>
@@ -523,8 +521,8 @@
     <string name="accessibility_status_bar_hotspot" msgid="2888479317489131669">"ဟော့စပေါ့"</string>
     <string name="accessibility_managed_profile" msgid="4703836746209377356">"အလုပ် ပရိုဖိုင်"</string>
     <string name="tuner_warning_title" msgid="7721976098452135267">"အချို့သူများ အတွက် ပျော်စရာ ဖြစ်ပေမဲ့ အားလုံး အတွက် မဟုတ်ပါ"</string>
-    <string name="tuner_warning" msgid="1861736288458481650">"စနစ် UI ဖမ်းစက်က သင့်အတွက် Android အသုံးပြုသူ အင်တာဖေ့စ်ကို ပြောင်းကြည့်ရန် နှင့် စိတ်ကြိုက်ပြုလုပ်ရန် နည်းလမ်း အပိုများကို သင့်အတွက် စီစဉ်ပေးသည်။ ဤ စမ်းသပ်ရေး အင်္ဂါရပ်များမှာ ပြောင်းလဲ၊ ကျိုးပျက် သို့မဟုတ် ပျောက်ကွယ် သွားနိုင်သည်။ သတိထားလျက် ဆက်လက် ဆောင်ရွက်ပါ။"</string>
-    <string name="tuner_persistent_warning" msgid="230466285569307806">"ဤ စမ်းသပ်ရေး အင်္ဂါရပ်များမှာ ပြောင်းလဲ၊ ကျိုးပျက် သို့မဟုတ် ပျောက်ကွယ် သွားနိုင်သည်။ သတိထားလျက် ဆက်လက် ဆောင်ရွက်ပါ။"</string>
+    <string name="tuner_warning" msgid="1861736288458481650">"စနစ် UI Tuner က သင့်အတွက် Android အသုံးပြုသူ အင်တာဖေ့စ်ကို ပြောင်းရန်နှင့် စိတ်ကြိုက်ပြုလုပ်ရန် နည်းလမ်း အပိုများကို သင့်အတွက် စီစဉ်ပေးသည်။ အနာဂတ်ဗားရှင်းများတွင် ဤစမ်းသပ်အင်္ဂါရပ်များမှာ ပြောင်းလဲ၊ ပျက်စီး သို့မဟုတ် ပျောက်ကွယ်သွားနိုင်သည်။ သတိဖြင့် ရှေ့ဆက်ပါ။"</string>
+    <string name="tuner_persistent_warning" msgid="230466285569307806">"အနာဂတ် ဗားရှင်းများတွင် ဤစမ်းသပ်အင်္ဂါရပ်များမှာ ပြောင်းလဲ၊ ပျက်စီး သို့မဟုတ် ပျောက်ကွယ်သွားနိုင်သည်။ သတိဖြင့် ရှေ့ဆက်ပါ။"</string>
     <string name="got_it" msgid="477119182261892069">"ရပါပြီ"</string>
     <string name="tuner_toast" msgid="3812684836514766951">"ဂုဏ်ပြုပါရစေ! စနစ် UI ဖမ်းစက်ကို ဆက်တင်ထဲသို့ ထည့်ပြီးပြီ။"</string>
     <string name="remove_from_settings" msgid="633775561782209994">"ဆက်တင် အထဲမှ ဖယ်ရှားရန်"</string>
@@ -745,6 +743,7 @@
     <string name="wifi_is_off" msgid="5389597396308001471">"Wi-Fi ပိတ်ထားသည်"</string>
     <string name="bt_is_off" msgid="7436344904889461591">"ဘလူးတုသ်ကို ပိတ်ထားသည်"</string>
     <string name="dnd_is_off" msgid="3185706903793094463">"\"မနှောင့်ယှက်ရ\" ကို ပိတ်ထားသည်"</string>
+    <string name="dnd_is_on" msgid="7009368176361546279">"‘မနှောင့်ယှက်ရ’ ဖွင့်ထားသည်"</string>
     <string name="qs_dnd_prompt_auto_rule" msgid="3535469468310002616">"\"မနှောင့်ယှက်ရ\" ကို အလိုအလျောက်စည်းမျဉ်း (<xliff:g id="ID_1">%s</xliff:g>) က ဖွင့်ခဲ့သည်။"</string>
     <string name="qs_dnd_prompt_app" msgid="4027984447935396820">"\"မနှောင့်ယှက်ရ\" ကို အက်ပ် (<xliff:g id="ID_1">%s</xliff:g>) က ဖွင့်ခဲ့သည်။"</string>
     <string name="qs_dnd_prompt_auto_rule_app" msgid="1841469944118486580">"\"မနှောင့်ယှက်ရ\" ကို အလိုအလျောက်စည်းမျဉ်းတစ်ခု သို့မဟုတ် အက်ပ်တစ်ခုက ဖွင့်ခဲ့သည်။"</string>
@@ -817,7 +816,7 @@
     <string name="accessibility_floating_button_migration_tooltip" msgid="5217151214439341902">"အများသုံးစွဲနိုင်မှုဆိုင်ရာ ဝန်ဆောင်မှုများ ဖွင့်ရန် တို့ပါ။ ဆက်တင်များတွင် ဤခလုတ်ကို စိတ်ကြိုက်ပြင်ပါ (သို့) လဲပါ။\n\n"<annotation id="link">"ဆက်တင်များ ကြည့်ရန်"</annotation></string>
     <string name="accessibility_floating_button_docking_tooltip" msgid="6814897496767461517">"ခလုတ်ကို ယာယီဝှက်ရန် အစွန်းသို့ရွှေ့ပါ"</string>
     <string name="accessibility_floating_button_undo" msgid="511112888715708241">"နောက်ပြန်ရန်"</string>
-    <string name="accessibility_floating_button_undo_message_text" msgid="3044079592757099698">"{count,plural, =1{ဖြတ်လမ်းလင့်ခ် {label} ခု ဖယ်ရှားပြီးပြီ}other{ဖြတ်လမ်းလင့်ခ် # ခု ဖယ်ရှားပြီးပြီ}}"</string>
+    <string name="accessibility_floating_button_undo_message_text" msgid="3044079592757099698">"{count,plural, =1{ {label} ဖြတ်လမ်းလင့်ခ် ဖယ်ရှားပြီးပြီ}other{ဖြတ်လမ်းလင့်ခ် # ခု ဖယ်ရှားပြီးပြီ}}"</string>
     <string name="accessibility_floating_button_action_move_top_left" msgid="6253520703618545705">"ဘယ်ဘက်ထိပ်သို့ ရွှေ့ရန်"</string>
     <string name="accessibility_floating_button_action_move_top_right" msgid="6106225581993479711">"ညာဘက်ထိပ်သို့ ရွှေ့ရန်"</string>
     <string name="accessibility_floating_button_action_move_bottom_left" msgid="8063394111137429725">"ဘယ်ဘက်အောက်ခြေသို့ ရွှေ့ရန်"</string>
@@ -907,6 +906,7 @@
     <string name="media_output_dialog_accessibility_title" msgid="4681741064190167888">"အသံအထွက်အတွက် ရရှိနိုင်သောစက်များ။"</string>
     <string name="media_output_dialog_accessibility_seekbar" msgid="5332843993805568978">"အသံအတိုးအကျယ်"</string>
     <string name="media_output_dialog_volume_percentage" msgid="1613984910585111798">"<xliff:g id="PERCENTAGE">%1$d</xliff:g>%%"</string>
+    <string name="media_output_group_title_speakers_and_displays" msgid="7169712332365659820">"စပီကာနှင့် ဖန်သားပြင်များ"</string>
     <string name="media_output_first_broadcast_title" msgid="6292237789860753022">"ထုတ်လွှင့်မှုဆောင်ရွက်ပုံ"</string>
     <string name="media_output_broadcast" msgid="3555580945878071543">"ထုတ်လွှင့်ခြင်း"</string>
     <string name="media_output_first_notify_broadcast_message" msgid="6353857724136398494">"အနီးရှိတွဲသုံးနိုင်သော ဘလူးတုသ်သုံးစက် အသုံးပြုသူများက သင်ထုတ်လွှင့်နေသော မီဒီယာကို နားဆင်နိုင်သည်"</string>
@@ -1034,20 +1034,19 @@
     <string name="log_access_confirmation_deny" msgid="2389461495803585795">"ခွင့်မပြုပါ"</string>
     <string name="log_access_confirmation_body" msgid="6883031912003112634">"သင့်စက်ရှိ အဖြစ်အပျက်များကို စက်မှတ်တမ်းများက မှတ်တမ်းတင်သည်။ အက်ပ်များက ပြဿနာများ ရှာဖွေပြီးဖြေရှင်းရန် ဤမှတ်တမ်းများကို သုံးနိုင်သည်။\n\nအချို့မှတ်တမ်းများတွင် သတိထားရမည့်အချက်အလက်များ ပါဝင်နိုင်သဖြင့် ယုံကြည်ရသည့် အက်ပ်များကိုသာ စက်မှတ်တမ်းအားလုံး သုံးခွင့်ပြုပါ။ \n\nဤအက်ပ်ကို စက်မှတ်တမ်းအားလုံး သုံးခွင့်မပြုသော်လည်း ၎င်းက ကိုယ်ပိုင်မှတ်တမ်းများ သုံးနိုင်သေးသည်။ သင့်စက်ရှိ အချို့မှတ်တမ်းများ (သို့) အချက်အလက်များကို သင့်စက်ထုတ်လုပ်သူက သုံးနိုင်ပါသေးသည်။"</string>
     <string name="keyguard_affordance_enablement_dialog_action_template" msgid="8164857863036314664">"<xliff:g id="APPNAME">%1$s</xliff:g> ဖွင့်ရန်"</string>
-    <string name="keyguard_affordance_enablement_dialog_message" msgid="2790910660524887941">"<xliff:g id="APPNAME">%1$s</xliff:g> အက်ပ်ကို ဖြတ်လမ်းလင့်ခ်အဖြစ် ထည့်ရန် အောက်ပါတို့နှင့်ကိုက်ညီရမည်"</string>
     <string name="keyguard_affordance_enablement_dialog_wallet_instruction_1" msgid="8439655049139819278">"• အက်ပ်ကို စနစ်ထည့်သွင်းထားရမည်"</string>
     <string name="keyguard_affordance_enablement_dialog_wallet_instruction_2" msgid="4321089250629477835">"• Wallet တွင် အနည်းဆုံးကတ်တစ်ခု ထည့်ထားရမည်"</string>
     <string name="keyguard_affordance_enablement_dialog_qr_scanner_instruction" msgid="5355839079232119791">"• ကင်မရာအက်ပ် ထည့်သွင်းထားရမည်"</string>
     <string name="keyguard_affordance_enablement_dialog_home_instruction_1" msgid="8438311171750568633">"• အက်ပ်ကို စနစ်ထည့်သွင်းထားရမည်"</string>
     <string name="keyguard_affordance_enablement_dialog_home_instruction_2" msgid="8308525385889021652">"• အနည်းဆုံး စက်တစ်ခုသုံးနိုင်ရမည်"</string>
+    <string name="keyguard_affordance_press_too_short" msgid="8145437175134998864">"ဖြတ်လမ်းလင့်ခ်ကို ထိပြီးဖိထားပါ"</string>
     <string name="rear_display_bottom_sheet_cancel" msgid="3461468855493357248">"မလုပ်တော့"</string>
     <string name="rear_display_bottom_sheet_confirm" msgid="4383356544661421206">"ယခုလှည့်လိုက်ပါ"</string>
     <string name="rear_display_fold_bottom_sheet_title" msgid="6081542277622721548">"ပိုကောင်းသော ဆယ်လ်ဖီအတွက် ဖုန်းကိုဖြန့်လိုက်ပါ"</string>
     <string name="rear_display_unfold_bottom_sheet_title" msgid="2137403802960396357">"ပိုကောင်းသော ဆယ်လ်ဖီအတွက် ဖန်သားပြင်ကိုလှည့်မလား။"</string>
     <string name="rear_display_bottom_sheet_description" msgid="1852662982816810352">"ပုံရိပ်ပြတ်သားကိန်း ပိုမြင့်ပြီး မြင်ကွင်းပိုကျယ်သည့် ဓာတ်ပုံအတွက် နောက်ဘက်ကင်မရာကို အသုံးပြုပါ။"</string>
     <string name="rear_display_bottom_sheet_warning" msgid="800995919558238930"><b>"✱ ဤဖန်သားပြင်ကို ပိတ်လိုက်မည်"</b></string>
-    <!-- no translation found for rear_display_accessibility_folded_animation (1538121649587978179) -->
-    <skip />
-    <!-- no translation found for rear_display_accessibility_unfolded_animation (1946153682258289040) -->
-    <skip />
+    <string name="rear_display_accessibility_folded_animation" msgid="1538121649587978179">"ခေါက်နိုင်သောစက်ကို ဖြန့်လိုက်သည်"</string>
+    <string name="rear_display_accessibility_unfolded_animation" msgid="1946153682258289040">"ခေါက်နိုင်သောစက်ကို တစ်ဘက်သို့ လှန်လိုက်သည်"</string>
+    <string name="stylus_battery_low" msgid="7134370101603167096">"စတိုင်လပ်စ် ဘက်ထရီ အားနည်းနေသည်"</string>
 </resources>

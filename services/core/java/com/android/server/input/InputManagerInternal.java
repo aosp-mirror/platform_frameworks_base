@@ -206,4 +206,11 @@ public abstract class InputManagerInternal {
      * @param inputPort The port of the input device.
      */
     public abstract void removeKeyboardLayoutAssociation(@NonNull String inputPort);
+
+    /**
+     * Set whether stylus button reporting through motion events should be enabled.
+     *
+     * @param enabled When true, stylus buttons will not be reported through motion events.
+     */
+    public abstract void setStylusButtonMotionEventsEnabled(boolean enabled);
 }

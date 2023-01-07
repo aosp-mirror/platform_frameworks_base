@@ -49,13 +49,16 @@ data class TurbulenceNoiseAnimationConfig(
     val opacity: Int = DEFAULT_OPACITY,
     val width: Float = 0f,
     val height: Float = 0f,
-    val duration: Float = DEFAULT_NOISE_DURATION_IN_MILLIS,
+    val maxDuration: Float = DEFAULT_MAX_DURATION_IN_MILLIS,
+    val easeInDuration: Float = DEFAULT_EASING_DURATION_IN_MILLIS,
+    val easeOutDuration: Float = DEFAULT_EASING_DURATION_IN_MILLIS,
     val pixelDensity: Float = 1f,
     val blendMode: BlendMode = DEFAULT_BLEND_MODE,
     val onAnimationEnd: Runnable? = null
 ) {
     companion object {
-        const val DEFAULT_NOISE_DURATION_IN_MILLIS = 7500F
+        const val DEFAULT_MAX_DURATION_IN_MILLIS = 7500f
+        const val DEFAULT_EASING_DURATION_IN_MILLIS = 750f
         const val DEFAULT_LUMINOSITY_MULTIPLIER = 1f
         const val DEFAULT_NOISE_GRID_COUNT = 1.2f
         const val DEFAULT_NOISE_SPEED_Z = 0.3f

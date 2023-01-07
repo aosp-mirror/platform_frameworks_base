@@ -23,10 +23,8 @@
     <string name="dock_alignment_not_charging" product="default" msgid="3980752926226749808">"Drejtvendose përsëri telefonin për ta karikuar me valë"</string>
     <string name="inattentive_sleep_warning_message" product="tv" msgid="6844464574089665063">"Pajisja Android TV së shpejti do të fiket. Shtyp një buton për ta mbajtur të ndezur."</string>
     <string name="inattentive_sleep_warning_message" product="default" msgid="5693904520452332224">"Pajisja së shpejti do të fiket. Shtype për ta mbajtur të ndezur."</string>
-    <!-- no translation found for keyguard_missing_sim_message (408124574073032188) -->
-    <skip />
-    <!-- no translation found for keyguard_missing_sim_message (2605468359948247208) -->
-    <skip />
+    <string name="keyguard_missing_sim_message" product="tablet" msgid="408124574073032188">"Nuk ka kartë SIM në tablet."</string>
+    <string name="keyguard_missing_sim_message" product="default" msgid="2605468359948247208">"Nuk ka kartë SIM në telefon."</string>
     <string name="kg_invalid_confirm_pin_hint" product="default" msgid="6278551068943958651">"Kodet PIN nuk përputhen"</string>
     <string name="kg_failed_attempts_almost_at_wipe" product="tablet" msgid="302165994845009232">"Ke tentuar <xliff:g id="NUMBER_0">%1$d</xliff:g> herë gabimisht për ta shkyçur tabletin. Pas <xliff:g id="NUMBER_1">%2$d</xliff:g> përpjekjeve të tjera të pasuksesshme, tableti do të rivendoset, gjë që do të rivendosë të gjitha të dhënat e tij."</string>
     <string name="kg_failed_attempts_almost_at_wipe" product="default" msgid="2594813176164266847">"Ke tentuar <xliff:g id="NUMBER_0">%1$d</xliff:g> herë gabimisht për ta shkyçur telefonin. Pas <xliff:g id="NUMBER_1">%2$d</xliff:g> përpjekjeve të tjera të pasuksesshme, telefoni do të rivendoset, gjë që do të fshijë të gjitha të dhënat e tij."</string>

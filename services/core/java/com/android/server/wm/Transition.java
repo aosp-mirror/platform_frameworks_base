@@ -1726,13 +1726,26 @@ class Transition implements BLASTSyncEngine.TransactionReadyListener {
             }
 
             if (activityRecord != null || (taskFragment != null && taskFragment.isEmbedded())) {
-                // Set background color to Task theme color for activity and embedded TaskFragment
-                // in case we want to show background during the animation.
-                final Task parentTask = activityRecord != null
-                        ? activityRecord.getTask()
-                        : taskFragment.getTask();
-                final int backgroundColor = ColorUtils.setAlphaComponent(
-                        parentTask.getTaskDescription().getBackgroundColor(), 255);
+                final int backgroundColor;
+                final TaskFragment organizedTf = activityRecord != null
+                        ? activityRecord.getOrganizedTaskFragment()
+                        : taskFragment.getOrganizedTaskFragment();
+                if (organizedTf != null && organizedTf.getAnimationParams()
+                        .getAnimationBackgroundColor() != 0) {
+                    // This window is embedded and has an animation background color set on the
+                    // TaskFragment. Pass this color with this window, so the handler can use it as
+                    // the animation background color if needed,
+                    backgroundColor = organizedTf.getAnimationParams()
+                            .getAnimationBackgroundColor();
+                } else {
+                    // Set background color to Task theme color for activity and embedded
+                    // TaskFragment in case we want to show background during the animation.
+                    final Task parentTask = activityRecord != null
+                            ? activityRecord.getTask()
+                            : taskFragment.getTask();
+                    backgroundColor = ColorUtils.setAlphaComponent(
+                            parentTask.getTaskDescription().getBackgroundColor(), 255);
+                }
                 change.setBackgroundColor(backgroundColor);
             }
 

@@ -23,8 +23,7 @@
     <string name="summary_watch" msgid="4085794790142204006">"আপোনাৰ <xliff:g id="DEVICE_NAME">%1$s</xliff:g> পৰিচালনা কৰিবলৈ এপ্‌টোৰ আৱশ্যক। <xliff:g id="APP_NAME">%2$s</xliff:g>ক আপোনাৰ জাননী ব্যৱহাৰ কৰিবলৈ আৰু আপোনাৰ ফ’ন, এছএমএছ, সম্পৰ্ক ,কেলেণ্ডাৰ, কল লগ আৰু নিকটৱৰ্তী ডিভাইচৰ অনুমতি এক্সেছ কৰিবলৈ দিয়া হ’ব।"</string>
     <string name="summary_watch_single_device" msgid="1523091550243476756">"আপোনাৰ <xliff:g id="DEVICE_NAME">%1$s</xliff:g> পৰিচালনা কৰিবলৈ এপ্‌টোৰ আৱশ্যক। <xliff:g id="APP_NAME">%2$s</xliff:g>ক এই অনুমতিসমূহৰ সৈতে ভাব-বিনিময় কৰিবলৈ দিয়া হ’ব:"</string>
     <string name="profile_name_glasses" msgid="8488394059007275998">"চছ্‌মা"</string>
-    <!-- no translation found for summary_glasses (8987925853224595628) -->
-    <skip />
+    <string name="summary_glasses" msgid="8987925853224595628">"আপোনাৰ <xliff:g id="DEVICE_NAME">%1$s</xliff:g> পৰিচালনা কৰিবলৈ এই এপ্‌টোৰ আৱশ্যক। <xliff:g id="APP_NAME">%2$s</xliff:g>ক এই অনুমতিসমূহৰ সৈতে ভাব-বিনিময় কৰিবলৈ আৰু আপোনাৰ ফ’ন, এছএমএছ, সম্পৰ্ক, মাইক্ৰ’ফ’ন আৰু নিকটৱৰ্তী ডিভাইচৰ অনুমতিসমূহ এক্সেছ কৰিবলৈ দিয়া হ’ব।"</string>
     <string name="summary_glasses_single_device" msgid="5725890636605211803">"আপোনাৰ <xliff:g id="DEVICE_NAME">%1$s</xliff:g> পৰিচালনা কৰিবলৈ এপ্‌টোৰ আৱশ্যক। <xliff:g id="APP_NAME">%2$s</xliff:g>ক এই অনুমতিসমূহৰ সৈতে ভাব-বিনিময় কৰিবলৈ দিয়া হ’ব:"</string>
     <string name="title_app_streaming" msgid="2270331024626446950">"&lt;strong&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/strong&gt;ক আপোনাৰ ফ’নৰ পৰা এই তথ্যখিনি এক্সেছ কৰাৰ অনুমতি দিয়ক"</string>
     <string name="helper_title_app_streaming" msgid="4151687003439969765">"ক্ৰছ-ডিভাইচ সেৱাসমূহ"</string>

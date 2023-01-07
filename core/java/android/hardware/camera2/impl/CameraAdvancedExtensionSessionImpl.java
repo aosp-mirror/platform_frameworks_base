@@ -176,7 +176,7 @@ public final class CameraAdvancedExtensionSessionImpl extends CameraExtensionSes
         }
 
         Surface postviewSurface = null;
-        if (burstCaptureSurface != null) {
+        if (burstCaptureSurface != null && config.getPostviewOutputConfiguration() != null) {
             CameraExtensionUtils.SurfaceInfo burstCaptureSurfaceInfo =
                     CameraExtensionUtils.querySurface(burstCaptureSurface);
             Size burstCaptureSurfaceSize =
@@ -193,8 +193,7 @@ public final class CameraAdvancedExtensionSessionImpl extends CameraExtensionSes
             postviewSurface = CameraExtensionUtils.getPostviewSurface(
                         config.getPostviewOutputConfiguration(), supportedPostviewSizes,
                         burstCaptureSurfaceInfo.mFormat);
-
-            if ((config.getPostviewOutputConfiguration() != null) && (postviewSurface == null)) {
+            if (postviewSurface == null) {
                 throw new IllegalArgumentException("Unsupported output surface for postview!");
             }
         }
@@ -456,11 +455,17 @@ public final class CameraAdvancedExtensionSessionImpl extends CameraExtensionSes
     }
 
     private void validateCaptureRequestTargets(@NonNull CaptureRequest request) {
-        if ((request.getTargets().size() == 1) &&
-                (!request.containsTarget(mClientRepeatingRequestSurface) ||
-                !request.containsTarget(mClientCaptureSurface))) {
-            throw new IllegalArgumentException("Target output combination requested is " +
-                    "not supported!");
+        if (request.getTargets().size() == 1) {
+            boolean containsCaptureTarget =
+                    mClientCaptureSurface != null && request.containsTarget(mClientCaptureSurface);
+            boolean containsRepeatingTarget =
+                    mClientRepeatingRequestSurface != null &&
+                    request.containsTarget(mClientRepeatingRequestSurface);
+
+            if (!containsCaptureTarget && !containsRepeatingTarget) {
+                throw new IllegalArgumentException("Target output combination requested is " +
+                        "not supported!");
+            }
         }
 
         if ((request.getTargets().size() == 2) &&

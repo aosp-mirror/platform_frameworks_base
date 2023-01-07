@@ -31,7 +31,7 @@ import com.android.internal.util.AnnotationValidations;
  *
  * @hide
  */
-public class ProviderDialogResult extends BaseDialogResult implements Parcelable {
+public final class ProviderDialogResult extends BaseDialogResult implements Parcelable {
     /** Parses and returns a ProviderDialogResult from the given resultData. */
     @Nullable
     public static ProviderDialogResult fromResultData(@NonNull Bundle resultData) {

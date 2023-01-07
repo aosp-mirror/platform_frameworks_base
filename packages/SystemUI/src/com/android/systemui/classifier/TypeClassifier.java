@@ -69,6 +69,8 @@ public class TypeClassifier extends FalsingClassifier {
                 // A more sophisticated thing to do here would be to look at the size of the
                 // vertical change relative to the screen size. _Some_ amount of vertical
                 // change should be expected.
+                wrongDirection = vertical;
+                break;
             case NOTIFICATION_DISMISS:
                 wrongDirection = vertical;
                 break;

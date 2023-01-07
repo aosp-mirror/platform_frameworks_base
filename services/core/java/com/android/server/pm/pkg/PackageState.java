@@ -163,6 +163,9 @@ public interface PackageState {
     @NonNull
     List<SharedLibrary> getUsesLibraries();
 
+    /** Whether this represents an APEX module. This is different from an APK inside an APEX. */
+    boolean isApex();
+
     /**
      * @see ApplicationInfo#PRIVATE_FLAG_PRIVILEGED
      */
