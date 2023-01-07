@@ -31,6 +31,10 @@ import android.view.inputmethod.InputMethodManager;
 import android.widget.EditText;
 import android.widget.LinearLayout;
 
+import androidx.annotation.Nullable;
+
+import java.lang.ref.WeakReference;
+
 /**
  * A special activity for testing purpose.
  *
@@ -40,6 +44,8 @@ import android.widget.LinearLayout;
  */
 public class TestActivity extends Activity {
     private static final String TAG = "TestActivity";
+    private static WeakReference<TestActivity> sLastCreatedInstance =
+            new WeakReference<>(null);
 
     /**
      * Start a new test activity with an editor and wait for it to begin running before returning.
@@ -57,10 +63,15 @@ public class TestActivity extends Activity {
         return (TestActivity) instrumentation.startActivitySync(intent);
     }
 
-    public EditText mEditText;
+    private EditText mEditText;
+
+    public EditText getEditText() {
+        return mEditText;
+    }
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
         getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_ALWAYS_HIDDEN);
         LinearLayout rootView = new LinearLayout(this);
         mEditText = new EditText(this);
@@ -68,14 +79,19 @@ public class TestActivity extends Activity {
         rootView.addView(mEditText, new LinearLayout.LayoutParams(MATCH_PARENT, WRAP_CONTENT));
         setContentView(rootView);
         mEditText.requestFocus();
-        super.onCreate(savedInstanceState);
+        sLastCreatedInstance = new WeakReference<>(this);
+    }
+
+    /** Get the last created TestActivity instance. */
+    public static @Nullable TestActivity getLastCreatedInstance() {
+        return sLastCreatedInstance.get();
     }
 
     /** Shows soft keyboard via InputMethodManager. */
     public boolean showImeWithInputMethodManager(int flags) {
         InputMethodManager imm = getSystemService(InputMethodManager.class);
         boolean result = imm.showSoftInput(mEditText, flags);
-        Log.i(TAG, "hideIme() via InputMethodManager, result=" + result);
+        Log.i(TAG, "showIme() via InputMethodManager, result=" + result);
         return result;
     }
 
