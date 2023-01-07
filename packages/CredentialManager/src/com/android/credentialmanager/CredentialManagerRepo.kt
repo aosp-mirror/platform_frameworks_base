@@ -139,9 +139,6 @@ class CredentialManagerRepo(
     val providerEnabledList = CreateFlowUtils.toEnabledProviderList(
       // Handle runtime cast error
       providerEnabledList as List<CreateCredentialProviderData>, context)
-    providerEnabledList.forEach{providerInfo -> providerInfo.createOptions =
-      providerInfo.createOptions.sortedWith(compareBy { it.lastUsedTimeMillis }).reversed()
-    }
     return providerEnabledList
   }
 
@@ -179,9 +176,9 @@ class CredentialManagerRepo(
               .setSaveEntries(
                   listOf<Entry>(
                       newCreateEntry("key1", "subkey-1", "elisa.beckett@gmail.com",
-                          20, 7, 27, 10000),
+                          20, 7, 27, 10L),
                       newCreateEntry("key1", "subkey-2", "elisa.work@google.com",
-                          20, 7, 27, 11000),
+                          20, 7, 27, 12L),
                   )
               )
               .setRemoteEntry(
@@ -193,9 +190,9 @@ class CredentialManagerRepo(
               .setSaveEntries(
                   listOf<Entry>(
                       newCreateEntry("key1", "subkey-3", "elisa.beckett@dashlane.com",
-                          20, 7, 27, 30000),
+                          20, 7, 27, 11L),
                       newCreateEntry("key1", "subkey-4", "elisa.work@dashlane.com",
-                          20, 7, 27, 31000),
+                          20, 7, 27, 14L),
                   )
               )
               .build(),
