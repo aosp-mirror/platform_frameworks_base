@@ -81,7 +81,7 @@ public class ActivityRelaunchItem extends ActivityTransactionItem {
     public void postExecute(ClientTransactionHandler client, IBinder token,
             PendingTransactionActions pendingActions) {
         final ActivityClientRecord r = getActivityClientRecord(client, token);
-        client.reportRelaunch(r, pendingActions);
+        client.reportRelaunch(r);
     }
 
     // ObjectPoolItem implementation

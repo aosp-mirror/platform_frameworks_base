@@ -515,8 +515,6 @@ public final class ViewRootImpl implements ViewParent,
     private boolean mInvalidateRootRequested;
     private int mCanvasOffsetX;
     private int mCanvasOffsetY;
-    private boolean mActivityRelaunched;
-
     CompatibilityInfo.Translator mTranslator;
 
     @UnsupportedAppUsage
@@ -3021,11 +3019,6 @@ public final class ViewRootImpl implements ViewParent,
                         frame.height() < desiredWindowHeight && frame.height() != mHeight));
         windowShouldResize |= mDragResizing && mPendingDragResizing;
 
-        // If the activity was just relaunched, it might have unfrozen the task bounds (while
-        // relaunching), so we need to force a call into window manager to pick up the latest
-        // bounds.
-        windowShouldResize |= mActivityRelaunched;
-
         // Determine whether to compute insets.
         // If there are no inset listeners remaining then we may still need to compute
         // insets in case the old insets were non-empty and must be reset.
@@ -3640,7 +3633,6 @@ public final class ViewRootImpl implements ViewParent,
         mFirst = false;
         mWillDrawSoon = false;
         mNewSurfaceNeeded = false;
-        mActivityRelaunched = false;
         mViewVisibility = viewVisibility;
 
         final boolean hasWindowFocus = mAttachInfo.mHasWindowFocus && isViewVisible;
@@ -10543,15 +10535,6 @@ public final class ViewRootImpl implements ViewParent,
         for (int i = mWindowCallbacks.size() - 1; i >= 0; i--) {
             mWindowCallbacks.get(i).onRequestDraw(mReportNextDraw);
         }
-    }
-
-    /**
-     * Tells this instance that its corresponding activity has just relaunched. In this case, we
-     * need to force a relayout of the window to make sure we get the correct bounds from window
-     * manager.
-     */
-    public void reportActivityRelaunched() {
-        mActivityRelaunched = true;
     }
 
     public SurfaceControl getSurfaceControl() {

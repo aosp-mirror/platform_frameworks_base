@@ -785,13 +785,6 @@ public class PhoneWindow extends Window implements MenuBuilder.Callback {
         }
     }
 
-    @Override
-    public void reportActivityRelaunched() {
-        if (mDecor != null && mDecor.getViewRootImpl() != null) {
-            mDecor.getViewRootImpl().reportActivityRelaunched();
-        }
-    }
-
     private static void clearMenuViews(PanelFeatureState st) {
         // This can be called on config changes, so we should make sure
         // the views will be reconstructed based on the new orientation, etc.
