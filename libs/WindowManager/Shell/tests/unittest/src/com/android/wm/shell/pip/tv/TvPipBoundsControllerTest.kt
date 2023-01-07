@@ -84,6 +84,9 @@ class TvPipBoundsControllerTest : ShellTestCase() {
 
     @Before
     fun setUp() {
+        if (!isTelevision) {
+            return
+        }
         MockitoAnnotations.initMocks(this)
         time = 0L
         inMenu = false
