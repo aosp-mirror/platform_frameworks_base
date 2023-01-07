@@ -16,6 +16,8 @@
 
 package android.service.voice;
 
+import android.os.Bundle;
+
 import com.android.internal.app.IVoiceActionCheckCallback;
 
 /**
@@ -28,4 +30,6 @@ oneway interface IVoiceInteractionService {
     void launchVoiceAssistFromKeyguard();
     void getActiveServiceSupportedActions(in List<String> voiceActions,
      in IVoiceActionCheckCallback callback);
+    void prepareToShowSession(in Bundle args, int flags);
+    void showSessionFailed();
 }
