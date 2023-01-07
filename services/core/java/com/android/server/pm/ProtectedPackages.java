@@ -16,7 +16,6 @@
 
 package com.android.server.pm;
 
-import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.UserIdInt;
 import android.content.Context;
@@ -81,8 +80,8 @@ public class ProtectedPackages {
 
     /** Sets packages protected by a device or profile owner. */
     public synchronized void setOwnerProtectedPackages(
-            @UserIdInt int userId, @NonNull List<String> packageNames) {
-        if (packageNames.isEmpty()) {
+            @UserIdInt int userId, @Nullable List<String> packageNames) {
+        if (packageNames == null) {
             mOwnerProtectedPackages.remove(userId);
         } else {
             mOwnerProtectedPackages.put(userId, new ArraySet<>(packageNames));
@@ -134,13 +133,19 @@ public class ProtectedPackages {
      */
     private synchronized boolean isOwnerProtectedPackage(
             @UserIdInt int userId, String packageName) {
-        return isPackageProtectedForUser(UserHandle.USER_ALL, packageName)
-                || isPackageProtectedForUser(userId, packageName);
+        return hasProtectedPackages(userId)
+                ? isPackageProtectedForUser(userId, packageName)
+                : isPackageProtectedForUser(UserHandle.USER_ALL, packageName);
     }
 
-    private synchronized boolean isPackageProtectedForUser(int userId, String packageName) {
+    private synchronized boolean isPackageProtectedForUser(
+            @UserIdInt int userId, String packageName) {
         int userIdx = mOwnerProtectedPackages.indexOfKey(userId);
         return userIdx >= 0 && mOwnerProtectedPackages.valueAt(userIdx).contains(packageName);
+    }
+
+    private synchronized boolean hasProtectedPackages(@UserIdInt int userId) {
+        return mOwnerProtectedPackages.indexOfKey(userId) >= 0;
     }
 
     /**
