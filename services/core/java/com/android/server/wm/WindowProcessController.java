@@ -54,6 +54,7 @@ import android.app.IApplicationThread;
 import android.app.ProfilerInfo;
 import android.app.servertransaction.ConfigurationChangeItem;
 import android.companion.virtual.VirtualDeviceManager;
+import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.ActivityInfo;
@@ -62,6 +63,7 @@ import android.content.pm.ServiceInfo;
 import android.content.res.Configuration;
 import android.os.Binder;
 import android.os.Build;
+import android.os.FactoryTest;
 import android.os.IBinder;
 import android.os.LocaleList;
 import android.os.Message;
@@ -1716,6 +1718,22 @@ public class WindowProcessController extends ConfigurationContainer<Configuratio
     @HotPath(caller = HotPath.OOM_ADJUSTMENT)
     public boolean isHeavyWeightProcess() {
         return this == mAtm.mHeavyWeightProcess;
+    }
+
+    @HotPath(caller = HotPath.PROCESS_CHANGE)
+    public boolean isFactoryTestProcess() {
+        final int factoryTestMode = mAtm.mFactoryTest;
+        if (factoryTestMode == FactoryTest.FACTORY_TEST_OFF) {
+            return false;
+        }
+        if (factoryTestMode == FactoryTest.FACTORY_TEST_LOW_LEVEL) {
+            final ComponentName topComponent = mAtm.mTopComponent;
+            if (topComponent != null && mName.equals(topComponent.getPackageName())) {
+                return true;
+            }
+        }
+        return factoryTestMode == FactoryTest.FACTORY_TEST_HIGH_LEVEL
+                && (mInfo.flags & ApplicationInfo.FLAG_FACTORY_TEST) != 0;
     }
 
     void setRunningRecentsAnimation(boolean running) {

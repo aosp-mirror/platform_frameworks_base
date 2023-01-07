@@ -1723,7 +1723,7 @@ public final class ProcessList {
             }
             app.setMountMode(mountExternal);
             checkSlow(startUptime, "startProcess: building args");
-            if (mService.mAtmInternal.isFactoryTestProcess(app.getWindowProcessController())) {
+            if (app.getWindowProcessController().isFactoryTestProcess()) {
                 uid = 0;
             }
             int runtimeFlags = 0;
