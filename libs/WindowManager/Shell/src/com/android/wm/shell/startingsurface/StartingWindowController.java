@@ -39,6 +39,7 @@ import android.window.TaskOrganizer;
 import android.window.TaskSnapshot;
 
 import androidx.annotation.BinderThread;
+import androidx.annotation.VisibleForTesting;
 
 import com.android.internal.annotations.GuardedBy;
 import com.android.internal.util.function.TriConsumer;
@@ -138,8 +139,14 @@ public class StartingWindowController implements RemoteCallable<StartingWindowCo
      *
      * @param listener The callback when need a starting window.
      */
+    @VisibleForTesting
     void setStartingWindowListener(TriConsumer<Integer, Integer, Integer> listener) {
         mTaskLaunchingCallback = listener;
+    }
+
+    @VisibleForTesting
+    boolean hasStartingWindowListener() {
+        return mTaskLaunchingCallback != null;
     }
 
     /**
@@ -281,6 +288,8 @@ public class StartingWindowController implements RemoteCallable<StartingWindowCo
         @Override
         public void invalidate() {
             mController = null;
+            // Unregister the listener to ensure any registered binder death recipients are unlinked
+            mListener.unregister();
         }
 
         @Override
