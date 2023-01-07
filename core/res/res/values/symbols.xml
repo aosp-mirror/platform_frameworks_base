@@ -4441,6 +4441,7 @@
   <java-symbol type="dimen" name="controls_thumbnail_image_max_height" />
   <java-symbol type="dimen" name="controls_thumbnail_image_max_width" />
 
+  <java-symbol type="bool" name="config_letterboxIsDisplayRotationImmersiveAppCompatPolicyEnabled" />
   <java-symbol type="dimen" name="config_fixedOrientationLetterboxAspectRatio" />
   <java-symbol type="dimen" name="config_letterboxBackgroundWallpaperBlurRadius" />
   <java-symbol type="integer" name="config_letterboxActivityCornersRadius" />

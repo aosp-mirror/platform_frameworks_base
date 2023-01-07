@@ -853,6 +853,8 @@
     <string name="media_move_closer_to_end_cast" msgid="6495907340926563656">"Flytta dig närmare <xliff:g id="DEVICENAME">%1$s</xliff:g> om du vill spela här"</string>
     <string name="media_transfer_playing_different_device" msgid="7186806382609785610">"Spelas upp på <xliff:g id="DEVICENAME">%1$s</xliff:g>"</string>
     <string name="media_transfer_failed" msgid="7955354964610603723">"Något gick fel. Försök igen."</string>
+    <!-- no translation found for media_transfer_loading (5544017127027152422) -->
+    <skip />
     <string name="controls_error_timeout" msgid="794197289772728958">"Inaktiv, kolla appen"</string>
     <string name="controls_error_removed" msgid="6675638069846014366">"Hittades inte"</string>
     <string name="controls_error_removed_title" msgid="1207794911208047818">"Styrning är inte tillgänglig"</string>
@@ -1004,8 +1006,7 @@
     <string name="keyguard_affordance_enablement_dialog_qr_scanner_instruction" msgid="5355839079232119791">"• installera en kameraapp"</string>
     <string name="keyguard_affordance_enablement_dialog_home_instruction_1" msgid="8438311171750568633">"• appen har konfigurerats"</string>
     <string name="keyguard_affordance_enablement_dialog_home_instruction_2" msgid="8308525385889021652">"• minst en enhet är tillgänglig"</string>
-    <!-- no translation found for keyguard_affordance_press_too_short (8145437175134998864) -->
-    <skip />
+    <string name="keyguard_affordance_press_too_short" msgid="8145437175134998864">"Tryck länge på genvägen"</string>
     <string name="rear_display_bottom_sheet_cancel" msgid="3461468855493357248">"Avbryt"</string>
     <string name="rear_display_bottom_sheet_confirm" msgid="4383356544661421206">"Vänd nu"</string>
     <string name="rear_display_fold_bottom_sheet_title" msgid="6081542277622721548">"Vik upp telefonen för att ta en bättre selfie"</string>
