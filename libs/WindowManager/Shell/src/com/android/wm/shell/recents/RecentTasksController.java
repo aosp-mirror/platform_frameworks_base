@@ -280,12 +280,19 @@ public class RecentTasksController implements TaskStackListenerCallback,
         }
     }
 
-    private void registerRecentTasksListener(IRecentTasksListener listener) {
+    @VisibleForTesting
+    void registerRecentTasksListener(IRecentTasksListener listener) {
         mListener = listener;
     }
 
-    private void unregisterRecentTasksListener() {
+    @VisibleForTesting
+    void unregisterRecentTasksListener() {
         mListener = null;
+    }
+
+    @VisibleForTesting
+    boolean hasRecentTasksListener() {
+        return mListener != null;
     }
 
     @VisibleForTesting
@@ -442,6 +449,8 @@ public class RecentTasksController implements TaskStackListenerCallback,
         @Override
         public void invalidate() {
             mController = null;
+            // Unregister the listener to ensure any registered binder death recipients are unlinked
+            mListener.unregister();
         }
 
         @Override
