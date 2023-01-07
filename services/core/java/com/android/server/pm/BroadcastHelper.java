@@ -51,7 +51,6 @@ import android.util.SparseArray;
 import com.android.internal.util.ArrayUtils;
 
 import java.util.ArrayList;
-import java.util.List;
 import java.util.function.BiFunction;
 import java.util.function.Supplier;
 
@@ -333,6 +332,13 @@ public final class BroadcastHelper {
 
         sendPackageBroadcast(Intent.ACTION_PACKAGE_ADDED,
                 packageName, extras, 0, null, null, userIds, instantUserIds,
+                broadcastAllowlist, null /* filterExtrasForReceiver */, null);
+        // Send to PermissionController for all new users, even if it may not be running for some
+        // users
+        sendPackageBroadcast(Intent.ACTION_PACKAGE_ADDED,
+                packageName, extras, 0,
+                mContext.getPackageManager().getPermissionControllerPackageName(),
+                null, userIds, instantUserIds,
                 broadcastAllowlist, null /* filterExtrasForReceiver */, null);
     }
 
