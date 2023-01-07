@@ -3759,7 +3759,6 @@ class WindowContainer<E extends WindowContainer> extends ConfigurationContainer<
         if (mSyncState == SYNC_STATE_NONE) return false;
         mSyncState = SYNC_STATE_READY;
         mSyncMethodOverride = BLASTSyncEngine.METHOD_UNDEFINED;
-        mWmService.mWindowPlacerLocked.requestTraversal();
         ProtoLog.v(WM_DEBUG_SYNC_ENGINE, "onSyncFinishedDrawing %s", this);
         return true;
     }
@@ -3829,8 +3828,8 @@ class WindowContainer<E extends WindowContainer> extends ConfigurationContainer<
 
     /**
      * Checks if the subtree rooted at this container is finished syncing (everything is ready or
-     * not visible). NOTE, this is not const: it will cancel/prepare itself depending on its state
-     * in the hierarchy.
+     * not visible). NOTE, this is not const: it may cancel/prepare/complete itself depending on
+     * its state in the hierarchy.
      *
      * @return {@code true} if this subtree is finished waiting for sync participants.
      */

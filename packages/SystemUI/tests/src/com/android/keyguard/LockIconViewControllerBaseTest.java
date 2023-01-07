@@ -68,6 +68,7 @@ import org.mockito.quality.Strictness;
 
 public class LockIconViewControllerBaseTest extends SysuiTestCase {
     protected static final String UNLOCKED_LABEL = "unlocked";
+    protected static final String LOCKED_LABEL = "locked";
     protected static final int PADDING = 10;
 
     protected MockitoSession mStaticMockSession;
@@ -130,6 +131,7 @@ public class LockIconViewControllerBaseTest extends SysuiTestCase {
         Rect windowBounds = new Rect(0, 0, 800, 1200);
         when(mWindowManager.getCurrentWindowMetrics().getBounds()).thenReturn(windowBounds);
         when(mResources.getString(R.string.accessibility_unlock_button)).thenReturn(UNLOCKED_LABEL);
+        when(mResources.getString(R.string.accessibility_lock_icon)).thenReturn(LOCKED_LABEL);
         when(mResources.getDrawable(anyInt(), any())).thenReturn(mIconDrawable);
         when(mResources.getDimensionPixelSize(R.dimen.lock_icon_padding)).thenReturn(PADDING);
         when(mAuthController.getScaleFactor()).thenReturn(1f);

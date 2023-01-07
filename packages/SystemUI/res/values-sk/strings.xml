@@ -853,6 +853,8 @@
     <string name="media_move_closer_to_end_cast" msgid="6495907340926563656">"Ak chcete prehrávať v zariadení <xliff:g id="DEVICENAME">%1$s</xliff:g>, priblížte sa k nemu"</string>
     <string name="media_transfer_playing_different_device" msgid="7186806382609785610">"Prehráva sa v zariadení <xliff:g id="DEVICENAME">%1$s</xliff:g>"</string>
     <string name="media_transfer_failed" msgid="7955354964610603723">"Niečo sa pokazilo. Skúste to znova."</string>
+    <!-- no translation found for media_transfer_loading (5544017127027152422) -->
+    <skip />
     <string name="controls_error_timeout" msgid="794197289772728958">"Neaktívne, preverte aplikáciu"</string>
     <string name="controls_error_removed" msgid="6675638069846014366">"Nenájdené"</string>
     <string name="controls_error_removed_title" msgid="1207794911208047818">"Ovládač nie je k dispozícii"</string>
@@ -1004,8 +1006,7 @@
     <string name="keyguard_affordance_enablement_dialog_qr_scanner_instruction" msgid="5355839079232119791">"• Nainštalujte si aplikáciu kamery"</string>
     <string name="keyguard_affordance_enablement_dialog_home_instruction_1" msgid="8438311171750568633">"• Aplikácia je nastavená"</string>
     <string name="keyguard_affordance_enablement_dialog_home_instruction_2" msgid="8308525385889021652">"• K dispozícii je minimálne jedno zariadenie"</string>
-    <!-- no translation found for keyguard_affordance_press_too_short (8145437175134998864) -->
-    <skip />
+    <string name="keyguard_affordance_press_too_short" msgid="8145437175134998864">"Pridržte skratku"</string>
     <string name="rear_display_bottom_sheet_cancel" msgid="3461468855493357248">"Zrušiť"</string>
     <string name="rear_display_bottom_sheet_confirm" msgid="4383356544661421206">"Prevráťte"</string>
     <string name="rear_display_fold_bottom_sheet_title" msgid="6081542277622721548">"Ak chcete lepšie selfie, rozložte telefón"</string>

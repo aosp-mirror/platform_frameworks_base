@@ -853,6 +853,8 @@
     <string name="media_move_closer_to_end_cast" msgid="6495907340926563656">"Burada oynatmak için <xliff:g id="DEVICENAME">%1$s</xliff:g> cihazına yaklaşın"</string>
     <string name="media_transfer_playing_different_device" msgid="7186806382609785610">"<xliff:g id="DEVICENAME">%1$s</xliff:g> cihazında oynatılıyor"</string>
     <string name="media_transfer_failed" msgid="7955354964610603723">"Bir sorun oldu. Tekrar deneyin."</string>
+    <!-- no translation found for media_transfer_loading (5544017127027152422) -->
+    <skip />
     <string name="controls_error_timeout" msgid="794197289772728958">"Devre dışı, uygulamaya bakın"</string>
     <string name="controls_error_removed" msgid="6675638069846014366">"Bulunamadı"</string>
     <string name="controls_error_removed_title" msgid="1207794911208047818">"Kontrol kullanılamıyor"</string>
@@ -1004,8 +1006,7 @@
     <string name="keyguard_affordance_enablement_dialog_qr_scanner_instruction" msgid="5355839079232119791">"• Kamera uygulaması yüklenmelidir"</string>
     <string name="keyguard_affordance_enablement_dialog_home_instruction_1" msgid="8438311171750568633">"• Uygulama kurulmuş olmalıdır"</string>
     <string name="keyguard_affordance_enablement_dialog_home_instruction_2" msgid="8308525385889021652">"• En az bir cihaz mevcut olmalıdır"</string>
-    <!-- no translation found for keyguard_affordance_press_too_short (8145437175134998864) -->
-    <skip />
+    <string name="keyguard_affordance_press_too_short" msgid="8145437175134998864">"Kısayola dokunup basılı tutun"</string>
     <string name="rear_display_bottom_sheet_cancel" msgid="3461468855493357248">"İptal"</string>
     <string name="rear_display_bottom_sheet_confirm" msgid="4383356544661421206">"Şimdi çevirin"</string>
     <string name="rear_display_fold_bottom_sheet_title" msgid="6081542277622721548">"Daha iyi selfie çekmek için telefonu açın"</string>

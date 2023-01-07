@@ -16,7 +16,6 @@
 package com.android.systemui.surfaceeffects.turbulencenoise
 
 import android.testing.AndroidTestingRunner
-import android.view.View
 import androidx.test.filters.SmallTest
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.util.concurrency.FakeExecutor
@@ -34,53 +33,65 @@ class TurbulenceNoiseViewTest : SysuiTestCase() {
     private val fakeExecutor = FakeExecutor(fakeSystemClock)
 
     @Test
-    fun play_viewHasCorrectVisibility() {
-        val config = TurbulenceNoiseAnimationConfig(duration = 1000f)
-        val turbulenceNoiseView = TurbulenceNoiseView(context, null)
-
-        assertThat(turbulenceNoiseView.visibility).isEqualTo(View.INVISIBLE)
-
-        fakeExecutor.execute {
-            turbulenceNoiseView.play(config)
-
-            assertThat(turbulenceNoiseView.visibility).isEqualTo(View.VISIBLE)
-
-            fakeSystemClock.advanceTime(config.duration.toLong())
-
-            assertThat(turbulenceNoiseView.visibility).isEqualTo(View.INVISIBLE)
-        }
-    }
-
-    @Test
     fun play_playsAnimation() {
-        val config = TurbulenceNoiseAnimationConfig(duration = 1000f)
-        val turbulenceNoiseView = TurbulenceNoiseView(context, null)
+        val config = TurbulenceNoiseAnimationConfig()
+        val turbulenceNoiseView = TurbulenceNoiseView(context, null).also { it.applyConfig(config) }
+        var onAnimationEndCalled = false
 
         fakeExecutor.execute {
-            turbulenceNoiseView.play(config)
+            turbulenceNoiseView.play(onAnimationEnd = { onAnimationEndCalled = true })
 
-            assertThat(turbulenceNoiseView.isPlaying).isTrue()
+            fakeSystemClock.advanceTime(config.maxDuration.toLong())
+
+            assertThat(onAnimationEndCalled).isTrue()
         }
     }
 
     @Test
-    fun play_onEnd_triggersOnAnimationEnd() {
-        var animationEnd = false
-        val config =
-            TurbulenceNoiseAnimationConfig(
-                duration = 1000f,
-                onAnimationEnd = { animationEnd = true }
-            )
-        val turbulenceNoiseView = TurbulenceNoiseView(context, null)
+    fun playEaseIn_playsEaseInAnimation() {
+        val config = TurbulenceNoiseAnimationConfig()
+        val turbulenceNoiseView = TurbulenceNoiseView(context, null).also { it.applyConfig(config) }
+        var onAnimationEndCalled = false
 
         fakeExecutor.execute {
-            turbulenceNoiseView.play(config)
+            turbulenceNoiseView.playEaseIn(onAnimationEnd = { onAnimationEndCalled = true })
 
-            assertThat(turbulenceNoiseView.isPlaying).isTrue()
+            fakeSystemClock.advanceTime(config.easeInDuration.toLong())
 
-            fakeSystemClock.advanceTime(config.duration.toLong())
+            assertThat(onAnimationEndCalled).isTrue()
+        }
+    }
 
-            assertThat(animationEnd).isTrue()
+    @Test
+    fun playEaseOut_playsEaseOutAnimation() {
+        val config = TurbulenceNoiseAnimationConfig()
+        val turbulenceNoiseView = TurbulenceNoiseView(context, null).also { it.applyConfig(config) }
+        var onAnimationEndCalled = false
+
+        fakeExecutor.execute {
+            turbulenceNoiseView.playEaseOut(onAnimationEnd = { onAnimationEndCalled = true })
+
+            fakeSystemClock.advanceTime(config.easeOutDuration.toLong())
+
+            assertThat(onAnimationEndCalled).isTrue()
+        }
+    }
+
+    @Test
+    fun finish_animationPlaying_finishesAnimation() {
+        val config = TurbulenceNoiseAnimationConfig()
+        val turbulenceNoiseView = TurbulenceNoiseView(context, null).also { it.applyConfig(config) }
+        var onAnimationEndCalled = false
+
+        fakeExecutor.execute {
+            turbulenceNoiseView.play(onAnimationEnd = { onAnimationEndCalled = true })
+
+            assertThat(turbulenceNoiseView.currentAnimator).isNotNull()
+
+            turbulenceNoiseView.finish()
+
+            assertThat(onAnimationEndCalled).isTrue()
+            assertThat(turbulenceNoiseView.currentAnimator).isNull()
         }
     }
 }
