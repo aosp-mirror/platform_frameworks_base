@@ -995,6 +995,9 @@ public class NavigationBar extends ViewController<NavigationBarView> implements 
         pw.println("  mOrientedHandleSamplingRegion: " + mOrientedHandleSamplingRegion);
         mView.dump(pw);
         mRegionSamplingHelper.dump(pw);
+        if (mAutoHideController != null) {
+            mAutoHideController.dump(pw);
+        }
     }
 
     // ----- CommandQueue Callbacks -----
