@@ -53,7 +53,7 @@ public class TechListParcel implements Parcelable {
             int count = source.readInt();
             String[][] techLists = new String[count][];
             for (int i = 0; i < count; i++) {
-                techLists[i] = source.readStringArray();
+                techLists[i] = source.createStringArray();
             }
             return new TechListParcel(techLists);
         }
