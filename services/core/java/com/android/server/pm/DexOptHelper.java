@@ -41,6 +41,7 @@ import android.annotation.Nullable;
 import android.annotation.RequiresPermission;
 import android.app.ActivityManager;
 import android.app.AppGlobals;
+import android.content.Context;
 import android.content.Intent;
 import android.content.pm.ResolveInfo;
 import android.content.pm.SharedLibraryInfo;
@@ -84,8 +85,10 @@ import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
+import java.util.concurrent.Executor;
 import java.util.concurrent.TimeUnit;
 import java.util.function.Predicate;
 
@@ -524,28 +527,12 @@ public final class DexOptHelper {
                 return Optional.empty();
             }
 
-            // TODO(b/251903639): Either remove controlDexOptBlocking, or don't ignore it here.
             OptimizeResult result;
             try {
                 result = artManager.optimizePackage(snapshot, options.getPackageName(), params);
             } catch (UnsupportedOperationException e) {
                 reportArtManagerFallback(options.getPackageName(), e.toString());
                 return Optional.empty();
-            }
-
-            // TODO(b/251903639): Move this to ArtManagerLocal.addOptimizePackageDoneCallback when
-            // it is implemented.
-            for (OptimizeResult.PackageOptimizeResult pkgRes : result.getPackageOptimizeResults()) {
-                PackageState ps = snapshot.getPackageState(pkgRes.getPackageName());
-                AndroidPackage ap = ps != null ? ps.getAndroidPackage() : null;
-                if (ap != null) {
-                    CompilerStats.PackageStats stats = mPm.getOrCreateCompilerPackageStats(ap);
-                    for (OptimizeResult.DexContainerFileOptimizeResult dexRes :
-                            pkgRes.getDexContainerFileOptimizeResults()) {
-                        stats.setCompileTime(
-                                dexRes.getDexContainerFile(), dexRes.getDex2oatWallTimeMillis());
-                    }
-                }
             }
 
             return Optional.of(convertToDexOptResult(result));
@@ -965,6 +952,46 @@ public final class DexOptHelper {
         } catch (ManagerNotFoundException e) {
             throw new RuntimeException(e);
         }
+    }
+
+    private static class OptimizePackageDoneHandler
+            implements ArtManagerLocal.OptimizePackageDoneCallback {
+        @NonNull private final PackageManagerService mPm;
+
+        OptimizePackageDoneHandler(@NonNull PackageManagerService pm) { mPm = pm; }
+
+        /**
+         * Called after every package optimization operation done by {@link ArtManagerLocal}.
+         */
+        @Override
+        public void onOptimizePackageDone(@NonNull OptimizeResult result) {
+            for (OptimizeResult.PackageOptimizeResult pkgRes : result.getPackageOptimizeResults()) {
+                CompilerStats.PackageStats stats =
+                        mPm.getOrCreateCompilerPackageStats(pkgRes.getPackageName());
+                for (OptimizeResult.DexContainerFileOptimizeResult dexRes :
+                        pkgRes.getDexContainerFileOptimizeResults()) {
+                    stats.setCompileTime(
+                            dexRes.getDexContainerFile(), dexRes.getDex2oatWallTimeMillis());
+                }
+            }
+        }
+    }
+
+    /**
+     * Initializes {@link ArtManagerLocal} before {@link getArtManagerLocal} is called.
+     */
+    public static void initializeArtManagerLocal(
+            @NonNull Context systemContext, @NonNull PackageManagerService pm) {
+        if (!useArtService()) {
+            return;
+        }
+
+        ArtManagerLocal artManager = new ArtManagerLocal(systemContext);
+        // There doesn't appear to be any checks that @NonNull is heeded, so use requireNonNull
+        // below to ensure we don't store away a null that we'll fail on later.
+        artManager.addOptimizePackageDoneCallback(false /* onlyIncludeUpdates */,
+                Runnable::run, new OptimizePackageDoneHandler(Objects.requireNonNull(pm)));
+        LocalManagerRegistry.addManager(ArtManagerLocal.class, artManager);
     }
 
     /**

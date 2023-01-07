@@ -108,7 +108,6 @@ import com.android.internal.widget.LockSettingsInternal;
 import com.android.server.am.ActivityManagerService;
 import com.android.server.ambientcontext.AmbientContextManagerService;
 import com.android.server.appbinding.AppBindingService;
-import com.android.server.art.ArtManagerLocal;
 import com.android.server.art.ArtModuleServiceInitializer;
 import com.android.server.art.DexUseManagerLocal;
 import com.android.server.attention.AttentionManagerService;
@@ -132,8 +131,8 @@ import com.android.server.display.DisplayManagerService;
 import com.android.server.display.color.ColorDisplayService;
 import com.android.server.dreams.DreamManagerService;
 import com.android.server.emergency.EmergencyAffordanceService;
-import com.android.server.grammaticalinflection.GrammaticalInflectionService;
 import com.android.server.gpu.GpuService;
+import com.android.server.grammaticalinflection.GrammaticalInflectionService;
 import com.android.server.graphics.fonts.FontManagerService;
 import com.android.server.hdmi.HdmiControlService;
 import com.android.server.incident.IncidentCompanionService;
@@ -163,6 +162,7 @@ import com.android.server.pm.ApexSystemServiceInfo;
 import com.android.server.pm.BackgroundInstallControlService;
 import com.android.server.pm.CrossProfileAppsService;
 import com.android.server.pm.DataLoaderManagerService;
+import com.android.server.pm.DexOptHelper;
 import com.android.server.pm.DynamicCodeLoggingService;
 import com.android.server.pm.Installer;
 import com.android.server.pm.LauncherAppsService;
@@ -2770,7 +2770,7 @@ public final class SystemServer implements Dumpable {
         t.traceEnd();
 
         t.traceBegin("ArtManagerLocal");
-        LocalManagerRegistry.addManager(ArtManagerLocal.class, new ArtManagerLocal(context));
+        DexOptHelper.initializeArtManagerLocal(context, mPackageManagerService);
         t.traceEnd();
 
         if (context.getPackageManager().hasSystemFeature(PackageManager.FEATURE_UWB)) {
