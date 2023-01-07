@@ -39834,10 +39834,10 @@ package android.service.credentials {
   }
 
   public final class CallingAppInfo implements android.os.Parcelable {
-    ctor public CallingAppInfo(@NonNull String, @NonNull java.util.Set<android.content.pm.Signature>);
+    ctor public CallingAppInfo(@NonNull String, @NonNull android.content.pm.SigningInfo);
     method public int describeContents();
     method @NonNull public String getPackageName();
-    method @NonNull public java.util.Set<android.content.pm.Signature> getSignatures();
+    method @NonNull public android.content.pm.SigningInfo getSigningInfo();
     method public void writeToParcel(@NonNull android.os.Parcel, int);
     field @NonNull public static final android.os.Parcelable.Creator<android.service.credentials.CallingAppInfo> CREATOR;
   }

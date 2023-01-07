@@ -26,6 +26,7 @@ import android.os.Binder;
 import android.os.Handler;
 import android.os.IBinder;
 import android.os.Looper;
+import android.service.credentials.CallingAppInfo;
 import android.service.credentials.CredentialProviderInfo;
 import android.util.Log;
 
@@ -49,20 +50,20 @@ abstract class RequestSession<T, U> implements CredentialManagerUi.CredentialMan
     @NonNull protected final String mRequestType;
     @NonNull protected final Handler mHandler;
     @UserIdInt protected final int mUserId;
-    @NonNull protected final String mClientCallingPackage;
+    @NonNull protected final CallingAppInfo mClientAppInfo;
 
     protected final Map<String, ProviderSession> mProviders = new HashMap<>();
 
     protected RequestSession(@NonNull Context context,
             @UserIdInt int userId, @NonNull T clientRequest, U clientCallback,
             @NonNull String requestType,
-            String clientCallingPackage) {
+            CallingAppInfo callingAppInfo) {
         mContext = context;
         mUserId = userId;
         mClientRequest = clientRequest;
         mClientCallback = clientCallback;
         mRequestType = requestType;
-        mClientCallingPackage = clientCallingPackage;
+        mClientAppInfo = callingAppInfo;
         mHandler = new Handler(Looper.getMainLooper(), null, true);
         mRequestId = new Binder();
         mCredentialManagerUi = new CredentialManagerUi(mContext,

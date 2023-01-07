@@ -23,6 +23,7 @@ import android.annotation.UserIdInt;
 import android.app.ActivityManager;
 import android.content.ComponentName;
 import android.content.Context;
+import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
 import android.credentials.ClearCredentialStateRequest;
 import android.credentials.CreateCredentialRequest;
@@ -44,6 +45,7 @@ import android.os.UserHandle;
 import android.provider.Settings;
 import android.service.credentials.BeginCreateCredentialRequest;
 import android.service.credentials.BeginGetCredentialRequest;
+import android.service.credentials.CallingAppInfo;
 import android.service.credentials.CredentialProviderInfo;
 import android.text.TextUtils;
 import android.util.Log;
@@ -189,6 +191,20 @@ public final class CredentialManagerService
         return providerSessions;
     }
 
+    private CallingAppInfo constructCallingAppInfo(String packageName, int userId) {
+        final PackageInfo packageInfo;
+        try {
+            packageInfo = getContext().getPackageManager().getPackageInfoAsUser(
+                    packageName,
+                    PackageManager.PackageInfoFlags.of(PackageManager.GET_SIGNING_CERTIFICATES),
+                    userId);
+        } catch (PackageManager.NameNotFoundException e) {
+            Log.i(TAG, "Issue while retrieving signatureInfo : " + e.getMessage());
+            return new CallingAppInfo(packageName, null);
+        }
+        return new CallingAppInfo(packageName, packageInfo.signingInfo);
+    }
+
     final class CredentialManagerServiceStub extends ICredentialManager.Stub {
         @Override
         public ICancellationSignal executeGetCredential(
@@ -199,14 +215,15 @@ public final class CredentialManagerService
             // TODO : Implement cancellation
             ICancellationSignal cancelTransport = CancellationSignal.createTransport();
 
+            int userId = UserHandle.getCallingUserId();
             // New request session, scoped for this request only.
             final GetRequestSession session =
                     new GetRequestSession(
                             getContext(),
-                            UserHandle.getCallingUserId(),
+                            userId,
                             callback,
                             request,
-                            callingPackage);
+                            constructCallingAppInfo(callingPackage, userId));
 
             // Initiate all provider sessions
             List<ProviderSession> providerSessions =
@@ -252,13 +269,14 @@ public final class CredentialManagerService
             ICancellationSignal cancelTransport = CancellationSignal.createTransport();
 
             // New request session, scoped for this request only.
+            int userId = UserHandle.getCallingUserId();
             final CreateRequestSession session =
                     new CreateRequestSession(
                             getContext(),
-                            UserHandle.getCallingUserId(),
+                            userId,
                             request,
                             callback,
-                            callingPackage);
+                            constructCallingAppInfo(callingPackage, userId));
 
             // Initiate all provider sessions
             List<ProviderSession> providerSessions =
@@ -368,13 +386,14 @@ public final class CredentialManagerService
             ICancellationSignal cancelTransport = CancellationSignal.createTransport();
 
             // New request session, scoped for this request only.
+            int userId = UserHandle.getCallingUserId();
             final ClearRequestSession session =
                     new ClearRequestSession(
                             getContext(),
-                            UserHandle.getCallingUserId(),
+                            userId,
                             callback,
                             request,
-                            callingPackage);
+                            constructCallingAppInfo(callingPackage, userId));
 
             // Initiate all provider sessions
             // TODO: Determine if provider needs to have clear capability in their manifest
