@@ -720,7 +720,7 @@ public abstract class Service extends ContextWrapper implements ComponentCallbac
      * apps targeting SDK Version {@link android.os.Build.VERSION_CODES#S}
      * or higher are not allowed to start foreground services from the background.
      * See
-     * <a href="{@docRoot}/about/versions/12/behavior-changes-12">
+     * <a href="{@docRoot}about/versions/12/behavior-changes-12">
      * Behavior changes: Apps targeting Android 12
      * </a>
      * for more details.
@@ -769,7 +769,7 @@ public abstract class Service extends ContextWrapper implements ComponentCallbac
    * apps targeting SDK Version {@link android.os.Build.VERSION_CODES#S}
    * or higher are not allowed to start foreground services from the background.
    * See
-   * <a href="{@docRoot}/about/versions/12/behavior-changes-12">
+   * <a href="{@docRoot}about/versions/12/behavior-changes-12">
    * Behavior changes: Apps targeting Android 12
    * </a>
    * for more details.
