@@ -1475,14 +1475,18 @@ public class ComputerEngine implements Computer {
             // Compute GIDs only if requested
             final int[] gids = (flags & PackageManager.GET_GIDS) == 0 ? EMPTY_INT_ARRAY
                     : mPermissionManager.getGidsForUid(UserHandle.getUid(userId, ps.getAppId()));
+            // Compute installed permissions only if requested
+            final Set<String> installedPermissions = ((flags & PackageManager.GET_PERMISSIONS) == 0
+                    || ArrayUtils.isEmpty(p.getPermissions())) ? Collections.emptySet()
+                    : mPermissionManager.getInstalledPermissions(ps.getPackageName());
             // Compute granted permissions only if package has requested permissions
-            final Set<String> permissions = ((flags & PackageManager.GET_PERMISSIONS) == 0
+            final Set<String> grantedPermissions = ((flags & PackageManager.GET_PERMISSIONS) == 0
                     || ArrayUtils.isEmpty(p.getRequestedPermissions())) ? Collections.emptySet()
                     : mPermissionManager.getGrantedPermissions(ps.getPackageName(), userId);
 
             PackageInfo packageInfo = PackageInfoUtils.generate(p, gids, flags,
-                    state.getFirstInstallTimeMillis(), ps.getLastUpdateTime(), permissions, state,
-                    userId, ps);
+                    state.getFirstInstallTimeMillis(), ps.getLastUpdateTime(), installedPermissions,
+                    grantedPermissions, state, userId, ps);
 
             if (packageInfo == null) {
                 return null;

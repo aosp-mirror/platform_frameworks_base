@@ -780,9 +780,11 @@ public class PackageParserTest {
         assertArrayEquals(a.getSplitFlags(), b.getSplitFlags());
 
         PackageInfo aInfo = PackageInfoUtils.generate(a, new int[]{}, 0, 0, 0,
-                Collections.emptySet(), PackageUserStateInternal.DEFAULT, 0, mockPkgSetting(a));
+                Collections.emptySet(), Collections.emptySet(), PackageUserStateInternal.DEFAULT, 0,
+                mockPkgSetting(a));
         PackageInfo bInfo = PackageInfoUtils.generate(b, new int[]{}, 0, 0, 0,
-                Collections.emptySet(), PackageUserStateInternal.DEFAULT, 0, mockPkgSetting(b));
+                Collections.emptySet(), Collections.emptySet(), PackageUserStateInternal.DEFAULT, 0,
+                mockPkgSetting(b));
         assertApplicationInfoEqual(aInfo.applicationInfo, bInfo.applicationInfo);
 
         assertEquals(ArrayUtils.size(a.getPermissions()), ArrayUtils.size(b.getPermissions()));

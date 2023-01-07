@@ -453,6 +453,18 @@ public interface PermissionManagerServiceInterface extends PermissionManagerInte
     void writeLegacyPermissionStateTEMP();
 
     /**
+     * Get all the permissions definitions from a package that's installed in the system.
+     * <p>
+     * A permission definition in a normal app may not be installed if it's overridden by the
+     * platform or system app that contains a conflicting definition after system upgrade.
+     *
+     * @param packageName the name of the package
+     * @return the names of the installed permissions
+     */
+    @NonNull
+    Set<String> getInstalledPermissions(@NonNull String packageName);
+
+    /**
      * Get all the permissions granted to a package.
      *
      * @param packageName the name of the package
