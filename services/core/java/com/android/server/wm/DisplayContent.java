@@ -4320,6 +4320,11 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
             return mImeTarget;
         }
 
+        @VisibleForTesting
+        SurfaceControl getImeScreenshotSurface() {
+            return mImeSurface;
+        }
+
         private SurfaceControl createImeSurface(ScreenCapture.ScreenshotHardwareBuffer b,
                 Transaction t) {
             final HardwareBuffer buffer = b.getHardwareBuffer();
@@ -4429,33 +4434,45 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
         }
     }
 
-    private void attachAndShowImeScreenshotOnTarget() {
+    private void attachImeScreenshotOnTargetIfNeeded() {
         // No need to attach screenshot if the IME target not exists or screen is off.
         if (!shouldImeAttachedToApp() || !mWmService.mPolicy.isScreenOn()) {
             return;
         }
 
-        final SurfaceControl.Transaction t = getPendingTransaction();
         // Prepare IME screenshot for the target if it allows to attach into.
         if (mInputMethodWindow != null && mInputMethodWindow.isVisible()) {
-            // Remove the obsoleted IME snapshot first in case the new snapshot happens to
-            // override the current one before the transition finish and the surface never be
-            // removed on the task.
-            removeImeSurfaceImmediately();
-            mImeScreenshot = new ImeScreenshot(
-                    mWmService.mSurfaceControlFactory.apply(null), mImeLayeringTarget);
-            mImeScreenshot.attachAndShow(t);
+            attachImeScreenshotOnTarget(mImeLayeringTarget);
         }
     }
 
+    private void attachImeScreenshotOnTarget(WindowState imeTarget) {
+        final SurfaceControl.Transaction t = getPendingTransaction();
+        // Remove the obsoleted IME snapshot first in case the new snapshot happens to
+        // override the current one before the transition finish and the surface never be
+        // removed on the task.
+        removeImeSurfaceImmediately();
+        mImeScreenshot = new ImeScreenshot(
+                mWmService.mSurfaceControlFactory.apply(null), imeTarget);
+        mImeScreenshot.attachAndShow(t);
+    }
+
     /**
-     * Shows the IME screenshot and attach to the IME target window.
+     * Shows the IME screenshot and attach to the IME layering target window.
      *
      * Used when the IME target window with IME visible is transitioning to the next target.
      * e.g. App transitioning or swiping this the task of the IME target window to recents app.
      */
     void showImeScreenshot() {
-        attachAndShowImeScreenshotOnTarget();
+        attachImeScreenshotOnTargetIfNeeded();
+    }
+
+    /**
+     * Shows the IME screenshot and attach it to the given IME target window.
+     */
+    @VisibleForTesting
+    void showImeScreenshot(WindowState imeTarget) {
+        attachImeScreenshotOnTarget(imeTarget);
     }
 
     /**

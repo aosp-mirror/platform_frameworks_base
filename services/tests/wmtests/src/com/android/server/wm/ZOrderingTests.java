@@ -45,16 +45,21 @@ import static com.android.server.wm.WindowStateAnimator.PRESERVED_SURFACE_LAYER;
 
 import static com.google.common.truth.Truth.assertThat;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
+import android.graphics.PixelFormat;
+import android.graphics.Rect;
 import android.os.Binder;
 import android.platform.test.annotations.Presubmit;
 import android.util.SparseBooleanArray;
 import android.view.IRecentsAnimationRunner;
 import android.view.SurfaceControl;
 import android.view.SurfaceSession;
+import android.window.ScreenCapture;
 
 import androidx.test.filters.SmallTest;
 
@@ -568,5 +573,27 @@ public class ZOrderingTests extends WindowTestsBase {
         assertThat(systemDialogWindow.needsRelativeLayeringToIme()).isTrue();
         assertZOrderGreaterThan(mTransaction, systemDialogWindow.getSurfaceControl(),
                 mDisplayContent.getImeContainer().getSurfaceControl());
+    }
+
+    @Test
+    public void testImeScreenshotLayer() {
+        final Task task = createTask(mDisplayContent);
+        final WindowState imeAppTarget = createAppWindow(task, TYPE_APPLICATION, "imeAppTarget");
+        final Rect bounds = mImeWindow.getParentFrame();
+        final ScreenCapture.ScreenshotHardwareBuffer imeBuffer =
+                ScreenCapture.captureLayersExcluding(mImeWindow.getSurfaceControl(),
+                bounds, 1.0f, PixelFormat.RGB_565, null);
+
+        spyOn(mDisplayContent.mWmService.mTaskSnapshotController);
+        doReturn(imeBuffer).when(mDisplayContent.mWmService.mTaskSnapshotController)
+                .snapshotImeFromAttachedTask(task);
+
+        mDisplayContent.showImeScreenshot(imeAppTarget);
+
+        assertEquals(imeAppTarget, mDisplayContent.mImeScreenshot.getImeTarget());
+        assertNotNull(mDisplayContent.mImeScreenshot);
+        assertZOrderGreaterThan(mTransaction,
+                mDisplayContent.mImeScreenshot.getImeScreenshotSurface(),
+                imeAppTarget.mSurfaceControl);
     }
 }
