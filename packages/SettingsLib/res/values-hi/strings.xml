@@ -184,7 +184,7 @@
     <string name="launch_defaults_some" msgid="3631650616557252926">"कुछ डिफ़ॉल्‍ट सेट हैं"</string>
     <string name="launch_defaults_none" msgid="8049374306261262709">"कोई डिफ़ॉल्‍ट सेट नहीं है"</string>
     <string name="tts_settings" msgid="8130616705989351312">"लेख से बोली सेटिंग"</string>
-    <string name="tts_settings_title" msgid="7602210956640483039">"लिखाई को बोली में बदलना"</string>
+    <string name="tts_settings_title" msgid="7602210956640483039">"लिखाई को बोली में बदलने की सुविधा"</string>
     <string name="tts_default_rate_title" msgid="3964187817364304022">"बोली दर"</string>
     <string name="tts_default_rate_summary" msgid="3781937042151716987">"बोलने की गति तय करें"</string>
     <string name="tts_default_pitch_title" msgid="6988592215554485479">"पिच"</string>

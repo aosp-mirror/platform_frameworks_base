@@ -597,7 +597,7 @@
     <string name="fingerprint_acquired_immobile" msgid="1621891895241888048">"지문을 등록할 때마다 손가락을 조금씩 이동하세요"</string>
   <string-array name="fingerprint_acquired_vendor">
   </string-array>
-    <string name="fingerprint_error_not_match" msgid="4599441812893438961">"지문이 인식되지 않습니다."</string>
+    <string name="fingerprint_error_not_match" msgid="4599441812893438961">"지문이 인식되지 않았습니다."</string>
     <string name="fingerprint_udfps_error_not_match" msgid="8236930793223158856">"지문을 인식할 수 없습니다."</string>
     <string name="fingerprint_authenticated" msgid="2024862866860283100">"지문이 인증됨"</string>
     <string name="face_authenticated_no_confirmation_required" msgid="8867889115112348167">"얼굴이 인증되었습니다"</string>
@@ -691,6 +691,8 @@
     <string name="permdesc_readMediaVideo" msgid="3846400073770403528">"앱이 공유 저장소에서 동영상 파일을 읽도록 허용합니다."</string>
     <string name="permlab_readMediaImages" msgid="4057590631020986789">"공유 저장소에서 이미지 파일 읽기"</string>
     <string name="permdesc_readMediaImages" msgid="5836219373138469259">"앱이 공유 저장소에서 이미지 파일을 읽도록 허용합니다."</string>
+    <string name="permlab_readVisualUserSelect" msgid="5516204215354667586">"공유 저장소에서 사용자가 선택한 이미지 및 동영상 파일 읽기"</string>
+    <string name="permdesc_readVisualUserSelect" msgid="8027174717714968217">"앱이 공유 저장소에서 내가 선택한 이미지와 동영상 파일을 읽을 수 있도록 허용합니다."</string>
     <string name="permlab_sdcardWrite" msgid="4863021819671416668">"공유 저장공간의 콘텐츠 수정 또는 삭제"</string>
     <string name="permdesc_sdcardWrite" msgid="8376047679331387102">"앱이 공유 저장공간의 콘텐츠에 쓰도록 허용합니다."</string>
     <string name="permlab_use_sip" msgid="8250774565189337477">"SIP 통화 발신/수신"</string>
