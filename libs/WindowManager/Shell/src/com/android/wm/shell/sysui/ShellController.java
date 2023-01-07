@@ -164,7 +164,8 @@ public class ShellController {
      * Updates the given bundle with the set of external interfaces, invalidating the old set of
      * binders.
      */
-    private void createExternalInterfaces(Bundle output) {
+    @VisibleForTesting
+    public void createExternalInterfaces(Bundle output) {
         // Invalidate the old binders
         for (int i = 0; i < mExternalInterfaces.size(); i++) {
             mExternalInterfaces.valueAt(i).invalidate();
