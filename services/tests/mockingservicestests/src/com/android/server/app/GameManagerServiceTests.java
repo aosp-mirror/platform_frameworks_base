@@ -1884,16 +1884,20 @@ public class GameManagerServiceTests {
     @Test
     public void testUpdateCustomGameModeConfiguration() throws InterruptedException {
         mockModifyGameModeGranted();
-        GameManagerService gameManagerService = createServiceAndStartUser(USER_ID_1);
+        GameManagerService gameManagerService = Mockito.spy(createServiceAndStartUser(USER_ID_1));
+        gameManagerService.setGameMode(mPackageName, GameManager.GAME_MODE_CUSTOM, USER_ID_1);
         gameManagerService.updateCustomGameModeConfiguration(mPackageName,
                 new GameModeConfiguration.Builder().setScalingFactor(0.35f).setFpsOverride(
                         60).build(),
                 USER_ID_1);
-
         assertTrue(gameManagerService.mHandler.hasEqualMessages(WRITE_SETTINGS, USER_ID_1));
         assertTrue(
                 gameManagerService.mHandler.hasEqualMessages(WRITE_GAME_MODE_INTERVENTION_LIST_FILE,
                         USER_ID_1));
+        Mockito.verify(gameManagerService).setOverrideFrameRate(
+                ArgumentMatchers.eq(DEFAULT_PACKAGE_UID),
+                ArgumentMatchers.eq(60.0f));
+        checkFps(gameManagerService, GameManager.GAME_MODE_CUSTOM, 60);
 
         GameManagerService.GamePackageConfiguration pkgConfig = gameManagerService.getConfig(
                 mPackageName, USER_ID_1);
