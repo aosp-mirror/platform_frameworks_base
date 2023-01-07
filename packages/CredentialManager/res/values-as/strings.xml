@@ -4,49 +4,49 @@
     <string name="app_name" msgid="4539824758261855508">"CredentialManager"</string>
     <string name="string_cancel" msgid="6369133483981306063">"বাতিল কৰক"</string>
     <string name="string_continue" msgid="1346732695941131882">"অব্যাহত ৰাখক"</string>
+    <string name="string_more_options" msgid="7990658711962795124">"অধিক বিকল্প"</string>
     <string name="string_create_in_another_place" msgid="1033635365843437603">"অন্য ঠাইত সৃষ্টি কৰক"</string>
     <string name="string_save_to_another_place" msgid="7590325934591079193">"অন্য ঠাইত ছেভ কৰক"</string>
     <string name="string_use_another_device" msgid="8754514926121520445">"অন্য ডিভাইচ ব্যৱহাৰ কৰক"</string>
     <string name="string_save_to_another_device" msgid="1959562542075194458">"অন্য এটা ডিভাইচত ছেভ কৰক"</string>
     <string name="passkey_creation_intro_title" msgid="4251037543787718844">"পাছকীৰ জৰিয়তে অধিক সুৰক্ষিত"</string>
-    <string name="passkey_creation_intro_body_password" msgid="312712407571126228">"জটিল পাছৱৰ্ডসমূহ সৃষ্টি কৰিব অথবা মনত ৰাখিব নালাগে"</string>
-    <string name="passkey_creation_intro_body_fingerprint" msgid="691816235541508203">"এটা ব্যতিক্ৰমী পাছকী সৃষ্টি কৰিবলৈ আপোনাৰ ফিংগাৰপ্ৰিণ্ট, মুখাৱয়ব অথবা স্ক্ৰীন লক ব্যৱহাৰ কৰক।"</string>
-    <string name="passkey_creation_intro_body_device" msgid="477121861162321129">"পাছকীসমূহ এটা পাছৱৰ্ড পৰিচালকত ছেভ কৰা হয়. যাতে আপুনি অন্য ডিভাইচসমূহত ছাইন ইন কৰিব পাৰে।"</string>
+    <string name="passkey_creation_intro_body_password" msgid="8825872426579958200">"পাছকী ব্যৱহাৰ কৰিলে আপুনি জটিল পাছৱৰ্ড সৃষ্টি কৰিব অথবা মনত ৰাখিব নালাগে"</string>
+    <string name="passkey_creation_intro_body_fingerprint" msgid="7331338631826254055">"পাছকীসমূহ হৈছে আপুনি আপোনাৰ ফিংগাৰপ্ৰিণ্ট, মুখাৱয়ব অথবা স্ক্ৰীন লক ব্যৱহাৰ কৰি সৃষ্টি কৰা এনক্ৰিপ্ট কৰা ডিজিটেল চাবি"</string>
+    <string name="passkey_creation_intro_body_device" msgid="1203796455762131631">"সেইসমূহ এটা পাছৱৰ্ড পৰিচালকত ছেভ কৰা হয়, যাতে আপুনি অন্য ডিভাইচসমূহত ছাইন ইন কৰিব পাৰে"</string>
     <string name="choose_provider_title" msgid="7245243990139698508">"ক’ত <xliff:g id="CREATETYPES">%1$s</xliff:g> সেয়া বাছনি কৰক"</string>
     <string name="create_your_passkeys" msgid="8901224153607590596">"আপোনাৰ পাছকী সৃষ্টি কৰক"</string>
     <string name="save_your_password" msgid="6597736507991704307">"আপোনাৰ পাছৱৰ্ড ছেভ কৰক"</string>
     <string name="save_your_sign_in_info" msgid="7213978049817076882">"আপোনাৰ ছাইন ইন কৰাৰ তথ্য ছেভ কৰক"</string>
-    <string name="choose_provider_body" msgid="8045759834416308059">"আপোনাৰ পাছৱৰ্ড আৰু পাছকী ছেভ কৰিবলৈ এটা ডিফ’ল্ট পাছৱৰ্ড পৰিচালক ছেট কৰক আৰু পৰৱৰ্তী বাৰ দ্ৰুতভাৱে ছাইন ইন কৰক।"</string>
-    <string name="choose_create_option_passkey_title" msgid="4146408187146573131">"<xliff:g id="PROVIDERINFODISPLAYNAME">%1$s</xliff:g>ত পাছকী সৃষ্টি কৰিবনে?"</string>
-    <string name="choose_create_option_password_title" msgid="8812546498357380545">"<xliff:g id="PROVIDERINFODISPLAYNAME">%1$s</xliff:g>ত আপোনাৰ পাছৱৰ্ড ছেভ কৰিবনে?"</string>
-    <string name="choose_create_option_sign_in_title" msgid="6318246378475961834">"<xliff:g id="PROVIDERINFODISPLAYNAME">%1$s</xliff:g>ত আপোনাৰ ছাইন ইন কৰাৰ তথ্য ছেভ কৰিবনে?"</string>
-    <string name="choose_create_option_description" msgid="4419171903963100257">"আপুনি আপোনাৰ <xliff:g id="APPDOMAINNAME">%1$s</xliff:g> <xliff:g id="TYPE">%2$s</xliff:g> যিকোনো ডিভাইচত ব্যৱহাৰ কৰিব পাৰে। এইটো <xliff:g id="CREATEINFODISPLAYNAME">%4$s</xliff:g>ৰ বাবে <xliff:g id="PROVIDERINFODISPLAYNAME">%3$s</xliff:g>ত ছেভ কৰা হৈছে"</string>
+    <string name="choose_provider_body" msgid="4384188171872005547">"আপোনাৰ তথ্য ছেভ কৰি পৰৱৰ্তী সময়ত দ্ৰুতভাৱে ছাইন ইন কৰিবলৈ এটা পাছৱৰ্ড পৰিচালক বাছনি কৰক।"</string>
+    <string name="choose_create_option_passkey_title" msgid="5220979185879006862">"<xliff:g id="APPNAME">%1$s</xliff:g>ৰ বাবে পাছকী সৃষ্টি কৰিবনে?"</string>
+    <string name="choose_create_option_password_title" msgid="7097275038523578687">"<xliff:g id="APPNAME">%1$s</xliff:g>ৰ বাবে পাছৱৰ্ড ছেভ কৰিবনে?"</string>
+    <string name="choose_create_option_sign_in_title" msgid="4124872317613421249">"<xliff:g id="APPNAME">%1$s</xliff:g>ৰ বাবে ছাইন ইনৰ তথ্য ছেভ কৰিবনে?"</string>
+    <string name="choose_create_option_description" msgid="5531335144879100664">"আপুনি আপোনাৰ <xliff:g id="APPDOMAINNAME">%1$s</xliff:g> <xliff:g id="CREDENTIALTYPES">%2$s</xliff:g> যিকোনো ডিভাইচত ব্যৱহাৰ কৰিব পাৰে। এইটো <xliff:g id="CREATEINFODISPLAYNAME">%4$s</xliff:g>ৰ বাবে <xliff:g id="PROVIDERINFODISPLAYNAME">%3$s</xliff:g>ত ছেভ কৰা হৈছে।"</string>
     <string name="passkey" msgid="632353688396759522">"পাছকী"</string>
     <string name="password" msgid="6738570945182936667">"পাছৱৰ্ড"</string>
     <string name="sign_ins" msgid="4710739369149469208">"ছাইন-ইন"</string>
-    <string name="create_passkey_in_title" msgid="2714306562710897785">"ইয়াত পাছকী সৃষ্টি কৰক"</string>
-    <string name="save_password_to_title" msgid="3450480045270186421">"ইয়াত পাছৱৰ্ড ছেভ কৰক"</string>
-    <string name="save_sign_in_to_title" msgid="8328143607671760232">"ইয়াত ছাইন ইন কৰাৰ তথ্য ছেভ কৰক"</string>
+    <string name="sign_in_info" msgid="2627704710674232328">"ছাইন ইনৰ তথ্য"</string>
+    <string name="save_credential_to_title" msgid="3172811692275634301">"<xliff:g id="CREDENTIALTYPES">%1$s</xliff:g> ইয়াত ছেভ কৰক"</string>
     <string name="create_passkey_in_other_device_title" msgid="6372952459932674632">"অন্য এটা ডিভাইচত এটা পাছকী সৃষ্টি কৰিবনে?"</string>
     <string name="use_provider_for_all_title" msgid="4201020195058980757">"আপোনাৰ আটাইবোৰ ছাইন ইনৰ বাবে <xliff:g id="PROVIDERINFODISPLAYNAME">%1$s</xliff:g> ব্যৱহাৰ কৰিবনে?"</string>
     <string name="use_provider_for_all_description" msgid="6560593199974037820">"আপোনাক সহজে ছাইন ইন কৰাত সহায় কৰিবলৈ এই পাছৱৰ্ড পৰিচালকটোৱে আপোনাৰ পাছৱৰ্ড আৰু পাছকী ষ্ট’ৰ কৰিব।"</string>
     <string name="set_as_default" msgid="4415328591568654603">"ডিফ’ল্ট হিচাপে ছেট কৰক"</string>
     <string name="use_once" msgid="9027366575315399714">"এবাৰ ব্যৱহাৰ কৰক"</string>
-    <string name="more_options_usage_passwords_passkeys" msgid="4794903978126339473">"<xliff:g id="PASSWORDSNUMBER">%1$s</xliff:g> টা পাছৱৰ্ড, <xliff:g id="PASSKEYSNUMBER">%2$s</xliff:g> টা পাছকী"</string>
+    <string name="more_options_usage_passwords_passkeys" msgid="3470113942332934279">"<xliff:g id="PASSWORDSNUMBER">%1$s</xliff:g> টা পাছৱৰ্ড • <xliff:g id="PASSKEYSNUMBER">%2$s</xliff:g> টা পাছকী"</string>
     <string name="more_options_usage_passwords" msgid="1632047277723187813">"<xliff:g id="PASSWORDSNUMBER">%1$s</xliff:g> টা পাছৱৰ্ড"</string>
     <string name="more_options_usage_passkeys" msgid="5390320437243042237">"<xliff:g id="PASSKEYSNUMBER">%1$s</xliff:g> টা পাছকী"</string>
+    <string name="more_options_usage_credentials" msgid="1785697001787193984">"<xliff:g id="TOTALCREDENTIALSNUMBER">%1$s</xliff:g> টা ক্ৰিডেনশ্বিয়েল"</string>
     <string name="passkey_before_subtitle" msgid="2448119456208647444">"পাছকী"</string>
     <string name="another_device" msgid="5147276802037801217">"অন্য এটা ডিভাইচ"</string>
     <string name="other_password_manager" msgid="565790221427004141">"অন্য পাছৱৰ্ড পৰিচালক"</string>
     <string name="close_sheet" msgid="1393792015338908262">"শ্বীট বন্ধ কৰক"</string>
     <string name="accessibility_back_arrow_button" msgid="3233198183497842492">"পূৰ্বৱৰ্তী পৃষ্ঠালৈ ঘূৰি যাওক"</string>
-    <!-- no translation found for accessibility_close_button (2953807735590034688) -->
-    <skip />
+    <string name="accessibility_close_button" msgid="2953807735590034688">"স্ক্ৰীনখনৰ একেবাৰে তলত প্ৰদৰ্শিত ক্ৰিডেনশ্বিয়েল পৰিচালকৰ কাৰ্য সম্পৰ্কীয় পৰামৰ্শ বন্ধ কৰক"</string>
     <string name="get_dialog_title_use_passkey_for" msgid="6236608872708021767">"<xliff:g id="APP_NAME">%1$s</xliff:g>ৰ বাবে আপোনাৰ ছেভ হৈ থকা পাছকী ব্যৱহাৰ কৰিবনে?"</string>
     <string name="get_dialog_title_use_sign_in_for" msgid="5283099528915572980">"<xliff:g id="APP_NAME">%1$s</xliff:g>ৰ বাবে আপোনাৰ ছেভ হৈ থকা ছাইন ইন তথ্য ব্যৱহাৰ কৰিবনে?"</string>
     <string name="get_dialog_title_choose_sign_in_for" msgid="1361715440877613701">"<xliff:g id="APP_NAME">%1$s</xliff:g>ৰ বাবে ছেভ হৈ থকা এটা ছাইন ইন বাছনি কৰক"</string>
     <string name="get_dialog_use_saved_passkey_for" msgid="4618100798664888512">"অন্য উপায়েৰে ছাইন ইন কৰক"</string>
-    <string name="get_dialog_button_label_no_thanks" msgid="8114363019023838533">"নালাগে, ধন্যবাদ"</string>
+    <string name="snackbar_action" msgid="37373514216505085">"বিকল্পসমূহ চাওক"</string>
     <string name="get_dialog_button_label_continue" msgid="6446201694794283870">"অব্যাহত ৰাখক"</string>
     <string name="get_dialog_title_sign_in_options" msgid="2092876443114893618">"ছাইন ইনৰ বিকল্প"</string>
     <string name="get_dialog_heading_for_username" msgid="3456868514554204776">"<xliff:g id="USERNAME">%1$s</xliff:g>ৰ বাবে"</string>

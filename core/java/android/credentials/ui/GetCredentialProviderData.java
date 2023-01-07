@@ -18,6 +18,7 @@ package android.credentials.ui;
 
 import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.annotation.TestApi;
 import android.os.Parcel;
 import android.os.Parcelable;
 
@@ -31,7 +32,8 @@ import java.util.List;
  *
  * @hide
  */
-public class GetCredentialProviderData extends ProviderData implements Parcelable {
+@TestApi
+public final class GetCredentialProviderData extends ProviderData implements Parcelable {
     @NonNull
     private final List<Entry> mCredentialEntries;
     @NonNull
@@ -72,7 +74,7 @@ public class GetCredentialProviderData extends ProviderData implements Parcelabl
         return mRemoteEntry;
     }
 
-    protected GetCredentialProviderData(@NonNull Parcel in) {
+    private GetCredentialProviderData(@NonNull Parcel in) {
         super(in);
 
         List<Entry> credentialEntries = new ArrayList<>();
@@ -124,12 +126,13 @@ public class GetCredentialProviderData extends ProviderData implements Parcelabl
      *
      * @hide
      */
-    public static class Builder {
-        private @NonNull String mProviderFlattenedComponentName;
-        private @NonNull List<Entry> mCredentialEntries = new ArrayList<>();
-        private @NonNull List<Entry> mActionChips = new ArrayList<>();
-        private @Nullable Entry mAuthenticationEntry = null;
-        private @Nullable Entry mRemoteEntry = null;
+    @TestApi
+    public static final class Builder {
+        @NonNull private String mProviderFlattenedComponentName;
+        @NonNull private List<Entry> mCredentialEntries = new ArrayList<>();
+        @NonNull private List<Entry> mActionChips = new ArrayList<>();
+        @Nullable private Entry mAuthenticationEntry = null;
+        @Nullable private Entry mRemoteEntry = null;
 
         /** Constructor with required properties. */
         public Builder(@NonNull String providerFlattenedComponentName) {

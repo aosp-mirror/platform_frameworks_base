@@ -329,6 +329,8 @@ public class SystemConfig {
     private final Set<String> mInstallConstraintsAllowlist = new ArraySet<>();
 
     private String mModulesInstallerPackageName;
+    // Update ownership for system applications and the installers eligible to update them.
+    private final ArrayMap<String, String> mUpdateOwnersForSystemApps = new ArrayMap<>();
 
     /**
      * Map of system pre-defined, uniquely named actors; keys are namespace,
@@ -473,6 +475,13 @@ public class SystemConfig {
 
     public String getModulesInstallerPackageName() {
         return mModulesInstallerPackageName;
+    }
+
+    /**
+     * Gets the update owner of the given package from "update-ownership" tags in sysconfig.
+     */
+    public @Nullable String getSystemAppUpdateOwnerPackageName(@NonNull String packageName) {
+        return mUpdateOwnersForSystemApps.get(packageName);
     }
 
     public ArraySet<String> getAppDataIsolationWhitelistedApps() {
@@ -1402,6 +1411,22 @@ public class SystemConfig {
                             }
                         } else {
                             logNotAllowedInPartition(name, permFile, parser);
+                        }
+                        XmlUtils.skipCurrentTag(parser);
+                    } break;
+                    case "update-ownership": {
+                        final String packageName = parser.getAttributeValue(null /* namespace */,
+                                "package");
+                        final String installerName = parser.getAttributeValue(null /* namespace */,
+                                "installer");
+                        if (TextUtils.isEmpty(packageName)) {
+                            Slog.w(TAG, "<" + name + "> without valid package in " + permFile
+                                    + " at " + parser.getPositionDescription());
+                        } else if (TextUtils.isEmpty(installerName)) {
+                            Slog.w(TAG, "<" + name + "> without valid installer in " + permFile
+                                    + " at " + parser.getPositionDescription());
+                        } else {
+                            mUpdateOwnersForSystemApps.put(packageName, installerName);
                         }
                         XmlUtils.skipCurrentTag(parser);
                     } break;

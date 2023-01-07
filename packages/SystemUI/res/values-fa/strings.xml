@@ -85,6 +85,7 @@
     <string name="screenshot_share_description" msgid="2861628935812656612">"هم‌رسانی نماگرفت"</string>
     <string name="screenshot_scroll_label" msgid="2930198809899329367">"ضبط محتوای بیشتر"</string>
     <string name="screenshot_dismiss_description" msgid="4702341245899508786">"رد کردن نماگرفت"</string>
+    <string name="screenshot_dismiss_work_profile" msgid="3101530842987697045">"رد کردن پیام نمایه کاری"</string>
     <string name="screenshot_preview_description" msgid="7606510140714080474">"پیش‌نمایش نماگرفت"</string>
     <string name="screenshot_top_boundary_pct" msgid="2520148599096479332">"مرز بالا <xliff:g id="PERCENT">%1$d</xliff:g> درصد"</string>
     <string name="screenshot_bottom_boundary_pct" msgid="3880821519814946478">"مرز پایین <xliff:g id="PERCENT">%1$d</xliff:g> درصد"</string>
@@ -317,8 +318,7 @@
     <string name="sensor_privacy_camera_unblocked_dialog_content" msgid="7847190103011782278">"دوربین برای همه برنامه‌ها و سرویس‌ها فعال است."</string>
     <string name="sensor_privacy_camera_blocked_dialog_content" msgid="3182428709314874616">"دسترسی به دوربین برای همه برنامه‌ها و سرویس‌ها غیرفعال است."</string>
     <string name="sensor_privacy_htt_blocked_dialog_content" msgid="3333321592997666441">"برای استفاده از دکمه میکروفون، دسترسی به میکروفون را در «تنظیمات» فعال کنید."</string>
-    <!-- no translation found for sensor_privacy_dialog_open_settings (5635865896053011859) -->
-    <skip />
+    <string name="sensor_privacy_dialog_open_settings" msgid="5635865896053011859">"باز کردن تنظیمات"</string>
     <string name="media_seamless_other_device" msgid="4654849800789196737">"دستگاه دیگر"</string>
     <string name="quick_step_accessibility_toggle_overview" msgid="7908949976727578403">"تغییر وضعیت نمای کلی"</string>
     <string name="zen_priority_introduction" msgid="3159291973383796646">"به‌جز هشدارها، یادآوری‌ها، رویدادها و تماس‌گیرندگانی که خودتان مشخص می‌کنید، هیچ صدا و لرزشی نخواهید داشت. همچنان صدای مواردی را که پخش می‌کنید می‌شنوید (ازجمله صدای موسیقی، ویدیو و بازی)."</string>
@@ -743,6 +743,7 @@
     <string name="wifi_is_off" msgid="5389597396308001471">"‏Wi-Fi خاموش است"</string>
     <string name="bt_is_off" msgid="7436344904889461591">"بلوتوث خاموش است"</string>
     <string name="dnd_is_off" msgid="3185706903793094463">"«مزاحم نشوید» خاموش است"</string>
+    <string name="dnd_is_on" msgid="7009368176361546279">"«مزاحم نشوید» روشن است"</string>
     <string name="qs_dnd_prompt_auto_rule" msgid="3535469468310002616">"قانون خودکاری (<xliff:g id="ID_1">%s</xliff:g>) «مزاحم نشوید» را روشن کرد."</string>
     <string name="qs_dnd_prompt_app" msgid="4027984447935396820">"برنامه‌ای (<xliff:g id="ID_1">%s</xliff:g>) «مزاحم نشوید» را روشن کرد."</string>
     <string name="qs_dnd_prompt_auto_rule_app" msgid="1841469944118486580">"برنامه یا قانون خودکاری، «مزاحم نشوید» را روشن کرد."</string>
@@ -905,6 +906,7 @@
     <string name="media_output_dialog_accessibility_title" msgid="4681741064190167888">"دستگاه‌های دردسترس برای خروجی صدا."</string>
     <string name="media_output_dialog_accessibility_seekbar" msgid="5332843993805568978">"میزان صدا"</string>
     <string name="media_output_dialog_volume_percentage" msgid="1613984910585111798">"<xliff:g id="PERCENTAGE">%1$d</xliff:g>%%"</string>
+    <string name="media_output_group_title_speakers_and_displays" msgid="7169712332365659820">"بلندگوها و نمایشگرها"</string>
     <string name="media_output_first_broadcast_title" msgid="6292237789860753022">"همه‌فرتستی چطور کار می‌کند"</string>
     <string name="media_output_broadcast" msgid="3555580945878071543">"همه‌فرستی"</string>
     <string name="media_output_first_notify_broadcast_message" msgid="6353857724136398494">"‏افرادی که در اطرافتان دستگاه‌های Bluetooth سازگار دارند می‌توانند به رسانه‌ای که همه‌فرستی می‌کنید گوش کنند"</string>
@@ -1032,20 +1034,19 @@
     <string name="log_access_confirmation_deny" msgid="2389461495803585795">"اجازه نمی‌دهم"</string>
     <string name="log_access_confirmation_body" msgid="6883031912003112634">"گزارش‌های دستگاه آنچه را در دستگاهتان رخ می‌دهد ثبت می‌کند. برنامه‌ها می‌توانند از این گزارش‌ها برای پیدا کردن مشکلات و رفع آن‌ها استفاده کنند.\n\nبرخی‌از گزارش‌ها ممکن است حاوی اطلاعات حساس باشند، بنابراین فقط به برنامه‌های مورداعتمادتان اجازه دسترسی به همه گزارش‌های دستگاه را بدهید. \n\nاگر به این برنامه اجازه ندهید به همه گزارش‌های دستگاه دسترسی داشته باشد، همچنان می‌تواند به گزارش‌های خودش دسترسی داشته باشد. سازنده دستگاه نیز ممکن است همچنان بتواند به برخی‌از گزارش‌ها یا اطلاعات دستگاهتان دسترسی داشته باشد."</string>
     <string name="keyguard_affordance_enablement_dialog_action_template" msgid="8164857863036314664">"باز کردن <xliff:g id="APPNAME">%1$s</xliff:g>"</string>
-    <string name="keyguard_affordance_enablement_dialog_message" msgid="2790910660524887941">"برای افزودن برنامه <xliff:g id="APPNAME">%1$s</xliff:g> به‌عنوان میان‌بر، مطمئن شوید"</string>
     <string name="keyguard_affordance_enablement_dialog_wallet_instruction_1" msgid="8439655049139819278">"• برنامه راه‌اندازی شده باشد"</string>
     <string name="keyguard_affordance_enablement_dialog_wallet_instruction_2" msgid="4321089250629477835">"• حداقل یک کارت به «کیف پول» اضافه شده باشد"</string>
     <string name="keyguard_affordance_enablement_dialog_qr_scanner_instruction" msgid="5355839079232119791">"• برنامه دوربین نصب شده باشد"</string>
     <string name="keyguard_affordance_enablement_dialog_home_instruction_1" msgid="8438311171750568633">"• برنامه راه‌اندازی شده باشد"</string>
     <string name="keyguard_affordance_enablement_dialog_home_instruction_2" msgid="8308525385889021652">"• حداقل یک دستگاه دردسترس باشد"</string>
+    <string name="keyguard_affordance_press_too_short" msgid="8145437175134998864">"میان‌بر را لمس کنید و نگه دارید"</string>
     <string name="rear_display_bottom_sheet_cancel" msgid="3461468855493357248">"لغو کردن"</string>
     <string name="rear_display_bottom_sheet_confirm" msgid="4383356544661421206">"اکنون چرخانده شود"</string>
     <string name="rear_display_fold_bottom_sheet_title" msgid="6081542277622721548">"برای خویش‌گرفت بهتر، تلفن را باز کنید"</string>
     <string name="rear_display_unfold_bottom_sheet_title" msgid="2137403802960396357">"برای خویش‌گرفت بهتر، از نمایشگر جلو استفاده شود؟"</string>
     <string name="rear_display_bottom_sheet_description" msgid="1852662982816810352">"برای عکسی عریض‌تر با وضوح بالاتر، از دوربین عقب استفاده کنید."</string>
     <string name="rear_display_bottom_sheet_warning" msgid="800995919558238930"><b>"✱ این صفحه‌نمایش خاموش خواهد شد"</b></string>
-    <!-- no translation found for rear_display_accessibility_folded_animation (1538121649587978179) -->
-    <skip />
-    <!-- no translation found for rear_display_accessibility_unfolded_animation (1946153682258289040) -->
-    <skip />
+    <string name="rear_display_accessibility_folded_animation" msgid="1538121649587978179">"دستگاه تاشو درحال باز شدن"</string>
+    <string name="rear_display_accessibility_unfolded_animation" msgid="1946153682258289040">"دستگاه تاشو درحال چرخش به اطراف"</string>
+    <string name="stylus_battery_low" msgid="7134370101603167096">"باتری قلم ضعیف است"</string>
 </resources>

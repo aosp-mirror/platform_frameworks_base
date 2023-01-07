@@ -41,3 +41,5 @@ per-file ContentProviderHelper.java = varunshah@google.com, omakoto@google.com, 
 # Multiuser
 per-file User* = file:/MULTIUSER_OWNERS
 
+# Broadcasts
+per-file Broadcast* = file:/BROADCASTS_OWNERS

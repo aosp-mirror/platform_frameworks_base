@@ -60,10 +60,8 @@
     <string name="uninstall_update_text" msgid="863648314632448705">"এই এপ্‌টোৰ ফেক্টৰী সংস্কৰণ ব্যৱহাৰ কৰিব বিচাৰেনে? আটাইবোৰ ডেটা মচা হ\'ব।"</string>
     <string name="uninstall_update_text_multiuser" msgid="8992883151333057227">"এই এপ্‌টোৰ ফেক্টৰী সংস্কৰণ ব্যৱহাৰ কৰিব বিচাৰেনে? সকলো ডেটা মচা হ\'ব। কর্মস্থানৰ প্ৰফাইল থকা ব্যৱহাৰকাৰীৰ লগতে ডিভাইচটোৰ সকলো ব্যৱহাৰকাৰীৰ ওপৰত ইয়াৰ প্ৰভাৱ পৰিব।"</string>
     <string name="uninstall_keep_data" msgid="7002379587465487550">"এপৰ ডেটাৰ <xliff:g id="SIZE">%1$s</xliff:g> ৰাখক"</string>
-    <!-- no translation found for uninstall_application_text_current_user_clone_profile (835170400160011636) -->
-    <skip />
-    <!-- no translation found for uninstall_application_text_with_clone_instance (6944473334273349036) -->
-    <skip />
+    <string name="uninstall_application_text_current_user_clone_profile" msgid="835170400160011636">"আপুনি এই এপ্‌টো মচিব বিচাৰেনে?"</string>
+    <string name="uninstall_application_text_with_clone_instance" msgid="6944473334273349036">"আপুনি এই এপ্‌টো আনইনষ্টল কৰিব বিচাৰেনে? <xliff:g id="PACKAGE_LABEL">%1$s</xliff:g>ৰ ক্ল’নো মচা হ’ব।"</string>
     <string name="uninstalling_notification_channel" msgid="840153394325714653">"আনইনষ্টল কৰি থকা হৈছে"</string>
     <string name="uninstall_failure_notification_channel" msgid="1136405866767576588">"যিবোৰ আনইনষ্টল পৰা নগ\'ল"</string>
     <string name="uninstalling" msgid="8709566347688966845">"আনইনষ্টল কৰি থকা হৈছে…"</string>
@@ -72,8 +70,7 @@
     <string name="uninstall_done_app" msgid="4588850984473605768">"<xliff:g id="PACKAGE_LABEL">%1$s</xliff:g> আনইনষ্টল কৰা হ’ল"</string>
     <string name="uninstall_failed" msgid="1847750968168364332">"আনইনষ্টল কৰিব পৰা নগ\'ল।"</string>
     <string name="uninstall_failed_app" msgid="5506028705017601412">"<xliff:g id="PACKAGE_LABEL">%1$s</xliff:g> আনইনষ্টল কৰিব পৰা নগ\'ল।"</string>
-    <!-- no translation found for uninstalling_cloned_app (1826380164974984870) -->
-    <skip />
+    <string name="uninstalling_cloned_app" msgid="1826380164974984870">"<xliff:g id="PACKAGE_LABEL">%1$s</xliff:g>ৰ ক্ল’ন মচি থকা হৈছে…"</string>
     <string name="uninstall_failed_device_policy_manager" msgid="785293813665540305">"ডিভাইচৰ সক্ৰিয় প্ৰশাসক এপ্ আনইনষ্টল কৰিব নোৱাৰি"</string>
     <string name="uninstall_failed_device_policy_manager_of_user" msgid="4813104025494168064">"<xliff:g id="USERNAME">%1$s</xliff:g>ৰ সক্ৰিয় ডিভাইচৰ প্ৰশাসকীয় এপ্ আনইনষ্টল কৰিব নোৱাৰি"</string>
     <string name="uninstall_all_blocked_profile_owner" msgid="2009393666026751501">"এই এপ্‌টো কিছুসংখ্যক ব্যৱহাৰকাৰী বা প্ৰ\'ফাইলৰ বাবে প্ৰয়োজনীয় আৰু বাকীসকলৰ বাবে ইয়াক আনইনষ্টল কৰা হৈছে"</string>
@@ -94,8 +91,7 @@
     <string name="anonymous_source_warning" product="default" msgid="2784902545920822500">"আপোনাৰ ফ\'ন আৰু ব্যক্তিগত ডেটা অজ্ঞাত এপৰ আক্ৰমণৰ বলি হোৱাৰ সম্ভাৱনা অধিক। আপুনি এই এপ্‌টো ইনষ্টল কৰি এপ্‌টোৰ ব্যৱহাৰৰ ফলত আপোনাৰ টিভিত হ\'ব পৰা যিকোনো ক্ষতি বা ডেটা ক্ষয়ৰ বাবে আপুনি নিজে দায়ী হ\'ব বুলি সন্মতি দিয়ে।"</string>
     <string name="anonymous_source_warning" product="tablet" msgid="3939101621438855516">"আপোনাৰ টেবলেট আৰু ব্যক্তিগত ডেটা অজ্ঞাত এপৰ আক্ৰমণৰ বলি হোৱাৰ সম্ভাৱনা অধিক। আপুনি এই এপ্‌টো ইনষ্টল কৰি এপ্‌টোৰ ব্যৱহাৰৰ ফলত আপোনাৰ টিভিত হ\'ব পৰা যিকোনো ক্ষতি বা ডেটা ক্ষয়ৰ বাবে আপুনি নিজে দায়ী হ\'ব বুলি সন্মতি দিয়ে।"</string>
     <string name="anonymous_source_warning" product="tv" msgid="5599483539528168566">"আপোনাৰ টিভি আৰু ব্যক্তিগত ডেটা অজ্ঞাত এপৰ আক্ৰমণৰ বলি হোৱাৰ সম্ভাৱনা অধিক। আপুনি এই এপ্‌টো ইনষ্টল কৰি এপ্‌টোৰ ব্যৱহাৰৰ ফলত আপোনাৰ টিভিত হ\'ব পৰা যিকোনো ক্ষতি বা ডেটা ক্ষয়ৰ বাবে আপুনি নিজে দায়ী হ\'ব বুলি সন্মতি দিয়ে।"</string>
-    <!-- no translation found for cloned_app_label (7503612829833756160) -->
-    <skip />
+    <string name="cloned_app_label" msgid="7503612829833756160">"<xliff:g id="PACKAGE_LABEL">%1$s</xliff:g>ৰ ক্ল’ন"</string>
     <string name="anonymous_source_continue" msgid="4375745439457209366">"অব্যাহত ৰাখক"</string>
     <string name="external_sources_settings" msgid="4046964413071713807">"ছেটিং"</string>
     <string name="wear_app_channel" msgid="1960809674709107850">"ৱেৰ এপসমূহ ইনষ্টল/আনইনষ্টল কৰি থকা হৈছে"</string>

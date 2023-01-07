@@ -4,37 +4,38 @@
     <string name="app_name" msgid="4539824758261855508">"Upravitelj vjerodajnicama"</string>
     <string name="string_cancel" msgid="6369133483981306063">"Odustani"</string>
     <string name="string_continue" msgid="1346732695941131882">"Nastavi"</string>
+    <string name="string_more_options" msgid="7990658711962795124">"Više opcija"</string>
     <string name="string_create_in_another_place" msgid="1033635365843437603">"Izradi na drugom mjestu"</string>
     <string name="string_save_to_another_place" msgid="7590325934591079193">"Spremi na drugom mjestu"</string>
     <string name="string_use_another_device" msgid="8754514926121520445">"Upotrijebite neki drugi uređaj"</string>
     <string name="string_save_to_another_device" msgid="1959562542075194458">"Spremi na drugi uređaj"</string>
     <string name="passkey_creation_intro_title" msgid="4251037543787718844">"Sigurniji s pristupnim ključevima"</string>
-    <string name="passkey_creation_intro_body_password" msgid="312712407571126228">"Ne trebate izrađivati niti pamtiti složene zaporke"</string>
-    <string name="passkey_creation_intro_body_fingerprint" msgid="691816235541508203">"Jedinstveni pristupni ključ možete izraditi pomoću otiska prsta, lica ili zaključavanja zaslona"</string>
-    <string name="passkey_creation_intro_body_device" msgid="477121861162321129">"Pristupni ključevi spremaju se u upravitelj zaporki, kako biste se mogli prijaviti na drugim uređajima"</string>
+    <string name="passkey_creation_intro_body_password" msgid="8825872426579958200">"Uz pristupne ključeve ne trebate izrađivati ili pamtiti složene zaporke"</string>
+    <string name="passkey_creation_intro_body_fingerprint" msgid="7331338631826254055">"Pristupni ključevi šifrirani su digitalni ključevi koje izrađujete pomoću svojeg otiska prsta, lica ili zaključavanja zaslona"</string>
+    <string name="passkey_creation_intro_body_device" msgid="1203796455762131631">"Spremaju se u upravitelju zaporki kako biste se mogli prijaviti na drugim uređajima"</string>
     <string name="choose_provider_title" msgid="7245243990139698508">"Odaberite mjesto za sljedeće: <xliff:g id="CREATETYPES">%1$s</xliff:g>"</string>
     <string name="create_your_passkeys" msgid="8901224153607590596">"izradite pristupne ključeve"</string>
     <string name="save_your_password" msgid="6597736507991704307">"spremi zaporku"</string>
     <string name="save_your_sign_in_info" msgid="7213978049817076882">"spremi podatke za prijavu"</string>
-    <string name="choose_provider_body" msgid="8045759834416308059">"Postavite zadani upravitelj zaporki da biste spremili zaporke i pristupne ključeve i sljedeći put se brže prijavili."</string>
-    <string name="choose_create_option_passkey_title" msgid="4146408187146573131">"Želite li izraditi pristupni ključ na usluzi <xliff:g id="PROVIDERINFODISPLAYNAME">%1$s</xliff:g>?"</string>
-    <string name="choose_create_option_password_title" msgid="8812546498357380545">"Želite li spremiti zaporku na usluzi <xliff:g id="PROVIDERINFODISPLAYNAME">%1$s</xliff:g>?"</string>
-    <string name="choose_create_option_sign_in_title" msgid="6318246378475961834">"Želite li spremiti podatke o prijavi na usluzi <xliff:g id="PROVIDERINFODISPLAYNAME">%1$s</xliff:g>?"</string>
-    <string name="choose_create_option_description" msgid="4419171903963100257">"Aplikaciju <xliff:g id="APPDOMAINNAME">%1$s</xliff:g> <xliff:g id="TYPE">%2$s</xliff:g> možete upotrijebiti na bilo kojem uređaju. Sprema se na uslugu <xliff:g id="PROVIDERINFODISPLAYNAME">%3$s</xliff:g> za: <xliff:g id="CREATEINFODISPLAYNAME">%4$s</xliff:g>"</string>
+    <string name="choose_provider_body" msgid="4384188171872005547">"Odaberite upravitelja zaporki kako biste spremili svoje informacije i drugi se put brže prijavili."</string>
+    <string name="choose_create_option_passkey_title" msgid="5220979185879006862">"Izraditi pristupni ključ za <xliff:g id="APPNAME">%1$s</xliff:g>?"</string>
+    <string name="choose_create_option_password_title" msgid="7097275038523578687">"Spremiti zaporku za <xliff:g id="APPNAME">%1$s</xliff:g>?"</string>
+    <string name="choose_create_option_sign_in_title" msgid="4124872317613421249">"Spremiti informacije o prijavi za <xliff:g id="APPNAME">%1$s</xliff:g>?"</string>
+    <string name="choose_create_option_description" msgid="5531335144879100664">"Aplikaciju <xliff:g id="APPDOMAINNAME">%1$s</xliff:g> <xliff:g id="CREDENTIALTYPES">%2$s</xliff:g> možete upotrijebiti na bilo kojem uređaju. Sprema se na uslugu <xliff:g id="PROVIDERINFODISPLAYNAME">%3$s</xliff:g> za: <xliff:g id="CREATEINFODISPLAYNAME">%4$s</xliff:g>"</string>
     <string name="passkey" msgid="632353688396759522">"pristupni ključ"</string>
     <string name="password" msgid="6738570945182936667">"zaporka"</string>
     <string name="sign_ins" msgid="4710739369149469208">"prijave"</string>
-    <string name="create_passkey_in_title" msgid="2714306562710897785">"Izradite pristupni ključ u"</string>
-    <string name="save_password_to_title" msgid="3450480045270186421">"Spremite zaporku na"</string>
-    <string name="save_sign_in_to_title" msgid="8328143607671760232">"Spremite podatke za prijavu na"</string>
+    <string name="sign_in_info" msgid="2627704710674232328">"informacije o prijavi"</string>
+    <string name="save_credential_to_title" msgid="3172811692275634301">"Spremi <xliff:g id="CREDENTIALTYPES">%1$s</xliff:g> u"</string>
     <string name="create_passkey_in_other_device_title" msgid="6372952459932674632">"Želite li izraditi pristupni ključ na nekom drugom uređaju?"</string>
     <string name="use_provider_for_all_title" msgid="4201020195058980757">"Želite li upotrebljavati uslugu <xliff:g id="PROVIDERINFODISPLAYNAME">%1$s</xliff:g> za sve prijave?"</string>
     <string name="use_provider_for_all_description" msgid="6560593199974037820">"Upravitelj zaporki pohranit će vaše zaporke i pristupne ključeve radi jednostavnije prijave."</string>
     <string name="set_as_default" msgid="4415328591568654603">"Postavi kao zadano"</string>
     <string name="use_once" msgid="9027366575315399714">"Upotrijebi jednom"</string>
-    <string name="more_options_usage_passwords_passkeys" msgid="4794903978126339473">"Broj zaporki: <xliff:g id="PASSWORDSNUMBER">%1$s</xliff:g>, broj pristupnih ključeva: <xliff:g id="PASSKEYSNUMBER">%2$s</xliff:g>"</string>
+    <string name="more_options_usage_passwords_passkeys" msgid="3470113942332934279">"Broj zaporki: <xliff:g id="PASSWORDSNUMBER">%1$s</xliff:g> • broj pristupnih ključeva: <xliff:g id="PASSKEYSNUMBER">%2$s</xliff:g>"</string>
     <string name="more_options_usage_passwords" msgid="1632047277723187813">"Broj zaporki: <xliff:g id="PASSWORDSNUMBER">%1$s</xliff:g>"</string>
     <string name="more_options_usage_passkeys" msgid="5390320437243042237">"Broj pristupnih ključeva: <xliff:g id="PASSKEYSNUMBER">%1$s</xliff:g>"</string>
+    <string name="more_options_usage_credentials" msgid="1785697001787193984">"Vjerodajnice: <xliff:g id="TOTALCREDENTIALSNUMBER">%1$s</xliff:g>"</string>
     <string name="passkey_before_subtitle" msgid="2448119456208647444">"Pristupni ključ"</string>
     <string name="another_device" msgid="5147276802037801217">"Drugi uređaj"</string>
     <string name="other_password_manager" msgid="565790221427004141">"Drugi upravitelji zaporki"</string>
@@ -45,7 +46,7 @@
     <string name="get_dialog_title_use_sign_in_for" msgid="5283099528915572980">"Želite li upotrijebiti spremljene podatke za prijavu za aplikaciju <xliff:g id="APP_NAME">%1$s</xliff:g>?"</string>
     <string name="get_dialog_title_choose_sign_in_for" msgid="1361715440877613701">"Odaberite spremljene podatke za prijavu za aplikaciju <xliff:g id="APP_NAME">%1$s</xliff:g>"</string>
     <string name="get_dialog_use_saved_passkey_for" msgid="4618100798664888512">"Prijavite se na neki drugi način"</string>
-    <string name="get_dialog_button_label_no_thanks" msgid="8114363019023838533">"Ne, hvala"</string>
+    <string name="snackbar_action" msgid="37373514216505085">"Prikaži opcije"</string>
     <string name="get_dialog_button_label_continue" msgid="6446201694794283870">"Nastavi"</string>
     <string name="get_dialog_title_sign_in_options" msgid="2092876443114893618">"Opcije prijave"</string>
     <string name="get_dialog_heading_for_username" msgid="3456868514554204776">"Za korisnika <xliff:g id="USERNAME">%1$s</xliff:g>"</string>

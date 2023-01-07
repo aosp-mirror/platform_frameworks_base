@@ -564,6 +564,8 @@
     <string name="user_add_user_title" msgid="5457079143694924885">"Voeg nuwe gebruiker by?"</string>
     <string name="user_add_user_message_long" msgid="1527434966294733380">"Jy kan hierdie toestel met ander mense deel deur bykomende gebruikers te skep. Elke gebruiker het sy eie spasie wat hulle kan pasmaak met programme, muurpapier en so meer. Gebruikers kan ook toestelinstellings wat almal raak, soos Wi-Fi, aanpas.\n\nWanneer jy \'n nuwe gebruiker byvoeg, moet daardie persoon hul eie spasie opstel.\n\nEnige gebruiker kan programme vir alle ander gebruikers opdateer. Toeganklikheidinstellings en -dienste sal dalk nie na die nuwe gebruiker oorgedra word nie."</string>
     <string name="user_add_user_message_short" msgid="3295959985795716166">"Wanneer jy \'n nuwe gebruiker byvoeg, moet daardie persoon hul spasie opstel.\n\nEnige gebruiker kan programme vir al die ander gebruikers opdateer."</string>
+    <string name="user_grant_admin_title" msgid="5565796912475193314">"Gee gebruiker adminvoorregte?"</string>
+    <string name="user_grant_admin_message" msgid="7925257971286380976">"As ’n admin sal hulle ander gebruikers kan bestuur, toestelinstellings kan wysig, en ’n fabriekterugstelling van die toestel kan doen."</string>
     <string name="user_setup_dialog_title" msgid="8037342066381939995">"Moet die gebruiker nou opgestel word?"</string>
     <string name="user_setup_dialog_message" msgid="269931619868102841">"Maak seker die persoon is beskikbaar om die toestel te vat en hul spasie op te stel"</string>
     <string name="user_setup_profile_dialog_message" msgid="4788197052296962620">"Stel profiel nou op?"</string>
@@ -595,6 +597,8 @@
     <string name="guest_reset_and_restart_dialog_message" msgid="2764425635305200790">"Dit sal ’n nuwe gastesessie begin en alle programme en data van die huidige sessie uitvee"</string>
     <string name="guest_exit_dialog_title" msgid="1846494656849381804">"Verlaat gasmodus?"</string>
     <string name="guest_exit_dialog_message" msgid="1743218864242719783">"Dit sal programme en data in die huidige gastesessie uitvee"</string>
+    <string name="grant_admin" msgid="4273077214151417783">"Gee hierdie gebruiker adminvoorregte"</string>
+    <string name="not_grant_admin" msgid="6985027675930546850">"Moenie vir gebruiker adminvoorregte gee nie"</string>
     <string name="guest_exit_dialog_button" msgid="1736401897067442044">"Gaan uit"</string>
     <string name="guest_exit_dialog_title_non_ephemeral" msgid="7675327443743162986">"Stoor gasaktiwiteit?"</string>
     <string name="guest_exit_dialog_message_non_ephemeral" msgid="223385323235719442">"Jy kan aktiwiteit in die huidige sessie stoor of alle programme en data uitvee"</string>

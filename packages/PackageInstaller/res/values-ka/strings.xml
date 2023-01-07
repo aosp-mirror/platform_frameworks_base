@@ -60,10 +60,8 @@
     <string name="uninstall_update_text" msgid="863648314632448705">"გსურთ ამ აპის ჩანაცვლება ქარხნული ვერსიით? მონაცემები მთლიანად ამოიშლება."</string>
     <string name="uninstall_update_text_multiuser" msgid="8992883151333057227">"გსურთ ამ აპის ჩანაცვლება ქარხნული ვერსიით? მონაცემები მთლიანად ამოიშლება. ეს ქმედება აისახება ამ მოწყობილობის ყველა მომხმარებელზე, მათ შორის, სამსახურის პროფილებით მოსარგებლეებზეც."</string>
     <string name="uninstall_keep_data" msgid="7002379587465487550">"შენარჩუნდეს აპების მონაცემების <xliff:g id="SIZE">%1$s</xliff:g>."</string>
-    <!-- no translation found for uninstall_application_text_current_user_clone_profile (835170400160011636) -->
-    <skip />
-    <!-- no translation found for uninstall_application_text_with_clone_instance (6944473334273349036) -->
-    <skip />
+    <string name="uninstall_application_text_current_user_clone_profile" msgid="835170400160011636">"გსურთ ამ აპის წაშლა?"</string>
+    <string name="uninstall_application_text_with_clone_instance" msgid="6944473334273349036">"გსურთ ამ აპის დეინსტალაცია? <xliff:g id="PACKAGE_LABEL">%1$s</xliff:g> კლონი ასევე წაიშლება."</string>
     <string name="uninstalling_notification_channel" msgid="840153394325714653">"გაშვებული დეინსტალაციები"</string>
     <string name="uninstall_failure_notification_channel" msgid="1136405866767576588">"შეუსრულებელი დეინსტალაციები"</string>
     <string name="uninstalling" msgid="8709566347688966845">"მიმდინარეობს დეინსტალაცია…"</string>
@@ -72,8 +70,7 @@
     <string name="uninstall_done_app" msgid="4588850984473605768">"<xliff:g id="PACKAGE_LABEL">%1$s</xliff:g> დეინსტალირებულია"</string>
     <string name="uninstall_failed" msgid="1847750968168364332">"დეინსტალაცია ვერ მოხერხდა."</string>
     <string name="uninstall_failed_app" msgid="5506028705017601412">"<xliff:g id="PACKAGE_LABEL">%1$s</xliff:g>-ის დეინსტალაცია ვერ მოხერხდა."</string>
-    <!-- no translation found for uninstalling_cloned_app (1826380164974984870) -->
-    <skip />
+    <string name="uninstalling_cloned_app" msgid="1826380164974984870">"მიმდინარეობს <xliff:g id="PACKAGE_LABEL">%1$s</xliff:g> კლონის წაშლა…"</string>
     <string name="uninstall_failed_device_policy_manager" msgid="785293813665540305">"მოწყობილობის ადმინისტრატორის აქტიური აპის დეინსტალაცია ვერ მოხერხდება"</string>
     <string name="uninstall_failed_device_policy_manager_of_user" msgid="4813104025494168064">"მოწყობილობის ადმინისტრატორის აქტიური აპის <xliff:g id="USERNAME">%1$s</xliff:g>-სთვის დეინსტალაცია ვერ მოხერხდება"</string>
     <string name="uninstall_all_blocked_profile_owner" msgid="2009393666026751501">"ამ აპს იყენებს მომხმარებლების/პროფილების ნაწილი. სხვებისთვის ის დეინსტალირებულია."</string>
@@ -94,8 +91,7 @@
     <string name="anonymous_source_warning" product="default" msgid="2784902545920822500">"თქვენი ტელეფონი და პერსონალური მონაცემები მეტად დაუცველია უცნობი აპების მხრიდან შეტევების წინაშე. ამ აპის ინსტალაციის შემთხვევაში, თქვენ თანახმა ხართ, პასუხისმგებელი იყოთ მისი გამოყენების შედეგად ტელეფონისთვის მიყენებულ ზიანსა თუ მონაცემების დაკარგვაზე."</string>
     <string name="anonymous_source_warning" product="tablet" msgid="3939101621438855516">"თქვენი ტაბლეტი და პერსონალური მონაცემები მეტად დაუცველია უცნობი აპების მხრიდან შეტევების წინაშე. ამ აპის ინსტალაციის შემთხვევაში, თქვენ თანახმა ხართ, პასუხისმგებელი იყოთ მისი გამოყენების შედეგად ტაბლეტისთვის მიყენებულ ზიანსა თუ მონაცემების დაკარგვაზე."</string>
     <string name="anonymous_source_warning" product="tv" msgid="5599483539528168566">"თქვენი ტელევიზორი და პერსონალური მონაცემები მეტად დაუცველია უცნობი აპების მხრიდან შეტევების წინაშე. ამ აპის ინსტალაციის შემთხვევაში, თქვენ თანახმა ხართ, პასუხისმგებელი იყოთ მისი გამოყენების შედეგად ტელევიზორისთვის მიყენებულ ზიანსა თუ მონაცემების დაკარგვაზე."</string>
-    <!-- no translation found for cloned_app_label (7503612829833756160) -->
-    <skip />
+    <string name="cloned_app_label" msgid="7503612829833756160">"<xliff:g id="PACKAGE_LABEL">%1$s</xliff:g> კლონის შექმნა"</string>
     <string name="anonymous_source_continue" msgid="4375745439457209366">"გაგრძელება"</string>
     <string name="external_sources_settings" msgid="4046964413071713807">"პარამეტრები"</string>
     <string name="wear_app_channel" msgid="1960809674709107850">"Wear აპების ინსტალაცია/დეინსტალაცია"</string>

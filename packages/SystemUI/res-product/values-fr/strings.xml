@@ -23,10 +23,8 @@
     <string name="dock_alignment_not_charging" product="default" msgid="3980752926226749808">"Réalignez le téléphone pour le recharger sans fil"</string>
     <string name="inattentive_sleep_warning_message" product="tv" msgid="6844464574089665063">"L\'appareil Android TV va bientôt passer en mode Veille. Appuyez sur un bouton pour qu\'il reste allumé."</string>
     <string name="inattentive_sleep_warning_message" product="default" msgid="5693904520452332224">"L\'appareil va bientôt passer en mode Veille. Appuyez dessus pour qu\'il reste allumé."</string>
-    <!-- no translation found for keyguard_missing_sim_message (408124574073032188) -->
-    <skip />
-    <!-- no translation found for keyguard_missing_sim_message (2605468359948247208) -->
-    <skip />
+    <string name="keyguard_missing_sim_message" product="tablet" msgid="408124574073032188">"Aucune SIM dans la tablette."</string>
+    <string name="keyguard_missing_sim_message" product="default" msgid="2605468359948247208">"Aucune SIM dans le téléphone."</string>
     <string name="kg_invalid_confirm_pin_hint" product="default" msgid="6278551068943958651">"Les codes PIN ne correspondent pas"</string>
     <string name="kg_failed_attempts_almost_at_wipe" product="tablet" msgid="302165994845009232">"Vous avez tenté de déverrouiller la tablette à <xliff:g id="NUMBER_0">%1$d</xliff:g> reprises. Si vous échouez encore <xliff:g id="NUMBER_1">%2$d</xliff:g> fois, elle sera réinitialisée et toutes les données qu\'elle contient seront supprimées."</string>
     <string name="kg_failed_attempts_almost_at_wipe" product="default" msgid="2594813176164266847">"Vous avez tenté de déverrouiller le téléphone à <xliff:g id="NUMBER_0">%1$d</xliff:g> reprises. Si vous échouez encore <xliff:g id="NUMBER_1">%2$d</xliff:g> fois, il sera réinitialisé et toutes les données qu\'il contient seront supprimées."</string>

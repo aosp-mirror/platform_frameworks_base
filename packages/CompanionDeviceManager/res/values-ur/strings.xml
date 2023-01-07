@@ -23,8 +23,7 @@
     <string name="summary_watch" msgid="4085794790142204006">"‏آپ کے <xliff:g id="DEVICE_NAME">%1$s</xliff:g> کا نظم کرنے کے لئے ایپ کی ضرورت ہے۔ <xliff:g id="APP_NAME">%2$s</xliff:g> کو آپ کی اطلاعات کے ساتھ تعامل کرنے اور آپ کے فون، SMS، رابطوں، کیلنڈر، کال لاگز اور قریبی آلات کی اجازتوں تک رسائی کی اجازت ہوگی۔"</string>
     <string name="summary_watch_single_device" msgid="1523091550243476756">"آپ کے <xliff:g id="DEVICE_NAME">%1$s</xliff:g> کا نظم کرنے کے لئے ایپ کی ضرورت ہے۔ <xliff:g id="APP_NAME">%2$s</xliff:g> کو ان اجازتوں کے ساتھ تعامل کرنے کی اجازت ہوگی:"</string>
     <string name="profile_name_glasses" msgid="8488394059007275998">"گلاسز"</string>
-    <!-- no translation found for summary_glasses (8987925853224595628) -->
-    <skip />
+    <string name="summary_glasses" msgid="8987925853224595628">"‏آپ کے <xliff:g id="DEVICE_NAME">%1$s</xliff:g> کا نظم کرنے کے لیے اس ایپ کی ضرورت ہے۔ <xliff:g id="APP_NAME">%2$s</xliff:g> کو آپ کی اطلاعات کے ساتھ تعامل کرنے اور آپ کے فون، SMS، رابطوں، مائیکروفون اور قریبی آلات کی اجازتوں تک رسائی کی اجازت ہوگی۔"</string>
     <string name="summary_glasses_single_device" msgid="5725890636605211803">"آپ کے <xliff:g id="DEVICE_NAME">%1$s</xliff:g> کا نظم کرنے کے لیے ایپ کی ضرورت ہے۔ <xliff:g id="APP_NAME">%2$s</xliff:g> کو ان اجازتوں کے ساتھ تعامل کرنے کی اجازت ہوگی:"</string>
     <string name="title_app_streaming" msgid="2270331024626446950">"‏اپنے فون سے ان معلومات تک رسائی حاصل کرنے کی &lt;strong&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/strong&gt; کو اجازت دیں"</string>
     <string name="helper_title_app_streaming" msgid="4151687003439969765">"کراس ڈیوائس سروسز"</string>
@@ -44,7 +43,7 @@
     <string name="consent_no" msgid="2640796915611404382">"اجازت نہ دیں"</string>
     <string name="consent_back" msgid="2560683030046918882">"پیچھے"</string>
     <string name="permission_sync_confirmation_title" msgid="4409622174437248702">"‏ایپس کو &lt;strong&gt;<xliff:g id="COMPANION_DEVICE_NAME">%1$s</xliff:g>&lt;/strong&gt; پر وہی اجازتیں دیں جو &lt;strong&gt;<xliff:g id="PRIMARY_DEVICE_NAME">%2$s</xliff:g>&lt;/strong&gt; پر دی گئی ہیں؟"</string>
-    <string name="permission_sync_summary" msgid="4866838188678457084">"‏&lt;p&gt;اس میں مائیکروفون، کیمرا اور مقام تک رسائی، اور &lt;strong&gt;<xliff:g id="COMPANION_DEVICE_NAME_0">%1$s</xliff:g>&lt;/strong&gt;.&lt;/p&gt; پر دیگر حساس اجازتیں شامل ہو سکتی ہیں۔ &lt;p&gt;آپ &lt;strong&gt;<xliff:g id="COMPANION_DEVICE_NAME_1">%1$s</xliff:g>&lt;/strong&gt; پر کسی بھی وقت اپنی ترتیبات میں ان اجازتوں کو تبدیل کر سکتے ہیں۔&lt;/p&gt;"</string>
+    <string name="permission_sync_summary" msgid="4866838188678457084">"‏&lt;p&gt;اس میں مائیکروفون، کیمرا اور مقام تک رسائی، اور &lt;strong&gt;<xliff:g id="COMPANION_DEVICE_NAME_0">%1$s</xliff:g>&lt;/strong&gt; پر دیگر حساس اجازتیں شامل ہو سکتی ہیں۔&lt;/p&gt;&lt;p&gt;آپ &lt;strong&gt;<xliff:g id="COMPANION_DEVICE_NAME_1">%1$s</xliff:g>&lt;/strong&gt; پر کسی بھی وقت اپنی ترتیبات میں ان اجازتوں کو تبدیل کر سکتے ہیں۔&lt;/p&gt;"</string>
     <string name="vendor_icon_description" msgid="4445875290032225965">"ایپ کا آئیکن"</string>
     <string name="vendor_header_button_description" msgid="6566660389500630608">"مزید معلومات کا بٹن"</string>
     <string name="permission_phone" msgid="2661081078692784919">"فون"</string>

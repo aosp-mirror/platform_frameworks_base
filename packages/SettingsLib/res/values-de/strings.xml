@@ -564,6 +564,8 @@
     <string name="user_add_user_title" msgid="5457079143694924885">"Neuen Nutzer hinzufügen?"</string>
     <string name="user_add_user_message_long" msgid="1527434966294733380">"Du kannst dieses Gerät zusammen mit anderen nutzen, indem du weitere Nutzer erstellst. Jeder erhält einen eigenen Bereich, in dem er Apps, den Hintergrund usw. personalisieren kann. Außerdem lassen sich Geräteeinstellungen wie WLAN ändern, die sich auf alle Nutzer auswirken.\n\nWenn du einen neuen Nutzer hinzufügst, muss dieser seinen Bereich einrichten.\n\nJeder Nutzer kann Apps für alle anderen Nutzer aktualisieren. Bedienungshilfen-Einstellungen und -Dienste werden möglicherweise nicht auf den neuen Nutzer übertragen."</string>
     <string name="user_add_user_message_short" msgid="3295959985795716166">"Wenn du einen neuen Nutzer hinzufügst, muss dieser seinen Bereich einrichten.\n\nJeder Nutzer kann Apps für alle anderen Nutzer aktualisieren."</string>
+    <string name="user_grant_admin_title" msgid="5565796912475193314">"Nutzer Administratorberechtigungen geben?"</string>
+    <string name="user_grant_admin_message" msgid="7925257971286380976">"Administratoren können andere Nutzer verwalten, Geräteeinstellungen ändern und das Gerät auf die Werkseinstellungen zurücksetzen."</string>
     <string name="user_setup_dialog_title" msgid="8037342066381939995">"Nutzer jetzt einrichten?"</string>
     <string name="user_setup_dialog_message" msgid="269931619868102841">"Die Person muss Zugang zum Gerät haben und bereit sein, ihren Bereich einzurichten."</string>
     <string name="user_setup_profile_dialog_message" msgid="4788197052296962620">"Profil jetzt einrichten?"</string>
@@ -595,6 +597,8 @@
     <string name="guest_reset_and_restart_dialog_message" msgid="2764425635305200790">"Hierdurch wird eine neue Gastsitzung gestartet und alle Apps und Daten der aktuellen Sitzung werden gelöscht"</string>
     <string name="guest_exit_dialog_title" msgid="1846494656849381804">"Gastmodus beenden?"</string>
     <string name="guest_exit_dialog_message" msgid="1743218864242719783">"Hierdurch werden Apps und Daten der aktuellen Gastsitzung gelöscht"</string>
+    <string name="grant_admin" msgid="4273077214151417783">"Nutzer Administratorberechtigungen geben"</string>
+    <string name="not_grant_admin" msgid="6985027675930546850">"Nutzer keine Administratorberechtigungen geben"</string>
     <string name="guest_exit_dialog_button" msgid="1736401897067442044">"Beenden"</string>
     <string name="guest_exit_dialog_title_non_ephemeral" msgid="7675327443743162986">"Gastaktivität speichern?"</string>
     <string name="guest_exit_dialog_message_non_ephemeral" msgid="223385323235719442">"Speichere Aktivitäten der aktuellen Sitzung oder lösche alle Apps und Daten"</string>

@@ -4,37 +4,38 @@
     <string name="app_name" msgid="4539824758261855508">"Tanúsítványkezelő"</string>
     <string name="string_cancel" msgid="6369133483981306063">"Mégse"</string>
     <string name="string_continue" msgid="1346732695941131882">"Folytatás"</string>
+    <string name="string_more_options" msgid="7990658711962795124">"További lehetőségek"</string>
     <string name="string_create_in_another_place" msgid="1033635365843437603">"Létrehozás másik helyen"</string>
     <string name="string_save_to_another_place" msgid="7590325934591079193">"Mentés másik helyre"</string>
     <string name="string_use_another_device" msgid="8754514926121520445">"Másik eszköz használata"</string>
     <string name="string_save_to_another_device" msgid="1959562542075194458">"Mentés másik eszközre"</string>
     <string name="passkey_creation_intro_title" msgid="4251037543787718844">"Fokozott biztonság – azonosítókulccsal"</string>
-    <string name="passkey_creation_intro_body_password" msgid="312712407571126228">"Nincs szükség összetett jelszavak létrehozására vagy megjegyzésére"</string>
-    <string name="passkey_creation_intro_body_fingerprint" msgid="691816235541508203">"Ujjlenyomatát, arcát vagy képernyőzárát egyedi azonosítókulcs létrehozására használhatja"</string>
-    <string name="passkey_creation_intro_body_device" msgid="477121861162321129">"Az azonosítókulcsokat a rendszer jelszókezelőbe menti, így más eszközökbe is be tud jelentkezni"</string>
+    <string name="passkey_creation_intro_body_password" msgid="8825872426579958200">"Azonosítókulcs birtokában nincs szükség összetett jelszavak létrehozására vagy megjegyzésére"</string>
+    <string name="passkey_creation_intro_body_fingerprint" msgid="7331338631826254055">"Az azonosítókulcsok olyan digitális kulcsok, amelyeket ujjlenyomata, arca vagy képernyőzár használatával hoz létre"</string>
+    <string name="passkey_creation_intro_body_device" msgid="1203796455762131631">"Az azonosítókulcsokat a rendszer jelszókezelőbe menti, így más eszközökbe is be tud jelentkezni"</string>
     <string name="choose_provider_title" msgid="7245243990139698508">"Válassza ki a(z) <xliff:g id="CREATETYPES">%1$s</xliff:g> helyét"</string>
     <string name="create_your_passkeys" msgid="8901224153607590596">"azonosítókulcsok létrehozása"</string>
     <string name="save_your_password" msgid="6597736507991704307">"jelszó mentése"</string>
     <string name="save_your_sign_in_info" msgid="7213978049817076882">"bejelentkezési adatok mentése"</string>
-    <string name="choose_provider_body" msgid="8045759834416308059">"Állítson be alapértelmezett jelszókezelőt jelszavai és azonosítókulcsai mentéséhez és a gyorsabb bejelentkezéshez."</string>
-    <string name="choose_create_option_passkey_title" msgid="4146408187146573131">"Létrehoz azonosítókulcsot a(z) <xliff:g id="PROVIDERINFODISPLAYNAME">%1$s</xliff:g> szolgáltatásban?"</string>
-    <string name="choose_create_option_password_title" msgid="8812546498357380545">"Menti jelszavát a(z) <xliff:g id="PROVIDERINFODISPLAYNAME">%1$s</xliff:g> szolgáltatásba?"</string>
-    <string name="choose_create_option_sign_in_title" msgid="6318246378475961834">"Menti bejelentkezési adatait a(z) <xliff:g id="PROVIDERINFODISPLAYNAME">%1$s</xliff:g> szolgáltatásba?"</string>
-    <string name="choose_create_option_description" msgid="4419171903963100257">"A(z) <xliff:g id="APPDOMAINNAME">%1$s</xliff:g> <xliff:g id="TYPE">%2$s</xliff:g> bármilyen eszközön használható. A(z) <xliff:g id="PROVIDERINFODISPLAYNAME">%3$s</xliff:g> szolgáltatásba van mentve a következő számára: <xliff:g id="CREATEINFODISPLAYNAME">%4$s</xliff:g>"</string>
+    <string name="choose_provider_body" msgid="4384188171872005547">"Jelszókezelő kiválasztásával mentheti a saját adatokat, és gyorsabban jelentkezhet be a következő alkalommal."</string>
+    <string name="choose_create_option_passkey_title" msgid="5220979185879006862">"Létrehoz azonosítókulcsot a következőhöz: <xliff:g id="APPNAME">%1$s</xliff:g>?"</string>
+    <string name="choose_create_option_password_title" msgid="7097275038523578687">"Szeretné elmenteni a(z) <xliff:g id="APPNAME">%1$s</xliff:g> jelszavát?"</string>
+    <string name="choose_create_option_sign_in_title" msgid="4124872317613421249">"Menti a bejelentkezési adatokat a következőhöz: <xliff:g id="APPNAME">%1$s</xliff:g>?"</string>
+    <string name="choose_create_option_description" msgid="5531335144879100664">"A(z) <xliff:g id="APPDOMAINNAME">%1$s</xliff:g>-<xliff:g id="CREDENTIALTYPES">%2$s</xliff:g> bármilyen eszközön használható. A(z) <xliff:g id="PROVIDERINFODISPLAYNAME">%3$s</xliff:g> szolgáltatásba van mentve a következő számára: <xliff:g id="CREATEINFODISPLAYNAME">%4$s</xliff:g>."</string>
     <string name="passkey" msgid="632353688396759522">"azonosítókulcs"</string>
     <string name="password" msgid="6738570945182936667">"jelszó"</string>
     <string name="sign_ins" msgid="4710739369149469208">"bejelentkezési adatok"</string>
-    <string name="create_passkey_in_title" msgid="2714306562710897785">"Azonosítókulcs létrehozása itt:"</string>
-    <string name="save_password_to_title" msgid="3450480045270186421">"Jelszó mentése ide:"</string>
-    <string name="save_sign_in_to_title" msgid="8328143607671760232">"Bejelentkezési adatok mentése ide:"</string>
+    <string name="sign_in_info" msgid="2627704710674232328">"bejelentkezési adatok"</string>
+    <string name="save_credential_to_title" msgid="3172811692275634301">"<xliff:g id="CREDENTIALTYPES">%1$s</xliff:g> mentése ide:"</string>
     <string name="create_passkey_in_other_device_title" msgid="6372952459932674632">"Létrehoz azonosítókulcsot egy másik eszközön?"</string>
     <string name="use_provider_for_all_title" msgid="4201020195058980757">"Szeretné a következőt használni az összes bejelentkezési adatához: <xliff:g id="PROVIDERINFODISPLAYNAME">%1$s</xliff:g>?"</string>
     <string name="use_provider_for_all_description" msgid="6560593199974037820">"Ez a jelszókezelő a bejelentkezés megkönnyítése érdekében tárolja jelszavait és azonosítókulcsait."</string>
     <string name="set_as_default" msgid="4415328591568654603">"Beállítás alapértelmezettként"</string>
     <string name="use_once" msgid="9027366575315399714">"Egyszeri használat"</string>
-    <string name="more_options_usage_passwords_passkeys" msgid="4794903978126339473">"<xliff:g id="PASSWORDSNUMBER">%1$s</xliff:g> jelszó, <xliff:g id="PASSKEYSNUMBER">%2$s</xliff:g> azonosítókulcs"</string>
+    <string name="more_options_usage_passwords_passkeys" msgid="3470113942332934279">"<xliff:g id="PASSWORDSNUMBER">%1$s</xliff:g> jelszó, <xliff:g id="PASSKEYSNUMBER">%2$s</xliff:g> azonosítókulcs"</string>
     <string name="more_options_usage_passwords" msgid="1632047277723187813">"<xliff:g id="PASSWORDSNUMBER">%1$s</xliff:g> jelszó"</string>
     <string name="more_options_usage_passkeys" msgid="5390320437243042237">"<xliff:g id="PASSKEYSNUMBER">%1$s</xliff:g> azonosítókulcs"</string>
+    <string name="more_options_usage_credentials" msgid="1785697001787193984">"<xliff:g id="TOTALCREDENTIALSNUMBER">%1$s</xliff:g> hitelesítési adat"</string>
     <string name="passkey_before_subtitle" msgid="2448119456208647444">"Azonosítókulcs"</string>
     <string name="another_device" msgid="5147276802037801217">"Másik eszköz"</string>
     <string name="other_password_manager" msgid="565790221427004141">"Egyéb jelszókezelők"</string>
@@ -45,7 +46,7 @@
     <string name="get_dialog_title_use_sign_in_for" msgid="5283099528915572980">"Szeretné a(z) <xliff:g id="APP_NAME">%1$s</xliff:g> alkalmazáshoz mentett bejelentkezési adatait használni?"</string>
     <string name="get_dialog_title_choose_sign_in_for" msgid="1361715440877613701">"Mentett bejelentkezési adatok választása a következő számára: <xliff:g id="APP_NAME">%1$s</xliff:g>"</string>
     <string name="get_dialog_use_saved_passkey_for" msgid="4618100798664888512">"Bejelentkezés más módon"</string>
-    <string name="get_dialog_button_label_no_thanks" msgid="8114363019023838533">"Most nem"</string>
+    <string name="snackbar_action" msgid="37373514216505085">"Lehetőségek megtekintése"</string>
     <string name="get_dialog_button_label_continue" msgid="6446201694794283870">"Folytatás"</string>
     <string name="get_dialog_title_sign_in_options" msgid="2092876443114893618">"Bejelentkezési beállítások"</string>
     <string name="get_dialog_heading_for_username" msgid="3456868514554204776">"<xliff:g id="USERNAME">%1$s</xliff:g>"</string>

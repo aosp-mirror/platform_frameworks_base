@@ -23,8 +23,7 @@
     <string name="summary_watch" msgid="4085794790142204006">"Appen behövs för att hantera <xliff:g id="DEVICE_NAME">%1$s</xliff:g>. <xliff:g id="APP_NAME">%2$s</xliff:g> får tillåtelse att interagera med dina aviseringar och får åtkomst till behörigheterna Telefon, Sms, Kontakter, Kalender, Samtalsloggar och Enheter i närheten."</string>
     <string name="summary_watch_single_device" msgid="1523091550243476756">"Appen behövs för att hantera <xliff:g id="DEVICE_NAME">%1$s</xliff:g>. <xliff:g id="APP_NAME">%2$s</xliff:g> får tillåtelse att interagera med följande behörigheter:"</string>
     <string name="profile_name_glasses" msgid="8488394059007275998">"glasögon"</string>
-    <!-- no translation found for summary_glasses (8987925853224595628) -->
-    <skip />
+    <string name="summary_glasses" msgid="8987925853224595628">"Appen behövs för att hantera <xliff:g id="DEVICE_NAME">%1$s</xliff:g>. <xliff:g id="APP_NAME">%2$s</xliff:g> får interagera med dina aviseringar och får åtkomst till behörigheterna Telefon, Sms, Kontakter, Mikrofon och Enheter i närheten."</string>
     <string name="summary_glasses_single_device" msgid="5725890636605211803">"Appen behövs för att hantera <xliff:g id="DEVICE_NAME">%1$s</xliff:g>. <xliff:g id="APP_NAME">%2$s</xliff:g> får tillåtelse att interagera med följande behörigheter:"</string>
     <string name="title_app_streaming" msgid="2270331024626446950">"Ge &lt;strong&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/strong&gt; åtkomstbehörighet till denna information på telefonen"</string>
     <string name="helper_title_app_streaming" msgid="4151687003439969765">"Tjänster för flera enheter"</string>

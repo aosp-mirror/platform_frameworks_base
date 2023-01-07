@@ -369,6 +369,11 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
         }
 
         @Override
+        public void performSystemAction(int actionId) {
+            mService.getSystemActionPerformer().performSystemAction(actionId);
+        }
+
+        @Override
         public boolean isTouchExplorationEnabled(@UserIdInt int userId) {
             synchronized (mService.mLock) {
                 return mService.getUserStateLocked(userId).isTouchExplorationEnabledLocked();

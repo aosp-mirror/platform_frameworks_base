@@ -36,7 +36,7 @@ abstract class AidlImplementationDetector : Detector(), SourceCodeScanner {
 
     private inner class AidlStubHandler(val context: JavaContext) : UElementHandler() {
         override fun visitMethod(node: UMethod) {
-            val interfaceName = getContainingAidlInterface(node)
+            val interfaceName = getContainingAidlInterface(context, node)
                     .takeUnless(EXCLUDED_CPP_INTERFACES::contains) ?: return
             val body = (node.uastBody as? UBlockExpression) ?: return
             visitAidlMethod(context, node, interfaceName, body)

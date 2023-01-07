@@ -4,37 +4,38 @@
     <string name="app_name" msgid="4539824758261855508">"Credential Manager"</string>
     <string name="string_cancel" msgid="6369133483981306063">"取消"</string>
     <string name="string_continue" msgid="1346732695941131882">"继续"</string>
+    <string name="string_more_options" msgid="7990658711962795124">"更多选项"</string>
     <string name="string_create_in_another_place" msgid="1033635365843437603">"在另一位置创建"</string>
     <string name="string_save_to_another_place" msgid="7590325934591079193">"保存到另一位置"</string>
     <string name="string_use_another_device" msgid="8754514926121520445">"使用另一台设备"</string>
     <string name="string_save_to_another_device" msgid="1959562542075194458">"保存到其他设备"</string>
     <string name="passkey_creation_intro_title" msgid="4251037543787718844">"通行密钥可提高安全性"</string>
-    <string name="passkey_creation_intro_body_password" msgid="312712407571126228">"无需创建或记住复杂的密码"</string>
-    <string name="passkey_creation_intro_body_fingerprint" msgid="691816235541508203">"使用指纹、人脸或屏锁创建唯一的通行密钥"</string>
-    <string name="passkey_creation_intro_body_device" msgid="477121861162321129">"系统会将通行密钥保存到密码管理工具中，以便您在其他设备上登录"</string>
+    <string name="passkey_creation_intro_body_password" msgid="8825872426579958200">"借助通行密钥，您无需创建或记住复杂的密码"</string>
+    <string name="passkey_creation_intro_body_fingerprint" msgid="7331338631826254055">"通行密钥是指您使用您的指纹、面孔或屏锁方式创建的加密数字钥匙"</string>
+    <string name="passkey_creation_intro_body_device" msgid="1203796455762131631">"系统会将通行密钥保存到密码管理工具中，以便您在其他设备上登录"</string>
     <string name="choose_provider_title" msgid="7245243990139698508">"选择<xliff:g id="CREATETYPES">%1$s</xliff:g>的位置"</string>
     <string name="create_your_passkeys" msgid="8901224153607590596">"创建通行密钥"</string>
     <string name="save_your_password" msgid="6597736507991704307">"保存您的密码"</string>
     <string name="save_your_sign_in_info" msgid="7213978049817076882">"保存您的登录信息"</string>
-    <string name="choose_provider_body" msgid="8045759834416308059">"设置默认密码管理工具，以便保存您的密码和通行密钥，从而提高下次的登录速度。"</string>
-    <string name="choose_create_option_passkey_title" msgid="4146408187146573131">"在“<xliff:g id="PROVIDERINFODISPLAYNAME">%1$s</xliff:g>”中创建通行密钥？"</string>
-    <string name="choose_create_option_password_title" msgid="8812546498357380545">"将您的密码保存至“<xliff:g id="PROVIDERINFODISPLAYNAME">%1$s</xliff:g>”？"</string>
-    <string name="choose_create_option_sign_in_title" msgid="6318246378475961834">"将您的登录信息保存至“<xliff:g id="PROVIDERINFODISPLAYNAME">%1$s</xliff:g>”？"</string>
-    <string name="choose_create_option_description" msgid="4419171903963100257">"您可以在任意设备上使用 <xliff:g id="APPDOMAINNAME">%1$s</xliff:g> <xliff:g id="TYPE">%2$s</xliff:g>。它会保存到“<xliff:g id="CREATEINFODISPLAYNAME">%4$s</xliff:g>”的<xliff:g id="PROVIDERINFODISPLAYNAME">%3$s</xliff:g>"</string>
+    <string name="choose_provider_body" msgid="4384188171872005547">"请选择一款密码管理工具来保存您的信息，以便下次更快地登录。"</string>
+    <string name="choose_create_option_passkey_title" msgid="5220979185879006862">"要为“<xliff:g id="APPNAME">%1$s</xliff:g>”创建通行密钥吗？"</string>
+    <string name="choose_create_option_password_title" msgid="7097275038523578687">"要保存“<xliff:g id="APPNAME">%1$s</xliff:g>”的密码吗？"</string>
+    <string name="choose_create_option_sign_in_title" msgid="4124872317613421249">"要保存“<xliff:g id="APPNAME">%1$s</xliff:g>”的登录信息吗？"</string>
+    <string name="choose_create_option_description" msgid="5531335144879100664">"您可以在任意设备上使用“<xliff:g id="APPDOMAINNAME">%1$s</xliff:g>”<xliff:g id="CREDENTIALTYPES">%2$s</xliff:g>。系统会将此信息保存到<xliff:g id="PROVIDERINFODISPLAYNAME">%3$s</xliff:g>，以供<xliff:g id="CREATEINFODISPLAYNAME">%4$s</xliff:g>使用。"</string>
     <string name="passkey" msgid="632353688396759522">"通行密钥"</string>
     <string name="password" msgid="6738570945182936667">"密码"</string>
     <string name="sign_ins" msgid="4710739369149469208">"登录"</string>
-    <string name="create_passkey_in_title" msgid="2714306562710897785">"在以下位置创建通行密钥"</string>
-    <string name="save_password_to_title" msgid="3450480045270186421">"将密码保存到"</string>
-    <string name="save_sign_in_to_title" msgid="8328143607671760232">"将登录信息保存到"</string>
+    <string name="sign_in_info" msgid="2627704710674232328">"登录信息"</string>
+    <string name="save_credential_to_title" msgid="3172811692275634301">"将<xliff:g id="CREDENTIALTYPES">%1$s</xliff:g>保存到"</string>
     <string name="create_passkey_in_other_device_title" msgid="6372952459932674632">"在其他设备上创建通行密钥？"</string>
     <string name="use_provider_for_all_title" msgid="4201020195058980757">"将“<xliff:g id="PROVIDERINFODISPLAYNAME">%1$s</xliff:g>”用于您的所有登录信息？"</string>
     <string name="use_provider_for_all_description" msgid="6560593199974037820">"此密码管理工具将会存储您的密码和通行密钥，以帮助您轻松登录。"</string>
     <string name="set_as_default" msgid="4415328591568654603">"设为默认项"</string>
     <string name="use_once" msgid="9027366575315399714">"使用一次"</string>
-    <string name="more_options_usage_passwords_passkeys" msgid="4794903978126339473">"<xliff:g id="PASSWORDSNUMBER">%1$s</xliff:g> 个密码，<xliff:g id="PASSKEYSNUMBER">%2$s</xliff:g> 个通行密钥"</string>
+    <string name="more_options_usage_passwords_passkeys" msgid="3470113942332934279">"<xliff:g id="PASSWORDSNUMBER">%1$s</xliff:g> 个密码 • <xliff:g id="PASSKEYSNUMBER">%2$s</xliff:g> 个通行密钥"</string>
     <string name="more_options_usage_passwords" msgid="1632047277723187813">"<xliff:g id="PASSWORDSNUMBER">%1$s</xliff:g> 个密码"</string>
     <string name="more_options_usage_passkeys" msgid="5390320437243042237">"<xliff:g id="PASSKEYSNUMBER">%1$s</xliff:g> 个通行密钥"</string>
+    <string name="more_options_usage_credentials" msgid="1785697001787193984">"<xliff:g id="TOTALCREDENTIALSNUMBER">%1$s</xliff:g>凭据"</string>
     <string name="passkey_before_subtitle" msgid="2448119456208647444">"通行密钥"</string>
     <string name="another_device" msgid="5147276802037801217">"另一台设备"</string>
     <string name="other_password_manager" msgid="565790221427004141">"其他密码管理工具"</string>
@@ -45,7 +46,7 @@
     <string name="get_dialog_title_use_sign_in_for" msgid="5283099528915572980">"将您已保存的登录信息用于<xliff:g id="APP_NAME">%1$s</xliff:g>？"</string>
     <string name="get_dialog_title_choose_sign_in_for" msgid="1361715440877613701">"为<xliff:g id="APP_NAME">%1$s</xliff:g>选择已保存的登录信息"</string>
     <string name="get_dialog_use_saved_passkey_for" msgid="4618100798664888512">"以另一种方式登录"</string>
-    <string name="get_dialog_button_label_no_thanks" msgid="8114363019023838533">"不用了"</string>
+    <string name="snackbar_action" msgid="37373514216505085">"查看选项"</string>
     <string name="get_dialog_button_label_continue" msgid="6446201694794283870">"继续"</string>
     <string name="get_dialog_title_sign_in_options" msgid="2092876443114893618">"登录选项"</string>
     <string name="get_dialog_heading_for_username" msgid="3456868514554204776">"用户：<xliff:g id="USERNAME">%1$s</xliff:g>"</string>

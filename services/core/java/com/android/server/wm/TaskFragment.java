@@ -2107,7 +2107,7 @@ class TaskFragment extends WindowContainer<WindowContainer> {
 
         final Rect parentBounds = parentConfig.windowConfiguration.getBounds();
         final Rect resolvedBounds = inOutConfig.windowConfiguration.getBounds();
-        if (resolvedBounds == null || resolvedBounds.isEmpty()) {
+        if (resolvedBounds.isEmpty()) {
             mTmpFullBounds.set(parentBounds);
             insideParentBounds = true;
         } else {
@@ -2196,6 +2196,7 @@ class TaskFragment extends WindowContainer<WindowContainer> {
                         : overrideScreenHeightDp;
             }
 
+            // TODO(b/238331848): Consider simplifying logic that computes smallestScreenWidthDp.
             if (inOutConfig.smallestScreenWidthDp
                     == Configuration.SMALLEST_SCREEN_WIDTH_DP_UNDEFINED) {
                 // When entering to or exiting from Pip, the PipTaskOrganizer will set the

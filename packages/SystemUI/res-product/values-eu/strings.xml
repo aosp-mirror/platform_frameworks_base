@@ -23,10 +23,8 @@
     <string name="dock_alignment_not_charging" product="default" msgid="3980752926226749808">"Jarri ondo telefonoa, haririk gabe karga dadin"</string>
     <string name="inattentive_sleep_warning_message" product="tv" msgid="6844464574089665063">"Android TV gailua laster itzaliko da; sakatu botoi bat piztuta mantentzeko."</string>
     <string name="inattentive_sleep_warning_message" product="default" msgid="5693904520452332224">"Gailua laster itzaliko da; sakatu piztuta mantentzeko."</string>
-    <!-- no translation found for keyguard_missing_sim_message (408124574073032188) -->
-    <skip />
-    <!-- no translation found for keyguard_missing_sim_message (2605468359948247208) -->
-    <skip />
+    <string name="keyguard_missing_sim_message" product="tablet" msgid="408124574073032188">"Ez dago SIMik tabletan."</string>
+    <string name="keyguard_missing_sim_message" product="default" msgid="2605468359948247208">"Ez dago SIMik telefonoan."</string>
     <string name="kg_invalid_confirm_pin_hint" product="default" msgid="6278551068943958651">"PIN kodeak ez datoz bat"</string>
     <string name="kg_failed_attempts_almost_at_wipe" product="tablet" msgid="302165994845009232">"<xliff:g id="NUMBER_0">%1$d</xliff:g> aldiz saiatu zara tableta desblokeatzen, baina huts egin duzu denetan. Beste <xliff:g id="NUMBER_1">%2$d</xliff:g> aldiz huts egiten baduzu, berrezarri egingo da tableta eta, ondorioz, bertako datu guztiak ezabatuko dira."</string>
     <string name="kg_failed_attempts_almost_at_wipe" product="default" msgid="2594813176164266847">"<xliff:g id="NUMBER_0">%1$d</xliff:g> aldiz saiatu zara telefonoa desblokeatzen, baina huts egin duzu denetan. Beste <xliff:g id="NUMBER_1">%2$d</xliff:g> aldiz huts egiten baduzu, berrezarri egingo da telefonoa eta, ondorioz, bertako datu guztiak ezabatuko dira."</string>

@@ -1481,8 +1481,8 @@ public class ComputerEngine implements Computer {
                     : mPermissionManager.getGrantedPermissions(ps.getPackageName(), userId);
 
             PackageInfo packageInfo = PackageInfoUtils.generate(p, gids, flags,
-                    state.getFirstInstallTime(), ps.getLastUpdateTime(), permissions, state, userId,
-                    ps);
+                    state.getFirstInstallTimeMillis(), ps.getLastUpdateTime(), permissions, state,
+                    userId, ps);
 
             if (packageInfo == null) {
                 return null;
@@ -1499,7 +1499,7 @@ public class ComputerEngine implements Computer {
             pi.setLongVersionCode(ps.getVersionCode());
             SharedUserApi sharedUser = mSettings.getSharedUserFromPackageName(pi.packageName);
             pi.sharedUserId = (sharedUser != null) ? sharedUser.getName() : null;
-            pi.firstInstallTime = state.getFirstInstallTime();
+            pi.firstInstallTime = state.getFirstInstallTimeMillis();
             pi.lastUpdateTime = ps.getLastUpdateTime();
 
             ApplicationInfo ai = new ApplicationInfo();

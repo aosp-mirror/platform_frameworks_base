@@ -23,8 +23,7 @@
     <string name="summary_watch" msgid="4085794790142204006">"このアプリは<xliff:g id="DEVICE_NAME">%1$s</xliff:g>の管理に必要です。<xliff:g id="APP_NAME">%2$s</xliff:g> は、通知の使用と、電話、SMS、連絡先、カレンダー、通話履歴、付近のデバイスの権限へのアクセスが可能となります。"</string>
     <string name="summary_watch_single_device" msgid="1523091550243476756">"このアプリは<xliff:g id="DEVICE_NAME">%1$s</xliff:g>の管理に必要です。<xliff:g id="APP_NAME">%2$s</xliff:g> は、次の権限の使用が可能となります。"</string>
     <string name="profile_name_glasses" msgid="8488394059007275998">"眼鏡"</string>
-    <!-- no translation found for summary_glasses (8987925853224595628) -->
-    <skip />
+    <string name="summary_glasses" msgid="8987925853224595628">"このアプリは<xliff:g id="DEVICE_NAME">%1$s</xliff:g>の管理に必要です。<xliff:g id="APP_NAME">%2$s</xliff:g> は、通知を操作し、電話、SMS、連絡先、マイク、付近のデバイスの権限を利用することができます。"</string>
     <string name="summary_glasses_single_device" msgid="5725890636605211803">"このアプリは<xliff:g id="DEVICE_NAME">%1$s</xliff:g>の管理に必要です。<xliff:g id="APP_NAME">%2$s</xliff:g> は、次の権限の使用が可能となります。"</string>
     <string name="title_app_streaming" msgid="2270331024626446950">"スマートフォンのこの情報へのアクセスを &lt;strong&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/strong&gt; に許可"</string>
     <string name="helper_title_app_streaming" msgid="4151687003439969765">"クロスデバイス サービス"</string>

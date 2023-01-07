@@ -85,6 +85,7 @@
     <string name="screenshot_share_description" msgid="2861628935812656612">"સ્ક્રીનશૉટ શેર કરો"</string>
     <string name="screenshot_scroll_label" msgid="2930198809899329367">"વધુ કૅપ્ચર કરો"</string>
     <string name="screenshot_dismiss_description" msgid="4702341245899508786">"સ્ક્રીનશૉટ છોડી દો"</string>
+    <string name="screenshot_dismiss_work_profile" msgid="3101530842987697045">"ઑફિસની પ્રોફાઇલનો મેસેજ છોડી દો"</string>
     <string name="screenshot_preview_description" msgid="7606510140714080474">"સ્ક્રીનશૉટનો પ્રીવ્યૂ"</string>
     <string name="screenshot_top_boundary_pct" msgid="2520148599096479332">"ઉપરની સીમા <xliff:g id="PERCENT">%1$d</xliff:g> ટકા"</string>
     <string name="screenshot_bottom_boundary_pct" msgid="3880821519814946478">"નીચેની સીમા <xliff:g id="PERCENT">%1$d</xliff:g> ટકા"</string>
@@ -317,8 +318,7 @@
     <string name="sensor_privacy_camera_unblocked_dialog_content" msgid="7847190103011782278">"બધી ઍપ અને સેવાઓ માટે કૅમેરા ચાલુ કર્યો."</string>
     <string name="sensor_privacy_camera_blocked_dialog_content" msgid="3182428709314874616">"બધી ઍપ અને સેવાઓ માટે કૅમેરાનો ઍક્સેસ બંધ કર્યો છે."</string>
     <string name="sensor_privacy_htt_blocked_dialog_content" msgid="3333321592997666441">"માઇક્રોફોન બટનનો ઉપયોગ કરવા માટે, સેટિંગમાં માઇક્રોફોનનો ઍક્સેસ ચાલુ કરો."</string>
-    <!-- no translation found for sensor_privacy_dialog_open_settings (5635865896053011859) -->
-    <skip />
+    <string name="sensor_privacy_dialog_open_settings" msgid="5635865896053011859">"સેટિંગ ખોલો"</string>
     <string name="media_seamless_other_device" msgid="4654849800789196737">"અન્ય ડિવાઇસ"</string>
     <string name="quick_step_accessibility_toggle_overview" msgid="7908949976727578403">"ઝલકને ટૉગલ કરો"</string>
     <string name="zen_priority_introduction" msgid="3159291973383796646">"અલાર્મ, રિમાઇન્ડર, ઇવેન્ટ અને તમે ઉલ્લેખ કરો તે કૉલર સિવાય તમને ધ્વનિ કે વાઇબ્રેશન દ્વારા ખલેલ પહોંચાડવામાં આવશે નહીં. સંગીત, વીડિઓ અને રમતો સહિત તમે જે કંઈપણ ચલાવવાનું પસંદ કરશો તે સંભળાતું રહેશે."</string>
@@ -743,6 +743,7 @@
     <string name="wifi_is_off" msgid="5389597396308001471">"વાઇ-ફાઇ બંધ છે"</string>
     <string name="bt_is_off" msgid="7436344904889461591">"બ્લૂટૂથ બંધ છે"</string>
     <string name="dnd_is_off" msgid="3185706903793094463">"ખલેલ પાડશો નહીં બંધ છે"</string>
+    <string name="dnd_is_on" msgid="7009368176361546279">"ખલેલ પાડશો નહીં ચાલુ છે"</string>
     <string name="qs_dnd_prompt_auto_rule" msgid="3535469468310002616">"ખલેલ પાડશો નહીં એક સ્વચાલિત નિયમ દ્વારા ચાલુ કરાયું હતું (<xliff:g id="ID_1">%s</xliff:g>)."</string>
     <string name="qs_dnd_prompt_app" msgid="4027984447935396820">"ખલેલ પાડશો નહીં એક ઍપ્લિકેશન દ્વારા ચાલુ કરાયું હતું (<xliff:g id="ID_1">%s</xliff:g>)."</string>
     <string name="qs_dnd_prompt_auto_rule_app" msgid="1841469944118486580">"ખલેલ પાડશો નહીં એક સ્વચાલિત નિયમ અથવા ઍપ્લિકેશન દ્વારા ચાલુ કરાયું હતું."</string>
@@ -815,7 +816,7 @@
     <string name="accessibility_floating_button_migration_tooltip" msgid="5217151214439341902">"ઍક્સેસિબિલિટી સુવિધાઓ ખોલવા માટે ટૅપ કરો. સેટિંગમાં આ બટનને કસ્ટમાઇઝ કરો અથવા બદલો.\n\n"<annotation id="link">"સેટિંગ જુઓ"</annotation></string>
     <string name="accessibility_floating_button_docking_tooltip" msgid="6814897496767461517">"તેને હંગામી રૂપે ખસેડવા માટે બટનને કિનારી પર ખસેડો"</string>
     <string name="accessibility_floating_button_undo" msgid="511112888715708241">"છેલ્લો ફેરફાર રદ કરો"</string>
-    <string name="accessibility_floating_button_undo_message_text" msgid="3044079592757099698">"{count,plural, =1{{label} શૉર્ટકટ કાઢી નાખ્યો}one{# શૉર્ટકટ કાઢી નાખ્યો}other{# શૉર્ટકટ કાઢી નાખ્યો}}"</string>
+    <string name="accessibility_floating_button_undo_message_text" msgid="3044079592757099698">"{count,plural, =1{{label} શૉર્ટકટ કાઢી નાખ્યો}one{# શૉર્ટકટ કાઢી નાખ્યો}other{# શૉર્ટકટ કાઢી નાખ્યા}}"</string>
     <string name="accessibility_floating_button_action_move_top_left" msgid="6253520703618545705">"ઉપર ડાબે ખસેડો"</string>
     <string name="accessibility_floating_button_action_move_top_right" msgid="6106225581993479711">"ઉપર જમણે ખસેડો"</string>
     <string name="accessibility_floating_button_action_move_bottom_left" msgid="8063394111137429725">"નીચે ડાબે ખસેડો"</string>
@@ -905,6 +906,7 @@
     <string name="media_output_dialog_accessibility_title" msgid="4681741064190167888">"ઑડિયો આઉટપુટ માટે ઉપલબ્ધ ડિવાઇસ."</string>
     <string name="media_output_dialog_accessibility_seekbar" msgid="5332843993805568978">"વૉલ્યૂમ"</string>
     <string name="media_output_dialog_volume_percentage" msgid="1613984910585111798">"<xliff:g id="PERCENTAGE">%1$d</xliff:g>%%"</string>
+    <string name="media_output_group_title_speakers_and_displays" msgid="7169712332365659820">"સ્પીકર અને ડિસ્પ્લે"</string>
     <string name="media_output_first_broadcast_title" msgid="6292237789860753022">"બ્રોડકાસ્ટ પ્રક્રિયાની કામ કરવાની રીત"</string>
     <string name="media_output_broadcast" msgid="3555580945878071543">"બ્રોડકાસ્ટ કરો"</string>
     <string name="media_output_first_notify_broadcast_message" msgid="6353857724136398494">"સુસંગત બ્લૂટૂથ ડિવાઇસ ધરાવતા નજીકના લોકો તમે જે મીડિયા બ્રોડકાસ્ટ કરી રહ્યાં છો તે સાંભળી શકે છે"</string>
@@ -1032,20 +1034,19 @@
     <string name="log_access_confirmation_deny" msgid="2389461495803585795">"મંજૂરી આપશો નહીં"</string>
     <string name="log_access_confirmation_body" msgid="6883031912003112634">"તમારા ડિવાઇસ પર થતી કામગીરીને ડિવાઇસ લૉગ રેકોર્ડ કરે છે. ઍપ આ લૉગનો ઉપયોગ સમસ્યાઓ શોધી તેનું નિરાકરણ કરવા માટે કરી શકે છે.\n\nઅમુક લૉગમાં સંવેદનશીલ માહિતી હોઈ શકે, આથી ડિવાઇસનો બધો લૉગ ઍક્સેસ કરવાની મંજૂરી માત્ર તમારી વિશ્વાસપાત્ર ઍપને જ આપો. \n\nજો તમે આ ઍપને ડિવાઇસનો બધો લૉગ ઍક્સેસ કરવાની મંજૂરી ન આપો, તો પણ તે તેના પોતાના લૉગ ઍક્સેસ કરી શકે છે. તમારા ડિવાઇસના નિર્માતા હજી પણ કદાચ તમારા ડિવાઇસ પર અમુક લૉગ અથવા માહિતી ઍક્સેસ કરી શકે છે."</string>
     <string name="keyguard_affordance_enablement_dialog_action_template" msgid="8164857863036314664">"<xliff:g id="APPNAME">%1$s</xliff:g> ખોલો"</string>
-    <string name="keyguard_affordance_enablement_dialog_message" msgid="2790910660524887941">"<xliff:g id="APPNAME">%1$s</xliff:g> ઍપને શૉર્ટકટ તરીકે ઉમેરવા માટે, આ બાબતોની ખાતરી કરો"</string>
     <string name="keyguard_affordance_enablement_dialog_wallet_instruction_1" msgid="8439655049139819278">"• ઍપનું સેટઅપ કરેલું છે"</string>
     <string name="keyguard_affordance_enablement_dialog_wallet_instruction_2" msgid="4321089250629477835">"• ઓછામાં ઓછું એક કાર્ડ વૉલેટમાં ઉમેરેલું છે"</string>
     <string name="keyguard_affordance_enablement_dialog_qr_scanner_instruction" msgid="5355839079232119791">"• કૅમેરા ઍપ ઇન્સ્ટૉલ કરી છે"</string>
     <string name="keyguard_affordance_enablement_dialog_home_instruction_1" msgid="8438311171750568633">"• ઍપનું સેટઅપ કરેલું છે"</string>
     <string name="keyguard_affordance_enablement_dialog_home_instruction_2" msgid="8308525385889021652">"• ઓછામાં ઓછું એક ડિવાઇસ ઉપલબ્ધ છે"</string>
+    <string name="keyguard_affordance_press_too_short" msgid="8145437175134998864">"શૉર્ટકટને ટચ વડે પળભર દબાવી રાખો"</string>
     <string name="rear_display_bottom_sheet_cancel" msgid="3461468855493357248">"રદ કરો"</string>
     <string name="rear_display_bottom_sheet_confirm" msgid="4383356544661421206">"હમણાં જ ફ્લિપ કરો"</string>
     <string name="rear_display_fold_bottom_sheet_title" msgid="6081542277622721548">"બહેતર સેલ્ફી લેવા માટે ફોન ખોલો"</string>
     <string name="rear_display_unfold_bottom_sheet_title" msgid="2137403802960396357">"બહેતર સેલ્ફી લેવા ફ્રન્ટ ડિસ્પ્લે પર ફ્લિપ કરીએ?"</string>
     <string name="rear_display_bottom_sheet_description" msgid="1852662982816810352">"વધુ ઉચ્ચ રિઝોલ્યુશનવાળો વિશાળ ફોટો લેવા માટે પાછલા કૅમેરાનો ઉપયોગ કરો."</string>
     <string name="rear_display_bottom_sheet_warning" msgid="800995919558238930"><b>"✱ આ સ્ક્રીન બંધ થઈ જશે"</b></string>
-    <!-- no translation found for rear_display_accessibility_folded_animation (1538121649587978179) -->
-    <skip />
-    <!-- no translation found for rear_display_accessibility_unfolded_animation (1946153682258289040) -->
-    <skip />
+    <string name="rear_display_accessibility_folded_animation" msgid="1538121649587978179">"ફોલ્ડ કરી શકાય એવું ડિવાઇસ અનફોલ્ડ કરવામાં આવી રહ્યું છે"</string>
+    <string name="rear_display_accessibility_unfolded_animation" msgid="1946153682258289040">"ફોલ્ડ કરી શકાય એવું ડિવાઇસ ફ્લિપ કરવામાં આવી રહ્યું છે"</string>
+    <string name="stylus_battery_low" msgid="7134370101603167096">"સ્ટાઇલસની બૅટરીમાં ચાર્જ ઓછો છે"</string>
 </resources>

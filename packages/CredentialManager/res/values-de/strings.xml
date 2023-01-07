@@ -4,49 +4,49 @@
     <string name="app_name" msgid="4539824758261855508">"Anmeldedaten-Manager"</string>
     <string name="string_cancel" msgid="6369133483981306063">"Abbrechen"</string>
     <string name="string_continue" msgid="1346732695941131882">"Weiter"</string>
+    <string name="string_more_options" msgid="7990658711962795124">"Weitere Optionen"</string>
     <string name="string_create_in_another_place" msgid="1033635365843437603">"An anderem Speicherort erstellen"</string>
     <string name="string_save_to_another_place" msgid="7590325934591079193">"An anderem Ort speichern"</string>
     <string name="string_use_another_device" msgid="8754514926121520445">"Anderes Gerät verwenden"</string>
     <string name="string_save_to_another_device" msgid="1959562542075194458">"Auf einem anderen Gerät speichern"</string>
     <string name="passkey_creation_intro_title" msgid="4251037543787718844">"Mehr Sicherheit mit Passkeys"</string>
-    <string name="passkey_creation_intro_body_password" msgid="312712407571126228">"Du musst keine komplizierten Passwörter erstellen oder dir merken"</string>
-    <string name="passkey_creation_intro_body_fingerprint" msgid="691816235541508203">"Verwende deinen Fingerabdruck oder deine Gesichts- bzw. Displaysperre, um einen eindeutigen Passkey zu erstellen"</string>
-    <string name="passkey_creation_intro_body_device" msgid="477121861162321129">"Passkeys werden in einem Passwortmanager gespeichert, damit du dich auf anderen Geräten anmelden kannst"</string>
+    <string name="passkey_creation_intro_body_password" msgid="8825872426579958200">"Mit Passkeys musst du keine komplizierten Passwörter erstellen oder dir merken"</string>
+    <string name="passkey_creation_intro_body_fingerprint" msgid="7331338631826254055">"Passkeys sind verschlüsselte digitale Schlüssel, die du mithilfe deines Fingerabdrucks, Gesichts oder deiner Displaysperre erstellst"</string>
+    <string name="passkey_creation_intro_body_device" msgid="1203796455762131631">"Sie werden in einem Passwortmanager gespeichert, damit du dich auf anderen Geräten anmelden kannst"</string>
     <string name="choose_provider_title" msgid="7245243990139698508">"Ort auswählen für: <xliff:g id="CREATETYPES">%1$s</xliff:g>"</string>
     <string name="create_your_passkeys" msgid="8901224153607590596">"Passkeys erstellen"</string>
     <string name="save_your_password" msgid="6597736507991704307">"Passwort speichern"</string>
     <string name="save_your_sign_in_info" msgid="7213978049817076882">"Anmeldedaten speichern"</string>
-    <string name="choose_provider_body" msgid="8045759834416308059">"Du kannst einen Passwortmanager festlegen, der standardmäßig zum Speichern deiner Passwörter und Passkeys verwendet wird, damit du dich das nächste Mal schneller anmelden kannst."</string>
-    <string name="choose_create_option_passkey_title" msgid="4146408187146573131">"Passkey hier erstellen: <xliff:g id="PROVIDERINFODISPLAYNAME">%1$s</xliff:g>?"</string>
-    <string name="choose_create_option_password_title" msgid="8812546498357380545">"Passwort hier speichern: <xliff:g id="PROVIDERINFODISPLAYNAME">%1$s</xliff:g>?"</string>
-    <string name="choose_create_option_sign_in_title" msgid="6318246378475961834">"Anmeldedaten hier speichern: <xliff:g id="PROVIDERINFODISPLAYNAME">%1$s</xliff:g>?"</string>
-    <string name="choose_create_option_description" msgid="4419171903963100257">"Du kannst <xliff:g id="APPDOMAINNAME">%1$s</xliff:g> <xliff:g id="TYPE">%2$s</xliff:g> auf jedem beliebigen Gerät verwenden. Gespeichert (<xliff:g id="PROVIDERINFODISPLAYNAME">%3$s</xliff:g>) für <xliff:g id="CREATEINFODISPLAYNAME">%4$s</xliff:g>"</string>
+    <string name="choose_provider_body" msgid="4384188171872005547">"Du kannst einen Passwortmanager auswählen, um deine Anmeldedaten zu speichern, damit du dich nächstes Mal schneller anmelden kannst."</string>
+    <string name="choose_create_option_passkey_title" msgid="5220979185879006862">"Passkey für <xliff:g id="APPNAME">%1$s</xliff:g> erstellen?"</string>
+    <string name="choose_create_option_password_title" msgid="7097275038523578687">"Passwort für <xliff:g id="APPNAME">%1$s</xliff:g> speichern?"</string>
+    <string name="choose_create_option_sign_in_title" msgid="4124872317613421249">"Anmeldedaten für <xliff:g id="APPNAME">%1$s</xliff:g> speichern?"</string>
+    <string name="choose_create_option_description" msgid="5531335144879100664">"Du kannst Folgendes von <xliff:g id="APPDOMAINNAME">%1$s</xliff:g> auf jedem beliebigen Gerät verwenden: <xliff:g id="CREDENTIALTYPES">%2$s</xliff:g>. Diese Anmeldeoption wird für <xliff:g id="CREATEINFODISPLAYNAME">%4$s</xliff:g> in <xliff:g id="PROVIDERINFODISPLAYNAME">%3$s</xliff:g> gespeichert."</string>
     <string name="passkey" msgid="632353688396759522">"Passkey"</string>
     <string name="password" msgid="6738570945182936667">"Passwort"</string>
     <string name="sign_ins" msgid="4710739369149469208">"Anmeldungen"</string>
-    <string name="create_passkey_in_title" msgid="2714306562710897785">"Passkey hier erstellen:"</string>
-    <string name="save_password_to_title" msgid="3450480045270186421">"Passwort hier speichern:"</string>
-    <string name="save_sign_in_to_title" msgid="8328143607671760232">"Anmeldedaten hier speichern:"</string>
+    <string name="sign_in_info" msgid="2627704710674232328">"Anmeldedaten"</string>
+    <string name="save_credential_to_title" msgid="3172811692275634301">"<xliff:g id="CREDENTIALTYPES">%1$s</xliff:g> speichern unter"</string>
     <string name="create_passkey_in_other_device_title" msgid="6372952459932674632">"Passkey auf anderem Gerät erstellen?"</string>
     <string name="use_provider_for_all_title" msgid="4201020195058980757">"<xliff:g id="PROVIDERINFODISPLAYNAME">%1$s</xliff:g> für alle Anmeldungen verwenden?"</string>
     <string name="use_provider_for_all_description" msgid="6560593199974037820">"Mit diesem Passwortmanager werden deine Passwörter und Passkeys gespeichert, damit du dich problemlos anmelden kannst."</string>
     <string name="set_as_default" msgid="4415328591568654603">"Als Standard festlegen"</string>
     <string name="use_once" msgid="9027366575315399714">"Einmal verwenden"</string>
-    <string name="more_options_usage_passwords_passkeys" msgid="4794903978126339473">"<xliff:g id="PASSWORDSNUMBER">%1$s</xliff:g> Passwörter, <xliff:g id="PASSKEYSNUMBER">%2$s</xliff:g> Passkeys"</string>
+    <string name="more_options_usage_passwords_passkeys" msgid="3470113942332934279">"<xliff:g id="PASSWORDSNUMBER">%1$s</xliff:g> Passwörter • <xliff:g id="PASSKEYSNUMBER">%2$s</xliff:g> Passkeys"</string>
     <string name="more_options_usage_passwords" msgid="1632047277723187813">"<xliff:g id="PASSWORDSNUMBER">%1$s</xliff:g> Passwörter"</string>
     <string name="more_options_usage_passkeys" msgid="5390320437243042237">"<xliff:g id="PASSKEYSNUMBER">%1$s</xliff:g> Passkeys"</string>
+    <string name="more_options_usage_credentials" msgid="1785697001787193984">"<xliff:g id="TOTALCREDENTIALSNUMBER">%1$s</xliff:g> Sätze mit Anmeldedaten"</string>
     <string name="passkey_before_subtitle" msgid="2448119456208647444">"Passkey"</string>
     <string name="another_device" msgid="5147276802037801217">"Ein anderes Gerät"</string>
     <string name="other_password_manager" msgid="565790221427004141">"Andere Passwortmanager"</string>
     <string name="close_sheet" msgid="1393792015338908262">"Tabellenblatt schließen"</string>
     <string name="accessibility_back_arrow_button" msgid="3233198183497842492">"Zurück zur vorherigen Seite"</string>
-    <!-- no translation found for accessibility_close_button (2953807735590034688) -->
-    <skip />
+    <string name="accessibility_close_button" msgid="2953807735590034688">"Den Vorschlag des Anmeldedaten-Managers unten auf dem Bildschirm schließen"</string>
     <string name="get_dialog_title_use_passkey_for" msgid="6236608872708021767">"Gespeicherten Passkey für <xliff:g id="APP_NAME">%1$s</xliff:g> verwenden?"</string>
     <string name="get_dialog_title_use_sign_in_for" msgid="5283099528915572980">"Gespeicherte Anmeldedaten für <xliff:g id="APP_NAME">%1$s</xliff:g> verwenden?"</string>
     <string name="get_dialog_title_choose_sign_in_for" msgid="1361715440877613701">"Gespeicherte Anmeldedaten für <xliff:g id="APP_NAME">%1$s</xliff:g> auswählen"</string>
     <string name="get_dialog_use_saved_passkey_for" msgid="4618100798664888512">"Andere Anmeldeoption auswählen"</string>
-    <string name="get_dialog_button_label_no_thanks" msgid="8114363019023838533">"Nein danke"</string>
+    <string name="snackbar_action" msgid="37373514216505085">"Optionen ansehen"</string>
     <string name="get_dialog_button_label_continue" msgid="6446201694794283870">"Weiter"</string>
     <string name="get_dialog_title_sign_in_options" msgid="2092876443114893618">"Anmeldeoptionen"</string>
     <string name="get_dialog_heading_for_username" msgid="3456868514554204776">"Für <xliff:g id="USERNAME">%1$s</xliff:g>"</string>

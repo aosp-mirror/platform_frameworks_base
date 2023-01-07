@@ -172,7 +172,7 @@
     <string name="unknown" msgid="3544487229740637809">"Неизвестно"</string>
     <string name="running_process_item_user_label" msgid="3988506293099805796">"Потребител: <xliff:g id="USER_NAME">%1$s</xliff:g>"</string>
     <string name="launch_defaults_some" msgid="3631650616557252926">"Зададени са някои стандартни настройки"</string>
-    <string name="launch_defaults_none" msgid="8049374306261262709">"Няма зададени стандартни настройки"</string>
+    <string name="launch_defaults_none" msgid="8049374306261262709">"Няма зададени стандартни действия"</string>
     <string name="tts_settings" msgid="8130616705989351312">"Настройки за синтезиран говор"</string>
     <string name="tts_settings_title" msgid="7602210956640483039">"Синтезиран говор"</string>
     <string name="tts_default_rate_title" msgid="3964187817364304022">"Скорост на речта"</string>
@@ -467,10 +467,8 @@
     <string name="power_charging" msgid="6727132649743436802">"<xliff:g id="LEVEL">%1$s</xliff:g> – <xliff:g id="STATE">%2$s</xliff:g>"</string>
     <string name="power_remaining_charging_duration_only" msgid="8085099012811384899">"Оставащо време до пълно зареждане: <xliff:g id="TIME">%1$s</xliff:g>"</string>
     <string name="power_charging_duration" msgid="6127154952524919719">"<xliff:g id="LEVEL">%1$s</xliff:g> – Оставащо време до пълно зареждане: <xliff:g id="TIME">%2$s</xliff:g>"</string>
-    <!-- no translation found for power_charging_limited (8202147604844938236) -->
-    <skip />
-    <!-- no translation found for power_charging_future_paused (4730177778538118032) -->
-    <skip />
+    <string name="power_charging_limited" msgid="8202147604844938236">"<xliff:g id="LEVEL">%1$s</xliff:g> – Зареждането е оптимизирано"</string>
+    <string name="power_charging_future_paused" msgid="4730177778538118032">"<xliff:g id="LEVEL">%1$s</xliff:g> – Зареждането е оптимизирано"</string>
     <string name="battery_info_status_unknown" msgid="268625384868401114">"Неизвестно"</string>
     <string name="battery_info_status_charging" msgid="4279958015430387405">"Зарежда се"</string>
     <string name="battery_info_status_charging_fast" msgid="8027559755902954885">"Зарежда се бързо"</string>
@@ -566,6 +564,8 @@
     <string name="user_add_user_title" msgid="5457079143694924885">"Добавяне на нов потребител?"</string>
     <string name="user_add_user_message_long" msgid="1527434966294733380">"Можете да споделите това устройство с други хора, като създадете допълнителни потребители. Всеки от тях има собствено работно пространство, което може да персонализира с приложения, тапет и др. Потребителите могат също да коригират настройки на устройството, които засягат всички – например за Wi‑Fi.\n\nКогато добавите нов потребител, той трябва да настрои работното си пространство.\n\nВсеки потребител може да актуализира приложенията за всички останали потребители. Настройките и услугите за достъпност може да не се прехвърлят за новия потребител."</string>
     <string name="user_add_user_message_short" msgid="3295959985795716166">"Когато добавите нов потребител, той трябва да настрои работното си пространство.\n\nВсеки потребител може да актуализира приложенията за всички останали потребители."</string>
+    <string name="user_grant_admin_title" msgid="5565796912475193314">"Да се дадат ли админ. права?"</string>
+    <string name="user_grant_admin_message" msgid="7925257971286380976">"Като администратор този потребител ще може да управлява други потребители, да променя настройките на устройството и да възстановява фабричните му настройки."</string>
     <string name="user_setup_dialog_title" msgid="8037342066381939995">"Настройване на потребителя?"</string>
     <string name="user_setup_dialog_message" msgid="269931619868102841">"Уверете се, че човекът има възможност да вземе устройството и да настрои работното си пространство."</string>
     <string name="user_setup_profile_dialog_message" msgid="4788197052296962620">"Ще настроите ли потребителския профил сега?"</string>
@@ -597,6 +597,8 @@
     <string name="guest_reset_and_restart_dialog_message" msgid="2764425635305200790">"Така ще стартирате нова сесия като гост и ще изтриете всички приложения и данни от текущата сесия"</string>
     <string name="guest_exit_dialog_title" msgid="1846494656849381804">"Изход от режима на гост?"</string>
     <string name="guest_exit_dialog_message" msgid="1743218864242719783">"Така ще изтриете приложенията и данните от текущата сесия като гост"</string>
+    <string name="grant_admin" msgid="4273077214151417783">"Предоставяне на администраторски права на този потребител"</string>
+    <string name="not_grant_admin" msgid="6985027675930546850">"Без предоставяне на администраторски права на потребителя"</string>
     <string name="guest_exit_dialog_button" msgid="1736401897067442044">"Изход"</string>
     <string name="guest_exit_dialog_title_non_ephemeral" msgid="7675327443743162986">"Запазване на активността като гост?"</string>
     <string name="guest_exit_dialog_message_non_ephemeral" msgid="223385323235719442">"Можете да запазите активността от сесията или да изтриете всички прил. и данни"</string>

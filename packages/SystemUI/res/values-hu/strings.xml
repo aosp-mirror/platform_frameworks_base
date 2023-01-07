@@ -85,6 +85,7 @@
     <string name="screenshot_share_description" msgid="2861628935812656612">"Képernyőkép megosztása"</string>
     <string name="screenshot_scroll_label" msgid="2930198809899329367">"Több rögzítése"</string>
     <string name="screenshot_dismiss_description" msgid="4702341245899508786">"Képernyőkép elvetése"</string>
+    <string name="screenshot_dismiss_work_profile" msgid="3101530842987697045">"Munkaprofil üzenetének elvetése"</string>
     <string name="screenshot_preview_description" msgid="7606510140714080474">"Képernyőkép előnézete"</string>
     <string name="screenshot_top_boundary_pct" msgid="2520148599096479332">"Felső rész <xliff:g id="PERCENT">%1$d</xliff:g> százaléka"</string>
     <string name="screenshot_bottom_boundary_pct" msgid="3880821519814946478">"Alsó rész <xliff:g id="PERCENT">%1$d</xliff:g> százaléka"</string>
@@ -317,8 +318,7 @@
     <string name="sensor_privacy_camera_unblocked_dialog_content" msgid="7847190103011782278">"A kamera az összes alkalmazás és szolgáltatás számára engedélyezve van."</string>
     <string name="sensor_privacy_camera_blocked_dialog_content" msgid="3182428709314874616">"A kamerához való hozzáférés az összes alkalmazás és szolgáltatás számára le van tiltva."</string>
     <string name="sensor_privacy_htt_blocked_dialog_content" msgid="3333321592997666441">"Ha használni szeretné a Mikrofon gombot, engedélyezze a mikrofonhoz való hozzáférést a Beállításokban."</string>
-    <!-- no translation found for sensor_privacy_dialog_open_settings (5635865896053011859) -->
-    <skip />
+    <string name="sensor_privacy_dialog_open_settings" msgid="5635865896053011859">"Beállítások megnyitása"</string>
     <string name="media_seamless_other_device" msgid="4654849800789196737">"Más eszköz"</string>
     <string name="quick_step_accessibility_toggle_overview" msgid="7908949976727578403">"Áttekintés be- és kikapcsolása"</string>
     <string name="zen_priority_introduction" msgid="3159291973383796646">"Az Ön által meghatározott ébresztéseken, emlékeztetőkön, eseményeken és hívókon kívül nem fogja Önt más hang vagy rezgés megzavarni. Továbbra is lesz hangjuk azoknak a tartalmaknak, amelyeket Ön elindít, például zenék, videók és játékok."</string>
@@ -743,6 +743,7 @@
     <string name="wifi_is_off" msgid="5389597396308001471">"A Wi-Fi ki van kapcsolva"</string>
     <string name="bt_is_off" msgid="7436344904889461591">"A Bluetooth ki van kapcsolva"</string>
     <string name="dnd_is_off" msgid="3185706903793094463">"A „Ne zavarjanak” mód ki van kapcsolva"</string>
+    <string name="dnd_is_on" msgid="7009368176361546279">"Ne zavarjanak mód: bekapcsolva"</string>
     <string name="qs_dnd_prompt_auto_rule" msgid="3535469468310002616">"Az egyik automatikus szabály (<xliff:g id="ID_1">%s</xliff:g>) bekapcsolta a „Ne zavarjanak” módot."</string>
     <string name="qs_dnd_prompt_app" msgid="4027984447935396820">"Az egyik alkalmazás (<xliff:g id="ID_1">%s</xliff:g>) bekapcsolta a „Ne zavarjanak” módot."</string>
     <string name="qs_dnd_prompt_auto_rule_app" msgid="1841469944118486580">"Az egyik alkalmazás vagy automatikus szabály bekapcsolta a „Ne zavarjanak” módot."</string>
@@ -905,6 +906,7 @@
     <string name="media_output_dialog_accessibility_title" msgid="4681741064190167888">"Rendelkezésre álló eszközök a hangkimenethez."</string>
     <string name="media_output_dialog_accessibility_seekbar" msgid="5332843993805568978">"Hangerő"</string>
     <string name="media_output_dialog_volume_percentage" msgid="1613984910585111798">"<xliff:g id="PERCENTAGE">%1$d</xliff:g>%%"</string>
+    <string name="media_output_group_title_speakers_and_displays" msgid="7169712332365659820">"Hangfalak és kijelzők"</string>
     <string name="media_output_first_broadcast_title" msgid="6292237789860753022">"A közvetítés működése"</string>
     <string name="media_output_broadcast" msgid="3555580945878071543">"Közvetítés"</string>
     <string name="media_output_first_notify_broadcast_message" msgid="6353857724136398494">"A közelben tartózkodó, kompatibilis Bluetooth-eszközzel rendelkező személyek meghallgathatják az Ön közvetített médiatartalmait"</string>
@@ -1032,20 +1034,19 @@
     <string name="log_access_confirmation_deny" msgid="2389461495803585795">"Tiltás"</string>
     <string name="log_access_confirmation_body" msgid="6883031912003112634">"Az eszköznaplók rögzítik, hogy mi történik az eszközén. Az alkalmazások ezeket a naplókat használhatják a problémák megkeresésére és kijavítására.\n\nBizonyos naplók bizalmas adatokat is tartalmazhatnak, ezért csak olyan alkalmazások számára engedélyezze az összes eszköznaplóhoz való hozzáférést, amelyekben megbízik. \n\nHa nem engedélyezi ennek az alkalmazásnak, hogy hozzáférjen az összes eszköznaplójához, az app továbbra is hozzáférhet a saját naplóihoz. Előfordulhat, hogy az eszköz gyártója továbbra is hozzáfér az eszközön található bizonyos naplókhoz és adatokhoz."</string>
     <string name="keyguard_affordance_enablement_dialog_action_template" msgid="8164857863036314664">"A(z) <xliff:g id="APPNAME">%1$s</xliff:g> megnyitása"</string>
-    <string name="keyguard_affordance_enablement_dialog_message" msgid="2790910660524887941">"Ha szeretné felvenni a(z) <xliff:g id="APPNAME">%1$s</xliff:g> alkalmazást parancsikonként, gondoskodjon a következőkről:"</string>
     <string name="keyguard_affordance_enablement_dialog_wallet_instruction_1" msgid="8439655049139819278">"• Az alkalmazás be van állítva"</string>
     <string name="keyguard_affordance_enablement_dialog_wallet_instruction_2" msgid="4321089250629477835">"• Legalább egy kártya hozzá lett adva a Wallethez"</string>
     <string name="keyguard_affordance_enablement_dialog_qr_scanner_instruction" msgid="5355839079232119791">"• Kameraalkalmazás telepítése"</string>
     <string name="keyguard_affordance_enablement_dialog_home_instruction_1" msgid="8438311171750568633">"• Az alkalmazás be van állítva"</string>
     <string name="keyguard_affordance_enablement_dialog_home_instruction_2" msgid="8308525385889021652">"• Legalább egy eszköz rendelkezésre áll"</string>
+    <string name="keyguard_affordance_press_too_short" msgid="8145437175134998864">"Tartsa nyomva a parancsikont"</string>
     <string name="rear_display_bottom_sheet_cancel" msgid="3461468855493357248">"Mégse"</string>
     <string name="rear_display_bottom_sheet_confirm" msgid="4383356544661421206">"Átfordítás most"</string>
     <string name="rear_display_fold_bottom_sheet_title" msgid="6081542277622721548">"Hajtsa ki a telefont jobb szelfi készítéséhez"</string>
     <string name="rear_display_unfold_bottom_sheet_title" msgid="2137403802960396357">"Átfordítja az előlapi kijelzőre a jobb szelfiért?"</string>
     <string name="rear_display_bottom_sheet_description" msgid="1852662982816810352">"Használja az előlapi kamerát, hogy nagyobb felbontású, szélesebb fotót készíthessen"</string>
     <string name="rear_display_bottom_sheet_warning" msgid="800995919558238930"><b>"✱ A képernyő kikapcsol"</b></string>
-    <!-- no translation found for rear_display_accessibility_folded_animation (1538121649587978179) -->
-    <skip />
-    <!-- no translation found for rear_display_accessibility_unfolded_animation (1946153682258289040) -->
-    <skip />
+    <string name="rear_display_accessibility_folded_animation" msgid="1538121649587978179">"Összehajtható eszköz kihajtása"</string>
+    <string name="rear_display_accessibility_unfolded_animation" msgid="1946153682258289040">"Összehajtható eszköz körbeforgatása"</string>
+    <string name="stylus_battery_low" msgid="7134370101603167096">"Az érintőceruza töltöttsége alacsony"</string>
 </resources>

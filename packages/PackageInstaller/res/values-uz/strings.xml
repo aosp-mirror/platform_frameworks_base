@@ -60,10 +60,8 @@
     <string name="uninstall_update_text" msgid="863648314632448705">"Bu ilova boshlang‘ich versiyasi bilan almashtirilsinmi? Barcha axborotlar o‘chirib tashlanadi."</string>
     <string name="uninstall_update_text_multiuser" msgid="8992883151333057227">"Bu ilova boshlang‘ich versiyasi bilan almashtirilsinmi? Barcha axborotlar o‘chirib tashlanadi. Bu qurilmaning barcha foydalanuvchilariga, jumladan, ularning ishchi profillariga ham ta’sir qiladi."</string>
     <string name="uninstall_keep_data" msgid="7002379587465487550">"<xliff:g id="SIZE">%1$s</xliff:g> hajmdagi ilova axborotlari saqlab qolinsin"</string>
-    <!-- no translation found for uninstall_application_text_current_user_clone_profile (835170400160011636) -->
-    <skip />
-    <!-- no translation found for uninstall_application_text_with_clone_instance (6944473334273349036) -->
-    <skip />
+    <string name="uninstall_application_text_current_user_clone_profile" msgid="835170400160011636">"Bu ilova oʻchirilsinmi?"</string>
+    <string name="uninstall_application_text_with_clone_instance" msgid="6944473334273349036">"Bu ilovani oʻchirib tashlamoqchimisiz? <xliff:g id="PACKAGE_LABEL">%1$s</xliff:g> nusxasi ham oʻchib ketadi."</string>
     <string name="uninstalling_notification_channel" msgid="840153394325714653">"Davom etayotganlar"</string>
     <string name="uninstall_failure_notification_channel" msgid="1136405866767576588">"Amalga oshmaganlar"</string>
     <string name="uninstalling" msgid="8709566347688966845">"O‘chirilmoqda…"</string>
@@ -72,8 +70,7 @@
     <string name="uninstall_done_app" msgid="4588850984473605768">"<xliff:g id="PACKAGE_LABEL">%1$s</xliff:g> o‘chirib tashlandi"</string>
     <string name="uninstall_failed" msgid="1847750968168364332">"O‘chirib tashlanmadi."</string>
     <string name="uninstall_failed_app" msgid="5506028705017601412">"<xliff:g id="PACKAGE_LABEL">%1$s</xliff:g> ilovasini o‘chirib bo‘lmadi."</string>
-    <!-- no translation found for uninstalling_cloned_app (1826380164974984870) -->
-    <skip />
+    <string name="uninstalling_cloned_app" msgid="1826380164974984870">"<xliff:g id="PACKAGE_LABEL">%1$s</xliff:g> nusxasi oʻchirilmoqda…"</string>
     <string name="uninstall_failed_device_policy_manager" msgid="785293813665540305">"Faol qurilma administratori ilovasini o‘chirib bo‘lmaydi"</string>
     <string name="uninstall_failed_device_policy_manager_of_user" msgid="4813104025494168064">"<xliff:g id="USERNAME">%1$s</xliff:g> profilida faol qurilma administratori ilovasini o‘chirib bo‘lmaydi"</string>
     <string name="uninstall_all_blocked_profile_owner" msgid="2009393666026751501">"Bu ilova ba’zi foydalanuvchi yoki profillar uchun zarur, boshqalar uchun esa o‘chirib tashlangan"</string>
@@ -94,8 +91,7 @@
     <string name="anonymous_source_warning" product="default" msgid="2784902545920822500">"Telefoningiz va shaxsiy axborotlaringiz notanish ilovalar hujumiga zaif bo‘ladi. Bu ilovani o‘rnatish bilan telefoningizga yetkaziladigan shikast va axborotlaringizni o‘chirib yuborilishiga javobgarlikni o‘z zimmangizga olasiz."</string>
     <string name="anonymous_source_warning" product="tablet" msgid="3939101621438855516">"Planshetingiz va shaxsiy axborotlaringiz notanish ilovalar hujumiga zaif bo‘ladi. Bu ilovani o‘rnatish bilan planshetingizga yetkaziladigan shikast va axborotlaringizni o‘chirib yuborilishiga javobgarlikni o‘z zimmangizga olasiz."</string>
     <string name="anonymous_source_warning" product="tv" msgid="5599483539528168566">"TV va shaxsiy axborotlaringiz notanish ilovalar hujumiga zaif bo‘ladi. Bu ilovani o‘rnatish bilan televizoringizga yetkaziladigan shikast va axborotlaringizni o‘chirib yuborilishiga javobgarlikni o‘z zimmangizga olasiz."</string>
-    <!-- no translation found for cloned_app_label (7503612829833756160) -->
-    <skip />
+    <string name="cloned_app_label" msgid="7503612829833756160">"<xliff:g id="PACKAGE_LABEL">%1$s</xliff:g> nusxasi"</string>
     <string name="anonymous_source_continue" msgid="4375745439457209366">"Davom etish"</string>
     <string name="external_sources_settings" msgid="4046964413071713807">"Sozlamalar"</string>
     <string name="wear_app_channel" msgid="1960809674709107850">"Wear ilovalarini o‘rnatish/o‘chirish"</string>

@@ -114,7 +114,7 @@ public class CredentialManagerUi {
             }
         }
 
-        Intent intent = IntentFactory.newIntent(requestInfo, providerDataList,
+        Intent intent = IntentFactory.createCredentialSelectorIntent(requestInfo, providerDataList,
                         disabledProviderDataList, mResultReceiver)
                 .setAction(UUID.randomUUID().toString());
         //TODO: Create unique pending intent using request code and cancel any pre-existing pending

@@ -17,15 +17,9 @@
 package android.service.credentials;
 
 import android.annotation.NonNull;
-import android.content.pm.Signature;
+import android.content.pm.SigningInfo;
 import android.os.Parcel;
 import android.os.Parcelable;
-import android.util.ArraySet;
-
-import com.android.internal.util.Preconditions;
-
-import java.util.Objects;
-import java.util.Set;
 
 /**
  * Information pertaining to the calling application, including the package name and a list of
@@ -33,26 +27,23 @@ import java.util.Set;
  */
 public final class CallingAppInfo implements Parcelable {
     @NonNull private final String mPackageName;
-    @NonNull private final Set<Signature> mSignatures;
+    @NonNull private final SigningInfo mSigningInfo;
 
     /**
      * Constructs a new instance.
      *
      * @throws IllegalArgumentException If {@code packageName} is null or empty.
-     * @throws NullPointerException If {@code signatures} is null.
+     * @throws NullPointerException If {@code signingInfo} is null.
      */
     public CallingAppInfo(@NonNull String packageName,
-            @NonNull Set<Signature> signatures) {
-        mPackageName = Preconditions.checkStringNotEmpty(packageName,
-                "packageName must not be null or empty");
-        mSignatures = Objects.requireNonNull(signatures);
+            @NonNull SigningInfo signingInfo) {
+        mPackageName = packageName;
+        mSigningInfo = signingInfo;
     }
 
     private CallingAppInfo(@NonNull Parcel in) {
-        final ClassLoader boot = Object.class.getClassLoader();
         mPackageName = in.readString8();
-        ArraySet<Signature> signatures = (ArraySet<Signature>) in.readArraySet(boot);
-        mSignatures = signatures == null ? new ArraySet<>() : signatures;
+        mSigningInfo = in.readTypedObject(SigningInfo.CREATOR);
     }
 
     public static final @NonNull Creator<CallingAppInfo> CREATOR = new Creator<CallingAppInfo>() {
@@ -72,9 +63,12 @@ public final class CallingAppInfo implements Parcelable {
         return mPackageName;
     }
 
-    /** Returns the Set of signatures belonging to the app */
-    @NonNull public Set<Signature> getSignatures() {
-        return mSignatures;
+    /**
+     * Returns the SigningInfo object that contains an array of
+     * {@link android.content.pm.Signature} belonging to the app.
+     */
+    @NonNull public SigningInfo getSigningInfo() {
+        return mSigningInfo;
     }
 
     @Override
@@ -85,14 +79,20 @@ public final class CallingAppInfo implements Parcelable {
     @Override
     public void writeToParcel(@NonNull Parcel dest, int flags) {
         dest.writeString8(mPackageName);
-        dest.writeArraySet(new ArraySet<>(mSignatures));
+        dest.writeTypedObject(mSigningInfo, flags);
     }
 
     @Override
     public String toString() {
-        return "CallingAppInfo {"
-                + "packageName= " + mPackageName
-                + ", No. of signatures: " + mSignatures.size()
-                + " }";
+        StringBuilder builder =  new StringBuilder("CallingAppInfo {"
+                + "packageName= " + mPackageName);
+        if (mSigningInfo != null) {
+            builder.append(", mSigningInfo : No. of signatures: " + mSigningInfo
+                    .getApkContentsSigners().length);
+        } else {
+            builder.append(", mSigningInfo: null");
+        }
+        builder.append(" }");
+        return builder.toString();
     }
 }

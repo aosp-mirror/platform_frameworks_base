@@ -1049,6 +1049,15 @@ public abstract class AbstractMasterSystemService<M extends AbstractMasterSystem
 
             @Override
             public void onPackageRemoved(String packageName, int uid) {
+                if (mServiceNameResolver != null
+                        && mServiceNameResolver.isConfiguredInMultipleMode()) {
+                    final int userId = getChangingUserId();
+                    synchronized (mLock) {
+                        handlePackageRemovedMultiModeLocked(packageName, userId);
+                    }
+                    return;
+                }
+
                 synchronized (mLock) {
                     final int userId = getChangingUserId();
                     final S service = peekServiceForUserLocked(userId);
@@ -1092,6 +1101,15 @@ public abstract class AbstractMasterSystemService<M extends AbstractMasterSystem
             public void onPackageDataCleared(String packageName, int uid) {
                 if (verbose) Slog.v(mTag, "onPackageDataCleared(): " + packageName);
                 final int userId = getChangingUserId();
+
+                if (mServiceNameResolver != null
+                        && mServiceNameResolver.isConfiguredInMultipleMode()) {
+                    synchronized (mLock) {
+                        onServicePackageDataClearedMultiModeLocked(packageName, userId);
+                    }
+                    return;
+                }
+
                 synchronized (mLock) {
                     final S service = peekServiceForUserLocked(userId);
                     if (service != null) {
@@ -1210,6 +1228,49 @@ public abstract class AbstractMasterSystemService<M extends AbstractMasterSystem
 
         // package changes
         monitor.register(getContext(), null, UserHandle.ALL, true);
+    }
+
+    @GuardedBy("mLock")
+    @SuppressWarnings("unused")
+    protected void onServicePackageDataClearedMultiModeLocked(String packageName, int userId) {
+        if (verbose) {
+            Slog.v(mTag, "onServicePackageDataClearedMultiModeLocked("
+                    + userId + ")");
+        }
+    }
+
+    @GuardedBy("mLock")
+    @SuppressWarnings("unused")
+    protected void handlePackageRemovedMultiModeLocked(String packageName, int userId) {
+        if (verbose) Slog.v(mTag, "handlePackageRemovedMultiModeLocked(" + userId + ")");
+    }
+
+    @GuardedBy("mLock")
+    protected void removeServiceFromCache(@NonNull S service, int userId) {
+        if (mServicesCacheList.get(userId) != null) {
+            mServicesCacheList.get(userId).remove(service);
+        }
+    }
+
+    @GuardedBy("mLock")
+    protected void removeServiceFromMultiModeSettings(String serviceComponentName, int userId) {
+        final String serviceSettingsProperty = getServiceSettingsProperty();
+        if (serviceSettingsProperty == null || mServiceNameResolver == null
+                || !mServiceNameResolver.isConfiguredInMultipleMode()) {
+            if (verbose) {
+                Slog.v(mTag, "removeServiceFromSettings not implemented "
+                        + " for single backend implementation");
+            }
+            return;
+        }
+        String[] settingComponentNames = mServiceNameResolver.getServiceNameList(userId);
+        List<String> remainingServices = new ArrayList<>();
+        for (String settingComponentName : settingComponentNames) {
+            if (!settingComponentName.equals(serviceComponentName)) {
+                remainingServices.add(settingComponentName);
+            }
+        }
+        mServiceNameResolver.setServiceNameList(remainingServices, userId);
     }
 
     /**

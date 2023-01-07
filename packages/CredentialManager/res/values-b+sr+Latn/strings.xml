@@ -1,58 +1,58 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <resources xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
-    <string name="app_name" msgid="4539824758261855508">"Менаџер акредитива"</string>
-    <string name="string_cancel" msgid="6369133483981306063">"Откажи"</string>
-    <string name="string_continue" msgid="1346732695941131882">"Настави"</string>
-    <string name="string_create_in_another_place" msgid="1033635365843437603">"Направи на другом месту"</string>
-    <string name="string_save_to_another_place" msgid="7590325934591079193">"Сачувај на другом месту"</string>
-    <string name="string_use_another_device" msgid="8754514926121520445">"Користи други уређај"</string>
-    <string name="string_save_to_another_device" msgid="1959562542075194458">"Сачувај на други уређај"</string>
-    <string name="passkey_creation_intro_title" msgid="4251037543787718844">"Безбедније уз приступне кодове"</string>
-    <string name="passkey_creation_intro_body_password" msgid="312712407571126228">"Нема потребе да правите или памтите сложене лозинке"</string>
-    <string name="passkey_creation_intro_body_fingerprint" msgid="691816235541508203">"Користите отисак прста, лице или закључавање екрана да бисте направили јединствени приступни кôд"</string>
-    <string name="passkey_creation_intro_body_device" msgid="477121861162321129">"Приступни кодови се чувају у менаџеру лозинки да бисте могли да се пријављујете на другим уређајима"</string>
-    <string name="choose_provider_title" msgid="7245243990139698508">"Одаберите локацију за: <xliff:g id="CREATETYPES">%1$s</xliff:g>"</string>
-    <string name="create_your_passkeys" msgid="8901224153607590596">"направите приступне кодове"</string>
-    <string name="save_your_password" msgid="6597736507991704307">"сачувајте лозинку"</string>
-    <string name="save_your_sign_in_info" msgid="7213978049817076882">"сачувајте податке о пријављивању"</string>
-    <string name="choose_provider_body" msgid="8045759834416308059">"Подесите подразумевани менаџер лозинки да бисте сачували лозинке и приступне кодове и следећи пут се пријавили брже."</string>
-    <string name="choose_create_option_passkey_title" msgid="4146408187146573131">"Желите да направите приступни кôд код корисника <xliff:g id="PROVIDERINFODISPLAYNAME">%1$s</xliff:g>?"</string>
-    <string name="choose_create_option_password_title" msgid="8812546498357380545">"Желите да сачувате лозинку код корисника <xliff:g id="PROVIDERINFODISPLAYNAME">%1$s</xliff:g>?"</string>
-    <string name="choose_create_option_sign_in_title" msgid="6318246378475961834">"Желите да сачувате податке о пријављивању код корисника <xliff:g id="PROVIDERINFODISPLAYNAME">%1$s</xliff:g>?"</string>
-    <string name="choose_create_option_description" msgid="4419171903963100257">"Можете да користите тип домена <xliff:g id="APPDOMAINNAME">%1$s</xliff:g> <xliff:g id="TYPE">%2$s</xliff:g> на било ком уређају. Чува се код корисника <xliff:g id="PROVIDERINFODISPLAYNAME">%3$s</xliff:g> за: <xliff:g id="CREATEINFODISPLAYNAME">%4$s</xliff:g>"</string>
-    <string name="passkey" msgid="632353688396759522">"приступни кôд"</string>
-    <string name="password" msgid="6738570945182936667">"лозинка"</string>
-    <string name="sign_ins" msgid="4710739369149469208">"пријављивања"</string>
-    <string name="create_passkey_in_title" msgid="2714306562710897785">"Направите приступни кôд у:"</string>
-    <string name="save_password_to_title" msgid="3450480045270186421">"Сачувајте лозинку на:"</string>
-    <string name="save_sign_in_to_title" msgid="8328143607671760232">"Сачувајте податке о пријављивању на:"</string>
-    <string name="create_passkey_in_other_device_title" msgid="6372952459932674632">"Желите да направите приступни кôд на другом уређају?"</string>
-    <string name="use_provider_for_all_title" msgid="4201020195058980757">"Желите да за сва пријављивања користите: <xliff:g id="PROVIDERINFODISPLAYNAME">%1$s</xliff:g>?"</string>
-    <string name="use_provider_for_all_description" msgid="6560593199974037820">"Овај менаџер лозинки ће чувати лозинке и приступне кодове да бисте се лако пријављивали."</string>
-    <string name="set_as_default" msgid="4415328591568654603">"Подеси као подразумевано"</string>
-    <string name="use_once" msgid="9027366575315399714">"Користи једном"</string>
-    <string name="more_options_usage_passwords_passkeys" msgid="4794903978126339473">"Лозинки: <xliff:g id="PASSWORDSNUMBER">%1$s</xliff:g>, приступних кодова:<xliff:g id="PASSKEYSNUMBER">%2$s</xliff:g>"</string>
-    <string name="more_options_usage_passwords" msgid="1632047277723187813">"Лозинки: <xliff:g id="PASSWORDSNUMBER">%1$s</xliff:g>"</string>
-    <string name="more_options_usage_passkeys" msgid="5390320437243042237">"Приступних кодова: <xliff:g id="PASSKEYSNUMBER">%1$s</xliff:g>"</string>
-    <string name="passkey_before_subtitle" msgid="2448119456208647444">"Приступни кôд"</string>
-    <string name="another_device" msgid="5147276802037801217">"Други уређај"</string>
-    <string name="other_password_manager" msgid="565790221427004141">"Други менаџери лозинки"</string>
-    <string name="close_sheet" msgid="1393792015338908262">"Затворите табелу"</string>
-    <string name="accessibility_back_arrow_button" msgid="3233198183497842492">"Вратите се на претходну страницу"</string>
-    <!-- no translation found for accessibility_close_button (2953807735590034688) -->
-    <skip />
-    <string name="get_dialog_title_use_passkey_for" msgid="6236608872708021767">"Желите да користите сачувани приступни кôд за: <xliff:g id="APP_NAME">%1$s</xliff:g>?"</string>
-    <string name="get_dialog_title_use_sign_in_for" msgid="5283099528915572980">"Желите да користите сачуване податке за пријављивање за: <xliff:g id="APP_NAME">%1$s</xliff:g>?"</string>
-    <string name="get_dialog_title_choose_sign_in_for" msgid="1361715440877613701">"Одаберите сачувано пријављивање за: <xliff:g id="APP_NAME">%1$s</xliff:g>"</string>
-    <string name="get_dialog_use_saved_passkey_for" msgid="4618100798664888512">"Пријавите се на други начин"</string>
-    <string name="get_dialog_button_label_no_thanks" msgid="8114363019023838533">"Не, хвала"</string>
-    <string name="get_dialog_button_label_continue" msgid="6446201694794283870">"Настави"</string>
-    <string name="get_dialog_title_sign_in_options" msgid="2092876443114893618">"Опције за пријављивање"</string>
-    <string name="get_dialog_heading_for_username" msgid="3456868514554204776">"За: <xliff:g id="USERNAME">%1$s</xliff:g>"</string>
-    <string name="get_dialog_heading_locked_password_managers" msgid="8911514851762862180">"Менаџери закључаних лозинки"</string>
-    <string name="locked_credential_entry_label_subtext" msgid="9213450912991988691">"Додирните да бисте откључали"</string>
-    <string name="get_dialog_heading_manage_sign_ins" msgid="3522556476480676782">"Управљајте пријављивањима"</string>
-    <string name="get_dialog_heading_from_another_device" msgid="1166697017046724072">"Са другог уређаја"</string>
-    <string name="get_dialog_option_headline_use_a_different_device" msgid="8201578814988047549">"Користи други уређај"</string>
+    <string name="app_name" msgid="4539824758261855508">"Menadžer akreditiva"</string>
+    <string name="string_cancel" msgid="6369133483981306063">"Otkaži"</string>
+    <string name="string_continue" msgid="1346732695941131882">"Nastavi"</string>
+    <string name="string_more_options" msgid="7990658711962795124">"Još opcija"</string>
+    <string name="string_create_in_another_place" msgid="1033635365843437603">"Napravi na drugom mestu"</string>
+    <string name="string_save_to_another_place" msgid="7590325934591079193">"Sačuvaj na drugom mestu"</string>
+    <string name="string_use_another_device" msgid="8754514926121520445">"Koristi drugi uređaj"</string>
+    <string name="string_save_to_another_device" msgid="1959562542075194458">"Sačuvaj na drugi uređaj"</string>
+    <string name="passkey_creation_intro_title" msgid="4251037543787718844">"Bezbednije uz pristupne kodove"</string>
+    <string name="passkey_creation_intro_body_password" msgid="8825872426579958200">"Uz pristupne kodove nema potrebe da pravite ili pamtite složene lozinke"</string>
+    <string name="passkey_creation_intro_body_fingerprint" msgid="7331338631826254055">"Pristupni kodovi su šifrovani digitalni kodovi koje pravite pomoću otiska prsta, lica ili zaključavanja ekrana"</string>
+    <string name="passkey_creation_intro_body_device" msgid="1203796455762131631">"Čuvaju se u menadžeru lozinki da biste mogli da se prijavljujete na drugim uređajima"</string>
+    <string name="choose_provider_title" msgid="7245243990139698508">"Odaberite lokaciju za: <xliff:g id="CREATETYPES">%1$s</xliff:g>"</string>
+    <string name="create_your_passkeys" msgid="8901224153607590596">"napravite pristupne kodove"</string>
+    <string name="save_your_password" msgid="6597736507991704307">"sačuvajte lozinku"</string>
+    <string name="save_your_sign_in_info" msgid="7213978049817076882">"sačuvajte podatke o prijavljivanju"</string>
+    <string name="choose_provider_body" msgid="4384188171872005547">"Izaberite menadžera lozinki da biste sačuvali podatke i brže se prijavili sledeći put."</string>
+    <string name="choose_create_option_passkey_title" msgid="5220979185879006862">"Želite da napravite pristupni kôd za: <xliff:g id="APPNAME">%1$s</xliff:g>?"</string>
+    <string name="choose_create_option_password_title" msgid="7097275038523578687">"Želite da sačuvate lozinku za: <xliff:g id="APPNAME">%1$s</xliff:g>?"</string>
+    <string name="choose_create_option_sign_in_title" msgid="4124872317613421249">"Želite da sačuvate podatke za prijavljivanje za: <xliff:g id="APPNAME">%1$s</xliff:g>?"</string>
+    <string name="choose_create_option_description" msgid="5531335144879100664">"Možete da koristite tip domena <xliff:g id="APPDOMAINNAME">%1$s</xliff:g> <xliff:g id="CREDENTIALTYPES">%2$s</xliff:g> na bilo kom uređaju. Čuva se kod korisnika <xliff:g id="PROVIDERINFODISPLAYNAME">%3$s</xliff:g> za: <xliff:g id="CREATEINFODISPLAYNAME">%4$s</xliff:g>."</string>
+    <string name="passkey" msgid="632353688396759522">"pristupni kôd"</string>
+    <string name="password" msgid="6738570945182936667">"lozinka"</string>
+    <string name="sign_ins" msgid="4710739369149469208">"prijavljivanja"</string>
+    <string name="sign_in_info" msgid="2627704710674232328">"podaci za prijavljivanje"</string>
+    <string name="save_credential_to_title" msgid="3172811692275634301">"Sačuvajte stavku<xliff:g id="CREDENTIALTYPES">%1$s</xliff:g> u"</string>
+    <string name="create_passkey_in_other_device_title" msgid="6372952459932674632">"Želite da napravite pristupni kôd na drugom uređaju?"</string>
+    <string name="use_provider_for_all_title" msgid="4201020195058980757">"Želite da za sva prijavljivanja koristite: <xliff:g id="PROVIDERINFODISPLAYNAME">%1$s</xliff:g>?"</string>
+    <string name="use_provider_for_all_description" msgid="6560593199974037820">"Ovaj menadžer lozinki će čuvati lozinke i pristupne kodove da biste se lako prijavljivali."</string>
+    <string name="set_as_default" msgid="4415328591568654603">"Podesi kao podrazumevano"</string>
+    <string name="use_once" msgid="9027366575315399714">"Koristi jednom"</string>
+    <string name="more_options_usage_passwords_passkeys" msgid="3470113942332934279">"Lozinki: <xliff:g id="PASSWORDSNUMBER">%1$s</xliff:g> • Pristupnih kodova:<xliff:g id="PASSKEYSNUMBER">%2$s</xliff:g>"</string>
+    <string name="more_options_usage_passwords" msgid="1632047277723187813">"Lozinki: <xliff:g id="PASSWORDSNUMBER">%1$s</xliff:g>"</string>
+    <string name="more_options_usage_passkeys" msgid="5390320437243042237">"Pristupnih kodova: <xliff:g id="PASSKEYSNUMBER">%1$s</xliff:g>"</string>
+    <string name="more_options_usage_credentials" msgid="1785697001787193984">"<xliff:g id="TOTALCREDENTIALSNUMBER">%1$s</xliff:g> akreditiva"</string>
+    <string name="passkey_before_subtitle" msgid="2448119456208647444">"Pristupni kôd"</string>
+    <string name="another_device" msgid="5147276802037801217">"Drugi uređaj"</string>
+    <string name="other_password_manager" msgid="565790221427004141">"Drugi menadžeri lozinki"</string>
+    <string name="close_sheet" msgid="1393792015338908262">"Zatvorite tabelu"</string>
+    <string name="accessibility_back_arrow_button" msgid="3233198183497842492">"Vratite se na prethodnu stranicu"</string>
+    <string name="accessibility_close_button" msgid="2953807735590034688">"Zatvorite predlog za radnju Menadžera akreditiva koji se prikazuje u dnu ekrana"</string>
+    <string name="get_dialog_title_use_passkey_for" msgid="6236608872708021767">"Želite da koristite sačuvani pristupni kôd za: <xliff:g id="APP_NAME">%1$s</xliff:g>?"</string>
+    <string name="get_dialog_title_use_sign_in_for" msgid="5283099528915572980">"Želite da koristite sačuvane podatke za prijavljivanje za: <xliff:g id="APP_NAME">%1$s</xliff:g>?"</string>
+    <string name="get_dialog_title_choose_sign_in_for" msgid="1361715440877613701">"Odaberite sačuvano prijavljivanje za: <xliff:g id="APP_NAME">%1$s</xliff:g>"</string>
+    <string name="get_dialog_use_saved_passkey_for" msgid="4618100798664888512">"Prijavite se na drugi način"</string>
+    <string name="snackbar_action" msgid="37373514216505085">"Prikaži opcije"</string>
+    <string name="get_dialog_button_label_continue" msgid="6446201694794283870">"Nastavi"</string>
+    <string name="get_dialog_title_sign_in_options" msgid="2092876443114893618">"Opcije za prijavljivanje"</string>
+    <string name="get_dialog_heading_for_username" msgid="3456868514554204776">"Za: <xliff:g id="USERNAME">%1$s</xliff:g>"</string>
+    <string name="get_dialog_heading_locked_password_managers" msgid="8911514851762862180">"Menadžeri zaključanih lozinki"</string>
+    <string name="locked_credential_entry_label_subtext" msgid="9213450912991988691">"Dodirnite da biste otključali"</string>
+    <string name="get_dialog_heading_manage_sign_ins" msgid="3522556476480676782">"Upravljajte prijavljivanjima"</string>
+    <string name="get_dialog_heading_from_another_device" msgid="1166697017046724072">"Sa drugog uređaja"</string>
+    <string name="get_dialog_option_headline_use_a_different_device" msgid="8201578814988047549">"Koristi drugi uređaj"</string>
 </resources>

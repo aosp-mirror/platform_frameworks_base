@@ -85,6 +85,7 @@
     <string name="screenshot_share_description" msgid="2861628935812656612">"Κοινοποίηση στιγμιότυπου οθόνης"</string>
     <string name="screenshot_scroll_label" msgid="2930198809899329367">"Λήψη περισσότερων"</string>
     <string name="screenshot_dismiss_description" msgid="4702341245899508786">"Παράβλεψη στιγμιότυπου οθόνης"</string>
+    <string name="screenshot_dismiss_work_profile" msgid="3101530842987697045">"Παράβλεψη μηνύματος προφίλ εργασίας"</string>
     <string name="screenshot_preview_description" msgid="7606510140714080474">"Προεπισκόπηση στιγμιότυπου οθόνης"</string>
     <string name="screenshot_top_boundary_pct" msgid="2520148599096479332">"Επάνω όριο <xliff:g id="PERCENT">%1$d</xliff:g> τοις εκατό"</string>
     <string name="screenshot_bottom_boundary_pct" msgid="3880821519814946478">"Κάτω όριο <xliff:g id="PERCENT">%1$d</xliff:g> τοις εκατό"</string>
@@ -742,6 +743,7 @@
     <string name="wifi_is_off" msgid="5389597396308001471">"Το Wi-Fi είναι ανενεργό"</string>
     <string name="bt_is_off" msgid="7436344904889461591">"Το Bluetooth είναι ανενεργό"</string>
     <string name="dnd_is_off" msgid="3185706903793094463">"Η λειτουργία \"Μην ενοχλείτε\" είναι ανενεργή"</string>
+    <string name="dnd_is_on" msgid="7009368176361546279">"Η λειτουργία Μην ενοχλείτε είναι ενεργή"</string>
     <string name="qs_dnd_prompt_auto_rule" msgid="3535469468310002616">"Η λειτουργία \"Μην ενοχλείτε\" ενεργοποιήθηκε από έναν αυτόματο κανόνα (<xliff:g id="ID_1">%s</xliff:g>)."</string>
     <string name="qs_dnd_prompt_app" msgid="4027984447935396820">"Η λειτουργία \"Μην ενοχλείτε\" ενεργοποιήθηκε από μια εφαρμογή (<xliff:g id="ID_1">%s</xliff:g>)."</string>
     <string name="qs_dnd_prompt_auto_rule_app" msgid="1841469944118486580">"Η λειτουργία \"Μην ενοχλείτε\" ενεργοποιήθηκε από έναν αυτόματο κανόνα ή μια εφαρμογή."</string>
@@ -904,6 +906,7 @@
     <string name="media_output_dialog_accessibility_title" msgid="4681741064190167888">"Διαθέσιμες συσκευές για έξοδο ήχου."</string>
     <string name="media_output_dialog_accessibility_seekbar" msgid="5332843993805568978">"Ένταση ήχου"</string>
     <string name="media_output_dialog_volume_percentage" msgid="1613984910585111798">"<xliff:g id="PERCENTAGE">%1$d</xliff:g>%%"</string>
+    <string name="media_output_group_title_speakers_and_displays" msgid="7169712332365659820">"Ηχεία και οθόνες"</string>
     <string name="media_output_first_broadcast_title" msgid="6292237789860753022">"Πώς λειτουργεί η μετάδοση"</string>
     <string name="media_output_broadcast" msgid="3555580945878071543">"Μετάδοση"</string>
     <string name="media_output_first_notify_broadcast_message" msgid="6353857724136398494">"Οι άνθρωποι με συμβατές συσκευές Bluetooth που βρίσκονται κοντά σας μπορούν να ακούσουν το μέσο που μεταδίδετε."</string>
@@ -1031,12 +1034,12 @@
     <string name="log_access_confirmation_deny" msgid="2389461495803585795">"Να μην επιτρέπεται"</string>
     <string name="log_access_confirmation_body" msgid="6883031912003112634">"Τα αρχεία καταγραφής συσκευής καταγράφουν ό,τι συμβαίνει στη συσκευή σας. Οι εφαρμογές μπορούν να χρησιμοποιούν αυτά τα αρχεία καταγραφής για να εντοπίζουν και να διορθώνουν ζητήματα.\n\nΟρισμένα αρχεία καταγραφής ενδέχεται να περιέχουν ευαίσθητες πληροφορίες. Ως εκ τούτου, επιτρέψτε την πρόσβαση σε όλα τα αρχεία καταγραφής συσκευής μόνο στις εφαρμογές που εμπιστεύεστε. \n\nΕάν δεν επιτρέψετε σε αυτήν την εφαρμογή την πρόσβαση σε όλα τα αρχεία καταγραφής συσκευής, η εφαρμογή εξακολουθεί να έχει πρόσβαση στα δικά της αρχεία καταγραφής. Ο κατασκευαστής της συσκευής σας ενδέχεται να εξακολουθεί να έχει πρόσβαση σε ορισμένα αρχεία καταγραφής ή ορισμένες πληροφορίες στη συσκευή σας."</string>
     <string name="keyguard_affordance_enablement_dialog_action_template" msgid="8164857863036314664">"Άνοιγμα <xliff:g id="APPNAME">%1$s</xliff:g>"</string>
-    <string name="keyguard_affordance_enablement_dialog_message" msgid="2790910660524887941">"Για να προσθέσετε την εφαρμογή <xliff:g id="APPNAME">%1$s</xliff:g> ως συντόμευση, βεβαιωθείτε ότι"</string>
     <string name="keyguard_affordance_enablement_dialog_wallet_instruction_1" msgid="8439655049139819278">"• Η εφαρμογή έχει ρυθμιστεί"</string>
     <string name="keyguard_affordance_enablement_dialog_wallet_instruction_2" msgid="4321089250629477835">"• Έχει προστεθεί τουλάχιστον μία κάρτα στο Πορτοφόλι"</string>
     <string name="keyguard_affordance_enablement_dialog_qr_scanner_instruction" msgid="5355839079232119791">"• Εγκαταστήσατε μια εφαρμογή κάμερας"</string>
     <string name="keyguard_affordance_enablement_dialog_home_instruction_1" msgid="8438311171750568633">"• Η εφαρμογή έχει ρυθμιστεί"</string>
     <string name="keyguard_affordance_enablement_dialog_home_instruction_2" msgid="8308525385889021652">"• Είναι διαθέσιμη τουλάχιστον μία συσκευή"</string>
+    <string name="keyguard_affordance_press_too_short" msgid="8145437175134998864">"Παρατεταμένο άγγιγμα συντόμευσης"</string>
     <string name="rear_display_bottom_sheet_cancel" msgid="3461468855493357248">"Ακύρωση"</string>
     <string name="rear_display_bottom_sheet_confirm" msgid="4383356544661421206">"Αναστροφή τώρα"</string>
     <string name="rear_display_fold_bottom_sheet_title" msgid="6081542277622721548">"Ξεδιπλώστε το τηλέφωνο για καλύτερη selfie"</string>
@@ -1045,4 +1048,5 @@
     <string name="rear_display_bottom_sheet_warning" msgid="800995919558238930"><b>"* Αυτή η οθόνη θα απενεργοποιηθεί"</b></string>
     <string name="rear_display_accessibility_folded_animation" msgid="1538121649587978179">"Αναδιπλούμενη συσκευή που ξεδιπλώνει"</string>
     <string name="rear_display_accessibility_unfolded_animation" msgid="1946153682258289040">"Αναδιπλούμενη συσκευή που διπλώνει"</string>
+    <string name="stylus_battery_low" msgid="7134370101603167096">"Χαμηλή στάθμη μπαταρίας γραφίδας"</string>
 </resources>

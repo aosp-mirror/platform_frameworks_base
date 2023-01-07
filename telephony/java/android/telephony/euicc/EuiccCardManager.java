@@ -116,10 +116,10 @@ public class EuiccCardManager {
     /** Resets the default SM-DP+ address. */
     public static final int RESET_OPTION_RESET_DEFAULT_SMDP_ADDRESS = 1 << 2;
 
-    /** Result code when the requested profile is not found
-     * @deprecated use {@link #RESULT_PROFILE_DOES_NOT_EXIST}
+    /** Result code when the requested profile is not found.
+     * {@link #RESULT_PROFILE_NOT_FOUND} is not used in Android U+,
+     * use {@link #RESULT_PROFILE_DOES_NOT_EXIST} instead.
      **/
-    @Deprecated
     public static final int RESULT_PROFILE_NOT_FOUND = 1;
 
     /** Result code of execution with no error. */

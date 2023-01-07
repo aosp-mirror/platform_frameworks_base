@@ -23,8 +23,7 @@
     <string name="summary_watch" msgid="4085794790142204006">"Seda rakendust on vaja teie seadme <xliff:g id="DEVICE_NAME">%1$s</xliff:g> haldamiseks. Rakendusel <xliff:g id="APP_NAME">%2$s</xliff:g> lubatakse kasutada teie märguandeid ning pääseda juurde teie telefoni, SMS-ide, kontaktide, kalendri, kõnelogide ja läheduses olevate seadmete lubadele."</string>
     <string name="summary_watch_single_device" msgid="1523091550243476756">"Seda rakendust on vaja teie seadme <xliff:g id="DEVICE_NAME">%1$s</xliff:g> haldamiseks. Rakendusel <xliff:g id="APP_NAME">%2$s</xliff:g> lubatakse kasutada järgmisi lube."</string>
     <string name="profile_name_glasses" msgid="8488394059007275998">"prillid"</string>
-    <!-- no translation found for summary_glasses (8987925853224595628) -->
-    <skip />
+    <string name="summary_glasses" msgid="8987925853224595628">"Seda rakendust on vaja teie seadme <xliff:g id="DEVICE_NAME">%1$s</xliff:g> haldamiseks. Rakendusel <xliff:g id="APP_NAME">%2$s</xliff:g> lubatakse kasutada teie märguandeid ning pääseda juurde teie telefoni, SMS-ide, kontaktide, mikrofoni ja läheduses olevate seadmete lubadele."</string>
     <string name="summary_glasses_single_device" msgid="5725890636605211803">"Seda rakendust on vaja teie seadme <xliff:g id="DEVICE_NAME">%1$s</xliff:g> haldamiseks. Rakendusel <xliff:g id="APP_NAME">%2$s</xliff:g> lubatakse kasutada järgmisi lube."</string>
     <string name="title_app_streaming" msgid="2270331024626446950">"Lubage rakendusel &lt;strong&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/strong&gt; pääseda teie telefonis juurde sellele teabele"</string>
     <string name="helper_title_app_streaming" msgid="4151687003439969765">"Seadmeülesed teenused"</string>

@@ -25,6 +25,7 @@ import android.credentials.IGetCredentialCallback;
 import android.credentials.ui.ProviderData;
 import android.credentials.ui.RequestInfo;
 import android.os.RemoteException;
+import android.service.credentials.CallingAppInfo;
 import android.service.credentials.CredentialProviderInfo;
 import android.util.Log;
 
@@ -41,8 +42,8 @@ public final class GetRequestSession extends RequestSession<GetCredentialRequest
 
     public GetRequestSession(Context context, int userId,
             IGetCredentialCallback callback, GetCredentialRequest request,
-            String callingPackage) {
-        super(context, userId, request, callback, RequestInfo.TYPE_GET, callingPackage);
+            CallingAppInfo callingAppInfo) {
+        super(context, userId, request, callback, RequestInfo.TYPE_GET, callingAppInfo);
     }
 
     /**
@@ -71,7 +72,7 @@ public final class GetRequestSession extends RequestSession<GetCredentialRequest
         try {
             mClientCallback.onPendingIntent(mCredentialManagerUi.createPendingIntent(
                     RequestInfo.newGetRequestInfo(
-                    mRequestId, null, mIsFirstUiTurn, ""),
+                    mRequestId, null, ""),
                     providerDataList));
         } catch (RemoteException e) {
             Log.i(TAG, "Issue with invoking pending intent: " + e.getMessage());
@@ -84,7 +85,6 @@ public final class GetRequestSession extends RequestSession<GetCredentialRequest
             ComponentName componentName) {
         super.onProviderStatusChanged(status, componentName);
     }
-
 
     @Override
     public void onFinalResponseReceived(ComponentName componentName,

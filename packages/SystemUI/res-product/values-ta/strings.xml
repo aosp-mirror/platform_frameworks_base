@@ -23,10 +23,8 @@
     <string name="dock_alignment_not_charging" product="default" msgid="3980752926226749808">"மொபைலை வயர்லெஸ்ஸாகச் சார்ஜ் செய்ய அதை சரியாக வைக்கவும்"</string>
     <string name="inattentive_sleep_warning_message" product="tv" msgid="6844464574089665063">"Android TV விரைவில் ஆஃப் ஆகும். இதைத் தொடர்ந்து ஆனில் வைக்க ஒரு பட்டனைத் தட்டவும்."</string>
     <string name="inattentive_sleep_warning_message" product="default" msgid="5693904520452332224">"இந்தச் சாதனம் விரைவில் ஆஃப் ஆகும். இதைத் தொடர்ந்து ஆனில் வைக்கத் தட்டவும்."</string>
-    <!-- no translation found for keyguard_missing_sim_message (408124574073032188) -->
-    <skip />
-    <!-- no translation found for keyguard_missing_sim_message (2605468359948247208) -->
-    <skip />
+    <string name="keyguard_missing_sim_message" product="tablet" msgid="408124574073032188">"டேப்லெட்டில் சிம் இல்லை."</string>
+    <string name="keyguard_missing_sim_message" product="default" msgid="2605468359948247208">"மொபைலில் சிம் இல்லை."</string>
     <string name="kg_invalid_confirm_pin_hint" product="default" msgid="6278551068943958651">"பின் குறியீடுகள் பொருந்தவில்லை"</string>
     <string name="kg_failed_attempts_almost_at_wipe" product="tablet" msgid="302165994845009232">"டேப்லெட்டை அன்லாக் செய்ய, <xliff:g id="NUMBER_0">%1$d</xliff:g> முறை தவறாக முயன்றுவிட்டீர்கள். இன்னும் <xliff:g id="NUMBER_1">%2$d</xliff:g> முறை தவறாக முயன்றால், இந்த டேப்லெட் மீட்டமைக்கப்படும். இதனால் அதிலுள்ள அனைத்துத் தரவும் நீக்கப்படும்."</string>
     <string name="kg_failed_attempts_almost_at_wipe" product="default" msgid="2594813176164266847">"மொபைலை அன்லாக் செய்ய <xliff:g id="NUMBER_0">%1$d</xliff:g> முறை தவறாக முயன்றுவிட்டீர்கள். இன்னும் <xliff:g id="NUMBER_1">%2$d</xliff:g> முறை தவறாக முயன்றால், இந்த மொபைல் மீட்டமைக்கப்படும். இதனால் அதிலுள்ள அனைத்துத் தரவும் நீக்கப்படும்."</string>

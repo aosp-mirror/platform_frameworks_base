@@ -14,10 +14,10 @@
     <string name="ssl_error_warning" msgid="3127935140338254180">"ਤੁਸੀਂ ਜਿਸ ਨੈੱਟਵਰਕ ਵਿੱਚ ਸ਼ਾਮਲ ਹੋਣ ਦੀ ਕੋਸ਼ਿਸ਼ ਕਰ ਰਹੇ ਹੋ ਉਸ ਵਿੱਚ ਸੁਰੱਖਿਆ ਸਬੰਧੀ ਸਮੱਸਿਆਵਾਂ ਹਨ।"</string>
     <string name="ssl_error_example" msgid="6188711843183058764">"ਉਦਾਹਰਣ ਵੱਜੋਂ, ਲੌਗ-ਇਨ ਪੰਨਾ ਦਿਖਾਈ ਗਈ ਸੰਸਥਾ ਨਾਲ ਸੰਬੰਧਿਤ ਨਹੀਂ ਹੋ ਸਕਦਾ ਹੈ।"</string>
     <string name="ssl_error_continue" msgid="1138548463994095584">"ਬ੍ਰਾਊਜ਼ਰ ਰਾਹੀਂ ਫਿਰ ਵੀ ਜਾਰੀ ਰੱਖੋ"</string>
-    <string name="network_boost_notification_channel" msgid="5430986172506159199">"ਨੈੱਟਵਰਕ ਬੂਸਟ"</string>
-    <string name="network_boost_notification_title" msgid="8226368121348880044">"%s ਵੱਲੋਂ ਡਾਟਾ ਬੂਸਟ ਦੀ ਸਿਫ਼ਾਰਸ਼ ਕੀਤੀ ਜਾਂਦੀ ਹੈ"</string>
-    <string name="network_boost_notification_detail" msgid="3812434025544196192">"ਬਿਹਤਰ ਕਾਰਗੁਜ਼ਾਰੀ ਲਈ ਨੈੱਟਵਰਕ ਬੂਸਟ ਖਰੀਦੋ"</string>
-    <string name="network_boost_notification_button_not_now" msgid="4129218252146702688">"ਹੁਣੇ ਨਹੀਂ"</string>
-    <string name="network_boost_notification_button_manage" msgid="1511552684142641182">"ਪ੍ਰਬੰਧਨ ਕਰੋ"</string>
-    <string name="slice_purchase_app_label" msgid="915654761797446390">"ਨੈੱਟਵਰਕ ਬੂਸਟ ਖਰੀਦੋ।"</string>
+    <string name="performance_boost_notification_channel" msgid="3475440855635538592">"ਕਾਰਗੁਜ਼ਾਰੀ ਬੂਸਟ"</string>
+    <string name="performance_boost_notification_title" msgid="5017421773334474875">"%s ਵੱਲੋਂ ਕਾਰਗੁਜ਼ਾਰੀ ਬੂਸਟ ਦੀ ਸਿਫ਼ਾਰਸ਼ ਕੀਤੀ ਜਾਂਦੀ ਹੈ"</string>
+    <string name="performance_boost_notification_detail" msgid="7216286153533321852">"ਬਿਹਤਰ ਨੈੱਟਵਰਕ ਕਾਰਗੁਜ਼ਾਰੀ ਲਈ ਕਾਰਗੁਜ਼ਾਰੀ ਬੂਸਟ ਖਰੀਦੋ"</string>
+    <string name="performance_boost_notification_button_not_now" msgid="6459755324243683785">"ਹੁਣੇ ਨਹੀਂ"</string>
+    <string name="performance_boost_notification_button_manage" msgid="4976836444046497973">"ਪ੍ਰਬੰਧਨ ਕਰੋ"</string>
+    <string name="slice_purchase_app_label" msgid="7170191659233241166">"ਕਾਰਗੁਜ਼ਾਰੀ ਬੂਸਟ ਖਰੀਦੋ।"</string>
 </resources>

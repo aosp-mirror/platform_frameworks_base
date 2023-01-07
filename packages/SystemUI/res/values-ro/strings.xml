@@ -85,6 +85,7 @@
     <string name="screenshot_share_description" msgid="2861628935812656612">"Trimite captura de ecran"</string>
     <string name="screenshot_scroll_label" msgid="2930198809899329367">"Surprinde mai mult"</string>
     <string name="screenshot_dismiss_description" msgid="4702341245899508786">"Închide captura de ecran"</string>
+    <string name="screenshot_dismiss_work_profile" msgid="3101530842987697045">"Mesaj de închidere a profilului de serviciu"</string>
     <string name="screenshot_preview_description" msgid="7606510140714080474">"Previzualizare a capturii de ecran"</string>
     <string name="screenshot_top_boundary_pct" msgid="2520148599096479332">"Marginea de sus la <xliff:g id="PERCENT">%1$d</xliff:g> %%"</string>
     <string name="screenshot_bottom_boundary_pct" msgid="3880821519814946478">"Marginea de jos la <xliff:g id="PERCENT">%1$d</xliff:g> %%"</string>
@@ -317,8 +318,7 @@
     <string name="sensor_privacy_camera_unblocked_dialog_content" msgid="7847190103011782278">"Camera este activată pentru toate aplicațiile și serviciile."</string>
     <string name="sensor_privacy_camera_blocked_dialog_content" msgid="3182428709314874616">"Accesul la cameră este dezactivat pentru toate aplicațiile și serviciile."</string>
     <string name="sensor_privacy_htt_blocked_dialog_content" msgid="3333321592997666441">"Pentru a folosi butonul microfonului, activează accesul la microfon în Setări."</string>
-    <!-- no translation found for sensor_privacy_dialog_open_settings (5635865896053011859) -->
-    <skip />
+    <string name="sensor_privacy_dialog_open_settings" msgid="5635865896053011859">"Deschide Setări"</string>
     <string name="media_seamless_other_device" msgid="4654849800789196737">"Alt dispozitiv"</string>
     <string name="quick_step_accessibility_toggle_overview" msgid="7908949976727578403">"Comută secțiunea Recente"</string>
     <string name="zen_priority_introduction" msgid="3159291973383796646">"Se vor anunța prin sunete și vibrații numai alarmele, mementourile, evenimentele și apelanții specificați de tine. Totuși, vei auzi tot ce alegi să redai, inclusiv muzică, videoclipuri și jocuri."</string>
@@ -743,6 +743,7 @@
     <string name="wifi_is_off" msgid="5389597396308001471">"Conexiunea Wi-Fi este dezactivată"</string>
     <string name="bt_is_off" msgid="7436344904889461591">"Funcția Bluetooth este dezactivată"</string>
     <string name="dnd_is_off" msgid="3185706903793094463">"Funcția Nu deranja este dezactivată"</string>
+    <string name="dnd_is_on" msgid="7009368176361546279">"Funcția Nu deranja este activată"</string>
     <string name="qs_dnd_prompt_auto_rule" msgid="3535469468310002616">"Funcția Nu deranja a fost activată de o regulă automată (<xliff:g id="ID_1">%s</xliff:g>)."</string>
     <string name="qs_dnd_prompt_app" msgid="4027984447935396820">"Funcția Nu deranja a fost activată de o aplicație (<xliff:g id="ID_1">%s</xliff:g>)."</string>
     <string name="qs_dnd_prompt_auto_rule_app" msgid="1841469944118486580">"Funcția Nu deranja a fost activată de o regulă automată sau de o aplicație."</string>
@@ -815,7 +816,7 @@
     <string name="accessibility_floating_button_migration_tooltip" msgid="5217151214439341902">"Atinge ca să deschizi funcțiile de accesibilitate. Personalizează sau înlocuiește butonul în setări.\n\n"<annotation id="link">"Vezi setările"</annotation></string>
     <string name="accessibility_floating_button_docking_tooltip" msgid="6814897496767461517">"Mută butonul spre margine pentru a-l ascunde temporar"</string>
     <string name="accessibility_floating_button_undo" msgid="511112888715708241">"Anulează"</string>
-    <string name="accessibility_floating_button_undo_message_text" msgid="3044079592757099698">"{count,plural, =1{{label} comandă rapidă eliminată}few{# comenzi rapide eliminate}other{# de comenzi rapide eliminate}}"</string>
+    <string name="accessibility_floating_button_undo_message_text" msgid="3044079592757099698">"{count,plural, =1{Comanda rapidă {label} eliminată}few{# comenzi rapide eliminate}other{# de comenzi rapide eliminate}}"</string>
     <string name="accessibility_floating_button_action_move_top_left" msgid="6253520703618545705">"Mută în stânga sus"</string>
     <string name="accessibility_floating_button_action_move_top_right" msgid="6106225581993479711">"Mută în dreapta sus"</string>
     <string name="accessibility_floating_button_action_move_bottom_left" msgid="8063394111137429725">"Mută în stânga jos"</string>
@@ -905,6 +906,7 @@
     <string name="media_output_dialog_accessibility_title" msgid="4681741064190167888">"Dispozitive disponibile pentru ieșire audio."</string>
     <string name="media_output_dialog_accessibility_seekbar" msgid="5332843993805568978">"Volum"</string>
     <string name="media_output_dialog_volume_percentage" msgid="1613984910585111798">"<xliff:g id="PERCENTAGE">%1$d</xliff:g>%%"</string>
+    <string name="media_output_group_title_speakers_and_displays" msgid="7169712332365659820">"Difuzoare și afișaje"</string>
     <string name="media_output_first_broadcast_title" msgid="6292237789860753022">"Cum funcționează transmisia"</string>
     <string name="media_output_broadcast" msgid="3555580945878071543">"Transmite"</string>
     <string name="media_output_first_notify_broadcast_message" msgid="6353857724136398494">"Persoanele din apropiere cu dispozitive Bluetooth compatibile pot asculta conținutul pe care îl transmiți"</string>
@@ -1032,20 +1034,19 @@
     <string name="log_access_confirmation_deny" msgid="2389461495803585795">"Nu permite"</string>
     <string name="log_access_confirmation_body" msgid="6883031912003112634">"Jurnalele dispozitivului înregistrează activitatea de pe dispozitivul tău. Aplicațiile pot folosi aceste jurnale pentru a identifica și a remedia probleme.\n\nUnele jurnale pot să conțină informații sensibile, prin urmare permite accesul la toate jurnalele dispozitivului doar aplicațiilor în care ai încredere. \n\nDacă nu permiți accesul aplicației la toate jurnalele dispozitivului, aceasta poate în continuare să acceseze propriile jurnale. Este posibil ca producătorul dispozitivului să acceseze în continuare unele jurnale sau informații de pe dispozitiv."</string>
     <string name="keyguard_affordance_enablement_dialog_action_template" msgid="8164857863036314664">"Deschide <xliff:g id="APPNAME">%1$s</xliff:g>"</string>
-    <string name="keyguard_affordance_enablement_dialog_message" msgid="2790910660524887941">"Pentru a adăuga aplicația <xliff:g id="APPNAME">%1$s</xliff:g> drept comandă rapidă, asigură-te"</string>
     <string name="keyguard_affordance_enablement_dialog_wallet_instruction_1" msgid="8439655049139819278">"• Aplicația este configurată"</string>
     <string name="keyguard_affordance_enablement_dialog_wallet_instruction_2" msgid="4321089250629477835">"• Cel puțin un card a fost adăugat în Portofel"</string>
     <string name="keyguard_affordance_enablement_dialog_qr_scanner_instruction" msgid="5355839079232119791">"• Instalează o aplicație pentru camera foto"</string>
     <string name="keyguard_affordance_enablement_dialog_home_instruction_1" msgid="8438311171750568633">"• Aplicația este configurată"</string>
     <string name="keyguard_affordance_enablement_dialog_home_instruction_2" msgid="8308525385889021652">"• Este disponibil cel puțin un dispozitiv"</string>
+    <string name="keyguard_affordance_press_too_short" msgid="8145437175134998864">"Atinge lung comanda rapidă"</string>
     <string name="rear_display_bottom_sheet_cancel" msgid="3461468855493357248">"Anulează"</string>
     <string name="rear_display_bottom_sheet_confirm" msgid="4383356544661421206">"Întoarce-l acum"</string>
     <string name="rear_display_fold_bottom_sheet_title" msgid="6081542277622721548">"Desfă telefonul pentru un selfie mai bun"</string>
     <string name="rear_display_unfold_bottom_sheet_title" msgid="2137403802960396357">"Comuți la ecranul frontal pentru un selfie mai bun?"</string>
     <string name="rear_display_bottom_sheet_description" msgid="1852662982816810352">"Folosește camera posterioară pentru o fotografie mai lată, cu rezoluție mai mare."</string>
     <string name="rear_display_bottom_sheet_warning" msgid="800995919558238930"><b>"✱ Acest ecran se va dezactiva"</b></string>
-    <!-- no translation found for rear_display_accessibility_folded_animation (1538121649587978179) -->
-    <skip />
-    <!-- no translation found for rear_display_accessibility_unfolded_animation (1946153682258289040) -->
-    <skip />
+    <string name="rear_display_accessibility_folded_animation" msgid="1538121649587978179">"Dispozitiv pliabil care este desfăcut"</string>
+    <string name="rear_display_accessibility_unfolded_animation" msgid="1946153682258289040">"Dispozitiv pliabil care este întors"</string>
+    <string name="stylus_battery_low" msgid="7134370101603167096">"Nivelul bateriei creionului este scăzut"</string>
 </resources>

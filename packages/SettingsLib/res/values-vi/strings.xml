@@ -564,6 +564,8 @@
     <string name="user_add_user_title" msgid="5457079143694924885">"Thêm người dùng mới?"</string>
     <string name="user_add_user_message_long" msgid="1527434966294733380">"Bạn có thể chia sẻ thiết bị này với người khác bằng cách tạo thêm người dùng. Mỗi người dùng sẽ có không gian riêng của mình. Họ có thể tùy chỉnh không gian riêng đó bằng các ứng dụng, hình nền, v.v. Người dùng cũng có thể điều chỉnh các tùy chọn cài đặt thiết bị có ảnh hưởng đến tất cả mọi người, chẳng hạn như Wi‑Fi.\n\nKhi bạn thêm người dùng mới, họ cần thiết lập không gian của mình.\n\nMọi người dùng đều có thể cập nhật ứng dụng cho tất cả người dùng khác. Các dịch vụ và các tùy chọn cài đặt hỗ trợ tiếp cận có thể không chuyển sang người dùng mới."</string>
     <string name="user_add_user_message_short" msgid="3295959985795716166">"Khi bạn thêm người dùng mới, họ cần thiết lập không gian của mình.\n\nMọi người dùng đều có thể cập nhật ứng dụng cho tất cả người dùng khác."</string>
+    <string name="user_grant_admin_title" msgid="5565796912475193314">"Trao đặc quyền của quản trị viên?"</string>
+    <string name="user_grant_admin_message" msgid="7925257971286380976">"Với tư cách là quản trị viên, họ sẽ có thể quản lý những người dùng khác, sửa đổi chế độ cài đặt thiết bị cũng như đặt lại thiết bị về trạng thái ban đầu."</string>
     <string name="user_setup_dialog_title" msgid="8037342066381939995">"Thiết lập người dùng ngay bây giờ?"</string>
     <string name="user_setup_dialog_message" msgid="269931619868102841">"Đảm bảo người dùng có mặt để tự thiết lập không gian của mình trên thiết bị"</string>
     <string name="user_setup_profile_dialog_message" msgid="4788197052296962620">"Thiết lập tiểu sử ngay bây giờ?"</string>
@@ -595,6 +597,8 @@
     <string name="guest_reset_and_restart_dialog_message" msgid="2764425635305200790">"Thao tác này sẽ bắt đầu một phiên khách mới và xoá mọi ứng dụng cũng như dữ liệu trong phiên hiện tại"</string>
     <string name="guest_exit_dialog_title" msgid="1846494656849381804">"Thoát khỏi chế độ khách?"</string>
     <string name="guest_exit_dialog_message" msgid="1743218864242719783">"Thao tác này sẽ xoá các ứng dụng và dữ liệu trong phiên khách hiện tại"</string>
+    <string name="grant_admin" msgid="4273077214151417783">"Trao đặc quyền quản trị viên cho người dùng này"</string>
+    <string name="not_grant_admin" msgid="6985027675930546850">"Không trao đặc quyền của quản trị viên"</string>
     <string name="guest_exit_dialog_button" msgid="1736401897067442044">"Thoát"</string>
     <string name="guest_exit_dialog_title_non_ephemeral" msgid="7675327443743162986">"Lưu hoạt động ở chế độ khách?"</string>
     <string name="guest_exit_dialog_message_non_ephemeral" msgid="223385323235719442">"Bạn có thể lưu hoạt động trong phiên hiện tại hoặc xoá mọi ứng dụng và dữ liệu"</string>

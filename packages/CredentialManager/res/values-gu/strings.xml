@@ -4,49 +4,49 @@
     <string name="app_name" msgid="4539824758261855508">"લૉગ ઇન વિગતોના મેનેજર"</string>
     <string name="string_cancel" msgid="6369133483981306063">"રદ કરો"</string>
     <string name="string_continue" msgid="1346732695941131882">"ચાલુ રાખો"</string>
+    <string name="string_more_options" msgid="7990658711962795124">"વધુ વિકલ્પો"</string>
     <string name="string_create_in_another_place" msgid="1033635365843437603">"કોઈ અન્ય સ્થાન પર બનાવો"</string>
     <string name="string_save_to_another_place" msgid="7590325934591079193">"કોઈ અન્ય સ્થાન પર સાચવો"</string>
     <string name="string_use_another_device" msgid="8754514926121520445">"કોઈ અન્ય ડિવાઇસનો ઉપયોગ કરો"</string>
     <string name="string_save_to_another_device" msgid="1959562542075194458">"અન્ય ડિવાઇસ પર સાચવો"</string>
     <string name="passkey_creation_intro_title" msgid="4251037543787718844">"પાસકી સાથે વધુ સલામત"</string>
-    <string name="passkey_creation_intro_body_password" msgid="312712407571126228">"જટિલ પાસવર્ડ બનાવવાની અથવા યાદ રાખવાની કોઈ જરૂર નથી"</string>
-    <string name="passkey_creation_intro_body_fingerprint" msgid="691816235541508203">"વિશિષ્ટ પાસકી બનાવવા માટે તમારી ફિંગરપ્રિન્ટ, ચહેરો અથવા સ્ક્રીન લૉકનો ઉપયોગ કરો"</string>
-    <string name="passkey_creation_intro_body_device" msgid="477121861162321129">"પાસકીને પાસવર્ડ મેનેજરમાં સાચવવામાં આવે છે, જેથી તમે અન્ય ડિવાઇસમાં સાઇન ઇન ન કરી શકો"</string>
+    <string name="passkey_creation_intro_body_password" msgid="8825872426579958200">"પાસકી હોવાથી, તમારે જટિલ પાસવર્ડ બનાવવાની કે યાદ રાખવાની જરૂર રહેતી નથી"</string>
+    <string name="passkey_creation_intro_body_fingerprint" msgid="7331338631826254055">"પાસકી એ એન્ક્રિપ્ટેડ ડિજિટલ કી છે, જેને તમે તમારી ફિંગરપ્રિન્ટ, ચહેરા અથવા સ્ક્રીન લૉકનો ઉપયોગ કરીને બનાવો છો"</string>
+    <string name="passkey_creation_intro_body_device" msgid="1203796455762131631">"તેને પાસવર્ડ મેનેજરમાં સાચવવામાં આવે છે, જેથી તમે અન્ય ડિવાઇસમાં સાઇન ઇન ન કરી શકો"</string>
     <string name="choose_provider_title" msgid="7245243990139698508">"<xliff:g id="CREATETYPES">%1$s</xliff:g> ક્યાં સાચવવી છે, તે પસંદ કરો"</string>
     <string name="create_your_passkeys" msgid="8901224153607590596">"તમારી પાસકી બનાવો"</string>
     <string name="save_your_password" msgid="6597736507991704307">"તમારો પાસવર્ડ સાચવો"</string>
     <string name="save_your_sign_in_info" msgid="7213978049817076882">"તમારી સાઇન-ઇનની માહિતી સાચવો"</string>
-    <string name="choose_provider_body" msgid="8045759834416308059">"તમારા પાસવર્ડ અને પાસકી સાચવવા માટે કોઈ ડિફૉલ્ટ પાસવર્ડ મેનેજર સેટ કરો અને આગલી વખતે વધુ ઝડપથી સાઇન ઇન કરો."</string>
-    <string name="choose_create_option_passkey_title" msgid="4146408187146573131">"શું <xliff:g id="PROVIDERINFODISPLAYNAME">%1$s</xliff:g>માં કોઈ પાસકી બનાવીએ?"</string>
-    <string name="choose_create_option_password_title" msgid="8812546498357380545">"શું તમારો પાસવર્ડ <xliff:g id="PROVIDERINFODISPLAYNAME">%1$s</xliff:g>માં સાચવીએ?"</string>
-    <string name="choose_create_option_sign_in_title" msgid="6318246378475961834">"શું તમારી સાઇન-ઇનની માહિતી <xliff:g id="PROVIDERINFODISPLAYNAME">%1$s</xliff:g>માં સાચવીએ?"</string>
-    <string name="choose_create_option_description" msgid="4419171903963100257">"તમે કોઈપણ ડિવાઇસ પર તમારા <xliff:g id="APPDOMAINNAME">%1$s</xliff:g> <xliff:g id="TYPE">%2$s</xliff:g>નો ઉપયોગ કરી શકો છો. <xliff:g id="CREATEINFODISPLAYNAME">%4$s</xliff:g> માટે <xliff:g id="PROVIDERINFODISPLAYNAME">%3$s</xliff:g>માં તેને સાચવવામાં આવે છે"</string>
+    <string name="choose_provider_body" msgid="4384188171872005547">"તમારી માહિતી સાચવવા માટે પાસવર્ડ મેનેજર પસંદ કરો અને આગલી વખતે વધુ ઝડપથી સાઇન ઇન કરો."</string>
+    <string name="choose_create_option_passkey_title" msgid="5220979185879006862">"<xliff:g id="APPNAME">%1$s</xliff:g> માટે પાસકી બનાવીએ?"</string>
+    <string name="choose_create_option_password_title" msgid="7097275038523578687">"<xliff:g id="APPNAME">%1$s</xliff:g> માટે પાસવર્ડ સાચવીએ?"</string>
+    <string name="choose_create_option_sign_in_title" msgid="4124872317613421249">"<xliff:g id="APPNAME">%1$s</xliff:g> માટે સાઇન-ઇન કરવાની માહિતી સાચવીએ?"</string>
+    <string name="choose_create_option_description" msgid="5531335144879100664">"તમે કોઈપણ ડિવાઇસ પર તમારા <xliff:g id="APPDOMAINNAME">%1$s</xliff:g> <xliff:g id="CREDENTIALTYPES">%2$s</xliff:g>નો ઉપયોગ કરી શકો છો. <xliff:g id="CREATEINFODISPLAYNAME">%4$s</xliff:g> માટે <xliff:g id="PROVIDERINFODISPLAYNAME">%3$s</xliff:g>માં તેને સાચવવામાં આવે છે."</string>
     <string name="passkey" msgid="632353688396759522">"પાસકી"</string>
     <string name="password" msgid="6738570945182936667">"પાસવર્ડ"</string>
     <string name="sign_ins" msgid="4710739369149469208">"સાઇન-ઇન"</string>
-    <string name="create_passkey_in_title" msgid="2714306562710897785">"આમાં પાસકી બનાવો"</string>
-    <string name="save_password_to_title" msgid="3450480045270186421">"પાસવર્ડ અહીં સાચવો"</string>
-    <string name="save_sign_in_to_title" msgid="8328143607671760232">"સાઇન-ઇનની માહિતી અહીં સાચવો"</string>
+    <string name="sign_in_info" msgid="2627704710674232328">"સાઇન-ઇન કરવાની માહિતી"</string>
+    <string name="save_credential_to_title" msgid="3172811692275634301">"<xliff:g id="CREDENTIALTYPES">%1$s</xliff:g>ને આમાં સાચવો"</string>
     <string name="create_passkey_in_other_device_title" msgid="6372952459932674632">"શું અન્ય ડિવાઇસમાં પાસકી બનાવવા માગો છો?"</string>
     <string name="use_provider_for_all_title" msgid="4201020195058980757">"શું તમારા બધા સાઇન-ઇન માટે <xliff:g id="PROVIDERINFODISPLAYNAME">%1$s</xliff:g>નો ઉપયોગ કરીએ?"</string>
     <string name="use_provider_for_all_description" msgid="6560593199974037820">"આ પાસવર્ડ મેનેજર તમને સરળતાથી સાઇન ઇન કરવામાં સહાય કરવા માટે, તમારા પાસવર્ડ અને પાસકીને સ્ટોર કરશે."</string>
     <string name="set_as_default" msgid="4415328591568654603">"ડિફૉલ્ટ તરીકે સેટ કરો"</string>
     <string name="use_once" msgid="9027366575315399714">"એકવાર ઉપયોગ કરો"</string>
-    <string name="more_options_usage_passwords_passkeys" msgid="4794903978126339473">"<xliff:g id="PASSWORDSNUMBER">%1$s</xliff:g> પાસવર્ડ, <xliff:g id="PASSKEYSNUMBER">%2$s</xliff:g> પાસકી"</string>
+    <string name="more_options_usage_passwords_passkeys" msgid="3470113942332934279">"<xliff:g id="PASSWORDSNUMBER">%1$s</xliff:g> પાસવર્ડ • <xliff:g id="PASSKEYSNUMBER">%2$s</xliff:g> પાસકી"</string>
     <string name="more_options_usage_passwords" msgid="1632047277723187813">"<xliff:g id="PASSWORDSNUMBER">%1$s</xliff:g> પાસવર્ડ"</string>
     <string name="more_options_usage_passkeys" msgid="5390320437243042237">"<xliff:g id="PASSKEYSNUMBER">%1$s</xliff:g> પાસકી"</string>
+    <string name="more_options_usage_credentials" msgid="1785697001787193984">"<xliff:g id="TOTALCREDENTIALSNUMBER">%1$s</xliff:g> લૉગ ઇન વિગત"</string>
     <string name="passkey_before_subtitle" msgid="2448119456208647444">"પાસકી"</string>
     <string name="another_device" msgid="5147276802037801217">"કોઈ અન્ય ડિવાઇસ"</string>
     <string name="other_password_manager" msgid="565790221427004141">"અન્ય પાસવર્ડ મેનેજર"</string>
     <string name="close_sheet" msgid="1393792015338908262">"શીટ બંધ કરો"</string>
     <string name="accessibility_back_arrow_button" msgid="3233198183497842492">"પાછલા પેજ પર પરત જાઓ"</string>
-    <!-- no translation found for accessibility_close_button (2953807735590034688) -->
-    <skip />
+    <string name="accessibility_close_button" msgid="2953807735590034688">"સ્ક્રીન પર સૌથી નીચે દેખાતું, લૉગ ઇન વિગતના મેનેજરનું ક્રિયા માટેનું સૂચન બંધ કરો"</string>
     <string name="get_dialog_title_use_passkey_for" msgid="6236608872708021767">"<xliff:g id="APP_NAME">%1$s</xliff:g> માટે શું તમારી સાચવેલી પાસકીનો ઉપયોગ કરીએ?"</string>
     <string name="get_dialog_title_use_sign_in_for" msgid="5283099528915572980">"<xliff:g id="APP_NAME">%1$s</xliff:g> માટે શું તમારા સાચવેલા સાઇન-ઇનનો ઉપયોગ કરીએ?"</string>
     <string name="get_dialog_title_choose_sign_in_for" msgid="1361715440877613701">"<xliff:g id="APP_NAME">%1$s</xliff:g> માટે કોઈ સાચવેલું સાઇન-ઇન પસંદ કરો"</string>
     <string name="get_dialog_use_saved_passkey_for" msgid="4618100798664888512">"કોઈ અન્ય રીતે સાઇન ઇન કરો"</string>
-    <string name="get_dialog_button_label_no_thanks" msgid="8114363019023838533">"ના, આભાર"</string>
+    <string name="snackbar_action" msgid="37373514216505085">"વ્યૂના વિકલ્પો"</string>
     <string name="get_dialog_button_label_continue" msgid="6446201694794283870">"ચાલુ રાખો"</string>
     <string name="get_dialog_title_sign_in_options" msgid="2092876443114893618">"સાઇન-ઇનના વિકલ્પો"</string>
     <string name="get_dialog_heading_for_username" msgid="3456868514554204776">"<xliff:g id="USERNAME">%1$s</xliff:g> માટે"</string>

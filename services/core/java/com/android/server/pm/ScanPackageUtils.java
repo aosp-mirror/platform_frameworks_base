@@ -406,7 +406,7 @@ final class ScanPackageUtils {
         final long scanFileTime = getLastModifiedTime(parsedPackage);
         final long existingFirstInstallTime = userId == UserHandle.USER_ALL
                 ? PackageStateUtils.getEarliestFirstInstallTime(pkgSetting.getUserStates())
-                : pkgSetting.readUserState(userId).getFirstInstallTime();
+                : pkgSetting.readUserState(userId).getFirstInstallTimeMillis();
         if (currentTime != 0) {
             if (existingFirstInstallTime == 0) {
                 pkgSetting.setFirstInstallTime(currentTime, userId)

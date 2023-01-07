@@ -23,8 +23,7 @@
     <string name="summary_watch" msgid="4085794790142204006">"I-app iyadingeka ukuphatha i-<xliff:g id="DEVICE_NAME">%1$s</xliff:g> yakho. I-<xliff:g id="APP_NAME">%2$s</xliff:g> izovunyelwa ukuthi ihlanganyele nezaziso zakho futhi ifinyelele Ifoni yakho, i-SMS, Oxhumana nabo, Ikhalenda, Amarekhodi wamakholi Nezimvume zamadivayisi aseduze."</string>
     <string name="summary_watch_single_device" msgid="1523091550243476756">"I-app iyadingeka ukuphatha i-<xliff:g id="DEVICE_NAME">%1$s</xliff:g> yakho. <xliff:g id="APP_NAME">%2$s</xliff:g> uzovunyelwa ukusebenzisana nalezi zimvume:"</string>
     <string name="profile_name_glasses" msgid="8488394059007275998">"Izingilazi"</string>
-    <!-- no translation found for summary_glasses (8987925853224595628) -->
-    <skip />
+    <string name="summary_glasses" msgid="8987925853224595628">"Le app iyadingeka ukuphatha i-<xliff:g id="DEVICE_NAME">%1$s</xliff:g> yakho. I-<xliff:g id="APP_NAME">%2$s</xliff:g> izovunyelwa ukuthi ihlanganyele nezaziso zakho futhi ifinyelele kufoni yakho, i-SMS, Oxhumana nabo, Imakrofoni nezimvume zamadivayisi aseduze."</string>
     <string name="summary_glasses_single_device" msgid="5725890636605211803">"I-app iyadingeka ukuphatha i-<xliff:g id="DEVICE_NAME">%1$s</xliff:g> yakho. I-<xliff:g id="APP_NAME">%2$s</xliff:g> izovunyelwa ukusebenzisana nalezi zimvume:"</string>
     <string name="title_app_streaming" msgid="2270331024626446950">"Vumela i-&lt;strong&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/strong&gt; ifinyelele lolu lwazi kusukela efonini yakho"</string>
     <string name="helper_title_app_streaming" msgid="4151687003439969765">"Amasevisi amadivayisi amaningi"</string>

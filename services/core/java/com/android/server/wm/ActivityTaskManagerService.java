@@ -3774,7 +3774,7 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
                     return null;
                 }
                 return mWindowManager.mTaskSnapshotController.captureSnapshot(
-                        task, false /* snapshotHome */);
+                        task, true /* snapshotHome */);
             }
         } finally {
             Binder.restoreCallingIdentity(ident);

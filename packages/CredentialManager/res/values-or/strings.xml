@@ -4,49 +4,49 @@
     <string name="app_name" msgid="4539824758261855508">"କ୍ରେଡେନସିଆଲ ମେନେଜର"</string>
     <string name="string_cancel" msgid="6369133483981306063">"ବାତିଲ କରନ୍ତୁ"</string>
     <string name="string_continue" msgid="1346732695941131882">"ଜାରି ରଖନ୍ତୁ"</string>
+    <string name="string_more_options" msgid="7990658711962795124">"ଅଧିକ ବିକଳ୍ପ"</string>
     <string name="string_create_in_another_place" msgid="1033635365843437603">"ଅନ୍ୟ ଏକ ସ୍ଥାନରେ ତିଆରି କରନ୍ତୁ"</string>
     <string name="string_save_to_another_place" msgid="7590325934591079193">"ଅନ୍ୟ ଏକ ସ୍ଥାନରେ ସେଭ କରନ୍ତୁ"</string>
     <string name="string_use_another_device" msgid="8754514926121520445">"ଅନ୍ୟ ଏହି ଡିଭାଇସ ବ୍ୟବହାର କରନ୍ତୁ"</string>
     <string name="string_save_to_another_device" msgid="1959562542075194458">"ଅନ୍ୟ ଏକ ଡିଭାଇସରେ ସେଭ କରନ୍ତୁ"</string>
     <string name="passkey_creation_intro_title" msgid="4251037543787718844">"ପାସକୀ ସହ ଅଧିକ ସୁରକ୍ଷିତ"</string>
-    <string name="passkey_creation_intro_body_password" msgid="312712407571126228">"ଜଟିଳ ପାସୱାର୍ଡଗୁଡ଼ିକ ତିଆରି କରିବା କିମ୍ବା ମନେରଖିବା ଆବଶ୍ୟକ ନାହିଁ"</string>
-    <string name="passkey_creation_intro_body_fingerprint" msgid="691816235541508203">"ଏକ ସ୍ୱତନ୍ତ୍ର ପାସକୀ ତିଆରି କରିବା ପାଇଁ ଆପଣଙ୍କ ଟିପଚିହ୍ନ, ଫେସ କିମ୍ବା ସ୍କ୍ରିନ ଲକ ବ୍ୟବହାର କରନ୍ତୁ"</string>
-    <string name="passkey_creation_intro_body_device" msgid="477121861162321129">"ପାସକୀ\'ଗୁଡ଼ିକୁ ଏକ ପାସୱାର୍ଡ ମେନେଜରରେ ସେଭ କରାଯାଇଛି, ଯାହାଫଳରେ ଆପଣ ଅନ୍ୟ ଡିଭାଇସଗୁଡ଼ିକରେ ସାଇନ ଇନ କରିପାରିବେ"</string>
+    <string name="passkey_creation_intro_body_password" msgid="8825872426579958200">"ପାସକୀଗୁଡ଼ିକ ସହ ଆପଣଙ୍କୁ ଜଟିଳ ପାସୱାର୍ଡଗୁଡ଼ିକ ତିଆରି କରିବା କିମ୍ବା ମନେରଖିବାର ଆବଶ୍ୟକତା ନାହିଁ"</string>
+    <string name="passkey_creation_intro_body_fingerprint" msgid="7331338631826254055">"ପାସକୀଗୁଡ଼ିକ ହେଉଛି ଆପଣ ଆପଣଙ୍କ ଟିପଚିହ୍ନ, ଫେସ କିମ୍ବା ସ୍କ୍ରିନ ଲକ ବ୍ୟବହାର କରି ତିଆରି କରୁଥିବା ଏକକ୍ରିପ୍ଟ କରାଯାଇଥିବା ଡିଜିଟାଲ କୀ"</string>
+    <string name="passkey_creation_intro_body_device" msgid="1203796455762131631">"ସେଗୁଡ଼ିକୁ ଏକ Password Managerରେ ସେଭ କରାଯାଏ, ଯାହା ଫଳରେ ଆପଣ ଅନ୍ୟ ଡିଭାଇସଗୁଡ଼ିକରେ ସାଇନ ଇନ କରିପାରିବେ"</string>
     <string name="choose_provider_title" msgid="7245243990139698508">"କେଉଁଠି <xliff:g id="CREATETYPES">%1$s</xliff:g> କରିବେ, ତାହା ବାଛନ୍ତୁ"</string>
     <string name="create_your_passkeys" msgid="8901224153607590596">"ଆପଣଙ୍କ ପାସକୀଗୁଡ଼ିକ ତିଆରି କରନ୍ତୁ"</string>
     <string name="save_your_password" msgid="6597736507991704307">"ଆପଣଙ୍କ ପାସୱାର୍ଡ ସେଭ କରନ୍ତୁ"</string>
     <string name="save_your_sign_in_info" msgid="7213978049817076882">"ଆପଣଙ୍କ ସାଇନ-ଇନ ସୂଚନା ସେଭ କରନ୍ତୁ"</string>
-    <string name="choose_provider_body" msgid="8045759834416308059">"ଆପଣଙ୍କ ପାସୱାର୍ଡ ଓ ପାସକୀଗୁଡ଼ିକୁ ସେଭ କରିବା ପାଇଁ ଏକ ଡିଫଲ୍ଟ Password Manager ସେଟ କରନ୍ତୁ ଏବଂ ପରବର୍ତ୍ତୀ ଥର ଶୀଘ୍ର ସାଇନ ଇନ କରନ୍ତୁ।"</string>
-    <string name="choose_create_option_passkey_title" msgid="4146408187146573131">"<xliff:g id="PROVIDERINFODISPLAYNAME">%1$s</xliff:g>ରେ ଏକ ପାସକୀ ତିଆରି କରିବେ?"</string>
-    <string name="choose_create_option_password_title" msgid="8812546498357380545">"ଆପଣଙ୍କ ପାସୱାର୍ଡକୁ <xliff:g id="PROVIDERINFODISPLAYNAME">%1$s</xliff:g>ରେ ସେଭ କରିବେ?"</string>
-    <string name="choose_create_option_sign_in_title" msgid="6318246378475961834">"ଆପଣଙ୍କ ସାଇନ-ଇନ ସୂଚନାକୁ <xliff:g id="PROVIDERINFODISPLAYNAME">%1$s</xliff:g>ରେ ସେଭ କରିବେ?"</string>
-    <string name="choose_create_option_description" msgid="4419171903963100257">"ଆପଣ ଯେ କୌଣସି ଡିଭାଇସରେ <xliff:g id="APPDOMAINNAME">%1$s</xliff:g> <xliff:g id="TYPE">%2$s</xliff:g>କୁ ବ୍ୟବହାର କରିପାରିବେ। ଏହାକୁ <xliff:g id="CREATEINFODISPLAYNAME">%4$s</xliff:g> ପାଇଁ <xliff:g id="PROVIDERINFODISPLAYNAME">%3$s</xliff:g>ରେ ସେଭ କରାଯାଏ"</string>
+    <string name="choose_provider_body" msgid="4384188171872005547">"ଆପଣଙ୍କ ସୂଚନା ସେଭ କରି ପରବର୍ତ୍ତୀ ସମୟରେ ଶୀଘ୍ର ସାଇନ ଇନ କରିବା ପାଇଁ ଏକ Password Manager ଚୟନ କରନ୍ତୁ।"</string>
+    <string name="choose_create_option_passkey_title" msgid="5220979185879006862">"<xliff:g id="APPNAME">%1$s</xliff:g> ପାଇଁ ପାସକୀ ତିଆରି କରିବେ?"</string>
+    <string name="choose_create_option_password_title" msgid="7097275038523578687">"<xliff:g id="APPNAME">%1$s</xliff:g> ପାଇଁ ପାସୱାର୍ଡ ସେଭ କରିବେ?"</string>
+    <string name="choose_create_option_sign_in_title" msgid="4124872317613421249">"<xliff:g id="APPNAME">%1$s</xliff:g> ପାଇଁ ସାଇନ-ଇନର ସୂଚନା ସେଭ କରିବେ?"</string>
+    <string name="choose_create_option_description" msgid="5531335144879100664">"ଆପଣ ଯେ କୌଣସି ଡିଭାଇସରେ ଆପଣଙ୍କ <xliff:g id="APPDOMAINNAME">%1$s</xliff:g> <xliff:g id="CREDENTIALTYPES">%2$s</xliff:g>କୁ ବ୍ୟବହାର କରିପାରିବେ। ଏହାକୁ <xliff:g id="CREATEINFODISPLAYNAME">%4$s</xliff:g> ପାଇଁ <xliff:g id="PROVIDERINFODISPLAYNAME">%3$s</xliff:g>ରେ ସେଭ କରାଯାଏ।"</string>
     <string name="passkey" msgid="632353688396759522">"ପାସକୀ"</string>
     <string name="password" msgid="6738570945182936667">"ପାସୱାର୍ଡ"</string>
     <string name="sign_ins" msgid="4710739369149469208">"ସାଇନ-ଇନ"</string>
-    <string name="create_passkey_in_title" msgid="2714306562710897785">"ଏଥିରେ ପାସକୀ ତିଆରି କରନ୍ତୁ"</string>
-    <string name="save_password_to_title" msgid="3450480045270186421">"ଏଥିରେ ପାସୱାର୍ଡ ସେଭ କରନ୍ତୁ"</string>
-    <string name="save_sign_in_to_title" msgid="8328143607671760232">"ଏଥିରେ ସାଇନ-ଇନ ସେଭ କରନ୍ତୁ"</string>
+    <string name="sign_in_info" msgid="2627704710674232328">"ସାଇନ-ଇନ ସୂଚନା"</string>
+    <string name="save_credential_to_title" msgid="3172811692275634301">"<xliff:g id="CREDENTIALTYPES">%1$s</xliff:g>କୁ ଏଥିରେ ସେଭ କରନ୍ତୁ"</string>
     <string name="create_passkey_in_other_device_title" msgid="6372952459932674632">"ଅନ୍ୟ ଏକ ଡିଭାଇସରେ ପାସକୀ ତିଆରି କରିବେ?"</string>
     <string name="use_provider_for_all_title" msgid="4201020195058980757">"ଆପଣଙ୍କ ସମସ୍ତ ସାଇନ-ଇନ ପାଇଁ <xliff:g id="PROVIDERINFODISPLAYNAME">%1$s</xliff:g> ବ୍ୟବହାର କରିବେ?"</string>
     <string name="use_provider_for_all_description" msgid="6560593199974037820">"ଏହି Password Manager ସହଜରେ ସାଇନ ଇନ କରିବାରେ ଆପଣଙ୍କୁ ସାହାଯ୍ୟ କରିବା ପାଇଁ ଆପଣଙ୍କ ପାସୱାର୍ଡ ଏବଂ ପାସକୀଗୁଡ଼ିକୁ ଷ୍ଟୋର କରିବ।"</string>
     <string name="set_as_default" msgid="4415328591568654603">"ଡିଫଲ୍ଟ ଭାବେ ସେଟ କରନ୍ତୁ"</string>
     <string name="use_once" msgid="9027366575315399714">"ଥରେ ବ୍ୟବହାର କରନ୍ତୁ"</string>
-    <string name="more_options_usage_passwords_passkeys" msgid="4794903978126339473">"<xliff:g id="PASSWORDSNUMBER">%1$s</xliff:g>ଟି ପାସୱାର୍ଡ, <xliff:g id="PASSKEYSNUMBER">%2$s</xliff:g>ଟି ପାସକୀ"</string>
+    <string name="more_options_usage_passwords_passkeys" msgid="3470113942332934279">"<xliff:g id="PASSWORDSNUMBER">%1$s</xliff:g>ଟି ପାସୱାର୍ଡ • <xliff:g id="PASSKEYSNUMBER">%2$s</xliff:g>ଟି ପାସକୀ"</string>
     <string name="more_options_usage_passwords" msgid="1632047277723187813">"<xliff:g id="PASSWORDSNUMBER">%1$s</xliff:g>ଟି ପାସୱାର୍ଡ"</string>
     <string name="more_options_usage_passkeys" msgid="5390320437243042237">"<xliff:g id="PASSKEYSNUMBER">%1$s</xliff:g>ଟି ପାସକୀ"</string>
+    <string name="more_options_usage_credentials" msgid="1785697001787193984">"<xliff:g id="TOTALCREDENTIALSNUMBER">%1$s</xliff:g>ଟି କ୍ରେଡେନସିଆଲ"</string>
     <string name="passkey_before_subtitle" msgid="2448119456208647444">"ପାସକୀ"</string>
     <string name="another_device" msgid="5147276802037801217">"ଅନ୍ୟ ଏକ ଡିଭାଇସ"</string>
     <string name="other_password_manager" msgid="565790221427004141">"ଅନ୍ୟ Password Manager"</string>
     <string name="close_sheet" msgid="1393792015338908262">"ସିଟ ବନ୍ଦ କରନ୍ତୁ"</string>
     <string name="accessibility_back_arrow_button" msgid="3233198183497842492">"ପୂର୍ବବର୍ତ୍ତୀ ପୃଷ୍ଠାକୁ ଫେରନ୍ତୁ"</string>
-    <!-- no translation found for accessibility_close_button (2953807735590034688) -->
-    <skip />
+    <string name="accessibility_close_button" msgid="2953807735590034688">"ସ୍କ୍ରିନର ନିମ୍ନରେ ଦେଖାଯାଉଥିବା କ୍ରେଡେନସିଆଲ ମେନେଜର ଆକ୍ସନ ବିଷୟରେ ପରାମର୍ଶକୁ ବନ୍ଦ କରନ୍ତୁ"</string>
     <string name="get_dialog_title_use_passkey_for" msgid="6236608872708021767">"<xliff:g id="APP_NAME">%1$s</xliff:g> ପାଇଁ ସେଭ କରାଯାଇଥିବା ଆପଣଙ୍କ ପାସକୀ ବ୍ୟବହାର କରିବେ?"</string>
     <string name="get_dialog_title_use_sign_in_for" msgid="5283099528915572980">"<xliff:g id="APP_NAME">%1$s</xliff:g> ପାଇଁ ସେଭ କରାଯାଇଥିବା ଆପଣଙ୍କ ସାଇନ-ଇନ ବ୍ୟବହାର କରିବେ?"</string>
     <string name="get_dialog_title_choose_sign_in_for" msgid="1361715440877613701">"<xliff:g id="APP_NAME">%1$s</xliff:g> ପାଇଁ ସେଭ କରାଯାଇଥିବା ଏକ ସାଇନ-ଇନ ବାଛନ୍ତୁ"</string>
     <string name="get_dialog_use_saved_passkey_for" msgid="4618100798664888512">"ଅନ୍ୟ ଏକ ଉପାୟରେ ସାଇନ ଇନ କରନ୍ତୁ"</string>
-    <string name="get_dialog_button_label_no_thanks" msgid="8114363019023838533">"ନା, ଧନ୍ୟବାଦ"</string>
+    <string name="snackbar_action" msgid="37373514216505085">"ବିକଳ୍ପଗୁଡ଼ିକୁ ଦେଖନ୍ତୁ"</string>
     <string name="get_dialog_button_label_continue" msgid="6446201694794283870">"ଜାରି ରଖନ୍ତୁ"</string>
     <string name="get_dialog_title_sign_in_options" msgid="2092876443114893618">"ସାଇନ ଇନ ବିକଳ୍ପଗୁଡ଼ିକ"</string>
     <string name="get_dialog_heading_for_username" msgid="3456868514554204776">"<xliff:g id="USERNAME">%1$s</xliff:g>ରେ"</string>

@@ -22,7 +22,6 @@ import android.annotation.UserIdInt;
 import android.app.PendingIntent;
 import android.content.Context;
 import android.content.Intent;
-import android.content.pm.Signature;
 import android.credentials.GetCredentialException;
 import android.credentials.GetCredentialOption;
 import android.credentials.GetCredentialResponse;
@@ -39,7 +38,6 @@ import android.service.credentials.CredentialProviderInfo;
 import android.service.credentials.CredentialProviderService;
 import android.service.credentials.CredentialsResponseContent;
 import android.service.credentials.GetCredentialRequest;
-import android.util.ArraySet;
 import android.util.Log;
 import android.util.Pair;
 import android.util.Slog;
@@ -96,8 +94,7 @@ public final class ProviderGetSession extends ProviderSession<BeginGetCredential
                         getRequestSession.mClientRequest);
         if (filteredRequest != null) {
             BeginGetCredentialRequest beginGetCredentialRequest = constructQueryPhaseRequest(
-                    filteredRequest, getRequestSession.mClientCallingPackage);
-
+                    filteredRequest, getRequestSession.mClientAppInfo);
             return new ProviderGetSession(context, providerInfo, getRequestSession, userId,
                     remoteCredentialService, beginGetCredentialRequest, filteredRequest);
         }
@@ -107,11 +104,9 @@ public final class ProviderGetSession extends ProviderSession<BeginGetCredential
 
     private static BeginGetCredentialRequest constructQueryPhaseRequest(
             android.credentials.GetCredentialRequest filteredRequest,
-            String clientCallingPackage
+            CallingAppInfo callingAppInfo
     ) {
-        return new BeginGetCredentialRequest.Builder(
-                new CallingAppInfo(clientCallingPackage,
-                        new ArraySet<Signature>()))
+        return new BeginGetCredentialRequest.Builder(callingAppInfo)
                 .setBeginGetCredentialOptions(
                         filteredRequest.getGetCredentialOptions().stream().map(
                                 option -> {

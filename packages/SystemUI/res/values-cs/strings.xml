@@ -85,6 +85,7 @@
     <string name="screenshot_share_description" msgid="2861628935812656612">"Sdílet snímek obrazovky"</string>
     <string name="screenshot_scroll_label" msgid="2930198809899329367">"Zvětšit záběr snímku"</string>
     <string name="screenshot_dismiss_description" msgid="4702341245899508786">"Zavřít snímek obrazovky"</string>
+    <string name="screenshot_dismiss_work_profile" msgid="3101530842987697045">"Zavřít zprávu o pracovním profilu"</string>
     <string name="screenshot_preview_description" msgid="7606510140714080474">"Náhled snímku obrazovky"</string>
     <string name="screenshot_top_boundary_pct" msgid="2520148599096479332">"Horní okraj <xliff:g id="PERCENT">%1$d</xliff:g> procent"</string>
     <string name="screenshot_bottom_boundary_pct" msgid="3880821519814946478">"Dolní okraj <xliff:g id="PERCENT">%1$d</xliff:g> procent"</string>
@@ -317,8 +318,7 @@
     <string name="sensor_privacy_camera_unblocked_dialog_content" msgid="7847190103011782278">"Přístup k fotoaparátu je aktivován pro všechny aplikace a služby."</string>
     <string name="sensor_privacy_camera_blocked_dialog_content" msgid="3182428709314874616">"Přístup k fotoaparátu je deaktivován pro všechny aplikace a služby."</string>
     <string name="sensor_privacy_htt_blocked_dialog_content" msgid="3333321592997666441">"Pokud chcete použít tlačítko mikrofonu, v nastavení udělte přístup k mikrofonu."</string>
-    <!-- no translation found for sensor_privacy_dialog_open_settings (5635865896053011859) -->
-    <skip />
+    <string name="sensor_privacy_dialog_open_settings" msgid="5635865896053011859">"Otevřít nastavení"</string>
     <string name="media_seamless_other_device" msgid="4654849800789196737">"Další zařízení"</string>
     <string name="quick_step_accessibility_toggle_overview" msgid="7908949976727578403">"Přepnout přehled"</string>
     <string name="zen_priority_introduction" msgid="3159291973383796646">"Nebudou vás rušit zvuky ani vibrace s výjimkou budíků, upozornění, událostí a volajících, které zadáte. Nadále uslyšíte veškerý obsah, který si sami pustíte (např. hudba, videa nebo hry)."</string>
@@ -743,6 +743,7 @@
     <string name="wifi_is_off" msgid="5389597396308001471">"Wi-Fi je vypnuta"</string>
     <string name="bt_is_off" msgid="7436344904889461591">"Bluetooth je vypnuto"</string>
     <string name="dnd_is_off" msgid="3185706903793094463">"Režim Nerušit je vypnut"</string>
+    <string name="dnd_is_on" msgid="7009368176361546279">"Režim Nerušit je zapnutý"</string>
     <string name="qs_dnd_prompt_auto_rule" msgid="3535469468310002616">"Režim Nerušit byl zapnut automatickým pravidlem (<xliff:g id="ID_1">%s</xliff:g>)."</string>
     <string name="qs_dnd_prompt_app" msgid="4027984447935396820">"Režim Nerušit byl zapnut aplikací (<xliff:g id="ID_1">%s</xliff:g>)."</string>
     <string name="qs_dnd_prompt_auto_rule_app" msgid="1841469944118486580">"Režim Nerušit byl zapnut automatickým pravidlem nebo aplikací."</string>
@@ -905,6 +906,7 @@
     <string name="media_output_dialog_accessibility_title" msgid="4681741064190167888">"Dostupná zařízení pro zvukový výstup."</string>
     <string name="media_output_dialog_accessibility_seekbar" msgid="5332843993805568978">"Hlasitost"</string>
     <string name="media_output_dialog_volume_percentage" msgid="1613984910585111798">"<xliff:g id="PERCENTAGE">%1$d</xliff:g> %%"</string>
+    <string name="media_output_group_title_speakers_and_displays" msgid="7169712332365659820">"Reproduktory a displeje"</string>
     <string name="media_output_first_broadcast_title" msgid="6292237789860753022">"Jak vysílání funguje"</string>
     <string name="media_output_broadcast" msgid="3555580945878071543">"Vysílání"</string>
     <string name="media_output_first_notify_broadcast_message" msgid="6353857724136398494">"Lidé ve vašem okolí s kompatibilními zařízeními Bluetooth mohou poslouchat média, která vysíláte"</string>
@@ -1032,20 +1034,19 @@
     <string name="log_access_confirmation_deny" msgid="2389461495803585795">"Nepovolovat"</string>
     <string name="log_access_confirmation_body" msgid="6883031912003112634">"Do protokolů zařízení se zaznamenává, co se na zařízení děje. Aplikace tyto protokoly mohou používat k vyhledání a odstranění problémů.\n\nNěkteré protokoly mohou zahrnovat citlivé údaje. Přístup k protokolům zařízení proto povolte pouze aplikacím, kterým důvěřujete. \n\nPokud této aplikaci nepovolíte přístup ke všem protokolům zařízení, bude mít stále přístup ke svým vlastním protokolům. Výrobce zařízení může mít stále přístup k některým protokolům nebo informacím na vašem zařízení."</string>
     <string name="keyguard_affordance_enablement_dialog_action_template" msgid="8164857863036314664">"Otevřít <xliff:g id="APPNAME">%1$s</xliff:g>"</string>
-    <string name="keyguard_affordance_enablement_dialog_message" msgid="2790910660524887941">"Podmínky pro to, aby aplikaci <xliff:g id="APPNAME">%1$s</xliff:g> bylo možné přidat jako zkratku:"</string>
     <string name="keyguard_affordance_enablement_dialog_wallet_instruction_1" msgid="8439655049139819278">"• Aplikace je nastavena"</string>
     <string name="keyguard_affordance_enablement_dialog_wallet_instruction_2" msgid="4321089250629477835">"• Do Peněženky byla přidána alespoň jedna karta"</string>
     <string name="keyguard_affordance_enablement_dialog_qr_scanner_instruction" msgid="5355839079232119791">"• Je nainstalována aplikace pro fotoaparát"</string>
     <string name="keyguard_affordance_enablement_dialog_home_instruction_1" msgid="8438311171750568633">"• Aplikace je nastavena"</string>
     <string name="keyguard_affordance_enablement_dialog_home_instruction_2" msgid="8308525385889021652">"• Je k dispozici alespoň jedno zařízení"</string>
+    <string name="keyguard_affordance_press_too_short" msgid="8145437175134998864">"Podržte zkratku"</string>
     <string name="rear_display_bottom_sheet_cancel" msgid="3461468855493357248">"Zrušit"</string>
     <string name="rear_display_bottom_sheet_confirm" msgid="4383356544661421206">"Otočit"</string>
     <string name="rear_display_fold_bottom_sheet_title" msgid="6081542277622721548">"Rozložte telefon, selfie bude lepší"</string>
     <string name="rear_display_unfold_bottom_sheet_title" msgid="2137403802960396357">"Otočit na přední fotoaparát pro lepší selfie?"</string>
     <string name="rear_display_bottom_sheet_description" msgid="1852662982816810352">"Pomocí zadního fotoaparátu pořiďte širší fotku s vyšším rozlišením."</string>
     <string name="rear_display_bottom_sheet_warning" msgid="800995919558238930"><b>"✱ Tato obrazovka se vypne"</b></string>
-    <!-- no translation found for rear_display_accessibility_folded_animation (1538121649587978179) -->
-    <skip />
-    <!-- no translation found for rear_display_accessibility_unfolded_animation (1946153682258289040) -->
-    <skip />
+    <string name="rear_display_accessibility_folded_animation" msgid="1538121649587978179">"Rozkládání rozkládacího zařízení"</string>
+    <string name="rear_display_accessibility_unfolded_animation" msgid="1946153682258289040">"Otáčení rozkládacího zařízení"</string>
+    <string name="stylus_battery_low" msgid="7134370101603167096">"Slabá baterie dotykového pera"</string>
 </resources>

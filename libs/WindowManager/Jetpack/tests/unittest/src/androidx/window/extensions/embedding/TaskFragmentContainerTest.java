@@ -45,6 +45,8 @@ import android.window.WindowContainerTransaction;
 
 import androidx.test.ext.junit.runners.AndroidJUnit4;
 import androidx.test.filters.SmallTest;
+import androidx.window.common.DeviceStateManagerFoldingFeatureProducer;
+import androidx.window.extensions.layout.WindowLayoutComponentImpl;
 
 import com.google.android.collect.Lists;
 
@@ -82,7 +84,10 @@ public class TaskFragmentContainerTest {
     @Before
     public void setup() {
         MockitoAnnotations.initMocks(this);
-        mController = new SplitController();
+        DeviceStateManagerFoldingFeatureProducer producer =
+                mock(DeviceStateManagerFoldingFeatureProducer.class);
+        WindowLayoutComponentImpl component = mock(WindowLayoutComponentImpl.class);
+        mController = new SplitController(component, producer);
         spyOn(mController);
         mActivity = createMockActivity();
         mIntent = new Intent();

@@ -23,10 +23,8 @@
     <string name="dock_alignment_not_charging" product="default" msgid="3980752926226749808">"Поправте телефон, щоб активувати бездротове заряджання"</string>
     <string name="inattentive_sleep_warning_message" product="tv" msgid="6844464574089665063">"Незабаром пристрій Android TV буде вимкнено. Натисніть кнопку, щоб цього не сталося."</string>
     <string name="inattentive_sleep_warning_message" product="default" msgid="5693904520452332224">"Незабаром пристрій буде вимкнено. Натисніть, щоб цього не сталося."</string>
-    <!-- no translation found for keyguard_missing_sim_message (408124574073032188) -->
-    <skip />
-    <!-- no translation found for keyguard_missing_sim_message (2605468359948247208) -->
-    <skip />
+    <string name="keyguard_missing_sim_message" product="tablet" msgid="408124574073032188">"У планшеті немає SIM-карти."</string>
+    <string name="keyguard_missing_sim_message" product="default" msgid="2605468359948247208">"У телефоні немає SIM-карти."</string>
     <string name="kg_invalid_confirm_pin_hint" product="default" msgid="6278551068943958651">"PIN-коди не збігаються"</string>
     <string name="kg_failed_attempts_almost_at_wipe" product="tablet" msgid="302165994845009232">"Кількість невдалих спроб розблокувати планшет: <xliff:g id="NUMBER_0">%1$d</xliff:g>. Залишилося спроб: <xliff:g id="NUMBER_1">%2$d</xliff:g>. У разі невдачі буде скинуто налаштування планшета й видалено всі його дані."</string>
     <string name="kg_failed_attempts_almost_at_wipe" product="default" msgid="2594813176164266847">"Кількість невдалих спроб розблокувати телефон: <xliff:g id="NUMBER_0">%1$d</xliff:g>. Залишилося спроб: <xliff:g id="NUMBER_1">%2$d</xliff:g>. У разі невдачі буде скинуто налаштування телефона й видалено всі його дані."</string>

@@ -85,6 +85,7 @@
     <string name="screenshot_share_description" msgid="2861628935812656612">"තිර රුව බෙදා ගන්න"</string>
     <string name="screenshot_scroll_label" msgid="2930198809899329367">"තව ග්‍රහණය කරන්න"</string>
     <string name="screenshot_dismiss_description" msgid="4702341245899508786">"තිර රුව ඉවත ලන්න"</string>
+    <string name="screenshot_dismiss_work_profile" msgid="3101530842987697045">"කාර්යාල පැතිකඩ පණිවිඩය අස් කරන්න"</string>
     <string name="screenshot_preview_description" msgid="7606510140714080474">"තිර රූ පෙර දසුන"</string>
     <string name="screenshot_top_boundary_pct" msgid="2520148599096479332">"ඉහළ සීමාව සියයට <xliff:g id="PERCENT">%1$d</xliff:g>"</string>
     <string name="screenshot_bottom_boundary_pct" msgid="3880821519814946478">"පහළ සීමාව සියයට <xliff:g id="PERCENT">%1$d</xliff:g>"</string>
@@ -317,8 +318,7 @@
     <string name="sensor_privacy_camera_unblocked_dialog_content" msgid="7847190103011782278">"සියලු යෙදුම් සහ සේවා සඳහා කැමරාව සබල කර ඇත."</string>
     <string name="sensor_privacy_camera_blocked_dialog_content" msgid="3182428709314874616">"සියලු යෙදුම් සහ සේවා සඳහා කැමරා ප්‍රවේශය අබල කර ඇත."</string>
     <string name="sensor_privacy_htt_blocked_dialog_content" msgid="3333321592997666441">"මයික්‍රෆෝන බොත්තම භාවිතය සඳහා, සැකසීම් තුළ මයික්‍රෆෝන ප්‍රවේශය සබල කරන්න."</string>
-    <!-- no translation found for sensor_privacy_dialog_open_settings (5635865896053011859) -->
-    <skip />
+    <string name="sensor_privacy_dialog_open_settings" msgid="5635865896053011859">"සැකසීම් විවෘත කරන්න"</string>
     <string name="media_seamless_other_device" msgid="4654849800789196737">"වෙනත් උපාංගය"</string>
     <string name="quick_step_accessibility_toggle_overview" msgid="7908949976727578403">"දළ විශ්ලේෂණය ටොගල කරන්න"</string>
     <string name="zen_priority_introduction" msgid="3159291973383796646">"එලාම සිහිකැඳවීම්, සිදුවීම්, සහ ඔබ සඳහන් කළ අමතන්නන් හැර, ශබ්ද සහ කම්පනවලින් ඔබට බාධා නොවනු ඇත. සංගීතය, වීඩියෝ, සහ ක්‍රීඩා ඇතුළු ඔබ වාදනය කිරීමට තෝරන ලද සියලු දේ ඔබට තවම ඇසෙනු ඇත."</string>
@@ -743,6 +743,7 @@
     <string name="wifi_is_off" msgid="5389597396308001471">"Wi-Fi ක්‍රියා විරහිතයි"</string>
     <string name="bt_is_off" msgid="7436344904889461591">"බ්ලූටූත් ක්‍රියා විරහිතයි"</string>
     <string name="dnd_is_off" msgid="3185706903793094463">"බාධා නොකරන්න ක්‍රියා විරහිතයි"</string>
+    <string name="dnd_is_on" msgid="7009368176361546279">"බාධා නොකරන්න ක්‍රියාත්මකයි"</string>
     <string name="qs_dnd_prompt_auto_rule" msgid="3535469468310002616">"ස්වයංක්‍රිය රීතියක් මගින් බාධා නොකරන්න ක්‍රියාත්මක කරන ලදී (<xliff:g id="ID_1">%s</xliff:g>)."</string>
     <string name="qs_dnd_prompt_app" msgid="4027984447935396820">"යෙදුමක් මගින් බාධා නොකරන්න ක්‍රියාත්මක කරන ලදී (<xliff:g id="ID_1">%s</xliff:g>)."</string>
     <string name="qs_dnd_prompt_auto_rule_app" msgid="1841469944118486580">"ස්වයංක්‍රිය රීතියක් හෝ යෙදුමක් මගින් බාධා නොකරන්න ක්‍රියාත්මක කරන ලදී."</string>
@@ -905,6 +906,7 @@
     <string name="media_output_dialog_accessibility_title" msgid="4681741064190167888">"ශ්‍රව්‍ය ප්‍රතිදානය සඳහා තිබෙන උපාංග."</string>
     <string name="media_output_dialog_accessibility_seekbar" msgid="5332843993805568978">"හඬ පරිමාව"</string>
     <string name="media_output_dialog_volume_percentage" msgid="1613984910585111798">"<xliff:g id="PERCENTAGE">%1$d</xliff:g>%%"</string>
+    <string name="media_output_group_title_speakers_and_displays" msgid="7169712332365659820">"ස්පීකර් සහ සංදර්ශක"</string>
     <string name="media_output_first_broadcast_title" msgid="6292237789860753022">"විකාශනය ක්‍රියා කරන ආකාරය"</string>
     <string name="media_output_broadcast" msgid="3555580945878071543">"විකාශනය"</string>
     <string name="media_output_first_notify_broadcast_message" msgid="6353857724136398494">"ගැළපෙන බ්ලූටූත් උපාංග සහිත ඔබ අවට සිටින පුද්ගලයින්ට ඔබ විකාශනය කරන මාධ්‍යයට සවන් දිය හැකිය"</string>
@@ -1032,20 +1034,20 @@
     <string name="log_access_confirmation_deny" msgid="2389461495803585795">"ඉඩ නොදෙන්න"</string>
     <string name="log_access_confirmation_body" msgid="6883031912003112634">"උපාංග ලොග ඔබේ උපාංගයෙහි සිදු වන දේ වාර්තා කරයි. ගැටලු සොයා ගැනීමට සහ නිරාකරණයට යෙදුම්වලට මෙම ලොග භාවිතා කළ හැක.\n\nසමහර ලොගවල සංවේදී තතු අඩංගු විය හැකි බැවින්, ඔබ විශ්වාස කරන යෙදුම්වලට පමණක් සියලු උපාංග ලොග වෙත ප්‍රවේශ වීමට ඉඩ දෙන්න. \n\nඔබ මෙම යෙදුමට සියලු උපාංග ලොග වෙත ප්‍රවේශ වීමට ඉඩ නොදෙන්නේ නම්, එයට තවමත් එහිම ලොග වෙත ප්‍රවේශ විය හැක. ඔබේ උපාංග නිෂ්පාදකයාට තවමත් ඔබේ උපාංගයෙහි සමහර ලොග හෝ තතු වෙත ප්‍රවේශ විය හැක."</string>
     <string name="keyguard_affordance_enablement_dialog_action_template" msgid="8164857863036314664">"<xliff:g id="APPNAME">%1$s</xliff:g> විවෘත කරන්න"</string>
-    <string name="keyguard_affordance_enablement_dialog_message" msgid="2790910660524887941">"කෙටිමඟක් ලෙස <xliff:g id="APPNAME">%1$s</xliff:g> එක් කිරීමට, තහවුරු කර ගන්න"</string>
     <string name="keyguard_affordance_enablement_dialog_wallet_instruction_1" msgid="8439655049139819278">"• යෙදුම සකසා ඇත"</string>
     <string name="keyguard_affordance_enablement_dialog_wallet_instruction_2" msgid="4321089250629477835">"• Wallet වෙත අවම වශයෙන් එක කාඩ්පතක් එක් කර ඇත"</string>
     <string name="keyguard_affordance_enablement_dialog_qr_scanner_instruction" msgid="5355839079232119791">"• කැමරා යෙදුමක් ස්ථාපන කරන්න"</string>
     <string name="keyguard_affordance_enablement_dialog_home_instruction_1" msgid="8438311171750568633">"• යෙදුම සකසා ඇත"</string>
     <string name="keyguard_affordance_enablement_dialog_home_instruction_2" msgid="8308525385889021652">"• අවම වශයෙන් එක උපාංගයක් ලැබේ"</string>
+    <!-- no translation found for keyguard_affordance_press_too_short (8145437175134998864) -->
+    <skip />
     <string name="rear_display_bottom_sheet_cancel" msgid="3461468855493357248">"අවලංගු කරන්න"</string>
     <string name="rear_display_bottom_sheet_confirm" msgid="4383356544661421206">"දැන් පෙරළන්න"</string>
     <string name="rear_display_fold_bottom_sheet_title" msgid="6081542277622721548">"වඩා හොඳ සෙල්ෆියක් සඳහා දුරකථනය දිගහරින්න"</string>
     <string name="rear_display_unfold_bottom_sheet_title" msgid="2137403802960396357">"වඩා හොඳ සෙල්ෆියක් සඳහා ඉදිරිපස සංදර්ශකයට පෙරළන්න ද?"</string>
     <string name="rear_display_bottom_sheet_description" msgid="1852662982816810352">"ඉහළ විභේදන සහිත පුළුල් ඡායාරූපයක් සඳහා පසුපසට මුහුණලා ඇති කැමරාව භාවිතා කරන්න."</string>
     <string name="rear_display_bottom_sheet_warning" msgid="800995919558238930"><b>"✱ මෙම තිරය ක්‍රියා විරහිත වනු ඇත"</b></string>
-    <!-- no translation found for rear_display_accessibility_folded_animation (1538121649587978179) -->
-    <skip />
-    <!-- no translation found for rear_display_accessibility_unfolded_animation (1946153682258289040) -->
-    <skip />
+    <string name="rear_display_accessibility_folded_animation" msgid="1538121649587978179">"දිග හැරෙමින් පවතින නැමිය හැකි උපාංගය"</string>
+    <string name="rear_display_accessibility_unfolded_animation" msgid="1946153682258289040">"වටා පෙරළෙමින් තිබෙන නැමිය හැකි උපාංගය"</string>
+    <string name="stylus_battery_low" msgid="7134370101603167096">"පන්හිඳ බැටරිය අඩුයි"</string>
 </resources>

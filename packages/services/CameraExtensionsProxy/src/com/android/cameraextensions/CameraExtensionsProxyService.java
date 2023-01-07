@@ -141,7 +141,7 @@ public class CameraExtensionsProxyService extends Service {
     private static final boolean EXTENSIONS_PRESENT = checkForExtensions();
     private static final String EXTENSIONS_VERSION = EXTENSIONS_PRESENT ?
             (new ExtensionVersionImpl()).checkApiVersion(LATEST_VERSION) : null;
-    private static final boolean LATENCY_API_SUPPORTED = checkForLatencyAPI();
+    private static final boolean ESTIMATED_LATENCY_API_SUPPORTED = checkForLatencyAPI();
     private static final boolean LATENCY_IMPROVEMENTS_SUPPORTED = EXTENSIONS_PRESENT &&
             (EXTENSIONS_VERSION.startsWith(LATENCY_VERSION_PREFIX));
     private static final boolean ADVANCED_API_SUPPORTED = checkForAdvancedAPI();
@@ -1647,7 +1647,7 @@ public class CameraExtensionsProxyService extends Service {
         @Override
         public LatencyRange getEstimatedCaptureLatencyRange(
                 android.hardware.camera2.extension.Size outputSize) {
-            if (LATENCY_API_SUPPORTED) {
+            if (ESTIMATED_LATENCY_API_SUPPORTED) {
                 Size sz = new Size(outputSize.width, outputSize.height);
                 Range<Long> latencyRange = mImageExtender.getEstimatedCaptureLatencyRange(sz);
                 if (latencyRange != null) {

@@ -127,13 +127,13 @@
     <string name="bluetooth_hid_profile_summary_connected" msgid="3923653977051684833">"ఇన్‌పుట్ పరికరానికి కనెక్ట్ చేయబడింది"</string>
     <string name="bluetooth_pan_user_profile_summary_connected" msgid="380469653827505727">"ఇంటర్నెట్ యాక్సెస్ కోసం పరికరానికి కనెక్ట్ చేయబడింది"</string>
     <string name="bluetooth_pan_nap_profile_summary_connected" msgid="3744773111299503493">"స్థానిక ఇంటర్నెట్ కనెక్షన్‌ను పరికరంతో షేర్ చేయడం"</string>
-    <string name="bluetooth_pan_profile_summary_use_for" msgid="7422039765025340313">"ఇంటర్నెట్ యాక్సెస్ కోసం ఉపయోగించు"</string>
-    <string name="bluetooth_map_profile_summary_use_for" msgid="4453622103977592583">"మ్యాప్ కోసం ఉపయోగించు"</string>
+    <string name="bluetooth_pan_profile_summary_use_for" msgid="7422039765025340313">"ఇంటర్నెట్ యాక్సెస్ కోసం ఉపయోగించండి"</string>
+    <string name="bluetooth_map_profile_summary_use_for" msgid="4453622103977592583">"మ్యాప్ కోసం ఉపయోగించండి"</string>
     <string name="bluetooth_sap_profile_summary_use_for" msgid="6204902866176714046">"SIM యాక్సెస్ కోసం ఉపయోగించబడుతుంది"</string>
-    <string name="bluetooth_a2dp_profile_summary_use_for" msgid="7324694226276491807">"మీడియా ఆడియో కోసం ఉపయోగించు"</string>
-    <string name="bluetooth_headset_profile_summary_use_for" msgid="808970643123744170">"ఫోన్ ఆడియో కోసం ఉపయోగించు"</string>
-    <string name="bluetooth_opp_profile_summary_use_for" msgid="461981154387015457">"ఫైల్ బదిలీ కోసం ఉపయోగించు"</string>
-    <string name="bluetooth_hid_profile_summary_use_for" msgid="4289460627406490952">"ఇన్‌పుట్ కోసం ఉపయోగించు"</string>
+    <string name="bluetooth_a2dp_profile_summary_use_for" msgid="7324694226276491807">"మీడియా ఆడియో కోసం ఉపయోగించండి"</string>
+    <string name="bluetooth_headset_profile_summary_use_for" msgid="808970643123744170">"ఫోన్ ఆడియో కోసం ఉపయోగించండి"</string>
+    <string name="bluetooth_opp_profile_summary_use_for" msgid="461981154387015457">"ఫైల్ బదిలీ కోసం ఉపయోగించండి"</string>
+    <string name="bluetooth_hid_profile_summary_use_for" msgid="4289460627406490952">"ఇన్‌పుట్ కోసం ఉపయోగించండి"</string>
     <string name="bluetooth_hearing_aid_profile_summary_use_for" msgid="7689393730163320483">"వినికిడి మద్దతు ఉపకరణాలకు ఉపయోగించండి"</string>
     <string name="bluetooth_le_audio_profile_summary_use_for" msgid="2778318636027348572">"LE_AUDIO కోసం ఉపయోగించండి"</string>
     <string name="bluetooth_pairing_accept" msgid="2054232610815498004">"జత చేయి"</string>
@@ -180,7 +180,7 @@
     <string name="tts_default_pitch_title" msgid="6988592215554485479">"పిచ్"</string>
     <string name="tts_default_pitch_summary" msgid="9132719475281551884">"సమన్వయం చేసిన ప్రసంగం యొక్క టోన్‌ను ప్రభావితం చేస్తుంది"</string>
     <string name="tts_default_lang_title" msgid="4698933575028098940">"భాష"</string>
-    <string name="tts_lang_use_system" msgid="6312945299804012406">"సిస్టమ్ భాషను ఉపయోగించు"</string>
+    <string name="tts_lang_use_system" msgid="6312945299804012406">"సిస్టమ్ భాషను ఉపయోగించండి"</string>
     <string name="tts_lang_not_selected" msgid="7927823081096056147">"భాష ఎంచుకోబడలేదు"</string>
     <string name="tts_default_lang_summary" msgid="9042620014800063470">"టెక్స్ట్‌ను చదివి వినిపించేటప్పుడు, ఒక్కో భాషకు వాడాల్సిన నిర్దిష్ట వాయిస్‌ను సెట్ చేస్తుంది"</string>
     <string name="tts_play_example_title" msgid="1599468547216481684">"ఒక ఉదాహరణ వినండి"</string>
@@ -362,7 +362,7 @@
     <string name="show_hw_layers_updates_summary" msgid="5850955890493054618">"హార్డ్‌వేర్ లేయర్‌లు అప్‌డేట్‌ చేయబడినప్పుడు వాటిని ఆకుపచ్చ రంగులో ఫ్లాష్ చేయి"</string>
     <string name="debug_hw_overdraw" msgid="8944851091008756796">"GPU ఓవర్‌డ్రాను డీబగ్ చేయండి"</string>
     <string name="disable_overlays" msgid="4206590799671557143">"డిజేబుల్-  HW ఓవర్‌లేలు"</string>
-    <string name="disable_overlays_summary" msgid="1954852414363338166">"స్క్రీన్ కంపాజిటింగ్‌కు ఎల్లప్పుడూ GPUని ఉపయోగించు"</string>
+    <string name="disable_overlays_summary" msgid="1954852414363338166">"స్క్రీన్ కంపాజిటింగ్‌కు ఎల్లప్పుడూ GPUని ఉపయోగించండి"</string>
     <string name="simulate_color_space" msgid="1206503300335835151">"రంగుల‌ను సిమ్యులేట్ చేయి"</string>
     <string name="enable_opengl_traces_title" msgid="4638773318659125196">"OpenGL ట్రేస్‌లను ప్రారంభించండి"</string>
     <string name="usb_audio_disable_routing" msgid="3367656923544254975">"USB ఆడియో రూటింగ్ నిలిపివేయి"</string>
@@ -504,7 +504,7 @@
     <string name="retail_demo_reset_next" msgid="3688129033843885362">"తర్వాత"</string>
     <string name="retail_demo_reset_title" msgid="1866911701095959800">"పాస్‌వర్డ్ అవసరం"</string>
     <string name="active_input_method_subtypes" msgid="4232680535471633046">"సక్రియ ఇన్‌పుట్ పద్ధతులు"</string>
-    <string name="use_system_language_to_select_input_method_subtypes" msgid="4865195835541387040">"సిస్టమ్ భాషలను ఉపయోగించు"</string>
+    <string name="use_system_language_to_select_input_method_subtypes" msgid="4865195835541387040">"సిస్టమ్ భాషలను ఉపయోగించండి"</string>
     <string name="failed_to_open_app_settings_toast" msgid="764897252657692092">"<xliff:g id="SPELL_APPLICATION_NAME">%1$s</xliff:g> యొక్క సెట్టింగ్‌లను తెరవడం విఫలమైంది"</string>
     <string name="ime_security_warning" msgid="6547562217880551450">"ఈ ఇన్‌పుట్ పద్ధతి మీరు టైప్ చేసే మొత్తం వచనాన్ని అలాగే పాస్‌వర్డ్‌లు మరియు క్రెడిట్ కార్డు నంబర్‌ల వంటి వ్యక్తిగత డేటాను సేకరించగలదు. ఇది <xliff:g id="IME_APPLICATION_NAME">%1$s</xliff:g> యాప్‌లో అందించబడుతుంది. ఈ ఇన్‌పుట్ పద్ధతిని ఉపయోగించాలా?"</string>
     <string name="direct_boot_unaware_dialog_message" msgid="7845398276735021548">"గమనిక: రీబూట్ చేసాక, మీరు మీ ఫోన్‌ను అన్‌లాక్ చేసే వరకు ఈ యాప్ ప్రారంభం కాదు"</string>
@@ -564,6 +564,8 @@
     <string name="user_add_user_title" msgid="5457079143694924885">"కొత్త యూజర్‌ను జోడించాలా?"</string>
     <string name="user_add_user_message_long" msgid="1527434966294733380">"అదనపు యూజర్‌లను క్రియేట్ చేయడం ద్వారా మీరు ఈ పరికరాన్ని ఇతరులతో షేర్ చేయవచ్చు. ప్రతి యూజర్‌కు‌ వారికంటూ ప్రత్యేక స్థలం ఉంటుంది, వారు ఆ స్థలాన్ని యాప్‌లు, వాల్‌పేపర్ మొదలైనవాటితో అనుకూలంగా మార్చవచ్చు. యూజర్‌లు ప్రతి ఒక్కరిపై ప్రభావం చూపే Wi‑Fi వంటి పరికర సెట్టింగ్‌లను కూడా సర్దుబాటు చేయవచ్చు.\n\nమీరు కొత్త యూజర్‌ను జోడించినప్పుడు, ఆ వ్యక్తి వారికంటూ స్వంత స్థలం సెట్ చేసుకోవాలి.\n\nఏ యూజర్ అయినా మిగిలిన యూజర్‌లందరి కోసం యాప్‌లను అప్‌డేట్ చేయవచ్చు. యాక్సెసిబిలిటీ సెట్టింగ్‌లు, సర్వీస్‌లు కొత్త యూజర్‌కి బదిలీ కాకపోవచ్చు."</string>
     <string name="user_add_user_message_short" msgid="3295959985795716166">"మీరు కొత్త యూజర్‌ను జోడించినప్పుడు, ఆ వ్యక్తి తన స్పేస్‌ను సెటప్ చేసుకోవాలి.\n\nఏ యూజర్ అయినా మిగతా యూజర్ల కోసం యాప్‌లను అప్‌డేట్‌ చేయగలరు."</string>
+    <string name="user_grant_admin_title" msgid="5565796912475193314">"వీరికి అడ్మిన్ హక్కు ఇవ్వాలా?"</string>
+    <string name="user_grant_admin_message" msgid="7925257971286380976">"ఒక అడ్మిన్‌గా, వారు ఇతర యూజర్‌లను మేనేజ్ చేయగలరు, పరికర సెట్టింగ్‌లను ఎడిట్ చేయగలరు, పరికరాన్ని ఫ్యాక్టరీ రీసెట్ చేయగలరు."</string>
     <string name="user_setup_dialog_title" msgid="8037342066381939995">"యూజర్‌ను ఇప్పుడే సెటప్ చేయాలా?"</string>
     <string name="user_setup_dialog_message" msgid="269931619868102841">"పరికరాన్ని తీసుకోవడానికి వ్యక్తి అందుబాటులో ఉన్నారని నిర్ధారించుకొని, ఆపై వారికి నిల్వ స్థలాన్ని సెటప్ చేయండి"</string>
     <string name="user_setup_profile_dialog_message" msgid="4788197052296962620">"ఇప్పుడు ప్రొఫైల్‌ను సెటప్ చేయాలా?"</string>
@@ -595,6 +597,8 @@
     <string name="guest_reset_and_restart_dialog_message" msgid="2764425635305200790">"ఇది కొత్త గెస్ట్ సెషన్‌ను ప్రారంభిస్తుంది, ప్రస్తుత సెషన్ నుండి అన్ని యాప్‌లు, డేటాను తొలగిస్తుంది."</string>
     <string name="guest_exit_dialog_title" msgid="1846494656849381804">"గెస్ట్ మోడ్ నుండి వైదొలగాలా?"</string>
     <string name="guest_exit_dialog_message" msgid="1743218864242719783">"ఇది ప్రస్తుత గెస్ట్ సెషన్ నుండి యాప్‌లను వాటితో పాటు డేటాను తొలగిస్తుంది"</string>
+    <string name="grant_admin" msgid="4273077214151417783">"ఈ యూజర్‌కు అడ్మిన్ హక్కులను ఇవ్వండి"</string>
+    <string name="not_grant_admin" msgid="6985027675930546850">"యూజర్‌కు అడ్మిన్ హక్కులను ఇవ్వకండి"</string>
     <string name="guest_exit_dialog_button" msgid="1736401897067442044">"వైదొలగండి"</string>
     <string name="guest_exit_dialog_title_non_ephemeral" msgid="7675327443743162986">"గెస్ట్ యాక్టివిటీని సేవ్ చేయాలా?"</string>
     <string name="guest_exit_dialog_message_non_ephemeral" msgid="223385323235719442">"మీరు సెషన్ నుండి యాక్టివిటీని సేవ్ చేయవచ్చు, అన్ని యాప్‌లు, డేటాను తొలగించవచ్చు"</string>

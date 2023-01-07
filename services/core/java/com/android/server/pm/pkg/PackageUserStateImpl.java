@@ -691,7 +691,7 @@ public class PackageUserStateImpl extends WatchableImpl implements PackageUserSt
     }
 
     @DataClass.Generated.Member
-    public long getFirstInstallTime() {
+    public long getFirstInstallTimeMillis() {
         return mFirstInstallTime;
     }
 

@@ -14,10 +14,10 @@
     <string name="ssl_error_warning" msgid="3127935140338254180">"La xarxa a què et vols connectar té problemes de seguretat."</string>
     <string name="ssl_error_example" msgid="6188711843183058764">"Per exemple, la pàgina d\'inici de sessió podria no pertànyer a l\'organització que es mostra."</string>
     <string name="ssl_error_continue" msgid="1138548463994095584">"Continua igualment mitjançant el navegador"</string>
-    <string name="network_boost_notification_channel" msgid="5430986172506159199">"Optimització de xarxa"</string>
-    <string name="network_boost_notification_title" msgid="8226368121348880044">"%s recomana optimitzar les dades"</string>
-    <string name="network_boost_notification_detail" msgid="3812434025544196192">"Compra una optimització de xarxa per millorar-ne el rendiment"</string>
-    <string name="network_boost_notification_button_not_now" msgid="4129218252146702688">"Ara no"</string>
-    <string name="network_boost_notification_button_manage" msgid="1511552684142641182">"Gestiona"</string>
-    <string name="slice_purchase_app_label" msgid="915654761797446390">"Compra una optimització de xarxa."</string>
+    <string name="performance_boost_notification_channel" msgid="3475440855635538592">"Optimització de rendiment"</string>
+    <string name="performance_boost_notification_title" msgid="5017421773334474875">"%s recomana optimitzar el rendiment"</string>
+    <string name="performance_boost_notification_detail" msgid="7216286153533321852">"Compra una optimització de rendiment perquè la xarxa funcioni millor"</string>
+    <string name="performance_boost_notification_button_not_now" msgid="6459755324243683785">"Ara no"</string>
+    <string name="performance_boost_notification_button_manage" msgid="4976836444046497973">"Gestiona"</string>
+    <string name="slice_purchase_app_label" msgid="7170191659233241166">"Compra una optimització de rendiment."</string>
 </resources>

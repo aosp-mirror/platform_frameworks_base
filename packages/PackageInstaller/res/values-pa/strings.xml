@@ -60,10 +60,8 @@
     <string name="uninstall_update_text" msgid="863648314632448705">"ਕੀ ਇਸ ਐਪ ਨੂੰ ਫੈਕਟਰੀ ਵਰਜਨ ਨਾਲ ਬਦਲਣਾ ਹੈ? ਸਾਰਾ ਡਾਟਾ ਹਟਾ ਦਿੱਤਾ ਜਾਵੇਗਾ।"</string>
     <string name="uninstall_update_text_multiuser" msgid="8992883151333057227">"ਕੀ ਇਸ ਐਪ ਨੂੰ ਫੈਕਟਰੀ ਵਰਜਨ ਨਾਲ ਬਦਲਣਾ ਹੈ? ਸਾਰਾ ਡਾਟਾ ਹਟਾ ਦਿੱਤਾ ਜਾਵੇਗਾ। ਇਹ ਇਸ ਡੀਵਾਈਸ ਦੇ ਸਾਰੇ ਵਰਤੋਂਕਾਰਾਂ ਨੂੰ ਪ੍ਰਭਾਵਿਤ ਕਰੇਗਾ, ਜਿਸ ਵਿੱਚ ਕਾਰਜ ਪ੍ਰੋਫਾਈਲ ਵਾਲੇ ਵਰਤੋਂਕਾਰ ਵੀ ਸ਼ਾਮਲ ਹਨ।"</string>
     <string name="uninstall_keep_data" msgid="7002379587465487550">"<xliff:g id="SIZE">%1$s</xliff:g> ਐਪ ਡਾਟਾ ਰੱਖੋ।"</string>
-    <!-- no translation found for uninstall_application_text_current_user_clone_profile (835170400160011636) -->
-    <skip />
-    <!-- no translation found for uninstall_application_text_with_clone_instance (6944473334273349036) -->
-    <skip />
+    <string name="uninstall_application_text_current_user_clone_profile" msgid="835170400160011636">"ਕੀ ਤੁਸੀਂ ਇਸ ਐਪ ਨੂੰ ਮਿਟਾਉਣਾ ਚਾਹੁੰਦੇ ਹੋ?"</string>
+    <string name="uninstall_application_text_with_clone_instance" msgid="6944473334273349036">"ਕੀ ਤੁਸੀਂ ਇਸ ਐਪ ਨੂੰ ਅਣਸਥਾਪਤ ਕਰਨਾ ਚਾਹੁੰਦੇ ਹੋ? <xliff:g id="PACKAGE_LABEL">%1$s</xliff:g> ਦੇ ਕਲੋਨ ਨੂੰ ਵੀ ਮਿਟਾਇਆ ਜਾਵੇਗਾ।"</string>
     <string name="uninstalling_notification_channel" msgid="840153394325714653">"ਚੱਲ ਰਹੀਆਂ ਅਣਸਥਾਪਨਾਵਾਂ"</string>
     <string name="uninstall_failure_notification_channel" msgid="1136405866767576588">"ਅਸਫਲ ਅਣਸਥਾਪਨਾਵਾਂ"</string>
     <string name="uninstalling" msgid="8709566347688966845">"ਅਣਸਥਾਪਤ ਕੀਤਾ ਜਾ ਰਿਹਾ ਹੈ…"</string>
@@ -72,8 +70,7 @@
     <string name="uninstall_done_app" msgid="4588850984473605768">"<xliff:g id="PACKAGE_LABEL">%1$s</xliff:g> ਨੂੰ ਅਣਸਥਾਪਤ ਕੀਤਾ ਗਿਆ"</string>
     <string name="uninstall_failed" msgid="1847750968168364332">"ਅਣਸਥਾਪਤ ਕਰਨਾ ਅਸਫਲ ਰਿਹਾ।"</string>
     <string name="uninstall_failed_app" msgid="5506028705017601412">"<xliff:g id="PACKAGE_LABEL">%1$s</xliff:g> ਨੂੰ ਅਣਸਥਾਪਤ ਕਰਨਾ ਅਸਫਲ ਰਿਹਾ।"</string>
-    <!-- no translation found for uninstalling_cloned_app (1826380164974984870) -->
-    <skip />
+    <string name="uninstalling_cloned_app" msgid="1826380164974984870">"<xliff:g id="PACKAGE_LABEL">%1$s</xliff:g> ਦੇ ਕਲੋਨ ਨੂੰ ਮਿਟਾਇਆ ਜਾ ਰਿਹਾ ਹੈ…"</string>
     <string name="uninstall_failed_device_policy_manager" msgid="785293813665540305">"ਕਿਰਿਆਸ਼ੀਲ ਡੀਵਾਈਸ ਪ੍ਰਸ਼ਾਸਕ ਐਪ ਨੂੰ ਅਣਸਥਾਪਤ ਨਹੀਂ ਕੀਤਾ ਜਾ ਸਕਦਾ"</string>
     <string name="uninstall_failed_device_policy_manager_of_user" msgid="4813104025494168064">"<xliff:g id="USERNAME">%1$s</xliff:g> ਲਈ ਕਿਰਿਆਸ਼ੀਲ ਡੀਵਾਈਸ ਪ੍ਰਸ਼ਾਸਕ ਐਪ ਨੂੰ ਅਣਸਥਾਪਤ ਨਹੀਂ ਕੀਤਾ ਜਾ ਸਕਦਾ"</string>
     <string name="uninstall_all_blocked_profile_owner" msgid="2009393666026751501">"ਇਹ ਐਪ ਕੁਝ ਵਰਤੋਂਕਾਰਾਂ ਜਾਂ ਪ੍ਰੋਫਾਈਲਾਂ ਲਈ ਲੋੜੀਂਦੀ ਹੈ ਅਤੇ ਹੋਰਾਂ ਲਈ ਅਣਸਥਾਪਤ ਕੀਤੀ ਗਈ ਹੈ"</string>
@@ -94,8 +91,7 @@
     <string name="anonymous_source_warning" product="default" msgid="2784902545920822500">"ਅਗਿਆਤ ਐਪਾਂ ਤੋਂ ਹੋਣ ਵਾਲੇ ਹਮਲਿਆਂ ਕਰਕੇ ਤੁਹਾਡੇ ਫ਼ੋਨ ਅਤੇ ਨਿੱਜੀ ਡਾਟੇ ਨਾਲ ਛੇੜਛਾੜ ਹੋ ਸਕਦੀ ਹੈ। ਇਹ ਐਪ ਸਥਾਪਤ ਕਰਕੇ, ਤੁਸੀਂ ਸਹਿਮਤੀ ਦਿੰਦੇ ਹੋ ਕਿ ਆਪਣੇ ਫ਼ੋਨ ਨੂੰ ਹੋਣ ਵਾਲੇ ਕਿਸੇ ਵੀ ਨੁਕਸਾਨ ਜਾਂ ਡਾਟੇ ਦੀ ਹਾਨੀ ਲਈ ਤੁਸੀਂ ਜ਼ਿੰਮੇਵਾਰ ਹੋ ਜੋ ਸ਼ਾਇਦ ਇਸ ਐਪ ਨੂੰ ਵਰਤਣ ਦੇ ਨਤੀਜੇ ਵਜੋਂ ਹੋ ਸਕਦਾ ਹੈ।"</string>
     <string name="anonymous_source_warning" product="tablet" msgid="3939101621438855516">"ਤੁਹਾਡਾ ਟੈਬਲੈੱਟ ਅਤੇ ਨਿੱਜੀ ਡਾਟਾ ਅਗਿਆਤ ਐਪਾਂ ਤੋਂ ਹਮਲੇ ਪ੍ਰਤੀ ਵਧੇਰੇ ਵਿੰਨਣਸ਼ੀਲ ਹਨ। ਇਹ ਐਪ ਸਥਾਪਤ ਕਰਕੇ, ਤੁਸੀਂ ਸਹਿਮਤੀ ਦਿੰਦੇ ਹੋ ਕਿ ਆਪਣੇ ਟੈਬਲੈੱਟ ਨੂੰ ਹੋਣ ਵਾਲੇ ਕਿਸੇ ਵੀ ਨੁਕਸਾਨ ਜਾਂ ਡਾਟੇ ਦੀ ਹਾਨੀ ਲਈ ਤੁਸੀਂ ਜ਼ੁੰਮੇਵਾਰ ਹੋ ਜੋ ਸ਼ਾਇਦ ਇਸ ਐਪ ਨੂੰ ਵਰਤਣ ਦੇ ਨਤੀਜੇ ਵਜੋਂ ਹੋ ਸਕਦਾ ਹੈ।"</string>
     <string name="anonymous_source_warning" product="tv" msgid="5599483539528168566">"ਤੁਹਾਡਾ ਟੀਵੀ ਅਤੇ ਨਿੱਜੀ ਡਾਟਾ ਅਗਿਆਤ ਐਪਾਂ ਤੋਂ ਹਮਲੇ ਪ੍ਰਤੀ ਵਧੇਰੇ ਵਿੰਨਣਸ਼ੀਲ ਹਨ। ਇਹ ਐਪ ਸਥਾਪਤ ਕਰਕੇ, ਤੁਸੀਂ ਸਹਿਮਤੀ ਦਿੰਦੇ ਹੋ ਕਿ ਆਪਣੇ ਟੀਵੀ ਨੂੰ ਹੋਣ ਵਾਲੇ ਕਿਸੇ ਵੀ ਨੁਕਸਾਨ ਜਾਂ ਡਾਟੇ ਦੀ ਹਾਨੀ ਲਈ ਤੁਸੀਂ ਜ਼ੁੰਮੇਵਾਰ ਹੋ ਜੋ ਸ਼ਾਇਦ ਇਸ ਐਪ ਨੂੰ ਵਰਤਣ ਦੇ ਨਤੀਜੇ ਵਜੋਂ ਹੋ ਸਕਦਾ ਹੈ।"</string>
-    <!-- no translation found for cloned_app_label (7503612829833756160) -->
-    <skip />
+    <string name="cloned_app_label" msgid="7503612829833756160">"<xliff:g id="PACKAGE_LABEL">%1$s</xliff:g> ਦਾ ਕਲੋਨ"</string>
     <string name="anonymous_source_continue" msgid="4375745439457209366">"ਜਾਰੀ ਰੱਖੋ"</string>
     <string name="external_sources_settings" msgid="4046964413071713807">"ਸੈਟਿੰਗਾਂ"</string>
     <string name="wear_app_channel" msgid="1960809674709107850">"ਵੀਅਰ ਐਪਾਂ ਸਥਾਪਤ ਜਾਂ ਅਣਸਥਾਪਤ ਕਰਨਾ"</string>

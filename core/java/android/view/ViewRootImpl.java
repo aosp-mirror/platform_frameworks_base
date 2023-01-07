@@ -2114,7 +2114,7 @@ public final class ViewRootImpl implements ViewParent,
         void surfaceCreated(Transaction t);
         void surfaceReplaced(Transaction t);
         void surfaceDestroyed();
-        default void surfaceSyncStarted() {};
+        default void vriDrawStarted(boolean isWmSync) {};
     }
 
     private final ArrayList<SurfaceChangedCallback> mSurfaceChangedCallbacks = new ArrayList<>();
@@ -2149,9 +2149,9 @@ public final class ViewRootImpl implements ViewParent,
         }
     }
 
-    private void notifySurfaceSyncStarted() {
+    private void notifyDrawStarted(boolean isWmSync) {
         for (int i = 0; i < mSurfaceChangedCallbacks.size(); i++) {
-            mSurfaceChangedCallbacks.get(i).surfaceSyncStarted();
+            mSurfaceChangedCallbacks.get(i).vriDrawStarted(isWmSync);
         }
     }
 
@@ -3663,6 +3663,7 @@ public final class ViewRootImpl implements ViewParent,
             }
 
             createSyncIfNeeded();
+            notifyDrawStarted(isInWMSRequestedSync());
             mDrewOnceForSync = true;
         }
 
@@ -3736,7 +3737,6 @@ public final class ViewRootImpl implements ViewParent,
 
         mWmsRequestSyncGroup.addToSync(this);
         Trace.traceEnd(Trace.TRACE_TAG_VIEW);
-        notifySurfaceSyncStarted();
     }
 
     private void notifyContentCatpureEvents() {

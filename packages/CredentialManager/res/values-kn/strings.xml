@@ -4,49 +4,49 @@
     <string name="app_name" msgid="4539824758261855508">"ರುಜುವಾತು ನಿರ್ವಾಹಕ"</string>
     <string name="string_cancel" msgid="6369133483981306063">"ರದ್ದುಗೊಳಿಸಿ"</string>
     <string name="string_continue" msgid="1346732695941131882">"ಮುಂದುವರಿಸಿ"</string>
+    <string name="string_more_options" msgid="7990658711962795124">"ಇನ್ನಷ್ಟು ಆಯ್ಕೆಗಳು"</string>
     <string name="string_create_in_another_place" msgid="1033635365843437603">"ಮತ್ತೊಂದು ಸ್ಥಳದಲ್ಲಿ ರಚಿಸಿ"</string>
     <string name="string_save_to_another_place" msgid="7590325934591079193">"ಮತ್ತೊಂದು ಸ್ಥಳದಲ್ಲಿ ಉಳಿಸಿ"</string>
     <string name="string_use_another_device" msgid="8754514926121520445">"ಬೇರೊಂದು ಸಾಧನವನ್ನು ಬಳಸಿ"</string>
     <string name="string_save_to_another_device" msgid="1959562542075194458">"ಬೇರೊಂದು ಸಾಧನದಲ್ಲಿ ಉಳಿಸಿ"</string>
     <string name="passkey_creation_intro_title" msgid="4251037543787718844">"ಪಾಸ್‌ಕೀಗಳೊಂದಿಗೆ ಸುರಕ್ಷಿತವಾಗಿರುತ್ತವೆ"</string>
-    <string name="passkey_creation_intro_body_password" msgid="312712407571126228">"ಕ್ಲಿಷ್ಟ ಪಾಸ್‌ವರ್ಡ್‌ಗಳನ್ನು ರಚಿಸುವ ಅಥವಾ ನೆನಪಿಟ್ಟುಕೊಳ್ಳುವ ಅಗತ್ಯವಿಲ್ಲ"</string>
-    <string name="passkey_creation_intro_body_fingerprint" msgid="691816235541508203">"ಅನನ್ಯ ಪಾಸ್‌ಕೀ ಅನ್ನು ರಚಿಸಲು ನಿಮ್ಮ ಫಿಂಗರ್‌ಪ್ರಿಂಟ್, ಮುಖ ಅಥವಾ ಸ್ಕ್ರೀನ್ ಲಾಕ್ ಅನ್ನು ಬಳಸಿ"</string>
-    <string name="passkey_creation_intro_body_device" msgid="477121861162321129">"ಪಾಸ್‌ಕೀಗಳನ್ನು ಪಾಸ್‌ವರ್ಡ್ ನಿರ್ವಾಹಕದಲ್ಲಿ ಉಳಿಸಲಾಗಿದೆ, ಹಾಗಾಗಿ ನೀವು ಇತರ ಸಾಧನಗಳಲ್ಲಿ ಸೈನ್ ಇನ್ ಮಾಡಬಹುದು"</string>
+    <string name="passkey_creation_intro_body_password" msgid="8825872426579958200">"ಪಾಸ್‌ಕೀಗಳ ಮೂಲಕ, ನೀವು ಕ್ಲಿಷ್ಟ ಪಾಸ್‌ವರ್ಡ್‌ಗಳನ್ನು ರಚಿಸುವ ಅಥವಾ ನೆನಪಿಟ್ಟುಕೊಳ್ಳುವ ಅಗತ್ಯವಿಲ್ಲ"</string>
+    <string name="passkey_creation_intro_body_fingerprint" msgid="7331338631826254055">"ಪಾಸ್‌ಕೀಗಳು ನಿಮ್ಮ ಫಿಂಗರ್‌ಪ್ರಿಂಟ್, ಫೇಸ್ ಅಥವಾ ಸ್ಕ್ರೀನ್ ಲಾಕ್ ಅನ್ನು ಬಳಸಿಕೊಂಡು ನೀವು ರಚಿಸುವ ಎನ್‌ಕ್ರಿಪ್ಟ್ ಮಾಡಿದ ಡಿಜಿಟಲ್ ಕೀಗಳಾಗಿವೆ"</string>
+    <string name="passkey_creation_intro_body_device" msgid="1203796455762131631">"ಅವುಗಳನ್ನು ಪಾಸ್‌ವರ್ಡ್ ನಿರ್ವಾಹಕದಲ್ಲಿ ಉಳಿಸಲಾಗಿದೆ, ಹಾಗಾಗಿ ನೀವು ಇತರ ಸಾಧನಗಳಲ್ಲಿ ಸೈನ್ ಇನ್ ಮಾಡಬಹುದು"</string>
     <string name="choose_provider_title" msgid="7245243990139698508">"<xliff:g id="CREATETYPES">%1$s</xliff:g> ಅನ್ನು ಎಲ್ಲಿ ಉಳಿಸಬೇಕು ಎಂದು ಆಯ್ಕೆಮಾಡಿ"</string>
     <string name="create_your_passkeys" msgid="8901224153607590596">"ನಿಮ್ಮ ಪಾಸ್‌ಕೀಗಳನ್ನು ರಚಿಸಿ"</string>
     <string name="save_your_password" msgid="6597736507991704307">"ನಿಮ್ಮ ಪಾಸ್‌ವರ್ಡ್‌ ಉಳಿಸಿ"</string>
     <string name="save_your_sign_in_info" msgid="7213978049817076882">"ನಿಮ್ಮ ಸೈನ್-ಇನ್ ಮಾಹಿತಿ ಉಳಿಸಿ"</string>
-    <string name="choose_provider_body" msgid="8045759834416308059">"ನಿಮ್ಮ ಪಾಸ್‌ವರ್ಡ್‌ಗಳು ಮತ್ತು ಪಾಸ್‌ಕೀಗಳನ್ನು ಉಳಿಸಲು ಡೀಫಾಲ್ಟ್ ಪಾಸ್‌ವರ್ಡ್ ನಿರ್ವಾಹಕವನ್ನು ಸೆಟ್ ಮಾಡಿ ಹಾಗೂ ಮುಂದಿನ ಬಾರಿ ವೇಗವಾಗಿ ಸೈನ್ ಇನ್ ಮಾಡಿ."</string>
-    <string name="choose_create_option_passkey_title" msgid="4146408187146573131">"<xliff:g id="PROVIDERINFODISPLAYNAME">%1$s</xliff:g> ನಲ್ಲಿ ಪಾಸ್‌ಕೀ ರಚಿಸಬೇಕೆ?"</string>
-    <string name="choose_create_option_password_title" msgid="8812546498357380545">"ನಿಮ್ಮ ಪಾಸ್‌ವರ್ಡ್ ಅನ್ನು <xliff:g id="PROVIDERINFODISPLAYNAME">%1$s</xliff:g> ಗೆ ಉಳಿಸಬೇಕೆ?"</string>
-    <string name="choose_create_option_sign_in_title" msgid="6318246378475961834">"ನಿಮ್ಮ ಸೈನ್ ಇನ್ ಮಾಹಿತಿಯನ್ನು <xliff:g id="PROVIDERINFODISPLAYNAME">%1$s</xliff:g> ಗೆ ಉಳಿಸಬೇಕೆ?"</string>
-    <string name="choose_create_option_description" msgid="4419171903963100257">"ನೀವು ಯಾವುದೇ ಸಾಧನದಲ್ಲಿ ನಿಮ್ಮ <xliff:g id="APPDOMAINNAME">%1$s</xliff:g> <xliff:g id="TYPE">%2$s</xliff:g> ಅನ್ನು ಬಳಸಬಹುದು. ಇದನ್ನು <xliff:g id="CREATEINFODISPLAYNAME">%4$s</xliff:g> ಗಾಗಿ <xliff:g id="PROVIDERINFODISPLAYNAME">%3$s</xliff:g> ಗೆ ಉಳಿಸಲಾಗಿದೆ"</string>
+    <string name="choose_provider_body" msgid="4384188171872005547">"ನಿಮ್ಮ ಮಾಹಿತಿಯನ್ನು ಉಳಿಸಲು ಪಾಸ್‌ವರ್ಡ್ ನಿರ್ವಾಹಕವನ್ನು ಆಯ್ಕೆಮಾಡಿ ಹಾಗೂ ಮುಂದಿನ ಬಾರಿ ವೇಗವಾಗಿ ಸೈನ್ ಇನ್ ಮಾಡಿ."</string>
+    <string name="choose_create_option_passkey_title" msgid="5220979185879006862">"<xliff:g id="APPNAME">%1$s</xliff:g> ಗಾಗಿ ಪಾಸ್‌ಕೀ ಅನ್ನು ರಚಿಸುವುದೇ?"</string>
+    <string name="choose_create_option_password_title" msgid="7097275038523578687">"<xliff:g id="APPNAME">%1$s</xliff:g> ಗಾಗಿ ಪಾಸ್‌ವರ್ಡ್‌ ಉಳಿಸುವುದೇ?"</string>
+    <string name="choose_create_option_sign_in_title" msgid="4124872317613421249">"<xliff:g id="APPNAME">%1$s</xliff:g> ಗಾಗಿ ಸೈನ್-ಇನ್ ಮಾಹಿತಿಯನ್ನು ಉಳಿಸುವುದೇ?"</string>
+    <string name="choose_create_option_description" msgid="5531335144879100664">"ನೀವು ಯಾವುದೇ ಸಾಧನದಲ್ಲಿ ನಿಮ್ಮ <xliff:g id="APPDOMAINNAME">%1$s</xliff:g> <xliff:g id="CREDENTIALTYPES">%2$s</xliff:g> ಅನ್ನು ಬಳಸಬಹುದು. ಇದನ್ನು <xliff:g id="CREATEINFODISPLAYNAME">%4$s</xliff:g> ಗಾಗಿ <xliff:g id="PROVIDERINFODISPLAYNAME">%3$s</xliff:g> ಗೆ ಉಳಿಸಲಾಗಿದೆ."</string>
     <string name="passkey" msgid="632353688396759522">"ಪಾಸ್‌ಕೀ"</string>
     <string name="password" msgid="6738570945182936667">"ಪಾಸ್‌ವರ್ಡ್"</string>
     <string name="sign_ins" msgid="4710739369149469208">"ಸೈನ್-ಇನ್‌ಗಳು"</string>
-    <string name="create_passkey_in_title" msgid="2714306562710897785">"ಇಲ್ಲಿ ಪಾಸ್‌ಕೀ ರಚಿಸಿ"</string>
-    <string name="save_password_to_title" msgid="3450480045270186421">"ಇಲ್ಲಿಗೆ ಪಾಸ್‌ವರ್ಡ್ ಉಳಿಸಿ"</string>
-    <string name="save_sign_in_to_title" msgid="8328143607671760232">"ಇಲ್ಲಿಗೆ ಸೈನ್-ಇನ್ ಮಾಹಿತಿ ಉಳಿಸಿ"</string>
+    <string name="sign_in_info" msgid="2627704710674232328">"ಸೈನ್-ಇನ್ ಮಾಹಿತಿ"</string>
+    <string name="save_credential_to_title" msgid="3172811692275634301">"ಇಲ್ಲಿಗೆ <xliff:g id="CREDENTIALTYPES">%1$s</xliff:g> ಅನ್ನು ಉಳಿಸಿ"</string>
     <string name="create_passkey_in_other_device_title" msgid="6372952459932674632">"ಮತ್ತೊಂದು ಸಾಧನದಲ್ಲಿ ಪಾಸ್‌ಕೀ ರಚಿಸಬೇಕೆ?"</string>
     <string name="use_provider_for_all_title" msgid="4201020195058980757">"ನಿಮ್ಮ ಎಲ್ಲಾ ಸೈನ್-ಇನ್‌ಗಳಿಗಾಗಿ <xliff:g id="PROVIDERINFODISPLAYNAME">%1$s</xliff:g> ಅನ್ನು ಬಳಸುವುದೇ?"</string>
     <string name="use_provider_for_all_description" msgid="6560593199974037820">"ಈ ಪಾಸ್‌ವರ್ಡ್ ನಿರ್ವಾಹಕವು ನಿಮಗೆ ಸುಲಭವಾಗಿ ಸೈನ್ ಇನ್ ಮಾಡುವುದಕ್ಕೆ ಸಹಾಯ ಮಾಡಲು ನಿಮ್ಮ ಪಾಸ್‌ವರ್ಡ್‌ಗಳು ಮತ್ತು ಪಾಸ್‌ಕೀಗಳನ್ನು ಸಂಗ್ರಹಿಸುತ್ತದೆ."</string>
     <string name="set_as_default" msgid="4415328591568654603">"ಡೀಫಾಲ್ಟ್ ಆಗಿ ಸೆಟ್ ಮಾಡಿ"</string>
     <string name="use_once" msgid="9027366575315399714">"ಒಂದು ಬಾರಿ ಬಳಸಿ"</string>
-    <string name="more_options_usage_passwords_passkeys" msgid="4794903978126339473">"<xliff:g id="PASSWORDSNUMBER">%1$s</xliff:g> ಪಾಸ್‌ವರ್ಡ್‌ಗಳು, <xliff:g id="PASSKEYSNUMBER">%2$s</xliff:g> ಪಾಸ್‌ಕೀಗಳು"</string>
+    <string name="more_options_usage_passwords_passkeys" msgid="3470113942332934279">"<xliff:g id="PASSWORDSNUMBER">%1$s</xliff:g> ಪಾಸ್‌ವರ್ಡ್‌ಗಳು • <xliff:g id="PASSKEYSNUMBER">%2$s</xliff:g> ಪಾಸ್‌ಕೀಗಳು"</string>
     <string name="more_options_usage_passwords" msgid="1632047277723187813">"<xliff:g id="PASSWORDSNUMBER">%1$s</xliff:g> ಪಾಸ್‌ವರ್ಡ್‌ಗಳು"</string>
     <string name="more_options_usage_passkeys" msgid="5390320437243042237">"<xliff:g id="PASSKEYSNUMBER">%1$s</xliff:g> ಪಾಸ್‌ಕೀಗಳು"</string>
+    <string name="more_options_usage_credentials" msgid="1785697001787193984">"<xliff:g id="TOTALCREDENTIALSNUMBER">%1$s</xliff:g> ರುಜುವಾತುಗಳು"</string>
     <string name="passkey_before_subtitle" msgid="2448119456208647444">"ಪಾಸ್‌ಕೀ"</string>
     <string name="another_device" msgid="5147276802037801217">"ಮತ್ತೊಂದು ಸಾಧನ"</string>
     <string name="other_password_manager" msgid="565790221427004141">"ಇತರ ಪಾಸ್‌ವರ್ಡ್ ನಿರ್ವಾಹಕರು"</string>
     <string name="close_sheet" msgid="1393792015338908262">"ಶೀಟ್ ಮುಚ್ಚಿರಿ"</string>
     <string name="accessibility_back_arrow_button" msgid="3233198183497842492">"ಹಿಂದಿನ ಪುಟಕ್ಕೆ ಹಿಂದಿರುಗಿ"</string>
-    <!-- no translation found for accessibility_close_button (2953807735590034688) -->
-    <skip />
+    <string name="accessibility_close_button" msgid="2953807735590034688">"ಸ್ಕ್ರೀನ್‌ನ ಕೆಳಭಾಗದಲ್ಲಿ ಗೋಚರಿಸುವ ರುಜುವಾತು ನಿರ್ವಾಹಕ ಕ್ರಿಯೆಯ ಸಲಹೆಯನ್ನು ಮುಚ್ಚಿ"</string>
     <string name="get_dialog_title_use_passkey_for" msgid="6236608872708021767">"<xliff:g id="APP_NAME">%1$s</xliff:g> ಗಾಗಿ ಉಳಿಸಲಾದ ನಿಮ್ಮ ಪಾಸ್‌ಕೀ ಅನ್ನು ಬಳಸಬೇಕೆ?"</string>
     <string name="get_dialog_title_use_sign_in_for" msgid="5283099528915572980">"<xliff:g id="APP_NAME">%1$s</xliff:g> ಗಾಗಿ ಉಳಿಸಲಾದ ನಿಮ್ಮ ಸೈನ್-ಇನ್ ಅನ್ನು ಬಳಸಬೇಕೆ?"</string>
     <string name="get_dialog_title_choose_sign_in_for" msgid="1361715440877613701">"<xliff:g id="APP_NAME">%1$s</xliff:g> ಗಾಗಿ ಉಳಿಸಲಾದ ಸೈನ್-ಇನ್ ಮಾಹಿತಿಯನ್ನು ಆಯ್ಕೆಮಾಡಿ"</string>
     <string name="get_dialog_use_saved_passkey_for" msgid="4618100798664888512">"ಬೇರೆ ವಿಧಾನದಲ್ಲಿ ಸೈನ್ ಇನ್ ಮಾಡಿ"</string>
-    <string name="get_dialog_button_label_no_thanks" msgid="8114363019023838533">"ಬೇಡ"</string>
+    <string name="snackbar_action" msgid="37373514216505085">"ಆಯ್ಕೆಗಳನ್ನು ವೀಕ್ಷಿಸಿ"</string>
     <string name="get_dialog_button_label_continue" msgid="6446201694794283870">"ಮುಂದುವರಿಸಿ"</string>
     <string name="get_dialog_title_sign_in_options" msgid="2092876443114893618">"ಸೈನ್ ಇನ್ ಆಯ್ಕೆಗಳು"</string>
     <string name="get_dialog_heading_for_username" msgid="3456868514554204776">"<xliff:g id="USERNAME">%1$s</xliff:g> ಗಾಗಿ"</string>

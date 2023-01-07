@@ -60,10 +60,8 @@
     <string name="uninstall_update_text" msgid="863648314632448705">"Відновити заводську версію цього додатка? Усі дані буде видалено."</string>
     <string name="uninstall_update_text_multiuser" msgid="8992883151333057227">"Відновити заводську версію цього додатка? Усі дані буде видалено. Це вплине на всіх користувачів цього пристрою, зокрема на користувачів із робочими профілями."</string>
     <string name="uninstall_keep_data" msgid="7002379587465487550">"Залишити <xliff:g id="SIZE">%1$s</xliff:g> даних додатка."</string>
-    <!-- no translation found for uninstall_application_text_current_user_clone_profile (835170400160011636) -->
-    <skip />
-    <!-- no translation found for uninstall_application_text_with_clone_instance (6944473334273349036) -->
-    <skip />
+    <string name="uninstall_application_text_current_user_clone_profile" msgid="835170400160011636">"Видалити цей додаток?"</string>
+    <string name="uninstall_application_text_with_clone_instance" msgid="6944473334273349036">"Видалити цей додаток? Копію <xliff:g id="PACKAGE_LABEL">%1$s</xliff:g> також буде видалено."</string>
     <string name="uninstalling_notification_channel" msgid="840153394325714653">"Активні видалення"</string>
     <string name="uninstall_failure_notification_channel" msgid="1136405866767576588">"Невиконані видалення"</string>
     <string name="uninstalling" msgid="8709566347688966845">"Видалення..."</string>
@@ -72,8 +70,7 @@
     <string name="uninstall_done_app" msgid="4588850984473605768">"Додаток <xliff:g id="PACKAGE_LABEL">%1$s</xliff:g> видалено"</string>
     <string name="uninstall_failed" msgid="1847750968168364332">"Не видалено."</string>
     <string name="uninstall_failed_app" msgid="5506028705017601412">"Не вдалося видалити додаток <xliff:g id="PACKAGE_LABEL">%1$s</xliff:g>."</string>
-    <!-- no translation found for uninstalling_cloned_app (1826380164974984870) -->
-    <skip />
+    <string name="uninstalling_cloned_app" msgid="1826380164974984870">"Видалення копії додатка <xliff:g id="PACKAGE_LABEL">%1$s</xliff:g>…"</string>
     <string name="uninstall_failed_device_policy_manager" msgid="785293813665540305">"Не вдається видалити активний додаток адміністратора пристрою"</string>
     <string name="uninstall_failed_device_policy_manager_of_user" msgid="4813104025494168064">"Не вдається видалити активний додаток адміністратора пристрою для користувача <xliff:g id="USERNAME">%1$s</xliff:g>"</string>
     <string name="uninstall_all_blocked_profile_owner" msgid="2009393666026751501">"Цей додаток потрібен для деяких користувачів чи профілів, але його було видалено для інших"</string>
@@ -94,8 +91,7 @@
     <string name="anonymous_source_warning" product="default" msgid="2784902545920822500">"Ваш телефон і особисті дані більш уразливі до атак невідомих додатків. Установлюючи цей додаток, ви берете на себе відповідальність за пошкодження телефона чи втрату даних унаслідок використання додатка."</string>
     <string name="anonymous_source_warning" product="tablet" msgid="3939101621438855516">"Ваш планшет і особисті дані більш уразливі до атак невідомих додатків. Установлюючи цей додаток, ви берете на себе відповідальність за пошкодження планшета чи втрату даних унаслідок використання додатка."</string>
     <string name="anonymous_source_warning" product="tv" msgid="5599483539528168566">"Ваш телевізор і особисті дані більш уразливі до атак невідомих додатків. Установлюючи цей додаток, ви берете на себе відповідальність за пошкодження телевізора чи втрату даних унаслідок використання додатка."</string>
-    <!-- no translation found for cloned_app_label (7503612829833756160) -->
-    <skip />
+    <string name="cloned_app_label" msgid="7503612829833756160">"Копія додатка <xliff:g id="PACKAGE_LABEL">%1$s</xliff:g>"</string>
     <string name="anonymous_source_continue" msgid="4375745439457209366">"Продовжити"</string>
     <string name="external_sources_settings" msgid="4046964413071713807">"Налаштування"</string>
     <string name="wear_app_channel" msgid="1960809674709107850">"Встановлення або видалення додатків Wear"</string>

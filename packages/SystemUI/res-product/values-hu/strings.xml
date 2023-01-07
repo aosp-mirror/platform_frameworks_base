@@ -23,10 +23,8 @@
     <string name="dock_alignment_not_charging" product="default" msgid="3980752926226749808">"Igazítsa a helyére a telefont a vezeték nélküli töltéshez"</string>
     <string name="inattentive_sleep_warning_message" product="tv" msgid="6844464574089665063">"Az Android TV eszköz hamarosan kikapcsol. Nyomja meg valamelyik gombot, hogy bekapcsolva tarthassa."</string>
     <string name="inattentive_sleep_warning_message" product="default" msgid="5693904520452332224">"Az eszköz hamarosan kikapcsol. Nyomja meg, hogy bekapcsolva tarthassa."</string>
-    <!-- no translation found for keyguard_missing_sim_message (408124574073032188) -->
-    <skip />
-    <!-- no translation found for keyguard_missing_sim_message (2605468359948247208) -->
-    <skip />
+    <string name="keyguard_missing_sim_message" product="tablet" msgid="408124574073032188">"Nincs SIM a táblagépben."</string>
+    <string name="keyguard_missing_sim_message" product="default" msgid="2605468359948247208">"Nincs SIM a telefonban."</string>
     <string name="kg_invalid_confirm_pin_hint" product="default" msgid="6278551068943958651">"A PIN-kódok nem egyeznek"</string>
     <string name="kg_failed_attempts_almost_at_wipe" product="tablet" msgid="302165994845009232">"<xliff:g id="NUMBER_0">%1$d</xliff:g> alkalommal próbálkozott sikertelenül a táblagép zárolásának feloldásával. További <xliff:g id="NUMBER_1">%2$d</xliff:g> sikertelen kísérlet után a rendszer visszaállítja a táblagépet, és ezzel az összes adat törlődik róla."</string>
     <string name="kg_failed_attempts_almost_at_wipe" product="default" msgid="2594813176164266847">"<xliff:g id="NUMBER_0">%1$d</xliff:g> alkalommal próbálkozott sikertelenül a telefon zárolásának feloldásával. További <xliff:g id="NUMBER_1">%2$d</xliff:g> sikertelen kísérlet után a rendszer visszaállítja a telefont, és ezzel az összes adat törlődik róla."</string>

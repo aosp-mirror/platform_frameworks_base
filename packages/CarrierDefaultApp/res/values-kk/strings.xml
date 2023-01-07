@@ -14,10 +14,10 @@
     <string name="ssl_error_warning" msgid="3127935140338254180">"Қосылайын деп жатқан желіңізде қауіпсіздік мәселелері бар."</string>
     <string name="ssl_error_example" msgid="6188711843183058764">"Мысалы, кіру беті көрсетілген ұйымға тиесілі болмауы мүмкін."</string>
     <string name="ssl_error_continue" msgid="1138548463994095584">"Бәрібір браузер арқылы жалғастыру"</string>
-    <string name="network_boost_notification_channel" msgid="5430986172506159199">"Күшейтілген желі"</string>
-    <string name="network_boost_notification_title" msgid="8226368121348880044">"%s күшейтілген желі пакетін ұсынады"</string>
-    <string name="network_boost_notification_detail" msgid="3812434025544196192">"Өнімділікті арттыру үшін күшейтілген желі пакетін сатып алыңыз."</string>
-    <string name="network_boost_notification_button_not_now" msgid="4129218252146702688">"Қазір емес"</string>
-    <string name="network_boost_notification_button_manage" msgid="1511552684142641182">"Басқару"</string>
-    <string name="slice_purchase_app_label" msgid="915654761797446390">"Күшейтілген желіні сатып алыңыз."</string>
+    <string name="performance_boost_notification_channel" msgid="3475440855635538592">"Өнімділікті арттыру"</string>
+    <string name="performance_boost_notification_title" msgid="5017421773334474875">"%s қызметі өнімділікті арттыру құралын ұсынады"</string>
+    <string name="performance_boost_notification_detail" msgid="7216286153533321852">"Желі өнімділігін жақсарту үшін өнімділікті арттыру құралын сатып алыңыз."</string>
+    <string name="performance_boost_notification_button_not_now" msgid="6459755324243683785">"Қазір емес"</string>
+    <string name="performance_boost_notification_button_manage" msgid="4976836444046497973">"Басқару"</string>
+    <string name="slice_purchase_app_label" msgid="7170191659233241166">"Өнімділікті арттыру құралын сатып алыңыз."</string>
 </resources>

@@ -144,11 +144,11 @@ import com.android.systemui.statusbar.policy.KeyguardStateController;
 import com.android.systemui.statusbar.policy.UserSwitcherController;
 import com.android.systemui.util.DeviceConfigProxy;
 
-import dagger.Lazy;
-
 import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.concurrent.Executor;
+
+import dagger.Lazy;
 
 /**
  * Mediates requests related to the keyguard.  This includes queries about the
@@ -2719,27 +2719,42 @@ public class KeyguardViewMediator implements CoreStartable, Dumpable,
     }
 
     /**
-     * Called if the keyguard exit animation has been cancelled, and we should dismiss to the
-     * keyguard.
+     * Called if the keyguard exit animation has been cancelled.
      *
      * This can happen due to the system cancelling the RemoteAnimation (due to a timeout, a new
-     * app transition before finishing the current RemoteAnimation).
+     * app transition before finishing the current RemoteAnimation, or the keyguard being re-shown).
      */
     private void handleCancelKeyguardExitAnimation() {
-        showSurfaceBehindKeyguard();
-        onKeyguardExitRemoteAnimationFinished(true /* cancelled */);
+        if (mPendingLock) {
+            Log.d(TAG, "#handleCancelKeyguardExitAnimation: keyguard exit animation cancelled. "
+                    + "There's a pending lock, so we were cancelled because the device was locked "
+                    + "again during the unlock sequence. We should end up locked.");
+
+            // A lock is pending, meaning the keyguard exit animation was cancelled because we're
+            // re-locking. We should just end the surface-behind animation without exiting the
+            // keyguard. The pending lock will be handled by onFinishedGoingToSleep().
+            finishSurfaceBehindRemoteAnimation(true);
+        } else {
+            Log.d(TAG, "#handleCancelKeyguardExitAnimation: keyguard exit animation cancelled. "
+                    + "No pending lock, we should end up unlocked with the app/launcher visible.");
+
+            // No lock is pending, so the animation was cancelled during the unlock sequence, but
+            // we should end up unlocked. Show the surface and exit the keyguard.
+            showSurfaceBehindKeyguard();
+            exitKeyguardAndFinishSurfaceBehindRemoteAnimation(true /* cancelled */);
+        }
     }
 
     /**
-     * Called when we're done running the keyguard exit animation.
+     * Called when we're done running the keyguard exit animation, we should now end up unlocked.
      *
-     * This will call {@link #mSurfaceBehindRemoteAnimationFinishedCallback} to let WM know that
-     * we're done with the RemoteAnimation, actually hide the keyguard, and clean up state related
-     * to the keyguard exit animation.
+     * This will call {@link #handleCancelKeyguardExitAnimation()} to let WM know that we're done
+     * with the RemoteAnimation, actually hide the keyguard, and clean up state related to the
+     * keyguard exit animation.
      *
      * @param cancelled {@code true} if the animation was cancelled before it finishes.
      */
-    public void onKeyguardExitRemoteAnimationFinished(boolean cancelled) {
+    public void exitKeyguardAndFinishSurfaceBehindRemoteAnimation(boolean cancelled) {
         Log.d(TAG, "onKeyguardExitRemoteAnimationFinished");
         if (!mSurfaceBehindRemoteAnimationRunning && !mSurfaceBehindRemoteAnimationRequested) {
             Log.d(TAG, "skip onKeyguardExitRemoteAnimationFinished cancelled=" + cancelled
@@ -2768,10 +2783,6 @@ public class KeyguardViewMediator implements CoreStartable, Dumpable,
             }
 
             finishSurfaceBehindRemoteAnimation(cancelled);
-            mSurfaceBehindRemoteAnimationRequested = false;
-
-            // The remote animation is over, so we're not going away anymore.
-            mKeyguardStateController.notifyKeyguardGoingAway(false);
 
             // Dispatch the callback on animation finishes.
             mUpdateMonitor.dispatchKeyguardDismissAnimationFinished();
@@ -2830,13 +2841,17 @@ public class KeyguardViewMediator implements CoreStartable, Dumpable,
         return mSurfaceBehindRemoteAnimationRunning;
     }
 
-    /** If it's running, finishes the RemoteAnimation on the surface behind the keyguard. */
+    /**
+     * If it's running, finishes the RemoteAnimation on the surface behind the keyguard and resets
+     * related state.
+     *
+     * This does not set keyguard state to either locked or unlocked, it simply ends the remote
+     * animation on the surface behind the keyguard. This can be called by
+     */
     void finishSurfaceBehindRemoteAnimation(boolean cancelled) {
-        if (!mSurfaceBehindRemoteAnimationRunning) {
-            return;
-        }
-
+        mSurfaceBehindRemoteAnimationRequested = false;
         mSurfaceBehindRemoteAnimationRunning = false;
+        mKeyguardStateController.notifyKeyguardGoingAway(false);
 
         if (mSurfaceBehindRemoteAnimationFinishedCallback != null) {
             try {

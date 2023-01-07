@@ -14,10 +14,10 @@
     <string name="ssl_error_warning" msgid="3127935140338254180">"നിങ്ങൾ ചേരാൻ ശ്രമിക്കുന്ന നെറ്റ്‌വർക്കിൽ സുരക്ഷാ പ്രശ്‌നങ്ങളുണ്ടായിരിക്കാം."</string>
     <string name="ssl_error_example" msgid="6188711843183058764">"ഉദാഹരണത്തിന്, കാണിച്ചിരിക്കുന്ന ഓർഗനൈസേഷന്റേതായിരിക്കില്ല ലോഗിൻ പേജ്."</string>
     <string name="ssl_error_continue" msgid="1138548463994095584">"എന്തായാലും ബ്രൗസർ വഴി തുടരുക"</string>
-    <string name="network_boost_notification_channel" msgid="5430986172506159199">"നെറ്റ്‌വർക്ക് ബൂസ്റ്റ്"</string>
-    <string name="network_boost_notification_title" msgid="8226368121348880044">"%s ഡാറ്റാ ബൂസ്റ്റ് നിർദ്ദേശിക്കുന്നു"</string>
-    <string name="network_boost_notification_detail" msgid="3812434025544196192">"മികച്ച പ്രകടനത്തിന് നെറ്റ്‌വർക്ക് ബൂസ്റ്റ് വാങ്ങുക"</string>
-    <string name="network_boost_notification_button_not_now" msgid="4129218252146702688">"ഇപ്പോൾ വേണ്ട"</string>
-    <string name="network_boost_notification_button_manage" msgid="1511552684142641182">"മാനേജ് ചെയ്യുക"</string>
-    <string name="slice_purchase_app_label" msgid="915654761797446390">"ഒരു നെറ്റ്‌വർക്ക് ബൂസ്‌റ്റ് വാങ്ങുക."</string>
+    <string name="performance_boost_notification_channel" msgid="3475440855635538592">"പ്രകടന ബൂസ്റ്റ്"</string>
+    <string name="performance_boost_notification_title" msgid="5017421773334474875">"%s പ്രകടന ബൂസ്റ്റ് നിർദ്ദേശിക്കുന്നു"</string>
+    <string name="performance_boost_notification_detail" msgid="7216286153533321852">"നെറ്റ്‌വർക്കിന്റെ മെച്ചപ്പെട്ട പ്രകടനത്തിന് ഒരു പ്രകടന ബൂസ്റ്റ് വാങ്ങൂ"</string>
+    <string name="performance_boost_notification_button_not_now" msgid="6459755324243683785">"ഇപ്പോൾ വേണ്ട"</string>
+    <string name="performance_boost_notification_button_manage" msgid="4976836444046497973">"മാനേജ് ചെയ്യുക"</string>
+    <string name="slice_purchase_app_label" msgid="7170191659233241166">"പ്രകടന ബൂസ്റ്റ് വാങ്ങൂ."</string>
 </resources>

@@ -17,15 +17,21 @@
 package androidx.window.extensions;
 
 import android.app.ActivityThread;
+import android.app.Application;
 import android.content.Context;
+import android.window.TaskFragmentOrganizer;
 
 import androidx.annotation.NonNull;
+import androidx.window.common.DeviceStateManagerFoldingFeatureProducer;
+import androidx.window.common.RawFoldingFeatureProducer;
 import androidx.window.extensions.area.WindowAreaComponent;
 import androidx.window.extensions.area.WindowAreaComponentImpl;
 import androidx.window.extensions.embedding.ActivityEmbeddingComponent;
 import androidx.window.extensions.embedding.SplitController;
 import androidx.window.extensions.layout.WindowLayoutComponent;
 import androidx.window.extensions.layout.WindowLayoutComponentImpl;
+
+import java.util.Objects;
 
 
 /**
@@ -34,7 +40,8 @@ import androidx.window.extensions.layout.WindowLayoutComponentImpl;
 public class WindowExtensionsImpl implements WindowExtensions {
 
     private final Object mLock = new Object();
-    private volatile WindowLayoutComponent mWindowLayoutComponent;
+    private volatile DeviceStateManagerFoldingFeatureProducer mFoldingFeatureProducer;
+    private volatile WindowLayoutComponentImpl mWindowLayoutComponent;
     private volatile SplitController mSplitController;
     private volatile WindowAreaComponent mWindowAreaComponent;
 
@@ -42,6 +49,49 @@ public class WindowExtensionsImpl implements WindowExtensions {
     @Override
     public int getVendorApiLevel() {
         return 2;
+    }
+
+    @NonNull
+    private Application getApplication() {
+        return Objects.requireNonNull(ActivityThread.currentApplication());
+    }
+
+    @NonNull
+    private DeviceStateManagerFoldingFeatureProducer getFoldingFeatureProducer() {
+        if (mFoldingFeatureProducer == null) {
+            synchronized (mLock) {
+                if (mFoldingFeatureProducer == null) {
+                    Context context = getApplication();
+                    RawFoldingFeatureProducer foldingFeatureProducer =
+                            new RawFoldingFeatureProducer(context);
+                    mFoldingFeatureProducer =
+                            new DeviceStateManagerFoldingFeatureProducer(context,
+                                    foldingFeatureProducer);
+                }
+            }
+        }
+        return mFoldingFeatureProducer;
+    }
+
+    @NonNull
+    private WindowLayoutComponentImpl getWindowLayoutComponentImpl() {
+        if (mWindowLayoutComponent == null) {
+            synchronized (mLock) {
+                if (mWindowLayoutComponent == null) {
+                    Context context = getApplication();
+                    DeviceStateManagerFoldingFeatureProducer producer =
+                            getFoldingFeatureProducer();
+                    // TODO(b/263263909) Use the organizer to tell if an Activity is embededed.
+                    // Need to improve our Dependency Injection and centralize the logic.
+                    TaskFragmentOrganizer organizer = new TaskFragmentOrganizer(command -> {
+                        throw new RuntimeException("Not allowed!");
+                    });
+                    mWindowLayoutComponent = new WindowLayoutComponentImpl(context, organizer,
+                            producer);
+                }
+            }
+        }
+        return mWindowLayoutComponent;
     }
 
     /**
@@ -52,15 +102,7 @@ public class WindowExtensionsImpl implements WindowExtensions {
      */
     @Override
     public WindowLayoutComponent getWindowLayoutComponent() {
-        if (mWindowLayoutComponent == null) {
-            synchronized (mLock) {
-                if (mWindowLayoutComponent == null) {
-                    Context context = ActivityThread.currentApplication();
-                    mWindowLayoutComponent = new WindowLayoutComponentImpl(context);
-                }
-            }
-        }
-        return mWindowLayoutComponent;
+        return getWindowLayoutComponentImpl();
     }
 
     /**
@@ -74,7 +116,10 @@ public class WindowExtensionsImpl implements WindowExtensions {
         if (mSplitController == null) {
             synchronized (mLock) {
                 if (mSplitController == null) {
-                    mSplitController = new SplitController();
+                    mSplitController = new SplitController(
+                            getWindowLayoutComponentImpl(),
+                            getFoldingFeatureProducer()
+                    );
                 }
             }
         }

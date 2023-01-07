@@ -564,6 +564,8 @@
     <string name="user_add_user_title" msgid="5457079143694924885">"Nieuwe gebruiker toevoegen?"</string>
     <string name="user_add_user_message_long" msgid="1527434966294733380">"Je kunt dit apparaat met anderen delen door extra gebruikers te maken. Elke gebruiker heeft een eigen profiel met zelf gekozen apps, achtergrond, enzovoort. Gebruikers kunnen ook apparaatinstellingen aanpassen die van invloed zijn op alle gebruikers, zoals wifi.\n\nWanneer je een nieuwe gebruiker toevoegt, moet die persoon een eigen profiel instellen.\n\nElke gebruiker kan apps updaten voor alle andere gebruikers. Toegankelijkheidsinstellingen en -services worden mogelijk niet overgezet naar de nieuwe gebruiker."</string>
     <string name="user_add_user_message_short" msgid="3295959985795716166">"Wanneer je een nieuwe gebruiker toevoegt, moet die persoon diens eigen profiel instellen.\n\nElke gebruiker kan apps updaten voor alle andere gebruikers."</string>
+    <string name="user_grant_admin_title" msgid="5565796912475193314">"Deze gebruiker beheerdersrechten geven?"</string>
+    <string name="user_grant_admin_message" msgid="7925257971286380976">"Als beheerder kan deze persoon andere gebruikers beheren, apparaatinstellingen aanpassen en het apparaat terugzetten op de fabrieksinstellingen."</string>
     <string name="user_setup_dialog_title" msgid="8037342066381939995">"Gebruiker nu instellen?"</string>
     <string name="user_setup_dialog_message" msgid="269931619868102841">"Zorg ervoor dat de persoon het apparaat kan overnemen om een profiel in te stellen"</string>
     <string name="user_setup_profile_dialog_message" msgid="4788197052296962620">"Profiel nu instellen?"</string>
@@ -595,6 +597,8 @@
     <string name="guest_reset_and_restart_dialog_message" msgid="2764425635305200790">"Hiermee start een nieuwe gastsessie en worden alle apps en gegevens van de huidige sessie verwijderd"</string>
     <string name="guest_exit_dialog_title" msgid="1846494656849381804">"Gastmodus sluiten?"</string>
     <string name="guest_exit_dialog_message" msgid="1743218864242719783">"Hierdoor worden apps en gegevens van de huidige gastsessie verwijderd"</string>
+    <string name="grant_admin" msgid="4273077214151417783">"Deze gebruiker beheerdersrechten geven"</string>
+    <string name="not_grant_admin" msgid="6985027675930546850">"Gebruiker geen beheerdersrechten geven"</string>
     <string name="guest_exit_dialog_button" msgid="1736401897067442044">"Sluiten"</string>
     <string name="guest_exit_dialog_title_non_ephemeral" msgid="7675327443743162986">"Gastactiviteit opslaan?"</string>
     <string name="guest_exit_dialog_message_non_ephemeral" msgid="223385323235719442">"Sla activiteit van de huidige sessie op of verwijder alle apps en gegevens"</string>

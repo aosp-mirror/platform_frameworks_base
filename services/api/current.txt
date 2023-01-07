@@ -146,6 +146,7 @@ package com.android.server.pm.pkg {
     method public boolean isRequestLegacyExternalStorage();
     method public boolean isRequiredForAllUsers();
     method public boolean isResetEnabledSettingsOnAppDataCleared();
+    method public boolean isResourceOverlay();
     method public boolean isRestoreAnyVersion();
     method public boolean isSignedWithPlatformKey();
     method public boolean isSupportsExtraLargeScreens();
@@ -180,12 +181,14 @@ package com.android.server.pm.pkg {
     method @Nullable public String getSecondaryCpuAbi();
     method @NonNull public com.android.server.pm.pkg.PackageUserState getStateForUser(@NonNull android.os.UserHandle);
     method @NonNull public java.util.List<com.android.server.pm.pkg.SharedLibrary> getUsesLibraries();
+    method public boolean isApex();
     method public boolean isPrivileged();
     method public boolean isSystem();
     method public boolean isUpdatedSystemApp();
   }
 
   public interface PackageUserState {
+    method public long getFirstInstallTimeMillis();
     method public boolean isInstalled();
   }
 

@@ -334,7 +334,7 @@
     <string name="enable_terminal_title" msgid="3834790541986303654">"Жергілікті терминал"</string>
     <string name="enable_terminal_summary" msgid="2481074834856064500">"Жергілікті шелл-код қол жетімділігін ұсынатын терминалды қолданбаны қосу"</string>
     <string name="hdcp_checking_title" msgid="3155692785074095986">"HDCP тексерісі"</string>
-    <string name="hdcp_checking_dialog_title" msgid="7691060297616217781">"HDCP (кең жолақты цифрлық мазмұн қорғау) тексеру мүмкіндігін орнату"</string>
+    <string name="hdcp_checking_dialog_title" msgid="7691060297616217781">"HDCP (кең жолақты цифрлық контент қорғау) тексеру мүмкіндігін орнату"</string>
     <string name="debug_debugging_category" msgid="535341063709248842">"Түзету"</string>
     <string name="debug_app" msgid="8903350241392391766">"Түзету қолданбасын таңдау"</string>
     <string name="debug_app_not_set" msgid="1934083001283807188">"Түзету қолданбалары орнатылмаған."</string>
@@ -414,7 +414,7 @@
   <string-array name="color_mode_descriptions">
     <item msgid="6828141153199944847">"Жақсартылған түстер"</item>
     <item msgid="4548987861791236754">"Көзбен көргендегі табиғи түстер"</item>
-    <item msgid="1282170165150762976">"Сандық мазмұн үшін оңтайландырылған түстер"</item>
+    <item msgid="1282170165150762976">"Сандық контент үшін оңтайландырылған түстер"</item>
   </string-array>
     <string name="inactive_apps_title" msgid="5372523625297212320">"Күту режиміндегі қолданбалар"</string>
     <string name="inactive_app_inactive_summary" msgid="3161222402614236260">"Белсенді емес. Ауыстырып қосу үшін түртіңіз."</string>
@@ -557,13 +557,15 @@
     <string name="accessor_expires_text" msgid="4625619273236786252">"Рұқсаттың аяқталу мерзімі: <xliff:g id="DATE">%s</xliff:g>"</string>
     <string name="delete_blob_text" msgid="2819192607255625697">"Ортақ деректерді жою"</string>
     <string name="delete_blob_confirmation_text" msgid="7807446938920827280">"Осы ортақ деректерді шынымен жойғыңыз келе ме?"</string>
-    <string name="user_add_user_item_summary" msgid="5748424612724703400">"Пайдаланушылардың өздерінің қолданбалары мен мазмұны болады"</string>
-    <string name="user_add_profile_item_summary" msgid="5418602404308968028">"Өз аккаунтыңыздан қолданбалар мен мазмұнға қол жетімділікті шектеуіңізге болады"</string>
+    <string name="user_add_user_item_summary" msgid="5748424612724703400">"Пайдаланушылардың өздерінің қолданбалары мен контенті болады"</string>
+    <string name="user_add_profile_item_summary" msgid="5418602404308968028">"Өз аккаунтыңыздан қолданбалар мен контентке қол жетімділікті шектеуіңізге болады"</string>
     <string name="user_add_user_item_title" msgid="2394272381086965029">"Пайдаланушы"</string>
     <string name="user_add_profile_item_title" msgid="3111051717414643029">"Шектелген профайл"</string>
     <string name="user_add_user_title" msgid="5457079143694924885">"Жаңа пайдаланушы қосылсын ба?"</string>
     <string name="user_add_user_message_long" msgid="1527434966294733380">"Қосымша профильдер жасай отырып, бұл құрылғыны басқалармен ортақ пайдалануға болады. Әр пайдаланушы қолданбаларды, тұсқағаздарды орнатып, профилін өз қалауынша реттей алады. Сондай-ақ барлығы ортақ қолданатын Wi‑Fi сияқты параметрлерді де реттеуге болады.\n\nЖаңа пайдаланушы енгізілгенде, ол өз профилін реттеуі керек болады.\n\nКез келген пайдаланушы барлық басқа пайдаланушылар үшін қолданбаларды жаңарта алады. Арнайы мүмкіндіктерге қатысты параметрлер мен қызметтер жаңа пайдаланушыға өтпейді."</string>
     <string name="user_add_user_message_short" msgid="3295959985795716166">"Жаңа пайдаланушыны қосқанда, сол адам өз кеңістігін реттеуі керек.\n\nКез келген пайдаланушы барлық басқа пайдаланушылар үшін қолданбаларды жаңарта алады."</string>
+    <string name="user_grant_admin_title" msgid="5565796912475193314">"Бұл пайдаланушыға әкімші өкілеттігі берілсін бе?"</string>
+    <string name="user_grant_admin_message" msgid="7925257971286380976">"Әкімші ретінде ол басқа пайдаланушыларды басқара, құрылғы параметрлерін өзгерте және құрылғыны зауыттық параметрлерге қайтара алады."</string>
     <string name="user_setup_dialog_title" msgid="8037342066381939995">"Профиль құру керек пе?"</string>
     <string name="user_setup_dialog_message" msgid="269931619868102841">"Пайдаланушы құрылғыны алып, өз профилін реттеуі керек."</string>
     <string name="user_setup_profile_dialog_message" msgid="4788197052296962620">"Профайл қазір жасақталсын ба?"</string>
@@ -595,6 +597,8 @@
     <string name="guest_reset_and_restart_dialog_message" msgid="2764425635305200790">"Мұндайда жаңа қонақ сеансы басталады және ағымдағы сеанстағы барлық қолданба мен дерек жойылады."</string>
     <string name="guest_exit_dialog_title" msgid="1846494656849381804">"Қонақ режимінен шығу керек пе?"</string>
     <string name="guest_exit_dialog_message" msgid="1743218864242719783">"Ағымдағы қонақ сеансындағы барлық қолданба мен дерек жойылады."</string>
+    <string name="grant_admin" msgid="4273077214151417783">"Бұл пайдаланушыға әкімші өкілеттігі берілсін"</string>
+    <string name="not_grant_admin" msgid="6985027675930546850">"Пайдаланушыға әкімші өкілеттігі берілмесін"</string>
     <string name="guest_exit_dialog_button" msgid="1736401897067442044">"Шығу"</string>
     <string name="guest_exit_dialog_title_non_ephemeral" msgid="7675327443743162986">"Қонақ әрекетін сақтау керек пе?"</string>
     <string name="guest_exit_dialog_message_non_ephemeral" msgid="223385323235719442">"Ағымдағы сеанстағы әрекетті сақтай не барлық қолданба мен деректі жоя аласыз."</string>

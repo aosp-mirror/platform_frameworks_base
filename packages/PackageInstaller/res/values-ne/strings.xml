@@ -60,10 +60,8 @@
     <string name="uninstall_update_text" msgid="863648314632448705">"यस एपलाई फ्याक्ट्रीको संस्करणले बदल्ने हो? सबै डेटा हटाइने छ।"</string>
     <string name="uninstall_update_text_multiuser" msgid="8992883151333057227">"यस एपलाई फ्याक्ट्रीको संस्करणले बदल्ने हो? सबै डेटा हटाइने छ। यसले यस डिभाइसका कार्य प्रोफाइल भएका लगायत सबै प्रयोगकर्ताहरूमा असर पार्छ।"</string>
     <string name="uninstall_keep_data" msgid="7002379587465487550">"<xliff:g id="SIZE">%1$s</xliff:g> एपको डेटा राख्नुहोस्।"</string>
-    <!-- no translation found for uninstall_application_text_current_user_clone_profile (835170400160011636) -->
-    <skip />
-    <!-- no translation found for uninstall_application_text_with_clone_instance (6944473334273349036) -->
-    <skip />
+    <string name="uninstall_application_text_current_user_clone_profile" msgid="835170400160011636">"तपाईंले यो एप मेटाउन चाहनुहुन्छ?"</string>
+    <string name="uninstall_application_text_with_clone_instance" msgid="6944473334273349036">"तपाईं यो एप अनइन्स्टल गर्न चाहनुहुन्छ? <xliff:g id="PACKAGE_LABEL">%1$s</xliff:g> क्लोन पनि मेटाइने छ।"</string>
     <string name="uninstalling_notification_channel" msgid="840153394325714653">"चलिरहेका स्थापना रद्द गर्ने कार्यहरू"</string>
     <string name="uninstall_failure_notification_channel" msgid="1136405866767576588">"असफल भएका स्थापना रद्द गर्ने कार्यहरू"</string>
     <string name="uninstalling" msgid="8709566347688966845">"स्थापना रद्द गर्दै…"</string>
@@ -72,8 +70,7 @@
     <string name="uninstall_done_app" msgid="4588850984473605768">"<xliff:g id="PACKAGE_LABEL">%1$s</xliff:g> अनइन्स्टल गरियो"</string>
     <string name="uninstall_failed" msgid="1847750968168364332">"स्थापना रद्द गर्न सकिएन।"</string>
     <string name="uninstall_failed_app" msgid="5506028705017601412">"<xliff:g id="PACKAGE_LABEL">%1$s</xliff:g> को स्थापना रद्द गर्ने कार्य असफल भयो।"</string>
-    <!-- no translation found for uninstalling_cloned_app (1826380164974984870) -->
-    <skip />
+    <string name="uninstalling_cloned_app" msgid="1826380164974984870">"<xliff:g id="PACKAGE_LABEL">%1$s</xliff:g> क्लोन मेटाइँदै छ…"</string>
     <string name="uninstall_failed_device_policy_manager" msgid="785293813665540305">"डिभाइसको सक्रिय प्रशासकीय एपको स्थापना रद्द गर्न मिल्दैन"</string>
     <string name="uninstall_failed_device_policy_manager_of_user" msgid="4813104025494168064">"<xliff:g id="USERNAME">%1$s</xliff:g> को डिभाइसको सक्रिय प्रशासकीय एपको स्थापना रद्द गर्न मिल्दैन"</string>
     <string name="uninstall_all_blocked_profile_owner" msgid="2009393666026751501">"अन्य प्रयोगकर्ताहरूका लागि यस एपको स्थापना रद्द गरे पनि केही प्रयोगकर्ता वा प्रोफाइलहरूलाई यसको आवश्यकता पर्दछ"</string>
@@ -94,8 +91,7 @@
     <string name="anonymous_source_warning" product="default" msgid="2784902545920822500">"तपाईंको फोन तथा व्यक्तिगत डेटा अज्ञात एपहरूबाट हुने आक्रमणको चपेटामा पर्ने बढी जोखिममा हुन्छन्। यो एप स्थापना गरेर तपाईं यसको प्रयोगबाट तपाईंको फोनमा हुन सक्ने क्षति वा डेटाको नोक्सानीका लागि स्वयं जिम्मेवार हुने कुरामा सहमत हुनुहुन्छ।"</string>
     <string name="anonymous_source_warning" product="tablet" msgid="3939101621438855516">"तपाईंको ट्याब्लेट तथा व्यक्तिगत डेटा अज्ञात एपहरूबाट हुने आक्रमणको चपेटामा पर्ने बढी जोखिममा हुन्छन्। यो एप स्थापना गरेर तपाईं यसको प्रयोगबाट तपाईंको ट्याब्लेटमा हुन सक्ने क्षति वा डेटाको नोक्सानीका लागि स्वयं जिम्मेवार हुने कुरामा सहमत हुनुहुन्छ।"</string>
     <string name="anonymous_source_warning" product="tv" msgid="5599483539528168566">"तपाईंको टिभी तथा व्यक्तिगत डेटा अज्ञात एपहरूबाट हुने आक्रमणको चपेटामा पर्ने बढी जोखिममा हुन्छन्। यो एप स्थापना गरेर तपाईं यसको प्रयोगबाट तपाईंको टिभी मा हुन सक्ने क्षति वा डेटाको नोक्सानीका लागि स्वयं जिम्मेवार हुने कुरामा सहमत हुनुहुन्छ।"</string>
-    <!-- no translation found for cloned_app_label (7503612829833756160) -->
-    <skip />
+    <string name="cloned_app_label" msgid="7503612829833756160">"<xliff:g id="PACKAGE_LABEL">%1$s</xliff:g> क्लोन"</string>
     <string name="anonymous_source_continue" msgid="4375745439457209366">"जारी राख्नुहोस्"</string>
     <string name="external_sources_settings" msgid="4046964413071713807">"सेटिङहरू"</string>
     <string name="wear_app_channel" msgid="1960809674709107850">"वेयर एपहरूको स्थापना/स्थापना रद्द गर्दै"</string>

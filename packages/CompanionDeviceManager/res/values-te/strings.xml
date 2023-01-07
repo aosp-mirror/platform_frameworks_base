@@ -23,8 +23,7 @@
     <string name="summary_watch" msgid="4085794790142204006">"మీ <xliff:g id="DEVICE_NAME">%1$s</xliff:g>‌ను మేనేజ్ చేయడానికి ఈ యాప్ అవసరం. మీ నోటిఫికేషన్‌లతో ఇంటరాక్ట్ అవ్వడానికి, అలాగే మీ ఫోన్, SMS, కాంటాక్ట్‌లు, క్యాలెండర్, కాల్ లాగ్‌లు, సమీపంలోని పరికరాల అనుమతులను యాక్సెస్ చేయడానికి <xliff:g id="APP_NAME">%2$s</xliff:g> అనుమతించబడుతుంది."</string>
     <string name="summary_watch_single_device" msgid="1523091550243476756">"మీ <xliff:g id="DEVICE_NAME">%1$s</xliff:g>‌ను మేనేజ్ చేయడానికి ఈ యాప్ అవసరం. ఈ అనుమతులతో ఇంటరాక్ట్ అవ్వడానికి <xliff:g id="APP_NAME">%2$s</xliff:g> అనుమతించబడుతుంది:"</string>
     <string name="profile_name_glasses" msgid="8488394059007275998">"గ్లాసెస్"</string>
-    <!-- no translation found for summary_glasses (8987925853224595628) -->
-    <skip />
+    <string name="summary_glasses" msgid="8987925853224595628">"మీ <xliff:g id="DEVICE_NAME">%1$s</xliff:g>‌ను మేనేజ్ చేయడానికి ఈ యాప్ అవసరం. <xliff:g id="APP_NAME">%2$s</xliff:g> మీ నోటిఫికేషన్‌లతో ఇంటరాక్ట్ అవ్వడానికి, అలాగే మీ ఫోన్, SMS, కాంటాక్ట్‌లు, మైక్రోఫోన్, సమీపంలోని పరికరాల అనుమతులను యాక్సెస్ చేయడానికి అనుమతించబడుతుంది."</string>
     <string name="summary_glasses_single_device" msgid="5725890636605211803">"మీ <xliff:g id="DEVICE_NAME">%1$s</xliff:g>‌ను మేనేజ్ చేయడానికి ఈ యాప్ అవసరం. ఈ అనుమతులతో ఇంటరాక్ట్ అవ్వడానికి <xliff:g id="APP_NAME">%2$s</xliff:g> అనుమతించబడుతుంది:"</string>
     <string name="title_app_streaming" msgid="2270331024626446950">"మీ ఫోన్ నుండి ఈ సమాచారాన్ని యాక్సెస్ చేయడానికి &lt;strong&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/strong&gt; యాప్‌ను అనుమతించండి"</string>
     <string name="helper_title_app_streaming" msgid="4151687003439969765">"Cross-device services"</string>

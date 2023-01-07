@@ -28,6 +28,7 @@ import static androidx.window.extensions.embedding.EmbeddingTestUtils.TASK_BOUND
 import static androidx.window.extensions.embedding.EmbeddingTestUtils.TASK_ID;
 import static androidx.window.extensions.embedding.EmbeddingTestUtils.createActivityInfoWithMinDimensions;
 import static androidx.window.extensions.embedding.EmbeddingTestUtils.createMockTaskFragmentInfo;
+import static androidx.window.extensions.embedding.EmbeddingTestUtils.createSplitPairRuleBuilder;
 import static androidx.window.extensions.embedding.EmbeddingTestUtils.createSplitRule;
 import static androidx.window.extensions.embedding.EmbeddingTestUtils.createWindowLayoutInfo;
 import static androidx.window.extensions.embedding.EmbeddingTestUtils.getSplitBounds;
@@ -75,6 +76,7 @@ import android.window.WindowContainerTransaction;
 import androidx.test.core.app.ApplicationProvider;
 import androidx.test.ext.junit.runners.AndroidJUnit4;
 import androidx.test.filters.SmallTest;
+import androidx.window.common.DeviceStateManagerFoldingFeatureProducer;
 import androidx.window.extensions.layout.WindowLayoutComponentImpl;
 import androidx.window.extensions.layout.WindowLayoutInfo;
 
@@ -117,7 +119,9 @@ public class SplitPresenterTest {
         MockitoAnnotations.initMocks(this);
         doReturn(new WindowLayoutInfo(new ArrayList<>())).when(mWindowLayoutComponent)
                 .getCurrentWindowLayoutInfo(anyInt(), any());
-        mController = new SplitController(mWindowLayoutComponent);
+        DeviceStateManagerFoldingFeatureProducer producer =
+                mock(DeviceStateManagerFoldingFeatureProducer.class);
+        mController = new SplitController(mWindowLayoutComponent, producer);
         mPresenter = mController.mPresenter;
         spyOn(mController);
         spyOn(mPresenter);
@@ -508,7 +512,7 @@ public class SplitPresenterTest {
         final Activity secondaryActivity = createMockActivity();
         final TaskFragmentContainer bottomTf = mController.newContainer(secondaryActivity, TASK_ID);
         final TaskFragmentContainer primaryTf = mController.newContainer(mActivity, TASK_ID);
-        final SplitPairRule rule = new SplitPairRule.Builder(pair ->
+        final SplitPairRule rule = createSplitPairRuleBuilder(pair ->
                 pair.first == mActivity && pair.second == secondaryActivity, pair -> false,
                 metrics -> true)
                 .setDefaultSplitAttributes(SPLIT_ATTRIBUTES)
@@ -526,7 +530,7 @@ public class SplitPresenterTest {
 
     @Test
     public void testComputeSplitAttributes() {
-        final SplitPairRule splitPairRule = new SplitPairRule.Builder(
+        final SplitPairRule splitPairRule = createSplitPairRuleBuilder(
                 activityPair -> true,
                 activityIntentPair -> true,
                 windowMetrics -> windowMetrics.getBounds().equals(TASK_BOUNDS))

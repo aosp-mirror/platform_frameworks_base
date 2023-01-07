@@ -43,10 +43,8 @@
     <string name="mismatchPin" msgid="2929611853228707473">"Daxil etdiyiniz PİN kodlar uyğun gəlmir."</string>
     <string name="invalidPin" msgid="7542498253319440408">"4-dən 8-ə qədər rəqəmi olan PIN yazın."</string>
     <string name="invalidPuk" msgid="8831151490931907083">"8 və daha çox rəqəmi olan PUK yazın."</string>
-    <!-- no translation found for needPuk (3503414069503752211) -->
-    <skip />
-    <!-- no translation found for needPuk2 (3910763547447344963) -->
-    <skip />
+    <string name="needPuk" msgid="3503414069503752211">"Sizin SIM kart PUK ilə kilidlənib. Onu açmaq üçün PUK kodu yazın."</string>
+    <string name="needPuk2" msgid="3910763547447344963">"SIM kartı blokdan çıxarmaq üçün PUK2 daxil edin."</string>
     <string name="enablePin" msgid="2543771964137091212">"Alınmadı, SIM/RUIM Kilidini aktiv edin."</string>
     <plurals name="pinpuk_attempts" formatted="false" msgid="1619867269012213584">
       <item quantity="other">SIM kartınızın kilidlənməsindən öncə <xliff:g id="NUMBER_1">%d</xliff:g> cəhdiniz qalır.</item>
@@ -388,6 +386,8 @@
     <string name="permdesc_killBackgroundProcesses" msgid="2357013583055434685">"Tətbiqə başqa tətbiqlərin arxafon proseslərini dayandırmaq icazəsi verir. Bu digər tətbiqlərin dayanmasına səbəb ola bilər."</string>
     <string name="permlab_systemAlertWindow" msgid="5757218350944719065">"Bu tətbiq digər tətbiqlərin üzərində görünə bilər"</string>
     <string name="permdesc_systemAlertWindow" msgid="1145660714855738308">"Bu tətbiq digər tətbiqlərin və ya ekran hissələrinin üzərində görünə bilər. Bu, normal tətbiq istifadəsinə müdaxilə edə və digər tətbiqlərin görünüşünün dəyişməsinə səbəb ola bilər."</string>
+    <string name="permlab_hideOverlayWindows" msgid="6382697828482271802">"digər tətbiq üst-üstə düşmələrini gizlədin"</string>
+    <string name="permdesc_hideOverlayWindows" msgid="5660242821651958225">"Bu tətbiq sistemin tətbiqlərdən yaranan üst-üstə düşmələri gizlətməsini tələb edə bilər."</string>
     <string name="permlab_runInBackground" msgid="541863968571682785">"arxa fonda işləmə"</string>
     <string name="permdesc_runInBackground" msgid="4344539472115495141">"Bu tətbiq arxa fonda işləsə, batareya daha tez qurtara bilər."</string>
     <string name="permlab_useDataInBackground" msgid="783415807623038947">"datanın arxa fonda istifadəsi"</string>
@@ -963,22 +963,14 @@
     <string name="lockscreen_password_wrong" msgid="8605355913868947490">"Bir daha cəhd et"</string>
     <string name="lockscreen_storage_locked" msgid="634993789186443380">"Bütün funksiyalar və data üçün kiliddən çıxarın"</string>
     <string name="faceunlock_multiple_failures" msgid="681991538434031708">"Üz ilə Kiliddən Açma cəhdləriniz bitdi"</string>
-    <!-- no translation found for lockscreen_missing_sim_message_short (1229301273156907613) -->
-    <skip />
-    <!-- no translation found for lockscreen_missing_sim_message (3986843848305639161) -->
-    <skip />
-    <!-- no translation found for lockscreen_missing_sim_message (3903140876952198273) -->
-    <skip />
-    <!-- no translation found for lockscreen_missing_sim_message (6184187634180854181) -->
-    <skip />
-    <!-- no translation found for lockscreen_missing_sim_instructions (5823469004536805423) -->
-    <skip />
-    <!-- no translation found for lockscreen_missing_sim_instructions_long (4403843937236648032) -->
-    <skip />
-    <!-- no translation found for lockscreen_permanent_disabled_sim_message_short (1925200607820809677) -->
-    <skip />
-    <!-- no translation found for lockscreen_permanent_disabled_sim_instructions (6902979937802238429) -->
-    <skip />
+    <string name="lockscreen_missing_sim_message_short" msgid="1229301273156907613">"SIM yoxdur"</string>
+    <string name="lockscreen_missing_sim_message" product="tablet" msgid="3986843848305639161">"Planşetdə SIM kart yoxdur."</string>
+    <string name="lockscreen_missing_sim_message" product="tv" msgid="3903140876952198273">"Android TV cihazında SIM kart yoxdur."</string>
+    <string name="lockscreen_missing_sim_message" product="default" msgid="6184187634180854181">"Telefonda SIM kart yoxdur."</string>
+    <string name="lockscreen_missing_sim_instructions" msgid="5823469004536805423">"SIM əlavə edin."</string>
+    <string name="lockscreen_missing_sim_instructions_long" msgid="4403843937236648032">"SIM kart yoxdur və ya oxuna bilinmir. SIM əlavə edin."</string>
+    <string name="lockscreen_permanent_disabled_sim_message_short" msgid="1925200607820809677">"İstifadəyə yararsız SIM."</string>
+    <string name="lockscreen_permanent_disabled_sim_instructions" msgid="6902979937802238429">"SIM kartınız həmişəlik deaktiv edilib.\n Başqa SIM kart üçün simsiz xidmət provayderinizə müraciət edin."</string>
     <string name="lockscreen_transport_prev_description" msgid="2879469521751181478">"Öncəki trek"</string>
     <string name="lockscreen_transport_next_description" msgid="2931509904881099919">"Növbəti trek"</string>
     <string name="lockscreen_transport_pause_description" msgid="6705284702135372494">"Pauza"</string>
@@ -988,13 +980,10 @@
     <string name="lockscreen_transport_ffw_description" msgid="4763794746640196772">"Sürətlə irəli"</string>
     <string name="emergency_calls_only" msgid="3057351206678279851">"Yalnız təcili zənglər"</string>
     <string name="lockscreen_network_locked_message" msgid="2814046965899249635">"Şəbəkə kilidlidir"</string>
-    <!-- no translation found for lockscreen_sim_puk_locked_message (2867953953604224166) -->
-    <skip />
+    <string name="lockscreen_sim_puk_locked_message" msgid="2867953953604224166">"SIM kart PUK ilə kilidlənib."</string>
     <string name="lockscreen_sim_puk_locked_instructions" msgid="5307979043730860995">"İstifadəçi Təlimatlarına baxın və ya Müştəri Xidmətlərinə müraciət edin."</string>
-    <!-- no translation found for lockscreen_sim_locked_message (5911944931911850164) -->
-    <skip />
-    <!-- no translation found for lockscreen_sim_unlock_progress_dialog_message (8381565919325410939) -->
-    <skip />
+    <string name="lockscreen_sim_locked_message" msgid="5911944931911850164">"SIM kilidlənib."</string>
+    <string name="lockscreen_sim_unlock_progress_dialog_message" msgid="8381565919325410939">"SIM kiliddən çıxarılır…"</string>
     <string name="lockscreen_too_many_failed_attempts_dialog_message" msgid="6458790975898594240">"Siz kilid modelini <xliff:g id="NUMBER_0">%1$d</xliff:g> dəfə yanlış çəkdiniz. \n\n <xliff:g id="NUMBER_1">%2$d</xliff:g> saniyə içində yenidən sınayın."</string>
     <string name="lockscreen_too_many_failed_password_attempts_dialog_message" msgid="3118353451602377380">"Şifrənizi <xliff:g id="NUMBER_0">%1$d</xliff:g> dəfə yanlış daxil etdiniz.\n\n <xliff:g id="NUMBER_1">%2$d</xliff:g> saniyə ərzində yenidən yoxlayın"</string>
     <string name="lockscreen_too_many_failed_pin_attempts_dialog_message" msgid="2874278239714821984">"Siz PIN nömrənizi <xliff:g id="NUMBER_0">%1$d</xliff:g> dəfə yanlış daxil etdiniz. \n \n <xliff:g id="NUMBER_1">%2$d</xliff:g> saniyə içində təkrar sınayın."</string>
@@ -1067,50 +1056,12 @@
     <string name="js_dialog_before_unload_positive_button" msgid="4274257182303565509">"Bu Səhifəni Tərk edin"</string>
     <string name="js_dialog_before_unload_negative_button" msgid="3873765747622415310">"Bu səhifədə qalın"</string>
     <string name="js_dialog_before_unload" msgid="7213364985774778744">"<xliff:g id="MESSAGE">%s</xliff:g>\n\nBu səhifədən kənara naviqasiya etmək istədiyinizə əminsiniz mi?"</string>
-    <string name="save_password_label" msgid="9161712335355510035">"Təsdiq edin"</string>
-    <string name="double_tap_toast" msgid="7065519579174882778">"Məsləhət: Böyütmək və kiçiltmək üçün iki dəfə tıklayın."</string>
-    <string name="autofill_this_form" msgid="3187132440451621492">"Avtodoldurma"</string>
-    <string name="setup_autofill" msgid="5431369130866618567">"AvtoDoldurmanı ayarla"</string>
     <string name="autofill_window_title" msgid="4379134104008111961">"<xliff:g id="SERVICENAME">%1$s</xliff:g> ilə avtomatik daxil etmə"</string>
-    <string name="autofill_address_name_separator" msgid="8190155636149596125">" "</string>
-    <string name="autofill_address_summary_name_format" msgid="3402882515222673691">"$1$2$3"</string>
-    <string name="autofill_address_summary_separator" msgid="760522655085707045">", "</string>
-    <string name="autofill_address_summary_format" msgid="8417010069362125194">"$1$2$3"</string>
-    <string name="autofill_province" msgid="3676846437741893159">"Vilayət"</string>
-    <string name="autofill_postal_code" msgid="7034789388968295591">"Poçt kodu"</string>
-    <string name="autofill_state" msgid="3341725337190434069">"Dövlət"</string>
-    <string name="autofill_zip_code" msgid="1315503730274962450">"Poçt indeksi"</string>
-    <string name="autofill_county" msgid="7781382735643492173">"Ölkə"</string>
-    <string name="autofill_island" msgid="5367139008536593734">"Ada"</string>
-    <string name="autofill_district" msgid="6428712062213557327">"Sahə"</string>
-    <string name="autofill_department" msgid="9047276226873531529">"Departament"</string>
-    <string name="autofill_prefecture" msgid="7267397763720241872">"Prefektura"</string>
-    <string name="autofill_parish" msgid="6847960518334530198">"Pariş"</string>
-    <string name="autofill_area" msgid="8289022370678448983">"Sahə"</string>
-    <string name="autofill_emirate" msgid="2544082046790551168">"Əmirlik"</string>
-    <string name="permlab_readHistoryBookmarks" msgid="9102293913842539697">"Veb əlfəcinlərinizi və tarixçələrinizi oxumaq"</string>
-    <string name="permdesc_readHistoryBookmarks" msgid="2323799501008967852">"Tətbiqə Brauzerin daxil olduğu bütün linkləri və bütün Brauzer əlfəcinlərini oxumaq imkanı verir. Qeyd: bu icazə veb brauzer imkanları olan üçüncü tərəf brazuerləri və digər tətbiqlər tərəfindən yerinə yetirilə bilməz."</string>
-    <string name="permlab_writeHistoryBookmarks" msgid="6090259925187986937">"veb əlfəcinləri və tarixçəsi yazmaq"</string>
-    <string name="permdesc_writeHistoryBookmarks" product="tablet" msgid="573341025292489065">"Tətbiqə planşetinizdəki brauzer tarixini və əlfəcinləri redaktə etmək icazəsi verir. Bu tətbizə brauzer məlumatlarını silmək və ya redaktə etmək imkanı verə bilər. Qeyd: Bu icazə 3-cü partiya brauzerlərə və ya veb brauzing xüsusiyyətli digər tətbiqlərə şamil olunmaya bilər."</string>
-    <string name="permdesc_writeHistoryBookmarks" product="tv" msgid="88642768580408561">"Tətbiqə Android TV cihazında saxlanılan brauzer tarixçəsi və ya əlfəcinləri dəyişdirmək icazəsi verir. Bu, tətbiqə Brauzer datasını silmək və ya dəyişdirmək icazəsi verə bilər. Qeyd: bu icazə vebdə axtarış imkanları olan üçüncü tərəf brauzerləri və ya digər tətbiqlər üçün aktiv deyil."</string>
-    <string name="permdesc_writeHistoryBookmarks" product="default" msgid="2245203087160913652">"Tətbiqə Brauzer tarixçəsi və telefonunuzda saxlanılan əlfəcinlərə dəyişiklik etmək imkanı verir. Bununla tətbiqlə Brauzer datanızı silə və ya dəyişdirə bilər. Qeyd: bu icazə veb brauzer imkanları olan üçüncü tərəf brazuerləri və digər tətbiqlər tərəfindən yerinə yetirilə bilməz."</string>
     <string name="permlab_setAlarm" msgid="1158001610254173567">"siqnal qurur"</string>
     <string name="permdesc_setAlarm" msgid="2185033720060109640">"Tətbiqə quraşdırlmış zəngli saata alarm ayarlamağa imkan verir. Bəzi zəngli saat tətbiqləri bu özəlliyi dəstəkləməyə bilər."</string>
     <string name="permlab_addVoicemail" msgid="4770245808840814471">"Səsli poçt əlavə et"</string>
     <string name="permdesc_addVoicemail" msgid="5470312139820074324">"Tətbiqə səsli poçt qutunuza mesaj əlavə etməyə imkan verir."</string>
-    <string name="permlab_writeGeolocationPermissions" msgid="8605631647492879449">"Brauzerin geolokasiya icazələrini dəyişir"</string>
-    <string name="permdesc_writeGeolocationPermissions" msgid="5817346421222227772">"Tətbiqə Brauzerin geolokasiya icazələrini dəyişməyə imkan verir. Zərərli tətbiqlər bundan istifadə edərək məkan məlumatlarını təsadüfi saytlara göndərə bilər."</string>
-    <string name="save_password_message" msgid="2146409467245462965">"Brauzerin bu şifrəni yadda saxlamasını istəyirsiz?"</string>
-    <string name="save_password_notnow" msgid="2878327088951240061">"İndi yox"</string>
-    <string name="save_password_remember" msgid="6490888932657708341">"Yadda saxlayın"</string>
-    <string name="save_password_never" msgid="6776808375903410659">"Heç vaxt"</string>
-    <string name="open_permission_deny" msgid="5136793905306987251">"Bu səhifəni açmaq üçün icazəniz yoxdur."</string>
-    <string name="text_copied" msgid="2531420577879738860">"Mətn panoya kopyalandı."</string>
-    <string name="pasted_from_app" msgid="5627698450808256545">"<xliff:g id="PASTING_APP_NAME">%1$s</xliff:g> <xliff:g id="SOURCE_APP_NAME">%2$s</xliff:g> tətbiqindən əlavə edilib"</string>
     <string name="pasted_from_clipboard" msgid="7355790625710831847">"<xliff:g id="PASTING_APP_NAME">%1$s</xliff:g> datanı panodan əlavə edib"</string>
-    <string name="pasted_text" msgid="4298871641549173733">"<xliff:g id="PASTING_APP_NAME">%1$s</xliff:g> kopyaladığınız mətni əlavə etdi"</string>
-    <string name="pasted_image" msgid="4729097394781491022">"<xliff:g id="PASTING_APP_NAME">%1$s</xliff:g> kopyaladığınız şəkli əlavə etdi"</string>
-    <string name="pasted_content" msgid="646276353060777131">"<xliff:g id="PASTING_APP_NAME">%1$s</xliff:g> kopyaladığınız kontenti əlavə etdi"</string>
     <string name="more_item_label" msgid="7419249600215749115">"Digər"</string>
     <string name="prepend_shortcut_label" msgid="1743716737502867951">"Menyu+"</string>
     <string name="menu_meta_shortcut_label" msgid="1623390163674762478">"Meta+"</string>
@@ -1378,13 +1329,10 @@
     <string name="sms_short_code_remember_undo_instruction" msgid="2620984439143080410">"Bunu sonra Ayarlarda dəyişə bilərsiniz &gt; Tətbiqlər"</string>
     <string name="sms_short_code_confirm_always_allow" msgid="2223014893129755950">"Həmişə icazə ver"</string>
     <string name="sms_short_code_confirm_never_allow" msgid="2688828813521652079">"Heç vaxt icazə verməyin"</string>
-    <!-- no translation found for sim_removed_title (1349026474932481037) -->
-    <skip />
-    <!-- no translation found for sim_removed_message (8469588437451533845) -->
-    <skip />
+    <string name="sim_removed_title" msgid="1349026474932481037">"SIM çıxarılıb"</string>
+    <string name="sim_removed_message" msgid="8469588437451533845">"Cihazınızı etibarlı SIM kart ilə başladana kimi mobil şəbəkə əlçatmaz olacaq."</string>
     <string name="sim_done_button" msgid="6464250841528410598">"Bitdi"</string>
-    <!-- no translation found for sim_added_title (2976783426741012468) -->
-    <skip />
+    <string name="sim_added_title" msgid="2976783426741012468">"SIM əlavə edilib"</string>
     <string name="sim_added_message" msgid="6602906609509958680">"Mobil şəbəkəyə qoşulmaq üçün cihazınızı yenidən başladın."</string>
     <string name="sim_restart_button" msgid="8481803851341190038">"Yenidən başlat"</string>
     <string name="install_carrier_app_notification_title" msgid="5712723402213090102">"Mobil xidməti aktiv edin"</string>
@@ -1696,8 +1644,7 @@
     <string name="kg_puk_enter_puk_hint" msgid="6696187482616360994">"SIM indi deaktivdir. Davam etmək üçün PUK kodu daxil edin. Əlavə məlumat üçün operatora müraciət edin."</string>
     <string name="kg_puk_enter_pin_hint" msgid="8190982314659429770">"İstədiyiniz PİN kodu daxil edin"</string>
     <string name="kg_enter_confirm_pin_hint" msgid="6372557107414074580">"İstədiyiniz PIN kodu təsdiqləyin"</string>
-    <!-- no translation found for kg_sim_unlock_progress_dialog_message (5743634657721110967) -->
-    <skip />
+    <string name="kg_sim_unlock_progress_dialog_message" msgid="5743634657721110967">"SIM kiliddən çıxarılır…"</string>
     <string name="kg_password_wrong_pin_code" msgid="9013856346870572451">"Yanlış PİN kod."</string>
     <string name="kg_invalid_sim_pin_hint" msgid="4821601451222564077">"4-dən 8-ə qədər rəqəmi olan PIN yazın."</string>
     <string name="kg_invalid_sim_puk_hint" msgid="2539364558870734339">"PUK kod 8 rəqəmli olmalıdır."</string>
@@ -1726,6 +1673,10 @@
     <string name="kg_text_message_separator" product="default" msgid="4503708889934976866">" - "</string>
     <string name="kg_reordering_delete_drop_target_text" msgid="2034358143731750914">"Yığışdır"</string>
     <string name="safe_media_volume_warning" product="default" msgid="3751676824423049994">"Səsin həcmi tövsiyə olunan səviyyədən artıq olsun?\n\nYüksək səsi uzun zaman dinləmək eşitmə qabiliyyətinizə zərər vura bilər."</string>
+    <string name="csd_dose_reached_warning" product="default" msgid="1032473160590983236">"Xəbərdarlıq,\nQulaqlıqlar vasitəsilə bir həftə ərzində güvənli şəkildə dinləyə biləcəyiniz yüksək səs siqnallarının miqdarını keçmisiniz.\n\nBu həddi aşmaq eşitmə qabiliyyətini həmişəlik zədələyəcək."</string>
+    <string name="csd_dose_repeat_warning" product="default" msgid="6765471037071089401">"Xəbərdarlıq,\nQulaqlıqlar vasitəsilə bir həftə ərzində güvənli şəkildə dinləyə biləcəyiniz yüksək səs siqnallarının miqdarını 5 dəfə keçmisiniz.\n\nEşitmə qabiliyyətinizi qorumaq üçün səs səviyyəsi azaldılıb."</string>
+    <string name="csd_entering_RS2_warning" product="default" msgid="3699509945325496807">"Mediaya qulaq asdığınız səviyyə uzun müddət davam etdikdə eşitmə qabuliyyətinin zədələnməsi ilə nəticələnə bilər.\n\nBu səviyyədə uzun müddət oxutmağa davam etmək eşitmə qabiliyyətinizə zərər verə bilər."</string>
+    <string name="csd_momentary_exposure_warning" product="default" msgid="7861896191081176454">"Xəbərdarlıq,\nHazırda təhlükəli səviyyədə oxudulan yüksək səsli məzmunu dinləyirsiniz.\n\nBu yüksək səslə dinləməyə davam etmək eşitmə qabiliyyətinizi həmişəlik zədələyəcək."</string>
     <string name="accessibility_shortcut_warning_dialog_title" msgid="4017995837692622933">"Əlçatımlılıq Qısayolu istifadə edilsin?"</string>
     <string name="accessibility_shortcut_toogle_warning" msgid="4161716521310929544">"Qısayol aktiv olduqda, hər iki səs düyməsinə 3 saniyə basıb saxlamaqla əlçatımlılıq funksiyası başladılacaq."</string>
     <string name="accessibility_shortcut_multiple_service_warning_title" msgid="3135860819356676426">"Əlçatımlılıq funksiyaları üçün qısayol aktiv edilsin?"</string>
@@ -1754,8 +1705,7 @@
     <string name="disable_accessibility_shortcut" msgid="5806091378745232383">"Qısayolu Deaktiv edin"</string>
     <string name="leave_accessibility_shortcut_on" msgid="6543362062336990814">"Qısayol İstifadə edin"</string>
     <string name="color_inversion_feature_name" msgid="326050048927789012">"Rəng İnversiyası"</string>
-    <!-- no translation found for color_correction_feature_name (7975133554160979214) -->
-    <skip />
+    <string name="color_correction_feature_name" msgid="7975133554160979214">"Rəng korreksiyası"</string>
     <string name="one_handed_mode_feature_name" msgid="2334330034828094891">"Birəlli rejim"</string>
     <string name="reduce_bright_colors_feature_name" msgid="3222994553174604132">"Əlavə tündləşmə"</string>
     <string name="accessibility_shortcut_enabling_service" msgid="5473495203759847687">"Səs səviyyəsi düymələrinə basıb saxlayın. <xliff:g id="SERVICE_NAME">%1$s</xliff:g> aktiv edildi."</string>
@@ -2352,8 +2302,6 @@
     <string name="permdesc_deliverCompanionMessages" msgid="2170847384281412850">"Kompanyon tətbiqinə kompanyon mesajlarını digər cihazlara çatdırmaq icazəsi verir."</string>
     <string name="permlab_startForegroundServicesFromBackground" msgid="6363004936218638382">"Ön fon xidmətlərini arxa fondan başlatmaq"</string>
     <string name="permdesc_startForegroundServicesFromBackground" msgid="4071826571656001537">"Kompanyon tətbiqinə ön fon xidmətlərini arxa fondan başlatmaq icazəsi verir."</string>
-    <!-- no translation found for mic_access_on_toast (2666925317663845156) -->
-    <skip />
-    <!-- no translation found for mic_access_off_toast (8111040892954242437) -->
-    <skip />
+    <string name="mic_access_on_toast" msgid="2666925317663845156">"Mikrofon əlçatandır"</string>
+    <string name="mic_access_off_toast" msgid="8111040892954242437">"Mikrofon blok edilib"</string>
 </resources>

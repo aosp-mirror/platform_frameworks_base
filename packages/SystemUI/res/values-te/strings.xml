@@ -85,6 +85,7 @@
     <string name="screenshot_share_description" msgid="2861628935812656612">"స్క్రీన్‌షాట్‌ను షేర్ చేయండి"</string>
     <string name="screenshot_scroll_label" msgid="2930198809899329367">"మరిన్ని క్యాప్చర్ చేయండి"</string>
     <string name="screenshot_dismiss_description" msgid="4702341245899508786">"స్క్రీన్‌షాట్‌ను విస్మరించు"</string>
+    <string name="screenshot_dismiss_work_profile" msgid="3101530842987697045">"వర్క్ ప్రొఫైల్ మెసేజ్‌ను విస్మరిస్తుంది"</string>
     <string name="screenshot_preview_description" msgid="7606510140714080474">"స్క్రీన్‌షాట్ ప్రివ్యూ"</string>
     <string name="screenshot_top_boundary_pct" msgid="2520148599096479332">"ఎగువ సరిహద్దు <xliff:g id="PERCENT">%1$d</xliff:g> శాతం"</string>
     <string name="screenshot_bottom_boundary_pct" msgid="3880821519814946478">"దిగువ సరిహద్దు <xliff:g id="PERCENT">%1$d</xliff:g> శాతం"</string>
@@ -144,9 +145,9 @@
     <string name="biometric_dialog_tap_confirm_with_face_alt_2" msgid="8586608186457385108">"ముఖం గుర్తించబడింది. కొనసాగించడానికి నొక్కండి."</string>
     <string name="biometric_dialog_tap_confirm_with_face_alt_3" msgid="2192670471930606539">"ముఖం గుర్తించబడింది. కొనసాగడానికి అన్‌లాక్ చిహ్నం నొక్కండి."</string>
     <string name="biometric_dialog_authenticated" msgid="7337147327545272484">"ప్రామాణీకరించబడింది"</string>
-    <string name="biometric_dialog_use_pin" msgid="8385294115283000709">"పిన్‌ను ఉపయోగించు"</string>
-    <string name="biometric_dialog_use_pattern" msgid="2315593393167211194">"ఆకృతిని ఉపయోగించు"</string>
-    <string name="biometric_dialog_use_password" msgid="3445033859393474779">"పాస్‌వర్డ్‌ను ఉపయోగించు"</string>
+    <string name="biometric_dialog_use_pin" msgid="8385294115283000709">"పిన్‌ను ఉపయోగించండి"</string>
+    <string name="biometric_dialog_use_pattern" msgid="2315593393167211194">"ఆకృతిని ఉపయోగించండి"</string>
+    <string name="biometric_dialog_use_password" msgid="3445033859393474779">"పాస్‌వర్డ్‌ను ఉపయోగించండి"</string>
     <string name="biometric_dialog_wrong_pin" msgid="1878539073972762803">"పిన్ తప్పు"</string>
     <string name="biometric_dialog_wrong_pattern" msgid="8954812279840889029">"ఆకృతి తప్పు"</string>
     <string name="biometric_dialog_wrong_password" msgid="69477929306843790">"పాస్‌వర్డ్ తప్పు"</string>
@@ -317,8 +318,7 @@
     <string name="sensor_privacy_camera_unblocked_dialog_content" msgid="7847190103011782278">"యాప్‌లు, అలాగే సర్వీస్‌లన్నింటికీ కెమెరా ఎనేబుల్ చేయబడింది."</string>
     <string name="sensor_privacy_camera_blocked_dialog_content" msgid="3182428709314874616">"యాప్‌లు, అలాగే సర్వీస్‌లన్నింటికీ కెమెరా యాక్సెస్ డిజేబుల్ చేయబడింది."</string>
     <string name="sensor_privacy_htt_blocked_dialog_content" msgid="3333321592997666441">"మైక్రోఫోన్ బటన్‌ను ఉపయోగించడానికి, సెట్టింగ్‌లలో మైక్రోఫోన్ యాక్సెస్‌ను ఎనేబుల్ చేయండి."</string>
-    <!-- no translation found for sensor_privacy_dialog_open_settings (5635865896053011859) -->
-    <skip />
+    <string name="sensor_privacy_dialog_open_settings" msgid="5635865896053011859">"సెట్టింగ్‌లను తెరవండి"</string>
     <string name="media_seamless_other_device" msgid="4654849800789196737">"ఇతర పరికరం"</string>
     <string name="quick_step_accessibility_toggle_overview" msgid="7908949976727578403">"స్థూలదృష్టిని టోగుల్ చేయి"</string>
     <string name="zen_priority_introduction" msgid="3159291973383796646">"మీరు పేర్కొనే అలారాలు, రిమైండర్‌లు, ఈవెంట్‌లు మరియు కాలర్‌ల నుండి మినహా మరే ఇతర ధ్వనులు మరియు వైబ్రేషన్‌లతో మీకు అంతరాయం కలగదు. మీరు ఇప్పటికీ సంగీతం, వీడియోలు మరియు గేమ్‌లతో సహా మీరు ప్లే చేయడానికి ఎంచుకున్నవి ఏవైనా వింటారు."</string>
@@ -369,7 +369,7 @@
     <string name="guest_wipe_session_title" msgid="7147965814683990944">"గెస్ట్‌కు తిరిగి స్వాగతం!"</string>
     <string name="guest_wipe_session_message" msgid="3393823610257065457">"మీరు మీ సెషన్‌ని కొనసాగించాలనుకుంటున్నారా?"</string>
     <string name="guest_wipe_session_wipe" msgid="8056836584445473309">"మొదటి నుండి ప్రారంభించండి"</string>
-    <string name="guest_wipe_session_dontwipe" msgid="3211052048269304205">"అవును, కొనసాగించు"</string>
+    <string name="guest_wipe_session_dontwipe" msgid="3211052048269304205">"అవును, కొనసాగించండి"</string>
     <string name="guest_notification_app_name" msgid="2110425506754205509">"గెస్ట్ మోడ్"</string>
     <string name="guest_notification_session_active" msgid="5567273684713471450">"మీరు గెస్ట్ మోడ్‌లో ఉన్నారు"</string>
     <string name="user_add_user_message_guest_remove" msgid="5589286604543355007">\n\n"కొత్త యూజర్‌ను జోడించడం వలన గెస్ట్ మోడ్ నుండి వైదొలుగుతుంది. అలాగే ప్రస్తుత గెస్ట్ సెషన్ నుండి అన్ని యాప్‌లతో పాటు మొత్తం డేటా తొలగించబడుతుంది."</string>
@@ -651,7 +651,7 @@
     <item msgid="7453955063378349599">"ఎడమవైపుకు వాలుగా"</item>
     <item msgid="5874146774389433072">"కుడివైపుకు వాలుగా"</item>
   </string-array>
-    <string name="save" msgid="3392754183673848006">"సేవ్ చేయి"</string>
+    <string name="save" msgid="3392754183673848006">"సేవ్ చేయండి"</string>
     <string name="reset" msgid="8715144064608810383">"రీసెట్ చేయండి"</string>
     <string name="clipboard" msgid="8517342737534284617">"క్లిప్‌బోర్డ్"</string>
     <string name="accessibility_key" msgid="3471162841552818281">"అనుకూల నావిగేషన్ బటన్"</string>
@@ -743,6 +743,7 @@
     <string name="wifi_is_off" msgid="5389597396308001471">"Wi-Fi ఆఫ్‌లో ఉంది"</string>
     <string name="bt_is_off" msgid="7436344904889461591">"బ్లూటూత్ ఆఫ్‌లో ఉంది"</string>
     <string name="dnd_is_off" msgid="3185706903793094463">"అంతరాయం కలిగించవద్దు ఆఫ్‌లో ఉంది"</string>
+    <string name="dnd_is_on" msgid="7009368176361546279">"\"అంతరాయం కలిగించవద్దు\" ఆన్‌లో ఉంది"</string>
     <string name="qs_dnd_prompt_auto_rule" msgid="3535469468310002616">"ఆటోమేటిక్‌ నియమం (<xliff:g id="ID_1">%s</xliff:g>) ద్వారా అంతరాయం కలిగించవద్దు ఆన్ చేయబడింది."</string>
     <string name="qs_dnd_prompt_app" msgid="4027984447935396820">"యాప్ (<xliff:g id="ID_1">%s</xliff:g>) ద్వారా అంతరాయం కలిగించవద్దు ఆన్ చేయబడింది."</string>
     <string name="qs_dnd_prompt_auto_rule_app" msgid="1841469944118486580">"ఆటోమేటిక్‌ నియమం లేదా యాప్ ద్వారా అంతరాయం కలిగించవద్దు ఆన్ చేయబడింది."</string>
@@ -905,6 +906,7 @@
     <string name="media_output_dialog_accessibility_title" msgid="4681741064190167888">"ఆడియో అవుట్‌పుట్ కోసం అందుబాటులో ఉన్న పరికరాలు."</string>
     <string name="media_output_dialog_accessibility_seekbar" msgid="5332843993805568978">"వాల్యూమ్"</string>
     <string name="media_output_dialog_volume_percentage" msgid="1613984910585111798">"<xliff:g id="PERCENTAGE">%1$d</xliff:g>%%"</string>
+    <string name="media_output_group_title_speakers_and_displays" msgid="7169712332365659820">"స్పీకర్‌లు &amp; డిస్‌ప్లేలు"</string>
     <string name="media_output_first_broadcast_title" msgid="6292237789860753022">"ప్రసారం కావడం అనేది ఎలా పని చేస్తుంది"</string>
     <string name="media_output_broadcast" msgid="3555580945878071543">"ప్రసారం"</string>
     <string name="media_output_first_notify_broadcast_message" msgid="6353857724136398494">"మీకు సమీపంలో ఉన్న వ్యక్తులు అనుకూలత ఉన్న బ్లూటూత్ పరికరాలతో మీరు ప్రసారం చేస్తున్న మీడియాను వినగలరు"</string>
@@ -1032,20 +1034,19 @@
     <string name="log_access_confirmation_deny" msgid="2389461495803585795">"అనుమతించవద్దు"</string>
     <string name="log_access_confirmation_body" msgid="6883031912003112634">"మీ పరికరంలో జరిగే దాన్ని పరికర లాగ్‌లు రికార్డ్ చేస్తాయి. సమస్యలను కనుగొని, పరిష్కరించడానికి యాప్‌లు ఈ లాగ్‌లను ఉపయోగిస్తాయి.\n\nకొన్ని లాగ్‌లలో గోప్యమైన సమాచారం ఉండవచ్చు, కాబట్టి మీరు విశ్వసించే యాప్‌లను మాత్రమే అన్ని పరికర లాగ్‌లను యాక్సెస్ చేయడానికి అనుమతించండి. \n\nఅన్ని పరికర లాగ్‌లను యాక్సెస్ చేయడానికి మీరు ఈ యాప్‌ను అనుమతించకపోతే, అది తన స్వంత లాగ్‌లను ఇప్పటికి యాక్సెస్ చేయగలదు. మీ పరికర తయారీదారు ఇప్పటికీ మీ పరికరంలో కొన్ని లాగ్‌లు లేదా సమాచారాన్ని యాక్సెస్ చేయగలరు."</string>
     <string name="keyguard_affordance_enablement_dialog_action_template" msgid="8164857863036314664">"<xliff:g id="APPNAME">%1$s</xliff:g>‌ను తెరవండి"</string>
-    <string name="keyguard_affordance_enablement_dialog_message" msgid="2790910660524887941">"<xliff:g id="APPNAME">%1$s</xliff:g> యాప్‌ను షార్ట్‌కట్‌గా జోడించడానికి, వీటిని నిర్ధారించుకోండి"</string>
     <string name="keyguard_affordance_enablement_dialog_wallet_instruction_1" msgid="8439655049139819278">"• యాప్ సెటప్ చేయబడి ఉందని"</string>
     <string name="keyguard_affordance_enablement_dialog_wallet_instruction_2" msgid="4321089250629477835">"• Walletకు కనీసం ఒక కార్డ్ అయినా జోడించబడి ఉందని"</string>
     <string name="keyguard_affordance_enablement_dialog_qr_scanner_instruction" msgid="5355839079232119791">"• కెమెరా యాప్ ఇన్‌స్టాల్ చేసి ఉందని"</string>
     <string name="keyguard_affordance_enablement_dialog_home_instruction_1" msgid="8438311171750568633">"• యాప్ సెటప్ చేయబడి ఉందని"</string>
     <string name="keyguard_affordance_enablement_dialog_home_instruction_2" msgid="8308525385889021652">"• కనీసం ఒక పరికరమైనా అందుబాటులో ఉందని"</string>
+    <string name="keyguard_affordance_press_too_short" msgid="8145437175134998864">"షార్ట్‌కట్‌ను తాకి, నొక్కి ఉంచు"</string>
     <string name="rear_display_bottom_sheet_cancel" msgid="3461468855493357248">"రద్దు చేయండి"</string>
     <string name="rear_display_bottom_sheet_confirm" msgid="4383356544661421206">"ఇప్పుడే తిప్పండి"</string>
     <string name="rear_display_fold_bottom_sheet_title" msgid="6081542277622721548">"మెరుగైన సెల్ఫీ కోసం ఫోన్‌ను అన్‌ఫోల్డ్ చేయండి"</string>
     <string name="rear_display_unfold_bottom_sheet_title" msgid="2137403802960396357">"మంచి సెల్ఫీ కోసం ముందు వైపు డిస్‌ప్లేకు తిప్పాలా?"</string>
     <string name="rear_display_bottom_sheet_description" msgid="1852662982816810352">"అధిక రిజల్యూషన్‌తో పెద్ద ఫోటో కోసం వెనుక వైపున ఉన్న కెమెరాను ఉపయోగించండి."</string>
     <string name="rear_display_bottom_sheet_warning" msgid="800995919558238930"><b>"✱ ఈ స్క్రీన్ ఆఫ్ అవుతుంది"</b></string>
-    <!-- no translation found for rear_display_accessibility_folded_animation (1538121649587978179) -->
-    <skip />
-    <!-- no translation found for rear_display_accessibility_unfolded_animation (1946153682258289040) -->
-    <skip />
+    <string name="rear_display_accessibility_folded_animation" msgid="1538121649587978179">"మడవగల పరికరం విప్పబడుతోంది"</string>
+    <string name="rear_display_accessibility_unfolded_animation" msgid="1946153682258289040">"మడవగల పరికరం చుట్టూ తిప్పబడుతోంది"</string>
+    <string name="stylus_battery_low" msgid="7134370101603167096">"తక్కువ స్టైలస్ బ్యాటరీ"</string>
 </resources>

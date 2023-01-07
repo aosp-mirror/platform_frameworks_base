@@ -85,6 +85,7 @@
     <string name="screenshot_share_description" msgid="2861628935812656612">"Споделете слика од екранот"</string>
     <string name="screenshot_scroll_label" msgid="2930198809899329367">"Сними повеќе"</string>
     <string name="screenshot_dismiss_description" msgid="4702341245899508786">"Отфрлете ја сликата од екранот"</string>
+    <string name="screenshot_dismiss_work_profile" msgid="3101530842987697045">"Отфрлете ја пораката за работен профил"</string>
     <string name="screenshot_preview_description" msgid="7606510140714080474">"Преглед на слика од екранот"</string>
     <string name="screenshot_top_boundary_pct" msgid="2520148599096479332">"Горна граница <xliff:g id="PERCENT">%1$d</xliff:g> %%"</string>
     <string name="screenshot_bottom_boundary_pct" msgid="3880821519814946478">"Долна граница <xliff:g id="PERCENT">%1$d</xliff:g> %%"</string>
@@ -317,8 +318,7 @@
     <string name="sensor_privacy_camera_unblocked_dialog_content" msgid="7847190103011782278">"Камерата е овозможена за сите апликации и услуги."</string>
     <string name="sensor_privacy_camera_blocked_dialog_content" msgid="3182428709314874616">"Пристапот до камерата е оневозможен за сите апликации и услуги."</string>
     <string name="sensor_privacy_htt_blocked_dialog_content" msgid="3333321592997666441">"За да го користите копчето за микрофон, овозможете пристап до микрофонот во „Поставки“."</string>
-    <!-- no translation found for sensor_privacy_dialog_open_settings (5635865896053011859) -->
-    <skip />
+    <string name="sensor_privacy_dialog_open_settings" msgid="5635865896053011859">"Отворете „Поставки“"</string>
     <string name="media_seamless_other_device" msgid="4654849800789196737">"Друг уред"</string>
     <string name="quick_step_accessibility_toggle_overview" msgid="7908949976727578403">"Вклучи/исклучи преглед"</string>
     <string name="zen_priority_introduction" msgid="3159291973383796646">"Нема да ве вознемируваат звуци и вибрации, освен од аларми, потсетници, настани и повикувачи што ќе ги наведете. Сѐ уште ќе слушате сѐ што ќе изберете да пуштите, како музика, видеа и игри."</string>
@@ -743,6 +743,7 @@
     <string name="wifi_is_off" msgid="5389597396308001471">"Wi-Fi е исклучено"</string>
     <string name="bt_is_off" msgid="7436344904889461591">"Bluetooth е исклучен"</string>
     <string name="dnd_is_off" msgid="3185706903793094463">"„Не вознемирувај“ е исклучено"</string>
+    <string name="dnd_is_on" msgid="7009368176361546279">"Вклучено е „Не вознемирувај“"</string>
     <string name="qs_dnd_prompt_auto_rule" msgid="3535469468310002616">"Едно автоматско правило (<xliff:g id="ID_1">%s</xliff:g>) ја вклучи „Не вознемирувај“."</string>
     <string name="qs_dnd_prompt_app" msgid="4027984447935396820">"Една апликација (<xliff:g id="ID_1">%s</xliff:g>) ја вклучи „Не вознемирувај“."</string>
     <string name="qs_dnd_prompt_auto_rule_app" msgid="1841469944118486580">"Едно автоматско правило или апликација ја вклучи „Не вознемирувај“."</string>
@@ -815,7 +816,7 @@
     <string name="accessibility_floating_button_migration_tooltip" msgid="5217151214439341902">"Допрете за функциите за пристапност. Приспособете или заменете го копчево во „Поставки“.\n\n"<annotation id="link">"Прикажи поставки"</annotation></string>
     <string name="accessibility_floating_button_docking_tooltip" msgid="6814897496767461517">"Преместете го копчето до работ за да го сокриете привремено"</string>
     <string name="accessibility_floating_button_undo" msgid="511112888715708241">"Врати"</string>
-    <string name="accessibility_floating_button_undo_message_text" msgid="3044079592757099698">"{count,plural, =1{Отстранета е {label} кратенка}one{Отстранети се # кратенка}other{Отстранети се # кратенки}}"</string>
+    <string name="accessibility_floating_button_undo_message_text" msgid="3044079592757099698">"{count,plural, =1{Кратенката {label} е отстранета}one{Отстранети се # кратенка}other{Отстранети се # кратенки}}"</string>
     <string name="accessibility_floating_button_action_move_top_left" msgid="6253520703618545705">"Премести горе лево"</string>
     <string name="accessibility_floating_button_action_move_top_right" msgid="6106225581993479711">"Премести горе десно"</string>
     <string name="accessibility_floating_button_action_move_bottom_left" msgid="8063394111137429725">"Премести долу лево"</string>
@@ -905,6 +906,7 @@
     <string name="media_output_dialog_accessibility_title" msgid="4681741064190167888">"Достапни уреди за аудиоизлез."</string>
     <string name="media_output_dialog_accessibility_seekbar" msgid="5332843993805568978">"Јачина на звук"</string>
     <string name="media_output_dialog_volume_percentage" msgid="1613984910585111798">"<xliff:g id="PERCENTAGE">%1$d</xliff:g> %%"</string>
+    <string name="media_output_group_title_speakers_and_displays" msgid="7169712332365659820">"Звучници и екрани"</string>
     <string name="media_output_first_broadcast_title" msgid="6292237789860753022">"Како функционира емитувањето"</string>
     <string name="media_output_broadcast" msgid="3555580945878071543">"Емитување"</string>
     <string name="media_output_first_notify_broadcast_message" msgid="6353857724136398494">"Луѓето во ваша близина со компатибилни уреди со Bluetooth може да ги слушаат аудиозаписите што ги емитувате"</string>
@@ -1032,20 +1034,19 @@
     <string name="log_access_confirmation_deny" msgid="2389461495803585795">"Не дозволувај"</string>
     <string name="log_access_confirmation_body" msgid="6883031912003112634">"Дневниците за евиденција на уредот снимаат што се случува на вашиот уред. Апликациите може да ги користат овие дневници за евиденција за да наоѓаат и поправаат проблеми.\n\nНекои дневници за евиденција може да содржат чувствителни податоци, па затоа дозволете им пристап до сите дневници за евиденција на уредот само на апликациите во кои имате доверба. \n\nАко не ѝ дозволите на апликацијава да пристапува до сите дневници за евиденција на уредот, таа сепак ќе може да пристапува до сопствените дневници за евиденција. Производителот на вашиот уред можеби сепак ќе може да пристапува до некои дневници за евиденција или податоци на уредот."</string>
     <string name="keyguard_affordance_enablement_dialog_action_template" msgid="8164857863036314664">"Отворете ја <xliff:g id="APPNAME">%1$s</xliff:g>"</string>
-    <string name="keyguard_affordance_enablement_dialog_message" msgid="2790910660524887941">"За да ја додадете апликацијата <xliff:g id="APPNAME">%1$s</xliff:g> како кратенка, треба да бидат исполнети следниве услови"</string>
     <string name="keyguard_affordance_enablement_dialog_wallet_instruction_1" msgid="8439655049139819278">"• апликацијата е поставена"</string>
     <string name="keyguard_affordance_enablement_dialog_wallet_instruction_2" msgid="4321089250629477835">"• најмалку една картичка е додадена во Wallet"</string>
     <string name="keyguard_affordance_enablement_dialog_qr_scanner_instruction" msgid="5355839079232119791">"• инсталирана е апликација за камера"</string>
     <string name="keyguard_affordance_enablement_dialog_home_instruction_1" msgid="8438311171750568633">"• апликацијата е поставена"</string>
     <string name="keyguard_affordance_enablement_dialog_home_instruction_2" msgid="8308525385889021652">"• достапен е најмалку еден уред"</string>
+    <string name="keyguard_affordance_press_too_short" msgid="8145437175134998864">"Допрете и задржете ја кратенката"</string>
     <string name="rear_display_bottom_sheet_cancel" msgid="3461468855493357248">"Откажи"</string>
     <string name="rear_display_bottom_sheet_confirm" msgid="4383356544661421206">"Префрли сега"</string>
     <string name="rear_display_fold_bottom_sheet_title" msgid="6081542277622721548">"Отворете го телефонот за подобро селфи"</string>
     <string name="rear_display_unfold_bottom_sheet_title" msgid="2137403802960396357">"Да се префрли на предниот екран за подобро селфи?"</string>
     <string name="rear_display_bottom_sheet_description" msgid="1852662982816810352">"Користете ја задната камера за поширока фотографија со повисока резолуција."</string>
     <string name="rear_display_bottom_sheet_warning" msgid="800995919558238930"><b>"✱ Екранов ќе се исклучи"</b></string>
-    <!-- no translation found for rear_display_accessibility_folded_animation (1538121649587978179) -->
-    <skip />
-    <!-- no translation found for rear_display_accessibility_unfolded_animation (1946153682258289040) -->
-    <skip />
+    <string name="rear_display_accessibility_folded_animation" msgid="1538121649587978179">"Преклопувачки уред се отклопува"</string>
+    <string name="rear_display_accessibility_unfolded_animation" msgid="1946153682258289040">"Преклопувачки уред се врти"</string>
+    <string name="stylus_battery_low" msgid="7134370101603167096">"Слаба батерија на пенкало"</string>
 </resources>

@@ -23,8 +23,7 @@
     <string name="summary_watch" msgid="4085794790142204006">"നിങ്ങളുടെ <xliff:g id="DEVICE_NAME">%1$s</xliff:g> മാനേജ് ചെയ്യാൻ ആപ്പ് ആവശ്യമാണ്. നിങ്ങളുടെ അറിയിപ്പുകളുമായി സംവദിക്കാനും നിങ്ങളുടെ ഫോൺ, SMS, Contacts, Calendar, കോൾ ചരിത്രം, സമീപമുള്ള ഉപകരണങ്ങളുടെ അനുമതികൾ എന്നിവ ആക്‌സസ് ചെയ്യാനും <xliff:g id="APP_NAME">%2$s</xliff:g> ആപ്പിനെ അനുവദിക്കും."</string>
     <string name="summary_watch_single_device" msgid="1523091550243476756">"നിങ്ങളുടെ <xliff:g id="DEVICE_NAME">%1$s</xliff:g> മാനേജ് ചെയ്യാൻ ആപ്പ് ആവശ്യമാണ്. ഇനിപ്പറയുന്ന അനുമതികളുമായി സംവദിക്കാൻ <xliff:g id="APP_NAME">%2$s</xliff:g> ആപ്പിനെ അനുവദിക്കും:"</string>
     <string name="profile_name_glasses" msgid="8488394059007275998">"ഗ്ലാസുകൾ"</string>
-    <!-- no translation found for summary_glasses (8987925853224595628) -->
-    <skip />
+    <string name="summary_glasses" msgid="8987925853224595628">"നിങ്ങളുടെ <xliff:g id="DEVICE_NAME">%1$s</xliff:g> മാനേജ് ചെയ്യാൻ ഈ ആപ്പ് ആവശ്യമാണ്. നിങ്ങളുടെ അറിയിപ്പുകളുമായി സംവദിക്കാനും ഫോൺ, SMS, കോൺടാക്റ്റുകൾ, മൈക്രോഫോൺ, സമീപമുള്ള ഉപകരണങ്ങളുടെ അനുമതികൾ എന്നിവ ആക്‌സസ് ചെയ്യാനും <xliff:g id="APP_NAME">%2$s</xliff:g> എന്നതിനെ അനുവദിക്കും."</string>
     <string name="summary_glasses_single_device" msgid="5725890636605211803">"നിങ്ങളുടെ <xliff:g id="DEVICE_NAME">%1$s</xliff:g> മാനേജ് ചെയ്യാൻ ആപ്പ് ആവശ്യമാണ്. ഇനിപ്പറയുന്ന അനുമതികളുമായി സംവദിക്കാൻ <xliff:g id="APP_NAME">%2$s</xliff:g> ആപ്പിനെ അനുവദിക്കും:"</string>
     <string name="title_app_streaming" msgid="2270331024626446950">"നിങ്ങളുടെ ഫോണിൽ നിന്ന് ഈ വിവരങ്ങൾ ആക്‌സസ് ചെയ്യാൻ &lt;strong&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/strong&gt; ആപ്പിനെ അനുവദിക്കുക"</string>
     <string name="helper_title_app_streaming" msgid="4151687003439969765">"ക്രോസ്-ഉപകരണ സേവനങ്ങൾ"</string>

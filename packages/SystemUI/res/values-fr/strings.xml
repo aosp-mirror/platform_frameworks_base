@@ -85,6 +85,7 @@
     <string name="screenshot_share_description" msgid="2861628935812656612">"Partager la capture d\'écran"</string>
     <string name="screenshot_scroll_label" msgid="2930198809899329367">"Capturer plus"</string>
     <string name="screenshot_dismiss_description" msgid="4702341245899508786">"Fermer la capture d\'écran"</string>
+    <string name="screenshot_dismiss_work_profile" msgid="3101530842987697045">"Ignorer le message du profil professionnel"</string>
     <string name="screenshot_preview_description" msgid="7606510140714080474">"Aperçu de la capture d\'écran"</string>
     <string name="screenshot_top_boundary_pct" msgid="2520148599096479332">"Limite supérieure : <xliff:g id="PERCENT">%1$d</xliff:g> pour cent"</string>
     <string name="screenshot_bottom_boundary_pct" msgid="3880821519814946478">"Limite inférieure : <xliff:g id="PERCENT">%1$d</xliff:g> pour cent"</string>
@@ -120,7 +121,7 @@
     <string name="accessibility_menu" msgid="2701163794470513040">"Menu"</string>
     <string name="accessibility_accessibility_button" msgid="4089042473497107709">"Accessibilité"</string>
     <string name="accessibility_rotate_button" msgid="1238584767612362586">"Faire pivoter l\'écran"</string>
-    <string name="accessibility_recent" msgid="901641734769533575">"Aperçu"</string>
+    <string name="accessibility_recent" msgid="901641734769533575">"Récents"</string>
     <string name="accessibility_camera_button" msgid="2938898391716647247">"Appareil photo"</string>
     <string name="accessibility_phone_button" msgid="4256353121703100427">"Téléphoner"</string>
     <string name="accessibility_voice_assist_button" msgid="6497706615649754510">"Assistance vocale"</string>
@@ -317,10 +318,9 @@
     <string name="sensor_privacy_camera_unblocked_dialog_content" msgid="7847190103011782278">"L\'appareil photo est activé pour tous les services et applis."</string>
     <string name="sensor_privacy_camera_blocked_dialog_content" msgid="3182428709314874616">"L\'accès à l\'appareil photo est désactivé pour tous les services et applis."</string>
     <string name="sensor_privacy_htt_blocked_dialog_content" msgid="3333321592997666441">"Pour utiliser le bouton du micro, activez l\'accès au micro dans les paramètres."</string>
-    <!-- no translation found for sensor_privacy_dialog_open_settings (5635865896053011859) -->
-    <skip />
+    <string name="sensor_privacy_dialog_open_settings" msgid="5635865896053011859">"Ouvrir les paramètres"</string>
     <string name="media_seamless_other_device" msgid="4654849800789196737">"Autre appareil"</string>
-    <string name="quick_step_accessibility_toggle_overview" msgid="7908949976727578403">"Activer/Désactiver l\'aperçu"</string>
+    <string name="quick_step_accessibility_toggle_overview" msgid="7908949976727578403">"Activer/Désactiver l\'écran Récents"</string>
     <string name="zen_priority_introduction" msgid="3159291973383796646">"Vous ne serez dérangé par aucun son ni aucune vibration, hormis ceux des alarmes, des rappels, des événements et des appels des contacts de votre choix. Le son continuera de fonctionner notamment pour la musique, les vidéos et les jeux."</string>
     <string name="zen_alarms_introduction" msgid="3987266042682300470">"Vous ne serez dérangé par aucun son ni aucune vibration, hormis ceux des alarmes. Le son continuera de fonctionner notamment pour la musique, les vidéos et les jeux."</string>
     <string name="zen_priority_customize_button" msgid="4119213187257195047">"Personnaliser"</string>
@@ -459,14 +459,14 @@
     <string name="sound_settings" msgid="8874581353127418308">"Son et vibreur"</string>
     <string name="volume_panel_dialog_settings_button" msgid="2513228491513390310">"Paramètres"</string>
     <string name="screen_pinning_title" msgid="9058007390337841305">"L\'application est épinglée"</string>
-    <string name="screen_pinning_description" msgid="8699395373875667743">"Elle restera visible jusqu\'à ce que vous la retiriez. Pour la retirer, appuyez de manière prolongée sur les boutons Retour et Aperçu."</string>
+    <string name="screen_pinning_description" msgid="8699395373875667743">"Elle restera visible jusqu\'à ce que vous la retiriez. Pour la retirer, appuyez de manière prolongée sur les boutons Retour et Récents."</string>
     <string name="screen_pinning_description_recents_invisible" msgid="4564466648700390037">"Elle restera visible jusqu\'à ce que vous la retiriez. Pour la retirer, appuyez de manière prolongée sur les boutons Retour et Accueil."</string>
     <string name="screen_pinning_description_gestural" msgid="7246323931831232068">"Elle restera visible jusqu\'à ce que vous la retiriez. Pour la retirer, balayez-la vers le haut et gardez le doigt appuyé."</string>
-    <string name="screen_pinning_description_accessible" msgid="7386449191953535332">"Elle restera visible jusqu\'à ce que vous la retiriez. Pour la retirer, appuyez de manière prolongée sur le bouton Aperçu."</string>
+    <string name="screen_pinning_description_accessible" msgid="7386449191953535332">"Elle restera visible jusqu\'à ce que vous la retiriez. Pour la retirer, appuyez de manière prolongée sur le bouton Récents."</string>
     <string name="screen_pinning_description_recents_invisible_accessible" msgid="2857071808674481986">"Elle restera visible jusqu\'à ce que vous la retiriez. Pour la retirer, appuyez de manière prolongée sur le bouton Accueil."</string>
     <string name="screen_pinning_exposes_personal_data" msgid="8189852022981524789">"Des données à caractère personnel, comme des contacts et le contenu d\'e-mails, peuvent être accessibles."</string>
     <string name="screen_pinning_can_open_other_apps" msgid="7529756813231421455">"D\'autres applications peuvent être ouvertes depuis une application épinglée."</string>
-    <string name="screen_pinning_toast" msgid="8177286912533744328">"Pour que l\'appli ne soit plus épinglée, appuyez de manière prolongée sur les boutons Retour et Aperçu"</string>
+    <string name="screen_pinning_toast" msgid="8177286912533744328">"Pour que l\'appli ne soit plus épinglée, appuyez de manière prolongée sur les boutons Retour et Récents"</string>
     <string name="screen_pinning_toast_recents_invisible" msgid="6850978077443052594">"Pour que l\'appli ne soit plus épinglée, appuyez de manière prolongée sur les boutons Retour et Accueil"</string>
     <string name="screen_pinning_toast_gesture_nav" msgid="170699893395336705">"Pour que l\'appli ne soit plus épinglée, balayez-la vers le haut et maintenez le doigt appuyé"</string>
     <string name="screen_pinning_positive" msgid="3285785989665266984">"OK"</string>
@@ -743,6 +743,7 @@
     <string name="wifi_is_off" msgid="5389597396308001471">"Wi-Fi désactivé"</string>
     <string name="bt_is_off" msgid="7436344904889461591">"Bluetooth désactivé"</string>
     <string name="dnd_is_off" msgid="3185706903793094463">"Mode \"Ne pas déranger\" désactivé"</string>
+    <string name="dnd_is_on" msgid="7009368176361546279">"Mode \"Ne pas déranger\" activé"</string>
     <string name="qs_dnd_prompt_auto_rule" msgid="3535469468310002616">"Le mode \"Ne pas déranger\" a été activé par une règle automatique (<xliff:g id="ID_1">%s</xliff:g>)."</string>
     <string name="qs_dnd_prompt_app" msgid="4027984447935396820">"Le mode \"Ne pas déranger\" a été activé par une application (<xliff:g id="ID_1">%s</xliff:g>)."</string>
     <string name="qs_dnd_prompt_auto_rule_app" msgid="1841469944118486580">"Le mode \"Ne pas déranger\" a été activé par une règle automatique ou une application."</string>
@@ -905,6 +906,7 @@
     <string name="media_output_dialog_accessibility_title" msgid="4681741064190167888">"Appareils disponibles pour la sortie audio."</string>
     <string name="media_output_dialog_accessibility_seekbar" msgid="5332843993805568978">"Volume"</string>
     <string name="media_output_dialog_volume_percentage" msgid="1613984910585111798">"<xliff:g id="PERCENTAGE">%1$d</xliff:g> %%"</string>
+    <string name="media_output_group_title_speakers_and_displays" msgid="7169712332365659820">"Enceintes et écrans"</string>
     <string name="media_output_first_broadcast_title" msgid="6292237789860753022">"Fonctionnement des annonces"</string>
     <string name="media_output_broadcast" msgid="3555580945878071543">"Annonce"</string>
     <string name="media_output_first_notify_broadcast_message" msgid="6353857724136398494">"Les personnes à proximité équipées d\'appareils Bluetooth compatibles peuvent écouter le contenu multimédia que vous diffusez"</string>
@@ -1032,20 +1034,19 @@
     <string name="log_access_confirmation_deny" msgid="2389461495803585795">"Ne pas autoriser"</string>
     <string name="log_access_confirmation_body" msgid="6883031912003112634">"Les journaux enregistrent ce qui se passe sur votre appareil. Les applis peuvent les utiliser pour rechercher et résoudre des problèmes.\n\nCertains journaux pouvant contenir des infos sensibles, autorisez uniquement les applis de confiance à accéder à tous les journaux de l\'appareil. \n\nSi vous refusez à cette appli l\'accès à tous les journaux de l\'appareil, elle a quand même accès aux siens. Le fabricant de l\'appareil peut accéder à certains journaux ou certaines infos sur votre appareil."</string>
     <string name="keyguard_affordance_enablement_dialog_action_template" msgid="8164857863036314664">"Ouvrir <xliff:g id="APPNAME">%1$s</xliff:g>"</string>
-    <string name="keyguard_affordance_enablement_dialog_message" msgid="2790910660524887941">"Pour ajouter l\'appli <xliff:g id="APPNAME">%1$s</xliff:g> comme raccourci, procédez aux vérifications suivantes"</string>
     <string name="keyguard_affordance_enablement_dialog_wallet_instruction_1" msgid="8439655049139819278">"• L\'appli est configurée"</string>
     <string name="keyguard_affordance_enablement_dialog_wallet_instruction_2" msgid="4321089250629477835">"• Au moins une carte a été ajoutée à Wallet"</string>
     <string name="keyguard_affordance_enablement_dialog_qr_scanner_instruction" msgid="5355839079232119791">"• Installer une appli d\'appareil photo"</string>
     <string name="keyguard_affordance_enablement_dialog_home_instruction_1" msgid="8438311171750568633">"• L\'appli est configurée"</string>
     <string name="keyguard_affordance_enablement_dialog_home_instruction_2" msgid="8308525385889021652">"• Au moins un appareil est disponible"</string>
+    <string name="keyguard_affordance_press_too_short" msgid="8145437175134998864">"Appuyez de manière prolongée sur raccourci"</string>
     <string name="rear_display_bottom_sheet_cancel" msgid="3461468855493357248">"Annuler"</string>
     <string name="rear_display_bottom_sheet_confirm" msgid="4383356544661421206">"Retourner maintenant"</string>
     <string name="rear_display_fold_bottom_sheet_title" msgid="6081542277622721548">"Déplier le téléphone pour un meilleur selfie"</string>
     <string name="rear_display_unfold_bottom_sheet_title" msgid="2137403802960396357">"Passer à l\'écran frontal pour un meilleur selfie ?"</string>
     <string name="rear_display_bottom_sheet_description" msgid="1852662982816810352">"Utilisez la caméra arrière pour prendre une photo plus large avec une résolution supérieure."</string>
     <string name="rear_display_bottom_sheet_warning" msgid="800995919558238930"><b>"✱ Cet écran sera désactivé"</b></string>
-    <!-- no translation found for rear_display_accessibility_folded_animation (1538121649587978179) -->
-    <skip />
-    <!-- no translation found for rear_display_accessibility_unfolded_animation (1946153682258289040) -->
-    <skip />
+    <string name="rear_display_accessibility_folded_animation" msgid="1538121649587978179">"Appareil pliable qui est déplié"</string>
+    <string name="rear_display_accessibility_unfolded_animation" msgid="1946153682258289040">"Appareil pliable qui est retourné"</string>
+    <string name="stylus_battery_low" msgid="7134370101603167096">"La batterie du stylet est faible"</string>
 </resources>
