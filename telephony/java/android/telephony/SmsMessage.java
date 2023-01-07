@@ -1031,6 +1031,15 @@ public class SmsMessage {
     }
 
     /**
+     * Check if format of the message is 3GPP.
+     *
+     * @hide
+     */
+    public boolean is3gpp() {
+        return (mWrappedSmsMessage instanceof com.android.internal.telephony.gsm.SmsMessage);
+    }
+
+    /**
      * Determines whether or not to use CDMA format for MO SMS.
      * If SMS over IMS is supported, then format is based on IMS SMS format,
      * otherwise format is based on current phone type.
