@@ -24,6 +24,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.ServiceConnection;
+import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageManager;
 import android.content.pm.ResolveInfo;
 import android.content.pm.ServiceInfo;
@@ -85,6 +86,11 @@ import java.util.Set;
 public class TvInteractiveAppManagerService extends SystemService {
     private static final boolean DEBUG = false;
     private static final String TAG = "TvInteractiveAppManagerService";
+
+    private static final String METADATA_CLASS_NAME =
+            "android.media.tv.interactive.AppLinkInfo.ClassName";
+    private static final String METADATA_URI =
+            "android.media.tv.interactive.AppLinkInfo.Uri";
     // A global lock.
     private final Object mLock = new Object();
     private final Context mContext;
@@ -101,6 +107,8 @@ public class TvInteractiveAppManagerService extends SystemService {
     // TODO: remove mGetServiceListCalled if onBootPhrase work correctly
     @GuardedBy("mLock")
     private boolean mGetServiceListCalled = false;
+    @GuardedBy("mLock")
+    private boolean mGetAppLinkInfoListCalled = false;
 
     private final UserManager mUserManager;
 
@@ -117,6 +125,41 @@ public class TvInteractiveAppManagerService extends SystemService {
         super(context);
         mContext = context;
         mUserManager = (UserManager) getContext().getSystemService(Context.USER_SERVICE);
+    }
+
+    @GuardedBy("mLock")
+    private void buildAppLinkInfoLocked(int userId) {
+        UserState userState = getOrCreateUserStateLocked(userId);
+        if (DEBUG) {
+            Slogf.d(TAG, "buildAppLinkInfoLocked");
+        }
+        PackageManager pm = mContext.getPackageManager();
+        List<ApplicationInfo> appInfos = pm.getInstalledApplicationsAsUser(
+                PackageManager.ApplicationInfoFlags.of(PackageManager.GET_META_DATA), userId);
+        List<AppLinkInfo> appLinkInfos = new ArrayList<>();
+        for (ApplicationInfo appInfo : appInfos) {
+            AppLinkInfo info = buildAppLinkInfoLocked(appInfo);
+            if (info != null) {
+                appLinkInfos.add(info);
+            }
+        }
+        // sort the list by package name
+        Collections.sort(appLinkInfos, Comparator.comparing(AppLinkInfo::getComponentName));
+        userState.mAppLinkInfoList.clear();
+        userState.mAppLinkInfoList.addAll(appLinkInfos);
+    }
+
+    @GuardedBy("mLock")
+    private AppLinkInfo buildAppLinkInfoLocked(ApplicationInfo appInfo) {
+        if (appInfo.metaData == null || appInfo.packageName == null) {
+            return null;
+        }
+        String className = appInfo.metaData.getString(METADATA_CLASS_NAME, null);
+        String uri = appInfo.metaData.getString(METADATA_URI, null);
+        if (className == null || uri == null) {
+            return null;
+        }
+        return new AppLinkInfo(appInfo.packageName, className, uri);
     }
 
     @GuardedBy("mLock")
@@ -310,6 +353,7 @@ public class TvInteractiveAppManagerService extends SystemService {
         } else if (phase == SystemService.PHASE_THIRD_PARTY_APPS_CAN_START) {
             synchronized (mLock) {
                 buildTvInteractiveAppServiceListLocked(mCurrentUserId, null);
+                buildAppLinkInfoLocked(mCurrentUserId);
             }
         }
     }
@@ -321,6 +365,7 @@ public class TvInteractiveAppManagerService extends SystemService {
                 synchronized (mLock) {
                     if (mCurrentUserId == userId || mRunningProfiles.contains(userId)) {
                         buildTvInteractiveAppServiceListLocked(userId, packages);
+                        buildAppLinkInfoLocked(userId);
                     }
                 }
             }
@@ -427,6 +472,7 @@ public class TvInteractiveAppManagerService extends SystemService {
 
             mCurrentUserId = userId;
             buildTvInteractiveAppServiceListLocked(userId, null);
+            buildAppLinkInfoLocked(userId);
         }
     }
 
@@ -512,6 +558,7 @@ public class TvInteractiveAppManagerService extends SystemService {
     private void startProfileLocked(int userId) {
         mRunningProfiles.add(userId);
         buildTvInteractiveAppServiceListLocked(userId, null);
+        buildAppLinkInfoLocked(userId);
     }
 
     @GuardedBy("mLock")
@@ -660,6 +707,26 @@ public class TvInteractiveAppManagerService extends SystemService {
                         iAppList.add(state.mInfo);
                     }
                     return iAppList;
+                }
+            } finally {
+                Binder.restoreCallingIdentity(identity);
+            }
+        }
+
+        @Override
+        public List<AppLinkInfo> getAppLinkInfoList(int userId) {
+            final int resolvedUserId = resolveCallingUserId(Binder.getCallingPid(),
+                    Binder.getCallingUid(), userId, "getAppLinkInfoList");
+            final long identity = Binder.clearCallingIdentity();
+            try {
+                synchronized (mLock) {
+                    if (!mGetAppLinkInfoListCalled) {
+                        buildAppLinkInfoLocked(userId);
+                        mGetAppLinkInfoListCalled = true;
+                    }
+                    UserState userState = getOrCreateUserStateLocked(resolvedUserId);
+                    List<AppLinkInfo> appLinkInfos = new ArrayList<>(userState.mAppLinkInfoList);
+                    return appLinkInfos;
                 }
             } finally {
                 Binder.restoreCallingIdentity(identity);
@@ -1883,6 +1950,8 @@ public class TvInteractiveAppManagerService extends SystemService {
 
         // A set of all TV Interactive App service packages.
         private final Set<String> mPackageSet = new HashSet<>();
+        // A list of all app link infos.
+        private final List<AppLinkInfo> mAppLinkInfoList = new ArrayList<>();
 
         // A list of callbacks.
         private final RemoteCallbackList<ITvInteractiveAppManagerCallback> mCallbacks =

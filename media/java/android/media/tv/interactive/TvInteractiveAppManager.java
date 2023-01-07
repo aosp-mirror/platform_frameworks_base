@@ -849,6 +849,24 @@ public final class TvInteractiveAppManager {
     }
 
     /**
+     * Returns a list of available app link information.
+     *
+     * <P>A package must declare its app link info in its manifest using meta-data tag, so the info
+     * can be detected by the system.
+     *
+     * @return List of {@link AppLinkInfo} for each package that deslares its app link information.
+     * @hide
+     */
+    @NonNull
+    public List<AppLinkInfo> getAppLinkInfoList() {
+        try {
+            return mService.getAppLinkInfoList(mUserId);
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
+    /**
      * Registers an Android application link info record which can be used to launch the specific
      * Android application by TV interactive App RTE.
      *

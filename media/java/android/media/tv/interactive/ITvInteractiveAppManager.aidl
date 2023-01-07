@@ -36,6 +36,7 @@ import android.view.Surface;
  */
 interface ITvInteractiveAppManager {
     List<TvInteractiveAppServiceInfo> getTvInteractiveAppServiceList(int userId);
+    List<AppLinkInfo> getAppLinkInfoList(int userId);
     void registerAppLinkInfo(String tiasId, in AppLinkInfo info, int userId);
     void unregisterAppLinkInfo(String tiasId, in AppLinkInfo info, int userId);
     void sendAppLinkCommand(String tiasId, in Bundle command, int userId);
