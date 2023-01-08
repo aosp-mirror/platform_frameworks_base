@@ -561,4 +561,11 @@ public class WindowlessWindowManager implements IWindowSession {
     public boolean cancelDraw(IWindow window) {
         return false;
     }
+
+    @Override
+    public boolean transferEmbeddedTouchFocusToHost(IWindow window) {
+        Log.e(TAG, "Received request to transferEmbeddedTouch focus on WindowlessWindowManager" +
+            " we shouldn't get here!");
+        return false;
+    }
 }

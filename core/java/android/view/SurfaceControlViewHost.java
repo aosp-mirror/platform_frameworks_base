@@ -194,7 +194,7 @@ public class SurfaceControlViewHost {
          * is more akin to a PopupWindow in that the size is user specified
          * independent of configuration width and height.
          *
-         * In order to receive the configuration change via 
+         * In order to receive the configuration change via
          * {@link View#onConfigurationChanged}, the context used with the
          * SurfaceControlViewHost and it's embedded view hierarchy must
          * be a WindowContext obtained from {@link Context#createWindowContext}.
@@ -460,5 +460,26 @@ public class SurfaceControlViewHost {
                 (WindowManagerImpl) mViewRoot.mContext.getSystemService(Context.WINDOW_SERVICE);
         attrs.token = wm.getDefaultToken();
     }
-}
 
+    /**
+     * Transfer the currently in progress touch gesture to the parent
+     * (if any) of this SurfaceControlViewHost. This requires that the
+     * SurfaceControlViewHost was created with an associated hostInputToken.
+     *
+     * @return Whether the touch stream was transferred.
+     * @hide
+     */
+    public boolean transferTouchGestureToHost() {
+        if (mViewRoot == null) {
+            return false;
+        }
+
+        final IWindowSession realWm = WindowManagerGlobal.getWindowSession();
+        try {
+            return realWm.transferEmbeddedTouchFocusToHost(mViewRoot.mWindow);
+        } catch (RemoteException e) {
+            e.rethrowAsRuntimeException();
+        }
+        return false;
+    }
+}

@@ -8682,6 +8682,38 @@ public class WindowManagerService extends IWindowManager.Stub
         clientChannel.copyTo(outInputChannel);
     }
 
+    boolean transferEmbeddedTouchFocusToHost(IWindow embeddedWindow) {
+        final IBinder windowBinder = embeddedWindow.asBinder();
+        final IBinder hostInputChannel, embeddedInputChannel;
+        synchronized (mGlobalLock) {
+            final EmbeddedWindowController.EmbeddedWindow ew =
+                mEmbeddedWindowController.getByWindowToken(windowBinder);
+            if (ew == null) {
+                Slog.w(TAG, "Attempt to transfer touch focus from non-existent embedded window");
+                return false;
+            }
+            final WindowState hostWindowState = ew.getWindowState();
+            if (hostWindowState == null) {
+                Slog.w(TAG, "Attempt to transfer touch focus from embedded window with no" +
+                    " associated host");
+                return false;
+            }
+            embeddedInputChannel = ew.getInputChannelToken();
+            if (embeddedInputChannel == null) {
+                Slog.w(TAG, "Attempt to transfer touch focus from embedded window with no input" +
+                    " channel");
+                return false;
+            }
+            hostInputChannel = hostWindowState.mInputChannelToken;
+            if (hostInputChannel == null) {
+                Slog.w(TAG, "Attempt to transfer touch focus to a host window with no" +
+                    " input channel");
+                return false;
+            }
+            return mInputManager.transferTouchFocus(embeddedInputChannel, hostInputChannel);
+        }
+    }
+
     private void updateInputChannel(IBinder channelToken, int callingUid, int callingPid,
             int displayId, SurfaceControl surface, String name,
             InputApplicationHandle applicationHandle, int flags,
