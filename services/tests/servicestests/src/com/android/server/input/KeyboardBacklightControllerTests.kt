@@ -28,7 +28,8 @@ import android.os.test.TestLooper
 import android.platform.test.annotations.Presubmit
 import android.view.InputDevice
 import androidx.test.core.app.ApplicationProvider
-import com.android.server.input.KeyboardBacklightController.BRIGHTNESS_LEVELS
+import com.android.server.input.KeyboardBacklightController.BRIGHTNESS_VALUE_FOR_LEVEL
+import com.android.server.input.KeyboardBacklightController.USER_INACTIVITY_THRESHOLD_MILLIS
 import org.junit.After
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertNotNull
@@ -78,6 +79,7 @@ class KeyboardBacklightControllerTests {
         const val DEVICE_ID = 1
         const val LIGHT_ID = 2
         const val SECOND_LIGHT_ID = 3
+        const val MAX_BRIGHTNESS = 255
     }
 
     @get:Rule
@@ -118,10 +120,6 @@ class KeyboardBacklightControllerTests {
             val args = it.arguments
             lightColorMap.put(args[1] as Int, args[2] as Int)
         }
-        `when`(native.getLightColor(anyInt(), anyInt())).then {
-            val args = it.arguments
-            lightColorMap.getOrDefault(args[1] as Int, -1)
-        }
         lightColorMap.clear()
     }
 
@@ -137,21 +135,17 @@ class KeyboardBacklightControllerTests {
         `when`(iInputManager.getInputDevice(DEVICE_ID)).thenReturn(keyboardWithBacklight)
         `when`(iInputManager.getLights(DEVICE_ID)).thenReturn(listOf(keyboardBacklight))
         keyboardBacklightController.onInputDeviceAdded(DEVICE_ID)
-        // Initially backlight is at min
-        lightColorMap[LIGHT_ID] = Color.argb(BRIGHTNESS_LEVELS.first(), 0, 0, 0)
 
-        val brightnessLevelsArray = BRIGHTNESS_LEVELS.toTypedArray()
-        for (level in 1 until brightnessLevelsArray.size) {
-            keyboardBacklightController.incrementKeyboardBacklight(DEVICE_ID)
-            testLooper.dispatchNext()
+        for (level in 1 until BRIGHTNESS_VALUE_FOR_LEVEL.size) {
+            incrementKeyboardBacklight(DEVICE_ID)
             assertEquals(
                 "Light value for level $level mismatched",
-                Color.argb(brightnessLevelsArray[level], 0, 0, 0),
+                Color.argb(BRIGHTNESS_VALUE_FOR_LEVEL[level], 0, 0, 0),
                 lightColorMap[LIGHT_ID]
             )
             assertEquals(
                 "Light value for level $level must be correctly stored in the datastore",
-                brightnessLevelsArray[level],
+                BRIGHTNESS_VALUE_FOR_LEVEL[level],
                 dataStore.getKeyboardBacklightBrightness(
                     keyboardWithBacklight.descriptor,
                     LIGHT_ID
@@ -159,72 +153,49 @@ class KeyboardBacklightControllerTests {
             )
         }
 
-        for (level in brightnessLevelsArray.size - 2 downTo 0) {
-            keyboardBacklightController.decrementKeyboardBacklight(DEVICE_ID)
-            testLooper.dispatchNext()
-            assertEquals(
-                "Light value for level $level mismatched",
-                Color.argb(brightnessLevelsArray[level], 0, 0, 0),
-                lightColorMap[LIGHT_ID]
-            )
-            assertEquals(
-                "Light value for level $level must be correctly stored in the datastore",
-                brightnessLevelsArray[level],
-                dataStore.getKeyboardBacklightBrightness(
-                    keyboardWithBacklight.descriptor,
-                    LIGHT_ID
-                ).asInt
-            )
-        }
-    }
-
-    @Test
-    fun testKeyboardBacklightIncrementAboveMaxLevel() {
-        val keyboardWithBacklight = createKeyboard(DEVICE_ID)
-        val keyboardBacklight = createLight(LIGHT_ID, Light.LIGHT_TYPE_KEYBOARD_BACKLIGHT)
-        `when`(iInputManager.getInputDevice(DEVICE_ID)).thenReturn(keyboardWithBacklight)
-        `when`(iInputManager.getLights(DEVICE_ID)).thenReturn(listOf(keyboardBacklight))
-        keyboardBacklightController.onInputDeviceAdded(DEVICE_ID)
-        // Initially backlight is at max
-        lightColorMap[LIGHT_ID] = Color.argb(BRIGHTNESS_LEVELS.last(), 0, 0, 0)
-
-        keyboardBacklightController.incrementKeyboardBacklight(DEVICE_ID)
-        testLooper.dispatchNext()
+        // Increment above max level
+        incrementKeyboardBacklight(DEVICE_ID)
         assertEquals(
             "Light value for max level mismatched",
-            Color.argb(BRIGHTNESS_LEVELS.last(), 0, 0, 0),
+            Color.argb(MAX_BRIGHTNESS, 0, 0, 0),
             lightColorMap[LIGHT_ID]
         )
         assertEquals(
             "Light value for max level must be correctly stored in the datastore",
-            BRIGHTNESS_LEVELS.last(),
+            MAX_BRIGHTNESS,
             dataStore.getKeyboardBacklightBrightness(
                 keyboardWithBacklight.descriptor,
                 LIGHT_ID
             ).asInt
         )
-    }
 
-    @Test
-    fun testKeyboardBacklightDecrementBelowMin() {
-        val keyboardWithBacklight = createKeyboard(DEVICE_ID)
-        val keyboardBacklight = createLight(LIGHT_ID, Light.LIGHT_TYPE_KEYBOARD_BACKLIGHT)
-        `when`(iInputManager.getInputDevice(DEVICE_ID)).thenReturn(keyboardWithBacklight)
-        `when`(iInputManager.getLights(DEVICE_ID)).thenReturn(listOf(keyboardBacklight))
-        keyboardBacklightController.onInputDeviceAdded(DEVICE_ID)
-        // Initially backlight is at min
-        lightColorMap[LIGHT_ID] = Color.argb(BRIGHTNESS_LEVELS.first(), 0, 0, 0)
+        for (level in BRIGHTNESS_VALUE_FOR_LEVEL.size - 2 downTo 0) {
+            decrementKeyboardBacklight(DEVICE_ID)
+            assertEquals(
+                "Light value for level $level mismatched",
+                Color.argb(BRIGHTNESS_VALUE_FOR_LEVEL[level], 0, 0, 0),
+                lightColorMap[LIGHT_ID]
+            )
+            assertEquals(
+                "Light value for level $level must be correctly stored in the datastore",
+                BRIGHTNESS_VALUE_FOR_LEVEL[level],
+                dataStore.getKeyboardBacklightBrightness(
+                    keyboardWithBacklight.descriptor,
+                    LIGHT_ID
+                ).asInt
+            )
+        }
 
-        keyboardBacklightController.decrementKeyboardBacklight(DEVICE_ID)
-        testLooper.dispatchNext()
+        // Decrement below min level
+        decrementKeyboardBacklight(DEVICE_ID)
         assertEquals(
             "Light value for min level mismatched",
-            Color.argb(BRIGHTNESS_LEVELS.first(), 0, 0, 0),
+            Color.argb(0, 0, 0, 0),
             lightColorMap[LIGHT_ID]
         )
         assertEquals(
             "Light value for min level must be correctly stored in the datastore",
-            BRIGHTNESS_LEVELS.first(),
+            0,
             dataStore.getKeyboardBacklightBrightness(
                 keyboardWithBacklight.descriptor,
                 LIGHT_ID
@@ -240,7 +211,7 @@ class KeyboardBacklightControllerTests {
         `when`(iInputManager.getLights(DEVICE_ID)).thenReturn(listOf(keyboardInputLight))
         keyboardBacklightController.onInputDeviceAdded(DEVICE_ID)
 
-        keyboardBacklightController.incrementKeyboardBacklight(DEVICE_ID)
+        incrementKeyboardBacklight(DEVICE_ID)
         assertTrue("Non Keyboard backlights should not change", lightColorMap.isEmpty())
     }
 
@@ -258,8 +229,7 @@ class KeyboardBacklightControllerTests {
         )
         keyboardBacklightController.onInputDeviceAdded(DEVICE_ID)
 
-        keyboardBacklightController.incrementKeyboardBacklight(DEVICE_ID)
-        testLooper.dispatchNext()
+        incrementKeyboardBacklight(DEVICE_ID)
         assertEquals("Only keyboard backlights should change", 1, lightColorMap.size)
         assertNotNull("Keyboard backlight should change", lightColorMap[LIGHT_ID])
         assertNull("Input lights should not change", lightColorMap[SECOND_LIGHT_ID])
@@ -275,14 +245,15 @@ class KeyboardBacklightControllerTests {
         dataStore.setKeyboardBacklightBrightness(
             keyboardWithBacklight.descriptor,
             LIGHT_ID,
-            BRIGHTNESS_LEVELS.last()
+            MAX_BRIGHTNESS
         )
-        lightColorMap.clear()
 
         keyboardBacklightController.onInputDeviceAdded(DEVICE_ID)
+        keyboardBacklightController.notifyUserActivity()
+        testLooper.dispatchNext()
         assertEquals(
             "Keyboard backlight level should be restored to the level saved in the data store",
-            Color.argb(BRIGHTNESS_LEVELS.last(), 0, 0, 0),
+            Color.argb(MAX_BRIGHTNESS, 0, 0, 0),
             lightColorMap[LIGHT_ID]
         )
     }
@@ -295,11 +266,12 @@ class KeyboardBacklightControllerTests {
         dataStore.setKeyboardBacklightBrightness(
             keyboardWithBacklight.descriptor,
             LIGHT_ID,
-            BRIGHTNESS_LEVELS.last()
+            MAX_BRIGHTNESS
         )
-        lightColorMap.clear()
 
         keyboardBacklightController.onInputDeviceAdded(DEVICE_ID)
+        keyboardBacklightController.notifyUserActivity()
+        testLooper.dispatchNext()
         assertTrue(
             "Keyboard backlight should not be changed until its added",
             lightColorMap.isEmpty()
@@ -307,22 +279,22 @@ class KeyboardBacklightControllerTests {
 
         `when`(iInputManager.getLights(DEVICE_ID)).thenReturn(listOf(keyboardBacklight))
         keyboardBacklightController.onInputDeviceChanged(DEVICE_ID)
+        keyboardBacklightController.notifyUserActivity()
+        testLooper.dispatchNext()
         assertEquals(
             "Keyboard backlight level should be restored to the level saved in the data store",
-            Color.argb(BRIGHTNESS_LEVELS.last(), 0, 0, 0),
+            Color.argb(MAX_BRIGHTNESS, 0, 0, 0),
             lightColorMap[LIGHT_ID]
         )
     }
 
     @Test
-    fun testKeyboardBacklightT_registerUnregisterListener() {
+    fun testKeyboardBacklight_registerUnregisterListener() {
         val keyboardWithBacklight = createKeyboard(DEVICE_ID)
         val keyboardBacklight = createLight(LIGHT_ID, Light.LIGHT_TYPE_KEYBOARD_BACKLIGHT)
         `when`(iInputManager.getInputDevice(DEVICE_ID)).thenReturn(keyboardWithBacklight)
         `when`(iInputManager.getLights(DEVICE_ID)).thenReturn(listOf(keyboardBacklight))
         keyboardBacklightController.onInputDeviceAdded(DEVICE_ID)
-        // Initially backlight is at min
-        lightColorMap[LIGHT_ID] = Color.argb(BRIGHTNESS_LEVELS.first(), 0, 0, 0)
 
         // Register backlight listener
         val listener = KeyboardBacklightListener()
@@ -343,8 +315,8 @@ class KeyboardBacklightControllerTests {
             lastBacklightState!!.brightnessLevel
         )
         assertEquals(
-            "Backlight state maxBrightnessLevel should be " + (BRIGHTNESS_LEVELS.size - 1),
-            (BRIGHTNESS_LEVELS.size - 1),
+            "Backlight state maxBrightnessLevel should be " + (BRIGHTNESS_VALUE_FOR_LEVEL.size - 1),
+            (BRIGHTNESS_VALUE_FOR_LEVEL.size - 1),
             lastBacklightState!!.maxBrightnessLevel
         )
         assertEquals(
@@ -357,10 +329,68 @@ class KeyboardBacklightControllerTests {
         keyboardBacklightController.unregisterKeyboardBacklightListener(listener, 0)
 
         lastBacklightState = null
-        keyboardBacklightController.incrementKeyboardBacklight(DEVICE_ID)
-        testLooper.dispatchNext()
+        incrementKeyboardBacklight(DEVICE_ID)
 
         assertNull("Listener should not receive any updates", lastBacklightState)
+    }
+
+    @Test
+    fun testKeyboardBacklight_userActivity() {
+        val keyboardWithBacklight = createKeyboard(DEVICE_ID)
+        val keyboardBacklight = createLight(LIGHT_ID, Light.LIGHT_TYPE_KEYBOARD_BACKLIGHT)
+        `when`(iInputManager.getInputDevice(DEVICE_ID)).thenReturn(keyboardWithBacklight)
+        `when`(iInputManager.getLights(DEVICE_ID)).thenReturn(listOf(keyboardBacklight))
+        dataStore.setKeyboardBacklightBrightness(
+            keyboardWithBacklight.descriptor,
+            LIGHT_ID,
+            MAX_BRIGHTNESS
+        )
+
+        keyboardBacklightController.onInputDeviceAdded(DEVICE_ID)
+        keyboardBacklightController.notifyUserActivity()
+        testLooper.dispatchNext()
+        assertEquals(
+            "Keyboard backlight level should be restored to the level saved in the data store",
+            Color.argb(MAX_BRIGHTNESS, 0, 0, 0),
+            lightColorMap[LIGHT_ID]
+        )
+
+        testLooper.moveTimeForward(USER_INACTIVITY_THRESHOLD_MILLIS + 1000)
+        testLooper.dispatchNext()
+        assertEquals(
+            "Keyboard backlight level should be turned off after inactivity",
+            0,
+            lightColorMap[LIGHT_ID]
+        )
+    }
+
+    @Test
+    fun testKeyboardBacklight_displayOnOff() {
+        val keyboardWithBacklight = createKeyboard(DEVICE_ID)
+        val keyboardBacklight = createLight(LIGHT_ID, Light.LIGHT_TYPE_KEYBOARD_BACKLIGHT)
+        `when`(iInputManager.getInputDevice(DEVICE_ID)).thenReturn(keyboardWithBacklight)
+        `when`(iInputManager.getLights(DEVICE_ID)).thenReturn(listOf(keyboardBacklight))
+        dataStore.setKeyboardBacklightBrightness(
+            keyboardWithBacklight.descriptor,
+            LIGHT_ID,
+            MAX_BRIGHTNESS
+        )
+
+        keyboardBacklightController.onInputDeviceAdded(DEVICE_ID)
+        keyboardBacklightController.handleInteractiveStateChange(true /* isDisplayOn */)
+        assertEquals(
+            "Keyboard backlight level should be restored to the level saved in the data " +
+                    "store when display turned on",
+            Color.argb(MAX_BRIGHTNESS, 0, 0, 0),
+            lightColorMap[LIGHT_ID]
+        )
+
+        keyboardBacklightController.handleInteractiveStateChange(false /* isDisplayOn */)
+        assertEquals(
+            "Keyboard backlight level should be turned off after display is turned off",
+            0,
+            lightColorMap[LIGHT_ID]
+        )
     }
 
     inner class KeyboardBacklightListener : IKeyboardBacklightListener.Stub() {
@@ -376,6 +406,18 @@ class KeyboardBacklightControllerTests {
                 isTriggeredByKeyPress
             )
         }
+    }
+
+    private fun incrementKeyboardBacklight(deviceId: Int) {
+        keyboardBacklightController.incrementKeyboardBacklight(deviceId)
+        keyboardBacklightController.notifyUserActivity()
+        testLooper.dispatchAll()
+    }
+
+    private fun decrementKeyboardBacklight(deviceId: Int) {
+        keyboardBacklightController.decrementKeyboardBacklight(deviceId)
+        keyboardBacklightController.notifyUserActivity()
+        testLooper.dispatchAll()
     }
 
     class KeyboardBacklightState(

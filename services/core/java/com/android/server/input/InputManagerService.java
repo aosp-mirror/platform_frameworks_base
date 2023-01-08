@@ -3271,6 +3271,7 @@ public class InputManagerService extends IInputManager.Stub
         public void setInteractive(boolean interactive) {
             mNative.setInteractive(interactive);
             mBatteryController.onInteractiveChanged(interactive);
+            mKeyboardBacklightController.onInteractiveChanged(interactive);
         }
 
         @Override
@@ -3355,6 +3356,11 @@ public class InputManagerService extends IInputManager.Stub
                 @Nullable InputMethodSubtypeHandle subtypeHandle,
                 @Nullable InputMethodSubtype subtype) {
             mKeyboardLayoutManager.onInputMethodSubtypeChanged(userId, subtypeHandle, subtype);
+        }
+
+        @Override
+        public void notifyUserActivity() {
+            mKeyboardBacklightController.notifyUserActivity();
         }
 
         @Override
@@ -3489,6 +3495,8 @@ public class InputManagerService extends IInputManager.Stub
         default void decrementKeyboardBacklight(int deviceId) {}
         default void registerKeyboardBacklightListener(IKeyboardBacklightListener l, int pid) {}
         default void unregisterKeyboardBacklightListener(IKeyboardBacklightListener l, int pid) {}
+        default void onInteractiveChanged(boolean isInteractive) {}
+        default void notifyUserActivity() {}
         default void systemRunning() {}
         default void dump(PrintWriter pw) {}
     }
