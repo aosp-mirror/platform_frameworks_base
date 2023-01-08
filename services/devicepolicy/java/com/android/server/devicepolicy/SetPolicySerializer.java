@@ -17,28 +17,27 @@
 package com.android.server.devicepolicy;
 
 import android.annotation.NonNull;
+import android.annotation.Nullable;
 
-import java.util.LinkedHashMap;
+import com.android.modules.utils.TypedXmlPullParser;
+import com.android.modules.utils.TypedXmlSerializer;
+
+import java.io.IOException;
 import java.util.Objects;
+import java.util.Set;
 
-final class IntegerUnion extends ResolutionMechanism<Integer> {
+// TODO(scottjonathan): Replace with actual implementation
+final class SetPolicySerializer<V> extends PolicySerializer<Set<V>> {
 
     @Override
-    Integer resolve(@NonNull LinkedHashMap<EnforcingAdmin, Integer> adminPolicies) {
-        Objects.requireNonNull(adminPolicies);
-        if (adminPolicies.isEmpty()) {
-            return null;
-        }
-
-        Integer unionOfPolicies = 0;
-        for (Integer policy : adminPolicies.values()) {
-            unionOfPolicies |= policy;
-        }
-        return unionOfPolicies;
+    void saveToXml(TypedXmlSerializer serializer, String attributeName, @NonNull Set<V> value)
+            throws IOException {
+        Objects.requireNonNull(value);
     }
 
+    @Nullable
     @Override
-    public String toString() {
-        return "IntegerUnion {}";
+    Set<V> readFromXml(TypedXmlPullParser parser, String attributeName) {
+        return null;
     }
 }

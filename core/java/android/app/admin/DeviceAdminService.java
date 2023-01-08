@@ -20,6 +20,7 @@ import android.content.ComponentName;
 import android.content.Intent;
 import android.os.IBinder;
 
+// TODO(b/263363091): Restrict to DPC and holders of a new role permission and update javadocs
 /**
  * Base class for a service that device owner/profile owners can optionally have.
  *
@@ -45,6 +46,11 @@ import android.os.IBinder;
  *
  * <p>Note the process may still be killed if the system is under heavy memory pressure, in which
  * case the process will be re-started later.
+ *
+ * <p>Starting from Android {@link android.os.Build.VERSION_CODES#UPSIDE_DOWN_CAKE},
+ * non-DPC admins can also optionally implement this service using the details
+ * mentioned above to ensure they receive policy update broadcasts
+ * (see {@link PolicyUpdatesReceiver}).
  */
 public class DeviceAdminService extends Service {
     private final IDeviceAdminServiceImpl mImpl;

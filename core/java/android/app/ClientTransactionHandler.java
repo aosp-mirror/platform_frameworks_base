@@ -234,9 +234,6 @@ public abstract class ClientTransactionHandler {
     /**
      * Report that relaunch request was handled.
      * @param r Target activity record.
-     * @param pendingActions Pending actions initialized on earlier stages of activity transaction.
-     *                       Used to check if we should report relaunch to WM.
-     * */
-    public abstract void reportRelaunch(@NonNull ActivityClientRecord r,
-            PendingTransactionActions pendingActions);
+     */
+    public abstract void reportRelaunch(@NonNull ActivityClientRecord r);
 }

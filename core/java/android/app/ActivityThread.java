@@ -5773,10 +5773,6 @@ public final class ActivityThread extends ClientTransactionHandler
 
         handleRelaunchActivityInner(r, configChanges, tmp.pendingResults, tmp.pendingIntents,
                 pendingActions, tmp.startsNotResumed, tmp.overrideConfig, "handleRelaunchActivity");
-        if (pendingActions != null) {
-            // Only report a successful relaunch to WindowManager.
-            pendingActions.setReportRelaunchToWindowManager(true);
-        }
     }
 
     void scheduleRelaunchActivity(IBinder token) {
@@ -5884,11 +5880,8 @@ public final class ActivityThread extends ClientTransactionHandler
     }
 
     @Override
-    public void reportRelaunch(ActivityClientRecord r, PendingTransactionActions pendingActions) {
+    public void reportRelaunch(ActivityClientRecord r) {
         ActivityClient.getInstance().activityRelaunched(r.token);
-        if (pendingActions.shouldReportRelaunchToWindowManager() && r.window != null) {
-            r.window.reportActivityRelaunched();
-        }
     }
 
     private void callActivityOnSaveInstanceState(ActivityClientRecord r) {

@@ -22,7 +22,7 @@ import android.graphics.drawable.Drawable
 
 open class ProviderInfo(
   val icon: Drawable,
-  val name: String,
+  val id: String,
   val displayName: String,
 )
 

@@ -8160,6 +8160,7 @@ package android.app.admin {
     field @NonNull public static final android.app.admin.TargetUser GLOBAL;
     field @NonNull public static final android.app.admin.TargetUser LOCAL_USER;
     field @NonNull public static final android.app.admin.TargetUser PARENT_USER;
+    field @NonNull public static final android.app.admin.TargetUser UNKNOWN_USER;
   }
 
   public final class UnsafeStateException extends java.lang.IllegalStateException implements android.os.Parcelable {
@@ -13222,7 +13223,7 @@ package android.credentials {
     ctor public ClearCredentialStateException(@NonNull String, @Nullable String, @Nullable Throwable);
     ctor public ClearCredentialStateException(@NonNull String, @Nullable Throwable);
     ctor public ClearCredentialStateException(@NonNull String);
-    field @NonNull public final String errorType;
+    method @NonNull public String getType();
   }
 
   public final class ClearCredentialStateRequest implements android.os.Parcelable {
@@ -13238,7 +13239,8 @@ package android.credentials {
     ctor public CreateCredentialException(@NonNull String, @Nullable String, @Nullable Throwable);
     ctor public CreateCredentialException(@NonNull String, @Nullable Throwable);
     ctor public CreateCredentialException(@NonNull String);
-    field @NonNull public final String errorType;
+    method @NonNull public String getType();
+    field @NonNull public static final String TYPE_NO_CREDENTIAL = "android.credentials.CreateCredentialException.TYPE_NO_CREDENTIAL";
   }
 
   public final class CreateCredentialRequest implements android.os.Parcelable {
@@ -13267,6 +13269,7 @@ package android.credentials {
     method @NonNull public String getType();
     method public void writeToParcel(@NonNull android.os.Parcel, int);
     field @NonNull public static final android.os.Parcelable.Creator<android.credentials.Credential> CREATOR;
+    field @NonNull public static final String TYPE_PASSWORD_CREDENTIAL = "android.credentials.TYPE_PASSWORD_CREDENTIAL";
   }
 
   public final class CredentialManager {
@@ -13280,7 +13283,8 @@ package android.credentials {
     ctor public GetCredentialException(@NonNull String, @Nullable String, @Nullable Throwable);
     ctor public GetCredentialException(@NonNull String, @Nullable Throwable);
     ctor public GetCredentialException(@NonNull String);
-    field @NonNull public final String errorType;
+    method @NonNull public String getType();
+    field @NonNull public static final String TYPE_NO_CREDENTIAL = "android.credentials.GetCredentialException.TYPE_NO_CREDENTIAL";
   }
 
   public final class GetCredentialOption implements android.os.Parcelable {

@@ -49,4 +49,10 @@ final class TopPriority<V> extends ResolutionMechanism<V> {
         Map.Entry<EnforcingAdmin, V> policy = adminPolicies.entrySet().stream().findFirst().get();
         return policy.getValue();
     }
+
+    @Override
+    public String toString() {
+        return "TopPriority { mHighestToLowestPriorityAuthorities= "
+                + mHighestToLowestPriorityAuthorities + " }";
+    }
 }

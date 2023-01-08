@@ -37,4 +37,9 @@ final class SetUnion<V> extends ResolutionMechanism<Set<V>> {
         }
         return unionOfPolicies;
     }
+
+    @Override
+    public String toString() {
+        return "SetUnion {}";
+    }
 }

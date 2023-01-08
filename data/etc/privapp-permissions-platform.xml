@@ -346,10 +346,6 @@ applications that come with the platform
         <permission name="android.permission.SET_WALLPAPER_COMPONENT" />
         <permission name="android.permission.SET_WALLPAPER_DIM_AMOUNT" />
         <permission name="android.permission.REQUEST_NOTIFICATION_ASSISTANT_SERVICE" />
-        <!-- Permission required for CTS test - TrustTestCases -->
-        <permission name="android.permission.PROVIDE_TRUST_AGENT" />
-        <permission name="android.permission.ACCESS_KEYGUARD_SECURE_STORAGE" />
-        <permission name="android.permission.TRUST_LISTENER" />
         <!-- Permissions required for Incremental CTS tests -->
         <permission name="com.android.permission.USE_INSTALLER_V2"/>
         <permission name="android.permission.LOADER_USAGE_STATS"/>

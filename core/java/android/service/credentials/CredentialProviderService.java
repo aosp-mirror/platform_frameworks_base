@@ -181,7 +181,7 @@ public abstract class CredentialProviderService extends Service {
                         @Override
                         public void onError(GetCredentialException e) {
                             try {
-                                callback.onFailure(e.errorType, e.getMessage());
+                                callback.onFailure(e.getType(), e.getMessage());
                             } catch (RemoteException ex) {
                                 ex.rethrowFromSystemServer();
                             }
@@ -216,7 +216,7 @@ public abstract class CredentialProviderService extends Service {
                         @Override
                         public void onError(CreateCredentialException e) {
                             try {
-                                callback.onFailure(e.errorType, e.getMessage());
+                                callback.onFailure(e.getType(), e.getMessage());
                             } catch (RemoteException ex) {
                                 ex.rethrowFromSystemServer();
                             }
@@ -250,7 +250,7 @@ public abstract class CredentialProviderService extends Service {
                         @Override
                         public void onError(ClearCredentialStateException e) {
                             try {
-                                callback.onFailure(e.errorType, e.getMessage());
+                                callback.onFailure(e.getType(), e.getMessage());
                             } catch (RemoteException ex) {
                                 ex.rethrowFromSystemServer();
                             }

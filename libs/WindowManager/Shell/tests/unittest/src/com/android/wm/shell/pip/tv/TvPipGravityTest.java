@@ -48,6 +48,9 @@ public class TvPipGravityTest extends ShellTestCase {
 
     @Before
     public void setUp() {
+        if (!isTelevision()) {
+            return;
+        }
         MockitoAnnotations.initMocks(this);
         mTvPipBoundsState = new TvPipBoundsState(mContext);
         mTvPipBoundsAlgorithm = new TvPipBoundsAlgorithm(mContext, mTvPipBoundsState,

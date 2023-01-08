@@ -173,6 +173,7 @@ public final class ImeInsetsSourceConsumer extends InsetsSourceConsumer {
                 ImeTracker.PHASE_CLIENT_INSETS_CONSUMER_NOTIFY_HIDDEN);
 
         getImm().notifyImeHidden(mController.getHost().getWindowToken(), statsToken);
+        mIsRequestedVisibleAwaitingControl = false;
         Trace.asyncTraceEnd(TRACE_TAG_VIEW, "IC.hideRequestFromApi", 0);
     }
 
