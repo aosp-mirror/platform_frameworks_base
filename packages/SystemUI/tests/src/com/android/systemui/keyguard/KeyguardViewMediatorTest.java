@@ -444,6 +444,45 @@ public class KeyguardViewMediatorTest extends SysuiTestCase {
         TestableLooper.get(this).processAllMessages();
     }
 
+    @Test
+    @TestableLooper.RunWithLooper(setAsMainLooper = true)
+    public void testKeyguardDelayedOnGoingToSleep_ifScreenOffAnimationWillPlayButIsntPlayingYet() {
+        mViewMediator.onSystemReady();
+        TestableLooper.get(this).processAllMessages();
+
+        mViewMediator.setShowingLocked(false);
+        TestableLooper.get(this).processAllMessages();
+
+        mViewMediator.onStartedGoingToSleep(OFF_BECAUSE_OF_USER);
+        TestableLooper.get(this).processAllMessages();
+
+        when(mScreenOffAnimationController.shouldDelayKeyguardShow()).thenReturn(true);
+        when(mScreenOffAnimationController.isKeyguardShowDelayed()).thenReturn(false);
+        mViewMediator.onFinishedGoingToSleep(OFF_BECAUSE_OF_USER, false);
+        TestableLooper.get(this).processAllMessages();
+
+        assertFalse(mViewMediator.isShowingAndNotOccluded());
+    }
+
+    @Test
+    @TestableLooper.RunWithLooper(setAsMainLooper = true)
+    public void testKeyguardNotDelayedOnGoingToSleep_ifScreenOffAnimationWillNotPlay() {
+        mViewMediator.onSystemReady();
+        TestableLooper.get(this).processAllMessages();
+
+        mViewMediator.setShowingLocked(false);
+        TestableLooper.get(this).processAllMessages();
+
+        mViewMediator.onStartedGoingToSleep(OFF_BECAUSE_OF_USER);
+        TestableLooper.get(this).processAllMessages();
+
+        when(mScreenOffAnimationController.shouldDelayKeyguardShow()).thenReturn(false);
+        mViewMediator.onFinishedGoingToSleep(OFF_BECAUSE_OF_USER, false);
+        TestableLooper.get(this).processAllMessages();
+
+        assertTrue(mViewMediator.isShowingAndNotOccluded());
+    }
+
     private void createAndStartViewMediator() {
         mViewMediator = new KeyguardViewMediator(
                 mContext,

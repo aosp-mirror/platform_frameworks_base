@@ -1459,16 +1459,16 @@ public class KeyguardViewMediator implements CoreStartable, Dumpable,
     public void maybeHandlePendingLock() {
         if (mPendingLock) {
 
-            // The screen off animation is playing, so if we lock now, the foreground app will
-            // vanish and the keyguard will jump-cut in. Delay it, until either:
+            // The screen off animation is playing or is about to be, so if we lock now, the
+            // foreground app will vanish and the keyguard will jump-cut in. Delay it, until either:
             //   - The screen off animation ends. We will call maybeHandlePendingLock from
             //     the end action in UnlockedScreenOffAnimationController#animateInKeyguard.
             //   - The screen off animation is cancelled by the device waking back up. We will call
             //     maybeHandlePendingLock from KeyguardViewMediator#onStartedWakingUp.
-            if (mScreenOffAnimationController.isKeyguardShowDelayed()) {
+            if (mScreenOffAnimationController.shouldDelayKeyguardShow()) {
                 if (DEBUG) {
                     Log.d(TAG, "#maybeHandlePendingLock: not handling because the screen off "
-                            + "animation's isKeyguardShowDelayed() returned true. This should be "
+                            + "animation's shouldDelayKeyguardShow() returned true. This should be "
                             + "handled soon by #onStartedWakingUp, or by the end actions of the "
                             + "screen off animation.");
                 }
