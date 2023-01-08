@@ -33,8 +33,6 @@ public final class Credential implements Parcelable {
 
     /**
      * The type value for password credential related operations.
-     *
-     * @hide
      */
     @NonNull public static final String TYPE_PASSWORD_CREDENTIAL =
             "android.credentials.TYPE_PASSWORD_CREDENTIAL";

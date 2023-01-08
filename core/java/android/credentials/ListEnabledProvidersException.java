@@ -31,44 +31,50 @@ import com.android.internal.util.Preconditions;
  */
 public class ListEnabledProvidersException extends Exception {
 
-    @NonNull public final String errorType;
+    @NonNull private final String mType;
 
-    /**
-     * Constructs a {@link ListEnabledProvidersException}.
-     *
-     * @throws IllegalArgumentException If errorType is empty.
-     */
-    public ListEnabledProvidersException(@NonNull String errorType, @Nullable String message) {
-        this(errorType, message, null);
+    /** Returns the specific exception type. */
+    @NonNull
+    public String getType() {
+        return mType;
     }
 
     /**
      * Constructs a {@link ListEnabledProvidersException}.
      *
-     * @throws IllegalArgumentException If errorType is empty.
+     * @throws IllegalArgumentException If type is empty.
+     */
+    public ListEnabledProvidersException(@NonNull String type, @Nullable String message) {
+        this(type, message, null);
+    }
+
+    /**
+     * Constructs a {@link ListEnabledProvidersException}.
+     *
+     * @throws IllegalArgumentException If type is empty.
      */
     public ListEnabledProvidersException(
-            @NonNull String errorType, @Nullable String message, @Nullable Throwable cause) {
+            @NonNull String type, @Nullable String message, @Nullable Throwable cause) {
         super(message, cause);
-        this.errorType =
-                Preconditions.checkStringNotEmpty(errorType, "errorType must not be empty");
+        this.mType =
+                Preconditions.checkStringNotEmpty(type, "type must not be empty");
     }
 
     /**
      * Constructs a {@link ListEnabledProvidersException}.
      *
-     * @throws IllegalArgumentException If errorType is empty.
+     * @throws IllegalArgumentException If type is empty.
      */
-    public ListEnabledProvidersException(@NonNull String errorType, @Nullable Throwable cause) {
-        this(errorType, null, cause);
+    public ListEnabledProvidersException(@NonNull String type, @Nullable Throwable cause) {
+        this(type, null, cause);
     }
 
     /**
      * Constructs a {@link ListEnabledProvidersException}.
      *
-     * @throws IllegalArgumentException If errorType is empty.
+     * @throws IllegalArgumentException If type is empty.
      */
-    public ListEnabledProvidersException(@NonNull String errorType) {
-        this(errorType, null, null);
+    public ListEnabledProvidersException(@NonNull String type) {
+        this(type, null, null);
     }
 }

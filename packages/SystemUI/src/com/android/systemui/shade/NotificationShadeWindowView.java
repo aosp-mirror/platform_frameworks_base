@@ -638,10 +638,6 @@ public class NotificationShadeWindowView extends FrameLayout {
         }
 
         @Override
-        public void reportActivityRelaunched() {
-        }
-
-        @Override
         public WindowInsetsController getInsetsController() {
             return null;
         }

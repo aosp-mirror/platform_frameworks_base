@@ -44,6 +44,11 @@ public final class TargetUser {
     public static final int GLOBAL_USER_ID = -3;
 
     /**
+     * @hide
+     */
+    public static final int UNKNOWN_USER_ID = -3;
+
+    /**
      * Indicates that the policy relates to the user the admin is installed on.
      */
     @NonNull
@@ -60,6 +65,15 @@ public final class TargetUser {
      */
     @NonNull
     public static final TargetUser GLOBAL = new TargetUser(GLOBAL_USER_ID);
+
+    /**
+     * Indicates that the policy relates to some unknown user on the device. For example, if Admin1
+     * has set a global policy on a device and Admin2 has set a conflicting local
+     * policy on some other secondary user, Admin1 will get a policy update callback with
+     * {@code UNKNOWN_USER} as the target user.
+     */
+    @NonNull
+    public static final TargetUser UNKNOWN_USER = new TargetUser(UNKNOWN_USER_ID);
 
     private final int mUserId;
 

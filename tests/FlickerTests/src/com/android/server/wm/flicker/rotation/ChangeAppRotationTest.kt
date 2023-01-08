@@ -78,7 +78,7 @@ import org.junit.runners.Parameterized
 @RunWith(Parameterized::class)
 @Parameterized.UseParametersRunnerFactory(FlickerParametersRunnerFactory::class)
 @FixMethodOrder(MethodSorters.NAME_ASCENDING)
-class ChangeAppRotationTest(flicker: FlickerTest) : RotationTransition(flicker) {
+open class ChangeAppRotationTest(flicker: FlickerTest) : RotationTransition(flicker) {
     override val testApp = SimpleAppHelper(instrumentation)
     override val transition: FlickerBuilder.() -> Unit
         get() = {

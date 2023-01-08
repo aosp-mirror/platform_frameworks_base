@@ -76,7 +76,14 @@ public abstract class ShellTestCase {
      * only be run on TVs.
      */
     protected void assumeTelevision() {
-        assumeTrue(mPm.hasSystemFeature(PackageManager.FEATURE_LEANBACK)
-                || mPm.hasSystemFeature(PackageManager.FEATURE_LEANBACK_ONLY));
+        assumeTrue(isTelevision());
+    }
+
+    /**
+     * Returns whether this test device is a TV device.
+     */
+    protected boolean isTelevision() {
+        return mPm.hasSystemFeature(PackageManager.FEATURE_LEANBACK)
+                || mPm.hasSystemFeature(PackageManager.FEATURE_LEANBACK_ONLY);
     }
 }

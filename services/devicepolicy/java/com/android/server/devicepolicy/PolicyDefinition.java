@@ -33,6 +33,7 @@ import java.io.IOException;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 final class PolicyDefinition<V> {
     private static final int POLICY_FLAG_NONE = 0;
@@ -98,10 +99,18 @@ final class PolicyDefinition<V> {
                     PolicyEnforcerCallbacks.setLockTask(value, context, userId),
             new LockTaskPolicy.LockTaskPolicySerializer());
 
-    private static Map<String, PolicyDefinition<?>> sPolicyDefinitions = Map.of(
+    static PolicyDefinition<Set<String>> USER_CONTROLLED_DISABLED_PACKAGES = new PolicyDefinition<>(
+            DevicePolicyManager.USER_CONTROL_DISABLED_PACKAGES,
+            new SetUnion<>(),
+            (Set<String> value, Context context, Integer userId, Bundle args) ->
+                    PolicyEnforcerCallbacks.setUserControlDisabledPackages(value, userId),
+            new SetPolicySerializer<>());
+
+    private static final Map<String, PolicyDefinition<?>> sPolicyDefinitions = Map.of(
             DevicePolicyManager.AUTO_TIMEZONE_POLICY, AUTO_TIMEZONE,
             DevicePolicyManager.PERMISSION_GRANT_POLICY_KEY, PERMISSION_GRANT_NO_ARGS,
-            DevicePolicyManager.LOCK_TASK_POLICY, LOCK_TASK
+            DevicePolicyManager.LOCK_TASK_POLICY, LOCK_TASK,
+            DevicePolicyManager.USER_CONTROL_DISABLED_PACKAGES, USER_CONTROLLED_DISABLED_PACKAGES
     );
 
 
@@ -260,5 +269,12 @@ final class PolicyDefinition<V> {
     @Nullable
     V readPolicyValueFromXml(TypedXmlPullParser parser, String attributeName) {
         return mPolicySerializer.readFromXml(parser, attributeName);
+    }
+
+    @Override
+    public String toString() {
+        return "PolicyDefinition { mPolicyKey= " + mPolicyKey + ", mPolicyDefinitionKey= "
+                + mPolicyDefinitionKey + ", mResolutionMechanism= " + mResolutionMechanism
+                + ", mCallbackArgs= " + mCallbackArgs + ", mPolicyFlags= " + mPolicyFlags + " }";
     }
 }

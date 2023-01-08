@@ -815,8 +815,8 @@ final class DisplayPowerController implements AutomaticBrightnessController.Call
                 loadFromDisplayDeviceConfig(token, info);
 
                 // Since the underlying display-device changed, we really don't know the
-                // last command that was sent to change it's state. Lets assume it is unknown so
-                // that we trigger a change immediately.
+                // last command that was sent to change it's state. Lets assume it is off and we
+                // trigger a change immediately.
                 mPowerState.resetScreenState();
             }
             if (mIsEnabled != isEnabled || mIsInTransition != isInTransition) {

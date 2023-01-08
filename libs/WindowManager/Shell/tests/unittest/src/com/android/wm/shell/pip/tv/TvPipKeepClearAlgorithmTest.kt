@@ -56,6 +56,9 @@ class TvPipKeepClearAlgorithmTest : ShellTestCase() {
 
     @Before
     fun setup() {
+        if (!isTelevision) {
+            return
+        }
         movementBounds = Rect(0, 0, SCREEN_SIZE.width, SCREEN_SIZE.height)
         movementBounds.inset(SCREEN_EDGE_INSET, SCREEN_EDGE_INSET)
 

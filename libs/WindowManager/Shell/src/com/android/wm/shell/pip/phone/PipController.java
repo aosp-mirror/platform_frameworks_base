@@ -207,7 +207,8 @@ public class PipController implements PipTransitionController.PipTransitionCallb
 
     private Consumer<Boolean> mOnIsInPipStateChangedListener;
 
-    private interface PipAnimationListener {
+    @VisibleForTesting
+    interface PipAnimationListener {
         /**
          * Notifies the listener that the Pip animation is started.
          */
@@ -434,11 +435,7 @@ public class PipController implements PipTransitionController.PipTransitionCallb
             Optional<OneHandedController> oneHandedController,
             ShellExecutor mainExecutor
     ) {
-        // Ensure that we are the primary user's SystemUI.
-        final int processUser = UserManager.get(context).getProcessUserId();
-        if (processUser != UserHandle.USER_SYSTEM) {
-            throw new IllegalStateException("Non-primary Pip component not currently supported.");
-        }
+
 
         mContext = context;
         mShellCommandHandler = shellCommandHandler;
@@ -872,9 +869,15 @@ public class PipController implements PipTransitionController.PipTransitionCallb
                 animationType == PipAnimationController.ANIM_TYPE_BOUNDS);
     }
 
-    private void setPinnedStackAnimationListener(PipAnimationListener callback) {
+    @VisibleForTesting
+    void setPinnedStackAnimationListener(PipAnimationListener callback) {
         mPinnedStackAnimationRecentsCallback = callback;
         onPipResourceDimensionsChanged();
+    }
+
+    @VisibleForTesting
+    boolean hasPinnedStackAnimationListener() {
+        return mPinnedStackAnimationRecentsCallback != null;
     }
 
     private void onPipResourceDimensionsChanged() {
@@ -1166,6 +1169,8 @@ public class PipController implements PipTransitionController.PipTransitionCallb
         @Override
         public void invalidate() {
             mController = null;
+            // Unregister the listener to ensure any registered binder death recipients are unlinked
+            mListener.unregister();
         }
 
         @Override

@@ -245,7 +245,9 @@ public class ImePerfTest extends ImePerfTestBase
         }
 
         long measuredTimeNs = 0;
-        while (state.keepRunning(measuredTimeNs)) {
+        boolean shouldRetry = false;
+        while (shouldRetry || state.keepRunning(measuredTimeNs)) {
+            shouldRetry = false;
             killBaselineIme();
             try (ImeSession imeSession = new ImeSession(BaselineIme.getName(
                     getInstrumentation().getContext()))) {
@@ -268,6 +270,14 @@ public class ImePerfTest extends ImePerfTestBase
                 });
 
                 measuredTimeNs = waitForAnimationStart(latchStart, startTime);
+
+                if (measuredTimeNs == ANIMATION_NOT_STARTED) {
+                    // Animation didn't start within timeout,
+                    // retry for more samples.
+                    // TODO(b/264722663): Investigate the animation start failure reason.
+                    shouldRetry = true;
+                    Log.w(TAG, "Insets animation didn't start within timeout.");
+                }
                 mActivityRule.finishActivity();
             }
         }

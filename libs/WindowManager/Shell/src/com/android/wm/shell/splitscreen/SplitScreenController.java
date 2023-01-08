@@ -954,6 +954,8 @@ public class SplitScreenController implements DragAndDropPolicy.Starter,
         @Override
         public void invalidate() {
             mController = null;
+            // Unregister the listener to ensure any registered binder death recipients are unlinked
+            mListener.unregister();
         }
 
         @Override

@@ -39,6 +39,7 @@ data class CreateCredentialUiState(
   val disabledProviders: List<DisabledProviderInfo>? = null,
   val currentScreenState: CreateScreenState,
   val requestDisplayInfo: RequestDisplayInfo,
+  val sortedCreateOptionsPairs: List<Pair<CreateOptionInfo, EnabledProviderInfo>>,
   // Should not change with the real time update of default provider, only determine whether we're
   // showing provider selection page at the beginning
   val hasDefaultProvider: Boolean,
@@ -89,9 +90,9 @@ class CreateCredentialViewModel(
     UserConfigRepo.getInstance().setIsPasskeyFirstUse(false)
   }
 
-  fun getProviderInfoByName(providerName: String): EnabledProviderInfo {
+  fun getProviderInfoByName(providerId: String): EnabledProviderInfo {
     return uiState.enabledProviders.single {
-      it.name == providerName
+      it.id == providerId
     }
   }
 
@@ -133,7 +134,7 @@ class CreateCredentialViewModel(
       currentScreenState = CreateScreenState.CREATION_OPTION_SELECTION,
       activeEntry = activeEntry
     )
-    val providerId = uiState.activeEntry?.activeProvider?.name
+    val providerId = uiState.activeEntry?.activeProvider?.id
     onDefaultChanged(providerId)
   }
 
@@ -150,7 +151,7 @@ class CreateCredentialViewModel(
     uiState = uiState.copy(
       currentScreenState = CreateScreenState.CREATION_OPTION_SELECTION,
     )
-    val providerId = uiState.activeEntry?.activeProvider?.name
+    val providerId = uiState.activeEntry?.activeProvider?.id
     onDefaultChanged(providerId)
   }
 

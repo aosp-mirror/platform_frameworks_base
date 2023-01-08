@@ -76,6 +76,7 @@ fun CreateCredentialScreen(
                         requestDisplayInfo = uiState.requestDisplayInfo,
                         enabledProviderList = uiState.enabledProviders,
                         disabledProviderList = uiState.disabledProviders,
+                        sortedCreateOptionsPairs = uiState.sortedCreateOptionsPairs,
                         onOptionSelected = viewModel::onEntrySelectedFromFirstUseScreen,
                         onDisabledPasswordManagerSelected =
                         viewModel::onDisabledPasswordManagerSelected,
@@ -94,6 +95,7 @@ fun CreateCredentialScreen(
                         requestDisplayInfo = uiState.requestDisplayInfo,
                         enabledProviderList = uiState.enabledProviders,
                         disabledProviderList = uiState.disabledProviders,
+                        sortedCreateOptionsPairs = uiState.sortedCreateOptionsPairs,
                         hasDefaultProvider = uiState.hasDefaultProvider,
                         isFromProviderSelection = uiState.isFromProviderSelection!!,
                         onBackProviderSelectionButtonSelected =
@@ -246,6 +248,7 @@ fun ProviderSelectionCard(
     requestDisplayInfo: RequestDisplayInfo,
     enabledProviderList: List<EnabledProviderInfo>,
     disabledProviderList: List<DisabledProviderInfo>?,
+    sortedCreateOptionsPairs: List<Pair<CreateOptionInfo, EnabledProviderInfo>>,
     onOptionSelected: (ActiveEntry) -> Unit,
     onDisabledPasswordManagerSelected: () -> Unit,
     onMoreOptionsSelected: () -> Unit,
@@ -295,22 +298,21 @@ fun ProviderSelectionCard(
                 LazyColumn(
                     verticalArrangement = Arrangement.spacedBy(2.dp)
                 ) {
-                    enabledProviderList.forEach { enabledProviderInfo ->
-                        enabledProviderInfo.createOptions.forEach { createOptionInfo ->
-                            item {
-                                MoreOptionsInfoRow(
-                                    requestDisplayInfo = requestDisplayInfo,
-                                    providerInfo = enabledProviderInfo,
-                                    createOptionInfo = createOptionInfo,
-                                    onOptionSelected = {
-                                        onOptionSelected(
-                                            ActiveEntry(
-                                                enabledProviderInfo,
-                                                createOptionInfo
-                                            )
+                    sortedCreateOptionsPairs.forEach { entry ->
+                        item {
+                            MoreOptionsInfoRow(
+                                requestDisplayInfo = requestDisplayInfo,
+                                providerInfo = entry.second,
+                                createOptionInfo = entry.first,
+                                onOptionSelected = {
+                                    onOptionSelected(
+                                        ActiveEntry(
+                                            entry.second,
+                                            entry.first
                                         )
-                                    })
-                            }
+                                    )
+                                }
+                            )
                         }
                     }
                     item {
@@ -355,6 +357,7 @@ fun MoreOptionsSelectionCard(
     requestDisplayInfo: RequestDisplayInfo,
     enabledProviderList: List<EnabledProviderInfo>,
     disabledProviderList: List<DisabledProviderInfo>?,
+    sortedCreateOptionsPairs: List<Pair<CreateOptionInfo, EnabledProviderInfo>>,
     hasDefaultProvider: Boolean,
     isFromProviderSelection: Boolean,
     onBackProviderSelectionButtonSelected: () -> Unit,
@@ -411,23 +414,23 @@ fun MoreOptionsSelectionCard(
                 LazyColumn(
                     verticalArrangement = Arrangement.spacedBy(2.dp)
                 ) {
+                    // Only in the flows with default provider(not first time use) we can show the
+                    // createOptions here, or they will be shown on ProviderSelectionCard
                     if (hasDefaultProvider) {
-                        enabledProviderList.forEach { enabledProviderInfo ->
-                            enabledProviderInfo.createOptions.forEach { createOptionInfo ->
-                                item {
-                                    MoreOptionsInfoRow(
-                                        requestDisplayInfo = requestDisplayInfo,
-                                        providerInfo = enabledProviderInfo,
-                                        createOptionInfo = createOptionInfo,
-                                        onOptionSelected = {
-                                            onOptionSelected(
-                                                ActiveEntry(
-                                                    enabledProviderInfo,
-                                                    createOptionInfo
-                                                )
+                        sortedCreateOptionsPairs.forEach { entry ->
+                            item {
+                                MoreOptionsInfoRow(
+                                    requestDisplayInfo = requestDisplayInfo,
+                                    providerInfo = entry.second,
+                                    createOptionInfo = entry.first,
+                                    onOptionSelected = {
+                                        onOptionSelected(
+                                            ActiveEntry(
+                                                entry.second,
+                                                entry.first
                                             )
-                                        })
-                                }
+                                        )
+                                    })
                             }
                         }
                         item {

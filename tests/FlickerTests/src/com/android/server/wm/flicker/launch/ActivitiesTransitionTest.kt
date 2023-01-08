@@ -57,7 +57,7 @@ import org.junit.runners.Parameterized
 @RunWith(Parameterized::class)
 @Parameterized.UseParametersRunnerFactory(FlickerParametersRunnerFactory::class)
 @FixMethodOrder(MethodSorters.NAME_ASCENDING)
-class ActivitiesTransitionTest(flicker: FlickerTest) : BaseTest(flicker) {
+open class ActivitiesTransitionTest(flicker: FlickerTest) : BaseTest(flicker) {
     private val testApp: TwoActivitiesAppHelper = TwoActivitiesAppHelper(instrumentation)
 
     /** {@inheritDoc} */
