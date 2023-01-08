@@ -20,15 +20,13 @@ import static com.android.internal.util.function.pooled.PooledLambda.obtainRunna
 
 import android.annotation.NonNull;
 import android.content.Context;
-import android.graphics.ImageFormat;
 import android.hardware.ICameraService;
 import android.hardware.camera2.CameraAccessException;
 import android.hardware.camera2.CameraCaptureSession;
 import android.hardware.camera2.CameraCharacteristics;
-import android.hardware.camera2.CameraExtensionCharacteristics;
-import android.hardware.camera2.CameraExtensionSession;
-import android.hardware.camera2.CameraOfflineSession;
 import android.hardware.camera2.CameraDevice;
+import android.hardware.camera2.CameraExtensionCharacteristics;
+import android.hardware.camera2.CameraOfflineSession;
 import android.hardware.camera2.CaptureFailure;
 import android.hardware.camera2.CaptureRequest;
 import android.hardware.camera2.CaptureResult;
@@ -63,17 +61,17 @@ import java.util.AbstractMap.SimpleEntry;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
-import java.util.HashSet;
 import java.util.HashMap;
-import java.util.Map;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
-import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.Executor;
-import java.util.concurrent.Executors;
 import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 /**
  * HAL2.1+ implementation of CameraDevice. Use CameraManager#open to instantiate
