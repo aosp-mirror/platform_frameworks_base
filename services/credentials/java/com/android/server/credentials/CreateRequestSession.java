@@ -87,12 +87,6 @@ public final class CreateRequestSession extends RequestSession<CreateCredentialR
     }
 
     @Override
-    public void onProviderStatusChanged(ProviderSession.Status status,
-            ComponentName componentName) {
-        super.onProviderStatusChanged(status, componentName);
-    }
-
-    @Override
     public void onFinalResponseReceived(ComponentName componentName,
             @Nullable CreateCredentialResponse response) {
         Log.i(TAG, "onFinalCredentialReceived from: " + componentName.flattenToString());
@@ -135,5 +129,23 @@ public final class CreateRequestSession extends RequestSession<CreateCredentialR
             Log.i(TAG, "Issue while responding to client: " + e.getMessage());
         }
         finishSession();
+    }
+
+    @Override
+    public void onProviderStatusChanged(ProviderSession.Status status,
+            ComponentName componentName) {
+        Log.i(TAG, "in onProviderStatusChanged with status: " + status);
+        // If all provider responses have been received, we can either need the UI,
+        // or we need to respond with error. The only other case is the entry being
+        // selected after the UI has been invoked which has a separate code path.
+        if (!isAnyProviderPending()) {
+            if (isUiInvocationNeeded()) {
+                Log.i(TAG, "in onProviderStatusChanged - isUiInvocationNeeded");
+                getProviderDataAndInitiateUi();
+            } else {
+                respondToClientWithErrorAndFinish(CreateCredentialException.TYPE_NO_CREDENTIAL,
+                        "No credentials available");
+            }
+        }
     }
 }
