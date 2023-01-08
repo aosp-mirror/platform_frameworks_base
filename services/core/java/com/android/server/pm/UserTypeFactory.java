@@ -35,6 +35,7 @@ import static android.os.UserManager.USER_TYPE_FULL_SYSTEM;
 import static android.os.UserManager.USER_TYPE_PROFILE_CLONE;
 import static android.os.UserManager.USER_TYPE_PROFILE_COMMUNAL;
 import static android.os.UserManager.USER_TYPE_PROFILE_MANAGED;
+import static android.os.UserManager.USER_TYPE_PROFILE_PRIVATE;
 import static android.os.UserManager.USER_TYPE_PROFILE_TEST;
 import static android.os.UserManager.USER_TYPE_SYSTEM_HEADLESS;
 
@@ -108,6 +109,7 @@ public final class UserTypeFactory {
         builders.put(USER_TYPE_SYSTEM_HEADLESS, getDefaultTypeSystemHeadless());
         builders.put(USER_TYPE_PROFILE_CLONE, getDefaultTypeProfileClone());
         builders.put(USER_TYPE_PROFILE_COMMUNAL, getDefaultTypeProfileCommunal());
+        builders.put(USER_TYPE_PROFILE_PRIVATE, getDefaultTypeProfilePrivate());
         if (Build.IS_DEBUGGABLE) {
             builders.put(USER_TYPE_PROFILE_TEST, getDefaultTypeProfileTest());
         }
@@ -261,6 +263,39 @@ public final class UserTypeFactory {
                         .setShowInSettings(UserProperties.SHOW_IN_SETTINGS_SEPARATE)
                         .setCredentialShareableWithParent(false)
                         .setAlwaysVisible(true));
+    }
+
+    /**
+     * Returns the Builder for the default {@link UserManager#USER_TYPE_PROFILE_PRIVATE}
+     * configuration.
+     */
+    private static UserTypeDetails.Builder getDefaultTypeProfilePrivate() {
+        return new UserTypeDetails.Builder()
+                .setName(USER_TYPE_PROFILE_PRIVATE)
+                .setBaseType(FLAG_PROFILE)
+                .setMaxAllowedPerParent(1)
+                .setLabel(0)
+                .setIconBadge(com.android.internal.R.drawable.ic_test_icon_badge_experiment)
+                .setBadgePlain(com.android.internal.R.drawable.ic_test_badge_experiment)
+                .setBadgeNoBackground(com.android.internal.R.drawable.ic_test_badge_no_background)
+                .setStatusBarIcon(com.android.internal.R.drawable.ic_test_badge_experiment)
+                .setBadgeLabels(
+                        com.android.internal.R.string.managed_profile_label_badge,
+                        com.android.internal.R.string.managed_profile_label_badge_2,
+                        com.android.internal.R.string.managed_profile_label_badge_3)
+                .setBadgeColors(
+                        com.android.internal.R.color.profile_badge_2)
+                .setDarkThemeBadgeColors(
+                        com.android.internal.R.color.profile_badge_2_dark)
+                .setDefaultRestrictions(getDefaultProfileRestrictions())
+                .setDefaultSecureSettings(getDefaultNonManagedProfileSecureSettings())
+                .setDefaultUserProperties(new UserProperties.Builder()
+                        .setStartWithParent(true)
+                        .setCredentialShareableWithParent(false)
+                        .setMediaSharedWithParent(false)
+                        .setShowInLauncher(UserProperties.SHOW_IN_LAUNCHER_SEPARATE)
+                        .setCrossProfileIntentFilterAccessControl(
+                                UserProperties.CROSS_PROFILE_INTENT_FILTER_ACCESS_LEVEL_SYSTEM));
     }
 
     /**

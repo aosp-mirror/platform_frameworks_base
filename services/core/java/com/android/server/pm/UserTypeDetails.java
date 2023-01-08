@@ -633,4 +633,12 @@ public final class UserTypeDetails {
     public boolean isCommunalProfile() {
         return UserManager.isUserTypeCommunalProfile(mName);
     }
+
+    /**
+     * Returns whether the user type is a private profile
+     * (i.e. {@link UserManager#USER_TYPE_PROFILE_PRIVATE}).
+     */
+    public boolean isPrivateProfile() {
+        return UserManager.isUserTypePrivateProfile(mName);
+    }
 }

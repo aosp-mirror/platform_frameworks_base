@@ -1060,6 +1060,7 @@ package android.content.pm {
     method public boolean isMain();
     method public boolean isManagedProfile();
     method @Deprecated public boolean isPrimary();
+    method public boolean isPrivateProfile();
     method public boolean isProfile();
     method public boolean isQuietModeEnabled();
     method public boolean isRestricted();
