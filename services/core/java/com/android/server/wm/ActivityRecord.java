@@ -5249,9 +5249,9 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
             transferStartingWindowFromHiddenAboveTokenIfNeeded();
         }
 
-        // If in a transition, defer commits for activities that are going invisible
-        if (!visible && inTransition()) {
-            if (mTransitionController.inPlayingTransition(this)
+        // Defer committing visibility until transition starts.
+        if (inTransition()) {
+            if (!visible && mTransitionController.inPlayingTransition(this)
                     && mTransitionController.isCollecting(this)) {
                 mTransitionChangeFlags |= FLAG_IS_OCCLUDED;
             }
@@ -5498,6 +5498,17 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
             } finally {
                 SurfaceControl.closeTransaction();
             }
+        }
+    }
+
+    /** Updates draw state and shows drawn windows. */
+    void commitFinishDrawing(SurfaceControl.Transaction t) {
+        boolean committed = false;
+        for (int i = mChildren.size() - 1; i >= 0; i--) {
+            committed |= mChildren.get(i).commitFinishDrawing(t);
+        }
+        if (committed) {
+            requestUpdateWallpaperIfNeeded();
         }
     }
 

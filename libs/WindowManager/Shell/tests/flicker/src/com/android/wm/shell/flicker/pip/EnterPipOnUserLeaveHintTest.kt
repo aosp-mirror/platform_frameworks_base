@@ -68,6 +68,18 @@ class EnterPipOnUserLeaveHintTest(flicker: FlickerTest) : EnterPipTest(flicker) 
 
     @Presubmit
     @Test
+    override fun pipAppWindowAlwaysVisible() {
+        // In gestural nav the pip will first move behind home and then above home. The visual
+        // appearance visible->invisible->visible is asserted by pipAppLayerAlwaysVisible().
+        // But the internal states of activity don't need to follow that, such as a temporary
+        // visibility state can be changed quickly outside a transaction so the test doesn't
+        // detect that. Hence, skip the case to avoid restricting the internal implementation.
+        Assume.assumeFalse(flicker.scenario.isGesturalNavigation)
+        super.pipAppWindowAlwaysVisible()
+    }
+
+    @Presubmit
+    @Test
     override fun pipAppLayerAlwaysVisible() {
         if (!flicker.scenario.isGesturalNavigation) super.pipAppLayerAlwaysVisible()
         else {

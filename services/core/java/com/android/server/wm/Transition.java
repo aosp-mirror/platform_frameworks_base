@@ -834,7 +834,7 @@ class Transition implements BLASTSyncEngine.TransactionReadyListener {
             final ActivityRecord ar = mParticipants.valueAt(i).asActivityRecord();
             if (ar == null || !ar.isVisible() || ar.getParent() == null) continue;
             if (inputSinkTransaction == null) {
-                inputSinkTransaction = new SurfaceControl.Transaction();
+                inputSinkTransaction = ar.mWmService.mTransactionFactory.get();
             }
             ar.mActivityRecordInputSink.applyChangesToSurfaceIfChanged(inputSinkTransaction);
         }
@@ -956,6 +956,11 @@ class Transition implements BLASTSyncEngine.TransactionReadyListener {
             cleanUpInternal();
             return;
         }
+
+        // Commit the visibility of visible activities before calculateTransitionInfo(), so the
+        // TaskInfo can be visible. Also it needs to be done before moveToPlaying(), otherwise
+        // ActivityRecord#canShowWindows() may reject to show its window.
+        commitVisibleActivities(transaction);
 
         mState = STATE_PLAYING;
         mStartTransaction = transaction;
@@ -1115,6 +1120,19 @@ class Transition implements BLASTSyncEngine.TransactionReadyListener {
             if (ci.mSnapshot != null) {
                 ci.mSnapshot.release();
             }
+        }
+    }
+
+    /** The transition is ready to play. Make the start transaction show the surfaces. */
+    private void commitVisibleActivities(SurfaceControl.Transaction transaction) {
+        for (int i = mParticipants.size() - 1; i >= 0; --i) {
+            final ActivityRecord ar = mParticipants.valueAt(i).asActivityRecord();
+            if (ar == null || !ar.isVisibleRequested()) {
+                continue;
+            }
+            ar.commitVisibility(true /* visible */, false /* performLayout */,
+                    true /* fromTransition */);
+            ar.commitFinishDrawing(transaction);
         }
     }
 

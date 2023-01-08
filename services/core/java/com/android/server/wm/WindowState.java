@@ -4624,6 +4624,19 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
         }
     }
 
+    /** Makes the surface of drawn window (COMMIT_DRAW_PENDING) to be visible. */
+    boolean commitFinishDrawing(SurfaceControl.Transaction t) {
+        boolean committed = mWinAnimator.commitFinishDrawingLocked();
+        if (committed) {
+            // Ensure that the visibility of buffer layer is set.
+            mWinAnimator.prepareSurfaceLocked(t);
+        }
+        for (int i = mChildren.size() - 1; i >= 0; i--) {
+            committed |= mChildren.get(i).commitFinishDrawing(t);
+        }
+        return committed;
+    }
+
     // This must be called while inside a transaction.
     boolean performShowLocked() {
         if (!showToCurrentUser()) {
