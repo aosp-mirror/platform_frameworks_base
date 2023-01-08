@@ -4300,9 +4300,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
             case KeyEvent.KEYCODE_DEMO_APP_3:
             case KeyEvent.KEYCODE_DEMO_APP_4: {
                 // TODO(b/254604589): Dispatch KeyEvent to System UI.
-                if (!mStylusButtonsDisabled) {
-                    sendSystemKeyToStatusBarAsync(keyCode);
-                }
+                sendSystemKeyToStatusBarAsync(keyCode);
 
                 // Just drop if keys are not intercepted for direct key.
                 result &= ~ACTION_PASS_TO_USER;
@@ -4312,7 +4310,9 @@ public class PhoneWindowManager implements WindowManagerPolicy {
             case KeyEvent.KEYCODE_STYLUS_BUTTON_SECONDARY:
             case KeyEvent.KEYCODE_STYLUS_BUTTON_TERTIARY:
             case KeyEvent.KEYCODE_STYLUS_BUTTON_TAIL: {
-                // TODO(go/android-stylus-buttons): Handle stylus button presses.
+                if (!mStylusButtonsDisabled) {
+                    sendSystemKeyToStatusBarAsync(keyCode);
+                }
                 result &= ~ACTION_PASS_TO_USER;
                 break;
             }
