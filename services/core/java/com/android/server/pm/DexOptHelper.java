@@ -974,6 +974,11 @@ public final class DexOptHelper {
                             dexRes.getDexContainerFile(), dexRes.getDex2oatWallTimeMillis());
                 }
             }
+
+            synchronized (mPm.mLock) {
+                mPm.getPackageUsage().maybeWriteAsync(mPm.mSettings.getPackagesLocked());
+                mPm.mCompilerStats.maybeWriteAsync();
+            }
         }
     }
 
