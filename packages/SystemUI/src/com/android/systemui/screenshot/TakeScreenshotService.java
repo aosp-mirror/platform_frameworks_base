@@ -59,6 +59,7 @@ import com.android.systemui.R;
 import com.android.systemui.dagger.qualifiers.Background;
 import com.android.systemui.flags.FeatureFlags;
 import com.android.systemui.flags.FlagListenable.FlagEvent;
+import com.android.systemui.flags.Flags;
 
 import java.util.concurrent.Executor;
 import java.util.function.Consumer;
@@ -221,8 +222,33 @@ public class TakeScreenshotService extends Service {
             return;
         }
 
-        mProcessor.processAsync(request,
-                (r) -> dispatchToController(r, onSaved, callback));
+        if (mFeatureFlags.isEnabled(Flags.SCREENSHOT_METADATA)) {
+            Log.d(TAG, "Processing screenshot data");
+            ScreenshotData screenshotData = ScreenshotData.fromRequest(request);
+            mProcessor.processAsync(screenshotData,
+                    (data) -> dispatchToController(data, onSaved, callback));
+        } else {
+            mProcessor.processAsync(request,
+                    (r) -> dispatchToController(r, onSaved, callback));
+        }
+    }
+
+    private void dispatchToController(ScreenshotData screenshot,
+            Consumer<Uri> uriConsumer, RequestCallback callback) {
+
+        mUiEventLogger.log(ScreenshotEvent.getScreenshotSource(screenshot.getSource()), 0,
+                screenshot.getPackageNameString());
+
+        if (screenshot.getType() == WindowManager.TAKE_SCREENSHOT_PROVIDED_IMAGE
+                && screenshot.getBitmap() == null) {
+            Log.e(TAG, "Got null bitmap from screenshot message");
+            mNotificationsController.notifyScreenshotError(
+                    R.string.screenshot_failed_to_capture_text);
+            callback.reportError();
+            return;
+        }
+
+        mScreenshot.handleScreenshot(screenshot, uriConsumer, callback);
     }
 
     private void dispatchToController(ScreenshotRequest request,

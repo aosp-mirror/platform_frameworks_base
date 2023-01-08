@@ -65,8 +65,7 @@ object Flags {
     val FSI_ON_DND_UPDATE = unreleasedFlag(259130119, "fsi_on_dnd_update", teamfood = true)
 
     // TODO(b/265804648): Tracking Bug
-    @JvmField
-    val DISABLE_FSI = unreleasedFlag(265804648, "disable_fsi")
+    @JvmField val DISABLE_FSI = unreleasedFlag(265804648, "disable_fsi")
 
     // TODO(b/254512538): Tracking Bug
     val INSTANT_VOICE_REPLY = unreleasedFlag(111, "instant_voice_reply", teamfood = true)
@@ -470,6 +469,9 @@ object Flags {
     val SCREENSHOT_WORK_PROFILE_POLICY =
         unreleasedFlag(1301, "screenshot_work_profile_policy", teamfood = true)
 
+    // TODO(b/264916608): Tracking Bug
+    @JvmField val SCREENSHOT_METADATA = unreleasedFlag(1302, "screenshot_metadata")
+
     // 1400 - columbus
     // TODO(b/254512756): Tracking Bug
     val QUICK_TAP_IN_PCC = releasedFlag(1400, "quick_tap_in_pcc")
@@ -554,6 +556,5 @@ object Flags {
 
     // 2600 - keyboard shortcut
     // TODO(b/259352579): Tracking Bug
-    @JvmField
-    val SHORTCUT_LIST_SEARCH_LAYOUT = unreleasedFlag(2600, "shortcut_list_search_layout")
+    @JvmField val SHORTCUT_LIST_SEARCH_LAYOUT = unreleasedFlag(2600, "shortcut_list_search_layout")
 }
