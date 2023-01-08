@@ -816,7 +816,10 @@
     <string name="accessibility_floating_button_migration_tooltip" msgid="5217151214439341902">"অ্যাক্সেসিবিলিটি ফিচার খুলতে ট্যাপ করুন। কাস্টমাইজ করুন বা সেটিংসে এই বোতামটি সরিয়ে দিন।\n\n"<annotation id="link">"সেটিংস দেখুন"</annotation></string>
     <string name="accessibility_floating_button_docking_tooltip" msgid="6814897496767461517">"এটি অস্থায়ীভাবে লুকাতে বোতামটি কোণে সরান"</string>
     <string name="accessibility_floating_button_undo" msgid="511112888715708241">"আগের অবস্থায় ফিরুন"</string>
-    <string name="accessibility_floating_button_undo_message_text" msgid="3044079592757099698">"{count,plural, =1{{label} শর্টকাট সরানো হয়েছে}one{#টি শর্টকাট সরানো হয়েছে}other{#টি শর্টকাট সরানো হয়েছে}}"</string>
+    <!-- no translation found for accessibility_floating_button_undo_message_label_text (9017658016426242640) -->
+    <skip />
+    <!-- no translation found for accessibility_floating_button_undo_message_number_text (4909270290725226075) -->
+    <skip />
     <string name="accessibility_floating_button_action_move_top_left" msgid="6253520703618545705">"উপরে বাঁদিকে সরান"</string>
     <string name="accessibility_floating_button_action_move_top_right" msgid="6106225581993479711">"উপরে ডানদিকে সরান"</string>
     <string name="accessibility_floating_button_action_move_bottom_left" msgid="8063394111137429725">"নিচে বাঁদিকে সরান"</string>
@@ -884,6 +887,8 @@
     <string name="media_move_closer_to_end_cast" msgid="6495907340926563656">"এখান থেকে চালাতে <xliff:g id="DEVICENAME">%1$s</xliff:g>-এর কাছে নিয়ে যান"</string>
     <string name="media_transfer_playing_different_device" msgid="7186806382609785610">"<xliff:g id="DEVICENAME">%1$s</xliff:g>-এ ভিডিও চালানো হচ্ছে"</string>
     <string name="media_transfer_failed" msgid="7955354964610603723">"কোনও সমস্যা হয়েছে। আবার চেষ্টা করুন।"</string>
+    <!-- no translation found for media_transfer_loading (5544017127027152422) -->
+    <skip />
     <string name="controls_error_timeout" msgid="794197289772728958">"বন্ধ আছে, অ্যাপ চেক করুন"</string>
     <string name="controls_error_removed" msgid="6675638069846014366">"খুঁজে পাওয়া যায়নি"</string>
     <string name="controls_error_removed_title" msgid="1207794911208047818">"কন্ট্রোল উপলভ্য নেই"</string>

@@ -816,7 +816,10 @@
     <string name="accessibility_floating_button_migration_tooltip" msgid="5217151214439341902">"Кнопка спеціальних можливостей. Змініть або замініть її в Налаштуваннях.\n\n"<annotation id="link">"Переглянути налаштування"</annotation></string>
     <string name="accessibility_floating_button_docking_tooltip" msgid="6814897496767461517">"Щоб тимчасово сховати кнопку, перемістіть її на край екрана"</string>
     <string name="accessibility_floating_button_undo" msgid="511112888715708241">"Відмінити"</string>
-    <string name="accessibility_floating_button_undo_message_text" msgid="3044079592757099698">"{count,plural, =1{Комбінацію для швидкого запуску функції \"{label}\" вилучено}one{# комбінацію для швидкого запуску вилучено}few{# комбінації для швидкого запуску вилучено}many{# комбінацій для швидкого запуску вилучено}other{# комбінації для швидкого запуску вилучено}}"</string>
+    <!-- no translation found for accessibility_floating_button_undo_message_label_text (9017658016426242640) -->
+    <skip />
+    <!-- no translation found for accessibility_floating_button_undo_message_number_text (4909270290725226075) -->
+    <skip />
     <string name="accessibility_floating_button_action_move_top_left" msgid="6253520703618545705">"Перемістити ліворуч угору"</string>
     <string name="accessibility_floating_button_action_move_top_right" msgid="6106225581993479711">"Перемістити праворуч угору"</string>
     <string name="accessibility_floating_button_action_move_bottom_left" msgid="8063394111137429725">"Перемістити ліворуч униз"</string>
@@ -884,6 +887,8 @@
     <string name="media_move_closer_to_end_cast" msgid="6495907340926563656">"Наблизьтеся до пристрою <xliff:g id="DEVICENAME">%1$s</xliff:g>, щоб відтворити медіафайли на ньому"</string>
     <string name="media_transfer_playing_different_device" msgid="7186806382609785610">"Відтворюється на пристрої <xliff:g id="DEVICENAME">%1$s</xliff:g>"</string>
     <string name="media_transfer_failed" msgid="7955354964610603723">"Сталася помилка. Повторіть спробу."</string>
+    <!-- no translation found for media_transfer_loading (5544017127027152422) -->
+    <skip />
     <string name="controls_error_timeout" msgid="794197289772728958">"Неактивно, перейдіть у додаток"</string>
     <string name="controls_error_removed" msgid="6675638069846014366">"Не знайдено"</string>
     <string name="controls_error_removed_title" msgid="1207794911208047818">"Елемент керування недоступний"</string>
@@ -1039,8 +1044,7 @@
     <string name="keyguard_affordance_enablement_dialog_qr_scanner_instruction" msgid="5355839079232119791">"• Встановлено додаток для камери"</string>
     <string name="keyguard_affordance_enablement_dialog_home_instruction_1" msgid="8438311171750568633">"• Додаток налаштовано"</string>
     <string name="keyguard_affordance_enablement_dialog_home_instruction_2" msgid="8308525385889021652">"• Принаймні один пристрій доступний"</string>
-    <!-- no translation found for keyguard_affordance_press_too_short (8145437175134998864) -->
-    <skip />
+    <string name="keyguard_affordance_press_too_short" msgid="8145437175134998864">"Натисніть і утримуйте ярлик"</string>
     <string name="rear_display_bottom_sheet_cancel" msgid="3461468855493357248">"Скасувати"</string>
     <string name="rear_display_bottom_sheet_confirm" msgid="4383356544661421206">"Перевернути"</string>
     <string name="rear_display_fold_bottom_sheet_title" msgid="6081542277622721548">"Розгорніть телефон, щоб зробити краще селфі"</string>
