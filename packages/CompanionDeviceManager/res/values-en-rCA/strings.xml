@@ -51,17 +51,19 @@
     <string name="permission_contacts" msgid="3858319347208004438">"Contacts"</string>
     <string name="permission_calendar" msgid="6805668388691290395">"Calendar"</string>
     <string name="permission_microphone" msgid="2152206421428732949">"Microphone"</string>
+    <string name="permission_call_logs" msgid="5546761417694586041">"Call logs"</string>
     <string name="permission_nearby_devices" msgid="7530973297737123481">"Nearby devices"</string>
     <string name="permission_storage" msgid="6831099350839392343">"Photos and media"</string>
     <string name="permission_notification" msgid="693762568127741203">"Notifications"</string>
     <string name="permission_app_streaming" msgid="6009695219091526422">"Apps"</string>
     <string name="permission_nearby_device_streaming" msgid="5868108148065023161">"Nearby Device Streaming"</string>
-    <string name="permission_phone_summary" msgid="6154198036705702389">"Can access your phone number and network info. Required for making calls and VoIP, voicemail, call redirect, and editing call logs"</string>
-    <string name="permission_sms_summary" msgid="5107174184224165570"></string>
-    <string name="permission_contacts_summary" msgid="7850901746005070792">"Can read, create, or edit our contact list, as well as access the list of all accounts used on your device"</string>
-    <string name="permission_calendar_summary" msgid="9070743747408808156"></string>
+    <string name="permission_phone_summary" msgid="6684396967861278044">"Can make and manage phone calls"</string>
+    <string name="permission_call_logs_summary" msgid="6186103394658755022">"Can read and write phone call log"</string>
+    <string name="permission_sms_summary" msgid="3508442683678912017">"Can send and view SMS messages"</string>
+    <string name="permission_contacts_summary" msgid="675861979475628708">"Can access your contacts"</string>
+    <string name="permission_calendar_summary" msgid="6460000922511766226">"Can access your calendar"</string>
     <string name="permission_microphone_summary" msgid="4241354865859396558">"Can record audio using the microphone"</string>
-    <string name="permission_nearby_devices_summary" msgid="8587497797301075494"></string>
+    <string name="permission_nearby_devices_summary" msgid="931940524460876655">"Can find, connect to, and determine the relative position of nearby devices"</string>
     <string name="permission_notification_summary" msgid="884075314530071011">"Can read all notifications, including information like contacts, messages, and photos"</string>
     <string name="permission_app_streaming_summary" msgid="606923325679670624">"Stream your phone’s apps"</string>
     <string name="permission_storage_summary" msgid="3918240895519506417"></string>

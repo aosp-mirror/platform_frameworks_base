@@ -51,17 +51,26 @@
     <string name="permission_contacts" msgid="3858319347208004438">"தொடர்புகள்"</string>
     <string name="permission_calendar" msgid="6805668388691290395">"கேலெண்டர்"</string>
     <string name="permission_microphone" msgid="2152206421428732949">"மைக்ரோஃபோன்"</string>
+    <!-- no translation found for permission_call_logs (5546761417694586041) -->
+    <skip />
     <string name="permission_nearby_devices" msgid="7530973297737123481">"அருகிலுள்ள சாதனங்கள்"</string>
     <string name="permission_storage" msgid="6831099350839392343">"படங்கள் மற்றும் மீடியா"</string>
     <string name="permission_notification" msgid="693762568127741203">"அறிவிப்புகள்"</string>
     <string name="permission_app_streaming" msgid="6009695219091526422">"ஆப்ஸ்"</string>
     <string name="permission_nearby_device_streaming" msgid="5868108148065023161">"அருகிலுள்ள சாதன ஸ்ட்ரீமிங்"</string>
-    <string name="permission_phone_summary" msgid="6154198036705702389">"உங்கள் மொபைல் எண், நெட்வொர்க் தகவல் ஆகியவற்றை அணுகலாம். அழைப்புகள் &amp; VoIP, குரலஞ்சல், அழைப்பைத் திசைதிருப்புதல், அழைப்புப் பதிவுகளைத் திருத்துதல் ஆகியவற்றுக்கு இது தேவை"</string>
-    <string name="permission_sms_summary" msgid="5107174184224165570"></string>
-    <string name="permission_contacts_summary" msgid="7850901746005070792">"உங்கள் தொடர்புப் பட்டியலைப் படிக்கலாம் உருவாக்கலாம் திருத்தலாம். மேலும் உங்கள் சாதனத்தில் பயன்படுத்தப்படும் அனைத்துக் கணக்குகளின் தொடர்புப் பட்டியலையும் அணுகலாம்"</string>
-    <string name="permission_calendar_summary" msgid="9070743747408808156"></string>
+    <!-- no translation found for permission_phone_summary (6684396967861278044) -->
+    <skip />
+    <!-- no translation found for permission_call_logs_summary (6186103394658755022) -->
+    <skip />
+    <!-- no translation found for permission_sms_summary (3508442683678912017) -->
+    <skip />
+    <!-- no translation found for permission_contacts_summary (675861979475628708) -->
+    <skip />
+    <!-- no translation found for permission_calendar_summary (6460000922511766226) -->
+    <skip />
     <string name="permission_microphone_summary" msgid="4241354865859396558">"மைக்ரோஃபோனைப் பயன்படுத்தி ஆடியோவை ரெக்கார்டு செய்யலாம்"</string>
-    <string name="permission_nearby_devices_summary" msgid="8587497797301075494"></string>
+    <!-- no translation found for permission_nearby_devices_summary (931940524460876655) -->
+    <skip />
     <string name="permission_notification_summary" msgid="884075314530071011">"தொடர்புகள், மெசேஜ்கள், படங்கள் போன்ற தகவல்கள் உட்பட அனைத்து அறிவிப்புகளையும் படிக்க முடியும்"</string>
     <string name="permission_app_streaming_summary" msgid="606923325679670624">"உங்கள் மொபைல் ஆப்ஸை ஸ்ட்ரீம் செய்யலாம்"</string>
     <string name="permission_storage_summary" msgid="3918240895519506417"></string>

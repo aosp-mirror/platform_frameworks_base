@@ -51,17 +51,26 @@
     <string name="permission_contacts" msgid="3858319347208004438">"კონტაქტები"</string>
     <string name="permission_calendar" msgid="6805668388691290395">"კალენდარი"</string>
     <string name="permission_microphone" msgid="2152206421428732949">"მიკროფონი"</string>
+    <!-- no translation found for permission_call_logs (5546761417694586041) -->
+    <skip />
     <string name="permission_nearby_devices" msgid="7530973297737123481">"ახლომახლო მოწყობილობები"</string>
     <string name="permission_storage" msgid="6831099350839392343">"ფოტოები და მედია"</string>
     <string name="permission_notification" msgid="693762568127741203">"შეტყობინებები"</string>
     <string name="permission_app_streaming" msgid="6009695219091526422">"აპები"</string>
     <string name="permission_nearby_device_streaming" msgid="5868108148065023161">"ახლომდებარე მოწყობილობის სტრიმინგი"</string>
-    <string name="permission_phone_summary" msgid="6154198036705702389">"შეუძლია თქვენი ტელეფონის ნომერსა და ქსელის ინფორმაციაზე წვდომა. საჭიროა ზარების განსახორციელებლად და VoIP-ისთვის, ხმოვანი ფოსტისთვის, ზარის გადამისამართებისა და ზარების ჟურნალების რედაქტირებისთვის"</string>
-    <string name="permission_sms_summary" msgid="5107174184224165570"></string>
-    <string name="permission_contacts_summary" msgid="7850901746005070792">"შეუძლია ჩვენი კონტაქტების სიის წაკითხვა, შექმნა ან რედაქტირება, ასევე, თქვენს მოწყობილობაზე გამოყენებული ყველა ანგარიშის კონტაქტების სიაზე წვდომა"</string>
-    <string name="permission_calendar_summary" msgid="9070743747408808156"></string>
+    <!-- no translation found for permission_phone_summary (6684396967861278044) -->
+    <skip />
+    <!-- no translation found for permission_call_logs_summary (6186103394658755022) -->
+    <skip />
+    <!-- no translation found for permission_sms_summary (3508442683678912017) -->
+    <skip />
+    <!-- no translation found for permission_contacts_summary (675861979475628708) -->
+    <skip />
+    <!-- no translation found for permission_calendar_summary (6460000922511766226) -->
+    <skip />
     <string name="permission_microphone_summary" msgid="4241354865859396558">"შეუძლია აუდიოს ჩაწერა მიკროფონის გამოყენებით"</string>
-    <string name="permission_nearby_devices_summary" msgid="8587497797301075494"></string>
+    <!-- no translation found for permission_nearby_devices_summary (931940524460876655) -->
+    <skip />
     <string name="permission_notification_summary" msgid="884075314530071011">"შეუძლია წაიკითხოს ყველა შეტყობინება, მათ შორის ისეთი ინფორმაცია, როგორიცაა კონტაქტები, ტექსტური შეტყობინებები და ფოტოები"</string>
     <string name="permission_app_streaming_summary" msgid="606923325679670624">"თქვენი ტელეფონის აპების სტრიმინგი"</string>
     <string name="permission_storage_summary" msgid="3918240895519506417"></string>

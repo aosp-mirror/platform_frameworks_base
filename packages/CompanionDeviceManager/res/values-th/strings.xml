@@ -51,17 +51,26 @@
     <string name="permission_contacts" msgid="3858319347208004438">"รายชื่อติดต่อ"</string>
     <string name="permission_calendar" msgid="6805668388691290395">"ปฏิทิน"</string>
     <string name="permission_microphone" msgid="2152206421428732949">"ไมโครโฟน"</string>
+    <!-- no translation found for permission_call_logs (5546761417694586041) -->
+    <skip />
     <string name="permission_nearby_devices" msgid="7530973297737123481">"อุปกรณ์ที่อยู่ใกล้เคียง"</string>
     <string name="permission_storage" msgid="6831099350839392343">"รูปภาพและสื่อ"</string>
     <string name="permission_notification" msgid="693762568127741203">"การแจ้งเตือน"</string>
     <string name="permission_app_streaming" msgid="6009695219091526422">"แอป"</string>
     <string name="permission_nearby_device_streaming" msgid="5868108148065023161">"การสตรีมไปยังอุปกรณ์ที่อยู่ใกล้เคียง"</string>
-    <string name="permission_phone_summary" msgid="6154198036705702389">"สามารถเข้าถึงหมายเลขโทรศัพท์และข้อมูลเครือข่ายของคุณ จำเป็นสำหรับการโทรและ VoIP, ข้อความเสียง, การเปลี่ยนเส้นทางการโทร และการแก้ไขบันทึกการโทร"</string>
-    <string name="permission_sms_summary" msgid="5107174184224165570"></string>
-    <string name="permission_contacts_summary" msgid="7850901746005070792">"สามารถอ่าน สร้าง หรือแก้ไขข้อมูลรายชื่อติดต่อของเรา รวมทั้งเข้าถึงข้อมูลรายชื่อติดต่อของทุกบัญชีที่ใช้ในอุปกรณ์ของคุณ"</string>
-    <string name="permission_calendar_summary" msgid="9070743747408808156"></string>
+    <!-- no translation found for permission_phone_summary (6684396967861278044) -->
+    <skip />
+    <!-- no translation found for permission_call_logs_summary (6186103394658755022) -->
+    <skip />
+    <!-- no translation found for permission_sms_summary (3508442683678912017) -->
+    <skip />
+    <!-- no translation found for permission_contacts_summary (675861979475628708) -->
+    <skip />
+    <!-- no translation found for permission_calendar_summary (6460000922511766226) -->
+    <skip />
     <string name="permission_microphone_summary" msgid="4241354865859396558">"บันทึกเสียงโดยใช้ไมโครโฟนได้"</string>
-    <string name="permission_nearby_devices_summary" msgid="8587497797301075494"></string>
+    <!-- no translation found for permission_nearby_devices_summary (931940524460876655) -->
+    <skip />
     <string name="permission_notification_summary" msgid="884075314530071011">"สามารถอ่านการแจ้งเตือนทั้งหมด รวมถึงข้อมูลอย่างรายชื่อติดต่อ ข้อความ และรูปภาพ"</string>
     <string name="permission_app_streaming_summary" msgid="606923325679670624">"สตรีมแอปของโทรศัพท์คุณ"</string>
     <string name="permission_storage_summary" msgid="3918240895519506417"></string>

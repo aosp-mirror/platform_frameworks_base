@@ -51,17 +51,26 @@
     <string name="permission_contacts" msgid="3858319347208004438">"Contacts"</string>
     <string name="permission_calendar" msgid="6805668388691290395">"Calendar"</string>
     <string name="permission_microphone" msgid="2152206421428732949">"मायक्रोफोन"</string>
+    <!-- no translation found for permission_call_logs (5546761417694586041) -->
+    <skip />
     <string name="permission_nearby_devices" msgid="7530973297737123481">"जवळपासची डिव्हाइस"</string>
     <string name="permission_storage" msgid="6831099350839392343">"फोटो आणि मीडिया"</string>
     <string name="permission_notification" msgid="693762568127741203">"सूचना"</string>
     <string name="permission_app_streaming" msgid="6009695219091526422">"ॲप्स"</string>
     <string name="permission_nearby_device_streaming" msgid="5868108148065023161">"जवळपासच्या डिव्हाइसवरील स्ट्रीमिंग"</string>
-    <string name="permission_phone_summary" msgid="6154198036705702389">"तुमचा फोन नंबर आणि नेटवर्कची माहिती अ‍ॅक्सेस करू शकते. कॉल करणे व VoIP, व्हॉइसमेल, कॉल रीडिरेक्ट करणे आणि कॉल लॉग संपादित करणे यांसाठी आवश्यक"</string>
-    <string name="permission_sms_summary" msgid="5107174184224165570"></string>
-    <string name="permission_contacts_summary" msgid="7850901746005070792">"आमची संपर्क सूची रीड, तयार आणि संपादित करू शकते, तसेच तुमच्या डिव्हाइसवर वापरल्या जाणाऱ्या खात्यांची सूची अ‍ॅक्सेस करू शकते"</string>
-    <string name="permission_calendar_summary" msgid="9070743747408808156"></string>
+    <!-- no translation found for permission_phone_summary (6684396967861278044) -->
+    <skip />
+    <!-- no translation found for permission_call_logs_summary (6186103394658755022) -->
+    <skip />
+    <!-- no translation found for permission_sms_summary (3508442683678912017) -->
+    <skip />
+    <!-- no translation found for permission_contacts_summary (675861979475628708) -->
+    <skip />
+    <!-- no translation found for permission_calendar_summary (6460000922511766226) -->
+    <skip />
     <string name="permission_microphone_summary" msgid="4241354865859396558">"मायक्रोफोन वापरून ऑडिओ रेकॉर्ड करता येईल"</string>
-    <string name="permission_nearby_devices_summary" msgid="8587497797301075494"></string>
+    <!-- no translation found for permission_nearby_devices_summary (931940524460876655) -->
+    <skip />
     <string name="permission_notification_summary" msgid="884075314530071011">"संपर्क, मेसेज आणि फोटो यांसारख्या माहितीचा समावेश असलेल्या सर्व सूचना वाचू शकते"</string>
     <string name="permission_app_streaming_summary" msgid="606923325679670624">"तुमच्या फोनवरील ॲप्स स्ट्रीम करा"</string>
     <string name="permission_storage_summary" msgid="3918240895519506417"></string>
