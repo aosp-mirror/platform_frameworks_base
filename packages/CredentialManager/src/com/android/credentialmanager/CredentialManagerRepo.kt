@@ -325,7 +325,6 @@ class CredentialManagerRepo(
                 key,
                 subkey,
                 CredentialEntry.toSlice(credentialEntry),
-                pendingIntent,
                 null
         )
   }
@@ -366,8 +365,7 @@ class CredentialManagerRepo(
                 key,
                 subkey,
                 CreateEntry.toSlice(createEntry),
-                pendingIntent,
-                fillInIntent,
+                fillInIntent
         )
     }
 

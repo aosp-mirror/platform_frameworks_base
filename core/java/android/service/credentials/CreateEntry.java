@@ -27,6 +27,13 @@ import android.os.Parcelable;
  * An entry to be shown on the UI. This entry represents where the credential to be created will
  * be stored. Examples include user's account, family group etc.
  *
+ * <p>If user selects this entry, the corresponding {@link PendingIntent} set on the
+ * {@code slice} as a {@link androidx.slice.core.SliceAction} will get invoked.
+ * Once the resulting activity fulfills the required user engagement,
+ * the {@link android.app.Activity} result should be set to {@link android.app.Activity#RESULT_OK},
+ * and the {@link CredentialProviderService#EXTRA_CREATE_CREDENTIAL_RESPONSE} must be set with a
+ * {@link android.credentials.CreateCredentialResponse} object.
+ *
  * <p>Any class that derives this class must only add extra field values to the {@code slice}
  * object passed into the constructor. Any other field will not be parceled through. If the
  * derived class has custom parceling implementation, this class will not be able to unpack
@@ -35,14 +42,13 @@ import android.os.Parcelable;
 @SuppressLint("ParcelNotFinal")
 public class CreateEntry implements Parcelable {
     private final @NonNull Slice mSlice;
-    private final @NonNull PendingIntent mPendingIntent;
 
     private CreateEntry(@NonNull Parcel in) {
         mSlice = in.readTypedObject(Slice.CREATOR);
-        mPendingIntent = in.readTypedObject(PendingIntent.CREATOR);
     }
 
-    public static final @NonNull Creator<CreateEntry> CREATOR = new Creator<CreateEntry>() {
+    @NonNull
+    public static final Creator<CreateEntry> CREATOR = new Creator<CreateEntry>() {
         @Override
         public CreateEntry createFromParcel(@NonNull Parcel in) {
             return new CreateEntry(in);
@@ -62,33 +68,23 @@ public class CreateEntry implements Parcelable {
     @Override
     public void writeToParcel(@NonNull Parcel dest, int flags) {
         dest.writeTypedObject(mSlice, flags);
-        dest.writeTypedObject(mPendingIntent, flags);
     }
 
     /**
      * Constructs a CreateEntry to be displayed on the UI.
      *
      * @param slice the display content to be displayed on the UI, along with this entry
-     * @param pendingIntent the intent to be invoked when the user selects this entry
      */
     public CreateEntry(
-            @NonNull Slice slice,
-            @NonNull PendingIntent pendingIntent) {
+            @NonNull Slice slice) {
         this.mSlice = slice;
         com.android.internal.util.AnnotationValidations.validate(
                 NonNull.class, null, mSlice);
-        this.mPendingIntent = pendingIntent;
-        com.android.internal.util.AnnotationValidations.validate(
-                NonNull.class, null, mPendingIntent);
     }
 
     /** Returns the content to be displayed with this create entry on the UI. */
-    public @NonNull Slice getSlice() {
+    @NonNull
+    public Slice getSlice() {
         return mSlice;
-    }
-
-    /** Returns the pendingIntent to be invoked when this create entry on the UI is selectcd. */
-    public @NonNull PendingIntent getPendingIntent() {
-        return mPendingIntent;
     }
 }
