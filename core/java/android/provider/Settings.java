@@ -2501,6 +2501,7 @@ public final class Settings {
      *
      * @hide
      */
+    @SystemApi
     @SdkConstant(SdkConstantType.BROADCAST_INTENT_ACTION)
     public static final String ACTION_SHOW_RESTRICTED_SETTING_DIALOG =
             "android.settings.SHOW_RESTRICTED_SETTING_DIALOG";
