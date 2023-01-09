@@ -13365,9 +13365,8 @@ package android.credentials {
 
   public final class GetCredentialResponse implements android.os.Parcelable {
     ctor public GetCredentialResponse(@NonNull android.credentials.Credential);
-    ctor public GetCredentialResponse();
     method public int describeContents();
-    method @Nullable public android.credentials.Credential getCredential();
+    method @NonNull public android.credentials.Credential getCredential();
     method public void writeToParcel(@NonNull android.os.Parcel, int);
     field @NonNull public static final android.os.Parcelable.Creator<android.credentials.GetCredentialResponse> CREATOR;
   }
