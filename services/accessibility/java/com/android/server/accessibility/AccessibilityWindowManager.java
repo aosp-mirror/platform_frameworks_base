@@ -988,11 +988,14 @@ public class AccessibilityWindowManager {
      *
      * @param displayId The logical display id.
      */
-    public void startTrackingWindows(int displayId) {
+    public void startTrackingWindows(int displayId, boolean proxyed) {
         synchronized (mLock) {
             DisplayWindowsObserver observer = mDisplayWindowsObservers.get(displayId);
             if (observer == null) {
                 observer = new DisplayWindowsObserver(displayId);
+            }
+            if (proxyed && !observer.mIsProxy) {
+                observer.mIsProxy = true;
             }
             if (observer.isTrackingWindowsLocked()) {
                 return;
@@ -1014,20 +1017,6 @@ public class AccessibilityWindowManager {
             if (observer != null) {
                 observer.stopTrackingWindowsLocked();
                 mDisplayWindowsObservers.remove(displayId);
-            }
-        }
-    }
-
-    /**
-     * Starts tracking a display as belonging to a proxy. Creates the window observer if necessary.
-     * @param displayId
-     */
-    public void startTrackingDisplayProxy(int displayId) {
-        startTrackingWindows(displayId);
-        synchronized (mLock) {
-            DisplayWindowsObserver observer = mDisplayWindowsObservers.get(displayId);
-            if (observer != null) {
-                observer.mIsProxy = true;
             }
         }
     }
