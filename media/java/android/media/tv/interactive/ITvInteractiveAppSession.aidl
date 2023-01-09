@@ -59,6 +59,7 @@ oneway interface ITvInteractiveAppSession {
     void notifySignalStrength(int strength);
     void notifyRecordingStarted(in String recordingId);
     void notifyRecordingStopped(in String recordingId);
+    void notifyTvMessage(in String type, in Bundle data);
     void setSurface(in Surface surface);
     void dispatchSurfaceChanged(int format, int width, int height);
     void notifyBroadcastInfoResponse(in BroadcastInfoResponse response);

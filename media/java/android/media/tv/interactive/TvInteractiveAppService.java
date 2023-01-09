@@ -641,6 +641,14 @@ public abstract class TvInteractiveAppService extends Service {
          * @hide
          */
         public void onAdBufferConsumed(AdBuffer buffer) {
+
+        }
+
+        /**
+         * Called when a tv message is received
+         * @hide
+         */
+        public void onTvMessage(@NonNull String type, @NonNull Bundle data) {
         }
 
         @Override
@@ -1287,6 +1295,13 @@ public abstract class TvInteractiveAppService extends Service {
                 Log.d(TAG, "notifyAdResponse (requestId=" + response.getId() + ")");
             }
             onAdResponse(response);
+        }
+
+        void notifyTvMessage(String type, Bundle data) {
+            if (DEBUG) {
+                Log.d(TAG, "notifyTvMessage (type=" + type + ", data= " + data + ")");
+            }
+            onTvMessage(type, data);
         }
 
         /**

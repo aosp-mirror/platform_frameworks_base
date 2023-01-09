@@ -3610,6 +3610,23 @@ public final class TvInputManagerService extends SystemService {
             }
         }
 
+        @Override
+        public void onTvMessage(String type, Bundle data) {
+            synchronized (mLock) {
+                if (DEBUG) {
+                    Slog.d(TAG, "onTvMessage(type=" + type + ", data=" + data + ")");
+                }
+                if (mSessionState.session == null || mSessionState.client == null) {
+                    return;
+                }
+                try {
+                    mSessionState.client.onTvMessage(type, data, mSessionState.seq);
+                } catch (RemoteException e) {
+                    Slog.e(TAG, "error in onTvMessage", e);
+                }
+            }
+        }
+
         // For the recording session only
         @Override
         public void onRecordingStopped(Uri recordedProgramUri) {
