@@ -40,6 +40,7 @@ oneway interface ITvInteractiveAppSession {
     void createBiInteractiveApp(in Uri biIAppUri, in Bundle params);
     void destroyBiInteractiveApp(in String biIAppId);
     void setTeletextAppEnabled(boolean enable);
+    void sendCurrentVideoBounds(in Rect bounds);
     void sendCurrentChannelUri(in Uri channelUri);
     void sendCurrentChannelLcn(int lcn);
     void sendStreamVolume(float volume);

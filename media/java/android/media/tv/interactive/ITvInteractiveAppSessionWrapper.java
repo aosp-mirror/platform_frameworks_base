@@ -94,6 +94,7 @@ public class ITvInteractiveAppSessionWrapper
     private static final int DO_NOTIFY_TIME_SHIFT_STATUS_CHANGED = 37;
     private static final int DO_NOTIFY_TIME_SHIFT_START_POSITION_CHANGED = 38;
     private static final int DO_NOTIFY_TIME_SHIFT_CURRENT_POSITION_CHANGED = 39;
+    private static final int DO_SEND_CURRENT_VIDEO_BOUNDS = 40;
 
     private final HandlerCaller mCaller;
     private Session mSessionImpl;
@@ -155,6 +156,10 @@ public class ITvInteractiveAppSessionWrapper
             }
             case DO_SET_TELETEXT_APP_ENABLED: {
                 mSessionImpl.setTeletextAppEnabled((Boolean) msg.obj);
+                break;
+            }
+            case DO_SEND_CURRENT_VIDEO_BOUNDS: {
+                mSessionImpl.sendCurrentVideoBounds((Rect) msg.obj);
                 break;
             }
             case DO_SEND_CURRENT_CHANNEL_URI: {
@@ -352,6 +357,12 @@ public class ITvInteractiveAppSessionWrapper
     public void setTeletextAppEnabled(boolean enable) {
         mCaller.executeOrSendMessage(
                 mCaller.obtainMessageO(DO_SET_TELETEXT_APP_ENABLED, enable));
+    }
+
+    @Override
+    public void sendCurrentVideoBounds(@Nullable Rect bounds) {
+        mCaller.executeOrSendMessage(
+                mCaller.obtainMessageO(DO_SEND_CURRENT_VIDEO_BOUNDS, bounds));
     }
 
     @Override

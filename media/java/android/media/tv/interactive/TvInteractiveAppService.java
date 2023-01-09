@@ -17,6 +17,7 @@
 package android.media.tv.interactive;
 
 import android.annotation.CallSuper;
+import android.annotation.IntDef;
 import android.annotation.MainThread;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
@@ -139,6 +140,38 @@ public abstract class TvInteractiveAppService extends Service {
      * Playback command type: select the given track.
      */
     public static final String PLAYBACK_COMMAND_TYPE_SELECT_TRACK = "select_track";
+
+
+
+    /** @hide */
+    @Retention(RetentionPolicy.SOURCE)
+    @IntDef(prefix = "PLAYBACK_COMMAND_STOP_MODE_", value = {
+            PLAYBACK_COMMAND_STOP_MODE_BLANK,
+            PLAYBACK_COMMAND_STOP_MODE_FREEZE
+    })
+    public @interface PlaybackCommandStopMode {}
+
+    /**
+     * Playback command stop mode: show a blank screen.
+     * @hide
+     */
+    public static final int PLAYBACK_COMMAND_STOP_MODE_BLANK = 1;
+
+    /**
+     * Playback command stop mode: freeze the video.
+     * @hide
+     */
+    public static final int PLAYBACK_COMMAND_STOP_MODE_FREEZE = 2;
+
+    /**
+     * Playback command parameter: stop mode.
+     * <p>Type: int
+     *
+     * @see #PLAYBACK_COMMAND_TYPE_STOP
+     * @hide
+     */
+    public static final String COMMAND_PARAMETER_KEY_STOP_MODE = "command_stop_mode";
+
     /**
      * Playback command parameter: channel URI.
      * <p>Type: android.net.Uri
@@ -495,6 +528,13 @@ public abstract class TvInteractiveAppService extends Service {
          * @param enable {@code true} to enable teletext app; {@code false} otherwise.
          */
         public void onSetTeletextAppEnabled(boolean enable) {
+        }
+
+        /**
+         * Receives current video bounds.
+         * @hide
+         */
+        public void onCurrentVideoBounds(@NonNull Rect bounds) {
         }
 
         /**
@@ -983,6 +1023,30 @@ public abstract class TvInteractiveAppService extends Service {
         }
 
         /**
+         * Requests the bounds of the current video.
+         * @hide
+         */
+        @CallSuper
+        public void requestCurrentVideoBounds() {
+            executeOrPostRunnableOnMainThread(new Runnable() {
+                @MainThread
+                @Override
+                public void run() {
+                    try {
+                        if (DEBUG) {
+                            Log.d(TAG, "requestCurrentVideoBounds");
+                        }
+                        if (mSessionCallback != null) {
+                            mSessionCallback.onRequestCurrentVideoBounds();
+                        }
+                    } catch (RemoteException e) {
+                        Log.w(TAG, "error in requestCurrentVideoBounds", e);
+                    }
+                }
+            });
+        }
+
+        /**
          * Requests the URI of the current channel.
          */
         @CallSuper
@@ -1307,6 +1371,10 @@ public abstract class TvInteractiveAppService extends Service {
 
         void setTeletextAppEnabled(boolean enable) {
             onSetTeletextAppEnabled(enable);
+        }
+
+        void sendCurrentVideoBounds(@NonNull Rect bounds) {
+            onCurrentVideoBounds(bounds);
         }
 
         void sendCurrentChannelUri(@Nullable Uri channelUri) {
