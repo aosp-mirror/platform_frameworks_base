@@ -90,6 +90,9 @@
             android:foregroundServiceType="mediaProjection"
             android:enabled="true">
         </service>
+
+        <service android:name="com.android.server.wm.scvh.EmbeddedSCVHService"
+            android:process="com.android.server.wm.scvh.embedded_process" />
     </application>
 
     <instrumentation

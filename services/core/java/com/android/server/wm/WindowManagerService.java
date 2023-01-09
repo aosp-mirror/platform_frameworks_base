@@ -292,7 +292,9 @@ import android.view.WindowManagerPolicyConstants.PointerEventListener;
 import android.view.displayhash.DisplayHash;
 import android.view.displayhash.VerifiedDisplayHash;
 import android.view.inputmethod.ImeTracker;
+import android.window.AddToSurfaceSyncGroupResult;
 import android.window.ClientWindowFrames;
+import android.window.ISurfaceSyncGroupCompletedListener;
 import android.window.ITaskFpsCallback;
 import android.window.ScreenCapture;
 import android.window.TaskSnapshot;
@@ -746,6 +748,10 @@ public class WindowManagerService extends IWindowManager.Stub
 
     @VisibleForTesting
     final ContentRecordingController mContentRecordingController = new ContentRecordingController();
+
+    private final SurfaceSyncGroupController mSurfaceSyncGroupController =
+            new SurfaceSyncGroupController();
+
     @VisibleForTesting
     final class SettingsObserver extends ContentObserver {
         private final Uri mDisplayInversionEnabledUri =
@@ -9415,5 +9421,17 @@ public class WindowManagerService extends IWindowManager.Stub
             return 0;
         }
         return type;
+    }
+    @Override
+    public boolean addToSurfaceSyncGroup(IBinder syncGroupToken, boolean parentSyncGroupMerge,
+            @Nullable ISurfaceSyncGroupCompletedListener completedListener,
+            AddToSurfaceSyncGroupResult outAddToSyncGroupResult) {
+        return mSurfaceSyncGroupController.addToSyncGroup(syncGroupToken, parentSyncGroupMerge,
+                completedListener, outAddToSyncGroupResult);
+    }
+
+    @Override
+    public void markSurfaceSyncGroupReady(IBinder syncGroupToken) {
+        mSurfaceSyncGroupController.markSyncGroupReady(syncGroupToken);
     }
 }

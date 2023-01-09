@@ -29,9 +29,14 @@ import android.os.Parcelable;
 import android.os.RemoteException;
 import android.util.Log;
 import android.view.accessibility.IAccessibilityEmbeddedConnection;
+import android.window.ISurfaceSyncGroup;
 import android.window.WindowTokenClient;
 
 import java.util.Objects;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.TimeoutException;
 
 /**
  * Utility class for adding a View hierarchy to a {@link SurfaceControl}. The View hierarchy
@@ -86,6 +91,19 @@ public class SurfaceControlViewHost {
                 });
             }
             mWm.setInsetsState(state);
+        }
+
+        @Override
+        public ISurfaceSyncGroup getSurfaceSyncGroup() {
+            CompletableFuture<ISurfaceSyncGroup> surfaceSyncGroup = new CompletableFuture<>();
+            mViewRoot.mHandler.post(
+                    () -> surfaceSyncGroup.complete(mViewRoot.getOrCreateSurfaceSyncGroup()));
+            try {
+                return surfaceSyncGroup.get(1, TimeUnit.SECONDS);
+            } catch (InterruptedException | ExecutionException | TimeoutException e) {
+                Log.e(TAG, "Failed to get SurfaceSyncGroup for SCVH", e);
+            }
+            return null;
         }
     }
 
