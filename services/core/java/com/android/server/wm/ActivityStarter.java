@@ -1972,7 +1972,7 @@ class ActivityStarter {
         );
 
         boolean shouldBlockActivityStart =
-                ActivitySecurityModelFeatureFlags.shouldBlockActivityStart(mCallingUid);
+                ActivitySecurityModelFeatureFlags.shouldRestrictActivitySwitch(mCallingUid);
 
         if (ActivitySecurityModelFeatureFlags.shouldShowToast(mCallingUid)) {
             UiThread.getHandler().post(() -> Toast.makeText(mService.mContext,
@@ -2127,7 +2127,7 @@ class ActivityStarter {
         ActivityRecord targetTaskTop = targetTask.getTopNonFinishingActivity();
         if (targetTaskTop != null && targetTaskTop.getUid() != startingUid) {
             boolean shouldBlockActivityStart = ActivitySecurityModelFeatureFlags
-                    .shouldBlockActivityStart(callingUid);
+                    .shouldRestrictActivitySwitch(callingUid);
             int[] finishCount = new int[0];
             if (shouldBlockActivityStart) {
                 ActivityRecord activity = targetTask.getActivity(

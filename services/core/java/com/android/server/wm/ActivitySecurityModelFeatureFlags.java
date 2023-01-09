@@ -72,7 +72,7 @@ class ActivitySecurityModelFeatureFlags {
     }
 
     @GuardedBy("ActivityTaskManagerService.mGlobalLock")
-    static boolean shouldBlockActivityStart(int uid) {
+    static boolean shouldRestrictActivitySwitch(int uid) {
         return flagEnabledForUid(sAsmRestrictionsEnabled, uid);
     }
 
