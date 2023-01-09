@@ -58,7 +58,6 @@ open class PipKeyboardTest(flicker: FlickerTest) : PipTransition(flicker) {
             }
             teardown {
                 imeApp.exit(wmHelper)
-                setRotation(PlatformConsts.Rotation.ROTATION_0)
             }
             transitions {
                 // open the soft keyboard
