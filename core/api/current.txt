@@ -39769,9 +39769,8 @@ package android.service.controls.templates {
 package android.service.credentials {
 
   public class Action implements android.os.Parcelable {
-    ctor public Action(@NonNull android.app.slice.Slice, @NonNull android.app.PendingIntent);
+    ctor public Action(@NonNull android.app.slice.Slice);
     method public int describeContents();
-    method @NonNull public android.app.PendingIntent getPendingIntent();
     method @NonNull public android.app.slice.Slice getSlice();
     method public void writeToParcel(@NonNull android.os.Parcel, int);
     field @NonNull public static final android.os.Parcelable.Creator<android.service.credentials.Action> CREATOR;
@@ -39866,21 +39865,18 @@ package android.service.credentials {
   }
 
   public class CreateEntry implements android.os.Parcelable {
-    ctor public CreateEntry(@NonNull android.app.slice.Slice, @NonNull android.app.PendingIntent);
+    ctor public CreateEntry(@NonNull android.app.slice.Slice);
     method public int describeContents();
-    method @NonNull public android.app.PendingIntent getPendingIntent();
     method @NonNull public android.app.slice.Slice getSlice();
     method public void writeToParcel(@NonNull android.os.Parcel, int);
     field @NonNull public static final android.os.Parcelable.Creator<android.service.credentials.CreateEntry> CREATOR;
   }
 
   public class CredentialEntry implements android.os.Parcelable {
-    ctor public CredentialEntry(@NonNull String, @NonNull android.app.slice.Slice, @NonNull android.app.PendingIntent, boolean);
+    ctor public CredentialEntry(@NonNull String, @NonNull android.app.slice.Slice);
     method public int describeContents();
-    method @NonNull public android.app.PendingIntent getPendingIntent();
     method @NonNull public android.app.slice.Slice getSlice();
     method @NonNull public String getType();
-    method public boolean isAutoSelectAllowed();
     method public void writeToParcel(@NonNull android.os.Parcel, int);
     field @NonNull public static final android.os.Parcelable.Creator<android.service.credentials.CredentialEntry> CREATOR;
   }

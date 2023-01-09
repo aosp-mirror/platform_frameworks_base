@@ -19,7 +19,6 @@ package com.android.server.credentials;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.UserIdInt;
-import android.app.PendingIntent;
 import android.content.Context;
 import android.content.Intent;
 import android.credentials.GetCredentialException;
@@ -288,8 +287,8 @@ public final class ProviderGetSession extends ProviderSession<BeginGetCredential
     private Entry prepareUiAuthenticationAction(@NonNull Action authenticationAction) {
         String entryId = generateEntryId();
         Entry authEntry = new Entry(
-                AUTHENTICATION_ACTION_ENTRY_KEY, entryId, authenticationAction.getSlice(),
-                authenticationAction.getPendingIntent(), /*fillInIntent=*/null);
+                AUTHENTICATION_ACTION_ENTRY_KEY, entryId,
+                authenticationAction.getSlice());
         mUiAuthenticationAction = new Pair<>(entryId, authenticationAction);
         return authEntry;
     }
@@ -304,20 +303,15 @@ public final class ProviderGetSession extends ProviderSession<BeginGetCredential
             String entryId = generateEntryId();
             mUiCredentialEntries.put(entryId, credentialEntry);
             Log.i(TAG, "in prepareUiProviderData creating ui entry with id " + entryId);
-            if (credentialEntry.getPendingIntent() != null) {
-                credentialUiEntries.add(new Entry(CREDENTIAL_ENTRY_KEY, entryId,
-                        credentialEntry.getSlice(), credentialEntry.getPendingIntent(),
-                        setUpFillInIntent(credentialEntry.getPendingIntent(),
-                                credentialEntry.getType())));
-            } else {
-                Log.i(TAG, "No pending intent. Should not happen.");
-            }
+            credentialUiEntries.add(new Entry(CREDENTIAL_ENTRY_KEY, entryId,
+                    credentialEntry.getSlice(),
+                    /*fillInIntent=*/setUpFillInIntent(credentialEntry.getType())));
         }
         return credentialUiEntries;
     }
 
-    private Intent setUpFillInIntent(PendingIntent pendingIntent, String type) {
-        Intent intent = pendingIntent.getIntent();
+    private Intent setUpFillInIntent(String type) {
+        Intent intent = new Intent();
         for (GetCredentialOption option : mCompleteRequest.getGetCredentialOptions()) {
             if (option.getType().equals(type)) {
                 intent.putExtra(
@@ -336,8 +330,7 @@ public final class ProviderGetSession extends ProviderSession<BeginGetCredential
             String entryId = UUID.randomUUID().toString();
             mUiActionsEntries.put(entryId, action);
             // TODO : Remove conversion of string to int after change in Entry class
-            actionEntries.add(new Entry(ACTION_ENTRY_KEY, entryId, action.getSlice(),
-                    action.getPendingIntent(), /*fillInIntent=*/null));
+            actionEntries.add(new Entry(ACTION_ENTRY_KEY, entryId, action.getSlice()));
         }
         return actionEntries;
     }
@@ -388,7 +381,7 @@ public final class ProviderGetSession extends ProviderSession<BeginGetCredential
 
     private void onAuthenticationEntrySelected(
             @Nullable ProviderPendingIntentResponse providerPendingIntentResponse) {
-            //TODO: Other provider intent statuses
+        //TODO: Other provider intent statuses
         // Check if pending intent has an error
         GetCredentialException exception = maybeGetPendingIntentException(
                 providerPendingIntentResponse);

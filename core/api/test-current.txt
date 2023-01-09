@@ -997,7 +997,8 @@ package android.credentials.ui {
 
   public final class Entry implements android.os.Parcelable {
     ctor public Entry(@NonNull String, @NonNull String, @NonNull android.app.slice.Slice);
-    ctor public Entry(@NonNull String, @NonNull String, @NonNull android.app.slice.Slice, @NonNull android.app.PendingIntent, @Nullable android.content.Intent);
+    ctor public Entry(@NonNull String, @NonNull String, @NonNull android.app.slice.Slice, @NonNull android.app.PendingIntent, @NonNull android.content.Intent);
+    ctor public Entry(@NonNull String, @NonNull String, @NonNull android.app.slice.Slice, @NonNull android.content.Intent);
     method public int describeContents();
     method @Nullable public android.content.Intent getFrameworkExtrasIntent();
     method @NonNull public String getKey();

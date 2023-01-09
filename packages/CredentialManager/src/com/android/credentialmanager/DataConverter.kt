@@ -53,8 +53,8 @@ class GetFlowUtils {
   companion object {
 
     fun toProviderList(
-      providerDataList: List<GetCredentialProviderData>,
-      context: Context,
+            providerDataList: List<GetCredentialProviderData>,
+            context: Context,
     ): List<ProviderInfo> {
       val packageManager = context.packageManager
       return providerDataList.map {
@@ -67,45 +67,45 @@ class GetFlowUtils {
         }
 
         val pkgInfo = packageManager
-          .getPackageInfo(packageName!!,
-            PackageManager.PackageInfoFlags.of(0))
+                .getPackageInfo(packageName!!,
+                        PackageManager.PackageInfoFlags.of(0))
         val providerDisplayName = pkgInfo.applicationInfo.loadLabel(packageManager).toString()
         // TODO: get the provider icon from the service
         //  and decide what to do when failed to load a provider icon
         val providerIcon = pkgInfo.applicationInfo.loadIcon(packageManager)!!
         ProviderInfo(
-          id = it.providerFlattenedComponentName,
-          // TODO: decide what to do when failed to load a provider icon
-          icon = providerIcon,
-          displayName = providerDisplayName,
-          credentialEntryList = getCredentialOptionInfoList(
-            it.providerFlattenedComponentName, it.credentialEntries, context),
-          authenticationEntry = getAuthenticationEntry(
-            it.providerFlattenedComponentName,
-            providerDisplayName,
-            providerIcon,
-            it.authenticationEntry),
-          remoteEntry = getRemoteEntry(it.providerFlattenedComponentName, it.remoteEntry),
-          actionEntryList = getActionEntryList(
-            it.providerFlattenedComponentName, it.actionChips, providerIcon),
+                id = it.providerFlattenedComponentName,
+                // TODO: decide what to do when failed to load a provider icon
+                icon = providerIcon,
+                displayName = providerDisplayName,
+                credentialEntryList = getCredentialOptionInfoList(
+                        it.providerFlattenedComponentName, it.credentialEntries, context),
+                authenticationEntry = getAuthenticationEntry(
+                        it.providerFlattenedComponentName,
+                        providerDisplayName,
+                        providerIcon,
+                        it.authenticationEntry),
+                remoteEntry = getRemoteEntry(it.providerFlattenedComponentName, it.remoteEntry),
+                actionEntryList = getActionEntryList(
+                        it.providerFlattenedComponentName, it.actionChips, providerIcon),
         )
       }
     }
 
     fun toRequestDisplayInfo(
-      requestInfo: RequestInfo,
+            requestInfo: RequestInfo,
     ): com.android.credentialmanager.getflow.RequestDisplayInfo {
       return com.android.credentialmanager.getflow.RequestDisplayInfo(
-        appDomainName = requestInfo.appPackageName
+              appDomainName = requestInfo.appPackageName
       )
     }
 
 
     /* From service data structure to UI credential entry list representation. */
     private fun getCredentialOptionInfoList(
-      providerId: String,
-      credentialEntries: List<Entry>,
-      context: Context,
+            providerId: String,
+            credentialEntries: List<Entry>,
+            context: Context,
     ): List<CredentialEntryInfo> {
       return credentialEntries.map {
         // TODO: handle NPE gracefully
@@ -113,27 +113,27 @@ class GetFlowUtils {
 
         // Consider directly move the UI object into the class.
         return@map CredentialEntryInfo(
-          providerId = providerId,
-          entryKey = it.key,
-          entrySubkey = it.subkey,
-          pendingIntent = it.pendingIntent,
-          fillInIntent = it.frameworkExtrasIntent,
-          credentialType = credentialEntry.type.toString(),
-          credentialTypeDisplayName = credentialEntry.typeDisplayName.toString(),
-          userName = credentialEntry.username.toString(),
-          displayName = credentialEntry.displayName?.toString(),
-          // TODO: proper fallback
-          icon = credentialEntry.icon?.loadDrawable(context),
-          lastUsedTimeMillis = credentialEntry.lastUsedTimeMillis,
+                providerId = providerId,
+                entryKey = it.key,
+                entrySubkey = it.subkey,
+                pendingIntent = credentialEntry.pendingIntent,
+                fillInIntent = it.frameworkExtrasIntent,
+                credentialType = credentialEntry.type.toString(),
+                credentialTypeDisplayName = credentialEntry.typeDisplayName.toString(),
+                userName = credentialEntry.username.toString(),
+                displayName = credentialEntry.displayName?.toString(),
+                // TODO: proper fallback
+                icon = credentialEntry.icon?.loadDrawable(context),
+                lastUsedTimeMillis = credentialEntry.lastUsedTimeMillis,
         )
       }
     }
 
     private fun getAuthenticationEntry(
-      providerId: String,
-      providerDisplayName: String,
-      providerIcon: Drawable,
-      authEntry: Entry?,
+            providerId: String,
+            providerDisplayName: String,
+            providerIcon: Drawable,
+            authEntry: Entry?,
     ): AuthenticationEntryInfo? {
       // TODO: should also call fromSlice after getting the official jetpack code.
 
@@ -141,13 +141,13 @@ class GetFlowUtils {
         return null
       }
       return AuthenticationEntryInfo(
-        providerId = providerId,
-        entryKey = authEntry.key,
-        entrySubkey = authEntry.subkey,
-        pendingIntent = authEntry.pendingIntent,
-        fillInIntent = authEntry.frameworkExtrasIntent,
-        title = providerDisplayName,
-        icon = providerIcon,
+              providerId = providerId,
+              entryKey = authEntry.key,
+              entrySubkey = authEntry.subkey,
+              pendingIntent = authEntry.pendingIntent,
+              fillInIntent = authEntry.frameworkExtrasIntent,
+              title = providerDisplayName,
+              icon = providerIcon,
       )
     }
 
@@ -157,33 +157,33 @@ class GetFlowUtils {
         return null
       }
       return RemoteEntryInfo(
-        providerId = providerId,
-        entryKey = remoteEntry.key,
-        entrySubkey = remoteEntry.subkey,
-        pendingIntent = remoteEntry.pendingIntent,
-        fillInIntent = remoteEntry.frameworkExtrasIntent,
+              providerId = providerId,
+              entryKey = remoteEntry.key,
+              entrySubkey = remoteEntry.subkey,
+              pendingIntent = remoteEntry.pendingIntent,
+              fillInIntent = remoteEntry.frameworkExtrasIntent,
       )
     }
 
     private fun getActionEntryList(
-      providerId: String,
-      actionEntries: List<Entry>,
-      providerIcon: Drawable,
+            providerId: String,
+            actionEntries: List<Entry>,
+            providerIcon: Drawable,
     ): List<ActionEntryInfo> {
       return actionEntries.map {
         // TODO: handle NPE gracefully
         val actionEntryUi = Action.fromSlice(it.slice)!!
 
         return@map ActionEntryInfo(
-          providerId = providerId,
-          entryKey = it.key,
-          entrySubkey = it.subkey,
-          pendingIntent = it.pendingIntent,
-          fillInIntent = it.frameworkExtrasIntent,
-          title = actionEntryUi.title.toString(),
-          // TODO: gracefully fail
-          icon = providerIcon,
-          subTitle = actionEntryUi.subTitle?.toString(),
+                providerId = providerId,
+                entryKey = it.key,
+                entrySubkey = it.subkey,
+                pendingIntent = actionEntryUi.pendingIntent,
+                fillInIntent = it.frameworkExtrasIntent,
+                title = actionEntryUi.title.toString(),
+                // TODO: gracefully fail
+                icon = providerIcon,
+                subTitle = actionEntryUi.subTitle?.toString(),
         )
       }
     }
@@ -194,8 +194,8 @@ class CreateFlowUtils {
   companion object {
 
     fun toEnabledProviderList(
-      providerDataList: List<CreateCredentialProviderData>,
-      context: Context,
+            providerDataList: List<CreateCredentialProviderData>,
+            context: Context,
     ): List<EnabledProviderInfo> {
       // TODO: get from the actual service info
       val packageManager = context.packageManager
@@ -209,23 +209,23 @@ class CreateFlowUtils {
         }
 
         val pkgInfo = packageManager
-          .getPackageInfo(packageName!!,
-            PackageManager.PackageInfoFlags.of(0))
+                .getPackageInfo(packageName!!,
+                        PackageManager.PackageInfoFlags.of(0))
         EnabledProviderInfo(
-          // TODO: decide what to do when failed to load a provider icon
-          icon = pkgInfo.applicationInfo.loadIcon(packageManager)!!,
-          name = it.providerFlattenedComponentName,
-          displayName = pkgInfo.applicationInfo.loadLabel(packageManager).toString(),
-          createOptions = toCreationOptionInfoList(
-            it.providerFlattenedComponentName, it.saveEntries, context),
-          remoteEntry = toRemoteInfo(it.providerFlattenedComponentName, it.remoteEntry),
+                // TODO: decide what to do when failed to load a provider icon
+                icon = pkgInfo.applicationInfo.loadIcon(packageManager)!!,
+                name = it.providerFlattenedComponentName,
+                displayName = pkgInfo.applicationInfo.loadLabel(packageManager).toString(),
+                createOptions = toCreationOptionInfoList(
+                        it.providerFlattenedComponentName, it.saveEntries, context),
+                remoteEntry = toRemoteInfo(it.providerFlattenedComponentName, it.remoteEntry),
         )
       }
     }
 
     fun toDisabledProviderList(
-      providerDataList: List<DisabledProviderData>?,
-      context: Context,
+            providerDataList: List<DisabledProviderData>?,
+            context: Context,
     ): List<DisabledProviderInfo>? {
       // TODO: get from the actual service info
       val packageManager = context.packageManager
@@ -240,31 +240,31 @@ class CreateFlowUtils {
                 .getPackageInfo(packageName,
                         PackageManager.PackageInfoFlags.of(0))
         DisabledProviderInfo(
-          icon = pkgInfo.applicationInfo.loadIcon(packageManager)!!,
-          name = it.providerFlattenedComponentName,
-          displayName = pkgInfo.applicationInfo.loadLabel(packageManager).toString(),
+                icon = pkgInfo.applicationInfo.loadIcon(packageManager)!!,
+                name = it.providerFlattenedComponentName,
+                displayName = pkgInfo.applicationInfo.loadLabel(packageManager).toString(),
         )
       }
     }
 
     fun toRequestDisplayInfo(
-      requestInfo: RequestInfo,
-      context: Context,
+            requestInfo: RequestInfo,
+            context: Context,
     ): RequestDisplayInfo {
       val createCredentialRequest = requestInfo.createCredentialRequest
       val createCredentialRequestJetpack = createCredentialRequest?.let {
         CreateCredentialRequest.createFrom(
-          it
+                it
         )
       }
       when (createCredentialRequestJetpack) {
         is CreatePasswordRequest -> {
           return RequestDisplayInfo(
-            createCredentialRequestJetpack.id,
-            createCredentialRequestJetpack.password,
-            createCredentialRequestJetpack.type,
-            requestInfo.appPackageName,
-            context.getDrawable(R.drawable.ic_password)!!
+                  createCredentialRequestJetpack.id,
+                  createCredentialRequestJetpack.password,
+                  createCredentialRequestJetpack.type,
+                  requestInfo.appPackageName,
+                  context.getDrawable(R.drawable.ic_password)!!
           )
         }
         is CreatePublicKeyCredentialRequest -> {
@@ -278,31 +278,31 @@ class CreateFlowUtils {
             displayName = user.getString("displayName")
           }
           return RequestDisplayInfo(
-            name,
-            displayName,
-            createCredentialRequestJetpack.type,
-            requestInfo.appPackageName,
-            context.getDrawable(R.drawable.ic_passkey)!!)
+                  name,
+                  displayName,
+                  createCredentialRequestJetpack.type,
+                  requestInfo.appPackageName,
+                  context.getDrawable(R.drawable.ic_passkey)!!)
         }
         // TODO: correctly parsing for other sign-ins
         else -> {
           return RequestDisplayInfo(
-            "beckett-bakert@gmail.com",
-            "Elisa Beckett",
-            "other-sign-ins",
-            requestInfo.appPackageName,
-            context.getDrawable(R.drawable.ic_other_sign_in)!!)
+                  "beckett-bakert@gmail.com",
+                  "Elisa Beckett",
+                  "other-sign-ins",
+                  requestInfo.appPackageName,
+                  context.getDrawable(R.drawable.ic_other_sign_in)!!)
         }
       }
     }
 
     fun toCreateCredentialUiState(
-      enabledProviders: List<EnabledProviderInfo>,
-      disabledProviders: List<DisabledProviderInfo>?,
-      defaultProviderId: String?,
-      requestDisplayInfo: RequestDisplayInfo,
-      isOnPasskeyIntroStateAlready: Boolean,
-      isPasskeyFirstUse: Boolean,
+            enabledProviders: List<EnabledProviderInfo>,
+            disabledProviders: List<DisabledProviderInfo>?,
+            defaultProviderId: String?,
+            requestDisplayInfo: RequestDisplayInfo,
+            isOnPasskeyIntroStateAlready: Boolean,
+            isPasskeyFirstUse: Boolean,
     ): CreateCredentialUiState {
       var lastSeenProviderWithNonEmptyCreateOptions: EnabledProviderInfo? = null
       var remoteEntry: RemoteInfo? = null
@@ -310,7 +310,7 @@ class CreateFlowUtils {
       var createOptionsPairs:
               MutableList<Pair<CreateOptionInfo, EnabledProviderInfo>> = mutableListOf()
       enabledProviders.forEach {
-          enabledProvider ->
+        enabledProvider ->
         if (defaultProviderId != null) {
           if (enabledProvider.id == defaultProviderId) {
             defaultProvider = enabledProvider
@@ -327,10 +327,10 @@ class CreateFlowUtils {
         }
       }
       return CreateCredentialUiState(
-        enabledProviders = enabledProviders,
-        disabledProviders = disabledProviders,
-        toCreateScreenState(
-          /*createOptionSize=*/createOptionsPairs.size,
+              enabledProviders = enabledProviders,
+              disabledProviders = disabledProviders,
+              toCreateScreenState(
+                      /*createOptionSize=*/createOptionsPairs.size,
           /*isOnPasskeyIntroStateAlready=*/isOnPasskeyIntroStateAlready,
           /*requestDisplayInfo=*/requestDisplayInfo,
           /*defaultProvider=*/defaultProvider, /*remoteEntry=*/remoteEntry,
@@ -341,31 +341,32 @@ class CreateFlowUtils {
         toActiveEntry(
           /*defaultProvider=*/defaultProvider,
           /*createOptionSize=*/createOptionsPairs.size,
-          /*lastSeenProviderWithNonEmptyCreateOptions=*/lastSeenProviderWithNonEmptyCreateOptions,
-          /*remoteEntry=*/remoteEntry),
+                      /*lastSeenProviderWithNonEmptyCreateOptions=*/
+                      lastSeenProviderWithNonEmptyCreateOptions,
+                      /*remoteEntry=*/remoteEntry),
       )
     }
 
     private fun toCreateScreenState(
-      createOptionSize: Int,
-      isOnPasskeyIntroStateAlready: Boolean,
-      requestDisplayInfo: RequestDisplayInfo,
-      defaultProvider: EnabledProviderInfo?,
-      remoteEntry: RemoteInfo?,
-      isPasskeyFirstUse: Boolean,
+            createOptionSize: Int,
+            isOnPasskeyIntroStateAlready: Boolean,
+            requestDisplayInfo: RequestDisplayInfo,
+            defaultProvider: EnabledProviderInfo?,
+            remoteEntry: RemoteInfo?,
+            isPasskeyFirstUse: Boolean,
     ): CreateScreenState {
       return if (
-        isPasskeyFirstUse && requestDisplayInfo
-          .type == TYPE_PUBLIC_KEY_CREDENTIAL && !isOnPasskeyIntroStateAlready) {
+              isPasskeyFirstUse && requestDisplayInfo
+                      .type == TYPE_PUBLIC_KEY_CREDENTIAL && !isOnPasskeyIntroStateAlready) {
         CreateScreenState.PASSKEY_INTRO
       } else if (
-        (defaultProvider == null || defaultProvider.createOptions.isEmpty()
-                ) && createOptionSize > 1) {
+              (defaultProvider == null || defaultProvider.createOptions.isEmpty()
+                      ) && createOptionSize > 1) {
         CreateScreenState.PROVIDER_SELECTION
       } else if (
-        ((defaultProvider == null || defaultProvider.createOptions.isEmpty()
-                ) && createOptionSize == 1) || (
-                defaultProvider != null && defaultProvider.createOptions.isNotEmpty())) {
+              ((defaultProvider == null || defaultProvider.createOptions.isEmpty()
+                      ) && createOptionSize == 1) || (
+                      defaultProvider != null && defaultProvider.createOptions.isNotEmpty())) {
         CreateScreenState.CREATION_OPTION_SELECTION
       } else if (createOptionSize == 0 && remoteEntry != null) {
         CreateScreenState.EXTERNAL_ONLY_SELECTION
@@ -376,65 +377,66 @@ class CreateFlowUtils {
     }
 
     private fun toActiveEntry(
-      defaultProvider: EnabledProviderInfo?,
-      createOptionSize: Int,
-      lastSeenProviderWithNonEmptyCreateOptions: EnabledProviderInfo?,
-      remoteEntry: RemoteInfo?,
+            defaultProvider: EnabledProviderInfo?,
+            createOptionSize: Int,
+            lastSeenProviderWithNonEmptyCreateOptions: EnabledProviderInfo?,
+            remoteEntry: RemoteInfo?,
     ): ActiveEntry? {
       return if (
-        defaultProvider != null && defaultProvider.createOptions.isEmpty() && remoteEntry != null) {
+              defaultProvider != null && defaultProvider.createOptions.isEmpty() &&
+              remoteEntry != null) {
         ActiveEntry(defaultProvider, remoteEntry)
       } else if (
-        defaultProvider != null && defaultProvider.createOptions.isNotEmpty()
+              defaultProvider != null && defaultProvider.createOptions.isNotEmpty()
       ) {
         ActiveEntry(defaultProvider, defaultProvider.createOptions.first())
       } else if (createOptionSize == 1) {
         ActiveEntry(lastSeenProviderWithNonEmptyCreateOptions!!,
-          lastSeenProviderWithNonEmptyCreateOptions.createOptions.first())
+                lastSeenProviderWithNonEmptyCreateOptions.createOptions.first())
       } else null
     }
 
     private fun toCreationOptionInfoList(
-      providerId: String,
-      creationEntries: List<Entry>,
-      context: Context,
+            providerId: String,
+            creationEntries: List<Entry>,
+            context: Context,
     ): List<CreateOptionInfo> {
       return creationEntries.map {
         // TODO: handle NPE gracefully
         val createEntry = CreateEntry.fromSlice(it.slice)!!
 
         return@map CreateOptionInfo(
-          // TODO: remove fallbacks
-          providerId = providerId,
-          entryKey = it.key,
-          entrySubkey = it.subkey,
-          pendingIntent = it.pendingIntent,
-          fillInIntent = it.frameworkExtrasIntent,
-          userProviderDisplayName = createEntry.accountName.toString(),
-          profileIcon = createEntry.icon?.loadDrawable(context),
-          passwordCount = CredentialCountInformation.getPasswordCount(
-                  createEntry.credentialCountInformationList) ?: 0,
-          passkeyCount = CredentialCountInformation.getPasskeyCount(
-                  createEntry.credentialCountInformationList) ?: 0,
-          totalCredentialCount = CredentialCountInformation.getTotalCount(
-                  createEntry.credentialCountInformationList) ?: 0,
-          lastUsedTimeMillis = createEntry.lastUsedTimeMillis ?: 0,
+                // TODO: remove fallbacks
+                providerId = providerId,
+                entryKey = it.key,
+                entrySubkey = it.subkey,
+                pendingIntent = createEntry.pendingIntent,
+                fillInIntent = it.frameworkExtrasIntent,
+                userProviderDisplayName = createEntry.accountName.toString(),
+                profileIcon = createEntry.icon?.loadDrawable(context),
+                passwordCount = CredentialCountInformation.getPasswordCount(
+                        createEntry.credentialCountInformationList) ?: 0,
+                passkeyCount = CredentialCountInformation.getPasskeyCount(
+                        createEntry.credentialCountInformationList) ?: 0,
+                totalCredentialCount = CredentialCountInformation.getTotalCount(
+                        createEntry.credentialCountInformationList) ?: 0,
+                lastUsedTimeMillis = createEntry.lastUsedTimeMillis ?: 0,
         )
       }
     }
 
     private fun toRemoteInfo(
-      providerId: String,
-      remoteEntry: Entry?,
+            providerId: String,
+            remoteEntry: Entry?,
     ): RemoteInfo? {
       // TODO: should also call fromSlice after getting the official jetpack code.
       return if (remoteEntry != null) {
         RemoteInfo(
-          providerId = providerId,
-          entryKey = remoteEntry.key,
-          entrySubkey = remoteEntry.subkey,
-          pendingIntent = remoteEntry.pendingIntent,
-          fillInIntent = remoteEntry.frameworkExtrasIntent,
+                providerId = providerId,
+                entryKey = remoteEntry.key,
+                entrySubkey = remoteEntry.subkey,
+                pendingIntent = remoteEntry.pendingIntent,
+                fillInIntent = remoteEntry.frameworkExtrasIntent,
         )
       } else null
     }

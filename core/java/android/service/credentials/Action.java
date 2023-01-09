@@ -29,6 +29,9 @@ import java.util.Objects;
  * An action defined by the provider that intents into the provider's app for specific
  * user actions.
  *
+ * <p>If user selects this action entry, the corresponding {@link PendingIntent} set on the
+ * {@code slice} as a {@link androidx.slice.core.SliceAction} will get invoked.
+ *
  * <p>Any class that derives this class must only add extra field values to the {@code slice}
  * object passed into the constructor. Any other field will not be parceled through. If the
  * derived class has custom parceling implementation, this class will not be able to unpack
@@ -37,9 +40,8 @@ import java.util.Objects;
 @SuppressLint("ParcelNotFinal")
 public class Action implements Parcelable {
     /** Slice object containing display content to be displayed with this action on the UI. */
-    private final @NonNull Slice mSlice;
-    /** The pending intent to be invoked when the user selects this action. */
-    private final @NonNull PendingIntent mPendingIntent;
+    @NonNull
+    private final Slice mSlice;
 
     /**
      * Constructs an action to be displayed on the UI.
@@ -52,21 +54,18 @@ public class Action implements Parcelable {
      * {@link BeginCreateCredentialResponse} and {@link BeginGetCredentialResponse}.
      *
      * @param slice the display content to be displayed on the UI, along with this action
-     * @param pendingIntent the intent to be invoked when the user selects this action
      */
-    public Action(@NonNull Slice slice, @NonNull PendingIntent pendingIntent) {
+    public Action(@NonNull Slice slice) {
         Objects.requireNonNull(slice, "slice must not be null");
-        Objects.requireNonNull(pendingIntent, "pendingIntent must not be null");
         mSlice = slice;
-        mPendingIntent = pendingIntent;
     }
 
     private Action(@NonNull Parcel in) {
         mSlice = in.readTypedObject(Slice.CREATOR);
-        mPendingIntent = in.readTypedObject(PendingIntent.CREATOR);
     }
 
-    public static final @NonNull Creator<Action> CREATOR = new Creator<Action>() {
+    @NonNull
+    public static final Creator<Action> CREATOR = new Creator<Action>() {
         @Override
         public Action createFromParcel(@NonNull Parcel in) {
             return new Action(in);
@@ -86,20 +85,13 @@ public class Action implements Parcelable {
     @Override
     public void writeToParcel(@NonNull Parcel dest, int flags) {
         dest.writeTypedObject(mSlice, flags);
-        dest.writeTypedObject(mPendingIntent, flags);
     }
 
     /**
      * Returns a {@code Slice} object containing the display content to be displayed on the UI.
      */
-    public @NonNull Slice getSlice() {
+    @NonNull
+    public Slice getSlice() {
         return mSlice;
-    }
-
-    /**
-     * Returns the {@link PendingIntent} to be invoked when the action is selected.
-     */
-    public @NonNull PendingIntent getPendingIntent() {
-        return mPendingIntent;
     }
 }
