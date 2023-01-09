@@ -28,6 +28,7 @@ import static androidx.window.extensions.embedding.EmbeddingTestUtils.TASK_BOUND
 import static androidx.window.extensions.embedding.EmbeddingTestUtils.TASK_ID;
 import static androidx.window.extensions.embedding.EmbeddingTestUtils.createActivityInfoWithMinDimensions;
 import static androidx.window.extensions.embedding.EmbeddingTestUtils.createMockTaskFragmentInfo;
+import static androidx.window.extensions.embedding.EmbeddingTestUtils.createSplitPairRuleBuilder;
 import static androidx.window.extensions.embedding.EmbeddingTestUtils.createSplitRule;
 import static androidx.window.extensions.embedding.EmbeddingTestUtils.createWindowLayoutInfo;
 import static androidx.window.extensions.embedding.EmbeddingTestUtils.getSplitBounds;
@@ -511,7 +512,7 @@ public class SplitPresenterTest {
         final Activity secondaryActivity = createMockActivity();
         final TaskFragmentContainer bottomTf = mController.newContainer(secondaryActivity, TASK_ID);
         final TaskFragmentContainer primaryTf = mController.newContainer(mActivity, TASK_ID);
-        final SplitPairRule rule = new SplitPairRule.Builder(pair ->
+        final SplitPairRule rule = createSplitPairRuleBuilder(pair ->
                 pair.first == mActivity && pair.second == secondaryActivity, pair -> false,
                 metrics -> true)
                 .setDefaultSplitAttributes(SPLIT_ATTRIBUTES)
@@ -529,7 +530,7 @@ public class SplitPresenterTest {
 
     @Test
     public void testComputeSplitAttributes() {
-        final SplitPairRule splitPairRule = new SplitPairRule.Builder(
+        final SplitPairRule splitPairRule = createSplitPairRuleBuilder(
                 activityPair -> true,
                 activityIntentPair -> true,
                 windowMetrics -> windowMetrics.getBounds().equals(TASK_BOUNDS))
