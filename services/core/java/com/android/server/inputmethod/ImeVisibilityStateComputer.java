@@ -49,6 +49,7 @@ import android.view.inputmethod.InputMethodManager;
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.inputmethod.SoftInputShowHideReason;
 import com.android.server.LocalServices;
+import com.android.server.wm.ImeTargetChangeListener;
 import com.android.server.wm.WindowManagerInternal;
 
 import java.io.PrintWriter;
@@ -172,6 +173,19 @@ public final class ImeVisibilityStateComputer {
         mWindowManagerInternal = wmService;
         mImeDisplayValidator = imeDisplayValidator;
         mPolicy = imePolicy;
+        mWindowManagerInternal.setInputMethodTargetChangeListener(new ImeTargetChangeListener() {
+            @Override
+            public void onImeTargetOverlayVisibilityChanged(IBinder overlayWindowToken,
+                    boolean visible, boolean removed) {
+                // TODO(b/258048231): implement logic to fix IME layering overlay visibility issue.
+            }
+
+            @Override
+            public void onImeInputTargetVisibilityChanged(IBinder imeInputTarget,
+                    boolean visibleRequested, boolean removed) {
+                // TODO(b/258048231): implement logic to fix IME input target visibility issue.
+            }
+        });
     }
 
     /**

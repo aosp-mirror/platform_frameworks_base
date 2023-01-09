@@ -353,6 +353,7 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
     // overlay window is hidden because the owning app is suspended
     private boolean mHiddenWhileSuspended;
     private boolean mAppOpVisibility = true;
+
     boolean mPermanentlyHidden; // the window should never be shown again
     // This is a non-system overlay window that is currently force hidden.
     private boolean mForceHideNonSystemOverlayWindow;
@@ -2345,6 +2346,10 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
         mWinAnimator.destroySurfaceLocked(getSyncTransaction());
         super.removeImmediately();
 
+        if (isImeOverlayLayeringTarget()) {
+            mWmService.dispatchImeTargetOverlayVisibilityChanged(mClient.asBinder(),
+                    false /* visible */, true /* removed */);
+        }
         final DisplayContent dc = getDisplayContent();
         if (isImeLayeringTarget()) {
             // Remove the attached IME screenshot surface.
@@ -2355,6 +2360,8 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
             dc.computeImeTarget(true /* updateImeTarget */);
         }
         if (dc.getImeInputTarget() == this && !inRelaunchingActivity()) {
+            mWmService.dispatchImeInputTargetVisibilityChanged(mClient.asBinder(),
+                    false /* visible */, true /* removed */);
             dc.updateImeInputAndControlTarget(null);
         }
 
@@ -5488,6 +5495,14 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
 
     boolean isImeLayeringTarget() {
         return getDisplayContent().getImeTarget(IME_TARGET_LAYERING) == this;
+    }
+
+    /**
+     * Whether the window is non-focusable IME overlay layering target.
+     */
+    boolean isImeOverlayLayeringTarget() {
+        return isImeLayeringTarget()
+                && (mAttrs.flags & (FLAG_ALT_FOCUSABLE_IM | FLAG_NOT_FOCUSABLE)) != 0;
     }
 
     WindowState getImeLayeringTarget() {

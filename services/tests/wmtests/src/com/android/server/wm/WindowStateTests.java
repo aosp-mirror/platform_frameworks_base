@@ -20,6 +20,7 @@ import static android.app.WindowConfiguration.ACTIVITY_TYPE_STANDARD;
 import static android.app.WindowConfiguration.WINDOWING_MODE_FULLSCREEN;
 import static android.app.WindowConfiguration.WINDOWING_MODE_MULTI_WINDOW;
 import static android.app.WindowConfiguration.WINDOWING_MODE_PINNED;
+import static android.view.Display.DEFAULT_DISPLAY;
 import static android.view.InsetsSource.ID_IME;
 import static android.view.Surface.ROTATION_0;
 import static android.view.Surface.ROTATION_270;
@@ -83,17 +84,25 @@ import android.content.res.Configuration;
 import android.graphics.Matrix;
 import android.graphics.Point;
 import android.graphics.Rect;
+import android.os.Bundle;
 import android.os.IBinder;
 import android.os.InputConfig;
 import android.os.RemoteException;
 import android.platform.test.annotations.Presubmit;
 import android.util.ArraySet;
+import android.util.MergedConfiguration;
 import android.view.Gravity;
+import android.view.IWindow;
+import android.view.IWindowSessionCallback;
 import android.view.InputWindowHandle;
 import android.view.InsetsSource;
+import android.view.InsetsSourceControl;
 import android.view.InsetsState;
 import android.view.SurfaceControl;
+import android.view.View;
+import android.view.WindowInsets;
 import android.view.WindowManager;
+import android.window.ClientWindowFrames;
 import android.window.ITaskFragmentOrganizer;
 import android.window.TaskFragmentOrganizer;
 
@@ -1249,5 +1258,119 @@ public class WindowStateTests extends WindowTestsBase {
         assertEquals(Collections.emptySet(), new ArraySet(restrictedKeepClearAreas));
         assertEquals(new ArraySet(Arrays.asList(expectedArea1, expectedArea2)),
                      new ArraySet(unrestrictedKeepClearAreas));
+    }
+
+    @Test
+    public void testImeTargetChangeListener_OnImeInputTargetVisibilityChanged() {
+        final TestImeTargetChangeListener listener = new TestImeTargetChangeListener();
+        mWm.mImeTargetChangeListener = listener;
+
+        final WindowState imeTarget = createWindow(null /* parent */, TYPE_BASE_APPLICATION,
+                createActivityRecord(mDisplayContent), "imeTarget");
+
+        imeTarget.mActivityRecord.setVisibleRequested(true);
+        makeWindowVisible(imeTarget);
+        mDisplayContent.setImeInputTarget(imeTarget);
+        waitHandlerIdle(mWm.mH);
+
+        assertThat(listener.mImeTargetToken).isEqualTo(imeTarget.mClient.asBinder());
+        assertThat(listener.mIsRemoved).isFalse();
+        assertThat(listener.mIsVisibleForImeInputTarget).isTrue();
+
+        imeTarget.mActivityRecord.setVisibleRequested(false);
+        waitHandlerIdle(mWm.mH);
+
+        assertThat(listener.mImeTargetToken).isEqualTo(imeTarget.mClient.asBinder());
+        assertThat(listener.mIsRemoved).isFalse();
+        assertThat(listener.mIsVisibleForImeInputTarget).isFalse();
+
+        imeTarget.removeImmediately();
+        assertThat(listener.mImeTargetToken).isEqualTo(imeTarget.mClient.asBinder());
+        assertThat(listener.mIsRemoved).isTrue();
+        assertThat(listener.mIsVisibleForImeInputTarget).isFalse();
+    }
+
+    @SetupWindows(addWindows = {W_INPUT_METHOD})
+    @Test
+    public void testImeTargetChangeListener_OnImeTargetOverlayVisibilityChanged() {
+        final TestImeTargetChangeListener listener = new TestImeTargetChangeListener();
+        mWm.mImeTargetChangeListener = listener;
+
+        // Scenario 1: test addWindow/relayoutWindow to add Ime layering overlay window as visible.
+        final WindowToken windowToken = createTestWindowToken(TYPE_APPLICATION_OVERLAY,
+                mDisplayContent);
+        final IWindow client = new TestIWindow();
+        final Session session = new Session(mWm, new IWindowSessionCallback.Stub() {
+            @Override
+            public void onAnimatorScaleChanged(float v) throws RemoteException {
+
+            }
+        });
+        final ClientWindowFrames outFrames = new ClientWindowFrames();
+        final MergedConfiguration outConfig = new MergedConfiguration();
+        final SurfaceControl outSurfaceControl = new SurfaceControl();
+        final InsetsState outInsetsState = new InsetsState();
+        final InsetsSourceControl.Array outControls = new InsetsSourceControl.Array();
+        final Bundle outBundle = new Bundle();
+        final WindowManager.LayoutParams params = new WindowManager.LayoutParams(
+                TYPE_APPLICATION_OVERLAY);
+        params.setTitle("imeLayeringTargetOverlay");
+        params.token = windowToken.token;
+        params.flags = FLAG_NOT_FOCUSABLE | FLAG_ALT_FOCUSABLE_IM;
+
+        mWm.addWindow(session, client, params, View.VISIBLE, DEFAULT_DISPLAY,
+                0 /* userUd */, WindowInsets.Type.defaultVisible(), null, new InsetsState(),
+                new InsetsSourceControl.Array(), new Rect(), new float[1]);
+        mWm.relayoutWindow(session, client, params, 100, 200, View.VISIBLE, 0, 0, 0,
+                outFrames, outConfig, outSurfaceControl, outInsetsState, outControls, outBundle);
+        waitHandlerIdle(mWm.mH);
+
+        final WindowState imeLayeringTargetOverlay = mDisplayContent.getWindow(
+                w -> w.mClient.asBinder() == client.asBinder());
+        assertThat(imeLayeringTargetOverlay.isVisible()).isTrue();
+        assertThat(listener.mImeTargetToken).isEqualTo(client.asBinder());
+        assertThat(listener.mIsRemoved).isFalse();
+        assertThat(listener.mIsVisibleForImeTargetOverlay).isTrue();
+
+        // Scenario 2: test relayoutWindow to let the Ime layering target overlay window invisible.
+        mWm.relayoutWindow(session, client, params, 100, 200, View.GONE, 0, 0, 0,
+                outFrames, outConfig, outSurfaceControl, outInsetsState, outControls, outBundle);
+        waitHandlerIdle(mWm.mH);
+
+        assertThat(imeLayeringTargetOverlay.isVisible()).isFalse();
+        assertThat(listener.mImeTargetToken).isEqualTo(client.asBinder());
+        assertThat(listener.mIsRemoved).isFalse();
+        assertThat(listener.mIsVisibleForImeTargetOverlay).isFalse();
+
+        // Scenario 3: test removeWindow to remove the Ime layering target overlay window.
+        mWm.removeWindow(session, client);
+        waitHandlerIdle(mWm.mH);
+
+        assertThat(listener.mImeTargetToken).isEqualTo(client.asBinder());
+        assertThat(listener.mIsRemoved).isTrue();
+        assertThat(listener.mIsVisibleForImeTargetOverlay).isFalse();
+    }
+
+    private static class TestImeTargetChangeListener implements ImeTargetChangeListener {
+        private IBinder mImeTargetToken;
+        private boolean mIsRemoved;
+        private boolean mIsVisibleForImeTargetOverlay;
+        private boolean mIsVisibleForImeInputTarget;
+
+        @Override
+        public void onImeTargetOverlayVisibilityChanged(IBinder overlayWindowToken, boolean visible,
+                boolean removed) {
+            mImeTargetToken = overlayWindowToken;
+            mIsVisibleForImeTargetOverlay = visible;
+            mIsRemoved = removed;
+        }
+
+        @Override
+        public void onImeInputTargetVisibilityChanged(IBinder imeInputTarget,
+                boolean visibleRequested, boolean removed) {
+            mImeTargetToken = imeInputTarget;
+            mIsVisibleForImeInputTarget = visibleRequested;
+            mIsRemoved = removed;
+        }
     }
 }
