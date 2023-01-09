@@ -1732,6 +1732,7 @@
   <java-symbol type="attr" name="dialogTitleDecorLayout" />
   <java-symbol type="attr" name="dialogTitleIconsDecorLayout" />
   <java-symbol type="bool" name="config_allowAllRotations" />
+  <java-symbol type="bool" name="config_useCurrentRotationOnRotationLockChange"/>
   <java-symbol type="bool" name="config_annoy_dianne" />
   <java-symbol type="bool" name="config_startDreamImmediatelyOnDock" />
   <java-symbol type="bool" name="config_carDockEnablesAccelerometer" />
