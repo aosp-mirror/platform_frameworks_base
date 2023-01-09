@@ -16545,6 +16545,7 @@ package android.view.accessibility {
     method public void interrupt();
     method public void onAccessibilityEvent(@NonNull android.view.accessibility.AccessibilityEvent);
     method public void onProxyConnected();
+    method public void setAccessibilityFocusAppearance(int, @ColorInt int);
     method public void setInstalledAndEnabledServices(@NonNull java.util.List<android.accessibilityservice.AccessibilityServiceInfo>);
   }
 
