@@ -39,7 +39,7 @@ public class BluetoothMediaDevice extends MediaDevice {
 
     BluetoothMediaDevice(Context context, CachedBluetoothDevice device,
             MediaRouter2Manager routerManager, MediaRoute2Info info, String packageName) {
-        super(context, routerManager, info, packageName);
+        super(context, routerManager, info, packageName, null);
         mCachedDevice = device;
         mAudioManager = context.getSystemService(AudioManager.class);
         initDeviceRecord();
