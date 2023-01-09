@@ -1020,9 +1020,7 @@ public final class SystemServer implements Dumpable {
             Runnable runnable = new Runnable() {
                 @Override
                 public void run() {
-                    synchronized (this) {
-                        ShutdownThread.rebootOrShutdown(null, reboot, reason);
-                    }
+                    ShutdownThread.rebootOrShutdown(null, reboot, reason);
                 }
             };
 
