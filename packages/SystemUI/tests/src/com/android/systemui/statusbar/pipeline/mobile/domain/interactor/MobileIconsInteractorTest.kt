@@ -31,11 +31,12 @@ import com.android.systemui.util.CarrierConfigTracker
 import com.android.systemui.util.mockito.whenever
 import com.android.systemui.util.time.FakeSystemClock
 import com.google.common.truth.Truth.assertThat
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
-import kotlinx.coroutines.runBlocking
+import kotlinx.coroutines.test.TestScope
+import kotlinx.coroutines.test.UnconfinedTestDispatcher
+import kotlinx.coroutines.test.runTest
 import kotlinx.coroutines.yield
 import org.junit.After
 import org.junit.Before
@@ -43,13 +44,16 @@ import org.junit.Test
 import org.mockito.Mock
 import org.mockito.MockitoAnnotations
 
+@OptIn(ExperimentalCoroutinesApi::class)
 @SmallTest
 class MobileIconsInteractorTest : SysuiTestCase() {
     private lateinit var underTest: MobileIconsInteractor
     private lateinit var connectionsRepository: FakeMobileConnectionsRepository
     private val userSetupRepository = FakeUserSetupRepository()
     private val mobileMappingsProxy = FakeMobileMappingsProxy()
-    private val scope = CoroutineScope(IMMEDIATE)
+
+    private val testDispatcher = UnconfinedTestDispatcher()
+    private val testScope = TestScope(testDispatcher)
 
     @Mock private lateinit var carrierConfigTracker: CarrierConfigTracker
 
@@ -73,7 +77,7 @@ class MobileIconsInteractorTest : SysuiTestCase() {
                 connectionsRepository,
                 carrierConfigTracker,
                 userSetupRepository,
-                scope
+                testScope.backgroundScope,
             )
     }
 
@@ -81,7 +85,7 @@ class MobileIconsInteractorTest : SysuiTestCase() {
 
     @Test
     fun filteredSubscriptions_default() =
-        runBlocking(IMMEDIATE) {
+        testScope.runTest {
             var latest: List<SubscriptionModel>? = null
             val job = underTest.filteredSubscriptions.onEach { latest = it }.launchIn(this)
 
@@ -92,7 +96,7 @@ class MobileIconsInteractorTest : SysuiTestCase() {
 
     @Test
     fun filteredSubscriptions_nonOpportunistic_updatesWithMultipleSubs() =
-        runBlocking(IMMEDIATE) {
+        testScope.runTest {
             connectionsRepository.setSubscriptions(listOf(SUB_1, SUB_2))
 
             var latest: List<SubscriptionModel>? = null
@@ -105,7 +109,7 @@ class MobileIconsInteractorTest : SysuiTestCase() {
 
     @Test
     fun filteredSubscriptions_bothOpportunistic_configFalse_showsActive_3() =
-        runBlocking(IMMEDIATE) {
+        testScope.runTest {
             connectionsRepository.setSubscriptions(listOf(SUB_3_OPP, SUB_4_OPP))
             connectionsRepository.setActiveMobileDataSubscriptionId(SUB_3_ID)
             whenever(carrierConfigTracker.alwaysShowPrimarySignalBarInOpportunisticNetworkDefault)
@@ -122,7 +126,7 @@ class MobileIconsInteractorTest : SysuiTestCase() {
 
     @Test
     fun filteredSubscriptions_bothOpportunistic_configFalse_showsActive_4() =
-        runBlocking(IMMEDIATE) {
+        testScope.runTest {
             connectionsRepository.setSubscriptions(listOf(SUB_3_OPP, SUB_4_OPP))
             connectionsRepository.setActiveMobileDataSubscriptionId(SUB_4_ID)
             whenever(carrierConfigTracker.alwaysShowPrimarySignalBarInOpportunisticNetworkDefault)
@@ -139,7 +143,7 @@ class MobileIconsInteractorTest : SysuiTestCase() {
 
     @Test
     fun filteredSubscriptions_oneOpportunistic_configTrue_showsPrimary_active_1() =
-        runBlocking(IMMEDIATE) {
+        testScope.runTest {
             connectionsRepository.setSubscriptions(listOf(SUB_1, SUB_3_OPP))
             connectionsRepository.setActiveMobileDataSubscriptionId(SUB_1_ID)
             whenever(carrierConfigTracker.alwaysShowPrimarySignalBarInOpportunisticNetworkDefault)
@@ -157,7 +161,7 @@ class MobileIconsInteractorTest : SysuiTestCase() {
 
     @Test
     fun filteredSubscriptions_oneOpportunistic_configTrue_showsPrimary_nonActive_1() =
-        runBlocking(IMMEDIATE) {
+        testScope.runTest {
             connectionsRepository.setSubscriptions(listOf(SUB_1, SUB_3_OPP))
             connectionsRepository.setActiveMobileDataSubscriptionId(SUB_3_ID)
             whenever(carrierConfigTracker.alwaysShowPrimarySignalBarInOpportunisticNetworkDefault)
@@ -175,7 +179,7 @@ class MobileIconsInteractorTest : SysuiTestCase() {
 
     @Test
     fun activeDataConnection_turnedOn() =
-        runBlocking(IMMEDIATE) {
+        testScope.runTest {
             CONNECTION_1.setDataEnabled(true)
             var latest: Boolean? = null
             val job =
@@ -188,7 +192,7 @@ class MobileIconsInteractorTest : SysuiTestCase() {
 
     @Test
     fun activeDataConnection_turnedOff() =
-        runBlocking(IMMEDIATE) {
+        testScope.runTest {
             CONNECTION_1.setDataEnabled(true)
             var latest: Boolean? = null
             val job =
@@ -204,7 +208,7 @@ class MobileIconsInteractorTest : SysuiTestCase() {
 
     @Test
     fun activeDataConnection_invalidSubId() =
-        runBlocking(IMMEDIATE) {
+        testScope.runTest {
             var latest: Boolean? = null
             val job =
                 underTest.activeDataConnectionHasDataEnabled.onEach { latest = it }.launchIn(this)
@@ -220,7 +224,7 @@ class MobileIconsInteractorTest : SysuiTestCase() {
 
     @Test
     fun failedConnection_connected_validated_notFailed() =
-        runBlocking(IMMEDIATE) {
+        testScope.runTest {
             var latest: Boolean? = null
             val job = underTest.isDefaultConnectionFailed.onEach { latest = it }.launchIn(this)
             connectionsRepository.setMobileConnectivity(MobileConnectivityModel(true, true))
@@ -233,7 +237,7 @@ class MobileIconsInteractorTest : SysuiTestCase() {
 
     @Test
     fun failedConnection_notConnected_notValidated_notFailed() =
-        runBlocking(IMMEDIATE) {
+        testScope.runTest {
             var latest: Boolean? = null
             val job = underTest.isDefaultConnectionFailed.onEach { latest = it }.launchIn(this)
 
@@ -247,7 +251,7 @@ class MobileIconsInteractorTest : SysuiTestCase() {
 
     @Test
     fun failedConnection_connected_notValidated_failed() =
-        runBlocking(IMMEDIATE) {
+        testScope.runTest {
             var latest: Boolean? = null
             val job = underTest.isDefaultConnectionFailed.onEach { latest = it }.launchIn(this)
 
@@ -261,7 +265,7 @@ class MobileIconsInteractorTest : SysuiTestCase() {
 
     @Test
     fun alwaysShowDataRatIcon_configHasTrue() =
-        runBlocking(IMMEDIATE) {
+        testScope.runTest {
             var latest: Boolean? = null
             val job = underTest.alwaysShowDataRatIcon.onEach { latest = it }.launchIn(this)
 
@@ -277,7 +281,7 @@ class MobileIconsInteractorTest : SysuiTestCase() {
 
     @Test
     fun alwaysShowDataRatIcon_configHasFalse() =
-        runBlocking(IMMEDIATE) {
+        testScope.runTest {
             var latest: Boolean? = null
             val job = underTest.alwaysShowDataRatIcon.onEach { latest = it }.launchIn(this)
 
@@ -293,7 +297,7 @@ class MobileIconsInteractorTest : SysuiTestCase() {
 
     @Test
     fun alwaysUseCdmaLevel_configHasTrue() =
-        runBlocking(IMMEDIATE) {
+        testScope.runTest {
             var latest: Boolean? = null
             val job = underTest.alwaysUseCdmaLevel.onEach { latest = it }.launchIn(this)
 
@@ -309,7 +313,7 @@ class MobileIconsInteractorTest : SysuiTestCase() {
 
     @Test
     fun alwaysUseCdmaLevel_configHasFalse() =
-        runBlocking(IMMEDIATE) {
+        testScope.runTest {
             var latest: Boolean? = null
             val job = underTest.alwaysUseCdmaLevel.onEach { latest = it }.launchIn(this)
 
@@ -324,7 +328,6 @@ class MobileIconsInteractorTest : SysuiTestCase() {
         }
 
     companion object {
-        private val IMMEDIATE = Dispatchers.Main.immediate
         private val tableLogBuffer =
             TableLogBuffer(8, "MobileIconsInteractorTest", FakeSystemClock())
 
