@@ -97,6 +97,7 @@ public class GlobalSettings {
         Settings.Global.Wearable.GESTURE_TOUCH_AND_HOLD_WATCH_FACE_ENABLED,
         Settings.Global.Wearable.BATTERY_SAVER_MODE,
         Settings.Global.Wearable.WEAR_ACTIVITY_AUTO_RESUME_TIMEOUT_MS,
-        Settings.Global.Wearable.WEAR_ACTIVITY_AUTO_RESUME_TIMEOUT_SET_BY_USER
+        Settings.Global.Wearable.WEAR_ACTIVITY_AUTO_RESUME_TIMEOUT_SET_BY_USER,
+        Settings.Global.Wearable.DYNAMIC_COLOR_THEME_ENABLED,
     };
 }
