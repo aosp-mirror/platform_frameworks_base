@@ -44,6 +44,7 @@
 #include "SkTextBlob.h"
 #include "SkVertices.h"
 #include "VectorDrawable.h"
+#include "include/gpu/GpuTypes.h" // from Skia
 #include "pipeline/skia/AnimatedDrawables.h"
 #include "pipeline/skia/FunctorDrawable.h"
 
@@ -570,7 +571,7 @@ public:
                 GrRecordingContext* directContext = c->recordingContext();
                 mLayerImageInfo =
                         c->imageInfo().makeWH(deviceBounds.width(), deviceBounds.height());
-                mLayerSurface = SkSurface::MakeRenderTarget(directContext, SkBudgeted::kYes,
+                mLayerSurface = SkSurface::MakeRenderTarget(directContext, skgpu::Budgeted::kYes,
                                                             mLayerImageInfo, 0,
                                                             kTopLeft_GrSurfaceOrigin, nullptr);
             }

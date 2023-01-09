@@ -18,6 +18,8 @@
 #include "SkBlendMode.h"
 #include "SkCanvas.h"
 #include "SkSurface.h"
+#include "include/gpu/GpuTypes.h" // from Skia
+
 #include "TransformCanvas.h"
 #include "SkiaDisplayList.h"
 
@@ -36,7 +38,7 @@ void StretchMask::draw(GrRecordingContext* context,
         // not match.
         mMaskSurface = SkSurface::MakeRenderTarget(
             context,
-            SkBudgeted::kYes,
+            skgpu::Budgeted::kYes,
             SkImageInfo::Make(
                 width,
                 height,

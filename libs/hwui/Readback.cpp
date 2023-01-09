@@ -28,6 +28,7 @@
 #include <SkRefCnt.h>
 #include <SkSamplingOptions.h>
 #include <SkSurface.h>
+#include "include/gpu/GpuTypes.h" // from Skia
 #include <gui/TraceUtils.h>
 #include <private/android/AHardwareBufferHelpers.h>
 #include <shaders/shaders.h>
@@ -170,14 +171,15 @@ void Readback::copySurfaceInto(ANativeWindow* window, const std::shared_ptr<Copy
     SkBitmap skBitmap = request->getDestinationBitmap(srcRect.width(), srcRect.height());
     SkBitmap* bitmap = &skBitmap;
     sk_sp<SkSurface> tmpSurface =
-            SkSurface::MakeRenderTarget(mRenderThread.getGrContext(), SkBudgeted::kYes,
+            SkSurface::MakeRenderTarget(mRenderThread.getGrContext(), skgpu::Budgeted::kYes,
                                         bitmap->info(), 0, kTopLeft_GrSurfaceOrigin, nullptr);
 
     // if we can't generate a GPU surface that matches the destination bitmap (e.g. 565) then we
     // attempt to do the intermediate rendering step in 8888
     if (!tmpSurface.get()) {
         SkImageInfo tmpInfo = bitmap->info().makeColorType(SkColorType::kN32_SkColorType);
-        tmpSurface = SkSurface::MakeRenderTarget(mRenderThread.getGrContext(), SkBudgeted::kYes,
+        tmpSurface = SkSurface::MakeRenderTarget(mRenderThread.getGrContext(),
+                                                 skgpu::Budgeted::kYes,
                                                  tmpInfo, 0, kTopLeft_GrSurfaceOrigin, nullptr);
         if (!tmpSurface.get()) {
             ALOGW("Unable to generate GPU buffer in a format compatible with the provided bitmap");
@@ -345,14 +347,17 @@ bool Readback::copyLayerInto(Layer* layer, const SkRect* srcRect, const SkRect* 
      * software buffer.
      */
     sk_sp<SkSurface> tmpSurface = SkSurface::MakeRenderTarget(mRenderThread.getGrContext(),
-                                                              SkBudgeted::kYes, bitmap->info(), 0,
+                                                              skgpu::Budgeted::kYes,
+                                                              bitmap->info(),
+                                                              0,
                                                               kTopLeft_GrSurfaceOrigin, nullptr);
 
     // if we can't generate a GPU surface that matches the destination bitmap (e.g. 565) then we
     // attempt to do the intermediate rendering step in 8888
     if (!tmpSurface.get()) {
         SkImageInfo tmpInfo = bitmap->info().makeColorType(SkColorType::kN32_SkColorType);
-        tmpSurface = SkSurface::MakeRenderTarget(mRenderThread.getGrContext(), SkBudgeted::kYes,
+        tmpSurface = SkSurface::MakeRenderTarget(mRenderThread.getGrContext(),
+                                                 skgpu::Budgeted::kYes,
                                                  tmpInfo, 0, kTopLeft_GrSurfaceOrigin, nullptr);
         if (!tmpSurface.get()) {
             ALOGW("Unable to generate GPU buffer in a format compatible with the provided bitmap");
