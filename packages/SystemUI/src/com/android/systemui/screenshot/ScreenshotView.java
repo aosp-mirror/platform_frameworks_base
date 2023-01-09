@@ -33,6 +33,7 @@ import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
 import android.animation.AnimatorSet;
 import android.animation.ValueAnimator;
+import android.annotation.Nullable;
 import android.app.ActivityManager;
 import android.app.Notification;
 import android.app.PendingIntent;
@@ -100,7 +101,8 @@ import java.util.ArrayList;
  * Handles the visual elements and animations for the screenshot flow.
  */
 public class ScreenshotView extends FrameLayout implements
-        ViewTreeObserver.OnComputeInternalInsetsListener {
+        ViewTreeObserver.OnComputeInternalInsetsListener,
+        WorkProfileMessageController.WorkProfileMessageDisplay {
 
     interface ScreenshotViewCallback {
         void onUserInteraction();
@@ -351,13 +353,23 @@ public class ScreenshotView extends FrameLayout implements
      * been taken and which app can be used to view it.
      *
      * @param appName The name of the app to use to view screenshots
+     * @param appIcon Optional icon for the relevant files app
+     * @param onDismiss Runnable to be run when the user dismisses this message
      */
-    void showWorkProfileMessage(String appName) {
+    @Override
+    public void showWorkProfileMessage(CharSequence appName, @Nullable Drawable appIcon,
+            Runnable onDismiss) {
+        if (appIcon != null) {
+            // Replace the default icon if one is provided.
+            ImageView imageView = mMessageContainer.findViewById(R.id.screenshot_message_icon);
+            imageView.setImageDrawable(appIcon);
+        }
         mMessageContent.setText(
                 mContext.getString(R.string.screenshot_work_profile_notification, appName));
         mMessageContainer.setVisibility(VISIBLE);
         mMessageContainer.findViewById(R.id.message_dismiss_button).setOnClickListener((v) -> {
             mMessageContainer.setVisibility(View.GONE);
+            onDismiss.run();
         });
     }
 
