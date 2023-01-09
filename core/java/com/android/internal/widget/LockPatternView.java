@@ -651,7 +651,11 @@ public class LockPatternView extends View {
     private void resetLastActivatedCellProgress() {
         final ArrayList<Cell> pattern = mPattern;
         final Cell lastCell = pattern.get(pattern.size() - 1);
-        mCellStates[lastCell.row][lastCell.column].activationAnimationProgress = 0f;
+        final CellState cellState = mCellStates[lastCell.row][lastCell.column];
+        if (cellState.activationAnimator != null) {
+            cellState.activationAnimator.cancel();
+        }
+        cellState.activationAnimationProgress = 0f;
     }
 
     /**
