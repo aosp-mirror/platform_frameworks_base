@@ -46,6 +46,7 @@ import com.android.internal.annotations.GuardedBy;
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.server.pm.Installer;
 import com.android.server.pm.Installer.InstallerException;
+import com.android.server.pm.Installer.LegacyDexoptDisabledException;
 import com.android.server.pm.PackageDexOptimizer;
 import com.android.server.pm.PackageManagerService;
 import com.android.server.pm.PackageManagerServiceUtils;
@@ -190,7 +191,7 @@ public class DexManager {
         try {
             notifyDexLoadInternal(loadingAppInfo, classLoaderContextMap, loaderIsa,
                     loaderUserId, loaderIsIsolatedProcess);
-        } catch (Exception e) {
+        } catch (RuntimeException e) {
             Slog.w(TAG, "Exception while notifying dex load for package " +
                     loadingAppInfo.packageName, e);
         }
@@ -325,7 +326,7 @@ public class DexManager {
     public void load(Map<Integer, List<PackageInfo>> existingPackages) {
         try {
             loadInternal(existingPackages);
-        } catch (Exception e) {
+        } catch (RuntimeException e) {
             mPackageDexUsage.clear();
             mDynamicCodeLogger.clear();
             Slog.w(TAG, "Exception while loading. Starting with a fresh state.", e);
@@ -457,7 +458,7 @@ public class DexManager {
             List<String> packagesToKeepDataAbout = new ArrayList<>();
             mPackageDexUsage.syncData(
                     packageToUsersMap, packageToCodePaths, packagesToKeepDataAbout);
-        } catch (Exception e) {
+        } catch (RuntimeException e) {
             mPackageDexUsage.clear();
             Slog.w(TAG, "Exception while loading package dex usage. "
                     + "Starting with a fresh state.", e);
@@ -465,7 +466,7 @@ public class DexManager {
 
         try {
             mDynamicCodeLogger.readAndSync(packageToUsersMap);
-        } catch (Exception e) {
+        } catch (RuntimeException e) {
             mDynamicCodeLogger.clear();
             Slog.w(TAG, "Exception while loading package dynamic code usage. "
                     + "Starting with a fresh state.", e);
@@ -514,7 +515,7 @@ public class DexManager {
      * @return true if all secondary dex files were processed successfully (compiled or skipped
      *         because they don't need to be compiled)..
      */
-    public boolean dexoptSecondaryDex(DexoptOptions options) {
+    public boolean dexoptSecondaryDex(DexoptOptions options) throws LegacyDexoptDisabledException {
         if (isPlatformPackage(options.getPackageName())) {
             // We could easily redirect to #dexoptSystemServer in this case. But there should be
             // no-one calling this method directly for system server.
@@ -574,7 +575,8 @@ public class DexManager {
      * <p>PackageDexOptimizer.DEX_OPT_FAILED if any dexopt operation failed.
      * <p>PackageDexOptimizer.DEX_OPT_PERFORMED if all dexopt operations succeeded.
      */
-    public int dexoptSystemServer(DexoptOptions options) {
+    public int dexoptSystemServer(DexoptOptions options) throws LegacyDexoptDisabledException {
+        // TODO(b/254043366): Clean this up.
         if (!isPlatformPackage(options.getPackageName())) {
             Slog.wtf(TAG, "Non system server package used when trying to dexopt system server:"
                     + options.getPackageName());
@@ -664,7 +666,8 @@ public class DexManager {
      * {@code packagName} and the actual dex files. For all dex files that were
      * deleted, update the internal records and delete any generated oat files.
      */
-    public void reconcileSecondaryDexFiles(String packageName) {
+    public void reconcileSecondaryDexFiles(String packageName)
+            throws LegacyDexoptDisabledException {
         PackageUseInfo useInfo = getPackageUseInfoOrDefault(packageName);
         if (useInfo.getDexUseInfoMap().isEmpty()) {
             if (DEBUG) {
@@ -756,7 +759,7 @@ public class DexManager {
     // TODO(calin): questionable API in the presence of class loaders context. Needs amends as the
     // compilation happening here will use a pessimistic context.
     public RegisterDexModuleResult registerDexModule(ApplicationInfo info, String dexPath,
-            boolean isSharedModule, int userId) {
+            boolean isSharedModule, int userId) throws LegacyDexoptDisabledException {
         // Find the owning package record.
         DexSearchResult searchResult = getDexPackage(info, dexPath, userId);
 
@@ -1012,7 +1015,8 @@ public class DexManager {
      * @param packageInfo the package information.
      * @return the number of freed bytes or -1 if there was an error in the process.
      */
-    public long deleteOptimizedFiles(ArtPackageInfo packageInfo) {
+    public long deleteOptimizedFiles(ArtPackageInfo packageInfo)
+            throws LegacyDexoptDisabledException {
         long freedBytes = 0;
         boolean hadErrors = false;
         final String packageName = packageInfo.getPackageName();

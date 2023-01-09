@@ -16,6 +16,8 @@
 
 package com.android.server.pm;
 
+import static com.android.server.pm.DexOptHelper.useArtService;
+
 import android.annotation.AppIdInt;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
@@ -609,11 +611,13 @@ public class Installer extends SystemService {
      * @throws InstallerException if {@code dexopt} fails.
      */
     public boolean dexopt(String apkPath, int uid, String pkgName, String instructionSet,
-            int dexoptNeeded, @Nullable String outputPath, int dexFlags,
-            String compilerFilter, @Nullable String volumeUuid, @Nullable String classLoaderContext,
+            int dexoptNeeded, @Nullable String outputPath, int dexFlags, String compilerFilter,
+            @Nullable String volumeUuid, @Nullable String classLoaderContext,
             @Nullable String seInfo, boolean downgrade, int targetSdkVersion,
             @Nullable String profileName, @Nullable String dexMetadataPath,
-            @Nullable String compilationReason) throws InstallerException {
+            @Nullable String compilationReason)
+            throws InstallerException, LegacyDexoptDisabledException {
+        checkLegacyDexoptDisabled();
         assertValidInstructionSet(instructionSet);
         BlockGuard.getVmPolicy().onPathAccess(apkPath);
         BlockGuard.getVmPolicy().onPathAccess(outputPath);
@@ -637,7 +641,8 @@ public class Installer extends SystemService {
      *
      * @param block set to true to enable blocking / false to disable blocking.
      */
-    public void controlDexOptBlocking(boolean block) {
+    public void controlDexOptBlocking(boolean block) throws LegacyDexoptDisabledException {
+        checkLegacyDexoptDisabled();
         try {
             mInstalld.controlDexOptBlocking(block);
         } catch (Exception e) {
@@ -655,7 +660,8 @@ public class Installer extends SystemService {
      *         {@link #PROFILE_ANALYSIS_DONT_OPTIMIZE_EMPTY_PROFILES}
      */
     public int mergeProfiles(int uid, String packageName, String profileName)
-            throws InstallerException {
+            throws InstallerException, LegacyDexoptDisabledException {
+        checkLegacyDexoptDisabled();
         if (!checkBeforeRemote()) return PROFILE_ANALYSIS_DONT_OPTIMIZE_SMALL_DELTA;
         try {
             return mInstalld.mergeProfiles(uid, packageName, profileName);
@@ -668,8 +674,9 @@ public class Installer extends SystemService {
      * Dumps profiles associated with a package in a human readable format.
      */
     public boolean dumpProfiles(int uid, String packageName, String profileName, String codePath,
-                                boolean dumpClassesAndMethods)
-            throws InstallerException {
+            boolean dumpClassesAndMethods)
+            throws InstallerException, LegacyDexoptDisabledException {
+        checkLegacyDexoptDisabled();
         if (!checkBeforeRemote()) return false;
         BlockGuard.getVmPolicy().onPathAccess(codePath);
         try {
@@ -681,7 +688,8 @@ public class Installer extends SystemService {
     }
 
     public boolean copySystemProfile(String systemProfile, int uid, String packageName,
-                String profileName) throws InstallerException {
+            String profileName) throws InstallerException, LegacyDexoptDisabledException {
+        checkLegacyDexoptDisabled();
         if (!checkBeforeRemote()) return false;
         try {
             return mInstalld.copySystemProfile(systemProfile, uid, packageName, profileName);
@@ -690,7 +698,9 @@ public class Installer extends SystemService {
         }
     }
 
-    public void rmdex(String codePath, String instructionSet) throws InstallerException {
+    public void rmdex(String codePath, String instructionSet)
+            throws InstallerException, LegacyDexoptDisabledException {
+        checkLegacyDexoptDisabled();
         assertValidInstructionSet(instructionSet);
         if (!checkBeforeRemote()) return;
         BlockGuard.getVmPolicy().onPathAccess(codePath);
@@ -714,7 +724,9 @@ public class Installer extends SystemService {
         }
     }
 
-    public void clearAppProfiles(String packageName, String profileName) throws InstallerException {
+    public void clearAppProfiles(String packageName, String profileName)
+            throws InstallerException, LegacyDexoptDisabledException {
+        checkLegacyDexoptDisabled();
         if (!checkBeforeRemote()) return;
         try {
             mInstalld.clearAppProfiles(packageName, profileName);
@@ -723,7 +735,9 @@ public class Installer extends SystemService {
         }
     }
 
-    public void destroyAppProfiles(String packageName) throws InstallerException {
+    public void destroyAppProfiles(String packageName)
+            throws InstallerException, LegacyDexoptDisabledException {
+        checkLegacyDexoptDisabled();
         if (!checkBeforeRemote()) return;
         try {
             mInstalld.destroyAppProfiles(packageName);
@@ -737,7 +751,8 @@ public class Installer extends SystemService {
      * @throws InstallerException if the deletion fails.
      */
     public void deleteReferenceProfile(String packageName, String profileName)
-            throws InstallerException {
+            throws InstallerException, LegacyDexoptDisabledException {
+        checkLegacyDexoptDisabled();
         if (!checkBeforeRemote()) return;
         try {
             mInstalld.deleteReferenceProfile(packageName, profileName);
@@ -799,7 +814,8 @@ public class Installer extends SystemService {
      * Creates an oat dir for given package and instruction set.
      */
     public void createOatDir(String packageName, String oatDir, String dexInstructionSet)
-            throws InstallerException {
+            throws InstallerException, LegacyDexoptDisabledException {
+        checkLegacyDexoptDisabled();
         if (!checkBeforeRemote()) return;
         try {
             mInstalld.createOatDir(packageName, oatDir, dexInstructionSet);
@@ -843,7 +859,8 @@ public class Installer extends SystemService {
      * of freed bytes.
      */
     public long deleteOdex(String packageName, String apkPath, String instructionSet,
-            String outputPath) throws InstallerException {
+            String outputPath) throws InstallerException, LegacyDexoptDisabledException {
+        checkLegacyDexoptDisabled();
         if (!checkBeforeRemote()) return -1;
         BlockGuard.getVmPolicy().onPathAccess(apkPath);
         BlockGuard.getVmPolicy().onPathAccess(outputPath);
@@ -855,7 +872,9 @@ public class Installer extends SystemService {
     }
 
     public boolean reconcileSecondaryDexFile(String apkPath, String packageName, int uid,
-            String[] isas, @Nullable String volumeUuid, int flags) throws InstallerException {
+            String[] isas, @Nullable String volumeUuid, int flags)
+            throws InstallerException, LegacyDexoptDisabledException {
+        checkLegacyDexoptDisabled();
         for (int i = 0; i < isas.length; i++) {
             assertValidInstructionSet(isas[i]);
         }
@@ -881,7 +900,8 @@ public class Installer extends SystemService {
     }
 
     public boolean createProfileSnapshot(int appId, String packageName, String profileName,
-            String classpath) throws InstallerException {
+            String classpath) throws InstallerException, LegacyDexoptDisabledException {
+        checkLegacyDexoptDisabled();
         if (!checkBeforeRemote()) return false;
         try {
             return mInstalld.createProfileSnapshot(appId, packageName, profileName, classpath);
@@ -891,7 +911,8 @@ public class Installer extends SystemService {
     }
 
     public void destroyProfileSnapshot(String packageName, String profileName)
-            throws InstallerException {
+            throws InstallerException, LegacyDexoptDisabledException {
+        checkLegacyDexoptDisabled();
         if (!checkBeforeRemote()) return;
         try {
             mInstalld.destroyProfileSnapshot(packageName, profileName);
@@ -952,7 +973,9 @@ public class Installer extends SystemService {
      * </ul>
      */
     public boolean prepareAppProfile(String pkg, @UserIdInt int userId, @AppIdInt int appId,
-            String profileName, String codePath, String dexMetadataPath) throws InstallerException {
+            String profileName, String codePath, String dexMetadataPath)
+            throws InstallerException, LegacyDexoptDisabledException {
+        checkLegacyDexoptDisabled();
         if (!checkBeforeRemote()) return false;
         BlockGuard.getVmPolicy().onPathAccess(codePath);
         BlockGuard.getVmPolicy().onPathAccess(dexMetadataPath);
@@ -1117,7 +1140,8 @@ public class Installer extends SystemService {
      * @throws InstallerException if failed to get the visibility of the optimized artifacts.
      */
     public int getOdexVisibility(String packageName, String apkPath, String instructionSet,
-            String outputPath) throws InstallerException {
+            String outputPath) throws InstallerException, LegacyDexoptDisabledException {
+        checkLegacyDexoptDisabled();
         if (!checkBeforeRemote()) return -1;
         BlockGuard.getVmPolicy().onPathAccess(apkPath);
         BlockGuard.getVmPolicy().onPathAccess(outputPath);
@@ -1135,6 +1159,28 @@ public class Installer extends SystemService {
 
         public static InstallerException from(Exception e) throws InstallerException {
             throw new InstallerException(e.toString());
+        }
+    }
+
+    /**
+     * A checked exception that is thrown in legacy dexopt code paths when ART Service should be
+     * used instead.
+     */
+    public static class LegacyDexoptDisabledException extends Exception {
+        // TODO(b/260124949): Remove the legacy dexopt code paths, i.e. this exception and all code
+        // that may throw it.
+        public LegacyDexoptDisabledException() {
+            super("Invalid call to legacy dexopt installd method while ART Service is in use.");
+        }
+    }
+
+    /**
+     * Throws LegacyDexoptDisabledException if ART Service should be used instead of the
+     * {@link android.os.IInstalld} method that follows this method call.
+     */
+    public static void checkLegacyDexoptDisabled() throws LegacyDexoptDisabledException {
+        if (useArtService()) {
+            throw new LegacyDexoptDisabledException();
         }
     }
 }

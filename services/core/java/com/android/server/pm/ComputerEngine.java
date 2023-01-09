@@ -124,6 +124,7 @@ import com.android.internal.util.CollectionUtils;
 import com.android.internal.util.IndentingPrintWriter;
 import com.android.internal.util.Preconditions;
 import com.android.modules.utils.TypedXmlSerializer;
+import com.android.server.pm.Installer.LegacyDexoptDisabledException;
 import com.android.server.pm.dex.DexManager;
 import com.android.server.pm.dex.PackageDexUsage;
 import com.android.server.pm.parsing.PackageInfoUtils;
@@ -3009,8 +3010,13 @@ public class ComputerEngine implements Computer {
                     ipw.println("[" + pkgName + "]");
                     ipw.increaseIndent();
 
-                    mPackageDexOptimizer.dumpDexoptState(ipw, pkg, pkgSetting,
-                            mDexManager.getPackageUseInfoOrDefault(pkgName));
+                    // TODO(b/251903639): Call into ART Service.
+                    try {
+                        mPackageDexOptimizer.dumpDexoptState(ipw, pkg, pkgSetting,
+                                mDexManager.getPackageUseInfoOrDefault(pkgName));
+                    } catch (LegacyDexoptDisabledException e) {
+                        throw new RuntimeException(e);
+                    }
                     ipw.decreaseIndent();
                 }
                 ipw.println("BgDexopt state:");
