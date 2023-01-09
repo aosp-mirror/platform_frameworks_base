@@ -956,14 +956,16 @@ android_media_MediaPlayer_native_init(JNIEnv *env)
 
 static void
 android_media_MediaPlayer_native_setup(JNIEnv *env, jobject thiz, jobject weak_this,
-                                       jobject jAttributionSource)
+                                       jobject jAttributionSource,
+                                       jint jAudioSessionId)
 {
     ALOGV("native_setup");
 
     Parcel* parcel = parcelForJavaObject(env, jAttributionSource);
     android::content::AttributionSourceState attributionSource;
     attributionSource.readFromParcel(parcel);
-    sp<MediaPlayer> mp = sp<MediaPlayer>::make(attributionSource);
+    sp<MediaPlayer> mp = sp<MediaPlayer>::make(
+        attributionSource, static_cast<audio_session_t>(jAudioSessionId));
     if (mp == NULL) {
         jniThrowException(env, "java/lang/RuntimeException", "Out of memory");
         return;
@@ -1419,7 +1421,9 @@ static const JNINativeMethod gMethods[] = {
     {"native_setMetadataFilter", "(Landroid/os/Parcel;)I",      (void *)android_media_MediaPlayer_setMetadataFilter},
     {"native_getMetadata", "(ZZLandroid/os/Parcel;)Z",          (void *)android_media_MediaPlayer_getMetadata},
     {"native_init",         "()V",                              (void *)android_media_MediaPlayer_native_init},
-    {"native_setup",        "(Ljava/lang/Object;Landroid/os/Parcel;)V",(void *)android_media_MediaPlayer_native_setup},
+    {"native_setup",
+        "(Ljava/lang/Object;Landroid/os/Parcel;I)V",
+        (void *)android_media_MediaPlayer_native_setup},
     {"native_finalize",     "()V",                              (void *)android_media_MediaPlayer_native_finalize},
     {"getAudioSessionId",   "()I",                              (void *)android_media_MediaPlayer_get_audio_session_id},
     {"native_setAudioSessionId",   "(I)V",                      (void *)android_media_MediaPlayer_set_audio_session_id},
