@@ -320,6 +320,15 @@ public final class HardwareBuffer implements Parcelable, AutoCloseable {
     /**
      * Returns the system-wide unique id for this buffer
      *
+     * This can be useful as a cache key for associating additional objects with
+     * a given HardwareBuffer, such as associating an imported EGLImage with
+     * the target HardwareBuffer when processing a stream of buffers from
+     * ImageReader.
+     *
+     * This can also be useful for doing cross-process buffer caching. As sending
+     * a HardwareBuffer over Binder is slower than sending a long, this can be
+     * used as reliable cache key after an initial handshake that passes the
+     * HardwareBuffers themselves to later be referred to using only the id.
      */
     public long getId() {
         checkClosed("id");
