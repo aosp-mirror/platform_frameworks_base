@@ -17,6 +17,7 @@
 package com.android.systemui.media.controls.ui
 
 import android.app.PendingIntent
+import android.content.res.Configuration
 import android.testing.AndroidTestingRunner
 import android.testing.TestableLooper
 import androidx.test.filters.SmallTest
@@ -86,6 +87,9 @@ class MediaCarouselControllerTest : SysuiTestCase() {
     @Mock lateinit var mediaViewController: MediaViewController
     @Mock lateinit var smartspaceMediaData: SmartspaceMediaData
     @Captor lateinit var listener: ArgumentCaptor<MediaDataManager.Listener>
+    @Captor
+    lateinit var configListener: ArgumentCaptor<ConfigurationController.ConfigurationListener>
+    @Captor lateinit var newConfig: ArgumentCaptor<Configuration>
     @Captor lateinit var visualStabilityCallback: ArgumentCaptor<OnReorderingAllowedListener>
 
     private val clock = FakeSystemClock()
@@ -111,6 +115,7 @@ class MediaCarouselControllerTest : SysuiTestCase() {
                 logger,
                 debugLogger
             )
+        verify(configurationController).addCallback(capture(configListener))
         verify(mediaDataManager).addListener(capture(listener))
         verify(visualStabilityProvider)
             .addPersistentReorderingAllowedListener(capture(visualStabilityCallback))
@@ -661,5 +666,40 @@ class MediaCarouselControllerTest : SysuiTestCase() {
         whenever(mediaHostState.squishFraction).thenReturn(paginationSquishEnd)
         mediaCarouselController.updatePageIndicatorAlpha()
         assertEquals(mediaCarouselController.pageIndicator.alpha, 1.0F, delta)
+    }
+
+    @Ignore("b/253229241")
+    @Test
+    fun testOnConfigChanged_playersAreAddedBack() {
+        listener.value.onMediaDataLoaded(
+            "playing local",
+            null,
+            DATA.copy(
+                active = true,
+                isPlaying = true,
+                playbackLocation = MediaData.PLAYBACK_LOCAL,
+                resumption = false
+            )
+        )
+        listener.value.onMediaDataLoaded(
+            "paused local",
+            null,
+            DATA.copy(
+                active = true,
+                isPlaying = false,
+                playbackLocation = MediaData.PLAYBACK_LOCAL,
+                resumption = false
+            )
+        )
+
+        val playersSize = MediaPlayerData.players().size
+
+        configListener.value.onConfigChanged(capture(newConfig))
+
+        assertEquals(playersSize, MediaPlayerData.players().size)
+        assertEquals(
+            MediaPlayerData.getMediaPlayerIndex("playing local"),
+            mediaCarouselController.mediaCarouselScrollHandler.visibleMediaIndex
+        )
     }
 }
