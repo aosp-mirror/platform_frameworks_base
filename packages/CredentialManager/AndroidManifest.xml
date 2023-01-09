@@ -32,9 +32,11 @@
       android:supportsRtl="true"
       android:theme="@style/Theme.CredentialSelector">
 
+    <!--TODO: make sure implementing singleTop on NewIntent-->
     <activity
         android:name=".CredentialSelectorActivity"
         android:exported="true"
+        android:launchMode="singleTop"
         android:label="@string/app_name"
         android:excludeFromRecents="true"
         android:theme="@style/Theme.CredentialSelector">
