@@ -814,7 +814,7 @@ public class PipController implements PipTransitionController.PipTransitionCallb
     @Override
     public void onKeyguardVisibilityChanged(boolean visible, boolean occluded,
             boolean animatingDismiss) {
-        if (!mPipTaskOrganizer.isInPip()) {
+        if (!mPipTransitionState.hasEnteredPip()) {
             return;
         }
         if (visible) {
