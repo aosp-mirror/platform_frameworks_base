@@ -1642,7 +1642,7 @@ class MediaRouter2ServiceImpl {
          * <p>This list contains all routes exposed by route providers. This includes routes from
          * both system route providers and user route providers.
          *
-         * <p>See {@link #getRouters(boolean hasModifyAudioRoutingPermission)}.
+         * <p>See {@link #getRouterRecords(boolean hasModifyAudioRoutingPermission)}.
          */
         private final Map<String, MediaRoute2Info> mLastNotifiedRoutesToPrivilegedRouters =
                 new ArrayMap<>();
@@ -1912,9 +1912,10 @@ class MediaRouter2ServiceImpl {
             if (!hasAddedOrModifiedRoutes && !hasRemovedRoutes) {
                 return;
             }
-
-            List<IMediaRouter2> routersWithModifyAudioRoutingPermission = getRouters(true);
-            List<IMediaRouter2> routersWithoutModifyAudioRoutingPermission = getRouters(false);
+            List<RouterRecord> routerRecordsWithModifyAudioRoutingPermission =
+                    getRouterRecords(true);
+            List<RouterRecord> routerRecordsWithoutModifyAudioRoutingPermission =
+                    getRouterRecords(false);
             List<IMediaRouter2Manager> managers = getManagers();
 
             // Managers receive all provider updates with all routes.
@@ -1923,22 +1924,22 @@ class MediaRouter2ServiceImpl {
 
             // Routers with modify audio permission (usually system routers) receive all provider
             // updates with all routes.
-            notifyRoutesUpdatedToRouters(
-                    routersWithModifyAudioRoutingPermission,
+            notifyRoutesUpdatedToRouterRecords(
+                    routerRecordsWithModifyAudioRoutingPermission,
                     new ArrayList<>(mLastNotifiedRoutesToPrivilegedRouters.values()));
 
             if (!isSystemProvider) {
                 // Regular routers receive updates from all non-system providers with all non-system
                 // routes.
-                notifyRoutesUpdatedToRouters(
-                        routersWithoutModifyAudioRoutingPermission,
+                notifyRoutesUpdatedToRouterRecords(
+                        routerRecordsWithoutModifyAudioRoutingPermission,
                         new ArrayList<>(mLastNotifiedRoutesToNonPrivilegedRouters.values()));
             } else if (hasAddedOrModifiedRoutes) {
                 // On system provider updates, regular routers receive the updated default route.
                 // This is the only system route they should receive.
                 mLastNotifiedRoutesToNonPrivilegedRouters.put(defaultRoute.getId(), defaultRoute);
-                notifyRoutesUpdatedToRouters(
-                        routersWithoutModifyAudioRoutingPermission,
+                notifyRoutesUpdatedToRouterRecords(
+                        routerRecordsWithoutModifyAudioRoutingPermission,
                         new ArrayList<>(mLastNotifiedRoutesToNonPrivilegedRouters.values()));
             }
         }
@@ -2207,8 +2208,8 @@ class MediaRouter2ServiceImpl {
                 if (mServiceRef.get() == null) {
                     return;
                 }
-                notifySessionInfoChangedToRouters(getRouters(true), sessionInfo);
-                notifySessionInfoChangedToRouters(getRouters(false),
+                notifySessionInfoChangedToRouters(getRouterRecords(true), sessionInfo);
+                notifySessionInfoChangedToRouters(getRouterRecords(false),
                         mSystemProvider.getDefaultSessionInfo());
                 return;
             }
@@ -2219,7 +2220,7 @@ class MediaRouter2ServiceImpl {
                         + sessionInfo);
                 return;
             }
-            notifySessionInfoChangedToRouters(Arrays.asList(routerRecord.mRouter), sessionInfo);
+            notifySessionInfoChangedToRouters(Arrays.asList(routerRecord), sessionInfo);
         }
 
         private void onSessionReleasedOnHandler(@NonNull MediaRoute2Provider provider,
@@ -2332,6 +2333,7 @@ class MediaRouter2ServiceImpl {
                             == routerRecord.mHasModifyAudioRoutingPermission) {
                         routers.add(routerRecord.mRouter);
                     }
+                    routers.add(routerRecord.mRouter);
                 }
             }
             return routers;
@@ -2358,6 +2360,23 @@ class MediaRouter2ServiceImpl {
             }
             synchronized (service.mLock) {
                 return new ArrayList<>(mUserRecord.mRouterRecords);
+            }
+        }
+
+        private List<RouterRecord> getRouterRecords(boolean hasModifyAudioRoutingPermission) {
+            MediaRouter2ServiceImpl service = mServiceRef.get();
+            List<RouterRecord> routerRecords = new ArrayList<>();
+            if (service == null) {
+                return routerRecords;
+            }
+            synchronized (service.mLock) {
+                for (RouterRecord routerRecord : mUserRecord.mRouterRecords) {
+                    if (hasModifyAudioRoutingPermission
+                            == routerRecord.mHasModifyAudioRoutingPermission) {
+                        routerRecords.add(routerRecord);
+                    }
+                }
+                return routerRecords;
             }
         }
 
@@ -2411,22 +2430,45 @@ class MediaRouter2ServiceImpl {
             }
         }
 
-        private void notifyRoutesUpdatedToRouters(
-                @NonNull List<IMediaRouter2> routers, @NonNull List<MediaRoute2Info> routes) {
-            for (IMediaRouter2 router : routers) {
+        private static void notifyRoutesUpdatedToRouterRecords(
+                @NonNull List<RouterRecord> routerRecords,
+                @NonNull List<MediaRoute2Info> routes) {
+            for (RouterRecord routerRecord: routerRecords) {
+                List<MediaRoute2Info> filteredRoutes = getFilteredRoutesForPackageName(routes,
+                        routerRecord.mPackageName);
                 try {
-                    router.notifyRoutesUpdated(routes);
+                    routerRecord.mRouter.notifyRoutesUpdated(filteredRoutes);
                 } catch (RemoteException ex) {
                     Slog.w(TAG, "Failed to notify routes updated. Router probably died.", ex);
                 }
             }
         }
 
+        /**
+         * Filters list of routes to return only public routes or routes provided by
+         * the same package name or routes containing this package name in its allow list.
+         * @param routes initial list of routes to be filtered.
+         * @param packageName router's package name to filter routes for it.
+         * @return only the routes that this package name is allowed to see.
+         */
+        private static List<MediaRoute2Info> getFilteredRoutesForPackageName(
+                @NonNull List<MediaRoute2Info> routes,
+                @NonNull String packageName) {
+            List<MediaRoute2Info> filteredRoutes = new ArrayList<>();
+            for (MediaRoute2Info route : routes) {
+                if (route.isVisibleTo(packageName)) {
+                    filteredRoutes.add(route);
+                }
+            }
+            return filteredRoutes;
+        }
+
         private void notifySessionInfoChangedToRouters(
-                @NonNull List<IMediaRouter2> routers, @NonNull RoutingSessionInfo sessionInfo) {
-            for (IMediaRouter2 router : routers) {
+                @NonNull List<RouterRecord> routerRecords,
+                @NonNull RoutingSessionInfo sessionInfo) {
+            for (RouterRecord routerRecord : routerRecords) {
                 try {
-                    router.notifySessionInfoChanged(sessionInfo);
+                    routerRecord.mRouter.notifySessionInfoChanged(sessionInfo);
                 } catch (RemoteException ex) {
                     Slog.w(TAG, "Failed to notify session info changed. Router probably died.", ex);
                 }

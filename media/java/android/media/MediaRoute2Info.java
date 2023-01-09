@@ -353,6 +353,8 @@ public final class MediaRoute2Info implements Parcelable {
     final Set<String> mDeduplicationIds;
     final Bundle mExtras;
     final String mProviderId;
+    final boolean mIsVisibilityRestricted;
+    final Set<String> mAllowedPackages;
 
     MediaRoute2Info(@NonNull Builder builder) {
         mId = builder.mId;
@@ -372,6 +374,8 @@ public final class MediaRoute2Info implements Parcelable {
         mDeduplicationIds = builder.mDeduplicationIds;
         mExtras = builder.mExtras;
         mProviderId = builder.mProviderId;
+        mIsVisibilityRestricted = builder.mIsVisibilityRestricted;
+        mAllowedPackages = builder.mAllowedPackages;
     }
 
     MediaRoute2Info(@NonNull Parcel in) {
@@ -393,6 +397,8 @@ public final class MediaRoute2Info implements Parcelable {
         mDeduplicationIds = Set.of(in.readStringArray());
         mExtras = in.readBundle();
         mProviderId = in.readString();
+        mIsVisibilityRestricted = in.readBoolean();
+        mAllowedPackages = Set.of(in.createString8Array());
     }
 
     /**
@@ -628,6 +634,15 @@ public final class MediaRoute2Info implements Parcelable {
     }
 
     /**
+     * Returns whether this route is visible to the package with the given name.
+     * @hide
+     */
+    public boolean isVisibleTo(String packageName) {
+        return !mIsVisibilityRestricted || getPackageName().equals(packageName)
+                || mAllowedPackages.contains(packageName);
+    }
+
+    /**
      * Dumps the current state of the object to the given {@code pw} as a human-readable string.
      *
      * <p> Used in the context of dumpsys. </p>
@@ -655,6 +670,8 @@ public final class MediaRoute2Info implements Parcelable {
         pw.println(indent + "mDeduplicationIds=" + mDeduplicationIds);
         pw.println(indent + "mExtras=" + mExtras);
         pw.println(indent + "mProviderId=" + mProviderId);
+        pw.println(indent + "mIsVisibilityRestricted=" + mIsVisibilityRestricted);
+        pw.println(indent + "mAllowedPackages=" + mAllowedPackages);
     }
 
     private void dumpVolume(@NonNull PrintWriter pw, @NonNull String prefix) {
@@ -705,7 +722,9 @@ public final class MediaRoute2Info implements Parcelable {
                 && (mVolume == other.mVolume)
                 && Objects.equals(mAddress, other.mAddress)
                 && Objects.equals(mDeduplicationIds, other.mDeduplicationIds)
-                && Objects.equals(mProviderId, other.mProviderId);
+                && Objects.equals(mProviderId, other.mProviderId)
+                && (mIsVisibilityRestricted == other.mIsVisibilityRestricted)
+                && Objects.equals(mAllowedPackages, other.mAllowedPackages);
     }
 
     @Override
@@ -713,7 +732,8 @@ public final class MediaRoute2Info implements Parcelable {
         // Note: mExtras is not included.
         return Objects.hash(mId, mName, mFeatures, mType, mIsSystem, mIconUri, mDescription,
                 mConnectionState, mClientPackageName, mPackageName, mVolumeHandling, mVolumeMax,
-                mVolume, mAddress, mDeduplicationIds, mProviderId);
+                mVolume, mAddress, mDeduplicationIds, mProviderId, mIsVisibilityRestricted,
+                mAllowedPackages);
     }
 
     @Override
@@ -733,6 +753,8 @@ public final class MediaRoute2Info implements Parcelable {
                 .append(", volume=").append(getVolume())
                 .append(", deduplicationIds=").append(String.join(",", getDeduplicationIds()))
                 .append(", providerId=").append(getProviderId())
+                .append(", isVisibilityRestricted=").append(mIsVisibilityRestricted)
+                .append(", allowedPackages=").append(String.join(",", mAllowedPackages))
                 .append(" }");
         return result.toString();
     }
@@ -761,6 +783,8 @@ public final class MediaRoute2Info implements Parcelable {
         dest.writeStringArray(mDeduplicationIds.toArray(new String[mDeduplicationIds.size()]));
         dest.writeBundle(mExtras);
         dest.writeString(mProviderId);
+        dest.writeBoolean(mIsVisibilityRestricted);
+        dest.writeString8Array(mAllowedPackages.toArray(new String[0]));
     }
 
     /**
@@ -787,6 +811,8 @@ public final class MediaRoute2Info implements Parcelable {
         Set<String> mDeduplicationIds;
         Bundle mExtras;
         String mProviderId;
+        boolean mIsVisibilityRestricted;
+        Set<String> mAllowedPackages;
 
         /**
          * Constructor for builder to create {@link MediaRoute2Info}.
@@ -809,6 +835,7 @@ public final class MediaRoute2Info implements Parcelable {
             mName = name;
             mFeatures = new ArrayList<>();
             mDeduplicationIds = Set.of();
+            mAllowedPackages = Set.of();
         }
 
         /**
@@ -854,6 +881,8 @@ public final class MediaRoute2Info implements Parcelable {
                 mExtras = new Bundle(routeInfo.mExtras);
             }
             mProviderId = routeInfo.mProviderId;
+            mIsVisibilityRestricted = routeInfo.mIsVisibilityRestricted;
+            mAllowedPackages = routeInfo.mAllowedPackages;
         }
 
         /**
@@ -1053,6 +1082,29 @@ public final class MediaRoute2Info implements Parcelable {
                 throw new IllegalArgumentException("providerId must not be null or empty");
             }
             mProviderId = providerId;
+            return this;
+        }
+
+        /**
+         * Sets the visibility of this route to public. This is the default
+         * visibility for routes that are public to all other apps.
+         */
+        @NonNull
+        public Builder setVisibilityPublic() {
+            mIsVisibilityRestricted = false;
+            mAllowedPackages = Set.of();
+            return this;
+        }
+
+        /**
+         * Sets the visibility of this route to restricted. This means that the
+         * route is only visible to a set of package name.
+         * @param allowedPackages set of package names which are allowed to see this route.
+         */
+        @NonNull
+        public Builder setVisibilityRestricted(@NonNull Set<String> allowedPackages) {
+            mIsVisibilityRestricted = true;
+            mAllowedPackages = Set.copyOf(allowedPackages);
             return this;
         }
 
