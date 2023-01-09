@@ -31,6 +31,12 @@ import java.util.concurrent.Executor;
  * CancellationSignal, Executor, OutcomeReceiver)} operation.
  */
 public class ClearCredentialStateException extends Exception {
+    /**
+     * The error type value for when the given operation failed due to an unknown reason.
+     */
+    @NonNull
+    public static final String TYPE_UNKNOWN =
+            "android.credentials.ClearCredentialStateException.TYPE_UNKNOWN";
 
     @NonNull
     private final String mType;

@@ -13251,6 +13251,7 @@ package android.credentials {
     ctor public ClearCredentialStateException(@NonNull String, @Nullable Throwable);
     ctor public ClearCredentialStateException(@NonNull String);
     method @NonNull public String getType();
+    field @NonNull public static final String TYPE_UNKNOWN = "android.credentials.ClearCredentialStateException.TYPE_UNKNOWN";
   }
 
   public final class ClearCredentialStateRequest implements android.os.Parcelable {
@@ -13267,7 +13268,10 @@ package android.credentials {
     ctor public CreateCredentialException(@NonNull String, @Nullable Throwable);
     ctor public CreateCredentialException(@NonNull String);
     method @NonNull public String getType();
+    field @NonNull public static final String TYPE_INTERRUPTED = "android.credentials.CreateCredentialException.TYPE_INTERRUPTED";
     field @NonNull public static final String TYPE_NO_CREDENTIAL = "android.credentials.CreateCredentialException.TYPE_NO_CREDENTIAL";
+    field @NonNull public static final String TYPE_UNKNOWN = "android.credentials.CreateCredentialException.TYPE_UNKNOWN";
+    field @NonNull public static final String TYPE_USER_CANCELED = "android.credentials.CreateCredentialException.TYPE_USER_CANCELED";
   }
 
   public final class CreateCredentialRequest implements android.os.Parcelable {
@@ -13311,7 +13315,10 @@ package android.credentials {
     ctor public GetCredentialException(@NonNull String, @Nullable Throwable);
     ctor public GetCredentialException(@NonNull String);
     method @NonNull public String getType();
+    field @NonNull public static final String TYPE_INTERRUPTED = "android.credentials.GetCredentialException.TYPE_INTERRUPTED";
     field @NonNull public static final String TYPE_NO_CREDENTIAL = "android.credentials.GetCredentialException.TYPE_NO_CREDENTIAL";
+    field @NonNull public static final String TYPE_UNKNOWN = "android.credentials.GetCredentialException.TYPE_UNKNOWN";
+    field @NonNull public static final String TYPE_USER_CANCELED = "android.credentials.GetCredentialException.TYPE_USER_CANCELED";
   }
 
   public final class GetCredentialOption implements android.os.Parcelable {
