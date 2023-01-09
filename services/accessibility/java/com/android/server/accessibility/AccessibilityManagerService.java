@@ -131,7 +131,7 @@ import android.view.inputmethod.EditorInfo;
 
 import com.android.internal.R;
 import com.android.internal.accessibility.AccessibilityShortcutController;
-import com.android.internal.accessibility.AccessibilityShortcutController.ToggleableFrameworkFeatureInfo;
+import com.android.internal.accessibility.AccessibilityShortcutController.FrameworkFeatureInfo;
 import com.android.internal.accessibility.dialog.AccessibilityButtonChooserActivity;
 import com.android.internal.accessibility.dialog.AccessibilityShortcutChooserActivity;
 import com.android.internal.annotations.GuardedBy;
@@ -3262,13 +3262,12 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
 
     private boolean performAccessibilityFrameworkFeature(ComponentName assignedTarget,
             @ShortcutType int shortcutType) {
-        final Map<ComponentName, ToggleableFrameworkFeatureInfo> frameworkFeatureMap =
+        final Map<ComponentName, FrameworkFeatureInfo> frameworkFeatureMap =
                 AccessibilityShortcutController.getFrameworkShortcutFeaturesMap();
         if (!frameworkFeatureMap.containsKey(assignedTarget)) {
             return false;
         }
-        // Toggle the requested framework feature
-        final ToggleableFrameworkFeatureInfo featureInfo = frameworkFeatureMap.get(assignedTarget);
+        final FrameworkFeatureInfo featureInfo = frameworkFeatureMap.get(assignedTarget);
         final SettingStringHelper setting = new SettingStringHelper(mContext.getContentResolver(),
                 featureInfo.getSettingKey(), mCurrentUserId);
         // Assuming that the default state will be to have the feature off
