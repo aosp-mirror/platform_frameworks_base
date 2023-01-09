@@ -24,17 +24,14 @@ import android.credentials.GetCredentialResponse;
 import android.os.Parcel;
 import android.os.Parcelable;
 
-import com.android.internal.util.Preconditions;
-
-import java.util.Objects;
-
 /**
  * A credential entry that is to be displayed on the account selector that is presented to the
  * user.
  *
- * <p>If user selects this entry, the corresponding {@code pendingIntent} will be invoked to
- * launch activities that require some user engagement before getting the credential
- * corresponding to this entry, e.g. authentication, confirmation etc.
+ * <p>If user selects this entry, the corresponding {@link PendingIntent},
+ * set on the {@code slice} as a {@link androidx.slice.core.SliceAction} will be
+ * invoked to launch activities that require some user engagement before getting
+ * the credential corresponding to this entry, e.g. authentication, confirmation etc.
  *
  * Once the activity fulfills the required user engagement, the {@link android.app.Activity}
  * result should be set to {@link android.app.Activity#RESULT_OK}, and the
@@ -55,51 +52,29 @@ public class CredentialEntry implements Parcelable {
      * on the UI. */
     private final @NonNull Slice mSlice;
 
-    /** The pending intent to be invoked when this credential entry is selected. */
-    private final @NonNull PendingIntent mPendingIntent;
-
-    /** A flag denoting whether auto-select is enabled for this entry. */
-    private final boolean mAutoSelectAllowed;
-
-    /**
-     * Constructs an instance of the credential entry to be displayed on the UI
-     * @param type the type of credential underlying this credential entry
-     * @param slice the content to be displayed with this entry on the UI
-     * @param pendingIntent the pendingIntent to be invoked when this entry is selected by the user
-     * @param autoSelectAllowed whether this entry should be auto selected if it is the only one
-     *                          on the selector
-     *
-     * @throws NullPointerException If {@code slice}, or {@code pendingIntent} is null.
-     * @throws IllegalArgumentException If {@code type} is null or empty, or if
-     * {@code pendingIntent} is null.
-     */
-    public CredentialEntry(@NonNull String type, @NonNull Slice slice,
-            @NonNull PendingIntent pendingIntent, boolean autoSelectAllowed) {
-        mType = Preconditions.checkStringNotEmpty(type, "type must not be null");
-        mSlice = Objects.requireNonNull(slice, "slice must not be null");
-        mPendingIntent = Objects.requireNonNull(pendingIntent, "pendingintent must not be null");
-        mAutoSelectAllowed = autoSelectAllowed;
+    public CredentialEntry(@NonNull String type, @NonNull Slice slice) {
+        mType = type;
+        mSlice = slice;
     }
 
     private CredentialEntry(@NonNull Parcel in) {
         mType = in.readString8();
         mSlice = in.readTypedObject(Slice.CREATOR);
-        mPendingIntent = in.readTypedObject(PendingIntent.CREATOR);
-        mAutoSelectAllowed = in.readBoolean();
     }
 
-    public static final @NonNull Creator<CredentialEntry> CREATOR =
+    @NonNull
+    public static final Creator<CredentialEntry> CREATOR =
             new Creator<CredentialEntry>() {
-        @Override
-        public CredentialEntry createFromParcel(@NonNull Parcel in) {
-            return new CredentialEntry(in);
-        }
+                @Override
+                public CredentialEntry createFromParcel(@NonNull Parcel in) {
+                    return new CredentialEntry(in);
+                }
 
-        @Override
-        public CredentialEntry[] newArray(int size) {
-            return new CredentialEntry[size];
-        }
-    };
+                @Override
+                public CredentialEntry[] newArray(int size) {
+                    return new CredentialEntry[size];
+                }
+            };
 
     @Override
     public int describeContents() {
@@ -110,35 +85,21 @@ public class CredentialEntry implements Parcelable {
     public void writeToParcel(@NonNull Parcel dest, int flags) {
         dest.writeString8(mType);
         dest.writeTypedObject(mSlice, flags);
-        dest.writeTypedObject(mPendingIntent, flags);
-        dest.writeBoolean(mAutoSelectAllowed);
     }
 
     /**
      * Returns the specific credential type of the entry.
      */
-    public @NonNull String getType() {
+    @NonNull
+    public String getType() {
         return mType;
     }
 
     /**
      * Returns the {@link Slice} object containing UI display content to be shown for this entry.
      */
-    public @NonNull Slice getSlice() {
+    @NonNull
+    public Slice getSlice() {
         return mSlice;
-    }
-
-    /**
-     * Returns the pending intent to be invoked if the user selects this entry.
-     */
-    public @NonNull PendingIntent getPendingIntent() {
-        return mPendingIntent;
-    }
-
-    /**
-     * Returns whether this entry can be auto selected if it is the only option for the user.
-     */
-    public boolean isAutoSelectAllowed() {
-        return mAutoSelectAllowed;
     }
 }
