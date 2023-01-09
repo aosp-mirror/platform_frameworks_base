@@ -59,17 +59,9 @@ class BluetoothRouteProvider {
     private static final String HEARING_AID_ROUTE_ID_PREFIX = "HEARING_AID_";
     private static final String LE_AUDIO_ROUTE_ID_PREFIX = "LE_AUDIO_";
 
-    @SuppressWarnings("WeakerAccess") /* synthetic access */
     // Maps hardware address to BluetoothRouteInfo
-    final Map<String, BluetoothRouteInfo> mBluetoothRoutes = new HashMap<>();
-    @SuppressWarnings("WeakerAccess") /* synthetic access */
-    final List<BluetoothRouteInfo> mActiveRoutes = new ArrayList<>();
-    @SuppressWarnings("WeakerAccess") /* synthetic access */
-    BluetoothA2dp mA2dpProfile;
-    @SuppressWarnings("WeakerAccess") /* synthetic access */
-    BluetoothHearingAid mHearingAidProfile;
-    @SuppressWarnings("WeakerAccess") /* synthetic access */
-    BluetoothLeAudio mLeAudioProfile;
+    private final Map<String, BluetoothRouteInfo> mBluetoothRoutes = new HashMap<>();
+    private final List<BluetoothRouteInfo> mActiveRoutes = new ArrayList<>();
 
     // Route type -> volume map
     private final SparseIntArray mVolumeMap = new SparseIntArray();
@@ -82,6 +74,10 @@ class BluetoothRouteProvider {
     private final IntentFilter mIntentFilter = new IntentFilter();
     private final BroadcastReceiver mBroadcastReceiver = new BluetoothBroadcastReceiver();
     private final BluetoothProfileListener mProfileListener = new BluetoothProfileListener();
+
+    private BluetoothA2dp mA2dpProfile;
+    private BluetoothHearingAid mHearingAidProfile;
+    private BluetoothLeAudio mLeAudioProfile;
 
     /**
      * Create an instance of {@link BluetoothRouteProvider}.
@@ -109,7 +105,7 @@ class BluetoothRouteProvider {
         buildBluetoothRoutes();
     }
 
-    public void start(UserHandle user) {
+    void start(UserHandle user) {
         mBluetoothAdapter.getProfileProxy(mContext, mProfileListener, BluetoothProfile.A2DP);
         mBluetoothAdapter.getProfileProxy(mContext, mProfileListener, BluetoothProfile.HEARING_AID);
         mBluetoothAdapter.getProfileProxy(mContext, mProfileListener, BluetoothProfile.LE_AUDIO);
@@ -133,7 +129,7 @@ class BluetoothRouteProvider {
                 mIntentFilter, null, null);
     }
 
-    public void stop() {
+    void stop() {
         mContext.unregisterReceiver(mBroadcastReceiver);
     }
 
@@ -144,7 +140,7 @@ class BluetoothRouteProvider {
      * @param routeId the id of the Bluetooth device. {@code null} denotes to clear the use of
      *               BT routes.
      */
-    public void transferTo(@Nullable String routeId) {
+    void transferTo(@Nullable String routeId) {
         if (routeId == null) {
             clearActiveDevices();
             return;
@@ -158,7 +154,7 @@ class BluetoothRouteProvider {
         }
 
         if (mBluetoothAdapter != null) {
-            mBluetoothAdapter.setActiveDevice(btRouteInfo.btDevice, ACTIVE_DEVICE_AUDIO);
+            mBluetoothAdapter.setActiveDevice(btRouteInfo.mBtDevice, ACTIVE_DEVICE_AUDIO);
         }
     }
 
@@ -183,7 +179,7 @@ class BluetoothRouteProvider {
             for (BluetoothDevice device : bondedDevices) {
                 if (device.isConnected()) {
                     BluetoothRouteInfo newBtRoute = createBluetoothRoute(device);
-                    if (newBtRoute.connectedProfiles.size() > 0) {
+                    if (newBtRoute.mConnectedProfiles.size() > 0) {
                         mBluetoothRoutes.put(device.getAddress(), newBtRoute);
                     }
                 }
@@ -195,14 +191,14 @@ class BluetoothRouteProvider {
     MediaRoute2Info getSelectedRoute() {
         // For now, active routes can be multiple only when a pair of hearing aid devices is active.
         // Let the first active device represent them.
-        return (mActiveRoutes.isEmpty() ? null : mActiveRoutes.get(0).route);
+        return (mActiveRoutes.isEmpty() ? null : mActiveRoutes.get(0).mRoute);
     }
 
     @NonNull
     List<MediaRoute2Info> getTransferableRoutes() {
         List<MediaRoute2Info> routes = getAllBluetoothRoutes();
         for (BluetoothRouteInfo btRoute : mActiveRoutes) {
-            routes.remove(btRoute.route);
+            routes.remove(btRoute.mRoute);
         }
         return routes;
     }
@@ -220,11 +216,11 @@ class BluetoothRouteProvider {
 
         for (BluetoothRouteInfo btRoute : mBluetoothRoutes.values()) {
             // A pair of hearing aid devices or having the same hardware address
-            if (routeIds.contains(btRoute.route.getId())) {
+            if (routeIds.contains(btRoute.mRoute.getId())) {
                 continue;
             }
-            routes.add(btRoute.route);
-            routeIds.add(btRoute.route.getId());
+            routes.add(btRoute.mRoute);
+            routeIds.add(btRoute.mRoute.getId());
         }
         return routes;
     }
@@ -234,7 +230,7 @@ class BluetoothRouteProvider {
             return null;
         }
         for (BluetoothRouteInfo btRouteInfo : mBluetoothRoutes.values()) {
-            if (TextUtils.equals(btRouteInfo.route.getId(), routeId)) {
+            if (TextUtils.equals(btRouteInfo.mRoute.getId(), routeId)) {
                 return btRouteInfo;
             }
         }
@@ -246,7 +242,7 @@ class BluetoothRouteProvider {
      *
      * @return true if devices can be handled by the provider.
      */
-    public boolean updateVolumeForDevices(int devices, int volume) {
+    boolean updateVolumeForDevices(int devices, int volume) {
         int routeType;
         if ((devices & (AudioSystem.DEVICE_OUT_HEARING_AID)) != 0) {
             routeType = MediaRoute2Info.TYPE_HEARING_AID;
@@ -263,10 +259,10 @@ class BluetoothRouteProvider {
 
         boolean shouldNotify = false;
         for (BluetoothRouteInfo btRoute : mActiveRoutes) {
-            if (btRoute.route.getType() != routeType) {
+            if (btRoute.mRoute.getType() != routeType) {
                 continue;
             }
-            btRoute.route = new MediaRoute2Info.Builder(btRoute.route)
+            btRoute.mRoute = new MediaRoute2Info.Builder(btRoute.mRoute)
                     .setVolume(volume)
                     .build();
             shouldNotify = true;
@@ -285,7 +281,7 @@ class BluetoothRouteProvider {
 
     private BluetoothRouteInfo createBluetoothRoute(BluetoothDevice device) {
         BluetoothRouteInfo newBtRoute = new BluetoothRouteInfo();
-        newBtRoute.btDevice = device;
+        newBtRoute.mBtDevice = device;
 
         String routeId = device.getAddress();
         String deviceName = device.getName();
@@ -293,26 +289,26 @@ class BluetoothRouteProvider {
             deviceName = mContext.getResources().getText(R.string.unknownName).toString();
         }
         int type = MediaRoute2Info.TYPE_BLUETOOTH_A2DP;
-        newBtRoute.connectedProfiles = new SparseBooleanArray();
+        newBtRoute.mConnectedProfiles = new SparseBooleanArray();
         if (mA2dpProfile != null && mA2dpProfile.getConnectedDevices().contains(device)) {
-            newBtRoute.connectedProfiles.put(BluetoothProfile.A2DP, true);
+            newBtRoute.mConnectedProfiles.put(BluetoothProfile.A2DP, true);
         }
         if (mHearingAidProfile != null
                 && mHearingAidProfile.getConnectedDevices().contains(device)) {
-            newBtRoute.connectedProfiles.put(BluetoothProfile.HEARING_AID, true);
+            newBtRoute.mConnectedProfiles.put(BluetoothProfile.HEARING_AID, true);
             // Intentionally assign the same ID for a pair of devices to publish only one of them.
             routeId = HEARING_AID_ROUTE_ID_PREFIX + mHearingAidProfile.getHiSyncId(device);
             type = MediaRoute2Info.TYPE_HEARING_AID;
         }
         if (mLeAudioProfile != null
                 && mLeAudioProfile.getConnectedDevices().contains(device)) {
-            newBtRoute.connectedProfiles.put(BluetoothProfile.LE_AUDIO, true);
+            newBtRoute.mConnectedProfiles.put(BluetoothProfile.LE_AUDIO, true);
             routeId = LE_AUDIO_ROUTE_ID_PREFIX + mLeAudioProfile.getGroupId(device);
             type = MediaRoute2Info.TYPE_BLE_HEADSET;
         }
 
         // Current volume will be set when connected.
-        newBtRoute.route = new MediaRoute2Info.Builder(routeId, deviceName)
+        newBtRoute.mRoute = new MediaRoute2Info.Builder(routeId, deviceName)
                 .addFeature(MediaRoute2Info.FEATURE_LIVE_AUDIO)
                 .addFeature(MediaRoute2Info.FEATURE_LOCAL_PLAYBACK)
                 .setConnectionState(MediaRoute2Info.CONNECTION_STATE_DISCONNECTED)
@@ -332,18 +328,18 @@ class BluetoothRouteProvider {
             Slog.w(TAG, "setRouteConnectionState: route shouldn't be null");
             return;
         }
-        if (btRoute.route.getConnectionState() == state) {
+        if (btRoute.mRoute.getConnectionState() == state) {
             return;
         }
 
-        MediaRoute2Info.Builder builder = new MediaRoute2Info.Builder(btRoute.route)
+        MediaRoute2Info.Builder builder = new MediaRoute2Info.Builder(btRoute.mRoute)
                 .setConnectionState(state);
         builder.setType(btRoute.getRouteType());
 
         if (state == MediaRoute2Info.CONNECTION_STATE_CONNECTED) {
             builder.setVolume(mVolumeMap.get(btRoute.getRouteType(), 0));
         }
-        btRoute.route = builder.build();
+        btRoute.mRoute = builder.build();
     }
 
     private void addActiveRoute(BluetoothRouteInfo btRoute) {
@@ -352,7 +348,7 @@ class BluetoothRouteProvider {
             return;
         }
         if (DEBUG) {
-            Log.d(TAG, "Adding active route: " + btRoute.route);
+            Log.d(TAG, "Adding active route: " + btRoute.mRoute);
         }
         if (mActiveRoutes.contains(btRoute)) {
             Slog.w(TAG, "addActiveRoute: btRoute is already added.");
@@ -364,7 +360,7 @@ class BluetoothRouteProvider {
 
     private void removeActiveRoute(BluetoothRouteInfo btRoute) {
         if (DEBUG) {
-            Log.d(TAG, "Removing active route: " + btRoute.route);
+            Log.d(TAG, "Removing active route: " + btRoute.mRoute);
         }
         if (mActiveRoutes.remove(btRoute)) {
             setRouteConnectionState(btRoute, STATE_DISCONNECTED);
@@ -378,7 +374,7 @@ class BluetoothRouteProvider {
         Iterator<BluetoothRouteInfo> iter = mActiveRoutes.iterator();
         while (iter.hasNext()) {
             BluetoothRouteInfo btRoute = iter.next();
-            if (btRoute.route.getType() == type) {
+            if (btRoute.mRoute.getType() == type) {
                 iter.remove();
                 setRouteConnectionState(btRoute, STATE_DISCONNECTED);
             }
@@ -398,9 +394,9 @@ class BluetoothRouteProvider {
 
         // A bluetooth route with the same route ID should be added.
         for (BluetoothRouteInfo btRoute : mBluetoothRoutes.values()) {
-            if (TextUtils.equals(btRoute.route.getId(), activeBtRoute.route.getId())
-                    && !TextUtils.equals(btRoute.btDevice.getAddress(),
-                    activeBtRoute.btDevice.getAddress())) {
+            if (TextUtils.equals(btRoute.mRoute.getId(), activeBtRoute.mRoute.getId())
+                    && !TextUtils.equals(btRoute.mBtDevice.getAddress(),
+                    activeBtRoute.mBtDevice.getAddress())) {
                 addActiveRoute(btRoute);
             }
         }
@@ -425,19 +421,19 @@ class BluetoothRouteProvider {
         void onBluetoothRoutesUpdated(@NonNull List<MediaRoute2Info> routes);
     }
 
-    private class BluetoothRouteInfo {
-        public BluetoothDevice btDevice;
-        public MediaRoute2Info route;
-        public SparseBooleanArray connectedProfiles;
+    private static class BluetoothRouteInfo {
+        private BluetoothDevice mBtDevice;
+        private MediaRoute2Info mRoute;
+        private SparseBooleanArray mConnectedProfiles;
 
         @MediaRoute2Info.Type
         int getRouteType() {
             // Let hearing aid profile have a priority.
-            if (connectedProfiles.get(BluetoothProfile.HEARING_AID, false)) {
+            if (mConnectedProfiles.get(BluetoothProfile.HEARING_AID, false)) {
                 return MediaRoute2Info.TYPE_HEARING_AID;
             }
 
-            if (connectedProfiles.get(BluetoothProfile.LE_AUDIO, false)) {
+            if (mConnectedProfiles.get(BluetoothProfile.LE_AUDIO, false)) {
                 return MediaRoute2Info.TYPE_BLE_HEADSET;
             }
 
@@ -447,6 +443,7 @@ class BluetoothRouteProvider {
 
     // These callbacks run on the main thread.
     private final class BluetoothProfileListener implements BluetoothProfile.ServiceListener {
+        @Override
         public void onServiceConnected(int profile, BluetoothProfile proxy) {
             List<BluetoothDevice> activeDevices;
             switch (profile) {
@@ -480,6 +477,7 @@ class BluetoothRouteProvider {
             notifyBluetoothRoutesUpdated();
         }
 
+        @Override
         public void onServiceDisconnected(int profile) {
             switch (profile) {
                 case BluetoothProfile.A2DP:
@@ -496,6 +494,7 @@ class BluetoothRouteProvider {
             }
         }
     }
+
     private class BluetoothBroadcastReceiver extends BroadcastReceiver {
         @Override
         public void onReceive(Context context, Intent intent) {
@@ -514,6 +513,7 @@ class BluetoothRouteProvider {
     }
 
     private class AdapterStateChangedReceiver implements BluetoothEventReceiver {
+        @Override
         public void onReceive(Context context, Intent intent, BluetoothDevice device) {
             int state = intent.getIntExtra(BluetoothAdapter.EXTRA_STATE, -1);
             if (state == BluetoothAdapter.STATE_OFF
@@ -573,18 +573,18 @@ class BluetoothRouteProvider {
             if (state == BluetoothProfile.STATE_CONNECTED) {
                 if (btRoute == null) {
                     btRoute = createBluetoothRoute(device);
-                    if (btRoute.connectedProfiles.size() > 0) {
+                    if (btRoute.mConnectedProfiles.size() > 0) {
                         mBluetoothRoutes.put(device.getAddress(), btRoute);
                         notifyBluetoothRoutesUpdated();
                     }
                 } else {
-                    btRoute.connectedProfiles.put(profile, true);
+                    btRoute.mConnectedProfiles.put(profile, true);
                 }
             } else if (state == BluetoothProfile.STATE_DISCONNECTING
                     || state == BluetoothProfile.STATE_DISCONNECTED) {
                 if (btRoute != null) {
-                    btRoute.connectedProfiles.delete(profile);
-                    if (btRoute.connectedProfiles.size() == 0) {
+                    btRoute.mConnectedProfiles.delete(profile);
+                    if (btRoute.mConnectedProfiles.size() == 0) {
                         removeActiveRoute(mBluetoothRoutes.remove(device.getAddress()));
                         notifyBluetoothRoutesUpdated();
                     }
