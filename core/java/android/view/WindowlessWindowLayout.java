@@ -16,13 +16,19 @@
 
 package android.view;
 
+import static android.view.ViewGroup.LayoutParams.MATCH_PARENT;
+import static android.view.ViewGroup.LayoutParams.WRAP_CONTENT;
+
 import android.app.WindowConfiguration.WindowingMode;
 import android.graphics.Rect;
 import android.view.WindowInsets.Type.InsetsType;
 import android.window.ClientWindowFrames;
 
+// TODO(b/262891212) use the real WindowLayout and remove WindowlessWindowLayout
+
 /**
  * Computes window frames for the windowless window.
+ *
  * @hide
  */
 public class WindowlessWindowLayout extends WindowLayout {
@@ -32,9 +38,32 @@ public class WindowlessWindowLayout extends WindowLayout {
             Rect displayCutoutSafe, Rect windowBounds, @WindowingMode int windowingMode,
             int requestedWidth, int requestedHeight, @InsetsType int requestedVisibleTypes,
             float compatScale, ClientWindowFrames frames) {
-        frames.frame.set(0, 0, attrs.width, attrs.height);
+        if (frames.attachedFrame == null) {
+            frames.frame.set(0, 0, attrs.width, attrs.height);
+            frames.parentFrame.set(frames.frame);
+            frames.displayFrame.set(frames.frame);
+            return;
+        }
+
+        final int height = calculateLength(attrs.height, requestedHeight,
+                frames.attachedFrame.height());
+        final int width = calculateLength(attrs.width, requestedWidth,
+                frames.attachedFrame.width());
+        Gravity.apply(attrs.gravity, width, height, frames.attachedFrame,
+                (int) (attrs.x + attrs.horizontalMargin),
+                (int) (attrs.y + attrs.verticalMargin),
+                frames.frame);
         frames.displayFrame.set(frames.frame);
-        frames.parentFrame.set(frames.frame);
+        frames.parentFrame.set(frames.attachedFrame);
+    }
+
+    private static int calculateLength(int attrLength, int requestedLength, int parentLength) {
+        if (attrLength == MATCH_PARENT) {
+            return parentLength;
+        }
+        if (attrLength == WRAP_CONTENT) {
+            return requestedLength;
+        }
+        return attrLength;
     }
 }
-

@@ -155,7 +155,7 @@ public abstract class CompatUIWindowManagerAbstract extends WindowlessWindowMana
     }
 
     @Override
-    protected void attachToParentSurface(IWindow window, SurfaceControl.Builder b) {
+    protected SurfaceControl getParentSurface(IWindow window, WindowManager.LayoutParams attrs) {
         String className = getClass().getSimpleName();
         final SurfaceControl.Builder builder = new SurfaceControl.Builder(new SurfaceSession())
                 .setContainerLayer()
@@ -164,9 +164,8 @@ public abstract class CompatUIWindowManagerAbstract extends WindowlessWindowMana
                 .setCallsite(className + "#attachToParentSurface");
         attachToParentSurface(builder);
         mLeash = builder.build();
-        b.setParent(mLeash);
-
         initSurface(mLeash);
+        return mLeash;
     }
 
     /** Inits the z-order of the surface. */

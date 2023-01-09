@@ -92,7 +92,7 @@ public class SplitDecorManager extends WindowlessWindowManager {
     }
 
     @Override
-    protected void attachToParentSurface(IWindow window, SurfaceControl.Builder b) {
+    protected SurfaceControl getParentSurface(IWindow window, WindowManager.LayoutParams attrs) {
         // Can't set position for the ViewRootImpl SC directly. Create a leash to manipulate later.
         final SurfaceControl.Builder builder = new SurfaceControl.Builder(new SurfaceSession())
                 .setContainerLayer()
@@ -101,7 +101,7 @@ public class SplitDecorManager extends WindowlessWindowManager {
                 .setParent(mHostLeash)
                 .setCallsite("SplitDecorManager#attachToParentSurface");
         mIconLeash = builder.build();
-        b.setParent(mIconLeash);
+        return mIconLeash;
     }
 
     /** Inflates split decor surface on the root surface. */
