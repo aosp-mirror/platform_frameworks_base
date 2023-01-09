@@ -21,7 +21,8 @@ import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.keyguard.domain.interactor.FromGoneTransitionInteractor.Companion.TO_DREAMING_DURATION
 import com.android.systemui.keyguard.domain.interactor.KeyguardTransitionInteractor
 import com.android.systemui.keyguard.shared.model.AnimationParams
-import com.android.systemui.keyguard.shared.model.TransitionState
+import com.android.systemui.keyguard.shared.model.TransitionState.CANCELED
+import com.android.systemui.keyguard.shared.model.TransitionState.FINISHED
 import javax.inject.Inject
 import kotlin.time.Duration.Companion.milliseconds
 import kotlinx.coroutines.flow.Flow
@@ -45,7 +46,7 @@ constructor(
             },
             // On end, reset the translation to 0
             interactor.goneToDreamingTransition
-                .filter { step -> step.transitionState == TransitionState.FINISHED }
+                .filter { it.transitionState == FINISHED || it.transitionState == CANCELED }
                 .map { 0f }
         )
     }

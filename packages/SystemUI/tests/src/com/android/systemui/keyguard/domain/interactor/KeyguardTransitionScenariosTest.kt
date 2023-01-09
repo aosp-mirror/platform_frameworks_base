@@ -38,6 +38,7 @@ import com.android.systemui.util.mockito.withArgCaptor
 import com.google.common.truth.Truth.assertThat
 import kotlinx.coroutines.cancelChildren
 import kotlinx.coroutines.test.TestScope
+import kotlinx.coroutines.test.advanceUntilIdle
 import kotlinx.coroutines.test.runCurrent
 import kotlinx.coroutines.test.runTest
 import org.junit.Before
@@ -177,7 +178,7 @@ class KeyguardTransitionScenariosTest : SysuiTestCase() {
             keyguardRepository.setDreamingWithOverlay(false)
             // AND occluded has stopped
             keyguardRepository.setKeyguardOccluded(false)
-            runCurrent()
+            advanceUntilIdle()
 
             val info =
                 withArgCaptor<TransitionInfo> {
@@ -539,12 +540,11 @@ class KeyguardTransitionScenariosTest : SysuiTestCase() {
                         },
                 )
             )
-            runCurrent()
             reset(mockTransitionRepository)
 
             // WHEN the device begins to dream
             keyguardRepository.setDreamingWithOverlay(true)
-            runCurrent()
+            advanceUntilIdle()
 
             val info =
                 withArgCaptor<TransitionInfo> {

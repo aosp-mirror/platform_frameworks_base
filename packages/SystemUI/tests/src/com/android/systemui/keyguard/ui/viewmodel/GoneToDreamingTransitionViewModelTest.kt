@@ -92,8 +92,10 @@ class GoneToDreamingTransitionViewModelTest : SysuiTestCase() {
             repository.sendTransitionStep(step(0.5f))
             // ...up to here
             repository.sendTransitionStep(step(1f))
+            // And a final reset event on CANCEL
+            repository.sendTransitionStep(step(0.8f, TransitionState.CANCELED))
 
-            assertThat(values.size).isEqualTo(3)
+            assertThat(values.size).isEqualTo(4)
             assertThat(values[0])
                 .isEqualTo(
                     EMPHASIZED_ACCELERATE.getInterpolation(
@@ -112,6 +114,7 @@ class GoneToDreamingTransitionViewModelTest : SysuiTestCase() {
                         animValue(0.5f, LOCKSCREEN_TRANSLATION_Y)
                     ) * pixels
                 )
+            assertThat(values[3]).isEqualTo(0f)
             job.cancel()
         }
 
@@ -123,12 +126,15 @@ class GoneToDreamingTransitionViewModelTest : SysuiTestCase() {
         return (stepValue - startValue) * multiplier
     }
 
-    private fun step(value: Float): TransitionStep {
+    private fun step(
+        value: Float,
+        state: TransitionState = TransitionState.RUNNING
+    ): TransitionStep {
         return TransitionStep(
             from = KeyguardState.GONE,
             to = KeyguardState.DREAMING,
             value = value,
-            transitionState = TransitionState.RUNNING,
+            transitionState = state,
             ownerName = "GoneToDreamingTransitionViewModelTest"
         )
     }
