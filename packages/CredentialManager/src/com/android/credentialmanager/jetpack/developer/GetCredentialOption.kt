@@ -28,30 +28,40 @@ import android.os.Bundle
  *                              otherwise
  */
 open class GetCredentialOption(
-    val type: String,
-    val data: Bundle,
-    val requireSystemProvider: Boolean,
+    open val type: String,
+    open val requestData: Bundle,
+    open val candidateQueryData: Bundle,
+    open val requireSystemProvider: Boolean,
 ) {
     companion object {
         @JvmStatic
-        fun createFrom(from: android.credentials.GetCredentialOption): GetCredentialOption {
+        fun createFrom(
+            type: String,
+            requestData: Bundle,
+            candidateQueryData: Bundle,
+            requireSystemProvider: Boolean
+        ): GetCredentialOption {
             return try {
-                when (from.type) {
+                when (type) {
                     Credential.TYPE_PASSWORD_CREDENTIAL ->
-                        GetPasswordOption.createFrom(from.credentialRetrievalData)
+                        GetPasswordOption.createFrom(requestData)
                     PublicKeyCredential.TYPE_PUBLIC_KEY_CREDENTIAL ->
-                        GetPublicKeyCredentialBaseOption.createFrom(from.credentialRetrievalData)
-                    else ->
-                        GetCredentialOption(
-                            from.type, from.credentialRetrievalData, from.requireSystemProvider()
-                        )
+                        when (requestData.getString(PublicKeyCredential.BUNDLE_KEY_SUBTYPE)) {
+                            GetPublicKeyCredentialOption
+                                .BUNDLE_VALUE_SUBTYPE_GET_PUBLIC_KEY_CREDENTIAL_OPTION ->
+                                GetPublicKeyCredentialOption.createFrom(requestData)
+                            GetPublicKeyCredentialOptionPrivileged
+                                .BUNDLE_VALUE_SUBTYPE_GET_PUBLIC_KEY_CREDENTIAL_OPTION_PRIVILEGED ->
+                                GetPublicKeyCredentialOptionPrivileged.createFrom(requestData)
+                            else -> throw FrameworkClassParsingException()
+                        }
+                    else -> throw FrameworkClassParsingException()
                 }
             } catch (e: FrameworkClassParsingException) {
-                GetCredentialOption(
-                    from.type,
-                    from.credentialRetrievalData,
-                    from.requireSystemProvider()
-                )
+                // Parsing failed but don't crash the process. Instead just output a request with
+                // the raw framework values.
+                GetCustomCredentialOption(
+                    type, requestData, candidateQueryData, requireSystemProvider)
             }
         }
     }

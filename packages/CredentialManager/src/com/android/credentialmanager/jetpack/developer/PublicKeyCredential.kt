@@ -45,6 +45,8 @@ class PublicKeyCredential constructor(
         /** The type value for public key credential related operations. */
         const val TYPE_PUBLIC_KEY_CREDENTIAL: String =
                 "androidx.credentials.TYPE_PUBLIC_KEY_CREDENTIAL"
+        /** The Bundle key value for the public key credential subtype (privileged or regular). */
+        internal const val BUNDLE_KEY_SUBTYPE = "androidx.credentials.BUNDLE_KEY_SUBTYPE"
         const val BUNDLE_KEY_AUTHENTICATION_RESPONSE_JSON =
                 "androidx.credentials.BUNDLE_KEY_AUTHENTICATION_RESPONSE_JSON"
 

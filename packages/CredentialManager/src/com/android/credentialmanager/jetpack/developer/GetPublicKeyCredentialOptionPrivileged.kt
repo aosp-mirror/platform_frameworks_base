@@ -21,41 +21,59 @@ import android.os.Bundle
 /**
  * A privileged request to get passkeys from the user's public key credential provider. The caller
  * can modify the RP. Only callers with privileged permission (e.g. user's public browser or caBLE)
- * can use this.
+ * can use this. These permissions will be introduced in an upcoming release.
+ * TODO("Add specific permission info/annotation")
  *
- * @property requestJson the privileged request in JSON format
- * @property allowHybrid defines whether hybrid credentials are allowed to fulfill this request,
- * true by default
- * @property rp the expected true RP ID which will override the one in the [requestJson]
- * @property clientDataHash a hash that is used to verify the [rp] Identity
- * @throws NullPointerException If any of [allowHybrid], [requestJson], [rp], or [clientDataHash]
- * is null. This is handled by the Kotlin runtime
- * @throws IllegalArgumentException If any of [requestJson], [rp], or [clientDataHash] is empty
- *
- * @hide
+ * @property requestJson the privileged request in JSON format in the standard webauthn web json
+ * shown [here](https://w3c.github.io/webauthn/#dictdef-publickeycredentialrequestoptionsjson).
+ * @property preferImmediatelyAvailableCredentials true if you prefer the operation to return
+ * immediately when there is no available credential instead of falling back to discovering remote
+ * credentials, and false (default) otherwise
+ * @property relyingParty the expected true RP ID which will override the one in the [requestJson],
+ * where relyingParty is defined [here](https://w3c.github.io/webauthn/#rp-id) in more detail
+ * @property clientDataHash a hash that is used to verify the [relyingParty] Identity
+ * @throws NullPointerException If any of [requestJson], [relyingParty], or [clientDataHash]
+ * is null
+ * @throws IllegalArgumentException If any of [requestJson], [relyingParty], or [clientDataHash] is
+ * empty
  */
 class GetPublicKeyCredentialOptionPrivileged @JvmOverloads constructor(
-        requestJson: String,
-        val rp: String,
-        val clientDataHash: String,
-        @get:JvmName("allowHybrid")
-        val allowHybrid: Boolean = true
-) : GetPublicKeyCredentialBaseOption(
+    val requestJson: String,
+    val relyingParty: String,
+    val clientDataHash: String,
+    @get:JvmName("preferImmediatelyAvailableCredentials")
+    val preferImmediatelyAvailableCredentials: Boolean = false
+) : GetCredentialOption(
+    type = PublicKeyCredential.TYPE_PUBLIC_KEY_CREDENTIAL,
+    requestData = toBundle(
         requestJson,
-        PublicKeyCredential.TYPE_PUBLIC_KEY_CREDENTIAL,
-        toBundle(requestJson, rp, clientDataHash, allowHybrid),
-        false,
+        relyingParty,
+        clientDataHash,
+        preferImmediatelyAvailableCredentials
+    ),
+    candidateQueryData = toBundle(
+        requestJson,
+        relyingParty,
+        clientDataHash,
+        preferImmediatelyAvailableCredentials
+    ),
+    requireSystemProvider = false,
 ) {
 
     init {
-        require(rp.isNotEmpty()) { "rp must not be empty" }
+        require(requestJson.isNotEmpty()) { "requestJson must not be empty" }
+        require(relyingParty.isNotEmpty()) { "rp must not be empty" }
         require(clientDataHash.isNotEmpty()) { "clientDataHash must not be empty" }
     }
 
     /** A builder for [GetPublicKeyCredentialOptionPrivileged]. */
-    class Builder(var requestJson: String, var rp: String, var clientDataHash: String) {
+    class Builder(
+        private var requestJson: String,
+        private var relyingParty: String,
+        private var clientDataHash: String
+    ) {
 
-        private var allowHybrid: Boolean = true
+        private var preferImmediatelyAvailableCredentials: Boolean = false
 
         /**
          * Sets the privileged request in JSON format.
@@ -66,23 +84,30 @@ class GetPublicKeyCredentialOptionPrivileged @JvmOverloads constructor(
         }
 
         /**
-         * Sets whether hybrid credentials are allowed to fulfill this request, true by default.
+         * Sets to true if you prefer the operation to return immediately when there is no available
+         * credential instead of falling back to discovering remote credentials, and false
+         * otherwise.
+         *
+         * The default value is false.
          */
-        fun setAllowHybrid(allowHybrid: Boolean): Builder {
-            this.allowHybrid = allowHybrid
+        @Suppress("MissingGetterMatchingBuilder")
+        fun setPreferImmediatelyAvailableCredentials(
+            preferImmediatelyAvailableCredentials: Boolean
+        ): Builder {
+            this.preferImmediatelyAvailableCredentials = preferImmediatelyAvailableCredentials
             return this
         }
 
         /**
          * Sets the expected true RP ID which will override the one in the [requestJson].
          */
-        fun setRp(rp: String): Builder {
-            this.rp = rp
+        fun setRelyingParty(relyingParty: String): Builder {
+            this.relyingParty = relyingParty
             return this
         }
 
         /**
-         * Sets a hash that is used to verify the [rp] Identity.
+         * Sets a hash that is used to verify the [relyingParty] Identity.
          */
         fun setClientDataHash(clientDataHash: String): Builder {
             this.clientDataHash = clientDataHash
@@ -91,47 +116,63 @@ class GetPublicKeyCredentialOptionPrivileged @JvmOverloads constructor(
 
         /** Builds a [GetPublicKeyCredentialOptionPrivileged]. */
         fun build(): GetPublicKeyCredentialOptionPrivileged {
-            return GetPublicKeyCredentialOptionPrivileged(this.requestJson,
-                    this.rp, this.clientDataHash, this.allowHybrid)
+            return GetPublicKeyCredentialOptionPrivileged(
+                this.requestJson,
+                this.relyingParty, this.clientDataHash, this.preferImmediatelyAvailableCredentials
+            )
         }
     }
 
+    /** @hide */
     companion object {
-        const val BUNDLE_KEY_RP = "androidx.credentials.BUNDLE_KEY_RP"
-        const val BUNDLE_KEY_CLIENT_DATA_HASH =
-                "androidx.credentials.BUNDLE_KEY_CLIENT_DATA_HASH"
-        const val BUNDLE_KEY_ALLOW_HYBRID = "androidx.credentials.BUNDLE_KEY_ALLOW_HYBRID"
-        const val BUNDLE_VALUE_SUBTYPE_GET_PUBLIC_KEY_CREDENTIAL_OPTION_PRIVILEGED =
-                "androidx.credentials.BUNDLE_VALUE_SUBTYPE_GET_PUBLIC_KEY_CREDENTIAL_OPTION" +
-                        "_PRIVILEGED"
+        internal const val BUNDLE_KEY_RELYING_PARTY =
+            "androidx.credentials.BUNDLE_KEY_RELYING_PARTY"
+        internal const val BUNDLE_KEY_CLIENT_DATA_HASH =
+            "androidx.credentials.BUNDLE_KEY_CLIENT_DATA_HASH"
+        internal const val BUNDLE_KEY_PREFER_IMMEDIATELY_AVAILABLE_CREDENTIALS =
+            "androidx.credentials.BUNDLE_KEY_PREFER_IMMEDIATELY_AVAILABLE_CREDENTIALS"
+        internal const val BUNDLE_KEY_REQUEST_JSON = "androidx.credentials.BUNDLE_KEY_REQUEST_JSON"
+        internal const val BUNDLE_VALUE_SUBTYPE_GET_PUBLIC_KEY_CREDENTIAL_OPTION_PRIVILEGED =
+            "androidx.credentials.BUNDLE_VALUE_SUBTYPE_GET_PUBLIC_KEY_CREDENTIAL_OPTION" +
+                    "_PRIVILEGED"
 
         @JvmStatic
         internal fun toBundle(
-                requestJson: String,
-                rp: String,
-                clientDataHash: String,
-                allowHybrid: Boolean
+            requestJson: String,
+            relyingParty: String,
+            clientDataHash: String,
+            preferImmediatelyAvailableCredentials: Boolean
         ): Bundle {
             val bundle = Bundle()
+            bundle.putString(
+                PublicKeyCredential.BUNDLE_KEY_SUBTYPE,
+                BUNDLE_VALUE_SUBTYPE_GET_PUBLIC_KEY_CREDENTIAL_OPTION_PRIVILEGED
+            )
             bundle.putString(BUNDLE_KEY_REQUEST_JSON, requestJson)
-            bundle.putString(BUNDLE_KEY_RP, rp)
+            bundle.putString(BUNDLE_KEY_RELYING_PARTY, relyingParty)
             bundle.putString(BUNDLE_KEY_CLIENT_DATA_HASH, clientDataHash)
-            bundle.putBoolean(BUNDLE_KEY_ALLOW_HYBRID, allowHybrid)
+            bundle.putBoolean(
+                BUNDLE_KEY_PREFER_IMMEDIATELY_AVAILABLE_CREDENTIALS,
+                preferImmediatelyAvailableCredentials
+            )
             return bundle
         }
 
+        @Suppress("deprecation") // bundle.get() used for boolean value to prevent default
+        // boolean value from being returned.
         @JvmStatic
-        fun createFrom(data: Bundle): GetPublicKeyCredentialOptionPrivileged {
+        internal fun createFrom(data: Bundle): GetPublicKeyCredentialOptionPrivileged {
             try {
                 val requestJson = data.getString(BUNDLE_KEY_REQUEST_JSON)
-                val rp = data.getString(BUNDLE_KEY_RP)
+                val rp = data.getString(BUNDLE_KEY_RELYING_PARTY)
                 val clientDataHash = data.getString(BUNDLE_KEY_CLIENT_DATA_HASH)
-                val allowHybrid = data.get(BUNDLE_KEY_ALLOW_HYBRID)
+                val preferImmediatelyAvailableCredentials =
+                    data.get(BUNDLE_KEY_PREFER_IMMEDIATELY_AVAILABLE_CREDENTIALS)
                 return GetPublicKeyCredentialOptionPrivileged(
-                        requestJson!!,
-                        rp!!,
-                        clientDataHash!!,
-                        (allowHybrid!!) as Boolean,
+                    requestJson!!,
+                    rp!!,
+                    clientDataHash!!,
+                    (preferImmediatelyAvailableCredentials!!) as Boolean,
                 )
             } catch (e: Exception) {
                 throw FrameworkClassParsingException()

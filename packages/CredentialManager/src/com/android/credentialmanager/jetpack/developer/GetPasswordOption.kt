@@ -23,6 +23,7 @@ import android.os.Bundle
 class GetPasswordOption : GetCredentialOption(
         Credential.TYPE_PASSWORD_CREDENTIAL,
         Bundle(),
+        Bundle(),
         false,
 ) {
     companion object {
