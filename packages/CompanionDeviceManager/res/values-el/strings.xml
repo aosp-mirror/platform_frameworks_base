@@ -51,17 +51,26 @@
     <string name="permission_contacts" msgid="3858319347208004438">"Επαφές"</string>
     <string name="permission_calendar" msgid="6805668388691290395">"Ημερολόγιο"</string>
     <string name="permission_microphone" msgid="2152206421428732949">"Μικρόφωνο"</string>
+    <!-- no translation found for permission_call_logs (5546761417694586041) -->
+    <skip />
     <string name="permission_nearby_devices" msgid="7530973297737123481">"Συσκευές σε κοντινή απόσταση"</string>
     <string name="permission_storage" msgid="6831099350839392343">"Φωτογραφίες και μέσα"</string>
     <string name="permission_notification" msgid="693762568127741203">"Ειδοποιήσεις"</string>
     <string name="permission_app_streaming" msgid="6009695219091526422">"Εφαρμογές"</string>
     <string name="permission_nearby_device_streaming" msgid="5868108148065023161">"Ροή σε κοντινή συσκευή"</string>
-    <string name="permission_phone_summary" msgid="6154198036705702389">"Δυνατότητα πρόσβασης στον αριθμό τηλεφώνου σας και στις πληροφορίες δικτύου. Απαιτείται για την πραγματοποίηση κλήσεων και για υπηρεσίες VoIP, μηνύματα αυτόματου τηλεφωνητή, ανακατεύθυνση κλήσεων και επεξεργασία αρχείων καταγραφής κλήσεων"</string>
-    <string name="permission_sms_summary" msgid="5107174184224165570"></string>
-    <string name="permission_contacts_summary" msgid="7850901746005070792">"Δυνατότητα ανάγνωσης, δημιουργίας ή επεξεργασίας της λίστας επαφών σας, καθώς και πρόσβασης στη λίστα επαφών όλων των λογαριασμών που χρησιμοποιούνται στη συσκευή σας"</string>
-    <string name="permission_calendar_summary" msgid="9070743747408808156"></string>
+    <!-- no translation found for permission_phone_summary (6684396967861278044) -->
+    <skip />
+    <!-- no translation found for permission_call_logs_summary (6186103394658755022) -->
+    <skip />
+    <!-- no translation found for permission_sms_summary (3508442683678912017) -->
+    <skip />
+    <!-- no translation found for permission_contacts_summary (675861979475628708) -->
+    <skip />
+    <!-- no translation found for permission_calendar_summary (6460000922511766226) -->
+    <skip />
     <string name="permission_microphone_summary" msgid="4241354865859396558">"Μπορεί να εγγράφει ήχο χρησιμοποιώντας το μικρόφωνο"</string>
-    <string name="permission_nearby_devices_summary" msgid="8587497797301075494"></string>
+    <!-- no translation found for permission_nearby_devices_summary (931940524460876655) -->
+    <skip />
     <string name="permission_notification_summary" msgid="884075314530071011">"Μπορεί να διαβάσει όλες τις ειδοποιήσεις, συμπεριλαμβανομένων πληροφοριών όπως επαφές, μηνύματα και φωτογραφίες"</string>
     <string name="permission_app_streaming_summary" msgid="606923325679670624">"Μεταδώστε σε ροή τις εφαρμογές του τηλεφώνου σας"</string>
     <string name="permission_storage_summary" msgid="3918240895519506417"></string>

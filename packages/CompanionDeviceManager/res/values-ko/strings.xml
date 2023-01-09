@@ -51,17 +51,26 @@
     <string name="permission_contacts" msgid="3858319347208004438">"연락처"</string>
     <string name="permission_calendar" msgid="6805668388691290395">"캘린더"</string>
     <string name="permission_microphone" msgid="2152206421428732949">"마이크"</string>
+    <!-- no translation found for permission_call_logs (5546761417694586041) -->
+    <skip />
     <string name="permission_nearby_devices" msgid="7530973297737123481">"근처 기기"</string>
     <string name="permission_storage" msgid="6831099350839392343">"사진 및 미디어"</string>
     <string name="permission_notification" msgid="693762568127741203">"알림"</string>
     <string name="permission_app_streaming" msgid="6009695219091526422">"앱"</string>
     <string name="permission_nearby_device_streaming" msgid="5868108148065023161">"근처 기기 스트리밍"</string>
-    <string name="permission_phone_summary" msgid="6154198036705702389">"전화번호 및 네트워크 정보에 액세스할 수 있습니다. 전화 걸기 및 VoIP, 음성사서함, 통화 리디렉션, 통화 기록 수정 시 필요합니다."</string>
-    <string name="permission_sms_summary" msgid="5107174184224165570"></string>
-    <string name="permission_contacts_summary" msgid="7850901746005070792">"연락처 목록을 읽고, 만들고, 수정할 수 있으며 기기에서 사용되는 모든 계정의 목록에도 액세스할 수 있습니다."</string>
-    <string name="permission_calendar_summary" msgid="9070743747408808156"></string>
+    <!-- no translation found for permission_phone_summary (6684396967861278044) -->
+    <skip />
+    <!-- no translation found for permission_call_logs_summary (6186103394658755022) -->
+    <skip />
+    <!-- no translation found for permission_sms_summary (3508442683678912017) -->
+    <skip />
+    <!-- no translation found for permission_contacts_summary (675861979475628708) -->
+    <skip />
+    <!-- no translation found for permission_calendar_summary (6460000922511766226) -->
+    <skip />
     <string name="permission_microphone_summary" msgid="4241354865859396558">"마이크를 사용하여 오디오를 녹음할 수 있습니다."</string>
-    <string name="permission_nearby_devices_summary" msgid="8587497797301075494"></string>
+    <!-- no translation found for permission_nearby_devices_summary (931940524460876655) -->
+    <skip />
     <string name="permission_notification_summary" msgid="884075314530071011">"연락처, 메시지, 사진 등의 정보를 포함한 모든 알림을 읽을 수 있습니다."</string>
     <string name="permission_app_streaming_summary" msgid="606923325679670624">"휴대전화의 앱을 스트리밍합니다."</string>
     <string name="permission_storage_summary" msgid="3918240895519506417"></string>

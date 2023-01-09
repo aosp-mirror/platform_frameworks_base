@@ -51,17 +51,26 @@
     <string name="permission_contacts" msgid="3858319347208004438">"Contacts"</string>
     <string name="permission_calendar" msgid="6805668388691290395">"Calendar"</string>
     <string name="permission_microphone" msgid="2152206421428732949">"മൈക്രോഫോൺ"</string>
+    <!-- no translation found for permission_call_logs (5546761417694586041) -->
+    <skip />
     <string name="permission_nearby_devices" msgid="7530973297737123481">"സമീപമുള്ള ഉപകരണങ്ങൾ"</string>
     <string name="permission_storage" msgid="6831099350839392343">"ഫോട്ടോകളും മീഡിയയും"</string>
     <string name="permission_notification" msgid="693762568127741203">"അറിയിപ്പുകൾ"</string>
     <string name="permission_app_streaming" msgid="6009695219091526422">"ആപ്പുകൾ"</string>
     <string name="permission_nearby_device_streaming" msgid="5868108148065023161">"സമീപമുള്ള ഉപകരണ സ്ട്രീമിംഗ്"</string>
-    <string name="permission_phone_summary" msgid="6154198036705702389">"നിങ്ങളുടെ ഫോൺ നമ്പറും നെറ്റ്‌വർക്ക് വിവരങ്ങളും ആക്‌സസ് ചെയ്യാനാകും. കോളുകൾ, VoIP, വോയ്‌സ്മെയിൽ, കോൾ റീഡയറക്റ്റ് ചെയ്യൽ, കോൾ ചരിത്രം എഡിറ്റ് ചെയ്യൽ എന്നിവയ്ക്ക് ഇത് ആവശ്യമാണ്"</string>
-    <string name="permission_sms_summary" msgid="5107174184224165570"></string>
-    <string name="permission_contacts_summary" msgid="7850901746005070792">"നിങ്ങളുടെ കോൺടാക്റ്റ് ലിസ്റ്റ് വായിക്കാനും സൃഷ്ടിക്കാനും എഡിറ്റ് ചെയ്യാനും കഴിയും, കൂടാതെ നിങ്ങളുടെ ഉപകരണത്തിൽ ഉപയോഗിക്കുന്ന എല്ലാ അക്കൗണ്ടുകളുടെയും കോൺടാക്റ്റ് ലിസ്റ്റ് ആക്‌സസ് ചെയ്യാനുമാകും"</string>
-    <string name="permission_calendar_summary" msgid="9070743747408808156"></string>
+    <!-- no translation found for permission_phone_summary (6684396967861278044) -->
+    <skip />
+    <!-- no translation found for permission_call_logs_summary (6186103394658755022) -->
+    <skip />
+    <!-- no translation found for permission_sms_summary (3508442683678912017) -->
+    <skip />
+    <!-- no translation found for permission_contacts_summary (675861979475628708) -->
+    <skip />
+    <!-- no translation found for permission_calendar_summary (6460000922511766226) -->
+    <skip />
     <string name="permission_microphone_summary" msgid="4241354865859396558">"മൈക്രോഫോൺ ഉപയോഗിച്ച് ഓഡിയോ റെക്കോർഡ് ചെയ്യാം"</string>
-    <string name="permission_nearby_devices_summary" msgid="8587497797301075494"></string>
+    <!-- no translation found for permission_nearby_devices_summary (931940524460876655) -->
+    <skip />
     <string name="permission_notification_summary" msgid="884075314530071011">"കോൺടാക്‌റ്റുകൾ, സന്ദേശങ്ങൾ, ഫോട്ടോകൾ മുതലായ വിവരങ്ങൾ ഉൾപ്പെടെയുള്ള എല്ലാ അറിയിപ്പുകളും വായിക്കാനാകും"</string>
     <string name="permission_app_streaming_summary" msgid="606923325679670624">"നിങ്ങളുടെ ഫോണിലെ ആപ്പുകൾ സ്‌ട്രീം ചെയ്യുക"</string>
     <string name="permission_storage_summary" msgid="3918240895519506417"></string>

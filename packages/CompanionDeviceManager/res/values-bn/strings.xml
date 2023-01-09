@@ -51,17 +51,26 @@
     <string name="permission_contacts" msgid="3858319347208004438">"পরিচিতি"</string>
     <string name="permission_calendar" msgid="6805668388691290395">"ক্যালেন্ডার"</string>
     <string name="permission_microphone" msgid="2152206421428732949">"মাইক্রোফোন"</string>
+    <!-- no translation found for permission_call_logs (5546761417694586041) -->
+    <skip />
     <string name="permission_nearby_devices" msgid="7530973297737123481">"আশেপাশের ডিভাইস"</string>
     <string name="permission_storage" msgid="6831099350839392343">"ফটো ও মিডিয়া"</string>
     <string name="permission_notification" msgid="693762568127741203">"বিজ্ঞপ্তি"</string>
     <string name="permission_app_streaming" msgid="6009695219091526422">"অ্যাপ"</string>
     <string name="permission_nearby_device_streaming" msgid="5868108148065023161">"আশেপাশের ডিভাইসে স্ট্রিম করা"</string>
-    <string name="permission_phone_summary" msgid="6154198036705702389">"আপনার ফোন নম্বর ও নেটওয়ার্ক সংক্রান্ত তথ্য অ্যাক্সেস করতে পারবে। কল করার জন্য এবং VoIP, ভয়েসমেল, কল রিডাইরেক্ট ও কল লগ এডিট করার জন্য যা প্রয়োজন"</string>
-    <string name="permission_sms_summary" msgid="5107174184224165570"></string>
-    <string name="permission_contacts_summary" msgid="7850901746005070792">"আমাদের পরিচিতি তালিকা দেখতে, তৈরি বা এডিট করতে পারবে, পাশাপাশি আপনার ডিভাইসে ব্যবহার করা হয় এমন সবকটি অ্যাকাউন্টের তালিকা অ্যাক্সেস করতে পারবে"</string>
-    <string name="permission_calendar_summary" msgid="9070743747408808156"></string>
+    <!-- no translation found for permission_phone_summary (6684396967861278044) -->
+    <skip />
+    <!-- no translation found for permission_call_logs_summary (6186103394658755022) -->
+    <skip />
+    <!-- no translation found for permission_sms_summary (3508442683678912017) -->
+    <skip />
+    <!-- no translation found for permission_contacts_summary (675861979475628708) -->
+    <skip />
+    <!-- no translation found for permission_calendar_summary (6460000922511766226) -->
+    <skip />
     <string name="permission_microphone_summary" msgid="4241354865859396558">"মাইক্রোফোন ব্যবহার করে অডিও রেকর্ড করতে পারবেন"</string>
-    <string name="permission_nearby_devices_summary" msgid="8587497797301075494"></string>
+    <!-- no translation found for permission_nearby_devices_summary (931940524460876655) -->
+    <skip />
     <string name="permission_notification_summary" msgid="884075314530071011">"সব বিজ্ঞপ্তি পড়তে পারবে, যার মধ্যে পরিচিতি, মেসেজ ও ফটোর মতো তথ্য অন্তর্ভুক্ত"</string>
     <string name="permission_app_streaming_summary" msgid="606923325679670624">"আপনার ফোনের অ্যাপ স্ট্রিম করুন"</string>
     <string name="permission_storage_summary" msgid="3918240895519506417"></string>

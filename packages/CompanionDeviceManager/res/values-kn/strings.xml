@@ -51,17 +51,26 @@
     <string name="permission_contacts" msgid="3858319347208004438">"ಸಂಪರ್ಕಗಳು"</string>
     <string name="permission_calendar" msgid="6805668388691290395">"Calendar"</string>
     <string name="permission_microphone" msgid="2152206421428732949">"ಮೈಕ್ರೊಫೋನ್"</string>
+    <!-- no translation found for permission_call_logs (5546761417694586041) -->
+    <skip />
     <string name="permission_nearby_devices" msgid="7530973297737123481">"ಸಮೀಪದಲ್ಲಿರುವ ಸಾಧನಗಳು"</string>
     <string name="permission_storage" msgid="6831099350839392343">"ಫೋಟೋಗಳು ಮತ್ತು ಮಾಧ್ಯಮ"</string>
     <string name="permission_notification" msgid="693762568127741203">"ಅಧಿಸೂಚನೆಗಳು"</string>
     <string name="permission_app_streaming" msgid="6009695219091526422">"ಆ್ಯಪ್‌ಗಳು"</string>
     <string name="permission_nearby_device_streaming" msgid="5868108148065023161">"ಸಮೀಪದಲ್ಲಿರುವ ಸಾಧನದ ಸ್ಟ್ರೀಮಿಂಗ್"</string>
-    <string name="permission_phone_summary" msgid="6154198036705702389">"ನಿಮ್ಮ ಫೋನ್ ಸಂಖ್ಯೆ ಮತ್ತು ನೆಟ್‌ವರ್ಕ್ ಮಾಹಿತಿಯನ್ನು ಪ್ರವೇಶಿಸಬಹುದು. ಕರೆಗಳನ್ನು ಮಾಡಲು ಮತ್ತು VoIP, ಧ್ವನಿಮೇಲ್, ಕರೆ ಮರುನಿರ್ದೇಶನ ಮತ್ತು ಕರೆಯ ಲಾಗ್‌ಗಳನ್ನು ಎಡಿಟ್ ಮಾಡಲು ಅಗತ್ಯವಿದೆ"</string>
-    <string name="permission_sms_summary" msgid="5107174184224165570"></string>
-    <string name="permission_contacts_summary" msgid="7850901746005070792">"ನಮ್ಮ ಸಂಪರ್ಕ ಪಟ್ಟಿಯನ್ನು ಓದಬಹುದು, ರಚಿಸಬಹುದು ಅಥವಾ ಎಡಿಟ್ ಮಾಡಬಹುದು, ಹಾಗೆಯೇ ನಿಮ್ಮ ಸಾಧನದಲ್ಲಿ ಬಳಸಲಾದ ಎಲ್ಲಾ ಖಾತೆಗಳ ಪಟ್ಟಿಯನ್ನು ಪ್ರವೇಶಿಸಬಹುದು"</string>
-    <string name="permission_calendar_summary" msgid="9070743747408808156"></string>
+    <!-- no translation found for permission_phone_summary (6684396967861278044) -->
+    <skip />
+    <!-- no translation found for permission_call_logs_summary (6186103394658755022) -->
+    <skip />
+    <!-- no translation found for permission_sms_summary (3508442683678912017) -->
+    <skip />
+    <!-- no translation found for permission_contacts_summary (675861979475628708) -->
+    <skip />
+    <!-- no translation found for permission_calendar_summary (6460000922511766226) -->
+    <skip />
     <string name="permission_microphone_summary" msgid="4241354865859396558">"ಮೈಕ್ರೊಫೋನ್ ಅನ್ನು ಬಳಸಿಕೊಂಡು ಆಡಿಯೋವನ್ನು ರೆಕಾರ್ಡ್ ಮಾಡಬಹುದು"</string>
-    <string name="permission_nearby_devices_summary" msgid="8587497797301075494"></string>
+    <!-- no translation found for permission_nearby_devices_summary (931940524460876655) -->
+    <skip />
     <string name="permission_notification_summary" msgid="884075314530071011">"ಸಂಪರ್ಕಗಳು, ಸಂದೇಶಗಳು ಮತ್ತು ಫೋಟೋಗಳಂತಹ ಮಾಹಿತಿಯನ್ನು ಒಳಗೊಂಡಂತೆ ಎಲ್ಲಾ ಅಧಿಸೂಚನೆಗಳನ್ನು ಓದಬಹುದು"</string>
     <string name="permission_app_streaming_summary" msgid="606923325679670624">"ನಿಮ್ಮ ಫೋನ್‍ನ ಆ್ಯಪ್‌ಗಳನ್ನು ಸ್ಟ್ರೀಮ್ ಮಾಡಿ"</string>
     <string name="permission_storage_summary" msgid="3918240895519506417"></string>
