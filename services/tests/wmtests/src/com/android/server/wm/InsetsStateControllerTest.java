@@ -39,6 +39,7 @@ import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.atLeastOnce;
 import static org.mockito.Mockito.clearInvocations;
 import static org.mockito.Mockito.spy;
@@ -411,7 +412,14 @@ public class InsetsStateControllerTest extends WindowTestsBase {
         final WindowState navBar = createTestWindow("navBar");
 
         getController().getSourceProvider(ITYPE_IME).setWindowContainer(ime, null, null);
+
+        waitUntilHandlersIdle();
+        clearInvocations(mDisplayContent);
         getController().getSourceProvider(ITYPE_IME).setClientVisible(true);
+        waitUntilHandlersIdle();
+        // The visibility change should trigger a traversal to notify the change.
+        verify(mDisplayContent).notifyInsetsChanged(any());
+
         getController().getSourceProvider(ITYPE_STATUS_BAR).setWindowContainer(statusBar, null,
                 null);
         getController().getSourceProvider(ITYPE_NAVIGATION_BAR).setWindowContainer(navBar, null,
