@@ -25,6 +25,7 @@ import android.credentials.ui.CreateCredentialProviderData
 import android.credentials.ui.DisabledProviderData
 import android.credentials.ui.RequestInfo
 import android.graphics.drawable.Drawable
+import android.text.TextUtils
 import com.android.credentialmanager.createflow.CreateOptionInfo
 import com.android.credentialmanager.createflow.RemoteInfo
 import com.android.credentialmanager.createflow.RequestDisplayInfo
@@ -58,7 +59,6 @@ class GetFlowUtils {
     ): List<ProviderInfo> {
       val packageManager = context.packageManager
       return providerDataList.map {
-        // TODO: get from the actual service info
         val componentName = ComponentName.unflattenFromString(it.providerFlattenedComponentName)
         var packageName = componentName?.packageName
         if (componentName == null) {
@@ -70,8 +70,7 @@ class GetFlowUtils {
                 .getPackageInfo(packageName!!,
                         PackageManager.PackageInfoFlags.of(0))
         val providerDisplayName = pkgInfo.applicationInfo.loadLabel(packageManager).toString()
-        // TODO: get the provider icon from the service
-        //  and decide what to do when failed to load a provider icon
+        // TODO: decide what to do when failed to load a provider icon
         val providerIcon = pkgInfo.applicationInfo.loadIcon(packageManager)!!
         ProviderInfo(
                 id = it.providerFlattenedComponentName,
@@ -94,9 +93,15 @@ class GetFlowUtils {
 
     fun toRequestDisplayInfo(
             requestInfo: RequestInfo,
+            context: Context,
     ): com.android.credentialmanager.getflow.RequestDisplayInfo {
-      return com.android.credentialmanager.getflow.RequestDisplayInfo(
-              appDomainName = requestInfo.appPackageName
+        val packageName = requestInfo.appPackageName
+        val pkgInfo = context.packageManager.getPackageInfo(packageName,
+                PackageManager.PackageInfoFlags.of(0))
+        val appLabel = pkgInfo.applicationInfo.loadSafeLabel(context.packageManager, 0f,
+            TextUtils.SAFE_STRING_FLAG_FIRST_LINE or TextUtils.SAFE_STRING_FLAG_TRIM)
+        return com.android.credentialmanager.getflow.RequestDisplayInfo(
+              appName = appLabel.toString()
       )
     }
 
@@ -251,6 +256,11 @@ class CreateFlowUtils {
             requestInfo: RequestInfo,
             context: Context,
     ): RequestDisplayInfo {
+      val packageName = requestInfo.appPackageName
+      val pkgInfo = context.packageManager.getPackageInfo(packageName,
+            PackageManager.PackageInfoFlags.of(0))
+      val appLabel = pkgInfo.applicationInfo.loadSafeLabel(context.packageManager, 0f,
+            TextUtils.SAFE_STRING_FLAG_FIRST_LINE or TextUtils.SAFE_STRING_FLAG_TRIM)
       val createCredentialRequest = requestInfo.createCredentialRequest
       val createCredentialRequestJetpack = createCredentialRequest?.let {
         CreateCredentialRequest.createFrom(
@@ -263,7 +273,7 @@ class CreateFlowUtils {
                   createCredentialRequestJetpack.id,
                   createCredentialRequestJetpack.password,
                   createCredentialRequestJetpack.type,
-                  requestInfo.appPackageName,
+                  appLabel.toString(),
                   context.getDrawable(R.drawable.ic_password)!!
           )
         }
@@ -281,7 +291,7 @@ class CreateFlowUtils {
                   name,
                   displayName,
                   createCredentialRequestJetpack.type,
-                  requestInfo.appPackageName,
+                  appLabel.toString(),
                   context.getDrawable(R.drawable.ic_passkey)!!)
         }
         // TODO: correctly parsing for other sign-ins
@@ -290,7 +300,7 @@ class CreateFlowUtils {
                   "beckett-bakert@gmail.com",
                   "Elisa Beckett",
                   "other-sign-ins",
-                  requestInfo.appPackageName,
+                  appLabel.toString(),
                   context.getDrawable(R.drawable.ic_other_sign_in)!!)
         }
       }

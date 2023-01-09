@@ -160,7 +160,7 @@ fun PrimarySelectionCard(
                     ) {
                         R.string.get_dialog_title_use_sign_in_for
                     } else R.string.get_dialog_title_choose_sign_in_for,
-                    requestDisplayInfo.appDomainName
+                    requestDisplayInfo.appName
                 ),
             )
 
