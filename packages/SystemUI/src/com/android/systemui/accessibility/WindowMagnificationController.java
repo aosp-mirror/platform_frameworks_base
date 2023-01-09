@@ -440,6 +440,7 @@ class WindowMagnificationController implements View.OnTouchListener, SurfaceHold
         final int configDiff = newConfig.diff(mConfiguration);
         mConfiguration.setTo(newConfig);
         onConfigurationChanged(configDiff);
+        mWindowMagnificationSettings.onConfigurationChanged(configDiff);
     }
 
     @Override
