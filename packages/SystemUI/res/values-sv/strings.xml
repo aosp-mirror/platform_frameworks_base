@@ -816,7 +816,10 @@
     <string name="accessibility_floating_button_migration_tooltip" msgid="5217151214439341902">"Tryck för att öppna tillgänglighetsfunktioner. Anpassa/ersätt knappen i Inställningar.\n\n"<annotation id="link">"Inställningar"</annotation></string>
     <string name="accessibility_floating_button_docking_tooltip" msgid="6814897496767461517">"Flytta knappen till kanten för att dölja den tillfälligt"</string>
     <string name="accessibility_floating_button_undo" msgid="511112888715708241">"Ångra"</string>
-    <string name="accessibility_floating_button_undo_message_text" msgid="3044079592757099698">"{count,plural, =1{Genväg till {label} har tagits bort}other{# genvägar har tagits bort}}"</string>
+    <!-- no translation found for accessibility_floating_button_undo_message_label_text (9017658016426242640) -->
+    <skip />
+    <!-- no translation found for accessibility_floating_button_undo_message_number_text (4909270290725226075) -->
+    <skip />
     <string name="accessibility_floating_button_action_move_top_left" msgid="6253520703618545705">"Flytta högst upp till vänster"</string>
     <string name="accessibility_floating_button_action_move_top_right" msgid="6106225581993479711">"Flytta högst upp till höger"</string>
     <string name="accessibility_floating_button_action_move_bottom_left" msgid="8063394111137429725">"Flytta längst ned till vänster"</string>
@@ -884,6 +887,8 @@
     <string name="media_move_closer_to_end_cast" msgid="6495907340926563656">"Flytta dig närmare <xliff:g id="DEVICENAME">%1$s</xliff:g> om du vill spela här"</string>
     <string name="media_transfer_playing_different_device" msgid="7186806382609785610">"Spelas upp på <xliff:g id="DEVICENAME">%1$s</xliff:g>"</string>
     <string name="media_transfer_failed" msgid="7955354964610603723">"Något gick fel. Försök igen."</string>
+    <!-- no translation found for media_transfer_loading (5544017127027152422) -->
+    <skip />
     <string name="controls_error_timeout" msgid="794197289772728958">"Inaktiv, kolla appen"</string>
     <string name="controls_error_removed" msgid="6675638069846014366">"Hittades inte"</string>
     <string name="controls_error_removed_title" msgid="1207794911208047818">"Styrning är inte tillgänglig"</string>
@@ -1039,8 +1044,7 @@
     <string name="keyguard_affordance_enablement_dialog_qr_scanner_instruction" msgid="5355839079232119791">"• installera en kameraapp"</string>
     <string name="keyguard_affordance_enablement_dialog_home_instruction_1" msgid="8438311171750568633">"• appen har konfigurerats"</string>
     <string name="keyguard_affordance_enablement_dialog_home_instruction_2" msgid="8308525385889021652">"• minst en enhet är tillgänglig"</string>
-    <!-- no translation found for keyguard_affordance_press_too_short (8145437175134998864) -->
-    <skip />
+    <string name="keyguard_affordance_press_too_short" msgid="8145437175134998864">"Tryck länge på genvägen"</string>
     <string name="rear_display_bottom_sheet_cancel" msgid="3461468855493357248">"Avbryt"</string>
     <string name="rear_display_bottom_sheet_confirm" msgid="4383356544661421206">"Vänd nu"</string>
     <string name="rear_display_fold_bottom_sheet_title" msgid="6081542277622721548">"Vik upp telefonen för att ta en bättre selfie"</string>

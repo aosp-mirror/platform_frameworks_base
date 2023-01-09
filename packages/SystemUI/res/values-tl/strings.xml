@@ -816,7 +816,10 @@
     <string name="accessibility_floating_button_migration_tooltip" msgid="5217151214439341902">"I-tap, buksan mga feature ng accessibility. I-customize o palitan button sa Mga Setting.\n\n"<annotation id="link">"Tingnan ang mga setting"</annotation></string>
     <string name="accessibility_floating_button_docking_tooltip" msgid="6814897496767461517">"Ilipat ang button sa gilid para pansamantala itong itago"</string>
     <string name="accessibility_floating_button_undo" msgid="511112888715708241">"I-undo"</string>
-    <string name="accessibility_floating_button_undo_message_text" msgid="3044079592757099698">"{count,plural, =1{{label} shortcut ang naalis}one{# shortcut ang naalis}other{# na shortcut ang naalis}}"</string>
+    <!-- no translation found for accessibility_floating_button_undo_message_label_text (9017658016426242640) -->
+    <skip />
+    <!-- no translation found for accessibility_floating_button_undo_message_number_text (4909270290725226075) -->
+    <skip />
     <string name="accessibility_floating_button_action_move_top_left" msgid="6253520703618545705">"Ilipat sa kaliwa sa itaas"</string>
     <string name="accessibility_floating_button_action_move_top_right" msgid="6106225581993479711">"Ilipat sa kanan sa itaas"</string>
     <string name="accessibility_floating_button_action_move_bottom_left" msgid="8063394111137429725">"Ilipat sa kaliwa sa ibaba"</string>
@@ -884,6 +887,8 @@
     <string name="media_move_closer_to_end_cast" msgid="6495907340926563656">"Lumapit sa <xliff:g id="DEVICENAME">%1$s</xliff:g> para mag-play rito"</string>
     <string name="media_transfer_playing_different_device" msgid="7186806382609785610">"Nagpe-play sa <xliff:g id="DEVICENAME">%1$s</xliff:g>"</string>
     <string name="media_transfer_failed" msgid="7955354964610603723">"Nagkaproblema. Subukan ulit."</string>
+    <!-- no translation found for media_transfer_loading (5544017127027152422) -->
+    <skip />
     <string name="controls_error_timeout" msgid="794197289772728958">"Hindi aktibo, tingnan ang app"</string>
     <string name="controls_error_removed" msgid="6675638069846014366">"Hindi nahanap"</string>
     <string name="controls_error_removed_title" msgid="1207794911208047818">"Hindi available ang kontrol"</string>

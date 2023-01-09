@@ -816,7 +816,10 @@
     <string name="accessibility_floating_button_migration_tooltip" msgid="5217151214439341902">"Докоснете, за да отворите функциите за достъпност. Персон./заменете бутона от настройките.\n\n"<annotation id="link">"Преглед на настройките"</annotation></string>
     <string name="accessibility_floating_button_docking_tooltip" msgid="6814897496767461517">"Преместете бутона до края, за да го скриете временно"</string>
     <string name="accessibility_floating_button_undo" msgid="511112888715708241">"Отмяна"</string>
-    <string name="accessibility_floating_button_undo_message_text" msgid="3044079592757099698">"{count,plural, =1{Прекият път за „{label}“ бе премахнат}other{# преки пътя бяха премахнати}}"</string>
+    <!-- no translation found for accessibility_floating_button_undo_message_label_text (9017658016426242640) -->
+    <skip />
+    <!-- no translation found for accessibility_floating_button_undo_message_number_text (4909270290725226075) -->
+    <skip />
     <string name="accessibility_floating_button_action_move_top_left" msgid="6253520703618545705">"Преместване горе вляво"</string>
     <string name="accessibility_floating_button_action_move_top_right" msgid="6106225581993479711">"Преместване горе вдясно"</string>
     <string name="accessibility_floating_button_action_move_bottom_left" msgid="8063394111137429725">"Преместване долу вляво"</string>
@@ -884,6 +887,8 @@
     <string name="media_move_closer_to_end_cast" msgid="6495907340926563656">"Приближете се до <xliff:g id="DEVICENAME">%1$s</xliff:g> за възпроизвеждане на това устройство"</string>
     <string name="media_transfer_playing_different_device" msgid="7186806382609785610">"Възпроизвежда се на <xliff:g id="DEVICENAME">%1$s</xliff:g>"</string>
     <string name="media_transfer_failed" msgid="7955354964610603723">"Нещо се обърка. Опитайте отново."</string>
+    <!-- no translation found for media_transfer_loading (5544017127027152422) -->
+    <skip />
     <string name="controls_error_timeout" msgid="794197289772728958">"Неактивно, проверете прилож."</string>
     <string name="controls_error_removed" msgid="6675638069846014366">"Не е намерено"</string>
     <string name="controls_error_removed_title" msgid="1207794911208047818">"Контролата не е налице"</string>

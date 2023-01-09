@@ -816,7 +816,10 @@
     <string name="accessibility_floating_button_migration_tooltip" msgid="5217151214439341902">"ප්‍රවේශ්‍යතා විශේෂාංග විවෘත කිරීමට තට්ටු කරන්න. සැකසීම් තුළ මෙම බොත්තම අභිරුචිකරණය හෝ ප්‍රතිස්ථාපනය කරන්න.\n\n"<annotation id="link">"සැකසීම් බලන්න"</annotation></string>
     <string name="accessibility_floating_button_docking_tooltip" msgid="6814897496767461517">"එය තාවකාලිකව සැඟවීමට බොත්තම දාරයට ගෙන යන්න"</string>
     <string name="accessibility_floating_button_undo" msgid="511112888715708241">"අස් කරන්න"</string>
-    <string name="accessibility_floating_button_undo_message_text" msgid="3044079592757099698">"{count,plural, =1{{label} කෙටිමඟ ඉවත් කළා}one{කෙටිමං # ක් ඉවත් කළා}other{කෙටිමං # ක් ඉවත් කළා}}"</string>
+    <!-- no translation found for accessibility_floating_button_undo_message_label_text (9017658016426242640) -->
+    <skip />
+    <!-- no translation found for accessibility_floating_button_undo_message_number_text (4909270290725226075) -->
+    <skip />
     <string name="accessibility_floating_button_action_move_top_left" msgid="6253520703618545705">"ඉහළ වමට ගෙන යන්න"</string>
     <string name="accessibility_floating_button_action_move_top_right" msgid="6106225581993479711">"ඉහළ දකුණට ගෙන යන්න"</string>
     <string name="accessibility_floating_button_action_move_bottom_left" msgid="8063394111137429725">"පහළ වමට ගෙන යන්න"</string>
@@ -884,6 +887,8 @@
     <string name="media_move_closer_to_end_cast" msgid="6495907340926563656">"මෙහි ක්‍රීඩා කිරීමට <xliff:g id="DEVICENAME">%1$s</xliff:g> වෙත වඩා සමීප වන්න"</string>
     <string name="media_transfer_playing_different_device" msgid="7186806382609785610">"<xliff:g id="DEVICENAME">%1$s</xliff:g> හි වාදනය කරමින්"</string>
     <string name="media_transfer_failed" msgid="7955354964610603723">"යම් දෙයක් වැරදිණි. නැවත උත්සාහ කරන්න."</string>
+    <!-- no translation found for media_transfer_loading (5544017127027152422) -->
+    <skip />
     <string name="controls_error_timeout" msgid="794197289772728958">"අක්‍රියයි, යෙදුම පරීක්ෂා කරන්න"</string>
     <string name="controls_error_removed" msgid="6675638069846014366">"හමු නොවිණි"</string>
     <string name="controls_error_removed_title" msgid="1207794911208047818">"පාලනය ලබා ගත නොහැකිය"</string>
@@ -1039,8 +1044,7 @@
     <string name="keyguard_affordance_enablement_dialog_qr_scanner_instruction" msgid="5355839079232119791">"• කැමරා යෙදුමක් ස්ථාපන කරන්න"</string>
     <string name="keyguard_affordance_enablement_dialog_home_instruction_1" msgid="8438311171750568633">"• යෙදුම සකසා ඇත"</string>
     <string name="keyguard_affordance_enablement_dialog_home_instruction_2" msgid="8308525385889021652">"• අවම වශයෙන් එක උපාංගයක් ලැබේ"</string>
-    <!-- no translation found for keyguard_affordance_press_too_short (8145437175134998864) -->
-    <skip />
+    <string name="keyguard_affordance_press_too_short" msgid="8145437175134998864">"ස්පර්ශ කර අල්ලා සිටීමේ කෙටිමඟ"</string>
     <string name="rear_display_bottom_sheet_cancel" msgid="3461468855493357248">"අවලංගු කරන්න"</string>
     <string name="rear_display_bottom_sheet_confirm" msgid="4383356544661421206">"දැන් පෙරළන්න"</string>
     <string name="rear_display_fold_bottom_sheet_title" msgid="6081542277622721548">"වඩා හොඳ සෙල්ෆියක් සඳහා දුරකථනය දිගහරින්න"</string>

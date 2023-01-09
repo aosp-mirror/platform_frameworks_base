@@ -386,7 +386,7 @@
     <string name="media_projection_permission_dialog_option_entire_screen" msgid="392086473225692983">"Celoten zaslon"</string>
     <string name="media_projection_permission_dialog_option_single_app" msgid="1591110238124910521">"Posamezna aplikacija"</string>
     <string name="media_projection_permission_dialog_warning_entire_screen" msgid="3989078820637452717">"Pri deljenju, snemanju ali predvajanju ima aplikacija <xliff:g id="APP_SEEKING_PERMISSION">%s</xliff:g> dostop do vsega, kar je prikazano na zaslonu ali se predvaja v napravi. Zato bodite previdni z gesli, podatki za plačilo, sporočili ali drugimi občutljivimi podatki."</string>
-    <string name="media_projection_permission_dialog_warning_single_app" msgid="1659532781536753059">"Pri deljenju, snemanju ali predvajanju aplikacije ima aplikacija <xliff:g id="APP_SEEKING_PERMISSION">%s</xliff:g> dostop do vsega, kar je prikazano ali predvajano v tej aplikaciji, zato bodite previdni z gesli, podatki za plačilo, sporočili ali drugimi občutljivimi podatki."</string>
+    <string name="media_projection_permission_dialog_warning_single_app" msgid="1659532781536753059">"Pri deljenju, snemanju ali predvajanju aplikacije ima <xliff:g id="APP_SEEKING_PERMISSION">%s</xliff:g> dostop do vsega, kar je prikazano ali predvajano v tej aplikaciji, zato bodite previdni z gesli, podatki za plačilo, sporočili ali drugimi občutljivimi podatki."</string>
     <string name="media_projection_permission_dialog_continue" msgid="1827799658916736006">"Naprej"</string>
     <string name="media_projection_permission_app_selector_title" msgid="894251621057480704">"Deljenje ali snemanje aplikacije"</string>
     <string name="media_projection_permission_dialog_system_service_title" msgid="6827129613741303726">"Ali tej aplikaciji dovolite deljenje ali snemanje?"</string>
@@ -816,7 +816,10 @@
     <string name="accessibility_floating_button_migration_tooltip" msgid="5217151214439341902">"Dotaknite se za funkcije za ljudi s posebnimi potrebami. Ta gumb lahko prilagodite ali zamenjate v nastavitvah.\n\n"<annotation id="link">"Ogled nastavitev"</annotation></string>
     <string name="accessibility_floating_button_docking_tooltip" msgid="6814897496767461517">"Če želite gumb začasno skriti, ga premaknite ob rob."</string>
     <string name="accessibility_floating_button_undo" msgid="511112888715708241">"Razveljavi"</string>
-    <string name="accessibility_floating_button_undo_message_text" msgid="3044079592757099698">"{count,plural, =1{Odstranjena bližnjica: {label}.}one{Odstranjena je # bližnjica.}two{Odstranjeni sta # bližnjici.}few{Odstranjene so # bližnjice.}other{Odstranjenih je # bližnjic.}}"</string>
+    <!-- no translation found for accessibility_floating_button_undo_message_label_text (9017658016426242640) -->
+    <skip />
+    <!-- no translation found for accessibility_floating_button_undo_message_number_text (4909270290725226075) -->
+    <skip />
     <string name="accessibility_floating_button_action_move_top_left" msgid="6253520703618545705">"Premakni zgoraj levo"</string>
     <string name="accessibility_floating_button_action_move_top_right" msgid="6106225581993479711">"Premakni zgoraj desno"</string>
     <string name="accessibility_floating_button_action_move_bottom_left" msgid="8063394111137429725">"Premakni spodaj levo"</string>
@@ -884,6 +887,8 @@
     <string name="media_move_closer_to_end_cast" msgid="6495907340926563656">"Približajte napravi <xliff:g id="DEVICENAME">%1$s</xliff:g> za predvajanje v tej napravi"</string>
     <string name="media_transfer_playing_different_device" msgid="7186806382609785610">"Predvajanje v napravi <xliff:g id="DEVICENAME">%1$s</xliff:g>"</string>
     <string name="media_transfer_failed" msgid="7955354964610603723">"Prišlo je do napake. Poskusite znova."</string>
+    <!-- no translation found for media_transfer_loading (5544017127027152422) -->
+    <skip />
     <string name="controls_error_timeout" msgid="794197289772728958">"Neaktivno, poglejte aplikacijo"</string>
     <string name="controls_error_removed" msgid="6675638069846014366">"Ni mogoče najti"</string>
     <string name="controls_error_removed_title" msgid="1207794911208047818">"Kontrolnik ni na voljo"</string>

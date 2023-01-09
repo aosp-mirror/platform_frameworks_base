@@ -816,7 +816,10 @@
     <string name="accessibility_floating_button_migration_tooltip" msgid="5217151214439341902">"Націсніце, каб адкрыць спецыяльныя магчымасці. Рэгулюйце ці замяняйце кнопку ў Наладах.\n\n"<annotation id="link">"Прагляд налад"</annotation></string>
     <string name="accessibility_floating_button_docking_tooltip" msgid="6814897496767461517">"Каб часова схаваць кнопку, перамясціце яе на край"</string>
     <string name="accessibility_floating_button_undo" msgid="511112888715708241">"Адрабіць"</string>
-    <string name="accessibility_floating_button_undo_message_text" msgid="3044079592757099698">"{count,plural, =1{Выдалена спалучэнне клавіш: {label}}one{Выдалена # спалучэнне клавіш}few{Выдалена # спалучэнні клавіш}many{Выдалена # спалучэнняў клавіш}other{Выдалена # спалучэння клавіш}}"</string>
+    <!-- no translation found for accessibility_floating_button_undo_message_label_text (9017658016426242640) -->
+    <skip />
+    <!-- no translation found for accessibility_floating_button_undo_message_number_text (4909270290725226075) -->
+    <skip />
     <string name="accessibility_floating_button_action_move_top_left" msgid="6253520703618545705">"Перамясціць лявей і вышэй"</string>
     <string name="accessibility_floating_button_action_move_top_right" msgid="6106225581993479711">"Перамясціць правей і вышэй"</string>
     <string name="accessibility_floating_button_action_move_bottom_left" msgid="8063394111137429725">"Перамясціць лявей і ніжэй"</string>
@@ -884,6 +887,8 @@
     <string name="media_move_closer_to_end_cast" msgid="6495907340926563656">"Падыдзіце бліжэй да прылады \"<xliff:g id="DEVICENAME">%1$s</xliff:g>\", каб прайграць на гэтай"</string>
     <string name="media_transfer_playing_different_device" msgid="7186806382609785610">"Прайграецца на прыладзе \"<xliff:g id="DEVICENAME">%1$s</xliff:g>\""</string>
     <string name="media_transfer_failed" msgid="7955354964610603723">"Нешта пайшло не так. Паўтарыце спробу."</string>
+    <!-- no translation found for media_transfer_loading (5544017127027152422) -->
+    <skip />
     <string name="controls_error_timeout" msgid="794197289772728958">"Неактыўна, праверце праграму"</string>
     <string name="controls_error_removed" msgid="6675638069846014366">"Не знойдзена"</string>
     <string name="controls_error_removed_title" msgid="1207794911208047818">"Кіраванне недаступнае"</string>
@@ -1039,8 +1044,7 @@
     <string name="keyguard_affordance_enablement_dialog_qr_scanner_instruction" msgid="5355839079232119791">"• Усталявана праграма \"Камера\"."</string>
     <string name="keyguard_affordance_enablement_dialog_home_instruction_1" msgid="8438311171750568633">"• Праграма наладжана."</string>
     <string name="keyguard_affordance_enablement_dialog_home_instruction_2" msgid="8308525385889021652">"• Даступная хаця б адна прылада."</string>
-    <!-- no translation found for keyguard_affordance_press_too_short (8145437175134998864) -->
-    <skip />
+    <string name="keyguard_affordance_press_too_short" msgid="8145437175134998864">"Дакраніцеся і ўтрымлівайце ярлык"</string>
     <string name="rear_display_bottom_sheet_cancel" msgid="3461468855493357248">"Скасаваць"</string>
     <string name="rear_display_bottom_sheet_confirm" msgid="4383356544661421206">"Пераключыць"</string>
     <string name="rear_display_fold_bottom_sheet_title" msgid="6081542277622721548">"Каб атрымаць лепшае сэлфі, раскрыйце тэлефон"</string>
