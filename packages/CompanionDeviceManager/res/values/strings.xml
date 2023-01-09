@@ -158,7 +158,7 @@
     <!-- Apps permission will be granted of corresponding profile [CHAR LIMIT=30] -->
     <string name="permission_app_streaming">Apps</string>
 
-    <!-- Nearby_device_streaming permission will be granted to the corresponding profile [CHAR LIMIT=30] -->
+    <!-- Nearby_device_streaming permission will be granted to the corresponding profile [CHAR LIMIT=45] -->
     <string name="permission_nearby_device_streaming">Nearby Device Streaming</string>
 
     <!-- Description of phone permission of corresponding profile [CHAR LIMIT=NONE] -->
