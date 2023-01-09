@@ -60,6 +60,7 @@ import android.os.SharedMemory;
 import android.os.UserHandle;
 import android.service.voice.HotwordDetector;
 import android.service.voice.IMicrophoneHotwordDetectionVoiceInteractionCallback;
+import android.service.voice.IVisualQueryDetectionVoiceInteractionCallback;
 import android.service.voice.IVoiceInteractionService;
 import android.service.voice.IVoiceInteractionSession;
 import android.service.voice.VoiceInteractionService;
@@ -735,6 +736,32 @@ class VoiceInteractionManagerServiceImpl implements VoiceInteractionSessionConne
         }
         mHotwordDetectionConnection.cancelLocked();
         mHotwordDetectionConnection = null;
+    }
+
+    public void startPerceivingLocked(IVisualQueryDetectionVoiceInteractionCallback callback) {
+        if (DEBUG) {
+            Slog.d(TAG, "startPerceivingLocked");
+        }
+
+        if (mHotwordDetectionConnection == null) {
+            // TODO: callback.onError();
+            return;
+        }
+
+        mHotwordDetectionConnection.startPerceivingLocked(callback);
+    }
+
+    public void stopPerceivingLocked() {
+        if (DEBUG) {
+            Slog.d(TAG, "stopPerceivingLocked");
+        }
+
+        if (mHotwordDetectionConnection == null) {
+            Slog.w(TAG, "stopPerceivingLocked() called but connection isn't established");
+            return;
+        }
+
+        mHotwordDetectionConnection.stopPerceivingLocked();
     }
 
     public void startListeningFromMicLocked(
