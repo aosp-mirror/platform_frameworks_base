@@ -6982,7 +6982,9 @@
                 android:protectionLevel="normal|appop"/>
 
     <!-- Allows an app access to the installer provided app metadata.
-        @hide -->
+        @SystemApi
+        @hide
+      -->
     <permission android:name="android.permission.GET_APP_METADATA"
                 android:protectionLevel="signature" />
 
