@@ -538,30 +538,11 @@ public class MediaSessionService extends SystemService implements Monitor {
         mHandler.postSessionsChanged(session);
     }
 
-    private void enforcePackageName(String packageName, int uid) {
-        if (TextUtils.isEmpty(packageName)) {
-            throw new IllegalArgumentException("packageName may not be empty");
-        }
-        if (uid == Process.ROOT_UID || uid == Process.SHELL_UID) {
-            // If the caller is shell, then trust the packageName given and allow it
-            // to proceed.
-            return;
-        }
-        final PackageManagerInternal packageManagerInternal =
-                LocalServices.getService(PackageManagerInternal.class);
-        final int actualUid = packageManagerInternal.getPackageUid(
-                packageName, 0 /* flags */, UserHandle.getUserId(uid));
-        if (!UserHandle.isSameApp(uid, actualUid)) {
-            throw new IllegalArgumentException("packageName does not belong to the calling uid; "
-                    + "pkg=" + packageName + ", uid=" + uid);
-        }
-    }
-
     void tempAllowlistTargetPkgIfPossible(int targetUid, String targetPackage,
             int callingPid, int callingUid, String callingPackage, String reason) {
         final long token = Binder.clearCallingIdentity();
         try {
-            enforcePackageName(callingPackage, callingUid);
+            MediaServerUtils.enforcePackageName(callingPackage, callingUid);
             if (targetUid != callingUid) {
                 boolean canAllowWhileInUse = mActivityManagerLocal
                         .canAllowWhileInUsePermissionInFgs(callingPid, callingUid, callingPackage);
@@ -1206,7 +1187,7 @@ public class MediaSessionService extends SystemService implements Monitor {
             final int uid = Binder.getCallingUid();
             final long token = Binder.clearCallingIdentity();
             try {
-                enforcePackageName(packageName, uid);
+                MediaServerUtils.enforcePackageName(packageName, uid);
                 int resolvedUserId = handleIncomingUser(pid, uid, userId, packageName);
                 if (cb == null) {
                     throw new IllegalArgumentException("Controller callback cannot be null");
@@ -1258,7 +1239,7 @@ public class MediaSessionService extends SystemService implements Monitor {
             final int userId = userHandle.getIdentifier();
             final long token = Binder.clearCallingIdentity();
             try {
-                enforcePackageName(packageName, uid);
+                MediaServerUtils.enforcePackageName(packageName, uid);
                 enforceMediaPermissions(packageName, pid, uid, userId);
 
                 MediaSessionRecordImpl record;
@@ -1289,7 +1270,7 @@ public class MediaSessionService extends SystemService implements Monitor {
             final int userId = userHandle.getIdentifier();
             final long token = Binder.clearCallingIdentity();
             try {
-                enforcePackageName(packageName, uid);
+                MediaServerUtils.enforcePackageName(packageName, uid);
                 enforceMediaPermissions(packageName, pid, uid, userId);
 
                 MediaSessionRecordImpl record;
@@ -1615,7 +1596,7 @@ public class MediaSessionService extends SystemService implements Monitor {
             final int userId = userHandle.getIdentifier();
             final long token = Binder.clearCallingIdentity();
             try {
-                enforcePackageName(packageName, uid);
+                MediaServerUtils.enforcePackageName(packageName, uid);
                 enforceMediaPermissions(packageName, pid, uid, userId);
 
                 synchronized (mLock) {
@@ -2129,7 +2110,7 @@ public class MediaSessionService extends SystemService implements Monitor {
                 // If they gave us a component name verify they own the
                 // package
                 packageName = componentName.getPackageName();
-                enforcePackageName(packageName, uid);
+                MediaServerUtils.enforcePackageName(packageName, uid);
             }
             // Check that they can make calls on behalf of the user and get the final user id
             int resolvedUserId = handleIncomingUser(pid, uid, userId, packageName);

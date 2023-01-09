@@ -24326,15 +24326,19 @@ package android.media {
 
   public final class RouteListingPreference implements android.os.Parcelable {
     method public int describeContents();
+    method @Nullable public android.content.ComponentName getInAppOnlyItemRoutingReceiver();
     method @NonNull public java.util.List<android.media.RouteListingPreference.Item> getItems();
     method public boolean getUseSystemOrdering();
     method public void writeToParcel(@NonNull android.os.Parcel, int);
+    field public static final String ACTION_TRANSFER_MEDIA = "android.media.action.TRANSFER_MEDIA";
     field @NonNull public static final android.os.Parcelable.Creator<android.media.RouteListingPreference> CREATOR;
+    field public static final String EXTRA_ROUTE_ID = "android.media.extra.ROUTE_ID";
   }
 
   public static final class RouteListingPreference.Builder {
     ctor public RouteListingPreference.Builder();
     method @NonNull public android.media.RouteListingPreference build();
+    method @NonNull public android.media.RouteListingPreference.Builder setInAppOnlyItemRoutingReceiver(@Nullable android.content.ComponentName);
     method @NonNull public android.media.RouteListingPreference.Builder setItems(@NonNull java.util.List<android.media.RouteListingPreference.Item>);
     method @NonNull public android.media.RouteListingPreference.Builder setUseSystemOrdering(boolean);
   }
@@ -24349,6 +24353,7 @@ package android.media {
     field @NonNull public static final android.os.Parcelable.Creator<android.media.RouteListingPreference.Item> CREATOR;
     field public static final int DISABLE_REASON_AD = 3; // 0x3
     field public static final int DISABLE_REASON_DOWNLOADED_CONTENT = 2; // 0x2
+    field public static final int DISABLE_REASON_IN_APP_ONLY = 4; // 0x4
     field public static final int DISABLE_REASON_NONE = 0; // 0x0
     field public static final int DISABLE_REASON_SUBSCRIPTION_REQUIRED = 1; // 0x1
     field public static final int FLAG_ONGOING_SESSION = 1; // 0x1

@@ -31,6 +31,7 @@ import android.annotation.Nullable;
 import android.app.ActivityManager;
 import android.app.ActivityThread;
 import android.content.BroadcastReceiver;
+import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
@@ -285,6 +286,15 @@ class MediaRouter2ServiceImpl {
     public void setRouteListingPreference(
             @NonNull IMediaRouter2 router,
             @Nullable RouteListingPreference routeListingPreference) {
+        ComponentName inAppOnlyItemRoutingReceiver =
+                routeListingPreference != null
+                        ? routeListingPreference.getInAppOnlyItemRoutingReceiver()
+                        : null;
+        if (inAppOnlyItemRoutingReceiver != null) {
+            MediaServerUtils.enforcePackageName(
+                    inAppOnlyItemRoutingReceiver.getPackageName(), Binder.getCallingUid());
+        }
+
         final long token = Binder.clearCallingIdentity();
         try {
             synchronized (mLock) {
@@ -787,6 +797,12 @@ class MediaRouter2ServiceImpl {
                 obtainMessage(UserHandler::notifyDiscoveryPreferenceChangedToManagers,
                         routerRecord.mUserRecord.mHandler,
                         routerRecord.mPackageName, null));
+        routerRecord.mUserRecord.mHandler.sendMessage(
+                obtainMessage(
+                        UserHandler::notifyRouteListingPreferenceChangeToManagers,
+                        routerRecord.mUserRecord.mHandler,
+                        routerRecord.mPackageName,
+                        /* routeListingPreference= */ null));
         userRecord.mHandler.sendMessage(
                 obtainMessage(UserHandler::updateDiscoveryPreferenceOnHandler,
                         userRecord.mHandler));
