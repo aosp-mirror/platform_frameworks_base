@@ -255,10 +255,10 @@ class ImageUtils {
             case ImageFormat.RAW_SENSOR:
             case ImageFormat.RAW_PRIVATE: // round estimate, real size is unknown
             case ImageFormat.DEPTH16:
-            case ImageFormat.YCBCR_P010:
                 estimatedBytePerPixel = 2.0;
                 break;
             case PixelFormat.RGB_888:
+            case ImageFormat.YCBCR_P010:
                 estimatedBytePerPixel = 3.0;
                 break;
             case PixelFormat.RGBA_8888:
