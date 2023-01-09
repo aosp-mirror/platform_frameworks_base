@@ -29,6 +29,7 @@ import android.content.pm.UserInfo;
 import android.os.RemoteException;
 import android.os.UserManager;
 import android.platform.test.annotations.Postsubmit;
+import android.provider.Settings;
 import android.util.Log;
 
 import androidx.test.InstrumentationRegistry;
@@ -37,6 +38,7 @@ import androidx.test.runner.AndroidJUnit4;
 
 import com.android.internal.util.FunctionalUtils;
 
+import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -62,12 +64,22 @@ public class UserLifecycleStressTest {
     private Context mContext;
     private UserManager mUserManager;
     private ActivityManager mActivityManager;
+    private String mRemoveGuestOnExitOriginalValue;
 
     @Before
     public void setup() {
         mContext = InstrumentationRegistry.getInstrumentation().getContext();
         mUserManager = mContext.getSystemService(UserManager.class);
         mActivityManager = mContext.getSystemService(ActivityManager.class);
+        mRemoveGuestOnExitOriginalValue = Settings.Global.getString(mContext.getContentResolver(),
+                Settings.Global.REMOVE_GUEST_ON_EXIT);
+
+    }
+
+    @After
+    public void tearDown() {
+        Settings.Global.putString(mContext.getContentResolver(),
+                Settings.Global.REMOVE_GUEST_ON_EXIT, mRemoveGuestOnExitOriginalValue);
     }
 
     /**
@@ -105,6 +117,9 @@ public class UserLifecycleStressTest {
      **/
     @Test
     public void switchToExistingGuestAndStartOverStressTest() throws Exception {
+        Settings.Global.putString(mContext.getContentResolver(),
+                Settings.Global.REMOVE_GUEST_ON_EXIT, "0");
+
         if (ActivityManager.getCurrentUser() != USER_SYSTEM) {
             switchUser(USER_SYSTEM);
         }
