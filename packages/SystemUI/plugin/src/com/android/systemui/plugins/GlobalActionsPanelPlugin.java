@@ -17,6 +17,7 @@
 package com.android.systemui.plugins;
 
 import android.annotation.Nullable;
+import android.app.BroadcastOptions;
 import android.app.PendingIntent;
 import android.graphics.drawable.Drawable;
 import android.view.View;
@@ -70,7 +71,9 @@ public interface GlobalActionsPanelPlugin extends Plugin {
         /** Starts a PendingIntent, dismissing the keyguard if necessary. */
         default void startPendingIntentDismissingKeyguard(PendingIntent pendingIntent) {
             try {
-                pendingIntent.send();
+                BroadcastOptions options = BroadcastOptions.makeBasic();
+                options.setInteractive(true);
+                pendingIntent.send(options.toBundle());
             } catch (PendingIntent.CanceledException e) {
                 // no-op
             }
