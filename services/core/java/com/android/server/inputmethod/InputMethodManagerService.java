@@ -3964,15 +3964,20 @@ public final class InputMethodManagerService extends IInputMethodManager.Stub
             if (!calledWithValidTokenLocked(token)) {
                 return false;
             }
-            final ImeSubtypeListItem nextSubtype = mSwitchingController.getNextInputMethodLocked(
-                    onlyCurrentIme, mMethodMap.get(getSelectedMethodIdLocked()), mCurrentSubtype);
-            if (nextSubtype == null) {
-                return false;
-            }
-            setInputMethodWithSubtypeIdLocked(token, nextSubtype.mImi.getId(),
-                    nextSubtype.mSubtypeId);
-            return true;
+            return switchToNextInputMethodLocked(token, onlyCurrentIme);
         }
+    }
+
+    @GuardedBy("ImfLock.class")
+    private boolean switchToNextInputMethodLocked(@Nullable IBinder token, boolean onlyCurrentIme) {
+        final ImeSubtypeListItem nextSubtype = mSwitchingController.getNextInputMethodLocked(
+                onlyCurrentIme, mMethodMap.get(getSelectedMethodIdLocked()), mCurrentSubtype);
+        if (nextSubtype == null) {
+            return false;
+        }
+        setInputMethodWithSubtypeIdLocked(token, nextSubtype.mImi.getId(),
+                nextSubtype.mSubtypeId);
+        return true;
     }
 
     @BinderThread
@@ -5621,6 +5626,17 @@ public final class InputMethodManagerService extends IInputMethodManager.Stub
         public void maybeFinishStylusHandwriting() {
             mHandler.removeMessages(MSG_FINISH_HANDWRITING);
             mHandler.obtainMessage(MSG_FINISH_HANDWRITING).sendToTarget();
+        }
+
+        @Override
+        public void switchKeyboardLayout(int direction) {
+            synchronized (ImfLock.class) {
+                if (direction > 0) {
+                    switchToNextInputMethodLocked(null /* token */, true /* onlyCurrentIme */);
+                } else {
+                    // TODO(b/258853866): Support backwards switching.
+                }
+            }
         }
     }
 

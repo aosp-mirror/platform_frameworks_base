@@ -89,6 +89,7 @@ import static com.android.server.wm.WindowManagerPolicyProto.WINDOW_MANAGER_DRAW
 
 import android.accessibilityservice.AccessibilityService;
 import android.accessibilityservice.AccessibilityServiceInfo;
+import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.app.ActivityManager;
 import android.app.ActivityManager.RecentTaskInfo;
@@ -161,6 +162,7 @@ import android.service.dreams.IDreamManager;
 import android.service.vr.IPersistentVrStateCallbacks;
 import android.speech.RecognizerIntent;
 import android.telecom.TelecomManager;
+import android.util.FeatureFlagUtils;
 import android.util.Log;
 import android.util.MutableBoolean;
 import android.util.PrintWriterPrinter;
@@ -396,7 +398,6 @@ public class PhoneWindowManager implements WindowManagerPolicy {
     ActivityTaskManagerInternal mActivityTaskManagerInternal;
     AutofillManagerInternal mAutofillManagerInternal;
     InputManagerInternal mInputManagerInternal;
-    InputMethodManagerInternal mInputMethodManagerInternal;
     DreamManagerInternal mDreamManagerInternal;
     PowerManagerInternal mPowerManagerInternal;
     IStatusBarService mStatusBarService;
@@ -656,6 +657,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
     private static final int MSG_HANDLE_ALL_APPS = 22;
     private static final int MSG_LAUNCH_ASSIST = 23;
     private static final int MSG_RINGER_TOGGLE_CHORD = 24;
+    private static final int MSG_SWITCH_KEYBOARD_LAYOUT = 25;
 
     private class PolicyHandler extends Handler {
         @Override
@@ -725,6 +727,9 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                     break;
                 case MSG_SCREENSHOT_CHORD:
                     handleScreenShot(msg.arg1);
+                    break;
+                case MSG_SWITCH_KEYBOARD_LAYOUT:
+                    handleSwitchKeyboardLayout(msg.arg1, msg.arg2);
                     break;
             }
         }
@@ -1022,14 +1027,8 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                     break;
                 case SHORT_PRESS_POWER_CLOSE_IME_OR_GO_HOME: {
                     if (mDismissImeOnBackKeyPressed) {
-                        if (mInputMethodManagerInternal == null) {
-                            mInputMethodManagerInternal =
-                                    LocalServices.getService(InputMethodManagerInternal.class);
-                        }
-                        if (mInputMethodManagerInternal != null) {
-                            mInputMethodManagerInternal.hideCurrentInputMethod(
+                        InputMethodManagerInternal.get().hideCurrentInputMethod(
                                     SoftInputShowHideReason.HIDE_POWER_BUTTON_GO_HOME);
-                        }
                     } else {
                         shortPressPowerGoHome();
                     }
@@ -3162,7 +3161,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                 }
                 if (down && repeatCount == 0) {
                     int direction = (metaState & KeyEvent.META_SHIFT_MASK) != 0 ? -1 : 1;
-                    mWindowManagerFuncs.switchKeyboardLayout(event.getDeviceId(), direction);
+                    sendSwitchKeyboardLayout(event, direction);
                     return key_consumed;
                 }
                 break;
@@ -3412,7 +3411,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                     if (KeyEvent.metaStateHasModifiers(metaState & ~KeyEvent.META_SHIFT_MASK,
                             KeyEvent.META_CTRL_ON)) {
                         int direction = (metaState & KeyEvent.META_SHIFT_MASK) != 0 ? -1 : 1;
-                        mWindowManagerFuncs.switchKeyboardLayout(event.getDeviceId(), direction);
+                        sendSwitchKeyboardLayout(event, direction);
                         return true;
                     }
                 }
@@ -3436,6 +3435,19 @@ public class PhoneWindowManager implements WindowManagerPolicy {
         }
 
         return false;
+    }
+
+    private void sendSwitchKeyboardLayout(@NonNull KeyEvent event, int direction) {
+        mHandler.obtainMessage(MSG_SWITCH_KEYBOARD_LAYOUT, event.getDeviceId(),
+                direction).sendToTarget();
+    }
+
+    private void handleSwitchKeyboardLayout(int deviceId, int direction) {
+        if (FeatureFlagUtils.isEnabled(mContext, FeatureFlagUtils.SETTINGS_NEW_KEYBOARD_UI)) {
+            InputMethodManagerInternal.get().switchKeyboardLayout(direction);
+        } else {
+            mWindowManagerFuncs.switchKeyboardLayout(deviceId, direction);
+        }
     }
 
     private boolean interceptFallback(IBinder focusedToken, KeyEvent fallbackEvent,
