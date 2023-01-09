@@ -21,6 +21,8 @@ import android.content.Context
 import android.content.pm.PackageManager
 import android.hardware.biometrics.BiometricSourceType
 import android.provider.Settings
+import android.util.Log
+import com.android.internal.annotations.VisibleForTesting
 import com.android.systemui.Dumpable
 import com.android.systemui.R
 import com.android.systemui.dagger.SysUISingleton
@@ -30,6 +32,9 @@ import com.android.systemui.shade.ShadeExpansionStateManager
 import com.android.systemui.statusbar.NotificationLockscreenUserManager
 import com.android.systemui.statusbar.StatusBarState
 import com.android.systemui.statusbar.notification.stack.StackScrollAlgorithm
+import com.android.systemui.statusbar.policy.DevicePostureController
+import com.android.systemui.statusbar.policy.DevicePostureController.DEVICE_POSTURE_UNKNOWN
+import com.android.systemui.statusbar.policy.DevicePostureController.DevicePostureInt
 import com.android.systemui.statusbar.policy.KeyguardStateController
 import com.android.systemui.tuner.TunerService
 import java.io.PrintWriter
@@ -40,11 +45,21 @@ open class KeyguardBypassController : Dumpable, StackScrollAlgorithm.BypassContr
 
     private val mKeyguardStateController: KeyguardStateController
     private val statusBarStateController: StatusBarStateController
+    private val devicePostureController: DevicePostureController
     @BypassOverride private val bypassOverride: Int
     private var hasFaceFeature: Boolean
+    @DevicePostureInt private val configFaceAuthSupportedPosture: Int
+    @DevicePostureInt private var postureState: Int = DEVICE_POSTURE_UNKNOWN
     private var pendingUnlock: PendingUnlock? = null
     private val listeners = mutableListOf<OnBypassStateChangedListener>()
 
+    @VisibleForTesting
+    val postureCallback = DevicePostureController.Callback { posture ->
+        if (postureState != posture) {
+            postureState = posture
+            notifyListeners()
+        }
+    }
     private val faceAuthEnabledChangedCallback = object : KeyguardStateController.Callback {
         override fun onFaceAuthEnabledChanged() = notifyListeners()
     }
@@ -86,7 +101,8 @@ open class KeyguardBypassController : Dumpable, StackScrollAlgorithm.BypassContr
                 FACE_UNLOCK_BYPASS_NEVER -> false
                 else -> field
             }
-            return enabled && mKeyguardStateController.isFaceAuthEnabled
+            return enabled && mKeyguardStateController.isFaceAuthEnabled &&
+                    isPostureAllowedForFaceAuth()
         }
         private set(value) {
             field = value
@@ -106,16 +122,30 @@ open class KeyguardBypassController : Dumpable, StackScrollAlgorithm.BypassContr
         lockscreenUserManager: NotificationLockscreenUserManager,
         keyguardStateController: KeyguardStateController,
         shadeExpansionStateManager: ShadeExpansionStateManager,
+        devicePostureController: DevicePostureController,
         dumpManager: DumpManager
     ) {
         this.mKeyguardStateController = keyguardStateController
         this.statusBarStateController = statusBarStateController
+        this.devicePostureController = devicePostureController
 
         bypassOverride = context.resources.getInteger(R.integer.config_face_unlock_bypass_override)
+        configFaceAuthSupportedPosture =
+            context.resources.getInteger(R.integer.config_face_auth_supported_posture)
 
-        hasFaceFeature = context.getPackageManager().hasSystemFeature(PackageManager.FEATURE_FACE)
+        hasFaceFeature = context.packageManager.hasSystemFeature(PackageManager.FEATURE_FACE)
+        Log.d("KeyguardBypassController", "Bill debug hasFaceFeature= " + hasFaceFeature)
         if (!hasFaceFeature) {
             return
+        }
+
+        if (configFaceAuthSupportedPosture != DEVICE_POSTURE_UNKNOWN) {
+            devicePostureController.addCallback { posture ->
+                if (postureState != posture) {
+                    postureState = posture
+                    notifyListeners()
+                }
+            }
         }
 
         dumpManager.registerDumpable("KeyguardBypassController", this)
@@ -203,6 +233,13 @@ open class KeyguardBypassController : Dumpable, StackScrollAlgorithm.BypassContr
         pendingUnlock = null
     }
 
+    fun isPostureAllowedForFaceAuth(): Boolean {
+        return when (configFaceAuthSupportedPosture) {
+            DEVICE_POSTURE_UNKNOWN -> true
+            else -> (postureState == configFaceAuthSupportedPosture)
+        }
+    }
+
     override fun dump(pw: PrintWriter, args: Array<out String>) {
         pw.println("KeyguardBypassController:")
         if (pendingUnlock != null) {
@@ -219,6 +256,7 @@ open class KeyguardBypassController : Dumpable, StackScrollAlgorithm.BypassContr
         pw.println("  launchingAffordance: $launchingAffordance")
         pw.println("  qSExpanded: $qsExpanded")
         pw.println("  hasFaceFeature: $hasFaceFeature")
+        pw.println("  postureState: $postureState")
     }
 
     /** Registers a listener for bypass state changes. */
@@ -237,6 +275,7 @@ open class KeyguardBypassController : Dumpable, StackScrollAlgorithm.BypassContr
     fun unregisterOnBypassStateChangedListener(listener: OnBypassStateChangedListener) {
         listeners.remove(listener)
         if (listeners.isEmpty()) {
+            devicePostureController.removeCallback(postureCallback)
             mKeyguardStateController.removeCallback(faceAuthEnabledChangedCallback)
         }
     }
