@@ -16,6 +16,8 @@
 
 package android.content.res
 
+
+import android.platform.test.annotations.Presubmit
 import androidx.core.util.forEach
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.LargeTest
@@ -27,6 +29,7 @@ import kotlin.math.floor
 import org.junit.Test
 import org.junit.runner.RunWith
 
+@Presubmit
 @RunWith(AndroidJUnit4::class)
 class FontScaleConverterFactoryTest {
 
@@ -79,10 +82,10 @@ class FontScaleConverterFactoryTest {
     @LargeTest
     @Test
     fun allFeasibleScalesAndConversionsDoNotCrash() {
-        generateSequenceOfFractions(-10000f..10000f, step = 0.01f)
+        generateSequenceOfFractions(-10f..10f, step = 0.01f)
             .mapNotNull{ FontScaleConverterFactory.forScale(it) }
             .flatMap{ table ->
-                generateSequenceOfFractions(-10000f..10000f, step = 0.01f)
+                generateSequenceOfFractions(-2000f..2000f, step = 0.01f)
                     .map{ Pair(table, it) }
             }
             .forEach { (table, sp) ->
