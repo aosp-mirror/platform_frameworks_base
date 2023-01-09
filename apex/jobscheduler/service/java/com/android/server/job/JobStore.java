@@ -70,6 +70,7 @@ import java.util.List;
 import java.util.Objects;
 import java.util.Set;
 import java.util.StringJoiner;
+import java.util.concurrent.CountDownLatch;
 import java.util.function.Consumer;
 import java.util.function.Predicate;
 
@@ -131,7 +132,7 @@ public final class JobStore {
     private JobStorePersistStats mPersistInfo = new JobStorePersistStats();
 
     /** Used by the {@link JobSchedulerService} to instantiate the JobStore. */
-    static JobStore initAndGet(JobSchedulerService jobManagerService) {
+    static JobStore get(JobSchedulerService jobManagerService) {
         synchronized (sSingletonLock) {
             if (sSingleton == null) {
                 sSingleton = new JobStore(jobManagerService.getContext(),
@@ -147,6 +148,7 @@ public final class JobStore {
     @VisibleForTesting
     public static JobStore initAndGetForTesting(Context context, File dataDir) {
         JobStore jobStoreUnderTest = new JobStore(context, new Object(), dataDir);
+        jobStoreUnderTest.init();
         jobStoreUnderTest.clearForTesting();
         return jobStoreUnderTest;
     }
@@ -181,8 +183,14 @@ public final class JobStore {
         mXmlTimestamp = mJobsFile.exists()
                 ? mJobsFile.getLastModifiedTime() : mJobFileDirectory.lastModified();
         mRtcGood = (sSystemClock.millis() > mXmlTimestamp);
+    }
 
+    private void init() {
         readJobMapFromDisk(mJobSet, mRtcGood);
+    }
+
+    void initAsync(CountDownLatch completionLatch) {
+        mIoHandler.post(new ReadJobMapFromDiskRunnable(mJobSet, mRtcGood, completionLatch));
     }
 
     private AtomicFile createJobFile(String baseName) {
@@ -199,6 +207,15 @@ public final class JobStore {
 
     public boolean clockNowValidToInflate(long now) {
         return now >= mXmlTimestamp;
+    }
+
+    /**
+     * Runs any necessary work asynchronously. If this is called after
+     * {@link #initAsync(CountDownLatch)}, this ensures the given work runs after
+     * the JobStore is initialized.
+     */
+    void runWorkAsync(@NonNull Runnable r) {
+        mIoHandler.post(r);
     }
 
     /**
@@ -998,14 +1015,21 @@ public final class JobStore {
     private final class ReadJobMapFromDiskRunnable implements Runnable {
         private final JobSet jobSet;
         private final boolean rtcGood;
+        private final CountDownLatch mCompletionLatch;
 
         /**
          * @param jobSet Reference to the (empty) set of JobStatus objects that back the JobStore,
          *               so that after disk read we can populate it directly.
          */
         ReadJobMapFromDiskRunnable(JobSet jobSet, boolean rtcIsGood) {
+            this(jobSet, rtcIsGood, null);
+        }
+
+        ReadJobMapFromDiskRunnable(JobSet jobSet, boolean rtcIsGood,
+                @Nullable CountDownLatch completionLatch) {
             this.jobSet = jobSet;
             this.rtcGood = rtcIsGood;
+            this.mCompletionLatch = completionLatch;
         }
 
         @Override
@@ -1087,6 +1111,9 @@ public final class JobStore {
             Slog.i(TAG, "Read " + numJobs + " jobs");
             if (needFileMigration) {
                 migrateJobFilesAsync();
+            }
+            if (mCompletionLatch != null) {
+                mCompletionLatch.countDown();
             }
         }
 
