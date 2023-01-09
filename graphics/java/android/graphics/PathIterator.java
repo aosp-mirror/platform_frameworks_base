@@ -29,8 +29,6 @@ import libcore.util.NativeAllocationRegistry;
 import java.lang.annotation.Retention;
 import java.util.ConcurrentModificationException;
 import java.util.Iterator;
-import java.util.NoSuchElementException;
-
 
 /**
  * <code>PathIterator</code> can be used to query a given {@link Path} object, to discover its
@@ -54,7 +52,8 @@ public class PathIterator implements Iterator<PathIterator.Segment> {
     /**
      * The <code>Verb</code> indicates the operation for a given segment of a path. These
      * operations correspond exactly to the primitive operations on {@link Path}, such as
-     * {@link Path#moveTo(float, float)} and {@link Path#lineTo(float, float)}.
+     * {@link Path#moveTo(float, float)} and {@link Path#lineTo(float, float)}, except for
+     * {@link #VERB_DONE}, which means that there are no more operations in this path.
      */
     @Retention(SOURCE)
     @IntDef({VERB_MOVE, VERB_LINE, VERB_QUAD, VERB_CONIC, VERB_CUBIC, VERB_CLOSE, VERB_DONE})
@@ -109,7 +108,6 @@ public class PathIterator implements Iterator<PathIterator.Segment> {
      * @throws ArrayIndexOutOfBoundsException if the points array is too small
      * @throws ConcurrentModificationException if the underlying path was modified
      * since this iterator was created.
-     * @throws NoSuchElementException if the iteration has no more elements
      */
     @NonNull
     public @Verb int next(@NonNull float[] points, int offset) {
@@ -126,8 +124,8 @@ public class PathIterator implements Iterator<PathIterator.Segment> {
     /**
      * Returns true if the there are more elements in this iterator to be returned.
      * A return value of <code>false</code> means there are no more elements, and an
-     * ensuing call to {@link #next()} or {@link #next(float[], int)} )} will throw a
-     * {@link NoSuchElementException}.
+     * ensuing call to {@link #next()} or {@link #next(float[], int)} )} will return
+     * {@link #VERB_DONE}.
      *
      * @return true if there are more elements to be iterated through, false otherwise
      * @throws ConcurrentModificationException if the underlying path was modified
@@ -135,14 +133,10 @@ public class PathIterator implements Iterator<PathIterator.Segment> {
      */
     @Override
     public boolean hasNext() {
-        try {
-            if (mCachedVerb == -1) {
-                mCachedVerb = nextInternal();
-            }
-            return true;
-        } catch (NoSuchElementException e) {
-            return false;
+        if (mCachedVerb == -1) {
+            mCachedVerb = nextInternal();
         }
+        return mCachedVerb != VERB_DONE;
     }
 
     /**
@@ -171,12 +165,13 @@ public class PathIterator implements Iterator<PathIterator.Segment> {
      * is helfpul for managing the cached segment used by {@link #hasNext()}.
      *
      * @return the segment to be returned by {@link #next()}
-     * @throws NoSuchElementException if the iteration has no more elements
+     * @throws ConcurrentModificationException if the underlying path was modified
+     * since this iterator was created.
      */
     @NonNull
     private @Verb int nextInternal() {
         if (mDone) {
-            throw new NoSuchElementException("No more path segments to iterate");
+            return VERB_DONE;
         }
         if (mPathGenerationId != mPath.getGenerationId()) {
             throw new ConcurrentModificationException(
@@ -198,7 +193,6 @@ public class PathIterator implements Iterator<PathIterator.Segment> {
      * requires a little more manual effort to use.
      *
      * @return the next segment in this iterator
-     * @throws NoSuchElementException if the iteration has no more elements
      * @throws ConcurrentModificationException if the underlying path was modified
      * since this iterator was created.
      */
