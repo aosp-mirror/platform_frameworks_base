@@ -290,7 +290,8 @@ public class JobParameters implements Parcelable {
     private final boolean mIsUserInitiated;
     private final Uri[] mTriggeredContentUris;
     private final String[] mTriggeredContentAuthorities;
-    private final Network network;
+    @Nullable
+    private Network mNetwork;
 
     private int mStopReason = STOP_REASON_UNDEFINED;
     private int mInternalStopReason = INTERNAL_STOP_REASON_UNKNOWN;
@@ -313,7 +314,7 @@ public class JobParameters implements Parcelable {
         this.mIsUserInitiated = isUserInitiated;
         this.mTriggeredContentUris = triggeredContentUris;
         this.mTriggeredContentAuthorities = triggeredContentAuthorities;
-        this.network = network;
+        this.mNetwork = network;
         this.mJobNamespace = namespace;
     }
 
@@ -478,7 +479,7 @@ public class JobParameters implements Parcelable {
      * @see JobInfo.Builder#setRequiredNetwork(NetworkRequest)
      */
     public @Nullable Network getNetwork() {
-        return network;
+        return mNetwork;
     }
 
     /**
@@ -573,13 +574,18 @@ public class JobParameters implements Parcelable {
         mTriggeredContentUris = in.createTypedArray(Uri.CREATOR);
         mTriggeredContentAuthorities = in.createStringArray();
         if (in.readInt() != 0) {
-            network = Network.CREATOR.createFromParcel(in);
+            mNetwork = Network.CREATOR.createFromParcel(in);
         } else {
-            network = null;
+            mNetwork = null;
         }
         mStopReason = in.readInt();
         mInternalStopReason = in.readInt();
         debugStopReason = in.readString();
+    }
+
+    /** @hide */
+    public void setNetwork(@Nullable Network network) {
+        mNetwork = network;
     }
 
     /** @hide */
@@ -614,9 +620,9 @@ public class JobParameters implements Parcelable {
         dest.writeBoolean(mIsUserInitiated);
         dest.writeTypedArray(mTriggeredContentUris, flags);
         dest.writeStringArray(mTriggeredContentAuthorities);
-        if (network != null) {
+        if (mNetwork != null) {
             dest.writeInt(1);
-            network.writeToParcel(dest, flags);
+            mNetwork.writeToParcel(dest, flags);
         } else {
             dest.writeInt(0);
         }

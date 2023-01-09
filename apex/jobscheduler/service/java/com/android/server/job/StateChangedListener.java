@@ -18,6 +18,7 @@ package com.android.server.job;
 
 import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.net.Network;
 import android.util.ArraySet;
 
 import com.android.server.job.controllers.JobStatus;
@@ -56,6 +57,8 @@ public interface StateChangedListener {
     public void onRunJobNow(JobStatus jobStatus);
 
     public void onDeviceIdleStateChanged(boolean deviceIdle);
+
+    void onNetworkChanged(JobStatus jobStatus, Network newNetwork);
 
     /**
      * Called when these jobs are added or removed from the

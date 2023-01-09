@@ -1179,6 +1179,25 @@ class JobConcurrencyManager {
         assignJobsToContextsLocked();
     }
 
+    @Nullable
+    @GuardedBy("mLock")
+    JobServiceContext getRunningJobServiceContextLocked(JobStatus job) {
+        if (!mRunningJobs.contains(job)) {
+            return null;
+        }
+
+        for (int i = 0; i < mActiveServices.size(); i++) {
+            JobServiceContext jsc = mActiveServices.get(i);
+            final JobStatus executing = jsc.getRunningJobLocked();
+            if (executing == job) {
+                return jsc;
+            }
+        }
+        Slog.wtf(TAG, "Couldn't find running job on a context");
+        mRunningJobs.remove(job);
+        return null;
+    }
+
     @GuardedBy("mLock")
     boolean stopJobOnServiceContextLocked(JobStatus job,
             @JobParameters.StopReason int reason, int internalReasonCode, String debugReason) {
