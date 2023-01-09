@@ -1033,10 +1033,10 @@ public final class JobStore {
             }
             boolean needFileMigration = false;
             long nowElapsed = sElapsedRealtimeClock.millis();
-            for (File file : files) {
-                final AtomicFile aFile = createJobFile(file);
-                try (FileInputStream fis = aFile.openRead()) {
-                    synchronized (mLock) {
+            synchronized (mLock) {
+                for (File file : files) {
+                    final AtomicFile aFile = createJobFile(file);
+                    try (FileInputStream fis = aFile.openRead()) {
                         jobs = readJobMapImpl(fis, rtcGood, nowElapsed);
                         if (jobs != null) {
                             for (int i = 0; i < jobs.size(); i++) {
@@ -1054,33 +1054,35 @@ public final class JobStore {
                                 }
                             }
                         }
+                    } catch (FileNotFoundException e) {
+                        // mJobFileDirectory.listFiles() gave us this file...why can't we find it???
+                        Slog.e(TAG, "Could not find jobs file: " + file.getName());
+                    } catch (XmlPullParserException | IOException e) {
+                        Slog.wtf(TAG, "Error in " + file.getName(), e);
+                    } catch (Exception e) {
+                        // Crashing at this point would result in a boot loop, so live with a
+                        // generic Exception for system stability's sake.
+                        Slog.wtf(TAG, "Unexpected exception", e);
                     }
-                } catch (FileNotFoundException e) {
-                    // mJobFileDirectory.listFiles() gave us this file...why can't we find it???
-                    Slog.e(TAG, "Could not find jobs file: " + file.getName());
-                } catch (XmlPullParserException | IOException e) {
-                    Slog.wtf(TAG, "Error in " + file.getName(), e);
-                } catch (Exception e) {
-                    // Crashing at this point would result in a boot loop, so live with a general
-                    // Exception for system stability's sake.
-                    Slog.wtf(TAG, "Unexpected exception", e);
-                }
-                if (mUseSplitFiles) {
-                    if (!file.getName().startsWith(JOB_FILE_SPLIT_PREFIX)) {
-                        // We're supposed to be using the split file architecture, but we still have
-                        // the old job file around. Fully migrate and remove the old file.
+                    if (mUseSplitFiles) {
+                        if (!file.getName().startsWith(JOB_FILE_SPLIT_PREFIX)) {
+                            // We're supposed to be using the split file architecture,
+                            // but we still have
+                            // the old job file around. Fully migrate and remove the old file.
+                            needFileMigration = true;
+                        }
+                    } else if (file.getName().startsWith(JOB_FILE_SPLIT_PREFIX)) {
+                        // We're supposed to be using the legacy single file architecture,
+                        // but we still have some job split files around. Fully migrate
+                        // and remove the split files.
                         needFileMigration = true;
                     }
-                } else if (file.getName().startsWith(JOB_FILE_SPLIT_PREFIX)) {
-                    // We're supposed to be using the legacy single file architecture, but we still
-                    // have some job split files around. Fully migrate and remove the split files.
-                    needFileMigration = true;
                 }
-            }
-            if (mPersistInfo.countAllJobsLoaded < 0) { // Only set them once.
-                mPersistInfo.countAllJobsLoaded = numJobs;
-                mPersistInfo.countSystemServerJobsLoaded = numSystemJobs;
-                mPersistInfo.countSystemSyncManagerJobsLoaded = numSyncJobs;
+                if (mPersistInfo.countAllJobsLoaded < 0) { // Only set them once.
+                    mPersistInfo.countAllJobsLoaded = numJobs;
+                    mPersistInfo.countSystemServerJobsLoaded = numSystemJobs;
+                    mPersistInfo.countSystemSyncManagerJobsLoaded = numSyncJobs;
+                }
             }
             Slog.i(TAG, "Read " + numJobs + " jobs");
             if (needFileMigration) {
