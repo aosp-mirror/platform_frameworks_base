@@ -5014,7 +5014,8 @@ public class DevicePolicyManagerTest extends DpmTestBase {
                 .thenReturn(new UserInfo(UserHandle.USER_SYSTEM, "user system", 0));
         when(getServices().userManager.getPrimaryUser())
                 .thenReturn(new UserInfo(UserHandle.USER_SYSTEM, "user system", 0));
-
+        when(getServices().subscriptionManager.getActiveSubscriptionIdList(false)).thenReturn(
+                new int[1]);
         // Set some device-wide policies:
         // Security logging
         when(getServices().settings.securityLogGetLoggingEnabledProperty()).thenReturn(true);
@@ -5062,6 +5063,7 @@ public class DevicePolicyManagerTest extends DpmTestBase {
         // Unsuspend personal apps
         verify(getServices().packageManagerInternal)
                 .unsuspendForSuspendingPackage(PLATFORM_PACKAGE_NAME, UserHandle.USER_SYSTEM);
+        verify(getServices().subscriptionManager).setSubscriptionUserHandle(0, null);
     }
 
     @Test

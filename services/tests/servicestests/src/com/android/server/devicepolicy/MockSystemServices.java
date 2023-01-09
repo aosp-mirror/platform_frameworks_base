@@ -63,6 +63,7 @@ import android.os.UserManager;
 import android.permission.IPermissionManager;
 import android.provider.Settings;
 import android.security.KeyChain;
+import android.telephony.SubscriptionManager;
 import android.telephony.TelephonyManager;
 import android.test.mock.MockContentProvider;
 import android.test.mock.MockContentResolver;
@@ -135,6 +136,7 @@ public class MockSystemServices {
     public final DevicePolicyManager devicePolicyManager;
     public final LocationManager locationManager;
     public final RoleManager roleManager;
+    public final SubscriptionManager subscriptionManager;
     /** Note this is a partial mock, not a real mock. */
     public final PackageManager packageManager;
     public final BuildMock buildMock = new BuildMock();
@@ -188,6 +190,7 @@ public class MockSystemServices {
         devicePolicyManager = mock(DevicePolicyManager.class);
         locationManager = mock(LocationManager.class);
         roleManager = realContext.getSystemService(RoleManager.class);
+        subscriptionManager = mock(SubscriptionManager.class);
 
         // Package manager is huge, so we use a partial mock instead.
         packageManager = spy(realContext.getPackageManager());

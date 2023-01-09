@@ -218,6 +218,7 @@ import android.app.admin.DeviceStateCache;
 import android.app.admin.FactoryResetProtectionPolicy;
 import android.app.admin.FullyManagedDeviceProvisioningParams;
 import android.app.admin.ManagedProfileProvisioningParams;
+import android.app.admin.ManagedSubscriptionsPolicy;
 import android.app.admin.NetworkEvent;
 import android.app.admin.PackagePolicy;
 import android.app.admin.ParcelableGranteeMap;
@@ -334,6 +335,8 @@ import android.security.keystore.AttestationUtils;
 import android.security.keystore.KeyGenParameterSpec;
 import android.security.keystore.ParcelableKeyGenParameterSpec;
 import android.stats.devicepolicy.DevicePolicyEnums;
+import android.telecom.TelecomManager;
+import android.telephony.SubscriptionManager;
 import android.telephony.TelephonyManager;
 import android.telephony.data.ApnSetting;
 import android.text.TextUtils;
@@ -768,6 +771,9 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
     private final DeviceStateCacheImpl mStateCache = new DeviceStateCacheImpl();
     private final Object mESIDInitilizationLock = new Object();
     private EnterpriseSpecificIdCalculator mEsidCalculator;
+    private final Object mSubscriptionsChangedListenerLock = new Object();
+    @GuardedBy("mSubscriptionsChangedListenerLock")
+    private SubscriptionManager.OnSubscriptionsChangedListener mSubscriptionsChangedListener;
 
     /**
      * Contains the list of OEM Default Role Holders for Contact-related roles
@@ -972,8 +978,6 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
 
     @GuardedBy("getLockObject()")
     final SparseArray<DevicePolicyData> mUserData;
-
-    @GuardedBy("getLockObject()")
 
     final Handler mHandler;
     final Handler mBackgroundHandler;
@@ -3092,6 +3096,7 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
                 onLockSettingsReady();
                 loadAdminDataAsync();
                 mOwners.systemReady();
+                applyManagedSubscriptionsPolicyIfRequired();
                 break;
             case SystemService.PHASE_ACTIVITY_MANAGER_READY:
                 synchronized (getLockObject()) {
@@ -3107,6 +3112,22 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
 
                 ensureDeviceOwnerUserStarted(); // TODO Consider better place to do this.
                 break;
+        }
+    }
+
+    private void applyManagedSubscriptionsPolicyIfRequired() {
+        int copeProfileUserId = getOrganizationOwnedProfileUserId();
+        // This policy is relevant only for COPE devices.
+        if (copeProfileUserId != UserHandle.USER_NULL) {
+            unregisterOnSubscriptionsChangedListener();
+            int policyType = getManagedSubscriptionsPolicy().getPolicyType();
+            if (policyType == ManagedSubscriptionsPolicy.TYPE_ALL_PERSONAL_SUBSCRIPTIONS) {
+                // By default, assign all current and future subs to system user on COPE devices.
+                registerListenerToAssignSubscriptionsToUser(UserHandle.USER_SYSTEM);
+            } else if (policyType == ManagedSubscriptionsPolicy.TYPE_ALL_MANAGED_SUBSCRIPTIONS) {
+                // Add listener to assign all current and future subs to managed profile.
+                registerListenerToAssignSubscriptionsToUser(copeProfileUserId);
+            }
         }
     }
 
@@ -6993,7 +7014,21 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
         }
         mLockSettingsInternal.refreshStrongAuthTimeout(parentId);
 
+        clearManagedSubscriptionsPolicy();
+
         Slogf.i(LOG_TAG, "Cleaning up device-wide policies done.");
+    }
+
+    private void clearManagedSubscriptionsPolicy() {
+        unregisterOnSubscriptionsChangedListener();
+
+        SubscriptionManager subscriptionManager = mContext.getSystemService(
+                SubscriptionManager.class);
+        //Iterate over all the subscriptions and remove association with any user.
+        int[] subscriptionIds = subscriptionManager.getActiveSubscriptionIdList(false);
+        for (int subId : subscriptionIds) {
+            subscriptionManager.setSubscriptionUserHandle(subId, null);
+        }
     }
 
     /**
@@ -10087,6 +10122,10 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
                 pw.println();
                 mStateCache.dump(pw);
                 pw.println();
+            }
+
+            synchronized (mSubscriptionsChangedListenerLock) {
+                pw.println("Subscription changed listener : " + mSubscriptionsChangedListener);
             }
             mHandler.post(() -> handleDump(pw));
             dumpResources(pw);
@@ -19951,5 +19990,140 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
                 NAMESPACE_DEVICE_POLICY_MANAGER,
                 HEADLESS_FLAG,
                 DEFAULT_HEADLESS_FLAG);
+    }
+
+    @Override
+    public ManagedSubscriptionsPolicy getManagedSubscriptionsPolicy() {
+        synchronized (getLockObject()) {
+            ActiveAdmin admin = getProfileOwnerOfOrganizationOwnedDeviceLocked();
+            if (admin != null && admin.mManagedSubscriptionsPolicy != null) {
+                return admin.mManagedSubscriptionsPolicy;
+            }
+        }
+        return new ManagedSubscriptionsPolicy(
+                ManagedSubscriptionsPolicy.TYPE_ALL_PERSONAL_SUBSCRIPTIONS);
+    }
+
+    @Override
+    public void setManagedSubscriptionsPolicy(ManagedSubscriptionsPolicy policy) {
+        CallerIdentity caller = getCallerIdentity();
+        Preconditions.checkCallAuthorization(isProfileOwnerOfOrganizationOwnedDevice(caller),
+                "This policy can only be set by a profile owner on an organization-owned device.");
+
+        synchronized (getLockObject()) {
+            final ActiveAdmin admin = getProfileOwnerLocked(caller.getUserId());
+            if (hasUserSetupCompleted(UserHandle.USER_SYSTEM) && !isAdminTestOnlyLocked(
+                    admin.info.getComponent(), caller.getUserId())) {
+                throw new IllegalStateException("Not allowed to apply this policy after setup");
+            }
+            boolean changed = false;
+            if (!Objects.equals(policy, admin.mManagedSubscriptionsPolicy)) {
+                admin.mManagedSubscriptionsPolicy = policy;
+                changed = true;
+            }
+            if (changed) {
+                saveSettingsLocked(caller.getUserId());
+            } else {
+                return;
+            }
+        }
+
+        applyManagedSubscriptionsPolicyIfRequired();
+
+        int policyType = getManagedSubscriptionsPolicy().getPolicyType();
+        if (policyType == ManagedSubscriptionsPolicy.TYPE_ALL_MANAGED_SUBSCRIPTIONS) {
+            final long id = mInjector.binderClearCallingIdentity();
+            try {
+                int parentUserId = getProfileParentId(caller.getUserId());
+                installOemDefaultDialerAndMessagesApp(parentUserId, caller.getUserId());
+            } finally {
+                mInjector.binderRestoreCallingIdentity(id);
+            }
+        }
+    }
+
+    private void installOemDefaultDialerAndMessagesApp(int sourceUserId, int targetUserId) {
+        try {
+            UserHandle sourceUserHandle = UserHandle.of(sourceUserId);
+            TelecomManager telecomManager = mContext.getSystemService(TelecomManager.class);
+            String dialerAppPackage = telecomManager.getDefaultDialerPackage(
+                    sourceUserHandle);
+            String messagesAppPackage = SmsApplication.getDefaultSmsApplicationAsUser(mContext,
+                    true, sourceUserHandle).getPackageName();
+            if (dialerAppPackage != null) {
+                mIPackageManager.installExistingPackageAsUser(dialerAppPackage, targetUserId,
+                        PackageManager.INSTALL_ALL_WHITELIST_RESTRICTED_PERMISSIONS,
+                        PackageManager.INSTALL_REASON_POLICY, null);
+            } else {
+                Slogf.w(LOG_TAG, "Couldn't install dialer app, dialer app package is null");
+            }
+
+            if (messagesAppPackage != null) {
+                mIPackageManager.installExistingPackageAsUser(messagesAppPackage, targetUserId,
+                        PackageManager.INSTALL_ALL_WHITELIST_RESTRICTED_PERMISSIONS,
+                        PackageManager.INSTALL_REASON_POLICY, null);
+            } else {
+                Slogf.w(LOG_TAG, "Couldn't install messages app, messages app package is null");
+            }
+        } catch (RemoteException re) {
+            // shouldn't happen
+            Slogf.wtf(LOG_TAG, "Failed to install dialer/messages app", re);
+        }
+    }
+
+    private void registerListenerToAssignSubscriptionsToUser(int userId) {
+        synchronized (mSubscriptionsChangedListenerLock) {
+            if (mSubscriptionsChangedListener != null) {
+                return;
+            }
+            SubscriptionManager subscriptionManager = mContext.getSystemService(
+                    SubscriptionManager.class);
+            // Listener to assign all current and future subs to managed profile.
+            mSubscriptionsChangedListener = new SubscriptionManager.OnSubscriptionsChangedListener(
+                    mHandler.getLooper()) {
+                @Override
+                public void onSubscriptionsChanged() {
+                    final long id = mInjector.binderClearCallingIdentity();
+                    try {
+                        int[] subscriptionIds = subscriptionManager.getActiveSubscriptionIdList(
+                                false);
+                        for (int subId : subscriptionIds) {
+                            UserHandle associatedUserHandle =
+                                    subscriptionManager.getSubscriptionUserHandle(subId);
+                            if (associatedUserHandle == null
+                                    || associatedUserHandle.getIdentifier() != userId) {
+                                subscriptionManager.setSubscriptionUserHandle(subId,
+                                        UserHandle.of(userId));
+                            }
+                        }
+                    } finally {
+                        mInjector.binderRestoreCallingIdentity(id);
+                    }
+                }
+            };
+
+            final long id = mInjector.binderClearCallingIdentity();
+            try {
+                // When listener is added onSubscriptionsChanged gets called immediately for once
+                // (even if subscriptions are not changed) and later on when subscriptions changes.
+                subscriptionManager.addOnSubscriptionsChangedListener(
+                        mSubscriptionsChangedListener.getHandlerExecutor(),
+                        mSubscriptionsChangedListener);
+            } finally {
+                mInjector.binderRestoreCallingIdentity(id);
+            }
+        }
+    }
+
+    private void unregisterOnSubscriptionsChangedListener() {
+        synchronized (mSubscriptionsChangedListenerLock) {
+            if (mSubscriptionsChangedListener != null) {
+                SubscriptionManager subscriptionManager = mContext.getSystemService(
+                        SubscriptionManager.class);
+                subscriptionManager.removeOnSubscriptionsChangedListener(
+                        mSubscriptionsChangedListener);
+                mSubscriptionsChangedListener = null;
+            }
+        }
     }
 }
