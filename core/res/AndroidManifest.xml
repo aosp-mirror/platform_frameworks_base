@@ -3119,10 +3119,97 @@
 
     <!-- @SystemApi @hide Allows an application to exempt apps from platform restrictions.-->
     <permission android:name="android.permission.MANAGE_DEVICE_POLICY_APP_EXEMPTIONS"
-                android:protectionLevel="signature|role" />
+                android:protectionLevel="internal|role" />
 
-    <!-- Allows an application to manage date and time device policy. -->
+    <!-- Allows an application to manage device policy relating to time.
+        <p>{@link Manifest.permission#MANAGE_DEVICE_POLICY_ACROSS_USERS_FULL} is required to call
+        APIs protected by this permission on users different to the calling user.-->
     <permission android:name="android.permission.MANAGE_DEVICE_POLICY_TIME"
+                android:protectionLevel="internal|role" />
+
+    <!-- Allows an application to set the grant state of runtime permissions on packages.
+        <p>{@link Manifest.permission#MANAGE_DEVICE_POLICY_ACROSS_USERS_FULL} is required to call
+        APIs protected by this permission on users different to the calling user.
+    -->
+    <permission android:name="android.permission.MANAGE_DEVICE_POLICY_RUNTIME_PERMISSIONS"
+                android:protectionLevel="internal|role" />
+
+    <!-- Allows an application to manage the identity of the managing organization.
+        <p>{@link Manifest.permission#MANAGE_DEVICE_POLICY_ACROSS_USERS_FULL} is required to call
+        APIs protected by this permission on users different to the calling user.
+    -->
+    <permission android:name="android.permission.MANAGE_DEVICE_POLICY_ORGANIZATION_IDENTITY"
+                android:protectionLevel="internal|role" />
+
+    <!-- Allows an application to set support messages for when a user action is affected by an
+        active policy.
+        <p>{@link Manifest.permission#MANAGE_DEVICE_POLICY_ACROSS_USERS_FULL} is required to call
+        APIs protected by this permission on users different to the calling user.
+    -->
+    <permission android:name="android.permission.MANAGE_DEVICE_POLICY_SUPPORT_MESSAGE"
+                android:protectionLevel="internal|role" />
+
+    <!-- Allows an application to manage backup service policy.
+        <p>{@link Manifest.permission#MANAGE_DEVICE_POLICY_ACROSS_USERS_FULL} is required to call
+        APIs protected by this permission on users different to the calling user.
+    -->
+    <permission android:name="android.permission.MANAGE_DEVICE_POLICY_BACKUP_SERVICE"
+                android:protectionLevel="internal|role" />
+
+    <!-- Allows an application to manage lock task policy.
+        <p>{@link Manifest.permission#MANAGE_DEVICE_POLICY_ACROSS_USERS_FULL} is required to call
+        APIs protected by this permission on users different to the calling user.
+    -->
+    <permission android:name="android.permission.MANAGE_DEVICE_POLICY_LOCK_TASK"
+                android:protectionLevel="internal|role" />
+
+    <!-- Allows an application to manage policy regarding modifying applications.
+        <p>{@link Manifest.permission#MANAGE_DEVICE_POLICY_ACROSS_USERS_FULL} is required to call
+        APIs protected by this permission on users different to the calling user.
+    -->
+    <permission android:name="android.permission.MANAGE_DEVICE_POLICY_APPS_CONTROL"
+                android:protectionLevel="internal|role" />
+
+    <!-- Allows an application to manage installing from unknown sources policy.
+        <p>MANAGE_SECURITY_CRITICAL_DEVICE_POLICY_ACROSS_USERS is required to call APIs protected
+        by this permission on users different to the calling user.
+    -->
+    <permission android:name="android.permission.MANAGE_DEVICE_POLICY_INSTALL_UNKNOWN_SOURCES"
+                android:protectionLevel="internal|role" />
+
+    <!-- Allows an application to manage application restrictions.
+        <p>{@link Manifest.permission#MANAGE_DEVICE_POLICY_ACROSS_USERS_FULL} is required to call
+        APIs protected by this permission on users different to the calling user.
+    -->
+    <permission android:name="android.permission.MANAGE_DEVICE_POLICY_APP_RESTRICTIONS"
+                android:protectionLevel="internal|role" />
+
+    <!-- Allows an application to manage calling policy.
+        <p>{@link Manifest.permission#MANAGE_DEVICE_POLICY_ACROSS_USERS_FULL} is required to call
+        APIs protected by this permission on users different to the calling user.
+    -->
+    <permission android:name="android.permission.MANAGE_DEVICE_POLICY_CALLS"
+                android:protectionLevel="internal|role" />
+
+    <!-- Allows an application to manage debugging features policy.
+        <p>{@link Manifest.permission#MANAGE_DEVICE_POLICY_ACROSS_USERS_FULL} is required to call
+        APIs protected by this permission on users different to the calling user.
+    -->
+    <permission android:name="android.permission.MANAGE_DEVICE_POLICY_DEBUGGING_FEATURES"
+                android:protectionLevel="internal|role" />
+
+    <!-- Allows an application to manage policy preventing users from modifying users.
+        <p>{@link Manifest.permission#MANAGE_DEVICE_POLICY_ACROSS_USERS_FULL} is required to call
+        APIs protected by this permission on users different to the calling user
+    -->
+    <permission android:name="android.permission.MANAGE_DEVICE_POLICY_MODIFY_USERS"
+                android:protectionLevel="internal|role" />
+
+    <!-- Allows an application to manage safe boot policy.
+        <p>{@link Manifest.permission#MANAGE_DEVICE_POLICY_ACROSS_USERS_FULL} is required to call
+        APIs protected by this permission on users different to the calling user.
+    -->
+    <permission android:name="android.permission.MANAGE_DEVICE_POLICY_SAFE_BOOT"
                 android:protectionLevel="internal|role" />
 
     <!-- Allows an application to set device policies outside the current user
