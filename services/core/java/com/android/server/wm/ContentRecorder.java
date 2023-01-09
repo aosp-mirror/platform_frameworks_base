@@ -20,6 +20,7 @@ import static android.content.Context.MEDIA_PROJECTION_SERVICE;
 import static android.content.res.Configuration.ORIENTATION_UNDEFINED;
 import static android.view.ContentRecordingSession.RECORD_CONTENT_DISPLAY;
 import static android.view.ContentRecordingSession.RECORD_CONTENT_TASK;
+import static android.view.ViewProtoEnums.DISPLAY_STATE_OFF;
 
 import static com.android.internal.protolog.ProtoLogGroup.WM_DEBUG_CONTENT_RECORDING;
 
@@ -317,6 +318,11 @@ final class ContentRecorder implements WindowContainerListener {
         if (mContentRecordingSession.getContentToRecord() == RECORD_CONTENT_TASK) {
             mMediaProjectionManager.notifyActiveProjectionCapturedContentVisibilityChanged(
                     mRecordedWindowContainer.asTask().isVisibleRequested());
+        } else {
+            int currentDisplayState =
+                    mRecordedWindowContainer.asDisplayContent().getDisplay().getState();
+            mMediaProjectionManager.notifyActiveProjectionCapturedContentVisibilityChanged(
+                    currentDisplayState != DISPLAY_STATE_OFF);
         }
 
         // No need to clean up. In SurfaceFlinger, parents hold references to their children. The
