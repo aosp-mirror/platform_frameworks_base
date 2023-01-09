@@ -27,6 +27,7 @@ import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothDevice;
 import android.bluetooth.BluetoothHearingAid;
 import android.bluetooth.BluetoothLeAudio;
+import android.bluetooth.BluetoothManager;
 import android.bluetooth.BluetoothProfile;
 import android.content.BroadcastReceiver;
 import android.content.Context;
@@ -91,7 +92,9 @@ class BluetoothRouteProvider {
         Objects.requireNonNull(context);
         Objects.requireNonNull(listener);
 
-        BluetoothAdapter btAdapter = BluetoothAdapter.getDefaultAdapter();
+        BluetoothManager bluetoothManager = (BluetoothManager)
+                context.getSystemService(Context.BLUETOOTH_SERVICE);
+        BluetoothAdapter btAdapter = bluetoothManager.getAdapter();
         if (btAdapter == null) {
             return null;
         }
