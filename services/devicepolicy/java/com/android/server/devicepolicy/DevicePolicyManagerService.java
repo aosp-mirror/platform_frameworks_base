@@ -8699,21 +8699,6 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
         }
     }
 
-    private boolean isDeviceOwnerPackage(String packageName, int userId) {
-        synchronized (getLockObject()) {
-            return mOwners.hasDeviceOwner()
-                    && mOwners.getDeviceOwnerUserId() == userId
-                    && mOwners.getDeviceOwnerPackageName().equals(packageName);
-        }
-    }
-
-    private boolean isProfileOwnerPackage(String packageName, int userId) {
-        synchronized (getLockObject()) {
-            return mOwners.hasProfileOwner(userId)
-                    && mOwners.getProfileOwnerPackage(userId).equals(packageName);
-        }
-    }
-
     public boolean isProfileOwner(ComponentName who, int userId) {
         final ComponentName profileOwner = mInjector.binderWithCleanCallingIdentity(() ->
                 getProfileOwnerAsUser(userId));
@@ -9264,7 +9249,7 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
                 boolean hasProfileOwner = mOwners.hasProfileOwner(userId);
                 if (!hasProfileOwner) {
                     int managedUserId = getManagedUserId(userId);
-                    if (managedUserId == -1 && newState != STATE_USER_UNMANAGED) {
+                    if (managedUserId < 0 && newState != STATE_USER_UNMANAGED) {
                         // No managed device, user or profile, so setting provisioning state makes
                         // no sense.
                         String error = "Not allowed to change provisioning state unless a "
@@ -12469,7 +12454,7 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
 
     /**
      * @return the user ID of the managed user that is linked to the current user, if any.
-     * Otherwise -1.
+     * Otherwise UserHandle.USER_NULL (-10000).
      */
     public int getManagedUserId(@UserIdInt int callingUserId) {
         if (VERBOSE_LOG) Slogf.v(LOG_TAG, "getManagedUserId: callingUserId=%d", callingUserId);
@@ -12482,7 +12467,26 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
             return ui.id;
         }
         if (VERBOSE_LOG)  Slogf.v(LOG_TAG, "Managed user not found.");
-        return -1;
+        return UserHandle.USER_NULL;
+    }
+
+    /**
+     * Returns the userId of the managed profile on the device.
+     * If none exists, return {@link UserHandle#USER_NULL}.
+     *
+     * We assume there is only one managed profile across all users
+     * on the device, which is true for now (HSUM or not) but could
+     * change in future.
+     */
+    private @UserIdInt int getManagedUserId() {
+        // On HSUM, there is only one main user and only the main user
+        // can have a managed profile (for now). On non-HSUM, only user 0
+        // can host the managed profile and user 0 is the main user.
+        // So in both cases, we could just get the main user and
+        // search for the profile user under it.
+        UserHandle mainUser = mUserManager.getMainUser();
+        if (mainUser == null) return UserHandle.USER_NULL;
+        return getManagedUserId(mainUser.getIdentifier());
     }
 
     @Override
@@ -16130,7 +16134,7 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
                 return mOwners.getDeviceOwnerUserId();
             } else {
                 return mInjector.binderWithCleanCallingIdentity(
-                        () -> getManagedUserId(UserHandle.USER_SYSTEM));
+                        () -> getManagedUserId());
             }
         }
     }
