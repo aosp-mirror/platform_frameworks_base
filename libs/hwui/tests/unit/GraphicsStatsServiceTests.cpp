@@ -15,6 +15,7 @@
  */
 
 #include <android-base/macros.h>
+#include <gmock/gmock.h>
 #include <gtest/gtest.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -49,8 +50,14 @@ std::string findRootPath() {
 
 // No code left untested
 TEST(GraphicsStats, findRootPath) {
-    std::string expected = "/data/local/tmp/nativetest/hwui_unit_tests/" ABI_STRING;
-    EXPECT_EQ(expected, findRootPath());
+    // Different tools/infrastructure seem to push this to different locations. It shouldn't really
+    // matter where the binary is, so add new locations here as needed. This test still seems good
+    // as it's nice to understand the possibility space, and ensure findRootPath continues working
+    // as expected.
+    std::string acceptableLocations[] = {"/data/nativetest/hwui_unit_tests",
+                                         "/data/nativetest64/hwui_unit_tests",
+                                         "/data/local/tmp/nativetest/hwui_unit_tests/" ABI_STRING};
+    EXPECT_THAT(acceptableLocations, ::testing::Contains(findRootPath()));
 }
 
 TEST(GraphicsStats, saveLoad) {
