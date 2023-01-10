@@ -42,23 +42,31 @@ class KeyguardTransitionInteractor
 constructor(
     repository: KeyguardTransitionRepository,
 ) {
+    /** (any)->AOD transition information */
+    val anyStateToAodTransition: Flow<TransitionStep> =
+        repository.transitions.filter { step -> step.to == KeyguardState.AOD }
+
     /** AOD->LOCKSCREEN transition information. */
     val aodToLockscreenTransition: Flow<TransitionStep> = repository.transition(AOD, LOCKSCREEN)
-
-    /** LOCKSCREEN->AOD transition information. */
-    val lockscreenToAodTransition: Flow<TransitionStep> = repository.transition(LOCKSCREEN, AOD)
 
     /** DREAMING->LOCKSCREEN transition information. */
     val dreamingToLockscreenTransition: Flow<TransitionStep> =
         repository.transition(DREAMING, LOCKSCREEN)
 
+    /** LOCKSCREEN->AOD transition information. */
+    val lockscreenToAodTransition: Flow<TransitionStep> = repository.transition(LOCKSCREEN, AOD)
+
+    /** LOCKSCREEN->DREAMING transition information. */
+    val lockscreenToDreamingTransition: Flow<TransitionStep> =
+        repository.transition(LOCKSCREEN, DREAMING)
+
+    /** LOCKSCREEN->OCCLUDED transition information. */
+    val lockscreenToOccludedTransition: Flow<TransitionStep> =
+        repository.transition(LOCKSCREEN, OCCLUDED)
+
     /** OCCLUDED->LOCKSCREEN transition information. */
     val occludedToLockscreenTransition: Flow<TransitionStep> =
         repository.transition(OCCLUDED, LOCKSCREEN)
-
-    /** (any)->AOD transition information */
-    val anyStateToAodTransition: Flow<TransitionStep> =
-        repository.transitions.filter { step -> step.to == KeyguardState.AOD }
 
     /**
      * AOD<->LOCKSCREEN transition information, mapped to dozeAmount range of AOD (1f) <->
