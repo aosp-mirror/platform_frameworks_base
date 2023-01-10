@@ -37,7 +37,7 @@ oneway interface IOverviewProxy {
     /**
      * Sent when overview is to be shown.
      */
-    void onOverviewShown(boolean triggeredFromAltTab) = 7;
+    void onOverviewShown(boolean triggeredFromAltTab, boolean forward) = 7;
 
     /**
      * Sent when overview is to be hidden.

@@ -31,7 +31,7 @@ public interface RecentsImplementation {
 
     default void preloadRecentApps() {}
     default void cancelPreloadRecentApps() {}
-    default void showRecentApps(boolean triggeredFromAltTab) {}
+    default void showRecentApps(boolean triggeredFromAltTab, boolean forward) {}
     default void hideRecentApps(boolean triggeredFromAltTab, boolean triggeredFromHomeKey) {}
     default void toggleRecentApps() {}
 
