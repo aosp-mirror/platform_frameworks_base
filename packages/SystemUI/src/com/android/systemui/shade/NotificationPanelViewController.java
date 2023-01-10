@@ -2288,7 +2288,7 @@ public final class NotificationPanelViewController implements Dumpable {
             // When false, down but not synthesized motion event.
             mLastEventSynthesizedDown = mExpectingSynthesizedDown;
             mLastDownEvents.insert(
-                    mSystemClock.currentTimeMillis(),
+                    event.getEventTime(),
                     mDownX,
                     mDownY,
                     mQsTouchAboveFalsingThreshold,
