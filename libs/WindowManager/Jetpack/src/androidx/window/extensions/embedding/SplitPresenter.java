@@ -43,11 +43,11 @@ import android.window.WindowContainerTransaction;
 import androidx.annotation.IntDef;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import androidx.window.extensions.core.util.function.Function;
 import androidx.window.extensions.embedding.SplitAttributes.SplitType;
 import androidx.window.extensions.embedding.SplitAttributes.SplitType.ExpandContainersSplitType;
 import androidx.window.extensions.embedding.SplitAttributes.SplitType.HingeSplitType;
 import androidx.window.extensions.embedding.SplitAttributes.SplitType.RatioSplitType;
-import androidx.window.extensions.embedding.SplitAttributesCalculator.SplitAttributesCalculatorParams;
 import androidx.window.extensions.embedding.TaskContainer.TaskProperties;
 import androidx.window.extensions.layout.DisplayFeature;
 import androidx.window.extensions.layout.FoldingFeature;
@@ -551,7 +551,8 @@ class SplitPresenter extends JetpackTaskFragmentOrganizer {
             @NonNull SplitRule rule, @Nullable Pair<Size, Size> minDimensionsPair) {
         final Configuration taskConfiguration = taskProperties.getConfiguration();
         final WindowMetrics taskWindowMetrics = getTaskWindowMetrics(taskConfiguration);
-        final SplitAttributesCalculator calculator = mController.getSplitAttributesCalculator();
+        final Function<SplitAttributesCalculatorParams, SplitAttributes> calculator =
+                mController.getSplitAttributesCalculator();
         final SplitAttributes defaultSplitAttributes = rule.getDefaultSplitAttributes();
         final boolean isDefaultMinSizeSatisfied = rule.checkParentMetrics(taskWindowMetrics);
         if (calculator == null) {
@@ -565,9 +566,9 @@ class SplitPresenter extends JetpackTaskFragmentOrganizer {
                 .getCurrentWindowLayoutInfo(taskProperties.getDisplayId(),
                         taskConfiguration.windowConfiguration);
         final SplitAttributesCalculatorParams params = new SplitAttributesCalculatorParams(
-                taskWindowMetrics, taskConfiguration, defaultSplitAttributes,
-                isDefaultMinSizeSatisfied, windowLayoutInfo, rule.getTag());
-        final SplitAttributes splitAttributes = calculator.computeSplitAttributesForParams(params);
+                taskWindowMetrics, taskConfiguration, windowLayoutInfo, defaultSplitAttributes,
+                isDefaultMinSizeSatisfied, rule.getTag());
+        final SplitAttributes splitAttributes = calculator.apply(params);
         return sanitizeSplitAttributes(taskProperties, splitAttributes, minDimensionsPair);
     }
 

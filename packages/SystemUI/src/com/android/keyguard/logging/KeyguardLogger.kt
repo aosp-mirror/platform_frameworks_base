@@ -34,7 +34,7 @@ private const val TAG = "KeyguardLog"
  * temporary logs or logs for smaller classes when creating whole new [LogBuffer] wrapper might be
  * an overkill.
  */
-class KeyguardLogger @Inject constructor(@KeyguardLog private val buffer: LogBuffer) :
+class KeyguardLogger @Inject constructor(@KeyguardLog val buffer: LogBuffer) :
     ConstantStringsLogger by ConstantStringsLoggerImpl(buffer, TAG) {
 
     fun logException(ex: Exception, @CompileTimeConstant logMsg: String) {

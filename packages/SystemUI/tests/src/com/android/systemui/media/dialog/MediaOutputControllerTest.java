@@ -149,7 +149,9 @@ public class MediaOutputControllerTest extends SysuiTestCase {
                 Optional.of(mNearbyMediaDevicesManager), mAudioManager, mPowerExemptionManager,
                 mKeyguardManager, mFlags);
         when(mFlags.isEnabled(Flags.OUTPUT_SWITCHER_ADVANCED_LAYOUT)).thenReturn(false);
+        when(mFlags.isEnabled(Flags.OUTPUT_SWITCHER_ROUTES_PROCESSING)).thenReturn(false);
         mLocalMediaManager = spy(mMediaOutputController.mLocalMediaManager);
+        when(mLocalMediaManager.isPreferenceRouteListingExist()).thenReturn(false);
         mMediaOutputController.mLocalMediaManager = mLocalMediaManager;
         MediaDescription.Builder builder = new MediaDescription.Builder();
         builder.setTitle(TEST_SONG);
@@ -167,9 +169,9 @@ public class MediaOutputControllerTest extends SysuiTestCase {
 
 
         when(mNearbyDevice1.getMediaRoute2Id()).thenReturn(TEST_DEVICE_1_ID);
-        when(mNearbyDevice1.getRangeZone()).thenReturn(NearbyDevice.RANGE_CLOSE);
+        when(mNearbyDevice1.getRangeZone()).thenReturn(NearbyDevice.RANGE_FAR);
         when(mNearbyDevice2.getMediaRoute2Id()).thenReturn(TEST_DEVICE_2_ID);
-        when(mNearbyDevice2.getRangeZone()).thenReturn(NearbyDevice.RANGE_FAR);
+        when(mNearbyDevice2.getRangeZone()).thenReturn(NearbyDevice.RANGE_CLOSE);
         mNearbyDevices.add(mNearbyDevice1);
         mNearbyDevices.add(mNearbyDevice2);
     }
@@ -274,8 +276,20 @@ public class MediaOutputControllerTest extends SysuiTestCase {
         mMediaOutputController.onDevicesUpdated(mNearbyDevices);
         mMediaOutputController.onDeviceListUpdate(mMediaDevices);
 
-        verify(mMediaDevice1).setRangeZone(NearbyDevice.RANGE_CLOSE);
-        verify(mMediaDevice2).setRangeZone(NearbyDevice.RANGE_FAR);
+        verify(mMediaDevice1).setRangeZone(NearbyDevice.RANGE_FAR);
+        verify(mMediaDevice2).setRangeZone(NearbyDevice.RANGE_CLOSE);
+    }
+
+    @Test
+    public void onDeviceListUpdate_withNearbyDevices_rankByRangeInformation()
+            throws RemoteException {
+        mMediaOutputController.start(mCb);
+        reset(mCb);
+
+        mMediaOutputController.onDevicesUpdated(mNearbyDevices);
+        mMediaOutputController.onDeviceListUpdate(mMediaDevices);
+
+        assertThat(mMediaDevices.get(0).getId()).isEqualTo(TEST_DEVICE_1_ID);
     }
 
     @Test
@@ -289,6 +303,22 @@ public class MediaOutputControllerTest extends SysuiTestCase {
         assertThat(devices.containsAll(mMediaDevices)).isTrue();
         assertThat(devices.size()).isEqualTo(mMediaDevices.size());
         verify(mCb).onDeviceListChanged();
+    }
+
+    @Test
+    public void routeProcessSupport_onDeviceListUpdate_preferenceExist_NotUpdatesRangeInformation()
+            throws RemoteException {
+        when(mLocalMediaManager.isPreferenceRouteListingExist()).thenReturn(true);
+        when(mFlags.isEnabled(Flags.OUTPUT_SWITCHER_ROUTES_PROCESSING)).thenReturn(true);
+        when(mFlags.isEnabled(Flags.OUTPUT_SWITCHER_ADVANCED_LAYOUT)).thenReturn(true);
+        mMediaOutputController.start(mCb);
+        reset(mCb);
+
+        mMediaOutputController.onDevicesUpdated(mNearbyDevices);
+        mMediaOutputController.onDeviceListUpdate(mMediaDevices);
+
+        verify(mMediaDevice1, never()).setRangeZone(anyInt());
+        verify(mMediaDevice2, never()).setRangeZone(anyInt());
     }
 
     @Test

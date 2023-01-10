@@ -509,9 +509,14 @@ class LockscreenShadeTransitionController @Inject constructor(
      * If secure with redaction: Show bouncer, go to unlocked shade.
      * If secure without redaction or no security: Go to [StatusBarState.SHADE_LOCKED].
      *
+     * Split shade is special case and [needsQSAnimation] will be always overridden to true.
+     * That's because handheld shade will automatically follow notifications animation, but that's
+     * not the case for split shade.
+     *
      * @param expandView The view to expand after going to the shade
      * @param needsQSAnimation if this needs the quick settings to slide in from the top or if
-     *                         that's already handled separately
+     *                         that's already handled separately. This argument will be ignored on
+     *                         split shade as there QS animation can't be handled separately.
      */
     @JvmOverloads
     fun goToLockedShade(expandedView: View?, needsQSAnimation: Boolean = true) {
@@ -519,7 +524,7 @@ class LockscreenShadeTransitionController @Inject constructor(
         logger.logTryGoToLockedShade(isKeyguard)
         if (isKeyguard) {
             val animationHandler: ((Long) -> Unit)?
-            if (needsQSAnimation) {
+            if (needsQSAnimation || useSplitShade) {
                 // Let's use the default animation
                 animationHandler = null
             } else {
