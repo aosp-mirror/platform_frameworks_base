@@ -50,6 +50,8 @@ class SystemState private constructor(
     var privilegedPermissionAllowlistPackages: IndexedListSet<String>,
     var permissionAllowlist: PermissionAllowlist,
     var implicitToSourcePermissions: IndexedMap<String, IndexedListSet<String>>,
+    var isSystemReady: Boolean,
+    // TODO: Get and watch the state for deviceAndProfileOwners
     // Mapping from user ID to package name.
     var deviceAndProfileOwners: IntMap<String>,
     val permissionGroups: IndexedMap<String, PermissionGroupInfo>,
@@ -67,6 +69,7 @@ class SystemState private constructor(
         IndexedListSet(),
         PermissionAllowlist(),
         IndexedMap(),
+        false,
         IntMap(),
         IndexedMap(),
         IndexedMap(),
@@ -85,6 +88,7 @@ class SystemState private constructor(
             privilegedPermissionAllowlistPackages,
             permissionAllowlist,
             implicitToSourcePermissions,
+            isSystemReady,
             deviceAndProfileOwners,
             permissionGroups.copy { it },
             permissionTrees.copy { it },

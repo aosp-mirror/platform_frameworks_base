@@ -255,6 +255,13 @@ class AccessPolicy private constructor(
         }
     }
 
+    fun MutateStateScope.onSystemReady() {
+        newState.systemState.isSystemReady = true
+        forEachSchemePolicy {
+            with(it) { onSystemReady() }
+        }
+    }
+
     fun BinaryXmlPullParser.parseSystemState(state: AccessState) {
         forEachTag {
             when (tagName) {
@@ -361,6 +368,8 @@ abstract class SchemePolicy {
     open fun MutateStateScope.onPackageInstalled(packageState: PackageState, userId: Int) {}
 
     open fun MutateStateScope.onPackageUninstalled(packageName: String, appId: Int, userId: Int) {}
+
+    open fun MutateStateScope.onSystemReady() {}
 
     open fun BinaryXmlPullParser.parseSystemState(state: AccessState) {}
 

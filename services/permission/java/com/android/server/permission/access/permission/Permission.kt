@@ -91,6 +91,9 @@ data class Permission(
     inline val isKnownSigner: Boolean
         get() = protectionFlags.hasBits(PermissionInfo.PROTECTION_FLAG_KNOWN_SIGNER)
 
+    inline val isModule: Boolean
+        get() = protectionFlags.hasBits(PermissionInfo.PROTECTION_FLAG_MODULE)
+
     inline val isOem: Boolean
         get() = protectionFlags.hasBits(PermissionInfo.PROTECTION_FLAG_OEM)
 

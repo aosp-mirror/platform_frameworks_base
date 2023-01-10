@@ -211,6 +211,12 @@ class AccessCheckingService(context: Context) : SystemService(context) {
         }
     }
 
+    internal fun onSystemReady() {
+        mutateState {
+            with(policy) { onSystemReady() }
+        }
+    }
+
     private val PackageManagerLocal.allPackageStates:
         Pair<Map<String, PackageState>, Map<String, PackageState>>
         get() = withUnfilteredSnapshot().use { it.packageStates to it.disabledSystemPackageStates }
