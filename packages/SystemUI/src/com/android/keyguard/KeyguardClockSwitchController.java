@@ -38,8 +38,11 @@ import com.android.systemui.R;
 import com.android.systemui.dagger.qualifiers.Main;
 import com.android.systemui.dump.DumpManager;
 import com.android.systemui.keyguard.KeyguardUnlockAnimationController;
+import com.android.systemui.log.dagger.KeyguardClockLog;
 import com.android.systemui.plugins.ClockAnimations;
 import com.android.systemui.plugins.ClockController;
+import com.android.systemui.plugins.log.LogBuffer;
+import com.android.systemui.plugins.log.LogLevel;
 import com.android.systemui.plugins.statusbar.StatusBarStateController;
 import com.android.systemui.shared.clocks.ClockRegistry;
 import com.android.systemui.statusbar.lockscreen.LockscreenSmartspaceController;
@@ -62,6 +65,8 @@ import javax.inject.Inject;
  */
 public class KeyguardClockSwitchController extends ViewController<KeyguardClockSwitch>
         implements Dumpable {
+    private static final String TAG = "KeyguardClockSwitchController";
+
     private final StatusBarStateController mStatusBarStateController;
     private final ClockRegistry mClockRegistry;
     private final KeyguardSliceViewController mKeyguardSliceViewController;
@@ -70,6 +75,7 @@ public class KeyguardClockSwitchController extends ViewController<KeyguardClockS
     private final SecureSettings mSecureSettings;
     private final DumpManager mDumpManager;
     private final ClockEventController mClockEventController;
+    private final LogBuffer mLogBuffer;
 
     private FrameLayout mSmallClockFrame; // top aligned clock
     private FrameLayout mLargeClockFrame; // centered clock
@@ -119,7 +125,8 @@ public class KeyguardClockSwitchController extends ViewController<KeyguardClockS
             SecureSettings secureSettings,
             @Main Executor uiExecutor,
             DumpManager dumpManager,
-            ClockEventController clockEventController) {
+            ClockEventController clockEventController,
+            @KeyguardClockLog LogBuffer logBuffer) {
         super(keyguardClockSwitch);
         mStatusBarStateController = statusBarStateController;
         mClockRegistry = clockRegistry;
@@ -131,6 +138,8 @@ public class KeyguardClockSwitchController extends ViewController<KeyguardClockS
         mKeyguardUnlockAnimationController = keyguardUnlockAnimationController;
         mDumpManager = dumpManager;
         mClockEventController = clockEventController;
+        mLogBuffer = logBuffer;
+        mView.setLogBuffer(mLogBuffer);
 
         mClockChangedListener = () -> {
             setClock(mClockRegistry.createCurrentClock());
@@ -378,6 +387,10 @@ public class KeyguardClockSwitchController extends ViewController<KeyguardClockS
     }
 
     private void setClock(ClockController clock) {
+        if (clock != null && mLogBuffer != null) {
+            mLogBuffer.log(TAG, LogLevel.INFO, "New Clock");
+        }
+
         mClockEventController.setClock(clock);
         mView.setClock(clock, mStatusBarStateController.getState());
     }

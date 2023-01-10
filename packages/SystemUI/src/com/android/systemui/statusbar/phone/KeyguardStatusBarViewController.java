@@ -45,6 +45,7 @@ import com.android.systemui.R;
 import com.android.systemui.animation.Interpolators;
 import com.android.systemui.battery.BatteryMeterViewController;
 import com.android.systemui.dagger.qualifiers.Main;
+import com.android.systemui.plugins.log.LogLevel;
 import com.android.systemui.plugins.statusbar.StatusBarStateController;
 import com.android.systemui.shade.NotificationPanelViewController;
 import com.android.systemui.statusbar.CommandQueue;
@@ -76,6 +77,7 @@ import javax.inject.Inject;
 
 /** View Controller for {@link com.android.systemui.statusbar.phone.KeyguardStatusBarView}. */
 public class KeyguardStatusBarViewController extends ViewController<KeyguardStatusBarView> {
+    private static final String TAG = "KeyguardStatusBarViewController";
     private static final AnimationProperties KEYGUARD_HUN_PROPERTIES =
             new AnimationProperties().setDuration(StackStateAnimator.ANIMATION_DURATION_STANDARD);
 
@@ -422,7 +424,7 @@ public class KeyguardStatusBarViewController extends ViewController<KeyguardStat
 
     /** Animate the keyguard status bar in. */
     public void animateKeyguardStatusBarIn() {
-        mLogger.d("animating status bar in");
+        mLogger.log(TAG, LogLevel.DEBUG, "animating status bar in");
         if (mDisableStateTracker.isDisabled()) {
             // If our view is disabled, don't allow us to animate in.
             return;
@@ -438,7 +440,7 @@ public class KeyguardStatusBarViewController extends ViewController<KeyguardStat
 
     /** Animate the keyguard status bar out. */
     public void animateKeyguardStatusBarOut(long startDelay, long duration) {
-        mLogger.d("animating status bar out");
+        mLogger.log(TAG, LogLevel.DEBUG, "animating status bar out");
         ValueAnimator anim = ValueAnimator.ofFloat(mView.getAlpha(), 0f);
         anim.addUpdateListener(mAnimatorUpdateListener);
         anim.setStartDelay(startDelay);
