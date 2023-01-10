@@ -14,11 +14,13 @@
  * limitations under the License.
  */
 
-package com.android.server.locksettings.recoverablekeystore;
+package com.android.security;
 
 import android.annotation.Nullable;
+
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.util.ArrayUtils;
+
 import java.math.BigInteger;
 import java.nio.BufferUnderflowException;
 import java.nio.ByteBuffer;
@@ -41,6 +43,7 @@ import java.security.spec.ECPublicKeySpec;
 import java.security.spec.EllipticCurve;
 import java.security.spec.InvalidKeySpecException;
 import java.util.Arrays;
+
 import javax.crypto.AEADBadTagException;
 import javax.crypto.BadPaddingException;
 import javax.crypto.Cipher;
@@ -380,7 +383,7 @@ public class SecureBox {
      * @param publicKey The public key.
      * @return The key packed into a 65-byte array.
      */
-    static byte[] encodePublicKey(PublicKey publicKey) {
+    public static byte[] encodePublicKey(PublicKey publicKey) {
         ECPoint point = ((ECPublicKey) publicKey).getW();
         byte[] x = point.getAffineX().toByteArray();
         byte[] y = point.getAffineY().toByteArray();
@@ -394,8 +397,13 @@ public class SecureBox {
         return output;
     }
 
-    @VisibleForTesting
-    static PublicKey decodePublicKey(byte[] keyBytes)
+    /**
+     * Decodes byte[] encoded public key.
+     *
+     * @param keyBytes encoded public key
+     * @return the public key
+     */
+    public static PublicKey decodePublicKey(byte[] keyBytes)
             throws NoSuchAlgorithmException, InvalidKeyException {
         BigInteger x =
                 new BigInteger(

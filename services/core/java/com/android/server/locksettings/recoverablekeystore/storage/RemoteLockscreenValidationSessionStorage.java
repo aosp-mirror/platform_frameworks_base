@@ -23,7 +23,7 @@ import android.util.Log;
 import android.util.SparseArray;
 
 import com.android.internal.annotations.VisibleForTesting;
-import com.android.server.locksettings.recoverablekeystore.SecureBox;
+import com.android.security.SecureBox;
 
 import java.security.KeyPair;
 import java.security.NoSuchAlgorithmException;
