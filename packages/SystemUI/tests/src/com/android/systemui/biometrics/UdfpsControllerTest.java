@@ -81,6 +81,7 @@ import com.android.systemui.dump.DumpManager;
 import com.android.systemui.flags.FeatureFlags;
 import com.android.systemui.flags.Flags;
 import com.android.systemui.keyguard.ScreenLifecycle;
+import com.android.systemui.keyguard.domain.interactor.AlternateBouncerInteractor;
 import com.android.systemui.keyguard.domain.interactor.PrimaryBouncerInteractor;
 import com.android.systemui.plugins.FalsingManager;
 import com.android.systemui.plugins.statusbar.StatusBarStateController;
@@ -202,6 +203,8 @@ public class UdfpsControllerTest extends SysuiTestCase {
     private PrimaryBouncerInteractor mPrimaryBouncerInteractor;
     @Mock
     private SinglePointerTouchProcessor mSinglePointerTouchProcessor;
+    @Mock
+    private AlternateBouncerInteractor mAlternateBouncerInteractor;
 
     // Capture listeners so that they can be used to send events
     @Captor
@@ -292,7 +295,8 @@ public class UdfpsControllerTest extends SysuiTestCase {
                 mDisplayManager, mHandler, mConfigurationController, mSystemClock,
                 mUnlockedScreenOffAnimationController, mSystemUIDialogManager, mLatencyTracker,
                 mActivityLaunchAnimator, alternateTouchProvider, mBiometricExecutor,
-                mPrimaryBouncerInteractor, mSinglePointerTouchProcessor);
+                mPrimaryBouncerInteractor, mSinglePointerTouchProcessor,
+                mAlternateBouncerInteractor);
         verify(mFingerprintManager).setUdfpsOverlayController(mOverlayCaptor.capture());
         mOverlayController = mOverlayCaptor.getValue();
         verify(mScreenLifecycle).addObserver(mScreenObserverCaptor.capture());
@@ -406,7 +410,7 @@ public class UdfpsControllerTest extends SysuiTestCase {
         // GIVEN overlay was showing and the udfps bouncer is showing
         mOverlayController.showUdfpsOverlay(TEST_REQUEST_ID, mOpticalProps.sensorId,
                 BiometricOverlayConstants.REASON_AUTH_KEYGUARD, mUdfpsOverlayControllerCallback);
-        when(mStatusBarKeyguardViewManager.isShowingAlternateBouncer()).thenReturn(true);
+        when(mAlternateBouncerInteractor.isVisibleState()).thenReturn(true);
 
         // WHEN the overlay is hidden
         mOverlayController.hideUdfpsOverlay(mOpticalProps.sensorId);
