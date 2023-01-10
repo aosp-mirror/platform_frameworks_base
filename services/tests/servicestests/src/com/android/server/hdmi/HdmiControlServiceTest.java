@@ -119,6 +119,7 @@ public class HdmiControlServiceTest {
 
         mHdmiControlServiceSpy.setIoLooper(mMyLooper);
         mHdmiControlServiceSpy.setHdmiCecConfig(hdmiCecConfig);
+        mHdmiControlServiceSpy.setDeviceConfig(new FakeDeviceConfigWrapper());
         mHdmiControlServiceSpy.onBootPhase(PHASE_SYSTEM_SERVICES_READY);
 
         mNativeWrapper = new FakeNativeWrapper();
