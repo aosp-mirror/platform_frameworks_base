@@ -22,6 +22,8 @@ import static android.view.WindowManager.TRANSIT_OPEN;
 import static android.view.WindowManager.TRANSIT_TO_BACK;
 import static android.view.WindowManager.TRANSIT_TO_FRONT;
 
+import static com.android.wm.shell.splitscreen.SplitScreen.STAGE_TYPE_MAIN;
+import static com.android.wm.shell.splitscreen.SplitScreen.STAGE_TYPE_UNDEFINED;
 import static com.android.wm.shell.splitscreen.SplitScreen.stageTypeToString;
 import static com.android.wm.shell.splitscreen.SplitScreenController.EXIT_REASON_DRAG_DIVIDER;
 import static com.android.wm.shell.splitscreen.SplitScreenController.exitReasonToString;
@@ -179,6 +181,33 @@ class SplitScreenTransitions {
         onFinish(null /* wct */, null /* wctCB */);
     }
 
+    void applyDismissTransition(@NonNull IBinder transition, @NonNull TransitionInfo info,
+            @NonNull SurfaceControl.Transaction startTransaction,
+            @NonNull SurfaceControl.Transaction finishTransaction,
+            @NonNull Transitions.TransitionFinishCallback finishCallback,
+            @NonNull WindowContainerToken topRoot,
+            @NonNull WindowContainerToken mainRoot, @NonNull WindowContainerToken sideRoot,
+            @NonNull SplitDecorManager mainDecor, @NonNull SplitDecorManager sideDecor) {
+        if (mPendingDismiss.mDismissTop != STAGE_TYPE_UNDEFINED) {
+            mFinishCallback = finishCallback;
+            mAnimatingTransition = transition;
+            mFinishTransaction = finishTransaction;
+
+            final SplitDecorManager topDecor = mPendingDismiss.mDismissTop == STAGE_TYPE_MAIN
+                    ? mainDecor : sideDecor;
+            topDecor.fadeOutDecor(() -> {
+                mTransitions.getMainExecutor().execute(() -> {
+                    onFinish(null /* wct */, null /* wctCB */);
+                });
+            });
+
+            startTransaction.apply();
+        } else {
+            playAnimation(transition, info, startTransaction, finishTransaction,
+                    finishCallback, mainRoot, sideRoot, topRoot);
+        }
+    }
+
     void applyResizeTransition(@NonNull IBinder transition, @NonNull TransitionInfo info,
             @NonNull SurfaceControl.Transaction startTransaction,
             @NonNull SurfaceControl.Transaction finishTransaction,
@@ -200,8 +229,11 @@ class SplitScreenTransitions {
 
                 SplitDecorManager decor = mainRoot.equals(change.getContainer())
                         ? mainDecor : sideDecor;
+
+                // This is to ensure onFinished be called after all animations ended.
                 ValueAnimator va = new ValueAnimator();
                 mAnimations.add(va);
+
                 decor.setScreenshotIfNeeded(change.getSnapshot(), startTransaction);
                 decor.onResized(startTransaction, () -> {
                     mTransitions.getMainExecutor().execute(() -> {

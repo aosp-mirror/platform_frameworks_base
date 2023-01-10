@@ -1296,8 +1296,18 @@ public class StageCoordinator implements SplitLayout.SplitLayoutHandler,
     private void prepareExitSplitScreen(@StageType int stageToTop,
             @NonNull WindowContainerTransaction wct) {
         if (!mMainStage.isActive()) return;
-        mSideStage.removeAllTasks(wct, stageToTop == STAGE_TYPE_SIDE);
-        mMainStage.deactivate(wct, stageToTop == STAGE_TYPE_MAIN);
+        // Set the dismiss-to-top side to fullscreen for dismiss transition.
+        // Reparent the non-dismiss-to-top side to properly update its visibility.
+        if (stageToTop == STAGE_TYPE_MAIN) {
+            wct.setBounds(mMainStage.mRootTaskInfo.token, null /* bounds */);
+            mSideStage.removeAllTasks(wct, false /* toTop */);
+        } else if (stageToTop == STAGE_TYPE_SIDE) {
+            wct.setBounds(mSideStage.mRootTaskInfo.token, null /* bounds */);
+            mMainStage.deactivate(wct, false /* toTop */);
+        } else {
+            mSideStage.removeAllTasks(wct, false /* toTop */);
+            mMainStage.deactivate(wct, false /* toTop */);
+        }
     }
 
     private void prepareEnterSplitScreen(WindowContainerTransaction wct) {
@@ -2214,6 +2224,13 @@ public class StageCoordinator implements SplitLayout.SplitLayoutHandler,
         } else if (mSplitTransitions.isPendingDismiss(transition)) {
             shouldAnimate = startPendingDismissAnimation(
                     mSplitTransitions.mPendingDismiss, info, startTransaction, finishTransaction);
+            if (shouldAnimate) {
+                mSplitTransitions.applyDismissTransition(transition, info,
+                        startTransaction, finishTransaction, finishCallback, mRootTaskInfo.token,
+                        mMainStage.mRootTaskInfo.token, mSideStage.mRootTaskInfo.token,
+                        mMainStage.getSplitDecorManager(), mSideStage.getSplitDecorManager());
+                return true;
+            }
         } else if (mSplitTransitions.isPendingResize(transition)) {
             mSplitTransitions.applyResizeTransition(transition, info, startTransaction,
                     finishTransaction, finishCallback, mMainStage.mRootTaskInfo.token,
@@ -2317,37 +2334,44 @@ public class StageCoordinator implements SplitLayout.SplitLayoutHandler,
         // aren't serialized with transition callbacks.
         // TODO(b/184679596): Find a way to either include task-org information in
         //                    the transition, or synchronize task-org callbacks.
-        if (mMainStage.getChildCount() != 0) {
-            final StringBuilder tasksLeft = new StringBuilder();
-            for (int i = 0; i < mMainStage.getChildCount(); ++i) {
-                tasksLeft.append(i != 0 ? ", " : "");
-                tasksLeft.append(mMainStage.mChildrenTaskInfo.keyAt(i));
+        if (toStage == STAGE_TYPE_UNDEFINED) {
+            if (mMainStage.getChildCount() != 0) {
+                final StringBuilder tasksLeft = new StringBuilder();
+                for (int i = 0; i < mMainStage.getChildCount(); ++i) {
+                    tasksLeft.append(i != 0 ? ", " : "");
+                    tasksLeft.append(mMainStage.mChildrenTaskInfo.keyAt(i));
+                }
+                Log.w(TAG, "Expected onTaskVanished on " + mMainStage
+                        + " to have been called with [" + tasksLeft.toString()
+                        + "] before startAnimation().");
             }
-            Log.w(TAG, "Expected onTaskVanished on " + mMainStage
-                    + " to have been called with [" + tasksLeft.toString()
-                    + "] before startAnimation().");
-        }
-        if (mSideStage.getChildCount() != 0) {
-            final StringBuilder tasksLeft = new StringBuilder();
-            for (int i = 0; i < mSideStage.getChildCount(); ++i) {
-                tasksLeft.append(i != 0 ? ", " : "");
-                tasksLeft.append(mSideStage.mChildrenTaskInfo.keyAt(i));
+            if (mSideStage.getChildCount() != 0) {
+                final StringBuilder tasksLeft = new StringBuilder();
+                for (int i = 0; i < mSideStage.getChildCount(); ++i) {
+                    tasksLeft.append(i != 0 ? ", " : "");
+                    tasksLeft.append(mSideStage.mChildrenTaskInfo.keyAt(i));
+                }
+                Log.w(TAG, "Expected onTaskVanished on " + mSideStage
+                        + " to have been called with [" + tasksLeft.toString()
+                        + "] before startAnimation().");
             }
-            Log.w(TAG, "Expected onTaskVanished on " + mSideStage
-                    + " to have been called with [" + tasksLeft.toString()
-                    + "] before startAnimation().");
         }
 
         mRecentTasks.ifPresent(recentTasks -> {
             // Notify recents if we are exiting in a way that breaks the pair, and disable further
             // updates to splits in the recents until we enter split again
             if (shouldBreakPairedTaskInRecents(dismissReason) && mShouldUpdateRecents) {
-                for (TransitionInfo.Change change : info.getChanges()) {
-                    final ActivityManager.RunningTaskInfo taskInfo = change.getTaskInfo();
-                    if (taskInfo != null
-                            && taskInfo.getWindowingMode() == WINDOWING_MODE_FULLSCREEN) {
-                        recentTasks.removeSplitPair(taskInfo.taskId);
+                if (toStage == STAGE_TYPE_UNDEFINED) {
+                    for (TransitionInfo.Change change : info.getChanges()) {
+                        final ActivityManager.RunningTaskInfo taskInfo = change.getTaskInfo();
+                        if (taskInfo != null
+                                && taskInfo.getWindowingMode() == WINDOWING_MODE_FULLSCREEN) {
+                            recentTasks.removeSplitPair(taskInfo.taskId);
+                        }
                     }
+                } else {
+                    recentTasks.removeSplitPair(mMainStage.getTopVisibleChildTaskId());
+                    recentTasks.removeSplitPair(mSideStage.getTopVisibleChildTaskId());
                 }
             }
         });
@@ -2360,6 +2384,12 @@ public class StageCoordinator implements SplitLayout.SplitLayoutHandler,
         // Reset crops so they don't interfere with subsequent launches
         t.setCrop(mMainStage.mRootLeash, null);
         t.setCrop(mSideStage.mRootLeash, null);
+        // Hide the non-top stage and set the top one to the fullscreen position.
+        if (toStage != STAGE_TYPE_UNDEFINED) {
+            t.hide(toStage == STAGE_TYPE_MAIN ? mSideStage.mRootLeash : mMainStage.mRootLeash);
+            t.setPosition(toStage == STAGE_TYPE_MAIN
+                    ? mMainStage.mRootLeash : mSideStage.mRootLeash, 0, 0);
+        }
 
         if (toStage == STAGE_TYPE_UNDEFINED) {
             logExit(dismissReason);
@@ -2386,6 +2416,18 @@ public class StageCoordinator implements SplitLayout.SplitLayoutHandler,
             mSplitLayout.release(t);
             mSplitTransitions.mPendingDismiss = null;
             return false;
+        } else {
+            final @SplitScreen.StageType int dismissTop = dismissTransition.mDismissTop;
+            // Reparent all tasks after dismiss transition finished.
+            dismissTransition.setFinishedCallback(
+                    new SplitScreenTransitions.TransitionFinishedCallback() {
+                        @Override
+                        public void onFinished(WindowContainerTransaction wct,
+                                SurfaceControl.Transaction t) {
+                            mSideStage.removeAllTasks(wct, dismissTop == STAGE_TYPE_SIDE);
+                            mMainStage.deactivate(wct, dismissTop == STAGE_TYPE_MAIN);
+                        }
+                    });
         }
 
         addDividerBarToTransition(info, finishT, false /* show */);
