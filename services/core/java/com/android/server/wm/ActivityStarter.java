@@ -60,6 +60,7 @@ import static android.window.WindowContainerTransaction.HierarchyOp.HIERARCHY_OP
 
 import static com.android.internal.protolog.ProtoLogGroup.WM_DEBUG_CONFIGURATION;
 import static com.android.internal.protolog.ProtoLogGroup.WM_DEBUG_TASKS;
+import static com.android.server.wm.ActivityRecord.State.FINISHING;
 import static com.android.server.wm.ActivityRecord.State.RESUMED;
 import static com.android.server.wm.ActivityTaskManagerDebugConfig.DEBUG_PERMISSIONS_REVIEW;
 import static com.android.server.wm.ActivityTaskManagerDebugConfig.DEBUG_RESULTS;
@@ -74,7 +75,12 @@ import static com.android.server.wm.ActivityTaskManagerService.ANIMATE;
 import static com.android.server.wm.ActivityTaskSupervisor.DEFER_RESUME;
 import static com.android.server.wm.ActivityTaskSupervisor.ON_TOP;
 import static com.android.server.wm.ActivityTaskSupervisor.PRESERVE_WINDOWS;
+import static com.android.server.wm.BackgroundActivityStartController.BAL_ALLOW_ALLOWLISTED_COMPONENT;
+import static com.android.server.wm.BackgroundActivityStartController.BAL_ALLOW_ALLOWLISTED_UID;
+import static com.android.server.wm.BackgroundActivityStartController.BAL_ALLOW_BAL_PERMISSION;
 import static com.android.server.wm.BackgroundActivityStartController.BAL_ALLOW_DEFAULT;
+import static com.android.server.wm.BackgroundActivityStartController.BAL_ALLOW_PENDING_INTENT;
+import static com.android.server.wm.BackgroundActivityStartController.BAL_ALLOW_VISIBLE_WINDOW;
 import static com.android.server.wm.BackgroundActivityStartController.BAL_BLOCK;
 import static com.android.server.wm.LaunchParamsController.LaunchParamsModifier.PHASE_BOUNDS;
 import static com.android.server.wm.LaunchParamsController.LaunchParamsModifier.PHASE_DISPLAY;
@@ -152,6 +158,7 @@ class ActivityStarter {
     private static final String TAG_FOCUS = TAG + POSTFIX_FOCUS;
     private static final String TAG_CONFIGURATION = TAG + POSTFIX_CONFIGURATION;
     private static final String TAG_USER_LEAVING = TAG + POSTFIX_USER_LEAVING;
+
     private static final int INVALID_LAUNCH_MODE = -1;
 
     /**
@@ -1851,62 +1858,114 @@ class ActivityStarter {
             }
         }
 
-        // Log activity starts which violate one of the following rules of the
-        // activity security model (ASM):
-        // 1. Only the top activity on a task can start activities on that task
-        // 2. Only the top activity on the top task can create new (top) tasks
-        // We don't currently block, but these checks may later become blocks
-        // TODO(b/236234252): Shift to BackgroundActivityStartController once
-        // class is ready
-        if (mSourceRecord != null) {
-            int callerUid = mSourceRecord.getUid();
-            ActivityRecord targetTopActivity =
-                    targetTask != null ? targetTask.getTopNonFinishingActivity() : null;
-            boolean passesAsmChecks = newTask
-                    ? mService.mVisibleActivityProcessTracker.hasResumedActivity(callerUid)
-                    : targetTopActivity != null && targetTopActivity.getUid() == callerUid;
-
-            if (!passesAsmChecks) {
-                Slog.i(TAG, "Launching r: " + r
-                        + " from background: " + mSourceRecord
-                        + ". New task: " + newTask);
-                boolean newOrEmptyTask = newTask || (targetTopActivity == null);
-                int action = newTask
-                        ? FrameworkStatsLog.ACTIVITY_ACTION_BLOCKED__ACTION__ACTIVITY_START_NEW_TASK
-                        : (mSourceRecord.getTask().equals(targetTask)
-                                ? FrameworkStatsLog.ACTIVITY_ACTION_BLOCKED__ACTION__ACTIVITY_START_SAME_TASK
-                                :  FrameworkStatsLog.ACTIVITY_ACTION_BLOCKED__ACTION__ACTIVITY_START_DIFFERENT_TASK);
-                FrameworkStatsLog.write(FrameworkStatsLog.ACTIVITY_ACTION_BLOCKED,
-                        /* caller_uid */
-                        callerUid,
-                        /* caller_activity_class_name */
-                        mSourceRecord.info.name,
-                        /* target_task_top_activity_uid */
-                        newOrEmptyTask ? -1 : targetTopActivity.getUid(),
-                        /* target_task_top_activity_class_name */
-                        newOrEmptyTask ? null : targetTopActivity.info.name,
-                        /* target_task_is_different */
-                        newTask || !mSourceRecord.getTask().equals(targetTask),
-                        /* target_activity_uid */
-                        r.getUid(),
-                        /* target_activity_class_name */
-                        r.info.name,
-                        /* target_intent_action */
-                        r.intent.getAction(),
-                        /* target_intent_flags */
-                        r.intent.getFlags(),
-                        /* action */
-                        action,
-                        /* version */
-                        1,
-                        /* multi_window */
-                        targetTask != null && !targetTask.equals(mSourceRecord.getTask())
-                                && targetTask.isVisible()
-                );
-            }
+        if (!checkActivitySecurityModel(r, newTask, targetTask)) {
+            return START_SUCCESS;
         }
 
         return START_SUCCESS;
+    }
+
+    /**
+     * TODO(b/263368846): Shift to BackgroundActivityStartController once class is ready
+     * Log activity starts which violate one of the following rules of the
+     * activity security model (ASM):
+     * See go/activity-security for rationale behind the rules.
+     * We don't currently block, but these checks may later become blocks
+     * 1. Within a task, only an activity matching a top UID of the task can start activities
+     * 2. Only activities within a foreground task, which match a top UID of the task, can
+     * create a new task or bring an existing one into the foreground
+     */
+    private boolean checkActivitySecurityModel(ActivityRecord r, boolean newTask, Task targetTask) {
+        // Intents with FLAG_ACTIVITY_NEW_TASK will always be considered as creating a new task
+        // even if the intent is delivered to an existing task.
+        boolean taskToFront = newTask
+                || (mLaunchFlags & FLAG_ACTIVITY_NEW_TASK) == FLAG_ACTIVITY_NEW_TASK;
+
+        if (mSourceRecord != null) {
+            boolean passesAsmChecks = true;
+            Task sourceTask = mSourceRecord.getTask();
+
+            // Don't allow launches into a new task if the current task is not foreground.
+            if (taskToFront) {
+                passesAsmChecks = sourceTask != null && sourceTask.isVisible();
+            }
+
+            Task taskToCheck = taskToFront ? sourceTask : targetTask;
+            passesAsmChecks = passesAsmChecks && ActivityTaskSupervisor
+                    .doesTopActivityMatchingUidExistForAsm(taskToCheck, mSourceRecord.getUid(),
+                            mSourceRecord);
+
+            if (passesAsmChecks) {
+                return true;
+            }
+        }
+
+        // BAL exception only allowed for new tasks
+        if (taskToFront) {
+            if (mBalCode == BAL_ALLOW_ALLOWLISTED_COMPONENT
+                    || mBalCode == BAL_ALLOW_BAL_PERMISSION
+                    || mBalCode == BAL_ALLOW_PENDING_INTENT) {
+                return true;
+            }
+        }
+
+        // BAL Exception allowed in all cases
+        if (mBalCode == BAL_ALLOW_ALLOWLISTED_UID) {
+            return true;
+        }
+
+        // TODO(b/230590090): Revisit this - ideally we would not rely on visibility, but rather
+        // have an explicit api for activities to opt-out of ASM protection if they need to.
+        if (mBalCode == BAL_ALLOW_VISIBLE_WINDOW) {
+            return true;
+        }
+
+        // ASM rules have failed. Log why
+        ActivityRecord targetTopActivity = targetTask == null ? null
+                : targetTask.getActivity(ar ->
+                        !ar.isState(FINISHING) && !ar.isAlwaysOnTop());
+
+        Slog.i(TAG, "Launching r: " + r
+                + " from background: " + mSourceRecord
+                + ". New task: " + newTask
+                + ". Top activity: " + targetTopActivity);
+
+        int action = newTask || mSourceRecord == null
+                ? FrameworkStatsLog.ACTIVITY_ACTION_BLOCKED__ACTION__ACTIVITY_START_NEW_TASK
+                : (mSourceRecord.getTask().equals(targetTask)
+                        ? FrameworkStatsLog.ACTIVITY_ACTION_BLOCKED__ACTION__ACTIVITY_START_SAME_TASK
+                        :  FrameworkStatsLog.ACTIVITY_ACTION_BLOCKED__ACTION__ACTIVITY_START_DIFFERENT_TASK);
+
+        FrameworkStatsLog.write(FrameworkStatsLog.ACTIVITY_ACTION_BLOCKED,
+                /* caller_uid */
+                mSourceRecord != null ? mSourceRecord.getUid() : -1,
+                /* caller_activity_class_name */
+                mSourceRecord != null ? mSourceRecord.info.name : null,
+                /* target_task_top_activity_uid */
+                targetTopActivity != null ? targetTopActivity.getUid() : -1,
+                /* target_task_top_activity_class_name */
+                targetTopActivity != null ? targetTopActivity.info.name : null,
+                /* target_task_is_different */
+                newTask || mSourceRecord == null || targetTask == null
+                        || !targetTask.equals(mSourceRecord.getTask()),
+                /* target_activity_uid */
+                r.getUid(),
+                /* target_activity_class_name */
+                r.info.name,
+                /* target_intent_action */
+                r.intent.getAction(),
+                /* target_intent_flags */
+                mLaunchFlags,
+                /* action */
+                action,
+                /* version */
+                1,
+                /* multi_window - we have our source not in the target task, but both are visible */
+                targetTask != null && mSourceRecord != null
+                        && !targetTask.equals(mSourceRecord.getTask()) && targetTask.isVisible()
+        );
+
+        return false;
     }
 
     /**

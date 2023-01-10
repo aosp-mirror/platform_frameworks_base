@@ -51,6 +51,7 @@ import static android.view.WindowManager.TRANSIT_TO_FRONT;
 
 import static com.android.internal.protolog.ProtoLogGroup.WM_DEBUG_STATES;
 import static com.android.internal.protolog.ProtoLogGroup.WM_DEBUG_TASKS;
+import static com.android.server.wm.ActivityRecord.State.FINISHING;
 import static com.android.server.wm.ActivityRecord.State.PAUSED;
 import static com.android.server.wm.ActivityRecord.State.PAUSING;
 import static com.android.server.wm.ActivityRecord.State.RESTARTING_PROCESS;
@@ -157,6 +158,7 @@ import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.function.Consumer;
+import java.util.function.Predicate;
 
 // TODO: This class has become a dumping ground. Let's
 // - Move things relating to the hierarchy to RootWindowContainer
@@ -1629,10 +1631,11 @@ public class ActivityTaskSupervisor implements RecentTasks.Callbacks {
         // cleared the calling identify. If so, we infer we do not need further restrictions here.
         // TODO(b/263368846) Move to live with the rest of the ASM logic.
         if (callingUid != SYSTEM_UID) {
-            ActivityRecord topActivity = task.getTopNonFinishingActivity();
-            boolean passesAsmChecks = topActivity != null
-                    && topActivity.getUid() == callingUid;
+            boolean passesAsmChecks = doesTopActivityMatchingUidExistForAsm(task, callingUid,
+                    null);
             if (!passesAsmChecks) {
+                ActivityRecord topActivity =  task.getActivity(ar ->
+                        !ar.isState(FINISHING) && !ar.isAlwaysOnTop());
                 Slog.i(TAG, "Finishing task from background. t: " + task);
                 FrameworkStatsLog.write(FrameworkStatsLog.ACTIVITY_ACTION_BLOCKED,
                         /* caller_uid */
@@ -1675,6 +1678,57 @@ public class ActivityTaskSupervisor implements RecentTasks.Callbacks {
         } finally {
             task.mInRemoveTask = false;
         }
+    }
+
+    /**
+     *  For the purpose of ASM, ‘Top UID” for a task is defined as an activity UID
+     *  1. Which is top of the stack in z-order
+     *      a. Excluding any activities with the flag ‘isAlwaysOnTop’ and
+     *      b. Excluding any activities which are `finishing`
+     *  2. Or top of an adjacent task fragment to (1)
+     *
+     *  The 'sourceRecord' can be considered top even if it is 'finishing'
+     *
+     *  TODO(b/263368846) Shift to BackgroundActivityStartController once class is ready
+     */
+    @Nullable
+    static boolean doesTopActivityMatchingUidExistForAsm(@Nullable Task task,
+            int uid, @Nullable ActivityRecord sourceRecord) {
+        // If the source is visible, consider it 'top'.
+        if (sourceRecord != null && sourceRecord.isVisible()) {
+            return true;
+        }
+
+        // Consider the source activity, whether or not it is finishing. Do not consider any other
+        // finishing activity.
+        Predicate<ActivityRecord> topOfStackPredicate = (ar) -> ar.equals(sourceRecord)
+                || (!ar.isState(FINISHING) && !ar.isAlwaysOnTop());
+
+        // Check top of stack (or the first task fragment for embedding).
+        ActivityRecord topActivity = task.getActivity(topOfStackPredicate);
+        if (topActivity == null) {
+            return false;
+        }
+
+        if (topActivity.getUid() == uid) {
+            return true;
+        }
+
+        // Even if the top activity is not a match, we may be in an embedded activity scenario with
+        // an adjacent task fragment. Get the second fragment.
+        TaskFragment taskFragment = topActivity.getTaskFragment();
+        if (taskFragment == null) {
+            return false;
+        }
+
+        TaskFragment adjacentTaskFragment = taskFragment.getAdjacentTaskFragment();
+        if (adjacentTaskFragment == null) {
+            return false;
+        }
+
+        // Check the second fragment.
+        topActivity = adjacentTaskFragment.getActivity(topOfStackPredicate);
+        return topActivity != null && topActivity.getUid() == uid;
     }
 
     void cleanUpRemovedTaskLocked(Task task, boolean killProcess, boolean removeFromRecents) {
