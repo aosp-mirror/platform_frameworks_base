@@ -16,9 +16,6 @@
 
 package com.android.systemui.statusbar.phone;
 
-import static android.view.InsetsState.ITYPE_STATUS_BAR;
-import static android.view.InsetsState.containsType;
-
 import static com.android.systemui.keyguard.WakefulnessLifecycle.WAKEFULNESS_AWAKE;
 import static com.android.systemui.keyguard.WakefulnessLifecycle.WAKEFULNESS_WAKING;
 
@@ -36,8 +33,8 @@ import android.os.VibrationEffect;
 import android.os.Vibrator;
 import android.util.Log;
 import android.util.Slog;
-import android.view.InsetsState.InternalInsetsType;
 import android.view.KeyEvent;
+import android.view.WindowInsets;
 import android.view.WindowInsets.Type.InsetsType;
 import android.view.WindowInsetsController.Appearance;
 import android.view.WindowInsetsController.Behavior;
@@ -168,11 +165,11 @@ public class CentralSurfacesCommandQueueCallbacks implements CommandQueue.Callba
     }
 
     @Override
-    public void abortTransient(int displayId, @InternalInsetsType int[] types) {
+    public void abortTransient(int displayId, @InsetsType int types) {
         if (displayId != mDisplayId) {
             return;
         }
-        if (!containsType(types, ITYPE_STATUS_BAR)) {
+        if ((types & WindowInsets.Type.statusBars()) == 0) {
             return;
         }
         mCentralSurfaces.clearTransient();
@@ -489,12 +486,11 @@ public class CentralSurfacesCommandQueueCallbacks implements CommandQueue.Callba
     }
 
     @Override
-    public void showTransient(int displayId, @InternalInsetsType int[] types,
-            boolean isGestureOnSystemBar) {
+    public void showTransient(int displayId, @InsetsType int types, boolean isGestureOnSystemBar) {
         if (displayId != mDisplayId) {
             return;
         }
-        if (!containsType(types, ITYPE_STATUS_BAR)) {
+        if ((types & WindowInsets.Type.statusBars()) == 0) {
             return;
         }
         mCentralSurfaces.showTransientUnchecked();

@@ -192,13 +192,6 @@ abstract class InsetsSourceProvider {
     }
 
     /**
-     * @return Whether there is a window container which backs this source.
-     */
-    boolean hasWindowContainer() {
-        return mWindowContainer != null;
-    }
-
-    /**
      * The source frame can affect the layout of other windows, so this should be called once the
      * window container gets laid out.
      */
@@ -363,9 +356,9 @@ abstract class InsetsSourceProvider {
     }
 
     /**
-     * @see InsetsStateController#onControlFakeTargetChanged(int, InsetsControlTarget)
+     * @see InsetsStateController#onControlTargetChanged
      */
-    void updateControlForFakeTarget(@Nullable InsetsControlTarget fakeTarget) {
+    void updateFakeControlTarget(@Nullable InsetsControlTarget fakeTarget) {
         if (fakeTarget == mFakeControlTarget) {
             return;
         }
@@ -570,6 +563,10 @@ abstract class InsetsSourceProvider {
         return mControlTarget;
     }
 
+    InsetsControlTarget getFakeControlTarget() {
+        return mFakeControlTarget;
+    }
+
     boolean isClientVisible() {
         return mClientVisible;
     }
@@ -609,15 +606,15 @@ abstract class InsetsSourceProvider {
         }
         if (mControlTarget != null) {
             pw.print(prefix + "mControlTarget=");
-            pw.println(mControlTarget.getWindow());
+            pw.println(mControlTarget);
         }
         if (mPendingControlTarget != null) {
             pw.print(prefix + "mPendingControlTarget=");
-            pw.println(mPendingControlTarget.getWindow());
+            pw.println(mPendingControlTarget);
         }
         if (mFakeControlTarget != null) {
             pw.print(prefix + "mFakeControlTarget=");
-            pw.println(mFakeControlTarget.getWindow());
+            pw.println(mFakeControlTarget);
         }
     }
 

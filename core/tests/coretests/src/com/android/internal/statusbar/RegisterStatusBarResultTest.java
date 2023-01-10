@@ -67,7 +67,7 @@ public class RegisterStatusBarResultTest {
                 BEHAVIOR_SHOW_TRANSIENT_BARS_BY_SWIPE,
                 WindowInsets.Type.defaultVisible(),
                 "test" /* packageName */,
-                new int[0] /* transientBarTypes */,
+                0 /* transientBarTypes */,
                 new LetterboxDetails[] {letterboxDetails});
 
         final RegisterStatusBarResult copy = clone(original);

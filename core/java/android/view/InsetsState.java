@@ -781,19 +781,6 @@ public class InsetsState implements Parcelable {
         }
     }
 
-    public static boolean containsType(@InternalInsetsType int[] types,
-            @InternalInsetsType int type) {
-        if (types == null) {
-            return false;
-        }
-        for (int t : types) {
-            if (t == type) {
-                return true;
-            }
-        }
-        return false;
-    }
-
     public void dump(String prefix, PrintWriter pw) {
         final String newPrefix = prefix + "  ";
         pw.println(prefix + "InsetsState");

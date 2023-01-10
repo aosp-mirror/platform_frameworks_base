@@ -171,9 +171,8 @@ public class DisplayPolicy {
     /** Use the transit animation in style resource (see {@link #selectAnimation}). */
     static final int ANIMATION_STYLEABLE = 0;
 
-    private static final int[] SHOW_TYPES_FOR_SWIPE = {ITYPE_NAVIGATION_BAR, ITYPE_STATUS_BAR,
-            ITYPE_CLIMATE_BAR, ITYPE_EXTRA_NAVIGATION_BAR};
-    private static final int[] SHOW_TYPES_FOR_PANIC = {ITYPE_NAVIGATION_BAR};
+    private static final int SHOW_TYPES_FOR_SWIPE = Type.statusBars() | Type.navigationBars();
+    private static final int SHOW_TYPES_FOR_PANIC = Type.navigationBars();
 
     private final WindowManagerService mService;
     private final Context mContext;
@@ -251,7 +250,7 @@ public class DisplayPolicy {
 
     private boolean mIsFreeformWindowOverlappingWithNavBar;
 
-    private boolean mLastImmersiveMode;
+    private boolean mIsImmersiveMode;
 
     // The windows we were told about in focusChanged.
     private WindowState mFocusedWindow;
@@ -2171,14 +2170,27 @@ public class DisplayPolicy {
         appearance = configureNavBarOpacity(appearance, multiWindowTaskVisible,
                 freeformRootTaskVisible);
 
+        // Show immersive mode confirmation if needed.
+        final boolean wasImmersiveMode = mIsImmersiveMode;
+        final boolean isImmersiveMode = isImmersiveMode(win);
+        if (wasImmersiveMode != isImmersiveMode) {
+            mIsImmersiveMode = isImmersiveMode;
+            // The immersive confirmation window should be attached to the immersive window root.
+            final RootDisplayArea root = win.getRootDisplayArea();
+            final int rootDisplayAreaId = root == null ? FEATURE_UNDEFINED : root.mFeatureId;
+            mImmersiveModeConfirmation.immersiveModeChangedLw(rootDisplayAreaId, isImmersiveMode,
+                    mService.mPolicy.isUserSetupComplete(),
+                    isNavBarEmpty(disableFlags));
+        }
+
+        // Show transient bars for panic if needed.
         final boolean requestHideNavBar = !win.isRequestedVisible(Type.navigationBars());
         final long now = SystemClock.uptimeMillis();
         final boolean pendingPanic = mPendingPanicGestureUptime != 0
                 && now - mPendingPanicGestureUptime <= PANIC_GESTURE_EXPIRATION;
         final DisplayPolicy defaultDisplayPolicy =
                 mService.getDefaultDisplayContentLocked().getDisplayPolicy();
-        if (pendingPanic && requestHideNavBar && win != mNotificationShade
-                && getInsetsPolicy().isHidden(ITYPE_NAVIGATION_BAR)
+        if (pendingPanic && requestHideNavBar && isImmersiveMode
                 // TODO (b/111955725): Show keyguard presentation on all external displays
                 && defaultDisplayPolicy.isKeyguardDrawComplete()) {
             // The user performed the panic gesture recently, we're about to hide the bars,
@@ -2188,19 +2200,6 @@ public class DisplayPolicy {
                 mDisplayContent.getInsetsPolicy().showTransient(SHOW_TYPES_FOR_PANIC,
                         true /* isGestureOnSystemBar */);
             }
-        }
-
-        // update navigation bar
-        boolean oldImmersiveMode = mLastImmersiveMode;
-        boolean newImmersiveMode = isImmersiveMode(win);
-        if (oldImmersiveMode != newImmersiveMode) {
-            mLastImmersiveMode = newImmersiveMode;
-            // The immersive confirmation window should be attached to the immersive window root.
-            final RootDisplayArea root = win.getRootDisplayArea();
-            final int rootDisplayAreaId = root == null ? FEATURE_UNDEFINED : root.mFeatureId;
-            mImmersiveModeConfirmation.immersiveModeChangedLw(rootDisplayAreaId, newImmersiveMode,
-                    mService.mPolicy.isUserSetupComplete(),
-                    isNavBarEmpty(disableFlags));
         }
 
         return appearance;
@@ -2324,18 +2323,10 @@ public class DisplayPolicy {
         if (win == null) {
             return false;
         }
-        return getNavigationBar() != null
-                && canHideNavigationBar()
-                && getInsetsPolicy().isHidden(ITYPE_NAVIGATION_BAR)
-                && win != getNotificationShade()
-                && !win.isActivityTypeDream();
-    }
-
-    /**
-     * @return whether the navigation bar can be hidden, e.g. the device has a navigation bar
-     */
-    private boolean canHideNavigationBar() {
-        return hasNavigationBar();
+        if (win == getNotificationShade() || win.isActivityTypeDream()) {
+            return false;
+        }
+        return getInsetsPolicy().hasHiddenSources(Type.navigationBars());
     }
 
     private static boolean isNavBarEmpty(int systemUiFlags) {
