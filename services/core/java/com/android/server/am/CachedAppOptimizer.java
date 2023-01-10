@@ -1860,7 +1860,10 @@ public final class CachedAppOptimizer {
                                 mLastCompactionStats.remove(pid);
                                 mLastCompactionStats.put(pid, memStats);
                                 mCompactionStatsHistory.add(memStats);
-                                memStats.sendStat();
+                                if (!forceCompaction) {
+                                    // Avoid polluting field metrics with forced compactions.
+                                    memStats.sendStat();
+                                }
                                 break;
                             default:
                                 // We likely missed adding this category, it needs to be added
