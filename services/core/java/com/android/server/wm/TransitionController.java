@@ -35,6 +35,7 @@ import android.os.IRemoteCallback;
 import android.os.RemoteException;
 import android.os.SystemClock;
 import android.os.SystemProperties;
+import android.os.Trace;
 import android.util.ArrayMap;
 import android.util.Slog;
 import android.util.proto.ProtoOutputStream;
@@ -117,7 +118,7 @@ class TransitionController {
      */
     boolean mBuildingFinishLayers = false;
 
-    private final SurfaceControl.Transaction mWakeT = new SurfaceControl.Transaction();
+    private boolean mAnimatingState = false;
 
     TransitionController(ActivityTaskManagerService atm,
             TaskSnapshotController taskSnapshotController,
@@ -623,20 +624,30 @@ class TransitionController {
         mTransitionTracer.logState(transition);
     }
 
+    void updateAnimatingState(SurfaceControl.Transaction t) {
+        final boolean animatingState = !mPlayingTransitions.isEmpty()
+                    || (mCollectingTransition != null && mCollectingTransition.isStarted());
+        if (animatingState && !mAnimatingState) {
+            t.setEarlyWakeupStart();
+            // Usually transitions put quite a load onto the system already (with all the things
+            // happening in app), so pause task snapshot persisting to not increase the load.
+            mAtm.mWindowManager.mSnapshotPersistQueue.setPaused(true);
+            mAnimatingState = true;
+            Trace.asyncTraceBegin(Trace.TRACE_TAG_WINDOW_MANAGER, "transitAnim", 0);
+        } else if (!animatingState && mAnimatingState) {
+            t.setEarlyWakeupEnd();
+            mAtm.mWindowManager.mSnapshotPersistQueue.setPaused(false);
+            mAnimatingState = false;
+            Trace.asyncTraceEnd(Trace.TRACE_TAG_WINDOW_MANAGER, "transitAnim", 0);
+        }
+    }
+
     /** Updates the process state of animation player. */
     private void updateRunningRemoteAnimation(Transition transition, boolean isPlaying) {
         if (mTransitionPlayerProc == null) return;
         if (isPlaying) {
-            mWakeT.setEarlyWakeupStart();
-            mWakeT.apply();
-            // Usually transitions put quite a load onto the system already (with all the things
-            // happening in app), so pause task snapshot persisting to not increase the load.
-            mAtm.mWindowManager.mSnapshotPersistQueue.setPaused(true);
             mTransitionPlayerProc.setRunningRemoteAnimation(true);
         } else if (mPlayingTransitions.isEmpty()) {
-            mWakeT.setEarlyWakeupEnd();
-            mWakeT.apply();
-            mAtm.mWindowManager.mSnapshotPersistQueue.setPaused(false);
             mTransitionPlayerProc.setRunningRemoteAnimation(false);
             mRemotePlayer.clear();
             return;
