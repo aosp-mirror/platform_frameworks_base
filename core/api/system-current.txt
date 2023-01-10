@@ -8596,6 +8596,11 @@ package android.media.tv.tuner.frontend {
     method public int getHierarchy();
     method public long getInnerFec();
     method @NonNull public int[] getInterleaving();
+    method @IntRange(from=0) public int getIptvAverageJitterMillis();
+    method @NonNull public String getIptvContentUrl();
+    method @IntRange(from=0) public long getIptvPacketsLost();
+    method @IntRange(from=0) public long getIptvPacketsReceived();
+    method @IntRange(from=0) public int getIptvWorstJitterMillis();
     method public int getIsdbtMode();
     method public int getIsdbtPartialReceptionFlag();
     method @IntRange(from=0, to=255) @NonNull public int[] getIsdbtSegment();
@@ -8639,6 +8644,11 @@ package android.media.tv.tuner.frontend {
     field public static final int FRONTEND_STATUS_TYPE_GUARD_INTERVAL = 26; // 0x1a
     field public static final int FRONTEND_STATUS_TYPE_HIERARCHY = 19; // 0x13
     field public static final int FRONTEND_STATUS_TYPE_INTERLEAVINGS = 30; // 0x1e
+    field public static final int FRONTEND_STATUS_TYPE_IPTV_AVERAGE_JITTER_MS = 46; // 0x2e
+    field public static final int FRONTEND_STATUS_TYPE_IPTV_CONTENT_URL = 42; // 0x2a
+    field public static final int FRONTEND_STATUS_TYPE_IPTV_PACKETS_LOST = 43; // 0x2b
+    field public static final int FRONTEND_STATUS_TYPE_IPTV_PACKETS_RECEIVED = 44; // 0x2c
+    field public static final int FRONTEND_STATUS_TYPE_IPTV_WORST_JITTER_MS = 45; // 0x2d
     field public static final int FRONTEND_STATUS_TYPE_ISDBT_MODE = 37; // 0x25
     field public static final int FRONTEND_STATUS_TYPE_ISDBT_PARTIAL_RECEPTION_FLAG = 38; // 0x26
     field public static final int FRONTEND_STATUS_TYPE_ISDBT_SEGMENTS = 31; // 0x1f

@@ -2772,6 +2772,52 @@ jobject JTuner::getFrontendStatus(jintArray types) {
                 env->DeleteLocalRef(valObj);
                 break;
             }
+            case FrontendStatus::Tag::iptvContentUrl: {
+                jfieldID field = env->GetFieldID(clazz, "mIptvContentUrl", "Ljava/lang/String;");
+                std::string iptvContentUrl = s.get<FrontendStatus::Tag::iptvContentUrl>();
+                jstring iptvContentUrlUtf8 = env->NewStringUTF(iptvContentUrl.c_str());
+                env->SetObjectField(statusObj, field, iptvContentUrlUtf8);
+                env->DeleteLocalRef(iptvContentUrlUtf8);
+                break;
+            }
+            case FrontendStatus::Tag::iptvPacketsLost: {
+                jfieldID field = env->GetFieldID(clazz, "mIptvPacketsLost", "Ljava/lang/Long;");
+                jobject newLongObj =
+                        env->NewObject(longClazz, initLong,
+                                       s.get<FrontendStatus::Tag::iptvPacketsLost>());
+                env->SetObjectField(statusObj, field, newLongObj);
+                env->DeleteLocalRef(newLongObj);
+                break;
+            }
+            case FrontendStatus::Tag::iptvPacketsReceived: {
+                jfieldID field = env->GetFieldID(clazz, "mIptvPacketsReceived", "Ljava/lang/Long;");
+                jobject newLongObj =
+                        env->NewObject(longClazz, initLong,
+                                       s.get<FrontendStatus::Tag::iptvPacketsReceived>());
+                env->SetObjectField(statusObj, field, newLongObj);
+                env->DeleteLocalRef(newLongObj);
+                break;
+            }
+            case FrontendStatus::Tag::iptvWorstJitterMs: {
+                jfieldID field = env->GetFieldID(clazz, "mIptvWorstJitterMs",
+                                                 "Ljava/lang/Integer;");
+                jobject newIntegerObj =
+                        env->NewObject(intClazz, initInt,
+                                       s.get<FrontendStatus::Tag::iptvWorstJitterMs>());
+                env->SetObjectField(statusObj, field, newIntegerObj);
+                env->DeleteLocalRef(newIntegerObj);
+                break;
+            }
+            case FrontendStatus::Tag::iptvAverageJitterMs: {
+                jfieldID field = env->GetFieldID(clazz, "mIptvAverageJitterMs",
+                                                 "Ljava/lang/Integer;");
+                jobject newIntegerObj =
+                        env->NewObject(intClazz, initInt,
+                                       s.get<FrontendStatus::Tag::iptvAverageJitterMs>());
+                env->SetObjectField(statusObj, field, newIntegerObj);
+                env->DeleteLocalRef(newIntegerObj);
+                break;
+            }
         }
     }
     return statusObj;

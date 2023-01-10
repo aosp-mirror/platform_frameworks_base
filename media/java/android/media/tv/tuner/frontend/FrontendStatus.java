@@ -23,6 +23,7 @@ import android.annotation.SuppressLint;
 import android.annotation.SystemApi;
 import android.media.tv.tuner.Lnb;
 import android.media.tv.tuner.TunerVersionChecker;
+
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.util.Arrays;
@@ -57,7 +58,10 @@ public class FrontendStatus {
             FRONTEND_STATUS_TYPE_IS_MISO_ENABLED, FRONTEND_STATUS_TYPE_IS_LINEAR,
             FRONTEND_STATUS_TYPE_IS_SHORT_FRAMES_ENABLED, FRONTEND_STATUS_TYPE_ISDBT_MODE,
             FRONTEND_STATUS_TYPE_ISDBT_PARTIAL_RECEPTION_FLAG, FRONTEND_STATUS_TYPE_STREAM_IDS,
-            FRONTEND_STATUS_TYPE_DVBT_CELL_IDS, FRONTEND_STATUS_TYPE_ATSC3_ALL_PLP_INFO})
+            FRONTEND_STATUS_TYPE_DVBT_CELL_IDS, FRONTEND_STATUS_TYPE_ATSC3_ALL_PLP_INFO,
+            FRONTEND_STATUS_TYPE_IPTV_CONTENT_URL, FRONTEND_STATUS_TYPE_IPTV_PACKETS_LOST,
+            FRONTEND_STATUS_TYPE_IPTV_PACKETS_RECEIVED, FRONTEND_STATUS_TYPE_IPTV_WORST_JITTER_MS,
+            FRONTEND_STATUS_TYPE_IPTV_AVERAGE_JITTER_MS})
     @Retention(RetentionPolicy.SOURCE)
     public @interface FrontendStatusType {}
 
@@ -269,6 +273,36 @@ public class FrontendStatus {
      */
     public static final int FRONTEND_STATUS_TYPE_DVBT_CELL_IDS =
             android.hardware.tv.tuner.FrontendStatusType.DVBT_CELL_IDS;
+
+    /**
+     * IPTV content URL.
+     */
+    public static final int FRONTEND_STATUS_TYPE_IPTV_CONTENT_URL =
+            android.hardware.tv.tuner.FrontendStatusType.IPTV_CONTENT_URL;
+
+    /**
+     * IPTV packets lost.
+     */
+    public static final int FRONTEND_STATUS_TYPE_IPTV_PACKETS_LOST =
+            android.hardware.tv.tuner.FrontendStatusType.IPTV_PACKETS_LOST;
+
+    /**
+     * IPTV packets received.
+     */
+    public static final int FRONTEND_STATUS_TYPE_IPTV_PACKETS_RECEIVED =
+            android.hardware.tv.tuner.FrontendStatusType.IPTV_PACKETS_RECEIVED;
+
+    /**
+     * IPTV worst jitter.
+     */
+    public static final int FRONTEND_STATUS_TYPE_IPTV_WORST_JITTER_MS =
+            android.hardware.tv.tuner.FrontendStatusType.IPTV_WORST_JITTER_MS;
+
+    /**
+     * IPTV average jitter.
+     */
+    public static final int FRONTEND_STATUS_TYPE_IPTV_AVERAGE_JITTER_MS =
+            android.hardware.tv.tuner.FrontendStatusType.IPTV_AVERAGE_JITTER_MS;
 
     /**
      * All PLP information in a frequency band for ATSC-3.0 frontend, which includes both tuned and
@@ -519,6 +553,11 @@ public class FrontendStatus {
     private int[] mStreamIds;
     private int[] mDvbtCellIds;
     private Atsc3PlpInfo[] mAllPlpInfo;
+    private String mIptvContentUrl;
+    private Long mIptvPacketsLost;
+    private Long mIptvPacketsReceived;
+    private Integer mIptvWorstJitterMs;
+    private Integer mIptvAverageJitterMs;
 
     // Constructed and fields set by JNI code.
     private FrontendStatus() {
@@ -1143,5 +1182,95 @@ public class FrontendStatus {
         public int getUec() {
             return mUec;
         }
+    }
+
+    /**
+     * Gets the IPTV content URL.
+     *
+     * @return A String URL in the format protocol://ip:port (udp://127.0.0.1:3000).
+     *
+     * <p>This query is only supported by Tuner HAL 3.0 or higher. Use
+     * {@link TunerVersionChecker#getTunerVersion()} to check the version.
+     */
+    @NonNull
+    public String getIptvContentUrl() {
+        TunerVersionChecker.checkHigherOrEqualVersionTo(
+                TunerVersionChecker.TUNER_VERSION_3_0, "IptvContentUrl status");
+        if (mIptvContentUrl == null) {
+            throw new IllegalStateException("IptvContentUrl status is empty");
+        }
+        return mIptvContentUrl;
+    }
+
+    /**
+     * Gets the number of packets lost.
+     *
+     * @return A long value representing the number of packets lost in transmission.
+     *
+     * <p>This query is only supported by Tuner HAL 3.0 or higher. Use
+     * {@link TunerVersionChecker#getTunerVersion()} to check the version.
+     */
+    @IntRange(from = 0)
+    public long getIptvPacketsLost() {
+        TunerVersionChecker.checkHigherOrEqualVersionTo(
+                TunerVersionChecker.TUNER_VERSION_3_0, "IptvPacketsLost status");
+        if (mIptvPacketsLost == null) {
+            throw new IllegalStateException("IptvPacketsLost status is empty");
+        }
+        return mIptvPacketsLost;
+    }
+
+    /**
+     * Gets the number of packets received.
+     *
+     * @return A long value representing the number of packets received.
+     *
+     * <p>This query is only supported by Tuner HAL 3.0 or higher. Use
+     * {@link TunerVersionChecker#getTunerVersion()} to check the version.
+     */
+    @IntRange(from = 0)
+    public long getIptvPacketsReceived() {
+        TunerVersionChecker.checkHigherOrEqualVersionTo(
+                TunerVersionChecker.TUNER_VERSION_3_0, "IptvPacketsReceived status");
+        if (mIptvPacketsReceived == null) {
+            throw new IllegalStateException("IptvPacketsReceived status is empty");
+        }
+        return mIptvPacketsReceived;
+    }
+
+    /**
+     * Gets the worst jitter.
+     *
+     * @return An integer representing worst jitter recorded (in milliseconds).
+     *
+     * <p>This query is only supported by Tuner HAL 3.0 or higher. Use
+     * {@link TunerVersionChecker#getTunerVersion()} to check the version.
+     */
+    @IntRange(from = 0)
+    public int getIptvWorstJitterMillis() {
+        TunerVersionChecker.checkHigherOrEqualVersionTo(
+                TunerVersionChecker.TUNER_VERSION_3_0, "IptvWorstJitterMs status");
+        if (mIptvWorstJitterMs == null) {
+            throw new IllegalStateException("IptvWorstJitterMs status is empty");
+        }
+        return mIptvWorstJitterMs;
+    }
+
+    /**
+     * Gets the average jitter.
+     *
+     * @return An integer representing average jitter recorded (in milliseconds).
+     *
+     * <p>This query is only supported by Tuner HAL 3.0 or higher. Use
+     * {@link TunerVersionChecker#getTunerVersion()} to check the version.
+     */
+    @IntRange(from = 0)
+    public int getIptvAverageJitterMillis() {
+        TunerVersionChecker.checkHigherOrEqualVersionTo(
+                TunerVersionChecker.TUNER_VERSION_3_0, "IptvAverageJitterMs status");
+        if (mIptvAverageJitterMs == null) {
+            throw new IllegalStateException("IptvAverageJitterMs status is empty");
+        }
+        return mIptvAverageJitterMs;
     }
 }
