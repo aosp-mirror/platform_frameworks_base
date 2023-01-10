@@ -102,6 +102,7 @@ public final class NotificationTest {
     @After
     public void tearDown() {
         mNotificationManager.cancelAll();
+        mUiDevice.pressHome();
     }
 
     @Test
