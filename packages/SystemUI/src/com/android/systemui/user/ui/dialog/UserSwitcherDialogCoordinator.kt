@@ -133,7 +133,10 @@ constructor(
                     }
                 currentDialog = dialog
 
-                if (request.dialogShower != null && dialogCuj != null) {
+                val controller = request.expandable?.dialogLaunchController(dialogCuj)
+                if (controller != null) {
+                    dialogLaunchAnimator.get().show(dialog, controller)
+                } else if (request.dialogShower != null && dialogCuj != null) {
                     request.dialogShower?.showDialog(dialog, dialogCuj)
                 } else {
                     dialog.show()

@@ -813,7 +813,8 @@ class UserInteractorTest : SysuiTestCase() {
             val job = underTest.dialogShowRequests.onEach { dialogRequest = it }.launchIn(this)
 
             // Dialog is shown.
-            assertThat(dialogRequest).isEqualTo(ShowDialogRequestModel.ShowUserSwitcherDialog)
+            assertThat(dialogRequest)
+                .isEqualTo(ShowDialogRequestModel.ShowUserSwitcherDialog(expandable))
 
             underTest.onDialogShown()
             assertThat(dialogRequest).isNull()
