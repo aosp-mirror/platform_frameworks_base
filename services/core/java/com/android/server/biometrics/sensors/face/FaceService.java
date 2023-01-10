@@ -125,7 +125,7 @@ public class FaceService extends SystemService {
             return proto.getBytes();
         }
 
-        @android.annotation.EnforcePermission(android.Manifest.permission.MANAGE_BIOMETRIC)
+        @android.annotation.EnforcePermission(android.Manifest.permission.USE_BIOMETRIC_INTERNAL)
         @Override // Binder call
         public List<FaceSensorPropertiesInternal> getSensorPropertiesInternal(
                 String opPackageName) {
