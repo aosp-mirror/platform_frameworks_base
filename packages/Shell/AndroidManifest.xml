@@ -793,6 +793,9 @@
     <uses-permission android:name="android.permission.FOREGROUND_SERVICE"/>
     <uses-permission android:name="android.permission.FOREGROUND_SERVICE_SYSTEM_EXEMPTED"/>
 
+    <!-- Permissions required for CTS test - CtsBroadcastRadioTestCases -->
+    <uses-permission android:name="android.permission.ACCESS_BROADCAST_RADIO" />
+
     <application android:label="@string/app_label"
                 android:theme="@android:style/Theme.DeviceDefault.DayNight"
                 android:defaultToDeviceProtectedStorage="true"

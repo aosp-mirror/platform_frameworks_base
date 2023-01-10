@@ -293,6 +293,13 @@ public class PermissionManagerServiceLoggingDecorator implements PermissionManag
 
     @NonNull
     @Override
+    public Set<String> getInstalledPermissions(@NonNull String packageName) {
+        Log.i(LOG_TAG, "getInstalledPermissions(packageName = " + packageName + ")");
+        return mService.getInstalledPermissions(packageName);
+    }
+
+    @NonNull
+    @Override
     public Set<String> getGrantedPermissions(@NonNull String packageName, int userId) {
         Log.i(LOG_TAG, "getGrantedPermissions(packageName = " + packageName + ", userId = "
                 + userId + ")");

@@ -91,6 +91,10 @@ public class AccessibilityShortcutController {
     public static final ComponentName ACCESSIBILITY_BUTTON_COMPONENT_NAME =
             new ComponentName("com.android.server.accessibility", "AccessibilityButton");
 
+    // The component name for the sub setting of Hearing aids in Accessibility settings
+    public static final ComponentName ACCESSIBILITY_HEARING_AIDS_COMPONENT_NAME =
+            new ComponentName("com.android.server.accessibility", "HearingAids");
+
     public static final ComponentName COLOR_INVERSION_TILE_COMPONENT_NAME =
             new ComponentName("com.android.server.accessibility", "ColorInversionTile");
     public static final ComponentName DALTONIZER_TILE_COMPONENT_NAME =
@@ -104,7 +108,7 @@ public class AccessibilityShortcutController {
             .setContentType(AudioAttributes.CONTENT_TYPE_SONIFICATION)
             .setUsage(AudioAttributes.USAGE_ASSISTANCE_ACCESSIBILITY)
             .build();
-    private static Map<ComponentName, ToggleableFrameworkFeatureInfo> sFrameworkShortcutFeaturesMap;
+    private static Map<ComponentName, FrameworkFeatureInfo> sFrameworkShortcutFeaturesMap;
 
     private final Context mContext;
     private final Handler mHandler;
@@ -133,10 +137,10 @@ public class AccessibilityShortcutController {
      * @return An immutable map from placeholder component names to feature
      *         info for toggling a framework feature
      */
-    public static Map<ComponentName, ToggleableFrameworkFeatureInfo>
+    public static Map<ComponentName, FrameworkFeatureInfo>
         getFrameworkShortcutFeaturesMap() {
         if (sFrameworkShortcutFeaturesMap == null) {
-            Map<ComponentName, ToggleableFrameworkFeatureInfo> featuresMap = new ArrayMap<>(4);
+            Map<ComponentName, FrameworkFeatureInfo> featuresMap = new ArrayMap<>(4);
             featuresMap.put(COLOR_INVERSION_COMPONENT_NAME,
                     new ToggleableFrameworkFeatureInfo(
                             Settings.Secure.ACCESSIBILITY_DISPLAY_INVERSION_ENABLED,
@@ -157,6 +161,8 @@ public class AccessibilityShortcutController {
                             Settings.Secure.REDUCE_BRIGHT_COLORS_ACTIVATED,
                             "1" /* Value to enable */, "0" /* Value to disable */,
                             R.string.reduce_bright_colors_feature_name));
+            featuresMap.put(ACCESSIBILITY_HEARING_AIDS_COMPONENT_NAME,
+                    new LaunchableFrameworkFeatureInfo(R.string.hearing_aids_feature_name));
             sFrameworkShortcutFeaturesMap = Collections.unmodifiableMap(featuresMap);
         }
         return sFrameworkShortcutFeaturesMap;
@@ -391,7 +397,7 @@ public class AccessibilityShortcutController {
         if (targetComponentName == null) {
             return null;
         }
-        final ToggleableFrameworkFeatureInfo frameworkFeatureInfo =
+        final FrameworkFeatureInfo frameworkFeatureInfo =
                 getFrameworkShortcutFeaturesMap().get(targetComponentName);
         if (frameworkFeatureInfo != null) {
             return frameworkFeatureInfo.getLabel(mContext);
@@ -670,15 +676,13 @@ public class AccessibilityShortcutController {
     /**
      * Immutable class to hold info about framework features that can be controlled by shortcut
      */
-    public static class ToggleableFrameworkFeatureInfo {
+    public abstract static class FrameworkFeatureInfo {
         private final String mSettingKey;
         private final String mSettingOnValue;
         private final String mSettingOffValue;
         private final int mLabelStringResourceId;
-        // These go to the settings wrapper
-        private int mIconDrawableId;
 
-        ToggleableFrameworkFeatureInfo(String settingKey, String settingOnValue,
+        FrameworkFeatureInfo(String settingKey, String settingOnValue,
                 String settingOffValue, int labelStringResourceId) {
             mSettingKey = settingKey;
             mSettingOnValue = settingOnValue;
@@ -696,7 +700,7 @@ public class AccessibilityShortcutController {
         /**
          * @return The value to write to settings to turn the feature on
          */
-        public String getSettingOnValue() {
+        public String getSettingOnValue()  {
             return mSettingOnValue;
         }
 
@@ -709,6 +713,29 @@ public class AccessibilityShortcutController {
 
         public String getLabel(Context context) {
             return context.getString(mLabelStringResourceId);
+        }
+    }
+    /**
+     * Immutable class to hold framework features that have on/off state settings key and can be
+     * controlled by shortcut.
+     */
+    public static class ToggleableFrameworkFeatureInfo extends FrameworkFeatureInfo {
+
+        ToggleableFrameworkFeatureInfo(String settingKey, String settingOnValue,
+                String settingOffValue, int labelStringResourceId) {
+            super(settingKey, settingOnValue, settingOffValue, labelStringResourceId);
+        }
+    }
+
+    /**
+     * Immutable class to hold framework features that don't have settings key and can be controlled
+     * by shortcut.
+     */
+    public static class LaunchableFrameworkFeatureInfo extends FrameworkFeatureInfo {
+
+        LaunchableFrameworkFeatureInfo(int labelStringResourceId) {
+            super(/* settingKey= */ null, /* settingOnValue= */ null, /* settingOffValue= */ null,
+                    labelStringResourceId);
         }
     }
 

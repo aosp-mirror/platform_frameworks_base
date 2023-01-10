@@ -92,8 +92,6 @@ public class LocalMediaManager implements BluetoothCallback {
     @VisibleForTesting
     List<MediaDevice> mDisconnectedMediaDevices = new CopyOnWriteArrayList<>();
     @VisibleForTesting
-    MediaDevice mPhoneDevice;
-    @VisibleForTesting
     MediaDevice mCurrentConnectedDevice;
     @VisibleForTesting
     DeviceAttributeChangeCallback mDeviceAttributeChangeCallback =

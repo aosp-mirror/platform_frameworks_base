@@ -29,9 +29,14 @@ import android.os.Parcelable;
 import android.os.RemoteException;
 import android.util.Log;
 import android.view.accessibility.IAccessibilityEmbeddedConnection;
+import android.window.ISurfaceSyncGroup;
 import android.window.WindowTokenClient;
 
 import java.util.Objects;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.TimeoutException;
 
 /**
  * Utility class for adding a View hierarchy to a {@link SurfaceControl}. The View hierarchy
@@ -86,6 +91,19 @@ public class SurfaceControlViewHost {
                 });
             }
             mWm.setInsetsState(state);
+        }
+
+        @Override
+        public ISurfaceSyncGroup getSurfaceSyncGroup() {
+            CompletableFuture<ISurfaceSyncGroup> surfaceSyncGroup = new CompletableFuture<>();
+            mViewRoot.mHandler.post(
+                    () -> surfaceSyncGroup.complete(mViewRoot.getOrCreateSurfaceSyncGroup()));
+            try {
+                return surfaceSyncGroup.get(1, TimeUnit.SECONDS);
+            } catch (InterruptedException | ExecutionException | TimeoutException e) {
+                Log.e(TAG, "Failed to get SurfaceSyncGroup for SCVH", e);
+            }
+            return null;
         }
     }
 
@@ -194,7 +212,7 @@ public class SurfaceControlViewHost {
          * is more akin to a PopupWindow in that the size is user specified
          * independent of configuration width and height.
          *
-         * In order to receive the configuration change via 
+         * In order to receive the configuration change via
          * {@link View#onConfigurationChanged}, the context used with the
          * SurfaceControlViewHost and it's embedded view hierarchy must
          * be a WindowContext obtained from {@link Context#createWindowContext}.
@@ -460,5 +478,26 @@ public class SurfaceControlViewHost {
                 (WindowManagerImpl) mViewRoot.mContext.getSystemService(Context.WINDOW_SERVICE);
         attrs.token = wm.getDefaultToken();
     }
-}
 
+    /**
+     * Transfer the currently in progress touch gesture to the parent
+     * (if any) of this SurfaceControlViewHost. This requires that the
+     * SurfaceControlViewHost was created with an associated hostInputToken.
+     *
+     * @return Whether the touch stream was transferred.
+     * @hide
+     */
+    public boolean transferTouchGestureToHost() {
+        if (mViewRoot == null) {
+            return false;
+        }
+
+        final IWindowSession realWm = WindowManagerGlobal.getWindowSession();
+        try {
+            return realWm.transferEmbeddedTouchFocusToHost(mViewRoot.mWindow);
+        } catch (RemoteException e) {
+            e.rethrowAsRuntimeException();
+        }
+        return false;
+    }
+}

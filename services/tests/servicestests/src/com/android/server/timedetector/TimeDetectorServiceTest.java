@@ -20,6 +20,7 @@ import static com.android.server.timedetector.TimeDetectorStrategy.ORIGIN_NETWOR
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertThrows;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
@@ -44,7 +45,6 @@ import android.app.time.TimeState;
 import android.app.time.UnixEpochTime;
 import android.app.timedetector.ManualTimeSuggestion;
 import android.app.timedetector.TelephonyTimeSuggestion;
-import android.app.timedetector.TimePoint;
 import android.content.Context;
 import android.content.pm.PackageManager;
 import android.os.HandlerThread;
@@ -385,8 +385,8 @@ public class TimeDetectorServiceTest {
                 1234L, 54321L, 999, InetSocketAddress.createUnresolved("test.timeserver", 123));
         when(mMockNtpTrustedTime.getCachedTimeResult())
                 .thenReturn(latestNetworkTime);
-        TimePoint expected = new TimePoint(latestNetworkTime.getTimeMillis(),
-                latestNetworkTime.getElapsedRealtimeMillis());
+        UnixEpochTime expected = new UnixEpochTime(
+                latestNetworkTime.getElapsedRealtimeMillis(), latestNetworkTime.getTimeMillis());
         assertEquals(expected, mTimeDetectorService.latestNetworkTime());
     }
 
@@ -394,6 +394,25 @@ public class TimeDetectorServiceTest {
     public void testLatestNetworkTime_noTimeAvailable() {
         when(mMockNtpTrustedTime.getCachedTimeResult()).thenReturn(null);
         assertThrows(ParcelableException.class, () -> mTimeDetectorService.latestNetworkTime());
+    }
+
+    @Test
+    public void testGetLatestNetworkSuggestion() {
+        NtpTrustedTime.TimeResult latestNetworkTime = new NtpTrustedTime.TimeResult(
+                1234L, 54321L, 999, InetSocketAddress.createUnresolved("test.timeserver", 123));
+        when(mMockNtpTrustedTime.getCachedTimeResult())
+                .thenReturn(latestNetworkTime);
+        UnixEpochTime expectedUnixEpochTime = new UnixEpochTime(
+                latestNetworkTime.getElapsedRealtimeMillis(), latestNetworkTime.getTimeMillis());
+        NetworkTimeSuggestion expected = new NetworkTimeSuggestion(
+                expectedUnixEpochTime, latestNetworkTime.getUncertaintyMillis());
+        assertEquals(expected, mTimeDetectorService.getLatestNetworkSuggestion());
+    }
+
+    @Test
+    public void testGetLatestNetworkSuggestion_noTimeAvailable() {
+        when(mMockNtpTrustedTime.getCachedTimeResult()).thenReturn(null);
+        assertNull(mTimeDetectorService.getLatestNetworkSuggestion());
     }
 
     @Test

@@ -10,44 +10,32 @@
     <string name="string_use_another_device" msgid="8754514926121520445">"استخدام جهاز آخر"</string>
     <string name="string_save_to_another_device" msgid="1959562542075194458">"الحفظ على جهاز آخر"</string>
     <string name="passkey_creation_intro_title" msgid="4251037543787718844">"توفير المزيد من الأمان باستخدام مفاتيح المرور"</string>
-    <!-- no translation found for passkey_creation_intro_body_password (8825872426579958200) -->
-    <skip />
-    <!-- no translation found for passkey_creation_intro_body_fingerprint (7331338631826254055) -->
-    <skip />
-    <!-- no translation found for passkey_creation_intro_body_device (1203796455762131631) -->
-    <skip />
+    <string name="passkey_creation_intro_body_password" msgid="8825872426579958200">"باستخدام مفاتيح المرور، لا حاجة لإنشاء كلمات مرور معقدة أو تذكّرها."</string>
+    <string name="passkey_creation_intro_body_fingerprint" msgid="7331338631826254055">"مفاتيح المرور هي مفاتيح رقمية مشفّرة يمكنك إنشاؤها باستخدام بصمة الإصبع أو التعرّف على الوجه أو قفل الشاشة."</string>
+    <string name="passkey_creation_intro_body_device" msgid="1203796455762131631">"يتم حفظها في مدير كلمات مرور، حتى تتمكن من تسجيل الدخول على أجهزة أخرى."</string>
     <string name="choose_provider_title" msgid="7245243990139698508">"اختيار مكان <xliff:g id="CREATETYPES">%1$s</xliff:g>"</string>
     <string name="create_your_passkeys" msgid="8901224153607590596">"إنشاء مفاتيح مرورك"</string>
     <string name="save_your_password" msgid="6597736507991704307">"حفظ كلمة المرور"</string>
     <string name="save_your_sign_in_info" msgid="7213978049817076882">"حفظ معلومات تسجيل الدخول"</string>
-    <!-- no translation found for choose_provider_body (4384188171872005547) -->
-    <skip />
-    <!-- no translation found for choose_create_option_passkey_title (5220979185879006862) -->
-    <skip />
-    <!-- no translation found for choose_create_option_password_title (7097275038523578687) -->
-    <skip />
-    <!-- no translation found for choose_create_option_sign_in_title (4124872317613421249) -->
-    <skip />
-    <!-- no translation found for choose_create_option_description (5531335144879100664) -->
-    <skip />
+    <string name="choose_provider_body" msgid="4384188171872005547">"اختَر مدير كلمة مرور لحفظ معلوماتك وتسجيل الدخول بشكل أسرع في المرة القادمة."</string>
+    <string name="choose_create_option_passkey_title" msgid="5220979185879006862">"إنشاء مفتاح مرور لتطبيق \"<xliff:g id="APPNAME">%1$s</xliff:g>\""</string>
+    <string name="choose_create_option_password_title" msgid="7097275038523578687">"هل تريد حفظ كلمة المرور لتطبيق \"<xliff:g id="APPNAME">%1$s</xliff:g>\"؟"</string>
+    <string name="choose_create_option_sign_in_title" msgid="4124872317613421249">"هل تريد حفظ معلومات تسجيل الدخول لتطبيق \"<xliff:g id="APPNAME">%1$s</xliff:g>\"؟"</string>
+    <string name="choose_create_option_description" msgid="5531335144879100664">"يمكنك استخدام <xliff:g id="CREDENTIALTYPES">%2$s</xliff:g> لتطبيق \"<xliff:g id="APPDOMAINNAME">%1$s</xliff:g>\" على أي جهاز. يتم حفظه في \"<xliff:g id="PROVIDERINFODISPLAYNAME">%3$s</xliff:g>\" للحساب \"<xliff:g id="CREATEINFODISPLAYNAME">%4$s</xliff:g>\"."</string>
     <string name="passkey" msgid="632353688396759522">"مفتاح مرور"</string>
     <string name="password" msgid="6738570945182936667">"كلمة المرور"</string>
     <string name="sign_ins" msgid="4710739369149469208">"عمليات تسجيل الدخول"</string>
-    <!-- no translation found for sign_in_info (2627704710674232328) -->
-    <skip />
-    <!-- no translation found for save_credential_to_title (3172811692275634301) -->
-    <skip />
+    <string name="sign_in_info" msgid="2627704710674232328">"معلومات تسجيل الدخول"</string>
+    <string name="save_credential_to_title" msgid="3172811692275634301">"حفظ <xliff:g id="CREDENTIALTYPES">%1$s</xliff:g> في"</string>
     <string name="create_passkey_in_other_device_title" msgid="6372952459932674632">"هل تريد إنشاء مفتاح مرور في جهاز آخر؟"</string>
     <string name="use_provider_for_all_title" msgid="4201020195058980757">"هل تريد استخدام \"<xliff:g id="PROVIDERINFODISPLAYNAME">%1$s</xliff:g>\" لكل عمليات تسجيل الدخول؟"</string>
     <string name="use_provider_for_all_description" msgid="6560593199974037820">"ستخزِّن خدمة إدارة كلمات المرور هذه كلمات المرور ومفاتيح المرور لمساعدتك في تسجيل الدخول بسهولة."</string>
     <string name="set_as_default" msgid="4415328591568654603">"ضبط الخيار كتلقائي"</string>
     <string name="use_once" msgid="9027366575315399714">"الاستخدام مرة واحدة"</string>
-    <!-- no translation found for more_options_usage_passwords_passkeys (3470113942332934279) -->
-    <skip />
+    <string name="more_options_usage_passwords_passkeys" msgid="3470113942332934279">"<xliff:g id="PASSWORDSNUMBER">%1$s</xliff:g> كلمة مرور • <xliff:g id="PASSKEYSNUMBER">%2$s</xliff:g> مفتاح مرور"</string>
     <string name="more_options_usage_passwords" msgid="1632047277723187813">"عدد كلمات المرور: <xliff:g id="PASSWORDSNUMBER">%1$s</xliff:g>"</string>
     <string name="more_options_usage_passkeys" msgid="5390320437243042237">"عدد مفاتيح المرور: <xliff:g id="PASSKEYSNUMBER">%1$s</xliff:g>"</string>
-    <!-- no translation found for more_options_usage_credentials (1785697001787193984) -->
-    <skip />
+    <string name="more_options_usage_credentials" msgid="1785697001787193984">"بيانات الاعتماد: <xliff:g id="TOTALCREDENTIALSNUMBER">%1$s</xliff:g>"</string>
     <string name="passkey_before_subtitle" msgid="2448119456208647444">"مفتاح مرور"</string>
     <string name="another_device" msgid="5147276802037801217">"جهاز آخر"</string>
     <string name="other_password_manager" msgid="565790221427004141">"خدمات مدراء كلمات المرور الأخرى"</string>
@@ -58,8 +46,7 @@
     <string name="get_dialog_title_use_sign_in_for" msgid="5283099528915572980">"هل تريد استخدام بيانات اعتماد تسجيل الدخول المحفوظة لتطبيق \"<xliff:g id="APP_NAME">%1$s</xliff:g>\"؟"</string>
     <string name="get_dialog_title_choose_sign_in_for" msgid="1361715440877613701">"اختيار بيانات اعتماد تسجيل دخول محفوظة لـ \"<xliff:g id="APP_NAME">%1$s</xliff:g>\""</string>
     <string name="get_dialog_use_saved_passkey_for" msgid="4618100798664888512">"تسجيل الدخول بطريقة أخرى"</string>
-    <!-- no translation found for snackbar_action (37373514216505085) -->
-    <skip />
+    <string name="snackbar_action" msgid="37373514216505085">"عرض الخيارات"</string>
     <string name="get_dialog_button_label_continue" msgid="6446201694794283870">"متابعة"</string>
     <string name="get_dialog_title_sign_in_options" msgid="2092876443114893618">"خيارات تسجيل الدخول"</string>
     <string name="get_dialog_heading_for_username" msgid="3456868514554204776">"معلومات تسجيل دخول \"<xliff:g id="USERNAME">%1$s</xliff:g>\""</string>

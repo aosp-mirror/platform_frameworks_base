@@ -16,6 +16,7 @@
 
 package com.android.systemui.media.controls.pipeline
 
+import android.app.BroadcastOptions
 import android.app.Notification
 import android.app.Notification.EXTRA_SUBSTITUTE_APP_NAME
 import android.app.PendingIntent
@@ -1165,7 +1166,9 @@ class MediaDataManager(
 
     private fun sendPendingIntent(intent: PendingIntent): Boolean {
         return try {
-            intent.send()
+            val options = BroadcastOptions.makeBasic()
+            options.setInteractive(true)
+            intent.send(options.toBundle())
             true
         } catch (e: PendingIntent.CanceledException) {
             Log.d(TAG, "Intent canceled", e)

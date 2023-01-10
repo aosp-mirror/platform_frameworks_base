@@ -19,6 +19,9 @@ package android.media;
 import android.annotation.IntDef;
 import android.annotation.IntRange;
 import android.annotation.NonNull;
+import android.annotation.Nullable;
+import android.content.ComponentName;
+import android.content.Intent;
 import android.os.Parcel;
 import android.os.Parcelable;
 import android.text.TextUtils;
@@ -40,6 +43,18 @@ import java.util.Objects;
  */
 public final class RouteListingPreference implements Parcelable {
 
+    /**
+     * {@link Intent} action for apps to take the user to a screen for transferring media playback
+     * to the route with the id provided by the extra with key {@link #EXTRA_ROUTE_ID}.
+     */
+    public static final String ACTION_TRANSFER_MEDIA = "android.media.action.TRANSFER_MEDIA";
+
+    /**
+     * {@link Intent} string extra key that contains the {@link Item#getRouteId() id} of the route
+     * to transfer to, as part of an {@link #ACTION_TRANSFER_MEDIA} intent.
+     */
+    public static final String EXTRA_ROUTE_ID = "android.media.extra.ROUTE_ID";
+
     @NonNull
     public static final Creator<RouteListingPreference> CREATOR =
             new Creator<>() {
@@ -56,10 +71,12 @@ public final class RouteListingPreference implements Parcelable {
 
     @NonNull private final List<Item> mItems;
     private final boolean mUseSystemOrdering;
+    @Nullable private final ComponentName mInAppOnlyItemRoutingReceiver;
 
     private RouteListingPreference(Builder builder) {
         mItems = builder.mItems;
         mUseSystemOrdering = builder.mUseSystemOrdering;
+        mInAppOnlyItemRoutingReceiver = builder.mInAppOnlyItemRoutingReceiver;
     }
 
     private RouteListingPreference(Parcel in) {
@@ -67,6 +84,7 @@ public final class RouteListingPreference implements Parcelable {
                 in.readParcelableList(new ArrayList<>(), Item.class.getClassLoader(), Item.class);
         mItems = List.copyOf(items);
         mUseSystemOrdering = in.readBoolean();
+        mInAppOnlyItemRoutingReceiver = ComponentName.readFromParcel(in);
     }
 
     /**
@@ -90,6 +108,21 @@ public final class RouteListingPreference implements Parcelable {
         return mUseSystemOrdering;
     }
 
+    /**
+     * Returns a {@link ComponentName} for handling routes disabled via {@link
+     * Item#DISABLE_REASON_IN_APP_ONLY}, or null if the user needs to manually navigate to the app
+     * in order to route to select the corresponding routes.
+     *
+     * <p>If the user selects an {@link Item} disabled via {@link Item#DISABLE_REASON_IN_APP_ONLY},
+     * and this method returns a non-null {@link ComponentName}, the system takes the user back to
+     * the app by launching an intent to the returned {@link ComponentName}, using action {@link
+     * #ACTION_TRANSFER_MEDIA}, with the extra {@link #EXTRA_ROUTE_ID}.
+     */
+    @Nullable
+    public ComponentName getInAppOnlyItemRoutingReceiver() {
+        return mInAppOnlyItemRoutingReceiver;
+    }
+
     // RouteListingPreference Parcelable implementation.
 
     @Override
@@ -101,6 +134,7 @@ public final class RouteListingPreference implements Parcelable {
     public void writeToParcel(@NonNull Parcel dest, int flags) {
         dest.writeParcelableList(mItems, flags);
         dest.writeBoolean(mUseSystemOrdering);
+        ComponentName.writeToParcel(mInAppOnlyItemRoutingReceiver, dest);
     }
 
     // Equals and hashCode.
@@ -114,12 +148,15 @@ public final class RouteListingPreference implements Parcelable {
             return false;
         }
         RouteListingPreference that = (RouteListingPreference) other;
-        return mItems.equals(that.mItems) && mUseSystemOrdering == that.mUseSystemOrdering;
+        return mItems.equals(that.mItems)
+                && mUseSystemOrdering == that.mUseSystemOrdering
+                && Objects.equals(
+                        mInAppOnlyItemRoutingReceiver, that.mInAppOnlyItemRoutingReceiver);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(mItems, mUseSystemOrdering);
+        return Objects.hash(mItems, mUseSystemOrdering, mInAppOnlyItemRoutingReceiver);
     }
 
     /** Builder for {@link RouteListingPreference}. */
@@ -127,6 +164,7 @@ public final class RouteListingPreference implements Parcelable {
 
         private List<Item> mItems;
         private boolean mUseSystemOrdering;
+        private ComponentName mInAppOnlyItemRoutingReceiver;
 
         /** Creates a new instance with default values (documented in the setters). */
         public Builder() {
@@ -155,6 +193,18 @@ public final class RouteListingPreference implements Parcelable {
         @NonNull
         public Builder setUseSystemOrdering(boolean useSystemOrdering) {
             mUseSystemOrdering = useSystemOrdering;
+            return this;
+        }
+
+        /**
+         * See {@link #getInAppOnlyItemRoutingReceiver()}.
+         *
+         * <p>The default value is {@code null}.
+         */
+        @NonNull
+        public Builder setInAppOnlyItemRoutingReceiver(
+                @Nullable ComponentName inAppOnlyItemRoutingReceiver) {
+            mInAppOnlyItemRoutingReceiver = inAppOnlyItemRoutingReceiver;
             return this;
         }
 
@@ -203,7 +253,8 @@ public final class RouteListingPreference implements Parcelable {
                     DISABLE_REASON_NONE,
                     DISABLE_REASON_SUBSCRIPTION_REQUIRED,
                     DISABLE_REASON_DOWNLOADED_CONTENT,
-                    DISABLE_REASON_AD
+                    DISABLE_REASON_AD,
+                    DISABLE_REASON_IN_APP_ONLY
                 })
         public @interface DisableReason {}
 
@@ -221,6 +272,14 @@ public final class RouteListingPreference implements Parcelable {
         public static final int DISABLE_REASON_DOWNLOADED_CONTENT = 2;
         /** The corresponding route is not available because an ad is in progress. */
         public static final int DISABLE_REASON_AD = 3;
+        /**
+         * The corresponding route is only available for routing from within the app.
+         *
+         * <p>The user may still select the corresponding route if the app provides an {@link
+         * #getInAppOnlyItemRoutingReceiver() in-app routing receiver}, in which case the system
+         * will take the user to the app.
+         */
+        public static final int DISABLE_REASON_IN_APP_ONLY = 4;
 
         @NonNull
         public static final Creator<Item> CREATOR =
@@ -257,7 +316,11 @@ public final class RouteListingPreference implements Parcelable {
             Preconditions.checkArgument(mSessionParticipantCount >= 0);
         }
 
-        /** Returns the id of the route that corresponds to this route listing preference item. */
+        /**
+         * Returns the id of the route that corresponds to this route listing preference item.
+         *
+         * @see MediaRoute2Info#getId()
+         */
         @NonNull
         public String getRouteId() {
             return mRouteId;
@@ -282,6 +345,7 @@ public final class RouteListingPreference implements Parcelable {
          * @see #DISABLE_REASON_SUBSCRIPTION_REQUIRED
          * @see #DISABLE_REASON_DOWNLOADED_CONTENT
          * @see #DISABLE_REASON_AD
+         * @see #DISABLE_REASON_IN_APP_ONLY
          */
         @DisableReason
         public int getDisableReason() {

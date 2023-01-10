@@ -94,6 +94,10 @@ class DeviceStateToLayoutMap {
         return layout;
     }
 
+    int size() {
+        return mLayoutMap.size();
+    }
+
     /**
      * Reads display-layout-configuration files to get the layouts to use for this device.
      */

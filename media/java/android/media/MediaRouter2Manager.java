@@ -247,7 +247,6 @@ public final class MediaRouter2Manager {
         return getTransferableRoutes(sessions.get(sessions.size() - 1));
     }
 
-
     /**
      * Gets available routes for the given routing session.
      * The returned routes can be passed to
@@ -313,9 +312,15 @@ public final class MediaRouter2Manager {
                 mDiscoveryPreferenceMap.getOrDefault(packageName, RouteDiscoveryPreference.EMPTY);
 
         for (MediaRoute2Info route : getSortedRoutes(discoveryPreference)) {
-            if (sessionInfo.getTransferableRoutes().contains(route.getId())
-                    || (includeSelectedRoutes
-                    && sessionInfo.getSelectedRoutes().contains(route.getId()))) {
+            if (!route.isVisibleTo(packageName)) {
+                continue;
+            }
+            boolean transferableRoutesContainRoute =
+                    sessionInfo.getTransferableRoutes().contains(route.getId());
+            boolean selectedRoutesContainRoute =
+                    sessionInfo.getSelectedRoutes().contains(route.getId());
+            if (transferableRoutesContainRoute
+                    || (includeSelectedRoutes && selectedRoutesContainRoute)) {
                 routes.add(route);
                 continue;
             }

@@ -52,6 +52,7 @@ import com.android.internal.util.Preconditions;
 import com.android.server.LocalServices;
 import com.android.server.pm.Installer;
 import com.android.server.pm.Installer.InstallerException;
+import com.android.server.pm.Installer.LegacyDexoptDisabledException;
 import com.android.server.pm.PackageManagerService;
 import com.android.server.pm.PackageManagerServiceCompilerMapping;
 import com.android.server.pm.parsing.PackageInfoUtils;
@@ -177,7 +178,6 @@ public class ArtManagerService extends android.content.pm.dex.IArtManager.Stub {
                 == ApplicationInfo.FLAG_DEBUGGABLE;
     }
 
-
     @Override
     public void snapshotRuntimeProfile(@ProfileType int profileType, @Nullable String packageName,
             @Nullable String codePath, @NonNull ISnapshotRuntimeProfileCallback callback,
@@ -210,15 +210,20 @@ public class ArtManagerService extends android.content.pm.dex.IArtManager.Stub {
             Slog.d(TAG, "Requested snapshot for " + packageName + ":" + codePath);
         }
 
-        if (bootImageProfile) {
-            snapshotBootImageProfile(callback);
-        } else {
-            snapshotAppProfile(packageName, codePath, callback);
+        // TODO(b/251903639): Call into ART Service.
+        try {
+            if (bootImageProfile) {
+                snapshotBootImageProfile(callback);
+            } else {
+                snapshotAppProfile(packageName, codePath, callback);
+            }
+        } catch (LegacyDexoptDisabledException e) {
+            throw new RuntimeException(e);
         }
     }
 
     private void snapshotAppProfile(String packageName, String codePath,
-            ISnapshotRuntimeProfileCallback callback) {
+            ISnapshotRuntimeProfileCallback callback) throws LegacyDexoptDisabledException {
         PackageInfo info = null;
         try {
             // Note that we use the default user 0 to retrieve the package info.
@@ -269,7 +274,8 @@ public class ArtManagerService extends android.content.pm.dex.IArtManager.Stub {
     }
 
     private void createProfileSnapshot(String packageName, String profileName, String classpath,
-            int appId, ISnapshotRuntimeProfileCallback callback) {
+            int appId, ISnapshotRuntimeProfileCallback callback)
+            throws LegacyDexoptDisabledException {
         // Ask the installer to snapshot the profile.
         try {
             if (!mInstaller.createProfileSnapshot(appId, packageName, profileName, classpath)) {
@@ -299,7 +305,8 @@ public class ArtManagerService extends android.content.pm.dex.IArtManager.Stub {
         }
     }
 
-    private void destroyProfileSnapshot(String packageName, String profileName) {
+    private void destroyProfileSnapshot(String packageName, String profileName)
+            throws LegacyDexoptDisabledException {
         if (DEBUG) {
             Slog.d(TAG, "Destroying profile snapshot for" + packageName + ":" + profileName);
         }
@@ -333,7 +340,8 @@ public class ArtManagerService extends android.content.pm.dex.IArtManager.Stub {
         }
     }
 
-    private void snapshotBootImageProfile(ISnapshotRuntimeProfileCallback callback) {
+    private void snapshotBootImageProfile(ISnapshotRuntimeProfileCallback callback)
+            throws LegacyDexoptDisabledException {
         // Combine the profiles for boot classpath and system server classpath.
         // This avoids having yet another type of profiles and simplifies the processing.
         String classpath = String.join(":", Os.getenv("BOOTCLASSPATH"),
@@ -364,7 +372,7 @@ public class ArtManagerService extends android.content.pm.dex.IArtManager.Stub {
         mHandler.post(() -> {
             try {
                 callback.onError(errCode);
-            } catch (Exception e) {
+            } catch (RemoteException | RuntimeException e) {
                 Slog.w(TAG, "Failed to callback after profile snapshot for " + packageName, e);
             }
         });
@@ -387,7 +395,7 @@ public class ArtManagerService extends android.content.pm.dex.IArtManager.Stub {
                             + packageName);
                     callback.onError(ArtManager.SNAPSHOT_FAILED_INTERNAL_ERROR);
                 }
-            } catch (Exception e) {
+            } catch (RemoteException | RuntimeException e) {
                 Slog.w(TAG,
                         "Failed to call onSuccess after profile snapshot for " + packageName, e);
             } finally {
@@ -402,9 +410,8 @@ public class ArtManagerService extends android.content.pm.dex.IArtManager.Stub {
      *   - create the current primary profile to save time at app startup time.
      *   - copy the profiles from the associated dex metadata file to the reference profile.
      */
-    public void prepareAppProfiles(
-            AndroidPackage pkg, @UserIdInt int user,
-            boolean updateReferenceProfileContent) {
+    public void prepareAppProfiles(AndroidPackage pkg, @UserIdInt int user,
+            boolean updateReferenceProfileContent) throws LegacyDexoptDisabledException {
         final int appId = UserHandle.getAppId(pkg.getUid());
         if (user < 0) {
             Slog.wtf(TAG, "Invalid user id: " + user);
@@ -444,9 +451,8 @@ public class ArtManagerService extends android.content.pm.dex.IArtManager.Stub {
     /**
      * Prepares the app profiles for a set of users. {@see ArtManagerService#prepareAppProfiles}.
      */
-    public void prepareAppProfiles(
-            AndroidPackage pkg, int[] user,
-            boolean updateReferenceProfileContent) {
+    public void prepareAppProfiles(AndroidPackage pkg, int[] user,
+            boolean updateReferenceProfileContent) throws LegacyDexoptDisabledException {
         for (int i = 0; i < user.length; i++) {
             prepareAppProfiles(pkg, user[i], updateReferenceProfileContent);
         }
@@ -455,7 +461,7 @@ public class ArtManagerService extends android.content.pm.dex.IArtManager.Stub {
     /**
      * Clear the profiles for the given package.
      */
-    public void clearAppProfiles(AndroidPackage pkg) {
+    public void clearAppProfiles(AndroidPackage pkg) throws LegacyDexoptDisabledException {
         try {
             ArrayMap<String, String> packageProfileNames = getPackageProfileNames(pkg);
             for (int i = packageProfileNames.size() - 1; i >= 0; i--) {
@@ -470,7 +476,8 @@ public class ArtManagerService extends android.content.pm.dex.IArtManager.Stub {
     /**
      * Dumps the profiles for the given package.
      */
-    public void dumpProfiles(AndroidPackage pkg, boolean dumpClassesAndMethods) {
+    public void dumpProfiles(AndroidPackage pkg, boolean dumpClassesAndMethods)
+            throws LegacyDexoptDisabledException {
         final int sharedGid = UserHandle.getSharedAppGid(pkg.getUid());
         try {
             ArrayMap<String, String> packageProfileNames = getPackageProfileNames(pkg);

@@ -383,10 +383,10 @@
     <string name="media_projection_dialog_service_title" msgid="2888507074107884040">"रेकर्ड गर्न वा cast गर्न थाल्ने हो?"</string>
     <string name="media_projection_dialog_title" msgid="3316063622495360646">"<xliff:g id="APP_SEEKING_PERMISSION">%s</xliff:g> मार्फत रेकर्ड गर्न वा cast गर्न थाल्ने हो?"</string>
     <string name="media_projection_permission_dialog_title" msgid="7130975432309482596">"<xliff:g id="APP_SEEKING_PERMISSION">%s</xliff:g> लाई सेयर गर्न वा रेकर्ड गर्न दिने हो?"</string>
-    <string name="media_projection_permission_dialog_option_entire_screen" msgid="392086473225692983">"पूर्ण स्क्रिन"</string>
+    <string name="media_projection_permission_dialog_option_entire_screen" msgid="392086473225692983">"सबै स्क्रिन"</string>
     <string name="media_projection_permission_dialog_option_single_app" msgid="1591110238124910521">"एकल एप"</string>
-    <string name="media_projection_permission_dialog_warning_entire_screen" msgid="3989078820637452717">"तपाईंले सेयर गर्दा, रेकर्ड गर्दा वा कास्ट गर्दा<xliff:g id="APP_SEEKING_PERMISSION">%s</xliff:g> ले तपाईंको स्क्रिनमा देखिने वा डिभाइसमा प्ले गरिएका सबै कुरा खिच्न सक्छ। त्यसैले सेयर, रेकर्ड वा कास्ट गर्दा पासवर्ड, भुक्तानीको विवरण, म्यासेज वा अन्य संवेदनशील जानकारी सुरक्षित राख्नुहोला।"</string>
-    <string name="media_projection_permission_dialog_warning_single_app" msgid="1659532781536753059">"तपाईंले सेयर गर्दा, रेकर्ड गर्दा वा कास्ट गर्दा<xliff:g id="APP_SEEKING_PERMISSION">%s</xliff:g> ले तपाईंको स्क्रिनमा देखिने वा डिभाइसमा प्ले गरिएका सबै कुरा खिच्न सक्छ। त्यसैले पासवर्ड, भुक्तानीको विवरण, म्यासेज वा अन्य संवेदनशील जानकारी सुरक्षित राख्नुहोला।"</string>
+    <string name="media_projection_permission_dialog_warning_entire_screen" msgid="3989078820637452717">"तपाईंले सेयर गर्दा, रेकर्ड गर्दा वा कास्ट गर्दा <xliff:g id="APP_SEEKING_PERMISSION">%s</xliff:g> ले तपाईंको स्क्रिनमा देखिने वा डिभाइसमा प्ले गरिएका सबै कुरा खिच्न सक्छ। त्यसैले सेयर, रेकर्ड वा कास्ट गर्दा  पासवर्ड, भुक्तानीको विवरण, म्यासेज वा अन्य संवेदनशील जानकारी सुरक्षित राख्नुहोला।"</string>
+    <string name="media_projection_permission_dialog_warning_single_app" msgid="1659532781536753059">"तपाईंले सेयर गर्दा, रेकर्ड गर्दा वा कास्ट गर्दा <xliff:g id="APP_SEEKING_PERMISSION">%s</xliff:g> ले तपाईंको स्क्रिनमा देखिने वा डिभाइसमा प्ले गरिएका सबै कुरा खिच्न सक्छ। त्यसैले पासवर्ड, भुक्तानीको विवरण, म्यासेज वा अन्य संवेदनशील जानकारी सुरक्षित राख्नुहोला।"</string>
     <string name="media_projection_permission_dialog_continue" msgid="1827799658916736006">"जारी राख्नुहोस्"</string>
     <string name="media_projection_permission_app_selector_title" msgid="894251621057480704">"सेयर वा रेकर्ड गर्नका लागि एप चयन गर्नुहोस्"</string>
     <string name="media_projection_permission_dialog_system_service_title" msgid="6827129613741303726">"यो एपलाई सेयर गर्न वा रेकर्ड गर्न दिने हो?"</string>
@@ -816,7 +816,10 @@
     <string name="accessibility_floating_button_migration_tooltip" msgid="5217151214439341902">"सर्वसुलभता कायम गर्ने सुविधा खोल्न ट्याप गर्नुहोस्। सेटिङमा गई यो बटन कस्टमाइज गर्नुहोस् वा बदल्नुहोस्।\n\n"<annotation id="link">"सेटिङ हेर्नुहोस्"</annotation></string>
     <string name="accessibility_floating_button_docking_tooltip" msgid="6814897496767461517">"यो बटन केही बेर नदेखिने पार्न किनारातिर सार्नुहोस्"</string>
     <string name="accessibility_floating_button_undo" msgid="511112888715708241">"अन्डू गर्नुहोस्"</string>
-    <string name="accessibility_floating_button_undo_message_text" msgid="3044079592757099698">"{count,plural, =1{{label} सर्टकट हटाइयो}other{# सर्टकटहरू हटाइए}}"</string>
+    <!-- no translation found for accessibility_floating_button_undo_message_label_text (9017658016426242640) -->
+    <skip />
+    <!-- no translation found for accessibility_floating_button_undo_message_number_text (4909270290725226075) -->
+    <skip />
     <string name="accessibility_floating_button_action_move_top_left" msgid="6253520703618545705">"सिरानको बायाँतिर सार्नुहोस्"</string>
     <string name="accessibility_floating_button_action_move_top_right" msgid="6106225581993479711">"सिरानको दायाँतिर सार्नुहोस्"</string>
     <string name="accessibility_floating_button_action_move_bottom_left" msgid="8063394111137429725">"पुछारको बायाँतिर सार्नुहोस्"</string>
@@ -884,6 +887,8 @@
     <string name="media_move_closer_to_end_cast" msgid="6495907340926563656">"तपाईं यहाँ प्ले गर्न चाहनुहुन्छ भने आफ्नो डिभाइसलाई <xliff:g id="DEVICENAME">%1$s</xliff:g> नजिकै लैजानुहोस्"</string>
     <string name="media_transfer_playing_different_device" msgid="7186806382609785610">"<xliff:g id="DEVICENAME">%1$s</xliff:g> मा प्ले गरिँदै छ"</string>
     <string name="media_transfer_failed" msgid="7955354964610603723">"केही चिज गडबड भयो। फेरि प्रयास गर्नुहोस्।"</string>
+    <!-- no translation found for media_transfer_loading (5544017127027152422) -->
+    <skip />
     <string name="controls_error_timeout" msgid="794197289772728958">"निष्क्रिय छ, एप जाँच गर्नु…"</string>
     <string name="controls_error_removed" msgid="6675638069846014366">"फेला परेन"</string>
     <string name="controls_error_removed_title" msgid="1207794911208047818">"नियन्त्रण उपलब्ध छैन"</string>

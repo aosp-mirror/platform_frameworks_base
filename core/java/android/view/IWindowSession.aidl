@@ -353,4 +353,6 @@ interface IWindowSession {
      * Returns whether this window needs to cancel draw and retry later.
      */
     boolean cancelDraw(IWindow window);
+
+    boolean transferEmbeddedTouchFocusToHost(IWindow embeddedWindow);
 }

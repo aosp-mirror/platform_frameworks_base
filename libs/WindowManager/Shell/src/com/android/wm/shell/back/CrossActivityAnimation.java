@@ -171,6 +171,7 @@ class CrossActivityAnimation {
         mInitialTouchPos.set(0, 0);
         mEnteringWindowShow = false;
         mEnteringMargin = 0;
+        mEnteringAnimator = null;
 
         if (mFinishCallback != null) {
             try {
@@ -276,7 +277,7 @@ class CrossActivityAnimation {
         }
 
         // End the fade in animation.
-        if (mEnteringAnimator.isRunning()) {
+        if (mEnteringAnimator != null && mEnteringAnimator.isRunning()) {
             mEnteringAnimator.cancel();
         }
 
@@ -329,12 +330,10 @@ class CrossActivityAnimation {
         @Override
         public void onBackCancelled() {
             // End the fade in animation.
-            if (mEnteringAnimator.isRunning()) {
+            if (mEnteringAnimator != null && mEnteringAnimator.isRunning()) {
                 mEnteringAnimator.cancel();
             }
-            // TODO (b259608500): Let BackProgressAnimator could play cancel animation.
-            mProgressAnimator.reset();
-            finishAnimation();
+            mProgressAnimator.onBackCancelled(CrossActivityAnimation.this::finishAnimation);
         }
 
         @Override

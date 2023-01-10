@@ -74,6 +74,9 @@ public final class BackEvent {
      * and animation should seek to its end state. Exact end value may vary depending on
      * screen size.
      * </ol>
+     * <li> After the gesture finishes in cancel state, this method keeps getting invoked until the
+     * progress value animates back to 0.
+     * </ol>
      * In-between locations are linearly interpolated based on horizontal distance from the starting
      * edge and smooth clamped to 1 when the distance exceeds a system-wide threshold.
      */

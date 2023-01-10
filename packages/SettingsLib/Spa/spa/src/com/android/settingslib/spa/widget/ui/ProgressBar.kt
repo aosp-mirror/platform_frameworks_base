@@ -30,9 +30,11 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.CornerRadius
+import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.drawscope.DrawScope
+import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.dp
 
 /**
@@ -62,13 +64,15 @@ fun LinearProgressBar(
 }
 
 private fun DrawScope.drawLinearBar(
-    endFraction: Float,
+    progress: Float,
     color: Color,
     roundedCorner: Boolean
 ) {
-    val width = endFraction * size.width
+    val isLtr = layoutDirection == LayoutDirection.Ltr
+    val width = progress * size.width
     drawRoundRect(
         color = color,
+        topLeft = if (isLtr) Offset.Zero else Offset((1 - progress) * size.width, 0f),
         size = Size(width, size.height),
         cornerRadius = if (roundedCorner) CornerRadius(
             size.height / 2,

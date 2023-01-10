@@ -2345,9 +2345,6 @@ public class PermissionManagerServiceImpl implements PermissionManagerServiceInt
         for (int i=0; i<N; i++) {
             ParsedPermission p = pkg.getPermissions().get(i);
 
-            // Assume by default that we did not install this permission into the system.
-            ComponentMutateUtils.setExactFlags(p, p.getFlags() & ~PermissionInfo.FLAG_INSTALLED);
-
             final PermissionInfo permissionInfo;
             final Permission oldPermission;
             synchronized (mLock) {
@@ -2383,10 +2380,6 @@ public class PermissionManagerServiceImpl implements PermissionManagerServiceInt
                     mRegistry.addPermissionTree(permission);
                 } else {
                     mRegistry.addPermission(permission);
-                }
-                if (permission.isInstalled()) {
-                    ComponentMutateUtils.setExactFlags(p,
-                            p.getFlags() | PermissionInfo.FLAG_INSTALLED);
                 }
                 if (permission.isDefinitionChanged()) {
                     definitionChangedPermissions.add(p.getName());
@@ -5139,6 +5132,21 @@ public class PermissionManagerServiceImpl implements PermissionManagerServiceInt
         // TODO(b/173235285): Some caller may pass USER_ALL as userId.
         //Preconditions.checkArgumentNonnegative(userId, "userId");
         return isPermissionsReviewRequiredInternal(packageName, userId);
+    }
+
+    @NonNull
+    @Override
+    public Set<String> getInstalledPermissions(@NonNull String packageName) {
+        Objects.requireNonNull(packageName, "packageName");
+        final Set<String> installedPermissions = new ArraySet<>();
+        synchronized (mLock) {
+            for (final Permission permission : mRegistry.getPermissions()) {
+                if (Objects.equals(permission.getPackageName(), packageName)) {
+                    installedPermissions.add(permission.getName());
+                }
+            }
+        }
+        return installedPermissions;
     }
 
     @NonNull

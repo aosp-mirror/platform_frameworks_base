@@ -18,6 +18,7 @@ package com.android.server.timedetector;
 
 import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.annotation.RequiresPermission;
 import android.app.AlarmManager;
 import android.app.PendingIntent;
 import android.app.time.UnixEpochTime;
@@ -33,8 +34,6 @@ import android.net.Network;
 import android.os.Binder;
 import android.os.Handler;
 import android.os.HandlerThread;
-import android.os.Looper;
-import android.os.Message;
 import android.os.PowerManager;
 import android.os.ResultReceiver;
 import android.os.ShellCallback;
@@ -45,6 +44,7 @@ import android.util.Log;
 import android.util.NtpTrustedTime;
 import android.util.NtpTrustedTime.TimeResult;
 
+import com.android.internal.annotations.GuardedBy;
 import com.android.internal.util.DumpUtils;
 import com.android.server.LocalServices;
 
@@ -66,17 +66,13 @@ public class NetworkTimeUpdateService extends Binder {
     private static final String TAG = "NetworkTimeUpdateService";
     private static final boolean DBG = false;
 
-    private static final int EVENT_AUTO_TIME_ENABLED = 1;
-    private static final int EVENT_POLL_NETWORK_TIME = 2;
-    private static final int EVENT_NETWORK_CHANGED = 3;
-
     private static final String ACTION_POLL =
             "com.android.server.timedetector.NetworkTimeUpdateService.action.POLL";
-
     private static final int POLL_REQUEST = 0;
 
+    private final Object mLock = new Object();
     private final Context mContext;
-    private final NtpTrustedTime mTime;
+    private final NtpTrustedTime mNtpTrustedTime;
     private final AlarmManager mAlarmManager;
     private final TimeDetectorInternal mTimeDetectorInternal;
     private final ConnectivityManager mCM;
@@ -84,9 +80,9 @@ public class NetworkTimeUpdateService extends Binder {
     private final PowerManager.WakeLock mWakeLock;
 
     // Normal polling frequency
-    private final long mPollingIntervalMs;
+    private final int mNormalPollingIntervalMillis;
     // Try-again polling interval, in case the network request failed
-    private final long mPollingIntervalShorterMs;
+    private final int mShortPollingIntervalMillis;
     // Number of times to try again
     private final int mTryAgainTimesMax;
 
@@ -94,18 +90,13 @@ public class NetworkTimeUpdateService extends Binder {
      * A log that records the decisions to fetch a network time update.
      * This is logged in bug reports to assist with debugging issues with network time suggestions.
      */
-    @NonNull
     private final LocalLog mLocalLog = new LocalLog(30, false /* useLocalTimestamps */);
 
-    // NTP lookup is done on this thread and handler
-    // @NonNull after systemRunning()
-    private Handler mHandler;
-    // @NonNull after systemRunning()
-    private AutoTimeSettingObserver mAutoTimeSettingObserver;
-    // @NonNull after systemRunning()
-    private NetworkTimeUpdateCallback mNetworkTimeUpdateCallback;
+    // Blocking NTP lookup is done using this handler
+    private final Handler mHandler;
 
     // This field is only updated and accessed by the mHandler thread (except dump()).
+    @GuardedBy("mLock")
     @Nullable
     private Network mDefaultNetwork = null;
 
@@ -113,54 +104,76 @@ public class NetworkTimeUpdateService extends Binder {
     // During bootup, the network may not have been up yet, or it's taking time for the
     // connection to happen.
     // This field is only updated and accessed by the mHandler thread (except dump()).
+    @GuardedBy("mLock")
     private int mTryAgainCounter;
 
     public NetworkTimeUpdateService(@NonNull Context context) {
         mContext = Objects.requireNonNull(context);
-        mTime = NtpTrustedTime.getInstance(context);
         mAlarmManager = mContext.getSystemService(AlarmManager.class);
         mTimeDetectorInternal = LocalServices.getService(TimeDetectorInternal.class);
         mCM = mContext.getSystemService(ConnectivityManager.class);
-
-        Intent pollIntent = new Intent(ACTION_POLL, null);
-        // Broadcast alarms sent by system are immutable
-        mPendingPollIntent = PendingIntent.getBroadcast(mContext, POLL_REQUEST, pollIntent,
-                PendingIntent.FLAG_IMMUTABLE);
-
-        mPollingIntervalMs = mContext.getResources().getInteger(
-                com.android.internal.R.integer.config_ntpPollingInterval);
-        mPollingIntervalShorterMs = mContext.getResources().getInteger(
-                com.android.internal.R.integer.config_ntpPollingIntervalShorter);
-        mTryAgainTimesMax = mContext.getResources().getInteger(
-                com.android.internal.R.integer.config_ntpRetry);
-
         mWakeLock = context.getSystemService(PowerManager.class).newWakeLock(
                 PowerManager.PARTIAL_WAKE_LOCK, TAG);
+        mNtpTrustedTime = NtpTrustedTime.getInstance(context);
+
+        mTryAgainTimesMax = mContext.getResources().getInteger(
+                com.android.internal.R.integer.config_ntpRetry);
+        mNormalPollingIntervalMillis = mContext.getResources().getInteger(
+                com.android.internal.R.integer.config_ntpPollingInterval);
+        mShortPollingIntervalMillis = mContext.getResources().getInteger(
+                com.android.internal.R.integer.config_ntpPollingIntervalShorter);
+
+        // Broadcast alarms sent by system are immutable
+        Intent pollIntent = new Intent(ACTION_POLL, null);
+        mPendingPollIntent = PendingIntent.getBroadcast(mContext, POLL_REQUEST,
+                pollIntent, PendingIntent.FLAG_IMMUTABLE);
+
+        HandlerThread thread = new HandlerThread(TAG);
+        thread.start();
+        mHandler = thread.getThreadHandler();
     }
 
     /** Initialize the receivers and initiate the first NTP request */
     public void systemRunning() {
-        registerForAlarms();
-
-        HandlerThread thread = new HandlerThread(TAG);
-        thread.start();
-        mHandler = new MyHandler(thread.getLooper());
-        mNetworkTimeUpdateCallback = new NetworkTimeUpdateCallback();
-        mCM.registerDefaultNetworkCallback(mNetworkTimeUpdateCallback, mHandler);
-
-        mAutoTimeSettingObserver = new AutoTimeSettingObserver(mContext, mHandler,
-                EVENT_AUTO_TIME_ENABLED);
-        mAutoTimeSettingObserver.observe();
-    }
-
-    private void registerForAlarms() {
+        // Listen for scheduled refreshes.
         mContext.registerReceiver(
                 new BroadcastReceiver() {
                     @Override
                     public void onReceive(Context context, Intent intent) {
-                        mHandler.obtainMessage(EVENT_POLL_NETWORK_TIME).sendToTarget();
+                        onPollNetworkTime("scheduled refresh");
                     }
-                }, new IntentFilter(ACTION_POLL));
+                },
+                new IntentFilter(ACTION_POLL),
+                /*broadcastPermission=*/ null,
+                mHandler);
+
+        // Listen for network connectivity changes.
+        NetworkTimeUpdateCallback networkTimeUpdateCallback = new NetworkTimeUpdateCallback();
+        mCM.registerDefaultNetworkCallback(networkTimeUpdateCallback, mHandler);
+
+        // Listen for user settings changes.
+        ContentResolver resolver = mContext.getContentResolver();
+        AutoTimeSettingObserver autoTimeSettingObserver =
+                new AutoTimeSettingObserver(mHandler, mContext);
+        resolver.registerContentObserver(Settings.Global.getUriFor(Settings.Global.AUTO_TIME),
+                false, autoTimeSettingObserver);
+    }
+
+    /**
+     * Overrides the NTP server config for tests. Passing {@code null} to a parameter clears the
+     * test value, i.e. so the normal value will be used next time.
+     */
+    @RequiresPermission(android.Manifest.permission.SET_TIME)
+    void setServerConfigForTests(@Nullable NtpTrustedTime.NtpConfig ntpConfig) {
+        mContext.enforceCallingPermission(
+                android.Manifest.permission.SET_TIME, "set NTP server config for tests");
+
+        final long token = Binder.clearCallingIdentity();
+        try {
+            mNtpTrustedTime.setServerConfigForTests(ntpConfig);
+        } finally {
+            Binder.restoreCallingIdentity(token);
+        }
     }
 
     /**
@@ -168,15 +181,14 @@ public class NetworkTimeUpdateService extends Binder {
      *
      * <p>This operation takes place in the calling thread rather than the service's handler thread.
      */
+    @RequiresPermission(android.Manifest.permission.SET_TIME)
     void clearTimeForTests() {
         mContext.enforceCallingPermission(
                 android.Manifest.permission.SET_TIME, "clear latest network time");
 
         final long token = Binder.clearCallingIdentity();
         try {
-            mTime.clearCachedTimeResult();
-
-            mLocalLog.log("clearTimeForTests");
+            mNtpTrustedTime.clearCachedTimeResult();
         } finally {
             Binder.restoreCallingIdentity(token);
         }
@@ -186,20 +198,28 @@ public class NetworkTimeUpdateService extends Binder {
      * Forces the service to refresh the NTP time.
      *
      * <p>This operation takes place in the calling thread rather than the service's handler thread.
-     * This method does not affect currently scheduled refreshes. If the NTP request is successful
-     * it will make an (asynchronously handled) suggestion to the time detector.
+     * This method does not affect currently scheduled refreshes.
+     *
+     * <p>If the NTP request is successful it will synchronously make a suggestion to the time
+     * detector, which will be asynchronously handled; therefore the effects are not guaranteed to
+     * be visible when this call returns.
      */
+    @RequiresPermission(android.Manifest.permission.SET_TIME)
     boolean forceRefreshForTests() {
         mContext.enforceCallingPermission(
                 android.Manifest.permission.SET_TIME, "force network time refresh");
 
         final long token = Binder.clearCallingIdentity();
         try {
-            boolean success = mTime.forceRefresh();
-            mLocalLog.log("forceRefreshForTests: success=" + success);
+            Network network;
+            synchronized (mLock) {
+                network = mDefaultNetwork;
+            }
+            if (network == null) return false;
 
+            boolean success = mNtpTrustedTime.forceRefresh(network);
             if (success) {
-                makeNetworkTimeSuggestion(mTime.getCachedTimeResult(),
+                makeNetworkTimeSuggestion(mNtpTrustedTime.getCachedTimeResult(),
                         "Origin: NetworkTimeUpdateService: forceRefreshForTests");
             }
             return success;
@@ -208,49 +228,41 @@ public class NetworkTimeUpdateService extends Binder {
         }
     }
 
-    /**
-     * Overrides the NTP server config for tests. Passing {@code null} to a parameter clears the
-     * test value, i.e. so the normal value will be used next time.
-     */
-    void setServerConfigForTests(@Nullable NtpTrustedTime.NtpConfig ntpConfig) {
-        mContext.enforceCallingPermission(
-                android.Manifest.permission.SET_TIME, "set NTP server config for tests");
-
-        final long token = Binder.clearCallingIdentity();
-        try {
-            mLocalLog.log("Setting server config for tests: ntpConnectionInfo=" + ntpConfig);
-            mTime.setServerConfigForTests(ntpConfig);
-        } finally {
-            Binder.restoreCallingIdentity(token);
-        }
-    }
-
-    private void onPollNetworkTime(int event) {
+    private void onPollNetworkTime(@NonNull String reason) {
         // If we don't have any default network, don't bother.
-        Network network = mDefaultNetwork;
+        Network network;
+        synchronized (mLock) {
+            network = mDefaultNetwork;
+        }
         if (network == null) return;
 
         mWakeLock.acquire();
         try {
-            onPollNetworkTimeUnderWakeLock(network, event);
+            onPollNetworkTimeUnderWakeLock(network, reason);
         } finally {
             mWakeLock.release();
         }
     }
 
-    private void onPollNetworkTimeUnderWakeLock(@NonNull Network network, int event) {
+    private void onPollNetworkTimeUnderWakeLock(
+            @NonNull Network network, @NonNull String reason) {
         long currentElapsedRealtimeMillis = SystemClock.elapsedRealtime();
 
+        final int maxNetworkTimeAgeMillis = mNormalPollingIntervalMillis;
         // Force an NTP fix when outdated
-        NtpTrustedTime.TimeResult cachedNtpResult = mTime.getCachedTimeResult();
-        if (cachedNtpResult == null || cachedNtpResult.getAgeMillis(currentElapsedRealtimeMillis)
-                >= mPollingIntervalMs) {
+        NtpTrustedTime.TimeResult cachedNtpResult = mNtpTrustedTime.getCachedTimeResult();
+        if (cachedNtpResult == null
+                || cachedNtpResult.getAgeMillis(currentElapsedRealtimeMillis)
+                >= maxNetworkTimeAgeMillis) {
             if (DBG) Log.d(TAG, "Stale NTP fix; forcing refresh using network=" + network);
-            boolean isSuccessful = mTime.forceRefresh(network);
-            if (isSuccessful) {
-                mTryAgainCounter = 0;
+            boolean success = mNtpTrustedTime.forceRefresh(network);
+            if (success) {
+                synchronized (mLock) {
+                    mTryAgainCounter = 0;
+                }
             } else {
-                String logMsg = "forceRefresh() returned false: cachedNtpResult=" + cachedNtpResult
+                String logMsg = "forceRefresh() returned false:"
+                        + " cachedNtpResult=" + cachedNtpResult
                         + ", currentElapsedRealtimeMillis=" + currentElapsedRealtimeMillis;
 
                 if (DBG) {
@@ -259,32 +271,35 @@ public class NetworkTimeUpdateService extends Binder {
                 mLocalLog.log(logMsg);
             }
 
-            cachedNtpResult = mTime.getCachedTimeResult();
+            cachedNtpResult = mNtpTrustedTime.getCachedTimeResult();
         }
 
         if (cachedNtpResult != null
                 && cachedNtpResult.getAgeMillis(currentElapsedRealtimeMillis)
-                < mPollingIntervalMs) {
+                < maxNetworkTimeAgeMillis) {
             // Obtained fresh fix; schedule next normal update
-            resetAlarm(mPollingIntervalMs
+            scheduleNextRefresh(mNormalPollingIntervalMillis
                     - cachedNtpResult.getAgeMillis(currentElapsedRealtimeMillis));
 
-            makeNetworkTimeSuggestion(cachedNtpResult,
-                    "Origin: NetworkTimeUpdateService. event=" + event);
+            makeNetworkTimeSuggestion(cachedNtpResult, reason);
         } else {
-            // No fresh fix; schedule retry
-            mTryAgainCounter++;
-            if (mTryAgainTimesMax < 0 || mTryAgainCounter <= mTryAgainTimesMax) {
-                resetAlarm(mPollingIntervalShorterMs);
-            } else {
-                // Try much later
-                String logMsg = "mTryAgainTimesMax exceeded, cachedNtpResult=" + cachedNtpResult;
-                if (DBG) {
-                    Log.d(TAG, logMsg);
+            synchronized (mLock) {
+                // No fresh fix; schedule retry
+                mTryAgainCounter++;
+                if (mTryAgainTimesMax < 0 || mTryAgainCounter <= mTryAgainTimesMax) {
+                    scheduleNextRefresh(mShortPollingIntervalMillis);
+                } else {
+                    // Try much later
+                    String logMsg = "mTryAgainTimesMax exceeded,"
+                            + " cachedNtpResult=" + cachedNtpResult;
+                    if (DBG) {
+                        Log.d(TAG, logMsg);
+                    }
+                    mLocalLog.log(logMsg);
+                    mTryAgainCounter = 0;
+
+                    scheduleNextRefresh(mNormalPollingIntervalMillis);
                 }
-                mLocalLog.log(logMsg);
-                mTryAgainCounter = 0;
-                resetAlarm(mPollingIntervalMs);
             }
         }
     }
@@ -304,46 +319,35 @@ public class NetworkTimeUpdateService extends Binder {
     /**
      * Cancel old alarm and starts a new one for the specified interval.
      *
-     * @param interval when to trigger the alarm, starting from now.
+     * @param delayMillis when to trigger the alarm, starting from now.
      */
-    private void resetAlarm(long interval) {
+    private void scheduleNextRefresh(long delayMillis) {
         mAlarmManager.cancel(mPendingPollIntent);
         long now = SystemClock.elapsedRealtime();
-        long next = now + interval;
+        long next = now + delayMillis;
         mAlarmManager.set(AlarmManager.ELAPSED_REALTIME, next, mPendingPollIntent);
     }
 
-    /** Handler to do the network accesses on */
-    private class MyHandler extends Handler {
-
-        MyHandler(Looper l) {
-            super(l);
-        }
-
-        @Override
-        public void handleMessage(@NonNull Message msg) {
-            switch (msg.what) {
-                case EVENT_AUTO_TIME_ENABLED:
-                case EVENT_POLL_NETWORK_TIME:
-                case EVENT_NETWORK_CHANGED:
-                    onPollNetworkTime(msg.what);
-                    break;
-            }
-        }
-    }
-
+    // All callbacks will be invoked using mHandler because of how the callback is registered.
     private class NetworkTimeUpdateCallback extends NetworkCallback {
         @Override
         public void onAvailable(@NonNull Network network) {
             Log.d(TAG, String.format("New default network %s; checking time.", network));
-            mDefaultNetwork = network;
+            synchronized (mLock) {
+                mDefaultNetwork = network;
+            }
+
             // Running on mHandler so invoke directly.
-            onPollNetworkTime(EVENT_NETWORK_CHANGED);
+            onPollNetworkTime("network available");
         }
 
         @Override
         public void onLost(@NonNull Network network) {
-            if (network.equals(mDefaultNetwork)) mDefaultNetwork = null;
+            synchronized (mLock) {
+                if (network.equals(mDefaultNetwork)) {
+                    mDefaultNetwork = null;
+                }
+            }
         }
     }
 
@@ -351,29 +355,20 @@ public class NetworkTimeUpdateService extends Binder {
      * Observer to watch for changes to the AUTO_TIME setting. It only triggers when the setting
      * is enabled.
      */
-    private static class AutoTimeSettingObserver extends ContentObserver {
+    private class AutoTimeSettingObserver extends ContentObserver {
 
         private final Context mContext;
-        private final int mMsg;
-        private final Handler mHandler;
 
-        AutoTimeSettingObserver(@NonNull Context context, @NonNull Handler handler, int msg) {
+        AutoTimeSettingObserver(@NonNull Handler handler, @NonNull Context context) {
             super(handler);
             mContext = Objects.requireNonNull(context);
-            mHandler = Objects.requireNonNull(handler);
-            mMsg = msg;
-        }
-
-        void observe() {
-            ContentResolver resolver = mContext.getContentResolver();
-            resolver.registerContentObserver(Settings.Global.getUriFor(Settings.Global.AUTO_TIME),
-                    false, this);
         }
 
         @Override
         public void onChange(boolean selfChange) {
+            // onChange() will be invoked using handler, see the constructor.
             if (isAutomaticTimeEnabled()) {
-                mHandler.obtainMessage(mMsg).sendToTarget();
+                onPollNetworkTime("automatic time enabled");
             }
         }
 
@@ -389,14 +384,19 @@ public class NetworkTimeUpdateService extends Binder {
     @Override
     protected void dump(FileDescriptor fd, PrintWriter pw, String[] args) {
         if (!DumpUtils.checkDumpPermission(mContext, TAG, pw)) return;
-        pw.println("mPollingIntervalMs=" + Duration.ofMillis(mPollingIntervalMs));
-        pw.println("mPollingIntervalShorterMs=" + Duration.ofMillis(mPollingIntervalShorterMs));
+
+        pw.println("mNormalPollingIntervalMillis="
+                + Duration.ofMillis(mNormalPollingIntervalMillis));
+        pw.println("mShortPollingIntervalMillis="
+                + Duration.ofMillis(mShortPollingIntervalMillis));
         pw.println("mTryAgainTimesMax=" + mTryAgainTimesMax);
-        pw.println("mDefaultNetwork=" + mDefaultNetwork);
-        pw.println("mTryAgainCounter=" + mTryAgainCounter);
+        synchronized (mLock) {
+            pw.println("mDefaultNetwork=" + mDefaultNetwork);
+            pw.println("mTryAgainCounter=" + mTryAgainCounter);
+        }
         pw.println();
         pw.println("NtpTrustedTime:");
-        mTime.dump(pw);
+        mNtpTrustedTime.dump(pw);
         pw.println();
         pw.println("Local logs:");
         mLocalLog.dump(fd, pw, args);

@@ -51,17 +51,26 @@
     <string name="permission_contacts" msgid="3858319347208004438">"အဆက်အသွယ်များ"</string>
     <string name="permission_calendar" msgid="6805668388691290395">"ပြက္ခဒိန်"</string>
     <string name="permission_microphone" msgid="2152206421428732949">"မိုက်ခရိုဖုန်း"</string>
+    <!-- no translation found for permission_call_logs (5546761417694586041) -->
+    <skip />
     <string name="permission_nearby_devices" msgid="7530973297737123481">"အနီးတစ်ဝိုက်ရှိ စက်များ"</string>
     <string name="permission_storage" msgid="6831099350839392343">"ဓာတ်ပုံနှင့် မီဒီယာများ"</string>
     <string name="permission_notification" msgid="693762568127741203">"အကြောင်းကြားချက်များ"</string>
     <string name="permission_app_streaming" msgid="6009695219091526422">"အက်ပ်များ"</string>
     <string name="permission_nearby_device_streaming" msgid="5868108148065023161">"အနီးရှိစက်တိုက်ရိုက်ဖွင့်ခြင်း"</string>
-    <string name="permission_phone_summary" msgid="6154198036705702389">"သင့်ဖုန်းနံပါတ်နှင့် ကွန်ရက်အချက်အလက်ကို သုံးနိုင်သည်။ ဖုန်းခေါ်ဆိုခြင်းနှင့် VoIP၊ အသံမေးလ်၊ ခေါ်ဆိုမှု တစ်ဆင့်ပြန်လွှဲခြင်းနှင့် ခေါ်ဆိုမှတ်တမ်းများ တည်းဖြတ်ခြင်းတို့အတွက် လိုအပ်သည်"</string>
-    <string name="permission_sms_summary" msgid="5107174184224165570"></string>
-    <string name="permission_contacts_summary" msgid="7850901746005070792">"အဆက်အသွယ် စာရင်းကို ဖတ်နိုင်၊ ပြုလုပ်နိုင် (သို့) တည်းဖြတ်နိုင်သည့်ပြင် သင့်စက်တွင်သုံးသော အကောင့်အားလုံး၏စာရင်းကို သုံးနိုင်သည်"</string>
-    <string name="permission_calendar_summary" msgid="9070743747408808156"></string>
+    <!-- no translation found for permission_phone_summary (6684396967861278044) -->
+    <skip />
+    <!-- no translation found for permission_call_logs_summary (6186103394658755022) -->
+    <skip />
+    <!-- no translation found for permission_sms_summary (3508442683678912017) -->
+    <skip />
+    <!-- no translation found for permission_contacts_summary (675861979475628708) -->
+    <skip />
+    <!-- no translation found for permission_calendar_summary (6460000922511766226) -->
+    <skip />
     <string name="permission_microphone_summary" msgid="4241354865859396558">"မိုက်ခရိုဖုန်းသုံးပြီး အသံဖမ်းနိုင်သည်"</string>
-    <string name="permission_nearby_devices_summary" msgid="8587497797301075494"></string>
+    <!-- no translation found for permission_nearby_devices_summary (931940524460876655) -->
+    <skip />
     <string name="permission_notification_summary" msgid="884075314530071011">"အဆက်အသွယ်၊ မက်ဆေ့ဂျ်နှင့် ဓာတ်ပုံကဲ့သို့ အချက်အလက်များအပါအဝင် အကြောင်းကြားချက်အားလုံးကို ဖတ်နိုင်သည်"</string>
     <string name="permission_app_streaming_summary" msgid="606923325679670624">"သင့်ဖုန်းရှိအက်ပ်များကို တိုက်ရိုက်ဖွင့်နိုင်သည်"</string>
     <string name="permission_storage_summary" msgid="3918240895519506417"></string>

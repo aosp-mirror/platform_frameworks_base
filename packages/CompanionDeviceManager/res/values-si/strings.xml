@@ -51,17 +51,26 @@
     <string name="permission_contacts" msgid="3858319347208004438">"සම්බන්‍ධතා"</string>
     <string name="permission_calendar" msgid="6805668388691290395">"දිනදර්ශනය"</string>
     <string name="permission_microphone" msgid="2152206421428732949">"මයික්‍රෆෝනය"</string>
+    <!-- no translation found for permission_call_logs (5546761417694586041) -->
+    <skip />
     <string name="permission_nearby_devices" msgid="7530973297737123481">"අවට උපාංග"</string>
     <string name="permission_storage" msgid="6831099350839392343">"ඡායාරූප සහ මාධ්‍ය"</string>
     <string name="permission_notification" msgid="693762568127741203">"දැනුම්දීම්"</string>
     <string name="permission_app_streaming" msgid="6009695219091526422">"යෙදුම්"</string>
     <string name="permission_nearby_device_streaming" msgid="5868108148065023161">"ආසන්න උපාංග ප්‍රවාහය"</string>
-    <string name="permission_phone_summary" msgid="6154198036705702389">"ඔබේ දුරකථන අංකයට සහ ජාල තොරතුරු වෙත ප්‍රවේශ විය හැක. ඇමතුම් සහ VoIP, හඬ තැපැල්, ඇමතුම් ප්‍රතියෝමුව, සහ ඇමතුම් සටහන් සංස්කරණය සඳහා අවශ්‍යයි."</string>
-    <string name="permission_sms_summary" msgid="5107174184224165570"></string>
-    <string name="permission_contacts_summary" msgid="7850901746005070792">"අපගේ සම්බන්‍ධතා ලැයිස්තුව කියවීමට, සෑදීමට, හෝ සංස්කරණ කිරීමට මෙන් ම ඔබේ උපාංගය මත භාවිත කරනු ලබන සියලුම ගිණුම් ලැයිස්තු වෙත ප්‍රවේශ වීමට හැකිය"</string>
-    <string name="permission_calendar_summary" msgid="9070743747408808156"></string>
+    <!-- no translation found for permission_phone_summary (6684396967861278044) -->
+    <skip />
+    <!-- no translation found for permission_call_logs_summary (6186103394658755022) -->
+    <skip />
+    <!-- no translation found for permission_sms_summary (3508442683678912017) -->
+    <skip />
+    <!-- no translation found for permission_contacts_summary (675861979475628708) -->
+    <skip />
+    <!-- no translation found for permission_calendar_summary (6460000922511766226) -->
+    <skip />
     <string name="permission_microphone_summary" msgid="4241354865859396558">"මයික්‍රෆෝනය භාවිතයෙන් ශ්‍රව්‍ය පටිගත කළ හැක"</string>
-    <string name="permission_nearby_devices_summary" msgid="8587497797301075494"></string>
+    <!-- no translation found for permission_nearby_devices_summary (931940524460876655) -->
+    <skip />
     <string name="permission_notification_summary" msgid="884075314530071011">"සම්බන්ධතා, පණිවිඩ සහ ඡායාරූප වැනි තොරතුරු ඇතුළුව සියලු දැනුම්දීම් කියවිය හැකිය"</string>
     <string name="permission_app_streaming_summary" msgid="606923325679670624">"ඔබේ දුරකථනයේ යෙදුම් ප්‍රවාහ කරන්න"</string>
     <string name="permission_storage_summary" msgid="3918240895519506417"></string>

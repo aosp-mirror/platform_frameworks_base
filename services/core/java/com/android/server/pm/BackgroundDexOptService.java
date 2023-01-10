@@ -55,9 +55,11 @@ import com.android.internal.annotations.GuardedBy;
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.util.ArrayUtils;
 import com.android.internal.util.FrameworkStatsLog;
+import com.android.internal.util.FunctionalUtils.ThrowingCheckedSupplier;
 import com.android.internal.util.IndentingPrintWriter;
 import com.android.server.LocalServices;
 import com.android.server.PinnerService;
+import com.android.server.pm.Installer.LegacyDexoptDisabledException;
 import com.android.server.pm.PackageDexOptimizer.DexOptResult;
 import com.android.server.pm.dex.DexManager;
 import com.android.server.pm.dex.DexoptOptions;
@@ -71,7 +73,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
 import java.util.concurrent.TimeUnit;
-import java.util.function.Supplier;
 
 /**
  * Controls background dex optimization run as idle job or command line.
@@ -202,7 +203,8 @@ public final class BackgroundDexOptService {
     }
 
     /** Start scheduling job after boot completion */
-    public void systemReady() {
+    public void systemReady() throws LegacyDexoptDisabledException {
+        Installer.checkLegacyDexoptDisabled();
         if (mInjector.isBackgroundDexOptDisabled()) {
             return;
         }
@@ -272,7 +274,8 @@ public final class BackgroundDexOptService {
      * @return true if dex optimization is complete. false if the task is cancelled or if there was
      *         an error.
      */
-    public boolean runBackgroundDexoptJob(@Nullable List<String> packageNames) {
+    public boolean runBackgroundDexoptJob(@Nullable List<String> packageNames)
+            throws LegacyDexoptDisabledException {
         enforceRootOrShell();
         long identity = Binder.clearCallingIdentity();
         try {
@@ -301,7 +304,8 @@ public final class BackgroundDexOptService {
      *
      * <p>This is only for shell command and only root or shell user can use this.
      */
-    public void cancelBackgroundDexoptJob() {
+    public void cancelBackgroundDexoptJob() throws LegacyDexoptDisabledException {
+        Installer.checkLegacyDexoptDisabled();
         enforceRootOrShell();
         Binder.withCleanCallingIdentity(() -> cancelDexOptAndWaitForCompletion());
     }
@@ -315,7 +319,8 @@ public final class BackgroundDexOptService {
      *
      * @param disable True if JobScheduler invocations should be disabled, false otherwise.
      */
-    public void setDisableJobSchedulerJobs(boolean disable) {
+    public void setDisableJobSchedulerJobs(boolean disable) throws LegacyDexoptDisabledException {
+        Installer.checkLegacyDexoptDisabled();
         enforceRootOrShell();
         synchronized (mLock) {
             mDisableJobSchedulerJobs = disable;
@@ -323,14 +328,18 @@ public final class BackgroundDexOptService {
     }
 
     /** Adds listener for package update */
-    public void addPackagesUpdatedListener(PackagesUpdatedListener listener) {
+    public void addPackagesUpdatedListener(PackagesUpdatedListener listener)
+            throws LegacyDexoptDisabledException {
+        Installer.checkLegacyDexoptDisabled();
         synchronized (mLock) {
             mPackagesUpdatedListeners.add(listener);
         }
     }
 
     /** Removes package update listener */
-    public void removePackagesUpdatedListener(PackagesUpdatedListener listener) {
+    public void removePackagesUpdatedListener(PackagesUpdatedListener listener)
+            throws LegacyDexoptDisabledException {
+        Installer.checkLegacyDexoptDisabled();
         synchronized (mLock) {
             mPackagesUpdatedListeners.remove(listener);
         }
@@ -340,7 +349,8 @@ public final class BackgroundDexOptService {
      * Notifies package change and removes the package from the failed package list so that
      * the package can run dexopt again.
      */
-    public void notifyPackageChanged(String packageName) {
+    public void notifyPackageChanged(String packageName) throws LegacyDexoptDisabledException {
+        Installer.checkLegacyDexoptDisabled();
         // The idle maintenance job skips packages which previously failed to
         // compile. The given package has changed and may successfully compile
         // now. Remove it from the list of known failing packages.
@@ -387,37 +397,43 @@ public final class BackgroundDexOptService {
                 // Post boot job not finished yet. Run post boot job first.
                 return false;
             }
-            resetStatesForNewDexOptRunLocked(mInjector.createAndStartThread(
-                    "BackgroundDexOptService_" + (isPostBootUpdateJob ? "PostBoot" : "Idle"),
-                    () -> {
-                        TimingsTraceAndSlog tr =
-                                new TimingsTraceAndSlog(TAG, Trace.TRACE_TAG_PACKAGE_MANAGER);
-                        tr.traceBegin("jobExecution");
-                        boolean completed = false;
-                        try {
-                            completed = runIdleOptimization(
-                                    pm, pkgs, params.getJobId() == JOB_POST_BOOT_UPDATE);
-                        } finally { // Those cleanup should be done always.
-                            tr.traceEnd();
-                            Slog.i(TAG,
-                                    "dexopt finishing. jobid:" + params.getJobId()
-                                            + " completed:" + completed);
+            try {
+                resetStatesForNewDexOptRunLocked(mInjector.createAndStartThread(
+                        "BackgroundDexOptService_" + (isPostBootUpdateJob ? "PostBoot" : "Idle"),
+                        () -> {
+                            TimingsTraceAndSlog tr =
+                                    new TimingsTraceAndSlog(TAG, Trace.TRACE_TAG_PACKAGE_MANAGER);
+                            tr.traceBegin("jobExecution");
+                            boolean completed = false;
+                            try {
+                                completed = runIdleOptimization(
+                                        pm, pkgs, params.getJobId() == JOB_POST_BOOT_UPDATE);
+                            } catch (LegacyDexoptDisabledException e) {
+                                Slog.wtf(TAG, e);
+                            } finally { // Those cleanup should be done always.
+                                tr.traceEnd();
+                                Slog.i(TAG,
+                                        "dexopt finishing. jobid:" + params.getJobId()
+                                                + " completed:" + completed);
 
-                            writeStatsLog(params);
+                                writeStatsLog(params);
 
-                            if (params.getJobId() == JOB_POST_BOOT_UPDATE) {
-                                if (completed) {
-                                    markPostBootUpdateCompleted(params);
+                                if (params.getJobId() == JOB_POST_BOOT_UPDATE) {
+                                    if (completed) {
+                                        markPostBootUpdateCompleted(params);
+                                    }
+                                    // Reschedule when cancelled
+                                    job.jobFinished(params, !completed);
+                                } else {
+                                    // Periodic job
+                                    job.jobFinished(params, false /* reschedule */);
                                 }
-                                // Reschedule when cancelled
-                                job.jobFinished(params, !completed);
-                            } else {
-                                // Periodic job
-                                job.jobFinished(params, false /* reschedule */);
+                                markDexOptCompleted();
                             }
-                            markDexOptCompleted();
-                        }
-                    }));
+                        }));
+            } catch (LegacyDexoptDisabledException e) {
+                Slog.wtf(TAG, e);
+            }
         }
         return true;
     }
@@ -425,11 +441,16 @@ public final class BackgroundDexOptService {
     /** For BackgroundDexOptJobService to dispatch onStopJob event */
     /* package */ boolean onStopJob(BackgroundDexOptJobService job, JobParameters params) {
         Slog.i(TAG, "onStopJob:" + params.getJobId());
-        // This cannot block as it is in main thread, thus dispatch to a newly created thread and
-        // cancel it from there.
-        // As this event does not happen often, creating a new thread is justified rather than
-        // having one thread kept permanently.
-        mInjector.createAndStartThread("DexOptCancel", this::cancelDexOptAndWaitForCompletion);
+        // This cannot block as it is in main thread, thus dispatch to a newly created thread
+        // and cancel it from there. As this event does not happen often, creating a new thread
+        // is justified rather than having one thread kept permanently.
+        mInjector.createAndStartThread("DexOptCancel", () -> {
+            try {
+                cancelDexOptAndWaitForCompletion();
+            } catch (LegacyDexoptDisabledException e) {
+                Slog.wtf(TAG, e);
+            }
+        });
         // Always reschedule for cancellation.
         return true;
     }
@@ -438,7 +459,7 @@ public final class BackgroundDexOptService {
      * Cancels pending dexopt and wait for completion of the cancellation. This can block the caller
      * until cancellation is done.
      */
-    private void cancelDexOptAndWaitForCompletion() {
+    private void cancelDexOptAndWaitForCompletion() throws LegacyDexoptDisabledException {
         synchronized (mLock) {
             if (mDexOptThread == null) {
                 return;
@@ -496,7 +517,8 @@ public final class BackgroundDexOptService {
     }
 
     @GuardedBy("mLock")
-    private void resetStatesForNewDexOptRunLocked(Thread thread) {
+    private void resetStatesForNewDexOptRunLocked(Thread thread)
+            throws LegacyDexoptDisabledException {
         mDexOptThread = thread;
         mLastCancelledPackages.clear();
         controlDexOptBlockingLocked(false);
@@ -510,7 +532,7 @@ public final class BackgroundDexOptService {
     }
 
     @GuardedBy("mLock")
-    private void controlDexOptBlockingLocked(boolean block) {
+    private void controlDexOptBlockingLocked(boolean block) throws LegacyDexoptDisabledException {
         PackageManagerService pm = mInjector.getPackageManagerService();
         mDexOptHelper.controlDexOptBlocking(block);
     }
@@ -564,8 +586,8 @@ public final class BackgroundDexOptService {
      * Returns whether we've successfully run the job. Note that it will return true even if some
      * packages may have failed compiling.
      */
-    private boolean runIdleOptimization(
-            PackageManagerService pm, List<String> pkgs, boolean isPostBootUpdate) {
+    private boolean runIdleOptimization(PackageManagerService pm, List<String> pkgs,
+            boolean isPostBootUpdate) throws LegacyDexoptDisabledException {
         synchronized (mLock) {
             mLastExecutionStatus = STATUS_UNSPECIFIED;
             mLastExecutionStartUptimeMs = SystemClock.uptimeMillis();
@@ -631,7 +653,8 @@ public final class BackgroundDexOptService {
 
     @Status
     private int idleOptimizePackages(PackageManagerService pm, List<String> pkgs,
-            long lowStorageThreshold, boolean isPostBootUpdate) {
+            long lowStorageThreshold, boolean isPostBootUpdate)
+            throws LegacyDexoptDisabledException {
         ArraySet<String> updatedPackages = new ArraySet<>();
 
         try {
@@ -707,7 +730,8 @@ public final class BackgroundDexOptService {
 
     @Status
     private int optimizePackages(List<String> pkgs, long lowStorageThreshold,
-            ArraySet<String> updatedPackages, boolean isPostBootUpdate) {
+            ArraySet<String> updatedPackages, boolean isPostBootUpdate)
+            throws LegacyDexoptDisabledException {
         boolean supportSecondaryDex = mInjector.supportSecondaryDex();
 
         // Keep the error if there is any error from any package.
@@ -760,7 +784,8 @@ public final class BackgroundDexOptService {
      */
     @DexOptResult
     private int downgradePackage(@NonNull Computer snapshot, PackageManagerService pm, String pkg,
-            boolean isForPrimaryDex, boolean isPostBootUpdate) {
+            boolean isForPrimaryDex, boolean isPostBootUpdate)
+            throws LegacyDexoptDisabledException {
         if (DEBUG) {
             Slog.d(TAG, "Downgrading " + pkg);
         }
@@ -808,7 +833,7 @@ public final class BackgroundDexOptService {
     }
 
     @Status
-    private int reconcileSecondaryDexFiles() {
+    private int reconcileSecondaryDexFiles() throws LegacyDexoptDisabledException {
         // TODO(calin): should we denylist packages for which we fail to reconcile?
         for (String p : mInjector.getDexManager().getAllPackagesWithSecondaryDexFiles()) {
             if (isCancelling()) {
@@ -829,7 +854,8 @@ public final class BackgroundDexOptService {
      * @return PackageDexOptimizer#DEX_OPT_*
      */
     @DexOptResult
-    private int optimizePackage(String pkg, boolean isForPrimaryDex, boolean isPostBootUpdate) {
+    private int optimizePackage(String pkg, boolean isForPrimaryDex, boolean isPostBootUpdate)
+            throws LegacyDexoptDisabledException {
         int reason = isPostBootUpdate ? PackageManagerService.REASON_POST_BOOT
                                       : PackageManagerService.REASON_BACKGROUND_DEXOPT;
         String filter = getCompilerFilterForReason(reason);
@@ -857,7 +883,8 @@ public final class BackgroundDexOptService {
     }
 
     @DexOptResult
-    private int performDexOptPrimary(String pkg, int reason, String filter, int dexoptFlags) {
+    private int performDexOptPrimary(String pkg, int reason, String filter, int dexoptFlags)
+            throws LegacyDexoptDisabledException {
         DexoptOptions dexoptOptions =
                 new DexoptOptions(pkg, reason, filter, /*splitName=*/null, dexoptFlags);
         return trackPerformDexOpt(pkg, /*isForPrimaryDex=*/true,
@@ -865,7 +892,8 @@ public final class BackgroundDexOptService {
     }
 
     @DexOptResult
-    private int performDexOptSecondary(String pkg, int reason, String filter, int dexoptFlags) {
+    private int performDexOptSecondary(String pkg, int reason, String filter, int dexoptFlags)
+            throws LegacyDexoptDisabledException {
         DexoptOptions dexoptOptions = new DexoptOptions(pkg, reason, filter, /*splitName=*/null,
                 dexoptFlags | DexoptOptions.DEXOPT_ONLY_SECONDARY_DEX);
         return trackPerformDexOpt(pkg, /*isForPrimaryDex=*/false,
@@ -885,8 +913,9 @@ public final class BackgroundDexOptService {
      *  {@link PackageDexOptimizer#DEX_OPT_FAILED}
      */
     @DexOptResult
-    private int trackPerformDexOpt(
-            String pkg, boolean isForPrimaryDex, Supplier<Integer> performDexOptWrapper) {
+    private int trackPerformDexOpt(String pkg, boolean isForPrimaryDex,
+            ThrowingCheckedSupplier<Integer, LegacyDexoptDisabledException> performDexOptWrapper)
+            throws LegacyDexoptDisabledException {
         ArraySet<String> failedPackageNames;
         synchronized (mLock) {
             failedPackageNames =

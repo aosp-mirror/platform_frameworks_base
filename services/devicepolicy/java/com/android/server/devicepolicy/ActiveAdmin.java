@@ -34,6 +34,7 @@ import android.annotation.Nullable;
 import android.app.admin.DeviceAdminInfo;
 import android.app.admin.DevicePolicyManager;
 import android.app.admin.FactoryResetProtectionPolicy;
+import android.app.admin.ManagedSubscriptionsPolicy;
 import android.app.admin.PackagePolicy;
 import android.app.admin.PasswordPolicy;
 import android.app.admin.PreferentialNetworkServiceConfig;
@@ -168,6 +169,7 @@ class ActiveAdmin {
     private static final String TAG_PROTECTED_PACKAGES = "protected_packages";
     private static final String TAG_SUSPENDED_PACKAGES = "suspended-packages";
     private static final String TAG_MTE_POLICY = "mte-policy";
+    private static final String TAG_MANAGED_SUBSCRIPTIONS_POLICY = "managed_subscriptions_policy";
     private static final String ATTR_VALUE = "value";
     private static final String ATTR_LAST_NETWORK_LOGGING_NOTIFICATION = "last-notification";
     private static final String ATTR_NUM_NETWORK_LOGGING_NOTIFICATIONS = "num-notifications";
@@ -271,6 +273,9 @@ class ActiveAdmin {
 
     // Wi-Fi SSID restriction policy.
     WifiSsidPolicy mWifiSsidPolicy;
+
+    // Managed subscriptions policy.
+    ManagedSubscriptionsPolicy mManagedSubscriptionsPolicy;
 
     // TODO: review implementation decisions with frameworks team
     boolean specifiesGlobalProxy = false;
@@ -642,6 +647,11 @@ class ActiveAdmin {
                 mManagedProfileCallerIdAccess);
         writePackagePolicy(out, TAG_CROSS_PROFILE_CONTACTS_SEARCH_POLICY,
                 mManagedProfileContactsAccess);
+        if (mManagedSubscriptionsPolicy != null) {
+            out.startTag(null, TAG_MANAGED_SUBSCRIPTIONS_POLICY);
+            mManagedSubscriptionsPolicy.saveToXml(out);
+            out.endTag(null, TAG_MANAGED_SUBSCRIPTIONS_POLICY);
+        }
     }
 
     private void writePackagePolicy(TypedXmlSerializer out, String tag,
@@ -946,6 +956,8 @@ class ActiveAdmin {
                 mManagedProfileCallerIdAccess = readPackagePolicy(parser);
             } else if (TAG_CROSS_PROFILE_CONTACTS_SEARCH_POLICY.equals(tag)) {
                 mManagedProfileContactsAccess = readPackagePolicy(parser);
+            } else if (TAG_MANAGED_SUBSCRIPTIONS_POLICY.equals(tag)) {
+                mManagedSubscriptionsPolicy = ManagedSubscriptionsPolicy.readFromXml(parser);
             } else {
                 Slogf.w(LOG_TAG, "Unknown admin tag: %s", tag);
                 XmlUtils.skipCurrentTag(parser);
@@ -1414,5 +1426,13 @@ class ActiveAdmin {
 
         pw.print("accountTypesWithManagementDisabled=");
         pw.println(accountTypesWithManagementDisabled);
+
+        if (mManagedSubscriptionsPolicy != null) {
+            pw.println("mManagedSubscriptionsPolicy:");
+            pw.increaseIndent();
+            pw.print("mPolicyType=");
+            mManagedSubscriptionsPolicy.getPolicyType();
+            pw.decreaseIndent();
+        }
     }
 }

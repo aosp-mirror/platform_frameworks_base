@@ -66,6 +66,8 @@ import com.android.server.art.DexUseManagerLocal;
 import com.android.server.art.model.ArtFlags;
 import com.android.server.art.model.OptimizeParams;
 import com.android.server.art.model.OptimizeResult;
+import com.android.server.pm.Installer.InstallerException;
+import com.android.server.pm.Installer.LegacyDexoptDisabledException;
 import com.android.server.pm.PackageDexOptimizer.DexOptResult;
 import com.android.server.pm.dex.DexManager;
 import com.android.server.pm.dex.DexoptOptions;
@@ -125,8 +127,9 @@ public final class DexOptHelper {
      * and {@code numberOfPackagesFailed}.
      */
     public int[] performDexOptUpgrade(List<PackageStateInternal> packageStates, boolean showDialog,
-            final int compilationReason, boolean bootComplete) {
-
+            final int compilationReason, boolean bootComplete)
+            throws LegacyDexoptDisabledException {
+        Installer.checkLegacyDexoptDisabled();
         int numberOfPackagesVisited = 0;
         int numberOfPackagesOptimized = 0;
         int numberOfPackagesSkipped = 0;
@@ -158,7 +161,7 @@ public final class DexOptHelper {
                             // even if things are already compiled.
                             // useProfileForDexopt = true;
                         }
-                    } catch (Exception e) {
+                    } catch (InstallerException | RuntimeException e) {
                         Log.e(TAG, "Failed to copy profile " + profileFile.getAbsolutePath() + " ",
                                 e);
                     }
@@ -193,7 +196,7 @@ public final class DexOptHelper {
                                 } else {
                                     useProfileForDexopt = true;
                                 }
-                            } catch (Exception e) {
+                            } catch (InstallerException | RuntimeException e) {
                                 Log.e(TAG, "Failed to copy profile "
                                         + profileFile.getAbsolutePath() + " ", e);
                             }
@@ -284,7 +287,8 @@ public final class DexOptHelper {
      * Checks if system UI package (typically "com.android.systemui") needs to be re-compiled, and
      * compiles it if needed.
      */
-    private void checkAndDexOptSystemUi() {
+    private void checkAndDexOptSystemUi() throws LegacyDexoptDisabledException {
+        Installer.checkLegacyDexoptDisabled();
         Computer snapshot = mPm.snapshotComputer();
         String sysUiPackageName =
                 mPm.mContext.getString(com.android.internal.R.string.config_systemUi);
@@ -320,7 +324,7 @@ public final class DexOptHelper {
                             Log.e(TAG, "Failed to copy profile " + profileFile.getAbsolutePath());
                         }
                     }
-                } catch (Exception e) {
+                } catch (InstallerException | RuntimeException e) {
                     Log.e(TAG, "Failed to copy profile " + profileFile.getAbsolutePath(), e);
                 }
             }
@@ -341,7 +345,7 @@ public final class DexOptHelper {
     }
 
     @RequiresPermission(Manifest.permission.READ_DEVICE_CONFIG)
-    public void performPackageDexOptUpgradeIfNeeded() {
+    public void performPackageDexOptUpgradeIfNeeded() throws LegacyDexoptDisabledException {
         PackageManagerServiceUtils.enforceSystemOrRoot(
                 "Only the system can request package update");
 
@@ -413,7 +417,12 @@ public final class DexOptHelper {
         }
 
         if (options.isDexoptOnlySecondaryDex()) {
-            return mPm.getDexManager().dexoptSecondaryDex(options);
+            // TODO(b/251903639): Call into ART Service.
+            try {
+                return mPm.getDexManager().dexoptSecondaryDex(options);
+            } catch (LegacyDexoptDisabledException e) {
+                throw new RuntimeException(e);
+            }
         } else {
             int dexoptStatus = performDexOptWithStatus(options);
             return dexoptStatus != PackageDexOptimizer.DEX_OPT_FAILED;
@@ -470,6 +479,8 @@ public final class DexOptHelper {
         final long callingId = Binder.clearCallingIdentity();
         try {
             return performDexOptInternalWithDependenciesLI(p, pkgSetting, options);
+        } catch (LegacyDexoptDisabledException e) {
+            throw new RuntimeException(e);
         } finally {
             Binder.restoreCallingIdentity(callingId);
         }
@@ -542,7 +553,8 @@ public final class DexOptHelper {
 
     @DexOptResult
     private int performDexOptInternalWithDependenciesLI(
-            AndroidPackage p, @NonNull PackageStateInternal pkgSetting, DexoptOptions options) {
+            AndroidPackage p, @NonNull PackageStateInternal pkgSetting, DexoptOptions options)
+            throws LegacyDexoptDisabledException {
         // System server gets a special path.
         if (PLATFORM_PACKAGE_NAME.equals(p.getPackageName())) {
             return mPm.getDexManager().dexoptSystemServer(options);
@@ -621,7 +633,11 @@ public final class DexOptHelper {
         if (artSrvRes.isPresent()) {
             res = artSrvRes.get();
         } else {
-            res = performDexOptInternalWithDependenciesLI(pkg, packageState, options);
+            try {
+                res = performDexOptInternalWithDependenciesLI(pkg, packageState, options);
+            } catch (LegacyDexoptDisabledException e) {
+                throw new RuntimeException(e);
+            }
         }
 
         Trace.traceEnd(TRACE_TAG_PACKAGE_MANAGER);
@@ -666,8 +682,8 @@ public final class DexOptHelper {
         return installerPkg.getUid() == Binder.getCallingUid();
     }
 
-    public boolean performDexOptSecondary(String packageName, String compilerFilter,
-            boolean force) {
+    public boolean performDexOptSecondary(
+            String packageName, String compilerFilter, boolean force) {
         int flags = DexoptOptions.DEXOPT_ONLY_SECONDARY_DEX
                 | DexoptOptions.DEXOPT_CHECK_FOR_PROFILES_UPDATES
                 | DexoptOptions.DEXOPT_BOOT_COMPLETE
@@ -869,7 +885,7 @@ public final class DexOptHelper {
         }
     }
 
-    /*package*/ void controlDexOptBlocking(boolean block) {
+    /*package*/ void controlDexOptBlocking(boolean block) throws LegacyDexoptDisabledException {
         mPm.mPackageDexOptimizer.controlDexOptBlocking(block);
     }
 
@@ -929,10 +945,17 @@ public final class DexOptHelper {
     }
 
     /**
+     * Returns true if ART Service should be used for package optimization.
+     */
+    public static boolean useArtService() {
+        return SystemProperties.getBoolean("dalvik.vm.useartservice", false);
+    }
+
+    /**
      * Returns {@link DexUseManagerLocal} if ART Service should be used for package optimization.
      */
     public static @Nullable DexUseManagerLocal getDexUseManagerLocal() {
-        if (!"true".equals(SystemProperties.get("dalvik.vm.useartservice", ""))) {
+        if (!useArtService()) {
             return null;
         }
         try {
@@ -946,7 +969,7 @@ public final class DexOptHelper {
      * Returns {@link ArtManagerLocal} if ART Service should be used for package optimization.
      */
     private static @Nullable ArtManagerLocal getArtManagerLocal() {
-        if (!"true".equals(SystemProperties.get("dalvik.vm.useartservice", ""))) {
+        if (!useArtService()) {
             return null;
         }
         try {

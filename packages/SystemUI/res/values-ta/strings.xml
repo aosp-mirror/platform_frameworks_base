@@ -816,7 +816,10 @@
     <string name="accessibility_floating_button_migration_tooltip" msgid="5217151214439341902">"அணுகல்தன்மை அம்சத்தை திறக்க தட்டவும். அமைப்பில் பட்டனை பிரத்தியேகமாக்கலாம்/மாற்றலாம்.\n\n"<annotation id="link">"அமைப்பில் காண்க"</annotation></string>
     <string name="accessibility_floating_button_docking_tooltip" msgid="6814897496767461517">"பட்டனைத் தற்காலிகமாக மறைக்க ஓரத்திற்கு நகர்த்தும்"</string>
     <string name="accessibility_floating_button_undo" msgid="511112888715708241">"செயல்தவிர்"</string>
-    <string name="accessibility_floating_button_undo_message_text" msgid="3044079592757099698">"{count,plural, =1{{label} ஷார்ட்கட் அகற்றப்பட்டது}other{# ஷார்ட்கட்கள் அகற்றப்பட்டன}}"</string>
+    <!-- no translation found for accessibility_floating_button_undo_message_label_text (9017658016426242640) -->
+    <skip />
+    <!-- no translation found for accessibility_floating_button_undo_message_number_text (4909270290725226075) -->
+    <skip />
     <string name="accessibility_floating_button_action_move_top_left" msgid="6253520703618545705">"மேலே இடதுபுறத்திற்கு நகர்த்து"</string>
     <string name="accessibility_floating_button_action_move_top_right" msgid="6106225581993479711">"மேலே வலதுபுறத்திற்கு நகர்த்து"</string>
     <string name="accessibility_floating_button_action_move_bottom_left" msgid="8063394111137429725">"கீழே இடதுபுறத்திற்கு நகர்த்து"</string>
@@ -884,6 +887,8 @@
     <string name="media_move_closer_to_end_cast" msgid="6495907340926563656">"இங்கு பிளே செய்ய உங்கள் சாதனத்தை <xliff:g id="DEVICENAME">%1$s</xliff:g> சாதனத்திற்கு அருகில் நகர்த்துங்கள்"</string>
     <string name="media_transfer_playing_different_device" msgid="7186806382609785610">"<xliff:g id="DEVICENAME">%1$s</xliff:g> சாதனத்தில் பிளே ஆகிறது"</string>
     <string name="media_transfer_failed" msgid="7955354964610603723">"ஏதோ தவறாகிவிட்டது. மீண்டும் முயலவும்."</string>
+    <!-- no translation found for media_transfer_loading (5544017127027152422) -->
+    <skip />
     <string name="controls_error_timeout" msgid="794197289772728958">"செயலில் இல்லை , சரிபார்க்கவும்"</string>
     <string name="controls_error_removed" msgid="6675638069846014366">"இல்லை"</string>
     <string name="controls_error_removed_title" msgid="1207794911208047818">"கட்டுப்பாடு இல்லை"</string>
