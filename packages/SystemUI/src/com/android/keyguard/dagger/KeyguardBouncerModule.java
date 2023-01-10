@@ -29,7 +29,7 @@ import com.android.keyguard.KeyguardSecurityViewFlipper;
 import com.android.systemui.R;
 import com.android.systemui.biometrics.SideFpsController;
 import com.android.systemui.dagger.qualifiers.RootView;
-import com.android.systemui.statusbar.phone.KeyguardBouncer;
+import com.android.systemui.keyguard.domain.interactor.PrimaryBouncerInteractor;
 
 import java.util.Optional;
 
@@ -39,7 +39,7 @@ import dagger.Module;
 import dagger.Provides;
 
 /**
- * Module to create and access view related to the {@link KeyguardBouncer}.
+ * Module to create and access view related to the {@link PrimaryBouncerInteractor}.
  */
 @Module
 public interface KeyguardBouncerModule {
