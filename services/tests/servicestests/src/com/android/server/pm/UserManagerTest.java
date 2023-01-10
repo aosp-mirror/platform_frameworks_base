@@ -208,6 +208,8 @@ public final class UserManagerTest {
         assertThrows(SecurityException.class, cloneUserProperties::getStartWithParent);
         assertThrows(SecurityException.class,
                 cloneUserProperties::getCrossProfileIntentFilterAccessControl);
+        assertThrows(SecurityException.class,
+                cloneUserProperties::getCrossProfileIntentResolutionStrategy);
 
         // Verify clone user parent
         assertThat(mUserManager.getProfileParent(primaryUserId)).isNull();
@@ -727,6 +729,7 @@ public final class UserManagerTest {
         assertThat(userProps.getShowInSettings()).isEqualTo(typeProps.getShowInSettings());
         assertFalse(userProps.getUseParentsContacts());
         assertThrows(SecurityException.class, userProps::getCrossProfileIntentFilterAccessControl);
+        assertThrows(SecurityException.class, userProps::getCrossProfileIntentResolutionStrategy);
         assertThrows(SecurityException.class, userProps::getStartWithParent);
         assertThrows(SecurityException.class, userProps::getInheritDevicePolicy);
     }

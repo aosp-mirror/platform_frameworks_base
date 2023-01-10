@@ -35,6 +35,7 @@
             startWithParent='false'
             useParentsContacts='false'
             crossProfileIntentFilterAccessControl='20'
+            crossProfileIntentResolutionStrategy='0'
         />
     </profile-type>
     <profile-type name='custom.test.1' max-allowed-per-parent='14' />
