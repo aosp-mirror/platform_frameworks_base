@@ -2123,6 +2123,14 @@ public final class Call {
      * <p>
      * No assumptions should be made as to how an In-Call UI or service will handle these
      * extras.  Keys should be fully qualified (e.g., com.example.MY_EXTRA) to avoid conflicts.
+     * <p>
+     * Extras added using this method will be made available to the {@link ConnectionService}
+     * associated with this {@link Call} and notified via
+     * {@link Connection#onExtrasChanged(Bundle)}.
+     * <p>
+     * Extras added using this method will also be available to other running {@link InCallService}s
+     * and notified via {@link Call.Callback#onDetailsChanged(Call, Details)}.  The extras can be
+     * accessed via {@link Details#getExtras()}.
      *
      * @param extras The extras to add.
      */
