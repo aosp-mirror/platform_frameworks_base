@@ -5,63 +5,49 @@
   <string name="app_name">Credential Manager</string>
 
   <!-- Strings for the create flow. -->
-  <!-- Button label to close the dialog when the user does not want to create the credential. [CHAR LIMIT=40] -->
+  <!-- Button label to close the dialog when the user does not want to create the credential. [CHAR LIMIT=20] -->
   <string name="string_cancel">Cancel</string>
-  <!-- Button label to confirm choosing the default dialog information and continue. [CHAR LIMIT=40] -->
+  <!-- This is a label for a button that takes user to the next screen. [CHAR LIMIT=20] -->
   <string name="string_continue">Continue</string>
-  <!-- Button label to create this credential in other available places. [CHAR LIMIT=40] -->
+  <!-- This is a label for a button that links to different places where the user can save their passkeys. [CHAR LIMIT=20] -->
   <string name="string_more_options">More options</string>
-  <!-- This appears as a text button where users can click to create this passkey in other available places. [CHAR LIMIT=80] -->
-  <string name="string_create_in_another_place">Create in another place</string>
-  <!-- This appears as a text button where users can click to create this password or other credential types in other available places. [CHAR LIMIT=80] -->
-  <string name="string_save_to_another_place">Save to another place</string>
-  <!-- This appears as a text button where users can click to use another device to create this credential. [CHAR LIMIT=80] -->
-  <string name="string_use_another_device">Use another device</string>
-  <!-- This appears as a text button where users can click to save this credential to another device. [CHAR LIMIT=80] -->
-  <string name="string_save_to_another_device">Save to another device</string>
-  <!-- This appears as the title of the modal bottom sheet introducing what is passkey to users. [CHAR LIMIT=200] -->
+  <!-- This string introduces passkeys to the users for the first time they use this method. Tip: to avoid gendered language patterns, this header could be translated as if the original string were "More safety with passkeys". [CHAR LIMIT=200] -->
   <string name="passkey_creation_intro_title">Safer with passkeys</string>
-  <!-- This appears as the description body of the modal bottom sheet introducing why passkey beneficial on the passwords side. [CHAR LIMIT=200] -->
+  <!-- These strings highlight passkey benefits. [CHAR LIMIT=200] -->
   <string name="passkey_creation_intro_body_password">With passkeys, you don’t need to create or remember complex passwords</string>
-  <!-- This appears as the description body of the modal bottom sheet introducing why passkey beneficial on the safety side. [CHAR LIMIT=200] -->
   <string name="passkey_creation_intro_body_fingerprint">Passkeys are encrypted digital keys you create using your fingerprint, face, or screen lock</string>
-  <!-- This appears as the description body of the modal bottom sheet introducing why passkey beneficial on the using other devices side. [CHAR LIMIT=200] -->
   <string name="passkey_creation_intro_body_device">They are saved to a password manager, so you can sign in on other devices</string>
-  <!-- This appears as the title of the modal bottom sheet which provides all available providers for users to choose. [CHAR LIMIT=200] -->
-  <string name="choose_provider_title">Choose where to <xliff:g id="createTypes" example="create your passkeys">%1$s</xliff:g></string>
-  <!-- Create types which are inserted as a placeholder for string choose_provider_title. [CHAR LIMIT=200] -->
-  <string name="create_your_passkeys">create your passkeys</string>
-  <string name="save_your_password">save your password</string>
-  <string name="save_your_sign_in_info">save your sign-in info</string>
 
+  <!-- This appears as the title of the modal bottom sheet which provides all available providers for users to choose. [CHAR LIMIT=200] -->
+  <string name="choose_provider_title">Choose where to save your <xliff:g id="createTypes" example="passkeys">%1$s</xliff:g></string>
   <!-- This appears as the description body of the modal bottom sheet which provides all available providers for users to choose. [CHAR LIMIT=200] -->
-  <string name="choose_provider_body">Select a password manager to save your info and sign in faster next time.</string>
+  <string name="choose_provider_body">Select a password manager to save your info and sign in faster next time</string>
   <!-- This appears as the title of the modal bottom sheet for users to choose the create option inside a provider when the credential type is passkey. [CHAR LIMIT=200] -->
   <string name="choose_create_option_passkey_title">Create passkey for <xliff:g id="appName" example="Tribank">%1$s</xliff:g>?</string>
   <!-- This appears as the title of the modal bottom sheet for users to choose the create option inside a provider when the credential type is password. [CHAR LIMIT=200] -->
   <string name="choose_create_option_password_title">Save password for <xliff:g id="appName" example="Tribank">%1$s</xliff:g>?</string>
   <!-- This appears as the title of the modal bottom sheet for users to choose the create option inside a provider when the credential type is others. [CHAR LIMIT=200] -->
   <string name="choose_create_option_sign_in_title">Save sign-in info for <xliff:g id="appName" example="Tribank">%1$s</xliff:g>?</string>
-  <!-- This appears as the description body of the modal bottom sheet for users to choose the create option inside a provider. [CHAR LIMIT=200] -->
-  <string name="choose_create_option_description">You can use your <xliff:g id="appDomainName" example="Tribank">%1$s</xliff:g> <xliff:g id="credentialTypes" example="passkey">%2$s</xliff:g> on any device. It is saved to <xliff:g id="providerInfoDisplayName" example="Google Password Manager">%3$s</xliff:g> for <xliff:g id="createInfoDisplayName" example="elisa.beckett@gmail.com">%4$s</xliff:g>.</string>
   <!-- Types which are inserted as a placeholder as credentialTypes for other strings. [CHAR LIMIT=200] -->
   <string name="passkey">passkey</string>
   <string name="password">password</string>
+  <string name="passkeys">passkeys</string>
+  <string name="passwords">passwords</string>
   <string name="sign_ins">sign-ins</string>
   <string name="sign_in_info">sign-in info</string>
 
-  <!-- This appears as the title of the modal bottom sheet for users to choose other available places the created password can be saved to. [CHAR LIMIT=200] -->
+  <!-- This text is followed by a list of one or more options. [CHAR LIMIT=200] -->
   <string name="save_credential_to_title">Save <xliff:g id="credentialTypes" example="passkey">%1$s</xliff:g> to</string>
   <!-- This appears as the title of the modal bottom sheet for users to choose to create a passkey on another device. [CHAR LIMIT=200] -->
-  <string name="create_passkey_in_other_device_title">Create a passkey in another device?</string>
+  <string name="create_passkey_in_other_device_title">Create passkey in another device?</string>
   <!-- This appears as the title of the modal bottom sheet for users to confirm whether they should use the selected provider as default or not. [CHAR LIMIT=200] -->
   <string name="use_provider_for_all_title">Use <xliff:g id="providerInfoDisplayName" example="Google Password Manager">%1$s</xliff:g> for all your sign-ins?</string>
   <!-- TODO: Check the wording here. -->
   <!-- This appears as the description body of the modal bottom sheet for users to confirm whether they should use the selected provider as default or not. [CHAR LIMIT=200] -->
-  <string name="use_provider_for_all_description">This password manager will store your passwords and passkeys to help you easily sign in.</string>
-  <!-- Button label to set the selected provider on the modal bottom sheet as default. [CHAR LIMIT=40] -->
+  <string name="use_provider_for_all_description">This password manager will store your passwords and passkeys to help you easily sign in</string>
+  <!-- This is a label for a button that sets this password manager as the default. [CHAR LIMIT=20] -->
   <string name="set_as_default">Set as default</string>
-  <!-- Button label to set the selected provider on the modal bottom sheet not as default but just use once. [CHAR LIMIT=40] -->
+  <!-- This is a label for a button that makes this password manager be used just in this specific case. [CHAR LIMIT=20] -->
   <string name="use_once">Use once</string>
   <!-- Appears as an option row subtitle to show how many passwords and passkeys are saved in this option when there are passwords and passkeys. [CHAR LIMIT=80] -->
   <string name="more_options_usage_passwords_passkeys"><xliff:g id="passwordsNumber" example="1">%1$s</xliff:g> passwords • <xliff:g id="passkeysNumber" example="2">%2$s</xliff:g> passkeys</string>
@@ -73,7 +59,7 @@
   <string name="more_options_usage_credentials"><xliff:g id="totalCredentialsNumber" example="5">%1$s</xliff:g> credentials</string>
   <!-- Appears before a request display name when the credential type is passkey . [CHAR LIMIT=80] -->
   <string name="passkey_before_subtitle">Passkey</string>
-  <!-- Appears as an option row title that users can choose to use another device for this creation. [CHAR LIMIT=80] -->
+  <!-- This is a label for a button that lets users save their passkey to a different device. [CHAR LIMIT=80] -->
   <string name="another_device">Another device</string>
   <!-- Appears as an option row title that users can choose to view other disabled providers. [CHAR LIMIT=80] -->
   <string name="other_password_manager">Other password managers</string>
@@ -91,15 +77,15 @@
   <string name="get_dialog_title_use_sign_in_for">Use your saved sign-in for <xliff:g id="app_name" example="YouTube">%1$s</xliff:g>?</string>
   <!-- This appears as the title of the dialog asking for user to make a choice from various previously saved credentials to sign in to the app. [CHAR LIMIT=200] -->
   <string name="get_dialog_title_choose_sign_in_for">Choose a saved sign-in for <xliff:g id="app_name" example="YouTube">%1$s</xliff:g></string>
-  <!-- Appears as an option row for viewing all the available sign-in options. [CHAR LIMIT=80] -->
+  <!-- This is a label for a button that links the user to different sign-in methods . [CHAR LIMIT=80] -->
   <string name="get_dialog_use_saved_passkey_for">Sign in another way</string>
-  <!-- Appears as a text button in the snackbar for users to click to view all options. [CHAR LIMIT=80] -->
+  <!-- This is a label for a button that links the user to different sign-in methods. [CHAR LIMIT=80] -->
   <string name="snackbar_action">View options</string>
-  <!-- Button label to continue with the selected sign-in. [CHAR LIMIT=40] -->
+  <!-- This is a label for a button that takes user to the next screen. [CHAR LIMIT=20] -->
   <string name="get_dialog_button_label_continue">Continue</string>
   <!-- Separator for sign-in type and username in a sign-in entry. -->
   <string name="get_dialog_sign_in_type_username_separator" translatable="false">" - "</string>
-  <!-- Modal bottom sheet title for displaying all the available sign-in options. [CHAR LIMIT=80] -->
+  <!-- This text is followed by a list of one or more options. [CHAR LIMIT=80] -->
   <string name="get_dialog_title_sign_in_options">Sign-in options</string>
   <!-- Column heading for displaying sign-ins for a specific username. [CHAR LIMIT=80] -->
   <string name="get_dialog_heading_for_username">For <xliff:g id="username" example="becket@gmail.com">%1$s</xliff:g></string>
@@ -111,6 +97,6 @@
   <string name="get_dialog_heading_manage_sign_ins">Manage sign-ins</string>
   <!-- Column heading for displaying option to use sign-ins saved on a different device. [CHAR LIMIT=80] -->
   <string name="get_dialog_heading_from_another_device">From another device</string>
-  <!-- Headline text for an option to use sign-ins saved on a different device. [CHAR LIMIT=120] -->
+  <!-- This is a label for a button that takes the user to other available devices. [CHAR LIMIT=120] -->
   <string name="get_dialog_option_headline_use_a_different_device">Use a different device</string>
 </resources>

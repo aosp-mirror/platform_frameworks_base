@@ -431,6 +431,7 @@ class CreateFlowUtils {
                 totalCredentialCount = CredentialCountInformation.getTotalCount(
                         createEntry.credentialCountInformationList) ?: 0,
                 lastUsedTimeMillis = createEntry.lastUsedTimeMillis ?: 0,
+                footerDescription = createEntry.footerDescription?.toString()
         )
       }
     }

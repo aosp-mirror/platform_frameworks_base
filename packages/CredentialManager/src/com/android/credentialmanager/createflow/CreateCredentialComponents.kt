@@ -264,11 +264,12 @@ fun ProviderSelectionCard(
                 text = stringResource(
                     R.string.choose_provider_title,
                     when (requestDisplayInfo.type) {
-                        TYPE_PUBLIC_KEY_CREDENTIAL -> stringResource(R.string.create_your_passkeys)
-                        TYPE_PASSWORD_CREDENTIAL -> stringResource(R.string.save_your_password)
-                        else -> stringResource(R.string.save_your_sign_in_info)
-                    },
-                ),
+                        TYPE_PUBLIC_KEY_CREDENTIAL ->
+                            stringResource(R.string.passkeys)
+                        TYPE_PASSWORD_CREDENTIAL ->
+                            stringResource(R.string.passwords)
+                        else -> stringResource(R.string.sign_in_info)
+                    }),
                 style = MaterialTheme.typography.titleMedium,
                 modifier = Modifier.padding(horizontal = 24.dp)
                     .align(alignment = Alignment.CenterHorizontally),
@@ -604,27 +605,17 @@ fun CreationSelectionCard(
                     onClick = onConfirm
                 )
             }
-            Divider(
-                thickness = 1.dp,
-                color = Color.LightGray,
-                modifier = Modifier.padding(start = 24.dp, end = 24.dp, top = 18.dp)
-            )
-            if (createOptionInfo.userProviderDisplayName != null) {
+            if (createOptionInfo.footerDescription != null) {
+                Divider(
+                    thickness = 1.dp,
+                    color = Color.LightGray,
+                    modifier = Modifier.padding(start = 24.dp, end = 24.dp, top = 18.dp)
+                )
                 TextSecondary(
-                    text = stringResource(
-                        R.string.choose_create_option_description,
-                        requestDisplayInfo.appName,
-                        when (requestDisplayInfo.type) {
-                            TYPE_PUBLIC_KEY_CREDENTIAL -> stringResource(R.string.passkey)
-                            TYPE_PASSWORD_CREDENTIAL -> stringResource(R.string.password)
-                            else -> stringResource(R.string.sign_ins)
-                        },
-                        providerInfo.displayName,
-                        createOptionInfo.userProviderDisplayName
-                    ),
+                    text = createOptionInfo.footerDescription,
                     style = MaterialTheme.typography.bodyLarge,
                     modifier = Modifier.padding(
-                        start = 24.dp, top = 8.dp, bottom = 18.dp, end = 24.dp)
+                        start = 29.dp, top = 8.dp, bottom = 18.dp, end = 28.dp)
                 )
             }
             Divider(
