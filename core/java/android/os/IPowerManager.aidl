@@ -86,12 +86,25 @@ interface IPowerManager
     boolean isExemptFromLowPowerStandby();
     boolean isReasonAllowedInLowPowerStandby(int reason);
     boolean isFeatureAllowedInLowPowerStandby(String feature);
+    @JavaPassthrough(annotation="@android.annotation.RequiresPermission(android.Manifest.permission.SET_LOW_POWER_STANDBY_PORTS)")
+    void acquireLowPowerStandbyPorts(in IBinder token, in List<LowPowerStandbyPortDescription> ports);
+    @JavaPassthrough(annotation="@android.annotation.RequiresPermission(android.Manifest.permission.SET_LOW_POWER_STANDBY_PORTS)")
+    void releaseLowPowerStandbyPorts(in IBinder token);
+    @JavaPassthrough(annotation="@android.annotation.RequiresPermission(anyOf = { android.Manifest.permission.MANAGE_LOW_POWER_STANDBY, android.Manifest.permission.DEVICE_POWER })")
+    List<LowPowerStandbyPortDescription> getActiveLowPowerStandbyPorts();
 
     parcelable LowPowerStandbyPolicy {
         String identifier;
         List<String> exemptPackages;
         int allowedReasons;
         List<String> allowedFeatures;
+    }
+
+    parcelable LowPowerStandbyPortDescription {
+        int protocol;
+        int portMatcher;
+        int portNumber;
+        @nullable String bindAddress;
     }
 
     @UnsupportedAppUsage
