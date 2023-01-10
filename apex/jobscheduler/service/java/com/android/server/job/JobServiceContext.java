@@ -35,7 +35,6 @@ import android.app.job.JobProtoEnums;
 import android.app.job.JobWorkItem;
 import android.app.usage.UsageStatsManagerInternal;
 import android.compat.annotation.ChangeId;
-import android.compat.annotation.Disabled;
 import android.compat.annotation.EnabledAfter;
 import android.content.ComponentName;
 import android.content.Context;
@@ -97,9 +96,7 @@ public final class JobServiceContext implements ServiceConnection {
      * Whether to trigger an ANR when apps are slow to respond on pre-UDC APIs and functionality.
      */
     @ChangeId
-    @Disabled
-    // TODO(258236856): Enable after test is fixed
-    // @EnabledAfter(targetSdkVersion = Build.VERSION_CODES.TIRAMISU)
+    @EnabledAfter(targetSdkVersion = Build.VERSION_CODES.TIRAMISU)
     private static final long ANR_PRE_UDC_APIS_ON_SLOW_RESPONSES = 258236856L;
 
     private static final String TAG = "JobServiceContext";
