@@ -171,4 +171,10 @@ interface IActivityClientController {
      */
     oneway void requestCompatCameraControl(in IBinder token, boolean showControl,
             boolean transformationApplied, in ICompatCameraControlCallback callback);
+
+    /**
+     * If set, any activity launch in the same task will be overridden to the locale of activity
+     * that started the task.
+     */
+    void enableTaskLocaleOverride(in IBinder token);
 }

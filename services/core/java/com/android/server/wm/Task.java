@@ -612,6 +612,8 @@ class Task extends TaskFragment {
 
     boolean mLastSurfaceShowing = true;
 
+    boolean mAlignActivityLocaleWithTask = false;
+
     private Task(ActivityTaskManagerService atmService, int _taskId, Intent _intent,
             Intent _affinityIntent, String _affinity, String _rootAffinity,
             ComponentName _realActivity, ComponentName _origActivity, boolean _rootWasReset,
