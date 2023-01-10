@@ -14,16 +14,16 @@
  * limitations under the License.
  */
 
+#include <android-base/macros.h>
 #include <gtest/gtest.h>
-
-#include "protos/graphicsstats.pb.h"
-#include "service/GraphicsStatsService.h"
-
 #include <stdio.h>
 #include <stdlib.h>
 #include <sys/stat.h>
 #include <sys/types.h>
 #include <unistd.h>
+
+#include "protos/graphicsstats.pb.h"
+#include "service/GraphicsStatsService.h"
 
 using namespace android;
 using namespace android::uirenderer;
@@ -49,11 +49,7 @@ std::string findRootPath() {
 
 // No code left untested
 TEST(GraphicsStats, findRootPath) {
-#ifdef __LP64__
-    std::string expected = "/data/nativetest64/hwui_unit_tests";
-#else
-    std::string expected = "/data/nativetest/hwui_unit_tests";
-#endif
+    std::string expected = "/data/local/tmp/nativetest/hwui_unit_tests/" ABI_STRING;
     EXPECT_EQ(expected, findRootPath());
 }
 
