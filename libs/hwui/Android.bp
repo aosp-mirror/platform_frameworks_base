@@ -634,7 +634,7 @@ cc_library_static {
 cc_defaults {
     name: "hwui_test_defaults",
     defaults: ["hwui_defaults"],
-    test_suites: ["device-tests"],
+    test_suites: ["general-tests"],
     header_libs: ["libandroid_headers_private"],
     target: {
         android: {
