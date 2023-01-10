@@ -49,6 +49,7 @@ import com.android.systemui.keyguard.domain.interactor.KeyguardInteractor;
 import com.android.systemui.keyguard.domain.interactor.KeyguardTransitionInteractor;
 import com.android.systemui.plugins.FalsingManager;
 import com.android.systemui.plugins.statusbar.StatusBarStateController;
+import com.android.systemui.statusbar.CommandQueue;
 import com.android.systemui.statusbar.StatusBarState;
 import com.android.systemui.statusbar.VibratorHelper;
 import com.android.systemui.statusbar.policy.ConfigurationController;
@@ -91,6 +92,7 @@ public class LockIconViewControllerBaseTest extends SysuiTestCase {
     protected @Mock AuthRippleController mAuthRippleController;
     protected @Mock FeatureFlags mFeatureFlags;
     protected @Mock KeyguardTransitionRepository mTransitionRepository;
+    protected @Mock CommandQueue mCommandQueue;
     protected FakeExecutor mDelayableExecutor = new FakeExecutor(new FakeSystemClock());
 
     protected LockIconViewController mUnderTest;
@@ -157,7 +159,7 @@ public class LockIconViewControllerBaseTest extends SysuiTestCase {
                 mAuthRippleController,
                 mResources,
                 new KeyguardTransitionInteractor(mTransitionRepository),
-                new KeyguardInteractor(new FakeKeyguardRepository()),
+                new KeyguardInteractor(new FakeKeyguardRepository(), mCommandQueue),
                 mFeatureFlags
         );
     }

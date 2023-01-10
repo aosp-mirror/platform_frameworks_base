@@ -17,17 +17,24 @@
 
 package com.android.systemui.keyguard.domain.interactor
 
+import android.app.StatusBarManager
 import android.graphics.Point
+import com.android.systemui.common.coroutine.ChannelExt.trySendWithFailureLogging
+import com.android.systemui.common.coroutine.ConflatedCallbackFlow.conflatedCallbackFlow
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.keyguard.data.repository.KeyguardRepository
 import com.android.systemui.keyguard.shared.model.BiometricUnlockModel
+import com.android.systemui.keyguard.shared.model.CameraLaunchSourceModel
 import com.android.systemui.keyguard.shared.model.DozeStateModel
 import com.android.systemui.keyguard.shared.model.DozeStateModel.Companion.isDozeOff
 import com.android.systemui.keyguard.shared.model.DozeTransitionModel
 import com.android.systemui.keyguard.shared.model.StatusBarState
 import com.android.systemui.keyguard.shared.model.WakefulnessModel
+import com.android.systemui.statusbar.CommandQueue
+import com.android.systemui.statusbar.CommandQueue.Callbacks
 import com.android.systemui.util.kotlin.sample
 import javax.inject.Inject
+import kotlinx.coroutines.channels.awaitClose
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.filter
@@ -41,6 +48,7 @@ class KeyguardInteractor
 @Inject
 constructor(
     private val repository: KeyguardRepository,
+    private val commandQueue: CommandQueue,
 ) {
     /**
      * The amount of doze the system is in, where `1.0` is fully dozing and `0.0` is not dozing at
@@ -58,6 +66,23 @@ constructor(
     val isDreaming: Flow<Boolean> = repository.isDreaming
     /** Whether the system is dreaming with an overlay active */
     val isDreamingWithOverlay: Flow<Boolean> = repository.isDreamingWithOverlay
+    /** Event for when the camera gesture is detected */
+    val onCameraLaunchDetected: Flow<CameraLaunchSourceModel> = conflatedCallbackFlow {
+        val callback =
+            object : CommandQueue.Callbacks {
+                override fun onCameraLaunchGestureDetected(source: Int) {
+                    trySendWithFailureLogging(
+                        cameraLaunchSourceIntToModel(source),
+                        TAG,
+                        "updated onCameraLaunchGestureDetected"
+                    )
+                }
+            }
+
+        commandQueue.addCallback(callback)
+
+        awaitClose { commandQueue.removeCallback(callback) }
+    }
 
     /**
      * Dozing and dreaming have overlapping events. If the doze state remains in FINISH, it means
@@ -102,5 +127,22 @@ constructor(
     }
     fun isKeyguardShowing(): Boolean {
         return repository.isKeyguardShowing()
+    }
+
+    private fun cameraLaunchSourceIntToModel(value: Int): CameraLaunchSourceModel {
+        return when (value) {
+            StatusBarManager.CAMERA_LAUNCH_SOURCE_WIGGLE -> CameraLaunchSourceModel.WIGGLE
+            StatusBarManager.CAMERA_LAUNCH_SOURCE_POWER_DOUBLE_TAP ->
+                CameraLaunchSourceModel.POWER_DOUBLE_TAP
+            StatusBarManager.CAMERA_LAUNCH_SOURCE_LIFT_TRIGGER ->
+                CameraLaunchSourceModel.LIFT_TRIGGER
+            StatusBarManager.CAMERA_LAUNCH_SOURCE_QUICK_AFFORDANCE ->
+                CameraLaunchSourceModel.QUICK_AFFORDANCE
+            else -> throw IllegalArgumentException("Invalid CameraLaunchSourceModel value: $value")
+        }
+    }
+
+    companion object {
+        private const val TAG = "KeyguardInteractor"
     }
 }

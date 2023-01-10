@@ -47,6 +47,7 @@ import com.android.systemui.plugins.ActivityStarter
 import com.android.systemui.settings.UserFileManager
 import com.android.systemui.settings.UserTracker
 import com.android.systemui.shared.keyguard.shared.model.KeyguardQuickAffordanceSlots
+import com.android.systemui.statusbar.CommandQueue
 import com.android.systemui.statusbar.policy.KeyguardStateController
 import com.android.systemui.util.FakeSharedPreferences
 import com.android.systemui.util.mockito.any
@@ -84,6 +85,7 @@ class KeyguardBottomAreaViewModelTest : SysuiTestCase() {
     @Mock private lateinit var userTracker: UserTracker
     @Mock private lateinit var activityStarter: ActivityStarter
     @Mock private lateinit var launchAnimator: DialogLaunchAnimator
+    @Mock private lateinit var commandQueue: CommandQueue
 
     private lateinit var underTest: KeyguardBottomAreaViewModel
 
@@ -124,7 +126,8 @@ class KeyguardBottomAreaViewModelTest : SysuiTestCase() {
             )
         repository = FakeKeyguardRepository()
 
-        val keyguardInteractor = KeyguardInteractor(repository = repository)
+        val keyguardInteractor =
+            KeyguardInteractor(repository = repository, commandQueue = commandQueue)
         whenever(userTracker.userHandle).thenReturn(mock())
         whenever(lockPatternUtils.getStrongAuthForUser(anyInt()))
             .thenReturn(LockPatternUtils.StrongAuthTracker.STRONG_AUTH_NOT_REQUIRED)

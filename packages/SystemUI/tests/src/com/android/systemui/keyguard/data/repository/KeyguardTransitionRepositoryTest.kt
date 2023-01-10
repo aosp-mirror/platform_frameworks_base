@@ -104,7 +104,7 @@ class KeyguardTransitionRepositoryTest : SysuiTestCase() {
             val firstTransitionSteps = listWithStep(step = BigDecimal(.1), stop = BigDecimal(.1))
             assertSteps(steps.subList(0, 4), firstTransitionSteps, AOD, LOCKSCREEN)
 
-            val secondTransitionSteps = listWithStep(step = BigDecimal(.1), start = BigDecimal(.9))
+            val secondTransitionSteps = listWithStep(step = BigDecimal(.1), start = BigDecimal(.1))
             assertSteps(steps.subList(4, steps.size), secondTransitionSteps, LOCKSCREEN, AOD)
 
             job.cancel()
@@ -201,7 +201,10 @@ class KeyguardTransitionRepositoryTest : SysuiTestCase() {
                 )
             )
         fractions.forEachIndexed { index, fraction ->
-            assertThat(steps[index + 1])
+            val step = steps[index + 1]
+            val truncatedValue =
+                BigDecimal(step.value.toDouble()).setScale(2, RoundingMode.HALF_UP).toFloat()
+            assertThat(step.copy(value = truncatedValue))
                 .isEqualTo(
                     TransitionStep(
                         from,
