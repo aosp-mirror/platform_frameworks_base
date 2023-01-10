@@ -133,20 +133,15 @@ public class ServiceInfo extends ComponentInfo
      * Data(photo, file, account) upload/download, backup/restore, import/export, fetch,
      * transfer over network between device and cloud.
      *
-     * <p>Apps targeting API level {@link android.os.Build.VERSION_CODES#UPSIDE_DOWN_CAKE} and
-     * later should NOT use this type:
-     * calling {@link android.app.Service#startForeground(int, android.app.Notification, int)} with
-     * this type on devices running {@link android.os.Build.VERSION_CODES#UPSIDE_DOWN_CAKE} is still
-     * allowed, but calling it with this type on devices running future platform releases may get a
-     * {@link android.app.InvalidForegroundServiceTypeException}.</p>
-     *
-     * @deprecated Use {@link android.app.job.JobInfo.Builder} data transfer APIs instead.
+     * <p class="note">
+     * Use the {@link android.app.job.JobInfo.Builder#setDataTransfer} API for data transfers
+     * that can be deferred until conditions are ideal for the app or device.
+     * </p>
      */
     @RequiresPermission(
             value = Manifest.permission.FOREGROUND_SERVICE_DATA_SYNC,
             conditional = true
     )
-    @Deprecated
     public static final int FOREGROUND_SERVICE_TYPE_DATA_SYNC = 1 << 0;
 
     /**

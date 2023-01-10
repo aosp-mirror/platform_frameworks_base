@@ -117,14 +117,10 @@ public abstract class ForegroundServiceTypePolicy {
      * The FGS type enforcement:
      * deprecating the {@link android.content.pm.ServiceInfo#FOREGROUND_SERVICE_TYPE_DATA_SYNC}.
      *
-     * <p>Starting a FGS with this type from apps with targetSdkVersion
-     * {@link android.os.Build.VERSION_CODES#UPSIDE_DOWN_CAKE} or later will
-     * result in a warning in the log.</p>
-     *
      * @hide
      */
     @ChangeId
-    @EnabledAfter(targetSdkVersion = android.os.Build.VERSION_CODES.TIRAMISU)
+    @Disabled
     @Overridable
     public static final long FGS_TYPE_DATA_SYNC_DEPRECATION_CHANGE_ID = 255039210L;
 
@@ -132,13 +128,8 @@ public abstract class ForegroundServiceTypePolicy {
      * The FGS type enforcement:
      * disabling the {@link android.content.pm.ServiceInfo#FOREGROUND_SERVICE_TYPE_DATA_SYNC}.
      *
-     * <p>Starting a FGS with this type from apps with targetSdkVersion
-     * {@link android.os.Build.VERSION_CODES#UPSIDE_DOWN_CAKE} or later will
-     * result in an exception.</p>
-     *
      * @hide
      */
-    // TODO (b/254661666): Change to @EnabledSince(U) in next OS release
     @ChangeId
     @Disabled
     @Overridable
