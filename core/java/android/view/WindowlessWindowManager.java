@@ -94,7 +94,10 @@ public class WindowlessWindowManager implements IWindowSession {
     private InsetsState mInsetsState;
     private final ClientWindowFrames mTmpFrames = new ClientWindowFrames();
     private final MergedConfiguration mTmpConfig = new MergedConfiguration();
-    private final WindowlessWindowLayout mLayout = new WindowlessWindowLayout();
+    private final InsetsState mTmpInsetsState = new InsetsState();
+    private final Rect mTmpDisplayCutoutSafe = new Rect();
+    private final Rect mTmpWindowBounds = new Rect();
+    private final WindowLayout mLayout = new WindowLayout();
 
     public WindowlessWindowManager(Configuration c, SurfaceControl rootSurface,
             IBinder hostInputToken) {
@@ -346,22 +349,27 @@ public class WindowlessWindowManager implements IWindowSession {
         }
         WindowManager.LayoutParams attrs = state.mParams;
 
-        ClientWindowFrames frames = new ClientWindowFrames();
-        frames.attachedFrame = state.mAttachedFrame;
+        mTmpFrames.attachedFrame = state.mAttachedFrame;
 
-        mLayout.computeFrames(attrs, null, null, null, WindowConfiguration.WINDOWING_MODE_UNDEFINED,
-                requestedWidth, requestedHeight, 0, 0,
-                frames);
-
-        state.mFrame.set(frames.frame);
-        if (outFrames != null) {
-            outFrames.frame.set(frames.frame);
-            outFrames.parentFrame.set(frames.parentFrame);
-            outFrames.displayFrame.set(frames.displayFrame);
+        if (state.mAttachedFrame == null) {
+            mTmpWindowBounds.set(0, 0, requestedWidth, requestedHeight);
+        } else {
+            mTmpWindowBounds.set(state.mAttachedFrame);
         }
 
-        t.setPosition(leash, frames.frame.left, frames.frame.top);
-        t.setWindowCrop(leash, frames.frame.width(), frames.frame.height());
+        mLayout.computeFrames(attrs, mTmpInsetsState, mTmpDisplayCutoutSafe, mTmpWindowBounds,
+                WindowConfiguration.WINDOWING_MODE_UNDEFINED, requestedWidth, requestedHeight, 0,
+                1f, mTmpFrames);
+
+        state.mFrame.set(mTmpFrames.frame);
+        if (outFrames != null) {
+            outFrames.frame.set(mTmpFrames.frame);
+            outFrames.parentFrame.set(mTmpFrames.parentFrame);
+            outFrames.displayFrame.set(mTmpFrames.displayFrame);
+        }
+
+        t.setPosition(leash, mTmpFrames.frame.left, mTmpFrames.frame.top);
+        t.setWindowCrop(leash, mTmpFrames.frame.width(), mTmpFrames.frame.height());
 
         if (viewFlags == View.VISIBLE) {
             // TODO(b/262892794) ViewRootImpl modifies the app's rendering SurfaceControl
