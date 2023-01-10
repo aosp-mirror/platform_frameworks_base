@@ -6898,6 +6898,10 @@ public class AudioManager {
      * Returns an array of {@link AudioDeviceInfo} objects corresponding to the audio devices
      * currently connected to the system and meeting the criteria specified in the
      * <code>flags</code> parameter.
+     * Notes that Android audio framework only support one device per device type. In that case,
+     * if there are multiple audio device with the same device type connected to the Android device,
+     * only the last reported device will be known by Android audio framework and returned by this
+     * API.
      * @param flags A set of bitflags specifying the criteria to test.
      * @see #GET_DEVICES_OUTPUTS
      * @see #GET_DEVICES_INPUTS
