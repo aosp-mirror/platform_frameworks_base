@@ -1949,6 +1949,13 @@ class WindowOrganizerController extends IWindowOrganizerController.Stub
                     creationParams.getPairedPrimaryFragmentToken());
             final int pairedPosition = ownerTask.mChildren.indexOf(pairedPrimaryTaskFragment);
             position = pairedPosition != -1 ? pairedPosition + 1 : POSITION_TOP;
+        } else if (creationParams.getPairedActivityToken() != null) {
+            // When there is a paired Activity, we want to place the new TaskFragment right above
+            // the paired Activity to make sure the Activity position is not changed after reparent.
+            final ActivityRecord pairedActivity = ActivityRecord.forTokenLocked(
+                    creationParams.getPairedActivityToken());
+            final int pairedPosition = ownerTask.mChildren.indexOf(pairedActivity);
+            position = pairedPosition != -1 ? pairedPosition + 1 : POSITION_TOP;
         } else {
             position = POSITION_TOP;
         }
