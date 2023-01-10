@@ -184,6 +184,7 @@ constructor(
 
     private val configListener =
         object : ConfigurationController.ConfigurationListener {
+            var lastOrientation = -1
 
             override fun onDensityOrFontScaleChanged() {
                 // System font changes should only happen when UMO is offscreen or a flicker may
@@ -200,7 +201,13 @@ constructor(
             override fun onConfigChanged(newConfig: Configuration?) {
                 if (newConfig == null) return
                 isRtl = newConfig.layoutDirection == View.LAYOUT_DIRECTION_RTL
-                updatePlayers(recreateMedia = true)
+                val newOrientation = newConfig.orientation
+                if (lastOrientation != newOrientation) {
+                    // The players actually depend on the orientation possibly, so we have to
+                    // recreate them (at least on large screen devices)
+                    lastOrientation = newOrientation
+                    updatePlayers(recreateMedia = true)
+                }
             }
 
             override fun onUiModeChanged() {
@@ -717,6 +724,9 @@ constructor(
     private fun updatePlayers(recreateMedia: Boolean) {
         pageIndicator.tintList =
             ColorStateList.valueOf(context.getColor(R.color.media_paging_indicator))
+        val previousVisibleKey =
+            MediaPlayerData.visiblePlayerKeys()
+                .elementAtOrNull(mediaCarouselScrollHandler.visibleMediaIndex)
 
         MediaPlayerData.mediaData().forEach { (key, data, isSsMediaRec) ->
             if (isSsMediaRec) {
@@ -740,6 +750,9 @@ constructor(
                     data = data,
                     isSsReactivated = isSsReactivated
                 )
+            }
+            if (recreateMedia) {
+                reorderAllPlayers(previousVisibleKey)
             }
         }
     }
