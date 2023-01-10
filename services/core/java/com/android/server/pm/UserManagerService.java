@@ -1834,6 +1834,23 @@ public class UserManagerService extends IUserManager.Stub {
     }
 
     /**
+     * Gets the current user id, or the target user id in case there is a started user switch.
+     *
+     * @return id of current or target foreground user, or {@link UserHandle#USER_NULL} if
+     * {@link ActivityManagerInternal} is not available yet.
+     */
+    @VisibleForTesting
+    int getCurrentOrTargetUserId() {
+        ActivityManagerInternal activityManagerInternal = getActivityManagerInternal();
+        if (activityManagerInternal == null) {
+            Slog.w(LOG_TAG, "getCurrentOrTargetUserId() called too early, ActivityManagerInternal"
+                    + " is not set yet");
+            return UserHandle.USER_NULL;
+        }
+        return activityManagerInternal.getCurrentUser().id;
+    }
+
+    /**
      * Gets whether the user is the current foreground user or a started profile of that user.
      *
      * <p>Doesn't perform any permission check.
@@ -5407,8 +5424,7 @@ public class UserManagerService extends IUserManager.Stub {
         final long ident = Binder.clearCallingIdentity();
         try {
             final UserData userData;
-            int currentUser = getCurrentUserId();
-            if (currentUser == userId) {
+            if (userId == getCurrentOrTargetUserId()) {
                 Slog.w(LOG_TAG, "Current user cannot be removed.");
                 return false;
             }
