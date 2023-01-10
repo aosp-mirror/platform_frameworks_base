@@ -1684,6 +1684,8 @@
   <java-symbol type="bool" name="config_lockUiMode" />
   <java-symbol type="bool" name="config_reverseDefaultRotation" />
   <java-symbol type="bool" name="config_perDisplayFocusEnabled" />
+  <java-symbol type="bool" name="config_enableMotionPrediction" />
+  <java-symbol type="integer" name="config_motionPredictionOffsetNanos" />
   <java-symbol type="bool" name="config_showNavigationBar" />
   <java-symbol type="bool" name="config_supportAutoRotation" />
   <java-symbol type="bool" name="config_dockedStackDividerFreeSnapMode" />
