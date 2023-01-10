@@ -504,6 +504,12 @@ public abstract class ActivityManagerInternal {
     public abstract void broadcastCloseSystemDialogs(String reason);
 
     /**
+     * Trigger an ANR for the specified process.
+     */
+    public abstract void appNotResponding(@NonNull String processName, int uid,
+            @NonNull TimeoutRecord timeoutRecord);
+
+    /**
      * Kills all background processes, except those matching any of the specified properties.
      *
      * @param minTargetSdk the target SDK version at or above which to preserve processes,
