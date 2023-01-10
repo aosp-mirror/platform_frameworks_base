@@ -30767,7 +30767,8 @@ package android.opengl {
     method public static void scaleM(float[], int, float, float, float);
     method public static void setIdentityM(float[], int);
     method public static void setLookAtM(float[], int, float, float, float, float, float, float, float, float, float);
-    method public static void setRotateEulerM(float[], int, float, float, float);
+    method @Deprecated public static void setRotateEulerM(float[], int, float, float, float);
+    method public static void setRotateEulerM2(@NonNull float[], int, float, float, float);
     method public static void setRotateM(float[], int, float, float, float, float);
     method public static void translateM(float[], int, float[], int, float, float, float);
     method public static void translateM(float[], int, float, float, float);
