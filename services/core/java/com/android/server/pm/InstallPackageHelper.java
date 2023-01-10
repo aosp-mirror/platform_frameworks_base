@@ -1039,15 +1039,48 @@ final class InstallPackageHelper {
                     DeviceConfig.getInt(DeviceConfig.NAMESPACE_PACKAGE_MANAGER_SERVICE,
                             "MinInstallableTargetSdk__min_installable_target_sdk",
                             0);
-            if (parsedPackage.getTargetSdkVersion() < minInstallableTargetSdk) {
+
+            // Skip enforcement when the bypass flag is set
+            boolean bypassLowTargetSdkBlock =
+                    ((installFlags & PackageManager.INSTALL_BYPASS_LOW_TARGET_SDK_BLOCK) != 0);
+
+            // Skip enforcement for tests that were installed from adb
+            if (!bypassLowTargetSdkBlock
+                    && ((installFlags & PackageManager.INSTALL_FROM_ADB) != 0)) {
+                bypassLowTargetSdkBlock = true;
+            }
+
+            // Skip enforcement if the installer package name is not set
+            // (e.g. "pm install" from shell)
+            if (!bypassLowTargetSdkBlock) {
+                if (request.getInstallerPackageName() == null) {
+                    bypassLowTargetSdkBlock = true;
+                } else {
+                    // Also skip if the install is occurring from an app that was installed from adb
+                    if (mContext
+                            .getPackageManager()
+                            .getInstallerPackageName(request.getInstallerPackageName()) == null) {
+                        bypassLowTargetSdkBlock = true;
+                    }
+                }
+            }
+
+            // Skip enforcement when the testOnly flag is set
+            if (!bypassLowTargetSdkBlock && parsedPackage.isTestOnly()) {
+                bypassLowTargetSdkBlock = true;
+            }
+
+            // Enforce the low target sdk install block except when
+            // the --bypass-low-target-sdk-block is set for the install
+            if (!bypassLowTargetSdkBlock
+                    && parsedPackage.getTargetSdkVersion() < minInstallableTargetSdk) {
                 Slog.w(TAG, "App " + parsedPackage.getPackageName()
                         + " targets deprecated sdk version");
                 throw new PrepareFailure(INSTALL_FAILED_DEPRECATED_SDK_VERSION,
-                        "App package must target at least version "
-                                + minInstallableTargetSdk);
+                        "App package must target at least SDK version "
+                                + minInstallableTargetSdk + ", but found "
+                                + parsedPackage.getTargetSdkVersion());
             }
-        } else {
-            Slog.i(TAG, "Minimum installable target sdk enforcement not enabled");
         }
 
         // Instant apps have several additional install-time checks.
