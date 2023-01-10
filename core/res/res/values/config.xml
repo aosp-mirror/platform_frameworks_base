@@ -2722,6 +2722,10 @@
         frameworks/base/services/core/java/com/android/server/pm/UserSystemPackageInstaller.java -->
     <integer name="config_userTypePackageWhitelistMode">13</integer> <!-- 1+4+8 -->
 
+    <!-- Whether the main user is a permanent admin user. If the main user is a permanent admin user
+     it can't be deleted or downgraded to non-admin status. -->
+    <bool name="config_isMainUserPermanentAdmin">false</bool>
+
     <!-- Whether UI for multi user should be shown -->
     <bool name="config_enableMultiUserUI">false</bool>
 
