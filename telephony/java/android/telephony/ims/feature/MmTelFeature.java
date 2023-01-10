@@ -1141,6 +1141,7 @@ public class MmTelFeature extends ImsFeature {
             throw new IllegalStateException("Session is not available.");
         }
         try {
+            c.setDefaultExecutor(MmTelFeature.this.mExecutor);
             listener.onIncomingCall(c.getServiceImpl(), null, extras);
         } catch (RemoteException e) {
             throw new RuntimeException(e);
@@ -1175,7 +1176,9 @@ public class MmTelFeature extends ImsFeature {
             IImsCallSessionListener isl =
                     listener.onIncomingCall(c.getServiceImpl(), callId, extras);
             if (isl != null) {
-                return new ImsCallSessionListener(isl);
+                ImsCallSessionListener iCSL = new ImsCallSessionListener(isl);
+                iCSL.setDefaultExecutor(MmTelFeature.this.mExecutor);
+                return iCSL;
             } else {
                 return null;
             }
