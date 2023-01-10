@@ -156,7 +156,8 @@ constructor(
     override val defaultDataSubId = MutableStateFlow(INVALID_SUBSCRIPTION_ID)
 
     // TODO(b/261029387): not yet supported
-    override val defaultMobileNetworkConnectivity = MutableStateFlow(MobileConnectivityModel())
+    override val defaultMobileNetworkConnectivity =
+        MutableStateFlow(MobileConnectivityModel(isConnected = true, isValidated = true))
 
     override fun getRepoForSubId(subId: Int): DemoMobileConnectionRepository {
         val current = connectionRepoCache[subId]?.repo
