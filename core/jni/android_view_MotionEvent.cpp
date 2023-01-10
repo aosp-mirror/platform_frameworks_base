@@ -59,6 +59,7 @@ static struct {
     jfieldID orientation;
     jfieldID relativeX;
     jfieldID relativeY;
+    jfieldID isResampled;
 } gPointerCoordsClassInfo;
 
 static struct {
@@ -223,6 +224,8 @@ static void pointerCoordsToNative(JNIEnv* env, jobject pointerCoordsObj,
     outRawPointerCoords->setAxisValue(AMOTION_EVENT_AXIS_RELATIVE_Y,
                                       env->GetFloatField(pointerCoordsObj,
                                                          gPointerCoordsClassInfo.relativeY));
+    outRawPointerCoords->isResampled =
+            env->GetBooleanField(pointerCoordsObj, gPointerCoordsClassInfo.isResampled);
 
     BitSet64 bits =
             BitSet64(env->GetLongField(pointerCoordsObj, gPointerCoordsClassInfo.mPackedAxisBits));
@@ -440,6 +443,11 @@ static void android_view_MotionEvent_nativeGetPointerCoords(JNIEnv* env, jclass 
         bits.clearBit(axis);
     }
     pointerCoordsFromNative(env, rawPointerCoords, bits, outPointerCoordsObj);
+
+    const bool isResampled = historyPos == HISTORY_CURRENT
+            ? event->isResampled(pointerIndex, event->getHistorySize())
+            : event->isResampled(pointerIndex, historyPos);
+    env->SetBooleanField(outPointerCoordsObj, gPointerCoordsClassInfo.isResampled, isResampled);
 }
 
 static void android_view_MotionEvent_nativeGetPointerProperties(JNIEnv* env, jclass clazz,
@@ -881,6 +889,7 @@ int register_android_view_MotionEvent(JNIEnv* env) {
     gPointerCoordsClassInfo.orientation = GetFieldIDOrDie(env, clazz, "orientation", "F");
     gPointerCoordsClassInfo.relativeX = GetFieldIDOrDie(env, clazz, "relativeX", "F");
     gPointerCoordsClassInfo.relativeY = GetFieldIDOrDie(env, clazz, "relativeY", "F");
+    gPointerCoordsClassInfo.isResampled = GetFieldIDOrDie(env, clazz, "isResampled", "Z");
 
     clazz = FindClassOrDie(env, "android/view/MotionEvent$PointerProperties");
 
