@@ -84,7 +84,8 @@ class ClockEventControllerTest : SysuiTestCase() {
     @Mock private lateinit var transitionRepository: KeyguardTransitionRepository
     @Mock private lateinit var commandQueue: CommandQueue
     private lateinit var repository: FakeKeyguardRepository
-    @Mock private lateinit var logBuffer: LogBuffer
+    @Mock private lateinit var smallLogBuffer: LogBuffer
+    @Mock private lateinit var largeLogBuffer: LogBuffer
     private lateinit var underTest: ClockEventController
 
     @Before
@@ -111,7 +112,8 @@ class ClockEventControllerTest : SysuiTestCase() {
             context,
             mainExecutor,
             bgExecutor,
-            logBuffer,
+            smallLogBuffer,
+            largeLogBuffer,
             featureFlags
         )
         underTest.clock = clock
