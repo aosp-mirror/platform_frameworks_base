@@ -789,8 +789,10 @@ public class PackageManagerService implements PackageSender, TestUtilityService 
 
     final ArtManagerService mArtManagerService;
 
+    // TODO(b/260124949): Remove these.
     final PackageDexOptimizer mPackageDexOptimizer;
-    final BackgroundDexOptService mBackgroundDexOptService;
+    @Nullable
+    final BackgroundDexOptService mBackgroundDexOptService; // null when ART Service is in use.
     // DexManager handles the usage of dex files (e.g. secondary files, whether or not a package
     // is used by other apps).
     private final DexManager mDexManager;
@@ -1567,7 +1569,16 @@ public class PackageManagerService implements PackageSender, TestUtilityService 
                 new DefaultSystemWrapper(),
                 LocalServices::getService,
                 context::getSystemService,
-                (i, pm) -> new BackgroundDexOptService(i.getContext(), i.getDexManager(), pm),
+                (i, pm) -> {
+                    if (useArtService()) {
+                        return null;
+                    }
+                    try {
+                        return new BackgroundDexOptService(i.getContext(), i.getDexManager(), pm);
+                    } catch (LegacyDexoptDisabledException e) {
+                        throw new RuntimeException(e);
+                    }
+                },
                 (i, pm) -> IBackupManager.Stub.asInterface(ServiceManager.getService(
                         Context.BACKUP_SERVICE)),
                 (i, pm) -> new SharedLibrariesImpl(pm, i),
@@ -4287,11 +4298,14 @@ public class PackageManagerService implements PackageSender, TestUtilityService 
                     }
                 });
 
-        // TODO(b/251903639): Call into ART Service.
-        try {
-            mBackgroundDexOptService.systemReady();
-        } catch (LegacyDexoptDisabledException e) {
-            throw new RuntimeException(e);
+        if (!useArtService()) {
+            // The background dexopt job is scheduled in DexOptHelper.initializeArtManagerLocal when
+            // ART Service is in use.
+            try {
+                mBackgroundDexOptService.systemReady();
+            } catch (LegacyDexoptDisabledException e) {
+                throw new RuntimeException(e);
+            }
         }
 
         // Prune unused static shared libraries which have been cached a period of time

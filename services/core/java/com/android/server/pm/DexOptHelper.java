@@ -997,6 +997,8 @@ public final class DexOptHelper {
         artManager.addOptimizePackageDoneCallback(false /* onlyIncludeUpdates */,
                 Runnable::run, new OptimizePackageDoneHandler(Objects.requireNonNull(pm)));
         LocalManagerRegistry.addManager(ArtManagerLocal.class, artManager);
+
+        artManager.scheduleBackgroundDexoptJob();
     }
 
     /**

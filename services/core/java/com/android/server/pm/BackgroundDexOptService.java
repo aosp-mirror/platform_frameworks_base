@@ -189,13 +189,14 @@ public final class BackgroundDexOptService {
         void onPackagesUpdated(ArraySet<String> updatedPackages);
     }
 
-    public BackgroundDexOptService(
-            Context context, DexManager dexManager, PackageManagerService pm) {
+    public BackgroundDexOptService(Context context, DexManager dexManager, PackageManagerService pm)
+            throws LegacyDexoptDisabledException {
         this(new Injector(context, dexManager, pm));
     }
 
     @VisibleForTesting
-    public BackgroundDexOptService(Injector injector) {
+    public BackgroundDexOptService(Injector injector) throws LegacyDexoptDisabledException {
+        Installer.checkLegacyDexoptDisabled();
         mInjector = injector;
         mDexOptHelper = mInjector.getDexOptHelper();
         LocalServices.addService(BackgroundDexOptService.class, this);
