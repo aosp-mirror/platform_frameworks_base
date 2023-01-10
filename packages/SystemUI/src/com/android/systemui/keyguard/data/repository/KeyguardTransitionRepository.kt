@@ -135,11 +135,14 @@ class KeyguardTransitionRepositoryImpl @Inject constructor() : KeyguardTransitio
             Log.i(TAG, "Duplicate call to start the transition, rejecting: $info")
             return null
         }
-        if (lastStep.transitionState != TransitionState.FINISHED) {
-            Log.i(TAG, "Transition still active: $lastStep, canceling")
-        }
+        val startingValue =
+            if (lastStep.transitionState != TransitionState.FINISHED) {
+                Log.i(TAG, "Transition still active: $lastStep, canceling")
+                lastStep.value
+            } else {
+                0f
+            }
 
-        val startingValue = 1f - lastStep.value
         lastAnimator?.cancel()
         lastAnimator = info.animator
 
