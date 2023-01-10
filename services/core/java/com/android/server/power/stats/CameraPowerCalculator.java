@@ -73,11 +73,19 @@ public class CameraPowerCalculator extends PowerCalculator {
     @Override
     protected void calculateApp(UidBatteryConsumer.Builder app, BatteryStats.Uid u,
             long rawRealtimeUs, long rawUptimeUs, BatteryUsageStatsQuery query) {
-        final long durationMs =
+        long consumptionUc = app.getBatteryStatsUid().getCameraEnergyConsumptionUC();
+        int powerModel = getPowerModel(consumptionUc, query);
+        long durationMs =
                 mPowerEstimator.calculateDuration(u.getCameraTurnedOnTimer(), rawRealtimeUs,
                         BatteryStats.STATS_SINCE_CHARGED);
-        final double powerMah = mPowerEstimator.calculatePower(durationMs);
+        double powerMah;
+        if (powerModel == BatteryConsumer.POWER_MODEL_ENERGY_CONSUMPTION) {
+            powerMah = uCtoMah(consumptionUc);
+        } else {
+            powerMah = mPowerEstimator.calculatePower(durationMs);
+        }
+
         app.setUsageDurationMillis(BatteryConsumer.POWER_COMPONENT_CAMERA, durationMs)
-                .setConsumedPower(BatteryConsumer.POWER_COMPONENT_CAMERA, powerMah);
+                .setConsumedPower(BatteryConsumer.POWER_COMPONENT_CAMERA, powerMah, powerModel);
     }
 }

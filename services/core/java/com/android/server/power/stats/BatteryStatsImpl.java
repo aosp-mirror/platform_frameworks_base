@@ -8442,6 +8442,12 @@ public class BatteryStatsImpl extends BatteryStats {
                     processState);
         }
 
+        @GuardedBy("mBsi")
+        @Override
+        public long getCameraEnergyConsumptionUC() {
+            return getEnergyConsumptionUC(EnergyConsumerStats.POWER_BUCKET_CAMERA);
+        }
+
         /**
          * Gets the minimum of the uid's foreground activity time and its PROCESS_STATE_TOP time
          * since last marked. Also sets the mark time for both these timers.
@@ -8490,6 +8496,20 @@ public class BatteryStatsImpl extends BatteryStats {
             final long gnssTimeUs = timer.getTimeSinceMarkLocked(elapsedRealtimeMs * 1000);
             timer.setMark(elapsedRealtimeMs);
             return gnssTimeUs;
+        }
+
+        /**
+         * Gets the uid's time spent using the camera since last marked. Also sets the mark time for
+         * the camera timer.
+         */
+        private long markCameraTimeUs(long elapsedRealtimeMs) {
+            final StopwatchTimer timer = mCameraTurnedOnTimer;
+            if (timer == null) {
+                return 0;
+            }
+            final long cameraTimeUs = timer.getTimeSinceMarkLocked(elapsedRealtimeMs * 1000);
+            timer.setMark(elapsedRealtimeMs);
+            return cameraTimeUs;
         }
 
         public StopwatchTimer createAudioTurnedOnTimerLocked() {
@@ -12934,12 +12954,33 @@ public class BatteryStatsImpl extends BatteryStats {
             return;
         }
 
-        // TODO(b/258319905): Handle mIgnoreNextExternalStats
+        if (mIgnoreNextExternalStats) {
+            // Although under ordinary resets we won't get here, and typically a new sync will
+            // happen right after the reset, strictly speaking we need to set all mark times to now.
+            final int uidStatsSize = mUidStats.size();
+            for (int i = 0; i < uidStatsSize; i++) {
+                final Uid uid = mUidStats.valueAt(i);
+                uid.markCameraTimeUs(elapsedRealtimeMs);
+            }
+            return;
+        }
 
         mGlobalEnergyConsumerStats.updateStandardBucket(
                 EnergyConsumerStats.POWER_BUCKET_CAMERA, chargeUC);
 
-        // TODO(b/258319905): Update per-UID stats.
+        // Collect the per uid time since mark so that we can normalize power.
+        final SparseDoubleArray cameraTimeUsArray = new SparseDoubleArray();
+
+        // Note: Iterating over all UIDs may be suboptimal.
+        final int uidStatsSize = mUidStats.size();
+        for (int i = 0; i < uidStatsSize; i++) {
+            final Uid uid = mUidStats.valueAt(i);
+            final long cameraTimeUs = uid.markCameraTimeUs(elapsedRealtimeMs);
+            if (cameraTimeUs == 0) continue;
+            cameraTimeUsArray.put(uid.getUid(), (double) cameraTimeUs);
+        }
+        distributeEnergyToUidsLocked(EnergyConsumerStats.POWER_BUCKET_CAMERA, chargeUC,
+                cameraTimeUsArray, 0, elapsedRealtimeMs);
     }
 
     /**
