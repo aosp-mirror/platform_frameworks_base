@@ -72,8 +72,6 @@ abstract class PipTransition(flicker: FlickerTest) : BaseTest(flicker) {
                 pipApp.launchViaIntentAndWaitForPip(wmHelper, stringExtras = stringExtras)
             }
             teardown {
-                setRotation(PlatformConsts.Rotation.ROTATION_0)
-                removeAllTasksButHome()
                 pipApp.exit(wmHelper)
             }
 
