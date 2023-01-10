@@ -21,26 +21,35 @@ import android.testing.AndroidTestingRunner
 import android.testing.TestableLooper
 import androidx.test.filters.SmallTest
 import com.android.keyguard.KeyguardSecurityModel
+import com.android.keyguard.KeyguardUpdateMonitor
 import com.android.systemui.classifier.FalsingCollector
+import com.android.systemui.flags.FeatureFlags
 import com.android.systemui.keyguard.DismissCallbackRegistry
 import com.android.systemui.keyguard.data.BouncerView
+import com.android.systemui.keyguard.data.repository.BiometricRepository
 import com.android.systemui.keyguard.data.repository.KeyguardBouncerRepository
+import com.android.systemui.keyguard.domain.interactor.AlternateBouncerInteractor
 import com.android.systemui.keyguard.domain.interactor.PrimaryBouncerCallbackInteractor
 import com.android.systemui.keyguard.domain.interactor.PrimaryBouncerInteractor
 import com.android.systemui.log.table.TableLogBuffer
 import com.android.systemui.statusbar.StatusBarState
 import com.android.systemui.statusbar.phone.KeyguardBouncer
 import com.android.systemui.statusbar.phone.KeyguardBypassController
+import com.android.systemui.util.time.FakeSystemClock
+import com.android.systemui.util.time.SystemClock
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.test.TestCoroutineScope
 import kotlinx.coroutines.yield
+import org.junit.Assert.assertFalse
 import org.junit.Assert.assertTrue
 import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
+import org.mockito.ArgumentMatchers.any
 import org.mockito.Mock
 import org.mockito.Mockito.mock
+import org.mockito.Mockito.verify
 import org.mockito.MockitoAnnotations
 
 @RunWith(AndroidTestingRunner::class)
@@ -57,6 +66,7 @@ class UdfpsKeyguardViewControllerWithCoroutinesTest : UdfpsKeyguardViewControlle
         keyguardBouncerRepository =
             KeyguardBouncerRepository(
                 mock(com.android.keyguard.ViewMediatorCallback::class.java),
+                FakeSystemClock(),
                 TestCoroutineScope(),
                 bouncerLogger,
             )
@@ -77,15 +87,43 @@ class UdfpsKeyguardViewControllerWithCoroutinesTest : UdfpsKeyguardViewControlle
                 mock(KeyguardBypassController::class.java),
                 mKeyguardUpdateMonitor
             )
+        mAlternateBouncerInteractor =
+            AlternateBouncerInteractor(
+                keyguardBouncerRepository,
+                mock(BiometricRepository::class.java),
+                mock(SystemClock::class.java),
+                mock(KeyguardUpdateMonitor::class.java),
+                mock(FeatureFlags::class.java)
+            )
         return createUdfpsKeyguardViewController(
             /* useModernBouncer */ true, /* useExpandedOverlay */
             false
         )
     }
 
-    /** After migration, replaces LockIconViewControllerTest version */
     @Test
-    fun testShouldPauseAuthBouncerShowing() =
+    fun shadeLocked_showAlternateBouncer_unpauseAuth() =
+        runBlocking(IMMEDIATE) {
+            // GIVEN view is attached + on the SHADE_LOCKED (udfps view not showing)
+            mController.onViewAttached()
+            captureStatusBarStateListeners()
+            sendStatusBarStateChanged(StatusBarState.SHADE_LOCKED)
+
+            // WHEN alternate bouncer is requested
+            val job = mController.listenForAlternateBouncerVisibility(this)
+            keyguardBouncerRepository.setAlternateVisible(true)
+            yield()
+
+            // THEN udfps view will animate in & pause auth is updated to NOT pause
+            verify(mView).animateInUdfpsBouncer(any())
+            assertFalse(mController.shouldPauseAuth())
+
+            job.cancel()
+        }
+
+    /** After migration to MODERN_BOUNCER, replaces UdfpsKeyguardViewControllerTest version */
+    @Test
+    fun shouldPauseAuthBouncerShowing() =
         runBlocking(IMMEDIATE) {
             // GIVEN view attached and we're on the keyguard
             mController.onViewAttached()

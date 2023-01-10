@@ -716,6 +716,13 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener, Dumpab
     }
 
     /**
+     * Whether keyguard is going away due to screen off or device entry.
+     */
+    public boolean isKeyguardGoingAway() {
+        return mKeyguardGoingAway;
+    }
+
+    /**
      * Updates KeyguardUpdateMonitor's internal state to know if keyguard is showing and if
      * its occluded. The keyguard is considered visible if its showing and NOT occluded.
      */
