@@ -158,6 +158,14 @@ public class FeatureFlagUtils {
      */
     public static final String SETTINGS_FLASH_ALERTS = "settings_flash_alerts";
 
+    /**
+     * Flag to disable/enable showing udfps enroll view in settings. If it's disabled, udfps enroll
+     * view is shown in system ui.
+     * @hide
+     */
+    public static final String SETTINGS_SHOW_UDFPS_ENROLL_IN_SETTINGS =
+            "settings_show_udfps_enroll_in_settings";
+
     private static final Map<String, String> DEFAULT_FLAGS;
 
     static {
@@ -198,6 +206,7 @@ public class FeatureFlagUtils {
         DEFAULT_FLAGS.put(SETTINGS_PREFER_ACCESSIBILITY_MENU_IN_SYSTEM, "false");
         DEFAULT_FLAGS.put(SETTINGS_AUDIO_ROUTING, "false");
         DEFAULT_FLAGS.put(SETTINGS_FLASH_ALERTS, "false");
+        DEFAULT_FLAGS.put(SETTINGS_SHOW_UDFPS_ENROLL_IN_SETTINGS, "false");
     }
 
     private static final Set<String> PERSISTENT_FLAGS;

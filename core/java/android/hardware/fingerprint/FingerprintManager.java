@@ -464,6 +464,12 @@ public class FingerprintManager implements BiometricAuthenticator, BiometricFing
          * @param remaining The number of remaining steps
          */
         public void onEnrollmentProgress(int remaining) { }
+
+        /**
+         * Called when a fingerprint image has been acquired.
+         * @param isAcquiredGood whether the fingerprint image was good.
+         */
+        public void onAcquired(boolean isAcquiredGood){ }
     }
 
     /**
@@ -1391,6 +1397,9 @@ public class FingerprintManager implements BiometricAuthenticator, BiometricFing
     private void sendAcquiredResult(int acquireInfo, int vendorCode) {
         if (mAuthenticationCallback != null) {
             mAuthenticationCallback.onAuthenticationAcquired(acquireInfo);
+        }
+        if (mEnrollmentCallback != null) {
+            mEnrollmentCallback.onAcquired(acquireInfo == FINGERPRINT_ACQUIRED_GOOD);
         }
         final String msg = getAcquiredString(mContext, acquireInfo, vendorCode);
         if (msg == null) {
