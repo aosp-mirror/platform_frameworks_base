@@ -45,7 +45,7 @@ import com.android.credentialmanager.createflow.DisabledProviderInfo
 import com.android.credentialmanager.createflow.EnabledProviderInfo
 import com.android.credentialmanager.createflow.RequestDisplayInfo
 import com.android.credentialmanager.getflow.GetCredentialUiState
-import com.android.credentialmanager.jetpack.developer.CreatePasswordRequest.Companion.toBundle
+import com.android.credentialmanager.jetpack.developer.CreatePasswordRequest.Companion.toCredentialDataBundle
 import com.android.credentialmanager.jetpack.developer.CreatePublicKeyCredentialRequest
 import com.android.credentialmanager.jetpack.developer.PublicKeyCredential.Companion.TYPE_PUBLIC_KEY_CREDENTIAL
 import com.android.credentialmanager.jetpack.provider.Action
@@ -325,7 +325,7 @@ class CredentialManagerRepo(
                 key,
                 subkey,
                 CredentialEntry.toSlice(credentialEntry),
-                null
+                Intent()
         )
   }
 
@@ -348,7 +348,7 @@ class CredentialManagerRepo(
                 android.service.credentials.CallingAppInfo(
                         context.applicationInfo.packageName, SigningInfo()),
                 TYPE_PASSWORD_CREDENTIAL,
-                toBundle("beckett-bakert@gmail.com", "password123")
+                toCredentialDataBundle("beckett-bakert@gmail.com", "password123")
         )
         val fillInIntent = Intent().putExtra(
                 CredentialProviderService.EXTRA_CREATE_CREDENTIAL_REQUEST,
@@ -417,7 +417,7 @@ class CredentialManagerRepo(
             "                     \"residentKey\": \"required\",\n" +
             "                     \"requireResidentKey\": true\n" +
             "                   }}")
-    val credentialData = request.data
+    val credentialData = request.credentialData
     return RequestInfo.newCreateRequestInfo(
       Binder(),
       CreateCredentialRequest(
@@ -432,7 +432,7 @@ class CredentialManagerRepo(
   }
 
   private fun testCreatePasswordRequestInfo(): RequestInfo {
-    val data = toBundle("beckett-bakert@gmail.com", "password123")
+    val data = toCredentialDataBundle("beckett-bakert@gmail.com", "password123")
     return RequestInfo.newCreateRequestInfo(
       Binder(),
       CreateCredentialRequest(

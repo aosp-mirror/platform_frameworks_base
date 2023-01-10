@@ -32,9 +32,11 @@ class CreatePasswordRequest constructor(
         val id: String,
         val password: String,
 ) : CreateCredentialRequest(
-        Credential.TYPE_PASSWORD_CREDENTIAL,
-        toBundle(id, password),
-        false,
+        type = Credential.TYPE_PASSWORD_CREDENTIAL,
+        credentialData = toCredentialDataBundle(id, password),
+        // No credential data should be sent during the query phase.
+        candidateQueryData = Bundle(),
+        requireSystemProvider = false,
 ) {
 
     init {
@@ -46,7 +48,7 @@ class CreatePasswordRequest constructor(
         const val BUNDLE_KEY_PASSWORD = "androidx.credentials.BUNDLE_KEY_PASSWORD"
 
         @JvmStatic
-        internal fun toBundle(id: String, password: String): Bundle {
+        internal fun toCredentialDataBundle(id: String, password: String): Bundle {
             val bundle = Bundle()
             bundle.putString(BUNDLE_KEY_ID, id)
             bundle.putString(BUNDLE_KEY_PASSWORD, password)
@@ -54,7 +56,14 @@ class CreatePasswordRequest constructor(
         }
 
         @JvmStatic
-        fun createFrom(data: Bundle): CreatePasswordRequest {
+        internal fun toCandidateDataBundle(id: String): Bundle {
+            val bundle = Bundle()
+            bundle.putString(BUNDLE_KEY_ID, id)
+            return bundle
+        }
+
+        @JvmStatic
+        internal fun createFrom(data: Bundle): CreatePasswordRequest {
             try {
                 val id = data.getString(BUNDLE_KEY_ID)
                 val password = data.getString(BUNDLE_KEY_PASSWORD)
