@@ -1756,8 +1756,14 @@ public class SurfaceView extends View implements ViewRootImpl.SurfaceChangedCall
     };
 
     /**
-     * Return a SurfaceControl which can be used for parenting Surfaces to
-     * this SurfaceView.
+     * Return a SurfaceControl which can be used for parenting Surfaces to this SurfaceView.
+     *
+     * Note that this SurfaceControl is effectively read-only. Its only well-defined usage is in
+     * using the SurfaceControl as a parent for an application's hierarchy of SurfaceControls. All
+     * other properties of the SurfaceControl, such as its position, may be mutated by the
+     * SurfaceView at any time which will override what the application is requesting. Do not apply
+     * any {@link SurfaceControl.Transaction} to this SurfaceControl except for reparenting
+     * child SurfaceControls. See: {@link SurfaceControl.Transaction#reparent}.
      *
      * @return The SurfaceControl for this SurfaceView.
      */
@@ -1982,5 +1988,33 @@ public class SurfaceView extends View implements ViewRootImpl.SurfaceChangedCall
      */
     public void syncNextFrame(Consumer<Transaction> t) {
         mBlastBufferQueue.syncNextTransaction(t);
+    }
+
+    /**
+     * Adds a transaction that would be applied synchronously with displaying the SurfaceView's next
+     * frame.
+     *
+     * Note that the exact frame that the transaction is applied with is only well-defined when
+     * SurfaceView rendering is paused prior to calling applyTransactionToFrame(), so that the
+     * transaction is applied with the next frame rendered after applyTransactionToFrame() is
+     * called. If frames are continuously rendering to the SurfaceView when
+     * applyTransactionToFrame() is called, then it is undefined which frame the transaction is
+     * applied with. It is also possible for the transaction to not be applied if no new frames are
+     * rendered to the SurfaceView after this is called.
+     *
+     * @param transaction The transaction to apply. The system takes ownership of the transaction
+     *                    and promises to eventually apply the transaction.
+     * @throws IllegalStateException if the underlying Surface does not exist (and therefore
+     *         there is no next frame).
+     */
+    public void applyTransactionToFrame(@NonNull SurfaceControl.Transaction transaction) {
+        synchronized (mSurfaceControlLock) {
+            if (mBlastBufferQueue == null) {
+                throw new IllegalStateException("Surface does not exist!");
+            }
+
+            long frameNumber = mBlastBufferQueue.getLastAcquiredFrameNum() + 1;
+            mBlastBufferQueue.mergeWithNextTransaction(transaction, frameNumber);
+        }
     }
 }
