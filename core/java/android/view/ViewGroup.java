@@ -4629,7 +4629,7 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
         final View[] children = mChildren;
         final int count = mChildrenCount;
         for (int i = 0; i < count; i++) {
-            children[i].setSelected(selected);
+            children[i].setSelected(selected, false);
         }
     }
 
