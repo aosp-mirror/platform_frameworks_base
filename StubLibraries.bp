@@ -378,6 +378,67 @@ java_library {
     },
 }
 
+java_library {
+    name: "android_stubs_private_jar",
+    defaults: ["android.jar_defaults"],
+    visibility: [
+        "//visibility:override",
+        "//visibility:private",
+    ],
+    static_libs: [
+        "stable.core.platform.api.stubs",
+        "core-lambda-stubs-for-system-modules",
+        "core-generated-annotation-stubs",
+        "framework",
+        "ext",
+        "framework-res-package-jar",
+        // The order of this matters, it has to be last to provide a
+        // package-private androidx.annotation.RecentlyNonNull without
+        // overriding the public android.annotation.Nullable in framework.jar
+        // with its own package-private android.annotation.Nullable.
+        "private-stub-annotations-jar",
+    ],
+}
+
+java_genrule {
+    name: "android_stubs_private_hjar",
+    visibility: ["//visibility:private"],
+    srcs: [":android_stubs_private_jar{.hjar}"],
+    out: ["android_stubs_private.jar"],
+    cmd: "cp $(in) $(out)",
+}
+
+java_library {
+    name: "android_stubs_private",
+    defaults: ["android_stubs_dists_default"],
+    visibility: ["//visibility:private"],
+    sdk_version: "none",
+    system_modules: "none",
+    static_libs: ["android_stubs_private_hjar"],
+    dist: {
+        dir: "apistubs/android/private",
+    },
+}
+
+java_genrule {
+    name: "android_stubs_private_framework_aidl",
+    visibility: ["//visibility:private"],
+    tools: ["sdkparcelables"],
+    srcs: [":android_stubs_private"],
+    out: ["framework.aidl"],
+    cmd: "rm -f $(genDir)/framework.aidl.merged && " +
+        "for i in $(in); do " +
+        "  rm -f $(genDir)/framework.aidl.tmp && " +
+        "  $(location sdkparcelables) $$i $(genDir)/framework.aidl.tmp && " +
+        "  cat $(genDir)/framework.aidl.tmp >> $(genDir)/framework.aidl.merged; " +
+        "done && " +
+        "sort -u $(genDir)/framework.aidl.merged > $(out)",
+    dist: {
+        targets: ["sdk"],
+        dir: "apistubs/android/private",
+    },
+}
+
 ////////////////////////////////////////////////////////////////////////
 // api-versions.xml generation, for public and system. This API database
 // also contains the android.test.* APIs.
