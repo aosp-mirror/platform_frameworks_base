@@ -61,7 +61,6 @@ import android.app.ActivityManagerInternal;
 import android.app.AppGlobals;
 import android.app.AppOpsManager;
 import android.app.BroadcastOptions;
-import android.app.Dialog;
 import android.app.IStopUserCallback;
 import android.app.IUserSwitchObserver;
 import android.app.KeyguardManager;
@@ -1683,6 +1682,7 @@ class UserController implements Handler.Callback {
                         R.anim.screen_user_exit, R.anim.screen_user_enter);
                 t.traceEnd();
             }
+            dismissUserSwitchDialog(); // so that we don't hold a reference to mUserSwitchingDialog
 
             boolean needStart = false;
             boolean updateUmState = false;
@@ -1869,6 +1869,8 @@ class UserController implements Handler.Callback {
         boolean success = startUser(targetUserId, USER_START_MODE_FOREGROUND);
         if (!success) {
             mInjector.getWindowManager().setSwitchingUser(false);
+            mTargetUserId = UserHandle.USER_NULL;
+            dismissUserSwitchDialog();
         }
     }
 
@@ -2015,6 +2017,10 @@ class UserController implements Handler.Callback {
                     START_USER_SWITCH_FG_MSG, targetUserId, 0));
         }
         return true;
+    }
+
+    private void dismissUserSwitchDialog() {
+        mInjector.dismissUserSwitchingDialog();
     }
 
     private void showUserSwitchDialog(Pair<UserInfo, UserInfo> fromToUserPair) {
@@ -3462,6 +3468,9 @@ class UserController implements Handler.Callback {
         private UserManagerService mUserManager;
         private UserManagerInternal mUserManagerInternal;
         private Handler mHandler;
+        private final Object mUserSwitchingDialogLock = new Object();
+        @GuardedBy("mUserSwitchingDialogLock")
+        private UserSwitchingDialog mUserSwitchingDialog;
 
         Injector(ActivityManagerService service) {
             mService = service;
@@ -3637,6 +3646,15 @@ class UserController implements Handler.Callback {
             mService.mCpHelper.installEncryptionUnawareProviders(userId);
         }
 
+        void dismissUserSwitchingDialog() {
+            synchronized (mUserSwitchingDialogLock) {
+                if (mUserSwitchingDialog != null) {
+                    mUserSwitchingDialog.dismiss();
+                    mUserSwitchingDialog = null;
+                }
+            }
+        }
+
         void showUserSwitchingDialog(UserInfo fromUser, UserInfo toUser,
                 String switchingFromSystemUserMessage, String switchingToSystemUserMessage) {
             if (mService.mContext.getPackageManager()
@@ -3647,10 +3665,13 @@ class UserController implements Handler.Callback {
                 Slogf.w(TAG, "Showing user switch dialog on UserController, it could cause a race "
                         + "condition if it's shown by CarSystemUI as well");
             }
-            final Dialog d = new UserSwitchingDialog(mService, mService.mContext, fromUser,
-                    toUser, true /* above system */, switchingFromSystemUserMessage,
-                    switchingToSystemUserMessage);
-            d.show();
+            synchronized (mUserSwitchingDialogLock) {
+                dismissUserSwitchingDialog();
+                mUserSwitchingDialog = new UserSwitchingDialog(mService, mService.mContext,
+                        fromUser, toUser, true /* above system */, switchingFromSystemUserMessage,
+                        switchingToSystemUserMessage);
+                mUserSwitchingDialog.show();
+            }
         }
 
         void reportGlobalUsageEvent(int event) {
