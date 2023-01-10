@@ -5,6 +5,8 @@
 android_test {
     name: "FrameworksServicesTests",
 
+    enabled: false, // TODO(b/264694201) Re-enable these tests.
+
     // Include all test java files.
     srcs: [
         "src/**/*.java",

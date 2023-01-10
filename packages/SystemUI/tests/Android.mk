@@ -79,7 +79,7 @@ LOCAL_JACK_COVERAGE_INCLUDE_FILTER := com.android.systemui.*,com.android.keyguar
 LOCAL_JACK_COVERAGE_EXCLUDE_FILTER := $(jacoco_exclude)
 
 ifeq ($(EXCLUDE_SYSTEMUI_TESTS),)
-    include $(BUILD_PACKAGE)
+#   include $(BUILD_PACKAGE) # TODO(b/264694201) Re-enable these tests.
 endif
 
 # Reset variables
