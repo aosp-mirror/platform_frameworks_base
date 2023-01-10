@@ -21959,6 +21959,7 @@ package android.media {
     field public static final int PLUGIN_STATUS_PHYSICAL_MODULE_CHANGED = 0; // 0x0
     field public static final int PLUGIN_STATUS_SESSION_NUMBER_CHANGED = 1; // 0x1
     field public static final int SCRAMBLING_MODE_AES128 = 9; // 0x9
+    field public static final int SCRAMBLING_MODE_AES_CBC = 14; // 0xe
     field public static final int SCRAMBLING_MODE_AES_ECB = 10; // 0xa
     field public static final int SCRAMBLING_MODE_AES_SCTE52 = 11; // 0xb
     field public static final int SCRAMBLING_MODE_DVB_CISSA_V1 = 6; // 0x6
