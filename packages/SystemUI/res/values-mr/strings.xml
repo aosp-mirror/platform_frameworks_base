@@ -816,7 +816,10 @@
     <string name="accessibility_floating_button_migration_tooltip" msgid="5217151214439341902">"अ‍ॅक्सेसिबिलिटी वैशिष्ट्ये उघडण्यासाठी, टॅप करा. सेटिंग्जमध्ये हे बटण कस्टमाइझ करा किंवा बदला.\n\n"<annotation id="link">"सेटिंग्ज पहा"</annotation></string>
     <string name="accessibility_floating_button_docking_tooltip" msgid="6814897496767461517">"बटण तात्पुरते लपवण्यासाठी ते कोपर्‍यामध्ये हलवा"</string>
     <string name="accessibility_floating_button_undo" msgid="511112888715708241">"पहिल्यासारखे करा"</string>
-    <string name="accessibility_floating_button_undo_message_text" msgid="3044079592757099698">"{count,plural, =1{{label} शॉर्टकट काढून टाकला आहे}other{# शॉर्टकट काढून टाकले आहेत}}"</string>
+    <!-- no translation found for accessibility_floating_button_undo_message_label_text (9017658016426242640) -->
+    <skip />
+    <!-- no translation found for accessibility_floating_button_undo_message_number_text (4909270290725226075) -->
+    <skip />
     <string name="accessibility_floating_button_action_move_top_left" msgid="6253520703618545705">"वर डावीकडे हलवा"</string>
     <string name="accessibility_floating_button_action_move_top_right" msgid="6106225581993479711">"वर उजवीकडे हलवा"</string>
     <string name="accessibility_floating_button_action_move_bottom_left" msgid="8063394111137429725">"तळाशी डावीकडे हलवा"</string>
@@ -884,6 +887,8 @@
     <string name="media_move_closer_to_end_cast" msgid="6495907340926563656">"येथे प्ले करण्यासाठी <xliff:g id="DEVICENAME">%1$s</xliff:g> च्या जवळ जा"</string>
     <string name="media_transfer_playing_different_device" msgid="7186806382609785610">"<xliff:g id="DEVICENAME">%1$s</xliff:g> वर प्ले केला जात आहे"</string>
     <string name="media_transfer_failed" msgid="7955354964610603723">"काहीतरी चूक झाली. पुन्हा प्रयत्न करा."</string>
+    <!-- no translation found for media_transfer_loading (5544017127027152422) -->
+    <skip />
     <string name="controls_error_timeout" msgid="794197289772728958">"निष्क्रिय, ॲप तपासा"</string>
     <string name="controls_error_removed" msgid="6675638069846014366">"आढळले नाही"</string>
     <string name="controls_error_removed_title" msgid="1207794911208047818">"नियंत्रण उपलब्ध नाही"</string>
@@ -1039,8 +1044,7 @@
     <string name="keyguard_affordance_enablement_dialog_qr_scanner_instruction" msgid="5355839079232119791">"• कॅमेरा अ‍ॅप इंस्टॉल करणे"</string>
     <string name="keyguard_affordance_enablement_dialog_home_instruction_1" msgid="8438311171750568633">"• अ‍ॅप सेट करणे"</string>
     <string name="keyguard_affordance_enablement_dialog_home_instruction_2" msgid="8308525385889021652">"• किमान एक डिव्हाइस उपलब्ध करणे"</string>
-    <!-- no translation found for keyguard_affordance_press_too_short (8145437175134998864) -->
-    <skip />
+    <string name="keyguard_affordance_press_too_short" msgid="8145437175134998864">"स्पर्श करा आणि धरून ठेवा शॉर्टकट"</string>
     <string name="rear_display_bottom_sheet_cancel" msgid="3461468855493357248">"रद्द करा"</string>
     <string name="rear_display_bottom_sheet_confirm" msgid="4383356544661421206">"आता फ्लिप करा"</string>
     <string name="rear_display_fold_bottom_sheet_title" msgid="6081542277622721548">"आणखी चांगल्या सेल्फीसाठी फोनबद्दल अधिक जाणून घ्या"</string>

@@ -566,7 +566,7 @@ public final class CompatModePackages {
             SparseArray<WindowProcessController> pidMap = mService.mProcessMap.getPidMap();
             for (int i = pidMap.size() - 1; i >= 0; i--) {
                 final WindowProcessController app = pidMap.valueAt(i);
-                if (!app.mPkgList.contains(packageName)) {
+                if (!app.containsPackage(packageName)) {
                     continue;
                 }
                 try {

@@ -292,7 +292,9 @@ import android.view.WindowManagerPolicyConstants.PointerEventListener;
 import android.view.displayhash.DisplayHash;
 import android.view.displayhash.VerifiedDisplayHash;
 import android.view.inputmethod.ImeTracker;
+import android.window.AddToSurfaceSyncGroupResult;
 import android.window.ClientWindowFrames;
+import android.window.ISurfaceSyncGroupCompletedListener;
 import android.window.ITaskFpsCallback;
 import android.window.ScreenCapture;
 import android.window.TaskSnapshot;
@@ -746,6 +748,10 @@ public class WindowManagerService extends IWindowManager.Stub
 
     @VisibleForTesting
     final ContentRecordingController mContentRecordingController = new ContentRecordingController();
+
+    private final SurfaceSyncGroupController mSurfaceSyncGroupController =
+            new SurfaceSyncGroupController();
+
     @VisibleForTesting
     final class SettingsObserver extends ContentObserver {
         private final Uri mDisplayInversionEnabledUri =
@@ -8682,6 +8688,38 @@ public class WindowManagerService extends IWindowManager.Stub
         clientChannel.copyTo(outInputChannel);
     }
 
+    boolean transferEmbeddedTouchFocusToHost(IWindow embeddedWindow) {
+        final IBinder windowBinder = embeddedWindow.asBinder();
+        final IBinder hostInputChannel, embeddedInputChannel;
+        synchronized (mGlobalLock) {
+            final EmbeddedWindowController.EmbeddedWindow ew =
+                mEmbeddedWindowController.getByWindowToken(windowBinder);
+            if (ew == null) {
+                Slog.w(TAG, "Attempt to transfer touch focus from non-existent embedded window");
+                return false;
+            }
+            final WindowState hostWindowState = ew.getWindowState();
+            if (hostWindowState == null) {
+                Slog.w(TAG, "Attempt to transfer touch focus from embedded window with no" +
+                    " associated host");
+                return false;
+            }
+            embeddedInputChannel = ew.getInputChannelToken();
+            if (embeddedInputChannel == null) {
+                Slog.w(TAG, "Attempt to transfer touch focus from embedded window with no input" +
+                    " channel");
+                return false;
+            }
+            hostInputChannel = hostWindowState.mInputChannelToken;
+            if (hostInputChannel == null) {
+                Slog.w(TAG, "Attempt to transfer touch focus to a host window with no" +
+                    " input channel");
+                return false;
+            }
+            return mInputManager.transferTouchFocus(embeddedInputChannel, hostInputChannel);
+        }
+    }
+
     private void updateInputChannel(IBinder channelToken, int callingUid, int callingPid,
             int displayId, SurfaceControl surface, String name,
             InputApplicationHandle applicationHandle, int flags,
@@ -9383,5 +9421,17 @@ public class WindowManagerService extends IWindowManager.Stub
             return 0;
         }
         return type;
+    }
+    @Override
+    public boolean addToSurfaceSyncGroup(IBinder syncGroupToken, boolean parentSyncGroupMerge,
+            @Nullable ISurfaceSyncGroupCompletedListener completedListener,
+            AddToSurfaceSyncGroupResult outAddToSyncGroupResult) {
+        return mSurfaceSyncGroupController.addToSyncGroup(syncGroupToken, parentSyncGroupMerge,
+                completedListener, outAddToSyncGroupResult);
+    }
+
+    @Override
+    public void markSurfaceSyncGroupReady(IBinder syncGroupToken) {
+        mSurfaceSyncGroupController.markSyncGroupReady(syncGroupToken);
     }
 }

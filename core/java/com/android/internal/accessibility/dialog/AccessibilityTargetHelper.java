@@ -18,6 +18,7 @@ package com.android.internal.accessibility.dialog;
 
 import static android.view.accessibility.AccessibilityManager.ACCESSIBILITY_BUTTON;
 
+import static com.android.internal.accessibility.AccessibilityShortcutController.ACCESSIBILITY_HEARING_AIDS_COMPONENT_NAME;
 import static com.android.internal.accessibility.AccessibilityShortcutController.COLOR_INVERSION_COMPONENT_NAME;
 import static com.android.internal.accessibility.AccessibilityShortcutController.DALTONIZER_COMPONENT_NAME;
 import static com.android.internal.accessibility.AccessibilityShortcutController.MAGNIFICATION_CONTROLLER_NAME;
@@ -250,11 +251,21 @@ public final class AccessibilityTargetHelper {
                         context.getDrawable(R.drawable.ic_accessibility_reduce_bright_colors),
                         Settings.Secure.REDUCE_BRIGHT_COLORS_ACTIVATED);
 
+        final InvisibleToggleAllowListingFeatureTarget hearingAids =
+                new InvisibleToggleAllowListingFeatureTarget(context,
+                        shortcutType,
+                        isShortcutContained(context, shortcutType,
+                                ACCESSIBILITY_HEARING_AIDS_COMPONENT_NAME.flattenToString()),
+                        ACCESSIBILITY_HEARING_AIDS_COMPONENT_NAME.flattenToString(),
+                        context.getString(R.string.hearing_aids_feature_name),
+                        context.getDrawable(R.drawable.ic_accessibility_hearing_aid),
+                        /* key= */ null);
         targets.add(magnification);
         targets.add(daltonizer);
         targets.add(colorInversion);
         targets.add(oneHandedMode);
         targets.add(reduceBrightColors);
+        targets.add(hearingAids);
 
         return targets;
     }

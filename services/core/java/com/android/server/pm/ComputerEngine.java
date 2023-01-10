@@ -124,6 +124,7 @@ import com.android.internal.util.CollectionUtils;
 import com.android.internal.util.IndentingPrintWriter;
 import com.android.internal.util.Preconditions;
 import com.android.modules.utils.TypedXmlSerializer;
+import com.android.server.pm.Installer.LegacyDexoptDisabledException;
 import com.android.server.pm.dex.DexManager;
 import com.android.server.pm.dex.PackageDexUsage;
 import com.android.server.pm.parsing.PackageInfoUtils;
@@ -1475,14 +1476,18 @@ public class ComputerEngine implements Computer {
             // Compute GIDs only if requested
             final int[] gids = (flags & PackageManager.GET_GIDS) == 0 ? EMPTY_INT_ARRAY
                     : mPermissionManager.getGidsForUid(UserHandle.getUid(userId, ps.getAppId()));
+            // Compute installed permissions only if requested
+            final Set<String> installedPermissions = ((flags & PackageManager.GET_PERMISSIONS) == 0
+                    || ArrayUtils.isEmpty(p.getPermissions())) ? Collections.emptySet()
+                    : mPermissionManager.getInstalledPermissions(ps.getPackageName());
             // Compute granted permissions only if package has requested permissions
-            final Set<String> permissions = ((flags & PackageManager.GET_PERMISSIONS) == 0
+            final Set<String> grantedPermissions = ((flags & PackageManager.GET_PERMISSIONS) == 0
                     || ArrayUtils.isEmpty(p.getRequestedPermissions())) ? Collections.emptySet()
                     : mPermissionManager.getGrantedPermissions(ps.getPackageName(), userId);
 
             PackageInfo packageInfo = PackageInfoUtils.generate(p, gids, flags,
-                    state.getFirstInstallTimeMillis(), ps.getLastUpdateTime(), permissions, state,
-                    userId, ps);
+                    state.getFirstInstallTimeMillis(), ps.getLastUpdateTime(), installedPermissions,
+                    grantedPermissions, state, userId, ps);
 
             if (packageInfo == null) {
                 return null;
@@ -3009,8 +3014,13 @@ public class ComputerEngine implements Computer {
                     ipw.println("[" + pkgName + "]");
                     ipw.increaseIndent();
 
-                    mPackageDexOptimizer.dumpDexoptState(ipw, pkg, pkgSetting,
-                            mDexManager.getPackageUseInfoOrDefault(pkgName));
+                    // TODO(b/251903639): Call into ART Service.
+                    try {
+                        mPackageDexOptimizer.dumpDexoptState(ipw, pkg, pkgSetting,
+                                mDexManager.getPackageUseInfoOrDefault(pkgName));
+                    } catch (LegacyDexoptDisabledException e) {
+                        throw new RuntimeException(e);
+                    }
                     ipw.decreaseIndent();
                 }
                 ipw.println("BgDexopt state:");

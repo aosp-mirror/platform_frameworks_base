@@ -241,6 +241,9 @@ class PermissionService(
     ): PermissionInfo =
         @Suppress("DEPRECATION")
         PermissionInfo(permissionInfo).apply {
+            // All Permission objects are registered so the PermissionInfo generated for it should
+            // also have FLAG_INSTALLED.
+            this.flags = this.flags or PermissionInfo.FLAG_INSTALLED
             if (!flags.hasBits(PackageManager.GET_META_DATA)) {
                 metaData = null
             }
@@ -320,6 +323,21 @@ class PermissionService(
             with(policy) { getPermissions()[permissionName] }
         } ?: return EmptyArray.INT
         return permission.getGidsForUser(userId)
+    }
+
+    override fun getInstalledPermissions(packageName: String): Set<String> {
+        requireNotNull(packageName) { "packageName cannot be null" }
+
+        val permissions = service.getState {
+            with(policy) { getPermissions() }
+        }
+        return permissions.mapNotNullIndexedToSet { _, _, permission ->
+            if (permission.packageName == packageName) {
+                permission.name
+            } else {
+                null
+            }
+        }
     }
 
     override fun addPermission(permissionInfo: PermissionInfo, async: Boolean): Boolean {

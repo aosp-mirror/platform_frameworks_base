@@ -760,6 +760,11 @@ public class PermissionManagerService extends IPermissionManager.Stub {
         }
         @NonNull
         @Override
+        public Set<String> getInstalledPermissions(@NonNull String packageName) {
+            return mPermissionManagerServiceImpl.getInstalledPermissions(packageName);
+        }
+        @NonNull
+        @Override
         public Set<String> getGrantedPermissions(@NonNull String packageName,
                 @UserIdInt int userId) {
             return mPermissionManagerServiceImpl.getGrantedPermissions(packageName, userId);

@@ -564,10 +564,8 @@
     <string name="user_add_user_title" msgid="5457079143694924885">"新しいユーザーを追加しますか？"</string>
     <string name="user_add_user_message_long" msgid="1527434966294733380">"追加ユーザーを作成して、このデバイスを他のユーザーと共有できます。各ユーザーは各自のスペースを所有して、アプリや壁紙などのカスタマイズを行うことができます。Wi-Fi など、すべてのユーザーに影響するデバイス設定を変更することもできます。\n\n新しく追加したユーザーは各自でスペースをセットアップする必要があります。\n\nすべてのユーザーがアプリを更新でき、その影響は他のユーザーにも及びます。ユーザー補助機能の設定とサービスは新しいユーザーに適用されないことがあります。"</string>
     <string name="user_add_user_message_short" msgid="3295959985795716166">"新しく追加したユーザーは各自でスペースをセットアップする必要があります。\n\nすべてのユーザーがアプリを更新でき、その影響は他のユーザーにも及びます。"</string>
-    <!-- no translation found for user_grant_admin_title (5565796912475193314) -->
-    <skip />
-    <!-- no translation found for user_grant_admin_message (7925257971286380976) -->
-    <skip />
+    <string name="user_grant_admin_title" msgid="5565796912475193314">"このユーザーに管理者権限を付与しますか？"</string>
+    <string name="user_grant_admin_message" msgid="7925257971286380976">"管理者は、他のユーザーの管理、デバイスの設定の変更、デバイスの出荷時設定へのリセットを行えます。"</string>
     <string name="user_setup_dialog_title" msgid="8037342066381939995">"ユーザーを今すぐセットアップ"</string>
     <string name="user_setup_dialog_message" msgid="269931619868102841">"ユーザーがデバイスを使って各自のスペースをセットアップできるようにします"</string>
     <string name="user_setup_profile_dialog_message" msgid="4788197052296962620">"プロファイルを今すぐセットアップしますか？"</string>
@@ -599,10 +597,8 @@
     <string name="guest_reset_and_restart_dialog_message" msgid="2764425635305200790">"新しいゲスト セッションが開始し、現在のセッションのすべてのアプリとデータが削除されます"</string>
     <string name="guest_exit_dialog_title" msgid="1846494656849381804">"ゲストモードを終了しますか？"</string>
     <string name="guest_exit_dialog_message" msgid="1743218864242719783">"現在のゲスト セッションからすべてのアプリとデータが削除されます"</string>
-    <!-- no translation found for grant_admin (4273077214151417783) -->
-    <skip />
-    <!-- no translation found for not_grant_admin (6985027675930546850) -->
-    <skip />
+    <string name="grant_admin" msgid="4273077214151417783">"このユーザーに管理者権限を付与します"</string>
+    <string name="not_grant_admin" msgid="6985027675930546850">"ユーザーに管理者権限を付与しません"</string>
     <string name="guest_exit_dialog_button" msgid="1736401897067442044">"終了"</string>
     <string name="guest_exit_dialog_title_non_ephemeral" msgid="7675327443743162986">"ゲストアクティビティの保存"</string>
     <string name="guest_exit_dialog_message_non_ephemeral" msgid="223385323235719442">"現在のセッションのアクティビティの保存や、すべてのアプリとデータの削除を行えます"</string>

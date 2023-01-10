@@ -101,7 +101,7 @@ class ActionEntryInfo(
 ) : EntryInfo(providerId, entryKey, entrySubkey, pendingIntent, fillInIntent)
 
 data class RequestDisplayInfo(
-  val appDomainName: String,
+  val appName: String,
 )
 
 /**

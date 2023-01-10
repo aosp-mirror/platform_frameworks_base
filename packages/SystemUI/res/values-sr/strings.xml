@@ -816,7 +816,10 @@
     <string name="accessibility_floating_button_migration_tooltip" msgid="5217151214439341902">"Додирните за функције приступачности. Прилагодите или замените ово дугме у Подешавањима.\n\n"<annotation id="link">"Подешавања"</annotation></string>
     <string name="accessibility_floating_button_docking_tooltip" msgid="6814897496767461517">"Померите дугме до ивице да бисте га привремено сакрили"</string>
     <string name="accessibility_floating_button_undo" msgid="511112888715708241">"Опозови"</string>
-    <string name="accessibility_floating_button_undo_message_text" msgid="3044079592757099698">"{count,plural, =1{{label} пречица је уклоњена}one{# пречица је уклоњена}few{# пречице су уклоњене}other{# пречица је уклоњено}}"</string>
+    <!-- no translation found for accessibility_floating_button_undo_message_label_text (9017658016426242640) -->
+    <skip />
+    <!-- no translation found for accessibility_floating_button_undo_message_number_text (4909270290725226075) -->
+    <skip />
     <string name="accessibility_floating_button_action_move_top_left" msgid="6253520703618545705">"Премести горе лево"</string>
     <string name="accessibility_floating_button_action_move_top_right" msgid="6106225581993479711">"Премести горе десно"</string>
     <string name="accessibility_floating_button_action_move_bottom_left" msgid="8063394111137429725">"Премести доле лево"</string>
@@ -884,6 +887,8 @@
     <string name="media_move_closer_to_end_cast" msgid="6495907340926563656">"Приближите се уређају <xliff:g id="DEVICENAME">%1$s</xliff:g> да бисте на њему пуштали"</string>
     <string name="media_transfer_playing_different_device" msgid="7186806382609785610">"Пушта се на уређају <xliff:g id="DEVICENAME">%1$s</xliff:g>"</string>
     <string name="media_transfer_failed" msgid="7955354964610603723">"Дошло је до грешке. Пробајте поново."</string>
+    <!-- no translation found for media_transfer_loading (5544017127027152422) -->
+    <skip />
     <string name="controls_error_timeout" msgid="794197289772728958">"Неактивно. Видите апликацију"</string>
     <string name="controls_error_removed" msgid="6675638069846014366">"Није пронађено"</string>
     <string name="controls_error_removed_title" msgid="1207794911208047818">"Контрола није доступна"</string>

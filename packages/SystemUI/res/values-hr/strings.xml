@@ -816,7 +816,10 @@
     <string name="accessibility_floating_button_migration_tooltip" msgid="5217151214439341902">"Dodirnite za otvaranje značajki pristupačnosti. Prilagodite ili zamijenite taj gumb u postavkama.\n\n"<annotation id="link">"Pregledajte postavke"</annotation></string>
     <string name="accessibility_floating_button_docking_tooltip" msgid="6814897496767461517">"Pomaknite gumb do ruba da biste ga privremeno sakrili"</string>
     <string name="accessibility_floating_button_undo" msgid="511112888715708241">"Poništi"</string>
-    <string name="accessibility_floating_button_undo_message_text" msgid="3044079592757099698">"{count,plural, =1{Prečac je uklonjen{label}}one{Uklonjen je # prečac}few{Uklonjena su # prečaca}other{Uklonjeno je # prečaca}}"</string>
+    <!-- no translation found for accessibility_floating_button_undo_message_label_text (9017658016426242640) -->
+    <skip />
+    <!-- no translation found for accessibility_floating_button_undo_message_number_text (4909270290725226075) -->
+    <skip />
     <string name="accessibility_floating_button_action_move_top_left" msgid="6253520703618545705">"Premjesti u gornji lijevi kut"</string>
     <string name="accessibility_floating_button_action_move_top_right" msgid="6106225581993479711">"Premjesti u gornji desni kut"</string>
     <string name="accessibility_floating_button_action_move_bottom_left" msgid="8063394111137429725">"Premjesti u donji lijevi kut"</string>
@@ -884,6 +887,8 @@
     <string name="media_move_closer_to_end_cast" msgid="6495907340926563656">"Približite se uređaju <xliff:g id="DEVICENAME">%1$s</xliff:g> da biste na njemu reproducirali"</string>
     <string name="media_transfer_playing_different_device" msgid="7186806382609785610">"Reproducira se na uređaju <xliff:g id="DEVICENAME">%1$s</xliff:g>"</string>
     <string name="media_transfer_failed" msgid="7955354964610603723">"Nešto nije u redu. Pokušajte ponovo."</string>
+    <!-- no translation found for media_transfer_loading (5544017127027152422) -->
+    <skip />
     <string name="controls_error_timeout" msgid="794197289772728958">"Neaktivno, provjerite aplik."</string>
     <string name="controls_error_removed" msgid="6675638069846014366">"Nije pronađeno"</string>
     <string name="controls_error_removed_title" msgid="1207794911208047818">"Kontrola nije dostupna"</string>

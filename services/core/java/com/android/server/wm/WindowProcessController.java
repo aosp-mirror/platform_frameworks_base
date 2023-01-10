@@ -76,6 +76,7 @@ import android.util.Slog;
 import android.util.proto.ProtoOutputStream;
 import android.view.IRemoteAnimationRunner;
 
+import com.android.internal.annotations.GuardedBy;
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.app.HeavyWeightSwitcherActivity;
 import com.android.internal.protolog.common.ProtoLog;
@@ -118,7 +119,8 @@ public class WindowProcessController extends ConfigurationContainer<Configuratio
     // communicate back to the activity manager side.
     public final Object mOwner;
     // List of packages running in the process
-    final ArraySet<String> mPkgList = new ArraySet<>();
+    @GuardedBy("itself")
+    private final ArrayList<String> mPkgList = new ArrayList<>(1);
     private final WindowProcessListener mListener;
     private final ActivityTaskManagerService mAtm;
     private final BackgroundLaunchProcessController mBgLaunchController;
@@ -645,15 +647,23 @@ public class WindowProcessController extends ConfigurationContainer<Configuratio
 
     @HotPath(caller = HotPath.PROCESS_CHANGE)
     public void addPackage(String packageName) {
-        synchronized (mAtm.mGlobalLockWithoutBoost) {
-            mPkgList.add(packageName);
+        synchronized (mPkgList) {
+            if (!mPkgList.contains(packageName)) {
+                mPkgList.add(packageName);
+            }
         }
     }
 
     @HotPath(caller = HotPath.PROCESS_CHANGE)
     public void clearPackageList() {
-        synchronized (mAtm.mGlobalLockWithoutBoost) {
+        synchronized (mPkgList) {
             mPkgList.clear();
+        }
+    }
+
+    boolean containsPackage(String packageName) {
+        synchronized (mPkgList) {
+            return mPkgList.contains(packageName);
         }
     }
 

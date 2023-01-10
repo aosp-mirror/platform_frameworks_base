@@ -23,6 +23,7 @@ import static com.android.companiondevicemanager.Utils.getHtmlFromResources;
 
 import static java.util.Objects.requireNonNull;
 
+import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.companion.datatransfer.PermissionSyncRequest;
 import android.companion.datatransfer.SystemDataTransferRequest;
@@ -37,6 +38,7 @@ import android.widget.TextView;
 /**
  * This activity manages the UI of companion device data transfer.
  */
+@SuppressLint("LongLogTag")
 public class CompanionDeviceDataTransferActivity extends Activity {
 
     private static final String LOG_TAG = "CDM_CompanionDeviceDataTransferActivity";

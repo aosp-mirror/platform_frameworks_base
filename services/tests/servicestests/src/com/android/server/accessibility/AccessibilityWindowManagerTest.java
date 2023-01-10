@@ -1019,7 +1019,7 @@ public class AccessibilityWindowManagerTest {
             windowInfosForDisplay.get(DEFAULT_FOCUSED_INDEX).focused = true;
         }
         // Turns on windows tracking, and update window info.
-        mA11yWindowManager.startTrackingWindows(displayId);
+        mA11yWindowManager.startTrackingWindows(displayId, false);
         // Puts window lists into array.
         mWindowInfos.put(displayId, windowInfosForDisplay);
         // Sets the default display is the top focused display and

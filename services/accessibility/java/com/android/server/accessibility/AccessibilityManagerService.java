@@ -33,6 +33,7 @@ import static android.view.accessibility.AccessibilityManager.CONTRAST_DEFAULT_V
 import static android.view.accessibility.AccessibilityManager.CONTRAST_NOT_SET;
 import static android.view.accessibility.AccessibilityManager.ShortcutType;
 
+import static com.android.internal.accessibility.AccessibilityShortcutController.ACCESSIBILITY_HEARING_AIDS_COMPONENT_NAME;
 import static com.android.internal.accessibility.AccessibilityShortcutController.MAGNIFICATION_COMPONENT_NAME;
 import static com.android.internal.accessibility.AccessibilityShortcutController.MAGNIFICATION_CONTROLLER_NAME;
 import static com.android.internal.accessibility.common.ShortcutConstants.CHOOSER_PACKAGE_NAME;
@@ -131,7 +132,8 @@ import android.view.inputmethod.EditorInfo;
 
 import com.android.internal.R;
 import com.android.internal.accessibility.AccessibilityShortcutController;
-import com.android.internal.accessibility.AccessibilityShortcutController.ToggleableFrameworkFeatureInfo;
+import com.android.internal.accessibility.AccessibilityShortcutController.FrameworkFeatureInfo;
+import com.android.internal.accessibility.AccessibilityShortcutController.LaunchableFrameworkFeatureInfo;
 import com.android.internal.accessibility.dialog.AccessibilityButtonChooserActivity;
 import com.android.internal.accessibility.dialog.AccessibilityShortcutChooserActivity;
 import com.android.internal.annotations.GuardedBy;
@@ -1810,6 +1812,18 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
         }
     }
 
+    private void launchAccessibilitySubSettings(int displayId, ComponentName name) {
+        final Intent intent = new Intent(Settings.ACTION_ACCESSIBILITY_DETAILS_SETTINGS);
+        final Bundle bundle = ActivityOptions.makeBasic().setLaunchDisplayId(displayId).toBundle();
+        intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+        intent.putExtra(Intent.EXTRA_COMPONENT_NAME, name.flattenToString());
+        try {
+            mContext.startActivityAsUser(intent, bundle, UserHandle.of(mCurrentUserId));
+        } catch (ActivityNotFoundException ignore) {
+            // ignore the exception
+        }
+    }
+
     private void notifyAccessibilityButtonVisibilityChangedLocked(boolean available) {
         final AccessibilityUserState state = getCurrentUserStateLocked();
         mIsAccessibilityButtonShown = available;
@@ -2513,7 +2527,8 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
             final Display display = displays.get(i);
             if (display != null) {
                 if (observingWindows) {
-                    mA11yWindowManager.startTrackingWindows(display.getDisplayId());
+                    mA11yWindowManager.startTrackingWindows(display.getDisplayId(),
+                            mProxyManager.isProxyed(display.getDisplayId()));
                 } else {
                     mA11yWindowManager.stopTrackingWindows(display.getDisplayId());
                 }
@@ -3245,7 +3260,7 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
             return;
         }
         // In case user assigned an accessibility framework feature to the given shortcut.
-        if (performAccessibilityFrameworkFeature(targetComponentName, shortcutType)) {
+        if (performAccessibilityFrameworkFeature(displayId, targetComponentName, shortcutType)) {
             return;
         }
         // In case user assigned an accessibility shortcut target to the given shortcut.
@@ -3260,17 +3275,24 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
         }
     }
 
-    private boolean performAccessibilityFrameworkFeature(ComponentName assignedTarget,
-            @ShortcutType int shortcutType) {
-        final Map<ComponentName, ToggleableFrameworkFeatureInfo> frameworkFeatureMap =
+    private boolean performAccessibilityFrameworkFeature(int displayId,
+            ComponentName assignedTarget, @ShortcutType int shortcutType) {
+        final Map<ComponentName, FrameworkFeatureInfo> frameworkFeatureMap =
                 AccessibilityShortcutController.getFrameworkShortcutFeaturesMap();
         if (!frameworkFeatureMap.containsKey(assignedTarget)) {
             return false;
         }
-        // Toggle the requested framework feature
-        final ToggleableFrameworkFeatureInfo featureInfo = frameworkFeatureMap.get(assignedTarget);
+        final FrameworkFeatureInfo featureInfo = frameworkFeatureMap.get(assignedTarget);
         final SettingStringHelper setting = new SettingStringHelper(mContext.getContentResolver(),
                 featureInfo.getSettingKey(), mCurrentUserId);
+
+        if (featureInfo instanceof LaunchableFrameworkFeatureInfo) {
+            logAccessibilityShortcutActivated(mContext, assignedTarget, shortcutType,
+                    /* serviceEnabled= */ true);
+            launchAccessibilityFrameworkFeature(displayId, assignedTarget);
+            return true;
+        }
+
         // Assuming that the default state will be to have the feature off
         if (!TextUtils.equals(featureInfo.getSettingOnValue(), setting.read())) {
             logAccessibilityShortcutActivated(mContext, assignedTarget, shortcutType,
@@ -3371,6 +3393,12 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
                     /* serviceEnabled= */ true);
             serviceConnection.notifyAccessibilityButtonClickedLocked(displayId);
             return true;
+        }
+    }
+
+    private void launchAccessibilityFrameworkFeature(int displayId, ComponentName assignedTarget) {
+        if (assignedTarget.equals(ACCESSIBILITY_HEARING_AIDS_COMPONENT_NAME)) {
+            launchAccessibilitySubSettings(displayId, ACCESSIBILITY_HEARING_AIDS_COMPONENT_NAME);
         }
     }
 

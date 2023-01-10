@@ -550,15 +550,15 @@ fun CreationSelectionCard(
                 text = when (requestDisplayInfo.type) {
                     TYPE_PUBLIC_KEY_CREDENTIAL -> stringResource(
                         R.string.choose_create_option_passkey_title,
-                        requestDisplayInfo.appDomainName
+                        requestDisplayInfo.appName
                     )
                     TYPE_PASSWORD_CREDENTIAL -> stringResource(
                         R.string.choose_create_option_password_title,
-                        requestDisplayInfo.appDomainName
+                        requestDisplayInfo.appName
                     )
                     else -> stringResource(
                         R.string.choose_create_option_sign_in_title,
-                        requestDisplayInfo.appDomainName
+                        requestDisplayInfo.appName
                     )
                 },
                 style = MaterialTheme.typography.titleMedium,
@@ -615,7 +615,7 @@ fun CreationSelectionCard(
                 TextSecondary(
                     text = stringResource(
                         R.string.choose_create_option_description,
-                        requestDisplayInfo.appDomainName,
+                        requestDisplayInfo.appName,
                         when (requestDisplayInfo.type) {
                             TYPE_PUBLIC_KEY_CREDENTIAL -> stringResource(R.string.passkey)
                             TYPE_PASSWORD_CREDENTIAL -> stringResource(R.string.password)

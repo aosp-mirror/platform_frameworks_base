@@ -29,7 +29,6 @@ import android.util.Log;
 import android.util.Slog;
 
 import com.android.server.pm.PackageManagerService;
-import com.android.server.pm.pkg.AndroidPackage;
 import com.android.server.pm.pkg.PackageState;
 import com.android.server.pm.pkg.component.ParsedPermission;
 
@@ -213,10 +212,6 @@ public final class Permission {
     public boolean isRuntime() {
         return (mPermissionInfo.protectionLevel & PermissionInfo.PROTECTION_MASK_BASE)
                 == PermissionInfo.PROTECTION_DANGEROUS;
-    }
-
-    public boolean isInstalled() {
-        return (mPermissionInfo.flags & PermissionInfo.FLAG_INSTALLED) != 0;
     }
 
     public boolean isRemoved() {
@@ -423,7 +418,6 @@ public final class Permission {
             if (packageState.isSystem()) {
                 if (permission.mType == Permission.TYPE_CONFIG && !permission.mReconciled) {
                     // It's a built-in permission and no owner, take ownership now
-                    permissionInfo.flags |= PermissionInfo.FLAG_INSTALLED;
                     permission.mPermissionInfo = permissionInfo;
                     permission.mReconciled = true;
                     permission.mUid = packageState.getAppId();
@@ -451,7 +445,6 @@ public final class Permission {
                 final Permission tree = findPermissionTree(permissionTrees, permissionInfo.name);
                 if (tree == null
                         || tree.mPermissionInfo.packageName.equals(permissionInfo.packageName)) {
-                    permissionInfo.flags |= PermissionInfo.FLAG_INSTALLED;
                     permission.mPermissionInfo = permissionInfo;
                     permission.mReconciled = true;
                     permission.mUid = packageState.getAppId();
@@ -562,6 +555,8 @@ public final class Permission {
             permissionInfo.packageName = mPermissionInfo.packageName;
             permissionInfo.nonLocalizedLabel = mPermissionInfo.name;
         }
+        // A Permission in PermissionRegistry is always installed.
+        permissionInfo.flags |= PermissionInfo.FLAG_INSTALLED;
         if (targetSdkVersion >= Build.VERSION_CODES.O) {
             permissionInfo.protectionLevel = mPermissionInfo.protectionLevel;
         } else {

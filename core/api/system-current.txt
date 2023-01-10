@@ -121,6 +121,7 @@ package android {
     field public static final String EXEMPT_FROM_AUDIO_RECORD_RESTRICTIONS = "android.permission.EXEMPT_FROM_AUDIO_RECORD_RESTRICTIONS";
     field public static final String FORCE_BACK = "android.permission.FORCE_BACK";
     field public static final String FORCE_STOP_PACKAGES = "android.permission.FORCE_STOP_PACKAGES";
+    field public static final String GET_APP_METADATA = "android.permission.GET_APP_METADATA";
     field public static final String GET_APP_OPS_STATS = "android.permission.GET_APP_OPS_STATS";
     field public static final String GET_HISTORICAL_APP_OPS_STATS = "android.permission.GET_HISTORICAL_APP_OPS_STATS";
     field public static final String GET_PROCESS_STATE_AND_OOM_SCORE = "android.permission.GET_PROCESS_STATE_AND_OOM_SCORE";
@@ -3651,7 +3652,7 @@ package android.content.pm {
     method public abstract boolean arePermissionsIndividuallyControlled();
     method @NonNull public boolean canUserUninstall(@NonNull String, @NonNull android.os.UserHandle);
     method @NonNull public abstract java.util.List<android.content.IntentFilter> getAllIntentFilters(@NonNull String);
-    method @NonNull @RequiresPermission("android.permission.GET_APP_METADATA") public android.os.PersistableBundle getAppMetadata(@NonNull String) throws android.content.pm.PackageManager.NameNotFoundException;
+    method @NonNull @RequiresPermission(android.Manifest.permission.GET_APP_METADATA) public android.os.PersistableBundle getAppMetadata(@NonNull String) throws android.content.pm.PackageManager.NameNotFoundException;
     method @Deprecated @NonNull @RequiresPermission(android.Manifest.permission.INTERACT_ACROSS_USERS) public android.content.pm.ApplicationInfo getApplicationInfoAsUser(@NonNull String, int, @NonNull android.os.UserHandle) throws android.content.pm.PackageManager.NameNotFoundException;
     method @NonNull @RequiresPermission(android.Manifest.permission.INTERACT_ACROSS_USERS) public android.content.pm.ApplicationInfo getApplicationInfoAsUser(@NonNull String, @NonNull android.content.pm.PackageManager.ApplicationInfoFlags, @NonNull android.os.UserHandle) throws android.content.pm.PackageManager.NameNotFoundException;
     method @NonNull public android.content.pm.dex.ArtManager getArtManager();

@@ -113,6 +113,7 @@ import com.android.server.LocalManagerRegistry;
 import com.android.server.LocalServices;
 import com.android.server.SystemConfig;
 import com.android.server.art.ArtManagerLocal;
+import com.android.server.pm.Installer.LegacyDexoptDisabledException;
 import com.android.server.pm.PackageManagerShellCommandDataLoader.Metadata;
 import com.android.server.pm.permission.LegacyPermissionManagerInternal;
 import com.android.server.pm.permission.PermissionAllowlist;
@@ -1953,52 +1954,62 @@ class PackageManagerShellCommand extends ShellCommand {
     }
 
     private int runBgDexOpt() throws RemoteException {
-        String opt = getNextOption();
+        // TODO(b/251903639): Call into ART Service.
+        try {
+            String opt = getNextOption();
 
-        if (opt == null) {
-            List<String> packageNames = new ArrayList<>();
-            String arg;
-            while ((arg = getNextArg()) != null) {
-                packageNames.add(arg);
-            }
-            if (!BackgroundDexOptService.getService().runBackgroundDexoptJob(
-                    packageNames.isEmpty() ? null : packageNames)) {
-                getOutPrintWriter().println("Failure");
-                return -1;
-            }
-        } else {
-            String extraArg = getNextArg();
-            if (extraArg != null) {
-                getErrPrintWriter().println("Invalid argument: " + extraArg);
-                return -1;
-            }
-
-            switch (opt) {
-                case "--cancel":
-                    return cancelBgDexOptJob();
-
-                case "--disable":
-                    BackgroundDexOptService.getService().setDisableJobSchedulerJobs(true);
-                    break;
-
-                case "--enable":
-                    BackgroundDexOptService.getService().setDisableJobSchedulerJobs(false);
-                    break;
-
-                default:
-                    getErrPrintWriter().println("Unknown option: " + opt);
+            if (opt == null) {
+                List<String> packageNames = new ArrayList<>();
+                String arg;
+                while ((arg = getNextArg()) != null) {
+                    packageNames.add(arg);
+                }
+                if (!BackgroundDexOptService.getService().runBackgroundDexoptJob(
+                            packageNames.isEmpty() ? null : packageNames)) {
+                    getOutPrintWriter().println("Failure");
                     return -1;
-            }
-        }
+                }
+            } else {
+                String extraArg = getNextArg();
+                if (extraArg != null) {
+                    getErrPrintWriter().println("Invalid argument: " + extraArg);
+                    return -1;
+                }
 
-        getOutPrintWriter().println("Success");
-        return 0;
+                switch (opt) {
+                    case "--cancel":
+                        return cancelBgDexOptJob();
+
+                    case "--disable":
+                        BackgroundDexOptService.getService().setDisableJobSchedulerJobs(true);
+                        break;
+
+                    case "--enable":
+                        BackgroundDexOptService.getService().setDisableJobSchedulerJobs(false);
+                        break;
+
+                    default:
+                        getErrPrintWriter().println("Unknown option: " + opt);
+                        return -1;
+                }
+            }
+
+            getOutPrintWriter().println("Success");
+            return 0;
+        } catch (LegacyDexoptDisabledException e) {
+            throw new RuntimeException(e);
+        }
     }
 
     private int cancelBgDexOptJob() throws RemoteException {
-        BackgroundDexOptService.getService().cancelBackgroundDexoptJob();
-        getOutPrintWriter().println("Success");
-        return 0;
+        // TODO(b/251903639): Call into ART Service.
+        try {
+            BackgroundDexOptService.getService().cancelBackgroundDexoptJob();
+            getOutPrintWriter().println("Success");
+            return 0;
+        } catch (LegacyDexoptDisabledException e) {
+            throw new RuntimeException(e);
+        }
     }
 
     private int runDeleteDexOpt() throws RemoteException {
@@ -2008,8 +2019,8 @@ class PackageManagerShellCommand extends ShellCommand {
             pw.println("Error: no package name");
             return 1;
         }
-        long freedBytes = LocalServices.getService(
-                PackageManagerInternal.class).deleteOatArtifactsOfPackage(packageName);
+        long freedBytes = LocalServices.getService(PackageManagerInternal.class)
+                                  .deleteOatArtifactsOfPackage(packageName);
         if (freedBytes < 0) {
             pw.println("Error: delete failed");
             return 1;
@@ -2273,7 +2284,7 @@ class PackageManagerShellCommand extends ShellCommand {
             if (abandonSession) {
                 try {
                     doAbandonSession(sessionId, false /*logSuccess*/);
-                } catch (Exception ignore) {
+                } catch (RuntimeException ignore) {
                 }
             }
         }

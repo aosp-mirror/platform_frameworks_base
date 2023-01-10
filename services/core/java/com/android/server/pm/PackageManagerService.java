@@ -39,6 +39,7 @@ import static android.provider.DeviceConfig.NAMESPACE_PACKAGE_MANAGER_SERVICE;
 
 import static com.android.internal.annotations.VisibleForTesting.Visibility;
 import static com.android.internal.util.FrameworkStatsLog.BOOT_TIME_EVENT_DURATION__EVENT__OTA_PACKAGE_MANAGER_INIT_TIME;
+import static com.android.server.pm.DexOptHelper.useArtService;
 import static com.android.server.pm.InstructionSets.getDexCodeInstructionSet;
 import static com.android.server.pm.InstructionSets.getPreferredInstructionSet;
 import static com.android.server.pm.PackageManagerServiceUtils.compareSignatures;
@@ -198,6 +199,7 @@ import com.android.server.art.DexUseManagerLocal;
 import com.android.server.compat.CompatChange;
 import com.android.server.compat.PlatformCompat;
 import com.android.server.pm.Installer.InstallerException;
+import com.android.server.pm.Installer.LegacyDexoptDisabledException;
 import com.android.server.pm.Settings.VersionInfo;
 import com.android.server.pm.dex.ArtManagerService;
 import com.android.server.pm.dex.ArtUtils;
@@ -2136,16 +2138,19 @@ public class PackageManagerService implements PackageSender, TestUtilityService 
                 // the rest of the commands above) because there's precious little we
                 // can do about it. A settings error is reported, though.
                 final List<String> changedAbiCodePath =
-                        ScanPackageUtils.applyAdjustedAbiToSharedUser(
-                                setting, null /*scannedPackage*/,
+                        ScanPackageUtils.applyAdjustedAbiToSharedUser(setting,
+                                null /*scannedPackage*/,
                                 mInjector.getAbiHelper().getAdjustedAbiForSharedUser(
                                         setting.getPackageStates(), null /*scannedPackage*/));
-                if (changedAbiCodePath != null && changedAbiCodePath.size() > 0) {
+                if (!useArtService() && // Skip for ART Service since it has its own dex file GC.
+                        changedAbiCodePath != null && changedAbiCodePath.size() > 0) {
                     for (int i = changedAbiCodePath.size() - 1; i >= 0; --i) {
                         final String codePathString = changedAbiCodePath.get(i);
                         try {
                             mInstaller.rmdex(codePathString,
                                     getDexCodeInstructionSet(getPreferredInstructionSet()));
+                        } catch (LegacyDexoptDisabledException e) {
+                            throw new RuntimeException(e);
                         } catch (InstallerException ignored) {
                         }
                     }
@@ -2952,7 +2957,12 @@ public class PackageManagerService implements PackageSender, TestUtilityService 
     }
 
     public void updatePackagesIfNeeded() {
-        mDexOptHelper.performPackageDexOptUpgradeIfNeeded();
+        // TODO(b/251903639): Call into ART Service.
+        try {
+            mDexOptHelper.performPackageDexOptUpgradeIfNeeded();
+        } catch (LegacyDexoptDisabledException e) {
+            throw new RuntimeException(e);
+        }
     }
 
     private void notifyPackageUseInternal(String packageName, int reason) {
@@ -4266,7 +4276,12 @@ public class PackageManagerService implements PackageSender, TestUtilityService 
                     }
                 });
 
-        mBackgroundDexOptService.systemReady();
+        // TODO(b/251903639): Call into ART Service.
+        try {
+            mBackgroundDexOptService.systemReady();
+        } catch (LegacyDexoptDisabledException e) {
+            throw new RuntimeException(e);
+        }
 
         // Prune unused static shared libraries which have been cached a period of time
         schedulePruneUnusedStaticSharedLibraries(false /* delay */);
@@ -4615,7 +4630,8 @@ public class PackageManagerService implements PackageSender, TestUtilityService 
 
             final Computer snapshot = snapshotComputer();
             final AndroidPackage pkg = snapshot.getPackage(packageName);
-            try (PackageFreezer ignored = freezePackage(packageName, "clearApplicationProfileData")) {
+            try (PackageFreezer ignored =
+                            freezePackage(packageName, "clearApplicationProfileData")) {
                 synchronized (mInstallLock) {
                     mAppDataHelper.clearAppProfilesLIF(pkg);
                 }
@@ -4797,9 +4813,14 @@ public class PackageManagerService implements PackageSender, TestUtilityService 
                 throw new IllegalArgumentException("Unknown package: " + packageName);
             }
 
+            // TODO(b/251903639): Call into ART Service.
             synchronized (mInstallLock) {
                 Trace.traceBegin(TRACE_TAG_PACKAGE_MANAGER, "dump profiles");
-                mArtManagerService.dumpProfiles(pkg, dumpClassesAndMethods);
+                try {
+                    mArtManagerService.dumpProfiles(pkg, dumpClassesAndMethods);
+                } catch (LegacyDexoptDisabledException e) {
+                    throw new RuntimeException(e);
+                }
                 Trace.traceEnd(TRACE_TAG_PACKAGE_MANAGER);
             }
         }
@@ -5497,20 +5518,40 @@ public class PackageManagerService implements PackageSender, TestUtilityService 
          */
         @Override
         public void reconcileSecondaryDexFiles(String packageName) {
+            if (useArtService()) {
+                // ART Service currently relies on a GC to find stale oat files, including secondary
+                // dex files. Hence it doesn't use this call for anything.
+                return;
+            }
+
             final Computer snapshot = snapshotComputer();
             if (snapshot.getInstantAppPackageName(Binder.getCallingUid()) != null) {
                 return;
             } else if (snapshot.isInstantAppInternal(
-                    packageName, UserHandle.getCallingUserId(), Process.SYSTEM_UID)) {
+                               packageName, UserHandle.getCallingUserId(), Process.SYSTEM_UID)) {
                 return;
             }
-            mDexManager.reconcileSecondaryDexFiles(packageName);
+            try {
+                mDexManager.reconcileSecondaryDexFiles(packageName);
+            } catch (LegacyDexoptDisabledException e) {
+                throw new RuntimeException(e);
+            }
         }
 
         @Override
         public void registerDexModule(String packageName, String dexModulePath,
                 boolean isSharedModule,
                 IDexModuleRegisterCallback callback) {
+            if (useArtService()) {
+                // ART Service currently doesn't support this explicit dexopting and instead relies
+                // on background dexopt for secondary dex files. This API is problematic since it
+                // doesn't provide the correct classloader context.
+                Slog.i(TAG,
+                        "Ignored unsupported registerDexModule call for " + dexModulePath + " in "
+                                + packageName);
+                return;
+            }
+
             int userId = UserHandle.getCallingUserId();
             ApplicationInfo ai = snapshot().getApplicationInfo(packageName, /*flags*/ 0, userId);
             DexManager.RegisterDexModuleResult result;
@@ -5520,7 +5561,12 @@ public class PackageManagerService implements PackageSender, TestUtilityService 
                                 " calling user. package=" + packageName + ", user=" + userId);
                 result = new DexManager.RegisterDexModuleResult(false, "Package not installed");
             } else {
-                result = mDexManager.registerDexModule(ai, dexModulePath, isSharedModule, userId);
+                try {
+                    result = mDexManager.registerDexModule(
+                            ai, dexModulePath, isSharedModule, userId);
+                } catch (LegacyDexoptDisabledException e) {
+                    throw new RuntimeException(e);
+                }
             }
 
             if (callback != null) {
@@ -6994,7 +7040,8 @@ public class PackageManagerService implements PackageSender, TestUtilityService 
         return AndroidPackageUtils.canHaveOatDir(packageState, packageState.getPkg());
     }
 
-    long deleteOatArtifactsOfPackage(@NonNull Computer snapshot, String packageName) {
+    long deleteOatArtifactsOfPackage(@NonNull Computer snapshot, String packageName)
+            throws LegacyDexoptDisabledException {
         PackageManagerServiceUtils.enforceSystemOrRootOrShell(
                 "Only the system or shell can delete oat artifacts");
 

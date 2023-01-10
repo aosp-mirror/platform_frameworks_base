@@ -125,6 +125,18 @@ package android {
     field public static final String MANAGE_DEVICE_POLICY_ACROSS_USERS = "android.permission.MANAGE_DEVICE_POLICY_ACROSS_USERS";
     field public static final String MANAGE_DEVICE_POLICY_ACROSS_USERS_FULL = "android.permission.MANAGE_DEVICE_POLICY_ACROSS_USERS_FULL";
     field public static final String MANAGE_DEVICE_POLICY_ACROSS_USERS_SECURITY_CRITICAL = "android.permission.MANAGE_DEVICE_POLICY_ACROSS_USERS_SECURITY_CRITICAL";
+    field public static final String MANAGE_DEVICE_POLICY_APPS_CONTROL = "android.permission.MANAGE_DEVICE_POLICY_APPS_CONTROL";
+    field public static final String MANAGE_DEVICE_POLICY_APP_RESTRICTIONS = "android.permission.MANAGE_DEVICE_POLICY_APP_RESTRICTIONS";
+    field public static final String MANAGE_DEVICE_POLICY_BACKUP_SERVICE = "android.permission.MANAGE_DEVICE_POLICY_BACKUP_SERVICE";
+    field public static final String MANAGE_DEVICE_POLICY_CALLS = "android.permission.MANAGE_DEVICE_POLICY_CALLS";
+    field public static final String MANAGE_DEVICE_POLICY_DEBUGGING_FEATURES = "android.permission.MANAGE_DEVICE_POLICY_DEBUGGING_FEATURES";
+    field public static final String MANAGE_DEVICE_POLICY_INSTALL_UNKNOWN_SOURCES = "android.permission.MANAGE_DEVICE_POLICY_INSTALL_UNKNOWN_SOURCES";
+    field public static final String MANAGE_DEVICE_POLICY_LOCK_TASK = "android.permission.MANAGE_DEVICE_POLICY_LOCK_TASK";
+    field public static final String MANAGE_DEVICE_POLICY_MODIFY_USERS = "android.permission.MANAGE_DEVICE_POLICY_MODIFY_USERS";
+    field public static final String MANAGE_DEVICE_POLICY_ORGANIZATION_IDENTITY = "android.permission.MANAGE_DEVICE_POLICY_ORGANIZATION_IDENTITY";
+    field public static final String MANAGE_DEVICE_POLICY_RUNTIME_PERMISSIONS = "android.permission.MANAGE_DEVICE_POLICY_RUNTIME_PERMISSIONS";
+    field public static final String MANAGE_DEVICE_POLICY_SAFE_BOOT = "android.permission.MANAGE_DEVICE_POLICY_SAFE_BOOT";
+    field public static final String MANAGE_DEVICE_POLICY_SUPPORT_MESSAGE = "android.permission.MANAGE_DEVICE_POLICY_SUPPORT_MESSAGE";
     field public static final String MANAGE_DEVICE_POLICY_TIME = "android.permission.MANAGE_DEVICE_POLICY_TIME";
     field public static final String MANAGE_DOCUMENTS = "android.permission.MANAGE_DOCUMENTS";
     field public static final String MANAGE_EXTERNAL_STORAGE = "android.permission.MANAGE_EXTERNAL_STORAGE";
@@ -7535,6 +7547,7 @@ package android.app.admin {
     method @Nullable public android.app.admin.PackagePolicy getManagedProfileCallerIdAccessPolicy();
     method @Nullable public android.app.admin.PackagePolicy getManagedProfileContactsAccessPolicy();
     method public long getManagedProfileMaximumTimeOff(@NonNull android.content.ComponentName);
+    method @NonNull public android.app.admin.ManagedSubscriptionsPolicy getManagedSubscriptionsPolicy();
     method public int getMaximumFailedPasswordsForWipe(@Nullable android.content.ComponentName);
     method public long getMaximumTimeToLock(@Nullable android.content.ComponentName);
     method @NonNull public java.util.List<java.lang.String> getMeteredDataDisabledPackages(@NonNull android.content.ComponentName);
@@ -7685,6 +7698,7 @@ package android.app.admin {
     method public void setManagedProfileCallerIdAccessPolicy(@Nullable android.app.admin.PackagePolicy);
     method public void setManagedProfileContactsAccessPolicy(@Nullable android.app.admin.PackagePolicy);
     method public void setManagedProfileMaximumTimeOff(@NonNull android.content.ComponentName, long);
+    method public void setManagedSubscriptionsPolicy(@Nullable android.app.admin.ManagedSubscriptionsPolicy);
     method public void setMasterVolumeMuted(@NonNull android.content.ComponentName, boolean);
     method public void setMaximumFailedPasswordsForWipe(@NonNull android.content.ComponentName, int);
     method public void setMaximumTimeToLock(@NonNull android.content.ComponentName, long);
@@ -7985,6 +7999,16 @@ package android.app.admin {
     ctor public FreezePeriod(java.time.MonthDay, java.time.MonthDay);
     method public java.time.MonthDay getEnd();
     method public java.time.MonthDay getStart();
+  }
+
+  public final class ManagedSubscriptionsPolicy implements android.os.Parcelable {
+    ctor public ManagedSubscriptionsPolicy(int);
+    method public int describeContents();
+    method public int getPolicyType();
+    method public void writeToParcel(@NonNull android.os.Parcel, int);
+    field @NonNull public static final android.os.Parcelable.Creator<android.app.admin.ManagedSubscriptionsPolicy> CREATOR;
+    field public static final int TYPE_ALL_MANAGED_SUBSCRIPTIONS = 1; // 0x1
+    field public static final int TYPE_ALL_PERSONAL_SUBSCRIPTIONS = 0; // 0x0
   }
 
   public abstract class NetworkEvent implements android.os.Parcelable {
@@ -23773,6 +23797,8 @@ package android.media {
     method @NonNull public android.media.MediaRoute2Info.Builder setDescription(@Nullable CharSequence);
     method @NonNull public android.media.MediaRoute2Info.Builder setExtras(@Nullable android.os.Bundle);
     method @NonNull public android.media.MediaRoute2Info.Builder setIconUri(@Nullable android.net.Uri);
+    method @NonNull public android.media.MediaRoute2Info.Builder setVisibilityPublic();
+    method @NonNull public android.media.MediaRoute2Info.Builder setVisibilityRestricted(@NonNull java.util.Set<java.lang.String>);
     method @NonNull public android.media.MediaRoute2Info.Builder setVolume(int);
     method @NonNull public android.media.MediaRoute2Info.Builder setVolumeHandling(int);
     method @NonNull public android.media.MediaRoute2Info.Builder setVolumeMax(int);
@@ -24314,15 +24340,19 @@ package android.media {
 
   public final class RouteListingPreference implements android.os.Parcelable {
     method public int describeContents();
+    method @Nullable public android.content.ComponentName getInAppOnlyItemRoutingReceiver();
     method @NonNull public java.util.List<android.media.RouteListingPreference.Item> getItems();
     method public boolean getUseSystemOrdering();
     method public void writeToParcel(@NonNull android.os.Parcel, int);
+    field public static final String ACTION_TRANSFER_MEDIA = "android.media.action.TRANSFER_MEDIA";
     field @NonNull public static final android.os.Parcelable.Creator<android.media.RouteListingPreference> CREATOR;
+    field public static final String EXTRA_ROUTE_ID = "android.media.extra.ROUTE_ID";
   }
 
   public static final class RouteListingPreference.Builder {
     ctor public RouteListingPreference.Builder();
     method @NonNull public android.media.RouteListingPreference build();
+    method @NonNull public android.media.RouteListingPreference.Builder setInAppOnlyItemRoutingReceiver(@Nullable android.content.ComponentName);
     method @NonNull public android.media.RouteListingPreference.Builder setItems(@NonNull java.util.List<android.media.RouteListingPreference.Item>);
     method @NonNull public android.media.RouteListingPreference.Builder setUseSystemOrdering(boolean);
   }
@@ -24337,6 +24367,7 @@ package android.media {
     field @NonNull public static final android.os.Parcelable.Creator<android.media.RouteListingPreference.Item> CREATOR;
     field public static final int DISABLE_REASON_AD = 3; // 0x3
     field public static final int DISABLE_REASON_DOWNLOADED_CONTENT = 2; // 0x2
+    field public static final int DISABLE_REASON_IN_APP_ONLY = 4; // 0x4
     field public static final int DISABLE_REASON_NONE = 0; // 0x0
     field public static final int DISABLE_REASON_SUBSCRIPTION_REQUIRED = 1; // 0x1
     field public static final int FLAG_ONGOING_SESSION = 1; // 0x1

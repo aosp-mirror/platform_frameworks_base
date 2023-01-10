@@ -47,6 +47,9 @@ final class ScanResult {
      */
     @Nullable
     public final PackageSetting mPkgSetting;
+
+    // TODO(b/260124949): Check if this can be dropped when the legacy PackageManager dexopt code is
+    // cleaned up.
     /** ABI code paths that have changed in the package scan */
     @Nullable public final List<String> mChangedAbiCodePath;
 

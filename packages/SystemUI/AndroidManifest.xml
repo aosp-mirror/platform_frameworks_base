@@ -180,6 +180,9 @@
     <!-- Doze mode temp whitelisting for notification dispatching. -->
     <uses-permission android:name="android.permission.CHANGE_DEVICE_IDLE_TEMP_WHITELIST" />
 
+    <!-- Tag user-initiated PendingIntent invocations as "interactive" when appropriate -->
+    <uses-permission android:name="android.permission.COMPONENT_OPTION_INTERACTIVE" />
+
     <!-- Listen for keyboard attachment / detachment -->
     <uses-permission android:name="android.permission.TABLET_MODE" />
 

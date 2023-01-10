@@ -24,7 +24,6 @@ import android.app.time.TimeState;
 import android.app.time.UnixEpochTime;
 import android.app.timedetector.ManualTimeSuggestion;
 import android.app.timedetector.TelephonyTimeSuggestion;
-import android.app.timedetector.TimePoint;
 
 /**
  * Binder APIs to communicate with the time detector service.
@@ -55,5 +54,5 @@ interface ITimeDetectorService {
   boolean suggestManualTime(in ManualTimeSuggestion timeSuggestion);
   void suggestTelephonyTime(in TelephonyTimeSuggestion timeSuggestion);
 
-  TimePoint latestNetworkTime();
+  UnixEpochTime latestNetworkTime();
 }

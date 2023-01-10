@@ -51,7 +51,7 @@ public class PhoneMediaDevice extends MediaDevice {
 
     PhoneMediaDevice(Context context, MediaRouter2Manager routerManager, MediaRoute2Info info,
             String packageName) {
-        super(context, routerManager, info, packageName);
+        super(context, routerManager, info, packageName, null);
         mDeviceIconUtil = new DeviceIconUtil();
         initDeviceRecord();
     }

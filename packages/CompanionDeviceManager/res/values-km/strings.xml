@@ -51,17 +51,26 @@
     <string name="permission_contacts" msgid="3858319347208004438">"Contacts"</string>
     <string name="permission_calendar" msgid="6805668388691290395">"ប្រតិទិន"</string>
     <string name="permission_microphone" msgid="2152206421428732949">"មីក្រូហ្វូន"</string>
+    <!-- no translation found for permission_call_logs (5546761417694586041) -->
+    <skip />
     <string name="permission_nearby_devices" msgid="7530973297737123481">"ឧបករណ៍នៅជិត"</string>
     <string name="permission_storage" msgid="6831099350839392343">"រូបថត និងមេឌៀ"</string>
     <string name="permission_notification" msgid="693762568127741203">"ការ​ជូនដំណឹង"</string>
     <string name="permission_app_streaming" msgid="6009695219091526422">"កម្មវិធី"</string>
     <string name="permission_nearby_device_streaming" msgid="5868108148065023161">"ការផ្សាយទៅឧបករណ៍នៅជិត"</string>
-    <string name="permission_phone_summary" msgid="6154198036705702389">"អាចចូលមើលលេខទូរសព្ទ និងព័ត៌មានបណ្ដាញរបស់អ្នក។ ត្រូវបានតម្រូវសម្រាប់ការហៅទូរសព្ទនិង VoIP, សារជាសំឡេង, ការបញ្ជូនបន្តការហៅទូរសព្ទ និងការកែកំណត់ហេតុហៅទូរសព្ទ"</string>
-    <string name="permission_sms_summary" msgid="5107174184224165570"></string>
-    <string name="permission_contacts_summary" msgid="7850901746005070792">"អាចអាន បង្កើត ឬកែបញ្ជីទំនាក់ទំនងរបស់យើង ក៏ដូចជាចូលប្រើបញ្ជីគណនីទាំងអស់ដែលត្រូវបានប្រើនៅលើឧបករណ៍របស់អ្នក"</string>
-    <string name="permission_calendar_summary" msgid="9070743747408808156"></string>
+    <!-- no translation found for permission_phone_summary (6684396967861278044) -->
+    <skip />
+    <!-- no translation found for permission_call_logs_summary (6186103394658755022) -->
+    <skip />
+    <!-- no translation found for permission_sms_summary (3508442683678912017) -->
+    <skip />
+    <!-- no translation found for permission_contacts_summary (675861979475628708) -->
+    <skip />
+    <!-- no translation found for permission_calendar_summary (6460000922511766226) -->
+    <skip />
     <string name="permission_microphone_summary" msgid="4241354865859396558">"អាចថតសំឡេងដោយប្រើមីក្រូហ្វូន"</string>
-    <string name="permission_nearby_devices_summary" msgid="8587497797301075494"></string>
+    <!-- no translation found for permission_nearby_devices_summary (931940524460876655) -->
+    <skip />
     <string name="permission_notification_summary" msgid="884075314530071011">"អាចអាន​ការជូនដំណឹង​ទាំងអស់ រួមទាំង​ព័ត៌មាន​ដូចជាទំនាក់ទំនង សារ និងរូបថត"</string>
     <string name="permission_app_streaming_summary" msgid="606923325679670624">"ផ្សាយកម្មវិធីរបស់ទូរសព្ទអ្នក"</string>
     <string name="permission_storage_summary" msgid="3918240895519506417"></string>

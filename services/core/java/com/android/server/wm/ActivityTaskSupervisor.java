@@ -1714,7 +1714,7 @@ public class ActivityTaskSupervisor implements RecentTasks.Callbacks {
                     // Don't kill the home process along with tasks from the same package.
                     continue;
                 }
-                if (!proc.mPkgList.contains(pkg)) {
+                if (!proc.containsPackage(pkg)) {
                     // Don't kill process that is not associated with this task.
                     continue;
                 }

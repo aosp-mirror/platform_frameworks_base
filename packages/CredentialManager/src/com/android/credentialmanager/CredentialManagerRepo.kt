@@ -128,7 +128,7 @@ class CredentialManagerRepo(
     val providerEnabledList = GetFlowUtils.toProviderList(
     // TODO: handle runtime cast error
       providerEnabledList as List<GetCredentialProviderData>, context)
-    val requestDisplayInfo = GetFlowUtils.toRequestDisplayInfo(requestInfo)
+    val requestDisplayInfo = GetFlowUtils.toRequestDisplayInfo(requestInfo, context)
     return GetCredentialUiState(
       providerEnabledList,
       requestDisplayInfo,
@@ -427,7 +427,7 @@ class CredentialManagerRepo(
         /*candidateQueryData=*/ Bundle(),
         /*requireSystemProvider=*/ false
       ),
-      "tribank"
+      "com.google.android.youtube"
     )
   }
 
@@ -442,7 +442,7 @@ class CredentialManagerRepo(
         /*candidateQueryData=*/ Bundle(),
         /*requireSystemProvider=*/ false
       ),
-      "tribank"
+      "com.google.android.youtube"
     )
   }
 
@@ -456,7 +456,7 @@ class CredentialManagerRepo(
         /*candidateQueryData=*/ Bundle(),
         /*requireSystemProvider=*/ false
       ),
-      "tribank"
+      "com.google.android.youtube"
     )
   }
 
@@ -471,7 +471,7 @@ class CredentialManagerRepo(
             TYPE_PUBLIC_KEY_CREDENTIAL, Bundle(), Bundle(), /*requireSystemProvider=*/ false)
         )
         .build(),
-      "tribank.us"
+      "com.google.android.youtube"
     )
   }
 }

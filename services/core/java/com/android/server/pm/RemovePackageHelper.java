@@ -45,6 +45,7 @@ import android.util.SparseBooleanArray;
 
 import com.android.internal.annotations.GuardedBy;
 import com.android.internal.util.ArrayUtils;
+import com.android.server.pm.Installer.LegacyDexoptDisabledException;
 import com.android.server.pm.parsing.PackageCacher;
 import com.android.server.pm.parsing.pkg.AndroidPackageUtils;
 import com.android.server.pm.parsing.pkg.PackageImpl;
@@ -424,8 +425,11 @@ final class RemovePackageHelper {
             String[] dexCodeInstructionSets = getDexCodeInstructionSets(instructionSets);
             for (String codePath : allCodePaths) {
                 for (String dexCodeInstructionSet : dexCodeInstructionSets) {
+                    // TODO(b/251903639): Call into ART Service.
                     try {
                         mPm.mInstaller.rmdex(codePath, dexCodeInstructionSet);
+                    } catch (LegacyDexoptDisabledException e) {
+                        throw new RuntimeException(e);
                     } catch (Installer.InstallerException ignored) {
                     }
                 }

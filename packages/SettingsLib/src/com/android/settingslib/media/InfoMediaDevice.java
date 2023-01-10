@@ -25,6 +25,7 @@ import android.content.Context;
 import android.graphics.drawable.Drawable;
 import android.media.MediaRoute2Info;
 import android.media.MediaRouter2Manager;
+import android.media.RouteListingPreference;
 
 import androidx.annotation.VisibleForTesting;
 
@@ -40,9 +41,14 @@ public class InfoMediaDevice extends MediaDevice {
     private static final String TAG = "InfoMediaDevice";
 
     InfoMediaDevice(Context context, MediaRouter2Manager routerManager, MediaRoute2Info info,
-            String packageName) {
-        super(context, routerManager, info, packageName);
+            String packageName, RouteListingPreference.Item item) {
+        super(context, routerManager, info, packageName, item);
         initDeviceRecord();
+    }
+
+    InfoMediaDevice(Context context, MediaRouter2Manager routerManager, MediaRoute2Info info,
+            String packageName) {
+        this(context, routerManager, info, packageName, null);
     }
 
     @Override

@@ -6344,7 +6344,7 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
                 int wakefulness) {
             synchronized (mGlobalLock) {
                 if (mHomeProcess != null && (dumpPackage == null
-                        || mHomeProcess.mPkgList.contains(dumpPackage))) {
+                        || mHomeProcess.containsPackage(dumpPackage))) {
                     if (needSep) {
                         pw.println();
                         needSep = false;
@@ -6352,7 +6352,7 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
                     pw.println("  mHomeProcess: " + mHomeProcess);
                 }
                 if (mPreviousProcess != null && (dumpPackage == null
-                        || mPreviousProcess.mPkgList.contains(dumpPackage))) {
+                        || mPreviousProcess.containsPackage(dumpPackage))) {
                     if (needSep) {
                         pw.println();
                         needSep = false;
@@ -6360,14 +6360,14 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
                     pw.println("  mPreviousProcess: " + mPreviousProcess);
                 }
                 if (dumpAll && (mPreviousProcess == null || dumpPackage == null
-                        || mPreviousProcess.mPkgList.contains(dumpPackage))) {
+                        || mPreviousProcess.containsPackage(dumpPackage))) {
                     StringBuilder sb = new StringBuilder(128);
                     sb.append("  mPreviousProcessVisibleTime: ");
                     TimeUtils.formatDuration(mPreviousProcessVisibleTime, sb);
                     pw.println(sb);
                 }
                 if (mHeavyWeightProcess != null && (dumpPackage == null
-                        || mHeavyWeightProcess.mPkgList.contains(dumpPackage))) {
+                        || mHeavyWeightProcess.containsPackage(dumpPackage))) {
                     if (needSep) {
                         pw.println();
                         needSep = false;
@@ -6491,18 +6491,18 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
                 }
 
                 if (mHomeProcess != null && (dumpPackage == null
-                        || mHomeProcess.mPkgList.contains(dumpPackage))) {
+                        || mHomeProcess.containsPackage(dumpPackage))) {
                     mHomeProcess.dumpDebug(proto, HOME_PROC);
                 }
 
                 if (mPreviousProcess != null && (dumpPackage == null
-                        || mPreviousProcess.mPkgList.contains(dumpPackage))) {
+                        || mPreviousProcess.containsPackage(dumpPackage))) {
                     mPreviousProcess.dumpDebug(proto, PREVIOUS_PROC);
                     proto.write(PREVIOUS_PROC_VISIBLE_TIME_MS, mPreviousProcessVisibleTime);
                 }
 
                 if (mHeavyWeightProcess != null && (dumpPackage == null
-                        || mHeavyWeightProcess.mPkgList.contains(dumpPackage))) {
+                        || mHeavyWeightProcess.containsPackage(dumpPackage))) {
                     mHeavyWeightProcess.dumpDebug(proto, HEAVY_WEIGHT_PROC);
                 }
 

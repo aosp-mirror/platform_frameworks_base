@@ -865,6 +865,7 @@ public class BinaryTransparencyService extends SystemService {
                     boolean printLibraries = false;
                     boolean useSha256 = false;
                     boolean printHeaders = true;
+                    boolean preloadsOnly = false;
                     String opt;
                     while ((opt = getNextOption()) != null) {
                         switch (opt) {
@@ -882,6 +883,9 @@ public class BinaryTransparencyService extends SystemService {
                             case "--no-headers":
                                 printHeaders = false;
                                 break;
+                            case "--preloads-only":
+                                preloadsOnly = true;
+                                break;
                             default:
                                 pw.println("ERROR: Unknown option: " + opt);
                                 return 1;
@@ -889,7 +893,47 @@ public class BinaryTransparencyService extends SystemService {
                     }
 
                     if (!verbose && printHeaders) {
-                        printHeadersHelper("MBA", useSha256, pw);
+                        if (preloadsOnly) {
+                            printHeadersHelper("Preload", useSha256, pw);
+                        } else {
+                            printHeadersHelper("MBA", useSha256, pw);
+                        }
+                    }
+
+                    PackageManager pm = mContext.getPackageManager();
+                    for (PackageInfo packageInfo : pm.getInstalledPackages(
+                            PackageManager.PackageInfoFlags.of(PackageManager.MATCH_FACTORY_ONLY
+                            | PackageManager.GET_SIGNING_CERTIFICATES))) {
+                        if (packageInfo.signingInfo == null) {
+                            PackageInfo origPackageInfo = packageInfo;
+                            try {
+                                pm.getPackageInfo(packageInfo.packageName,
+                                        PackageManager.PackageInfoFlags.of(PackageManager.MATCH_ALL
+                                                | PackageManager.GET_SIGNING_CERTIFICATES));
+                            } catch (PackageManager.NameNotFoundException e) {
+                                Slog.e(TAG, "Failed to obtain an updated PackageInfo of "
+                                        + origPackageInfo.packageName);
+                                packageInfo = origPackageInfo;
+                            }
+                        }
+
+                        if (verbose && printHeaders) {
+                            printHeadersHelper("Preload", useSha256, pw);
+                        }
+                        pw.print(packageInfo.packageName + ",");
+                        pw.print(packageInfo.getLongVersionCode() + ",");
+                        printPackageMeasurements(packageInfo, useSha256, pw);
+
+                        if (verbose) {
+                            printAppDetails(packageInfo, printLibraries, pw);
+                            printPackageInstallationInfo(packageInfo, useSha256, pw);
+                            printPackageSignerDetails(packageInfo.signingInfo, pw);
+                            pw.println("");
+                        }
+                    }
+
+                    if (preloadsOnly) {
+                        return 0;
                     }
                     for (PackageInfo packageInfo : getNewlyInstalledMbas()) {
                         if (verbose && printHeaders) {
@@ -905,25 +949,6 @@ public class BinaryTransparencyService extends SystemService {
                             printPackageSignerDetails(packageInfo.signingInfo, pw);
                             pw.println("");
                         }
-                    }
-                    return 0;
-                }
-
-                // TODO(b/259347186): add option handling full file-based SHA256 digest
-                private int printAllPreloads() {
-                    final PrintWriter pw = getOutPrintWriter();
-
-                    PackageManager pm = mContext.getPackageManager();
-                    if (pm == null) {
-                        Slog.e(TAG, "Failed to obtain PackageManager.");
-                        return -1;
-                    }
-                    List<PackageInfo> factoryApps = pm.getInstalledPackages(
-                            PackageManager.PackageInfoFlags.of(PackageManager.MATCH_FACTORY_ONLY));
-
-                    pw.println("Preload Info [Format: package_name]");
-                    for (PackageInfo packageInfo : factoryApps) {
-                        pw.println(packageInfo.packageName);
                     }
                     return 0;
                 }
@@ -952,8 +977,6 @@ public class BinaryTransparencyService extends SystemService {
                                     return printAllModules();
                                 case "mba_info":
                                     return printAllMbas();
-                                case "preload_info":
-                                    return printAllPreloads();
                                 default:
                                     pw.println(String.format("ERROR: Unknown info type '%s'",
                                             infoType));
@@ -981,7 +1004,7 @@ public class BinaryTransparencyService extends SystemService {
                                + "APEX hashes. WARNING: This can be a very slow and CPU-intensive "
                                + "computation.");
                     pw.println("      -v: lists more verbose information about each APEX.");
-                    pw.println("      --no-headers: does not print the header if specified");
+                    pw.println("      --no-headers: does not print the header if specified.");
                     pw.println("");
                     pw.println("  get module_info [-o] [-v] [--no-headers]");
                     pw.println("    Print information about installed modules on device.");
@@ -989,9 +1012,9 @@ public class BinaryTransparencyService extends SystemService {
                                + "module hashes. WARNING: This can be a very slow and "
                                + "CPU-intensive computation.");
                     pw.println("      -v: lists more verbose information about each module.");
-                    pw.println("      --no-headers: does not print the header if specified");
+                    pw.println("      --no-headers: does not print the header if specified.");
                     pw.println("");
-                    pw.println("  get mba_info [-o] [-v] [-l] [--no-headers]");
+                    pw.println("  get mba_info [-o] [-v] [-l] [--no-headers] [--preloads-only]");
                     pw.println("    Print information about installed mobile bundle apps "
                                + "(MBAs on device).");
                     pw.println("      -o: also uses the old digest scheme (SHA256) to compute "
@@ -1000,7 +1023,9 @@ public class BinaryTransparencyService extends SystemService {
                     pw.println("      -v: lists more verbose information about each app.");
                     pw.println("      -l: lists shared library info. (This option only works "
                                + "when -v option is also specified)");
-                    pw.println("      --no-headers: does not print the header if specified");
+                    pw.println("      --no-headers: does not print the header if specified.");
+                    pw.println("      --preloads-only: lists only preloaded apps. This options can "
+                               + "also be combined with others.");
                     pw.println("");
                 }
 

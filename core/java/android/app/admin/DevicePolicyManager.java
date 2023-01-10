@@ -10997,6 +10997,51 @@ public class DevicePolicyManager {
     }
 
     /**
+     * Called by a profile owner of an organization-owned device to specify {@link
+     * ManagedSubscriptionsPolicy}
+     *
+     * <p>Managed subscriptions policy controls how SIMs would be associated with the
+     * managed profile. For example a policy of type
+     * {@link ManagedSubscriptionsPolicy#TYPE_ALL_MANAGED_SUBSCRIPTIONS} assigns all
+     * SIM-based subscriptions to the managed profile. In this case OEM default
+     * dialer and messages app are automatically installed in the managed profile
+     * and all incoming and outgoing calls and text messages are handled by them.
+     * <p>This API can only be called during device setup.
+     *
+     * @param policy {@link ManagedSubscriptionsPolicy} policy, passing null for this resets the
+     *               policy to be the default.
+     * @throws SecurityException     if the caller is not a profile owner on an organization-owned
+     *                               managed profile.
+     * @throws IllegalStateException if called after the device setup has been completed.
+     * @see ManagedSubscriptionsPolicy
+     */
+    public void setManagedSubscriptionsPolicy(@Nullable ManagedSubscriptionsPolicy policy) {
+        throwIfParentInstance("setManagedSubscriptionsPolicy");
+        try {
+            mService.setManagedSubscriptionsPolicy(policy);
+        } catch (RemoteException re) {
+            throw re.rethrowFromSystemServer();
+        }
+    }
+
+    /**
+     * Returns the current {@link ManagedSubscriptionsPolicy}.
+     * If the policy has not been set, it will return a default policy of Type {@link
+     * ManagedSubscriptionsPolicy#TYPE_ALL_PERSONAL_SUBSCRIPTIONS}.
+     *
+     * @see #setManagedSubscriptionsPolicy(ManagedSubscriptionsPolicy)
+     */
+    @NonNull
+    public ManagedSubscriptionsPolicy getManagedSubscriptionsPolicy() {
+        throwIfParentInstance("getManagedSubscriptionsPolicy");
+        try {
+            return mService.getManagedSubscriptionsPolicy();
+        } catch (RemoteException re) {
+            throw re.rethrowFromSystemServer();
+        }
+    }
+
+    /**
      * Similar to {@link #logoutUser(ComponentName)}, except:
      *
      * <ul>
@@ -14166,12 +14211,12 @@ public class DevicePolicyManager {
      * {@link DeviceAdminReceiver#DEVICE_ADMIN_META_DATA}. Otherwise an
      * {@link IllegalArgumentException} will be thrown.
      *
-     * @param admin which {@link DeviceAdminReceiver} this request is associated with
-     * @param target which {@link DeviceAdminReceiver} we want the new administrator to be
-     * @param bundle data to be sent to the new administrator
-     * @throws SecurityException if {@code admin} is not a device owner nor a profile owner
+     * @param admin which {@link DeviceAdminReceiver} this request is associated with.
+     * @param target which {@link DeviceAdminReceiver} we want the new administrator to be.
+     * @param bundle data to be sent to the new administrator.
+     * @throws SecurityException if {@code admin} is not a device owner nor a profile owner.
      * @throws IllegalArgumentException if {@code admin} or {@code target} is {@code null}, they
-     * are components in the same package or {@code target} is not an active admin
+     * are components in the same package or {@code target} is not an active admin.
      */
     public void transferOwnership(@NonNull ComponentName admin, @NonNull ComponentName target,
             @Nullable PersistableBundle bundle) {

@@ -816,7 +816,8 @@
     <string name="accessibility_floating_button_migration_tooltip" msgid="5217151214439341902">"Tap to open accessibility features. Customise or replace this button in Settings.\n\n"<annotation id="link">"View settings"</annotation></string>
     <string name="accessibility_floating_button_docking_tooltip" msgid="6814897496767461517">"Move button to the edge to hide it temporarily"</string>
     <string name="accessibility_floating_button_undo" msgid="511112888715708241">"Undo"</string>
-    <string name="accessibility_floating_button_undo_message_text" msgid="3044079592757099698">"{count,plural, =1{{label} shortcut removed}other{# shortcuts removed}}"</string>
+    <string name="accessibility_floating_button_undo_message_label_text" msgid="9017658016426242640">"<xliff:g id="FEATURE_NAME">%s</xliff:g> shortcut removed"</string>
+    <string name="accessibility_floating_button_undo_message_number_text" msgid="4909270290725226075">"{count,plural, =1{# shortcut removed}other{# shortcuts removed}}"</string>
     <string name="accessibility_floating_button_action_move_top_left" msgid="6253520703618545705">"Move top left"</string>
     <string name="accessibility_floating_button_action_move_top_right" msgid="6106225581993479711">"Move top right"</string>
     <string name="accessibility_floating_button_action_move_bottom_left" msgid="8063394111137429725">"Move bottom left"</string>
@@ -884,6 +885,7 @@
     <string name="media_move_closer_to_end_cast" msgid="6495907340926563656">"Move closer to <xliff:g id="DEVICENAME">%1$s</xliff:g> to play here"</string>
     <string name="media_transfer_playing_different_device" msgid="7186806382609785610">"Playing on <xliff:g id="DEVICENAME">%1$s</xliff:g>"</string>
     <string name="media_transfer_failed" msgid="7955354964610603723">"Something went wrong. Try again."</string>
+    <string name="media_transfer_loading" msgid="5544017127027152422">"Loading"</string>
     <string name="controls_error_timeout" msgid="794197289772728958">"Inactive, check app"</string>
     <string name="controls_error_removed" msgid="6675638069846014366">"Not found"</string>
     <string name="controls_error_removed_title" msgid="1207794911208047818">"Control is unavailable"</string>

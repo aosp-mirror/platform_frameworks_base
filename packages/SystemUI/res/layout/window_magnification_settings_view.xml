@@ -37,6 +37,7 @@
 
         <Button
             android:id="@+id/magnifier_edit_button"
+            android:background="@drawable/accessibility_magnification_setting_view_btn_bg"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="@string/accessibility_magnifier_edit"
@@ -57,21 +58,36 @@
             android:layout_height="56dp"
             android:scaleType="center"
             android:layout_weight="1"
-            android:layout_marginStart="12dp"/>
+            android:layout_marginStart="12dp"
+            android:background="@drawable/accessibility_magnification_setting_view_btn_bg"
+            android:padding="@dimen/magnification_switch_button_padding"
+            android:src="@drawable/ic_magnification_menu_small"
+            android:tint="@color/accessibility_magnifier_icon_color"
+            android:tintMode="src_atop" />
 
         <ImageButton
             android:id="@+id/magnifier_medium_button"
             android:layout_width="0dp"
             android:layout_height="56dp"
             android:scaleType="center"
-            android:layout_weight="1"/>
+            android:layout_weight="1"
+            android:background="@drawable/accessibility_magnification_setting_view_btn_bg"
+            android:padding="@dimen/magnification_switch_button_padding"
+            android:src="@drawable/ic_magnification_menu_medium"
+            android:tint="@color/accessibility_magnifier_icon_color"
+            android:tintMode="src_atop" />
 
         <ImageButton
             android:id="@+id/magnifier_large_button"
             android:layout_width="0dp"
             android:layout_height="56dp"
             android:scaleType="center"
-            android:layout_weight="1"/>
+            android:layout_weight="1"
+            android:background="@drawable/accessibility_magnification_setting_view_btn_bg"
+            android:padding="@dimen/magnification_switch_button_padding"
+            android:src="@drawable/ic_magnification_menu_large"
+            android:tint="@color/accessibility_magnifier_icon_color"
+            android:tintMode="src_atop" />
 
         <ImageButton
             android:id="@+id/magnifier_full_button"
@@ -79,7 +95,12 @@
             android:layout_height="56dp"
             android:scaleType="center"
             android:layout_weight="1"
-            android:layout_marginEnd="12dp"/>
+            android:layout_marginEnd="12dp"
+            android:background="@drawable/accessibility_magnification_setting_view_btn_bg"
+            android:padding="@dimen/magnification_switch_button_padding"
+            android:src="@drawable/ic_open_in_new_fullscreen"
+            android:tint="@color/accessibility_magnifier_icon_color"
+            android:tintMode="src_atop" />
     </LinearLayout>
 
     <LinearLayout
@@ -141,6 +162,7 @@
 
     <Button
         android:id="@+id/magnifier_close_button"
+        android:background="@drawable/accessibility_magnification_setting_view_btn_bg"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:text="@string/accessibility_magnification_close"

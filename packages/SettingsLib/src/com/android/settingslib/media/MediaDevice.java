@@ -30,6 +30,7 @@ import static android.media.MediaRoute2Info.TYPE_USB_DEVICE;
 import static android.media.MediaRoute2Info.TYPE_USB_HEADSET;
 import static android.media.MediaRoute2Info.TYPE_WIRED_HEADPHONES;
 import static android.media.MediaRoute2Info.TYPE_WIRED_HEADSET;
+import static android.media.RouteListingPreference.Item.FLAG_SUGGESTED_ROUTE;
 
 import static com.android.settingslib.media.LocalMediaManager.MediaDeviceState.STATE_SELECTED;
 
@@ -39,10 +40,14 @@ import android.graphics.drawable.Drawable;
 import android.media.MediaRoute2Info;
 import android.media.MediaRouter2Manager;
 import android.media.NearbyDevice;
+import android.media.RouteListingPreference;
+import android.os.Build;
 import android.text.TextUtils;
 import android.util.Log;
 
+import androidx.annotation.DoNotInline;
 import androidx.annotation.IntDef;
+import androidx.annotation.RequiresApi;
 import androidx.annotation.VisibleForTesting;
 
 import java.lang.annotation.Retention;
@@ -87,14 +92,16 @@ public abstract class MediaDevice implements Comparable<MediaDevice> {
     protected final Context mContext;
     protected final MediaRoute2Info mRouteInfo;
     protected final MediaRouter2Manager mRouterManager;
+    protected final RouteListingPreference.Item mItem;
     protected final String mPackageName;
 
     MediaDevice(Context context, MediaRouter2Manager routerManager, MediaRoute2Info info,
-            String packageName) {
+            String packageName, RouteListingPreference.Item item) {
         mContext = context;
         mRouteInfo = info;
         mRouterManager = routerManager;
         mPackageName = packageName;
+        mItem = item;
         setType(info);
     }
 
@@ -180,9 +187,20 @@ public abstract class MediaDevice implements Comparable<MediaDevice> {
 
     /**
      * Get unique ID that represent MediaDevice
+     *
      * @return unique id of MediaDevice
      */
     public abstract String getId();
+
+    /**
+     * Checks if device is suggested device from application
+     *
+     * @return true if device is suggested device
+     */
+    public boolean isSuggestedDevice() {
+        return Build.VERSION.SDK_INT >= Build.VERSION_CODES.UPSIDE_DOWN_CAKE
+                && Api34Impl.isSuggestedDevice(mItem);
+    }
 
     void setConnectedRecord() {
         mConnectedRecord++;
@@ -465,5 +483,13 @@ public abstract class MediaDevice implements Comparable<MediaDevice> {
         }
         final MediaDevice otherDevice = (MediaDevice) obj;
         return otherDevice.getId().equals(getId());
+    }
+
+    @RequiresApi(34)
+    private static class Api34Impl {
+        @DoNotInline
+        static boolean isSuggestedDevice(RouteListingPreference.Item item) {
+            return item != null && item.getFlags() == FLAG_SUGGESTED_ROUTE;
+        }
     }
 }
