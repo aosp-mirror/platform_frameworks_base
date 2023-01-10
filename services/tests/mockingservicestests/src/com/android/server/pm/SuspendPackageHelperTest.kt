@@ -392,7 +392,7 @@ class SuspendPackageHelperTest : PackageHelperTestBase() {
         whenever(rule.mocks().appsFilter.getVisibilityAllowList(
                 any(PackageDataSnapshot::class.java),
             argThat { it?.packageName == pkgSetting.packageName }, any(IntArray::class.java),
-            any() as ArrayMap<String, out PackageStateInternal>
+            any<ArrayMap<String, out PackageStateInternal>>()
         ))
             .thenReturn(list)
     }

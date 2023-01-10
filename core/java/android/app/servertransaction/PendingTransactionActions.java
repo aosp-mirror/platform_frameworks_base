@@ -25,10 +25,11 @@ import android.os.Bundle;
 import android.os.PersistableBundle;
 import android.os.TransactionTooLargeException;
 import android.util.Log;
-import android.util.LogWriter;
 import android.util.Slog;
 
 import com.android.internal.util.IndentingPrintWriter;
+
+import java.io.StringWriter;
 
 /**
  * Container that has data pending to be used at later stages of
@@ -134,6 +135,16 @@ public class PendingTransactionActions {
             mDescription = description;
         }
 
+        private String collectBundleStates() {
+            final StringWriter writer = new StringWriter();
+            final IndentingPrintWriter pw = new IndentingPrintWriter(writer, "  ");
+            pw.println("Bundle stats:");
+            Bundle.dumpStats(pw, mState);
+            pw.println("PersistableBundle stats:");
+            Bundle.dumpStats(pw, mPersistentState);
+            return writer.toString().stripTrailing();
+        }
+
         @Override
         public void run() {
             // Tell activity manager we have been stopped.
@@ -142,19 +153,24 @@ public class PendingTransactionActions {
                 // TODO(lifecycler): Use interface callback instead of AMS.
                 ActivityClient.getInstance().activityStopped(
                         mActivity.token, mState, mPersistentState, mDescription);
-            } catch (RuntimeException ex) {
-                // Dump statistics about bundle to help developers debug
-                final LogWriter writer = new LogWriter(Log.WARN, TAG);
-                final IndentingPrintWriter pw = new IndentingPrintWriter(writer, "  ");
-                pw.println("Bundle stats:");
-                Bundle.dumpStats(pw, mState);
-                pw.println("PersistableBundle stats:");
-                Bundle.dumpStats(pw, mPersistentState);
+            } catch (RuntimeException runtimeException) {
+                // Collect the statistics about bundle
+                final String bundleStats = collectBundleStates();
 
-                if (ex.getCause() instanceof TransactionTooLargeException
-                        && mActivity.packageInfo.getTargetSdkVersion() < Build.VERSION_CODES.N) {
-                    Log.e(TAG, "App sent too much data in instance state, so it was ignored", ex);
-                    return;
+                RuntimeException ex = runtimeException;
+                if (ex.getCause() instanceof TransactionTooLargeException) {
+                    // Embed the stats into exception message to help developers debug if the
+                    // transaction size is too large.
+                    final String message = ex.getMessage() + "\n" + bundleStats;
+                    ex = new RuntimeException(message, ex.getCause());
+                    if (mActivity.packageInfo.getTargetSdkVersion() < Build.VERSION_CODES.N) {
+                        Log.e(TAG, "App sent too much data in instance state, so it was ignored",
+                                ex);
+                        return;
+                    }
+                } else {
+                    // Otherwise, dump the stats anyway.
+                    Log.w(TAG, bundleStats);
                 }
                 throw ex;
             }

@@ -68,6 +68,9 @@ data class ListAttachState private constructor(
      */
     var stableIndex: Int = -1
 
+    /** Access the index of the [section] or -1 if the entry does not have one */
+    val sectionIndex: Int get() = section?.index ?: -1
+
     /** Copies the state of another instance. */
     fun clone(other: ListAttachState) {
         parent = other.parent
@@ -88,6 +91,20 @@ data class ListAttachState private constructor(
         groupPruneReason = null
         suppressedChanges.reset()
         stableIndex = -1
+    }
+
+    /**
+     * Erases bookkeeping traces stored on an entry when it is removed from the notif list.
+     * This can happen if the entry is removed from a group that was broken up or if the entry was
+     * filtered out during any of the filtering steps.
+     */
+    fun detach(includingStableIndex: Boolean) {
+        parent = null
+        section = null
+        promoter = null
+        if (includingStableIndex) {
+            stableIndex = -1
+        }
     }
 
     companion object {

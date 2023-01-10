@@ -47,6 +47,7 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.MockitoSession;
+import org.mockito.quality.Strictness;
 
 /**
  * Tests for {@link DisplayLayout}.
@@ -62,6 +63,7 @@ public class DisplayLayoutTest extends ShellTestCase {
     public void setup() {
         mMockitoSession = mockitoSession()
                 .initMocks(this)
+                .strictness(Strictness.WARN)
                 .mockStatic(SystemBarUtils.class)
                 .startMocking();
     }

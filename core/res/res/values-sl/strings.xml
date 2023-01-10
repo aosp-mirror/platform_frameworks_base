@@ -33,6 +33,7 @@
     <string name="defaultVoiceMailAlphaTag" msgid="2190754495304236490">"Glasovna pošta"</string>
     <string name="defaultMsisdnAlphaTag" msgid="2285034592902077488">"MSISDN1"</string>
     <string name="mmiError" msgid="2862759606579822246">"Težava s povezavo ali neveljavna koda MMI."</string>
+    <string name="mmiErrorNotSupported" msgid="5001803469335286099">"Funkcija ni podprta."</string>
     <string name="mmiFdnError" msgid="3975490266767565852">"Operacija je omejena na dovoljene telefonske številke, za katere ne velja zapora odhodnega klica."</string>
     <string name="mmiErrorWhileRoaming" msgid="1204173664713870114">"Nastavitev preusmerjanja klicev ni mogoče spremeniti v telefonu med gostovanjem v tujem omrežju."</string>
     <string name="serviceEnabled" msgid="7549025003394765639">"Storitev je omogočena."</string>
@@ -588,13 +589,14 @@
     <string name="screen_lock_app_setting_name" msgid="6054944352976789228">"Uporaba odklepanja s poverilnico"</string>
     <string name="screen_lock_dialog_default_subtitle" msgid="120359538048533695">"Odklenite zaslon, če želite nadaljevati."</string>
     <string name="fingerprint_acquired_partial" msgid="4323789264604479684">"Prst dobro pridržite na tipalu."</string>
-    <string name="fingerprint_acquired_insufficient" msgid="2545149524031515411">"Prstnega odtisa ni bilo mogoče obdelati. Poskusite znova."</string>
+    <string name="fingerprint_acquired_insufficient" msgid="623888149088216458">"Prstnega odtisa ni mogoče prepoznati. Poskusite znova."</string>
     <string name="fingerprint_acquired_imager_dirty" msgid="1770676120848224250">"Očistite tipalo prstnih odtisov in poskusite znova."</string>
     <string name="fingerprint_acquired_imager_dirty_alt" msgid="9169582140486372897">"Očistite tipalo in poskusite znova."</string>
     <string name="fingerprint_acquired_too_fast" msgid="1628459767349116104">"Prst dobro pridržite na tipalu."</string>
     <string name="fingerprint_acquired_too_slow" msgid="6683510291554497580">"Prepočasen premik prsta. Poskusite znova."</string>
     <string name="fingerprint_acquired_already_enrolled" msgid="2285166003936206785">"Poskusite z drugim prstnim odtisom."</string>
     <string name="fingerprint_acquired_too_bright" msgid="3863560181670915607">"Presvetlo je."</string>
+    <string name="fingerprint_acquired_power_press" msgid="3107864151278434961">"Zaznan je bil pritisk gumba za vklop."</string>
     <string name="fingerprint_acquired_try_adjusting" msgid="3667006071003809364">"Poskusite popraviti položaj prsta."</string>
     <string name="fingerprint_acquired_immobile" msgid="1621891895241888048">"Vsakič nekoliko spremenite položaj prsta."</string>
   <string-array name="fingerprint_acquired_vendor">
@@ -606,12 +608,12 @@
     <string name="face_authenticated_confirmation_required" msgid="6872632732508013755">"Pristnost obraza je preverjena. Pritisnite gumb »Potrdi«."</string>
     <string name="fingerprint_error_hw_not_available" msgid="4571700896929561202">"Strojna oprema za prstne odtise ni na voljo."</string>
     <string name="fingerprint_error_no_space" msgid="7285481581905967580">"Prstnega odtisa ni mogoče nastaviti."</string>
-    <string name="fingerprint_error_timeout" msgid="2946635815726054226">"Dosežena časovna omejitev za prstni odtis. Poskusite znova."</string>
+    <string name="fingerprint_error_timeout" msgid="7361192266621252164">"Čas za nastavitev prstnega odtisa je potekel. Poskusite znova."</string>
     <string name="fingerprint_error_canceled" msgid="540026881380070750">"Dejanje s prstnim odtisom je bilo preklicano."</string>
     <string name="fingerprint_error_user_canceled" msgid="7685676229281231614">"Dejanje s prstnim odtisom je preklical uporabnik."</string>
-    <string name="fingerprint_error_lockout" msgid="7853461265604738671">"Preveč poskusov. Poskusite znova pozneje."</string>
-    <string name="fingerprint_error_lockout_permanent" msgid="3895478283943513746">"Preveč poskusov. Tipalo prstnih odtisov je onemogočeno."</string>
-    <string name="fingerprint_error_unable_to_process" msgid="1148553603490048742">"Poskusite znova."</string>
+    <string name="fingerprint_error_lockout" msgid="6626753679019351368">"Preveč poskusov. Odklenite z načinom za zaklepanje zaslona."</string>
+    <string name="fingerprint_error_lockout_permanent" msgid="9060651300306264843">"Preveč poskusov. Odklenite z zaklepanjem zaslona."</string>
+    <string name="fingerprint_error_unable_to_process" msgid="2446280592818621224">"Prstnega odtisa ni mogoče obdelati. Poskusite znova."</string>
     <string name="fingerprint_error_no_fingerprints" msgid="8671811719699072411">"Ni registriranih prstnih odtisov."</string>
     <string name="fingerprint_error_hw_not_present" msgid="578914350967423382">"Ta naprava nima tipala prstnih odtisov."</string>
     <string name="fingerprint_error_security_update_required" msgid="7750187320640856433">"Tipalo je začasno onemogočeno."</string>
@@ -639,7 +641,7 @@
     <string name="fingerprint_recalibrate_notification_content" msgid="8519935717822194943">"Obiščite ponudnika popravil."</string>
     <string name="face_acquired_insufficient" msgid="6889245852748492218">"Modela obraza ni mogoče ustvariti. Poskusite znova."</string>
     <string name="face_acquired_too_bright" msgid="8070756048978079164">"Presvetlo. Poskusite z blažjo osvetlitvijo."</string>
-    <string name="face_acquired_too_dark" msgid="7919016380747701228">"Poskusite z močnejšo osvetlitvijo."</string>
+    <string name="face_acquired_too_dark" msgid="8539853432479385326">"Premalo svetlobe"</string>
     <string name="face_acquired_too_close" msgid="4453646176196302462">"Telefon nekoliko odmaknite."</string>
     <string name="face_acquired_too_far" msgid="2922278214231064859">"Bolj približajte telefon."</string>
     <string name="face_acquired_too_high" msgid="8278815780046368576">"Telefon premaknite višje."</string>
@@ -1251,10 +1253,9 @@
     <string name="android_preparing_apk" msgid="589736917792300956">"Pripravljanje aplikacije <xliff:g id="APPNAME">%1$s</xliff:g>."</string>
     <string name="android_upgrading_starting_apps" msgid="6206161195076057075">"Zagon aplikacij."</string>
     <string name="android_upgrading_complete" msgid="409800058018374746">"Dokončevanje zagona."</string>
-    <string name="fp_power_button_enrollment_title" msgid="3574363228413259548">"Ali želite nadaljevati nastavitev?"</string>
     <string name="fp_power_button_enrollment_message" msgid="5648173517663246140">"Pritisnili ste gumb za vklop, s čimer običajno izklopite zaslon.\n\nPoskusite se narahlo dotakniti med nastavljanjem prstnega odtisa."</string>
-    <string name="fp_power_button_enrollment_positive_button" msgid="2095415838459356833">"Izklopi zaslon"</string>
-    <string name="fp_power_button_enrollment_negative_button" msgid="6558436406362486747">"Nadaljuj nastavitev"</string>
+    <string name="fp_power_button_enrollment_title" msgid="6976841690455338563">"Za končanje nastavitve izklopite zaslon."</string>
+    <string name="fp_power_button_enrollment_button_text" msgid="3199783266386029200">"Izklopi"</string>
     <string name="fp_power_button_bp_title" msgid="5585506104526820067">"Želite nadaljevati preverjanje prstnega odtisa?"</string>
     <string name="fp_power_button_bp_message" msgid="2983163038168903393">"Pritisnili ste gumb za vklop, s čimer običajno izklopite zaslon.\n\nZa preverjanje prstnega odtisa se poskusite narahlo dotakniti."</string>
     <string name="fp_power_button_bp_positive_button" msgid="728945472408552251">"Izklopi zaslon"</string>
@@ -1407,16 +1408,16 @@
     <string name="ext_media_new_notification_message" msgid="6095403121990786986">"Dotaknite se, če želite nastaviti"</string>
     <string name="ext_media_new_notification_message" product="tv" msgid="216863352100263668">"Izberite, če želite nastaviti."</string>
     <string name="ext_media_new_notification_message" product="automotive" msgid="5140127881613227162">"Napravo boste morda morali znova formatirati. Če jo želite izvreči, se dotaknite."</string>
-    <string name="ext_media_ready_notification_message" msgid="777258143284919261">"Za prenos fotografij in predstavnosti"</string>
+    <string name="ext_media_ready_notification_message" msgid="7509496364380197369">"Za shranjevanje fotografij, videoposnetkov, glasbe in druge vsebine."</string>
     <string name="ext_media_ready_notification_message" product="tv" msgid="8847134811163165935">"Brskajte po predstavnostnih datotekah."</string>
     <string name="ext_media_unmountable_notification_title" msgid="4895444667278979910">"Težava z nosilcem <xliff:g id="NAME">%s</xliff:g>"</string>
     <string name="ext_media_unmountable_notification_title" product="automotive" msgid="3142723758949023280">"Naprava <xliff:g id="NAME">%s</xliff:g> ne deluje"</string>
     <string name="ext_media_unmountable_notification_message" msgid="3256290114063126205">"Dotaknite se, da to popravite"</string>
     <string name="ext_media_unmountable_notification_message" product="tv" msgid="3003611129979934633">"Nosilec <xliff:g id="NAME">%s</xliff:g> je pokvarjen. Izberite, če ga želite popraviti."</string>
     <string name="ext_media_unmountable_notification_message" product="automotive" msgid="2274596120715020680">"Napravo boste morda morali znova formatirati. Če jo želite izvreči, se dotaknite."</string>
-    <string name="ext_media_unsupported_notification_title" msgid="4358280700537030333">"Nepodprta naprava za shran. <xliff:g id="NAME">%s</xliff:g>"</string>
+    <string name="ext_media_unsupported_notification_title" msgid="3487534182861251401">"Zaznana je bila naprava <xliff:g id="NAME">%s</xliff:g>"</string>
     <string name="ext_media_unsupported_notification_title" product="automotive" msgid="6004193172658722381">"Naprava <xliff:g id="NAME">%s</xliff:g> ne deluje"</string>
-    <string name="ext_media_unsupported_notification_message" msgid="917738524888367560">"Ta naprava ne podpira tega nosilca <xliff:g id="NAME">%s</xliff:g>. Dotaknite se, če želite nastaviti v podprti obliki."</string>
+    <string name="ext_media_unsupported_notification_message" msgid="8463636521459807981">"Dotaknite se za nastavitev."</string>
     <string name="ext_media_unsupported_notification_message" product="tv" msgid="1595482802187036532">"Izberite, da nastavite »<xliff:g id="NAME">%s</xliff:g>« v podprti obliki."</string>
     <string name="ext_media_unsupported_notification_message" product="automotive" msgid="3412494732736336330">"Napravo boste morda morali znova formatirati"</string>
     <string name="ext_media_badremoval_notification_title" msgid="4114625551266196872">"Shramba <xliff:g id="NAME">%s</xliff:g> nepričak. odstranjena"</string>
@@ -1929,6 +1930,7 @@
     <string name="country_selection_title" msgid="5221495687299014379">"Nastavitev območja"</string>
     <string name="search_language_hint" msgid="7004225294308793583">"Vnesite ime jezika"</string>
     <string name="language_picker_section_suggested" msgid="6556199184638990447">"Predlagano"</string>
+    <string name="language_picker_regions_section_suggested" msgid="6080131515268225316">"Predlagano"</string>
     <string name="language_picker_section_all" msgid="1985809075777564284">"Vsi jeziki"</string>
     <string name="region_picker_section_all" msgid="756441309928774155">"Vse regije"</string>
     <string name="locale_search_menu" msgid="6258090710176422934">"Išči"</string>
@@ -1946,8 +1948,7 @@
     <string name="app_streaming_blocked_title_for_camera_dialog" msgid="3935701653713853065">"Fotoaparat ni na voljo"</string>
     <string name="app_streaming_blocked_title_for_fingerprint_dialog" msgid="3516853717714141951">"Nadaljevanje v telefonu"</string>
     <string name="app_streaming_blocked_title_for_microphone_dialog" msgid="544822455127171206">"Mikrofon ni na voljo"</string>
-    <!-- no translation found for app_streaming_blocked_title_for_playstore_dialog (8149823099822897538) -->
-    <skip />
+    <string name="app_streaming_blocked_title_for_playstore_dialog" msgid="8149823099822897538">"Trgovina Play ni na voljo"</string>
     <string name="app_streaming_blocked_title_for_settings_dialog" product="tv" msgid="196994247017450357">"Nastavitve naprave Android TV niso na voljo"</string>
     <string name="app_streaming_blocked_title_for_settings_dialog" product="tablet" msgid="8222710146267948647">"Nastavitve tabličnega računalnika niso na voljo"</string>
     <string name="app_streaming_blocked_title_for_settings_dialog" product="default" msgid="6895719984375299791">"Nastavitve telefona niso na voljo"</string>
@@ -1957,12 +1958,9 @@
     <string name="app_streaming_blocked_message_for_fingerprint_dialog" product="tv" msgid="3470977315395784567">"Ta aplikacija zahteva dodatno varnost. Poskusite z napravo Android TV."</string>
     <string name="app_streaming_blocked_message_for_fingerprint_dialog" product="tablet" msgid="698460091901465092">"Ta aplikacija zahteva dodatno varnost. Poskusite s tabličnim računalnikom."</string>
     <string name="app_streaming_blocked_message_for_fingerprint_dialog" product="default" msgid="8552691971910603907">"Ta aplikacija zahteva dodatno varnost. Poskusite s telefonom."</string>
-    <!-- no translation found for app_streaming_blocked_message_for_settings_dialog (820334666354451145) -->
-    <skip />
-    <!-- no translation found for app_streaming_blocked_message_for_settings_dialog (3286849551133045896) -->
-    <skip />
-    <!-- no translation found for app_streaming_blocked_message_for_settings_dialog (6264287556598916295) -->
-    <skip />
+    <string name="app_streaming_blocked_message_for_settings_dialog" product="tv" msgid="820334666354451145">"V napravi <xliff:g id="DEVICE">%1$s</xliff:g> ni mogoče dostopati do te vsebine. Poskusite z napravo Android TV."</string>
+    <string name="app_streaming_blocked_message_for_settings_dialog" product="tablet" msgid="3286849551133045896">"V napravi <xliff:g id="DEVICE">%1$s</xliff:g> ni mogoče dostopati do te vsebine. Poskusite s tabličnim računalnikom."</string>
+    <string name="app_streaming_blocked_message_for_settings_dialog" product="default" msgid="6264287556598916295">"V napravi <xliff:g id="DEVICE">%1$s</xliff:g> ni mogoče dostopati do te vsebine. Poskusite s telefonom."</string>
     <string name="deprecated_target_sdk_message" msgid="5203207875657579953">"Ta aplikacija je bila zasnovana za starejšo različico Androida in morda ne bo delovala pravilno. Preverite, ali so na voljo posodobitve, ali pa se obrnite na razvijalca."</string>
     <string name="deprecated_target_sdk_app_store" msgid="8456784048558808909">"Preveri, ali je na voljo posodobitev"</string>
     <string name="new_sms_notification_title" msgid="6528758221319927107">"Imate nova sporočila."</string>
@@ -2055,7 +2053,8 @@
     <string name="log_access_confirmation_title" msgid="2343578467290592708">"Ali aplikaciji <xliff:g id="LOG_ACCESS_APP_NAME">%s</xliff:g> dovolite dostop do vseh dnevnikov naprave?"</string>
     <string name="log_access_confirmation_allow" msgid="5302517782599389507">"Dovoli enkratni dostop"</string>
     <string name="log_access_confirmation_deny" msgid="7685790957455099845">"Ne dovoli"</string>
-    <string name="log_access_confirmation_body" msgid="6581985716241928135">"V dnevnikih naprave se beleži dogajanje v napravi. Aplikacije lahko te dnevnike uporabijo za iskanje in odpravljanje težav.\n\nNekateri dnevniki morda vsebujejo občutljive podatke, zato dostop do vseh dnevnikov naprave omogočite le aplikacijam, ki jim zaupate. \n\nČe tej aplikaciji ne dovolite dostopa do vseh dnevnikov naprave, bo aplikacija kljub temu lahko dostopala do svojih dnevnikov. Proizvajalec naprave bo morda lahko kljub temu dostopal do nekaterih dnevnikov ali podatkov v napravi. Več o tem"</string>
+    <string name="log_access_confirmation_body" product="default" msgid="1806692062668620735">"V dnevnikih naprave se beleži dogajanje v napravi. Aplikacije lahko te dnevnike uporabijo za iskanje in odpravljanje težav.\n\nNekateri dnevniki morda vsebujejo občutljive podatke, zato dostop do vseh dnevnikov naprave omogočite le aplikacijam, ki jim zaupate. \n\nČe tej aplikaciji ne dovolite dostopa do vseh dnevnikov naprave, bo aplikacija kljub temu lahko dostopala do svojih dnevnikov. Proizvajalec naprave bo morda lahko kljub temu dostopal do nekaterih dnevnikov ali podatkov v napravi."</string>
+    <string name="log_access_confirmation_body" product="tv" msgid="7379536536425265262">"V dnevnikih naprave se beleži dogajanje v napravi. Aplikacije lahko te dnevnike uporabijo za iskanje in odpravljanje težav.\n\nNekateri dnevniki morda vsebujejo občutljive podatke, zato dostop do vseh dnevnikov naprave omogočite le aplikacijam, ki jim zaupate. \n\nČe tej aplikaciji ne dovolite dostopa do vseh dnevnikov naprave, bo aplikacija kljub temu lahko dostopala do svojih dnevnikov. Proizvajalec naprave bo morda lahko kljub temu dostopal do nekaterih dnevnikov ali podatkov v napravi.\n\nPreberite več o tem na g.co/android/devicelogs."</string>
     <string name="log_access_do_not_show_again" msgid="1058690599083091552">"Ne prikaži več"</string>
     <string name="slices_permission_request" msgid="3677129866636153406">"Aplikacija <xliff:g id="APP_0">%1$s</xliff:g> želi prikazati izreze aplikacije <xliff:g id="APP_2">%2$s</xliff:g>"</string>
     <string name="screenshot_edit" msgid="7408934887203689207">"Uredi"</string>
@@ -2296,5 +2295,6 @@
     <string name="notification_action_check_bg_apps" msgid="4758877443365362532">"Preverite aktivne aplikacije"</string>
     <string name="vdm_camera_access_denied" product="default" msgid="6102378580971542473">"Ni mogoče dostopati do fotoaparata telefona prek naprave <xliff:g id="DEVICE">%1$s</xliff:g>."</string>
     <string name="vdm_camera_access_denied" product="tablet" msgid="6895968310395249076">"Ni mogoče dostopati do fotoaparata tabličnega računalnika prek naprave <xliff:g id="DEVICE">%1$s</xliff:g>."</string>
+    <string name="vdm_secure_window" msgid="161700398158812314">"Do te vsebine ni mogoče dostopati med pretočnim predvajanjem. Poskusite s telefonom."</string>
     <string name="system_locale_title" msgid="711882686834677268">"Sistemsko privzeto"</string>
 </resources>

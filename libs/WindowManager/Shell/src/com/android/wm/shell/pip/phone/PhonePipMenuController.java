@@ -31,8 +31,6 @@ import android.os.RemoteException;
 import android.util.Size;
 import android.view.MotionEvent;
 import android.view.SurfaceControl;
-import android.view.SyncRtSurfaceTransactionApplier;
-import android.view.SyncRtSurfaceTransactionApplier.SurfaceParams;
 import android.view.WindowManagerGlobal;
 
 import com.android.internal.protolog.common.ProtoLog;
@@ -42,6 +40,7 @@ import com.android.wm.shell.pip.PipBoundsState;
 import com.android.wm.shell.pip.PipMediaController;
 import com.android.wm.shell.pip.PipMediaController.ActionListener;
 import com.android.wm.shell.pip.PipMenuController;
+import com.android.wm.shell.pip.PipSurfaceTransactionHelper;
 import com.android.wm.shell.pip.PipUiEventLogger;
 import com.android.wm.shell.protolog.ShellProtoLogGroup;
 import com.android.wm.shell.splitscreen.SplitScreenController;
@@ -115,6 +114,10 @@ public class PhonePipMenuController implements PipMenuController {
     private final ShellExecutor mMainExecutor;
     private final Handler mMainHandler;
 
+    private final PipSurfaceTransactionHelper.SurfaceControlTransactionFactory
+            mSurfaceControlTransactionFactory;
+    private final float[] mTmpTransform = new float[9];
+
     private final ArrayList<Listener> mListeners = new ArrayList<>();
     private final SystemWindows mSystemWindows;
     private final Optional<SplitScreenController> mSplitScreenController;
@@ -124,7 +127,6 @@ public class PhonePipMenuController implements PipMenuController {
     private RemoteAction mCloseAction;
     private List<RemoteAction> mMediaActions;
 
-    private SyncRtSurfaceTransactionApplier mApplier;
     private int mMenuState;
 
     private PipMenuView mPipMenuView;
@@ -150,6 +152,9 @@ public class PhonePipMenuController implements PipMenuController {
         mMainHandler = mainHandler;
         mSplitScreenController = splitScreenOptional;
         mPipUiEventLogger = pipUiEventLogger;
+
+        mSurfaceControlTransactionFactory =
+                new PipSurfaceTransactionHelper.VsyncSurfaceControlTransactionFactory();
     }
 
     public boolean isMenuVisible() {
@@ -194,7 +199,6 @@ public class PhonePipMenuController implements PipMenuController {
             return;
         }
 
-        mApplier = null;
         mSystemWindows.removeView(mPipMenuView);
         mPipMenuView = null;
     }
@@ -289,7 +293,7 @@ public class PhonePipMenuController implements PipMenuController {
                     willResizeMenu, withDelay, showResizeHandle, Debug.getCallers(5, "    "));
         }
 
-        if (!maybeCreateSyncApplier()) {
+        if (!checkPipMenuState()) {
             return;
         }
 
@@ -312,7 +316,7 @@ public class PhonePipMenuController implements PipMenuController {
             return;
         }
 
-        if (!maybeCreateSyncApplier()) {
+        if (!checkPipMenuState()) {
             return;
         }
 
@@ -328,18 +332,15 @@ public class PhonePipMenuController implements PipMenuController {
         mTmpSourceRectF.set(mTmpSourceBounds);
         mTmpDestinationRectF.set(destinationBounds);
         mMoveTransform.setRectToRect(mTmpSourceRectF, mTmpDestinationRectF, Matrix.ScaleToFit.FILL);
-        SurfaceControl surfaceControl = getSurfaceControl();
-        SurfaceParams params = new SurfaceParams.Builder(surfaceControl)
-                .withMatrix(mMoveTransform)
-                .build();
+        final SurfaceControl surfaceControl = getSurfaceControl();
+        final SurfaceControl.Transaction menuTx =
+                mSurfaceControlTransactionFactory.getTransaction();
+        menuTx.setMatrix(surfaceControl, mMoveTransform, mTmpTransform);
         if (pipLeash != null && t != null) {
-            SurfaceParams pipParams = new SurfaceParams.Builder(pipLeash)
-                    .withMergeTransaction(t)
-                    .build();
-            mApplier.scheduleApply(params, pipParams);
-        } else {
-            mApplier.scheduleApply(params);
+            // Merge the two transactions, vsyncId has been set on menuTx.
+            menuTx.merge(t);
         }
+        menuTx.apply();
     }
 
     /**
@@ -353,36 +354,29 @@ public class PhonePipMenuController implements PipMenuController {
             return;
         }
 
-        if (!maybeCreateSyncApplier()) {
+        if (!checkPipMenuState()) {
             return;
         }
 
-        SurfaceControl surfaceControl = getSurfaceControl();
-        SurfaceParams params = new SurfaceParams.Builder(surfaceControl)
-                .withWindowCrop(destinationBounds)
-                .build();
+        final SurfaceControl surfaceControl = getSurfaceControl();
+        final SurfaceControl.Transaction menuTx =
+                mSurfaceControlTransactionFactory.getTransaction();
+        menuTx.setCrop(surfaceControl, destinationBounds);
         if (pipLeash != null && t != null) {
-            SurfaceParams pipParams = new SurfaceParams.Builder(pipLeash)
-                    .withMergeTransaction(t)
-                    .build();
-            mApplier.scheduleApply(params, pipParams);
-        } else {
-            mApplier.scheduleApply(params);
+            // Merge the two transactions, vsyncId has been set on menuTx.
+            menuTx.merge(t);
         }
+        menuTx.apply();
     }
 
-    private boolean maybeCreateSyncApplier() {
+    private boolean checkPipMenuState() {
         if (mPipMenuView == null || mPipMenuView.getViewRootImpl() == null) {
             ProtoLog.v(ShellProtoLogGroup.WM_SHELL_PICTURE_IN_PICTURE,
                     "%s: Not going to move PiP, either menu or its parent is not created.", TAG);
             return false;
         }
 
-        if (mApplier == null) {
-            mApplier = new SyncRtSurfaceTransactionApplier(mPipMenuView);
-        }
-
-        return mApplier != null;
+        return true;
     }
 
     /**

@@ -21,8 +21,6 @@
     android:id="@+id/keyguard_bouncer_user_switcher"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:clipChildren="false"
-    android:clipToPadding="false"
     android:orientation="vertical"
     android:gravity="center"
     android:importantForAccessibility="yes"> <!-- Needed because TYPE_WINDOW_STATE_CHANGED is sent
@@ -35,7 +33,7 @@
 
     <!-- need to keep this outer view in order to have a correctly sized anchor
          for the dropdown menu, as well as dropdown background in the right place -->
-    <LinearLayout
+    <com.android.keyguard.KeyguardUserSwitcherAnchor
         android:id="@+id/user_switcher_anchor"
         android:orientation="horizontal"
         android:layout_height="wrap_content"
@@ -48,7 +46,7 @@
           android:textDirection="locale"
           android:layout_width="@dimen/bouncer_user_switcher_width"
           android:layout_height="wrap_content" />
-    </LinearLayout>>
+    </com.android.keyguard.KeyguardUserSwitcherAnchor>
 
 </LinearLayout>
 

@@ -131,6 +131,17 @@ public class ValidateNotificationPeople implements NotificationSignalExtractor {
         }
     }
 
+    // For tests: just do the setting of various local variables without actually doing work
+    @VisibleForTesting
+    protected void initForTests(Context context, NotificationUsageStats usageStats,
+            LruCache peopleCache) {
+        mUserToContextMap = new ArrayMap<>();
+        mBaseContext = context;
+        mUsageStats = usageStats;
+        mPeopleCache = peopleCache;
+        mEnabled = true;
+    }
+
     public RankingReconsideration process(NotificationRecord record) {
         if (!mEnabled) {
             if (VERBOSE) Slog.i(TAG, "disabled");
@@ -179,7 +190,7 @@ public class ValidateNotificationPeople implements NotificationSignalExtractor {
             return NONE;
         }
         final PeopleRankingReconsideration prr =
-                validatePeople(context, key, extras, null, affinityOut);
+                validatePeople(context, key, extras, null, affinityOut, null);
         float affinity = affinityOut[0];
 
         if (prr != null) {
@@ -224,15 +235,21 @@ public class ValidateNotificationPeople implements NotificationSignalExtractor {
         return context;
     }
 
-    private RankingReconsideration validatePeople(Context context,
+    @VisibleForTesting
+    protected RankingReconsideration validatePeople(Context context,
             final NotificationRecord record) {
         final String key = record.getKey();
         final Bundle extras = record.getNotification().extras;
         final float[] affinityOut = new float[1];
+        ArraySet<String> phoneNumbersOut = new ArraySet<>();
         final PeopleRankingReconsideration rr =
-                validatePeople(context, key, extras, record.getPeopleOverride(), affinityOut);
+                validatePeople(context, key, extras, record.getPeopleOverride(), affinityOut,
+                        phoneNumbersOut);
         final float affinity = affinityOut[0];
         record.setContactAffinity(affinity);
+        if (phoneNumbersOut.size() > 0) {
+            record.mergePhoneNumbers(phoneNumbersOut);
+        }
         if (rr == null) {
             mUsageStats.registerPeopleAffinity(record, affinity > NONE, affinity == STARRED_CONTACT,
                     true /* cached */);
@@ -243,7 +260,7 @@ public class ValidateNotificationPeople implements NotificationSignalExtractor {
     }
 
     private PeopleRankingReconsideration validatePeople(Context context, String key, Bundle extras,
-            List<String> peopleOverride, float[] affinityOut) {
+            List<String> peopleOverride, float[] affinityOut, ArraySet<String> phoneNumbersOut) {
         float affinity = NONE;
         if (extras == null) {
             return null;
@@ -270,6 +287,15 @@ public class ValidateNotificationPeople implements NotificationSignalExtractor {
                 }
                 if (lookupResult != null) {
                     affinity = Math.max(affinity, lookupResult.getAffinity());
+
+                    // add all phone numbers associated with this lookup result, if they exist
+                    // and if requested
+                    if (phoneNumbersOut != null) {
+                        ArraySet<String> phoneNumbers = lookupResult.getPhoneNumbers();
+                        if (phoneNumbers != null && phoneNumbers.size() > 0) {
+                            phoneNumbersOut.addAll(phoneNumbers);
+                        }
+                    }
                 }
             }
             if (++personIdx == MAX_PEOPLE) {
@@ -289,7 +315,8 @@ public class ValidateNotificationPeople implements NotificationSignalExtractor {
         return new PeopleRankingReconsideration(context, key, pendingLookups);
     }
 
-    private String getCacheKey(int userId, String handle) {
+    @VisibleForTesting
+    protected static String getCacheKey(int userId, String handle) {
         return Integer.toString(userId) + ":" + handle;
     }
 
@@ -485,7 +512,8 @@ public class ValidateNotificationPeople implements NotificationSignalExtractor {
         }
     }
 
-    private static class LookupResult {
+    @VisibleForTesting
+    protected static class LookupResult {
         private static final long CONTACT_REFRESH_MILLIS = 60 * 60 * 1000;  // 1hr
 
         private final long mExpireMillis;
@@ -574,7 +602,8 @@ public class ValidateNotificationPeople implements NotificationSignalExtractor {
             return mPhoneNumbers;
         }
 
-        private boolean isExpired() {
+        @VisibleForTesting
+        protected boolean isExpired() {
             return mExpireMillis < System.currentTimeMillis();
         }
 

@@ -16,8 +16,10 @@
 
 package androidx.window.util;
 
+import androidx.annotation.GuardedBy;
 import androidx.annotation.NonNull;
 
+import java.util.HashSet;
 import java.util.LinkedHashSet;
 import java.util.Optional;
 import java.util.Set;
@@ -25,25 +27,48 @@ import java.util.function.Consumer;
 
 /**
  * Base class that provides the implementation for the callback mechanism of the
- * {@link DataProducer} API.
+ * {@link DataProducer} API.  This class is thread safe for adding, removing, and notifying
+ * consumers.
  *
  * @param <T> The type of data this producer returns through {@link DataProducer#getData}.
  */
-public abstract class BaseDataProducer<T> implements DataProducer<T> {
-    private final Set<Consumer<T>> mCallbacks = new LinkedHashSet<>();
+public abstract class BaseDataProducer<T> implements DataProducer<T>,
+        AcceptOnceConsumer.AcceptOnceProducerCallback<T> {
 
+    private final Object mLock = new Object();
+    @GuardedBy("mLock")
+    private final Set<Consumer<T>> mCallbacks = new LinkedHashSet<>();
+    @GuardedBy("mLock")
+    private final Set<Consumer<T>> mCallbacksToRemove = new HashSet<>();
+
+    /**
+     * Adds a callback to the set of callbacks listening for data. Data is delivered through
+     * {@link BaseDataProducer#notifyDataChanged(Object)}. This method is thread safe. Callers
+     * should ensure that callbacks are thread safe.
+     * @param callback that will receive data from the producer.
+     */
     @Override
     public final void addDataChangedCallback(@NonNull Consumer<T> callback) {
-        mCallbacks.add(callback);
-        Optional<T> currentData = getCurrentData();
-        currentData.ifPresent(callback);
-        onListenersChanged(mCallbacks);
+        synchronized (mLock) {
+            mCallbacks.add(callback);
+            Optional<T> currentData = getCurrentData();
+            currentData.ifPresent(callback);
+            onListenersChanged(mCallbacks);
+        }
     }
 
+    /**
+     * Removes a callback to the set of callbacks listening for data. This method is thread safe
+     * for adding.
+     * @param callback that was registered in
+     * {@link BaseDataProducer#addDataChangedCallback(Consumer)}.
+     */
     @Override
     public final void removeDataChangedCallback(@NonNull Consumer<T> callback) {
-        mCallbacks.remove(callback);
-        onListenersChanged(mCallbacks);
+        synchronized (mLock) {
+            mCallbacks.remove(callback);
+            onListenersChanged(mCallbacks);
+        }
     }
 
     protected void onListenersChanged(Set<Consumer<T>> callbacks) {}
@@ -56,11 +81,34 @@ public abstract class BaseDataProducer<T> implements DataProducer<T> {
 
     /**
      * Called to notify all registered consumers that the data provided
-     * by {@link DataProducer#getData} has changed.
+     * by {@link DataProducer#getData} has changed. Calls to this are thread save but callbacks need
+     * to ensure thread safety.
      */
     protected void notifyDataChanged(T value) {
-        for (Consumer<T> callback : mCallbacks) {
-            callback.accept(value);
+        synchronized (mLock) {
+            for (Consumer<T> callback : mCallbacks) {
+                callback.accept(value);
+            }
+            removeFinishedCallbacksLocked();
+        }
+    }
+
+    /**
+     * Removes any callbacks that notified us through {@link #onConsumerReadyToBeRemoved(Consumer)}
+     * that they are ready to be removed.
+     */
+    @GuardedBy("mLock")
+    private void removeFinishedCallbacksLocked() {
+        for (Consumer<T> callback: mCallbacksToRemove) {
+            mCallbacks.remove(callback);
+        }
+        mCallbacksToRemove.clear();
+    }
+
+    @Override
+    public void onConsumerReadyToBeRemoved(Consumer<T> callback) {
+        synchronized (mLock) {
+            mCallbacksToRemove.add(callback);
         }
     }
 }

@@ -125,9 +125,9 @@
     <string name="bluetooth_profile_a2dp_high_quality" msgid="4739440941324792775">"एचडी ऑडियो: <xliff:g id="CODEC_NAME">%1$s</xliff:g>"</string>
     <string name="bluetooth_profile_a2dp_high_quality_unknown_codec" msgid="2477639096903834374">"एचडी ऑडियो"</string>
     <string name="bluetooth_profile_hearing_aid" msgid="58154575573984914">"कान की मशीन"</string>
-    <string name="bluetooth_profile_le_audio" msgid="5158149987518342036">"LE_AUDIO"</string>
+    <string name="bluetooth_profile_le_audio" msgid="3237854988278539061">"LE Audio"</string>
     <string name="bluetooth_hearing_aid_profile_summary_connected" msgid="8191273236809964030">"सुनने में मदद करने वाले डिवाइस से कनेक्ट है"</string>
-    <string name="bluetooth_le_audio_profile_summary_connected" msgid="3162538609379333442">"LE_AUDIO से कनेक्ट किया गया"</string>
+    <string name="bluetooth_le_audio_profile_summary_connected" msgid="6916226974453480650">"LE Audio से कनेक्ट किया गया"</string>
     <string name="bluetooth_a2dp_profile_summary_connected" msgid="7422607970115444153">"मीडिया ऑडियो से कनेक्‍ट किया गया"</string>
     <string name="bluetooth_headset_profile_summary_connected" msgid="2420981566026949688">"फ़ोन ऑडियो से कनेक्‍ट किया गया"</string>
     <string name="bluetooth_opp_profile_summary_connected" msgid="2393521801478157362">"फ़ाइल स्‍थानांतरण सर्वर से कनेक्‍ट किया गया"</string>
@@ -184,7 +184,7 @@
     <string name="launch_defaults_some" msgid="3631650616557252926">"कुछ डिफ़ॉल्‍ट सेट हैं"</string>
     <string name="launch_defaults_none" msgid="8049374306261262709">"कोई डिफ़ॉल्‍ट सेट नहीं है"</string>
     <string name="tts_settings" msgid="8130616705989351312">"लेख से बोली सेटिंग"</string>
-    <string name="tts_settings_title" msgid="7602210956640483039">"लिखाई को बोली में बदलना"</string>
+    <string name="tts_settings_title" msgid="7602210956640483039">"लिखाई को बोली में बदलने की सुविधा"</string>
     <string name="tts_default_rate_title" msgid="3964187817364304022">"बोली दर"</string>
     <string name="tts_default_rate_summary" msgid="3781937042151716987">"बोलने की गति तय करें"</string>
     <string name="tts_default_pitch_title" msgid="6988592215554485479">"पिच"</string>
@@ -273,8 +273,8 @@
     <string name="oem_unlock_enable_summary" msgid="5857388174390953829">"बूटलोडर को अनलाॅक किए जाने की अनुमति दें"</string>
     <string name="confirm_enable_oem_unlock_title" msgid="8249318129774367535">"OEM अनलॉक करने की अनुमति दें?"</string>
     <string name="confirm_enable_oem_unlock_text" msgid="854131050791011970">"चेतावनी: इस सेटिंग के चालू रहने पर डिवाइस सुरक्षा सुविधाएं इस डिवाइस पर काम नहीं करेंगी."</string>
-    <string name="mock_location_app" msgid="6269380172542248304">"जगह की दिखावटी जानकारी देने के लिए ऐप्लिकेशन चुनें"</string>
-    <string name="mock_location_app_not_set" msgid="6972032787262831155">"जगह की दिखावटी जानकारी देने के लिए ऐप सेट नहीं है"</string>
+    <string name="mock_location_app" msgid="6269380172542248304">"मॉक लोकेशन के लिए ऐप्लिकेशन चुनें"</string>
+    <string name="mock_location_app_not_set" msgid="6972032787262831155">"मॉक लोकेशन के लिए ऐप्लिकेशन सेट नहीं है"</string>
     <string name="mock_location_app_set" msgid="4706722469342913843">"जगह की दिखावटी जानकारी देने वाला ऐप: <xliff:g id="APP_NAME">%1$s</xliff:g>"</string>
     <string name="debug_networking_category" msgid="6829757985772659599">"नेटवर्किंग"</string>
     <string name="wifi_display_certification" msgid="1805579519992520381">"वायरलेस डिसप्ले सर्टिफ़िकेशन"</string>
@@ -338,7 +338,7 @@
     <string name="verify_apps_over_usb_title" msgid="6031809675604442636">"यूएसबी पर ऐप्लिकेशन की पुष्टि करें"</string>
     <string name="verify_apps_over_usb_summary" msgid="1317933737581167839">"नुकसान पहुंचाने वाली गतिविधियों के लिए ADB/ADT से इंस्टॉल किए गए ऐप्लिकेशन जांचें."</string>
     <string name="bluetooth_show_devices_without_names_summary" msgid="780964354377854507">"बिना नाम वाले ब्लूटूथ डिवाइस (सिर्फ़ MAC पते वाले) दिखाए जाएंगे"</string>
-    <string name="bluetooth_disable_absolute_volume_summary" msgid="2006309932135547681">"दूर के डिवाइस पर आवाज़ बहुत बढ़ जाने या उससे कंट्रोल हटने जैसी समस्याएं होने पर, यह ब्लूटूथ के ज़रिए आवाज़ के कंट्रोल की सुविधा रोक देता है."</string>
+    <string name="bluetooth_disable_absolute_volume_summary" msgid="2006309932135547681">"रिमोट डिवाइस पर आवाज़ बहुत बढ़ जाने या उससे कंट्रोल हटने जैसी समस्याएं होने पर, यह ब्लूटूथ के ज़रिए आवाज़ के कंट्रोल की सुविधा रोक देता है."</string>
     <string name="bluetooth_enable_gabeldorsche_summary" msgid="2054730331770712629">"ब्लूटूथ सेटिंग में Gabeldorsche सुविधा को चालू करता है."</string>
     <string name="enhanced_connectivity_summary" msgid="1576414159820676330">"कनेक्टिविटी बेहतर बनाने की सुविधा को चालू करें"</string>
     <string name="enable_terminal_title" msgid="3834790541986303654">"स्थानीय टर्मिनल"</string>
@@ -408,6 +408,7 @@
     <string name="force_resizable_activities_summary" msgid="2490382056981583062">"सभी गतिविधियों को मल्टी-विंडो (एक से ज़्यादा ऐप्लिकेशन, एक साथ) के लिए साइज़ बदलने लायक बनाएं, चाहे उनकी मेनिफ़ेस्ट वैल्यू कुछ भी हो."</string>
     <string name="enable_freeform_support" msgid="7599125687603914253">"फ़्रीफ़ॉर्म विंडो (एक साथ कई विंडो दिखाना) चालू करें"</string>
     <string name="enable_freeform_support_summary" msgid="1822862728719276331">"जांच के लिए बनी फ़्रीफ़ॉर्म विंडो के लिए सहायता चालू करें."</string>
+    <string name="desktop_mode" msgid="2389067840550544462">"डेस्कटॉप मोड"</string>
     <string name="local_backup_password_title" msgid="4631017948933578709">"डेस्‍कटॉप बैक अप पासवर्ड"</string>
     <string name="local_backup_password_summary_none" msgid="7646898032616361714">"डेस्‍कटॉप के पूरे बैक अप फ़िलहाल सुरक्षित नहीं हैं"</string>
     <string name="local_backup_password_summary_change" msgid="1707357670383995567">"डेस्कटॉप के पूरे बैक अप का पासवर्ड बदलने या हटाने के लिए टैप करें"</string>
@@ -476,13 +477,14 @@
     <string name="power_charging" msgid="6727132649743436802">"<xliff:g id="LEVEL">%1$s</xliff:g> - <xliff:g id="STATE">%2$s</xliff:g>"</string>
     <string name="power_remaining_charging_duration_only" msgid="8085099012811384899">"<xliff:g id="TIME">%1$s</xliff:g> में बैटरी पूरी चार्ज हो जाएगी"</string>
     <string name="power_charging_duration" msgid="6127154952524919719">"<xliff:g id="LEVEL">%1$s</xliff:g> - <xliff:g id="TIME">%2$s</xliff:g> में बैटरी पूरी चार्ज हो जाएगी"</string>
-    <string name="power_charging_limited" msgid="7956120998372505295">"<xliff:g id="LEVEL">%1$s</xliff:g> - चार्जिंग कुछ समय के लिए रोकी गई"</string>
+    <string name="power_charging_limited" msgid="8202147604844938236">"<xliff:g id="LEVEL">%1$s</xliff:g> - चार्जिंग को ऑप्टिमाइज़ किया गया"</string>
+    <string name="power_charging_future_paused" msgid="4730177778538118032">"<xliff:g id="LEVEL">%1$s</xliff:g> - चार्जिंग को ऑप्टिमाइज़ किया गया"</string>
     <string name="battery_info_status_unknown" msgid="268625384868401114">"अज्ञात"</string>
     <string name="battery_info_status_charging" msgid="4279958015430387405">"चार्ज हो रही है"</string>
     <string name="battery_info_status_charging_fast" msgid="8027559755902954885">"तेज़ चार्ज हो रही है"</string>
     <string name="battery_info_status_charging_slow" msgid="3190803837168962319">"धीरे चार्ज हो रही है"</string>
     <string name="battery_info_status_charging_wireless" msgid="8924722966861282197">"वायरलेस चार्जिंग"</string>
-    <string name="battery_info_status_charging_dock" msgid="3554147903321236585">"चार्जिंग डॉक"</string>
+    <string name="battery_info_status_charging_dock" msgid="8573274094093364791">"चार्ज हो रहा है"</string>
     <string name="battery_info_status_discharging" msgid="6962689305413556485">"चार्ज नहीं हो रही है"</string>
     <string name="battery_info_status_not_charging" msgid="3371084153747234837">"कनेक्ट किया गया, चार्ज नहीं हो रहा है"</string>
     <string name="battery_info_status_full" msgid="1339002294876531312">"बैटरी चार्ज हो गई"</string>
@@ -492,7 +494,7 @@
     <string name="disabled" msgid="8017887509554714950">"बंद किया गया"</string>
     <string name="external_source_trusted" msgid="1146522036773132905">"अनुमति है"</string>
     <string name="external_source_untrusted" msgid="5037891688911672227">"अनुमति नहीं है"</string>
-    <string name="install_other_apps" msgid="3232595082023199454">"अनजान ऐप्लिकेशन इंस्टॉल करने का ऐक्सेस"</string>
+    <string name="install_other_apps" msgid="3232595082023199454">"अनजान ऐप्लिकेशन इंस्टॉल करने की अनुमति देना"</string>
     <string name="home" msgid="973834627243661438">"सेटिंग का होम पेज"</string>
   <string-array name="battery_labels">
     <item msgid="7878690469765357158">"0%"</item>
@@ -602,14 +604,14 @@
     <string name="guest_reset_and_restart_dialog_title" msgid="3396657008451616041">"क्या मेहमान मोड के मौजूदा सेशन को रीसेट करना है?"</string>
     <string name="guest_reset_and_restart_dialog_message" msgid="2764425635305200790">"ऐसा करने पर, मेहमान के तौर पर ब्राउज़ करने का एक नया सेशन शुरू हो जाएगा. साथ ही, पिछले सेशन में मौजूद डेटा और इस्तेमाल किए जा रहे ऐप्लिकेशन को मिटा दिया जाएगा"</string>
     <string name="guest_exit_dialog_title" msgid="1846494656849381804">"मेहमान मोड से बाहर निकलना है?"</string>
-    <string name="guest_exit_dialog_message" msgid="1743218864242719783">"इससे, मेहमान मोड के मौजूदा सेशन का डेटा और इसमें इस्तेमाल हो रहे ऐप मिट जाएंगे"</string>
+    <string name="guest_exit_dialog_message" msgid="1743218864242719783">"इससे, मेहमान मोड के मौजूदा सेशन का डेटा और इसमें इस्तेमाल हो रहे ऐप्लिकेशन मिट जाएंगे"</string>
     <string name="guest_exit_dialog_button" msgid="1736401897067442044">"बाहर निकलें"</string>
     <string name="guest_exit_dialog_title_non_ephemeral" msgid="7675327443743162986">"मेहमान मोड की गतिविधि को सेव करना है?"</string>
     <string name="guest_exit_dialog_message_non_ephemeral" msgid="223385323235719442">"मौजूदा सेशन की गतिविधि को सेव किया जा सकता है या सभी ऐप और डेटा को मिटाया जा सकता है"</string>
     <string name="guest_exit_clear_data_button" msgid="3425812652180679014">"मिटाएं"</string>
     <string name="guest_exit_save_data_button" msgid="3690974510644963547">"सेव करें"</string>
     <string name="guest_exit_button" msgid="5774985819191803960">"मेहमान मोड से बाहर निकलें"</string>
-    <string name="guest_reset_button" msgid="2515069346223503479">"मेहमान मोड के सेशन को रीसेट करें?"</string>
+    <string name="guest_reset_button" msgid="2515069346223503479">"मेहमान मोड के सेशन को रीसेट करें"</string>
     <string name="guest_exit_quick_settings_button" msgid="1912362095913765471">"मेहमान मोड से बाहर निकलें"</string>
     <string name="guest_notification_ephemeral" msgid="7263252466950923871">"बाहर निकलने पर, सारी गतिविधि मिट जाएगी"</string>
     <string name="guest_notification_non_ephemeral" msgid="6843799963012259330">"बाहर निकलने पर, गतिविधि को मिटाया या सेव किया जा सकता है"</string>
@@ -655,13 +657,6 @@
     <string name="accessibility_ethernet_disconnected" msgid="2832501530856497489">"ईथरनेट डिस्‍कनेक्‍ट किया गया."</string>
     <string name="accessibility_ethernet_connected" msgid="6175942685957461563">"ईथरनेट."</string>
     <string name="accessibility_no_calling" msgid="3540827068323895748">"वॉइस कॉल की सुविधा उपलब्ध नहीं है."</string>
-    <string name="dream_complication_title_time" msgid="701747800712893499">"समय"</string>
-    <string name="dream_complication_title_date" msgid="8661176085446135789">"तारीख"</string>
-    <string name="dream_complication_title_weather" msgid="598609151677172783">"मौसम"</string>
-    <string name="dream_complication_title_aqi" msgid="4587552608957834110">"हवा की क्वालिटी"</string>
-    <string name="dream_complication_title_cast_info" msgid="4038776652841885084">"कास्टिंग की जानकारी"</string>
-    <!-- no translation found for dream_complication_title_home_controls (9153381632476738811) -->
-    <skip />
     <string name="avatar_picker_title" msgid="8492884172713170652">"प्रोफ़ाइल फ़ोटो चुनें"</string>
     <string name="default_user_icon_description" msgid="6554047177298972638">"उपयोगकर्ता के लिए डिफ़ॉल्ट आइकॉन"</string>
     <string name="physical_keyboard_title" msgid="4811935435315835220">"फ़िज़िकल कीबोर्ड"</string>

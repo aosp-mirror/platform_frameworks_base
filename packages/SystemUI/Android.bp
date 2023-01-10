@@ -31,6 +31,52 @@ license {
     ],
 }
 
+// Opt-in configuration for code depending on Jetpack Compose.
+soong_config_module_type {
+    name: "systemui_compose_java_defaults",
+    module_type: "java_defaults",
+    config_namespace: "ANDROID",
+    bool_variables: ["SYSTEMUI_USE_COMPOSE"],
+    properties: [
+        "srcs",
+        "static_libs",
+    ],
+}
+
+systemui_compose_java_defaults {
+    name: "SystemUI_compose_defaults",
+    soong_config_variables: {
+        SYSTEMUI_USE_COMPOSE: {
+            // Because files in compose/features/ depend on SystemUI
+            // code, we compile those files when compiling SystemUI-core.
+            // We also compile the ComposeFacade in
+            // compose/facade/enabled/.
+            srcs: [
+                "compose/features/src/**/*.kt",
+                "compose/facade/enabled/src/**/*.kt",
+            ],
+
+            // The dependencies needed by SystemUIComposeFeatures,
+            // except for SystemUI-core.
+            // Copied from compose/features/Android.bp.
+            static_libs: [
+                "PlatformComposeCore",
+
+                "androidx.compose.runtime_runtime",
+                "androidx.compose.material3_material3",
+                "androidx.activity_activity-compose",
+            ],
+
+            // By default, Compose is disabled and we compile the ComposeFacade
+            // in compose/facade/disabled/.
+            conditions_default: {
+                srcs: ["compose/facade/disabled/src/**/*.kt"],
+                static_libs: [],
+            },
+        },
+    },
+}
+
 java_library {
     name: "SystemUI-proto",
 
@@ -68,6 +114,9 @@ filegroup {
 
 android_library {
     name: "SystemUI-core",
+    defaults: [
+        "SystemUI_compose_defaults",
+    ],
     srcs: [
         "src/**/*.kt",
         "src/**/*.java",
@@ -91,6 +140,7 @@ android_library {
         "SystemUIAnimationLib",
         "SystemUIPluginLib",
         "SystemUISharedLib",
+        "SystemUICustomizationLib",
         "SystemUI-statsd",
         "SettingsLib",
         "androidx.core_core-ktx",
@@ -114,6 +164,7 @@ android_library {
         "androidx.dynamicanimation_dynamicanimation",
         "androidx-constraintlayout_constraintlayout",
         "androidx.exifinterface_exifinterface",
+        "androidx.test.ext.junit",
         "com.google.android.material_material",
         "kotlinx_coroutines_android",
         "kotlinx_coroutines",
@@ -124,6 +175,8 @@ android_library {
         "dagger2",
         "jsr330",
         "lottie",
+        "LowLightDreamLib",
+        "motion_tool_lib",
     ],
     manifest: "AndroidManifest.xml",
 
@@ -163,30 +216,20 @@ java_library {
 }
 
 android_library {
-    name: "SystemUI-tests",
+    name: "SystemUI-tests-base",
     manifest: "tests/AndroidManifest-base.xml",
-    additional_manifests: ["tests/AndroidManifest.xml"],
-
     resource_dirs: [
         "tests/res",
         "res-product",
         "res-keyguard",
         "res",
     ],
-    srcs: [
-        "tests/src/**/*.kt",
-        "tests/src/**/*.java",
-        "src/**/*.kt",
-        "src/**/*.java",
-        "src/**/I*.aidl",
-        ":ReleaseJavaFiles",
-        ":SystemUI-tests-utils",
-    ],
     static_libs: [
         "WifiTrackerLib",
         "SystemUIAnimationLib",
         "SystemUIPluginLib",
         "SystemUISharedLib",
+        "SystemUICustomizationLib",
         "SystemUI-statsd",
         "SettingsLib",
         "androidx.viewpager2_viewpager2",
@@ -212,24 +255,51 @@ android_library {
         "kotlinx-coroutines-android",
         "kotlinx-coroutines-core",
         "kotlinx_coroutines_test",
+        "kotlin-reflect",
         "iconloader_base",
         "SystemUI-tags",
         "SystemUI-proto",
         "metrics-helper-lib",
         "hamcrest-library",
         "androidx.test.rules",
-        "androidx.test.uiautomator",
-        "mockito-target-extended-minus-junit4",
         "testables",
         "truth-prebuilt",
         "monet",
         "dagger2",
         "jsr330",
         "WindowManager-Shell",
+        "LowLightDreamLib",
+        "motion_tool_lib",
+        "androidx.core_core-animation-testing-nodeps",
+    ],
+}
+
+android_library {
+    name: "SystemUI-tests",
+    defaults: [
+        "SystemUI_compose_defaults",
+    ],
+    manifest: "tests/AndroidManifest-base.xml",
+    additional_manifests: ["tests/AndroidManifest.xml"],
+    srcs: [
+        "tests/src/**/*.kt",
+        "tests/src/**/*.java",
+        "src/**/*.kt",
+        "src/**/*.java",
+        "src/**/I*.aidl",
+        ":ReleaseJavaFiles",
+        ":SystemUI-tests-utils",
+    ],
+    static_libs: [
+        "SystemUI-tests-base",
+        "androidx.test.uiautomator",
+        "mockito-target-extended-minus-junit4",
+        "androidx.test.ext.junit",
     ],
     libs: [
         "android.test.runner",
         "android.test.base",
+        "android.test.mock",
     ],
     kotlincflags: ["-Xjvm-default=enable"],
     aaptflags: [
@@ -239,11 +309,48 @@ android_library {
     plugins: ["dagger2-compiler"],
 }
 
-// Opt-in config for optimizing the SystemUI target using R8.
-// Enabled via `export SYSTEMUI_OPTIMIZE_JAVA=true`, or explicitly in Make via
-// the `SOONG_CONFIG_ANDROID_SYSTEMUI_OPTIMIZE_JAVA` variable.
-// TODO(b/203472868): Enable optimizations by default after stabilizing and
-// building out retrace infrastructure.
+android_app {
+    name: "SystemUIRobo-stub",
+    defaults: [
+        "platform_app_defaults",
+        "SystemUI_app_defaults",
+    ],
+    manifest: "tests/AndroidManifest-base.xml",
+    static_libs: [
+        "SystemUI-tests-base",
+    ],
+    aaptflags: [
+        "--extra-packages",
+        "com.android.systemui",
+    ],
+    dont_merge_manifests: true,
+    platform_apis: true,
+    system_ext_specific: true,
+    certificate: "platform",
+    privileged: true,
+    resource_dirs: [],
+}
+
+android_robolectric_test {
+    name: "SystemUiRoboTests",
+    srcs: [
+        "tests/robolectric/src/**/*.kt",
+        "tests/robolectric/src/**/*.java",
+    ],
+    libs: [
+        "android.test.runner",
+        "android.test.base",
+        "android.test.mock",
+        "truth-prebuilt",
+    ],
+    kotlincflags: ["-Xjvm-default=enable"],
+    instrumentation_for: "SystemUIRobo-stub",
+    java_resource_dirs: ["tests/robolectric/config"],
+}
+
+// Opt-out config for optimizing the SystemUI target using R8.
+// Disabled via `export SYSTEMUI_OPTIMIZE_JAVA=false`, or explicitly in Make via
+// `SYSTEMUI_OPTIMIZE_JAVA := false`.
 soong_config_module_type {
     name: "systemui_optimized_java_defaults",
     module_type: "java_defaults",
@@ -292,5 +399,6 @@ android_app {
     dxflags: ["--multi-dex"],
     required: [
         "privapp_whitelist_com.android.systemui",
+        "wmshell.protolog.json.gz",
     ],
 }

@@ -37,7 +37,7 @@ import dagger.Provides;
 public interface DreamClockTimeComplicationModule {
     String DREAM_CLOCK_TIME_COMPLICATION_VIEW = "clock_time_complication_view";
     String TAG_WEIGHT = "'wght' ";
-    int WEIGHT = 200;
+    int WEIGHT = 400;
 
     /**
      * Provides the complication view.
@@ -45,11 +45,12 @@ public interface DreamClockTimeComplicationModule {
     @Provides
     @Named(DREAM_CLOCK_TIME_COMPLICATION_VIEW)
     static View provideComplicationView(LayoutInflater layoutInflater) {
-        final TextClock view = Preconditions.checkNotNull((TextClock)
+        final View view = Preconditions.checkNotNull(
                         layoutInflater.inflate(R.layout.dream_overlay_complication_clock_time,
                                 null, false),
                 "R.layout.dream_overlay_complication_clock_time did not properly inflated");
-        view.setFontVariationSettings(TAG_WEIGHT + WEIGHT);
+        ((TextClock) view.findViewById(R.id.time_view)).setFontVariationSettings(
+                TAG_WEIGHT + WEIGHT);
         return view;
     }
 }

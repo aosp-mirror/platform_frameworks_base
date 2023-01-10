@@ -23,9 +23,11 @@ import platform.test.screenshot.PathConfig
 /** A [GoldenImagePathManager] that should be used for all SystemUI screenshot tests. */
 class SystemUIGoldenImagePathManager(
     pathConfig: PathConfig,
+    assetsPathRelativeToBuildRoot: String
 ) :
     GoldenImagePathManager(
         appContext = InstrumentationRegistry.getInstrumentation().context,
+        assetsPathRelativeToBuildRoot = assetsPathRelativeToBuildRoot,
         deviceLocalPath =
             InstrumentationRegistry.getInstrumentation()
                 .targetContext

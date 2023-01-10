@@ -33,6 +33,7 @@
     <string name="accessibility_action_pip_unstash" msgid="7467499339610437646">"Unstash"</string>
     <string name="dock_forced_resizable" msgid="1749750436092293116">"திரைப் பிரிப்பு அம்சத்தில் ஆப்ஸ் செயல்படாமல் போகக்கூடும்."</string>
     <string name="dock_non_resizeble_failed_to_dock_text" msgid="7408396418008948957">"திரையைப் பிரிப்பதைப் ஆப்ஸ் ஆதரிக்கவில்லை."</string>
+    <string name="dock_multi_instances_not_supported_text" msgid="5242868470666346929">"இந்த ஆப்ஸை 1 சாளரத்தில் மட்டுமே திறக்க முடியும்."</string>
     <string name="forced_resizable_secondary_display" msgid="1768046938673582671">"இரண்டாம்நிலைத் திரையில் ஆப்ஸ் வேலை செய்யாமல் போகக்கூடும்."</string>
     <string name="activity_launch_on_secondary_display_failed_text" msgid="4226485344988071769">"இரண்டாம்நிலைத் திரைகளில் பயன்பாட்டைத் தொடங்க முடியாது."</string>
     <string name="accessibility_divider" msgid="703810061635792791">"திரையைப் பிரிக்கும் பிரிப்பான்"</string>
@@ -76,12 +77,19 @@
     <string name="camera_compat_treatment_suggested_button_description" msgid="8103916969024076767">"கேமரா தொடர்பான சிக்கல்களா?\nமீண்டும் பொருத்த தட்டவும்"</string>
     <string name="camera_compat_treatment_applied_button_description" msgid="2944157113330703897">"சிக்கல்கள் சரிசெய்யப்படவில்லையா?\nமாற்றியமைக்க தட்டவும்"</string>
     <string name="camera_compat_dismiss_button_description" msgid="2795364433503817511">"கேமரா தொடர்பான சிக்கல்கள் எதுவும் இல்லையா? நிராகரிக்க தட்டவும்."</string>
-    <string name="letterbox_education_dialog_title" msgid="6688664582871779215">"சில ஆப்ஸ் \'போர்ட்ரெய்ட்டில்\' சிறப்பாகச் செயல்படும்"</string>
-    <string name="letterbox_education_dialog_subtext" msgid="4853542518367719562">"ஸ்பேஸ்களிலிருந்து அதிகப் பலன்களைப் பெற இந்த விருப்பங்களில் ஒன்றைப் பயன்படுத்துங்கள்"</string>
-    <string name="letterbox_education_screen_rotation_text" msgid="5085786687366339027">"முழுத்திரைக்குச் செல்ல உங்கள் சாதனத்தைச் சுழற்றவும்"</string>
-    <string name="letterbox_education_reposition_text" msgid="1068293354123934727">"ஆப்ஸை இடம் மாற்ற, ஆப்ஸுக்கு அடுத்து இருமுறை தட்டவும்"</string>
+    <string name="letterbox_education_dialog_title" msgid="7739895354143295358">"பலவற்றைப் பார்த்தல் மற்றும் செய்தல்"</string>
+    <string name="letterbox_education_split_screen_text" msgid="6206339484068670830">"திரைப் பிரிப்புக்கு மற்றொரு ஆப்ஸை இழுக்கலாம்"</string>
+    <string name="letterbox_education_reposition_text" msgid="4589957299813220661">"ஆப்ஸை இடம் மாற்ற அதன் வெளியில் இருமுறை தட்டலாம்"</string>
     <string name="letterbox_education_got_it" msgid="4057634570866051177">"சரி"</string>
     <string name="letterbox_education_expand_button_description" msgid="1729796567101129834">"கூடுதல் தகவல்களுக்கு விரிவாக்கலாம்."</string>
     <string name="maximize_button_text" msgid="1650859196290301963">"பெரிதாக்கும்"</string>
+    <string name="minimize_button_text" msgid="271592547935841753">"சிறிதாக்கும்"</string>
     <string name="close_button_text" msgid="2913281996024033299">"மூடும்"</string>
+    <string name="back_button_text" msgid="1469718707134137085">"பின்செல்லும்"</string>
+    <string name="handle_text" msgid="1766582106752184456">"ஹேண்டில்"</string>
+    <string name="fullscreen_text" msgid="1162316685217676079">"முழுத்திரை"</string>
+    <string name="desktop_text" msgid="1077633567027630454">"டெஸ்க்டாப் பயன்முறை"</string>
+    <string name="split_screen_text" msgid="1396336058129570886">"திரையைப் பிரிக்கும்"</string>
+    <string name="more_button_text" msgid="3655388105592893530">"கூடுதல் விருப்பத்தேர்வுகள்"</string>
+    <string name="float_button_text" msgid="9221657008391364581">"மிதக்கும் சாளரம்"</string>
 </resources>

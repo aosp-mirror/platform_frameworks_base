@@ -21,15 +21,21 @@ import android.content.Context
 import android.content.Intent
 import android.content.IntentFilter
 import android.os.Bundle
+import android.os.RemoteException
+import android.service.dreams.IDreamManager
 import android.view.View
 import android.view.ViewGroup
 import android.view.WindowInsets
 import android.view.WindowInsets.Type
-
+import android.view.WindowManager
+import androidx.activity.ComponentActivity
 import com.android.systemui.R
 import com.android.systemui.broadcast.BroadcastDispatcher
 import com.android.systemui.controls.management.ControlsAnimations
-import com.android.systemui.util.LifecycleActivity
+import com.android.systemui.controls.settings.ControlsSettingsDialogManager
+import com.android.systemui.flags.FeatureFlags
+import com.android.systemui.flags.Flags
+import com.android.systemui.statusbar.policy.KeyguardStateController
 import javax.inject.Inject
 
 /**
@@ -41,14 +47,22 @@ import javax.inject.Inject
  */
 class ControlsActivity @Inject constructor(
     private val uiController: ControlsUiController,
-    private val broadcastDispatcher: BroadcastDispatcher
-) : LifecycleActivity() {
+    private val broadcastDispatcher: BroadcastDispatcher,
+    private val dreamManager: IDreamManager,
+    private val featureFlags: FeatureFlags,
+    private val controlsSettingsDialogManager: ControlsSettingsDialogManager,
+    private val keyguardStateController: KeyguardStateController
+) : ComponentActivity() {
 
     private lateinit var parent: ViewGroup
     private lateinit var broadcastReceiver: BroadcastReceiver
+    private var mExitToDream: Boolean = false
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        if (featureFlags.isEnabled(Flags.USE_APP_PANELS)) {
+            window.addPrivateFlags(WindowManager.LayoutParams.PRIVATE_FLAG_TRUSTED_OVERLAY)
+        }
 
         setContentView(R.layout.controls_fullscreen)
 
@@ -56,7 +70,8 @@ class ControlsActivity @Inject constructor(
             ControlsAnimations.observerForAnimations(
                 requireViewById<ViewGroup>(R.id.control_detail_root),
                 window,
-                intent
+                intent,
+                !featureFlags.isEnabled(Flags.USE_APP_PANELS)
             )
         )
 
@@ -82,19 +97,45 @@ class ControlsActivity @Inject constructor(
 
         parent = requireViewById<ViewGroup>(R.id.global_actions_controls)
         parent.alpha = 0f
-        uiController.show(parent, { finish() }, this)
+        if (featureFlags.isEnabled(Flags.USE_APP_PANELS) && !keyguardStateController.isUnlocked) {
+            controlsSettingsDialogManager.maybeShowDialog(this) {
+                uiController.show(parent, { finishOrReturnToDream() }, this)
+            }
+        } else {
+            uiController.show(parent, { finishOrReturnToDream() }, this)
+        }
 
         ControlsAnimations.enterAnimation(parent).start()
     }
 
-    override fun onBackPressed() {
+    override fun onResume() {
+        super.onResume()
+        mExitToDream = intent.getBooleanExtra(ControlsUiController.EXIT_TO_DREAM, false)
+    }
+
+    fun finishOrReturnToDream() {
+        if (mExitToDream) {
+            try {
+                mExitToDream = false
+                dreamManager.dream()
+                return
+            } catch (e: RemoteException) {
+                // Fall through
+            }
+        }
         finish()
+    }
+
+    override fun onBackPressed() {
+        finishOrReturnToDream()
     }
 
     override fun onStop() {
         super.onStop()
+        mExitToDream = false
 
         uiController.hide()
+        controlsSettingsDialogManager.closeDialog()
     }
 
     override fun onDestroy() {
@@ -107,7 +148,8 @@ class ControlsActivity @Inject constructor(
         broadcastReceiver = object : BroadcastReceiver() {
             override fun onReceive(context: Context, intent: Intent) {
                 val action = intent.getAction()
-                if (Intent.ACTION_SCREEN_OFF.equals(action)) {
+                if (action == Intent.ACTION_SCREEN_OFF ||
+                    action == Intent.ACTION_DREAMING_STARTED) {
                     finish()
                 }
             }
@@ -115,6 +157,7 @@ class ControlsActivity @Inject constructor(
 
         val filter = IntentFilter()
         filter.addAction(Intent.ACTION_SCREEN_OFF)
+        filter.addAction(Intent.ACTION_DREAMING_STARTED)
         broadcastDispatcher.registerReceiver(broadcastReceiver, filter)
     }
 }

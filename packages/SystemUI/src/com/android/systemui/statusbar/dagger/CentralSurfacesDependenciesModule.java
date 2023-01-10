@@ -18,7 +18,6 @@ package com.android.systemui.statusbar.dagger;
 
 import android.app.IActivityManager;
 import android.content.Context;
-import android.os.Handler;
 import android.os.RemoteException;
 import android.service.dreams.IDreamManager;
 import android.util.Log;
@@ -27,10 +26,12 @@ import com.android.internal.jank.InteractionJankMonitor;
 import com.android.internal.statusbar.IStatusBarService;
 import com.android.systemui.animation.ActivityLaunchAnimator;
 import com.android.systemui.animation.DialogLaunchAnimator;
+import com.android.systemui.colorextraction.SysuiColorExtractor;
 import com.android.systemui.dagger.SysUISingleton;
 import com.android.systemui.dagger.qualifiers.Main;
+import com.android.systemui.dump.DumpHandler;
 import com.android.systemui.dump.DumpManager;
-import com.android.systemui.media.MediaDataManager;
+import com.android.systemui.media.controls.pipeline.MediaDataManager;
 import com.android.systemui.plugins.ActivityStarter;
 import com.android.systemui.plugins.statusbar.StatusBarStateController;
 import com.android.systemui.qs.carrier.QSCarrierGroupController;
@@ -42,14 +43,12 @@ import com.android.systemui.statusbar.NotificationLockscreenUserManager;
 import com.android.systemui.statusbar.NotificationMediaManager;
 import com.android.systemui.statusbar.NotificationRemoteInputManager;
 import com.android.systemui.statusbar.NotificationShadeWindowController;
-import com.android.systemui.statusbar.RemoteInputNotificationRebuilder;
 import com.android.systemui.statusbar.SmartReplyController;
 import com.android.systemui.statusbar.StatusBarStateControllerImpl;
 import com.android.systemui.statusbar.SysuiStatusBarStateController;
 import com.android.systemui.statusbar.commandline.CommandRegistry;
 import com.android.systemui.statusbar.gesture.SwipeStatusBarAwayGestureHandler;
 import com.android.systemui.statusbar.notification.NotifPipelineFlags;
-import com.android.systemui.statusbar.notification.NotificationEntryManager;
 import com.android.systemui.statusbar.notification.collection.NotifCollection;
 import com.android.systemui.statusbar.notification.collection.NotifPipeline;
 import com.android.systemui.statusbar.notification.collection.notifcollection.CommonNotifCollection;
@@ -99,11 +98,8 @@ public interface CentralSurfacesDependenciesModule {
             NotificationLockscreenUserManager lockscreenUserManager,
             SmartReplyController smartReplyController,
             NotificationVisibilityProvider visibilityProvider,
-            NotificationEntryManager notificationEntryManager,
-            RemoteInputNotificationRebuilder rebuilder,
             Lazy<Optional<CentralSurfaces>> centralSurfacesOptionalLazy,
             StatusBarStateController statusBarStateController,
-            Handler mainHandler,
             RemoteInputUriController remoteInputUriController,
             NotificationClickNotifier clickNotifier,
             ActionClickLogger actionClickLogger,
@@ -114,11 +110,8 @@ public interface CentralSurfacesDependenciesModule {
                 lockscreenUserManager,
                 smartReplyController,
                 visibilityProvider,
-                notificationEntryManager,
-                rebuilder,
                 centralSurfacesOptionalLazy,
                 statusBarStateController,
-                mainHandler,
                 remoteInputUriController,
                 clickNotifier,
                 actionClickLogger,
@@ -139,6 +132,9 @@ public interface CentralSurfacesDependenciesModule {
             NotifCollection notifCollection,
             @Main DelayableExecutor mainExecutor,
             MediaDataManager mediaDataManager,
+            StatusBarStateController statusBarStateController,
+            SysuiColorExtractor colorExtractor,
+            KeyguardStateController keyguardStateController,
             DumpManager dumpManager) {
         return new NotificationMediaManager(
                 context,
@@ -151,6 +147,9 @@ public interface CentralSurfacesDependenciesModule {
                 notifCollection,
                 mainExecutor,
                 mediaDataManager,
+                statusBarStateController,
+                colorExtractor,
+                keyguardStateController,
                 dumpManager);
     }
 
@@ -183,8 +182,10 @@ public interface CentralSurfacesDependenciesModule {
     static CommandQueue provideCommandQueue(
             Context context,
             ProtoTracer protoTracer,
-            CommandRegistry registry) {
-        return new CommandQueue(context, protoTracer, registry);
+            CommandRegistry registry,
+            DumpHandler dumpHandler
+    ) {
+        return new CommandQueue(context, protoTracer, registry, dumpHandler);
     }
 
     /**
@@ -299,7 +300,7 @@ public interface CentralSurfacesDependenciesModule {
 
             @Override
             public boolean isShowingAlternateAuthOnUnlock() {
-                return statusBarKeyguardViewManager.get().shouldShowAltAuth();
+                return statusBarKeyguardViewManager.get().canShowAlternateBouncer();
             }
         };
         return new DialogLaunchAnimator(callback, interactionJankMonitor);

@@ -33,6 +33,7 @@
     <string name="accessibility_action_pip_unstash" msgid="7467499339610437646">"Hiện"</string>
     <string name="dock_forced_resizable" msgid="1749750436092293116">"Ứng dụng có thể không hoạt động với tính năng chia đôi màn hình."</string>
     <string name="dock_non_resizeble_failed_to_dock_text" msgid="7408396418008948957">"Ứng dụng không hỗ trợ chia đôi màn hình."</string>
+    <string name="dock_multi_instances_not_supported_text" msgid="5242868470666346929">"Ứng dụng này chỉ có thể mở 1 cửa sổ."</string>
     <string name="forced_resizable_secondary_display" msgid="1768046938673582671">"Ứng dụng có thể không hoạt động trên màn hình phụ."</string>
     <string name="activity_launch_on_secondary_display_failed_text" msgid="4226485344988071769">"Ứng dụng không hỗ trợ khởi chạy trên màn hình phụ."</string>
     <string name="accessibility_divider" msgid="703810061635792791">"Bộ chia chia đôi màn hình"</string>
@@ -76,12 +77,19 @@
     <string name="camera_compat_treatment_suggested_button_description" msgid="8103916969024076767">"Có vấn đề với máy ảnh?\nHãy nhấn để sửa lỗi"</string>
     <string name="camera_compat_treatment_applied_button_description" msgid="2944157113330703897">"Bạn chưa khắc phục vấn đề?\nHãy nhấn để hủy bỏ"</string>
     <string name="camera_compat_dismiss_button_description" msgid="2795364433503817511">"Không có vấn đề với máy ảnh? Hãy nhấn để đóng."</string>
-    <string name="letterbox_education_dialog_title" msgid="6688664582871779215">"Một số ứng dụng hoạt động tốt nhất ở chế độ dọc"</string>
-    <string name="letterbox_education_dialog_subtext" msgid="4853542518367719562">"Hãy thử một trong các tuỳ chọn sau để tận dụng không gian"</string>
-    <string name="letterbox_education_screen_rotation_text" msgid="5085786687366339027">"Xoay thiết bị để chuyển sang chế độ toàn màn hình"</string>
-    <string name="letterbox_education_reposition_text" msgid="1068293354123934727">"Nhấn đúp vào bên cạnh ứng dụng để đặt lại vị trí"</string>
+    <string name="letterbox_education_dialog_title" msgid="7739895354143295358">"Xem và làm được nhiều việc hơn"</string>
+    <string name="letterbox_education_split_screen_text" msgid="6206339484068670830">"Kéo vào một ứng dụng khác để chia đôi màn hình"</string>
+    <string name="letterbox_education_reposition_text" msgid="4589957299813220661">"Nhấn đúp bên ngoài ứng dụng để đặt lại vị trí"</string>
     <string name="letterbox_education_got_it" msgid="4057634570866051177">"OK"</string>
     <string name="letterbox_education_expand_button_description" msgid="1729796567101129834">"Mở rộng để xem thêm thông tin."</string>
     <string name="maximize_button_text" msgid="1650859196290301963">"Phóng to"</string>
+    <string name="minimize_button_text" msgid="271592547935841753">"Thu nhỏ"</string>
     <string name="close_button_text" msgid="2913281996024033299">"Đóng"</string>
+    <string name="back_button_text" msgid="1469718707134137085">"Quay lại"</string>
+    <string name="handle_text" msgid="1766582106752184456">"Xử lý"</string>
+    <string name="fullscreen_text" msgid="1162316685217676079">"Toàn màn hình"</string>
+    <string name="desktop_text" msgid="1077633567027630454">"Chế độ máy tính"</string>
+    <string name="split_screen_text" msgid="1396336058129570886">"Chia đôi màn hình"</string>
+    <string name="more_button_text" msgid="3655388105592893530">"Tuỳ chọn khác"</string>
+    <string name="float_button_text" msgid="9221657008391364581">"Nổi"</string>
 </resources>

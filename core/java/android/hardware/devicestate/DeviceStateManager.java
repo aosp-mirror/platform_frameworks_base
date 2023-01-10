@@ -16,6 +16,7 @@
 
 package android.hardware.devicestate;
 
+import android.Manifest;
 import android.annotation.CallbackExecutor;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
@@ -50,6 +51,22 @@ public final class DeviceStateManager {
 
     /** The maximum allowed device state identifier. */
     public static final int MAXIMUM_DEVICE_STATE = 255;
+
+    /**
+     * Intent needed to launch the rear display overlay activity from SysUI
+     *
+     * @hide
+     */
+    public static final String ACTION_SHOW_REAR_DISPLAY_OVERLAY =
+            "com.android.intent.action.SHOW_REAR_DISPLAY_OVERLAY";
+
+    /**
+     * Intent extra sent to the rear display overlay activity of the current base state
+     *
+     * @hide
+     */
+    public static final String EXTRA_ORIGINAL_DEVICE_BASE_STATE =
+            "original_device_base_state";
 
     private final DeviceStateManagerGlobal mGlobal;
 
@@ -112,6 +129,52 @@ public final class DeviceStateManager {
             conditional = true)
     public void cancelStateRequest() {
         mGlobal.cancelStateRequest();
+    }
+
+    /**
+     * Submits a {@link DeviceStateRequest request} to override the base state of the device. This
+     * should only be used for testing, where you want to simulate the physical change to the
+     * device state.
+     * <p>
+     * By default, the request is kept active until one of the following occurs:
+     * <ul>
+     *     <li>The physical state of the device changes</li>
+     *     <li>The system deems the request can no longer be honored, for example if the requested
+     *     state becomes unsupported.
+     *     <li>A call to {@link #cancelBaseStateOverride}.
+     *     <li>Another processes submits a request succeeding this request in which case the request
+     *     will be canceled.
+     * </ul>
+     *
+     * Submitting a base state override request may not cause any change in the presentation
+     * of the system if there is an emulated request made through {@link #requestState}, as the
+     * emulated override requests take priority.
+     *
+     * @throws IllegalArgumentException if the requested state is unsupported.
+     * @throws SecurityException if the caller does not hold the
+     * {@link android.Manifest.permission#CONTROL_DEVICE_STATE} permission.
+     *
+     * @see DeviceStateRequest
+     */
+    @RequiresPermission(android.Manifest.permission.CONTROL_DEVICE_STATE)
+    public void requestBaseStateOverride(@NonNull DeviceStateRequest request,
+            @Nullable @CallbackExecutor Executor executor,
+            @Nullable DeviceStateRequest.Callback callback) {
+        mGlobal.requestBaseStateOverride(request, executor, callback);
+    }
+
+    /**
+     * Cancels the active {@link DeviceStateRequest} previously submitted with a call to
+     * {@link #requestBaseStateOverride(DeviceStateRequest, Executor, DeviceStateRequest.Callback)}.
+     * <p>
+     * This method is noop if there is no base state request currently active.
+     *
+     * @throws SecurityException if the caller does not hold the
+     * {@link android.Manifest.permission#CONTROL_DEVICE_STATE} permission.
+     */
+    @RequiresPermission(Manifest.permission.CONTROL_DEVICE_STATE)
+    public void cancelBaseStateOverride() {
+        mGlobal.cancelBaseStateOverride();
     }
 
     /**

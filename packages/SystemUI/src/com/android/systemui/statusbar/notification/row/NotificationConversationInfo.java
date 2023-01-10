@@ -154,10 +154,10 @@ public class NotificationConversationInfo extends LinearLayout implements
         // If the user selected Priority and the previous selection was not priority, show a
         // People Tile add request.
         if (mSelectedAction == ACTION_FAVORITE && getPriority() != mSelectedAction) {
-            mShadeController.animateCollapsePanels();
+            mShadeController.animateCollapseShade();
             mPeopleSpaceWidgetManager.requestPinAppWidget(mShortcutInfo, new Bundle());
         }
-        mGutsContainer.closeControls(v, true);
+        mGutsContainer.closeControls(v, /* save= */ true);
     };
 
     public NotificationConversationInfo(Context context, AttributeSet attrs) {
@@ -186,7 +186,6 @@ public class NotificationConversationInfo extends LinearLayout implements
     }
 
     public void bindNotification(
-            @Action int selectedAction,
             ShortcutManager shortcutManager,
             PackageManager pm,
             PeopleSpaceWidgetManager peopleSpaceWidgetManager,
@@ -205,8 +204,6 @@ public class NotificationConversationInfo extends LinearLayout implements
             OnConversationSettingsClickListener onConversationSettingsClickListener,
             Optional<BubblesManager> bubblesManagerOptional,
             ShadeController shadeController) {
-        mPressedApply = false;
-        mSelectedAction = selectedAction;
         mINotificationManager = iNotificationManager;
         mPeopleSpaceWidgetManager = peopleSpaceWidgetManager;
         mOnUserInteractionCallback = onUserInteractionCallback;
@@ -417,9 +414,7 @@ public class NotificationConversationInfo extends LinearLayout implements
     }
 
     @Override
-    public void onFinishedClosing() {
-        mSelectedAction = -1;
-    }
+    public void onFinishedClosing() { }
 
     @Override
     public boolean needsFalsingProtection() {
@@ -564,7 +559,7 @@ public class NotificationConversationInfo extends LinearLayout implements
     }
 
     @Override
-    public boolean shouldBeSaved() {
+    public boolean shouldBeSavedOnClose() {
         return mPressedApply;
     }
 
@@ -578,6 +573,12 @@ public class NotificationConversationInfo extends LinearLayout implements
         if (save && mSelectedAction > -1) {
             updateChannel();
         }
+
+        // Clear the selected importance when closing, so when when we open again,
+        // we starts from a clean state.
+        mSelectedAction = -1;
+        mPressedApply = false;
+
         return false;
     }
 

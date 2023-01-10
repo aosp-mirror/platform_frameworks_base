@@ -39,6 +39,7 @@ import android.graphics.Canvas;
 import android.graphics.Point;
 import android.graphics.Rect;
 import android.os.Bundle;
+import android.os.RemoteException;
 import android.util.AttributeSet;
 import android.util.Log;
 import android.util.SparseArray;
@@ -51,6 +52,7 @@ import android.view.ViewGroup;
 import android.view.WindowInsets;
 import android.view.WindowInsetsController.Behavior;
 import android.view.WindowManager;
+import android.view.WindowManagerGlobal;
 import android.view.accessibility.AccessibilityNodeInfo;
 import android.view.accessibility.AccessibilityNodeInfo.AccessibilityAction;
 import android.widget.FrameLayout;
@@ -78,7 +80,6 @@ import com.android.systemui.shared.rotation.RotationButton.RotationButtonUpdates
 import com.android.systemui.shared.rotation.RotationButtonController;
 import com.android.systemui.shared.system.ActivityManagerWrapper;
 import com.android.systemui.shared.system.QuickStepContract;
-import com.android.systemui.shared.system.WindowManagerWrapper;
 import com.android.systemui.statusbar.phone.AutoHideController;
 import com.android.systemui.statusbar.phone.CentralSurfaces;
 import com.android.systemui.statusbar.phone.LightBarTransitionsController;
@@ -147,6 +148,7 @@ public class NavigationBarView extends FrameLayout {
 
     private NavigationBarInflaterView mNavigationInflaterView;
     private Optional<Recents> mRecentsOptional = Optional.empty();
+    @Nullable
     private NotificationPanelViewController mPanelView;
     private RotationContextButton mRotationContextButton;
     private FloatingRotationButton mFloatingRotationButton;
@@ -775,10 +777,21 @@ public class NavigationBarView extends FrameLayout {
         updateSlippery();
         reloadNavIcons();
         updateNavButtonIcons();
-        mBgExecutor.execute(() -> WindowManagerWrapper.getInstance()
-                .setNavBarVirtualKeyHapticFeedbackEnabled(!mShowSwipeUpUi));
+        mBgExecutor.execute(() -> setNavBarVirtualKeyHapticFeedbackEnabled(!mShowSwipeUpUi));
         getHomeButton().setAccessibilityDelegate(
                 mShowSwipeUpUi ? mQuickStepAccessibilityDelegate : null);
+    }
+
+    /**
+     * Enable or disable haptic feedback on the navigation bar buttons.
+     */
+    private void setNavBarVirtualKeyHapticFeedbackEnabled(boolean enabled) {
+        try {
+            WindowManagerGlobal.getWindowManagerService()
+                    .setNavBarVirtualKeyHapticFeedbackEnabled(enabled);
+        } catch (RemoteException e) {
+            Log.w(TAG, "Failed to enable or disable navigation bar button haptics: ", e);
+        }
     }
 
     /**

@@ -15,12 +15,11 @@
 package com.android.systemui.unfold.util
 
 import android.content.Context
-import android.os.RemoteException
-import android.view.IRotationWatcher
-import android.view.IWindowManager
 import android.view.Surface
 import com.android.systemui.unfold.UnfoldTransitionProgressProvider
 import com.android.systemui.unfold.UnfoldTransitionProgressProvider.TransitionProgressListener
+import com.android.systemui.unfold.updates.RotationChangeProvider
+import com.android.systemui.unfold.updates.RotationChangeProvider.RotationListener
 
 /**
  * [UnfoldTransitionProgressProvider] that emits transition progress only when the display has
@@ -29,27 +28,21 @@ import com.android.systemui.unfold.UnfoldTransitionProgressProvider.TransitionPr
  */
 class NaturalRotationUnfoldProgressProvider(
     private val context: Context,
-    private val windowManagerInterface: IWindowManager,
+    private val rotationChangeProvider: RotationChangeProvider,
     unfoldTransitionProgressProvider: UnfoldTransitionProgressProvider
 ) : UnfoldTransitionProgressProvider {
 
     private val scopedUnfoldTransitionProgressProvider =
         ScopedUnfoldTransitionProgressProvider(unfoldTransitionProgressProvider)
-    private val rotationWatcher = RotationWatcher()
 
     private var isNaturalRotation: Boolean = false
 
     fun init() {
-        try {
-            windowManagerInterface.watchRotation(rotationWatcher, context.display.displayId)
-        } catch (e: RemoteException) {
-            throw e.rethrowFromSystemServer()
-        }
-
-        onRotationChanged(context.display.rotation)
+        rotationChangeProvider.addCallback(rotationListener)
+        rotationListener.onRotationChanged(context.display.rotation)
     }
 
-    private fun onRotationChanged(rotation: Int) {
+    private val rotationListener = RotationListener { rotation ->
         val isNewRotationNatural =
             rotation == Surface.ROTATION_0 || rotation == Surface.ROTATION_180
 
@@ -60,12 +53,7 @@ class NaturalRotationUnfoldProgressProvider(
     }
 
     override fun destroy() {
-        try {
-            windowManagerInterface.removeRotationWatcher(rotationWatcher)
-        } catch (e: RemoteException) {
-            e.rethrowFromSystemServer()
-        }
-
+        rotationChangeProvider.removeCallback(rotationListener)
         scopedUnfoldTransitionProgressProvider.destroy()
     }
 
@@ -75,11 +63,5 @@ class NaturalRotationUnfoldProgressProvider(
 
     override fun removeCallback(listener: TransitionProgressListener) {
         scopedUnfoldTransitionProgressProvider.removeCallback(listener)
-    }
-
-    private inner class RotationWatcher : IRotationWatcher.Stub() {
-        override fun onRotationChanged(rotation: Int) {
-            this@NaturalRotationUnfoldProgressProvider.onRotationChanged(rotation)
-        }
     }
 }

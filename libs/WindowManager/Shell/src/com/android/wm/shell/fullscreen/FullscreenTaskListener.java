@@ -19,9 +19,9 @@ package com.android.wm.shell.fullscreen;
 import static com.android.wm.shell.ShellTaskOrganizer.TASK_LISTENER_TYPE_FULLSCREEN;
 import static com.android.wm.shell.ShellTaskOrganizer.taskListenerTypeToString;
 
+import android.app.ActivityManager;
 import android.app.ActivityManager.RunningTaskInfo;
 import android.graphics.Point;
-import android.util.Slog;
 import android.util.SparseArray;
 import android.view.SurfaceControl;
 
@@ -34,36 +34,46 @@ import com.android.wm.shell.protolog.ShellProtoLogGroup;
 import com.android.wm.shell.recents.RecentTasksController;
 import com.android.wm.shell.sysui.ShellInit;
 import com.android.wm.shell.transition.Transitions;
+import com.android.wm.shell.windowdecor.WindowDecorViewModel;
 
 import java.io.PrintWriter;
 import java.util.Optional;
 
 /**
   * Organizes tasks presented in {@link android.app.WindowConfiguration.WINDOWING_MODE_FULLSCREEN}.
+ * @param <T> the type of window decoration instance
   */
 public class FullscreenTaskListener implements ShellTaskOrganizer.TaskListener {
     private static final String TAG = "FullscreenTaskListener";
 
     private final ShellTaskOrganizer mShellTaskOrganizer;
+
+    private final SparseArray<State> mTasks = new SparseArray<>();
+
+    private static class State {
+        RunningTaskInfo mTaskInfo;
+        SurfaceControl mLeash;
+    }
     private final SyncTransactionQueue mSyncQueue;
     private final Optional<RecentTasksController> mRecentTasksOptional;
-
-    private final SparseArray<TaskData> mDataByTaskId = new SparseArray<>();
-
+    private final Optional<WindowDecorViewModel> mWindowDecorViewModelOptional;
     /**
      * This constructor is used by downstream products.
      */
     public FullscreenTaskListener(SyncTransactionQueue syncQueue) {
-        this(null /* shellInit */, null /* shellTaskOrganizer */, syncQueue, Optional.empty());
+        this(null /* shellInit */, null /* shellTaskOrganizer */, syncQueue, Optional.empty(),
+                Optional.empty());
     }
 
     public FullscreenTaskListener(ShellInit shellInit,
             ShellTaskOrganizer shellTaskOrganizer,
             SyncTransactionQueue syncQueue,
-            Optional<RecentTasksController> recentTasksOptional) {
+            Optional<RecentTasksController> recentTasksOptional,
+            Optional<WindowDecorViewModel> windowDecorViewModelOptional) {
         mShellTaskOrganizer = shellTaskOrganizer;
         mSyncQueue = syncQueue;
         mRecentTasksOptional = recentTasksOptional;
+        mWindowDecorViewModelOptional = windowDecorViewModelOptional;
         // Note: Some derivative FullscreenTaskListener implementations do not use ShellInit
         if (shellInit != null) {
             shellInit.addInitCallback(this::onInit, this);
@@ -76,55 +86,69 @@ public class FullscreenTaskListener implements ShellTaskOrganizer.TaskListener {
 
     @Override
     public void onTaskAppeared(RunningTaskInfo taskInfo, SurfaceControl leash) {
-        if (mDataByTaskId.get(taskInfo.taskId) != null) {
+        if (mTasks.get(taskInfo.taskId) != null) {
             throw new IllegalStateException("Task appeared more than once: #" + taskInfo.taskId);
         }
         ProtoLog.v(ShellProtoLogGroup.WM_SHELL_TASK_ORG, "Fullscreen Task Appeared: #%d",
                 taskInfo.taskId);
         final Point positionInParent = taskInfo.positionInParent;
-        mDataByTaskId.put(taskInfo.taskId, new TaskData(leash, positionInParent));
+        final State state = new State();
+        state.mLeash = leash;
+        state.mTaskInfo = taskInfo;
+        mTasks.put(taskInfo.taskId, state);
 
         if (Transitions.ENABLE_SHELL_TRANSITIONS) return;
-        mSyncQueue.runInSync(t -> {
-            // Reset several properties back to fullscreen (PiP, for example, leaves all these
-            // properties in a bad state).
-            t.setWindowCrop(leash, null);
-            t.setPosition(leash, positionInParent.x, positionInParent.y);
-            t.setAlpha(leash, 1f);
-            t.setMatrix(leash, 1, 0, 0, 1);
-            t.show(leash);
-        });
-
         updateRecentsForVisibleFullscreenTask(taskInfo);
-    }
-
-    @Override
-    public void onTaskInfoChanged(RunningTaskInfo taskInfo) {
-        if (Transitions.ENABLE_SHELL_TRANSITIONS) return;
-
-        updateRecentsForVisibleFullscreenTask(taskInfo);
-
-        final TaskData data = mDataByTaskId.get(taskInfo.taskId);
-        final Point positionInParent = taskInfo.positionInParent;
-        if (!positionInParent.equals(data.positionInParent)) {
-            data.positionInParent.set(positionInParent.x, positionInParent.y);
+        boolean createdWindowDecor = false;
+        if (mWindowDecorViewModelOptional.isPresent()) {
+            SurfaceControl.Transaction t = new SurfaceControl.Transaction();
+            createdWindowDecor = mWindowDecorViewModelOptional.get()
+                    .onTaskOpening(taskInfo, leash, t, t);
+            t.apply();
+        }
+        if (!createdWindowDecor) {
             mSyncQueue.runInSync(t -> {
-                t.setPosition(data.surface, positionInParent.x, positionInParent.y);
+                // Reset several properties back to fullscreen (PiP, for example, leaves all these
+                // properties in a bad state).
+                t.setWindowCrop(leash, null);
+                t.setPosition(leash, positionInParent.x, positionInParent.y);
+                t.setAlpha(leash, 1f);
+                t.setMatrix(leash, 1, 0, 0, 1);
+                t.show(leash);
             });
         }
     }
 
     @Override
-    public void onTaskVanished(RunningTaskInfo taskInfo) {
-        if (mDataByTaskId.get(taskInfo.taskId) == null) {
-            Slog.e(TAG, "Task already vanished: #" + taskInfo.taskId);
-            return;
+    public void onTaskInfoChanged(RunningTaskInfo taskInfo) {
+        final State state = mTasks.get(taskInfo.taskId);
+        final Point oldPositionInParent = state.mTaskInfo.positionInParent;
+
+        if (mWindowDecorViewModelOptional.isPresent()) {
+            mWindowDecorViewModelOptional.get().onTaskInfoChanged(taskInfo);
         }
+        state.mTaskInfo = taskInfo;
+        if (Transitions.ENABLE_SHELL_TRANSITIONS) return;
+        updateRecentsForVisibleFullscreenTask(taskInfo);
 
-        mDataByTaskId.remove(taskInfo.taskId);
+        final Point positionInParent = state.mTaskInfo.positionInParent;
+        if (!oldPositionInParent.equals(state.mTaskInfo.positionInParent)) {
+            mSyncQueue.runInSync(t -> {
+                t.setPosition(state.mLeash, positionInParent.x, positionInParent.y);
+            });
+        }
+    }
 
+    @Override
+    public void onTaskVanished(ActivityManager.RunningTaskInfo taskInfo) {
         ProtoLog.v(ShellProtoLogGroup.WM_SHELL_TASK_ORG, "Fullscreen Task Vanished: #%d",
                 taskInfo.taskId);
+        mTasks.remove(taskInfo.taskId);
+
+        if (Transitions.ENABLE_SHELL_TRANSITIONS) return;
+        if (mWindowDecorViewModelOptional.isPresent()) {
+            mWindowDecorViewModelOptional.get().destroyWindowDecoration(taskInfo);
+        }
     }
 
     private void updateRecentsForVisibleFullscreenTask(RunningTaskInfo taskInfo) {
@@ -148,34 +172,21 @@ public class FullscreenTaskListener implements ShellTaskOrganizer.TaskListener {
     }
 
     private SurfaceControl findTaskSurface(int taskId) {
-        if (!mDataByTaskId.contains(taskId)) {
+        if (!mTasks.contains(taskId)) {
             throw new IllegalArgumentException("There is no surface for taskId=" + taskId);
         }
-        return mDataByTaskId.get(taskId).surface;
+        return mTasks.get(taskId).mLeash;
     }
 
     @Override
     public void dump(@NonNull PrintWriter pw, String prefix) {
         final String innerPrefix = prefix + "  ";
         pw.println(prefix + this);
-        pw.println(innerPrefix + mDataByTaskId.size() + " Tasks");
+        pw.println(innerPrefix + mTasks.size() + " Tasks");
     }
 
     @Override
     public String toString() {
         return TAG + ":" + taskListenerTypeToString(TASK_LISTENER_TYPE_FULLSCREEN);
-    }
-
-    /**
-     * Per-task data for each managed task.
-     */
-    private static class TaskData {
-        public final SurfaceControl surface;
-        public final Point positionInParent;
-
-        public TaskData(SurfaceControl surface, Point positionInParent) {
-            this.surface = surface;
-            this.positionInParent = positionInParent;
-        }
     }
 }

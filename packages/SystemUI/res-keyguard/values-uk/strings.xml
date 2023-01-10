@@ -26,11 +26,11 @@
     <string name="keyguard_sim_error_message_short" msgid="633630844240494070">"Недійсна картка."</string>
     <string name="keyguard_charged" msgid="5478247181205188995">"Заряджено"</string>
     <string name="keyguard_plugged_in_wireless" msgid="2537874724955057383">"<xliff:g id="PERCENTAGE">%s</xliff:g> • Бездротове заряджання"</string>
-    <string name="keyguard_plugged_in_dock" msgid="449722738270908674">"<xliff:g id="PERCENTAGE">%s</xliff:g> • Док-станція для заряджання"</string>
+    <string name="keyguard_plugged_in_dock" msgid="2122073051904360987">"<xliff:g id="PERCENTAGE">%s</xliff:g> • Заряджання"</string>
     <string name="keyguard_plugged_in" msgid="8169926454348380863">"<xliff:g id="PERCENTAGE">%s</xliff:g> • Заряджання"</string>
     <string name="keyguard_plugged_in_charging_fast" msgid="4386594091107340426">"<xliff:g id="PERCENTAGE">%s</xliff:g> • Швидке заряджання"</string>
     <string name="keyguard_plugged_in_charging_slowly" msgid="217655355424210">"<xliff:g id="PERCENTAGE">%s</xliff:g> • Повільне заряджання"</string>
-    <string name="keyguard_plugged_in_charging_limited" msgid="6091488837901216962">"<xliff:g id="PERCENTAGE">%s</xliff:g> • Заряджання тимчасово обмежено"</string>
+    <string name="keyguard_plugged_in_charging_limited" msgid="1053130519456324630">"<xliff:g id="PERCENTAGE">%s</xliff:g> • Заряджання оптимізовано, щоб захистити акумулятор"</string>
     <string name="keyguard_instructions_when_pattern_disabled" msgid="8448804180089936954">"Натисніть меню, щоб розблокувати."</string>
     <string name="keyguard_network_locked_message" msgid="407096292844868608">"Мережу заблоковано"</string>
     <string name="keyguard_missing_sim_message_short" msgid="704159478161444907">"Немає SIM-карти"</string>
@@ -78,9 +78,9 @@
     <string name="kg_prompt_reason_restart_pattern" msgid="4720554342633852066">"Після перезавантаження пристрою потрібно ввести ключ"</string>
     <string name="kg_prompt_reason_restart_pin" msgid="1587671566498057656">"Після перезавантаження пристрою потрібно ввести PIN-код"</string>
     <string name="kg_prompt_reason_restart_password" msgid="8061279087240952002">"Після перезавантаження пристрою потрібно ввести пароль"</string>
-    <string name="kg_prompt_reason_timeout_pattern" msgid="9170360502528959889">"Для додаткового захисту потрібно ввести ключ"</string>
-    <string name="kg_prompt_reason_timeout_pin" msgid="5945186097160029201">"Для додаткового захисту потрібно ввести PIN-код"</string>
-    <string name="kg_prompt_reason_timeout_password" msgid="2258263949430384278">"Для додаткового захисту потрібно ввести пароль"</string>
+    <string name="kg_prompt_reason_timeout_pattern" msgid="5514969660010197363">"З міркувань додаткової безпеки скористайтеся ключем"</string>
+    <string name="kg_prompt_reason_timeout_pin" msgid="4227962059353859376">"З міркувань додаткової безпеки скористайтеся PIN-кодом"</string>
+    <string name="kg_prompt_reason_timeout_password" msgid="8810879144143933690">"З міркувань додаткової безпеки скористайтеся паролем"</string>
     <string name="kg_prompt_reason_device_admin" msgid="6961159596224055685">"Адміністратор заблокував пристрій"</string>
     <string name="kg_prompt_reason_user_request" msgid="6015774877733717904">"Пристрій заблоковано вручну"</string>
     <string name="kg_face_not_recognized" msgid="7903950626744419160">"Не розпізнано"</string>
@@ -90,4 +90,5 @@
     <string name="clock_title_default" msgid="6342735240617459864">"За умовчанням"</string>
     <string name="clock_title_bubble" msgid="2204559396790593213">"Бульбашковий"</string>
     <string name="clock_title_analog" msgid="8409262532900918273">"Аналоговий"</string>
+    <string name="keyguard_unlock_to_continue" msgid="7509503484250597743">"Розблокуйте пристрій, щоб продовжити"</string>
 </resources>

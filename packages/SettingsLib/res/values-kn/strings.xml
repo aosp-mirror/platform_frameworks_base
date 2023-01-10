@@ -125,9 +125,9 @@
     <string name="bluetooth_profile_a2dp_high_quality" msgid="4739440941324792775">"HD ಆಡಿಯೋ: <xliff:g id="CODEC_NAME">%1$s</xliff:g>"</string>
     <string name="bluetooth_profile_a2dp_high_quality_unknown_codec" msgid="2477639096903834374">"HD ಆಡಿಯೋ"</string>
     <string name="bluetooth_profile_hearing_aid" msgid="58154575573984914">"ಶ್ರವಣ ಸಾಧನಗಳು"</string>
-    <string name="bluetooth_profile_le_audio" msgid="5158149987518342036">"LE_AUDIO"</string>
+    <string name="bluetooth_profile_le_audio" msgid="3237854988278539061">"LE ಆಡಿಯೋ"</string>
     <string name="bluetooth_hearing_aid_profile_summary_connected" msgid="8191273236809964030">"ಶ್ರವಣ ಸಾಧನಗಳಿಗೆ ಸಂಪರ್ಕಿಸಲಾಗಿದೆ"</string>
-    <string name="bluetooth_le_audio_profile_summary_connected" msgid="3162538609379333442">"LE_AUDIO ಗೆ ಕನೆಕ್ಟ್ ಆಗಿದೆ"</string>
+    <string name="bluetooth_le_audio_profile_summary_connected" msgid="6916226974453480650">"LE ಆಡಿಯೋಗೆ ಕನೆಕ್ಟ್ ಮಾಡಲಾಗಿದೆ"</string>
     <string name="bluetooth_a2dp_profile_summary_connected" msgid="7422607970115444153">"ಮಾಧ್ಯಮ ಆಡಿಯೋಗೆ ಸಂಪರ್ಕಗೊಂಡಿದೆ"</string>
     <string name="bluetooth_headset_profile_summary_connected" msgid="2420981566026949688">"ಫೋನ್ ಆಡಿಯೋಗೆ ಸಂಪರ್ಕಗೊಂಡಿದೆ"</string>
     <string name="bluetooth_opp_profile_summary_connected" msgid="2393521801478157362">"ಫೈಲ್ ವರ್ಗಾವಣೆ ಸರ್ವರ್‌ಗೆ ಸಂಪರ್ಕಗೊಂಡಿದೆ"</string>
@@ -408,6 +408,7 @@
     <string name="force_resizable_activities_summary" msgid="2490382056981583062">"ಮ್ಯಾನಿಫೆಸ್ಟ್ ಮೌಲ್ಯಗಳನ್ನು ಪರಿಗಣಿಸದೇ, ಬಹು-ವಿಂಡೊಗೆ ಎಲ್ಲಾ ಚಟುವಟಿಕೆಗಳನ್ನು ಮರುಗಾತ್ರಗೊಳಿಸುವಂತೆ ಮಾಡಿ."</string>
     <string name="enable_freeform_support" msgid="7599125687603914253">"ಮುಕ್ತಸ್ವರೂಪದ ವಿಂಡೊಗಳನ್ನು ಸಕ್ರಿಯಗೊಳಿಸಿ"</string>
     <string name="enable_freeform_support_summary" msgid="1822862728719276331">"ಪ್ರಾಯೋಗಿಕ ಫ್ರೀಫಾರ್ಮ್ ವಿಂಡೊಗಳಿಗೆ ಬೆಂಬಲವನ್ನು ಸಕ್ರಿಯಗೊಳಿಸಿ."</string>
+    <string name="desktop_mode" msgid="2389067840550544462">"ಡೆಸ್ಕ್‌ಟಾಪ್ ಮೋಡ್"</string>
     <string name="local_backup_password_title" msgid="4631017948933578709">"ಡೆಸ್ಕ್‌ಟಾಪ್ ಬ್ಯಾಕಪ್ ಪಾಸ್‌ವರ್ಡ್"</string>
     <string name="local_backup_password_summary_none" msgid="7646898032616361714">"ಡೆಸ್ಕ್‌ಟಾಪ್‌‌ನ ಪೂರ್ಣ ಬ್ಯಾಕಪ್‌‌ಗಳನ್ನು ಪ್ರಸ್ತುತ ರಕ್ಷಿಸಲಾಗಿಲ್ಲ"</string>
     <string name="local_backup_password_summary_change" msgid="1707357670383995567">"ಡೆಸ್ಕ್‌ಟಾಪ್‌ನ ಪೂರ್ಣ ಬ್ಯಾಕಪ್‌ಗಳಿಗೆ ಪಾಸ್‌ವರ್ಡ್‌ ಬದಲಾಯಿಸಲು ಅಥವಾ ತೆಗೆದುಹಾಕಲು ಟ್ಯಾಪ್ ಮಾಡಿ"</string>
@@ -476,13 +477,14 @@
     <string name="power_charging" msgid="6727132649743436802">"<xliff:g id="LEVEL">%1$s</xliff:g> - <xliff:g id="STATE">%2$s</xliff:g>"</string>
     <string name="power_remaining_charging_duration_only" msgid="8085099012811384899">"<xliff:g id="TIME">%1$s</xliff:g> - ಸಮಯದಲ್ಲಿ ಪೂರ್ತಿ ಚಾರ್ಜ್ ಆಗುತ್ತದೆ"</string>
     <string name="power_charging_duration" msgid="6127154952524919719">"<xliff:g id="LEVEL">%1$s</xliff:g> - <xliff:g id="TIME">%2$s</xliff:g> ಸಮಯದಲ್ಲಿ ಪೂರ್ತಿ ಚಾರ್ಜ್ ಆಗುತ್ತದೆ"</string>
-    <string name="power_charging_limited" msgid="7956120998372505295">"<xliff:g id="LEVEL">%1$s</xliff:g> - ಚಾರ್ಜಿಂಗ್ ಅನ್ನು ತಾತ್ಕಾಲಿಕವಾಗಿ ಸೀಮಿತಗೊಳಿಸಲಾಗಿದೆ"</string>
+    <string name="power_charging_limited" msgid="8202147604844938236">"<xliff:g id="LEVEL">%1$s</xliff:g> - ಚಾರ್ಜಿಂಗ್ ಅನ್ನು ಆಪ್ಟಿಮೈಸ್ ಮಾಡಲಾಗಿದೆ"</string>
+    <string name="power_charging_future_paused" msgid="4730177778538118032">"<xliff:g id="LEVEL">%1$s</xliff:g> - ಚಾರ್ಜಿಂಗ್ ಅನ್ನು ಆಪ್ಟಿಮೈಸ್ ಮಾಡಲಾಗಿದೆ"</string>
     <string name="battery_info_status_unknown" msgid="268625384868401114">"ಅಪರಿಚಿತ"</string>
     <string name="battery_info_status_charging" msgid="4279958015430387405">"ಚಾರ್ಜ್ ಆಗುತ್ತಿದೆ"</string>
     <string name="battery_info_status_charging_fast" msgid="8027559755902954885">"ವೇಗದ ಚಾರ್ಜಿಂಗ್"</string>
     <string name="battery_info_status_charging_slow" msgid="3190803837168962319">"ನಿಧಾನ ಗತಿಯ ಚಾರ್ಜಿಂಗ್"</string>
     <string name="battery_info_status_charging_wireless" msgid="8924722966861282197">"ವೈರ್‌ಲೆಸ್ ಚಾರ್ಜಿಂಗ್"</string>
-    <string name="battery_info_status_charging_dock" msgid="3554147903321236585">"ಚಾರ್ಜಿಂಗ್ ಡಾಕ್"</string>
+    <string name="battery_info_status_charging_dock" msgid="8573274094093364791">"ಚಾರ್ಜ್ ಆಗುತ್ತಿದೆ"</string>
     <string name="battery_info_status_discharging" msgid="6962689305413556485">"ಚಾರ್ಜ್‌ ಆಗುತ್ತಿಲ್ಲ"</string>
     <string name="battery_info_status_not_charging" msgid="3371084153747234837">"ಕನೆಕ್ಟ್ ಆಗಿದೆ, ಚಾರ್ಜ್ ಆಗುತ್ತಿಲ್ಲ"</string>
     <string name="battery_info_status_full" msgid="1339002294876531312">"ಚಾರ್ಜ್ ಆಗಿದೆ"</string>
@@ -655,13 +657,6 @@
     <string name="accessibility_ethernet_disconnected" msgid="2832501530856497489">"ಇಥರ್ನೆಟ್ ಸಂಪರ್ಕ ಕಡಿತಗೊಳಿಸಲಾಗಿದೆ."</string>
     <string name="accessibility_ethernet_connected" msgid="6175942685957461563">"ಇಥರ್ನೆಟ್."</string>
     <string name="accessibility_no_calling" msgid="3540827068323895748">"ಕರೆ ಮಾಡಲಾಗುವುದಿಲ್ಲ."</string>
-    <string name="dream_complication_title_time" msgid="701747800712893499">"ಸಮಯ"</string>
-    <string name="dream_complication_title_date" msgid="8661176085446135789">"ದಿನಾಂಕ"</string>
-    <string name="dream_complication_title_weather" msgid="598609151677172783">"ಹವಾಮಾನ"</string>
-    <string name="dream_complication_title_aqi" msgid="4587552608957834110">"ವಾಯು ಗುಣಮಟ್ಟ"</string>
-    <string name="dream_complication_title_cast_info" msgid="4038776652841885084">"ಬಿತ್ತರಿಸಿದ ಮಾಹಿತಿ"</string>
-    <!-- no translation found for dream_complication_title_home_controls (9153381632476738811) -->
-    <skip />
     <string name="avatar_picker_title" msgid="8492884172713170652">"ಪ್ರೊಫೈಲ್ ಚಿತ್ರವನ್ನು ಆಯ್ಕೆ ಮಾಡಿ"</string>
     <string name="default_user_icon_description" msgid="6554047177298972638">"ಡೀಫಾಲ್ಟ್ ಬಳಕೆದಾರರ ಐಕಾನ್"</string>
     <string name="physical_keyboard_title" msgid="4811935435315835220">"ಭೌತಿಕ ಕೀಬೋರ್ಡ್"</string>
@@ -674,7 +669,7 @@
     <string name="bt_le_audio_broadcast_dialog_sub_title" msgid="268234802198852753">"ನೀವು <xliff:g id="SWITCHAPP">%1$s</xliff:g> ಅನ್ನು ಪ್ರಸಾರ ಮಾಡಿದರೆ ಅಥವಾ ಔಟ್‌ಪುಟ್ ಅನ್ನು ಬದಲಾಯಿಸಿದರೆ, ನಿಮ್ಮ ಪ್ರಸ್ತುತ ಪ್ರಸಾರವು ಸ್ಥಗಿತಗೊಳ್ಳುತ್ತದೆ"</string>
     <string name="bt_le_audio_broadcast_dialog_switch_app" msgid="5749813313369517812">"<xliff:g id="SWITCHAPP">%1$s</xliff:g> ಅನ್ನು ಪ್ರಸಾರ ಮಾಡಿ"</string>
     <string name="bt_le_audio_broadcast_dialog_different_output" msgid="2638402023060391333">"ಔಟ್‌ಪುಟ್ ಅನ್ನು ಬದಲಾಯಿಸಿ"</string>
-    <string name="back_navigation_animation" msgid="8105467568421689484">"ಮುನ್ನೋಟದ ಬ್ಯಾಕ್ ಆ್ಯನಿಮೇಶನ್‌ಗಳು"</string>
-    <string name="back_navigation_animation_summary" msgid="741292224121599456">"ಮುನ್ನೋಟದ ಬ್ಯಾಕ್ ಗೆಸ್ಚರ್‌ಗಾಗಿ ಸಿಸ್ಟಂ ಆ್ಯನಿಮೇಶನ್‌ಗಳನ್ನು ಸಕ್ರಿಯಗೊಳಿಸಿ."</string>
+    <string name="back_navigation_animation" msgid="8105467568421689484">"ಮುನ್ಸೂಚಕ ಬ್ಯಾಕ್ ಆ್ಯನಿಮೇಶನ್‌ಗಳು"</string>
+    <string name="back_navigation_animation_summary" msgid="741292224121599456">"ಮುನ್ಸೂಚಕ ಬ್ಯಾಕ್ ಗೆಸ್ಚರ್‌ಗಾಗಿ ಸಿಸ್ಟಂ ಆ್ಯನಿಮೇಶನ್‌ಗಳನ್ನು ಸಕ್ರಿಯಗೊಳಿಸಿ."</string>
     <string name="back_navigation_animation_dialog" msgid="8696966520944625596">"ಮುನ್ನೋಟದ ಗೆಸ್ಚರ್ ಆ್ಯನಿಮೇಶನ್‌ಗಾಗಿ ಸಿಸ್ಟಂ ಆ್ಯನಿಮೇಶನ್‌ಗಳನ್ನು ಈ ಸೆಟ್ಟಿಂಗ್ ಸಕ್ರಿಯಗೊಳಿಸುತ್ತವೆ. ಇದನ್ನು ಮಾಡಲು, ಪ್ರತಿ ಆ್ಯಪ್‌ನ ಮ್ಯಾನಿಫೆಸ್ಟ್ ಫೈಲ್‌ನಲ್ಲಿರುವ enableOnBackInvokedCallback ಪ್ಯಾರಾಮೀಟರ್ ಅನ್ನು ಸರಿ ಎಂದು ಹೊಂದಿಸಬೇಕು."</string>
 </resources>

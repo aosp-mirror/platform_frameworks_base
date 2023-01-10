@@ -3846,6 +3846,7 @@ public abstract class Context {
             WIFI_RTT_RANGING_SERVICE,
             NSD_SERVICE,
             AUDIO_SERVICE,
+            AUDIO_DEVICE_VOLUME_SERVICE,
             AUTH_SERVICE,
             FINGERPRINT_SERVICE,
             //@hide: FACE_SERVICE,
@@ -4685,6 +4686,17 @@ public abstract class Context {
      * @see android.media.AudioManager
      */
     public static final String AUDIO_SERVICE = "audio";
+
+    /**
+     * @hide
+     * Use with {@link #getSystemService(String)} to retrieve a
+     * {@link android.media.AudioDeviceVolumeManager} for handling management of audio device
+     * (e.g. speaker, USB headset) volume.
+     *
+     * @see #getSystemService(String)
+     * @see android.media.AudioDeviceVolumeManager
+     */
+    public static final String AUDIO_DEVICE_VOLUME_SERVICE = "audio_device_volume";
 
     /**
      * Use with {@link #getSystemService(String)} to retrieve a {@link

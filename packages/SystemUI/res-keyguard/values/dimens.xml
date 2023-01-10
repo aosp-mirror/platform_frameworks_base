@@ -41,12 +41,11 @@
     <!-- Minimum bottom margin under the security view -->
     <dimen name="keyguard_security_view_bottom_margin">60dp</dimen>
 
+    <!-- Margin above the ambient indication container -->
+    <dimen name="ambient_indication_container_margin_top">0dp</dimen>
+
     <dimen name="keyguard_eca_top_margin">18dp</dimen>
     <dimen name="keyguard_eca_bottom_margin">12dp</dimen>
-
-    <!-- EmergencyCarrierArea overlap - amount to overlap the emergency button and carrier text.
-         Should be 0 on devices with plenty of room (e.g. tablets) -->
-    <dimen name="eca_overlap">-10dip</dimen>
 
     <!-- Slice header -->
     <dimen name="widget_title_font_size">20dp</dimen>
@@ -84,9 +83,13 @@
     <!-- The translation for disappearing security views after having solved them. -->
     <dimen name="disappear_y_translation">-32dp</dimen>
 
+    <!-- Dimens for animation for the Bouncer PIN view -->
+    <dimen name="pin_view_trans_y_entry">120dp</dimen>
+    <dimen name="pin_view_trans_y_entry_offset">10dp</dimen>
+
     <!-- Spacing around each button used for PIN view -->
     <dimen name="num_pad_key_width">72dp</dimen>
-    <dimen name="num_pad_entry_row_margin_bottom">16dp</dimen>
+    <dimen name="num_pad_entry_row_margin_bottom">12dp</dimen>
     <dimen name="num_pad_row_margin_bottom">6dp</dimen>
     <dimen name="num_pad_key_margin_end">12dp</dimen>
 
@@ -119,10 +122,13 @@
     <dimen name="bouncer_user_switcher_width">248dp</dimen>
     <dimen name="bouncer_user_switcher_popup_header_height">12dp</dimen>
     <dimen name="bouncer_user_switcher_popup_divider_height">4dp</dimen>
+    <dimen name="bouncer_user_switcher_popup_items_divider_height">2dp</dimen>
     <dimen name="bouncer_user_switcher_item_padding_vertical">10dp</dimen>
     <dimen name="bouncer_user_switcher_item_padding_horizontal">12dp</dimen>
     <dimen name="bouncer_user_switcher_header_padding_end">44dp</dimen>
     <dimen name="bouncer_user_switcher_y_trans">0dp</dimen>
+    <dimen name="bouncer_user_switcher_view_mode_user_switcher_bottom_margin">0dp</dimen>
+    <dimen name="bouncer_user_switcher_view_mode_view_flipper_bottom_margin">0dp</dimen>
 
     <!-- 2 * the margin + size should equal the plus_margin -->
     <dimen name="user_switcher_icon_large_margin">16dp</dimen>

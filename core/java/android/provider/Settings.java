@@ -3344,9 +3344,26 @@ public final class Settings {
                     }
                 }
 
-                // Fetch all flags for the namespace at once for caching purposes
-                Bundle b = cp.call(cr.getAttributionSource(),
-                        mProviderHolder.mUri.getAuthority(), mCallListCommand, null, args);
+                Bundle b;
+                // b/252663068: if we're in system server and the caller did not call
+                // clearCallingIdentity, the read would fail due to mismatched AttributionSources.
+                // TODO(b/256013480): remove this bypass after fixing the callers in system server.
+                if (namespace.equals(DeviceConfig.NAMESPACE_DEVICE_POLICY_MANAGER)
+                        && Settings.isInSystemServer()
+                        && Binder.getCallingUid() != Process.myUid()) {
+                    final long token = Binder.clearCallingIdentity();
+                    try {
+                        // Fetch all flags for the namespace at once for caching purposes
+                        b = cp.call(cr.getAttributionSource(),
+                                mProviderHolder.mUri.getAuthority(), mCallListCommand, null, args);
+                    } finally {
+                        Binder.restoreCallingIdentity(token);
+                    }
+                } else {
+                    // Fetch all flags for the namespace at once for caching purposes
+                    b = cp.call(cr.getAttributionSource(),
+                            mProviderHolder.mUri.getAuthority(), mCallListCommand, null, args);
+                }
                 if (b == null) {
                     // Invalid response, return an empty map
                     return keyValues;
@@ -5482,6 +5499,15 @@ public final class Settings {
         public static final String MULTI_AUDIO_FOCUS_ENABLED = "multi_audio_focus_enabled";
 
         /**
+         * Whether desktop mode is enabled or not.
+         * 0 = off
+         * 1 = on
+         * @hide
+         */
+        @Readable
+        public static final String DESKTOP_MODE = "desktop_mode";
+
+        /**
          * IMPORTANT: If you add a new public settings you also have to add it to
          * PUBLIC_SETTINGS below. If the new setting is hidden you have to add
          * it to PRIVATE_SETTINGS below. Also add a validator that can validate
@@ -5610,6 +5636,7 @@ public final class Settings {
             PRIVATE_SETTINGS.add(SHOW_BATTERY_PERCENT);
             PRIVATE_SETTINGS.add(DISPLAY_COLOR_MODE);
             PRIVATE_SETTINGS.add(DISPLAY_COLOR_MODE_VENDOR_HINT);
+            PRIVATE_SETTINGS.add(DESKTOP_MODE);
         }
 
         /**
@@ -6650,6 +6677,26 @@ public final class Settings {
         public static final String BLUETOOTH_ADDR_VALID = "bluetooth_addr_valid";
 
         /**
+         * This is used by LocalBluetoothLeBroadcast to store the broadcast program info.
+         * @hide
+         */
+        public static final String BLUETOOTH_LE_BROADCAST_PROGRAM_INFO =
+                "bluetooth_le_broadcast_program_info";
+
+        /**
+         * This is used by LocalBluetoothLeBroadcast to store the broadcast code.
+         * @hide
+         */
+        public static final String BLUETOOTH_LE_BROADCAST_CODE = "bluetooth_le_broadcast_code";
+
+        /**
+         * This is used by LocalBluetoothLeBroadcast to store the app source name.
+         * @hide
+         */
+        public static final String BLUETOOTH_LE_BROADCAST_APP_SOURCE_NAME =
+                "bluetooth_le_broadcast_app_source_name";
+
+        /**
          * Setting to indicate that on device captions are enabled.
          *
          * @hide
@@ -7397,6 +7444,13 @@ public final class Settings {
                 "trust_agents_initialized";
 
         /**
+         * Set to 1 by the system after the list of known trust agents have been initialized.
+         * @hide
+         */
+        public static final String KNOWN_TRUST_AGENTS_INITIALIZED =
+                "known_trust_agents_initialized";
+
+        /**
          * The Logging ID (a unique 64-bit value) as a hex string.
          * Used as a pseudonymous identifier for logging.
          * @deprecated This identifier is poorly initialized and has
@@ -7720,6 +7774,13 @@ public final class Settings {
         @Readable
         public static final String ACCESSIBILITY_HIGH_TEXT_CONTRAST_ENABLED =
                 "high_text_contrast_enabled";
+
+        /**
+         * The color contrast, float in [-1, 1], 1 being the highest contrast.
+         *
+         * @hide
+         */
+        public static final String CONTRAST_LEVEL = "contrast_level";
 
         /**
          * Setting that specifies whether the display magnification is enabled via a system-wide
@@ -9132,14 +9193,12 @@ public final class Settings {
         public static final String SCREENSAVER_DEFAULT_COMPONENT = "screensaver_default_component";
 
         /**
-         * The complications that are enabled to be shown over the screensaver by the user. Holds
-         * a comma separated list of
-         * {@link com.android.settingslib.dream.DreamBackend.ComplicationType}.
+         * Whether complications are enabled to be shown over the screensaver by the user.
          *
          * @hide
          */
-        public static final String SCREENSAVER_ENABLED_COMPLICATIONS =
-                "screensaver_enabled_complications";
+        public static final String SCREENSAVER_COMPLICATIONS_ENABLED =
+                "screensaver_complications_enabled";
 
 
         /**
@@ -9166,6 +9225,14 @@ public final class Settings {
         public static final int DOCK_SETUP_PAUSED = 2;
 
         /**
+         * Indicates that the user has been prompted to start dock setup.
+         * One of the possible states for {@link #DOCK_SETUP_STATE}.
+         *
+         * @hide
+         */
+        public static final int DOCK_SETUP_PROMPTED = 3;
+
+        /**
          * Indicates that the user has completed dock setup.
          * One of the possible states for {@link #DOCK_SETUP_STATE}.
          *
@@ -9179,6 +9246,7 @@ public final class Settings {
                 DOCK_SETUP_NOT_STARTED,
                 DOCK_SETUP_STARTED,
                 DOCK_SETUP_PAUSED,
+                DOCK_SETUP_PROMPTED,
                 DOCK_SETUP_COMPLETED
         })
         public @interface DockSetupState {
@@ -9444,6 +9512,16 @@ public final class Settings {
         @Readable
         public static final String LOCK_SCREEN_SHOW_SILENT_NOTIFICATIONS =
                 "lock_screen_show_silent_notifications";
+
+        /**
+         * Indicates whether "seen" notifications should be suppressed from the lockscreen.
+         * <p>
+         * Type: int (0 for false, 1 for true)
+         *
+         * @hide
+         */
+        public static final String LOCK_SCREEN_SHOW_ONLY_UNSEEN_NOTIFICATIONS =
+                "lock_screen_show_only_unseen_notifications";
 
         /**
          * Indicates whether snooze options should be shown on notifications
@@ -9739,6 +9817,13 @@ public final class Settings {
         @Readable
         public static final String FINGERPRINT_SIDE_FPS_AUTH_DOWNTIME =
                 "fingerprint_side_fps_auth_downtime";
+
+        /**
+         * Whether or not a SFPS device is required to be interactive for auth to unlock the device.
+         * @hide
+         */
+        public static final String SFPS_REQUIRE_SCREEN_ON_TO_AUTH_ENABLED =
+                "sfps_require_screen_on_to_auth_enabled";
 
         /**
          * Whether or not debugging is enabled.
@@ -10250,11 +10335,11 @@ public final class Settings {
         public static final String QS_AUTO_ADDED_TILES = "qs_auto_tiles";
 
         /**
-         * The duration of timeout, in milliseconds, to switch from a non-primary user to the
-         * primary user when the device is docked.
+         * The duration of timeout, in milliseconds, to switch from a non-Dock User to the
+         * Dock User when the device is docked.
          * @hide
          */
-        public static final String TIMEOUT_TO_USER_ZERO = "timeout_to_user_zero";
+        public static final String TIMEOUT_TO_DOCK_USER = "timeout_to_dock_user";
 
         /**
          * Backup manager behavioral parameters.
@@ -10579,6 +10664,13 @@ public final class Settings {
          */
         @Readable
         public static final String MEDIA_CONTROLS_RESUME = "qs_media_resumption";
+
+        /**
+         * Whether to enable media controls on lock screen.
+         * When enabled, media controls will appear on lock screen.
+         * @hide
+         */
+        public static final String MEDIA_CONTROLS_LOCK_SCREEN = "media_controls_lock_screen";
 
         /**
          * Controls whether contextual suggestions can be shown in the media controls.
@@ -15722,6 +15814,15 @@ public final class Settings {
         public static final String STYLUS_HANDWRITING_ENABLED = "stylus_handwriting_enabled";
 
         /**
+         * Indicates whether a stylus has ever been used on the device.
+         *
+         * @hide
+         */
+        @Readable
+        @SuppressLint("NoSettingsProvider")
+        public static final String STYLUS_EVER_USED = "stylus_ever_used";
+
+        /**
          * Exemptions to the hidden API blacklist.
          *
          * @hide
@@ -18375,6 +18476,9 @@ public final class Settings {
     /**
      * Activity Action: For system or preinstalled apps to show their {@link Activity} embedded
      * in Settings app on large screen devices.
+     *
+     * Developers should resolve the Intent action before using it.
+     *
      * <p>
      *     Input: {@link #EXTRA_SETTINGS_EMBEDDED_DEEP_LINK_INTENT_URI} must be included to
      * specify the intent for the activity which will be embedded in Settings app.

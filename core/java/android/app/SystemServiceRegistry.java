@@ -29,8 +29,6 @@ import android.app.ambientcontext.AmbientContextManager;
 import android.app.ambientcontext.IAmbientContextManager;
 import android.app.appsearch.AppSearchManagerFrameworkInitializer;
 import android.app.blob.BlobStoreManagerFrameworkInitializer;
-import android.app.cloudsearch.CloudSearchManager;
-import android.app.cloudsearch.ICloudSearchManager;
 import android.app.contentsuggestions.ContentSuggestionsManager;
 import android.app.contentsuggestions.IContentSuggestionsManager;
 import android.app.job.JobSchedulerFrameworkInitializer;
@@ -117,6 +115,7 @@ import android.location.CountryDetector;
 import android.location.ICountryDetector;
 import android.location.ILocationManager;
 import android.location.LocationManager;
+import android.media.AudioDeviceVolumeManager;
 import android.media.AudioManager;
 import android.media.MediaFrameworkInitializer;
 import android.media.MediaFrameworkPlatformInitializer;
@@ -339,6 +338,13 @@ public final class SystemServiceRegistry {
             @Override
             public AudioManager createService(ContextImpl ctx) {
                 return new AudioManager(ctx);
+            }});
+
+        registerService(Context.AUDIO_DEVICE_VOLUME_SERVICE, AudioDeviceVolumeManager.class,
+                new CachedServiceFetcher<AudioDeviceVolumeManager>() {
+            @Override
+            public AudioDeviceVolumeManager createService(ContextImpl ctx) {
+                return new AudioDeviceVolumeManager(ctx);
             }});
 
         registerService(Context.MEDIA_ROUTER_SERVICE, MediaRouter.class,
@@ -1217,17 +1223,6 @@ public final class SystemServiceRegistry {
                     throws ServiceNotFoundException {
                     IBinder b = ServiceManager.getService(Context.SMARTSPACE_SERVICE);
                     return b == null ? null : new SmartspaceManager(ctx);
-                }
-            });
-
-        registerService(Context.CLOUDSEARCH_SERVICE, CloudSearchManager.class,
-            new CachedServiceFetcher<CloudSearchManager>() {
-                @Override
-                public CloudSearchManager createService(ContextImpl ctx)
-                    throws ServiceNotFoundException {
-                    IBinder b = ServiceManager.getService(Context.CLOUDSEARCH_SERVICE);
-                    return b == null ? null :
-                        new CloudSearchManager(ICloudSearchManager.Stub.asInterface(b));
                 }
             });
 

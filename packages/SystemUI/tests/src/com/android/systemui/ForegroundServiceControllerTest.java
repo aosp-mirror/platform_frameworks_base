@@ -44,12 +44,10 @@ import androidx.test.filters.SmallTest;
 
 import com.android.internal.messages.nano.SystemMessageProto;
 import com.android.systemui.appops.AppOpsController;
-import com.android.systemui.statusbar.notification.NotificationEntryListener;
-import com.android.systemui.statusbar.notification.NotificationEntryManager;
 import com.android.systemui.statusbar.notification.collection.NotifPipeline;
 import com.android.systemui.statusbar.notification.collection.NotificationEntry;
 import com.android.systemui.statusbar.notification.collection.NotificationEntryBuilder;
-import com.android.systemui.util.time.FakeSystemClock;
+import com.android.systemui.statusbar.notification.collection.notifcollection.NotifCollectionListener;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -64,9 +62,7 @@ import org.mockito.MockitoAnnotations;
 public class ForegroundServiceControllerTest extends SysuiTestCase {
     private ForegroundServiceController mFsc;
     private ForegroundServiceNotificationListener mListener;
-    private NotificationEntryListener mEntryListener;
-    private final FakeSystemClock mClock = new FakeSystemClock();
-    @Mock private NotificationEntryManager mEntryManager;
+    private NotifCollectionListener mCollectionListener;
     @Mock private AppOpsController mAppOpsController;
     @Mock private Handler mMainHandler;
     @Mock private NotifPipeline mNotifPipeline;
@@ -79,12 +75,13 @@ public class ForegroundServiceControllerTest extends SysuiTestCase {
         MockitoAnnotations.initMocks(this);
         mFsc = new ForegroundServiceController(mAppOpsController, mMainHandler);
         mListener = new ForegroundServiceNotificationListener(
-                mContext, mFsc, mEntryManager, mNotifPipeline, mClock);
-        ArgumentCaptor<NotificationEntryListener> entryListenerCaptor =
-                ArgumentCaptor.forClass(NotificationEntryListener.class);
-        verify(mEntryManager).addNotificationEntryListener(
+                mContext, mFsc, mNotifPipeline);
+        mListener.init();
+        ArgumentCaptor<NotifCollectionListener> entryListenerCaptor =
+                ArgumentCaptor.forClass(NotifCollectionListener.class);
+        verify(mNotifPipeline).addCollectionListener(
                 entryListenerCaptor.capture());
-        mEntryListener = entryListenerCaptor.getValue();
+        mCollectionListener = entryListenerCaptor.getValue();
     }
 
     @Test
@@ -449,7 +446,7 @@ public class ForegroundServiceControllerTest extends SysuiTestCase {
 
     private NotificationEntry addFgEntry() {
         NotificationEntry entry = createFgEntry();
-        mEntryListener.onPendingEntryAdded(entry);
+        mCollectionListener.onEntryAdded(entry);
         return entry;
     }
 
@@ -461,12 +458,10 @@ public class ForegroundServiceControllerTest extends SysuiTestCase {
     }
 
     private void entryRemoved(StatusBarNotification notification) {
-        mEntryListener.onEntryRemoved(
+        mCollectionListener.onEntryRemoved(
                 new NotificationEntryBuilder()
                         .setSbn(notification)
                         .build(),
-                null,
-                false,
                 REASON_APP_CANCEL);
     }
 
@@ -475,7 +470,7 @@ public class ForegroundServiceControllerTest extends SysuiTestCase {
                 .setSbn(notification)
                 .setImportance(importance)
                 .build();
-        mEntryListener.onPendingEntryAdded(entry);
+        mCollectionListener.onEntryAdded(entry);
     }
 
     private void entryUpdated(StatusBarNotification notification, int importance) {
@@ -483,7 +478,7 @@ public class ForegroundServiceControllerTest extends SysuiTestCase {
                 .setSbn(notification)
                 .setImportance(importance)
                 .build();
-        mEntryListener.onPreEntryUpdated(entry);
+        mCollectionListener.onEntryUpdated(entry);
     }
 
     @UserIdInt private static final int USERID_ONE = 10; // UserManagerService.MIN_USER_ID;

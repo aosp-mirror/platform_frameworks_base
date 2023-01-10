@@ -19,7 +19,6 @@ package com.android.wm.shell.bubbles;
 import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
-import android.graphics.Color;
 import android.graphics.Path;
 import android.graphics.Rect;
 import android.graphics.drawable.AdaptiveIconDrawable;
@@ -52,14 +51,15 @@ public class BubbleBadgeIconFactory extends BaseIconFactory {
             userBadgedAppIcon = new CircularRingDrawable(userBadgedAppIcon);
         }
         Bitmap userBadgedBitmap = createIconBitmap(
-                userBadgedAppIcon, 1, BITMAP_GENERATION_MODE_WITH_SHADOW);
+                userBadgedAppIcon, 1, MODE_WITH_SHADOW);
         return createIconBitmap(userBadgedBitmap);
     }
 
     private class CircularRingDrawable extends CircularAdaptiveIcon {
 
         final int mImportantConversationColor;
-        final Rect mTempBounds = new Rect();
+        final int mRingWidth;
+        final Rect mInnerBounds = new Rect();
 
         final Drawable mDr;
 
@@ -68,6 +68,8 @@ public class BubbleBadgeIconFactory extends BaseIconFactory {
             mDr = dr;
             mImportantConversationColor = mContext.getResources().getColor(
                     R.color.important_conversation, null);
+            mRingWidth = mContext.getResources().getDimensionPixelSize(
+                    com.android.internal.R.dimen.importance_ring_stroke_width);
         }
 
         @Override
@@ -75,11 +77,10 @@ public class BubbleBadgeIconFactory extends BaseIconFactory {
             int save = canvas.save();
             canvas.clipPath(getIconMask());
             canvas.drawColor(mImportantConversationColor);
-            int ringStrokeWidth = mContext.getResources().getDimensionPixelSize(
-                    com.android.internal.R.dimen.importance_ring_stroke_width);
-            mTempBounds.set(getBounds());
-            mTempBounds.inset(ringStrokeWidth, ringStrokeWidth);
-            mDr.setBounds(mTempBounds);
+            mInnerBounds.set(getBounds());
+            mInnerBounds.inset(mRingWidth, mRingWidth);
+            canvas.translate(mInnerBounds.left, mInnerBounds.top);
+            mDr.setBounds(0, 0, mInnerBounds.width(), mInnerBounds.height());
             mDr.draw(canvas);
             canvas.restoreToCount(save);
         }
@@ -106,7 +107,6 @@ public class BubbleBadgeIconFactory extends BaseIconFactory {
             int save = canvas.save();
             canvas.clipPath(getIconMask());
 
-            canvas.drawColor(Color.BLACK);
             Drawable d;
             if ((d = getBackground()) != null) {
                 d.draw(canvas);

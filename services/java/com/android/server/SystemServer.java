@@ -376,8 +376,6 @@ public final class SystemServer implements Dumpable {
             "com.android.server.searchui.SearchUiManagerService";
     private static final String SMARTSPACE_MANAGER_SERVICE_CLASS =
             "com.android.server.smartspace.SmartspaceManagerService";
-    private static final String CLOUDSEARCH_MANAGER_SERVICE_CLASS =
-            "com.android.server.cloudsearch.CloudSearchManagerService";
     private static final String DEVICE_IDLE_CONTROLLER_CLASS =
             "com.android.server.DeviceIdleController";
     private static final String BLOB_STORE_MANAGER_SERVICE_CLASS =
@@ -1825,7 +1823,8 @@ public final class SystemServer implements Dumpable {
                 t.traceBegin("StartStatusBarManagerService");
                 try {
                     statusBar = new StatusBarManagerService(context);
-                    ServiceManager.addService(Context.STATUS_BAR_SERVICE, statusBar);
+                    ServiceManager.addService(Context.STATUS_BAR_SERVICE, statusBar, false,
+                            DUMP_FLAG_PRIORITY_NORMAL | DUMP_FLAG_PROTO);
                 } catch (Throwable e) {
                     reportWtf("starting StatusBarManagerService", e);
                 }
@@ -1882,12 +1881,6 @@ public final class SystemServer implements Dumpable {
             // TODO: add deviceHasConfigString(context, R.string.config_defaultSmartspaceService)
             t.traceBegin("StartSmartspaceService");
             mSystemServiceManager.startService(SMARTSPACE_MANAGER_SERVICE_CLASS);
-            t.traceEnd();
-
-            // CloudSearch manager service
-            // TODO: add deviceHasConfigString(context, R.string.config_defaultCloudSearchServices)
-            t.traceBegin("StartCloudSearchService");
-            mSystemServiceManager.startService(CLOUDSEARCH_MANAGER_SERVICE_CLASS);
             t.traceEnd();
 
             t.traceBegin("InitConnectivityModuleConnector");

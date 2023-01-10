@@ -18,70 +18,11 @@
 -->
 <com.android.systemui.statusbar.StatusBarWifiView
     xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:systemui="http://schemas.android.com/apk/res-auto"
     android:id="@+id/wifi_combo"
     android:layout_width="wrap_content"
     android:layout_height="match_parent"
     android:gravity="center_vertical" >
 
-    <com.android.keyguard.AlphaOptimizedLinearLayout
-        android:id="@+id/wifi_group"
-        android:layout_width="wrap_content"
-        android:layout_height="match_parent"
-        android:gravity="center_vertical"
-        android:layout_marginStart="2.5dp"
-    >
-        <FrameLayout
-                android:id="@+id/inout_container"
-                android:layout_height="17dp"
-                android:layout_width="wrap_content"
-                android:gravity="center_vertical" >
-            <ImageView
-                android:id="@+id/wifi_in"
-                android:layout_height="wrap_content"
-                android:layout_width="wrap_content"
-                android:src="@drawable/ic_activity_down"
-                android:visibility="gone"
-                android:paddingEnd="2dp"
-            />
-            <ImageView
-                android:id="@+id/wifi_out"
-                android:layout_height="wrap_content"
-                android:layout_width="wrap_content"
-                android:src="@drawable/ic_activity_up"
-                android:paddingEnd="2dp"
-                android:visibility="gone"
-            />
-        </FrameLayout>
-        <FrameLayout
-            android:id="@+id/wifi_combo"
-            android:layout_height="wrap_content"
-            android:layout_width="wrap_content"
-            android:gravity="center_vertical" >
-            <com.android.systemui.statusbar.AlphaOptimizedImageView
-                android:id="@+id/wifi_signal"
-                android:layout_height="@dimen/status_bar_wifi_signal_size"
-                android:layout_width="@dimen/status_bar_wifi_signal_size" />
-        </FrameLayout>
+    <include layout="@layout/status_bar_wifi_group_inner" />
 
-        <View
-            android:id="@+id/wifi_signal_spacer"
-            android:layout_width="@dimen/status_bar_wifi_signal_spacer_width"
-            android:layout_height="4dp"
-            android:visibility="gone" />
-
-        <!-- Looks like CarStatusBar uses this... -->
-        <ViewStub
-            android:id="@+id/connected_device_signals_stub"
-            android:layout="@layout/connected_device_signal"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content" />
-
-        <View
-            android:id="@+id/wifi_airplane_spacer"
-            android:layout_width="@dimen/status_bar_airplane_spacer_width"
-            android:layout_height="4dp"
-            android:visibility="gone"
-        />
-    </com.android.keyguard.AlphaOptimizedLinearLayout>
 </com.android.systemui.statusbar.StatusBarWifiView>

@@ -26,11 +26,11 @@
     <string name="keyguard_sim_error_message_short" msgid="633630844240494070">"ভুল কার্ড।"</string>
     <string name="keyguard_charged" msgid="5478247181205188995">"চার্জ হয়েছে"</string>
     <string name="keyguard_plugged_in_wireless" msgid="2537874724955057383">"<xliff:g id="PERCENTAGE">%s</xliff:g> • ওয়্যারলেস পদ্ধতিতে চার্জ হচ্ছে"</string>
-    <string name="keyguard_plugged_in_dock" msgid="449722738270908674">"<xliff:g id="PERCENTAGE">%s</xliff:g> • চার্জিং ডক"</string>
+    <string name="keyguard_plugged_in_dock" msgid="2122073051904360987">"<xliff:g id="PERCENTAGE">%s</xliff:g> • চার্জ হচ্ছে"</string>
     <string name="keyguard_plugged_in" msgid="8169926454348380863">"<xliff:g id="PERCENTAGE">%s</xliff:g> • চার্জ হচ্ছে"</string>
     <string name="keyguard_plugged_in_charging_fast" msgid="4386594091107340426">"<xliff:g id="PERCENTAGE">%s</xliff:g> • দ্রুত চার্জ হচ্ছে"</string>
     <string name="keyguard_plugged_in_charging_slowly" msgid="217655355424210">"<xliff:g id="PERCENTAGE">%s</xliff:g> • ধীরে চার্জ হচ্ছে"</string>
-    <string name="keyguard_plugged_in_charging_limited" msgid="6091488837901216962">"<xliff:g id="PERCENTAGE">%s</xliff:g> • চার্জ করা সাময়িকভাবে বন্ধ রাখা হয়েছে"</string>
+    <string name="keyguard_plugged_in_charging_limited" msgid="1053130519456324630">"<xliff:g id="PERCENTAGE">%s</xliff:g> • ব্যাটারি ভাল রাখতে চার্জিং অপ্টিমাইজ করা হয়েছে"</string>
     <string name="keyguard_instructions_when_pattern_disabled" msgid="8448804180089936954">"আনলক করতে মেনুতে টিপুন।"</string>
     <string name="keyguard_network_locked_message" msgid="407096292844868608">"নেটওয়ার্ক লক করা আছে"</string>
     <string name="keyguard_missing_sim_message_short" msgid="704159478161444907">"কোনো সিম কার্ড নেই"</string>
@@ -78,9 +78,9 @@
     <string name="kg_prompt_reason_restart_pattern" msgid="4720554342633852066">"ডিভাইসটি পুনরায় চালু হওয়ার পর প্যাটার্নের প্রয়োজন হবে"</string>
     <string name="kg_prompt_reason_restart_pin" msgid="1587671566498057656">"ডিভাইসটি পুনরায় চালু হওয়ার পর পিন প্রয়োজন হবে"</string>
     <string name="kg_prompt_reason_restart_password" msgid="8061279087240952002">"ডিভাইসটি পুনরায় চালু হওয়ার পর পাসওয়ার্ডের প্রয়োজন হবে"</string>
-    <string name="kg_prompt_reason_timeout_pattern" msgid="9170360502528959889">"অতিরিক্ত সুরক্ষার জন্য প্যাটার্ন দেওয়া প্রয়োজন"</string>
-    <string name="kg_prompt_reason_timeout_pin" msgid="5945186097160029201">"অতিরিক্ত সুরক্ষার জন্য পিন দেওয়া প্রয়োজন"</string>
-    <string name="kg_prompt_reason_timeout_password" msgid="2258263949430384278">"অতিরিক্ত সুরক্ষার জন্য পাসওয়ার্ড দেওয়া প্রয়োজন"</string>
+    <string name="kg_prompt_reason_timeout_pattern" msgid="5514969660010197363">"অতিরিক্ত সুরক্ষার জন্য, এর বদলে প্যাটার্ন ব্যবহার করুন"</string>
+    <string name="kg_prompt_reason_timeout_pin" msgid="4227962059353859376">"অতিরিক্ত সুরক্ষার জন্য, এর বদলে পিন ব্যবহার করুন"</string>
+    <string name="kg_prompt_reason_timeout_password" msgid="8810879144143933690">"অতিরিক্ত সুরক্ষার জন্য, এর বদলে পাসওয়ার্ড ব্যবহার করুন"</string>
     <string name="kg_prompt_reason_device_admin" msgid="6961159596224055685">"প্রশাসক ডিভাইসটি লক করেছেন"</string>
     <string name="kg_prompt_reason_user_request" msgid="6015774877733717904">"ডিভাইসটিকে ম্যানুয়ালি লক করা হয়েছে"</string>
     <string name="kg_face_not_recognized" msgid="7903950626744419160">"শনাক্ত করা যায়নি"</string>
@@ -90,4 +90,5 @@
     <string name="clock_title_default" msgid="6342735240617459864">"ডিফল্ট"</string>
     <string name="clock_title_bubble" msgid="2204559396790593213">"বাবল"</string>
     <string name="clock_title_analog" msgid="8409262532900918273">"অ্যানালগ"</string>
+    <string name="keyguard_unlock_to_continue" msgid="7509503484250597743">"চালিয়ে যেতে আপনার ডিভাইস আনলক করুন"</string>
 </resources>

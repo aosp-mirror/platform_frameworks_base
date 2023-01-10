@@ -28,10 +28,10 @@
     <string name="helper_summary_app_streaming" msgid="5977509499890099">"A app <xliff:g id="APP_NAME">%1$s</xliff:g> está a pedir autorização em nome do seu dispositivo <xliff:g id="DEVICE_TYPE">%2$s</xliff:g> para fazer stream de apps entre os seus dispositivos"</string>
     <string name="title_automotive_projection" msgid="3296005598978412847"></string>
     <string name="summary_automotive_projection" msgid="8683801274662496164"></string>
-    <string name="title_computer" msgid="4693714143506569253">"Permita que a app &lt;strong&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/strong&gt; aceda a estas informações do seu telemóvel"</string>
+    <string name="title_computer" msgid="4693714143506569253">"Permita que &lt;strong&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/strong&gt; aceda a estas informações do seu telemóvel"</string>
     <string name="summary_computer" msgid="3798467601598297062"></string>
     <string name="permission_notification" msgid="693762568127741203">"Notificações"</string>
-    <string name="permission_notification_summary" msgid="884075314530071011">"Pode ler todas as notificações, incluindo informações como contratos, mensagens e fotos"</string>
+    <string name="permission_notification_summary" msgid="884075314530071011">"Pode ler todas as notificações, incluindo informações como contactos, mensagens e fotos"</string>
     <string name="permission_storage" msgid="6831099350839392343">"Fotos e multimédia"</string>
     <string name="permission_storage_summary" msgid="3918240895519506417"></string>
     <string name="helper_title_computer" msgid="4671071173916176037">"Serviços do Google Play"</string>

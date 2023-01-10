@@ -22,7 +22,6 @@ import static android.app.WindowConfiguration.WINDOWING_MODE_FULLSCREEN;
 import android.app.ActivityManager;
 import android.app.WindowConfiguration;
 import android.os.IBinder;
-import android.util.Log;
 import android.view.SurfaceControl;
 import android.view.WindowManager;
 import android.window.TransitionInfo;
@@ -40,36 +39,30 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * The {@link Transitions.TransitionHandler} that handles freeform task launches, closes,
- * maximizing and restoring transitions. It also reports transitions so that window decorations can
- * be a part of transitions.
+ * The {@link Transitions.TransitionHandler} that handles freeform task maximizing and restoring
+ * transitions.
  */
 public class FreeformTaskTransitionHandler
         implements Transitions.TransitionHandler, FreeformTaskTransitionStarter {
-    private static final String TAG = "FreeformTH";
 
     private final Transitions mTransitions;
-    private final FreeformTaskListener<?> mFreeformTaskListener;
-    private final WindowDecorViewModel<?> mWindowDecorViewModel;
+    private final WindowDecorViewModel mWindowDecorViewModel;
 
     private final List<IBinder> mPendingTransitionTokens = new ArrayList<>();
 
     public FreeformTaskTransitionHandler(
             ShellInit shellInit,
             Transitions transitions,
-            WindowDecorViewModel<?> windowDecorViewModel,
-            FreeformTaskListener<?> freeformTaskListener) {
+            WindowDecorViewModel windowDecorViewModel) {
         mTransitions = transitions;
-        mFreeformTaskListener = freeformTaskListener;
         mWindowDecorViewModel = windowDecorViewModel;
-        if (shellInit != null && Transitions.ENABLE_SHELL_TRANSITIONS) {
+        if (Transitions.ENABLE_SHELL_TRANSITIONS) {
             shellInit.addInitCallback(this::onInit, this);
         }
     }
 
     private void onInit() {
         mWindowDecorViewModel.setFreeformTaskTransitionStarter(this);
-        mTransitions.addHandler(this);
     }
 
     @Override
@@ -92,12 +85,24 @@ public class FreeformTaskTransitionHandler
     }
 
     @Override
+    public void startMinimizedModeTransition(WindowContainerTransaction wct) {
+        final int type = WindowManager.TRANSIT_TO_BACK;
+        mPendingTransitionTokens.add(mTransitions.startTransition(type, wct, this));
+    }
+
+
+    @Override
+    public void startRemoveTransition(WindowContainerTransaction wct) {
+        final int type = WindowManager.TRANSIT_CLOSE;
+        mPendingTransitionTokens.add(mTransitions.startTransition(type, wct, this));
+    }
+
+    @Override
     public boolean startAnimation(@NonNull IBinder transition, @NonNull TransitionInfo info,
             @NonNull SurfaceControl.Transaction startT,
             @NonNull SurfaceControl.Transaction finishT,
             @NonNull Transitions.TransitionFinishCallback finishCallback) {
         boolean transitionHandled = false;
-        final ArrayList<AutoCloseable> windowDecorsInCloseTransitions = new ArrayList<>();
         for (TransitionInfo.Change change : info.getChanges()) {
             if ((change.getFlags() & TransitionInfo.FLAG_IS_WALLPAPER) != 0) {
                 continue;
@@ -109,19 +114,12 @@ public class FreeformTaskTransitionHandler
             }
 
             switch (change.getMode()) {
-                case WindowManager.TRANSIT_OPEN:
-                    transitionHandled |= startOpenTransition(change, startT, finishT);
-                    break;
-                case WindowManager.TRANSIT_CLOSE:
-                    transitionHandled |= startCloseTransition(
-                            change, windowDecorsInCloseTransitions, startT, finishT);
-                    break;
                 case WindowManager.TRANSIT_CHANGE:
                     transitionHandled |= startChangeTransition(
-                            transition, info.getType(), change, startT, finishT);
+                            transition, info.getType(), change);
                     break;
                 case WindowManager.TRANSIT_TO_BACK:
-                case WindowManager.TRANSIT_TO_FRONT:
+                    transitionHandled |= startMinimizeTransition(transition);
                     break;
             }
         }
@@ -134,49 +132,14 @@ public class FreeformTaskTransitionHandler
 
         startT.apply();
         mTransitions.getMainExecutor().execute(
-                () -> finishTransition(windowDecorsInCloseTransitions, finishCallback));
+                () -> finishCallback.onTransitionFinished(null, null));
         return true;
-    }
-
-    private boolean startOpenTransition(
-            TransitionInfo.Change change,
-            SurfaceControl.Transaction startT,
-            SurfaceControl.Transaction finishT) {
-        if (change.getTaskInfo().getWindowingMode() != WINDOWING_MODE_FREEFORM) {
-            return false;
-        }
-        mFreeformTaskListener.createWindowDecoration(change, startT, finishT);
-
-        // Intercepted transition to manage the window decorations. Let other handlers animate.
-        return false;
-    }
-
-    private boolean startCloseTransition(
-            TransitionInfo.Change change,
-            ArrayList<AutoCloseable> windowDecors,
-            SurfaceControl.Transaction startT,
-            SurfaceControl.Transaction finishT) {
-        if (change.getTaskInfo().getWindowingMode() != WINDOWING_MODE_FREEFORM) {
-            return false;
-        }
-        final AutoCloseable windowDecor =
-                mFreeformTaskListener.giveWindowDecoration(change.getTaskInfo(), startT, finishT);
-        if (windowDecor != null) {
-            windowDecors.add(windowDecor);
-        }
-
-        // Intercepted transition to manage the window decorations. Let other handlers animate.
-        return false;
     }
 
     private boolean startChangeTransition(
             IBinder transition,
             int type,
-            TransitionInfo.Change change,
-            SurfaceControl.Transaction startT,
-            SurfaceControl.Transaction finishT) {
-        AutoCloseable windowDecor = null;
-
+            TransitionInfo.Change change) {
         if (!mPendingTransitionTokens.contains(transition)) {
             return false;
         }
@@ -185,62 +148,27 @@ public class FreeformTaskTransitionHandler
         final ActivityManager.RunningTaskInfo taskInfo = change.getTaskInfo();
         if (type == Transitions.TRANSIT_MAXIMIZE
                 && taskInfo.getWindowingMode() == WINDOWING_MODE_FULLSCREEN) {
+            // TODO: Add maximize animations
             handled = true;
-            windowDecor = mFreeformTaskListener.giveWindowDecoration(
-                    change.getTaskInfo(), startT, finishT);
-            // TODO(b/235638450): Let fullscreen task listener adopt the window decor.
         }
 
         if (type == Transitions.TRANSIT_RESTORE_FROM_MAXIMIZE
                 && taskInfo.getWindowingMode() == WINDOWING_MODE_FREEFORM) {
+            // TODO: Add restore animations
             handled = true;
-            // TODO(b/235638450): Let fullscreen task listener transfer the window decor.
-            mFreeformTaskListener.adoptWindowDecoration(change, startT, finishT, windowDecor);
         }
-
-        releaseWindowDecor(windowDecor);
 
         return handled;
     }
 
-    private void finishTransition(
-            ArrayList<AutoCloseable> windowDecorsInCloseTransitions,
-            Transitions.TransitionFinishCallback finishCallback) {
-        for (AutoCloseable windowDecor : windowDecorsInCloseTransitions) {
-            releaseWindowDecor(windowDecor);
-        }
-        mFreeformTaskListener.onTaskTransitionFinished();
-        // TODO(b/235638450): Dispatch it to fullscreen task listener.
-        finishCallback.onTransitionFinished(null, null);
-    }
-
-    private void releaseWindowDecor(AutoCloseable windowDecor) {
-        if (windowDecor == null) {
-            return;
-        }
-        try {
-            windowDecor.close();
-        } catch (Exception e) {
-            Log.e(TAG, "Failed to release window decoration.", e);
-        }
+    private boolean startMinimizeTransition(IBinder transition) {
+        return mPendingTransitionTokens.contains(transition);
     }
 
     @Nullable
     @Override
     public WindowContainerTransaction handleRequest(@NonNull IBinder transition,
             @NonNull TransitionRequestInfo request) {
-        final ActivityManager.RunningTaskInfo taskInfo = request.getTriggerTask();
-        if (taskInfo == null || taskInfo.getWindowingMode() != WINDOWING_MODE_FREEFORM) {
-            return null;
-        }
-        switch (request.getType()) {
-            case WindowManager.TRANSIT_OPEN:
-            case WindowManager.TRANSIT_CLOSE:
-            case WindowManager.TRANSIT_TO_FRONT:
-            case WindowManager.TRANSIT_TO_BACK:
-                return new WindowContainerTransaction();
-            default:
-                return null;
-        }
+        return null;
     }
 }

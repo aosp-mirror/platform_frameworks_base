@@ -195,8 +195,16 @@ class RemoteTransitionAdapter {
             val out = ArrayList<RemoteAnimationTarget>()
             for (i in info.changes.indices) {
                 val change = info.changes[i]
-                val changeIsWallpaper = change.flags and TransitionInfo.FLAG_IS_WALLPAPER != 0
-                if (wallpapers != changeIsWallpaper) continue
+                if (change.hasFlags(TransitionInfo.FLAG_IN_TASK_WITH_EMBEDDED_ACTIVITY)) {
+                    // For embedded container, when the parent Task is also in the transition, we
+                    // should only animate the parent Task.
+                    if (change.parent != null) continue
+                    // For embedded container without parent, we should only animate if it fills
+                    // the Task. Otherwise we may animate only partial of the Task.
+                    if (!change.hasFlags(TransitionInfo.FLAG_FILLS_TASK)) continue
+                }
+                // Check if it is wallpaper
+                if (wallpapers != change.hasFlags(TransitionInfo.FLAG_IS_WALLPAPER)) continue
                 out.add(createTarget(change, info.changes.size - i, info, t))
                 if (leashMap != null) {
                     leashMap[change.leash] = out[out.size - 1].leash
@@ -320,9 +328,7 @@ class RemoteTransitionAdapter {
                                 counterWallpaper.cleanUp(finishTransaction)
                                 // Release surface references now. This is apparently to free GPU
                                 // memory while doing quick operations (eg. during CTS).
-                                for (i in info.changes.indices.reversed()) {
-                                    info.changes[i].leash.release()
-                                }
+                                info.releaseAllSurfaces()
                                 for (i in leashMap.size - 1 downTo 0) {
                                     leashMap.valueAt(i).release()
                                 }
@@ -331,6 +337,7 @@ class RemoteTransitionAdapter {
                                         null /* wct */,
                                         finishTransaction
                                     )
+                                    finishTransaction.close()
                                 } catch (e: RemoteException) {
                                     Log.e(
                                         "ActivityOptionsCompat",
@@ -364,6 +371,9 @@ class RemoteTransitionAdapter {
                 ) {
                     // TODO: hook up merge to recents onTaskAppeared if applicable. Until then,
                     //       ignore any incoming merges.
+                    // Clean up stuff though cuz GC takes too long for benchmark tests.
+                    t.close()
+                    info.releaseAllSurfaces()
                 }
             }
         }

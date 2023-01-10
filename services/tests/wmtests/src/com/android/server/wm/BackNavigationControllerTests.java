@@ -80,10 +80,12 @@ public class BackNavigationControllerTests extends WindowTestsBase {
         IOnBackInvokedCallback callback = withSystemCallback(task);
 
         BackNavigationInfo backNavigationInfo =
-                mBackNavigationController.startBackNavigation(true, null);
+                mBackNavigationController.startBackNavigation(true, null, null);
         assertWithMessage("BackNavigationInfo").that(backNavigationInfo).isNotNull();
-        assertThat(backNavigationInfo.getDepartingAnimationTarget()).isNotNull();
-        assertThat(backNavigationInfo.getTaskWindowConfiguration()).isNotNull();
+        if (!BackNavigationController.USE_TRANSITION) {
+            assertThat(backNavigationInfo.getDepartingAnimationTarget()).isNotNull();
+            assertThat(backNavigationInfo.getTaskWindowConfiguration()).isNotNull();
+        }
         assertThat(backNavigationInfo.getOnBackInvokedCallback()).isEqualTo(callback);
         assertThat(typeToString(backNavigationInfo.getType()))
                 .isEqualTo(typeToString(BackNavigationInfo.TYPE_RETURN_TO_HOME));
@@ -233,14 +235,14 @@ public class BackNavigationControllerTests extends WindowTestsBase {
 
     @Nullable
     private BackNavigationInfo startBackNavigation() {
-        return mBackNavigationController.startBackNavigation(true, null);
+        return mBackNavigationController.startBackNavigation(true, null, null);
     }
 
     @NonNull
     private IOnBackInvokedCallback createOnBackInvokedCallback() {
         return new IOnBackInvokedCallback.Stub() {
             @Override
-            public void onBackStarted() {
+            public void onBackStarted(BackEvent backEvent) {
             }
 
             @Override

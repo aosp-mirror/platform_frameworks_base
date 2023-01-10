@@ -16,6 +16,7 @@
 
 package com.android.systemui.media.dialog
 
+import android.app.KeyguardManager
 import android.content.Context
 import android.media.AudioManager
 import android.media.session.MediaSessionManager
@@ -25,6 +26,7 @@ import com.android.internal.logging.UiEventLogger
 import com.android.settingslib.bluetooth.LocalBluetoothManager
 import com.android.systemui.animation.DialogLaunchAnimator
 import com.android.systemui.broadcast.BroadcastSender
+import com.android.systemui.flags.FeatureFlags
 import com.android.systemui.media.nearby.NearbyMediaDevicesManager
 import com.android.systemui.plugins.ActivityStarter
 import com.android.systemui.statusbar.notification.collection.notifcollection.CommonNotifCollection
@@ -45,7 +47,9 @@ class MediaOutputBroadcastDialogFactory @Inject constructor(
     private val dialogLaunchAnimator: DialogLaunchAnimator,
     private val nearbyMediaDevicesManagerOptional: Optional<NearbyMediaDevicesManager>,
     private val audioManager: AudioManager,
-    private val powerExemptionManager: PowerExemptionManager
+    private val powerExemptionManager: PowerExemptionManager,
+    private val keyGuardManager: KeyguardManager,
+    private val featureFlags: FeatureFlags
 ) {
     var mediaOutputBroadcastDialog: MediaOutputBroadcastDialog? = null
 
@@ -57,7 +61,7 @@ class MediaOutputBroadcastDialogFactory @Inject constructor(
         val controller = MediaOutputController(context, packageName,
                 mediaSessionManager, lbm, starter, notifCollection,
                 dialogLaunchAnimator, nearbyMediaDevicesManagerOptional, audioManager,
-                powerExemptionManager)
+                powerExemptionManager, keyGuardManager, featureFlags)
         val dialog =
                 MediaOutputBroadcastDialog(context, aboveStatusBar, broadcastSender, controller)
         mediaOutputBroadcastDialog = dialog

@@ -33,6 +33,7 @@
     <string name="accessibility_action_pip_unstash" msgid="7467499339610437646">"Паказаць"</string>
     <string name="dock_forced_resizable" msgid="1749750436092293116">"Праграма можа не працаваць у рэжыме падзеленага экрана."</string>
     <string name="dock_non_resizeble_failed_to_dock_text" msgid="7408396418008948957">"Праграма не падтрымлівае функцыю дзялення экрана."</string>
+    <string name="dock_multi_instances_not_supported_text" msgid="5242868470666346929">"Гэту праграму можна адкрыць толькі ў адным акне."</string>
     <string name="forced_resizable_secondary_display" msgid="1768046938673582671">"Праграма можа не працаваць на дадатковых экранах."</string>
     <string name="activity_launch_on_secondary_display_failed_text" msgid="4226485344988071769">"Праграма не падтрымлівае запуск на дадатковых экранах."</string>
     <string name="accessibility_divider" msgid="703810061635792791">"Раздзяляльнік падзеленага экрана"</string>
@@ -76,12 +77,19 @@
     <string name="camera_compat_treatment_suggested_button_description" msgid="8103916969024076767">"Праблемы з камерай?\nНацісніце, каб пераабсталяваць"</string>
     <string name="camera_compat_treatment_applied_button_description" msgid="2944157113330703897">"Не ўдалося выправіць?\nНацісніце, каб аднавіць"</string>
     <string name="camera_compat_dismiss_button_description" msgid="2795364433503817511">"Ніякіх праблем з камерай? Націсніце, каб адхіліць."</string>
-    <string name="letterbox_education_dialog_title" msgid="6688664582871779215">"Некаторыя праграмы лепш за ўсё працуюць у кніжнай арыентацыі"</string>
-    <string name="letterbox_education_dialog_subtext" msgid="4853542518367719562">"Каб эфектыўна выкарыстоўваць прастору, паспрабуйце адзін з гэтых варыянтаў"</string>
-    <string name="letterbox_education_screen_rotation_text" msgid="5085786687366339027">"Каб перайсці ў поўнаэкранны рэжым, павярніце прыладу"</string>
-    <string name="letterbox_education_reposition_text" msgid="1068293354123934727">"Двойчы націсніце побач з праграмай, каб перамясціць яе"</string>
+    <string name="letterbox_education_dialog_title" msgid="7739895354143295358">"Адначасова выконвайце розныя задачы"</string>
+    <string name="letterbox_education_split_screen_text" msgid="6206339484068670830">"Перацягніце іншую праграму, каб выкарыстоўваць падзелены экран"</string>
+    <string name="letterbox_education_reposition_text" msgid="4589957299813220661">"Двойчы націсніце экран па-за праграмай, каб перамясціць яе"</string>
     <string name="letterbox_education_got_it" msgid="4057634570866051177">"Зразумела"</string>
     <string name="letterbox_education_expand_button_description" msgid="1729796567101129834">"Разгарнуць для дадатковай інфармацыі"</string>
     <string name="maximize_button_text" msgid="1650859196290301963">"Разгарнуць"</string>
+    <string name="minimize_button_text" msgid="271592547935841753">"Згарнуць"</string>
     <string name="close_button_text" msgid="2913281996024033299">"Закрыць"</string>
+    <string name="back_button_text" msgid="1469718707134137085">"Назад"</string>
+    <string name="handle_text" msgid="1766582106752184456">"Маркер"</string>
+    <string name="fullscreen_text" msgid="1162316685217676079">"На ўвесь экран"</string>
+    <string name="desktop_text" msgid="1077633567027630454">"Рэжым працоўнага стала"</string>
+    <string name="split_screen_text" msgid="1396336058129570886">"Падзяліць экран"</string>
+    <string name="more_button_text" msgid="3655388105592893530">"Яшчэ"</string>
+    <string name="float_button_text" msgid="9221657008391364581">"Зрабіць рухомым акном"</string>
 </resources>

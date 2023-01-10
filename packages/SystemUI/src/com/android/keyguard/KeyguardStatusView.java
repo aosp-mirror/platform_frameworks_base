@@ -16,14 +16,14 @@
 
 package com.android.keyguard;
 
+import static java.util.Collections.emptySet;
+
 import android.content.Context;
-import android.graphics.Color;
+import android.os.Trace;
 import android.util.AttributeSet;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.GridLayout;
-
-import androidx.core.graphics.ColorUtils;
 
 import com.android.systemui.R;
 import com.android.systemui.statusbar.CrossFadeHelper;
@@ -46,7 +46,6 @@ public class KeyguardStatusView extends GridLayout {
     private View mMediaHostContainer;
 
     private float mDarkAmount = 0;
-    private int mTextColor;
 
     public KeyguardStatusView(Context context) {
         this(context, null, 0);
@@ -71,7 +70,6 @@ public class KeyguardStatusView extends GridLayout {
         }
 
         mKeyguardSlice = findViewById(R.id.keyguard_slice_view);
-        mTextColor = mClockView.getCurrentTextColor();
 
         mMediaHostContainer = findViewById(R.id.status_view_media_container);
 
@@ -83,20 +81,18 @@ public class KeyguardStatusView extends GridLayout {
             return;
         }
         mDarkAmount = darkAmount;
-        mClockView.setDarkAmount(darkAmount);
         CrossFadeHelper.fadeOut(mMediaHostContainer, darkAmount);
         updateDark();
     }
 
     void updateDark() {
-        final int blendedTextColor = ColorUtils.blendARGB(mTextColor, Color.WHITE, mDarkAmount);
         mKeyguardSlice.setDarkAmount(mDarkAmount);
-        mClockView.setTextColor(blendedTextColor);
     }
 
     /** Sets a translationY value on every child view except for the media view. */
-    public void setChildrenTranslationYExcludingMediaView(float translationY) {
-        setChildrenTranslationYExcluding(translationY, Set.of(mMediaHostContainer));
+    public void setChildrenTranslationY(float translationY, boolean excludeMedia) {
+        setChildrenTranslationYExcluding(translationY,
+                excludeMedia ? Set.of(mMediaHostContainer) : emptySet());
     }
 
     /** Sets a translationY value on every view except for the views in the provided set. */
@@ -113,12 +109,18 @@ public class KeyguardStatusView extends GridLayout {
     public void dump(PrintWriter pw, String[] args) {
         pw.println("KeyguardStatusView:");
         pw.println("  mDarkAmount: " + mDarkAmount);
-        pw.println("  mTextColor: " + Integer.toHexString(mTextColor));
         if (mClockView != null) {
             mClockView.dump(pw, args);
         }
         if (mKeyguardSlice != null) {
             mKeyguardSlice.dump(pw, args);
         }
+    }
+
+    @Override
+    protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
+        Trace.beginSection("KeyguardStatusView#onMeasure");
+        super.onMeasure(widthMeasureSpec, heightMeasureSpec);
+        Trace.endSection();
     }
 }

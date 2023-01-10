@@ -33,6 +33,7 @@
     <string name="accessibility_action_pip_unstash" msgid="7467499339610437646">"Сейфтен чыгаруу"</string>
     <string name="dock_forced_resizable" msgid="1749750436092293116">"Колдонмодо экран бөлүнбөшү мүмкүн."</string>
     <string name="dock_non_resizeble_failed_to_dock_text" msgid="7408396418008948957">"Колдонмодо экран бөлүнбөйт."</string>
+    <string name="dock_multi_instances_not_supported_text" msgid="5242868470666346929">"Бул колдонмону 1 терезеде гана ачууга болот."</string>
     <string name="forced_resizable_secondary_display" msgid="1768046938673582671">"Колдонмо кошумча экранда иштебей коюшу мүмкүн."</string>
     <string name="activity_launch_on_secondary_display_failed_text" msgid="4226485344988071769">"Колдонмону кошумча экрандарда иштетүүгө болбойт."</string>
     <string name="accessibility_divider" msgid="703810061635792791">"Экранды бөлгүч"</string>
@@ -56,9 +57,9 @@
     <string name="bubble_content_description_single" msgid="8495748092720065813">"<xliff:g id="APP_NAME">%2$s</xliff:g> колдонмосунан <xliff:g id="NOTIFICATION_TITLE">%1$s</xliff:g>"</string>
     <string name="bubble_content_description_stack" msgid="8071515017164630429">"<xliff:g id="APP_NAME">%2$s</xliff:g> жана дагы <xliff:g id="BUBBLE_COUNT">%3$d</xliff:g> колдонмодон <xliff:g id="NOTIFICATION_TITLE">%1$s</xliff:g>"</string>
     <string name="bubble_accessibility_action_move_top_left" msgid="2644118920500782758">"Жогорку сол жакка жылдыруу"</string>
-    <string name="bubble_accessibility_action_move_top_right" msgid="5864594920870245525">"Жогорку оң жакка жылдырыңыз"</string>
+    <string name="bubble_accessibility_action_move_top_right" msgid="5864594920870245525">"Жогорку оң жакка жылдыруу"</string>
     <string name="bubble_accessibility_action_move_bottom_left" msgid="850271002773745634">"Төмөнкү сол жакка жылдыруу"</string>
-    <string name="bubble_accessibility_action_move_bottom_right" msgid="2107626346109206352">"Төмөнкү оң жакка жылдырыңыз"</string>
+    <string name="bubble_accessibility_action_move_bottom_right" msgid="2107626346109206352">"Төмөнкү оң жакка жылдыруу"</string>
     <string name="bubbles_app_settings" msgid="3617224938701566416">"<xliff:g id="NOTIFICATION_TITLE">%1$s</xliff:g> жөндөөлөрү"</string>
     <string name="bubble_dismiss_text" msgid="8816558050659478158">"Калкып чыкма билдирмени жабуу"</string>
     <string name="bubbles_dont_bubble_conversation" msgid="310000317885712693">"Жазышууда калкып чыкма билдирмелер көрүнбөсүн"</string>
@@ -76,12 +77,19 @@
     <string name="camera_compat_treatment_suggested_button_description" msgid="8103916969024076767">"Камерада маселелер келип чыктыбы?\nОңдоо үчүн таптаңыз"</string>
     <string name="camera_compat_treatment_applied_button_description" msgid="2944157113330703897">"Оңдолгон жокпу?\nАртка кайтаруу үчүн таптаңыз"</string>
     <string name="camera_compat_dismiss_button_description" msgid="2795364433503817511">"Камерада маселе жокпу? Этибарга албоо үчүн таптаңыз."</string>
-    <string name="letterbox_education_dialog_title" msgid="6688664582871779215">"Айрым колдонмолорду тигинен иштетүү туура болот"</string>
-    <string name="letterbox_education_dialog_subtext" msgid="4853542518367719562">"Иш чөйрөсүнүн бардык мүмкүнчүлүктөрүн пайдалануу үчүн бул параметрлердин бирин колдонуп көрүңүз"</string>
-    <string name="letterbox_education_screen_rotation_text" msgid="5085786687366339027">"Толук экран режимине өтүү үчүн түзмөктү буруңуз"</string>
-    <string name="letterbox_education_reposition_text" msgid="1068293354123934727">"Колдонмонун ракурсун өзгөртүү үчүн анын тушуна эки жолу басыңыз"</string>
+    <string name="letterbox_education_dialog_title" msgid="7739895354143295358">"Көрүп, көбүрөөк нерселерди жасаңыз"</string>
+    <string name="letterbox_education_split_screen_text" msgid="6206339484068670830">"Экранды бөлүү үчүн башка колдонмону сүйрөңүз"</string>
+    <string name="letterbox_education_reposition_text" msgid="4589957299813220661">"Колдонмону жылдыруу үчүн сырт жагын эки жолу таптаңыз"</string>
     <string name="letterbox_education_got_it" msgid="4057634570866051177">"Түшүндүм"</string>
     <string name="letterbox_education_expand_button_description" msgid="1729796567101129834">"Толук маалымат алуу үчүн жайып көрүңүз."</string>
     <string name="maximize_button_text" msgid="1650859196290301963">"Чоңойтуу"</string>
+    <string name="minimize_button_text" msgid="271592547935841753">"Кичирейтүү"</string>
     <string name="close_button_text" msgid="2913281996024033299">"Жабуу"</string>
+    <string name="back_button_text" msgid="1469718707134137085">"Артка"</string>
+    <string name="handle_text" msgid="1766582106752184456">"Маркер"</string>
+    <string name="fullscreen_text" msgid="1162316685217676079">"Толук экран"</string>
+    <string name="desktop_text" msgid="1077633567027630454">"Компьютер режими"</string>
+    <string name="split_screen_text" msgid="1396336058129570886">"Экранды бөлүү"</string>
+    <string name="more_button_text" msgid="3655388105592893530">"Дагы"</string>
+    <string name="float_button_text" msgid="9221657008391364581">"Калкыма"</string>
 </resources>

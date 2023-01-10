@@ -96,6 +96,7 @@ abstract class AbstractVibratorStep extends Step {
                     "Turning off vibrator " + getVibratorId());
         }
         controller.off();
+        getVibration().stats().reportVibratorOff();
     }
 
     protected void changeAmplitude(float amplitude) {
@@ -104,6 +105,7 @@ abstract class AbstractVibratorStep extends Step {
                     "Amplitude changed on vibrator " + getVibratorId() + " to " + amplitude);
         }
         controller.setAmplitude(amplitude);
+        getVibration().stats().reportSetAmplitude();
     }
 
     /**
@@ -147,6 +149,8 @@ abstract class AbstractVibratorStep extends Step {
         if (nextSegmentIndex >= effectSize && repeatIndex >= 0) {
             // Count the loops that were played.
             int loopSize = effectSize - repeatIndex;
+            int loopSegmentsPlayed = nextSegmentIndex - repeatIndex;
+            getVibration().stats().reportRepetition(loopSegmentsPlayed / loopSize);
             nextSegmentIndex = repeatIndex + ((nextSegmentIndex - effectSize) % loopSize);
         }
         Step nextStep = conductor.nextVibrateStep(nextStartTime, controller, effect,

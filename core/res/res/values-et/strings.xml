@@ -33,6 +33,7 @@
     <string name="defaultVoiceMailAlphaTag" msgid="2190754495304236490">"Kõnepost"</string>
     <string name="defaultMsisdnAlphaTag" msgid="2285034592902077488">"MSISDN1"</string>
     <string name="mmiError" msgid="2862759606579822246">"Ühendusprobleem või kehtetu MMI-kood."</string>
+    <string name="mmiErrorNotSupported" msgid="5001803469335286099">"Funktsiooni ei toetata."</string>
     <string name="mmiFdnError" msgid="3975490266767565852">"Toiming on ainult fikseeritud valimisnumbritele."</string>
     <string name="mmiErrorWhileRoaming" msgid="1204173664713870114">"Kõne suunamise seadeid ei saa rändluse ajal teie telefonis muuta."</string>
     <string name="serviceEnabled" msgid="7549025003394765639">"Teenus on lubatud."</string>
@@ -586,13 +587,14 @@
     <string name="screen_lock_app_setting_name" msgid="6054944352976789228">"Ekraaniluku kasutamine"</string>
     <string name="screen_lock_dialog_default_subtitle" msgid="120359538048533695">"Jätkamiseks sisestage oma ekraanilukk"</string>
     <string name="fingerprint_acquired_partial" msgid="4323789264604479684">"Vajutage tugevalt andurile"</string>
-    <string name="fingerprint_acquired_insufficient" msgid="2545149524031515411">"Sõrmejälge ei õnnestunud töödelda. Proovige uuesti."</string>
+    <string name="fingerprint_acquired_insufficient" msgid="623888149088216458">"Sõrmejälge ei õnnestu tuvastada. Proovige uuesti."</string>
     <string name="fingerprint_acquired_imager_dirty" msgid="1770676120848224250">"Puhastage sõrmejäljeandur ja proovige uuesti"</string>
     <string name="fingerprint_acquired_imager_dirty_alt" msgid="9169582140486372897">"Puhastage andur ja proovige uuesti"</string>
     <string name="fingerprint_acquired_too_fast" msgid="1628459767349116104">"Vajutage tugevalt andurile"</string>
     <string name="fingerprint_acquired_too_slow" msgid="6683510291554497580">"Sõrm liikus liiga aeglaselt. Proovige uuesti."</string>
     <string name="fingerprint_acquired_already_enrolled" msgid="2285166003936206785">"Proovige teist sõrmejälge"</string>
     <string name="fingerprint_acquired_too_bright" msgid="3863560181670915607">"Liiga ere"</string>
+    <string name="fingerprint_acquired_power_press" msgid="3107864151278434961">"Tuvastati toitenupu vajutamine"</string>
     <string name="fingerprint_acquired_try_adjusting" msgid="3667006071003809364">"Proovige kohandada"</string>
     <string name="fingerprint_acquired_immobile" msgid="1621891895241888048">"Muutke iga kord pisut oma sõrme asendit"</string>
   <string-array name="fingerprint_acquired_vendor">
@@ -604,12 +606,12 @@
     <string name="face_authenticated_confirmation_required" msgid="6872632732508013755">"Nägu on autenditud, vajutage käsku Kinnita"</string>
     <string name="fingerprint_error_hw_not_available" msgid="4571700896929561202">"Sõrmejälje riistvara pole saadaval."</string>
     <string name="fingerprint_error_no_space" msgid="7285481581905967580">"Sõrmejälge ei saa seadistada"</string>
-    <string name="fingerprint_error_timeout" msgid="2946635815726054226">"Sõrmejälje riistvara taimeri ajalõpp. Proovige uuesti."</string>
+    <string name="fingerprint_error_timeout" msgid="7361192266621252164">"Sõrmejälje seadistamine aegus. Proovige uuesti."</string>
     <string name="fingerprint_error_canceled" msgid="540026881380070750">"Sõrmejälje toiming tühistati."</string>
     <string name="fingerprint_error_user_canceled" msgid="7685676229281231614">"Kasutaja tühistas sõrmejälje kasutamise."</string>
-    <string name="fingerprint_error_lockout" msgid="7853461265604738671">"Liiga palju katseid. Proovige hiljem uuesti."</string>
-    <string name="fingerprint_error_lockout_permanent" msgid="3895478283943513746">"Liiga palju katseid. Sõrmejäljeandur on keelatud."</string>
-    <string name="fingerprint_error_unable_to_process" msgid="1148553603490048742">"Proovige uuesti."</string>
+    <string name="fingerprint_error_lockout" msgid="6626753679019351368">"Liiga palju katseid. Kasutage selle asemel ekraanilukku."</string>
+    <string name="fingerprint_error_lockout_permanent" msgid="9060651300306264843">"Liiga palju katseid. Kasutage selle asemel ekraanilukku."</string>
+    <string name="fingerprint_error_unable_to_process" msgid="2446280592818621224">"Sõrmejälge ei õnnestu töödelda. Proovige uuesti."</string>
     <string name="fingerprint_error_no_fingerprints" msgid="8671811719699072411">"Ühtegi sõrmejälge pole registreeritud."</string>
     <string name="fingerprint_error_hw_not_present" msgid="578914350967423382">"Selles seadmes pole sõrmejäljeandurit."</string>
     <string name="fingerprint_error_security_update_required" msgid="7750187320640856433">"Andur on ajutiselt keelatud."</string>
@@ -637,7 +639,7 @@
     <string name="fingerprint_recalibrate_notification_content" msgid="8519935717822194943">"Külastage remonditeenuse pakkujat."</string>
     <string name="face_acquired_insufficient" msgid="6889245852748492218">"Teie näomudelit ei saa luua. Proovige uuesti."</string>
     <string name="face_acquired_too_bright" msgid="8070756048978079164">"Liiga ere. Proovige hämaramat valgust."</string>
-    <string name="face_acquired_too_dark" msgid="7919016380747701228">"Proovige parema valgustusega kohas"</string>
+    <string name="face_acquired_too_dark" msgid="8539853432479385326">"Pole piisavalt valgust"</string>
     <string name="face_acquired_too_close" msgid="4453646176196302462">"Liigutage telefoni kaugemale"</string>
     <string name="face_acquired_too_far" msgid="2922278214231064859">"Liigutage telefoni lähemale"</string>
     <string name="face_acquired_too_high" msgid="8278815780046368576">"Liigutage telefoni kõrgemale"</string>
@@ -1249,10 +1251,9 @@
     <string name="android_preparing_apk" msgid="589736917792300956">"Rakenduse <xliff:g id="APPNAME">%1$s</xliff:g> ettevalmistamine."</string>
     <string name="android_upgrading_starting_apps" msgid="6206161195076057075">"Rakenduste käivitamine."</string>
     <string name="android_upgrading_complete" msgid="409800058018374746">"Käivitamise lõpuleviimine."</string>
-    <string name="fp_power_button_enrollment_title" msgid="3574363228413259548">"Kas jätkata seadistamist?"</string>
     <string name="fp_power_button_enrollment_message" msgid="5648173517663246140">"Vajutasite toitenuppu – tavaliselt lülitab see ekraani välja.\n\nPuudutage õrnalt ja seadistage oma sõrmejälg."</string>
-    <string name="fp_power_button_enrollment_positive_button" msgid="2095415838459356833">"Lülita ekraan välja"</string>
-    <string name="fp_power_button_enrollment_negative_button" msgid="6558436406362486747">"Jätka seadistamist"</string>
+    <string name="fp_power_button_enrollment_title" msgid="6976841690455338563">"Seadistuse lõpet. lülitage ekraan välja"</string>
+    <string name="fp_power_button_enrollment_button_text" msgid="3199783266386029200">"Lülita välja"</string>
     <string name="fp_power_button_bp_title" msgid="5585506104526820067">"Kas jätkata sõrmejälje kinnitamist?"</string>
     <string name="fp_power_button_bp_message" msgid="2983163038168903393">"Vajutasite toitenuppu – tavaliselt lülitab see ekraani välja.\n\nPuudutage õrnalt, et oma sõrmejälg kinnitada."</string>
     <string name="fp_power_button_bp_positive_button" msgid="728945472408552251">"Lülita ekraan välja"</string>
@@ -1405,16 +1406,16 @@
     <string name="ext_media_new_notification_message" msgid="6095403121990786986">"Puudutage seadistamiseks"</string>
     <string name="ext_media_new_notification_message" product="tv" msgid="216863352100263668">"Valige seadistamiseks"</string>
     <string name="ext_media_new_notification_message" product="automotive" msgid="5140127881613227162">"Peate võib-olla seadme uuesti vormindama. Puudutage väljutamiseks."</string>
-    <string name="ext_media_ready_notification_message" msgid="777258143284919261">"Fotode ja meedia ülekandmiseks"</string>
+    <string name="ext_media_ready_notification_message" msgid="7509496364380197369">"Salvestage fotosid, videoid, muusikat ja muud"</string>
     <string name="ext_media_ready_notification_message" product="tv" msgid="8847134811163165935">"Sirvige meediafaile"</string>
     <string name="ext_media_unmountable_notification_title" msgid="4895444667278979910">"Probleem üksusega <xliff:g id="NAME">%s</xliff:g>"</string>
     <string name="ext_media_unmountable_notification_title" product="automotive" msgid="3142723758949023280">"<xliff:g id="NAME">%s</xliff:g> ei tööta"</string>
     <string name="ext_media_unmountable_notification_message" msgid="3256290114063126205">"Puudutage parandamiseks"</string>
     <string name="ext_media_unmountable_notification_message" product="tv" msgid="3003611129979934633">"Kaart <xliff:g id="NAME">%s</xliff:g> on rikutud. Valige parandamiseks."</string>
     <string name="ext_media_unmountable_notification_message" product="automotive" msgid="2274596120715020680">"Peate võib-olla seadme uuesti vormindama. Puudutage väljutamiseks."</string>
-    <string name="ext_media_unsupported_notification_title" msgid="4358280700537030333">"Toetamata <xliff:g id="NAME">%s</xliff:g>"</string>
+    <string name="ext_media_unsupported_notification_title" msgid="3487534182861251401">"Tuvastati meedium <xliff:g id="NAME">%s</xliff:g>"</string>
     <string name="ext_media_unsupported_notification_title" product="automotive" msgid="6004193172658722381">"<xliff:g id="NAME">%s</xliff:g> ei tööta"</string>
-    <string name="ext_media_unsupported_notification_message" msgid="917738524888367560">"See seade ei toeta üksust <xliff:g id="NAME">%s</xliff:g>. Puudutage toetatud vormingus seadistamiseks."</string>
+    <string name="ext_media_unsupported_notification_message" msgid="8463636521459807981">"Puudutage seadistamiseks."</string>
     <string name="ext_media_unsupported_notification_message" product="tv" msgid="1595482802187036532">"Valige üksuse <xliff:g id="NAME">%s</xliff:g> seadistamiseks toetatud vormingus."</string>
     <string name="ext_media_unsupported_notification_message" product="automotive" msgid="3412494732736336330">"Peate võib-olla seadme uuesti vormindama"</string>
     <string name="ext_media_badremoval_notification_title" msgid="4114625551266196872">"Üksus <xliff:g id="NAME">%s</xliff:g> eemaldati ootamatult"</string>
@@ -1424,8 +1425,8 @@
     <string name="ext_media_unmounting_notification_title" msgid="4147986383917892162">"Üksuse <xliff:g id="NAME">%s</xliff:g> väljutamine …"</string>
     <string name="ext_media_unmounting_notification_message" msgid="5717036261538754203">"Ärge eemaldage"</string>
     <string name="ext_media_init_action" msgid="2312974060585056709">"Seadistus"</string>
-    <string name="ext_media_unmount_action" msgid="966992232088442745">"Eemaldamine"</string>
-    <string name="ext_media_browse_action" msgid="344865351947079139">"Avastamine"</string>
+    <string name="ext_media_unmount_action" msgid="966992232088442745">"Eemalda"</string>
+    <string name="ext_media_browse_action" msgid="344865351947079139">"Avasta"</string>
     <string name="ext_media_seamless_action" msgid="8837030226009268080">"Vahetage väljundit"</string>
     <string name="ext_media_missing_title" msgid="3209472091220515046">"Üksust <xliff:g id="NAME">%s</xliff:g> pole"</string>
     <string name="ext_media_missing_message" msgid="4408988706227922909">"Sisestage seade uuesti"</string>
@@ -1568,9 +1569,9 @@
     <string name="action_bar_home_subtitle_description_format" msgid="4346835454749569826">"%1$s, %2$s, %3$s"</string>
     <string name="storage_internal" msgid="8490227947584914460">"Sisemine jagatud mäluruum"</string>
     <string name="storage_sd_card" msgid="3404740277075331881">"SD-kaart"</string>
-    <string name="storage_sd_card_label" msgid="7526153141147470509">"Tootja <xliff:g id="MANUFACTURER">%s</xliff:g> SD-kaart"</string>
+    <string name="storage_sd_card_label" msgid="7526153141147470509">"<xliff:g id="MANUFACTURER">%s</xliff:g> SD-kaart"</string>
     <string name="storage_usb_drive" msgid="448030813201444573">"USB-ketas"</string>
-    <string name="storage_usb_drive_label" msgid="6631740655876540521">"Tootja <xliff:g id="MANUFACTURER">%s</xliff:g> USB-ketas"</string>
+    <string name="storage_usb_drive_label" msgid="6631740655876540521">"<xliff:g id="MANUFACTURER">%s</xliff:g> USB-ketas"</string>
     <string name="storage_usb" msgid="2391213347883616886">"USB-mäluseade"</string>
     <string name="extract_edit_menu_button" msgid="63954536535863040">"Muuda"</string>
     <string name="data_usage_warning_title" msgid="9034893717078325845">"Andmekasutuse hoiatus"</string>
@@ -1927,6 +1928,7 @@
     <string name="country_selection_title" msgid="5221495687299014379">"Piirkonnaeelistus"</string>
     <string name="search_language_hint" msgid="7004225294308793583">"Sisestage keele nimi"</string>
     <string name="language_picker_section_suggested" msgid="6556199184638990447">"Soovitatud"</string>
+    <string name="language_picker_regions_section_suggested" msgid="6080131515268225316">"Soovitatud"</string>
     <string name="language_picker_section_all" msgid="1985809075777564284">"Kõik keeled"</string>
     <string name="region_picker_section_all" msgid="756441309928774155">"Kõik piirkonnad"</string>
     <string name="locale_search_menu" msgid="6258090710176422934">"Otsing"</string>
@@ -1944,8 +1946,7 @@
     <string name="app_streaming_blocked_title_for_camera_dialog" msgid="3935701653713853065">"Kaamera pole saadaval"</string>
     <string name="app_streaming_blocked_title_for_fingerprint_dialog" msgid="3516853717714141951">"Jätkake telefonis"</string>
     <string name="app_streaming_blocked_title_for_microphone_dialog" msgid="544822455127171206">"Mikrofon pole saadaval"</string>
-    <!-- no translation found for app_streaming_blocked_title_for_playstore_dialog (8149823099822897538) -->
-    <skip />
+    <string name="app_streaming_blocked_title_for_playstore_dialog" msgid="8149823099822897538">"Play pood ei ole saadaval"</string>
     <string name="app_streaming_blocked_title_for_settings_dialog" product="tv" msgid="196994247017450357">"Android TV seaded pole saadaval"</string>
     <string name="app_streaming_blocked_title_for_settings_dialog" product="tablet" msgid="8222710146267948647">"Tahvelarvuti seaded pole saadaval"</string>
     <string name="app_streaming_blocked_title_for_settings_dialog" product="default" msgid="6895719984375299791">"Telefoni seaded pole saadaval"</string>
@@ -1955,12 +1956,9 @@
     <string name="app_streaming_blocked_message_for_fingerprint_dialog" product="tv" msgid="3470977315395784567">"See rakendus nõuab lisaturvalisust. Proovige juurde pääseda oma Android TV seadmes."</string>
     <string name="app_streaming_blocked_message_for_fingerprint_dialog" product="tablet" msgid="698460091901465092">"See rakendus nõuab lisaturvalisust. Proovige juurde pääseda oma tahvelarvutis."</string>
     <string name="app_streaming_blocked_message_for_fingerprint_dialog" product="default" msgid="8552691971910603907">"See rakendus nõuab lisaturvalisust. Proovige juurde pääseda oma telefonis."</string>
-    <!-- no translation found for app_streaming_blocked_message_for_settings_dialog (820334666354451145) -->
-    <skip />
-    <!-- no translation found for app_streaming_blocked_message_for_settings_dialog (3286849551133045896) -->
-    <skip />
-    <!-- no translation found for app_streaming_blocked_message_for_settings_dialog (6264287556598916295) -->
-    <skip />
+    <string name="app_streaming_blocked_message_for_settings_dialog" product="tv" msgid="820334666354451145">"Sellele ei pääse teie seadmes <xliff:g id="DEVICE">%1$s</xliff:g> juurde. Proovige juurde pääseda oma Android TV seadmes."</string>
+    <string name="app_streaming_blocked_message_for_settings_dialog" product="tablet" msgid="3286849551133045896">"Sellele ei pääse teie seadmes <xliff:g id="DEVICE">%1$s</xliff:g> juurde. Proovige juurde pääseda oma tahvelarvutis."</string>
+    <string name="app_streaming_blocked_message_for_settings_dialog" product="default" msgid="6264287556598916295">"Sellele ei pääse teie seadmes <xliff:g id="DEVICE">%1$s</xliff:g> juurde. Proovige juurde pääseda oma telefonis."</string>
     <string name="deprecated_target_sdk_message" msgid="5203207875657579953">"See rakendus on loodud Androidi vanema versiooni jaoks ega pruugi õigesti töötada. Otsige värskendusi või võtke ühendust arendajaga."</string>
     <string name="deprecated_target_sdk_app_store" msgid="8456784048558808909">"Otsi värskendust"</string>
     <string name="new_sms_notification_title" msgid="6528758221319927107">"Teile on uusi sõnumeid"</string>
@@ -2053,7 +2051,8 @@
     <string name="log_access_confirmation_title" msgid="2343578467290592708">"Kas anda rakendusele <xliff:g id="LOG_ACCESS_APP_NAME">%s</xliff:g> juurdepääs kõigile seadmelogidele?"</string>
     <string name="log_access_confirmation_allow" msgid="5302517782599389507">"Luba ühekordne juurdepääs"</string>
     <string name="log_access_confirmation_deny" msgid="7685790957455099845">"Ära luba"</string>
-    <string name="log_access_confirmation_body" msgid="6581985716241928135">"Seadmelogid jäädvustavad, mis teie seadmes toimub. Rakendused saavad neid logisid kasutada probleemide tuvastamiseks ja lahendamiseks.\n\nMõned logid võivad sisaldada tundlikku teavet, seega lubage juurdepääs kõigile seadmelogidele ainult rakendustele, mida usaldate. \n\nKui te ei luba sellel rakendusel kõigile seadmelogidele juurde pääseda, pääseb see siiski juurde oma logidele. Teie seadme tootja võib teie seadmes siiski teatud logidele või teabele juurde pääseda. Lisateave"</string>
+    <string name="log_access_confirmation_body" product="default" msgid="1806692062668620735">"Seadmelogid jäädvustavad, mis teie seadmes toimub. Rakendused saavad neid logisid kasutada probleemide tuvastamiseks ja lahendamiseks.\n\nMõned logid võivad sisaldada tundlikku teavet, seega lubage juurdepääs kõigile seadmelogidele ainult rakendustele, mida usaldate. \n\nKui te ei luba sellel rakendusel kõigile seadmelogidele juurde pääseda, pääseb see siiski juurde oma logidele. Teie seadme tootja võib teie seadmes siiski teatud logidele või teabele juurde pääseda."</string>
+    <string name="log_access_confirmation_body" product="tv" msgid="7379536536425265262">"Seadmelogid jäädvustavad, mis teie seadmes toimub. Rakendused saavad neid logisid kasutada probleemide tuvastamiseks ja lahendamiseks.\n\nMõned logid võivad sisaldada tundlikku teavet, seega lubage juurdepääs kõigile seadmelogidele ainult rakendustele, mida usaldate. \n\nKui te ei luba sellel rakendusel kõigile seadmelogidele juurde pääseda, pääseb see siiski juurde oma logidele. Teie seadme tootja võib teie seadmes siiski teatud logidele või teabele juurde pääseda.\n\nLugege lisateavet aadressil g.co/android/devicelogs."</string>
     <string name="log_access_do_not_show_again" msgid="1058690599083091552">"Ära kuva uuesti"</string>
     <string name="slices_permission_request" msgid="3677129866636153406">"Rakendus <xliff:g id="APP_0">%1$s</xliff:g> soovib näidata rakenduse <xliff:g id="APP_2">%2$s</xliff:g> lõike"</string>
     <string name="screenshot_edit" msgid="7408934887203689207">"Muuda"</string>
@@ -2292,7 +2291,8 @@
     <string name="notification_content_abusive_bg_apps" msgid="5296898075922695259">"Rakendus <xliff:g id="APP">%1$s</xliff:g> töötab taustal. Puudutage akukasutuse haldamiseks."</string>
     <string name="notification_content_long_running_fgs" msgid="8258193410039977101">"<xliff:g id="APP">%1$s</xliff:g> võib aku tööiga mõjutada. Puudutage aktiivsete rakenduste ülevaatamiseks."</string>
     <string name="notification_action_check_bg_apps" msgid="4758877443365362532">"Vaadake aktiivseid rakendusi"</string>
-    <string name="vdm_camera_access_denied" product="default" msgid="6102378580971542473">"Teie seadmest <xliff:g id="DEVICE">%1$s</xliff:g> ei pääse telefoni kaamerale juurde"</string>
+    <string name="vdm_camera_access_denied" product="default" msgid="6102378580971542473">"Teie seadmest <xliff:g id="DEVICE">%1$s</xliff:g> ei pääse telefoni kaamerale juurde."</string>
     <string name="vdm_camera_access_denied" product="tablet" msgid="6895968310395249076">"Teie seadmest <xliff:g id="DEVICE">%1$s</xliff:g> ei pääse tahvelarvuti kaamerale juurde"</string>
+    <string name="vdm_secure_window" msgid="161700398158812314">"Sellele ei pääse voogesituse ajal juurde. Proovige juurde pääseda oma telefonis."</string>
     <string name="system_locale_title" msgid="711882686834677268">"Süsteemi vaikeseade"</string>
 </resources>

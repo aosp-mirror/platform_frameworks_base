@@ -19,12 +19,15 @@ package com.android.internal.widget;
 import android.annotation.DrawableRes;
 import android.annotation.Nullable;
 import android.content.Context;
+import android.content.pm.ApplicationInfo;
+import android.content.pm.PackageManager;
 import android.content.res.Resources;
 import android.graphics.Bitmap;
 import android.graphics.ImageDecoder;
 import android.graphics.drawable.Drawable;
 import android.graphics.drawable.Icon;
 import android.net.Uri;
+import android.text.TextUtils;
 import android.util.Log;
 import android.util.Size;
 
@@ -108,7 +111,13 @@ public class LocalImageResolver {
                 }
                 break;
             case Icon.TYPE_RESOURCE:
-                Drawable result = resolveImage(icon.getResId(), context, maxWidth, maxHeight);
+                Resources res = resolveResourcesForIcon(context, icon);
+                if (res == null) {
+                    // We couldn't resolve resources properly, fall back to icon loading.
+                    return icon.loadDrawable(context);
+                }
+
+                Drawable result = resolveImage(res, icon.getResId(), maxWidth, maxHeight);
                 if (result != null) {
                     return tintDrawable(icon, result);
                 }
@@ -148,6 +157,13 @@ public class LocalImageResolver {
     public static Drawable resolveImage(@DrawableRes int resId, Context context, int maxWidth,
             int maxHeight) {
         final ImageDecoder.Source source = ImageDecoder.createSource(context.getResources(), resId);
+        return resolveImage(source, maxWidth, maxHeight);
+    }
+
+    @Nullable
+    private static Drawable resolveImage(Resources res, @DrawableRes int resId, int maxWidth,
+            int maxHeight) {
+        final ImageDecoder.Source source = ImageDecoder.createSource(res, resId);
         return resolveImage(source, maxWidth, maxHeight);
     }
 
@@ -251,5 +267,53 @@ public class LocalImageResolver {
             return null;
         }
         return icon.getUri();
+    }
+
+    /**
+     * Resolves the correct resources package for a given Icon - it may come from another
+     * package.
+     *
+     * @see Icon#loadDrawableInner(Context)
+     * @hide
+     *
+     * @return resources instance if the operation succeeded, null otherwise
+     */
+    @Nullable
+    @VisibleForTesting
+    public static Resources resolveResourcesForIcon(Context context, Icon icon) {
+        if (icon.getType() != Icon.TYPE_RESOURCE) {
+            return null;
+        }
+
+        // Icons cache resolved resources, use cache if available.
+        Resources res = icon.getResources();
+        if (res != null) {
+            return res;
+        }
+
+        String resPackage = icon.getResPackage();
+        // No package means we try to use current context.
+        if (TextUtils.isEmpty(resPackage) || context.getPackageName().equals(resPackage)) {
+            return context.getResources();
+        }
+
+        if ("android".equals(resPackage)) {
+            return Resources.getSystem();
+        }
+
+        final PackageManager pm = context.getPackageManager();
+        try {
+            ApplicationInfo ai = pm.getApplicationInfo(resPackage,
+                    PackageManager.MATCH_UNINSTALLED_PACKAGES
+                            | PackageManager.GET_SHARED_LIBRARY_FILES);
+            if (ai != null) {
+                return pm.getResourcesForApplication(ai);
+            }
+        } catch (PackageManager.NameNotFoundException e) {
+            Log.e(TAG, String.format("Unable to resolve package %s for icon %s", resPackage, icon));
+            return null;
+        }
+
+        return null;
     }
 }

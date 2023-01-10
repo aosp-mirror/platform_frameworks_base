@@ -59,6 +59,7 @@ public class FalsingDataProvider {
     private MotionEvent mFirstRecentMotionEvent;
     private MotionEvent mLastMotionEvent;
     private boolean mJustUnlockedWithFace;
+    private boolean mA11YAction;
 
     @Inject
     public FalsingDataProvider(
@@ -78,10 +79,10 @@ public class FalsingDataProvider {
 
     void onMotionEvent(MotionEvent motionEvent) {
         List<MotionEvent> motionEvents = unpackMotionEvent(motionEvent);
-        FalsingClassifier.logDebug("Unpacked into: " + motionEvents.size());
+        FalsingClassifier.logVerbose("Unpacked into: " + motionEvents.size());
         if (BrightLineFalsingManager.DEBUG) {
             for (MotionEvent m : motionEvents) {
-                FalsingClassifier.logDebug(
+                FalsingClassifier.logVerbose(
                         "x,y,t: " + m.getX() + "," + m.getY() + "," + m.getEventTime());
             }
         }
@@ -92,7 +93,7 @@ public class FalsingDataProvider {
         }
         mRecentMotionEvents.addAll(motionEvents);
 
-        FalsingClassifier.logDebug("Size: " + mRecentMotionEvents.size());
+        FalsingClassifier.logVerbose("Size: " + mRecentMotionEvents.size());
 
         mMotionEventListeners.forEach(listener -> listener.onMotionEvent(motionEvent));
 
@@ -124,6 +125,7 @@ public class FalsingDataProvider {
             mPriorMotionEvents = mRecentMotionEvents;
             mRecentMotionEvents = new TimeLimitedMotionEventBuffer(MOTION_EVENT_AGE_MS);
         }
+        mA11YAction = false;
     }
 
     /** Returns screen width in pixels. */
@@ -332,6 +334,17 @@ public class FalsingDataProvider {
     /** Unregister a {@link GestureFinalizedListener}. */
     public void removeGestureCompleteListener(GestureFinalizedListener listener) {
         mGestureFinalizedListeners.remove(listener);
+    }
+
+    /** Return whether last gesture was an A11y action. */
+    public boolean isA11yAction() {
+        return mA11YAction;
+    }
+
+    /** Set whether last gesture was an A11y action. */
+    public void onA11yAction() {
+        completePriorGesture();
+        this.mA11YAction = true;
     }
 
     void onSessionStarted() {

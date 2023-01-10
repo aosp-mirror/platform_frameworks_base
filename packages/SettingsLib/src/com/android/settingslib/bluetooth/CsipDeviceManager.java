@@ -101,10 +101,20 @@ public class CsipDeviceManager {
         return groupId != BluetoothCsipSetCoordinator.GROUP_ID_INVALID;
     }
 
-    private CachedBluetoothDevice getCachedDevice(int groupId) {
+    /**
+     * To find the device with {@code groupId}.
+     *
+     * @param groupId The group id
+     * @return if we could find a device with this {@code groupId} return this device. Otherwise,
+     * return null.
+     */
+    public CachedBluetoothDevice getCachedDevice(int groupId) {
+        log("getCachedDevice: groupId: " + groupId);
         for (int i = mCachedDevices.size() - 1; i >= 0; i--) {
             CachedBluetoothDevice cachedDevice = mCachedDevices.get(i);
             if (cachedDevice.getGroupId() == groupId) {
+                log("getCachedDevice: found cachedDevice with the groupId: "
+                        + cachedDevice.getDevice().getAnonymizedAddress());
                 return cachedDevice;
             }
         }
@@ -231,7 +241,7 @@ public class CsipDeviceManager {
                         // When both LE Audio devices are disconnected, receiving member device
                         // connection. To switch content and dispatch to notify UI change
                         mBtManager.getEventManager().dispatchDeviceRemoved(mainDevice);
-                        mainDevice.switchMemberDeviceContent(mainDevice, cachedDevice);
+                        mainDevice.switchMemberDeviceContent(cachedDevice);
                         mainDevice.refresh();
                         // It is necessary to do remove and add for updating the mapping on
                         // preference and device
@@ -255,10 +265,11 @@ public class CsipDeviceManager {
 
                 for (CachedBluetoothDevice device: memberSet) {
                     if (device.isConnected()) {
+                        log("set device: " + device + " as the main device");
                         // Main device is disconnected and sub device is connected
                         // To copy data from sub device to main device
                         mBtManager.getEventManager().dispatchDeviceRemoved(cachedDevice);
-                        cachedDevice.switchMemberDeviceContent(device, cachedDevice);
+                        cachedDevice.switchMemberDeviceContent(device);
                         cachedDevice.refresh();
                         // It is necessary to do remove and add for updating the mapping on
                         // preference and device

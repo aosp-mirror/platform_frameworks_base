@@ -32,6 +32,9 @@ import androidx.test.filters.SmallTest;
 import com.android.internal.logging.MetricsLogger;
 import com.android.internal.logging.testing.FakeMetricsLogger;
 import com.android.systemui.SysuiTestCase;
+import com.android.systemui.flags.FakeFeatureFlags;
+import com.android.systemui.flags.Flags;
+import com.android.systemui.plugins.FalsingManager;
 import com.android.systemui.statusbar.policy.KeyguardStateController;
 
 import org.junit.Before;
@@ -56,6 +59,8 @@ public class BrightLineFalsingManagerTest extends SysuiTestCase {
     @Mock
     private SingleTapClassifier mSingleTapClassifier;
     @Mock
+    private LongTapClassifier mLongTapClassifier;
+    @Mock
     private DoubleTapClassifier mDoubleTapClassifier;
     @Mock
     private FalsingClassifier mClassifierA;
@@ -70,6 +75,7 @@ public class BrightLineFalsingManagerTest extends SysuiTestCase {
     private final FalsingClassifier.Result mPassedResult = FalsingClassifier.Result.passed(1);
     private final FalsingClassifier.Result mFalsedResult =
             FalsingClassifier.Result.falsed(1, getClass().getSimpleName(), "");
+    private final FakeFeatureFlags mFakeFeatureFlags = new FakeFeatureFlags();
 
     @Before
     public void setup() {
@@ -77,15 +83,17 @@ public class BrightLineFalsingManagerTest extends SysuiTestCase {
         when(mClassifierA.classifyGesture(anyInt(), anyDouble(), anyDouble()))
                 .thenReturn(mFalsedResult);
         when(mSingleTapClassifier.isTap(any(List.class), anyDouble())).thenReturn(mFalsedResult);
+        when(mLongTapClassifier.isTap(any(List.class), anyDouble())).thenReturn(mFalsedResult);
         when(mDoubleTapClassifier.classifyGesture(anyInt(), anyDouble(), anyDouble()))
                 .thenReturn(mFalsedResult);
         mClassifiers.add(mClassifierA);
         when(mFalsingDataProvider.getRecentMotionEvents()).thenReturn(mMotionEventList);
         when(mKeyguardStateController.isShowing()).thenReturn(true);
         mBrightLineFalsingManager = new BrightLineFalsingManager(mFalsingDataProvider,
-                mMetricsLogger, mClassifiers, mSingleTapClassifier, mDoubleTapClassifier,
-                mHistoryTracker, mKeyguardStateController, mAccessibilityManager,
-                false);
+                mMetricsLogger, mClassifiers, mSingleTapClassifier, mLongTapClassifier,
+                mDoubleTapClassifier, mHistoryTracker, mKeyguardStateController,
+                mAccessibilityManager, false, mFakeFeatureFlags);
+        mFakeFeatureFlags.set(Flags.FALSING_FOR_LONG_TAPS, true);
     }
 
     @Test
@@ -94,7 +102,6 @@ public class BrightLineFalsingManagerTest extends SysuiTestCase {
         when(mAccessibilityManager.isTouchExplorationEnabled()).thenReturn(true);
         assertThat(mBrightLineFalsingManager.isFalseTap(1)).isFalse();
     }
-
 
     @Test
     public void testA11yDisablesTap() {
@@ -105,11 +112,71 @@ public class BrightLineFalsingManagerTest extends SysuiTestCase {
 
 
     @Test
+    public void testA11yDisablesLongTap() {
+        assertThat(mBrightLineFalsingManager.isFalseLongTap(1)).isTrue();
+        when(mAccessibilityManager.isTouchExplorationEnabled()).thenReturn(true);
+        assertThat(mBrightLineFalsingManager.isFalseLongTap(1)).isFalse();
+    }
+
+    @Test
     public void testA11yDisablesDoubleTap() {
         assertThat(mBrightLineFalsingManager.isFalseDoubleTap()).isTrue();
         when(mAccessibilityManager.isTouchExplorationEnabled()).thenReturn(true);
         assertThat(mBrightLineFalsingManager.isFalseDoubleTap()).isFalse();
     }
 
+    @Test
+    public void testIsProxNear_noProxEvents_defaultsToFalse() {
+        assertThat(mBrightLineFalsingManager.isProximityNear()).isFalse();
+    }
 
+    @Test
+    public void testIsProxNear_receivesNearEvent() {
+        mBrightLineFalsingManager.onProximityEvent(new FalsingManager.ProximityEvent() {
+            @Override
+            public boolean getCovered() {
+                return true;
+            }
+
+            @Override
+            public long getTimestampNs() {
+                return 0;
+            }
+        });
+        assertThat(mBrightLineFalsingManager.isProximityNear()).isTrue();
+    }
+
+    @Test
+    public void testIsProxNear_receivesNearAndThenFarEvent() {
+        mBrightLineFalsingManager.onProximityEvent(new FalsingManager.ProximityEvent() {
+            @Override
+            public boolean getCovered() {
+                return true;
+            }
+
+            @Override
+            public long getTimestampNs() {
+                return 0;
+            }
+        });
+        mBrightLineFalsingManager.onProximityEvent(new FalsingManager.ProximityEvent() {
+            @Override
+            public boolean getCovered() {
+                return false;
+            }
+
+            @Override
+            public long getTimestampNs() {
+                return 5;
+            }
+        });
+        assertThat(mBrightLineFalsingManager.isProximityNear()).isFalse();
+    }
+
+    @Test
+    public void testA11yAction() {
+        assertThat(mBrightLineFalsingManager.isFalseTap(1)).isTrue();
+        when(mFalsingDataProvider.isA11yAction()).thenReturn(true);
+        assertThat(mBrightLineFalsingManager.isFalseTap(1)).isFalse();
+    }
 }

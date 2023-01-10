@@ -20,6 +20,7 @@ import static com.android.systemui.statusbar.phone.CentralSurfaces.MULTIUSER_DEB
 
 import android.app.KeyguardManager;
 import android.content.Context;
+import android.os.PowerManager;
 import android.os.RemoteException;
 import android.os.ServiceManager;
 import android.os.SystemClock;
@@ -33,8 +34,6 @@ import android.view.accessibility.AccessibilityManager;
 
 import com.android.internal.logging.nano.MetricsProto.MetricsEvent;
 import com.android.internal.statusbar.IStatusBarService;
-import com.android.systemui.Dependency;
-import com.android.systemui.ForegroundServiceNotificationListener;
 import com.android.systemui.InitController;
 import com.android.systemui.R;
 import com.android.systemui.plugins.ActivityStarter;
@@ -181,13 +180,8 @@ class StatusBarNotificationPresenter implements NotificationPresenter,
             mNotifShadeEventSource.setNotifRemovedByUserCallback(this::maybeEndAmbientPulse);
             notificationInterruptStateProvider.addSuppressor(mInterruptSuppressor);
             mLockscreenUserManager.setUpWithPresenter(this);
-            mMediaManager.setUpWithPresenter(this);
             mGutsManager.setUpWithPresenter(
                     this, mNotifListContainer, mOnSettingsClickListener);
-            // ForegroundServiceNotificationListener adds its listener in its constructor
-            // but we need to request it here in order for it to be instantiated.
-            // TODO: figure out how to do this correctly once Dependency.get() is gone.
-            Dependency.get(ForegroundServiceNotificationListener.class);
 
             onUserSwitched(mLockscreenUserManager.getCurrentUserId());
         });
@@ -277,7 +271,8 @@ class StatusBarNotificationPresenter implements NotificationPresenter,
             boolean nowExpanded) {
         mHeadsUpManager.setExpanded(clickedEntry, nowExpanded);
         mCentralSurfaces.wakeUpIfDozing(
-                SystemClock.uptimeMillis(), clickedView, "NOTIFICATION_CLICK");
+                SystemClock.uptimeMillis(), clickedView, "NOTIFICATION_CLICK",
+                PowerManager.WAKE_REASON_GESTURE);
         if (nowExpanded) {
             if (mStatusBarStateController.getState() == StatusBarState.KEYGUARD) {
                 mShadeTransitionController.goToLockedShade(clickedEntry.getRow());

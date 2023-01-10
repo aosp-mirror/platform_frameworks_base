@@ -17,6 +17,7 @@
 package com.android.systemui.dagger
 
 import com.android.keyguard.KeyguardBiometricLockoutLogger
+import com.android.systemui.ChooserSelector
 import com.android.systemui.CoreStartable
 import com.android.systemui.LatencyTester
 import com.android.systemui.ScreenDecorations
@@ -31,12 +32,21 @@ import com.android.systemui.keyboard.KeyboardUI
 import com.android.systemui.keyguard.KeyguardViewMediator
 import com.android.systemui.log.SessionTracker
 import com.android.systemui.media.RingtonePlayer
+import com.android.systemui.media.taptotransfer.MediaTttCommandLineHelper
+import com.android.systemui.media.taptotransfer.receiver.MediaTttChipControllerReceiver
+import com.android.systemui.media.taptotransfer.sender.MediaTttSenderCoordinator
 import com.android.systemui.power.PowerUI
+import com.android.systemui.reardisplay.RearDisplayDialogController
 import com.android.systemui.recents.Recents
 import com.android.systemui.settings.dagger.MultiUserUtilsModule
 import com.android.systemui.shortcut.ShortcutKeyDispatcher
+import com.android.systemui.statusbar.notification.fsi.FsiChromeRepo
 import com.android.systemui.statusbar.notification.InstantAppNotifier
+import com.android.systemui.statusbar.notification.fsi.FsiChromeViewModelFactory
+import com.android.systemui.statusbar.notification.fsi.FsiChromeViewBinder
 import com.android.systemui.statusbar.phone.KeyguardLiftController
+import com.android.systemui.stylus.StylusUsiPowerStartable
+import com.android.systemui.temporarydisplay.chipbar.ChipbarCoordinator
 import com.android.systemui.theme.ThemeOverlayController
 import com.android.systemui.toast.ToastUI
 import com.android.systemui.usb.StorageNotification
@@ -60,11 +70,35 @@ abstract class SystemUICoreStartableModule {
     @ClassKey(AuthController::class)
     abstract fun bindAuthController(service: AuthController): CoreStartable
 
+    /** Inject into ChooserCoreStartable. */
+    @Binds
+    @IntoMap
+    @ClassKey(ChooserSelector::class)
+    abstract fun bindChooserSelector(sysui: ChooserSelector): CoreStartable
+
     /** Inject into ClipboardListener.  */
     @Binds
     @IntoMap
     @ClassKey(ClipboardListener::class)
     abstract fun bindClipboardListener(sysui: ClipboardListener): CoreStartable
+
+    /** Inject into FsiChromeRepo.  */
+    @Binds
+    @IntoMap
+    @ClassKey(FsiChromeRepo::class)
+    abstract fun bindFSIChromeRepo(sysui: FsiChromeRepo): CoreStartable
+
+    /** Inject into FsiChromeWindowViewModel.  */
+    @Binds
+    @IntoMap
+    @ClassKey(FsiChromeViewModelFactory::class)
+    abstract fun bindFSIChromeWindowViewModel(sysui: FsiChromeViewModelFactory): CoreStartable
+
+    /** Inject into FsiChromeWindowBinder.  */
+    @Binds
+    @IntoMap
+    @ClassKey(FsiChromeViewBinder::class)
+    abstract fun bindFsiChromeWindowBinder(sysui: FsiChromeViewBinder): CoreStartable
 
     /** Inject into GarbageMonitor.Service.  */
     @Binds
@@ -206,4 +240,43 @@ abstract class SystemUICoreStartableModule {
     @IntoMap
     @ClassKey(KeyguardLiftController::class)
     abstract fun bindKeyguardLiftController(sysui: KeyguardLiftController): CoreStartable
+
+    /** Inject into MediaTttSenderCoordinator. */
+    @Binds
+    @IntoMap
+    @ClassKey(MediaTttSenderCoordinator::class)
+    abstract fun bindMediaTttSenderCoordinator(sysui: MediaTttSenderCoordinator): CoreStartable
+
+    /** Inject into MediaTttChipControllerReceiver. */
+    @Binds
+    @IntoMap
+    @ClassKey(MediaTttChipControllerReceiver::class)
+    abstract fun bindMediaTttChipControllerReceiver(
+            sysui: MediaTttChipControllerReceiver
+    ): CoreStartable
+
+    /** Inject into MediaTttCommandLineHelper. */
+    @Binds
+    @IntoMap
+    @ClassKey(MediaTttCommandLineHelper::class)
+    abstract fun bindMediaTttCommandLineHelper(sysui: MediaTttCommandLineHelper): CoreStartable
+
+    /** Inject into ChipbarCoordinator. */
+    @Binds
+    @IntoMap
+    @ClassKey(ChipbarCoordinator::class)
+    abstract fun bindChipbarController(sysui: ChipbarCoordinator): CoreStartable
+
+
+    /** Inject into RearDisplayDialogController) */
+    @Binds
+    @IntoMap
+    @ClassKey(RearDisplayDialogController::class)
+    abstract fun bindRearDisplayDialogController(sysui: RearDisplayDialogController): CoreStartable
+
+    /** Inject into StylusUsiPowerStartable) */
+    @Binds
+    @IntoMap
+    @ClassKey(StylusUsiPowerStartable::class)
+    abstract fun bindStylusUsiPowerStartable(sysui: StylusUsiPowerStartable): CoreStartable
 }

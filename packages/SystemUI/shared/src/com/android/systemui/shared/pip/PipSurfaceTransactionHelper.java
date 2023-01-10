@@ -85,13 +85,12 @@ public class PipSurfaceTransactionHelper {
         mTmpSourceRectF.set(sourceBounds);
         mTmpDestinationRect.set(sourceBounds);
         mTmpDestinationRect.inset(insets);
-        // Scale by the shortest edge and offset such that the top/left of the scaled inset
-        // source rect aligns with the top/left of the destination bounds
+        // Scale to the bounds no smaller than the destination and offset such that the top/left
+        // of the scaled inset source rect aligns with the top/left of the destination bounds
         final float scale;
         if (sourceRectHint.isEmpty() || sourceRectHint.width() == sourceBounds.width()) {
-            scale = sourceBounds.width() <= sourceBounds.height()
-                    ? (float) destinationBounds.width() / sourceBounds.width()
-                    : (float) destinationBounds.height() / sourceBounds.height();
+            scale = Math.max((float) destinationBounds.width() / sourceBounds.width(),
+                    (float) destinationBounds.height() / sourceBounds.height());
         } else {
             // scale by sourceRectHint if it's not edge-to-edge
             final float endScale = sourceRectHint.width() <= sourceRectHint.height()
@@ -170,7 +169,7 @@ public class PipSurfaceTransactionHelper {
     /** @return {@link SurfaceControl.Transaction} instance with vsync-id */
     public static SurfaceControl.Transaction newSurfaceControlTransaction() {
         final SurfaceControl.Transaction tx = new SurfaceControl.Transaction();
-        tx.setFrameTimelineVsync(Choreographer.getSfInstance().getVsyncId());
+        tx.setFrameTimelineVsync(Choreographer.getInstance().getVsyncId());
         return tx;
     }
 }

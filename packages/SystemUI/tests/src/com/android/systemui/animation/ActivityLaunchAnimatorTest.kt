@@ -10,12 +10,10 @@ import android.graphics.Rect
 import android.os.Looper
 import android.testing.AndroidTestingRunner
 import android.testing.TestableLooper.RunWithLooper
-import android.util.Log
 import android.view.IRemoteAnimationFinishedCallback
 import android.view.RemoteAnimationAdapter
 import android.view.RemoteAnimationTarget
 import android.view.SurfaceControl
-import android.view.View
 import android.view.ViewGroup
 import android.widget.LinearLayout
 import androidx.test.filters.SmallTest
@@ -51,7 +49,6 @@ class ActivityLaunchAnimatorTest : SysuiTestCase() {
     @Mock lateinit var listener: ActivityLaunchAnimator.Listener
     @Spy private val controller = TestLaunchAnimatorController(launchContainer)
     @Mock lateinit var iCallback: IRemoteAnimationFinishedCallback
-    @Mock lateinit var failHandler: Log.TerribleFailureHandler
 
     private lateinit var activityLaunchAnimator: ActivityLaunchAnimator
     @get:Rule val rule = MockitoJUnit.rule()
@@ -164,7 +161,18 @@ class ActivityLaunchAnimatorTest : SysuiTestCase() {
         runner.onAnimationStart(0, emptyArray(), emptyArray(), emptyArray(), iCallback)
 
         waitForIdleSync()
-        verify(controller).onLaunchAnimationCancelled()
+        verify(controller).onLaunchAnimationCancelled(false /* newKeyguardOccludedState */)
+        verify(controller, never()).onLaunchAnimationStart(anyBoolean())
+    }
+
+    @Test
+    fun passesOccludedStateToLaunchAnimationCancelled_ifTrue() {
+        val runner = activityLaunchAnimator.createRunner(controller)
+        runner.onAnimationCancelled(true /* isKeyguardOccluded */)
+        runner.onAnimationStart(0, emptyArray(), emptyArray(), emptyArray(), iCallback)
+
+        waitForIdleSync()
+        verify(controller).onLaunchAnimationCancelled(true /* newKeyguardOccludedState */)
         verify(controller, never()).onLaunchAnimationStart(anyBoolean())
     }
 
@@ -185,13 +193,6 @@ class ActivityLaunchAnimatorTest : SysuiTestCase() {
         waitForIdleSync()
         verify(listener).onLaunchAnimationStart()
         verify(controller).onLaunchAnimationStart(anyBoolean())
-    }
-
-    @Test
-    fun controllerFromOrphanViewReturnsNullAndIsATerribleFailure() {
-        Log.setWtfHandler(failHandler)
-        assertNull(ActivityLaunchAnimator.Controller.fromView(View(mContext)))
-        verify(failHandler).onTerribleFailure(any(), any(), anyBoolean())
     }
 
     private fun fakeWindow(): RemoteAnimationTarget {
@@ -263,7 +264,7 @@ private class TestLaunchAnimatorController(override var launchContainer: ViewGro
         assertOnMainThread()
     }
 
-    override fun onLaunchAnimationCancelled() {
+    override fun onLaunchAnimationCancelled(newKeyguardOccludedState: Boolean?) {
         assertOnMainThread()
     }
 }

@@ -125,9 +125,9 @@
     <string name="bluetooth_profile_a2dp_high_quality" msgid="4739440941324792775">"Ήχος HD: <xliff:g id="CODEC_NAME">%1$s</xliff:g>"</string>
     <string name="bluetooth_profile_a2dp_high_quality_unknown_codec" msgid="2477639096903834374">"Ήχος HD"</string>
     <string name="bluetooth_profile_hearing_aid" msgid="58154575573984914">"Βοηθήματα ακοής"</string>
-    <string name="bluetooth_profile_le_audio" msgid="5158149987518342036">"LE_AUDIO"</string>
+    <string name="bluetooth_profile_le_audio" msgid="3237854988278539061">"LE Audio"</string>
     <string name="bluetooth_hearing_aid_profile_summary_connected" msgid="8191273236809964030">"Έγινε σύνδεση σε βοηθήματα ακοής"</string>
-    <string name="bluetooth_le_audio_profile_summary_connected" msgid="3162538609379333442">"Συνδέθηκε σε LE_AUDIO"</string>
+    <string name="bluetooth_le_audio_profile_summary_connected" msgid="6916226974453480650">"Συνδέθηκε σε LE Audio"</string>
     <string name="bluetooth_a2dp_profile_summary_connected" msgid="7422607970115444153">"Συνδέθηκε σε ήχο πολυμέσων"</string>
     <string name="bluetooth_headset_profile_summary_connected" msgid="2420981566026949688">"Συνδεδεμένο στον ήχο τηλεφώνου"</string>
     <string name="bluetooth_opp_profile_summary_connected" msgid="2393521801478157362">"Συνδεδεμένο σε διακομιστή μεταφοράς αρχείων"</string>
@@ -317,7 +317,7 @@
     <string name="wifi_unmetered_label" msgid="6174142840934095093">"Χωρίς μέτρηση με βάση τη χρήση"</string>
     <string name="select_logd_size_title" msgid="1604578195914595173">"Μέγεθος προσωρινής μνήμης για τη λειτουργία καταγραφής"</string>
     <string name="select_logd_size_dialog_title" msgid="2105401994681013578">"Μέγεθος αρχείων κατ/φής ανά προ/νή μνήμη αρχείου κατ/φής"</string>
-    <string name="dev_logpersist_clear_warning_title" msgid="8631859265777337991">"Διαγραφή αποθηκευτικού χώρου μόνιμων αρχείων καταγραφής;"</string>
+    <string name="dev_logpersist_clear_warning_title" msgid="8631859265777337991">"Εκκαθάριση αποθηκευτικού χώρου μόνιμων αρχείων καταγραφής;"</string>
     <string name="dev_logpersist_clear_warning_message" msgid="6447590867594287413">"Όταν δεν γίνεται πλέον παρακολούθηση με μόνιμο αρχείο καταγραφής, θα πρέπει να διαγραφούν τα δεδομένα του αρχείου καταγραφής στη συσκευή σας."</string>
     <string name="select_logpersist_title" msgid="447071974007104196">"Αποθ.δεδ.αρχείων κατ.μόνιμα στη συσκ."</string>
     <string name="select_logpersist_dialog_title" msgid="7745193591195485594">"Επιλογή αρχείων καταγραφής προσωρινής μνήμης για αποθήκευση μόνιμα στη συσκευή"</string>
@@ -408,6 +408,7 @@
     <string name="force_resizable_activities_summary" msgid="2490382056981583062">"Να έχουν όλες οι δραστηριότητες δυνατότητα αλλαγής μεγέθους για την προβολή πολλαπλών παραθύρων, ανεξάρτητα από τις τιμές του μανιφέστου."</string>
     <string name="enable_freeform_support" msgid="7599125687603914253">"Ενεργοποίηση παραθύρων ελεύθερης μορφής"</string>
     <string name="enable_freeform_support_summary" msgid="1822862728719276331">"Ενεργοποίηση υποστήριξης για πειραματικά παράθυρα ελεύθερης μορφής."</string>
+    <string name="desktop_mode" msgid="2389067840550544462">"Λειτ. επιφάνειας εργασίας"</string>
     <string name="local_backup_password_title" msgid="4631017948933578709">"Εφ/κός κωδικός desktop"</string>
     <string name="local_backup_password_summary_none" msgid="7646898032616361714">"Τα πλήρη αντίγραφα ασφαλείας επιφάνειας εργασίας δεν προστατεύονται αυτήν τη στιγμή"</string>
     <string name="local_backup_password_summary_change" msgid="1707357670383995567">"Πατήστε για αλλαγή ή κατάργηση του κωδικού πρόσβασης για τα πλήρη αντίγραφα ασφαλείας επιφάνειας εργασίας"</string>
@@ -476,13 +477,14 @@
     <string name="power_charging" msgid="6727132649743436802">"<xliff:g id="LEVEL">%1$s</xliff:g> - <xliff:g id="STATE">%2$s</xliff:g>"</string>
     <string name="power_remaining_charging_duration_only" msgid="8085099012811384899">"Απομένουν <xliff:g id="TIME">%1$s</xliff:g> για πλήρη φόρτιση"</string>
     <string name="power_charging_duration" msgid="6127154952524919719">"<xliff:g id="LEVEL">%1$s</xliff:g> - Απομένουν <xliff:g id="TIME">%2$s</xliff:g> για πλήρη φόρτιση"</string>
-    <string name="power_charging_limited" msgid="7956120998372505295">"<xliff:g id="LEVEL">%1$s</xliff:g> - Προσωρινός περιορισμός φόρτισης"</string>
+    <string name="power_charging_limited" msgid="8202147604844938236">"<xliff:g id="LEVEL">%1$s</xliff:g> - Η φόρτιση βελτιστοποιήθηκε"</string>
+    <string name="power_charging_future_paused" msgid="4730177778538118032">"<xliff:g id="LEVEL">%1$s</xliff:g> - Η φόρτιση βελτιστοποιήθηκε"</string>
     <string name="battery_info_status_unknown" msgid="268625384868401114">"Άγνωστο"</string>
     <string name="battery_info_status_charging" msgid="4279958015430387405">"Φόρτιση"</string>
     <string name="battery_info_status_charging_fast" msgid="8027559755902954885">"Ταχεία φόρτιση"</string>
     <string name="battery_info_status_charging_slow" msgid="3190803837168962319">"Αργή φόρτιση"</string>
     <string name="battery_info_status_charging_wireless" msgid="8924722966861282197">"Ασύρματη φόρτιση"</string>
-    <string name="battery_info_status_charging_dock" msgid="3554147903321236585">"Βάση φόρτισης"</string>
+    <string name="battery_info_status_charging_dock" msgid="8573274094093364791">"Φόρτιση"</string>
     <string name="battery_info_status_discharging" msgid="6962689305413556485">"Δεν φορτίζει"</string>
     <string name="battery_info_status_not_charging" msgid="3371084153747234837">"Συνδεδεμένη, δεν φορτίζει"</string>
     <string name="battery_info_status_full" msgid="1339002294876531312">"Φορτισμένη"</string>
@@ -586,9 +588,9 @@
     <string name="user_set_lock_button" msgid="1427128184982594856">"Ορισμός κλειδώματος"</string>
     <string name="user_switch_to_user" msgid="6975428297154968543">"Εναλλαγή σε <xliff:g id="USER_NAME">%s</xliff:g>"</string>
     <string name="creating_new_user_dialog_message" msgid="7232880257538970375">"Δημιουργία νέου χρήστη…"</string>
-    <string name="creating_new_guest_dialog_message" msgid="1114905602181350690">"Δημιουργία νέου προσκεκλημένου…"</string>
+    <string name="creating_new_guest_dialog_message" msgid="1114905602181350690">"Δημιουργία νέου επισκέπτη…"</string>
     <string name="add_user_failed" msgid="4809887794313944872">"Η δημιουργία νέου χρήστη απέτυχε"</string>
-    <string name="add_guest_failed" msgid="8074548434469843443">"Αποτυχία δημιουργίας νέου προσκεκλημένου"</string>
+    <string name="add_guest_failed" msgid="8074548434469843443">"Αποτυχία δημιουργίας νέου επισκέπτη"</string>
     <string name="user_nickname" msgid="262624187455825083">"Ψευδώνυμο"</string>
     <string name="user_add_user" msgid="7876449291500212468">"Προσθήκη χρήστη"</string>
     <string name="guest_new_guest" msgid="3482026122932643557">"Προσθήκη επισκέπτη"</string>
@@ -655,13 +657,6 @@
     <string name="accessibility_ethernet_disconnected" msgid="2832501530856497489">"Το Ethernet αποσυνδέθηκε."</string>
     <string name="accessibility_ethernet_connected" msgid="6175942685957461563">"Ethernet."</string>
     <string name="accessibility_no_calling" msgid="3540827068323895748">"Χωρίς κλήσεις."</string>
-    <string name="dream_complication_title_time" msgid="701747800712893499">"Ώρα"</string>
-    <string name="dream_complication_title_date" msgid="8661176085446135789">"Ημερομηνία"</string>
-    <string name="dream_complication_title_weather" msgid="598609151677172783">"Καιρός"</string>
-    <string name="dream_complication_title_aqi" msgid="4587552608957834110">"Ποιότητα αέρα"</string>
-    <string name="dream_complication_title_cast_info" msgid="4038776652841885084">"Πληροφορίες ηθοποιών"</string>
-    <!-- no translation found for dream_complication_title_home_controls (9153381632476738811) -->
-    <skip />
     <string name="avatar_picker_title" msgid="8492884172713170652">"Επιλογή φωτογραφίας προφίλ"</string>
     <string name="default_user_icon_description" msgid="6554047177298972638">"Προεπιλεγμένο εικονίδιο χρήστη"</string>
     <string name="physical_keyboard_title" msgid="4811935435315835220">"Φυσικό πληκτρολόγιο"</string>

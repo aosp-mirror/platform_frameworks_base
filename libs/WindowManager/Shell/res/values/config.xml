@@ -19,6 +19,14 @@
          by the resources of the app using the Shell library. -->
     <bool name="config_enableShellMainThread">false</bool>
 
+    <!-- Determines whether to register the shell task organizer on init.
+         TODO(b/238217847): This config is temporary until we refactor the base WMComponent. -->
+    <bool name="config_registerShellTaskOrganizerOnInit">true</bool>
+
+    <!-- Determines whether to register the shell transitions on init.
+         TODO(b/238217847): This config is temporary until we refactor the base WMComponent. -->
+    <bool name="config_registerShellTransitionsOnInit">true</bool>
+
     <!-- Animation duration for PIP when entering. -->
     <integer name="config_pipEnterAnimationDuration">425</integer>
 
@@ -103,4 +111,14 @@
 
     <!-- Whether to dim a split-screen task when the other is the IME target -->
     <bool name="config_dimNonImeAttachedSide">true</bool>
+
+    <!-- Components support to launch multiple instances into split-screen -->
+    <string-array name="config_appsSupportMultiInstancesSplit">
+    </string-array>
+
+    <!-- Whether the extended restart dialog is enabled -->
+    <bool name="config_letterboxIsRestartDialogEnabled">false</bool>
+
+    <!-- Whether the additional education about reachability is enabled -->
+    <bool name="config_letterboxIsReachabilityEducationEnabled">false</bool>
 </resources>

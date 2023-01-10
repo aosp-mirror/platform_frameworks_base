@@ -41,6 +41,10 @@ interface IDeviceStateManager {
      * previously registered with {@link #registerCallback(IDeviceStateManagerCallback)} before a
      * call to this method.
      *
+     * Requesting a state does not cancel a base state override made through
+     * {@link #requestBaseStateOverride}, but will still attempt to put the device into the
+     * supplied {@code state}.
+     *
      * @param token the request token provided
      * @param state the state of device the request is asking for
      * @param flags any flags that correspond to the request
@@ -50,14 +54,64 @@ interface IDeviceStateManager {
      * @throws IllegalStateException if the supplied {@code token} has already been registered.
      * @throws IllegalArgumentException if the supplied {@code state} is not supported.
      */
+    @JavaPassthrough(annotation=
+            "@android.annotation.RequiresPermission(value=android.Manifest.permission.CONTROL_DEVICE_STATE, conditional=true)")
     void requestState(IBinder token, int state, int flags);
 
     /**
      * Cancels the active request previously submitted with a call to
-     * {@link #requestState(IBinder, int, int)}.
+     * {@link #requestState(IBinder, int, int)}. Will have no effect on any base state override that
+     * was previously requested with {@link #requestBaseStateOverride}.
      *
      * @throws IllegalStateException if a callback has not yet been registered for the calling
      *         process.
      */
+    @JavaPassthrough(annotation=
+            "@android.annotation.RequiresPermission(value=android.Manifest.permission.CONTROL_DEVICE_STATE, conditional=true)")
     void cancelStateRequest();
+
+    /**
+     * Requests that the device's base state be overridden to the supplied {@code state}. A callback
+     * <b>MUST</b> have been previously registered with
+     * {@link #registerCallback(IDeviceStateManagerCallback)} before a call to this method.
+     *
+     * This method should only be used for testing, when you want to simulate the device physically
+     * changing states. If you are looking to change device state for a feature, where the system
+     * should still be aware that the physical state is different than the emulated state, use
+     * {@link #requestState}.
+     *
+     * @param token the request token provided
+     * @param state the state of device the request is asking for
+     * @param flags any flags that correspond to the request
+     *
+     * @throws IllegalStateException if a callback has not yet been registered for the calling
+     *         process.
+     * @throws IllegalStateException if the supplied {@code token} has already been registered.
+     * @throws IllegalArgumentException if the supplied {@code state} is not supported.
+     */
+    @JavaPassthrough(annotation=
+        "@android.annotation.RequiresPermission(android.Manifest.permission.CONTROL_DEVICE_STATE)")
+    void requestBaseStateOverride(IBinder token, int state, int flags);
+
+    /**
+     * Cancels the active base state request previously submitted with a call to
+     * {@link #overrideBaseState(IBinder, int, int)}.
+     *
+     * @throws IllegalStateException if a callback has not yet been registered for the calling
+     *         process.
+     */
+    @JavaPassthrough(annotation=
+        "@android.annotation.RequiresPermission(android.Manifest.permission.CONTROL_DEVICE_STATE)")
+    void cancelBaseStateOverride();
+
+    /**
+    * Notifies the system service that the educational overlay that was launched
+    * before entering a requested state was dismissed or closed, and provides
+    * the system information on if the pairing mode should be canceled or not.
+    *
+    * This should only be called from the overlay itself.
+    */
+    @JavaPassthrough(annotation=
+        "@android.annotation.RequiresPermission(android.Manifest.permission.CONTROL_DEVICE_STATE)")
+    void onStateRequestOverlayDismissed(boolean shouldCancelRequest);
 }

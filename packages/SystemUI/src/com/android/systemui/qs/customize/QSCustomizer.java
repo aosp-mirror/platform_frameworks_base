@@ -82,12 +82,12 @@ public class QSCustomizer extends LinearLayout {
         DefaultItemAnimator animator = new DefaultItemAnimator();
         animator.setMoveDuration(TileAdapter.MOVE_DURATION);
         mRecyclerView.setItemAnimator(animator);
+
+        updateTransparentViewHeight();
     }
 
     void updateResources() {
-        LayoutParams lp = (LayoutParams) mTransparentView.getLayoutParams();
-        lp.height = QSUtils.getQsHeaderSystemIconsAreaHeight(mContext);
-        mTransparentView.setLayoutParams(lp);
+        updateTransparentViewHeight();
         mRecyclerView.getAdapter().notifyItemChanged(0);
     }
 
@@ -125,9 +125,10 @@ public class QSCustomizer extends LinearLayout {
             isShown = true;
             mOpening = true;
             setVisibility(View.VISIBLE);
-            mClipper.animateCircularClip(mX, mY, true, new ExpandAnimatorListener(tileAdapter));
+            long duration = mClipper.animateCircularClip(
+                    mX, mY, true, new ExpandAnimatorListener(tileAdapter));
             mQsContainerController.setCustomizerAnimating(true);
-            mQsContainerController.setCustomizerShowing(true);
+            mQsContainerController.setCustomizerShowing(true, duration);
         }
     }
 
@@ -153,13 +154,14 @@ public class QSCustomizer extends LinearLayout {
             // Make sure we're not opening (because we're closing). Nobody can think we are
             // customizing after the next two lines.
             mOpening = false;
+            long duration = 0;
             if (animate) {
-                mClipper.animateCircularClip(mX, mY, false, mCollapseAnimationListener);
+                duration = mClipper.animateCircularClip(mX, mY, false, mCollapseAnimationListener);
             } else {
                 setVisibility(View.GONE);
             }
             mQsContainerController.setCustomizerAnimating(animate);
-            mQsContainerController.setCustomizerShowing(false);
+            mQsContainerController.setCustomizerShowing(false, duration);
         }
     }
 
@@ -233,5 +235,11 @@ public class QSCustomizer extends LinearLayout {
 
     public boolean isOpening() {
         return mOpening;
+    }
+
+    private void updateTransparentViewHeight() {
+        LayoutParams lp = (LayoutParams) mTransparentView.getLayoutParams();
+        lp.height = QSUtils.getQsHeaderSystemIconsAreaHeight(mContext);
+        mTransparentView.setLayoutParams(lp);
     }
 }

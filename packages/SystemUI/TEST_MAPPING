@@ -1,25 +1,6 @@
 {
   // Looking for unit test presubmit configuration?
   // This currently lives in ATP config apct/system_ui/unit_test
-  "presubmit-large": [
-    {
-      "name": "PlatformScenarioTests",
-      "options": [
-        {
-            "include-filter": "android.platform.test.scenario.sysui"
-        },
-        {
-            "include-annotation": "android.platform.test.scenario.annotation.Scenario"
-        },
-        {
-            "exclude-annotation": "org.junit.Ignore"
-        },
-        {
-            "exclude-annotation": "android.platform.test.annotations.Postsubmit"
-        }
-      ]
-    }
-  ],
   "presubmit-sysui": [
     {
       "name": "PlatformScenarioTests",
@@ -133,6 +114,22 @@
         },
         {
             "exclude-annotation": "org.junit.Ignore"
+        }
+      ]
+    }
+  ],
+  "ironwood-postsubmit": [
+    {
+      "name": "PlatformScenarioTests",
+      "options": [
+        {
+            "include-annotation": "android.platform.test.annotations.IwTest"
+        },
+        {
+            "exclude-annotation": "org.junit.Ignore"
+        },
+        {
+            "include-filter": "android.platform.test.scenario.sysui"
         }
       ]
     }

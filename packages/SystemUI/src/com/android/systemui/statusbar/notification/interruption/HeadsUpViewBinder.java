@@ -41,8 +41,7 @@ import javax.inject.Inject;
  * figuring out the right heads up inflation parameters and inflating/freeing the heads up
  * content view.
  *
- * TODO: This should be moved into {@link HeadsUpCoordinator} when the old pipeline is deprecated
- * (i.e. when {@link HeadsUpController} is removed).
+ * TODO: This should be moved into {@link HeadsUpCoordinator} when the old pipeline is deprecated.
  */
 @SysUISingleton
 public class HeadsUpViewBinder {
@@ -115,7 +114,18 @@ public class HeadsUpViewBinder {
      */
     public void unbindHeadsUpView(NotificationEntry entry) {
         abortBindCallback(entry);
-        mStage.getStageParams(entry).markContentViewsFreeable(FLAG_CONTENT_VIEW_HEADS_UP);
+
+        // params may be null if the notification was already removed from the collection but we let
+        // it stick around during a launch animation. In this case, the heads up view has already
+        // been unbound, so we don't need to unbind it.
+        // TODO(b/253081345): Change this back to getStageParams and remove null check.
+        RowContentBindParams params = mStage.tryGetStageParams(entry);
+        if (params == null) {
+            mLogger.entryBindStageParamsNullOnUnbind(entry);
+            return;
+        }
+
+        params.markContentViewsFreeable(FLAG_CONTENT_VIEW_HEADS_UP);
         mLogger.entryContentViewMarkedFreeable(entry);
         mStage.requestRebind(entry, e -> mLogger.entryUnbound(e));
     }

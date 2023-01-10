@@ -30,7 +30,10 @@ import com.android.systemui.statusbar.policy.DevicePostureController
 import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
+import org.mockito.ArgumentMatchers.anyBoolean
+import org.mockito.ArgumentMatchers.anyString
 import org.mockito.Mock
+import org.mockito.Mockito.never
 import org.mockito.Mockito.verify
 import org.mockito.Mockito.`when`
 import org.mockito.MockitoAnnotations
@@ -39,75 +42,81 @@ import org.mockito.MockitoAnnotations
 @RunWith(AndroidTestingRunner::class)
 @TestableLooper.RunWithLooper
 class KeyguardPatternViewControllerTest : SysuiTestCase() {
-    @Mock
-    private lateinit var mKeyguardPatternView: KeyguardPatternView
+  @Mock private lateinit var mKeyguardPatternView: KeyguardPatternView
 
-    @Mock
-    private lateinit var mKeyguardUpdateMonitor: KeyguardUpdateMonitor
+  @Mock private lateinit var mKeyguardUpdateMonitor: KeyguardUpdateMonitor
 
-    @Mock
-    private lateinit var mSecurityMode: KeyguardSecurityModel.SecurityMode
+  @Mock private lateinit var mSecurityMode: KeyguardSecurityModel.SecurityMode
 
-    @Mock
-    private lateinit var mLockPatternUtils: LockPatternUtils
+  @Mock private lateinit var mLockPatternUtils: LockPatternUtils
 
-    @Mock
-    private lateinit var mKeyguardSecurityCallback: KeyguardSecurityCallback
+  @Mock private lateinit var mKeyguardSecurityCallback: KeyguardSecurityCallback
 
-    @Mock
-    private lateinit var mLatencyTracker: LatencyTracker
-    private var mFalsingCollector: FalsingCollector = FalsingCollectorFake()
+  @Mock private lateinit var mLatencyTracker: LatencyTracker
+  private var mFalsingCollector: FalsingCollector = FalsingCollectorFake()
 
-    @Mock
-    private lateinit var mEmergencyButtonController: EmergencyButtonController
+  @Mock private lateinit var mEmergencyButtonController: EmergencyButtonController
 
-    @Mock
-    private lateinit
-    var mKeyguardMessageAreaControllerFactory: KeyguardMessageAreaController.Factory
+  @Mock
+  private lateinit var mKeyguardMessageAreaControllerFactory: KeyguardMessageAreaController.Factory
 
-    @Mock
-    private lateinit var mKeyguardMessageArea: KeyguardMessageArea
+  @Mock private lateinit var mKeyguardMessageArea: BouncerKeyguardMessageArea
 
-    @Mock
-    private lateinit var mKeyguardMessageAreaController: KeyguardMessageAreaController
+  @Mock
+  private lateinit var mKeyguardMessageAreaController:
+      KeyguardMessageAreaController<BouncerKeyguardMessageArea>
 
-    @Mock
-    private lateinit var mLockPatternView: LockPatternView
+  @Mock private lateinit var mLockPatternView: LockPatternView
 
-    @Mock
-    private lateinit var mPostureController: DevicePostureController
+  @Mock private lateinit var mPostureController: DevicePostureController
 
-    private lateinit var mKeyguardPatternViewController: KeyguardPatternViewController
+  private lateinit var mKeyguardPatternViewController: KeyguardPatternViewController
 
-    @Before
-    fun setup() {
-        MockitoAnnotations.initMocks(this)
-        `when`(mKeyguardPatternView.isAttachedToWindow).thenReturn(true)
-        `when`(mKeyguardPatternView.findViewById<KeyguardMessageArea>(R.id.keyguard_message_area))
-            .thenReturn(mKeyguardMessageArea)
-        `when`(mKeyguardPatternView.findViewById<LockPatternView>(R.id.lockPatternView))
-            .thenReturn(mLockPatternView)
-        `when`(mKeyguardMessageAreaControllerFactory.create(mKeyguardMessageArea))
-            .thenReturn(mKeyguardMessageAreaController)
-        mKeyguardPatternViewController = KeyguardPatternViewController(
+  @Before
+  fun setup() {
+    MockitoAnnotations.initMocks(this)
+    `when`(mKeyguardPatternView.isAttachedToWindow).thenReturn(true)
+    `when`(
+            mKeyguardPatternView.requireViewById<BouncerKeyguardMessageArea>(
+                R.id.bouncer_message_area))
+        .thenReturn(mKeyguardMessageArea)
+    `when`(mKeyguardPatternView.findViewById<LockPatternView>(R.id.lockPatternView))
+        .thenReturn(mLockPatternView)
+    `when`(mKeyguardMessageAreaControllerFactory.create(mKeyguardMessageArea))
+        .thenReturn(mKeyguardMessageAreaController)
+    `when`(mKeyguardPatternView.resources).thenReturn(context.resources)
+    mKeyguardPatternViewController =
+        KeyguardPatternViewController(
             mKeyguardPatternView,
-            mKeyguardUpdateMonitor, mSecurityMode, mLockPatternUtils, mKeyguardSecurityCallback,
-            mLatencyTracker, mFalsingCollector, mEmergencyButtonController,
-            mKeyguardMessageAreaControllerFactory, mPostureController
-        )
-    }
+            mKeyguardUpdateMonitor,
+            mSecurityMode,
+            mLockPatternUtils,
+            mKeyguardSecurityCallback,
+            mLatencyTracker,
+            mFalsingCollector,
+            mEmergencyButtonController,
+            mKeyguardMessageAreaControllerFactory,
+            mPostureController)
+  }
 
-    @Test
-    fun onPause_clearsTextField() {
-        mKeyguardPatternViewController.init()
-        mKeyguardPatternViewController.onPause()
-        verify(mKeyguardMessageAreaController).setMessage("")
-    }
+  @Test
+  fun onPause_resetsText() {
+    mKeyguardPatternViewController.init()
+    mKeyguardPatternViewController.onPause()
+    verify(mKeyguardMessageAreaController).setMessage(R.string.keyguard_enter_your_pattern)
+  }
 
-    @Test
-    fun onResume_setInitialText() {
-        mKeyguardPatternViewController.onResume(KeyguardSecurityView.SCREEN_ON)
-        verify(mKeyguardMessageAreaController)
-            .setMessageIfEmpty(R.string.keyguard_enter_your_pattern)
-    }
+  @Test
+  fun startAppearAnimation() {
+    mKeyguardPatternViewController.startAppearAnimation()
+    verify(mKeyguardMessageAreaController)
+        .setMessage(context.resources.getString(R.string.keyguard_enter_your_pattern), false)
+  }
+
+  @Test
+  fun startAppearAnimation_withExistingMessage() {
+    `when`(mKeyguardMessageAreaController.message).thenReturn("Unlock to continue.")
+    mKeyguardPatternViewController.startAppearAnimation()
+    verify(mKeyguardMessageAreaController, never()).setMessage(anyString(), anyBoolean())
+  }
 }

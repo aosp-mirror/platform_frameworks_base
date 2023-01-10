@@ -199,6 +199,10 @@ open class GhostedViewLaunchAnimatorController @JvmOverloads constructor(
         // the content before fading out the background.
         ghostView = GhostView.addGhost(ghostedView, launchContainer)
 
+        // The ghost was just created, so ghostedView is currently invisible. We need to make sure
+        // that it stays invisible as long as we are animating.
+        (ghostedView as? LaunchableView)?.setShouldBlockVisibilityChanges(true)
+
         val matrix = ghostView?.animationMatrix ?: Matrix.IDENTITY_MATRIX
         matrix.getValues(initialGhostViewMatrixValues)
 
@@ -293,6 +297,7 @@ open class GhostedViewLaunchAnimatorController @JvmOverloads constructor(
         backgroundDrawable?.wrapped?.alpha = startBackgroundAlpha
 
         GhostView.removeGhost(ghostedView)
+        (ghostedView as? LaunchableView)?.setShouldBlockVisibilityChanges(false)
         launchContainerOverlay.remove(backgroundView)
 
         // Make sure that the view is considered VISIBLE by accessibility by first making it

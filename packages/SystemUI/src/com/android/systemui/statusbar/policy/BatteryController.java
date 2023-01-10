@@ -19,14 +19,17 @@ package com.android.systemui.statusbar.policy;
 import android.annotation.Nullable;
 import android.view.View;
 
-import com.android.systemui.Dumpable;
 import com.android.systemui.demomode.DemoMode;
 import com.android.systemui.statusbar.policy.BatteryController.BatteryStateChangeCallback;
 
 import java.io.PrintWriter;
 import java.lang.ref.WeakReference;
 
-public interface BatteryController extends DemoMode, Dumpable,
+/**
+ * Controller for battery related information, including the charge level, power save mode,
+ * and time remaining information
+ */
+public interface BatteryController extends DemoMode,
         CallbackController<BatteryStateChangeCallback> {
     /**
      * Prints the current state of the {@link BatteryController} to the given {@link PrintWriter}.
@@ -151,6 +154,9 @@ public interface BatteryController extends DemoMode, Dumpable,
         }
 
         default void onWirelessChargingChanged(boolean isWirlessCharging) {
+        }
+
+        default void onIsOverheatedChanged(boolean isOverheated) {
         }
     }
 

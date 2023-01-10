@@ -50,12 +50,6 @@ public interface NotificationLockscreenUserManager {
     void addUserChangedListener(UserChangedListener listener);
 
     /**
-     * Registers a [KeyguardNotificationSuppressor] that will be consulted during
-     * {@link #shouldShowOnKeyguard(NotificationEntry)}
-     */
-    void addKeyguardNotificationSuppressor(KeyguardNotificationSuppressor suppressor);
-
-    /**
      * Removes a listener previously registered with
      * {@link #addUserChangedListener(UserChangedListener)}
      */
@@ -63,13 +57,7 @@ public interface NotificationLockscreenUserManager {
 
     SparseArray<UserInfo> getCurrentProfiles();
 
-    void setLockscreenPublicMode(boolean isProfilePublic, int userId);
-
     boolean shouldShowLockscreenNotifications();
-
-    boolean shouldHideNotifications(int userId);
-    boolean shouldHideNotifications(String key);
-    boolean shouldShowOnKeyguard(NotificationEntry entry);
 
     boolean isAnyProfilePublicMode();
 
@@ -106,11 +94,6 @@ public interface NotificationLockscreenUserManager {
         default void onUserChanged(int userId) {}
         default void onCurrentProfilesChanged(SparseArray<UserInfo> currentProfiles) {}
         default void onUserRemoved(int userId) {}
-    }
-
-    /** Used to hide notifications on the lockscreen */
-    interface KeyguardNotificationSuppressor {
-        boolean shouldSuppressOnKeyguard(NotificationEntry entry);
     }
 
     /**

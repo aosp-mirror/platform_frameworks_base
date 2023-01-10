@@ -19,6 +19,7 @@ package com.android.keyguard;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.reset;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyZeroInteractions;
@@ -56,7 +57,7 @@ public class KeyguardAbsKeyInputViewControllerTest extends SysuiTestCase {
     @Mock
     private PasswordTextView mPasswordEntry;
     @Mock
-    private KeyguardMessageArea mKeyguardMessageArea;
+    private BouncerKeyguardMessageArea mKeyguardMessageArea;
     @Mock
     private KeyguardUpdateMonitor mKeyguardUpdateMonitor;
     @Mock
@@ -85,8 +86,9 @@ public class KeyguardAbsKeyInputViewControllerTest extends SysuiTestCase {
         when(mAbsKeyInputView.getPasswordTextViewId()).thenReturn(1);
         when(mAbsKeyInputView.findViewById(1)).thenReturn(mPasswordEntry);
         when(mAbsKeyInputView.isAttachedToWindow()).thenReturn(true);
-        when(mAbsKeyInputView.findViewById(R.id.keyguard_message_area))
+        when(mAbsKeyInputView.requireViewById(R.id.bouncer_message_area))
                 .thenReturn(mKeyguardMessageArea);
+        when(mAbsKeyInputView.getResources()).thenReturn(getContext().getResources());
         mKeyguardAbsKeyInputViewController = new KeyguardAbsKeyInputViewController(mAbsKeyInputView,
                 mKeyguardUpdateMonitor, mSecurityMode, mLockPatternUtils, mKeyguardSecurityCallback,
                 mKeyguardMessageAreaControllerFactory, mLatencyTracker, mFalsingCollector,
@@ -98,6 +100,11 @@ public class KeyguardAbsKeyInputViewControllerTest extends SysuiTestCase {
             @Override
             public void onResume(int reason) {
                 super.onResume(reason);
+            }
+
+            @Override
+            protected int getInitialMessageResId() {
+                return 0;
             }
         };
         mKeyguardAbsKeyInputViewController.init();
@@ -124,5 +131,23 @@ public class KeyguardAbsKeyInputViewControllerTest extends SysuiTestCase {
                 KeyEvent.KEYCODE_UNKNOWN, mock(KeyEvent.class));
         verifyZeroInteractions(mKeyguardSecurityCallback);
         verifyZeroInteractions(mKeyguardMessageAreaController);
+    }
+
+    @Test
+    public void onPromptReasonNone_doesNotSetMessage() {
+        mKeyguardAbsKeyInputViewController.showPromptReason(0);
+        verify(mKeyguardMessageAreaController, never()).setMessage(
+                getContext().getResources().getString(R.string.kg_prompt_reason_restart_password),
+                false);
+    }
+
+    @Test
+    public void onPromptReason_setsMessage() {
+        when(mAbsKeyInputView.getPromptReasonStringRes(1)).thenReturn(
+                R.string.kg_prompt_reason_restart_password);
+        mKeyguardAbsKeyInputViewController.showPromptReason(1);
+        verify(mKeyguardMessageAreaController).setMessage(
+                getContext().getResources().getString(R.string.kg_prompt_reason_restart_password),
+                false);
     }
 }

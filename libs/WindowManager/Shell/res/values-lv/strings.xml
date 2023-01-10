@@ -33,6 +33,7 @@
     <string name="accessibility_action_pip_unstash" msgid="7467499339610437646">"Rādīt"</string>
     <string name="dock_forced_resizable" msgid="1749750436092293116">"Iespējams, lietotne nedarbosies ekrāna sadalīšanas režīmā."</string>
     <string name="dock_non_resizeble_failed_to_dock_text" msgid="7408396418008948957">"Lietotnē netiek atbalstīta ekrāna sadalīšana."</string>
+    <string name="dock_multi_instances_not_supported_text" msgid="5242868470666346929">"Šo lietotni var atvērt tikai vienā logā."</string>
     <string name="forced_resizable_secondary_display" msgid="1768046938673582671">"Lietotne, iespējams, nedarbosies sekundārajā displejā."</string>
     <string name="activity_launch_on_secondary_display_failed_text" msgid="4226485344988071769">"Lietotnē netiek atbalstīta palaišana sekundārajos displejos."</string>
     <string name="accessibility_divider" msgid="703810061635792791">"Ekrāna sadalītājs"</string>
@@ -76,12 +77,19 @@
     <string name="camera_compat_treatment_suggested_button_description" msgid="8103916969024076767">"Vai ir problēmas ar kameru?\nPieskarieties, lai tās novērstu."</string>
     <string name="camera_compat_treatment_applied_button_description" msgid="2944157113330703897">"Vai problēma netika novērsta?\nPieskarieties, lai atjaunotu."</string>
     <string name="camera_compat_dismiss_button_description" msgid="2795364433503817511">"Vai nav problēmu ar kameru? Pieskarieties, lai nerādītu."</string>
-    <string name="letterbox_education_dialog_title" msgid="6688664582871779215">"Dažas lietotnes vislabāk darbojas portreta režīmā"</string>
-    <string name="letterbox_education_dialog_subtext" msgid="4853542518367719562">"Izmēģiniet vienu no šīm iespējām, lai efektīvi izmantotu pieejamo vietu"</string>
-    <string name="letterbox_education_screen_rotation_text" msgid="5085786687366339027">"Pagrieziet ierīci, lai aktivizētu pilnekrāna režīmu"</string>
-    <string name="letterbox_education_reposition_text" msgid="1068293354123934727">"Veiciet dubultskārienu blakus lietotnei, lai manītu tās pozīciju"</string>
+    <string name="letterbox_education_dialog_title" msgid="7739895354143295358">"Uzziniet un paveiciet vairāk"</string>
+    <string name="letterbox_education_split_screen_text" msgid="6206339484068670830">"Lai izmantotu sadalītu ekrānu, ievelciet vēl vienu lietotni"</string>
+    <string name="letterbox_education_reposition_text" msgid="4589957299813220661">"Lai pārvietotu lietotni, veiciet dubultskārienu ārpus lietotnes"</string>
     <string name="letterbox_education_got_it" msgid="4057634570866051177">"Labi"</string>
     <string name="letterbox_education_expand_button_description" msgid="1729796567101129834">"Izvērsiet, lai iegūtu plašāku informāciju."</string>
     <string name="maximize_button_text" msgid="1650859196290301963">"Maksimizēt"</string>
+    <string name="minimize_button_text" msgid="271592547935841753">"Minimizēt"</string>
     <string name="close_button_text" msgid="2913281996024033299">"Aizvērt"</string>
+    <string name="back_button_text" msgid="1469718707134137085">"Atpakaļ"</string>
+    <string name="handle_text" msgid="1766582106752184456">"Turis"</string>
+    <string name="fullscreen_text" msgid="1162316685217676079">"Pilnekrāna režīms"</string>
+    <string name="desktop_text" msgid="1077633567027630454">"Darbvirsmas režīms"</string>
+    <string name="split_screen_text" msgid="1396336058129570886">"Sadalīt ekrānu"</string>
+    <string name="more_button_text" msgid="3655388105592893530">"Vairāk"</string>
+    <string name="float_button_text" msgid="9221657008391364581">"Peldošs"</string>
 </resources>

@@ -88,6 +88,7 @@ message SecureSettingsProto {
         optional SettingProto odi_captions_volume_ui_enabled = 42 [ (android.privacy).dest = DEST_AUTOMATIC ];
         // Setting for accessibility magnification for following typing.
         optional SettingProto accessibility_magnification_follow_typing_enabled = 43 [ (android.privacy).dest = DEST_AUTOMATIC ];
+        optional SettingProto contrast_level = 44 [ (android.privacy).dest = DEST_AUTOMATIC ];
     }
     optional Accessibility accessibility = 2;
 

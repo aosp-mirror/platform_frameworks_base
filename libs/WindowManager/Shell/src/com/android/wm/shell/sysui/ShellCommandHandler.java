@@ -16,19 +16,14 @@
 
 package com.android.wm.shell.sysui;
 
-import static com.android.wm.shell.common.split.SplitScreenConstants.SPLIT_POSITION_BOTTOM_OR_RIGHT;
+import static com.android.wm.shell.protolog.ShellProtoLogGroup.WM_SHELL_INIT;
 
-import com.android.wm.shell.ShellTaskOrganizer;
-import com.android.wm.shell.common.ShellExecutor;
-import com.android.wm.shell.hidedisplaycutout.HideDisplayCutoutController;
-import com.android.wm.shell.kidsmode.KidsModeTaskOrganizer;
-import com.android.wm.shell.onehanded.OneHandedController;
-import com.android.wm.shell.pip.Pip;
-import com.android.wm.shell.recents.RecentTasksController;
-import com.android.wm.shell.splitscreen.SplitScreenController;
+import com.android.internal.protolog.common.ProtoLog;
 
 import java.io.PrintWriter;
-import java.util.Optional;
+import java.util.Arrays;
+import java.util.TreeMap;
+import java.util.function.BiConsumer;
 
 /**
  * An entry point into the shell for dumping shell internal state and running adb commands.
@@ -38,52 +33,61 @@ import java.util.Optional;
 public final class ShellCommandHandler {
     private static final String TAG = ShellCommandHandler.class.getSimpleName();
 
-    private final Optional<SplitScreenController> mSplitScreenOptional;
-    private final Optional<Pip> mPipOptional;
-    private final Optional<OneHandedController> mOneHandedOptional;
-    private final Optional<HideDisplayCutoutController> mHideDisplayCutout;
-    private final Optional<RecentTasksController> mRecentTasks;
-    private final ShellTaskOrganizer mShellTaskOrganizer;
-    private final KidsModeTaskOrganizer mKidsModeTaskOrganizer;
+    // We're using a TreeMap to keep them sorted by command name
+    private final TreeMap<String, BiConsumer<PrintWriter, String>> mDumpables = new TreeMap<>();
+    private final TreeMap<String, ShellCommandActionHandler> mCommands = new TreeMap<>();
 
-    public ShellCommandHandler(
-            ShellController shellController,
-            ShellTaskOrganizer shellTaskOrganizer,
-            KidsModeTaskOrganizer kidsModeTaskOrganizer,
-            Optional<SplitScreenController> splitScreenOptional,
-            Optional<Pip> pipOptional,
-            Optional<OneHandedController> oneHandedOptional,
-            Optional<HideDisplayCutoutController> hideDisplayCutout,
-            Optional<RecentTasksController> recentTasks,
-            ShellExecutor mainExecutor) {
-        mShellTaskOrganizer = shellTaskOrganizer;
-        mKidsModeTaskOrganizer = kidsModeTaskOrganizer;
-        mRecentTasks = recentTasks;
-        mSplitScreenOptional = splitScreenOptional;
-        mPipOptional = pipOptional;
-        mOneHandedOptional = oneHandedOptional;
-        mHideDisplayCutout = hideDisplayCutout;
-        // TODO(238217847): To be removed once the command handler dependencies are inverted
-        shellController.setShellCommandHandler(this);
+    public interface ShellCommandActionHandler {
+        /**
+         * Handles the given command.
+         *
+         * @param args the arguments starting with the action name, then the action arguments
+         * @param pw the write to print output to
+         */
+        boolean onShellCommand(String[] args, PrintWriter pw);
+
+        /**
+         * Prints the help for this class of commands.  Implementations do not need to print the
+         * command class.
+         */
+        void printShellCommandHelp(PrintWriter pw, String prefix);
+    }
+
+
+    /**
+     * Adds a callback to run when the Shell is being dumped.
+     *
+     * @param callback the callback to be made when Shell is dumped, takes the print writer and
+     *                 a prefix
+     * @param instance used for debugging only
+     */
+    public <T> void addDumpCallback(BiConsumer<PrintWriter, String> callback, T instance) {
+        mDumpables.put(instance.getClass().getSimpleName(), callback);
+        ProtoLog.v(WM_SHELL_INIT, "Adding dump callback for %s",
+                instance.getClass().getSimpleName());
+    }
+
+    /**
+     * Adds an action callback to be invoked when the user runs that particular command from adb.
+     *
+     * @param commandClass the top level class of command to invoke
+     * @param actions the interface to callback when an action of this class is invoked
+     * @param instance used for debugging only
+     */
+    public <T> void addCommandCallback(String commandClass, ShellCommandActionHandler actions,
+            T instance) {
+        mCommands.put(commandClass, actions);
+        ProtoLog.v(WM_SHELL_INIT, "Adding command class %s for %s", commandClass,
+                instance.getClass().getSimpleName());
     }
 
     /** Dumps WM Shell internal state. */
     public void dump(PrintWriter pw) {
-        mShellTaskOrganizer.dump(pw, "");
-        pw.println();
-        pw.println();
-        mPipOptional.ifPresent(pip -> pip.dump(pw));
-        mOneHandedOptional.ifPresent(oneHanded -> oneHanded.dump(pw));
-        mHideDisplayCutout.ifPresent(hideDisplayCutout -> hideDisplayCutout.dump(pw));
-        pw.println();
-        pw.println();
-        mSplitScreenOptional.ifPresent(splitScreen -> splitScreen.dump(pw, ""));
-        pw.println();
-        pw.println();
-        mRecentTasks.ifPresent(recentTasks -> recentTasks.dump(pw, ""));
-        pw.println();
-        pw.println();
-        mKidsModeTaskOrganizer.dump(pw, "");
+        for (String key : mDumpables.keySet()) {
+            final BiConsumer<PrintWriter, String> r = mDumpables.get(key);
+            r.accept(pw, "");
+            pw.println();
+        }
     }
 
 
@@ -93,72 +97,32 @@ public final class ShellCommandHandler {
             // Argument at position 0 is "WMShell".
             return false;
         }
-        switch (args[1]) {
-            case "moveToSideStage":
-                return runMoveToSideStage(args, pw);
-            case "removeFromSideStage":
-                return runRemoveFromSideStage(args, pw);
-            case "setSideStagePosition":
-                return runSetSideStagePosition(args, pw);
-            case "help":
-                return runHelp(pw);
-            default:
-                return false;
-        }
-    }
 
-    private boolean runMoveToSideStage(String[] args, PrintWriter pw) {
-        if (args.length < 3) {
-            // First arguments are "WMShell" and command name.
-            pw.println("Error: task id should be provided as arguments");
+        final String cmdClass = args[1];
+        if (cmdClass.toLowerCase().equals("help")) {
+            return runHelp(pw);
+        }
+        if (!mCommands.containsKey(cmdClass)) {
             return false;
         }
-        final int taskId = new Integer(args[2]);
-        final int sideStagePosition = args.length > 3
-                ? new Integer(args[3]) : SPLIT_POSITION_BOTTOM_OR_RIGHT;
-        mSplitScreenOptional.ifPresent(split -> split.moveToSideStage(taskId, sideStagePosition));
-        return true;
-    }
 
-    private boolean runRemoveFromSideStage(String[] args, PrintWriter pw) {
-        if (args.length < 3) {
-            // First arguments are "WMShell" and command name.
-            pw.println("Error: task id should be provided as arguments");
-            return false;
-        }
-        final int taskId = new Integer(args[2]);
-        mSplitScreenOptional.ifPresent(split -> split.removeFromSideStage(taskId));
-        return true;
-    }
-
-    private boolean runSetSideStagePosition(String[] args, PrintWriter pw) {
-        if (args.length < 3) {
-            // First arguments are "WMShell" and command name.
-            pw.println("Error: side stage position should be provided as arguments");
-            return false;
-        }
-        final int position = new Integer(args[2]);
-        mSplitScreenOptional.ifPresent(split -> split.setSideStagePosition(position));
+        // Only pass the actions onwards as arguments to the callback
+        final ShellCommandActionHandler actions = mCommands.get(args[1]);
+        final String[] cmdClassArgs = Arrays.copyOfRange(args, 2, args.length);
+        actions.onShellCommand(cmdClassArgs, pw);
         return true;
     }
 
     private boolean runHelp(PrintWriter pw) {
         pw.println("Window Manager Shell commands:");
+        for (String commandClass : mCommands.keySet()) {
+            pw.println("  " + commandClass);
+            mCommands.get(commandClass).printShellCommandHelp(pw, "    ");
+        }
         pw.println("  help");
         pw.println("      Print this help text.");
         pw.println("  <no arguments provided>");
-        pw.println("    Dump Window Manager Shell internal state");
-        pw.println("  pair <taskId1> <taskId2>");
-        pw.println("  unpair <taskId>");
-        pw.println("    Pairs/unpairs tasks with given ids.");
-        pw.println("  moveToSideStage <taskId> <SideStagePosition>");
-        pw.println("    Move a task with given id in split-screen mode.");
-        pw.println("  removeFromSideStage <taskId>");
-        pw.println("    Remove a task with given id in split-screen mode.");
-        pw.println("  setSideStageOutline <true/false>");
-        pw.println("    Enable/Disable outline on the side-stage.");
-        pw.println("  setSideStagePosition <SideStagePosition>");
-        pw.println("    Sets the position of the side-stage.");
+        pw.println("    Dump all Window Manager Shell internal state");
         return true;
     }
 }

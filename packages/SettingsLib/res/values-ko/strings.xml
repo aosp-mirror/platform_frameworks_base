@@ -125,9 +125,9 @@
     <string name="bluetooth_profile_a2dp_high_quality" msgid="4739440941324792775">"HD 오디오: <xliff:g id="CODEC_NAME">%1$s</xliff:g>"</string>
     <string name="bluetooth_profile_a2dp_high_quality_unknown_codec" msgid="2477639096903834374">"HD 오디오"</string>
     <string name="bluetooth_profile_hearing_aid" msgid="58154575573984914">"보청기"</string>
-    <string name="bluetooth_profile_le_audio" msgid="5158149987518342036">"LE_AUDIO"</string>
+    <string name="bluetooth_profile_le_audio" msgid="3237854988278539061">"LE 오디오"</string>
     <string name="bluetooth_hearing_aid_profile_summary_connected" msgid="8191273236809964030">"보청기에 연결됨"</string>
-    <string name="bluetooth_le_audio_profile_summary_connected" msgid="3162538609379333442">"LE_AUDIO에 연결됨"</string>
+    <string name="bluetooth_le_audio_profile_summary_connected" msgid="6916226974453480650">"LE 오디오에 연결됨"</string>
     <string name="bluetooth_a2dp_profile_summary_connected" msgid="7422607970115444153">"미디어 오디오에 연결됨"</string>
     <string name="bluetooth_headset_profile_summary_connected" msgid="2420981566026949688">"휴대전화 오디오에 연결됨"</string>
     <string name="bluetooth_opp_profile_summary_connected" msgid="2393521801478157362">"파일 전송 서버에 연결됨"</string>
@@ -184,7 +184,7 @@
     <string name="launch_defaults_some" msgid="3631650616557252926">"일부 기본값이 설정됨"</string>
     <string name="launch_defaults_none" msgid="8049374306261262709">"기본값이 설정되지 않음"</string>
     <string name="tts_settings" msgid="8130616705989351312">"TTS 설정"</string>
-    <string name="tts_settings_title" msgid="7602210956640483039">"TTS 출력"</string>
+    <string name="tts_settings_title" msgid="7602210956640483039">"텍스트 음성 변환 출력"</string>
     <string name="tts_default_rate_title" msgid="3964187817364304022">"말하는 속도"</string>
     <string name="tts_default_rate_summary" msgid="3781937042151716987">"텍스트를 읽어주는 속도"</string>
     <string name="tts_default_pitch_title" msgid="6988592215554485479">"음조"</string>
@@ -273,8 +273,8 @@
     <string name="oem_unlock_enable_summary" msgid="5857388174390953829">"부트로더 잠금 해제 허용"</string>
     <string name="confirm_enable_oem_unlock_title" msgid="8249318129774367535">"OEM 잠금 해제를 허용하시겠습니까?"</string>
     <string name="confirm_enable_oem_unlock_text" msgid="854131050791011970">"경고: 이 설정을 사용하는 동안에는 이 기기에서 기기 보호 기능이 작동하지 않습니다."</string>
-    <string name="mock_location_app" msgid="6269380172542248304">"모의 위치 앱 선택"</string>
-    <string name="mock_location_app_not_set" msgid="6972032787262831155">"모의 위치 앱이 설정되어 있지 않음"</string>
+    <string name="mock_location_app" msgid="6269380172542248304">"가상 위치 앱 선택"</string>
+    <string name="mock_location_app_not_set" msgid="6972032787262831155">"가상 위치 앱이 설정되어 있지 않음"</string>
     <string name="mock_location_app_set" msgid="4706722469342913843">"모의 위치 앱: <xliff:g id="APP_NAME">%1$s</xliff:g>"</string>
     <string name="debug_networking_category" msgid="6829757985772659599">"네트워크"</string>
     <string name="wifi_display_certification" msgid="1805579519992520381">"무선 디스플레이 인증서"</string>
@@ -385,7 +385,7 @@
     <string name="force_msaa" msgid="4081288296137775550">"4x MSAA 강제 사용"</string>
     <string name="force_msaa_summary" msgid="9070437493586769500">"OpenGL ES 2.0 앱에서 4x MSAA 사용"</string>
     <string name="show_non_rect_clip" msgid="7499758654867881817">"사각형이 아닌 클립 작업 디버그"</string>
-    <string name="track_frame_time" msgid="522674651937771106">"프로필 HWUI 렌더링"</string>
+    <string name="track_frame_time" msgid="522674651937771106">"HWUI 렌더링 프로파일"</string>
     <string name="enable_gpu_debug_layers" msgid="4986675516188740397">"GPU 디버그 레이어 사용 설정"</string>
     <string name="enable_gpu_debug_layers_summary" msgid="4921521407377170481">"디버그 앱에 GPU 디버그 레이어 로드 허용"</string>
     <string name="enable_verbose_vendor_logging" msgid="1196698788267682072">"상세 공급업체 로깅 사용 설정"</string>
@@ -408,6 +408,7 @@
     <string name="force_resizable_activities_summary" msgid="2490382056981583062">"모든 활동을 매니페스트 값에 관계없이 멀티 윈도우용으로 크기 조정 가능하도록 설정"</string>
     <string name="enable_freeform_support" msgid="7599125687603914253">"자유 형식 창 사용"</string>
     <string name="enable_freeform_support_summary" msgid="1822862728719276331">"자유 형식 창 지원 사용"</string>
+    <string name="desktop_mode" msgid="2389067840550544462">"데스크톱 모드"</string>
     <string name="local_backup_password_title" msgid="4631017948933578709">"데스크톱 백업 비밀번호"</string>
     <string name="local_backup_password_summary_none" msgid="7646898032616361714">"데스크톱 전체 백업에 비밀번호가 설정되어 있지 않음"</string>
     <string name="local_backup_password_summary_change" msgid="1707357670383995567">"데스크톱 전체 백업에 대한 비밀번호를 변경하거나 삭제하려면 탭하세요."</string>
@@ -476,13 +477,14 @@
     <string name="power_charging" msgid="6727132649743436802">"<xliff:g id="LEVEL">%1$s</xliff:g> - <xliff:g id="STATE">%2$s</xliff:g>"</string>
     <string name="power_remaining_charging_duration_only" msgid="8085099012811384899">"<xliff:g id="TIME">%1$s</xliff:g> 후 충전 완료"</string>
     <string name="power_charging_duration" msgid="6127154952524919719">"<xliff:g id="LEVEL">%1$s</xliff:g>: <xliff:g id="TIME">%2$s</xliff:g> 후 충전 완료"</string>
-    <string name="power_charging_limited" msgid="7956120998372505295">"<xliff:g id="LEVEL">%1$s</xliff:g> - 충전이 일시적으로 제한됨"</string>
+    <string name="power_charging_limited" msgid="8202147604844938236">"<xliff:g id="LEVEL">%1$s</xliff:g> - 충전 최적화됨"</string>
+    <string name="power_charging_future_paused" msgid="4730177778538118032">"<xliff:g id="LEVEL">%1$s</xliff:g> - 충전 최적화됨"</string>
     <string name="battery_info_status_unknown" msgid="268625384868401114">"알 수 없음"</string>
     <string name="battery_info_status_charging" msgid="4279958015430387405">"충전 중"</string>
     <string name="battery_info_status_charging_fast" msgid="8027559755902954885">"고속 충전 중"</string>
     <string name="battery_info_status_charging_slow" msgid="3190803837168962319">"저속 충전 중"</string>
     <string name="battery_info_status_charging_wireless" msgid="8924722966861282197">"무선 충전 중"</string>
-    <string name="battery_info_status_charging_dock" msgid="3554147903321236585">"충전 도크"</string>
+    <string name="battery_info_status_charging_dock" msgid="8573274094093364791">"충전"</string>
     <string name="battery_info_status_discharging" msgid="6962689305413556485">"충전 안함"</string>
     <string name="battery_info_status_not_charging" msgid="3371084153747234837">"연결됨, 충전 중 아님"</string>
     <string name="battery_info_status_full" msgid="1339002294876531312">"충전됨"</string>
@@ -655,13 +657,6 @@
     <string name="accessibility_ethernet_disconnected" msgid="2832501530856497489">"이더넷에서 연결 해제되었습니다."</string>
     <string name="accessibility_ethernet_connected" msgid="6175942685957461563">"이더넷에 연결되었습니다."</string>
     <string name="accessibility_no_calling" msgid="3540827068323895748">"통화 모드가 없습니다."</string>
-    <string name="dream_complication_title_time" msgid="701747800712893499">"시간"</string>
-    <string name="dream_complication_title_date" msgid="8661176085446135789">"날짜"</string>
-    <string name="dream_complication_title_weather" msgid="598609151677172783">"날씨"</string>
-    <string name="dream_complication_title_aqi" msgid="4587552608957834110">"대기 상태"</string>
-    <string name="dream_complication_title_cast_info" msgid="4038776652841885084">"전송 정보"</string>
-    <!-- no translation found for dream_complication_title_home_controls (9153381632476738811) -->
-    <skip />
     <string name="avatar_picker_title" msgid="8492884172713170652">"프로필 사진 선택하기"</string>
     <string name="default_user_icon_description" msgid="6554047177298972638">"기본 사용자 아이콘"</string>
     <string name="physical_keyboard_title" msgid="4811935435315835220">"물리적 키보드"</string>

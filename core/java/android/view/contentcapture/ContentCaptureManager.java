@@ -280,6 +280,15 @@ public final class ContentCaptureManager {
             "service_explicitly_enabled";
 
     /**
+     * Device config property used by {@code android.widget.AbsListView} to determine whether or
+     * not it should report the positions of its children to Content Capture.
+     *
+     * @hide
+     */
+    public static final String DEVICE_CONFIG_PROPERTY_REPORT_LIST_VIEW_CHILDREN =
+            "report_list_view_children";
+
+    /**
      * Maximum number of events that are buffered before sent to the app.
      *
      * @hide
@@ -369,7 +378,7 @@ public final class ContentCaptureManager {
     private final Object mLock = new Object();
 
     @NonNull
-    private final Context mContext;
+    private final StrippedContext mContext;
 
     @NonNull
     private final IContentCaptureManager mService;
@@ -405,9 +414,37 @@ public final class ContentCaptureManager {
     }
 
     /** @hide */
+    static class StrippedContext {
+        final String mPackageName;
+        final String mContext;
+        final @UserIdInt int mUserId;
+
+        private StrippedContext(Context context) {
+            mPackageName = context.getPackageName();
+            mContext = context.toString();
+            mUserId = context.getUserId();
+        }
+
+        @Override
+        public String toString() {
+            return mContext;
+        }
+
+        public String getPackageName() {
+            return mPackageName;
+        }
+
+        @UserIdInt
+        public int getUserId() {
+            return mUserId;
+        }
+    }
+
+    /** @hide */
     public ContentCaptureManager(@NonNull Context context,
             @NonNull IContentCaptureManager service, @NonNull ContentCaptureOptions options) {
-        mContext = Objects.requireNonNull(context, "context cannot be null");
+        Objects.requireNonNull(context, "context cannot be null");
+        mContext = new StrippedContext(context);
         mService = Objects.requireNonNull(service, "service cannot be null");
         mOptions = Objects.requireNonNull(options, "options cannot be null");
 

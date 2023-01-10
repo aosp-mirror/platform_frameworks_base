@@ -286,7 +286,7 @@ public class PreparationCoordinator implements Coordinator {
                 if (isInflated(child)) {
                     // TODO: May want to put an animation hint here so view manager knows to treat
                     //  this differently from a regular removal animation
-                    freeNotifViews(child);
+                    freeNotifViews(child, "Past last visible group child");
                 }
             }
         }
@@ -379,7 +379,8 @@ public class PreparationCoordinator implements Coordinator {
         mNotifInflatingFilter.invalidateList("onInflationFinished for " + logKey(entry));
     }
 
-    private void freeNotifViews(NotificationEntry entry) {
+    private void freeNotifViews(NotificationEntry entry, String reason) {
+        mLogger.logFreeNotifViews(entry, reason);
         mViewBarn.removeViewForEntry(entry);
         mNotifInflater.releaseViews(entry);
         // TODO: clear the entry's row here, or even better, stop setting the row on the entry!
@@ -406,7 +407,10 @@ public class PreparationCoordinator implements Coordinator {
             mLogger.logGroupInflationTookTooLong(group);
             return false;
         }
-        if (mInflatingNotifs.contains(group.getSummary())) {
+        // Only delay release if the summary is not inflated.
+        // TODO(253454977): Once we ensure that all other pipeline filtering and pruning has been
+        //  done by this point, we can revert back to checking for mInflatingNotifs.contains(...)
+        if (group.getSummary() != null && !isInflated(group.getSummary())) {
             mLogger.logDelayingGroupRelease(group, group.getSummary());
             return true;
         }

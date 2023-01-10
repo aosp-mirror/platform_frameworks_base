@@ -20,6 +20,7 @@ import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.TestApi;
 import android.app.Service;
+import android.content.ComponentName;
 import android.content.Intent;
 import android.os.IBinder;
 import android.os.RemoteException;
@@ -36,13 +37,28 @@ public abstract class DreamOverlayService extends Service {
     private static final String TAG = "DreamOverlayService";
     private static final boolean DEBUG = false;
     private boolean mShowComplications;
+    private ComponentName mDreamComponent;
 
     private IDreamOverlay mDreamOverlay = new IDreamOverlay.Stub() {
         @Override
         public void startDream(WindowManager.LayoutParams layoutParams,
-                IDreamOverlayCallback callback) {
+                IDreamOverlayCallback callback, String dreamComponent,
+                boolean shouldShowComplications) {
             mDreamOverlayCallback = callback;
+            mDreamComponent = ComponentName.unflattenFromString(dreamComponent);
+            mShowComplications = shouldShowComplications;
             onStartDream(layoutParams);
+        }
+
+        @Override
+        public void wakeUp() {
+            onWakeUp(() -> {
+                try {
+                    mDreamOverlayCallback.onWakeUpComplete();
+                } catch (RemoteException e) {
+                    Log.e(TAG, "Could not notify dream of wakeUp:" + e);
+                }
+            });
         }
     };
 
@@ -54,8 +70,6 @@ public abstract class DreamOverlayService extends Service {
     @Nullable
     @Override
     public final IBinder onBind(@NonNull Intent intent) {
-        mShowComplications = intent.getBooleanExtra(DreamService.EXTRA_SHOW_COMPLICATIONS,
-                DreamService.DEFAULT_SHOW_COMPLICATIONS);
         return mDreamOverlay.asBinder();
     }
 
@@ -66,6 +80,17 @@ public abstract class DreamOverlayService extends Service {
      *                     dream window.
      */
     public abstract void onStartDream(@NonNull WindowManager.LayoutParams layoutParams);
+
+    /**
+     * This method is overridden by implementations to handle when the dream has been requested
+     * to wakeup. This allows any overlay animations to run.
+     *
+     * @param onCompleteCallback The callback to trigger to notify the dream service that the
+     *                           overlay has completed waking up.
+     * @hide
+     */
+    public void onWakeUp(@NonNull Runnable onCompleteCallback) {
+    }
 
     /**
      * This method is invoked to request the dream exit.
@@ -83,5 +108,13 @@ public abstract class DreamOverlayService extends Service {
      */
     public final boolean shouldShowComplications() {
         return mShowComplications;
+    }
+
+    /**
+     * Returns the active dream component.
+     * @hide
+     */
+    public final ComponentName getDreamComponent() {
+        return mDreamComponent;
     }
 }

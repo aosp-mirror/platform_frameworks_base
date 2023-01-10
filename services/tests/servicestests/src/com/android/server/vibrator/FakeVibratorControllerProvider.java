@@ -53,7 +53,8 @@ final class FakeVibratorControllerProvider {
 
     private boolean mIsAvailable = true;
     private boolean mIsInfoLoadSuccessful = true;
-    private long mLatency;
+    private long mOnLatency;
+    private long mOffLatency;
     private int mOffCount;
 
     private int mCapabilities;
@@ -97,7 +98,7 @@ final class FakeVibratorControllerProvider {
         public long on(long milliseconds, long vibrationId) {
             recordEffectSegment(vibrationId, new StepSegment(VibrationEffect.DEFAULT_AMPLITUDE,
                     /* frequencyHz= */ 0, (int) milliseconds));
-            applyLatency();
+            applyLatency(mOnLatency);
             scheduleListener(milliseconds, vibrationId);
             return milliseconds;
         }
@@ -105,12 +106,13 @@ final class FakeVibratorControllerProvider {
         @Override
         public void off() {
             mOffCount++;
+            applyLatency(mOffLatency);
         }
 
         @Override
         public void setAmplitude(float amplitude) {
             mAmplitudes.add(amplitude);
-            applyLatency();
+            applyLatency(mOnLatency);
         }
 
         @Override
@@ -121,19 +123,27 @@ final class FakeVibratorControllerProvider {
             }
             recordEffectSegment(vibrationId,
                     new PrebakedSegment((int) effect, false, (int) strength));
-            applyLatency();
+            applyLatency(mOnLatency);
             scheduleListener(EFFECT_DURATION, vibrationId);
             return EFFECT_DURATION;
         }
 
         @Override
-        public long compose(PrimitiveSegment[] effects, long vibrationId) {
+        public long compose(PrimitiveSegment[] primitives, long vibrationId) {
+            if (mSupportedPrimitives == null) {
+                return 0;
+            }
+            for (PrimitiveSegment primitive : primitives) {
+                if (Arrays.binarySearch(mSupportedPrimitives, primitive.getPrimitiveId()) < 0) {
+                    return 0;
+                }
+            }
             long duration = 0;
-            for (PrimitiveSegment primitive : effects) {
+            for (PrimitiveSegment primitive : primitives) {
                 duration += EFFECT_DURATION + primitive.getDelay();
                 recordEffectSegment(vibrationId, primitive);
             }
-            applyLatency();
+            applyLatency(mOnLatency);
             scheduleListener(duration, vibrationId);
             return duration;
         }
@@ -146,7 +156,7 @@ final class FakeVibratorControllerProvider {
                 recordEffectSegment(vibrationId, primitive);
             }
             recordBraking(vibrationId, braking);
-            applyLatency();
+            applyLatency(mOnLatency);
             scheduleListener(duration, vibrationId);
             return duration;
         }
@@ -185,10 +195,10 @@ final class FakeVibratorControllerProvider {
             return mIsInfoLoadSuccessful;
         }
 
-        private void applyLatency() {
+        private void applyLatency(long latencyMillis) {
             try {
-                if (mLatency > 0) {
-                    Thread.sleep(mLatency);
+                if (latencyMillis > 0) {
+                    Thread.sleep(latencyMillis);
                 }
             } catch (InterruptedException e) {
             }
@@ -232,10 +242,15 @@ final class FakeVibratorControllerProvider {
 
     /**
      * Sets the latency this controller should fake for turning the vibrator hardware on or setting
-     * it's vibration amplitude.
+     * the vibration amplitude.
      */
-    public void setLatency(long millis) {
-        mLatency = millis;
+    public void setOnLatency(long millis) {
+        mOnLatency = millis;
+    }
+
+    /** Sets the latency this controller should fake for turning the vibrator off. */
+    public void setOffLatency(long millis) {
+        mOffLatency = millis;
     }
 
     /** Set the capabilities of the fake vibrator hardware. */

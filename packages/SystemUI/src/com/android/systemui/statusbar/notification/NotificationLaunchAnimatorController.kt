@@ -70,8 +70,8 @@ class NotificationLaunchAnimatorController(
         val height = max(0, notification.actualHeight - notification.clipBottomAmount)
         val location = notification.locationOnScreen
 
-        val clipStartLocation = notificationListContainer.getTopClippingStartLocation()
-        val roundedTopClipping = Math.max(clipStartLocation - location[1], 0)
+        val clipStartLocation = notificationListContainer.topClippingStartLocation
+        val roundedTopClipping = (clipStartLocation - location[1]).coerceAtLeast(0)
         val windowTop = location[1] + roundedTopClipping
         val topCornerRadius = if (roundedTopClipping > 0) {
             // Because the rounded Rect clipping is complex, we start the top rounding at
@@ -80,7 +80,7 @@ class NotificationLaunchAnimatorController(
             // if we'd like to have this perfect, but this is close enough.
             0f
         } else {
-            notification.currentBackgroundRadiusTop
+            notification.topCornerRadius
         }
         val params = LaunchAnimationParameters(
             top = windowTop,
@@ -88,17 +88,18 @@ class NotificationLaunchAnimatorController(
             left = location[0],
             right = location[0] + notification.width,
             topCornerRadius = topCornerRadius,
-            bottomCornerRadius = notification.currentBackgroundRadiusBottom
+            bottomCornerRadius = notification.bottomCornerRadius
         )
 
         params.startTranslationZ = notification.translationZ
-        params.startNotificationTop = notification.translationY
+        params.startNotificationTop = location[1]
+        params.notificationParentTop = notificationListContainer
+                .getViewParentForNotification(notificationEntry).locationOnScreen[1]
         params.startRoundedTopClipping = roundedTopClipping
         params.startClipTopAmount = notification.clipTopAmount
         if (notification.isChildInGroup) {
-            params.startNotificationTop += notification.notificationParent.translationY
-            val parentRoundedClip = Math.max(
-                clipStartLocation - notification.notificationParent.locationOnScreen[1], 0)
+            val locationOnScreen = notification.notificationParent.locationOnScreen[1]
+            val parentRoundedClip = (clipStartLocation - locationOnScreen).coerceAtLeast(0)
             params.parentStartRoundedTopClipping = parentRoundedClip
 
             val parentClip = notification.notificationParent.clipTopAmount
@@ -136,7 +137,7 @@ class NotificationLaunchAnimatorController(
         headsUpManager.removeNotification(notificationKey, true /* releaseImmediately */, animate)
     }
 
-    override fun onLaunchAnimationCancelled() {
+    override fun onLaunchAnimationCancelled(newKeyguardOccludedState: Boolean?) {
         // TODO(b/184121838): Should we call InteractionJankMonitor.cancel if the animation started
         // here?
         notificationShadeWindowViewController.setExpandAnimationRunning(false)

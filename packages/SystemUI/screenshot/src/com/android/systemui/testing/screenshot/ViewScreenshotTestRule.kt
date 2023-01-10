@@ -19,21 +19,13 @@ package com.android.systemui.testing.screenshot
 import android.app.Activity
 import android.app.Dialog
 import android.graphics.Bitmap
-import android.graphics.HardwareRenderer
-import android.os.Looper
 import android.view.View
 import android.view.ViewGroup
 import android.view.ViewGroup.LayoutParams
 import android.view.ViewGroup.LayoutParams.MATCH_PARENT
 import android.view.ViewGroup.LayoutParams.WRAP_CONTENT
-import android.view.Window
 import androidx.activity.ComponentActivity
-import androidx.test.espresso.Espresso
 import androidx.test.ext.junit.rules.ActivityScenarioRule
-import com.google.common.util.concurrent.FutureCallback
-import com.google.common.util.concurrent.Futures
-import kotlin.coroutines.suspendCoroutine
-import kotlinx.coroutines.runBlocking
 import org.junit.Assert.assertEquals
 import org.junit.rules.RuleChain
 import org.junit.rules.TestRule
@@ -44,14 +36,22 @@ import platform.test.screenshot.DeviceEmulationSpec
 import platform.test.screenshot.MaterialYouColorsRule
 import platform.test.screenshot.ScreenshotTestRule
 import platform.test.screenshot.getEmulatedDevicePathConfig
+import platform.test.screenshot.matchers.BitmapMatcher
 
 /** A rule for View screenshot diff unit tests. */
-class ViewScreenshotTestRule(emulationSpec: DeviceEmulationSpec) : TestRule {
+class ViewScreenshotTestRule(
+    emulationSpec: DeviceEmulationSpec,
+    private val matcher: BitmapMatcher = UnitTestBitmapMatcher,
+    assetsPathRelativeToBuildRoot: String
+) : TestRule {
     private val colorsRule = MaterialYouColorsRule()
     private val deviceEmulationRule = DeviceEmulationRule(emulationSpec)
     private val screenshotRule =
         ScreenshotTestRule(
-            SystemUIGoldenImagePathManager(getEmulatedDevicePathConfig(emulationSpec))
+            SystemUIGoldenImagePathManager(
+                getEmulatedDevicePathConfig(emulationSpec),
+                assetsPathRelativeToBuildRoot
+            )
         )
     private val activityRule = ActivityScenarioRule(ScreenshotActivity::class.java)
     private val delegateRule =
@@ -59,7 +59,6 @@ class ViewScreenshotTestRule(emulationSpec: DeviceEmulationSpec) : TestRule {
             .around(deviceEmulationRule)
             .around(screenshotRule)
             .around(activityRule)
-    private val matcher = UnitTestBitmapMatcher
 
     override fun apply(base: Statement, description: Description): Statement {
         return delegateRule.apply(base, description)
@@ -86,6 +85,8 @@ class ViewScreenshotTestRule(emulationSpec: DeviceEmulationSpec) : TestRule {
             // Elevation/shadows is not deterministic when doing hardware rendering, so we disable
             // it for any view in the hierarchy.
             window.decorView.removeElevationRecursively()
+
+            activity.currentFocus?.clearFocus()
         }
 
         // We call onActivity again because it will make sure that our Activity is done measuring,
@@ -147,51 +148,9 @@ class ViewScreenshotTestRule(emulationSpec: DeviceEmulationSpec) : TestRule {
         }
     }
 
-    private fun View.removeElevationRecursively() {
-        this.elevation = 0f
-
-        if (this is ViewGroup) {
-            repeat(childCount) { i -> getChildAt(i).removeElevationRecursively() }
-        }
-    }
-
     private fun Dialog.toBitmap(): Bitmap {
         val window = window
         return window.decorView.toBitmap(window)
-    }
-
-    private fun View.toBitmap(window: Window? = null): Bitmap {
-        if (Looper.getMainLooper() == Looper.myLooper()) {
-            error("toBitmap() can't be called from the main thread")
-        }
-
-        if (!HardwareRenderer.isDrawingEnabled()) {
-            error("Hardware rendering is not enabled")
-        }
-
-        // Make sure we are idle.
-        Espresso.onIdle()
-
-        val mainExecutor = context.mainExecutor
-        return runBlocking {
-            suspendCoroutine { continuation ->
-                Futures.addCallback(
-                    captureToBitmap(window),
-                    object : FutureCallback<Bitmap> {
-                        override fun onSuccess(result: Bitmap?) {
-                            continuation.resumeWith(Result.success(result!!))
-                        }
-
-                        override fun onFailure(t: Throwable) {
-                            continuation.resumeWith(Result.failure(t))
-                        }
-                    },
-                    // We know that we are not on the main thread, so we can block the current
-                    // thread and wait for the result in the main thread.
-                    mainExecutor,
-                )
-            }
-        }
     }
 
     enum class Mode(val layoutParams: LayoutParams) {

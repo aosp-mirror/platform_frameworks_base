@@ -21,7 +21,6 @@ import android.app.ITransientNotificationCallback;
 import android.hardware.fingerprint.IUdfpsHbmListener;
 import android.os.Bundle;
 import android.os.IBinder;
-import android.os.ParcelFileDescriptor;
 import android.view.InsetsState.InternalInsetsType;
 import android.view.InsetsVisibilities;
 import android.view.WindowInsetsController.Appearance;
@@ -162,11 +161,6 @@ public interface StatusBarManagerInternal {
     boolean requestWindowMagnificationConnection(boolean request);
 
     /**
-     * Handles a logging command from the WM shell command.
-     */
-    void handleWindowManagerLoggingCommand(String[] args, ParcelFileDescriptor outFd);
-
-    /**
      * @see com.android.internal.statusbar.IStatusBar#setNavigationBarLumaSamplingEnabled(int,
      * boolean)
      */
@@ -178,4 +172,23 @@ public interface StatusBarManagerInternal {
      * @see com.android.internal.statusbar.IStatusBar#setUdfpsHbmListener(IUdfpsHbmListener)
      */
     void setUdfpsHbmListener(IUdfpsHbmListener listener);
+
+    /**
+     * Shows the rear display educational dialog
+     *
+     * @see com.android.internal.statusbar.IStatusBar#showRearDisplayDialog
+     */
+    void showRearDisplayDialog(int currentBaseState);
+
+    /**
+     * Called when requested to go to fullscreen from the active split app.
+     */
+    void goToFullscreenFromSplit();
+
+    /**
+     * Enters stage split from a current running app.
+     *
+     * @see com.android.internal.statusbar.IStatusBar#enterStageSplitFromRunningApp
+     */
+    void enterStageSplitFromRunningApp(boolean leftOrTop);
 }

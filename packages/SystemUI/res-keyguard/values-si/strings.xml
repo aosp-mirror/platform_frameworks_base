@@ -26,11 +26,11 @@
     <string name="keyguard_sim_error_message_short" msgid="633630844240494070">"වලංගු නොවන කාඩ්පත."</string>
     <string name="keyguard_charged" msgid="5478247181205188995">"අරෝපිතයි"</string>
     <string name="keyguard_plugged_in_wireless" msgid="2537874724955057383">"<xliff:g id="PERCENTAGE">%s</xliff:g> • නොරැහැන්ව ආරෝපණ කෙරේ"</string>
-    <string name="keyguard_plugged_in_dock" msgid="449722738270908674">"<xliff:g id="PERCENTAGE">%s</xliff:g> • ආරෝපණය වන ඩොකය"</string>
+    <string name="keyguard_plugged_in_dock" msgid="2122073051904360987">"<xliff:g id="PERCENTAGE">%s</xliff:g> • ආරෝපණය වෙමින්"</string>
     <string name="keyguard_plugged_in" msgid="8169926454348380863">"<xliff:g id="PERCENTAGE">%s</xliff:g> • ආරෝපණය වෙමින්"</string>
     <string name="keyguard_plugged_in_charging_fast" msgid="4386594091107340426">"<xliff:g id="PERCENTAGE">%s</xliff:g> • වේගයෙන් ආරෝපණය වෙමින්"</string>
     <string name="keyguard_plugged_in_charging_slowly" msgid="217655355424210">"<xliff:g id="PERCENTAGE">%s</xliff:g> • සෙමින් ආරෝපණය වෙමින්"</string>
-    <string name="keyguard_plugged_in_charging_limited" msgid="6091488837901216962">"<xliff:g id="PERCENTAGE">%s</xliff:g> • ආරෝපණය කිරීම තාවකාලිකව සීමා කර ඇත"</string>
+    <string name="keyguard_plugged_in_charging_limited" msgid="1053130519456324630">"<xliff:g id="PERCENTAGE">%s</xliff:g> • බැටරිය ආරක්ෂා කිරීම සඳහා ආරෝපණය ප්‍රශස්ත කර ඇත"</string>
     <string name="keyguard_instructions_when_pattern_disabled" msgid="8448804180089936954">"අගුලු හැරීමට මෙනුව ඔබන්න."</string>
     <string name="keyguard_network_locked_message" msgid="407096292844868608">"ජාලය අගුළු දමා ඇත"</string>
     <string name="keyguard_missing_sim_message_short" msgid="704159478161444907">"SIM පත නැත"</string>
@@ -78,9 +78,9 @@
     <string name="kg_prompt_reason_restart_pattern" msgid="4720554342633852066">"උපාංගය නැවත ආරම්භ වූ පසු රටාව අවශ්‍යයි"</string>
     <string name="kg_prompt_reason_restart_pin" msgid="1587671566498057656">"උපාංගය නැවත ආරම්භ වූ පසු PIN අංකය අවශ්‍යයි"</string>
     <string name="kg_prompt_reason_restart_password" msgid="8061279087240952002">"උපාංගය නැවත ආරම්භ වූ පසු මුරපදය අවශ්‍යයි"</string>
-    <string name="kg_prompt_reason_timeout_pattern" msgid="9170360502528959889">"අමතර ආරක්ෂාව සඳහා රටාව අවශ්‍යයි"</string>
-    <string name="kg_prompt_reason_timeout_pin" msgid="5945186097160029201">"අමතර ආරක්ෂාව සඳහා PIN අංකය අවශ්‍යයි"</string>
-    <string name="kg_prompt_reason_timeout_password" msgid="2258263949430384278">"අමතර ආරක්ෂාව සඳහා මුරපදය අවශ්‍යයි"</string>
+    <string name="kg_prompt_reason_timeout_pattern" msgid="5514969660010197363">"අතිරේක ආරක්ෂාව සඳහා, ඒ වෙනුවට රටාව භාවිතා කරන්න"</string>
+    <string name="kg_prompt_reason_timeout_pin" msgid="4227962059353859376">"අතිරේක ආරක්ෂාව සඳහා, ඒ වෙනුවට PIN භාවිතා කරන්න"</string>
+    <string name="kg_prompt_reason_timeout_password" msgid="8810879144143933690">"අතිරේක ආරක්ෂාව සඳහා, ඒ වෙනුවට මුරපදය භාවිතා කරන්න"</string>
     <string name="kg_prompt_reason_device_admin" msgid="6961159596224055685">"ඔබගේ පරිපාලක විසින් උපාංගය අගුළු දමා ඇත"</string>
     <string name="kg_prompt_reason_user_request" msgid="6015774877733717904">"උපාංගය හස්තීයව අගුලු දමන ලදී"</string>
     <string name="kg_face_not_recognized" msgid="7903950626744419160">"හඳුනා නොගන්නා ලදී"</string>
@@ -90,4 +90,5 @@
     <string name="clock_title_default" msgid="6342735240617459864">"පෙරනිමි"</string>
     <string name="clock_title_bubble" msgid="2204559396790593213">"බුබුළ"</string>
     <string name="clock_title_analog" msgid="8409262532900918273">"ප්‍රතිසමය"</string>
+    <string name="keyguard_unlock_to_continue" msgid="7509503484250597743">"ඉදිරියට යාමට ඔබේ උපාංගය අගුළු හරින්න"</string>
 </resources>

@@ -31,8 +31,8 @@ public class GroupEntryBuilder {
     private long mCreationTime = 0;
     @Nullable private GroupEntry mParent = GroupEntry.ROOT_ENTRY;
     private NotifSection mNotifSection;
-    private NotificationEntry mSummary = null;
-    private List<NotificationEntry> mChildren = new ArrayList<>();
+    @Nullable private NotificationEntry mSummary = null;
+    private final List<NotificationEntry> mChildren = new ArrayList<>();
 
     /** Builds a new instance of GroupEntry */
     public GroupEntry build() {
@@ -41,7 +41,9 @@ public class GroupEntryBuilder {
         ge.getAttachState().setSection(mNotifSection);
 
         ge.setSummary(mSummary);
-        mSummary.setParent(ge);
+        if (mSummary != null) {
+            mSummary.setParent(ge);
+        }
 
         for (NotificationEntry child : mChildren) {
             ge.addChild(child);

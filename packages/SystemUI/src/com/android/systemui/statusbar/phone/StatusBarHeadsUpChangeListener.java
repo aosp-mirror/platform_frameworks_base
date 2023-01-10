@@ -21,8 +21,6 @@ import com.android.systemui.shade.NotificationPanelViewController;
 import com.android.systemui.statusbar.NotificationRemoteInputManager;
 import com.android.systemui.statusbar.NotificationShadeWindowController;
 import com.android.systemui.statusbar.StatusBarState;
-import com.android.systemui.statusbar.notification.collection.NotificationEntry;
-import com.android.systemui.statusbar.notification.init.NotificationsController;
 import com.android.systemui.statusbar.phone.dagger.CentralSurfacesComponent;
 import com.android.systemui.statusbar.policy.OnHeadsUpChangedListener;
 import com.android.systemui.statusbar.window.StatusBarWindowController;
@@ -41,9 +39,6 @@ public class StatusBarHeadsUpChangeListener implements OnHeadsUpChangedListener 
     private final HeadsUpManagerPhone mHeadsUpManager;
     private final StatusBarStateController mStatusBarStateController;
     private final NotificationRemoteInputManager mNotificationRemoteInputManager;
-    private final NotificationsController mNotificationsController;
-    private final DozeServiceHost mDozeServiceHost;
-    private final DozeScrimController mDozeScrimController;
 
     @Inject
     StatusBarHeadsUpChangeListener(
@@ -53,10 +48,7 @@ public class StatusBarHeadsUpChangeListener implements OnHeadsUpChangedListener 
             KeyguardBypassController keyguardBypassController,
             HeadsUpManagerPhone headsUpManager,
             StatusBarStateController statusBarStateController,
-            NotificationRemoteInputManager notificationRemoteInputManager,
-            NotificationsController notificationsController,
-            DozeServiceHost dozeServiceHost,
-            DozeScrimController dozeScrimController) {
+            NotificationRemoteInputManager notificationRemoteInputManager) {
 
         mNotificationShadeWindowController = notificationShadeWindowController;
         mStatusBarWindowController = statusBarWindowController;
@@ -65,9 +57,6 @@ public class StatusBarHeadsUpChangeListener implements OnHeadsUpChangedListener 
         mHeadsUpManager = headsUpManager;
         mStatusBarStateController = statusBarStateController;
         mNotificationRemoteInputManager = notificationRemoteInputManager;
-        mNotificationsController = notificationsController;
-        mDozeServiceHost = dozeServiceHost;
-        mDozeScrimController = dozeScrimController;
     }
 
     @Override
@@ -83,9 +72,9 @@ public class StatusBarHeadsUpChangeListener implements OnHeadsUpChangedListener 
                 //resize the layout. Let's
                 // make sure that the window stays small for one frame until the
                 //touchableRegion is set.
-                mNotificationPanelViewController.getView().requestLayout();
+                mNotificationPanelViewController.requestLayoutOnView();
                 mNotificationShadeWindowController.setForceWindowCollapsed(true);
-                mNotificationPanelViewController.getView().post(() -> {
+                mNotificationPanelViewController.postToView(() -> {
                     mNotificationShadeWindowController.setForceWindowCollapsed(false);
                 });
             }
@@ -115,23 +104,6 @@ public class StatusBarHeadsUpChangeListener implements OnHeadsUpChangedListener 
                     mNotificationRemoteInputManager.onPanelCollapsed();
                 });
             }
-        }
-    }
-
-    @Override
-    public void onHeadsUpStateChanged(NotificationEntry entry, boolean isHeadsUp) {
-        mNotificationsController.requestNotificationUpdate("onHeadsUpStateChanged");
-        if (mStatusBarStateController.isDozing() && isHeadsUp) {
-            entry.setPulseSuppressed(false);
-            mDozeServiceHost.fireNotificationPulse(entry);
-            if (mDozeServiceHost.isPulsing()) {
-                mDozeScrimController.cancelPendingPulseTimeout();
-            }
-        }
-        if (!isHeadsUp && !mHeadsUpManager.hasNotifications()) {
-            // There are no longer any notifications to show.  We should end the
-            //pulse now.
-            mDozeScrimController.pulseOutNow();
         }
     }
 }

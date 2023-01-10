@@ -63,7 +63,6 @@ import static android.view.WindowManager.LayoutParams.isSystemAlertWindowType;
 import static android.view.WindowManager.ScreenshotSource.SCREENSHOT_KEY_CHORD;
 import static android.view.WindowManager.ScreenshotSource.SCREENSHOT_KEY_OTHER;
 import static android.view.WindowManager.TAKE_SCREENSHOT_FULLSCREEN;
-import static android.view.WindowManager.TAKE_SCREENSHOT_SELECTED_REGION;
 import static android.view.WindowManagerGlobal.ADD_OKAY;
 import static android.view.WindowManagerGlobal.ADD_PERMISSION_DENIED;
 
@@ -257,6 +256,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
     static final int SHORT_PRESS_POWER_GO_HOME = 4;
     static final int SHORT_PRESS_POWER_CLOSE_IME_OR_GO_HOME = 5;
     static final int SHORT_PRESS_POWER_LOCK_OR_SLEEP = 6;
+    static final int SHORT_PRESS_POWER_DREAM_OR_SLEEP = 7;
 
     // must match: config_LongPressOnPowerBehavior in config.xml
     static final int LONG_PRESS_POWER_NOTHING = 0;
@@ -972,7 +972,12 @@ public class PhoneWindowManager implements WindowManagerPolicy {
             powerMultiPressAction(eventTime, interactive, mTriplePressOnPowerBehavior);
         } else if (count > 3 && count <= getMaxMultiPressPowerCount()) {
             Slog.d(TAG, "No behavior defined for power press count " + count);
-        } else if (count == 1 && interactive && !beganFromNonInteractive) {
+        } else if (count == 1 && interactive) {
+            if (beganFromNonInteractive) {
+                // The screen off case, where we might want to start dreaming on power button press.
+                attemptToDreamFromShortPowerButtonPress(false, () -> {});
+                return;
+            }
             if (mSideFpsEventHandler.shouldConsumeSinglePress(eventTime)) {
                 Slog.i(TAG, "Suppressing power key because the user is interacting with the "
                         + "fingerprint sensor");
@@ -1021,8 +1026,42 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                     }
                     break;
                 }
+                case SHORT_PRESS_POWER_DREAM_OR_SLEEP: {
+                    attemptToDreamFromShortPowerButtonPress(
+                            true,
+                            () -> sleepDefaultDisplayFromPowerButton(eventTime, 0));
+                    break;
+                }
             }
         }
+    }
+
+    /**
+     * Attempt to dream from a power button press.
+     *
+     * @param isScreenOn Whether the screen is currently on.
+     * @param noDreamAction The action to perform if dreaming is not possible.
+     */
+    private void attemptToDreamFromShortPowerButtonPress(
+            boolean isScreenOn, Runnable noDreamAction) {
+        if (mShortPressOnPowerBehavior != SHORT_PRESS_POWER_DREAM_OR_SLEEP) {
+            noDreamAction.run();
+            return;
+        }
+
+        final DreamManagerInternal dreamManagerInternal = getDreamManagerInternal();
+        if (dreamManagerInternal == null || !dreamManagerInternal.canStartDreaming(isScreenOn)) {
+            noDreamAction.run();
+            return;
+        }
+
+        // Make sure the device locks. Unfortunately, this has the side-effect of briefly revealing
+        // the lock screen before the dream appears. Note that locking is a side-effect of the no
+        // dream action that is executed if we early return above.
+        // TODO(b/261662912): Find a better way to lock the device that doesn't result in jank.
+        lockNow(null);
+
+        dreamManagerInternal.requestDream();
     }
 
     /**
@@ -1038,10 +1077,9 @@ public class PhoneWindowManager implements WindowManagerPolicy {
         // a tendency to hit the power button immediately when they pick up their device, and we
         // don't want to put the device back to sleep in those cases.
         final PowerManager.WakeData lastWakeUp = mPowerManagerInternal.getLastWakeup();
-        if (lastWakeUp != null && lastWakeUp.wakeReason == PowerManager.WAKE_REASON_GESTURE) {
-            final int gestureDelayMillis = Settings.Global.getInt(mContext.getContentResolver(),
-                    Settings.Global.POWER_BUTTON_SUPPRESSION_DELAY_AFTER_GESTURE_WAKE,
-                    POWER_BUTTON_SUPPRESSION_DELAY_DEFAULT_MILLIS);
+        if (lastWakeUp != null && (lastWakeUp.wakeReason == PowerManager.WAKE_REASON_GESTURE
+                || lastWakeUp.wakeReason == PowerManager.WAKE_REASON_LIFT
+                || lastWakeUp.wakeReason == PowerManager.WAKE_REASON_BIOMETRIC)) {
             final long now = SystemClock.uptimeMillis();
             if (mPowerButtonSuppressionDelayMillis > 0
                     && (now < lastWakeUp.wakeTime + mPowerButtonSuppressionDelayMillis)) {
@@ -1596,8 +1634,9 @@ public class PhoneWindowManager implements WindowManagerPolicy {
 
         // If there's a dream running then use home to escape the dream
         // but don't actually go home.
-        if (mDreamManagerInternal != null && mDreamManagerInternal.isDreaming()) {
-            mDreamManagerInternal.stopDream(false /*immediate*/);
+        final DreamManagerInternal dreamManagerInternal = getDreamManagerInternal();
+        if (dreamManagerInternal != null && dreamManagerInternal.isDreaming()) {
+            mDreamManagerInternal.stopDream(false /*immediate*/, "short press on home" /*reason*/);
             return;
         }
 
@@ -2484,6 +2523,15 @@ public class PhoneWindowManager implements WindowManagerPolicy {
         }
     }
 
+    private DreamManagerInternal getDreamManagerInternal() {
+        if (mDreamManagerInternal == null) {
+            // If mDreamManagerInternal is null, attempt to re-fetch it.
+            mDreamManagerInternal = LocalServices.getService(DreamManagerInternal.class);
+        }
+
+        return mDreamManagerInternal;
+    }
+
     private void updateWakeGestureListenerLp() {
         if (shouldEnableWakeGestureLp()) {
             mWakeGestureListener.requestWakeUpTrigger();
@@ -2816,9 +2864,29 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                 break;
             case KeyEvent.KEYCODE_S:
                 if (down && event.isMetaPressed() && event.isCtrlPressed() && repeatCount == 0) {
-                    int type = event.isShiftPressed() ? TAKE_SCREENSHOT_SELECTED_REGION
-                            : TAKE_SCREENSHOT_FULLSCREEN;
-                    interceptScreenshotChord(type, SCREENSHOT_KEY_OTHER, 0 /*pressDelay*/);
+                    interceptScreenshotChord(
+                            TAKE_SCREENSHOT_FULLSCREEN, SCREENSHOT_KEY_OTHER, 0 /*pressDelay*/);
+                    return key_consumed;
+                }
+                break;
+            case KeyEvent.KEYCODE_DPAD_UP:
+                if (down && event.isMetaPressed() && event.isCtrlPressed() && repeatCount == 0) {
+                    StatusBarManagerInternal statusbar = getStatusBarManagerInternal();
+                    if (statusbar != null) {
+                        statusbar.goToFullscreenFromSplit();
+                    }
+                    return key_consumed;
+                }
+                break;
+            case KeyEvent.KEYCODE_DPAD_LEFT:
+                if (down && event.isMetaPressed() && event.isCtrlPressed() && repeatCount == 0) {
+                    enterStageSplitFromRunningApp(true /* leftOrTop */);
+                    return key_consumed;
+                }
+                break;
+            case KeyEvent.KEYCODE_DPAD_RIGHT:
+                if (down && event.isMetaPressed() && event.isCtrlPressed() && repeatCount == 0) {
+                    enterStageSplitFromRunningApp(false /* leftOrTop */);
                     return key_consumed;
                 }
                 break;
@@ -3245,8 +3313,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
 
     @Override
     public void onKeyguardOccludedChangedLw(boolean occluded) {
-        if (mKeyguardDelegate != null && mKeyguardDelegate.isShowing()
-                && !WindowManagerService.sEnableShellTransitions) {
+        if (mKeyguardDelegate != null && mKeyguardDelegate.isShowing()) {
             mPendingKeyguardOccluded = occluded;
             mKeyguardOccludedChanged = true;
         } else {
@@ -3436,6 +3503,13 @@ public class PhoneWindowManager implements WindowManagerPolicy {
         StatusBarManagerInternal statusbar = getStatusBarManagerInternal();
         if (statusbar != null) {
             statusbar.hideRecentApps(triggeredFromAltTab, triggeredFromHome);
+        }
+    }
+
+    private void enterStageSplitFromRunningApp(boolean leftOrTop) {
+        StatusBarManagerInternal statusbar = getStatusBarManagerInternal();
+        if (statusbar != null) {
+            statusbar.enterStageSplitFromRunningApp(leftOrTop);
         }
     }
 
@@ -4055,6 +4129,9 @@ public class PhoneWindowManager implements WindowManagerPolicy {
             case KeyEvent.KEYCODE_DEMO_APP_2:
             case KeyEvent.KEYCODE_DEMO_APP_3:
             case KeyEvent.KEYCODE_DEMO_APP_4: {
+                // TODO(b/254604589): Dispatch KeyEvent to System UI.
+                sendSystemKeyToStatusBarAsync(keyCode);
+
                 // Just drop if keys are not intercepted for direct key.
                 result &= ~ACTION_PASS_TO_USER;
                 break;
@@ -4128,6 +4205,10 @@ public class PhoneWindowManager implements WindowManagerPolicy {
         mCameraGestureTriggered = true;
         if (mRequestedOrSleepingDefaultDisplay) {
             mCameraGestureTriggeredDuringGoingToSleep = true;
+            // Wake device up early to prevent display doing redundant turning off/on stuff.
+            wakeUp(SystemClock.uptimeMillis(), mAllowTheaterModeWakeFromPowerKey,
+                    PowerManager.WAKE_REASON_CAMERA_LAUNCH,
+                    "android.policy:CAMERA_GESTURE_PREVENT_LOCK");
         }
         return true;
     }
@@ -4659,11 +4740,6 @@ public class PhoneWindowManager implements WindowManagerPolicy {
             }
             mDefaultDisplayRotation.updateOrientationListener();
             reportScreenStateToVrManager(false);
-            if (mCameraGestureTriggeredDuringGoingToSleep) {
-                wakeUp(SystemClock.uptimeMillis(), mAllowTheaterModeWakeFromPowerKey,
-                        PowerManager.WAKE_REASON_CAMERA_LAUNCH,
-                        "com.android.systemui:CAMERA_GESTURE_PREVENT_LOCK");
-            }
         }
     }
 
@@ -5107,18 +5183,10 @@ public class PhoneWindowManager implements WindowManagerPolicy {
 
     /** {@inheritDoc} */
     @Override
-    public void userActivity() {
-        // ***************************************
-        // NOTE NOTE NOTE NOTE NOTE NOTE NOTE NOTE
-        // ***************************************
-        // THIS IS CALLED FROM DEEP IN THE POWER MANAGER
-        // WITH ITS LOCKS HELD.
-        //
-        // This code must be VERY careful about the locks
-        // it acquires.
-        // In fact, the current code acquires way too many,
-        // and probably has lurking deadlocks.
-
+    public void userActivity(int displayGroupId, int event) {
+        if (displayGroupId == DEFAULT_DISPLAY && event == PowerManager.USER_ACTIVITY_EVENT_TOUCH) {
+            mDefaultDisplayPolicy.onUserActivityEventTouch();
+        }
         synchronized (mScreenLockTimeout) {
             if (mLockScreenTimerActive) {
                 // reset the timer

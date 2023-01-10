@@ -16,6 +16,7 @@
 
 package com.android.systemui.statusbar.notification.interruption;
 
+import static android.app.Notification.VISIBILITY_PRIVATE;
 import static android.app.Notification.VISIBILITY_PUBLIC;
 import static android.app.Notification.VISIBILITY_SECRET;
 import static android.app.NotificationManager.IMPORTANCE_HIGH;
@@ -25,21 +26,17 @@ import static android.app.NotificationManager.IMPORTANCE_MIN;
 import static com.android.systemui.statusbar.StatusBarState.KEYGUARD;
 import static com.android.systemui.statusbar.StatusBarState.SHADE;
 import static com.android.systemui.statusbar.notification.collection.EntryUtilKt.modifyEntry;
-import static com.android.systemui.util.mockito.KotlinMockitoHelpersKt.argThat;
 
 import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
-import static org.mockito.ArgumentMatchers.eq;
-import static org.mockito.ArgumentMatchers.isNull;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
-import android.content.BroadcastReceiver;
 import android.content.Context;
-import android.content.Intent;
 import android.os.Handler;
 import android.os.UserHandle;
 import android.provider.Settings;
@@ -52,10 +49,10 @@ import com.android.keyguard.KeyguardUpdateMonitor;
 import com.android.keyguard.KeyguardUpdateMonitorCallback;
 import com.android.systemui.CoreStartable;
 import com.android.systemui.SysuiTestCase;
-import com.android.systemui.broadcast.BroadcastDispatcher;
 import com.android.systemui.dagger.SysUISingleton;
 import com.android.systemui.dagger.qualifiers.Main;
 import com.android.systemui.plugins.statusbar.StatusBarStateController;
+import com.android.systemui.settings.UserTracker;
 import com.android.systemui.statusbar.NotificationLockscreenUserManager;
 import com.android.systemui.statusbar.RankingBuilder;
 import com.android.systemui.statusbar.SysuiStatusBarStateController;
@@ -95,7 +92,7 @@ public class KeyguardNotificationVisibilityProviderTest  extends SysuiTestCase {
     @Mock private KeyguardUpdateMonitor mKeyguardUpdateMonitor;
     @Mock private HighPriorityProvider mHighPriorityProvider;
     @Mock private SysuiStatusBarStateController mStatusBarStateController;
-    @Mock private BroadcastDispatcher mBroadcastDispatcher;
+    @Mock private UserTracker mUserTracker;
     private final FakeSettings mFakeSettings = new FakeSettings();
 
     private KeyguardNotificationVisibilityProvider mKeyguardNotificationVisibilityProvider;
@@ -115,7 +112,7 @@ public class KeyguardNotificationVisibilityProviderTest  extends SysuiTestCase {
                                 mKeyguardUpdateMonitor,
                                 mHighPriorityProvider,
                                 mStatusBarStateController,
-                                mBroadcastDispatcher,
+                                mUserTracker,
                                 mFakeSettings,
                                 mFakeSettings);
         mKeyguardNotificationVisibilityProvider = component.getProvider();
@@ -203,23 +200,19 @@ public class KeyguardNotificationVisibilityProviderTest  extends SysuiTestCase {
     }
 
     @Test
-    public void notifyListeners_onReceiveUserSwitchBroadcast() {
-        ArgumentCaptor<BroadcastReceiver> callbackCaptor =
-                ArgumentCaptor.forClass(BroadcastReceiver.class);
-        verify(mBroadcastDispatcher).registerReceiver(
+    public void notifyListeners_onReceiveUserSwitchCallback() {
+        ArgumentCaptor<UserTracker.Callback> callbackCaptor =
+                ArgumentCaptor.forClass(UserTracker.Callback.class);
+        verify(mUserTracker).addCallback(
                 callbackCaptor.capture(),
-                argThat(intentFilter -> intentFilter.hasAction(Intent.ACTION_USER_SWITCHED)),
-                isNull(),
-                isNull(),
-                eq(Context.RECEIVER_EXPORTED),
-                isNull());
-        BroadcastReceiver callback = callbackCaptor.getValue();
+                any());
+        UserTracker.Callback callback = callbackCaptor.getValue();
 
         Consumer<String> listener = mock(Consumer.class);
         mKeyguardNotificationVisibilityProvider.addOnStateChangedListener(listener);
 
         when(mStatusBarStateController.getCurrentOrUpcomingState()).thenReturn(KEYGUARD);
-        callback.onReceive(mContext, new Intent(Intent.ACTION_USER_SWITCHED));
+        callback.onUserChanged(CURR_USER_ID, mContext);
 
         verify(listener).accept(anyString());
     }
@@ -304,15 +297,59 @@ public class KeyguardNotificationVisibilityProviderTest  extends SysuiTestCase {
     }
 
     @Test
-    public void hideSilentNotificationsPerUserSetting() {
-        when(mKeyguardStateController.isShowing()).thenReturn(true);
+    public void hideSilentOnLockscreenSetting() {
+        // GIVEN an 'unfiltered-keyguard-showing' state and notifications shown on lockscreen
+        setupUnfilteredState(mEntry);
         mFakeSettings.putBool(Settings.Secure.LOCK_SCREEN_SHOW_NOTIFICATIONS, true);
+
+        // WHEN the show silent notifs on lockscreen setting is false
         mFakeSettings.putBool(Settings.Secure.LOCK_SCREEN_SHOW_SILENT_NOTIFICATIONS, false);
+
+        // WHEN the notification is not high priority and not ambient
+        mEntry = new NotificationEntryBuilder()
+                .setImportance(IMPORTANCE_LOW)
+                .build();
+        when(mHighPriorityProvider.isHighPriority(any())).thenReturn(false);
+
+        // THEN filter out the entry
+        assertTrue(mKeyguardNotificationVisibilityProvider.shouldHideNotification(mEntry));
+    }
+
+    @Test
+    public void showSilentOnLockscreenSetting() {
+        // GIVEN an 'unfiltered-keyguard-showing' state and notifications shown on lockscreen
+        setupUnfilteredState(mEntry);
+        mFakeSettings.putBool(Settings.Secure.LOCK_SCREEN_SHOW_NOTIFICATIONS, true);
+
+        // WHEN the show silent notifs on lockscreen setting is true
+        mFakeSettings.putBool(Settings.Secure.LOCK_SCREEN_SHOW_SILENT_NOTIFICATIONS, true);
+
+        // WHEN the notification is not high priority and not ambient
+        mEntry = new NotificationEntryBuilder()
+                .setImportance(IMPORTANCE_LOW)
+                .build();
+        when(mHighPriorityProvider.isHighPriority(mEntry)).thenReturn(false);
+
+        // THEN do not filter out the entry
+        assertFalse(mKeyguardNotificationVisibilityProvider.shouldHideNotification(mEntry));
+    }
+
+    @Test
+    public void defaultSilentOnLockscreenSettingIsHide() {
+        // GIVEN an 'unfiltered-keyguard-showing' state and notifications shown on lockscreen
+        setupUnfilteredState(mEntry);
+        mFakeSettings.putBool(Settings.Secure.LOCK_SCREEN_SHOW_NOTIFICATIONS, true);
+
+        // WHEN the notification is not high priority and not ambient
         mEntry = new NotificationEntryBuilder()
                 .setUser(new UserHandle(NOTIF_USER_ID))
                 .setImportance(IMPORTANCE_LOW)
                 .build();
         when(mHighPriorityProvider.isHighPriority(any())).thenReturn(false);
+
+        // WhHEN the show silent notifs on lockscreen setting is unset
+        assertNull(mFakeSettings.getString(Settings.Secure.LOCK_SCREEN_SHOW_SILENT_NOTIFICATIONS));
+
         assertTrue(mKeyguardNotificationVisibilityProvider.shouldHideNotification(mEntry));
     }
 
@@ -430,22 +467,51 @@ public class KeyguardNotificationVisibilityProviderTest  extends SysuiTestCase {
     }
 
     @Test
-    public void showSilentOnLockscreenSetting() {
-        // GIVEN an 'unfiltered-keyguard-showing' state
+    public void notificationVisibilityPublic() {
+        // GIVEN a VISIBILITY_PUBLIC notification
+        NotificationEntryBuilder entryBuilder = new NotificationEntryBuilder()
+                .setUser(new UserHandle(NOTIF_USER_ID));
+        entryBuilder.modifyNotification(mContext)
+                .setVisibility(VISIBILITY_PUBLIC);
+        mEntry = entryBuilder.build();
+
+        // WHEN we're in an 'unfiltered-keyguard-showing' state
         setupUnfilteredState(mEntry);
 
-        // WHEN the notification is not high priority and not ambient
-        mEntry.setRanking(new RankingBuilder()
-                .setKey(mEntry.getKey())
-                .setImportance(IMPORTANCE_LOW)
-                .build());
-        when(mHighPriorityProvider.isHighPriority(mEntry)).thenReturn(false);
-
-        // WHEN the show silent notifs on lockscreen setting is true
-        mFakeSettings.putBool(Settings.Secure.LOCK_SCREEN_SHOW_SILENT_NOTIFICATIONS, true);
-
-        // THEN do not filter out the entry
+        // THEN don't hide the entry based on visibility.
         assertFalse(mKeyguardNotificationVisibilityProvider.shouldHideNotification(mEntry));
+    }
+
+    @Test
+    public void notificationVisibilityPrivate() {
+        // GIVEN a VISIBILITY_PRIVATE notification
+        NotificationEntryBuilder entryBuilder = new NotificationEntryBuilder()
+                .setUser(new UserHandle(NOTIF_USER_ID));
+        entryBuilder.modifyNotification(mContext)
+                .setVisibility(VISIBILITY_PRIVATE);
+        mEntry = entryBuilder.build();
+
+        // WHEN we're in an 'unfiltered-keyguard-showing' state
+        setupUnfilteredState(mEntry);
+
+        // THEN don't hide the entry based on visibility. (Redaction is handled elsewhere.)
+        assertFalse(mKeyguardNotificationVisibilityProvider.shouldHideNotification(mEntry));
+    }
+
+    @Test
+    public void notificationVisibilitySecret() {
+        // GIVEN a VISIBILITY_SECRET notification
+        NotificationEntryBuilder entryBuilder = new NotificationEntryBuilder()
+                .setUser(new UserHandle(NOTIF_USER_ID));
+        entryBuilder.modifyNotification(mContext)
+                .setVisibility(VISIBILITY_SECRET);
+        mEntry = entryBuilder.build();
+
+        // WHEN we're in an 'unfiltered-keyguard-showing' state
+        setupUnfilteredState(mEntry);
+
+        // THEN hide the entry based on visibility.
+        assertTrue(mKeyguardNotificationVisibilityProvider.shouldHideNotification(mEntry));
     }
 
     @Test
@@ -544,7 +610,7 @@ public class KeyguardNotificationVisibilityProviderTest  extends SysuiTestCase {
                     @BindsInstance KeyguardUpdateMonitor keyguardUpdateMonitor,
                     @BindsInstance HighPriorityProvider highPriorityProvider,
                     @BindsInstance SysuiStatusBarStateController statusBarStateController,
-                    @BindsInstance BroadcastDispatcher broadcastDispatcher,
+                    @BindsInstance UserTracker userTracker,
                     @BindsInstance SecureSettings secureSettings,
                     @BindsInstance GlobalSettings globalSettings
             );

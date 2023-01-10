@@ -18,56 +18,66 @@ package com.android.systemui.controls.management
 
 import android.app.ActivityOptions
 import android.content.ComponentName
+import android.content.Context
 import android.content.Intent
 import android.os.Bundle
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.view.ViewStub
 import android.widget.Button
 import android.widget.TextView
+import android.window.OnBackInvokedCallback
+import android.window.OnBackInvokedDispatcher
+import androidx.activity.ComponentActivity
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
-import androidx.recyclerview.widget.RecyclerView.AdapterDataObserver
 import com.android.systemui.R
-import com.android.systemui.broadcast.BroadcastDispatcher
 import com.android.systemui.controls.controller.ControlsController
 import com.android.systemui.controls.ui.ControlsActivity
 import com.android.systemui.controls.ui.ControlsUiController
 import com.android.systemui.dagger.qualifiers.Background
 import com.android.systemui.dagger.qualifiers.Main
-import com.android.systemui.settings.CurrentUserTracker
-import com.android.systemui.util.LifecycleActivity
+import com.android.systemui.settings.UserTracker
 import java.util.concurrent.Executor
 import javax.inject.Inject
 
 /**
  * Activity to select an application to favorite the [Control] provided by them.
  */
-class ControlsProviderSelectorActivity @Inject constructor(
+open class ControlsProviderSelectorActivity @Inject constructor(
     @Main private val executor: Executor,
     @Background private val backExecutor: Executor,
     private val listingController: ControlsListingController,
     private val controlsController: ControlsController,
-    private val broadcastDispatcher: BroadcastDispatcher,
+    private val userTracker: UserTracker,
     private val uiController: ControlsUiController
-) : LifecycleActivity() {
+) : ComponentActivity() {
 
     companion object {
+        private const val DEBUG = false
         private const val TAG = "ControlsProviderSelectorActivity"
         const val BACK_SHOULD_EXIT = "back_should_exit"
     }
     private var backShouldExit = false
     private lateinit var recyclerView: RecyclerView
-    private val currentUserTracker = object : CurrentUserTracker(broadcastDispatcher) {
+    private val userTrackerCallback: UserTracker.Callback = object : UserTracker.Callback {
         private val startingUser = listingController.currentUserId
 
-        override fun onUserSwitched(newUserId: Int) {
-            if (newUserId != startingUser) {
-                stopTracking()
+        override fun onUserChanged(newUser: Int, userContext: Context) {
+            if (newUser != startingUser) {
+                userTracker.removeCallback(this)
                 finish()
             }
         }
+    }
+
+    private val mOnBackInvokedCallback = OnBackInvokedCallback {
+        if (DEBUG) {
+            Log.d(TAG, "Predictive Back dispatcher called mOnBackInvokedCallback")
+        }
+        onBackPressed()
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -119,7 +129,7 @@ class ControlsProviderSelectorActivity @Inject constructor(
 
     override fun onStart() {
         super.onStart()
-        currentUserTracker.startTracking()
+        userTracker.addCallback(userTrackerCallback, executor)
 
         recyclerView.alpha = 0.0f
         recyclerView.adapter = AppAdapter(
@@ -141,11 +151,22 @@ class ControlsProviderSelectorActivity @Inject constructor(
                 }
             })
         }
+
+        if (DEBUG) {
+            Log.d(TAG, "Registered onBackInvokedCallback")
+        }
+        onBackInvokedDispatcher.registerOnBackInvokedCallback(
+                OnBackInvokedDispatcher.PRIORITY_DEFAULT, mOnBackInvokedCallback)
     }
 
     override fun onStop() {
         super.onStop()
-        currentUserTracker.stopTracking()
+        userTracker.removeCallback(userTrackerCallback)
+
+        if (DEBUG) {
+            Log.d(TAG, "Unregistered onBackInvokedCallback")
+        }
+        onBackInvokedDispatcher.unregisterOnBackInvokedCallback(mOnBackInvokedCallback)
     }
 
     /**
@@ -169,7 +190,7 @@ class ControlsProviderSelectorActivity @Inject constructor(
     }
 
     override fun onDestroy() {
-        currentUserTracker.stopTracking()
+        userTracker.removeCallback(userTrackerCallback)
         super.onDestroy()
     }
 

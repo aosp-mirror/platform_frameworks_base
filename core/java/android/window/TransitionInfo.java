@@ -110,14 +110,40 @@ public final class TransitionInfo implements Parcelable {
     /** The container is an input-method window. */
     public static final int FLAG_IS_INPUT_METHOD = 1 << 8;
 
-    /** The container is ActivityEmbedding embedded. */
-    public static final int FLAG_IS_EMBEDDED = 1 << 9;
+    /** The container is in a Task with embedded activity. */
+    public static final int FLAG_IN_TASK_WITH_EMBEDDED_ACTIVITY = 1 << 9;
 
-    /** The first unused bit. This can be used by remotes to attach custom flags to this change. */
-    public static final int FLAG_FIRST_CUSTOM = 1 << 10;
+    /** The container fills its parent Task before and after the transition. */
+    public static final int FLAG_FILLS_TASK = 1 << 10;
 
     /** The container is going to show IME on its task after the transition. */
     public static final int FLAG_WILL_IME_SHOWN = 1 << 11;
+
+    /** The container attaches owner profile thumbnail for cross profile animation. */
+    public static final int FLAG_CROSS_PROFILE_OWNER_THUMBNAIL = 1 << 12;
+
+    /** The container attaches work profile thumbnail for cross profile animation. */
+    public static final int FLAG_CROSS_PROFILE_WORK_THUMBNAIL = 1 << 13;
+
+    /**
+     * Whether the window is covered by an app starting window. This is different from
+     * {@link #FLAG_STARTING_WINDOW_TRANSFER_RECIPIENT} which is only set on the Activity window
+     * that contains the starting window.
+     */
+    public static final int FLAG_IS_BEHIND_STARTING_WINDOW = 1 << 14;
+
+    /** This change happened underneath something else. */
+    public static final int FLAG_IS_OCCLUDED = 1 << 15;
+
+    /** The container is a system window, excluding wallpaper and input-method. */
+    public static final int FLAG_IS_SYSTEM_WINDOW = 1 << 16;
+
+    /** The first unused bit. This can be used by remotes to attach custom flags to this change. */
+    public static final int FLAG_FIRST_CUSTOM = 1 << 17;
+
+    /** The change belongs to a window that won't contain activities. */
+    public static final int FLAGS_IS_NON_APP_WINDOW =
+            FLAG_IS_WALLPAPER | FLAG_IS_INPUT_METHOD | FLAG_IS_SYSTEM_WINDOW;
 
     /** @hide */
     @IntDef(prefix = { "FLAG_" }, value = {
@@ -131,9 +157,15 @@ public final class TransitionInfo implements Parcelable {
             FLAG_OCCLUDES_KEYGUARD,
             FLAG_DISPLAY_HAS_ALERT_WINDOWS,
             FLAG_IS_INPUT_METHOD,
-            FLAG_IS_EMBEDDED,
-            FLAG_FIRST_CUSTOM,
-            FLAG_WILL_IME_SHOWN
+            FLAG_IN_TASK_WITH_EMBEDDED_ACTIVITY,
+            FLAG_FILLS_TASK,
+            FLAG_WILL_IME_SHOWN,
+            FLAG_CROSS_PROFILE_OWNER_THUMBNAIL,
+            FLAG_CROSS_PROFILE_WORK_THUMBNAIL,
+            FLAG_IS_BEHIND_STARTING_WINDOW,
+            FLAG_IS_OCCLUDED,
+            FLAG_IS_SYSTEM_WINDOW,
+            FLAG_FIRST_CUSTOM
     })
     public @interface ChangeFlags {}
 
@@ -316,28 +348,40 @@ public final class TransitionInfo implements Parcelable {
             sb.append("IS_INPUT_METHOD");
         }
         if ((flags & FLAG_TRANSLUCENT) != 0) {
-            sb.append((sb.length() == 0 ? "" : "|") + "TRANSLUCENT");
+            sb.append(sb.length() == 0 ? "" : "|").append("TRANSLUCENT");
         }
         if ((flags & FLAG_STARTING_WINDOW_TRANSFER_RECIPIENT) != 0) {
-            sb.append((sb.length() == 0 ? "" : "|") + "STARTING_WINDOW_TRANSFER");
+            sb.append(sb.length() == 0 ? "" : "|").append("STARTING_WINDOW_TRANSFER");
         }
         if ((flags & FLAG_IS_VOICE_INTERACTION) != 0) {
-            sb.append((sb.length() == 0 ? "" : "|") + "IS_VOICE_INTERACTION");
+            sb.append(sb.length() == 0 ? "" : "|").append("IS_VOICE_INTERACTION");
         }
         if ((flags & FLAG_IS_DISPLAY) != 0) {
-            sb.append((sb.length() == 0 ? "" : "|") + "IS_DISPLAY");
+            sb.append(sb.length() == 0 ? "" : "|").append("IS_DISPLAY");
         }
         if ((flags & FLAG_OCCLUDES_KEYGUARD) != 0) {
-            sb.append((sb.length() == 0 ? "" : "|") + "OCCLUDES_KEYGUARD");
+            sb.append(sb.length() == 0 ? "" : "|").append("OCCLUDES_KEYGUARD");
         }
         if ((flags & FLAG_DISPLAY_HAS_ALERT_WINDOWS) != 0) {
-            sb.append((sb.length() == 0 ? "" : "|") + "DISPLAY_HAS_ALERT_WINDOWS");
+            sb.append(sb.length() == 0 ? "" : "|").append("DISPLAY_HAS_ALERT_WINDOWS");
         }
-        if ((flags & FLAG_IS_EMBEDDED) != 0) {
-            sb.append((sb.length() == 0 ? "" : "|") + "IS_EMBEDDED");
+        if ((flags & FLAG_IN_TASK_WITH_EMBEDDED_ACTIVITY) != 0) {
+            sb.append(sb.length() == 0 ? "" : "|").append("IN_TASK_WITH_EMBEDDED_ACTIVITY");
+        }
+        if ((flags & FLAG_FILLS_TASK) != 0) {
+            sb.append(sb.length() == 0 ? "" : "|").append("FILLS_TASK");
+        }
+        if ((flags & FLAG_IS_BEHIND_STARTING_WINDOW) != 0) {
+            sb.append(sb.length() == 0 ? "" : "|").append("IS_BEHIND_STARTING_WINDOW");
+        }
+        if ((flags & FLAG_IS_OCCLUDED) != 0) {
+            sb.append(sb.length() == 0 ? "" : "|").append("IS_OCCLUDED");
+        }
+        if ((flags & FLAG_IS_SYSTEM_WINDOW) != 0) {
+            sb.append(sb.length() == 0 ? "" : "|").append("FLAG_IS_SYSTEM_WINDOW");
         }
         if ((flags & FLAG_FIRST_CUSTOM) != 0) {
-            sb.append((sb.length() == 0 ? "" : "|") + "FIRST_CUSTOM");
+            sb.append(sb.length() == 0 ? "" : "|").append("FIRST_CUSTOM");
         }
         return sb.toString();
     }
@@ -370,10 +414,58 @@ public final class TransitionInfo implements Parcelable {
         return false;
     }
 
+    /**
+     * Releases temporary-for-animation surfaces referenced by this to potentially free up memory.
+     * This includes root-leash and snapshots.
+     */
+    public void releaseAnimSurfaces() {
+        for (int i = mChanges.size() - 1; i >= 0; --i) {
+            final Change c = mChanges.get(i);
+            if (c.mSnapshot != null) {
+                c.mSnapshot.release();
+                c.mSnapshot = null;
+            }
+        }
+        if (mRootLeash != null) {
+            mRootLeash.release();
+        }
+    }
+
+    /**
+     * Releases ALL the surfaces referenced by this to potentially free up memory. Do NOT use this
+     * if the surface-controls get stored and used elsewhere in the process. To just release
+     * temporary-for-animation surfaces, use {@link #releaseAnimSurfaces}.
+     */
+    public void releaseAllSurfaces() {
+        releaseAnimSurfaces();
+        for (int i = mChanges.size() - 1; i >= 0; --i) {
+            mChanges.get(i).getLeash().release();
+        }
+    }
+
+    /**
+     * Makes a copy of this as if it were parcel'd and unparcel'd. This implies that surfacecontrol
+     * refcounts are incremented which allows the "remote" receiver to release them without breaking
+     * the caller's references. Use this only if you need to "send" this to a local function which
+     * assumes it is being called from a remote caller.
+     */
+    public TransitionInfo localRemoteCopy() {
+        final TransitionInfo out = new TransitionInfo(mType, mFlags);
+        for (int i = 0; i < mChanges.size(); ++i) {
+            out.mChanges.add(mChanges.get(i).localRemoteCopy());
+        }
+        out.mRootLeash = mRootLeash != null ? new SurfaceControl(mRootLeash, "localRemote") : null;
+        // Doesn't have any native stuff, so no need for actual copy
+        out.mOptions = mOptions;
+        out.mRootOffset.set(mRootOffset);
+        return out;
+    }
+
     /** Represents the change a WindowContainer undergoes during a transition */
     public static final class Change implements Parcelable {
         private final WindowContainerToken mContainer;
         private WindowContainerToken mParent;
+        private WindowContainerToken mLastParent;
         private final SurfaceControl mLeash;
         private @TransitionMode int mMode = TRANSIT_NONE;
         private @ChangeFlags int mFlags = FLAG_NONE;
@@ -391,6 +483,8 @@ public final class TransitionInfo implements Parcelable {
         private @Surface.Rotation int mEndFixedRotation = ROTATION_UNDEFINED;
         private int mRotationAnimation = ROTATION_ANIMATION_UNSPECIFIED;
         private @ColorInt int mBackgroundColor;
+        private SurfaceControl mSnapshot = null;
+        private float mSnapshotLuma;
 
         public Change(@Nullable WindowContainerToken container, @NonNull SurfaceControl leash) {
             mContainer = container;
@@ -400,6 +494,7 @@ public final class TransitionInfo implements Parcelable {
         private Change(Parcel in) {
             mContainer = in.readTypedObject(WindowContainerToken.CREATOR);
             mParent = in.readTypedObject(WindowContainerToken.CREATOR);
+            mLastParent = in.readTypedObject(WindowContainerToken.CREATOR);
             mLeash = new SurfaceControl();
             mLeash.readFromParcel(in);
             mMode = in.readInt();
@@ -414,11 +509,42 @@ public final class TransitionInfo implements Parcelable {
             mEndFixedRotation = in.readInt();
             mRotationAnimation = in.readInt();
             mBackgroundColor = in.readInt();
+            mSnapshot = in.readTypedObject(SurfaceControl.CREATOR);
+            mSnapshotLuma = in.readFloat();
+        }
+
+        private Change localRemoteCopy() {
+            final Change out = new Change(mContainer, new SurfaceControl(mLeash, "localRemote"));
+            out.mParent = mParent;
+            out.mLastParent = mLastParent;
+            out.mMode = mMode;
+            out.mFlags = mFlags;
+            out.mStartAbsBounds.set(mStartAbsBounds);
+            out.mEndAbsBounds.set(mEndAbsBounds);
+            out.mEndRelOffset.set(mEndRelOffset);
+            out.mTaskInfo = mTaskInfo;
+            out.mAllowEnterPip = mAllowEnterPip;
+            out.mStartRotation = mStartRotation;
+            out.mEndRotation = mEndRotation;
+            out.mEndFixedRotation = mEndFixedRotation;
+            out.mRotationAnimation = mRotationAnimation;
+            out.mBackgroundColor = mBackgroundColor;
+            out.mSnapshot = mSnapshot != null ? new SurfaceControl(mSnapshot, "localRemote") : null;
+            out.mSnapshotLuma = mSnapshotLuma;
+            return out;
         }
 
         /** Sets the parent of this change's container. The parent must be a participant or null. */
         public void setParent(@Nullable WindowContainerToken parent) {
             mParent = parent;
+        }
+
+        /**
+         * Sets the parent of this change's container before the transition if this change's
+         * container is reparented in the transition.
+         */
+        public void setLastParent(@Nullable WindowContainerToken lastParent) {
+            mLastParent = lastParent;
         }
 
         /** Sets the transition mode for this change */
@@ -483,6 +609,12 @@ public final class TransitionInfo implements Parcelable {
             mBackgroundColor = backgroundColor;
         }
 
+        /** Sets a snapshot surface for the "start" state of the container. */
+        public void setSnapshot(@Nullable SurfaceControl snapshot, float luma) {
+            mSnapshot = snapshot;
+            mSnapshotLuma = luma;
+        }
+
         /** @return the container that is changing. May be null if non-remotable (eg. activity) */
         @Nullable
         public WindowContainerToken getContainer() {
@@ -498,6 +630,17 @@ public final class TransitionInfo implements Parcelable {
             return mParent;
         }
 
+        /**
+         * @return the parent of the changing container before the transition if it is reparented
+         * in the transition. The parent window may not be collected in the transition as a
+         * participant, and it may have been detached from the display. {@code null} if the changing
+         * container has not been reparented in the transition, or if the parent is not organizable.
+         */
+        @Nullable
+        public WindowContainerToken getLastParent() {
+            return mLastParent;
+        }
+
         /** @return which action this change represents. */
         public @TransitionMode int getMode() {
             return mMode;
@@ -506,6 +649,16 @@ public final class TransitionInfo implements Parcelable {
         /** @return the flags for this change. */
         public @ChangeFlags int getFlags() {
             return mFlags;
+        }
+
+        /** Whether this change contains any of the given change flags. */
+        public boolean hasFlags(@ChangeFlags int flags) {
+            return (mFlags & flags) != 0;
+        }
+
+        /** Whether this change contains all of the given change flags. */
+        public boolean hasAllFlags(@ChangeFlags int flags) {
+            return (mFlags & flags) == flags;
         }
 
         /**
@@ -576,11 +729,23 @@ public final class TransitionInfo implements Parcelable {
             return mBackgroundColor;
         }
 
+        /** @return a snapshot surface (if applicable). */
+        @Nullable
+        public SurfaceControl getSnapshot() {
+            return mSnapshot;
+        }
+
+        /** @return the luma calculated for the snapshot surface (if applicable). */
+        public float getSnapshotLuma() {
+            return mSnapshotLuma;
+        }
+
         /** @hide */
         @Override
         public void writeToParcel(@NonNull Parcel dest, int flags) {
             dest.writeTypedObject(mContainer, flags);
             dest.writeTypedObject(mParent, flags);
+            dest.writeTypedObject(mLastParent, flags);
             mLeash.writeToParcel(dest, flags);
             dest.writeInt(mMode);
             dest.writeInt(mFlags);
@@ -594,6 +759,8 @@ public final class TransitionInfo implements Parcelable {
             dest.writeInt(mEndFixedRotation);
             dest.writeInt(mRotationAnimation);
             dest.writeInt(mBackgroundColor);
+            dest.writeTypedObject(mSnapshot, flags);
+            dest.writeFloat(mSnapshotLuma);
         }
 
         @NonNull
@@ -618,11 +785,37 @@ public final class TransitionInfo implements Parcelable {
 
         @Override
         public String toString() {
-            return "{" + mContainer + "(" + mParent + ") leash=" + mLeash
-                    + " m=" + modeToString(mMode) + " f=" + flagsToString(mFlags) + " sb="
-                    + mStartAbsBounds + " eb=" + mEndAbsBounds + " eo=" + mEndRelOffset + " r="
-                    + mStartRotation + "->" + mEndRotation + ":" + mRotationAnimation
-                    + " endFixedRotation=" + mEndFixedRotation + "}";
+            final StringBuilder sb = new StringBuilder();
+            sb.append('{'); sb.append(mContainer);
+            sb.append(" m="); sb.append(modeToString(mMode));
+            sb.append(" f="); sb.append(flagsToString(mFlags));
+            if (mParent != null) {
+                sb.append(" p="); sb.append(mParent);
+            }
+            if (mLeash != null) {
+                sb.append(" leash="); sb.append(mLeash);
+            }
+            sb.append(" sb="); sb.append(mStartAbsBounds);
+            sb.append(" eb="); sb.append(mEndAbsBounds);
+            if (mEndRelOffset.x != 0 || mEndRelOffset.y != 0) {
+                sb.append(" eo="); sb.append(mEndRelOffset);
+            }
+            if (mStartRotation != mEndRotation) {
+                sb.append(" r="); sb.append(mStartRotation);
+                sb.append("->"); sb.append(mEndRotation);
+                sb.append(':'); sb.append(mRotationAnimation);
+            }
+            if (mEndFixedRotation != ROTATION_UNDEFINED) {
+                sb.append(" endFixedRotation="); sb.append(mEndFixedRotation);
+            }
+            if (mSnapshot != null) {
+                sb.append(" snapshot="); sb.append(mSnapshot);
+            }
+            if (mLastParent != null) {
+                sb.append(" lastParent="); sb.append(mLastParent);
+            }
+            sb.append('}');
+            return sb.toString();
         }
     }
 

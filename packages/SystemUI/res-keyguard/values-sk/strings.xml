@@ -26,11 +26,11 @@
     <string name="keyguard_sim_error_message_short" msgid="633630844240494070">"Neplatná karta."</string>
     <string name="keyguard_charged" msgid="5478247181205188995">"Nabité"</string>
     <string name="keyguard_plugged_in_wireless" msgid="2537874724955057383">"<xliff:g id="PERCENTAGE">%s</xliff:g> • Nabíja sa bezdrôtovo"</string>
-    <string name="keyguard_plugged_in_dock" msgid="449722738270908674">"<xliff:g id="PERCENTAGE">%s</xliff:g> • Nabíjací dok"</string>
+    <string name="keyguard_plugged_in_dock" msgid="2122073051904360987">"<xliff:g id="PERCENTAGE">%s</xliff:g> • Nabíja sa"</string>
     <string name="keyguard_plugged_in" msgid="8169926454348380863">"<xliff:g id="PERCENTAGE">%s</xliff:g> • Nabíja sa"</string>
     <string name="keyguard_plugged_in_charging_fast" msgid="4386594091107340426">"<xliff:g id="PERCENTAGE">%s</xliff:g> • Nabíja sa rýchlo"</string>
     <string name="keyguard_plugged_in_charging_slowly" msgid="217655355424210">"<xliff:g id="PERCENTAGE">%s</xliff:g> • Nabíja sa pomaly"</string>
-    <string name="keyguard_plugged_in_charging_limited" msgid="6091488837901216962">"<xliff:g id="PERCENTAGE">%s</xliff:g> • Nabíjanie je dočasne obmedzené"</string>
+    <string name="keyguard_plugged_in_charging_limited" msgid="1053130519456324630">"<xliff:g id="PERCENTAGE">%s</xliff:g> • Nabíjanie je optimalizované, aby sa chránila batéria"</string>
     <string name="keyguard_instructions_when_pattern_disabled" msgid="8448804180089936954">"Odomknete stlačením tlačidla ponuky."</string>
     <string name="keyguard_network_locked_message" msgid="407096292844868608">"Sieť je zablokovaná"</string>
     <string name="keyguard_missing_sim_message_short" msgid="704159478161444907">"Žiadna SIM karta"</string>
@@ -78,9 +78,9 @@
     <string name="kg_prompt_reason_restart_pattern" msgid="4720554342633852066">"Po reštartovaní zariadenia musíte zadať bezpečnostný vzor"</string>
     <string name="kg_prompt_reason_restart_pin" msgid="1587671566498057656">"Po reštartovaní zariadenia musíte zadať kód PIN"</string>
     <string name="kg_prompt_reason_restart_password" msgid="8061279087240952002">"Po reštartovaní zariadenia musíte zadať heslo"</string>
-    <string name="kg_prompt_reason_timeout_pattern" msgid="9170360502528959889">"Na ďalšie zabezpečenie musíte zadať bezpečnostný vzor"</string>
-    <string name="kg_prompt_reason_timeout_pin" msgid="5945186097160029201">"Na ďalšie zabezpečenie musíte zadať kód PIN"</string>
-    <string name="kg_prompt_reason_timeout_password" msgid="2258263949430384278">"Na ďalšie zabezpečenie musíte zadať heslo"</string>
+    <string name="kg_prompt_reason_timeout_pattern" msgid="5514969660010197363">"V rámci zvýšenia zabezpečenia použite radšej vzor"</string>
+    <string name="kg_prompt_reason_timeout_pin" msgid="4227962059353859376">"V rámci zvýšenia zabezpečenia použite radšej PIN"</string>
+    <string name="kg_prompt_reason_timeout_password" msgid="8810879144143933690">"V rámci zvýšenia zabezpečenia použite radšej heslo"</string>
     <string name="kg_prompt_reason_device_admin" msgid="6961159596224055685">"Zariadenie zamkol správca"</string>
     <string name="kg_prompt_reason_user_request" msgid="6015774877733717904">"Zariadenie bolo uzamknuté ručne"</string>
     <string name="kg_face_not_recognized" msgid="7903950626744419160">"Nerozpoznané"</string>
@@ -90,4 +90,5 @@
     <string name="clock_title_default" msgid="6342735240617459864">"Predvolený"</string>
     <string name="clock_title_bubble" msgid="2204559396790593213">"Bublina"</string>
     <string name="clock_title_analog" msgid="8409262532900918273">"Analógový"</string>
+    <string name="keyguard_unlock_to_continue" msgid="7509503484250597743">"Ak chcete pokračovať, odomknite zariadenie"</string>
 </resources>

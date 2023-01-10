@@ -28,7 +28,6 @@ import android.os.RemoteException
 import android.os.UserHandle
 import android.util.Log
 import android.view.WindowManager
-import androidx.annotation.VisibleForTesting
 import com.android.keyguard.KeyguardUpdateMonitor
 import com.android.systemui.ActivityIntentHelper
 import com.android.systemui.dagger.qualifiers.Main
@@ -36,7 +35,6 @@ import com.android.systemui.plugins.ActivityStarter
 import com.android.systemui.shared.system.ActivityManagerKt.isInForeground
 import com.android.systemui.statusbar.StatusBarState
 import com.android.systemui.statusbar.phone.CentralSurfaces
-import com.android.systemui.shade.PanelViewController
 import com.android.systemui.statusbar.policy.KeyguardStateController
 import java.util.concurrent.Executor
 import javax.inject.Inject
@@ -84,7 +82,7 @@ class CameraGestureHelper @Inject constructor(
      */
     fun launchCamera(source: Int) {
         val intent: Intent = getStartCameraIntent()
-        intent.putExtra(EXTRA_CAMERA_LAUNCH_SOURCE, source)
+        intent.putExtra(CameraIntents.EXTRA_LAUNCH_SOURCE, source)
         val wouldLaunchResolverActivity = activityIntentHelper.wouldLaunchResolverActivity(
             intent, KeyguardUpdateMonitor.getCurrentUser()
         )
@@ -117,7 +115,7 @@ class CameraGestureHelper @Inject constructor(
                     )
                 } catch (e: RemoteException) {
                     Log.w(
-                        PanelViewController.TAG,
+                        "CameraGestureHelper",
                         "Unable to start camera activity",
                         e
                     )
@@ -149,10 +147,5 @@ class CameraGestureHelper @Inject constructor(
         } else {
             cameraIntents.getInsecureCameraIntent()
         }
-    }
-
-    companion object {
-        @VisibleForTesting
-        const val EXTRA_CAMERA_LAUNCH_SOURCE = "com.android.systemui.camera_launch_source"
     }
 }

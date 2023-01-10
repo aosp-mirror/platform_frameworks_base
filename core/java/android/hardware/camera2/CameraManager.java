@@ -23,6 +23,10 @@ import android.annotation.RequiresPermission;
 import android.annotation.SystemApi;
 import android.annotation.SystemService;
 import android.annotation.TestApi;
+import android.app.compat.CompatChanges;
+import android.compat.annotation.ChangeId;
+import android.compat.annotation.EnabledSince;
+import android.compat.annotation.Overridable;
 import android.content.Context;
 import android.content.pm.PackageManager;
 import android.graphics.Point;
@@ -102,6 +106,24 @@ public final class CameraManager {
     private static final String CAMERA_OPEN_CLOSE_LISTENER_PERMISSION =
             "android.permission.CAMERA_OPEN_CLOSE_LISTENER";
     private final boolean mHasOpenCloseListenerPermission;
+
+    /**
+     * Force camera output to be rotated to portrait orientation on landscape cameras.
+     * Many apps do not handle this situation and display stretched images otherwise.
+     * @hide
+     */
+    @ChangeId
+    @Overridable
+    @EnabledSince(targetSdkVersion = android.os.Build.VERSION_CODES.BASE)
+    @TestApi
+    public static final long OVERRIDE_FRONT_CAMERA_APP_COMPAT = 250678880L;
+
+    /**
+     * System property for allowing the above
+     * @hide
+     */
+    public static final String LANDSCAPE_TO_PORTRAIT_PROP =
+            "camera.enable_landscape_to_portrait";
 
     /**
      * @hide
@@ -520,7 +542,8 @@ public final class CameraManager {
             for (String physicalCameraId : physicalCameraIds) {
                 CameraMetadataNative physicalCameraInfo =
                         cameraService.getCameraCharacteristics(physicalCameraId,
-                                mContext.getApplicationInfo().targetSdkVersion);
+                                mContext.getApplicationInfo().targetSdkVersion,
+                                /*overrideToPortrait*/false);
                 StreamConfiguration[] configs = physicalCameraInfo.get(
                         CameraCharacteristics.
                                 SCALER_PHYSICAL_CAMERA_MULTI_RESOLUTION_STREAM_CONFIGURATIONS);
@@ -579,8 +602,9 @@ public final class CameraManager {
             try {
                 Size displaySize = getDisplaySize();
 
+                boolean overrideToPortrait = shouldOverrideToPortrait();
                 CameraMetadataNative info = cameraService.getCameraCharacteristics(cameraId,
-                        mContext.getApplicationInfo().targetSdkVersion);
+                        mContext.getApplicationInfo().targetSdkVersion, overrideToPortrait);
                 try {
                     info.setCameraId(Integer.parseInt(cameraId));
                 } catch (NumberFormatException e) {
@@ -697,9 +721,12 @@ public final class CameraManager {
                         ICameraService.ERROR_DISCONNECTED,
                         "Camera service is currently unavailable");
                 }
+
+                boolean overrideToPortrait = shouldOverrideToPortrait();
                 cameraUser = cameraService.connectDevice(callbacks, cameraId,
-                    mContext.getOpPackageName(),  mContext.getAttributionTag(), uid,
-                    oomScoreOffset, mContext.getApplicationInfo().targetSdkVersion);
+                    mContext.getOpPackageName(), mContext.getAttributionTag(), uid,
+                    oomScoreOffset, mContext.getApplicationInfo().targetSdkVersion,
+                    overrideToPortrait);
             } catch (ServiceSpecificException e) {
                 if (e.errorCode == ICameraService.ERROR_DEPRECATED_HAL) {
                     throw new AssertionError("Should've gone down the shim path");
@@ -1127,6 +1154,11 @@ public final class CameraManager {
         return CameraManagerGlobal.get().getTorchStrengthLevel(cameraId);
     }
 
+    private static boolean shouldOverrideToPortrait() {
+        return CompatChanges.isChangeEnabled(OVERRIDE_FRONT_CAMERA_APP_COMPAT)
+                && CameraManagerGlobal.sLandscapeToPortrait;
+    }
+
     /**
      * A callback for camera devices becoming available or unavailable to open.
      *
@@ -1204,6 +1236,20 @@ public final class CameraManager {
          * to begin with, {@link #onPhysicalCameraUnavailable} may be invoked after
          * {@link #onCameraAvailable}.</p>
          *
+         * <p>Limitation: Opening a logical camera disables the {@link #onPhysicalCameraAvailable}
+         * and {@link #onPhysicalCameraUnavailable} callbacks for its physical cameras. For example,
+         * if app A opens the camera device:</p>
+         *
+         * <ul>
+         *
+         * <li>All apps subscribing to ActivityCallback get {@link #onCameraUnavailable}.</li>
+         *
+         * <li>No app (including app A) subscribing to ActivityCallback gets
+         * {@link #onPhysicalCameraAvailable} or {@link #onPhysicalCameraUnavailable}, because
+         * the logical camera is unavailable (some app is using it).</li>
+         *
+         * </ul>
+         *
          * <p>The default implementation of this method does nothing.</p>
          *
          * @param cameraId The unique identifier of the logical multi-camera.
@@ -1221,11 +1267,24 @@ public final class CameraManager {
          * A previously-available physical camera has become unavailable for use.
          *
          * <p>By default, all of the physical cameras of a logical multi-camera are
-         * available, so {@link #onPhysicalCameraAvailable} is not called for any of the physical
-         * cameras of a logical multi-camera, when {@link #onCameraAvailable} for the logical
-         * multi-camera is invoked. If some specific physical cameras are unavailable
-         * to begin with, {@link #onPhysicalCameraUnavailable} may be invoked after
-         * {@link #onCameraAvailable}.</p>
+         * unavailable if the logical camera itself is unavailable.
+         * No availability callbacks will be called for any of the physical
+         * cameras of its parent logical multi-camera, when {@link #onCameraUnavailable} for
+         * the logical multi-camera is invoked.</p>
+         *
+         * <p>Limitation: Opening a logical camera disables the {@link #onPhysicalCameraAvailable}
+         * and {@link #onPhysicalCameraUnavailable} callbacks for its physical cameras. For example,
+         * if app A opens the camera device:</p>
+         *
+         * <ul>
+         *
+         * <li>All apps subscribing to ActivityCallback get {@link #onCameraUnavailable}.</li>
+         *
+         * <li>No app (including app A) subscribing to ActivityCallback gets
+         * {@link #onPhysicalCameraAvailable} or {@link #onPhysicalCameraUnavailable}, because
+         * the logical camera is unavailable (some app is using it).</li>
+         *
+         * </ul>
          *
          * <p>The default implementation of this method does nothing.</p>
          *
@@ -1545,6 +1604,9 @@ public final class CameraManager {
 
         public static final boolean sCameraServiceDisabled =
                 SystemProperties.getBoolean("config.disable_cameraservice", false);
+
+        public static final boolean sLandscapeToPortrait =
+                SystemProperties.getBoolean(LANDSCAPE_TO_PORTRAIT_PROP, false);
 
         public static CameraManagerGlobal get() {
             return gCameraManager;

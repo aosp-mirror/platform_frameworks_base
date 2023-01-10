@@ -16,11 +16,11 @@
 
 package com.android.systemui.statusbar.notification.interruption
 
-import com.android.systemui.log.LogBuffer
-import com.android.systemui.log.LogLevel.DEBUG
-import com.android.systemui.log.LogLevel.INFO
-import com.android.systemui.log.LogLevel.WARNING
 import com.android.systemui.log.dagger.NotificationInterruptLog
+import com.android.systemui.plugins.log.LogBuffer
+import com.android.systemui.plugins.log.LogLevel.DEBUG
+import com.android.systemui.plugins.log.LogLevel.INFO
+import com.android.systemui.plugins.log.LogLevel.WARNING
 import com.android.systemui.statusbar.notification.collection.NotificationEntry
 import com.android.systemui.statusbar.notification.logKey
 import javax.inject.Inject
@@ -103,6 +103,36 @@ class NotificationInterruptLogger @Inject constructor(
             str1 = entry.logKey
         }, {
             "No heads up: not in use: $str1"
+        })
+    }
+
+    fun logNoHeadsUpOldWhen(
+        entry: NotificationEntry,
+        notifWhen: Long,
+        notifAge: Long
+    ) {
+        buffer.log(TAG, DEBUG, {
+            str1 = entry.logKey
+            long1 = notifWhen
+            long2 = notifAge
+        }, {
+            "No heads up: old when $long1 (age=$long2 ms): $str1"
+        })
+    }
+
+    fun logMaybeHeadsUpDespiteOldWhen(
+        entry: NotificationEntry,
+        notifWhen: Long,
+        notifAge: Long,
+        reason: String
+    ) {
+        buffer.log(TAG, DEBUG, {
+            str1 = entry.logKey
+            str2 = reason
+            long1 = notifWhen
+            long2 = notifAge
+        }, {
+            "Maybe heads up: old when $long1 (age=$long2 ms) but $str2: $str1"
         })
     }
 

@@ -31,7 +31,7 @@ import com.android.systemui.R
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.flags.FeatureFlags
 import com.android.systemui.flags.Flags
-import com.android.systemui.ripple.RippleView
+import com.android.systemui.surfaceeffects.ripple.RippleView
 import com.android.systemui.statusbar.commandline.Command
 import com.android.systemui.statusbar.commandline.CommandRegistry
 import com.android.systemui.statusbar.policy.BatteryController
@@ -149,7 +149,7 @@ class WiredChargingRippleController @Inject constructor(
     }
 
     fun startRipple() {
-        if (rippleView.rippleInProgress || rippleView.parent != null) {
+        if (rippleView.rippleInProgress() || rippleView.parent != null) {
             // Skip if ripple is still playing, or not playing but already added the parent
             // (which might happen just before the animation starts or right after
             // the animation ends.)
@@ -200,8 +200,7 @@ class WiredChargingRippleController @Inject constructor(
     }
 
     private fun updateRippleColor() {
-        rippleView.setColor(
-                Utils.getColorAttr(context, android.R.attr.colorAccent).defaultColor)
+        rippleView.setColor(Utils.getColorAttr(context, android.R.attr.colorAccent).defaultColor)
     }
 
     inner class ChargingRippleCommand : Command {

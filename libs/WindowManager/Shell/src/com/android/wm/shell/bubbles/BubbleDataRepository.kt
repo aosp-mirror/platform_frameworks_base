@@ -25,6 +25,7 @@ import android.content.pm.LauncherApps.ShortcutQuery.FLAG_MATCH_PINNED_BY_ANY_LA
 import android.content.pm.UserInfo
 import android.os.UserHandle
 import android.util.Log
+import com.android.wm.shell.bubbles.Bubbles.BubbleMetadataFlagListener
 import com.android.wm.shell.bubbles.storage.BubbleEntity
 import com.android.wm.shell.bubbles.storage.BubblePersistentRepository
 import com.android.wm.shell.bubbles.storage.BubbleVolatileRepository
@@ -46,6 +47,13 @@ internal class BubbleDataRepository(
 
     private val ioScope = CoroutineScope(Dispatchers.IO)
     private var job: Job? = null
+
+    // For use in Bubble construction.
+    private lateinit var bubbleMetadataFlagListener: BubbleMetadataFlagListener
+
+    fun setSuppressionChangedListener(listener: BubbleMetadataFlagListener) {
+        bubbleMetadataFlagListener = listener
+    }
 
     /**
      * Adds the bubble in memory, then persists the snapshot after adding the bubble to disk
@@ -197,7 +205,8 @@ internal class BubbleDataRepository(
                                 entity.title,
                                 entity.taskId,
                                 entity.locus,
-                                mainExecutor
+                                mainExecutor,
+                                bubbleMetadataFlagListener
                         )
                     }
         }

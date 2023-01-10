@@ -17,7 +17,9 @@
 package com.android.wm.shell.hidedisplaycutout;
 
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.reset;
+import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 
@@ -29,7 +31,10 @@ import androidx.test.filters.SmallTest;
 import androidx.test.platform.app.InstrumentationRegistry;
 
 import com.android.wm.shell.ShellTestCase;
+import com.android.wm.shell.common.ShellExecutor;
+import com.android.wm.shell.sysui.ShellCommandHandler;
 import com.android.wm.shell.sysui.ShellController;
+import com.android.wm.shell.sysui.ShellInit;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -45,17 +50,32 @@ public class HideDisplayCutoutControllerTest extends ShellTestCase {
             InstrumentationRegistry.getInstrumentation().getTargetContext(), null);
 
     @Mock
+    private ShellCommandHandler mShellCommandHandler;
+    @Mock
     private ShellController mShellController;
     @Mock
     private HideDisplayCutoutOrganizer mMockDisplayAreaOrganizer;
 
     private HideDisplayCutoutController mHideDisplayCutoutController;
+    private ShellInit mShellInit;
 
     @Before
     public void setUp() throws Exception {
         MockitoAnnotations.initMocks(this);
-        mHideDisplayCutoutController = new HideDisplayCutoutController(
-                mContext, mShellController, mMockDisplayAreaOrganizer);
+        mShellInit = spy(new ShellInit(mock(ShellExecutor.class)));
+        mHideDisplayCutoutController = new HideDisplayCutoutController(mContext, mShellInit,
+                mShellCommandHandler, mShellController, mMockDisplayAreaOrganizer);
+        mShellInit.init();
+    }
+
+    @Test
+    public void instantiateController_addInitCallback() {
+        verify(mShellInit, times(1)).addInitCallback(any(), any());
+    }
+
+    @Test
+    public void instantiateController_registerDumpCallback() {
+        verify(mShellCommandHandler, times(1)).addDumpCallback(any(), any());
     }
 
     @Test

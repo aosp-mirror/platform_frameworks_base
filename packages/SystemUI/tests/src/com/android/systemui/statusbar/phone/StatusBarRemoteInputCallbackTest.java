@@ -37,8 +37,7 @@ import com.android.systemui.statusbar.ActionClickLogger;
 import com.android.systemui.statusbar.CommandQueue;
 import com.android.systemui.statusbar.NotificationLockscreenUserManager;
 import com.android.systemui.statusbar.SysuiStatusBarStateController;
-import com.android.systemui.statusbar.notification.NotificationEntryManager;
-import com.android.systemui.statusbar.notification.collection.legacy.NotificationGroupManagerLegacy;
+import com.android.systemui.statusbar.notification.collection.render.GroupExpansionManager;
 import com.android.systemui.statusbar.notification.row.ExpandableNotificationRow;
 import com.android.systemui.statusbar.policy.DeviceProvisionedController;
 import com.android.systemui.statusbar.policy.KeyguardStateController;
@@ -55,7 +54,6 @@ import org.mockito.MockitoAnnotations;
 @RunWith(AndroidTestingRunner.class)
 @TestableLooper.RunWithLooper
 public class StatusBarRemoteInputCallbackTest extends SysuiTestCase {
-    @Mock private NotificationEntryManager mEntryManager;
     @Mock private DeviceProvisionedController mDeviceProvisionedController;
     @Mock private com.android.systemui.shade.ShadeController mShadeController;
     @Mock private NotificationLockscreenUserManager mNotificationLockscreenUserManager;
@@ -71,7 +69,6 @@ public class StatusBarRemoteInputCallbackTest extends SysuiTestCase {
     @Before
     public void setUp() {
         MockitoAnnotations.initMocks(this);
-        mDependency.injectTestDependency(NotificationEntryManager.class, mEntryManager);
         mDependency.injectTestDependency(DeviceProvisionedController.class,
                 mDeviceProvisionedController);
         mDependency.injectTestDependency(ShadeController.class, mShadeController);
@@ -79,7 +76,7 @@ public class StatusBarRemoteInputCallbackTest extends SysuiTestCase {
                 mNotificationLockscreenUserManager);
 
         mRemoteInputCallback = spy(new StatusBarRemoteInputCallback(mContext,
-                mock(NotificationGroupManagerLegacy.class), mNotificationLockscreenUserManager,
+                mock(GroupExpansionManager.class), mNotificationLockscreenUserManager,
                 mKeyguardStateController, mStatusBarStateController, mStatusBarKeyguardViewManager,
                 mActivityStarter, mShadeController, new CommandQueue(mContext),
                 mock(ActionClickLogger.class), mFakeExecutor));
@@ -102,6 +99,6 @@ public class StatusBarRemoteInputCallbackTest extends SysuiTestCase {
         mRemoteInputCallback.onLockedRemoteInput(
                 mock(ExpandableNotificationRow.class), mock(View.class));
 
-        verify(mStatusBarKeyguardViewManager).showGenericBouncer(true);
+        verify(mStatusBarKeyguardViewManager).showBouncer(true);
     }
 }

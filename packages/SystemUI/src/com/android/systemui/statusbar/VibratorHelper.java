@@ -19,33 +19,56 @@ package com.android.systemui.statusbar;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.media.AudioAttributes;
+import android.os.Process;
 import android.os.VibrationAttributes;
 import android.os.VibrationEffect;
 import android.os.Vibrator;
 
+import androidx.annotation.VisibleForTesting;
+
 import com.android.systemui.dagger.SysUISingleton;
-import com.android.systemui.dagger.qualifiers.Background;
 
 import org.jetbrains.annotations.NotNull;
 
 import java.util.concurrent.Executor;
+import java.util.concurrent.Executors;
 
 import javax.inject.Inject;
 
 /**
+ * A Helper class that offloads {@link Vibrator} calls to a different thread.
+ * {@link Vibrator} makes blocking calls that may cause SysUI to ANR.
+ * TODO(b/245528624): Use regular Vibrator instance once new APIs are available.
  */
 @SysUISingleton
 public class VibratorHelper {
 
     private final Vibrator mVibrator;
-    private static final VibrationAttributes TOUCH_VIBRATION_ATTRIBUTES =
+    public static final VibrationAttributes TOUCH_VIBRATION_ATTRIBUTES =
             VibrationAttributes.createForUsage(VibrationAttributes.USAGE_TOUCH);
+
+    private static final VibrationEffect BIOMETRIC_SUCCESS_VIBRATION_EFFECT =
+            VibrationEffect.get(VibrationEffect.EFFECT_CLICK);
+    private static final VibrationEffect BIOMETRIC_ERROR_VIBRATION_EFFECT =
+            VibrationEffect.get(VibrationEffect.EFFECT_DOUBLE_CLICK);
+    private static final VibrationAttributes HARDWARE_FEEDBACK_VIBRATION_ATTRIBUTES =
+            VibrationAttributes.createForUsage(VibrationAttributes.USAGE_HARDWARE_FEEDBACK);
+
     private final Executor mExecutor;
 
     /**
+     * Creates a vibrator helper on a new single threaded {@link Executor}.
      */
     @Inject
-    public VibratorHelper(@Nullable Vibrator vibrator, @Background Executor executor) {
+    public VibratorHelper(@Nullable Vibrator vibrator) {
+        this(vibrator, Executors.newSingleThreadExecutor());
+    }
+
+    /**
+     * Creates new vibrator helper on a specific {@link Executor}.
+     */
+    @VisibleForTesting
+    public VibratorHelper(@Nullable Vibrator vibrator, Executor executor) {
         mExecutor = executor;
         mVibrator = vibrator;
     }
@@ -108,5 +131,24 @@ public class VibratorHelper {
             return;
         }
         mExecutor.execute(mVibrator::cancel);
+    }
+
+    /**
+     * Perform vibration when biometric authentication success
+     */
+    public void vibrateAuthSuccess(String reason) {
+        vibrate(Process.myUid(),
+                "com.android.systemui",
+                BIOMETRIC_SUCCESS_VIBRATION_EFFECT, reason,
+                HARDWARE_FEEDBACK_VIBRATION_ATTRIBUTES);
+    }
+
+    /**
+     * Perform vibration when biometric authentication error
+     */
+    public void vibrateAuthError(String reason) {
+        vibrate(Process.myUid(), "com.android.systemui",
+                BIOMETRIC_ERROR_VIBRATION_EFFECT, reason,
+                HARDWARE_FEEDBACK_VIBRATION_ATTRIBUTES);
     }
 }

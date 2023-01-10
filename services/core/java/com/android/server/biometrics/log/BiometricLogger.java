@@ -17,21 +17,15 @@
 package com.android.server.biometrics.log;
 
 import android.annotation.NonNull;
-import android.annotation.Nullable;
 import android.content.Context;
-import android.hardware.Sensor;
-import android.hardware.SensorEvent;
-import android.hardware.SensorEventListener;
 import android.hardware.SensorManager;
 import android.hardware.biometrics.BiometricConstants;
 import android.hardware.biometrics.BiometricsProtoEnums;
 import android.hardware.biometrics.common.OperationContext;
 import android.hardware.face.FaceManager;
 import android.hardware.fingerprint.FingerprintManager;
-import android.util.Log;
 import android.util.Slog;
 
-import com.android.internal.annotations.GuardedBy;
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.util.FrameworkStatsLog;
 import com.android.server.biometrics.Utils;
@@ -43,60 +37,15 @@ public class BiometricLogger {
 
     public static final String TAG = "BiometricLogger";
     public static final boolean DEBUG = false;
-    private static final Object sLock = new Object();
-
-    @GuardedBy("sLock")
-    private static int sAlsCounter;
 
     private final int mStatsModality;
     private final int mStatsAction;
     private final int mStatsClient;
     private final BiometricFrameworkStatsLogger mSink;
-    @NonNull private final SensorManager mSensorManager;
+    @NonNull private final ALSProbe mALSProbe;
 
     private long mFirstAcquireTimeMs;
-    private boolean mLightSensorEnabled = false;
     private boolean mShouldLogMetrics = true;
-
-    private class ALSProbe implements Probe {
-        private boolean mDestroyed = false;
-
-        @Override
-        public synchronized void enable() {
-            if (!mDestroyed) {
-                setLightSensorLoggingEnabled(getAmbientLightSensor(mSensorManager));
-            }
-        }
-
-        @Override
-        public synchronized void disable() {
-            if (!mDestroyed) {
-                setLightSensorLoggingEnabled(null);
-            }
-        }
-
-        @Override
-        public synchronized void destroy() {
-            disable();
-            mDestroyed = true;
-        }
-    }
-
-    // report only the most recent value
-    // consider com.android.server.display.utils.AmbientFilter or similar if need arises
-    private volatile float mLastAmbientLux = 0;
-
-    private final SensorEventListener mLightSensorListener = new SensorEventListener() {
-        @Override
-        public void onSensorChanged(SensorEvent event) {
-            mLastAmbientLux = event.values[0];
-        }
-
-        @Override
-        public void onAccuracyChanged(Sensor sensor, int accuracy) {
-            // Not used.
-        }
-    };
 
     /** Get a new logger with all unknown fields (for operations that do not require logs). */
     public static BiometricLogger ofUnknown(@NonNull Context context) {
@@ -105,6 +54,11 @@ public class BiometricLogger {
     }
 
     /**
+     * Creates a new logger for an instance of a biometric operation.
+     *
+     * Do not reuse across operations. Instead, create a new one or use
+     * {@link #swapAction(Context, int)}.
+     *
      * @param context system_server context
      * @param statsModality One of {@link BiometricsProtoEnums} MODALITY_* constants.
      * @param statsAction One of {@link BiometricsProtoEnums} ACTION_* constants.
@@ -125,7 +79,7 @@ public class BiometricLogger {
         mStatsAction = statsAction;
         mStatsClient = statsClient;
         mSink = logSink;
-        mSensorManager = sensorManager;
+        mALSProbe = new ALSProbe(sensorManager);
     }
 
     /** Creates a new logger with the action replaced with the new action. */
@@ -136,6 +90,7 @@ public class BiometricLogger {
     /** Disable logging metrics and only log critical events, such as system health issues. */
     public void disableMetrics() {
         mShouldLogMetrics = false;
+        mALSProbe.destroy();
     }
 
     /** {@link BiometricsProtoEnums} CLIENT_* constants */
@@ -265,7 +220,7 @@ public class BiometricLogger {
                     + ", RequireConfirmation: " + requireConfirmation
                     + ", State: " + authState
                     + ", Latency: " + latency
-                    + ", Lux: " + mLastAmbientLux);
+                    + ", Lux: " + mALSProbe.getMostRecentLux());
         } else {
             Slog.v(TAG, "Authentication latency: " + latency);
         }
@@ -276,7 +231,7 @@ public class BiometricLogger {
 
         mSink.authenticate(operationContext, mStatsModality, mStatsAction, mStatsClient,
                 Utils.isDebugEnabled(context, targetUserId),
-                latency, authState, requireConfirmation, targetUserId, mLastAmbientLux);
+                latency, authState, requireConfirmation, targetUserId, mALSProbe);
     }
 
     /** Log enrollment outcome. */
@@ -290,7 +245,7 @@ public class BiometricLogger {
                     + ", User: " + targetUserId
                     + ", Client: " + mStatsClient
                     + ", Latency: " + latency
-                    + ", Lux: " + mLastAmbientLux
+                    + ", Lux: " + mALSProbe.getMostRecentLux()
                     + ", Success: " + enrollSuccessful);
         } else {
             Slog.v(TAG, "Enroll latency: " + latency);
@@ -301,7 +256,7 @@ public class BiometricLogger {
         }
 
         mSink.enroll(mStatsModality, mStatsAction, mStatsClient,
-                targetUserId, latency, enrollSuccessful, mLastAmbientLux);
+                targetUserId, latency, enrollSuccessful, mALSProbe.getMostRecentLux());
     }
 
     /** Report unexpected enrollment reported by the HAL. */
@@ -323,7 +278,9 @@ public class BiometricLogger {
     }
 
     /**
-     * Get a callback to start/stop ALS capture when a client runs.
+     * Get a callback to start/stop ALS capture when the client runs. Do not create
+     * multiple callbacks since there is at most one light sensor (they will all share
+     * a single probe sampling from that sensor).
      *
      * If the probe should not run for the entire operation, do not set startWithClient and
      * start/stop the problem when needed.
@@ -331,53 +288,7 @@ public class BiometricLogger {
      * @param startWithClient if probe should start automatically when the operation starts.
      */
     @NonNull
-    public CallbackWithProbe<Probe> createALSCallback(boolean startWithClient) {
-        return new CallbackWithProbe<>(new ALSProbe(), startWithClient);
-    }
-
-    /** The sensor to use for ALS logging. */
-    @Nullable
-    protected Sensor getAmbientLightSensor(@NonNull SensorManager sensorManager) {
-        return mShouldLogMetrics ? sensorManager.getDefaultSensor(Sensor.TYPE_LIGHT) : null;
-    }
-
-    private void setLightSensorLoggingEnabled(@Nullable Sensor lightSensor) {
-        if (DEBUG) {
-            Slog.v(TAG, "capturing ambient light using: "
-                    + (lightSensor != null ? lightSensor : "[disabled]"));
-        }
-
-        if (lightSensor != null) {
-            if (!mLightSensorEnabled) {
-                mLightSensorEnabled = true;
-                mLastAmbientLux = 0;
-                int localAlsCounter;
-                synchronized (sLock) {
-                    localAlsCounter = sAlsCounter++;
-                }
-
-                if (localAlsCounter == 0) {
-                    mSensorManager.registerListener(mLightSensorListener, lightSensor,
-                            SensorManager.SENSOR_DELAY_NORMAL);
-                } else {
-                    Slog.e(TAG, "Ignoring request to subscribe to ALSProbe due to non-zero ALS"
-                            + " counter: " + localAlsCounter);
-                    Slog.e(TAG, Log.getStackTraceString(new Throwable()));
-                }
-            }
-        } else {
-            mLightSensorEnabled = false;
-            mLastAmbientLux = 0;
-            mSensorManager.unregisterListener(mLightSensorListener);
-            int localAlsCounter;
-            synchronized (sLock) {
-                localAlsCounter = --sAlsCounter;
-            }
-            if (localAlsCounter != 0) {
-                Slog.e(TAG, "Non-zero ALS counter after unsubscribing from ALSProbe: "
-                        + localAlsCounter);
-                Slog.e(TAG, Log.getStackTraceString(new Throwable()));
-            }
-        }
+    public CallbackWithProbe<Probe> getAmbientLightProbe(boolean startWithClient) {
+        return new CallbackWithProbe<>(mALSProbe, startWithClient);
     }
 }

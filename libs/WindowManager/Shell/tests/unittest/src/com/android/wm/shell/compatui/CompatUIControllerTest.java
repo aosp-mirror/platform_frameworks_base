@@ -29,6 +29,7 @@ import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.clearInvocations;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 
@@ -50,10 +51,12 @@ import com.android.wm.shell.common.DisplayImeController;
 import com.android.wm.shell.common.DisplayInsetsController;
 import com.android.wm.shell.common.DisplayInsetsController.OnInsetsChangedListener;
 import com.android.wm.shell.common.DisplayLayout;
+import com.android.wm.shell.common.DockStateReader;
 import com.android.wm.shell.common.ShellExecutor;
 import com.android.wm.shell.common.SyncTransactionQueue;
 import com.android.wm.shell.compatui.letterboxedu.LetterboxEduWindowManager;
 import com.android.wm.shell.sysui.ShellController;
+import com.android.wm.shell.sysui.ShellInit;
 import com.android.wm.shell.transition.Transitions;
 
 import org.junit.Before;
@@ -79,6 +82,7 @@ public class CompatUIControllerTest extends ShellTestCase {
     private static final int TASK_ID = 12;
 
     private CompatUIController mController;
+    private ShellInit mShellInit;
     private @Mock ShellController mMockShellController;
     private @Mock DisplayController mMockDisplayController;
     private @Mock DisplayInsetsController mMockDisplayInsetsController;
@@ -90,6 +94,7 @@ public class CompatUIControllerTest extends ShellTestCase {
     private @Mock Lazy<Transitions> mMockTransitionsLazy;
     private @Mock CompatUIWindowManager mMockCompatLayout;
     private @Mock LetterboxEduWindowManager mMockLetterboxEduLayout;
+    private @Mock DockStateReader mDockStateReader;
 
     @Captor
     ArgumentCaptor<OnInsetsChangedListener> mOnInsetsChangedListenerCaptor;
@@ -107,9 +112,10 @@ public class CompatUIControllerTest extends ShellTestCase {
         doReturn(TASK_ID).when(mMockLetterboxEduLayout).getTaskId();
         doReturn(true).when(mMockLetterboxEduLayout).createLayout(anyBoolean());
         doReturn(true).when(mMockLetterboxEduLayout).updateCompatInfo(any(), any(), anyBoolean());
-        mController = new CompatUIController(mContext, mMockShellController, mMockDisplayController,
-                mMockDisplayInsetsController, mMockImeController, mMockSyncQueue, mMockExecutor,
-                mMockTransitionsLazy) {
+        mShellInit = spy(new ShellInit(mMockExecutor));
+        mController = new CompatUIController(mContext, mShellInit, mMockShellController,
+                mMockDisplayController, mMockDisplayInsetsController, mMockImeController,
+                mMockSyncQueue, mMockExecutor, mMockTransitionsLazy, mDockStateReader) {
             @Override
             CompatUIWindowManager createCompatUiWindowManager(Context context, TaskInfo taskInfo,
                     ShellTaskOrganizer.TaskListener taskListener) {
@@ -122,7 +128,13 @@ public class CompatUIControllerTest extends ShellTestCase {
                 return mMockLetterboxEduLayout;
             }
         };
+        mShellInit.init();
         spyOn(mController);
+    }
+
+    @Test
+    public void instantiateController_addInitCallback() {
+        verify(mShellInit, times(1)).addInitCallback(any(), any());
     }
 
     @Test

@@ -142,6 +142,7 @@
     <protected-broadcast android:name="android.appwidget.action.APPWIDGET_ENABLED" />
     <protected-broadcast android:name="android.appwidget.action.APPWIDGET_HOST_RESTORED" />
     <protected-broadcast android:name="android.appwidget.action.APPWIDGET_RESTORED" />
+    <protected-broadcast android:name="android.appwidget.action.APPWIDGET_ENABLE_AND_UPDATE" />
 
     <protected-broadcast android:name="android.os.action.SETTING_RESTORED" />
 
@@ -257,6 +258,7 @@
         android:name="com.android.bluetooth.BluetoothMapContentObserver.action.MESSAGE_DELIVERY" />
     <protected-broadcast
         android:name="android.bluetooth.pan.profile.action.CONNECTION_STATE_CHANGED" />
+    <protected-broadcast android:name="android.bluetooth.action.HAP_CONNECTION_STATE_CHANGED" />
     <protected-broadcast android:name="android.bluetooth.action.LE_AUDIO_CONNECTION_STATE_CHANGED" />
     <protected-broadcast android:name="android.bluetooth.action.LE_AUDIO_ACTIVE_DEVICE_CHANGED" />
     <protected-broadcast android:name="android.bluetooth.action.LE_AUDIO_CONF_CHANGED" />
@@ -920,7 +922,7 @@
          <p>Protection level: dangerous
 
          <p> This is a hard restricted permission which cannot be held by an app until
-         the installer on record whitelists the permission. For more details see
+         the installer on record allowlists the permission. For more details see
          {@link android.content.pm.PackageInstaller.SessionParams#setWhitelistedRestrictedPermissions(Set)}.
     -->
     <permission android:name="android.permission.SEND_SMS"
@@ -934,7 +936,7 @@
          <p>Protection level: dangerous
 
          <p> This is a hard restricted permission which cannot be held by an app until
-         the installer on record whitelists the permission. For more details see
+         the installer on record allowlists the permission. For more details see
          {@link android.content.pm.PackageInstaller.SessionParams#setWhitelistedRestrictedPermissions(Set)}.
     -->
     <permission android:name="android.permission.RECEIVE_SMS"
@@ -948,7 +950,7 @@
          <p>Protection level: dangerous
 
          <p> This is a hard restricted permission which cannot be held by an app until
-         the installer on record whitelists the permission. For more details see
+         the installer on record allowlists the permission. For more details see
          {@link android.content.pm.PackageInstaller.SessionParams#setWhitelistedRestrictedPermissions(Set)}.
     -->
     <permission android:name="android.permission.READ_SMS"
@@ -962,7 +964,7 @@
          <p>Protection level: dangerous
 
          <p> This is a hard restricted permission which cannot be held by an app until
-         the installer on record whitelists the permission. For more details see
+         the installer on record allowlists the permission. For more details see
          {@link android.content.pm.PackageInstaller.SessionParams#setWhitelistedRestrictedPermissions(Set)}.
     -->
     <permission android:name="android.permission.RECEIVE_WAP_PUSH"
@@ -976,7 +978,7 @@
          <p>Protection level: dangerous
 
          <p> This is a hard restricted permission which cannot be held by an app until
-         the installer on record whitelists the permission. For more details see
+         the installer on record allowlists the permission. For more details see
          {@link android.content.pm.PackageInstaller.SessionParams#setWhitelistedRestrictedPermissions(Set)}.
     -->
     <permission android:name="android.permission.RECEIVE_MMS"
@@ -1011,7 +1013,7 @@
          <p>Protection level: dangerous
 
          <p> This is a hard restricted permission which cannot be held by an app until
-         the installer on record whitelists the permission. For more details see
+         the installer on record allowlists the permission. For more details see
          {@link android.content.pm.PackageInstaller.SessionParams#setWhitelistedRestrictedPermissions(Set)}.
 
          @hide Pending API council approval -->
@@ -1035,28 +1037,41 @@
         android:priority="900" />
 
     <!-- Allows an application to read from external storage.
-      <p>Any app that declares the {@link #WRITE_EXTERNAL_STORAGE} permission is implicitly
-      granted this permission.</p>
+      <p class="note"><strong>Note: </strong>Starting in API level 33, this permission has no
+      effect. If your app accesses other apps' media files, request one or more of these permissions
+      instead: <a href="#READ_MEDIA_IMAGES"><code>READ_MEDIA_IMAGES</code></a>,
+      <a href="#READ_MEDIA_VIDEO"><code>READ_MEDIA_VIDEO</code></a>,
+      <a href="#READ_MEDIA_AUDIO"><code>READ_MEDIA_AUDIO</code></a>. Learn more about the
+      <a href="{@docRoot}training/data-storage/shared/media#storage-permission">storage
+      permissions</a> that are associated with media files.</p>
+
       <p>This permission is enforced starting in API level 19.  Before API level 19, this
       permission is not enforced and all apps still have access to read from external storage.
       You can test your app with the permission enforced by enabling <em>Protect USB
-      storage</em> under Developer options in the Settings app on a device running Android 4.1 or
-      higher.</p>
+      storage</em> under <b>Developer options</b> in the Settings app on a device running Android
+      4.1 or higher.</p>
       <p>Also starting in API level 19, this permission is <em>not</em> required to
-      read/write files in your application-specific directories returned by
+      read or write files in your application-specific directories returned by
       {@link android.content.Context#getExternalFilesDir} and
-      {@link android.content.Context#getExternalCacheDir}.
-      <p class="note"><strong>Note:</strong> If <em>both</em> your <a
+      {@link android.content.Context#getExternalCacheDir}.</p>
+      <p>Starting in API level 29, apps don't need to request this permission to access files in
+      their app-specific directory on external storage, or their own files in the
+      <a href="{@docRoot}reference/android/provider/MediaStore"><code>MediaStore</code></a>. Apps
+      shouldn't request this permission unless they need to access other apps' files in the
+      <code>MediaStore</code>. Read more about these changes in the
+      <a href="{@docRoot}training/data-storage#scoped-storage">scoped storage</a> section of the
+      developer documentation.</p>
+      <p>If <em>both</em> your <a
       href="{@docRoot}guide/topics/manifest/uses-sdk-element.html#min">{@code
       minSdkVersion}</a> and <a
       href="{@docRoot}guide/topics/manifest/uses-sdk-element.html#target">{@code
       targetSdkVersion}</a> values are set to 3 or lower, the system implicitly
       grants your app this permission. If you don't need this permission, be sure your <a
       href="{@docRoot}guide/topics/manifest/uses-sdk-element.html#target">{@code
-      targetSdkVersion}</a> is 4 or higher.
+      targetSdkVersion}</a> is 4 or higher.</p>
 
       <p> This is a soft restricted permission which cannot be held by an app it its
-      full form until the installer on record whitelists the permission.
+      full form until the installer on record allowlists the permission.
       Specifically, if the permission is allowlisted the holder app can access
       external storage and the visual and aural media collections while if the
       permission is not allowlisted the holder app can only access to the visual
@@ -1134,7 +1149,28 @@
                 android:protectionLevel="dangerous" />
 
     <!-- Allows an application to write to external storage.
-         <p class="note"><strong>Note:</strong> If <em>both</em> your <a
+         <p><strong>Note: </strong>If your app targets {@link android.os.Build.VERSION_CODES#R} or
+         higher, this permission has no effect.
+
+         <p>If your app is on a device that runs API level 19 or higher, you don't need to declare
+         this permission to read and write files in your application-specific directories returned
+         by {@link android.content.Context#getExternalFilesDir} and
+         {@link android.content.Context#getExternalCacheDir}.
+
+         <p>Learn more about how to
+         <a href="{@docRoot}training/data-storage/shared/media#update-other-apps-files">modify media
+         files</a> that your app doesn't own, and how to
+         <a href="{@docRoot}training/data-storage/shared/documents-files">modify non-media files</a>
+         that your app doesn't own.
+
+         <p>If your app is a file manager and needs broad access to external storage files, then
+         the system must place your app on an allowlist so that you can successfully request the
+         <a href="#MANAGE_EXTERNAL_STORAGE><code>MANAGE_EXTERNAL_STORAGE</code></a> permission.
+         Learn more about the appropriate use cases for
+         <a href="{@docRoot}training/data-storage/manage-all-files>managing all files on a storage
+         device</a>.
+
+         <p>If <em>both</em> your <a
          href="{@docRoot}guide/topics/manifest/uses-sdk-element.html#min">{@code
          minSdkVersion}</a> and <a
          href="{@docRoot}guide/topics/manifest/uses-sdk-element.html#target">{@code
@@ -1142,12 +1178,6 @@
          grants your app this permission. If you don't need this permission, be sure your <a
          href="{@docRoot}guide/topics/manifest/uses-sdk-element.html#target">{@code
          targetSdkVersion}</a> is 4 or higher.
-         <p>Starting in API level 19, this permission is <em>not</em> required to
-         read/write files in your application-specific directories returned by
-         {@link android.content.Context#getExternalFilesDir} and
-         {@link android.content.Context#getExternalCacheDir}.
-         <p>If this permission is not allowlisted for an app that targets an API level before
-         {@link android.os.Build.VERSION_CODES#Q} this permission cannot be granted to apps.</p>
          <p>Protection level: dangerous</p>
     -->
     <permission android:name="android.permission.WRITE_EXTERNAL_STORAGE"
@@ -1236,7 +1266,7 @@
          <p>Protection level: dangerous
 
          <p> This is a hard restricted permission which cannot be held by an app until
-         the installer on record whitelists the permission. For more details see
+         the installer on record allowlists the permission. For more details see
          {@link android.content.pm.PackageInstaller.SessionParams#setWhitelistedRestrictedPermissions(Set)}.
     -->
     <permission android:name="android.permission.ACCESS_BACKGROUND_LOCATION"
@@ -1298,7 +1328,7 @@
          <p>Protection level: dangerous
 
          <p> This is a hard restricted permission which cannot be held by an app until
-         the installer on record whitelists the permission. For more details see
+         the installer on record allowlists the permission. For more details see
          {@link android.content.pm.PackageInstaller.SessionParams#setWhitelistedRestrictedPermissions(Set)}.
     -->
     <permission android:name="android.permission.READ_CALL_LOG"
@@ -1322,7 +1352,7 @@
          <p>Protection level: dangerous
 
          <p> This is a hard restricted permission which cannot be held by an app until
-         the installer on record whitelists the permission. For more details see
+         the installer on record allowlists the permission. For more details see
          {@link android.content.pm.PackageInstaller.SessionParams#setWhitelistedRestrictedPermissions(Set)}.
     -->
     <permission android:name="android.permission.WRITE_CALL_LOG"
@@ -1338,7 +1368,7 @@
          <p>Protection level: dangerous
 
          <p> This is a hard restricted permission which cannot be held by an app until
-         the installer on record whitelists the permission. For more details see
+         the installer on record allowlists the permission. For more details see
          {@link android.content.pm.PackageInstaller.SessionParams#setWhitelistedRestrictedPermissions(Set)}.
 
          @deprecated Applications should use {@link android.telecom.CallRedirectionService} instead
@@ -4753,7 +4783,7 @@
                 android:protectionLevel="signature" />
 
     <!-- @SystemApi Allows an application to allowlist restricted permissions
-         on any of the whitelists.
+         on any of the allowlists.
     @hide -->
     <permission android:name="android.permission.WHITELIST_RESTRICTED_PERMISSIONS"
                 android:protectionLevel="signature|installer" />
@@ -6071,7 +6101,7 @@
     <!-- @SystemApi Allows to access all app shortcuts.
          @hide -->
     <permission android:name="android.permission.ACCESS_SHORTCUTS"
-        android:protectionLevel="signature|role" />
+        android:protectionLevel="signature|role|recents" />
 
     <!-- @SystemApi Allows unlimited calls to shortcut mutation APIs.
          @hide -->
@@ -6783,8 +6813,9 @@
                   android:exported="false">
         </activity>
 
-        <activity android:name="com.android.server.logcat.LogAccessDialogActivity"
+        <activity android:name="com.android.internal.app.LogAccessDialogActivity"
                   android:theme="@style/Theme.Translucent.NoTitleBar"
+                  android:process=":ui"
                   android:excludeFromRecents="true"
                   android:exported="false">
         </activity>

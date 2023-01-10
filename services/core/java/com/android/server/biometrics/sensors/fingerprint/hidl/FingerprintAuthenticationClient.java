@@ -81,12 +81,12 @@ class FingerprintAuthenticationClient extends AuthenticationClient<IBiometricsFi
         super(context, lazyDaemon, token, listener, targetUserId, operationId, restricted,
                 owner, cookie, requireConfirmation, sensorId, logger, biometricContext,
                 isStrongBiometric, taskStackListener, lockoutTracker, allowBackgroundAuthentication,
-                true /* shouldVibrate */, false /* isKeyguardBypassEnabled */);
+                false /* shouldVibrate */, false /* isKeyguardBypassEnabled */);
         setRequestId(requestId);
         mLockoutFrameworkImpl = lockoutTracker;
         mSensorOverlays = new SensorOverlays(udfpsOverlayController, sidefpsController);
         mSensorProps = sensorProps;
-        mALSProbeCallback = getLogger().createALSCallback(false /* startWithClient */);
+        mALSProbeCallback = getLogger().getAmbientLightProbe(false /* startWithClient */);
     }
 
     @Override

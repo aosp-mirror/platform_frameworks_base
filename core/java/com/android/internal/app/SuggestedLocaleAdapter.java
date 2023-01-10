@@ -70,17 +70,17 @@ public class SuggestedLocaleAdapter extends BaseAdapter implements Filterable {
     private Locale mDisplayLocale = null;
     // used to potentially cache a modified Context that uses mDisplayLocale
     private Context mContextOverride = null;
-    private String mAppPackageName;
+    private boolean mHasSpecificAppPackageName;
 
     public SuggestedLocaleAdapter(Set<LocaleStore.LocaleInfo> localeOptions, boolean countryMode) {
-        this(localeOptions, countryMode, null);
+        this(localeOptions, countryMode, false);
     }
 
     public SuggestedLocaleAdapter(Set<LocaleStore.LocaleInfo> localeOptions, boolean countryMode,
-            String appPackageName) {
+            boolean hasSpecificAppPackageName) {
         mCountryMode = countryMode;
         mLocaleOptions = new ArrayList<>(localeOptions.size());
-        mAppPackageName = appPackageName;
+        mHasSpecificAppPackageName = hasSpecificAppPackageName;
 
         for (LocaleStore.LocaleInfo li : localeOptions) {
             if (li.isSuggested()) {
@@ -134,7 +134,7 @@ public class SuggestedLocaleAdapter extends BaseAdapter implements Filterable {
 
     @Override
     public int getViewTypeCount() {
-        if (!TextUtils.isEmpty(mAppPackageName) && showHeaders()) {
+        if (mHasSpecificAppPackageName && showHeaders()) {
             // Two headers, 1 "System language", 1 current locale
             return APP_LANGUAGE_PICKER_TYPE_COUNT;
         } else if (showHeaders()) {
@@ -207,7 +207,11 @@ public class SuggestedLocaleAdapter extends BaseAdapter implements Filterable {
             case TYPE_HEADER_ALL_OTHERS:
                 TextView textView = (TextView) itemView;
                 if (itemType == TYPE_HEADER_SUGGESTED) {
-                    setTextTo(textView, R.string.language_picker_section_suggested);
+                   if (mCountryMode) {
+                        setTextTo(textView, R.string.language_picker_regions_section_suggested);
+                    } else {
+                        setTextTo(textView, R.string.language_picker_section_suggested);
+                    }
                 } else {
                     if (mCountryMode) {
                         setTextTo(textView, R.string.region_picker_section_all);

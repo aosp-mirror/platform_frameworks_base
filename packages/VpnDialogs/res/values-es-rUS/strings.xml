@@ -17,7 +17,7 @@
 <resources xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
     <string name="prompt" msgid="3183836924226407828">"Solicitud de conexión"</string>
-    <string name="warning" msgid="809658604548412033">"<xliff:g id="APP">%s</xliff:g> quiere configurar una conexión VPN capaz de controlar el tráfico de la red. Acéptala solo si confías en la fuente. &lt;br /&gt; &lt;br /&gt; &lt;img src=vpn_icon /&gt; aparece en la parte superior de la pantalla cuando se activa la VPN."</string>
+    <string name="warning" msgid="809658604548412033">"<xliff:g id="APP">%s</xliff:g> quiere configurar una conexión VPN capaz de supervisar el tráfico de la red. Acéptala solo si confías en la fuente. &lt;br /&gt; &lt;br /&gt; &lt;img src=vpn_icon /&gt; aparece en la parte superior de la pantalla cuando se activa la VPN."</string>
     <string name="warning" product="tv" msgid="5188957997628124947">"<xliff:g id="APP">%s</xliff:g> quiere configurar una conexión VPN que le permita supervisar el tráfico de red. Solo acéptala si confías en la fuente. &lt;br /&gt; &lt;br /&gt; &lt;img src=vpn_icon /&gt; aparecerá en tu pantalla cuando se active la VPN."</string>
     <string name="legacy_title" msgid="192936250066580964">"La VPN está conectada."</string>
     <string name="session" msgid="6470628549473641030">"Sesión:"</string>

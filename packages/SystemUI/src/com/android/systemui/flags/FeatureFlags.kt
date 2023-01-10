@@ -16,12 +16,14 @@
 
 package com.android.systemui.flags
 
+import android.util.Dumpable
+
 /**
  * Class to manage simple DeviceConfig-based feature flags.
  *
  * See [Flags] for instructions on defining new flags.
  */
-interface FeatureFlags : FlagListenable {
+interface FeatureFlags : FlagListenable, Dumpable {
     /** Returns a boolean value for the given flag.  */
     fun isEnabled(flag: UnreleasedFlag): Boolean
 
@@ -32,9 +34,6 @@ interface FeatureFlags : FlagListenable {
     fun isEnabled(flag: ResourceBooleanFlag): Boolean
 
     /** Returns a boolean value for the given flag.  */
-    fun isEnabled(flag: DeviceConfigBooleanFlag): Boolean
-
-    /** Returns a boolean value for the given flag.  */
     fun isEnabled(flag: SysPropBooleanFlag): Boolean
 
     /** Returns a string value for the given flag.  */
@@ -42,4 +41,10 @@ interface FeatureFlags : FlagListenable {
 
     /** Returns a string value for the given flag.  */
     fun getString(flag: ResourceStringFlag): String
+
+    /** Returns an int value for a given flag/ */
+    fun getInt(flag: IntFlag): Int
+
+    /** Returns an int value for a given flag/ */
+    fun getInt(flag: ResourceIntFlag): Int
 }

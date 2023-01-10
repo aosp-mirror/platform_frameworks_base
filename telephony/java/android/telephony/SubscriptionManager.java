@@ -3426,9 +3426,19 @@ public class SubscriptionManager {
      * Get subscriptionInfo list of subscriptions that are in the same group of given subId.
      * See {@link #createSubscriptionGroup(List)} for more details.
      *
-     * Caller will either have {@link android.Manifest.permission#READ_PHONE_STATE}
-     * permission or had carrier privilege permission on the subscription.
+     * Caller must have {@link android.Manifest.permission#READ_PHONE_STATE}
+     * or carrier privilege permission on the subscription.
      * {@link TelephonyManager#hasCarrierPrivileges()}
+     *
+     * <p>Starting with API level 33, this method will return an empty List if the caller does
+     * not have access to device identifiers.
+     * This method can be invoked if one of the following requirements is met:
+     * <ul>
+     *     <li>If the app has carrier privilege permission.
+     *     {@link TelephonyManager#hasCarrierPrivileges()}
+     *     <li>If the app has {@link android.Manifest.permission#READ_PHONE_STATE} permission and
+     *     access to device identifiers.
+     * </ul>
      *
      * @throws IllegalStateException if Telephony service is in bad state.
      * @throws SecurityException if the caller doesn't meet the requirements
@@ -3953,6 +3963,10 @@ public class SubscriptionManager {
      * may provide one. Or, a carrier may decide to provide the phone number via source
      * {@link #PHONE_NUMBER_SOURCE_CARRIER carrier} if neither source UICC nor IMS is available.
      *
+     * <p>The availability and correctness of the phone number depends on the underlying source
+     * and the network etc. Additional verification is needed to use this number for
+     * security-related or other sensitive scenarios.
+     *
      * @param subscriptionId the subscription ID, or {@link #DEFAULT_SUBSCRIPTION_ID}
      *                       for the default one.
      * @param source the source of the phone number, one of the PHONE_NUMBER_SOURCE_* constants.
@@ -4008,6 +4022,10 @@ public class SubscriptionManager {
      * depending on the underlying source and the network etc. Programmatic parsing should be done
      * cautiously, for example, after formatting the number to a consistent format with
      * {@link android.telephony.PhoneNumberUtils#formatNumberToE164(String, String)}.
+     *
+     * <p>The availability and correctness of the phone number depends on the underlying source
+     * and the network etc. Additional verification is needed to use this number for
+     * security-related or other sensitive scenarios.
      *
      * @param subscriptionId the subscription ID, or {@link #DEFAULT_SUBSCRIPTION_ID}
      *                       for the default one.

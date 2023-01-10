@@ -16,26 +16,36 @@
 
 package androidx.window.extensions.embedding;
 
-import android.annotation.NonNull;
 import android.app.Activity;
+import android.content.res.Configuration;
 import android.util.Pair;
 import android.util.Size;
+import android.window.WindowContainerTransaction;
+
+import androidx.annotation.NonNull;
 
 /**
  * Client-side descriptor of a split that holds two containers.
  */
 class SplitContainer {
+    @NonNull
     private final TaskFragmentContainer mPrimaryContainer;
+    @NonNull
     private final TaskFragmentContainer mSecondaryContainer;
+    @NonNull
     private final SplitRule mSplitRule;
+    @NonNull
+    private SplitAttributes mSplitAttributes;
 
     SplitContainer(@NonNull TaskFragmentContainer primaryContainer,
             @NonNull Activity primaryActivity,
             @NonNull TaskFragmentContainer secondaryContainer,
-            @NonNull SplitRule splitRule) {
+            @NonNull SplitRule splitRule,
+            @NonNull SplitAttributes splitAttributes) {
         mPrimaryContainer = primaryContainer;
         mSecondaryContainer = secondaryContainer;
         mSplitRule = splitRule;
+        mSplitAttributes = splitAttributes;
 
         if (shouldFinishPrimaryWithSecondary(splitRule)) {
             if (mPrimaryContainer.getRunningActivityCount() == 1
@@ -68,6 +78,26 @@ class SplitContainer {
         return mSplitRule;
     }
 
+    @NonNull
+    SplitAttributes getSplitAttributes() {
+        return mSplitAttributes;
+    }
+
+    /**
+     * Updates the {@link SplitAttributes} to this container.
+     * It is usually used when there's a folding state change or
+     * {@link SplitController#onTaskFragmentParentInfoChanged(WindowContainerTransaction, int,
+     * Configuration)}.
+     */
+    void setSplitAttributes(@NonNull SplitAttributes splitAttributes) {
+        mSplitAttributes = splitAttributes;
+    }
+
+    @NonNull
+    TaskContainer getTaskContainer() {
+        return getPrimaryContainer().getTaskContainer();
+    }
+
     /** Returns the minimum dimension pair of primary container and secondary container. */
     @NonNull
     Pair<Size, Size> getMinDimensionsPair() {
@@ -77,6 +107,12 @@ class SplitContainer {
 
     boolean isPlaceholderContainer() {
         return (mSplitRule instanceof SplitPlaceholderRule);
+    }
+
+    @NonNull
+    SplitInfo toSplitInfo() {
+        return new SplitInfo(mPrimaryContainer.toActivityStack(),
+                mSecondaryContainer.toActivityStack(), mSplitAttributes);
     }
 
     static boolean shouldFinishPrimaryWithSecondary(@NonNull SplitRule splitRule) {
@@ -137,6 +173,7 @@ class SplitContainer {
                 + " primaryContainer=" + mPrimaryContainer
                 + " secondaryContainer=" + mSecondaryContainer
                 + " splitRule=" + mSplitRule
+                + " splitAttributes" + mSplitAttributes
                 + "}";
     }
 }

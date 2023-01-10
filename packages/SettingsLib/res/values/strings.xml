@@ -264,12 +264,12 @@
 
     <!-- Bluetooth settings.  The user-visible string that is used whenever referring to the Hearing Aid profile. -->
     <string name="bluetooth_profile_hearing_aid">Hearing Aids</string>
-    <!-- Bluetooth settings.  The user-visible string that is used whenever referring to the LE_AUDIO profile. -->
-    <string name="bluetooth_profile_le_audio">LE_AUDIO</string>
+    <!-- Bluetooth settings.  The user-visible string that is used whenever referring to the LE audio profile. -->
+    <string name="bluetooth_profile_le_audio">LE audio</string>
     <!-- Bluetooth settings.  Connection options screen.  The summary for the Hearing Aid checkbox preference when Hearing Aid is connected. -->
     <string name="bluetooth_hearing_aid_profile_summary_connected">Connected to Hearing Aids</string>
-    <!-- Bluetooth settings.  Connection options screen.  The summary for the LE_AUDIO checkbox preference when LE_AUDIO is connected. -->
-    <string name="bluetooth_le_audio_profile_summary_connected">Connected to LE_AUDIO</string>
+    <!-- Bluetooth settings.  Connection options screen.  The summary for the LE audio checkbox preference when LE audio is connected. -->
+    <string name="bluetooth_le_audio_profile_summary_connected">Connected to LE audio</string>
 
     <!-- Bluetooth settings.  Connection options screen.  The summary for the A2DP checkbox preference when A2DP is connected. -->
     <string name="bluetooth_a2dp_profile_summary_connected">Connected to media audio</string>
@@ -962,6 +962,9 @@
     <!-- UI debug setting: enable freeform window support summary [CHAR LIMIT=150] -->
     <string name="enable_freeform_support_summary">Enable support for experimental freeform windows.</string>
 
+    <!-- UI debug setting: enable desktop mode [CHAR LIMIT=25] -->
+    <string name="desktop_mode">Desktop mode</string>
+
     <!-- Local (desktop) backup password menu title [CHAR LIMIT=25] -->
     <string name="local_backup_password_title">Desktop backup password</string>
     <!-- Summary text of the "local backup password" setting when the user has not supplied a password -->
@@ -1122,7 +1125,9 @@
     <!-- [CHAR_LIMIT=40] Label for battery level chart when charging with duration -->
     <string name="power_charging_duration"><xliff:g id="level">%1$s</xliff:g> - <xliff:g id="time">%2$s</xliff:g> left until full</string>
     <!-- [CHAR_LIMIT=80] Label for battery level chart when charge been limited -->
-    <string name="power_charging_limited"><xliff:g id="level">%1$s</xliff:g> - Charging temporarily limited</string>
+    <string name="power_charging_limited"><xliff:g id="level">%1$s</xliff:g> - Charging optimized</string>
+    <!-- [CHAR_LIMIT=80] Label for battery charging future pause -->
+    <string name="power_charging_future_paused"><xliff:g id="level">%1$s</xliff:g> - Charging optimized</string>
 
     <!-- Battery Info screen. Value for a status item.  Used for diagnostic info screens, precise translation isn't needed -->
     <string name="battery_info_status_unknown">Unknown</string>
@@ -1135,7 +1140,7 @@
     <!-- [CHAR_LIMIT=20] Battery use screen.  Battery status shown in chart label when charging wirelessly.  -->
     <string name="battery_info_status_charging_wireless">Charging wirelessly</string>
     <!-- [CHAR_LIMIT=20] Battery use screen.  Battery status shown in chart label when the device is dock charging.  -->
-    <string name="battery_info_status_charging_dock">Charging Dock</string>
+    <string name="battery_info_status_charging_dock">Charging</string>
     <!-- Battery Info screen. Value for a status item.  Used for diagnostic info screens, precise translation isn't needed -->
     <string name="battery_info_status_discharging">Not charging</string>
     <!-- Battery Info screen. Value for a status item. A state which device is connected with any charger(e.g. USB, Adapter or Wireless) but not charging yet. Used for diagnostic info screens, precise translation isn't needed -->
@@ -1598,18 +1603,6 @@
     <!-- Content description of the no calling for accessibility (not shown on the screen). [CHAR LIMIT=NONE] -->
     <string name="accessibility_no_calling">No calling.</string>
 
-    <!-- Screensaver overlay which displays the time. [CHAR LIMIT=20] -->
-    <string name="dream_complication_title_time">Time</string>
-    <!-- Screensaver overlay which displays the date. [CHAR LIMIT=20] -->
-    <string name="dream_complication_title_date">Date</string>
-    <!-- Screensaver overlay which displays the weather. [CHAR LIMIT=20] -->
-    <string name="dream_complication_title_weather">Weather</string>
-    <!-- Screensaver overlay which displays air quality. [CHAR LIMIT=20] -->
-    <string name="dream_complication_title_aqi">Air Quality</string>
-    <!-- Screensaver overlay which displays cast info. [CHAR LIMIT=20] -->
-    <string name="dream_complication_title_cast_info">Cast Info</string>
-    <!-- Screensaver overlay which displays home controls. [CHAR LIMIT=20] -->
-    <string name="dream_complication_title_home_controls">Home Controls</string>
 
     <!-- Title for a screen allowing the user to choose a profile picture. [CHAR LIMIT=NONE] -->
     <string name="avatar_picker_title">Choose a profile picture</string>

@@ -105,7 +105,7 @@ public class KeyguardSimPinViewController
             showDefaultMessage();
         }
 
-        mView.setEsimLocked(KeyguardEsimArea.isEsimLocked(mView.getContext(), mSubId), mSubId);
+        mView.setESimLocked(KeyguardEsimArea.isEsimLocked(mView.getContext(), mSubId), mSubId);
     }
 
     @Override
@@ -130,12 +130,6 @@ public class KeyguardSimPinViewController
             mSimUnlockProgressDialog.dismiss();
             mSimUnlockProgressDialog = null;
         }
-    }
-
-    @Override
-    public void reloadColors() {
-        super.reloadColors();
-        mView.reloadColors();
     }
 
     @Override

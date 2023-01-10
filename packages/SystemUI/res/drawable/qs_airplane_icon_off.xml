@@ -15,11 +15,28 @@
   -->
 <animated-vector xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:aapt="http://schemas.android.com/aapt">
+    <target android:name="_R_G_L_0_G_D_0_P_0">
+        <aapt:attr name="android:animation">
+            <set android:ordering="together">
+                <objectAnimator
+                    android:duration="167"
+                    android:propertyName="fillColor"
+                    android:startOffset="0"
+                    android:valueFrom="#000000"
+                    android:valueTo="#ffffff"
+                    android:valueType="colorType">
+                    <aapt:attr name="android:interpolator">
+                        <pathInterpolator android:pathData="M 0.0,0.0 c0.167,0.167 0.833,0.833 1.0,1.0" />
+                    </aapt:attr>
+                </objectAnimator>
+            </set>
+        </aapt:attr>
+    </target>
     <target android:name="time_group">
         <aapt:attr name="android:animation">
             <set android:ordering="together">
                 <objectAnimator
-                    android:duration="183"
+                    android:duration="333"
                     android:propertyName="translateX"
                     android:startOffset="0"
                     android:valueFrom="0"
@@ -38,13 +55,13 @@
                 <group
                     android:name="_R_G_L_0_G"
                     android:translateX="12"
-                    android:translateY="12">
+                    android:translateY="11.969">
                     <path
                         android:name="_R_G_L_0_G_D_0_P_0"
                         android:fillAlpha="1"
-                        android:fillColor="#ffffff"
+                        android:fillColor="#000000"
                         android:fillType="nonZero"
-                        android:pathData=" M-1.5 -3.02 C-1.5,-3.02 -1.5,-8.5 -1.5,-8.5 C-1.5,-9.33 -0.83,-10 0,-10 C0.83,-10 1.5,-9.33 1.5,-8.5 C1.5,-8.5 1.5,-3 1.5,-3 C1.5,-3 10,2 10,2 C10,2 10,4 10,4 C10,4 1.51,1.49 1.51,1.49 C1.51,1.49 -1.5,-3.02 -1.5,-3.02c  M1.5 1.5 C1.5,1.5 -1.5,-3 -1.5,-3 C-1.5,-3 -10,2 -10,2 C-10,2 -10,4 -10,4 C-10,4 -1.5,1.5 -1.5,1.5 C-1.5,1.5 -1.5,7 -1.5,7 C-1.5,7 -4,8.5 -4,8.5 C-4,8.5 -4,10 -4,10 C-4,10 0,9 0,9 C0,9 4,10 4,10 C4,10 4,8.5 4,8.5 C4,8.5 1.5,7 1.5,7 C1.5,7 1.5,1.5 1.5,1.5c " />
+                        android:pathData=" M-3.5 8.5 C-3.5,8.5 -3.5,10 -3.5,10 C-3.5,10 0,9 0,9 C0,9 3.5,10 3.5,10 C3.5,10 3.5,8.5 3.5,8.5 C3.5,8.5 1.5,7 1.5,7 C1.5,7 1.5,1.5 1.5,1.5 C1.5,1.5 10,4 10,4 C10,4 10,2 10,2 C10,2 1.5,-3 1.5,-3 C1.5,-3 1.5,-8.02 1.5,-8.02 C1.5,-8.44 1.2,-9.52 0,-9.52 C-1.19,-9.52 -1.5,-8.44 -1.5,-8.02 C-1.5,-8.02 -1.5,-3 -1.5,-3 C-1.5,-3 -10,2 -10,2 C-10,2 -10,4 -10,4 C-10,4 -1.5,1.5 -1.5,1.5 C-1.5,1.5 -1.5,7 -1.5,7 C-1.5,7 -3.5,8.5 -3.5,8.5c " />
                 </group>
             </group>
             <group android:name="time_group" />

@@ -16,8 +16,10 @@
 
 package android.window;
 
+import android.os.IBinder;
 import android.view.RemoteAnimationDefinition;
 import android.window.ITaskFragmentOrganizer;
+import android.window.WindowContainerTransaction;
 
 /** @hide */
 interface ITaskFragmentOrganizerController {
@@ -37,17 +39,30 @@ interface ITaskFragmentOrganizerController {
      * animations if the transition only contains windows that belong to the organized
      * TaskFragments in the given Task.
      */
-    void registerRemoteAnimations(in ITaskFragmentOrganizer organizer, int taskId,
+    void registerRemoteAnimations(in ITaskFragmentOrganizer organizer,
         in RemoteAnimationDefinition definition);
 
     /**
      * Unregisters remote animations per transition type for the organizer.
      */
-    void unregisterRemoteAnimations(in ITaskFragmentOrganizer organizer, int taskId);
+    void unregisterRemoteAnimations(in ITaskFragmentOrganizer organizer);
 
     /**
-      * Checks if an activity organized by a {@link android.window.TaskFragmentOrganizer} and
-      * only occupies a portion of Task bounds.
-      */
+     * Checks if an activity organized by a {@link android.window.TaskFragmentOrganizer} and
+     * only occupies a portion of Task bounds.
+     */
     boolean isActivityEmbedded(in IBinder activityToken);
+
+    /**
+     * Notifies the server that the organizer has finished handling the given transaction. The
+     * server should apply the given {@link WindowContainerTransaction} for the necessary changes.
+     */
+    void onTransactionHandled(in IBinder transactionToken, in WindowContainerTransaction wct,
+        int transitionType, boolean shouldApplyIndependently);
+
+    /**
+     * Requests the server to apply the given {@link WindowContainerTransaction}.
+     */
+    void applyTransaction(in WindowContainerTransaction wct, int transitionType,
+        boolean shouldApplyIndependently);
 }

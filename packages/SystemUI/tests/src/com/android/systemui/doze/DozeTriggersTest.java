@@ -23,15 +23,16 @@ import static com.android.systemui.doze.DozeMachine.State.UNINITIALIZED;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyFloat;
 import static org.mockito.ArgumentMatchers.anyInt;
+import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.clearInvocations;
 import static org.mockito.Mockito.doAnswer;
-import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import android.app.StatusBarManager;
 import android.hardware.Sensor;
 import android.hardware.display.AmbientDisplayConfiguration;
 import android.testing.AndroidTestingRunner;
@@ -40,12 +41,15 @@ import android.view.Display;
 
 import androidx.test.filters.SmallTest;
 
+import com.android.internal.logging.InstanceId;
 import com.android.internal.logging.UiEventLogger;
 import com.android.systemui.SysuiTestCase;
 import com.android.systemui.biometrics.AuthController;
 import com.android.systemui.broadcast.BroadcastDispatcher;
 import com.android.systemui.dock.DockManager;
 import com.android.systemui.doze.DozeTriggers.DozingUpdateUiEvent;
+import com.android.systemui.log.SessionTracker;
+import com.android.systemui.settings.UserTracker;
 import com.android.systemui.statusbar.phone.DozeParameters;
 import com.android.systemui.statusbar.policy.DevicePostureController;
 import com.android.systemui.statusbar.policy.KeyguardStateController;
@@ -85,6 +89,8 @@ public class DozeTriggersTest extends SysuiTestCase {
     @Mock
     private ProximityCheck mProximityCheck;
     @Mock
+    private DozeLog mDozeLog;
+    @Mock
     private AuthController mAuthController;
     @Mock
     private UiEventLogger mUiEventLogger;
@@ -92,12 +98,16 @@ public class DozeTriggersTest extends SysuiTestCase {
     private KeyguardStateController mKeyguardStateController;
     @Mock
     private DevicePostureController mDevicePostureController;
+    @Mock
+    private UserTracker mUserTracker;
+    @Mock
+    private SessionTracker mSessionTracker;
 
     private DozeTriggers mTriggers;
     private FakeSensorManager mSensors;
     private Sensor mTapSensor;
     private FakeProximitySensor mProximitySensor;
-    private FakeExecutor mExecutor = new FakeExecutor(new FakeSystemClock());
+    private final FakeExecutor mExecutor = new FakeExecutor(new FakeSystemClock());
 
     @Before
     public void setUp() throws Exception {
@@ -122,15 +132,15 @@ public class DozeTriggersTest extends SysuiTestCase {
 
         mTriggers = new DozeTriggers(mContext, mHost, config, dozeParameters,
                 asyncSensorManager, wakeLock, mDockManager, mProximitySensor,
-                mProximityCheck, mock(DozeLog.class), mBroadcastDispatcher, new FakeSettings(),
-                mAuthController, mExecutor, mUiEventLogger, mKeyguardStateController,
-                mDevicePostureController);
+                mProximityCheck, mDozeLog, mBroadcastDispatcher, new FakeSettings(),
+                mAuthController, mUiEventLogger, mSessionTracker, mKeyguardStateController,
+                mDevicePostureController, mUserTracker);
         mTriggers.setDozeMachine(mMachine);
         waitForSensorManager();
     }
 
     @Test
-    public void testOnNotification_stillWorksAfterOneFailedProxCheck() throws Exception {
+    public void testOnNotification_stillWorksAfterOneFailedProxCheck() {
         when(mMachine.getState()).thenReturn(DozeMachine.State.DOZE);
         ArgumentCaptor<DozeHost.Callback> captor = ArgumentCaptor.forClass(DozeHost.Callback.class);
         doAnswer(invocation -> null).when(mHost).addCallback(captor.capture());
@@ -139,6 +149,12 @@ public class DozeTriggersTest extends SysuiTestCase {
         mTriggers.transitionTo(DozeMachine.State.INITIALIZED, DozeMachine.State.DOZE);
         clearInvocations(mMachine);
 
+        ArgumentCaptor<Boolean> boolCaptor = ArgumentCaptor.forClass(Boolean.class);
+        doAnswer(invocation ->
+                when(mHost.isPulsePending()).thenReturn(boolCaptor.getValue())
+        ).when(mHost).setPulsePending(boolCaptor.capture());
+
+        when(mHost.isPulsingBlocked()).thenReturn(false);
         mProximitySensor.setLastEvent(new ThresholdSensorEvent(true, 1));
         captor.getValue().onNotificationAlerted(null /* pulseSuppressedListener */);
         mProximitySensor.alertListeners();
@@ -152,6 +168,29 @@ public class DozeTriggersTest extends SysuiTestCase {
         captor.getValue().onNotificationAlerted(null /* pulseSuppressedListener */);
 
         verify(mMachine).requestPulse(anyInt());
+    }
+
+    @Test
+    public void testOnNotification_noPulseIfPulseIsNotPendingAnymore() {
+        when(mMachine.getState()).thenReturn(DozeMachine.State.DOZE);
+        ArgumentCaptor<DozeHost.Callback> captor = ArgumentCaptor.forClass(DozeHost.Callback.class);
+        doAnswer(invocation -> null).when(mHost).addCallback(captor.capture());
+
+        mTriggers.transitionTo(UNINITIALIZED, DozeMachine.State.INITIALIZED);
+        mTriggers.transitionTo(DozeMachine.State.INITIALIZED, DozeMachine.State.DOZE);
+        clearInvocations(mMachine);
+        when(mHost.isPulsingBlocked()).thenReturn(false);
+
+        // GIVEN pulsePending = false
+        when(mHost.isPulsePending()).thenReturn(false);
+
+        // WHEN prox check returns FAR
+        mProximitySensor.setLastEvent(new ThresholdSensorEvent(false, 2));
+        captor.getValue().onNotificationAlerted(null /* pulseSuppressedListener */);
+        mProximitySensor.alertListeners();
+
+        // THEN don't request pulse because the pending pulse was abandoned early
+        verify(mMachine, never()).requestPulse(anyInt());
     }
 
     @Test
@@ -216,7 +255,7 @@ public class DozeTriggersTest extends SysuiTestCase {
     }
 
     @Test
-    public void testProximitySensorNotAvailablel() {
+    public void testProximitySensorNotAvailable() {
         mProximitySensor.setSensorAvailable(false);
         mTriggers.onSensor(DozeLog.PULSE_REASON_SENSOR_LONG_PRESS, 100, 100, null);
         mTriggers.onSensor(DozeLog.PULSE_REASON_SENSOR_WAKE_REACH, 100, 100,
@@ -228,6 +267,14 @@ public class DozeTriggersTest extends SysuiTestCase {
     public void testQuickPickup() {
         // GIVEN device is in doze (screen blank, but running doze sensors)
         when(mMachine.getState()).thenReturn(DozeMachine.State.DOZE);
+        InstanceId keyguardSessionId = InstanceId.fakeInstanceId(99);
+        when(mSessionTracker.getSessionId(StatusBarManager.SESSION_KEYGUARD))
+                .thenReturn(keyguardSessionId);
+
+        ArgumentCaptor<Boolean> boolCaptor = ArgumentCaptor.forClass(Boolean.class);
+        doAnswer(invocation ->
+                when(mHost.isPulsePending()).thenReturn(boolCaptor.getValue())
+        ).when(mHost).setPulsePending(boolCaptor.capture());
 
         // WHEN quick pick up is triggered
         mTriggers.onSensor(DozeLog.REASON_SENSOR_QUICK_PICKUP, 100, 100, null);
@@ -236,7 +283,8 @@ public class DozeTriggersTest extends SysuiTestCase {
         verify(mMachine).requestPulse(anyInt());
 
         // THEN a log is taken that quick pick up was triggered
-        verify(mUiEventLogger).log(DozingUpdateUiEvent.DOZING_UPDATE_QUICK_PICKUP);
+        verify(mUiEventLogger)
+                .log(DozingUpdateUiEvent.DOZING_UPDATE_QUICK_PICKUP, keyguardSessionId);
     }
 
     @Test
@@ -249,7 +297,7 @@ public class DozeTriggersTest extends SysuiTestCase {
         mTriggers.onSensor(DozeLog.REASON_SENSOR_PICKUP, 100, 100, null);
 
         // THEN wakeup
-        verify(mMachine).wakeUp();
+        verify(mMachine).wakeUp(DozeLog.REASON_SENSOR_PICKUP);
     }
 
     @Test
@@ -262,7 +310,7 @@ public class DozeTriggersTest extends SysuiTestCase {
         mTriggers.onSensor(DozeLog.REASON_SENSOR_PICKUP, 100, 100, null);
 
         // THEN never wakeup
-        verify(mMachine, never()).wakeUp();
+        verify(mMachine, never()).wakeUp(DozeLog.REASON_SENSOR_PICKUP);
     }
 
     @Test
@@ -297,6 +345,54 @@ public class DozeTriggersTest extends SysuiTestCase {
     public void testDestroy() {
         mTriggers.destroy();
         verify(mProximityCheck).destroy();
+    }
+
+    @Test
+    public void testIsExecutingTransition_dropPulse() {
+        when(mHost.isPulsePending()).thenReturn(false);
+        when(mMachine.isExecutingTransition()).thenReturn(true);
+
+        mTriggers.onSensor(DozeLog.PULSE_REASON_SENSOR_LONG_PRESS, 100, 100, null);
+
+        verify(mDozeLog).tracePulseDropped(anyString(), eq(null));
+    }
+
+    @Test
+    public void udfpsLongPress_triggeredWhenAodPaused() {
+        // GIVEN device is DOZE_AOD_PAUSED
+        when(mMachine.getState()).thenReturn(DozeMachine.State.DOZE_AOD_PAUSED);
+
+        // WHEN udfps long-press is triggered
+        mTriggers.onSensor(DozeLog.REASON_SENSOR_UDFPS_LONG_PRESS, 100, 100,
+                new float[]{0, 1, 2, 3, 4});
+
+        // THEN the pulse is NOT dropped
+        verify(mDozeLog, never()).tracePulseDropped(anyString(), any());
+
+        // WHEN the screen state is ON
+        mTriggers.onScreenState(Display.STATE_ON);
+
+        // THEN aod interrupt is sent
+        verify(mAuthController).onAodInterrupt(anyInt(), anyInt(), anyFloat(), anyFloat());
+    }
+
+    @Test
+    public void udfpsLongPress_triggeredWhenAodPausing() {
+        // GIVEN device is DOZE_AOD_PAUSED
+        when(mMachine.getState()).thenReturn(DozeMachine.State.DOZE_AOD_PAUSING);
+
+        // WHEN udfps long-press is triggered
+        mTriggers.onSensor(DozeLog.REASON_SENSOR_UDFPS_LONG_PRESS, 100, 100,
+                new float[]{0, 1, 2, 3, 4});
+
+        // THEN the pulse is NOT dropped
+        verify(mDozeLog, never()).tracePulseDropped(anyString(), any());
+
+        // WHEN the screen state is ON
+        mTriggers.onScreenState(Display.STATE_ON);
+
+        // THEN aod interrupt is sent
+        verify(mAuthController).onAodInterrupt(anyInt(), anyInt(), anyFloat(), anyFloat());
     }
 
     private void waitForSensorManager() {

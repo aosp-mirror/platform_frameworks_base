@@ -30,23 +30,6 @@ public interface OneHanded {
             OneHandedController.SUPPORT_ONE_HANDED_MODE, false);
 
     /**
-     * Returns a binder that can be passed to an external process to manipulate OneHanded.
-     */
-    default IOneHanded createExternalInterface() {
-        return null;
-    }
-
-    /**
-     * Return one handed settings enabled or not.
-     */
-    boolean isOneHandedEnabled();
-
-    /**
-     * Return swipe to notification settings enabled or not.
-     */
-    boolean isSwipeToNotificationEnabled();
-
-    /**
      * Enters one handed mode.
      */
     void startOneHanded();
@@ -80,9 +63,4 @@ public interface OneHanded {
      * transition start or finish
      */
     void registerTransitionCallback(OneHandedTransitionCallback callback);
-
-    /**
-     * Notifies when user switch complete
-     */
-    void onUserSwitch(int userId);
 }

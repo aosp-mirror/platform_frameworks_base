@@ -39,6 +39,7 @@ import com.android.systemui.plugins.qs.QSTile;
 import com.android.systemui.plugins.statusbar.StatusBarStateController;
 import com.android.systemui.qs.QSTileHost;
 import com.android.systemui.qs.logging.QSLogger;
+import com.android.systemui.qs.tileimpl.QSTileImpl;
 import com.android.systemui.statusbar.policy.DataSaverController;
 import com.android.systemui.statusbar.policy.HotspotController;
 
@@ -121,5 +122,41 @@ public class HotspotTileTest extends SysuiTestCase {
         assertThat(String.valueOf(mState.secondaryLabel))
                 .isEqualTo(mContext.getString(R.string.wifitrackerlib_admin_restricted_network));
         mockitoSession.finishMocking();
+    }
+
+    @Test
+    public void testIcon_whenDisabled_isOffState() {
+        QSTile.BooleanState state = new QSTile.BooleanState();
+        when(mHotspotController.isHotspotTransient()).thenReturn(false);
+        when(mHotspotController.isHotspotEnabled()).thenReturn(false);
+
+        mTile.handleUpdateState(state, /* arg= */ null);
+
+        assertThat(state.icon)
+                .isEqualTo(QSTileImpl.ResourceIcon.get(R.drawable.qs_hotspot_icon_off));
+    }
+
+    @Test
+    public void testIcon_whenTransient_isSearchState() {
+        QSTile.BooleanState state = new QSTile.BooleanState();
+        when(mHotspotController.isHotspotTransient()).thenReturn(true);
+        when(mHotspotController.isHotspotEnabled()).thenReturn(true);
+
+        mTile.handleUpdateState(state, /* arg= */ null);
+
+        assertThat(state.icon)
+                .isEqualTo(QSTileImpl.ResourceIcon.get(R.drawable.qs_hotspot_icon_search));
+    }
+
+    @Test
+    public void testIcon_whenEnabled_isOnState() {
+        QSTile.BooleanState state = new QSTile.BooleanState();
+        when(mHotspotController.isHotspotTransient()).thenReturn(false);
+        when(mHotspotController.isHotspotEnabled()).thenReturn(true);
+
+        mTile.handleUpdateState(state, /* arg= */ null);
+
+        assertThat(state.icon)
+                .isEqualTo(QSTileImpl.ResourceIcon.get(R.drawable.qs_hotspot_icon_on));
     }
 }

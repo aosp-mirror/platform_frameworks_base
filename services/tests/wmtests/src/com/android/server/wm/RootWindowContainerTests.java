@@ -72,6 +72,7 @@ import android.content.pm.ApplicationInfo;
 import android.content.pm.ResolveInfo;
 import android.content.res.Configuration;
 import android.content.res.Resources;
+import android.graphics.Rect;
 import android.os.UserHandle;
 import android.platform.test.annotations.Presubmit;
 import android.util.MergedConfiguration;
@@ -107,9 +108,10 @@ public class RootWindowContainerTests extends WindowTestsBase {
     }
 
     @Test
-    public void testUpdateDefaultDisplayWindowingModeOnSettingsRetrieved() {
+    public void testUpdateDefaultTaskDisplayAreaWindowingModeOnSettingsRetrieved() {
         assertEquals(WindowConfiguration.WINDOWING_MODE_FULLSCREEN,
-                mWm.getDefaultDisplayContentLocked().getWindowingMode());
+                mWm.getDefaultDisplayContentLocked().getDefaultTaskDisplayArea()
+                        .getWindowingMode());
 
         mWm.mIsPc = true;
         mWm.mAtmService.mSupportsFreeformWindowManagement = true;
@@ -117,7 +119,8 @@ public class RootWindowContainerTests extends WindowTestsBase {
         mWm.mRoot.onSettingsRetrieved();
 
         assertEquals(WindowConfiguration.WINDOWING_MODE_FREEFORM,
-                mWm.getDefaultDisplayContentLocked().getWindowingMode());
+                mWm.getDefaultDisplayContentLocked().getDefaultTaskDisplayArea()
+                        .getWindowingMode());
     }
 
     /**
@@ -169,7 +172,7 @@ public class RootWindowContainerTests extends WindowTestsBase {
     public void testTaskLayerRank() {
         final Task rootTask = new TaskBuilder(mSupervisor).build();
         final Task task1 = new TaskBuilder(mSupervisor).setParentTaskFragment(rootTask).build();
-        new ActivityBuilder(mAtm).setTask(task1).build().mVisibleRequested = true;
+        new ActivityBuilder(mAtm).setTask(task1).build().setVisibleRequested(true);
         mWm.mRoot.rankTaskLayers();
 
         assertEquals(1, task1.mLayerRank);
@@ -177,7 +180,7 @@ public class RootWindowContainerTests extends WindowTestsBase {
         assertEquals(Task.LAYER_RANK_INVISIBLE, rootTask.mLayerRank);
 
         final Task task2 = new TaskBuilder(mSupervisor).build();
-        new ActivityBuilder(mAtm).setTask(task2).build().mVisibleRequested = true;
+        new ActivityBuilder(mAtm).setTask(task2).build().setVisibleRequested(true);
         mWm.mRoot.rankTaskLayers();
 
         // Note that ensureActivitiesVisible is disabled in SystemServicesTestRule, so both the
@@ -373,6 +376,33 @@ public class RootWindowContainerTests extends WindowTestsBase {
         ensureTaskPlacement(fullscreenTask, secondActivity);
         assertTrue(pinnedRootTask.inPinnedWindowingMode());
         assertEquals(WINDOWING_MODE_FULLSCREEN, fullscreenTask.getWindowingMode());
+    }
+
+    @Test
+    public void testMovingEmbeddedActivityToPip() {
+        final Rect taskBounds = new Rect(0, 0, 800, 1000);
+        final Rect taskFragmentBounds = new Rect(0, 0, 400, 1000);
+        final Task task = mRootWindowContainer.getDefaultTaskDisplayArea().createRootTask(
+                WINDOWING_MODE_MULTI_WINDOW, ACTIVITY_TYPE_STANDARD, true /* onTop */);
+        task.setBounds(taskBounds);
+        assertEquals(taskBounds, task.getBounds());
+        final TaskFragment taskFragment = new TaskFragmentBuilder(mAtm)
+                .setParentTask(task)
+                .createActivityCount(2)
+                .setBounds(taskFragmentBounds)
+                .build();
+        assertEquals(taskFragmentBounds, taskFragment.getBounds());
+        final ActivityRecord topActivity = taskFragment.getTopMostActivity();
+
+        // Move the top activity to pinned root task.
+        mRootWindowContainer.moveActivityToPinnedRootTask(topActivity,
+                null /* launchIntoPipHostActivity */, "test");
+
+        final Task pinnedRootTask = task.getDisplayArea().getRootPinnedTask();
+
+        // Ensure the initial bounds of the PiP Task is the same as the TaskFragment.
+        ensureTaskPlacement(pinnedRootTask, topActivity);
+        assertEquals(taskFragmentBounds, pinnedRootTask.getBounds());
     }
 
     private static void ensureTaskPlacement(Task task, ActivityRecord... activities) {

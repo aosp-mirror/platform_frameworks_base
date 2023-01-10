@@ -3211,6 +3211,7 @@ public class PackageManagerService implements PackageSender, TestUtilityService 
         return isPackageDeviceAdmin(packageName, UserHandle.USER_ALL);
     }
 
+    // TODO(b/261957226): centralise this logic in DPM
     boolean isPackageDeviceAdmin(String packageName, int userId) {
         final IDevicePolicyManager dpm = getDevicePolicyManager();
         try {
@@ -3237,11 +3238,32 @@ public class PackageManagerService implements PackageSender, TestUtilityService 
                     if (dpm.packageHasActiveAdmins(packageName, users[i])) {
                         return true;
                     }
+                    if (isDeviceManagementRoleHolder(packageName, users[i])) {
+                        return true;
+                    }
                 }
             }
         } catch (RemoteException e) {
         }
         return false;
+    }
+
+    private boolean isDeviceManagementRoleHolder(String packageName, int userId) {
+        return Objects.equals(packageName, getDevicePolicyManagementRoleHolderPackageName(userId));
+    }
+
+    @Nullable
+    private String getDevicePolicyManagementRoleHolderPackageName(int userId) {
+        return Binder.withCleanCallingIdentity(() -> {
+            RoleManager roleManager = mContext.getSystemService(RoleManager.class);
+            List<String> roleHolders =
+                    roleManager.getRoleHoldersAsUser(
+                            RoleManager.ROLE_DEVICE_POLICY_MANAGEMENT, UserHandle.of(userId));
+            if (roleHolders.isEmpty()) {
+                return null;
+            }
+            return roleHolders.get(0);
+        });
     }
 
     /** Returns the device policy manager interface. */
@@ -3373,6 +3395,11 @@ public class PackageManagerService implements PackageSender, TestUtilityService 
         enforceOwnerRights(snapshot, ownerPackage, callingUid);
         PackageManagerServiceUtils.enforceShellRestriction(mInjector.getUserManagerInternal(),
                 UserManager.DISALLOW_DEBUGGING_FEATURES, callingUid, sourceUserId);
+        if (!intentFilter.checkDataPathAndSchemeSpecificParts()) {
+            EventLog.writeEvent(0x534e4554, "246749936", callingUid);
+            throw new IllegalArgumentException("Invalid intent data paths or scheme specific parts"
+                    + " in the filter.");
+        }
         if (intentFilter.countActions() == 0) {
             Slog.w(TAG, "Cannot set a crossProfile intent filter with no filter actions");
             return;
@@ -5798,6 +5825,11 @@ public class PackageManagerService implements PackageSender, TestUtilityService 
             final Computer snapshot = snapshotComputer();
             enforceOwnerRights(snapshot, packageName, Binder.getCallingUid());
             mimeTypes = CollectionUtils.emptyIfNull(mimeTypes);
+            for (String mimeType : mimeTypes) {
+                if (mimeType.length() > 255) {
+                    throw new IllegalArgumentException("MIME type length exceeds 255 characters");
+                }
+            }
             final PackageStateInternal packageState = snapshot.getPackageStateInternal(packageName);
             Set<String> existingMimeTypes = packageState.getMimeGroups().get(mimeGroup);
             if (existingMimeTypes == null) {
@@ -5807,6 +5839,10 @@ public class PackageManagerService implements PackageSender, TestUtilityService 
             if (existingMimeTypes.size() == mimeTypes.size()
                     && existingMimeTypes.containsAll(mimeTypes)) {
                 return;
+            }
+            if (mimeTypes.size() > 500) {
+                throw new IllegalStateException("Max limit on MIME types for MIME group "
+                        + mimeGroup + " exceeded for package " + packageName);
             }
 
             ArraySet<String> mimeTypesSet = new ArraySet<>(mimeTypes);
@@ -6537,7 +6573,7 @@ public class PackageManagerService implements PackageSender, TestUtilityService 
                         if (dependentState == null) {
                             continue;
                         }
-                        if (!Objects.equals(dependentState.getUserStateOrDefault(userId)
+                        if (canSetOverlayPaths(dependentState.getUserStateOrDefault(userId)
                                 .getSharedLibraryOverlayPaths()
                                 .get(libName), newOverlayPaths)) {
                             String dependentPackageName = dependent.getPackageName();
@@ -6553,7 +6589,10 @@ public class PackageManagerService implements PackageSender, TestUtilityService 
                 }
             }
 
-            outUpdatedPackageNames.add(targetPackageName);
+            if (canSetOverlayPaths(packageState.getUserStateOrDefault(userId).getOverlayPaths(),
+                    newOverlayPaths)) {
+                outUpdatedPackageNames.add(targetPackageName);
+            }
 
             commitPackageStateMutation(null, mutator -> {
                 mutator.forPackage(targetPackageName)
@@ -6581,6 +6620,17 @@ public class PackageManagerService implements PackageSender, TestUtilityService 
 
         invalidatePackageInfoCache();
 
+        return true;
+    }
+
+    private boolean canSetOverlayPaths(OverlayPaths origPaths, OverlayPaths newPaths) {
+        if (Objects.equals(origPaths, newPaths)) {
+            return false;
+        }
+        if ((origPaths == null && newPaths.isEmpty())
+                || (newPaths == null && origPaths.isEmpty())) {
+            return false;
+        }
         return true;
     }
 
@@ -7051,7 +7101,8 @@ public class PackageManagerService implements PackageSender, TestUtilityService 
             mResolveActivity.processName = pkg.getProcessName();
             mResolveActivity.launchMode = ActivityInfo.LAUNCH_MULTIPLE;
             mResolveActivity.flags = ActivityInfo.FLAG_EXCLUDE_FROM_RECENTS
-                    | ActivityInfo.FLAG_FINISH_ON_CLOSE_SYSTEM_DIALOGS;
+                    | ActivityInfo.FLAG_FINISH_ON_CLOSE_SYSTEM_DIALOGS
+                    | ActivityInfo.FLAG_CAN_DISPLAY_ON_REMOTE_DEVICES;
             mResolveActivity.theme = 0;
             mResolveActivity.exported = true;
             mResolveActivity.enabled = true;
@@ -7084,7 +7135,8 @@ public class PackageManagerService implements PackageSender, TestUtilityService 
                 mResolveActivity.launchMode = ActivityInfo.LAUNCH_MULTIPLE;
                 mResolveActivity.documentLaunchMode = ActivityInfo.DOCUMENT_LAUNCH_NEVER;
                 mResolveActivity.flags = ActivityInfo.FLAG_EXCLUDE_FROM_RECENTS
-                        | ActivityInfo.FLAG_RELINQUISH_TASK_IDENTITY;
+                        | ActivityInfo.FLAG_RELINQUISH_TASK_IDENTITY
+                        | ActivityInfo.FLAG_CAN_DISPLAY_ON_REMOTE_DEVICES;
                 mResolveActivity.theme = R.style.Theme_Material_Dialog_Alert;
                 mResolveActivity.exported = true;
                 mResolveActivity.enabled = true;

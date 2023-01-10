@@ -26,12 +26,12 @@
     android:fitsSystemWindows="true">
 
     <com.android.systemui.statusbar.BackDropView
-            android:id="@+id/backdrop"
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:visibility="gone"
-            sysui:ignoreRightInset="true"
-            >
+        android:id="@+id/backdrop"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:visibility="gone"
+        sysui:ignoreRightInset="true"
+    >
         <ImageView android:id="@+id/backdrop_back"
                    android:layout_width="match_parent"
                    android:scaleType="centerCrop"
@@ -49,7 +49,7 @@
         android:layout_height="match_parent"
         android:importantForAccessibility="no"
         sysui:ignoreRightInset="true"
-        />
+    />
 
     <com.android.systemui.scrim.ScrimView
         android:id="@+id/scrim_notifications"
@@ -57,17 +57,17 @@
         android:layout_height="match_parent"
         android:importantForAccessibility="no"
         sysui:ignoreRightInset="true"
-        />
+    />
 
     <com.android.systemui.statusbar.LightRevealScrim
-            android:id="@+id/light_reveal_scrim"
-            android:layout_width="match_parent"
-            android:layout_height="match_parent" />
+        android:id="@+id/light_reveal_scrim"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent" />
 
     <include layout="@layout/status_bar_expanded"
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:visibility="invisible" />
+             android:layout_width="match_parent"
+             android:layout_height="match_parent"
+             android:visibility="invisible" />
 
     <include layout="@layout/brightness_mirror_container" />
 
@@ -88,7 +88,7 @@
         android:layout_marginTop="@dimen/status_bar_height"
         android:layout_gravity="top|center_horizontal"
         android:gravity="center_horizontal">
-        <com.android.keyguard.KeyguardMessageArea
+        <com.android.keyguard.AuthKeyguardMessageArea
             android:id="@+id/keyguard_message_area"
             style="@style/Keyguard.TextView"
             android:layout_width="wrap_content"
@@ -98,14 +98,17 @@
             android:singleLine="true"
             android:ellipsize="marquee"
             android:focusable="true" />
-        <FrameLayout android:id="@+id/keyguard_bouncer_container"
-                     android:layout_height="0dp"
-                     android:layout_width="match_parent"
-                     android:layout_weight="1"
-                     android:background="@android:color/transparent"
-                     android:clipChildren="false"
-                     android:clipToPadding="false" />
     </LinearLayout>
+
+    <FrameLayout android:id="@+id/keyguard_bouncer_container"
+        android:paddingTop="@dimen/status_bar_height"
+        android:layout_height="match_parent"
+        android:layout_width="match_parent"
+        android:layout_weight="1"
+        android:background="@android:color/transparent"
+        android:visibility="invisible"
+        android:clipChildren="false"
+        android:clipToPadding="false" />
 
     <com.android.systemui.biometrics.AuthRippleView
         android:id="@+id/auth_ripple"

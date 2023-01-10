@@ -145,7 +145,10 @@ class ActivityTransitionState {
      * that it is preserved through activty destroy and restore.
      */
     private ArrayList<String> getPendingExitNames() {
-        if (mPendingExitNames == null && mEnterTransitionCoordinator != null) {
+        if (mPendingExitNames == null
+                && mEnterTransitionCoordinator != null
+                && !mEnterTransitionCoordinator.isReturning()
+        ) {
             mPendingExitNames = mEnterTransitionCoordinator.getPendingExitSharedElementNames();
         }
         return mPendingExitNames;
@@ -202,6 +205,7 @@ class ActivityTransitionState {
             restoreExitedViews();
             activity.getWindow().getDecorView().setVisibility(View.VISIBLE);
         }
+        getPendingExitNames(); // Set mPendingExitNames before resetting mEnterTransitionCoordinator
         mEnterTransitionCoordinator = new EnterTransitionCoordinator(activity,
                 resultReceiver, sharedElementNames, mEnterActivityOptions.isReturning(),
                 mEnterActivityOptions.isCrossTask());
@@ -250,6 +254,7 @@ class ActivityTransitionState {
     public void onStop(Activity activity) {
         restoreExitedViews();
         if (mEnterTransitionCoordinator != null) {
+            getPendingExitNames(); // Set mPendingExitNames before clearing
             mEnterTransitionCoordinator.stop();
             mEnterTransitionCoordinator = null;
         }
@@ -263,11 +268,6 @@ class ActivityTransitionState {
         // After orientation change, the onResume can come in before the top Activity has
         // left, so if the Activity is not top, wait a second for the top Activity to exit.
         if (mEnterTransitionCoordinator == null || activity.isTopOfTask()) {
-            if (mEnterTransitionCoordinator != null) {
-                mEnterTransitionCoordinator.runAfterTransitionsComplete(() -> {
-                    mEnterTransitionCoordinator = null;
-                });
-            }
             restoreExitedViews();
             restoreReenteringViews();
         } else {
@@ -276,15 +276,11 @@ class ActivityTransitionState {
                 public void run() {
                     if (mEnterTransitionCoordinator == null ||
                             mEnterTransitionCoordinator.isWaitingForRemoteExit()) {
-                        if (mEnterTransitionCoordinator != null) {
-                            mEnterTransitionCoordinator.runAfterTransitionsComplete(() -> {
-                                mEnterTransitionCoordinator = null;
-                            });
-                        }
                         restoreExitedViews();
                         restoreReenteringViews();
                     } else if (mEnterTransitionCoordinator.isReturning()) {
                         mEnterTransitionCoordinator.runAfterTransitionsComplete(() -> {
+                            getPendingExitNames(); // Set mPendingExitNames before clearing
                             mEnterTransitionCoordinator = null;
                         });
                     }
@@ -384,6 +380,7 @@ class ActivityTransitionState {
     }
 
     public void startExitOutTransition(Activity activity, Bundle options) {
+        getPendingExitNames(); // Set mPendingExitNames before clearing mEnterTransitionCoordinator
         mEnterTransitionCoordinator = null;
         if (!activity.getWindow().hasFeature(Window.FEATURE_ACTIVITY_TRANSITIONS) ||
                 mExitTransitionCoordinators == null) {

@@ -26,11 +26,11 @@
     <string name="keyguard_sim_error_message_short" msgid="633630844240494070">"การ์ดไม่ถูกต้อง"</string>
     <string name="keyguard_charged" msgid="5478247181205188995">"ชาร์จแล้ว"</string>
     <string name="keyguard_plugged_in_wireless" msgid="2537874724955057383">"<xliff:g id="PERCENTAGE">%s</xliff:g> • กำลังชาร์จแบบไร้สาย"</string>
-    <string name="keyguard_plugged_in_dock" msgid="449722738270908674">"<xliff:g id="PERCENTAGE">%s</xliff:g> • กำลังชาร์จบนแท่นชาร์จ"</string>
+    <string name="keyguard_plugged_in_dock" msgid="2122073051904360987">"<xliff:g id="PERCENTAGE">%s</xliff:g> • กำลังชาร์จ"</string>
     <string name="keyguard_plugged_in" msgid="8169926454348380863">"<xliff:g id="PERCENTAGE">%s</xliff:g> • กำลังชาร์จ"</string>
     <string name="keyguard_plugged_in_charging_fast" msgid="4386594091107340426">"<xliff:g id="PERCENTAGE">%s</xliff:g> • กำลังชาร์จอย่างเร็ว"</string>
     <string name="keyguard_plugged_in_charging_slowly" msgid="217655355424210">"<xliff:g id="PERCENTAGE">%s</xliff:g> • กำลังชาร์จอย่างช้าๆ"</string>
-    <string name="keyguard_plugged_in_charging_limited" msgid="6091488837901216962">"<xliff:g id="PERCENTAGE">%s</xliff:g> • จำกัดการชาร์จชั่วคราว"</string>
+    <string name="keyguard_plugged_in_charging_limited" msgid="1053130519456324630">"<xliff:g id="PERCENTAGE">%s</xliff:g> • ปรับการชาร์จให้เหมาะสมเพื่อถนอมแบตเตอรี่"</string>
     <string name="keyguard_instructions_when_pattern_disabled" msgid="8448804180089936954">"กด \"เมนู\" เพื่อปลดล็อก"</string>
     <string name="keyguard_network_locked_message" msgid="407096292844868608">"เครือข่ายถูกล็อก"</string>
     <string name="keyguard_missing_sim_message_short" msgid="704159478161444907">"ไม่มีซิมการ์ด"</string>
@@ -78,9 +78,9 @@
     <string name="kg_prompt_reason_restart_pattern" msgid="4720554342633852066">"ต้องวาดรูปแบบหลังจากอุปกรณ์รีสตาร์ท"</string>
     <string name="kg_prompt_reason_restart_pin" msgid="1587671566498057656">"ต้องระบุ PIN หลังจากอุปกรณ์รีสตาร์ท"</string>
     <string name="kg_prompt_reason_restart_password" msgid="8061279087240952002">"ต้องป้อนรหัสผ่านหลังจากอุปกรณ์รีสตาร์ท"</string>
-    <string name="kg_prompt_reason_timeout_pattern" msgid="9170360502528959889">"ต้องวาดรูปแบบเพื่อความปลอดภัยเพิ่มเติม"</string>
-    <string name="kg_prompt_reason_timeout_pin" msgid="5945186097160029201">"ต้องระบุ PIN เพื่อความปลอดภัยเพิ่มเติม"</string>
-    <string name="kg_prompt_reason_timeout_password" msgid="2258263949430384278">"ต้องป้อนรหัสผ่านเพื่อความปลอดภัยเพิ่มเติม"</string>
+    <string name="kg_prompt_reason_timeout_pattern" msgid="5514969660010197363">"ใช้รูปแบบแทนเพื่อเพิ่มความปลอดภัย"</string>
+    <string name="kg_prompt_reason_timeout_pin" msgid="4227962059353859376">"ใช้ PIN แทนเพื่อเพิ่มความปลอดภัย"</string>
+    <string name="kg_prompt_reason_timeout_password" msgid="8810879144143933690">"ใช้รหัสผ่านแทนเพื่อเพิ่มความปลอดภัย"</string>
     <string name="kg_prompt_reason_device_admin" msgid="6961159596224055685">"ผู้ดูแลระบบล็อกอุปกรณ์"</string>
     <string name="kg_prompt_reason_user_request" msgid="6015774877733717904">"มีการล็อกอุปกรณ์ด้วยตัวเอง"</string>
     <string name="kg_face_not_recognized" msgid="7903950626744419160">"ไม่รู้จัก"</string>
@@ -90,4 +90,5 @@
     <string name="clock_title_default" msgid="6342735240617459864">"ค่าเริ่มต้น"</string>
     <string name="clock_title_bubble" msgid="2204559396790593213">"บับเบิล"</string>
     <string name="clock_title_analog" msgid="8409262532900918273">"แอนะล็อก"</string>
+    <string name="keyguard_unlock_to_continue" msgid="7509503484250597743">"ปลดล็อกอุปกรณ์ของคุณเพื่อดำเนินการต่อ"</string>
 </resources>

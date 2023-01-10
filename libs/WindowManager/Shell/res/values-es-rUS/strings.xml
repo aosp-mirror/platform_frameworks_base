@@ -33,6 +33,7 @@
     <string name="accessibility_action_pip_unstash" msgid="7467499339610437646">"Dejar de almacenar de manera segura"</string>
     <string name="dock_forced_resizable" msgid="1749750436092293116">"Es posible que la app no funcione en el modo de pantalla dividida."</string>
     <string name="dock_non_resizeble_failed_to_dock_text" msgid="7408396418008948957">"La app no es compatible con la función de pantalla dividida."</string>
+    <string name="dock_multi_instances_not_supported_text" msgid="5242868470666346929">"Esta app solo puede estar abierta en 1 ventana."</string>
     <string name="forced_resizable_secondary_display" msgid="1768046938673582671">"Es posible que la app no funcione en una pantalla secundaria."</string>
     <string name="activity_launch_on_secondary_display_failed_text" msgid="4226485344988071769">"La app no puede iniciarse en pantallas secundarias."</string>
     <string name="accessibility_divider" msgid="703810061635792791">"Divisor de pantalla dividida"</string>
@@ -76,12 +77,19 @@
     <string name="camera_compat_treatment_suggested_button_description" msgid="8103916969024076767">"¿Tienes problemas con la cámara?\nPresiona para reajustarla"</string>
     <string name="camera_compat_treatment_applied_button_description" msgid="2944157113330703897">"¿No se resolvió?\nPresiona para revertir los cambios"</string>
     <string name="camera_compat_dismiss_button_description" msgid="2795364433503817511">"¿No tienes problemas con la cámara? Presionar para descartar."</string>
-    <string name="letterbox_education_dialog_title" msgid="6688664582871779215">"Algunas apps funcionan mejor en modo vertical"</string>
-    <string name="letterbox_education_dialog_subtext" msgid="4853542518367719562">"Prueba estas opciones para aprovechar al máximo tu espacio"</string>
-    <string name="letterbox_education_screen_rotation_text" msgid="5085786687366339027">"Rota el dispositivo para ver la pantalla completa"</string>
-    <string name="letterbox_education_reposition_text" msgid="1068293354123934727">"Presiona dos veces junto a una app para cambiar su posición"</string>
+    <string name="letterbox_education_dialog_title" msgid="7739895354143295358">"Aprovecha más"</string>
+    <string name="letterbox_education_split_screen_text" msgid="6206339484068670830">"Arrastra otra app para el modo de pantalla dividida"</string>
+    <string name="letterbox_education_reposition_text" msgid="4589957299813220661">"Presiona dos veces fuera de una app para cambiar su ubicación"</string>
     <string name="letterbox_education_got_it" msgid="4057634570866051177">"Entendido"</string>
     <string name="letterbox_education_expand_button_description" msgid="1729796567101129834">"Expande para obtener más información."</string>
     <string name="maximize_button_text" msgid="1650859196290301963">"Maximizar"</string>
+    <string name="minimize_button_text" msgid="271592547935841753">"Minimizar"</string>
     <string name="close_button_text" msgid="2913281996024033299">"Cerrar"</string>
+    <string name="back_button_text" msgid="1469718707134137085">"Atrás"</string>
+    <string name="handle_text" msgid="1766582106752184456">"Controlador"</string>
+    <string name="fullscreen_text" msgid="1162316685217676079">"Pantalla completa"</string>
+    <string name="desktop_text" msgid="1077633567027630454">"Modo de escritorio"</string>
+    <string name="split_screen_text" msgid="1396336058129570886">"Pantalla dividida"</string>
+    <string name="more_button_text" msgid="3655388105592893530">"Más"</string>
+    <string name="float_button_text" msgid="9221657008391364581">"Flotante"</string>
 </resources>

@@ -33,6 +33,7 @@
     <string name="accessibility_action_pip_unstash" msgid="7467499339610437646">"Показати"</string>
     <string name="dock_forced_resizable" msgid="1749750436092293116">"Додаток може не працювати в режимі розділеного екрана."</string>
     <string name="dock_non_resizeble_failed_to_dock_text" msgid="7408396418008948957">"Додаток не підтримує розділення екрана."</string>
+    <string name="dock_multi_instances_not_supported_text" msgid="5242868470666346929">"Цей додаток можна відкрити лише в одному вікні."</string>
     <string name="forced_resizable_secondary_display" msgid="1768046938673582671">"Додаток може не працювати на додатковому екрані."</string>
     <string name="activity_launch_on_secondary_display_failed_text" msgid="4226485344988071769">"Додаток не підтримує запуск на додаткових екранах."</string>
     <string name="accessibility_divider" msgid="703810061635792791">"Розділювач екрана"</string>
@@ -76,12 +77,19 @@
     <string name="camera_compat_treatment_suggested_button_description" msgid="8103916969024076767">"Проблеми з камерою?\nНатисніть, щоб пристосувати"</string>
     <string name="camera_compat_treatment_applied_button_description" msgid="2944157113330703897">"Проблему не вирішено?\nНатисніть, щоб скасувати зміни"</string>
     <string name="camera_compat_dismiss_button_description" msgid="2795364433503817511">"Немає проблем із камерою? Торкніться, щоб закрити."</string>
-    <string name="letterbox_education_dialog_title" msgid="6688664582871779215">"Деякі додатки найкраще працюють у вертикальній орієнтації"</string>
-    <string name="letterbox_education_dialog_subtext" msgid="4853542518367719562">"Щоб максимально ефективно використовувати місце на екрані, спробуйте виконати одну з наведених нижче дій"</string>
-    <string name="letterbox_education_screen_rotation_text" msgid="5085786687366339027">"Щоб перейти в повноекранний режим, поверніть пристрій"</string>
-    <string name="letterbox_education_reposition_text" msgid="1068293354123934727">"Щоб перемістити додаток, двічі торкніться області поруч із ним"</string>
+    <string name="letterbox_education_dialog_title" msgid="7739895354143295358">"Більше простору та можливостей"</string>
+    <string name="letterbox_education_split_screen_text" msgid="6206339484068670830">"Щоб перейти в режим розділення екрана, перетягніть сюди інший додаток"</string>
+    <string name="letterbox_education_reposition_text" msgid="4589957299813220661">"Щоб перемістити додаток, двічі торкніться області поза ним"</string>
     <string name="letterbox_education_got_it" msgid="4057634570866051177">"ОK"</string>
     <string name="letterbox_education_expand_button_description" msgid="1729796567101129834">"Розгорніть, щоб дізнатися більше."</string>
     <string name="maximize_button_text" msgid="1650859196290301963">"Збільшити"</string>
+    <string name="minimize_button_text" msgid="271592547935841753">"Згорнути"</string>
     <string name="close_button_text" msgid="2913281996024033299">"Закрити"</string>
+    <string name="back_button_text" msgid="1469718707134137085">"Назад"</string>
+    <string name="handle_text" msgid="1766582106752184456">"Маркер"</string>
+    <string name="fullscreen_text" msgid="1162316685217676079">"На весь екран"</string>
+    <string name="desktop_text" msgid="1077633567027630454">"Режим комп’ютера"</string>
+    <string name="split_screen_text" msgid="1396336058129570886">"Розділити екран"</string>
+    <string name="more_button_text" msgid="3655388105592893530">"Більше"</string>
+    <string name="float_button_text" msgid="9221657008391364581">"Плаваюче вікно"</string>
 </resources>

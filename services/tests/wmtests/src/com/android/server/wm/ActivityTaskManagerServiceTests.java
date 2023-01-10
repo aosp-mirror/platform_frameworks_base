@@ -220,10 +220,7 @@ public class ActivityTaskManagerServiceTests extends WindowTestsBase {
         // Check that changes are reported
         Configuration c = new Configuration(newDisp1.getRequestedOverrideConfiguration());
         c.windowConfiguration.setBounds(new Rect(0, 0, 1000, 1300));
-        newDisp1.onRequestedOverrideConfigurationChanged(c);
-        mAtm.mRootWindowContainer.ensureVisibilityAndConfig(null /* starting */,
-                newDisp1.mDisplayId, false /* markFrozenIfConfigChanged */,
-                false /* deferResume */);
+        newDisp1.performDisplayOverrideConfigUpdate(c);
         assertEquals(0, added.size());
         assertEquals(1, changed.size());
         assertEquals(0, removed.size());
@@ -347,7 +344,7 @@ public class ActivityTaskManagerServiceTests extends WindowTestsBase {
 
         // Assume the activity is finishing and hidden because it was crashed.
         activity.finishing = true;
-        activity.mVisibleRequested = false;
+        activity.setVisibleRequested(false);
         activity.setVisible(false);
         activity.getTask().setPausingActivity(activity);
         homeActivity.setState(PAUSED, "test");

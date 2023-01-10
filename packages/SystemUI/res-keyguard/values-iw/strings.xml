@@ -26,11 +26,11 @@
     <string name="keyguard_sim_error_message_short" msgid="633630844240494070">"כרטיס לא חוקי."</string>
     <string name="keyguard_charged" msgid="5478247181205188995">"הסוללה טעונה"</string>
     <string name="keyguard_plugged_in_wireless" msgid="2537874724955057383">"<xliff:g id="PERCENTAGE">%s</xliff:g> • בטעינה אלחוטית"</string>
-    <string name="keyguard_plugged_in_dock" msgid="449722738270908674">"<xliff:g id="PERCENTAGE">%s</xliff:g> • אביזר העגינה בטעינה"</string>
+    <string name="keyguard_plugged_in_dock" msgid="2122073051904360987">"<xliff:g id="PERCENTAGE">%s</xliff:g> • בטעינה"</string>
     <string name="keyguard_plugged_in" msgid="8169926454348380863">"<xliff:g id="PERCENTAGE">%s</xliff:g> • בטעינה"</string>
     <string name="keyguard_plugged_in_charging_fast" msgid="4386594091107340426">"<xliff:g id="PERCENTAGE">%s</xliff:g> • בטעינה מהירה"</string>
     <string name="keyguard_plugged_in_charging_slowly" msgid="217655355424210">"<xliff:g id="PERCENTAGE">%s</xliff:g> • בטעינה איטית"</string>
-    <string name="keyguard_plugged_in_charging_limited" msgid="6091488837901216962">"<xliff:g id="PERCENTAGE">%s</xliff:g> • הטעינה מוגבלת באופן זמני"</string>
+    <string name="keyguard_plugged_in_charging_limited" msgid="1053130519456324630">"<xliff:g id="PERCENTAGE">%s</xliff:g> • הטעינה עברה אופטימיזציה כדי להגן על הסוללה"</string>
     <string name="keyguard_instructions_when_pattern_disabled" msgid="8448804180089936954">"יש ללחוץ על \'תפריט\' כדי לבטל את הנעילה."</string>
     <string name="keyguard_network_locked_message" msgid="407096292844868608">"הרשת נעולה"</string>
     <string name="keyguard_missing_sim_message_short" msgid="704159478161444907">"‏אין כרטיס SIM"</string>
@@ -53,7 +53,7 @@
     <string name="kg_wrong_pattern" msgid="5907301342430102842">"קו ביטול נעילה שגוי"</string>
     <string name="kg_wrong_password" msgid="4143127991071670512">"סיסמה שגויה"</string>
     <string name="kg_wrong_pin" msgid="4160978845968732624">"קוד האימות שגוי"</string>
-    <string name="kg_too_many_failed_attempts_countdown" msgid="2038195171919795529">"{count,plural, =1{אפשר לנסות שוב בעוד שנייה אחת.}two{אפשר לנסות שוב בעוד # שניות.}many{אפשר לנסות שוב בעוד # שניות.}other{אפשר לנסות שוב בעוד # שניות.}}"</string>
+    <string name="kg_too_many_failed_attempts_countdown" msgid="2038195171919795529">"{count,plural, =1{אפשר לנסות שוב בעוד שנייה אחת.}one{אפשר לנסות שוב בעוד # שניות.}two{אפשר לנסות שוב בעוד # שניות.}other{אפשר לנסות שוב בעוד # שניות.}}"</string>
     <string name="kg_sim_pin_instructions" msgid="1942424305184242951">"‏יש להזין את קוד האימות של כרטיס ה-SIM."</string>
     <string name="kg_sim_pin_instructions_multi" msgid="3639863309953109649">"‏יש להזין את קוד האימות של כרטיס ה-SIM של <xliff:g id="CARRIER">%1$s</xliff:g>."</string>
     <string name="kg_sim_lock_esim_instructions" msgid="5577169988158738030">"‏<xliff:g id="PREVIOUS_MSG">%1$s</xliff:g> יש להשבית את כרטיס ה-eSIM כדי להשתמש במכשיר ללא שירות סלולרי."</string>
@@ -68,9 +68,9 @@
     <string name="kg_too_many_failed_password_attempts_dialog_message" msgid="190984061975729494">"הקלדת סיסמה שגויה <xliff:g id="NUMBER_0">%1$d</xliff:g> פעמים. \n\nאפשר לנסות שוב בעוד <xliff:g id="NUMBER_1">%2$d</xliff:g> שניות."</string>
     <string name="kg_too_many_failed_pattern_attempts_dialog_message" msgid="4252405904570284368">"שרטטת קו ביטול נעילה שגוי <xliff:g id="NUMBER_0">%1$d</xliff:g> פעמים. \n\nאפשר לנסות שוב בעוד <xliff:g id="NUMBER_1">%2$d</xliff:g> שניות."</string>
     <string name="kg_password_wrong_pin_code_pukked" msgid="8047350661459040581">"‏קוד האימות של כרטיס ה-SIM שגוי. יש ליצור קשר עם הספק כדי לבטל את נעילת המכשיר."</string>
-    <string name="kg_password_wrong_pin_code" msgid="5629415765976820357">"{count,plural, =1{‏קוד האימות של כרטיס ה-SIM שגוי. נשאר לך עוד ניסיון אחד (#) לפני שיהיה צורך ליצור קשר עם הספק כדי לבטל את נעילת המכשיר.}two{‏קוד האימות של כרטיס ה-SIM שגוי. נשארו לך עוד # ניסיונות. }many{‏קוד האימות של כרטיס ה-SIM שגוי. נשארו לך עוד # ניסיונות. }other{‏קוד האימות של כרטיס ה-SIM שגוי. נשארו לך עוד # ניסיונות. }}"</string>
+    <string name="kg_password_wrong_pin_code" msgid="5629415765976820357">"{count,plural, =1{‏קוד האימות של כרטיס ה-SIM שגוי. נשאר לך עוד ניסיון אחד (#) לפני שיהיה צורך ליצור קשר עם הספק כדי לבטל את נעילת המכשיר.}one{‏קוד האימות של כרטיס ה-SIM שגוי. נשארו לך עוד # ניסיונות. }two{‏קוד האימות של כרטיס ה-SIM שגוי. נשארו לך עוד # ניסיונות. }other{‏קוד האימות של כרטיס ה-SIM שגוי. נשארו לך עוד # ניסיונות. }}"</string>
     <string name="kg_password_wrong_puk_code_dead" msgid="3698285357028468617">"‏לא ניתן להשתמש בכרטיס ה-SIM. יש ליצור קשר עם הספק."</string>
-    <string name="kg_password_wrong_puk_code" msgid="6820515467645087827">"{count,plural, =1{‏קוד ה-PUK של כרטיס ה-SIM שגוי. נשאר לך עוד ניסיון אחד (#) לפני שכרטיס ה-SIM יינעל לתמיד.}two{‏קוד ה-PUK של כרטיס ה-SIM שגוי. נשארו לך עוד # ניסיונות לפני שכרטיס ה-SIM יינעל לתמיד.}many{‏קוד ה-PUK של כרטיס ה-SIM שגוי. נשארו לך עוד # ניסיונות לפני שכרטיס ה-SIM יינעל לתמיד.}other{‏קוד ה-PUK של כרטיס ה-SIM שגוי. נשארו לך עוד # ניסיונות לפני שכרטיס ה-SIM יינעל לתמיד.}}"</string>
+    <string name="kg_password_wrong_puk_code" msgid="6820515467645087827">"{count,plural, =1{‏קוד ה-PUK של כרטיס ה-SIM שגוי. נשאר לך עוד ניסיון אחד (#) לפני שכרטיס ה-SIM יינעל לתמיד.}one{‏קוד ה-PUK של כרטיס ה-SIM שגוי. נשארו לך עוד # ניסיונות לפני שכרטיס ה-SIM יינעל לתמיד.}two{‏קוד ה-PUK של כרטיס ה-SIM שגוי. נשארו לך עוד # ניסיונות לפני שכרטיס ה-SIM יינעל לתמיד.}other{‏קוד ה-PUK של כרטיס ה-SIM שגוי. נשארו לך עוד # ניסיונות לפני שכרטיס ה-SIM יינעל לתמיד.}}"</string>
     <string name="kg_password_pin_failed" msgid="5136259126330604009">"‏נכשלה פעולת קוד הגישה של כרטיס ה-SIM"</string>
     <string name="kg_password_puk_failed" msgid="6778867411556937118">"‏הניסיון לביטול הנעילה של כרטיס ה-SIM באמצעות קוד PUK נכשל!"</string>
     <string name="accessibility_ime_switch_button" msgid="9082358310194861329">"החלפת שיטת קלט"</string>
@@ -78,16 +78,17 @@
     <string name="kg_prompt_reason_restart_pattern" msgid="4720554342633852066">"יש להזין את קו ביטול הנעילה לאחר הפעלה מחדש של המכשיר"</string>
     <string name="kg_prompt_reason_restart_pin" msgid="1587671566498057656">"צריך להזין קוד אימות לאחר הפעלה מחדש של המכשיר"</string>
     <string name="kg_prompt_reason_restart_password" msgid="8061279087240952002">"יש להזין סיסמה לאחר הפעלה מחדש של המכשיר"</string>
-    <string name="kg_prompt_reason_timeout_pattern" msgid="9170360502528959889">"יש להזין את קו ביטול הנעילה כדי להגביר את רמת האבטחה"</string>
-    <string name="kg_prompt_reason_timeout_pin" msgid="5945186097160029201">"יש להזין קוד אימות כדי להגביר את רמת האבטחה"</string>
-    <string name="kg_prompt_reason_timeout_password" msgid="2258263949430384278">"יש להזין סיסמה כדי להגביר את רמת האבטחה"</string>
+    <string name="kg_prompt_reason_timeout_pattern" msgid="5514969660010197363">"כדי להגביר את רמת האבטחה, כדאי להשתמש בקו ביטול נעילה במקום זאת"</string>
+    <string name="kg_prompt_reason_timeout_pin" msgid="4227962059353859376">"כדי להגביר את רמת האבטחה, כדאי להשתמש בקוד אימות במקום זאת"</string>
+    <string name="kg_prompt_reason_timeout_password" msgid="8810879144143933690">"כדי להגביר את רמת האבטחה, כדאי להשתמש בסיסמה במקום זאת"</string>
     <string name="kg_prompt_reason_device_admin" msgid="6961159596224055685">"המנהל של המכשיר נהל אותו"</string>
     <string name="kg_prompt_reason_user_request" msgid="6015774877733717904">"המכשיר ננעל באופן ידני"</string>
     <string name="kg_face_not_recognized" msgid="7903950626744419160">"לא זוהתה"</string>
     <string name="kg_face_sensor_privacy_enabled" msgid="939511161763558512">"לזיהוי הפנים יש להפעיל את הגישה למצלמה בהגדרות"</string>
-    <string name="kg_password_default_pin_message" msgid="1434544655827987873">"{count,plural, =1{‏יש להזין את קוד האימות של כרטיס ה-SIM. נשאר לך עוד ניסיון אחד (#) לפני שיהיה צורך ליצור קשר עם הספק כדי לבטל את נעילת המכשיר.}two{‏יש להזין את קוד האימות של כרטיס ה-SIM. נשארו לך עוד # ניסיונות.}many{‏יש להזין את קוד האימות של כרטיס ה-SIM. נשארו לך עוד # ניסיונות.}other{‏יש להזין את קוד האימות של כרטיס ה-SIM. נשארו לך עוד # ניסיונות.}}"</string>
-    <string name="kg_password_default_puk_message" msgid="1025139786449741950">"{count,plural, =1{‏כרטיס ה-SIM מושבת כעת. יש להזין קוד PUK כדי להמשיך. נשאר לך עוד ניסיון אחד (#) לפני שכרטיס ה-SIM יינעל לתמיד. למידע נוסף, ניתן לפנות לספק.}two{‏כרטיס ה-SIM מושבת כעת. יש להזין קוד PUK כדי להמשיך. נשארו לך עוד # ניסיונות לפני שכרטיס ה-SIM יינעל לתמיד. למידע נוסף, ניתן לפנות לספק.}many{‏כרטיס ה-SIM מושבת כעת. יש להזין קוד PUK כדי להמשיך. נשארו לך עוד # ניסיונות לפני שכרטיס ה-SIM יינעל לתמיד. למידע נוסף, ניתן לפנות לספק.}other{‏כרטיס ה-SIM מושבת כעת. יש להזין קוד PUK כדי להמשיך. נשארו לך עוד # ניסיונות לפני שכרטיס ה-SIM יינעל לתמיד. למידע נוסף, ניתן לפנות לספק.}}"</string>
+    <string name="kg_password_default_pin_message" msgid="1434544655827987873">"{count,plural, =1{‏יש להזין את קוד האימות של כרטיס ה-SIM. נשאר לך עוד ניסיון אחד (#) לפני שיהיה צורך ליצור קשר עם הספק כדי לבטל את נעילת המכשיר.}one{‏יש להזין את קוד האימות של כרטיס ה-SIM. נשארו לך עוד # ניסיונות.}two{‏יש להזין את קוד האימות של כרטיס ה-SIM. נשארו לך עוד # ניסיונות.}other{‏יש להזין את קוד האימות של כרטיס ה-SIM. נשארו לך עוד # ניסיונות.}}"</string>
+    <string name="kg_password_default_puk_message" msgid="1025139786449741950">"{count,plural, =1{‏כרטיס ה-SIM מושבת כעת. יש להזין קוד PUK כדי להמשיך. נשאר לך עוד ניסיון אחד (#) לפני שכרטיס ה-SIM יינעל לתמיד. למידע נוסף, ניתן לפנות לספק.}one{‏כרטיס ה-SIM מושבת כעת. יש להזין קוד PUK כדי להמשיך. נשארו לך עוד # ניסיונות לפני שכרטיס ה-SIM יינעל לתמיד. למידע נוסף, ניתן לפנות לספק.}two{‏כרטיס ה-SIM מושבת כעת. יש להזין קוד PUK כדי להמשיך. נשארו לך עוד # ניסיונות לפני שכרטיס ה-SIM יינעל לתמיד. למידע נוסף, ניתן לפנות לספק.}other{‏כרטיס ה-SIM מושבת כעת. יש להזין קוד PUK כדי להמשיך. נשארו לך עוד # ניסיונות לפני שכרטיס ה-SIM יינעל לתמיד. למידע נוסף, ניתן לפנות לספק.}}"</string>
     <string name="clock_title_default" msgid="6342735240617459864">"ברירת מחדל"</string>
     <string name="clock_title_bubble" msgid="2204559396790593213">"בועה"</string>
     <string name="clock_title_analog" msgid="8409262532900918273">"אנלוגי"</string>
+    <string name="keyguard_unlock_to_continue" msgid="7509503484250597743">"צריך לבטל את הנעילה של המכשיר כדי להמשיך"</string>
 </resources>

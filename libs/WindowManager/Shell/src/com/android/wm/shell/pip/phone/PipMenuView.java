@@ -207,6 +207,9 @@ public class PipMenuView extends FrameLayout {
             }
         });
 
+        // this disables the ripples
+        mEnterSplitButton.setEnabled(false);
+
         findViewById(R.id.resize_handle).setAlpha(0);
 
         mActionsGroup = findViewById(R.id.actions_group);

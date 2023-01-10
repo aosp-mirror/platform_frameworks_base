@@ -50,7 +50,6 @@ import android.util.Pair;
 import com.android.internal.messages.nano.SystemMessageProto;
 import com.android.internal.messages.nano.SystemMessageProto.SystemMessage;
 import com.android.systemui.CoreStartable;
-import com.android.systemui.Dependency;
 import com.android.systemui.R;
 import com.android.systemui.dagger.SysUISingleton;
 import com.android.systemui.dagger.qualifiers.UiBackground;
@@ -67,29 +66,32 @@ import javax.inject.Inject;
  * splitted screen.
  */
 @SysUISingleton
-public class InstantAppNotifier extends CoreStartable
-        implements CommandQueue.Callbacks, KeyguardStateController.Callback {
+public class InstantAppNotifier
+        implements CoreStartable, CommandQueue.Callbacks, KeyguardStateController.Callback {
     private static final String TAG = "InstantAppNotifier";
     public static final int NUM_TASKS_FOR_INSTANT_APP_INFO = 5;
 
+    private final Context mContext;
     private final Handler mHandler = new Handler();
     private final Executor mUiBgExecutor;
     private final ArraySet<Pair<String, Integer>> mCurrentNotifs = new ArraySet<>();
     private final CommandQueue mCommandQueue;
-    private KeyguardStateController mKeyguardStateController;
+    private final KeyguardStateController mKeyguardStateController;
 
     @Inject
-    public InstantAppNotifier(Context context, CommandQueue commandQueue,
-            @UiBackground Executor uiBgExecutor) {
-        super(context);
+    public InstantAppNotifier(
+            Context context,
+            CommandQueue commandQueue,
+            @UiBackground Executor uiBgExecutor,
+            KeyguardStateController keyguardStateController) {
+        mContext = context;
         mCommandQueue = commandQueue;
         mUiBgExecutor = uiBgExecutor;
+        mKeyguardStateController = keyguardStateController;
     }
 
     @Override
     public void start() {
-        mKeyguardStateController = Dependency.get(KeyguardStateController.class);
-
         // listen for user / profile change.
         try {
             ActivityManager.getService().registerUserSwitchObserver(mUserSwitchListener, TAG);
@@ -288,7 +290,7 @@ public class InstantAppNotifier extends CoreStartable
                             .setComponent(aiaComponent)
                             .setAction(Intent.ACTION_VIEW)
                             .addCategory(Intent.CATEGORY_BROWSABLE)
-                            .addCategory("unique:" + System.currentTimeMillis())
+                            .setIdentifier("unique:" + System.currentTimeMillis())
                             .putExtra(Intent.EXTRA_PACKAGE_NAME, appInfo.packageName)
                             .putExtra(
                                     Intent.EXTRA_VERSION_CODE,

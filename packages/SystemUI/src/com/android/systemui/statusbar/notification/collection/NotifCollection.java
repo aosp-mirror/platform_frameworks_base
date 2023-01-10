@@ -88,9 +88,9 @@ import com.android.systemui.statusbar.notification.collection.notifcollection.En
 import com.android.systemui.statusbar.notification.collection.notifcollection.EntryUpdatedEvent;
 import com.android.systemui.statusbar.notification.collection.notifcollection.InitEntryEvent;
 import com.android.systemui.statusbar.notification.collection.notifcollection.InternalNotifUpdater;
+import com.android.systemui.statusbar.notification.collection.notifcollection.NotifCollectionInconsistencyTracker;
 import com.android.systemui.statusbar.notification.collection.notifcollection.NotifCollectionListener;
 import com.android.systemui.statusbar.notification.collection.notifcollection.NotifCollectionLogger;
-import com.android.systemui.statusbar.notification.collection.notifcollection.NotifCollectionLoggerKt;
 import com.android.systemui.statusbar.notification.collection.notifcollection.NotifDismissInterceptor;
 import com.android.systemui.statusbar.notification.collection.notifcollection.NotifEvent;
 import com.android.systemui.statusbar.notification.collection.notifcollection.NotifLifetimeExtender;
@@ -112,7 +112,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Queue;
-import java.util.Set;
 import java.util.concurrent.Executor;
 import java.util.concurrent.TimeUnit;
 
@@ -142,7 +141,7 @@ import javax.inject.Inject;
  */
 @MainThread
 @SysUISingleton
-public class NotifCollection implements Dumpable {
+public class NotifCollection implements Dumpable, PipelineDumpable {
     private final IStatusBarService mStatusBarService;
     private final SystemClock mClock;
     private final NotifPipelineFlags mNotifPipelineFlags;
@@ -151,6 +150,7 @@ public class NotifCollection implements Dumpable {
     private final Executor mBgExecutor;
     private final LogBufferEulogizer mEulogizer;
     private final DumpManager mDumpManager;
+    private final NotifCollectionInconsistencyTracker mInconsistencyTracker;
 
     private final Map<String, NotificationEntry> mNotificationSet = new ArrayMap<>();
     private final Collection<NotificationEntry> mReadOnlyNotificationSet =
@@ -162,7 +162,6 @@ public class NotifCollection implements Dumpable {
     private final List<NotifLifetimeExtender> mLifetimeExtenders = new ArrayList<>();
     private final List<NotifDismissInterceptor> mDismissInterceptors = new ArrayList<>();
 
-    private Set<String> mNotificationsWithoutRankings = Collections.emptySet();
 
     private Queue<NotifEvent> mEventQueue = new ArrayDeque<>();
 
@@ -188,6 +187,7 @@ public class NotifCollection implements Dumpable {
         mBgExecutor = bgExecutor;
         mEulogizer = logBufferEulogizer;
         mDumpManager = dumpManager;
+        mInconsistencyTracker = new NotifCollectionInconsistencyTracker(mLogger);
     }
 
     /** Initializes the NotifCollection and registers it to receive notification events. */
@@ -199,6 +199,7 @@ public class NotifCollection implements Dumpable {
         mAttached = true;
         mDumpManager.registerDumpable(TAG, this);
         groupCoalescer.setNotificationHandler(mNotifHandler);
+        mInconsistencyTracker.attach(mNotificationSet::keySet, groupCoalescer::getCoalescedKeySet);
     }
 
     /**
@@ -598,15 +599,10 @@ public class NotifCollection implements Dumpable {
                 }
             }
         }
-        NotifCollectionLoggerKt.maybeLogInconsistentRankings(
-                mLogger,
-                mNotificationsWithoutRankings,
-                currentEntriesWithoutRankings,
-                rankingMap
-        );
-        mNotificationsWithoutRankings = currentEntriesWithoutRankings == null
-                ? Collections.emptySet() : currentEntriesWithoutRankings.keySet();
-        if (currentEntriesWithoutRankings != null && mNotifPipelineFlags.removeUnrankedNotifs()) {
+
+        mInconsistencyTracker.logNewMissingNotifications(rankingMap);
+        mInconsistencyTracker.logNewInconsistentRankings(currentEntriesWithoutRankings, rankingMap);
+        if (currentEntriesWithoutRankings != null) {
             for (NotificationEntry entry : currentEntriesWithoutRankings.values()) {
                 entry.mCancellationReason = REASON_UNKNOWN;
                 tryRemoveNotification(entry);
@@ -864,10 +860,15 @@ public class NotifCollection implements Dumpable {
                         true,
                         "\t\t"));
 
-        pw.println("\n\tmNotificationsWithoutRankings: " + mNotificationsWithoutRankings.size());
-        for (String key : mNotificationsWithoutRankings) {
-            pw.println("\t * : " + key);
-        }
+        mInconsistencyTracker.dump(pw);
+    }
+
+    @Override
+    public void dumpPipeline(@NonNull PipelineDumper d) {
+        d.dump("notifCollectionListeners", mNotifCollectionListeners);
+        d.dump("lifetimeExtenders", mLifetimeExtenders);
+        d.dump("dismissInterceptors", mDismissInterceptors);
+        d.dump("buildListener", mBuildListener);
     }
 
     private final BatchableNotificationHandler mNotifHandler = new BatchableNotificationHandler() {

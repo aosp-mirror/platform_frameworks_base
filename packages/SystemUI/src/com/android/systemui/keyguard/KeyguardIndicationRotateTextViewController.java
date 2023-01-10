@@ -27,6 +27,7 @@ import androidx.annotation.IntDef;
 import com.android.systemui.Dumpable;
 import com.android.systemui.dagger.qualifiers.Main;
 import com.android.systemui.plugins.statusbar.StatusBarStateController;
+import com.android.systemui.statusbar.KeyguardIndicationController;
 import com.android.systemui.statusbar.phone.KeyguardIndicationTextView;
 import com.android.systemui.util.ViewController;
 import com.android.systemui.util.concurrency.DelayableExecutor;
@@ -56,8 +57,11 @@ import java.util.Map;
 public class KeyguardIndicationRotateTextViewController extends
         ViewController<KeyguardIndicationTextView> implements Dumpable {
     public static String TAG = "KgIndicationRotatingCtrl";
-    private static final long DEFAULT_INDICATION_SHOW_LENGTH = 3500; // milliseconds
-    public static final long IMPORTANT_MSG_MIN_DURATION = 2000L + 600L; // 2000ms + [Y in duration]
+    private static final long DEFAULT_INDICATION_SHOW_LENGTH =
+            KeyguardIndicationController.DEFAULT_HIDE_DELAY_MS
+                    - KeyguardIndicationTextView.Y_IN_DURATION;
+    public static final long IMPORTANT_MSG_MIN_DURATION =
+            2000L + KeyguardIndicationTextView.Y_IN_DURATION;
 
     private final StatusBarStateController mStatusBarStateController;
     private final float mMaxAlpha;
@@ -371,10 +375,11 @@ public class KeyguardIndicationRotateTextViewController extends
     public static final int INDICATION_TYPE_ALIGNMENT = 4;
     public static final int INDICATION_TYPE_TRANSIENT = 5;
     public static final int INDICATION_TYPE_TRUST = 6;
-    public static final int INDICATION_TYPE_RESTING = 7;
+    public static final int INDICATION_TYPE_PERSISTENT_UNLOCK_MESSAGE = 7;
     public static final int INDICATION_TYPE_USER_LOCKED = 8;
     public static final int INDICATION_TYPE_REVERSE_CHARGING = 10;
     public static final int INDICATION_TYPE_BIOMETRIC_MESSAGE = 11;
+    public static final int INDICATION_TYPE_BIOMETRIC_MESSAGE_FOLLOW_UP = 12;
 
     @IntDef({
             INDICATION_TYPE_NONE,
@@ -385,10 +390,11 @@ public class KeyguardIndicationRotateTextViewController extends
             INDICATION_TYPE_ALIGNMENT,
             INDICATION_TYPE_TRANSIENT,
             INDICATION_TYPE_TRUST,
-            INDICATION_TYPE_RESTING,
+            INDICATION_TYPE_PERSISTENT_UNLOCK_MESSAGE,
             INDICATION_TYPE_USER_LOCKED,
             INDICATION_TYPE_REVERSE_CHARGING,
-            INDICATION_TYPE_BIOMETRIC_MESSAGE
+            INDICATION_TYPE_BIOMETRIC_MESSAGE,
+            INDICATION_TYPE_BIOMETRIC_MESSAGE_FOLLOW_UP
     })
     @Retention(RetentionPolicy.SOURCE)
     public @interface IndicationType{}

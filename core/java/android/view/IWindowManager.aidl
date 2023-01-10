@@ -413,11 +413,6 @@ interface IWindowManager
     boolean hasNavigationBar(int displayId);
 
     /**
-     * Get the position of the nav bar
-     */
-    int getNavBarPosition(int displayId);
-
-    /**
      * Lock the device immediately with the specified options (can be null).
      */
     @UnsupportedAppUsage(maxTargetSdk = 30, trackingBug = 170729553)
@@ -732,9 +727,8 @@ interface IWindowManager
      * If invoked through a package other than a launcher app, returns an empty list.
      *
      * @param displayId the id of the logical display
-     * @param packageName the name of the calling package
      */
-    List<DisplayInfo> getPossibleDisplayInfo(int displayId, String packageName);
+    List<DisplayInfo> getPossibleDisplayInfo(int displayId);
 
     /**
      * Called to show global actions.

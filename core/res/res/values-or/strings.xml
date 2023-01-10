@@ -33,6 +33,7 @@
     <string name="defaultVoiceMailAlphaTag" msgid="2190754495304236490">"ଭଏସ୍‌ ମେଲ୍"</string>
     <string name="defaultMsisdnAlphaTag" msgid="2285034592902077488">"MSISDN1"</string>
     <string name="mmiError" msgid="2862759606579822246">"ସଂଯୋଗରେ ସମସ୍ୟା ଅଛି କିମ୍ବା ଅମାନ୍ୟ MMI କୋଡ୍।"</string>
+    <string name="mmiErrorNotSupported" msgid="5001803469335286099">"ଫିଚର ସମର୍ଥିତ ନୁହେଁ।"</string>
     <string name="mmiFdnError" msgid="3975490266767565852">"କେବଳ ସ୍ଥାୟୀ ଡାୟଲିଙ୍ଗ ନମ୍ବର୍‌ ପାଇଁ କାର୍ଯ୍ୟ ସୀମିତ ଅଟେ।"</string>
     <string name="mmiErrorWhileRoaming" msgid="1204173664713870114">"ଆପଣ ରୋମିଙ୍ଗରେ ଥିବାବେଳେ କଲ୍‍ ଫର୍‌ୱର୍ଡିଙ୍ଗ ସେଟିଙ୍ଗ ବଦଳାଇପାରିବେ ନାହିଁ।"</string>
     <string name="serviceEnabled" msgid="7549025003394765639">"ସେବା ସକ୍ଷମ କରାଯାଇଥିଲା।"</string>
@@ -90,7 +91,7 @@
     <string name="notification_channel_network_alert" msgid="4788053066033851841">"ଆଲର୍ଟ"</string>
     <string name="notification_channel_call_forward" msgid="8230490317314272406">"କଲ୍‌ ଫରୱାର୍ଡିଂ"</string>
     <string name="notification_channel_emergency_callback" msgid="54074839059123159">"ଜରୁରୀକାଳୀନ କଲବ୍ୟାକ୍‍ ମୋଡ୍‍"</string>
-    <string name="notification_channel_mobile_data_status" msgid="1941911162076442474">"ମୋବାଇଲ୍‍ ଡାଟା ଷ୍ଟାଟସ୍‌"</string>
+    <string name="notification_channel_mobile_data_status" msgid="1941911162076442474">"ମୋବାଇଲ ଡାଟା ଷ୍ଟାଟସ"</string>
     <string name="notification_channel_sms" msgid="1243384981025535724">"SMS ମେସେଜ୍‌"</string>
     <string name="notification_channel_voice_mail" msgid="8457433203106654172">"ଭଏସମେଲ୍‍ ମେସେଜ୍‍"</string>
     <string name="notification_channel_wfc" msgid="9048240466765169038">"ୱାଇ-ଫାଇ କଲିଙ୍ଗ"</string>
@@ -142,7 +143,7 @@
     <string name="wfcSpnFormat_wifi" msgid="1376356951297043426">"ୱାଇ-ଫାଇ"</string>
     <string name="wfcSpnFormat_wifi_calling_wo_hyphen" msgid="7178561009225028264">"ୱାଇଫାଇ କଲିଂ"</string>
     <string name="wfcSpnFormat_vowifi" msgid="8371335230890725606">"VoWifi"</string>
-    <string name="wifi_calling_off_summary" msgid="5626710010766902560">"ବନ୍ଦ"</string>
+    <string name="wifi_calling_off_summary" msgid="5626710010766902560">"ବନ୍ଦ ଅଛି"</string>
     <string name="wfc_mode_wifi_preferred_summary" msgid="1035175836270943089">"ୱାଇ-ଫାଇ ମାଧ୍ୟମରେ କଲ୍ କରନ୍ତୁ"</string>
     <string name="wfc_mode_cellular_preferred_summary" msgid="4958965609212575619">"ମୋବାଇଲ ନେଟ୍‌ୱର୍କ ମାଧ୍ୟମରେ କଲ୍ କରନ୍ତୁ"</string>
     <string name="wfc_mode_wifi_only_summary" msgid="104951993894678665">"କେବଳ ୱାଇ-ଫାଇ"</string>
@@ -185,14 +186,14 @@
     <string name="ssl_ca_cert_noti_by_administrator" msgid="4564941950768783879">"ଆପଣଙ୍କ ୱର୍କ ପ୍ରୋଫାଇଲ୍‍ ଆଡମିନଙ୍କ ଦ୍ୱାରା"</string>
     <string name="ssl_ca_cert_noti_managed" msgid="217337232273211674">"<xliff:g id="MANAGING_DOMAIN">%s</xliff:g> ଅନୁଯାୟୀ"</string>
     <string name="work_profile_deleted" msgid="5891181538182009328">"ୱାର୍କ ପ୍ରୋଫାଇଲ୍‍ ଡିଲିଟ୍ ହେଲା"</string>
-    <string name="work_profile_deleted_details" msgid="3773706828364418016">"ଆଡମିନ୍‍ ଆପ୍‍ ନାହିଁ କିମ୍ବା ଭୁଲ ଅଛି। ଫଳସ୍ୱରୂପ, ଆପଣଙ୍କ ୱାର୍କ ପ୍ରୋଫାଇଲ୍‍ ଏବଂ ସମ୍ବନ୍ଧୀୟ ଡାଟା ଡିଲିଟ୍ କରାଯାଇଛି। ସହାୟତା ପାଇଁ ଆପଣଙ୍କ ଆଡମିନଙ୍କୁ ଯୋଗାଯୋଗ କରନ୍ତୁ।"</string>
+    <string name="work_profile_deleted_details" msgid="3773706828364418016">"ଆଡମିନ ଆପ ନାହିଁ କିମ୍ବା ଭୁଲ ଅଛି। ଫଳସ୍ୱରୂପ, ଆପଣଙ୍କ ୱାର୍କ ପ୍ରୋଫାଇଲ ଏବଂ ସମ୍ବନ୍ଧୀୟ ଡାଟା ଡିଲିଟ କରାଯାଇଛି। ସହାୟତା ପାଇଁ ଆପଣଙ୍କ ଆଡମିନଙ୍କୁ କଣ୍ଟାକ୍ଟ କରନ୍ତୁ।"</string>
     <string name="work_profile_deleted_description_dpm_wipe" msgid="2477244968924647232">"ଏହି ଡିଭାଇସରେ ଆପଣଙ୍କ ୱର୍କ ପ୍ରୋଫାଇଲ୍‍ ଆଉ ଉପଲବ୍ଧ ନାହିଁ"</string>
     <string name="work_profile_deleted_reason_maximum_password_failure" msgid="1080323158315663167">"ବହୁତ ଥର ଭୁଲ ପାସ୍‌ୱର୍ଡ ଲେଖିଛନ୍ତି"</string>
     <string name="device_ownership_relinquished" msgid="4080886992183195724">"ବ୍ୟକ୍ତିଗତ ବ୍ୟବହାର ପାଇଁ ଆଡ୍‌ମିନ୍ ଡିଭାଇସ୍‌କୁ ଅଲଗା କରିଛନ୍ତି"</string>
     <string name="network_logging_notification_title" msgid="554983187553845004">"ଡିଭାଇସକୁ ପରିଚାଳନା କରାଯାଉଛି"</string>
     <string name="network_logging_notification_text" msgid="1327373071132562512">"ଆପଣଙ୍କ ସଂସ୍ଥା ଏହି ଡିଭାଇସକୁ ପରିଚାଳନା କରନ୍ତି ଏବଂ ନେଟୱର୍କ ଟ୍ରାଫିକ୍‍ ନୀରିକ୍ଷଣ କରନ୍ତି। ବିବରଣୀ ପାଇଁ ଟାପ୍‍ କରନ୍ତୁ।"</string>
     <string name="location_changed_notification_title" msgid="3620158742816699316">"ଆପଗୁଡ଼ିକ ଆପଣଙ୍କ ଲୋକେସନକୁ ଆକ୍ସେସ୍ କରିପାରିବ"</string>
-    <string name="location_changed_notification_text" msgid="7158423339982706912">"ଅଧିକ ଜାଣିବାକୁ ଆପଣଙ୍କ IT ଆଡମିନଙ୍କ ସହ ଯୋଗାଯୋଗ କରନ୍ତୁ"</string>
+    <string name="location_changed_notification_text" msgid="7158423339982706912">"ଅଧିକ ଜାଣିବାକୁ ଆପଣଙ୍କ IT ଆଡମିନଙ୍କ ସହ କଣ୍ଟାକ୍ଟ କରନ୍ତୁ"</string>
     <string name="geofencing_service" msgid="3826902410740315456">"ଜିଓଫେନସିଂ ସେବା"</string>
     <string name="country_detector" msgid="7023275114706088854">"କଣ୍ଟ୍ରି ଡିଟେକ୍ଟର୍"</string>
     <string name="location_service" msgid="2439187616018455546">"ଲୋକେସନ୍ ସର୍ଭିସ୍"</string>
@@ -203,7 +204,7 @@
     <string name="device_policy_manager_service" msgid="5085762851388850332">"ଡିଭାଇସ ନୀତି ପରିଚାଳକ ସେବା"</string>
     <string name="music_recognition_manager_service" msgid="7481956037950276359">"ମ୍ୟୁଜିକ୍ ଚିହ୍ନଟକରଣ ପରିଚାଳକ ସେବା"</string>
     <string name="factory_reset_warning" msgid="6858705527798047809">"ଆପଣଙ୍କ ଡିଭାଇସ୍‍ ବର୍ତ୍ତମାନ ଲିଭାଯିବ"</string>
-    <string name="factory_reset_message" msgid="2657049595153992213">"ଆଡମିନ୍‍ ଆପ୍‍‍ ବ୍ୟବହାର କରାଯାଇପାରିବ ନାହିଁ। ଆପଣଙ୍କ ଡିଭାଇସ୍‍‌ର ସମସ୍ତ ଡାଟାକୁ ବର୍ତ୍ତମାନ ଲିଭାଇଦିଆଯିବ। \n\nଯଦି ଆପଣଙ୍କର କୌଣସି ପ୍ରଶ୍ନ ରହିଥାଏ, ଆପଣଙ୍କ ସଂସ୍ଥାର ଆଡମିନ୍‌ଙ୍କ ସହ ଯୋଗାଯୋଗ କରନ୍ତୁ।"</string>
+    <string name="factory_reset_message" msgid="2657049595153992213">"ଆଡମିନ ଆପ ବ୍ୟବହାର କରାଯାଇପାରିବ ନାହିଁ। ଆପଣଙ୍କ ଡିଭାଇସର ସମସ୍ତ ଡାଟାକୁ ବର୍ତ୍ତମାନ ଲିଭାଇଦିଆଯିବ। \n\nଯଦି ଆପଣଙ୍କର କୌଣସି ପ୍ରଶ୍ନ ଅଛି, ଆପଣଙ୍କ ସଂସ୍ଥାର ଆଡମିନଙ୍କ ସହ କଣ୍ଟାକ୍ଟ କରନ୍ତୁ।"</string>
     <string name="printing_disabled_by" msgid="3517499806528864633">"<xliff:g id="OWNER_APP">%s</xliff:g> ଦ୍ଵାରା ପ୍ରିଣ୍ଟିଙ୍ଗ ଅକ୍ଷମ କରାଯାଇଛି"</string>
     <string name="personal_apps_suspension_title" msgid="7561416677884286600">"ୱାର୍କ ପ୍ରୋଫାଇଲ୍ ଚାଲୁ କରନ୍ତୁ"</string>
     <string name="personal_apps_suspension_text" msgid="6115455688932935597">"ଆପଣ ଆପଣଙ୍କ ୱାର୍କ ପ୍ରୋଫାଇଲ୍ ଚାଲୁ ନକରିବା ପର୍ଯ୍ୟନ୍ତ ଆପଣଙ୍କର ବ୍ୟକ୍ତିଗତ ଆପ୍ସ ବ୍ଲକ୍ କରାଯାଇଛି"</string>
@@ -216,8 +217,8 @@
     <string name="silent_mode" msgid="8796112363642579333">"ସାଇଲେଣ୍ଟ ମୋଡ୍"</string>
     <string name="turn_on_radio" msgid="2961717788170634233">"ୱେୟାରଲେସ୍‌କୁ ଚାଲୁ କରନ୍ତୁ"</string>
     <string name="turn_off_radio" msgid="7222573978109933360">"ୱେୟାରଲେସ୍‌କୁ ବନ୍ଦ କରନ୍ତୁ"</string>
-    <string name="screen_lock" msgid="2072642720826409809">"ସ୍କ୍ରୀନ୍‌ ଲକ୍‌"</string>
-    <string name="power_off" msgid="4111692782492232778">"ପାୱାର୍ ବନ୍ଦ"</string>
+    <string name="screen_lock" msgid="2072642720826409809">"ସ୍କ୍ରିନ ଲକ"</string>
+    <string name="power_off" msgid="4111692782492232778">"ପାୱାର ବନ୍ଦ ଅଛି"</string>
     <string name="silent_mode_silent" msgid="5079789070221150912">"ରିଙ୍ଗର୍‍ ଅଫ୍‍ ଅଛି"</string>
     <string name="silent_mode_vibrate" msgid="8821830448369552678">"ରିଙ୍ଗର୍‍ କମ୍ପନ"</string>
     <string name="silent_mode_ring" msgid="6039011004781526678">"ରିଙ୍ଗର୍‍ ଚାଲୁ ଅଛି"</string>
@@ -240,8 +241,8 @@
     <string name="global_actions" product="tablet" msgid="4412132498517933867">"ଟାବଲେଟ ବିକଳ୍ପ"</string>
     <string name="global_actions" product="tv" msgid="3871763739487450369">"Android TVର ବିକଳ୍ପଗୁଡ଼ିକ"</string>
     <string name="global_actions" product="default" msgid="6410072189971495460">"ଫୋନ ବିକଳ୍ପ"</string>
-    <string name="global_action_lock" msgid="6949357274257655383">"ସ୍କ୍ରୀନ୍‌ ଲକ୍‌"</string>
-    <string name="global_action_power_off" msgid="4404936470711393203">"ପାୱାର୍ ବନ୍ଦ"</string>
+    <string name="global_action_lock" msgid="6949357274257655383">"ସ୍କ୍ରିନ ଲକ"</string>
+    <string name="global_action_power_off" msgid="4404936470711393203">"ପାୱାର ବନ୍ଦ ଅଛି"</string>
     <string name="global_action_power_options" msgid="1185286119330160073">"ପାୱାର"</string>
     <string name="global_action_restart" msgid="4678451019561687074">"ରିଷ୍ଟାର୍ଟ କରନ୍ତୁ"</string>
     <string name="global_action_emergency" msgid="1387617624177105088">"ଜରୁରୀକାଳୀନ"</string>
@@ -297,11 +298,11 @@
     <string name="android_system_label" msgid="5974767339591067210">"Android ସିଷ୍ଟମ୍‌"</string>
     <string name="user_owner_label" msgid="8628726904184471211">"ବ୍ୟକ୍ତିଗତ ପ୍ରୋଫାଇଲ୍‌କୁ ଫେରିଆସନ୍ତୁ"</string>
     <string name="managed_profile_label" msgid="7316778766973512382">"କାର୍ଯ୍ୟ ପ୍ରୋଫାଇଲ୍‌କୁ ଯାଆନ୍ତୁ"</string>
-    <string name="permgrouplab_contacts" msgid="4254143639307316920">"ଯୋଗାଯୋଗ"</string>
+    <string name="permgrouplab_contacts" msgid="4254143639307316920">"କଣ୍ଟାକ୍ଟ"</string>
     <string name="permgroupdesc_contacts" msgid="9163927941244182567">"ଆପଣଙ୍କ ଯୋଗାଯୋଗ ଆକ୍ସେସ୍ କରେ"</string>
-    <string name="permgrouplab_location" msgid="1858277002233964394">"ଲୋକେସନ୍‌"</string>
+    <string name="permgrouplab_location" msgid="1858277002233964394">"ଲୋକେସନ"</string>
     <string name="permgroupdesc_location" msgid="1995955142118450685">"ଏହି ଡିଭାଇସ୍‌ର ଲୋକେସନ୍‍ ଆକ୍ସେସ୍‍ କରେ"</string>
-    <string name="permgrouplab_calendar" msgid="6426860926123033230">"କ୍ୟାଲେଣ୍ଡର୍"</string>
+    <string name="permgrouplab_calendar" msgid="6426860926123033230">"କ୍ୟାଲେଣ୍ଡର"</string>
     <string name="permgroupdesc_calendar" msgid="6762751063361489379">"ଆପଣଙ୍କ କ୍ୟାଲେଣ୍ଡର୍‍ ଆକ୍ସେସ୍‍ କରେ"</string>
     <string name="permgrouplab_sms" msgid="795737735126084874">"SMS"</string>
     <string name="permgroupdesc_sms" msgid="5726462398070064542">"SMS ମେସେଜ୍‍ ପଠାନ୍ତୁ ଓ ଦେଖନ୍ତୁ"</string>
@@ -311,7 +312,7 @@
     <string name="permgroupdesc_readMediaAural" msgid="7565467343667089595">"ଆପଣଙ୍କ ଡିଭାଇସରେ ମ୍ୟୁଜିକ ଏବଂ ଅଡିଓକୁ ଆକ୍ସେସ କରନ୍ତୁ"</string>
     <string name="permgrouplab_readMediaVisual" msgid="4724874717811908660">"ଫଟୋ ଏବଂ ଭିଡିଓଗୁଡ଼ିକ"</string>
     <string name="permgroupdesc_readMediaVisual" msgid="4080463241903508688">"ଆପଣଙ୍କ ଡିଭାଇସରେ ଫଟୋ ଏବଂ ଭିଡିଓଗୁଡ଼ିକୁ ଆକ୍ସେସ କରନ୍ତୁ"</string>
-    <string name="permgrouplab_microphone" msgid="2480597427667420076">"ମାଇକ୍ରୋଫୋନ୍"</string>
+    <string name="permgrouplab_microphone" msgid="2480597427667420076">"ମାଇକ୍ରୋଫୋନ"</string>
     <string name="permgroupdesc_microphone" msgid="1047786732792487722">"ଅଡିଓ ରେକର୍ଡ କରେ"</string>
     <string name="permgrouplab_activityRecognition" msgid="3324466667921775766">"ଶାରୀରିକ କାର୍ଯ୍ୟକଳାପ"</string>
     <string name="permgroupdesc_activityRecognition" msgid="4725624819457670704">"ଆପଣଙ୍କ ଶାରୀରିକ କାର୍ଯ୍ୟକଳାପ ଆକ୍ସେସ୍ କରନ୍ତୁ"</string>
@@ -319,9 +320,9 @@
     <string name="permgroupdesc_camera" msgid="7585150538459320326">"ଫଟୋ ନିଏ ଓ ଭିଡିଓ ରେକର୍ଡ କରେ"</string>
     <string name="permgrouplab_nearby_devices" msgid="5529147543651181991">"ଆଖପାଖର ଡିଭାଇସଗୁଡ଼ିକ"</string>
     <string name="permgroupdesc_nearby_devices" msgid="3213561597116913508">"ଆଖପାଖର ଡିଭାଇସଗୁଡ଼ିକୁ ଖୋଜି ସଂଯୋଗ କରନ୍ତୁ"</string>
-    <string name="permgrouplab_calllog" msgid="7926834372073550288">"କଲ୍‌ ଲଗ୍‌"</string>
+    <string name="permgrouplab_calllog" msgid="7926834372073550288">"କଲ ଲଗ"</string>
     <string name="permgroupdesc_calllog" msgid="2026996642917801803">"ଫୋନ୍‌ କଲ୍‌ ଲଗ୍‌ ପଢ଼ନ୍ତୁ ଓ ଲେଖନ୍ତୁ"</string>
-    <string name="permgrouplab_phone" msgid="570318944091926620">"ଫୋନ୍‍"</string>
+    <string name="permgrouplab_phone" msgid="570318944091926620">"ଫୋନ"</string>
     <string name="permgroupdesc_phone" msgid="270048070781478204">"ଫୋନ୍‍ କଲ୍‍ କରେ ଏବଂ ପରିଚାଳନା କରେ"</string>
     <string name="permgrouplab_sensors" msgid="9134046949784064495">"ବଡି ସେନ୍ସର୍"</string>
     <string name="permgroupdesc_sensors" msgid="2610631290633747752">"ଆପଣଙ୍କ ଗୁରୁତପୂର୍ଣ୍ଣ ସଂକେତଗୁଡ଼ିକ ବିଷୟରେ ସେନ୍ସର୍‍ ଡାଟା ଆକ୍ସେସ୍‍ କରେ"</string>
@@ -412,13 +413,13 @@
     <string name="permdesc_broadcastSticky" product="tv" msgid="2338185920171000650">"ଷ୍ଟିକି ବ୍ରଡକାଷ୍ଟ୍ ପଠାଇବା ପାଇଁ ଆପ୍‌କୁ ଅନୁମତି ଦେଇଥାଏ, ଯାହା ବ୍ରଡକାଷ୍ଟ୍ ଶେଷ ହେବାପରେ ରହିଥାଏ। ଅତ୍ୟଧିକ ବ୍ୟବହାର ଦ୍ୱାରା ଅଧିକ ମେମୋରୀ ବ୍ୟବହାର ହୋଇ ଆପଣଙ୍କର Android TV ଡିଭାଇସ୍‌କୁ ଧୀର କିମ୍ବା ଅସ୍ଥିର କରିପାରେ।"</string>
     <string name="permdesc_broadcastSticky" product="default" msgid="134529339678913453">"ଷ୍ଟିକୀ ବ୍ରଡ୍‌କାଷ୍ଟ ପଠାଇବାକୁ ଆପ୍‍କୁ ଅନୁମତି ଦିଏ, ଯାହା ବ୍ରଡ୍‌କାଷ୍ଟ ଶେଷ ହେବାପରେ ରହିଥାଏ। ଅତିରିକ୍ତ ବ୍ୟବହାର ଦ୍ୱାରା ଅଧିକ ମେମୋରୀ ବ୍ୟବହାର ହୋଇ ଫୋନ୍‌କୁ ମନ୍ଥର କିମ୍ବା ଅସ୍ଥିର କରିପାରେ।"</string>
     <string name="permlab_readContacts" msgid="8776395111787429099">"ଆପଣଙ୍କ ଯୋଗାଯୋଗ ପଢ଼ନ୍ତୁ"</string>
-    <string name="permdesc_readContacts" product="tablet" msgid="6430093481659992692">"ଏହା ଆପଣଙ୍କ ଟାବ୍‌ଲେଟ୍‌ରେ ଷ୍ଟୋର୍ କରାଯାଇଥିବା ଯୋଗାଯୋଗଗୁଡ଼ିକ ବିଷୟରେ ଡାଟା ପଢ଼ିବା ପାଇଁ ଆପ୍‌କୁ ଅନୁମତି ଦେଇଥାଏ। ଆପଣଙ୍କର ଟାବ୍‌ଲେଟ୍‌ରେ ଥିବା ଆକାଉଣ୍ଟଗୁଡ଼ିକ ଯେଉଁଥିରେ ଯୋଗାଯୋଗଗୁଡ଼ିକ ତିଆରି ହୋଇଛି, ସେଗୁଡ଼ିକୁ ଆପ୍ସର ଆକ୍ସେସ୍ ରହିବ। ଆପଣ ଇନ୍‌ଷ୍ଟଲ୍ କରିଥିବା ଆପ୍ସ ମାଧ୍ୟମରେ ତିଆରି କରାଯାଇଥିବା ଆକାଉଣ୍ଟଗୁଡ଼ିକୁ ଏହା ସାମିଲ କରିପାରେ। ଏହି ଅନୁମତି ଆପ୍ସକୁ ଆପଣଙ୍କର ଯୋଗାଯୋଗ ଡାଟା ସେଭ୍ କରିବାକୁ ଦିଏ ଏବଂ ହାନୀକାରକ ଆପ୍ ଆପଣଙ୍କ ଅଜାଣତରେ ଯୋଗାଯୋଗ ଡାଟା ସେୟାର୍ କରିପାରେ।"</string>
-    <string name="permdesc_readContacts" product="tv" msgid="8400138591135554789">"ଏହା ଆପଣଙ୍କ Android TV ଡିଭାଇସ୍‌ରେ ଷ୍ଟୋର୍ କରାଯାଇଥିବା ଯୋଗାଯୋଗ ବିଷୟରେ ଡାଟା ପଢ଼ିବା ପାଇଁ ଆପ୍‌କୁ ଅନୁମତି ଦେଇଥାଏ। ଆପଣଙ୍କର Android TV ଡିଭାଇସ୍‌ରେ ଥିବା ଆକାଉଣ୍ଟଗୁଡ଼ିକ ଯେଉଁଥିରେ ଯୋଗାଯୋଗଗୁଡ଼ିକ ତିଆରି ହୋଇଛି, ସେଗୁଡ଼ିକୁ ମଧ୍ୟ ଆପ୍ସର ଆକ୍ସେସ୍ ରହିବ। ଆପଣ ଇନ୍‌ଷ୍ଟଲ୍ କରିଥିବା ଆପ୍ସ ମାଧ୍ୟମରେ ତିଆରି କରାଯାଇଥିବା ଆକାଉଣ୍ଟଗୁଡ଼ିକୁ ଏହା ସାମିଲ କରିପାରେ। ଏହି ଅନୁମତି ଆପ୍ସକୁ ଆପଣଙ୍କର ଯୋଗାଯୋଗ ଡାଟା ସେଭ୍ କରିବାକୁ ଦିଏ ଏବଂ ହାନୀକାରକ ଆପ୍ ଆପଣଙ୍କ ଅଜାଣତରେ ଯୋଗାଯୋଗ ଡାଟା ସେୟାର୍ କରିପାରେ।"</string>
-    <string name="permdesc_readContacts" product="default" msgid="4911989776203207644">"ଏହା ଆପଣଙ୍କ ଫୋନ୍‌ରେ ଷ୍ଟୋର୍ କରାଯାଇଥିବା ଯୋଗାଯୋଗଗୁଡ଼ିକ ବିଷୟରେ ଡାଟା ପଢ଼ିବା ପାଇଁ ଆପ୍‌କୁ ଅନୁମତି ଦେଇଥାଏ। ଆପଣଙ୍କର ଫୋନ୍‌ରେ ଥିବା ଆକାଉଣ୍ଟଗୁଡ଼ିକ ଯେଉଁଥିରେ ଯୋଗାଯୋଗଗୁଡ଼ିକ ତିଆରି ହୋଇଛି, ସେଗୁଡ଼ିକୁ ଆପ୍ସର ଆକ୍ସେସ୍ ରହିବ। ଆପଣ ଇନ୍‌ଷ୍ଟଲ୍ କରିଥିବା ଆପ୍ସ ମାଧ୍ୟମରେ ତିଆରି କରାଯାଇଥିବା ଆକାଉଣ୍ଟଗୁଡ଼ିକୁ ଏହା ସାମିଲ କରିପାରେ। ଏହି ଅନୁମତି ଆପ୍ସକୁ ଆପଣଙ୍କର ଯୋଗାଯୋଗ ଡାଟା ସେଭ୍ କରିବାକୁ ଦିଏ ଏବଂ ହାନୀକାରକ ଆପ୍ ଆପଣଙ୍କ ଅଜାଣତରେ ଯୋଗାଯୋଗ ଡାଟା ସେୟାର୍ କରିପାରେ।"</string>
+    <string name="permdesc_readContacts" product="tablet" msgid="6430093481659992692">"ଏହା ଆପଣଙ୍କ ଟାବଲେଟରେ ଷ୍ଟୋର କରାଯାଇଥିବା କଣ୍ଟାକ୍ଟଗୁଡ଼ିକ ବିଷୟରେ ଡାଟା ପଢ଼ିବା ପାଇଁ ଆପକୁ ଅନୁମତି ଦେଇଥାଏ। ଆପଣଙ୍କର ଟାବଲେଟରେ ଥିବା ଆକାଉଣ୍ଟଗୁଡ଼ିକ ଯେଉଁଥିରେ କଣ୍ଟାକ୍ଟଗୁଡ଼ିକ ତିଆରି ହୋଇଛି, ସେଗୁଡ଼ିକୁ ଆପ୍ସର ଆକ୍ସେସ ରହିବ। ଆପଣ ଇନଷ୍ଟଲ କରିଥିବା ଆପ୍ସ ମାଧ୍ୟମରେ ତିଆରି କରାଯାଇଥିବା ଆକାଉଣ୍ଟଗୁଡ଼ିକୁ ଏହା ସାମିଲ କରିପାରେ। ଏହି ଅନୁମତି ଆପ୍ସକୁ ଆପଣଙ୍କର କଣ୍ଟାକ୍ଟ ଡାଟା ସେଭ କରିବାକୁ ଦିଏ ଏବଂ ହାନୀକରକ ଆପ ଆପଣଙ୍କ ଅଜାଣତରେ କଣ୍ଟାକ୍ଟ ଡାଟା ସେୟାର କରିପାରେ।"</string>
+    <string name="permdesc_readContacts" product="tv" msgid="8400138591135554789">"ଏହା ଆପଣଙ୍କ Android TV ଡିଭାଇସରେ ଷ୍ଟୋର କରାଯାଇଥିବା କଣ୍ଟାକ୍ଟ ବିଷୟରେ ଡାଟା ପଢ଼ିବା ପାଇଁ ଆପକୁ ଅନୁମତି ଦେଇଥାଏ। ଆପଣଙ୍କର Android TV ଡିଭାଇସରେ ଥିବା ଆକାଉଣ୍ଟଗୁଡ଼ିକ ଯେଉଁଥିରେ କଣ୍ଟାକ୍ଟଗୁଡ଼ିକ ତିଆରି ହୋଇଛି, ସେଗୁଡ଼ିକୁ ମଧ୍ୟ ଆପ୍ସର ଆକ୍ସେସ ରହିବ। ଆପଣ ଇନଷ୍ଟଲ କରିଥିବା ଆପ୍ସ ମାଧ୍ୟମରେ ତିଆରି କରାଯାଇଥିବା ଆକାଉଣ୍ଟଗୁଡ଼ିକୁ ଏହା ସାମିଲ କରିପାରେ। ଏହି ଅନୁମତି ଆପ୍ସକୁ ଆପଣଙ୍କର କଣ୍ଟାକ୍ଟ ଡାଟା ସେଭ କରିବାକୁ ଦିଏ ଏବଂ ହାନୀକାରକ ଆପ ଆପଣଙ୍କ ଅଜାଣତରେ କଣ୍ଟାକ୍ଟ ଡାଟା ସେୟାର କରିପାରେ।"</string>
+    <string name="permdesc_readContacts" product="default" msgid="4911989776203207644">"ଏହା ଆପଣଙ୍କ ଫୋନରେ ଷ୍ଟୋର କରାଯାଇଥିବା କଣ୍ଟାକ୍ଟଗୁଡ଼ିକ ବିଷୟରେ ଡାଟା ପଢ଼ିବା ପାଇଁ ଆପକୁ ଅନୁମତି ଦେଇଥାଏ। ଆପଣଙ୍କର ଫୋନରେ ଥିବା ଆକାଉଣ୍ଟଗୁଡ଼ିକ ଯେଉଁଥିରେ କଣ୍ଟାକ୍ଟଗୁଡ଼ିକ ତିଆରି ହୋଇଛି, ସେଗୁଡ଼ିକୁ ଆପ୍ସର ଆକ୍ସେସ ରହିବ। ଆପଣ ଇନଷ୍ଟଲ କରିଥିବା ଆପ୍ସ ମାଧ୍ୟମରେ ତିଆରି କରାଯାଇଥିବା ଆକାଉଣ୍ଟଗୁଡ଼ିକୁ ଏହା ସାମିଲ କରିପାରେ। ଏହି ଅନୁମତି ଆପ୍ସକୁ ଆପଣଙ୍କର କଣ୍ଟାକ୍ଟ ଡାଟା ସେଭ କରିବାକୁ ଦିଏ ଏବଂ ହାନୀକାରକ ଆପ ଆପଣଙ୍କ ଅଜାଣତରେ କଣ୍ଟାକ୍ଟ ଡାଟା ସେୟାର କରିପାରେ।"</string>
     <string name="permlab_writeContacts" msgid="8919430536404830430">"ନିଜ ଯୋଗାଯୋଗ ସଂଶୋଧନ କରନ୍ତୁ"</string>
-    <string name="permdesc_writeContacts" product="tablet" msgid="6422419281427826181">"ଏହା ଆପଣଙ୍କ ଟାବ୍‌ଲେଟ୍‌ରେ ଷ୍ଟୋର୍ କରାଯାଇଥିବା ଯୋଗାଯୋଗ ବିଷୟରେ ଡାଟା ସଂଶୋଧନ କରିବା ପାଇଁ ଆପ୍‌କୁ ଅନୁମତି ଦେଇଥାଏ। ଏହି ଅନୁମତି ଆପ୍ସକୁ ଆପଣଙ୍କର ଯୋଗାଯୋଗ ଡାଟା ଡିଲିଟ୍ କରିବାକୁ ଦିଏ।"</string>
-    <string name="permdesc_writeContacts" product="tv" msgid="6488872735379978935">"ଏହା ଆପଣଙ୍କ Android TV ଡିଭାଇସ୍‌ରେ ଷ୍ଟୋର୍ କରାଯାଇଥିବା ଯୋଗାଯୋଗ ବିଷୟରେ ଡାଟା ସଂଶୋଧନ କରିବା ପାଇଁ ଆପ୍‌କୁ ଅନୁମତି ଦେଇଥାଏ। ଏହି ଅନୁମତି ଆପ୍ସକୁ ଆପଣଙ୍କର ଯୋଗାଯୋଗ ଡାଟା ଡିଲିଟ୍ କରିବାକୁ ଦିଏ।"</string>
-    <string name="permdesc_writeContacts" product="default" msgid="8304795696237065281">"ଏହା ଆପଣଙ୍କ ଫୋନ୍‌ରେ ଷ୍ଟୋର୍ କରାଯାଇଥିବା ଯୋଗାଯୋଗ ବିଷୟରେ ଡାଟା ପରିବର୍ତ୍ତନ କରିବା ପାଇଁ ଆପ୍‌କୁ ଅନୁମତି ଦେଇଥାଏ। ଏହି ଅନୁମତି ଆପ୍ସକୁ ଆପଣଙ୍କର ଯୋଗାଯୋଗ ଡାଟା ଡିଲିଟ୍ କରିବାକୁ ଦିଏ।"</string>
+    <string name="permdesc_writeContacts" product="tablet" msgid="6422419281427826181">"ଏହା ଆପଣଙ୍କ ଟାବଲେଟରେ ଷ୍ଟୋର କରାଯାଇଥିବା କଣ୍ଟାକ୍ଟ ବିଷୟରେ ଡାଟା ସଂଶୋଧନ କରିବା ପାଇଁ ଆପକୁ ଅନୁମତି ଦେଇଥାଏ। ଏହି ଅନୁମତି ଆପ୍ସକୁ ଆପଣଙ୍କର କଣ୍ଟାକ୍ଟ ଡାଟା ଡିଲିଟ କରିବାକୁ ଦିଏ।"</string>
+    <string name="permdesc_writeContacts" product="tv" msgid="6488872735379978935">"ଏହା ଆପଣଙ୍କ Android TV ଡିଭାଇସରେ ଷ୍ଟୋର କରାଯାଇଥିବା କଣ୍ଟାକ୍ଟ ବିଷୟରେ ଡାଟା ସଂଶୋଧନ କରିବା ପାଇଁ ଆପକୁ ଅନୁମତି ଦେଇଥାଏ। ଏହି ଅନୁମତି ଆପ୍ସକୁ ଆପଣଙ୍କର କଣ୍ଟାକ୍ଟ ଡାଟା ଡିଲିଟ କରିବାକୁ ଦିଏ।"</string>
+    <string name="permdesc_writeContacts" product="default" msgid="8304795696237065281">"ଏହା ଆପଣଙ୍କ ଫୋନରେ ଷ୍ଟୋର କରାଯାଇଥିବା କଣ୍ଟାକ୍ଟ ବିଷୟରେ ଡାଟା ପରିବର୍ତ୍ତନ କରିବା ପାଇଁ ଆପକୁ ଅନୁମତି ଦେଇଥାଏ। ଏହି ଅନୁମତି ଆପ୍ସକୁ ଆପଣଙ୍କର କଣ୍ଟାକ୍ଟ ଡାଟା ଡିଲିଟ କରିବାକୁ ଦିଏ।"</string>
     <string name="permlab_readCallLog" msgid="1739990210293505948">"କଲ୍‌ ଲଗ୍‌ ପଢ଼ନ୍ତୁ"</string>
     <string name="permdesc_readCallLog" msgid="8964770895425873433">"ଏହି ଆପ୍‍ ଆପଣଙ୍କ କଲ୍‍ ହିଷ୍ଟୋରୀ ପଢ଼ିପାରେ।"</string>
     <string name="permlab_writeCallLog" msgid="670292975137658895">"କଲ୍‍ ଲଗ୍‍ ଲେଖନ୍ତୁ"</string>
@@ -586,13 +587,14 @@
     <string name="screen_lock_app_setting_name" msgid="6054944352976789228">"ସ୍କ୍ରିନ୍ ଲକ୍ ବ୍ୟବହାର କରନ୍ତୁ"</string>
     <string name="screen_lock_dialog_default_subtitle" msgid="120359538048533695">"ଜାରି ରଖିବାକୁ ଆପଣଙ୍କ ସ୍କ୍ରିନ୍ ଲକ୍ ଏଣ୍ଟର୍ କରନ୍ତୁ"</string>
     <string name="fingerprint_acquired_partial" msgid="4323789264604479684">"ସେନ୍ସର ଉପରେ ଦୃଢ଼ ଭାବେ ଦବାନ୍ତୁ"</string>
-    <string name="fingerprint_acquired_insufficient" msgid="2545149524031515411">"ଟିପଚିହ୍ନ ପ୍ରୋସେସ୍‍ କରାଯାଇପାରିଲା ନାହିଁ। ଦୟାକରି ପୁଣି ଚେଷ୍ଟା କରନ୍ତୁ।"</string>
+    <string name="fingerprint_acquired_insufficient" msgid="623888149088216458">"ଟିପଚିହ୍ନକୁ ଚିହ୍ନଟ କରାଯାଇପାରିବ ନାହିଁ। ପୁଣି ଚେଷ୍ଟା କରନ୍ତୁ।"</string>
     <string name="fingerprint_acquired_imager_dirty" msgid="1770676120848224250">"ଟିପଚିହ୍ନ ସେନ୍ସରକୁ ପରିଷ୍କାର କରି ପୁଣି ଚେଷ୍ଟା କରନ୍ତୁ"</string>
     <string name="fingerprint_acquired_imager_dirty_alt" msgid="9169582140486372897">"ସେନ୍ସରକୁ ପରିଷ୍କାର କରି ପୁଣି ଚେଷ୍ଟା କରନ୍ତୁ"</string>
     <string name="fingerprint_acquired_too_fast" msgid="1628459767349116104">"ସେନ୍ସର ଉପରେ ଦୃଢ଼ ଭାବେ ଦବାନ୍ତୁ"</string>
     <string name="fingerprint_acquired_too_slow" msgid="6683510291554497580">"ଆଙ୍ଗୁଠି ଖୁବ୍‍ ଧୀରେ ନିଆଗଲା। ଦୟାକରି ପୁଣି ଚେଷ୍ଟା କରନ୍ତୁ।"</string>
     <string name="fingerprint_acquired_already_enrolled" msgid="2285166003936206785">"ଅନ୍ୟ ଏକ ଟିପଚିହ୍ନ ବ୍ୟବହାର କରି ଦେଖନ୍ତୁ"</string>
     <string name="fingerprint_acquired_too_bright" msgid="3863560181670915607">"ବହୁତ ଉଜ୍ଜ୍ୱଳ"</string>
+    <string name="fingerprint_acquired_power_press" msgid="3107864151278434961">"ପାୱାର ବଟନ ଦବାଇବା ଚିହ୍ନଟ କରାଯାଇଛି"</string>
     <string name="fingerprint_acquired_try_adjusting" msgid="3667006071003809364">"ଆଡଜଷ୍ଟ କରି ଦେଖନ୍ତୁ"</string>
     <string name="fingerprint_acquired_immobile" msgid="1621891895241888048">"ପ୍ରତି ଥର ଆପଣଙ୍କ ଆଙ୍ଗୁଠିର ସ୍ଥାନ ସାମାନ୍ୟ ପରିବର୍ତ୍ତନ କରନ୍ତୁ"</string>
   <string-array name="fingerprint_acquired_vendor">
@@ -604,12 +606,12 @@
     <string name="face_authenticated_confirmation_required" msgid="6872632732508013755">"ମୁହଁ ଚିହ୍ନଟ ହୋଇଛି, ଦୟାକରି ସୁନିଶ୍ଚିତ ଦବାନ୍ତୁ"</string>
     <string name="fingerprint_error_hw_not_available" msgid="4571700896929561202">"ଟିପଚିହ୍ନ ହାର୍ଡୱେର୍‍ ଉପଲବ୍ଧ ନାହିଁ।"</string>
     <string name="fingerprint_error_no_space" msgid="7285481581905967580">"ଟିପଚିହ୍ନକୁ ସେଟ୍ ଅପ୍ କରାଯାଇପାରିବ ନାହିଁ"</string>
-    <string name="fingerprint_error_timeout" msgid="2946635815726054226">"ଟିପଚିହ୍ନର ସମୟ ଶେଷ ହେଲା । ପୁଣି ଚେଷ୍ଟା କରନ୍ତୁ।"</string>
+    <string name="fingerprint_error_timeout" msgid="7361192266621252164">"ଫିଙ୍ଗରପ୍ରିଣ୍ଟ ସେଟଅପର ସମୟସୀମା ସମାପ୍ତ ହୋଇଯାଇଛି। ପୁଣି ଚେଷ୍ଟା କରନ୍ତୁ।"</string>
     <string name="fingerprint_error_canceled" msgid="540026881380070750">"ଟିପଚିହ୍ନ କାର୍ଯ୍ୟ ବାତିଲ୍ କରାଗଲା।"</string>
     <string name="fingerprint_error_user_canceled" msgid="7685676229281231614">"ଉପଯୋଗକର୍ତ୍ତା ଟିପଚିହ୍ନ କାର୍ଯ୍ୟ ବାତିଲ୍ କରିଛନ୍ତି।"</string>
-    <string name="fingerprint_error_lockout" msgid="7853461265604738671">"ବହୁତ ପ୍ରୟାସ କରାଗଲା। ପରେ ପୁଣି ଚେଷ୍ଟା କରନ୍ତୁ।"</string>
-    <string name="fingerprint_error_lockout_permanent" msgid="3895478283943513746">"ବହୁଥର ପ୍ରୟାସ କରିଛନ୍ତି। ଟିପଚିହ୍ନ ସେନ୍ସର୍‍ ଅକ୍ଷମ କରାଯାଇଛି।"</string>
-    <string name="fingerprint_error_unable_to_process" msgid="1148553603490048742">"ପୁଣି ଚେଷ୍ଟା କରନ୍ତୁ।"</string>
+    <string name="fingerprint_error_lockout" msgid="6626753679019351368">"ଅନେକଗୁଡ଼ିଏ ପ୍ରଚେଷ୍ଟା। ଏହା ପରିବର୍ତ୍ତେ ସ୍କ୍ରିନ ଲକ ବ୍ୟବହାର କରନ୍ତୁ।"</string>
+    <string name="fingerprint_error_lockout_permanent" msgid="9060651300306264843">"ଅନେକଗୁଡ଼ିଏ ପ୍ରଚେଷ୍ଟା। ଏହା ପରିବର୍ତ୍ତେ ସ୍କ୍ରିନ ଲକ ବ୍ୟବହାର କରନ୍ତୁ।"</string>
+    <string name="fingerprint_error_unable_to_process" msgid="2446280592818621224">"ଟିପଚିହ୍ନକୁ ପ୍ରକ୍ରିୟାନ୍ୱିତ କରାଯାଇପାରିବ ନାହିଁ। ପୁଣି ଚେଷ୍ଟା କରନ୍ତୁ।"</string>
     <string name="fingerprint_error_no_fingerprints" msgid="8671811719699072411">"କୌଣସି ଆଙ୍ଗୁଠି ଚିହ୍ନ ପଞ୍ଜୀକୃତ ହୋଇନାହିଁ।"</string>
     <string name="fingerprint_error_hw_not_present" msgid="578914350967423382">"ଏହି ଡିଭାଇସ୍‌ରେ ଟିପଚିହ୍ନ ସେନ୍‍ସର୍ ନାହିଁ।"</string>
     <string name="fingerprint_error_security_update_required" msgid="7750187320640856433">"ସେନ୍ସରକୁ ଅସ୍ଥାୟୀ ଭାବେ ଅକ୍ଷମ କରାଯାଇଛି।"</string>
@@ -637,7 +639,7 @@
     <string name="fingerprint_recalibrate_notification_content" msgid="8519935717822194943">"ଏକ ମରାମତି କେନ୍ଦ୍ରକୁ ଭିଜିଟ୍ କରନ୍ତୁ।"</string>
     <string name="face_acquired_insufficient" msgid="6889245852748492218">"ଫେସର ମଡେଲ ତିଆରି କରାଯାଇପାରିବ ନାହିଁ। ପୁଣି ଚେଷ୍ଟା କର।"</string>
     <string name="face_acquired_too_bright" msgid="8070756048978079164">"ଅତ୍ୟଧିକ ଉଜ୍ଵଳ। କମ୍ ଉଜ୍ବଳକରଣରେ ଚେଷ୍ଟା କରନ୍ତୁ।"</string>
-    <string name="face_acquired_too_dark" msgid="7919016380747701228">"ଉଜ୍ଜ୍ୱଳ ଲାଇଟ ବ୍ୟବହାର କରି ଦେଖନ୍ତୁ"</string>
+    <string name="face_acquired_too_dark" msgid="8539853432479385326">"ଯଥେଷ୍ଟ ଆଲୋକ ନାହିଁ"</string>
     <string name="face_acquired_too_close" msgid="4453646176196302462">"ଫୋନକୁ ଟିକେ ଦୂରକୁ ନିଅନ୍ତୁ"</string>
     <string name="face_acquired_too_far" msgid="2922278214231064859">"ଫୋନକୁ ପାଖକୁ ଆଣନ୍ତୁ"</string>
     <string name="face_acquired_too_high" msgid="8278815780046368576">"ଫୋନକୁ ଉପରକୁ ମୁଭ କରନ୍ତୁ"</string>
@@ -796,32 +798,32 @@
     <item msgid="7740243458912727194">"ମୋବାଇଲ୍‍"</item>
     <item msgid="8526146065496663766">"ୱାର୍କ"</item>
     <item msgid="8150904584178569699">"ୱାର୍କ ଫ୍ୟାକ୍ସ"</item>
-    <item msgid="4537253139152229577">"ହୋମ୍ ଫାକ୍ସ"</item>
+    <item msgid="4537253139152229577">"ହୋମ ଫାକ୍ସ"</item>
     <item msgid="6751245029698664340">"ପେଜର୍"</item>
-    <item msgid="1692790665884224905">"ଅନ୍ୟାନ୍ୟ"</item>
+    <item msgid="1692790665884224905">"ଅନ୍ୟ"</item>
     <item msgid="6216981255272016212">"କଷ୍ଟମ୍‌"</item>
   </string-array>
   <string-array name="emailAddressTypes">
     <item msgid="7786349763648997741">"ହୋମ"</item>
     <item msgid="435564470865989199">"ୱାର୍କ"</item>
-    <item msgid="4199433197875490373">"ଅନ୍ୟାନ୍ୟ"</item>
+    <item msgid="4199433197875490373">"ଅନ୍ୟ"</item>
     <item msgid="3233938986670468328">"କଷ୍ଟମ୍‌"</item>
   </string-array>
   <string-array name="postalAddressTypes">
-    <item msgid="3861463339764243038">"ମୂଳପୃଷ୍ଠା"</item>
+    <item msgid="3861463339764243038">"ହୋମ"</item>
     <item msgid="5472578890164979109">"ୱାର୍କ"</item>
-    <item msgid="5718921296646594739">"ଅନ୍ୟାନ୍ୟ"</item>
+    <item msgid="5718921296646594739">"ଅନ୍ୟ"</item>
     <item msgid="5523122236731783179">"କଷ୍ଟମ୍‌"</item>
   </string-array>
   <string-array name="imAddressTypes">
     <item msgid="588088543406993772">"ହୋମ"</item>
     <item msgid="5503060422020476757">"ୱାର୍କ"</item>
-    <item msgid="2530391194653760297">"ଅନ୍ୟାନ୍ୟ"</item>
+    <item msgid="2530391194653760297">"ଅନ୍ୟ"</item>
     <item msgid="7640927178025203330">"କଷ୍ଟମ୍‌"</item>
   </string-array>
   <string-array name="organizationTypes">
     <item msgid="6144047813304847762">"ୱାର୍କ"</item>
-    <item msgid="7402720230065674193">"ଅନ୍ୟାନ୍ୟ"</item>
+    <item msgid="7402720230065674193">"ଅନ୍ୟ"</item>
     <item msgid="808230403067569648">"କଷ୍ଟମ୍‌"</item>
   </string-array>
   <string-array name="imProtocols">
@@ -835,13 +837,13 @@
     <item msgid="8293711853624033835">"Jabber"</item>
   </string-array>
     <string name="phoneTypeCustom" msgid="5120365721260686814">"କଷ୍ଟମ୍‌"</string>
-    <string name="phoneTypeHome" msgid="3880132427643623588">"ମୂଳପୃଷ୍ଠା"</string>
+    <string name="phoneTypeHome" msgid="3880132427643623588">"ହୋମ"</string>
     <string name="phoneTypeMobile" msgid="1178852541462086735">"ମୋବାଇଲ୍‍"</string>
     <string name="phoneTypeWork" msgid="6604967163358864607">"ୱାର୍କ"</string>
     <string name="phoneTypeFaxWork" msgid="6757519896109439123">"ୱାର୍କ ଫାକ୍ସ"</string>
-    <string name="phoneTypeFaxHome" msgid="6678559953115904345">"ହୋମ୍ ଫାକ୍ସ"</string>
+    <string name="phoneTypeFaxHome" msgid="6678559953115904345">"ହୋମ ଫାକ୍ସ"</string>
     <string name="phoneTypePager" msgid="576402072263522767">"ପେଜର୍"</string>
-    <string name="phoneTypeOther" msgid="6918196243648754715">"ଅନ୍ୟାନ୍ୟ"</string>
+    <string name="phoneTypeOther" msgid="6918196243648754715">"ଅନ୍ୟ"</string>
     <string name="phoneTypeCallback" msgid="3455781500844157767">"କଲବ୍ୟାକ୍"</string>
     <string name="phoneTypeCar" msgid="4604775148963129195">"କାର୍"</string>
     <string name="phoneTypeCompanyMain" msgid="4482773154536455441">"କମ୍ପାନୀର ମୁଖ୍ୟ"</string>
@@ -862,16 +864,16 @@
     <string name="emailTypeCustom" msgid="1809435350482181786">"କଷ୍ଟମ୍‌"</string>
     <string name="emailTypeHome" msgid="1597116303154775999">"ହୋମ"</string>
     <string name="emailTypeWork" msgid="2020095414401882111">"ୱାର୍କ"</string>
-    <string name="emailTypeOther" msgid="5131130857030897465">"ଅନ୍ୟାନ୍ୟ"</string>
+    <string name="emailTypeOther" msgid="5131130857030897465">"ଅନ୍ୟ"</string>
     <string name="emailTypeMobile" msgid="787155077375364230">"ମୋବାଇଲ୍‍"</string>
     <string name="postalTypeCustom" msgid="5645590470242939129">"କଷ୍ଟମ୍‌"</string>
     <string name="postalTypeHome" msgid="7562272480949727912">"ହୋମ"</string>
     <string name="postalTypeWork" msgid="8553425424652012826">"ୱାର୍କ"</string>
-    <string name="postalTypeOther" msgid="7094245413678857420">"ଅନ୍ୟାନ୍ୟ"</string>
+    <string name="postalTypeOther" msgid="7094245413678857420">"ଅନ୍ୟ"</string>
     <string name="imTypeCustom" msgid="5653384545085765570">"କଷ୍ଟମ୍‌"</string>
     <string name="imTypeHome" msgid="6996507981044278216">"ହୋମ"</string>
     <string name="imTypeWork" msgid="2099668940169903123">"ୱାର୍କ"</string>
-    <string name="imTypeOther" msgid="8068447383276219810">"ଅନ୍ୟାନ୍ୟ"</string>
+    <string name="imTypeOther" msgid="8068447383276219810">"ଅନ୍ୟ"</string>
     <string name="imProtocolCustom" msgid="4437878287653764692">"କଷ୍ଟମ୍‌"</string>
     <string name="imProtocolAim" msgid="4050198236506604378">"AIM"</string>
     <string name="imProtocolMsn" msgid="2257148557766499232">"Windows Live"</string>
@@ -883,7 +885,7 @@
     <string name="imProtocolJabber" msgid="7919269388889582015">"Jabber"</string>
     <string name="imProtocolNetMeeting" msgid="4985002408136148256">"NetMeeting"</string>
     <string name="orgTypeWork" msgid="8684458700669564172">"ୱାର୍କ"</string>
-    <string name="orgTypeOther" msgid="5450675258408005553">"ଅନ୍ୟାନ୍ୟ"</string>
+    <string name="orgTypeOther" msgid="5450675258408005553">"ଅନ୍ୟ"</string>
     <string name="orgTypeCustom" msgid="1126322047677329218">"କଷ୍ଟମ୍‌"</string>
     <string name="relationTypeCustom" msgid="282938315217441351">"କଷ୍ଟମ୍‌"</string>
     <string name="relationTypeAssistant" msgid="4057605157116589315">"Assistant"</string>
@@ -901,10 +903,10 @@
     <string name="relationTypeSister" msgid="3721676005094140671">"ଭଉଣୀ"</string>
     <string name="relationTypeSpouse" msgid="6916682664436031703">"ସ୍ଵାମୀ ବା ସ୍ତ୍ରୀ"</string>
     <string name="sipAddressTypeCustom" msgid="6283889809842649336">"କଷ୍ଟମ୍‌"</string>
-    <string name="sipAddressTypeHome" msgid="5918441930656878367">"ଘର"</string>
+    <string name="sipAddressTypeHome" msgid="5918441930656878367">"ହୋମ"</string>
     <string name="sipAddressTypeWork" msgid="7873967986701216770">"ୱାର୍କ"</string>
-    <string name="sipAddressTypeOther" msgid="6317012577345187275">"ଅନ୍ୟାନ୍ୟ"</string>
-    <string name="quick_contacts_not_available" msgid="1262709196045052223">"ଏହି ଯୋଗାଯୋଗ ଦେଖିବାକୁ କୌଣସି ଆପ୍ଲିକେଶନ୍‍ ମିଳିଲା ନାହିଁ।"</string>
+    <string name="sipAddressTypeOther" msgid="6317012577345187275">"ଅନ୍ୟ"</string>
+    <string name="quick_contacts_not_available" msgid="1262709196045052223">"ଏହି କଣ୍ଟାକ୍ଟ ଦେଖିବାକୁ କୌଣସି ଆପ୍ଲିକେସନ ମିଳିଲା ନାହିଁ।"</string>
     <string name="keyguard_password_enter_pin_code" msgid="6401406801060956153">"PIN କୋଡ୍‍ ଟାଇପ୍‍ କରନ୍ତୁ"</string>
     <string name="keyguard_password_enter_puk_code" msgid="3112256684547584093">"PUK ଓ ନୂଆ PIN କୋଡ୍‍ ଟାଇପ୍‍ କରନ୍ତୁ"</string>
     <string name="keyguard_password_enter_puk_prompt" msgid="2825313071899938305">"PUK କୋଡ୍‍"</string>
@@ -934,7 +936,7 @@
     <string name="lockscreen_missing_sim_instructions" msgid="8473601862688263903">"ଏକ SIM କାର୍ଡ ଭର୍ତ୍ତି କରନ୍ତୁ।"</string>
     <string name="lockscreen_missing_sim_instructions_long" msgid="3664999892038416334">"SIM କାର୍ଡ ନାହିଁ କିମ୍ବା ଖରାପ ଅଛି। SIM କାର୍ଡ ଭର୍ତ୍ତି କରନ୍ତୁ।"</string>
     <string name="lockscreen_permanent_disabled_sim_message_short" msgid="3812893366715730539">"SIM କାର୍ଡଟି ବ୍ୟବହାର କରାଯାଇପାରିବ ନାହିଁ।"</string>
-    <string name="lockscreen_permanent_disabled_sim_instructions" msgid="4358929052509450807">"ଆପଣଙ୍କ SIM କାର୍ଡକୁ ସ୍ଥାୟୀ ରୂପେ ଅକ୍ଷମ କରିଦିଆଯାଇଛି।\n ଅନ୍ୟ SIM କାର୍ଡ ପାଇଁ ଆପଣଙ୍କ ୱାୟରଲେସ୍‍ ସେବା ପ୍ରଦାନକାରୀଙ୍କ ସହ ଯୋଗାଯୋଗ କରନ୍ତୁ।"</string>
+    <string name="lockscreen_permanent_disabled_sim_instructions" msgid="4358929052509450807">"ଆପଣଙ୍କ SIM କାର୍ଡକୁ ସ୍ଥାୟୀ ରୂପେ ଅକ୍ଷମ କରିଦିଆଯାଇଛି।\n ଅନ୍ୟ SIM କାର୍ଡ ପାଇଁ ଆପଣଙ୍କ ୱାୟରଲେସ ସେବା ପ୍ରଦାନକାରୀଙ୍କ ସହ କଣ୍ଟାକ୍ଟ କରନ୍ତୁ।"</string>
     <string name="lockscreen_transport_prev_description" msgid="2879469521751181478">"ପୂର୍ବବର୍ତ୍ତୀ ଟ୍ରାକ୍‌"</string>
     <string name="lockscreen_transport_next_description" msgid="2931509904881099919">"ପରବର୍ତ୍ତୀ ଟ୍ରାକ୍‌"</string>
     <string name="lockscreen_transport_pause_description" msgid="6705284702135372494">"ପଜ୍‍ କରନ୍ତୁ"</string>
@@ -945,7 +947,7 @@
     <string name="emergency_calls_only" msgid="3057351206678279851">"କେବଳ ଜରୁରୀକାଳୀନ କଲ୍‌"</string>
     <string name="lockscreen_network_locked_message" msgid="2814046965899249635">"ନେଟ୍‌ୱର୍କକୁ ଲକ୍‌ କରାଯାଇଛି"</string>
     <string name="lockscreen_sim_puk_locked_message" msgid="6618356415831082174">"SIM କାର୍ଡଟିରେ PUK ଲକ୍‍ ହୋଇଯାଇଛି।"</string>
-    <string name="lockscreen_sim_puk_locked_instructions" msgid="5307979043730860995">"ୟୁଜର୍‍ ଗାଇଡ୍‍ ଦେଖନ୍ତୁ କିମ୍ବା ଗ୍ରାହକ ସେବା କେନ୍ଦ୍ର ସହ ଯୋଗାଯୋଗ କରନ୍ତୁ।"</string>
+    <string name="lockscreen_sim_puk_locked_instructions" msgid="5307979043730860995">"ୟୁଜର ଗାଇଡ ଦେଖନ୍ତୁ କିମ୍ବା ଗ୍ରାହକ ସେବା କେନ୍ଦ୍ର ସହ କଣ୍ଟାକ୍ଟ କରନ୍ତୁ।"</string>
     <string name="lockscreen_sim_locked_message" msgid="3160196135801185938">"SIM କାର୍ଡ ଲକ୍‍ ହୋଇଯାଇଛି"</string>
     <string name="lockscreen_sim_unlock_progress_dialog_message" msgid="2286497117428409709">"SIM କାର୍ଡକୁ ଅନଲକ୍‍ କରାଯାଉଛି…"</string>
     <string name="lockscreen_too_many_failed_attempts_dialog_message" msgid="6458790975898594240">"ଆପଣଙ୍କ ଅନଲକ୍‍ ପାଟର୍ନକୁ ଆପଣ <xliff:g id="NUMBER_0">%1$d</xliff:g> ଥର ଭୁଲ ଭାବେ ଅଙ୍କନ କରିଛନ୍ତି। \n\n<xliff:g id="NUMBER_1">%2$d</xliff:g> ସେକେଣ୍ଡ ପରେ ପୁଣି ଚେଷ୍ଟା କରନ୍ତୁ।"</string>
@@ -1164,8 +1166,8 @@
     <string name="no" msgid="5122037903299899715">"ବାତିଲ କରନ୍ତୁ"</string>
     <string name="dialog_alert_title" msgid="651856561974090712">"ଧ୍ୟାନଦିଅନ୍ତୁ"</string>
     <string name="loading" msgid="3138021523725055037">"ଲୋଡ୍ କରାଯାଉଛି…"</string>
-    <string name="capital_on" msgid="2770685323900821829">"ଚାଲୁ"</string>
-    <string name="capital_off" msgid="7443704171014626777">"ବନ୍ଦ"</string>
+    <string name="capital_on" msgid="2770685323900821829">"ଚାଲୁ ଅଛି"</string>
+    <string name="capital_off" msgid="7443704171014626777">"ବନ୍ଦ ଅଛି"</string>
     <string name="checked" msgid="9179896827054513119">"ଯାଞ୍ଚ ହୋଇଛି"</string>
     <string name="not_checked" msgid="7972320087569023342">"ଯାଞ୍ଚ ହୋଇନାହିଁ"</string>
     <string name="selected" msgid="6614607926197755875">"ଚୟନ କରାଯାଇଛି"</string>
@@ -1191,8 +1193,8 @@
     <string name="whichSendToApplication" msgid="77101541959464018">"ଏହା ଜରିଆରେ ପଠାନ୍ତୁ"</string>
     <string name="whichSendToApplicationNamed" msgid="3385686512014670003">"%1$s ଜରିଆରେ ପଠାନ୍ତୁ"</string>
     <string name="whichSendToApplicationLabel" msgid="3543240188816513303">"ପଠାନ୍ତୁ"</string>
-    <string name="whichHomeApplication" msgid="8276350727038396616">"ହୋମ୍‍ ଆପ୍‌ ଚୟନ କରନ୍ତୁ"</string>
-    <string name="whichHomeApplicationNamed" msgid="5855990024847433794">"ହୋମ୍‍ ରୂପରେ %1$s ବ୍ୟବହାର କରନ୍ତୁ"</string>
+    <string name="whichHomeApplication" msgid="8276350727038396616">"ଏକ ହୋମ ଆପ ଚୟନ କରନ୍ତୁ"</string>
+    <string name="whichHomeApplicationNamed" msgid="5855990024847433794">"ହୋମ ରୂପରେ %1$s ବ୍ୟବହାର କରନ୍ତୁ"</string>
     <string name="whichHomeApplicationLabel" msgid="8907334282202933959">"ଇମେଜ୍‍ କ୍ୟାପଚର୍ କରନ୍ତୁ"</string>
     <string name="whichImageCaptureApplication" msgid="2737413019463215284">"ଏହା ସହ ଇମେଜ୍‍ କ୍ୟାପଚର୍ କରନ୍ତୁ"</string>
     <string name="whichImageCaptureApplicationNamed" msgid="8820702441847612202">"%1$s ସହ ଇମେଜ୍‍ କ୍ୟାପଚର୍ କରନ୍ତୁ"</string>
@@ -1249,10 +1251,9 @@
     <string name="android_preparing_apk" msgid="589736917792300956">"<xliff:g id="APPNAME">%1$s</xliff:g> ପ୍ରସ୍ତୁତ କରାଯାଉଛି।"</string>
     <string name="android_upgrading_starting_apps" msgid="6206161195076057075">"ଆପ୍‍ ଆରମ୍ଭ କରାଯାଉଛି।"</string>
     <string name="android_upgrading_complete" msgid="409800058018374746">"ବୁଟ୍‍ ସମାପ୍ତ କରୁଛି।"</string>
-    <string name="fp_power_button_enrollment_title" msgid="3574363228413259548">"ସେଟଅପ କରିବା ଜାରି ରଖିବେ?"</string>
     <string name="fp_power_button_enrollment_message" msgid="5648173517663246140">"ଆପଣ ପାୱାର ବଟନ ଦବାଇଛନ୍ତି — ଏହା ସାଧାରଣତଃ ଆପଣଙ୍କ ସ୍କ୍ରିନକୁ ବନ୍ଦ କରିଥାଏ।\n\nଆପଣଙ୍କ ଟିପଚିହ୍ନ ସେଟ ଅପ କରିବା ସମୟରେ ଧୀରେ ଟାପ କରିବାକୁ ଚେଷ୍ଟା କରନ୍ତୁ।"</string>
-    <string name="fp_power_button_enrollment_positive_button" msgid="2095415838459356833">"ସ୍କ୍ରିନ ବନ୍ଦ କରନ୍ତୁ"</string>
-    <string name="fp_power_button_enrollment_negative_button" msgid="6558436406362486747">"ସେଟଅପ କରିବା ଜାରି ରଖ"</string>
+    <string name="fp_power_button_enrollment_title" msgid="6976841690455338563">"ସେଟଅପ ସମାପ୍ତ କରିବାକୁ ସ୍କ୍ରିନ ବନ୍ଦ କରନ୍ତୁ"</string>
+    <string name="fp_power_button_enrollment_button_text" msgid="3199783266386029200">"ବନ୍ଦ କରନ୍ତୁ"</string>
     <string name="fp_power_button_bp_title" msgid="5585506104526820067">"ଆପଣଙ୍କ ଟିପଚିହ୍ନ ଯାଞ୍ଚ କରିବା ଜାରି ରଖିବେ?"</string>
     <string name="fp_power_button_bp_message" msgid="2983163038168903393">"ଆପଣ ପାୱାର ବଟନ ଦବାଇଛନ୍ତି — ଏହା ସାଧାରଣତଃ ଆପଣଙ୍କ ସ୍କ୍ରିନକୁ ବନ୍ଦ କରିଥାଏ।\n\nଆପଣଙ୍କ ଟିପଚିହ୍ନ ଯାଞ୍ଚ କରିବା ପାଇଁ ଧୀରେ ଟାପ କରିବାକୁ ଚେଷ୍ଟା କରନ୍ତୁ।"</string>
     <string name="fp_power_button_bp_positive_button" msgid="728945472408552251">"ସ୍କ୍ରିନ ବନ୍ଦ କରନ୍ତୁ"</string>
@@ -1275,7 +1276,7 @@
     <string name="volume_ringtone" msgid="134784084629229029">"ରିଙ୍ଗର୍‌ ଭଲ୍ୟୁମ୍"</string>
     <string name="volume_music" msgid="7727274216734955095">"ମିଡିଆ ଭଲ୍ୟୁମ୍‌"</string>
     <string name="volume_music_hint_playing_through_bluetooth" msgid="2614142915948898228">"ବ୍ଲୁଟୂଥ୍‍ ମାଧ୍ୟମରେ ଚାଲୁଛି"</string>
-    <string name="volume_music_hint_silent_ringtone_selected" msgid="1514829655029062233">"ରିଙ୍ଗଟୋନ୍‍‍କୁ ନିରବ ଭାବେ ସେଟ୍ କରାଯାଇଛି"</string>
+    <string name="volume_music_hint_silent_ringtone_selected" msgid="1514829655029062233">"ସାଇଲେଣ୍ଟ ରିଂଟୋନ ସେଟ ହୋଇଛି"</string>
     <string name="volume_call" msgid="7625321655265747433">"ଇନ୍‍-କଲ୍‍ ଭଲ୍ୟୁମ୍‌"</string>
     <string name="volume_bluetooth_call" msgid="2930204618610115061">"ବ୍ଲୁଟୂଥ୍‍ ଇନ୍-କଲ୍ ଭଲ୍ୟୁମ୍‌"</string>
     <string name="volume_alarm" msgid="4486241060751798448">"ଆଲାରାମ୍ ଭଲ୍ୟୁମ୍‌"</string>
@@ -1405,16 +1406,16 @@
     <string name="ext_media_new_notification_message" msgid="6095403121990786986">"ସେଟଅପ୍‌ କରିବା ପାଇଁ ଟାପ୍‌ କରନ୍ତୁ"</string>
     <string name="ext_media_new_notification_message" product="tv" msgid="216863352100263668">"ସେଟ୍ ଅପ୍ କରିବାକୁ ଚୟନ କରନ୍ତୁ"</string>
     <string name="ext_media_new_notification_message" product="automotive" msgid="5140127881613227162">"ଆପଣଙ୍କୁ ପୁଣି ଡିଭାଇସ୍ ଫର୍ମାଟ୍ କରିବାକୁ ପଡ଼ିପାରେ। ବାହାର କରିବାକୁ ଟାପ୍ କରନ୍ତୁ।"</string>
-    <string name="ext_media_ready_notification_message" msgid="777258143284919261">"ଫଟୋ ଓ ମିଡିଆ ସ୍ଥାନାନ୍ତର କରାଯିବା ପାଇଁ"</string>
+    <string name="ext_media_ready_notification_message" msgid="7509496364380197369">"ଫଟୋ, ଭିଡିଓ, ମ୍ୟୁଜିକ ଏବଂ ଆହୁରି ଅନେକ କିଛି ଷ୍ଟୋର କରିବା ପାଇଁ"</string>
     <string name="ext_media_ready_notification_message" product="tv" msgid="8847134811163165935">"ମିଡିଆ ଫାଇଲଗୁଡ଼ିକୁ ବ୍ରାଉଜ୍ କରନ୍ତୁ"</string>
     <string name="ext_media_unmountable_notification_title" msgid="4895444667278979910">"<xliff:g id="NAME">%s</xliff:g> ସହ ସମସ୍ୟା"</string>
     <string name="ext_media_unmountable_notification_title" product="automotive" msgid="3142723758949023280">"<xliff:g id="NAME">%s</xliff:g> କାମ କରୁନାହିଁ"</string>
     <string name="ext_media_unmountable_notification_message" msgid="3256290114063126205">"ଠିକ୍‌ କରିବାକୁ ଟାପ୍‌ କରନ୍ତୁ"</string>
     <string name="ext_media_unmountable_notification_message" product="tv" msgid="3003611129979934633">"<xliff:g id="NAME">%s</xliff:g> ଖରାପ ହୋଇଯାଇଛି। ଠିକ୍‍ କରିବାକୁ ଚୟନ କରନ୍ତୁ।"</string>
     <string name="ext_media_unmountable_notification_message" product="automotive" msgid="2274596120715020680">"ଆପଣଙ୍କୁ ପୁଣି ଡିଭାଇସ୍ ଫର୍ମାଟ୍ କରିବାକୁ ପଡ଼ିପାରେ। ବାହାର କରିବାକୁ ଟାପ୍ କରନ୍ତୁ।"</string>
-    <string name="ext_media_unsupported_notification_title" msgid="4358280700537030333">"<xliff:g id="NAME">%s</xliff:g> ସପୋର୍ଟ କରୁନାହିଁ"</string>
+    <string name="ext_media_unsupported_notification_title" msgid="3487534182861251401">"<xliff:g id="NAME">%s</xliff:g> ଚିହ୍ନଟ କରାଯାଇଛି"</string>
     <string name="ext_media_unsupported_notification_title" product="automotive" msgid="6004193172658722381">"<xliff:g id="NAME">%s</xliff:g> କାମ କରୁନାହିଁ"</string>
-    <string name="ext_media_unsupported_notification_message" msgid="917738524888367560">"ଏହି ଡିଭାଇସ୍ ଏହି <xliff:g id="NAME">%s</xliff:g>କୁ ସପୋର୍ଟ କରେନାହିଁ। ଗୋଟିଏ ସପୋର୍ଟ କରୁଥିବା ଫର୍ମାଟ୍‌ରେ ସେଟ୍‍ ଅପ୍‍ କରିବା ପାଇଁ ଟାପ୍‍ କରନ୍ତୁ।"</string>
+    <string name="ext_media_unsupported_notification_message" msgid="8463636521459807981">"ସେଟ ଅପ କରିବା ପାଇଁ ଟାପ କରନ୍ତୁ।"</string>
     <string name="ext_media_unsupported_notification_message" product="tv" msgid="1595482802187036532">"<xliff:g id="NAME">%s</xliff:g>କୁ ଏକ ସମର୍ଥିତ ଫର୍ମାଟରେ ସେଟ୍ ଅପ୍ କରିବାକୁ ଚୟନ କରନ୍ତୁ।"</string>
     <string name="ext_media_unsupported_notification_message" product="automotive" msgid="3412494732736336330">"ଆପଣଙ୍କୁ ପୁଣି ଡିଭାଇସ୍ ଫର୍ମାଟ୍ କରିବାକୁ ପଡ଼ିପାରେ"</string>
     <string name="ext_media_badremoval_notification_title" msgid="4114625551266196872">"<xliff:g id="NAME">%s</xliff:g>କୁ ହଠାତ୍‌ କାଢ଼ିଦିଆଗଲା"</string>
@@ -1469,7 +1470,7 @@
     <string name="ime_action_previous" msgid="6548799326860401611">"ପୂର୍ବବର୍ତ୍ତୀ"</string>
     <string name="ime_action_default" msgid="8265027027659800121">"କାମ କରନ୍ତୁ"</string>
     <string name="dial_number_using" msgid="6060769078933953531">"<xliff:g id="NUMBER">%s</xliff:g>ବ୍ୟବହାର କରି\n ଡାଏଲ୍ କରନ୍ତୁ"</string>
-    <string name="create_contact_using" msgid="6200708808003692594">"<xliff:g id="NUMBER">%s</xliff:g>ବ୍ୟବହାର କରି\n ଯୋଗାଯୋଗ ତିଆରି କରନ୍ତୁ"</string>
+    <string name="create_contact_using" msgid="6200708808003692594">"<xliff:g id="NUMBER">%s</xliff:g>ବ୍ୟବହାର କରି\n କଣ୍ଟାକ୍ଟ ତିଆରି କରନ୍ତୁ"</string>
     <string name="grant_credentials_permission_message_header" msgid="5365733888842570481">"ବର୍ତ୍ତମାନ ଓ ଭବିଷ୍ୟତରେ ଆପଣଙ୍କ ଆକାଉଣ୍ଟ ଆକ୍ସେସ୍‌ କରିବାକୁ ନିମ୍ନରୁ ଗୋଟିଏ କିମ୍ବା ଅଧିକ ଆପ୍‍ ଅନୁମତି ଅନୁରୋଧ କରନ୍ତି।"</string>
     <string name="grant_credentials_permission_message_footer" msgid="1886710210516246461">"ଆପଣ ଏହି ଅନୁରୋଧକୁ ଅନୁମତି ଦେବାକୁ ଚାହାଁନ୍ତି କି?"</string>
     <string name="grant_permissions_header_text" msgid="3420736827804657201">"ଆକ୍ସେସ୍‌ ଅନୁରୋଧ"</string>
@@ -1561,7 +1562,7 @@
     <string name="shareactionprovider_share_with_application" msgid="4902832247173666973">"<xliff:g id="APPLICATION_NAME">%s</xliff:g> ସହ ସେୟାର୍‍ କରନ୍ତୁ"</string>
     <string name="content_description_sliding_handle" msgid="982510275422590757">"ହ୍ୟାଣ୍ଡେଲ୍‍ ସ୍ଲାଇଡ୍‍ କରାଯାଉଛି। ସ୍ପର୍ଶ କରି ଧରିରଖନ୍ତୁ।"</string>
     <string name="description_target_unlock_tablet" msgid="7431571180065859551">"ଅନଲକ୍‍ କରିବାକୁ ସ୍ୱାଇପ୍‍ କରନ୍ତୁ।"</string>
-    <string name="action_bar_home_description" msgid="1501655419158631974">"ହୋମ୍ ପେଜ୍‌କୁ ନେଭିଗେଟ୍ କରନ୍ତୁ"</string>
+    <string name="action_bar_home_description" msgid="1501655419158631974">"ହୋମକୁ ନେଭିଗେଟ କରନ୍ତୁ"</string>
     <string name="action_bar_up_description" msgid="6611579697195026932">"ଉପରକୁ ନେଭିଗେଟ୍ କରନ୍ତୁ"</string>
     <string name="action_menu_overflow_description" msgid="4579536843510088170">"ଅଧିକ ବିକଳ୍ପ"</string>
     <string name="action_bar_home_description_format" msgid="5087107531331621803">"%1$s, %2$s"</string>
@@ -1611,12 +1612,12 @@
     <string name="activity_resolver_work_profiles_support" msgid="4071345609235361269">"%1$s ୱର୍କ ପ୍ରୋଫାଇଲ୍‌କୁ ସପୋର୍ଟ କରୁନାହିଁ"</string>
     <string name="default_audio_route_name" product="tablet" msgid="367936735632195517">"ଟାବଲେଟ୍‌"</string>
     <string name="default_audio_route_name" product="tv" msgid="4908971385068087367">"TV"</string>
-    <string name="default_audio_route_name" product="default" msgid="9213546147739983977">"ଫୋନ୍"</string>
+    <string name="default_audio_route_name" product="default" msgid="9213546147739983977">"ଫୋନ"</string>
     <string name="default_audio_route_name_dock_speakers" msgid="1551166029093995289">"ଡକ୍‌ ସ୍ପିକର୍‌"</string>
     <string name="default_audio_route_name_hdmi" msgid="5474470558160717850">"HDMI"</string>
     <string name="default_audio_route_name_headphones" msgid="6954070994792640762">"ହେଡଫୋନ୍‍"</string>
     <string name="default_audio_route_name_usb" msgid="895668743163316932">"USB"</string>
-    <string name="default_audio_route_category_name" msgid="5241740395748134483">"ସିଷ୍ଟମ୍‌"</string>
+    <string name="default_audio_route_category_name" msgid="5241740395748134483">"ସିଷ୍ଟମ"</string>
     <string name="bluetooth_a2dp_audio_route_name" msgid="4214648773120426288">"ବ୍ଲୁଟୂଥ୍‍‌ ଅଡିଓ"</string>
     <string name="wireless_display_route_description" msgid="8297563323032966831">"ୱେୟାର୍‍ଲେସ୍‍ ଡିସ୍‍ପ୍ଲେ"</string>
     <string name="media_route_button_content_description" msgid="2299223698196869956">"କାଷ୍ଟ କରନ୍ତୁ"</string>
@@ -1643,7 +1644,7 @@
     <string name="kg_sim_pin_instructions" msgid="6479401489471690359">"SIM PIN ଲେଖନ୍ତୁ"</string>
     <string name="kg_pin_instructions" msgid="7355933174673539021">"PIN ଲେଖନ୍ତୁ"</string>
     <string name="kg_password_instructions" msgid="7179782578809398050">"ପାସ୍‌ୱର୍ଡ ଲେଖନ୍ତୁ"</string>
-    <string name="kg_puk_enter_puk_hint" msgid="6696187482616360994">"SIM ବର୍ତ୍ତମାନ ଅକ୍ଷମ ଅଟେ। ଜାରି ରଖିବାକୁ PUK କୋଡ୍‍ ଏଣ୍ଟର୍ କରନ୍ତୁ। ବିବରଣୀ ପାଇଁ ନିଜ କେରିଅର୍‌ଙ୍କ ସହ ଯୋଗାଯୋଗ କରନ୍ତୁ।"</string>
+    <string name="kg_puk_enter_puk_hint" msgid="6696187482616360994">"SIM ବର୍ତ୍ତମାନ ଅକ୍ଷମ ଅଟେ। ଜାରି ରଖିବାକୁ PUK କୋଡ ଲେଖନ୍ତୁ। ବିବରଣୀ ପାଇଁ ନିଜ କ୍ଯାରିଅରଙ୍କ ସହ କଣ୍ଟାକ୍ଟ କରନ୍ତୁ।"</string>
     <string name="kg_puk_enter_pin_hint" msgid="8190982314659429770">"ନିଜ ଇଚ୍ଛାର PIN କୋଡ୍‍ ଲେଖନ୍ତୁ"</string>
     <string name="kg_enter_confirm_pin_hint" msgid="6372557107414074580">"ନିଜ ଇଚ୍ଛାର PIN କୋଡ୍‍ ନିଶ୍ଚିତ କରନ୍ତୁ"</string>
     <string name="kg_sim_unlock_progress_dialog_message" msgid="8871937892678885545">"SIM କାର୍ଡ ଅନଲକ୍‍ କରାଯାଉଛି…"</string>
@@ -1885,7 +1886,7 @@
     <string name="zen_mode_default_every_night_name" msgid="1467765312174275823">"ଶୋଇବା"</string>
     <string name="muted_by" msgid="91464083490094950">"<xliff:g id="THIRD_PARTY">%1$s</xliff:g> କିଛି ସାଉଣ୍ଡକୁ ମ୍ୟୁଟ୍ କରୁଛି"</string>
     <string name="system_error_wipe_data" msgid="5910572292172208493">"ଆପଣଙ୍କ ଡିଭାଇସ୍‍ରେ ଏକ ସମସ୍ୟା ରହିଛି ଏବଂ ଆପଣ ଫ୍ୟାକ୍ଟୋରୀ ଡାଟା ରିସେଟ୍‍ ନକରିବା ପର୍ଯ୍ୟନ୍ତ ଏହା ଅସ୍ଥିର ରହିପାରେ।"</string>
-    <string name="system_error_manufacturer" msgid="703545241070116315">"ଆପଣଙ୍କ ଡିଭାଇସ୍‍ରେ ଏକ ସମସ୍ୟା ରହିଛି। ବିବରଣୀ ପାଇଁ ଆପଣଙ୍କ ଉତ୍ପାଦକଙ୍କ ସହ ଯୋଗାଯୋଗ କରନ୍ତୁ।"</string>
+    <string name="system_error_manufacturer" msgid="703545241070116315">"ଆପଣଙ୍କ ଡିଭାଇସରେ ଏକ ସମସ୍ୟା ରହିଛି। ବିବରଣୀ ପାଇଁ ଆପଣଙ୍କ ଉତ୍ପାଦକଙ୍କ ସହ କଣ୍ଟାକ୍ଟ କରନ୍ତୁ।"</string>
     <string name="stk_cc_ussd_to_dial" msgid="3139884150741157610">"USSD ଅନୁରୋଧ, ସ୍ଵାଭାବିକ କଲ୍‌ରେ ପରିବର୍ତ୍ତନ ହେଲା"</string>
     <string name="stk_cc_ussd_to_ss" msgid="4826846653052609738">"USSD ଅନୁରୋଧ, SS ଅନୁରୋଧକୁ ପରିବର୍ତ୍ତନ ହେଲା"</string>
     <string name="stk_cc_ussd_to_ussd" msgid="8343001461299302472">"ନୂତନ USSD ଅନୁରୋଧରେ ପରିବର୍ତ୍ତନ ହେଲା"</string>
@@ -1927,6 +1928,7 @@
     <string name="country_selection_title" msgid="5221495687299014379">"ପସନ୍ଦର ଅଞ୍ଚଳ"</string>
     <string name="search_language_hint" msgid="7004225294308793583">"ଭାଷାର ନାମ ଟାଇପ୍‍ କରନ୍ତୁ"</string>
     <string name="language_picker_section_suggested" msgid="6556199184638990447">"ପ୍ରସ୍ତାବିତ"</string>
+    <string name="language_picker_regions_section_suggested" msgid="6080131515268225316">"ପ୍ରସ୍ତାବିତ"</string>
     <string name="language_picker_section_all" msgid="1985809075777564284">"ସମସ୍ତ ଭାଷା"</string>
     <string name="region_picker_section_all" msgid="756441309928774155">"ସମସ୍ତ ଅଞ୍ଚଳ"</string>
     <string name="locale_search_menu" msgid="6258090710176422934">"ସନ୍ଧାନ କରନ୍ତୁ"</string>
@@ -1934,7 +1936,7 @@
     <string name="app_suspended_default_message" msgid="6451215678552004172">"ବର୍ତ୍ତମାନ <xliff:g id="APP_NAME_0">%1$s</xliff:g> ଉପଲବ୍ଧ ନାହିଁ। ଏହା <xliff:g id="APP_NAME_1">%2$s</xliff:g> ଦ୍ଵାରା ପରିଚାଳିତ ହେଉଛି।"</string>
     <string name="app_suspended_more_details" msgid="211260942831587014">"ଅଧିକ ଜାଣନ୍ତୁ"</string>
     <string name="app_suspended_unsuspend_message" msgid="1665438589450555459">"ଆପ୍ ଅନପଜ୍ କରନ୍ତୁ"</string>
-    <string name="work_mode_off_title" msgid="961171256005852058">"ୱାର୍କ ଆପଗୁଡ଼ିକୁ ଚାଲୁ କରିବେ?"</string>
+    <string name="work_mode_off_title" msgid="961171256005852058">"ୱାର୍କ ଆପ୍ସ ଚାଲୁ କରିବେ?"</string>
     <string name="work_mode_off_message" msgid="7319580997683623309">"ଆପଣଙ୍କ ୱାର୍କ ଆପ୍ ଏବଂ ବିଜ୍ଞପ୍ତିଗୁଡ଼ିକୁ ଆକ୍ସେସ୍ ପାଆନ୍ତୁ"</string>
     <string name="work_mode_turn_on" msgid="3662561662475962285">"ଚାଲୁ କରନ୍ତୁ"</string>
     <string name="app_blocked_title" msgid="7353262160455028160">"ଆପ୍ ଉପଲବ୍ଧ ନାହିଁ"</string>
@@ -1944,8 +1946,7 @@
     <string name="app_streaming_blocked_title_for_camera_dialog" msgid="3935701653713853065">"କ୍ୟାମେରା ଉପଲବ୍ଧ ନାହିଁ"</string>
     <string name="app_streaming_blocked_title_for_fingerprint_dialog" msgid="3516853717714141951">"ଫୋନରେ ଜାରି ରଖନ୍ତୁ"</string>
     <string name="app_streaming_blocked_title_for_microphone_dialog" msgid="544822455127171206">"ମାଇକ୍ରୋଫୋନ ଉପଲବ୍ଧ ନାହିଁ"</string>
-    <!-- no translation found for app_streaming_blocked_title_for_playstore_dialog (8149823099822897538) -->
-    <skip />
+    <string name="app_streaming_blocked_title_for_playstore_dialog" msgid="8149823099822897538">"Play Store ଉପଲବ୍ଧ ନାହିଁ"</string>
     <string name="app_streaming_blocked_title_for_settings_dialog" product="tv" msgid="196994247017450357">"Android TV ସେଟିଂସ ଉପଲବ୍ଧ ନାହିଁ"</string>
     <string name="app_streaming_blocked_title_for_settings_dialog" product="tablet" msgid="8222710146267948647">"ଟାବଲେଟ ସେଟିଂସ ଉପଲବ୍ଧ ନାହିଁ"</string>
     <string name="app_streaming_blocked_title_for_settings_dialog" product="default" msgid="6895719984375299791">"ଫୋନ ସେଟିଂସ ଉପଲବ୍ଧ ନାହିଁ"</string>
@@ -1955,13 +1956,10 @@
     <string name="app_streaming_blocked_message_for_fingerprint_dialog" product="tv" msgid="3470977315395784567">"ଏହି ଆପ ଅତିରିକ୍ତ ସୁରକ୍ଷା ପାଇଁ ଅନୁରୋଧ କରୁଛି। ଏହା ପରିବର୍ତ୍ତେ ଆପଣଙ୍କ Android TV ଡିଭାଇସରେ ଚେଷ୍ଟା କରନ୍ତୁ।"</string>
     <string name="app_streaming_blocked_message_for_fingerprint_dialog" product="tablet" msgid="698460091901465092">"ଏହି ଆପ ଅତିରିକ୍ତ ସୁରକ୍ଷା ପାଇଁ ଅନୁରୋଧ କରୁଛି। ଏହା ପରିବର୍ତ୍ତେ ଆପଣଙ୍କ ଟାବଲେଟରେ ଚେଷ୍ଟା କରନ୍ତୁ।"</string>
     <string name="app_streaming_blocked_message_for_fingerprint_dialog" product="default" msgid="8552691971910603907">"ଏହି ଆପ ଅତିରିକ୍ତ ସୁରକ୍ଷା ପାଇଁ ଅନୁରୋଧ କରୁଛି। ଏହା ପରିବର୍ତ୍ତେ ଆପଣଙ୍କ ଫୋନରେ ଚେଷ୍ଟା କରନ୍ତୁ।"</string>
-    <!-- no translation found for app_streaming_blocked_message_for_settings_dialog (820334666354451145) -->
-    <skip />
-    <!-- no translation found for app_streaming_blocked_message_for_settings_dialog (3286849551133045896) -->
-    <skip />
-    <!-- no translation found for app_streaming_blocked_message_for_settings_dialog (6264287556598916295) -->
-    <skip />
-    <string name="deprecated_target_sdk_message" msgid="5203207875657579953">"ଏହି ଆପ୍‌କୁ Androidର ପୁରୁଣା ଭର୍ସନ୍ ପାଇଁ ନିର୍ମାଣ କରାଯାଇଥିଲା ଏବଂ ଠିକ୍ ଭାବେ କାମ କରିନପାରେ। ଏହାପାଇଁ ଅପଡେଟ୍‌ ଅଛି କି ନାହିଁ ଯାଞ୍ଚ କରନ୍ତୁ କିମ୍ବା ଡେଭେଲପର୍‌ଙ୍କ ସହିତ ସମ୍ପର୍କ କରନ୍ତୁ।"</string>
+    <string name="app_streaming_blocked_message_for_settings_dialog" product="tv" msgid="820334666354451145">"ଏହାକୁ ଆପଣଙ୍କ <xliff:g id="DEVICE">%1$s</xliff:g>ରେ ଆକ୍ସେସ କରାଯାଇପାରିବ ନାହିଁ। ଏହା ପରିବର୍ତ୍ତେ ଆପଣଙ୍କ Android TV ଡିଭାଇସରେ ଚେଷ୍ଟା କରନ୍ତୁ।"</string>
+    <string name="app_streaming_blocked_message_for_settings_dialog" product="tablet" msgid="3286849551133045896">"ଏହାକୁ ଆପଣଙ୍କ <xliff:g id="DEVICE">%1$s</xliff:g>ରେ ଆକ୍ସେସ କରାଯାଇପାରିବ ନାହିଁ। ଏହା ପରିବର୍ତ୍ତେ ଆପଣଙ୍କ ଟାବଲେଟରେ ଚେଷ୍ଟା କରନ୍ତୁ।"</string>
+    <string name="app_streaming_blocked_message_for_settings_dialog" product="default" msgid="6264287556598916295">"ଏହାକୁ ଆପଣଙ୍କ <xliff:g id="DEVICE">%1$s</xliff:g>ରେ ଆକ୍ସେସ କରାଯାଇପାରିବ ନାହିଁ। ଏହା ପରିବର୍ତ୍ତେ ଆପଣଙ୍କ ଫୋନରେ ଚେଷ୍ଟା କରନ୍ତୁ।"</string>
+    <string name="deprecated_target_sdk_message" msgid="5203207875657579953">"ଏହି ଆପକୁ Androidର ପୁରୁଣା ସଂସ୍କରଣ ପାଇଁ ନିର୍ମାଣ କରାଯାଇଥିଲା ଏବଂ ଠିକ୍ ଭାବେ କାମ କରିନପାରେ। ଏଥିପାଇଁ ଅପଡେଟ ଅଛି କି ନାହିଁ ଯାଞ୍ଚ କରନ୍ତୁ କିମ୍ବା ଡେଭେଲପରଙ୍କ ସହିତ କଣ୍ଟାକ୍ଟ କରନ୍ତୁ।"</string>
     <string name="deprecated_target_sdk_app_store" msgid="8456784048558808909">"ଅପଡେଟ୍‌ ପାଇଁ ଯାଞ୍ଚ କରନ୍ତୁ"</string>
     <string name="new_sms_notification_title" msgid="6528758221319927107">"ଆପଣଙ୍କ ପାଖରେ ନୂଆ ମେସେଜ୍‍ ରହିଛି"</string>
     <string name="new_sms_notification_content" msgid="3197949934153460639">"ଦେଖିବା ପାଇଁ SMS ଆପ୍‍ ଖୋଲନ୍ତୁ"</string>
@@ -2047,13 +2045,14 @@
     <string name="shortcut_restore_signature_mismatch" msgid="579345304221605479">"ଶର୍ଟକଟ୍‍ ରିଷ୍ଟୋର୍‍ କରିହେଲା ନାହିଁ, କାରଣ ଏହି ଆପ୍‍ର ସ୍ୱାକ୍ଷର ମେଳ ହେଉନାହିଁ"</string>
     <string name="shortcut_restore_unknown_issue" msgid="2478146134395982154">"ଶର୍ଟକଟ୍‍ ରିଷ୍ଟୋର୍‍ କରିହେଲା ନାହିଁ"</string>
     <string name="shortcut_disabled_reason_unknown" msgid="753074793553599166">"ଶର୍ଟକଟ୍‍ ଅକ୍ଷମ କରାଯାଇଛି"</string>
-    <string name="harmful_app_warning_uninstall" msgid="6472912975664191772">"ଅନଇନଷ୍ଟଲ୍‌ କରନ୍ତୁ"</string>
+    <string name="harmful_app_warning_uninstall" msgid="6472912975664191772">"ଅନଇନଷ୍ଟଲ କରନ୍ତୁ"</string>
     <string name="harmful_app_warning_open_anyway" msgid="5963657791740211807">"କୌଣସିମତେ ଖୋଲନ୍ତୁ"</string>
     <string name="harmful_app_warning_title" msgid="8794823880881113856">"ହାନିକାରକ ଆପ୍‌ ଚିହ୍ନଟ ହୋଇଛି"</string>
     <string name="log_access_confirmation_title" msgid="2343578467290592708">"ସମସ୍ତ ଡିଭାଇସ ଲଗକୁ ଆକ୍ସେସ କରିବା ପାଇଁ <xliff:g id="LOG_ACCESS_APP_NAME">%s</xliff:g>କୁ ଅନୁମତି ଦେବେ?"</string>
     <string name="log_access_confirmation_allow" msgid="5302517782599389507">"ଗୋଟିଏ-ଥର ଆକ୍ସେସ ପାଇଁ ଅନୁମତି ଦିଅନ୍ତୁ"</string>
     <string name="log_access_confirmation_deny" msgid="7685790957455099845">"ଅନୁମତି ଦିଅନ୍ତୁ ନାହିଁ"</string>
-    <string name="log_access_confirmation_body" msgid="6581985716241928135">"ଆପଣଙ୍କ ଡିଭାଇସରେ ଯାହା ହୁଏ ତାହା ଡିଭାଇସ ଲଗଗୁଡ଼ିକ ରେକର୍ଡ କରେ। ସମସ୍ୟାଗୁଡ଼ିକୁ ଖୋଜି ସମାଧାନ କରିବାକୁ ଆପ୍ସ ଏହି ଲଗଗୁଡ଼ିକୁ ବ୍ୟବହାର କରିପାରିବ।\n\nକିଛି ଲଗରେ ସମ୍ବେଦନଶୀଳ ସୂଚନା ଥାଇପାରେ, ତେଣୁ ସମସ୍ତ ଡିଭାଇସ ଲଗକୁ ଆକ୍ସେସ କରିବା ପାଇଁ ଆପଣ ବିଶ୍ୱାସ କରୁଥିବା ଆପ୍ସକୁ ହିଁ ଅନୁମତି ଦିଅନ୍ତୁ। \n\nଯଦି ଆପଣ ସମସ୍ତ ଡିଭାଇସ ଲଗକୁ ଆକ୍ସେସ କରିବା ପାଇଁ ଏହି ଆପକୁ ଅନୁମତି ଦିଅନ୍ତି ନାହିଁ, ତେବେ ବି ଏହା ନିଜର ଡିଭାଇସ ଲଗଗୁଡ଼ିକୁ ଆକ୍ସେସ କରିପାରିବ। ଆପଣଙ୍କ ଡିଭାଇସର ନିର୍ମାତା ଏବେ ବି ଆପଣଙ୍କର ଡିଭାଇସରେ କିଛି ଲଗ କିମ୍ବା ସୂଚନାକୁ ଆକ୍ସେସ କରିବା ପାଇଁ ସକ୍ଷମ ହୋଇପାରନ୍ତି। ଅଧିକ ଜାଣନ୍ତୁ"</string>
+    <string name="log_access_confirmation_body" product="default" msgid="1806692062668620735">"ଆପଣଙ୍କ ଡିଭାଇସରେ ଯାହା ହୁଏ ତାହା ଡିଭାଇସ ଲଗଗୁଡ଼ିକ ରେକର୍ଡ କରେ। ସମସ୍ୟାଗୁଡ଼ିକୁ ଖୋଜି ସମାଧାନ କରିବାକୁ ଆପ୍ସ ଏହି ଲଗଗୁଡ଼ିକୁ ବ୍ୟବହାର କରିପାରିବ।\n\nକିଛି ଲଗରେ ସମ୍ବେଦନଶୀଳ ସୂଚନା ଥାଇପାରେ, ତେଣୁ ସମସ୍ତ ଡିଭାଇସ ଲଗକୁ ଆକ୍ସେସ କରିବା ପାଇଁ ଆପଣ ବିଶ୍ୱାସ କରୁଥିବା ଆପ୍ସକୁ ହିଁ ଅନୁମତି ଦିଅନ୍ତୁ। \n\nଯଦି ଆପଣ ସମସ୍ତ ଡିଭାଇସ ଲଗକୁ ଆକ୍ସେସ କରିବା ପାଇଁ ଏହି ଆପକୁ ଅନୁମତି ଦିଅନ୍ତି ନାହିଁ, ତେବେ ବି ଏହା ନିଜର ଡିଭାଇସ ଲଗଗୁଡ଼ିକୁ ଆକ୍ସେସ କରିପାରିବ। ଆପଣଙ୍କ ଡିଭାଇସର ନିର୍ମାତା ଏବେ ବି ଆପଣଙ୍କର ଡିଭାଇସରେ କିଛି ଲଗ କିମ୍ବା ସୂଚନାକୁ ଆକ୍ସେସ କରିବା ପାଇଁ ସକ୍ଷମ ହୋଇପାରନ୍ତି।"</string>
+    <string name="log_access_confirmation_body" product="tv" msgid="7379536536425265262">"ଆପଣଙ୍କ ଡିଭାଇସରେ ଯାହା ହୁଏ ତାହା ଡିଭାଇସ ଲଗଗୁଡ଼ିକ ରେକର୍ଡ କରେ। ସମସ୍ୟାଗୁଡ଼ିକୁ ଖୋଜି ସମାଧାନ କରିବାକୁ ଆପ୍ସ ଏହି ଲଗଗୁଡ଼ିକୁ ବ୍ୟବହାର କରିପାରିବ।\n\nକିଛି ଲଗରେ ସମ୍ବେଦନଶୀଳ ସୂଚନା ଥାଇପାରେ, ତେଣୁ ସମସ୍ତ ଡିଭାଇସ ଲଗକୁ ଆକ୍ସେସ କରିବା ପାଇଁ ଆପଣ ବିଶ୍ୱାସ କରୁଥିବା ଆପ୍ସକୁ ହିଁ ଅନୁମତି ଦିଅନ୍ତୁ। \n\nଯଦି ଆପଣ ସମସ୍ତ ଡିଭାଇସ ଲଗକୁ ଆକ୍ସେସ କରିବା ପାଇଁ ଏହି ଆପକୁ ଅନୁମତି ଦିଅନ୍ତି ନାହିଁ, ତେବେ ବି ଏହା ନିଜର ଡିଭାଇସ ଲଗଗୁଡ଼ିକୁ ଆକ୍ସେସ କରିପାରିବ। ଆପଣଙ୍କ ଡିଭାଇସର ନିର୍ମାତା ଏବେ ବି ଆପଣଙ୍କର ଡିଭାଇସରେ କିଛି ଲଗ କିମ୍ବା ସୂଚନାକୁ ଆକ୍ସେସ କରିବା ପାଇଁ ସକ୍ଷମ ହୋଇପାରନ୍ତି।\n\ng.co/android/devicelogsରେ ଅଧିକ ଜାଣନ୍ତୁ।"</string>
     <string name="log_access_do_not_show_again" msgid="1058690599083091552">"ପୁଣି ଦେଖାନ୍ତୁ ନାହିଁ"</string>
     <string name="slices_permission_request" msgid="3677129866636153406">"<xliff:g id="APP_0">%1$s</xliff:g>, <xliff:g id="APP_2">%2$s</xliff:g> ସ୍ଲାଇସ୍‌କୁ ଦେଖାଇବା ପାଇଁ ଚାହେଁ"</string>
     <string name="screenshot_edit" msgid="7408934887203689207">"ଏଡିଟ କରନ୍ତୁ"</string>
@@ -2069,10 +2068,10 @@
     <string name="review_notification_settings_text" msgid="5916244866751849279">"Android 13ଠାରୁ, ଆପଣ ଇନଷ୍ଟଲ କରୁଥିବା ଆପ୍ସ ବିଜ୍ଞପ୍ତିଗୁଡ଼ିକୁ ପଠାଇବା ପାଇଁ ଆପଣଙ୍କ ଅନୁମତି ଆବଶ୍ୟକ କରେ। ପୂର୍ବରୁ ଥିବା ଆପ୍ସ ପାଇଁ ଏହି ଅନୁମତିକୁ ପରିବର୍ତ୍ତନ କରିବାକୁ ଟାପ କରନ୍ତୁ।"</string>
     <string name="review_notification_settings_remind_me_action" msgid="1081081018678480907">"ମୋତେ ପରେ ରିମାଇଣ୍ଡ କର"</string>
     <string name="review_notification_settings_dismiss" msgid="4160916504616428294">"ଖାରଜ କରନ୍ତୁ"</string>
-    <string name="notification_app_name_system" msgid="3045196791746735601">"ସିଷ୍ଟମ୍‌"</string>
+    <string name="notification_app_name_system" msgid="3045196791746735601">"ସିଷ୍ଟମ"</string>
     <string name="notification_app_name_settings" msgid="9088548800899952531">"ସେଟିଂସ୍"</string>
     <string name="notification_appops_camera_active" msgid="8177643089272352083">"କ୍ୟାମେରା"</string>
-    <string name="notification_appops_microphone_active" msgid="581333393214739332">"ମାଇକ୍ରୋଫୋନ୍"</string>
+    <string name="notification_appops_microphone_active" msgid="581333393214739332">"ମାଇକ୍ରୋଫୋନ"</string>
     <string name="notification_appops_overlay_active" msgid="5571732753262836481">"ଆପଣଙ୍କ ସ୍କ୍ରୀନ୍ ଉପରେ ଥିବା ଅନ୍ୟ ଆପ୍‌ ଉପରେ ଦେଖାଦେବ"</string>
     <string name="notification_feedback_indicator" msgid="663476517711323016">"ମତାମତ ଦିଅନ୍ତୁ"</string>
     <string name="notification_feedback_indicator_alerted" msgid="6552871804121942099">"ଏହି ବିଜ୍ଞପ୍ତିକୁ ଡିଫଲ୍ଟ ଭାବେ ପ୍ରମୋଟ୍ କରାଯାଇଛି। ମତାମତ ପ୍ରଦାନ କରିବାକୁ ଟାପ୍ କରନ୍ତୁ।"</string>
@@ -2084,7 +2083,7 @@
     <string name="nas_upgrade_notification_enable_action" msgid="3046406808378726874">"ଠିକ୍ ଅଛି"</string>
     <string name="nas_upgrade_notification_disable_action" msgid="3794833210043497982">"ବନ୍ଦ କରନ୍ତୁ"</string>
     <string name="nas_upgrade_notification_learn_more_action" msgid="7011130656195423947">"ଅଧିକ ଜାଣନ୍ତୁ"</string>
-    <string name="nas_upgrade_notification_learn_more_content" msgid="3735480566983530650">"Android 12ରେ Android ଆଡେପ୍ଟିଭ୍ ବିଜ୍ଞପ୍ତିଗୁଡ଼ିକୁ ଉନ୍ନତ ବିଜ୍ଞପ୍ତିଗୁଡ଼ିକରେ ପରିବର୍ତ୍ତନ କରାଯାଇଛି। ଏହି ଫିଚର୍ ପ୍ରସ୍ତାବିତ କାର୍ଯ୍ୟ ଏବଂ ପ୍ରତ୍ୟୁତ୍ତରଗୁଡ଼ିକୁ ଦେଖାଏ ଏବଂ ଆପଣଙ୍କ ବିଜ୍ଞପ୍ତିଗୁଡ଼ିକୁ ବ୍ୟବସ୍ଥିତ କରେ।\n\nଉନ୍ନତ ବିଜ୍ଞପ୍ତିଗୁଡ଼ିକ ଯୋଗାଯୋଗ ନାମ ଏବଂ ମେସେଜଗୁଡ଼ିକ ପରି ବ୍ୟକ୍ତିଗତ ସୂଚନା ସମେତ ବିଜ୍ଞପ୍ତିର ବିଷୟବସ୍ତୁକୁ ଆକ୍ସେସ୍ କରିପାରିବ। ଏହି ଫିଚର୍ ଫୋନ୍ କଲଗୁଡ଼ିକର ଉତ୍ତର ଦେବା ଏବଂ \'ବିରକ୍ତ କରନ୍ତୁ ନାହିଁ\'କୁ ନିୟନ୍ତ୍ରଣ କରିବା ପରି, ବିଜ୍ଞପ୍ତିଗୁଡ଼ିକୁ ମଧ୍ୟ ଖାରଜ କରିପାରିବ କିମ୍ବା ସେଗୁଡ଼ିକର ଉତ୍ତର ଦେଇପାରିବ।"</string>
+    <string name="nas_upgrade_notification_learn_more_content" msgid="3735480566983530650">"Android 12ରେ Android ଆଡେପ୍ଟିଭ ବିଜ୍ଞପ୍ତିଗୁଡ଼ିକୁ ଉନ୍ନତ ବିଜ୍ଞପ୍ତିଗୁଡ଼ିକରେ ପରିବର୍ତ୍ତନ କରାଯାଇଛି। ଏହି ଫିଚର ପ୍ରସ୍ତାବିତ କାର୍ଯ୍ୟ ଏବଂ ପ୍ରତ୍ୟୁତ୍ତରଗୁଡ଼ିକୁ ଦେଖାଏ ଏବଂ ଆପଣଙ୍କ ବିଜ୍ଞପ୍ତିଗୁଡ଼ିକୁ ବ୍ୟବସ୍ଥିତ କରେ।\n\nଉନ୍ନତ ବିଜ୍ଞପ୍ତିଗୁଡ଼ିକ କଣ୍ଟାକ୍ଟ ନାମ ଏବଂ ମେସେଜଗୁଡ଼ିକ ପରି ବ୍ୟକ୍ତିଗତ ସୂଚନା ସମେତ ବିଜ୍ଞପ୍ତିର ବିଷୟବସ୍ତୁକୁ ଆକ୍ସେସ କରିପାରିବ। ଏହି ଫିଚର ଫୋନ କଲଗୁଡ଼ିକର ଉତ୍ତର ଦେବା ଏବଂ \'ବିରକ୍ତ କରନ୍ତୁ ନାହିଁ\'କୁ ନିୟନ୍ତ୍ରଣ କରିବା ପରି, ବିଜ୍ଞପ୍ତିଗୁଡ଼ିକୁ ମଧ୍ୟ ଖାରଜ କରିପାରିବ କିମ୍ବା ସେଗୁଡ଼ିକର ଉତ୍ତର ଦେଇପାରିବ।"</string>
     <string name="dynamic_mode_notification_channel_name" msgid="2986926422100223328">"ନିୟମିତ ମୋଡ୍‍ ସୂଚନା ବିଜ୍ଞପ୍ତି"</string>
     <string name="dynamic_mode_notification_title" msgid="9205715501274608016">"ସାଧାରଣ ଭାବରେ ଚାର୍ଜ୍ କରିବା ପୂର୍ବରୁ ବ୍ୟାଟେରୀ ସରିଯାଇପାରେ"</string>
     <string name="dynamic_mode_notification_summary" msgid="4141614604437372157">"ବ୍ୟାଟେରୀର ସମୟକୁ ବଢ଼ାଇବା ପାଇଁ ବ୍ୟଟେରୀ ସେଭର୍‍କୁ କାର୍ଯ୍ୟକାରୀ କରାଯାଇଛି"</string>
@@ -2117,7 +2116,7 @@
     <string name="chooser_no_direct_share_targets" msgid="1511722103987329028">"ଏହାକୁ ସେୟାର୍ କରିବା ପାଇଁ କୌଣସି ସୁପାରିଶ କରାଯାଇଥିବା ଲୋକ ନାହାଁନ୍ତି"</string>
     <string name="chooser_all_apps_button_label" msgid="3230427756238666328">"ଆପ୍ସ ତାଲିକା"</string>
     <string name="usb_device_resolve_prompt_warn" msgid="325871329788064199">"ଏହି ଆପ୍‌କୁ ରେକର୍ଡ କରିବାକୁ ଅନୁମତି ଦିଆଯାଇ ନାହିଁ କିନ୍ତୁ ଏହି USB ଡିଭାଇସ୍ ଜରିଆରେ ଅଡିଓ କ୍ୟାପ୍‍ଚର୍‍ କରିପାରିବ।"</string>
-    <string name="accessibility_system_action_home_label" msgid="3234748160850301870">"ମୂଳପୃଷ୍ଠା"</string>
+    <string name="accessibility_system_action_home_label" msgid="3234748160850301870">"ହୋମ"</string>
     <string name="accessibility_system_action_back_label" msgid="4205361367345537608">"ପଛକୁ ଫେରନ୍ତୁ"</string>
     <string name="accessibility_system_action_recents_label" msgid="4782875610281649728">"ବର୍ତ୍ତମାନର ଆପ୍‌ଗୁଡ଼ିକ"</string>
     <string name="accessibility_system_action_notifications_label" msgid="6083767351772162010">"ବିଜ୍ଞପ୍ତିଗୁଡ଼ିକ ଖୋଲନ୍ତୁ"</string>
@@ -2182,7 +2181,7 @@
     <string name="PERSOSUBSTATE_RUIM_RUIM_PUK_ENTRY" msgid="9129139686191167829">"PUK ଲେଖନ୍ତୁ"</string>
     <string name="PERSOSUBSTATE_RUIM_CORPORATE_PUK_ENTRY" msgid="2869929685874615358">"PUK ଲେଖନ୍ତୁ"</string>
     <string name="PERSOSUBSTATE_SIM_SPN_ENTRY" msgid="1238663472392741771">"SPN ଅନଲକ୍ PIN"</string>
-    <string name="PERSOSUBSTATE_SIM_SP_EHPLMN_ENTRY" msgid="3988705848553894358">"SP ଇକ୍ୟୁଭେଲେଣ୍ଟ ହୋମ୍ PLMN ଅନଲକ୍ PIN"</string>
+    <string name="PERSOSUBSTATE_SIM_SP_EHPLMN_ENTRY" msgid="3988705848553894358">"SP ଇକ୍ୟୁଭେଲେଣ୍ଟ ହୋମ PLMN ଅନଲକ PIN"</string>
     <string name="PERSOSUBSTATE_SIM_ICCID_ENTRY" msgid="6186770686690993200">"ICCID ଅନଲକ୍ PIN"</string>
     <string name="PERSOSUBSTATE_SIM_IMPI_ENTRY" msgid="7043865376145617024">"IMPI ଅନଲକ୍ PIN"</string>
     <string name="PERSOSUBSTATE_SIM_NS_SP_ENTRY" msgid="6144227308185112176">"ନେଟୱାର୍କ ସବସେଟର ସେବା ପ୍ରଦାନକାରୀ ଅନଲକ୍ PIN"</string>
@@ -2202,7 +2201,7 @@
     <string name="PERSOSUBSTATE_RUIM_SERVICE_PROVIDER_IN_PROGRESS" msgid="830981927724888114">"RUIM ସେବା ପ୍ରଦାନକାରୀ ଅନଲକ୍ କରିବାକୁ ଅନୁରୋଧ କରାଯାଉଛି…"</string>
     <string name="PERSOSUBSTATE_RUIM_CORPORATE_IN_PROGRESS" msgid="7851790973098894802">"RUIM କର୍ପୋରେଟ୍ ଅନଲକ୍ କରିବାକୁ ଅନୁରୋଧ କରାଯାଉଛି…"</string>
     <string name="PERSOSUBSTATE_SIM_SPN_IN_PROGRESS" msgid="1149560739586960121">"SPN ଅନଲକ୍ କରିବାକୁ ଅନୁରୋଧ କରାଯାଉଛି…"</string>
-    <string name="PERSOSUBSTATE_SIM_SP_EHPLMN_IN_PROGRESS" msgid="5708964693522116025">"SP ଇକ୍ୟୁଭେଲେଣ୍ଟ ହୋମ୍ PLMN ଅନଲକ୍ କରିବାକୁ ଅନୁରୋଧ କରାଯାଉଛି…"</string>
+    <string name="PERSOSUBSTATE_SIM_SP_EHPLMN_IN_PROGRESS" msgid="5708964693522116025">"SP ଇକ୍ୟୁଭେଲେଣ୍ଟ ହୋମ PLMN ଅନଲକ କରିବାକୁ ଅନୁରୋଧ କରାଯାଉଛି…"</string>
     <string name="PERSOSUBSTATE_SIM_ICCID_IN_PROGRESS" msgid="7288103122966483455">"ICCID ଅନଲକ୍ କରିବାକୁ ଅନୁରୋଧ କରାଯାଉଛି…"</string>
     <string name="PERSOSUBSTATE_SIM_IMPI_IN_PROGRESS" msgid="4036752174056147753">"IMPI ଅନଲକ୍ କରିବାକୁ ଅନୁରୋଧ କରାଯାଉଛି…"</string>
     <string name="PERSOSUBSTATE_SIM_NS_SP_IN_PROGRESS" msgid="5089536274515338566">"ନେଟୱାର୍କ ସବସେଟର ସେବା ପ୍ରଦାନକାରୀ ଅନଲକ୍ କରିବାକୁ ଅନୁରୋଧ କରାଯାଉଛି…"</string>
@@ -2236,7 +2235,7 @@
     <string name="PERSOSUBSTATE_RUIM_RUIM_PUK_ERROR" msgid="5391587926974531008">"PUK ଅନଲକ୍ କରିବା ବିଫଳ ହୋଇଛି।"</string>
     <string name="PERSOSUBSTATE_RUIM_CORPORATE_PUK_ERROR" msgid="4895494864493315868">"PUK ଅନଲକ୍ କରିବା ବିଫଳ ହୋଇଛି।"</string>
     <string name="PERSOSUBSTATE_SIM_SPN_ERROR" msgid="9017576601595353649">"SPN ଅନଲକ୍ କରିବା ଅନୁରୋଧ ବିଫଳ ହୋଇଛି।"</string>
-    <string name="PERSOSUBSTATE_SIM_SP_EHPLMN_ERROR" msgid="1116993930995545742">"SP ଇକ୍ୟୁଭେଲେଣ୍ଟ ହୋମ୍ PLMN ଅନଲକ୍ କରିବା ଅନୁରୋଧ ବିଫଳ ହୋଇଛି।"</string>
+    <string name="PERSOSUBSTATE_SIM_SP_EHPLMN_ERROR" msgid="1116993930995545742">"SP ଇକ୍ୟୁଭେଲେଣ୍ଟ ହୋମ PLMN ଅନଲକ କରିବା ଅନୁରୋଧ ବିଫଳ ହୋଇଛି।"</string>
     <string name="PERSOSUBSTATE_SIM_ICCID_ERROR" msgid="7559167306794441462">"ICCID ଅନଲକ୍ କରିବା ଅନୁରୋଧ ବିଫଳ ହୋଇଛି।"</string>
     <string name="PERSOSUBSTATE_SIM_IMPI_ERROR" msgid="2782926139511136588">"IMPI ଅନଲକ୍ କରିବା ଅନୁରୋଧ ବିଫଳ ହୋଇଛି।"</string>
     <string name="PERSOSUBSTATE_SIM_NS_SP_ERROR" msgid="1890493954453456758">"ନେଟୱାର୍କ ସବସେଟର ସେବା ପ୍ରଦାନକାରୀ ଅନଲକ୍ କରିବା ବିଫଳ ହୋଇଛି।"</string>
@@ -2263,7 +2262,7 @@
     <string name="PERSOSUBSTATE_RUIM_SERVICE_PROVIDER_PUK_SUCCESS" msgid="7873675303000794343">"PUK ଅନଲକ୍ କରିବା ସଫଳ ହୋଇଛି।"</string>
     <string name="PERSOSUBSTATE_RUIM_RUIM_PUK_SUCCESS" msgid="1763198215069819523">"PUK ଅନଲକ୍ କରିବା ସଫଳ ହୋଇଛି।"</string>
     <string name="PERSOSUBSTATE_SIM_SPN_SUCCESS" msgid="2053891977727320532">"SPN ଅନଲକ୍ କରିବା ସଫଳ ହୋଇଛି।"</string>
-    <string name="PERSOSUBSTATE_SIM_SP_EHPLMN_SUCCESS" msgid="8146602361895007345">"SP ଇକ୍ୟୁଭେଲେଣ୍ଟ ହୋମ୍ PLMN ଅନଲକ୍ କରିବା ସଫଳ ହୋଇଛି।"</string>
+    <string name="PERSOSUBSTATE_SIM_SP_EHPLMN_SUCCESS" msgid="8146602361895007345">"SP ଇକ୍ୟୁଭେଲେଣ୍ଟ ହୋମ PLMN ଅନଲକ କରିବା ସଫଳ ହୋଇଛି।"</string>
     <string name="PERSOSUBSTATE_SIM_ICCID_SUCCESS" msgid="8058678548991999545">"ICCID ଅନଲକ୍ କରିବା ସଫଳ ହୋଇଛି।"</string>
     <string name="PERSOSUBSTATE_SIM_IMPI_SUCCESS" msgid="2545608067978550571">"IMPI ଅନଲକ୍ କରିବା ସଫଳ ହୋଇଛି।"</string>
     <string name="PERSOSUBSTATE_SIM_NS_SP_SUCCESS" msgid="4352382949744625007">"ନେଟୱାର୍କ ସବସେଟର ସେବା ପ୍ରଦାନକାରୀକୁ ଅନଲକ୍ କରିବା ସଫଳ ହୋଇଛି।"</string>
@@ -2275,10 +2274,10 @@
     <string name="window_magnification_prompt_content" msgid="8159173903032344891">"ଆପଣ ଏବେ ଆପଣଙ୍କ ସ୍କ୍ରିନର ଅଂଶକୁ ମ୍ୟାଗ୍ନିଫାଏ କରିପାରିବେ"</string>
     <string name="turn_on_magnification_settings_action" msgid="8521433346684847700">"ସେଟିଂସରେ ଚାଲୁ କରନ୍ତୁ"</string>
     <string name="dismiss_action" msgid="1728820550388704784">"ଖାରଜ କରନ୍ତୁ"</string>
-    <string name="sensor_privacy_start_use_mic_notification_content_title" msgid="2420858361276370367">"ଡିଭାଇସର ମାଇକ୍ରୋଫୋନକୁ ଅନବ୍ଲକ୍ କରନ୍ତୁ"</string>
-    <string name="sensor_privacy_start_use_camera_notification_content_title" msgid="7287720213963466672">"ଡିଭାଇସର କ୍ୟାମେରାକୁ ଅନବ୍ଲକ୍ କରନ୍ତୁ"</string>
+    <string name="sensor_privacy_start_use_mic_notification_content_title" msgid="2420858361276370367">"ଡିଭାଇସର ମାଇକ୍ରୋଫୋନକୁ ଅନବ୍ଲକ କରନ୍ତୁ"</string>
+    <string name="sensor_privacy_start_use_camera_notification_content_title" msgid="7287720213963466672">"ଡିଭାଇସର କ୍ୟାମେରାକୁ ଅନବ୍ଲକ କରନ୍ତୁ"</string>
     <string name="sensor_privacy_start_use_notification_content_text" msgid="7595608891015777346">"&lt;b&gt;<xliff:g id="APP">%s</xliff:g>&lt;/b&gt; ଏବଂ ସମସ୍ତ ଆପ୍ ଓ ସେବା ପାଇଁ"</string>
-    <string name="sensor_privacy_start_use_dialog_turn_on_button" msgid="7089318886628390827">"ଅନବ୍ଲକ୍ କରନ୍ତୁ"</string>
+    <string name="sensor_privacy_start_use_dialog_turn_on_button" msgid="7089318886628390827">"ଅନବ୍ଲକ କରନ୍ତୁ"</string>
     <string name="sensor_privacy_notification_channel_label" msgid="936036783155261349">"ସେନ୍ସର୍ ଗୋପନୀୟତା"</string>
     <string name="splash_screen_view_icon_description" msgid="180638751260598187">"ଆପ୍ଲିକେସନ୍ ଆଇକନ୍"</string>
     <string name="splash_screen_view_branding_description" msgid="7911129347402728216">"ଆପ୍ଲିକେସନ୍ ବ୍ରାଣ୍ଡିଂ ଛବି"</string>
@@ -2294,5 +2293,6 @@
     <string name="notification_action_check_bg_apps" msgid="4758877443365362532">"ସକ୍ରିୟ ଆପଗୁଡ଼ିକୁ ଯାଞ୍ଚ କରନ୍ତୁ"</string>
     <string name="vdm_camera_access_denied" product="default" msgid="6102378580971542473">"ଆପଣଙ୍କ <xliff:g id="DEVICE">%1$s</xliff:g>ରୁ ଫୋନର କ୍ୟାମେରାକୁ ଆକ୍ସେସ କରାଯାଇପାରିବ ନାହିଁ"</string>
     <string name="vdm_camera_access_denied" product="tablet" msgid="6895968310395249076">"ଆପଣଙ୍କ <xliff:g id="DEVICE">%1$s</xliff:g>ରୁ ଟାବଲେଟର କ୍ୟାମେରାକୁ ଆକ୍ସେସ କରାଯାଇପାରିବ ନାହିଁ"</string>
+    <string name="vdm_secure_window" msgid="161700398158812314">"ଷ୍ଟ୍ରିମ କରିବା ସମୟରେ ଏହାକୁ ଆକ୍ସେସ କରାଯାଇପାରିବ ନାହିଁ। ଏହା ପରିବର୍ତ୍ତେ ଆପଣଙ୍କ ଫୋନରେ ଚେଷ୍ଟା କରନ୍ତୁ।"</string>
     <string name="system_locale_title" msgid="711882686834677268">"ସିଷ୍ଟମ ଡିଫଲ୍ଟ"</string>
 </resources>

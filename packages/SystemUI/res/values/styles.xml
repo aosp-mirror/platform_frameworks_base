@@ -23,6 +23,12 @@
         <item name="android:textColor">@color/status_bar_clock_color</item>
     </style>
 
+    <style name="TextAppearance.StatusBar.UserChip" parent="@*android:style/TextAppearance.StatusBar.Icon">
+        <item name="android:textSize">@dimen/status_bar_user_chip_text_size</item>
+        <item name="android:fontFamily">@*android:string/config_headlineFontFamilyMedium</item>
+        <item name="android:textColor">@color/status_bar_clock_color</item>
+    </style>
+
     <style name="TextAppearance.StatusBar.Expanded" parent="@*android:style/TextAppearance.StatusBar">
         <item name="android:textColor">?android:attr/textColorTertiary</item>
     </style>
@@ -128,11 +134,10 @@
     <!-- This is hard coded to be sans-serif-condensed to match the icons -->
 
     <style name="TextAppearance.QS.Status">
-        <item name="android:fontFamily">@*android:string/config_bodyFontFamilyMedium</item>
+        <item name="android:fontFamily">@*android:string/config_headlineFontFamily</item>
         <item name="android:textColor">?android:attr/textColorPrimary</item>
         <item name="android:textSize">14sp</item>
         <item name="android:letterSpacing">0.01</item>
-        <item name="android:lineHeight">20sp</item>
     </style>
 
     <style name="TextAppearance.QS.SecurityFooter" parent="@style/TextAppearance.QS.Status">
@@ -143,12 +148,10 @@
     <style name="TextAppearance.QS.Status.Carriers" />
 
     <style name="TextAppearance.QS.Status.Carriers.NoCarrierText">
-        <item name="android:fontFamily">@*android:string/config_bodyFontFamily</item>
         <item name="android:textColor">?android:attr/textColorSecondary</item>
     </style>
 
     <style name="TextAppearance.QS.Status.Build">
-        <item name="android:fontFamily">@*android:string/config_bodyFontFamily</item>
         <item name="android:textColor">?android:attr/textColorSecondary</item>
     </style>
 
@@ -200,8 +203,9 @@
 
     <style name="TextAppearance.AuthNonBioCredential.Title">
         <item name="android:fontFamily">google-sans</item>
-        <item name="android:layout_marginTop">20dp</item>
-        <item name="android:textSize">36sp</item>
+        <item name="android:layout_marginTop">24dp</item>
+        <item name="android:textSize">36dp</item>
+        <item name="android:focusable">true</item>
     </style>
 
     <style name="TextAppearance.AuthNonBioCredential.Subtitle">
@@ -213,12 +217,10 @@
     <style name="TextAppearance.AuthNonBioCredential.Description">
         <item name="android:fontFamily">google-sans</item>
         <item name="android:layout_marginTop">20dp</item>
-        <item name="android:textSize">16sp</item>
+        <item name="android:textSize">18sp</item>
     </style>
 
     <style name="TextAppearance.AuthNonBioCredential.Error">
-        <item name="android:paddingTop">6dp</item>
-        <item name="android:paddingBottom">18dp</item>
         <item name="android:paddingHorizontal">24dp</item>
         <item name="android:textSize">14sp</item>
         <item name="android:textColor">?android:attr/colorError</item>
@@ -227,18 +229,41 @@
 
     <style name="TextAppearance.AuthCredential.PasswordEntry" parent="@android:style/TextAppearance.DeviceDefault">
         <item name="android:gravity">center</item>
+        <item name="android:paddingTop">28dp</item>
         <item name="android:singleLine">true</item>
         <item name="android:textColor">?android:attr/colorForeground</item>
         <item name="android:textSize">24sp</item>
+        <item name="android:background">@drawable/edit_text_filled</item>
     </style>
 
     <style name="AuthCredentialHeaderStyle">
         <item name="android:paddingStart">48dp</item>
-        <item name="android:paddingEnd">24dp</item>
-        <item name="android:paddingTop">28dp</item>
-        <item name="android:paddingBottom">20dp</item>
-        <item name="android:orientation">vertical</item>
+        <item name="android:paddingEnd">48dp</item>
+        <item name="android:paddingTop">48dp</item>
+        <item name="android:paddingBottom">10dp</item>
         <item name="android:layout_gravity">top</item>
+    </style>
+
+    <style name="AuthCredentialIconStyle">
+        <item name="android:layout_width">@dimen/biometric_auth_icon_size</item>
+        <item name="android:layout_height">@dimen/biometric_auth_icon_size</item>
+    </style>
+
+    <style name="AuthCredentialPatternContainerStyle">
+        <item name="android:gravity">center</item>
+        <item name="android:maxHeight">420dp</item>
+        <item name="android:maxWidth">420dp</item>
+        <item name="android:minHeight">200dp</item>
+        <item name="android:minWidth">200dp</item>
+        <item name="android:padding">20dp</item>
+    </style>
+
+    <style name="AuthCredentialPinPasswordContainerStyle">
+        <item name="android:gravity">center</item>
+        <item name="android:maxHeight">48dp</item>
+        <item name="android:maxWidth">600dp</item>
+        <item name="android:minHeight">48dp</item>
+        <item name="android:minWidth">200dp</item>
     </style>
 
     <style name="DeviceManagementDialogTitle">
@@ -278,7 +303,9 @@
         <item name="wallpaperTextColorSecondary">@*android:color/secondary_text_material_dark</item>
         <item name="wallpaperTextColorAccent">@color/material_dynamic_primary90</item>
         <item name="android:colorError">@*android:color/error_color_material_dark</item>
-        <item name="*android:lockPatternStyle">@style/LockPatternStyle</item>
+        <item name="*android:lockPatternStyle">@style/LockPatternViewStyle</item>
+        <item name="lockPatternStyle">@style/LockPatternContainerStyle</item>
+        <item name="lockPinPasswordStyle">@style/LockPinPasswordContainerStyle</item>
         <item name="passwordStyle">@style/PasswordTheme</item>
         <item name="numPadKeyStyle">@style/NumPadKey</item>
         <item name="backgroundProtectedStyle">@style/BackgroundProtectedStyle</item>
@@ -287,6 +314,10 @@
 
         <!-- Needed for MediaRoute chooser dialog -->
         <item name="*android:isLightTheme">false</item>
+
+        <!-- Biometrics enroll color style -->
+        <item name="biometricsEnrollStyle">@style/BiometricsEnrollStyle</item>
+
     </style>
 
     <style name="Theme.SystemUI.LightWallpaper">
@@ -304,27 +335,33 @@
         <item name="android:textColor">?attr/wallpaperTextColor</item>
     </style>
 
-    <style name="LockPatternContainerStyle">
-        <item name="android:maxHeight">400dp</item>
-        <item name="android:maxWidth">420dp</item>
-        <item name="android:minHeight">0dp</item>
-        <item name="android:minWidth">0dp</item>
-        <item name="android:paddingHorizontal">60dp</item>
-        <item name="android:paddingBottom">40dp</item>
+    <style name="AuthCredentialStyle">
+        <item name="*android:regularColor">?android:attr/colorForeground</item>
+        <item name="*android:successColor">?android:attr/colorForeground</item>
+        <item name="*android:errorColor">?android:attr/colorError</item>
+        <item name="*android:dotColor">?android:attr/textColorSecondary</item>
+        <item name="headerStyle">@style/AuthCredentialHeaderStyle</item>
+        <item name="headerIconStyle">@style/AuthCredentialIconStyle</item>
+        <item name="titleTextAppearance">@style/TextAppearance.AuthNonBioCredential.Title</item>
+        <item name="subTitleTextAppearance">@style/TextAppearance.AuthNonBioCredential.Subtitle</item>
+        <item name="descriptionTextAppearance">@style/TextAppearance.AuthNonBioCredential.Description</item>
+        <item name="passwordTextAppearance">@style/TextAppearance.AuthCredential.PasswordEntry</item>
+        <item name="errorTextAppearance">@style/TextAppearance.AuthNonBioCredential.Error</item>
     </style>
 
-    <style name="LockPatternStyle">
+    <style name="LockPatternViewStyle" >
         <item name="*android:regularColor">?android:attr/colorAccent</item>
         <item name="*android:successColor">?android:attr/textColorPrimary</item>
         <item name="*android:errorColor">?android:attr/colorError</item>
         <item name="*android:dotColor">?android:attr/textColorSecondary</item>
     </style>
 
-    <style name="LockPatternStyleBiometricPrompt">
-        <item name="*android:regularColor">?android:attr/colorForeground</item>
-        <item name="*android:successColor">?android:attr/colorForeground</item>
-        <item name="*android:errorColor">?android:attr/colorError</item>
-        <item name="*android:dotColor">?android:attr/textColorSecondary</item>
+    <style name="LockPatternContainerStyle" parent="@style/AuthCredentialStyle">
+        <item name="containerStyle">@style/AuthCredentialPatternContainerStyle</item>
+    </style>
+
+    <style name="LockPinPasswordContainerStyle" parent="@style/AuthCredentialStyle">
+        <item name="containerStyle">@style/AuthCredentialPinPasswordContainerStyle</item>
     </style>
 
     <style name="Theme.SystemUI.QuickSettings" parent="@*android:style/Theme.DeviceDefault">
@@ -573,6 +610,7 @@
     </style>
 
     <style name="MediaPlayer.ProgressBar" parent="@android:style/Widget.ProgressBar.Horizontal">
+        <item name="android:thumb">@drawable/media_seekbar_thumb</item>
         <item name="android:thumbTint">?android:attr/textColorPrimary</item>
         <item name="android:progressDrawable">@drawable/media_squiggly_progress</item>
         <item name="android:progressTint">?android:attr/textColorPrimary</item>
@@ -928,6 +966,10 @@
         <item name="rowStyle">@style/SliceRow</item>
     </style>
 
+    <style name="Widget.SliceView.Panel.Slider">
+        <item name="rowStyle">@style/SliceRow.Slider</item>
+    </style>
+
     <style name="SliceRow">
         <!-- 2dp start padding for the start icon -->
         <item name="titleItemStartPadding">2dp</item>
@@ -947,6 +989,28 @@
         <item name="bottomDividerEndPadding">12dp</item>
 
         <item name="actionDividerHeight">32dp</item>
+    </style>
+
+    <style name="SliceRow.Slider">
+        <!-- Padding between content and the start icon is 5dp -->
+        <item name="contentStartPadding">5dp</item>
+        <item name="contentEndPadding">0dp</item>
+
+        <!-- 0dp start padding for the end item -->
+        <item name="endItemStartPadding">0dp</item>
+        <!-- 8dp end padding for the end item -->
+        <item name="endItemEndPadding">8dp</item>
+
+        <item name="titleSize">20sp</item>
+        <!-- Align text with slider -->
+        <item name="titleStartPadding">11dp</item>
+        <item name="subContentStartPadding">11dp</item>
+
+        <!-- Padding for indeterminate progress bar -->
+        <item name="progressBarStartPadding">12dp</item>
+        <item name="progressBarEndPadding">16dp</item>
+
+        <item name="iconSize">25dp</item>
     </style>
 
     <style name="TextAppearance.Dialog.Title" parent="@android:style/TextAppearance.DeviceDefault.Large">
@@ -1037,7 +1101,7 @@
         <item name="android:orientation">horizontal</item>
         <item name="android:focusable">true</item>
         <item name="android:clickable">true</item>
-        <item name="android:background">?android:attr/selectableItemBackground</item>
+        <item name="android:background">@drawable/internet_dialog_selected_effect</item>
     </style>
 
     <style name="InternetDialog.NetworkTitle">
@@ -1219,5 +1283,14 @@
     <style name="TextAppearanceBroadcastDialogButton" parent="@android:style/TextAppearance.DeviceDefault.Headline">
         <item name="android:textColor">?androidprv:attr/textColorOnAccent</item>
         <item name="android:textSize">@dimen/broadcast_dialog_btn_text_size</item>
+    </style>
+
+    <style name="BiometricsEnrollStyle">
+        <item name="biometricsEnrollIcon">@color/udfps_enroll_icon</item>
+        <item name="biometricsMovingTargetFill">@color/udfps_moving_target_fill</item>
+        <item name="biometricsMovingTargetFillError">@color/udfps_moving_target_fill_error</item>
+        <item name="biometricsEnrollProgress">@color/udfps_enroll_progress</item>
+        <item name="biometricsEnrollProgressHelp">@color/udfps_enroll_progress_help</item>
+        <item name="biometricsEnrollProgressHelpWithTalkback">@color/udfps_enroll_progress_help_with_talkback</item>
     </style>
 </resources>

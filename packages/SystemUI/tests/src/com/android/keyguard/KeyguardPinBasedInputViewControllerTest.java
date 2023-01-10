@@ -16,6 +16,8 @@
 
 package com.android.keyguard;
 
+import static com.google.common.truth.Truth.assertThat;
+
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -51,7 +53,7 @@ public class KeyguardPinBasedInputViewControllerTest extends SysuiTestCase {
     @Mock
     private PasswordTextView mPasswordEntry;
     @Mock
-    private KeyguardMessageArea mKeyguardMessageArea;
+    private BouncerKeyguardMessageArea mKeyguardMessageArea;
     @Mock
     private KeyguardUpdateMonitor mKeyguardUpdateMonitor;
     @Mock
@@ -90,7 +92,7 @@ public class KeyguardPinBasedInputViewControllerTest extends SysuiTestCase {
         when(mPinBasedInputView.findViewById(1)).thenReturn(mPasswordEntry);
         when(mPinBasedInputView.isAttachedToWindow()).thenReturn(true);
         when(mPinBasedInputView.getButtons()).thenReturn(mButtons);
-        when(mPinBasedInputView.findViewById(R.id.keyguard_message_area))
+        when(mPinBasedInputView.requireViewById(R.id.bouncer_message_area))
                 .thenReturn(mKeyguardMessageArea);
         when(mPinBasedInputView.findViewById(R.id.delete_button))
                 .thenReturn(mDeleteButton);
@@ -115,9 +117,7 @@ public class KeyguardPinBasedInputViewControllerTest extends SysuiTestCase {
     }
 
     @Test
-    public void onResume_setInitialText() {
-        mKeyguardPinViewController.onResume(KeyguardSecurityView.SCREEN_ON);
-        verify(mKeyguardMessageAreaController).setMessageIfEmpty(R.string.keyguard_enter_your_pin);
+    public void testGetInitialMessageResId() {
+        assertThat(mKeyguardPinViewController.getInitialMessageResId()).isNotEqualTo(0);
     }
 }
-

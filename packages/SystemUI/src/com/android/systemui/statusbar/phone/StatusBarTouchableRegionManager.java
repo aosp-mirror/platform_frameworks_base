@@ -34,6 +34,7 @@ import com.android.systemui.Dumpable;
 import com.android.systemui.R;
 import com.android.systemui.ScreenDecorations;
 import com.android.systemui.dagger.SysUISingleton;
+import com.android.systemui.shade.ShadeExpansionStateManager;
 import com.android.systemui.statusbar.NotificationShadeWindowController;
 import com.android.systemui.statusbar.policy.ConfigurationController;
 import com.android.systemui.statusbar.policy.ConfigurationController.ConfigurationListener;
@@ -55,6 +56,7 @@ public final class StatusBarTouchableRegionManager implements Dumpable {
     private final Context mContext;
     private final HeadsUpManagerPhone mHeadsUpManager;
     private final NotificationShadeWindowController mNotificationShadeWindowController;
+    private final UnlockedScreenOffAnimationController mUnlockedScreenOffAnimationController;
 
     private boolean mIsStatusBarExpanded = false;
     private boolean mShouldAdjustInsets = false;
@@ -67,12 +69,16 @@ public final class StatusBarTouchableRegionManager implements Dumpable {
     private int mDisplayCutoutTouchableRegionSize;
     private int mStatusBarHeight;
 
+    private final OnComputeInternalInsetsListener mOnComputeInternalInsetsListener;
+
     @Inject
     public StatusBarTouchableRegionManager(
             Context context,
             NotificationShadeWindowController notificationShadeWindowController,
             ConfigurationController configurationController,
-            HeadsUpManagerPhone headsUpManager
+            HeadsUpManagerPhone headsUpManager,
+            ShadeExpansionStateManager shadeExpansionStateManager,
+            UnlockedScreenOffAnimationController unlockedScreenOffAnimationController
     ) {
         mContext = context;
         initResources();
@@ -99,22 +105,17 @@ public final class StatusBarTouchableRegionManager implements Dumpable {
                         updateTouchableRegion();
                     }
                 });
-        mHeadsUpManager.addHeadsUpPhoneListener(
-                new HeadsUpManagerPhone.OnHeadsUpPhoneListenerChange() {
-                    @Override
-                    public void onHeadsUpGoingAwayStateChanged(boolean headsUpGoingAway) {
-                        if (!headsUpGoingAway) {
-                            updateTouchableRegionAfterLayout();
-                        } else {
-                            updateTouchableRegion();
-                        }
-                    }
-                });
+        mHeadsUpManager.addHeadsUpPhoneListener(this::onHeadsUpGoingAwayStateChanged);
 
         mNotificationShadeWindowController = notificationShadeWindowController;
         mNotificationShadeWindowController.setForcePluginOpenListener((forceOpen) -> {
             updateTouchableRegion();
         });
+
+        mUnlockedScreenOffAnimationController = unlockedScreenOffAnimationController;
+        shadeExpansionStateManager.addFullExpansionListener(this::onShadeExpansionFullyChanged);
+
+        mOnComputeInternalInsetsListener = this::onComputeInternalInsets;
     }
 
     protected void setup(
@@ -132,17 +133,11 @@ public final class StatusBarTouchableRegionManager implements Dumpable {
         pw.println(mTouchableRegion);
     }
 
-    /**
-     * Notify that the status bar panel gets expanded or collapsed.
-     *
-     * @param isExpanded True to notify expanded, false to notify collapsed.
-     * TODO(b/237811427) replace with a listener
-     */
-    public void setPanelExpanded(boolean isExpanded) {
+    private void onShadeExpansionFullyChanged(Boolean isExpanded) {
         if (isExpanded != mIsStatusBarExpanded) {
             mIsStatusBarExpanded = isExpanded;
             if (isExpanded) {
-                // make sure our state is sane
+                // make sure our state is sensible
                 mForceCollapsedUntilLayout = false;
             }
             updateTouchableRegion();
@@ -179,7 +174,7 @@ public final class StatusBarTouchableRegionManager implements Dumpable {
     /**
      * Set the touchable portion of the status bar based on what elements are visible.
      */
-    private void updateTouchableRegion() {
+    public void updateTouchableRegion() {
         boolean hasCutoutInset = (mNotificationShadeWindowView != null)
                 && (mNotificationShadeWindowView.getRootWindowInsets() != null)
                 && (mNotificationShadeWindowView.getRootWindowInsets().getDisplayCutout() != null);
@@ -242,19 +237,36 @@ public final class StatusBarTouchableRegionManager implements Dumpable {
         touchableRegion.union(bounds);
     }
 
-    private final OnComputeInternalInsetsListener mOnComputeInternalInsetsListener =
-            new OnComputeInternalInsetsListener() {
-        @Override
-        public void onComputeInternalInsets(ViewTreeObserver.InternalInsetsInfo info) {
-            if (mIsStatusBarExpanded || mCentralSurfaces.isBouncerShowing()) {
-                // The touchable region is always the full area when expanded
-                return;
-            }
+    /**
+     * Helper to let us know when calculating the region is not needed because we know the entire
+     * screen needs to be touchable.
+     */
+    private boolean shouldMakeEntireScreenTouchable() {
+        // The touchable region is always the full area when expanded, whether we're showing the
+        // shade or the bouncer. It's also fully touchable when the screen off animation is playing
+        // since we don't want stray touches to go through the light reveal scrim to whatever is
+        // underneath.
+        return mIsStatusBarExpanded
+                || mCentralSurfaces.isBouncerShowing()
+                || mUnlockedScreenOffAnimationController.isAnimationPlaying();
+    }
 
-            // Update touch insets to include any area needed for touching features that live in
-            // the status bar (ie: heads up notifications)
-            info.setTouchableInsets(ViewTreeObserver.InternalInsetsInfo.TOUCHABLE_INSETS_REGION);
-            info.touchableRegion.set(calculateTouchableRegion());
+    private void onHeadsUpGoingAwayStateChanged(boolean headsUpGoingAway) {
+        if (!headsUpGoingAway) {
+            updateTouchableRegionAfterLayout();
+        } else {
+            updateTouchableRegion();
         }
-    };
+    }
+
+    private void onComputeInternalInsets(ViewTreeObserver.InternalInsetsInfo info) {
+        if (shouldMakeEntireScreenTouchable()) {
+            return;
+        }
+
+        // Update touch insets to include any area needed for touching features that live in
+        // the status bar (ie: heads up notifications)
+        info.setTouchableInsets(ViewTreeObserver.InternalInsetsInfo.TOUCHABLE_INSETS_REGION);
+        info.touchableRegion.set(calculateTouchableRegion());
+    }
 }

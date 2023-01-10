@@ -34,6 +34,7 @@ import android.util.Slog;
 import android.view.IWindowFocusObserver;
 import android.view.RemoteAnimationTarget;
 import android.view.SurfaceControl;
+import android.window.BackAnimationAdaptor;
 import android.window.BackNavigationInfo;
 import android.window.OnBackInvokedCallbackInfo;
 import android.window.TaskSnapshot;
@@ -46,9 +47,15 @@ import com.android.server.LocalServices;
  * Controller to handle actions related to the back gesture on the server side.
  */
 class BackNavigationController {
-    private static final String TAG = "BackNavigationController";
-    private WindowManagerService mWindowManagerService;
+    static final String TAG = "BackNavigationController";
+    WindowManagerService mWindowManagerService;
     private IWindowFocusObserver mFocusObserver;
+    // TODO (b/241808055) Find a appropriate time to remove during refactor
+    // Execute back animation with legacy transition system. Temporary flag for easier debugging.
+    static final boolean USE_TRANSITION =
+            SystemProperties.getInt("persist.wm.debug.predictive_back_ani_trans", 1) != 0;
+
+    BackNaviAnimationController mBackNaviAnimationController;
 
     /**
      * Returns true if the back predictability feature is enabled
@@ -72,7 +79,7 @@ class BackNavigationController {
     @VisibleForTesting
     @Nullable
     BackNavigationInfo startBackNavigation(boolean requestAnimation,
-            IWindowFocusObserver observer) {
+            IWindowFocusObserver observer, BackAnimationAdaptor backAnimationAdaptor) {
         final WindowManagerService wmService = mWindowManagerService;
         final SurfaceControl.Transaction tx = wmService.mTransactionFactory.get();
         mFocusObserver = observer;
@@ -259,6 +266,8 @@ class BackNavigationController {
                     && requestAnimation
                     // Only create a new leash if no leash has been created.
                     // Otherwise return null for animation target to avoid conflict.
+                    // TODO isAnimating, recents can cancel app transition animation, can't back
+                    //  cancel like recents?
                     && !removedWindowContainer.hasCommittedReparentToAnimationLeash();
 
             if (prepareAnimation) {
@@ -266,19 +275,21 @@ class BackNavigationController {
                         currentTask.getTaskInfo().configuration.windowConfiguration;
 
                 infoBuilder.setTaskWindowConfiguration(taskWindowConfiguration);
-                // Prepare a leash to animate the current top window
-                // TODO(b/220934562): Use surface animator to better manage animation conflicts.
-                SurfaceControl animLeash = removedWindowContainer.makeAnimationLeash()
-                        .setName("BackPreview Leash for " + removedWindowContainer)
-                        .setHidden(false)
-                        .setBLASTLayer()
-                        .build();
-                removedWindowContainer.reparentSurfaceControl(tx, animLeash);
-                animationLeashParent = removedWindowContainer.getAnimationLeashParent();
-                topAppTarget = createRemoteAnimationTargetLocked(removedWindowContainer,
-                        currentActivity,
-                        currentTask, animLeash);
-                infoBuilder.setDepartingAnimationTarget(topAppTarget);
+                if (!USE_TRANSITION) {
+                    // Prepare a leash to animate the current top window
+                    // TODO(b/220934562): Use surface animator to better manage animation conflicts.
+                    SurfaceControl animLeash = removedWindowContainer.makeAnimationLeash()
+                            .setName("BackPreview Leash for " + removedWindowContainer)
+                            .setHidden(false)
+                            .setBLASTLayer()
+                            .build();
+                    removedWindowContainer.reparentSurfaceControl(tx, animLeash);
+                    animationLeashParent = removedWindowContainer.getAnimationLeashParent();
+                    topAppTarget = createRemoteAnimationTargetLocked(removedWindowContainer,
+                            currentActivity,
+                            currentTask, animLeash);
+                    infoBuilder.setDepartingAnimationTarget(topAppTarget);
+                }
             }
 
             //TODO(207481538) Remove once the infrastructure to support per-activity screenshot is
@@ -293,21 +304,32 @@ class BackNavigationController {
             // Special handling for back to home animation
             if (backType == BackNavigationInfo.TYPE_RETURN_TO_HOME && prepareAnimation
                     && prevTask != null) {
-                currentTask.mBackGestureStarted = true;
-                // Make launcher show from behind by marking its top activity as visible and
-                // launch-behind to bump its visibility for the duration of the back gesture.
-                prevActivity = prevTask.getTopNonFinishingActivity();
-                if (prevActivity != null) {
-                    if (!prevActivity.mVisibleRequested) {
-                        prevActivity.setVisibility(true);
+                if (USE_TRANSITION && mBackNaviAnimationController == null) {
+                    if (backAnimationAdaptor != null
+                            && backAnimationAdaptor.getSupportType() == backType) {
+                        mBackNaviAnimationController = new BackNaviAnimationController(
+                                backAnimationAdaptor.getRunner(), this,
+                                currentActivity.getDisplayId());
+                        prepareBackToHomeTransition(currentActivity, prevTask);
+                        infoBuilder.setPrepareAnimation(true);
                     }
-                    prevActivity.mLaunchTaskBehind = true;
-                    ProtoLog.d(WM_DEBUG_BACK_PREVIEW,
-                            "Setting Activity.mLauncherTaskBehind to true. Activity=%s",
-                            prevActivity);
-                    prevActivity.mRootWindowContainer.ensureActivitiesVisible(
-                            null /* starting */, 0 /* configChanges */,
-                            false /* preserveWindows */);
+                } else {
+                    currentTask.mBackGestureStarted = true;
+                    // Make launcher show from behind by marking its top activity as visible and
+                    // launch-behind to bump its visibility for the duration of the back gesture.
+                    prevActivity = prevTask.getTopNonFinishingActivity();
+                    if (prevActivity != null) {
+                        if (!prevActivity.isVisibleRequested()) {
+                            prevActivity.setVisibility(true);
+                        }
+                        prevActivity.mLaunchTaskBehind = true;
+                        ProtoLog.d(WM_DEBUG_BACK_PREVIEW,
+                                "Setting Activity.mLauncherTaskBehind to true. Activity=%s",
+                                prevActivity);
+                        prevActivity.mRootWindowContainer.ensureActivitiesVisible(
+                                null /* starting */, 0 /* configChanges */,
+                                false /* preserveWindows */);
+                    }
                 }
             }
         } // Release wm Lock
@@ -388,29 +410,30 @@ class BackNavigationController {
                 BackNavigationInfo.KEY_TRIGGER_BACK);
         ProtoLog.d(WM_DEBUG_BACK_PREVIEW, "onBackNavigationDone backType=%s, "
                 + "task=%s, prevActivity=%s", backType, task, prevActivity);
-
-        if (backType == BackNavigationInfo.TYPE_RETURN_TO_HOME && prepareAnimation) {
-            if (triggerBack) {
-                if (surfaceControl != null && surfaceControl.isValid()) {
-                    // When going back to home, hide the task surface before it is re-parented to
-                    // avoid flicker.
-                    SurfaceControl.Transaction t = windowContainer.getSyncTransaction();
-                    t.hide(surfaceControl);
-                    t.apply();
+        if (!USE_TRANSITION) {
+            if (backType == BackNavigationInfo.TYPE_RETURN_TO_HOME && prepareAnimation) {
+                if (triggerBack) {
+                    if (surfaceControl != null && surfaceControl.isValid()) {
+                        // When going back to home, hide the task surface before it is re-parented
+                        // to avoid flicker.
+                        SurfaceControl.Transaction t = windowContainer.getSyncTransaction();
+                        t.hide(surfaceControl);
+                        t.apply();
+                    }
                 }
+                if (prevActivity != null && !triggerBack) {
+                    // Restore the launch-behind state.
+                    task.mTaskSupervisor.scheduleLaunchTaskBehindComplete(prevActivity.token);
+                    prevActivity.mLaunchTaskBehind = false;
+                    ProtoLog.d(WM_DEBUG_BACK_PREVIEW,
+                            "Setting Activity.mLauncherTaskBehind to false. Activity=%s",
+                            prevActivity);
+                }
+            } else {
+                task.mBackGestureStarted = false;
             }
-            if (prevActivity != null && !triggerBack) {
-                // Restore the launch-behind state.
-                task.mTaskSupervisor.scheduleLaunchTaskBehindComplete(prevActivity.token);
-                prevActivity.mLaunchTaskBehind = false;
-                ProtoLog.d(WM_DEBUG_BACK_PREVIEW,
-                        "Setting Activity.mLauncherTaskBehind to false. Activity=%s",
-                        prevActivity);
-            }
-        } else if (task != null) {
-            task.mBackGestureStarted = false;
+            resetSurfaces(windowContainer);
         }
-        resetSurfaces(windowContainer);
 
         if (mFocusObserver != null) {
             focusedWindow.unregisterFocusObserver(mFocusObserver);
@@ -464,5 +487,22 @@ class BackNavigationController {
 
     void setWindowManager(WindowManagerService wm) {
         mWindowManagerService = wm;
+    }
+
+    private void prepareBackToHomeTransition(ActivityRecord currentActivity, Task homeTask) {
+        final DisplayContent dc = currentActivity.getDisplayContent();
+        final ActivityRecord homeActivity = homeTask.getTopNonFinishingActivity();
+        if (!homeActivity.isVisibleRequested()) {
+            homeActivity.setVisibility(true);
+        }
+        homeActivity.mLaunchTaskBehind = true;
+        dc.ensureActivitiesVisible(
+                null /* starting */, 0 /* configChanges */,
+                false /* preserveWindows */, true);
+        mBackNaviAnimationController.initialize(homeActivity, currentActivity);
+    }
+
+    void finishAnimation() {
+        mBackNaviAnimationController = null;
     }
 }

@@ -454,8 +454,7 @@ class InsetsPolicy {
             final InsetsSource originalImeSource = originalState.peekSource(ITYPE_IME);
 
             if (originalImeSource != null) {
-                final boolean imeVisibility =
-                        w.mActivityRecord.mLastImeShown || w.getRequestedVisibility(ITYPE_IME);
+                final boolean imeVisibility = w.getRequestedVisibility(ITYPE_IME);
                 final InsetsState state = copyState ? new InsetsState(originalState)
                         : originalState;
                 final InsetsSource imeSource = new InsetsSource(originalImeSource);
@@ -759,7 +758,7 @@ class InsetsPolicy {
 
         InsetsPolicyAnimationControlListener(boolean show, Runnable finishCallback, int types) {
             super(show, false /* hasCallbacks */, types, BEHAVIOR_SHOW_TRANSIENT_BARS_BY_SWIPE,
-                    false /* disable */, 0 /* floatingImeBottomInsets */);
+                    false /* disable */, 0 /* floatingImeBottomInsets */, null);
             mFinishCallback = finishCallback;
             mControlCallbacks = new InsetsPolicyAnimationControlCallbacks(this);
         }

@@ -32,10 +32,8 @@ import android.widget.FrameLayout
 import com.android.keyguard.KeyguardUpdateMonitor
 import com.android.systemui.FaceScanningOverlay
 import com.android.systemui.biometrics.AuthController
-import com.android.systemui.dagger.qualifiers.Main
 import com.android.systemui.dagger.SysUISingleton
-import com.android.systemui.flags.FeatureFlags
-import com.android.systemui.flags.Flags
+import com.android.systemui.dagger.qualifiers.Main
 import com.android.systemui.plugins.statusbar.StatusBarStateController
 import java.util.concurrent.Executor
 import javax.inject.Inject
@@ -47,15 +45,13 @@ class FaceScanningProviderFactory @Inject constructor(
     private val statusBarStateController: StatusBarStateController,
     private val keyguardUpdateMonitor: KeyguardUpdateMonitor,
     @Main private val mainExecutor: Executor,
-    private val featureFlags: FeatureFlags
 ) : DecorProviderFactory() {
     private val display = context.display
     private val displayInfo = DisplayInfo()
 
     override val hasProviders: Boolean
         get() {
-            if (!featureFlags.isEnabled(Flags.FACE_SCANNING_ANIM) ||
-                    authController.faceAuthSensorLocation == null) {
+            if (authController.faceSensorLocation == null) {
                 return false
             }
 
@@ -99,7 +95,7 @@ class FaceScanningProviderFactory @Inject constructor(
     }
 
     fun shouldShowFaceScanningAnim(): Boolean {
-        return canShowFaceScanningAnim() && keyguardUpdateMonitor.isFaceScanning
+        return canShowFaceScanningAnim() && keyguardUpdateMonitor.isFaceDetectionRunning
     }
 }
 
@@ -115,19 +111,25 @@ class FaceScanningOverlayProviderImpl(
     override fun onReloadResAndMeasure(
         view: View,
         reloadToken: Int,
-        rotation: Int,
+        @Surface.Rotation rotation: Int,
+        tintColor: Int,
         displayUniqueId: String?
     ) {
         (view.layoutParams as FrameLayout.LayoutParams).let {
             updateLayoutParams(it, rotation)
             view.layoutParams = it
+            (view as? FaceScanningOverlay)?.let { overlay ->
+                overlay.setColor(tintColor)
+                overlay.updateConfiguration(displayUniqueId)
+            }
         }
     }
 
     override fun inflateView(
         context: Context,
         parent: ViewGroup,
-        @Surface.Rotation rotation: Int
+        @Surface.Rotation rotation: Int,
+        tintColor: Int
     ): View {
         val view = FaceScanningOverlay(
                 context,
@@ -137,6 +139,7 @@ class FaceScanningOverlayProviderImpl(
                 mainExecutor
         )
         view.id = viewId
+        view.setColor(tintColor)
         FrameLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT,
                 ViewGroup.LayoutParams.MATCH_PARENT).let {
             updateLayoutParams(it, rotation)
@@ -152,7 +155,7 @@ class FaceScanningOverlayProviderImpl(
         layoutParams.let { lp ->
             lp.width = ViewGroup.LayoutParams.MATCH_PARENT
             lp.height = ViewGroup.LayoutParams.MATCH_PARENT
-            authController.faceAuthSensorLocation?.y?.let { faceAuthSensorHeight ->
+            authController.faceSensorLocation?.y?.let { faceAuthSensorHeight ->
                 val faceScanningHeight = (faceAuthSensorHeight * 2).toInt()
                 when (rotation) {
                     Surface.ROTATION_0, Surface.ROTATION_180 ->

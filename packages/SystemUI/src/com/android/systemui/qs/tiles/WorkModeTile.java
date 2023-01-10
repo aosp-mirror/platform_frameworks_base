@@ -27,6 +27,7 @@ import android.service.quicksettings.Tile;
 import android.view.View;
 import android.widget.Switch;
 
+import androidx.annotation.MainThread;
 import androidx.annotation.Nullable;
 
 import com.android.internal.logging.MetricsLogger;
@@ -91,11 +92,13 @@ public class WorkModeTile extends QSTileImpl<BooleanState> implements
     }
 
     @Override
+    @MainThread
     public void onManagedProfileChanged() {
         refreshState(mProfileController.isWorkModeEnabled());
     }
 
     @Override
+    @MainThread
     public void onManagedProfileRemoved() {
         mHost.removeTile(getTileSpec());
         mHost.unmarkTileAsAutoAdded(getTileSpec());

@@ -41,9 +41,11 @@ import com.android.systemui.animation.DialogLaunchAnimator;
 import com.android.systemui.classifier.FalsingManagerFake;
 import com.android.systemui.flags.FeatureFlags;
 import com.android.systemui.plugins.ActivityStarter;
+import com.android.systemui.plugins.qs.QSTile;
 import com.android.systemui.plugins.statusbar.StatusBarStateController;
 import com.android.systemui.qs.QSTileHost;
 import com.android.systemui.qs.logging.QSLogger;
+import com.android.systemui.qs.tileimpl.QSTileImpl;
 import com.android.systemui.screenrecord.RecordingController;
 import com.android.systemui.statusbar.phone.KeyguardDismissUtil;
 import com.android.systemui.statusbar.policy.KeyguardStateController;
@@ -229,4 +231,38 @@ public class ScreenRecordTileTest extends SysuiTestCase {
 
         assertFalse(mTile.getState().forceExpandIcon);
     }
+
+    @Test
+    public void testIcon_whenRecording_isOnState() {
+        when(mController.isStarting()).thenReturn(false);
+        when(mController.isRecording()).thenReturn(true);
+        QSTile.BooleanState state = new QSTile.BooleanState();
+
+        mTile.handleUpdateState(state, /* arg= */ null);
+
+        assertEquals(state.icon, QSTileImpl.ResourceIcon.get(R.drawable.qs_screen_record_icon_on));
+    }
+
+    @Test
+    public void testIcon_whenStarting_isOnState() {
+        when(mController.isStarting()).thenReturn(true);
+        when(mController.isRecording()).thenReturn(false);
+        QSTile.BooleanState state = new QSTile.BooleanState();
+
+        mTile.handleUpdateState(state, /* arg= */ null);
+
+        assertEquals(state.icon, QSTileImpl.ResourceIcon.get(R.drawable.qs_screen_record_icon_on));
+    }
+
+    @Test
+    public void testIcon_whenRecordingOff_isOffState() {
+        when(mController.isStarting()).thenReturn(false);
+        when(mController.isRecording()).thenReturn(false);
+        QSTile.BooleanState state = new QSTile.BooleanState();
+
+        mTile.handleUpdateState(state, /* arg= */ null);
+
+        assertEquals(state.icon, QSTileImpl.ResourceIcon.get(R.drawable.qs_screen_record_icon_off));
+    }
+
 }

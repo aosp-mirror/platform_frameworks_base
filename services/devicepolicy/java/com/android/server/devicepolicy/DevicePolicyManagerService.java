@@ -7783,6 +7783,7 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
         Preconditions.checkCallAuthorization(
                 isProfileOwner(caller) || isDefaultDeviceOwner(caller)
                         || hasCallingOrSelfPermission(permission.READ_NEARBY_STREAMING_POLICY));
+        Preconditions.checkCallAuthorization(hasCrossUsersPermission(caller, userId));
 
         synchronized (getLockObject()) {
             if (mOwners.hasProfileOwner(userId) || mOwners.hasDeviceOwner()) {
@@ -7823,6 +7824,7 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
         Preconditions.checkCallAuthorization(
                 isProfileOwner(caller) || isDefaultDeviceOwner(caller)
                         || hasCallingOrSelfPermission(permission.READ_NEARBY_STREAMING_POLICY));
+        Preconditions.checkCallAuthorization(hasCrossUsersPermission(caller, userId));
 
         synchronized (getLockObject()) {
             if (mOwners.hasProfileOwner(userId) || mOwners.hasDeviceOwner()) {
@@ -8178,7 +8180,8 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
         }
 
         final CallerIdentity caller = getCallerIdentity(who);
-        Preconditions.checkCallAuthorization(hasFullCrossUsersPermission(caller, userHandle));
+        Preconditions.checkCallAuthorization(hasFullCrossUsersPermission(caller, userHandle)
+                || isCameraServerUid(caller));
 
         if (parent) {
             Preconditions.checkCallAuthorization(
@@ -9687,6 +9690,10 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
 
     private boolean isShellUid(CallerIdentity caller) {
         return UserHandle.isSameApp(caller.getUid(), Process.SHELL_UID);
+    }
+
+    private boolean isCameraServerUid(CallerIdentity caller) {
+        return UserHandle.isSameApp(caller.getUid(), Process.CAMERASERVER_UID);
     }
 
     private @UserIdInt int getCurrentForegroundUserId() {

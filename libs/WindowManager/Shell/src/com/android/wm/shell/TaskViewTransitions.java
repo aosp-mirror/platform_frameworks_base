@@ -87,6 +87,10 @@ public class TaskViewTransitions implements Transitions.TransitionHandler {
         // Note: Don't unregister handler since this is a singleton with lifetime bound to Shell
     }
 
+    boolean isEnabled() {
+        return mTransitions.isRegistered();
+    }
+
     /**
      * Looks through the pending transitions for one matching `taskView`.
      * @param taskView the pending transition should be for this.

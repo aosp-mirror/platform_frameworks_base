@@ -15,6 +15,7 @@
  */
 package android.service.quicksettings;
 
+import android.app.PendingIntent;
 import android.content.ComponentName;
 import android.graphics.drawable.Icon;
 import android.service.quicksettings.Tile;
@@ -29,10 +30,10 @@ interface IQSService {
             String contentDescription);
     void onShowDialog(in IBinder tile);
     void onStartActivity(in IBinder tile);
+    void startActivity(in IBinder tile, in PendingIntent pendingIntent);
     boolean isLocked();
     boolean isSecure();
     void startUnlockAndRun(in IBinder tile);
-
     void onDialogHidden(in IBinder tile);
     void onStartSuccessful(in IBinder tile);
 }

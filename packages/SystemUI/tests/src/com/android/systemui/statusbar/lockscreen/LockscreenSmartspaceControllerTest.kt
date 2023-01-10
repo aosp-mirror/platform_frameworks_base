@@ -55,20 +55,21 @@ import com.android.systemui.util.mockito.capture
 import com.android.systemui.util.mockito.eq
 import com.android.systemui.util.settings.SecureSettings
 import com.android.systemui.util.time.FakeSystemClock
-import java.util.Optional
 import org.junit.Before
 import org.junit.Test
 import org.mockito.ArgumentCaptor
 import org.mockito.Captor
 import org.mockito.Mock
+import org.mockito.Mockito.`when`
 import org.mockito.Mockito.anyInt
 import org.mockito.Mockito.clearInvocations
 import org.mockito.Mockito.mock
 import org.mockito.Mockito.never
 import org.mockito.Mockito.spy
 import org.mockito.Mockito.verify
-import org.mockito.Mockito.`when`
 import org.mockito.MockitoAnnotations
+import java.util.Optional
+import java.util.concurrent.Executor
 
 @SmallTest
 class LockscreenSmartspaceControllerTest : SysuiTestCase() {
@@ -103,6 +104,9 @@ class LockscreenSmartspaceControllerTest : SysuiTestCase() {
 
     @Mock
     private lateinit var deviceProvisionedController: DeviceProvisionedController
+
+    @Mock
+    private lateinit var bgExecutor: Executor
 
     @Mock
     private lateinit var handler: Handler
@@ -203,6 +207,7 @@ class LockscreenSmartspaceControllerTest : SysuiTestCase() {
                 keyguardBypassController,
                 execution,
                 executor,
+                bgExecutor,
                 handler,
                 Optional.of(plugin)
         )
@@ -513,6 +518,7 @@ class LockscreenSmartspaceControllerTest : SysuiTestCase() {
 
         // THEN the existing session is reused and views are registered
         verify(smartspaceManager, never()).createSmartspaceSession(any())
+        verify(smartspaceView2).setUiSurface(BcSmartspaceDataPlugin.UI_SURFACE_LOCK_SCREEN_AOD)
         verify(smartspaceView2).registerDataProvider(plugin)
     }
 
@@ -549,6 +555,7 @@ class LockscreenSmartspaceControllerTest : SysuiTestCase() {
 
         controller.stateChangeListener.onViewAttachedToWindow(view)
 
+        verify(smartspaceView).setUiSurface(BcSmartspaceDataPlugin.UI_SURFACE_LOCK_SCREEN_AOD)
         verify(smartspaceView).registerDataProvider(plugin)
         verify(smartspaceSession)
                 .addOnTargetsAvailableListener(any(), capture(sessionListenerCaptor))
@@ -635,6 +642,9 @@ class LockscreenSmartspaceControllerTest : SysuiTestCase() {
             }
 
             override fun setIsDreaming(isDreaming: Boolean) {
+            }
+
+            override fun setUiSurface(uiSurface: String) {
             }
 
             override fun setDozeAmount(amount: Float) {

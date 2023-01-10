@@ -24,25 +24,20 @@ import android.os.Handler;
 import android.view.accessibility.AccessibilityManager;
 
 import com.android.internal.logging.UiEventLogger;
-import com.android.internal.statusbar.IStatusBarService;
 import com.android.systemui.R;
 import com.android.systemui.dagger.SysUISingleton;
 import com.android.systemui.dagger.qualifiers.Background;
 import com.android.systemui.dagger.qualifiers.Main;
 import com.android.systemui.dagger.qualifiers.UiBackground;
-import com.android.systemui.dump.DumpManager;
-import com.android.systemui.keyguard.WakefulnessLifecycle;
 import com.android.systemui.people.widget.PeopleSpaceWidgetManager;
 import com.android.systemui.plugins.statusbar.StatusBarStateController;
 import com.android.systemui.settings.UserContextProvider;
-import com.android.systemui.shade.NotifPanelEventsModule;
 import com.android.systemui.shade.ShadeController;
+import com.android.systemui.shade.ShadeEventsModule;
+import com.android.systemui.shade.ShadeExpansionStateManager;
 import com.android.systemui.statusbar.NotificationListener;
-import com.android.systemui.statusbar.NotificationRemoteInputManager;
 import com.android.systemui.statusbar.notification.AssistantFeedbackController;
-import com.android.systemui.statusbar.notification.NotifPipelineFlags;
-import com.android.systemui.statusbar.notification.NotificationEntryManager;
-import com.android.systemui.statusbar.notification.NotificationEntryManagerLogger;
+import com.android.systemui.statusbar.notification.VisibilityLocationProvider;
 import com.android.systemui.statusbar.notification.collection.NotifInflaterImpl;
 import com.android.systemui.statusbar.notification.collection.NotifLiveDataStore;
 import com.android.systemui.statusbar.notification.collection.NotifLiveDataStoreImpl;
@@ -53,14 +48,12 @@ import com.android.systemui.statusbar.notification.collection.coordinator.dagger
 import com.android.systemui.statusbar.notification.collection.inflation.BindEventManager;
 import com.android.systemui.statusbar.notification.collection.inflation.BindEventManagerImpl;
 import com.android.systemui.statusbar.notification.collection.inflation.NotifInflater;
-import com.android.systemui.statusbar.notification.collection.inflation.NotificationRowBinder;
 import com.android.systemui.statusbar.notification.collection.inflation.OnUserInteractionCallbackImpl;
-import com.android.systemui.statusbar.notification.collection.legacy.NotificationGroupManagerLegacy;
-import com.android.systemui.statusbar.notification.collection.legacy.VisualStabilityManager;
 import com.android.systemui.statusbar.notification.collection.notifcollection.CommonNotifCollection;
 import com.android.systemui.statusbar.notification.collection.provider.HighPriorityProvider;
 import com.android.systemui.statusbar.notification.collection.provider.NotificationVisibilityProviderImpl;
-import com.android.systemui.statusbar.notification.collection.provider.VisualStabilityProvider;
+import com.android.systemui.statusbar.notification.collection.provider.SeenNotificationsProviderModule;
+import com.android.systemui.statusbar.notification.collection.provider.VisibilityLocationProviderDelegator;
 import com.android.systemui.statusbar.notification.collection.render.GroupExpansionManager;
 import com.android.systemui.statusbar.notification.collection.render.GroupExpansionManagerImpl;
 import com.android.systemui.statusbar.notification.collection.render.GroupMembershipManager;
@@ -86,7 +79,6 @@ import com.android.systemui.statusbar.notification.stack.NotificationSectionsMan
 import com.android.systemui.statusbar.notification.stack.StackScrollAlgorithm;
 import com.android.systemui.statusbar.phone.CentralSurfaces;
 import com.android.systemui.statusbar.phone.KeyguardBypassController;
-import com.android.systemui.util.leak.LeakDetector;
 import com.android.systemui.wmshell.BubblesManager;
 
 import java.util.Optional;
@@ -105,7 +97,8 @@ import dagger.Provides;
 @Module(includes = {
         CoordinatorsModule.class,
         KeyguardNotificationVisibilityProviderModule.class,
-        NotifPanelEventsModule.class,
+        SeenNotificationsProviderModule.class,
+        ShadeEventsModule.class,
         NotifPipelineChoreographerModule.class,
         NotificationSectionHeadersModule.class,
 })
@@ -115,31 +108,6 @@ public interface NotificationsModule {
 
     @Binds
     StackScrollAlgorithm.BypassController bindBypassController(KeyguardBypassController impl);
-
-    /** Provides an instance of {@link NotificationEntryManager} */
-    @SysUISingleton
-    @Provides
-    static NotificationEntryManager provideNotificationEntryManager(
-            NotificationEntryManagerLogger logger,
-            NotificationGroupManagerLegacy groupManager,
-            NotifPipelineFlags notifPipelineFlags,
-            Lazy<NotificationRowBinder> notificationRowBinderLazy,
-            Lazy<NotificationRemoteInputManager> notificationRemoteInputManagerLazy,
-            LeakDetector leakDetector,
-            IStatusBarService statusBarService,
-            DumpManager dumpManager,
-            @Background Executor bgExecutor) {
-        return new NotificationEntryManager(
-                logger,
-                groupManager,
-                notifPipelineFlags,
-                notificationRowBinderLazy,
-                notificationRemoteInputManagerLazy,
-                leakDetector,
-                statusBarService,
-                dumpManager,
-                bgExecutor);
-    }
 
     /** Provides an instance of {@link NotificationGutsManager} */
     @SysUISingleton
@@ -152,7 +120,6 @@ public interface NotificationsModule {
             AccessibilityManager accessibilityManager,
             HighPriorityProvider highPriorityProvider,
             INotificationManager notificationManager,
-            NotificationEntryManager notificationEntryManager,
             PeopleSpaceWidgetManager peopleSpaceWidgetManager,
             LauncherApps launcherApps,
             ShortcutManager shortcutManager,
@@ -162,8 +129,7 @@ public interface NotificationsModule {
             Optional<BubblesManager> bubblesManagerOptional,
             UiEventLogger uiEventLogger,
             OnUserInteractionCallback onUserInteractionCallback,
-            ShadeController shadeController,
-            DumpManager dumpManager) {
+            ShadeController shadeController) {
         return new NotificationGutsManager(
                 context,
                 centralSurfacesOptionalLazy,
@@ -181,32 +147,18 @@ public interface NotificationsModule {
                 bubblesManagerOptional,
                 uiEventLogger,
                 onUserInteractionCallback,
-                shadeController,
-                dumpManager);
+                shadeController
+        );
     }
 
     /** Provides an instance of {@link NotifGutsViewManager} */
     @Binds
     NotifGutsViewManager bindNotifGutsViewManager(NotificationGutsManager notificationGutsManager);
 
-    /** Provides an instance of {@link VisualStabilityManager} */
-    @SysUISingleton
-    @Provides
-    static VisualStabilityManager provideVisualStabilityManager(
-            NotificationEntryManager notificationEntryManager,
-            VisualStabilityProvider visualStabilityProvider,
-            @Main Handler handler,
-            StatusBarStateController statusBarStateController,
-            WakefulnessLifecycle wakefulnessLifecycle,
-            DumpManager dumpManager) {
-        return new VisualStabilityManager(
-                notificationEntryManager,
-                visualStabilityProvider,
-                handler,
-                statusBarStateController,
-                wakefulnessLifecycle,
-                dumpManager);
-    }
+    /** Provides an instance of {@link VisibilityLocationProvider} */
+    @Binds
+    VisibilityLocationProvider bindVisibilityLocationProvider(
+            VisibilityLocationProviderDelegator visibilityLocationProviderDelegator);
 
     /** Provides an instance of {@link NotificationLogger} */
     @SysUISingleton
@@ -218,6 +170,7 @@ public interface NotificationsModule {
             NotificationVisibilityProvider visibilityProvider,
             NotifPipeline notifPipeline,
             StatusBarStateController statusBarStateController,
+            ShadeExpansionStateManager shadeExpansionStateManager,
             NotificationLogger.ExpansionStateLogger expansionStateLogger,
             NotificationPanelLogger notificationPanelLogger) {
         return new NotificationLogger(
@@ -227,6 +180,7 @@ public interface NotificationsModule {
                 visibilityProvider,
                 notifPipeline,
                 statusBarStateController,
+                shadeExpansionStateManager,
                 expansionStateLogger,
                 notificationPanelLogger);
     }

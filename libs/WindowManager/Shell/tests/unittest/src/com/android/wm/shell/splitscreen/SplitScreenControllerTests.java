@@ -16,16 +16,27 @@
 
 package com.android.wm.shell.splitscreen;
 
+import static android.app.PendingIntent.FLAG_IMMUTABLE;
 import static android.app.WindowConfiguration.ACTIVITY_TYPE_STANDARD;
 import static android.app.WindowConfiguration.WINDOWING_MODE_FULLSCREEN;
 import static android.app.WindowConfiguration.WINDOWING_MODE_MULTI_WINDOW;
+import static android.content.Intent.FLAG_ACTIVITY_MULTIPLE_TASK;
+import static android.content.Intent.FLAG_ACTIVITY_NO_USER_ACTION;
 
+import static com.android.wm.shell.common.split.SplitScreenConstants.SPLIT_POSITION_BOTTOM_OR_RIGHT;
 import static com.android.wm.shell.common.split.SplitScreenConstants.SPLIT_POSITION_TOP_OR_LEFT;
 
+import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
+import static org.junit.Assume.assumeTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyInt;
+import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.ArgumentMatchers.isA;
+import static org.mockito.ArgumentMatchers.isNull;
+import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.times;
@@ -33,10 +44,14 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import android.app.ActivityManager;
+import android.app.ActivityTaskManager;
+import android.app.PendingIntent;
 import android.content.ComponentName;
 import android.content.Intent;
 import android.content.pm.ActivityInfo;
+import android.os.Bundle;
 
+import androidx.test.annotation.UiThreadTest;
 import androidx.test.ext.junit.runners.AndroidJUnit4;
 import androidx.test.filters.SmallTest;
 
@@ -53,17 +68,19 @@ import com.android.wm.shell.common.SyncTransactionQueue;
 import com.android.wm.shell.common.TransactionPool;
 import com.android.wm.shell.draganddrop.DragAndDropController;
 import com.android.wm.shell.recents.RecentTasksController;
+import com.android.wm.shell.sysui.ShellCommandHandler;
 import com.android.wm.shell.sysui.ShellController;
 import com.android.wm.shell.sysui.ShellInit;
+import com.android.wm.shell.sysui.ShellSharedConstants;
 import com.android.wm.shell.transition.Transitions;
 
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.mockito.ArgumentCaptor;
+import org.mockito.Captor;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
-
-import java.util.Optional;
 
 /**
  * Tests for {@link SplitScreenController}
@@ -72,8 +89,8 @@ import java.util.Optional;
 @RunWith(AndroidJUnit4.class)
 public class SplitScreenControllerTests extends ShellTestCase {
 
-    @Mock ShellController mShellController;
     @Mock ShellInit mShellInit;
+    @Mock ShellCommandHandler mShellCommandHandler;
     @Mock ShellTaskOrganizer mTaskOrganizer;
     @Mock SyncTransactionQueue mSyncQueue;
     @Mock RootTaskDisplayAreaOrganizer mRootTDAOrganizer;
@@ -85,72 +102,176 @@ public class SplitScreenControllerTests extends ShellTestCase {
     @Mock Transitions mTransitions;
     @Mock TransactionPool mTransactionPool;
     @Mock IconProvider mIconProvider;
-    @Mock Optional<RecentTasksController> mRecentTasks;
+    @Mock StageCoordinator mStageCoordinator;
+    @Mock RecentTasksController mRecentTasks;
+    @Captor ArgumentCaptor<Intent> mIntentCaptor;
 
+    private ShellController mShellController;
     private SplitScreenController mSplitScreenController;
 
     @Before
     public void setup() {
+        assumeTrue(ActivityTaskManager.supportsSplitScreenMultiWindow(mContext));
         MockitoAnnotations.initMocks(this);
+        mShellController = spy(new ShellController(mShellInit, mShellCommandHandler,
+                mMainExecutor));
         mSplitScreenController = spy(new SplitScreenController(mContext, mShellInit,
-                mShellController, mTaskOrganizer, mSyncQueue, mRootTDAOrganizer, mDisplayController,
-                mDisplayImeController, mDisplayInsetsController, mDragAndDropController,
-                mTransitions, mTransactionPool, mIconProvider, mRecentTasks, mMainExecutor));
+                mShellCommandHandler, mShellController, mTaskOrganizer, mSyncQueue,
+                mRootTDAOrganizer, mDisplayController, mDisplayImeController,
+                mDisplayInsetsController, mDragAndDropController, mTransitions, mTransactionPool,
+                mIconProvider, mRecentTasks, mMainExecutor, mStageCoordinator));
     }
 
     @Test
     public void instantiateController_addInitCallback() {
-        verify(mShellInit, times(1)).addInitCallback(any(), any());
+        verify(mShellInit, times(1)).addInitCallback(any(), isA(SplitScreenController.class));
     }
 
     @Test
+    @UiThreadTest
+    public void instantiateController_registerDumpCallback() {
+        doReturn(mMainExecutor).when(mTaskOrganizer).getExecutor();
+        when(mDisplayController.getDisplayLayout(anyInt())).thenReturn(new DisplayLayout());
+        mSplitScreenController.onInit();
+        verify(mShellCommandHandler, times(1)).addDumpCallback(any(), any());
+    }
+
+    @Test
+    @UiThreadTest
+    public void instantiateController_registerCommandCallback() {
+        doReturn(mMainExecutor).when(mTaskOrganizer).getExecutor();
+        when(mDisplayController.getDisplayLayout(anyInt())).thenReturn(new DisplayLayout());
+        mSplitScreenController.onInit();
+        verify(mShellCommandHandler, times(1)).addCommandCallback(eq("splitscreen"), any(), any());
+    }
+
+    @Test
+    @UiThreadTest
     public void testControllerRegistersKeyguardChangeListener() {
+        doReturn(mMainExecutor).when(mTaskOrganizer).getExecutor();
         when(mDisplayController.getDisplayLayout(anyInt())).thenReturn(new DisplayLayout());
         mSplitScreenController.onInit();
         verify(mShellController, times(1)).addKeyguardChangeListener(any());
     }
 
     @Test
-    public void testIsLaunchingAdjacently_notInSplitScreen() {
-        doReturn(false).when(mSplitScreenController).isSplitScreenVisible();
-        doReturn(true).when(mSplitScreenController).isValidToEnterSplitScreen(any());
-
-        // Verify launching the same activity returns true.
-        Intent startIntent = createStartIntent("startActivity");
-        ActivityManager.RunningTaskInfo focusTaskInfo =
-                createTaskInfo(WINDOWING_MODE_FULLSCREEN, ACTIVITY_TYPE_STANDARD, startIntent);
-        doReturn(focusTaskInfo).when(mSplitScreenController).getFocusingTaskInfo();
-        assertTrue(mSplitScreenController.isLaunchingAdjacently(
-                startIntent, SPLIT_POSITION_TOP_OR_LEFT));
-
-        // Verify launching different activity returns false.
-        Intent diffIntent = createStartIntent("diffActivity");
-        focusTaskInfo =
-                createTaskInfo(WINDOWING_MODE_FULLSCREEN, ACTIVITY_TYPE_STANDARD, diffIntent);
-        doReturn(focusTaskInfo).when(mSplitScreenController).getFocusingTaskInfo();
-        assertFalse(mSplitScreenController.isLaunchingAdjacently(
-                startIntent, SPLIT_POSITION_TOP_OR_LEFT));
+    @UiThreadTest
+    public void instantiateController_addExternalInterface() {
+        doReturn(mMainExecutor).when(mTaskOrganizer).getExecutor();
+        when(mDisplayController.getDisplayLayout(anyInt())).thenReturn(new DisplayLayout());
+        mSplitScreenController.onInit();
+        verify(mShellController, times(1)).addExternalInterface(
+                eq(ShellSharedConstants.KEY_EXTRA_SHELL_SPLIT_SCREEN), any(), any());
     }
 
     @Test
-    public void testIsLaunchingAdjacently_inSplitScreen() {
-        doReturn(true).when(mSplitScreenController).isSplitScreenVisible();
+    public void testInvalidateExternalInterface_unregistersListener() {
+        mSplitScreenController.onInit();
+        mSplitScreenController.registerSplitScreenListener(
+                new SplitScreen.SplitScreenListener() {});
+        verify(mStageCoordinator).registerSplitScreenListener(any());
+        // Create initial interface
+        mShellController.createExternalInterfaces(new Bundle());
+        // Recreate the interface to trigger invalidation of the previous instance
+        mShellController.createExternalInterfaces(new Bundle());
+        verify(mStageCoordinator).unregisterSplitScreenListener(any());
+    }
 
-        // Verify launching the same activity returns true.
+    @Test
+    public void testStartIntent_appendsNoUserActionFlag() {
         Intent startIntent = createStartIntent("startActivity");
-        ActivityManager.RunningTaskInfo pairingTaskInfo =
-                createTaskInfo(WINDOWING_MODE_MULTI_WINDOW, ACTIVITY_TYPE_STANDARD, startIntent);
-        doReturn(pairingTaskInfo).when(mSplitScreenController).getTaskInfo(anyInt());
-        assertTrue(mSplitScreenController.isLaunchingAdjacently(
-                startIntent, SPLIT_POSITION_TOP_OR_LEFT));
+        PendingIntent pendingIntent =
+                PendingIntent.getActivity(mContext, 0, startIntent, FLAG_IMMUTABLE);
 
-        // Verify launching different activity returns false.
-        Intent diffIntent = createStartIntent("diffActivity");
-        pairingTaskInfo =
-                createTaskInfo(WINDOWING_MODE_MULTI_WINDOW, ACTIVITY_TYPE_STANDARD, diffIntent);
-        doReturn(pairingTaskInfo).when(mSplitScreenController).getTaskInfo(anyInt());
-        assertFalse(mSplitScreenController.isLaunchingAdjacently(
-                startIntent, SPLIT_POSITION_TOP_OR_LEFT));
+        mSplitScreenController.startIntent(pendingIntent, null, SPLIT_POSITION_TOP_OR_LEFT, null);
+
+        verify(mStageCoordinator).startIntent(eq(pendingIntent), mIntentCaptor.capture(),
+                eq(SPLIT_POSITION_TOP_OR_LEFT), isNull());
+        assertEquals(FLAG_ACTIVITY_NO_USER_ACTION,
+                mIntentCaptor.getValue().getFlags() & FLAG_ACTIVITY_NO_USER_ACTION);
+    }
+
+    @Test
+    public void startIntent_multiInstancesSupported_appendsMultipleTaskFag() {
+        doReturn(true).when(mSplitScreenController).supportMultiInstancesSplit(any());
+        Intent startIntent = createStartIntent("startActivity");
+        PendingIntent pendingIntent =
+                PendingIntent.getActivity(mContext, 0, startIntent, FLAG_IMMUTABLE);
+        // Put the same component to the top running task
+        ActivityManager.RunningTaskInfo topRunningTask =
+                createTaskInfo(WINDOWING_MODE_FULLSCREEN, ACTIVITY_TYPE_STANDARD, startIntent);
+        doReturn(topRunningTask).when(mRecentTasks).getTopRunningTask();
+        doReturn(true).when(mStageCoordinator).isValidToEnterSplitScreen(any());
+
+        mSplitScreenController.startIntent(pendingIntent, null, SPLIT_POSITION_TOP_OR_LEFT, null);
+
+        verify(mStageCoordinator).startIntent(eq(pendingIntent), mIntentCaptor.capture(),
+                eq(SPLIT_POSITION_TOP_OR_LEFT), isNull());
+        assertEquals(FLAG_ACTIVITY_MULTIPLE_TASK,
+                mIntentCaptor.getValue().getFlags() & FLAG_ACTIVITY_MULTIPLE_TASK);
+    }
+
+    @Test
+    public void startIntent_multiInstancesSupported_startTaskInBackgroundBeforeSplitActivated() {
+        doReturn(true).when(mSplitScreenController).supportMultiInstancesSplit(any());
+        doNothing().when(mSplitScreenController).startTask(anyInt(), anyInt(), any());
+        Intent startIntent = createStartIntent("startActivity");
+        PendingIntent pendingIntent =
+                PendingIntent.getActivity(mContext, 0, startIntent, FLAG_IMMUTABLE);
+        // Put the same component to the top running task
+        ActivityManager.RunningTaskInfo topRunningTask =
+                createTaskInfo(WINDOWING_MODE_FULLSCREEN, ACTIVITY_TYPE_STANDARD, startIntent);
+        doReturn(topRunningTask).when(mRecentTasks).getTopRunningTask();
+        doReturn(true).when(mStageCoordinator).isValidToEnterSplitScreen(any());
+        // Put the same component into a task in the background
+        ActivityManager.RecentTaskInfo sameTaskInfo = new ActivityManager.RecentTaskInfo();
+        doReturn(sameTaskInfo).when(mRecentTasks).findTaskInBackground(any());
+
+        mSplitScreenController.startIntent(pendingIntent, null, SPLIT_POSITION_TOP_OR_LEFT, null);
+
+        verify(mSplitScreenController).startTask(anyInt(), eq(SPLIT_POSITION_TOP_OR_LEFT),
+                isNull());
+    }
+
+    @Test
+    public void startIntent_multiInstancesSupported_startTaskInBackgroundAfterSplitActivated() {
+        doReturn(true).when(mSplitScreenController).supportMultiInstancesSplit(any());
+        doNothing().when(mSplitScreenController).startTask(anyInt(), anyInt(), any());
+        Intent startIntent = createStartIntent("startActivity");
+        PendingIntent pendingIntent =
+                PendingIntent.getActivity(mContext, 0, startIntent, FLAG_IMMUTABLE);
+        // Put the same component into another side of the split
+        doReturn(true).when(mSplitScreenController).isSplitScreenVisible();
+        ActivityManager.RunningTaskInfo sameTaskInfo =
+                createTaskInfo(WINDOWING_MODE_MULTI_WINDOW, ACTIVITY_TYPE_STANDARD, startIntent);
+        doReturn(sameTaskInfo).when(mSplitScreenController).getTaskInfo(
+                SPLIT_POSITION_BOTTOM_OR_RIGHT);
+        // Put the same component into a task in the background
+        doReturn(new ActivityManager.RecentTaskInfo()).when(mRecentTasks)
+                .findTaskInBackground(any());
+
+        mSplitScreenController.startIntent(pendingIntent, null, SPLIT_POSITION_TOP_OR_LEFT, null);
+
+        verify(mSplitScreenController).startTask(anyInt(), eq(SPLIT_POSITION_TOP_OR_LEFT),
+                isNull());
+    }
+
+    @Test
+    public void startIntent_multiInstancesNotSupported_switchesPositionAfterSplitActivated() {
+        doReturn(false).when(mSplitScreenController).supportMultiInstancesSplit(any());
+        Intent startIntent = createStartIntent("startActivity");
+        PendingIntent pendingIntent =
+                PendingIntent.getActivity(mContext, 0, startIntent, FLAG_IMMUTABLE);
+        // Put the same component into another side of the split
+        doReturn(true).when(mSplitScreenController).isSplitScreenVisible();
+        ActivityManager.RunningTaskInfo sameTaskInfo =
+                createTaskInfo(WINDOWING_MODE_MULTI_WINDOW, ACTIVITY_TYPE_STANDARD, startIntent);
+        doReturn(sameTaskInfo).when(mSplitScreenController).getTaskInfo(
+                SPLIT_POSITION_BOTTOM_OR_RIGHT);
+
+        mSplitScreenController.startIntent(pendingIntent, null, SPLIT_POSITION_TOP_OR_LEFT, null);
+
+        verify(mStageCoordinator).switchSplitPosition(anyString());
     }
 
     private Intent createStartIntent(String activityName) {

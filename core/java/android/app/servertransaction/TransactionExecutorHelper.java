@@ -195,7 +195,8 @@ public class TransactionExecutorHelper {
                 lifecycleItem = StopActivityItem.obtain(0 /* configChanges */);
                 break;
             default:
-                lifecycleItem = ResumeActivityItem.obtain(false /* isForward */);
+                lifecycleItem = ResumeActivityItem.obtain(false /* isForward */,
+                        false /* shouldSendCompatFakeFocus */);
                 break;
         }
 

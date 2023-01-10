@@ -42,14 +42,19 @@ import com.android.systemui.dump.DumpManager;
 import com.android.systemui.keyguard.DismissCallbackRegistry;
 import com.android.systemui.keyguard.KeyguardUnlockAnimationController;
 import com.android.systemui.keyguard.KeyguardViewMediator;
+import com.android.systemui.keyguard.data.quickaffordance.KeyguardDataQuickAffordanceModule;
 import com.android.systemui.keyguard.data.repository.KeyguardRepositoryModule;
-import com.android.systemui.keyguard.domain.usecase.KeyguardUseCaseModule;
+import com.android.systemui.keyguard.domain.interactor.StartKeyguardTransitionModule;
+import com.android.systemui.keyguard.domain.quickaffordance.KeyguardQuickAffordanceModule;
 import com.android.systemui.navigationbar.NavigationModeController;
+import com.android.systemui.settings.UserTracker;
+import com.android.systemui.shade.ShadeController;
 import com.android.systemui.statusbar.NotificationShadeDepthController;
 import com.android.systemui.statusbar.NotificationShadeWindowController;
 import com.android.systemui.statusbar.SysuiStatusBarStateController;
 import com.android.systemui.statusbar.phone.DozeParameters;
 import com.android.systemui.statusbar.phone.ScreenOffAnimationController;
+import com.android.systemui.statusbar.phone.ScrimController;
 import com.android.systemui.statusbar.policy.KeyguardStateController;
 import com.android.systemui.statusbar.policy.UserSwitcherController;
 import com.android.systemui.util.DeviceConfigProxy;
@@ -70,8 +75,10 @@ import dagger.Provides;
         KeyguardUserSwitcherComponent.class},
         includes = {
             FalsingModule.class,
+            KeyguardDataQuickAffordanceModule.class,
+            KeyguardQuickAffordanceModule.class,
             KeyguardRepositoryModule.class,
-            KeyguardUseCaseModule.class,
+            StartKeyguardTransitionModule.class,
         })
 public class KeyguardModule {
     /**
@@ -81,6 +88,7 @@ public class KeyguardModule {
     @SysUISingleton
     public static KeyguardViewMediator newKeyguardViewMediator(
             Context context,
+            UserTracker userTracker,
             FalsingCollector falsingCollector,
             LockPatternUtils lockPatternUtils,
             BroadcastDispatcher broadcastDispatcher,
@@ -104,10 +112,13 @@ public class KeyguardModule {
             ScreenOnCoordinator screenOnCoordinator,
             InteractionJankMonitor interactionJankMonitor,
             DreamOverlayStateController dreamOverlayStateController,
+            Lazy<ShadeController> shadeController,
             Lazy<NotificationShadeWindowController> notificationShadeWindowController,
-            Lazy<ActivityLaunchAnimator> activityLaunchAnimator) {
+            Lazy<ActivityLaunchAnimator> activityLaunchAnimator,
+            Lazy<ScrimController> scrimControllerLazy) {
         return new KeyguardViewMediator(
                 context,
+                userTracker,
                 falsingCollector,
                 lockPatternUtils,
                 broadcastDispatcher,
@@ -131,8 +142,10 @@ public class KeyguardModule {
                 screenOnCoordinator,
                 interactionJankMonitor,
                 dreamOverlayStateController,
+                shadeController,
                 notificationShadeWindowController,
-                activityLaunchAnimator);
+                activityLaunchAnimator,
+                scrimControllerLazy);
     }
 
     /** */

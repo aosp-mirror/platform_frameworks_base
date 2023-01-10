@@ -125,9 +125,9 @@
     <string name="bluetooth_profile_a2dp_high_quality" msgid="4739440941324792775">"HD ශ්‍රව්‍යය: <xliff:g id="CODEC_NAME">%1$s</xliff:g>"</string>
     <string name="bluetooth_profile_a2dp_high_quality_unknown_codec" msgid="2477639096903834374">"HD ශ්‍රව්‍යය"</string>
     <string name="bluetooth_profile_hearing_aid" msgid="58154575573984914">"ශ්‍රවණාධාරක"</string>
-    <string name="bluetooth_profile_le_audio" msgid="5158149987518342036">"LE_AUDIO"</string>
+    <string name="bluetooth_profile_le_audio" msgid="3237854988278539061">"LE ශ්‍රව්‍ය"</string>
     <string name="bluetooth_hearing_aid_profile_summary_connected" msgid="8191273236809964030">"ශ්‍රවණාධාරක වෙත සම්බන්ධ කළා"</string>
-    <string name="bluetooth_le_audio_profile_summary_connected" msgid="3162538609379333442">"LE_AUDIO වෙත සම්බන්ධ විය"</string>
+    <string name="bluetooth_le_audio_profile_summary_connected" msgid="6916226974453480650">"LE ශ්‍රව්‍ය වෙත සම්බන්ධ විය"</string>
     <string name="bluetooth_a2dp_profile_summary_connected" msgid="7422607970115444153">"මාධ්‍ය ශ්‍රව්‍යට සම්බන්ධ විය"</string>
     <string name="bluetooth_headset_profile_summary_connected" msgid="2420981566026949688">"දුරකතනයේ ශ්‍රව්‍යට සම්බන්ධ විය"</string>
     <string name="bluetooth_opp_profile_summary_connected" msgid="2393521801478157362">"ගොනු හුවමාරු සේවාදායකය සමග සම්බන්ධ විය"</string>
@@ -408,6 +408,7 @@
     <string name="force_resizable_activities_summary" msgid="2490382056981583062">"මැනිෆෙස්ට් අගයන් නොසලකා, සියලු ක්‍රියාකාරකම් බහු-කවුළුව සඳහා ප්‍රතිප්‍රමාණ කළ හැකි බවට පත් කරන්න."</string>
     <string name="enable_freeform_support" msgid="7599125687603914253">"අනියම් හැඩැති කවුළු සබල කරන්න"</string>
     <string name="enable_freeform_support_summary" msgid="1822862728719276331">"පරීක්ෂණාත්මක අනියම් හැඩැති කවුළු සඳහා සහාය සබල කරන්න."</string>
+    <string name="desktop_mode" msgid="2389067840550544462">"ඩෙස්ක්ටොප් ප්‍රකාරය"</string>
     <string name="local_backup_password_title" msgid="4631017948933578709">"ඩෙස්ක්ටොප් උපස්ථ මුරපදය"</string>
     <string name="local_backup_password_summary_none" msgid="7646898032616361714">"ඩෙස්ක්ටොප් සම්පූර්ණ උපස්ථ දැනට ආරක්ෂා කර නොමැත"</string>
     <string name="local_backup_password_summary_change" msgid="1707357670383995567">"ඩෙස්ක්ටොප් සම්පූර්ණ උපස්ථ සඳහා මුරපදය වෙනස් කිරීමට හෝ ඉවත් කිරීමට තට්ටු කරන්න"</string>
@@ -476,13 +477,14 @@
     <string name="power_charging" msgid="6727132649743436802">"<xliff:g id="LEVEL">%1$s</xliff:g> - <xliff:g id="STATE">%2$s</xliff:g>"</string>
     <string name="power_remaining_charging_duration_only" msgid="8085099012811384899">"සම්පූර්ණ වීමට <xliff:g id="TIME">%1$s</xliff:g>ක් ඉතිරියි"</string>
     <string name="power_charging_duration" msgid="6127154952524919719">"<xliff:g id="LEVEL">%1$s</xliff:g> - සම්පූර්ණ වීමට <xliff:g id="TIME">%2$s</xliff:g>ක් ඉතිරියි"</string>
-    <string name="power_charging_limited" msgid="7956120998372505295">"<xliff:g id="LEVEL">%1$s</xliff:g> - ආරෝපණය කිරීම තාවකාලිකව සීමා කර ඇත"</string>
+    <string name="power_charging_limited" msgid="8202147604844938236">"<xliff:g id="LEVEL">%1$s</xliff:g> - ආරෝපණය ප්‍රශස්ත කර ඇත"</string>
+    <string name="power_charging_future_paused" msgid="4730177778538118032">"<xliff:g id="LEVEL">%1$s</xliff:g> - ආරෝපණය ප්‍රශස්ත කර ඇත"</string>
     <string name="battery_info_status_unknown" msgid="268625384868401114">"නොදනී"</string>
     <string name="battery_info_status_charging" msgid="4279958015430387405">"ආරෝපණය වෙමින්"</string>
     <string name="battery_info_status_charging_fast" msgid="8027559755902954885">"ශීඝ්‍ර ආරෝපණය"</string>
     <string name="battery_info_status_charging_slow" msgid="3190803837168962319">"සෙමින් ආරෝපණය"</string>
     <string name="battery_info_status_charging_wireless" msgid="8924722966861282197">"නොරැහැන්ව ආරෝපණය වේ"</string>
-    <string name="battery_info_status_charging_dock" msgid="3554147903321236585">"ආරෝපණ ඩොකය"</string>
+    <string name="battery_info_status_charging_dock" msgid="8573274094093364791">"ආරෝපණය වේ"</string>
     <string name="battery_info_status_discharging" msgid="6962689305413556485">"ආරෝපණය නොවේ"</string>
     <string name="battery_info_status_not_charging" msgid="3371084153747234837">"සම්බන්ධයි, ආරෝපණය නොවේ"</string>
     <string name="battery_info_status_full" msgid="1339002294876531312">"අරෝපිතයි"</string>
@@ -655,13 +657,6 @@
     <string name="accessibility_ethernet_disconnected" msgid="2832501530856497489">"ඊතර්නෙට් විසන්ධි කරන ලදී."</string>
     <string name="accessibility_ethernet_connected" msgid="6175942685957461563">"ඊතර්නෙට්."</string>
     <string name="accessibility_no_calling" msgid="3540827068323895748">"ඇමතුම් නැත."</string>
-    <string name="dream_complication_title_time" msgid="701747800712893499">"වේලාව"</string>
-    <string name="dream_complication_title_date" msgid="8661176085446135789">"දිනය"</string>
-    <string name="dream_complication_title_weather" msgid="598609151677172783">"කාලගුණය"</string>
-    <string name="dream_complication_title_aqi" msgid="4587552608957834110">"වායු ගුණත්වය"</string>
-    <string name="dream_complication_title_cast_info" msgid="4038776652841885084">"විකාශ තතු"</string>
-    <!-- no translation found for dream_complication_title_home_controls (9153381632476738811) -->
-    <skip />
     <string name="avatar_picker_title" msgid="8492884172713170652">"පැතිකඩ පින්තූරයක් තේරීම"</string>
     <string name="default_user_icon_description" msgid="6554047177298972638">"පෙරනිමි පරිශීලක නිරූපකය"</string>
     <string name="physical_keyboard_title" msgid="4811935435315835220">"භෞතික යතුරු පුවරුව"</string>

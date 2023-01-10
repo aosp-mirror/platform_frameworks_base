@@ -75,40 +75,41 @@ interface IWindowSession {
      * @param requestedWidth The width the window wants to be.
      * @param requestedHeight The height the window wants to be.
      * @param viewVisibility Window root view's visibility.
-     * @param flags Request flags: {@link WindowManagerGlobal#RELAYOUT_INSETS_PENDING},
-     * {@link WindowManagerGlobal#RELAYOUT_DEFER_SURFACE_DESTROY}.
-     * @param outFrame Rect in which is placed the new position/size on
-     * screen.
-     * @param outContentInsets Rect in which is placed the offsets from
-     * <var>outFrame</var> in which the content of the window should be
-     * placed.  This can be used to modify the window layout to ensure its
-     * contents are visible to the user, taking into account system windows
-     * like the status bar or a soft keyboard.
-     * @param outVisibleInsets Rect in which is placed the offsets from
-     * <var>outFrame</var> in which the window is actually completely visible
-     * to the user.  This can be used to temporarily scroll the window's
-     * contents to make sure the user can see it.  This is different than
-     * <var>outContentInsets</var> in that these insets change transiently,
-     * so complex relayout of the window should not happen based on them.
-     * @param outOutsets Rect in which is placed the dead area of the screen that we would like to
-     * treat as real display. Example of such area is a chin in some models of wearable devices.
-     * @param outBackdropFrame Rect which is used draw the resizing background during a resize
-     * operation.
+     * @param flags Request flags: {@link WindowManagerGlobal#RELAYOUT_INSETS_PENDING}.
+     * @param seq The calling sequence of {@link #relayout} and {@link #relayoutAsync}.
+     * @param lastSyncSeqId The last SyncSeqId that the client applied.
+     * @param outFrames The window frames used by the client side for layout.
      * @param outMergedConfiguration New config container that holds global, override and merged
-     * config for window, if it is now becoming visible and the merged configuration has changed
-     * since it was last displayed.
-     * @param outSurface Object in which is placed the new display surface.
+     *                               config for window, if it is now becoming visible and the merged
+     *                               config has changed since it was last displayed.
+     * @param outSurfaceControl Object in which is placed the new display surface.
      * @param insetsState The current insets state in the system.
-     *
-     * @return int Result flags: {@link WindowManagerGlobal#RELAYOUT_SHOW_FOCUS},
-     * {@link WindowManagerGlobal#RELAYOUT_FIRST_TIME}.
+     * @param activeControls Objects which allow controlling {@link InsetsSource}s.
+     * @param bundle A temporary object to obtain the latest SyncSeqId.
+     * @return int Result flags, defined in {@link WindowManagerGlobal}.
      */
     int relayout(IWindow window, in WindowManager.LayoutParams attrs,
             int requestedWidth, int requestedHeight, int viewVisibility,
-            int flags, out ClientWindowFrames outFrames,
+            int flags, int seq, int lastSyncSeqId, out ClientWindowFrames outFrames,
             out MergedConfiguration outMergedConfiguration, out SurfaceControl outSurfaceControl,
             out InsetsState insetsState, out InsetsSourceControl[] activeControls,
             out Bundle bundle);
+
+    /**
+     * Similar to {@link #relayout} but this is an oneway method which doesn't return anything.
+     *
+     * @param window The window being modified.
+     * @param attrs If non-null, new attributes to apply to the window.
+     * @param requestedWidth The width the window wants to be.
+     * @param requestedHeight The height the window wants to be.
+     * @param viewVisibility Window root view's visibility.
+     * @param flags Request flags: {@link WindowManagerGlobal#RELAYOUT_INSETS_PENDING}.
+     * @param seq The calling sequence of {@link #relayout} and {@link #relayoutAsync}.
+     * @param lastSyncSeqId The last SyncSeqId that the client applied.
+     */
+    oneway void relayoutAsync(IWindow window, in WindowManager.LayoutParams attrs,
+            int requestedWidth, int requestedHeight, int viewVisibility, int flags, int seq,
+            int lastSyncSeqId);
 
     /*
      * Notify the window manager that an application is relaunching and

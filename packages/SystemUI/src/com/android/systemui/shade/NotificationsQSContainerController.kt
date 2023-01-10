@@ -1,3 +1,19 @@
+/*
+ * Copyright (C) 2022 The Android Open Source Project
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 package com.android.systemui.shade
 
 import android.view.View
@@ -6,7 +22,11 @@ import android.view.ViewGroup.LayoutParams.WRAP_CONTENT
 import android.view.WindowInsets
 import androidx.annotation.VisibleForTesting
 import androidx.constraintlayout.widget.ConstraintSet
-import androidx.constraintlayout.widget.ConstraintSet.*
+import androidx.constraintlayout.widget.ConstraintSet.BOTTOM
+import androidx.constraintlayout.widget.ConstraintSet.END
+import androidx.constraintlayout.widget.ConstraintSet.PARENT_ID
+import androidx.constraintlayout.widget.ConstraintSet.START
+import androidx.constraintlayout.widget.ConstraintSet.TOP
 import com.android.systemui.R
 import com.android.systemui.dagger.qualifiers.Main
 import com.android.systemui.flags.FeatureFlags
@@ -31,17 +51,13 @@ class NotificationsQSContainerController @Inject constructor(
     view: NotificationsQuickSettingsContainer,
     private val navigationModeController: NavigationModeController,
     private val overviewProxyService: OverviewProxyService,
+    private val largeScreenShadeHeaderController: LargeScreenShadeHeaderController,
+    private val shadeExpansionStateManager: ShadeExpansionStateManager,
     private val featureFlags: FeatureFlags,
     @Main private val delayableExecutor: DelayableExecutor
 ) : ViewController<NotificationsQuickSettingsContainer>(view), QSContainerController {
 
-    var qsExpanded = false
-        set(value) {
-            if (field != value) {
-                field = value
-                mView.invalidate()
-            }
-        }
+    private var qsExpanded = false
     private var splitShadeEnabled = false
     private var isQSDetailShowing = false
     private var isQSCustomizing = false
@@ -66,6 +82,13 @@ class NotificationsQSContainerController @Inject constructor(
             taskbarVisible = visible
         }
     }
+    private val shadeQsExpansionListener: ShadeQsExpansionListener =
+        ShadeQsExpansionListener { isQsExpanded ->
+            if (qsExpanded != isQsExpanded) {
+                qsExpanded = isQsExpanded
+                mView.invalidate()
+            }
+        }
 
     // With certain configuration changes (like light/dark changes), the nav bar will disappear
     // for a bit, causing `bottomStableInsets` to be unstable for some time. Debounce the value
@@ -101,6 +124,7 @@ class NotificationsQSContainerController @Inject constructor(
     public override fun onViewAttached() {
         updateResources()
         overviewProxyService.addCallback(taskbarVisibilityListener)
+        shadeExpansionStateManager.addQsExpansionListener(shadeQsExpansionListener)
         mView.setInsetsChangedListener(delayedInsetSetter)
         mView.setQSFragmentAttachedListener { qs: QS -> qs.setContainerController(this) }
         mView.setConfigurationChangedListener { updateResources() }
@@ -108,6 +132,7 @@ class NotificationsQSContainerController @Inject constructor(
 
     override fun onViewDetached() {
         overviewProxyService.removeCallback(taskbarVisibilityListener)
+        shadeExpansionStateManager.removeQsExpansionListener(shadeQsExpansionListener)
         mView.removeOnInsetsChangedListener()
         mView.removeQSFragmentAttachedListener()
         mView.setConfigurationChangedListener(null)
@@ -152,9 +177,12 @@ class NotificationsQSContainerController @Inject constructor(
         }
     }
 
-    override fun setCustomizerShowing(showing: Boolean) {
-        isQSCustomizing = showing
-        updateBottomSpacing()
+    override fun setCustomizerShowing(showing: Boolean, animationDuration: Long) {
+        if (showing != isQSCustomizing) {
+            isQSCustomizing = showing
+            largeScreenShadeHeaderController.startCustomizingAnimation(showing, animationDuration)
+            updateBottomSpacing()
+        }
     }
 
     override fun setDetailShowing(showing: Boolean) {
@@ -171,33 +199,23 @@ class NotificationsQSContainerController @Inject constructor(
 
     private fun calculateBottomSpacing(): Paddings {
         val containerPadding: Int
-        var stackScrollMargin = notificationsBottomMargin
-        if (splitShadeEnabled) {
-            if (isGestureNavigation) {
-                // only default cutout padding, taskbar always hides
-                containerPadding = bottomCutoutInsets
-            } else if (taskbarVisible) {
-                // navigation buttons + visible taskbar means we're NOT on homescreen
-                containerPadding = bottomStableInsets
-            } else {
-                // navigation buttons + hidden taskbar means we're on homescreen
-                containerPadding = 0
-                // we need extra margin for notifications as navigation buttons are below them
-                stackScrollMargin = bottomStableInsets + notificationsBottomMargin
-            }
+        val stackScrollMargin: Int
+        if (!splitShadeEnabled && (isQSCustomizing || isQSDetailShowing)) {
+            // Clear out bottom paddings/margins so the qs customization can be full height.
+            containerPadding = 0
+            stackScrollMargin = 0
+        } else if (isGestureNavigation) {
+            // only default cutout padding, taskbar always hides
+            containerPadding = bottomCutoutInsets
+            stackScrollMargin = notificationsBottomMargin
+        } else if (taskbarVisible) {
+            // navigation buttons + visible taskbar means we're NOT on homescreen
+            containerPadding = bottomStableInsets
+            stackScrollMargin = notificationsBottomMargin
         } else {
-            if (isQSCustomizing || isQSDetailShowing) {
-                // Clear out bottom paddings/margins so the qs customization can be full height.
-                containerPadding = 0
-                stackScrollMargin = 0
-            } else if (isGestureNavigation) {
-                containerPadding = bottomCutoutInsets
-            } else if (taskbarVisible) {
-                containerPadding = bottomStableInsets
-            } else {
-                containerPadding = 0
-                stackScrollMargin = bottomStableInsets + notificationsBottomMargin
-            }
+            // navigation buttons + hidden taskbar means we're on homescreen
+            containerPadding = 0
+            stackScrollMargin = bottomStableInsets + notificationsBottomMargin
         }
         val qsContainerPadding = if (!(isQSCustomizing || isQSDetailShowing)) {
             // We also want this padding in the bottom in these cases

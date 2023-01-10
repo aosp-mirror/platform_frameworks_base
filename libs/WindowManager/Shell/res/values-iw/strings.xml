@@ -33,6 +33,7 @@
     <string name="accessibility_action_pip_unstash" msgid="7467499339610437646">"ביטול ההסתרה הזמנית"</string>
     <string name="dock_forced_resizable" msgid="1749750436092293116">"ייתכן שהאפליקציה לא תפעל במסך מפוצל."</string>
     <string name="dock_non_resizeble_failed_to_dock_text" msgid="7408396418008948957">"האפליקציה אינה תומכת במסך מפוצל."</string>
+    <string name="dock_multi_instances_not_supported_text" msgid="5242868470666346929">"ניתן לפתוח את האפליקציה הזו רק בחלון אחד."</string>
     <string name="forced_resizable_secondary_display" msgid="1768046938673582671">"ייתכן שהאפליקציה לא תפעל במסך משני."</string>
     <string name="activity_launch_on_secondary_display_failed_text" msgid="4226485344988071769">"האפליקציה אינה תומכת בהפעלה במסכים משניים."</string>
     <string name="accessibility_divider" msgid="703810061635792791">"מחלק מסך מפוצל"</string>
@@ -76,12 +77,19 @@
     <string name="camera_compat_treatment_suggested_button_description" msgid="8103916969024076767">"בעיות במצלמה?\nאפשר להקיש כדי לבצע התאמה מחדש"</string>
     <string name="camera_compat_treatment_applied_button_description" msgid="2944157113330703897">"הבעיה לא נפתרה?\nאפשר להקיש כדי לחזור לגרסה הקודמת"</string>
     <string name="camera_compat_dismiss_button_description" msgid="2795364433503817511">"אין בעיות במצלמה? אפשר להקיש כדי לסגור."</string>
-    <string name="letterbox_education_dialog_title" msgid="6688664582871779215">"חלק מהאפליקציות פועלות בצורה הטובה ביותר במצב תצוגה לאורך"</string>
-    <string name="letterbox_education_dialog_subtext" msgid="4853542518367719562">"כדי להפיק את המרב משטח המסך, ניתן לנסות את אחת מהאפשרויות האלה"</string>
-    <string name="letterbox_education_screen_rotation_text" msgid="5085786687366339027">"מסובבים את המכשיר כדי לעבור לתצוגה במסך מלא"</string>
-    <string name="letterbox_education_reposition_text" msgid="1068293354123934727">"מקישים הקשה כפולה ליד אפליקציה כדי למקם אותה מחדש"</string>
+    <string name="letterbox_education_dialog_title" msgid="7739895354143295358">"רוצה לראות ולעשות יותר?"</string>
+    <string name="letterbox_education_split_screen_text" msgid="6206339484068670830">"צריך לגרור אפליקציה אחרת כדי להשתמש במסך מפוצל"</string>
+    <string name="letterbox_education_reposition_text" msgid="4589957299813220661">"צריך להקיש הקשה כפולה מחוץ לאפליקציה כדי למקם אותה מחדש"</string>
     <string name="letterbox_education_got_it" msgid="4057634570866051177">"הבנתי"</string>
     <string name="letterbox_education_expand_button_description" msgid="1729796567101129834">"מרחיבים כדי לקבל מידע נוסף."</string>
     <string name="maximize_button_text" msgid="1650859196290301963">"הגדלה"</string>
+    <string name="minimize_button_text" msgid="271592547935841753">"מזעור"</string>
     <string name="close_button_text" msgid="2913281996024033299">"סגירה"</string>
+    <string name="back_button_text" msgid="1469718707134137085">"חזרה"</string>
+    <string name="handle_text" msgid="1766582106752184456">"נקודת אחיזה"</string>
+    <string name="fullscreen_text" msgid="1162316685217676079">"מסך מלא"</string>
+    <string name="desktop_text" msgid="1077633567027630454">"ממשק המחשב"</string>
+    <string name="split_screen_text" msgid="1396336058129570886">"מסך מפוצל"</string>
+    <string name="more_button_text" msgid="3655388105592893530">"עוד"</string>
+    <string name="float_button_text" msgid="9221657008391364581">"בלונים"</string>
 </resources>

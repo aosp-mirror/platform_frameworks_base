@@ -41,11 +41,10 @@ import com.android.internal.logging.InstanceId;
 import com.android.internal.statusbar.IStatusBarService;
 import com.android.internal.statusbar.NotificationVisibility;
 import com.android.systemui.SysuiTestCase;
+import com.android.systemui.shade.ShadeExpansionStateManager;
 import com.android.systemui.statusbar.NotificationListener;
 import com.android.systemui.statusbar.StatusBarState;
 import com.android.systemui.statusbar.StatusBarStateControllerImpl;
-import com.android.systemui.statusbar.notification.NotifPipelineFlags;
-import com.android.systemui.statusbar.notification.NotificationEntryManager;
 import com.android.systemui.statusbar.notification.collection.NotifLiveData;
 import com.android.systemui.statusbar.notification.collection.NotifLiveDataStore;
 import com.android.systemui.statusbar.notification.collection.NotifPipeline;
@@ -85,13 +84,12 @@ public class NotificationLoggerTest extends SysuiTestCase {
     @Mock private NotificationLogger.ExpansionStateLogger mExpansionStateLogger;
 
     // Dependency mocks:
-    @Mock private NotifPipelineFlags mNotifPipelineFlags;
     @Mock private NotifLiveDataStore mNotifLiveDataStore;
     @Mock private NotifLiveData<List<NotificationEntry>> mActiveNotifEntries;
     @Mock private NotificationVisibilityProvider mVisibilityProvider;
-    @Mock private NotificationEntryManager mEntryManager;
     @Mock private NotifPipeline mNotifPipeline;
     @Mock private NotificationListener mListener;
+    @Mock private ShadeExpansionStateManager mShadeExpansionStateManager;
 
     private NotificationEntry mEntry;
     private TestableNotificationLogger mLogger;
@@ -118,17 +116,15 @@ public class NotificationLoggerTest extends SysuiTestCase {
         mLogger = new TestableNotificationLogger(
                 mListener,
                 mUiBgExecutor,
-                mNotifPipelineFlags,
                 mNotifLiveDataStore,
                 mVisibilityProvider,
-                mEntryManager,
                 mNotifPipeline,
                 mock(StatusBarStateControllerImpl.class),
+                mShadeExpansionStateManager,
                 mBarService,
                 mExpansionStateLogger
         );
         mLogger.setUpWithContainer(mListContainer);
-        verify(mEntryManager, never()).addNotificationEntryListener(any());
         verify(mNotifPipeline).addCollectionListener(any());
     }
 
@@ -159,7 +155,7 @@ public class NotificationLoggerTest extends SysuiTestCase {
 
         when(mListContainer.isInVisibleLocation(any())).thenReturn(true);
         when(mActiveNotifEntries.getValue()).thenReturn(Lists.newArrayList(mEntry));
-        mLogger.getChildLocationsChangedListenerForTest().onChildLocationsChanged();
+        mLogger.onChildLocationsChanged();
         TestableLooper.get(this).processAllMessages();
         mUiBgExecutor.runAllReady();
 
@@ -169,7 +165,7 @@ public class NotificationLoggerTest extends SysuiTestCase {
 
         // |mEntry| won't change visibility, so it shouldn't be reported again:
         Mockito.reset(mBarService);
-        mLogger.getChildLocationsChangedListenerForTest().onChildLocationsChanged();
+        mLogger.onChildLocationsChanged();
         TestableLooper.get(this).processAllMessages();
         mUiBgExecutor.runAllReady();
 
@@ -181,7 +177,7 @@ public class NotificationLoggerTest extends SysuiTestCase {
             throws Exception {
         when(mListContainer.isInVisibleLocation(any())).thenReturn(true);
         when(mActiveNotifEntries.getValue()).thenReturn(Lists.newArrayList(mEntry));
-        mLogger.getChildLocationsChangedListenerForTest().onChildLocationsChanged();
+        mLogger.onChildLocationsChanged();
         TestableLooper.get(this).processAllMessages();
         mUiBgExecutor.runAllReady();
         Mockito.reset(mBarService);
@@ -196,13 +192,13 @@ public class NotificationLoggerTest extends SysuiTestCase {
     }
 
     private void setStateAsleep() {
-        mLogger.onPanelExpandedChanged(true);
+        mLogger.onShadeExpansionFullyChanged(true);
         mLogger.onDozingChanged(true);
         mLogger.onStateChanged(StatusBarState.KEYGUARD);
     }
 
     private void setStateAwake() {
-        mLogger.onPanelExpandedChanged(false);
+        mLogger.onShadeExpansionFullyChanged(false);
         mLogger.onDozingChanged(false);
         mLogger.onStateChanged(StatusBarState.SHADE);
     }
@@ -228,7 +224,7 @@ public class NotificationLoggerTest extends SysuiTestCase {
         when(mActiveNotifEntries.getValue()).thenReturn(Lists.newArrayList(mEntry));
         setStateAwake();
         // Now expand panel
-        mLogger.onPanelExpandedChanged(true);
+        mLogger.onShadeExpansionFullyChanged(true);
         assertEquals(1, mNotificationPanelLoggerFake.getCalls().size());
         assertFalse(mNotificationPanelLoggerFake.get(0).isLockscreen);
         assertEquals(1, mNotificationPanelLoggerFake.get(0).list.notifications.length);
@@ -266,12 +262,11 @@ public class NotificationLoggerTest extends SysuiTestCase {
 
         TestableNotificationLogger(NotificationListener notificationListener,
                 Executor uiBgExecutor,
-                NotifPipelineFlags notifPipelineFlags,
                 NotifLiveDataStore notifLiveDataStore,
                 NotificationVisibilityProvider visibilityProvider,
-                NotificationEntryManager entryManager,
                 NotifPipeline notifPipeline,
                 StatusBarStateControllerImpl statusBarStateController,
+                ShadeExpansionStateManager shadeExpansionStateManager,
                 IStatusBarService barService,
                 ExpansionStateLogger expansionStateLogger) {
             super(
@@ -281,6 +276,7 @@ public class NotificationLoggerTest extends SysuiTestCase {
                     visibilityProvider,
                     notifPipeline,
                     statusBarStateController,
+                    shadeExpansionStateManager,
                     expansionStateLogger,
                     mNotificationPanelLoggerFake
             );
@@ -288,10 +284,6 @@ public class NotificationLoggerTest extends SysuiTestCase {
             mHandler.removeCallbacksAndMessages(null);
             // Make this on the current thread so we can wait for it during tests.
             mHandler = Handler.createAsync(Looper.myLooper());
-        }
-
-        OnChildLocationsChangedListener getChildLocationsChangedListenerForTest() {
-            return mNotificationLocationsChangedListener;
         }
     }
 }

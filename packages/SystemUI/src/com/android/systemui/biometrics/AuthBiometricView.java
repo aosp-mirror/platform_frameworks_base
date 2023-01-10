@@ -27,6 +27,7 @@ import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.StringRes;
 import android.content.Context;
+import android.content.res.Configuration;
 import android.hardware.biometrics.BiometricAuthenticator.Modality;
 import android.hardware.biometrics.BiometricPrompt;
 import android.hardware.biometrics.PromptInfo;
@@ -41,14 +42,14 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.view.accessibility.AccessibilityManager;
 import android.widget.Button;
-import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.widget.LockPatternUtils;
 import com.android.systemui.R;
-import com.android.systemui.util.LargeScreenUtils;
+
+import com.airbnb.lottie.LottieAnimationView;
 
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
@@ -133,7 +134,8 @@ public abstract class AuthBiometricView extends LinearLayout {
     private TextView mSubtitleView;
     private TextView mDescriptionView;
     private View mIconHolderView;
-    protected ImageView mIconView;
+    protected LottieAnimationView mIconViewOverlay;
+    protected LottieAnimationView mIconView;
     protected TextView mIndicatorView;
 
     @VisibleForTesting @NonNull AuthIconController mIconController;
@@ -167,6 +169,10 @@ public abstract class AuthBiometricView extends LinearLayout {
     private final Runnable mResetHelpRunnable;
 
     private Animator.AnimatorListener mJankListener;
+
+    private final boolean mUseCustomBpSize;
+    private final int mCustomBpWidth;
+    private final int mCustomBpHeight;
 
     private final OnClickListener mBackgroundClickListener = (view) -> {
         if (mState == STATE_AUTHENTICATED) {
@@ -208,6 +214,10 @@ public abstract class AuthBiometricView extends LinearLayout {
             handleResetAfterHelp();
             Utils.notifyAccessibilityContentChanged(mAccessibilityManager, this);
         };
+
+        mUseCustomBpSize = getResources().getBoolean(R.bool.use_custom_bp_size);
+        mCustomBpWidth = getResources().getDimensionPixelSize(R.dimen.biometric_dialog_width);
+        mCustomBpHeight = getResources().getDimensionPixelSize(R.dimen.biometric_dialog_height);
     }
 
     /** Delay after authentication is confirmed, before the dialog should be animated away. */
@@ -468,6 +478,7 @@ public abstract class AuthBiometricView extends LinearLayout {
                 break;
 
             case STATE_AUTHENTICATED:
+                removePendingAnimations();
                 if (mSize != AuthDialog.SIZE_SMALL) {
                     mConfirmButton.setVisibility(View.GONE);
                     mNegativeButton.setVisibility(View.GONE);
@@ -644,12 +655,19 @@ public abstract class AuthBiometricView extends LinearLayout {
     }
 
     @Override
+    protected void onConfigurationChanged(Configuration newConfig) {
+        super.onConfigurationChanged(newConfig);
+        mIconController.onConfigurationChanged(newConfig);
+    }
+
+    @Override
     protected void onFinishInflate() {
         super.onFinishInflate();
 
         mTitleView = findViewById(R.id.title);
         mSubtitleView = findViewById(R.id.subtitle);
         mDescriptionView = findViewById(R.id.description);
+        mIconViewOverlay = findViewById(R.id.biometric_icon_overlay);
         mIconView = findViewById(R.id.biometric_icon);
         mIconHolderView = findViewById(R.id.biometric_icon_frame);
         mIndicatorView = findViewById(R.id.indicator);
@@ -688,6 +706,11 @@ public abstract class AuthBiometricView extends LinearLayout {
 
         mIconController = createIconController();
         if (mIconController.getActsAsConfirmButton()) {
+            mIconViewOverlay.setOnClickListener((view)->{
+                if (mState == STATE_PENDING_CONFIRMATION) {
+                    updateState(STATE_AUTHENTICATED);
+                }
+            });
             mIconView.setOnClickListener((view) -> {
                 if (mState == STATE_PENDING_CONFIRMATION) {
                     updateState(STATE_AUTHENTICATED);
@@ -824,29 +847,19 @@ public abstract class AuthBiometricView extends LinearLayout {
         return new AuthDialog.LayoutParams(width, totalHeight);
     }
 
-    private boolean isLargeDisplay() {
-        return LargeScreenUtils.shouldUseSplitNotificationShade(getResources());
-    }
-
     @Override
     protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
-        final int width = MeasureSpec.getSize(widthMeasureSpec);
-        final int height = MeasureSpec.getSize(heightMeasureSpec);
+        int width = MeasureSpec.getSize(widthMeasureSpec);
+        int height = MeasureSpec.getSize(heightMeasureSpec);
 
-        final boolean isLargeDisplay = isLargeDisplay();
-
-        final int newWidth;
-        if (isLargeDisplay) {
-            // TODO(b/201811580): Unless we can come up with a one-size-fits-all equation, we may
-            //  want to consider moving this to an overlay.
-            newWidth = 2 * Math.min(width, height) / 3;
+        if (mUseCustomBpSize) {
+            width = mCustomBpWidth;
+            height = mCustomBpHeight;
         } else {
-            newWidth = Math.min(width, height);
+            width = Math.min(width, height);
         }
 
-        // Use "newWidth" instead, so the landscape dialog width is the same as the portrait
-        // width.
-        mLayoutParams = onMeasureInternal(newWidth, height);
+        mLayoutParams = onMeasureInternal(width, height);
         setMeasuredDimension(mLayoutParams.mMediumWidth, mLayoutParams.mMediumHeight);
     }
 

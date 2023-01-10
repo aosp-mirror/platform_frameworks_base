@@ -33,6 +33,7 @@
     <string name="defaultVoiceMailAlphaTag" msgid="2190754495304236490">"ხმოვანი ფოსტა"</string>
     <string name="defaultMsisdnAlphaTag" msgid="2285034592902077488">"MSISDN1"</string>
     <string name="mmiError" msgid="2862759606579822246">"კავშირის პრობლემა ან არასწორი MMI კოდი."</string>
+    <string name="mmiErrorNotSupported" msgid="5001803469335286099">"ფუნქცია მხარდაუჭერელია."</string>
     <string name="mmiFdnError" msgid="3975490266767565852">"ოპერაცია შეზღუდულია მხოლოდ დაშვებულ ნომრებზე."</string>
     <string name="mmiErrorWhileRoaming" msgid="1204173664713870114">"ზარის გადამისამართების პარამეტრების თქვენი ტელეფონიდან შეცვლა როუმინგისას ვერ მოხერხდება."</string>
     <string name="serviceEnabled" msgid="7549025003394765639">"სერვისი ჩართულია."</string>
@@ -586,13 +587,14 @@
     <string name="screen_lock_app_setting_name" msgid="6054944352976789228">"გამოიყენეთ ეკრანის დაბლოკვა"</string>
     <string name="screen_lock_dialog_default_subtitle" msgid="120359538048533695">"გასაგრძელებლად შედით ეკრანის დაბლოკვაში"</string>
     <string name="fingerprint_acquired_partial" msgid="4323789264604479684">"მაგრად დააჭირეთ სენსორს"</string>
-    <string name="fingerprint_acquired_insufficient" msgid="2545149524031515411">"თითის ანაბეჭდის დამუშავება ვერ მოხერხდა. გთხოვთ, ცადოთ ხელახლა."</string>
+    <string name="fingerprint_acquired_insufficient" msgid="623888149088216458">"თითის ანაბეჭდის ამოცნობა ვერ ხერხდება. ცადეთ ხელახლა."</string>
     <string name="fingerprint_acquired_imager_dirty" msgid="1770676120848224250">"გაწმინდეთ თითის ანაბეჭდის სენსორი და ხელახლა ცადეთ"</string>
     <string name="fingerprint_acquired_imager_dirty_alt" msgid="9169582140486372897">"გაწმინდეთ სენსორი და ხელახლა ცადეთ"</string>
     <string name="fingerprint_acquired_too_fast" msgid="1628459767349116104">"მაგრად დააჭირეთ სენსორს"</string>
     <string name="fingerprint_acquired_too_slow" msgid="6683510291554497580">"თითის აღება მეტისმეტად ნელა მოხდა. გთხოვთ, სცადოთ ხელახლა."</string>
     <string name="fingerprint_acquired_already_enrolled" msgid="2285166003936206785">"ცადეთ სხვა თითის ანაბეჭდი"</string>
     <string name="fingerprint_acquired_too_bright" msgid="3863560181670915607">"ზედმეტად ნათელია"</string>
+    <string name="fingerprint_acquired_power_press" msgid="3107864151278434961">"აღმოჩენილია Ძლიერი დაჭერა"</string>
     <string name="fingerprint_acquired_try_adjusting" msgid="3667006071003809364">"ცადეთ დარეგულირება"</string>
     <string name="fingerprint_acquired_immobile" msgid="1621891895241888048">"ოდნავ შეცვალეთ თითის დაჭერის ადგილი ყოველ ჯერზე"</string>
   <string-array name="fingerprint_acquired_vendor">
@@ -604,12 +606,12 @@
     <string name="face_authenticated_confirmation_required" msgid="6872632732508013755">"სახე ავტორიზებულია, დააჭირეთ დადასტურებას"</string>
     <string name="fingerprint_error_hw_not_available" msgid="4571700896929561202">"თითის ანაბეჭდის აპარატურა არ არის ხელმისაწვდომი."</string>
     <string name="fingerprint_error_no_space" msgid="7285481581905967580">"თითის ანაბეჭდის დაყენება ვერ ხერხდება"</string>
-    <string name="fingerprint_error_timeout" msgid="2946635815726054226">"თითის ანაბეჭდის ლოდინის დრო ამოიწურა. სცადეთ ხელახლა."</string>
+    <string name="fingerprint_error_timeout" msgid="7361192266621252164">"თითის ანაბეჭდის დაყენების დრო ამოიწურა. ცადეთ ხელახლა."</string>
     <string name="fingerprint_error_canceled" msgid="540026881380070750">"თითის ანაბეჭდის აღების ოპერაცია გაუქმდა."</string>
     <string name="fingerprint_error_user_canceled" msgid="7685676229281231614">"თითის ანაბეჭდის ოპერაცია გააუქმა მომხმარებელმა."</string>
-    <string name="fingerprint_error_lockout" msgid="7853461265604738671">"ძალიან ბევრი მცდელობა იყო. სცადეთ მოგვიანებით."</string>
-    <string name="fingerprint_error_lockout_permanent" msgid="3895478283943513746">"დაფიქსირდა მეტისმეტად ბევრი მცდელობა. თითის ანაბეჭდის სენსორი გათიშულია."</string>
-    <string name="fingerprint_error_unable_to_process" msgid="1148553603490048742">"ხელახლა სცადეთ"</string>
+    <string name="fingerprint_error_lockout" msgid="6626753679019351368">"მეტისმეტად ბევრი მცდელობა იყო. სანაცვლოდ გამოიყენეთ ეკრანის დაბლოკვა."</string>
+    <string name="fingerprint_error_lockout_permanent" msgid="9060651300306264843">"მეტისმეტად ბევრი მცდელობა იყო. სანაცვლოდ გამოიყენეთ ეკრანის დაბლოკვა."</string>
+    <string name="fingerprint_error_unable_to_process" msgid="2446280592818621224">"თითის ანაბეჭდის დამუშავება შეუძლებელია. ცადეთ ხელახლა."</string>
     <string name="fingerprint_error_no_fingerprints" msgid="8671811719699072411">"თითის ანაბეჭდები რეგისტრირებული არ არის."</string>
     <string name="fingerprint_error_hw_not_present" msgid="578914350967423382">"ამ მოწყობილობას არ აქვს თითის ანაბეჭდის სენსორი."</string>
     <string name="fingerprint_error_security_update_required" msgid="7750187320640856433">"სენსორი დროებით გათიშულია."</string>
@@ -637,7 +639,7 @@
     <string name="fingerprint_recalibrate_notification_content" msgid="8519935717822194943">"ეწვიეთ შეკეთების სერვისის პროვაიდერს."</string>
     <string name="face_acquired_insufficient" msgid="6889245852748492218">"თქვენი სახის მოდელი ვერ იქმნება. ცადეთ ხელახლა."</string>
     <string name="face_acquired_too_bright" msgid="8070756048978079164">"მეტისმეტად ნათელია. ცადეთ უფრო სუსტი განათება."</string>
-    <string name="face_acquired_too_dark" msgid="7919016380747701228">"ცადეთ უფრო ძლიერი განათება"</string>
+    <string name="face_acquired_too_dark" msgid="8539853432479385326">"განათება არასაკმარისია"</string>
     <string name="face_acquired_too_close" msgid="4453646176196302462">"გაწიეთ ტელეფონი უფრო შორს"</string>
     <string name="face_acquired_too_far" msgid="2922278214231064859">"მიიტანეთ ტელეფონი უფრო ახლოს"</string>
     <string name="face_acquired_too_high" msgid="8278815780046368576">"აწიეთ ტელეფონი ზემოთ"</string>
@@ -1249,10 +1251,9 @@
     <string name="android_preparing_apk" msgid="589736917792300956">"ემზადება <xliff:g id="APPNAME">%1$s</xliff:g>."</string>
     <string name="android_upgrading_starting_apps" msgid="6206161195076057075">"აპების ჩართვა"</string>
     <string name="android_upgrading_complete" msgid="409800058018374746">"ჩატვირთვის დასასრული."</string>
-    <string name="fp_power_button_enrollment_title" msgid="3574363228413259548">"გსურთ დაყენების გაგრძელება?"</string>
     <string name="fp_power_button_enrollment_message" msgid="5648173517663246140">"თქვენ დააჭირეთ ჩართვის ღილაკს — ჩვეულებრივ, ის ეკრანს გამორთავს.\n\nთქვენი თითის ანაბეჭდის დაყენებისას ცადეთ მსუბუქად შეხება."</string>
-    <string name="fp_power_button_enrollment_positive_button" msgid="2095415838459356833">"ეკრანის გამორთვა"</string>
-    <string name="fp_power_button_enrollment_negative_button" msgid="6558436406362486747">"დაყენების გაგრძელება"</string>
+    <string name="fp_power_button_enrollment_title" msgid="6976841690455338563">"დაყენების დასასრულებლად გამორთეთ ეკრანი"</string>
+    <string name="fp_power_button_enrollment_button_text" msgid="3199783266386029200">"გამორთვა"</string>
     <string name="fp_power_button_bp_title" msgid="5585506104526820067">"გსურთ ანაბეჭდის დადასტურების გაგრძელება?"</string>
     <string name="fp_power_button_bp_message" msgid="2983163038168903393">"თქვენ დააჭირეთ ჩართვის ღილაკს — ჩვეულებრივ, ის ეკრანს გამორთავს.\n\nთქვენი თითის ანაბეჭდის დასადასტურებლად ცადეთ მსუბუქად შეხება."</string>
     <string name="fp_power_button_bp_positive_button" msgid="728945472408552251">"ეკრანის გამორთვა"</string>
@@ -1405,16 +1406,16 @@
     <string name="ext_media_new_notification_message" msgid="6095403121990786986">"შეეხეთ დასაყენებლად"</string>
     <string name="ext_media_new_notification_message" product="tv" msgid="216863352100263668">"დასაყენებლად აირჩიეთ"</string>
     <string name="ext_media_new_notification_message" product="automotive" msgid="5140127881613227162">"შეიძლება მოწყობილობის რეფორმატირება დაგჭირდეთ. შეეხეთ ამოსაღებად."</string>
-    <string name="ext_media_ready_notification_message" msgid="777258143284919261">"ფოტოებისა და მედიის გადასატანად"</string>
+    <string name="ext_media_ready_notification_message" msgid="7509496364380197369">"ფოტოების, ვიდეოების, მუსიკისა და ბევრი სხვა რამის შესანახად"</string>
     <string name="ext_media_ready_notification_message" product="tv" msgid="8847134811163165935">"მედიაფაილების დათვალიერება"</string>
     <string name="ext_media_unmountable_notification_title" msgid="4895444667278979910">"პრობლემა <xliff:g id="NAME">%s</xliff:g>-თან მიმართებით"</string>
     <string name="ext_media_unmountable_notification_title" product="automotive" msgid="3142723758949023280">"<xliff:g id="NAME">%s</xliff:g> არ მუშაობს"</string>
     <string name="ext_media_unmountable_notification_message" msgid="3256290114063126205">"შეეხეთ გამოსასწორებლად"</string>
     <string name="ext_media_unmountable_notification_message" product="tv" msgid="3003611129979934633">"<xliff:g id="NAME">%s</xliff:g> დაზიანებულია. შეეხეთ გასასწორებლად."</string>
     <string name="ext_media_unmountable_notification_message" product="automotive" msgid="2274596120715020680">"შეიძლება მოწყობილობის რეფორმატირება დაგჭირდეთ. შეეხეთ ამოსაღებად."</string>
-    <string name="ext_media_unsupported_notification_title" msgid="4358280700537030333">"მხარდაუჭერელი <xliff:g id="NAME">%s</xliff:g>"</string>
+    <string name="ext_media_unsupported_notification_title" msgid="3487534182861251401">"აღმოჩენილია <xliff:g id="NAME">%s</xliff:g>"</string>
     <string name="ext_media_unsupported_notification_title" product="automotive" msgid="6004193172658722381">"<xliff:g id="NAME">%s</xliff:g> არ მუშაობს"</string>
-    <string name="ext_media_unsupported_notification_message" msgid="917738524888367560">"ეს <xliff:g id="NAME">%s</xliff:g> მხარდაუჭერელია არ მოწყობილობაზე. შეეხეთ მხარდაჭერილ ფორმატში დასაყენებლად."</string>
+    <string name="ext_media_unsupported_notification_message" msgid="8463636521459807981">"შეეხეთ დასაყენებლად ."</string>
     <string name="ext_media_unsupported_notification_message" product="tv" msgid="1595482802187036532">"აირჩიეთ, რათა დააყენოთ <xliff:g id="NAME">%s</xliff:g> მხარდაჭერილ ფორმატში."</string>
     <string name="ext_media_unsupported_notification_message" product="automotive" msgid="3412494732736336330">"შეიძლება მოწყობილობის რეფორმატირება დაგჭირდეთ"</string>
     <string name="ext_media_badremoval_notification_title" msgid="4114625551266196872">"მოულოდნელად მოხდა <xliff:g id="NAME">%s</xliff:g>-ის ამოღება"</string>
@@ -1927,6 +1928,7 @@
     <string name="country_selection_title" msgid="5221495687299014379">"რეგიონის პარამეტრები"</string>
     <string name="search_language_hint" msgid="7004225294308793583">"აკრიფეთ ენის სახელი"</string>
     <string name="language_picker_section_suggested" msgid="6556199184638990447">"რეკომენდებული"</string>
+    <string name="language_picker_regions_section_suggested" msgid="6080131515268225316">"რეკომენდებული"</string>
     <string name="language_picker_section_all" msgid="1985809075777564284">"ყველა ენა"</string>
     <string name="region_picker_section_all" msgid="756441309928774155">"ყველა რეგიონი"</string>
     <string name="locale_search_menu" msgid="6258090710176422934">"ძიება"</string>
@@ -2049,7 +2051,8 @@
     <string name="log_access_confirmation_title" msgid="2343578467290592708">"გსურთ <xliff:g id="LOG_ACCESS_APP_NAME">%s</xliff:g>-ს მიანიჭოთ მოწყობილობის ყველა ჟურნალზე წვდომა?"</string>
     <string name="log_access_confirmation_allow" msgid="5302517782599389507">"ერთჯერადი წვდომის დაშვება"</string>
     <string name="log_access_confirmation_deny" msgid="7685790957455099845">"არ დაიშვას"</string>
-    <string name="log_access_confirmation_body" msgid="6581985716241928135">"მოწყობილობის ჟურნალში იწერება, რა ხდება ამ მოწყობილობაზე. აპებს შეუძლია ამ ჟურნალების გამოყენება პრობლემების აღმოსაჩენად და მოსაგვარებლად.\n\nზოგი ჟურნალი შეიძლება სენსიტიური ინფორმაციის მატარებელი იყოს, ამიტომაც მოწყობილობის ყველა ჟურნალზე წვდომა მხოლოდ სანდო აპებს მიანიჭეთ. \n\nთუ ამ აპს მოწყობილობის ყველა ჟურნალზე წვდომას არ მიანიჭებთ, მას მაინც ექნება წვდომა საკუთარ ჟურნალებზე. თქვენი მოწყობილობის მწარმოებელს მაინც შეეძლება თქვენი მოწყობილობის ზოგიერთ ჟურნალსა თუ ინფორმაციაზე წვდომა. შეიტყვეთ მეტი"</string>
+    <string name="log_access_confirmation_body" product="default" msgid="1806692062668620735">"მოწყობილობის ჟურნალში იწერება, რა ხდება ამ მოწყობილობაზე. აპებს შეუძლია ამ ჟურნალების გამოყენება პრობლემების აღმოსაჩენად და მოსაგვარებლად.\n\nზოგი ჟურნალი შეიძლება სენსიტიური ინფორმაციის მატარებელი იყოს, ამიტომაც მოწყობილობის ყველა ჟურნალზე წვდომა მხოლოდ სანდო აპებს მიანიჭეთ. \n\nთუ ამ აპს მოწყობილობის ყველა ჟურნალზე წვდომას არ მიანიჭებთ, მას მაინც ექნება წვდომა თქვენს ჟურნალებზე. თქვენი მოწყობილობის მწარმოებელს მაინც შეეძლება თქვენი მოწყობილობის ზოგიერთ ჟურნალსა თუ ინფორმაციაზე წვდომა."</string>
+    <string name="log_access_confirmation_body" product="tv" msgid="7379536536425265262">"მოწყობილობის ჟურნალში იწერება, რა ხდება ამ მოწყობილობაზე. აპებს შეუძლია ამ ჟურნალების გამოყენება პრობლემების აღმოსაჩენად და მოსაგვარებლად.\n\nზოგი ჟურნალი შეიძლება სენსიტიური ინფორმაციის მატარებელი იყოს, ამიტომაც მოწყობილობის ყველა ჟურნალზე წვდომა მხოლოდ სანდო აპებს მიანიჭეთ. \n\nთუ ამ აპს მოწყობილობის ყველა ჟურნალზე წვდომას არ მიანიჭებთ, მას მაინც ექნება წვდომა საკუთარ ჟურნალებზე. თქვენი მოწყობილობის მწარმოებელს მაინც შეეძლება თქვენი მოწყობილობის ზოგიერთ ჟურნალსა თუ ინფორმაციაზე წვდომა.\n\n შეიტყვეთ მეტი g.co/android/devicelogs."</string>
     <string name="log_access_do_not_show_again" msgid="1058690599083091552">"აღარ გამოჩნდეს"</string>
     <string name="slices_permission_request" msgid="3677129866636153406">"<xliff:g id="APP_0">%1$s</xliff:g>-ს სურს, გაჩვენოთ <xliff:g id="APP_2">%2$s</xliff:g>-ის ფრაგმენტები"</string>
     <string name="screenshot_edit" msgid="7408934887203689207">"რედაქტირება"</string>
@@ -2290,5 +2293,6 @@
     <string name="notification_action_check_bg_apps" msgid="4758877443365362532">"აქტიური აპების შემოწმება"</string>
     <string name="vdm_camera_access_denied" product="default" msgid="6102378580971542473">"ტელეფონის კამერაზე წვდომა ვერ მოხერხდა თქვენი <xliff:g id="DEVICE">%1$s</xliff:g>-დან"</string>
     <string name="vdm_camera_access_denied" product="tablet" msgid="6895968310395249076">"ტაბლეტის კამერაზე წვდომა ვერ მოხერხდა თქვენი <xliff:g id="DEVICE">%1$s</xliff:g>-დან"</string>
+    <string name="vdm_secure_window" msgid="161700398158812314">"მასზე წვდომის მიᲦება შეუძლებელია სტრიმინგის დროს. ცადეთ ტელეფონიდან."</string>
     <string name="system_locale_title" msgid="711882686834677268">"სისტემის ნაგულისხმევი"</string>
 </resources>

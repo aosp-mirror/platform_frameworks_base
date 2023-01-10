@@ -20,7 +20,6 @@ import android.graphics.Rect;
 
 import com.android.wm.shell.common.annotations.ExternalThread;
 
-import java.io.PrintWriter;
 import java.util.function.Consumer;
 
 /**
@@ -28,14 +27,6 @@ import java.util.function.Consumer;
  */
 @ExternalThread
 public interface Pip {
-
-    /**
-     * Returns a binder that can be passed to an external process to manipulate PIP.
-     */
-    default IPip createExternalInterface() {
-        return null;
-    }
-
     /**
      * Expand PIP, it's possible that specific request to activate the window via Alt-tab.
      */
@@ -52,35 +43,12 @@ public interface Pip {
     }
 
     /**
-     * Registers the session listener for the current user.
-     */
-    default void registerSessionListenerForCurrentUser() {
-    }
-
-    /**
-     * Sets both shelf visibility and its height.
-     *
-     * @param visible visibility of shelf.
-     * @param height  to specify the height for shelf.
-     */
-    default void setShelfHeight(boolean visible, int height) {
-    }
-
-    /**
      * Set the callback when {@link PipTaskOrganizer#isInPip()} state is changed.
      *
      * @param callback The callback accepts the result of {@link PipTaskOrganizer#isInPip()}
      *                 when it's changed.
      */
     default void setOnIsInPipStateChangedListener(Consumer<Boolean> callback) {}
-
-    /**
-     * Set the pinned stack with {@link PipAnimationController.AnimationType}
-     *
-     * @param animationType The pre-defined {@link PipAnimationController.AnimationType}
-     */
-    default void setPinnedStackAnimationType(int animationType) {
-    }
 
     /**
      * Called when showing Pip menu.
@@ -99,12 +67,4 @@ public interface Pip {
      * view hierarchy or destroyed.
      */
     default void removePipExclusionBoundsChangeListener(Consumer<Rect> listener) { }
-
-    /**
-     * Dump the current state and information if need.
-     *
-     * @param pw The stream to dump information to.
-     */
-    default void dump(PrintWriter pw) {
-    }
 }

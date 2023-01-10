@@ -20,6 +20,10 @@ import android.graphics.Rect;
 import android.util.Slog;
 
 import com.android.keyguard.KeyguardClockSwitch.ClockSize;
+import com.android.keyguard.logging.KeyguardLogger;
+import com.android.systemui.flags.FeatureFlags;
+import com.android.systemui.flags.Flags;
+import com.android.systemui.plugins.ClockAnimations;
 import com.android.systemui.statusbar.notification.AnimatableProperty;
 import com.android.systemui.statusbar.notification.PropertyAnimator;
 import com.android.systemui.statusbar.notification.stack.AnimationProperties;
@@ -29,8 +33,6 @@ import com.android.systemui.statusbar.phone.ScreenOffAnimationController;
 import com.android.systemui.statusbar.policy.ConfigurationController;
 import com.android.systemui.statusbar.policy.KeyguardStateController;
 import com.android.systemui.util.ViewController;
-
-import java.util.TimeZone;
 
 import javax.inject.Inject;
 
@@ -60,14 +62,19 @@ public class KeyguardStatusViewController extends ViewController<KeyguardStatusV
             KeyguardUpdateMonitor keyguardUpdateMonitor,
             ConfigurationController configurationController,
             DozeParameters dozeParameters,
-            ScreenOffAnimationController screenOffAnimationController) {
+            FeatureFlags featureFlags,
+            ScreenOffAnimationController screenOffAnimationController,
+            KeyguardLogger logger) {
         super(keyguardStatusView);
         mKeyguardSliceViewController = keyguardSliceViewController;
         mKeyguardClockSwitchController = keyguardClockSwitchController;
         mKeyguardUpdateMonitor = keyguardUpdateMonitor;
         mConfigurationController = configurationController;
         mKeyguardVisibilityHelper = new KeyguardVisibilityHelper(mView, keyguardStateController,
-                dozeParameters, screenOffAnimationController, /* animateYPos= */ true);
+                dozeParameters, screenOffAnimationController, /* animateYPos= */ true,
+                logger.getBuffer());
+        mKeyguardVisibilityHelper.setOcclusionTransitionFlagEnabled(
+                featureFlags.isEnabled(Flags.UNOCCLUSION_TRANSITION));
     }
 
     @Override
@@ -96,13 +103,6 @@ public class KeyguardStatusViewController extends ViewController<KeyguardStatusV
     }
 
     /**
-     * The amount we're in doze.
-     */
-    public void setDarkAmount(float darkAmount) {
-        mView.setDarkAmount(darkAmount);
-    }
-
-    /**
      * Set which clock should be displayed on the keyguard. The other one will be automatically
      * hidden.
      */
@@ -114,23 +114,17 @@ public class KeyguardStatusViewController extends ViewController<KeyguardStatusV
      * Performs fold to aod animation of the clocks (changes font weight from bold to thin).
      * This animation is played when AOD is enabled and foldable device is fully folded, it is
      * displayed on the outer screen
+     * @param foldFraction current fraction of fold animation complete
      */
-    public void animateFoldToAod() {
-        mKeyguardClockSwitchController.animateFoldToAod();
-    }
-
-    /**
-     * If we're presenting a custom clock of just the default one.
-     */
-    public boolean hasCustomClock() {
-        return mKeyguardClockSwitchController.hasCustomClock();
+    public void animateFoldToAod(float foldFraction) {
+        mKeyguardClockSwitchController.animateFoldToAod(foldFraction);
     }
 
     /**
      * Sets a translationY on the views on the keyguard, except on the media view.
      */
-    public void setTranslationYExcludingMedia(float translationY) {
-        mView.setChildrenTranslationYExcludingMediaView(translationY);
+    public void setTranslationY(float translationY, boolean excludeMedia) {
+        mView.setChildrenTranslationY(translationY, excludeMedia);
     }
 
     /**
@@ -143,24 +137,11 @@ public class KeyguardStatusViewController extends ViewController<KeyguardStatusV
     }
 
     /**
-     * Set pivot x.
+     * Update the pivot position based on the parent view
      */
-    public void setPivotX(float pivot) {
-        mView.setPivotX(pivot);
-    }
-
-    /**
-     * Set pivot y.
-     */
-    public void setPivotY(float pivot) {
-        mView.setPivotY(pivot);
-    }
-
-    /**
-     * Get the clock text size.
-     */
-    public float getClockTextSize() {
-        return mKeyguardClockSwitchController.getClockTextSize();
+    public void updatePivot(float parentWidth, float parentHeight) {
+        mView.setPivotX(parentWidth / 2f);
+        mView.setPivotY(mKeyguardClockSwitchController.getClockHeight() / 2f);
     }
 
     /**
@@ -240,14 +221,9 @@ public class KeyguardStatusViewController extends ViewController<KeyguardStatusV
         }
 
         @Override
-        public void onTimeZoneChanged(TimeZone timeZone) {
-            mKeyguardClockSwitchController.updateTimeZone(timeZone);
-        }
-
-        @Override
-        public void onKeyguardVisibilityChanged(boolean showing) {
-            if (showing) {
-                if (DEBUG) Slog.v(TAG, "refresh statusview showing:" + showing);
+        public void onKeyguardVisibilityChanged(boolean visible) {
+            if (visible) {
+                if (DEBUG) Slog.v(TAG, "refresh statusview visible:true");
                 refreshTime();
             }
         }
@@ -264,5 +240,10 @@ public class KeyguardStatusViewController extends ViewController<KeyguardStatusV
         } else {
             mView.setClipBounds(null);
         }
+    }
+
+    /** Gets the animations for the current clock. */
+    public ClockAnimations getClockAnimations() {
+        return mKeyguardClockSwitchController.getClockAnimations();
     }
 }

@@ -28,12 +28,18 @@ import android.widget.ScrollView;
 public class NonInterceptingScrollView extends ScrollView {
 
     private final int mTouchSlop;
+
     private float mDownY;
     private boolean mScrollEnabled = true;
+    private boolean mPreventingIntercept;
 
     public NonInterceptingScrollView(Context context, AttributeSet attrs) {
         super(context, attrs);
         mTouchSlop = ViewConfiguration.get(context).getScaledTouchSlop();
+    }
+
+    public boolean isPreventingIntercept() {
+        return mPreventingIntercept;
     }
 
     @Override
@@ -41,8 +47,10 @@ public class NonInterceptingScrollView extends ScrollView {
         int action = ev.getActionMasked();
         switch (action) {
             case MotionEvent.ACTION_DOWN:
+                mPreventingIntercept = false;
                 if (canScrollVertically(1)) {
                     // If we can scroll down, make sure we're not intercepted by the parent
+                    mPreventingIntercept = true;
                     final ViewParent parent = getParent();
                     if (parent != null) {
                         parent.requestDisallowInterceptTouchEvent(true);
@@ -62,10 +70,13 @@ public class NonInterceptingScrollView extends ScrollView {
     public boolean onInterceptTouchEvent(MotionEvent ev) {
         // If there's a touch on this view and we can scroll down, we don't want to be intercepted
         int action = ev.getActionMasked();
+
         switch (action) {
             case MotionEvent.ACTION_DOWN:
-                // If we can scroll down, make sure non of our parents intercepts us.
+                mPreventingIntercept = false;
+                // If we can scroll down, make sure none of our parents intercepts us.
                 if (canScrollVertically(1)) {
+                    mPreventingIntercept = true;
                     final ViewParent parent = getParent();
                     if (parent != null) {
                         parent.requestDisallowInterceptTouchEvent(true);

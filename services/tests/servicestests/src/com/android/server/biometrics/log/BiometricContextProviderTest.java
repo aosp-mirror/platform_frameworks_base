@@ -40,8 +40,6 @@ import com.android.internal.logging.InstanceId;
 import com.android.internal.statusbar.ISessionListener;
 import com.android.internal.statusbar.IStatusBarService;
 
-import com.google.common.collect.ImmutableList;
-
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
@@ -89,33 +87,64 @@ public class BiometricContextProviderTest {
 
     @Test
     public void testIsAod() throws RemoteException {
-        mListener.onDozeChanged(true);
+        mListener.onDozeChanged(true /* isDozing */, false /* isAwake */);
         assertThat(mProvider.isAod()).isTrue();
-        mListener.onDozeChanged(false);
+        mListener.onDozeChanged(false /* isDozing */, false /* isAwake */);
         assertThat(mProvider.isAod()).isFalse();
 
         when(mAmbientDisplayConfiguration.alwaysOnEnabled(anyInt())).thenReturn(false);
-        mListener.onDozeChanged(true);
+        mListener.onDozeChanged(true /* isDozing */, false /* isAwake */);
         assertThat(mProvider.isAod()).isFalse();
-        mListener.onDozeChanged(false);
+        mListener.onDozeChanged(false /* isDozing */, false /* isAwake */);
         assertThat(mProvider.isAod()).isFalse();
     }
 
     @Test
+    public void testIsAwake() throws RemoteException {
+        mListener.onDozeChanged(false /* isDozing */, true /* isAwake */);
+        assertThat(mProvider.isAwake()).isTrue();
+        mListener.onDozeChanged(false /* isDozing */, false /* isAwake */);
+        assertThat(mProvider.isAwake()).isFalse();
+        mListener.onDozeChanged(true /* isDozing */, true /* isAwake */);
+        assertThat(mProvider.isAwake()).isTrue();
+        mListener.onDozeChanged(true /* isDozing */, false /* isAwake */);
+        assertThat(mProvider.isAwake()).isFalse();
+    }
+
+    @Test
     public void testSubscribesToAod() throws RemoteException {
-        final List<Boolean> expected = ImmutableList.of(true, false, true, true, false);
         final List<Boolean> actual = new ArrayList<>();
 
         mProvider.subscribe(mOpContext, ctx -> {
             assertThat(ctx).isSameInstanceAs(mOpContext);
+            assertThat(mProvider.isAod()).isEqualTo(ctx.isAod);
+            assertThat(mProvider.isAwake()).isFalse();
             actual.add(ctx.isAod);
         });
 
-        for (boolean v : expected) {
-            mListener.onDozeChanged(v);
+        for (boolean v : List.of(true, false, true, true, false, false)) {
+            mListener.onDozeChanged(v /* isDozing */, false /* isAwake */);
         }
 
-        assertThat(actual).containsExactlyElementsIn(expected).inOrder();
+        assertThat(actual).containsExactly(true, false, true, false).inOrder();
+    }
+
+    @Test
+    public void testSubscribesToAwake() throws RemoteException {
+        final List<Boolean> actual = new ArrayList<>();
+
+        mProvider.subscribe(mOpContext, ctx -> {
+            assertThat(ctx).isSameInstanceAs(mOpContext);
+            assertThat(ctx.isAod).isFalse();
+            assertThat(mProvider.isAod()).isFalse();
+            actual.add(mProvider.isAwake());
+        });
+
+        for (boolean v : List.of(true, false, true, true, false, false)) {
+            mListener.onDozeChanged(false /* isDozing */, v /* isAwake */);
+        }
+
+        assertThat(actual).containsExactly(true, false, true, false).inOrder();
     }
 
     @Test
@@ -124,13 +153,13 @@ public class BiometricContextProviderTest {
         mProvider.subscribe(mOpContext, emptyConsumer);
         mProvider.unsubscribe(mOpContext);
 
-        mListener.onDozeChanged(true);
+        mListener.onDozeChanged(true /* isDozing */, false /* isAwake */);
 
         final Consumer<OperationContext> nonEmptyConsumer = mock(Consumer.class);
         mProvider.subscribe(mOpContext, nonEmptyConsumer);
-        mListener.onDozeChanged(false);
+        mListener.onDozeChanged(false /* isDozing */, false /* isAwake */);
         mProvider.unsubscribe(mOpContext);
-        mListener.onDozeChanged(true);
+        mListener.onDozeChanged(true /* isDozing */, false /* isAwake */);
 
         verify(emptyConsumer, never()).accept(any());
         verify(nonEmptyConsumer).accept(same(mOpContext));
@@ -171,7 +200,7 @@ public class BiometricContextProviderTest {
 
     @Test
     public void testUpdate() throws RemoteException {
-        mListener.onDozeChanged(false);
+        mListener.onDozeChanged(false /* isDozing */, false /* isAwake */);
         OperationContext context = mProvider.updateContext(mOpContext, false /* crypto */);
 
         // default state when nothing has been set
@@ -186,7 +215,7 @@ public class BiometricContextProviderTest {
             final int id = 40 + type;
             final boolean aod = (type & 1) == 0;
 
-            mListener.onDozeChanged(aod);
+            mListener.onDozeChanged(aod /* isDozing */, false /* isAwake */);
             mSessionListener.onSessionStarted(type, InstanceId.fakeInstanceId(id));
             context = mProvider.updateContext(mOpContext, false /* crypto */);
             assertThat(context).isSameInstanceAs(mOpContext);

@@ -1022,6 +1022,19 @@ public class ActivityInfo extends ComponentInfo implements Parcelable {
     public @interface SizeChangesSupportMode {}
 
     /**
+     * This change id enables compat policy that ignores app requested orientation in
+     * response to an app calling {@link android.app.Activity#setRequestedOrientation}. See
+     * com.android.server.wm.LetterboxUiController#shouldIgnoreRequestedOrientation for
+     * details.
+     * @hide
+     */
+    @ChangeId
+    @Overridable
+    @Disabled
+    public static final long OVERRIDE_ENABLE_COMPAT_IGNORE_REQUESTED_ORIENTATION =
+            254631730L; // buganizer id
+
+    /**
      * This change id forces the packages it is applied to never have Display API sandboxing
      * applied for a letterbox or SCM activity. The Display APIs will continue to provide
      * DisplayArea bounds.
@@ -1107,6 +1120,37 @@ public class ActivityInfo extends ComponentInfo implements Parcelable {
     /** @hide Large override aspect ratio, currently 16:9 */
     @TestApi
     public static final float OVERRIDE_MIN_ASPECT_RATIO_LARGE_VALUE = 16 / 9f;
+
+    /**
+     * Enables the use of split screen aspect ratio. This allows an app to use all the available
+     * space in split mode avoiding letterboxing.
+     * @hide
+     */
+    @ChangeId
+    @Disabled
+    @Overridable
+    public static final long OVERRIDE_MIN_ASPECT_RATIO_TO_ALIGN_WITH_SPLIT_SCREEN = 208648326L;
+
+    /**
+     * Overrides the min aspect ratio restriction in portrait fullscreen in order to use all
+     * available screen space.
+     * @hide
+     */
+    @ChangeId
+    @Disabled
+    @Overridable
+    public static final long OVERRIDE_MIN_ASPECT_RATIO_EXCLUDE_PORTRAIT_FULLSCREEN = 218959984L;
+
+    /**
+     * Enables sending fake focus for unfocused apps in splitscreen. Some game engines
+     * wait to get focus before drawing the content of the app so fake focus helps them to avoid
+     * staying blacked out when they are resumed and do not have focus yet.
+     * @hide
+     */
+    @ChangeId
+    @Disabled
+    @Overridable
+    public static final long OVERRIDE_ENABLE_COMPAT_FAKE_FOCUS = 263259275L;
 
     /**
      * Compares activity window layout min width/height with require space for multi window to
@@ -1317,8 +1361,8 @@ public class ActivityInfo extends ComponentInfo implements Parcelable {
      * Returns true if the activity has maximum or minimum aspect ratio.
      * @hide
      */
-    public boolean hasFixedAspectRatio(@ScreenOrientation int orientation) {
-        return getMaxAspectRatio() != 0 || getMinAspectRatio(orientation) != 0;
+    public boolean hasFixedAspectRatio() {
+        return getMaxAspectRatio() != 0 || getMinAspectRatio() != 0;
     }
 
     /**
@@ -1460,30 +1504,10 @@ public class ActivityInfo extends ComponentInfo implements Parcelable {
     }
 
     /**
-     * Returns the min aspect ratio of this activity.
-     *
-     * This takes into account the minimum aspect ratio as defined in the app's manifest and
-     * possible overrides as per OVERRIDE_MIN_ASPECT_RATIO.
-     *
-     * In the rare cases where the manifest minimum aspect ratio is required, use
-     * {@code getManifestMinAspectRatio}.
+     * Returns the min aspect ratio of this activity as defined in the manifest file.
      * @hide
      */
-    public float getMinAspectRatio(@ScreenOrientation int orientation) {
-        if (applicationInfo == null || !isChangeEnabled(OVERRIDE_MIN_ASPECT_RATIO) || (
-                isChangeEnabled(OVERRIDE_MIN_ASPECT_RATIO_PORTRAIT_ONLY)
-                        && !isFixedOrientationPortrait(orientation))) {
-            return mMinAspectRatio;
-        }
-
-        if (isChangeEnabled(OVERRIDE_MIN_ASPECT_RATIO_LARGE)) {
-            return Math.max(OVERRIDE_MIN_ASPECT_RATIO_LARGE_VALUE, mMinAspectRatio);
-        }
-
-        if (isChangeEnabled(OVERRIDE_MIN_ASPECT_RATIO_MEDIUM)) {
-            return Math.max(OVERRIDE_MIN_ASPECT_RATIO_MEDIUM_VALUE, mMinAspectRatio);
-        }
-
+    public float getMinAspectRatio() {
         return mMinAspectRatio;
     }
 
@@ -1512,7 +1536,13 @@ public class ActivityInfo extends ComponentInfo implements Parcelable {
         }
     }
 
-    private boolean isChangeEnabled(long changeId) {
+    /**
+     * Checks if a changeId is enabled for the current user
+     * @param changeId The changeId to verify
+     * @return True of the changeId is enabled
+     * @hide
+     */
+    public boolean isChangeEnabled(long changeId) {
         return CompatChanges.isChangeEnabled(changeId, applicationInfo.packageName,
                 UserHandle.getUserHandleForUid(applicationInfo.uid));
     }
@@ -1633,12 +1663,9 @@ public class ActivityInfo extends ComponentInfo implements Parcelable {
         if (getMaxAspectRatio() != 0) {
             pw.println(prefix + "maxAspectRatio=" + getMaxAspectRatio());
         }
-        final float minAspectRatio = getMinAspectRatio(screenOrientation);
+        final float minAspectRatio = getMinAspectRatio();
         if (minAspectRatio != 0) {
             pw.println(prefix + "minAspectRatio=" + minAspectRatio);
-            if (getManifestMinAspectRatio() !=  minAspectRatio) {
-                pw.println(prefix + "getManifestMinAspectRatio=" + getManifestMinAspectRatio());
-            }
         }
         if (supportsSizeChanges) {
             pw.println(prefix + "supportsSizeChanges=true");

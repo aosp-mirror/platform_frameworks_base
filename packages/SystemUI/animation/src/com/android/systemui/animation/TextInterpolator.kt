@@ -244,7 +244,7 @@ class TextInterpolator(
                     canvas.translate(origin, layout.getLineBaseline(lineNo).toFloat())
 
                     run.fontRuns.forEach { fontRun ->
-                        drawFontRun(canvas, run, fontRun, tmpPaint)
+                        drawFontRun(canvas, run, fontRun, lineNo, tmpPaint)
                     }
                 } finally {
                     canvas.restore()
@@ -349,7 +349,7 @@ class TextInterpolator(
     var glyphFilter: GlyphCallback? = null
 
     // Draws single font run.
-    private fun drawFontRun(c: Canvas, line: Run, run: FontRun, paint: Paint) {
+    private fun drawFontRun(c: Canvas, line: Run, run: FontRun, lineNo: Int, paint: Paint) {
         var arrayIndex = 0
         val font = fontInterpolator.lerp(run.baseFont, run.targetFont, progress)
 
@@ -368,11 +368,13 @@ class TextInterpolator(
         tmpGlyph.font = font
         tmpGlyph.runStart = run.start
         tmpGlyph.runLength = run.end - run.start
+        tmpGlyph.lineNo = lineNo
 
         tmpPaintForGlyph.set(paint)
         var prevStart = run.start
 
         for (i in run.start until run.end) {
+            tmpGlyph.glyphIndex = i
             tmpGlyph.glyphId = line.glyphIds[i]
             tmpGlyph.x = MathUtils.lerp(line.baseX[i], line.targetX[i], progress)
             tmpGlyph.y = MathUtils.lerp(line.baseY[i], line.targetY[i], progress)
@@ -485,7 +487,13 @@ class TextInterpolator(
         val out = mutableListOf<List<PositionedGlyphs>>()
         for (lineNo in 0 until layout.lineCount) { // Shape all lines.
             val lineStart = layout.getLineStart(lineNo)
-            val count = layout.getLineEnd(lineNo) - lineStart
+            var count = layout.getLineEnd(lineNo) - lineStart
+            // Do not render the last character in the line if it's a newline and unprintable
+            val last = lineStart + count - 1
+            if (last > lineStart && last < layout.text.length && layout.text[last] == '\n') {
+                count--
+            }
+
             val runs = mutableListOf<PositionedGlyphs>()
             TextShaper.shapeText(layout.text, lineStart, count, layout.textDirectionHeuristic,
                     paint) { _, _, glyphs, _ ->

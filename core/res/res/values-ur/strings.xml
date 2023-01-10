@@ -33,6 +33,7 @@
     <string name="defaultVoiceMailAlphaTag" msgid="2190754495304236490">"صوتی میل"</string>
     <string name="defaultMsisdnAlphaTag" msgid="2285034592902077488">"MSISDN1"</string>
     <string name="mmiError" msgid="2862759606579822246">"‏کنکشن مسئلہ یا غلط MMI کوڈ۔"</string>
+    <string name="mmiErrorNotSupported" msgid="5001803469335286099">"خصوصیت تعاون یافتہ نہیں ہے۔"</string>
     <string name="mmiFdnError" msgid="3975490266767565852">"آپریشن صرف متعین ڈائلنگ نمبرز تک محدود ہے۔"</string>
     <string name="mmiErrorWhileRoaming" msgid="1204173664713870114">"جب آپ رومنگ پر ہوں تو اپنے فون سے کال فارورڈنگ کی ترتیبات تبدیل نہیں کی جا سکتیں۔"</string>
     <string name="serviceEnabled" msgid="7549025003394765639">"سروس فعال کی گئی۔"</string>
@@ -586,13 +587,14 @@
     <string name="screen_lock_app_setting_name" msgid="6054944352976789228">"اسکرین لاک استعمال کریں"</string>
     <string name="screen_lock_dialog_default_subtitle" msgid="120359538048533695">"جاری رکھنے کے لیے اپنا اسکرین لاک درج کریں"</string>
     <string name="fingerprint_acquired_partial" msgid="4323789264604479684">"سینسر پر اچھی طرح دبائیں"</string>
-    <string name="fingerprint_acquired_insufficient" msgid="2545149524031515411">"فنگر پرنٹ پر کارروائی نہیں کی جا سکی۔ براہ کرم دوبارہ کوشش کریں۔"</string>
+    <string name="fingerprint_acquired_insufficient" msgid="623888149088216458">"فنگر پرنٹ کی شناخت نہیں کی جا سکی۔ دوبارہ کوشش کریں۔"</string>
     <string name="fingerprint_acquired_imager_dirty" msgid="1770676120848224250">"فنگر پرنٹ سینسر صاف کریں اور دوبارہ کوشش کریں"</string>
     <string name="fingerprint_acquired_imager_dirty_alt" msgid="9169582140486372897">"سینسر صاف کریں اور دوبارہ کوشش کریں"</string>
     <string name="fingerprint_acquired_too_fast" msgid="1628459767349116104">"سینسر پر اچھی طرح دبائیں"</string>
     <string name="fingerprint_acquired_too_slow" msgid="6683510291554497580">"انگلی کو بہت آہستہ ہٹایا گیا۔ براہ کرم دوبارہ کوشش کریں۔"</string>
     <string name="fingerprint_acquired_already_enrolled" msgid="2285166003936206785">"دوسرا فنگر پرنٹ آزمائیں"</string>
     <string name="fingerprint_acquired_too_bright" msgid="3863560181670915607">"کافی روشنی ہے"</string>
+    <string name="fingerprint_acquired_power_press" msgid="3107864151278434961">"پاور پریس کا پتہ چلا"</string>
     <string name="fingerprint_acquired_try_adjusting" msgid="3667006071003809364">"ایڈجسٹ کرنے کی کوشش کریں"</string>
     <string name="fingerprint_acquired_immobile" msgid="1621891895241888048">"ہر بار اپنی انگلی کی پوزیشن کو تھوڑا تبدیل کریں"</string>
   <string-array name="fingerprint_acquired_vendor">
@@ -604,12 +606,12 @@
     <string name="face_authenticated_confirmation_required" msgid="6872632732508013755">"چہرے کی تصدیق ہو گئی، براہ کرم \'تصدیق کریں\' کو دبائيں"</string>
     <string name="fingerprint_error_hw_not_available" msgid="4571700896929561202">"فنگر پرنٹ ہارڈ ویئر دستیاب نہیں ہے۔"</string>
     <string name="fingerprint_error_no_space" msgid="7285481581905967580">"فنگر پرنٹ کو سیٹ اپ نہیں کیا جا سکا"</string>
-    <string name="fingerprint_error_timeout" msgid="2946635815726054226">"فنگر پرنٹ کی میعاد ختم ہوگئی۔ دوبارہ کوشش کریں۔"</string>
+    <string name="fingerprint_error_timeout" msgid="7361192266621252164">"فنگر پرنٹ کے سیٹ اپ کا وقت ختم ہو گیا۔ دوبارہ کوشش کریں۔"</string>
     <string name="fingerprint_error_canceled" msgid="540026881380070750">"فنگر پرنٹ کی کارروائی منسوخ ہوگئی۔"</string>
     <string name="fingerprint_error_user_canceled" msgid="7685676229281231614">"صارف نے فنگر پرنٹ کی کارروائی منسوخ کر دی۔"</string>
-    <string name="fingerprint_error_lockout" msgid="7853461265604738671">"کافی زیادہ کوششیں کی گئیں۔ بعد میں دوبارہ کوشش کریں۔"</string>
-    <string name="fingerprint_error_lockout_permanent" msgid="3895478283943513746">"کافی زیادہ کوششیں۔ فنگر پرنٹ سینسر غیر فعال ہو گیا۔"</string>
-    <string name="fingerprint_error_unable_to_process" msgid="1148553603490048742">"دوبارہ کوشش کریں۔"</string>
+    <string name="fingerprint_error_lockout" msgid="6626753679019351368">"کافی زیادہ کوششیں۔ اس کے بجائے اسکرین لاک کا استعمال کریں۔"</string>
+    <string name="fingerprint_error_lockout_permanent" msgid="9060651300306264843">"کافی زیادہ کوششیں۔ اس کے بجائے اسکرین لاک کا استعمال کریں۔"</string>
+    <string name="fingerprint_error_unable_to_process" msgid="2446280592818621224">"فنگر پرنٹ پروسیس نہیں ہو سکتا۔ دوبارہ کوشش کریں۔"</string>
     <string name="fingerprint_error_no_fingerprints" msgid="8671811719699072411">"کوئی فنگر پرنٹ مندرج شدہ نہیں ہے۔"</string>
     <string name="fingerprint_error_hw_not_present" msgid="578914350967423382">"اس آلہ میں فنگر پرنٹ سینسر نہیں ہے۔"</string>
     <string name="fingerprint_error_security_update_required" msgid="7750187320640856433">"سینسر عارضی طور غیر فعال ہے۔"</string>
@@ -637,7 +639,7 @@
     <string name="fingerprint_recalibrate_notification_content" msgid="8519935717822194943">"ایک مرمت فراہم کنندہ کو ملاحظہ کریں۔"</string>
     <string name="face_acquired_insufficient" msgid="6889245852748492218">"آپکے چہرے کا ماڈل تخلیق نہیں ہو سکا۔ پھر کوشش کریں۔"</string>
     <string name="face_acquired_too_bright" msgid="8070756048978079164">"کافی روشنی ہے۔ ہلکی روشنی میں آزمائیں۔"</string>
-    <string name="face_acquired_too_dark" msgid="7919016380747701228">"تیز روشنی میں آزمائیں"</string>
+    <string name="face_acquired_too_dark" msgid="8539853432479385326">"کافی روشنی نہیں ہے"</string>
     <string name="face_acquired_too_close" msgid="4453646176196302462">"فون کو تھوڑا دور کریں"</string>
     <string name="face_acquired_too_far" msgid="2922278214231064859">"فون کو تھوڑا قریب کریں"</string>
     <string name="face_acquired_too_high" msgid="8278815780046368576">"فون کو تھوڑا اوپر لے جائیں"</string>
@@ -1249,10 +1251,9 @@
     <string name="android_preparing_apk" msgid="589736917792300956">"<xliff:g id="APPNAME">%1$s</xliff:g> تیار ہو رہی ہے۔"</string>
     <string name="android_upgrading_starting_apps" msgid="6206161195076057075">"ایپس شروع ہو رہی ہیں۔"</string>
     <string name="android_upgrading_complete" msgid="409800058018374746">"بوٹ مکمل ہو رہا ہے۔"</string>
-    <string name="fp_power_button_enrollment_title" msgid="3574363228413259548">"سیٹ اپ جاری رکھیں؟"</string>
     <string name="fp_power_button_enrollment_message" msgid="5648173517663246140">"آپ نے پاور بٹن دبایا — اس سے عام طور پر اسکرین آف ہو جاتی ہے۔\n\nاپنے فنگر پرنٹ کو سیٹ اپ کرنے کے دوران ہلکا سا تھپتھپانے کی کوشش کریں۔"</string>
-    <string name="fp_power_button_enrollment_positive_button" msgid="2095415838459356833">"اسکرین آف کریں"</string>
-    <string name="fp_power_button_enrollment_negative_button" msgid="6558436406362486747">"سیٹ اپ جاری رکھیں"</string>
+    <string name="fp_power_button_enrollment_title" msgid="6976841690455338563">"سیٹ اپ ختم کرنے کیلئے، اسکرین آف کریں"</string>
+    <string name="fp_power_button_enrollment_button_text" msgid="3199783266386029200">"آف کریں"</string>
     <string name="fp_power_button_bp_title" msgid="5585506104526820067">"اپنے فنگر پرنٹ کی توثیق کرنا جاری رکھیں؟"</string>
     <string name="fp_power_button_bp_message" msgid="2983163038168903393">"آپ نے پاور بٹن دبایا — اس سے عام طور پر اسکرین آف ہو جاتی ہے۔\n\nاپنے فنگر پرنٹ کی توثیق کرنے کے لیے ہلکا سا تھپتھپانے کی کوشش کریں۔"</string>
     <string name="fp_power_button_bp_positive_button" msgid="728945472408552251">"اسکرین آف کریں"</string>
@@ -1405,16 +1406,16 @@
     <string name="ext_media_new_notification_message" msgid="6095403121990786986">"سیٹ اپ کرنے کیلئے تھپتھپائیں"</string>
     <string name="ext_media_new_notification_message" product="tv" msgid="216863352100263668">"سیٹ اپ کرنے کے لیے منتخب کریں"</string>
     <string name="ext_media_new_notification_message" product="automotive" msgid="5140127881613227162">"آپ کو آلے کو پھر سے فارمیٹ کرنے کی ضرورت پیش آ سکتی ہے۔ خارج کرنے کے لیے تھپتھپائیں۔"</string>
-    <string name="ext_media_ready_notification_message" msgid="777258143284919261">"تصاویر اور میڈیا منتقل کرنے کیلئے"</string>
+    <string name="ext_media_ready_notification_message" msgid="7509496364380197369">"تصاویر، ویڈیوز، موسیقی وغیرہ کو اسٹور کرنے کے لئے"</string>
     <string name="ext_media_ready_notification_message" product="tv" msgid="8847134811163165935">"میڈیا فائلز کو براؤز کریں"</string>
     <string name="ext_media_unmountable_notification_title" msgid="4895444667278979910">"<xliff:g id="NAME">%s</xliff:g> کے ساتھ مسئلہ"</string>
     <string name="ext_media_unmountable_notification_title" product="automotive" msgid="3142723758949023280">"<xliff:g id="NAME">%s</xliff:g> کام نہیں کر رہا ہے"</string>
     <string name="ext_media_unmountable_notification_message" msgid="3256290114063126205">"درست کرنے کیلئے تھپتھپائیں"</string>
     <string name="ext_media_unmountable_notification_message" product="tv" msgid="3003611129979934633">"<xliff:g id="NAME">%s</xliff:g> خراب ہے۔ اسے ٹھیک کرنے کیلئے منتخب کریں۔"</string>
     <string name="ext_media_unmountable_notification_message" product="automotive" msgid="2274596120715020680">"آپ کو آلے کو پھر سے فارمیٹ کرنے کی ضرورت پیش آ سکتی ہے۔ خارج کرنے کے لیے تھپتھپائیں۔"</string>
-    <string name="ext_media_unsupported_notification_title" msgid="4358280700537030333">"غیر تعاون یافتہ <xliff:g id="NAME">%s</xliff:g>"</string>
+    <string name="ext_media_unsupported_notification_title" msgid="3487534182861251401">"<xliff:g id="NAME">%s</xliff:g> کا پتا چلا"</string>
     <string name="ext_media_unsupported_notification_title" product="automotive" msgid="6004193172658722381">"<xliff:g id="NAME">%s</xliff:g> کام نہیں کر رہا ہے"</string>
-    <string name="ext_media_unsupported_notification_message" msgid="917738524888367560">"یہ آلہ <xliff:g id="NAME">%s</xliff:g> کو سپورٹ نہیں کرتا۔ ایک سپورٹ یافتہ فارمیٹ میں سیٹ اپ کرنے کیلئے تھپتھپائیں۔"</string>
+    <string name="ext_media_unsupported_notification_message" msgid="8463636521459807981">"سیٹ اپ کرنے کیلئے تھپتھپائیں ۔"</string>
     <string name="ext_media_unsupported_notification_message" product="tv" msgid="1595482802187036532">"سپورٹ یافتہ فارمیٹ میں <xliff:g id="NAME">%s</xliff:g> سیٹ اپ کرنے کے لیے منتخب کریں۔"</string>
     <string name="ext_media_unsupported_notification_message" product="automotive" msgid="3412494732736336330">"آپ کو آلے کو پھر سے فارمیٹ کرنے کی ضرورت پیش آ سکتی ہے"</string>
     <string name="ext_media_badremoval_notification_title" msgid="4114625551266196872">"<xliff:g id="NAME">%s</xliff:g> غیر متوقع طور پر ہٹا دیا گیا"</string>
@@ -1927,6 +1928,7 @@
     <string name="country_selection_title" msgid="5221495687299014379">"علاقہ کی ترجیح"</string>
     <string name="search_language_hint" msgid="7004225294308793583">"زبان کا نام ٹائپ کریں"</string>
     <string name="language_picker_section_suggested" msgid="6556199184638990447">"تجویز کردہ"</string>
+    <string name="language_picker_regions_section_suggested" msgid="6080131515268225316">"تجویز کردہ"</string>
     <string name="language_picker_section_all" msgid="1985809075777564284">"سبھی زبانیں"</string>
     <string name="region_picker_section_all" msgid="756441309928774155">"تمام علاقے"</string>
     <string name="locale_search_menu" msgid="6258090710176422934">"تلاش"</string>
@@ -1987,7 +1989,7 @@
     <string name="app_category_productivity" msgid="1844422703029557883">"پروڈکٹیوٹی"</string>
     <string name="app_category_accessibility" msgid="6643521607848547683">"ایکسیسبیلٹی"</string>
     <string name="device_storage_monitor_notification_channel" msgid="5164244565844470758">"آلہ کی اسٹوریج"</string>
-    <string name="adb_debugging_notification_channel_tv" msgid="4764046459631031496">"‏USB ڈیبگ کرنا"</string>
+    <string name="adb_debugging_notification_channel_tv" msgid="4764046459631031496">"‏USB ڈیبگنگ"</string>
     <string name="time_picker_hour_label" msgid="4208590187662336864">"گھنٹہ"</string>
     <string name="time_picker_minute_label" msgid="8307452311269824553">"منٹ"</string>
     <string name="time_picker_header_text" msgid="9073802285051516688">"وقت سیٹ کریں"</string>
@@ -2049,7 +2051,8 @@
     <string name="log_access_confirmation_title" msgid="2343578467290592708">"<xliff:g id="LOG_ACCESS_APP_NAME">%s</xliff:g> کو آلے کے تمام لاگز تک رسائی کی اجازت دیں؟"</string>
     <string name="log_access_confirmation_allow" msgid="5302517782599389507">"یک وقتی رسائی کی اجازت دیں"</string>
     <string name="log_access_confirmation_deny" msgid="7685790957455099845">"اجازت نہ دیں"</string>
-    <string name="log_access_confirmation_body" msgid="6581985716241928135">"آپ کے آلے پر جو ہوتا ہے آلے کے لاگز اسے ریکارڈ کر لیتے ہیں۔ ایپس ان لاگز کا استعمال مسائل کو تلاش کرنے اور ان کو حل کرنے کے لیے کر سکتی ہیں۔\n\nکچھ لاگز میں حساس معلومات شامل ہو سکتی ہیں، اس لیے صرف اپنی بھروسے مند ایپس کو ہی آلے کے تمام لاگز تک رسائی کی اجازت دیں۔ \n\nاگر آپ اس ایپ کو آلے کے تمام لاگز تک رسائی کی اجازت نہیں دیتے ہیں تب بھی یہ اپنے لاگز تک رسائی حاصل کر سکتی ہے۔ آپ کے آلے کا مینوفیکچرر اب بھی آپ کے آلے پر کچھ لاگز یا معلومات تک رسائی حاصل کر سکتا ہے۔ مزید جانیں"</string>
+    <string name="log_access_confirmation_body" product="default" msgid="1806692062668620735">"آپ کے آلے پر جو ہوتا ہے آلے کے لاگز اسے ریکارڈ کر لیتے ہیں۔ ایپس ان لاگز کا استعمال مسائل کو تلاش کرنے اور ان کو حل کرنے کے لیے کر سکتی ہیں۔\n\nکچھ لاگز میں حساس معلومات شامل ہو سکتی ہیں، اس لیے صرف اپنے بھروسے مند ایپس کو ہی آلے کے تمام لاگز تک رسائی کی اجازت دیں۔ \n\nاگر آپ اس ایپ کو آلے کے تمام لاگز تک رسائی کی اجازت نہیں دیتے ہیں تب بھی یہ اپنے لاگز تک رسائی حاصل کر سکتی ہے۔ آپ کے آلے کا مینوفیکچرر اب بھی آپ کے آلے پر کچھ لاگز یا معلومات تک رسائی حاصل کر سکتا ہے۔"</string>
+    <string name="log_access_confirmation_body" product="tv" msgid="7379536536425265262">"‏آپ کے آلے پر جو ہوتا ہے آلے کے لاگز اسے ریکارڈ کر لیتے ہیں۔ ایپس ان لاگز کا استعمال مسائل کو تلاش کرنے اور ان کو حل کرنے کے لیے کر سکتی ہیں۔\n\nکچھ لاگز میں حساس معلومات شامل ہو سکتی ہیں، اس لیے صرف اپنی بھروسے مند ایپس کو ہی آلے کے تمام لاگز تک رسائی کی اجازت دیں۔ \n\nاگر آپ اس ایپ کو آلے کے تمام لاگز تک رسائی کی اجازت نہیں دیتے ہیں تب بھی یہ اپنے لاگز تک رسائی حاصل کر سکتی ہے۔ آپ کے آلے کا مینوفیکچرر اب بھی آپ کے آلے پر کچھ لاگز یا معلومات تک رسائی حاصل کر سکتا ہے۔\n\ng.co/android/devicelogs پر مزید جانیں۔"</string>
     <string name="log_access_do_not_show_again" msgid="1058690599083091552">"دوبارہ نہ دکھائیں"</string>
     <string name="slices_permission_request" msgid="3677129866636153406">"<xliff:g id="APP_0">%1$s</xliff:g> <xliff:g id="APP_2">%2$s</xliff:g> کے سلائسز دکھانا چاہتی ہے"</string>
     <string name="screenshot_edit" msgid="7408934887203689207">"ترمیم کریں"</string>
@@ -2290,5 +2293,6 @@
     <string name="notification_action_check_bg_apps" msgid="4758877443365362532">"فعال ایپس چیک کریں"</string>
     <string name="vdm_camera_access_denied" product="default" msgid="6102378580971542473">"آپ کے <xliff:g id="DEVICE">%1$s</xliff:g> سے فون کے کیمرا تک رسائی حاصل نہیں کی جا سکتی"</string>
     <string name="vdm_camera_access_denied" product="tablet" msgid="6895968310395249076">"آپ کے <xliff:g id="DEVICE">%1$s</xliff:g> سے ٹیبلیٹ کے کیمرا تک رسائی حاصل نہیں کی جا سکتی"</string>
+    <string name="vdm_secure_window" msgid="161700398158812314">"سلسلہ بندی کے دوران اس تک رسائی حاصل نہیں کی جا سکتی۔ اس کے بجائے اپنے فون پر کوشش کریں۔"</string>
     <string name="system_locale_title" msgid="711882686834677268">"سسٹم ڈیفالٹ"</string>
 </resources>

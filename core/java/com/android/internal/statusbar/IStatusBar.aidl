@@ -264,11 +264,6 @@ oneway interface IStatusBar
     void stopTracing();
 
     /**
-     * Handles a logging command from the WM shell command.
-     */
-    void handleWindowManagerLoggingCommand(in String[] args, in ParcelFileDescriptor outFd);
-
-    /**
      * If true, suppresses the ambient display from showing. If false, re-enables the ambient
      * display.
      */
@@ -327,4 +322,20 @@ oneway interface IStatusBar
 
     /** Unregisters a nearby media devices provider. */
     void unregisterNearbyMediaDevicesProvider(in INearbyMediaDevicesProvider provider);
+
+    /** Dump protos from SystemUI. The proto definition is defined there */
+    void dumpProto(in String[] args, in ParcelFileDescriptor pfd);
+
+    /** Shows rear display educational dialog */
+    void showRearDisplayDialog(int currentBaseState);
+
+    /** Called when requested to go to fullscreen from the active split app. */
+    void goToFullscreenFromSplit();
+
+    /**
+     * Enters stage split from a current running app.
+     *
+     * @param leftOrTop indicates where the stage split is.
+     */
+    void enterStageSplitFromRunningApp(boolean leftOrTop);
 }

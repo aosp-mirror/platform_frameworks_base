@@ -287,8 +287,10 @@ public abstract class ActivityTaskManagerInternal {
 
     /**
      * Called when the device changes its dreaming state.
+     *
+     * @param activeDreamComponent The currently active dream. If null, the device is not dreaming.
      */
-    public abstract void notifyDreamStateChanged(boolean dreaming);
+    public abstract void notifyActiveDreamChanged(@Nullable ComponentName activeDreamComponent);
 
     /**
      * Set a uid that is allowed to bypass stopped app switches, launching an app

@@ -16,6 +16,7 @@
 
 package com.android.systemui.qs.tiles;
 
+import android.app.Dialog;
 import android.content.Intent;
 import android.os.Handler;
 import android.os.Looper;
@@ -43,7 +44,6 @@ import com.android.systemui.qs.QSHost;
 import com.android.systemui.qs.logging.QSLogger;
 import com.android.systemui.qs.tileimpl.QSTileImpl;
 import com.android.systemui.screenrecord.RecordingController;
-import com.android.systemui.screenrecord.ScreenRecordDialog;
 import com.android.systemui.statusbar.phone.KeyguardDismissUtil;
 import com.android.systemui.statusbar.policy.KeyguardStateController;
 
@@ -120,7 +120,9 @@ public class ScreenRecordTile extends QSTileImpl<QSTile.BooleanState>
         state.value = isRecording || isStarting;
         state.state = (isRecording || isStarting) ? Tile.STATE_ACTIVE : Tile.STATE_INACTIVE;
         state.label = mContext.getString(R.string.quick_settings_screen_record_label);
-        state.icon = ResourceIcon.get(R.drawable.ic_screenrecord);
+        state.icon = ResourceIcon.get(state.value
+                ? R.drawable.qs_screen_record_icon_on
+                : R.drawable.qs_screen_record_icon_off);
         // Show expand icon when clicking will open a dialog
         state.forceExpandIcon = state.state == Tile.STATE_INACTIVE;
 
@@ -168,9 +170,9 @@ public class ScreenRecordTile extends QSTileImpl<QSTile.BooleanState>
             mDialogLaunchAnimator.disableAllCurrentDialogsExitAnimations();
             getHost().collapsePanels();
         };
-        ScreenRecordDialog dialog = mController.createScreenRecordDialog(mContext, mFlags,
-                mDialogLaunchAnimator, mActivityStarter, onStartRecordingClicked);
 
+        Dialog dialog = mController.createScreenRecordDialog(mContext, mFlags,
+                mDialogLaunchAnimator, mActivityStarter, onStartRecordingClicked);
         ActivityStarter.OnDismissAction dismissAction = () -> {
             if (shouldAnimateFromView) {
                 mDialogLaunchAnimator.showFromView(dialog, view, new DialogCuj(

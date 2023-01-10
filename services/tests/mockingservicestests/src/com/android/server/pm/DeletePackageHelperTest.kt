@@ -76,8 +76,7 @@ class DeletePackageHelperTest {
         whenever(mUserManagerInternal.getProfileParentId(1)).thenReturn(1)
 
         val dph = DeletePackageHelper(mPms)
-        val result = dph.deletePackageX("a.data.package", 1L, 1,
-            PackageManager.DELETE_SYSTEM_APP, false)
+        val result = dph.deletePackageX("a.data.package", 1L, 1, 0, false)
 
         assertThat(result).isEqualTo(PackageManager.DELETE_FAILED_USER_RESTRICTED)
     }
@@ -95,8 +94,7 @@ class DeletePackageHelperTest {
             UserInfo(userId, "testparent", 0))
 
         val dph = DeletePackageHelper(mPms)
-        val result = dph.deletePackageX("a.data.package", 1L, userId,
-            PackageManager.DELETE_SYSTEM_APP, false)
+        val result = dph.deletePackageX("a.data.package", 1L, userId, 0, false)
 
         assertThat(result).isEqualTo(PackageManager.DELETE_FAILED_USER_RESTRICTED)
     }
@@ -130,6 +128,20 @@ class DeletePackageHelperTest {
         val dph = DeletePackageHelper(mPms)
         val result = dph.deletePackageX("a.data.package", 1L, userId,
             PackageManager.DELETE_SYSTEM_APP, false)
+
+        assertThat(result).isEqualTo(PackageManager.DELETE_SUCCEEDED)
+    }
+
+    @Test
+    fun deleteSystemPackageSucceedsIfNotAdminButDeleteSystemAppSpecified() {
+        val ps = mPms.mSettings.getPackageLPr("a.data.package")
+        whenever(PackageManagerServiceUtils.isSystemApp(ps)).thenReturn(true)
+        whenever(mUserManagerInternal.getUserInfo(1)).thenReturn(UserInfo(1, "test", 0))
+        whenever(mUserManagerInternal.getProfileParentId(1)).thenReturn(1)
+
+        val dph = DeletePackageHelper(mPms)
+        val result = dph.deletePackageX("a.data.package", 1L, 1,
+                PackageManager.DELETE_SYSTEM_APP, false)
 
         assertThat(result).isEqualTo(PackageManager.DELETE_SUCCEEDED)
     }

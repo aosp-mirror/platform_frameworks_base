@@ -49,6 +49,7 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
+import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.function.Consumer;
 
 /**
@@ -104,11 +105,7 @@ public final class PlaybackActivityMonitor
     private static final VolumeShaper.Operation PLAY_SKIP_RAMP =
             new VolumeShaper.Operation.Builder(PLAY_CREATE_IF_NEEDED).setXOffset(1.0f).build();
 
-    private final ArrayList<PlayMonitorClient> mClients = new ArrayList<PlayMonitorClient>();
-    // a public client is one that needs an anonymized version of the playback configurations, we
-    // keep track of whether there is at least one to know when we need to create the list of
-    // playback configurations that do not contain uid/pid/package name information.
-    private boolean mHasPublicClients = false;
+    private final ConcurrentLinkedQueue<PlayMonitorClient> mClients = new ConcurrentLinkedQueue<>();
 
     private final Object mPlayerLock = new Object();
     @GuardedBy("mPlayerLock")
@@ -172,6 +169,18 @@ public final class PlaybackActivityMonitor
             }
         }
         return toBan;
+    }
+
+    //=================================================================
+    // Player to ignore (only handling single player, designed for ignoring
+    // in the logs one specific player such as the touch sounds player)
+    @GuardedBy("mPlayerLock")
+    private ArrayList<Integer> mDoNotLogPiidList = new ArrayList<>();
+
+    /*package*/ void ignorePlayerIId(int doNotLogPiid) {
+        synchronized (mPlayerLock) {
+            mDoNotLogPiidList.add(doNotLogPiid);
+        }
     }
 
     //=================================================================
@@ -298,13 +307,20 @@ public final class PlaybackActivityMonitor
             Log.v(TAG, String.format("playerEvent(piid=%d, deviceId=%d, event=%s)",
                     piid, deviceId, AudioPlaybackConfiguration.playerStateToString(event)));
         }
-        final boolean change;
+        boolean change;
         synchronized(mPlayerLock) {
             final AudioPlaybackConfiguration apc = mPlayers.get(new Integer(piid));
             if (apc == null) {
                 return;
             }
+
+            final boolean doNotLog = mDoNotLogPiidList.contains(piid);
+            if (doNotLog && event != AudioPlaybackConfiguration.PLAYER_STATE_RELEASED) {
+                // do not log nor dispatch events for "ignored" players other than the release
+                return;
+            }
             sEventLogger.log(new PlayerEvent(piid, event, deviceId));
+
             if (event == AudioPlaybackConfiguration.PLAYER_STATE_STARTED) {
                 for (Integer uidInteger: mBannedUids) {
                     if (checkBanPlayer(apc, uidInteger.intValue())) {
@@ -315,7 +331,8 @@ public final class PlaybackActivityMonitor
                     }
                 }
             }
-            if (apc.getPlayerType() == AudioPlaybackConfiguration.PLAYER_TYPE_JAM_SOUNDPOOL) {
+            if (apc.getPlayerType() == AudioPlaybackConfiguration.PLAYER_TYPE_JAM_SOUNDPOOL
+                    && event != AudioPlaybackConfiguration.PLAYER_STATE_RELEASED) {
                 // FIXME SoundPool not ready for state reporting
                 return;
             }
@@ -327,9 +344,15 @@ public final class PlaybackActivityMonitor
                 Log.e(TAG, "Error handling event " + event);
                 change = false;
             }
-            if (change && event == AudioPlaybackConfiguration.PLAYER_STATE_STARTED) {
-                mDuckingManager.checkDuck(apc);
-                mFadingManager.checkFade(apc);
+            if (change) {
+                if (event == AudioPlaybackConfiguration.PLAYER_STATE_STARTED) {
+                    mDuckingManager.checkDuck(apc);
+                    mFadingManager.checkFade(apc);
+                }
+                if (doNotLog) {
+                    // do not dispatch events for "ignored" players
+                    change = false;
+                }
             }
         }
         if (change) {
@@ -357,6 +380,11 @@ public final class PlaybackActivityMonitor
                 checkVolumeForPrivilegedAlarm(apc, AudioPlaybackConfiguration.PLAYER_STATE_RELEASED);
                 change = apc.handleStateEvent(AudioPlaybackConfiguration.PLAYER_STATE_RELEASED,
                         AudioPlaybackConfiguration.PLAYER_DEVICEID_INVALID);
+
+                if (change && mDoNotLogPiidList.contains(piid)) {
+                    // do not dispatch a change for a "do not log" player
+                    change = false;
+                }
             }
         }
         if (change) {
@@ -458,11 +486,9 @@ public final class PlaybackActivityMonitor
                 + DateFormat.getTimeInstance().format(new Date()));
         synchronized(mPlayerLock) {
             pw.println("\n  playback listeners:");
-            synchronized(mClients) {
-                for (PlayMonitorClient pmc : mClients) {
-                    pw.print(" " + (pmc.mIsPrivileged ? "(S)" : "(P)")
-                            + pmc.toString());
-                }
+            for (PlayMonitorClient pmc : mClients) {
+                pw.print(" " + (pmc.isPrivileged() ? "(S)" : "(P)")
+                        + pmc.toString());
             }
             pw.println("\n");
             // all players
@@ -472,6 +498,9 @@ public final class PlaybackActivityMonitor
             for (Integer piidInt : piidIntList) {
                 final AudioPlaybackConfiguration apc = mPlayers.get(piidInt);
                 if (apc != null) {
+                    if (mDoNotLogPiidList.contains(apc.getPlayerInterfaceId())) {
+                        pw.print("(not logged)");
+                    }
                     apc.dump(pw);
                 }
             }
@@ -534,48 +563,33 @@ public final class PlaybackActivityMonitor
      * @param iplayerReleased indicates if the change was due to a player being released
      */
     private void dispatchPlaybackChange(boolean iplayerReleased) {
-        synchronized (mClients) {
-            // typical use case, nobody is listening, don't do any work
-            if (mClients.isEmpty()) {
-                return;
-            }
-        }
         if (DEBUG) { Log.v(TAG, "dispatchPlaybackChange to " + mClients.size() + " clients"); }
         final List<AudioPlaybackConfiguration> configsSystem;
-        // list of playback configurations for "public consumption". It is only computed if there
+        // list of playback configurations for "public consumption". It is computed lazy if there
         // are non-system playback activity listeners.
-        final List<AudioPlaybackConfiguration> configsPublic;
+        List<AudioPlaybackConfiguration> configsPublic = null;
         synchronized (mPlayerLock) {
             if (mPlayers.isEmpty()) {
                 return;
             }
-            configsSystem = new ArrayList<AudioPlaybackConfiguration>(mPlayers.values());
+            configsSystem = new ArrayList<>(mPlayers.values());
         }
-        synchronized (mClients) {
-            // was done at beginning of method, but could have changed
-            if (mClients.isEmpty()) {
-                return;
-            }
-            configsPublic = mHasPublicClients ? anonymizeForPublicConsumption(configsSystem) : null;
-            final Iterator<PlayMonitorClient> clientIterator = mClients.iterator();
-            while (clientIterator.hasNext()) {
-                final PlayMonitorClient pmc = clientIterator.next();
-                try {
-                    // do not spam the logs if there are problems communicating with this client
-                    if (pmc.mErrorCount < PlayMonitorClient.MAX_ERRORS) {
-                        if (pmc.mIsPrivileged) {
-                            pmc.mDispatcherCb.dispatchPlaybackConfigChange(configsSystem,
-                                    iplayerReleased);
-                        } else {
-                            // non-system clients don't have the control interface IPlayer, so
-                            // they don't need to flush commands when a player was released
-                            pmc.mDispatcherCb.dispatchPlaybackConfigChange(configsPublic, false);
-                        }
+
+        final Iterator<PlayMonitorClient> clientIterator = mClients.iterator();
+        while (clientIterator.hasNext()) {
+            final PlayMonitorClient pmc = clientIterator.next();
+            // do not spam the logs if there are problems communicating with this client
+            if (!pmc.reachedMaxErrorCount()) {
+                if (pmc.isPrivileged()) {
+                    pmc.dispatchPlaybackConfigChange(configsSystem,
+                            iplayerReleased);
+                } else {
+                    if (configsPublic == null) {
+                        configsPublic = anonymizeForPublicConsumption(configsSystem);
                     }
-                } catch (RemoteException e) {
-                    pmc.mErrorCount++;
-                    Log.e(TAG, "Error (" + pmc.mErrorCount +
-                            ") trying to dispatch playback config change to " + pmc, e);
+                    // non-system clients don't have the control interface IPlayer, so
+                    // they don't need to flush commands when a player was released
+                    pmc.dispatchPlaybackConfigChange(configsPublic, false);
                 }
             }
         }
@@ -798,14 +812,9 @@ public final class PlaybackActivityMonitor
         if (pcdb == null) {
             return;
         }
-        synchronized(mClients) {
-            final PlayMonitorClient pmc = new PlayMonitorClient(pcdb, isPrivileged);
-            if (pmc.init()) {
-                if (!isPrivileged) {
-                    mHasPublicClients = true;
-                }
-                mClients.add(pmc);
-            }
+        final PlayMonitorClient pmc = new PlayMonitorClient(pcdb, isPrivileged);
+        if (pmc.init()) {
+            mClients.add(pmc);
         }
     }
 
@@ -813,23 +822,14 @@ public final class PlaybackActivityMonitor
         if (pcdb == null) {
             return;
         }
-        synchronized(mClients) {
-            final Iterator<PlayMonitorClient> clientIterator = mClients.iterator();
-            boolean hasPublicClients = false;
-            // iterate over the clients to remove the dispatcher to remove, and reevaluate at
-            // the same time if we still have a public client.
-            while (clientIterator.hasNext()) {
-                PlayMonitorClient pmc = clientIterator.next();
-                if (pcdb.asBinder().equals(pmc.mDispatcherCb.asBinder())) {
-                    pmc.release();
-                    clientIterator.remove();
-                } else {
-                    if (!pmc.mIsPrivileged) {
-                        hasPublicClients = true;
-                    }
-                }
+        final Iterator<PlayMonitorClient> clientIterator = mClients.iterator();
+        // iterate over the clients to remove the dispatcher
+        while (clientIterator.hasNext()) {
+            PlayMonitorClient pmc = clientIterator.next();
+            if (pmc.equalsDispatcher(pcdb)) {
+                pmc.release();
+                clientIterator.remove();
             }
-            mHasPublicClients = hasPublicClients;
         }
     }
 
@@ -857,24 +857,34 @@ public final class PlaybackActivityMonitor
         // can afford to be static because only one PlaybackActivityMonitor ever instantiated
         static PlaybackActivityMonitor sListenerDeathMonitor;
 
-        final IPlaybackConfigDispatcher mDispatcherCb;
-        final boolean mIsPrivileged;
-
-        int mErrorCount = 0;
         // number of errors after which we don't update this client anymore to not spam the logs
-        static final int MAX_ERRORS = 5;
+        private static final int MAX_ERRORS = 5;
+
+        private final IPlaybackConfigDispatcher mDispatcherCb;
+
+        @GuardedBy("this")
+        private final boolean mIsPrivileged;
+        @GuardedBy("this")
+        private boolean mIsReleased = false;
+        @GuardedBy("this")
+        private int mErrorCount = 0;
 
         PlayMonitorClient(IPlaybackConfigDispatcher pcdb, boolean isPrivileged) {
             mDispatcherCb = pcdb;
             mIsPrivileged = isPrivileged;
         }
 
+        @Override
         public void binderDied() {
             Log.w(TAG, "client died");
             sListenerDeathMonitor.unregisterPlaybackCallback(mDispatcherCb);
         }
 
-        boolean init() {
+        synchronized boolean init() {
+            if (mIsReleased) {
+                // Do not init after release
+                return false;
+            }
             try {
                 mDispatcherCb.asBinder().linkToDeath(this, 0);
                 return true;
@@ -884,8 +894,43 @@ public final class PlaybackActivityMonitor
             }
         }
 
-        void release() {
+        synchronized void release() {
             mDispatcherCb.asBinder().unlinkToDeath(this, 0);
+            mIsReleased = true;
+        }
+
+        void dispatchPlaybackConfigChange(List<AudioPlaybackConfiguration> configs,
+                boolean flush) {
+            synchronized (this) {
+                if (mIsReleased) {
+                    // Do not dispatch anything after release
+                    return;
+                }
+            }
+            try {
+                mDispatcherCb.dispatchPlaybackConfigChange(configs, flush);
+            } catch (RemoteException e) {
+                synchronized (this) {
+                    mErrorCount++;
+                    Log.e(TAG, "Error (" + mErrorCount
+                            + ") trying to dispatch playback config change to " + this, e);
+                }
+            }
+        }
+
+        synchronized boolean isPrivileged() {
+            return mIsPrivileged;
+        }
+
+        synchronized boolean reachedMaxErrorCount() {
+            return mErrorCount >= MAX_ERRORS;
+        }
+
+        synchronized boolean equalsDispatcher(IPlaybackConfigDispatcher pcdb) {
+            if (pcdb == null) {
+                return false;
+            }
+            return pcdb.asBinder().equals(mDispatcherCb.asBinder());
         }
     }
 

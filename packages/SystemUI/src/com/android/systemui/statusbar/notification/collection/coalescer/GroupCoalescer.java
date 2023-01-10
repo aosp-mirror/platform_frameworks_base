@@ -32,14 +32,18 @@ import com.android.systemui.Dumpable;
 import com.android.systemui.dagger.qualifiers.Main;
 import com.android.systemui.statusbar.NotificationListener;
 import com.android.systemui.statusbar.NotificationListener.NotificationHandler;
+import com.android.systemui.statusbar.notification.collection.PipelineDumpable;
+import com.android.systemui.statusbar.notification.collection.PipelineDumper;
 import com.android.systemui.util.concurrency.DelayableExecutor;
 import com.android.systemui.util.time.SystemClock;
 
 import java.io.PrintWriter;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import javax.inject.Inject;
 
@@ -63,7 +67,7 @@ import javax.inject.Inject;
  * passed along to the NotifCollection.
  */
 @MainThread
-public class GroupCoalescer implements Dumpable {
+public class GroupCoalescer implements Dumpable, PipelineDumpable {
     private final DelayableExecutor mMainExecutor;
     private final SystemClock mClock;
     private final GroupCoalescerLogger mLogger;
@@ -114,6 +118,11 @@ public class GroupCoalescer implements Dumpable {
 
     public void setNotificationHandler(BatchableNotificationHandler handler) {
         mHandler = handler;
+    }
+
+    /** @return the set of notification keys currently in the coalescer */
+    public Set<String> getCoalescedKeySet() {
+        return Collections.unmodifiableSet(mCoalescedEvents.keySet());
     }
 
     private final NotificationHandler mListener = new NotificationHandler() {
@@ -312,6 +321,11 @@ public class GroupCoalescer implements Dumpable {
                 pw.println("        " + event.getKey());
             }
         }
+    }
+
+    @Override
+    public void dumpPipeline(@NonNull PipelineDumper d) {
+        d.dump("handler", mHandler);
     }
 
     private final Comparator<CoalescedEvent> mEventComparator = (o1, o2) -> {

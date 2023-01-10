@@ -33,6 +33,7 @@
     <string name="accessibility_action_pip_unstash" msgid="7467499339610437646">"සඟවා තැබීම ඉවත් කරන්න"</string>
     <string name="dock_forced_resizable" msgid="1749750436092293116">"යෙදුම බෙදුම් තිරය සමග ක්‍රියා නොකළ හැකිය"</string>
     <string name="dock_non_resizeble_failed_to_dock_text" msgid="7408396418008948957">"යෙදුම බෙදුණු-තිරය සඳහා සහාය නොදක්වයි."</string>
+    <string name="dock_multi_instances_not_supported_text" msgid="5242868470666346929">"මෙම යෙදුම විවෘත කළ හැක්කේ 1 කවුළුවක පමණයි."</string>
     <string name="forced_resizable_secondary_display" msgid="1768046938673582671">"යෙදුම ද්විතියික සංදර්ශකයක ක්‍රියා නොකළ හැකිය."</string>
     <string name="activity_launch_on_secondary_display_failed_text" msgid="4226485344988071769">"යෙදුම ද්විතීයික සංදර්ශක මත දියත් කිරීම සඳහා සහාය නොදක්වයි."</string>
     <string name="accessibility_divider" msgid="703810061635792791">"බෙදුම්-තිර වෙන්කරණය"</string>
@@ -76,12 +77,19 @@
     <string name="camera_compat_treatment_suggested_button_description" msgid="8103916969024076767">"කැමරා ගැටලුද?\nයළි සවි කිරීමට තට්ටු කරන්න"</string>
     <string name="camera_compat_treatment_applied_button_description" msgid="2944157113330703897">"එය විසඳුවේ නැතිද?\nප්‍රතිවර්තනය කිරීමට තට්ටු කරන්න"</string>
     <string name="camera_compat_dismiss_button_description" msgid="2795364433503817511">"කැමරා ගැටලු නොමැතිද? ඉවත දැමීමට තට්ටු කරන්න"</string>
-    <string name="letterbox_education_dialog_title" msgid="6688664582871779215">"සමහර යෙදුම් ප්‍රතිමූර්තිය තුළ හොඳින්ම ක්‍රියා කරයි"</string>
-    <string name="letterbox_education_dialog_subtext" msgid="4853542518367719562">"ඔබගේ ඉඩෙන් උපරිම ප්‍රයෝජන ගැනීමට මෙම විකල්පවලින් එකක් උත්සාහ කරන්න"</string>
-    <string name="letterbox_education_screen_rotation_text" msgid="5085786687366339027">"සම්පූර්ණ තිරයට යාමට ඔබගේ උපාංගය කරකවන්න"</string>
-    <string name="letterbox_education_reposition_text" msgid="1068293354123934727">"එය නැවත ස්ථානගත කිරීමට යෙදුමකට යාබදව දෙවරක් තට්ටු කරන්න"</string>
+    <string name="letterbox_education_dialog_title" msgid="7739895354143295358">"බලන්න සහ තවත් දේ කරන්න"</string>
+    <string name="letterbox_education_split_screen_text" msgid="6206339484068670830">"බෙදුම් තිරය සඳහා වෙනත් යෙදුමකට අදින්න"</string>
+    <string name="letterbox_education_reposition_text" msgid="4589957299813220661">"යෙදුමක් නැවත ස්ථානගත කිරීමට පිටතින් දෙවරක් තට්ටු කරන්න"</string>
     <string name="letterbox_education_got_it" msgid="4057634570866051177">"තේරුණා"</string>
     <string name="letterbox_education_expand_button_description" msgid="1729796567101129834">"වැඩිදුර තොරතුරු සඳහා දිග හරින්න"</string>
     <string name="maximize_button_text" msgid="1650859196290301963">"විහිදන්න"</string>
+    <string name="minimize_button_text" msgid="271592547935841753">"කුඩා කරන්න"</string>
     <string name="close_button_text" msgid="2913281996024033299">"වසන්න"</string>
+    <string name="back_button_text" msgid="1469718707134137085">"ආපසු"</string>
+    <string name="handle_text" msgid="1766582106752184456">"හැඬලය"</string>
+    <string name="fullscreen_text" msgid="1162316685217676079">"පූර්ණ තිරය"</string>
+    <string name="desktop_text" msgid="1077633567027630454">"ඩෙස්ක්ටොප් ප්‍රකාරය"</string>
+    <string name="split_screen_text" msgid="1396336058129570886">"බෙදුම් තිරය"</string>
+    <string name="more_button_text" msgid="3655388105592893530">"තව"</string>
+    <string name="float_button_text" msgid="9221657008391364581">"පාවෙන"</string>
 </resources>

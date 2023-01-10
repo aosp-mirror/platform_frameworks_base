@@ -25,7 +25,7 @@ android_test {
         "testng",
         "truth-prebuilt",
     ],
-
+    test_suites: ["general-tests"],
     platform_apis: true,
     certificate: "platform",
 }

@@ -16,16 +16,26 @@
 
 package com.android.wm.shell.sysui;
 
+import static org.junit.Assert.assertThrows;
 import static org.junit.Assert.assertTrue;
+import static org.mockito.Mockito.mock;
 
+import android.content.Context;
+import android.content.pm.UserInfo;
 import android.content.res.Configuration;
+import android.os.Binder;
+import android.os.Bundle;
+import android.os.IBinder;
 import android.testing.AndroidTestingRunner;
 import android.testing.TestableLooper;
 
+import androidx.annotation.NonNull;
 import androidx.test.filters.SmallTest;
 import androidx.test.platform.app.InstrumentationRegistry;
 
 import com.android.wm.shell.ShellTestCase;
+import com.android.wm.shell.TestShellExecutor;
+import com.android.wm.shell.common.ExternalInterfaceBinder;
 import com.android.wm.shell.common.ShellExecutor;
 
 import org.junit.After;
@@ -35,6 +45,8 @@ import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Locale;
 
 @SmallTest
@@ -42,27 +54,119 @@ import java.util.Locale;
 @TestableLooper.RunWithLooper(setAsMainLooper = true)
 public class ShellControllerTest extends ShellTestCase {
 
+    private static final int TEST_USER_ID = 100;
+    private static final String EXTRA_TEST_BINDER = "test_binder";
+
     @Mock
     private ShellInit mShellInit;
     @Mock
-    private ShellExecutor mExecutor;
+    private ShellCommandHandler mShellCommandHandler;
+    @Mock
+    private Context mTestUserContext;
 
+    private TestShellExecutor mExecutor;
     private ShellController mController;
     private TestConfigurationChangeListener mConfigChangeListener;
     private TestKeyguardChangeListener mKeyguardChangeListener;
+    private TestUserChangeListener mUserChangeListener;
+
 
     @Before
     public void setUp() {
         MockitoAnnotations.initMocks(this);
         mKeyguardChangeListener = new TestKeyguardChangeListener();
         mConfigChangeListener = new TestConfigurationChangeListener();
-        mController = new ShellController(mShellInit, mExecutor);
+        mUserChangeListener = new TestUserChangeListener();
+        mExecutor = new TestShellExecutor();
+        mController = new ShellController(mShellInit, mShellCommandHandler, mExecutor);
         mController.onConfigurationChanged(getConfigurationCopy());
     }
 
     @After
     public void tearDown() {
         // Do nothing
+    }
+
+    @Test
+    public void testAddExternalInterface_ensureCallback() {
+        Binder callback = new Binder();
+        ExternalInterfaceBinder wrapper = new ExternalInterfaceBinder() {
+            @Override
+            public void invalidate() {
+                // Do nothing
+            }
+
+            @Override
+            public IBinder asBinder() {
+                return callback;
+            }
+        };
+        mController.addExternalInterface(EXTRA_TEST_BINDER, () -> wrapper, this);
+
+        Bundle b = new Bundle();
+        mController.asShell().createExternalInterfaces(b);
+        mExecutor.flushAll();
+        assertTrue(b.getIBinder(EXTRA_TEST_BINDER) == callback);
+    }
+
+    @Test
+    public void testAddExternalInterface_disallowDuplicateKeys() {
+        Binder callback = new Binder();
+        ExternalInterfaceBinder wrapper = new ExternalInterfaceBinder() {
+            @Override
+            public void invalidate() {
+                // Do nothing
+            }
+
+            @Override
+            public IBinder asBinder() {
+                return callback;
+            }
+        };
+        mController.addExternalInterface(EXTRA_TEST_BINDER, () -> wrapper, this);
+        assertThrows(IllegalArgumentException.class, () -> {
+            mController.addExternalInterface(EXTRA_TEST_BINDER, () -> wrapper, this);
+        });
+    }
+
+    @Test
+    public void testAddUserChangeListener_ensureCallback() {
+        mController.addUserChangeListener(mUserChangeListener);
+
+        mController.onUserChanged(TEST_USER_ID, mTestUserContext);
+        assertTrue(mUserChangeListener.userChanged == 1);
+        assertTrue(mUserChangeListener.lastUserContext == mTestUserContext);
+    }
+
+    @Test
+    public void testDoubleAddUserChangeListener_ensureSingleCallback() {
+        mController.addUserChangeListener(mUserChangeListener);
+        mController.addUserChangeListener(mUserChangeListener);
+
+        mController.onUserChanged(TEST_USER_ID, mTestUserContext);
+        assertTrue(mUserChangeListener.userChanged == 1);
+        assertTrue(mUserChangeListener.lastUserContext == mTestUserContext);
+    }
+
+    @Test
+    public void testAddRemoveUserChangeListener_ensureNoCallback() {
+        mController.addUserChangeListener(mUserChangeListener);
+        mController.removeUserChangeListener(mUserChangeListener);
+
+        mController.onUserChanged(TEST_USER_ID, mTestUserContext);
+        assertTrue(mUserChangeListener.userChanged == 0);
+        assertTrue(mUserChangeListener.lastUserContext == null);
+    }
+
+    @Test
+    public void testUserProfilesChanged() {
+        mController.addUserChangeListener(mUserChangeListener);
+
+        ArrayList<UserInfo> profiles = new ArrayList<>();
+        profiles.add(mock(UserInfo.class));
+        profiles.add(mock(UserInfo.class));
+        mController.onUserProfilesChanged(profiles);
+        assertTrue(mUserChangeListener.lastUserProfiles.equals(profiles));
     }
 
     @Test
@@ -328,6 +432,29 @@ public class ShellControllerTest extends ShellTestCase {
         @Override
         public void onKeyguardDismissAnimationFinished() {
             dismissAnimationFinished++;
+        }
+    }
+
+    private class TestUserChangeListener implements UserChangeListener {
+        // Counts of number of times each of the callbacks are called
+        public int userChanged;
+        public int lastUserId;
+        public Context lastUserContext;
+        public int userProfilesChanged;
+        public List<? extends UserInfo> lastUserProfiles;
+
+
+        @Override
+        public void onUserChanged(int newUserId, @NonNull Context userContext) {
+            userChanged++;
+            lastUserId = newUserId;
+            lastUserContext = userContext;
+        }
+
+        @Override
+        public void onUserProfilesChanged(@NonNull List<UserInfo> profiles) {
+            userProfilesChanged++;
+            lastUserProfiles = profiles;
         }
     }
 }

@@ -72,6 +72,7 @@
     <string name="global_action_smart_lock_disabled" msgid="9097102067802412936">"Το Smart Lock έχει απενεργοποιηθεί"</string>
     <string name="remote_input_image_insertion_text" msgid="4850791636452521123">"έστειλε μια εικόνα"</string>
     <string name="screenshot_saving_title" msgid="2298349784913287333">"Αποθήκευση στιγμιότυπου οθόνης..."</string>
+    <string name="screenshot_saving_work_profile_title" msgid="5332829607308450880">"Αποθήκευση στιγμιότ. οθόνης στο προφίλ εργασίας…"</string>
     <string name="screenshot_saved_title" msgid="8893267638659083153">"Το στιγμιότυπο οθόνης αποθηκεύτηκε"</string>
     <string name="screenshot_failed_title" msgid="3259148215671936891">"Μη δυνατή αποθήκευση του στιγμιότυπου οθόνης"</string>
     <string name="screenshot_failed_to_save_user_locked_text" msgid="6156607948256936920">"Η συσκευή πρέπει να ξεκλειδωθεί για να αποθηκευτεί το στιγμιότυπο οθόνης."</string>
@@ -84,6 +85,7 @@
     <string name="screenshot_share_description" msgid="2861628935812656612">"Κοινοποίηση στιγμιότυπου οθόνης"</string>
     <string name="screenshot_scroll_label" msgid="2930198809899329367">"Λήψη περισσότερων"</string>
     <string name="screenshot_dismiss_description" msgid="4702341245899508786">"Παράβλεψη στιγμιότυπου οθόνης"</string>
+    <string name="screenshot_dismiss_work_profile" msgid="3101530842987697045">"Παράβλεψη μηνύματος προφίλ εργασίας"</string>
     <string name="screenshot_preview_description" msgid="7606510140714080474">"Προεπισκόπηση στιγμιότυπου οθόνης"</string>
     <string name="screenshot_top_boundary_pct" msgid="2520148599096479332">"Επάνω όριο <xliff:g id="PERCENT">%1$d</xliff:g> τοις εκατό"</string>
     <string name="screenshot_bottom_boundary_pct" msgid="3880821519814946478">"Κάτω όριο <xliff:g id="PERCENT">%1$d</xliff:g> τοις εκατό"</string>
@@ -94,6 +96,11 @@
     <string name="screenrecord_channel_description" msgid="4147077128486138351">"Ειδοποίηση σε εξέλιξη για μια περίοδο λειτουργίας εγγραφής οθόνης"</string>
     <string name="screenrecord_start_label" msgid="1750350278888217473">"Έναρξη εγγραφής;"</string>
     <string name="screenrecord_description" msgid="1123231719680353736">"Κατά την εγγραφή, το σύστημα Android μπορεί να καταγράψει τυχόν ευαίσθητες πληροφορίες που είναι ορατές στην οθόνη ή αναπαράγονται στη συσκευή σας. Σε αυτές περιλαμβάνονται οι κωδικοί πρόσβασης, οι πληροφορίες πληρωμής, οι φωτογραφίες, τα μηνύματα και ο ήχος."</string>
+    <string name="screenrecord_option_entire_screen" msgid="1732437834603426934">"Εγγραφή ολόκληρης οθόνης"</string>
+    <string name="screenrecord_option_single_app" msgid="5954863081500035825">"Εγγραφή μίας εφαρμογής"</string>
+    <string name="screenrecord_warning_entire_screen" msgid="8141407178104195610">"Όταν κάνετε εγγραφή, το Android έχει πρόσβαση σε οτιδήποτε είναι ορατό στην οθόνη ή αναπαράγεται στη συσκευή σας. Επομένως, να είστε προσεκτικοί με τους κωδικούς πρόσβασης, τα στοιχεία πληρωμής, τα μηνύματα ή άλλες ευαίσθητες πληροφορίες."</string>
+    <string name="screenrecord_warning_single_app" msgid="7760723997065948283">"Όταν κάνετε εγγραφή μιας εφαρμογής, το Android έχει πρόσβαση σε οτιδήποτε είναι ορατό ή αναπαράγεται στη συγκεκριμένη εφαρμογή. Επομένως, να είστε προσεκτικοί με τους κωδικούς πρόσβασης, τα στοιχεία πληρωμής, τα μηνύματα ή άλλες ευαίσθητες πληροφορίες."</string>
+    <string name="screenrecord_start_recording" msgid="348286842544768740">"Έναρξη εγγραφής"</string>
     <string name="screenrecord_audio_label" msgid="6183558856175159629">"Ηχογράφηση"</string>
     <string name="screenrecord_device_audio_label" msgid="9016927171280567791">"Ήχος συσκευής"</string>
     <string name="screenrecord_device_audio_description" msgid="4922694220572186193">"Ήχος από τη συσκευή σας, όπως μουσική, κλήσεις και ήχοι κλήσης"</string>
@@ -120,7 +127,7 @@
     <string name="accessibility_voice_assist_button" msgid="6497706615649754510">"Φωνητική υποβοήθηση"</string>
     <string name="accessibility_wallet_button" msgid="1458258783460555507">"Πορτοφόλι"</string>
     <string name="accessibility_qr_code_scanner_button" msgid="7521277927692910795">"Σάρωση κωδικών QR"</string>
-    <string name="accessibility_unlock_button" msgid="122785427241471085">"Ξεκλείδωμα"</string>
+    <string name="accessibility_unlock_button" msgid="3613812140816244310">"Ξεκλειδώθηκε"</string>
     <string name="accessibility_lock_icon" msgid="661492842417875775">"Η συσκευή κλειδώθηκε"</string>
     <string name="accessibility_scanning_face" msgid="3093828357921541387">"Σάρωση προσώπου"</string>
     <string name="accessibility_send_smart_reply" msgid="8885032190442015141">"Αποστολή"</string>
@@ -161,6 +168,9 @@
     <string name="fingerprint_dialog_use_fingerprint_instead" msgid="6178228876763024452">"Το πρόσωπο δεν αναγνωρίζεται. Χρησιμ. δακτ. αποτ."</string>
     <!-- no translation found for keyguard_face_failed_use_fp (7140293906176164263) -->
     <skip />
+    <string name="keyguard_face_failed" msgid="9044619102286917151">"Αδύνατη η αναγν. προσώπου"</string>
+    <string name="keyguard_suggest_fingerprint" msgid="8742015961962702960">"Χρησιμ. δακτυλ. αποτύπ."</string>
+    <string name="keyguard_face_unlock_unavailable" msgid="1581949044193418736">"Ξεκλ. με πρόσωπο μη διαθ."</string>
     <string name="accessibility_bluetooth_connected" msgid="4745196874551115205">"Το Bluetooth είναι συνδεδεμένο."</string>
     <string name="accessibility_battery_unknown" msgid="1807789554617976440">"Άγνωστο ποσοστό μπαταρίας."</string>
     <string name="accessibility_bluetooth_name" msgid="7300973230214067678">"Συνδέθηκε στο <xliff:g id="BLUETOOTH">%s</xliff:g>."</string>
@@ -171,8 +181,10 @@
     <string name="accessibility_airplane_mode" msgid="1899529214045998505">"Λειτουργία πτήσης."</string>
     <string name="accessibility_vpn_on" msgid="8037549696057288731">"VPN ενεργό."</string>
     <string name="accessibility_battery_level" msgid="5143715405241138822">"Μπαταρία <xliff:g id="NUMBER">%d</xliff:g> τοις εκατό."</string>
-    <string name="accessibility_battery_level_with_estimate" msgid="4843119982547599452">"Μπαταρία στο <xliff:g id="PERCENTAGE">%1$s</xliff:g> τοις εκατό. Περίπου <xliff:g id="TIME">%2$s</xliff:g> ακόμη, βάσει της χρήσης σας"</string>
+    <string name="accessibility_battery_level_with_estimate" msgid="6548654589315074529">"Μπαταρία <xliff:g id="PERCENTAGE">%1$d</xliff:g> τοις εκατό, <xliff:g id="TIME">%2$s</xliff:g>"</string>
     <string name="accessibility_battery_level_charging" msgid="8892191177774027364">"Φόρτιση μπαταρίας: <xliff:g id="BATTERY_PERCENTAGE">%d</xliff:g>%%."</string>
+    <string name="accessibility_battery_level_charging_paused" msgid="3560711496775146763">"Μπαταρία <xliff:g id="PERCENTAGE">%d</xliff:g> τοις εκατό, η φόρτιση τέθηκε σε παύση για την προστασία της μπαταρίας."</string>
+    <string name="accessibility_battery_level_charging_paused_with_estimate" msgid="2223541217743647858">"Μπαταρία <xliff:g id="PERCENTAGE">%1$d</xliff:g> τοις εκατό, <xliff:g id="TIME">%2$s</xliff:g>, η φόρτιση τέθηκε σε παύση για την προστασία της μπαταρίας."</string>
     <string name="accessibility_overflow_action" msgid="8555835828182509104">"Δείτε όλες τις ειδοποιήσεις"</string>
     <string name="accessibility_tty_enabled" msgid="1123180388823381118">"Το TeleTypewriter ενεργοποιήθηκε."</string>
     <string name="accessibility_ringer_vibrate" msgid="6261841170896561364">"Δόνηση ειδοποίησης ήχου."</string>
@@ -241,7 +253,7 @@
     <string name="quick_settings_brightness_dialog_title" msgid="4980669966716685588">"Φωτεινότητα"</string>
     <string name="quick_settings_inversion_label" msgid="3501527749494755688">"Αντιστροφή χρωμάτων"</string>
     <string name="quick_settings_color_correction_label" msgid="5636617913560474664">"Διόρθωση χρωμάτων"</string>
-    <string name="quick_settings_more_user_settings" msgid="1064187451100861954">"Ρυθμίσεις χρήστη"</string>
+    <string name="quick_settings_more_user_settings" msgid="7634653308485206306">"Διαχείριση χρηστών"</string>
     <string name="quick_settings_done" msgid="2163641301648855793">"Τέλος"</string>
     <string name="quick_settings_close_user_panel" msgid="5599724542275896849">"Κλείσιμο"</string>
     <string name="quick_settings_connected" msgid="3873605509184830379">"Συνδέθηκε"</string>
@@ -312,6 +324,8 @@
     <string name="keyguard_face_successful_unlock_press_alt_1" msgid="5715461103913071474">"Ξεκλείδωμα με αναγνώριση προσώπου. Πατήστε για άνοιγμα."</string>
     <string name="keyguard_face_successful_unlock_press_alt_2" msgid="8310787946357120406">"Το πρόσωπο αναγνωρίστηκε. Πατήστε για άνοιγμα."</string>
     <string name="keyguard_face_successful_unlock_press_alt_3" msgid="7219030481255573962">"Το πρόσωπο αναγνωρ. Πατήστ. το εικον. ξεκλειδ. για άνοιγμα."</string>
+    <string name="keyguard_face_successful_unlock" msgid="4203999851465708287">"Ξεκλείδωμα με αναγνώριση προσώπου"</string>
+    <string name="keyguard_face_successful_unlock_alt1" msgid="5853906076353839628">"Το πρόσωπο αναγνωρίστηκε"</string>
   <string-array name="udfps_accessibility_touch_hints">
     <item msgid="1901953991150295169">"Μετακίνηση αριστερά"</item>
     <item msgid="5558598599408514296">"Μετακίνηση κάτω"</item>
@@ -337,8 +351,9 @@
     <string name="keyguard_indication_charging_time" msgid="6492711711891071502">"<xliff:g id="PERCENTAGE">%2$s</xliff:g> • Φόρτιση • Πλήρης φόρτιση σε <xliff:g id="CHARGING_TIME_LEFT">%1$s</xliff:g>"</string>
     <string name="keyguard_indication_charging_time_fast" msgid="8390311020603859480">"<xliff:g id="PERCENTAGE">%2$s</xliff:g> • Γρήγορη φόρτιση • Πλήρης φόρτιση σε <xliff:g id="CHARGING_TIME_LEFT">%1$s</xliff:g>"</string>
     <string name="keyguard_indication_charging_time_slowly" msgid="301936949731705417">"<xliff:g id="PERCENTAGE">%2$s</xliff:g> • Αργή φόρτιση • Πλήρης φόρτιση σε <xliff:g id="CHARGING_TIME_LEFT">%1$s</xliff:g>"</string>
-    <string name="keyguard_indication_charging_time_dock" msgid="6150404291427377863">"<xliff:g id="PERCENTAGE">%2$s</xliff:g> • Βάση φόρτισης • Πλήρης φόρτιση σε <xliff:g id="CHARGING_TIME_LEFT">%1$s</xliff:g>"</string>
+    <string name="keyguard_indication_charging_time_dock" msgid="3149328898931741271">"<xliff:g id="PERCENTAGE">%2$s</xliff:g> • Φόρτιση • Πλήρης φόρτιση σε <xliff:g id="CHARGING_TIME_LEFT">%1$s</xliff:g>"</string>
     <string name="accessibility_multi_user_switch_switcher" msgid="5330448341251092660">"Εναλλαγή χρήστη"</string>
+    <string name="accessibility_multi_user_list_switcher" msgid="8574105376229857407">"αναπτυσσόμενο μενού"</string>
     <string name="guest_exit_guest_dialog_message" msgid="8183450985628495709">"Όλες οι εφαρμογές και τα δεδομένα αυτής της περιόδου σύνδεσης θα διαγραφούν."</string>
     <string name="guest_wipe_session_title" msgid="7147965814683990944">"Kαλώς ορίσατε ξανά!"</string>
     <string name="guest_wipe_session_message" msgid="3393823610257065457">"Θέλετε να συνεχίσετε την περίοδο σύνδεσής σας;"</string>
@@ -356,6 +371,18 @@
     <string name="media_projection_dialog_service_text" msgid="958000992162214611">"Η υπηρεσία που παρέχει αυτήν τη λειτουργία θα έχει πρόσβαση σε όλες τις πληροφορίες που εμφανίζονται στην οθόνη σας ή που αναπαράγονται από τη συσκευή σας κατά την εγγραφή ή τη μετάδοση. Αυτό περιλαμβάνει πληροφορίες όπως κωδικούς πρόσβασης, στοιχεία πληρωμής, φωτογραφίες, μηνύματα και ήχο που αναπαράγετε."</string>
     <string name="media_projection_dialog_service_title" msgid="2888507074107884040">"Έναρξη εγγραφής ή μετάδοσης;"</string>
     <string name="media_projection_dialog_title" msgid="3316063622495360646">"Έναρξη εγγραφής ή μετάδοσης με <xliff:g id="APP_SEEKING_PERMISSION">%s</xliff:g>;"</string>
+    <string name="media_projection_permission_dialog_title" msgid="7130975432309482596">"Να επιτρέπεται στην εφαρμογή <xliff:g id="APP_SEEKING_PERMISSION">%s</xliff:g> η κοινοποίηση ή η εγγραφή;"</string>
+    <string name="media_projection_permission_dialog_option_entire_screen" msgid="392086473225692983">"Ολόκληρη την οθόνη"</string>
+    <string name="media_projection_permission_dialog_option_single_app" msgid="1591110238124910521">"Μία εφαρμογή"</string>
+    <string name="media_projection_permission_dialog_warning_entire_screen" msgid="3989078820637452717">"Όταν κάνετε κοινοποίηση, εγγραφή ή μετάδοση, η εφαρμογή <xliff:g id="APP_SEEKING_PERMISSION">%s</xliff:g> έχει πρόσβαση σε οτιδήποτε είναι ορατό στην οθόνη σας ή αναπαράγεται στη συσκευή σας. Επομένως, να είστε προσεκτικοί με τους κωδικούς πρόσβασης, τα στοιχεία πληρωμής, τα μηνύματα ή άλλες ευαίσθητες πληροφορίες."</string>
+    <string name="media_projection_permission_dialog_warning_single_app" msgid="1659532781536753059">"Όταν κάνετε κοινοποίηση, εγγραφή ή μετάδοση μιας εφαρμογής, η εφαρμογή <xliff:g id="APP_SEEKING_PERMISSION">%s</xliff:g> έχει πρόσβαση σε οτιδήποτε είναι ορατό ή αναπαράγεται στη συγκεκριμένη εφαρμογή. Επομένως, να είστε προσεκτικοί με τους κωδικούς πρόσβασης, τα στοιχεία πληρωμής, τα μηνύματα ή άλλες ευαίσθητες πληροφορίες."</string>
+    <string name="media_projection_permission_dialog_continue" msgid="1827799658916736006">"Συνέχεια"</string>
+    <string name="media_projection_permission_app_selector_title" msgid="894251621057480704">"Κοινοποίηση ή εγγραφή εφαρμογής"</string>
+    <string name="media_projection_permission_dialog_system_service_title" msgid="6827129613741303726">"Να επιτρέπεται σε αυτήν την εφαρμογή η κοινή χρήση ή εγγραφή;"</string>
+    <string name="media_projection_permission_dialog_system_service_warning_entire_screen" msgid="8801616203805837575">"Όταν κάνετε κοινοποίηση, εγγραφή ή μετάδοση, αυτή η εφαρμογή έχει πρόσβαση σε οτιδήποτε είναι ορατό στην οθόνη σας ή αναπαράγεται στη συσκευή σας. Επομένως, να είστε προσεκτικοί με τους κωδικούς πρόσβασης, τα στοιχεία πληρωμής, τα μηνύματα ή άλλες ευαίσθητες πληροφορίες."</string>
+    <string name="media_projection_permission_dialog_system_service_warning_single_app" msgid="543310680568419338">"Όταν κάνετε κοινοποίηση, εγγραφή ή μετάδοση μιας εφαρμογής, αυτή η εφαρμογή έχει πρόσβαση σε οτιδήποτε είναι ορατό ή αναπαράγεται στη συγκεκριμένη εφαρμογή. Επομένως, να είστε προσεκτικοί με τους κωδικούς πρόσβασης, τα στοιχεία πληρωμής, τα μηνύματα ή άλλες ευαίσθητες πληροφορίες."</string>
+    <string name="screen_capturing_disabled_by_policy_dialog_title" msgid="2113331792064527203">"Αποκλείστηκε από τον διαχειριστή IT"</string>
+    <string name="screen_capturing_disabled_by_policy_dialog_description" msgid="6015975736747696431">"Η καταγραφή οθόνης έχει απενεργοποιηθεί από την πολιτική χρήσης συσκευής."</string>
     <string name="clear_all_notifications_text" msgid="348312370303046130">"Διαγραφή όλων"</string>
     <string name="manage_notifications_text" msgid="6885645344647733116">"Διαχείριση"</string>
     <string name="manage_notifications_history_text" msgid="57055985396576230">"Ιστορικό"</string>
@@ -367,6 +394,8 @@
     <string name="dnd_suppressing_shade_text" msgid="5588252250634464042">"Οι ειδοποιήσεις τέθηκαν σε παύση από τη λειτουργία \"Μην ενοχλείτε\""</string>
     <string name="media_projection_action_text" msgid="3634906766918186440">"Έναρξη τώρα"</string>
     <string name="empty_shade_text" msgid="8935967157319717412">"Δεν υπάρχουν ειδοποιήσεις"</string>
+    <string name="no_unseen_notif_text" msgid="395512586119868682">"Δεν υπάρχουν νέες ειδοποιήσεις"</string>
+    <string name="unlock_to_see_notif_text" msgid="7439033907167561227">"Ξεκλειδώστε για εμφάνιση παλαιότ. ειδοπ."</string>
     <string name="quick_settings_disclosure_parental_controls" msgid="2114102871438223600">"Αυτή η συσκευή είναι διαχειριζόμενη από τον γονέα σου"</string>
     <string name="quick_settings_disclosure_management_monitoring" msgid="8231336875820702180">"Ο οργανισμός σας κατέχει αυτήν τη συσκευή και μπορεί να παρακολουθεί την επισκεψιμότητα δικτύου."</string>
     <string name="quick_settings_disclosure_named_management_monitoring" msgid="2831423806103479812">"Ο οργανισμός <xliff:g id="ORGANIZATION_NAME">%1$s</xliff:g> κατέχει αυτήν τη συσκευή και μπορεί να παρακολουθεί την επισκεψιμότητα δικτύου."</string>
@@ -416,6 +445,8 @@
     <string name="volume_odi_captions_content_description" msgid="4172765742046013630">"Επικάλυψη υπότιτλων"</string>
     <string name="volume_odi_captions_hint_enable" msgid="2073091194012843195">"ενεργοποίηση"</string>
     <string name="volume_odi_captions_hint_disable" msgid="2518846326748183407">"απενεργοποίηση"</string>
+    <string name="sound_settings" msgid="8874581353127418308">"Ήχος και δόνηση"</string>
+    <string name="volume_panel_dialog_settings_button" msgid="2513228491513390310">"Ρυθμίσεις"</string>
     <string name="screen_pinning_title" msgid="9058007390337841305">"Η εφαρμογή είναι καρφιτσωμένη."</string>
     <string name="screen_pinning_description" msgid="8699395373875667743">"Με αυτόν τον τρόπο παραμένει σε προβολή μέχρι να το ξεκαρφιτσώσετε. Αγγίξτε παρατεταμένα τα στοιχεία \"Επιστροφή\" και \"Επισκόπηση\" για ξεκαρφίτσωμα."</string>
     <string name="screen_pinning_description_recents_invisible" msgid="4564466648700390037">"Με αυτόν τον τρόπο, παραμένει σε προβολή μέχρι να το ξεκαρφιτσώσετε. Αγγίξτε παρατεταμένα τα στοιχεία \"Πίσω\" και \"Αρχική οθόνη\" για ξεκαρφίτσωμα."</string>
@@ -469,7 +500,8 @@
     <string name="wallet_secondary_label_device_locked" msgid="5175862019125370506">"Ξεκλείδωμα για χρήση"</string>
     <string name="wallet_error_generic" msgid="257704570182963611">"Παρουσιάστηκε πρόβλημα με τη λήψη των καρτών σας. Δοκιμάστε ξανά αργότερα"</string>
     <string name="wallet_lockscreen_settings_label" msgid="3539105300870383570">"Ρυθμίσεις κλειδώματος οθόνης"</string>
-    <string name="qr_code_scanner_title" msgid="5290201053875420785">"Σάρωση κωδικού QR"</string>
+    <string name="qr_code_scanner_title" msgid="1938155688725760702">"Σάρωση κωδικών QR"</string>
+    <string name="qr_code_scanner_updating_secondary_label" msgid="8344598017007876352">"Ενημέρωση"</string>
     <string name="status_bar_work" msgid="5238641949837091056">"Προφίλ εργασίας"</string>
     <string name="status_bar_airplane" msgid="4848702508684541009">"Λειτουργία πτήσης"</string>
     <string name="zen_alarm_warning" msgid="7844303238486849503">"Δεν θα ακούσετε το επόμενο ξυπνητήρι σας <xliff:g id="WHEN">%1$s</xliff:g>"</string>
@@ -591,7 +623,7 @@
     <string name="switch_bar_on" msgid="1770868129120096114">"Ενεργό"</string>
     <string name="switch_bar_off" msgid="5669805115416379556">"Απενεργοποίηση"</string>
     <string name="tile_unavailable" msgid="3095879009136616920">"Μη διαθέσιμο"</string>
-    <string name="tile_disabled" msgid="373212051546573069">"Ανενεργό"</string>
+    <string name="accessibility_tile_disabled_by_policy_action_description" msgid="6958422730461646926">"μάθετε περισσότερα"</string>
     <string name="nav_bar" msgid="4642708685386136807">"Γραμμή πλοήγησης"</string>
     <string name="nav_bar_layout" msgid="4716392484772899544">"Διάταξη"</string>
     <string name="left_nav_bar_button_type" msgid="2634852842345192790">"Επιπλέον τύπος αριστερού κουμπιού"</string>
@@ -664,8 +696,8 @@
     <string name="high_temp_notif_message" msgid="1277346543068257549">"Ορισμένες λειτουργίες περιορίζονται κατά τη μείωση της θερμοκρασίας.\nΠατήστε για περισσότερες πληροφορίες."</string>
     <string name="high_temp_dialog_message" msgid="3793606072661253968">"Το τηλέφωνό σας θα προσπαθήσει να μειώσει αυτόματα τη θερμοκρασία. Μπορείτε να εξακολουθήσετε να το χρησιμοποιείτε, αλλά είναι πιθανό να λειτουργεί πιο αργά.\n\nΜόλις μειωθεί η θερμοκρασία του τηλεφώνου σας, θα λειτουργεί ξανά κανονικά."</string>
     <string name="high_temp_dialog_help_text" msgid="7380171287943345858">"Δείτε βήματα αντιμετώπισης."</string>
-    <string name="high_temp_alarm_title" msgid="2359958549570161495">"Αποσυνδέστε τον φορτιστή"</string>
-    <string name="high_temp_alarm_notify_message" msgid="7186272817783835089">"Υπάρχει κάποιο πρόβλημα με τη φόρτιση αυτής της συσκευής. Αποσυνδέστε τον μετασχηματιστή με προσοχή, λαμβάνοντας υπόψη ότι το καλώδιο μπορεί να είναι ζεστό."</string>
+    <string name="high_temp_alarm_title" msgid="8654754369605452169">"Αποσυνδέστε τη συσκευή"</string>
+    <string name="high_temp_alarm_notify_message" msgid="3917622943609118956">"Η συσκευή έχει αρχίσει να ζεσταίνεται κοντά στη θύρα φόρτισης. Αν είναι συνδεδεμένη σε φορτιστή ή αξεσουάρ USB, αποσυνδέστε την και προσέξτε γιατί και το καλώδιο μπορεί να έχει ζεσταθεί."</string>
     <string name="high_temp_alarm_help_care_steps" msgid="5017002218341329566">"Δείτε βήματα αντιμετώπισης"</string>
     <string name="lockscreen_shortcut_left" msgid="1238765178956067599">"Αριστερή συντόμευση"</string>
     <string name="lockscreen_shortcut_right" msgid="4138414674531853719">"Δεξιά συντόμευση"</string>
@@ -700,6 +732,7 @@
     <string name="wifi_is_off" msgid="5389597396308001471">"Το Wi-Fi είναι ανενεργό"</string>
     <string name="bt_is_off" msgid="7436344904889461591">"Το Bluetooth είναι ανενεργό"</string>
     <string name="dnd_is_off" msgid="3185706903793094463">"Η λειτουργία \"Μην ενοχλείτε\" είναι ανενεργή"</string>
+    <string name="dnd_is_on" msgid="7009368176361546279">"Η λειτουργία Μην ενοχλείτε είναι ενεργή"</string>
     <string name="qs_dnd_prompt_auto_rule" msgid="3535469468310002616">"Η λειτουργία \"Μην ενοχλείτε\" ενεργοποιήθηκε από έναν αυτόματο κανόνα (<xliff:g id="ID_1">%s</xliff:g>)."</string>
     <string name="qs_dnd_prompt_app" msgid="4027984447935396820">"Η λειτουργία \"Μην ενοχλείτε\" ενεργοποιήθηκε από μια εφαρμογή (<xliff:g id="ID_1">%s</xliff:g>)."</string>
     <string name="qs_dnd_prompt_auto_rule_app" msgid="1841469944118486580">"Η λειτουργία \"Μην ενοχλείτε\" ενεργοποιήθηκε από έναν αυτόματο κανόνα ή μια εφαρμογή."</string>
@@ -708,6 +741,10 @@
     <string name="mobile_data_disable_title" msgid="5366476131671617790">"Απενεργοποίηση δεδομένων κινητής τηλεφωνίας;"</string>
     <string name="mobile_data_disable_message" msgid="8604966027899770415">"Δεν θα έχετε πρόσβαση σε δεδομένα ή στο διαδίκτυο μέσω της εταιρείας κινητής τηλεφωνίας <xliff:g id="CARRIER">%s</xliff:g>. Θα έχετε πρόσβαση στο διαδίκτυο μόνο μέσω Wi-Fi."</string>
     <string name="mobile_data_disable_message_default_carrier" msgid="6496033312431658238">"η εταιρεία κινητής τηλεφωνίας"</string>
+    <string name="auto_data_switch_disable_title" msgid="5146527155665190652">"Επιστροφή σε <xliff:g id="CARRIER">%s</xliff:g>;"</string>
+    <string name="auto_data_switch_disable_message" msgid="5885533647399535852">"Δεν θα γίνεται αυτόματα εναλλαγή των δεδομένων κινητής τηλεφωνίας βάσει της διαθεσιμότητας"</string>
+    <string name="auto_data_switch_dialog_negative_button" msgid="2370876875999891444">"Όχι, ευχαριστώ"</string>
+    <string name="auto_data_switch_dialog_positive_button" msgid="8531782041263087564">"Ναι, εναλλαγή"</string>
     <string name="touch_filtered_warning" msgid="8119511393338714836">"Επειδή μια εφαρμογή αποκρύπτει ένα αίτημα άδειας, δεν είναι δυνατή η επαλήθευση της απάντησής σας από τις Ρυθμίσεις."</string>
     <string name="slice_permission_title" msgid="3262615140094151017">"Να επιτρέπεται στο <xliff:g id="APP_0">%1$s</xliff:g> να εμφανίζει τμήματα της εφαρμογής <xliff:g id="APP_2">%2$s</xliff:g>;"</string>
     <string name="slice_permission_text_1" msgid="6675965177075443714">"- Μπορεί να διαβάζει πληροφορίες από την εφαρμογή <xliff:g id="APP">%1$s</xliff:g>"</string>
@@ -816,6 +853,8 @@
     <string name="media_move_closer_to_end_cast" msgid="6495907340926563656">"Μετακινηθείτε πιο κοντά στη συσκευή <xliff:g id="DEVICENAME">%1$s</xliff:g> για αναπαραγωγή εδώ"</string>
     <string name="media_transfer_playing_different_device" msgid="7186806382609785610">"Αναπαραγωγή στη συσκευή <xliff:g id="DEVICENAME">%1$s</xliff:g>"</string>
     <string name="media_transfer_failed" msgid="7955354964610603723">"Παρουσιάστηκε κάποιο πρόβλημα. Δοκιμάστε ξανά."</string>
+    <!-- no translation found for media_transfer_loading (5544017127027152422) -->
+    <skip />
     <string name="controls_error_timeout" msgid="794197289772728958">"Ανενεργό, έλεγχος εφαρμογής"</string>
     <string name="controls_error_removed" msgid="6675638069846014366">"Δεν βρέθηκε."</string>
     <string name="controls_error_removed_title" msgid="1207794911208047818">"Μη διαθέσιμο στοιχείο ελέγχου"</string>
@@ -837,6 +876,8 @@
     <string name="media_output_dialog_button_stop_casting" msgid="6581379537930199189">"Διακοπή μετάδοσης"</string>
     <string name="media_output_dialog_accessibility_title" msgid="4681741064190167888">"Διαθέσιμες συσκευές για έξοδο ήχου."</string>
     <string name="media_output_dialog_accessibility_seekbar" msgid="5332843993805568978">"Ένταση ήχου"</string>
+    <string name="media_output_dialog_volume_percentage" msgid="1613984910585111798">"<xliff:g id="PERCENTAGE">%1$d</xliff:g>%%"</string>
+    <string name="media_output_group_title_speakers_and_displays" msgid="7169712332365659820">"Ηχεία και οθόνες"</string>
     <string name="media_output_first_broadcast_title" msgid="6292237789860753022">"Πώς λειτουργεί η μετάδοση"</string>
     <string name="media_output_broadcast" msgid="3555580945878071543">"Μετάδοση"</string>
     <string name="media_output_first_notify_broadcast_message" msgid="6353857724136398494">"Οι άνθρωποι με συμβατές συσκευές Bluetooth που βρίσκονται κοντά σας μπορούν να ακούσουν το μέσο που μεταδίδετε."</string>
@@ -898,6 +939,8 @@
     <string name="mobile_data_settings_title" msgid="3955246641380064901">"Δεδομένα κινητής τηλεφωνίας"</string>
     <string name="preference_summary_default_combination" msgid="8453246369903749670">"<xliff:g id="STATE">%1$s</xliff:g> / <xliff:g id="NETWORKMODE">%2$s</xliff:g>"</string>
     <string name="mobile_data_connection_active" msgid="944490013299018227">"Συνδέθηκε"</string>
+    <string name="mobile_data_temp_connection_active" msgid="4590222725908806824">"Προσωρινή σύνδεση"</string>
+    <string name="mobile_data_poor_connection" msgid="819617772268371434">"Ασθενής σύνδεση"</string>
     <string name="mobile_data_off_summary" msgid="3663995422004150567">"Χωρίς αυτόματη σύνδεση δεδομένων κινητ. τηλεφωνίας"</string>
     <string name="mobile_data_no_connection" msgid="1713872434869947377">"Χωρίς σύνδεση"</string>
     <string name="non_carrier_network_unavailable" msgid="770049357024492372">"Δεν υπάρχουν άλλα διαθέσιμα δίκτυα"</string>
@@ -948,13 +991,29 @@
     <string name="dream_overlay_status_bar_camera_mic_off" msgid="3199425257833773569">"Η κάμερα και το μικρόφωνο έχουν απενεργοποιηθεί"</string>
     <string name="dream_overlay_status_bar_notification_indicator" msgid="8091389255691081711">"{count,plural, =1{# ειδοποίηση}other{# ειδοποιήσεις}}"</string>
     <string name="dream_overlay_weather_complication_desc" msgid="824503662089783824">"<xliff:g id="WEATHER_CONDITION">%1$s</xliff:g>, <xliff:g id="TEMPERATURE">%2$s</xliff:g>"</string>
+    <string name="note_task_button_label" msgid="8718616095800343136">"Δημιουργία σημειώσεων"</string>
     <string name="broadcasting_description_is_broadcasting" msgid="765627502786404290">"Μετάδοση"</string>
     <string name="bt_le_audio_broadcast_dialog_title" msgid="3605428497924077811">"Διακοπή μετάδοσης με την εφαρμογή <xliff:g id="APP_NAME">%1$s</xliff:g>;"</string>
     <string name="bt_le_audio_broadcast_dialog_sub_title" msgid="7889684551194225793">"Εάν κάνετε μετάδοση με την εφαρμογή <xliff:g id="SWITCHAPP">%1$s</xliff:g> ή αλλάξετε την έξοδο, η τρέχουσα μετάδοση θα σταματήσει"</string>
     <string name="bt_le_audio_broadcast_dialog_switch_app" msgid="6098768269397105733">"Μετάδοση με την εφαρμογή <xliff:g id="SWITCHAPP">%1$s</xliff:g>"</string>
     <string name="bt_le_audio_broadcast_dialog_different_output" msgid="7885102097302562674">"Αλλαγή εξόδου"</string>
     <string name="bt_le_audio_broadcast_dialog_unknown_name" msgid="3791472237793443044">"Άγνωστο"</string>
-    <string name="dream_date_complication_date_format" msgid="8191225366513860104">"ΗΗΗ, ΜΜΜ η"</string>
     <string name="dream_time_complication_12_hr_time_format" msgid="4691197486690291529">"ώ:λλ"</string>
     <string name="dream_time_complication_24_hr_time_format" msgid="6248280719733640813">"kk:λλ"</string>
+    <string name="keyguard_affordance_enablement_dialog_action_template" msgid="8164857863036314664">"Άνοιγμα <xliff:g id="APPNAME">%1$s</xliff:g>"</string>
+    <string name="keyguard_affordance_enablement_dialog_wallet_instruction_1" msgid="8439655049139819278">"• Η εφαρμογή έχει ρυθμιστεί"</string>
+    <string name="keyguard_affordance_enablement_dialog_wallet_instruction_2" msgid="4321089250629477835">"• Έχει προστεθεί τουλάχιστον μία κάρτα στο Πορτοφόλι"</string>
+    <string name="keyguard_affordance_enablement_dialog_qr_scanner_instruction" msgid="5355839079232119791">"• Εγκαταστήσατε μια εφαρμογή κάμερας"</string>
+    <string name="keyguard_affordance_enablement_dialog_home_instruction_1" msgid="8438311171750568633">"• Η εφαρμογή έχει ρυθμιστεί"</string>
+    <string name="keyguard_affordance_enablement_dialog_home_instruction_2" msgid="8308525385889021652">"• Είναι διαθέσιμη τουλάχιστον μία συσκευή"</string>
+    <string name="keyguard_affordance_press_too_short" msgid="8145437175134998864">"Παρατεταμένο άγγιγμα συντόμευσης"</string>
+    <string name="rear_display_bottom_sheet_cancel" msgid="3461468855493357248">"Ακύρωση"</string>
+    <string name="rear_display_bottom_sheet_confirm" msgid="4383356544661421206">"Αναστροφή τώρα"</string>
+    <string name="rear_display_fold_bottom_sheet_title" msgid="6081542277622721548">"Ξεδιπλώστε το τηλέφωνο για καλύτερη selfie"</string>
+    <string name="rear_display_unfold_bottom_sheet_title" msgid="2137403802960396357">"Αναστροφή στην μπροστ. οθόνη για καλύτερη selfie;"</string>
+    <string name="rear_display_bottom_sheet_description" msgid="1852662982816810352">"Χρησιμοποιήστε την πίσω κάμερα για να βγάλετε μια φωτογραφία με μεγαλύτερο εύρος και υψηλότερη ανάλυση."</string>
+    <string name="rear_display_bottom_sheet_warning" msgid="800995919558238930"><b>"* Αυτή η οθόνη θα απενεργοποιηθεί"</b></string>
+    <string name="rear_display_accessibility_folded_animation" msgid="1538121649587978179">"Αναδιπλούμενη συσκευή που ξεδιπλώνει"</string>
+    <string name="rear_display_accessibility_unfolded_animation" msgid="1946153682258289040">"Αναδιπλούμενη συσκευή που διπλώνει"</string>
+    <string name="stylus_battery_low" msgid="7134370101603167096">"Χαμηλή στάθμη μπαταρίας γραφίδας"</string>
 </resources>

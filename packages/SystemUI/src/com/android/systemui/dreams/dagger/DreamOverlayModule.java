@@ -47,6 +47,14 @@ public abstract class DreamOverlayModule {
     public static final String BURN_IN_PROTECTION_UPDATE_INTERVAL =
             "burn_in_protection_update_interval";
     public static final String MILLIS_UNTIL_FULL_JITTER = "millis_until_full_jitter";
+    public static final String DREAM_BLUR_RADIUS = "DREAM_BLUR_RADIUS";
+    public static final String DREAM_IN_BLUR_ANIMATION_DURATION = "dream_in_blur_anim_duration";
+    public static final String DREAM_IN_COMPLICATIONS_ANIMATION_DURATION =
+            "dream_in_complications_anim_duration";
+    public static final String DREAM_IN_TRANSLATION_Y_DISTANCE =
+            "dream_in_complications_translation_y";
+    public static final String DREAM_IN_TRANSLATION_Y_DURATION =
+            "dream_in_complications_translation_y_duration";
 
     /** */
     @Provides
@@ -112,6 +120,53 @@ public abstract class DreamOverlayModule {
     @Named(MILLIS_UNTIL_FULL_JITTER)
     static long providesMillisUntilFullJitter(@Main Resources resources) {
         return resources.getInteger(R.integer.config_dreamOverlayMillisUntilFullJitter);
+    }
+
+    /**
+     * The blur radius applied to the dream overlay at dream entry and exit.
+     */
+    @Provides
+    @Named(DREAM_BLUR_RADIUS)
+    static int providesDreamBlurRadius(@Main Resources resources) {
+        return resources.getDimensionPixelSize(R.dimen.dream_overlay_anim_blur_radius);
+    }
+
+    /**
+     * Duration in milliseconds of the dream in un-blur animation.
+     */
+    @Provides
+    @Named(DREAM_IN_BLUR_ANIMATION_DURATION)
+    static long providesDreamInBlurAnimationDuration(@Main Resources resources) {
+        return (long) resources.getInteger(R.integer.config_dreamOverlayInBlurDurationMs);
+    }
+
+    /**
+     * Duration in milliseconds of the dream in complications fade-in animation.
+     */
+    @Provides
+    @Named(DREAM_IN_COMPLICATIONS_ANIMATION_DURATION)
+    static long providesDreamInComplicationsAnimationDuration(@Main Resources resources) {
+        return (long) resources.getInteger(R.integer.config_dreamOverlayInComplicationsDurationMs);
+    }
+
+    /**
+     * Provides the number of pixels to translate complications when entering a dream.
+     */
+    @Provides
+    @Named(DREAM_IN_TRANSLATION_Y_DISTANCE)
+    @DreamOverlayComponent.DreamOverlayScope
+    static int providesDreamInComplicationsTranslationY(@Main Resources resources) {
+        return resources.getDimensionPixelSize(R.dimen.dream_overlay_entry_y_offset);
+    }
+
+    /**
+     * Provides the duration in ms of the y-translation when dream enters.
+     */
+    @Provides
+    @Named(DREAM_IN_TRANSLATION_Y_DURATION)
+    @DreamOverlayComponent.DreamOverlayScope
+    static long providesDreamInComplicationsTranslationYDuration(@Main Resources resources) {
+        return (long) resources.getInteger(R.integer.config_dreamOverlayInTranslationYDurationMs);
     }
 
     @Provides

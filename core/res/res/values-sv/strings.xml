@@ -33,6 +33,7 @@
     <string name="defaultVoiceMailAlphaTag" msgid="2190754495304236490">"Röstbrevlåda"</string>
     <string name="defaultMsisdnAlphaTag" msgid="2285034592902077488">"MSISDN1"</string>
     <string name="mmiError" msgid="2862759606579822246">"Anslutningsproblem eller ogiltig MMI-kod."</string>
+    <string name="mmiErrorNotSupported" msgid="5001803469335286099">"Funktionen stöds inte."</string>
     <string name="mmiFdnError" msgid="3975490266767565852">"Endast fasta nummer kan användas."</string>
     <string name="mmiErrorWhileRoaming" msgid="1204173664713870114">"Det går inte att ändra inställningarna för vidarebefordran av samtal medan mobilen är i roaming-läge."</string>
     <string name="serviceEnabled" msgid="7549025003394765639">"Tjänsten har aktiverats."</string>
@@ -242,7 +243,7 @@
     <string name="global_actions" product="default" msgid="6410072189971495460">"Telefonalternativ"</string>
     <string name="global_action_lock" msgid="6949357274257655383">"Skärmlås"</string>
     <string name="global_action_power_off" msgid="4404936470711393203">"Stäng av"</string>
-    <string name="global_action_power_options" msgid="1185286119330160073">"Strömbrytare"</string>
+    <string name="global_action_power_options" msgid="1185286119330160073">"Av/på"</string>
     <string name="global_action_restart" msgid="4678451019561687074">"Starta om"</string>
     <string name="global_action_emergency" msgid="1387617624177105088">"Nödsituation"</string>
     <string name="global_action_bug_report" msgid="5127867163044170003">"Felrapport"</string>
@@ -586,13 +587,14 @@
     <string name="screen_lock_app_setting_name" msgid="6054944352976789228">"Använd skärmlåset"</string>
     <string name="screen_lock_dialog_default_subtitle" msgid="120359538048533695">"Fortsätt med hjälp av ditt skärmlås"</string>
     <string name="fingerprint_acquired_partial" msgid="4323789264604479684">"Tryck på sensorn med ett stadigt tryck"</string>
-    <string name="fingerprint_acquired_insufficient" msgid="2545149524031515411">"Det gick inte att bearbeta fingeravtrycket. Försök igen."</string>
+    <string name="fingerprint_acquired_insufficient" msgid="623888149088216458">"Fingeravtrycket kändes inte igen. Försök igen."</string>
     <string name="fingerprint_acquired_imager_dirty" msgid="1770676120848224250">"Rengör fingeravtryckssensorn och försök igen"</string>
     <string name="fingerprint_acquired_imager_dirty_alt" msgid="9169582140486372897">"Rengör sensorn och försök igen"</string>
     <string name="fingerprint_acquired_too_fast" msgid="1628459767349116104">"Tryck hårt på sensorn"</string>
     <string name="fingerprint_acquired_too_slow" msgid="6683510291554497580">"Du rörde fingret för långsamt. Försök igen."</string>
     <string name="fingerprint_acquired_already_enrolled" msgid="2285166003936206785">"Testa ett annat fingeravtryck"</string>
     <string name="fingerprint_acquired_too_bright" msgid="3863560181670915607">"Det är för ljust"</string>
+    <string name="fingerprint_acquired_power_press" msgid="3107864151278434961">"Tryckning registrerades"</string>
     <string name="fingerprint_acquired_try_adjusting" msgid="3667006071003809364">"Testa att justera fingeravtrycket"</string>
     <string name="fingerprint_acquired_immobile" msgid="1621891895241888048">"Flytta fingret lite varje gång"</string>
   <string-array name="fingerprint_acquired_vendor">
@@ -604,17 +606,17 @@
     <string name="face_authenticated_confirmation_required" msgid="6872632732508013755">"Ansiktet har autentiserats. Tryck på Bekräfta"</string>
     <string name="fingerprint_error_hw_not_available" msgid="4571700896929561202">"Det finns ingen maskinvara för fingeravtryck."</string>
     <string name="fingerprint_error_no_space" msgid="7285481581905967580">"Det gick inte att konfigurera fingeravtryck"</string>
-    <string name="fingerprint_error_timeout" msgid="2946635815726054226">"Tidsgränsen för fingeravtrycket har uppnåtts. Försök igen."</string>
+    <string name="fingerprint_error_timeout" msgid="7361192266621252164">"Fingeravtryckskonfigurering nådde tidsgränsen. Försök igen."</string>
     <string name="fingerprint_error_canceled" msgid="540026881380070750">"Fingeravtrycksåtgärden avbröts."</string>
     <string name="fingerprint_error_user_canceled" msgid="7685676229281231614">"Fingeravtrycksåtgärden avbröts av användaren."</string>
-    <string name="fingerprint_error_lockout" msgid="7853461265604738671">"Du har gjort för många försök. Försök igen senare."</string>
-    <string name="fingerprint_error_lockout_permanent" msgid="3895478283943513746">"Du har försökt för många gånger. Fingeravtryckssensorn har inaktiverats."</string>
-    <string name="fingerprint_error_unable_to_process" msgid="1148553603490048742">"Försök igen."</string>
+    <string name="fingerprint_error_lockout" msgid="6626753679019351368">"För många försök. Använd låsskärmen i stället."</string>
+    <string name="fingerprint_error_lockout_permanent" msgid="9060651300306264843">"För många försök. Använd låsskärmen i stället."</string>
+    <string name="fingerprint_error_unable_to_process" msgid="2446280592818621224">"Det gick inte att bearbeta fingeravtrycket. Försök igen."</string>
     <string name="fingerprint_error_no_fingerprints" msgid="8671811719699072411">"Inga fingeravtryck har registrerats."</string>
     <string name="fingerprint_error_hw_not_present" msgid="578914350967423382">"Enheten har ingen fingeravtryckssensor."</string>
     <string name="fingerprint_error_security_update_required" msgid="7750187320640856433">"Sensorn har tillfälligt inaktiverats."</string>
     <string name="fingerprint_error_bad_calibration" msgid="4385512597740168120">"Det går inte att använda fingeravtryckssensorn. Besök ett reparationsställe"</string>
-    <string name="fingerprint_error_power_pressed" msgid="5479524500542129414">"Strömbrytaren nedtryckt"</string>
+    <string name="fingerprint_error_power_pressed" msgid="5479524500542129414">"Av/på-knappen nedtryckt"</string>
     <string name="fingerprint_name_template" msgid="8941662088160289778">"Finger <xliff:g id="FINGERID">%d</xliff:g>"</string>
     <string name="fingerprint_app_setting_name" msgid="4253767877095495844">"Använd ditt fingeravtryck"</string>
     <string name="fingerprint_or_screen_lock_app_setting_name" msgid="3501743523487644907">"Använd ditt fingeravtryck eller skärmlåset"</string>
@@ -637,7 +639,7 @@
     <string name="fingerprint_recalibrate_notification_content" msgid="8519935717822194943">"Besök ett reparationsställe."</string>
     <string name="face_acquired_insufficient" msgid="6889245852748492218">"Ansiktsmodellen kunde inte skapas. Försök igen."</string>
     <string name="face_acquired_too_bright" msgid="8070756048978079164">"Det är för ljust. Testa lägre belysning."</string>
-    <string name="face_acquired_too_dark" msgid="7919016380747701228">"Testa med bättre belysning"</string>
+    <string name="face_acquired_too_dark" msgid="8539853432479385326">"För lite ljus"</string>
     <string name="face_acquired_too_close" msgid="4453646176196302462">"Flytta telefonen längre bort"</string>
     <string name="face_acquired_too_far" msgid="2922278214231064859">"För telefonen närmare"</string>
     <string name="face_acquired_too_high" msgid="8278815780046368576">"Höj telefonen"</string>
@@ -1171,7 +1173,7 @@
     <string name="selected" msgid="6614607926197755875">"valt"</string>
     <string name="not_selected" msgid="410652016565864475">"inte valt"</string>
     <string name="in_progress" msgid="2149208189184319441">"pågår"</string>
-    <string name="whichApplication" msgid="5432266899591255759">"Slutför åtgärd genom att använda"</string>
+    <string name="whichApplication" msgid="5432266899591255759">"Slutför åtgärd med"</string>
     <string name="whichApplicationNamed" msgid="6969946041713975681">"Slutför åtgärden med %1$s"</string>
     <string name="whichApplicationLabel" msgid="7852182961472531728">"Slutför åtgärd"</string>
     <string name="whichViewApplication" msgid="5733194231473132945">"Öppna med"</string>
@@ -1249,12 +1251,11 @@
     <string name="android_preparing_apk" msgid="589736917792300956">"<xliff:g id="APPNAME">%1$s</xliff:g> förbereds."</string>
     <string name="android_upgrading_starting_apps" msgid="6206161195076057075">"Appar startas."</string>
     <string name="android_upgrading_complete" msgid="409800058018374746">"Uppgraderingen är klar."</string>
-    <string name="fp_power_button_enrollment_title" msgid="3574363228413259548">"Vill du fortsätta med konfigureringen?"</string>
-    <string name="fp_power_button_enrollment_message" msgid="5648173517663246140">"Du tryckte på strömbrytaren, vilket vanligtvis stänger av skärmen.\n\nTesta att trycka lätt när du konfigurerar fingeravtrycket."</string>
-    <string name="fp_power_button_enrollment_positive_button" msgid="2095415838459356833">"Stäng av skärmen"</string>
-    <string name="fp_power_button_enrollment_negative_button" msgid="6558436406362486747">"Fortsätt konfigurera"</string>
+    <string name="fp_power_button_enrollment_message" msgid="5648173517663246140">"Du tryckte på av/på-knappen, vilket vanligtvis stänger av skärmen.\n\nTesta att trycka lätt när du konfigurerar fingeravtrycket."</string>
+    <string name="fp_power_button_enrollment_title" msgid="6976841690455338563">"Stäng av skärmen för att avbryta"</string>
+    <string name="fp_power_button_enrollment_button_text" msgid="3199783266386029200">"Stäng av"</string>
     <string name="fp_power_button_bp_title" msgid="5585506104526820067">"Vill du verifiera ditt fingeravtryck?"</string>
-    <string name="fp_power_button_bp_message" msgid="2983163038168903393">"Du tryckte på strömbrytaren, vilket vanligtvis stänger av skärmen.\n\nTesta att trycka lätt för att verifiera ditt fingeravtryck."</string>
+    <string name="fp_power_button_bp_message" msgid="2983163038168903393">"Du tryckte på av/på-knappen, vilket vanligtvis stänger av skärmen.\n\nTesta att trycka lätt för att verifiera ditt fingeravtryck."</string>
     <string name="fp_power_button_bp_positive_button" msgid="728945472408552251">"Stäng av skärmen"</string>
     <string name="fp_power_button_bp_negative_button" msgid="3971364246496775178">"Fortsätt"</string>
     <string name="heavy_weight_notification" msgid="8382784283600329576">"<xliff:g id="APP">%1$s</xliff:g> körs"</string>
@@ -1405,16 +1406,16 @@
     <string name="ext_media_new_notification_message" msgid="6095403121990786986">"Tryck för att konfigurera"</string>
     <string name="ext_media_new_notification_message" product="tv" msgid="216863352100263668">"Välj för att konfigurera"</string>
     <string name="ext_media_new_notification_message" product="automotive" msgid="5140127881613227162">"Du måste eventuellt formatera om enheten. Tryck för att mata ut."</string>
-    <string name="ext_media_ready_notification_message" msgid="777258143284919261">"För överföring av foton och media"</string>
+    <string name="ext_media_ready_notification_message" msgid="7509496364380197369">"För lagring av foton, videor, musik och mer"</string>
     <string name="ext_media_ready_notification_message" product="tv" msgid="8847134811163165935">"Bläddra bland mediefiler"</string>
     <string name="ext_media_unmountable_notification_title" msgid="4895444667278979910">"Problem med <xliff:g id="NAME">%s</xliff:g>"</string>
     <string name="ext_media_unmountable_notification_title" product="automotive" msgid="3142723758949023280">"<xliff:g id="NAME">%s</xliff:g> fungerar inte"</string>
     <string name="ext_media_unmountable_notification_message" msgid="3256290114063126205">"Tryck och åtgärda"</string>
     <string name="ext_media_unmountable_notification_message" product="tv" msgid="3003611129979934633">"<xliff:g id="NAME">%s</xliff:g> har skadats. Välj för att åtgärda."</string>
     <string name="ext_media_unmountable_notification_message" product="automotive" msgid="2274596120715020680">"Du måste eventuellt formatera om enheten. Tryck för att mata ut."</string>
-    <string name="ext_media_unsupported_notification_title" msgid="4358280700537030333">"<xliff:g id="NAME">%s</xliff:g> stöds inte"</string>
+    <string name="ext_media_unsupported_notification_title" msgid="3487534182861251401">"<xliff:g id="NAME">%s</xliff:g> identifierades"</string>
     <string name="ext_media_unsupported_notification_title" product="automotive" msgid="6004193172658722381">"<xliff:g id="NAME">%s</xliff:g> fungerar inte"</string>
-    <string name="ext_media_unsupported_notification_message" msgid="917738524888367560">"Enheten har inte stöd för <xliff:g id="NAME">%s</xliff:g>. Tryck här om du vill konfigurera i ett format som stöds."</string>
+    <string name="ext_media_unsupported_notification_message" msgid="8463636521459807981">"Tryck för att konfigurera."</string>
     <string name="ext_media_unsupported_notification_message" product="tv" msgid="1595482802187036532">"Välj för att konfigurera <xliff:g id="NAME">%s</xliff:g> i ett format som stöds."</string>
     <string name="ext_media_unsupported_notification_message" product="automotive" msgid="3412494732736336330">"Du måste eventuellt formatera om enheten"</string>
     <string name="ext_media_badremoval_notification_title" msgid="4114625551266196872">"<xliff:g id="NAME">%s</xliff:g> togs bort oväntat"</string>
@@ -1485,7 +1486,7 @@
     <string name="accessibility_binding_label" msgid="1974602776545801715">"Tillgänglighet"</string>
     <string name="wallpaper_binding_label" msgid="1197440498000786738">"Bakgrund"</string>
     <string name="chooser_wallpaper" msgid="3082405680079923708">"Ändra bakgrund"</string>
-    <string name="notification_listener_binding_label" msgid="2702165274471499713">"Meddelandelyssnare"</string>
+    <string name="notification_listener_binding_label" msgid="2702165274471499713">"Aviseringslyssnare"</string>
     <string name="vr_listener_binding_label" msgid="8013112996671206429">"Lyssnare för VR"</string>
     <string name="condition_provider_service_binding_label" msgid="8490641013951857673">"Leverantör"</string>
     <string name="notification_ranker_binding_label" msgid="432708245635563763">"Rankningstjänst för aviseringar"</string>
@@ -1927,6 +1928,7 @@
     <string name="country_selection_title" msgid="5221495687299014379">"Regionsinställningar"</string>
     <string name="search_language_hint" msgid="7004225294308793583">"Ange språk"</string>
     <string name="language_picker_section_suggested" msgid="6556199184638990447">"Förslag"</string>
+    <string name="language_picker_regions_section_suggested" msgid="6080131515268225316">"Förslag"</string>
     <string name="language_picker_section_all" msgid="1985809075777564284">"Alla språk"</string>
     <string name="region_picker_section_all" msgid="756441309928774155">"Alla regioner"</string>
     <string name="locale_search_menu" msgid="6258090710176422934">"Sök"</string>
@@ -1944,8 +1946,7 @@
     <string name="app_streaming_blocked_title_for_camera_dialog" msgid="3935701653713853065">"Kameran är inte tillgänglig"</string>
     <string name="app_streaming_blocked_title_for_fingerprint_dialog" msgid="3516853717714141951">"Fortsätt på telefonen"</string>
     <string name="app_streaming_blocked_title_for_microphone_dialog" msgid="544822455127171206">"Mikrofonen är inte tillgänglig"</string>
-    <!-- no translation found for app_streaming_blocked_title_for_playstore_dialog (8149823099822897538) -->
-    <skip />
+    <string name="app_streaming_blocked_title_for_playstore_dialog" msgid="8149823099822897538">"Play Butik är inte tillgängligt"</string>
     <string name="app_streaming_blocked_title_for_settings_dialog" product="tv" msgid="196994247017450357">"Inställningarna för Android TV är inte tillgängliga"</string>
     <string name="app_streaming_blocked_title_for_settings_dialog" product="tablet" msgid="8222710146267948647">"Surfplattans inställningar är inte tillgängliga"</string>
     <string name="app_streaming_blocked_title_for_settings_dialog" product="default" msgid="6895719984375299791">"Telefonens inställningar är inte tillgängliga"</string>
@@ -1955,12 +1956,9 @@
     <string name="app_streaming_blocked_message_for_fingerprint_dialog" product="tv" msgid="3470977315395784567">"Appen begär ytterligare säkerhet. Testa med Android TV-enheten i stället."</string>
     <string name="app_streaming_blocked_message_for_fingerprint_dialog" product="tablet" msgid="698460091901465092">"Appen begär ytterligare säkerhet. Testa med surfplattan i stället."</string>
     <string name="app_streaming_blocked_message_for_fingerprint_dialog" product="default" msgid="8552691971910603907">"Appen begär ytterligare säkerhet. Testa med telefonen i stället."</string>
-    <!-- no translation found for app_streaming_blocked_message_for_settings_dialog (820334666354451145) -->
-    <skip />
-    <!-- no translation found for app_streaming_blocked_message_for_settings_dialog (3286849551133045896) -->
-    <skip />
-    <!-- no translation found for app_streaming_blocked_message_for_settings_dialog (6264287556598916295) -->
-    <skip />
+    <string name="app_streaming_blocked_message_for_settings_dialog" product="tv" msgid="820334666354451145">"Det går inte att streama detta till <xliff:g id="DEVICE">%1$s</xliff:g>. Testa med Android TV-enheten i stället."</string>
+    <string name="app_streaming_blocked_message_for_settings_dialog" product="tablet" msgid="3286849551133045896">"Det går inte att streama detta till <xliff:g id="DEVICE">%1$s</xliff:g>. Testa med surfplattan i stället."</string>
+    <string name="app_streaming_blocked_message_for_settings_dialog" product="default" msgid="6264287556598916295">"Det går inte att streama detta till <xliff:g id="DEVICE">%1$s</xliff:g>. Testa med telefonen i stället."</string>
     <string name="deprecated_target_sdk_message" msgid="5203207875657579953">"Appen har utvecklats för en äldre version av Android och kanske inte fungerar som den ska. Testa att söka efter uppdateringar eller kontakta utvecklaren."</string>
     <string name="deprecated_target_sdk_app_store" msgid="8456784048558808909">"Sök efter uppdateringar"</string>
     <string name="new_sms_notification_title" msgid="6528758221319927107">"Du har nya meddelanden"</string>
@@ -2053,7 +2051,8 @@
     <string name="log_access_confirmation_title" msgid="2343578467290592708">"Vill du tillåta att <xliff:g id="LOG_ACCESS_APP_NAME">%s</xliff:g> får åtkomst till alla enhetsloggar?"</string>
     <string name="log_access_confirmation_allow" msgid="5302517782599389507">"Tillåt engångsåtkomst"</string>
     <string name="log_access_confirmation_deny" msgid="7685790957455099845">"Tillåt inte"</string>
-    <string name="log_access_confirmation_body" msgid="6581985716241928135">"I enhetsloggar registreras vad som händer på enheten. Appar kan använda dessa loggar för att hitta och åtgärda problem.\n\nVissa loggar kan innehålla känsliga uppgifter, så du ska bara bevilja appar du litar på åtkomst till alla enhetsloggar. \n\nEn app har åtkomst till sina egna loggar även om du inte ger den åtkomst till alla enhetsloggar. Enhetens tillverkare kan fortfarande ha åtkomst till vissa loggar eller viss information på enheten. Läs mer"</string>
+    <string name="log_access_confirmation_body" product="default" msgid="1806692062668620735">"I enhetsloggar registreras vad som händer på enheten. Appar kan använda dessa loggar för att hitta och åtgärda problem.\n\nVissa loggar kan innehålla känsliga uppgifter, så du ska bara bevilja appar du litar på åtkomst till alla enhetsloggar. \n\nEn app har åtkomst till sina egna loggar även om du inte ger den åtkomst till alla enhetsloggar. Enhetens tillverkare kan fortfarande ha åtkomst till vissa loggar eller viss information på enheten."</string>
+    <string name="log_access_confirmation_body" product="tv" msgid="7379536536425265262">"Enhetsloggar registrerar vad som händer på enheten. Appar kan använda dessa loggar för att hitta och åtgärda problem.\n\nVissa loggar kan innehålla känsliga uppgifter, så du ska bara bevilja appar du litar på åtkomst till alla enhetsloggar. \n\nEn app har åtkomst till sina egna loggar även om du inte ger den åtkomst till alla enhetsloggar. Enhetens tillverkare kan fortfarande ha åtkomst till vissa loggar eller viss information på enheten.\n\nLäs mer på g.co/android/devicelogs."</string>
     <string name="log_access_do_not_show_again" msgid="1058690599083091552">"Visa inte igen"</string>
     <string name="slices_permission_request" msgid="3677129866636153406">"<xliff:g id="APP_0">%1$s</xliff:g> vill kunna visa bitar av <xliff:g id="APP_2">%2$s</xliff:g>"</string>
     <string name="screenshot_edit" msgid="7408934887203689207">"Redigera"</string>
@@ -2294,5 +2293,6 @@
     <string name="notification_action_check_bg_apps" msgid="4758877443365362532">"Kontrollera aktiva appar"</string>
     <string name="vdm_camera_access_denied" product="default" msgid="6102378580971542473">"Telefonens kamera kan inte användas från <xliff:g id="DEVICE">%1$s</xliff:g>"</string>
     <string name="vdm_camera_access_denied" product="tablet" msgid="6895968310395249076">"Surfplattans kamera kan inte användas från <xliff:g id="DEVICE">%1$s</xliff:g>"</string>
+    <string name="vdm_secure_window" msgid="161700398158812314">"Det går inte att komma åt innehållet när du streamar. Testa med telefonen i stället."</string>
     <string name="system_locale_title" msgid="711882686834677268">"Systemets standardinställning"</string>
 </resources>

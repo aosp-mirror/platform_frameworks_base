@@ -33,6 +33,7 @@
     <string name="accessibility_action_pip_unstash" msgid="7467499339610437646">"إظهار"</string>
     <string name="dock_forced_resizable" msgid="1749750436092293116">"قد لا يعمل التطبيق بشكل سليم في وضع \"تقسيم الشاشة\"."</string>
     <string name="dock_non_resizeble_failed_to_dock_text" msgid="7408396418008948957">"التطبيق لا يتيح تقسيم الشاشة."</string>
+    <string name="dock_multi_instances_not_supported_text" msgid="5242868470666346929">"لا يمكن فتح هذا التطبيق إلا في نافذة واحدة."</string>
     <string name="forced_resizable_secondary_display" msgid="1768046938673582671">"قد لا يعمل التطبيق على شاشة عرض ثانوية."</string>
     <string name="activity_launch_on_secondary_display_failed_text" msgid="4226485344988071769">"لا يمكن تشغيل التطبيق على شاشات عرض ثانوية."</string>
     <string name="accessibility_divider" msgid="703810061635792791">"أداة تقسيم الشاشة"</string>
@@ -76,12 +77,19 @@
     <string name="camera_compat_treatment_suggested_button_description" msgid="8103916969024076767">"هل هناك مشاكل في الكاميرا؟\nانقر لإعادة الضبط."</string>
     <string name="camera_compat_treatment_applied_button_description" msgid="2944157113330703897">"ألم يتم حل المشكلة؟\nانقر للعودة"</string>
     <string name="camera_compat_dismiss_button_description" msgid="2795364433503817511">"أليس هناك مشاكل في الكاميرا؟ انقر للإغلاق."</string>
-    <string name="letterbox_education_dialog_title" msgid="6688664582871779215">"تعمل بعض التطبيقات على أكمل وجه في الشاشات العمودية"</string>
-    <string name="letterbox_education_dialog_subtext" msgid="4853542518367719562">"جرِّب تنفيذ أحد هذه الخيارات للاستفادة من مساحتك إلى أقصى حد."</string>
-    <string name="letterbox_education_screen_rotation_text" msgid="5085786687366339027">"قم بتدوير الشاشة للانتقال إلى وضع ملء الشاشة."</string>
-    <string name="letterbox_education_reposition_text" msgid="1068293354123934727">"انقر مرتين بجانب التطبيق لتغيير موضعه."</string>
+    <string name="letterbox_education_dialog_title" msgid="7739895354143295358">"استخدام تطبيقات متعدّدة في وقت واحد"</string>
+    <string name="letterbox_education_split_screen_text" msgid="6206339484068670830">"اسحب تطبيقًا آخر لاستخدام وضع تقسيم الشاشة."</string>
+    <string name="letterbox_education_reposition_text" msgid="4589957299813220661">"انقر مرّتين خارج تطبيق لتغيير موضعه."</string>
     <string name="letterbox_education_got_it" msgid="4057634570866051177">"حسنًا"</string>
     <string name="letterbox_education_expand_button_description" msgid="1729796567101129834">"التوسيع للحصول على مزيد من المعلومات"</string>
     <string name="maximize_button_text" msgid="1650859196290301963">"تكبير"</string>
+    <string name="minimize_button_text" msgid="271592547935841753">"تصغير"</string>
     <string name="close_button_text" msgid="2913281996024033299">"إغلاق"</string>
+    <string name="back_button_text" msgid="1469718707134137085">"رجوع"</string>
+    <string name="handle_text" msgid="1766582106752184456">"مقبض"</string>
+    <string name="fullscreen_text" msgid="1162316685217676079">"ملء الشاشة"</string>
+    <string name="desktop_text" msgid="1077633567027630454">"وضع سطح المكتب"</string>
+    <string name="split_screen_text" msgid="1396336058129570886">"تقسيم الشاشة"</string>
+    <string name="more_button_text" msgid="3655388105592893530">"المزيد"</string>
+    <string name="float_button_text" msgid="9221657008391364581">"نافذة عائمة"</string>
 </resources>

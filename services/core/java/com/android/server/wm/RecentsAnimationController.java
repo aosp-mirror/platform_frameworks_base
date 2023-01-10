@@ -116,7 +116,7 @@ public class RecentsAnimationController implements DeathRecipient {
     private boolean mWillFinishToHome = false;
     private final Runnable mFailsafeRunnable = this::onFailsafe;
 
-    // The recents component app token that is shown behind the visibile tasks
+    // The recents component app token that is shown behind the visible tasks
     private ActivityRecord mTargetActivityRecord;
     private DisplayContent mDisplayContent;
     private int mTargetActivityType;
@@ -457,6 +457,22 @@ public class RecentsAnimationController implements DeathRecipient {
         }
     }
 
+    /**
+     * Return whether the given window should still be considered interesting for the all-drawn
+     * state.  This is only interesting for the target app, which may have child windows that are
+     * not actually visible and should not be considered interesting and waited upon.
+     */
+    protected boolean isInterestingForAllDrawn(WindowState window) {
+        if (isTargetApp(window.getActivityRecord())) {
+            if (window.getWindowType() != TYPE_BASE_APPLICATION
+                    && window.getAttrs().alpha == 0f) {
+                // If there is a cihld window that is alpha 0, then ignore that window
+                return false;
+            }
+        }
+        // By default all windows are still interesting for all drawn purposes
+        return true;
+    }
 
     /**
      * Whether a task should be filtered from the recents animation. This can be true for tasks

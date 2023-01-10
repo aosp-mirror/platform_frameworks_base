@@ -53,7 +53,8 @@
     <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
     <uses-permission android:name="android.permission.REGISTER_WINDOW_MANAGER_LISTENERS" />
 
-    <application android:debuggable="true" android:largeHeap="true">
+    <application android:debuggable="true" android:largeHeap="true"
+            android:enableOnBackInvokedCallback="true" >
         <uses-library android:name="android.test.runner" />
 
         <receiver android:name="com.android.systemui.SliceBroadcastRelayHandlerTest$Receiver"
@@ -87,6 +88,26 @@
                   android:excludeFromRecents="true"
                   />
 
+        <activity android:name=".settings.brightness.BrightnessDialogTest$TestDialog"
+            android:exported="false"
+            android:excludeFromRecents="true"
+            />
+
+        <activity android:name="com.android.systemui.controls.management.ControlsEditingActivityTest$TestableControlsEditingActivity"
+            android:exported="false"
+            android:excludeFromRecents="true"
+            />
+
+        <activity android:name="com.android.systemui.controls.management.ControlsFavoritingActivityTest$TestableControlsFavoritingActivity"
+            android:exported="false"
+            android:excludeFromRecents="true"
+            />
+
+        <activity android:name="com.android.systemui.controls.management.ControlsProviderSelectorActivityTest$TestableControlsProviderSelectorActivity"
+            android:exported="false"
+            android:excludeFromRecents="true"
+            />
+
         <activity android:name="com.android.systemui.screenshot.ScrollViewActivity"
                   android:exported="false" />
 
@@ -95,6 +116,18 @@
 
         <!-- started from UsbDeviceSettingsManager -->
         <activity android:name=".usb.UsbPermissionActivityTest$UsbPermissionActivityTestable"
+                  android:exported="false"
+                  android:theme="@style/Theme.SystemUI.Dialog.Alert"
+                  android:finishOnCloseSystemDialogs="true"
+                  android:excludeFromRecents="true" />
+
+        <activity android:name=".user.CreateUserActivityTest$CreateUserActivityTestable"
+            android:exported="false"
+            android:theme="@style/Theme.SystemUI.Dialog.Alert"
+            android:finishOnCloseSystemDialogs="true"
+            android:excludeFromRecents="true" />
+
+        <activity android:name=".sensorprivacy.SensorUseStartedActivityTest$SensorUseStartedActivityTestable"
                   android:exported="false"
                   android:theme="@style/Theme.SystemUI.Dialog.Alert"
                   android:finishOnCloseSystemDialogs="true"
@@ -109,6 +142,12 @@
             android:multiprocess="true" />
         <provider android:name="com.android.systemui.keyguard.KeyguardSliceProvider"
             android:authorities="com.android.systemui.test.keyguard.disabled"
+            android:enabled="false"
+            tools:replace="android:authorities"
+            tools:node="remove" />
+
+        <provider android:name="com.android.systemui.keyguard.CustomizationProvider"
+            android:authorities="com.android.systemui.test.keyguard.quickaffordance.disabled"
             android:enabled="false"
             tools:replace="android:authorities"
             tools:node="remove" />

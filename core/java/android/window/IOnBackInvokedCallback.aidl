@@ -28,17 +28,18 @@ import android.window.BackEvent;
 oneway interface IOnBackInvokedCallback {
    /**
     * Called when a back gesture has been started, or back button has been pressed down.
-    * Wraps {@link OnBackInvokedCallback#onBackStarted()}.
+    * Wraps {@link OnBackInvokedCallback#onBackStarted(BackEvent)}.
+    *
+    * @param backEvent The {@link BackEvent} containing information about the touch or button press.
     */
-    void onBackStarted();
+    void onBackStarted(in BackEvent backEvent);
 
     /**
      * Called on back gesture progress.
-     * Wraps {@link OnBackInvokedCallback#onBackProgressed()}.
+     * Wraps {@link OnBackInvokedCallback#onBackProgressed(BackEvent)}.
      *
-     * @param touchX Absolute X location of the touch point.
-     * @param touchY Absolute Y location of the touch point.
-     * @param progress Value between 0 and 1 on how far along the back gesture is.
+     * @param backEvent The {@link BackEvent} containing information about the latest touch point
+     *                  and the progress that the back animation should seek to.
      */
     void onBackProgressed(in BackEvent backEvent);
 

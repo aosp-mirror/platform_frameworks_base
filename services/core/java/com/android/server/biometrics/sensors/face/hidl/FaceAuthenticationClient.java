@@ -74,7 +74,7 @@ class FaceAuthenticationClient extends AuthenticationClient<IBiometricsFace> {
         super(context, lazyDaemon, token, listener, targetUserId, operationId, restricted,
                 owner, cookie, requireConfirmation, sensorId, logger, biometricContext,
                 isStrongBiometric, null /* taskStackListener */,
-                lockoutTracker, allowBackgroundAuthentication, true /* shouldVibrate */,
+                lockoutTracker, allowBackgroundAuthentication, false /* shouldVibrate */,
                 isKeyguardBypassEnabled);
         setRequestId(requestId);
         mUsageStats = usageStats;
@@ -101,7 +101,7 @@ class FaceAuthenticationClient extends AuthenticationClient<IBiometricsFace> {
     @Override
     protected ClientMonitorCallback wrapCallbackForStart(@NonNull ClientMonitorCallback callback) {
         return new ClientMonitorCompositeCallback(
-                getLogger().createALSCallback(true /* startWithClient */), callback);
+                getLogger().getAmbientLightProbe(true /* startWithClient */), callback);
     }
 
     @Override

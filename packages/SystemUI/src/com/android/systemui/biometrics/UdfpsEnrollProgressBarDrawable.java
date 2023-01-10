@@ -18,6 +18,7 @@ package com.android.systemui.biometrics;
 
 import android.animation.ValueAnimator;
 import android.content.Context;
+import android.content.res.TypedArray;
 import android.graphics.Canvas;
 import android.graphics.ColorFilter;
 import android.graphics.Paint;
@@ -26,6 +27,7 @@ import android.os.Process;
 import android.os.VibrationAttributes;
 import android.os.VibrationEffect;
 import android.os.Vibrator;
+import android.util.AttributeSet;
 import android.view.accessibility.AccessibilityManager;
 import android.view.animation.DecelerateInterpolator;
 import android.view.animation.Interpolator;
@@ -93,17 +95,25 @@ public class UdfpsEnrollProgressBarDrawable extends Drawable {
     @Nullable private ValueAnimator mCheckmarkAnimator;
     @NonNull private final ValueAnimator.AnimatorUpdateListener mCheckmarkUpdateListener;
 
-    public UdfpsEnrollProgressBarDrawable(@NonNull Context context) {
+    private int mMovingTargetFill;
+    private int mMovingTargetFillError;
+    private int mEnrollProgress;
+    private int mEnrollProgressHelp;
+    private int mEnrollProgressHelpWithTalkback;
+
+    public UdfpsEnrollProgressBarDrawable(@NonNull Context context, @Nullable AttributeSet attrs) {
         mContext = context;
+
+        loadResources(context, attrs);
         mStrokeWidthPx = Utils.dpToPixels(context, STROKE_WIDTH_DP);
-        mProgressColor = context.getColor(R.color.udfps_enroll_progress);
+        mProgressColor = mEnrollProgress;
         final AccessibilityManager am = context.getSystemService(AccessibilityManager.class);
         mIsAccessibilityEnabled = am.isTouchExplorationEnabled();
         if (!mIsAccessibilityEnabled) {
-            mHelpColor = context.getColor(R.color.udfps_enroll_progress_help);
-            mOnFirstBucketFailedColor = context.getColor(R.color.udfps_moving_target_fill_error);
+            mHelpColor = mEnrollProgressHelp;
+            mOnFirstBucketFailedColor = mMovingTargetFillError;
         } else {
-            mHelpColor = context.getColor(R.color.udfps_enroll_progress_help_with_talkback);
+            mHelpColor = mEnrollProgressHelpWithTalkback;
             mOnFirstBucketFailedColor = mHelpColor;
         }
         mCheckmarkDrawable = context.getDrawable(R.drawable.udfps_enroll_checkmark);
@@ -112,7 +122,7 @@ public class UdfpsEnrollProgressBarDrawable extends Drawable {
 
         mBackgroundPaint = new Paint();
         mBackgroundPaint.setStrokeWidth(mStrokeWidthPx);
-        mBackgroundPaint.setColor(context.getColor(R.color.udfps_moving_target_fill));
+        mBackgroundPaint.setColor(mMovingTargetFill);
         mBackgroundPaint.setAntiAlias(true);
         mBackgroundPaint.setStyle(Paint.Style.STROKE);
         mBackgroundPaint.setStrokeCap(Paint.Cap.ROUND);
@@ -146,6 +156,23 @@ public class UdfpsEnrollProgressBarDrawable extends Drawable {
             mBackgroundPaint.setColor((int) animation.getAnimatedValue());
             invalidateSelf();
         };
+    }
+
+    void loadResources(Context context, @Nullable AttributeSet attrs) {
+        final TypedArray ta = context.obtainStyledAttributes(attrs,
+                R.styleable.BiometricsEnrollView, R.attr.biometricsEnrollStyle,
+                R.style.BiometricsEnrollStyle);
+        mMovingTargetFill = ta.getColor(
+                R.styleable.BiometricsEnrollView_biometricsMovingTargetFill, 0);
+        mMovingTargetFillError = ta.getColor(
+                R.styleable.BiometricsEnrollView_biometricsMovingTargetFillError, 0);
+        mEnrollProgress = ta.getColor(
+                R.styleable.BiometricsEnrollView_biometricsEnrollProgress, 0);
+        mEnrollProgressHelp = ta.getColor(
+                R.styleable.BiometricsEnrollView_biometricsEnrollProgressHelp, 0);
+        mEnrollProgressHelpWithTalkback = ta.getColor(
+                R.styleable.BiometricsEnrollView_biometricsEnrollProgressHelpWithTalkback, 0);
+        ta.recycle();
     }
 
     void onEnrollmentProgress(int remaining, int totalSteps) {

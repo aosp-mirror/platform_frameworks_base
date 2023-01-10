@@ -22,8 +22,8 @@ import static java.lang.annotation.ElementType.PARAMETER;
 import static java.lang.annotation.RetentionPolicy.SOURCE;
 
 import android.app.NotificationChannel;
+import android.content.Intent;
 import android.content.pm.UserInfo;
-import android.os.Bundle;
 import android.os.UserHandle;
 import android.service.notification.NotificationListenerService;
 import android.service.notification.NotificationListenerService.RankingMap;
@@ -35,7 +35,6 @@ import androidx.annotation.Nullable;
 
 import com.android.wm.shell.common.annotations.ExternalThread;
 
-import java.io.PrintWriter;
 import java.lang.annotation.Retention;
 import java.lang.annotation.Target;
 import java.util.HashMap;
@@ -91,18 +90,6 @@ public interface Bubbles {
      */
     boolean isBubbleExpanded(String key);
 
-    /** @return {@code true} if stack of bubbles is expanded or not. */
-    boolean isStackExpanded();
-
-    /**
-     * Removes a group key indicating that the summary for this group should no longer be
-     * suppressed.
-     *
-     * @param callback If removed, this callback will be called with the summary key of the group
-     */
-    void removeSuppressedSummaryIfNecessary(String groupKey, Consumer<String> callback,
-            Executor callbackExecutor);
-
     /** Tell the stack of bubbles to collapse. */
     void collapseStack();
 
@@ -122,16 +109,19 @@ public interface Bubbles {
     void expandStackAndSelectBubble(Bubble bubble);
 
     /**
+     * Adds and expands bubble that is not notification based, but instead based on an intent from
+     * the app. The intent must be explicit (i.e. include a package name or fully qualified
+     * component class name) and the activity for it should be resizable.
+     *
+     * @param intent the intent to populate the bubble.
+     */
+    void showAppBubble(Intent intent);
+
+    /**
      * @return a bubble that matches the provided shortcutId, if one exists.
      */
     @Nullable
     Bubble getBubbleWithShortcutId(String shortcutId);
-
-    /** Called for any taskbar changes. */
-    void onTaskbarChanged(Bundle b);
-
-    /** Open the overflow view. */
-    void openBubbleOverflow();
 
     /**
      * We intercept notification entries (including group summaries) dismissed by the user when
@@ -171,8 +161,9 @@ public interface Bubbles {
      *
      * @param entry the {@link BubbleEntry} by the notification.
      * @param shouldBubbleUp {@code true} if this notification should bubble up.
+     * @param fromSystem {@code true} if this update is from NotificationManagerService.
      */
-    void onEntryUpdated(BubbleEntry entry, boolean shouldBubbleUp);
+    void onEntryUpdated(BubbleEntry entry, boolean shouldBubbleUp, boolean fromSystem);
 
     /**
      * Called when new notification entry removed.
@@ -251,8 +242,10 @@ public interface Bubbles {
      */
     void onUserRemoved(int removedUserId);
 
-    /** Description of current bubble state. */
-    void dump(PrintWriter pw, String[] args);
+    /**
+     * Sets whether bubble bar should be enabled or not.
+     */
+    void setBubbleBarEnabled(boolean enabled);
 
     /** Listener to find out about stack expansion / collapse events. */
     interface BubbleExpandListener {
@@ -294,13 +287,7 @@ public interface Bubbles {
 
         void notifyInvalidateNotifications(String reason);
 
-        void notifyMaybeCancelSummary(String key);
-
-        void removeNotificationEntry(String key);
-
         void updateNotificationBubbleButton(String key);
-
-        void updateNotificationSuppression(String key);
 
         void onStackExpandChanged(boolean shouldExpand);
 

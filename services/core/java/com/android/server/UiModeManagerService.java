@@ -152,6 +152,8 @@ final class UiModeManagerService extends SystemService {
 
     // flag set by resource, whether to start dream immediately upon docking even if unlocked.
     private boolean mStartDreamImmediatelyOnDock = true;
+    // flag set by resource, whether to disable dreams when ambient mode suppression is enabled.
+    private boolean mDreamsDisabledByAmbientModeSuppression = false;
     // flag set by resource, whether to enable Car dock launch when starting car mode.
     private boolean mEnableCarDockLaunch = true;
     // flag set by resource, whether to lock UI mode to the default one or not.
@@ -359,6 +361,16 @@ final class UiModeManagerService extends SystemService {
         SystemProperties.set(SYSTEM_PROPERTY_DEVICE_THEME, Integer.toString(mode));
     }
 
+    @VisibleForTesting
+    void setStartDreamImmediatelyOnDock(boolean startDreamImmediatelyOnDock) {
+        mStartDreamImmediatelyOnDock = startDreamImmediatelyOnDock;
+    }
+
+    @VisibleForTesting
+    void setDreamsDisabledByAmbientModeSuppression(boolean disabledByAmbientModeSuppression) {
+        mDreamsDisabledByAmbientModeSuppression = disabledByAmbientModeSuppression;
+    }
+
     @Override
     public void onUserSwitching(@Nullable TargetUser from, @NonNull TargetUser to) {
         mCurrentUser = to.getUserIdentifier();
@@ -419,6 +431,8 @@ final class UiModeManagerService extends SystemService {
         final Resources res = context.getResources();
         mStartDreamImmediatelyOnDock = res.getBoolean(
                 com.android.internal.R.bool.config_startDreamImmediatelyOnDock);
+        mDreamsDisabledByAmbientModeSuppression = res.getBoolean(
+                com.android.internal.R.bool.config_dreamsDisabledByAmbientModeSuppressionConfig);
         mNightMode = res.getInteger(
                 com.android.internal.R.integer.config_defaultNightMode);
         mDefaultUiModeType = res.getInteger(
@@ -1822,10 +1836,15 @@ final class UiModeManagerService extends SystemService {
         // Send the new configuration.
         applyConfigurationExternallyLocked();
 
+        final boolean dreamsSuppressed = mDreamsDisabledByAmbientModeSuppression
+                && mLocalPowerManager.isAmbientDisplaySuppressed();
+
         // If we did not start a dock app, then start dreaming if appropriate.
-        if (category != null && !dockAppStarted && (mStartDreamImmediatelyOnDock
-                || mKeyguardManager.isKeyguardLocked())) {
-            Sandman.startDreamWhenDockedIfAppropriate(getContext());
+        if (category != null && !dockAppStarted && !dreamsSuppressed && (
+                mStartDreamImmediatelyOnDock
+                        || mWindowManager.isKeyguardShowingAndNotOccluded()
+                        || !mPowerManager.isInteractive())) {
+            mInjector.startDreamWhenDockedIfAppropriate(getContext());
         }
     }
 
@@ -2138,6 +2157,10 @@ final class UiModeManagerService extends SystemService {
     public static class Injector {
         public int getCallingUid() {
             return Binder.getCallingUid();
+        }
+
+        public void startDreamWhenDockedIfAppropriate(Context context) {
+            Sandman.startDreamWhenDockedIfAppropriate(context);
         }
     }
 }

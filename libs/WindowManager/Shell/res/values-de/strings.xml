@@ -33,6 +33,7 @@
     <string name="accessibility_action_pip_unstash" msgid="7467499339610437646">"Aus Stash entfernen"</string>
     <string name="dock_forced_resizable" msgid="1749750436092293116">"Die App funktioniert unter Umständen im Modus für geteilten Bildschirm nicht."</string>
     <string name="dock_non_resizeble_failed_to_dock_text" msgid="7408396418008948957">"Das Teilen des Bildschirms wird in dieser App nicht unterstützt."</string>
+    <string name="dock_multi_instances_not_supported_text" msgid="5242868470666346929">"Diese App kann nur in einem einzigen Fenster geöffnet werden."</string>
     <string name="forced_resizable_secondary_display" msgid="1768046938673582671">"Die App funktioniert auf einem sekundären Display möglicherweise nicht."</string>
     <string name="activity_launch_on_secondary_display_failed_text" msgid="4226485344988071769">"Die App unterstützt den Start auf sekundären Displays nicht."</string>
     <string name="accessibility_divider" msgid="703810061635792791">"Bildschirmteiler"</string>
@@ -76,12 +77,19 @@
     <string name="camera_compat_treatment_suggested_button_description" msgid="8103916969024076767">"Probleme mit der Kamera?\nZum Anpassen tippen."</string>
     <string name="camera_compat_treatment_applied_button_description" msgid="2944157113330703897">"Das Problem ist nicht behoben?\nZum Rückgängigmachen tippen."</string>
     <string name="camera_compat_dismiss_button_description" msgid="2795364433503817511">"Keine Probleme mit der Kamera? Zum Schließen tippen."</string>
-    <string name="letterbox_education_dialog_title" msgid="6688664582871779215">"Einige Apps funktionieren am besten im Hochformat"</string>
-    <string name="letterbox_education_dialog_subtext" msgid="4853542518367719562">"Mithilfe dieser Möglichkeiten kannst du dein Display optimal nutzen"</string>
-    <string name="letterbox_education_screen_rotation_text" msgid="5085786687366339027">"Gerät drehen, um zum Vollbildmodus zu wechseln"</string>
-    <string name="letterbox_education_reposition_text" msgid="1068293354123934727">"Neben einer App doppeltippen, um die Position zu ändern"</string>
+    <string name="letterbox_education_dialog_title" msgid="7739895354143295358">"Mehr sehen und erledigen"</string>
+    <string name="letterbox_education_split_screen_text" msgid="6206339484068670830">"Weitere App hineinziehen, um den Bildschirm zu teilen"</string>
+    <string name="letterbox_education_reposition_text" msgid="4589957299813220661">"Außerhalb einer App doppeltippen, um die Position zu ändern"</string>
     <string name="letterbox_education_got_it" msgid="4057634570866051177">"Ok"</string>
     <string name="letterbox_education_expand_button_description" msgid="1729796567101129834">"Für weitere Informationen maximieren."</string>
     <string name="maximize_button_text" msgid="1650859196290301963">"Maximieren"</string>
+    <string name="minimize_button_text" msgid="271592547935841753">"Minimieren"</string>
     <string name="close_button_text" msgid="2913281996024033299">"Schließen"</string>
+    <string name="back_button_text" msgid="1469718707134137085">"Zurück"</string>
+    <string name="handle_text" msgid="1766582106752184456">"Ziehpunkt"</string>
+    <string name="fullscreen_text" msgid="1162316685217676079">"Vollbild"</string>
+    <string name="desktop_text" msgid="1077633567027630454">"Desktopmodus"</string>
+    <string name="split_screen_text" msgid="1396336058129570886">"Geteilter Bildschirm"</string>
+    <string name="more_button_text" msgid="3655388105592893530">"Mehr"</string>
+    <string name="float_button_text" msgid="9221657008391364581">"Frei schwebend"</string>
 </resources>

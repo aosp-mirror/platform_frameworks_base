@@ -35,6 +35,7 @@ import static android.app.WindowConfiguration.WINDOWING_MODE_PINNED;
 import static android.content.Intent.FLAG_ACTIVITY_CLEAR_TASK;
 import static android.content.Intent.FLAG_ACTIVITY_LAUNCH_ADJACENT;
 import static android.content.Intent.FLAG_ACTIVITY_NEW_TASK;
+import static android.content.Intent.FLAG_ACTIVITY_REORDER_TO_FRONT;
 import static android.content.Intent.FLAG_ACTIVITY_RESET_TASK_IF_NEEDED;
 import static android.content.Intent.FLAG_ACTIVITY_SINGLE_TOP;
 import static android.content.pm.ActivityInfo.FLAG_ALLOW_UNTRUSTED_ACTIVITY_EMBEDDING;
@@ -66,6 +67,7 @@ import static com.google.common.truth.Truth.assertThat;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyBoolean;
@@ -96,6 +98,7 @@ import android.service.voice.IVoiceInteractionSession;
 import android.util.Pair;
 import android.util.Size;
 import android.view.Gravity;
+import android.view.RemoteAnimationAdapter;
 import android.window.TaskFragmentOrganizerToken;
 
 import androidx.test.filters.SmallTest;
@@ -502,7 +505,9 @@ public class ActivityStarterTests extends WindowTestsBase {
                 .setCreateActivity(true)
                 .build()
                 .getTopMostActivity();
-        splitPrimaryActivity.mVisibleRequested = splitSecondActivity.mVisibleRequested = true;
+
+        splitPrimaryActivity.setVisibleRequested(true);
+        splitSecondActivity.setVisibleRequested(true);
 
         assertEquals(splitOrg.mPrimary, splitPrimaryActivity.getRootTask());
         assertEquals(splitOrg.mSecondary, splitSecondActivity.getRootTask());
@@ -515,7 +520,7 @@ public class ActivityStarterTests extends WindowTestsBase {
                 .setCreateActivity(true).build().getTopMostActivity();
         final ActivityRecord translucentActivity = new TaskBuilder(mSupervisor)
                 .setCreateActivity(true).build().getTopMostActivity();
-        assertTrue(activity.mVisibleRequested);
+        assertTrue(activity.isVisibleRequested());
 
         final ActivityStarter starter = prepareStarter(FLAG_ACTIVITY_NEW_TASK,
                 false /* mockGetRootTask */);
@@ -916,7 +921,7 @@ public class ActivityStarterTests extends WindowTestsBase {
                         ACTIVITY_TYPE_STANDARD, false /* onTop */));
         // Activity should start invisible since we are bringing it to front.
         singleTaskActivity.setVisible(false);
-        singleTaskActivity.mVisibleRequested = false;
+        singleTaskActivity.setVisibleRequested(false);
 
         // Create another activity on top of the secondary display.
         final Task topStack = secondaryTaskContainer.createRootTask(WINDOWING_MODE_FULLSCREEN,
@@ -1128,6 +1133,26 @@ public class ActivityStarterTests extends WindowTestsBase {
     }
 
     @Test
+    public void testRecycleTaskWakeUpWhenDreaming() {
+        doNothing().when(mWm.mAtmService.mTaskSupervisor).wakeUp(anyString());
+        doReturn(true).when(mWm.mAtmService).isDreaming();
+        final ActivityStarter starter = prepareStarter(0 /* flags */);
+        final ActivityRecord target = new ActivityBuilder(mAtm).setCreateTask(true).build();
+        starter.mStartActivity = target;
+        target.setVisibleRequested(false);
+        target.setTurnScreenOn(true);
+        // Assume the flag was consumed by relayout.
+        target.setCurrentLaunchCanTurnScreenOn(false);
+        startActivityInner(starter, target, null /* source */, null /* options */,
+                null /* inTask */, null /* inTaskFragment */);
+        // The flag should be set again when resuming (from recycleTask) the target as top.
+        assertTrue(target.currentLaunchCanTurnScreenOn());
+        // In real case, dream activity has a higher priority (TaskDisplayArea#getPriority) that
+        // will be put at a higher z-order. So it relies on wakeUp() to be dismissed.
+        verify(mWm.mAtmService.mTaskSupervisor).wakeUp(anyString());
+    }
+
+    @Test
     public void testTargetTaskInSplitScreen() {
         final ActivityStarter starter =
                 prepareStarter(FLAG_ACTIVITY_LAUNCH_ADJACENT, false /* mockGetRootTask */);
@@ -1313,6 +1338,32 @@ public class ActivityStarterTests extends WindowTestsBase {
     }
 
     @Test
+    public void testRemoteAnimation_appliesToExistingTask() {
+        final ActivityStarter starter = prepareStarter(0, false);
+
+        // Put an activity on default display as the top focused activity.
+        ActivityRecord r = new ActivityBuilder(mAtm).setCreateTask(true).build();
+        final Intent intent = new Intent();
+        intent.setComponent(ActivityBuilder.getDefaultComponent());
+        starter.setReason("testRemoteAnimation_newTask")
+                .setIntent(intent)
+                .execute();
+
+        assertNull(mRootWindowContainer.topRunningActivity().mPendingRemoteAnimation);
+
+        // Relaunch the activity with remote animation indicated in options.
+        final RemoteAnimationAdapter adaptor = mock(RemoteAnimationAdapter.class);
+        final ActivityOptions options = ActivityOptions.makeRemoteAnimation(adaptor);
+        starter.setReason("testRemoteAnimation_existingTask")
+                .setIntent(intent)
+                .setActivityOptions(options.toBundle())
+                .execute();
+
+        // Verify the remote animation is updated.
+        assertEquals(adaptor, mRootWindowContainer.topRunningActivity().mPendingRemoteAnimation);
+    }
+
+    @Test
     public void testStartLaunchIntoPipActivity() {
         final ActivityStarter starter = prepareStarter(0, false);
 
@@ -1400,6 +1451,39 @@ public class ActivityStarterTests extends WindowTestsBase {
 
         assertEquals(EMBEDDING_DISALLOWED_MIN_DIMENSION_VIOLATION,
                 canEmbedActivity(taskFragment, starting, task));
+    }
+
+    @Test
+    public void testRecordActivityMovementBeforeDeliverToTop() {
+        final Task task = new TaskBuilder(mAtm.mTaskSupervisor).build();
+        final ActivityRecord activityBot = new ActivityBuilder(mAtm).setTask(task).build();
+        final ActivityRecord activityTop = new ActivityBuilder(mAtm).setTask(task).build();
+
+        activityBot.setVisible(false);
+        activityBot.setVisibleRequested(false);
+
+        assertTrue(activityTop.isVisible());
+        assertTrue(activityTop.isVisibleRequested());
+
+        final ActivityStarter starter = prepareStarter(FLAG_ACTIVITY_REORDER_TO_FRONT
+                        | FLAG_ACTIVITY_NEW_TASK, false /* mockGetRootTask */);
+        starter.mStartActivity = activityBot;
+        task.inRecents = true;
+        starter.setInTask(task);
+        starter.getIntent().setComponent(activityBot.mActivityComponent);
+        final int result = starter.setReason("testRecordActivityMovement").execute();
+
+        assertEquals(START_DELIVERED_TO_TOP, result);
+        assertNotNull(starter.mMovedToTopActivity);
+
+        final ActivityStarter starter2 = prepareStarter(FLAG_ACTIVITY_REORDER_TO_FRONT
+                        | FLAG_ACTIVITY_NEW_TASK, false /* mockGetRootTask */);
+        starter2.setInTask(task);
+        starter2.getIntent().setComponent(activityBot.mActivityComponent);
+        final int result2 = starter2.setReason("testRecordActivityMovement").execute();
+
+        assertEquals(START_DELIVERED_TO_TOP, result2);
+        assertNull(starter2.mMovedToTopActivity);
     }
 
     private static void startActivityInner(ActivityStarter starter, ActivityRecord target,

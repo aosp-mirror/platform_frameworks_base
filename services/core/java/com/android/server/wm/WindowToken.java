@@ -16,7 +16,6 @@
 
 package com.android.server.wm;
 
-import static android.app.WindowConfiguration.WINDOWING_MODE_FULLSCREEN;
 import static android.app.WindowConfiguration.WINDOWING_MODE_PINNED;
 import static android.view.WindowManager.LayoutParams.TYPE_NAVIGATION_BAR;
 
@@ -259,7 +258,7 @@ class WindowToken extends WindowContainer<WindowState> {
      * @return The scale for applications running in compatibility mode. Multiply the size in the
      *         application by this scale will be the size in the screen.
      */
-    float getSizeCompatScale() {
+    float getCompatScale() {
         return mDisplayContent.mCompatibleScreenScale;
     }
 
@@ -589,9 +588,7 @@ class WindowToken extends WindowContainer<WindowState> {
                 .setCallsite("WindowToken.getOrCreateFixedRotationLeash")
                 .build();
         t.setPosition(leash, mLastSurfacePosition.x, mLastSurfacePosition.y);
-        t.show(leash);
         t.reparent(getSurfaceControl(), leash);
-        t.setAlpha(getSurfaceControl(), 1.f);
         mFixedRotationTransformLeash = leash;
         updateSurfaceRotation(t, rotation, mFixedRotationTransformLeash);
         return mFixedRotationTransformLeash;
@@ -630,12 +627,6 @@ class WindowToken extends WindowContainer<WindowState> {
             // override configuration can update to the same state.
             getResolvedOverrideConfiguration().updateFrom(
                     mFixedRotationTransformState.mRotatedOverrideConfiguration);
-        }
-        if (getTaskDisplayArea() == null) {
-            // We only defined behaviors of system windows in fullscreen mode, i.e. windows not
-            // contained in a task display area.
-            getResolvedOverrideConfiguration().windowConfiguration.setWindowingMode(
-                    WINDOWING_MODE_FULLSCREEN);
         }
     }
 

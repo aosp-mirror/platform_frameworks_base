@@ -34,9 +34,14 @@
     <uses-permission android:name="android.permission.STATUS_BAR_SERVICE" />
     <uses-permission android:name="android.permission.MANAGE_GAME_ACTIVITY" />
     <uses-permission android:name="android.permission.SET_ALWAYS_FINISH" />
+    <uses-permission android:name="android.permission.MANAGE_USERS" />
+    <uses-permission android:name="android.permission.USE_BIOMETRIC_INTERNAL" />
 
     <!-- needed by MasterClearReceiverTest to display a system dialog -->
     <uses-permission android:name="android.permission.INTERNAL_SYSTEM_WINDOW"/>
+
+    <!-- needed by TrustManagerServiceTest to access LockSettings' secure storage -->
+    <uses-permission android:name="android.permission.ACCESS_KEYGUARD_SECURE_STORAGE" />
 
     <application android:testOnly="true"
                  android:debuggable="true">

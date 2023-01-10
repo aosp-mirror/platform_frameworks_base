@@ -26,11 +26,11 @@
     <string name="keyguard_sim_error_message_short" msgid="633630844240494070">"Неважечка картичка."</string>
     <string name="keyguard_charged" msgid="5478247181205188995">"Полна"</string>
     <string name="keyguard_plugged_in_wireless" msgid="2537874724955057383">"<xliff:g id="PERCENTAGE">%s</xliff:g> • Се полни безжично"</string>
-    <string name="keyguard_plugged_in_dock" msgid="449722738270908674">"<xliff:g id="PERCENTAGE">%s</xliff:g> • Се полни на док"</string>
+    <string name="keyguard_plugged_in_dock" msgid="2122073051904360987">"<xliff:g id="PERCENTAGE">%s</xliff:g> • Се полни"</string>
     <string name="keyguard_plugged_in" msgid="8169926454348380863">"<xliff:g id="PERCENTAGE">%s</xliff:g> • Се полни"</string>
     <string name="keyguard_plugged_in_charging_fast" msgid="4386594091107340426">"<xliff:g id="PERCENTAGE">%s</xliff:g> • Брзо полнење"</string>
     <string name="keyguard_plugged_in_charging_slowly" msgid="217655355424210">"<xliff:g id="PERCENTAGE">%s</xliff:g> • Бавно полнење"</string>
-    <string name="keyguard_plugged_in_charging_limited" msgid="6091488837901216962">"<xliff:g id="PERCENTAGE">%s</xliff:g> • Полнењето е привремено ограничено"</string>
+    <string name="keyguard_plugged_in_charging_limited" msgid="1053130519456324630">"<xliff:g id="PERCENTAGE">%s</xliff:g> • Полнењето е оптимизирано за да се заштити батеријата"</string>
     <string name="keyguard_instructions_when_pattern_disabled" msgid="8448804180089936954">"Притиснете „Мени“ за отклучување."</string>
     <string name="keyguard_network_locked_message" msgid="407096292844868608">"Мрежата е заклучена"</string>
     <string name="keyguard_missing_sim_message_short" msgid="704159478161444907">"Нема SIM-картичка"</string>
@@ -78,9 +78,9 @@
     <string name="kg_prompt_reason_restart_pattern" msgid="4720554342633852066">"Потребна е шема по рестартирање на уредот"</string>
     <string name="kg_prompt_reason_restart_pin" msgid="1587671566498057656">"Потребен е PIN-код по рестартирање на уредот"</string>
     <string name="kg_prompt_reason_restart_password" msgid="8061279087240952002">"Потребна е лозинка по рестартирање на уредот"</string>
-    <string name="kg_prompt_reason_timeout_pattern" msgid="9170360502528959889">"Потребна е шема за дополнителна безбедност"</string>
-    <string name="kg_prompt_reason_timeout_pin" msgid="5945186097160029201">"Потребен е PIN-код за дополнителна безбедност"</string>
-    <string name="kg_prompt_reason_timeout_password" msgid="2258263949430384278">"Потребна е лозинка за дополнителна безбедност"</string>
+    <string name="kg_prompt_reason_timeout_pattern" msgid="5514969660010197363">"За дополнителна безбедност, користете шема"</string>
+    <string name="kg_prompt_reason_timeout_pin" msgid="4227962059353859376">"За дополнителна безбедност, користете PIN"</string>
+    <string name="kg_prompt_reason_timeout_password" msgid="8810879144143933690">"За дополнителна безбедност, користете лозинка"</string>
     <string name="kg_prompt_reason_device_admin" msgid="6961159596224055685">"Уредот е заклучен од администраторот"</string>
     <string name="kg_prompt_reason_user_request" msgid="6015774877733717904">"Уредот е заклучен рачно"</string>
     <string name="kg_face_not_recognized" msgid="7903950626744419160">"Непознат"</string>
@@ -90,4 +90,5 @@
     <string name="clock_title_default" msgid="6342735240617459864">"Стандарден"</string>
     <string name="clock_title_bubble" msgid="2204559396790593213">"Балонче"</string>
     <string name="clock_title_analog" msgid="8409262532900918273">"Аналоген"</string>
+    <string name="keyguard_unlock_to_continue" msgid="7509503484250597743">"Отклучете го уредот за да продолжите"</string>
 </resources>

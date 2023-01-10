@@ -23,6 +23,8 @@ import android.util.AttributeSet;
 import android.util.IndentingPrintWriter;
 import android.view.View;
 
+import androidx.annotation.NonNull;
+
 import com.android.systemui.R;
 import com.android.systemui.statusbar.notification.stack.ExpandableViewState;
 import com.android.systemui.statusbar.notification.stack.ViewState;
@@ -142,6 +144,7 @@ public class FooterView extends StackScrollerDecorView {
     }
 
     @Override
+    @NonNull
     public ExpandableViewState createExpandableViewState() {
         return new FooterViewState();
     }

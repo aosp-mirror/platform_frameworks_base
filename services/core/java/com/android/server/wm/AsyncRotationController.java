@@ -202,10 +202,15 @@ class AsyncRotationController extends FadeAnimationController implements Consume
         // target windows. But the windows still need to use sync transaction to keep the appearance
         // in previous rotation, so request a no-op sync to keep the state.
         for (int i = mTargetWindowTokens.size() - 1; i >= 0; i--) {
+            if (mTargetWindowTokens.valueAt(i).canDrawBeforeStartTransaction()) {
+                // Expect a screenshot layer will cover the non seamless windows.
+                continue;
+            }
             final WindowToken token = mTargetWindowTokens.keyAt(i);
             for (int j = token.getChildCount() - 1; j >= 0; j--) {
                 // TODO(b/234585256): The consumer should be handleFinishDrawing().
                 token.getChildAt(j).applyWithNextDraw(t -> {});
+                if (DEBUG) Slog.d(TAG, "Sync draw for " + token.getChildAt(j));
             }
         }
         mIsSyncDrawRequested = true;
@@ -357,7 +362,12 @@ class AsyncRotationController extends FadeAnimationController implements Consume
      * or seamless transformation in a rotated display.
      */
     boolean shouldFreezeInsetsPosition(WindowState w) {
-        return mTransitionOp != OP_LEGACY && w.mTransitionController.inTransition()
+        if (TransitionController.SYNC_METHOD != BLASTSyncEngine.METHOD_BLAST) {
+            // Expect a screenshot layer has covered the screen, so it is fine to let client side
+            // insets animation runner update the position directly.
+            return false;
+        }
+        return mTransitionOp != OP_LEGACY && !mIsStartTransactionCommitted
                 && isTargetToken(w.mToken);
     }
 
@@ -478,7 +488,7 @@ class AsyncRotationController extends FadeAnimationController implements Consume
             return false;
         }
         final Operation op = mTargetWindowTokens.get(w.mToken);
-        if (op == null) return false;
+        if (op == null || op.canDrawBeforeStartTransaction()) return false;
         if (DEBUG) Slog.d(TAG, "handleFinishDrawing " + w);
         if (op.mDrawTransaction == null) {
             if (w.isClientLocal()) {
@@ -542,6 +552,15 @@ class AsyncRotationController extends FadeAnimationController implements Consume
 
         Operation(@Action int action) {
             mAction = action;
+        }
+
+        /**
+         * Returns {@code true} if the corresponding window can draw its latest content before the
+         * start transaction of rotation transition is applied.
+         */
+        boolean canDrawBeforeStartTransaction() {
+            return TransitionController.SYNC_METHOD != BLASTSyncEngine.METHOD_BLAST
+                    && mAction != ACTION_SEAMLESS;
         }
     }
 }

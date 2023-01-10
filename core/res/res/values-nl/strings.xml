@@ -33,6 +33,7 @@
     <string name="defaultVoiceMailAlphaTag" msgid="2190754495304236490">"Voicemail"</string>
     <string name="defaultMsisdnAlphaTag" msgid="2285034592902077488">"MSISDN1"</string>
     <string name="mmiError" msgid="2862759606579822246">"Verbindingsprobleem of ongeldige MMI-code."</string>
+    <string name="mmiErrorNotSupported" msgid="5001803469335286099">"Functie niet ondersteund."</string>
     <string name="mmiFdnError" msgid="3975490266767565852">"Bewerking is beperkt tot vaste nummers."</string>
     <string name="mmiErrorWhileRoaming" msgid="1204173664713870114">"Kan instellingen voor doorschakelen van gesprekken niet wijzigen vanaf je telefoon tijdens roaming."</string>
     <string name="serviceEnabled" msgid="7549025003394765639">"Service staat aan."</string>
@@ -260,7 +261,7 @@
     <string name="global_action_toggle_silent_mode" msgid="8464352592860372188">"Stille modus"</string>
     <string name="global_action_silent_mode_on_status" msgid="2371892537738632013">"Geluid is UIT"</string>
     <string name="global_action_silent_mode_off_status" msgid="6608006545950920042">"Geluid is AAN"</string>
-    <string name="global_actions_toggle_airplane_mode" msgid="6911684460146916206">"Vliegtuigmodus"</string>
+    <string name="global_actions_toggle_airplane_mode" msgid="6911684460146916206">"Vliegtuig­modus"</string>
     <string name="global_actions_airplane_mode_on_status" msgid="5508025516695361936">"Vliegtuigmodus is AAN"</string>
     <string name="global_actions_airplane_mode_off_status" msgid="8522219771500505475">"Vliegtuigmodus is UIT"</string>
     <string name="global_action_settings" msgid="4671878836947494217">"Instellingen"</string>
@@ -586,13 +587,14 @@
     <string name="screen_lock_app_setting_name" msgid="6054944352976789228">"Schermvergrendeling gebruiken"</string>
     <string name="screen_lock_dialog_default_subtitle" msgid="120359538048533695">"Voer je schermvergrendeling in om door te gaan"</string>
     <string name="fingerprint_acquired_partial" msgid="4323789264604479684">"Druk stevig op de sensor"</string>
-    <string name="fingerprint_acquired_insufficient" msgid="2545149524031515411">"Kan vingerafdruk niet verwerken. Probeer het opnieuw."</string>
+    <string name="fingerprint_acquired_insufficient" msgid="623888149088216458">"Vingerafdruk niet herkend. Probeer het opnieuw."</string>
     <string name="fingerprint_acquired_imager_dirty" msgid="1770676120848224250">"Reinig de vingerafdruksensor en probeer het opnieuw"</string>
     <string name="fingerprint_acquired_imager_dirty_alt" msgid="9169582140486372897">"Reinig de sensor en probeer het opnieuw"</string>
     <string name="fingerprint_acquired_too_fast" msgid="1628459767349116104">"Druk stevig op de sensor"</string>
     <string name="fingerprint_acquired_too_slow" msgid="6683510291554497580">"Vinger te langzaam bewogen. Probeer het opnieuw."</string>
     <string name="fingerprint_acquired_already_enrolled" msgid="2285166003936206785">"Probeer een andere vingerafdruk"</string>
     <string name="fingerprint_acquired_too_bright" msgid="3863560181670915607">"Te veel licht"</string>
+    <string name="fingerprint_acquired_power_press" msgid="3107864151278434961">"Druk op aan/uit-knop waargenomen"</string>
     <string name="fingerprint_acquired_try_adjusting" msgid="3667006071003809364">"Verplaats je vinger"</string>
     <string name="fingerprint_acquired_immobile" msgid="1621891895241888048">"Verander de positie van je vinger steeds een beetje"</string>
   <string-array name="fingerprint_acquired_vendor">
@@ -604,12 +606,12 @@
     <string name="face_authenticated_confirmation_required" msgid="6872632732508013755">"Gezicht geverifieerd. Druk op Bevestigen."</string>
     <string name="fingerprint_error_hw_not_available" msgid="4571700896929561202">"Hardware voor vingerafdruk niet beschikbaar."</string>
     <string name="fingerprint_error_no_space" msgid="7285481581905967580">"Kan vingerafdruk niet instellen"</string>
-    <string name="fingerprint_error_timeout" msgid="2946635815726054226">"Time-out bereikt voor vingerafdruk. Probeer het opnieuw."</string>
+    <string name="fingerprint_error_timeout" msgid="7361192266621252164">"Time-out bij instellen van vingerafdruk. Probeer het opnieuw."</string>
     <string name="fingerprint_error_canceled" msgid="540026881380070750">"Vingerafdrukbewerking geannuleerd."</string>
     <string name="fingerprint_error_user_canceled" msgid="7685676229281231614">"Vingerafdrukverificatie geannuleerd door gebruiker."</string>
-    <string name="fingerprint_error_lockout" msgid="7853461265604738671">"Te veel pogingen. Probeer het later opnieuw."</string>
-    <string name="fingerprint_error_lockout_permanent" msgid="3895478283943513746">"Te veel pogingen. Vingerafdruksensor staat uit."</string>
-    <string name="fingerprint_error_unable_to_process" msgid="1148553603490048742">"Probeer het opnieuw."</string>
+    <string name="fingerprint_error_lockout" msgid="6626753679019351368">"Te veel pogingen. Gebruik in plaats daarvan de schermvergrendeling."</string>
+    <string name="fingerprint_error_lockout_permanent" msgid="9060651300306264843">"Te veel pogingen. Gebruik in plaats daarvan de schermvergrendeling."</string>
+    <string name="fingerprint_error_unable_to_process" msgid="2446280592818621224">"Kan vingerafdruk niet verwerken. Probeer het opnieuw."</string>
     <string name="fingerprint_error_no_fingerprints" msgid="8671811719699072411">"Geen vingerafdrukken geregistreerd."</string>
     <string name="fingerprint_error_hw_not_present" msgid="578914350967423382">"Dit apparaat heeft geen vingerafdruksensor."</string>
     <string name="fingerprint_error_security_update_required" msgid="7750187320640856433">"Sensor staat tijdelijk uit."</string>
@@ -637,7 +639,7 @@
     <string name="fingerprint_recalibrate_notification_content" msgid="8519935717822194943">"Ga naar een reparateur."</string>
     <string name="face_acquired_insufficient" msgid="6889245852748492218">"Kan gezichtsmodel niet maken. Probeer het opnieuw."</string>
     <string name="face_acquired_too_bright" msgid="8070756048978079164">"Overbelicht. Probeer een minder felle belichting."</string>
-    <string name="face_acquired_too_dark" msgid="7919016380747701228">"Probeer fellere verlichting"</string>
+    <string name="face_acquired_too_dark" msgid="8539853432479385326">"Te weinig licht"</string>
     <string name="face_acquired_too_close" msgid="4453646176196302462">"Houd de telefoon verder weg"</string>
     <string name="face_acquired_too_far" msgid="2922278214231064859">"Houd de telefoon dichterbij"</string>
     <string name="face_acquired_too_high" msgid="8278815780046368576">"Houd de telefoon hoger"</string>
@@ -989,7 +991,7 @@
     <string name="keyguard_accessibility_user_selector" msgid="1466067610235696600">"Gebruikersselectie"</string>
     <string name="keyguard_accessibility_status" msgid="6792745049712397237">"Status"</string>
     <string name="keyguard_accessibility_camera" msgid="7862557559464986528">"Camera"</string>
-    <string name="keygaurd_accessibility_media_controls" msgid="2267379779900620614">"Mediabediening"</string>
+    <string name="keygaurd_accessibility_media_controls" msgid="2267379779900620614">"Media­bediening"</string>
     <string name="keyguard_accessibility_widget_reorder_start" msgid="7066213328912939191">"Opnieuw indelen van widget gestart."</string>
     <string name="keyguard_accessibility_widget_reorder_end" msgid="1083806817600593490">"Opnieuw indelen van widget beëindigd."</string>
     <string name="keyguard_accessibility_widget_deleted" msgid="1509738950119878705">"Widget <xliff:g id="WIDGET_INDEX">%1$s</xliff:g> verwijderd."</string>
@@ -1249,10 +1251,9 @@
     <string name="android_preparing_apk" msgid="589736917792300956">"<xliff:g id="APPNAME">%1$s</xliff:g> voorbereiden."</string>
     <string name="android_upgrading_starting_apps" msgid="6206161195076057075">"Apps starten."</string>
     <string name="android_upgrading_complete" msgid="409800058018374746">"Opstarten afronden."</string>
-    <string name="fp_power_button_enrollment_title" msgid="3574363228413259548">"Doorgaan met instellen?"</string>
     <string name="fp_power_button_enrollment_message" msgid="5648173517663246140">"Je hebt op de aan/uit-knop gedrukt. Zo zet je meestal het scherm uit.\n\nRaak de knop voorzichtig aan terwijl je je vingerafdruk instelt."</string>
-    <string name="fp_power_button_enrollment_positive_button" msgid="2095415838459356833">"Scherm uitzetten"</string>
-    <string name="fp_power_button_enrollment_negative_button" msgid="6558436406362486747">"Doorgaan met instellen"</string>
+    <string name="fp_power_button_enrollment_title" msgid="6976841690455338563">"Zet het scherm uit om het instellen te beëindigen"</string>
+    <string name="fp_power_button_enrollment_button_text" msgid="3199783266386029200">"Uitzetten"</string>
     <string name="fp_power_button_bp_title" msgid="5585506104526820067">"Doorgaan met verificatie van je vingerafdruk?"</string>
     <string name="fp_power_button_bp_message" msgid="2983163038168903393">"Je hebt op de aan/uit-knop gedrukt. Zo zet je meestal het scherm uit.\n\nRaak de knop voorzichtig aan om je vingerafdruk te verifiëren."</string>
     <string name="fp_power_button_bp_positive_button" msgid="728945472408552251">"Scherm uitzetten"</string>
@@ -1405,16 +1406,16 @@
     <string name="ext_media_new_notification_message" msgid="6095403121990786986">"Tik om in te stellen"</string>
     <string name="ext_media_new_notification_message" product="tv" msgid="216863352100263668">"Selecteer om in te stellen"</string>
     <string name="ext_media_new_notification_message" product="automotive" msgid="5140127881613227162">"Je moet het apparaat misschien opnieuw formatteren. Tik om het uit te werpen."</string>
-    <string name="ext_media_ready_notification_message" msgid="777258143284919261">"Voor overzetten van foto\'s en media"</string>
+    <string name="ext_media_ready_notification_message" msgid="7509496364380197369">"Voor de opslag van foto\'s, video\'s, muziek en meer"</string>
     <string name="ext_media_ready_notification_message" product="tv" msgid="8847134811163165935">"Browsen door mediabestanden"</string>
     <string name="ext_media_unmountable_notification_title" msgid="4895444667278979910">"Probleem met <xliff:g id="NAME">%s</xliff:g>"</string>
     <string name="ext_media_unmountable_notification_title" product="automotive" msgid="3142723758949023280">"<xliff:g id="NAME">%s</xliff:g> werkt niet"</string>
     <string name="ext_media_unmountable_notification_message" msgid="3256290114063126205">"Tik om het probleem op te lossen"</string>
     <string name="ext_media_unmountable_notification_message" product="tv" msgid="3003611129979934633">"<xliff:g id="NAME">%s</xliff:g> is beschadigd. Selecteer om te herstellen."</string>
     <string name="ext_media_unmountable_notification_message" product="automotive" msgid="2274596120715020680">"Je moet het apparaat misschien opnieuw formatteren. Tik om het uit te werpen."</string>
-    <string name="ext_media_unsupported_notification_title" msgid="4358280700537030333">"<xliff:g id="NAME">%s</xliff:g> niet ondersteund"</string>
+    <string name="ext_media_unsupported_notification_title" msgid="3487534182861251401">"<xliff:g id="NAME">%s</xliff:g> waargenomen"</string>
     <string name="ext_media_unsupported_notification_title" product="automotive" msgid="6004193172658722381">"<xliff:g id="NAME">%s</xliff:g> werkt niet"</string>
-    <string name="ext_media_unsupported_notification_message" msgid="917738524888367560">"Dit apparaat biedt geen ondersteuning voor deze <xliff:g id="NAME">%s</xliff:g>. Tik om in te stellen in een ondersteunde indeling."</string>
+    <string name="ext_media_unsupported_notification_message" msgid="8463636521459807981">"Tik om in te stellen."</string>
     <string name="ext_media_unsupported_notification_message" product="tv" msgid="1595482802187036532">"Selecteer om <xliff:g id="NAME">%s</xliff:g> in te stellen in een ondersteunde indeling."</string>
     <string name="ext_media_unsupported_notification_message" product="automotive" msgid="3412494732736336330">"Je moet het apparaat misschien opnieuw formatteren"</string>
     <string name="ext_media_badremoval_notification_title" msgid="4114625551266196872">"<xliff:g id="NAME">%s</xliff:g> is onverwacht verwijderd"</string>
@@ -1428,7 +1429,7 @@
     <string name="ext_media_browse_action" msgid="344865351947079139">"Verkennen"</string>
     <string name="ext_media_seamless_action" msgid="8837030226009268080">"Uitvoer wijzigen"</string>
     <string name="ext_media_missing_title" msgid="3209472091220515046">"<xliff:g id="NAME">%s</xliff:g> ontbreekt"</string>
-    <string name="ext_media_missing_message" msgid="4408988706227922909">"Voer apparaat opnieuw in"</string>
+    <string name="ext_media_missing_message" msgid="4408988706227922909">"Voer het apparaat opnieuw in"</string>
     <string name="ext_media_move_specific_title" msgid="8492118544775964250">"<xliff:g id="NAME">%s</xliff:g> verplaatsen"</string>
     <string name="ext_media_move_title" msgid="2682741525619033637">"Gegevens verplaatsen"</string>
     <string name="ext_media_move_success_title" msgid="4901763082647316767">"Contentoverdracht is voltooid"</string>
@@ -1482,7 +1483,7 @@
     <string name="forward_intent_to_work" msgid="3620262405636021151">"U gebruikt deze app in je werkprofiel"</string>
     <string name="input_method_binding_label" msgid="1166731601721983656">"Invoermethode"</string>
     <string name="sync_binding_label" msgid="469249309424662147">"Synchroniseren"</string>
-    <string name="accessibility_binding_label" msgid="1974602776545801715">"Toegankelijkheid"</string>
+    <string name="accessibility_binding_label" msgid="1974602776545801715">"Toe­gankelijk­heid"</string>
     <string name="wallpaper_binding_label" msgid="1197440498000786738">"Achtergrond"</string>
     <string name="chooser_wallpaper" msgid="3082405680079923708">"Achtergrond wijzigen"</string>
     <string name="notification_listener_binding_label" msgid="2702165274471499713">"Listener voor meldingen"</string>
@@ -1927,6 +1928,7 @@
     <string name="country_selection_title" msgid="5221495687299014379">"Regiovoorkeur"</string>
     <string name="search_language_hint" msgid="7004225294308793583">"Typ de naam van een taal"</string>
     <string name="language_picker_section_suggested" msgid="6556199184638990447">"Voorgesteld"</string>
+    <string name="language_picker_regions_section_suggested" msgid="6080131515268225316">"Voorgesteld"</string>
     <string name="language_picker_section_all" msgid="1985809075777564284">"Alle talen"</string>
     <string name="region_picker_section_all" msgid="756441309928774155">"Alle regio\'s"</string>
     <string name="locale_search_menu" msgid="6258090710176422934">"Zoeken"</string>
@@ -1985,7 +1987,7 @@
     <string name="app_category_news" msgid="1172762719574964544">"Nieuws en tijdschriften"</string>
     <string name="app_category_maps" msgid="6395725487922533156">"Maps en navigatie"</string>
     <string name="app_category_productivity" msgid="1844422703029557883">"Productiviteit"</string>
-    <string name="app_category_accessibility" msgid="6643521607848547683">"Toegankelijkheid"</string>
+    <string name="app_category_accessibility" msgid="6643521607848547683">"Toe­gankelijk­heid"</string>
     <string name="device_storage_monitor_notification_channel" msgid="5164244565844470758">"Apparaatopslag"</string>
     <string name="adb_debugging_notification_channel_tv" msgid="4764046459631031496">"USB-foutopsporing"</string>
     <string name="time_picker_hour_label" msgid="4208590187662336864">"uur"</string>
@@ -2049,7 +2051,8 @@
     <string name="log_access_confirmation_title" msgid="2343578467290592708">"<xliff:g id="LOG_ACCESS_APP_NAME">%s</xliff:g> toegang geven tot alle apparaatlogboeken?"</string>
     <string name="log_access_confirmation_allow" msgid="5302517782599389507">"Eenmalige toegang toestaan"</string>
     <string name="log_access_confirmation_deny" msgid="7685790957455099845">"Niet toestaan"</string>
-    <string name="log_access_confirmation_body" msgid="6581985716241928135">"Apparaatlogboeken leggen vast wat er op je apparaat gebeurt. Apps kunnen deze logboeken gebruiken om problemen op te sporen en te verhelpen.\n\nSommige logboeken kunnen gevoelige informatie bevatten, dus geef alleen apps die je vertrouwt toegang tot alle apparaatlogboeken. \n\nAls je deze app geen toegang tot alle apparaatlogboeken geeft, heeft de app nog wel toegang tot de eigen logboeken. De fabrikant van je apparaat heeft misschien nog steeds toegang tot bepaalde logboeken of informatie op je apparaat. Meer informatie"</string>
+    <string name="log_access_confirmation_body" product="default" msgid="1806692062668620735">"Apparaatlogboeken leggen vast wat er op je apparaat gebeurt. Apps kunnen deze logboeken gebruiken om problemen op te sporen en te verhelpen.\n\nSommige logboeken kunnen gevoelige informatie bevatten, dus geef alleen apps die je vertrouwt toegang tot alle apparaatlogboeken. \n\nAls je deze app geen toegang tot alle apparaatlogboeken geeft, heeft de app nog wel toegang tot de eigen logboeken. De fabrikant van je apparaat heeft misschien nog steeds toegang tot bepaalde logboeken of informatie op je apparaat."</string>
+    <string name="log_access_confirmation_body" product="tv" msgid="7379536536425265262">"Apparaatlogboeken leggen vast wat er op je apparaat gebeurt. Apps kunnen deze logboeken gebruiken om problemen op te sporen en te verhelpen.\n\nSommige logboeken kunnen gevoelige informatie bevatten, dus geef alleen apps die je vertrouwt toegang tot alle apparaatlogboeken. \n\nAls je deze app geen toegang tot alle apparaatlogboeken geeft, heeft de app nog wel toegang tot de eigen logboeken. De fabrikant van je apparaat heeft misschien nog steeds toegang tot bepaalde logboeken of informatie op je apparaat.\n\nGa voor meer informatie naar g.co/android/devicelogs."</string>
     <string name="log_access_do_not_show_again" msgid="1058690599083091552">"Niet opnieuw tonen"</string>
     <string name="slices_permission_request" msgid="3677129866636153406">"<xliff:g id="APP_0">%1$s</xliff:g> wil segmenten van <xliff:g id="APP_2">%2$s</xliff:g> tonen"</string>
     <string name="screenshot_edit" msgid="7408934887203689207">"Bewerken"</string>
@@ -2290,5 +2293,6 @@
     <string name="notification_action_check_bg_apps" msgid="4758877443365362532">"Actieve apps checken"</string>
     <string name="vdm_camera_access_denied" product="default" msgid="6102378580971542473">"Kan geen toegang tot de camera van de telefoon krijgen vanaf je <xliff:g id="DEVICE">%1$s</xliff:g>"</string>
     <string name="vdm_camera_access_denied" product="tablet" msgid="6895968310395249076">"Kan geen toegang tot de camera van de tablet krijgen vanaf je <xliff:g id="DEVICE">%1$s</xliff:g>"</string>
+    <string name="vdm_secure_window" msgid="161700398158812314">"Je hebt hier geen toegang toe tijdens streaming. Probeer het in plaats daarvan op je telefoon."</string>
     <string name="system_locale_title" msgid="711882686834677268">"Systeemstandaard"</string>
 </resources>

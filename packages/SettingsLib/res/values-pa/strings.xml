@@ -125,9 +125,9 @@
     <string name="bluetooth_profile_a2dp_high_quality" msgid="4739440941324792775">"HD ਆਡੀਓ: <xliff:g id="CODEC_NAME">%1$s</xliff:g>"</string>
     <string name="bluetooth_profile_a2dp_high_quality_unknown_codec" msgid="2477639096903834374">"HD ਆਡੀਓ"</string>
     <string name="bluetooth_profile_hearing_aid" msgid="58154575573984914">"ਸੁਣਨ ਦੇ ਸਾਧਨ"</string>
-    <string name="bluetooth_profile_le_audio" msgid="5158149987518342036">"LE_AUDIO"</string>
+    <string name="bluetooth_profile_le_audio" msgid="3237854988278539061">"LE ਆਡੀਓ"</string>
     <string name="bluetooth_hearing_aid_profile_summary_connected" msgid="8191273236809964030">"ਸੁਣਨ ਦੇ ਸਾਧਨਾਂ ਨਾਲ ਕਨੈਕਟ ਕੀਤਾ ਗਿਆ"</string>
-    <string name="bluetooth_le_audio_profile_summary_connected" msgid="3162538609379333442">"LE_AUDIO ਨਾਲ ਕਨੈਕਟ ਕੀਤਾ"</string>
+    <string name="bluetooth_le_audio_profile_summary_connected" msgid="6916226974453480650">"LE ਆਡੀਓ ਨਾਲ ਕਨੈਕਟ ਕੀਤਾ ਗਿਆ"</string>
     <string name="bluetooth_a2dp_profile_summary_connected" msgid="7422607970115444153">"ਮੀਡੀਆ  ਆਡੀਓ  ਨਾਲ ਕਨੈਕਟ ਕੀਤਾ"</string>
     <string name="bluetooth_headset_profile_summary_connected" msgid="2420981566026949688">"ਫ਼ੋਨ ਔਡੀਓ ਨਾਲ ਕਨੈਕਟ ਕੀਤਾ"</string>
     <string name="bluetooth_opp_profile_summary_connected" msgid="2393521801478157362">"ਫਾਈਲ ਟ੍ਰਾਂਸਫ਼ਰ ਸਰਵਰ ਨਾਲ ਕਨੈਕਟ ਕੀਤਾ"</string>
@@ -337,7 +337,7 @@
     <string name="dev_settings_warning_message" msgid="37741686486073668">"ਇਹ ਸੈਟਿੰਗਾਂ ਕੇਵਲ ਵਿਕਾਸਕਾਰ ਦੀ ਵਰਤੋਂ ਲਈ ਹਨ। ਇਹ ਤੁਹਾਡੇ ਡੀਵਾਈਸ ਅਤੇ ਇਸਤੇ ਮੌਜੂਦ ਐਪਲੀਕੇਸ਼ਨ ਨੂੰ ਬ੍ਰੇਕ ਕਰਨ ਜਾਂ ਦੁਰਵਿਵਹਾਰ ਕਰਨ ਦਾ ਕਾਰਨ ਬਣ ਸਕਦੇ ਹਨ।"</string>
     <string name="verify_apps_over_usb_title" msgid="6031809675604442636">"USB \'ਤੇ ਐਪਾਂ ਦੀ ਪੁਸ਼ਟੀ ਕਰੋ"</string>
     <string name="verify_apps_over_usb_summary" msgid="1317933737581167839">"ADB/ADT ਰਾਹੀਂ ਸਥਾਪਤ ਕੀਤੀਆਂ ਐਪਾਂ ਦੀ ਹਾਨੀਕਾਰਕ ਵਿਵਹਾਰ ਲਈ ਜਾਂਚ ਕਰੋ।"</string>
-    <string name="bluetooth_show_devices_without_names_summary" msgid="780964354377854507">"ਅਨਾਮ ਬਲੂਟੁੱਥ ਡੀਵਾਈਸਾਂ ਦਿਖਾਈਆਂ ਜਾਣਗੀਆਂ (ਸਿਰਫ਼ MAC ਪਤੇ)"</string>
+    <string name="bluetooth_show_devices_without_names_summary" msgid="780964354377854507">"ਅਨਾਮ ਬਲੂਟੁੱਥ ਡੀਵਾਈਸ ਦਿਖਾਏ ਜਾਣਗੇ (ਸਿਰਫ਼ MAC ਪਤੇ)"</string>
     <string name="bluetooth_disable_absolute_volume_summary" msgid="2006309932135547681">"ਰਿਮੋਟ ਡੀਵਾਈਸਾਂ ਨਾਲ ਅਵਾਜ਼ੀ ਸਮੱਸਿਆਵਾਂ ਜਿਵੇਂ ਕਿ ਨਾ ਪਸੰਦ ਕੀਤੀ ਜਾਣ ਵਾਲੀ ਉੱਚੀ ਅਵਾਜ਼ ਜਾਂ ਕੰਟਰੋਲ ਦੀ ਕਮੀ ਵਰਗੀ ਹਾਲਤ ਵਿੱਚ ਬਲੂਟੁੱਥ ਪੂਰਨ ਅਵਾਜ਼ ਵਿਸ਼ੇਸ਼ਤਾ ਨੂੰ ਬੰਦ ਕਰਦਾ ਹੈ।"</string>
     <string name="bluetooth_enable_gabeldorsche_summary" msgid="2054730331770712629">"ਬਲੂਟੁੱਥ Gabeldorsche ਵਿਸ਼ੇਸ਼ਤਾ ਸਟੈਕ ਨੂੰ ਚਾਲੂ ਕਰਦਾ ਹੈ।"</string>
     <string name="enhanced_connectivity_summary" msgid="1576414159820676330">"ਵਿਸਤ੍ਰਿਤ ਕਨੈਕਟੀਵਿਟੀ ਵਿਸ਼ੇਸ਼ਤਾ ਨੂੰ ਚਾਲੂ ਕਰਦਾ ਹੈ।"</string>
@@ -408,6 +408,7 @@
     <string name="force_resizable_activities_summary" msgid="2490382056981583062">"ਮੈਨੀਫ਼ੈਸਟ ਮੁੱਲਾਂ ਦੀ ਪਰਵਾਹ ਕੀਤੇ ਬਿਨਾਂ, ਮਲਟੀ-ਵਿੰਡੋ ਲਈ ਸਾਰੀਆਂ ਸਰਗਰਮੀਆਂ ਨੂੰ ਆਕਾਰ ਬਦਲਣਯੋਗ ਬਣਾਓ।"</string>
     <string name="enable_freeform_support" msgid="7599125687603914253">"ਫ੍ਰੀਫਾਰਮ ਵਿੰਡੋਜ਼ ਨੂੰ ਚਾਲੂ ਕਰੋ"</string>
     <string name="enable_freeform_support_summary" msgid="1822862728719276331">"ਪ੍ਰਯੋਗਮਈ ਫ੍ਰੀਫਾਰਮ ਵਿੰਡੋਜ਼ ਲਈ ਸਮਰਥਨ ਨੂੰ ਚਾਲੂ ਕਰੋ।"</string>
+    <string name="desktop_mode" msgid="2389067840550544462">"ਡੈਸਕਟਾਪ ਮੋਡ"</string>
     <string name="local_backup_password_title" msgid="4631017948933578709">"ਡੈਸਕਟਾਪ ਬੈਕਅੱਪ ਪਾਸਵਰਡ"</string>
     <string name="local_backup_password_summary_none" msgid="7646898032616361714">"ਡੈਸਕਟਾਪ ਦੇ ਪੂਰੇ ਬੈਕਅੱਪ ਇਸ ਵੇਲੇ ਸੁਰੱਖਿਅਤ ਨਹੀਂ ਹਨ"</string>
     <string name="local_backup_password_summary_change" msgid="1707357670383995567">"ਡੈਸਕਟਾਪ ਦੇ ਮੁਕੰਮਲ ਬੈਕਅੱਪਾਂ ਲਈ ਪਾਸਵਰਡ ਨੂੰ ਬਦਲਣ ਜਾਂ ਹਟਾਉਣ ਲਈ ਟੈਪ ਕਰੋ"</string>
@@ -476,13 +477,14 @@
     <string name="power_charging" msgid="6727132649743436802">"<xliff:g id="LEVEL">%1$s</xliff:g> - <xliff:g id="STATE">%2$s</xliff:g>"</string>
     <string name="power_remaining_charging_duration_only" msgid="8085099012811384899">"ਬੈਟਰੀ ਪੂਰੀ ਚਾਰਜ ਹੋਣ ਵਿੱਚ <xliff:g id="TIME">%1$s</xliff:g> ਬਾਕੀ"</string>
     <string name="power_charging_duration" msgid="6127154952524919719">"<xliff:g id="LEVEL">%1$s</xliff:g> - ਬੈਟਰੀ ਪੂਰੀ ਚਾਰਜ ਹੋਣ ਵਿੱਚ <xliff:g id="TIME">%2$s</xliff:g> ਬਾਕੀ"</string>
-    <string name="power_charging_limited" msgid="7956120998372505295">"<xliff:g id="LEVEL">%1$s</xliff:g> - ਚਾਰਜਿੰਗ ਕੁਝ ਸਮੇਂ ਲਈ ਰੋਕੀ ਗਈ"</string>
+    <string name="power_charging_limited" msgid="8202147604844938236">"<xliff:g id="LEVEL">%1$s</xliff:g> - ਚਾਰਜਿੰਗ ਨੂੰ ਸੁਯੋਗ ਬਣਾਇਆ ਗਿਆ"</string>
+    <string name="power_charging_future_paused" msgid="4730177778538118032">"<xliff:g id="LEVEL">%1$s</xliff:g> - ਚਾਰਜਿੰਗ ਨੂੰ ਸੁਯੋਗ ਬਣਾਇਆ ਗਿਆ"</string>
     <string name="battery_info_status_unknown" msgid="268625384868401114">"ਅਗਿਆਤ"</string>
     <string name="battery_info_status_charging" msgid="4279958015430387405">"ਚਾਰਜ ਹੋ ਰਹੀ ਹੈ"</string>
     <string name="battery_info_status_charging_fast" msgid="8027559755902954885">"ਤੇਜ਼ ਚਾਰਜ ਹੋ ਰਹੀ ਹੈ"</string>
     <string name="battery_info_status_charging_slow" msgid="3190803837168962319">"ਹੌਲੀ ਚਾਰਜ ਹੋ ਰਹੀ ਹੈ"</string>
     <string name="battery_info_status_charging_wireless" msgid="8924722966861282197">"ਬਿਨਾਂ ਤਾਰ ਤੋਂ ਚਾਰਜ ਹੋ ਰਹੀ ਹੈ"</string>
-    <string name="battery_info_status_charging_dock" msgid="3554147903321236585">"ਡੌਕ ਚਾਰਜ ਹੋ ਰਿਹਾ ਹੈ"</string>
+    <string name="battery_info_status_charging_dock" msgid="8573274094093364791">"ਚਾਰਜ ਹੋ ਰਿਹਾ ਹੈ"</string>
     <string name="battery_info_status_discharging" msgid="6962689305413556485">"ਚਾਰਜ ਨਹੀਂ ਹੋ ਰਿਹਾ"</string>
     <string name="battery_info_status_not_charging" msgid="3371084153747234837">"ਕਨੈਕਟ ਹੈ, ਚਾਰਜ ਨਹੀਂ ਹੋ ਰਹੀ"</string>
     <string name="battery_info_status_full" msgid="1339002294876531312">"ਚਾਰਜ ਹੋ ਗਈ"</string>
@@ -655,13 +657,6 @@
     <string name="accessibility_ethernet_disconnected" msgid="2832501530856497489">"ਈਥਰਨੈੱਟ ਡਿਸਕਨੈਕਟ ਹੋ ਗਿਆ।"</string>
     <string name="accessibility_ethernet_connected" msgid="6175942685957461563">"ਈਥਰਨੈੱਟ।"</string>
     <string name="accessibility_no_calling" msgid="3540827068323895748">"ਕਾਲਿੰਗ ਸੇਵਾ ਉਪਲਬਧ ਨਹੀਂ ਹੈ।"</string>
-    <string name="dream_complication_title_time" msgid="701747800712893499">"ਸਮਾਂ"</string>
-    <string name="dream_complication_title_date" msgid="8661176085446135789">"ਤਾਰੀਖ"</string>
-    <string name="dream_complication_title_weather" msgid="598609151677172783">"ਮੌਸਮ"</string>
-    <string name="dream_complication_title_aqi" msgid="4587552608957834110">"ਹਵਾ ਦੀ ਕੁਆਲਿਟੀ"</string>
-    <string name="dream_complication_title_cast_info" msgid="4038776652841885084">"ਕਾਸਟ ਸੰਬੰਧੀ ਜਾਣਕਾਰੀ"</string>
-    <!-- no translation found for dream_complication_title_home_controls (9153381632476738811) -->
-    <skip />
     <string name="avatar_picker_title" msgid="8492884172713170652">"ਕੋਈ ਪ੍ਰੋਫਾਈਲ ਤਸਵੀਰ ਚੁਣੋ"</string>
     <string name="default_user_icon_description" msgid="6554047177298972638">"ਪੂਰਵ-ਨਿਰਧਾਰਿਤ ਵਰਤੋਂਕਾਰ ਪ੍ਰਤੀਕ"</string>
     <string name="physical_keyboard_title" msgid="4811935435315835220">"ਭੌਤਿਕ ਕੀ-ਬੋਰਡ"</string>

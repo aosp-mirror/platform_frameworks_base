@@ -96,6 +96,31 @@ public class MediaOutputMetricLogger {
     }
 
     /**
+     * Do the metric logging of content switching success.
+     * @param selectedDeviceType string representation of the target media device
+     * @param deviceItemList media item list for device count updating
+     */
+    public void logOutputItemSuccess(String selectedDeviceType, List<MediaItem> deviceItemList) {
+        if (DEBUG) {
+            Log.d(TAG, "logOutputSuccess - selected device: " + selectedDeviceType);
+        }
+
+        updateLoggingMediaItemCount(deviceItemList);
+
+        SysUiStatsLog.write(
+                SysUiStatsLog.MEDIAOUTPUT_OP_SWITCH_REPORTED,
+                getLoggingDeviceType(mSourceDevice, true),
+                getLoggingDeviceType(mTargetDevice, false),
+                SysUiStatsLog.MEDIA_OUTPUT_OP_SWITCH_REPORTED__RESULT__OK,
+                SysUiStatsLog.MEDIA_OUTPUT_OP_SWITCH_REPORTED__SUBRESULT__NO_ERROR,
+                getLoggingPackageName(),
+                mWiredDeviceCount,
+                mConnectedBluetoothDeviceCount,
+                mRemoteDeviceCount,
+                mAppliedDeviceCountWithinRemoteGroup);
+    }
+
+    /**
      * Do the metric logging of volume adjustment.
      * @param source the device been adjusted
      */
@@ -107,7 +132,8 @@ public class MediaOutputMetricLogger {
         SysUiStatsLog.write(
                 SysUiStatsLog.MEDIAOUTPUT_OP_INTERACTION_REPORT,
                 SysUiStatsLog.MEDIA_OUTPUT_OP_INTERACTION_REPORTED__INTERACTION_TYPE__ADJUST_VOLUME,
-                getInteractionDeviceType(source));
+                getInteractionDeviceType(source),
+                getLoggingPackageName());
     }
 
     /**
@@ -121,7 +147,8 @@ public class MediaOutputMetricLogger {
         SysUiStatsLog.write(
                 SysUiStatsLog.MEDIAOUTPUT_OP_INTERACTION_REPORT,
                 SysUiStatsLog.MEDIA_OUTPUT_OP_INTERACTION_REPORTED__INTERACTION_TYPE__STOP_CASTING,
-                SysUiStatsLog.MEDIA_OUTPUT_OP_INTERACTION_REPORTED__TARGET__UNKNOWN_TYPE);
+                SysUiStatsLog.MEDIA_OUTPUT_OP_INTERACTION_REPORTED__TARGET__UNKNOWN_TYPE,
+                getLoggingPackageName());
     }
 
     /**
@@ -135,7 +162,8 @@ public class MediaOutputMetricLogger {
         SysUiStatsLog.write(
                 SysUiStatsLog.MEDIAOUTPUT_OP_INTERACTION_REPORT,
                 SysUiStatsLog.MEDIA_OUTPUT_OP_INTERACTION_REPORTED__INTERACTION_TYPE__EXPANSION,
-                getInteractionDeviceType(source));
+                getInteractionDeviceType(source),
+                getLoggingPackageName());
     }
 
     /**
@@ -149,6 +177,31 @@ public class MediaOutputMetricLogger {
         }
 
         updateLoggingDeviceCount(deviceList);
+
+        SysUiStatsLog.write(
+                SysUiStatsLog.MEDIAOUTPUT_OP_SWITCH_REPORTED,
+                getLoggingDeviceType(mSourceDevice, true),
+                getLoggingDeviceType(mTargetDevice, false),
+                SysUiStatsLog.MEDIA_OUTPUT_OP_SWITCH_REPORTED__RESULT__ERROR,
+                getLoggingSwitchOpSubResult(reason),
+                getLoggingPackageName(),
+                mWiredDeviceCount,
+                mConnectedBluetoothDeviceCount,
+                mRemoteDeviceCount,
+                mAppliedDeviceCountWithinRemoteGroup);
+    }
+
+    /**
+     * Do the metric logging of content switching failure.
+     * @param deviceItemList media item list for device count updating
+     * @param reason the reason of content switching failure
+     */
+    public void logOutputItemFailure(List<MediaItem> deviceItemList, int reason) {
+        if (DEBUG) {
+            Log.e(TAG, "logRequestFailed - " + reason);
+        }
+
+        updateLoggingMediaItemCount(deviceItemList);
 
         SysUiStatsLog.write(
                 SysUiStatsLog.MEDIAOUTPUT_OP_SWITCH_REPORTED,
@@ -193,7 +246,43 @@ public class MediaOutputMetricLogger {
         }
     }
 
+    private void updateLoggingMediaItemCount(List<MediaItem> deviceItemList) {
+        mWiredDeviceCount = mConnectedBluetoothDeviceCount = mRemoteDeviceCount = 0;
+        mAppliedDeviceCountWithinRemoteGroup = 0;
+
+        for (MediaItem mediaItem: deviceItemList) {
+            if (mediaItem.getMediaDevice().isPresent()
+                    && mediaItem.getMediaDevice().get().isConnected()) {
+                switch (mediaItem.getMediaDevice().get().getDeviceType()) {
+                    case MediaDevice.MediaDeviceType.TYPE_3POINT5_MM_AUDIO_DEVICE:
+                    case MediaDevice.MediaDeviceType.TYPE_USB_C_AUDIO_DEVICE:
+                        mWiredDeviceCount++;
+                        break;
+                    case MediaDevice.MediaDeviceType.TYPE_BLUETOOTH_DEVICE:
+                        mConnectedBluetoothDeviceCount++;
+                        break;
+                    case MediaDevice.MediaDeviceType.TYPE_CAST_DEVICE:
+                    case MediaDevice.MediaDeviceType.TYPE_CAST_GROUP_DEVICE:
+                        mRemoteDeviceCount++;
+                        break;
+                    default:
+                }
+            }
+        }
+
+        if (DEBUG) {
+            Log.d(TAG, "connected devices:" + " wired: " + mWiredDeviceCount
+                    + " bluetooth: " + mConnectedBluetoothDeviceCount
+                    + " remote: " + mRemoteDeviceCount);
+        }
+    }
+
     private int getLoggingDeviceType(MediaDevice device, boolean isSourceDevice) {
+        if (device == null) {
+            return isSourceDevice
+                    ? SysUiStatsLog.MEDIA_OUTPUT_OP_SWITCH_REPORTED__SOURCE__UNKNOWN_TYPE
+                    : SysUiStatsLog.MEDIA_OUTPUT_OP_SWITCH_REPORTED__TARGET__UNKNOWN_TYPE;
+        }
         switch (device.getDeviceType()) {
             case MediaDevice.MediaDeviceType.TYPE_PHONE_DEVICE:
                 return isSourceDevice
@@ -229,6 +318,9 @@ public class MediaOutputMetricLogger {
     }
 
     private int getInteractionDeviceType(MediaDevice device) {
+        if (device == null) {
+            return SysUiStatsLog.MEDIA_OUTPUT_OP_INTERACTION_REPORTED__TARGET__UNKNOWN_TYPE;
+        }
         switch (device.getDeviceType()) {
             case MediaDevice.MediaDeviceType.TYPE_PHONE_DEVICE:
                 return SysUiStatsLog.MEDIA_OUTPUT_OP_INTERACTION_REPORTED__TARGET__BUILTIN_SPEAKER;

@@ -595,8 +595,11 @@ public class UserManager {
     /**
      * Specifies if a user is disallowed from transferring files over USB.
      *
-     * <p>This restriction can only be set by a device owner, a profile owner on the primary
-     * user or a profile owner of an organization-owned managed profile on the parent profile.
+     * <p>This restriction can only be set by a <a href="https://developers.google.com/android/work/terminology#device_owner_do">
+     * device owner</a> or a <a href="https://developers.google.com/android/work/terminology#profile_owner_po">
+     * profile owner</a> on the primary user's profile or a profile owner of an organization-owned
+     * <a href="https://developers.google.com/android/work/terminology#managed_profile">
+     * managed profile</a> on the parent profile.
      * When it is set by a device owner, it applies globally. When it is set by a profile owner
      * on the primary user or by a profile owner of an organization-owned managed profile on
      * the parent profile, it disables the primary user from transferring files over USB. No other
@@ -1971,7 +1974,8 @@ public class UserManager {
     /** @hide */
     public UserManager(Context context, IUserManager service) {
         mService = service;
-        mContext = context.getApplicationContext();
+        Context appContext = context.getApplicationContext();
+        mContext = (appContext == null ? context : appContext);
         mUserId = context.getUserId();
     }
 
@@ -5131,23 +5135,13 @@ public class UserManager {
     })
     @UserHandleAware
     public boolean isUserSwitcherEnabled(boolean showEvenIfNotActionable) {
-        if (!supportsMultipleUsers()) {
-            return false;
-        }
-        if (hasUserRestrictionForUser(DISALLOW_USER_SWITCH, mUserId)) {
-            return false;
-        }
-        // If Demo Mode is on, don't show user switcher
-        if (isDeviceInDemoMode(mContext)) {
-            return false;
-        }
-        // Check the Settings.Global.USER_SWITCHER_ENABLED that the user can toggle on/off.
-        final boolean userSwitcherSettingOn = Settings.Global.getInt(mContext.getContentResolver(),
-                Settings.Global.USER_SWITCHER_ENABLED,
-                Resources.getSystem().getBoolean(R.bool.config_showUserSwitcherByDefault) ? 1 : 0)
-                != 0;
-        if (!userSwitcherSettingOn) {
-            return false;
+
+        try {
+            if (!mService.isUserSwitcherEnabled(mUserId)) {
+                return false;
+            }
+        } catch (RemoteException re) {
+            throw re.rethrowFromSystemServer();
         }
 
         // The feature is enabled. But is it worth showing?

@@ -1,25 +1,73 @@
 # Keyguard Quick Affordances
-These are interactive UI elements that appear at the bottom of the lockscreen when the device is
-locked. They allow the user to perform quick actions without unlocking their device. For example:
+Quick Affordances are interactive UI elements that appear on the lock screen when the device is
+locked. They allow the user to perform quick actions without necessarily unlocking their device. For example:
 opening an screen that lets them control the smart devices in their home, access their touch-to-pay
-credit card, etc.
+credit card, turn on the flashlight, etc.
 
-## Adding a new Quick Affordance
-### Step 1: create a new quick affordance config
-* Create a new class under the [systemui/keyguard/data/quickaffordance](../../src/com/android/systemui/keyguard/data/quickaffordance) directory
-* Please make sure that the class is injected through the Dagger dependency injection system by using the `@Inject` annotation on its main constructor and the `@SysUISingleton` annotation at class level, to make sure only one instance of the class is ever instantiated
-* Have the class implement the [KeyguardQuickAffordanceConfig](../../src/com/android/systemui/keyguard/data/quickaffordance/KeyguardQuickAffordanceConfig.kt) interface, notes:
-  * The `state` Flow property must emit `State.Hidden` when the feature is not enabled!
-  * It is safe to assume that `onQuickAffordanceClicked` will not be invoked if-and-only-if the previous rule is followed
-  * When implementing `onQuickAffordanceClicked`, the implementation can do something or it can ask the framework to start an activity using an `Intent` provided by the implementation
-* Please include a unit test for your new implementation under [the correct directory](../../tests/src/com/android/systemui/keyguard/data/quickaffordance)
+## Creating a new Quick Affordance
+All Quick Affordances are defined in System UI code.
 
-### Step 2: choose a position and priority
-* Add the new class as a dependency in the constructor of [KeyguardQuickAffordanceConfigs](../../src/com/android/systemui/keyguard/data/repository/KeyguardQuickAffordanceConfigs.kt)
-* Place the new class in one of the available positions in the `configsByPosition` property, note:
-  * In each position, there is a list. The order matters. The order of that list is the priority order in which the framework considers each config. The first config whose state property returns `State.Visible` determines the button that is shown for that position
-  * Please only add to one position. The framework treats each position individually and there is no good way to prevent the same config from making its button appear in more than one position at the same time
+To implement a new Quick Affordance, a developer may add a new implementation of `KeyguardQuickAffordanceConfig` in the `packages/SystemUI/src/com/android/systemui/keyguard/data/quickaffordance` package/directory and add it to the set defined in `KeyguardDataQuickAffordanceModule`.
 
-### Step 3: manually verify the new quick affordance
-* Build and launch SysUI on a device
-* Verify that the quick affordance button for the new implementation is correctly visible and clicking it does the right thing
+Tests belong in the `packages/SystemUI/tests/src/com/android/systemui/keyguard/data/quickaffordance` package. This should be enough for the system to pick up the new config and make it available for selection by the user.
+
+## Slots
+"Slots" is what we call the position of Quick Affordances on the lock screen. Each slot has a unique ID and a capacity denoting how many Quick Affordances can be "placed" in that slot.
+
+By default, AOSP ships with a "bottom right" and a "bottom left" slot, each with a slot capacity of `1`, allowing only one Quick Affordance on each side of the lock screen.
+
+### Customizing Slots
+OEMs may choose to override the IDs and number of slots and/or override the default capacities. This can be achieved by overridding the `config_keyguardQuickAffordanceSlots` resource in `packages/SystemUI/res/values/config.xml`.
+
+### Default Quick Affordances
+OEMs may also choose to predefine default Quick Affordances for each slot. To achieve this, a developer may override the `config_keyguardQuickAffordanceDefaults` resource in `packages/SystemUI/res/values/config.xml`. Note that defaults only work until the user of the device selects a different quick affordance for that slot, even if they select the "None" option.
+
+## Selections
+"Selections" are many-to-many relationships between slots and quick affordances. We add a selection when the user selects a quick affordance for a specific slot. We remove a selection when the user un-selects a quick affordance in a slot or when the user selects an additional quick affordance for a slot that is already at capacity. The definition of each slot tells us the maximum number of quick affordances that may be selected for each slot.
+
+## Building a Quick affordance Picker Experience
+This section describes how to implement a potential picker, selector, or configuration experience for quick affordances.
+
+### Accessing Quick Affordance Data
+Quick Affordances structured data are exposed to other applications through the `KeyguardQuickAffordanceProvider` content provider which is owned by the System UI process.
+
+To access this content provider, applications must have the `android.permission.CUSTOMIZE_SYSTEM_UI` permission which is a signature and privileged permission, limiting access to system apps or apps signed by the same signature as System UI. The `KeyguardQuickAffordanceProviderContract` file defines the content provider schema for consumers.
+
+Generally speaking, there are three important tables served by the content provider: `slots`, `affordances`, and `selections`. There is also a `flags` table, but that's not important and may be ignored.
+
+The `slots`, `affordances`, and `selections` tables may be queried using their `Uri` resulting with a `Cursor` where each row represents a slot, affordance, or selection, respectively. Note that the affordance list does not include the "None" option.
+
+### Modifying Quick Affordance Data
+The `selections` table accepts `insert` or `delete` operations to either add or remove a quick affordance on a slot.
+* To add a selection of a quick affordance on a slot, execute the `insert` operation on the `selections` table `Uri` and include the `slot_id` of the slot and `affordance_id` of the affordance, both in the `ContentValues`
+* To remove a selection of a specific quick affordance from a slot, execute the `delete` operation on the `selections` table `Uri` and include the `slot_id` of the slot and the `affordance_id` of the affordance to remove as the first and second selection arguments, respectively
+* To remove all selections of any currently-selected quick affordance from a specific slot, repeat the above, but omit the `affordance_id`
+
+### The Picker Experience
+A picker experience may:
+* Show the list of available slots based on the result of the `slots` table query
+* Show the list of available quick affordances on the device (regardless of selection) based on the result of the `affordances` table query
+* Show the quick affordances already selected for each slot based on the result of the `selections` table query
+* Select one quick affordance per slot at a time
+* Unselect an already-selected quick affordance from a slot
+* Unselect all already-selected quick affordances from a slot
+
+## Debugging
+To see the current state of the system, you can run `dumpsys`:
+
+```
+$ adb shell dumpsys activity service com.android.systemui/.SystemUIService KeyguardQuickAffordances
+```
+
+The output will spell out the current slot configuration, selections, and collection of available affordances, for example:
+```
+    KeyguardQuickAffordances:
+    ----------------------------------------------------------------------------
+    Slots & selections:
+        bottom_start: home (capacity = 1)
+        bottom_end is empty (capacity = 1)
+    Available affordances on device:
+        home ("Home")
+        wallet ("Wallet")
+        qr_code_scanner ("QR code scanner")
+```

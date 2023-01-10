@@ -23,7 +23,9 @@ import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.content.ComponentName;
 import android.content.res.Configuration;
+import android.content.res.Configuration.Orientation;
 import android.metrics.LogMaker;
+import android.util.Log;
 import android.view.View;
 
 import com.android.internal.annotations.VisibleForTesting;
@@ -31,12 +33,13 @@ import com.android.internal.logging.MetricsLogger;
 import com.android.internal.logging.UiEventLogger;
 import com.android.systemui.Dumpable;
 import com.android.systemui.dump.DumpManager;
-import com.android.systemui.media.MediaHost;
+import com.android.systemui.media.controls.ui.MediaHost;
 import com.android.systemui.plugins.qs.QSTile;
 import com.android.systemui.plugins.qs.QSTileView;
 import com.android.systemui.qs.customize.QSCustomizerController;
 import com.android.systemui.qs.external.CustomTile;
 import com.android.systemui.qs.logging.QSLogger;
+import com.android.systemui.qs.tileimpl.QSTileViewImpl;
 import com.android.systemui.util.LargeScreenUtils;
 import com.android.systemui.util.ViewController;
 import com.android.systemui.util.animation.DisappearParameters;
@@ -60,19 +63,21 @@ import kotlin.jvm.functions.Function1;
  */
 public abstract class QSPanelControllerBase<T extends QSPanel> extends ViewController<T>
         implements Dumpable{
+    private static final String TAG = "QSPanelControllerBase";
     protected final QSTileHost mHost;
     private final QSCustomizerController mQsCustomizerController;
     private final boolean mUsingMediaPlayer;
     protected final MediaHost mMediaHost;
     protected final MetricsLogger mMetricsLogger;
     private final UiEventLogger mUiEventLogger;
-    private final QSLogger mQSLogger;
+    protected final QSLogger mQSLogger;
     private final DumpManager mDumpManager;
     protected final ArrayList<TileRecord> mRecords = new ArrayList<>();
     protected boolean mShouldUseSplitNotificationShade;
 
     @Nullable
     private Consumer<Boolean> mMediaVisibilityChangedListener;
+    @Orientation
     private int mLastOrientation;
     private String mCachedSpecs = "";
     @Nullable
@@ -86,17 +91,27 @@ public abstract class QSPanelControllerBase<T extends QSPanel> extends ViewContr
             new QSPanel.OnConfigurationChangedListener() {
                 @Override
                 public void onConfigurationChange(Configuration newConfig) {
+                    mQSLogger.logOnConfigurationChanged(
+                        /* lastOrientation= */ mLastOrientation,
+                        /* newOrientation= */ newConfig.orientation,
+                        /* containerName= */ mView.getDumpableTag());
+
+                    boolean previousSplitShadeState = mShouldUseSplitNotificationShade;
                     mShouldUseSplitNotificationShade =
-                            LargeScreenUtils.shouldUseSplitNotificationShade(getResources());
+                        LargeScreenUtils.shouldUseSplitNotificationShade(getResources());
+                    mLastOrientation = newConfig.orientation;
+
+                    switchTileLayoutIfNeeded();
                     onConfigurationChanged();
-                    if (newConfig.orientation != mLastOrientation) {
-                        mLastOrientation = newConfig.orientation;
-                        switchTileLayout(false);
+                    if (previousSplitShadeState != mShouldUseSplitNotificationShade) {
+                        onSplitShadeChanged();
                     }
                 }
             };
 
     protected void onConfigurationChanged() { }
+
+    protected void onSplitShadeChanged() { }
 
     private final Function1<Boolean, Unit> mMediaHostVisibilityListener = (visible) -> {
         if (mMediaVisibilityChangedListener != null) {
@@ -137,7 +152,7 @@ public abstract class QSPanelControllerBase<T extends QSPanel> extends ViewContr
 
     @Override
     protected void onInit() {
-        mView.initialize();
+        mView.initialize(mQSLogger);
         mQSLogger.logAllTilesChangeListening(mView.isListening(), mView.getDumpableTag(), "");
     }
 
@@ -164,6 +179,7 @@ public abstract class QSPanelControllerBase<T extends QSPanel> extends ViewContr
         mHost.addCallback(mQSHostCallback);
         setTiles();
         mLastOrientation = getResources().getConfiguration().orientation;
+        mQSLogger.logOnViewAttached(mLastOrientation, mView.getDumpableTag());
         switchTileLayout(true);
 
         mDumpManager.registerDumpable(mView.getDumpableTag(), this);
@@ -171,6 +187,7 @@ public abstract class QSPanelControllerBase<T extends QSPanel> extends ViewContr
 
     @Override
     protected void onViewDetached() {
+        mQSLogger.logOnViewDetached(mLastOrientation, mView.getDumpableTag());
         mView.removeOnConfigurationChangedListener(mOnConfigurationChangedListener);
         mHost.removeCallback(mQSHostCallback);
 
@@ -228,6 +245,16 @@ public abstract class QSPanelControllerBase<T extends QSPanel> extends ViewContr
     private void addTile(final QSTile tile, boolean collapsedView) {
         final TileRecord r =
                 new TileRecord(tile, mHost.createTileView(getContext(), tile, collapsedView));
+        // TODO(b/250618218): Remove the QSLogger in QSTileViewImpl once we know the root cause of
+        // b/250618218.
+        try {
+            QSTileViewImpl qsTileView = (QSTileViewImpl) (r.tileView);
+            if (qsTileView != null) {
+                qsTileView.setQsLogger(mQSLogger);
+            }
+        } catch (ClassCastException e) {
+            Log.e(TAG, "Failed to cast QSTileView to QSTileViewImpl", e);
+        }
         mView.addTile(r);
         mRecords.add(r);
         mCachedSpecs = getTilesSpecs();
@@ -242,14 +269,6 @@ public abstract class QSPanelControllerBase<T extends QSPanel> extends ViewContr
                 break;
             }
         }
-    }
-    protected QSTile getTile(String subPanel) {
-        for (int i = 0; i < mRecords.size(); i++) {
-            if (subPanel.equals(mRecords.get(i).tile.getTileSpec())) {
-                return mRecords.get(i).tile;
-            }
-        }
-        return mHost.createTile(subPanel);
     }
 
     boolean areThereTiles() {
@@ -321,10 +340,16 @@ public abstract class QSPanelControllerBase<T extends QSPanel> extends ViewContr
         }
     }
 
+    private void switchTileLayoutIfNeeded() {
+        switchTileLayout(/* force= */ false);
+    }
+
     boolean switchTileLayout(boolean force) {
         /* Whether or not the panel currently contains a media player. */
         boolean horizontal = shouldUseHorizontalLayout();
         if (horizontal != mUsingHorizontalLayout || force) {
+            mQSLogger.logSwitchTileLayout(horizontal, mUsingHorizontalLayout, force,
+                    mView.getDumpableTag());
             mUsingHorizontalLayout = horizontal;
             mView.setUsingHorizontalLayout(mUsingHorizontalLayout, mMediaHost.getHostView(), force);
             updateMediaDisappearParameters();
@@ -402,7 +427,10 @@ public abstract class QSPanelControllerBase<T extends QSPanel> extends ViewContr
         }
         if (mMediaHost != null) {
             pw.println("  media bounds: " + mMediaHost.getCurrentBounds());
+            pw.println("  horizontal layout: " + mUsingHorizontalLayout);
+            pw.println("  last orientation: " + mLastOrientation);
         }
+        pw.println("  mShouldUseSplitNotificationShade: " + mShouldUseSplitNotificationShade);
     }
 
     public QSPanel.QSTileLayout getTileLayout() {

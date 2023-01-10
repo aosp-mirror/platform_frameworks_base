@@ -50,6 +50,7 @@ import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
 import android.graphics.drawable.Drawable;
+import android.os.RemoteException;
 import android.os.UserHandle;
 import android.service.notification.StatusBarNotification;
 import android.telecom.TelecomManager;
@@ -1090,6 +1091,7 @@ public class NotificationInfoTest extends SysuiTestCase {
                 mUiEventLogger.eventId(0));
         assertEquals(NotificationControlsEvent.NOTIFICATION_CONTROLS_SAVE_IMPORTANCE.getId(),
                 mUiEventLogger.eventId(1));
+        assertFalse(mNotificationInfo.shouldBeSavedOnClose());
     }
 
     @Test
@@ -1124,6 +1126,7 @@ public class NotificationInfoTest extends SysuiTestCase {
         assertTrue((updated.getValue().getUserLockedFields()
                 & USER_LOCKED_IMPORTANCE) != 0);
         assertEquals(IMPORTANCE_DEFAULT, updated.getValue().getImportance());
+        assertFalse(mNotificationInfo.shouldBeSavedOnClose());
     }
 
     @Test
@@ -1156,6 +1159,7 @@ public class NotificationInfoTest extends SysuiTestCase {
         verify(mMockINotificationManager, times(1)).unlockNotificationChannel(
                 anyString(), eq(TEST_UID), any());
         assertEquals(IMPORTANCE_DEFAULT, mNotificationChannel.getImportance());
+        assertFalse(mNotificationInfo.shouldBeSavedOnClose());
     }
 
     @Test
@@ -1191,6 +1195,7 @@ public class NotificationInfoTest extends SysuiTestCase {
         assertTrue((updated.getValue().getUserLockedFields()
                 & USER_LOCKED_IMPORTANCE) != 0);
         assertEquals(IMPORTANCE_LOW, updated.getValue().getImportance());
+        assertFalse(mNotificationInfo.shouldBeSavedOnClose());
     }
 
     @Test
@@ -1229,6 +1234,37 @@ public class NotificationInfoTest extends SysuiTestCase {
                 anyString(), eq(TEST_UID), updated.capture());
         assertTrue((updated.getValue().getUserLockedFields() & USER_LOCKED_IMPORTANCE) != 0);
         assertEquals(IMPORTANCE_MIN, updated.getValue().getImportance());
+        assertFalse(mNotificationInfo.shouldBeSavedOnClose());
+    }
+
+    @Test
+    public void testSilence_closeGutsThenTryToSave() throws RemoteException {
+        mNotificationChannel.setImportance(IMPORTANCE_DEFAULT);
+        mNotificationInfo.bindNotification(
+                mMockPackageManager,
+                mMockINotificationManager,
+                mOnUserInteractionCallback,
+                mChannelEditorDialogController,
+                TEST_PACKAGE_NAME,
+                mNotificationChannel,
+                mNotificationChannelSet,
+                mEntry,
+                null,
+                null,
+                mUiEventLogger,
+                true,
+                false,
+                false,
+                mAssistantFeedbackController);
+
+        mNotificationInfo.findViewById(R.id.silence).performClick();
+        mNotificationInfo.handleCloseControls(false, false);
+        mNotificationInfo.handleCloseControls(true, false);
+
+        mTestableLooper.processAllMessages();
+
+        assertEquals(IMPORTANCE_DEFAULT, mNotificationChannel.getImportance());
+        assertFalse(mNotificationInfo.shouldBeSavedOnClose());
     }
 
     @Test
@@ -1267,6 +1303,7 @@ public class NotificationInfoTest extends SysuiTestCase {
                 anyString(), eq(TEST_UID), updated.capture());
         assertTrue((updated.getValue().getUserLockedFields() & USER_LOCKED_IMPORTANCE) != 0);
         assertEquals(IMPORTANCE_DEFAULT, updated.getValue().getImportance());
+        assertFalse(mNotificationInfo.shouldBeSavedOnClose());
     }
 
     @Test
@@ -1294,6 +1331,7 @@ public class NotificationInfoTest extends SysuiTestCase {
         mNotificationInfo.handleCloseControls(true, false);
 
         verify(mOnUserInteractionCallback).onImportanceChanged(mEntry);
+        assertFalse(mNotificationInfo.shouldBeSavedOnClose());
     }
 
     @Test
@@ -1360,6 +1398,7 @@ public class NotificationInfoTest extends SysuiTestCase {
         assertTrue((updated.getValue().getUserLockedFields()
                 & USER_LOCKED_IMPORTANCE) != 0);
         assertEquals(IMPORTANCE_DEFAULT, updated.getValue().getImportance());
+        assertFalse(mNotificationInfo.shouldBeSavedOnClose());
     }
 
     @Test
@@ -1450,7 +1489,7 @@ public class NotificationInfoTest extends SysuiTestCase {
 
         mNotificationInfo.findViewById(R.id.alert).performClick();
 
-        assertFalse(mNotificationInfo.shouldBeSaved());
+        assertFalse(mNotificationInfo.shouldBeSavedOnClose());
     }
 
     @Test

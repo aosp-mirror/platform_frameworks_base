@@ -42,6 +42,7 @@ import com.android.settingslib.fuelgauge.BatterySaverUtils;
 import com.android.systemui.SysuiTestCase;
 import com.android.systemui.broadcast.BroadcastDispatcher;
 import com.android.systemui.demomode.DemoModeController;
+import com.android.systemui.dump.DumpManager;
 import com.android.systemui.power.EnhancedEstimates;
 import com.android.systemui.statusbar.policy.BatteryController.BatteryStateChangeCallback;
 
@@ -80,6 +81,7 @@ public class BatteryControllerTest extends SysuiTestCase {
                 mPowerManager,
                 mBroadcastDispatcher,
                 mDemoModeController,
+                mock(DumpManager.class),
                 new Handler(),
                 new Handler());
         // Can throw if updateEstimate is called on the main thread
@@ -218,5 +220,34 @@ public class BatteryControllerTest extends SysuiTestCase {
         mBatteryController.onReceive(getContext(), intent);
 
         Assert.assertFalse(mBatteryController.isChargingSourceDock());
+    }
+
+    @Test
+    public void batteryStateChanged_healthNotOverheated_outputsFalse() {
+        Intent intent = new Intent(Intent.ACTION_BATTERY_CHANGED);
+        intent.putExtra(BatteryManager.EXTRA_HEALTH, BatteryManager.BATTERY_HEALTH_GOOD);
+
+        mBatteryController.onReceive(getContext(), intent);
+
+        Assert.assertFalse(mBatteryController.isOverheated());
+    }
+
+    @Test
+    public void batteryStateChanged_healthOverheated_outputsTrue() {
+        Intent intent = new Intent(Intent.ACTION_BATTERY_CHANGED);
+        intent.putExtra(BatteryManager.EXTRA_HEALTH, BatteryManager.BATTERY_HEALTH_OVERHEAT);
+
+        mBatteryController.onReceive(getContext(), intent);
+
+        Assert.assertTrue(mBatteryController.isOverheated());
+    }
+
+    @Test
+    public void batteryStateChanged_noHealthGiven_outputsFalse() {
+        Intent intent = new Intent(Intent.ACTION_BATTERY_CHANGED);
+
+        mBatteryController.onReceive(getContext(), intent);
+
+        Assert.assertFalse(mBatteryController.isOverheated());
     }
 }

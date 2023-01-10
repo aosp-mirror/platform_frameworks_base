@@ -16,8 +16,6 @@
 
 package com.android.systemui.keyguard.data.repository
 
-import com.android.systemui.keyguard.data.config.KeyguardQuickAffordanceConfigs
-import com.android.systemui.keyguard.data.config.KeyguardQuickAffordanceConfigsImpl
 import dagger.Binds
 import dagger.Module
 
@@ -26,12 +24,10 @@ interface KeyguardRepositoryModule {
     @Binds fun keyguardRepository(impl: KeyguardRepositoryImpl): KeyguardRepository
 
     @Binds
-    fun keyguardQuickAffordanceRepository(
-        impl: KeyguardQuickAffordanceRepositoryImpl
-    ): KeyguardQuickAffordanceRepository
+    fun keyguardTransitionRepository(
+        impl: KeyguardTransitionRepositoryImpl
+    ): KeyguardTransitionRepository
 
     @Binds
-    fun keyguardQuickAffordanceConfigs(
-        impl: KeyguardQuickAffordanceConfigsImpl
-    ): KeyguardQuickAffordanceConfigs
+    fun lightRevealScrimRepository(impl: LightRevealScrimRepositoryImpl): LightRevealScrimRepository
 }

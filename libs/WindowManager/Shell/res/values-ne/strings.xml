@@ -33,6 +33,7 @@
     <string name="accessibility_action_pip_unstash" msgid="7467499339610437646">"अनस्ट्यास गर्नुहोस्"</string>
     <string name="dock_forced_resizable" msgid="1749750436092293116">"एप विभाजित स्क्रिनमा काम नगर्न सक्छ।"</string>
     <string name="dock_non_resizeble_failed_to_dock_text" msgid="7408396418008948957">"अनुप्रयोगले विभाजित-स्क्रिनलाई समर्थन गर्दैन।"</string>
+    <string name="dock_multi_instances_not_supported_text" msgid="5242868470666346929">"यो एप एउटा विन्डोमा मात्र खोल्न मिल्छ।"</string>
     <string name="forced_resizable_secondary_display" msgid="1768046938673582671">"यो एपले सहायक प्रदर्शनमा काम नगर्नसक्छ।"</string>
     <string name="activity_launch_on_secondary_display_failed_text" msgid="4226485344988071769">"अनुप्रयोगले सहायक प्रदर्शनहरूमा लञ्च सुविधालाई समर्थन गर्दैन।"</string>
     <string name="accessibility_divider" msgid="703810061635792791">"विभाजित-स्क्रिन छुट्याउने"</string>
@@ -76,12 +77,19 @@
     <string name="camera_compat_treatment_suggested_button_description" msgid="8103916969024076767">"क्यामेरासम्बन्धी समस्या देखियो?\nसमस्या हल गर्न ट्याप गर्नुहोस्"</string>
     <string name="camera_compat_treatment_applied_button_description" msgid="2944157113330703897">"समस्या हल भएन?\nपहिलेको जस्तै बनाउन ट्याप गर्नुहोस्"</string>
     <string name="camera_compat_dismiss_button_description" msgid="2795364433503817511">"क्यामेरासम्बन्धी कुनै पनि समस्या छैन? खारेज गर्न ट्याप गर्नुहोस्।"</string>
-    <string name="letterbox_education_dialog_title" msgid="6688664582871779215">"केही एपहरूले पोर्ट्रेटमा राम्रोसँग काम गर्छन्"</string>
-    <string name="letterbox_education_dialog_subtext" msgid="4853542518367719562">"तपाईं स्क्रिनको अधिकतम ठाउँ प्रयोग गर्न चाहनुहुन्छ भने यीमध्ये कुनै विकल्प प्रयोग गरी हेर्नुहोस्"</string>
-    <string name="letterbox_education_screen_rotation_text" msgid="5085786687366339027">"तपाईं फुल स्क्रिन मोड हेर्न चाहनुहुन्छ भने आफ्नो डिभाइस रोटेट गर्नुहोस्"</string>
-    <string name="letterbox_education_reposition_text" msgid="1068293354123934727">"तपाईं जुन एपको स्थिति मिलाउन चाहनुहुन्छ सोही एपको छेउमा डबल ट्याप गर्नुहोस्"</string>
+    <string name="letterbox_education_dialog_title" msgid="7739895354143295358">"थप कुरा हेर्नुहोस् र गर्नुहोस्"</string>
+    <string name="letterbox_education_split_screen_text" msgid="6206339484068670830">"स्प्लिट स्क्रिन मोड प्रयोग गर्न अर्को एप ड्रयाग एन्ड ड्रप गर्नुहोस्"</string>
+    <string name="letterbox_education_reposition_text" msgid="4589957299813220661">"तपाईं जुन एपको स्थिति मिलाउन चाहनुहुन्छ सोही एपको बाहिर डबल ट्याप गर्नुहोस्"</string>
     <string name="letterbox_education_got_it" msgid="4057634570866051177">"बुझेँ"</string>
     <string name="letterbox_education_expand_button_description" msgid="1729796567101129834">"थप जानकारी प्राप्त गर्न चाहनुहुन्छ भने एक्स्पान्ड गर्नुहोस्।"</string>
     <string name="maximize_button_text" msgid="1650859196290301963">"ठुलो बनाउनुहोस्"</string>
+    <string name="minimize_button_text" msgid="271592547935841753">"मिनिमाइज गर्नुहोस्"</string>
     <string name="close_button_text" msgid="2913281996024033299">"बन्द गर्नुहोस्"</string>
+    <string name="back_button_text" msgid="1469718707134137085">"पछाडि"</string>
+    <string name="handle_text" msgid="1766582106752184456">"ह्यान्डल"</string>
+    <string name="fullscreen_text" msgid="1162316685217676079">"फुल स्क्रिन"</string>
+    <string name="desktop_text" msgid="1077633567027630454">"डेस्कटप मोड"</string>
+    <string name="split_screen_text" msgid="1396336058129570886">"स्प्लिट स्क्रिन"</string>
+    <string name="more_button_text" msgid="3655388105592893530">"थप"</string>
+    <string name="float_button_text" msgid="9221657008391364581">"फ्लोट"</string>
 </resources>

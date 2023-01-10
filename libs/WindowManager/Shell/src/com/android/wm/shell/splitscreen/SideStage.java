@@ -42,11 +42,6 @@ class SideStage extends StageTaskListener {
                 iconProvider);
     }
 
-    @Override
-    void dismiss(WindowContainerTransaction wct, boolean toTop) {
-        removeAllTasks(wct, toTop);
-    }
-
     boolean removeAllTasks(WindowContainerTransaction wct, boolean toTop) {
         if (mChildrenTaskInfo.size() == 0) return false;
         wct.reparentTasks(

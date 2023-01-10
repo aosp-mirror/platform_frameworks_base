@@ -20,14 +20,14 @@ import static android.Manifest.permission.SOUNDTRIGGER_DELEGATE_IDENTITY;
 
 import android.annotation.NonNull;
 import android.content.Context;
-import android.media.soundtrigger.ModelParameterRange;
-import android.media.soundtrigger.PhraseSoundModel;
-import android.media.soundtrigger.RecognitionConfig;
-import android.media.soundtrigger.SoundModel;
 import android.media.permission.ClearCallingIdentityContext;
 import android.media.permission.Identity;
 import android.media.permission.PermissionUtil;
 import android.media.permission.SafeCloseable;
+import android.media.soundtrigger.ModelParameterRange;
+import android.media.soundtrigger.PhraseSoundModel;
+import android.media.soundtrigger.RecognitionConfig;
+import android.media.soundtrigger.SoundModel;
 import android.media.soundtrigger_middleware.ISoundTriggerCallback;
 import android.media.soundtrigger_middleware.ISoundTriggerMiddlewareService;
 import android.media.soundtrigger_middleware.ISoundTriggerModule;
@@ -226,12 +226,13 @@ public class SoundTriggerMiddlewareService extends ISoundTriggerMiddlewareServic
             HalFactory[] factories = new HalFactory[]{new DefaultHalFactory()};
 
             publishBinderService(Context.SOUND_TRIGGER_MIDDLEWARE_SERVICE,
-                    new SoundTriggerMiddlewareService(new SoundTriggerMiddlewareLogging(
-                            new SoundTriggerMiddlewarePermission(
-                                    new SoundTriggerMiddlewareValidation(
-                                            new SoundTriggerMiddlewareImpl(factories,
-                                                    new AudioSessionProviderImpl())),
-                                    getContext())), getContext()));
+                    new SoundTriggerMiddlewareService(
+                            new SoundTriggerMiddlewareLogging(getContext(),
+                                new SoundTriggerMiddlewarePermission(
+                                        new SoundTriggerMiddlewareValidation(
+                                                new SoundTriggerMiddlewareImpl(factories,
+                                                        new AudioSessionProviderImpl())),
+                                        getContext())), getContext()));
         }
     }
 }

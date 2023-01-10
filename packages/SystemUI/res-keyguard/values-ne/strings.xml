@@ -26,11 +26,11 @@
     <string name="keyguard_sim_error_message_short" msgid="633630844240494070">"अमान्य कार्ड।"</string>
     <string name="keyguard_charged" msgid="5478247181205188995">"चार्ज भयो"</string>
     <string name="keyguard_plugged_in_wireless" msgid="2537874724955057383">"<xliff:g id="PERCENTAGE">%s</xliff:g> • तारविनै चार्ज गर्दै"</string>
-    <string name="keyguard_plugged_in_dock" msgid="449722738270908674">"<xliff:g id="PERCENTAGE">%s</xliff:g> • डक चार्ज हुँदै छ"</string>
+    <string name="keyguard_plugged_in_dock" msgid="2122073051904360987">"<xliff:g id="PERCENTAGE">%s</xliff:g> • चार्ज हुँदै छ"</string>
     <string name="keyguard_plugged_in" msgid="8169926454348380863">"<xliff:g id="PERCENTAGE">%s</xliff:g> • चार्ज गरिँदै"</string>
     <string name="keyguard_plugged_in_charging_fast" msgid="4386594091107340426">"<xliff:g id="PERCENTAGE">%s</xliff:g> • द्रुत गतिमा चार्ज गरिँदै छ"</string>
     <string name="keyguard_plugged_in_charging_slowly" msgid="217655355424210">"<xliff:g id="PERCENTAGE">%s</xliff:g> • मन्द गतिमा चार्ज गरिँदै"</string>
-    <string name="keyguard_plugged_in_charging_limited" msgid="6091488837901216962">"<xliff:g id="PERCENTAGE">%s</xliff:g> • चार्जिङ केही समयका लागि सीमित पारिएको छ"</string>
+    <string name="keyguard_plugged_in_charging_limited" msgid="1053130519456324630">"<xliff:g id="PERCENTAGE">%s</xliff:g> • ब्याट्री जोगाउन चार्ज गर्ने प्रक्रिया अप्टिमाइज गरिएको छ"</string>
     <string name="keyguard_instructions_when_pattern_disabled" msgid="8448804180089936954">"अनलक गर्न मेनु थिच्नुहोस्।"</string>
     <string name="keyguard_network_locked_message" msgid="407096292844868608">"नेटवर्क लक भएको छ"</string>
     <string name="keyguard_missing_sim_message_short" msgid="704159478161444907">"SIM कार्ड छैन"</string>
@@ -78,9 +78,9 @@
     <string name="kg_prompt_reason_restart_pattern" msgid="4720554342633852066">"यन्त्र पुनः सुरु भएपछि ढाँचा आवश्यक पर्दछ"</string>
     <string name="kg_prompt_reason_restart_pin" msgid="1587671566498057656">"यन्त्र पुनः सुरु भएपछि PIN आवश्यक पर्दछ"</string>
     <string name="kg_prompt_reason_restart_password" msgid="8061279087240952002">"यन्त्र पुनः सुरु भएपछि पासवर्ड आवश्यक पर्दछ"</string>
-    <string name="kg_prompt_reason_timeout_pattern" msgid="9170360502528959889">"अतिरिक्त सुरक्षाको लागि ढाँचा आवश्यक छ"</string>
-    <string name="kg_prompt_reason_timeout_pin" msgid="5945186097160029201">"अतिरिक्त सुरक्षाको लागि PIN आवश्यक छ"</string>
-    <string name="kg_prompt_reason_timeout_password" msgid="2258263949430384278">"अतिरिक्त सुरक्षाको लागि पासवर्ड आवश्यक छ"</string>
+    <string name="kg_prompt_reason_timeout_pattern" msgid="5514969660010197363">"अतिरिक्त सुरक्षाका लागि यो प्रमाणीकरण विधिको साटो प्याटर्न प्रयोग गर्नुहोस्"</string>
+    <string name="kg_prompt_reason_timeout_pin" msgid="4227962059353859376">"अतिरिक्त सुरक्षाका लागि यो प्रमाणीकरण विधिको साटो पिन प्रयोग गर्नुहोस्"</string>
+    <string name="kg_prompt_reason_timeout_password" msgid="8810879144143933690">"अतिरिक्त सुरक्षाका लागि यो प्रमाणीकरण विधिको साटो पासवर्ड प्रयोग गर्नुहोस्"</string>
     <string name="kg_prompt_reason_device_admin" msgid="6961159596224055685">"प्रशासकले यन्त्रलाई लक गर्नुभएको छ"</string>
     <string name="kg_prompt_reason_user_request" msgid="6015774877733717904">"यन्त्रलाई म्यानुअल तरिकाले लक गरिएको थियो"</string>
     <string name="kg_face_not_recognized" msgid="7903950626744419160">"पहिचान भएन"</string>
@@ -90,4 +90,5 @@
     <string name="clock_title_default" msgid="6342735240617459864">"डिफल्ट"</string>
     <string name="clock_title_bubble" msgid="2204559396790593213">"बबल"</string>
     <string name="clock_title_analog" msgid="8409262532900918273">"एनालग"</string>
+    <string name="keyguard_unlock_to_continue" msgid="7509503484250597743">"आफ्नो डिभाइस अनलक गरी जारी राख्नुहोस्"</string>
 </resources>

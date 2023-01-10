@@ -105,6 +105,10 @@ public class DragLayout extends LinearLayout {
                 MATCH_PARENT));
         ((LayoutParams) mDropZoneView1.getLayoutParams()).weight = 1;
         ((LayoutParams) mDropZoneView2.getLayoutParams()).weight = 1;
+        int orientation = getResources().getConfiguration().orientation;
+        setOrientation(orientation == Configuration.ORIENTATION_LANDSCAPE
+                ? LinearLayout.HORIZONTAL
+                : LinearLayout.VERTICAL);
         updateContainerMargins(getResources().getConfiguration().orientation);
     }
 
@@ -307,7 +311,7 @@ public class DragLayout extends LinearLayout {
                     animateSplitContainers(true, null /* animCompleteCallback */);
                     animateHighlight(target);
                 }
-            } else {
+            } else if (mCurrentTarget.type != target.type) {
                 // Switching between targets
                 mDropZoneView1.animateSwitch();
                 mDropZoneView2.animateSwitch();

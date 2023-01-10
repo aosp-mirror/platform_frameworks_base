@@ -16,6 +16,9 @@
 
 package com.android.systemui.qs;
 
+import static android.os.PowerExemptionManager.REASON_ALLOWLISTED_PACKAGE;
+
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.argThat;
 import static org.mockito.ArgumentMatchers.eq;
@@ -27,6 +30,9 @@ import static org.mockito.Mockito.verify;
 
 import android.app.IActivityManager;
 import android.app.IForegroundServiceObserver;
+import android.app.job.IUserVisibleJobObserver;
+import android.app.job.JobScheduler;
+import android.app.job.UserVisibleJobSummary;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
@@ -34,6 +40,7 @@ import android.content.pm.PackageManager;
 import android.content.pm.UserInfo;
 import android.os.Binder;
 import android.os.RemoteException;
+import android.os.UserHandle;
 import android.provider.DeviceConfig;
 import android.testing.AndroidTestingRunner;
 import android.testing.TestableLooper;
@@ -56,6 +63,7 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.ArgumentCaptor;
 import org.mockito.ArgumentMatchers;
+import org.mockito.InOrder;
 import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
@@ -76,6 +84,8 @@ public class FgsManagerControllerTest extends SysuiTestCase {
     @Mock
     IActivityManager mIActivityManager;
     @Mock
+    JobScheduler mJobScheduler;
+    @Mock
     PackageManager mPackageManager;
     @Mock
     UserTracker mUserTracker;
@@ -89,8 +99,10 @@ public class FgsManagerControllerTest extends SysuiTestCase {
     private FgsManagerController mFmc;
 
     private IForegroundServiceObserver mIForegroundServiceObserver;
+    private IUserVisibleJobObserver mIUserVisibleJobObserver;
     private UserTracker.Callback mUserTrackerCallback;
     private BroadcastReceiver mShowFgsManagerReceiver;
+    private InOrder mJobSchedulerInOrder;
 
     private List<UserInfo> mUserProfiles;
 
@@ -107,6 +119,8 @@ public class FgsManagerControllerTest extends SysuiTestCase {
 
         mUserProfiles = new ArrayList<>();
         Mockito.doReturn(mUserProfiles).when(mUserTracker).getUserProfiles();
+
+        mJobSchedulerInOrder = Mockito.inOrder(mJobScheduler);
 
         mFmc = createFgsManagerController();
     }
@@ -125,6 +139,52 @@ public class FgsManagerControllerTest extends SysuiTestCase {
         mIForegroundServiceObserver.onForegroundStateChanged(b1, "pkg1", 0, false);
         Assert.assertEquals(1, mFmc.getNumRunningPackages());
         mIForegroundServiceObserver.onForegroundStateChanged(b2, "pkg2", 0, false);
+        Assert.assertEquals(0, mFmc.getNumRunningPackages());
+    }
+
+    @Test
+    public void testNumPackages_jobs() throws RemoteException {
+        setUserProfiles(0);
+        setShowUserVisibleJobs(true);
+
+        UserVisibleJobSummary j1 = new UserVisibleJobSummary(0, 0, "pkg1", 0);
+        UserVisibleJobSummary j2 = new UserVisibleJobSummary(1, 0, "pkg2", 1);
+        Assert.assertEquals(0, mFmc.getNumRunningPackages());
+        mIUserVisibleJobObserver.onUserVisibleJobStateChanged(j1, true);
+        Assert.assertEquals(1, mFmc.getNumRunningPackages());
+        mIUserVisibleJobObserver.onUserVisibleJobStateChanged(j2, true);
+        Assert.assertEquals(2, mFmc.getNumRunningPackages());
+        mIUserVisibleJobObserver.onUserVisibleJobStateChanged(j1, false);
+        Assert.assertEquals(1, mFmc.getNumRunningPackages());
+        mIUserVisibleJobObserver.onUserVisibleJobStateChanged(j2, false);
+        Assert.assertEquals(0, mFmc.getNumRunningPackages());
+    }
+
+    @Test
+    public void testNumPackages_FgsAndJobs() throws RemoteException {
+        setUserProfiles(0);
+        setShowUserVisibleJobs(true);
+
+        Binder b1 = new Binder();
+        Binder b2 = new Binder();
+        UserVisibleJobSummary j1 = new UserVisibleJobSummary(0, 0, "pkg1", 0);
+        UserVisibleJobSummary j3 = new UserVisibleJobSummary(1, 0, "pkg3", 1);
+        Assert.assertEquals(0, mFmc.getNumRunningPackages());
+        mIForegroundServiceObserver.onForegroundStateChanged(b1, "pkg1", 0, true);
+        Assert.assertEquals(1, mFmc.getNumRunningPackages());
+        mIForegroundServiceObserver.onForegroundStateChanged(b2, "pkg2", 0, true);
+        Assert.assertEquals(2, mFmc.getNumRunningPackages());
+        mIUserVisibleJobObserver.onUserVisibleJobStateChanged(j1, true);
+        Assert.assertEquals(2, mFmc.getNumRunningPackages());
+        mIUserVisibleJobObserver.onUserVisibleJobStateChanged(j3, true);
+        Assert.assertEquals(3, mFmc.getNumRunningPackages());
+        mIForegroundServiceObserver.onForegroundStateChanged(b2, "pkg2", 0, false);
+        Assert.assertEquals(2, mFmc.getNumRunningPackages());
+        mIUserVisibleJobObserver.onUserVisibleJobStateChanged(j3, false);
+        Assert.assertEquals(1, mFmc.getNumRunningPackages());
+        mIForegroundServiceObserver.onForegroundStateChanged(b1, "pkg1", 0, false);
+        Assert.assertEquals(1, mFmc.getNumRunningPackages());
+        mIUserVisibleJobObserver.onUserVisibleJobStateChanged(j1, false);
         Assert.assertEquals(0, mFmc.getNumRunningPackages());
     }
 
@@ -185,9 +245,9 @@ public class FgsManagerControllerTest extends SysuiTestCase {
     public void testChangesSinceLastDialog() throws RemoteException {
         setUserProfiles(0);
 
-        Assert.assertFalse(mFmc.getChangesSinceDialog());
+        Assert.assertFalse(mFmc.getNewChangesSinceDialogWasDismissed());
         mIForegroundServiceObserver.onForegroundStateChanged(new Binder(), "pkg", 0, true);
-        Assert.assertTrue(mFmc.getChangesSinceDialog());
+        Assert.assertTrue(mFmc.getNewChangesSinceDialogWasDismissed());
     }
 
     @Test
@@ -222,7 +282,153 @@ public class FgsManagerControllerTest extends SysuiTestCase {
         Assert.assertEquals(2, mFmc.getNumRunningPackages());
     }
 
+    @Test
+    public void testButtonVisibilityOnShowAllowlistButtonFlagChange() throws Exception {
+        setUserProfiles(0);
+        setBackgroundRestrictionExemptionReason("pkg", 12345, REASON_ALLOWLISTED_PACKAGE);
 
+        final Binder binder = new Binder();
+        setShowStopButtonForUserAllowlistedApps(true);
+        mIForegroundServiceObserver.onForegroundStateChanged(binder, "pkg", 0, true);
+        Assert.assertEquals(1, mFmc.visibleButtonsCount());
+
+        mIForegroundServiceObserver.onForegroundStateChanged(binder, "pkg", 0, false);
+        Assert.assertEquals(0, mFmc.visibleButtonsCount());
+
+        setShowStopButtonForUserAllowlistedApps(false);
+        mIForegroundServiceObserver.onForegroundStateChanged(binder, "pkg", 0, true);
+        Assert.assertEquals(0, mFmc.visibleButtonsCount());
+    }
+
+    @Test
+    public void testShowUserVisibleJobsOnCreation() {
+        // Test when the default is on.
+        mDeviceConfigProxyFake.setProperty(DeviceConfig.NAMESPACE_SYSTEMUI,
+                SystemUiDeviceConfigFlags.TASK_MANAGER_SHOW_USER_VISIBLE_JOBS,
+                "true", false);
+        FgsManagerController fmc = new FgsManagerControllerImpl(
+                mContext,
+                mMainExecutor,
+                mBackgroundExecutor,
+                mSystemClock,
+                mIActivityManager,
+                mJobScheduler,
+                mPackageManager,
+                mUserTracker,
+                mDeviceConfigProxyFake,
+                mDialogLaunchAnimator,
+                mBroadcastDispatcher,
+                mDumpManager
+        );
+        fmc.init();
+        Assert.assertTrue(fmc.getIncludesUserVisibleJobs());
+        ArgumentCaptor<IUserVisibleJobObserver> iUserVisibleJobObserverArgumentCaptor =
+                ArgumentCaptor.forClass(IUserVisibleJobObserver.class);
+        mJobSchedulerInOrder.verify(mJobScheduler)
+                .registerUserVisibleJobObserver(iUserVisibleJobObserverArgumentCaptor.capture());
+        Assert.assertNotNull(iUserVisibleJobObserverArgumentCaptor.getValue());
+
+        // Test when the default is off.
+        mDeviceConfigProxyFake.setProperty(DeviceConfig.NAMESPACE_SYSTEMUI,
+                SystemUiDeviceConfigFlags.TASK_MANAGER_SHOW_USER_VISIBLE_JOBS,
+                "false", false);
+        fmc = new FgsManagerControllerImpl(
+                mContext,
+                mMainExecutor,
+                mBackgroundExecutor,
+                mSystemClock,
+                mIActivityManager,
+                mJobScheduler,
+                mPackageManager,
+                mUserTracker,
+                mDeviceConfigProxyFake,
+                mDialogLaunchAnimator,
+                mBroadcastDispatcher,
+                mDumpManager
+        );
+        fmc.init();
+        Assert.assertFalse(fmc.getIncludesUserVisibleJobs());
+        mJobSchedulerInOrder.verify(mJobScheduler, never()).registerUserVisibleJobObserver(any());
+    }
+
+    @Test
+    public void testShowUserVisibleJobsToggling() throws Exception {
+        setUserProfiles(0);
+        setShowUserVisibleJobs(true);
+
+        // pkg1 has only job
+        // pkg2 has both job and fgs
+        // pkg3 has only fgs
+        UserVisibleJobSummary j1 = new UserVisibleJobSummary(0, 0, "pkg1", 0);
+        UserVisibleJobSummary j2 = new UserVisibleJobSummary(1, 0, "pkg2", 1);
+        Binder b2 = new Binder();
+        Binder b3 = new Binder();
+
+        Assert.assertEquals(0, mFmc.getNumRunningPackages());
+        mIForegroundServiceObserver.onForegroundStateChanged(b2, "pkg2", 0, true);
+        mIForegroundServiceObserver.onForegroundStateChanged(b3, "pkg3", 0, true);
+        Assert.assertEquals(2, mFmc.getNumRunningPackages());
+        mIUserVisibleJobObserver.onUserVisibleJobStateChanged(j1, true);
+        mIUserVisibleJobObserver.onUserVisibleJobStateChanged(j2, true);
+        Assert.assertEquals(3, mFmc.getNumRunningPackages());
+
+        // Turn off the flag, confirm the number of packages is updated properly.
+        setShowUserVisibleJobs(false);
+        // Only pkg1 should be removed since the other two have fgs
+        Assert.assertEquals(2, mFmc.getNumRunningPackages());
+
+        setShowUserVisibleJobs(true);
+
+        Assert.assertEquals(2, mFmc.getNumRunningPackages());
+        mIUserVisibleJobObserver.onUserVisibleJobStateChanged(j1, true);
+        mIUserVisibleJobObserver.onUserVisibleJobStateChanged(j2, true);
+        Assert.assertEquals(3, mFmc.getNumRunningPackages());
+    }
+
+    private void setShowStopButtonForUserAllowlistedApps(boolean enable) {
+        mDeviceConfigProxyFake.setProperty(DeviceConfig.NAMESPACE_SYSTEMUI,
+                SystemUiDeviceConfigFlags.TASK_MANAGER_SHOW_STOP_BUTTON_FOR_USER_ALLOWLISTED_APPS,
+                enable ? "true" : "false", false);
+        mBackgroundExecutor.advanceClockToLast();
+        mBackgroundExecutor.runAllReady();
+    }
+
+    private void setShowUserVisibleJobs(boolean enable) {
+        if (mFmc.getIncludesUserVisibleJobs() == enable) {
+            // No change.
+            return;
+        }
+
+        mDeviceConfigProxyFake.setProperty(DeviceConfig.NAMESPACE_SYSTEMUI,
+                SystemUiDeviceConfigFlags.TASK_MANAGER_SHOW_USER_VISIBLE_JOBS,
+                enable ? "true" : "false", false);
+        mBackgroundExecutor.advanceClockToLast();
+        mBackgroundExecutor.runAllReady();
+
+        ArgumentCaptor<IUserVisibleJobObserver> iUserVisibleJobObserverArgumentCaptor =
+                ArgumentCaptor.forClass(IUserVisibleJobObserver.class);
+        if (enable) {
+            mJobSchedulerInOrder.verify(mJobScheduler).registerUserVisibleJobObserver(
+                    iUserVisibleJobObserverArgumentCaptor.capture()
+            );
+            mIUserVisibleJobObserver = iUserVisibleJobObserverArgumentCaptor.getValue();
+        } else {
+            mJobSchedulerInOrder.verify(mJobScheduler).unregisterUserVisibleJobObserver(
+                    eq(mIUserVisibleJobObserver)
+            );
+            mIUserVisibleJobObserver = null;
+        }
+    }
+
+    private void setBackgroundRestrictionExemptionReason(String pkgName, int uid, int reason)
+            throws Exception {
+        Mockito.doReturn(uid)
+                .when(mPackageManager)
+                .getPackageUidAsUser(pkgName, UserHandle.getUserId(uid));
+        Mockito.doReturn(reason)
+                .when(mIActivityManager)
+                .getBackgroundRestrictionExemptionReason(uid);
+    }
 
     FgsManagerController createFgsManagerController() throws RemoteException {
         ArgumentCaptor<IForegroundServiceObserver> iForegroundServiceObserverArgumentCaptor =
@@ -232,12 +438,13 @@ public class FgsManagerControllerTest extends SysuiTestCase {
         ArgumentCaptor<BroadcastReceiver> showFgsManagerReceiverArgumentCaptor =
                 ArgumentCaptor.forClass(BroadcastReceiver.class);
 
-        FgsManagerController result = new FgsManagerController(
+        FgsManagerController result = new FgsManagerControllerImpl(
                 mContext,
                 mMainExecutor,
                 mBackgroundExecutor,
                 mSystemClock,
                 mIActivityManager,
+                mJobScheduler,
                 mPackageManager,
                 mUserTracker,
                 mDeviceConfigProxyFake,
@@ -266,6 +473,15 @@ public class FgsManagerControllerTest extends SysuiTestCase {
         mIForegroundServiceObserver = iForegroundServiceObserverArgumentCaptor.getValue();
         mUserTrackerCallback = userTrackerCallbackArgumentCaptor.getValue();
         mShowFgsManagerReceiver = showFgsManagerReceiverArgumentCaptor.getValue();
+
+        if (result.getIncludesUserVisibleJobs()) {
+            ArgumentCaptor<IUserVisibleJobObserver> iUserVisibleJobObserverArgumentCaptor =
+                    ArgumentCaptor.forClass(IUserVisibleJobObserver.class);
+            mJobSchedulerInOrder.verify(mJobScheduler).registerUserVisibleJobObserver(
+                    iUserVisibleJobObserverArgumentCaptor.capture()
+            );
+            mIUserVisibleJobObserver = iUserVisibleJobObserverArgumentCaptor.getValue();
+        }
 
         return result;
     }

@@ -20,6 +20,7 @@ import com.android.systemui.recents.OverviewProxyService.OverviewProxyListener
 import com.android.systemui.util.concurrency.FakeExecutor
 import com.android.systemui.util.time.FakeSystemClock
 import com.google.common.truth.Truth.assertThat
+import java.util.function.Consumer
 import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -33,10 +34,10 @@ import org.mockito.Mockito.doNothing
 import org.mockito.Mockito.eq
 import org.mockito.Mockito.mock
 import org.mockito.Mockito.never
+import org.mockito.Mockito.reset
 import org.mockito.Mockito.verify
-import org.mockito.MockitoAnnotations
-import java.util.function.Consumer
 import org.mockito.Mockito.`when` as whenever
+import org.mockito.MockitoAnnotations
 
 @SmallTest
 @RunWith(AndroidTestingRunner::class)
@@ -62,6 +63,10 @@ class NotificationQSContainerControllerTest : SysuiTestCase() {
     private lateinit var overviewProxyService: OverviewProxyService
     @Mock
     private lateinit var notificationsQSContainer: NotificationsQuickSettingsContainer
+    @Mock
+    private lateinit var largeScreenShadeHeaderController: LargeScreenShadeHeaderController
+    @Mock
+    private lateinit var shadeExpansionStateManager: ShadeExpansionStateManager
     @Mock
     private lateinit var featureFlags: FeatureFlags
     @Captor
@@ -92,6 +97,8 @@ class NotificationQSContainerControllerTest : SysuiTestCase() {
                 notificationsQSContainer,
                 navigationModeController,
                 overviewProxyService,
+                largeScreenShadeHeaderController,
+                shadeExpansionStateManager,
                 featureFlags,
                 delayableExecutor
         )
@@ -371,8 +378,15 @@ class NotificationQSContainerControllerTest : SysuiTestCase() {
         container.removeAllViews()
         container.addView(newViewWithId(1))
         container.addView(newViewWithId(View.NO_ID))
-        val controller = NotificationsQSContainerController(container, navigationModeController,
-                overviewProxyService, featureFlags, delayableExecutor)
+        val controller = NotificationsQSContainerController(
+                container,
+                navigationModeController,
+                overviewProxyService,
+                largeScreenShadeHeaderController,
+                shadeExpansionStateManager,
+                featureFlags,
+                delayableExecutor
+        )
         controller.updateConstraints()
 
         assertThat(container.getChildAt(0).id).isEqualTo(1)
@@ -395,6 +409,21 @@ class NotificationQSContainerControllerTest : SysuiTestCase() {
 
         verify(notificationsQSContainer, never()).setQSContainerPaddingBottom(0)
         verify(notificationsQSContainer).setQSContainerPaddingBottom(STABLE_INSET_BOTTOM)
+    }
+
+    @Test
+    fun testStartCustomizingWithDuration() {
+        controller.setCustomizerShowing(true, 100L)
+        verify(largeScreenShadeHeaderController).startCustomizingAnimation(true, 100L)
+    }
+
+    @Test
+    fun testEndCustomizingWithDuration() {
+        controller.setCustomizerShowing(true, 0L) // Only tracks changes
+        reset(largeScreenShadeHeaderController)
+
+        controller.setCustomizerShowing(false, 100L)
+        verify(largeScreenShadeHeaderController).startCustomizingAnimation(false, 100L)
     }
 
     private fun disableSplitShade() {

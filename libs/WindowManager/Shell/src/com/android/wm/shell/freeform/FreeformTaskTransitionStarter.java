@@ -29,6 +29,23 @@ public interface FreeformTaskTransitionStarter {
      *
      * @param targetWindowingMode the target windowing mode
      * @param wct the {@link WindowContainerTransaction} that changes the windowing mode
+     *
      */
     void startWindowingModeTransition(int targetWindowingMode, WindowContainerTransaction wct);
+
+    /**
+     * Starts window minimization transition
+     *
+     * @param wct the {@link WindowContainerTransaction} that changes the windowing mode
+     *
+     */
+    void startMinimizedModeTransition(WindowContainerTransaction wct);
+
+    /**
+     * Starts close window transition
+     *
+     * @param wct the {@link WindowContainerTransaction} that closes the task
+     *
+     */
+    void startRemoveTransition(WindowContainerTransaction wct);
 }

@@ -50,6 +50,7 @@ import android.util.Slog;
 import android.util.SparseArray;
 import android.view.RemoteAnimationAdapter;
 import android.view.WindowManager;
+import android.window.RemoteTransition;
 
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.util.ArrayUtils;
@@ -94,6 +95,7 @@ public class ActivityStartController {
 
     boolean mCheckedForSetup = false;
 
+    /** Whether an {@link ActivityStarter} is currently executing (starting an Activity). */
     private boolean mInExecution = false;
 
     /**
@@ -129,7 +131,7 @@ public class ActivityStartController {
         return mFactory.obtain().setIntent(intent).setReason(reason);
     }
 
-    void onExecutionStarted(ActivityStarter starter) {
+    void onExecutionStarted() {
         mInExecution = true;
     }
 
@@ -383,6 +385,14 @@ public class ActivityStartController {
                 callingUid, realCallingUid, UserHandle.USER_NULL);
         final SparseArray<String> startingUidPkgs = new SparseArray<>();
         final long origId = Binder.clearCallingIdentity();
+
+        SafeActivityOptions bottomOptions = null;
+        if (options != null) {
+            // To ensure the first N-1 activities (N == total # of activities) are also launched
+            // into the correct display and root task, use a copy of the passed-in options (keeping
+            // only display-related and launch-root-task information) for these activities.
+            bottomOptions = options.selectiveCloneLaunchOptions();
+        }
         try {
             intents = ArrayUtils.filterNotNull(intents, Intent[]::new);
             final ActivityStarter[] starters = new ActivityStarter[intents.length];
@@ -431,7 +441,7 @@ public class ActivityStartController {
                 final boolean top = i == intents.length - 1;
                 final SafeActivityOptions checkedOptions = top
                         ? options
-                        : null;
+                        : bottomOptions;
                 starters[i] = obtainStarter(intent, reason)
                         .setIntentGrants(intentGrants)
                         .setCaller(caller)
@@ -546,8 +556,9 @@ public class ActivityStartController {
         final Task rootTask = mService.mRootWindowContainer.getDefaultTaskDisplayArea()
                 .getRootTask(WINDOWING_MODE_UNDEFINED, activityType);
         if (rootTask == null) return false;
+        final RemoteTransition remote = options.getRemoteTransition();
         final ActivityRecord r = rootTask.topRunningActivity();
-        if (r == null || r.mVisibleRequested || !r.attachedToProcess()
+        if (r == null || r.isVisibleRequested() || !r.attachedToProcess() || remote == null
                 || !r.mActivityComponent.equals(intent.getComponent())
                 // Recents keeps invisible while device is locked.
                 || r.mDisplayContent.isKeyguardLocked()) {
@@ -556,12 +567,41 @@ public class ActivityStartController {
         mService.mRootWindowContainer.startPowerModeLaunchIfNeeded(true /* forceSend */, r);
         final ActivityMetricsLogger.LaunchingState launchingState =
                 mSupervisor.getActivityMetricsLogger().notifyActivityLaunching(intent);
+        final Transition transition = new Transition(WindowManager.TRANSIT_TO_FRONT,
+                0 /* flags */, r.mTransitionController, mService.mWindowManager.mSyncEngine);
+        if (r.mTransitionController.isCollecting()) {
+            // Special case: we are entering recents while an existing transition is running. In
+            // this case, we know it's safe to "defer" the activity launch, so lets do so now so
+            // that it can get its own transition and thus update launcher correctly.
+            mService.mWindowManager.mSyncEngine.queueSyncSet(
+                    () -> {
+                        if (r.isAttached()) {
+                            r.mTransitionController.moveToCollecting(transition);
+                        }
+                    },
+                    () -> {
+                        if (r.isAttached() && transition.isCollecting()) {
+                            startExistingRecentsIfPossibleInner(options, r, rootTask,
+                                    launchingState, remote, transition);
+                        }
+                    });
+        } else {
+            r.mTransitionController.moveToCollecting(transition);
+            startExistingRecentsIfPossibleInner(options, r, rootTask, launchingState, remote,
+                    transition);
+        }
+        return true;
+    }
+
+    private void startExistingRecentsIfPossibleInner(ActivityOptions options, ActivityRecord r,
+            Task rootTask, ActivityMetricsLogger.LaunchingState launchingState,
+            RemoteTransition remoteTransition, Transition transition) {
         final Task task = r.getTask();
         mService.deferWindowLayout();
         try {
-            task.mTransitionController.requestTransitionIfNeeded(WindowManager.TRANSIT_TO_FRONT,
-                    0 /* flags */, task, task /* readyGroupRef */,
-                    options.getRemoteTransition(), null /* displayChange */);
+            r.mTransitionController.requestStartTransition(transition,
+                    task, remoteTransition, null /* displayChange */);
+            r.mTransitionController.collect(task);
             r.mTransitionController.setTransientLaunch(r,
                     TaskDisplayArea.getRootTaskAbove(rootTask));
             task.moveToFront("startExistingRecents");
@@ -573,7 +613,6 @@ public class ActivityStartController {
             task.mInResumeTopActivity = false;
             mService.continueWindowLayout();
         }
-        return true;
     }
 
     void registerRemoteAnimationForNextActivityStart(String packageName,

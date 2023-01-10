@@ -1,5 +1,7 @@
 # Doze
 
+`Dozing` is a low-powered state of the device. If Always-on Display (AOD), pulsing, or wake-gestures are enabled, then the device will enter the `dozing` state after a user intent to turn off the screen (ie: power button) or the screen times out.
+
 Always-on Display (AOD) provides an alternative 'screen-off' experience. Instead, of completely turning the display off, it provides a distraction-free, glanceable experience for the phone in a low-powered mode. In this low-powered mode, the display will have a lower refresh rate and the UI should frequently shift its displayed contents in order to prevent burn-in. The recommended max on-pixel-ratio (OPR) is 5% to reduce battery consumption.
 
 ![ss-aod](./imgs/aod.png)
@@ -58,7 +60,7 @@ When Dozing is enabled, it can still be suppressed based on the device state. On
 Refer to the documentation in [DozeSuppressors][15] for more information.
 
 ## AOD burn-in and image retention
-Because AOD will show an image on the screen for an elogated period of time, AOD designs must take into consideration burn-in (leaving a permanent mark on the screen). Temporary burn-in is called image-retention.
+Because AOD will show an image on the screen for an elongated period of time, AOD designs must take into consideration burn-in (leaving a permanent mark on the screen). Temporary burn-in is called image-retention.
 
 To prevent burn-in, it is recommended to often shift UI on the screen. [DozeUi][17] schedules a call to dozeTimeTick every minute to request a shift in UI for all elements on AOD. The amount of shift can be determined by undergoing simulated AOD testing since this may vary depending on the display.
 

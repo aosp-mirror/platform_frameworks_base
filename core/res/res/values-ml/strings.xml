@@ -33,6 +33,7 @@
     <string name="defaultVoiceMailAlphaTag" msgid="2190754495304236490">"വോയ്സ് മെയില്‍"</string>
     <string name="defaultMsisdnAlphaTag" msgid="2285034592902077488">"MSISDN1"</string>
     <string name="mmiError" msgid="2862759606579822246">"കണക്ഷൻ പ്രശ്‌നം അല്ലെങ്കിൽ MMI കോഡ് അസാധുവാണ്."</string>
+    <string name="mmiErrorNotSupported" msgid="5001803469335286099">"ഫീച്ചർ പിന്തുണയ്‌ക്കുന്നില്ല."</string>
     <string name="mmiFdnError" msgid="3975490266767565852">"നിശ്ചയിച്ചുറപ്പിച്ച ഡയൽ ചെയ്യൽ നമ്പറുകൾക്ക് മാത്രമായി പ്രവർത്തനം പരിമിതപ്പെടുത്തിയിരിക്കുന്നു."</string>
     <string name="mmiErrorWhileRoaming" msgid="1204173664713870114">"റോമിംഗിൽ ആയിരിക്കുമ്പോൾ നിങ്ങളുടെ ഫോണിൽ നിന്ന് കോൾ കൈമാറ്റ ക്രമീകരണം സാധിക്കില്ല."</string>
     <string name="serviceEnabled" msgid="7549025003394765639">"സേവനം പ്രവർത്തനക്ഷമമാക്കി."</string>
@@ -586,13 +587,14 @@
     <string name="screen_lock_app_setting_name" msgid="6054944352976789228">"സ്‌ക്രീൻ ലോക്ക് ഉപയോഗിക്കുക"</string>
     <string name="screen_lock_dialog_default_subtitle" msgid="120359538048533695">"തുടരാൻ നിങ്ങളുടെ സ്‌ക്രീൻ ലോക്ക് നൽകുക"</string>
     <string name="fingerprint_acquired_partial" msgid="4323789264604479684">"സെൻസറിന് മുകളിൽ ശക്തിയായി അമർത്തുക"</string>
-    <string name="fingerprint_acquired_insufficient" msgid="2545149524031515411">"ഫിംഗർപ്രിന്റ് പ്രോസസ് ചെയ്യാനായില്ല. വീണ്ടും ശ്രമിക്കുക."</string>
+    <string name="fingerprint_acquired_insufficient" msgid="623888149088216458">"ഫിംഗർപ്രിന്റ് തിരിച്ചറിയാനാകുന്നില്ല. വീണ്ടും ശ്രമിക്കുക."</string>
     <string name="fingerprint_acquired_imager_dirty" msgid="1770676120848224250">"ഫിംഗർപ്രിന്റ് സെൻസർ വൃത്തിയാക്കിയ ശേഷം വീണ്ടും ശ്രമിക്കുക"</string>
     <string name="fingerprint_acquired_imager_dirty_alt" msgid="9169582140486372897">"സെൻസർ വൃത്തിയാക്കിയ ശേഷം വീണ്ടും ശ്രമിക്കുക"</string>
     <string name="fingerprint_acquired_too_fast" msgid="1628459767349116104">"സെൻസറിന് മുകളിൽ ശക്തിയായി അമർത്തുക"</string>
     <string name="fingerprint_acquired_too_slow" msgid="6683510291554497580">"വിരൽ വളരെ പതുക്കെ നീക്കി. വീണ്ടും ശ്രമിക്കുക."</string>
     <string name="fingerprint_acquired_already_enrolled" msgid="2285166003936206785">"മറ്റൊരു ഫിംഗർപ്രിന്റ് ഉപയോഗിച്ച് നോക്കുക"</string>
     <string name="fingerprint_acquired_too_bright" msgid="3863560181670915607">"തെളിച്ചം വളരെയധികമാണ്"</string>
+    <string name="fingerprint_acquired_power_press" msgid="3107864151278434961">"പവർ ബട്ടൺ അമർത്തിയത് തിരിച്ചറിഞ്ഞു"</string>
     <string name="fingerprint_acquired_try_adjusting" msgid="3667006071003809364">"അൽപ്പം നീക്കി നോക്കൂ"</string>
     <string name="fingerprint_acquired_immobile" msgid="1621891895241888048">"ഓരോ തവണയും നിങ്ങളുടെ വിരലിന്റെ സ്ഥാനം ചെറുതായി മാറ്റുക"</string>
   <string-array name="fingerprint_acquired_vendor">
@@ -604,12 +606,12 @@
     <string name="face_authenticated_confirmation_required" msgid="6872632732508013755">"മുഖം പരിശോധിച്ചുറപ്പിച്ചു, സ്ഥിരീകരിക്കുക അമർത്തുക"</string>
     <string name="fingerprint_error_hw_not_available" msgid="4571700896929561202">"ഫിംഗർപ്രിന്റ് ഹാർഡ്‌വെയർ ലഭ്യമല്ല."</string>
     <string name="fingerprint_error_no_space" msgid="7285481581905967580">"ഫിംഗർപ്രിന്റ് സജ്ജീകരിക്കാനാകില്ല"</string>
-    <string name="fingerprint_error_timeout" msgid="2946635815726054226">"ഫിംഗർപ്രിന്റ് നൽകേണ്ട സമയം കഴിഞ്ഞു. വീണ്ടും ശ്രമിക്കുക."</string>
+    <string name="fingerprint_error_timeout" msgid="7361192266621252164">"ഫിംഗർപ്രിന്റ് സജ്ജീകരണം ടൈംഔട്ടായി. വീണ്ടും ശ്രമിക്കുക."</string>
     <string name="fingerprint_error_canceled" msgid="540026881380070750">"ഫിംഗർപ്രിന്റ് പ്രവർത്തനം റദ്ദാക്കി."</string>
     <string name="fingerprint_error_user_canceled" msgid="7685676229281231614">"ഉപയോക്താവ് റദ്ദാക്കിയ ഫിംഗർപ്രിന്‍റ് പ്രവർത്തനം."</string>
-    <string name="fingerprint_error_lockout" msgid="7853461265604738671">"നിരവധി തവണ ശ്രമിച്ചു. പിന്നീട് വീണ്ടും ശ്രമിക്കുക."</string>
-    <string name="fingerprint_error_lockout_permanent" msgid="3895478283943513746">"നിരവധി തവണ ശ്രമിച്ചതിനാൽ, ഫിംഗർപ്രിന്റ് സെൻസർ പ്രവർത്തനരഹിതമായി."</string>
-    <string name="fingerprint_error_unable_to_process" msgid="1148553603490048742">"വീണ്ടും ശ്രമിക്കൂ."</string>
+    <string name="fingerprint_error_lockout" msgid="6626753679019351368">"നിരവധി ശ്രമങ്ങൾ. പകരം സ്‌ക്രീൻ ലോക്ക് ഉപയോഗിക്കുക."</string>
+    <string name="fingerprint_error_lockout_permanent" msgid="9060651300306264843">"നിരവധി ശ്രമങ്ങൾ. പകരം സ്‌ക്രീൻ ലോക്ക് ഉപയോഗിക്കുക."</string>
+    <string name="fingerprint_error_unable_to_process" msgid="2446280592818621224">"ഫിംഗർപ്രിന്റ് പ്രോസസ് ചെയ്യാനാകില്ല. വീണ്ടും ശ്രമിക്കുക."</string>
     <string name="fingerprint_error_no_fingerprints" msgid="8671811719699072411">"വിരലടയാളങ്ങൾ എൻറോൾ ചെയ്തിട്ടില്ല."</string>
     <string name="fingerprint_error_hw_not_present" msgid="578914350967423382">"ഈ ഉപകരണത്തിൽ ഫിംഗർപ്രിന്റ് സെൻസറില്ല."</string>
     <string name="fingerprint_error_security_update_required" msgid="7750187320640856433">"സെൻസർ താൽക്കാലികമായി പ്രവർത്തനരഹിതമാക്കി."</string>
@@ -637,7 +639,7 @@
     <string name="fingerprint_recalibrate_notification_content" msgid="8519935717822194943">"റിപ്പയർ കേന്ദ്രം സന്ദർശിക്കുക."</string>
     <string name="face_acquired_insufficient" msgid="6889245852748492218">"മുഖ മോഡൽ സൃഷ്ടിക്കാനാകുന്നില്ല. വീണ്ടും ശ്രമിക്കൂ."</string>
     <string name="face_acquired_too_bright" msgid="8070756048978079164">"വളരെയധികം തെളിച്ചം. സൗമ്യതയേറിയ പ്രകാശം ശ്രമിക്കൂ."</string>
-    <string name="face_acquired_too_dark" msgid="7919016380747701228">"കൂടുതൽ വെളിച്ചമുള്ളയിടത്ത് പരീക്ഷിച്ച് നോക്കൂ"</string>
+    <string name="face_acquired_too_dark" msgid="8539853432479385326">"വേണ്ടത്ര പ്രകാശമില്ല"</string>
     <string name="face_acquired_too_close" msgid="4453646176196302462">"ഫോൺ കൂടുതൽ ദൂരേയ്ക്ക് നീക്കുക"</string>
     <string name="face_acquired_too_far" msgid="2922278214231064859">"ഫോൺ അടുത്തേക്ക് നീക്കുക"</string>
     <string name="face_acquired_too_high" msgid="8278815780046368576">"ഫോൺ മുകളിലേക്ക് ഉയർത്തുക"</string>
@@ -1249,10 +1251,9 @@
     <string name="android_preparing_apk" msgid="589736917792300956">"<xliff:g id="APPNAME">%1$s</xliff:g> തയ്യാറാക്കുന്നു."</string>
     <string name="android_upgrading_starting_apps" msgid="6206161195076057075">"അപ്ലിക്കേഷനുകൾ ആരംഭിക്കുന്നു."</string>
     <string name="android_upgrading_complete" msgid="409800058018374746">"ബൂട്ട് ചെയ്യൽ പൂർത്തിയാകുന്നു."</string>
-    <string name="fp_power_button_enrollment_title" msgid="3574363228413259548">"സജ്ജീകരണം തുടരണോ?"</string>
     <string name="fp_power_button_enrollment_message" msgid="5648173517663246140">"നിങ്ങൾ പവർ ബട്ടൺ അമർത്തി — സാധാരണയായി ഇത് സ്ക്രീൻ ഓഫാകുന്നതിന് കാരണമാകും.\n\nനിങ്ങളുടെ ഫിംഗർപ്രിന്റ് സജ്ജീകരിക്കുമ്പോൾ മൃദുവായി ടാപ്പ് ചെയ്ത് നോക്കുക."</string>
-    <string name="fp_power_button_enrollment_positive_button" msgid="2095415838459356833">"സ്ക്രീൻ ഓഫാക്കുക"</string>
-    <string name="fp_power_button_enrollment_negative_button" msgid="6558436406362486747">"സജ്ജീകരണം തുടരുക"</string>
+    <string name="fp_power_button_enrollment_title" msgid="6976841690455338563">"സജ്ജീകരണം നിർത്താൻ, സ്ക്രീൻ ഓഫാക്കുക"</string>
+    <string name="fp_power_button_enrollment_button_text" msgid="3199783266386029200">"ഓഫാക്കുക"</string>
     <string name="fp_power_button_bp_title" msgid="5585506104526820067">"ഫിംഗർപ്രിന്റ് പരിശോധിച്ചുറപ്പിക്കൽ തുടരണോ?"</string>
     <string name="fp_power_button_bp_message" msgid="2983163038168903393">"നിങ്ങൾ പവർ ബട്ടൺ അമർത്തി — സാധാരണയായി ഇത് സ്ക്രീൻ ഓഫാകുന്നതിന് കാരണമാകും.\n\nനിങ്ങളുടെ ഫിംഗർപ്രിന്റ് പരിശോധിച്ചുറപ്പിക്കാൻ മൃദുവായി ടാപ്പ് ചെയ്ത് നോക്കുക."</string>
     <string name="fp_power_button_bp_positive_button" msgid="728945472408552251">"സ്ക്രീൻ ഓഫാക്കുക"</string>
@@ -1405,16 +1406,16 @@
     <string name="ext_media_new_notification_message" msgid="6095403121990786986">"സജ്ജമാക്കാൻ ടാപ്പ് ചെയ്യുക"</string>
     <string name="ext_media_new_notification_message" product="tv" msgid="216863352100263668">"സജ്ജീകരിക്കാൻ തിരഞ്ഞെടുക്കുക"</string>
     <string name="ext_media_new_notification_message" product="automotive" msgid="5140127881613227162">"ഉപകരണം വീണ്ടും ഫോർമാറ്റ് ചെയ്യേണ്ടി വന്നേക്കാം. പുറത്തെടുക്കാൻ ടാപ്പ് ചെയ്യുക."</string>
-    <string name="ext_media_ready_notification_message" msgid="777258143284919261">"ഫോട്ടോകളും മീഡിയയും ട്രാൻസ്‌ഫർ ചെയ്യാൻ"</string>
+    <string name="ext_media_ready_notification_message" msgid="7509496364380197369">"ഫോട്ടോകളും വീഡിയോകളും സംഗീതവും മറ്റും സംഭരിക്കുന്നതിന്"</string>
     <string name="ext_media_ready_notification_message" product="tv" msgid="8847134811163165935">"മീഡിയാ ഫയലുകൾ ബ്രൗസ് ചെയ്യുക"</string>
     <string name="ext_media_unmountable_notification_title" msgid="4895444667278979910">"<xliff:g id="NAME">%s</xliff:g>-ൽ പ്രശ്‌നം"</string>
     <string name="ext_media_unmountable_notification_title" product="automotive" msgid="3142723758949023280">"<xliff:g id="NAME">%s</xliff:g> പ്രവർത്തിക്കുന്നില്ല"</string>
     <string name="ext_media_unmountable_notification_message" msgid="3256290114063126205">"പരിഹരിക്കാൻ ടാപ്പ് ചെയ്യുക"</string>
     <string name="ext_media_unmountable_notification_message" product="tv" msgid="3003611129979934633">"<xliff:g id="NAME">%s</xliff:g> കേടായി. പരിഹരിക്കാൻ തിരഞ്ഞെടുക്കുക."</string>
     <string name="ext_media_unmountable_notification_message" product="automotive" msgid="2274596120715020680">"ഉപകരണം വീണ്ടും ഫോർമാറ്റ് ചെയ്യേണ്ടി വന്നേക്കാം. പുറത്തെടുക്കാൻ ടാപ്പ് ചെയ്യുക."</string>
-    <string name="ext_media_unsupported_notification_title" msgid="4358280700537030333">"പിന്തുണയില്ലാത്ത <xliff:g id="NAME">%s</xliff:g>"</string>
+    <string name="ext_media_unsupported_notification_title" msgid="3487534182861251401">"<xliff:g id="NAME">%s</xliff:g> കണ്ടെത്തി"</string>
     <string name="ext_media_unsupported_notification_title" product="automotive" msgid="6004193172658722381">"<xliff:g id="NAME">%s</xliff:g> പ്രവർത്തിക്കുന്നില്ല"</string>
-    <string name="ext_media_unsupported_notification_message" msgid="917738524888367560">"ഈ ഉപകരണം <xliff:g id="NAME">%s</xliff:g> പിന്തുണയ്ക്കുന്നതല്ല. പിന്തുണയുള്ള ഫോർമാറ്റിൽ സജ്ജമാക്കുന്നതിന് ടാപ്പുചെയ്യുക."</string>
+    <string name="ext_media_unsupported_notification_message" msgid="8463636521459807981">"സജ്ജീകരിക്കാൻ ടാപ്പ് ചെയ്യുക."</string>
     <string name="ext_media_unsupported_notification_message" product="tv" msgid="1595482802187036532">"പിന്തുണയ്‌ക്കുന്ന ഫോർമാറ്റിൽ <xliff:g id="NAME">%s</xliff:g> സജ്ജീകരിക്കാൻ തിരഞ്ഞെടുക്കുക."</string>
     <string name="ext_media_unsupported_notification_message" product="automotive" msgid="3412494732736336330">"ഉപകരണം വീണ്ടും ഫോർമാറ്റ് ചെയ്യേണ്ടി വന്നേക്കാം"</string>
     <string name="ext_media_badremoval_notification_title" msgid="4114625551266196872">"<xliff:g id="NAME">%s</xliff:g> അപ്രതീക്ഷിതമായി നീക്കംചെയ്‌തു"</string>
@@ -1424,7 +1425,7 @@
     <string name="ext_media_unmounting_notification_title" msgid="4147986383917892162">"<xliff:g id="NAME">%s</xliff:g> ഒഴിവാക്കുന്നു"</string>
     <string name="ext_media_unmounting_notification_message" msgid="5717036261538754203">"നീക്കം ചെയ്യരുത്"</string>
     <string name="ext_media_init_action" msgid="2312974060585056709">"സജ്ജമാക്കുക"</string>
-    <string name="ext_media_unmount_action" msgid="966992232088442745">"നിരസിക്കുക"</string>
+    <string name="ext_media_unmount_action" msgid="966992232088442745">"ഒഴിവാക്കുക"</string>
     <string name="ext_media_browse_action" msgid="344865351947079139">"അടുത്തറിയുക"</string>
     <string name="ext_media_seamless_action" msgid="8837030226009268080">"ഔട്ട്പുട്ട് മാറുക"</string>
     <string name="ext_media_missing_title" msgid="3209472091220515046">"<xliff:g id="NAME">%s</xliff:g> കാണുന്നില്ല"</string>
@@ -1927,6 +1928,7 @@
     <string name="country_selection_title" msgid="5221495687299014379">"മേഖലാ മുൻഗണന"</string>
     <string name="search_language_hint" msgid="7004225294308793583">"ഭാഷ ടൈപ്പ് ചെയ്യുക"</string>
     <string name="language_picker_section_suggested" msgid="6556199184638990447">"നിര്‍‌ദ്ദേശിച്ചത്"</string>
+    <string name="language_picker_regions_section_suggested" msgid="6080131515268225316">"നിർദ്ദേശിച്ചവ"</string>
     <string name="language_picker_section_all" msgid="1985809075777564284">"എല്ലാ ഭാഷകളും"</string>
     <string name="region_picker_section_all" msgid="756441309928774155">"എല്ലാ പ്രദേശങ്ങളും"</string>
     <string name="locale_search_menu" msgid="6258090710176422934">"തിരയുക"</string>
@@ -2049,7 +2051,8 @@
     <string name="log_access_confirmation_title" msgid="2343578467290592708">"എല്ലാ ഉപകരണ ലോഗുകളും ആക്‌സസ് ചെയ്യാൻ <xliff:g id="LOG_ACCESS_APP_NAME">%s</xliff:g> എന്നതിനെ അനുവദിക്കണോ?"</string>
     <string name="log_access_confirmation_allow" msgid="5302517782599389507">"ഒറ്റത്തവണ ആക്‌സസ് അനുവദിക്കുക"</string>
     <string name="log_access_confirmation_deny" msgid="7685790957455099845">"അനുവദിക്കരുത്"</string>
-    <string name="log_access_confirmation_body" msgid="6581985716241928135">"നിങ്ങളുടെ ഉപകരണത്തിൽ എന്തൊക്കെയാണ് സംഭവിക്കുന്നതെന്ന് ഉപകരണ ലോഗുകൾ റെക്കോർഡ് ചെയ്യുന്നു. പ്രശ്‌നങ്ങൾ കണ്ടെത്തി പരിഹരിക്കുന്നതിന് ആപ്പുകൾക്ക് ഈ ലോഗുകൾ ഉപയോഗിക്കാൻ കഴിയും.\n\nചില ലോഗുകളിൽ സൂക്ഷ്‌മമായി കൈകാര്യം ചെയ്യേണ്ട വിവരങ്ങൾ അടങ്ങിയിരിക്കാൻ സാധ്യതയുള്ളതിനാൽ, നിങ്ങൾക്ക് വിശ്വാസമുള്ള ആപ്പുകൾക്ക് മാത്രമേ എല്ലാ ഉപകരണ ലോഗുകളും ആക്‌സസ് ചെയ്യാൻ അനുമതി നൽകാവൂ. \n\nഎല്ലാ ഉപകരണ ലോഗുകളും ആക്‌സസ് ചെയ്യാൻ നിങ്ങൾ ഈ ആപ്പിനെ അനുവദിക്കുന്നില്ലെങ്കിൽ പോലും, ആപ്പിന് അതിന്റെ സ്വന്തം ലോഗുകൾ ആക്‌സസ് ചെയ്യാനാകും. നിങ്ങളുടെ ഉപകരണ നിർമ്മാതാവിനും നിങ്ങളുടെ ഉപകരണത്തിലെ ചില ലോഗുകളോ വിവരങ്ങളോ തുടർന്നും ആക്‌സസ് ചെയ്യാനായേക്കും. കൂടുതലറിയുക"</string>
+    <string name="log_access_confirmation_body" product="default" msgid="1806692062668620735">"ഉപകരണ ലോഗുകൾ നിങ്ങളുടെ ഉപകരണത്തിൽ എന്തൊക്കെയാണ് സംഭവിക്കുന്നതെന്ന് റെക്കോർഡ് ചെയ്യുന്നു. പ്രശ്‌നങ്ങൾ കണ്ടെത്തി പരിഹരിക്കുന്നതിന് ആപ്പുകൾക്ക് ഈ ലോഗുകൾ ഉപയോഗിക്കാൻ കഴിയും.\n\nചില ലോഗുകളിൽ സൂക്ഷ്‌മമായി കൈകാര്യം ചെയ്യേണ്ട വിവരങ്ങൾ അടങ്ങിയിരിക്കാൻ സാധ്യതയുള്ളതിനാൽ, എല്ലാ ഉപകരണ ലോഗുകളും ആക്സസ് ചെയ്യാനുള്ള അനുമതി നിങ്ങൾക്ക് വിശ്വാസമുള്ള ആപ്പുകൾക്ക് മാത്രം നൽകുക. \n\nഎല്ലാ ഉപകരണ ലോഗുകളും ആക്‌സസ് ചെയ്യാനുള്ള അനുവാദം നൽകിയില്ലെങ്കിലും, ഈ ആപ്പിന് അതിന്റെ സ്വന്തം ലോഗുകൾ ആക്‌സസ് ചെയ്യാനാകും. നിങ്ങളുടെ ഉപകരണ നിർമ്മാതാവിന് തുടർന്നും നിങ്ങളുടെ ഉപകരണത്തിലെ ചില ലോഗുകളോ വിവരങ്ങളോ ആക്‌സസ് ചെയ്യാനായേക്കും."</string>
+    <string name="log_access_confirmation_body" product="tv" msgid="7379536536425265262">"ഉപകരണ ലോഗുകൾ നിങ്ങളുടെ ഉപകരണത്തിൽ എന്തൊക്കെയാണ് സംഭവിക്കുന്നതെന്ന് റെക്കോർഡ് ചെയ്യുന്നു. പ്രശ്‌നങ്ങൾ കണ്ടെത്തി പരിഹരിക്കുന്നതിന് ആപ്പുകൾക്ക് ഈ ലോഗുകൾ ഉപയോഗിക്കാൻ കഴിയും.\n\nചില ലോഗുകളിൽ സൂക്ഷ്‌മമായി കൈകാര്യം ചെയ്യേണ്ട വിവരങ്ങൾ അടങ്ങിയിരിക്കാൻ സാധ്യതയുള്ളതിനാൽ, എല്ലാ ഉപകരണ ലോഗുകളും ആക്സസ് ചെയ്യാനുള്ള അനുമതി നിങ്ങൾക്ക് വിശ്വാസമുള്ള ആപ്പുകൾക്ക് മാത്രം നൽകുക. \n\nഎല്ലാ ഉപകരണ ലോഗുകളും ആക്‌സസ് ചെയ്യാനുള്ള അനുവാദം നൽകിയില്ലെങ്കിലും, ഈ ആപ്പിന് അതിന്റെ സ്വന്തം ലോഗുകൾ ആക്‌സസ് ചെയ്യാനാകും. നിങ്ങളുടെ ഉപകരണ നിർമ്മാതാവിന് തുടർന്നും നിങ്ങളുടെ ഉപകരണത്തിലെ ചില ലോഗുകളോ വിവരങ്ങളോ ആക്‌സസ് ചെയ്യാനായേക്കും.\n\ng.co/android/devicelogs എന്നതിൽ കൂടുതലറിയുക."</string>
     <string name="log_access_do_not_show_again" msgid="1058690599083091552">"വീണ്ടും കാണിക്കരുത്"</string>
     <string name="slices_permission_request" msgid="3677129866636153406">"<xliff:g id="APP_2">%2$s</xliff:g> സ്ലൈസുകൾ കാണിക്കാൻ <xliff:g id="APP_0">%1$s</xliff:g> താൽപ്പര്യപ്പെടുന്നു"</string>
     <string name="screenshot_edit" msgid="7408934887203689207">"എഡിറ്റ് ചെയ്യുക"</string>
@@ -2290,5 +2293,6 @@
     <string name="notification_action_check_bg_apps" msgid="4758877443365362532">"സജീവമായ ആപ്പുകൾ പരിശോധിക്കുക"</string>
     <string name="vdm_camera_access_denied" product="default" msgid="6102378580971542473">"നിങ്ങളുടെ <xliff:g id="DEVICE">%1$s</xliff:g> എന്നതിൽ നിന്ന് ഫോണിന്റെ ക്യാമറ ആക്‌സസ് ചെയ്യാനാകില്ല"</string>
     <string name="vdm_camera_access_denied" product="tablet" msgid="6895968310395249076">"നിങ്ങളുടെ <xliff:g id="DEVICE">%1$s</xliff:g> എന്നതിൽ നിന്ന് ടാബ്‌ലെറ്റിന്റെ ക്യാമറ ആക്‌സസ് ചെയ്യാനാകില്ല"</string>
+    <string name="vdm_secure_window" msgid="161700398158812314">"സ്ട്രീം ചെയ്യുമ്പോൾ ഇത് ആക്സസ് ചെയ്യാനാകില്ല. പകരം നിങ്ങളുടെ ഫോണിൽ ശ്രമിച്ച് നോക്കൂ."</string>
     <string name="system_locale_title" msgid="711882686834677268">"സിസ്‌റ്റം ഡിഫോൾട്ട്"</string>
 </resources>

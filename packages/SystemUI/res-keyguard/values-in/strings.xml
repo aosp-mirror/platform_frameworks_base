@@ -26,11 +26,11 @@
     <string name="keyguard_sim_error_message_short" msgid="633630844240494070">"Kartu Tidak Valid"</string>
     <string name="keyguard_charged" msgid="5478247181205188995">"Terisi penuh"</string>
     <string name="keyguard_plugged_in_wireless" msgid="2537874724955057383">"<xliff:g id="PERCENTAGE">%s</xliff:g> • Mengisi daya secara nirkabel"</string>
-    <string name="keyguard_plugged_in_dock" msgid="449722738270908674">"<xliff:g id="PERCENTAGE">%s</xliff:g> • Mengisi Daya dengan Dok"</string>
+    <string name="keyguard_plugged_in_dock" msgid="2122073051904360987">"<xliff:g id="PERCENTAGE">%s</xliff:g> • Mengisi daya"</string>
     <string name="keyguard_plugged_in" msgid="8169926454348380863">"<xliff:g id="PERCENTAGE">%s</xliff:g> • Mengisi daya"</string>
     <string name="keyguard_plugged_in_charging_fast" msgid="4386594091107340426">"<xliff:g id="PERCENTAGE">%s</xliff:g> • Mengisi daya dengan cepat"</string>
     <string name="keyguard_plugged_in_charging_slowly" msgid="217655355424210">"<xliff:g id="PERCENTAGE">%s</xliff:g> • Mengisi daya dengan lambat"</string>
-    <string name="keyguard_plugged_in_charging_limited" msgid="6091488837901216962">"<xliff:g id="PERCENTAGE">%s</xliff:g> • Pengisian daya dibatasi sementara"</string>
+    <string name="keyguard_plugged_in_charging_limited" msgid="1053130519456324630">"<xliff:g id="PERCENTAGE">%s</xliff:g> • Pengisian daya dioptimalkan untuk melindungi baterai"</string>
     <string name="keyguard_instructions_when_pattern_disabled" msgid="8448804180089936954">"Tekan Menu untuk membuka kunci."</string>
     <string name="keyguard_network_locked_message" msgid="407096292844868608">"Jaringan terkunci"</string>
     <string name="keyguard_missing_sim_message_short" msgid="704159478161444907">"Tidak ada kartu SIM"</string>
@@ -78,16 +78,17 @@
     <string name="kg_prompt_reason_restart_pattern" msgid="4720554342633852066">"Pola diperlukan setelah perangkat dimulai ulang"</string>
     <string name="kg_prompt_reason_restart_pin" msgid="1587671566498057656">"PIN diperlukan setelah perangkat dimulai ulang"</string>
     <string name="kg_prompt_reason_restart_password" msgid="8061279087240952002">"Sandi diperlukan setelah perangkat dimulai ulang"</string>
-    <string name="kg_prompt_reason_timeout_pattern" msgid="9170360502528959889">"Pola diperlukan untuk keamanan tambahan"</string>
-    <string name="kg_prompt_reason_timeout_pin" msgid="5945186097160029201">"PIN diperlukan untuk keamanan tambahan"</string>
-    <string name="kg_prompt_reason_timeout_password" msgid="2258263949430384278">"Sandi diperlukan untuk keamanan tambahan"</string>
+    <string name="kg_prompt_reason_timeout_pattern" msgid="5514969660010197363">"Untuk keamanan tambahan, gunakan pola"</string>
+    <string name="kg_prompt_reason_timeout_pin" msgid="4227962059353859376">"Untuk keamanan tambahan, gunakan PIN"</string>
+    <string name="kg_prompt_reason_timeout_password" msgid="8810879144143933690">"Untuk keamanan tambahan, gunakan sandi"</string>
     <string name="kg_prompt_reason_device_admin" msgid="6961159596224055685">"Perangkat dikunci oleh admin"</string>
     <string name="kg_prompt_reason_user_request" msgid="6015774877733717904">"Perangkat dikunci secara manual"</string>
     <string name="kg_face_not_recognized" msgid="7903950626744419160">"Tidak dikenali"</string>
-    <string name="kg_face_sensor_privacy_enabled" msgid="939511161763558512">"Untuk pakai Face Unlock, beri akses kamera di Setelan"</string>
+    <string name="kg_face_sensor_privacy_enabled" msgid="939511161763558512">"Untuk pakai Buka dengan Wajah, beri akses kamera di Setelan"</string>
     <string name="kg_password_default_pin_message" msgid="1434544655827987873">"{count,plural, =1{Masukkan PIN SIM. Tersisa # percobaan lagi sebelum Anda harus menghubungi operator untuk membuka kunci perangkat.}other{Masukkan PIN SIM. Tersisa # percobaan lagi.}}"</string>
     <string name="kg_password_default_puk_message" msgid="1025139786449741950">"{count,plural, =1{SIM kini dinonaktifkan. Masukkan kode PUK untuk melanjutkan. Tersisa # percobaan lagi sebelum SIM tidak dapat digunakan secara permanen. Hubungi operator untuk mengetahui detailnya.}other{SIM kini dinonaktifkan. Masukkan kode PUK untuk melanjutkan. Tersisa # percobaan lagi sebelum SIM tidak dapat digunakan secara permanen. Hubungi operator untuk mengetahui detailnya.}}"</string>
     <string name="clock_title_default" msgid="6342735240617459864">"Default"</string>
     <string name="clock_title_bubble" msgid="2204559396790593213">"Balon"</string>
     <string name="clock_title_analog" msgid="8409262532900918273">"Analog"</string>
+    <string name="keyguard_unlock_to_continue" msgid="7509503484250597743">"Buka kunci perangkat untuk melanjutkan"</string>
 </resources>

@@ -54,7 +54,9 @@ import com.android.wm.shell.R;
 import com.android.wm.shell.ShellTaskOrganizer;
 import com.android.wm.shell.ShellTestCase;
 import com.android.wm.shell.common.DisplayLayout;
+import com.android.wm.shell.common.DockStateReader;
 import com.android.wm.shell.common.SyncTransactionQueue;
+import com.android.wm.shell.compatui.DialogAnimationController;
 import com.android.wm.shell.transition.Transitions;
 
 import org.junit.After;
@@ -97,12 +99,13 @@ public class LetterboxEduWindowManagerTest extends ShellTestCase {
     @Captor
     private ArgumentCaptor<Runnable> mRunOnIdleCaptor;
 
-    @Mock private LetterboxEduAnimationController mAnimationController;
+    @Mock private DialogAnimationController<LetterboxEduDialogLayout> mAnimationController;
     @Mock private SyncTransactionQueue mSyncTransactionQueue;
     @Mock private ShellTaskOrganizer.TaskListener mTaskListener;
     @Mock private SurfaceControlViewHost mViewHost;
     @Mock private Transitions mTransitions;
     @Mock private Runnable mOnDismissCallback;
+    @Mock private DockStateReader mDockStateReader;
 
     private SharedPreferences mSharedPreferences;
     @Nullable
@@ -146,6 +149,16 @@ public class LetterboxEduWindowManagerTest extends ShellTestCase {
     @Test
     public void testCreateLayout_notEligible_doesNotCreateLayout() {
         LetterboxEduWindowManager windowManager = createWindowManager(/* eligible= */ false);
+
+        assertFalse(windowManager.createLayout(/* canShow= */ true));
+
+        assertNull(windowManager.mLayout);
+    }
+
+    @Test
+    public void testCreateLayout_eligibleAndDocked_doesNotCreateLayout() {
+        LetterboxEduWindowManager windowManager = createWindowManager(/* eligible= */
+                true, /* isDocked */ true);
 
         assertFalse(windowManager.createLayout(/* canShow= */ true));
 
@@ -354,7 +367,7 @@ public class LetterboxEduWindowManagerTest extends ShellTestCase {
         assertThat(params.width).isEqualTo(expectedWidth);
         assertThat(params.height).isEqualTo(expectedHeight);
         MarginLayoutParams dialogParams =
-                (MarginLayoutParams) layout.getDialogContainer().getLayoutParams();
+                (MarginLayoutParams) layout.getDialogContainerView().getLayoutParams();
         int verticalMargin = (int) mContext.getResources().getDimension(
                 R.dimen.letterbox_education_dialog_margin);
         assertThat(dialogParams.topMargin).isEqualTo(verticalMargin + expectedExtraTopMargin);
@@ -382,17 +395,27 @@ public class LetterboxEduWindowManagerTest extends ShellTestCase {
         return createWindowManager(eligible, USER_ID_1, /* isTaskbarEduShowing= */ false);
     }
 
+    private LetterboxEduWindowManager createWindowManager(boolean eligible, boolean isDocked) {
+        return createWindowManager(eligible, USER_ID_1, /* isTaskbarEduShowing= */
+                false, isDocked);
+    }
+
     private LetterboxEduWindowManager createWindowManager(boolean eligible,
             int userId, boolean isTaskbarEduShowing) {
+        return createWindowManager(eligible, userId, isTaskbarEduShowing, /* isDocked */false);
+    }
+
+    private LetterboxEduWindowManager createWindowManager(boolean eligible,
+            int userId, boolean isTaskbarEduShowing, boolean isDocked) {
+        doReturn(isDocked).when(mDockStateReader).isDocked();
         LetterboxEduWindowManager windowManager = new LetterboxEduWindowManager(mContext,
                 createTaskInfo(eligible, userId), mSyncTransactionQueue, mTaskListener,
                 createDisplayLayout(), mTransitions, mOnDismissCallback,
-                mAnimationController);
+                mAnimationController, mDockStateReader);
 
         spyOn(windowManager);
         doReturn(mViewHost).when(windowManager).createSurfaceViewHost();
         doReturn(isTaskbarEduShowing).when(windowManager).isTaskbarEduShowing();
-
         return windowManager;
     }
 

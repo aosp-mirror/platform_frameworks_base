@@ -73,8 +73,8 @@
         android:singleLine="true"
         android:textDirection="locale"
         android:textAppearance="@style/TextAppearance.QS.Status"
-        android:transformPivotX="0sp"
-        android:transformPivotY="20sp"
+        android:transformPivotX="0dp"
+        android:transformPivotY="24dp"
         android:scaleX="1"
         android:scaleY="1"
     />

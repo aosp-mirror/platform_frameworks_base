@@ -26,11 +26,11 @@
     <string name="keyguard_sim_error_message_short" msgid="633630844240494070">"Nieprawidłowa karta."</string>
     <string name="keyguard_charged" msgid="5478247181205188995">"Naładowana"</string>
     <string name="keyguard_plugged_in_wireless" msgid="2537874724955057383">"<xliff:g id="PERCENTAGE">%s</xliff:g> • Ładowanie bezprzewodowe"</string>
-    <string name="keyguard_plugged_in_dock" msgid="449722738270908674">"<xliff:g id="PERCENTAGE">%s</xliff:g> • Ładowanie na stacji dokującej"</string>
+    <string name="keyguard_plugged_in_dock" msgid="2122073051904360987">"<xliff:g id="PERCENTAGE">%s</xliff:g> • Ładowanie"</string>
     <string name="keyguard_plugged_in" msgid="8169926454348380863">"<xliff:g id="PERCENTAGE">%s</xliff:g> • Ładowanie"</string>
     <string name="keyguard_plugged_in_charging_fast" msgid="4386594091107340426">"<xliff:g id="PERCENTAGE">%s</xliff:g> • Szybkie ładowanie"</string>
     <string name="keyguard_plugged_in_charging_slowly" msgid="217655355424210">"<xliff:g id="PERCENTAGE">%s</xliff:g> • Wolne ładowanie"</string>
-    <string name="keyguard_plugged_in_charging_limited" msgid="6091488837901216962">"<xliff:g id="PERCENTAGE">%s</xliff:g> • Ładowanie tymczasowo ograniczone"</string>
+    <string name="keyguard_plugged_in_charging_limited" msgid="1053130519456324630">"<xliff:g id="PERCENTAGE">%s</xliff:g> • Ładowanie zoptymalizowane w celu ochrony baterii"</string>
     <string name="keyguard_instructions_when_pattern_disabled" msgid="8448804180089936954">"Naciśnij Menu, aby odblokować."</string>
     <string name="keyguard_network_locked_message" msgid="407096292844868608">"Sieć zablokowana"</string>
     <string name="keyguard_missing_sim_message_short" msgid="704159478161444907">"Brak karty SIM"</string>
@@ -78,9 +78,9 @@
     <string name="kg_prompt_reason_restart_pattern" msgid="4720554342633852066">"Po ponownym uruchomieniu urządzenia wymagany jest wzór"</string>
     <string name="kg_prompt_reason_restart_pin" msgid="1587671566498057656">"Po ponownym uruchomieniu urządzenia wymagany jest kod PIN"</string>
     <string name="kg_prompt_reason_restart_password" msgid="8061279087240952002">"Po ponownym uruchomieniu urządzenia wymagane jest hasło"</string>
-    <string name="kg_prompt_reason_timeout_pattern" msgid="9170360502528959889">"Dla większego bezpieczeństwa musisz narysować wzór"</string>
-    <string name="kg_prompt_reason_timeout_pin" msgid="5945186097160029201">"Dla większego bezpieczeństwa musisz podać kod PIN"</string>
-    <string name="kg_prompt_reason_timeout_password" msgid="2258263949430384278">"Dla większego bezpieczeństwa musisz podać hasło"</string>
+    <string name="kg_prompt_reason_timeout_pattern" msgid="5514969660010197363">"Ze względów bezpieczeństwa użyj wzoru"</string>
+    <string name="kg_prompt_reason_timeout_pin" msgid="4227962059353859376">"Ze względów bezpieczeństwa użyj kodu PIN"</string>
+    <string name="kg_prompt_reason_timeout_password" msgid="8810879144143933690">"Ze względów bezpieczeństwa użyj hasła"</string>
     <string name="kg_prompt_reason_device_admin" msgid="6961159596224055685">"Urządzenie zablokowane przez administratora"</string>
     <string name="kg_prompt_reason_user_request" msgid="6015774877733717904">"Urządzenie zostało zablokowane ręcznie"</string>
     <string name="kg_face_not_recognized" msgid="7903950626744419160">"Nie rozpoznano"</string>
@@ -90,4 +90,5 @@
     <string name="clock_title_default" msgid="6342735240617459864">"Domyślna"</string>
     <string name="clock_title_bubble" msgid="2204559396790593213">"Bąbelkowy"</string>
     <string name="clock_title_analog" msgid="8409262532900918273">"Analogowy"</string>
+    <string name="keyguard_unlock_to_continue" msgid="7509503484250597743">"Odblokuj urządzenie, aby kontynuować"</string>
 </resources>

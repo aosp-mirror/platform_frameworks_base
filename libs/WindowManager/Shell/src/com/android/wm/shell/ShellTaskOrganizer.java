@@ -55,6 +55,7 @@ import com.android.wm.shell.common.ShellExecutor;
 import com.android.wm.shell.compatui.CompatUIController;
 import com.android.wm.shell.recents.RecentTasksController;
 import com.android.wm.shell.startingsurface.StartingWindowController;
+import com.android.wm.shell.sysui.ShellCommandHandler;
 import com.android.wm.shell.sysui.ShellInit;
 import com.android.wm.shell.unfold.UnfoldAnimationController;
 
@@ -72,6 +73,7 @@ import java.util.function.Consumer;
  */
 public class ShellTaskOrganizer extends TaskOrganizer implements
         CompatUIController.CompatUICallback {
+    private static final String TAG = "ShellTaskOrganizer";
 
     // Intentionally using negative numbers here so the positive numbers can be used
     // for task id specific listeners that will be added later.
@@ -89,8 +91,6 @@ public class ShellTaskOrganizer extends TaskOrganizer implements
             TASK_LISTENER_TYPE_FREEFORM,
     })
     public @interface TaskListenerType {}
-
-    private static final String TAG = "ShellTaskOrganizer";
 
     /**
      * Callbacks for when the tasks change in the system.
@@ -177,6 +177,9 @@ public class ShellTaskOrganizer extends TaskOrganizer implements
     @Nullable
     private final CompatUIController mCompatUI;
 
+    @NonNull
+    private final ShellCommandHandler mShellCommandHandler;
+
     @Nullable
     private final Optional<RecentTasksController> mRecentTasks;
 
@@ -187,29 +190,33 @@ public class ShellTaskOrganizer extends TaskOrganizer implements
     private RunningTaskInfo mLastFocusedTaskInfo;
 
     public ShellTaskOrganizer(ShellExecutor mainExecutor) {
-        this(null /* shellInit */, null /* taskOrganizerController */, null /* compatUI */,
+        this(null /* shellInit */, null /* shellCommandHandler */,
+                null /* taskOrganizerController */, null /* compatUI */,
                 Optional.empty() /* unfoldAnimationController */,
                 Optional.empty() /* recentTasksController */,
                 mainExecutor);
     }
 
     public ShellTaskOrganizer(ShellInit shellInit,
+            ShellCommandHandler shellCommandHandler,
             @Nullable CompatUIController compatUI,
             Optional<UnfoldAnimationController> unfoldAnimationController,
             Optional<RecentTasksController> recentTasks,
             ShellExecutor mainExecutor) {
-        this(shellInit, null /* taskOrganizerController */, compatUI,
+        this(shellInit, shellCommandHandler, null /* taskOrganizerController */, compatUI,
                 unfoldAnimationController, recentTasks, mainExecutor);
     }
 
     @VisibleForTesting
     protected ShellTaskOrganizer(ShellInit shellInit,
+            ShellCommandHandler shellCommandHandler,
             ITaskOrganizerController taskOrganizerController,
             @Nullable CompatUIController compatUI,
             Optional<UnfoldAnimationController> unfoldAnimationController,
             Optional<RecentTasksController> recentTasks,
             ShellExecutor mainExecutor) {
         super(taskOrganizerController, mainExecutor);
+        mShellCommandHandler = shellCommandHandler;
         mCompatUI = compatUI;
         mRecentTasks = recentTasks;
         mUnfoldAnimationController = unfoldAnimationController.orElse(null);
@@ -219,6 +226,7 @@ public class ShellTaskOrganizer extends TaskOrganizer implements
     }
 
     private void onInit() {
+        mShellCommandHandler.addDumpCallback(this::dump, this);
         if (mCompatUI != null) {
             mCompatUI.setCompatUICallback(this);
         }
@@ -556,6 +564,22 @@ public class ShellTaskOrganizer extends TaskOrganizer implements
         }
     }
 
+    /**
+     * Return list of {@link RunningTaskInfo}s for the given display.
+     *
+     * @return filtered list of tasks or empty list
+     */
+    public ArrayList<RunningTaskInfo> getRunningTasks(int displayId) {
+        ArrayList<RunningTaskInfo> result = new ArrayList<>();
+        for (int i = 0; i < mTasks.size(); i++) {
+            RunningTaskInfo taskInfo = mTasks.valueAt(i).getTaskInfo();
+            if (taskInfo.displayId == displayId) {
+                result.add(taskInfo);
+            }
+        }
+        return result;
+    }
+
     /** Gets running task by taskId. Returns {@code null} if no such task observed. */
     @Nullable
     public RunningTaskInfo getRunningTaskInfo(int taskId) {
@@ -808,7 +832,18 @@ public class ShellTaskOrganizer extends TaskOrganizer implements
                 final int key = mTasks.keyAt(i);
                 final TaskAppearedInfo info = mTasks.valueAt(i);
                 final TaskListener listener = getTaskListener(info.getTaskInfo());
-                pw.println(innerPrefix + "#" + i + " task=" + key + " listener=" + listener);
+                final int windowingMode = info.getTaskInfo().getWindowingMode();
+                String pkg = "";
+                if (info.getTaskInfo().baseActivity != null) {
+                    pkg = info.getTaskInfo().baseActivity.getPackageName();
+                }
+                Rect bounds = info.getTaskInfo().getConfiguration().windowConfiguration.getBounds();
+                boolean running = info.getTaskInfo().isRunning;
+                boolean visible = info.getTaskInfo().isVisible;
+                boolean focused = info.getTaskInfo().isFocused;
+                pw.println(innerPrefix + "#" + i + " task=" + key + " listener=" + listener
+                        + " wmMode=" + windowingMode + " pkg=" + pkg + " bounds=" + bounds
+                        + " running=" + running + " visible=" + visible + " focused=" + focused);
             }
 
             pw.println();
@@ -818,6 +853,7 @@ public class ShellTaskOrganizer extends TaskOrganizer implements
                 final TaskListener listener = mLaunchCookieToListener.valueAt(i);
                 pw.println(innerPrefix + "#" + i + " cookie=" + key + " listener=" + listener);
             }
+
         }
     }
 }

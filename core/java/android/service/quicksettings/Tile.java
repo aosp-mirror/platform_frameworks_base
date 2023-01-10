@@ -16,6 +16,7 @@
 package android.service.quicksettings;
 
 import android.annotation.Nullable;
+import android.app.PendingIntent;
 import android.graphics.drawable.Icon;
 import android.os.IBinder;
 import android.os.Parcel;
@@ -39,8 +40,8 @@ public final class Tile implements Parcelable {
 
     /**
      * An unavailable state indicates that for some reason this tile is not currently
-     * available to the user for some reason, and will have no click action.  The tile's
-     * icon will be tinted differently to reflect this state.
+     * available to the user, and will have no click action.  The tile's icon will be
+     * tinted differently to reflect this state.
      */
     public static final int STATE_UNAVAILABLE = 0;
 
@@ -66,6 +67,7 @@ public final class Tile implements Parcelable {
     private CharSequence mSubtitle;
     private CharSequence mContentDescription;
     private CharSequence mStateDescription;
+    private PendingIntent mPendingIntent;
     // Default to inactive until clients of the new API can update.
     private int mState = STATE_INACTIVE;
 
@@ -223,11 +225,45 @@ public final class Tile implements Parcelable {
         }
     }
 
+    /**
+     * Gets the Activity {@link PendingIntent} to be launched when the tile is clicked.
+     * @hide
+     */
+    @Nullable
+    public PendingIntent getActivityLaunchForClick() {
+        return mPendingIntent;
+    }
+
+    /**
+     * Sets an Activity {@link PendingIntent} to be launched when the tile is clicked.
+     *
+     * The last value set here will be launched when the user clicks in the tile, instead of
+     * forwarding the `onClick` message to the {@link TileService}. Set to {@code null} to handle
+     * the `onClick` in the `TileService`
+     * (This is the default behavior if this method is never called.)
+     * @param pendingIntent a PendingIntent for an activity to be launched onclick, or {@code null}
+     *                      to handle the clicks in the `TileService`.
+     * @hide
+     */
+    public void setActivityLaunchForClick(@Nullable PendingIntent pendingIntent) {
+        if (pendingIntent != null && !pendingIntent.isActivity()) {
+            throw new IllegalArgumentException();
+        } else {
+            mPendingIntent = pendingIntent;
+        }
+    }
+
     @Override
     public void writeToParcel(Parcel dest, int flags) {
         if (mIcon != null) {
             dest.writeByte((byte) 1);
             mIcon.writeToParcel(dest, flags);
+        } else {
+            dest.writeByte((byte) 0);
+        }
+        if (mPendingIntent != null) {
+            dest.writeByte((byte) 1);
+            mPendingIntent.writeToParcel(dest, flags);
         } else {
             dest.writeByte((byte) 0);
         }
@@ -243,6 +279,11 @@ public final class Tile implements Parcelable {
             mIcon = Icon.CREATOR.createFromParcel(source);
         } else {
             mIcon = null;
+        }
+        if (source.readByte() != 0) {
+            mPendingIntent = PendingIntent.CREATOR.createFromParcel(source);
+        } else {
+            mPendingIntent = null;
         }
         mState = source.readInt();
         mLabel = TextUtils.CHAR_SEQUENCE_CREATOR.createFromParcel(source);

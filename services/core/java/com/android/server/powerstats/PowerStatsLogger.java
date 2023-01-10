@@ -159,12 +159,12 @@ public final class PowerStatsLogger extends Handler {
                         EnergyMeasurementUtils.packProtoMessage(energyMeasurement, pos);
                         if (DEBUG) EnergyMeasurementUtils.print(energyMeasurement);
                     } catch (IOException e) {
-                        Slog.e(TAG, "Failed to write energy meter data to incident report.");
+                        Slog.e(TAG, "Failed to write energy meter data to incident report.", e);
                     }
                 }
             });
         } catch (IOException e) {
-            Slog.e(TAG, "Failed to write energy meter info to incident report.");
+            Slog.e(TAG, "Failed to write energy meter info to incident report.", e);
         }
 
         pos.flush();
@@ -200,12 +200,12 @@ public final class PowerStatsLogger extends Handler {
                         EnergyConsumerResultUtils.packProtoMessage(energyConsumerResult, pos, true);
                         if (DEBUG) EnergyConsumerResultUtils.print(energyConsumerResult);
                     } catch (IOException e) {
-                        Slog.e(TAG, "Failed to write energy model data to incident report.");
+                        Slog.e(TAG, "Failed to write energy model data to incident report.", e);
                     }
                 }
             });
         } catch (IOException e) {
-            Slog.e(TAG, "Failed to write energy model info to incident report.");
+            Slog.e(TAG, "Failed to write energy model info to incident report.", e);
         }
 
         pos.flush();
@@ -241,12 +241,12 @@ public final class PowerStatsLogger extends Handler {
                         StateResidencyResultUtils.packProtoMessage(stateResidencyResult, pos);
                         if (DEBUG) StateResidencyResultUtils.print(stateResidencyResult);
                     } catch (IOException e) {
-                        Slog.e(TAG, "Failed to write residency data to incident report.");
+                        Slog.e(TAG, "Failed to write residency data to incident report.", e);
                     }
                 }
             });
         } catch (IOException e) {
-            Slog.e(TAG, "Failed to write residency data to incident report.");
+            Slog.e(TAG, "Failed to write residency data to incident report.", e);
         }
 
         pos.flush();
@@ -267,7 +267,7 @@ public final class PowerStatsLogger extends Handler {
                     final FileInputStream fis = new FileInputStream(cachedFile.getPath());
                     fis.read(dataCached);
                 } catch (IOException e) {
-                    Slog.e(TAG, "Failed to read cached data from file");
+                    Slog.e(TAG, "Failed to read cached data from file", e);
                 }
 
                 // If the cached and current data are different, delete the data store.
@@ -291,7 +291,7 @@ public final class PowerStatsLogger extends Handler {
             fos.write(data);
             atomicCachedFile.finishWrite(fos);
         } catch (IOException e) {
-            Slog.e(TAG, "Failed to write current data to cached file");
+            Slog.e(TAG, "Failed to write current data to cached file", e);
         }
     }
 

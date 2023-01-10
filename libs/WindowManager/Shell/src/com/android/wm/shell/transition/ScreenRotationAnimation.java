@@ -86,8 +86,6 @@ class ScreenRotationAnimation {
     private final float[] mTmpFloats = new float[9];
     /** The leash of the changing window container. */
     private final SurfaceControl mSurfaceControl;
-    private final Rect mStartBounds = new Rect();
-    private final Rect mEndBounds = new Rect();
 
     private final int mAnimHint;
     private final int mStartWidth;
@@ -105,8 +103,7 @@ class ScreenRotationAnimation {
      */
     private SurfaceControl mBackColorSurface;
     /** The leash using to animate screenshot layer. */
-    private SurfaceControl mAnimLeash;
-    private Transaction mTransaction;
+    private final SurfaceControl mAnimLeash;
 
     // The current active animation to move from the old to the new rotated
     // state.  Which animation is run here will depend on the old and new
@@ -134,9 +131,6 @@ class ScreenRotationAnimation {
         mStartRotation = change.getStartRotation();
         mEndRotation = change.getEndRotation();
 
-        mStartBounds.set(change.getStartAbsBounds());
-        mEndBounds.set(change.getEndAbsBounds());
-
         mAnimLeash = new SurfaceControl.Builder(session)
                 .setParent(rootLeash)
                 .setEffectLayer()
@@ -145,51 +139,59 @@ class ScreenRotationAnimation {
                 .build();
 
         try {
-            SurfaceControl.LayerCaptureArgs args =
-                    new SurfaceControl.LayerCaptureArgs.Builder(mSurfaceControl)
-                            .setCaptureSecureLayers(true)
-                            .setAllowProtected(true)
-                            .setSourceCrop(new Rect(0, 0, mStartWidth, mStartHeight))
-                            .build();
-            SurfaceControl.ScreenshotHardwareBuffer screenshotBuffer =
-                    SurfaceControl.captureLayers(args);
-            if (screenshotBuffer == null) {
-                Slog.w(TAG, "Unable to take screenshot of display");
-                return;
+            if (change.getSnapshot() != null) {
+                mScreenshotLayer = change.getSnapshot();
+                t.reparent(mScreenshotLayer, mAnimLeash);
+                mStartLuma = change.getSnapshotLuma();
+            } else {
+                SurfaceControl.LayerCaptureArgs args =
+                        new SurfaceControl.LayerCaptureArgs.Builder(mSurfaceControl)
+                                .setCaptureSecureLayers(true)
+                                .setAllowProtected(true)
+                                .setSourceCrop(new Rect(0, 0, mStartWidth, mStartHeight))
+                                .build();
+                SurfaceControl.ScreenshotHardwareBuffer screenshotBuffer =
+                        SurfaceControl.captureLayers(args);
+                if (screenshotBuffer == null) {
+                    Slog.w(TAG, "Unable to take screenshot of display");
+                    return;
+                }
+
+                mScreenshotLayer = new SurfaceControl.Builder(session)
+                        .setParent(mAnimLeash)
+                        .setBLASTLayer()
+                        .setSecure(screenshotBuffer.containsSecureLayers())
+                        .setOpaque(true)
+                        .setCallsite("ShellRotationAnimation")
+                        .setName("RotationLayer")
+                        .build();
+
+                final ColorSpace colorSpace = screenshotBuffer.getColorSpace();
+                final HardwareBuffer hardwareBuffer = screenshotBuffer.getHardwareBuffer();
+                t.setDataSpace(mScreenshotLayer, colorSpace.getDataSpace());
+                t.setBuffer(mScreenshotLayer, hardwareBuffer);
+                t.show(mScreenshotLayer);
+                if (!isCustomRotate()) {
+                    mStartLuma = getMedianBorderLuma(hardwareBuffer, colorSpace);
+                }
             }
 
-            mScreenshotLayer = new SurfaceControl.Builder(session)
-                    .setParent(mAnimLeash)
-                    .setBLASTLayer()
-                    .setSecure(screenshotBuffer.containsSecureLayers())
-                    .setCallsite("ShellRotationAnimation")
-                    .setName("RotationLayer")
-                    .build();
-
             t.setLayer(mAnimLeash, SCREEN_FREEZE_LAYER_BASE);
-            t.setPosition(mAnimLeash, 0, 0);
-            t.setAlpha(mAnimLeash, 1);
             t.show(mAnimLeash);
-
-            final ColorSpace colorSpace = screenshotBuffer.getColorSpace();
-            final HardwareBuffer hardwareBuffer = screenshotBuffer.getHardwareBuffer();
-            t.setDataSpace(mScreenshotLayer, colorSpace.getDataSpace());
-            t.setBuffer(mScreenshotLayer, hardwareBuffer);
-            t.show(mScreenshotLayer);
+            // Crop the real content in case it contains a larger child layer, e.g. wallpaper.
+            t.setCrop(mSurfaceControl, new Rect(0, 0, mEndWidth, mEndHeight));
 
             if (!isCustomRotate()) {
                 mBackColorSurface = new SurfaceControl.Builder(session)
                         .setParent(rootLeash)
                         .setColorLayer()
+                        .setOpaque(true)
                         .setCallsite("ShellRotationAnimation")
                         .setName("BackColorSurface")
                         .build();
 
-                mStartLuma = getMedianBorderLuma(hardwareBuffer, colorSpace);
-
                 t.setLayer(mBackColorSurface, -1);
                 t.setColor(mBackColorSurface, new float[]{mStartLuma, mStartLuma, mStartLuma});
-                t.setAlpha(mBackColorSurface, 1);
                 t.show(mBackColorSurface);
             }
 
@@ -242,7 +244,6 @@ class ScreenRotationAnimation {
         t.setMatrix(mScreenshotLayer,
                 mTmpFloats[Matrix.MSCALE_X], mTmpFloats[Matrix.MSKEW_Y],
                 mTmpFloats[Matrix.MSKEW_X], mTmpFloats[Matrix.MSCALE_Y]);
-        t.setAlpha(mScreenshotLayer, (float) 1.0);
     }
 
     /**
@@ -308,7 +309,6 @@ class ScreenRotationAnimation {
         mRotateEnterAnimation.restrictDuration(MAX_ANIMATION_DURATION);
         mRotateEnterAnimation.scaleCurrentDuration(animationScale);
 
-        mTransaction = mTransactionPool.acquire();
         if (customRotate) {
             mRotateAlphaAnimation.initialize(mEndWidth, mEndHeight, mStartWidth, mStartHeight);
             mRotateAlphaAnimation.restrictDuration(MAX_ANIMATION_DURATION);
@@ -388,22 +388,16 @@ class ScreenRotationAnimation {
     }
 
     public void kill() {
-        Transaction t = mTransaction != null ? mTransaction : mTransactionPool.acquire();
+        final Transaction t = mTransactionPool.acquire();
         if (mAnimLeash.isValid()) {
             t.remove(mAnimLeash);
         }
 
-        if (mScreenshotLayer != null) {
-            if (mScreenshotLayer.isValid()) {
-                t.remove(mScreenshotLayer);
-            }
-            mScreenshotLayer = null;
+        if (mScreenshotLayer != null && mScreenshotLayer.isValid()) {
+            t.remove(mScreenshotLayer);
         }
-        if (mBackColorSurface != null) {
-            if (mBackColorSurface.isValid()) {
-                t.remove(mBackColorSurface);
-            }
-            mBackColorSurface = null;
+        if (mBackColorSurface != null && mBackColorSurface.isValid()) {
+            t.remove(mBackColorSurface);
         }
         t.apply();
         mTransactionPool.release(t);

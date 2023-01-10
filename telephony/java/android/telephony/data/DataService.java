@@ -725,7 +725,7 @@ public abstract class DataService extends Service {
 
     @Override
     public void onDestroy() {
-        mHandlerThread.quit();
+        mHandlerThread.quitSafely();
         super.onDestroy();
     }
 

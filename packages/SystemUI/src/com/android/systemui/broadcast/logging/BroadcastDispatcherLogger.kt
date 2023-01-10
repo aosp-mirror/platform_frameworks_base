@@ -20,11 +20,11 @@ import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
 import android.content.IntentFilter
-import com.android.systemui.log.LogBuffer
-import com.android.systemui.log.LogLevel
-import com.android.systemui.log.LogLevel.DEBUG
-import com.android.systemui.log.LogLevel.INFO
-import com.android.systemui.log.LogMessage
+import com.android.systemui.plugins.log.LogBuffer
+import com.android.systemui.plugins.log.LogLevel
+import com.android.systemui.plugins.log.LogLevel.DEBUG
+import com.android.systemui.plugins.log.LogLevel.INFO
+import com.android.systemui.plugins.log.LogMessage
 import com.android.systemui.log.dagger.BroadcastDispatcherLog
 import javax.inject.Inject
 

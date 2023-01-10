@@ -22,6 +22,7 @@ import static android.app.WindowConfiguration.WINDOWING_MODE_FULLSCREEN;
 import static android.app.WindowConfiguration.WINDOWING_MODE_MULTI_WINDOW;
 import static android.app.WindowConfiguration.WINDOWING_MODE_PINNED;
 import static android.view.Display.DEFAULT_DISPLAY;
+import static android.view.WindowManager.LayoutParams.ROTATION_ANIMATION_ROTATE;
 import static android.view.WindowManager.LayoutParams.ROTATION_ANIMATION_SEAMLESS;
 import static android.view.WindowManager.LayoutParams.ROTATION_ANIMATION_UNSPECIFIED;
 import static android.view.WindowManager.TRANSIT_CHANGE;
@@ -43,11 +44,12 @@ import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyInt;
+import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.ArgumentMatchers.isNull;
 import static org.mockito.Mockito.clearInvocations;
 import static org.mockito.Mockito.doAnswer;
+import static org.mockito.Mockito.inOrder;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
@@ -59,17 +61,17 @@ import android.os.Handler;
 import android.os.IBinder;
 import android.os.Looper;
 import android.os.RemoteException;
-import android.view.IDisplayWindowListener;
-import android.view.IWindowManager;
 import android.view.Surface;
 import android.view.SurfaceControl;
 import android.view.WindowManager;
 import android.window.IRemoteTransition;
 import android.window.IRemoteTransitionFinishedCallback;
+import android.window.IWindowContainerToken;
 import android.window.RemoteTransition;
 import android.window.TransitionFilter;
 import android.window.TransitionInfo;
 import android.window.TransitionRequestInfo;
+import android.window.WindowContainerToken;
 import android.window.WindowContainerTransaction;
 import android.window.WindowOrganizer;
 
@@ -82,13 +84,17 @@ import androidx.test.platform.app.InstrumentationRegistry;
 import com.android.wm.shell.ShellTestCase;
 import com.android.wm.shell.TestShellExecutor;
 import com.android.wm.shell.common.DisplayController;
+import com.android.wm.shell.common.DisplayLayout;
 import com.android.wm.shell.common.ShellExecutor;
 import com.android.wm.shell.common.TransactionPool;
+import com.android.wm.shell.sysui.ShellController;
 import com.android.wm.shell.sysui.ShellInit;
+import com.android.wm.shell.sysui.ShellSharedConstants;
 
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.mockito.InOrder;
 
 import java.util.ArrayList;
 
@@ -114,15 +120,28 @@ public class ShellTransitionTests extends ShellTestCase {
     @Before
     public void setUp() {
         doAnswer(invocation -> invocation.getArguments()[1])
-                .when(mOrganizer).startTransition(anyInt(), any(), any());
+                .when(mOrganizer).startTransition(any(), any());
     }
 
     @Test
     public void instantiate_addInitCallback() {
         ShellInit shellInit = mock(ShellInit.class);
-        final Transitions t = new Transitions(mContext, shellInit, mOrganizer, mTransactionPool,
-                createTestDisplayController(), mMainExecutor, mMainHandler, mAnimExecutor);
+        final Transitions t = new Transitions(mContext, shellInit, mock(ShellController.class),
+                mOrganizer, mTransactionPool, createTestDisplayController(), mMainExecutor,
+                mMainHandler, mAnimExecutor);
         verify(shellInit, times(1)).addInitCallback(any(), eq(t));
+    }
+
+    @Test
+    public void instantiateController_addExternalInterface() {
+        ShellInit shellInit = new ShellInit(mMainExecutor);
+        ShellController shellController = mock(ShellController.class);
+        final Transitions t = new Transitions(mContext, shellInit, shellController,
+                mOrganizer, mTransactionPool, createTestDisplayController(), mMainExecutor,
+                mMainHandler, mAnimExecutor);
+        shellInit.init();
+        verify(shellController, times(1)).addExternalInterface(
+                eq(ShellSharedConstants.KEY_EXTRA_SHELL_SHELL_TRANSITIONS), any(), any());
     }
 
     @Test
@@ -133,7 +152,7 @@ public class ShellTransitionTests extends ShellTestCase {
         IBinder transitToken = new Binder();
         transitions.requestStartTransition(transitToken,
                 new TransitionRequestInfo(TRANSIT_OPEN, null /* trigger */, null /* remote */));
-        verify(mOrganizer, times(1)).startTransition(eq(TRANSIT_OPEN), eq(transitToken), any());
+        verify(mOrganizer, times(1)).startTransition(eq(transitToken), any());
         TransitionInfo info = new TransitionInfoBuilder(TRANSIT_OPEN)
                 .addChange(TRANSIT_OPEN).addChange(TRANSIT_CLOSE).build();
         transitions.onTransitionReady(transitToken, info, mock(SurfaceControl.Transaction.class),
@@ -185,7 +204,7 @@ public class ShellTransitionTests extends ShellTestCase {
         // Make a request that will be rejected by the testhandler.
         transitions.requestStartTransition(transitToken,
                 new TransitionRequestInfo(TRANSIT_OPEN, null /* trigger */, null /* remote */));
-        verify(mOrganizer, times(1)).startTransition(eq(TRANSIT_OPEN), eq(transitToken), isNull());
+        verify(mOrganizer, times(1)).startTransition(eq(transitToken), isNull());
         transitions.onTransitionReady(transitToken, open, mock(SurfaceControl.Transaction.class),
                 mock(SurfaceControl.Transaction.class));
         assertEquals(1, mDefaultHandler.activeCount());
@@ -196,10 +215,12 @@ public class ShellTransitionTests extends ShellTestCase {
         // Make a request that will be handled by testhandler but not animated by it.
         RunningTaskInfo mwTaskInfo =
                 createTaskInfo(1, WINDOWING_MODE_MULTI_WINDOW, ACTIVITY_TYPE_STANDARD);
+        // Make the wct non-empty.
+        handlerWCT.setFocusable(new WindowContainerToken(mock(IWindowContainerToken.class)), true);
         transitions.requestStartTransition(transitToken,
                 new TransitionRequestInfo(TRANSIT_OPEN, mwTaskInfo, null /* remote */));
         verify(mOrganizer, times(1)).startTransition(
-                eq(TRANSIT_OPEN), eq(transitToken), eq(handlerWCT));
+                eq(transitToken), eq(handlerWCT));
         transitions.onTransitionReady(transitToken, open, mock(SurfaceControl.Transaction.class),
                 mock(SurfaceControl.Transaction.class));
         assertEquals(1, mDefaultHandler.activeCount());
@@ -214,8 +235,8 @@ public class ShellTransitionTests extends ShellTestCase {
         transitions.addHandler(topHandler);
         transitions.requestStartTransition(transitToken,
                 new TransitionRequestInfo(TRANSIT_CHANGE, mwTaskInfo, null /* remote */));
-        verify(mOrganizer, times(1)).startTransition(
-                eq(TRANSIT_CHANGE), eq(transitToken), eq(handlerWCT));
+        verify(mOrganizer, times(2)).startTransition(
+                eq(transitToken), eq(handlerWCT));
         TransitionInfo change = new TransitionInfoBuilder(TRANSIT_CHANGE)
                 .addChange(TRANSIT_CHANGE).build();
         transitions.onTransitionReady(transitToken, change, mock(SurfaceControl.Transaction.class),
@@ -253,7 +274,7 @@ public class ShellTransitionTests extends ShellTestCase {
         transitions.requestStartTransition(transitToken,
                 new TransitionRequestInfo(TRANSIT_OPEN, null /* trigger */,
                         new RemoteTransition(testRemote)));
-        verify(mOrganizer, times(1)).startTransition(eq(TRANSIT_OPEN), eq(transitToken), any());
+        verify(mOrganizer, times(1)).startTransition(eq(transitToken), any());
         TransitionInfo info = new TransitionInfoBuilder(TRANSIT_OPEN)
                 .addChange(TRANSIT_OPEN).addChange(TRANSIT_CLOSE).build();
         transitions.onTransitionReady(transitToken, info, mock(SurfaceControl.Transaction.class),
@@ -403,7 +424,7 @@ public class ShellTransitionTests extends ShellTestCase {
         IBinder transitToken = new Binder();
         transitions.requestStartTransition(transitToken,
                 new TransitionRequestInfo(TRANSIT_OPEN, null /* trigger */, null /* remote */));
-        verify(mOrganizer, times(1)).startTransition(eq(TRANSIT_OPEN), eq(transitToken), any());
+        verify(mOrganizer, times(1)).startTransition(eq(transitToken), any());
         TransitionInfo info = new TransitionInfoBuilder(TRANSIT_OPEN)
                 .addChange(TRANSIT_OPEN).addChange(TRANSIT_CLOSE).build();
         transitions.onTransitionReady(transitToken, info, mock(SurfaceControl.Transaction.class),
@@ -551,64 +572,77 @@ public class ShellTransitionTests extends ShellTestCase {
         final @Surface.Rotation int upsideDown = displays
                 .getDisplayLayout(DEFAULT_DISPLAY).getUpsideDownRotation();
 
+        TransitionInfo.Change displayChange = new ChangeBuilder(TRANSIT_CHANGE)
+                .setFlags(FLAG_IS_DISPLAY).setRotate().build();
+        // Set non-square display so nav bar won't be allowed to move.
+        displayChange.getStartAbsBounds().set(0, 0, 1000, 2000);
         final TransitionInfo normalDispRotate = new TransitionInfoBuilder(TRANSIT_CHANGE)
-                .addChange(new ChangeBuilder(TRANSIT_CHANGE).setFlags(FLAG_IS_DISPLAY).setRotate()
-                        .build())
+                .addChange(displayChange)
                 .addChange(new ChangeBuilder(TRANSIT_CHANGE).setTask(taskInfo).setRotate().build())
                 .build();
-        assertFalse(DefaultTransitionHandler.isRotationSeamless(normalDispRotate, displays));
+        assertEquals(ROTATION_ANIMATION_ROTATE, DefaultTransitionHandler.getRotationAnimationHint(
+                displayChange, normalDispRotate, displays));
 
         // Seamless if all tasks are seamless
         final TransitionInfo rotateSeamless = new TransitionInfoBuilder(TRANSIT_CHANGE)
-                .addChange(new ChangeBuilder(TRANSIT_CHANGE).setFlags(FLAG_IS_DISPLAY).setRotate()
-                        .build())
+                .addChange(displayChange)
                 .addChange(new ChangeBuilder(TRANSIT_CHANGE).setTask(taskInfo)
                         .setRotate(ROTATION_ANIMATION_SEAMLESS).build())
                 .build();
-        assertTrue(DefaultTransitionHandler.isRotationSeamless(rotateSeamless, displays));
+        assertEquals(ROTATION_ANIMATION_SEAMLESS, DefaultTransitionHandler.getRotationAnimationHint(
+                displayChange, rotateSeamless, displays));
 
         // Not seamless if there is PiP (or any other non-seamless task)
         final TransitionInfo pipDispRotate = new TransitionInfoBuilder(TRANSIT_CHANGE)
-                .addChange(new ChangeBuilder(TRANSIT_CHANGE).setFlags(FLAG_IS_DISPLAY).setRotate()
-                        .build())
+                .addChange(displayChange)
                 .addChange(new ChangeBuilder(TRANSIT_CHANGE).setTask(taskInfo)
                         .setRotate(ROTATION_ANIMATION_SEAMLESS).build())
                 .addChange(new ChangeBuilder(TRANSIT_CHANGE).setTask(taskInfoPip)
                         .setRotate().build())
                 .build();
-        assertFalse(DefaultTransitionHandler.isRotationSeamless(pipDispRotate, displays));
-
-        // Not seamless if one of rotations is upside-down
-        final TransitionInfo seamlessUpsideDown = new TransitionInfoBuilder(TRANSIT_CHANGE)
-                .addChange(new ChangeBuilder(TRANSIT_CHANGE).setFlags(FLAG_IS_DISPLAY)
-                        .setRotate(upsideDown, ROTATION_ANIMATION_UNSPECIFIED).build())
-                .addChange(new ChangeBuilder(TRANSIT_CHANGE).setTask(taskInfo)
-                        .setRotate(upsideDown, ROTATION_ANIMATION_SEAMLESS).build())
-                .build();
-        assertFalse(DefaultTransitionHandler.isRotationSeamless(seamlessUpsideDown, displays));
-
-        // Not seamless if system alert windows
-        final TransitionInfo seamlessButAlert = new TransitionInfoBuilder(TRANSIT_CHANGE)
-                .addChange(new ChangeBuilder(TRANSIT_CHANGE).setFlags(
-                        FLAG_IS_DISPLAY | FLAG_DISPLAY_HAS_ALERT_WINDOWS).setRotate().build())
-                .addChange(new ChangeBuilder(TRANSIT_CHANGE).setTask(taskInfo)
-                        .setRotate(ROTATION_ANIMATION_SEAMLESS).build())
-                .build();
-        assertFalse(DefaultTransitionHandler.isRotationSeamless(seamlessButAlert, displays));
+        assertEquals(ROTATION_ANIMATION_ROTATE, DefaultTransitionHandler.getRotationAnimationHint(
+                displayChange, pipDispRotate, displays));
 
         // Not seamless if there is no changed task.
         final TransitionInfo noTask = new TransitionInfoBuilder(TRANSIT_CHANGE)
-                .addChange(new ChangeBuilder(TRANSIT_CHANGE).setFlags(FLAG_IS_DISPLAY)
-                        .setRotate().build())
+                .addChange(displayChange)
                 .build();
-        assertFalse(DefaultTransitionHandler.isRotationSeamless(noTask, displays));
+        assertEquals(ROTATION_ANIMATION_ROTATE, DefaultTransitionHandler.getRotationAnimationHint(
+                displayChange, noTask, displays));
 
-        // Seamless if display is explicitly seamless.
-        final TransitionInfo seamlessDisplay = new TransitionInfoBuilder(TRANSIT_CHANGE)
-                .addChange(new ChangeBuilder(TRANSIT_CHANGE).setFlags(FLAG_IS_DISPLAY)
+        // Not seamless if one of rotations is upside-down
+        displayChange = new ChangeBuilder(TRANSIT_CHANGE).setFlags(FLAG_IS_DISPLAY)
+                .setRotate(upsideDown, ROTATION_ANIMATION_UNSPECIFIED).build();
+        final TransitionInfo seamlessUpsideDown = new TransitionInfoBuilder(TRANSIT_CHANGE)
+                .addChange(displayChange)
+                .addChange(new ChangeBuilder(TRANSIT_CHANGE).setTask(taskInfo)
+                        .setRotate(upsideDown, ROTATION_ANIMATION_SEAMLESS).build())
+                .build();
+        assertEquals(ROTATION_ANIMATION_ROTATE, DefaultTransitionHandler.getRotationAnimationHint(
+                displayChange, seamlessUpsideDown, displays));
+
+        // Not seamless if system alert windows
+        displayChange = new ChangeBuilder(TRANSIT_CHANGE)
+                .setFlags(FLAG_IS_DISPLAY | FLAG_DISPLAY_HAS_ALERT_WINDOWS).setRotate().build();
+        final TransitionInfo seamlessButAlert = new TransitionInfoBuilder(TRANSIT_CHANGE)
+                .addChange(displayChange)
+                .addChange(new ChangeBuilder(TRANSIT_CHANGE).setTask(taskInfo)
                         .setRotate(ROTATION_ANIMATION_SEAMLESS).build())
                 .build();
-        assertTrue(DefaultTransitionHandler.isRotationSeamless(seamlessDisplay, displays));
+        assertEquals(ROTATION_ANIMATION_ROTATE, DefaultTransitionHandler.getRotationAnimationHint(
+                displayChange, seamlessButAlert, displays));
+
+        // Seamless if display is explicitly seamless.
+        displayChange = new ChangeBuilder(TRANSIT_CHANGE).setFlags(FLAG_IS_DISPLAY)
+                .setRotate(ROTATION_ANIMATION_SEAMLESS).build();
+        final TransitionInfo seamlessDisplay = new TransitionInfoBuilder(TRANSIT_CHANGE)
+                .addChange(displayChange)
+                // The animation hint of task will be ignored.
+                .addChange(new ChangeBuilder(TRANSIT_CHANGE).setTask(taskInfo)
+                        .setRotate(ROTATION_ANIMATION_ROTATE).build())
+                .build();
+        assertEquals(ROTATION_ANIMATION_SEAMLESS, DefaultTransitionHandler.getRotationAnimationHint(
+                displayChange, seamlessDisplay, displays));
     }
 
     @Test
@@ -688,6 +722,204 @@ public class ShellTransitionTests extends ShellTestCase {
         verify(runnable4, times(1)).run();
     }
 
+    @Test
+    public void testObserverLifecycle_basicTransitionFlow() {
+        Transitions transitions = createTestTransitions();
+        Transitions.TransitionObserver observer = mock(Transitions.TransitionObserver.class);
+        transitions.registerObserver(observer);
+        transitions.replaceDefaultHandlerForTest(mDefaultHandler);
+
+        IBinder transitToken = new Binder();
+        transitions.requestStartTransition(transitToken,
+                new TransitionRequestInfo(TRANSIT_OPEN, null /* trigger */, null /* remote */));
+        TransitionInfo info = new TransitionInfoBuilder(TRANSIT_OPEN)
+                .addChange(TRANSIT_OPEN).addChange(TRANSIT_CLOSE).build();
+        SurfaceControl.Transaction startT = mock(SurfaceControl.Transaction.class);
+        SurfaceControl.Transaction finishT = mock(SurfaceControl.Transaction.class);
+        transitions.onTransitionReady(transitToken, info, startT, finishT);
+
+        InOrder observerOrder = inOrder(observer);
+        observerOrder.verify(observer).onTransitionReady(transitToken, info, startT, finishT);
+        observerOrder.verify(observer).onTransitionStarting(transitToken);
+        verify(observer, times(0)).onTransitionFinished(eq(transitToken), anyBoolean());
+        mDefaultHandler.finishAll();
+        mMainExecutor.flushAll();
+        verify(observer).onTransitionFinished(transitToken, false);
+    }
+
+    @Test
+    public void testObserverLifecycle_queueing() {
+        Transitions transitions = createTestTransitions();
+        Transitions.TransitionObserver observer = mock(Transitions.TransitionObserver.class);
+        transitions.registerObserver(observer);
+        transitions.replaceDefaultHandlerForTest(mDefaultHandler);
+
+        IBinder transitToken1 = new Binder();
+        transitions.requestStartTransition(transitToken1,
+                new TransitionRequestInfo(TRANSIT_OPEN, null /* trigger */, null /* remote */));
+        TransitionInfo info1 = new TransitionInfoBuilder(TRANSIT_OPEN)
+                .addChange(TRANSIT_OPEN).addChange(TRANSIT_CLOSE).build();
+        SurfaceControl.Transaction startT1 = mock(SurfaceControl.Transaction.class);
+        SurfaceControl.Transaction finishT1 = mock(SurfaceControl.Transaction.class);
+        transitions.onTransitionReady(transitToken1, info1, startT1, finishT1);
+        verify(observer).onTransitionReady(transitToken1, info1, startT1, finishT1);
+
+        IBinder transitToken2 = new Binder();
+        transitions.requestStartTransition(transitToken2,
+                new TransitionRequestInfo(TRANSIT_CLOSE, null /* trigger */, null /* remote */));
+        TransitionInfo info2 = new TransitionInfoBuilder(TRANSIT_CLOSE)
+                .addChange(TRANSIT_OPEN).addChange(TRANSIT_CLOSE).build();
+        SurfaceControl.Transaction startT2 = mock(SurfaceControl.Transaction.class);
+        SurfaceControl.Transaction finishT2 = mock(SurfaceControl.Transaction.class);
+        transitions.onTransitionReady(transitToken2, info2, startT2, finishT2);
+        verify(observer, times(1)).onTransitionReady(transitToken2, info2, startT2, finishT2);
+        verify(observer, times(0)).onTransitionStarting(transitToken2);
+        verify(observer, times(0)).onTransitionFinished(eq(transitToken1), anyBoolean());
+        verify(observer, times(0)).onTransitionFinished(eq(transitToken2), anyBoolean());
+
+        mDefaultHandler.finishAll();
+        mMainExecutor.flushAll();
+        // first transition finished
+        verify(observer, times(1)).onTransitionFinished(transitToken1, false);
+        verify(observer, times(1)).onTransitionStarting(transitToken2);
+        verify(observer, times(0)).onTransitionFinished(eq(transitToken2), anyBoolean());
+
+        mDefaultHandler.finishAll();
+        mMainExecutor.flushAll();
+        verify(observer, times(1)).onTransitionFinished(transitToken2, false);
+    }
+
+
+    @Test
+    public void testObserverLifecycle_merging() {
+        Transitions transitions = createTestTransitions();
+        Transitions.TransitionObserver observer = mock(Transitions.TransitionObserver.class);
+        transitions.registerObserver(observer);
+        mDefaultHandler.setSimulateMerge(true);
+        transitions.replaceDefaultHandlerForTest(mDefaultHandler);
+
+        IBinder transitToken1 = new Binder();
+        transitions.requestStartTransition(transitToken1,
+                new TransitionRequestInfo(TRANSIT_OPEN, null /* trigger */, null /* remote */));
+        TransitionInfo info1 = new TransitionInfoBuilder(TRANSIT_OPEN)
+                .addChange(TRANSIT_OPEN).addChange(TRANSIT_CLOSE).build();
+        SurfaceControl.Transaction startT1 = mock(SurfaceControl.Transaction.class);
+        SurfaceControl.Transaction finishT1 = mock(SurfaceControl.Transaction.class);
+        transitions.onTransitionReady(transitToken1, info1, startT1, finishT1);
+
+        IBinder transitToken2 = new Binder();
+        transitions.requestStartTransition(transitToken2,
+                new TransitionRequestInfo(TRANSIT_CLOSE, null /* trigger */, null /* remote */));
+        TransitionInfo info2 = new TransitionInfoBuilder(TRANSIT_CLOSE)
+                .addChange(TRANSIT_OPEN).addChange(TRANSIT_CLOSE).build();
+        SurfaceControl.Transaction startT2 = mock(SurfaceControl.Transaction.class);
+        SurfaceControl.Transaction finishT2 = mock(SurfaceControl.Transaction.class);
+        transitions.onTransitionReady(transitToken2, info2, startT2, finishT2);
+
+        InOrder observerOrder = inOrder(observer);
+        observerOrder.verify(observer).onTransitionReady(transitToken2, info2, startT2, finishT2);
+        observerOrder.verify(observer).onTransitionMerged(transitToken2, transitToken1);
+        verify(observer, times(0)).onTransitionFinished(eq(transitToken1), anyBoolean());
+
+        mDefaultHandler.finishAll();
+        mMainExecutor.flushAll();
+        // transition + merged all finished.
+        verify(observer, times(1)).onTransitionFinished(transitToken1, false);
+        // Merged transition won't receive any lifecycle calls beyond ready
+        verify(observer, times(0)).onTransitionStarting(transitToken2);
+        verify(observer, times(0)).onTransitionFinished(eq(transitToken2), anyBoolean());
+    }
+
+    @Test
+    public void testObserverLifecycle_mergingAfterQueueing() {
+        Transitions transitions = createTestTransitions();
+        Transitions.TransitionObserver observer = mock(Transitions.TransitionObserver.class);
+        transitions.registerObserver(observer);
+        mDefaultHandler.setSimulateMerge(true);
+        transitions.replaceDefaultHandlerForTest(mDefaultHandler);
+
+        // Make a test handler that only responds to multi-window triggers AND only animates
+        // Change transitions.
+        final WindowContainerTransaction handlerWCT = new WindowContainerTransaction();
+        TestTransitionHandler testHandler = new TestTransitionHandler() {
+            @Override
+            public boolean startAnimation(@NonNull IBinder transition, @NonNull TransitionInfo info,
+                    @NonNull SurfaceControl.Transaction startTransaction,
+                    @NonNull SurfaceControl.Transaction finishTransaction,
+                    @NonNull Transitions.TransitionFinishCallback finishCallback) {
+                for (TransitionInfo.Change chg : info.getChanges()) {
+                    if (chg.getMode() == TRANSIT_CHANGE) {
+                        return super.startAnimation(transition, info, startTransaction,
+                                finishTransaction, finishCallback);
+                    }
+                }
+                return false;
+            }
+
+            @Nullable
+            @Override
+            public WindowContainerTransaction handleRequest(@NonNull IBinder transition,
+                    @NonNull TransitionRequestInfo request) {
+                final RunningTaskInfo task = request.getTriggerTask();
+                return (task != null && task.getWindowingMode() == WINDOWING_MODE_MULTI_WINDOW)
+                        ? handlerWCT : null;
+            }
+        };
+        transitions.addHandler(testHandler);
+
+        // Use test handler to play an animation
+        IBinder transitToken1 = new Binder();
+        RunningTaskInfo mwTaskInfo =
+                createTaskInfo(1, WINDOWING_MODE_MULTI_WINDOW, ACTIVITY_TYPE_STANDARD);
+        transitions.requestStartTransition(transitToken1,
+                new TransitionRequestInfo(TRANSIT_CHANGE, mwTaskInfo, null /* remote */));
+        TransitionInfo change = new TransitionInfoBuilder(TRANSIT_CHANGE)
+                .addChange(TRANSIT_CHANGE).build();
+        SurfaceControl.Transaction startT1 = mock(SurfaceControl.Transaction.class);
+        SurfaceControl.Transaction finishT1 = mock(SurfaceControl.Transaction.class);
+        transitions.onTransitionReady(transitToken1, change, startT1, finishT1);
+
+        // Request the second transition that should be handled by the default handler
+        IBinder transitToken2 = new Binder();
+        TransitionInfo open = new TransitionInfoBuilder(TRANSIT_OPEN)
+                .addChange(TRANSIT_OPEN).addChange(TRANSIT_CLOSE).build();
+        transitions.requestStartTransition(transitToken2,
+                new TransitionRequestInfo(TRANSIT_OPEN, null /* trigger */, null /* remote */));
+        SurfaceControl.Transaction startT2 = mock(SurfaceControl.Transaction.class);
+        SurfaceControl.Transaction finishT2 = mock(SurfaceControl.Transaction.class);
+        transitions.onTransitionReady(transitToken2, open, startT2, finishT2);
+        verify(observer).onTransitionReady(transitToken2, open, startT2, finishT2);
+        verify(observer, times(0)).onTransitionStarting(transitToken2);
+
+        // Request the third transition that should be merged into the second one
+        IBinder transitToken3 = new Binder();
+        transitions.requestStartTransition(transitToken3,
+                new TransitionRequestInfo(TRANSIT_OPEN, null /* trigger */, null /* remote */));
+        SurfaceControl.Transaction startT3 = mock(SurfaceControl.Transaction.class);
+        SurfaceControl.Transaction finishT3 = mock(SurfaceControl.Transaction.class);
+        transitions.onTransitionReady(transitToken3, open, startT3, finishT3);
+        verify(observer, times(0)).onTransitionStarting(transitToken2);
+        verify(observer).onTransitionReady(transitToken3, open, startT3, finishT3);
+        verify(observer, times(0)).onTransitionStarting(transitToken3);
+
+        testHandler.finishAll();
+        mMainExecutor.flushAll();
+
+        verify(observer).onTransitionFinished(transitToken1, false);
+
+        mDefaultHandler.finishAll();
+        mMainExecutor.flushAll();
+
+        InOrder observerOrder = inOrder(observer);
+        observerOrder.verify(observer).onTransitionStarting(transitToken2);
+        observerOrder.verify(observer).onTransitionMerged(transitToken3, transitToken2);
+        observerOrder.verify(observer).onTransitionFinished(transitToken2, false);
+
+        // Merged transition won't receive any lifecycle calls beyond ready
+        verify(observer, times(0)).onTransitionStarting(transitToken3);
+        verify(observer, times(0)).onTransitionFinished(eq(transitToken3), anyBoolean());
+    }
+
     class TransitionInfoBuilder {
         final TransitionInfo mInfo;
 
@@ -704,7 +936,7 @@ public class ShellTransitionTests extends ShellTestCase {
         TransitionInfoBuilder addChange(@WindowManager.TransitionType int mode,
                 RunningTaskInfo taskInfo) {
             final TransitionInfo.Change change =
-                    new TransitionInfo.Change(null /* token */, null /* leash */);
+                    new TransitionInfo.Change(null /* token */, createMockSurface(true));
             change.setMode(mode);
             change.setTaskInfo(taskInfo);
             mInfo.addChange(change);
@@ -729,7 +961,7 @@ public class ShellTransitionTests extends ShellTestCase {
         final TransitionInfo.Change mChange;
 
         ChangeBuilder(@WindowManager.TransitionType int mode) {
-            mChange = new TransitionInfo.Change(null /* token */, null /* leash */);
+            mChange = new TransitionInfo.Change(null /* token */, createMockSurface(true));
             mChange.setMode(mode);
         }
 
@@ -834,37 +1066,22 @@ public class ShellTransitionTests extends ShellTestCase {
     }
 
     private DisplayController createTestDisplayController() {
-        IWindowManager mockWM = mock(IWindowManager.class);
-        final IDisplayWindowListener[] displayListener = new IDisplayWindowListener[1];
-        try {
-            doReturn(new int[]{DEFAULT_DISPLAY}).when(mockWM).registerDisplayWindowListener(any());
-        } catch (RemoteException e) {
-            // No remote stuff happening, so this can't be hit
-        }
-        ShellInit shellInit = new ShellInit(mMainExecutor);
-        DisplayController out = new DisplayController(mContext, mockWM, shellInit, mMainExecutor);
-        shellInit.init();
+        DisplayLayout displayLayout = mock(DisplayLayout.class);
+        doReturn(Surface.ROTATION_180).when(displayLayout).getUpsideDownRotation();
+        // By default we ignore nav bar in deciding if a seamless rotation is allowed.
+        doReturn(true).when(displayLayout).allowSeamlessRotationDespiteNavBarMoving();
+
+        DisplayController out = mock(DisplayController.class);
+        doReturn(displayLayout).when(out).getDisplayLayout(DEFAULT_DISPLAY);
         return out;
     }
 
     private Transitions createTestTransitions() {
         ShellInit shellInit = new ShellInit(mMainExecutor);
-        final Transitions t = new Transitions(mContext, shellInit, mOrganizer, mTransactionPool,
-                createTestDisplayController(), mMainExecutor, mMainHandler, mAnimExecutor);
+        final Transitions t = new Transitions(mContext, shellInit, mock(ShellController.class),
+                mOrganizer, mTransactionPool, createTestDisplayController(), mMainExecutor,
+                mMainHandler, mAnimExecutor);
         shellInit.init();
         return t;
     }
-//
-//    private class TestDisplayController extends DisplayController {
-//        private final DisplayLayout mTestDisplayLayout;
-//        TestDisplayController() {
-//            super(mContext, mock(IWindowManager.class), mMainExecutor);
-//            mTestDisplayLayout = new DisplayLayout();
-//            mTestDisplayLayout.
-//        }
-//
-//        @Override
-//        DisplayLayout
-//    }
-
 }

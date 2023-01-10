@@ -17,6 +17,8 @@
 package com.android.wm.shell.draganddrop;
 
 import static android.app.ActivityTaskManager.INVALID_TASK_ID;
+import static android.app.ComponentOptions.KEY_PENDING_INTENT_BACKGROUND_ACTIVITY_ALLOWED;
+import static android.app.ComponentOptions.KEY_PENDING_INTENT_BACKGROUND_ACTIVITY_ALLOWED_BY_PERMISSION;
 import static android.app.WindowConfiguration.ACTIVITY_TYPE_STANDARD;
 import static android.app.WindowConfiguration.WINDOWING_MODE_FULLSCREEN;
 import static android.app.WindowConfiguration.WINDOWING_MODE_UNDEFINED;
@@ -238,7 +240,7 @@ public class DragAndDropPolicy {
             // Update launch options for the split side we are targeting.
             position = leftOrTop ? SPLIT_POSITION_TOP_OR_LEFT : SPLIT_POSITION_BOTTOM_OR_RIGHT;
             // Add some data for logging splitscreen once it is invoked
-            mSplitScreen.logOnDroppedToSplit(position, mLoggerSessionId);
+            mSplitScreen.onDroppedToSplit(position, mLoggerSessionId);
         }
 
         final ClipDescription description = data.getDescription();
@@ -263,6 +265,9 @@ public class DragAndDropPolicy {
             mStarter.startShortcut(packageName, id, position, opts, user);
         } else {
             final PendingIntent launchIntent = intent.getParcelableExtra(EXTRA_PENDING_INTENT);
+            // Put BAL flags to avoid activity start aborted.
+            opts.putBoolean(KEY_PENDING_INTENT_BACKGROUND_ACTIVITY_ALLOWED, true);
+            opts.putBoolean(KEY_PENDING_INTENT_BACKGROUND_ACTIVITY_ALLOWED_BY_PERMISSION, true);
             mStarter.startIntent(launchIntent, null /* fillIntent */, position, opts);
         }
     }

@@ -19,7 +19,7 @@
     <string name="app_label" msgid="4470785958457506021">"Kaasseadme haldur"</string>
     <string name="confirmation_title" msgid="3785000297483688997">"Lubage rakendusel &lt;strong&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/strong&gt; teie seadmele &lt;strong&gt;<xliff:g id="DEVICE_NAME">%2$s</xliff:g>&lt;/strong&gt; juurde pääseda"</string>
     <string name="profile_name_watch" msgid="576290739483672360">"käekell"</string>
-    <string name="chooser_title" msgid="2262294130493605839">"Valige seade <xliff:g id="PROFILE_NAME">%1$s</xliff:g>, mida haldab rakendus &lt;strong&gt;<xliff:g id="APP_NAME">%2$s</xliff:g>&lt;/strong&gt;"</string>
+    <string name="chooser_title" msgid="2262294130493605839">"Valige <xliff:g id="PROFILE_NAME">%1$s</xliff:g>, mida haldab rakendus &lt;strong&gt;<xliff:g id="APP_NAME">%2$s</xliff:g>&lt;/strong&gt;"</string>
     <string name="summary_watch" msgid="3002344206574997652">"Seda rakendust on vaja teie profiili <xliff:g id="DEVICE_NAME">%1$s</xliff:g> haldamiseks. Rakendusel <xliff:g id="APP_NAME">%2$s</xliff:g> lubatakse kasutada teie märguandeid ja pääseda juurde teie telefoni, SMS-ide, kontaktide, kalendri, kõnelogide ja läheduses olevate seadmete lubadele."</string>
     <string name="permission_apps" msgid="6142133265286656158">"Rakendused"</string>
     <string name="permission_apps_summary" msgid="798718816711515431">"Telefoni rakenduste voogesitamine"</string>

@@ -141,7 +141,6 @@ public class NotificationIconContainer extends ViewGroup {
     /* Maximum number of icons in short shelf on lockscreen when also showing overflow dot. */
     public static final int MAX_ICONS_ON_LOCKSCREEN = 3;
     public static final int MAX_STATIC_ICONS = 4;
-    private static final int MAX_DOTS = 1;
 
     private boolean mIsStaticLayout = true;
     private final HashMap<View, IconState> mIconStates = new HashMap<>();
@@ -166,8 +165,7 @@ public class NotificationIconContainer extends ViewGroup {
     private IconState mLastVisibleIconState;
     private IconState mFirstVisibleIconState;
     private float mVisualOverflowStart;
-    // Keep track of overflow in range [0, 3]
-    private int mNumDots;
+    private boolean mIsShowingOverflowDot;
     private StatusBarIconView mIsolatedIcon;
     private Rect mIsolatedIconLocation;
     private int[] mAbsolutePosition = new int[2];
@@ -211,11 +209,11 @@ public class NotificationIconContainer extends ViewGroup {
             canvas.drawLine(end, 0, end, height, paint);
 
             paint.setColor(Color.GREEN);
-            int lastIcon = (int) mLastVisibleIconState.xTranslation;
+            int lastIcon = (int) mLastVisibleIconState.getXTranslation();
             canvas.drawLine(lastIcon, 0, lastIcon, height, paint);
 
             if (mFirstVisibleIconState != null) {
-                int firstIcon = (int) mFirstVisibleIconState.xTranslation;
+                int firstIcon = (int) mFirstVisibleIconState.getXTranslation();
                 canvas.drawLine(firstIcon, 0, firstIcon, height, paint);
             }
 
@@ -276,6 +274,15 @@ public class NotificationIconContainer extends ViewGroup {
         if (mIsStaticLayout) {
             updateState();
         }
+    }
+
+    @Override
+    public String toString() {
+        return "NotificationIconContainer("
+                + "dozing=" + mDozing + " onLockScreen=" + mOnLockScreen
+                + " inNotificationIconShelf=" + mInNotificationIconShelf
+                + " speedBumpIndex=" + mSpeedBumpIndex
+                + " themedTextColorPrimary=#" + Integer.toHexString(mThemedTextColorPrimary) + ')';
     }
 
     @VisibleForTesting
@@ -378,8 +385,8 @@ public class NotificationIconContainer extends ViewGroup {
         }
     }
 
-    public boolean hasMaxNumDot() {
-        return mNumDots >= MAX_DOTS;
+    public boolean areIconsOverflowing() {
+        return mIsShowingOverflowDot;
     }
 
     private boolean areAnimationsEnabled(StatusBarIconView icon) {
@@ -404,7 +411,7 @@ public class NotificationIconContainer extends ViewGroup {
             View view = getChildAt(i);
             ViewState iconState = mIconStates.get(view);
             iconState.initFrom(view);
-            iconState.alpha = mIsolatedIcon == null || view == mIsolatedIcon ? 1.0f : 0.0f;
+            iconState.setAlpha(mIsolatedIcon == null || view == mIsolatedIcon ? 1.0f : 0.0f);
             iconState.hidden = false;
         }
     }
@@ -458,7 +465,7 @@ public class NotificationIconContainer extends ViewGroup {
                 // We only modify the xTranslation if it's fully inside of the container
                 // since during the transition to the shelf, the translations are controlled
                 // from the outside
-                iconState.xTranslation = translationX;
+                iconState.setXTranslation(translationX);
             }
             if (mFirstVisibleIconState == null) {
                 mFirstVisibleIconState = iconState;
@@ -485,23 +492,22 @@ public class NotificationIconContainer extends ViewGroup {
                     : 1f;
             translationX += iconState.iconAppearAmount * view.getWidth() * drawingScale;
         }
-        mNumDots = 0;
+        mIsShowingOverflowDot = false;
         if (firstOverflowIndex != -1) {
             translationX = mVisualOverflowStart;
             for (int i = firstOverflowIndex; i < childCount; i++) {
                 View view = getChildAt(i);
                 IconState iconState = mIconStates.get(view);
                 int dotWidth = mStaticDotDiameter + mDotPadding;
-                iconState.xTranslation = translationX;
-                if (mNumDots < MAX_DOTS) {
-                    if (mNumDots == 0 && iconState.iconAppearAmount < 0.8f) {
+                iconState.setXTranslation(translationX);
+                if (!mIsShowingOverflowDot) {
+                    if (iconState.iconAppearAmount < 0.8f) {
                         iconState.visibleState = StatusBarIconView.STATE_ICON;
                     } else {
                         iconState.visibleState = StatusBarIconView.STATE_DOT;
-                        mNumDots++;
+                        mIsShowingOverflowDot = true;
                     }
-                    translationX += (mNumDots == MAX_DOTS ? MAX_DOTS * dotWidth : dotWidth)
-                            * iconState.iconAppearAmount;
+                    translationX += dotWidth * iconState.iconAppearAmount;
                     mLastVisibleIconState = iconState;
                 } else {
                     iconState.visibleState = StatusBarIconView.STATE_HIDDEN;
@@ -516,7 +522,8 @@ public class NotificationIconContainer extends ViewGroup {
             for (int i = 0; i < childCount; i++) {
                 View view = getChildAt(i);
                 IconState iconState = mIconStates.get(view);
-                iconState.xTranslation = getWidth() - iconState.xTranslation - view.getWidth();
+                iconState.setXTranslation(
+                        getWidth() - iconState.getXTranslation() - view.getWidth());
             }
         }
         if (mIsolatedIcon != null) {
@@ -524,8 +531,8 @@ public class NotificationIconContainer extends ViewGroup {
             if (iconState != null) {
                 // Most of the time the icon isn't yet added when this is called but only happening
                 // later
-                iconState.xTranslation = mIsolatedIconLocation.left - mAbsolutePosition[0]
-                        - (1 - mIsolatedIcon.getIconScale()) * mIsolatedIcon.getWidth() / 2.0f;
+                iconState.setXTranslation(mIsolatedIconLocation.left - mAbsolutePosition[0]
+                        - (1 - mIsolatedIcon.getIconScale()) * mIsolatedIcon.getWidth() / 2.0f);
                 iconState.visibleState = StatusBarIconView.STATE_ICON;
             }
         }
@@ -600,14 +607,12 @@ public class NotificationIconContainer extends ViewGroup {
             return 0;
         }
 
-        int translation = (int) (isLayoutRtl() ? getWidth() - mLastVisibleIconState.xTranslation
-                : mLastVisibleIconState.xTranslation + mIconSize);
+        int translation = (int) (isLayoutRtl()
+                ? getWidth() - mLastVisibleIconState.getXTranslation()
+                : mLastVisibleIconState.getXTranslation() + mIconSize);
+
         // There's a chance that last translation goes beyond the edge maybe
         return Math.min(getWidth(), translation);
-    }
-
-    private float getMaxOverflowStart() {
-        return getLayoutEnd() - mIconSize;
     }
 
     public void setChangingViewPositions(boolean changingViewPositions) {
@@ -631,56 +636,6 @@ public class NotificationIconContainer extends ViewGroup {
 
     public void setSpeedBumpIndex(int speedBumpIndex) {
         mSpeedBumpIndex = speedBumpIndex;
-    }
-
-    public boolean hasOverflow() {
-        return mNumDots > 0;
-    }
-
-    /**
-     * If the overflow is in the range [1, max_dots - 1) (basically 1 or 2 dots), then
-     * extra padding will have to be accounted for
-     *
-     * This method has no meaning for non-static containers
-     */
-    public boolean hasPartialOverflow() {
-        return mNumDots > 0 && mNumDots < MAX_DOTS;
-    }
-
-    /**
-     * Get padding that can account for extra dots up to the max. The only valid values for
-     * this method are for 1 or 2 dots.
-     * @return only extraDotPadding or extraDotPadding * 2
-     */
-    public int getPartialOverflowExtraPadding() {
-        if (!hasPartialOverflow()) {
-            return 0;
-        }
-
-        int partialOverflowAmount = (MAX_DOTS - mNumDots) * (mStaticDotDiameter + mDotPadding);
-
-        int adjustedWidth = getFinalTranslationX() + partialOverflowAmount;
-        // In case we actually give too much padding...
-        if (adjustedWidth > getWidth()) {
-            partialOverflowAmount = getWidth() - getFinalTranslationX();
-        }
-
-        return partialOverflowAmount;
-    }
-
-    // Give some extra room for btw notifications if we can
-    public int getNoOverflowExtraPadding() {
-        if (mNumDots != 0) {
-            return 0;
-        }
-
-        int collapsedPadding = mIconSize;
-
-        if (collapsedPadding + getFinalTranslationX() > getWidth()) {
-            collapsedPadding = getWidth() - getFinalTranslationX();
-        }
-
-        return collapsedPadding;
     }
 
     public int getIconSize() {

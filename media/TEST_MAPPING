@@ -1,6 +1,9 @@
 {
   "presubmit": [
     {
+      "name": "mediaroutertest"
+    },
+    {
       "name": "CtsCameraTestCases",
       "options" : [
         {

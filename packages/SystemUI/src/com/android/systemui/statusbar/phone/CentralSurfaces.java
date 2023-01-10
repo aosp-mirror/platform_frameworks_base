@@ -25,10 +25,10 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.os.Bundle;
+import android.os.PowerManager;
 import android.os.UserHandle;
 import android.service.notification.StatusBarNotification;
 import android.view.KeyEvent;
-import android.view.MotionEvent;
 import android.view.RemoteAnimationAdapter;
 import android.view.View;
 import android.view.ViewGroup;
@@ -40,6 +40,7 @@ import androidx.lifecycle.LifecycleOwner;
 
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.statusbar.RegisterStatusBarResult;
+import com.android.keyguard.AuthKeyguardMessageArea;
 import com.android.systemui.Dumpable;
 import com.android.systemui.animation.ActivityLaunchAnimator;
 import com.android.systemui.animation.RemoteTransitionAdapter;
@@ -50,10 +51,8 @@ import com.android.systemui.qs.QSPanelController;
 import com.android.systemui.shade.NotificationPanelViewController;
 import com.android.systemui.shade.NotificationShadeWindowView;
 import com.android.systemui.shade.NotificationShadeWindowViewController;
-import com.android.systemui.statusbar.GestureRecorder;
 import com.android.systemui.statusbar.LightRevealScrim;
 import com.android.systemui.statusbar.NotificationPresenter;
-import com.android.systemui.statusbar.notification.row.NotificationGutsManager;
 
 import java.io.PrintWriter;
 
@@ -191,11 +190,7 @@ public interface CentralSurfaces extends Dumpable, ActivityStarter, LifecycleOwn
 
     void animateExpandSettingsPanel(@Nullable String subpanel);
 
-    void animateCollapsePanels(int flags, boolean force);
-
     void collapsePanelOnMainThread();
-
-    void collapsePanelWithDuration(int duration);
 
     void togglePanel();
 
@@ -209,7 +204,10 @@ public interface CentralSurfaces extends Dumpable, ActivityStarter, LifecycleOwn
     @Override
     Lifecycle getLifecycle();
 
-    void wakeUpIfDozing(long time, View where, String why);
+    /**
+     * Wakes up the device if the device was dozing.
+     */
+    void wakeUpIfDozing(long time, View where, String why, @PowerManager.WakeReason int wakeReason);
 
     NotificationShadeWindowView getNotificationShadeWindowView();
 
@@ -219,15 +217,14 @@ public interface CentralSurfaces extends Dumpable, ActivityStarter, LifecycleOwn
 
     ViewGroup getBouncerContainer();
 
+    /** Get the Keyguard Message Area that displays auth messages. */
+    AuthKeyguardMessageArea getKeyguardMessageArea();
+
     int getStatusBarHeight();
 
     void updateQsExpansionEnabled();
 
     boolean isShadeDisabled();
-
-    void requestNotificationUpdate(String reason);
-
-    void requestFaceAuth(boolean userInitiatedRequest);
 
     @Override
     void startActivity(Intent intent, boolean onlyProvisioned, boolean dismissShade,
@@ -254,15 +251,9 @@ public interface CentralSurfaces extends Dumpable, ActivityStarter, LifecycleOwn
     @Override
     void startActivity(Intent intent, boolean dismissShade, Callback callback);
 
-    void setQsExpanded(boolean expanded);
-
     boolean isWakeUpComingFromTouch();
 
-    boolean isFalsingThresholdNeeded();
-
     void onKeyguardViewManagerStatesUpdated();
-
-    void setPanelExpanded(boolean isExpanded);
 
     ViewGroup getNotificationScrollLayout();
 
@@ -289,26 +280,23 @@ public interface CentralSurfaces extends Dumpable, ActivityStarter, LifecycleOwn
 
     void postAnimateOpenPanels();
 
-    boolean isExpandedVisible();
-
     boolean isPanelExpanded();
 
     void onInputFocusTransfer(boolean start, boolean cancel, float velocity);
 
     void animateCollapseQuickSettings();
 
-    void onTouchEvent(MotionEvent event);
+    /** */
+    boolean getCommandQueuePanelsEnabled();
 
-    GestureRecorder getGestureRecorder();
+    /** */
+    int getStatusBarWindowState();
 
     BiometricUnlockController getBiometricUnlockController();
 
     void showWirelessChargingAnimation(int batteryLevel);
 
     void checkBarModes();
-
-    // Called by NavigationBarFragment
-    void setQsScrimEnabled(boolean scrimEnabled);
 
     void updateBubblesVisibility();
 
@@ -381,12 +369,8 @@ public interface CentralSurfaces extends Dumpable, ActivityStarter, LifecycleOwn
 
     void showKeyguardImpl();
 
-    boolean isInLaunchTransition();
-
     void fadeKeyguardAfterLaunchTransition(Runnable beforeFading,
             Runnable endRunnable, Runnable cancelRunnable);
-
-    void fadeKeyguardWhilePulsing();
 
     void animateKeyguardUnoccluding();
 
@@ -410,6 +394,9 @@ public interface CentralSurfaces extends Dumpable, ActivityStarter, LifecycleOwn
 
     void endAffordanceLaunch();
 
+    /** Should the keyguard be hidden immediately in response to a back press/gesture. */
+    boolean shouldKeyguardHideImmediately();
+
     boolean onBackPressed();
 
     boolean onSpacePressed();
@@ -418,16 +405,6 @@ public interface CentralSurfaces extends Dumpable, ActivityStarter, LifecycleOwn
             Runnable cancelAction);
 
     LightRevealScrim getLightRevealScrim();
-
-    void onTrackingStarted();
-
-    void onClosingFinished();
-
-    void onUnlockHintStarted();
-
-    void onHintFinished();
-
-    void onTrackingStopped(boolean expand);
 
     // TODO: Figure out way to remove these.
     NavigationBarView getNavigationBarView();
@@ -438,13 +415,14 @@ public interface CentralSurfaces extends Dumpable, ActivityStarter, LifecycleOwn
 
     void showPinningEscapeToast();
 
-    KeyguardBottomAreaView getKeyguardBottomAreaView();
-
     void setBouncerShowing(boolean bouncerShowing);
 
   void setBouncerShowingOverDream(boolean bouncerShowingOverDream);
 
     void collapseShade();
+
+    /** Collapse the shade, but conditional on a flag specific to the trigger of a bugreport. */
+    void collapseShadeForBugreport();
 
     int getWakefulnessState();
 
@@ -463,7 +441,11 @@ public interface CentralSurfaces extends Dumpable, ActivityStarter, LifecycleOwn
 
     void setTransitionToFullShadeProgress(float transitionToFullShadeProgress);
 
-    void setBouncerHiddenFraction(float expansion);
+    /**
+     * Sets the amount of progress to the bouncer being fully hidden/visible. 1 means the bouncer
+     * is fully hidden, while 0 means the bouncer is visible.
+     */
+    void setPrimaryBouncerHiddenFraction(float expansion);
 
     @VisibleForTesting
     void updateScrimController();
@@ -503,21 +485,9 @@ public interface CentralSurfaces extends Dumpable, ActivityStarter, LifecycleOwn
 
     boolean isBouncerShowingOverDream();
 
-    void onBouncerPreHideAnimation();
-
     boolean isKeyguardSecure();
 
-    NotificationPanelViewController getPanelController();
-
-    NotificationGutsManager getGutsManager();
-
     void updateNotificationPanelTouchState();
-
-    void makeExpandedVisible(boolean force);
-
-    void instantCollapseNotificationPanel();
-
-    void visibilityChanged(boolean visible);
 
     int getDisplayId();
 

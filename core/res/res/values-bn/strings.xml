@@ -33,6 +33,7 @@
     <string name="defaultVoiceMailAlphaTag" msgid="2190754495304236490">"ভয়েসমেল"</string>
     <string name="defaultMsisdnAlphaTag" msgid="2285034592902077488">"MSISDN1"</string>
     <string name="mmiError" msgid="2862759606579822246">"সংযোগ সমস্যা বা অবৈধ MMI কোড৷"</string>
+    <string name="mmiErrorNotSupported" msgid="5001803469335286099">"ফিচার কাজ করে না।"</string>
     <string name="mmiFdnError" msgid="3975490266767565852">"নির্দিষ্ট নম্বরে ডায়ালযোগ্য হিসেবে প্রক্রিয়াটি সীমিত করা হয়েছে৷"</string>
     <string name="mmiErrorWhileRoaming" msgid="1204173664713870114">"আপনি রোমিংয়ে থাকাকালীন আপনার ফোন থেকে \'কল ফরওয়ার্ড করার সেটিংস\' পরিবর্তন করা যাবে না৷"</string>
     <string name="serviceEnabled" msgid="7549025003394765639">"পরিষেবা সক্ষম করা ছিল৷"</string>
@@ -586,13 +587,14 @@
     <string name="screen_lock_app_setting_name" msgid="6054944352976789228">"স্ক্রিন লক ব্যবহার করুন"</string>
     <string name="screen_lock_dialog_default_subtitle" msgid="120359538048533695">"চালিয়ে যেতে আপনার স্ক্রিন লক ব্যবহার করুন"</string>
     <string name="fingerprint_acquired_partial" msgid="4323789264604479684">"সেন্সর জোরে প্রেস করুন"</string>
-    <string name="fingerprint_acquired_insufficient" msgid="2545149524031515411">"আঙ্গুলের ছাপ প্রক্রিয়া করা যায়নি৷ অনুগ্রহ করে আবার চেষ্টা করুন৷"</string>
+    <string name="fingerprint_acquired_insufficient" msgid="623888149088216458">"ফিঙ্গারপ্রিন্ট শনাক্ত করা যায়নি। আবার চেষ্টা করুন।"</string>
     <string name="fingerprint_acquired_imager_dirty" msgid="1770676120848224250">"আঙ্গুলের ছাপের সেন্সর পরিষ্কার করে আবার চেষ্টা করুন"</string>
     <string name="fingerprint_acquired_imager_dirty_alt" msgid="9169582140486372897">"সেন্সর পরিষ্কার করে আবার চেষ্টা করুন"</string>
     <string name="fingerprint_acquired_too_fast" msgid="1628459767349116104">"সেন্সর জোরে প্রেস করুন"</string>
     <string name="fingerprint_acquired_too_slow" msgid="6683510291554497580">"আঙ্গুল খুব ধীরে সরানো হয়েছে৷ অনুগ্রহ করে আবার চেষ্টা করুন৷"</string>
     <string name="fingerprint_acquired_already_enrolled" msgid="2285166003936206785">"অন্য আঙ্গুলের ছাপ দিয়ে চেষ্টা করুন"</string>
     <string name="fingerprint_acquired_too_bright" msgid="3863560181670915607">"অত্যন্ত উজ্জ্বল"</string>
+    <string name="fingerprint_acquired_power_press" msgid="3107864151278434961">"পাওয়ার বোতাম প্রেস করার বিষয়টি শনাক্ত করা হয়েছে"</string>
     <string name="fingerprint_acquired_try_adjusting" msgid="3667006071003809364">"অ্যাডজাস্ট করার চেষ্টা করুন"</string>
     <string name="fingerprint_acquired_immobile" msgid="1621891895241888048">"প্রতিবার আঙ্গুলের ছাপ সেটআপ করার সময় আপনার আঙ্গুলের অবস্থান সামান্য পরিবর্তন করুন"</string>
   <string-array name="fingerprint_acquired_vendor">
@@ -604,12 +606,12 @@
     <string name="face_authenticated_confirmation_required" msgid="6872632732508013755">"ফেস যাচাই করা হয়েছে, \'কনফার্ম করুন\' বোতাম প্রেস করুন"</string>
     <string name="fingerprint_error_hw_not_available" msgid="4571700896929561202">"আঙ্গুলের ছাপ নেওয়ার হার্ডওয়্যার অনুপলব্ধ৷"</string>
     <string name="fingerprint_error_no_space" msgid="7285481581905967580">"আঙ্গুলের ছাপ সেট-আপ করতে পারছি না"</string>
-    <string name="fingerprint_error_timeout" msgid="2946635815726054226">"আঙ্গুলের ছাপ নেওয়ার সময়সীমা শেষ হযেছে৷ আবার চেষ্টা করুন৷"</string>
+    <string name="fingerprint_error_timeout" msgid="7361192266621252164">"ফিঙ্গারপ্রিন্ট সেট-আপ করার সময় সীমা পেরিয়ে গেছে। আবার চেষ্টা করুন।"</string>
     <string name="fingerprint_error_canceled" msgid="540026881380070750">"আঙ্গুলের ছাপ অপারেশন বাতিল করা হয়েছে৷"</string>
     <string name="fingerprint_error_user_canceled" msgid="7685676229281231614">"ব্যবহারকারী আঙ্গুলের ছাপের অপারেশনটি বাতিল করেছেন।"</string>
-    <string name="fingerprint_error_lockout" msgid="7853461265604738671">"অনেকবার প্রচেষ্টা করা হয়েছে৷ পরে আবার চেষ্টা করুন৷"</string>
-    <string name="fingerprint_error_lockout_permanent" msgid="3895478283943513746">"বহুবার চেষ্টা করেছেন। আঙ্গুলের ছাপ নেওয়ার সেন্সর অক্ষম করা হয়েছে।"</string>
-    <string name="fingerprint_error_unable_to_process" msgid="1148553603490048742">"আবার চেষ্টা করুন৷"</string>
+    <string name="fingerprint_error_lockout" msgid="6626753679019351368">"অনেকবার চেষ্টা করেছেন। পরিবর্তে স্ক্রিন লক ব্যবহার করুন।"</string>
+    <string name="fingerprint_error_lockout_permanent" msgid="9060651300306264843">"অনেকবার চেষ্টা করেছেন। পরিবর্তে স্ক্রিন লক ব্যবহার করুন।"</string>
+    <string name="fingerprint_error_unable_to_process" msgid="2446280592818621224">"ফিঙ্গারপ্রিন্ট প্রসেস করা যায়নি। আবার চেষ্টা করুন।"</string>
     <string name="fingerprint_error_no_fingerprints" msgid="8671811719699072411">"কোনও আঙ্গুলের ছাপ নথিভুক্ত করা হয়নি।"</string>
     <string name="fingerprint_error_hw_not_present" msgid="578914350967423382">"এই ডিভাইসে আঙ্গুলের ছাপ নেওয়ার সেন্সর নেই।"</string>
     <string name="fingerprint_error_security_update_required" msgid="7750187320640856433">"সেন্সর অস্থায়ীভাবে বন্ধ করা আছে।"</string>
@@ -637,7 +639,7 @@
     <string name="fingerprint_recalibrate_notification_content" msgid="8519935717822194943">"একজন মেরামতি মিস্ত্রির কাছে যান।"</string>
     <string name="face_acquired_insufficient" msgid="6889245852748492218">"ফেস মডেল তৈরি করা যাচ্ছে না। আবার চেষ্টা করুন।"</string>
     <string name="face_acquired_too_bright" msgid="8070756048978079164">"খুব উজ্জ্বল। আলো কমিয়ে চেষ্টা করে দেখুন।"</string>
-    <string name="face_acquired_too_dark" msgid="7919016380747701228">"আরও উজ্জ্বল আলো ব্যবহার করে দেখুন"</string>
+    <string name="face_acquired_too_dark" msgid="8539853432479385326">"পর্যাপ্ত আলো নেই"</string>
     <string name="face_acquired_too_close" msgid="4453646176196302462">"ফোন আরও দূরে নিয়ে যান"</string>
     <string name="face_acquired_too_far" msgid="2922278214231064859">"ফোন আরও কাছে নিয়ে আসুন"</string>
     <string name="face_acquired_too_high" msgid="8278815780046368576">"ফোন আরও উঁচুতে তুলুন"</string>
@@ -1072,7 +1074,7 @@
     <string name="menu_shift_shortcut_label" msgid="5443936876111232346">"Shift+"</string>
     <string name="menu_sym_shortcut_label" msgid="4037566049061218776">"Sym+"</string>
     <string name="menu_function_shortcut_label" msgid="2367112760987662566">"Function+"</string>
-    <string name="menu_space_shortcut_label" msgid="5949311515646872071">"স্পেস"</string>
+    <string name="menu_space_shortcut_label" msgid="5949311515646872071">"space"</string>
     <string name="menu_enter_shortcut_label" msgid="6709499510082897320">"enter"</string>
     <string name="menu_delete_shortcut_label" msgid="4365787714477739080">"মুছুন"</string>
     <string name="search_go" msgid="2141477624421347086">"সার্চ"</string>
@@ -1249,10 +1251,9 @@
     <string name="android_preparing_apk" msgid="589736917792300956">"<xliff:g id="APPNAME">%1$s</xliff:g> প্রস্তুত করা হচ্ছে৷"</string>
     <string name="android_upgrading_starting_apps" msgid="6206161195076057075">"অ্যাপ্লিকেশানগুলি শুরু করা হচ্ছে৷"</string>
     <string name="android_upgrading_complete" msgid="409800058018374746">"চালু করা সম্পূর্ণ হচ্ছে৷"</string>
-    <string name="fp_power_button_enrollment_title" msgid="3574363228413259548">"সেট-আপ করা চালিয়ে যাবেন?"</string>
     <string name="fp_power_button_enrollment_message" msgid="5648173517663246140">"আপনি \'পাওয়ার\' বোতাম প্রেস করেছেন — এর ফলে সাধারণত স্ক্রিন বন্ধ হয়ে যায়।\n\nআঙ্গুলের ছাপ সেট-আপ করার সময় হালকাভাবে ট্যাপ করে দেখুন।"</string>
-    <string name="fp_power_button_enrollment_positive_button" msgid="2095415838459356833">"স্ক্রিন বন্ধ করুন"</string>
-    <string name="fp_power_button_enrollment_negative_button" msgid="6558436406362486747">"সেট-আপ চালিয়ে যান"</string>
+    <string name="fp_power_button_enrollment_title" msgid="6976841690455338563">"সেট-আপ সম্পূর্ণ করতে, স্ক্রিন বন্ধ করুন"</string>
+    <string name="fp_power_button_enrollment_button_text" msgid="3199783266386029200">"বন্ধ করুন"</string>
     <string name="fp_power_button_bp_title" msgid="5585506104526820067">"আঙ্গুলের ছাপ যাচাই করা চালিয়ে যাবেন?"</string>
     <string name="fp_power_button_bp_message" msgid="2983163038168903393">"আপনি \'পাওয়ার\' বোতাম প্রেস করেছেন — এর ফলে সাধারণত স্ক্রিন বন্ধ হয়ে যায়।\n\nআঙ্গুলের ছাপ যাচাই করতে হালকাভাবে ট্যাপ করে দেখুন।"</string>
     <string name="fp_power_button_bp_positive_button" msgid="728945472408552251">"স্ক্রিন বন্ধ করুন"</string>
@@ -1405,16 +1406,16 @@
     <string name="ext_media_new_notification_message" msgid="6095403121990786986">"সেট-আপ করতে ট্যাপ করুন"</string>
     <string name="ext_media_new_notification_message" product="tv" msgid="216863352100263668">"সেটআপ করতে বেছে নিন"</string>
     <string name="ext_media_new_notification_message" product="automotive" msgid="5140127881613227162">"আপনাকে ডিভাইসটি আবার ফর্ম্যাট করতে হতে পারে। বের করে নিতে ট্যাপ করুন।"</string>
-    <string name="ext_media_ready_notification_message" msgid="777258143284919261">"ফটো এবং মিডিয়া ট্রান্সফার"</string>
+    <string name="ext_media_ready_notification_message" msgid="7509496364380197369">"ফটো, ভিডিও, মিউজিক ও আরও অনেক কিছু সেভ করার জন্য"</string>
     <string name="ext_media_ready_notification_message" product="tv" msgid="8847134811163165935">"মিডিয়া ফাইল ব্রাউজ করুন"</string>
     <string name="ext_media_unmountable_notification_title" msgid="4895444667278979910">"<xliff:g id="NAME">%s</xliff:g> নিয়ে সমস্যা আছে"</string>
     <string name="ext_media_unmountable_notification_title" product="automotive" msgid="3142723758949023280">"<xliff:g id="NAME">%s</xliff:g> কাজ করছে না"</string>
     <string name="ext_media_unmountable_notification_message" msgid="3256290114063126205">"ঠিক করতে ট্যাপ করুন"</string>
     <string name="ext_media_unmountable_notification_message" product="tv" msgid="3003611129979934633">"<xliff:g id="NAME">%s</xliff:g> ত্রুটিপূর্ণ। মেরামত করতে বেছে নিন।"</string>
     <string name="ext_media_unmountable_notification_message" product="automotive" msgid="2274596120715020680">"আপনাকে ডিভাইসটি আবার ফর্ম্যাট করতে হতে পারে। বের করে নিতে ট্যাপ করুন।"</string>
-    <string name="ext_media_unsupported_notification_title" msgid="4358280700537030333">"<xliff:g id="NAME">%s</xliff:g> অসমর্থিত"</string>
+    <string name="ext_media_unsupported_notification_title" msgid="3487534182861251401">"<xliff:g id="NAME">%s</xliff:g> শনাক্ত করা হয়েছে"</string>
     <string name="ext_media_unsupported_notification_title" product="automotive" msgid="6004193172658722381">"<xliff:g id="NAME">%s</xliff:g> কাজ করছে না"</string>
-    <string name="ext_media_unsupported_notification_message" msgid="917738524888367560">"এই ডিভাইসটি <xliff:g id="NAME">%s</xliff:g> সমর্থন করে না। কোনো সমর্থিত ফর্ম্যাটে সেট-আপ করতে আলতো চাপুন।"</string>
+    <string name="ext_media_unsupported_notification_message" msgid="8463636521459807981">"সেট-আপ করতে ট্যাপ করুন ।"</string>
     <string name="ext_media_unsupported_notification_message" product="tv" msgid="1595482802187036532">"<xliff:g id="NAME">%s</xliff:g> সঠিক ফর্ম্যাটে সেটআপ করতে বেছে নিন।"</string>
     <string name="ext_media_unsupported_notification_message" product="automotive" msgid="3412494732736336330">"আপনাকে ডিভাইসটি আবার ফর্ম্যাট করতে হতে পারে"</string>
     <string name="ext_media_badremoval_notification_title" msgid="4114625551266196872">"<xliff:g id="NAME">%s</xliff:g> অপ্রত্যাশিতভাবে মুছে ফেলা হয়েছে"</string>
@@ -1927,6 +1928,7 @@
     <string name="country_selection_title" msgid="5221495687299014379">"পছন্দের অঞ্চল"</string>
     <string name="search_language_hint" msgid="7004225294308793583">"ভাষার নাম লিখুন"</string>
     <string name="language_picker_section_suggested" msgid="6556199184638990447">"প্রস্তাবিত"</string>
+    <string name="language_picker_regions_section_suggested" msgid="6080131515268225316">"সাজেস্ট করা অঞ্চল"</string>
     <string name="language_picker_section_all" msgid="1985809075777564284">"সকল ভাষা"</string>
     <string name="region_picker_section_all" msgid="756441309928774155">"সমস্ত অঞ্চল"</string>
     <string name="locale_search_menu" msgid="6258090710176422934">"সার্চ"</string>
@@ -2049,7 +2051,8 @@
     <string name="log_access_confirmation_title" msgid="2343578467290592708">"<xliff:g id="LOG_ACCESS_APP_NAME">%s</xliff:g> অ্যাপকে ডিভাইসের সব লগ অ্যাক্সেসের অনুমতি দিতে চান?"</string>
     <string name="log_access_confirmation_allow" msgid="5302517782599389507">"এককালীন অ্যাক্সেসের অনুমতি দিন"</string>
     <string name="log_access_confirmation_deny" msgid="7685790957455099845">"অনুমতি দেবেন না"</string>
-    <string name="log_access_confirmation_body" msgid="6581985716241928135">"ডিভাইস লগে আপনার ডিভাইসে করা অ্যাক্টিভিটি রেকর্ড করা হয়। বিভিন্ন সমস্যা খুঁজে তা সমাধান করতে, অ্যাপ এইসব লগ ব্যবহার করতে পারে।\n\nকিছু লগে সংবেদনশীল তথ্য থাকতে পারে, তাই বিশ্বাস করেন শুধুমাত্র এমন অ্যাপকেই সব ডিভাইসের লগ অ্যাক্সেসের অনুমতি দিন। \n\nআপনি এই অ্যাপকে ডিভাইসের সব লগ অ্যাক্সেস করার অনুমতি না দিলেও, এটি নিজে লগ অ্যাক্সেস করতে পারবে। ডিভাইস প্রস্তুতকারকও আপনার ডিভাইসের কিছু লগ বা তথ্য হয়ত অ্যাক্সেস করতে পারবে। আরও জানুন"</string>
+    <string name="log_access_confirmation_body" product="default" msgid="1806692062668620735">"ডিভাইস লগে আপনার ডিভাইসে করা অ্যাক্টিভিটি রেকর্ড করা হয়। অ্যাপ সমস্যা খুঁজে তা সমাধান করতে এইসব লগ ব্যবহার করতে পারে।\n\nকিছু লগে সংবেদনশীল তথ্য থাকতে পারে, তাই বিশ্বাস করেন শুধুমাত্র এমন অ্যাপকেই সব ডিভাইসের লগ অ্যাক্সেসের অনুমতি দিন। \n\nআপনি এই অ্যাপকে ডিভাইসের সব লগ অ্যাক্সেস করার অনুমতি না দিলেও, এটি নিজের লগ অ্যাক্সেস করতে পারবে। ডিভাইস প্রস্তুতকারকও আপনার ডিভাইসের কিছু লগ বা তথ্য হয়ত অ্যাক্সেস করতে পারবে।"</string>
+    <string name="log_access_confirmation_body" product="tv" msgid="7379536536425265262">"ডিভাইস লগে আপনার ডিভাইসে করা অ্যাক্টিভিটি রেকর্ড করা হয়। অ্যাপ, সমস্যা খুঁজে তা সমাধান করতে এইসব লগ ব্যবহার করতে পারে।\n\nকিছু লগে সংবেদনশীল তথ্য থাকতে পারে, তাই বিশ্বাস করেন শুধুমাত্র এমন অ্যাপকেই ডিভাইসের সব লগ অ্যাক্সেসের অনুমতি দিন। \n\nআপনি এই অ্যাপকে ডিভাইসের সব লগ অ্যাক্সেস করার অনুমতি না দিলেও, এটি নিজের লগ অ্যাক্সেস করতে পারবে। ডিভাইস প্রস্তুতকারক এখনও আপনার ডিভাইসের কিছু লগ বা তথ্য হয়ত অ্যাক্সেস করতে পারবে।\n\ng.co/android/devicelogs লিঙ্ক থেকে আরও জানুন।"</string>
     <string name="log_access_do_not_show_again" msgid="1058690599083091552">"আর দেখতে চাই না"</string>
     <string name="slices_permission_request" msgid="3677129866636153406">"<xliff:g id="APP_0">%1$s</xliff:g> অ্যাপটি <xliff:g id="APP_2">%2$s</xliff:g> এর অংশ দেখাতে চায়"</string>
     <string name="screenshot_edit" msgid="7408934887203689207">"এডিট করুন"</string>
@@ -2290,5 +2293,6 @@
     <string name="notification_action_check_bg_apps" msgid="4758877443365362532">"অ্যাক্টিভ অ্যাপ চেক করুন"</string>
     <string name="vdm_camera_access_denied" product="default" msgid="6102378580971542473">"আপনার <xliff:g id="DEVICE">%1$s</xliff:g> থেকে ফোনের ক্যামেরা অ্যাক্সেস করা যাচ্ছে না"</string>
     <string name="vdm_camera_access_denied" product="tablet" msgid="6895968310395249076">"আপনার <xliff:g id="DEVICE">%1$s</xliff:g> থেকে ট্যাবলেটের ক্যামেরা অ্যাক্সেস করা যাচ্ছে না"</string>
+    <string name="vdm_secure_window" msgid="161700398158812314">"স্ট্রিমিংয়ের সময় এটি অ্যাক্সেস করা যাবে না। পরিবর্তে আপনার ফোনে ব্যবহার করে দেখুন।"</string>
     <string name="system_locale_title" msgid="711882686834677268">"সিস্টেম ডিফল্ট"</string>
 </resources>

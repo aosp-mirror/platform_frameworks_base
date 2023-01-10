@@ -72,9 +72,11 @@ import android.os.Message;
 import android.os.SystemClock;
 import android.os.Trace;
 import android.os.VibrationEffect;
+import android.provider.DeviceConfig;
 import android.provider.Settings;
 import android.provider.Settings.Global;
 import android.text.InputFilter;
+import android.util.FeatureFlagUtils;
 import android.util.Log;
 import android.util.Slog;
 import android.util.SparseBooleanArray;
@@ -107,13 +109,17 @@ import android.widget.Toast;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 
+import com.android.internal.annotations.VisibleForTesting;
+import com.android.internal.config.sysui.SystemUiDeviceConfigFlags;
 import com.android.internal.graphics.drawable.BackgroundBlurDrawable;
 import com.android.internal.jank.InteractionJankMonitor;
 import com.android.internal.view.RotationPolicy;
 import com.android.settingslib.Utils;
+import com.android.systemui.Dumpable;
 import com.android.systemui.Prefs;
 import com.android.systemui.R;
 import com.android.systemui.animation.Interpolators;
+import com.android.systemui.dump.DumpManager;
 import com.android.systemui.media.dialog.MediaOutputDialogFactory;
 import com.android.systemui.plugins.ActivityStarter;
 import com.android.systemui.plugins.VolumeDialog;
@@ -124,11 +130,15 @@ import com.android.systemui.statusbar.policy.AccessibilityManagerWrapper;
 import com.android.systemui.statusbar.policy.ConfigurationController;
 import com.android.systemui.statusbar.policy.DeviceProvisionedController;
 import com.android.systemui.util.AlphaTintDrawableWrapper;
+import com.android.systemui.util.DeviceConfigProxy;
 import com.android.systemui.util.RoundedCornerProgressDrawable;
 
 import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
+import java.util.Set;
+import java.util.concurrent.Executor;
 import java.util.function.Consumer;
 
 /**
@@ -138,7 +148,7 @@ import java.util.function.Consumer;
  *
  * Methods ending in "H" must be called on the (ui) handler.
  */
-public class VolumeDialogImpl implements VolumeDialog,
+public class VolumeDialogImpl implements VolumeDialog, Dumpable,
         ConfigurationController.ConfigurationListener,
         ViewTreeObserver.OnComputeInternalInsetsListener {
     private static final String TAG = Util.logTag(VolumeDialogImpl.class);
@@ -184,6 +194,9 @@ public class VolumeDialogImpl implements VolumeDialog,
     private ViewGroup mDialogRowsViewContainer;
     private ViewGroup mDialogRowsView;
     private ViewGroup mRinger;
+
+    private DeviceConfigProxy mDeviceConfigProxy;
+    private Executor mExecutor;
 
     /**
      * Container for the top part of the dialog, which contains the ringer, the ringer drawer, the
@@ -248,6 +261,7 @@ public class VolumeDialogImpl implements VolumeDialog,
 
     private final ConfigurationController mConfigurationController;
     private final MediaOutputDialogFactory mMediaOutputDialogFactory;
+    private final VolumePanelFactory mVolumePanelFactory;
     private final ActivityStarter mActivityStarter;
 
     private boolean mShowing;
@@ -272,6 +286,13 @@ public class VolumeDialogImpl implements VolumeDialog,
     private BackgroundBlurDrawable mDialogRowsViewBackground;
     private final InteractionJankMonitor mInteractionJankMonitor;
 
+    private boolean mSeparateNotification;
+
+    @VisibleForTesting
+    int mVolumeRingerIconDrawableId;
+    @VisibleForTesting
+    int mVolumeRingerMuteIconDrawableId;
+
     public VolumeDialogImpl(
             Context context,
             VolumeDialogController volumeDialogController,
@@ -279,8 +300,12 @@ public class VolumeDialogImpl implements VolumeDialog,
             DeviceProvisionedController deviceProvisionedController,
             ConfigurationController configurationController,
             MediaOutputDialogFactory mediaOutputDialogFactory,
+            VolumePanelFactory volumePanelFactory,
             ActivityStarter activityStarter,
-            InteractionJankMonitor interactionJankMonitor) {
+            InteractionJankMonitor interactionJankMonitor,
+            DeviceConfigProxy deviceConfigProxy,
+            Executor executor,
+            DumpManager dumpManager) {
         mContext =
                 new ContextThemeWrapper(context, R.style.volume_dialog_theme);
         mController = volumeDialogController;
@@ -290,6 +315,7 @@ public class VolumeDialogImpl implements VolumeDialog,
         mDeviceProvisionedController = deviceProvisionedController;
         mConfigurationController = configurationController;
         mMediaOutputDialogFactory = mediaOutputDialogFactory;
+        mVolumePanelFactory = volumePanelFactory;
         mActivityStarter = activityStarter;
         mShowActiveStreamOnly = showActiveStreamOnly();
         mHasSeenODICaptionsTooltip =
@@ -306,6 +332,8 @@ public class VolumeDialogImpl implements VolumeDialog,
             mContext.getResources().getBoolean(R.bool.config_volumeDialogUseBackgroundBlur);
         mInteractionJankMonitor = interactionJankMonitor;
 
+        dumpManager.registerDumpable("VolumeDialogImpl", this);
+
         if (mUseBackgroundBlur) {
             final int dialogRowsViewColorAboveBlur = mContext.getColor(
                     R.color.volume_dialog_background_color_above_blur);
@@ -319,6 +347,50 @@ public class VolumeDialogImpl implements VolumeDialog,
         }
 
         initDimens();
+
+        mDeviceConfigProxy = deviceConfigProxy;
+        mExecutor = executor;
+        mSeparateNotification = mDeviceConfigProxy.getBoolean(DeviceConfig.NAMESPACE_SYSTEMUI,
+                SystemUiDeviceConfigFlags.VOLUME_SEPARATE_NOTIFICATION, false);
+        updateRingerModeIconSet();
+    }
+
+    /**
+     * If ringer and notification are the same stream (T and earlier), use notification-like bell
+     * icon set.
+     * If ringer and notification are separated, then use generic speaker icons.
+     */
+    private void updateRingerModeIconSet() {
+        if (mSeparateNotification) {
+            mVolumeRingerIconDrawableId = R.drawable.ic_speaker_on;
+            mVolumeRingerMuteIconDrawableId = R.drawable.ic_speaker_mute;
+        } else {
+            mVolumeRingerIconDrawableId = R.drawable.ic_volume_ringer;
+            mVolumeRingerMuteIconDrawableId = R.drawable.ic_volume_ringer_mute;
+        }
+
+        if (mRingerDrawerMuteIcon != null) {
+            mRingerDrawerMuteIcon.setImageResource(mVolumeRingerMuteIconDrawableId);
+        }
+        if (mRingerDrawerNormalIcon != null) {
+            mRingerDrawerNormalIcon.setImageResource(mVolumeRingerIconDrawableId);
+        }
+    }
+
+    /**
+     * Change icon for ring stream (not ringer mode icon)
+     */
+    private void updateRingRowIcon() {
+        Optional<VolumeRow> volumeRow = mRows.stream().filter(row -> row.stream == STREAM_RING)
+                .findFirst();
+        if (volumeRow.isPresent()) {
+            VolumeRow volRow = volumeRow.get();
+            volRow.iconRes = mSeparateNotification ? R.drawable.ic_ring_volume
+                    : R.drawable.ic_volume_ringer;
+            volRow.iconMuteRes = mSeparateNotification ? R.drawable.ic_ring_volume_off
+                    : R.drawable.ic_volume_ringer_mute;
+            volRow.setIcon(volRow.iconRes, mContext.getTheme());
+        }
     }
 
     @Override
@@ -335,6 +407,9 @@ public class VolumeDialogImpl implements VolumeDialog,
         mController.getState();
 
         mConfigurationController.addCallback(this);
+
+        mDeviceConfigProxy.addOnPropertiesChangedListener(DeviceConfig.NAMESPACE_SYSTEMUI,
+                mExecutor, this::onDeviceConfigChange);
     }
 
     @Override
@@ -342,6 +417,24 @@ public class VolumeDialogImpl implements VolumeDialog,
         mController.removeCallback(mControllerCallbackH);
         mHandler.removeCallbacksAndMessages(null);
         mConfigurationController.removeCallback(this);
+        mDeviceConfigProxy.removeOnPropertiesChangedListener(this::onDeviceConfigChange);
+    }
+
+    /**
+     * Update ringer mode icon based on the config
+     */
+    private void onDeviceConfigChange(DeviceConfig.Properties properties) {
+        Set<String> changeSet = properties.getKeyset();
+        if (changeSet.contains(SystemUiDeviceConfigFlags.VOLUME_SEPARATE_NOTIFICATION)) {
+            boolean newVal = properties.getBoolean(
+                    SystemUiDeviceConfigFlags.VOLUME_SEPARATE_NOTIFICATION, false);
+            if (newVal != mSeparateNotification) {
+                mSeparateNotification = newVal;
+                updateRingerModeIconSet();
+                updateRingRowIcon();
+
+            }
+        }
     }
 
     @Override
@@ -548,6 +641,8 @@ public class VolumeDialogImpl implements VolumeDialog,
         mRingerDrawerNormalIcon = mDialog.findViewById(R.id.volume_drawer_normal_icon);
         mRingerDrawerNewSelectionBg = mDialog.findViewById(R.id.volume_drawer_selection_background);
 
+        updateRingerModeIconSet();
+
         setupRingerDrawer();
 
         mODICaptionsView = mDialog.findViewById(R.id.odi_captions);
@@ -571,8 +666,14 @@ public class VolumeDialogImpl implements VolumeDialog,
             addRow(AudioManager.STREAM_MUSIC,
                     R.drawable.ic_volume_media, R.drawable.ic_volume_media_mute, true, true);
             if (!AudioSystem.isSingleVolume(mContext)) {
-                addRow(AudioManager.STREAM_RING,
-                        R.drawable.ic_volume_ringer, R.drawable.ic_volume_ringer_mute, true, false);
+                if (mSeparateNotification) {
+                    addRow(AudioManager.STREAM_RING, R.drawable.ic_ring_volume,
+                            R.drawable.ic_ring_volume_off, true, false);
+                } else {
+                    addRow(AudioManager.STREAM_RING, R.drawable.ic_volume_ringer,
+                            R.drawable.ic_volume_ringer, true, false);
+                }
+
                 addRow(STREAM_ALARM,
                         R.drawable.ic_alarm, R.drawable.ic_volume_alarm_mute, true, false);
                 addRow(AudioManager.STREAM_VOICE_CALL,
@@ -695,7 +796,10 @@ public class VolumeDialogImpl implements VolumeDialog,
         return null;
     }
 
-    public void dump(PrintWriter writer) {
+    /**
+     * Print dump info for debugging.
+     */
+    public void dump(PrintWriter writer, String[] unusedArgs) {
         writer.println(VolumeDialogImpl.class.getSimpleName() + " state:");
         writer.print("  mShowing: "); writer.println(mShowing);
         writer.print("  mActiveStream: "); writer.println(mActiveStream);
@@ -1043,10 +1147,15 @@ public class VolumeDialogImpl implements VolumeDialog,
         if (mSettingsIcon != null) {
             mSettingsIcon.setOnClickListener(v -> {
                 Events.writeEvent(Events.EVENT_SETTINGS_CLICK);
-                Intent intent = new Intent(Settings.Panel.ACTION_VOLUME);
                 dismissH(DISMISS_REASON_SETTINGS_CLICKED);
                 mMediaOutputDialogFactory.dismiss();
-                mActivityStarter.startActivity(intent, true /* dismissShade */);
+                if (FeatureFlagUtils.isEnabled(mContext,
+                        FeatureFlagUtils.SETTINGS_VOLUME_PANEL_IN_SYSTEMUI)) {
+                    mVolumePanelFactory.create(true /* aboveStatusBar */, null);
+                } else {
+                    mActivityStarter.startActivity(new Intent(Settings.Panel.ACTION_VOLUME),
+                            true /* dismissShade */);
+                }
             });
         }
     }
@@ -1219,6 +1328,9 @@ public class VolumeDialogImpl implements VolumeDialog,
                 effect = VibrationEffect.get(VibrationEffect.EFFECT_CLICK);
                 break;
             case RINGER_MODE_VIBRATE:
+                // Feedback handled by onStateChange, for feedback both when user toggles
+                // directly in volume dialog, or drags slider to a value of 0 in settings.
+                break;
             default:
                 effect = VibrationEffect.get(VibrationEffect.EFFECT_DOUBLE_CLICK);
         }
@@ -1297,7 +1409,7 @@ public class VolumeDialogImpl implements VolumeDialog,
 
     private void showH(int reason, boolean keyguardLocked, int lockTaskModeState) {
         Trace.beginSection("VolumeDialogImpl#showH");
-        if (D.BUG) Log.d(TAG, "showH r=" + Events.SHOW_REASONS[reason]);
+        Log.i(TAG, "showH r=" + Events.SHOW_REASONS[reason]);
         mHandler.removeMessages(H.SHOW);
         mHandler.removeMessages(H.DISMISS);
         rescheduleTimeoutH();
@@ -1325,7 +1437,7 @@ public class VolumeDialogImpl implements VolumeDialog,
         final int timeout = computeTimeoutH();
         mHandler.sendMessageDelayed(mHandler
                 .obtainMessage(H.DISMISS, Events.DISMISS_REASON_TIMEOUT, 0), timeout);
-        if (D.BUG) Log.d(TAG, "rescheduleTimeout " + timeout + " " + Debug.getCaller());
+        Log.i(TAG, "rescheduleTimeout " + timeout + " " + Debug.getCaller());
         mController.userActivity();
     }
 
@@ -1352,10 +1464,10 @@ public class VolumeDialogImpl implements VolumeDialog,
 
     protected void dismissH(int reason) {
         Trace.beginSection("VolumeDialogImpl#dismissH");
-        if (D.BUG) {
-            Log.d(TAG, "mDialog.dismiss() reason: " + Events.DISMISS_REASONS[reason]
-                    + " from: " + Debug.getCaller());
-        }
+
+        Log.i(TAG, "mDialog.dismiss() reason: " + Events.DISMISS_REASONS[reason]
+                + " from: " + Debug.getCaller());
+
         mHandler.removeMessages(H.DISMISS);
         mHandler.removeMessages(H.SHOW);
         if (mIsAnimatingDismiss) {
@@ -1520,8 +1632,8 @@ public class VolumeDialogImpl implements VolumeDialog,
                     mRingerIcon.setTag(Events.ICON_STATE_VIBRATE);
                     break;
                 case AudioManager.RINGER_MODE_SILENT:
-                    mRingerIcon.setImageResource(R.drawable.ic_volume_ringer_mute);
-                    mSelectedRingerIcon.setImageResource(R.drawable.ic_volume_ringer_mute);
+                    mRingerIcon.setImageResource(mVolumeRingerMuteIconDrawableId);
+                    mSelectedRingerIcon.setImageResource(mVolumeRingerMuteIconDrawableId);
                     mRingerIcon.setTag(Events.ICON_STATE_MUTE);
                     addAccessibilityDescription(mRingerIcon, RINGER_MODE_SILENT,
                             mContext.getString(R.string.volume_ringer_hint_unmute));
@@ -1530,14 +1642,14 @@ public class VolumeDialogImpl implements VolumeDialog,
                 default:
                     boolean muted = (mAutomute && ss.level == 0) || ss.muted;
                     if (!isZenMuted && muted) {
-                        mRingerIcon.setImageResource(R.drawable.ic_volume_ringer_mute);
-                        mSelectedRingerIcon.setImageResource(R.drawable.ic_volume_ringer_mute);
+                        mRingerIcon.setImageResource(mVolumeRingerMuteIconDrawableId);
+                        mSelectedRingerIcon.setImageResource(mVolumeRingerMuteIconDrawableId);
                         addAccessibilityDescription(mRingerIcon, RINGER_MODE_NORMAL,
                                 mContext.getString(R.string.volume_ringer_hint_unmute));
                         mRingerIcon.setTag(Events.ICON_STATE_MUTE);
                     } else {
-                        mRingerIcon.setImageResource(R.drawable.ic_volume_ringer);
-                        mSelectedRingerIcon.setImageResource(R.drawable.ic_volume_ringer);
+                        mRingerIcon.setImageResource(mVolumeRingerIconDrawableId);
+                        mSelectedRingerIcon.setImageResource(mVolumeRingerIconDrawableId);
                         if (mController.hasVibrator()) {
                             addAccessibilityDescription(mRingerIcon, RINGER_MODE_NORMAL,
                                     mContext.getString(R.string.volume_ringer_hint_vibrate));
@@ -1619,9 +1731,8 @@ public class VolumeDialogImpl implements VolumeDialog,
                 && mState.ringerModeInternal != -1
                 && mState.ringerModeInternal != state.ringerModeInternal
                 && state.ringerModeInternal == AudioManager.RINGER_MODE_VIBRATE) {
-            mController.vibrate(VibrationEffect.get(VibrationEffect.EFFECT_HEAVY_CLICK));
+            mController.vibrate(VibrationEffect.get(VibrationEffect.EFFECT_DOUBLE_CLICK));
         }
-
         mState = state;
         mDynamic.clear();
         // add any new dynamic rows
@@ -1666,6 +1777,7 @@ public class VolumeDialogImpl implements VolumeDialog,
         if (ss.level == row.requestedLevel) {
             row.requestedLevel = -1;
         }
+        final boolean isVoiceCallStream = row.stream == AudioManager.STREAM_VOICE_CALL;
         final boolean isA11yStream = row.stream == STREAM_ACCESSIBILITY;
         final boolean isRingStream = row.stream == AudioManager.STREAM_RING;
         final boolean isSystemStream = row.stream == AudioManager.STREAM_SYSTEM;
@@ -1710,8 +1822,12 @@ public class VolumeDialogImpl implements VolumeDialog,
         } else if (isRingSilent || zenMuted) {
             iconRes = row.iconMuteRes;
         } else if (ss.routedToBluetooth) {
-            iconRes = isStreamMuted(ss) ? R.drawable.ic_volume_media_bt_mute
-                                        : R.drawable.ic_volume_media_bt;
+            if (isVoiceCallStream) {
+                iconRes = R.drawable.ic_volume_bt_sco;
+            } else {
+                iconRes = isStreamMuted(ss) ? R.drawable.ic_volume_media_bt_mute
+                                            : R.drawable.ic_volume_media_bt;
+            }
         } else if (isStreamMuted(ss)) {
             iconRes = ss.muted ? R.drawable.ic_volume_media_off : row.iconMuteRes;
         } else {

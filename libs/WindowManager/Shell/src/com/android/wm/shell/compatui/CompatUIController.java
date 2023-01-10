@@ -37,12 +37,14 @@ import com.android.wm.shell.common.DisplayImeController;
 import com.android.wm.shell.common.DisplayInsetsController;
 import com.android.wm.shell.common.DisplayInsetsController.OnInsetsChangedListener;
 import com.android.wm.shell.common.DisplayLayout;
+import com.android.wm.shell.common.DockStateReader;
 import com.android.wm.shell.common.ShellExecutor;
 import com.android.wm.shell.common.SyncTransactionQueue;
 import com.android.wm.shell.compatui.CompatUIWindowManager.CompatUIHintsState;
 import com.android.wm.shell.compatui.letterboxedu.LetterboxEduWindowManager;
 import com.android.wm.shell.sysui.KeyguardChangeListener;
 import com.android.wm.shell.sysui.ShellController;
+import com.android.wm.shell.sysui.ShellInit;
 import com.android.wm.shell.transition.Transitions;
 
 import java.lang.ref.WeakReference;
@@ -108,6 +110,7 @@ public class CompatUIController implements OnDisplaysChangedListener,
     private final SyncTransactionQueue mSyncQueue;
     private final ShellExecutor mMainExecutor;
     private final Lazy<Transitions> mTransitionsLazy;
+    private final DockStateReader mDockStateReader;
 
     private CompatUICallback mCallback;
 
@@ -119,13 +122,15 @@ public class CompatUIController implements OnDisplaysChangedListener,
     private boolean mKeyguardShowing;
 
     public CompatUIController(Context context,
+            ShellInit shellInit,
             ShellController shellController,
             DisplayController displayController,
             DisplayInsetsController displayInsetsController,
             DisplayImeController imeController,
             SyncTransactionQueue syncQueue,
             ShellExecutor mainExecutor,
-            Lazy<Transitions> transitionsLazy) {
+            Lazy<Transitions> transitionsLazy,
+            DockStateReader dockStateReader) {
         mContext = context;
         mShellController = shellController;
         mDisplayController = displayController;
@@ -134,10 +139,15 @@ public class CompatUIController implements OnDisplaysChangedListener,
         mSyncQueue = syncQueue;
         mMainExecutor = mainExecutor;
         mTransitionsLazy = transitionsLazy;
+        mCompatUIHintsState = new CompatUIHintsState();
+        shellInit.addInitCallback(this::onInit, this);
+        mDockStateReader = dockStateReader;
+    }
+
+    private void onInit() {
+        mShellController.addKeyguardChangeListener(this);
         mDisplayController.addDisplayWindowListener(this);
         mImeController.addPositionProcessor(this);
-        mCompatUIHintsState = new CompatUIHintsState();
-        shellController.addKeyguardChangeListener(this);
     }
 
     /** Sets the callback for UI interactions. */
@@ -309,7 +319,8 @@ public class CompatUIController implements OnDisplaysChangedListener,
         return new LetterboxEduWindowManager(context, taskInfo,
                 mSyncQueue, taskListener, mDisplayController.getDisplayLayout(taskInfo.displayId),
                 mTransitionsLazy.get(),
-                this::onLetterboxEduDismissed);
+                this::onLetterboxEduDismissed,
+                mDockStateReader);
     }
 
     private void onLetterboxEduDismissed() {

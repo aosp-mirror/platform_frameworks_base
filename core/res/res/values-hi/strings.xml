@@ -33,6 +33,7 @@
     <string name="defaultVoiceMailAlphaTag" msgid="2190754495304236490">"वॉइसमेल"</string>
     <string name="defaultMsisdnAlphaTag" msgid="2285034592902077488">"MSISDN1"</string>
     <string name="mmiError" msgid="2862759606579822246">"कनेक्‍शन समस्‍या या अमान्‍य MMI कोड."</string>
+    <string name="mmiErrorNotSupported" msgid="5001803469335286099">"यह सुविधा, इस नेटवर्क पर काम नहीं करती है."</string>
     <string name="mmiFdnError" msgid="3975490266767565852">"कार्रवाई केवल फ़िक्‍स्‍ड डायलिंग नंबर के लिए प्रतिबंधित है."</string>
     <string name="mmiErrorWhileRoaming" msgid="1204173664713870114">"आपके रोमिंग में होने पर, आपके फ़ोन से कॉल को दूसरे नंबर पर भेजने की सेटिंग नहीं बदली जा सकती."</string>
     <string name="serviceEnabled" msgid="7549025003394765639">"सेवा अक्षम थी."</string>
@@ -307,7 +308,7 @@
     <string name="permgroupdesc_sms" msgid="5726462398070064542">"मैसेज (एसएमएस) भेजें और देखें"</string>
     <string name="permgrouplab_storage" msgid="17339216290379241">"फ़ाइलें"</string>
     <string name="permgroupdesc_storage" msgid="5378659041354582769">"अपने डिवाइस में मौजूद फ़ाइलों का ऐक्सेस दें"</string>
-    <string name="permgrouplab_readMediaAural" msgid="1858331312624942053">"संगीत और ऑडियो के ऐक्सेस"</string>
+    <string name="permgrouplab_readMediaAural" msgid="1858331312624942053">"संगीत और ऑडियो"</string>
     <string name="permgroupdesc_readMediaAural" msgid="7565467343667089595">"आपके डिवाइस पर संगीत और ऑडियो को ऐक्सेस करने की अनुमति"</string>
     <string name="permgrouplab_readMediaVisual" msgid="4724874717811908660">"फ़ोटो और वीडियो के ऐक्सेस"</string>
     <string name="permgroupdesc_readMediaVisual" msgid="4080463241903508688">"आपके डिवाइस पर फ़ोटो और वीडियो को ऐक्सेस करने की अनुमति"</string>
@@ -586,13 +587,14 @@
     <string name="screen_lock_app_setting_name" msgid="6054944352976789228">"स्क्रीन लॉक का क्रेडेंशियल इस्तेमाल करें"</string>
     <string name="screen_lock_dialog_default_subtitle" msgid="120359538048533695">"जारी रखने के लिए, अपने स्क्रीन लॉक की पुष्टि करें"</string>
     <string name="fingerprint_acquired_partial" msgid="4323789264604479684">"सेंसर को उंगली से ज़ोर से दबाएं"</string>
-    <string name="fingerprint_acquired_insufficient" msgid="2545149524031515411">"फ़िंगरप्रिंट प्रोसेस नहीं हो सका. कृपया दोबारा कोशिश करें."</string>
+    <string name="fingerprint_acquired_insufficient" msgid="623888149088216458">"फ़िंगरप्रिंट की पहचान नहीं की जा सकी. फिर से कोशिश करें."</string>
     <string name="fingerprint_acquired_imager_dirty" msgid="1770676120848224250">"फ़िंगरप्रिंट सेंसर को साफ़ करके फिर से कोशिश करें"</string>
     <string name="fingerprint_acquired_imager_dirty_alt" msgid="9169582140486372897">"फ़िंगरप्रिंट सेंसर को साफ़ करके फिर से कोशिश करें"</string>
     <string name="fingerprint_acquired_too_fast" msgid="1628459767349116104">"सेंसर को उंगली से ज़ोर से दबाएं"</string>
     <string name="fingerprint_acquired_too_slow" msgid="6683510291554497580">"उंगली बहुत धीरे चलाई गई. कृपया फिर से कोशिश करें."</string>
     <string name="fingerprint_acquired_already_enrolled" msgid="2285166003936206785">"किसी दूसरे फ़िंगरप्रिंट से कोशिश करें"</string>
     <string name="fingerprint_acquired_too_bright" msgid="3863560181670915607">"बहुत रोशनी है"</string>
+    <string name="fingerprint_acquired_power_press" msgid="3107864151278434961">"पावर बटन दबाया गया"</string>
     <string name="fingerprint_acquired_try_adjusting" msgid="3667006071003809364">"सेंसर पर सही तरीके से उंगली लगाने की कोशिश करें"</string>
     <string name="fingerprint_acquired_immobile" msgid="1621891895241888048">"फ़िंगरप्रिंट सेट अप करते समय, अपनी उंगली को हर बार थोड़ी अलग स्थिति में रखें"</string>
   <string-array name="fingerprint_acquired_vendor">
@@ -604,12 +606,12 @@
     <string name="face_authenticated_confirmation_required" msgid="6872632732508013755">"चेहरे की पहचान की गई, कृपया पुष्टि बटन दबाएं"</string>
     <string name="fingerprint_error_hw_not_available" msgid="4571700896929561202">"फ़िंगरप्रिंट हार्डवेयर उपलब्ध नहीं है."</string>
     <string name="fingerprint_error_no_space" msgid="7285481581905967580">"फ़िंगरप्रिंट सेट अप नहीं किया जा सका"</string>
-    <string name="fingerprint_error_timeout" msgid="2946635815726054226">"फ़िंगरप्रिंट का समय खत्म हो गया. फिर से कोशिश करें."</string>
+    <string name="fingerprint_error_timeout" msgid="7361192266621252164">"फ़िंगरप्रिंट सेटअप करने का समय खत्म हो गया. फिर से कोशिश करें."</string>
     <string name="fingerprint_error_canceled" msgid="540026881380070750">"फ़िंगरप्रिंट ऑपरेशन रोक दिया गया."</string>
     <string name="fingerprint_error_user_canceled" msgid="7685676229281231614">"उपयोगकर्ता ने फिंगरप्रिंट की पुष्टि की कार्रवाई रद्द कर दी है."</string>
-    <string name="fingerprint_error_lockout" msgid="7853461265604738671">"बहुत ज़्यादा प्रयास कर लिए गए हैं. बाद में फिर से प्रयास करें."</string>
-    <string name="fingerprint_error_lockout_permanent" msgid="3895478283943513746">"बहुत ज़्यादा कोशिशें. फ़िंगरप्रिंट सेंसर अक्षम है."</string>
-    <string name="fingerprint_error_unable_to_process" msgid="1148553603490048742">"फिर से कोशिश करें."</string>
+    <string name="fingerprint_error_lockout" msgid="6626753679019351368">"कई बार कोशिश की जा चुकी है. इसके बजाय, स्क्रीन लॉक का इस्तेमाल करें."</string>
+    <string name="fingerprint_error_lockout_permanent" msgid="9060651300306264843">"इससे ज़्यादा बार कोशिश नहीं की जा सकती. इसके बजाय, स्क्रीन लॉक का इस्तेमाल करें."</string>
+    <string name="fingerprint_error_unable_to_process" msgid="2446280592818621224">"फ़िंगरप्रिंट की पहचान नहीं की जा सकी. फिर से कोशिश करें."</string>
     <string name="fingerprint_error_no_fingerprints" msgid="8671811719699072411">"कोई फ़िंगरप्रिंट रजिस्टर नहीं किया गया है."</string>
     <string name="fingerprint_error_hw_not_present" msgid="578914350967423382">"इस डिवाइस में फ़िंगरप्रिंट सेंसर नहीं है."</string>
     <string name="fingerprint_error_security_update_required" msgid="7750187320640856433">"सेंसर कुछ समय के लिए बंद कर दिया गया है."</string>
@@ -637,7 +639,7 @@
     <string name="fingerprint_recalibrate_notification_content" msgid="8519935717822194943">"फ़िंगरप्रिंट सेंसर को रिपेयर करने की सेवा देने वाली कंपनी से संपर्क करें."</string>
     <string name="face_acquired_insufficient" msgid="6889245852748492218">"चेहरे का माॅडल नहीं बन सका. फिर से कोशिश करें."</string>
     <string name="face_acquired_too_bright" msgid="8070756048978079164">"बहुत रोशनी है. हल्की रोशनी आज़माएं."</string>
-    <string name="face_acquired_too_dark" msgid="7919016380747701228">"बेहतर रोशनी में कोशिश करें"</string>
+    <string name="face_acquired_too_dark" msgid="8539853432479385326">"ज़रूरत के मुताबिक रोशनी नहीं है"</string>
     <string name="face_acquired_too_close" msgid="4453646176196302462">"फ़ोन को दूर ले जाएं"</string>
     <string name="face_acquired_too_far" msgid="2922278214231064859">"फ़ोन को नज़दीक लाएं"</string>
     <string name="face_acquired_too_high" msgid="8278815780046368576">"फ़ोन को थोड़ा और ऊपर ले जाएं"</string>
@@ -1138,7 +1140,7 @@
     <string name="copy" msgid="5472512047143665218">"कॉपी करें"</string>
     <string name="failed_to_copy_to_clipboard" msgid="725919885138539875">"क्लिपबोर्ड पर कॉपी नहीं हो सका"</string>
     <string name="paste" msgid="461843306215520225">"चिपकाएं"</string>
-    <string name="paste_as_plain_text" msgid="7664800665823182587">"सादे पाठ के रूप में चिपकाएं"</string>
+    <string name="paste_as_plain_text" msgid="7664800665823182587">"सादे टेक्स्ट के रूप में चिपकाएं"</string>
     <string name="replace" msgid="7842675434546657444">"बदलें•"</string>
     <string name="delete" msgid="1514113991712129054">"मिटाएं"</string>
     <string name="copyUrl" msgid="6229645005987260230">"यूआरएल को कॉपी करें"</string>
@@ -1249,10 +1251,9 @@
     <string name="android_preparing_apk" msgid="589736917792300956">"<xliff:g id="APPNAME">%1$s</xliff:g> तैयार हो रहा है."</string>
     <string name="android_upgrading_starting_apps" msgid="6206161195076057075">"ऐप्स  प्रारंभ होने वाले हैं"</string>
     <string name="android_upgrading_complete" msgid="409800058018374746">"बूट खत्म हो रहा है."</string>
-    <string name="fp_power_button_enrollment_title" msgid="3574363228413259548">"सेट अप जारी रखना है?"</string>
     <string name="fp_power_button_enrollment_message" msgid="5648173517663246140">"आपने पावर बटन दबाया - आम तौर पर, इससे स्क्रीन बंद हो जाती है.\n\nअपना फ़िंगरप्रिंट सेट अप करते समय, बटन को हल्के से टैप करके देखें."</string>
-    <string name="fp_power_button_enrollment_positive_button" msgid="2095415838459356833">"स्क्रीन बंद करें"</string>
-    <string name="fp_power_button_enrollment_negative_button" msgid="6558436406362486747">"सेट अप जारी रखें"</string>
+    <string name="fp_power_button_enrollment_title" msgid="6976841690455338563">"सेटअप पूरा होने पर, स्क्रीन बंद करें"</string>
+    <string name="fp_power_button_enrollment_button_text" msgid="3199783266386029200">"बंद करें"</string>
     <string name="fp_power_button_bp_title" msgid="5585506104526820067">"फ़िंगरप्रिंट की पुष्टि करना जारी रखना है?"</string>
     <string name="fp_power_button_bp_message" msgid="2983163038168903393">"आपने पावर बटन दबाया - आम तौर पर, इससे स्क्रीन बंद हो जाती है.\n\nअपने फ़िंगरप्रिंट की पुष्टि करने के लिए, बटन पर हल्के से टैप करके देखें."</string>
     <string name="fp_power_button_bp_positive_button" msgid="728945472408552251">"स्क्रीन बंद करें"</string>
@@ -1405,16 +1406,16 @@
     <string name="ext_media_new_notification_message" msgid="6095403121990786986">"सेटअप करने के लिए टैप करें"</string>
     <string name="ext_media_new_notification_message" product="tv" msgid="216863352100263668">"सेट अप करने के लिए चुनें"</string>
     <string name="ext_media_new_notification_message" product="automotive" msgid="5140127881613227162">"आपको डिवाइस फिर से फ़ॉर्मैट करना पड़ सकता है. निकालने के लिए टैप करें."</string>
-    <string name="ext_media_ready_notification_message" msgid="777258143284919261">"फ़ोटो और मीडिया ट्रांसफर करने के लिए"</string>
+    <string name="ext_media_ready_notification_message" msgid="7509496364380197369">"फ़ोटो, वीडियो, संगीत वगैरह सेव करने के लिए"</string>
     <string name="ext_media_ready_notification_message" product="tv" msgid="8847134811163165935">"मीडिया फ़ाइलों को ब्राउज़ करें"</string>
     <string name="ext_media_unmountable_notification_title" msgid="4895444667278979910">"<xliff:g id="NAME">%s</xliff:g> में गड़बड़ी है"</string>
     <string name="ext_media_unmountable_notification_title" product="automotive" msgid="3142723758949023280">"<xliff:g id="NAME">%s</xliff:g> काम नहीं कर रहा है"</string>
     <string name="ext_media_unmountable_notification_message" msgid="3256290114063126205">"समस्या ठीक करने के लिए टैप करें"</string>
     <string name="ext_media_unmountable_notification_message" product="tv" msgid="3003611129979934633">"<xliff:g id="NAME">%s</xliff:g> काम नहीं कर रहा है. ठीक करने के लिए चुनें."</string>
     <string name="ext_media_unmountable_notification_message" product="automotive" msgid="2274596120715020680">"आपको डिवाइस फिर से फ़ॉर्मैट करना पड़ सकता है. निकालने के लिए टैप करें."</string>
-    <string name="ext_media_unsupported_notification_title" msgid="4358280700537030333">"असमर्थित <xliff:g id="NAME">%s</xliff:g>"</string>
+    <string name="ext_media_unsupported_notification_title" msgid="3487534182861251401">"<xliff:g id="NAME">%s</xliff:g> का पता चला"</string>
     <string name="ext_media_unsupported_notification_title" product="automotive" msgid="6004193172658722381">"<xliff:g id="NAME">%s</xliff:g> काम नहीं कर रहा है"</string>
-    <string name="ext_media_unsupported_notification_message" msgid="917738524888367560">"यह डिवाइस इस <xliff:g id="NAME">%s</xliff:g> का समर्थन नहीं करता है. समर्थित प्रारूप में सेट करने के लिए टैप करें."</string>
+    <string name="ext_media_unsupported_notification_message" msgid="8463636521459807981">"सेट अप करने के लिए टैप करें."</string>
     <string name="ext_media_unsupported_notification_message" product="tv" msgid="1595482802187036532">"<xliff:g id="NAME">%s</xliff:g> को काम करने वाले फ़ॉर्मैट में सेट अप करने के लिए चुनें."</string>
     <string name="ext_media_unsupported_notification_message" product="automotive" msgid="3412494732736336330">"आपको डिवाइस फिर से फ़ॉर्मैट करना पड़ सकता है"</string>
     <string name="ext_media_badremoval_notification_title" msgid="4114625551266196872">"<xliff:g id="NAME">%s</xliff:g> अप्रत्याशित रूप से निकाला गया"</string>
@@ -1427,7 +1428,7 @@
     <string name="ext_media_unmount_action" msgid="966992232088442745">"निकालें"</string>
     <string name="ext_media_browse_action" msgid="344865351947079139">"एक्सप्लोर करें"</string>
     <string name="ext_media_seamless_action" msgid="8837030226009268080">"आउटपुट बदलें"</string>
-    <string name="ext_media_missing_title" msgid="3209472091220515046">"<xliff:g id="NAME">%s</xliff:g> गुम है"</string>
+    <string name="ext_media_missing_title" msgid="3209472091220515046">"<xliff:g id="NAME">%s</xliff:g> नहीं मिल रहा है"</string>
     <string name="ext_media_missing_message" msgid="4408988706227922909">"डिवाइस को दोबारा लगाएं"</string>
     <string name="ext_media_move_specific_title" msgid="8492118544775964250">"<xliff:g id="NAME">%s</xliff:g> को ले जाया जा रहा है"</string>
     <string name="ext_media_move_title" msgid="2682741525619033637">"डेटा ले जाया जा रहा है"</string>
@@ -1629,7 +1630,7 @@
     <string name="media_route_status_connecting" msgid="5845597961412010540">"कनेक्ट हो रहा है..."</string>
     <string name="media_route_status_available" msgid="1477537663492007608">"मौजूद"</string>
     <string name="media_route_status_not_available" msgid="480912417977515261">"उपलब्‍ध नहीं"</string>
-    <string name="media_route_status_in_use" msgid="6684112905244944724">"उपयोग में"</string>
+    <string name="media_route_status_in_use" msgid="6684112905244944724">"इस्तेमाल में है"</string>
     <string name="display_manager_built_in_display_name" msgid="1015775198829722440">"अंतर्निहित स्क्रीन"</string>
     <string name="display_manager_hdmi_display_name" msgid="1022758026251534975">"HDMI स्क्रीन"</string>
     <string name="display_manager_overlay_display_name" msgid="5306088205181005861">"ओवरले #<xliff:g id="ID">%1$d</xliff:g>"</string>
@@ -1857,8 +1858,8 @@
     <string name="package_updated_device_owner" msgid="7560272363805506941">"आपके व्यवस्थापक ने अपडेट किया है"</string>
     <string name="package_deleted_device_owner" msgid="2292335928930293023">"आपके व्यवस्थापक ने हटा दिया है"</string>
     <string name="confirm_battery_saver" msgid="5247976246208245754">"ठीक है"</string>
-    <string name="battery_saver_description_with_learn_more" msgid="5444908404021316250">"बैटरी सेवर, गहरे रंग वाली थीम को चालू करता है. साथ ही, यह बैकग्राउंड की गतिविधि, कुछ विज़ुअल इफ़ेक्ट, कुछ खास सुविधाओं, और कुछ खास तरह के इंटरनेट कनेक्शन इस्तेमाल करने से डिवाइस को रोकता है या इन्हें बंद कर देता है."</string>
-    <string name="battery_saver_description" msgid="8518809702138617167">"बैटरी सेवर, गहरे रंग वाली थीम को चालू करता है. साथ ही, यह बैकग्राउंड की गतिविधि, कुछ विज़ुअल इफ़ेक्ट, कुछ खास सुविधाओं, और कुछ खास तरह के इंटरनेट कनेक्शन इस्तेमाल करने से डिवाइस को रोकता है या इन्हें बंद कर देता है."</string>
+    <string name="battery_saver_description_with_learn_more" msgid="5444908404021316250">"बैटरी सेवर, गहरे रंग वाली थीम को चालू करता है. साथ ही, इस मोड में बैकग्राउंड की गतिविधि, कुछ विज़ुअल इफ़ेक्ट, और कुछ खास सुविधाएं कम या बंद हो जाती हैं. कुछ इंटरनेट कनेक्शन भी पूरी तरह काम नहीं करते."</string>
+    <string name="battery_saver_description" msgid="8518809702138617167">"बैटरी सेवर, गहरे रंग वाली थीम को चालू करता है. साथ ही, इस मोड में बैकग्राउंड की गतिविधि, कुछ विज़ुअल इफ़ेक्ट, और कुछ सुविधाएं सीमित या बंद हो जाती हैं. कुछ इंटरनेट कनेक्शन भी पूरी तरह काम नहीं करते."</string>
     <string name="data_saver_description" msgid="4995164271550590517">"डेटा खर्च को कम करने के लिए, डेटा बचाने की सेटिंग कुछ ऐप्लिकेशन को बैकग्राउंड में डेटा भेजने या डेटा पाने से रोकती है. फ़िलहाल, जिस ऐप्लिकेशन का इस्तेमाल किया जा रहा है वह डेटा ऐक्सेस कर सकता है, लेकिन ऐसा कभी-कभी ही हो पाएगा. उदाहरण के लिए, इमेज तब तक दिखाई नहीं देंगी, जब तक उन पर टैप नहीं किया जाएगा."</string>
     <string name="data_saver_enable_title" msgid="7080620065745260137">"डेटा बचाने की सेटिंग चालू करें?"</string>
     <string name="data_saver_enable_button" msgid="4399405762586419726">"चालू करें"</string>
@@ -1927,6 +1928,7 @@
     <string name="country_selection_title" msgid="5221495687299014379">"क्षेत्र प्राथमिकता"</string>
     <string name="search_language_hint" msgid="7004225294308793583">"भाषा का नाम लिखें"</string>
     <string name="language_picker_section_suggested" msgid="6556199184638990447">"दिए गए सुझाव"</string>
+    <string name="language_picker_regions_section_suggested" msgid="6080131515268225316">"सुझाए गए देश/इलाके"</string>
     <string name="language_picker_section_all" msgid="1985809075777564284">"सभी भाषाएं"</string>
     <string name="region_picker_section_all" msgid="756441309928774155">"सभी क्षेत्र"</string>
     <string name="locale_search_menu" msgid="6258090710176422934">"खोजें"</string>
@@ -1944,23 +1946,19 @@
     <string name="app_streaming_blocked_title_for_camera_dialog" msgid="3935701653713853065">"कैमरा उपलब्ध नहीं है"</string>
     <string name="app_streaming_blocked_title_for_fingerprint_dialog" msgid="3516853717714141951">"फ़ोन पर जारी रखें"</string>
     <string name="app_streaming_blocked_title_for_microphone_dialog" msgid="544822455127171206">"माइक्रोफ़ोन उपलब्ध नहीं है"</string>
-    <!-- no translation found for app_streaming_blocked_title_for_playstore_dialog (8149823099822897538) -->
-    <skip />
+    <string name="app_streaming_blocked_title_for_playstore_dialog" msgid="8149823099822897538">"Play Store उपलब्ध नहीं है"</string>
     <string name="app_streaming_blocked_title_for_settings_dialog" product="tv" msgid="196994247017450357">"Android TV की सेटिंग उपलब्ध नहीं हैं"</string>
     <string name="app_streaming_blocked_title_for_settings_dialog" product="tablet" msgid="8222710146267948647">"टैबलेट की सेटिंग उपलब्ध नहीं हैं"</string>
-    <string name="app_streaming_blocked_title_for_settings_dialog" product="default" msgid="6895719984375299791">"फ़ोन की सेटिंग उपलब्ध नहीं हैं"</string>
+    <string name="app_streaming_blocked_title_for_settings_dialog" product="default" msgid="6895719984375299791">"फ़ोन की सेटिंग उपलब्ध नहीं है"</string>
     <string name="app_streaming_blocked_message" product="tv" msgid="4003011766528814377">"इस समय, आपके <xliff:g id="DEVICE">%1$s</xliff:g> पर इसे ऐक्सेस नहीं किया जा सकता. इसके बजाय, अपने Android TV डिवाइस पर कोशिश करें."</string>
     <string name="app_streaming_blocked_message" product="tablet" msgid="4242053045964946062">"इस समय, आपके <xliff:g id="DEVICE">%1$s</xliff:g> पर इसे ऐक्सेस नहीं किया जा सकता. इसके बजाय, अपने टैबलेट पर कोशिश करें."</string>
     <string name="app_streaming_blocked_message" product="default" msgid="6159168735030739398">"इस समय, आपके <xliff:g id="DEVICE">%1$s</xliff:g> पर इसे ऐक्सेस नहीं किया जा सकता. इसके बजाय, अपने फ़ोन पर कोशिश करें."</string>
     <string name="app_streaming_blocked_message_for_fingerprint_dialog" product="tv" msgid="3470977315395784567">"यह ऐप्लिकेशन ज़्यादा सुरक्षा का अनुरोध कर रहा है. इसके बजाय, अपने Android TV डिवाइस पर ऐक्सेस करने की कोशिश करें."</string>
     <string name="app_streaming_blocked_message_for_fingerprint_dialog" product="tablet" msgid="698460091901465092">"यह ऐप्लिकेशन ज़्यादा सुरक्षा का अनुरोध कर रहा है. इसके बजाय, अपने टैबलेट पर ऐक्सेस करने की कोशिश करें."</string>
     <string name="app_streaming_blocked_message_for_fingerprint_dialog" product="default" msgid="8552691971910603907">"यह ऐप्लिकेशन ज़्यादा सुरक्षा का अनुरोध कर रहा है. इसके बजाय, अपने फ़ोन पर ऐक्सेस करने की कोशिश करें."</string>
-    <!-- no translation found for app_streaming_blocked_message_for_settings_dialog (820334666354451145) -->
-    <skip />
-    <!-- no translation found for app_streaming_blocked_message_for_settings_dialog (3286849551133045896) -->
-    <skip />
-    <!-- no translation found for app_streaming_blocked_message_for_settings_dialog (6264287556598916295) -->
-    <skip />
+    <string name="app_streaming_blocked_message_for_settings_dialog" product="tv" msgid="820334666354451145">"आपके <xliff:g id="DEVICE">%1$s</xliff:g> पर इसे ऐक्सेस नहीं किया जा सकता. इसके बजाय, अपने Android TV डिवाइस पर ऐक्सेस करने की कोशिश करें."</string>
+    <string name="app_streaming_blocked_message_for_settings_dialog" product="tablet" msgid="3286849551133045896">"आपके <xliff:g id="DEVICE">%1$s</xliff:g> पर इसे ऐक्सेस नहीं किया जा सकता. इसके बजाय, अपने टैबलेट पर ऐक्सेस करने की कोशिश करें."</string>
+    <string name="app_streaming_blocked_message_for_settings_dialog" product="default" msgid="6264287556598916295">"आपके <xliff:g id="DEVICE">%1$s</xliff:g> पर इसे ऐक्सेस नहीं किया जा सकता. इसके बजाय, अपने फ़ोन पर ऐक्सेस करने की कोशिश करें."</string>
     <string name="deprecated_target_sdk_message" msgid="5203207875657579953">"यह ऐप्लिकेशन Android के पुराने वर्शन के लिए बनाया गया था, इसलिए हो सकता है कि यह सही से काम न करे. देखें कि अपडेट मौजूद हैं या नहीं, या फिर डेवलपर से संपर्क करें."</string>
     <string name="deprecated_target_sdk_app_store" msgid="8456784048558808909">"देखें कि अपडेट मौजूद है या नहीं"</string>
     <string name="new_sms_notification_title" msgid="6528758221319927107">"आपके पास नए संदेश हैं"</string>
@@ -1991,7 +1989,7 @@
     <string name="app_category_productivity" msgid="1844422703029557883">"उत्पादकता"</string>
     <string name="app_category_accessibility" msgid="6643521607848547683">"सुलभता"</string>
     <string name="device_storage_monitor_notification_channel" msgid="5164244565844470758">"डिवाइस में जगह"</string>
-    <string name="adb_debugging_notification_channel_tv" msgid="4764046459631031496">"यूएसबी डीबग करना"</string>
+    <string name="adb_debugging_notification_channel_tv" msgid="4764046459631031496">"यूएसबी डीबग करें"</string>
     <string name="time_picker_hour_label" msgid="4208590187662336864">"घंटा"</string>
     <string name="time_picker_minute_label" msgid="8307452311269824553">"मिनट"</string>
     <string name="time_picker_header_text" msgid="9073802285051516688">"समय सेट करें"</string>
@@ -2053,7 +2051,8 @@
     <string name="log_access_confirmation_title" msgid="2343578467290592708">"क्या <xliff:g id="LOG_ACCESS_APP_NAME">%s</xliff:g> को डिवाइस लॉग का ऐक्सेस देना है?"</string>
     <string name="log_access_confirmation_allow" msgid="5302517782599389507">"एक बार ऐक्सेस करने की अनुमति दें"</string>
     <string name="log_access_confirmation_deny" msgid="7685790957455099845">"अनुमति न दें"</string>
-    <string name="log_access_confirmation_body" msgid="6581985716241928135">"डिवाइस लॉग में आपके डिवाइस पर की गई कार्रवाइयां रिकॉर्ड होती हैं. ऐप्लिकेशन, इन लॉग का इस्तेमाल गड़बड़ियां ढूंढने और उन्हें सही करने के लिए करता है.\n\nकुछ लॉग में संवेदनशील जानकारी हो सकती है. इसलिए, सिर्फ़ भरोसेमंद ऐप्लिकेशन को डिवाइस लॉग का ऐक्सेस दें. \n\nअगर इस ऐप्लिकेशन को डिवाइस के सभी लॉग का ऐक्सेस नहीं दिया जाता है, तब भी यह डिवाइस पर अपने लॉग को ऐक्सेस कर सकता है. डिवाइस को बनाने वाली कंपनी अब भी डिवाइस के कुछ लॉग या जानकारी को ऐक्सेस कर सकती है. ज़्यादा जानें"</string>
+    <string name="log_access_confirmation_body" product="default" msgid="1806692062668620735">"डिवाइस लॉग में, आपके डिवाइस पर की गई कार्रवाइयां रिकॉर्ड होती हैं. ऐप्लिकेशन, इन लॉग का इस्तेमाल गड़बड़ियां ढूंढने और उन्हें ठीक करने के लिए करते हैं.\n\nकुछ लॉग में संवेदनशील जानकारी हो सकती है. इसलिए, सिर्फ़ भरोसेमंद ऐप्लिकेशन को डिवाइस लॉग का ऐक्सेस दें. \n\nअगर इस ऐप्लिकेशन को डिवाइस के सभी लॉग का ऐक्सेस नहीं दिया जाता है, तब भी यह डिवाइस पर अपने लॉग को ऐक्सेस कर सकता है. डिवाइस को बनाने वाली कंपनी अब भी डिवाइस के कुछ लॉग या जानकारी को ऐक्सेस कर सकती है."</string>
+    <string name="log_access_confirmation_body" product="tv" msgid="7379536536425265262">"डिवाइस लॉग में आपके डिवाइस पर की गई कार्रवाइयां रिकॉर्ड होती हैं. ऐप्लिकेशन, इन लॉग का इस्तेमाल गड़बड़ियां ढूंढने और उन्हें सही करने के लिए करता है.\n\nकुछ लॉग में संवेदनशील जानकारी हो सकती है. इसलिए, सिर्फ़ भरोसेमंद ऐप्लिकेशन को डिवाइस के सभी लॉग का ऐक्सेस दें. \n\nअगर किसी ऐप्लिकेशन को डिवाइस के सभी लॉग का ऐक्सेस नहीं दिया जाता है, तब भी वह डिवाइस पर अपने लॉग को ऐक्सेस कर सकता है. डिवाइस को बनाने वाली कंपनी अब भी डिवाइस के कुछ लॉग या जानकारी को ऐक्सेस कर सकती है.\n\nज़्यादा जानने के लिए, g.co/android/devicelogs पर जाएं."</string>
     <string name="log_access_do_not_show_again" msgid="1058690599083091552">"फिर से न दिखाएं"</string>
     <string name="slices_permission_request" msgid="3677129866636153406">"<xliff:g id="APP_0">%1$s</xliff:g>, <xliff:g id="APP_2">%2$s</xliff:g> के हिस्से (स्लाइस) दिखाना चाहता है"</string>
     <string name="screenshot_edit" msgid="7408934887203689207">"बदलाव करें"</string>
@@ -2294,5 +2293,6 @@
     <string name="notification_action_check_bg_apps" msgid="4758877443365362532">"चालू ऐप्लिकेशन देखें"</string>
     <string name="vdm_camera_access_denied" product="default" msgid="6102378580971542473">"आपके <xliff:g id="DEVICE">%1$s</xliff:g> से फ़ोन के कैमरे को ऐक्सेस नहीं किया जा सकता"</string>
     <string name="vdm_camera_access_denied" product="tablet" msgid="6895968310395249076">"आपके <xliff:g id="DEVICE">%1$s</xliff:g> से टैबलेट के कैमरे को ऐक्सेस नहीं किया जा सकता"</string>
+    <string name="vdm_secure_window" msgid="161700398158812314">"स्ट्रीमिंग के दौरान, इसे ऐक्सेस नहीं किया जा सकता. इसके बजाय, अपने फ़ोन पर ऐक्सेस करके देखें."</string>
     <string name="system_locale_title" msgid="711882686834677268">"सिस्टम डिफ़ॉल्ट"</string>
 </resources>

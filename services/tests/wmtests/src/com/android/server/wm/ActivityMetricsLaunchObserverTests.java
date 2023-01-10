@@ -99,7 +99,7 @@ public class ActivityMetricsLaunchObserverTests extends WindowTestsBase {
                 .setComponent(createRelative(DEFAULT_COMPONENT_PACKAGE_NAME, "TopActivity"))
                 .build();
         // becomes invisible when covered by mTopActivity
-        mTrampolineActivity.mVisibleRequested = false;
+        mTrampolineActivity.setVisibleRequested(false);
     }
 
     private <T> T verifyAsync(T mock) {
@@ -228,7 +228,7 @@ public class ActivityMetricsLaunchObserverTests extends WindowTestsBase {
     public void testOnActivityLaunchCancelled_hasDrawn() {
         onActivityLaunched(mTopActivity);
 
-        mTopActivity.mVisibleRequested = true;
+        mTopActivity.setVisibleRequested(true);
         doReturn(true).when(mTopActivity).isReportedDrawn();
 
         // Cannot time already-visible activities.
@@ -251,7 +251,7 @@ public class ActivityMetricsLaunchObserverTests extends WindowTestsBase {
         notifyActivityLaunching(noDrawnActivity.intent);
         notifyAndVerifyActivityLaunched(noDrawnActivity);
 
-        noDrawnActivity.mVisibleRequested = false;
+        noDrawnActivity.setVisibleRequested(false);
         mActivityMetricsLogger.notifyVisibilityChanged(noDrawnActivity);
 
         verifyAsync(mLaunchObserver).onActivityLaunchCancelled(eqLastStartedId(noDrawnActivity));
@@ -279,7 +279,7 @@ public class ActivityMetricsLaunchObserverTests extends WindowTestsBase {
 
         clearInvocations(mLaunchObserver);
         mLaunchTopByTrampoline = true;
-        mTopActivity.mVisibleRequested = false;
+        mTopActivity.setVisibleRequested(false);
         notifyActivityLaunching(mTopActivity.intent);
         // It should schedule a message with UNKNOWN_VISIBILITY_CHECK_DELAY_MS to check whether
         // the launch event is still valid.
@@ -307,7 +307,7 @@ public class ActivityMetricsLaunchObserverTests extends WindowTestsBase {
         // Create an invisible event that should be cancelled after the next event starts.
         final ActivityRecord prev = new ActivityBuilder(mAtm).setCreateTask(true).build();
         onActivityLaunched(prev);
-        prev.mVisibleRequested = false;
+        prev.setVisibleRequested(false);
 
         mActivityOptions = ActivityOptions.makeBasic();
         mActivityOptions.setSourceInfo(SourceInfo.TYPE_LAUNCHER, SystemClock.uptimeMillis() - 10);
@@ -540,7 +540,7 @@ public class ActivityMetricsLaunchObserverTests extends WindowTestsBase {
     @Test
     public void testConsecutiveLaunchWithDifferentWindowingMode() {
         mTopActivity.setWindowingMode(WindowConfiguration.WINDOWING_MODE_MULTI_WINDOW);
-        mTrampolineActivity.mVisibleRequested = true;
+        mTrampolineActivity.setVisibleRequested(true);
         onActivityLaunched(mTrampolineActivity);
         mActivityMetricsLogger.notifyActivityLaunching(mTopActivity.intent,
                 mTrampolineActivity /* caller */, mTrampolineActivity.getUid());

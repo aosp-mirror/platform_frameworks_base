@@ -46,6 +46,9 @@ public interface BiometricContext {
     /** If the display is in AOD. */
     boolean isAod();
 
+    /** If the device is awake or is becoming awake. */
+    boolean isAwake();
+
     /**
      * Subscribe to context changes.
      *

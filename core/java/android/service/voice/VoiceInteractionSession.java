@@ -19,6 +19,7 @@ package android.service.voice;
 import static android.view.ViewGroup.LayoutParams.MATCH_PARENT;
 
 import android.annotation.CallbackExecutor;
+import android.annotation.IntDef;
 import android.annotation.IntRange;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
@@ -71,6 +72,8 @@ import com.android.internal.util.function.pooled.PooledLambda;
 
 import java.io.FileDescriptor;
 import java.io.PrintWriter;
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
 import java.lang.ref.WeakReference;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -142,6 +145,25 @@ public class VoiceInteractionSession implements KeyEvent.Callback, ComponentCall
      * from an Android automotive system UI.
      */
     public static final int SHOW_SOURCE_AUTOMOTIVE_SYSTEM_UI = 1 << 7;
+
+    /** @hide */
+    public static final int VOICE_INTERACTION_ACTIVITY_EVENT_START = 1;
+    /** @hide */
+    public static final int VOICE_INTERACTION_ACTIVITY_EVENT_RESUME = 2;
+    /** @hide */
+    public static final int VOICE_INTERACTION_ACTIVITY_EVENT_PAUSE = 3;
+    /** @hide */
+    public static final int VOICE_INTERACTION_ACTIVITY_EVENT_STOP = 4;
+
+    /** @hide */
+    @IntDef(prefix = { "VOICE_INTERACTION_ACTIVITY_EVENT_" }, value = {
+            VOICE_INTERACTION_ACTIVITY_EVENT_START,
+            VOICE_INTERACTION_ACTIVITY_EVENT_RESUME,
+            VOICE_INTERACTION_ACTIVITY_EVENT_PAUSE,
+            VOICE_INTERACTION_ACTIVITY_EVENT_STOP
+    })
+    @Retention(RetentionPolicy.SOURCE)
+    public @interface VoiceInteractionActivityEventType{}
 
     final Context mContext;
     final HandlerCaller mHandlerCaller;
@@ -358,9 +380,10 @@ public class VoiceInteractionSession implements KeyEvent.Callback, ComponentCall
         }
 
         @Override
-        public void updateVisibleActivityInfo(VisibleActivityInfo visibleActivityInfo, int type) {
+        public void notifyVisibleActivityInfoChanged(VisibleActivityInfo visibleActivityInfo,
+                int type) {
             mHandlerCaller.sendMessage(
-                    mHandlerCaller.obtainMessageIO(MSG_UPDATE_VISIBLE_ACTIVITY_INFO, type,
+                    mHandlerCaller.obtainMessageIO(MSG_NOTIFY_VISIBLE_ACTIVITY_INFO_CHANGED, type,
                             visibleActivityInfo));
         }
     };
@@ -854,7 +877,7 @@ public class VoiceInteractionSession implements KeyEvent.Callback, ComponentCall
     static final int MSG_SHOW = 106;
     static final int MSG_HIDE = 107;
     static final int MSG_ON_LOCKSCREEN_SHOWN = 108;
-    static final int MSG_UPDATE_VISIBLE_ACTIVITY_INFO = 109;
+    static final int MSG_NOTIFY_VISIBLE_ACTIVITY_INFO_CHANGED = 109;
     static final int MSG_REGISTER_VISIBLE_ACTIVITY_CALLBACK = 110;
     static final int MSG_UNREGISTER_VISIBLE_ACTIVITY_CALLBACK = 111;
 
@@ -942,12 +965,13 @@ public class VoiceInteractionSession implements KeyEvent.Callback, ComponentCall
                     if (DEBUG) Log.d(TAG, "onLockscreenShown");
                     onLockscreenShown();
                     break;
-                case MSG_UPDATE_VISIBLE_ACTIVITY_INFO:
+                case MSG_NOTIFY_VISIBLE_ACTIVITY_INFO_CHANGED:
                     if (DEBUG) {
-                        Log.d(TAG, "doUpdateVisibleActivityInfo: visibleActivityInfo=" + msg.obj
-                                + " type=" + msg.arg1);
+                        Log.d(TAG,
+                                "doNotifyVisibleActivityInfoChanged: visibleActivityInfo=" + msg.obj
+                                        + " type=" + msg.arg1);
                     }
-                    doUpdateVisibleActivityInfo((VisibleActivityInfo) msg.obj, msg.arg1);
+                    doNotifyVisibleActivityInfoChanged((VisibleActivityInfo) msg.obj, msg.arg1);
                     break;
                 case MSG_REGISTER_VISIBLE_ACTIVITY_CALLBACK:
                     if (DEBUG) {
@@ -1157,7 +1181,8 @@ public class VoiceInteractionSession implements KeyEvent.Callback, ComponentCall
         }
     }
 
-    private void doUpdateVisibleActivityInfo(VisibleActivityInfo visibleActivityInfo, int type) {
+    private void doNotifyVisibleActivityInfoChanged(VisibleActivityInfo visibleActivityInfo,
+            int type) {
 
         if (mVisibleActivityCallbacks.isEmpty()) {
             return;
@@ -1165,11 +1190,11 @@ public class VoiceInteractionSession implements KeyEvent.Callback, ComponentCall
 
         switch (type) {
             case VisibleActivityInfo.TYPE_ACTIVITY_ADDED:
-                informVisibleActivityChanged(visibleActivityInfo, type);
+                notifyVisibleActivityChanged(visibleActivityInfo, type);
                 mVisibleActivityInfos.add(visibleActivityInfo);
                 break;
             case VisibleActivityInfo.TYPE_ACTIVITY_REMOVED:
-                informVisibleActivityChanged(visibleActivityInfo, type);
+                notifyVisibleActivityChanged(visibleActivityInfo, type);
                 mVisibleActivityInfos.remove(visibleActivityInfo);
                 break;
         }
@@ -1214,7 +1239,7 @@ public class VoiceInteractionSession implements KeyEvent.Callback, ComponentCall
         }
     }
 
-    private void informVisibleActivityChanged(VisibleActivityInfo visibleActivityInfo, int type) {
+    private void notifyVisibleActivityChanged(VisibleActivityInfo visibleActivityInfo, int type) {
         for (Map.Entry<VisibleActivityCallback, Executor> e :
                 mVisibleActivityCallbacks.entrySet()) {
             final Executor executor = e.getValue();

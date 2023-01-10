@@ -1301,6 +1301,21 @@ public class BuzzBeepBlinkTest extends UiServiceTestCase {
     }
 
     @Test
+    public void testA11yCrossUserEventNotSent() throws Exception {
+        final Notification n = new Builder(getContext(), "test")
+                .setSmallIcon(android.R.drawable.sym_def_app_icon).build();
+        int userId = mUser.getIdentifier() + 1;
+        StatusBarNotification sbn = new StatusBarNotification(mPkg, mPkg, 0, mTag, mUid,
+                mPid, n, UserHandle.of(userId), null, System.currentTimeMillis());
+        NotificationRecord r = new NotificationRecord(getContext(), sbn,
+                new NotificationChannel("test", "test", IMPORTANCE_HIGH));
+
+        mService.buzzBeepBlinkLocked(r);
+
+        verify(mAccessibilityService, never()).sendAccessibilityEvent(any(), anyInt());
+    }
+
+    @Test
     public void testLightsScreenOn() {
         mService.mScreenOn = true;
         NotificationRecord r = getLightsNotification();

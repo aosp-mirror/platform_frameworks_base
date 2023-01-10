@@ -22,85 +22,194 @@ import android.graphics.ColorSpace
 import android.graphics.Insets
 import android.graphics.Rect
 import android.hardware.HardwareBuffer
-import android.net.Uri
-import android.view.WindowManager
-import android.view.WindowManager.ScreenshotSource
+import android.os.Bundle
+import android.os.UserHandle
+import android.view.WindowManager.ScreenshotSource.SCREENSHOT_KEY_CHORD
+import android.view.WindowManager.ScreenshotSource.SCREENSHOT_OTHER
+import android.view.WindowManager.TAKE_SCREENSHOT_FULLSCREEN
+import android.view.WindowManager.TAKE_SCREENSHOT_PROVIDED_IMAGE
 import com.android.internal.util.ScreenshotHelper.HardwareBitmapBundler
+import com.android.internal.util.ScreenshotHelper.HardwareBitmapBundler.bundleToHardwareBitmap
 import com.android.internal.util.ScreenshotHelper.ScreenshotRequest
-import com.android.systemui.screenshot.TakeScreenshotService.RequestCallback
-import com.android.systemui.util.mockito.argumentCaptor
-import com.android.systemui.util.mockito.mock
+import com.android.systemui.flags.FakeFeatureFlags
+import com.android.systemui.flags.Flags
+import com.android.systemui.screenshot.ScreenshotPolicy.DisplayContentInfo
 import com.google.common.truth.Truth.assertThat
-import java.util.function.Consumer
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.runBlocking
 import org.junit.Test
-import org.mockito.Mockito.eq
-import org.mockito.Mockito.verify
-import org.mockito.Mockito.isNull
+
+private const val USER_ID = 1
+private const val TASK_ID = 1
 
 class RequestProcessorTest {
-    private val controller = mock<ScreenshotController>()
-    private val bitmapCaptor = argumentCaptor<Bitmap>()
+    private val imageCapture = FakeImageCapture()
+    private val component = ComponentName("android.test", "android.test.Component")
+    private val bounds = Rect(25, 25, 75, 75)
 
+    private val scope = CoroutineScope(Dispatchers.Unconfined)
+    private val dispatcher = Dispatchers.Unconfined
+    private val policy = FakeScreenshotPolicy()
+    private val flags = FakeFeatureFlags()
+
+    /** Tests the Java-compatible function wrapper, ensures callback is invoked. */
     @Test
-    fun testFullScreenshot() {
-        val request = ScreenshotRequest(ScreenshotSource.SCREENSHOT_KEY_CHORD)
-        val onSavedListener = mock<Consumer<Uri>>()
-        val callback = mock<RequestCallback>()
-        val processor = RequestProcessor(controller)
+    fun testProcessAsync() {
+        flags.set(Flags.SCREENSHOT_WORK_PROFILE_POLICY, false)
 
-        processor.processRequest(WindowManager.TAKE_SCREENSHOT_FULLSCREEN, onSavedListener,
-            request, callback)
+        val request = ScreenshotRequest(TAKE_SCREENSHOT_FULLSCREEN, SCREENSHOT_KEY_CHORD)
+        val processor = RequestProcessor(imageCapture, policy, flags, scope)
 
-        verify(controller).takeScreenshotFullscreen(/* topComponent */ isNull(),
-            eq(onSavedListener), eq(callback))
+        var result: ScreenshotRequest? = null
+        var callbackCount = 0
+        val callback: (ScreenshotRequest) -> Unit = { processedRequest: ScreenshotRequest ->
+            result = processedRequest
+            callbackCount++
+        }
+
+        // runs synchronously, using Unconfined Dispatcher
+        processor.processAsync(request, callback)
+
+        // Callback invoked once returning the same request (no changes)
+        assertThat(callbackCount).isEqualTo(1)
+        assertThat(result).isEqualTo(request)
     }
 
     @Test
-    fun testSelectedRegionScreenshot() {
-        val request = ScreenshotRequest(ScreenshotSource.SCREENSHOT_KEY_CHORD)
-        val onSavedListener = mock<Consumer<Uri>>()
-        val callback = mock<RequestCallback>()
-        val processor = RequestProcessor(controller)
+    fun testFullScreenshot_workProfilePolicyDisabled() = runBlocking {
+        flags.set(Flags.SCREENSHOT_WORK_PROFILE_POLICY, false)
 
-        processor.processRequest(WindowManager.TAKE_SCREENSHOT_SELECTED_REGION, onSavedListener,
-            request, callback)
+        val request = ScreenshotRequest(TAKE_SCREENSHOT_FULLSCREEN, SCREENSHOT_KEY_CHORD)
+        val processor = RequestProcessor(imageCapture, policy, flags, scope)
 
-        verify(controller).takeScreenshotPartial(/* topComponent */ isNull(),
-            eq(onSavedListener), eq(callback))
+        val processedRequest = processor.process(request)
+
+        // No changes
+        assertThat(processedRequest).isEqualTo(request)
     }
 
     @Test
-    fun testProvidedImageScreenshot() {
-        val taskId = 1111
-        val userId = 2222
+    fun testFullScreenshot() = runBlocking {
+        flags.set(Flags.SCREENSHOT_WORK_PROFILE_POLICY, true)
+
+        // Indicate that the primary content belongs to a normal user
+        policy.setManagedProfile(USER_ID, false)
+        policy.setDisplayContentInfo(
+            policy.getDefaultDisplayId(),
+            DisplayContentInfo(component, bounds, UserHandle.of(USER_ID), TASK_ID))
+
+        val request = ScreenshotRequest(TAKE_SCREENSHOT_FULLSCREEN, SCREENSHOT_OTHER)
+        val processor = RequestProcessor(imageCapture, policy, flags, scope)
+
+        val processedRequest = processor.process(request)
+
+        // Request has topComponent added, but otherwise unchanged.
+        assertThat(processedRequest.type).isEqualTo(TAKE_SCREENSHOT_FULLSCREEN)
+        assertThat(processedRequest.source).isEqualTo(SCREENSHOT_OTHER)
+        assertThat(processedRequest.topComponent).isEqualTo(component)
+    }
+
+    @Test
+    fun testFullScreenshot_managedProfile() = runBlocking {
+        flags.set(Flags.SCREENSHOT_WORK_PROFILE_POLICY, true)
+
+        // Provide a fake task bitmap when asked
+        val bitmap = makeHardwareBitmap(100, 100)
+        imageCapture.image = bitmap
+
+        // Indicate that the primary content belongs to a manged profile
+        policy.setManagedProfile(USER_ID, true)
+        policy.setDisplayContentInfo(policy.getDefaultDisplayId(),
+            DisplayContentInfo(component, bounds, UserHandle.of(USER_ID), TASK_ID))
+
+        val request = ScreenshotRequest(TAKE_SCREENSHOT_FULLSCREEN, SCREENSHOT_KEY_CHORD)
+        val processor = RequestProcessor(imageCapture, policy, flags, scope)
+
+        val processedRequest = processor.process(request)
+
+        // Expect a task snapshot is taken, overriding the full screen mode
+        assertThat(processedRequest.type).isEqualTo(TAKE_SCREENSHOT_PROVIDED_IMAGE)
+        assertThat(bitmap.equalsHardwareBitmapBundle(processedRequest.bitmapBundle)).isTrue()
+        assertThat(processedRequest.boundsInScreen).isEqualTo(bounds)
+        assertThat(processedRequest.insets).isEqualTo(Insets.NONE)
+        assertThat(processedRequest.taskId).isEqualTo(TASK_ID)
+        assertThat(imageCapture.requestedTaskId).isEqualTo(TASK_ID)
+        assertThat(processedRequest.userId).isEqualTo(USER_ID)
+        assertThat(processedRequest.topComponent).isEqualTo(component)
+    }
+
+    @Test
+    fun testProvidedImageScreenshot_workProfilePolicyDisabled() = runBlocking {
+        flags.set(Flags.SCREENSHOT_WORK_PROFILE_POLICY, false)
+
         val bounds = Rect(50, 50, 150, 150)
-        val topComponent = ComponentName("test", "test")
-        val processor = RequestProcessor(controller)
+        val processor = RequestProcessor(imageCapture, policy, flags, scope)
 
-        val buffer = HardwareBuffer.create(100, 100, HardwareBuffer.RGBA_8888, 1,
-            HardwareBuffer.USAGE_GPU_SAMPLED_IMAGE)
-        val bitmap = Bitmap.wrapHardwareBuffer(buffer, ColorSpace.get(ColorSpace.Named.SRGB))!!
+        val bitmap = makeHardwareBitmap(100, 100)
         val bitmapBundle = HardwareBitmapBundler.hardwareBitmapToBundle(bitmap)
 
-        val request = ScreenshotRequest(ScreenshotSource.SCREENSHOT_OTHER, bitmapBundle,
-            bounds, Insets.NONE, taskId, userId, topComponent)
+        val request = ScreenshotRequest(TAKE_SCREENSHOT_PROVIDED_IMAGE, SCREENSHOT_OTHER,
+            bitmapBundle, bounds, Insets.NONE, TASK_ID, USER_ID, component)
 
-        val onSavedListener = mock<Consumer<Uri>>()
-        val callback = mock<RequestCallback>()
+        val processedRequest = processor.process(request)
 
-        processor.processRequest(WindowManager.TAKE_SCREENSHOT_PROVIDED_IMAGE, onSavedListener,
-            request, callback)
-
-        verify(controller).handleImageAsScreenshot(
-            bitmapCaptor.capture(), eq(bounds), eq(Insets.NONE), eq(taskId), eq(userId),
-            eq(topComponent), eq(onSavedListener), eq(callback)
-        )
-
-        assertThat(bitmapCaptor.value.equalsHardwareBitmap(bitmap)).isTrue()
+        // No changes
+        assertThat(processedRequest).isEqualTo(request)
     }
 
-    private fun Bitmap.equalsHardwareBitmap(bitmap: Bitmap): Boolean {
-        return bitmap.hardwareBuffer == this.hardwareBuffer &&
-                bitmap.colorSpace == this.colorSpace
+    @Test
+    fun testProvidedImageScreenshot() = runBlocking {
+        flags.set(Flags.SCREENSHOT_WORK_PROFILE_POLICY, true)
+
+        val bounds = Rect(50, 50, 150, 150)
+        val processor = RequestProcessor(imageCapture, policy, flags, scope)
+
+        policy.setManagedProfile(USER_ID, false)
+
+        val bitmap = makeHardwareBitmap(100, 100)
+        val bitmapBundle = HardwareBitmapBundler.hardwareBitmapToBundle(bitmap)
+
+        val request = ScreenshotRequest(TAKE_SCREENSHOT_PROVIDED_IMAGE, SCREENSHOT_OTHER,
+            bitmapBundle, bounds, Insets.NONE, TASK_ID, USER_ID, component)
+
+        val processedRequest = processor.process(request)
+
+        // No changes
+        assertThat(processedRequest).isEqualTo(request)
+    }
+
+    @Test
+    fun testProvidedImageScreenshot_managedProfile() = runBlocking {
+        flags.set(Flags.SCREENSHOT_WORK_PROFILE_POLICY, true)
+
+        val bounds = Rect(50, 50, 150, 150)
+        val processor = RequestProcessor(imageCapture, policy, flags, scope)
+
+        // Indicate that the screenshot belongs to a manged profile
+        policy.setManagedProfile(USER_ID, true)
+
+        val bitmap = makeHardwareBitmap(100, 100)
+        val bitmapBundle = HardwareBitmapBundler.hardwareBitmapToBundle(bitmap)
+
+        val request = ScreenshotRequest(TAKE_SCREENSHOT_PROVIDED_IMAGE, SCREENSHOT_OTHER,
+            bitmapBundle, bounds, Insets.NONE, TASK_ID, USER_ID, component)
+
+        val processedRequest = processor.process(request)
+
+        // Work profile, but already a task snapshot, so no changes
+        assertThat(processedRequest).isEqualTo(request)
+    }
+
+    private fun makeHardwareBitmap(width: Int, height: Int): Bitmap {
+        val buffer = HardwareBuffer.create(width, height, HardwareBuffer.RGBA_8888, 1,
+            HardwareBuffer.USAGE_GPU_SAMPLED_IMAGE)
+        return Bitmap.wrapHardwareBuffer(buffer, ColorSpace.get(ColorSpace.Named.SRGB))!!
+    }
+
+    private fun Bitmap.equalsHardwareBitmapBundle(bundle: Bundle): Boolean {
+        val provided = bundleToHardwareBitmap(bundle)
+        return provided.hardwareBuffer == this.hardwareBuffer &&
+                provided.colorSpace == this.colorSpace
     }
 }

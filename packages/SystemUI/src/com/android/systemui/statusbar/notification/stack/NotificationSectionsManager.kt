@@ -19,52 +19,43 @@ import android.annotation.ColorInt
 import android.util.Log
 import android.view.View
 import com.android.internal.annotations.VisibleForTesting
-import com.android.systemui.media.KeyguardMediaController
-import com.android.systemui.plugins.statusbar.StatusBarStateController
-import com.android.systemui.statusbar.StatusBarState
-import com.android.systemui.statusbar.notification.NotifPipelineFlags
+import com.android.systemui.flags.FeatureFlags
+import com.android.systemui.flags.Flags
+import com.android.systemui.media.controls.ui.KeyguardMediaController
 import com.android.systemui.statusbar.notification.NotificationSectionsFeatureManager
+import com.android.systemui.statusbar.notification.SourceType
 import com.android.systemui.statusbar.notification.collection.render.MediaContainerController
 import com.android.systemui.statusbar.notification.collection.render.SectionHeaderController
-import com.android.systemui.statusbar.notification.collection.render.ShadeViewManager
 import com.android.systemui.statusbar.notification.dagger.AlertingHeader
 import com.android.systemui.statusbar.notification.dagger.IncomingHeader
 import com.android.systemui.statusbar.notification.dagger.PeopleHeader
 import com.android.systemui.statusbar.notification.dagger.SilentHeader
 import com.android.systemui.statusbar.notification.row.ExpandableNotificationRow
 import com.android.systemui.statusbar.notification.row.ExpandableView
-import com.android.systemui.statusbar.notification.row.StackScrollerDecorView
 import com.android.systemui.statusbar.notification.stack.StackScrollAlgorithm.SectionProvider
 import com.android.systemui.statusbar.policy.ConfigurationController
-import com.android.systemui.util.children
 import com.android.systemui.util.foldToSparseArray
-import com.android.systemui.util.takeUntil
-import com.android.systemui.util.traceSection
 import javax.inject.Inject
 
 /**
- * Manages the boundaries of the notification sections (incoming, conversations, high priority, and
- * low priority).
- *
- * In the legacy notification pipeline, this is responsible for correctly positioning all section
- * headers after the [NotificationStackScrollLayout] has had notifications added/removed/changed. In
- * the new pipeline, this is handled as part of the [ShadeViewManager].
+ * Manages section headers in the NSSL.
  *
  * TODO: Move remaining sections logic from NSSL into this class.
  */
 class NotificationSectionsManager @Inject internal constructor(
-    private val statusBarStateController: StatusBarStateController,
     private val configurationController: ConfigurationController,
     private val keyguardMediaController: KeyguardMediaController,
     private val sectionsFeatureManager: NotificationSectionsFeatureManager,
-    private val logger: NotificationSectionsLogger,
-    private val notifPipelineFlags: NotifPipelineFlags,
     private val mediaContainerController: MediaContainerController,
+    private val notificationRoundnessManager: NotificationRoundnessManager,
     @IncomingHeader private val incomingHeaderController: SectionHeaderController,
     @PeopleHeader private val peopleHeaderController: SectionHeaderController,
     @AlertingHeader private val alertingHeaderController: SectionHeaderController,
-    @SilentHeader private val silentHeaderController: SectionHeaderController
+    @SilentHeader private val silentHeaderController: SectionHeaderController,
+    featureFlags: FeatureFlags
 ) : SectionProvider {
+
+    private val useRoundnessSourceTypes = featureFlags.isEnabled(Flags.USE_ROUNDNESS_SOURCETYPES)
 
     private val configurationListener = object : ConfigurationController.ConfigurationListener {
         override fun onLocaleListChanged() {
@@ -139,205 +130,6 @@ class NotificationSectionsManager @Inject internal constructor(
         else -> null
     }
 
-    private fun logShadeChild(i: Int, child: View) {
-        when {
-            child === incomingHeaderView -> logger.logIncomingHeader(i)
-            child === mediaControlsView -> logger.logMediaControls(i)
-            child === peopleHeaderView -> logger.logConversationsHeader(i)
-            child === alertingHeaderView -> logger.logAlertingHeader(i)
-            child === silentHeaderView -> logger.logSilentHeader(i)
-            child !is ExpandableNotificationRow -> logger.logOther(i, child.javaClass)
-            else -> {
-                val isHeadsUp = child.isHeadsUp
-                when (child.entry.bucket) {
-                    BUCKET_HEADS_UP -> logger.logHeadsUp(i, isHeadsUp)
-                    BUCKET_PEOPLE -> logger.logConversation(i, isHeadsUp)
-                    BUCKET_ALERTING -> logger.logAlerting(i, isHeadsUp)
-                    BUCKET_SILENT -> logger.logSilent(i, isHeadsUp)
-                }
-            }
-        }
-    }
-    private fun logShadeContents() = traceSection("NotifSectionsManager.logShadeContents") {
-        parent.children.forEachIndexed(::logShadeChild)
-    }
-
-    private val isUsingMultipleSections: Boolean
-        get() = sectionsFeatureManager.getNumberOfBuckets() > 1
-
-    @VisibleForTesting
-    fun updateSectionBoundaries() = updateSectionBoundaries("test")
-
-    private interface SectionUpdateState<out T : ExpandableView> {
-        val header: T
-        var currentPosition: Int?
-        var targetPosition: Int?
-        fun adjustViewPosition()
-    }
-
-    private fun <T : ExpandableView> expandableViewHeaderState(header: T): SectionUpdateState<T> =
-            object : SectionUpdateState<T> {
-                override val header = header
-                override var currentPosition: Int? = null
-                override var targetPosition: Int? = null
-
-                override fun adjustViewPosition() {
-                    notifPipelineFlags.checkLegacyPipelineEnabled()
-                    val target = targetPosition
-                    val current = currentPosition
-                    if (target == null) {
-                        if (current != null) {
-                            parent.removeView(header)
-                        }
-                    } else {
-                        if (current == null) {
-                            // If the header is animating away, it will still have a parent, so
-                            // detach it first
-                            // TODO: We should really cancel the active animations here. This will
-                            //  happen automatically when the view's intro animation starts, but
-                            //  it's a fragile link.
-                            header.removeFromTransientContainer()
-                            parent.addView(header, target)
-                        } else {
-                            parent.changeViewPosition(header, target)
-                        }
-                    }
-                }
-    }
-
-    private fun <T : StackScrollerDecorView> decorViewHeaderState(
-        header: T
-    ): SectionUpdateState<T> {
-        notifPipelineFlags.checkLegacyPipelineEnabled()
-        val inner = expandableViewHeaderState(header)
-        return object : SectionUpdateState<T> by inner {
-            override fun adjustViewPosition() {
-                inner.adjustViewPosition()
-                if (targetPosition != null && currentPosition == null) {
-                    header.isContentVisible = true
-                }
-            }
-        }
-    }
-
-    /**
-     * Should be called whenever notifs are added, removed, or updated. Updates section boundary
-     * bookkeeping and adds/moves/removes section headers if appropriate.
-     */
-    fun updateSectionBoundaries(reason: String) = traceSection("NotifSectionsManager.update") {
-        notifPipelineFlags.checkLegacyPipelineEnabled()
-        if (!isUsingMultipleSections) {
-            return@traceSection
-        }
-        logger.logStartSectionUpdate(reason)
-
-        // The overall strategy here is to iterate over the current children of mParent, looking
-        // for where the sections headers are currently positioned, and where each section begins.
-        // Then, once we find the start of a new section, we track that position as the "target" for
-        // the section header, adjusted for the case where existing headers are in front of that
-        // target, but won't be once they are moved / removed after the pass has completed.
-
-        val showHeaders = statusBarStateController.state != StatusBarState.KEYGUARD
-        val usingMediaControls = sectionsFeatureManager.isMediaControlsEnabled()
-
-        val mediaState = mediaControlsView?.let(::expandableViewHeaderState)
-        val incomingState = incomingHeaderView?.let(::decorViewHeaderState)
-        val peopleState = peopleHeaderView?.let(::decorViewHeaderState)
-        val alertingState = alertingHeaderView?.let(::decorViewHeaderState)
-        val gentleState = silentHeaderView?.let(::decorViewHeaderState)
-
-        fun getSectionState(view: View): SectionUpdateState<ExpandableView>? = when {
-            view === mediaControlsView -> mediaState
-            view === incomingHeaderView -> incomingState
-            view === peopleHeaderView -> peopleState
-            view === alertingHeaderView -> alertingState
-            view === silentHeaderView -> gentleState
-            else -> null
-        }
-
-        val headersOrdered = sequenceOf(
-                mediaState, incomingState, peopleState, alertingState, gentleState
-        ).filterNotNull()
-
-        var peopleNotifsPresent = false
-        var nextBucket: Int? = null
-        var inIncomingSection = false
-
-        // Iterating backwards allows for easier construction of the Incoming section, as opposed
-        // to backtracking when a discontinuity in the sections is discovered.
-        // Iterating to -1 in order to support the case where a header is at the very top of the
-        // shade.
-        for (i in parent.childCount - 1 downTo -1) {
-            val child: View? = parent.getChildAt(i)
-
-            child?.let {
-                logShadeChild(i, child)
-                // If this child is a header, update the tracked positions
-                getSectionState(child)?.let { state ->
-                    state.currentPosition = i
-                    // If headers that should appear above this one in the shade already have a
-                    // target index, then we need to decrement them in order to account for this one
-                    // being either removed, or moved below them.
-                    headersOrdered.takeUntil { it === state }
-                            .forEach { it.targetPosition = it.targetPosition?.minus(1) }
-                }
-            }
-
-            val row = (child as? ExpandableNotificationRow)
-                    ?.takeUnless { it.visibility == View.GONE }
-
-            // Is there a section discontinuity? This usually occurs due to HUNs
-            inIncomingSection = inIncomingSection || nextBucket?.let { next ->
-                row?.entry?.bucket?.let { curr -> next < curr }
-            } == true
-
-            if (inIncomingSection) {
-                // Update the bucket to reflect that it's being placed in the Incoming section
-                row?.entry?.bucket = BUCKET_HEADS_UP
-            }
-
-            // Insert a header in front of the next row, if there's a boundary between it and this
-            // row, or if it is the topmost row.
-            val isSectionBoundary = nextBucket != null &&
-                    (child == null || row != null && nextBucket != row.entry.bucket)
-            if (isSectionBoundary && showHeaders) {
-                when (nextBucket) {
-                    BUCKET_SILENT -> gentleState?.targetPosition = i + 1
-                }
-            }
-
-            row ?: continue
-
-            // Check if there are any people notifications
-            peopleNotifsPresent = peopleNotifsPresent || row.entry.bucket == BUCKET_PEOPLE
-            nextBucket = row.entry.bucket
-        }
-
-        mediaState?.targetPosition = if (usingMediaControls) 0 else null
-
-        logger.logStr("New header target positions:")
-        logger.logMediaControls(mediaState?.targetPosition ?: -1)
-        logger.logIncomingHeader(incomingState?.targetPosition ?: -1)
-        logger.logConversationsHeader(peopleState?.targetPosition ?: -1)
-        logger.logAlertingHeader(alertingState?.targetPosition ?: -1)
-        logger.logSilentHeader(gentleState?.targetPosition ?: -1)
-
-        // Update headers in reverse order to preserve indices, otherwise movements earlier in the
-        // list will affect the target indices of the headers later in the list.
-        headersOrdered.asIterable().reversed().forEach { it.adjustViewPosition() }
-
-        logger.logStr("Final order:")
-        logShadeContents()
-        logger.logStr("Section boundary update complete")
-
-        // Update headers to reflect state of section contents
-        silentHeaderView?.run {
-            val hasActiveClearableNotifications = this@NotificationSectionsManager.parent
-                    .hasActiveClearableNotifications(NotificationStackScrollLayout.ROWS_GENTLE)
-            setClearSectionButtonEnabled(hasActiveClearableNotifications)
-        }
-    }
-
     private sealed class SectionBounds {
 
         data class Many(
@@ -392,11 +184,49 @@ class NotificationSectionsManager @Inject internal constructor(
                         size = sections.size,
                         operation = SectionBounds::addNotif
                 )
+
+        // Build a set of the old first/last Views of the sections
+        val oldFirstChildren = sections.mapNotNull { it.firstVisibleChild }.toSet().toMutableSet()
+        val oldLastChildren = sections.mapNotNull { it.lastVisibleChild }.toSet().toMutableSet()
+
         // Update each section with the associated boundary, tracking if there was a change
         val changed = sections.fold(false) { changed, section ->
             val bounds = sectionBounds[section.bucket] ?: SectionBounds.None
-            bounds.updateSection(section) || changed
+            val isSectionChanged = bounds.updateSection(section)
+            isSectionChanged || changed
         }
+
+        if (useRoundnessSourceTypes) {
+            val newFirstChildren = sections.mapNotNull { it.firstVisibleChild }
+            val newLastChildren = sections.mapNotNull { it.lastVisibleChild }
+
+            // Update the roundness of Views that weren't already in the first/last position
+            newFirstChildren.forEach { firstChild ->
+                val wasFirstChild = oldFirstChildren.remove(firstChild)
+                if (!wasFirstChild) {
+                    val notAnimatedChild = !notificationRoundnessManager.isAnimatedChild(firstChild)
+                    val animated = firstChild.isShown && notAnimatedChild
+                    firstChild.requestTopRoundness(1f, SECTION, animated)
+                }
+            }
+            newLastChildren.forEach { lastChild ->
+                val wasLastChild = oldLastChildren.remove(lastChild)
+                if (!wasLastChild) {
+                    val notAnimatedChild = !notificationRoundnessManager.isAnimatedChild(lastChild)
+                    val animated = lastChild.isShown && notAnimatedChild
+                    lastChild.requestBottomRoundness(1f, SECTION, animated)
+                }
+            }
+
+            // The Views left in the set are no longer in the first/last position
+            oldFirstChildren.forEach { noMoreFirstChild ->
+                noMoreFirstChild.requestTopRoundness(0f, SECTION)
+            }
+            oldLastChildren.forEach { noMoreLastChild ->
+                noMoreLastChild.requestBottomRoundness(0f, SECTION)
+            }
+        }
+
         if (DEBUG) {
             logSections(sections)
         }
@@ -430,5 +260,6 @@ class NotificationSectionsManager @Inject internal constructor(
     companion object {
         private const val TAG = "NotifSectionsManager"
         private const val DEBUG = false
+        private val SECTION = SourceType.from("Section")
     }
 }

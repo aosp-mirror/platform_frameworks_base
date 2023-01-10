@@ -588,7 +588,7 @@ public class DisplayContentTests extends WindowTestsBase {
         assertEquals(window1, mWm.mRoot.getTopFocusedDisplayContent().mCurrentFocus);
 
         // Make sure top focused display not changed if there is a focused app.
-        window1.mActivityRecord.mVisibleRequested = false;
+        window1.mActivityRecord.setVisibleRequested(false);
         window1.getDisplayContent().setFocusedApp(window1.mActivityRecord);
         updateFocusedWindow();
         assertTrue(!window1.isFocused());
@@ -1066,6 +1066,7 @@ public class DisplayContentTests extends WindowTestsBase {
         final DisplayContent dc = createNewDisplay();
         dc.getDisplayRotation().setFixedToUserRotation(
                 IWindowManager.FIXED_TO_USER_ROTATION_DISABLED);
+        dc.getDefaultTaskDisplayArea().setWindowingMode(WINDOWING_MODE_FULLSCREEN);
         final int newOrientation = getRotatedOrientation(dc);
 
         final Task task = new TaskBuilder(mSupervisor)
@@ -1103,7 +1104,7 @@ public class DisplayContentTests extends WindowTestsBase {
     public void testOrientationBehind() {
         final ActivityRecord prev = new ActivityBuilder(mAtm).setCreateTask(true)
                 .setScreenOrientation(getRotatedOrientation(mDisplayContent)).build();
-        prev.mVisibleRequested = false;
+        prev.setVisibleRequested(false);
         final ActivityRecord top = new ActivityBuilder(mAtm).setCreateTask(true)
                 .setScreenOrientation(SCREEN_ORIENTATION_BEHIND).build();
         assertNotEquals(WindowConfiguration.ROTATION_UNDEFINED,
@@ -1125,6 +1126,7 @@ public class DisplayContentTests extends WindowTestsBase {
                 IWindowManager.FIXED_TO_USER_ROTATION_ENABLED);
         dc.getDisplayRotation().setUserRotation(
                 WindowManagerPolicy.USER_ROTATION_LOCKED, ROTATION_0);
+        dc.getDefaultTaskDisplayArea().setWindowingMode(WINDOWING_MODE_FULLSCREEN);
         final int newOrientation = getRotatedOrientation(dc);
 
         final Task task = new TaskBuilder(mSupervisor)
@@ -1251,7 +1253,15 @@ public class DisplayContentTests extends WindowTestsBase {
     public void testComputeImeControlTarget() throws Exception {
         final DisplayContent dc = createNewDisplay();
         dc.setRemoteInsetsController(createDisplayWindowInsetsController());
-        dc.setImeInputTarget(createWindow(null, TYPE_BASE_APPLICATION, "app"));
+        dc.mCurrentFocus = createWindow(null, TYPE_BASE_APPLICATION, "app");
+
+        // Expect returning null IME control target when the focus window has not yet been the
+        // IME input target (e.g. IME is restarting) in fullscreen windowing mode.
+        dc.setImeInputTarget(null);
+        assertFalse(dc.mCurrentFocus.inMultiWindowMode());
+        assertNull(dc.computeImeControlTarget());
+
+        dc.setImeInputTarget(dc.mCurrentFocus);
         dc.setImeLayeringTarget(dc.getImeInputTarget().getWindowState());
         assertEquals(dc.getImeInputTarget().getWindowState(), dc.computeImeControlTarget());
     }
@@ -1820,19 +1830,18 @@ public class DisplayContentTests extends WindowTestsBase {
 
     @Test
     public void testRemoteRotation() {
-        DisplayContent dc = createNewDisplay();
-
+        final DisplayContent dc = mDisplayContent;
         final DisplayRotation dr = dc.getDisplayRotation();
-        doCallRealMethod().when(dr).updateRotationUnchecked(anyBoolean());
+        spyOn(dr);
         // Rotate 180 degree so the display doesn't have configuration change. This condition is
         // used for the later verification of stop-freezing (without setting mWaitingForConfig).
         doReturn((dr.getRotation() + 2) % 4).when(dr).rotationForOrientation(anyInt(), anyInt());
         final boolean[] continued = new boolean[1];
-        doAnswer(
-                invocation -> {
-                    continued[0] = true;
-                    return true;
-                }).when(dc).updateDisplayOverrideConfigurationLocked();
+        doAnswer(invocation -> {
+            continued[0] = true;
+            mAtm.addWindowLayoutReasons(ActivityTaskManagerService.LAYOUT_REASON_CONFIG_CHANGED);
+            return true;
+        }).when(dc).updateDisplayOverrideConfigurationLocked();
         final boolean[] called = new boolean[1];
         mWm.mDisplayChangeController =
                 new IDisplayChangeWindowController.Stub() {
@@ -1905,10 +1914,10 @@ public class DisplayContentTests extends WindowTestsBase {
         testPlayer.start();
         assertNotEquals(origRot, dc.getConfiguration().windowConfiguration.getRotation());
         assertNotNull(testPlayer.mLastReady);
-        assertEquals(dc, DisplayRotation.getDisplayFromTransition(testPlayer.mLastTransit));
         WindowContainerToken dcToken = dc.mRemoteToken.toWindowContainerToken();
         assertNotEquals(testPlayer.mLastReady.getChange(dcToken).getEndRotation(),
                 testPlayer.mLastReady.getChange(dcToken).getStartRotation());
+        assertTrue(testPlayer.mLastTransit.applyDisplayChangeIfNeeded());
         testPlayer.finish();
     }
 
@@ -2018,23 +2027,6 @@ public class DisplayContentTests extends WindowTestsBase {
         }).when(mockTda).ensureActivitiesVisible(any(), anyInt(), anyBoolean(), anyBoolean());
 
         mDisplayContent.ensureActivitiesVisible(null, 0, false, false);
-    }
-
-    @Test
-    public void testSetWindowingModeAtomicallyUpdatesWindoingModeAndDisplayWindowingMode() {
-        final DisplayContent dc = createNewDisplay();
-        final Task rootTask = new TaskBuilder(mSupervisor)
-                .setDisplay(dc)
-                .build();
-        doAnswer(invocation -> {
-            Object[] args = invocation.getArguments();
-            final Configuration config = ((Configuration) args[0]);
-            assertEquals(config.windowConfiguration.getWindowingMode(),
-                    config.windowConfiguration.getDisplayWindowingMode());
-            return null;
-        }).when(rootTask).onConfigurationChanged(any());
-        dc.setWindowingMode(WINDOWING_MODE_FREEFORM);
-        dc.setWindowingMode(WINDOWING_MODE_FULLSCREEN);
     }
 
     @Test

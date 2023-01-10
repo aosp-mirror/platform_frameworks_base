@@ -42,9 +42,13 @@ import android.testing.AndroidTestingRunner;
 import android.testing.TestableLooper;
 import android.view.GestureDetector;
 import android.view.IWindowManager;
+import android.view.KeyEvent;
 import android.view.MotionEvent;
 import android.view.WindowManagerPolicyConstants;
+import android.window.OnBackInvokedCallback;
+import android.window.OnBackInvokedDispatcher;
 
+import androidx.test.filters.FlakyTest;
 import androidx.test.filters.SmallTest;
 
 import com.android.internal.colorextraction.ColorExtractor;
@@ -59,6 +63,7 @@ import com.android.systemui.broadcast.BroadcastDispatcher;
 import com.android.systemui.colorextraction.SysuiColorExtractor;
 import com.android.systemui.plugins.GlobalActions;
 import com.android.systemui.settings.UserContextProvider;
+import com.android.systemui.settings.UserTracker;
 import com.android.systemui.statusbar.NotificationShadeWindowController;
 import com.android.systemui.statusbar.VibratorHelper;
 import com.android.systemui.statusbar.phone.CentralSurfaces;
@@ -73,6 +78,8 @@ import com.android.systemui.util.settings.SecureSettings;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.mockito.ArgumentCaptor;
+import org.mockito.Captor;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 
@@ -97,6 +104,7 @@ public class GlobalActionsDialogLiteTest extends SysuiTestCase {
     @Mock private SecureSettings mSecureSettings;
     @Mock private Resources mResources;
     @Mock private ConfigurationController mConfigurationController;
+    @Mock private UserTracker mUserTracker;
     @Mock private KeyguardStateController mKeyguardStateController;
     @Mock private UserManager mUserManager;
     @Mock private TrustManager mTrustManager;
@@ -117,6 +125,8 @@ public class GlobalActionsDialogLiteTest extends SysuiTestCase {
     @Mock private CentralSurfaces mCentralSurfaces;
     @Mock private KeyguardUpdateMonitor mKeyguardUpdateMonitor;
     @Mock private DialogLaunchAnimator mDialogLaunchAnimator;
+    @Mock private OnBackInvokedDispatcher mOnBackInvokedDispatcher;
+    @Captor private ArgumentCaptor<OnBackInvokedCallback> mOnBackInvokedCallback;
 
     private TestableLooper mTestableLooper;
 
@@ -144,6 +154,7 @@ public class GlobalActionsDialogLiteTest extends SysuiTestCase {
                 mVibratorHelper,
                 mResources,
                 mConfigurationController,
+                mUserTracker,
                 mKeyguardStateController,
                 mUserManager,
                 mTrustManager,
@@ -200,6 +211,63 @@ public class GlobalActionsDialogLiteTest extends SysuiTestCase {
         dialog.onBackPressed();
         mTestableLooper.processAllMessages();
         verifyLogPosted(GlobalActionsDialogLite.GlobalActionsEvent.GA_CLOSE_BACK);
+    }
+
+    @Test
+    public void testPredictiveBackCallbackRegisteredAndUnregistered() {
+        mGlobalActionsDialogLite = spy(mGlobalActionsDialogLite);
+        doReturn(4).when(mGlobalActionsDialogLite).getMaxShownPowerItems();
+        doReturn(true).when(mGlobalActionsDialogLite).shouldDisplayLockdown(any());
+        doReturn(true).when(mGlobalActionsDialogLite).shouldShowAction(any());
+        String[] actions = {
+                GlobalActionsDialogLite.GLOBAL_ACTION_KEY_EMERGENCY,
+                GlobalActionsDialogLite.GLOBAL_ACTION_KEY_LOCKDOWN,
+                GlobalActionsDialogLite.GLOBAL_ACTION_KEY_POWER,
+                GlobalActionsDialogLite.GLOBAL_ACTION_KEY_RESTART,
+        };
+        doReturn(actions).when(mGlobalActionsDialogLite).getDefaultActions();
+
+        GlobalActionsDialogLite.ActionsDialogLite dialog = mGlobalActionsDialogLite.createDialog();
+        dialog.setBackDispatcherOverride(mOnBackInvokedDispatcher);
+        dialog.create();
+        mTestableLooper.processAllMessages();
+        verify(mOnBackInvokedDispatcher).registerOnBackInvokedCallback(
+                eq(OnBackInvokedDispatcher.PRIORITY_DEFAULT), any());
+        dialog.onDetachedFromWindow();
+        mTestableLooper.processAllMessages();
+        verify(mOnBackInvokedDispatcher).unregisterOnBackInvokedCallback(any());
+    }
+
+    /**
+     * This specific test case appears to be flaky.
+     * b/249136797 tracks the task of root-causing and fixing it.
+     */
+    @FlakyTest
+    @Test
+    public void testPredictiveBackInvocationDismissesDialog() {
+        mGlobalActionsDialogLite = spy(mGlobalActionsDialogLite);
+        doReturn(4).when(mGlobalActionsDialogLite).getMaxShownPowerItems();
+        doReturn(true).when(mGlobalActionsDialogLite).shouldDisplayLockdown(any());
+        doReturn(true).when(mGlobalActionsDialogLite).shouldShowAction(any());
+        String[] actions = {
+                GlobalActionsDialogLite.GLOBAL_ACTION_KEY_EMERGENCY,
+                GlobalActionsDialogLite.GLOBAL_ACTION_KEY_LOCKDOWN,
+                GlobalActionsDialogLite.GLOBAL_ACTION_KEY_POWER,
+                GlobalActionsDialogLite.GLOBAL_ACTION_KEY_RESTART,
+        };
+        doReturn(actions).when(mGlobalActionsDialogLite).getDefaultActions();
+
+        GlobalActionsDialogLite.ActionsDialogLite dialog = mGlobalActionsDialogLite.createDialog();
+        dialog.create();
+        dialog.show();
+        mTestableLooper.processAllMessages();
+        dialog.getWindow().injectInputEvent(
+                new KeyEvent(KeyEvent.ACTION_DOWN, KeyEvent.KEYCODE_BACK));
+        dialog.getWindow().injectInputEvent(
+                new KeyEvent(KeyEvent.ACTION_UP, KeyEvent.KEYCODE_BACK));
+        mTestableLooper.processAllMessages();
+        verifyLogPosted(GlobalActionsDialogLite.GlobalActionsEvent.GA_CLOSE_BACK);
+        assertThat(dialog.isShowing()).isFalse();
     }
 
     @Test

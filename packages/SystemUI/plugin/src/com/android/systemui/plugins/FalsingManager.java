@@ -82,6 +82,18 @@ public interface FalsingManager {
     boolean isFalseTap(@Penalty int penalty);
 
     /**
+     * Returns true if the FalsingManager thinks the last gesture was not a valid long tap.
+     *
+     * Use this method to validate a long tap for launching an action, like long press on a UMO
+     *
+     * The only parameter, penalty, indicates how much this should affect future gesture
+     * classifications if this long tap looks like a false.
+     * As long taps are hard to confirm as false or otherwise,
+     * a low penalty value is encouraged unless context indicates otherwise.
+     */
+    boolean isFalseLongTap(@Penalty int penalty);
+
+    /**
      * Returns true if the last two gestures do not look like a double tap.
      *
      * Only works on data that has already been reported to the FalsingManager. Be sure that
@@ -101,6 +113,12 @@ public interface FalsingManager {
      * @return
      */
     boolean isFalseDoubleTap();
+
+    /**
+     * Whether the last proximity event reported NEAR. May be used to short circuit motion events
+     * that require the proximity sensor is not covered.
+     */
+    boolean isProximityNear();
 
     boolean isClassifierEnabled();
 
@@ -141,10 +159,10 @@ public interface FalsingManager {
     }
 
     /**
-     * Listener that is alerted when a double tap is required to confirm a single tap.
+     * Listener that is alerted when an additional tap is required to confirm a single tap.
      **/
     interface FalsingTapListener {
-        void onDoubleTapRequired();
+        void onAdditionalTapRequired();
     }
 
     /** Passed to {@link FalsingManager#onProximityEvent}. */

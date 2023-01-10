@@ -33,6 +33,7 @@
     <string name="defaultVoiceMailAlphaTag" msgid="2190754495304236490">"Галасавая пошта"</string>
     <string name="defaultMsisdnAlphaTag" msgid="2285034592902077488">"MSISDN1"</string>
     <string name="mmiError" msgid="2862759606579822246">"Праблема падлучэння ці няправільны код MMI."</string>
+    <string name="mmiErrorNotSupported" msgid="5001803469335286099">"Функцыя не падтрымліваецца."</string>
     <string name="mmiFdnError" msgid="3975490266767565852">"Выкарыстанне абмежаванае толькі дазволенымі нумарамі."</string>
     <string name="mmiErrorWhileRoaming" msgid="1204173664713870114">"Немагчыма змяніць налады пераадрасацыі выклікаў з тэлефона, пакуль вы знаходзіцеся ў роўмінгу."</string>
     <string name="serviceEnabled" msgid="7549025003394765639">"Служба была ўключана."</string>
@@ -195,7 +196,7 @@
     <string name="network_logging_notification_text" msgid="1327373071132562512">"Ваша арганізацыя кіруе гэтай прыладай і можа сачыць за сеткавым трафікам. Дакраніцеся для атрымання дадатковай інфармацыі."</string>
     <string name="location_changed_notification_title" msgid="3620158742816699316">"Праграмы могуць атрымліваць даныя пра ваша месцазнаходжанне"</string>
     <string name="location_changed_notification_text" msgid="7158423339982706912">"Каб даведацца больш, звярніцеся да ІТ-адміністратара"</string>
-    <string name="geofencing_service" msgid="3826902410740315456">"Служба вызначэння геаперыметра"</string>
+    <string name="geofencing_service" msgid="3826902410740315456">"Сэрвіс геазаніравання"</string>
     <string name="country_detector" msgid="7023275114706088854">"Дэтэктар краіны"</string>
     <string name="location_service" msgid="2439187616018455546">"Служба геалакацыі"</string>
     <string name="gnss_service" msgid="8907781262179951385">"Служба GNSS"</string>
@@ -588,13 +589,14 @@
     <string name="screen_lock_app_setting_name" msgid="6054944352976789228">"Ужываць блакіроўку экрана"</string>
     <string name="screen_lock_dialog_default_subtitle" msgid="120359538048533695">"Каб працягнуць, скарыстайце свой сродак блакіроўкі экрана"</string>
     <string name="fingerprint_acquired_partial" msgid="4323789264604479684">"Моцна націсніце на сканер"</string>
-    <string name="fingerprint_acquired_insufficient" msgid="2545149524031515411">"Не атрымалася апрацаваць адбітак пальца. Паспрабуйце яшчэ раз."</string>
+    <string name="fingerprint_acquired_insufficient" msgid="623888149088216458">"Не ўдалося распазнаць адбітак пальца. Паўтарыце спробу."</string>
     <string name="fingerprint_acquired_imager_dirty" msgid="1770676120848224250">"Ачысціце сканер адбіткаў пальцаў і паўтарыце спробу"</string>
     <string name="fingerprint_acquired_imager_dirty_alt" msgid="9169582140486372897">"Ачысціце сканер і паўтарыце спробу"</string>
     <string name="fingerprint_acquired_too_fast" msgid="1628459767349116104">"Моцна націсніце на сканер"</string>
     <string name="fingerprint_acquired_too_slow" msgid="6683510291554497580">"Палец рухаўся занадта павольна. Паспрабуйце яшчэ раз."</string>
     <string name="fingerprint_acquired_already_enrolled" msgid="2285166003936206785">"Паспрабуйце іншы адбітак пальца"</string>
     <string name="fingerprint_acquired_too_bright" msgid="3863560181670915607">"Занадта светла"</string>
+    <string name="fingerprint_acquired_power_press" msgid="3107864151278434961">"Выяўлена моцнае націсканне"</string>
     <string name="fingerprint_acquired_try_adjusting" msgid="3667006071003809364">"Паспрабуйце наладзіць"</string>
     <string name="fingerprint_acquired_immobile" msgid="1621891895241888048">"Кожны раз крыху мяняйце пазіцыю пальца"</string>
   <string-array name="fingerprint_acquired_vendor">
@@ -606,12 +608,12 @@
     <string name="face_authenticated_confirmation_required" msgid="6872632732508013755">"Твар распазнаны. Націсніце, каб пацвердзіць"</string>
     <string name="fingerprint_error_hw_not_available" msgid="4571700896929561202">"Апаратныя сродкі адбіткаў пальцаў недаступныя."</string>
     <string name="fingerprint_error_no_space" msgid="7285481581905967580">"Не ўдалося захаваць адбітак пальца"</string>
-    <string name="fingerprint_error_timeout" msgid="2946635815726054226">"Час чакання выйшаў. Паспрабуйце яшчэ раз."</string>
+    <string name="fingerprint_error_timeout" msgid="7361192266621252164">"Наладжванне адбітка пальца не завершана. Паўтарыце спробу."</string>
     <string name="fingerprint_error_canceled" msgid="540026881380070750">"Аперацыя з адбіткамі пальцаў скасавана."</string>
     <string name="fingerprint_error_user_canceled" msgid="7685676229281231614">"Аўтэнтыфікацыя па адбітках пальцаў скасавана карыстальнікам."</string>
-    <string name="fingerprint_error_lockout" msgid="7853461265604738671">"Занадта шмат спроб. Паспрабуйце яшчэ раз пазней."</string>
-    <string name="fingerprint_error_lockout_permanent" msgid="3895478283943513746">"Занадта шмат спроб. Сканер адбіткаў пальцаў выключаны."</string>
-    <string name="fingerprint_error_unable_to_process" msgid="1148553603490048742">"Паўтарыце спробу."</string>
+    <string name="fingerprint_error_lockout" msgid="6626753679019351368">"Занадта шмат спроб. Скарыстайце блакіроўку экрана."</string>
+    <string name="fingerprint_error_lockout_permanent" msgid="9060651300306264843">"Занадта шмат спроб. Скарыстайце блакіроўку экрана."</string>
+    <string name="fingerprint_error_unable_to_process" msgid="2446280592818621224">"Не ўдалося апрацаваць адбітак пальца. Паўтарыце спробу."</string>
     <string name="fingerprint_error_no_fingerprints" msgid="8671811719699072411">"Адбіткі пальцаў не зарэгістраваны."</string>
     <string name="fingerprint_error_hw_not_present" msgid="578914350967423382">"На гэтай прыладзе няма сканера адбіткаў пальцаў."</string>
     <string name="fingerprint_error_security_update_required" msgid="7750187320640856433">"Датчык часова выключаны."</string>
@@ -639,7 +641,7 @@
     <string name="fingerprint_recalibrate_notification_content" msgid="8519935717822194943">"Звярніцеся ў сэрвісны цэнтр."</string>
     <string name="face_acquired_insufficient" msgid="6889245852748492218">"Не ўдалося стварыць мадэль твару. Паўтарыце."</string>
     <string name="face_acquired_too_bright" msgid="8070756048978079164">"Занадта светла. Прыглушыце асвятленне."</string>
-    <string name="face_acquired_too_dark" msgid="7919016380747701228">"Павялічце асвятленне"</string>
+    <string name="face_acquired_too_dark" msgid="8539853432479385326">"Недастаткова святла"</string>
     <string name="face_acquired_too_close" msgid="4453646176196302462">"Перамясціце тэлефон далей"</string>
     <string name="face_acquired_too_far" msgid="2922278214231064859">"Перамясціце тэлефон бліжэй"</string>
     <string name="face_acquired_too_high" msgid="8278815780046368576">"Перамясціце тэлефон вышэй"</string>
@@ -1251,10 +1253,9 @@
     <string name="android_preparing_apk" msgid="589736917792300956">"Падрыхтоўка <xliff:g id="APPNAME">%1$s</xliff:g>."</string>
     <string name="android_upgrading_starting_apps" msgid="6206161195076057075">"Запуск прыкладанняў."</string>
     <string name="android_upgrading_complete" msgid="409800058018374746">"Завяршэнне загрузкі."</string>
-    <string name="fp_power_button_enrollment_title" msgid="3574363228413259548">"Працягнуць наладжванне?"</string>
     <string name="fp_power_button_enrollment_message" msgid="5648173517663246140">"Вы націснулі кнопку сілкавання. Звычайна ў выніку гэтага дзеяння выключаецца экран.\n\nПадчас наладжвання адбітка пальца злёгку дакраніцеся да кнопкі."</string>
-    <string name="fp_power_button_enrollment_positive_button" msgid="2095415838459356833">"Выключыць экран"</string>
-    <string name="fp_power_button_enrollment_negative_button" msgid="6558436406362486747">"Працягнуць наладку"</string>
+    <string name="fp_power_button_enrollment_title" msgid="6976841690455338563">"Каб завяршыць наладку, выключыце экран"</string>
+    <string name="fp_power_button_enrollment_button_text" msgid="3199783266386029200">"Выключыць"</string>
     <string name="fp_power_button_bp_title" msgid="5585506104526820067">"Працягнуць спраўджанне адбітка пальца?"</string>
     <string name="fp_power_button_bp_message" msgid="2983163038168903393">"Вы націснулі кнопку сілкавання. Звычайна ў выніку гэтага дзеяння выключаецца экран.\n\nКаб спраўдзіць адбітак пальца, злёгку дакраніцеся да кнопкі."</string>
     <string name="fp_power_button_bp_positive_button" msgid="728945472408552251">"Выключыць экран"</string>
@@ -1407,16 +1408,16 @@
     <string name="ext_media_new_notification_message" msgid="6095403121990786986">"Дакраніцеся, каб наладзіць"</string>
     <string name="ext_media_new_notification_message" product="tv" msgid="216863352100263668">"Выберыце, каб наладзіць"</string>
     <string name="ext_media_new_notification_message" product="automotive" msgid="5140127881613227162">"Магчыма, вам спатрэбіцца перафармаціраваць прыладу. Націсніце, каб выняць."</string>
-    <string name="ext_media_ready_notification_message" msgid="777258143284919261">"Для перадачы фатаграфій і медыяфайлаў"</string>
+    <string name="ext_media_ready_notification_message" msgid="7509496364380197369">"Для захоўвання фота, відэа, музыкі і іншага змесціва"</string>
     <string name="ext_media_ready_notification_message" product="tv" msgid="8847134811163165935">"Пошук медыяфайлаў"</string>
     <string name="ext_media_unmountable_notification_title" msgid="4895444667278979910">"Праблема з носьбітам (<xliff:g id="NAME">%s</xliff:g>)"</string>
     <string name="ext_media_unmountable_notification_title" product="automotive" msgid="3142723758949023280">"<xliff:g id="NAME">%s</xliff:g> не працуе"</string>
     <string name="ext_media_unmountable_notification_message" msgid="3256290114063126205">"Націсніце, каб выправіць"</string>
     <string name="ext_media_unmountable_notification_message" product="tv" msgid="3003611129979934633">"Носьбіт <xliff:g id="NAME">%s</xliff:g> пашкоджаны. Выберыце, каб выправіць."</string>
     <string name="ext_media_unmountable_notification_message" product="automotive" msgid="2274596120715020680">"Магчыма, вам спатрэбіцца перафармаціраваць прыладу. Націсніце, каб выняць."</string>
-    <string name="ext_media_unsupported_notification_title" msgid="4358280700537030333">"<xliff:g id="NAME">%s</xliff:g> не падтрымліваецца"</string>
+    <string name="ext_media_unsupported_notification_title" msgid="3487534182861251401">"Выяўлены носьбіт \"<xliff:g id="NAME">%s</xliff:g>\""</string>
     <string name="ext_media_unsupported_notification_title" product="automotive" msgid="6004193172658722381">"<xliff:g id="NAME">%s</xliff:g> не працуе"</string>
-    <string name="ext_media_unsupported_notification_message" msgid="917738524888367560">"Гэта прылада не падтрымлівае носьбіт <xliff:g id="NAME">%s</xliff:g>. Дакраніцеся, каб наладзіць яго ў фармаце, які падтрымліваецца."</string>
+    <string name="ext_media_unsupported_notification_message" msgid="8463636521459807981">"Дакраніцеся, каб наладзіць ."</string>
     <string name="ext_media_unsupported_notification_message" product="tv" msgid="1595482802187036532">"Выберыце, каб задаць для носьбіта \"<xliff:g id="NAME">%s</xliff:g>\" фармат, які падтрымліваецца."</string>
     <string name="ext_media_unsupported_notification_message" product="automotive" msgid="3412494732736336330">"Магчыма, вам спатрэбіцца перафармаціраваць прыладу"</string>
     <string name="ext_media_badremoval_notification_title" msgid="4114625551266196872">"Носьбіт <xliff:g id="NAME">%s</xliff:g> нечакана выняты"</string>
@@ -1929,6 +1930,7 @@
     <string name="country_selection_title" msgid="5221495687299014379">"Параметры рэгіёна"</string>
     <string name="search_language_hint" msgid="7004225294308793583">"Увядзіце назву мовы"</string>
     <string name="language_picker_section_suggested" msgid="6556199184638990447">"Прапанаваныя"</string>
+    <string name="language_picker_regions_section_suggested" msgid="6080131515268225316">"Прапанавана"</string>
     <string name="language_picker_section_all" msgid="1985809075777564284">"Усе мовы"</string>
     <string name="region_picker_section_all" msgid="756441309928774155">"Усе рэгіёны"</string>
     <string name="locale_search_menu" msgid="6258090710176422934">"Шукаць"</string>
@@ -1946,8 +1948,7 @@
     <string name="app_streaming_blocked_title_for_camera_dialog" msgid="3935701653713853065">"Камера недаступная"</string>
     <string name="app_streaming_blocked_title_for_fingerprint_dialog" msgid="3516853717714141951">"Працягніце на тэлефоне"</string>
     <string name="app_streaming_blocked_title_for_microphone_dialog" msgid="544822455127171206">"Мікрафон недаступны"</string>
-    <!-- no translation found for app_streaming_blocked_title_for_playstore_dialog (8149823099822897538) -->
-    <skip />
+    <string name="app_streaming_blocked_title_for_playstore_dialog" msgid="8149823099822897538">"Крама Play недаступная"</string>
     <string name="app_streaming_blocked_title_for_settings_dialog" product="tv" msgid="196994247017450357">"Налады Android TV недаступныя"</string>
     <string name="app_streaming_blocked_title_for_settings_dialog" product="tablet" msgid="8222710146267948647">"Налады планшэта недаступныя"</string>
     <string name="app_streaming_blocked_title_for_settings_dialog" product="default" msgid="6895719984375299791">"Налады тэлефона недаступныя"</string>
@@ -1957,12 +1958,9 @@
     <string name="app_streaming_blocked_message_for_fingerprint_dialog" product="tv" msgid="3470977315395784567">"Гэтай праграме патрабуецца дадатковая бяспека. Паспрабуйце скарыстаць прыладу Android TV."</string>
     <string name="app_streaming_blocked_message_for_fingerprint_dialog" product="tablet" msgid="698460091901465092">"Гэтай праграме патрабуецца дадатковая бяспека. Паспрабуйце скарыстаць планшэт."</string>
     <string name="app_streaming_blocked_message_for_fingerprint_dialog" product="default" msgid="8552691971910603907">"Гэтай праграме патрабуецца дадатковая бяспека. Паспрабуйце скарыстаць тэлефон."</string>
-    <!-- no translation found for app_streaming_blocked_message_for_settings_dialog (820334666354451145) -->
-    <skip />
-    <!-- no translation found for app_streaming_blocked_message_for_settings_dialog (3286849551133045896) -->
-    <skip />
-    <!-- no translation found for app_streaming_blocked_message_for_settings_dialog (6264287556598916295) -->
-    <skip />
+    <string name="app_streaming_blocked_message_for_settings_dialog" product="tv" msgid="820334666354451145">"Не ўдаецца атрымаць доступ з прылады \"<xliff:g id="DEVICE">%1$s</xliff:g>\". Паспрабуйце скарыстаць прыладу Android TV."</string>
+    <string name="app_streaming_blocked_message_for_settings_dialog" product="tablet" msgid="3286849551133045896">"Не ўдаецца атрымаць доступ з прылады \"<xliff:g id="DEVICE">%1$s</xliff:g>\". Паспрабуйце скарыстаць планшэт."</string>
+    <string name="app_streaming_blocked_message_for_settings_dialog" product="default" msgid="6264287556598916295">"Не ўдаецца атрымаць доступ з прылады \"<xliff:g id="DEVICE">%1$s</xliff:g>\". Паспрабуйце скарыстаць тэлефон."</string>
     <string name="deprecated_target_sdk_message" msgid="5203207875657579953">"Гэта праграма была створана для больш старой версіі Android і можа не працаваць належным чынам. Праверце наяўнасць абнаўленняў або звярніцеся да распрацоўшчыка."</string>
     <string name="deprecated_target_sdk_app_store" msgid="8456784048558808909">"Праверыць наяўнасць абнаўленняў"</string>
     <string name="new_sms_notification_title" msgid="6528758221319927107">"У вас ёсць новыя паведамленні"</string>
@@ -1976,7 +1974,7 @@
     <string name="pin_specific_target" msgid="7824671240625957415">"Замацаваць праграму \"<xliff:g id="LABEL">%1$s</xliff:g>\""</string>
     <string name="unpin_target" msgid="3963318576590204447">"Адмацаваць"</string>
     <string name="unpin_specific_target" msgid="3859828252160908146">"Адмацаваць праграму \"<xliff:g id="LABEL">%1$s</xliff:g>\""</string>
-    <string name="app_info" msgid="6113278084877079851">"Інфармацыя пра праграму"</string>
+    <string name="app_info" msgid="6113278084877079851">"Звесткі аб праграме"</string>
     <string name="negative_duration" msgid="1938335096972945232">"−<xliff:g id="TIME">%1$s</xliff:g>"</string>
     <string name="demo_starting_message" msgid="6577581216125805905">"Ідзе запуск дэманстрацыі…"</string>
     <string name="demo_restarting_message" msgid="1160053183701746766">"Ідзе скід налад прылады…"</string>
@@ -2055,7 +2053,8 @@
     <string name="log_access_confirmation_title" msgid="2343578467290592708">"Дазволіць праграме \"<xliff:g id="LOG_ACCESS_APP_NAME">%s</xliff:g>\" мець доступ да ўсіх журналаў прылады?"</string>
     <string name="log_access_confirmation_allow" msgid="5302517782599389507">"Дазволіць аднаразовы доступ"</string>
     <string name="log_access_confirmation_deny" msgid="7685790957455099845">"Не дазваляць"</string>
-    <string name="log_access_confirmation_body" msgid="6581985716241928135">"Журналы прылад запісваюць усё, што адбываецца на вашай прыладзе. Праграмы выкарыстоўваюць гэтыя журналы для пошуку і выпраўлення памылак.\n\nУ некаторых журналах можа ўтрымлівацца канфідэнцыяльная інфармацыя, таму давайце доступ да ўсіх журналаў прылады толькі тым праграмам, якім вы давяраеце. \n\nКалі вы не дасце гэтай праграме доступу да ўсіх журналаў прылад, у яе ўсё роўна застанецца доступ да ўласных журналаў. Для вытворцы вашай прылады будуць даступнымі некаторыя журналы і інфармацыя на вашай прыладзе. Даведацца больш"</string>
+    <string name="log_access_confirmation_body" product="default" msgid="1806692062668620735">"Журналы прылад запісваюць усё, што адбываецца на вашай прыладзе. Праграмы выкарыстоўваюць гэтыя журналы для пошуку і выпраўлення памылак.\n\nУ некаторых журналах можа ўтрымлівацца канфідэнцыяльная інфармацыя, таму давайце доступ да ўсіх журналаў прылады толькі тым праграмам, якім вы давяраеце. \n\nКалі вы не дасце гэтай праграме доступу да ўсіх журналаў прылад, у яе ўсё роўна застанецца доступ да ўласных журналаў. Для вытворцы вашай прылады будуць даступнымі некаторыя журналы і інфармацыя на вашай прыладзе."</string>
+    <string name="log_access_confirmation_body" product="tv" msgid="7379536536425265262">"Журналы прылад запісваюць усё, што адбываецца на вашай прыладзе. Праграмы выкарыстоўваюць гэтыя журналы для пошуку і выпраўлення памылак.\n\nУ некаторых журналах можа ўтрымлівацца канфідэнцыяльная інфармацыя, таму давайце доступ да ўсіх журналаў прылады толькі тым праграмам, якім вы давяраеце. \n\nКалі вы не дасце гэтай праграме доступу да ўсіх журналаў прылад, у яе ўсё роўна застанецца доступ да ўласных журналаў. Для вытворцы вашай прылады будуць даступнымі некаторыя журналы і інфармацыя на вашай прыладзе.\n\nДаведайцеся больш на старонцы g.co/android/devicelogs."</string>
     <string name="log_access_do_not_show_again" msgid="1058690599083091552">"Больш не паказваць"</string>
     <string name="slices_permission_request" msgid="3677129866636153406">"Праграма <xliff:g id="APP_0">%1$s</xliff:g> запытвае дазвол на паказ зрэзаў праграмы <xliff:g id="APP_2">%2$s</xliff:g>"</string>
     <string name="screenshot_edit" msgid="7408934887203689207">"Рэдагаваць"</string>
@@ -2296,5 +2295,6 @@
     <string name="notification_action_check_bg_apps" msgid="4758877443365362532">"Праверце актыўныя праграмы"</string>
     <string name="vdm_camera_access_denied" product="default" msgid="6102378580971542473">"Не ўдалося атрымаць доступ да камеры тэлефона з прылады \"<xliff:g id="DEVICE">%1$s</xliff:g>\""</string>
     <string name="vdm_camera_access_denied" product="tablet" msgid="6895968310395249076">"Не ўдалося атрымаць доступ да камеры планшэта з прылады \"<xliff:g id="DEVICE">%1$s</xliff:g>\""</string>
+    <string name="vdm_secure_window" msgid="161700398158812314">"Не ўдаецца атрымаць доступ у час перадачы плынню. Паспрабуйце скарыстаць тэлефон."</string>
     <string name="system_locale_title" msgid="711882686834677268">"Стандартная сістэмная налада"</string>
 </resources>

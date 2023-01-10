@@ -286,10 +286,11 @@ public class WindowlessWindowManager implements IWindowSession {
 
     @Override
     public int relayout(IWindow window, WindowManager.LayoutParams inAttrs,
-            int requestedWidth, int requestedHeight, int viewFlags, int flags,
-            ClientWindowFrames outFrames, MergedConfiguration mergedConfiguration,
-            SurfaceControl outSurfaceControl, InsetsState outInsetsState,
-            InsetsSourceControl[] outActiveControls, Bundle outSyncSeqIdBundle) {
+            int requestedWidth, int requestedHeight, int viewFlags, int flags, int seq,
+            int lastSyncSeqId, ClientWindowFrames outFrames,
+            MergedConfiguration outMergedConfiguration, SurfaceControl outSurfaceControl,
+            InsetsState outInsetsState, InsetsSourceControl[] outActiveControls,
+            Bundle outSyncSeqIdBundle) {
         final State state;
         synchronized (this) {
             state = mStateForWindow.get(window.asBinder());
@@ -309,15 +310,23 @@ public class WindowlessWindowManager implements IWindowSession {
 
         if (viewFlags == View.VISIBLE) {
             t.setOpaque(sc, isOpaque(attrs)).show(sc).apply();
-            outSurfaceControl.copyFrom(sc, "WindowlessWindowManager.relayout");
+            if (outSurfaceControl != null) {
+                outSurfaceControl.copyFrom(sc, "WindowlessWindowManager.relayout");
+            }
         } else {
             t.hide(sc).apply();
-            outSurfaceControl.release();
+            if (outSurfaceControl != null) {
+                outSurfaceControl.release();
+            }
         }
-        outFrames.frame.set(0, 0, attrs.width, attrs.height);
-        outFrames.displayFrame.set(outFrames.frame);
+        if (outFrames != null) {
+            outFrames.frame.set(0, 0, attrs.width, attrs.height);
+            outFrames.displayFrame.set(outFrames.frame);
+        }
 
-        mergedConfiguration.setConfiguration(mConfiguration, mConfiguration);
+        if (outMergedConfiguration != null) {
+            outMergedConfiguration.setConfiguration(mConfiguration, mConfiguration);
+        }
 
         if ((attrChanges & WindowManager.LayoutParams.FLAGS_CHANGED) != 0
                 && state.mInputChannelToken != null) {
@@ -335,11 +344,21 @@ public class WindowlessWindowManager implements IWindowSession {
             }
         }
 
-        if (mInsetsState != null) {
+        if (outInsetsState != null && mInsetsState != null) {
             outInsetsState.set(mInsetsState);
         }
 
         return 0;
+    }
+
+    @Override
+    public void relayoutAsync(IWindow window, WindowManager.LayoutParams inAttrs,
+            int requestedWidth, int requestedHeight, int viewFlags, int flags, int seq,
+            int lastSyncSeqId) {
+        relayout(window, inAttrs, requestedWidth, requestedHeight, viewFlags, flags, seq,
+                lastSyncSeqId, null /* outFrames */, null /* outMergedConfiguration */,
+                null /* outSurfaceControl */, null /* outInsetsState */,
+                null /* outActiveControls */, null /* outSyncSeqIdBundle */);
     }
 
     @Override

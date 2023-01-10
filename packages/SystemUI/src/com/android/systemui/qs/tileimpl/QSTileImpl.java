@@ -105,6 +105,9 @@ public abstract class QSTileImpl<TState extends State> implements QSTile, Lifecy
     private final FalsingManager mFalsingManager;
     protected final QSLogger mQSLogger;
     private volatile int mReadyState;
+    // Keeps track of the click event, to match it with the handling in the background thread
+    // Only read and modified in main thread (where click events come through).
+    private int mClickEventId = 0;
 
     private final ArrayList<Callback> mCallbacks = new ArrayList<>();
     private final Object mStaleListener = new Object();
@@ -295,9 +298,11 @@ public abstract class QSTileImpl<TState extends State> implements QSTile, Lifecy
                         mStatusBarStateController.getState())));
         mUiEventLogger.logWithInstanceId(QSEvent.QS_ACTION_CLICK, 0, getMetricsSpec(),
                 getInstanceId());
-        mQSLogger.logTileClick(mTileSpec, mStatusBarStateController.getState(), mState.state);
+        final int eventId = mClickEventId++;
+        mQSLogger.logTileClick(mTileSpec, mStatusBarStateController.getState(), mState.state,
+                eventId);
         if (!mFalsingManager.isFalseTap(FalsingManager.LOW_PENALTY)) {
-            mHandler.obtainMessage(H.CLICK, view).sendToTarget();
+            mHandler.obtainMessage(H.CLICK, eventId, 0, view).sendToTarget();
         }
     }
 
@@ -307,9 +312,10 @@ public abstract class QSTileImpl<TState extends State> implements QSTile, Lifecy
                         mStatusBarStateController.getState())));
         mUiEventLogger.logWithInstanceId(QSEvent.QS_ACTION_SECONDARY_CLICK, 0, getMetricsSpec(),
                 getInstanceId());
+        final int eventId = mClickEventId++;
         mQSLogger.logTileSecondaryClick(mTileSpec, mStatusBarStateController.getState(),
-                mState.state);
-        mHandler.obtainMessage(H.SECONDARY_CLICK, view).sendToTarget();
+                mState.state, eventId);
+        mHandler.obtainMessage(H.SECONDARY_CLICK, eventId, 0, view).sendToTarget();
     }
 
     @Override
@@ -319,8 +325,10 @@ public abstract class QSTileImpl<TState extends State> implements QSTile, Lifecy
                         mStatusBarStateController.getState())));
         mUiEventLogger.logWithInstanceId(QSEvent.QS_ACTION_LONG_PRESS, 0, getMetricsSpec(),
                 getInstanceId());
-        mQSLogger.logTileLongClick(mTileSpec, mStatusBarStateController.getState(), mState.state);
-        mHandler.obtainMessage(H.LONG_CLICK, view).sendToTarget();
+        final int eventId = mClickEventId++;
+        mQSLogger.logTileLongClick(mTileSpec, mStatusBarStateController.getState(), mState.state,
+                eventId);
+        mHandler.obtainMessage(H.LONG_CLICK, eventId, 0, view).sendToTarget();
     }
 
     public LogMaker populate(LogMaker logMaker) {
@@ -590,13 +598,16 @@ public abstract class QSTileImpl<TState extends State> implements QSTile, Lifecy
                                 mContext, mEnforcedAdmin);
                         mActivityStarter.postStartActivityDismissingKeyguard(intent, 0);
                     } else {
+                        mQSLogger.logHandleClick(mTileSpec, msg.arg1);
                         handleClick((View) msg.obj);
                     }
                 } else if (msg.what == SECONDARY_CLICK) {
                     name = "handleSecondaryClick";
+                    mQSLogger.logHandleSecondaryClick(mTileSpec, msg.arg1);
                     handleSecondaryClick((View) msg.obj);
                 } else if (msg.what == LONG_CLICK) {
                     name = "handleLongClick";
+                    mQSLogger.logHandleLongClick(mTileSpec, msg.arg1);
                     handleLongClick((View) msg.obj);
                 } else if (msg.what == REFRESH_STATE) {
                     name = "handleRefreshState";

@@ -12273,7 +12273,7 @@ public class TelephonyManager {
             Log.e(TAG, "Error calling ITelephony#getServiceStateForSubscriber", e);
         } catch (NullPointerException e) {
             AnomalyReporter.reportAnomaly(
-                    UUID.fromString("a3ab0b9d-f2aa-4baf-911d-7096c0d4645a"),
+                    UUID.fromString("e2bed88e-def9-476e-bd71-3e572a8de6d1"),
                     "getServiceStateForSubscriber " + subId + " NPE");
         }
         return null;
@@ -15380,11 +15380,28 @@ public class TelephonyManager {
     public static final int MOBILE_DATA_POLICY_MMS_ALWAYS_ALLOWED = 2;
 
     /**
+     * Allow switching mobile data to the non-default SIM if the non-default SIM has better
+     * availability.
+     *
+     * This is used for temporarily allowing data on the non-default data SIM when on-default SIM
+     * has better availability on DSDS devices, where better availability means strong
+     * signal/connectivity.
+     * If this policy is enabled, data will be temporarily enabled on the non-default data SIM,
+     * including during any voice calls(equivalent to enabling
+     * {@link #MOBILE_DATA_POLICY_DATA_ON_NON_DEFAULT_DURING_VOICE_CALL}).
+     *
+     * This policy can be enabled and disabled via {@link #setMobileDataPolicyEnabled}.
+     * @hide
+     */
+    public static final int MOBILE_DATA_POLICY_AUTO_DATA_SWITCH = 3;
+
+    /**
      * @hide
      */
     @IntDef(prefix = { "MOBILE_DATA_POLICY_" }, value = {
             MOBILE_DATA_POLICY_DATA_ON_NON_DEFAULT_DURING_VOICE_CALL,
             MOBILE_DATA_POLICY_MMS_ALWAYS_ALLOWED,
+            MOBILE_DATA_POLICY_AUTO_DATA_SWITCH,
     })
     @Retention(RetentionPolicy.SOURCE)
     public @interface MobileDataPolicy { }

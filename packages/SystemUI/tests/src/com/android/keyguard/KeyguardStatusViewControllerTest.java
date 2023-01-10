@@ -16,12 +16,18 @@
 
 package com.android.keyguard;
 
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
+import android.graphics.Rect;
 import android.test.suitebuilder.annotation.SmallTest;
 import android.testing.AndroidTestingRunner;
 
+import com.android.keyguard.logging.KeyguardLogger;
 import com.android.systemui.SysuiTestCase;
+import com.android.systemui.flags.FeatureFlags;
+import com.android.systemui.plugins.ClockAnimations;
 import com.android.systemui.statusbar.phone.DozeParameters;
 import com.android.systemui.statusbar.phone.ScreenOffAnimationController;
 import com.android.systemui.statusbar.policy.ConfigurationController;
@@ -55,9 +61,13 @@ public class KeyguardStatusViewControllerTest extends SysuiTestCase {
     @Mock
     DozeParameters mDozeParameters;
     @Mock
+    FeatureFlags mFeatureFlags;
+    @Mock
     ScreenOffAnimationController mScreenOffAnimationController;
     @Captor
     private ArgumentCaptor<KeyguardUpdateMonitorCallback> mKeyguardUpdateMonitorCallbackCaptor;
+    @Mock
+    KeyguardLogger mKeyguardLogger;
 
     private KeyguardStatusViewController mController;
 
@@ -73,7 +83,9 @@ public class KeyguardStatusViewControllerTest extends SysuiTestCase {
                 mKeyguardUpdateMonitor,
                 mConfigurationController,
                 mDozeParameters,
-                mScreenOffAnimationController);
+                mFeatureFlags,
+                mScreenOffAnimationController,
+                mKeyguardLogger);
     }
 
     @Test
@@ -92,9 +104,9 @@ public class KeyguardStatusViewControllerTest extends SysuiTestCase {
     public void setTranslationYExcludingMedia_forwardsCallToView() {
         float translationY = 123f;
 
-        mController.setTranslationYExcludingMedia(translationY);
+        mController.setTranslationY(translationY, /* excludeMedia= */true);
 
-        verify(mKeyguardStatusView).setChildrenTranslationYExcludingMediaView(translationY);
+        verify(mKeyguardStatusView).setChildrenTranslationY(translationY, /* excludeMedia= */true);
     }
 
     @Test
@@ -107,5 +119,17 @@ public class KeyguardStatusViewControllerTest extends SysuiTestCase {
 
         configurationListenerArgumentCaptor.getValue().onLocaleListChanged();
         verify(mKeyguardClockSwitchController).onLocaleListChanged();
+    }
+
+    @Test
+    public void getClockAnimations_forwardsToClockSwitch() {
+        ClockAnimations mockClockAnimations = mock(ClockAnimations.class);
+        when(mKeyguardClockSwitchController.getClockAnimations()).thenReturn(mockClockAnimations);
+
+        Rect r1 = new Rect(1, 2, 3, 4);
+        Rect r2 = new Rect(5, 6, 7, 8);
+        mController.getClockAnimations().onPositionUpdated(r1, r2, 0.3f);
+
+        verify(mockClockAnimations).onPositionUpdated(r1, r2, 0.3f);
     }
 }

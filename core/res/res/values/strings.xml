@@ -58,6 +58,9 @@
     <!-- Displayed when the user dialed an MMI code whose function
          could not be performed. This will be displayed in a toast. -->
     <string name="mmiError">Connection problem or invalid MMI code.</string>
+    <!-- Displayed when the user dialed an MMI code whose function could not be performed because
+         the feature is not supported on the current mobile network. -->
+    <string name="mmiErrorNotSupported">Feature not supported.</string>
     <!-- Displayed when the user dialed an MMI code whose function
          could not be performed because FDN is enabled. This will be displayed in a toast. -->
     <string name="mmiFdnError">Operation is restricted to fixed dialing numbers only.</string>
@@ -1696,7 +1699,7 @@
     <!-- Message shown during fingerprint acquisision when the fingerprint cannot be recognized -->
     <string name="fingerprint_acquired_partial">Press firmly on the sensor</string>
     <!-- Message shown during fingerprint acquisision when the fingerprint cannot be recognized -->
-    <string name="fingerprint_acquired_insufficient">Couldn\'t process fingerprint. Please try again.</string>
+    <string name="fingerprint_acquired_insufficient">Can\u2019t recognize fingerprint. Try again.</string>
     <!-- Message shown during fingerprint acquisision when the fingerprint sensor needs cleaning -->
     <string name="fingerprint_acquired_imager_dirty">Clean fingerprint sensor and try again</string>
     <string name="fingerprint_acquired_imager_dirty_alt">Clean sensor and try again</string>
@@ -1708,6 +1711,8 @@
     <string name="fingerprint_acquired_already_enrolled">Try another fingerprint</string>
     <!-- Message shown during fingerprint acquisition when fingerprint sensor detected too much light.[CHAR LIMIT=50] -->
     <string name="fingerprint_acquired_too_bright">Too bright</string>
+    <!-- Message shown during fingerprint acquisition when a Power press has been detected.[CHAR LIMIT=50] -->
+    <string name="fingerprint_acquired_power_press">Power press detected</string>
     <!-- Message shown during fingerprint acquisition when a fingerprint must be adjusted.[CHAR LIMIT=50] -->
     <string name="fingerprint_acquired_try_adjusting">Try adjusting</string>
     <!-- Message shown during fingerprint acquisition when a fingeprint area has already been captured during enrollment [CHAR LIMIT=100] -->
@@ -1732,17 +1737,17 @@
     <!-- Error message shown when the fingerprint hardware has run out of room for storing fingerprints -->
     <string name="fingerprint_error_no_space">Can\u2019t set up fingerprint</string>
     <!-- Error message shown when the fingerprint hardware timer has expired and the user needs to restart the operation. -->
-    <string name="fingerprint_error_timeout">Fingerprint time out reached. Try again.</string>
+    <string name="fingerprint_error_timeout">Fingerprint setup timed out. Try again.</string>
     <!-- Generic error message shown when the fingerprint operation (e.g. enrollment or authentication) is canceled. Generally not shown to the user-->
     <string name="fingerprint_error_canceled">Fingerprint operation canceled.</string>
     <!-- Generic error message shown when the fingerprint authentication operation is canceled due to user input. Generally not shown to the user -->
     <string name="fingerprint_error_user_canceled">Fingerprint operation canceled by user.</string>
     <!-- Generic error message shown when the fingerprint operation fails because too many attempts have been made. -->
-    <string name="fingerprint_error_lockout">Too many attempts. Try again later.</string>
+    <string name="fingerprint_error_lockout">Too many attempts. Use screen lock instead.</string>
     <!-- Generic error message shown when the fingerprint operation fails because strong authentication is required -->
-    <string name="fingerprint_error_lockout_permanent">Too many attempts. Fingerprint sensor disabled.</string>
+    <string name="fingerprint_error_lockout_permanent">Too many attempts. Use screen lock instead.</string>
     <!-- Generic error message shown when the fingerprint hardware can't recognize the fingerprint -->
-    <string name="fingerprint_error_unable_to_process">Try again.</string>
+    <string name="fingerprint_error_unable_to_process">Can\u2019t process fingerprint. Try again.</string>
     <!-- Generic error message shown when the user has no enrolled fingerprints -->
     <string name="fingerprint_error_no_fingerprints">No fingerprints enrolled.</string>
     <!-- Generic error message shown when the app requests fingerprint authentication on a device without a sensor -->
@@ -1804,7 +1809,7 @@
     <!-- Message shown during face acquisition when the image is too bright [CHAR LIMIT=50] -->
     <string name="face_acquired_too_bright">Too bright. Try gentler lighting.</string>
     <!-- Message shown during face acquisition when the image is too dark [CHAR LIMIT=50] -->
-    <string name="face_acquired_too_dark">Try brighter lighting</string>
+    <string name="face_acquired_too_dark">Not enough light</string>
     <!-- Message shown during face acquisition when the user is too close to sensor [CHAR LIMIT=50] -->
     <string name="face_acquired_too_close">Move phone farther away</string>
     <!-- Message shown during face acquisition when the user is too far from sensor [CHAR LIMIT=50] -->
@@ -3568,21 +3573,17 @@
     <!-- [CHAR LIMIT=NONE] Message to show in upgrading dialog when the bulk of the upgrade work is done. -->
     <string name="android_upgrading_complete">Finishing boot.</string>
 
-    <!-- [CHAR LIMIT=40] Title of dialog shown to confirm device going to sleep if the power button
-    is pressed during fingerprint enrollment. -->
-    <string name="fp_power_button_enrollment_title">Continue setup?</string>
-
     <!-- [CHAR LIMIT=NONE] Message of dialog shown to confirm device going to sleep if the power
     button is pressed during fingerprint enrollment. -->
     <string name="fp_power_button_enrollment_message">You pressed the power button — this usually turns off the screen.\n\nTry tapping lightly while setting up your fingerprint.</string>
 
+    <!-- [CHAR LIMIT=40] Title of dialog shown to confirm device going to sleep if the power button
+    is pressed during fingerprint enrollment. -->
+    <string name="fp_power_button_enrollment_title">To end setup, turn off screen</string>
+
     <!-- [CHAR LIMIT=20] Positive button of dialog shown to confirm device going to sleep if the
     power button is pressed during fingerprint enrollment. -->
-    <string name="fp_power_button_enrollment_positive_button">Turn off screen</string>
-
-    <!-- [CHAR LIMIT=20] Negative button of dialog shown to confirm device going to sleep if the
-    power button is pressed during fingerprint enrollment. -->
-    <string name="fp_power_button_enrollment_negative_button">Continue setup</string>
+    <string name="fp_power_button_enrollment_button_text">Turn off</string>
 
     <!-- [CHAR LIMIT=40] Title of dialog shown to confirm device going to sleep if the power button
     is pressed during biometric prompt when a side fingerprint sensor is present. -->
@@ -3978,7 +3979,7 @@
     <string name="ext_media_new_notification_message" product="automotive">You may need to reformat the device. Tap to eject.</string>
 
     <!-- Notification body when external media is ready for use [CHAR LIMIT=NONE] -->
-    <string name="ext_media_ready_notification_message">For transferring photos and media</string>
+    <string name="ext_media_ready_notification_message">For storing  photos, videos, music and more</string>
     <!-- TV specific notification body when external media is ready for use [CHAR LIMIT=75] -->
     <string name="ext_media_ready_notification_message" product="tv">Browse media files</string>
 
@@ -3994,11 +3995,11 @@
     <string name="ext_media_unmountable_notification_message" product="automotive">You may need to reformat the device. Tap to eject.</string>
 
     <!-- Notification title when external media is unsupported [CHAR LIMIT=30] -->
-    <string name="ext_media_unsupported_notification_title">Unsupported <xliff:g id="name" example="SD card">%s</xliff:g></string>
+    <string name="ext_media_unsupported_notification_title"><xliff:g id="name" example="SD card">%s</xliff:g> detected </string>
     <!-- Automotive specific notification title when external media is unsupported [CHAR LIMIT=30] -->
     <string name="ext_media_unsupported_notification_title" product="automotive"><xliff:g id="name" example="SD card">%s</xliff:g> isn\u2019t working</string>
     <!-- Notification body when external media is unsupported [CHAR LIMIT=NONE] -->
-    <string name="ext_media_unsupported_notification_message">This device doesn\u2019t support this <xliff:g id="name" example="SD card">%s</xliff:g>. Tap to set up in a supported format.</string>
+    <string name="ext_media_unsupported_notification_message">Tap to set up .</string>
     <!-- TV-specific notification body when external media is unsupported [CHAR LIMIT=75] -->
     <string name="ext_media_unsupported_notification_message" product="tv">Select to set up <xliff:g id="name" example="SD card">%s</xliff:g> in a supported format.</string>
     <!-- Automotive specific notification body when external media is unsupported [CHAR LIMIT=NONE] -->
@@ -4029,7 +4030,7 @@
     <!-- Notification action to transfer media [CHAR LIMIT=40] -->
     <string name="ext_media_seamless_action">Switch output</string>
 
-    <!-- Notification title when external media is missing [CHAR LIMIT=30] -->
+    <!-- Notification title when adoptable storage media is ejected [CHAR LIMIT=30] -->
     <string name="ext_media_missing_title"><xliff:g id="name" example="SD card">%s</xliff:g> missing</string>
     <!-- Notification body when external media is missing [CHAR LIMIT=30] -->
     <string name="ext_media_missing_message">Insert device again</string>
@@ -5433,8 +5434,10 @@
     <!-- Hint text in a search edit box (used to filter long language / country lists) [CHAR LIMIT=25] -->
     <string name="search_language_hint">Type language name</string>
 
-    <!-- List section subheader for the language picker, containing a list of suggested languages determined by the default region [CHAR LIMIT=30] -->
+    <!-- List section subheader for the language picker, containing a list of suggested languages [CHAR LIMIT=30] -->
     <string name="language_picker_section_suggested">Suggested</string>
+    <!-- "List section subheader for the language picker, containing a list of suggested regions available for that language [CHAR LIMIT=30] -->
+    <string name="language_picker_regions_section_suggested">Suggested</string>
     <!-- List section subheader for the language picker, containing a list of all languages available [CHAR LIMIT=30] -->
     <string name="language_picker_section_all">All languages</string>
     <!-- List section subheader for the region picker, containing a list of all regions supported for the selected language.
@@ -5755,9 +5758,20 @@
     <string name="log_access_confirmation_deny">Don\u2019t allow</string>
 
     <!-- Content for the log access confirmation dialog. [CHAR LIMIT=NONE]-->
-    <string name="log_access_confirmation_body">Device logs record what happens on your device. Apps can use these logs to find and fix issues.\n\nSome logs may contain sensitive info, so only allow apps you trust to access all device logs.
-        \n\nIf you don’t allow this app to access all device logs, it can still access its own logs. Your device manufacturer may still be able to access some logs or info on your device. Learn more
+    <string name="log_access_confirmation_body" product="default">Device logs record what happens on your device. Apps can use these logs to find and fix issues.\n\nSome logs may contain sensitive info, so only allow apps you trust to access all device logs.
+        \n\nIf you don’t allow this app to access all device logs, it can still access its own logs. Your device manufacturer may still be able to access some logs or info on your device.
     </string>
+
+    <!-- Content for the log access confirmation dialog. [CHAR LIMIT=NONE]-->
+    <string name="log_access_confirmation_body" product="tv">Device logs record what happens on your device. Apps can use these logs to find and fix issues.\n\nSome logs may contain sensitive info, so only allow apps you trust to access all device logs.
+        \n\nIf you don’t allow this app to access all device logs, it can still access its own logs. Your device manufacturer may still be able to access some logs or info on your device.\n\nLearn more at g.co/android/devicelogs.
+    </string>
+
+    <!-- Learn more URL for the log access confirmation dialog. [DO NOT TRANSLATE]-->
+    <string name="log_access_confirmation_learn_more" product="default" translatable="false">&lt;a href="https://support.google.com/android?p=system_logs#topic=7313011"&gt;Learn more&lt;/a&gt;</string>
+
+    <!-- Learn more URL for the log access confirmation dialog. [DO NOT TRANSLATE]-->
+    <string name="log_access_confirmation_learn_more" product="tv" translatable="false"></string>
 
     <!-- Privacy notice do not show [CHAR LIMIT=20] -->
     <string name="log_access_do_not_show_again">Don\u2019t show again</string>
@@ -6327,6 +6341,8 @@ ul.</string>
     <string name="vdm_camera_access_denied" product="default">Can’t access the phone’s camera from your <xliff:g id="device" example="Chromebook">%1$s</xliff:g></string>
     <!-- Error message indicating the camera cannot be accessed when running on a virtual device. [CHAR LIMIT=NONE] -->
     <string name="vdm_camera_access_denied" product="tablet">Can’t access the tablet’s camera from your <xliff:g id="device" example="Chromebook">%1$s</xliff:g></string>
+    <!-- Error message indicating the user cannot access secure content when running on a virtual device. [CHAR LIMIT=NONE] -->
+    <string name="vdm_secure_window">This can’t be accessed while streaming. Try on your phone instead.</string>
 
     <!-- Title for preference of the system default locale. [CHAR LIMIT=50]-->
     <string name="system_locale_title">System default</string>

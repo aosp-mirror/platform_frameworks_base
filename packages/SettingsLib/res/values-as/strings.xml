@@ -75,7 +75,7 @@
     <string name="wifi_limited_connection" msgid="1184778285475204682">"ইণ্টাৰনেট সংযোগ সীমিত"</string>
     <string name="wifi_status_no_internet" msgid="3799933875988829048">"ইণ্টাৰনেট সংযোগ নাই"</string>
     <string name="wifi_status_sign_in_required" msgid="2236267500459526855">"ছাইন ইন কৰা দৰকাৰী"</string>
-    <string name="wifi_ap_unable_to_handle_new_sta" msgid="5885145407184194503">"একচেছ পইণ্ট কিছু সময়ৰ বাবে পূৰ্ণ হৈ আছে"</string>
+    <string name="wifi_ap_unable_to_handle_new_sta" msgid="5885145407184194503">"এক্সেছ পইণ্ট সাময়িকভাৱে পূৰ্ণ হৈ আছে"</string>
     <string name="connected_via_carrier" msgid="1968057009076191514">"%1$sৰ যোগেৰে সংযোজিত"</string>
     <string name="available_via_carrier" msgid="465598683092718294">"%1$sৰ মাধ্যমেৰে উপলব্ধ"</string>
     <string name="osu_opening_provider" msgid="4318105381295178285">"<xliff:g id="PASSPOINTPROVIDER">%1$s</xliff:g> খুলি থকা হৈছে"</string>
@@ -98,7 +98,7 @@
     <string name="bluetooth_pairing" msgid="4269046942588193600">"যোৰা লগোৱা হৈছে…"</string>
     <string name="bluetooth_connected_no_headset" msgid="2224101138659967604">"সংযোগ কৰা হ’ল (ফ\'ন নাই)<xliff:g id="ACTIVE_DEVICE">%1$s</xliff:g>"</string>
     <string name="bluetooth_connected_no_a2dp" msgid="8566874395813947092">"সংযোগ কৰা হ’ল (মিডিয়া নাই)<xliff:g id="ACTIVE_DEVICE">%1$s</xliff:g>"</string>
-    <string name="bluetooth_connected_no_map" msgid="3381860077002724689">"সংযোগ কৰা হ’ল (বাৰ্তাত প্ৰৱেশাধিকাৰ নাই)<xliff:g id="ACTIVE_DEVICE">%1$s</xliff:g>"</string>
+    <string name="bluetooth_connected_no_map" msgid="3381860077002724689">"সংযোগ কৰা হ’ল (বাৰ্তাৰ এক্সেছ নাই)<xliff:g id="ACTIVE_DEVICE">%1$s</xliff:g>"</string>
     <string name="bluetooth_connected_no_headset_no_a2dp" msgid="2893204819854215433">"সংযোগ কৰা হ’ল (কোনো ফ\'ন বা মিডিয়া নাই)<xliff:g id="ACTIVE_DEVICE">%1$s</xliff:g>"</string>
     <string name="bluetooth_connected_battery_level" msgid="5410325759372259950">"সংযোগ কৰা হ’ল, বেটাৰীৰ স্তৰ <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g><xliff:g id="ACTIVE_DEVICE">%2$s</xliff:g>"</string>
     <string name="bluetooth_connected_no_headset_battery_level" msgid="2661863370509206428">"সংযোগ কৰা হ’ল (ফ\'ন নাই), বেটাৰীৰ স্তৰ <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g><xliff:g id="ACTIVE_DEVICE">%2$s</xliff:g>"</string>
@@ -121,13 +121,13 @@
     <string name="bluetooth_profile_pbap_summary" msgid="6466456791354759132">"সম্পৰ্কসূচী আৰু কলৰ ইতিহাস শ্বেয়াৰ কৰাৰ বাবে ব্যৱহাৰ কৰক"</string>
     <string name="bluetooth_profile_pan_nap" msgid="7871974753822470050">"ইণ্টাৰনেট সংযোগ শ্বেয়াৰ"</string>
     <string name="bluetooth_profile_map" msgid="8907204701162107271">"পাঠ বাৰ্তা"</string>
-    <string name="bluetooth_profile_sap" msgid="8304170950447934386">"ছিম প্ৰৱেশ"</string>
+    <string name="bluetooth_profile_sap" msgid="8304170950447934386">"ছিমৰ এক্সেছ"</string>
     <string name="bluetooth_profile_a2dp_high_quality" msgid="4739440941324792775">"এইচ্ছডি অডি\'অ: <xliff:g id="CODEC_NAME">%1$s</xliff:g>"</string>
     <string name="bluetooth_profile_a2dp_high_quality_unknown_codec" msgid="2477639096903834374">"এইচ্ছডি অডিঅ’"</string>
     <string name="bluetooth_profile_hearing_aid" msgid="58154575573984914">"শ্ৰৱণ যন্ত্ৰ"</string>
-    <string name="bluetooth_profile_le_audio" msgid="5158149987518342036">"LE_AUDIO"</string>
+    <string name="bluetooth_profile_le_audio" msgid="3237854988278539061">"LE অডিঅ’"</string>
     <string name="bluetooth_hearing_aid_profile_summary_connected" msgid="8191273236809964030">"শ্ৰৱণ যন্ত্ৰলৈ সংযোগ কৰা হৈছে"</string>
-    <string name="bluetooth_le_audio_profile_summary_connected" msgid="3162538609379333442">"LE_AUDIOৰ সৈতে সংযোগ কৰক"</string>
+    <string name="bluetooth_le_audio_profile_summary_connected" msgid="6916226974453480650">"LE অডিঅ’ৰ সৈতে সংযোগ কৰক"</string>
     <string name="bluetooth_a2dp_profile_summary_connected" msgid="7422607970115444153">"মিডিয়া অডিঅ’লৈ সংযোগ হৈছে"</string>
     <string name="bluetooth_headset_profile_summary_connected" msgid="2420981566026949688">"ফ’ন অডিঅ\'ৰ লগত সংযোগ কৰা হ’ল"</string>
     <string name="bluetooth_opp_profile_summary_connected" msgid="2393521801478157362">"ফাইল ট্ৰান্সফাৰ ছাৰ্ভাৰৰ সৈতে সংযোজিত হৈ আছে"</string>
@@ -139,7 +139,7 @@
     <string name="bluetooth_pan_nap_profile_summary_connected" msgid="3744773111299503493">"ডিভাইচৰ সৈতে স্থানীয় ইণ্টাৰনেট সংযোগ শ্বেয়াৰ কৰা হৈছে"</string>
     <string name="bluetooth_pan_profile_summary_use_for" msgid="7422039765025340313">"ইণ্টাৰনেট চলাবলৈ ব্যৱহাৰ কৰক"</string>
     <string name="bluetooth_map_profile_summary_use_for" msgid="4453622103977592583">"মেপৰ বাবে ব্যৱহাৰ কৰক"</string>
-    <string name="bluetooth_sap_profile_summary_use_for" msgid="6204902866176714046">"ছিমত প্ৰৱেশৰ বাবে ব্যৱহাৰ কৰক"</string>
+    <string name="bluetooth_sap_profile_summary_use_for" msgid="6204902866176714046">"ছিমৰ এক্সেছৰ বাবে ব্যৱহাৰ কৰক"</string>
     <string name="bluetooth_a2dp_profile_summary_use_for" msgid="7324694226276491807">"মিডিয়া অডিঅ\'ৰ বাবে ব্যৱহাৰ কৰক"</string>
     <string name="bluetooth_headset_profile_summary_use_for" msgid="808970643123744170">"ফ\'ন অডিঅ\'ৰ বাবে ব্যৱহাৰ কৰক"</string>
     <string name="bluetooth_opp_profile_summary_use_for" msgid="461981154387015457">"ফাইল স্থানান্তৰ কৰিবলৈ ব্যৱহাৰ কৰক"</string>
@@ -149,7 +149,7 @@
     <string name="bluetooth_pairing_accept" msgid="2054232610815498004">"পেয়াৰ কৰক"</string>
     <string name="bluetooth_pairing_accept_all_caps" msgid="2734383073450506220">"পেয়াৰ কৰক"</string>
     <string name="bluetooth_pairing_decline" msgid="6483118841204885890">"বাতিল কৰক"</string>
-    <string name="bluetooth_pairing_will_share_phonebook" msgid="3064334458659165176">"যোৰা লগালে ইয়ে সংযোজিত কৰাৰ সময়ত আপোনাৰ সম্পৰ্কসমূহ আৰু কলৰ ইতিহাস চাবলৈ অনুমতি দিব।"</string>
+    <string name="bluetooth_pairing_will_share_phonebook" msgid="3064334458659165176">"পেয়াৰিঙে সংযোজিত হ\'লে আপোনাৰ সম্পৰ্ক আৰু কলৰ ইতিহাসৰ এক্সেছ প্ৰদান কৰে।"</string>
     <string name="bluetooth_pairing_error_message" msgid="6626399020672335565">"<xliff:g id="DEVICE_NAME">%1$s</xliff:g>ৰ সৈতে পেয়াৰ কৰিব পৰা নগ’ল।"</string>
     <string name="bluetooth_pairing_pin_error_message" msgid="264422127613704940">"এটা ভুল পিন বা পাছকীৰ কাৰণে <xliff:g id="DEVICE_NAME">%1$s</xliff:g>ৰ সৈতে পেয়াৰ কৰিব পৰা নাই।"</string>
     <string name="bluetooth_pairing_device_down_error_message" msgid="2554424863101358857">"<xliff:g id="DEVICE_NAME">%1$s</xliff:g>ৰ সৈতে যোগাযোগ কৰিব পৰা নগ\'ল"</string>
@@ -268,7 +268,7 @@
     <string name="keep_screen_on" msgid="1187161672348797558">"জাগ্ৰত কৰি ৰাখক"</string>
     <string name="keep_screen_on_summary" msgid="1510731514101925829">"চ্চাৰ্জ হৈ থকাৰ সময়ত স্ক্ৰীন কেতিয়াও সুপ্ত অৱস্থালৈ নাযায়"</string>
     <string name="bt_hci_snoop_log" msgid="7291287955649081448">"ব্লুটুথ HCI স্নুপ ল’গ সক্ষম কৰক"</string>
-    <string name="bt_hci_snoop_log_summary" msgid="6808538971394092284">"ব্লুটুথ পেকেট সংগ্ৰহ কৰক। (এই ছেটিংটো সলনি কৰাৰ পিছত ব্লুটুথ ট’গল কৰক)"</string>
+    <string name="bt_hci_snoop_log_summary" msgid="6808538971394092284">"ব্লুটুথ পেকেট সংগ্ৰহ কৰক। (এই ছেটিংটো সলনি কৰাৰ পাছত ব্লুটুথ ট’গল কৰক)"</string>
     <string name="oem_unlock_enable" msgid="5334869171871566731">"ঔইএম আনলক"</string>
     <string name="oem_unlock_enable_summary" msgid="5857388174390953829">"বুটল\'ডাৰটো আনলক কৰিবলৈ অনুমতি দিয়ক"</string>
     <string name="confirm_enable_oem_unlock_title" msgid="8249318129774367535">"ঔইএম আনলক কৰাৰ অনুমতি দিবনে?"</string>
@@ -342,7 +342,7 @@
     <string name="bluetooth_enable_gabeldorsche_summary" msgid="2054730331770712629">"ব্লুটুথ Gabeldorche সুবিধাৰ সমষ্টিটো সক্ষম কৰে।"</string>
     <string name="enhanced_connectivity_summary" msgid="1576414159820676330">"উন্নত সংযোগ সুবিধাটো সক্ষম কৰে।"</string>
     <string name="enable_terminal_title" msgid="3834790541986303654">"স্থানীয় টাৰ্মিনেল"</string>
-    <string name="enable_terminal_summary" msgid="2481074834856064500">"স্থানীয় শ্বেল প্ৰৱেশাধিকাৰ দিয়া টাৰ্মিনেল এপ্ সক্ষম কৰক"</string>
+    <string name="enable_terminal_summary" msgid="2481074834856064500">"স্থানীয় শ্বেলৰ এক্সেছ দিয়া টাৰ্মিনেল এপ্ সক্ষম কৰক"</string>
     <string name="hdcp_checking_title" msgid="3155692785074095986">"HDCP পৰীক্ষণ"</string>
     <string name="hdcp_checking_dialog_title" msgid="7691060297616217781">"HDCP পৰীক্ষণ আচৰণ ছেট কৰক"</string>
     <string name="debug_debugging_category" msgid="535341063709248842">"ডিবাগিং"</string>
@@ -408,6 +408,7 @@
     <string name="force_resizable_activities_summary" msgid="2490382056981583062">"মেনিফেষ্টৰ মান যিয়েই নহওক, মাল্টি-ৱিণ্ডৰ বাবে আটাইবোৰ কাৰ্যকলাপৰ আকাৰ সলনি কৰিব পৰা কৰক।"</string>
     <string name="enable_freeform_support" msgid="7599125687603914253">"ফ্ৰিফৰ্ম ৱিণ্ড\'জ সক্ষম কৰক"</string>
     <string name="enable_freeform_support_summary" msgid="1822862728719276331">"পৰীক্ষামূলক ফ্ৰী-ফৰ্ম ৱিণ্ড’বোৰৰ বাবে সহায়তা সক্ষম কৰক৷"</string>
+    <string name="desktop_mode" msgid="2389067840550544462">"ডেস্কটপ ম’ড"</string>
     <string name="local_backup_password_title" msgid="4631017948933578709">"ডেস্কটপ বেকআপ পাছৱৰ্ড"</string>
     <string name="local_backup_password_summary_none" msgid="7646898032616361714">"ডেস্কটপৰ পূৰ্ণ বেকআপ এতিয়ালৈকে সংৰক্ষিত অৱস্থাত নাই"</string>
     <string name="local_backup_password_summary_change" msgid="1707357670383995567">"ডেস্কটপ সম্পূৰ্ণ বেকআপৰ বাবে পাছৱৰ্ডটো সলনি কৰিবলৈ বা আঁতৰাবলৈ টিপক"</string>
@@ -476,13 +477,14 @@
     <string name="power_charging" msgid="6727132649743436802">"<xliff:g id="LEVEL">%1$s</xliff:g> - <xliff:g id="STATE">%2$s</xliff:g>"</string>
     <string name="power_remaining_charging_duration_only" msgid="8085099012811384899">"সম্পূৰ্ণ হ’বলৈ <xliff:g id="TIME">%1$s</xliff:g> বাকী আছে"</string>
     <string name="power_charging_duration" msgid="6127154952524919719">"সম্পূৰ্ণ হ’বলৈ <xliff:g id="LEVEL">%1$s</xliff:g> - <xliff:g id="TIME">%2$s</xliff:g> বাকী আছে"</string>
-    <string name="power_charging_limited" msgid="7956120998372505295">"<xliff:g id="LEVEL">%1$s</xliff:g> • চাৰ্জ কৰাটো সাময়িকভাৱে সীমিত কৰা হৈছে"</string>
+    <string name="power_charging_limited" msgid="8202147604844938236">"<xliff:g id="LEVEL">%1$s</xliff:g> - চাৰ্জিং অপ্টিমাইজ কৰা হৈছে"</string>
+    <string name="power_charging_future_paused" msgid="4730177778538118032">"<xliff:g id="LEVEL">%1$s</xliff:g> - চাৰ্জিং অপ্টিমাইজ কৰা হৈছে"</string>
     <string name="battery_info_status_unknown" msgid="268625384868401114">"অজ্ঞাত"</string>
     <string name="battery_info_status_charging" msgid="4279958015430387405">"চাৰ্জ কৰি থকা হৈছে"</string>
     <string name="battery_info_status_charging_fast" msgid="8027559755902954885">"দ্ৰুততাৰে চাৰ্জ হৈছে"</string>
     <string name="battery_info_status_charging_slow" msgid="3190803837168962319">"লাহে লাহে চাৰ্জ হৈছে"</string>
     <string name="battery_info_status_charging_wireless" msgid="8924722966861282197">"বেতাঁৰৰ মাধ্যমেৰে চাৰ্জ হৈ আছে"</string>
-    <string name="battery_info_status_charging_dock" msgid="3554147903321236585">"চাৰ্জিং ড’ক"</string>
+    <string name="battery_info_status_charging_dock" msgid="8573274094093364791">"চাৰ্জ কৰি থকা হৈছে"</string>
     <string name="battery_info_status_discharging" msgid="6962689305413556485">"চ্চাৰ্জ কৰা নাই"</string>
     <string name="battery_info_status_not_charging" msgid="3371084153747234837">"সংযোগ হৈ আছে, চাৰ্জ হৈ থকা নাই"</string>
     <string name="battery_info_status_full" msgid="1339002294876531312">"চাৰ্জ হ’ল"</string>
@@ -514,8 +516,8 @@
     <string name="active_input_method_subtypes" msgid="4232680535471633046">"সক্ৰিয়হৈ থকা ইনপুট পদ্ধতিসমূহ"</string>
     <string name="use_system_language_to_select_input_method_subtypes" msgid="4865195835541387040">"ছিষ্টেমৰ ভাষা ব্যৱহাৰ কৰক"</string>
     <string name="failed_to_open_app_settings_toast" msgid="764897252657692092">"<xliff:g id="SPELL_APPLICATION_NAME">%1$s</xliff:g>ৰ ছেটিং খুলিব পৰা নগ\'ল"</string>
-    <string name="ime_security_warning" msgid="6547562217880551450">"এই ইনপুট পদ্ধতিটোৱে আপুনি টাইপ কৰা আপোনাৰ ব্যক্তিগত ডেটা যেনে পাছৱৰ্ডসমূহ আৰু ক্ৰেডিট কাৰ্ডৰ নম্বৰসমূহকে ধৰি আটাইবোৰ পাঠ সংগ্ৰহ কৰিবলৈ সক্ষম হ\'ব পাৰে। <xliff:g id="IME_APPLICATION_NAME">%1$s</xliff:g> এপটোৰ লগত ই সংলগ্ন। এই ইনপুট পদ্ধতিটো ব্যৱহাৰ কৰেনে?"</string>
-    <string name="direct_boot_unaware_dialog_message" msgid="7845398276735021548">"টোকা: ৰিবুট কৰাৰ পিছত আপুনি ফ\'নটো আনলক নকৰালৈকে এই এপটো ষ্টাৰ্ট নহ’ব"</string>
+    <string name="ime_security_warning" msgid="6547562217880551450">"এই ইনপুট পদ্ধতিটোৱে আপুনি টাইপ কৰা আপোনাৰ ব্যক্তিগত ডেটা যেনে পাছৱৰ্ডসমূহ আৰু ক্ৰেডিট কাৰ্ডৰ নম্বৰসমূহকে ধৰি আটাইবোৰ পাঠ সংগ্ৰহ কৰিবলৈ সক্ষম হ\'ব পাৰে। <xliff:g id="IME_APPLICATION_NAME">%1$s</xliff:g> এপ্‌টোৰ লগত ই সংলগ্ন। এই ইনপুট পদ্ধতিটো ব্যৱহাৰ কৰেনে?"</string>
+    <string name="direct_boot_unaware_dialog_message" msgid="7845398276735021548">"টোকা: ৰিবুট কৰাৰ পাছত আপুনি ফ\'নটো আনলক নকৰালৈকে এই এপ্‌টো ষ্টাৰ্ট নহ’ব"</string>
     <string name="ims_reg_title" msgid="8197592958123671062">"আইএমএছ পঞ্জীয়ন স্থিতি"</string>
     <string name="ims_reg_status_registered" msgid="884916398194885457">"পঞ্জীকৃত"</string>
     <string name="ims_reg_status_not_registered" msgid="2989287366045704694">"পঞ্জীকৃত নহয়"</string>
@@ -655,13 +657,6 @@
     <string name="accessibility_ethernet_disconnected" msgid="2832501530856497489">"ইথাৰনেট সংযোগ বিচ্ছিন্ন হৈছে।"</string>
     <string name="accessibility_ethernet_connected" msgid="6175942685957461563">"ইথাৰনেট।"</string>
     <string name="accessibility_no_calling" msgid="3540827068323895748">"কল কৰা নহয়"</string>
-    <string name="dream_complication_title_time" msgid="701747800712893499">"সময়"</string>
-    <string name="dream_complication_title_date" msgid="8661176085446135789">"তাৰিখ"</string>
-    <string name="dream_complication_title_weather" msgid="598609151677172783">"বতৰ"</string>
-    <string name="dream_complication_title_aqi" msgid="4587552608957834110">"বায়ুৰ গুণগত মান"</string>
-    <string name="dream_complication_title_cast_info" msgid="4038776652841885084">"কাষ্টৰ তথ্য"</string>
-    <!-- no translation found for dream_complication_title_home_controls (9153381632476738811) -->
-    <skip />
     <string name="avatar_picker_title" msgid="8492884172713170652">"এখন প্ৰ’ফাইল চিত্ৰ বাছনি কৰক"</string>
     <string name="default_user_icon_description" msgid="6554047177298972638">"ডিফ’ল্ট ব্যৱহাৰকাৰীৰ চিহ্ন"</string>
     <string name="physical_keyboard_title" msgid="4811935435315835220">"কায়িক কীব’ৰ্ড"</string>

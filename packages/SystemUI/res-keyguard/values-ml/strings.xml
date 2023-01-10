@@ -26,11 +26,11 @@
     <string name="keyguard_sim_error_message_short" msgid="633630844240494070">"അസാധുവായ കാർഡ്."</string>
     <string name="keyguard_charged" msgid="5478247181205188995">"ചാർജായി"</string>
     <string name="keyguard_plugged_in_wireless" msgid="2537874724955057383">"<xliff:g id="PERCENTAGE">%s</xliff:g> • വയർലെസ്സ് ആയി ചാർജ് ചെയ്യുന്നു"</string>
-    <string name="keyguard_plugged_in_dock" msgid="449722738270908674">"<xliff:g id="PERCENTAGE">%s</xliff:g> • ചാർജിംഗ് ഡോക്ക്"</string>
+    <string name="keyguard_plugged_in_dock" msgid="2122073051904360987">"<xliff:g id="PERCENTAGE">%s</xliff:g> • ചാർജ് ചെയ്യുന്നു"</string>
     <string name="keyguard_plugged_in" msgid="8169926454348380863">"<xliff:g id="PERCENTAGE">%s</xliff:g> • ചാർജ് ചെയ്യുന്നു"</string>
     <string name="keyguard_plugged_in_charging_fast" msgid="4386594091107340426">"<xliff:g id="PERCENTAGE">%s</xliff:g> • വേഗത്തിൽ ചാർജ് ചെയ്യുന്നു"</string>
     <string name="keyguard_plugged_in_charging_slowly" msgid="217655355424210">"<xliff:g id="PERCENTAGE">%s</xliff:g> • പതുക്കെ ചാർജ് ചെയ്യുന്നു"</string>
-    <string name="keyguard_plugged_in_charging_limited" msgid="6091488837901216962">"<xliff:g id="PERCENTAGE">%s</xliff:g> • ചാർജിംഗ് താൽക്കാലികമായി പരിമിതപ്പെടുത്തിയിരിക്കുന്നു"</string>
+    <string name="keyguard_plugged_in_charging_limited" msgid="1053130519456324630">"<xliff:g id="PERCENTAGE">%s</xliff:g> • ബാറ്ററി പരിരക്ഷിക്കാൻ ചാർജിംഗ് ഒപ്റ്റിമൈസ് ചെയ്തു"</string>
     <string name="keyguard_instructions_when_pattern_disabled" msgid="8448804180089936954">"അൺലോക്കുചെയ്യാൻ മെനു അമർത്തുക."</string>
     <string name="keyguard_network_locked_message" msgid="407096292844868608">"നെറ്റ്‌വർക്ക് ലോക്കുചെയ്‌തു"</string>
     <string name="keyguard_missing_sim_message_short" msgid="704159478161444907">"സിം കാർഡില്ല"</string>
@@ -78,9 +78,9 @@
     <string name="kg_prompt_reason_restart_pattern" msgid="4720554342633852066">"ഉപകരണം റീസ്റ്റാർട്ടായശേഷം ‌പാറ്റേൺ വരയ്‌ക്കേണ്ടതുണ്ട്"</string>
     <string name="kg_prompt_reason_restart_pin" msgid="1587671566498057656">"ഉപകരണം റീസ്റ്റാർട്ടായശേഷം ‌പിൻ നൽകേണ്ടതുണ്ട്"</string>
     <string name="kg_prompt_reason_restart_password" msgid="8061279087240952002">"ഉപകരണം റീസ്റ്റാർട്ടായശേഷം ‌പാസ്‌വേഡ് നൽകേണ്ടതുണ്ട്"</string>
-    <string name="kg_prompt_reason_timeout_pattern" msgid="9170360502528959889">"അധിക സുരക്ഷയ്ക്ക് പാറ്റേൺ ആവശ്യമാണ്"</string>
-    <string name="kg_prompt_reason_timeout_pin" msgid="5945186097160029201">"അധിക സുരക്ഷയ്ക്ക് പിൻ ആവശ്യമാണ്"</string>
-    <string name="kg_prompt_reason_timeout_password" msgid="2258263949430384278">"അധിക സുരക്ഷയ്ക്ക് പാസ്‌വേഡ് ആവശ്യമാണ്"</string>
+    <string name="kg_prompt_reason_timeout_pattern" msgid="5514969660010197363">"അധിക സുരക്ഷയ്ക്കായി, പകരം പാറ്റേൺ ഉപയോഗിക്കുക"</string>
+    <string name="kg_prompt_reason_timeout_pin" msgid="4227962059353859376">"അധിക സുരക്ഷയ്ക്കായി, പകരം പിൻ ഉപയോഗിക്കുക"</string>
+    <string name="kg_prompt_reason_timeout_password" msgid="8810879144143933690">"അധിക സുരക്ഷയ്ക്കായി, പകരം പാസ്‍വേഡ് ഉപയോഗിക്കുക"</string>
     <string name="kg_prompt_reason_device_admin" msgid="6961159596224055685">"ഉപകരണം അഡ്‌മിൻ ലോക്കുചെയ്തു"</string>
     <string name="kg_prompt_reason_user_request" msgid="6015774877733717904">"ഉപകരണം നേരിട്ട് ലോക്കുചെയ്തു"</string>
     <string name="kg_face_not_recognized" msgid="7903950626744419160">"തിരിച്ചറിയുന്നില്ല"</string>
@@ -90,4 +90,5 @@
     <string name="clock_title_default" msgid="6342735240617459864">"ഡിഫോൾട്ട്"</string>
     <string name="clock_title_bubble" msgid="2204559396790593213">"ബബിൾ"</string>
     <string name="clock_title_analog" msgid="8409262532900918273">"അനലോഗ്"</string>
+    <string name="keyguard_unlock_to_continue" msgid="7509503484250597743">"തുടരാൻ നിങ്ങളുടെ ഉപകരണം അൺലോക്ക് ചെയ്യുക"</string>
 </resources>

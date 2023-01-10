@@ -20,6 +20,7 @@ import android.content.Context;
 import android.graphics.Matrix;
 import android.graphics.Rect;
 import android.graphics.RectF;
+import android.view.Choreographer;
 import android.view.SurfaceControl;
 
 import com.android.wm.shell.R;
@@ -114,8 +115,8 @@ public class PipSurfaceTransactionHelper {
         // coordinates so offset the bounds to 0,0
         mTmpDestinationRect.offsetTo(0, 0);
         mTmpDestinationRect.inset(insets);
-        // Scale by the shortest edge and offset such that the top/left of the scaled inset source
-        // rect aligns with the top/left of the destination bounds
+        // Scale to the bounds no smaller than the destination and offset such that the top/left
+        // of the scaled inset source rect aligns with the top/left of the destination bounds
         final float scale;
         if (isInPipDirection
                 && sourceRectHint != null && sourceRectHint.width() < sourceBounds.width()) {
@@ -128,9 +129,8 @@ public class PipSurfaceTransactionHelper {
                     : (float) destinationBounds.height() / sourceBounds.height();
             scale = (1 - fraction) * startScale + fraction * endScale;
         } else {
-            scale = sourceBounds.width() <= sourceBounds.height()
-                    ? (float) destinationBounds.width() / sourceBounds.width()
-                    : (float) destinationBounds.height() / sourceBounds.height();
+            scale = Math.max((float) destinationBounds.width() / sourceBounds.width(),
+                    (float) destinationBounds.height() / sourceBounds.height());
         }
         final float left = destinationBounds.left - insets.left * scale;
         final float top = destinationBounds.top - insets.top * scale;
@@ -233,5 +233,19 @@ public class PipSurfaceTransactionHelper {
 
     public interface SurfaceControlTransactionFactory {
         SurfaceControl.Transaction getTransaction();
+    }
+
+    /**
+     * Implementation of {@link SurfaceControlTransactionFactory} that returns
+     * {@link SurfaceControl.Transaction} with VsyncId being set.
+     */
+    public static class VsyncSurfaceControlTransactionFactory
+            implements SurfaceControlTransactionFactory {
+        @Override
+        public SurfaceControl.Transaction getTransaction() {
+            final SurfaceControl.Transaction tx = new SurfaceControl.Transaction();
+            tx.setFrameTimelineVsync(Choreographer.getInstance().getVsyncId());
+            return tx;
+        }
     }
 }

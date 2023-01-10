@@ -19,12 +19,10 @@ package com.android.server;
 import static android.Manifest.permission.ACCESS_MTP;
 import static android.Manifest.permission.INSTALL_PACKAGES;
 import static android.Manifest.permission.MANAGE_EXTERNAL_STORAGE;
-import static android.Manifest.permission.WRITE_EXTERNAL_STORAGE;
 import static android.app.AppOpsManager.MODE_ALLOWED;
 import static android.app.AppOpsManager.OP_LEGACY_STORAGE;
 import static android.app.AppOpsManager.OP_MANAGE_EXTERNAL_STORAGE;
 import static android.app.AppOpsManager.OP_REQUEST_INSTALL_PACKAGES;
-import static android.app.AppOpsManager.OP_WRITE_EXTERNAL_STORAGE;
 import static android.app.PendingIntent.FLAG_CANCEL_CURRENT;
 import static android.app.PendingIntent.FLAG_IMMUTABLE;
 import static android.app.PendingIntent.FLAG_ONE_SHOT;
@@ -383,7 +381,7 @@ class StorageManagerService extends IStorageManager.Stub
     private volatile boolean mChargingRequired;
     private volatile int mMinGCSleepTime;
     private volatile int mTargetDirtyRatio;
-    private volatile boolean mNeedGC;
+    private volatile boolean mNeedGC = true;
 
     private volatile boolean mPassedLifetimeThresh;
     // Tracking storage write amounts in one period
@@ -4526,11 +4524,7 @@ class StorageManagerService extends IStorageManager.Stub
                 }
             }
 
-            // Determine if caller is holding runtime permission
-            final boolean hasWrite = StorageManager.checkPermissionAndCheckOp(mContext, false, 0,
-                    uid, packageName, WRITE_EXTERNAL_STORAGE, OP_WRITE_EXTERNAL_STORAGE);
-
-            // We're only willing to give out installer access if they also hold
+            // We're only willing to give out installer access if they hold
             // runtime permission; this is a firm CDD requirement
             final boolean hasInstall = mIPackageManager.checkUidPermission(INSTALL_PACKAGES,
                     uid) == PERMISSION_GRANTED;
@@ -4546,7 +4540,7 @@ class StorageManagerService extends IStorageManager.Stub
                     break;
                 }
             }
-            if ((hasInstall || hasInstallOp) && hasWrite) {
+            if (hasInstall || hasInstallOp) {
                 return StorageManager.MOUNT_MODE_EXTERNAL_INSTALLER;
             }
             return StorageManager.MOUNT_MODE_EXTERNAL_DEFAULT;

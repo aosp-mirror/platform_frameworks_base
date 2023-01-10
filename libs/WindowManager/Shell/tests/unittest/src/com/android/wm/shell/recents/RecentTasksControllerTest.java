@@ -20,10 +20,17 @@ import static android.app.ActivityManager.RECENT_IGNORE_UNAVAILABLE;
 import static android.app.WindowConfiguration.WINDOWING_MODE_FULLSCREEN;
 import static android.app.WindowConfiguration.WINDOWING_MODE_MULTI_WINDOW;
 
+import static com.android.dx.mockito.inline.extended.ExtendedMockito.mockitoSession;
+
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyInt;
+import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.ArgumentMatchers.isA;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.reset;
@@ -35,20 +42,27 @@ import static org.mockito.Mockito.when;
 import static java.lang.Integer.MAX_VALUE;
 
 import android.app.ActivityManager;
+import android.app.ActivityTaskManager;
 import android.content.Context;
 import android.content.pm.PackageManager;
 import android.graphics.Rect;
+import android.os.Bundle;
 import android.view.SurfaceControl;
 
 import androidx.test.filters.SmallTest;
 import androidx.test.runner.AndroidJUnit4;
 
+import com.android.dx.mockito.inline.extended.StaticMockitoSession;
 import com.android.wm.shell.ShellTaskOrganizer;
 import com.android.wm.shell.ShellTestCase;
 import com.android.wm.shell.TestShellExecutor;
-import com.android.wm.shell.common.ShellExecutor;
 import com.android.wm.shell.common.TaskStackListenerImpl;
+import com.android.wm.shell.desktopmode.DesktopModeStatus;
+import com.android.wm.shell.desktopmode.DesktopModeTaskRepository;
+import com.android.wm.shell.sysui.ShellCommandHandler;
+import com.android.wm.shell.sysui.ShellController;
 import com.android.wm.shell.sysui.ShellInit;
+import com.android.wm.shell.sysui.ShellSharedConstants;
 import com.android.wm.shell.util.GroupedRecentTaskInfo;
 import com.android.wm.shell.util.SplitBounds;
 
@@ -59,7 +73,9 @@ import org.mockito.Mock;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.List;
 import java.util.Optional;
+import java.util.function.Consumer;
 
 /**
  * Tests for {@link RecentTasksController}.
@@ -73,21 +89,65 @@ public class RecentTasksControllerTest extends ShellTestCase {
     @Mock
     private TaskStackListenerImpl mTaskStackListener;
     @Mock
-    private ShellInit mShellInit;
+    private ShellCommandHandler mShellCommandHandler;
+    @Mock
+    private DesktopModeTaskRepository mDesktopModeTaskRepository;
+    @Mock
+    private ActivityTaskManager mActivityTaskManager;
 
     private ShellTaskOrganizer mShellTaskOrganizer;
     private RecentTasksController mRecentTasksController;
-    private ShellExecutor mMainExecutor;
+    private RecentTasksController mRecentTasksControllerReal;
+    private ShellInit mShellInit;
+    private ShellController mShellController;
+    private TestShellExecutor mMainExecutor;
 
     @Before
     public void setUp() {
         mMainExecutor = new TestShellExecutor();
         when(mContext.getPackageManager()).thenReturn(mock(PackageManager.class));
-        mRecentTasksController = spy(new RecentTasksController(mContext, mShellInit,
-                mTaskStackListener, mMainExecutor));
-        mShellTaskOrganizer = new ShellTaskOrganizer(mShellInit,
+        mShellInit = spy(new ShellInit(mMainExecutor));
+        mShellController = spy(new ShellController(mShellInit, mShellCommandHandler,
+                mMainExecutor));
+        mRecentTasksControllerReal = new RecentTasksController(mContext, mShellInit,
+                mShellController, mShellCommandHandler, mTaskStackListener, mActivityTaskManager,
+                Optional.of(mDesktopModeTaskRepository), mMainExecutor);
+        mRecentTasksController = spy(mRecentTasksControllerReal);
+        mShellTaskOrganizer = new ShellTaskOrganizer(mShellInit, mShellCommandHandler,
                 null /* sizeCompatUI */, Optional.empty(), Optional.of(mRecentTasksController),
                 mMainExecutor);
+        mShellInit.init();
+    }
+
+    @Test
+    public void instantiateController_addInitCallback() {
+        verify(mShellInit, times(1)).addInitCallback(any(), isA(RecentTasksController.class));
+    }
+
+    @Test
+    public void instantiateController_addDumpCallback() {
+        verify(mShellCommandHandler, times(1)).addDumpCallback(any(),
+                isA(RecentTasksController.class));
+    }
+
+    @Test
+    public void instantiateController_addExternalInterface() {
+        verify(mShellController, times(1)).addExternalInterface(
+                eq(ShellSharedConstants.KEY_EXTRA_SHELL_RECENT_TASKS), any(), any());
+    }
+
+    @Test
+    public void testInvalidateExternalInterface_unregistersListener() {
+        // Note: We have to use the real instance of the controller here since that is the instance
+        // that is passed to ShellController internally, and the instance that the listener will be
+        // unregistered from
+        mRecentTasksControllerReal.registerRecentTasksListener(new IRecentTasksListener.Default());
+        assertTrue(mRecentTasksControllerReal.hasRecentTasksListener());
+        // Create initial interface
+        mShellController.createExternalInterfaces(new Bundle());
+        // Recreate the interface to trigger invalidation of the previous instance
+        mShellController.createExternalInterfaces(new Bundle());
+        assertFalse(mRecentTasksControllerReal.hasRecentTasksListener());
     }
 
     @Test
@@ -162,6 +222,77 @@ public class RecentTasksControllerTest extends ShellTestCase {
     }
 
     @Test
+    public void testGetRecentTasks_ReturnsRecentTasksAsynchronously() {
+        @SuppressWarnings("unchecked")
+        final List<GroupedRecentTaskInfo>[] recentTasks = new List[1];
+        Consumer<List<GroupedRecentTaskInfo>> consumer = argument -> recentTasks[0] = argument;
+        ActivityManager.RecentTaskInfo t1 = makeTaskInfo(1);
+        ActivityManager.RecentTaskInfo t2 = makeTaskInfo(2);
+        ActivityManager.RecentTaskInfo t3 = makeTaskInfo(3);
+        ActivityManager.RecentTaskInfo t4 = makeTaskInfo(4);
+        ActivityManager.RecentTaskInfo t5 = makeTaskInfo(5);
+        ActivityManager.RecentTaskInfo t6 = makeTaskInfo(6);
+        setRawList(t1, t2, t3, t4, t5, t6);
+
+        // Mark a couple pairs [t2, t4], [t3, t5]
+        SplitBounds pair1Bounds = new SplitBounds(new Rect(), new Rect(), 2, 4);
+        SplitBounds pair2Bounds = new SplitBounds(new Rect(), new Rect(), 3, 5);
+
+        mRecentTasksController.addSplitPair(t2.taskId, t4.taskId, pair1Bounds);
+        mRecentTasksController.addSplitPair(t3.taskId, t5.taskId, pair2Bounds);
+
+        mRecentTasksController.asRecentTasks()
+                .getRecentTasks(MAX_VALUE, RECENT_IGNORE_UNAVAILABLE, 0, Runnable::run, consumer);
+        mMainExecutor.flushAll();
+
+        assertGroupedTasksListEquals(recentTasks[0],
+                t1.taskId, -1,
+                t2.taskId, t4.taskId,
+                t3.taskId, t5.taskId,
+                t6.taskId, -1);
+    }
+
+    @Test
+    public void testGetRecentTasks_groupActiveFreeformTasks() {
+        StaticMockitoSession mockitoSession = mockitoSession().mockStatic(
+                DesktopModeStatus.class).startMocking();
+        when(DesktopModeStatus.isActive(any())).thenReturn(true);
+
+        ActivityManager.RecentTaskInfo t1 = makeTaskInfo(1);
+        ActivityManager.RecentTaskInfo t2 = makeTaskInfo(2);
+        ActivityManager.RecentTaskInfo t3 = makeTaskInfo(3);
+        ActivityManager.RecentTaskInfo t4 = makeTaskInfo(4);
+        setRawList(t1, t2, t3, t4);
+
+        when(mDesktopModeTaskRepository.isActiveTask(1)).thenReturn(true);
+        when(mDesktopModeTaskRepository.isActiveTask(3)).thenReturn(true);
+
+        ArrayList<GroupedRecentTaskInfo> recentTasks = mRecentTasksController.getRecentTasks(
+                MAX_VALUE, RECENT_IGNORE_UNAVAILABLE, 0);
+
+        // 2 freeform tasks should be grouped into one, 3 total recents entries
+        assertEquals(3, recentTasks.size());
+        GroupedRecentTaskInfo freeformGroup = recentTasks.get(0);
+        GroupedRecentTaskInfo singleGroup1 = recentTasks.get(1);
+        GroupedRecentTaskInfo singleGroup2 = recentTasks.get(2);
+
+        // Check that groups have expected types
+        assertEquals(GroupedRecentTaskInfo.TYPE_FREEFORM, freeformGroup.getType());
+        assertEquals(GroupedRecentTaskInfo.TYPE_SINGLE, singleGroup1.getType());
+        assertEquals(GroupedRecentTaskInfo.TYPE_SINGLE, singleGroup2.getType());
+
+        // Check freeform group entries
+        assertEquals(t1, freeformGroup.getTaskInfoList().get(0));
+        assertEquals(t3, freeformGroup.getTaskInfoList().get(1));
+
+        // Check single entries
+        assertEquals(t2, singleGroup1.getTaskInfo1());
+        assertEquals(t4, singleGroup2.getTaskInfo1());
+
+        mockitoSession.finishMocking();
+    }
+
+    @Test
     public void testRemovedTaskRemovesSplit() {
         ActivityManager.RecentTaskInfo t1 = makeTaskInfo(1);
         ActivityManager.RecentTaskInfo t2 = makeTaskInfo(2);
@@ -230,37 +361,39 @@ public class RecentTasksControllerTest extends ShellTestCase {
         for (ActivityManager.RecentTaskInfo task : tasks) {
             rawList.add(task);
         }
-        doReturn(rawList).when(mRecentTasksController).getRawRecentTasks(anyInt(), anyInt(),
+        doReturn(rawList).when(mActivityTaskManager).getRecentTasks(anyInt(), anyInt(),
                 anyInt());
         return rawList;
     }
 
     /**
      * Asserts that the recent tasks matches the given task ids.
+     *
      * @param expectedTaskIds list of task ids that map to the flattened task ids of the tasks in
      *                        the grouped task list
      */
-    private void assertGroupedTasksListEquals(ArrayList<GroupedRecentTaskInfo> recentTasks,
+    private void assertGroupedTasksListEquals(List<GroupedRecentTaskInfo> recentTasks,
             int... expectedTaskIds) {
         int[] flattenedTaskIds = new int[recentTasks.size() * 2];
         for (int i = 0; i < recentTasks.size(); i++) {
             GroupedRecentTaskInfo pair = recentTasks.get(i);
-            int taskId1 = pair.mTaskInfo1.taskId;
+            int taskId1 = pair.getTaskInfo1().taskId;
             flattenedTaskIds[2 * i] = taskId1;
-            flattenedTaskIds[2 * i + 1] = pair.mTaskInfo2 != null
-                    ? pair.mTaskInfo2.taskId
+            flattenedTaskIds[2 * i + 1] = pair.getTaskInfo2() != null
+                    ? pair.getTaskInfo2().taskId
                     : -1;
 
-            if (pair.mTaskInfo2 != null) {
-                assertNotNull(pair.mSplitBounds);
-                int leftTopTaskId = pair.mSplitBounds.leftTopTaskId;
-                int bottomRightTaskId = pair.mSplitBounds.rightBottomTaskId;
+            if (pair.getTaskInfo2() != null) {
+                assertNotNull(pair.getSplitBounds());
+                int leftTopTaskId = pair.getSplitBounds().leftTopTaskId;
+                int bottomRightTaskId = pair.getSplitBounds().rightBottomTaskId;
                 // Unclear if pairs are ordered by split position, most likely not.
-                assertTrue(leftTopTaskId == taskId1 || leftTopTaskId == pair.mTaskInfo2.taskId);
+                assertTrue(leftTopTaskId == taskId1
+                        || leftTopTaskId == pair.getTaskInfo2().taskId);
                 assertTrue(bottomRightTaskId == taskId1
-                        || bottomRightTaskId == pair.mTaskInfo2.taskId);
+                        || bottomRightTaskId == pair.getTaskInfo2().taskId);
             } else {
-                assertNull(pair.mSplitBounds);
+                assertNull(pair.getSplitBounds());
             }
         }
         assertTrue("Expected: " + Arrays.toString(expectedTaskIds)

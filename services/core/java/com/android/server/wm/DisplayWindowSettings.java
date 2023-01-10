@@ -150,7 +150,10 @@ class DisplayWindowSettings {
         final SettingsProvider.SettingsEntry overrideSettings =
                 mSettingsProvider.getOverrideSettings(displayInfo);
         overrideSettings.mWindowingMode = mode;
-        dc.setWindowingMode(mode);
+        final TaskDisplayArea defaultTda = dc.getDefaultTaskDisplayArea();
+        if (defaultTda != null) {
+            defaultTda.setWindowingMode(mode);
+        }
         mSettingsProvider.updateOverrideSettings(displayInfo, overrideSettings);
     }
 
@@ -253,8 +256,10 @@ class DisplayWindowSettings {
 
         // Setting windowing mode first, because it may override overscan values later.
         final int windowingMode = getWindowingModeLocked(settings, dc);
-        dc.setWindowingMode(windowingMode);
-
+        final TaskDisplayArea defaultTda = dc.getDefaultTaskDisplayArea();
+        if (defaultTda != null) {
+            defaultTda.setWindowingMode(windowingMode);
+        }
         final int userRotationMode = settings.mUserRotationMode != null
                 ? settings.mUserRotationMode : WindowManagerPolicy.USER_ROTATION_FREE;
         final int userRotation = settings.mUserRotation != null
@@ -311,10 +316,11 @@ class DisplayWindowSettings {
      * changed.
      */
     boolean updateSettingsForDisplay(DisplayContent dc) {
-        if (dc.getWindowingMode() != getWindowingModeLocked(dc)) {
+        final TaskDisplayArea defaultTda = dc.getDefaultTaskDisplayArea();
+        if (defaultTda != null && defaultTda.getWindowingMode() != getWindowingModeLocked(dc)) {
             // For the time being the only thing that may change is windowing mode, so just update
             // that.
-            dc.setWindowingMode(getWindowingModeLocked(dc));
+            defaultTda.setWindowingMode(getWindowingModeLocked(dc));
             return true;
         }
         return false;

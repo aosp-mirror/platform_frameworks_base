@@ -18,6 +18,7 @@ package com.android.systemui.volume;
 
 import static com.android.systemui.volume.VolumeDialogControllerImpl.STREAMS;
 
+import static junit.framework.Assert.assertEquals;
 import static junit.framework.Assert.assertTrue;
 
 import static org.mockito.ArgumentMatchers.any;
@@ -28,6 +29,7 @@ import static org.mockito.Mockito.verify;
 import android.app.KeyguardManager;
 import android.media.AudioManager;
 import android.os.SystemClock;
+import android.provider.DeviceConfig;
 import android.testing.AndroidTestingRunner;
 import android.testing.TestableLooper;
 import android.view.InputDevice;
@@ -38,10 +40,12 @@ import android.view.accessibility.AccessibilityManager;
 
 import androidx.test.filters.SmallTest;
 
+import com.android.internal.config.sysui.SystemUiDeviceConfigFlags;
 import com.android.internal.jank.InteractionJankMonitor;
 import com.android.systemui.Prefs;
 import com.android.systemui.R;
 import com.android.systemui.SysuiTestCase;
+import com.android.systemui.dump.DumpManager;
 import com.android.systemui.media.dialog.MediaOutputDialogFactory;
 import com.android.systemui.plugins.ActivityStarter;
 import com.android.systemui.plugins.VolumeDialogController;
@@ -49,6 +53,9 @@ import com.android.systemui.plugins.VolumeDialogController.State;
 import com.android.systemui.statusbar.policy.AccessibilityManagerWrapper;
 import com.android.systemui.statusbar.policy.ConfigurationController;
 import com.android.systemui.statusbar.policy.DeviceProvisionedController;
+import com.android.systemui.util.DeviceConfigProxyFake;
+import com.android.systemui.util.concurrency.FakeExecutor;
+import com.android.systemui.util.time.FakeSystemClock;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -71,6 +78,8 @@ public class VolumeDialogImplTest extends SysuiTestCase {
     View mDrawerVibrate;
     View mDrawerMute;
     View mDrawerNormal;
+    private DeviceConfigProxyFake mDeviceConfigProxy;
+    private FakeExecutor mExecutor;
 
     @Mock
     VolumeDialogController mVolumeDialogController;
@@ -85,15 +94,22 @@ public class VolumeDialogImplTest extends SysuiTestCase {
     @Mock
     MediaOutputDialogFactory mMediaOutputDialogFactory;
     @Mock
+    VolumePanelFactory mVolumePanelFactory;
+    @Mock
     ActivityStarter mActivityStarter;
     @Mock
     InteractionJankMonitor mInteractionJankMonitor;
+    @Mock
+    private DumpManager mDumpManager;
 
     @Before
     public void setup() throws Exception {
         MockitoAnnotations.initMocks(this);
 
         getContext().addMockSystemService(KeyguardManager.class, mKeyguard);
+
+        mDeviceConfigProxy = new DeviceConfigProxyFake();
+        mExecutor = new FakeExecutor(new FakeSystemClock());
 
         mDialog = new VolumeDialogImpl(
                 getContext(),
@@ -102,8 +118,13 @@ public class VolumeDialogImplTest extends SysuiTestCase {
                 mDeviceProvisionedController,
                 mConfigurationController,
                 mMediaOutputDialogFactory,
+                mVolumePanelFactory,
                 mActivityStarter,
-                mInteractionJankMonitor);
+                mInteractionJankMonitor,
+                mDeviceConfigProxy,
+                mExecutor,
+                mDumpManager
+            );
         mDialog.init(0, null);
         State state = createShellState();
         mDialog.onStateChangedH(state);
@@ -120,6 +141,9 @@ public class VolumeDialogImplTest extends SysuiTestCase {
                 VolumePrefs.SHOW_RINGER_TOAST_COUNT + 1);
 
         Prefs.putBoolean(mContext, Prefs.Key.HAS_SEEN_ODI_CAPTIONS_TOOLTIP, false);
+
+        mDeviceConfigProxy.setProperty(DeviceConfig.NAMESPACE_SYSTEMUI,
+                SystemUiDeviceConfigFlags.VOLUME_SEPARATE_NOTIFICATION, "false", false);
     }
 
     private State createShellState() {
@@ -287,6 +311,35 @@ public class VolumeDialogImplTest extends SysuiTestCase {
         // Make sure we've actually changed the ringer mode.
         verify(mVolumeDialogController, times(1)).setRingerMode(
                 AudioManager.RINGER_MODE_NORMAL, false);
+    }
+
+    /**
+     * Ideally we would look at the ringer ImageView and check its assigned drawable id, but that
+     * API does not exist. So we do the next best thing; we check the cached icon id.
+     */
+    @Test
+    public void notificationVolumeSeparated_theRingerIconChanges() {
+        mDeviceConfigProxy.setProperty(DeviceConfig.NAMESPACE_SYSTEMUI,
+                SystemUiDeviceConfigFlags.VOLUME_SEPARATE_NOTIFICATION, "true", false);
+
+        mExecutor.runAllReady(); // for the config change to take effect
+
+        // assert icon is new based on res id
+        assertEquals(mDialog.mVolumeRingerIconDrawableId,
+                R.drawable.ic_speaker_on);
+        assertEquals(mDialog.mVolumeRingerMuteIconDrawableId,
+                R.drawable.ic_speaker_mute);
+    }
+
+    @Test
+    public void notificationVolumeNotSeparated_theRingerIconRemainsTheSame() {
+        mDeviceConfigProxy.setProperty(DeviceConfig.NAMESPACE_SYSTEMUI,
+                SystemUiDeviceConfigFlags.VOLUME_SEPARATE_NOTIFICATION, "false", false);
+
+        mExecutor.runAllReady();
+
+        assertEquals(mDialog.mVolumeRingerIconDrawableId, R.drawable.ic_volume_ringer);
+        assertEquals(mDialog.mVolumeRingerMuteIconDrawableId, R.drawable.ic_volume_ringer_mute);
     }
 
 /*

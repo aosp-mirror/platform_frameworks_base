@@ -26,11 +26,11 @@
     <string name="keyguard_sim_error_message_short" msgid="633630844240494070">"Kehtetu kaart."</string>
     <string name="keyguard_charged" msgid="5478247181205188995">"Laetud"</string>
     <string name="keyguard_plugged_in_wireless" msgid="2537874724955057383">"<xliff:g id="PERCENTAGE">%s</xliff:g> • Juhtmeta laadimine"</string>
-    <string name="keyguard_plugged_in_dock" msgid="449722738270908674">"<xliff:g id="PERCENTAGE">%s</xliff:g> • Laadimisdokk"</string>
+    <string name="keyguard_plugged_in_dock" msgid="2122073051904360987">"<xliff:g id="PERCENTAGE">%s</xliff:g> • Laadimine"</string>
     <string name="keyguard_plugged_in" msgid="8169926454348380863">"<xliff:g id="PERCENTAGE">%s</xliff:g> • Laadimine"</string>
     <string name="keyguard_plugged_in_charging_fast" msgid="4386594091107340426">"<xliff:g id="PERCENTAGE">%s</xliff:g> • Kiirlaadimine"</string>
     <string name="keyguard_plugged_in_charging_slowly" msgid="217655355424210">"<xliff:g id="PERCENTAGE">%s</xliff:g> • Aeglane laadimine"</string>
-    <string name="keyguard_plugged_in_charging_limited" msgid="6091488837901216962">"<xliff:g id="PERCENTAGE">%s</xliff:g> • Laadimine on ajutiselt piiratud"</string>
+    <string name="keyguard_plugged_in_charging_limited" msgid="1053130519456324630">"<xliff:g id="PERCENTAGE">%s</xliff:g> • Laadimine on aku kaitsmiseks optimeeritud"</string>
     <string name="keyguard_instructions_when_pattern_disabled" msgid="8448804180089936954">"Vajutage avamiseks menüüklahvi."</string>
     <string name="keyguard_network_locked_message" msgid="407096292844868608">"Võrk on lukus"</string>
     <string name="keyguard_missing_sim_message_short" msgid="704159478161444907">"SIM-kaarti pole"</string>
@@ -78,9 +78,9 @@
     <string name="kg_prompt_reason_restart_pattern" msgid="4720554342633852066">"Pärast seadme taaskäivitamist tuleb sisestada muster"</string>
     <string name="kg_prompt_reason_restart_pin" msgid="1587671566498057656">"Pärast seadme taaskäivitamist tuleb sisestada PIN-kood"</string>
     <string name="kg_prompt_reason_restart_password" msgid="8061279087240952002">"Pärast seadme taaskäivitamist tuleb sisestada parool"</string>
-    <string name="kg_prompt_reason_timeout_pattern" msgid="9170360502528959889">"Lisaturvalisuse huvides tuleb sisestada muster"</string>
-    <string name="kg_prompt_reason_timeout_pin" msgid="5945186097160029201">"Lisaturvalisuse huvides tuleb sisestada PIN-kood"</string>
-    <string name="kg_prompt_reason_timeout_password" msgid="2258263949430384278">"Lisaturvalisuse huvides tuleb sisestada parool"</string>
+    <string name="kg_prompt_reason_timeout_pattern" msgid="5514969660010197363">"Kasutage tugevama turvalisuse huvides hoopis mustrit"</string>
+    <string name="kg_prompt_reason_timeout_pin" msgid="4227962059353859376">"Kasutage tugevama turvalisuse huvides hoopis PIN-koodi"</string>
+    <string name="kg_prompt_reason_timeout_password" msgid="8810879144143933690">"Kasutage tugevama turvalisuse huvides hoopis parooli"</string>
     <string name="kg_prompt_reason_device_admin" msgid="6961159596224055685">"Administraator lukustas seadme"</string>
     <string name="kg_prompt_reason_user_request" msgid="6015774877733717904">"Seade lukustati käsitsi"</string>
     <string name="kg_face_not_recognized" msgid="7903950626744419160">"Ei tuvastatud"</string>
@@ -90,4 +90,5 @@
     <string name="clock_title_default" msgid="6342735240617459864">"Vaikenumbrilaud"</string>
     <string name="clock_title_bubble" msgid="2204559396790593213">"Mull"</string>
     <string name="clock_title_analog" msgid="8409262532900918273">"Analoog"</string>
+    <string name="keyguard_unlock_to_continue" msgid="7509503484250597743">"Jätkamiseks avage oma seade"</string>
 </resources>

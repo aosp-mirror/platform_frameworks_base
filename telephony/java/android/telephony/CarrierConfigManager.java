@@ -584,6 +584,17 @@ public class CarrierConfigManager {
             KEY_ONLY_SINGLE_DC_ALLOWED_INT_ARRAY = "only_single_dc_allowed_int_array";
 
     /**
+     * List of network capabilities which, if requested, will exempt the request from single PDN
+     * connection checks.
+     * @see NetworkCapabilities NET_CAPABILITY_*
+     * @see #KEY_ONLY_SINGLE_DC_ALLOWED_INT_ARRAY
+     *
+     * @hide
+     */
+    public static final String KEY_CAPABILITIES_EXEMPT_FROM_SINGLE_DC_CHECK_INT_ARRAY =
+            "capabilities_exempt_from_single_dc_check_int_array";
+
+    /**
      * Override the platform's notion of a network operator being considered roaming.
      * Value is string array of MCCMNCs to be considered roaming for 3GPP RATs.
      */
@@ -1169,7 +1180,10 @@ public class CarrierConfigManager {
             "carrier_data_call_retry_network_requested_max_count_int";
 
     /**
-     * Data call setup permanent failure causes by the carrier
+     * Data call setup permanent failure causes by the carrier.
+     *
+     * This API key was added in mistake and is not used anymore by the telephony data
+     * frameworks.
      */
     public static final String KEY_CARRIER_DATA_CALL_PERMANENT_FAILURE_STRINGS =
             "carrier_data_call_permanent_failure_strings";
@@ -1984,6 +1998,17 @@ public class CarrierConfigManager {
      */
     public static final String KEY_NR_ADVANCED_THRESHOLD_BANDWIDTH_KHZ_INT =
             "nr_advanced_threshold_bandwidth_khz_int";
+
+    /**
+     * Indicating whether to include LTE cell bandwidths when determining whether the aggregated
+     * cell bandwidth meets the required threshold for NR advanced.
+     *
+     * @see TelephonyDisplayInfo#OVERRIDE_NETWORK_TYPE_NR_ADVANCED
+     *
+     * @hide
+     */
+    public static final String KEY_INCLUDE_LTE_FOR_NR_ADVANCED_THRESHOLD_BANDWIDTH_BOOL =
+            "include_lte_for_nr_advanced_threshold_bandwidth_bool";
 
     /**
      * Boolean indicating if operator name should be shown in the status bar
@@ -8297,7 +8322,8 @@ public class CarrierConfigManager {
      *
      * The syntax of the retry rule:
      * 1. Retry based on {@link NetworkCapabilities}. Note that only APN-type network capabilities
-     *    are supported.
+     *    are supported. If the capabilities are not specified, then the retry rule only applies
+     *    to the current failed APN used in setup data call request.
      * "capabilities=[netCaps1|netCaps2|...], [retry_interval=n1|n2|n3|n4...], [maximum_retries=n]"
      *
      * 2. Retry based on {@link DataFailCause}
@@ -8308,14 +8334,15 @@ public class CarrierConfigManager {
      * "capabilities=[netCaps1|netCaps2|...], fail_causes=[cause1|cause2|cause3|...],
      *     [retry_interval=n1|n2|n3|n4...], [maximum_retries=n]"
      *
+     * 4. Permanent fail causes (no timer-based retry) on the current failed APN. Retry interval
+     *    is specified for retrying the next available APN.
+     * "permanent_fail_causes=8|27|28|29|30|32|33|35|50|51|111|-5|-6|65537|65538|-3|65543|65547|
+     *     2252|2253|2254, retry_interval=2500"
+     *
      * For example,
      * "capabilities=eims, retry_interval=1000, maximum_retries=20" means if the attached
      * network request is emergency, then retry data network setup every 1 second for up to 20
      * times.
-     *
-     * "fail_causes=8|27|28|29|30|32|33|35|50|51|111|-5|-6|65537|65538|-3|2253|2254
-     * , maximum_retries=0" means for those fail causes, never retry with timers. Note that
-     * when environment changes, retry can still happen.
      *
      * "capabilities=internet|enterprise|dun|ims|fota, retry_interval=2500|3000|"
      * "5000|10000|15000|20000|40000|60000|120000|240000|600000|1200000|1800000"
@@ -8539,6 +8566,16 @@ public class CarrierConfigManager {
     public static final String KEY_VONR_ENABLED_BOOL = "vonr_enabled_bool";
 
     /**
+     * Boolean indicating the default VoNR user preference setting.
+     * If true, the VoNR setting will be enabled. If false, it will be disabled initially.
+     *
+     * Enabled by default.
+     *
+     * @hide
+     */
+    public static final String KEY_VONR_ON_BY_DEFAULT_BOOL = "vonr_on_by_default_bool";
+
+    /**
      * Determine whether unthrottle data retry when tracking area code (TAC/LAC) from cell changes
      *
      * @hide
@@ -8749,6 +8786,8 @@ public class CarrierConfigManager {
                 new int[] {TelephonyManager.NETWORK_TYPE_CDMA, TelephonyManager.NETWORK_TYPE_1xRTT,
                         TelephonyManager.NETWORK_TYPE_EVDO_0, TelephonyManager.NETWORK_TYPE_EVDO_A,
                         TelephonyManager.NETWORK_TYPE_EVDO_B});
+        sDefaults.putIntArray(KEY_CAPABILITIES_EXEMPT_FROM_SINGLE_DC_CHECK_INT_ARRAY,
+                new int[] {NetworkCapabilities.NET_CAPABILITY_IMS});
         sDefaults.putStringArray(KEY_GSM_ROAMING_NETWORKS_STRING_ARRAY, null);
         sDefaults.putStringArray(KEY_GSM_NONROAMING_NETWORKS_STRING_ARRAY, null);
         sDefaults.putString(KEY_CONFIG_IMS_PACKAGE_OVERRIDE_STRING, null);
@@ -8973,6 +9012,7 @@ public class CarrierConfigManager {
         sDefaults.putBoolean(KEY_HIDE_LTE_PLUS_DATA_ICON_BOOL, true);
         sDefaults.putInt(KEY_LTE_PLUS_THRESHOLD_BANDWIDTH_KHZ_INT, 20000);
         sDefaults.putInt(KEY_NR_ADVANCED_THRESHOLD_BANDWIDTH_KHZ_INT, 0);
+        sDefaults.putBoolean(KEY_INCLUDE_LTE_FOR_NR_ADVANCED_THRESHOLD_BANDWIDTH_BOOL, false);
         sDefaults.putIntArray(KEY_CARRIER_NR_AVAILABILITIES_INT_ARRAY,
                 new int[]{CARRIER_NR_AVAILABILITY_NSA, CARRIER_NR_AVAILABILITY_SA});
         sDefaults.putBoolean(KEY_LTE_ENABLED_BOOL, true);
@@ -9192,8 +9232,13 @@ public class CarrierConfigManager {
         sDefaults.putStringArray(
                 KEY_TELEPHONY_DATA_SETUP_RETRY_RULES_STRING_ARRAY, new String[] {
                         "capabilities=eims, retry_interval=1000, maximum_retries=20",
-                        "fail_causes=8|27|28|29|30|32|33|35|50|51|111|-5|-6|65537|65538|-3|2252|"
-                                + "2253|2254, maximum_retries=0", // No retry for those causes
+                        // Permanent fail causes. When setup data call fails with the following
+                        // fail causes, telephony data frameworks will stop timer-based retry on
+                        // the failed APN until power cycle, APM, or some special events. Note that
+                        // even though timer-based retry is not performed, condition-based (RAT
+                        // changes, registration state changes) retry can still happen.
+                        "permanent_fail_causes=8|27|28|29|30|32|33|35|50|51|111|-5|-6|65537|65538|"
+                                + "-3|65543|65547|2252|2253|2254, retry_interval=2500",
                         "capabilities=mms|supl|cbs, retry_interval=2000",
                         "capabilities=internet|enterprise|dun|ims|fota, retry_interval=2500|3000|"
                                 + "5000|10000|15000|20000|40000|60000|120000|240000|"
@@ -9224,6 +9269,7 @@ public class CarrierConfigManager {
         sDefaults.putBoolean(KEY_UNTHROTTLE_DATA_RETRY_WHEN_TAC_CHANGES_BOOL, false);
         sDefaults.putBoolean(KEY_VONR_SETTING_VISIBILITY_BOOL, true);
         sDefaults.putBoolean(KEY_VONR_ENABLED_BOOL, false);
+        sDefaults.putBoolean(KEY_VONR_ON_BY_DEFAULT_BOOL, true);
         sDefaults.putStringArray(KEY_IWLAN_HANDOVER_POLICY_STRING_ARRAY, new String[]{
                 "source=GERAN|UTRAN|EUTRAN|NGRAN|IWLAN, "
                         + "target=GERAN|UTRAN|EUTRAN|NGRAN|IWLAN, type=allowed"});

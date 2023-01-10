@@ -5484,22 +5484,22 @@
              ignores some hyphen character related typographic features, e.g. kerning. -->
             <enum name="fullFast" value="4" />
         </attr>
-        <!-- Indicates the line break strategies can be used when calculating the text wrapping. -->
+        <!-- Specifies the line-break strategies for text wrapping. -->
         <attr name="lineBreakStyle">
-            <!-- No line break style specific. -->
+            <!-- No line-break rules are used for line breaking. -->
             <enum name="none" value="0" />
-            <!-- Use the least restrictive rule for line-breaking. -->
+            <!-- The least restrictive line-break rules are used for line breaking. -->
             <enum name="loose" value="1" />
-            <!-- Indicates breaking text with the most comment set of line-breaking rules. -->
+            <!-- The most common line-break rules are used for line breaking. -->
             <enum name="normal" value="2" />
-            <!-- Indicates breaking text with the most strictest line-breaking rules. -->
+            <!-- The most strict line-break rules are used for line breaking. -->
             <enum name="strict" value="3" />
         </attr>
-        <!-- Specify the phrase-based line break can be used when calculating the text wrapping.-->
+        <!-- Specifies the line-break word strategies for text wrapping.-->
         <attr name="lineBreakWordStyle">
-            <!-- No line break word style specific. -->
+            <!-- No line-break word style is used for line breaking. -->
             <enum name="none" value="0" />
-            <!-- Specify the phrase based breaking. -->
+            <!-- Line breaking is based on phrases, which results in text wrapping only on meaningful words. -->
             <enum name="phrase" value="1" />
         </attr>
         <!-- Specify the type of auto-size. Note that this feature is not supported by EditText,
@@ -9560,6 +9560,12 @@
         <attr name="maxCollapsedHeightSmall" format="dimension" />
         <!-- Whether the Drawer should be positioned at the top rather than at the bottom. -->
         <attr name="showAtTop" format="boolean" />
+        <!-- By default `ResolverDrawerLayout`’s children views with `layout_ignoreOffset` property
+             set to true have a fixed position in the layout that won’t be affected by the drawer’s
+             movements. This property alternates that behavior. It specifies a child view’s id that
+             will push all ignoreOffset siblings below it when the drawer is moved i.e. setting the
+             top limit the ignoreOffset elements. -->
+        <attr name="ignoreOffsetTopLimit" format="reference" />
     </declare-styleable>
 
     <declare-styleable name="MessagingLinearLayout">

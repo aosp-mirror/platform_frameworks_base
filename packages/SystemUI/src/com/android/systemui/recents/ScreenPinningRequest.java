@@ -37,10 +37,12 @@ import android.os.RemoteException;
 import android.text.SpannableStringBuilder;
 import android.text.style.BulletSpan;
 import android.util.DisplayMetrics;
+import android.util.Log;
 import android.view.Gravity;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.WindowManager;
+import android.view.WindowManagerGlobal;
 import android.view.accessibility.AccessibilityManager;
 import android.view.animation.DecelerateInterpolator;
 import android.widget.Button;
@@ -49,12 +51,14 @@ import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 
+import androidx.annotation.NonNull;
+
 import com.android.systemui.R;
 import com.android.systemui.broadcast.BroadcastDispatcher;
 import com.android.systemui.navigationbar.NavigationBarView;
 import com.android.systemui.navigationbar.NavigationModeController;
+import com.android.systemui.settings.UserTracker;
 import com.android.systemui.shared.system.QuickStepContract;
-import com.android.systemui.shared.system.WindowManagerWrapper;
 import com.android.systemui.statusbar.phone.CentralSurfaces;
 import com.android.systemui.util.leak.RotationUtils;
 
@@ -67,6 +71,7 @@ import dagger.Lazy;
 
 public class ScreenPinningRequest implements View.OnClickListener,
         NavigationModeController.ModeChangedListener {
+    private static final String TAG = "ScreenPinningRequest";
 
     private final Context mContext;
     private final Lazy<Optional<CentralSurfaces>> mCentralSurfacesOptionalLazy;
@@ -74,6 +79,7 @@ public class ScreenPinningRequest implements View.OnClickListener,
     private final AccessibilityManager mAccessibilityService;
     private final WindowManager mWindowManager;
     private final BroadcastDispatcher mBroadcastDispatcher;
+    private final UserTracker mUserTracker;
 
     private RequestWindowView mRequestWindow;
     private int mNavBarMode;
@@ -81,12 +87,21 @@ public class ScreenPinningRequest implements View.OnClickListener,
     /** ID of task to be pinned or locked. */
     private int taskId;
 
+    private final UserTracker.Callback mUserChangedCallback =
+            new UserTracker.Callback() {
+                @Override
+                public void onUserChanged(int newUser, @NonNull Context userContext) {
+                    clearPrompt();
+                }
+            };
+
     @Inject
     public ScreenPinningRequest(
             Context context,
             Lazy<Optional<CentralSurfaces>> centralSurfacesOptionalLazy,
             NavigationModeController navigationModeController,
-            BroadcastDispatcher broadcastDispatcher) {
+            BroadcastDispatcher broadcastDispatcher,
+            UserTracker userTracker) {
         mContext = context;
         mCentralSurfacesOptionalLazy = centralSurfacesOptionalLazy;
         mAccessibilityService = (AccessibilityManager)
@@ -95,6 +110,7 @@ public class ScreenPinningRequest implements View.OnClickListener,
                 mContext.getSystemService(Context.WINDOW_SERVICE);
         mNavBarMode = navigationModeController.addListener(this);
         mBroadcastDispatcher = broadcastDispatcher;
+        mUserTracker = userTracker;
     }
 
     public void clearPrompt() {
@@ -226,9 +242,9 @@ public class ScreenPinningRequest implements View.OnClickListener,
             }
 
             IntentFilter filter = new IntentFilter(Intent.ACTION_CONFIGURATION_CHANGED);
-            filter.addAction(Intent.ACTION_USER_SWITCHED);
             filter.addAction(Intent.ACTION_SCREEN_OFF);
             mBroadcastDispatcher.registerReceiver(mReceiver, filter);
+            mUserTracker.addCallback(mUserChangedCallback, mContext.getMainExecutor());
         }
 
         private void inflateView(int rotation) {
@@ -248,9 +264,8 @@ public class ScreenPinningRequest implements View.OnClickListener,
             mLayout.findViewById(R.id.screen_pinning_text_area)
                     .setLayoutDirection(View.LAYOUT_DIRECTION_LOCALE);
             View buttons = mLayout.findViewById(R.id.screen_pinning_buttons);
-            WindowManagerWrapper wm = WindowManagerWrapper.getInstance();
             if (!QuickStepContract.isGesturalMode(mNavBarMode)
-            	    && wm.hasSoftNavigationBar(mContext.getDisplayId()) && !isTablet(mContext)) {
+            	    && hasSoftNavigationBar(mContext.getDisplayId()) && !isTablet(mContext)) {
                 buttons.setLayoutDirection(View.LAYOUT_DIRECTION_LOCALE);
                 swapChildrenIfRtlAndVertical(buttons);
             } else {
@@ -321,6 +336,20 @@ public class ScreenPinningRequest implements View.OnClickListener,
             addView(mLayout, getRequestLayoutParams(rotation));
         }
 
+        /**
+         * @param displayId the id of display to check if there is a software navigation bar.
+         *
+         * @return whether there is a soft nav bar on specific display.
+         */
+        private boolean hasSoftNavigationBar(int displayId) {
+            try {
+                return WindowManagerGlobal.getWindowManagerService().hasNavigationBar(displayId);
+            } catch (RemoteException e) {
+                Log.e(TAG, "Failed to check soft navigation bar", e);
+                return false;
+            }
+        }
+
         private void swapChildrenIfRtlAndVertical(View group) {
             if (mContext.getResources().getConfiguration().getLayoutDirection()
                     != View.LAYOUT_DIRECTION_RTL) {
@@ -343,6 +372,7 @@ public class ScreenPinningRequest implements View.OnClickListener,
         @Override
         public void onDetachedFromWindow() {
             mBroadcastDispatcher.unregisterReceiver(mReceiver);
+            mUserTracker.removeCallback(mUserChangedCallback);
         }
 
         protected void onConfigurationChanged() {
@@ -373,8 +403,7 @@ public class ScreenPinningRequest implements View.OnClickListener,
             public void onReceive(Context context, Intent intent) {
                 if (intent.getAction().equals(Intent.ACTION_CONFIGURATION_CHANGED)) {
                     post(mUpdateLayoutRunnable);
-                } else if (intent.getAction().equals(Intent.ACTION_USER_SWITCHED)
-                        || intent.getAction().equals(Intent.ACTION_SCREEN_OFF)) {
+                } else if (intent.getAction().equals(Intent.ACTION_SCREEN_OFF)) {
                     clearPrompt();
                 }
             }

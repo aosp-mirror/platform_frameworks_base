@@ -52,6 +52,9 @@ public class ShellInit {
      * Adds a callback to the ordered list of callbacks be made when Shell is first started.  This
      * can be used in class constructors when dagger is used to ensure that the initialization order
      * matches the dependency order.
+     *
+     * @param r the callback to be made when Shell is initialized
+     * @param instance used for debugging only
      */
     public <T extends Object> void addInitCallback(Runnable r, T instance) {
         if (mHasInitialized) {

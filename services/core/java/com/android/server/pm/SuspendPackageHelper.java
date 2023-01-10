@@ -110,12 +110,12 @@ public final class SuspendPackageHelper {
         final SuspendParams newSuspendParams =
                 new SuspendParams(dialogInfo, appExtras, launcherExtras);
 
-        final List<String> changedPackagesList = new ArrayList<>(packageNames.length);
-        final IntArray changedUids = new IntArray(packageNames.length);
-        final IntArray modifiedUids = new IntArray(packageNames.length);
         final List<String> unmodifiablePackages = new ArrayList<>(packageNames.length);
 
-        ArraySet<String> modifiedPackages = new ArraySet<>();
+        final List<String> notifyPackagesList = new ArrayList<>(packageNames.length);
+        final IntArray notifyUids = new IntArray(packageNames.length);
+        final ArraySet<String> changedPackagesList = new ArraySet<>(packageNames.length);
+        final IntArray changedUids = new IntArray(packageNames.length);
 
         final boolean[] canSuspend = suspended
                 ? canSuspendPackageForUser(snapshot, packageNames, userId, callingUid) : null;
@@ -143,39 +143,39 @@ public final class SuspendPackageHelper {
 
             final WatchedArrayMap<String, SuspendParams> suspendParamsMap =
                     packageState.getUserStateOrDefault(userId).getSuspendParams();
-            if (suspended) {
-                if (suspendParamsMap != null && suspendParamsMap.containsKey(packageName)) {
-                    final SuspendParams suspendParams = suspendParamsMap.get(packageName);
-                    // Skip if there's no changes
-                    if (suspendParams != null
-                            && Objects.equals(suspendParams.getDialogInfo(), dialogInfo)
-                            && Objects.equals(suspendParams.getAppExtras(), appExtras)
-                            && Objects.equals(suspendParams.getLauncherExtras(),
-                            launcherExtras)) {
-                        // Carried over API behavior, must notify change even if no change
-                        changedPackagesList.add(packageName);
-                        changedUids.add(UserHandle.getUid(userId, packageState.getAppId()));
-                        continue;
-                    }
-                }
+
+            SuspendParams oldSuspendParams = suspendParamsMap == null
+                    ? null : suspendParamsMap.get(packageName);
+            boolean changed = !Objects.equals(oldSuspendParams, newSuspendParams);
+
+            if (suspended && !changed) {
+                // Carried over API behavior, must notify change even if no change
+                notifyPackagesList.add(packageName);
+                notifyUids.add(UserHandle.getUid(userId, packageState.getAppId()));
+                continue;
             }
 
-            // If size one, the package will be unsuspended from this call
-            boolean packageUnsuspended =
-                    !suspended && CollectionUtils.size(suspendParamsMap) <= 1;
+            // If only the callingPackage is suspending this package,
+            // it will be unsuspended when this change is committed
+            boolean packageUnsuspended = !suspended
+                    && CollectionUtils.size(suspendParamsMap) == 1
+                    && suspendParamsMap.containsKey(callingPackage);
             if (suspended || packageUnsuspended) {
+                // Always notify of a suspend call + notify when fully unsuspended
+                notifyPackagesList.add(packageName);
+                notifyUids.add(UserHandle.getUid(userId, packageState.getAppId()));
+            }
+
+            if (changed) {
                 changedPackagesList.add(packageName);
                 changedUids.add(UserHandle.getUid(userId, packageState.getAppId()));
             }
-
-            modifiedPackages.add(packageName);
-            modifiedUids.add(UserHandle.getUid(userId, packageState.getAppId()));
         }
 
         mPm.commitPackageStateMutation(null, mutator -> {
-            final int size = modifiedPackages.size();
+            final int size = changedPackagesList.size();
             for (int index = 0; index < size; index++) {
-                final String packageName  = modifiedPackages.valueAt(index);
+                final String packageName  = changedPackagesList.valueAt(index);
                 final PackageUserStateWrite userState = mutator.forPackage(packageName)
                         .userState(userId);
                 if (suspended) {
@@ -188,19 +188,19 @@ public final class SuspendPackageHelper {
 
         final Computer newSnapshot = mPm.snapshotComputer();
 
-        if (!changedPackagesList.isEmpty()) {
-            final String[] changedPackages = changedPackagesList.toArray(new String[0]);
+        if (!notifyPackagesList.isEmpty()) {
+            final String[] notifyPackages = notifyPackagesList.toArray(new String[0]);
             sendPackagesSuspendedForUser(newSnapshot,
                     suspended ? Intent.ACTION_PACKAGES_SUSPENDED
                             : Intent.ACTION_PACKAGES_UNSUSPENDED,
-                    changedPackages, changedUids.toArray(), userId);
-            sendMyPackageSuspendedOrUnsuspended(changedPackages, suspended, userId);
+                    notifyPackages, notifyUids.toArray(), userId);
+            sendMyPackageSuspendedOrUnsuspended(notifyPackages, suspended, userId);
             mPm.scheduleWritePackageRestrictions(userId);
         }
         // Send the suspension changed broadcast to ensure suspension state is not stale.
-        if (!modifiedPackages.isEmpty()) {
+        if (!changedPackagesList.isEmpty()) {
             sendPackagesSuspendedForUser(newSnapshot, Intent.ACTION_PACKAGES_SUSPENSION_CHANGED,
-                    modifiedPackages.toArray(new String[0]), modifiedUids.toArray(), userId);
+                    changedPackagesList.toArray(new String[0]), changedUids.toArray(), userId);
         }
         return unmodifiablePackages.toArray(new String[0]);
     }

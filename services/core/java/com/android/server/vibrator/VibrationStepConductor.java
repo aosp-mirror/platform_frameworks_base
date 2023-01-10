@@ -65,6 +65,9 @@ final class VibrationStepConductor implements IBinder.DeathRecipient {
     public final DeviceVibrationEffectAdapter deviceEffectAdapter;
     public final VibrationThread.VibratorManagerHooks vibratorManagerHooks;
 
+    // Not guarded by lock because they're not modified by this conductor, it's used here only to
+    // check immutable attributes. The status and other mutable states are changed by the service or
+    // by the vibrator steps.
     private final Vibration mVibration;
     private final SparseArray<VibratorController> mVibrators = new SparseArray<>();
 
@@ -81,12 +84,12 @@ final class VibrationStepConductor implements IBinder.DeathRecipient {
     private final IntArray mSignalVibratorsComplete;
     @Nullable
     @GuardedBy("mLock")
-    private Vibration.Status mSignalCancelStatus = null;
+    private Vibration.EndInfo mSignalCancel = null;
     @GuardedBy("mLock")
     private boolean mSignalCancelImmediate = false;
 
     @Nullable
-    private Vibration.Status mCancelStatus = null;
+    private Vibration.EndInfo mCancelledVibrationEndInfo = null;
     private boolean mCancelledImmediately = false;  // hard stop
     private int mPendingVibrateSteps;
     private int mRemainingStartSequentialEffectSteps;
@@ -153,6 +156,9 @@ final class VibrationStepConductor implements IBinder.DeathRecipient {
         // This count is decremented at the completion of the step, so we don't subtract one.
         mRemainingStartSequentialEffectSteps = sequentialEffect.getEffects().size();
         mNextSteps.offer(new StartSequentialEffectStep(this, sequentialEffect));
+        // Vibration will start playing in the Vibrator, following the effect timings and delays.
+        // Report current time as the vibration start time, for debugging.
+        mVibration.stats().reportStarted();
     }
 
     public Vibration getVibration() {
@@ -182,24 +188,25 @@ final class VibrationStepConductor implements IBinder.DeathRecipient {
      * Calculate the {@link Vibration.Status} based on the current queue state and the expected
      * number of {@link StartSequentialEffectStep} to be played.
      */
-    public Vibration.Status calculateVibrationStatus() {
+    @Nullable
+    public Vibration.EndInfo calculateVibrationEndInfo() {
         if (Build.IS_DEBUGGABLE) {
             expectIsVibrationThread(true);
         }
 
-        if (mCancelStatus != null) {
-            return mCancelStatus;
+        if (mCancelledVibrationEndInfo != null) {
+            return mCancelledVibrationEndInfo;
         }
-        if (mPendingVibrateSteps > 0
-                || mRemainingStartSequentialEffectSteps > 0) {
-            return Vibration.Status.RUNNING;
+        if (mPendingVibrateSteps > 0 || mRemainingStartSequentialEffectSteps > 0) {
+            // Vibration still running.
+            return null;
         }
         // No pending steps, and something happened.
         if (mSuccessfulVibratorOnSteps > 0) {
-            return Vibration.Status.FINISHED;
+            return new Vibration.EndInfo(Vibration.Status.FINISHED);
         }
         // If no step was able to turn the vibrator ON successfully.
-        return Vibration.Status.IGNORED_UNSUPPORTED;
+        return new Vibration.EndInfo(Vibration.Status.IGNORED_UNSUPPORTED);
     }
 
     /**
@@ -305,45 +312,50 @@ final class VibrationStepConductor implements IBinder.DeathRecipient {
         if (DEBUG) {
             Slog.d(TAG, "Binder died, cancelling vibration...");
         }
-        notifyCancelled(Vibration.Status.CANCELLED_BINDER_DIED, /* immediate= */ false);
+        notifyCancelled(new Vibration.EndInfo(Vibration.Status.CANCELLED_BINDER_DIED),
+                /* immediate= */ false);
     }
 
     /**
      * Notify the execution that cancellation is requested. This will be acted upon
      * asynchronously in the VibrationThread.
      *
+     * <p>Only the first cancel signal will be used to end a cancelled vibration, but subsequent
+     * calls with {@code immediate} flag set to true can still force the first cancel signal to
+     * take effect urgently.
+     *
      * @param immediate indicates whether cancellation should abort urgently and skip cleanup steps.
      */
-    public void notifyCancelled(@NonNull Vibration.Status cancelStatus, boolean immediate) {
+    public void notifyCancelled(@NonNull Vibration.EndInfo cancelInfo, boolean immediate) {
         if (Build.IS_DEBUGGABLE) {
             expectIsVibrationThread(false);
         }
         if (DEBUG) {
-            Slog.d(TAG, "Vibration cancel requested with status=" + cancelStatus
+            Slog.d(TAG, "Vibration cancel requested with signal=" + cancelInfo
                     + ", immediate=" + immediate);
         }
-        if ((cancelStatus == null) || !cancelStatus.name().startsWith("CANCEL")) {
-            Slog.w(TAG, "Vibration cancel requested with bad status=" + cancelStatus
+        if ((cancelInfo == null) || !cancelInfo.status.name().startsWith("CANCEL")) {
+            Slog.w(TAG, "Vibration cancel requested with bad signal=" + cancelInfo
                     + ", using CANCELLED_UNKNOWN_REASON to ensure cancellation.");
-            cancelStatus = Vibration.Status.CANCELLED_BY_UNKNOWN_REASON;
+            cancelInfo = new Vibration.EndInfo(Vibration.Status.CANCELLED_BY_UNKNOWN_REASON);
         }
         synchronized (mLock) {
-            if (immediate && mSignalCancelImmediate || (mSignalCancelStatus != null)) {
+            if ((immediate && mSignalCancelImmediate) || (mSignalCancel != null)) {
                 if (DEBUG) {
                     Slog.d(TAG, "Vibration cancel request ignored as the vibration "
-                            + mVibration.id + "is already being cancelled with status="
-                            + mSignalCancelStatus + ", immediate=" + mSignalCancelImmediate);
+                            + mVibration.id + "is already being cancelled with signal="
+                            + mSignalCancel + ", immediate=" + mSignalCancelImmediate);
                 }
                 return;
             }
             mSignalCancelImmediate |= immediate;
-            if (mSignalCancelStatus == null) {
-                mSignalCancelStatus = cancelStatus;
+            if (mSignalCancel == null) {
+                mSignalCancel = cancelInfo;
             } else {
                 if (DEBUG) {
-                    Slog.d(TAG, "Vibration cancel request new status=" + cancelStatus
-                            + " ignored as the vibration was already cancelled with status="
-                            + mSignalCancelStatus + ", but immediate flag was updated to "
+                    Slog.d(TAG, "Vibration cancel request new signal=" + cancelInfo
+                            + " ignored as the vibration was already cancelled with signal="
+                            + mSignalCancel + ", but immediate flag was updated to "
                             + mSignalCancelImmediate);
                 }
             }
@@ -396,14 +408,24 @@ final class VibrationStepConductor implements IBinder.DeathRecipient {
         }
     }
 
+    /** Returns true if a cancellation signal was sent via {@link #notifyCancelled}. */
+    public boolean wasNotifiedToCancel() {
+        if (Build.IS_DEBUGGABLE) {
+            expectIsVibrationThread(false);
+        }
+        synchronized (mLock) {
+            return mSignalCancel != null;
+        }
+    }
+
     @GuardedBy("mLock")
     private boolean hasPendingNotifySignalLocked() {
         if (Build.IS_DEBUGGABLE) {
             expectIsVibrationThread(true);  // Reads VibrationThread variables as well as signals.
         }
-        return (mSignalCancelStatus != mCancelStatus)
-            || (mSignalCancelImmediate && !mCancelledImmediately)
-            || (mSignalVibratorsComplete.size() > 0);
+        return (mSignalCancel != null && mCancelledVibrationEndInfo == null)
+                || (mSignalCancelImmediate && !mCancelledImmediately)
+                || (mSignalVibratorsComplete.size() > 0);
     }
 
     /**
@@ -416,7 +438,7 @@ final class VibrationStepConductor implements IBinder.DeathRecipient {
         }
 
         int[] vibratorsToProcess = null;
-        Vibration.Status doCancelStatus = null;
+        Vibration.EndInfo doCancelInfo = null;
         boolean doCancelImmediate = false;
         // Collect signals to process, but don't keep the lock while processing them.
         synchronized (mLock) {
@@ -426,10 +448,10 @@ final class VibrationStepConductor implements IBinder.DeathRecipient {
                 }
                 // This should only happen once.
                 doCancelImmediate = true;
-                doCancelStatus = mSignalCancelStatus;
+                doCancelInfo = mSignalCancel;
             }
-            if (mSignalCancelStatus != mCancelStatus) {
-                doCancelStatus = mSignalCancelStatus;
+            if ((mSignalCancel != null) && (mCancelledVibrationEndInfo == null)) {
+                doCancelInfo = mSignalCancel;
             }
             if (!doCancelImmediate && mSignalVibratorsComplete.size() > 0) {
                 // Swap out the queue of completions to process.
@@ -443,11 +465,11 @@ final class VibrationStepConductor implements IBinder.DeathRecipient {
         // completion signals that were collected in this call, but we won't process them
         // anyway as all steps are cancelled.
         if (doCancelImmediate) {
-            processCancelImmediately(doCancelStatus);
+            processCancelImmediately(doCancelInfo);
             return;
         }
-        if (doCancelStatus != null) {
-            processCancel(doCancelStatus);
+        if (doCancelInfo != null) {
+            processCancel(doCancelInfo);
         }
         if (vibratorsToProcess != null) {
             processVibratorsComplete(vibratorsToProcess);
@@ -460,12 +482,12 @@ final class VibrationStepConductor implements IBinder.DeathRecipient {
      * <p>This will remove all steps and replace them with respective results of
      * {@link Step#cancel()}.
      */
-    public void processCancel(Vibration.Status cancelStatus) {
+    public void processCancel(Vibration.EndInfo cancelInfo) {
         if (Build.IS_DEBUGGABLE) {
             expectIsVibrationThread(true);
         }
 
-        mCancelStatus = cancelStatus;
+        mCancelledVibrationEndInfo = cancelInfo;
         // Vibrator callbacks should wait until all steps from the queue are properly cancelled
         // and clean up steps are added back to the queue, so they can handle the callback.
         List<Step> cleanUpSteps = new ArrayList<>();
@@ -483,13 +505,13 @@ final class VibrationStepConductor implements IBinder.DeathRecipient {
      *
      * <p>This will remove and trigger {@link Step#cancelImmediately()} in all steps, in order.
      */
-    public void processCancelImmediately(Vibration.Status cancelStatus) {
+    public void processCancelImmediately(Vibration.EndInfo cancelInfo) {
         if (Build.IS_DEBUGGABLE) {
             expectIsVibrationThread(true);
         }
 
         mCancelledImmediately = true;
-        mCancelStatus = cancelStatus;
+        mCancelledVibrationEndInfo = cancelInfo;
         Step step;
         while ((step = pollNext()) != null) {
             step.cancelImmediately();

@@ -286,7 +286,9 @@ package android.app {
     method @RequiresPermission(android.Manifest.permission.WRITE_DREAM_STATE) public void setActiveDream(@Nullable android.content.ComponentName);
     method @RequiresPermission(android.Manifest.permission.WRITE_DREAM_STATE) public void setDreamOverlay(@Nullable android.content.ComponentName);
     method @RequiresPermission(android.Manifest.permission.WRITE_SECURE_SETTINGS) public void setScreensaverEnabled(boolean);
-    method @RequiresPermission(android.Manifest.permission.WRITE_DREAM_STATE) public void startDream(@NonNull android.content.ComponentName);
+    method @RequiresPermission(android.Manifest.permission.WRITE_DREAM_STATE) public void setSystemDreamComponent(@Nullable android.content.ComponentName);
+    method @RequiresPermission(android.Manifest.permission.WRITE_DREAM_STATE) public void startDream(@Nullable android.content.ComponentName);
+    method @RequiresPermission(android.Manifest.permission.WRITE_DREAM_STATE) public void startDream();
     method @RequiresPermission(android.Manifest.permission.WRITE_DREAM_STATE) public void stopDream();
   }
 
@@ -1137,6 +1139,7 @@ package android.hardware.camera2 {
   public final class CameraManager {
     method public String[] getCameraIdListNoLazy() throws android.hardware.camera2.CameraAccessException;
     method @RequiresPermission(allOf={android.Manifest.permission.SYSTEM_CAMERA, android.Manifest.permission.CAMERA}) public void openCamera(@NonNull String, int, @NonNull java.util.concurrent.Executor, @NonNull android.hardware.camera2.CameraDevice.StateCallback) throws android.hardware.camera2.CameraAccessException;
+    field public static final long OVERRIDE_FRONT_CAMERA_APP_COMPAT = 250678880L; // 0xef10e60L
   }
 
   public abstract static class CameraManager.AvailabilityCallback {
@@ -1153,9 +1156,11 @@ package android.hardware.camera2 {
 package android.hardware.devicestate {
 
   public final class DeviceStateManager {
+    method @RequiresPermission(android.Manifest.permission.CONTROL_DEVICE_STATE) public void cancelBaseStateOverride();
     method @RequiresPermission(value=android.Manifest.permission.CONTROL_DEVICE_STATE, conditional=true) public void cancelStateRequest();
     method @NonNull public int[] getSupportedStates();
     method public void registerCallback(@NonNull java.util.concurrent.Executor, @NonNull android.hardware.devicestate.DeviceStateManager.DeviceStateCallback);
+    method @RequiresPermission(android.Manifest.permission.CONTROL_DEVICE_STATE) public void requestBaseStateOverride(@NonNull android.hardware.devicestate.DeviceStateRequest, @Nullable java.util.concurrent.Executor, @Nullable android.hardware.devicestate.DeviceStateRequest.Callback);
     method @RequiresPermission(value=android.Manifest.permission.CONTROL_DEVICE_STATE, conditional=true) public void requestState(@NonNull android.hardware.devicestate.DeviceStateRequest, @Nullable java.util.concurrent.Executor, @Nullable android.hardware.devicestate.DeviceStateRequest.Callback);
     method public void unregisterCallback(@NonNull android.hardware.devicestate.DeviceStateManager.DeviceStateCallback);
     field public static final int MAXIMUM_DEVICE_STATE = 255; // 0xff
@@ -2412,6 +2417,16 @@ package android.service.dreams {
     method public final boolean shouldShowComplications();
   }
 
+  public class DreamService extends android.app.Service implements android.view.Window.Callback {
+    method @Nullable public static android.service.dreams.DreamService.DreamMetadata getDreamMetadata(@NonNull android.content.Context, @Nullable android.content.pm.ServiceInfo);
+  }
+
+  public static final class DreamService.DreamMetadata {
+    field @Nullable public final android.graphics.drawable.Drawable previewImage;
+    field @Nullable public final android.content.ComponentName settingsActivity;
+    field @NonNull public final boolean showComplications;
+  }
+
 }
 
 package android.service.notification {
@@ -3349,12 +3364,11 @@ package android.window {
     ctor public TaskFragmentOrganizer(@NonNull java.util.concurrent.Executor);
     method @NonNull public java.util.concurrent.Executor getExecutor();
     method @NonNull public android.window.TaskFragmentOrganizerToken getOrganizerToken();
-    method public void onTaskFragmentAppeared(@NonNull android.window.TaskFragmentInfo);
+    method @Deprecated public void onTaskFragmentAppeared(@NonNull android.window.TaskFragmentInfo);
     method @Deprecated public void onTaskFragmentError(@NonNull android.os.IBinder, @NonNull Throwable);
-    method public void onTaskFragmentError(@NonNull android.os.IBinder, @Nullable android.window.TaskFragmentInfo, int, @NonNull Throwable);
-    method public void onTaskFragmentInfoChanged(@NonNull android.window.TaskFragmentInfo);
-    method public void onTaskFragmentParentInfoChanged(@NonNull android.os.IBinder, @NonNull android.content.res.Configuration);
-    method public void onTaskFragmentVanished(@NonNull android.window.TaskFragmentInfo);
+    method @Deprecated public void onTaskFragmentInfoChanged(@NonNull android.window.TaskFragmentInfo);
+    method @Deprecated public void onTaskFragmentParentInfoChanged(@NonNull android.os.IBinder, @NonNull android.content.res.Configuration);
+    method @Deprecated public void onTaskFragmentVanished(@NonNull android.window.TaskFragmentInfo);
     method @CallSuper public void registerOrganizer();
     method @CallSuper public void unregisterOrganizer();
   }
@@ -3393,11 +3407,14 @@ package android.window {
     method @NonNull public android.window.WindowContainerTransaction createTaskFragment(@NonNull android.window.TaskFragmentCreationParams);
     method @NonNull public android.window.WindowContainerTransaction deleteTaskFragment(@NonNull android.window.WindowContainerToken);
     method public int describeContents();
+    method @NonNull public android.window.WindowContainerTransaction finishActivity(@NonNull android.os.IBinder);
+    method @NonNull public android.window.WindowContainerTransaction removeTask(@NonNull android.window.WindowContainerToken);
     method @NonNull public android.window.WindowContainerTransaction reorder(@NonNull android.window.WindowContainerToken, boolean);
     method @NonNull public android.window.WindowContainerTransaction reparent(@NonNull android.window.WindowContainerToken, @Nullable android.window.WindowContainerToken, boolean);
     method @NonNull public android.window.WindowContainerTransaction reparentActivityToTaskFragment(@NonNull android.os.IBinder, @NonNull android.os.IBinder);
     method @NonNull public android.window.WindowContainerTransaction reparentChildren(@NonNull android.window.WindowContainerToken, @Nullable android.window.WindowContainerToken);
     method @NonNull public android.window.WindowContainerTransaction reparentTasks(@Nullable android.window.WindowContainerToken, @Nullable android.window.WindowContainerToken, @Nullable int[], @Nullable int[], boolean);
+    method @NonNull public android.window.WindowContainerTransaction requestFocusOnTaskFragment(@NonNull android.os.IBinder);
     method @NonNull public android.window.WindowContainerTransaction scheduleFinishEnterPip(@NonNull android.window.WindowContainerToken, @NonNull android.graphics.Rect);
     method @NonNull public android.window.WindowContainerTransaction setActivityWindowingMode(@NonNull android.window.WindowContainerToken, int);
     method @NonNull public android.window.WindowContainerTransaction setAdjacentRoots(@NonNull android.window.WindowContainerToken, @NonNull android.window.WindowContainerToken);

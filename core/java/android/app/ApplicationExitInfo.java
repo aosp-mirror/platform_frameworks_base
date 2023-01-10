@@ -407,6 +407,15 @@ public final class ApplicationExitInfo implements Parcelable {
      */
     public static final int SUBREASON_PACKAGE_UPDATE = 25;
 
+    /**
+     * The process was killed because of undelivered broadcasts; this would be set only when the
+     * reason is {@link #REASON_OTHER}.
+     *
+     * For internal use only.
+     * @hide
+     */
+    public static final int SUBREASON_UNDELIVERED_BROADCAST = 26;
+
     // If there is any OEM code which involves additional app kill reasons, it should
     // be categorized in {@link #REASON_OTHER}, with subreason code starting from 1000.
 
@@ -579,6 +588,7 @@ public final class ApplicationExitInfo implements Parcelable {
         SUBREASON_STOP_APP,
         SUBREASON_KILL_BACKGROUND,
         SUBREASON_PACKAGE_UPDATE,
+        SUBREASON_UNDELIVERED_BROADCAST,
     })
     @Retention(RetentionPolicy.SOURCE)
     public @interface SubReason {}
@@ -1196,7 +1206,8 @@ public final class ApplicationExitInfo implements Parcelable {
         return sb.toString();
     }
 
-    private static String reasonCodeToString(@Reason int reason) {
+    /** @hide */
+    public static String reasonCodeToString(@Reason int reason) {
         switch (reason) {
             case REASON_EXIT_SELF:
                 return "EXIT_SELF";
@@ -1282,6 +1293,8 @@ public final class ApplicationExitInfo implements Parcelable {
                 return "KILL BACKGROUND";
             case SUBREASON_PACKAGE_UPDATE:
                 return "PACKAGE UPDATE";
+            case SUBREASON_UNDELIVERED_BROADCAST:
+                return "UNDELIVERED BROADCAST";
             default:
                 return "UNKNOWN";
         }

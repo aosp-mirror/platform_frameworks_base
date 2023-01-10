@@ -33,6 +33,7 @@
     <string name="accessibility_action_pip_unstash" msgid="7467499339610437646">"আনস্ট্যাস করুন"</string>
     <string name="dock_forced_resizable" msgid="1749750436092293116">"অ্যাপটি স্প্লিট স্ক্রিনে কাজ নাও করতে পারে।"</string>
     <string name="dock_non_resizeble_failed_to_dock_text" msgid="7408396418008948957">"অ্যাপ্লিকেশান বিভক্ত-স্ক্রিন সমর্থন করে না৷"</string>
+    <string name="dock_multi_instances_not_supported_text" msgid="5242868470666346929">"এই অ্যাপটি শুধু ১টি উইন্ডোয় খোলা যেতে পারে।"</string>
     <string name="forced_resizable_secondary_display" msgid="1768046938673582671">"সেকেন্ডারি ডিসপ্লেতে অ্যাপটি কাজ নাও করতে পারে।"</string>
     <string name="activity_launch_on_secondary_display_failed_text" msgid="4226485344988071769">"সেকেন্ডারি ডিসপ্লেতে অ্যাপ লঞ্চ করা যাবে না।"</string>
     <string name="accessibility_divider" msgid="703810061635792791">"বিভক্ত-স্ক্রিন বিভাজক"</string>
@@ -76,12 +77,19 @@
     <string name="camera_compat_treatment_suggested_button_description" msgid="8103916969024076767">"ক্যামেরা সংক্রান্ত সমস্যা?\nরিফিট করতে ট্যাপ করুন"</string>
     <string name="camera_compat_treatment_applied_button_description" msgid="2944157113330703897">"এখনও সমাধান হয়নি?\nরিভার্ট করার জন্য ট্যাপ করুন"</string>
     <string name="camera_compat_dismiss_button_description" msgid="2795364433503817511">"ক্যামেরা সংক্রান্ত সমস্যা নেই? বাতিল করতে ট্যাপ করুন।"</string>
-    <string name="letterbox_education_dialog_title" msgid="6688664582871779215">"কিছু অ্যাপ \'পোর্ট্রেট\' মোডে সবচেয়ে ভাল কাজ করে"</string>
-    <string name="letterbox_education_dialog_subtext" msgid="4853542518367719562">"আপনার স্পেস সবচেয়ে ভালভাবে কাজে লাগাতে এইসব বিকল্পের মধ্যে কোনও একটি ব্যবহার করে দেখুন"</string>
-    <string name="letterbox_education_screen_rotation_text" msgid="5085786687366339027">"\'ফুল স্ক্রিন\' মোডে যেতে ডিভাইস ঘোরান"</string>
-    <string name="letterbox_education_reposition_text" msgid="1068293354123934727">"কোনও অ্যাপের পাশে ডবল ট্যাপ করে সেটির জায়গা পরিবর্তন করুন"</string>
+    <string name="letterbox_education_dialog_title" msgid="7739895354143295358">"দেখুন ও আরও অনেক কিছু করুন"</string>
+    <string name="letterbox_education_split_screen_text" msgid="6206339484068670830">"স্প্লিট স্ক্রিনের জন্য অন্য অ্যাপে টেনে আনুন"</string>
+    <string name="letterbox_education_reposition_text" msgid="4589957299813220661">"কোনও অ্যাপের স্থান পরিবর্তন করতে তার বাইরে ডবল ট্যাপ করুন"</string>
     <string name="letterbox_education_got_it" msgid="4057634570866051177">"বুঝেছি"</string>
     <string name="letterbox_education_expand_button_description" msgid="1729796567101129834">"আরও তথ্যের জন্য বড় করুন।"</string>
     <string name="maximize_button_text" msgid="1650859196290301963">"বড় করুন"</string>
+    <string name="minimize_button_text" msgid="271592547935841753">"ছোট করুন"</string>
     <string name="close_button_text" msgid="2913281996024033299">"বন্ধ করুন"</string>
+    <string name="back_button_text" msgid="1469718707134137085">"ফিরে যান"</string>
+    <string name="handle_text" msgid="1766582106752184456">"হাতল"</string>
+    <string name="fullscreen_text" msgid="1162316685217676079">"ফুলস্ক্রিন"</string>
+    <string name="desktop_text" msgid="1077633567027630454">"ডেস্কটপ মোড"</string>
+    <string name="split_screen_text" msgid="1396336058129570886">"স্প্লিট স্ক্রিন"</string>
+    <string name="more_button_text" msgid="3655388105592893530">"আরও"</string>
+    <string name="float_button_text" msgid="9221657008391364581">"ফ্লোট"</string>
 </resources>

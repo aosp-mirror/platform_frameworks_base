@@ -27,17 +27,17 @@ import android.media.AudioManager;
 import android.media.AudioSystem;
 import android.media.VolumeInfo;
 import android.os.test.TestLooper;
+import android.util.Log;
 
 import androidx.test.InstrumentationRegistry;
+
+import junit.framework.Assert;
 
 import org.junit.Before;
 import org.junit.Test;
 
 public class AudioDeviceVolumeManagerTest {
     private static final String TAG = "AudioDeviceVolumeManagerTest";
-
-    private static final AudioDeviceAttributes DEVICE_SPEAKER_OUT = new AudioDeviceAttributes(
-            AudioDeviceAttributes.ROLE_OUTPUT, AudioDeviceInfo.TYPE_BUILTIN_SPEAKER, "");
 
     private Context mContext;
     private String mPackageName;
@@ -84,14 +84,20 @@ public class AudioDeviceVolumeManagerTest {
         final AudioDeviceAttributes usbDevice = new AudioDeviceAttributes(
                 /*native type*/ AudioSystem.DEVICE_OUT_USB_DEVICE, /*address*/ "bla");
 
-        mAudioService.setDeviceVolume(volMin, usbDevice, mPackageName, TAG);
+        mAudioService.setDeviceVolume(volMin, usbDevice, mPackageName);
         mTestLooper.dispatchAll();
         verify(mSpyAudioSystem, atLeast(1)).setStreamVolumeIndexAS(
                         AudioManager.STREAM_MUSIC, minIndex, AudioSystem.DEVICE_OUT_USB_DEVICE);
 
-        mAudioService.setDeviceVolume(volMid, usbDevice, mPackageName, TAG);
+        mAudioService.setDeviceVolume(volMid, usbDevice, mPackageName);
         mTestLooper.dispatchAll();
         verify(mSpyAudioSystem, atLeast(1)).setStreamVolumeIndexAS(
                 AudioManager.STREAM_MUSIC, midIndex, AudioSystem.DEVICE_OUT_USB_DEVICE);
+
+        final VolumeInfo vi = mAudioService.getDeviceVolume(volMin, usbDevice, mPackageName);
+        Assert.assertEquals("getDeviceVolume doesn't return expected value in " + vi
+                + " after setting " + volMid,
+                (volMid.getMaxVolumeIndex() - volMid.getMinVolumeIndex()) / 2,
+                (vi.getMaxVolumeIndex() - vi.getMinVolumeIndex()) / 2);
     }
 }

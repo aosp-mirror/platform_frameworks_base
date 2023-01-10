@@ -64,6 +64,7 @@ class MediaTttCommandLineHelperTest : SysuiTestCase() {
                 context,
                 FakeExecutor(FakeSystemClock()),
             )
+        mediaTttCommandLineHelper.start()
     }
 
     @Test(expected = IllegalStateException::class)

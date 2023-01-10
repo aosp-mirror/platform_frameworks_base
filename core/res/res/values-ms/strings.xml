@@ -33,6 +33,7 @@
     <string name="defaultVoiceMailAlphaTag" msgid="2190754495304236490">"Mel suara"</string>
     <string name="defaultMsisdnAlphaTag" msgid="2285034592902077488">"MSISDN1"</string>
     <string name="mmiError" msgid="2862759606579822246">"Masalah sambungan atau kod MMI tidak sah"</string>
+    <string name="mmiErrorNotSupported" msgid="5001803469335286099">"Ciri tidak disokong."</string>
     <string name="mmiFdnError" msgid="3975490266767565852">"Pengendalian dihadkan kepada nombor dailan tetap sahaja."</string>
     <string name="mmiErrorWhileRoaming" msgid="1204173664713870114">"Tidak dapat mengubah tetapan pemajuan panggilan daripad telefon anda semasa dalam perayauan."</string>
     <string name="serviceEnabled" msgid="7549025003394765639">"Perkhidmatan telah didayakan."</string>
@@ -301,7 +302,7 @@
     <string name="permgroupdesc_contacts" msgid="9163927941244182567">"mengakses kenalan anda"</string>
     <string name="permgrouplab_location" msgid="1858277002233964394">"Lokasi"</string>
     <string name="permgroupdesc_location" msgid="1995955142118450685">"mengakses lokasi peranti ini"</string>
-    <string name="permgrouplab_calendar" msgid="6426860926123033230">"Kalendar"</string>
+    <string name="permgrouplab_calendar" msgid="6426860926123033230">"Calendar"</string>
     <string name="permgroupdesc_calendar" msgid="6762751063361489379">"mengakses kalendar"</string>
     <string name="permgrouplab_sms" msgid="795737735126084874">"SMS"</string>
     <string name="permgroupdesc_sms" msgid="5726462398070064542">"menghantar dan melihat mesej SMS"</string>
@@ -586,13 +587,14 @@
     <string name="screen_lock_app_setting_name" msgid="6054944352976789228">"Gunakan kunci skrin"</string>
     <string name="screen_lock_dialog_default_subtitle" msgid="120359538048533695">"Masukkan kunci skrin untuk teruskan"</string>
     <string name="fingerprint_acquired_partial" msgid="4323789264604479684">"Tekan dengan kuat pada penderia"</string>
-    <string name="fingerprint_acquired_insufficient" msgid="2545149524031515411">"Tidak dapat memproses cap jari. Sila cuba lagi."</string>
+    <string name="fingerprint_acquired_insufficient" msgid="623888149088216458">"Tidak dapat mengecam cap jari. Cuba lagi."</string>
     <string name="fingerprint_acquired_imager_dirty" msgid="1770676120848224250">"Bersihkan penderia cap jari dan cuba lagi"</string>
     <string name="fingerprint_acquired_imager_dirty_alt" msgid="9169582140486372897">"Bersihkan penderia dan cuba lagi"</string>
     <string name="fingerprint_acquired_too_fast" msgid="1628459767349116104">"Tekan dengan kuat pada penderia"</string>
     <string name="fingerprint_acquired_too_slow" msgid="6683510291554497580">"Jari digerakkan terlalu perlahan. Sila cuba lagi."</string>
     <string name="fingerprint_acquired_already_enrolled" msgid="2285166003936206785">"Cuba cap jari lain"</string>
     <string name="fingerprint_acquired_too_bright" msgid="3863560181670915607">"Terlalu terang"</string>
+    <string name="fingerprint_acquired_power_press" msgid="3107864151278434961">"Penekanan Kuasa dikesan"</string>
     <string name="fingerprint_acquired_try_adjusting" msgid="3667006071003809364">"Cuba selaraskan"</string>
     <string name="fingerprint_acquired_immobile" msgid="1621891895241888048">"Tukar sedikit kedudukan jari anda setiap kali pergerakan dilakukan"</string>
   <string-array name="fingerprint_acquired_vendor">
@@ -604,12 +606,12 @@
     <string name="face_authenticated_confirmation_required" msgid="6872632732508013755">"Wajah disahkan, sila tekan sahkan"</string>
     <string name="fingerprint_error_hw_not_available" msgid="4571700896929561202">"Perkakasan cap jari tidak tersedia."</string>
     <string name="fingerprint_error_no_space" msgid="7285481581905967580">"Tidak dapat menyediakan cap jari"</string>
-    <string name="fingerprint_error_timeout" msgid="2946635815726054226">"Sudah tamat masa untuk cap jari. Cuba lagi"</string>
+    <string name="fingerprint_error_timeout" msgid="7361192266621252164">"Persediaan cap jari telah tamat masa. Cuba lagi."</string>
     <string name="fingerprint_error_canceled" msgid="540026881380070750">"Pengendalian cap jari dibatalkan."</string>
     <string name="fingerprint_error_user_canceled" msgid="7685676229281231614">"Pengendalian cap jari dibatalkan oleh pengguna."</string>
-    <string name="fingerprint_error_lockout" msgid="7853461265604738671">"Terlalu banyak percubaan. Cuba sebentar lagi."</string>
-    <string name="fingerprint_error_lockout_permanent" msgid="3895478283943513746">"Terlalu banyak percubaan. Penderia cap jari dilumpuhkan."</string>
-    <string name="fingerprint_error_unable_to_process" msgid="1148553603490048742">"Cuba lagi."</string>
+    <string name="fingerprint_error_lockout" msgid="6626753679019351368">"Terlalu banyak percubaan. Gunakan kunci skrin."</string>
+    <string name="fingerprint_error_lockout_permanent" msgid="9060651300306264843">"Terlalu banyak percubaan. Gunakan kunci skrin."</string>
+    <string name="fingerprint_error_unable_to_process" msgid="2446280592818621224">"Tidak dapat memproses cap jari. Cuba lagi."</string>
     <string name="fingerprint_error_no_fingerprints" msgid="8671811719699072411">"Tiada cap jari didaftarkan."</string>
     <string name="fingerprint_error_hw_not_present" msgid="578914350967423382">"Peranti ini tiada penderia cap jari."</string>
     <string name="fingerprint_error_security_update_required" msgid="7750187320640856433">"Penderia dilumpuhkan sementara."</string>
@@ -637,7 +639,7 @@
     <string name="fingerprint_recalibrate_notification_content" msgid="8519935717822194943">"Lawati penyedia pembaikan."</string>
     <string name="face_acquired_insufficient" msgid="6889245852748492218">"Tidak dapat membuat model wajah anda. Cuba lagi."</string>
     <string name="face_acquired_too_bright" msgid="8070756048978079164">"Terlalu terang. Cuba pencahayaan yang lebih lembut."</string>
-    <string name="face_acquired_too_dark" msgid="7919016380747701228">"Cuba pencahayaan yang lebih cerah"</string>
+    <string name="face_acquired_too_dark" msgid="8539853432479385326">"Cahaya tidak mencukupi"</string>
     <string name="face_acquired_too_close" msgid="4453646176196302462">"Jauhkan telefon"</string>
     <string name="face_acquired_too_far" msgid="2922278214231064859">"Dekatkan telefon"</string>
     <string name="face_acquired_too_high" msgid="8278815780046368576">"Tinggikan lagi telefon"</string>
@@ -1249,10 +1251,9 @@
     <string name="android_preparing_apk" msgid="589736917792300956">"Menyediakan <xliff:g id="APPNAME">%1$s</xliff:g>."</string>
     <string name="android_upgrading_starting_apps" msgid="6206161195076057075">"Memulakan apl."</string>
     <string name="android_upgrading_complete" msgid="409800058018374746">"But akhir."</string>
-    <string name="fp_power_button_enrollment_title" msgid="3574363228413259548">"Teruskan persediaan?"</string>
     <string name="fp_power_button_enrollment_message" msgid="5648173517663246140">"Anda menekan butang kuasa — tindakan ini biasanya mematikan skrin.\n\nCuba ketik dengan perlahan semasa menetapkan cap jari anda."</string>
-    <string name="fp_power_button_enrollment_positive_button" msgid="2095415838459356833">"Matikan skrin"</string>
-    <string name="fp_power_button_enrollment_negative_button" msgid="6558436406362486747">"Teruskan persediaan"</string>
+    <string name="fp_power_button_enrollment_title" msgid="6976841690455338563">"Untuk tamatkan persediaan, matikan skrin"</string>
+    <string name="fp_power_button_enrollment_button_text" msgid="3199783266386029200">"Matikan"</string>
     <string name="fp_power_button_bp_title" msgid="5585506104526820067">"Terus mengesahkan cap jari anda?"</string>
     <string name="fp_power_button_bp_message" msgid="2983163038168903393">"Anda menekan butang kuasa — tindakan ini biasanya mematikan skrin.\n\nCuba ketik dengan perlahan untuk mengesahkan cap jari anda."</string>
     <string name="fp_power_button_bp_positive_button" msgid="728945472408552251">"Matikan skrin"</string>
@@ -1405,16 +1406,16 @@
     <string name="ext_media_new_notification_message" msgid="6095403121990786986">"Ketik untuk menyediakan"</string>
     <string name="ext_media_new_notification_message" product="tv" msgid="216863352100263668">"Pilih untuk penyediaan"</string>
     <string name="ext_media_new_notification_message" product="automotive" msgid="5140127881613227162">"Anda mungkin perlu memformatkan semula peranti. Ketik untuk mengeluarkan media."</string>
-    <string name="ext_media_ready_notification_message" msgid="777258143284919261">"Untuk memindahkan foto dan media"</string>
+    <string name="ext_media_ready_notification_message" msgid="7509496364380197369">"Untuk menyimpan foto, video, muzik dan banyak lagi"</string>
     <string name="ext_media_ready_notification_message" product="tv" msgid="8847134811163165935">"Semak imbas fail media"</string>
     <string name="ext_media_unmountable_notification_title" msgid="4895444667278979910">"Isu dengan <xliff:g id="NAME">%s</xliff:g>"</string>
     <string name="ext_media_unmountable_notification_title" product="automotive" msgid="3142723758949023280">"<xliff:g id="NAME">%s</xliff:g> tidak berfungsi"</string>
     <string name="ext_media_unmountable_notification_message" msgid="3256290114063126205">"Ketik untuk menyelesaikan masalah"</string>
     <string name="ext_media_unmountable_notification_message" product="tv" msgid="3003611129979934633">"<xliff:g id="NAME">%s</xliff:g> rosak. Pilih untuk baiki."</string>
     <string name="ext_media_unmountable_notification_message" product="automotive" msgid="2274596120715020680">"Anda mungkin perlu memformatkan semula peranti. Ketik untuk mengeluarkan media."</string>
-    <string name="ext_media_unsupported_notification_title" msgid="4358280700537030333">"<xliff:g id="NAME">%s</xliff:g> tidak disokong"</string>
+    <string name="ext_media_unsupported_notification_title" msgid="3487534182861251401">"<xliff:g id="NAME">%s</xliff:g> dikesan"</string>
     <string name="ext_media_unsupported_notification_title" product="automotive" msgid="6004193172658722381">"<xliff:g id="NAME">%s</xliff:g> tidak berfungsi"</string>
-    <string name="ext_media_unsupported_notification_message" msgid="917738524888367560">"Peranti ini tidak menyokong <xliff:g id="NAME">%s</xliff:g> ini. Ketik untuk menyediakannya dalam format yang disokong."</string>
+    <string name="ext_media_unsupported_notification_message" msgid="8463636521459807981">"Ketik untuk membuat persediaan."</string>
     <string name="ext_media_unsupported_notification_message" product="tv" msgid="1595482802187036532">"Pilih untuk menyediakan <xliff:g id="NAME">%s</xliff:g> dalam format yang disokong."</string>
     <string name="ext_media_unsupported_notification_message" product="automotive" msgid="3412494732736336330">"Anda mungkin perlu memformatkan semula peranti"</string>
     <string name="ext_media_badremoval_notification_title" msgid="4114625551266196872">"<xliff:g id="NAME">%s</xliff:g> ditanggalkan tanpa dijangka"</string>
@@ -1927,6 +1928,7 @@
     <string name="country_selection_title" msgid="5221495687299014379">"Pilihan wilayah"</string>
     <string name="search_language_hint" msgid="7004225294308793583">"Taipkan nama bahasa"</string>
     <string name="language_picker_section_suggested" msgid="6556199184638990447">"Dicadangkan"</string>
+    <string name="language_picker_regions_section_suggested" msgid="6080131515268225316">"Dicadangkan"</string>
     <string name="language_picker_section_all" msgid="1985809075777564284">"Semua bahasa"</string>
     <string name="region_picker_section_all" msgid="756441309928774155">"Semua rantau"</string>
     <string name="locale_search_menu" msgid="6258090710176422934">"Cari"</string>
@@ -1944,8 +1946,7 @@
     <string name="app_streaming_blocked_title_for_camera_dialog" msgid="3935701653713853065">"Kamera tidak tersedia"</string>
     <string name="app_streaming_blocked_title_for_fingerprint_dialog" msgid="3516853717714141951">"Teruskan pada telefon"</string>
     <string name="app_streaming_blocked_title_for_microphone_dialog" msgid="544822455127171206">"Mikrofon tidak tersedia"</string>
-    <!-- no translation found for app_streaming_blocked_title_for_playstore_dialog (8149823099822897538) -->
-    <skip />
+    <string name="app_streaming_blocked_title_for_playstore_dialog" msgid="8149823099822897538">"Play Store tidak tersedia"</string>
     <string name="app_streaming_blocked_title_for_settings_dialog" product="tv" msgid="196994247017450357">"Tetapan Android TV tidak tersedia"</string>
     <string name="app_streaming_blocked_title_for_settings_dialog" product="tablet" msgid="8222710146267948647">"Tetapan tablet tidak tersedia"</string>
     <string name="app_streaming_blocked_title_for_settings_dialog" product="default" msgid="6895719984375299791">"Tetapan telefon tidak tersedia"</string>
@@ -1955,12 +1956,9 @@
     <string name="app_streaming_blocked_message_for_fingerprint_dialog" product="tv" msgid="3470977315395784567">"Apl ini meminta keselamatan tambahan. Cuba pada peranti Android TV anda."</string>
     <string name="app_streaming_blocked_message_for_fingerprint_dialog" product="tablet" msgid="698460091901465092">"Apl ini meminta keselamatan tambahan. Cuba pada tablet anda."</string>
     <string name="app_streaming_blocked_message_for_fingerprint_dialog" product="default" msgid="8552691971910603907">"Apl ini meminta keselamatan tambahan. Cuba pada telefon anda."</string>
-    <!-- no translation found for app_streaming_blocked_message_for_settings_dialog (820334666354451145) -->
-    <skip />
-    <!-- no translation found for app_streaming_blocked_message_for_settings_dialog (3286849551133045896) -->
-    <skip />
-    <!-- no translation found for app_streaming_blocked_message_for_settings_dialog (6264287556598916295) -->
-    <skip />
+    <string name="app_streaming_blocked_message_for_settings_dialog" product="tv" msgid="820334666354451145">"Apl ini tidak boleh diakses pada <xliff:g id="DEVICE">%1$s</xliff:g> anda. Cuba pada peranti Android TV anda."</string>
+    <string name="app_streaming_blocked_message_for_settings_dialog" product="tablet" msgid="3286849551133045896">"Apl ini tidak boleh diakses pada <xliff:g id="DEVICE">%1$s</xliff:g> anda. Cuba pada tablet anda."</string>
+    <string name="app_streaming_blocked_message_for_settings_dialog" product="default" msgid="6264287556598916295">"Apl ini tidak boleh diakses pada <xliff:g id="DEVICE">%1$s</xliff:g> anda. Cuba pada telefon anda."</string>
     <string name="deprecated_target_sdk_message" msgid="5203207875657579953">"Apl ini dibina untuk versi Android yang lebih lama dan mungkin tidak berfungsi dengan betul. Cuba semak kemas kini atau hubungi pembangun."</string>
     <string name="deprecated_target_sdk_app_store" msgid="8456784048558808909">"Semak kemaskinian"</string>
     <string name="new_sms_notification_title" msgid="6528758221319927107">"Anda mempunyai mesej baharu"</string>
@@ -2053,7 +2051,8 @@
     <string name="log_access_confirmation_title" msgid="2343578467290592708">"Benarkan <xliff:g id="LOG_ACCESS_APP_NAME">%s</xliff:g> mengakses semua log peranti?"</string>
     <string name="log_access_confirmation_allow" msgid="5302517782599389507">"Benarkan akses satu kali"</string>
     <string name="log_access_confirmation_deny" msgid="7685790957455099845">"Jangan benarkan"</string>
-    <string name="log_access_confirmation_body" msgid="6581985716241928135">"Log peranti merekodkan perkara yang berlaku pada peranti anda. Apl dapat menggunakan log ini untuk menemukan dan membetulkan isu.\n\nSesetengah log mungkin mengandungi maklumat sensitif, jadi benarkan apl yang anda percaya sahaja untuk mengakses semua log peranti. \n\nJika anda tidak membenarkan apl ini mengakses semua log peranti, apl masih boleh mengakses log sendiri. Pengilang peranti anda mungkin masih boleh mengakses sesetengah log atau maklumat pada peranti anda. Ketahui lebih lanjut"</string>
+    <string name="log_access_confirmation_body" product="default" msgid="1806692062668620735">"Log peranti merekodkan perkara yang berlaku pada peranti anda. Apl dapat menggunakan log ini untuk menemukan dan membetulkan isu.\n\nSesetengah log mungkin mengandungi maklumat sensitif, jadi benarkan apl yang anda percaya sahaja untuk mengakses semua log peranti. \n\nJika anda tidak membenarkan apl ini mengakses semua log peranti, apl masih boleh mengakses log sendiri. Pengilang peranti anda mungkin masih dapat mengakses sesetengah log atau maklumat pada peranti anda."</string>
+    <string name="log_access_confirmation_body" product="tv" msgid="7379536536425265262">"Log peranti merekodkan perkara yang berlaku pada peranti anda. Apl boleh menggunakan log ini untuk menemukan dan membetulkan masalah.\n\nSesetengah log mungkin mengandungi maklumat sensitif, jadi hanya benarkan apl yang anda percaya untuk mengakses semua log peranti. \n\nJika anda tidak membenarkan apl ini mengakses semua log peranti, apl ini masih boleh mengakses log sendiri. Pengilang peranti anda mungkin masih dapat mengakses sesetengah log atau maklumat pada peranti anda.\n\nKetahui lebih lanjut di g.co/android/devicelogs."</string>
     <string name="log_access_do_not_show_again" msgid="1058690599083091552">"Jangan tunjuk lagi"</string>
     <string name="slices_permission_request" msgid="3677129866636153406">"<xliff:g id="APP_0">%1$s</xliff:g> mahu menunjukkan <xliff:g id="APP_2">%2$s</xliff:g> hirisan"</string>
     <string name="screenshot_edit" msgid="7408934887203689207">"Edit"</string>
@@ -2294,5 +2293,6 @@
     <string name="notification_action_check_bg_apps" msgid="4758877443365362532">"Semak apl aktif"</string>
     <string name="vdm_camera_access_denied" product="default" msgid="6102378580971542473">"Tidak dapat mengakses kamera telefon daripada <xliff:g id="DEVICE">%1$s</xliff:g> anda"</string>
     <string name="vdm_camera_access_denied" product="tablet" msgid="6895968310395249076">"Tidak dapat mengakses kamera tablet daripada <xliff:g id="DEVICE">%1$s</xliff:g> anda"</string>
+    <string name="vdm_secure_window" msgid="161700398158812314">"Kandungan ini tidak boleh diakses semasa penstriman. Cuba pada telefon anda."</string>
     <string name="system_locale_title" msgid="711882686834677268">"Lalai sistem"</string>
 </resources>

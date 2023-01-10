@@ -125,9 +125,9 @@
     <string name="bluetooth_profile_a2dp_high_quality" msgid="4739440941324792775">"HD 高解析音訊：<xliff:g id="CODEC_NAME">%1$s</xliff:g>"</string>
     <string name="bluetooth_profile_a2dp_high_quality_unknown_codec" msgid="2477639096903834374">"HD 高解析音訊"</string>
     <string name="bluetooth_profile_hearing_aid" msgid="58154575573984914">"助聽器"</string>
-    <string name="bluetooth_profile_le_audio" msgid="5158149987518342036">"LE_AUDIO"</string>
+    <string name="bluetooth_profile_le_audio" msgid="3237854988278539061">"LE audio"</string>
     <string name="bluetooth_hearing_aid_profile_summary_connected" msgid="8191273236809964030">"已連接到助聽器"</string>
-    <string name="bluetooth_le_audio_profile_summary_connected" msgid="3162538609379333442">"已連上 LE_AUDIO"</string>
+    <string name="bluetooth_le_audio_profile_summary_connected" msgid="6916226974453480650">"已連上 LE audio"</string>
     <string name="bluetooth_a2dp_profile_summary_connected" msgid="7422607970115444153">"連接至媒體音訊"</string>
     <string name="bluetooth_headset_profile_summary_connected" msgid="2420981566026949688">"連接至電話音訊"</string>
     <string name="bluetooth_opp_profile_summary_connected" msgid="2393521801478157362">"已連線到檔案傳輸伺服器"</string>
@@ -241,7 +241,7 @@
     <string name="adb_wireless_settings" msgid="2295017847215680229">"無線偵錯"</string>
     <string name="adb_wireless_list_empty_off" msgid="1713707973837255490">"如要查看並使用可用的裝置，請開啟無線偵錯功能"</string>
     <string name="adb_pair_method_qrcode_title" msgid="6982904096137468634">"使用 QR 圖碼配對裝置"</string>
-    <string name="adb_pair_method_qrcode_summary" msgid="7130694277228970888">"使用 QR 圖碼掃描器配對新裝置"</string>
+    <string name="adb_pair_method_qrcode_summary" msgid="7130694277228970888">"使用 QR code 掃描器配對新裝置"</string>
     <string name="adb_pair_method_code_title" msgid="1122590300445142904">"使用配對碼配對裝置"</string>
     <string name="adb_pair_method_code_summary" msgid="6370414511333685185">"使用六位數的配對碼配對新裝置"</string>
     <string name="adb_paired_devices_title" msgid="5268997341526217362">"已配對的裝置"</string>
@@ -259,7 +259,7 @@
     <string name="adb_wireless_verifying_qrcode_text" msgid="6123192424916029207">"正在配對裝置…"</string>
     <string name="adb_qrcode_pairing_device_failed_msg" msgid="6936292092592914132">"無法配對裝置。可能是QR 圖碼錯誤，或是裝置未連上相同的網路。"</string>
     <string name="adb_wireless_ip_addr_preference_title" msgid="8335132107715311730">"IP 位址和通訊埠"</string>
-    <string name="adb_wireless_qrcode_pairing_title" msgid="1906409667944674707">"掃描 QR 圖碼"</string>
+    <string name="adb_wireless_qrcode_pairing_title" msgid="1906409667944674707">"掃描 QR code"</string>
     <string name="adb_wireless_qrcode_pairing_description" msgid="6014121407143607851">"掃描 QR 圖碼即可透過 Wi-Fi 配對裝置"</string>
     <string name="adb_wireless_no_network_msg" msgid="2365795244718494658">"請連上 Wi-Fi 網路"</string>
     <string name="keywords_adb_wireless" msgid="6507505581882171240">"ADB, 偵錯, 開發"</string>
@@ -408,6 +408,7 @@
     <string name="force_resizable_activities_summary" msgid="2490382056981583062">"將所有活動設為可配合多重視窗環境調整大小 (無論資訊清單值為何)。"</string>
     <string name="enable_freeform_support" msgid="7599125687603914253">"啟用自由形式視窗"</string>
     <string name="enable_freeform_support_summary" msgid="1822862728719276331">"啟用實驗版自由形式視窗的支援功能。"</string>
+    <string name="desktop_mode" msgid="2389067840550544462">"電腦模式"</string>
     <string name="local_backup_password_title" msgid="4631017948933578709">"電腦備份密碼"</string>
     <string name="local_backup_password_summary_none" msgid="7646898032616361714">"目前尚未設定密碼來保護完整的備份檔案 (透過電腦備份的檔案)"</string>
     <string name="local_backup_password_summary_change" msgid="1707357670383995567">"輕觸即可變更或移除電腦完整備份的密碼"</string>
@@ -476,13 +477,14 @@
     <string name="power_charging" msgid="6727132649743436802">"<xliff:g id="LEVEL">%1$s</xliff:g> - <xliff:g id="STATE">%2$s</xliff:g>"</string>
     <string name="power_remaining_charging_duration_only" msgid="8085099012811384899">"<xliff:g id="TIME">%1$s</xliff:g>後充飽"</string>
     <string name="power_charging_duration" msgid="6127154952524919719">"<xliff:g id="LEVEL">%1$s</xliff:g> - <xliff:g id="TIME">%2$s</xliff:g>後充飽"</string>
-    <string name="power_charging_limited" msgid="7956120998372505295">"<xliff:g id="LEVEL">%1$s</xliff:g> - 已暫時限制充電"</string>
+    <string name="power_charging_limited" msgid="8202147604844938236">"<xliff:g id="LEVEL">%1$s</xliff:g> - 充電效能已最佳化"</string>
+    <string name="power_charging_future_paused" msgid="4730177778538118032">"<xliff:g id="LEVEL">%1$s</xliff:g> - 充電效能將最佳化"</string>
     <string name="battery_info_status_unknown" msgid="268625384868401114">"不明"</string>
     <string name="battery_info_status_charging" msgid="4279958015430387405">"充電中"</string>
     <string name="battery_info_status_charging_fast" msgid="8027559755902954885">"快速充電中"</string>
     <string name="battery_info_status_charging_slow" msgid="3190803837168962319">"慢速充電中"</string>
     <string name="battery_info_status_charging_wireless" msgid="8924722966861282197">"正在進行無線充電"</string>
-    <string name="battery_info_status_charging_dock" msgid="3554147903321236585">"充電座架"</string>
+    <string name="battery_info_status_charging_dock" msgid="8573274094093364791">"充電中"</string>
     <string name="battery_info_status_discharging" msgid="6962689305413556485">"非充電中"</string>
     <string name="battery_info_status_not_charging" msgid="3371084153747234837">"已連接，尚未充電"</string>
     <string name="battery_info_status_full" msgid="1339002294876531312">"充電完成"</string>
@@ -600,9 +602,9 @@
     <string name="guest_remove_guest_confirm_button" msgid="7858123434954143879">"移除"</string>
     <string name="guest_resetting" msgid="7822120170191509566">"正在重設訪客…"</string>
     <string name="guest_reset_and_restart_dialog_title" msgid="3396657008451616041">"要重設訪客工作階段嗎？"</string>
-    <string name="guest_reset_and_restart_dialog_message" msgid="2764425635305200790">"這麼做將開始新的訪客工作階段，並刪除目前工作階段中的所有應用程式和資料"</string>
+    <string name="guest_reset_and_restart_dialog_message" msgid="2764425635305200790">"如果重設，系統會開始新的訪客工作階段，並刪除目前工作階段中的所有應用程式和資料"</string>
     <string name="guest_exit_dialog_title" msgid="1846494656849381804">"要結束訪客模式嗎？"</string>
-    <string name="guest_exit_dialog_message" msgid="1743218864242719783">"這麼做將刪除目前訪客工作階段中的所有應用程式和資料"</string>
+    <string name="guest_exit_dialog_message" msgid="1743218864242719783">"如果結束，系統會刪除目前訪客工作階段中的所有應用程式和資料"</string>
     <string name="guest_exit_dialog_button" msgid="1736401897067442044">"結束"</string>
     <string name="guest_exit_dialog_title_non_ephemeral" msgid="7675327443743162986">"要儲存訪客活動嗎？"</string>
     <string name="guest_exit_dialog_message_non_ephemeral" msgid="223385323235719442">"你可以儲存目前工作階段中的活動，也可以刪除所有應用程式和資料"</string>
@@ -655,13 +657,6 @@
     <string name="accessibility_ethernet_disconnected" msgid="2832501530856497489">"未連上乙太網路。"</string>
     <string name="accessibility_ethernet_connected" msgid="6175942685957461563">"乙太網路。"</string>
     <string name="accessibility_no_calling" msgid="3540827068323895748">"不顯示在螢幕上。"</string>
-    <string name="dream_complication_title_time" msgid="701747800712893499">"時間"</string>
-    <string name="dream_complication_title_date" msgid="8661176085446135789">"日期"</string>
-    <string name="dream_complication_title_weather" msgid="598609151677172783">"天氣"</string>
-    <string name="dream_complication_title_aqi" msgid="4587552608957834110">"空氣品質"</string>
-    <string name="dream_complication_title_cast_info" msgid="4038776652841885084">"演出者資訊"</string>
-    <!-- no translation found for dream_complication_title_home_controls (9153381632476738811) -->
-    <skip />
     <string name="avatar_picker_title" msgid="8492884172713170652">"選擇個人資料相片"</string>
     <string name="default_user_icon_description" msgid="6554047177298972638">"預設使用者圖示"</string>
     <string name="physical_keyboard_title" msgid="4811935435315835220">"實體鍵盤"</string>

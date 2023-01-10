@@ -33,6 +33,7 @@
     <string name="accessibility_action_pip_unstash" msgid="7467499339610437646">"ಅನ್‌ಸ್ಟ್ಯಾಶ್ ಮಾಡಿ"</string>
     <string name="dock_forced_resizable" msgid="1749750436092293116">"ವಿಭಜಿಸಿದ ಸ್ಕ್ರೀನ್‌ನಲ್ಲಿ ಆ್ಯಪ್ ಕೆಲಸ ಮಾಡದೇ ಇರಬಹುದು."</string>
     <string name="dock_non_resizeble_failed_to_dock_text" msgid="7408396418008948957">"ಅಪ್ಲಿಕೇಶನ್ ಸ್ಪ್ಲಿಟ್ ಸ್ಕ್ರೀನ್ ಅನ್ನು ಬೆಂಬಲಿಸುವುದಿಲ್ಲ."</string>
+    <string name="dock_multi_instances_not_supported_text" msgid="5242868470666346929">"ಈ ಆ್ಯಪ್ ಅನ್ನು 1 ವಿಂಡೋದಲ್ಲಿ ಮಾತ್ರ ತೆರೆಯಬಹುದು."</string>
     <string name="forced_resizable_secondary_display" msgid="1768046938673582671">"ಸೆಕೆಂಡರಿ ಡಿಸ್‌ಪ್ಲೇಗಳಲ್ಲಿ ಅಪ್ಲಿಕೇಶನ್‌ ಕಾರ್ಯ ನಿರ್ವಹಿಸದೇ ಇರಬಹುದು."</string>
     <string name="activity_launch_on_secondary_display_failed_text" msgid="4226485344988071769">"ಸೆಕೆಂಡರಿ ಡಿಸ್‌ಪ್ಲೇಗಳಲ್ಲಿ ಪ್ರಾರಂಭಿಸುವಿಕೆಯನ್ನು ಅಪ್ಲಿಕೇಶನ್ ಬೆಂಬಲಿಸುವುದಿಲ್ಲ."</string>
     <string name="accessibility_divider" msgid="703810061635792791">"ಸ್ಪ್ಲಿಟ್-ಪರದೆ ಡಿವೈಡರ್"</string>
@@ -76,12 +77,19 @@
     <string name="camera_compat_treatment_suggested_button_description" msgid="8103916969024076767">"ಕ್ಯಾಮರಾ ಸಮಸ್ಯೆಗಳಿವೆಯೇ?\nಮರುಹೊಂದಿಸಲು ಟ್ಯಾಪ್ ಮಾಡಿ"</string>
     <string name="camera_compat_treatment_applied_button_description" msgid="2944157113330703897">"ಅದನ್ನು ಸರಿಪಡಿಸಲಿಲ್ಲವೇ?\nಹಿಂತಿರುಗಿಸಲು ಟ್ಯಾಪ್ ಮಾಡಿ"</string>
     <string name="camera_compat_dismiss_button_description" msgid="2795364433503817511">"ಕ್ಯಾಮರಾ ಸಮಸ್ಯೆಗಳಿಲ್ಲವೇ? ವಜಾಗೊಳಿಸಲು ಟ್ಯಾಪ್ ಮಾಡಿ."</string>
-    <string name="letterbox_education_dialog_title" msgid="6688664582871779215">"ಕೆಲವು ಆ್ಯಪ್‌ಗಳು ಪೋರ್ಟ್ರೇಟ್ ಮೋಡ್‌ನಲ್ಲಿ ಅತ್ಯುತ್ತಮವಾಗಿ ಕಾರ್ಯನಿರ್ವಹಿಸುತ್ತವೆ"</string>
-    <string name="letterbox_education_dialog_subtext" msgid="4853542518367719562">"ನಿಮ್ಮ ಸ್ಥಳಾವಕಾಶದ ಅತಿಹೆಚ್ಚು ಪ್ರಯೋಜನ ಪಡೆಯಲು ಈ ಆಯ್ಕೆಗಳಲ್ಲಿ ಒಂದನ್ನು ಬಳಸಿ ನೋಡಿ"</string>
-    <string name="letterbox_education_screen_rotation_text" msgid="5085786687366339027">"ಪೂರ್ಣ ಸ್ಕ್ರೀನ್‌ಗೆ ಹೋಗಲು ನಿಮ್ಮ ಸಾಧನವನ್ನು ತಿರುಗಿಸಿ"</string>
-    <string name="letterbox_education_reposition_text" msgid="1068293354123934727">"ಆ್ಯಪ್ ಒಂದರ ಸ್ಥಾನವನ್ನು ಬದಲಾಯಿಸಲು ಅದರ ಪಕ್ಕದಲ್ಲಿ ಡಬಲ್-ಟ್ಯಾಪ್ ಮಾಡಿ"</string>
+    <string name="letterbox_education_dialog_title" msgid="7739895354143295358">"ನೋಡಿ ಮತ್ತು ಹೆಚ್ಚಿನದನ್ನು ಮಾಡಿ"</string>
+    <string name="letterbox_education_split_screen_text" msgid="6206339484068670830">"ಸ್ಪ್ಲಿಟ್ ಸ್ಕ್ರೀನ್‌ಗಾಗಿ ಮತ್ತೊಂದು ಆ್ಯಪ್‌ನಲ್ಲಿ ಎಳೆಯಿರಿ"</string>
+    <string name="letterbox_education_reposition_text" msgid="4589957299813220661">"ಆ್ಯಪ್ ಒಂದರ ಸ್ಥಾನವನ್ನು ಬದಲಾಯಿಸಲು ಅದರ ಹೊರಗೆ ಡಬಲ್-ಟ್ಯಾಪ್ ಮಾಡಿ"</string>
     <string name="letterbox_education_got_it" msgid="4057634570866051177">"ಸರಿ"</string>
     <string name="letterbox_education_expand_button_description" msgid="1729796567101129834">"ಇನ್ನಷ್ಟು ಮಾಹಿತಿಗಾಗಿ ವಿಸ್ತೃತಗೊಳಿಸಿ."</string>
     <string name="maximize_button_text" msgid="1650859196290301963">"ಹಿಗ್ಗಿಸಿ"</string>
+    <string name="minimize_button_text" msgid="271592547935841753">"ಕುಗ್ಗಿಸಿ"</string>
     <string name="close_button_text" msgid="2913281996024033299">"ಮುಚ್ಚಿರಿ"</string>
+    <string name="back_button_text" msgid="1469718707134137085">"ಹಿಂದಕ್ಕೆ"</string>
+    <string name="handle_text" msgid="1766582106752184456">"ಹ್ಯಾಂಡಲ್"</string>
+    <string name="fullscreen_text" msgid="1162316685217676079">"ಫುಲ್‌ಸ್ಕ್ರೀನ್"</string>
+    <string name="desktop_text" msgid="1077633567027630454">"ಡೆಸ್ಕ್‌ಟಾಪ್ ಮೋಡ್"</string>
+    <string name="split_screen_text" msgid="1396336058129570886">"ಸ್ಪ್ಲಿಟ್ ಸ್ಕ್ರೀನ್"</string>
+    <string name="more_button_text" msgid="3655388105592893530">"ಇನ್ನಷ್ಟು"</string>
+    <string name="float_button_text" msgid="9221657008391364581">"ಫ್ಲೋಟ್"</string>
 </resources>

@@ -44,7 +44,7 @@ import com.android.internal.logging.testing.UiEventLoggerFake;
 import com.android.systemui.R;
 import com.android.systemui.SysuiTestCase;
 import com.android.systemui.dump.DumpManager;
-import com.android.systemui.media.MediaHost;
+import com.android.systemui.media.controls.ui.MediaHost;
 import com.android.systemui.plugins.qs.QSTile;
 import com.android.systemui.plugins.qs.QSTileView;
 import com.android.systemui.qs.customize.QSCustomizerController;
@@ -224,7 +224,10 @@ public class QSPanelControllerBaseTest extends SysuiTestCase {
                 + "  Tile records:\n"
                 + "    " + mockTileString + "\n"
                 + "    " + mockTileViewString + "\n"
-                + "  media bounds: null\n";
+                + "  media bounds: null\n"
+                + "  horizontal layout: false\n"
+                + "  last orientation: 0\n"
+                + "  mShouldUseSplitNotificationShade: false\n";
         assertEquals(expected, w.getBuffer().toString());
     }
 
@@ -275,7 +278,7 @@ public class QSPanelControllerBaseTest extends SysuiTestCase {
 
         // Then the layout changes
         assertThat(mController.shouldUseHorizontalLayout()).isTrue();
-        verify(mHorizontalLayoutListener).run(); // not invoked
+        verify(mHorizontalLayoutListener).run();
 
         // When it is rotated back to portrait
         mConfiguration.orientation = Configuration.ORIENTATION_PORTRAIT;
@@ -297,5 +300,25 @@ public class QSPanelControllerBaseTest extends SysuiTestCase {
         mController.refreshAllTiles();
         verify(mQSTile).refreshState();
         verify(mOtherTile, never()).refreshState();
+    }
+
+    @Test
+    public void configurationChange_onlySplitShadeConfigChanges_horizontalLayoutStatusUpdated() {
+        // Preconditions for horizontal layout
+        when(mMediaHost.getVisible()).thenReturn(true);
+        when(mResources.getBoolean(R.bool.config_use_split_notification_shade)).thenReturn(false);
+        mConfiguration.orientation = Configuration.ORIENTATION_LANDSCAPE;
+        mController.setUsingHorizontalLayoutChangeListener(mHorizontalLayoutListener);
+        mController.mOnConfigurationChangedListener.onConfigurationChange(mConfiguration);
+        assertThat(mController.shouldUseHorizontalLayout()).isTrue();
+        reset(mHorizontalLayoutListener);
+
+        // Only split shade status changes
+        when(mResources.getBoolean(R.bool.config_use_split_notification_shade)).thenReturn(true);
+        mController.mOnConfigurationChangedListener.onConfigurationChange(mConfiguration);
+
+        // Horizontal layout is updated accordingly.
+        assertThat(mController.shouldUseHorizontalLayout()).isFalse();
+        verify(mHorizontalLayoutListener).run();
     }
 }

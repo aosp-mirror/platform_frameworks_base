@@ -18,80 +18,12 @@
 -->
 <com.android.systemui.statusbar.StatusBarMobileView
     xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:systemui="http://schemas.android.com/apk/res-auto"
     android:id="@+id/mobile_combo"
     android:layout_width="wrap_content"
     android:layout_height="match_parent"
     android:gravity="center_vertical" >
 
-    <com.android.keyguard.AlphaOptimizedLinearLayout
-        android:id="@+id/mobile_group"
-        android:layout_width="wrap_content"
-        android:layout_height="match_parent"
-        android:gravity="center_vertical"
-        android:orientation="horizontal" >
+    <include layout="@layout/status_bar_mobile_signal_group_inner" />
 
-        <FrameLayout
-            android:id="@+id/inout_container"
-            android:layout_height="17dp"
-            android:layout_width="wrap_content"
-            android:layout_gravity="center_vertical">
-            <ImageView
-                android:id="@+id/mobile_in"
-                android:layout_height="wrap_content"
-                android:layout_width="wrap_content"
-                android:src="@drawable/ic_activity_down"
-                android:visibility="gone"
-                android:paddingEnd="2dp"
-            />
-            <ImageView
-                android:id="@+id/mobile_out"
-                android:layout_height="wrap_content"
-                android:layout_width="wrap_content"
-                android:src="@drawable/ic_activity_up"
-                android:paddingEnd="2dp"
-                android:visibility="gone"
-            />
-        </FrameLayout>
-        <ImageView
-            android:id="@+id/mobile_type"
-            android:layout_height="wrap_content"
-            android:layout_width="wrap_content"
-            android:layout_gravity="center_vertical"
-            android:paddingStart="2.5dp"
-            android:paddingEnd="1dp"
-            android:visibility="gone" />
-        <Space
-            android:id="@+id/mobile_roaming_space"
-            android:layout_height="match_parent"
-            android:layout_width="@dimen/roaming_icon_start_padding"
-            android:visibility="gone"
-        />
-        <FrameLayout
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_gravity="center_vertical">
-            <com.android.systemui.statusbar.AnimatedImageView
-                android:id="@+id/mobile_signal"
-                android:layout_height="wrap_content"
-                android:layout_width="wrap_content"
-                systemui:hasOverlappingRendering="false"
-            />
-            <ImageView
-                android:id="@+id/mobile_roaming"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:src="@drawable/stat_sys_roaming"
-                android:contentDescription="@string/data_connection_roaming"
-                android:visibility="gone" />
-        </FrameLayout>
-        <ImageView
-            android:id="@+id/mobile_roaming_large"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:src="@drawable/stat_sys_roaming_large"
-            android:contentDescription="@string/data_connection_roaming"
-            android:visibility="gone" />
-    </com.android.keyguard.AlphaOptimizedLinearLayout>
 </com.android.systemui.statusbar.StatusBarMobileView>
 

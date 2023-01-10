@@ -1,6 +1,7 @@
 package com.android.internal.util;
 
 import static android.content.Intent.ACTION_USER_SWITCHED;
+import static android.view.WindowManager.TAKE_SCREENSHOT_PROVIDED_IMAGE;
 
 import android.annotation.NonNull;
 import android.annotation.Nullable;
@@ -27,7 +28,6 @@ import android.os.Parcelable;
 import android.os.RemoteException;
 import android.os.UserHandle;
 import android.util.Log;
-import android.view.WindowManager;
 import android.view.WindowManager.ScreenshotSource;
 import android.view.WindowManager.ScreenshotType;
 
@@ -42,10 +42,15 @@ public class ScreenshotHelper {
     public static final int SCREENSHOT_MSG_PROCESS_COMPLETE = 2;
 
     /**
-     * Describes a screenshot request (to make it easier to pass data through to the handler).
+     * Describes a screenshot request.
      */
     public static class ScreenshotRequest implements Parcelable {
+        @ScreenshotType
+        private final int mType;
+
+        @ScreenshotSource
         private final int mSource;
+
         private final Bundle mBitmapBundle;
         private final Rect mBoundsInScreen;
         private final Insets mInsets;
@@ -53,20 +58,27 @@ public class ScreenshotHelper {
         private final int mUserId;
         private final ComponentName mTopComponent;
 
-        @VisibleForTesting
-        public ScreenshotRequest(int source) {
-            mSource = source;
-            mBitmapBundle = null;
-            mBoundsInScreen = null;
-            mInsets = null;
-            mTaskId = -1;
-            mUserId = -1;
-            mTopComponent = null;
+
+        public ScreenshotRequest(@ScreenshotType int type, @ScreenshotSource int source) {
+            this(type, source, /* topComponent */ null);
         }
 
-        @VisibleForTesting
-        public ScreenshotRequest(int source, Bundle bitmapBundle, Rect boundsInScreen,
-                Insets insets, int taskId, int userId, ComponentName topComponent) {
+        public ScreenshotRequest(@ScreenshotType int type, @ScreenshotSource int source,
+                ComponentName topComponent) {
+            this(type,
+                source,
+                /* bitmapBundle*/ null,
+                /* boundsInScreen */ null,
+                /* insets */ null,
+                /* taskId */ -1,
+                /* userId */ -1,
+                topComponent);
+        }
+
+        public ScreenshotRequest(@ScreenshotType int type, @ScreenshotSource int source,
+                Bundle bitmapBundle, Rect boundsInScreen, Insets insets, int taskId, int userId,
+                ComponentName topComponent) {
+            mType = type;
             mSource = source;
             mBitmapBundle = bitmapBundle;
             mBoundsInScreen = boundsInScreen;
@@ -77,6 +89,7 @@ public class ScreenshotHelper {
         }
 
         ScreenshotRequest(Parcel in) {
+            mType = in.readInt();
             mSource = in.readInt();
             if (in.readInt() == 1) {
                 mBitmapBundle = in.readBundle(getClass().getClassLoader());
@@ -96,6 +109,12 @@ public class ScreenshotHelper {
             }
         }
 
+        @ScreenshotType
+        public int getType() {
+            return mType;
+        }
+
+        @ScreenshotSource
         public int getSource() {
             return mSource;
         }
@@ -131,6 +150,7 @@ public class ScreenshotHelper {
 
         @Override
         public void writeToParcel(Parcel dest, int flags) {
+            dest.writeInt(mType);
             dest.writeInt(mSource);
             if (mBitmapBundle == null) {
                 dest.writeInt(0);
@@ -208,8 +228,7 @@ public class ScreenshotHelper {
          * Extracts the Bitmap added to a Bundle with {@link #hardwareBitmapToBundle(Bitmap)} .}
          *
          * <p>This Bitmap contains the HardwareBuffer from the original caller, be careful passing
-         * this
-         * Bitmap on to any other source.
+         * this Bitmap on to any other source.
          *
          * @param bundle containing the bitmap
          * @return a hardware Bitmap
@@ -219,8 +238,9 @@ public class ScreenshotHelper {
                 throw new IllegalArgumentException("Bundle does not contain a hardware bitmap");
             }
 
-            HardwareBuffer buffer = bundle.getParcelable(KEY_BUFFER);
-            ParcelableColorSpace colorSpace = bundle.getParcelable(KEY_COLOR_SPACE);
+            HardwareBuffer buffer = bundle.getParcelable(KEY_BUFFER, HardwareBuffer.class);
+            ParcelableColorSpace colorSpace = bundle.getParcelable(KEY_COLOR_SPACE,
+                    ParcelableColorSpace.class);
 
             return Bitmap.wrapHardwareBuffer(Objects.requireNonNull(buffer),
                     colorSpace.getColorSpace());
@@ -260,16 +280,16 @@ public class ScreenshotHelper {
      * Added to support reducing unit test duration; the method variant without a timeout argument
      * is recommended for general use.
      *
-     * @param screenshotType The type of screenshot, defined by {@link ScreenshotType}
+     * @param type The type of screenshot, defined by {@link ScreenshotType}
      * @param source The source of the screenshot request, defined by {@link ScreenshotSource}
      * @param handler used to process messages received from the screenshot service
      * @param completionConsumer receives the URI of the captured screenshot, once saved or
      *         null if no screenshot was saved
      */
-    public void takeScreenshot(@ScreenshotType int screenshotType, @ScreenshotSource int source,
+    public void takeScreenshot(@ScreenshotType int type, @ScreenshotSource int source,
             @NonNull Handler handler, @Nullable Consumer<Uri> completionConsumer) {
-        ScreenshotRequest screenshotRequest = new ScreenshotRequest(source);
-        takeScreenshot(screenshotType, handler, screenshotRequest, SCREENSHOT_TIMEOUT_MS,
+        ScreenshotRequest screenshotRequest = new ScreenshotRequest(type, source);
+        takeScreenshot(handler, screenshotRequest, SCREENSHOT_TIMEOUT_MS,
                 completionConsumer);
     }
 
@@ -279,7 +299,7 @@ public class ScreenshotHelper {
      * Added to support reducing unit test duration; the method variant without a timeout argument
      * is recommended for general use.
      *
-     * @param screenshotType The type of screenshot, defined by {@link ScreenshotType}
+     * @param type The type of screenshot, defined by {@link ScreenshotType}
      * @param source The source of the screenshot request, defined by {@link ScreenshotSource}
      * @param handler used to process messages received from the screenshot service
      * @param timeoutMs time limit for processing, intended only for testing
@@ -287,10 +307,10 @@ public class ScreenshotHelper {
      *         null if no screenshot was saved
      */
     @VisibleForTesting
-    public void takeScreenshot(@ScreenshotType int screenshotType, @ScreenshotSource int source,
+    public void takeScreenshot(@ScreenshotType int type, @ScreenshotSource int source,
             @NonNull Handler handler, long timeoutMs, @Nullable Consumer<Uri> completionConsumer) {
-        ScreenshotRequest screenshotRequest = new ScreenshotRequest(source);
-        takeScreenshot(screenshotType, handler, screenshotRequest, timeoutMs, completionConsumer);
+        ScreenshotRequest screenshotRequest = new ScreenshotRequest(type, source);
+        takeScreenshot(handler, screenshotRequest, timeoutMs, completionConsumer);
     }
 
     /**
@@ -311,14 +331,12 @@ public class ScreenshotHelper {
             @NonNull Insets insets, int taskId, int userId, ComponentName topComponent,
             @ScreenshotSource int source, @NonNull Handler handler,
             @Nullable Consumer<Uri> completionConsumer) {
-        ScreenshotRequest screenshotRequest = new ScreenshotRequest(source, screenshotBundle,
-                boundsInScreen, insets, taskId, userId, topComponent);
-        takeScreenshot(WindowManager.TAKE_SCREENSHOT_PROVIDED_IMAGE, handler, screenshotRequest,
-                SCREENSHOT_TIMEOUT_MS,
-                completionConsumer);
+        ScreenshotRequest screenshotRequest = new ScreenshotRequest(TAKE_SCREENSHOT_PROVIDED_IMAGE,
+                source, screenshotBundle, boundsInScreen, insets, taskId, userId, topComponent);
+        takeScreenshot(handler, screenshotRequest, SCREENSHOT_TIMEOUT_MS, completionConsumer);
     }
 
-    private void takeScreenshot(@ScreenshotType int screenshotType, @NonNull Handler handler,
+    private void takeScreenshot(@NonNull Handler handler,
             ScreenshotRequest screenshotRequest, long timeoutMs,
             @Nullable Consumer<Uri> completionConsumer) {
         synchronized (mScreenshotLock) {
@@ -336,7 +354,7 @@ public class ScreenshotHelper {
                 }
             };
 
-            Message msg = Message.obtain(null, screenshotType, screenshotRequest);
+            Message msg = Message.obtain(null, 0, screenshotRequest);
 
             Handler h = new Handler(handler.getLooper()) {
                 @Override
@@ -359,6 +377,9 @@ public class ScreenshotHelper {
             msg.replyTo = new Messenger(h);
 
             if (mScreenshotConnection == null || mScreenshotService == null) {
+                if (mScreenshotConnection != null) {
+                    resetConnection();
+                }
                 final ComponentName serviceComponent = ComponentName.unflattenFromString(
                         mContext.getResources().getString(
                                 com.android.internal.R.string.config_screenshotServiceComponent));

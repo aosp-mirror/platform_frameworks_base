@@ -31,6 +31,7 @@ import androidx.test.filters.SmallTest;
 
 import com.android.internal.widget.LockPatternUtils;
 import com.android.keyguard.KeyguardUpdateMonitor;
+import com.android.keyguard.logging.KeyguardUpdateMonitorLogger;
 import com.android.systemui.SysuiTestCase;
 import com.android.systemui.dump.DumpManager;
 import com.android.systemui.keyguard.KeyguardUnlockAnimationController;
@@ -57,6 +58,8 @@ public class KeyguardStateControllerTest extends SysuiTestCase {
     private DumpManager mDumpManager;
     @Mock
     private Lazy<KeyguardUnlockAnimationController> mKeyguardUnlockAnimationControllerLazy;
+    @Mock
+    private KeyguardUpdateMonitorLogger mLogger;
 
     @Before
     public void setup() {
@@ -66,6 +69,7 @@ public class KeyguardStateControllerTest extends SysuiTestCase {
                 mKeyguardUpdateMonitor,
                 mLockPatternUtils,
                 mKeyguardUnlockAnimationControllerLazy,
+                mLogger,
                 mDumpManager);
     }
 

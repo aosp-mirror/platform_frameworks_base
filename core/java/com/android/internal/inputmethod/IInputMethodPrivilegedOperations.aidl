@@ -34,7 +34,7 @@ oneway interface IInputMethodPrivilegedOperations {
     void setInputMethod(String id, in AndroidFuture future /* T=Void */);
     void setInputMethodAndSubtype(String id, in InputMethodSubtype subtype,
             in AndroidFuture future /* T=Void */);
-    void hideMySoftInput(int flags, in AndroidFuture future /* T=Void */);
+    void hideMySoftInput(int flags, int reason, in AndroidFuture future /* T=Void */);
     void showMySoftInput(int flags, in AndroidFuture future /* T=Void */);
     void updateStatusIconAsync(String packageName, int iconId);
     void switchToPreviousInputMethod(in AndroidFuture future /* T=Boolean */);

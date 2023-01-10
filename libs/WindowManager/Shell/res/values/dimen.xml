@@ -81,6 +81,9 @@
     <!-- The width and height of the background for custom action in PiP menu. -->
     <dimen name="pip_custom_close_bg_size">32dp</dimen>
 
+    <!-- Extra padding between picture-in-picture windows and any registered keep clear areas. -->
+    <dimen name="pip_keep_clear_areas_padding">16dp</dimen>
+
     <dimen name="dismiss_target_x_size">24dp</dimen>
     <dimen name="floating_dismiss_bottom_margin">50dp</dimen>
 
@@ -246,8 +249,17 @@
     <!-- The corner radius of the letterbox education dialog. -->
     <dimen name="letterbox_education_dialog_corner_radius">28dp</dimen>
 
-    <!-- The size of an icon in the letterbox education dialog. -->
-    <dimen name="letterbox_education_dialog_icon_size">48dp</dimen>
+    <!-- The width of the top icon in the letterbox education dialog. -->
+    <dimen name="letterbox_education_dialog_title_icon_width">45dp</dimen>
+
+    <!-- The height of the top icon in the letterbox education dialog. -->
+    <dimen name="letterbox_education_dialog_title_icon_height">44dp</dimen>
+
+    <!-- The width of an icon in the letterbox education dialog. -->
+    <dimen name="letterbox_education_dialog_icon_width">40dp</dimen>
+
+    <!-- The height of an icon in the letterbox education dialog. -->
+    <dimen name="letterbox_education_dialog_icon_height">32dp</dimen>
 
     <!-- The fixed width of the dialog if there is enough space in the parent. -->
     <dimen name="letterbox_education_dialog_width">472dp</dimen>
@@ -285,4 +297,45 @@
       when the pinned stack size is overridden by app via minWidth/minHeight.
     -->
     <dimen name="overridable_minimal_size_pip_resizable_task">48dp</dimen>
+
+    <!-- The size of the drag handle / menu shown along with a floating task. -->
+    <dimen name="floating_task_menu_size">32dp</dimen>
+
+    <!-- The size of menu items in the floating task menu. -->
+    <dimen name="floating_task_menu_item_size">24dp</dimen>
+
+    <!-- The horizontal margin of menu items in the floating task menu. -->
+    <dimen name="floating_task_menu_item_padding">5dp</dimen>
+
+    <!-- The width of visible floating view region when stashed. -->
+    <dimen name="floating_task_stash_offset">32dp</dimen>
+
+    <!-- The amount of elevation for a floating task. -->
+    <dimen name="floating_task_elevation">8dp</dimen>
+
+    <!-- The amount of padding around the bottom and top of the task. -->
+    <dimen name="floating_task_vertical_padding">8dp</dimen>
+
+    <!-- The normal size of the dismiss target. -->
+    <dimen name="floating_task_dismiss_circle_size">150dp</dimen>
+
+    <!-- The smaller size of the dismiss target (shrinks when something is in the target). -->
+    <dimen name="floating_dismiss_circle_small">120dp</dimen>
+
+    <!-- The thickness of shadows of a window that has focus in DIP. -->
+    <dimen name="freeform_decor_shadow_focused_thickness">20dp</dimen>
+
+    <!-- The thickness of shadows of a window that doesn't have focus in DIP. -->
+    <dimen name="freeform_decor_shadow_unfocused_thickness">5dp</dimen>
+
+    <!-- Height of button (32dp)  + 2 * margin (5dp each). -->
+    <dimen name="freeform_decor_caption_height">42dp</dimen>
+
+    <!-- Width of buttons (64dp) + handle (128dp) + padding (24dp total). -->
+    <dimen name="freeform_decor_caption_width">216dp</dimen>
+
+    <dimen name="freeform_resize_handle">30dp</dimen>
+
+    <dimen name="freeform_resize_corner">44dp</dimen>
+
 </resources>

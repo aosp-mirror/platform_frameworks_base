@@ -49,11 +49,12 @@ import com.android.systemui.R;
 import com.android.systemui.SysuiBaseFragmentTest;
 import com.android.systemui.dump.DumpManager;
 import com.android.systemui.flags.FeatureFlags;
-import com.android.systemui.log.LogBuffer;
-import com.android.systemui.log.LogcatEchoTracker;
 import com.android.systemui.plugins.DarkIconDispatcher;
+import com.android.systemui.plugins.log.LogBuffer;
+import com.android.systemui.plugins.log.LogcatEchoTracker;
 import com.android.systemui.plugins.statusbar.StatusBarStateController;
 import com.android.systemui.shade.NotificationPanelViewController;
+import com.android.systemui.shade.ShadeExpansionStateManager;
 import com.android.systemui.statusbar.CommandQueue;
 import com.android.systemui.statusbar.DisableFlagsLogger;
 import com.android.systemui.statusbar.OperatorNameViewController;
@@ -66,7 +67,6 @@ import com.android.systemui.statusbar.phone.StatusBarIconController;
 import com.android.systemui.statusbar.phone.StatusBarLocationPublisher;
 import com.android.systemui.statusbar.phone.fragment.dagger.StatusBarFragmentComponent;
 import com.android.systemui.statusbar.phone.ongoingcall.OngoingCallController;
-import com.android.systemui.statusbar.phone.panelstate.PanelExpansionStateManager;
 import com.android.systemui.statusbar.policy.KeyguardStateController;
 import com.android.systemui.util.CarrierConfigTracker;
 import com.android.systemui.util.concurrency.FakeExecutor;
@@ -112,6 +112,10 @@ public class CollapsedStatusBarFragmentTest extends SysuiBaseFragmentTest {
     private HeadsUpAppearanceController mHeadsUpAppearanceController;
     @Mock
     private NotificationPanelViewController mNotificationPanelViewController;
+    @Mock
+    private StatusBarIconController.DarkIconManager.Factory mIconManagerFactory;
+    @Mock
+    private StatusBarIconController.DarkIconManager mIconManager;
     @Mock
     private StatusBarHideIconsForBouncerManager mStatusBarHideIconsForBouncerManager;
     @Mock
@@ -329,10 +333,9 @@ public class CollapsedStatusBarFragmentTest extends SysuiBaseFragmentTest {
     }
 
     @Test
-    public void disable_isDozingButNoCustomClock_clockAndSystemInfoVisible() {
+    public void disable_isDozing_clockAndSystemInfoVisible() {
         CollapsedStatusBarFragment fragment = resumeAndGetFragment();
         when(mStatusBarStateController.isDozing()).thenReturn(true);
-        when(mNotificationPanelViewController.hasCustomClock()).thenReturn(false);
 
         fragment.disable(DEFAULT_DISPLAY, 0, 0, false);
 
@@ -341,49 +344,14 @@ public class CollapsedStatusBarFragmentTest extends SysuiBaseFragmentTest {
     }
 
     @Test
-    public void disable_customClockButNotDozing_clockAndSystemInfoVisible() {
+    public void disable_NotDozing_clockAndSystemInfoVisible() {
         CollapsedStatusBarFragment fragment = resumeAndGetFragment();
         when(mStatusBarStateController.isDozing()).thenReturn(false);
-        when(mNotificationPanelViewController.hasCustomClock()).thenReturn(true);
 
         fragment.disable(DEFAULT_DISPLAY, 0, 0, false);
 
         assertEquals(View.VISIBLE, getEndSideContentView().getVisibility());
         assertEquals(View.VISIBLE, getClockView().getVisibility());
-    }
-
-    @Test
-    public void disable_dozingAndCustomClock_clockAndSystemInfoHidden() {
-        CollapsedStatusBarFragment fragment = resumeAndGetFragment();
-        when(mStatusBarStateController.isDozing()).thenReturn(true);
-        when(mNotificationPanelViewController.hasCustomClock()).thenReturn(true);
-
-        // Make sure they start out as visible
-        assertEquals(View.VISIBLE, getEndSideContentView().getVisibility());
-        assertEquals(View.VISIBLE, getClockView().getVisibility());
-
-        fragment.disable(DEFAULT_DISPLAY, 0, 0, false);
-
-        assertEquals(View.INVISIBLE, getEndSideContentView().getVisibility());
-        assertEquals(View.GONE, getClockView().getVisibility());
-    }
-
-    @Test
-    public void onDozingChanged_clockAndSystemInfoVisibilitiesUpdated() {
-        CollapsedStatusBarFragment fragment = resumeAndGetFragment();
-        when(mStatusBarStateController.isDozing()).thenReturn(true);
-        when(mNotificationPanelViewController.hasCustomClock()).thenReturn(true);
-
-        // Make sure they start out as visible
-        assertEquals(View.VISIBLE, getEndSideContentView().getVisibility());
-        assertEquals(View.VISIBLE, getClockView().getVisibility());
-
-        fragment.onDozingChanged(true);
-
-        // When this callback is triggered, we want to make sure the clock and system info
-        // visibilities are recalculated. Since dozing=true, they shouldn't be visible.
-        assertEquals(View.INVISIBLE, getEndSideContentView().getVisibility());
-        assertEquals(View.GONE, getClockView().getVisibility());
     }
 
     @Test
@@ -463,6 +431,7 @@ public class CollapsedStatusBarFragmentTest extends SysuiBaseFragmentTest {
         mOperatorNameViewControllerFactory = mock(OperatorNameViewController.Factory.class);
         when(mOperatorNameViewControllerFactory.create(any()))
                 .thenReturn(mOperatorNameViewController);
+        when(mIconManagerFactory.create(any(), any())).thenReturn(mIconManager);
         mSecureSettings = mock(SecureSettings.class);
 
         setUpNotificationIconAreaController();
@@ -472,9 +441,10 @@ public class CollapsedStatusBarFragmentTest extends SysuiBaseFragmentTest {
                 mAnimationScheduler,
                 mLocationPublisher,
                 mMockNotificationAreaController,
-                new PanelExpansionStateManager(),
+                new ShadeExpansionStateManager(),
                 mock(FeatureFlags.class),
                 mStatusBarIconController,
+                mIconManagerFactory,
                 mStatusBarHideIconsForBouncerManager,
                 mKeyguardStateController,
                 mNotificationPanelViewController,

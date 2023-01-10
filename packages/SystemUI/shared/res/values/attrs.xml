@@ -20,9 +20,38 @@
 -->
 
 <resources>
-    <declare-styleable name="AnimatableClockView">
-        <attr name="dozeWeight" format="integer" />
-        <attr name="lockScreenWeight" format="integer" />
-        <attr name="chargeAnimationDelay" format="integer" />
+    <declare-styleable name="DoubleShadowAttrDeclare">
+        <attr name="keyShadowBlur" format="dimension" />
+        <attr name="keyShadowOffsetX" format="dimension" />
+        <attr name="keyShadowOffsetY" format="dimension" />
+        <attr name="keyShadowAlpha" format="float" />
+        <attr name="ambientShadowBlur" format="dimension" />
+        <attr name="ambientShadowOffsetX" format="dimension" />
+        <attr name="ambientShadowOffsetY" format="dimension" />
+        <attr name="ambientShadowAlpha" format="float" />
+    </declare-styleable>
+
+    <declare-styleable name="DoubleShadowTextClock">
+        <attr name="keyShadowBlur" />
+        <attr name="keyShadowOffsetX" />
+        <attr name="keyShadowOffsetY" />
+        <attr name="keyShadowAlpha" />
+        <attr name="ambientShadowBlur" />
+        <attr name="ambientShadowOffsetX" />
+        <attr name="ambientShadowOffsetY" />
+        <attr name="ambientShadowAlpha" />
+    </declare-styleable>
+
+    <declare-styleable name="DoubleShadowTextView">
+        <attr name="keyShadowBlur" />
+        <attr name="keyShadowOffsetX" />
+        <attr name="keyShadowOffsetY" />
+        <attr name="keyShadowAlpha" />
+        <attr name="ambientShadowBlur" />
+        <attr name="ambientShadowOffsetX" />
+        <attr name="ambientShadowOffsetY" />
+        <attr name="ambientShadowAlpha" />
+        <attr name="drawableIconSize" format="dimension" />
+        <attr name="drawableIconInsetSize" format="dimension" />
     </declare-styleable>
 </resources>

@@ -28,8 +28,13 @@ import android.util.Log;
 import android.view.View;
 import android.widget.ImageView;
 
+import com.android.internal.annotations.VisibleForTesting;
+import com.android.internal.logging.UiEvent;
+import com.android.internal.logging.UiEventLogger;
 import com.android.systemui.CoreStartable;
+import com.android.systemui.R;
 import com.android.systemui.animation.ActivityLaunchAnimator;
+import com.android.systemui.controls.ControlsServiceInfo;
 import com.android.systemui.controls.dagger.ControlsComponent;
 import com.android.systemui.controls.management.ControlsListingController;
 import com.android.systemui.controls.ui.ControlsActivity;
@@ -38,6 +43,8 @@ import com.android.systemui.dreams.DreamOverlayStateController;
 import com.android.systemui.dreams.complication.dagger.DreamHomeControlsComplicationComponent;
 import com.android.systemui.plugins.ActivityStarter;
 import com.android.systemui.util.ViewController;
+
+import java.util.List;
 
 import javax.inject.Inject;
 import javax.inject.Named;
@@ -68,30 +75,37 @@ public class DreamHomeControlsComplication implements Complication {
     /**
      * {@link CoreStartable} for registering the complication with SystemUI on startup.
      */
-    public static class Registrant extends CoreStartable {
+    public static class Registrant implements CoreStartable {
         private final DreamHomeControlsComplication mComplication;
         private final DreamOverlayStateController mDreamOverlayStateController;
         private final ControlsComponent mControlsComponent;
 
-        private boolean mControlServicesAvailable = false;
+        private boolean mOverlayActive = false;
 
         // Callback for when the home controls service availability changes.
         private final ControlsListingController.ControlsListingCallback mControlsCallback =
-                serviceInfos -> {
-                    boolean available = !serviceInfos.isEmpty();
+                services -> updateHomeControlsComplication();
 
-                    if (available != mControlServicesAvailable) {
-                        mControlServicesAvailable = available;
-                        updateComplicationAvailability();
+        private final DreamOverlayStateController.Callback mOverlayStateCallback =
+                new DreamOverlayStateController.Callback() {
+                    @Override
+                    public void onStateChanged() {
+                        if (mOverlayActive == mDreamOverlayStateController.isOverlayActive()) {
+                            return;
+                        }
+
+                        mOverlayActive = !mOverlayActive;
+
+                        if (mOverlayActive) {
+                            updateHomeControlsComplication();
+                        }
                     }
                 };
 
         @Inject
-        public Registrant(Context context, DreamHomeControlsComplication complication,
+        public Registrant(DreamHomeControlsComplication complication,
                 DreamOverlayStateController dreamOverlayStateController,
                 ControlsComponent controlsComponent) {
-            super(context);
-
             mComplication = complication;
             mControlsComponent = controlsComponent;
             mDreamOverlayStateController = dreamOverlayStateController;
@@ -101,18 +115,36 @@ public class DreamHomeControlsComplication implements Complication {
         public void start() {
             mControlsComponent.getControlsListingController().ifPresent(
                     c -> c.addCallback(mControlsCallback));
+            mDreamOverlayStateController.addCallback(mOverlayStateCallback);
         }
 
-        private void updateComplicationAvailability() {
+        private void updateHomeControlsComplication() {
+            mControlsComponent.getControlsListingController().ifPresent(c -> {
+                if (isHomeControlsAvailable(c.getCurrentServices())) {
+                    mDreamOverlayStateController.addComplication(mComplication);
+                } else {
+                    mDreamOverlayStateController.removeComplication(mComplication);
+                }
+            });
+        }
+
+        private boolean isHomeControlsAvailable(List<ControlsServiceInfo> controlsServices) {
+            if (controlsServices.isEmpty()) {
+                return false;
+            }
+
             final boolean hasFavorites = mControlsComponent.getControlsController()
                     .map(c -> !c.getFavorites().isEmpty())
                     .orElse(false);
-            if (!hasFavorites || !mControlServicesAvailable
-                    || mControlsComponent.getVisibility() == UNAVAILABLE) {
-                mDreamOverlayStateController.removeComplication(mComplication);
-            } else {
-                mDreamOverlayStateController.addComplication(mComplication);
+            boolean hasPanels = false;
+            for (int i = 0; i < controlsServices.size(); i++) {
+                if (controlsServices.get(i).getPanelActivity() != null) {
+                    hasPanels = true;
+                    break;
+                }
             }
+            final ControlsComponent.Visibility visibility = mControlsComponent.getVisibility();
+            return (hasFavorites || hasPanels) && visibility != UNAVAILABLE;
         }
     }
 
@@ -127,7 +159,7 @@ public class DreamHomeControlsComplication implements Complication {
         @Inject
         DreamHomeControlsChipViewHolder(
                 DreamHomeControlsChipViewController dreamHomeControlsChipViewController,
-                @Named(DREAM_HOME_CONTROLS_CHIP_VIEW) ImageView view,
+                @Named(DREAM_HOME_CONTROLS_CHIP_VIEW) View view,
                 @Named(DREAM_HOME_CONTROLS_CHIP_LAYOUT_PARAMS) ComplicationLayoutParams layoutParams
         ) {
             mView = view;
@@ -150,32 +182,54 @@ public class DreamHomeControlsComplication implements Complication {
     /**
      * Controls behavior of the dream complication.
      */
-    static class DreamHomeControlsChipViewController extends ViewController<ImageView> {
-        private static final boolean DEBUG = false;
+    static class DreamHomeControlsChipViewController extends ViewController<View> {
         private static final String TAG = "DreamHomeControlsCtrl";
+        private static final boolean DEBUG = Log.isLoggable(TAG, Log.DEBUG);
 
         private final ActivityStarter mActivityStarter;
         private final Context mContext;
         private final ControlsComponent mControlsComponent;
 
+        private final UiEventLogger mUiEventLogger;
+
+        @VisibleForTesting
+        public enum DreamOverlayEvent implements UiEventLogger.UiEventEnum {
+            @UiEvent(doc = "The home controls on the screensaver has been tapped.")
+            DREAM_HOME_CONTROLS_TAPPED(1212);
+
+            private final int mId;
+
+            DreamOverlayEvent(int id) {
+                mId = id;
+            }
+
+            @Override
+            public int getId() {
+                return mId;
+            }
+        }
+
         @Inject
         DreamHomeControlsChipViewController(
-                @Named(DREAM_HOME_CONTROLS_CHIP_VIEW) ImageView view,
+                @Named(DREAM_HOME_CONTROLS_CHIP_VIEW) View view,
                 ActivityStarter activityStarter,
                 Context context,
-                ControlsComponent controlsComponent) {
+                ControlsComponent controlsComponent,
+                UiEventLogger uiEventLogger) {
             super(view);
 
             mActivityStarter = activityStarter;
             mContext = context;
             mControlsComponent = controlsComponent;
+            mUiEventLogger = uiEventLogger;
         }
 
         @Override
         protected void onViewAttached() {
-            mView.setImageResource(mControlsComponent.getTileImageId());
-            mView.setContentDescription(mContext.getString(mControlsComponent.getTileTitleId()));
-            mView.setOnClickListener(this::onClickHomeControls);
+            final ImageView chip = mView.findViewById(R.id.home_controls_chip);
+            chip.setImageResource(mControlsComponent.getTileImageId());
+            chip.setContentDescription(mContext.getString(mControlsComponent.getTileTitleId()));
+            chip.setOnClickListener(this::onClickHomeControls);
         }
 
         @Override
@@ -184,9 +238,12 @@ public class DreamHomeControlsComplication implements Complication {
         private void onClickHomeControls(View v) {
             if (DEBUG) Log.d(TAG, "home controls complication tapped");
 
+            mUiEventLogger.log(DreamOverlayEvent.DREAM_HOME_CONTROLS_TAPPED);
+
             final Intent intent = new Intent(mContext, ControlsActivity.class)
                     .addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_NEW_TASK)
-                    .putExtra(ControlsUiController.EXTRA_ANIMATE, true);
+                    .putExtra(ControlsUiController.EXTRA_ANIMATE, true)
+                    .putExtra(ControlsUiController.EXIT_TO_DREAM, true);
 
             final ActivityLaunchAnimator.Controller controller =
                     v != null ? ActivityLaunchAnimator.Controller.fromView(v, null /* cujType */)

@@ -246,7 +246,7 @@ public class TaskSnapshotWindow {
         window.setOuter(snapshotSurface);
         try {
             Trace.traceBegin(TRACE_TAG_WINDOW_MANAGER, "TaskSnapshot#relayout");
-            session.relayout(window, layoutParams, -1, -1, View.VISIBLE, 0,
+            session.relayout(window, layoutParams, -1, -1, View.VISIBLE, 0, 0, 0,
                     tmpFrames, tmpMergedConfiguration, surfaceControl, tmpInsetsState,
                     tmpControls, new Bundle());
             Trace.traceEnd(TRACE_TAG_WINDOW_MANAGER);

@@ -37,5 +37,5 @@ object CoroutinesModule {
     @Provides
     @SysUISingleton
     @Background
-    fun bgDispatcher(): CoroutineDispatcher = Dispatchers.Default
+    fun bgDispatcher(): CoroutineDispatcher = Dispatchers.IO
 }

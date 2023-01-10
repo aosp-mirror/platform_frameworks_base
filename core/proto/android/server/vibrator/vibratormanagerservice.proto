@@ -86,7 +86,7 @@ message VibrationAttributesProto {
     optional int32 flags = 3;
 }
 
-// Next id: 8
+// Next Tag: 9
 message VibrationProto {
     option (.android.msg_privacy).dest = DEST_AUTOMATIC;
     optional int64 start_time = 1;
@@ -94,11 +94,44 @@ message VibrationProto {
     optional CombinedVibrationEffectProto effect = 3;
     optional CombinedVibrationEffectProto original_effect = 4;
     optional VibrationAttributesProto attributes = 5;
-    optional int32 status = 6;
     optional int64 duration_ms = 7;
+    optional Status status = 8;
+    reserved 6; // prev int32 status
+
+    // Also used by VibrationReported from frameworks/proto_logging/stats/atoms.proto.
+    // Next Tag: 26
+    enum Status {
+        UNKNOWN = 0;
+        RUNNING = 1;
+        FINISHED = 2;
+        FINISHED_UNEXPECTED = 3;  // Didn't terminate in the usual way.
+        FORWARDED_TO_INPUT_DEVICES = 4;
+        CANCELLED_BINDER_DIED = 5;
+        CANCELLED_BY_SCREEN_OFF = 6;
+        CANCELLED_BY_SETTINGS_UPDATE = 7;
+        CANCELLED_BY_USER = 8;
+        CANCELLED_BY_UNKNOWN_REASON = 9;
+        CANCELLED_SUPERSEDED = 10;
+        IGNORED_ERROR_APP_OPS = 11;
+        IGNORED_ERROR_CANCELLING = 12;
+        IGNORED_ERROR_SCHEDULING = 13;
+        IGNORED_ERROR_TOKEN= 14;
+        IGNORED_APP_OPS = 15;
+        IGNORED_BACKGROUND = 16;
+        IGNORED_UNKNOWN_VIBRATION = 17;
+        IGNORED_UNSUPPORTED = 18;
+        IGNORED_FOR_EXTERNAL = 19;
+        IGNORED_FOR_HIGHER_IMPORTANCE = 20;
+        IGNORED_FOR_ONGOING = 21;
+        IGNORED_FOR_POWER = 22;
+        IGNORED_FOR_RINGER_MODE = 23;
+        IGNORED_FOR_SETTINGS = 24;
+        IGNORED_SUPERSEDED = 25;
+        IGNORED_FROM_VIRTUAL_DEVICE = 26;
+    }
 }
 
-// Next id: 25
+// Next Tag: 25
 message VibratorManagerServiceDumpProto {
     option (.android.msg_privacy).dest = DEST_AUTOMATIC;
     repeated int32 vibrator_ids = 1;

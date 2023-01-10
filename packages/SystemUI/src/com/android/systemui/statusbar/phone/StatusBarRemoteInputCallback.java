@@ -133,7 +133,7 @@ public class StatusBarRemoteInputCallback implements Callback, Callbacks,
         if (!row.isPinned()) {
             mStatusBarStateController.setLeaveOpenOnKeyguardHide(true);
         }
-        mStatusBarKeyguardViewManager.showGenericBouncer(true /* scrimmed */);
+        mStatusBarKeyguardViewManager.showBouncer(true /* scrimmed */);
         mPendingRemoteInputView = clicked;
     }
 
@@ -180,7 +180,7 @@ public class StatusBarRemoteInputCallback implements Callback, Callbacks,
                 }
             };
             mShadeController.postOnShadeExpanded(clickPendingViewRunnable);
-            mShadeController.instantExpandNotificationsPanel();
+            mShadeController.instantExpandShade();
         }
     }
 
@@ -259,8 +259,9 @@ public class StatusBarRemoteInputCallback implements Callback, Callbacks,
         final boolean isActivity = pendingIntent.isActivity();
         if (isActivity || appRequestedAuth) {
             mActionClickLogger.logWaitingToCloseKeyguard(pendingIntent);
-            final boolean afterKeyguardGone = mActivityIntentHelper.wouldLaunchResolverActivity(
-                    pendingIntent.getIntent(), mLockscreenUserManager.getCurrentUserId());
+            final boolean afterKeyguardGone = mActivityIntentHelper
+                    .wouldPendingLaunchResolverActivity(pendingIntent,
+                            mLockscreenUserManager.getCurrentUserId());
             mActivityStarter.dismissKeyguardThenExecute(() -> {
                 mActionClickLogger.logKeyguardGone(pendingIntent);
 

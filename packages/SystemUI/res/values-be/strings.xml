@@ -72,6 +72,7 @@
     <string name="global_action_smart_lock_disabled" msgid="9097102067802412936">"Функцыя \"Smart Lock\" адключана"</string>
     <string name="remote_input_image_insertion_text" msgid="4850791636452521123">"адпраўлены відарыс"</string>
     <string name="screenshot_saving_title" msgid="2298349784913287333">"Захаванне скрыншота..."</string>
+    <string name="screenshot_saving_work_profile_title" msgid="5332829607308450880">"Захаванне здымка экрана ў працоўны профіль…"</string>
     <string name="screenshot_saved_title" msgid="8893267638659083153">"Здымак экрана захаваны"</string>
     <string name="screenshot_failed_title" msgid="3259148215671936891">"Не атрымалася зрабіць здымак экрана"</string>
     <string name="screenshot_failed_to_save_user_locked_text" msgid="6156607948256936920">"Перад захаваннем здымка экрана трэба разблакіраваць прыладу"</string>
@@ -84,6 +85,7 @@
     <string name="screenshot_share_description" msgid="2861628935812656612">"Абагуліць здымак экрана"</string>
     <string name="screenshot_scroll_label" msgid="2930198809899329367">"Захапіць больш"</string>
     <string name="screenshot_dismiss_description" msgid="4702341245899508786">"Адхіліць здымак экрана"</string>
+    <string name="screenshot_dismiss_work_profile" msgid="3101530842987697045">"Закрыць паведамленне працоўнага профілю"</string>
     <string name="screenshot_preview_description" msgid="7606510140714080474">"Перадпрагляд здымка экрана"</string>
     <string name="screenshot_top_boundary_pct" msgid="2520148599096479332">"Верхняя граніца: <xliff:g id="PERCENT">%1$d</xliff:g>%%"</string>
     <string name="screenshot_bottom_boundary_pct" msgid="3880821519814946478">"Ніжняя граніца: <xliff:g id="PERCENT">%1$d</xliff:g>%%"</string>
@@ -94,6 +96,11 @@
     <string name="screenrecord_channel_description" msgid="4147077128486138351">"Бягучае апавяшчэнне для сеанса запісу экрана"</string>
     <string name="screenrecord_start_label" msgid="1750350278888217473">"Пачаць запіс?"</string>
     <string name="screenrecord_description" msgid="1123231719680353736">"Падчас запісу сістэма Android можа збіраць канфідэнцыяльную інфармацыю, якая адлюстроўваецца на экране вашай прылады ці прайграецца на ёй. Гэта могуць быць паролі, плацежная інфармацыя, фота, паведамленні і аўдыяданыя."</string>
+    <string name="screenrecord_option_entire_screen" msgid="1732437834603426934">"Запісаць змесціва ўсяго экрана"</string>
+    <string name="screenrecord_option_single_app" msgid="5954863081500035825">"Запісаць змесціва праграмы"</string>
+    <string name="screenrecord_warning_entire_screen" msgid="8141407178104195610">"Калі адбываецца запіс, Android мае доступ да ўсяго змесціва, якое паказваецца на экране ці прайграецца на прыладзе. Таму прадухіліце паказ пароляў, плацежных рэквізітаў, паведамленняў і іншай канфідэнцыяльнай інфармацыі."</string>
+    <string name="screenrecord_warning_single_app" msgid="7760723997065948283">"Калі адбываецца запіс змесціва праграмы, Android мае доступ да ўсяго змесціва, якое паказваецца ці прайграецца ў праграме. Таму прадухіліце паказ пароляў, плацежных рэквізітаў, паведамленняў і іншай канфідэнцыяльнай інфармацыі."</string>
+    <string name="screenrecord_start_recording" msgid="348286842544768740">"Пачаць запіс"</string>
     <string name="screenrecord_audio_label" msgid="6183558856175159629">"Запісаць аўдыя"</string>
     <string name="screenrecord_device_audio_label" msgid="9016927171280567791">"Аўдыя з прылады"</string>
     <string name="screenrecord_device_audio_description" msgid="4922694220572186193">"Гук на вашай прыладзе, напрыклад музыка, выклікі і рынгтоны"</string>
@@ -120,7 +127,7 @@
     <string name="accessibility_voice_assist_button" msgid="6497706615649754510">"Галасавая дапамога"</string>
     <string name="accessibility_wallet_button" msgid="1458258783460555507">"Кашалёк"</string>
     <string name="accessibility_qr_code_scanner_button" msgid="7521277927692910795">"Сканер QR-кодаў"</string>
-    <string name="accessibility_unlock_button" msgid="122785427241471085">"Разблакiраваць"</string>
+    <string name="accessibility_unlock_button" msgid="3613812140816244310">"Разблакіравана"</string>
     <string name="accessibility_lock_icon" msgid="661492842417875775">"Прылада заблакіравана"</string>
     <string name="accessibility_scanning_face" msgid="3093828357921541387">"Сканіраванне твару"</string>
     <string name="accessibility_send_smart_reply" msgid="8885032190442015141">"Адправіць"</string>
@@ -161,6 +168,9 @@
     <string name="fingerprint_dialog_use_fingerprint_instead" msgid="6178228876763024452">"Твар не распазнаны. Скарыстайце адбітак пальца."</string>
     <!-- no translation found for keyguard_face_failed_use_fp (7140293906176164263) -->
     <skip />
+    <string name="keyguard_face_failed" msgid="9044619102286917151">"Твар не распазнаны"</string>
+    <string name="keyguard_suggest_fingerprint" msgid="8742015961962702960">"Скарыстайце адбітак пальца"</string>
+    <string name="keyguard_face_unlock_unavailable" msgid="1581949044193418736">"Распазнаванне твару не працуе"</string>
     <string name="accessibility_bluetooth_connected" msgid="4745196874551115205">"Bluetooth-сувязь."</string>
     <string name="accessibility_battery_unknown" msgid="1807789554617976440">"Працэнт зараду акумулятара невядомы."</string>
     <string name="accessibility_bluetooth_name" msgid="7300973230214067678">"Падлучаны да <xliff:g id="BLUETOOTH">%s</xliff:g>."</string>
@@ -171,8 +181,10 @@
     <string name="accessibility_airplane_mode" msgid="1899529214045998505">"Рэжым палёту."</string>
     <string name="accessibility_vpn_on" msgid="8037549696057288731">"VPN уключана."</string>
     <string name="accessibility_battery_level" msgid="5143715405241138822">"Працэнт зараду акумулятара: <xliff:g id="NUMBER">%d</xliff:g>."</string>
-    <string name="accessibility_battery_level_with_estimate" msgid="4843119982547599452">"Зарад акумулятара ў працэнтах: <xliff:g id="PERCENTAGE">%1$s</xliff:g>. Пры такім выкарыстанні яго хопіць прыблізна на <xliff:g id="TIME">%2$s</xliff:g>"</string>
+    <string name="accessibility_battery_level_with_estimate" msgid="6548654589315074529">"Працэнт зараду акумулятара: <xliff:g id="PERCENTAGE">%1$d</xliff:g>, <xliff:g id="TIME">%2$s</xliff:g>"</string>
     <string name="accessibility_battery_level_charging" msgid="8892191177774027364">"Акумулятар зараджаецца. Бягучы зарад: <xliff:g id="BATTERY_PERCENTAGE">%d</xliff:g>%%."</string>
+    <string name="accessibility_battery_level_charging_paused" msgid="3560711496775146763">"Працэнт зараду акумулятара: <xliff:g id="PERCENTAGE">%d</xliff:g>. Дзеля зберажэння акумулятара зарадка прыпынена."</string>
+    <string name="accessibility_battery_level_charging_paused_with_estimate" msgid="2223541217743647858">"Працэнт зараду акумулятара: <xliff:g id="PERCENTAGE">%1$d</xliff:g>, <xliff:g id="TIME">%2$s</xliff:g>. Дзеля зберажэння акумулятара зарадка прыпынена."</string>
     <string name="accessibility_overflow_action" msgid="8555835828182509104">"Паказаць усе апавяшчэнні"</string>
     <string name="accessibility_tty_enabled" msgid="1123180388823381118">"TeleTypewriter уключаны."</string>
     <string name="accessibility_ringer_vibrate" msgid="6261841170896561364">"Выклік з вібрацыяй."</string>
@@ -241,7 +253,7 @@
     <string name="quick_settings_brightness_dialog_title" msgid="4980669966716685588">"Яркасць"</string>
     <string name="quick_settings_inversion_label" msgid="3501527749494755688">"Інверсія колераў"</string>
     <string name="quick_settings_color_correction_label" msgid="5636617913560474664">"Карэкцыя колераў"</string>
-    <string name="quick_settings_more_user_settings" msgid="1064187451100861954">"Налады карыстальніка"</string>
+    <string name="quick_settings_more_user_settings" msgid="7634653308485206306">"Кіраваць карыстальнікамі"</string>
     <string name="quick_settings_done" msgid="2163641301648855793">"Гатова"</string>
     <string name="quick_settings_close_user_panel" msgid="5599724542275896849">"Закрыць"</string>
     <string name="quick_settings_connected" msgid="3873605509184830379">"Падлучана"</string>
@@ -312,6 +324,8 @@
     <string name="keyguard_face_successful_unlock_press_alt_1" msgid="5715461103913071474">"Разблакіравана распазнаваннем твару. Націсніце, каб адкрыць."</string>
     <string name="keyguard_face_successful_unlock_press_alt_2" msgid="8310787946357120406">"Твар распазнаны. Націсніце, каб адкрыць."</string>
     <string name="keyguard_face_successful_unlock_press_alt_3" msgid="7219030481255573962">"Твар распазнаны. Для адкрыцця націсніце значок разблакіроўкі."</string>
+    <string name="keyguard_face_successful_unlock" msgid="4203999851465708287">"Разблакіравана распазнаваннем твару"</string>
+    <string name="keyguard_face_successful_unlock_alt1" msgid="5853906076353839628">"Твар распазнаны"</string>
   <string-array name="udfps_accessibility_touch_hints">
     <item msgid="1901953991150295169">"Перамясціце палец улева"</item>
     <item msgid="5558598599408514296">"Перамясціце палец ніжэй"</item>
@@ -337,8 +351,9 @@
     <string name="keyguard_indication_charging_time" msgid="6492711711891071502">"<xliff:g id="PERCENTAGE">%2$s</xliff:g> • Ідзе зарадка • Поўны зарад праз <xliff:g id="CHARGING_TIME_LEFT">%1$s</xliff:g>"</string>
     <string name="keyguard_indication_charging_time_fast" msgid="8390311020603859480">"<xliff:g id="PERCENTAGE">%2$s</xliff:g> • Ідзе хуткая зарадка • Поўны зарад праз <xliff:g id="CHARGING_TIME_LEFT">%1$s</xliff:g>"</string>
     <string name="keyguard_indication_charging_time_slowly" msgid="301936949731705417">"<xliff:g id="PERCENTAGE">%2$s</xliff:g> • Ідзе павольная зарадка • Поўны зарад праз <xliff:g id="CHARGING_TIME_LEFT">%1$s</xliff:g>"</string>
-    <string name="keyguard_indication_charging_time_dock" msgid="6150404291427377863">"<xliff:g id="PERCENTAGE">%2$s</xliff:g> • Ідзе зарадка праз док-станцыю • Поўнасцю зарадзіцца праз <xliff:g id="CHARGING_TIME_LEFT">%1$s</xliff:g>"</string>
+    <string name="keyguard_indication_charging_time_dock" msgid="3149328898931741271">"<xliff:g id="PERCENTAGE">%2$s</xliff:g> • Ідзе зарадка • Поўны зарад праз <xliff:g id="CHARGING_TIME_LEFT">%1$s</xliff:g>"</string>
     <string name="accessibility_multi_user_switch_switcher" msgid="5330448341251092660">"Перайсці да іншага карыстальніка"</string>
+    <string name="accessibility_multi_user_list_switcher" msgid="8574105376229857407">"высоўнае меню"</string>
     <string name="guest_exit_guest_dialog_message" msgid="8183450985628495709">"Усе праграмы і даныя гэтага сеанса будуць выдалены."</string>
     <string name="guest_wipe_session_title" msgid="7147965814683990944">"З вяртаннем, госць!"</string>
     <string name="guest_wipe_session_message" msgid="3393823610257065457">"Хочаце працягнуць сеанс?"</string>
@@ -356,6 +371,18 @@
     <string name="media_projection_dialog_service_text" msgid="958000992162214611">"Падчас запісу ці трансляцыі служба, якая забяспечвае работу гэтай функцыі, будзе мець доступ да ўсёй інфармацыі, адлюстраванай на экране вашай прылады, ці той, якая праз яе прайграецца. Гэта інфармацыя ўключае паролі, звесткі пра аплату, фота, паведамленні і аўдыя, якое вы прайграяце."</string>
     <string name="media_projection_dialog_service_title" msgid="2888507074107884040">"Пачаць запіс або трансляцыю?"</string>
     <string name="media_projection_dialog_title" msgid="3316063622495360646">"Пачаць запіс або трансляцыю з дапамогай праграмы \"<xliff:g id="APP_SEEKING_PERMISSION">%s</xliff:g>\"?"</string>
+    <string name="media_projection_permission_dialog_title" msgid="7130975432309482596">"Дазволіць праграме \"<xliff:g id="APP_SEEKING_PERMISSION">%s</xliff:g>\" абагульваць ці запісваць змесціва?"</string>
+    <string name="media_projection_permission_dialog_option_entire_screen" msgid="392086473225692983">"Увесь экран"</string>
+    <string name="media_projection_permission_dialog_option_single_app" msgid="1591110238124910521">"Адна праграма"</string>
+    <string name="media_projection_permission_dialog_warning_entire_screen" msgid="3989078820637452717">"Калі пачынаецца абагульванне, запіс ці трансляцыя, <xliff:g id="APP_SEEKING_PERMISSION">%s</xliff:g> атрымлівае доступ да ўсяго змесціва, якое паказваецца на экране ці прайграецца на прыладзе. Таму прадухіліце паказ пароляў, плацежных рэквізітаў, паведамленняў і іншай канфідэнцыяльнай інфармацыі."</string>
+    <string name="media_projection_permission_dialog_warning_single_app" msgid="1659532781536753059">"Калі пачынаецца абагульванне, запіс ці трансляцыя змесціва праграмы, <xliff:g id="APP_SEEKING_PERMISSION">%s</xliff:g> атрымлівае доступ да ўсяго змесціва, якое паказваецца ці прайграецца ў праграме. Таму прадухіліце паказ пароляў, плацежных рэквізітаў, паведамленняў і іншай канфідэнцыяльнай інфармацыі."</string>
+    <string name="media_projection_permission_dialog_continue" msgid="1827799658916736006">"Далей"</string>
+    <string name="media_projection_permission_app_selector_title" msgid="894251621057480704">"Абагульванне або запіс праграмы"</string>
+    <string name="media_projection_permission_dialog_system_service_title" msgid="6827129613741303726">"Дазволіць гэтай праграме абагульваць або запісваць змесціва?"</string>
+    <string name="media_projection_permission_dialog_system_service_warning_entire_screen" msgid="8801616203805837575">"Калі пачынаецца абагульванне, запіс ці трансляцыя, гэта праграма атрымлівае доступ да ўсяго змесціва, якое паказваецца на экране ці прайграецца на прыладзе. Таму прадухіліце паказ пароляў, звестак пра плацяжы, паведамленняў і іншай канфідэнцыяльнай інфармацыі."</string>
+    <string name="media_projection_permission_dialog_system_service_warning_single_app" msgid="543310680568419338">"Калі пачынаецца абагульванне, запіс ці трансляцыя змесціва праграмы, гэта праграма атрымлівае доступ да ўсяго змесціва, якое ў ёй паказваецца ці прайграецца. Таму прадухіліце паказ пароляў, звестак пра плацяжы, паведамленняў і іншай канфідэнцыяльнай інфармацыі."</string>
+    <string name="screen_capturing_disabled_by_policy_dialog_title" msgid="2113331792064527203">"Заблакіравана вашым ІТ-адміністратарам"</string>
+    <string name="screen_capturing_disabled_by_policy_dialog_description" msgid="6015975736747696431">"Здыманне экрана адключана згодна з палітыкай прылады"</string>
     <string name="clear_all_notifications_text" msgid="348312370303046130">"Ачысціць усё"</string>
     <string name="manage_notifications_text" msgid="6885645344647733116">"Кіраваць"</string>
     <string name="manage_notifications_history_text" msgid="57055985396576230">"Гісторыя"</string>
@@ -367,6 +394,8 @@
     <string name="dnd_suppressing_shade_text" msgid="5588252250634464042">"Паказ апавяшчэнняў прыпынены ў рэжыме \"Не турбаваць\""</string>
     <string name="media_projection_action_text" msgid="3634906766918186440">"Пачаць зараз"</string>
     <string name="empty_shade_text" msgid="8935967157319717412">"Апавяшчэнняў няма"</string>
+    <string name="no_unseen_notif_text" msgid="395512586119868682">"Няма новых апавяшчэнняў"</string>
+    <string name="unlock_to_see_notif_text" msgid="7439033907167561227">"Разблакіруйце, каб убачыць усе апавяшчэнні"</string>
     <string name="quick_settings_disclosure_parental_controls" msgid="2114102871438223600">"Гэта прылада знаходзіцца пад кантролем бацькоў"</string>
     <string name="quick_settings_disclosure_management_monitoring" msgid="8231336875820702180">"Ваша арганізацыя валодае гэтай прыладай і можа кантраляваць сеткавы трафік"</string>
     <string name="quick_settings_disclosure_named_management_monitoring" msgid="2831423806103479812">"<xliff:g id="ORGANIZATION_NAME">%1$s</xliff:g> валодае гэтай прыладай і можа кантраляваць сеткавы трафік"</string>
@@ -416,6 +445,8 @@
     <string name="volume_odi_captions_content_description" msgid="4172765742046013630">"Накладанне субцітраў"</string>
     <string name="volume_odi_captions_hint_enable" msgid="2073091194012843195">"уключыць"</string>
     <string name="volume_odi_captions_hint_disable" msgid="2518846326748183407">"адключыць"</string>
+    <string name="sound_settings" msgid="8874581353127418308">"Гук і вібрацыя"</string>
+    <string name="volume_panel_dialog_settings_button" msgid="2513228491513390310">"Налады"</string>
     <string name="screen_pinning_title" msgid="9058007390337841305">"Праграма замацавана"</string>
     <string name="screen_pinning_description" msgid="8699395373875667743">"Будзе паказвацца, пакуль не адмацуеце. Каб адмацаваць, краніце і ўтрымлівайце кнопкі \"Назад\" і \"Агляд\"."</string>
     <string name="screen_pinning_description_recents_invisible" msgid="4564466648700390037">"Будзе паказвацца, пакуль не адмацуеце. Каб адмацаваць, націсніце і ўтрымлівайце кнопкі \"Назад\" і \"Галоўны экран\"."</string>
@@ -469,7 +500,8 @@
     <string name="wallet_secondary_label_device_locked" msgid="5175862019125370506">"Разблакіраваць для выкарыстання"</string>
     <string name="wallet_error_generic" msgid="257704570182963611">"Узнікла праблема з загрузкай вашых карт. Паўтарыце спробу пазней"</string>
     <string name="wallet_lockscreen_settings_label" msgid="3539105300870383570">"Налады экрана блакіроўкі"</string>
-    <string name="qr_code_scanner_title" msgid="5290201053875420785">"Сканіраванне QR-кода"</string>
+    <string name="qr_code_scanner_title" msgid="1938155688725760702">"Сканер QR-кодаў"</string>
+    <string name="qr_code_scanner_updating_secondary_label" msgid="8344598017007876352">"Абнаўленне…"</string>
     <string name="status_bar_work" msgid="5238641949837091056">"Працоўны профіль"</string>
     <string name="status_bar_airplane" msgid="4848702508684541009">"Рэжым палёту"</string>
     <string name="zen_alarm_warning" msgid="7844303238486849503">"Вы не пачуеце наступны будзільнік <xliff:g id="WHEN">%1$s</xliff:g>"</string>
@@ -591,7 +623,7 @@
     <string name="switch_bar_on" msgid="1770868129120096114">"Уключана"</string>
     <string name="switch_bar_off" msgid="5669805115416379556">"Выключана"</string>
     <string name="tile_unavailable" msgid="3095879009136616920">"Недаступна"</string>
-    <string name="tile_disabled" msgid="373212051546573069">"Выключана"</string>
+    <string name="accessibility_tile_disabled_by_policy_action_description" msgid="6958422730461646926">"даведацца больш"</string>
     <string name="nav_bar" msgid="4642708685386136807">"Панэль навігацыі"</string>
     <string name="nav_bar_layout" msgid="4716392484772899544">"Раскладка"</string>
     <string name="left_nav_bar_button_type" msgid="2634852842345192790">"Дадатковы тып кнопкі \"ўлева\""</string>
@@ -664,8 +696,8 @@
     <string name="high_temp_notif_message" msgid="1277346543068257549">"Некаторыя функцыі абмежаваны, пакуль тэлефон не астыне.\nНацісніце, каб даведацца больш"</string>
     <string name="high_temp_dialog_message" msgid="3793606072661253968">"Ваш тэлефон аўтаматычна паспрабуе астыць. Вы можаце па-ранейшаму карыстацца сваім тэлефонам, але ён можа працаваць больш павольна.\n\nПасля таго як ваш тэлефон астыне, ён будзе працаваць у звычайным рэжыме."</string>
     <string name="high_temp_dialog_help_text" msgid="7380171287943345858">"Глядзець паэтапную дапамогу"</string>
-    <string name="high_temp_alarm_title" msgid="2359958549570161495">"Адключыце зарадную прыладу"</string>
-    <string name="high_temp_alarm_notify_message" msgid="7186272817783835089">"Узнікла праблема з зарадкай гэтай прылады. Адключыце адаптар сілкавання і праверце, ці не нагрэўся кабель."</string>
+    <string name="high_temp_alarm_title" msgid="8654754369605452169">"Адключыце прыладу"</string>
+    <string name="high_temp_alarm_notify_message" msgid="3917622943609118956">"Ваша прылада моцна награваецца ў месцы, дзе знаходзіцца зарадны порт. Калі яна падключана да зараднай прылады ці USB-прылады, адключыце яе і будзьце асцярожнымі з кабелем, які таксама можа награвацца."</string>
     <string name="high_temp_alarm_help_care_steps" msgid="5017002218341329566">"Глядзець паэтапную дапамогу"</string>
     <string name="lockscreen_shortcut_left" msgid="1238765178956067599">"Ярлык \"улева\""</string>
     <string name="lockscreen_shortcut_right" msgid="4138414674531853719">"Ярлык \"управа\""</string>
@@ -692,7 +724,7 @@
     <string name="instant_apps_title" msgid="8942706782103036910">"Праграма \"<xliff:g id="APP">%1$s</xliff:g>\" запушчана"</string>
     <string name="instant_apps_message" msgid="6112428971833011754">"Праграма адкрыта без усталёўкі."</string>
     <string name="instant_apps_message_with_help" msgid="1816952263531203932">"Праграма адкрыта без усталёўкі. Націсніце, каб даведацца больш."</string>
-    <string name="app_info" msgid="5153758994129963243">"Звесткі пра праграму"</string>
+    <string name="app_info" msgid="5153758994129963243">"Звесткі аб праграме"</string>
     <string name="go_to_web" msgid="636673528981366511">"Перайсці ў браўзер"</string>
     <string name="mobile_data" msgid="4564407557775397216">"Маб. перадача даных"</string>
     <string name="mobile_data_text_format" msgid="6806501540022589786">"<xliff:g id="ID_1">%1$s</xliff:g> — <xliff:g id="ID_2">%2$s</xliff:g>"</string>
@@ -700,6 +732,7 @@
     <string name="wifi_is_off" msgid="5389597396308001471">"Wi-Fi выключаны"</string>
     <string name="bt_is_off" msgid="7436344904889461591">"Bluetooth выключаны"</string>
     <string name="dnd_is_off" msgid="3185706903793094463">"Рэжым \"Не турбаваць\" выключаны"</string>
+    <string name="dnd_is_on" msgid="7009368176361546279">"Рэжым \"Не турбаваць\" уключаны"</string>
     <string name="qs_dnd_prompt_auto_rule" msgid="3535469468310002616">"Рэжым \"Не турбаваць\" быў уключаны аўтаматычным правілам (<xliff:g id="ID_1">%s</xliff:g>)."</string>
     <string name="qs_dnd_prompt_app" msgid="4027984447935396820">"Рэжым \"Не турбаваць\" быў уключаны праграмай (<xliff:g id="ID_1">%s</xliff:g>)."</string>
     <string name="qs_dnd_prompt_auto_rule_app" msgid="1841469944118486580">"Рэжым \"Не турбаваць\" быў уключаны аўтаматычным правілам ці праграмай."</string>
@@ -708,6 +741,10 @@
     <string name="mobile_data_disable_title" msgid="5366476131671617790">"Выключыць мабільную перадачу даных?"</string>
     <string name="mobile_data_disable_message" msgid="8604966027899770415">"У вас не будзе доступу да даных ці інтэрнэту праз аператара <xliff:g id="CARRIER">%s</xliff:g>. Інтэрнэт будзе даступны толькі праз Wi-Fi."</string>
     <string name="mobile_data_disable_message_default_carrier" msgid="6496033312431658238">"ваш аператар"</string>
+    <string name="auto_data_switch_disable_title" msgid="5146527155665190652">"Зноў пераключыцца на аператара \"<xliff:g id="CARRIER">%s</xliff:g>\"?"</string>
+    <string name="auto_data_switch_disable_message" msgid="5885533647399535852">"Мабільны інтэрнэт не будзе аўтаматычна пераключацца ў залежнасці ад даступнасці"</string>
+    <string name="auto_data_switch_dialog_negative_button" msgid="2370876875999891444">"Не, дзякуй"</string>
+    <string name="auto_data_switch_dialog_positive_button" msgid="8531782041263087564">"Так, пераключыцца"</string>
     <string name="touch_filtered_warning" msgid="8119511393338714836">"Праграма хавае запыт на дазвол, таму ваш адказ немагчыма спраўдзіць у Наладах."</string>
     <string name="slice_permission_title" msgid="3262615140094151017">"Дазволіць праграме <xliff:g id="APP_0">%1$s</xliff:g> паказваць зрэзы праграмы <xliff:g id="APP_2">%2$s</xliff:g>?"</string>
     <string name="slice_permission_text_1" msgid="6675965177075443714">"- Можа счытваць інфармацыю з праграмы <xliff:g id="APP">%1$s</xliff:g>"</string>
@@ -816,6 +853,8 @@
     <string name="media_move_closer_to_end_cast" msgid="6495907340926563656">"Падыдзіце бліжэй да прылады \"<xliff:g id="DEVICENAME">%1$s</xliff:g>\", каб прайграць на гэтай"</string>
     <string name="media_transfer_playing_different_device" msgid="7186806382609785610">"Прайграецца на прыладзе \"<xliff:g id="DEVICENAME">%1$s</xliff:g>\""</string>
     <string name="media_transfer_failed" msgid="7955354964610603723">"Нешта пайшло не так. Паўтарыце спробу."</string>
+    <!-- no translation found for media_transfer_loading (5544017127027152422) -->
+    <skip />
     <string name="controls_error_timeout" msgid="794197289772728958">"Неактыўна, праверце праграму"</string>
     <string name="controls_error_removed" msgid="6675638069846014366">"Не знойдзена"</string>
     <string name="controls_error_removed_title" msgid="1207794911208047818">"Кіраванне недаступнае"</string>
@@ -837,6 +876,8 @@
     <string name="media_output_dialog_button_stop_casting" msgid="6581379537930199189">"Спыніць трансляцыю"</string>
     <string name="media_output_dialog_accessibility_title" msgid="4681741064190167888">"Даступныя прылады для вываду аўдыя."</string>
     <string name="media_output_dialog_accessibility_seekbar" msgid="5332843993805568978">"Гучнасць"</string>
+    <string name="media_output_dialog_volume_percentage" msgid="1613984910585111798">"<xliff:g id="PERCENTAGE">%1$d</xliff:g>%%"</string>
+    <string name="media_output_group_title_speakers_and_displays" msgid="7169712332365659820">"Дынамікі і дысплэі"</string>
     <string name="media_output_first_broadcast_title" msgid="6292237789860753022">"Як адбываецца трансляцыя"</string>
     <string name="media_output_broadcast" msgid="3555580945878071543">"Трансляцыя"</string>
     <string name="media_output_first_notify_broadcast_message" msgid="6353857724136398494">"Людзі паблізу, у якіх ёсць прылады з Bluetooth, змогуць праслухваць мультымедыйнае змесціва, якое вы трансліруеце"</string>
@@ -898,6 +939,8 @@
     <string name="mobile_data_settings_title" msgid="3955246641380064901">"Мабільная перадача даных"</string>
     <string name="preference_summary_default_combination" msgid="8453246369903749670">"<xliff:g id="STATE">%1$s</xliff:g> / <xliff:g id="NETWORKMODE">%2$s</xliff:g>"</string>
     <string name="mobile_data_connection_active" msgid="944490013299018227">"Падключана"</string>
+    <string name="mobile_data_temp_connection_active" msgid="4590222725908806824">"Падключана часова"</string>
+    <string name="mobile_data_poor_connection" msgid="819617772268371434">"Нестабільнае падключэнне"</string>
     <string name="mobile_data_off_summary" msgid="3663995422004150567">"Мабільная перадача даных не ўключаецца аўтаматычна"</string>
     <string name="mobile_data_no_connection" msgid="1713872434869947377">"Няма падключэння"</string>
     <string name="non_carrier_network_unavailable" msgid="770049357024492372">"Больш няма даступных сетак"</string>
@@ -948,13 +991,29 @@
     <string name="dream_overlay_status_bar_camera_mic_off" msgid="3199425257833773569">"Камера і мікрафон выключаны"</string>
     <string name="dream_overlay_status_bar_notification_indicator" msgid="8091389255691081711">"{count,plural, =1{# апавяшчэнне}one{# апавяшчэнне}few{# апавяшчэнні}many{# апавяшчэнняў}other{# апавяшчэння}}"</string>
     <string name="dream_overlay_weather_complication_desc" msgid="824503662089783824">"<xliff:g id="WEATHER_CONDITION">%1$s</xliff:g>, <xliff:g id="TEMPERATURE">%2$s</xliff:g>"</string>
+    <string name="note_task_button_label" msgid="8718616095800343136">"Стварэнне нататак"</string>
     <string name="broadcasting_description_is_broadcasting" msgid="765627502786404290">"Перадача даных"</string>
     <string name="bt_le_audio_broadcast_dialog_title" msgid="3605428497924077811">"Спыніць трансляцыю праграмы \"<xliff:g id="APP_NAME">%1$s</xliff:g>\"?"</string>
     <string name="bt_le_audio_broadcast_dialog_sub_title" msgid="7889684551194225793">"Пры пераключэнні на праграму \"<xliff:g id="SWITCHAPP">%1$s</xliff:g>\" ці змяненні вываду бягучая трансляцыя спыняецца"</string>
     <string name="bt_le_audio_broadcast_dialog_switch_app" msgid="6098768269397105733">"Трансляцыя праграмы \"<xliff:g id="SWITCHAPP">%1$s</xliff:g>\""</string>
     <string name="bt_le_audio_broadcast_dialog_different_output" msgid="7885102097302562674">"Змяненне вываду"</string>
     <string name="bt_le_audio_broadcast_dialog_unknown_name" msgid="3791472237793443044">"Невядома"</string>
-    <string name="dream_date_complication_date_format" msgid="8191225366513860104">"EEE, d MMM"</string>
     <string name="dream_time_complication_12_hr_time_format" msgid="4691197486690291529">"h:mm"</string>
     <string name="dream_time_complication_24_hr_time_format" msgid="6248280719733640813">"kk:mm"</string>
+    <string name="keyguard_affordance_enablement_dialog_action_template" msgid="8164857863036314664">"Адкрыць праграму \"<xliff:g id="APPNAME">%1$s</xliff:g>\""</string>
+    <string name="keyguard_affordance_enablement_dialog_wallet_instruction_1" msgid="8439655049139819278">"• Праграма наладжана."</string>
+    <string name="keyguard_affordance_enablement_dialog_wallet_instruction_2" msgid="4321089250629477835">"• У Кашалёк дададзена хаця б адна картка."</string>
+    <string name="keyguard_affordance_enablement_dialog_qr_scanner_instruction" msgid="5355839079232119791">"• Усталявана праграма \"Камера\"."</string>
+    <string name="keyguard_affordance_enablement_dialog_home_instruction_1" msgid="8438311171750568633">"• Праграма наладжана."</string>
+    <string name="keyguard_affordance_enablement_dialog_home_instruction_2" msgid="8308525385889021652">"• Даступная хаця б адна прылада."</string>
+    <string name="keyguard_affordance_press_too_short" msgid="8145437175134998864">"Дакраніцеся і ўтрымлівайце ярлык"</string>
+    <string name="rear_display_bottom_sheet_cancel" msgid="3461468855493357248">"Скасаваць"</string>
+    <string name="rear_display_bottom_sheet_confirm" msgid="4383356544661421206">"Пераключыць"</string>
+    <string name="rear_display_fold_bottom_sheet_title" msgid="6081542277622721548">"Каб атрымаць лепшае сэлфі, раскрыйце тэлефон"</string>
+    <string name="rear_display_unfold_bottom_sheet_title" msgid="2137403802960396357">"Пераключыць на пярэднюю камеру для лепшага сэлфі?"</string>
+    <string name="rear_display_bottom_sheet_description" msgid="1852662982816810352">"Каб зрабіць шырэйшае фота з больш высокай раздзяляльнасцю, скарыстайце заднюю камеру."</string>
+    <string name="rear_display_bottom_sheet_warning" msgid="800995919558238930"><b>"✱ Гэты экран будзе выключаны"</b></string>
+    <string name="rear_display_accessibility_folded_animation" msgid="1538121649587978179">"Складная прылада ў раскладзеным выглядзе"</string>
+    <string name="rear_display_accessibility_unfolded_animation" msgid="1946153682258289040">"Перавернутая складная прылада"</string>
+    <string name="stylus_battery_low" msgid="7134370101603167096">"Нізкі ўзровень зараду пяра"</string>
 </resources>

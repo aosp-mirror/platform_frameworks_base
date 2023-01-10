@@ -19,33 +19,35 @@ package com.android.systemui.shade
 import android.testing.AndroidTestingRunner
 import android.testing.TestableLooper.RunWithLooper
 import android.view.MotionEvent
+import android.view.ViewGroup
 import androidx.test.filters.SmallTest
+import com.android.keyguard.KeyguardHostViewController
 import com.android.keyguard.LockIconViewController
+import com.android.keyguard.dagger.KeyguardBouncerComponent
+import com.android.systemui.R
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.classifier.FalsingCollectorFake
 import com.android.systemui.dock.DockManager
+import com.android.systemui.flags.FeatureFlags
 import com.android.systemui.keyguard.KeyguardUnlockAnimationController
-import com.android.systemui.lowlightclock.LowLightClockController
+import com.android.systemui.keyguard.ui.viewmodel.KeyguardBouncerViewModel
+import com.android.systemui.shade.NotificationShadeWindowView.InteractionEventHandler
 import com.android.systemui.statusbar.LockscreenShadeTransitionController
+import com.android.systemui.statusbar.NotificationInsetsController
 import com.android.systemui.statusbar.NotificationShadeDepthController
 import com.android.systemui.statusbar.NotificationShadeWindowController
 import com.android.systemui.statusbar.SysuiStatusBarStateController
 import com.android.systemui.statusbar.notification.stack.AmbientState
 import com.android.systemui.statusbar.notification.stack.NotificationStackScrollLayoutController
-import com.android.systemui.shade.NotificationShadeWindowView.InteractionEventHandler
 import com.android.systemui.statusbar.phone.CentralSurfaces
 import com.android.systemui.statusbar.phone.PhoneStatusBarViewController
 import com.android.systemui.statusbar.phone.StatusBarKeyguardViewManager
-import com.android.systemui.statusbar.phone.panelstate.PanelExpansionStateManager
 import com.android.systemui.statusbar.window.StatusBarWindowStateController
-import com.android.systemui.tuner.TunerService
 import com.google.common.truth.Truth.assertThat
-import java.util.Optional
 import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.mockito.ArgumentCaptor
-import org.mockito.ArgumentMatchers
 import org.mockito.Mock
 import org.mockito.Mockito.anyFloat
 import org.mockito.Mockito.never
@@ -53,14 +55,12 @@ import org.mockito.Mockito.verify
 import org.mockito.Mockito.`when` as whenever
 import org.mockito.MockitoAnnotations
 
+@SmallTest
 @RunWith(AndroidTestingRunner::class)
 @RunWithLooper(setAsMainLooper = true)
-@SmallTest
 class NotificationShadeWindowViewControllerTest : SysuiTestCase() {
     @Mock
     private lateinit var view: NotificationShadeWindowView
-    @Mock
-    private lateinit var tunserService: TunerService
     @Mock
     private lateinit var sysuiStatusBarStateController: SysuiStatusBarStateController
     @Mock
@@ -76,7 +76,11 @@ class NotificationShadeWindowViewControllerTest : SysuiTestCase() {
     @Mock
     private lateinit var keyguardUnlockAnimationController: KeyguardUnlockAnimationController
     @Mock
+    private lateinit var featureFlags: FeatureFlags
+    @Mock
     private lateinit var ambientState: AmbientState
+    @Mock
+    private lateinit var keyguardBouncerViewModel: KeyguardBouncerViewModel
     @Mock
     private lateinit var stackScrollLayoutController: NotificationStackScrollLayoutController
     @Mock
@@ -90,7 +94,13 @@ class NotificationShadeWindowViewControllerTest : SysuiTestCase() {
     @Mock
     private lateinit var phoneStatusBarViewController: PhoneStatusBarViewController
     @Mock
-    private lateinit var lowLightClockController: LowLightClockController
+    private lateinit var pulsingGestureListener: PulsingGestureListener
+    @Mock
+    private lateinit var notificationInsetsController: NotificationInsetsController
+    @Mock lateinit var keyguardBouncerComponentFactory: KeyguardBouncerComponent.Factory
+    @Mock lateinit var keyguardBouncerContainer: ViewGroup
+    @Mock lateinit var keyguardBouncerComponent: KeyguardBouncerComponent
+    @Mock lateinit var keyguardHostViewController: KeyguardHostViewController
 
     private lateinit var interactionEventHandlerCaptor: ArgumentCaptor<InteractionEventHandler>
     private lateinit var interactionEventHandler: InteractionEventHandler
@@ -101,26 +111,28 @@ class NotificationShadeWindowViewControllerTest : SysuiTestCase() {
     fun setUp() {
         MockitoAnnotations.initMocks(this)
         whenever(view.bottom).thenReturn(VIEW_BOTTOM)
-
         underTest = NotificationShadeWindowViewController(
             lockscreenShadeTransitionController,
             FalsingCollectorFake(),
-            tunserService,
             sysuiStatusBarStateController,
             dockManager,
             notificationShadeDepthController,
             view,
             notificationPanelViewController,
-            PanelExpansionStateManager(),
+            ShadeExpansionStateManager(),
             stackScrollLayoutController,
             statusBarKeyguardViewManager,
             statusBarWindowStateController,
             lockIconViewController,
-            Optional.of(lowLightClockController),
             centralSurfaces,
             notificationShadeWindowController,
             keyguardUnlockAnimationController,
-            ambientState
+            notificationInsetsController,
+            ambientState,
+            pulsingGestureListener,
+            featureFlags,
+            keyguardBouncerViewModel,
+            keyguardBouncerComponentFactory
         )
         underTest.setupExpandedStatusBar()
 
@@ -255,28 +267,15 @@ class NotificationShadeWindowViewControllerTest : SysuiTestCase() {
     }
 
     @Test
-    fun testLowLightClockAttachedWhenExpandedStatusBarSetup() {
-        verify(lowLightClockController).attachLowLightClockView(ArgumentMatchers.any())
+    fun testGetBouncerContainer() {
+        underTest.bouncerContainer
+        verify(view).findViewById<ViewGroup>(R.id.keyguard_bouncer_container)
     }
 
     @Test
-    fun testLowLightClockShownWhenDozing() {
-        underTest.setDozing(true)
-        verify(lowLightClockController).showLowLightClock(true)
-    }
-
-    @Test
-    fun testLowLightClockDozeTimeTickCalled() {
-        underTest.dozeTimeTick()
-        verify(lowLightClockController).dozeTimeTick()
-    }
-
-    @Test
-    fun testLowLightClockHiddenWhenNotDozing() {
-        underTest.setDozing(true)
-        verify(lowLightClockController).showLowLightClock(true)
-        underTest.setDozing(false)
-        verify(lowLightClockController).showLowLightClock(false)
+    fun testGetKeyguardMessageArea() {
+        underTest.keyguardMessageArea
+        verify(view).findViewById<ViewGroup>(R.id.keyguard_message_area)
     }
 }
 

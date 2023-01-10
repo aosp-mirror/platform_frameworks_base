@@ -125,9 +125,9 @@
     <string name="bluetooth_profile_a2dp_high_quality" msgid="4739440941324792775">"HD ઑડિયો: <xliff:g id="CODEC_NAME">%1$s</xliff:g>"</string>
     <string name="bluetooth_profile_a2dp_high_quality_unknown_codec" msgid="2477639096903834374">"HD ઑડિયો"</string>
     <string name="bluetooth_profile_hearing_aid" msgid="58154575573984914">"શ્રવણ યંત્રો"</string>
-    <string name="bluetooth_profile_le_audio" msgid="5158149987518342036">"LE_AUDIO"</string>
+    <string name="bluetooth_profile_le_audio" msgid="3237854988278539061">"LE ઑડિયો"</string>
     <string name="bluetooth_hearing_aid_profile_summary_connected" msgid="8191273236809964030">"શ્રવણ યંત્રો સાથે કનેક્ટ કરેલું છે"</string>
-    <string name="bluetooth_le_audio_profile_summary_connected" msgid="3162538609379333442">"LE_AUDIO સાથે કનેક્ટેડ છે"</string>
+    <string name="bluetooth_le_audio_profile_summary_connected" msgid="6916226974453480650">"LE ઑડિયોથી કનેક્ટેડ"</string>
     <string name="bluetooth_a2dp_profile_summary_connected" msgid="7422607970115444153">"મીડિયા ઑડિઓ સાથે કનેક્ટ કર્યુ"</string>
     <string name="bluetooth_headset_profile_summary_connected" msgid="2420981566026949688">"ફોન ઑડિઓ સાથે કનેક્ટ થયાં"</string>
     <string name="bluetooth_opp_profile_summary_connected" msgid="2393521801478157362">"ફાઇલ સ્થાનાંતરણ સેવાથી કનેક્ટ થયાં"</string>
@@ -408,6 +408,7 @@
     <string name="force_resizable_activities_summary" msgid="2490382056981583062">"મૅનિફેસ્ટ મૂલ્યોને ધ્યાનમાં લીધા સિવાય, તમામ પ્રવૃત્તિઓને મલ્ટી-વિન્ડો માટે ફરીથી કદ બદલી શકે તેવી બનાવો."</string>
     <string name="enable_freeform_support" msgid="7599125687603914253">"ફ્રીફોર્મ વિન્ડો ચાલુ કરો"</string>
     <string name="enable_freeform_support_summary" msgid="1822862728719276331">"પ્રાયોગિક ફ્રીફોર્મ વિન્ડો માટે સપોર્ટને ચાલુ કરો."</string>
+    <string name="desktop_mode" msgid="2389067840550544462">"ડેસ્કટૉપ મોડ"</string>
     <string name="local_backup_password_title" msgid="4631017948933578709">"ડેસ્કટૉપ બૅકઅપ પાસવર્ડ"</string>
     <string name="local_backup_password_summary_none" msgid="7646898032616361714">"ડેસ્કટૉપ સંપૂર્ણ બૅકઅપ હાલમાં સુરક્ષિત નથી"</string>
     <string name="local_backup_password_summary_change" msgid="1707357670383995567">"ડેસ્કટૉપ સંપૂર્ણ બેકઅપ્સ માટેનો પાસવર્ડ બદલવા અથવા દૂર કરવા માટે ટૅચ કરો"</string>
@@ -476,13 +477,14 @@
     <string name="power_charging" msgid="6727132649743436802">"<xliff:g id="LEVEL">%1$s</xliff:g> - <xliff:g id="STATE">%2$s</xliff:g>"</string>
     <string name="power_remaining_charging_duration_only" msgid="8085099012811384899">"પૂર્ણ ચાર્જ થવામાં <xliff:g id="TIME">%1$s</xliff:g> બાકી છે"</string>
     <string name="power_charging_duration" msgid="6127154952524919719">"<xliff:g id="LEVEL">%1$s</xliff:g> - પૂર્ણ ચાર્જ થવામાં <xliff:g id="TIME">%2$s</xliff:g> બાકી છે"</string>
-    <string name="power_charging_limited" msgid="7956120998372505295">"<xliff:g id="LEVEL">%1$s</xliff:g> - ચાર્જ કરવાનું થોડા સમય માટે મર્યાદિત કરવામાં આવ્યું છે"</string>
+    <string name="power_charging_limited" msgid="8202147604844938236">"<xliff:g id="LEVEL">%1$s</xliff:g> - ચાર્જિંગ ઑપ્ટિમાઇઝ કરવામાં આવ્યું છે"</string>
+    <string name="power_charging_future_paused" msgid="4730177778538118032">"<xliff:g id="LEVEL">%1$s</xliff:g> - ચાર્જિંગ ઑપ્ટિમાઇઝ કરવામાં આવ્યું છે"</string>
     <string name="battery_info_status_unknown" msgid="268625384868401114">"અજાણ્યું"</string>
     <string name="battery_info_status_charging" msgid="4279958015430387405">"ચાર્જ થઈ રહ્યું છે"</string>
     <string name="battery_info_status_charging_fast" msgid="8027559755902954885">"ઝડપથી ચાર્જ થાય છે"</string>
     <string name="battery_info_status_charging_slow" msgid="3190803837168962319">"ધીમેથી ચાર્જ થાય છે"</string>
     <string name="battery_info_status_charging_wireless" msgid="8924722966861282197">"વાયરલેસથી ચાર્જિંગ"</string>
-    <string name="battery_info_status_charging_dock" msgid="3554147903321236585">"ડૉકથી ચાર્જ થઈ રહ્યું છે"</string>
+    <string name="battery_info_status_charging_dock" msgid="8573274094093364791">"ચાર્જ થઈ રહ્યું છે"</string>
     <string name="battery_info_status_discharging" msgid="6962689305413556485">"ચાર્જ થઈ રહ્યું નથી"</string>
     <string name="battery_info_status_not_charging" msgid="3371084153747234837">"કનેક્ટ કરેલું છે, પણ ચાર્જ થઈ રહ્યું નથી"</string>
     <string name="battery_info_status_full" msgid="1339002294876531312">"ચાર્જ થયું"</string>
@@ -655,13 +657,6 @@
     <string name="accessibility_ethernet_disconnected" msgid="2832501530856497489">"ઇથરનેટ ડિસ્કનેક્ટ થયું."</string>
     <string name="accessibility_ethernet_connected" msgid="6175942685957461563">"ઇથરનેટ."</string>
     <string name="accessibility_no_calling" msgid="3540827068323895748">"કોઈ કૉલિંગ નહીં."</string>
-    <string name="dream_complication_title_time" msgid="701747800712893499">"સમય"</string>
-    <string name="dream_complication_title_date" msgid="8661176085446135789">"તારીખ"</string>
-    <string name="dream_complication_title_weather" msgid="598609151677172783">"હવામાન"</string>
-    <string name="dream_complication_title_aqi" msgid="4587552608957834110">"હવાની ક્વૉલિટી"</string>
-    <string name="dream_complication_title_cast_info" msgid="4038776652841885084">"કાસ્ટ વિશેની માહિતી"</string>
-    <!-- no translation found for dream_complication_title_home_controls (9153381632476738811) -->
-    <skip />
     <string name="avatar_picker_title" msgid="8492884172713170652">"પ્રોફાઇલ ફોટો પસંદ કરો"</string>
     <string name="default_user_icon_description" msgid="6554047177298972638">"ડિફૉલ્ટ વપરાશકર્તાનું આઇકન"</string>
     <string name="physical_keyboard_title" msgid="4811935435315835220">"ભૌતિક કીબોર્ડ"</string>

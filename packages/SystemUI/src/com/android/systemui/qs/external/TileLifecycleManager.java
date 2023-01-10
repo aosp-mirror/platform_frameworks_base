@@ -36,6 +36,7 @@ import android.util.ArraySet;
 import android.util.Log;
 
 import androidx.annotation.Nullable;
+import androidx.annotation.WorkerThread;
 
 import com.android.systemui.broadcast.BroadcastDispatcher;
 import com.android.systemui.dagger.qualifiers.Main;
@@ -127,6 +128,10 @@ public class TileLifecycleManager extends BroadcastReceiver implements
         TileLifecycleManager create(Intent intent, UserHandle userHandle);
     }
 
+    public int getUserId() {
+        return mUser.getIdentifier();
+    }
+
     public ComponentName getComponent() {
         return mIntent.getComponent();
     }
@@ -178,6 +183,10 @@ public class TileLifecycleManager extends BroadcastReceiver implements
         setBindService(true);
     }
 
+    /**
+     * Binds or unbinds to IQSService
+     */
+    @WorkerThread
     public void setBindService(boolean bind) {
         if (mBound && mUnbindImmediate) {
             // If we are already bound and expecting to unbind, this means we should stay bound
@@ -506,14 +515,5 @@ public class TileLifecycleManager extends BroadcastReceiver implements
 
     public interface TileChangeListener {
         void onTileChanged(ComponentName tile);
-    }
-
-    public static boolean isTileAdded(Context context, ComponentName component) {
-        return context.getSharedPreferences(TILES, 0).getBoolean(component.flattenToString(), false);
-    }
-
-    public static void setTileAdded(Context context, ComponentName component, boolean added) {
-        context.getSharedPreferences(TILES, 0).edit().putBoolean(component.flattenToString(),
-                added).commit();
     }
 }

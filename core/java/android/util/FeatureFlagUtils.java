@@ -52,18 +52,18 @@ public class FeatureFlagUtils {
     public static final String SETTINGS_SUPPORT_LARGE_SCREEN = "settings_support_large_screen";
 
     /**
-     * Support per app's language selection
-     * @hide
-     */
-    public static final String SETTINGS_APP_LANGUAGE_SELECTION = "settings_app_language_selection";
-
-    /**
      * Support locale opt-out and opt-in switch for per app's language.
      * @hide
      */
     public static final String SETTINGS_APP_LOCALE_OPT_IN_ENABLED =
             "settings_app_locale_opt_in_enabled";
 
+    /**
+     * Launch the Volume panel in SystemUI.
+     * @hide
+     */
+    public static final String SETTINGS_VOLUME_PANEL_IN_SYSTEMUI =
+            "settings_volume_panel_in_systemui";
 
     /** @hide */
     public static final String SETTINGS_ENABLE_MONITOR_PHANTOM_PROCS =
@@ -82,16 +82,6 @@ public class FeatureFlagUtils {
      */
     public static final String SETTINGS_HIDE_SECOND_LAYER_PAGE_NAVIGATE_UP_BUTTON_IN_TWO_PANE =
             "settings_hide_second_layer_page_navigate_up_button_in_two_pane";
-
-    /** Flag to enable/disable guest mode UX changes as mentioned in b/214031645
-     *  @hide
-     */
-    public static final String SETTINGS_GUEST_MODE_UX_CHANGES = "settings_guest_mode_ux_changes";
-
-    /** Support Clear Calling feature.
-     *  @hide
-     */
-    public static final String SETTINGS_ENABLE_CLEAR_CALLING = "settings_enable_clear_calling";
 
     private static final Map<String, String> DEFAULT_FLAGS;
 
@@ -115,19 +105,16 @@ public class FeatureFlagUtils {
         DEFAULT_FLAGS.put(SETTINGS_ENABLE_SECURITY_HUB, "true");
         DEFAULT_FLAGS.put(SETTINGS_SUPPORT_LARGE_SCREEN, "true");
         DEFAULT_FLAGS.put("settings_search_always_expand", "true");
-        DEFAULT_FLAGS.put(SETTINGS_APP_LANGUAGE_SELECTION, "true");
         DEFAULT_FLAGS.put(SETTINGS_APP_LOCALE_OPT_IN_ENABLED, "true");
+        DEFAULT_FLAGS.put(SETTINGS_VOLUME_PANEL_IN_SYSTEMUI, "false");
         DEFAULT_FLAGS.put(SETTINGS_ENABLE_MONITOR_PHANTOM_PROCS, "true");
         DEFAULT_FLAGS.put(SETTINGS_APP_ALLOW_DARK_THEME_ACTIVATION_AT_BEDTIME, "true");
         DEFAULT_FLAGS.put(SETTINGS_HIDE_SECOND_LAYER_PAGE_NAVIGATE_UP_BUTTON_IN_TWO_PANE, "true");
-        DEFAULT_FLAGS.put(SETTINGS_GUEST_MODE_UX_CHANGES, "true");
-        DEFAULT_FLAGS.put(SETTINGS_ENABLE_CLEAR_CALLING, "false");
     }
 
     private static final Set<String> PERSISTENT_FLAGS;
     static {
         PERSISTENT_FLAGS = new HashSet<>();
-        PERSISTENT_FLAGS.add(SETTINGS_APP_LANGUAGE_SELECTION);
         PERSISTENT_FLAGS.add(SETTINGS_APP_LOCALE_OPT_IN_ENABLED);
         PERSISTENT_FLAGS.add(SETTINGS_SUPPORT_LARGE_SCREEN);
         PERSISTENT_FLAGS.add(SETTINGS_ENABLE_MONITOR_PHANTOM_PROCS);

@@ -571,7 +571,8 @@ public class Notifier {
     /**
      * Called when there has been user activity.
      */
-    public void onUserActivity(int displayGroupId, int event, int uid) {
+    public void onUserActivity(int displayGroupId, @PowerManager.UserActivityEvent int event,
+            int uid) {
         if (DEBUG) {
             Slog.d(TAG, "onUserActivity: event=" + event + ", uid=" + uid);
         }
@@ -712,7 +713,7 @@ public class Notifier {
         }
         TelephonyManager tm = mContext.getSystemService(TelephonyManager.class);
         tm.notifyUserActivity();
-        mPolicy.userActivity();
+        mPolicy.userActivity(displayGroupId, event);
         mFaceDownDetector.userActivity(event);
         mScreenUndimDetector.userActivity(displayGroupId);
     }

@@ -38,6 +38,7 @@ import com.android.internal.policy.IKeyguardDismissCallback;
 interface IActivityClientController {
     oneway void activityIdle(in IBinder token, in Configuration config, in boolean stopProfiling);
     oneway void activityResumed(in IBinder token, in boolean handleSplashScreenExit);
+    oneway void activityRefreshed(in IBinder token);
     /**
      * This call is not one-way because {@link #activityPaused()) is not one-way, or
      * the top-resumed-lost could be reported after activity paused.
@@ -60,8 +61,8 @@ interface IActivityClientController {
             in SizeConfigurationBuckets sizeConfigurations);
     boolean moveActivityTaskToBack(in IBinder token, boolean nonRoot);
     boolean shouldUpRecreateTask(in IBinder token, in String destAffinity);
-    boolean navigateUpTo(in IBinder token, in Intent target, int resultCode,
-            in Intent resultData);
+    boolean navigateUpTo(in IBinder token, in Intent target, in String resolvedType,
+            int resultCode, in Intent resultData);
     boolean releaseActivityInstance(in IBinder token);
     boolean finishActivity(in IBinder token, int code, in Intent data, int finishTask);
     boolean finishActivityAffinity(in IBinder token);
@@ -78,7 +79,11 @@ interface IActivityClientController {
     boolean willActivityBeVisible(in IBinder token);
     int getDisplayId(in IBinder activityToken);
     int getTaskForActivity(in IBinder token, in boolean onlyRoot);
-    int getTaskWindowingMode(in IBinder activityToken);
+    /**
+     * Returns the {@link Configuration} of the task which hosts the Activity, or {@code null} if
+     * the task {@link Configuration} cannot be obtained.
+     */
+    Configuration getTaskConfiguration(in IBinder activityToken);
     IBinder getActivityTokenBelow(IBinder token);
     ComponentName getCallingActivity(in IBinder token);
     String getCallingPackage(in IBinder token);
@@ -145,10 +150,9 @@ interface IActivityClientController {
     void unregisterRemoteAnimations(in IBinder token);
 
     /**
-     * Reports that an Activity received a back key press when there were no additional activities
-     * on the back stack.
+     * Reports that an Activity received a back key press.
      */
-    oneway void onBackPressedOnTaskRoot(in IBinder activityToken,
+    oneway void onBackPressed(in IBinder activityToken,
             in IRequestFinishCallback callback);
 
     /** Reports that the splash screen view has attached to activity.  */

@@ -337,9 +337,6 @@
      have been scrolled off-screen. -->
     <bool name="config_showNotificationShelf">true</bool>
 
-    <!-- Whether or not the notifications should always fade as they are dismissed. -->
-    <bool name="config_fadeNotificationsOnDismiss">false</bool>
-
     <!-- Whether or not the fade on the notification is based on the amount that it has been swiped
          off-screen. -->
     <bool name="config_fadeDependingOnAmountSwiped">false</bool>
@@ -488,6 +485,12 @@
     <!-- Whether to show a severe low battery dialog. -->
     <bool name="config_severe_battery_dialog">false</bool>
 
+    <!-- A path representing a shield. Will sometimes be displayed with the battery icon when
+         needed. This path is a 10px wide and 13px tall. -->
+    <string name="config_batterymeterShieldPath" translatable="false">
+        M5 0L0 1.88V6.19C0 9.35 2.13 12.29 5 13.01C7.87 12.29 10 9.35 10 6.19V1.88L5 0Z
+    </string>
+
     <!-- A path similar to frameworks/base/core/res/res/values/config.xml
       config_mainBuiltInDisplayCutout that describes a path larger than the exact path of a display
       cutout. If present as well as config_enableDisplayCutoutProtection is set to true, then
@@ -549,7 +552,7 @@
     <string name="config_preferredEmergencySosPackage" translatable="false"></string>
 
     <!-- Whether to show the side fps hint while on bouncer -->
-    <bool name="config_show_sidefps_hint_on_bouncer">false</bool>
+    <bool name="config_show_sidefps_hint_on_bouncer">true</bool>
 
     <!-- Whether to use the split 2-column notification shade -->
     <bool name="config_use_split_notification_shade">false</bool>
@@ -587,9 +590,6 @@
          when the double-press power gesture is used. Ignored if empty. -->
     <string translatable="false" name="config_cameraGesturePackage"></string>
 
-    <!-- Determines whether to allow the nav bar handle to be forced to be opaque. -->
-    <bool name="allow_force_nav_bar_handle_opaque">true</bool>
-
     <!-- Whether a transition of ACTIVITY_TYPE_DREAM to the home app should play a home sound
          effect -->
     <bool name="config_playHomeSoundAfterDream">false</bool>
@@ -614,11 +614,53 @@
          2 - Override the setting to never bypass keyguard -->
     <integer name="config_face_unlock_bypass_override">0</integer>
 
+    <!-- Messages that should NOT be shown to the user during face authentication on keyguard.
+         This includes both lockscreen and bouncer. This should be used to hide messages that may be
+         too chatty or messages that the user can't do much about. Entries are defined in
+         android.hardware.biometrics.face@1.0 types.hal.
+
+         Although not visibly shown to the user, these acquired messages (sent per face auth frame)
+         are still counted towards the total frames to determine whether a deferred message
+         (see config_face_help_msgs_defer_until_timeout) meets the threshold % of frames to show on
+         face timeout. -->
+     <integer-array name="config_face_acquire_device_entry_ignorelist" translatable="false" >
+    </integer-array>
+
+    <!-- Which face help messages to defer until face auth times out. If face auth is cancelled
+         or ends on another error, then the message is never surfaced. May also never surface
+         if it doesn't meet a threshold % of authentication frames specified by.
+         config_face_help_msgs_defer_until_timeout_threshold. -->
+    <integer-array name="config_face_help_msgs_defer_until_timeout">
+    </integer-array>
+
+    <!-- Percentage of face auth frames received required to show a deferred message at
+         FACE_ERROR_TIMEOUT. See config_face_help_msgs_defer_until_timeout for messages
+         that are deferred.-->
+    <item name="config_face_help_msgs_defer_until_timeout_threshold"
+          translatable="false" format="float" type="dimen">
+        .75
+    </item>
+
     <!-- Which face help messages to surface when fingerprint is also enrolled.
          Message ids correspond with the acquired ids in BiometricFaceConstants -->
     <integer-array name="config_face_help_msgs_when_fingerprint_enrolled">
-        <item>25</item>
-        <item>26</item>
+        <item>3</item> <!-- TOO_DARK -->
+        <item>25</item> <!-- DARK_GLASSES -->
+        <item>26</item> <!-- MOUTH_COVERING_DETECTED -->
+    </integer-array>
+
+    <!-- Which device wake-ups will trigger face auth. These values correspond with
+         PowerManager#WakeReason. -->
+    <integer-array name="config_face_auth_wake_up_triggers">
+        <item>1</item> <!-- WAKE_REASON_POWER_BUTTON -->
+        <item>4</item> <!-- WAKE_REASON_GESTURE -->
+        <item>6</item> <!-- WAKE_REASON_WAKE_KEY -->
+        <item>7</item> <!-- WAKE_REASON_WAKE_MOTION -->
+        <item>9</item> <!-- WAKE_REASON_LID -->
+        <item>10</item> <!-- WAKE_REASON_DISPLAY_GROUP_ADDED -->
+        <item>15</item> <!-- WAKE_REASON_TAP -->
+        <item>16</item> <!-- WAKE_REASON_LIFT -->
+        <item>17</item> <!-- WAKE_REASON_BIOMETRIC -->
     </integer-array>
 
     <!-- Whether the communal service should be enabled -->
@@ -629,11 +671,15 @@
 
     <!-- This value is used when calculating whether the device is in ambient light mode. It is
         light mode when the light sensor sample value exceeds above this value. -->
-    <integer name="config_ambientLightModeThreshold">10</integer>
+    <item name="config_ambientLightModeThreshold" translatable="false" format="float" type="dimen">
+        0.8
+    </item>
 
     <!-- This value is used when calculating whether the device is in ambient dark mode. It is
         dark mode when the light sensor sample value drops below this value. -->
-    <integer name="config_ambientDarkModeThreshold">5</integer>
+    <item name="config_ambientDarkModeThreshold" translatable="false" format="float" type="dimen">
+        0.4
+    </item>
 
     <!-- This value is used when calculating whether the device is in ambient light mode. Each
         sample contains light sensor events from this span of time duration. -->
@@ -705,6 +751,19 @@
 
     <integer name="complicationRestoreMs">1000</integer>
 
+    <integer name="complicationFadeOutDelayMs">200</integer>
+
+    <!-- Duration in milliseconds of the dream in un-blur animation. -->
+    <integer name="config_dreamOverlayInBlurDurationMs">250</integer>
+    <!-- Duration in milliseconds of the dream in complications fade-in animation. -->
+    <integer name="config_dreamOverlayInComplicationsDurationMs">250</integer>
+    <!-- Duration in milliseconds of the y-translation animation when entering a dream -->
+    <integer name="config_dreamOverlayInTranslationYDurationMs">917</integer>
+
+    <!-- Delay in milliseconds before switching to the dock user and dreaming if a secondary user is
+    active when the device is locked and docked. 0 indicates disabled. Default is 1 minute. -->
+    <integer name="config_defaultDockUserTimeoutMs">60000</integer>
+
     <!-- Icons that don't show in a collapsed non-keyguard statusbar -->
     <string-array name="config_collapsed_statusbar_icon_blocklist" translatable="false">
         <item>@*android:string/status_bar_volume</item>
@@ -725,24 +784,29 @@
         <item>com.android.systemui</item>
     </string-array>
 
-    <!-- The thresholds which determine the color used by the AQI dream overlay.
-         NOTE: This must always be kept sorted from low to high -->
-    <integer-array name="config_dreamAqiThresholds">
-        <item>-1</item>
-        <item>50</item>
-        <item>100</item>
-        <item>150</item>
-        <item>200</item>
-        <item>300</item>
-    </integer-array>
+    <!-- Whether the device should display hotspot UI. If true, UI will display only when tethering
+         is available. If false, UI will never show regardless of tethering availability" -->
+    <bool name="config_show_wifi_tethering">true</bool>
 
-    <!-- The color values which correspond to the thresholds above -->
-    <integer-array name="config_dreamAqiColorValues">
-        <item>@color/dream_overlay_aqi_good</item>
-        <item>@color/dream_overlay_aqi_moderate</item>
-        <item>@color/dream_overlay_aqi_unhealthy_sensitive</item>
-        <item>@color/dream_overlay_aqi_unhealthy</item>
-        <item>@color/dream_overlay_aqi_very_unhealthy</item>
-        <item>@color/dream_overlay_aqi_hazardous</item>
-    </integer-array>
+    <!-- A collection of "slots" for placing quick affordance actions on the lock screen when the
+    device is locked. Each item is a string consisting of two parts, separated by the ':' character.
+    The first part is the unique ID for the slot, it is not a human-visible name, but should still
+    be unique across all slots specified. The second part is the capacity and must be a positive
+    integer; this is how many quick affordance actions that user is allowed to add to the slot. -->
+    <string-array name="config_keyguardQuickAffordanceSlots" translatable="false">
+        <item>bottom_start:1</item>
+        <item>bottom_end:1</item>
+    </string-array>
+
+    <!-- A collection of defaults for the quick affordances on the lock screen. Each item must be a
+    string with two parts: the ID of the slot and the comma-delimited list of affordance IDs,
+    separated by a colon ':' character. For example: <item>bottom_end:home,wallet</item>. The
+    default is displayed by System UI as long as the user hasn't made a different choice for that
+    slot. If the user did make a choice, even if the choice is the "None" option, the default is
+    ignored. -->
+    <string-array name="config_keyguardQuickAffordanceDefaults" translatable="false">
+        <item>bottom_start:home</item>
+        <item>bottom_end:wallet</item>
+    </string-array>
+
 </resources>

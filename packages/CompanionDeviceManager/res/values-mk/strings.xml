@@ -28,7 +28,7 @@
     <string name="helper_summary_app_streaming" msgid="5977509499890099">"<xliff:g id="APP_NAME">%1$s</xliff:g> бара дозвола во име на вашиот <xliff:g id="DEVICE_TYPE">%2$s</xliff:g> за да стримува апликации помеѓу вашите уреди"</string>
     <string name="title_automotive_projection" msgid="3296005598978412847"></string>
     <string name="summary_automotive_projection" msgid="8683801274662496164"></string>
-    <string name="title_computer" msgid="4693714143506569253">"Овозможете &lt;strong&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/strong&gt; да пристапува до овие податоци на телефонот"</string>
+    <string name="title_computer" msgid="4693714143506569253">"Дозволете &lt;strong&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/strong&gt; да пристапува до овие податоци на телефонот"</string>
     <string name="summary_computer" msgid="3798467601598297062"></string>
     <string name="permission_notification" msgid="693762568127741203">"Известувања"</string>
     <string name="permission_notification_summary" msgid="884075314530071011">"може да ги чита сите известувања, вклучително и податоци како контакти, пораки и фотографии"</string>

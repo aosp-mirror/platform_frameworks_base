@@ -16,6 +16,8 @@
 
 package com.android.systemui.dreams;
 
+import static com.android.systemui.dreams.dagger.DreamModule.DREAM_OVERLAY_ENABLED;
+
 import android.service.dreams.DreamService;
 import android.util.Log;
 
@@ -37,6 +39,7 @@ import java.util.function.Consumer;
 import java.util.stream.Collectors;
 
 import javax.inject.Inject;
+import javax.inject.Named;
 
 /**
  * {@link DreamOverlayStateController} is the source of truth for Dream overlay configurations and
@@ -50,6 +53,9 @@ public class DreamOverlayStateController implements
     private static final boolean DEBUG = Log.isLoggable(TAG, Log.DEBUG);
 
     public static final int STATE_DREAM_OVERLAY_ACTIVE = 1 << 0;
+    public static final int STATE_LOW_LIGHT_ACTIVE = 1 << 1;
+    public static final int STATE_DREAM_ENTRY_ANIMATIONS_FINISHED = 1 << 2;
+    public static final int STATE_DREAM_EXIT_ANIMATIONS_RUNNING = 1 << 3;
 
     private static final int OP_CLEAR_STATE = 1;
     private static final int OP_SET_STATE = 2;
@@ -80,6 +86,7 @@ public class DreamOverlayStateController implements
     }
 
     private final Executor mExecutor;
+    private final boolean mOverlayEnabled;
     private final ArrayList<Callback> mCallbacks = new ArrayList<>();
 
     @Complication.ComplicationType
@@ -91,14 +98,27 @@ public class DreamOverlayStateController implements
 
     @VisibleForTesting
     @Inject
-    public DreamOverlayStateController(@Main Executor executor) {
+    public DreamOverlayStateController(@Main Executor executor,
+            @Named(DREAM_OVERLAY_ENABLED) boolean overlayEnabled) {
         mExecutor = executor;
+        mOverlayEnabled = overlayEnabled;
+        if (DEBUG) {
+            Log.d(TAG, "Dream overlay enabled:" + mOverlayEnabled);
+        }
     }
 
     /**
      * Adds a complication to be included on the dream overlay.
      */
     public void addComplication(Complication complication) {
+        if (!mOverlayEnabled) {
+            if (DEBUG) {
+                Log.d(TAG,
+                        "Ignoring adding complication due to overlay disabled:" + complication);
+            }
+            return;
+        }
+
         mExecutor.execute(() -> {
             if (mComplications.add(complication)) {
                 if (DEBUG) {
@@ -113,6 +133,14 @@ public class DreamOverlayStateController implements
      * Removes a complication from inclusion on the dream overlay.
      */
     public void removeComplication(Complication complication) {
+        if (!mOverlayEnabled) {
+            if (DEBUG) {
+                Log.d(TAG,
+                        "Ignoring removing complication due to overlay disabled:" + complication);
+            }
+            return;
+        }
+
         mExecutor.execute(() -> {
             if (mComplications.remove(complication)) {
                 if (DEBUG) {
@@ -190,7 +218,31 @@ public class DreamOverlayStateController implements
      * @return {@code true} if overlay is active, {@code false} otherwise.
      */
     public boolean isOverlayActive() {
-        return containsState(STATE_DREAM_OVERLAY_ACTIVE);
+        return mOverlayEnabled && containsState(STATE_DREAM_OVERLAY_ACTIVE);
+    }
+
+    /**
+     * Returns whether low light mode is active.
+     * @return {@code true} if in low light mode, {@code false} otherwise.
+     */
+    public boolean isLowLightActive() {
+        return containsState(STATE_LOW_LIGHT_ACTIVE);
+    }
+
+    /**
+     * Returns whether the dream content and dream overlay entry animations are finished.
+     * @return {@code true} if animations are finished, {@code false} otherwise.
+     */
+    public boolean areEntryAnimationsFinished() {
+        return containsState(STATE_DREAM_ENTRY_ANIMATIONS_FINISHED);
+    }
+
+    /**
+     * Returns whether the dream content and dream overlay exit animations are running.
+     * @return {@code true} if animations are running, {@code false} otherwise.
+     */
+    public boolean areExitAnimationsRunning() {
+        return containsState(STATE_DREAM_EXIT_ANIMATIONS_RUNNING);
     }
 
     private boolean containsState(int state) {
@@ -209,7 +261,7 @@ public class DreamOverlayStateController implements
         }
 
         if (existingState != mState) {
-            notifyCallbacks(callback -> callback.onStateChanged());
+            notifyCallbacks(Callback::onStateChanged);
         }
     }
 
@@ -219,6 +271,32 @@ public class DreamOverlayStateController implements
      */
     public void setOverlayActive(boolean active) {
         modifyState(active ? OP_SET_STATE : OP_CLEAR_STATE, STATE_DREAM_OVERLAY_ACTIVE);
+    }
+
+    /**
+     * Sets whether low light mode is active.
+     * @param active {@code true} if low light mode is active, {@code false} otherwise.
+     */
+    public void setLowLightActive(boolean active) {
+        modifyState(active ? OP_SET_STATE : OP_CLEAR_STATE, STATE_LOW_LIGHT_ACTIVE);
+    }
+
+    /**
+     * Sets whether dream content and dream overlay entry animations are finished.
+     * @param finished {@code true} if entry animations are finished, {@code false} otherwise.
+     */
+    public void setEntryAnimationsFinished(boolean finished) {
+        modifyState(finished ? OP_SET_STATE : OP_CLEAR_STATE,
+                STATE_DREAM_ENTRY_ANIMATIONS_FINISHED);
+    }
+
+    /**
+     * Sets whether dream content and dream overlay exit animations are running.
+     * @param running {@code true} if exit animations are running, {@code false} otherwise.
+     */
+    public void setExitAnimationsRunning(boolean running) {
+        modifyState(running ? OP_SET_STATE : OP_CLEAR_STATE,
+                STATE_DREAM_EXIT_ANIMATIONS_RUNNING);
     }
 
     /**

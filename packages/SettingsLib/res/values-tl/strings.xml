@@ -58,7 +58,7 @@
     <string name="wifi_disabled_password_failure" msgid="6892387079613226738">"Problema sa pag-authenticate"</string>
     <string name="wifi_cant_connect" msgid="5718417542623056783">"Hindi makakonekta"</string>
     <string name="wifi_cant_connect_to_ap" msgid="3099667989279700135">"Hindi makakonekta sa \'<xliff:g id="AP_NAME">%1$s</xliff:g>\'"</string>
-    <string name="wifi_check_password_try_again" msgid="8817789642851605628">"Suriin ang password at subukang muli"</string>
+    <string name="wifi_check_password_try_again" msgid="8817789642851605628">"Suriin ang password at subukan ulit"</string>
     <string name="wifi_not_in_range" msgid="1541760821805777772">"Wala sa sakop"</string>
     <string name="wifi_no_internet_no_reconnect" msgid="821591791066497347">"Hindi awtomatikong kokonekta"</string>
     <string name="wifi_no_internet" msgid="1774198889176926299">"Walang access sa internet"</string>
@@ -81,7 +81,7 @@
     <string name="osu_opening_provider" msgid="4318105381295178285">"Binubuksan ang <xliff:g id="PASSPOINTPROVIDER">%1$s</xliff:g>"</string>
     <string name="osu_connect_failed" msgid="9107873364807159193">"Hindi makakonekta"</string>
     <string name="osu_completing_sign_up" msgid="8412636665040390901">"Kinukumpleto ang pag-sign up…"</string>
-    <string name="osu_sign_up_failed" msgid="5605453599586001793">"Hindi makumpleto ang pag-sign up. I-tap para subukang muli."</string>
+    <string name="osu_sign_up_failed" msgid="5605453599586001793">"Hindi makumpleto ang pag-sign up. I-tap para subukan ulit."</string>
     <string name="osu_sign_up_complete" msgid="7640183358878916847">"Kumpleto na ang pag-sign up. Kumokonekta…"</string>
     <string name="speed_label_very_slow" msgid="8526005255731597666">"Napakabagal"</string>
     <string name="speed_label_slow" msgid="6069917670665664161">"Mabagal"</string>
@@ -125,9 +125,9 @@
     <string name="bluetooth_profile_a2dp_high_quality" msgid="4739440941324792775">"HD audio: <xliff:g id="CODEC_NAME">%1$s</xliff:g>"</string>
     <string name="bluetooth_profile_a2dp_high_quality_unknown_codec" msgid="2477639096903834374">"HD audio"</string>
     <string name="bluetooth_profile_hearing_aid" msgid="58154575573984914">"Mga Hearing Aid"</string>
-    <string name="bluetooth_profile_le_audio" msgid="5158149987518342036">"LE_AUDIO"</string>
+    <string name="bluetooth_profile_le_audio" msgid="3237854988278539061">"LE audio"</string>
     <string name="bluetooth_hearing_aid_profile_summary_connected" msgid="8191273236809964030">"Nakakonekta sa Mga Hearing Aid"</string>
-    <string name="bluetooth_le_audio_profile_summary_connected" msgid="3162538609379333442">"Nakakonekta sa LE_AUDIO"</string>
+    <string name="bluetooth_le_audio_profile_summary_connected" msgid="6916226974453480650">"Nakakonekta sa LE audio"</string>
     <string name="bluetooth_a2dp_profile_summary_connected" msgid="7422607970115444153">"Konektado sa media audio"</string>
     <string name="bluetooth_headset_profile_summary_connected" msgid="2420981566026949688">"Nakakonekta sa audio ng telepono"</string>
     <string name="bluetooth_opp_profile_summary_connected" msgid="2393521801478157362">"Nakakonekta sa server sa paglilipat ng file"</string>
@@ -408,6 +408,7 @@
     <string name="force_resizable_activities_summary" msgid="2490382056981583062">"Gawing nare-resize ang lahat ng aktibidad para sa multi-window, anuman ang mga value ng manifest."</string>
     <string name="enable_freeform_support" msgid="7599125687603914253">"I-enable ang mga freeform window"</string>
     <string name="enable_freeform_support_summary" msgid="1822862728719276331">"I-enable ang suporta para sa mga pang-eksperimentong freeform window."</string>
+    <string name="desktop_mode" msgid="2389067840550544462">"Desktop mode"</string>
     <string name="local_backup_password_title" msgid="4631017948933578709">"Password ng pag-backup ng desktop"</string>
     <string name="local_backup_password_summary_none" msgid="7646898032616361714">"Kasalukuyang hindi pinoprotektahan ang mga buong pag-backup ng desktop"</string>
     <string name="local_backup_password_summary_change" msgid="1707357670383995567">"I-tap upang baguhin o alisin ang password para sa mga kumpletong pag-back up sa desktop"</string>
@@ -476,13 +477,14 @@
     <string name="power_charging" msgid="6727132649743436802">"<xliff:g id="LEVEL">%1$s</xliff:g> - <xliff:g id="STATE">%2$s</xliff:g>"</string>
     <string name="power_remaining_charging_duration_only" msgid="8085099012811384899">"<xliff:g id="TIME">%1$s</xliff:g> na lang bago mapuno"</string>
     <string name="power_charging_duration" msgid="6127154952524919719">"<xliff:g id="LEVEL">%1$s</xliff:g> - <xliff:g id="TIME">%2$s</xliff:g> na lang bago mapuno"</string>
-    <string name="power_charging_limited" msgid="7956120998372505295">"<xliff:g id="LEVEL">%1$s</xliff:g> - Pansamantalang limitado ang pag-charge"</string>
+    <string name="power_charging_limited" msgid="8202147604844938236">"<xliff:g id="LEVEL">%1$s</xliff:g> - Naka-optimize ang pag-charge"</string>
+    <string name="power_charging_future_paused" msgid="4730177778538118032">"<xliff:g id="LEVEL">%1$s</xliff:g> - Naka-optimize ang pag-charge"</string>
     <string name="battery_info_status_unknown" msgid="268625384868401114">"Hindi Kilala"</string>
     <string name="battery_info_status_charging" msgid="4279958015430387405">"Nagcha-charge"</string>
     <string name="battery_info_status_charging_fast" msgid="8027559755902954885">"Mabilis na charge"</string>
     <string name="battery_info_status_charging_slow" msgid="3190803837168962319">"Mabagal na charge"</string>
     <string name="battery_info_status_charging_wireless" msgid="8924722966861282197">"Wireless na nagcha-charge"</string>
-    <string name="battery_info_status_charging_dock" msgid="3554147903321236585">"Charging Dock"</string>
+    <string name="battery_info_status_charging_dock" msgid="8573274094093364791">"Nagcha-charge"</string>
     <string name="battery_info_status_discharging" msgid="6962689305413556485">"Hindi nagcha-charge"</string>
     <string name="battery_info_status_not_charging" msgid="3371084153747234837">"Nakakonekta, hindi nagcha-charge"</string>
     <string name="battery_info_status_full" msgid="1339002294876531312">"Nasingil"</string>
@@ -655,13 +657,6 @@
     <string name="accessibility_ethernet_disconnected" msgid="2832501530856497489">"Nadiskonekta ang Ethernet."</string>
     <string name="accessibility_ethernet_connected" msgid="6175942685957461563">"Ethernet."</string>
     <string name="accessibility_no_calling" msgid="3540827068323895748">"Hindi makakatawag."</string>
-    <string name="dream_complication_title_time" msgid="701747800712893499">"Oras"</string>
-    <string name="dream_complication_title_date" msgid="8661176085446135789">"Petsa"</string>
-    <string name="dream_complication_title_weather" msgid="598609151677172783">"Lagay ng Panahon"</string>
-    <string name="dream_complication_title_aqi" msgid="4587552608957834110">"Kalidad ng Hangin"</string>
-    <string name="dream_complication_title_cast_info" msgid="4038776652841885084">"Impormasyon ng Cast"</string>
-    <!-- no translation found for dream_complication_title_home_controls (9153381632476738811) -->
-    <skip />
     <string name="avatar_picker_title" msgid="8492884172713170652">"Pumili ng larawan sa profile"</string>
     <string name="default_user_icon_description" msgid="6554047177298972638">"Icon ng default na user"</string>
     <string name="physical_keyboard_title" msgid="4811935435315835220">"Pisikal na keyboard"</string>

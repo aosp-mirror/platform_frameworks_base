@@ -16,14 +16,15 @@
 
 package com.android.keyguard;
 
+import static com.google.common.truth.Truth.assertThat;
+
 import static org.mockito.ArgumentMatchers.eq;
-import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 import android.test.suitebuilder.annotation.SmallTest;
 import android.testing.AndroidTestingRunner;
 
-import com.android.systemui.R;
 import com.android.systemui.SysuiTestCase;
 import com.android.systemui.statusbar.policy.ConfigurationController;
 import com.android.systemui.statusbar.policy.ConfigurationController.ConfigurationListener;
@@ -84,27 +85,19 @@ public class KeyguardMessageAreaControllerTest extends SysuiTestCase {
     @Test
     public void testClearsTextField() {
         mMessageAreaController.setMessage("");
-        verify(mKeyguardMessageArea).setMessage("");
+        verify(mKeyguardMessageArea).setMessage("", /* animate= */ true);
     }
 
     @Test
     public void testSetBouncerVisible() {
-        mMessageAreaController.setBouncerShowing(true);
-        verify(mKeyguardMessageArea).setBouncerShowing(true);
+        mMessageAreaController.setIsVisible(true);
+        verify(mKeyguardMessageArea).setIsVisible(true);
     }
 
     @Test
-    public void testSetMessageIfEmpty_empty() {
-        mMessageAreaController.setMessage("");
-        mMessageAreaController.setMessageIfEmpty(R.string.keyguard_enter_your_pin);
-        verify(mKeyguardMessageArea).setMessage(R.string.keyguard_enter_your_pin);
-    }
-
-    @Test
-    public void testSetMessageIfEmpty_notEmpty() {
-        mMessageAreaController.setMessage("abc");
-        mMessageAreaController.setMessageIfEmpty(R.string.keyguard_enter_your_pin);
-        verify(mKeyguardMessageArea, never()).setMessage(getContext()
-                .getResources().getText(R.string.keyguard_enter_your_pin));
+    public void testGetMessage() {
+        String msg = "abc";
+        when(mKeyguardMessageArea.getText()).thenReturn(msg);
+        assertThat(mMessageAreaController.getMessage()).isEqualTo(msg);
     }
 }

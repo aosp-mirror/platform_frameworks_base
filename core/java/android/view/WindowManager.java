@@ -285,10 +285,16 @@ public interface WindowManager extends ViewManager {
     int TRANSIT_OLD_KEYGUARD_GOING_AWAY_ON_WALLPAPER = 21;
 
     /**
-     * Keyguard is being occluded.
+     * Keyguard is being occluded by non-Dream.
      * @hide
      */
     int TRANSIT_OLD_KEYGUARD_OCCLUDE = 22;
+
+    /**
+     * Keyguard is being occluded by Dream.
+     * @hide
+     */
+    int TRANSIT_OLD_KEYGUARD_OCCLUDE_BY_DREAM = 33;
 
     /**
      * Keyguard is being unoccluded.
@@ -771,12 +777,6 @@ public interface WindowManager extends ViewManager {
     int TAKE_SCREENSHOT_FULLSCREEN = 1;
 
     /**
-     * Invoke screenshot flow allowing the user to select a region.
-     * @hide
-     */
-    int TAKE_SCREENSHOT_SELECTED_REGION = 2;
-
-    /**
      * Invoke screenshot flow with an image provided by the caller.
      * @hide
      */
@@ -788,7 +788,6 @@ public interface WindowManager extends ViewManager {
      * @hide
      */
     @IntDef({TAKE_SCREENSHOT_FULLSCREEN,
-            TAKE_SCREENSHOT_SELECTED_REGION,
             TAKE_SCREENSHOT_PROVIDED_IMAGE})
     @interface ScreenshotType {}
 
@@ -813,6 +812,45 @@ public interface WindowManager extends ViewManager {
         int SCREENSHOT_OTHER = 5;
         int SCREENSHOT_VENDOR_GESTURE = 6;
     }
+
+    /**
+     * Activity level {@link android.content.pm.PackageManager.Property PackageManager
+     * .Property} for an app to inform the system that the activity can be opted-in or opted-out
+     * from the compatibility treatment that avoids {@link
+     * android.app.Activity#setRequestedOrientation} loops. The loop can be trigerred by
+     * ignoreRequestedOrientation display setting enabled on the device or by the landscape natural
+     * orientation of the device.
+     *
+     * <p>The treatment is disabled by default but device manufacturers can enable the treatment
+     * using their discretion to improve display compatibility.
+     *
+     * <p>With this property set to {@code true}, the system could ignore {@link
+     * android.app.Activity#setRequestedOrientation} call from an app if one of the following
+     * conditions are true:
+     * <ul>
+     *     <li>Activity is relaunching due to the previous {@link
+     *     android.app.Activity#setRequestedOrientation} call.
+     *     <li>Camera compatibility force rotation treatment is active for the package.
+     * </ul>
+     *
+     * <p>Setting this property to {@code false} informs the system that the activity must be
+     * opted-out from the compatibility treatment even if the device manufacturer has opted the app
+     * into the treatment.
+     *
+     * <p><b>Syntax:</b>
+     * <pre>
+     * &lt;activity&gt;
+     *   &lt;property
+     *     android:name="android.window.PROPERTY_COMPAT_IGNORE_REQUESTED_ORIENTATION"
+     *     android:value="true|false"/&gt;
+     * &lt;/activity&gt;
+     * </pre>
+     *
+     * @hide
+     */
+    // TODO(b/263984287): Make this public API.
+    String PROPERTY_COMPAT_IGNORE_REQUESTED_ORIENTATION =
+            "android.window.PROPERTY_COMPAT_IGNORE_REQUESTED_ORIENTATION";
 
     /**
      * @hide
@@ -1021,6 +1059,14 @@ public interface WindowManager extends ViewManager {
                 }
                 return "UNKNOWN(" + type + ")";
         }
+    }
+
+    /**
+     * Ensure scales are between 0 and 20.
+     * @hide
+     */
+    static float fixScale(float scale) {
+        return Math.max(Math.min(scale, 20), 0);
     }
 
     public static class LayoutParams extends ViewGroup.LayoutParams implements Parcelable {
@@ -4396,13 +4442,40 @@ public interface WindowManager extends ViewManager {
                 changes |= LAYOUT_CHANGED;
             }
 
-            if (!Arrays.equals(paramsForRotation, o.paramsForRotation)) {
+            if (paramsForRotation != o.paramsForRotation) {
+                if ((changes & LAYOUT_CHANGED) == 0) {
+                    if (paramsForRotation != null && o.paramsForRotation != null
+                            && paramsForRotation.length == o.paramsForRotation.length) {
+                        for (int i = paramsForRotation.length - 1; i >= 0; i--) {
+                            if (hasLayoutDiff(paramsForRotation[i], o.paramsForRotation[i])) {
+                                changes |= LAYOUT_CHANGED;
+                                break;
+                            }
+                        }
+                    } else {
+                        changes |= LAYOUT_CHANGED;
+                    }
+                }
                 paramsForRotation = o.paramsForRotation;
                 checkNonRecursiveParams();
-                changes |= LAYOUT_CHANGED;
             }
 
             return changes;
+        }
+
+        /**
+         * Returns {@code true} if the 2 params may have difference results of
+         * {@link WindowLayout#computeFrames}.
+         */
+        private static boolean hasLayoutDiff(LayoutParams a, LayoutParams b) {
+            return a.width != b.width || a.height != b.height || a.x != b.x || a.y != b.y
+                    || a.horizontalMargin != b.horizontalMargin
+                    || a.verticalMargin != b.verticalMargin
+                    || a.layoutInDisplayCutoutMode != b.layoutInDisplayCutoutMode
+                    || a.gravity != b.gravity || !Arrays.equals(a.providedInsets, b.providedInsets)
+                    || a.mFitInsetsTypes != b.mFitInsetsTypes
+                    || a.mFitInsetsSides != b.mFitInsetsSides
+                    || a.mFitInsetsIgnoringVisibility != b.mFitInsetsIgnoringVisibility;
         }
 
         @Override

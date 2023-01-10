@@ -25,6 +25,7 @@ import static android.os.InputConstants.DEFAULT_DISPATCHING_TIMEOUT_MILLIS;
 
 import static com.android.internal.protolog.ProtoLogGroup.WM_DEBUG_CONFIGURATION;
 import static com.android.internal.util.Preconditions.checkArgument;
+import static com.android.server.am.ProcessList.INVALID_ADJ;
 import static com.android.server.wm.ActivityRecord.State.DESTROYED;
 import static com.android.server.wm.ActivityRecord.State.DESTROYING;
 import static com.android.server.wm.ActivityRecord.State.PAUSED;
@@ -123,6 +124,8 @@ public class WindowProcessController extends ConfigurationContainer<Configuratio
     private volatile int mCurProcState = PROCESS_STATE_NONEXISTENT;
     // Last reported process state;
     private volatile int mRepProcState = PROCESS_STATE_NONEXISTENT;
+    // Currently computed oom adj score
+    private volatile int mCurAdj = INVALID_ADJ;
     // are we in the process of crashing?
     private volatile boolean mCrashing;
     // does the app have a not responding dialog?
@@ -315,6 +318,14 @@ public class WindowProcessController extends ConfigurationContainer<Configuratio
 
     int getCurrentProcState() {
         return mCurProcState;
+    }
+
+    public void setCurrentAdj(int curAdj) {
+        mCurAdj = curAdj;
+    }
+
+    int getCurrentAdj() {
+        return mCurAdj;
     }
 
     /**
@@ -740,7 +751,7 @@ public class WindowProcessController extends ConfigurationContainer<Configuratio
         // - no longer visible OR
         // - not focusable (in PiP mode for instance)
         if (topDisplay == null
-                || !mPreQTopResumedActivity.mVisibleRequested
+                || !mPreQTopResumedActivity.isVisibleRequested()
                 || !mPreQTopResumedActivity.isFocusable()) {
             canUpdate = true;
         }
@@ -849,7 +860,7 @@ public class WindowProcessController extends ConfigurationContainer<Configuratio
             // to those activities that are part of the package whose app-specific settings changed
             if (packageName.equals(r.packageName)
                     && r.applyAppSpecificConfig(nightMode, localesOverride)
-                    && r.mVisibleRequested) {
+                    && r.isVisibleRequested()) {
                 r.ensureActivityConfiguration(0 /* globalChanges */, true /* preserveWindow */);
             }
         }
@@ -931,7 +942,7 @@ public class WindowProcessController extends ConfigurationContainer<Configuratio
             }
             // Don't consider any activities that are currently not in a state where they
             // can be destroyed.
-            if (r.mVisibleRequested || !r.stopped || !r.hasSavedState() || !r.isDestroyable()
+            if (r.isVisibleRequested() || !r.stopped || !r.hasSavedState() || !r.isDestroyable()
                     || r.isState(STARTED, RESUMED, PAUSING, PAUSED, STOPPING)) {
                 if (DEBUG_RELEASE) Slog.d(TAG_RELEASE, "Not releasing in-use activity: " + r);
                 continue;
@@ -977,7 +988,7 @@ public class WindowProcessController extends ConfigurationContainer<Configuratio
                 final int displayId = r.getDisplayId();
                 final Context c = root.getDisplayUiContext(displayId);
 
-                if (c != null && r.mVisibleRequested && !displayContexts.contains(c)) {
+                if (c != null && r.isVisibleRequested() && !displayContexts.contains(c)) {
                     displayContexts.add(c);
                 }
             }
@@ -1045,7 +1056,7 @@ public class WindowProcessController extends ConfigurationContainer<Configuratio
             if (task != null && task.mLayerRank != Task.LAYER_RANK_INVISIBLE) {
                 stateFlags |= ACTIVITY_STATE_FLAG_HAS_ACTIVITY_IN_VISIBLE_TASK;
             }
-            if (r.mVisibleRequested) {
+            if (r.isVisibleRequested()) {
                 if (r.isState(RESUMED)) {
                     stateFlags |= ACTIVITY_STATE_FLAG_HAS_RESUMED;
                 }
@@ -1257,7 +1268,7 @@ public class WindowProcessController extends ConfigurationContainer<Configuratio
         }
         for (int i = activities.size() - 1; i >= 0; i--) {
             final ActivityRecord r = activities.get(i);
-            if (r.mVisibleRequested || r.isVisible()) {
+            if (r.isVisibleRequested() || r.isVisible()) {
                 // While an activity launches a new activity, it's possible that the old activity
                 // is already requested to be hidden (mVisibleRequested=false), but this visibility
                 // is not yet committed, so isVisible()=true.
@@ -1478,7 +1489,7 @@ public class WindowProcessController extends ConfigurationContainer<Configuratio
             Configuration overrideConfig = new Configuration(r.getRequestedOverrideConfiguration());
             overrideConfig.assetsSeq = assetSeq;
             r.onRequestedOverrideConfigurationChanged(overrideConfig);
-            if (r.mVisibleRequested) {
+            if (r.isVisibleRequested()) {
                 r.ensureActivityConfiguration(0, true);
             }
         }

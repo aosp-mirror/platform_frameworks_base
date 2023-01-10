@@ -41,6 +41,7 @@ import android.os.Looper;
 import android.os.Parcel;
 import android.os.RemoteException;
 import android.os.UserHandle;
+import android.util.ArraySet;
 import android.util.ExceptionUtils;
 import android.util.Slog;
 import android.util.SparseArray;
@@ -56,6 +57,7 @@ import com.android.server.wm.ActivityTaskManagerInternal;
 
 import java.io.FileDescriptor;
 import java.io.PrintWriter;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -84,6 +86,12 @@ public class VirtualDeviceManagerService extends SystemService {
      */
     @GuardedBy("mVirtualDeviceManagerLock")
     private final SparseArray<VirtualDeviceImpl> mVirtualDevices = new SparseArray<>();
+
+    /**
+     * Mapping from CDM association IDs to app UIDs running on the corresponding virtual device.
+     */
+    @GuardedBy("mVirtualDeviceManagerLock")
+    private final SparseArray<ArraySet<Integer>> mAppsOnVirtualDevices = new SparseArray<>();
 
     /**
      * Mapping from user ID to CDM associations. The associations come from
@@ -202,12 +210,24 @@ public class VirtualDeviceManagerService extends SystemService {
                         getContext().getString(
                             com.android.internal.R.string.vdm_camera_access_denied,
                             deviceName),
-                        Toast.LENGTH_LONG);
+                        Toast.LENGTH_LONG, Looper.myLooper());
             }
         }
     }
 
     @VisibleForTesting
+    VirtualDeviceManagerInternal getLocalServiceInstance() {
+        return mLocalService;
+    }
+
+    @VisibleForTesting
+    void notifyRunningAppsChanged(int associationId, ArraySet<Integer> uids) {
+        synchronized (mVirtualDeviceManagerLock) {
+            mAppsOnVirtualDevices.put(associationId, uids);
+        }
+        mLocalService.onAppsOnVirtualDeviceChanged();
+    }
+
     class VirtualDeviceManagerImpl extends IVirtualDeviceManager.Stub implements
             VirtualDeviceImpl.PendingTrampolineCallback {
 
@@ -247,6 +267,7 @@ public class VirtualDeviceManagerService extends SystemService {
                             public void onClose(int associationId) {
                                 synchronized (mVirtualDeviceManagerLock) {
                                     mVirtualDevices.remove(associationId);
+                                    mAppsOnVirtualDevices.remove(associationId);
                                     if (cameraAccessController != null) {
                                         cameraAccessController.stopObservingIfNeeded();
                                     } else {
@@ -257,8 +278,10 @@ public class VirtualDeviceManagerService extends SystemService {
                             }
                         },
                         this, activityListener,
-                        runningUids -> cameraAccessController.blockCameraAccessIfNeeded(
-                                runningUids),
+                        runningUids -> {
+                            cameraAccessController.blockCameraAccessIfNeeded(runningUids);
+                            notifyRunningAppsChanged(associationInfo.getId(), runningUids);
+                        },
                         params);
                 if (cameraAccessController != null) {
                     cameraAccessController.startObservingIfNeeded();
@@ -308,10 +331,11 @@ public class VirtualDeviceManagerService extends SystemService {
             final long tokenTwo = Binder.clearCallingIdentity();
             try {
                 virtualDeviceImpl.onVirtualDisplayCreatedLocked(gwpc, displayId);
-                return displayId;
             } finally {
                 Binder.restoreCallingIdentity(tokenTwo);
             }
+            mLocalService.onVirtualDisplayCreated(displayId);
+            return displayId;
         }
 
         @Nullable
@@ -378,6 +402,15 @@ public class VirtualDeviceManagerService extends SystemService {
     }
 
     private final class LocalService extends VirtualDeviceManagerInternal {
+        @GuardedBy("mVirtualDeviceManagerLock")
+        private final ArrayList<VirtualDisplayListener>
+                mVirtualDisplayListeners = new ArrayList<>();
+        @GuardedBy("mVirtualDeviceManagerLock")
+        private final ArrayList<AppsOnVirtualDeviceListener>
+                mAppsOnVirtualDeviceListeners = new ArrayList<>();
+        @GuardedBy("mVirtualDeviceManagerLock")
+        private final ArraySet<Integer> mAllUidsOnVirtualDevice = new ArraySet<>();
+
         @Override
         public boolean isValidVirtualDevice(IVirtualDevice virtualDevice) {
             synchronized (mVirtualDeviceManagerLock) {
@@ -386,9 +419,57 @@ public class VirtualDeviceManagerService extends SystemService {
         }
 
         @Override
+        public void onVirtualDisplayCreated(int displayId) {
+            final VirtualDisplayListener[] listeners;
+            synchronized (mVirtualDeviceManagerLock) {
+                listeners = mVirtualDisplayListeners.toArray(new VirtualDisplayListener[0]);
+            }
+            mHandler.post(() -> {
+                for (VirtualDisplayListener listener : listeners) {
+                    listener.onVirtualDisplayCreated(displayId);
+                }
+            });
+        }
+
+        @Override
         public void onVirtualDisplayRemoved(IVirtualDevice virtualDevice, int displayId) {
+            final VirtualDisplayListener[] listeners;
             synchronized (mVirtualDeviceManagerLock) {
                 ((VirtualDeviceImpl) virtualDevice).onVirtualDisplayRemovedLocked(displayId);
+                listeners = mVirtualDisplayListeners.toArray(new VirtualDisplayListener[0]);
+            }
+            mHandler.post(() -> {
+                for (VirtualDisplayListener listener : listeners) {
+                    listener.onVirtualDisplayRemoved(displayId);
+                }
+            });
+        }
+
+        @Override
+        public void onAppsOnVirtualDeviceChanged() {
+            ArraySet<Integer> latestRunningUids = new ArraySet<>();
+            final AppsOnVirtualDeviceListener[] listeners;
+            synchronized (mVirtualDeviceManagerLock) {
+                int size = mAppsOnVirtualDevices.size();
+                for (int i = 0; i < size; i++) {
+                    latestRunningUids.addAll(mAppsOnVirtualDevices.valueAt(i));
+                }
+                if (!mAllUidsOnVirtualDevice.equals(latestRunningUids)) {
+                    mAllUidsOnVirtualDevice.clear();
+                    mAllUidsOnVirtualDevice.addAll(latestRunningUids);
+                    listeners =
+                            mAppsOnVirtualDeviceListeners.toArray(
+                                    new AppsOnVirtualDeviceListener[0]);
+                } else {
+                    listeners = null;
+                }
+            }
+            if (listeners != null) {
+                mHandler.post(() -> {
+                    for (AppsOnVirtualDeviceListener listener : listeners) {
+                        listener.onAppsOnAnyVirtualDeviceChanged(latestRunningUids);
+                    }
+                });
             }
         }
 
@@ -434,6 +515,38 @@ public class VirtualDeviceManagerService extends SystemService {
                 }
             }
             return false;
+        }
+
+        @Override
+        public void registerVirtualDisplayListener(
+                @NonNull VirtualDisplayListener listener) {
+            synchronized (mVirtualDeviceManagerLock) {
+                mVirtualDisplayListeners.add(listener);
+            }
+        }
+
+        @Override
+        public void unregisterVirtualDisplayListener(
+                @NonNull VirtualDisplayListener listener) {
+            synchronized (mVirtualDeviceManagerLock) {
+                mVirtualDisplayListeners.remove(listener);
+            }
+        }
+
+        @Override
+        public void registerAppsOnVirtualDeviceListener(
+                @NonNull AppsOnVirtualDeviceListener listener) {
+            synchronized (mVirtualDeviceManagerLock) {
+                mAppsOnVirtualDeviceListeners.add(listener);
+            }
+        }
+
+        @Override
+        public void unregisterAppsOnVirtualDeviceListener(
+                @NonNull AppsOnVirtualDeviceListener listener) {
+            synchronized (mVirtualDeviceManagerLock) {
+                mAppsOnVirtualDeviceListeners.remove(listener);
+            }
         }
     }
 

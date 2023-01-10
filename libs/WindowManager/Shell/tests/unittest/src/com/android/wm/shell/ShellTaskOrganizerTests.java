@@ -59,6 +59,7 @@ import androidx.test.filters.SmallTest;
 
 import com.android.wm.shell.common.ShellExecutor;
 import com.android.wm.shell.compatui.CompatUIController;
+import com.android.wm.shell.sysui.ShellCommandHandler;
 import com.android.wm.shell.sysui.ShellInit;
 
 import org.junit.Before;
@@ -85,10 +86,12 @@ public class ShellTaskOrganizerTests extends ShellTestCase {
     @Mock
     private CompatUIController mCompatUI;
     @Mock
-    private ShellInit mShellInit;
+    private ShellExecutor mTestExecutor;
+    @Mock
+    private ShellCommandHandler mShellCommandHandler;
 
-    ShellTaskOrganizer mOrganizer;
-    private final ShellExecutor mTestExecutor = mock(ShellExecutor.class);
+    private ShellTaskOrganizer mOrganizer;
+    private ShellInit mShellInit;
 
     private class TrackingTaskListener implements ShellTaskOrganizer.TaskListener {
         final ArrayList<RunningTaskInfo> appeared = new ArrayList<>();
@@ -132,8 +135,11 @@ public class ShellTaskOrganizerTests extends ShellTestCase {
             doReturn(ParceledListSlice.<TaskAppearedInfo>emptyList())
                     .when(mTaskOrganizerController).registerTaskOrganizer(any());
         } catch (RemoteException e) {}
-        mOrganizer = spy(new ShellTaskOrganizer(mShellInit, mTaskOrganizerController,
-                mCompatUI, Optional.empty(), Optional.empty(), mTestExecutor));
+        mShellInit = spy(new ShellInit(mTestExecutor));
+        mOrganizer = spy(new ShellTaskOrganizer(mShellInit, mShellCommandHandler,
+                mTaskOrganizerController, mCompatUI, Optional.empty(), Optional.empty(),
+                mTestExecutor));
+        mShellInit.init();
     }
 
     @Test
@@ -142,9 +148,12 @@ public class ShellTaskOrganizerTests extends ShellTestCase {
     }
 
     @Test
-    public void testRegisterOrganizer_sendRegisterTaskOrganizer() throws RemoteException {
-        mOrganizer.registerOrganizer();
+    public void instantiate_addDumpCallback() {
+        verify(mShellCommandHandler, times(1)).addDumpCallback(any(), any());
+    }
 
+    @Test
+    public void testInit_sendRegisterTaskOrganizer() throws RemoteException {
         verify(mTaskOrganizerController).registerTaskOrganizer(any(ITaskOrganizer.class));
     }
 
@@ -625,5 +634,4 @@ public class ShellTaskOrganizerTests extends ShellTestCase {
         taskInfo.configuration.windowConfiguration.setWindowingMode(windowingMode);
         return taskInfo;
     }
-
 }
