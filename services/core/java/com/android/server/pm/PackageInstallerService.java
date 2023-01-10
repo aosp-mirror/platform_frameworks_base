@@ -184,6 +184,7 @@ public class PackageInstallerService extends IPackageInstaller.Stub implements
     private volatile boolean mOkToSendBroadcasts = false;
     private volatile boolean mBypassNextStagedInstallerCheck = false;
     private volatile boolean mBypassNextAllowedApexUpdateCheck = false;
+    private volatile int mDisableVerificationForUid = INVALID_UID;
 
     /**
      * File storing persisted {@link #mSessions} metadata.
@@ -712,7 +713,16 @@ public class PackageInstallerService extends IPackageInstaller.Stub implements
             params.installFlags &= ~PackageManager.INSTALL_REQUEST_DOWNGRADE;
         }
 
-        if ((params.installFlags & ADB_DEV_MODE) != ADB_DEV_MODE) {
+        if (mDisableVerificationForUid != INVALID_UID) {
+            if (callingUid == mDisableVerificationForUid) {
+                params.installFlags |= PackageManager.INSTALL_DISABLE_VERIFICATION;
+            } else {
+                // Clear the flag if current calling uid doesn't match the requested uid.
+                params.installFlags &= ~PackageManager.INSTALL_DISABLE_VERIFICATION;
+            }
+            // Reset the field as this is a one-off request.
+            mDisableVerificationForUid = INVALID_UID;
+        } else if ((params.installFlags & ADB_DEV_MODE) != ADB_DEV_MODE) {
             // Only tools under specific conditions (test app installed through ADB, and
             // verification disabled flag specified) can disable verification.
             params.installFlags &= ~PackageManager.INSTALL_DISABLE_VERIFICATION;
@@ -1365,6 +1375,14 @@ public class PackageInstallerService extends IPackageInstaller.Stub implements
             throw new SecurityException("Caller not allowed to bypass allowed apex update check");
         }
         mBypassNextAllowedApexUpdateCheck = value;
+    }
+
+    @Override
+    public void disableVerificationForUid(int uid) {
+        if (!isCalledBySystemOrShell(Binder.getCallingUid())) {
+            throw new SecurityException("Operation not allowed for caller");
+        }
+        mDisableVerificationForUid = uid;
     }
 
     /**

@@ -65,6 +65,8 @@ interface IPackageInstaller {
 
     void bypassNextAllowedApexUpdateCheck(boolean value);
 
+    void disableVerificationForUid(int uid);
+
     void setAllowUnlimitedSilentUpdates(String installerPackageName);
     void setSilentUpdatesThrottleTime(long throttleTimeInSeconds);
     void checkInstallConstraints(String installerPackageName, in List<String> packageNames,
