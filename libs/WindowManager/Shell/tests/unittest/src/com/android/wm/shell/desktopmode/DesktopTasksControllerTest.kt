@@ -150,8 +150,8 @@ class DesktopTasksControllerTest : ShellTestCase() {
     }
 
     @Test
-    fun showDesktopApps_appsAlreadyVisible_doesNothing() {
-        setUpHomeTask()
+    fun showDesktopApps_appsAlreadyVisible_bringsToFront() {
+        val homeTask = setUpHomeTask()
         val task1 = setUpFreeformTask()
         val task2 = setUpFreeformTask()
         markTaskVisible(task1)
@@ -159,7 +159,12 @@ class DesktopTasksControllerTest : ShellTestCase() {
 
         controller.showDesktopApps()
 
-        verifyWCTNotExecuted()
+        val wct = getLatestWct()
+        assertThat(wct.hierarchyOps).hasSize(3)
+        // Expect order to be from bottom: home, task1, task2
+        wct.assertReorderAt(index = 0, homeTask)
+        wct.assertReorderAt(index = 1, task1)
+        wct.assertReorderAt(index = 2, task2)
     }
 
     @Test
@@ -204,6 +209,23 @@ class DesktopTasksControllerTest : ShellTestCase() {
     fun moveToDesktop_nonExistentTask_doesNothing() {
         controller.moveToDesktop(999)
         verifyWCTNotExecuted()
+    }
+
+    @Test
+    fun moveToDesktop_otherFreeformTasksBroughtToFront() {
+        val homeTask = setUpHomeTask()
+        val freeformTask = setUpFreeformTask()
+        val fullscreenTask = setUpFullscreenTask()
+        markTaskHidden(freeformTask)
+
+        controller.moveToDesktop(fullscreenTask)
+
+        with(getLatestWct()) {
+            assertThat(hierarchyOps).hasSize(3)
+            assertReorderSequence(homeTask, freeformTask, fullscreenTask)
+            assertThat(changes[fullscreenTask.token.asBinder()]?.windowingMode)
+                    .isEqualTo(WINDOWING_MODE_FREEFORM)
+        }
     }
 
     @Test
@@ -405,4 +427,10 @@ private fun WindowContainerTransaction.assertReorderAt(index: Int, task: Running
     val op = hierarchyOps[index]
     assertThat(op.type).isEqualTo(HIERARCHY_OP_TYPE_REORDER)
     assertThat(op.container).isEqualTo(task.token.asBinder())
+}
+
+private fun WindowContainerTransaction.assertReorderSequence(vararg tasks: RunningTaskInfo) {
+    for (i in tasks.indices) {
+        assertReorderAt(i, tasks[i])
+    }
 }
