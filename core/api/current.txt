@@ -40439,7 +40439,7 @@ package android.service.quicksettings {
     method public void onTileRemoved();
     method public static final void requestListeningState(android.content.Context, android.content.ComponentName);
     method public final void showDialog(android.app.Dialog);
-    method public final void startActivityAndCollapse(android.content.Intent);
+    method @Deprecated public final void startActivityAndCollapse(android.content.Intent);
     method public final void startActivityAndCollapse(@NonNull android.app.PendingIntent);
     method public final void unlockAndRun(Runnable);
     field public static final String ACTION_QS_TILE = "android.service.quicksettings.action.QS_TILE";
