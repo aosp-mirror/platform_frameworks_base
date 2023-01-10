@@ -108,6 +108,10 @@ void DeviceInfo::setSupportFp16ForHdr(bool supportFp16ForHdr) {
     get()->mSupportFp16ForHdr = supportFp16ForHdr;
 }
 
+void DeviceInfo::setSupportMixedColorSpaces(bool supportMixedColorSpaces) {
+    get()->mSupportMixedColorSpaces = supportMixedColorSpaces;
+}
+
 void DeviceInfo::onRefreshRateChanged(int64_t vsyncPeriod) {
     mVsyncPeriod = vsyncPeriod;
 }

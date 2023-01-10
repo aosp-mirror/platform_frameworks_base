@@ -1334,6 +1334,8 @@ public class HardwareRenderer {
             final OverlayProperties overlayProperties = defaultDisplay.getOverlaySupport();
             boolean supportFp16ForHdr = overlayProperties != null
                     ? overlayProperties.supportFp16ForHdr() : false;
+            boolean supportMixedColorSpaces = overlayProperties != null
+                    ? overlayProperties.supportMixedColorSpaces() : false;
 
             for (int i = 0; i < allDisplays.length; i++) {
                 final Display display = allDisplays[i];
@@ -1361,7 +1363,7 @@ public class HardwareRenderer {
             nInitDisplayInfo(largestWidth, largestHeight, defaultDisplay.getRefreshRate(),
                     wideColorDataspace, defaultDisplay.getAppVsyncOffsetNanos(),
                     defaultDisplay.getPresentationDeadlineNanos(),
-                    supportFp16ForHdr);
+                    supportFp16ForHdr, supportMixedColorSpaces);
 
             mDisplayInitialized = true;
         }
@@ -1542,7 +1544,7 @@ public class HardwareRenderer {
 
     private static native void nInitDisplayInfo(int width, int height, float refreshRate,
             int wideColorDataspace, long appVsyncOffsetNanos, long presentationDeadlineNanos,
-            boolean supportsFp16ForHdr);
+            boolean supportsFp16ForHdr, boolean nInitDisplayInfo);
 
     private static native void nSetDrawingEnabled(boolean drawingEnabled);
 
