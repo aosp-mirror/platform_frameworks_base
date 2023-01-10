@@ -20,8 +20,9 @@
 #include "include/core/SkScalar.h"
 #include "include/core/SkTypes.h"
 #include "include/private/SkFixed.h"
-#include "include/private/SkMalloc.h"
 #include "src/core/SkTSearch.h"
+
+#include <log/log.h>
 
 typedef int Dot14;
 #define Dot14_ONE (1 << 14)
@@ -96,7 +97,7 @@ SkiaInterpolatorBase::SkiaInterpolatorBase() {
 
 SkiaInterpolatorBase::~SkiaInterpolatorBase() {
     if (fStorage) {
-        sk_free(fStorage);
+        free(fStorage);
     }
 }
 
@@ -106,7 +107,7 @@ void SkiaInterpolatorBase::reset(int elemCount, int frameCount) {
     fFrameCount = static_cast<int16_t>(frameCount);
     fRepeat = SK_Scalar1;
     if (fStorage) {
-        sk_free(fStorage);
+        free(fStorage);
         fStorage = nullptr;
         fTimes = nullptr;
     }
@@ -213,7 +214,10 @@ SkiaInterpolator::SkiaInterpolator(int elemCount, int frameCount) {
 
 void SkiaInterpolator::reset(int elemCount, int frameCount) {
     INHERITED::reset(elemCount, frameCount);
-    fStorage = sk_malloc_throw((sizeof(float) * elemCount + sizeof(SkTimeCode)) * frameCount);
+    size_t numBytes = (sizeof(float) * elemCount + sizeof(SkTimeCode)) * frameCount;
+    fStorage = malloc(numBytes);
+    LOG_ALWAYS_FATAL_IF(!fStorage, "Failed to allocate %zu bytes in %s",
+                        numBytes, __func__);
     fTimes = (SkTimeCode*)fStorage;
     fValues = (float*)((char*)fStorage + sizeof(SkTimeCode) * frameCount);
 }
