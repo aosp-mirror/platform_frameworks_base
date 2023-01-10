@@ -16,8 +16,17 @@
 
 package com.android.server.wallpaper;
 
+import static android.app.WallpaperManager.FLAG_LOCK;
+
+import static com.android.server.wallpaper.WallpaperManagerService.WALLPAPER;
+import static com.android.server.wallpaper.WallpaperManagerService.WALLPAPER_CROP;
+import static com.android.server.wallpaper.WallpaperManagerService.WALLPAPER_LOCK_CROP;
+import static com.android.server.wallpaper.WallpaperManagerService.WALLPAPER_LOCK_ORIG;
+import static com.android.server.wallpaper.WallpaperUtils.getWallpaperDir;
+
 import android.app.IWallpaperManagerCallback;
 import android.app.WallpaperColors;
+import android.app.WallpaperManager.SetWallpaperFlags;
 import android.content.ComponentName;
 import android.graphics.Rect;
 import android.os.RemoteCallbackList;
@@ -42,8 +51,7 @@ class WallpaperData {
     boolean imageWallpaperPending;
 
     /**
-     * Which wallpaper is set. Flag values are from
-     * {@link android.app.WallpaperManager.SetWallpaperFlags}.
+     * Which wallpaper is set. Flag values are from {@link SetWallpaperFlags}.
      */
     int mWhich;
 
@@ -123,6 +131,12 @@ class WallpaperData {
         this.userId = userId;
         wallpaperFile = new File(wallpaperDir, inputFileName);
         cropFile = new File(wallpaperDir, cropFileName);
+    }
+
+    WallpaperData(int userId, @SetWallpaperFlags int wallpaperType) {
+        this(userId, getWallpaperDir(userId),
+                (wallpaperType == FLAG_LOCK) ? WALLPAPER_LOCK_ORIG : WALLPAPER,
+                (wallpaperType == FLAG_LOCK) ? WALLPAPER_LOCK_CROP : WALLPAPER_CROP);
     }
 
     // Called during initialization of a given user's wallpaper bookkeeping
