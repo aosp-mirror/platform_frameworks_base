@@ -30,13 +30,20 @@ import android.view.ViewGroup
 import android.view.animation.PathInterpolator
 import android.widget.LinearLayout
 import androidx.annotation.VisibleForTesting
+import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.repeatOnLifecycle
 import com.android.internal.logging.InstanceId
+import com.android.keyguard.KeyguardUpdateMonitor
+import com.android.keyguard.KeyguardUpdateMonitorCallback
 import com.android.systemui.Dumpable
 import com.android.systemui.R
 import com.android.systemui.classifier.FalsingCollector
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.dagger.qualifiers.Main
 import com.android.systemui.dump.DumpManager
+import com.android.systemui.keyguard.domain.interactor.KeyguardTransitionInteractor
+import com.android.systemui.keyguard.shared.model.TransitionState
+import com.android.systemui.lifecycle.repeatWhenAttached
 import com.android.systemui.media.controls.models.player.MediaData
 import com.android.systemui.media.controls.models.player.MediaViewHolder
 import com.android.systemui.media.controls.models.recommendation.RecommendationViewHolder
@@ -63,6 +70,10 @@ import java.io.PrintWriter
 import java.util.TreeMap
 import javax.inject.Inject
 import javax.inject.Provider
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.flow.filter
+import kotlinx.coroutines.launch
 
 private const val TAG = "MediaCarouselController"
 private val settingsIntent = Intent().setAction(ACTION_MEDIA_CONTROLS_SETTINGS)
@@ -91,6 +102,8 @@ constructor(
     private val logger: MediaUiEventLogger,
     private val debugLogger: MediaCarouselControllerLogger,
     private val mediaFlags: MediaFlags,
+    private val keyguardUpdateMonitor: KeyguardUpdateMonitor,
+    private val keyguardTransitionInteractor: KeyguardTransitionInteractor,
 ) : Dumpable {
     /** The current width of the carousel */
     private var currentCarouselWidth: Int = 0
@@ -210,6 +223,17 @@ constructor(
             override fun onUiModeChanged() {
                 updatePlayers(recreateMedia = false)
                 inflateSettingsButton()
+            }
+        }
+
+    private val keyguardUpdateMonitorCallback =
+        object : KeyguardUpdateMonitorCallback() {
+            override fun onStrongAuthStateChanged(userId: Int) {
+                if (keyguardUpdateMonitor.isUserInLockdown(userId)) {
+                    hideMediaCarousel()
+                } else if (keyguardUpdateMonitor.isUserUnlocked(userId)) {
+                    showMediaCarousel()
+                }
             }
         }
 
@@ -487,6 +511,13 @@ constructor(
                 }
             }
         )
+        keyguardUpdateMonitor.registerCallback(keyguardUpdateMonitorCallback)
+        mediaCarousel.repeatWhenAttached {
+            repeatOnLifecycle(Lifecycle.State.STARTED) {
+                // A backup to show media carousel (if available) once the keyguard is gone.
+                listenForAnyStateToGoneKeyguardTransition(this)
+            }
+        }
     }
 
     private fun inflateSettingsButton() {
@@ -514,6 +545,23 @@ constructor(
         // (rather than inherited from the parent, which would resolve to LTR when unattached).
         mediaCarousel.layoutDirection = View.LAYOUT_DIRECTION_LOCALE
         return mediaCarousel
+    }
+
+    private fun hideMediaCarousel() {
+        mediaCarousel.visibility = View.GONE
+    }
+
+    private fun showMediaCarousel() {
+        mediaCarousel.visibility = View.VISIBLE
+    }
+
+    @VisibleForTesting
+    internal fun listenForAnyStateToGoneKeyguardTransition(scope: CoroutineScope): Job {
+        return scope.launch {
+            keyguardTransitionInteractor.anyStateToGoneTransition
+                .filter { it.transitionState == TransitionState.FINISHED }
+                .collect { showMediaCarousel() }
+        }
     }
 
     private fun reorderAllPlayers(
