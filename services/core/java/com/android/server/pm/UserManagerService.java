@@ -5442,6 +5442,12 @@ public class UserManagerService extends IUserManager.Stub {
                         return false;
                     }
 
+                    if (isNonRemovableMainUser(userData.info)) {
+                        Slog.e(LOG_TAG, "Main user cannot be removed when "
+                                + "it's a permanent admin user.");
+                        return false;
+                    }
+
                     if (mRemovingUserIds.get(userId)) {
                         Slog.e(LOG_TAG, TextUtils.formatSimple(
                                 "User %d is already scheduled for removal.", userId));
@@ -5544,6 +5550,12 @@ public class UserManagerService extends IUserManager.Stub {
                         Slog.e(LOG_TAG,
                                 "Cannot remove user " + userId + ", invalid user id provided.");
                         return UserManager.REMOVE_RESULT_ERROR_USER_NOT_FOUND;
+                    }
+
+                    if (isNonRemovableMainUser(userData.info)) {
+                        Slog.e(LOG_TAG, "Main user cannot be removed when "
+                                + "it's a permanent admin user.");
+                        return UserManager.REMOVE_RESULT_ERROR_MAIN_USER_PERMANENT_ADMIN;
                     }
 
                     if (mRemovingUserIds.get(userId)) {
@@ -6764,7 +6776,7 @@ public class UserManagerService extends IUserManager.Stub {
         public void removeAllUsers() {
             if (UserHandle.USER_SYSTEM == getCurrentUserId()) {
                 // Remove the non-system users straight away.
-                removeNonSystemUsers();
+                removeAllUsersExceptSystemAndPermanentAdminMain();
             } else {
                 // Switch to the system user first and then remove the other users.
                 BroadcastReceiver userSwitchedReceiver = new BroadcastReceiver() {
@@ -6776,7 +6788,7 @@ public class UserManagerService extends IUserManager.Stub {
                             return;
                         }
                         mContext.unregisterReceiver(this);
-                        removeNonSystemUsers();
+                        removeAllUsersExceptSystemAndPermanentAdminMain();
                     }
                 };
                 IntentFilter userSwitchedFilter = new IntentFilter();
@@ -7129,14 +7141,14 @@ public class UserManagerService extends IUserManager.Stub {
         throw new UserManager.CheckedUserOperationException(message, userOperationResult);
     }
 
-    /* Remove all the users except of the system one. */
-    private void removeNonSystemUsers() {
+    /* Remove all the users except the system and permanent admin main.*/
+    private void removeAllUsersExceptSystemAndPermanentAdminMain() {
         ArrayList<UserInfo> usersToRemove = new ArrayList<>();
         synchronized (mUsersLock) {
             final int userSize = mUsers.size();
             for (int i = 0; i < userSize; i++) {
                 UserInfo ui = mUsers.valueAt(i).info;
-                if (ui.id != UserHandle.USER_SYSTEM) {
+                if (ui.id != UserHandle.USER_SYSTEM && !isNonRemovableMainUser(ui)) {
                     usersToRemove.add(ui);
                 }
             }
@@ -7263,6 +7275,24 @@ public class UserManagerService extends IUserManager.Stub {
             mAmInternal = LocalServices.getService(ActivityManagerInternal.class);
         }
         return mAmInternal;
+    }
+
+    /**
+     * Returns true, when user has {@link UserInfo#FLAG_MAIN} and system property
+     * {@link com.android.internal.R.bool.isMainUserPermanentAdmin} is true.
+     */
+    private boolean isNonRemovableMainUser(UserInfo userInfo) {
+        return userInfo.isMain() && isMainUserPermanentAdmin();
+    }
+
+    /**
+     * Returns true, when {@link com.android.internal.R.bool.isMainUserPermanentAdmin} is true.
+     * If the main user is a permanent admin user it can't be deleted
+     * or downgraded to non-admin status.
+     */
+    private static boolean isMainUserPermanentAdmin() {
+        return Resources.getSystem()
+                .getBoolean(com.android.internal.R.bool.config_isMainUserPermanentAdmin);
     }
 
 }

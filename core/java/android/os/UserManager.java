@@ -1827,6 +1827,15 @@ public class UserManager {
     public static final int REMOVE_RESULT_ERROR_SYSTEM_USER = -4;
 
     /**
+     * A response code from {@link #removeUserWhenPossible(UserHandle, boolean)} indicating that
+     * user being removed is a  {@link UserInfo#FLAG_MAIN}  user and can't be removed because
+     * system property {@link com.android.internal.R.bool.isMainUserPermanentAdmin} is true.
+     * @hide
+     */
+    @SystemApi
+    public static final int REMOVE_RESULT_ERROR_MAIN_USER_PERMANENT_ADMIN = -5;
+
+    /**
      * Possible response codes from {@link #removeUserWhenPossible(UserHandle, boolean)}.
      *
      * @hide
@@ -1838,6 +1847,7 @@ public class UserManager {
             REMOVE_RESULT_ERROR_USER_RESTRICTION,
             REMOVE_RESULT_ERROR_USER_NOT_FOUND,
             REMOVE_RESULT_ERROR_SYSTEM_USER,
+            REMOVE_RESULT_ERROR_MAIN_USER_PERMANENT_ADMIN,
             REMOVE_RESULT_ERROR_UNKNOWN,
     })
     @Retention(RetentionPolicy.SOURCE)
@@ -5236,8 +5246,9 @@ public class UserManager {
      * @return the {@link RemoveResult} code: {@link #REMOVE_RESULT_REMOVED},
      * {@link #REMOVE_RESULT_DEFERRED}, {@link #REMOVE_RESULT_ALREADY_BEING_REMOVED},
      * {@link #REMOVE_RESULT_ERROR_USER_RESTRICTION}, {@link #REMOVE_RESULT_ERROR_USER_NOT_FOUND},
-     * {@link #REMOVE_RESULT_ERROR_SYSTEM_USER}, or {@link #REMOVE_RESULT_ERROR_UNKNOWN}. All error
-     * codes have negative values.
+     * {@link #REMOVE_RESULT_ERROR_SYSTEM_USER},
+     * {@link #REMOVE_RESULT_ERROR_MAIN_USER_PERMANENT_ADMIN}, or
+     * {@link #REMOVE_RESULT_ERROR_UNKNOWN}. All error codes have negative values.
      *
      * @hide
      */

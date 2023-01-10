@@ -3023,6 +3023,10 @@ class PackageManagerShellCommand extends ShellCommand {
             case UserManager.REMOVE_RESULT_ALREADY_BEING_REMOVED:
                 getOutPrintWriter().printf("Success: user %d is already being removed\n", userId);
                 return 0;
+            case UserManager.REMOVE_RESULT_ERROR_MAIN_USER_PERMANENT_ADMIN:
+                getOutPrintWriter().printf("Error: user %d is a permanent admin main user\n",
+                        userId);
+                return 1;
             default:
                 getErrPrintWriter().printf("Error: couldn't remove or mark ephemeral user id %d\n",
                         userId);

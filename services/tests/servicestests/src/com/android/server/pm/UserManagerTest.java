@@ -375,6 +375,29 @@ public final class UserManagerTest {
 
     @MediumTest
     @Test
+    public void testRemoveUserWhenPossible_permanentAdminMainUserReturnsError() throws Exception {
+        assumeHeadlessModeEnabled();
+        assumeTrue("Main user is not permanent admin", isMainUserPermanentAdmin());
+
+        int currentUser = ActivityManager.getCurrentUser();
+        final UserInfo otherUser = createUser("User 1", /* flags= */ UserInfo.FLAG_ADMIN);
+        UserHandle mainUser = mUserManager.getMainUser();
+
+        switchUser(otherUser.id, null, true);
+
+        assertThat(mUserManager.removeUserWhenPossible(mainUser,
+                /* overrideDevicePolicy= */ false))
+                .isEqualTo(UserManager.REMOVE_RESULT_ERROR_MAIN_USER_PERMANENT_ADMIN);
+
+
+        assertThat(hasUser(mainUser.getIdentifier())).isTrue();
+
+        // Switch back to the starting user.
+        switchUser(currentUser, null, true);
+    }
+
+    @MediumTest
+    @Test
     public void testRemoveUserWhenPossible_invalidUserReturnsError() throws Exception {
         assertThat(hasUser(Integer.MAX_VALUE)).isFalse();
         assertThat(mUserManager.removeUserWhenPossible(UserHandle.of(Integer.MAX_VALUE),
@@ -1423,4 +1446,10 @@ public final class UserManagerTest {
     private static UserHandle asHandle(int userId) {
         return new UserHandle(userId);
     }
+
+    private boolean isMainUserPermanentAdmin() {
+        return Resources.getSystem()
+                .getBoolean(com.android.internal.R.bool.config_isMainUserPermanentAdmin);
+    }
+
 }

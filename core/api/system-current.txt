@@ -10416,6 +10416,7 @@ package android.os {
     field public static final String DISALLOW_RUN_IN_BACKGROUND = "no_run_in_background";
     field public static final int REMOVE_RESULT_ALREADY_BEING_REMOVED = 2; // 0x2
     field public static final int REMOVE_RESULT_DEFERRED = 1; // 0x1
+    field public static final int REMOVE_RESULT_ERROR_MAIN_USER_PERMANENT_ADMIN = -5; // 0xfffffffb
     field public static final int REMOVE_RESULT_ERROR_SYSTEM_USER = -4; // 0xfffffffc
     field public static final int REMOVE_RESULT_ERROR_UNKNOWN = -1; // 0xffffffff
     field public static final int REMOVE_RESULT_ERROR_USER_NOT_FOUND = -3; // 0xfffffffd
