@@ -26,6 +26,7 @@ import com.android.systemui.log.table.TableLogBuffer
 import com.android.systemui.statusbar.pipeline.mobile.data.model.MobileConnectivityModel
 import com.android.systemui.statusbar.pipeline.mobile.data.model.SubscriptionModel
 import com.android.systemui.statusbar.pipeline.mobile.util.MobileMappingsProxy
+import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 
 // TODO(b/261632894): remove this in favor of the real impl or DemoMobileConnectionsRepository
@@ -56,6 +57,7 @@ class FakeMobileConnectionsRepository(
 
     private val _activeMobileDataSubscriptionId = MutableStateFlow(INVALID_SUBSCRIPTION_ID)
     override val activeMobileDataSubscriptionId = _activeMobileDataSubscriptionId
+    override val activeSubChangedInGroupEvent: MutableSharedFlow<Unit> = MutableSharedFlow()
 
     private val _mobileConnectivity = MutableStateFlow(MobileConnectivityModel())
     override val defaultMobileNetworkConnectivity = _mobileConnectivity

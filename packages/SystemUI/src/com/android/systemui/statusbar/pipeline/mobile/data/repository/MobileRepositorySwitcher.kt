@@ -124,6 +124,9 @@ constructor(
                 realRepository.activeMobileDataSubscriptionId.value
             )
 
+    override val activeSubChangedInGroupEvent: Flow<Unit> =
+        activeRepo.flatMapLatest { it.activeSubChangedInGroupEvent }
+
     override val defaultDataSubRatConfig: StateFlow<MobileMappings.Config> =
         activeRepo
             .flatMapLatest { it.defaultDataSubRatConfig }

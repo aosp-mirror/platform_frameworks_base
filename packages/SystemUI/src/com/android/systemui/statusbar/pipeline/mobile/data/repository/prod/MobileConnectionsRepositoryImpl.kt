@@ -52,6 +52,7 @@ import com.android.systemui.statusbar.pipeline.shared.ConnectivityPipelineLogger
 import com.android.systemui.statusbar.pipeline.shared.ConnectivityPipelineLogger.Companion.logInputChange
 import com.android.systemui.statusbar.pipeline.wifi.data.model.WifiNetworkModel
 import com.android.systemui.statusbar.pipeline.wifi.data.repository.WifiRepository
+import com.android.systemui.util.kotlin.pairwiseBy
 import com.android.systemui.util.settings.GlobalSettings
 import javax.inject.Inject
 import kotlinx.coroutines.CoroutineDispatcher
@@ -63,6 +64,8 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.distinctUntilChanged
+import kotlinx.coroutines.flow.flow
+import kotlinx.coroutines.flow.flowOn
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.mapLatest
 import kotlinx.coroutines.flow.merge
@@ -257,6 +260,35 @@ constructor(
             .distinctUntilChanged()
             .logInputChange(logger, "defaultMobileNetworkConnectivity")
             .stateIn(scope, SharingStarted.WhileSubscribed(), MobileConnectivityModel())
+
+    /**
+     * Flow that tracks the active mobile data subscriptions. Emits `true` whenever the active data
+     * subscription Id changes but the subscription group remains the same. In these cases, we want
+     * to retain the previous subscription's validation status for up to 2s to avoid flickering the
+     * icon.
+     *
+     * TODO(b/265164432): we should probably expose all change events, not just same group
+     */
+    @SuppressLint("MissingPermission")
+    override val activeSubChangedInGroupEvent =
+        flow {
+                activeMobileDataSubscriptionId.pairwiseBy { prevVal: Int, newVal: Int ->
+                    if (!defaultMobileNetworkConnectivity.value.isValidated) {
+                        return@pairwiseBy
+                    }
+                    val prevSub = subscriptionManager.getActiveSubscriptionInfo(prevVal)
+                    val nextSub = subscriptionManager.getActiveSubscriptionInfo(newVal)
+
+                    if (prevSub == null || nextSub == null) {
+                        return@pairwiseBy
+                    }
+
+                    if (prevSub.groupUuid != null && prevSub.groupUuid == nextSub.groupUuid) {
+                        emit(Unit)
+                    }
+                }
+            }
+            .flowOn(bgDispatcher)
 
     private fun isValidSubId(subId: Int): Boolean {
         subscriptions.value.forEach {

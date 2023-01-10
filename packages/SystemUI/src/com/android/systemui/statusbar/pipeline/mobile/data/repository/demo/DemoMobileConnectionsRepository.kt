@@ -48,6 +48,7 @@ import javax.inject.Inject
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.Job
+import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
@@ -119,6 +120,9 @@ constructor(
                 SharingStarted.WhileSubscribed(),
                 subscriptions.value.firstOrNull()?.subscriptionId ?: INVALID_SUBSCRIPTION_ID
             )
+
+    // TODO(b/261029387): consider adding a demo command for this
+    override val activeSubChangedInGroupEvent: Flow<Unit> = flowOf()
 
     /** Demo mode doesn't currently support modifications to the mobile mappings */
     override val defaultDataSubRatConfig =

@@ -36,6 +36,7 @@ import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.test.TestScope
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
+import kotlinx.coroutines.test.advanceTimeBy
 import kotlinx.coroutines.test.runTest
 import kotlinx.coroutines.yield
 import org.junit.After
@@ -349,6 +350,259 @@ class MobileIconsInteractorTest : SysuiTestCase() {
             expected = MobileConnectivityModel(isConnected = false, isValidated = false)
             connectionsRepository.setMobileConnectivity(expected)
             assertThat(latest).isEqualTo(expected)
+
+            job.cancel()
+        }
+
+    @Test
+    fun `data switch - in same group - validated matches previous value`() =
+        testScope.runTest {
+            var latest: MobileConnectivityModel? = null
+            val job =
+                underTest.defaultMobileNetworkConnectivity.onEach { latest = it }.launchIn(this)
+
+            connectionsRepository.setMobileConnectivity(
+                MobileConnectivityModel(
+                    isConnected = true,
+                    isValidated = true,
+                )
+            )
+            // Trigger a data change in the same subscription group
+            connectionsRepository.activeSubChangedInGroupEvent.emit(Unit)
+            connectionsRepository.setMobileConnectivity(
+                MobileConnectivityModel(
+                    isConnected = false,
+                    isValidated = false,
+                )
+            )
+
+            assertThat(latest)
+                .isEqualTo(
+                    MobileConnectivityModel(
+                        isConnected = false,
+                        isValidated = true,
+                    )
+                )
+
+            job.cancel()
+        }
+
+    @Test
+    fun `data switch - in same group - validated matches previous value - expires after 2s`() =
+        testScope.runTest {
+            var latest: MobileConnectivityModel? = null
+            val job =
+                underTest.defaultMobileNetworkConnectivity.onEach { latest = it }.launchIn(this)
+
+            connectionsRepository.setMobileConnectivity(
+                MobileConnectivityModel(
+                    isConnected = true,
+                    isValidated = true,
+                )
+            )
+            // Trigger a data change in the same subscription group
+            connectionsRepository.activeSubChangedInGroupEvent.emit(Unit)
+            connectionsRepository.setMobileConnectivity(
+                MobileConnectivityModel(
+                    isConnected = false,
+                    isValidated = false,
+                )
+            )
+            // After 1s, the force validation bit is still present
+            advanceTimeBy(1000)
+            assertThat(latest)
+                .isEqualTo(
+                    MobileConnectivityModel(
+                        isConnected = false,
+                        isValidated = true,
+                    )
+                )
+
+            // After 2s, the force validation expires
+            advanceTimeBy(1001)
+
+            assertThat(latest)
+                .isEqualTo(
+                    MobileConnectivityModel(
+                        isConnected = false,
+                        isValidated = false,
+                    )
+                )
+
+            job.cancel()
+        }
+
+    @Test
+    fun `data switch - in same group - not validated - uses new value immediately`() =
+        testScope.runTest {
+            var latest: MobileConnectivityModel? = null
+            val job =
+                underTest.defaultMobileNetworkConnectivity.onEach { latest = it }.launchIn(this)
+
+            connectionsRepository.setMobileConnectivity(
+                MobileConnectivityModel(
+                    isConnected = true,
+                    isValidated = false,
+                )
+            )
+            connectionsRepository.activeSubChangedInGroupEvent.emit(Unit)
+            connectionsRepository.setMobileConnectivity(
+                MobileConnectivityModel(
+                    isConnected = false,
+                    isValidated = false,
+                )
+            )
+
+            assertThat(latest)
+                .isEqualTo(
+                    MobileConnectivityModel(
+                        isConnected = false,
+                        isValidated = false,
+                    )
+                )
+
+            job.cancel()
+        }
+
+    @Test
+    fun `data switch - lose validation - then switch happens - clears forced bit`() =
+        testScope.runTest {
+            var latest: MobileConnectivityModel? = null
+            val job =
+                underTest.defaultMobileNetworkConnectivity.onEach { latest = it }.launchIn(this)
+
+            // GIVEN the network starts validated
+            connectionsRepository.setMobileConnectivity(
+                MobileConnectivityModel(
+                    isConnected = true,
+                    isValidated = true,
+                )
+            )
+
+            // WHEN a data change happens in the same group
+            connectionsRepository.activeSubChangedInGroupEvent.emit(Unit)
+
+            // WHEN the validation bit is lost
+            connectionsRepository.setMobileConnectivity(
+                MobileConnectivityModel(
+                    isConnected = false,
+                    isValidated = false,
+                )
+            )
+
+            // WHEN another data change happens in the same group
+            connectionsRepository.activeSubChangedInGroupEvent.emit(Unit)
+
+            // THEN the forced validation bit is still removed after 2s
+            assertThat(latest)
+                .isEqualTo(
+                    MobileConnectivityModel(
+                        isConnected = false,
+                        isValidated = true,
+                    )
+                )
+
+            advanceTimeBy(1000)
+
+            assertThat(latest)
+                .isEqualTo(
+                    MobileConnectivityModel(
+                        isConnected = false,
+                        isValidated = true,
+                    )
+                )
+
+            advanceTimeBy(1001)
+
+            assertThat(latest)
+                .isEqualTo(
+                    MobileConnectivityModel(
+                        isConnected = false,
+                        isValidated = false,
+                    )
+                )
+
+            job.cancel()
+        }
+
+    @Test
+    fun `data switch - while already forcing validation - resets clock`() =
+        testScope.runTest {
+            var latest: MobileConnectivityModel? = null
+            val job =
+                underTest.defaultMobileNetworkConnectivity.onEach { latest = it }.launchIn(this)
+            connectionsRepository.setMobileConnectivity(
+                MobileConnectivityModel(
+                    isConnected = true,
+                    isValidated = true,
+                )
+            )
+
+            connectionsRepository.activeSubChangedInGroupEvent.emit(Unit)
+
+            advanceTimeBy(1000)
+
+            // WHEN another change in same group event happens
+            connectionsRepository.activeSubChangedInGroupEvent.emit(Unit)
+            connectionsRepository.setMobileConnectivity(
+                MobileConnectivityModel(
+                    isConnected = false,
+                    isValidated = false,
+                )
+            )
+
+            // THEN the forced validation remains for exactly 2 more seconds from now
+
+            // 1.500s from second event
+            advanceTimeBy(1500)
+            assertThat(latest)
+                .isEqualTo(
+                    MobileConnectivityModel(
+                        isConnected = false,
+                        isValidated = true,
+                    )
+                )
+
+            // 2.001s from the second event
+            advanceTimeBy(501)
+            assertThat(latest)
+                .isEqualTo(
+                    MobileConnectivityModel(
+                        isConnected = false,
+                        isValidated = false,
+                    )
+                )
+
+            job.cancel()
+        }
+
+    @Test
+    fun `data switch - not in same group - uses new values`() =
+        testScope.runTest {
+            var latest: MobileConnectivityModel? = null
+            val job =
+                underTest.defaultMobileNetworkConnectivity.onEach { latest = it }.launchIn(this)
+
+            connectionsRepository.setMobileConnectivity(
+                MobileConnectivityModel(
+                    isConnected = true,
+                    isValidated = true,
+                )
+            )
+            connectionsRepository.setMobileConnectivity(
+                MobileConnectivityModel(
+                    isConnected = false,
+                    isValidated = false,
+                )
+            )
+
+            assertThat(latest)
+                .isEqualTo(
+                    MobileConnectivityModel(
+                        isConnected = false,
+                        isValidated = false,
+                    )
+                )
 
             job.cancel()
         }

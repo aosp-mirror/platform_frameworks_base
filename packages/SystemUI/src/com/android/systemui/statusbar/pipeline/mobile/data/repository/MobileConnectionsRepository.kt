@@ -37,6 +37,12 @@ interface MobileConnectionsRepository {
     /** Observable for the subscriptionId of the current mobile data connection */
     val activeMobileDataSubscriptionId: StateFlow<Int>
 
+    /**
+     * Observable event for when the active data sim switches but the group stays the same. E.g.,
+     * CBRS switching would trigger this
+     */
+    val activeSubChangedInGroupEvent: Flow<Unit>
+
     /** The current connectivity status for the default mobile network connection */
     val defaultMobileNetworkConnectivity: StateFlow<MobileConnectivityModel>
 

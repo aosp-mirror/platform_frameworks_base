@@ -32,14 +32,17 @@ import com.android.systemui.util.CarrierConfigTracker
 import javax.inject.Inject
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.mapLatest
 import kotlinx.coroutines.flow.stateIn
+import kotlinx.coroutines.flow.transformLatest
 
 /**
  * Business layer logic for the set of mobile subscription icons.
@@ -163,8 +166,45 @@ constructor(
             }
         }
 
+    /**
+     * Copied from the old pipeline. We maintain a 2s period of time where we will keep the
+     * validated bit from the old active network (A) while data is changing to the new one (B).
+     *
+     * This condition only applies if
+     * 1. A and B are in the same subscription group (e.c. for CBRS data switching) and
+     * 2. A was validated before the switch
+     *
+     * The goal of this is to minimize the flickering in the UI of the cellular indicator
+     */
+    private val forcingCellularValidation =
+        mobileConnectionsRepo.activeSubChangedInGroupEvent
+            .filter { mobileConnectionsRepo.defaultMobileNetworkConnectivity.value.isValidated }
+            .transformLatest {
+                emit(true)
+                delay(2000)
+                emit(false)
+            }
+            .stateIn(scope, SharingStarted.WhileSubscribed(), false)
+
     override val defaultMobileNetworkConnectivity: StateFlow<MobileConnectivityModel> =
-        mobileConnectionsRepo.defaultMobileNetworkConnectivity
+        combine(
+                mobileConnectionsRepo.defaultMobileNetworkConnectivity,
+                forcingCellularValidation,
+            ) { networkConnectivity, forceValidation ->
+                return@combine if (forceValidation) {
+                    MobileConnectivityModel(
+                        isValidated = true,
+                        isConnected = networkConnectivity.isConnected
+                    )
+                } else {
+                    networkConnectivity
+                }
+            }
+            .stateIn(
+                scope,
+                SharingStarted.WhileSubscribed(),
+                mobileConnectionsRepo.defaultMobileNetworkConnectivity.value
+            )
 
     /**
      * Mapping from network type to [MobileIconGroup] using the config generated for the default
