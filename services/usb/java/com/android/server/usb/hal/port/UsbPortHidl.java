@@ -35,7 +35,8 @@ import static android.hardware.usb.UsbPortStatus.POWER_ROLE_SINK;
 import static android.hardware.usb.UsbPortStatus.POWER_ROLE_SOURCE;
 import static android.hardware.usb.UsbPortStatus.DATA_STATUS_DISABLED_FORCE;
 import static android.hardware.usb.UsbPortStatus.DATA_STATUS_UNKNOWN;
-
+import static android.hardware.usb.UsbPortStatus.PLUG_STATE_UNKNOWN;
+import static android.hardware.usb.DisplayPortAltModeInfo.DISPLAYPORT_ALT_MODE_STATUS_UNKNOWN;
 
 import static com.android.server.usb.UsbPortManager.logAndPrint;
 import static com.android.server.usb.UsbPortManager.logAndPrintException;
@@ -422,7 +423,10 @@ public final class UsbPortHidl implements UsbPortHal {
                         false, CONTAMINANT_PROTECTION_NONE,
                         false, CONTAMINANT_DETECTION_NOT_SUPPORTED, sUsbDataStatus,
                         false, POWER_BRICK_STATUS_UNKNOWN,
-                        false, new int[] {});
+                        false, new int[] {},
+                        PLUG_STATE_UNKNOWN,
+                        0,
+                        null);
                 newPortInfo.add(temp);
                 UsbPortManager.logAndPrint(Log.INFO, mPw, "ClientCallback V1_0: "
                         + current.portName);
@@ -457,7 +461,10 @@ public final class UsbPortHidl implements UsbPortHal {
                         false, CONTAMINANT_PROTECTION_NONE,
                         false, CONTAMINANT_DETECTION_NOT_SUPPORTED, sUsbDataStatus,
                         false, POWER_BRICK_STATUS_UNKNOWN,
-                        false, new int[] {});
+                        false, new int[] {},
+                        PLUG_STATE_UNKNOWN,
+                        0,
+                        null);
                 newPortInfo.add(temp);
                 UsbPortManager.logAndPrint(Log.INFO, mPw, "ClientCallback V1_1: "
                         + current.status.portName);
@@ -496,7 +503,10 @@ public final class UsbPortHidl implements UsbPortHal {
                         current.contaminantDetectionStatus,
                         sUsbDataStatus,
                         false, POWER_BRICK_STATUS_UNKNOWN,
-                        false, new int[] {});
+                        false, new int[] {},
+                        PLUG_STATE_UNKNOWN,
+                        0,
+                        null);
                 newPortInfo.add(temp);
                 UsbPortManager.logAndPrint(Log.INFO, mPw, "ClientCallback V1_2: "
                         + current.status_1_1.status.portName);

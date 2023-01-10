@@ -20,6 +20,7 @@ package android.hardware.usb;
 import static android.hardware.usb.UsbPortStatus.DATA_STATUS_DISABLED_FORCE;
 
 import android.Manifest;
+import android.annotation.CallbackExecutor;
 import android.annotation.IntDef;
 import android.annotation.LongDef;
 import android.annotation.NonNull;
@@ -44,16 +45,24 @@ import android.os.Bundle;
 import android.os.ParcelFileDescriptor;
 import android.os.Process;
 import android.os.RemoteException;
+import android.util.ArrayMap;
 import android.util.Log;
+import android.util.Slog;
+
+import com.android.internal.annotations.GuardedBy;
 
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.StringJoiner;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.concurrent.Executor;
+import java.util.function.BiConsumer;
+import java.util.function.Consumer;
 
 /**
  * This class allows you to access the state of USB and communicate with USB devices.
@@ -724,8 +733,60 @@ public class UsbManager {
     })
     public @interface UsbHalVersion {}
 
+    /**
+     * Listener to register for when the {@link DisplayPortAltModeInfo} changes on a
+     * {@link UsbPort}.
+     *
+     * @hide
+     */
+    @SystemApi
+    public interface DisplayPortAltModeInfoListener {
+        /**
+         * Callback to be executed when the {@link DisplayPortAltModeInfo} changes on a
+         * {@link UsbPort}.
+         *
+         * @param portId    String describing the {@link UsbPort} that was changed.
+         * @param info      New {@link DisplayPortAltModeInfo} for the corresponding portId.
+         */
+        public void onDisplayPortAltModeInfoChanged(@NonNull String portId,
+                @NonNull DisplayPortAltModeInfo info);
+    }
+
+    /**
+     * Holds callback and executor data to be passed across UsbService.
+     */
+    private class DisplayPortAltModeInfoDispatchingListener extends
+            IDisplayPortAltModeInfoListener.Stub {
+
+        public void onDisplayPortAltModeInfoChanged(String portId,
+                DisplayPortAltModeInfo displayPortAltModeInfo) {
+            synchronized (mDisplayPortListenersLock) {
+                for (Map.Entry<DisplayPortAltModeInfoListener, Executor> entry :
+                        mDisplayPortListeners.entrySet()) {
+                    Executor executor = entry.getValue();
+                    DisplayPortAltModeInfoListener callback = entry.getKey();
+                    final long token = Binder.clearCallingIdentity();
+                    try {
+                        executor.execute(() -> callback.onDisplayPortAltModeInfoChanged(portId,
+                                displayPortAltModeInfo));
+                    } catch (Exception e) {
+                        Slog.e(TAG, "Exception during onDisplayPortAltModeInfoChanged from "
+                                + "executor: " + executor, e);
+                    } finally {
+                        Binder.restoreCallingIdentity(token);
+                    }
+                }
+            }
+        }
+    }
+
     private final Context mContext;
     private final IUsbManager mService;
+    private final Object mDisplayPortListenersLock = new Object();
+    @GuardedBy("mDisplayPortListenersLock")
+    private ArrayMap<DisplayPortAltModeInfoListener, Executor> mDisplayPortListeners;
+    @GuardedBy("mDisplayPortListenersLock")
+    private DisplayPortAltModeInfoDispatchingListener mDisplayPortServiceListener;
 
     /**
      * @hide
@@ -1522,6 +1583,109 @@ public class UsbManager {
             }
             throw e.rethrowFromSystemServer();
         }
+    }
+
+    @GuardedBy("mDisplayPortListenersLock")
+    @RequiresPermission(Manifest.permission.MANAGE_USB)
+    private boolean registerDisplayPortAltModeEventsIfNeededLocked() {
+        DisplayPortAltModeInfoDispatchingListener displayPortDispatchingListener =
+                new DisplayPortAltModeInfoDispatchingListener();
+        try {
+            if (mService.registerForDisplayPortEvents(displayPortDispatchingListener)) {
+                mDisplayPortServiceListener = displayPortDispatchingListener;
+                return true;
+            }
+            return false;
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
+    /**
+     * Registers the given listener to listen for DisplayPort Alt Mode changes.
+     * <p>
+     * If this method returns true, the caller should ensure to call
+     * {@link #unregisterDisplayPortAltModeListener} when it no longer requires updates.
+     *
+     * @param executor          Executor on which to run the listener.
+     * @param listener          DisplayPortAltModeInfoListener invoked on DisplayPortAltModeInfo
+     *                          changes. See {@link #DisplayPortAltModeInfoListener} for listener
+     *                          details.
+     *
+     * @return true on successful register, false on failed register due to listener already being
+     *         registered or an internal error.
+     *
+     * @hide
+     */
+    @SystemApi
+    @RequiresPermission(Manifest.permission.MANAGE_USB)
+    public boolean registerDisplayPortAltModeInfoListener(
+            @NonNull @CallbackExecutor Executor executor,
+            @NonNull DisplayPortAltModeInfoListener listener) {
+        Objects.requireNonNull(executor, "registerDisplayPortAltModeInfoListener: "
+                + "executor must not be null.");
+        Objects.requireNonNull(listener, "registerDisplayPortAltModeInfoListener: "
+                + "listener must not be null.");
+
+        synchronized (mDisplayPortListenersLock) {
+            if (mDisplayPortListeners == null) {
+                mDisplayPortListeners = new ArrayMap<DisplayPortAltModeInfoListener,
+                        Executor>();
+            }
+
+            if (mDisplayPortServiceListener == null) {
+                if (!registerDisplayPortAltModeEventsIfNeededLocked()) {
+                    return false;
+                }
+            }
+            if (mDisplayPortListeners.containsKey(listener)) {
+                return false;
+            }
+
+            mDisplayPortListeners.put(listener, executor);
+            return true;
+        }
+    }
+
+    @GuardedBy("mDisplayPortListenersLock")
+    @RequiresPermission(Manifest.permission.MANAGE_USB)
+    private void unregisterDisplayPortAltModeEventsLocked() {
+        if (mDisplayPortServiceListener != null) {
+            try {
+                mService.unregisterForDisplayPortEvents(mDisplayPortServiceListener);
+            } catch (RemoteException e) {
+                throw e.rethrowFromSystemServer();
+            } finally {
+                // If there was a RemoteException, the system server may have died,
+                // and this listener probably became unregistered, so clear it for re-registration.
+                mDisplayPortServiceListener = null;
+            }
+        }
+    }
+
+    /**
+     * Unregisters the given listener if it was previously passed to
+     * registerDisplayPortAltModeInfoListener.
+     *
+     * @param listener          DisplayPortAltModeInfoListener used to register the listener
+     *                          in registerDisplayPortAltModeInfoListener.
+     *
+     * @hide
+     */
+    @SystemApi
+    @RequiresPermission(Manifest.permission.MANAGE_USB)
+    public void unregisterDisplayPortAltModeInfoListener(
+            @NonNull DisplayPortAltModeInfoListener listener) {
+        synchronized (mDisplayPortListenersLock) {
+            if (mDisplayPortListeners == null) {
+                return;
+            }
+            mDisplayPortListeners.remove(listener);
+            if (mDisplayPortListeners.isEmpty()) {
+                unregisterDisplayPortAltModeEventsLocked();
+            }
+        }
+        return;
     }
 
     /**
