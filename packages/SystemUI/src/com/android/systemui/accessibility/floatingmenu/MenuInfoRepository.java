@@ -42,6 +42,7 @@ import android.os.UserHandle;
 import android.provider.Settings;
 import android.text.TextUtils;
 import android.util.Log;
+import android.view.View;
 import android.view.accessibility.AccessibilityManager;
 
 import androidx.annotation.NonNull;
@@ -63,6 +64,9 @@ class MenuInfoRepository {
 
     @FloatRange(from = 0.0, to = 1.0)
     private static final float DEFAULT_MENU_POSITION_X_PERCENT = 1.0f;
+
+    @FloatRange(from = 0.0, to = 1.0)
+    private static final float DEFAULT_MENU_POSITION_X_PERCENT_RTL = 0.0f;
 
     @FloatRange(from = 0.0, to = 1.0)
     private static final float DEFAULT_MENU_POSITION_Y_PERCENT = 0.77f;
@@ -223,8 +227,12 @@ class MenuInfoRepository {
         final String absolutePositionString = Prefs.getString(mContext,
                 Prefs.Key.ACCESSIBILITY_FLOATING_MENU_POSITION, /* defaultValue= */ null);
 
+        final float defaultPositionXPercent =
+                mConfiguration.getLayoutDirection() == View.LAYOUT_DIRECTION_RTL
+                        ? DEFAULT_MENU_POSITION_X_PERCENT_RTL
+                        : DEFAULT_MENU_POSITION_X_PERCENT;
         return TextUtils.isEmpty(absolutePositionString)
-                ? new Position(DEFAULT_MENU_POSITION_X_PERCENT, DEFAULT_MENU_POSITION_Y_PERCENT)
+                ? new Position(defaultPositionXPercent, DEFAULT_MENU_POSITION_Y_PERCENT)
                 : Position.fromString(absolutePositionString);
     }
 
