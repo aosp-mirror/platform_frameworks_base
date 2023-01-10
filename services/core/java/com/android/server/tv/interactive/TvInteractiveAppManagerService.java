@@ -29,6 +29,7 @@ import android.content.pm.ResolveInfo;
 import android.content.pm.ServiceInfo;
 import android.content.pm.UserInfo;
 import android.graphics.Rect;
+import android.media.PlaybackParams;
 import android.media.tv.AdBuffer;
 import android.media.tv.AdRequest;
 import android.media.tv.AdResponse;
@@ -1496,6 +1497,118 @@ public class TvInteractiveAppManagerService extends SystemService {
         }
 
         @Override
+        public void notifyTimeShiftPlaybackParams(
+                IBinder sessionToken, PlaybackParams params, int userId) {
+            if (DEBUG) {
+                Slogf.d(TAG, "notifyTimeShiftPlaybackParams(params=%s)", params);
+            }
+            final int callingUid = Binder.getCallingUid();
+            final int resolvedUserId = resolveCallingUserId(
+                    Binder.getCallingPid(), callingUid, userId, "notifyTimeShiftPlaybackParams");
+            SessionState sessionState = null;
+            final long identity = Binder.clearCallingIdentity();
+            try {
+                synchronized (mLock) {
+                    try {
+                        sessionState =
+                                getSessionStateLocked(sessionToken, callingUid, resolvedUserId);
+                        getSessionLocked(sessionState).notifyTimeShiftPlaybackParams(params);
+                    } catch (RemoteException | SessionNotFoundException e) {
+                        Slogf.e(TAG, "error in notifyTimeShiftPlaybackParams", e);
+                    }
+                }
+            } finally {
+                Binder.restoreCallingIdentity(identity);
+            }
+        }
+
+        @Override
+        public void notifyTimeShiftStatusChanged(
+                IBinder sessionToken, String inputId, int status, int userId) {
+            if (DEBUG) {
+                Slogf.d(TAG, "notifyTimeShiftStatusChanged(inputId=%s, status=%d)",
+                        inputId, status);
+            }
+            final int callingUid = Binder.getCallingUid();
+            final int resolvedUserId = resolveCallingUserId(
+                    Binder.getCallingPid(), callingUid, userId, "notifyTimeShiftStatusChanged");
+            SessionState sessionState = null;
+            final long identity = Binder.clearCallingIdentity();
+            try {
+                synchronized (mLock) {
+                    try {
+                        sessionState =
+                                getSessionStateLocked(sessionToken, callingUid, resolvedUserId);
+                        getSessionLocked(sessionState).notifyTimeShiftStatusChanged(
+                                inputId, status);
+                    } catch (RemoteException | SessionNotFoundException e) {
+                        Slogf.e(TAG, "error in notifyTimeShiftStatusChanged", e);
+                    }
+                }
+            } finally {
+                Binder.restoreCallingIdentity(identity);
+            }
+        }
+
+        @Override
+        public void notifyTimeShiftStartPositionChanged(
+                IBinder sessionToken, String inputId, long timeMs, int userId) {
+            if (DEBUG) {
+                Slogf.d(TAG, "notifyTimeShiftStartPositionChanged(inputId=%s, timeMs=%d)",
+                        inputId, timeMs);
+            }
+            final int callingUid = Binder.getCallingUid();
+            final int resolvedUserId = resolveCallingUserId(
+                    Binder.getCallingPid(), callingUid, userId,
+                    "notifyTimeShiftStartPositionChanged");
+            SessionState sessionState = null;
+            final long identity = Binder.clearCallingIdentity();
+            try {
+                synchronized (mLock) {
+                    try {
+                        sessionState =
+                                getSessionStateLocked(sessionToken, callingUid, resolvedUserId);
+                        getSessionLocked(sessionState).notifyTimeShiftStartPositionChanged(
+                                inputId, timeMs);
+                    } catch (RemoteException | SessionNotFoundException e) {
+                        Slogf.e(TAG, "error in notifyTimeShiftStartPositionChanged", e);
+                    }
+                }
+            } finally {
+                Binder.restoreCallingIdentity(identity);
+            }
+        }
+
+        @Override
+        public void notifyTimeShiftCurrentPositionChanged(
+                IBinder sessionToken, String inputId, long timeMs, int userId) {
+            if (DEBUG) {
+                Slogf.d(TAG, "notifyTimeShiftCurrentPositionChanged(inputId=%s, timeMs=%d)",
+                        inputId, timeMs);
+            }
+            final int callingUid = Binder.getCallingUid();
+            final int resolvedUserId = resolveCallingUserId(
+                    Binder.getCallingPid(), callingUid, userId,
+                    "notifyTimeShiftCurrentPositionChanged");
+            SessionState sessionState = null;
+            final long identity = Binder.clearCallingIdentity();
+            try {
+                synchronized (mLock) {
+                    try {
+                        sessionState =
+                                getSessionStateLocked(sessionToken, callingUid, resolvedUserId);
+                        getSessionLocked(sessionState).notifyTimeShiftCurrentPositionChanged(
+                                inputId, timeMs);
+                    } catch (RemoteException | SessionNotFoundException e) {
+                        Slogf.e(TAG, "error in notifyTimeShiftCurrentPositionChanged", e);
+                    }
+                }
+            } finally {
+                Binder.restoreCallingIdentity(identity);
+            }
+        }
+
+        @Override
         public void setSurface(IBinder sessionToken, Surface surface, int userId) {
             final int callingUid = Binder.getCallingUid();
             final int resolvedUserId = resolveCallingUserId(Binder.getCallingPid(), callingUid,
@@ -2250,6 +2363,27 @@ public class TvInteractiveAppManagerService extends SystemService {
                     mSessionState.mClient.onCommandRequest(cmdType, parameters, mSessionState.mSeq);
                 } catch (RemoteException e) {
                     Slogf.e(TAG, "error in onCommandRequest", e);
+                }
+            }
+        }
+
+        @Override
+        public void onTimeShiftCommandRequest(
+                @TvInteractiveAppService.TimeShiftCommandType String cmdType,
+                Bundle parameters) {
+            synchronized (mLock) {
+                if (DEBUG) {
+                    Slogf.d(TAG, "onTimeShiftCommandRequest (cmdType=" + cmdType
+                            + ", parameters=" + parameters.toString() + ")");
+                }
+                if (mSessionState.mSession == null || mSessionState.mClient == null) {
+                    return;
+                }
+                try {
+                    mSessionState.mClient.onTimeShiftCommandRequest(
+                            cmdType, parameters, mSessionState.mSeq);
+                } catch (RemoteException e) {
+                    Slogf.e(TAG, "error in onTimeShiftCommandRequest", e);
                 }
             }
         }

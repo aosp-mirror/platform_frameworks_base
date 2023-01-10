@@ -26,6 +26,7 @@ import android.media.tv.interactive.AppLinkInfo;
 import android.media.tv.interactive.ITvInteractiveAppClient;
 import android.media.tv.interactive.ITvInteractiveAppManagerCallback;
 import android.media.tv.interactive.TvInteractiveAppServiceInfo;
+import android.media.PlaybackParams;
 import android.net.Uri;
 import android.os.Bundle;
 import android.view.Surface;
@@ -57,6 +58,14 @@ interface ITvInteractiveAppManager {
     void sendTvRecordingInfoList(in IBinder sessionToken,
             in List<TvRecordingInfo> recordingInfoList, int userId);
     void notifyError(in IBinder sessionToken, in String errMsg, in Bundle params, int userId);
+    void notifyTimeShiftPlaybackParams(
+            in IBinder sessionToken, in PlaybackParams params, int userId);
+    void notifyTimeShiftStatusChanged(
+            in IBinder sessionToken, in String inputId, int status, int userId);
+    void notifyTimeShiftStartPositionChanged(
+            in IBinder sessionToken, in String inputId, long timeMs, int userId);
+    void notifyTimeShiftCurrentPositionChanged(
+            in IBinder sessionToken, in String inputId, long timeMs, int userId);
     void createSession(in ITvInteractiveAppClient client, in String iAppServiceId, int type,
             int seq, int userId);
     void releaseSession(in IBinder sessionToken, int userId);
