@@ -176,6 +176,18 @@ class BluetoothRouteProvider {
         }
     }
 
+    private BluetoothRouteInfo findBluetoothRouteWithRouteId(String routeId) {
+        if (routeId == null) {
+            return null;
+        }
+        for (BluetoothRouteInfo btRouteInfo : mBluetoothRoutes.values()) {
+            if (TextUtils.equals(btRouteInfo.mRoute.getId(), routeId)) {
+                return btRouteInfo;
+            }
+        }
+        return null;
+    }
+
     /**
      * Clears the active device for all known profiles.
      */
@@ -236,18 +248,6 @@ class BluetoothRouteProvider {
             routeIds.add(btRoute.mRoute.getId());
         }
         return routes;
-    }
-
-    BluetoothRouteInfo findBluetoothRouteWithRouteId(String routeId) {
-        if (routeId == null) {
-            return null;
-        }
-        for (BluetoothRouteInfo btRouteInfo : mBluetoothRoutes.values()) {
-            if (TextUtils.equals(btRouteInfo.mRoute.getId(), routeId)) {
-                return btRouteInfo;
-            }
-        }
-        return null;
     }
 
     /**
