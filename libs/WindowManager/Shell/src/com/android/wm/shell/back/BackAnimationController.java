@@ -51,6 +51,7 @@ import android.view.RemoteAnimationTarget;
 import android.view.SurfaceControl;
 import android.window.BackAnimationAdaptor;
 import android.window.BackEvent;
+import android.window.BackMotionEvent;
 import android.window.BackNavigationInfo;
 import android.window.IBackAnimationRunner;
 import android.window.IBackNaviAnimationController;
@@ -173,11 +174,11 @@ public class BackAnimationController implements RemoteCallable<BackAnimationCont
             boolean consumed = false;
             if (mWaitingAnimation && mOnBackCallback != null) {
                 if (mTriggerBack) {
-                    final BackEvent backFinish = mTouchTracker.createProgressEvent(1);
+                    final BackMotionEvent backFinish = mTouchTracker.createProgressEvent(1);
                     dispatchOnBackProgressed(mBackToLauncherCallback, backFinish);
                     dispatchOnBackInvoked(mOnBackCallback);
                 } else {
-                    final BackEvent backFinish = mTouchTracker.createProgressEvent(0);
+                    final BackMotionEvent backFinish = mTouchTracker.createProgressEvent(0);
                     dispatchOnBackProgressed(mBackToLauncherCallback, backFinish);
                     dispatchOnBackCancelled(mOnBackCallback);
                 }
@@ -480,7 +481,7 @@ public class BackAnimationController implements RemoteCallable<BackAnimationCont
         if (!mBackGestureStarted || mBackNavigationInfo == null) {
             return;
         }
-        final BackEvent backEvent = mTouchTracker.createProgressEvent();
+        final BackMotionEvent backEvent = mTouchTracker.createProgressEvent();
         if (USE_TRANSITION && mBackAnimationController != null && mAnimationTarget != null) {
                 dispatchOnBackProgressed(mBackToLauncherCallback, backEvent);
         } else if (mEnableAnimations.get()) {
@@ -573,7 +574,7 @@ public class BackAnimationController implements RemoteCallable<BackAnimationCont
     }
 
     private void dispatchOnBackStarted(IOnBackInvokedCallback callback,
-            BackEvent backEvent) {
+            BackMotionEvent backEvent) {
         if (callback == null) {
             return;
         }
@@ -611,7 +612,7 @@ public class BackAnimationController implements RemoteCallable<BackAnimationCont
     }
 
     private void dispatchOnBackProgressed(IOnBackInvokedCallback callback,
-            BackEvent backEvent) {
+            BackMotionEvent backEvent) {
         if (callback == null) {
             return;
         }
@@ -730,7 +731,7 @@ public class BackAnimationController implements RemoteCallable<BackAnimationCont
                     }
                     dispatchOnBackStarted(mBackToLauncherCallback,
                             mTouchTracker.createStartEvent(mAnimationTarget));
-                    final BackEvent backInit = mTouchTracker.createProgressEvent();
+                    final BackMotionEvent backInit = mTouchTracker.createProgressEvent();
                     if (!mCachingBackDispatcher.consume()) {
                         dispatchOnBackProgressed(mBackToLauncherCallback, backInit);
                     }
