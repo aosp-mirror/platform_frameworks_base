@@ -973,21 +973,59 @@ public class BubbleController implements ConfigurationChangeListener {
     }
 
     /**
-     * Adds and expands bubble for a specific intent. These bubbles are <b>not</b> backed by a n
-     * otification and remain until the user dismisses the bubble or bubble stack. Only one intent
-     * bubble is supported at a time.
+     * This method has different behavior depending on:
+     *    - if an app bubble exists
+     *    - if an app bubble is expanded
+     *
+     * If no app bubble exists, this will add and expand a bubble with the provided intent. The
+     * intent must be explicit (i.e. include a package name or fully qualified component class name)
+     * and the activity for it should be resizable.
+     *
+     * If an app bubble exists, this will toggle the visibility of it, i.e. if the app bubble is
+     * expanded, calling this method will collapse it. If the app bubble is not expanded, calling
+     * this method will expand it.
+     *
+     * These bubbles are <b>not</b> backed by a notification and remain until the user dismisses
+     * the bubble or bubble stack.
+     *
+     * Some notes:
+     *    - Only one app bubble is supported at a time
+     *    - Calling this method with a different intent than the existing app bubble will do nothing
      *
      * @param intent the intent to display in the bubble expanded view.
      */
-    public void showAppBubble(Intent intent) {
-        if (intent == null || intent.getPackage() == null) return;
+    public void showOrHideAppBubble(Intent intent) {
+        if (intent == null || intent.getPackage() == null) {
+            Log.w(TAG, "App bubble failed to show, invalid intent: " + intent
+                    + ((intent != null) ? " with package: " + intent.getPackage() : " "));
+            return;
+        }
 
         PackageManager packageManager = getPackageManagerForUser(mContext, mCurrentUserId);
         if (!isResizableActivity(intent, packageManager, KEY_APP_BUBBLE)) return;
 
-        Bubble b = new Bubble(intent, UserHandle.of(mCurrentUserId), mMainExecutor);
-        b.setShouldAutoExpand(true);
-        inflateAndAdd(b, /* suppressFlyout= */ true, /* showInShade= */ false);
+        Bubble existingAppBubble = mBubbleData.getBubbleInStackWithKey(KEY_APP_BUBBLE);
+        if (existingAppBubble != null) {
+            BubbleViewProvider selectedBubble = mBubbleData.getSelectedBubble();
+            if (isStackExpanded()) {
+                if (selectedBubble != null && KEY_APP_BUBBLE.equals(selectedBubble.getKey())) {
+                    // App bubble is expanded, lets collapse
+                    collapseStack();
+                } else {
+                    // App bubble is not selected, select it
+                    mBubbleData.setSelectedBubble(existingAppBubble);
+                }
+            } else {
+                // App bubble is not selected, select it & expand
+                mBubbleData.setSelectedBubble(existingAppBubble);
+                mBubbleData.setExpanded(true);
+            }
+        } else {
+            // App bubble does not exist, lets add and expand it
+            Bubble b = new Bubble(intent, UserHandle.of(mCurrentUserId), mMainExecutor);
+            b.setShouldAutoExpand(true);
+            inflateAndAdd(b, /* suppressFlyout= */ true, /* showInShade= */ false);
+        }
     }
 
     /**
@@ -1697,9 +1735,9 @@ public class BubbleController implements ConfigurationChangeListener {
         }
 
         @Override
-        public void showAppBubble(Intent intent) {
+        public void showOrHideAppBubble(Intent intent) {
             mMainExecutor.execute(() -> {
-                BubbleController.this.showAppBubble(intent);
+                BubbleController.this.showOrHideAppBubble(intent);
             });
         }
 
