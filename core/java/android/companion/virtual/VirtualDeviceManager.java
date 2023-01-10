@@ -931,16 +931,16 @@ public final class VirtualDeviceManager {
          * when matching the provided IntentFilter and calls the callback with the intercepted
          * intent.
          *
-         * @param executor The executor where the interceptor is executed on.
          * @param interceptorFilter The filter to match intents intended for interception.
+         * @param executor The executor where the interceptor is executed on.
          * @param interceptorCallback The callback called when an intent matching interceptorFilter
          * is intercepted.
          * @see #unregisterIntentInterceptor(IntentInterceptorCallback)
          */
         @RequiresPermission(android.Manifest.permission.CREATE_VIRTUAL_DEVICE)
         public void registerIntentInterceptor(
-                @CallbackExecutor @NonNull Executor executor,
                 @NonNull IntentFilter interceptorFilter,
+                @CallbackExecutor @NonNull Executor executor,
                 @NonNull IntentInterceptorCallback interceptorCallback) {
             Objects.requireNonNull(executor);
             Objects.requireNonNull(interceptorFilter);
