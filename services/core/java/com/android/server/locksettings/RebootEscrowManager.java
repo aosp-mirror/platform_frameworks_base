@@ -36,6 +36,7 @@ import android.content.pm.UserInfo;
 import android.net.ConnectivityManager;
 import android.net.Network;
 import android.net.NetworkCapabilities;
+import android.net.NetworkRequest;
 import android.os.Handler;
 import android.os.PowerManager;
 import android.os.SystemClock;
@@ -103,12 +104,12 @@ class RebootEscrowManager {
 
     /**
      * Number of boots until we consider the escrow data to be stale for the purposes of metrics.
-     * <p>
-     * If the delta between the current boot number and the boot number stored when the mechanism
+     *
+     * <p>If the delta between the current boot number and the boot number stored when the mechanism
      * was armed is under this number and the escrow mechanism fails, we report it as a failure of
      * the mechanism.
-     * <p>
-     * If the delta over this number and escrow fails, we will not report the metric as failed
+     *
+     * <p>If the delta over this number and escrow fails, we will not report the metric as failed
      * since there most likely was some other issue if the device rebooted several times before
      * getting to the escrow restore code.
      */
@@ -120,8 +121,11 @@ class RebootEscrowManager {
      */
     private static final int DEFAULT_LOAD_ESCROW_DATA_RETRY_COUNT = 3;
     private static final int DEFAULT_LOAD_ESCROW_DATA_RETRY_INTERVAL_SECONDS = 30;
+
     // 3 minutes. It's enough for the default 3 retries with 30 seconds interval
-    private static final int DEFAULT_WAKE_LOCK_TIMEOUT_MILLIS = 180_000;
+    private static final int DEFAULT_LOAD_ESCROW_BASE_TIMEOUT_MILLIS = 180_000;
+    // 5 seconds. An extension of the overall RoR timeout to account for overhead.
+    private static final int DEFAULT_LOAD_ESCROW_TIMEOUT_EXTENSION_MILLIS = 5000;
 
     @IntDef(prefix = {"ERROR_"}, value = {
             ERROR_NONE,
@@ -133,6 +137,7 @@ class RebootEscrowManager {
             ERROR_PROVIDER_MISMATCH,
             ERROR_KEYSTORE_FAILURE,
             ERROR_NO_NETWORK,
+            ERROR_TIMEOUT_EXHAUSTED,
     })
     @Retention(RetentionPolicy.SOURCE)
     @interface RebootEscrowErrorCode {
@@ -147,6 +152,7 @@ class RebootEscrowManager {
     static final int ERROR_PROVIDER_MISMATCH = 6;
     static final int ERROR_KEYSTORE_FAILURE = 7;
     static final int ERROR_NO_NETWORK = 8;
+    static final int ERROR_TIMEOUT_EXHAUSTED = 9;
 
     private @RebootEscrowErrorCode int mLoadEscrowDataErrorCode = ERROR_NONE;
 
@@ -167,6 +173,15 @@ class RebootEscrowManager {
 
     /** Notified when mRebootEscrowReady changes. */
     private RebootEscrowListener mRebootEscrowListener;
+
+    /** Set when unlocking reboot escrow times out. */
+    private boolean mRebootEscrowTimedOut = false;
+
+    /**
+     * Set when {@link #loadRebootEscrowDataWithRetry} is called to ensure the function is only
+     * called once.
+     */
+    private boolean mLoadEscrowDataWithRetry = false;
 
     /**
      * Hold this lock when checking or generating the reboot escrow key.
@@ -192,6 +207,7 @@ class RebootEscrowManager {
 
     PowerManager.WakeLock mWakeLock;
 
+    private ConnectivityManager.NetworkCallback mNetworkCallback;
 
     interface Callbacks {
         boolean isUserSecure(int userId);
@@ -246,6 +262,11 @@ class RebootEscrowManager {
                     "server_based_ror_enabled", false);
         }
 
+        public boolean waitForInternet() {
+            return DeviceConfig.getBoolean(
+                    DeviceConfig.NAMESPACE_OTA, "wait_for_internet_ror", false);
+        }
+
         public boolean isNetworkConnected() {
             final ConnectivityManager connectivityManager =
                     mContext.getSystemService(ConnectivityManager.class);
@@ -261,6 +282,38 @@ class RebootEscrowManager {
                             NetworkCapabilities.NET_CAPABILITY_INTERNET)
                     && networkCapabilities.hasCapability(
                             NetworkCapabilities.NET_CAPABILITY_VALIDATED);
+        }
+
+        /**
+         * Request network with internet connectivity with timeout.
+         *
+         * @param networkCallback callback to be executed if connectivity manager exists.
+         * @return true if success
+         */
+        public boolean requestNetworkWithInternet(
+                ConnectivityManager.NetworkCallback networkCallback) {
+            final ConnectivityManager connectivityManager =
+                    mContext.getSystemService(ConnectivityManager.class);
+            if (connectivityManager == null) {
+                return false;
+            }
+            NetworkRequest request =
+                    new NetworkRequest.Builder()
+                            .addCapability(NetworkCapabilities.NET_CAPABILITY_INTERNET)
+                            .build();
+
+            connectivityManager.requestNetwork(
+                    request, networkCallback, getLoadEscrowTimeoutMillis());
+            return true;
+        }
+
+        public void stopRequestingNetwork(ConnectivityManager.NetworkCallback networkCallback) {
+            final ConnectivityManager connectivityManager =
+                    mContext.getSystemService(ConnectivityManager.class);
+            if (connectivityManager == null) {
+                return;
+            }
+            connectivityManager.unregisterNetworkCallback(networkCallback);
         }
 
         public Context getContext() {
@@ -318,6 +371,16 @@ class RebootEscrowManager {
                     DEFAULT_LOAD_ESCROW_DATA_RETRY_INTERVAL_SECONDS);
         }
 
+        @VisibleForTesting
+        public int getLoadEscrowTimeoutMillis() {
+            return DEFAULT_LOAD_ESCROW_BASE_TIMEOUT_MILLIS;
+        }
+
+        @VisibleForTesting
+        public int getWakeLockTimeoutMillis() {
+            return getLoadEscrowTimeoutMillis() + DEFAULT_LOAD_ESCROW_TIMEOUT_EXTENSION_MILLIS;
+        }
+
         public void reportMetric(boolean success, int errorCode, int serviceType, int attemptCount,
                 int escrowDurationInSeconds, int vbmetaDigestStatus,
                 int durationSinceBootCompleteInSeconds) {
@@ -351,13 +414,37 @@ class RebootEscrowManager {
         mKeyStoreManager = injector.getKeyStoreManager();
     }
 
-    private void onGetRebootEscrowKeyFailed(List<UserInfo> users, int attemptCount) {
+    /** Wrapper function to set error code serialized through handler, */
+    private void setLoadEscrowDataErrorCode(@RebootEscrowErrorCode int value, Handler handler) {
+        if (mInjector.waitForInternet()) {
+            mInjector.post(
+                    handler,
+                    () -> {
+                        mLoadEscrowDataErrorCode = value;
+                    });
+        } else {
+            mLoadEscrowDataErrorCode = value;
+        }
+    }
+
+    /** Wrapper function to compare and set error code serialized through handler. */
+    private void compareAndSetLoadEscrowDataErrorCode(
+            @RebootEscrowErrorCode int expectedValue,
+            @RebootEscrowErrorCode int newValue,
+            Handler handler) {
+        if (expectedValue == mLoadEscrowDataErrorCode) {
+            setLoadEscrowDataErrorCode(newValue, handler);
+        }
+    }
+
+    private void onGetRebootEscrowKeyFailed(
+            List<UserInfo> users, int attemptCount, Handler retryHandler) {
         Slog.w(TAG, "Had reboot escrow data for users, but no key; removing escrow storage.");
         for (UserInfo user : users) {
             mStorage.removeRebootEscrow(user.id);
         }
 
-        onEscrowRestoreComplete(false, attemptCount);
+        onEscrowRestoreComplete(false, attemptCount, retryHandler);
     }
 
     void loadRebootEscrowDataIfAvailable(Handler retryHandler) {
@@ -380,25 +467,59 @@ class RebootEscrowManager {
         mWakeLock = mInjector.getWakeLock();
         if (mWakeLock != null) {
             mWakeLock.setReferenceCounted(false);
-            mWakeLock.acquire(DEFAULT_WAKE_LOCK_TIMEOUT_MILLIS);
+            mWakeLock.acquire(mInjector.getWakeLockTimeoutMillis());
+        }
+
+        if (mInjector.waitForInternet()) {
+            // Timeout to stop retrying same as the wake lock timeout.
+            mInjector.postDelayed(
+                    retryHandler,
+                    () -> {
+                        mRebootEscrowTimedOut = true;
+                    },
+                    mInjector.getLoadEscrowTimeoutMillis());
+
+            mInjector.post(
+                    retryHandler,
+                    () -> loadRebootEscrowDataOnInternet(retryHandler, users, rebootEscrowUsers));
+            return;
         }
 
         mInjector.post(retryHandler, () -> loadRebootEscrowDataWithRetry(
                 retryHandler, 0, users, rebootEscrowUsers));
     }
 
-    void scheduleLoadRebootEscrowDataOrFail(Handler retryHandler, int attemptNumber,
-            List<UserInfo> users, List<UserInfo> rebootEscrowUsers) {
+    void scheduleLoadRebootEscrowDataOrFail(
+            Handler retryHandler,
+            int attemptNumber,
+            List<UserInfo> users,
+            List<UserInfo> rebootEscrowUsers) {
         Objects.requireNonNull(retryHandler);
 
         final int retryLimit = mInjector.getLoadEscrowDataRetryLimit();
         final int retryIntervalInSeconds = mInjector.getLoadEscrowDataRetryIntervalSeconds();
 
-        if (attemptNumber < retryLimit) {
+        if (attemptNumber < retryLimit && !mRebootEscrowTimedOut) {
             Slog.i(TAG, "Scheduling loadRebootEscrowData retry number: " + attemptNumber);
             mInjector.postDelayed(retryHandler, () -> loadRebootEscrowDataWithRetry(
-                    retryHandler, attemptNumber, users, rebootEscrowUsers),
+                            retryHandler, attemptNumber, users, rebootEscrowUsers),
                     retryIntervalInSeconds * 1000);
+            return;
+        }
+
+        if (mInjector.waitForInternet()) {
+            if (mRebootEscrowTimedOut) {
+                Slog.w(TAG, "Failed to load reboot escrow data within timeout");
+                compareAndSetLoadEscrowDataErrorCode(
+                        ERROR_NONE, ERROR_TIMEOUT_EXHAUSTED, retryHandler);
+            } else {
+                Slog.w(
+                        TAG,
+                        "Failed to load reboot escrow data after " + attemptNumber + " attempts");
+                compareAndSetLoadEscrowDataErrorCode(
+                        ERROR_NONE, ERROR_RETRY_COUNT_EXHAUSTED, retryHandler);
+            }
+            onGetRebootEscrowKeyFailed(users, attemptNumber, retryHandler);
             return;
         }
 
@@ -408,11 +529,68 @@ class RebootEscrowManager {
         } else {
             mLoadEscrowDataErrorCode = ERROR_RETRY_COUNT_EXHAUSTED;
         }
-        onGetRebootEscrowKeyFailed(users, attemptNumber);
+        onGetRebootEscrowKeyFailed(users, attemptNumber, retryHandler);
     }
 
-    void loadRebootEscrowDataWithRetry(Handler retryHandler, int attemptNumber,
-            List<UserInfo> users, List<UserInfo> rebootEscrowUsers) {
+    void loadRebootEscrowDataOnInternet(
+            Handler retryHandler, List<UserInfo> users, List<UserInfo> rebootEscrowUsers) {
+
+        // HAL-Based RoR does not require network connectivity.
+        if (!mInjector.serverBasedResumeOnReboot()) {
+            loadRebootEscrowDataWithRetry(
+                    retryHandler, /* attemptNumber = */ 0, users, rebootEscrowUsers);
+            return;
+        }
+
+        mNetworkCallback =
+                new ConnectivityManager.NetworkCallback() {
+                    @Override
+                    public void onAvailable(Network network) {
+                        compareAndSetLoadEscrowDataErrorCode(
+                                ERROR_NO_NETWORK, ERROR_NONE, retryHandler);
+
+                        if (!mLoadEscrowDataWithRetry) {
+                            mLoadEscrowDataWithRetry = true;
+                            // Only kickoff retry mechanism on first onAvailable call.
+                            loadRebootEscrowDataWithRetry(
+                                    retryHandler,
+                                    /* attemptNumber = */ 0,
+                                    users,
+                                    rebootEscrowUsers);
+                        }
+                    }
+
+                    @Override
+                    public void onUnavailable() {
+                        Slog.w(TAG, "Failed to connect to network within timeout");
+                        compareAndSetLoadEscrowDataErrorCode(
+                                ERROR_NONE, ERROR_NO_NETWORK, retryHandler);
+                        onGetRebootEscrowKeyFailed(users, /* attemptCount= */ 0, retryHandler);
+                    }
+
+                    @Override
+                    public void onLost(Network lostNetwork) {
+                        // TODO(b/231660348): If network is lost, wait for network to become
+                        // available again.
+                        Slog.w(TAG, "Network lost, still attempting to load escrow key.");
+                        compareAndSetLoadEscrowDataErrorCode(
+                                ERROR_NONE, ERROR_NO_NETWORK, retryHandler);
+                    }
+                };
+
+        // Fallback to retrying without waiting for internet on failure.
+        boolean success = mInjector.requestNetworkWithInternet(mNetworkCallback);
+        if (!success) {
+            loadRebootEscrowDataWithRetry(
+                    retryHandler, /* attemptNumber = */ 0, users, rebootEscrowUsers);
+        }
+    }
+
+    void loadRebootEscrowDataWithRetry(
+            Handler retryHandler,
+            int attemptNumber,
+            List<UserInfo> users,
+            List<UserInfo> rebootEscrowUsers) {
         // Fetch the key from keystore to decrypt the escrow data & escrow key; this key is
         // generated before reboot. Note that we will clear the escrow key even if the keystore key
         // is null.
@@ -423,7 +601,7 @@ class RebootEscrowManager {
 
         RebootEscrowKey escrowKey;
         try {
-            escrowKey = getAndClearRebootEscrowKey(kk);
+            escrowKey = getAndClearRebootEscrowKey(kk, retryHandler);
         } catch (IOException e) {
             Slog.i(TAG, "Failed to load escrow key, scheduling retry.", e);
             scheduleLoadRebootEscrowDataOrFail(retryHandler, attemptNumber + 1, users,
@@ -438,12 +616,12 @@ class RebootEscrowManager {
                         ? RebootEscrowProviderInterface.TYPE_SERVER_BASED
                         : RebootEscrowProviderInterface.TYPE_HAL;
                 if (providerType != mStorage.getInt(REBOOT_ESCROW_KEY_PROVIDER, -1, USER_SYSTEM)) {
-                    mLoadEscrowDataErrorCode = ERROR_PROVIDER_MISMATCH;
+                    setLoadEscrowDataErrorCode(ERROR_PROVIDER_MISMATCH, retryHandler);
                 } else {
-                    mLoadEscrowDataErrorCode = ERROR_LOAD_ESCROW_KEY;
+                    setLoadEscrowDataErrorCode(ERROR_LOAD_ESCROW_KEY, retryHandler);
                 }
             }
-            onGetRebootEscrowKeyFailed(users, attemptNumber + 1);
+            onGetRebootEscrowKeyFailed(users, attemptNumber + 1, retryHandler);
             return;
         }
 
@@ -454,10 +632,10 @@ class RebootEscrowManager {
             allUsersUnlocked &= restoreRebootEscrowForUser(user.id, escrowKey, kk);
         }
 
-        if (!allUsersUnlocked && mLoadEscrowDataErrorCode == ERROR_NONE) {
-            mLoadEscrowDataErrorCode = ERROR_UNLOCK_ALL_USERS;
+        if (!allUsersUnlocked) {
+            compareAndSetLoadEscrowDataErrorCode(ERROR_NONE, ERROR_UNLOCK_ALL_USERS, retryHandler);
         }
-        onEscrowRestoreComplete(allUsersUnlocked, attemptNumber + 1);
+        onEscrowRestoreComplete(allUsersUnlocked, attemptNumber + 1, retryHandler);
     }
 
     private void clearMetricsStorage() {
@@ -497,7 +675,8 @@ class RebootEscrowManager {
                 .REBOOT_ESCROW_RECOVERY_REPORTED__VBMETA_DIGEST_STATUS__MISMATCH;
     }
 
-    private void reportMetricOnRestoreComplete(boolean success, int attemptCount) {
+    private void reportMetricOnRestoreComplete(
+            boolean success, int attemptCount, Handler retryHandler) {
         int serviceType = mInjector.serverBasedResumeOnReboot()
                 ? FrameworkStatsLog.REBOOT_ESCROW_RECOVERY_REPORTED__TYPE__SERVER_BASED
                 : FrameworkStatsLog.REBOOT_ESCROW_RECOVERY_REPORTED__TYPE__HAL;
@@ -511,52 +690,69 @@ class RebootEscrowManager {
         }
 
         int vbmetaDigestStatus = getVbmetaDigestStatusOnRestoreComplete();
-        if (!success && mLoadEscrowDataErrorCode == ERROR_NONE) {
-            mLoadEscrowDataErrorCode = ERROR_UNKNOWN;
+        if (!success) {
+            compareAndSetLoadEscrowDataErrorCode(ERROR_NONE, ERROR_UNKNOWN, retryHandler);
         }
 
-        Slog.i(TAG, "Reporting RoR recovery metrics, success: " + success + ", service type: "
-                + serviceType + ", error code: " + mLoadEscrowDataErrorCode);
+        Slog.i(
+                TAG,
+                "Reporting RoR recovery metrics, success: "
+                        + success
+                        + ", service type: "
+                        + serviceType
+                        + ", error code: "
+                        + mLoadEscrowDataErrorCode);
         // TODO(179105110) report the duration since boot complete.
-        mInjector.reportMetric(success, mLoadEscrowDataErrorCode, serviceType, attemptCount,
-                escrowDurationInSeconds, vbmetaDigestStatus, -1);
+        mInjector.reportMetric(
+                success,
+                mLoadEscrowDataErrorCode,
+                serviceType,
+                attemptCount,
+                escrowDurationInSeconds,
+                vbmetaDigestStatus,
+                -1);
 
-        mLoadEscrowDataErrorCode = ERROR_NONE;
+        setLoadEscrowDataErrorCode(ERROR_NONE, retryHandler);
     }
 
-    private void onEscrowRestoreComplete(boolean success, int attemptCount) {
+    private void onEscrowRestoreComplete(boolean success, int attemptCount, Handler retryHandler) {
         int previousBootCount = mStorage.getInt(REBOOT_ESCROW_ARMED_KEY, -1, USER_SYSTEM);
 
         int bootCountDelta = mInjector.getBootCount() - previousBootCount;
         if (success || (previousBootCount != -1 && bootCountDelta <= BOOT_COUNT_TOLERANCE)) {
-            reportMetricOnRestoreComplete(success, attemptCount);
+            reportMetricOnRestoreComplete(success, attemptCount, retryHandler);
         }
-
         // Clear the old key in keystore. A new key will be generated by new RoR requests.
         mKeyStoreManager.clearKeyStoreEncryptionKey();
         // Clear the saved reboot escrow provider
         mInjector.clearRebootEscrowProvider();
         clearMetricsStorage();
 
+        if (mNetworkCallback != null) {
+            mInjector.stopRequestingNetwork(mNetworkCallback);
+        }
+
         if (mWakeLock != null) {
             mWakeLock.release();
         }
     }
 
-    private RebootEscrowKey getAndClearRebootEscrowKey(SecretKey kk) throws IOException {
+    private RebootEscrowKey getAndClearRebootEscrowKey(SecretKey kk, Handler retryHandler)
+            throws IOException {
         RebootEscrowProviderInterface rebootEscrowProvider =
                 mInjector.createRebootEscrowProviderIfNeeded();
         if (rebootEscrowProvider == null) {
-            Slog.w(TAG,
+            Slog.w(
+                    TAG,
                     "Had reboot escrow data for users, but RebootEscrowProvider is unavailable");
-            mLoadEscrowDataErrorCode = ERROR_NO_PROVIDER;
+            setLoadEscrowDataErrorCode(ERROR_NO_PROVIDER, retryHandler);
             return null;
         }
 
         // Server based RoR always need the decryption key from keystore.
         if (rebootEscrowProvider.getType() == RebootEscrowProviderInterface.TYPE_SERVER_BASED
                 && kk == null) {
-            mLoadEscrowDataErrorCode = ERROR_KEYSTORE_FAILURE;
+            setLoadEscrowDataErrorCode(ERROR_KEYSTORE_FAILURE, retryHandler);
             return null;
         }
 
@@ -869,6 +1065,9 @@ class RebootEscrowManager {
 
         pw.print("mRebootEscrowListener=");
         pw.println(mRebootEscrowListener);
+
+        pw.print("mLoadEscrowDataErrorCode=");
+        pw.println(mLoadEscrowDataErrorCode);
 
         boolean keySet;
         synchronized (mKeyGenerationLock) {
