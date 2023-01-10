@@ -66,7 +66,7 @@ abstract class AppOpPermissionListModel(
      * If true, it uses getAppOpPermissionPackages() to fetch bits to decide whether the permission
      * is requested.
      */
-    open val permissionHasAppopFlag: Boolean = true
+    open val permissionHasAppOpFlag: Boolean = true
 
     open val modeForNotAllowed: Int = MODE_ERRORED
 
@@ -105,7 +105,7 @@ abstract class AppOpPermissionListModel(
         }
 
     override fun transform(userIdFlow: Flow<Int>, appListFlow: Flow<List<ApplicationInfo>>) =
-        if (permissionHasAppopFlag) {
+        if (permissionHasAppOpFlag) {
             userIdFlow
                 .map { userId -> packageManagers.getAppOpPermissionPackages(userId, permission) }
                 .combine(appListFlow) { packageNames, appList ->
