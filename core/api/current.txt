@@ -17718,8 +17718,8 @@ package android.hardware {
     method public boolean flush(android.hardware.SensorEventListener);
     method public static float getAltitude(float, float);
     method public static void getAngleChange(float[], float[], float[]);
-    method public android.hardware.Sensor getDefaultSensor(int);
-    method public android.hardware.Sensor getDefaultSensor(int, boolean);
+    method @Nullable public android.hardware.Sensor getDefaultSensor(int);
+    method @Nullable public android.hardware.Sensor getDefaultSensor(int, boolean);
     method public java.util.List<android.hardware.Sensor> getDynamicSensorList(int);
     method public static float getInclination(float[]);
     method public static float[] getOrientation(float[], float[]);
