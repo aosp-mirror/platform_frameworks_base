@@ -418,11 +418,12 @@ public abstract class JobServiceEngine {
     /**
      * Call in to engine to report data transfer progress.
      *
-     * @hide
      * @see JobService#updateTransferredNetworkBytes(JobParameters, long, long)
+     * @see JobService#updateTransferredNetworkBytes(JobParameters, JobWorkItem, long, long)
      */
     public void updateTransferredNetworkBytes(@NonNull JobParameters params,
-            @Nullable JobWorkItem item, long downloadBytes, long uploadBytes) {
+            @Nullable JobWorkItem item,
+            @BytesLong long downloadBytes, @BytesLong long uploadBytes) {
         if (params == null) {
             throw new NullPointerException("params");
         }
@@ -437,11 +438,11 @@ public abstract class JobServiceEngine {
     /**
      * Call in to engine to report data transfer progress.
      *
-     * @hide
+     * @see JobService#updateEstimatedNetworkBytes(JobParameters, long, long)
      * @see JobService#updateEstimatedNetworkBytes(JobParameters, JobWorkItem, long, long)
      */
     public void updateEstimatedNetworkBytes(@NonNull JobParameters params,
-            @NonNull JobWorkItem item,
+            @Nullable JobWorkItem item,
             @BytesLong long downloadBytes, @BytesLong long uploadBytes) {
         if (params == null) {
             throw new NullPointerException("params");
@@ -457,7 +458,6 @@ public abstract class JobServiceEngine {
     /**
      * Give JobScheduler a notification to tie to this job's lifecycle.
      *
-     * @hide
      * @see JobService#setNotification(JobParameters, int, Notification, int)
      */
     public void setNotification(@NonNull JobParameters params, int notificationId,

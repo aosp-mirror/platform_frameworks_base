@@ -8640,6 +8640,9 @@ package android.app.job {
     method public void jobFinished(android.app.job.JobParameters, boolean);
     method public abstract boolean onStartJob(android.app.job.JobParameters);
     method public abstract boolean onStopJob(android.app.job.JobParameters);
+    method public void setNotification(@NonNull android.app.job.JobParameters, int, @NonNull android.app.Notification, int);
+    method public void updateEstimatedNetworkBytes(@NonNull android.app.job.JobParameters, @Nullable android.app.job.JobWorkItem, long, long);
+    method public void updateTransferredNetworkBytes(@NonNull android.app.job.JobParameters, @Nullable android.app.job.JobWorkItem, long, long);
   }
 
   public final class JobWorkItem implements android.os.Parcelable {
