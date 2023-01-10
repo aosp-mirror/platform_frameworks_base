@@ -60,6 +60,7 @@ class FakeMobileIconsInteractor(
     override val alwaysShowDataRatIcon = MutableStateFlow(false)
 
     override val alwaysUseCdmaLevel = MutableStateFlow(false)
+    override val defaultDataSubId = MutableStateFlow(DEFAULT_DATA_SUB_ID)
 
     override val defaultMobileNetworkConnectivity = MutableStateFlow(MobileConnectivityModel())
 
@@ -79,6 +80,8 @@ class FakeMobileIconsInteractor(
 
     companion object {
         val DEFAULT_ICON = TelephonyIcons.G
+
+        const val DEFAULT_DATA_SUB_ID = 1
 
         // Use [MobileMappings] to define some simple definitions
         const val THREE_G = NETWORK_TYPE_GSM

@@ -64,6 +64,7 @@ class MobileIconInteractorTest : SysuiTestCase() {
                 mobileIconsInteractor.defaultMobileNetworkConnectivity,
                 mobileIconsInteractor.defaultMobileIconMapping,
                 mobileIconsInteractor.defaultMobileIconGroup,
+                mobileIconsInteractor.defaultDataSubId,
                 mobileIconsInteractor.isDefaultConnectionFailed,
                 connectionRepository,
             )
@@ -285,6 +286,30 @@ class MobileIconInteractorTest : SysuiTestCase() {
             val job = underTest.networkTypeIconGroup.onEach { latest = it }.launchIn(this)
 
             assertThat(latest).isEqualTo(CarrierMergedNetworkType.iconGroupOverride)
+
+            job.cancel()
+        }
+
+    @Test
+    fun `icon group - checks default data`() =
+        runBlocking(IMMEDIATE) {
+            mobileIconsInteractor.defaultDataSubId.value = SUB_1_ID
+            connectionRepository.setConnectionInfo(
+                MobileConnectionModel(
+                    resolvedNetworkType = DefaultNetworkType(mobileMappingsProxy.toIconKey(THREE_G))
+                ),
+            )
+
+            var latest: MobileIconGroup? = null
+            val job = underTest.networkTypeIconGroup.onEach { latest = it }.launchIn(this)
+
+            assertThat(latest).isEqualTo(TelephonyIcons.THREE_G)
+
+            // Default data sub id changes to something else
+            mobileIconsInteractor.defaultDataSubId.value = 123
+            yield()
+
+            assertThat(latest).isEqualTo(TelephonyIcons.NOT_DEFAULT_DATA)
 
             job.cancel()
         }

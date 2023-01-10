@@ -18,6 +18,7 @@ package com.android.systemui.statusbar.pipeline.mobile.domain.interactor
 
 import android.telephony.CarrierConfigManager
 import com.android.settingslib.SignalIcon.MobileIconGroup
+import com.android.settingslib.mobile.TelephonyIcons.NOT_DEFAULT_DATA
 import com.android.systemui.dagger.qualifiers.Application
 import com.android.systemui.log.table.TableLogBuffer
 import com.android.systemui.statusbar.pipeline.mobile.data.model.DataConnectionState.Connected
@@ -121,6 +122,7 @@ class MobileIconInteractorImpl(
     defaultMobileConnectivity: StateFlow<MobileConnectivityModel>,
     defaultMobileIconMapping: StateFlow<Map<String, MobileIconGroup>>,
     defaultMobileIconGroup: StateFlow<MobileIconGroup>,
+    defaultDataSubId: StateFlow<Int>,
     override val isDefaultConnectionFailed: StateFlow<Boolean>,
     connectionRepository: MobileConnectionRepository,
 ) : MobileIconInteractor {
@@ -133,6 +135,15 @@ class MobileIconInteractorImpl(
     override val isConnected: Flow<Boolean> = defaultMobileConnectivity.mapLatest { it.isConnected }
 
     override val isDataEnabled: StateFlow<Boolean> = connectionRepository.dataEnabled
+
+    private val isDefault =
+        defaultDataSubId
+            .mapLatest { connectionRepository.subId == it }
+            .stateIn(
+                scope,
+                SharingStarted.WhileSubscribed(),
+                connectionRepository.subId == defaultDataSubId.value
+            )
 
     override val isDefaultDataEnabled = defaultSubscriptionHasDataEnabled
 
@@ -158,7 +169,12 @@ class MobileIconInteractorImpl(
                 connectionInfo,
                 defaultMobileIconMapping,
                 defaultMobileIconGroup,
-            ) { info, mapping, defaultGroup ->
+                isDefault,
+            ) { info, mapping, defaultGroup, isDefault ->
+                if (!isDefault) {
+                    return@combine NOT_DEFAULT_DATA
+                }
+
                 when (info.resolvedNetworkType) {
                     is ResolvedNetworkType.CarrierMergedNetworkType ->
                         info.resolvedNetworkType.iconGroupOverride
