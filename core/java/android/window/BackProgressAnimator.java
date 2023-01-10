@@ -40,7 +40,7 @@ public class BackProgressAnimator {
     private final SpringAnimation mSpring;
     private ProgressCallback mCallback;
     private float mProgress = 0;
-    private BackEvent mLastBackEvent;
+    private BackMotionEvent mLastBackEvent;
     private boolean mStarted = false;
 
     private void setProgress(float progress) {
@@ -82,9 +82,9 @@ public class BackProgressAnimator {
     /**
      * Sets a new target position for the back progress.
      *
-     * @param event the {@link BackEvent} containing the latest target progress.
+     * @param event the {@link BackMotionEvent} containing the latest target progress.
      */
-    public void onBackProgressed(BackEvent event) {
+    public void onBackProgressed(BackMotionEvent event) {
         if (!mStarted) {
             return;
         }
@@ -95,11 +95,11 @@ public class BackProgressAnimator {
     /**
      * Starts the back progress animation.
      *
-     * @param event the {@link BackEvent} that started the gesture.
+     * @param event the {@link BackMotionEvent} that started the gesture.
      * @param callback the back callback to invoke for the gesture. It will receive back progress
      *                 dispatches as the progress animation updates.
      */
-    public void onBackStarted(BackEvent event, ProgressCallback callback) {
+    public void onBackStarted(BackMotionEvent event, ProgressCallback callback) {
         reset();
         mLastBackEvent = event;
         mCallback = callback;
@@ -129,8 +129,7 @@ public class BackProgressAnimator {
         }
         mCallback.onProgressUpdate(
                 new BackEvent(mLastBackEvent.getTouchX(), mLastBackEvent.getTouchY(),
-                        progress / SCALE_FACTOR, mLastBackEvent.getSwipeEdge(),
-                        mLastBackEvent.getDepartingAnimationTarget()));
+                        progress / SCALE_FACTOR, mLastBackEvent.getSwipeEdge()));
     }
 
 }
