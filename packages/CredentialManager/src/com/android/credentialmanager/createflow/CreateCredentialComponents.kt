@@ -78,8 +78,7 @@ fun CreateCredentialScreen(
                         disabledProviderList = uiState.disabledProviders,
                         sortedCreateOptionsPairs = uiState.sortedCreateOptionsPairs,
                         onOptionSelected = viewModel::onEntrySelectedFromFirstUseScreen,
-                        onDisabledPasswordManagerSelected =
-                        viewModel::onDisabledPasswordManagerSelected,
+                        onDisabledProvidersSelected = viewModel::onDisabledProvidersSelected,
                         onMoreOptionsSelected = viewModel::onMoreOptionsSelectedOnProviderSelection,
                     )
                     CreateScreenState.CREATION_OPTION_SELECTION -> CreationSelectionCard(
@@ -103,8 +102,7 @@ fun CreateCredentialScreen(
                         onBackCreationSelectionButtonSelected =
                         viewModel::onBackCreationSelectionButtonSelected,
                         onOptionSelected = viewModel::onEntrySelectedFromMoreOptionScreen,
-                        onDisabledPasswordManagerSelected =
-                        viewModel::onDisabledPasswordManagerSelected,
+                        onDisabledProvidersSelected = viewModel::onDisabledProvidersSelected,
                         onRemoteEntrySelected = viewModel::onEntrySelected,
                     )
                     CreateScreenState.MORE_OPTIONS_ROW_INTRO -> MoreOptionsRowIntroCard(
@@ -250,7 +248,7 @@ fun ProviderSelectionCard(
     disabledProviderList: List<DisabledProviderInfo>?,
     sortedCreateOptionsPairs: List<Pair<CreateOptionInfo, EnabledProviderInfo>>,
     onOptionSelected: (ActiveEntry) -> Unit,
-    onDisabledPasswordManagerSelected: () -> Unit,
+    onDisabledProvidersSelected: () -> Unit,
     onMoreOptionsSelected: () -> Unit,
 ) {
     ContainerCard() {
@@ -318,8 +316,8 @@ fun ProviderSelectionCard(
                     item {
                         MoreOptionsDisabledProvidersRow(
                             disabledProviders = disabledProviderList,
-                            onDisabledPasswordManagerSelected =
-                            onDisabledPasswordManagerSelected,
+                            onDisabledProvidersSelected =
+                            onDisabledProvidersSelected,
                         )
                     }
                 }
@@ -363,7 +361,7 @@ fun MoreOptionsSelectionCard(
     onBackProviderSelectionButtonSelected: () -> Unit,
     onBackCreationSelectionButtonSelected: () -> Unit,
     onOptionSelected: (ActiveEntry) -> Unit,
-    onDisabledPasswordManagerSelected: () -> Unit,
+    onDisabledProvidersSelected: () -> Unit,
     onRemoteEntrySelected: (EntryInfo) -> Unit,
 ) {
     ContainerCard() {
@@ -436,8 +434,8 @@ fun MoreOptionsSelectionCard(
                         item {
                             MoreOptionsDisabledProvidersRow(
                                 disabledProviders = disabledProviderList,
-                                onDisabledPasswordManagerSelected =
-                                onDisabledPasswordManagerSelected,
+                                onDisabledProvidersSelected =
+                                onDisabledProvidersSelected,
                             )
                         }
                     }
@@ -891,11 +889,11 @@ fun MoreOptionsInfoRow(
 @Composable
 fun MoreOptionsDisabledProvidersRow(
     disabledProviders: List<ProviderInfo>?,
-    onDisabledPasswordManagerSelected: () -> Unit,
+    onDisabledProvidersSelected: () -> Unit,
 ) {
     if (disabledProviders != null && disabledProviders.isNotEmpty()) {
         Entry(
-            onClick = onDisabledPasswordManagerSelected,
+            onClick = onDisabledProvidersSelected,
             icon = {
                 Icon(
                     Icons.Filled.Add,

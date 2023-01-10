@@ -24,8 +24,6 @@ import androidx.activity.result.IntentSenderRequest
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
-import androidx.lifecycle.LiveData
-import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import com.android.credentialmanager.CreateFlowUtils
 import com.android.credentialmanager.CredentialManagerRepo
@@ -33,6 +31,9 @@ import com.android.credentialmanager.UserConfigRepo
 import com.android.credentialmanager.common.DialogResult
 import com.android.credentialmanager.common.ProviderActivityResult
 import com.android.credentialmanager.common.ResultState
+import kotlinx.coroutines.channels.BufferOverflow
+import kotlinx.coroutines.flow.MutableSharedFlow
+import kotlinx.coroutines.flow.SharedFlow
 
 data class CreateCredentialUiState(
   val enabledProviders: List<EnabledProviderInfo>,
@@ -75,11 +76,11 @@ class CreateCredentialViewModel(
       isPasskeyFirstUse))
     private set
 
-  val dialogResult: MutableLiveData<DialogResult> by lazy {
-    MutableLiveData<DialogResult>()
-  }
+  val dialogResult: MutableSharedFlow<DialogResult> =
+    MutableSharedFlow(replay = 0, extraBufferCapacity = 1,
+      onBufferOverflow = BufferOverflow.DROP_OLDEST)
 
-  fun observeDialogResult(): LiveData<DialogResult> {
+  fun observeDialogResult(): SharedFlow<DialogResult> {
     return dialogResult
   }
 
@@ -138,13 +139,14 @@ class CreateCredentialViewModel(
     onDefaultChanged(providerId)
   }
 
-  fun onDisabledPasswordManagerSelected() {
-    // TODO: Complete this function
+  fun onDisabledProvidersSelected() {
+    CredentialManagerRepo.getInstance().onCancel()
+    dialogResult.tryEmit(DialogResult(ResultState.LAUNCH_SETTING_CANCELED))
   }
 
   fun onCancel() {
     CredentialManagerRepo.getInstance().onCancel()
-    dialogResult.value = DialogResult(ResultState.CANCELED)
+    dialogResult.tryEmit(DialogResult(ResultState.NORMAL_CANCELED))
   }
 
   fun onChangeDefaultSelected() {
@@ -190,9 +192,7 @@ class CreateCredentialViewModel(
         entryKey,
         entrySubkey
       )
-      dialogResult.value = DialogResult(
-        ResultState.COMPLETE,
-      )
+      dialogResult.tryEmit(DialogResult(ResultState.COMPLETE))
     }
   }
 
@@ -219,9 +219,7 @@ class CreateCredentialViewModel(
     } else {
       Log.w("Account Selector",
         "Illegal state: confirm is pressed but activeEntry isn't set.")
-      dialogResult.value = DialogResult(
-        ResultState.COMPLETE,
-      )
+      dialogResult.tryEmit(DialogResult(ResultState.COMPLETE))
     }
   }
 
@@ -250,9 +248,7 @@ class CreateCredentialViewModel(
         Log.w("Account Selector",
           "Illegal state: received a provider result but found no matching entry.")
       }
-      dialogResult.value = DialogResult(
-        ResultState.COMPLETE,
-      )
+      dialogResult.tryEmit(DialogResult(ResultState.COMPLETE))
     }
   }
 }
