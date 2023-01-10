@@ -3043,7 +3043,14 @@ class ContextImpl extends Context {
 
     @Override
     public boolean isDeviceContext() {
-        return mIsExplicitDeviceId || isAssociatedWithDisplay();
+        if (mIsExplicitDeviceId) {
+            if (mDeviceId == VirtualDeviceManager.DEVICE_ID_DEFAULT) {
+                return true;
+            }
+            VirtualDeviceManager vdm = getSystemService(VirtualDeviceManager.class);
+            return vdm.isValidVirtualDeviceId(mDeviceId);
+        }
+        return isAssociatedWithDisplay();
     }
 
     @Override

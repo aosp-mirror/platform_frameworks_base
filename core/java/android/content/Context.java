@@ -7340,10 +7340,12 @@ public abstract class Context {
     /**
      * Indicates whether the value of {@link Context#getDeviceId()} can be relied upon for
      * this instance. It will return {@code true} for Contexts created by
-     * {@link Context#createDeviceContext(int)}, as well as for UI and Display Contexts.
+     * {@link Context#createDeviceContext(int)} which reference a valid device ID, as well as for
+     * UI and Display Contexts.
      * <p>
      * Contexts created with {@link Context#createDeviceContext(int)} will have an explicit
-     * device association, which will never change. UI Contexts and Display Contexts are
+     * device association, which will never change, even if the underlying device is closed or is
+     * removed. UI Contexts and Display Contexts are
      * already associated with a display, so if the device association is not explicitly
      * given, {@link Context#getDeviceId()} will return the ID of the device associated with
      * the associated display. The system can assign an arbitrary device id value for Contexts not
