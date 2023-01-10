@@ -36,10 +36,6 @@ class MediaOutputDialogReceiver @Inject constructor(
 ) : BroadcastReceiver() {
     override fun onReceive(context: Context, intent: Intent) {
         when {
-            TextUtils.equals(Intent.ACTION_SHOW_OUTPUT_SWITCHER, intent.action) -> {
-                val packageName: String? = intent.getStringExtra(Intent.EXTRA_PACKAGE_NAME)
-                launchMediaOutputDialogIfPossible(packageName)
-            }
             TextUtils.equals(
                 MediaOutputConstants.ACTION_LAUNCH_MEDIA_OUTPUT_DIALOG, intent.action) -> {
                 val packageName: String? =
