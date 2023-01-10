@@ -110,6 +110,7 @@ import com.android.systemui.keyguard.KeyguardUnlockAnimationController;
 import com.android.systemui.keyguard.KeyguardViewMediator;
 import com.android.systemui.keyguard.ScreenLifecycle;
 import com.android.systemui.keyguard.WakefulnessLifecycle;
+import com.android.systemui.keyguard.domain.interactor.AlternateBouncerInteractor;
 import com.android.systemui.keyguard.ui.viewmodel.LightRevealScrimViewModel;
 import com.android.systemui.navigationbar.NavigationBarController;
 import com.android.systemui.plugins.ActivityStarter.OnDismissAction;
@@ -177,8 +178,6 @@ import com.android.systemui.volume.VolumeComponent;
 import com.android.wm.shell.bubbles.Bubbles;
 import com.android.wm.shell.startingsurface.StartingSurface;
 
-import dagger.Lazy;
-
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -190,6 +189,8 @@ import org.mockito.MockitoAnnotations;
 import java.io.ByteArrayOutputStream;
 import java.io.PrintWriter;
 import java.util.Optional;
+
+import dagger.Lazy;
 
 @SmallTest
 @RunWith(AndroidTestingRunner.class)
@@ -297,6 +298,7 @@ public class CentralSurfacesImplTest extends SysuiTestCase {
     @Mock private WiredChargingRippleController mWiredChargingRippleController;
     @Mock private Lazy<CameraLauncher> mCameraLauncherLazy;
     @Mock private CameraLauncher mCameraLauncher;
+    @Mock private AlternateBouncerInteractor mAlternateBouncerInteractor;
     /**
      * The process of registering/unregistering a predictive back callback requires a
      * ViewRootImpl, which is present IRL, but may be missing during a Mockito unit test.
@@ -504,7 +506,9 @@ public class CentralSurfacesImplTest extends SysuiTestCase {
                 mWiredChargingRippleController,
                 mDreamManager,
                 mCameraLauncherLazy,
-                () -> mLightRevealScrimViewModel) {
+                () -> mLightRevealScrimViewModel,
+                mAlternateBouncerInteractor
+        ) {
             @Override
             protected ViewRootImpl getViewRootImpl() {
                 return mViewRootImpl;
