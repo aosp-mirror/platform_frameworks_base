@@ -14,16 +14,17 @@
  * limitations under the License.
  */
 
+#include <android-base/macros.h>
+#include <gmock/gmock.h>
 #include <gtest/gtest.h>
-
-#include "protos/graphicsstats.pb.h"
-#include "service/GraphicsStatsService.h"
-
 #include <stdio.h>
 #include <stdlib.h>
 #include <sys/stat.h>
 #include <sys/types.h>
 #include <unistd.h>
+
+#include "protos/graphicsstats.pb.h"
+#include "service/GraphicsStatsService.h"
 
 using namespace android;
 using namespace android::uirenderer;
@@ -49,12 +50,14 @@ std::string findRootPath() {
 
 // No code left untested
 TEST(GraphicsStats, findRootPath) {
-#ifdef __LP64__
-    std::string expected = "/data/nativetest64/hwui_unit_tests";
-#else
-    std::string expected = "/data/nativetest/hwui_unit_tests";
-#endif
-    EXPECT_EQ(expected, findRootPath());
+    // Different tools/infrastructure seem to push this to different locations. It shouldn't really
+    // matter where the binary is, so add new locations here as needed. This test still seems good
+    // as it's nice to understand the possibility space, and ensure findRootPath continues working
+    // as expected.
+    std::string acceptableLocations[] = {"/data/nativetest/hwui_unit_tests",
+                                         "/data/nativetest64/hwui_unit_tests",
+                                         "/data/local/tmp/nativetest/hwui_unit_tests/" ABI_STRING};
+    EXPECT_THAT(acceptableLocations, ::testing::Contains(findRootPath()));
 }
 
 TEST(GraphicsStats, saveLoad) {
