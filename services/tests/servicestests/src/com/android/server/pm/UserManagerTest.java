@@ -175,14 +175,14 @@ public final class UserManagerTest {
         final UserProperties typeProps = userTypeDetails.getDefaultUserPropertiesReference();
 
         // Test that only one clone user can be created
-        final int primaryUserId = mUserManager.getPrimaryUser().id;
+        final int mainUserId = mUserManager.getMainUser().getIdentifier();
         UserInfo userInfo = createProfileForUser("Clone user1",
                 UserManager.USER_TYPE_PROFILE_CLONE,
-                primaryUserId);
+                mainUserId);
         assertThat(userInfo).isNotNull();
         UserInfo userInfo2 = createProfileForUser("Clone user2",
                 UserManager.USER_TYPE_PROFILE_CLONE,
-                primaryUserId);
+                mainUserId);
         assertThat(userInfo2).isNull();
 
         final Context userContext = mContext.createPackageContextAsUser("system", 0,
@@ -210,12 +210,12 @@ public final class UserManagerTest {
                 cloneUserProperties::getCrossProfileIntentFilterAccessControl);
 
         // Verify clone user parent
-        assertThat(mUserManager.getProfileParent(primaryUserId)).isNull();
+        assertThat(mUserManager.getProfileParent(mainUserId)).isNull();
         UserInfo parentProfileInfo = mUserManager.getProfileParent(userInfo.id);
         assertThat(parentProfileInfo).isNotNull();
-        assertThat(primaryUserId).isEqualTo(parentProfileInfo.id);
+        assertThat(mainUserId).isEqualTo(parentProfileInfo.id);
         removeUser(userInfo.id);
-        assertThat(mUserManager.getProfileParent(primaryUserId)).isNull();
+        assertThat(mUserManager.getProfileParent(mainUserId)).isNull();
     }
 
     @MediumTest
@@ -645,17 +645,16 @@ public final class UserManagerTest {
     @Test
     public void testGetProfileParent() throws Exception {
         assumeManagedUsersSupported();
-        final int primaryUserId = mUserManager.getPrimaryUser().id;
-
+        int mainUserId = mUserManager.getMainUser().getIdentifier();
         UserInfo userInfo = createProfileForUser("Profile",
-                UserManager.USER_TYPE_PROFILE_MANAGED, primaryUserId);
+                UserManager.USER_TYPE_PROFILE_MANAGED, mainUserId);
         assertThat(userInfo).isNotNull();
-        assertThat(mUserManager.getProfileParent(primaryUserId)).isNull();
+        assertThat(mUserManager.getProfileParent(mainUserId)).isNull();
         UserInfo parentProfileInfo = mUserManager.getProfileParent(userInfo.id);
         assertThat(parentProfileInfo).isNotNull();
-        assertThat(primaryUserId).isEqualTo(parentProfileInfo.id);
+        assertThat(mainUserId).isEqualTo(parentProfileInfo.id);
         removeUser(userInfo.id);
-        assertThat(mUserManager.getProfileParent(primaryUserId)).isNull();
+        assertThat(mUserManager.getProfileParent(mainUserId)).isNull();
     }
 
     /** Test that UserManager returns the correct badge information for a managed profile. */
@@ -669,9 +668,9 @@ public final class UserManagerTest {
                 .that(userTypeDetails).isNotNull();
         assertThat(userTypeDetails.getName()).isEqualTo(UserManager.USER_TYPE_PROFILE_MANAGED);
 
-        final int primaryUserId = mUserManager.getPrimaryUser().id;
+        int mainUserId = mUserManager.getMainUser().getIdentifier();
         UserInfo userInfo = createProfileForUser("Managed",
-                UserManager.USER_TYPE_PROFILE_MANAGED, primaryUserId);
+                UserManager.USER_TYPE_PROFILE_MANAGED, mainUserId);
         assertThat(userInfo).isNotNull();
         final int userId = userInfo.id;
 
@@ -714,9 +713,9 @@ public final class UserManagerTest {
         final UserProperties typeProps = userTypeDetails.getDefaultUserPropertiesReference();
 
         // Create an actual user (of this user type) and get its properties.
-        final int primaryUserId = mUserManager.getPrimaryUser().id;
+        int mainUserId = mUserManager.getMainUser().getIdentifier();
         final UserInfo userInfo = createProfileForUser("Managed",
-                UserManager.USER_TYPE_PROFILE_MANAGED, primaryUserId);
+                UserManager.USER_TYPE_PROFILE_MANAGED, mainUserId);
         assertThat(userInfo).isNotNull();
         final int userId = userInfo.id;
         final UserProperties userProps = mUserManager.getUserProperties(UserHandle.of(userId));
@@ -736,11 +735,11 @@ public final class UserManagerTest {
     @Test
     public void testAddManagedProfile() throws Exception {
         assumeManagedUsersSupported();
-        final int primaryUserId = mUserManager.getPrimaryUser().id;
+        int mainUserId = mUserManager.getMainUser().getIdentifier();
         UserInfo userInfo1 = createProfileForUser("Managed 1",
-                UserManager.USER_TYPE_PROFILE_MANAGED, primaryUserId);
+                UserManager.USER_TYPE_PROFILE_MANAGED, mainUserId);
         UserInfo userInfo2 = createProfileForUser("Managed 2",
-                UserManager.USER_TYPE_PROFILE_MANAGED, primaryUserId);
+                UserManager.USER_TYPE_PROFILE_MANAGED, mainUserId);
 
         assertThat(userInfo1).isNotNull();
         assertThat(userInfo2).isNull();
@@ -759,9 +758,9 @@ public final class UserManagerTest {
     @Test
     public void testAddManagedProfile_withDisallowedPackages() throws Exception {
         assumeManagedUsersSupported();
-        final int primaryUserId = mUserManager.getPrimaryUser().id;
+        int mainUserId = mUserManager.getMainUser().getIdentifier();
         UserInfo userInfo1 = createProfileForUser("Managed1",
-                UserManager.USER_TYPE_PROFILE_MANAGED, primaryUserId);
+                UserManager.USER_TYPE_PROFILE_MANAGED, mainUserId);
         // Verify that the packagesToVerify are installed by default.
         for (String pkg : PACKAGES) {
             if (!mPackageManager.isPackageAvailable(pkg)) {
@@ -775,7 +774,7 @@ public final class UserManagerTest {
         removeUser(userInfo1.id);
 
         UserInfo userInfo2 = createProfileForUser("Managed2",
-                UserManager.USER_TYPE_PROFILE_MANAGED, primaryUserId, PACKAGES);
+                UserManager.USER_TYPE_PROFILE_MANAGED, mainUserId, PACKAGES);
         // Verify that the packagesToVerify are not installed by default.
         for (String pkg : PACKAGES) {
             if (!mPackageManager.isPackageAvailable(pkg)) {
@@ -795,9 +794,9 @@ public final class UserManagerTest {
     @Test
     public void testAddManagedProfile_disallowedPackagesInstalledLater() throws Exception {
         assumeManagedUsersSupported();
-        final int primaryUserId = mUserManager.getPrimaryUser().id;
+        final int mainUserId = mUserManager.getMainUser().getIdentifier();
         UserInfo userInfo = createProfileForUser("Managed",
-                UserManager.USER_TYPE_PROFILE_MANAGED, primaryUserId, PACKAGES);
+                UserManager.USER_TYPE_PROFILE_MANAGED, mainUserId, PACKAGES);
         // Verify that the packagesToVerify are not installed by default.
         for (String pkg : PACKAGES) {
             if (!mPackageManager.isPackageAvailable(pkg)) {
@@ -842,17 +841,17 @@ public final class UserManagerTest {
     @MediumTest
     @Test
     public void testCreateUser_disallowAddClonedUserProfile() throws Exception {
-        final int primaryUserId = ActivityManager.getCurrentUser();
-        final UserHandle primaryUserHandle = asHandle(primaryUserId);
+        final int mainUserId = ActivityManager.getCurrentUser();
+        final UserHandle mainUserHandle = asHandle(mainUserId);
         mUserManager.setUserRestriction(UserManager.DISALLOW_ADD_CLONE_PROFILE,
-                true, primaryUserHandle);
+                true, mainUserHandle);
         try {
             UserInfo cloneProfileUserInfo = createProfileForUser("Clone",
-                    UserManager.USER_TYPE_PROFILE_CLONE, primaryUserId);
+                    UserManager.USER_TYPE_PROFILE_CLONE, mainUserId);
             assertThat(cloneProfileUserInfo).isNull();
         } finally {
             mUserManager.setUserRestriction(UserManager.DISALLOW_ADD_CLONE_PROFILE, false,
-                    primaryUserHandle);
+                    mainUserHandle);
         }
     }
 
@@ -861,17 +860,17 @@ public final class UserManagerTest {
     @Test
     public void testCreateProfileForUser_disallowAddManagedProfile() throws Exception {
         assumeManagedUsersSupported();
-        final int primaryUserId = mUserManager.getPrimaryUser().id;
-        final UserHandle primaryUserHandle = asHandle(primaryUserId);
+        final int mainUserId = mUserManager.getMainUser().getIdentifier();
+        final UserHandle mainUserHandle = asHandle(mainUserId);
         mUserManager.setUserRestriction(UserManager.DISALLOW_ADD_MANAGED_PROFILE, true,
-                primaryUserHandle);
+                mainUserHandle);
         try {
             UserInfo userInfo = createProfileForUser("Managed",
-                    UserManager.USER_TYPE_PROFILE_MANAGED, primaryUserId);
+                    UserManager.USER_TYPE_PROFILE_MANAGED, mainUserId);
             assertThat(userInfo).isNull();
         } finally {
             mUserManager.setUserRestriction(UserManager.DISALLOW_ADD_MANAGED_PROFILE, false,
-                    primaryUserHandle);
+                    mainUserHandle);
         }
     }
 
@@ -880,17 +879,17 @@ public final class UserManagerTest {
     @Test
     public void testCreateProfileForUserEvenWhenDisallowed() throws Exception {
         assumeManagedUsersSupported();
-        final int primaryUserId = mUserManager.getPrimaryUser().id;
-        final UserHandle primaryUserHandle = asHandle(primaryUserId);
+        final int mainUserId = mUserManager.getMainUser().getIdentifier();
+        final UserHandle mainUserHandle = asHandle(mainUserId);
         mUserManager.setUserRestriction(UserManager.DISALLOW_ADD_MANAGED_PROFILE, true,
-                primaryUserHandle);
+                mainUserHandle);
         try {
             UserInfo userInfo = createProfileEvenWhenDisallowedForUser("Managed",
-                    UserManager.USER_TYPE_PROFILE_MANAGED, primaryUserId);
+                    UserManager.USER_TYPE_PROFILE_MANAGED, mainUserId);
             assertThat(userInfo).isNotNull();
         } finally {
             mUserManager.setUserRestriction(UserManager.DISALLOW_ADD_MANAGED_PROFILE, false,
-                    primaryUserHandle);
+                    mainUserHandle);
         }
     }
 
@@ -899,23 +898,23 @@ public final class UserManagerTest {
     @Test
     public void testCreateProfileForUser_disallowAddUser() throws Exception {
         assumeManagedUsersSupported();
-        final int primaryUserId = mUserManager.getPrimaryUser().id;
-        final UserHandle primaryUserHandle = asHandle(primaryUserId);
-        mUserManager.setUserRestriction(UserManager.DISALLOW_ADD_USER, true, primaryUserHandle);
+        final int mainUserId = mUserManager.getMainUser().getIdentifier();
+        final UserHandle mainUserHandle = asHandle(mainUserId);
+        mUserManager.setUserRestriction(UserManager.DISALLOW_ADD_USER, true, mainUserHandle);
         try {
             UserInfo userInfo = createProfileForUser("Managed",
-                    UserManager.USER_TYPE_PROFILE_MANAGED, primaryUserId);
+                    UserManager.USER_TYPE_PROFILE_MANAGED, mainUserId);
             assertThat(userInfo).isNotNull();
         } finally {
             mUserManager.setUserRestriction(UserManager.DISALLOW_ADD_USER, false,
-                    primaryUserHandle);
+                    mainUserHandle);
         }
     }
 
     @MediumTest
     @Test
     public void testAddRestrictedProfile() throws Exception {
-        if (isAutomotive()) return;
+        if (isAutomotive() || UserManager.isHeadlessSystemUserMode()) return;
         assertWithMessage("There should be no associated restricted profiles before the test")
                 .that(mUserManager.hasRestrictedProfiles()).isFalse();
         UserInfo userInfo = createRestrictedProfile("Profile");
@@ -947,10 +946,10 @@ public final class UserManagerTest {
     @Test
     public void testGetManagedProfileCreationTime() throws Exception {
         assumeManagedUsersSupported();
-        final int primaryUserId = mUserManager.getPrimaryUser().id;
+        final int mainUserId = mUserManager.getMainUser().getIdentifier();
         final long startTime = System.currentTimeMillis();
         UserInfo profile = createProfileForUser("Managed 1",
-                UserManager.USER_TYPE_PROFILE_MANAGED, primaryUserId);
+                UserManager.USER_TYPE_PROFILE_MANAGED, mainUserId);
         final long endTime = System.currentTimeMillis();
         assertThat(profile).isNotNull();
         if (System.currentTimeMillis() > EPOCH_PLUS_30_YEARS) {
@@ -963,8 +962,8 @@ public final class UserManagerTest {
         assertThat(mUserManager.getUserCreationTime(asHandle(profile.id)))
                 .isEqualTo(profile.creationTime);
 
-        long ownerCreationTime = mUserManager.getUserInfo(primaryUserId).creationTime;
-        assertThat(mUserManager.getUserCreationTime(asHandle(primaryUserId)))
+        long ownerCreationTime = mUserManager.getUserInfo(mainUserId).creationTime;
+        assertThat(mUserManager.getUserCreationTime(asHandle(mainUserId)))
             .isEqualTo(ownerCreationTime);
     }
 
@@ -1200,14 +1199,14 @@ public final class UserManagerTest {
     @Test
     public void testCreateProfile_withContextUserId() throws Exception {
         assumeManagedUsersSupported();
-        final int primaryUserId = mUserManager.getPrimaryUser().id;
+        final int mainUserId = mUserManager.getMainUser().getIdentifier();
 
         UserInfo userProfile = createProfileForUser("Managed 1",
-                UserManager.USER_TYPE_PROFILE_MANAGED, primaryUserId);
+                UserManager.USER_TYPE_PROFILE_MANAGED, mainUserId);
         assertThat(userProfile).isNotNull();
 
         UserManager um = (UserManager) mContext.createPackageContextAsUser(
-                "android", 0, mUserManager.getPrimaryUser().getUserHandle())
+                "android", 0, mUserManager.getMainUser())
                 .getSystemService(Context.USER_SERVICE);
 
         List<UserHandle> profiles = um.getAllProfiles();
@@ -1219,10 +1218,10 @@ public final class UserManagerTest {
     @Test
     public void testSetUserName_withContextUserId() throws Exception {
         assumeManagedUsersSupported();
-        final int primaryUserId = mUserManager.getPrimaryUser().id;
+        final int mainUserId = mUserManager.getMainUser().getIdentifier();
 
         UserInfo userInfo1 = createProfileForUser("Managed 1",
-                UserManager.USER_TYPE_PROFILE_MANAGED, primaryUserId);
+                UserManager.USER_TYPE_PROFILE_MANAGED, mainUserId);
         assertThat(userInfo1).isNotNull();
 
         UserManager um = (UserManager) mContext.createPackageContextAsUser(
@@ -1268,10 +1267,10 @@ public final class UserManagerTest {
     @Test
     public void testGetUserIcon_withContextUserId() throws Exception {
         assumeManagedUsersSupported();
-        final int primaryUserId = mUserManager.getPrimaryUser().id;
+        final int mainUserId = mUserManager.getMainUser().getIdentifier();
 
         UserInfo userInfo1 = createProfileForUser("Managed 1",
-                UserManager.USER_TYPE_PROFILE_MANAGED, primaryUserId);
+                UserManager.USER_TYPE_PROFILE_MANAGED, mainUserId);
         assertThat(userInfo1).isNotNull();
 
         UserManager um = (UserManager) mContext.createPackageContextAsUser(
