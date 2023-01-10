@@ -327,6 +327,32 @@ class MobileIconsInteractorTest : SysuiTestCase() {
             job.cancel()
         }
 
+    @Test
+    fun `default mobile connectivity - uses repo value`() =
+        testScope.runTest {
+            var latest: MobileConnectivityModel? = null
+            val job =
+                underTest.defaultMobileNetworkConnectivity.onEach { latest = it }.launchIn(this)
+
+            var expected = MobileConnectivityModel(isConnected = true, isValidated = true)
+            connectionsRepository.setMobileConnectivity(expected)
+            assertThat(latest).isEqualTo(expected)
+
+            expected = MobileConnectivityModel(isConnected = false, isValidated = true)
+            connectionsRepository.setMobileConnectivity(expected)
+            assertThat(latest).isEqualTo(expected)
+
+            expected = MobileConnectivityModel(isConnected = true, isValidated = false)
+            connectionsRepository.setMobileConnectivity(expected)
+            assertThat(latest).isEqualTo(expected)
+
+            expected = MobileConnectivityModel(isConnected = false, isValidated = false)
+            connectionsRepository.setMobileConnectivity(expected)
+            assertThat(latest).isEqualTo(expected)
+
+            job.cancel()
+        }
+
     companion object {
         private val tableLogBuffer =
             TableLogBuffer(8, "MobileIconsInteractorTest", FakeSystemClock())

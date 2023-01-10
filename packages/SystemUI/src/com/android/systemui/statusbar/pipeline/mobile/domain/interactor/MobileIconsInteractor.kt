@@ -23,6 +23,7 @@ import com.android.settingslib.SignalIcon.MobileIconGroup
 import com.android.settingslib.mobile.TelephonyIcons
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.dagger.qualifiers.Application
+import com.android.systemui.statusbar.pipeline.mobile.data.model.MobileConnectivityModel
 import com.android.systemui.statusbar.pipeline.mobile.data.model.SubscriptionModel
 import com.android.systemui.statusbar.pipeline.mobile.data.repository.MobileConnectionRepository
 import com.android.systemui.statusbar.pipeline.mobile.data.repository.MobileConnectionsRepository
@@ -61,6 +62,14 @@ interface MobileIconsInteractor {
 
     /** True if the CDMA level should be preferred over the primary level. */
     val alwaysUseCdmaLevel: StateFlow<Boolean>
+
+    /**
+     * The connectivity of the default mobile network. Note that this can differ from what is
+     * reported from [MobileConnectionsRepository] in some cases. E.g., when the active subscription
+     * changes but the groupUuid remains the same, we keep the old validation information for 2
+     * seconds to avoid icon flickering.
+     */
+    val defaultMobileNetworkConnectivity: StateFlow<MobileConnectivityModel>
 
     /** The icon mapping from network type to [MobileIconGroup] for the default subscription */
     val defaultMobileIconMapping: StateFlow<Map<String, MobileIconGroup>>
@@ -154,6 +163,9 @@ constructor(
             }
         }
 
+    override val defaultMobileNetworkConnectivity: StateFlow<MobileConnectivityModel> =
+        mobileConnectionsRepo.defaultMobileNetworkConnectivity
+
     /**
      * Mapping from network type to [MobileIconGroup] using the config generated for the default
      * subscription Id. This mapping is the same for every subscription.
@@ -207,6 +219,7 @@ constructor(
             activeDataConnectionHasDataEnabled,
             alwaysShowDataRatIcon,
             alwaysUseCdmaLevel,
+            defaultMobileNetworkConnectivity,
             defaultMobileIconMapping,
             defaultMobileIconGroup,
             isDefaultConnectionFailed,

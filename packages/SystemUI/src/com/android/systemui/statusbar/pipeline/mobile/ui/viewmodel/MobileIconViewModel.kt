@@ -102,24 +102,29 @@ constructor(
             .stateIn(scope, SharingStarted.WhileSubscribed(), initial)
     }
 
+    private val showNetworkTypeIcon: Flow<Boolean> =
+        combine(
+            iconInteractor.isDataConnected,
+            iconInteractor.isDataEnabled,
+            iconInteractor.isDefaultConnectionFailed,
+            iconInteractor.alwaysShowDataRatIcon,
+            iconInteractor.isConnected,
+        ) { dataConnected, dataEnabled, failedConnection, alwaysShow, connected ->
+            alwaysShow || (dataConnected && dataEnabled && !failedConnection && connected)
+        }
+
     override val networkTypeIcon: Flow<Icon?> =
         combine(
                 iconInteractor.networkTypeIconGroup,
-                iconInteractor.isDataConnected,
-                iconInteractor.isDataEnabled,
-                iconInteractor.isDefaultConnectionFailed,
-                iconInteractor.alwaysShowDataRatIcon,
-            ) { networkTypeIconGroup, dataConnected, dataEnabled, failedConnection, alwaysShow ->
+                showNetworkTypeIcon,
+            ) { networkTypeIconGroup, shouldShow ->
                 val desc =
                     if (networkTypeIconGroup.dataContentDescription != 0)
                         ContentDescription.Resource(networkTypeIconGroup.dataContentDescription)
                     else null
                 val icon = Icon.Resource(networkTypeIconGroup.dataType, desc)
                 return@combine when {
-                    alwaysShow -> icon
-                    !dataConnected -> null
-                    !dataEnabled -> null
-                    failedConnection -> null
+                    !shouldShow -> null
                     else -> icon
                 }
             }
