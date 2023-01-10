@@ -279,7 +279,6 @@ public class StatusBarKeyguardViewManager implements RemoteInputController.Callb
     private boolean mLastScreenOffAnimationPlaying;
     private float mQsExpansion;
     final Set<KeyguardViewManagerCallback> mCallbacks = new HashSet<>();
-    private boolean mIsModernBouncerEnabled;
     private boolean mIsModernAlternateBouncerEnabled;
     private boolean mIsUnoccludeTransitionFlagEnabled;
     private boolean mIsBackAnimationEnabled;
@@ -358,7 +357,6 @@ public class StatusBarKeyguardViewManager implements RemoteInputController.Callb
         mPrimaryBouncerView = primaryBouncerView;
         mFoldAodAnimationController = sysUIUnfoldComponent
                 .map(SysUIUnfoldComponent::getFoldAodAnimationController).orElse(null);
-        mIsModernBouncerEnabled = featureFlags.isEnabled(Flags.MODERN_BOUNCER);
         mIsModernAlternateBouncerEnabled = featureFlags.isEnabled(Flags.MODERN_ALTERNATE_BOUNCER);
         mAlternateBouncerInteractor = alternateBouncerInteractor;
         mIsUnoccludeTransitionFlagEnabled = featureFlags.isEnabled(Flags.UNOCCLUSION_TRANSITION);
