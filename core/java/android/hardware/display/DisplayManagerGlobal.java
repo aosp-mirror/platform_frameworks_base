@@ -990,6 +990,19 @@ public final class DisplayManagerGlobal {
     }
 
     /**
+     * Returns the {@link HdrConversionMode} of the device, which is set by the user.
+     * The HDR conversion mode chosen by user is returned irrespective of whether HDR conversion
+     * is disabled by an app.
+     */
+    public HdrConversionMode getHdrConversionModeSetting() {
+        try {
+            return mDm.getHdrConversionModeSetting();
+        } catch (RemoteException ex) {
+            throw ex.rethrowFromSystemServer();
+        }
+    }
+
+    /**
      * Returns the {@link HdrConversionMode} of the device.
      */
     public HdrConversionMode getHdrConversionMode() {
