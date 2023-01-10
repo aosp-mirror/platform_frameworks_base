@@ -469,7 +469,7 @@ class LogicalDisplayMapper implements DisplayDeviceRepository.Listener {
         synchronized (mSyncRoot) {
             mBootCompleted = true;
             if (mPendingDeviceState != DeviceStateManager.INVALID_DEVICE_STATE) {
-                setDeviceStateLocked(mPendingDeviceState, false);
+                setDeviceStateLocked(mPendingDeviceState, /* isOverrideActive= */ false);
             }
         }
     }
