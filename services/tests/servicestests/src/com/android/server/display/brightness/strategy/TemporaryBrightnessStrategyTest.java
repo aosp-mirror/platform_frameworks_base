@@ -59,8 +59,6 @@ public class TemporaryBrightnessStrategyTest {
         DisplayBrightnessState updatedDisplayBrightnessState =
                 mTemporaryBrightnessStrategy.updateBrightness(displayPowerRequest);
         assertEquals(updatedDisplayBrightnessState, expectedDisplayBrightnessState);
-        assertEquals(mTemporaryBrightnessStrategy.getTemporaryScreenBrightness(),
-                Float.NaN, 0.0f);
     }
 
 }

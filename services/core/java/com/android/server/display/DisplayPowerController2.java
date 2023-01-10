@@ -1197,7 +1197,9 @@ final class DisplayPowerController2 implements AutomaticBrightnessController.Cal
                         && Display.isDozeState(state);
         final boolean autoBrightnessEnabled = mUseAutoBrightness
                 && (state == Display.STATE_ON || autoBrightnessEnabledInDoze)
-                && Float.isNaN(brightnessState)
+                && (Float.isNaN(brightnessState)
+                        || mBrightnessReasonTemp.getReason() == BrightnessReason.REASON_TEMPORARY
+                        || mBrightnessReasonTemp.getReason() == BrightnessReason.REASON_BOOST)
                 && mAutomaticBrightnessController != null;
         final boolean autoBrightnessDisabledDueToDisplayOff = mUseAutoBrightness
                 && !(state == Display.STATE_ON || autoBrightnessEnabledInDoze);
