@@ -1314,7 +1314,7 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
         if (((response.getDatasets() == null || response.getDatasets().isEmpty())
                         && response.getAuthentication() == null)
                 || autofillDisabled) {
-            // Response is "empty" from an UI point of view, need to notify client.
+            // Response is "empty" from a UI point of view, need to notify client.
             notifyUnavailableToClient(
                     autofillDisabled ? AutofillManager.STATE_DISABLED_BY_SERVICE : 0,
                     /* autofillableIds= */ null);
@@ -3857,7 +3857,7 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
 
         mService.resetLastResponse();
 
-        // The default autofill service cannot fullfill the request, let's check if the augmented
+        // The default autofill service cannot fulfill the request, let's check if the augmented
         // autofill service can.
         mAugmentedAutofillDestroyer = triggerAugmentedAutofillLocked(flags);
         if (mAugmentedAutofillDestroyer == null && ((flags & FLAG_PASSWORD_INPUT_TYPE) == 0)) {
