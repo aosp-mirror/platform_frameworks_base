@@ -19216,6 +19216,18 @@ public final class Settings {
             "android.settings.MANAGE_APP_ALL_FILES_ACCESS_PERMISSION";
 
     /**
+     * Activity Action: Show screen for controlling whether an app can send full screen intents.
+     * <p>
+     *     Input: the intent's data URI must specify the application package name for which you want
+     *     to manage full screen intents.
+     * <p>
+     * Output: Nothing.
+     */
+    @SdkConstant(SdkConstantType.ACTIVITY_INTENT_ACTION)
+    public static final String ACTION_MANAGE_APP_USE_FULL_SCREEN_INTENT =
+            "android.settings.MANAGE_APP_USE_FULL_SCREEN_INTENT";
+
+    /**
      * Activity Action: For system or preinstalled apps to show their {@link Activity} embedded
      * in Settings app on large screen devices.
      *
