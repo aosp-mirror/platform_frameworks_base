@@ -61,6 +61,8 @@ open class EnterPipOnUserLeaveHintTest(flicker: FlickerTest) : EnterPipTest(flic
                 pipApp.enableEnterPipOnUserLeaveHint()
             }
             teardown {
+                // close gracefully so that onActivityUnpinned() can be called before force exit
+                pipApp.closePipWindow(wmHelper)
                 pipApp.exit(wmHelper)
             }
             transitions { tapl.goHome() }
