@@ -4815,5 +4815,12 @@ public final class Telephony {
          * @hide
          */
         public static final String COLUMN_USAGE_SETTING = "usage_setting";
+
+        /**
+         * TelephonyProvider column name for user handle associated with this sim.
+         *
+         * @hide
+         */
+        public static final String COLUMN_USER_HANDLE = "user_handle";
     }
 }
