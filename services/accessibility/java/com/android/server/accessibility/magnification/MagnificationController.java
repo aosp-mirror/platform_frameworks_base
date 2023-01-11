@@ -410,9 +410,6 @@ public class MagnificationController implements WindowMagnificationManager.Callb
     public void onRequestMagnificationSpec(int displayId, int serviceId) {
         final WindowMagnificationManager windowMagnificationManager;
         synchronized (mLock) {
-            if (serviceId == MAGNIFICATION_GESTURE_HANDLER_ID) {
-                return;
-            }
             updateMagnificationButton(displayId, ACCESSIBILITY_MAGNIFICATION_MODE_FULLSCREEN);
             windowMagnificationManager = mWindowMagnificationMgr;
         }
