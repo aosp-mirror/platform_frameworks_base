@@ -66,12 +66,15 @@ public final class ImeOpenCloseStressTest {
     private static final String TAG = "ImeOpenCloseStressTest";
     private static final int NUM_TEST_ITERATIONS = 10;
 
-    @Rule public UnlockScreenRule mUnlockScreenRule = new UnlockScreenRule();
-    @Rule public ScreenCaptureRule mScreenCaptureRule =
-            new ScreenCaptureRule("/sdcard/InputMethodStressTest");
-    @Rule public DisableLockScreenRule mDisableLockScreenRule = new DisableLockScreenRule();
-    @Rule public ScreenOrientationRule mScreenOrientationRule =
+    @Rule(order = 0) public DisableLockScreenRule mDisableLockScreenRule =
+            new DisableLockScreenRule();
+    @Rule(order = 1) public UnlockScreenRule mUnlockScreenRule = new UnlockScreenRule();
+    @Rule(order = 2) public ScreenOrientationRule mScreenOrientationRule =
             new ScreenOrientationRule(true /* isPortrait */);
+    @Rule(order = 3) public PressHomeBeforeTestRule mPressHomeBeforeTestRule =
+            new PressHomeBeforeTestRule();
+    @Rule(order = 4) public ScreenCaptureRule mScreenCaptureRule =
+            new ScreenCaptureRule("/sdcard/InputMethodStressTest");
 
     private final Instrumentation mInstrumentation;
     private final int mSoftInputFlags;
