@@ -26,7 +26,10 @@ import com.android.systemui.keyguard.shared.model.TransitionInfo
 import com.android.systemui.keyguard.shared.model.WakefulnessState
 import com.android.systemui.util.kotlin.sample
 import javax.inject.Inject
+import kotlin.time.Duration
+import kotlin.time.Duration.Companion.milliseconds
 import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.launch
 
 @SysUISingleton
@@ -40,7 +43,7 @@ constructor(
 ) : TransitionInteractor(FromGoneTransitionInteractor::class.simpleName!!) {
 
     override fun start() {
-        listenForGoneToAod()
+        listenForGoneToAodOrDozing()
         listenForGoneToDreaming()
     }
 
@@ -56,7 +59,7 @@ constructor(
                                 name,
                                 KeyguardState.GONE,
                                 KeyguardState.DREAMING,
-                                getAnimator(),
+                                getAnimator(TO_DREAMING_DURATION),
                             )
                         )
                     }
@@ -64,12 +67,18 @@ constructor(
         }
     }
 
-    private fun listenForGoneToAod() {
+    private fun listenForGoneToAodOrDozing() {
         scope.launch {
             keyguardInteractor.wakefulnessModel
-                .sample(keyguardTransitionInteractor.finishedKeyguardState, ::Pair)
-                .collect { pair ->
-                    val (wakefulnessState, keyguardState) = pair
+                .sample(
+                    combine(
+                        keyguardTransitionInteractor.finishedKeyguardState,
+                        keyguardInteractor.isAodAvailable,
+                        ::Pair
+                    ),
+                    ::toTriple
+                )
+                .collect { (wakefulnessState, keyguardState, isAodAvailable) ->
                     if (
                         keyguardState == KeyguardState.GONE &&
                             wakefulnessState.state == WakefulnessState.STARTING_TO_SLEEP
@@ -78,7 +87,11 @@ constructor(
                             TransitionInfo(
                                 name,
                                 KeyguardState.GONE,
-                                KeyguardState.AOD,
+                                if (isAodAvailable) {
+                                    KeyguardState.AOD
+                                } else {
+                                    KeyguardState.DOZING
+                                },
                                 getAnimator(),
                             )
                         )
@@ -87,14 +100,15 @@ constructor(
         }
     }
 
-    private fun getAnimator(): ValueAnimator {
+    private fun getAnimator(duration: Duration = DEFAULT_DURATION): ValueAnimator {
         return ValueAnimator().apply {
             setInterpolator(Interpolators.LINEAR)
-            setDuration(TRANSITION_DURATION_MS)
+            setDuration(duration.inWholeMilliseconds)
         }
     }
 
     companion object {
-        private const val TRANSITION_DURATION_MS = 500L
+        private val DEFAULT_DURATION = 500.milliseconds
+        val TO_DREAMING_DURATION = 933.milliseconds
     }
 }
