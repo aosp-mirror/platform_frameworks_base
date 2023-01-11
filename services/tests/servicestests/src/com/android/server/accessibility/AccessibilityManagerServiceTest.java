@@ -106,7 +106,8 @@ public class AccessibilityManagerServiceTest {
     private static final String INTENT_ACTION = "TESTACTION";
     private static final String DESCRIPTION = "description";
     private static final PendingIntent TEST_PENDING_INTENT = PendingIntent.getBroadcast(
-            ApplicationProvider.getApplicationContext(), 0, new Intent(INTENT_ACTION),
+            ApplicationProvider.getApplicationContext(), 0, new Intent(INTENT_ACTION)
+                    .setPackage(ApplicationProvider.getApplicationContext().getPackageName()),
             PendingIntent.FLAG_MUTABLE_UNAUDITED);
     private static final RemoteAction TEST_ACTION = new RemoteAction(
             Icon.createWithContentUri("content://test"),
