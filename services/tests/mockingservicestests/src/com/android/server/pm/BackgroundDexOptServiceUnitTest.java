@@ -413,8 +413,8 @@ public final class BackgroundDexOptServiceUnitTest {
         mDexOptThread.join(TEST_WAIT_TIMEOUT_MS);
         mCancelThread.join(TEST_WAIT_TIMEOUT_MS);
 
-        // Always reschedule for periodic job
-        verify(mJobServiceForIdle).jobFinished(mJobParametersForIdle, false);
+        // The job should be rescheduled.
+        verify(mJobServiceForIdle).jobFinished(mJobParametersForIdle, true /* wantsReschedule */);
         verifyLastControlDexOptBlockingCall(false);
     }
 
