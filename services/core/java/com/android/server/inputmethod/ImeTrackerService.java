@@ -24,6 +24,7 @@ import android.os.Binder;
 import android.os.Handler;
 import android.os.IBinder;
 import android.os.Looper;
+import android.util.Log;
 import android.view.inputmethod.ImeTracker;
 
 import com.android.internal.annotations.GuardedBy;
@@ -53,7 +54,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 @SuppressWarnings("GuardedBy")
 public final class ImeTrackerService extends IImeTracker.Stub {
 
-    static final String TAG = "ImeTrackerService";
+    private static final String TAG = ImeTracker.TAG;
 
     /** The threshold in milliseconds after which a history entry is considered timed out. */
     private static final long TIMEOUT_MS = 10_000;
@@ -71,67 +72,71 @@ public final class ImeTrackerService extends IImeTracker.Stub {
 
     @NonNull
     @Override
-    public synchronized IBinder onRequestShow(int uid, @ImeTracker.Origin int origin,
-            @SoftInputShowHideReason int reason) {
-        final IBinder binder = new Binder();
-        final History.Entry entry = new History.Entry(uid, ImeTracker.TYPE_SHOW,
-                ImeTracker.STATUS_RUN, origin, reason);
+    public synchronized ImeTracker.Token onRequestShow(@NonNull String tag, int uid,
+            @ImeTracker.Origin int origin, @SoftInputShowHideReason int reason) {
+        final var binder = new Binder();
+        final var token = new ImeTracker.Token(binder, tag);
+        final var entry = new History.Entry(uid, ImeTracker.TYPE_SHOW, ImeTracker.STATUS_RUN,
+                origin, reason);
         mHistory.addEntry(binder, entry);
 
         // Register a delayed task to handle the case where the new entry times out.
         mHandler.postDelayed(() -> {
             synchronized (ImeTrackerService.this) {
-                mHistory.setFinished(binder, ImeTracker.STATUS_TIMEOUT, ImeTracker.PHASE_NOT_SET);
+                mHistory.setFinished(token, ImeTracker.STATUS_TIMEOUT, ImeTracker.PHASE_NOT_SET);
             }
         }, TIMEOUT_MS);
 
-        return binder;
+        return token;
     }
 
     @NonNull
     @Override
-    public synchronized IBinder onRequestHide(int uid, @ImeTracker.Origin int origin,
-            @SoftInputShowHideReason int reason) {
-        final IBinder binder = new Binder();
-        final History.Entry entry = new History.Entry(uid, ImeTracker.TYPE_HIDE,
-                ImeTracker.STATUS_RUN, origin, reason);
+    public synchronized ImeTracker.Token onRequestHide(@NonNull String tag, int uid,
+            @ImeTracker.Origin int origin, @SoftInputShowHideReason int reason) {
+        final var binder = new Binder();
+        final var token = new ImeTracker.Token(binder, tag);
+        final var entry = new History.Entry(uid, ImeTracker.TYPE_HIDE, ImeTracker.STATUS_RUN,
+                origin, reason);
         mHistory.addEntry(binder, entry);
 
         // Register a delayed task to handle the case where the new entry times out.
         mHandler.postDelayed(() -> {
             synchronized (ImeTrackerService.this) {
-                mHistory.setFinished(binder, ImeTracker.STATUS_TIMEOUT, ImeTracker.PHASE_NOT_SET);
+                mHistory.setFinished(token, ImeTracker.STATUS_TIMEOUT, ImeTracker.PHASE_NOT_SET);
             }
         }, TIMEOUT_MS);
 
-        return binder;
+        return token;
     }
 
     @Override
-    public synchronized void onProgress(@NonNull IBinder statsToken, @ImeTracker.Phase int phase) {
-        final History.Entry entry = mHistory.getEntry(statsToken);
+    public synchronized void onProgress(@NonNull IBinder binder, @ImeTracker.Phase int phase) {
+        final var entry = mHistory.getEntry(binder);
         if (entry == null) return;
 
         entry.mPhase = phase;
     }
 
     @Override
-    public synchronized void onFailed(@NonNull IBinder statsToken, @ImeTracker.Phase int phase) {
+    public synchronized void onFailed(@NonNull ImeTracker.Token statsToken,
+            @ImeTracker.Phase int phase) {
         mHistory.setFinished(statsToken, ImeTracker.STATUS_FAIL, phase);
     }
 
     @Override
-    public synchronized void onCancelled(@NonNull IBinder statsToken, @ImeTracker.Phase int phase) {
+    public synchronized void onCancelled(@NonNull ImeTracker.Token statsToken,
+            @ImeTracker.Phase int phase) {
         mHistory.setFinished(statsToken, ImeTracker.STATUS_CANCEL, phase);
     }
 
     @Override
-    public synchronized void onShown(@NonNull IBinder statsToken) {
+    public synchronized void onShown(@NonNull ImeTracker.Token statsToken) {
         mHistory.setFinished(statsToken, ImeTracker.STATUS_SUCCESS, ImeTracker.PHASE_NOT_SET);
     }
 
     @Override
-    public synchronized void onHidden(@NonNull IBinder statsToken) {
+    public synchronized void onHidden(@NonNull ImeTracker.Token statsToken) {
         mHistory.setFinished(statsToken, ImeTracker.STATUS_SUCCESS, ImeTracker.PHASE_NOT_SET);
     }
 
@@ -141,9 +146,9 @@ public final class ImeTrackerService extends IImeTracker.Stub {
      * @param statsToken the token corresponding to the current IME request.
      * @param requestWindowName the name of the window that created the IME request.
      */
-    public synchronized void onImmsUpdate(@NonNull IBinder statsToken,
+    public synchronized void onImmsUpdate(@NonNull ImeTracker.Token statsToken,
             @NonNull String requestWindowName) {
-        final History.Entry entry = mHistory.getEntry(statsToken);
+        final var entry = mHistory.getEntry(statsToken.getBinder());
         if (entry == null) return;
 
         entry.mRequestWindowName = requestWindowName;
@@ -181,17 +186,17 @@ public final class ImeTrackerService extends IImeTracker.Stub {
         /** Latest entry sequence number. */
         private static final AtomicInteger sSequenceNumber = new AtomicInteger(0);
 
-        /** Adds a live entry. */
+        /** Adds a live entry corresponding to the given IME tracking token's binder. */
         @GuardedBy("ImeTrackerService.this")
-        private void addEntry(@NonNull IBinder statsToken, @NonNull Entry entry) {
-            mLiveEntries.put(statsToken, entry);
+        private void addEntry(@NonNull IBinder binder, @NonNull Entry entry) {
+            mLiveEntries.put(binder, entry);
         }
 
-        /** Gets the entry corresponding to the given IME tracking token, if it exists. */
+        /** Gets the entry corresponding to the given IME tracking token's binder, if it exists. */
         @Nullable
         @GuardedBy("ImeTrackerService.this")
-        private Entry getEntry(@NonNull IBinder statsToken) {
-            return mLiveEntries.get(statsToken);
+        private Entry getEntry(@NonNull IBinder binder) {
+            return mLiveEntries.get(binder);
         }
 
         /**
@@ -204,16 +209,34 @@ public final class ImeTrackerService extends IImeTracker.Stub {
          *              (or {@link ImeTracker#PHASE_NOT_SET} otherwise).
          */
         @GuardedBy("ImeTrackerService.this")
-        private void setFinished(@NonNull IBinder statsToken, @ImeTracker.Status int status,
-                @ImeTracker.Phase int phase) {
-            final Entry entry = mLiveEntries.remove(statsToken);
-            if (entry == null) return;
+        private void setFinished(@NonNull ImeTracker.Token statsToken,
+                @ImeTracker.Status int status, @ImeTracker.Phase int phase) {
+            final var entry = mLiveEntries.remove(statsToken.getBinder());
+            if (entry == null) {
+                // This will be unconditionally called through the postDelayed above to handle
+                // potential timeouts, and is thus intentionally dropped to avoid having to manually
+                // save and remove the registered callback. Only timeout calls are expected.
+                if (status != ImeTracker.STATUS_TIMEOUT) {
+                    Log.i(TAG, statsToken.getTag()
+                            + ": setFinished on previously finished token at "
+                            + ImeTracker.Debug.phaseToString(phase) + " with "
+                            + ImeTracker.Debug.statusToString(status));
+                }
+                return;
+            }
 
             entry.mDuration = System.currentTimeMillis() - entry.mStartTime;
             entry.mStatus = status;
 
             if (phase != ImeTracker.PHASE_NOT_SET) {
                 entry.mPhase = phase;
+            }
+
+            if (status == ImeTracker.STATUS_TIMEOUT) {
+                // All events other than timeouts are already logged in the client-side ImeTracker.
+                Log.i(TAG, statsToken.getTag() + ": setFinished at "
+                        + ImeTracker.Debug.phaseToString(entry.mPhase) + " with "
+                        + ImeTracker.Debug.statusToString(status));
             }
 
             // Remove excess entries overflowing capacity (plus one for the new entry).
@@ -232,21 +255,20 @@ public final class ImeTrackerService extends IImeTracker.Stub {
         /** Dumps the contents of the circular buffer. */
         @GuardedBy("ImeTrackerService.this")
         private void dump(@NonNull PrintWriter pw, @NonNull String prefix) {
-            final DateTimeFormatter formatter =
-                    DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss.SSS", Locale.US)
-                            .withZone(ZoneId.systemDefault());
+            final var formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss.SSS", Locale.US)
+                    .withZone(ZoneId.systemDefault());
 
             pw.print(prefix);
             pw.println("ImeTrackerService#History.mLiveEntries:");
 
-            for (final Entry entry: mLiveEntries.values()) {
+            for (final var entry: mLiveEntries.values()) {
                 dumpEntry(entry, pw, prefix, formatter);
             }
 
             pw.print(prefix);
             pw.println("ImeTrackerService#History.mEntries:");
 
-            for (final Entry entry: mEntries) {
+            for (final var entry: mEntries) {
                 dumpEntry(entry, pw, prefix, formatter);
             }
         }
@@ -323,7 +345,7 @@ public final class ImeTrackerService extends IImeTracker.Stub {
             /**
              * Name of the window that created the IME request.
              *
-             * Note: This is later set through {@link #onImmsUpdate(IBinder, String)}.
+             * Note: This is later set through {@link #onImmsUpdate}.
              */
             @NonNull
             private String mRequestWindowName = "not set";

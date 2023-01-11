@@ -4629,7 +4629,7 @@ public final class InputMethodManagerService extends IInputMethodManager.Stub
                 info.imeSurfaceParentName));
 
         if (statsToken != null) {
-            mImeTrackerService.onImmsUpdate(statsToken.mBinder, info.requestWindowName);
+            mImeTrackerService.onImmsUpdate(statsToken, info.requestWindowName);
         }
     }
 

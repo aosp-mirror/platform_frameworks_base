@@ -26,7 +26,6 @@ import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.app.ActivityThread;
 import android.content.Context;
-import android.os.Binder;
 import android.os.IBinder;
 import android.os.Parcel;
 import android.os.Parcelable;
@@ -47,7 +46,7 @@ import java.lang.reflect.Field;
 import java.util.Arrays;
 import java.util.Locale;
 import java.util.Map;
-import java.util.Random;
+import java.util.concurrent.ThreadLocalRandom;
 import java.util.stream.Collectors;
 
 /** @hide */
@@ -321,9 +320,8 @@ public interface ImeTracker {
     /**
      * Creates an IME show request tracking token.
      *
-     * @param component the component name where the IME show request was created,
-     *                  or {@code null} otherwise
-     *                  (defaulting to {@link ActivityThread#currentProcessName()}).
+     * @param component the component name where the IME request was created, or {@code null}
+     *                  otherwise (defaulting to {@link ActivityThread#currentProcessName()}).
      * @param uid the uid of the client that requested the IME.
      * @param origin the origin of the IME show request.
      * @param reason the reason why the IME show request was created.
@@ -337,9 +335,8 @@ public interface ImeTracker {
     /**
      * Creates an IME hide request tracking token.
      *
-     * @param component the component name where the IME hide request was created,
-     *                  or {@code null} otherwise
-     *                  (defaulting to {@link ActivityThread#currentProcessName()}).
+     * @param component the component name where the IME request was created, or {@code null}
+     *                  otherwise (defaulting to {@link ActivityThread#currentProcessName()}).
      * @param uid the uid of the client that requested the IME.
      * @param origin the origin of the IME hide request.
      * @param reason the reason why the IME hide request was created.
@@ -435,8 +432,7 @@ public interface ImeTracker {
             mLogProgress = SystemProperties.getBoolean("persist.debug.imetracker", false);
             // Update logging flag dynamically.
             SystemProperties.addChangeCallback(() ->
-                    mLogProgress =
-                            SystemProperties.getBoolean("persist.debug.imetracker", false));
+                    mLogProgress = SystemProperties.getBoolean("persist.debug.imetracker", false));
         }
 
         /** Whether progress should be logged. */
@@ -446,10 +442,9 @@ public interface ImeTracker {
         @Override
         public Token onRequestShow(@Nullable String component, int uid, @Origin int origin,
                 @SoftInputShowHideReason int reason) {
-            IBinder binder = IInputMethodManagerGlobalInvoker.onRequestShow(uid, origin, reason);
-            if (binder == null) binder = new Binder();
-
-            final Token token = Token.build(binder, component);
+            final var tag = getTag(component);
+            final var token = IInputMethodManagerGlobalInvoker.onRequestShow(tag, uid, origin,
+                    reason);
 
             Log.i(TAG, token.mTag + ": onRequestShow at " + Debug.originToString(origin)
                     + " reason " + InputMethodDebug.softInputDisplayReasonToString(reason));
@@ -461,10 +456,9 @@ public interface ImeTracker {
         @Override
         public Token onRequestHide(@Nullable String component, int uid, @Origin int origin,
                 @SoftInputShowHideReason int reason) {
-            IBinder binder = IInputMethodManagerGlobalInvoker.onRequestHide(uid, origin, reason);
-            if (binder == null) binder = new Binder();
-
-            final Token token = Token.build(binder, component);
+            final var tag = getTag(component);
+            final var token = IInputMethodManagerGlobalInvoker.onRequestHide(tag, uid, origin,
+                    reason);
 
             Log.i(TAG, token.mTag + ": onRequestHide at " + Debug.originToString(origin)
                     + " reason " + InputMethodDebug.softInputDisplayReasonToString(reason));
@@ -485,7 +479,7 @@ public interface ImeTracker {
         @Override
         public void onFailed(@Nullable Token token, @Phase int phase) {
             if (token == null) return;
-            IInputMethodManagerGlobalInvoker.onFailed(token.mBinder, phase);
+            IInputMethodManagerGlobalInvoker.onFailed(token, phase);
 
             Log.i(TAG, token.mTag + ": onFailed at " + Debug.phaseToString(phase));
         }
@@ -499,7 +493,7 @@ public interface ImeTracker {
         @Override
         public void onCancelled(@Nullable Token token, @Phase int phase) {
             if (token == null) return;
-            IInputMethodManagerGlobalInvoker.onCancelled(token.mBinder, phase);
+            IInputMethodManagerGlobalInvoker.onCancelled(token, phase);
 
             Log.i(TAG, token.mTag + ": onCancelled at " + Debug.phaseToString(phase));
         }
@@ -507,7 +501,7 @@ public interface ImeTracker {
         @Override
         public void onShown(@Nullable Token token) {
             if (token == null) return;
-            IInputMethodManagerGlobalInvoker.onShown(token.mBinder);
+            IInputMethodManagerGlobalInvoker.onShown(token);
 
             Log.i(TAG, token.mTag + ": onShown");
         }
@@ -515,9 +509,23 @@ public interface ImeTracker {
         @Override
         public void onHidden(@Nullable Token token) {
             if (token == null) return;
-            IInputMethodManagerGlobalInvoker.onHidden(token.mBinder);
+            IInputMethodManagerGlobalInvoker.onHidden(token);
 
             Log.i(TAG, token.mTag + ": onHidden");
+        }
+
+        /**
+         * Returns a logging tag using the given component name.
+         *
+         * @param component the component name where the IME request was created, or {@code null}
+         *                  otherwise (defaulting to {@link ActivityThread#currentProcessName()}).
+         */
+        @NonNull
+        private String getTag(@Nullable String component) {
+            if (component == null) {
+                component = ActivityThread.currentProcessName();
+            }
+            return component + ":" + Integer.toHexString(ThreadLocalRandom.current().nextInt());
         }
     };
 
@@ -528,28 +536,31 @@ public interface ImeTracker {
     ImeLatencyTracker LATENCY_TRACKER = new ImeLatencyTracker();
 
     /** A token that tracks the progress of an IME request. */
-    class Token implements Parcelable {
+    final class Token implements Parcelable {
 
+        /** The binder used to identify this token. */
         @NonNull
-        public final IBinder mBinder;
+        private final IBinder mBinder;
 
+        /** The logging tag. */
         @NonNull
         private final String mTag;
 
-        @NonNull
-        private static Token build(@NonNull IBinder binder, @Nullable String component) {
-            if (component == null) component = ActivityThread.currentProcessName();
-            final String tag = component + ":" + Integer.toHexString((new Random().nextInt()));
-
-            return new Token(binder, tag);
-        }
-
-        private Token(@NonNull IBinder binder, @NonNull String tag) {
+        public Token(@NonNull IBinder binder, @NonNull String tag) {
             mBinder = binder;
             mTag = tag;
         }
 
-        /** Returns the {@link Token#mTag} */
+        private Token(@NonNull Parcel in) {
+            mBinder = in.readStrongBinder();
+            mTag = in.readString8();
+        }
+
+        @NonNull
+        public IBinder getBinder() {
+            return mBinder;
+        }
+
         @NonNull
         public String getTag() {
             return mTag;
@@ -562,7 +573,7 @@ public interface ImeTracker {
         }
 
         @Override
-        public void writeToParcel(Parcel dest, int flags) {
+        public void writeToParcel(@NonNull Parcel dest, int flags) {
             dest.writeStrongBinder(mBinder);
             dest.writeString8(mTag);
         }
@@ -571,12 +582,11 @@ public interface ImeTracker {
         public static final Creator<Token> CREATOR = new Creator<>() {
             @NonNull
             @Override
-            public Token createFromParcel(Parcel source) {
-                final IBinder binder = source.readStrongBinder();
-                final String tag = source.readString8();
-                return new Token(binder, tag);
+            public Token createFromParcel(@NonNull Parcel in) {
+                return new Token(in);
             }
 
+            @NonNull
             @Override
             public Token[] newArray(int size) {
                 return new Token[size];
@@ -589,40 +599,50 @@ public interface ImeTracker {
      *
      * Note: This is held in a separate class so that it only gets initialized when actually needed.
      */
-    class Debug {
+    final class Debug {
 
+        @NonNull
         private static final Map<Integer, String> sTypes =
                 getFieldMapping(ImeTracker.class, "TYPE_");
+        @NonNull
         private static final Map<Integer, String> sStatus =
                 getFieldMapping(ImeTracker.class, "STATUS_");
+        @NonNull
         private static final Map<Integer, String> sOrigins =
                 getFieldMapping(ImeTracker.class, "ORIGIN_");
+        @NonNull
         private static final Map<Integer, String> sPhases =
                 getFieldMapping(ImeTracker.class, "PHASE_");
 
+        @NonNull
         public static String typeToString(@Type int type) {
             return sTypes.getOrDefault(type, "TYPE_" + type);
         }
 
+        @NonNull
         public static String statusToString(@Status int status) {
             return sStatus.getOrDefault(status, "STATUS_" + status);
         }
 
+        @NonNull
         public static String originToString(@Origin int origin) {
             return sOrigins.getOrDefault(origin, "ORIGIN_" + origin);
         }
 
+        @NonNull
         public static String phaseToString(@Phase int phase) {
             return sPhases.getOrDefault(phase, "PHASE_" + phase);
         }
 
-        private static Map<Integer, String> getFieldMapping(Class<?> cls, String fieldPrefix) {
+        @NonNull
+        private static Map<Integer, String> getFieldMapping(Class<?> cls,
+                @NonNull String fieldPrefix) {
             return Arrays.stream(cls.getDeclaredFields())
                     .filter(field -> field.getName().startsWith(fieldPrefix))
                     .collect(Collectors.toMap(Debug::getFieldValue, Field::getName));
         }
 
-        private static int getFieldValue(Field field) {
+        private static int getFieldValue(@NonNull Field field) {
             try {
                 return field.getInt(null);
             } catch (IllegalAccessException e) {
