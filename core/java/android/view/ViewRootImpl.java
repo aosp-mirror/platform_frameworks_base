@@ -1110,6 +1110,8 @@ public final class ViewRootImpl implements ViewParent,
         // Update the last resource config in case the resource configuration was changed while
         // activity relaunched.
         updateLastConfigurationFromResources(getConfiguration());
+        // Make sure to report the completion of draw for relaunch with preserved window.
+        reportNextDraw("rebuilt");
     }
 
     private Configuration getConfiguration() {
