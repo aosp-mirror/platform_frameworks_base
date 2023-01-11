@@ -783,7 +783,8 @@ class TaskOrganizerController extends ITaskOrganizerController.Stub {
     }
 
     @Override
-    public void createRootTask(int displayId, int windowingMode, @Nullable IBinder launchCookie) {
+    public void createRootTask(int displayId, int windowingMode, @Nullable IBinder launchCookie,
+            boolean removeWithTaskOrganizer) {
         enforceTaskPermission("createRootTask()");
         final long origId = Binder.clearCallingIdentity();
         try {
@@ -795,7 +796,7 @@ class TaskOrganizerController extends ITaskOrganizerController.Stub {
                     return;
                 }
 
-                createRootTask(display, windowingMode, launchCookie);
+                createRootTask(display, windowingMode, launchCookie, removeWithTaskOrganizer);
             }
         } finally {
             Binder.restoreCallingIdentity(origId);
@@ -804,6 +805,12 @@ class TaskOrganizerController extends ITaskOrganizerController.Stub {
 
     @VisibleForTesting
     Task createRootTask(DisplayContent display, int windowingMode, @Nullable IBinder launchCookie) {
+        return createRootTask(display, windowingMode, launchCookie,
+                false /* removeWithTaskOrganizer */);
+    }
+
+    Task createRootTask(DisplayContent display, int windowingMode, @Nullable IBinder launchCookie,
+            boolean removeWithTaskOrganizer) {
         ProtoLog.v(WM_DEBUG_WINDOW_ORGANIZER, "Create root task displayId=%d winMode=%d",
                 display.mDisplayId, windowingMode);
         // We want to defer the task appear signal until the task is fully created and attached to
@@ -816,6 +823,7 @@ class TaskOrganizerController extends ITaskOrganizerController.Stub {
                 .setDeferTaskAppear(true)
                 .setLaunchCookie(launchCookie)
                 .setParent(display.getDefaultTaskDisplayArea())
+                .setRemoveWithTaskOrganizer(removeWithTaskOrganizer)
                 .build();
         task.setDeferTaskAppear(false /* deferTaskAppear */);
         return task;
