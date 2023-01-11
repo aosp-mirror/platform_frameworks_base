@@ -229,12 +229,7 @@ public class BroadcastSkipPolicy {
                 return "Background execution disabled: receiving "
                         + r.intent + " to "
                         + component.flattenToShortString();
-            } else if (((r.intent.getFlags()&Intent.FLAG_RECEIVER_EXCLUDE_BACKGROUND) != 0)
-                    || (r.intent.getComponent() == null
-                        && r.intent.getPackage() == null
-                        && ((r.intent.getFlags()
-                                & Intent.FLAG_RECEIVER_INCLUDE_BACKGROUND) == 0)
-                        && !isSignaturePerm(r.requiredPermissions))) {
+            } else if (disallowBackgroundStart(r)) {
                 mService.addBackgroundCheckViolationLocked(r.intent.getAction(),
                         component.getPackageName());
                 return "Background execution not allowed: receiving "
@@ -338,6 +333,18 @@ public class BroadcastSkipPolicy {
         }
 
         return null;
+    }
+
+    /**
+     * Determine if the given {@link BroadcastRecord} is eligible to launch processes.
+     */
+    public boolean disallowBackgroundStart(@NonNull BroadcastRecord r) {
+        return ((r.intent.getFlags() & Intent.FLAG_RECEIVER_EXCLUDE_BACKGROUND) != 0)
+                || (r.intent.getComponent() == null
+                        && r.intent.getPackage() == null
+                        && ((r.intent.getFlags()
+                                        & Intent.FLAG_RECEIVER_INCLUDE_BACKGROUND) == 0)
+                        && !isSignaturePerm(r.requiredPermissions));
     }
 
     /**
@@ -624,7 +631,7 @@ public class BroadcastSkipPolicy {
     /**
      * Return true if all given permissions are signature-only perms.
      */
-    private boolean isSignaturePerm(String[] perms) {
+    private static boolean isSignaturePerm(String[] perms) {
         if (perms == null) {
             return false;
         }

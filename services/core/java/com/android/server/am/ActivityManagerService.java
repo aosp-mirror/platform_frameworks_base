@@ -14108,8 +14108,16 @@ public class ActivityManagerService extends IActivityManager.Stub
         if (DEBUG_BROADCAST_LIGHT) Slog.v(TAG_BROADCAST,
                 (sticky ? "Broadcast sticky: ": "Broadcast: ") + intent
                 + " ordered=" + ordered + " userid=" + userId);
-        if ((resultTo != null) && !ordered && !mEnableModernQueue) {
-            Slog.w(TAG, "Broadcast " + intent + " not ordered but result callback requested!");
+        if ((resultTo != null) && !ordered) {
+            if (!mEnableModernQueue) {
+                Slog.w(TAG, "Broadcast " + intent + " not ordered but result callback requested!");
+            }
+            if (!UserHandle.isCore(callingUid)) {
+                String msg = "Unauthorized unordered resultTo broadcast "
+                             + intent + " sent from uid " + callingUid;
+                Slog.w(TAG, msg);
+                throw new SecurityException(msg);
+            }
         }
 
         userId = mUserController.handleIncomingUser(callingPid, callingUid, userId, true,
@@ -14188,6 +14196,18 @@ public class ActivityManagerService extends IActivityManager.Stub
                 enforcePermission(android.Manifest.permission.ACCESS_BROADCAST_RESPONSE_STATS,
                         callingPid, callingUid, "recordResponseEventWhileInBackground");
             }
+        }
+
+        // resultTo broadcasts are always infinitely deferrable.
+        if ((resultTo != null) && !ordered && mEnableModernQueue) {
+            if (brOptions == null) {
+                brOptions = BroadcastOptions.makeBasic();
+            }
+            brOptions.setDeferUntilActive(true);
+        }
+
+        if (ordered && brOptions != null && brOptions.isDeferUntilActive()) {
+            throw new IllegalArgumentException("Ordered broadcasts can't be deferred until active");
         }
 
         // Verify that protected broadcasts are only being sent by system code,
