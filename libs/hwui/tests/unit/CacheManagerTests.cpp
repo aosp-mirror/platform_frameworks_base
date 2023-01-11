@@ -21,6 +21,7 @@
 #include "tests/common/TestUtils.h"
 
 #include <SkImagePriv.h>
+#include "include/gpu/GpuTypes.h" // from Skia
 
 using namespace android;
 using namespace android::uirenderer;
@@ -45,7 +46,8 @@ RENDERTHREAD_SKIA_PIPELINE_TEST(CacheManager, DISABLED_trimMemory) {
 
     while (getCacheUsage(grContext) <= renderThread.cacheManager().getBackgroundCacheSize()) {
         SkImageInfo info = SkImageInfo::MakeA8(width, height);
-        sk_sp<SkSurface> surface = SkSurface::MakeRenderTarget(grContext, SkBudgeted::kYes, info);
+        sk_sp<SkSurface> surface = SkSurface::MakeRenderTarget(grContext, skgpu::Budgeted::kYes,
+                                                               info);
         surface->getCanvas()->drawColor(SK_AlphaTRANSPARENT);
 
         grContext->flushAndSubmit();
