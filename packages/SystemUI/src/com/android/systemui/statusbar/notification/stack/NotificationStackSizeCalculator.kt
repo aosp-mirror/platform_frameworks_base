@@ -30,7 +30,6 @@ import com.android.systemui.statusbar.notification.row.ExpandableNotificationRow
 import com.android.systemui.statusbar.notification.row.ExpandableView
 import com.android.systemui.util.Compile
 import com.android.systemui.util.children
-import java.io.PrintWriter
 import javax.inject.Inject
 import kotlin.math.max
 import kotlin.math.min
@@ -53,8 +52,6 @@ constructor(
     private val lockscreenShadeTransitionController: LockscreenShadeTransitionController,
     @Main private val resources: Resources
 ) {
-
-    private lateinit var lastComputeHeightLog : String
 
     /**
      * Maximum # notifications to show on Keyguard; extras will be collapsed in an overflow shelf.
@@ -117,9 +114,7 @@ constructor(
         shelfIntrinsicHeight: Float
     ): Int {
         log { "\n" }
-
-        val stackHeightSequence = computeHeightPerNotificationLimit(stack, shelfIntrinsicHeight,
-            /* computeHeight= */ false)
+        val stackHeightSequence = computeHeightPerNotificationLimit(stack, shelfIntrinsicHeight)
 
         var maxNotifications =
             stackHeightSequence.lastIndexWhile { heightResult ->
@@ -162,21 +157,18 @@ constructor(
         shelfIntrinsicHeight: Float
     ): Float {
         log { "\n" }
-        lastComputeHeightLog = ""
         val heightPerMaxNotifications =
-            computeHeightPerNotificationLimit(stack, shelfIntrinsicHeight,
-                    /* computeHeight= */ true)
+            computeHeightPerNotificationLimit(stack, shelfIntrinsicHeight)
 
         val (notificationsHeight, shelfHeightWithSpaceBefore) =
             heightPerMaxNotifications.elementAtOrElse(maxNotifications) {
                 heightPerMaxNotifications.last() // Height with all notifications visible.
             }
-        lastComputeHeightLog += "\ncomputeHeight(maxNotifications=$maxNotifications," +
+        log {
+            "computeHeight(maxNotifications=$maxNotifications," +
                 "shelfIntrinsicHeight=$shelfIntrinsicHeight) -> " +
                 "${notificationsHeight + shelfHeightWithSpaceBefore}" +
                 " = ($notificationsHeight + $shelfHeightWithSpaceBefore)"
-        log {
-            lastComputeHeightLog
         }
         return notificationsHeight + shelfHeightWithSpaceBefore
     }
@@ -192,8 +184,7 @@ constructor(
 
     private fun computeHeightPerNotificationLimit(
         stack: NotificationStackScrollLayout,
-        shelfHeight: Float,
-        computeHeight: Boolean
+        shelfHeight: Float
     ): Sequence<StackHeight> = sequence {
         log { "computeHeightPerNotificationLimit" }
 
@@ -222,14 +213,9 @@ constructor(
                             currentIndex = firstViewInShelfIndex)
                     spaceBeforeShelf + shelfHeight
                 }
-
-            val currentLog = "computeHeight | i=$i notificationsHeight=$notifications " +
-                "shelfHeightWithSpaceBefore=$shelfWithSpaceBefore"
-            if (computeHeight) {
-                lastComputeHeightLog += "\n" + currentLog
-            }
             log {
-                currentLog
+                "i=$i notificationsHeight=$notifications " +
+                    "shelfHeightWithSpaceBefore=$shelfWithSpaceBefore"
             }
             yield(
                 StackHeight(
@@ -272,10 +258,6 @@ constructor(
             }
         size += calculateGapAndDividerHeight(stack, previousView, current = view, visibleIndex)
         return size
-    }
-
-    fun dump(pw: PrintWriter, args: Array<out String>) {
-        pw.println("NotificationStackSizeCalculator lastComputeHeightLog = $lastComputeHeightLog")
     }
 
     private fun ExpandableView.isShowable(onLockscreen: Boolean): Boolean {

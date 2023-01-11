@@ -1431,6 +1431,22 @@ public class NotificationChildrenContainer extends ViewGroup
     @Override
     public void applyRoundnessAndInvalidate() {
         boolean last = true;
+        if (mUseRoundnessSourceTypes) {
+            if (mNotificationHeaderWrapper != null) {
+                mNotificationHeaderWrapper.requestTopRoundness(
+                        /* value = */ getTopRoundness(),
+                        /* sourceType = */ FROM_PARENT,
+                        /* animate = */ false
+                );
+            }
+            if (mNotificationHeaderWrapperLowPriority != null) {
+                mNotificationHeaderWrapperLowPriority.requestTopRoundness(
+                        /* value = */ getTopRoundness(),
+                        /* sourceType = */ FROM_PARENT,
+                        /* animate = */ false
+                );
+            }
+        }
         for (int i = mAttachedChildren.size() - 1; i >= 0; i--) {
             ExpandableNotificationRow child = mAttachedChildren.get(i);
             if (child.getVisibility() == View.GONE) {
