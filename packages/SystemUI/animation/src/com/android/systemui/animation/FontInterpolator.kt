@@ -33,7 +33,9 @@ private const val FONT_ITALIC_MIN = 0f
 private const val FONT_ITALIC_ANIMATION_STEP = 0.1f
 private const val FONT_ITALIC_DEFAULT_VALUE = 0f
 
-/** Provide interpolation of two fonts by adjusting font variation settings. */
+/**
+ * Provide interpolation of two fonts by adjusting font variation settings.
+ */
 class FontInterpolator {
 
     /**
@@ -59,14 +61,11 @@ class FontInterpolator {
         var index: Int,
         val sortedAxes: MutableList<FontVariationAxis>
     ) {
-        constructor(
-            font: Font,
-            axes: List<FontVariationAxis>
-        ) : this(
-            font.sourceIdentifier,
-            font.ttcIndex,
-            axes.toMutableList().apply { sortBy { it.tag } }
-        )
+        constructor(font: Font, axes: List<FontVariationAxis>) :
+                this(font.sourceIdentifier,
+                        font.ttcIndex,
+                        axes.toMutableList().apply { sortBy { it.tag } }
+                )
 
         fun set(font: Font, axes: List<FontVariationAxis>) {
             sourceId = font.sourceIdentifier
@@ -87,7 +86,9 @@ class FontInterpolator {
     private val tmpInterpKey = InterpKey(null, null, 0f)
     private val tmpVarFontKey = VarFontKey(0, 0, mutableListOf())
 
-    /** Linear interpolate the font variation settings. */
+    /**
+     * Linear interpolate the font variation settings.
+     */
     fun lerp(start: Font, end: Font, progress: Float): Font {
         if (progress == 0f) {
             return start
@@ -114,34 +115,27 @@ class FontInterpolator {
         // this doesn't take much time since the variation axes is usually up to 5. If we need to
         // support more number of axes, we may want to preprocess the font and store the sorted axes
         // and also pre-fill the missing axes value with default value from 'fvar' table.
-        val newAxes =
-            lerp(startAxes, endAxes) { tag, startValue, endValue ->
-                when (tag) {
-                    // TODO: Good to parse 'fvar' table for retrieving default value.
-                    TAG_WGHT ->
-                        adjustWeight(
-                            MathUtils.lerp(
+        val newAxes = lerp(startAxes, endAxes) { tag, startValue, endValue ->
+            when (tag) {
+                // TODO: Good to parse 'fvar' table for retrieving default value.
+                TAG_WGHT -> adjustWeight(
+                        MathUtils.lerp(
                                 startValue ?: FONT_WEIGHT_DEFAULT_VALUE,
                                 endValue ?: FONT_WEIGHT_DEFAULT_VALUE,
-                                progress
-                            )
-                        )
-                    TAG_ITAL ->
-                        adjustItalic(
-                            MathUtils.lerp(
+                                progress))
+                TAG_ITAL -> adjustItalic(
+                        MathUtils.lerp(
                                 startValue ?: FONT_ITALIC_DEFAULT_VALUE,
                                 endValue ?: FONT_ITALIC_DEFAULT_VALUE,
-                                progress
-                            )
-                        )
-                    else -> {
-                        require(startValue != null && endValue != null) {
-                            "Unable to interpolate due to unknown default axes value : $tag"
-                        }
-                        MathUtils.lerp(startValue, endValue, progress)
+                                progress))
+                else -> {
+                    require(startValue != null && endValue != null) {
+                        "Unable to interpolate due to unknown default axes value : $tag"
                     }
+                    MathUtils.lerp(startValue, endValue, progress)
                 }
             }
+        }
 
         // Check if we already make font for this axes. This is typically happens if the animation
         // happens backward.
@@ -155,7 +149,9 @@ class FontInterpolator {
         // This is the first time to make the font for the axes. Build and store it to the cache.
         // Font.Builder#build won't throw IOException since creating fonts from existing fonts will
         // not do any IO work.
-        val newFont = Font.Builder(start).setFontVariationSettings(newAxes.toTypedArray()).build()
+        val newFont = Font.Builder(start)
+                .setFontVariationSettings(newAxes.toTypedArray())
+                .build()
         interpCache[InterpKey(start, end, progress)] = newFont
         verFontCache[VarFontKey(start, newAxes)] = newFont
         return newFont
@@ -177,28 +173,26 @@ class FontInterpolator {
             val tagA = if (i < start.size) start[i].tag else null
             val tagB = if (j < end.size) end[j].tag else null
 
-            val comp =
-                when {
-                    tagA == null -> 1
-                    tagB == null -> -1
-                    else -> tagA.compareTo(tagB)
-                }
+            val comp = when {
+                tagA == null -> 1
+                tagB == null -> -1
+                else -> tagA.compareTo(tagB)
+            }
 
-            val axis =
-                when {
-                    comp == 0 -> {
-                        val v = filter(tagA!!, start[i++].styleValue, end[j++].styleValue)
-                        FontVariationAxis(tagA, v)
-                    }
-                    comp < 0 -> {
-                        val v = filter(tagA!!, start[i++].styleValue, null)
-                        FontVariationAxis(tagA, v)
-                    }
-                    else -> { // comp > 0
-                        val v = filter(tagB!!, null, end[j++].styleValue)
-                        FontVariationAxis(tagB, v)
-                    }
+            val axis = when {
+                comp == 0 -> {
+                    val v = filter(tagA!!, start[i++].styleValue, end[j++].styleValue)
+                    FontVariationAxis(tagA, v)
                 }
+                comp < 0 -> {
+                    val v = filter(tagA!!, start[i++].styleValue, null)
+                    FontVariationAxis(tagA, v)
+                }
+                else -> { // comp > 0
+                    val v = filter(tagB!!, null, end[j++].styleValue)
+                    FontVariationAxis(tagB, v)
+                }
+            }
 
             result.add(axis)
         }
@@ -208,21 +202,21 @@ class FontInterpolator {
     // For the performance reasons, we animate weight with FONT_WEIGHT_ANIMATION_STEP. This helps
     // Cache hit ratio in the Skia glyph cache.
     private fun adjustWeight(value: Float) =
-        coerceInWithStep(value, FONT_WEIGHT_MIN, FONT_WEIGHT_MAX, FONT_WEIGHT_ANIMATION_STEP)
+            coerceInWithStep(value, FONT_WEIGHT_MIN, FONT_WEIGHT_MAX, FONT_WEIGHT_ANIMATION_STEP)
 
     // For the performance reasons, we animate italic with FONT_ITALIC_ANIMATION_STEP. This helps
     // Cache hit ratio in the Skia glyph cache.
     private fun adjustItalic(value: Float) =
-        coerceInWithStep(value, FONT_ITALIC_MIN, FONT_ITALIC_MAX, FONT_ITALIC_ANIMATION_STEP)
+            coerceInWithStep(value, FONT_ITALIC_MIN, FONT_ITALIC_MAX, FONT_ITALIC_ANIMATION_STEP)
 
     private fun coerceInWithStep(v: Float, min: Float, max: Float, step: Float) =
-        (v.coerceIn(min, max) / step).toInt() * step
+            (v.coerceIn(min, max) / step).toInt() * step
 
     companion object {
         private val EMPTY_AXES = arrayOf<FontVariationAxis>()
 
         // Returns true if given two font instance can be interpolated.
         fun canInterpolate(start: Font, end: Font) =
-            start.ttcIndex == end.ttcIndex && start.sourceIdentifier == end.sourceIdentifier
+                start.ttcIndex == end.ttcIndex && start.sourceIdentifier == end.sourceIdentifier
     }
 }
