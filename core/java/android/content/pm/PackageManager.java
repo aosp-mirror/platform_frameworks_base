@@ -2241,6 +2241,15 @@ public abstract class PackageManager {
      */
     public static final int INSTALL_FAILED_PRE_APPROVAL_NOT_AVAILABLE = -129;
 
+    /**
+     * Installation return code: this is passed in the {@link PackageInstaller#EXTRA_LEGACY_STATUS}
+     * if the new package declares bad certificate digest for a shared library in the package
+     * manifest.
+     *
+     * @hide
+     */
+    public static final int INSTALL_FAILED_SHARED_LIBRARY_BAD_CERTIFICATE_DIGEST = -130;
+
     /** @hide */
     @IntDef(flag = true, prefix = { "DELETE_" }, value = {
             DELETE_KEEP_DATA,
@@ -9689,6 +9698,8 @@ public abstract class PackageManager {
             case INSTALL_FAILED_WRONG_INSTALLED_VERSION: return "INSTALL_FAILED_WRONG_INSTALLED_VERSION";
             case INSTALL_FAILED_PROCESS_NOT_DEFINED: return "INSTALL_FAILED_PROCESS_NOT_DEFINED";
             case INSTALL_FAILED_SESSION_INVALID: return "INSTALL_FAILED_SESSION_INVALID";
+            case INSTALL_FAILED_SHARED_LIBRARY_BAD_CERTIFICATE_DIGEST:
+                return "INSTALL_FAILED_SHARED_LIBRARY_BAD_CERTIFICATE_DIGEST";
             default: return Integer.toString(status);
         }
     }
