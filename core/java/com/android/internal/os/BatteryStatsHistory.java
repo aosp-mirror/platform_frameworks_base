@@ -187,8 +187,6 @@ public class BatteryStatsHistory {
     private int mNextHistoryTagIdx = 0;
     private int mNumHistoryTagChars = 0;
     private int mHistoryBufferLastPos = -1;
-    private int mActiveHistoryStates = 0xffffffff;
-    private int mActiveHistoryStates2 = 0xffffffff;
     private long mLastHistoryElapsedRealtimeMs = 0;
     private long mTrackRunningHistoryElapsedRealtimeMs = 0;
     private long mTrackRunningHistoryUptimeMs = 0;
@@ -362,8 +360,6 @@ public class BatteryStatsHistory {
         mNextHistoryTagIdx = 0;
         mNumHistoryTagChars = 0;
         mHistoryBufferLastPos = -1;
-        mActiveHistoryStates = 0xffffffff;
-        mActiveHistoryStates2 = 0xffffffff;
         if (mStepDetailsCalculator != null) {
             mStepDetailsCalculator.clear();
         }
@@ -1098,8 +1094,9 @@ public class BatteryStatsHistory {
      */
     public void recordScreenBrightnessEvent(long elapsedRealtimeMs, long uptimeMs,
             int brightnessBin) {
-        mHistoryCur.states = (mHistoryCur.states & ~HistoryItem.STATE_BRIGHTNESS_MASK)
-                | (brightnessBin << HistoryItem.STATE_BRIGHTNESS_SHIFT);
+        mHistoryCur.states = setBitField(mHistoryCur.states, brightnessBin,
+                HistoryItem.STATE_BRIGHTNESS_SHIFT,
+                HistoryItem.STATE_BRIGHTNESS_MASK);
         writeHistoryItem(elapsedRealtimeMs, uptimeMs);
     }
 
@@ -1108,8 +1105,9 @@ public class BatteryStatsHistory {
      */
     public void recordGpsSignalQualityEvent(long elapsedRealtimeMs, long uptimeMs,
             int signalLevel) {
-        mHistoryCur.states2 = (mHistoryCur.states2 & ~HistoryItem.STATE2_GPS_SIGNAL_QUALITY_MASK)
-                | (signalLevel << HistoryItem.STATE2_GPS_SIGNAL_QUALITY_SHIFT);
+        mHistoryCur.states2 = setBitField(mHistoryCur.states2, signalLevel,
+                HistoryItem.STATE2_GPS_SIGNAL_QUALITY_SHIFT,
+                HistoryItem.STATE2_GPS_SIGNAL_QUALITY_MASK);
         writeHistoryItem(elapsedRealtimeMs, uptimeMs);
     }
 
@@ -1117,8 +1115,9 @@ public class BatteryStatsHistory {
      * Records a device idle mode change event.
      */
     public void recordDeviceIdleEvent(long elapsedRealtimeMs, long uptimeMs, int mode) {
-        mHistoryCur.states2 = (mHistoryCur.states2 & ~HistoryItem.STATE2_DEVICE_IDLE_MASK)
-                | (mode << HistoryItem.STATE2_DEVICE_IDLE_SHIFT);
+        mHistoryCur.states2 = setBitField(mHistoryCur.states2, mode,
+                HistoryItem.STATE2_DEVICE_IDLE_SHIFT,
+                HistoryItem.STATE2_DEVICE_IDLE_MASK);
         writeHistoryItem(elapsedRealtimeMs, uptimeMs);
     }
 
@@ -1130,13 +1129,15 @@ public class BatteryStatsHistory {
         mHistoryCur.states = (mHistoryCur.states | addStateFlag) & ~removeStateFlag;
         if (state != -1) {
             mHistoryCur.states =
-                    (mHistoryCur.states & ~HistoryItem.STATE_PHONE_STATE_MASK)
-                            | (state << HistoryItem.STATE_PHONE_STATE_SHIFT);
+                    setBitField(mHistoryCur.states, state,
+                            HistoryItem.STATE_PHONE_STATE_SHIFT,
+                            HistoryItem.STATE_PHONE_STATE_MASK);
         }
         if (signalStrength != -1) {
             mHistoryCur.states =
-                    (mHistoryCur.states & ~HistoryItem.STATE_PHONE_SIGNAL_STRENGTH_MASK)
-                            | (signalStrength << HistoryItem.STATE_PHONE_SIGNAL_STRENGTH_SHIFT);
+                    setBitField(mHistoryCur.states, signalStrength,
+                            HistoryItem.STATE_PHONE_SIGNAL_STRENGTH_SHIFT,
+                            HistoryItem.STATE_PHONE_SIGNAL_STRENGTH_MASK);
         }
         writeHistoryItem(elapsedRealtimeMs, uptimeMs);
     }
@@ -1146,8 +1147,9 @@ public class BatteryStatsHistory {
      */
     public void recordDataConnectionTypeChangeEvent(long elapsedRealtimeMs, long uptimeMs,
             int dataConnectionType) {
-        mHistoryCur.states = (mHistoryCur.states & ~HistoryItem.STATE_DATA_CONNECTION_MASK)
-                | (dataConnectionType << HistoryItem.STATE_DATA_CONNECTION_SHIFT);
+        mHistoryCur.states = setBitField(mHistoryCur.states, dataConnectionType,
+                HistoryItem.STATE_DATA_CONNECTION_SHIFT,
+                HistoryItem.STATE_DATA_CONNECTION_MASK);
         writeHistoryItem(elapsedRealtimeMs, uptimeMs);
     }
 
@@ -1157,8 +1159,9 @@ public class BatteryStatsHistory {
     public void recordWifiSupplicantStateChangeEvent(long elapsedRealtimeMs, long uptimeMs,
             int supplState) {
         mHistoryCur.states2 =
-                (mHistoryCur.states2 & ~HistoryItem.STATE2_WIFI_SUPPL_STATE_MASK)
-                        | (supplState << HistoryItem.STATE2_WIFI_SUPPL_STATE_SHIFT);
+                setBitField(mHistoryCur.states2, supplState,
+                        HistoryItem.STATE2_WIFI_SUPPL_STATE_SHIFT,
+                        HistoryItem.STATE2_WIFI_SUPPL_STATE_MASK);
         writeHistoryItem(elapsedRealtimeMs, uptimeMs);
     }
 
@@ -1168,8 +1171,9 @@ public class BatteryStatsHistory {
     public void recordWifiSignalStrengthChangeEvent(long elapsedRealtimeMs, long uptimeMs,
             int strengthBin) {
         mHistoryCur.states2 =
-                (mHistoryCur.states2 & ~HistoryItem.STATE2_WIFI_SIGNAL_STRENGTH_MASK)
-                        | (strengthBin << HistoryItem.STATE2_WIFI_SIGNAL_STRENGTH_SHIFT);
+                setBitField(mHistoryCur.states2, strengthBin,
+                        HistoryItem.STATE2_WIFI_SIGNAL_STRENGTH_SHIFT,
+                        HistoryItem.STATE2_WIFI_SIGNAL_STRENGTH_MASK);
         writeHistoryItem(elapsedRealtimeMs, uptimeMs);
     }
 
@@ -1227,6 +1231,16 @@ public class BatteryStatsHistory {
         }
     }
 
+    private int setBitField(int bits, int value, int shift, int mask) {
+        int shiftedValue = value << shift;
+        if ((shiftedValue & ~mask) != 0) {
+            Slog.wtfStack(TAG, "Value " + Integer.toHexString(value)
+                    + " does not fit in the bit field: " + Integer.toHexString(mask));
+            shiftedValue &= mask;
+        }
+        return (bits & ~mask) | shiftedValue;
+    }
+
     /**
      * Writes the current history item to history.
      */
@@ -1260,8 +1274,8 @@ public class BatteryStatsHistory {
         }
 
         final long timeDiffMs = (mHistoryBaseTimeMs + elapsedRealtimeMs) - mHistoryLastWritten.time;
-        final int diffStates = mHistoryLastWritten.states ^ (cur.states & mActiveHistoryStates);
-        final int diffStates2 = mHistoryLastWritten.states2 ^ (cur.states2 & mActiveHistoryStates2);
+        final int diffStates = mHistoryLastWritten.states ^ cur.states;
+        final int diffStates2 = mHistoryLastWritten.states2 ^ cur.states2;
         final int lastDiffStates = mHistoryLastWritten.states ^ mHistoryLastLastWritten.states;
         final int lastDiffStates2 = mHistoryLastWritten.states2 ^ mHistoryLastLastWritten.states2;
         if (DEBUG) {
@@ -1274,9 +1288,9 @@ public class BatteryStatsHistory {
 
         recordTraceEvents(cur.eventCode, cur.eventTag);
         recordTraceCounters(mHistoryLastWritten.states,
-                cur.states & mActiveHistoryStates, BatteryStats.HISTORY_STATE_DESCRIPTIONS);
+                cur.states, BatteryStats.HISTORY_STATE_DESCRIPTIONS);
         recordTraceCounters(mHistoryLastWritten.states2,
-                cur.states2 & mActiveHistoryStates2, BatteryStats.HISTORY_STATE2_DESCRIPTIONS);
+                cur.states2, BatteryStats.HISTORY_STATE2_DESCRIPTIONS);
 
         if (mHistoryBufferLastPos >= 0 && mHistoryLastWritten.cmd == HistoryItem.CMD_UPDATE
                 && timeDiffMs < 1000 && (diffStates & lastDiffStates) == 0
@@ -1387,8 +1401,6 @@ public class BatteryStatsHistory {
         final boolean hasTags = mHistoryLastWritten.tagsFirstOccurrence || cur.tagsFirstOccurrence;
         mHistoryLastWritten.setTo(mHistoryBaseTimeMs + elapsedRealtimeMs, cmd, cur);
         mHistoryLastWritten.tagsFirstOccurrence = hasTags;
-        mHistoryLastWritten.states &= mActiveHistoryStates;
-        mHistoryLastWritten.states2 &= mActiveHistoryStates2;
         writeHistoryDelta(mHistoryBuffer, mHistoryLastWritten, mHistoryLastLastWritten);
         mLastHistoryElapsedRealtimeMs = elapsedRealtimeMs;
         cur.wakelockTag = null;
@@ -1627,7 +1639,7 @@ public class BatteryStatsHistory {
         }
         if (cur.eventCode != HistoryItem.EVENT_NONE) {
             final int index = writeHistoryTag(cur.eventTag);
-            final int codeAndIndex = (cur.eventCode & 0xffff) | (index << 16);
+            final int codeAndIndex = setBitField(cur.eventCode & 0xffff, index, 16, 0xFFFF0000);
             dest.writeInt(codeAndIndex);
             if ((index & BatteryStatsHistory.TAG_FIRST_OCCURRENCE_FLAG) != 0) {
                 cur.eventTag.writeToParcel(dest, 0);
@@ -1689,9 +1701,11 @@ public class BatteryStatsHistory {
     }
 
     private int buildBatteryLevelInt(HistoryItem h) {
-        return ((((int) h.batteryLevel) << 25) & 0xfe000000)
-                | ((((int) h.batteryTemperature) << 15) & 0x01ff8000)
-                | ((((int) h.batteryVoltage) << 1) & 0x00007ffe);
+        int bits = 0;
+        bits = setBitField(bits, h.batteryLevel, 25, 0xfe000000 /* 7F << 25 */);
+        bits = setBitField(bits, h.batteryTemperature, 15, 0x01ff8000 /* 3FF << 15 */);
+        bits = setBitField(bits, h.batteryVoltage, 1, 0x00007ffe /* 3FFF << 1 */);
+        return bits;
     }
 
     private int buildStateInt(HistoryItem h) {
