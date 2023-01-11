@@ -200,7 +200,7 @@ object Flags {
     /** A different path for unocclusion transitions back to keyguard */
     // TODO(b/262859270): Tracking Bug
     @JvmField
-    val UNOCCLUSION_TRANSITION = unreleasedFlag(223, "unocclusion_transition", teamfood = false)
+    val UNOCCLUSION_TRANSITION = unreleasedFlag(223, "unocclusion_transition", teamfood = true)
 
     // flag for controlling auto pin confirmation and material u shapes in bouncer
     @JvmField
