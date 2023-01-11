@@ -2200,9 +2200,11 @@ public final class SystemServer implements Dumpable {
                 t.traceEnd();
             }
 
-            t.traceBegin("StartDockObserver");
-            mSystemServiceManager.startService(DockObserver.class);
-            t.traceEnd();
+            if (!isTv) {
+                t.traceBegin("StartDockObserver");
+                mSystemServiceManager.startService(DockObserver.class);
+                t.traceEnd();
+            }
 
             if (isWatch) {
                 t.traceBegin("StartThermalObserver");
