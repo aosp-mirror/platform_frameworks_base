@@ -75,7 +75,7 @@ public final class UserManagerTest {
 
     private static final int REMOVE_CHECK_INTERVAL_MILLIS = 500; // 0.5 seconds
     private static final int REMOVE_TIMEOUT_MILLIS = 60 * 1000; // 60 seconds
-    private static final int SWITCH_USER_TIMEOUT_MILLIS = 40 * 1000; // 40 seconds
+    private static final int SWITCH_USER_TIMEOUT_SECONDS = 40; // 40 seconds
 
     // Packages which are used during tests.
     private static final String[] PACKAGES = new String[] {
@@ -87,19 +87,21 @@ public final class UserManagerTest {
     private final Context mContext = InstrumentationRegistry.getInstrumentation().getContext();
 
     private final Object mUserRemoveLock = new Object();
-    private final Object mUserSwitchLock = new Object();
 
     private UserManager mUserManager = null;
+    private ActivityManager mActivityManager;
     private PackageManager mPackageManager;
     private List<Integer> usersToRemove;
+    private UserSwitchWaiter mUserSwitchWaiter;
 
     @Before
     public void setUp() throws Exception {
         mUserManager = UserManager.get(mContext);
+        mActivityManager = mContext.getSystemService(ActivityManager.class);
         mPackageManager = mContext.getPackageManager();
+        mUserSwitchWaiter = new UserSwitchWaiter(TAG, SWITCH_USER_TIMEOUT_SECONDS);
 
         IntentFilter filter = new IntentFilter(Intent.ACTION_USER_REMOVED);
-        filter.addAction(Intent.ACTION_USER_SWITCHED);
         mContext.registerReceiver(new BroadcastReceiver() {
             @Override
             public void onReceive(Context context, Intent intent) {
@@ -107,11 +109,6 @@ public final class UserManagerTest {
                     case Intent.ACTION_USER_REMOVED:
                         synchronized (mUserRemoveLock) {
                             mUserRemoveLock.notifyAll();
-                        }
-                        break;
-                    case Intent.ACTION_USER_SWITCHED:
-                        synchronized (mUserSwitchLock) {
-                            mUserSwitchLock.notifyAll();
                         }
                         break;
                 }
@@ -124,6 +121,7 @@ public final class UserManagerTest {
 
     @After
     public void tearDown() throws Exception {
+        mUserSwitchWaiter.close();
         for (Integer userId : usersToRemove) {
             removeUser(userId);
         }
@@ -322,6 +320,66 @@ public final class UserManagerTest {
 
     @MediumTest
     @Test
+    public void testRemoveUserShouldNotRemoveCurrentUser() {
+        final int startUser = ActivityManager.getCurrentUser();
+        final UserInfo testUser = createUser("TestUser", /* flags= */ 0);
+        // Switch to the user just created.
+        switchUser(testUser.id);
+
+        assertWithMessage("Current user should not be removed")
+                .that(mUserManager.removeUser(testUser.id))
+                .isFalse();
+
+        // Switch back to the starting user.
+        switchUser(startUser);
+
+        // Now we can remove the user
+        removeUser(testUser.id);
+    }
+
+    @MediumTest
+    @Test
+    public void testRemoveUserShouldNotRemoveCurrentUser_DuringUserSwitch() {
+        final int startUser = ActivityManager.getCurrentUser();
+        final UserInfo testUser = createUser("TestUser", /* flags= */ 0);
+        // Switch to the user just created.
+        switchUser(testUser.id);
+
+        switchUserThenRun(startUser, () -> {
+            // While the user switch is happening, call removeUser for the current user.
+            assertWithMessage("Current user should not be removed during user switch")
+                    .that(mUserManager.removeUser(testUser.id))
+                    .isFalse();
+        });
+        assertThat(hasUser(testUser.id)).isTrue();
+
+        // Now we can remove the user
+        removeUser(testUser.id);
+    }
+
+    @MediumTest
+    @Test
+    public void testRemoveUserShouldNotRemoveTargetUser_DuringUserSwitch() {
+        final int startUser = ActivityManager.getCurrentUser();
+        final UserInfo testUser = createUser("TestUser", /* flags= */ 0);
+
+        switchUserThenRun(testUser.id, () -> {
+            // While the user switch is happening, call removeUser for the target user.
+            assertWithMessage("Target user should not be removed during user switch")
+                    .that(mUserManager.removeUser(testUser.id))
+                    .isFalse();
+        });
+        assertThat(hasUser(testUser.id)).isTrue();
+
+        // Switch back to the starting user.
+        switchUser(startUser);
+
+        // Now we can remove the user
+        removeUser(testUser.id);
+    }
+
+    @MediumTest
+    @Test
     public void testRemoveUserWhenPossible_restrictedReturnsError() throws Exception {
         final int currentUser = ActivityManager.getCurrentUser();
         final UserInfo user1 = createUser("User 1", /* flags= */ 0);
@@ -383,7 +441,7 @@ public final class UserManagerTest {
         final UserInfo otherUser = createUser("User 1", /* flags= */ UserInfo.FLAG_ADMIN);
         UserHandle mainUser = mUserManager.getMainUser();
 
-        switchUser(otherUser.id, null, true);
+        switchUser(otherUser.id);
 
         assertThat(mUserManager.removeUserWhenPossible(mainUser,
                 /* overrideDevicePolicy= */ false))
@@ -393,7 +451,7 @@ public final class UserManagerTest {
         assertThat(hasUser(mainUser.getIdentifier())).isTrue();
 
         // Switch back to the starting user.
-        switchUser(currentUser, null, true);
+        switchUser(currentUser);
     }
 
     @MediumTest
@@ -411,7 +469,7 @@ public final class UserManagerTest {
         final int startUser = ActivityManager.getCurrentUser();
         final UserInfo user1 = createUser("User 1", /* flags= */ 0);
         // Switch to the user just created.
-        switchUser(user1.id, null, /* ignoreHandle= */ true);
+        switchUser(user1.id);
 
         assertThat(mUserManager.removeUserWhenPossible(user1.getUserHandle(),
                 /* overrideDevicePolicy= */ false)).isEqualTo(UserManager.REMOVE_RESULT_DEFERRED);
@@ -420,13 +478,62 @@ public final class UserManagerTest {
         assertThat(getUser(user1.id).isEphemeral()).isTrue();
 
         // Switch back to the starting user.
-        switchUser(startUser, null, /* ignoreHandle= */ true);
+        switchUser(startUser);
 
         // User is removed once switch is complete
         synchronized (mUserRemoveLock) {
             waitForUserRemovalLocked(user1.id);
         }
         assertThat(hasUser(user1.id)).isFalse();
+    }
+
+    @MediumTest
+    @Test
+    public void testRemoveUserWhenPossible_currentUserSetEphemeral_duringUserSwitch() {
+        final int startUser = ActivityManager.getCurrentUser();
+        final UserInfo testUser = createUser("TestUser", /* flags= */ 0);
+        // Switch to the user just created.
+        switchUser(testUser.id);
+
+        switchUserThenRun(startUser, () -> {
+            // While the user switch is happening, call removeUserWhenPossible for the current user.
+            assertThat(mUserManager.removeUserWhenPossible(testUser.getUserHandle(), false))
+                    .isEqualTo(UserManager.REMOVE_RESULT_DEFERRED);
+
+            assertThat(hasUser(testUser.id)).isTrue();
+            assertThat(getUser(testUser.id).isEphemeral()).isTrue();
+        });
+
+        // User is removed once switch is complete
+        synchronized (mUserRemoveLock) {
+            waitForUserRemovalLocked(testUser.id);
+        }
+        assertThat(hasUser(testUser.id)).isFalse();
+    }
+
+    @MediumTest
+    @Test
+    public void testRemoveUserWhenPossible_targetUserSetEphemeral_duringUserSwitch() {
+        final int startUser = ActivityManager.getCurrentUser();
+        final UserInfo testUser = createUser("TestUser", /* flags= */ 0);
+
+        switchUserThenRun(testUser.id, () -> {
+            // While the user switch is happening, call removeUserWhenPossible for the target user.
+            assertThat(mUserManager.removeUserWhenPossible(testUser.getUserHandle(), false))
+                    .isEqualTo(UserManager.REMOVE_RESULT_DEFERRED);
+
+            assertThat(hasUser(testUser.id)).isTrue();
+            assertThat(getUser(testUser.id).isEphemeral()).isTrue();
+        });
+
+        // Switch back to the starting user.
+        switchUser(startUser);
+
+        // User is removed once switch is complete
+        synchronized (mUserRemoveLock) {
+            waitForUserRemovalLocked(testUser.id);
+        }
+        assertThat(hasUser(testUser.id)).isFalse();
     }
 
     @MediumTest
@@ -1149,33 +1256,30 @@ public final class UserManagerTest {
     @LargeTest
     @Test
     public void testSwitchUser() {
-        ActivityManager am = mContext.getSystemService(ActivityManager.class);
-        final int startUser = am.getCurrentUser();
+        final int startUser = ActivityManager.getCurrentUser();
         UserInfo user = createUser("User", 0);
         assertThat(user).isNotNull();
         // Switch to the user just created.
-        switchUser(user.id, null, true);
+        switchUser(user.id);
         // Switch back to the starting user.
-        switchUser(startUser, null, true);
+        switchUser(startUser);
     }
 
     @LargeTest
     @Test
     public void testSwitchUserByHandle() {
-        ActivityManager am = mContext.getSystemService(ActivityManager.class);
-        final int startUser = am.getCurrentUser();
+        final int startUser = ActivityManager.getCurrentUser();
         UserInfo user = createUser("User", 0);
         assertThat(user).isNotNull();
         // Switch to the user just created.
-        switchUser(-1, user.getUserHandle(), false);
+        switchUser(user.getUserHandle());
         // Switch back to the starting user.
-        switchUser(-1, UserHandle.of(startUser), false);
+        switchUser(UserHandle.of(startUser));
     }
 
     @Test
     public void testSwitchUserByHandle_ThrowsException() {
-        ActivityManager am = mContext.getSystemService(ActivityManager.class);
-        assertThrows(IllegalArgumentException.class, () -> am.switchUser(null));
+        assertThrows(IllegalArgumentException.class, () -> mActivityManager.switchUser(null));
     }
 
     @MediumTest
@@ -1319,31 +1423,43 @@ public final class UserManagerTest {
     }
 
     /**
-     * @param userId value will be used to call switchUser(int) only if ignoreHandle is false.
-     * @param user value will be used to call switchUser(UserHandle) only if ignoreHandle is true.
-     * @param ignoreHandle if true, switchUser(int) will be called with the provided userId,
-     *                     else, switchUser(UserHandle) will be called with the provided user.
-     */
-    private void switchUser(int userId, UserHandle user, boolean ignoreHandle) {
-        synchronized (mUserSwitchLock) {
-            ActivityManager am = mContext.getSystemService(ActivityManager.class);
-            if (ignoreHandle) {
-                am.switchUser(userId);
-            } else {
-                am.switchUser(user);
+     * Starts the given user in the foreground. And waits for the user switch to be complete.
+     **/
+    private void switchUser(UserHandle user) {
+        final int userId = user.getIdentifier();
+        Slog.d(TAG, "Switching to user " + userId);
+
+        mUserSwitchWaiter.runThenWaitUntilSwitchCompleted(userId, () -> {
+            assertWithMessage("Could not start switching to user " + userId)
+                    .that(mActivityManager.switchUser(user)).isTrue();
+        }, /* onFail= */ () -> {
+            throw new AssertionError("Could not complete switching to user " + userId);
+        });
+    }
+
+    /**
+     * Starts the given user in the foreground. And waits for the user switch to be complete.
+     **/
+    private void switchUser(int userId) {
+        switchUserThenRun(userId, null);
+    }
+
+    /**
+     * Starts the given user in the foreground. And runs the given Runnable right after
+     * am.switchUser call, before waiting for the actual user switch to be complete.
+     **/
+    private void switchUserThenRun(int userId, Runnable runAfterSwitchBeforeWait) {
+        Slog.d(TAG, "Switching to user " + userId);
+        mUserSwitchWaiter.runThenWaitUntilSwitchCompleted(userId, () -> {
+            // Start switching to user
+            assertWithMessage("Could not start switching to user " + userId)
+                    .that(mActivityManager.switchUser(userId)).isTrue();
+
+            // While the user switch is happening, call runAfterSwitchBeforeWait.
+            if (runAfterSwitchBeforeWait != null) {
+                runAfterSwitchBeforeWait.run();
             }
-            long time = System.currentTimeMillis();
-            try {
-                mUserSwitchLock.wait(SWITCH_USER_TIMEOUT_MILLIS);
-            } catch (InterruptedException ie) {
-                Thread.currentThread().interrupt();
-                return;
-            }
-            if (System.currentTimeMillis() - time > SWITCH_USER_TIMEOUT_MILLIS) {
-                fail("Timeout waiting for the user switch to u"
-                        + (ignoreHandle ? userId : user.getIdentifier()));
-            }
-        }
+        }, () -> fail("Could not complete switching to user " + userId));
     }
 
     private void removeUser(UserHandle user) {
