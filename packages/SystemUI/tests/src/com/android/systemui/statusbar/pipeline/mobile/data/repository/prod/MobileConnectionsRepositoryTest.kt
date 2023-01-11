@@ -37,6 +37,7 @@ import com.android.systemui.SysuiTestCase
 import com.android.systemui.log.table.TableLogBuffer
 import com.android.systemui.log.table.TableLogBufferFactory
 import com.android.systemui.statusbar.pipeline.mobile.data.model.MobileConnectivityModel
+import com.android.systemui.statusbar.pipeline.mobile.data.model.NetworkNameModel
 import com.android.systemui.statusbar.pipeline.mobile.data.model.SubscriptionModel
 import com.android.systemui.statusbar.pipeline.mobile.util.FakeMobileMappingsProxy
 import com.android.systemui.statusbar.pipeline.shared.ConnectivityPipelineLogger
@@ -46,6 +47,7 @@ import com.android.systemui.util.mockito.eq
 import com.android.systemui.util.mockito.mock
 import com.android.systemui.util.mockito.whenever
 import com.android.systemui.util.settings.FakeSettings
+import com.android.systemui.util.time.FakeSystemClock
 import com.google.common.truth.Truth.assertThat
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -94,7 +96,7 @@ class MobileConnectionsRepositoryTest : SysuiTestCase() {
             }
         }
 
-        whenever(logBufferFactory.create(anyString(), anyInt())).thenAnswer { _ ->
+        whenever(logBufferFactory.getOrCreate(anyString(), anyInt())).thenAnswer { _ ->
             mock<TableLogBuffer>()
         }
 
@@ -292,18 +294,58 @@ class MobileConnectionsRepositoryTest : SysuiTestCase() {
             // Get repos to trigger creation
             underTest.getRepoForSubId(SUB_1_ID)
             verify(logBufferFactory)
-                .create(
+                .getOrCreate(
                     eq(MobileConnectionRepositoryImpl.tableBufferLogName(SUB_1_ID)),
                     anyInt(),
                 )
             underTest.getRepoForSubId(SUB_2_ID)
             verify(logBufferFactory)
-                .create(
+                .getOrCreate(
                     eq(MobileConnectionRepositoryImpl.tableBufferLogName(SUB_2_ID)),
                     anyInt(),
                 )
 
             job.cancel()
+        }
+
+    @Test
+    fun `connection repository factory - reuses log buffers for same connection`() =
+        runBlocking(IMMEDIATE) {
+            val realLoggerFactory = TableLogBufferFactory(mock(), FakeSystemClock())
+
+            connectionFactory =
+                MobileConnectionRepositoryImpl.Factory(
+                    fakeBroadcastDispatcher,
+                    context = context,
+                    telephonyManager = telephonyManager,
+                    bgDispatcher = IMMEDIATE,
+                    globalSettings = globalSettings,
+                    logger = logger,
+                    mobileMappingsProxy = mobileMappings,
+                    scope = scope,
+                    logFactory = realLoggerFactory,
+                )
+
+            // Create two connections for the same subId. Similar to if the connection appeared
+            // and disappeared from the connectionFactory's perspective
+            val connection1 =
+                connectionFactory.build(
+                    1,
+                    NetworkNameModel.Default("default_name"),
+                    "-",
+                    underTest.globalMobileDataSettingChangedEvent,
+                )
+
+            val connection1_repeat =
+                connectionFactory.build(
+                    1,
+                    NetworkNameModel.Default("default_name"),
+                    "-",
+                    underTest.globalMobileDataSettingChangedEvent,
+                )
+
+            assertThat(connection1.tableLogBuffer)
+                .isSameInstanceAs(connection1_repeat.tableLogBuffer)
         }
 
     @Test
