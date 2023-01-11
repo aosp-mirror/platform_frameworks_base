@@ -28,6 +28,7 @@ import android.content.ComponentName;
 import android.content.IIntentReceiver;
 import android.content.IIntentSender;
 import android.content.Intent;
+import android.content.ServiceConnection;
 import android.content.pm.ActivityInfo;
 import android.content.pm.ActivityPresentationInfo;
 import android.content.pm.ApplicationInfo;
@@ -922,4 +923,30 @@ public abstract class ActivityManagerInternal {
      * @param callingPid The PID mapped with the callback.
      */
     public abstract void unregisterStrictModeCallback(int callingPid);
+
+    /**
+     * Start a foreground service delegate.
+     * @param options foreground service delegate options.
+     * @param connection a service connection served as callback to caller.
+     * @return true if delegate is started successfully, false otherwise.
+     * @hide
+     */
+    public abstract boolean startForegroundServiceDelegate(
+            @NonNull ForegroundServiceDelegationOptions options,
+            @Nullable ServiceConnection connection);
+
+    /**
+     * Stop a foreground service delegate.
+     * @param options the foreground service delegate options.
+     * @hide
+     */
+    public abstract void stopForegroundServiceDelegate(
+            @NonNull ForegroundServiceDelegationOptions options);
+
+    /**
+     * Stop a foreground service delegate by service connection.
+     * @param connection service connection used to start delegate previously.
+     * @hide
+     */
+    public abstract void stopForegroundServiceDelegate(@NonNull ServiceConnection connection);
 }

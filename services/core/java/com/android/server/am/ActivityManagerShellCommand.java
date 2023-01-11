@@ -46,6 +46,7 @@ import android.app.ActivityTaskManager;
 import android.app.ActivityTaskManager.RootTaskInfo;
 import android.app.AppGlobals;
 import android.app.BroadcastOptions;
+import android.app.ForegroundServiceDelegationOptions;
 import android.app.IActivityController;
 import android.app.IActivityManager;
 import android.app.IActivityTaskManager;

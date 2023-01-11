@@ -184,6 +184,7 @@ import android.app.ApplicationThreadConstants;
 import android.app.BroadcastOptions;
 import android.app.ComponentOptions;
 import android.app.ContentProviderHolder;
+import android.app.ForegroundServiceDelegationOptions;
 import android.app.IActivityController;
 import android.app.IActivityManager;
 import android.app.IApplicationThread;
@@ -18549,10 +18550,10 @@ public class ActivityManagerService extends IActivityManager.Stub
                 for (int i = delegates.size() - 1; i >= 0; i--) {
                     final ForegroundServiceDelegationOptions options = delegates.get(i);
                     if (isStart) {
-                        ((ActivityManagerLocal) mInternal).startForegroundServiceDelegate(options,
+                        mInternal.startForegroundServiceDelegate(options,
                                 null /* connection */);
                     } else {
-                        ((ActivityManagerLocal) mInternal).stopForegroundServiceDelegate(options);
+                        mInternal.stopForegroundServiceDelegate(options);
                     }
                 }
             }

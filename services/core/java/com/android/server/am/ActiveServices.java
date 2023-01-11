@@ -112,6 +112,7 @@ import android.app.ActivityManagerInternal.ServiceNotificationPolicy;
 import android.app.ActivityThread;
 import android.app.AppGlobals;
 import android.app.AppOpsManager;
+import android.app.ForegroundServiceDelegationOptions;
 import android.app.ForegroundServiceStartNotAllowedException;
 import android.app.ForegroundServiceTypePolicy;
 import android.app.ForegroundServiceTypePolicy.ForegroundServicePolicyCheckCode;
