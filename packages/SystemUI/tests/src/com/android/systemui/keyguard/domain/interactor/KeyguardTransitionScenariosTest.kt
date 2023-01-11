@@ -33,6 +33,7 @@ import com.android.systemui.keyguard.shared.model.WakefulnessState
 import com.android.systemui.keyguard.util.KeyguardTransitionRunner
 import com.android.systemui.shade.data.repository.FakeShadeRepository
 import com.android.systemui.shade.data.repository.ShadeRepository
+import com.android.systemui.statusbar.CommandQueue
 import com.android.systemui.util.mockito.withArgCaptor
 import com.google.common.truth.Truth.assertThat
 import kotlinx.coroutines.cancelChildren
@@ -66,6 +67,7 @@ class KeyguardTransitionScenariosTest : SysuiTestCase() {
 
     // Used to verify transition requests for test output
     @Mock private lateinit var mockTransitionRepository: KeyguardTransitionRepository
+    @Mock private lateinit var commandQueue: CommandQueue
 
     private lateinit var fromLockscreenTransitionInteractor: FromLockscreenTransitionInteractor
     private lateinit var fromDreamingTransitionInteractor: FromDreamingTransitionInteractor
@@ -85,7 +87,7 @@ class KeyguardTransitionScenariosTest : SysuiTestCase() {
         fromLockscreenTransitionInteractor =
             FromLockscreenTransitionInteractor(
                 scope = testScope,
-                keyguardInteractor = KeyguardInteractor(keyguardRepository),
+                keyguardInteractor = KeyguardInteractor(keyguardRepository, commandQueue),
                 shadeRepository = shadeRepository,
                 keyguardTransitionRepository = mockTransitionRepository,
                 keyguardTransitionInteractor = KeyguardTransitionInteractor(transitionRepository),
@@ -95,7 +97,7 @@ class KeyguardTransitionScenariosTest : SysuiTestCase() {
         fromDreamingTransitionInteractor =
             FromDreamingTransitionInteractor(
                 scope = testScope,
-                keyguardInteractor = KeyguardInteractor(keyguardRepository),
+                keyguardInteractor = KeyguardInteractor(keyguardRepository, commandQueue),
                 keyguardTransitionRepository = mockTransitionRepository,
                 keyguardTransitionInteractor = KeyguardTransitionInteractor(transitionRepository),
             )

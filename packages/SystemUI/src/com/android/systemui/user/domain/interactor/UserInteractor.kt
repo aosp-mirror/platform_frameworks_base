@@ -115,9 +115,7 @@ constructor(
     private val callbackMutex = Mutex()
     private val callbacks = mutableSetOf<UserCallback>()
     private val userInfos: Flow<List<UserInfo>> =
-        repository.userInfos.map { userInfos ->
-            userInfos.filter { it.isFull }
-        }
+        repository.userInfos.map { userInfos -> userInfos.filter { it.isFull } }
 
     /** List of current on-device users to select from. */
     val users: Flow<List<UserModel>>
@@ -445,7 +443,8 @@ constructor(
                     )
                 )
             }
-            UserActionModel.ADD_SUPERVISED_USER ->
+            UserActionModel.ADD_SUPERVISED_USER -> {
+                dismissDialog()
                 activityStarter.startActivity(
                     Intent()
                         .setAction(UserManager.ACTION_CREATE_SUPERVISED_USER)
@@ -453,6 +452,7 @@ constructor(
                         .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK),
                     /* dismissShade= */ true,
                 )
+            }
             UserActionModel.NAVIGATE_TO_USER_MANAGEMENT ->
                 activityStarter.startActivity(
                     Intent(Settings.ACTION_USER_SETTINGS),
@@ -493,7 +493,7 @@ constructor(
 
     fun showUserSwitcher(context: Context, expandable: Expandable) {
         if (!featureFlags.isEnabled(Flags.FULL_SCREEN_USER_SWITCHER)) {
-            showDialog(ShowDialogRequestModel.ShowUserSwitcherDialog)
+            showDialog(ShowDialogRequestModel.ShowUserSwitcherDialog(expandable))
             return
         }
 

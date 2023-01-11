@@ -210,6 +210,7 @@ public final class NotificationRecord {
     // Whether this notification record should have an update logged the next time notifications
     // are sorted.
     private boolean mPendingLogUpdate = false;
+    private int mProposedImportance = IMPORTANCE_UNSPECIFIED;
 
     public NotificationRecord(Context context, StatusBarNotification sbn,
             NotificationChannel channel) {
@@ -499,6 +500,8 @@ public final class NotificationRecord {
         pw.println(prefix + "mImportance="
                 + NotificationListenerService.Ranking.importanceToString(mImportance));
         pw.println(prefix + "mImportanceExplanation=" + getImportanceExplanation());
+        pw.println(prefix + "mProposedImportance="
+                + NotificationListenerService.Ranking.importanceToString(mProposedImportance));
         pw.println(prefix + "mIsAppImportanceLocked=" + mIsAppImportanceLocked);
         pw.println(prefix + "mIntercept=" + mIntercept);
         pw.println(prefix + "mHidden==" + mHidden);
@@ -738,6 +741,12 @@ public final class NotificationRecord {
                             Adjustment.KEY_NOT_CONVERSATION,
                             Boolean.toString(mIsNotConversationOverride));
                 }
+                if (signals.containsKey(Adjustment.KEY_IMPORTANCE_PROPOSAL)) {
+                    mProposedImportance = signals.getInt(Adjustment.KEY_IMPORTANCE_PROPOSAL);
+                    EventLogTags.writeNotificationAdjusted(getKey(),
+                            Adjustment.KEY_IMPORTANCE_PROPOSAL,
+                            Integer.toString(mProposedImportance));
+                }
                 if (!signals.isEmpty() && adjustment.getIssuer() != null) {
                     mAdjustmentIssuer = adjustment.getIssuer();
                 }
@@ -868,6 +877,10 @@ public final class NotificationRecord {
 
     int getInitialImportance() {
         return stats.naturalImportance;
+    }
+
+    public int getProposedImportance() {
+        return mProposedImportance;
     }
 
     public float getRankingScore() {
