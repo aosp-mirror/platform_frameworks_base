@@ -279,6 +279,14 @@ public final class ViewRootImpl implements ViewParent,
     private static final boolean ENABLE_INPUT_LATENCY_TRACKING = true;
 
     /**
+     * Controls whether to use the new oneway performHapticFeedback call. This returns
+     * true in a few more conditions, but doesn't affect which haptics happen. Notably, it
+     * makes the call to performHapticFeedback non-blocking, which reduces potential UI jank.
+     * This is intended as a temporary flag, ultimately becoming permanently 'true'.
+     */
+    private static final boolean USE_ASYNC_PERFORM_HAPTIC_FEEDBACK = true;
+
+    /**
      * Whether the caption is drawn by the shell.
      * @hide
      */
@@ -8566,7 +8574,13 @@ public final class ViewRootImpl implements ViewParent,
         }
 
         try {
-            return mWindowSession.performHapticFeedback(effectId, always);
+            if (USE_ASYNC_PERFORM_HAPTIC_FEEDBACK) {
+                mWindowSession.performHapticFeedbackAsync(effectId, always);
+                return true;
+            } else {
+                // Original blocking binder call path.
+                return mWindowSession.performHapticFeedback(effectId, always);
+            }
         } catch (RemoteException e) {
             return false;
         }

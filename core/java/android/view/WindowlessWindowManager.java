@@ -466,6 +466,11 @@ public class WindowlessWindowManager implements IWindowSession {
     }
 
     @Override
+    public void performHapticFeedbackAsync(int effectId, boolean always) {
+        performHapticFeedback(effectId, always);
+    }
+
+    @Override
     public android.os.IBinder performDrag(android.view.IWindow window, int flags,
             android.view.SurfaceControl surface, int touchSource, float touchX, float touchY,
             float thumbCenterX, float thumbCenterY, android.content.ClipData data) {
