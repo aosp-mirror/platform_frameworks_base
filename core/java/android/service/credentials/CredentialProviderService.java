@@ -140,6 +140,20 @@ public abstract class CredentialProviderService extends Service {
     public static final String SERVICE_INTERFACE =
             "android.service.credentials.CredentialProviderService";
 
+    /**
+     * The {@link Intent} that must be declared as handled by a system credential provider
+     * service.
+     *
+     * <p>The service must also require the
+     * {android.Manifest.permission#BIND_CREDENTIAL_PROVIDER_SERVICE} permission
+     * so that only the system can bind to it.
+     *
+     * @hide
+     */
+    @SdkConstant(SdkConstant.SdkConstantType.SERVICE_ACTION)
+    public static final String SYSTEM_SERVICE_INTERFACE =
+            "android.service.credentials.system.CredentialProviderService";
+
     @CallSuper
     @Override
     public void onCreate() {
