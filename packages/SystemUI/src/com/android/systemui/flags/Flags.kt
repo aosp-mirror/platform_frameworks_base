@@ -114,8 +114,6 @@ object Flags {
     // ** Flag retired **
     // public static final BooleanFlag KEYGUARD_LAYOUT =
     //         new BooleanFlag(200, true);
-    // TODO(b/254512713): Tracking Bug
-    @JvmField val LOCKSCREEN_ANIMATIONS = releasedFlag(201, "lockscreen_animations")
 
     // TODO(b/254512750): Tracking Bug
     val NEW_UNLOCK_SWIPE_ANIMATION = releasedFlag(202, "new_unlock_swipe_animation")

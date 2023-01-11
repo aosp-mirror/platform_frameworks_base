@@ -40,6 +40,7 @@ import com.android.systemui.keyguard.shared.model.WakefulnessModel
 import com.android.systemui.plugins.statusbar.StatusBarStateController
 import com.android.systemui.statusbar.phone.BiometricUnlockController
 import com.android.systemui.statusbar.phone.BiometricUnlockController.WakeAndUnlockMode
+import com.android.systemui.statusbar.phone.DozeParameters
 import com.android.systemui.statusbar.policy.KeyguardStateController
 import javax.inject.Inject
 import kotlinx.coroutines.channels.awaitClose
@@ -87,6 +88,9 @@ interface KeyguardRepository {
 
     /** Observable for whether the bouncer is showing. */
     val isBouncerShowing: Flow<Boolean>
+
+    /** Is the always-on display available to be used? */
+    val isAodAvailable: Flow<Boolean>
 
     /**
      * Observable for whether we are in doze state.
@@ -182,6 +186,7 @@ constructor(
     private val keyguardStateController: KeyguardStateController,
     private val keyguardUpdateMonitor: KeyguardUpdateMonitor,
     private val dozeTransitionListener: DozeTransitionListener,
+    private val dozeParameters: DozeParameters,
     private val authController: AuthController,
     private val dreamOverlayCallbackController: DreamOverlayCallbackController,
 ) : KeyguardRepository {
@@ -217,6 +222,31 @@ constructor(
                 )
 
                 awaitClose { keyguardStateController.removeCallback(callback) }
+            }
+            .distinctUntilChanged()
+
+    override val isAodAvailable: Flow<Boolean> =
+        conflatedCallbackFlow {
+                val callback =
+                    object : DozeParameters.Callback {
+                        override fun onAlwaysOnChange() {
+                            trySendWithFailureLogging(
+                                dozeParameters.getAlwaysOn(),
+                                TAG,
+                                "updated isAodAvailable"
+                            )
+                        }
+                    }
+
+                dozeParameters.addCallback(callback)
+                // Adding the callback does not send an initial update.
+                trySendWithFailureLogging(
+                    dozeParameters.getAlwaysOn(),
+                    TAG,
+                    "initial isAodAvailable"
+                )
+
+                awaitClose { dozeParameters.removeCallback(callback) }
             }
             .distinctUntilChanged()
 
