@@ -16,13 +16,19 @@
 
 package com.android.server.accessibility;
 
+import static android.provider.Settings.Secure.ACCESSIBILITY_BUTTON_TARGETS;
+import static android.provider.Settings.Secure.ACCESSIBILITY_BUTTON_TARGET_COMPONENT;
 import static android.provider.Settings.Secure.ACCESSIBILITY_MAGNIFICATION_MODE_ALL;
 import static android.provider.Settings.Secure.ACCESSIBILITY_MAGNIFICATION_MODE_FULLSCREEN;
 import static android.provider.Settings.Secure.ACCESSIBILITY_MAGNIFICATION_MODE_NONE;
 import static android.provider.Settings.Secure.ACCESSIBILITY_MAGNIFICATION_MODE_WINDOW;
+import static android.provider.Settings.Secure.ACCESSIBILITY_SHORTCUT_TARGET_SERVICE;
+import static android.provider.Settings.Secure.ENABLED_ACCESSIBILITY_SERVICES;
+import static android.view.accessibility.AccessibilityManager.ACCESSIBILITY_MENU_IN_SYSTEM;
 
 import static com.android.internal.accessibility.AccessibilityShortcutController.ACCESSIBILITY_HEARING_AIDS_COMPONENT_NAME;
 import static com.android.internal.accessibility.AccessibilityShortcutController.MAGNIFICATION_CONTROLLER_NAME;
+import static com.android.server.accessibility.AccessibilityManagerService.MENU_SERVICE_RELATIVE_CLASS_NAME;
 
 import static com.google.common.truth.Truth.assertThat;
 
@@ -93,6 +99,7 @@ import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
 
 import java.util.ArrayList;
+import java.util.List;
 
 /**
  * APCT tests for {@link AccessibilityManagerService}.
@@ -512,6 +519,113 @@ public class AccessibilityManagerServiceTest {
 
         assertStartActivityWithExpectedComponentName(mTestableContext.getMockContext(),
                 ACCESSIBILITY_HEARING_AIDS_COMPONENT_NAME.flattenToString());
+    }
+
+    @Test
+    public void testMigrateA11yMenu_ResetSingularComponentToDefaultState() {
+        final ComponentName componentName =
+                ComponentName.createRelative("external", MENU_SERVICE_RELATIVE_CLASS_NAME);
+        when(mMockPackageManager.queryIntentServicesAsUser(any(), any(),
+                eq(mA11yms.getCurrentUserIdLocked()))).thenReturn(
+                List.of(createResolveInfo(componentName)));
+
+        mA11yms.migrateAccessibilityMenuIfNecessaryLocked(mA11yms.getCurrentUserState());
+
+        verify(mMockPackageManager).setComponentEnabledSetting(componentName,
+                PackageManager.COMPONENT_ENABLED_STATE_DEFAULT,
+                PackageManager.DONT_KILL_APP);
+    }
+
+    @Test
+    public void testMigrateA11yMenu_DoNothing_WhenNoMenuComponents() {
+        when(mMockPackageManager.queryIntentServicesAsUser(any(), any(),
+                eq(mA11yms.getCurrentUserIdLocked()))).thenReturn(List.of());
+
+        mA11yms.migrateAccessibilityMenuIfNecessaryLocked(mA11yms.getCurrentUserState());
+
+        verify(mMockPackageManager, never()).setComponentEnabledSetting(any(),
+                anyInt(), anyInt());
+    }
+
+    @Test
+    public void testMigrateA11yMenu_DoNothing_WhenTooManyMenuComponents() {
+        when(mMockPackageManager.queryIntentServicesAsUser(any(), any(),
+                eq(mA11yms.getCurrentUserIdLocked()))).thenReturn(List.of(
+                createResolveInfo(ComponentName.createRelative("external1",
+                        MENU_SERVICE_RELATIVE_CLASS_NAME)),
+                createResolveInfo(ComponentName.createRelative("external2",
+                        MENU_SERVICE_RELATIVE_CLASS_NAME)),
+                createResolveInfo(ComponentName.createRelative("external3",
+                        MENU_SERVICE_RELATIVE_CLASS_NAME))));
+
+        mA11yms.migrateAccessibilityMenuIfNecessaryLocked(mA11yms.getCurrentUserState());
+
+        verify(mMockPackageManager, never()).setComponentEnabledSetting(any(),
+                anyInt(), anyInt());
+    }
+
+    @Test
+    public void testMigrateA11yMenu_DoNothing_WhenNoMenuInSystem() {
+        when(mMockPackageManager.queryIntentServicesAsUser(any(), any(),
+                eq(mA11yms.getCurrentUserIdLocked()))).thenReturn(List.of(
+                createResolveInfo(ComponentName.createRelative("external1",
+                        MENU_SERVICE_RELATIVE_CLASS_NAME)),
+                createResolveInfo(ComponentName.createRelative("external2",
+                        MENU_SERVICE_RELATIVE_CLASS_NAME))));
+
+        mA11yms.migrateAccessibilityMenuIfNecessaryLocked(mA11yms.getCurrentUserState());
+
+        verify(mMockPackageManager, never()).setComponentEnabledSetting(any(),
+                anyInt(), anyInt());
+    }
+
+    @Test
+    public void testMigrateA11yMenu_PerformsMigration() {
+        final ComponentName menuOutsideSystem =
+                ComponentName.createRelative("external", MENU_SERVICE_RELATIVE_CLASS_NAME);
+        final String[] migratedSettings = {
+                ACCESSIBILITY_BUTTON_TARGETS,
+                ACCESSIBILITY_BUTTON_TARGET_COMPONENT,
+                ACCESSIBILITY_SHORTCUT_TARGET_SERVICE,
+                ENABLED_ACCESSIBILITY_SERVICES
+        };
+        // Start the user with Menu-outside-system enabled,
+        for (String setting : migratedSettings) {
+            Settings.Secure.putStringForUser(
+                    mTestableContext.getContentResolver(),
+                    setting,
+                    menuOutsideSystem.flattenToShortString(),
+                    mA11yms.getCurrentUserIdLocked());
+        }
+        // and both Menu versions present.
+        when(mMockPackageManager.queryIntentServicesAsUser(any(), any(),
+                eq(mA11yms.getCurrentUserIdLocked()))).thenReturn(List.of(
+                createResolveInfo(menuOutsideSystem),
+                createResolveInfo(ACCESSIBILITY_MENU_IN_SYSTEM)));
+
+        mA11yms.migrateAccessibilityMenuIfNecessaryLocked(mA11yms.getCurrentUserState());
+
+        // Menu-outside-system should be disabled,
+        verify(mMockPackageManager).setComponentEnabledSetting(menuOutsideSystem,
+                PackageManager.COMPONENT_ENABLED_STATE_DISABLED,
+                PackageManager.DONT_KILL_APP);
+        // and all settings should migrated to Menu-in-system.
+        for (String setting : migratedSettings) {
+            ComponentName componentName = ComponentName.unflattenFromString(
+                    Settings.Secure.getStringForUser(
+                            mTestableContext.getContentResolver(),
+                            setting,
+                            mA11yms.getCurrentUserIdLocked()));
+            assertThat(componentName).isEqualTo(ACCESSIBILITY_MENU_IN_SYSTEM);
+        }
+    }
+
+    private static ResolveInfo createResolveInfo(ComponentName componentName) {
+        ResolveInfo resolveInfo = new ResolveInfo();
+        resolveInfo.serviceInfo = new ServiceInfo();
+        resolveInfo.serviceInfo.packageName = componentName.getPackageName();
+        resolveInfo.serviceInfo.name = componentName.getClassName();
+        return resolveInfo;
     }
 
     private void mockManageAccessibilityGranted(TestableContext context) {

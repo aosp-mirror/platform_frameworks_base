@@ -28,6 +28,7 @@ import static android.accessibilityservice.AccessibilityTrace.FLAGS_WINDOW_MANAG
 import static android.provider.Settings.Secure.ACCESSIBILITY_DISPLAY_MAGNIFICATION_NAVBAR_ENABLED;
 import static android.provider.Settings.Secure.CONTRAST_LEVEL;
 import static android.view.accessibility.AccessibilityManager.ACCESSIBILITY_BUTTON;
+import static android.view.accessibility.AccessibilityManager.ACCESSIBILITY_MENU_IN_SYSTEM;
 import static android.view.accessibility.AccessibilityManager.ACCESSIBILITY_SHORTCUT_KEY;
 import static android.view.accessibility.AccessibilityManager.CONTRAST_DEFAULT_VALUE;
 import static android.view.accessibility.AccessibilityManager.CONTRAST_NOT_SET;
@@ -170,6 +171,7 @@ import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Set;
 import java.util.function.Consumer;
 import java.util.function.Function;
@@ -214,6 +216,9 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
 
     private static final String SET_PIP_ACTION_REPLACEMENT =
             "setPictureInPictureActionReplacingConnection";
+
+    @VisibleForTesting
+    static final String MENU_SERVICE_RELATIVE_CLASS_NAME = ".AccessibilityMenuService";
 
     private static final char COMPONENT_NAME_SEPARATOR = ':';
 
@@ -821,6 +826,95 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
         };
         mContext.registerReceiverAsUser(receiver, UserHandle.ALL, filter, null, mMainHandler,
                 Context.RECEIVER_EXPORTED);
+    }
+
+    /**
+     * Migrates the Accessibility Menu to the version provided by the system build,
+     * if necessary based on presence of the service on the device.
+     */
+    @VisibleForTesting
+    void migrateAccessibilityMenuIfNecessaryLocked(AccessibilityUserState userState) {
+        final Set<ComponentName> menuComponentNames = findA11yMenuComponentNamesLocked();
+        final ComponentName menuOutsideSystem = getA11yMenuOutsideSystem(menuComponentNames);
+        final boolean shouldMigrateToMenuInSystem = menuComponentNames.size() == 2
+                && menuComponentNames.contains(ACCESSIBILITY_MENU_IN_SYSTEM)
+                && menuOutsideSystem != null;
+
+        if (!shouldMigrateToMenuInSystem) {
+            if (menuComponentNames.size() == 1) {
+                // If only one Menu package exists then reset its component to the default state.
+                mPackageManager.setComponentEnabledSetting(
+                        menuComponentNames.stream().findFirst().get(),
+                        PackageManager.COMPONENT_ENABLED_STATE_DEFAULT,
+                        PackageManager.DONT_KILL_APP);
+            }
+            return;
+        }
+
+        // Hide Menu-outside-system so that it does not appear in Settings.
+        mPackageManager.setComponentEnabledSetting(
+                menuOutsideSystem,
+                PackageManager.COMPONENT_ENABLED_STATE_DISABLED,
+                PackageManager.DONT_KILL_APP);
+        // Migrate the accessibility shortcuts.
+        migrateA11yMenuInSettingLocked(userState,
+                Settings.Secure.ACCESSIBILITY_BUTTON_TARGETS, menuOutsideSystem);
+        migrateA11yMenuInSettingLocked(userState,
+                Settings.Secure.ACCESSIBILITY_BUTTON_TARGET_COMPONENT, menuOutsideSystem);
+        migrateA11yMenuInSettingLocked(userState,
+                Settings.Secure.ACCESSIBILITY_SHORTCUT_TARGET_SERVICE, menuOutsideSystem);
+        // If Menu-outside-system is currently enabled by the user then automatically
+        // disable it and enable Menu-in-system.
+        migrateA11yMenuInSettingLocked(userState,
+                Settings.Secure.ENABLED_ACCESSIBILITY_SERVICES, menuOutsideSystem);
+    }
+
+    /**
+     * Returns all {@link ComponentName}s whose class name ends in {@link
+     * #MENU_SERVICE_RELATIVE_CLASS_NAME}.
+     **/
+    private Set<ComponentName> findA11yMenuComponentNamesLocked() {
+        Set<ComponentName> result = new ArraySet<>();
+        final var flags =
+                PackageManager.ResolveInfoFlags.of(PackageManager.MATCH_DISABLED_COMPONENTS
+                        | PackageManager.MATCH_DIRECT_BOOT_AWARE
+                        | PackageManager.MATCH_DIRECT_BOOT_UNAWARE);
+        for (ResolveInfo resolveInfo : mPackageManager.queryIntentServicesAsUser(
+                new Intent(AccessibilityService.SERVICE_INTERFACE), flags, mCurrentUserId)) {
+            final ComponentName componentName = resolveInfo.serviceInfo.getComponentName();
+            if (componentName.getClassName().endsWith(MENU_SERVICE_RELATIVE_CLASS_NAME)) {
+                result.add(componentName);
+            }
+        }
+        return result;
+    }
+
+    /**
+     * Returns the first {@link ComponentName} in the provided set that is not equal to {@link
+     * AccessibilityManager#ACCESSIBILITY_MENU_IN_SYSTEM}.
+     */
+    private static ComponentName getA11yMenuOutsideSystem(Set<ComponentName> menuComponentNames) {
+        Optional<ComponentName> menuOutsideSystem = menuComponentNames.stream().filter(
+                name -> !name.equals(ACCESSIBILITY_MENU_IN_SYSTEM)).findFirst();
+        if (menuOutsideSystem.isEmpty()) {
+            return null;
+        }
+        return menuOutsideSystem.get();
+    }
+
+    /**
+     * Replaces <code>toRemove</code> with {@link AccessibilityManager#ACCESSIBILITY_MENU_IN_SYSTEM}
+     * in the requested setting, if present already.
+     */
+    private void migrateA11yMenuInSettingLocked(AccessibilityUserState userState, String setting,
+            ComponentName toRemove) {
+        mTempComponentNameSet.clear();
+        readComponentNamesFromSettingLocked(setting, userState.mUserId, mTempComponentNameSet);
+        if (mTempComponentNameSet.contains(toRemove)) {
+            mTempComponentNameSet.remove(toRemove);
+            mTempComponentNameSet.add(ACCESSIBILITY_MENU_IN_SYSTEM);
+            persistComponentNamesToSettingLocked(setting, mTempComponentNameSet, userState.mUserId);
+        }
     }
 
     // Called only during settings restore; currently supports only the owner user
@@ -1591,6 +1685,8 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
             // The user changed.
             mCurrentUserId = userId;
             AccessibilityUserState userState = getCurrentUserStateLocked();
+
+            migrateAccessibilityMenuIfNecessaryLocked(userState);
 
             readConfigurationForUserStateLocked(userState);
             mSecurityPolicy.onSwitchUserLocked(mCurrentUserId, userState.mEnabledServices);
