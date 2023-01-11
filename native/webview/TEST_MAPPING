@@ -9,6 +9,14 @@
       ]
     },
     {
+      "name": "CtsSdkSandboxWebkitTestCases",
+      "options": [
+        {
+          "exclude-annotation": "androidx.test.filters.FlakyTest"
+        }
+      ]
+    },
+    {
       "name": "CtsHostsideWebViewTests",
       "options": [
         {
