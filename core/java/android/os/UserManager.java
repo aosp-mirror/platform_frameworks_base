@@ -1472,6 +1472,21 @@ public class UserManager {
     public static final String DISALLOW_BIOMETRIC = "disallow_biometric";
 
     /**
+     * Specifies whether the user is allowed to modify default apps in settings.
+     *
+     * <p>This restriction can be set by device or profile owner.
+     *
+     * <p>The default value is <code>false</code>.
+     *
+     * <p>Key for user restrictions.
+     * <p>Type: Boolean
+     * @see DevicePolicyManager#addUserRestriction(ComponentName, String)
+     * @see DevicePolicyManager#clearUserRestriction(ComponentName, String)
+     * @see #getUserRestrictions()
+     */
+    public static final String DISALLOW_CONFIG_DEFAULT_APPS = "disallow_config_default_apps";
+
+    /**
      * Application restriction key that is used to indicate the pending arrival
      * of real restrictions for the app.
      *
