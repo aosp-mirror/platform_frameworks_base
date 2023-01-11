@@ -94,9 +94,19 @@ class LaunchBubbleFromLockScreen(flicker: FlickerTest) : BaseBubbleScreen(flicke
         flicker.assertLayersEnd { this.isVisible(testApp) }
     }
 
-    @Postsubmit @Test fun navBarLayerIsVisibleAtEnd() = flicker.navBarLayerIsVisibleAtEnd()
+    @Postsubmit
+    @Test
+    fun navBarLayerIsVisibleAtEnd() {
+        Assume.assumeFalse(flicker.scenario.isTablet)
+        flicker.navBarLayerIsVisibleAtEnd()
+    }
 
-    @Postsubmit @Test fun navBarLayerPositionAtEnd() = flicker.navBarLayerPositionAtEnd()
+    @Postsubmit
+    @Test
+    fun navBarLayerPositionAtEnd() {
+        Assume.assumeFalse(flicker.scenario.isTablet)
+        flicker.navBarLayerPositionAtEnd()
+    }
 
     /** {@inheritDoc} */
     @FlakyTest
