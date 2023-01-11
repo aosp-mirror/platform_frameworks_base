@@ -31,7 +31,6 @@
 #include "hwui/Canvas.h"
 #include "hwui/Paint.h"
 #include "pipeline/skia/AnimatedDrawables.h"
-#include "src/core/SkArenaAlloc.h"
 
 enum class SkBlendMode;
 class SkRRect;
