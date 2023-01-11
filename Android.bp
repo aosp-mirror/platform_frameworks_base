@@ -694,3 +694,12 @@ build = [
     "ProtoLibraries.bp",
     "TestProtoLibraries.bp",
 ]
+
+java_api_contribution {
+    name: "api-stubs-docs-non-updatable-public-stubs",
+    api_surface: "public",
+    api_file: "core/api/current.txt",
+    visibility: [
+        "//build/orchestrator/apis",
+    ],
+}
