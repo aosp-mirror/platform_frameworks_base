@@ -21,13 +21,13 @@ import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 
-import android.os.Handler;
 import android.testing.AndroidTestingRunner;
 import android.testing.TestableLooper;
 
 import androidx.test.filters.SmallTest;
 
 import com.android.systemui.SysuiTestCase;
+import com.android.systemui.util.Assert;
 import com.android.systemui.util.concurrency.FakeExecutor;
 import com.android.systemui.util.time.FakeSystemClock;
 
@@ -51,9 +51,10 @@ public class ProximityCheckTest extends SysuiTestCase {
 
     @Before
     public void setUp() throws Exception {
-        AsyncSensorManager asyncSensorManager =
-                new AsyncSensorManager(new FakeSensorManager(mContext), null, new Handler());
-        mFakeProximitySensor = new FakeProximitySensor(mContext.getResources(), asyncSensorManager);
+        Assert.setTestableLooper(TestableLooper.get(this).getLooper());
+        FakeThresholdSensor thresholdSensor = new FakeThresholdSensor();
+        thresholdSensor.setLoaded(true);
+        mFakeProximitySensor = new FakeProximitySensor(thresholdSensor, null, mFakeExecutor);
 
         mProximityCheck = new ProximitySensor.ProximityCheck(mFakeProximitySensor, mFakeExecutor);
     }
@@ -64,7 +65,7 @@ public class ProximityCheckTest extends SysuiTestCase {
 
         assertNull(mTestableCallback.mLastResult);
 
-        mFakeProximitySensor.setLastEvent(new ProximitySensor.ProximityEvent(true, 0));
+        mFakeProximitySensor.setLastEvent(new ProximitySensor.ThresholdSensorEvent(true, 0));
         mFakeProximitySensor.alertListeners();
 
         assertTrue(mTestableCallback.mLastResult);
@@ -98,7 +99,6 @@ public class ProximityCheckTest extends SysuiTestCase {
         assertNull(mTestableCallback.mLastResult);
 
         mFakeProximitySensor.setLastEvent(new ProximitySensor.ThresholdSensorEvent(true, 0));
-
         mFakeProximitySensor.alertListeners();
 
         assertTrue(mTestableCallback.mLastResult);

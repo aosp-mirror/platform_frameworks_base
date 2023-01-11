@@ -48,7 +48,6 @@ android_test {
         // TODO: remove once Android migrates to JUnit 4.12,
         // which provides assertThrows
         "testng",
-
     ],
 
     aidl: {
@@ -110,6 +109,7 @@ java_library {
         "utils/**/*.java",
         "utils/**/*.kt",
         "utils-mockito/**/*.kt",
+        ":services.core-sources-deviceconfig-interface",
     ],
     static_libs: [
         "junit",
@@ -126,6 +126,7 @@ java_library {
         "utils/**/*.java",
         "utils/**/*.kt",
         "utils-mockito/**/*.kt",
+        ":services.core-sources-deviceconfig-interface",
     ],
     static_libs: [
         "junit",
