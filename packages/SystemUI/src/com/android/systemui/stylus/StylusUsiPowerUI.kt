@@ -123,13 +123,13 @@ constructor(
                 .setSmallIcon(R.drawable.ic_power_low)
                 .setDeleteIntent(getPendingBroadcast(ACTION_DISMISSED_LOW_BATTERY))
                 .setContentIntent(getPendingBroadcast(ACTION_CLICKED_LOW_BATTERY))
-                .setContentTitle(context.getString(R.string.stylus_battery_low))
-                .setContentText(
+                .setContentTitle(
                     context.getString(
-                        R.string.battery_low_percent_format,
+                        R.string.stylus_battery_low_percentage,
                         NumberFormat.getPercentInstance().format(batteryCapacity)
                     )
                 )
+                .setContentText(context.getString(R.string.stylus_battery_low_subtitle))
                 .setPriority(NotificationCompat.PRIORITY_DEFAULT)
                 .setLocalOnly(true)
                 .setAutoCancel(true)
@@ -177,7 +177,7 @@ constructor(
         // https://source.chromium.org/chromium/chromium/src/+/main:ash/system/power/peripheral_battery_notifier.cc;l=41
         private const val LOW_BATTERY_THRESHOLD = 0.16f
 
-        private val USI_NOTIFICATION_ID = R.string.stylus_battery_low
+        private val USI_NOTIFICATION_ID = R.string.stylus_battery_low_percentage
 
         private const val ACTION_DISMISSED_LOW_BATTERY = "StylusUsiPowerUI.dismiss"
         private const val ACTION_CLICKED_LOW_BATTERY = "StylusUsiPowerUI.click"
