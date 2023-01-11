@@ -993,7 +993,7 @@ public class WindowProcessController extends ConfigurationContainer<Configuratio
 
     /**
      * Returns display UI context list which there is any app window shows or starting activities
-     * int this process.
+     * in this process.
      */
     public void getDisplayContextsWithErrorDialogs(List<Context> displayContexts) {
         if (displayContexts == null) {
