@@ -182,8 +182,8 @@ public class UdfpsController implements DozeReceiver, Dumpable {
     private int mActivePointerId = -1;
     // The timestamp of the most recent touch log.
     private long mTouchLogTime;
-    // The timestamp of the most recent log of the UNCHANGED interaction.
-    private long mLastUnchangedInteractionTime;
+    // The timestamp of the most recent log of a touch InteractionEvent.
+    private long mLastTouchInteractionTime;
     // Sensor has a capture (good or bad) for this touch. No need to enable the UDFPS display mode
     // anymore for this particular touch event. In other words, do not enable the UDFPS mode until
     // the user touches the sensor area again.
@@ -540,12 +540,12 @@ public class UdfpsController implements DozeReceiver, Dumpable {
 
     private void logBiometricTouch(InteractionEvent event, NormalizedTouchData data) {
         if (event == InteractionEvent.UNCHANGED) {
-            long sinceLastLog = mSystemClock.elapsedRealtime() - mLastUnchangedInteractionTime;
+            long sinceLastLog = mSystemClock.elapsedRealtime() - mLastTouchInteractionTime;
             if (sinceLastLog < MIN_UNCHANGED_INTERACTION_LOG_INTERVAL) {
                 return;
             }
-            mLastUnchangedInteractionTime = mSystemClock.elapsedRealtime();
         }
+        mLastTouchInteractionTime = mSystemClock.elapsedRealtime();
 
         final int biometricTouchReportedTouchType = toBiometricTouchReportedTouchType(event);
         final InstanceId sessionIdProvider = mSessionTracker.getSessionId(
