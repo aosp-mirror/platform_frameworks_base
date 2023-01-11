@@ -53,7 +53,7 @@ import org.junit.runners.Parameterized
 @RunWith(Parameterized::class)
 @Parameterized.UseParametersRunnerFactory(FlickerParametersRunnerFactory::class)
 @FixMethodOrder(MethodSorters.NAME_ASCENDING)
-class QuickSwitchFromLauncherTest(flicker: FlickerTest) : BaseTest(flicker) {
+open class QuickSwitchFromLauncherTest(flicker: FlickerTest) : BaseTest(flicker) {
     private val testApp = SimpleAppHelper(instrumentation)
 
     /** {@inheritDoc} */
