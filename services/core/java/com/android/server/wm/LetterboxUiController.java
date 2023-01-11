@@ -1007,10 +1007,9 @@ final class LetterboxUiController {
         final ActivityRecord firstOpaqueActivityBeneath = mActivityRecord.getTask().getActivity(
                 ActivityRecord::fillsParent, mActivityRecord, false /* includeBoundary */,
                 true /* traverseTopToBottom */);
-        if (firstOpaqueActivityBeneath == null
-                || mActivityRecord.launchedFromUid != firstOpaqueActivityBeneath.getUid()) {
+        if (firstOpaqueActivityBeneath == null) {
             // We skip letterboxing if the translucent activity doesn't have any opaque
-            // activities beneath of if it's launched from a different user (e.g. notification)
+            // activities beneath
             return;
         }
         inheritConfiguration(firstOpaqueActivityBeneath);
