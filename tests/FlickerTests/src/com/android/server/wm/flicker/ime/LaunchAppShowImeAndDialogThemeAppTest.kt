@@ -16,7 +16,6 @@
 
 package com.android.server.wm.flicker.ime
 
-import android.platform.test.annotations.Postsubmit
 import android.platform.test.annotations.Presubmit
 import android.view.WindowInsets.Type.ime
 import android.view.WindowInsets.Type.navigationBars
@@ -63,16 +62,6 @@ class LaunchAppShowImeAndDialogThemeAppTest(flicker: FlickerTest) : BaseTest(fli
         teardown { testApp.exit(wmHelper) }
         transitions { testApp.dismissDialog(wmHelper) }
     }
-
-    /** {@inheritDoc} */
-    @Postsubmit
-    @Test
-    override fun taskBarWindowIsAlwaysVisible() = super.taskBarWindowIsAlwaysVisible()
-
-    /** {@inheritDoc} */
-    @Postsubmit
-    @Test
-    override fun taskBarLayerIsVisibleAtStartAndEnd() = super.taskBarLayerIsVisibleAtStartAndEnd()
 
     /** Checks that [ComponentNameMatcher.IME] layer becomes visible during the transition */
     @Presubmit @Test fun imeWindowIsAlwaysVisible() = flicker.imeWindowIsAlwaysVisible()
