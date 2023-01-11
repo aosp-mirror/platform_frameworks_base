@@ -20,6 +20,7 @@ import static android.view.Display.DEFAULT_DISPLAY;
 import static android.view.Display.INVALID_DISPLAY;
 
 import static com.android.server.pm.UserManagerInternal.USER_ASSIGNMENT_RESULT_FAILURE;
+import static com.android.server.pm.UserManagerInternal.USER_ASSIGNMENT_RESULT_SUCCESS_ALREADY_VISIBLE;
 import static com.android.server.pm.UserManagerInternal.USER_ASSIGNMENT_RESULT_SUCCESS_INVISIBLE;
 import static com.android.server.pm.UserManagerInternal.USER_ASSIGNMENT_RESULT_SUCCESS_VISIBLE;
 import static com.android.server.pm.UserVisibilityChangedEvent.onInvisible;
@@ -129,7 +130,28 @@ public final class UserVisibilityMediatorMUPANDTest
     }
 
     @Test
-    public void testStartVisibleBgProfile_onDefaultDisplay_whenParentIsStartedVisibleOnBg()
+    public void
+       testStartVisibleBgProfile_onDefaultDisplay_whenParentIsStartedVisibleOnBgOnSecondaryDisplay()
+            throws Exception {
+        AsyncUserVisibilityListener listener = addListenerForEvents(onVisible(PARENT_USER_ID));
+        startUserInSecondaryDisplay(PARENT_USER_ID, OTHER_SECONDARY_DISPLAY_ID);
+
+        int result = mMediator.assignUserToDisplayOnStart(PROFILE_USER_ID, PARENT_USER_ID,
+                BG_VISIBLE, DEFAULT_DISPLAY);
+        assertStartUserResult(result, USER_ASSIGNMENT_RESULT_FAILURE);
+
+        expectUserIsNotVisibleAtAll(PROFILE_USER_ID);
+        expectNoDisplayAssignedToUser(PROFILE_USER_ID);
+        expectUserAssignedToDisplay(OTHER_SECONDARY_DISPLAY_ID, PARENT_USER_ID);
+
+        assertInvisibleUserCannotBeAssignedExtraDisplay(PROFILE_USER_ID, SECONDARY_DISPLAY_ID);
+
+        listener.verify();
+    }
+
+    @Test
+    public void
+        testStartVisibleBgProfile_onDefaultDisplay_whenParentIsStartedVisibleOnBgOnDefaultDisplay()
             throws Exception {
         AsyncUserVisibilityListener listener = addListenerForEvents(
                 onVisible(PARENT_USER_ID),
@@ -181,6 +203,27 @@ public final class UserVisibilityMediatorMUPANDTest
         expectUserIsNotVisibleAtAll(PROFILE_USER_ID);
         expectNoDisplayAssignedToUser(PROFILE_USER_ID);
         assertUserCannotBeAssignedExtraDisplay(PROFILE_USER_ID, OTHER_SECONDARY_DISPLAY_ID);
+        listener.verify();
+    }
+
+    @Test
+    public void testStartVisibleBgUser_onDefaultDisplay_currentUserId() throws Exception {
+        int currentUserId = INITIAL_CURRENT_USER_ID;
+
+        AsyncUserVisibilityListener listener = addListenerForNoEvents();
+
+        int result = mMediator.assignUserToDisplayOnStart(currentUserId, currentUserId,
+                BG_VISIBLE, DEFAULT_DISPLAY);
+        assertStartUserResult(result, USER_ASSIGNMENT_RESULT_SUCCESS_ALREADY_VISIBLE);
+
+        // Assert current user visibility
+        expectUserIsVisible(currentUserId);
+        expectUserIsVisibleOnDisplay(currentUserId, DEFAULT_DISPLAY);
+        expectUserIsNotVisibleOnDisplay(currentUserId, INVALID_DISPLAY);
+        expectDisplayAssignedToUser(currentUserId, DEFAULT_DISPLAY);
+
+        assertUserCanBeAssignedExtraDisplay(currentUserId, OTHER_SECONDARY_DISPLAY_ID);
+
         listener.verify();
     }
 }

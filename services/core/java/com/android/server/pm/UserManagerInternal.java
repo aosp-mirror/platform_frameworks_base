@@ -52,12 +52,14 @@ public abstract class UserManagerInternal {
     // TODO(b/248408342): Move keep annotation to the method referencing these fields reflectively.
     @Keep public static final int USER_ASSIGNMENT_RESULT_SUCCESS_VISIBLE = 1;
     @Keep public static final int USER_ASSIGNMENT_RESULT_SUCCESS_INVISIBLE = 2;
+    @Keep public static final int USER_ASSIGNMENT_RESULT_SUCCESS_ALREADY_VISIBLE = 3;
     @Keep public static final int USER_ASSIGNMENT_RESULT_FAILURE = -1;
 
     private static final String PREFIX_USER_ASSIGNMENT_RESULT = "USER_ASSIGNMENT_RESULT_";
     @IntDef(flag = false, prefix = {PREFIX_USER_ASSIGNMENT_RESULT}, value = {
             USER_ASSIGNMENT_RESULT_SUCCESS_VISIBLE,
             USER_ASSIGNMENT_RESULT_SUCCESS_INVISIBLE,
+            USER_ASSIGNMENT_RESULT_SUCCESS_ALREADY_VISIBLE,
             USER_ASSIGNMENT_RESULT_FAILURE
     })
     public @interface UserAssignmentResult {}
