@@ -26,7 +26,10 @@ import android.Manifest;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.app.admin.DevicePolicyManager;
+import android.app.admin.DevicePolicyState;
+import android.app.admin.PolicyKey;
 import android.app.admin.PolicyUpdatesReceiver;
+import android.app.admin.PolicyValue;
 import android.app.admin.TargetUser;
 import android.content.Context;
 import android.content.Intent;
@@ -113,7 +116,7 @@ final class DevicePolicyEngine {
     <V> void setLocalPolicy(
             @NonNull PolicyDefinition<V> policyDefinition,
             @NonNull EnforcingAdmin enforcingAdmin,
-            @NonNull V value,
+            @NonNull PolicyValue<V> value,
             int userId) {
 
         Objects.requireNonNull(policyDefinition);
@@ -215,7 +218,7 @@ final class DevicePolicyEngine {
      * else remove the policy from child.
      */
     private <V> void applyToInheritableProfiles(PolicyDefinition<V> policyDefinition,
-            EnforcingAdmin enforcingAdmin, V value, int userId) {
+            EnforcingAdmin enforcingAdmin, PolicyValue<V> value, int userId) {
         if (policyDefinition.isInheritable()) {
             Binder.withCleanCallingIdentity(() -> {
                 List<UserInfo> userInfos = mUserManager.getProfiles(userId);
@@ -259,7 +262,7 @@ final class DevicePolicyEngine {
 
         PolicyState<V> localPolicyState = getLocalPolicyStateLocked(policyDefinition, userId);
         enforcePolicy(
-                policyDefinition, localPolicyState.getCurrentResolvedPolicy(), userId);
+                policyDefinition, localPolicyState.getCurrentResolvedPolicy().getValue(), userId);
 
         // Send policy updates to admins who've set it locally
         sendPolicyChangedToAdmins(
@@ -288,7 +291,7 @@ final class DevicePolicyEngine {
     <V> void setGlobalPolicy(
             @NonNull PolicyDefinition<V> policyDefinition,
             @NonNull EnforcingAdmin enforcingAdmin,
-            @NonNull V value) {
+            @NonNull PolicyValue<V> value) {
 
         Objects.requireNonNull(policyDefinition);
         Objects.requireNonNull(enforcingAdmin);
@@ -372,7 +375,7 @@ final class DevicePolicyEngine {
             @NonNull EnforcingAdmin enforcingAdmin) {
         PolicyState<V> policyState = getGlobalPolicyStateLocked(policyDefinition);
 
-        enforcePolicy(policyDefinition, policyState.getCurrentResolvedPolicy(),
+        enforcePolicy(policyDefinition, policyState.getCurrentResolvedPolicy().getValue(),
                 UserHandle.USER_ALL);
 
         sendPolicyChangedToAdmins(
@@ -395,7 +398,7 @@ final class DevicePolicyEngine {
     private <V> boolean enforceGlobalPolicyOnUsersWithLocalPoliciesLocked(
             @NonNull PolicyDefinition<V> policyDefinition,
             @NonNull EnforcingAdmin enforcingAdmin,
-            @Nullable V value) {
+            @Nullable PolicyValue<V> value) {
         // Global only policies can't be applied locally, return early.
         if (policyDefinition.isGlobalOnlyPolicy()) {
             return true;
@@ -414,7 +417,9 @@ final class DevicePolicyEngine {
                     globalPolicyState.getPoliciesSetByAdmins());
             if (policyChanged) {
                 enforcePolicy(
-                        policyDefinition, localPolicyState.getCurrentResolvedPolicy(), userId);
+                        policyDefinition,
+                        localPolicyState.getCurrentResolvedPolicy().getValue(),
+                        userId);
                 sendPolicyChangedToAdmins(
                         localPolicyState,
                         enforcingAdmin,
@@ -440,10 +445,11 @@ final class DevicePolicyEngine {
         synchronized (mLock) {
             if (hasLocalPolicyLocked(policyDefinition, userId)) {
                 return getLocalPolicyStateLocked(
-                        policyDefinition, userId).getCurrentResolvedPolicy();
+                        policyDefinition, userId).getCurrentResolvedPolicy().getValue();
             }
             if (hasGlobalPolicyLocked(policyDefinition)) {
-                return getGlobalPolicyStateLocked(policyDefinition).getCurrentResolvedPolicy();
+                return getGlobalPolicyStateLocked(policyDefinition).getCurrentResolvedPolicy()
+                        .getValue();
             }
             return null;
         }
@@ -466,13 +472,13 @@ final class DevicePolicyEngine {
                 return null;
             }
             return getLocalPolicyStateLocked(policyDefinition, userId)
-                    .getPoliciesSetByAdmins().get(enforcingAdmin);
+                    .getPoliciesSetByAdmins().get(enforcingAdmin).getValue();
         }
     }
 
     /**
-     * Returns the policies set by the given admin that share the same {@link PolicyKey#getKey()} as
-     * the provided {@code policyDefinition}.
+     * Returns the policies set by the given admin that share the same
+     * {@link PolicyKey#getIdentifier()} as the provided {@code policyDefinition}.
      *
      * <p>For example, getLocalPolicyKeysSetByAdmin(PERMISSION_GRANT, admin) returns all permission
      * grants set by the given admin.
@@ -496,7 +502,7 @@ final class DevicePolicyEngine {
             }
             Set<PolicyKey> keys = new HashSet<>();
             for (PolicyKey key : mLocalPolicies.get(userId).keySet()) {
-                if (key.hasSameKeyAs(policyDefinition.getPolicyKey())
+                if (key.hasSameIdentifierAs(policyDefinition.getPolicyKey())
                         && mLocalPolicies.get(userId).get(key).getPoliciesSetByAdmins()
                         .containsKey(enforcingAdmin)) {
                     keys.add(key);
@@ -766,7 +772,7 @@ final class DevicePolicyEngine {
         if (!policyState.getPolicyDefinition().isInheritable()) {
             return;
         }
-        for (Map.Entry<EnforcingAdmin, V> enforcingAdminEntry :
+        for (Map.Entry<EnforcingAdmin, PolicyValue<V>> enforcingAdminEntry :
                 policyState.getPoliciesSetByAdmins().entrySet()) {
             setLocalPolicy(policyState.getPolicyDefinition(),
                     enforcingAdminEntry.getKey(),
@@ -807,6 +813,34 @@ final class DevicePolicyEngine {
             return;
         }
         updateDeviceAdminServiceOnPackageChanged(updatedPackage, userId);
+    }
+
+    /**
+     * Returns all current enforced policies set on the device, and the individual values set by
+     * each admin. Global policies are returned under {@link UserHandle#ALL}.
+     */
+    @NonNull
+    DevicePolicyState getParcelablePoliciesStateMap() {
+        Map<UserHandle, Map<PolicyKey, android.app.admin.PolicyState<?>>> policies =
+                new HashMap<>();
+        for (int i = 0; i < mLocalPolicies.size(); i++) {
+            UserHandle user = UserHandle.of(mLocalPolicies.keyAt(i));
+            policies.put(user, new HashMap<>());
+            for (PolicyKey policyKey : mLocalPolicies.valueAt(i).keySet()) {
+                policies.get(user).put(
+                        policyKey,
+                        mLocalPolicies.valueAt(i).get(policyKey).getParcelablePolicyState());
+            }
+        }
+        if (!mGlobalPolicies.isEmpty()) {
+            policies.put(UserHandle.ALL, new HashMap<>());
+            for (PolicyKey policyKey : mGlobalPolicies.keySet()) {
+                policies.get(UserHandle.ALL).put(
+                        policyKey,
+                        mGlobalPolicies.get(policyKey).getParcelablePolicyState());
+            }
+        }
+        return new DevicePolicyState(policies);
     }
 
     /**

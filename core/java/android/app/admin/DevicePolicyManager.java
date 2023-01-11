@@ -16313,4 +16313,25 @@ public class DevicePolicyManager {
         }
         return false;
     }
+
+    /**
+     * Returns a {@link DevicePolicyState} object containing information about the current state
+     * of device policies (e.g. values set by different admins, info about the enforcing admins,
+     * resolved policy, etc).
+     *
+     * @hide
+     */
+    @SystemApi
+    @NonNull
+    @RequiresPermission(permission.MANAGE_PROFILE_AND_DEVICE_OWNERS)
+    public DevicePolicyState getDevicePolicyState() {
+        if (mService != null) {
+            try {
+                return mService.getDevicePolicyState();
+            } catch (RemoteException e) {
+                throw e.rethrowFromSystemServer();
+            }
+        }
+        return null;
+    }
 }

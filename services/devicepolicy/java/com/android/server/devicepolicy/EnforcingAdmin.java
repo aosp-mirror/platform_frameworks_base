@@ -18,7 +18,13 @@ package com.android.server.devicepolicy;
 
 import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.app.admin.Authority;
+import android.app.admin.UnknownAuthority;
+import android.app.admin.DeviceAdminAuthority;
+import android.app.admin.DpcAuthority;
+import android.app.admin.RoleAuthority;
 import android.content.ComponentName;
+import android.os.UserHandle;
 
 import com.android.modules.utils.TypedXmlPullParser;
 import com.android.modules.utils.TypedXmlSerializer;
@@ -180,6 +186,29 @@ final class EnforcingAdmin {
     @Nullable
     public ActiveAdmin getActiveAdmin() {
         return mActiveAdmin;
+    }
+
+    @NonNull
+    android.app.admin.EnforcingAdmin getParcelableAdmin() {
+        Authority authority;
+        if (mIsRoleAuthority) {
+            Set<String> roles = getRoles(mPackageName, mUserId);
+            if (roles.isEmpty()) {
+                authority = UnknownAuthority.UNKNOWN_AUTHORITY;
+            } else {
+                authority = new RoleAuthority(roles);
+            }
+        } else if (mAuthorities.contains(DPC_AUTHORITY)) {
+            authority = DpcAuthority.DPC_AUTHORITY;
+        } else if (mAuthorities.contains(DEVICE_ADMIN_AUTHORITY)) {
+            authority = DeviceAdminAuthority.DEVICE_ADMIN_AUTHORITY;
+        } else {
+            authority = UnknownAuthority.UNKNOWN_AUTHORITY;
+        }
+        return new android.app.admin.EnforcingAdmin(
+                mPackageName,
+                authority,
+                UserHandle.of(mUserId));
     }
 
     /**

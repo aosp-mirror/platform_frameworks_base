@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2022 The Android Open Source Project
+ * Copyright (C) 2023 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,18 +14,6 @@
  * limitations under the License.
  */
 
-package com.android.server.devicepolicy;
+package android.app.admin;
 
-import android.annotation.NonNull;
-import android.app.admin.PolicyValue;
-
-import com.android.modules.utils.TypedXmlPullParser;
-import com.android.modules.utils.TypedXmlSerializer;
-
-import java.io.IOException;
-
-abstract class PolicySerializer<V> {
-    abstract void saveToXml(TypedXmlSerializer serializer, String attributeName, @NonNull V value)
-            throws IOException;
-    abstract PolicyValue<V> readFromXml(TypedXmlPullParser parser, String attributeName);
-}
+parcelable DevicePolicyState;

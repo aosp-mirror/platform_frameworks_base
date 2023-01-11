@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2022 The Android Open Source Project
+ * Copyright (C) 2023 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,18 +14,33 @@
  * limitations under the License.
  */
 
-package com.android.server.devicepolicy;
+package android.app.admin;
 
 import android.annotation.NonNull;
-import android.app.admin.PolicyValue;
+import android.os.Parcelable;
 
-import com.android.modules.utils.TypedXmlPullParser;
-import com.android.modules.utils.TypedXmlSerializer;
+import java.util.Objects;
 
-import java.io.IOException;
+/**
+ * Wrapper class to ensure that all policy values stored in the policy engine are parcelable.
+ *
+ * @hide
+ */
+public abstract class PolicyValue<V> implements Parcelable {
+    private V mValue;
 
-abstract class PolicySerializer<V> {
-    abstract void saveToXml(TypedXmlSerializer serializer, String attributeName, @NonNull V value)
-            throws IOException;
-    abstract PolicyValue<V> readFromXml(TypedXmlPullParser parser, String attributeName);
+    public PolicyValue(V value) {
+        mValue = Objects.requireNonNull(value);
+    }
+
+    PolicyValue() {}
+
+    @NonNull
+    public V getValue() {
+        return mValue;
+    }
+
+    void setValue(V value) {
+        mValue = value;
+    }
 }

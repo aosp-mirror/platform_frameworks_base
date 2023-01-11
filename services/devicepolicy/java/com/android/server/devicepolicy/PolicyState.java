@@ -18,6 +18,7 @@ package com.android.server.devicepolicy;
 
 import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.app.admin.PolicyValue;
 import android.util.Log;
 
 import com.android.internal.util.XmlUtils;
@@ -40,8 +41,9 @@ final class PolicyState<V> {
     private static final String ATTR_RESOLVED_POLICY = "resolved-policy";
 
     private final PolicyDefinition<V> mPolicyDefinition;
-    private final LinkedHashMap<EnforcingAdmin, V> mPoliciesSetByAdmins = new LinkedHashMap<>();
-    private V mCurrentResolvedPolicy;
+    private final LinkedHashMap<EnforcingAdmin, PolicyValue<V>> mPoliciesSetByAdmins =
+            new LinkedHashMap<>();
+    private PolicyValue<V> mCurrentResolvedPolicy;
 
     PolicyState(@NonNull PolicyDefinition<V> policyDefinition) {
         mPolicyDefinition = Objects.requireNonNull(policyDefinition);
@@ -49,8 +51,8 @@ final class PolicyState<V> {
 
     private PolicyState(
             @NonNull PolicyDefinition<V> policyDefinition,
-            @NonNull LinkedHashMap<EnforcingAdmin, V> policiesSetByAdmins,
-            V currentEnforcedPolicy) {
+            @NonNull LinkedHashMap<EnforcingAdmin, PolicyValue<V>> policiesSetByAdmins,
+            PolicyValue<V> currentEnforcedPolicy) {
         Objects.requireNonNull(policyDefinition);
         Objects.requireNonNull(policiesSetByAdmins);
 
@@ -62,7 +64,7 @@ final class PolicyState<V> {
     /**
      * Returns {@code true} if the resolved policy has changed, {@code false} otherwise.
      */
-    boolean addPolicy(@NonNull EnforcingAdmin admin, @NonNull V policy) {
+    boolean addPolicy(@NonNull EnforcingAdmin admin, @NonNull PolicyValue<V> policy) {
         mPoliciesSetByAdmins.put(Objects.requireNonNull(admin), Objects.requireNonNull(policy));
 
         return resolvePolicy();
@@ -78,8 +80,8 @@ final class PolicyState<V> {
      * Returns {@code true} if the resolved policy has changed, {@code false} otherwise.
      */
     boolean addPolicy(
-            @NonNull EnforcingAdmin admin, @NonNull V policy,
-            LinkedHashMap<EnforcingAdmin, V> globalPoliciesSetByAdmins) {
+            @NonNull EnforcingAdmin admin, @NonNull PolicyValue<V> policy,
+            LinkedHashMap<EnforcingAdmin, PolicyValue<V>> globalPoliciesSetByAdmins) {
         mPoliciesSetByAdmins.put(Objects.requireNonNull(admin), Objects.requireNonNull(policy));
 
         return resolvePolicy(globalPoliciesSetByAdmins);
@@ -109,7 +111,7 @@ final class PolicyState<V> {
      */
     boolean removePolicy(
             @NonNull EnforcingAdmin admin,
-            LinkedHashMap<EnforcingAdmin, V> globalPoliciesSetByAdmins) {
+            LinkedHashMap<EnforcingAdmin, PolicyValue<V>> globalPoliciesSetByAdmins) {
         Objects.requireNonNull(admin);
 
         if (mPoliciesSetByAdmins.remove(admin) == null) {
@@ -128,13 +130,13 @@ final class PolicyState<V> {
      *
      * Returns {@code true} if the resolved policy has changed, {@code false} otherwise.
      */
-    boolean resolvePolicy(LinkedHashMap<EnforcingAdmin, V> globalPoliciesSetByAdmins) {
+    boolean resolvePolicy(LinkedHashMap<EnforcingAdmin, PolicyValue<V>> globalPoliciesSetByAdmins) {
         // Add global policies first then override with local policies for the same admin.
-        LinkedHashMap<EnforcingAdmin, V> mergedPolicies =
+        LinkedHashMap<EnforcingAdmin, PolicyValue<V>> mergedPolicies =
                 new LinkedHashMap<>(globalPoliciesSetByAdmins);
         mergedPolicies.putAll(mPoliciesSetByAdmins);
 
-        V resolvedPolicy = mPolicyDefinition.resolvePolicy(mergedPolicies);
+        PolicyValue<V> resolvedPolicy = mPolicyDefinition.resolvePolicy(mergedPolicies);
         boolean policyChanged = !Objects.equals(resolvedPolicy, mCurrentResolvedPolicy);
         mCurrentResolvedPolicy = resolvedPolicy;
 
@@ -142,12 +144,12 @@ final class PolicyState<V> {
     }
 
     @NonNull
-    LinkedHashMap<EnforcingAdmin, V> getPoliciesSetByAdmins() {
+    LinkedHashMap<EnforcingAdmin, PolicyValue<V>> getPoliciesSetByAdmins() {
         return new LinkedHashMap<>(mPoliciesSetByAdmins);
     }
 
     private boolean resolvePolicy() {
-        V resolvedPolicy = mPolicyDefinition.resolvePolicy(mPoliciesSetByAdmins);
+        PolicyValue<V> resolvedPolicy = mPolicyDefinition.resolvePolicy(mPoliciesSetByAdmins);
         boolean policyChanged = !Objects.equals(resolvedPolicy, mCurrentResolvedPolicy);
         mCurrentResolvedPolicy = resolvedPolicy;
 
@@ -155,8 +157,18 @@ final class PolicyState<V> {
     }
 
     @Nullable
-    V getCurrentResolvedPolicy() {
+    PolicyValue<V> getCurrentResolvedPolicy() {
         return mCurrentResolvedPolicy;
+    }
+
+    android.app.admin.PolicyState<V> getParcelablePolicyState() {
+        LinkedHashMap<android.app.admin.EnforcingAdmin, PolicyValue<V>> adminPolicies =
+                new LinkedHashMap<>();
+        for (EnforcingAdmin admin : mPoliciesSetByAdmins.keySet()) {
+            adminPolicies.put(admin.getParcelableAdmin(), mPoliciesSetByAdmins.get(admin));
+        }
+        return new android.app.admin.PolicyState<>(adminPolicies, mCurrentResolvedPolicy,
+                mPolicyDefinition.getResolutionMechanism().getParcelableResolutionMechanism());
     }
 
     @Override
@@ -171,14 +183,14 @@ final class PolicyState<V> {
 
         if (mCurrentResolvedPolicy != null) {
             mPolicyDefinition.savePolicyValueToXml(
-                    serializer, ATTR_RESOLVED_POLICY, mCurrentResolvedPolicy);
+                    serializer, ATTR_RESOLVED_POLICY, mCurrentResolvedPolicy.getValue());
         }
 
         for (EnforcingAdmin admin : mPoliciesSetByAdmins.keySet()) {
             serializer.startTag(/* namespace= */ null, TAG_ADMIN_POLICY_ENTRY);
 
             mPolicyDefinition.savePolicyValueToXml(
-                    serializer, ATTR_POLICY_VALUE, mPoliciesSetByAdmins.get(admin));
+                    serializer, ATTR_POLICY_VALUE, mPoliciesSetByAdmins.get(admin).getValue());
 
             serializer.startTag(/* namespace= */ null, TAG_ENFORCING_ADMIN_ENTRY);
             admin.saveToXml(serializer);
@@ -193,15 +205,15 @@ final class PolicyState<V> {
 
         PolicyDefinition<V> policyDefinition = PolicyDefinition.readFromXml(parser);
 
-        V currentResolvedPolicy = policyDefinition.readPolicyValueFromXml(
+        PolicyValue<V> currentResolvedPolicy = policyDefinition.readPolicyValueFromXml(
                 parser, ATTR_RESOLVED_POLICY);
 
-        LinkedHashMap<EnforcingAdmin, V> policiesSetByAdmins = new LinkedHashMap<>();
+        LinkedHashMap<EnforcingAdmin, PolicyValue<V>> policiesSetByAdmins = new LinkedHashMap<>();
         int outerDepth = parser.getDepth();
         while (XmlUtils.nextElementWithin(parser, outerDepth)) {
             String tag = parser.getName();
             if (TAG_ADMIN_POLICY_ENTRY.equals(tag)) {
-                V value = policyDefinition.readPolicyValueFromXml(
+                PolicyValue<V> value = policyDefinition.readPolicyValueFromXml(
                         parser, ATTR_POLICY_VALUE);
                 EnforcingAdmin admin;
                 int adminPolicyDepth = parser.getDepth();

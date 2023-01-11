@@ -18,6 +18,7 @@ package com.android.server.devicepolicy;
 
 import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.app.admin.ComponentNamePolicyValue;
 import android.content.ComponentName;
 import android.util.Log;
 
@@ -46,7 +47,7 @@ final class ComponentNamePolicySerializer extends PolicySerializer<ComponentName
 
     @Nullable
     @Override
-    ComponentName readFromXml(TypedXmlPullParser parser, String attributeNamePrefix) {
+    ComponentNamePolicyValue readFromXml(TypedXmlPullParser parser, String attributeNamePrefix) {
         String packageName = parser.getAttributeValue(
                 /* namespace= */ null, attributeNamePrefix + ATTR_PACKAGE_NAME);
         String className = parser.getAttributeValue(
@@ -55,6 +56,6 @@ final class ComponentNamePolicySerializer extends PolicySerializer<ComponentName
             Log.e(DevicePolicyEngine.TAG, "Error parsing ComponentName policy.");
             return null;
         }
-        return new ComponentName(packageName, className);
+        return new ComponentNamePolicyValue(new ComponentName(packageName, className));
     }
 }

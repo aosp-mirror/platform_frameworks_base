@@ -18,6 +18,7 @@ package com.android.server.devicepolicy;
 
 import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.app.admin.BooleanPolicyValue;
 import android.util.Log;
 
 import com.android.modules.utils.TypedXmlPullParser;
@@ -39,9 +40,10 @@ final class BooleanPolicySerializer extends PolicySerializer<Boolean> {
 
     @Nullable
     @Override
-    Boolean readFromXml(TypedXmlPullParser parser, String attributeName) {
+    BooleanPolicyValue readFromXml(TypedXmlPullParser parser, String attributeName) {
         try {
-            return parser.getAttributeBoolean(/* namespace= */ null, attributeName);
+            return new BooleanPolicyValue(
+                    parser.getAttributeBoolean(/* namespace= */ null, attributeName));
         } catch (XmlPullParserException e) {
             Log.e(DevicePolicyEngine.TAG, "Error parsing Boolean policy value", e);
             return null;

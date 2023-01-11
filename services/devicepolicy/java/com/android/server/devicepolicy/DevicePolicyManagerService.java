@@ -206,6 +206,8 @@ import android.app.Notification;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
 import android.app.StatusBarManager;
+import android.app.admin.BooleanPolicyValue;
+import android.app.admin.ComponentNamePolicyValue;
 import android.app.admin.DeviceAdminInfo;
 import android.app.admin.DeviceAdminReceiver;
 import android.app.admin.DevicePolicyCache;
@@ -220,11 +222,15 @@ import android.app.admin.DevicePolicyManager.PersonalAppsSuspensionReason;
 import android.app.admin.DevicePolicyManagerInternal;
 import android.app.admin.DevicePolicyManagerLiteInternal;
 import android.app.admin.DevicePolicySafetyChecker;
+import android.app.admin.DevicePolicyState;
 import android.app.admin.DevicePolicyStringResource;
 import android.app.admin.DeviceStateCache;
 import android.app.admin.FactoryResetProtectionPolicy;
 import android.app.admin.FullyManagedDeviceProvisioningParams;
 import android.app.admin.IDevicePolicyManager;
+import android.app.admin.IntegerPolicyValue;
+import android.app.admin.IntentFilterPolicyKey;
+import android.app.admin.LockTaskPolicy;
 import android.app.admin.ManagedProfileProvisioningParams;
 import android.app.admin.ManagedSubscriptionsPolicy;
 import android.app.admin.NetworkEvent;
@@ -233,10 +239,12 @@ import android.app.admin.ParcelableGranteeMap;
 import android.app.admin.ParcelableResource;
 import android.app.admin.PasswordMetrics;
 import android.app.admin.PasswordPolicy;
+import android.app.admin.PolicyKey;
 import android.app.admin.PreferentialNetworkServiceConfig;
 import android.app.admin.SecurityLog;
 import android.app.admin.SecurityLog.SecurityEvent;
 import android.app.admin.StartInstallingUpdateCallback;
+import android.app.admin.StringSetPolicyValue;
 import android.app.admin.SystemUpdateInfo;
 import android.app.admin.SystemUpdatePolicy;
 import android.app.admin.UnsafeStateException;
@@ -8245,7 +8253,7 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
                     //  merged.
                     EnforcingAdmin.createEnterpriseEnforcingAdmin(
                             caller.getComponentName(), caller.getUserId()),
-                    enabled);
+                    new BooleanPolicyValue(enabled));
         } else {
             mInjector.binderWithCleanCallingIdentity(() ->
                     mInjector.settingsGlobalPutInt(Global.AUTO_TIME_ZONE, enabled ? 1 : 0));
@@ -10352,7 +10360,7 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
             mDevicePolicyEngine.setLocalPolicy(
                     PolicyDefinition.PERSISTENT_PREFERRED_ACTIVITY(filter),
                     EnforcingAdmin.createEnterpriseEnforcingAdmin(who, userHandle),
-                    activity,
+                    new ComponentNamePolicyValue(activity),
                     userHandle);
         } else {
             synchronized (getLockObject()) {
@@ -10422,13 +10430,13 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
                 admin,
                 userId);
         for (PolicyKey key : keys) {
-            if (!(key instanceof PersistentPreferredActivityPolicyKey)) {
+            if (!(key instanceof IntentFilterPolicyKey)) {
                 throw new IllegalStateException("PolicyKey for PERSISTENT_PREFERRED_ACTIVITY is not"
                         + "of type PersistentPreferredActivityPolicyKey");
             }
-            PersistentPreferredActivityPolicyKey parsedKey =
-                    (PersistentPreferredActivityPolicyKey) key;
-            IntentFilter filter = Objects.requireNonNull(parsedKey.getFilter());
+            IntentFilterPolicyKey parsedKey =
+                    (IntentFilterPolicyKey) key;
+            IntentFilter filter = Objects.requireNonNull(parsedKey.getIntentFilter());
 
             ComponentName preferredActivity = mDevicePolicyEngine.getLocalPolicySetByAdmin(
                     PolicyDefinition.PERSISTENT_PREFERRED_ACTIVITY(filter),
@@ -12380,7 +12388,7 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
             mDevicePolicyEngine.setLocalPolicy(
                     PolicyDefinition.PACKAGE_UNINSTALL_BLOCKED(packageName),
                     admin,
-                    uninstallBlocked,
+                    new BooleanPolicyValue(uninstallBlocked),
                     caller.getUserId());
         } else {
             final int userId = caller.getUserId();
@@ -12951,7 +12959,7 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
                 if (currentPolicy == null) {
                     policy = new LockTaskPolicy(Set.of(packages));
                 } else {
-                    policy = currentPolicy.clone();
+                    policy = new LockTaskPolicy(currentPolicy);
                     policy.setPackages(Set.of(packages));
                 }
 
@@ -13062,7 +13070,7 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
                 throw new IllegalArgumentException("Can't set a lock task flags without setting "
                         + "lock task packages first.");
             }
-            LockTaskPolicy policy = currentPolicy.clone();
+            LockTaskPolicy policy = new LockTaskPolicy(currentPolicy);
             policy.setFlags(flags);
 
             mDevicePolicyEngine.setLocalPolicy(
@@ -14773,7 +14781,7 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
                     //  component name isn't null.
                     EnforcingAdmin.createEnterpriseEnforcingAdmin(
                             caller.getComponentName(), caller.getUserId()),
-                    grantState,
+                    new IntegerPolicyValue(grantState),
                     caller.getUserId());
             // TODO: update javadoc to reflect that callback no longer return success/failure
             callback.sendResult(Bundle.EMPTY);
@@ -18102,7 +18110,7 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
                     //  merged.
                     EnforcingAdmin.createEnterpriseEnforcingAdmin(
                             caller.getComponentName(), caller.getUserId()),
-                    packages);
+                    new StringSetPolicyValue(packages));
         } else {
             mDevicePolicyEngine.setLocalPolicy(
                     PolicyDefinition.USER_CONTROLLED_DISABLED_PACKAGES,
@@ -18110,7 +18118,7 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
                     //  merged.
                     EnforcingAdmin.createEnterpriseEnforcingAdmin(
                             caller.getComponentName(), caller.getUserId()),
-                    packages,
+                    new StringSetPolicyValue(packages),
                     caller.getUserId());
         }
     }
@@ -20608,5 +20616,13 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
                 mSubscriptionsChangedListener = null;
             }
         }
+    }
+
+    @Override
+    public DevicePolicyState getDevicePolicyState() {
+        Preconditions.checkCallAuthorization(
+                hasCallingOrSelfPermission(permission.MANAGE_PROFILE_AND_DEVICE_OWNERS));
+        return mInjector.binderWithCleanCallingIdentity(() ->
+                mDevicePolicyEngine.getParcelablePoliciesStateMap());
     }
 }

@@ -592,8 +592,40 @@ package android.app.admin {
     field @Deprecated public static final int STATUS_SPLIT_SYSTEM_USER_DEVICE_SYSTEM_USER = 14; // 0xe
   }
 
+  public final class FlagUnion extends android.app.admin.ResolutionMechanism<java.lang.Integer> {
+    method public int describeContents();
+    method public void writeToParcel(@NonNull android.os.Parcel, int);
+    field @NonNull public static final android.os.Parcelable.Creator<android.app.admin.FlagUnion> CREATOR;
+  }
+
+  public final class MostRestrictive<V> extends android.app.admin.ResolutionMechanism<V> {
+    method public int describeContents();
+    method public void writeToParcel(@NonNull android.os.Parcel, int);
+    field @NonNull public static final android.os.Parcelable.Creator<android.app.admin.MostRestrictive<?>> CREATOR;
+  }
+
+  public final class PolicyState<V> implements android.os.Parcelable {
+    method @NonNull public android.app.admin.ResolutionMechanism<V> getResolutionMechanism();
+  }
+
+  public abstract class ResolutionMechanism<V> implements android.os.Parcelable {
+  }
+
   public static final class SecurityLog.SecurityEvent implements android.os.Parcelable {
     ctor public SecurityLog.SecurityEvent(long, byte[]);
+  }
+
+  public final class StringSetUnion extends android.app.admin.ResolutionMechanism<java.util.Set<java.lang.String>> {
+    ctor public StringSetUnion();
+    method public int describeContents();
+    method public void writeToParcel(@NonNull android.os.Parcel, int);
+    field @NonNull public static final android.os.Parcelable.Creator<android.app.admin.StringSetUnion> CREATOR;
+  }
+
+  public final class TopPriority<V> extends android.app.admin.ResolutionMechanism<V> {
+    method public int describeContents();
+    method public void writeToParcel(@NonNull android.os.Parcel, int);
+    field @NonNull public static final android.os.Parcelable.Creator<android.app.admin.TopPriority<?>> CREATOR;
   }
 
   public final class UnsafeStateException extends java.lang.IllegalStateException implements android.os.Parcelable {

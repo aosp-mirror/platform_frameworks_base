@@ -14,18 +14,25 @@
  * limitations under the License.
  */
 
-package com.android.server.devicepolicy;
+package android.app.admin;
 
-import android.annotation.NonNull;
-import android.app.admin.PolicyValue;
+import android.annotation.SuppressLint;
+import android.annotation.TestApi;
+import android.os.Parcelable;
 
-import com.android.modules.utils.TypedXmlPullParser;
-import com.android.modules.utils.TypedXmlSerializer;
-
-import java.io.IOException;
-
-abstract class PolicySerializer<V> {
-    abstract void saveToXml(TypedXmlSerializer serializer, String attributeName, @NonNull V value)
-            throws IOException;
-    abstract PolicyValue<V> readFromXml(TypedXmlPullParser parser, String attributeName);
+/**
+ * Abstract class to identify a resolution mechanism that is used to resolve the enforced
+ * policy when being set by multiple admins (see {@link PolicyState#getResolutionMechanism()}).
+ *
+ * @hide
+ */
+// This is ok as the constructor is hidden and all subclasses have implemented
+// Parcelable.
+@SuppressLint({"ParcelNotFinal", "ParcelCreator"})
+@TestApi
+public abstract class ResolutionMechanism<V> implements Parcelable {
+    /**
+     * @hide
+     */
+    ResolutionMechanism(){}
 }
