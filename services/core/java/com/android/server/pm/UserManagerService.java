@@ -1476,20 +1476,15 @@ public class UserManagerService extends IUserManager.Stub {
     @Override
     public void revokeUserAdmin(@UserIdInt int userId) {
         checkManageUserAndAcrossUsersFullPermission("revoke admin privileges");
-
         synchronized (mPackagesLock) {
-            UserInfo info;
             synchronized (mUsersLock) {
-                info = getUserInfoLU(userId);
-            }
-            if (info == null || !info.isAdmin()) {
-                // Exit if no user found with that id, or the user is not an Admin.
-                return;
-            }
-
-            info.flags ^= UserInfo.FLAG_ADMIN;
-            synchronized (mUsersLock) {
-                writeUserLP(getUserDataLU(info.id));
+                UserData user = getUserDataLU(userId);
+                if (user == null || !user.info.isAdmin()) {
+                    // Exit if no user found with that id, or the user is not an Admin.
+                    return;
+                }
+                user.info.flags ^= UserInfo.FLAG_ADMIN;
+                writeUserLP(user);
             }
         }
     }
