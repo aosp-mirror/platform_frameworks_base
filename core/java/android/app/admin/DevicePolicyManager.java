@@ -3963,6 +3963,9 @@ public class DevicePolicyManager {
      * Called by a device owner, a profile owner of an organization-owned device or the system to
      * get the Memory Tagging Extension (MTE) policy
      *
+     * <a href="https://source.android.com/docs/security/test/memory-safety/arm-mte">
+     * Learn more about MTE</a>
+     *
      * @throws SecurityException if caller is not device owner or profile owner of org-owned device
      *                           or system uid, or if called on a parent instance
      * @return the currently set MTE policy
