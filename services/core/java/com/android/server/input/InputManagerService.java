@@ -70,6 +70,7 @@ import android.os.RemoteCallbackList;
 import android.os.RemoteException;
 import android.os.ResultReceiver;
 import android.os.ShellCallback;
+import android.os.SystemProperties;
 import android.os.UserHandle;
 import android.os.VibrationEffect;
 import android.os.vibrator.StepSegment;
@@ -157,6 +158,11 @@ public class InputManagerService extends IInputManager.Stub
     private static final int DEFAULT_VIBRATION_MAGNITUDE = 192;
     private static final AdditionalDisplayInputProperties
             DEFAULT_ADDITIONAL_DISPLAY_INPUT_PROPERTIES = new AdditionalDisplayInputProperties();
+
+    // To disable Keyboard backlight control via Framework, run:
+    // 'adb shell setprop persist.input.keyboard_backlight_control.enabled false' (requires restart)
+    private static final boolean KEYBOARD_BACKLIGHT_CONTROL_ENABLED = SystemProperties.getBoolean(
+            "persist.input.keyboard.backlight_control.enabled", true);
 
     private final NativeInputManagerService mNative;
 
@@ -305,7 +311,7 @@ public class InputManagerService extends IInputManager.Stub
     private final BatteryController mBatteryController;
 
     // Manages Keyboard backlight
-    private final KeyboardBacklightController mKeyboardBacklightController;
+    private final KeyboardBacklightControllerInterface mKeyboardBacklightController;
 
     // Manages Keyboard modifier keys remapping
     private final KeyRemapper mKeyRemapper;
@@ -422,8 +428,10 @@ public class InputManagerService extends IInputManager.Stub
         mKeyboardLayoutManager = new KeyboardLayoutManager(mContext, mNative, mDataStore,
                 injector.getLooper());
         mBatteryController = new BatteryController(mContext, mNative, injector.getLooper());
-        mKeyboardBacklightController = new KeyboardBacklightController(mContext, mNative,
-                mDataStore, injector.getLooper());
+        mKeyboardBacklightController =
+                KEYBOARD_BACKLIGHT_CONTROL_ENABLED ? new KeyboardBacklightController(mContext,
+                        mNative, mDataStore, injector.getLooper())
+                        : new KeyboardBacklightControllerInterface() {};
         mKeyRemapper = new KeyRemapper(mContext, mNative, mDataStore, injector.getLooper());
 
         mUseDevInputEventForAudioJack =
@@ -3477,5 +3485,14 @@ public class InputManagerService extends IInputManager.Stub
             }
             applyAdditionalDisplayInputPropertiesLocked(properties);
         }
+    }
+
+    interface KeyboardBacklightControllerInterface {
+        default void incrementKeyboardBacklight(int deviceId) {}
+        default void decrementKeyboardBacklight(int deviceId) {}
+        default void registerKeyboardBacklightListener(IKeyboardBacklightListener l, int pid) {}
+        default void unregisterKeyboardBacklightListener(IKeyboardBacklightListener l, int pid) {}
+        default void systemRunning() {}
+        default void dump(PrintWriter pw) {}
     }
 }
