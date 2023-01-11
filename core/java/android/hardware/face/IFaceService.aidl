@@ -43,7 +43,7 @@ interface IFaceService {
     byte[] dumpSensorServiceStateProto(int sensorId, boolean clearSchedulerBuffer);
 
     // Retrieve static sensor properties for all face sensors
-    @EnforcePermission("MANAGE_BIOMETRIC")
+    @EnforcePermission("USE_BIOMETRIC_INTERNAL")
     List<FaceSensorPropertiesInternal> getSensorPropertiesInternal(String opPackageName);
 
     // Retrieve static sensor properties for the specified sensor
