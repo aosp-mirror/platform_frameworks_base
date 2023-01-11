@@ -878,9 +878,14 @@ public class PackageInstallerService extends IPackageInstaller.Stub implements
             requestedInstallerPackageName = null;
         }
 
+        if (isApex || mContext.checkCallingOrSelfPermission(
+                Manifest.permission.ENFORCE_UPDATE_OWNERSHIP) == PackageManager.PERMISSION_DENIED) {
+            params.installFlags &= ~PackageManager.INSTALL_REQUEST_UPDATE_OWNERSHIP;
+        }
+
         InstallSource installSource = InstallSource.create(installerPackageName,
                 originatingPackageName, requestedInstallerPackageName, requestedInstallerPackageUid,
-                installerAttributionTag, params.packageSource);
+                requestedInstallerPackageName, installerAttributionTag, params.packageSource);
         session = new PackageInstallerSession(mInternalCallback, mContext, mPm, this,
                 mSilentUpdatePolicy, mInstallThread.getLooper(), mStagingManager, sessionId,
                 userId, callingUid, installSource, params, createdMillis, 0L, stageDir, stageCid,

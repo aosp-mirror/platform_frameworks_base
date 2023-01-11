@@ -311,10 +311,15 @@ final class InstallPackageHelper {
             pkgSetting.setForceQueryableOverride(true);
         }
 
-        // If this is part of a standard install, set the initiating package name, else rely on
-        // previous device state.
         InstallSource installSource = request.getInstallSource();
+        final boolean isApex = (scanFlags & SCAN_AS_APEX) != 0;
+        final String updateOwnerFromSysconfig = isApex || !pkgSetting.isSystem() ? null
+                : mPm.mInjector.getSystemConfig().getSystemAppUpdateOwnerPackageName(
+                        parsedPackage.getPackageName());
+        // For new install (standard install), the installSource isn't null.
         if (installSource != null) {
+            // If this is part of a standard install, set the initiating package name, else rely on
+            // previous device state.
             if (installSource.mInitiatingPackageName != null) {
                 final PackageSetting ips = mPm.mSettings.getPackageLPr(
                         installSource.mInitiatingPackageName);
@@ -323,7 +328,37 @@ final class InstallPackageHelper {
                             ips.getSignatures());
                 }
             }
+
+            // Handle the update ownership enforcement for APK
+            if (updateOwnerFromSysconfig != null) {
+                // For system app, we always use the update owner from sysconfig if presented.
+                installSource = installSource.setUpdateOwnerPackageName(updateOwnerFromSysconfig);
+            } else if (!isApex) {
+                final boolean isUpdate = oldPkgSetting != null;
+                final String oldUpdateOwner =
+                        isUpdate ? oldPkgSetting.getInstallSource().mUpdateOwnerPackageName : null;
+                final boolean isUpdateOwnershipEnabled = oldUpdateOwner != null;
+                final boolean isRequestUpdateOwnership = (request.getInstallFlags()
+                        & PackageManager.INSTALL_REQUEST_UPDATE_OWNERSHIP) != 0;
+
+                // Here we assign the update owner for the package, and the rules are:
+                // -. If the installer doesn't request update ownership on initial installation,
+                //    keep the update owner as null.
+                // -. If the installer doesn't want to be the owner to provide the subsequent
+                //    update (doesn't request to be the update owner), e.g., non-store installer
+                //    (file manager), ADB, or DO/PO, we should not update the owner.
+                // -. Else, the installer requests update ownership on initial installation or
+                //    update, we use installSource.mUpdateOwnerPackageName as the update owner.
+                if (!isRequestUpdateOwnership || (isUpdate && !isUpdateOwnershipEnabled)) {
+                    installSource = installSource.setUpdateOwnerPackageName(oldUpdateOwner);
+                }
+            }
+
             pkgSetting.setInstallSource(installSource);
+        // non-standard install (addForInit and install existing packages), installSource is null.
+        } else if (updateOwnerFromSysconfig != null) {
+            // For system app, we always use the update owner from sysconfig if presented.
+            pkgSetting.setUpdateOwnerPackage(updateOwnerFromSysconfig);
         }
 
         if ((scanFlags & SCAN_AS_APK_IN_APEX) != 0) {

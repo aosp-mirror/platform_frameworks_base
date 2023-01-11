@@ -89,6 +89,7 @@ public class SystemAppUpdateTrackerTest {
             /* initiatingPackageName = */ null, /* initiatingPackageSigningInfo = */ null,
             /* originatingPackageName = */ null,
             /* installingPackageName = */ DEFAULT_INSTALLER_PACKAGE_NAME,
+            /* updateOwnerPackageName = */ null,
             /* packageSource = */ PackageInstaller.PACKAGE_SOURCE_UNSPECIFIED);
 
     @Mock

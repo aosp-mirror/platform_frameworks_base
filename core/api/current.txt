@@ -88,6 +88,7 @@ package android {
     field public static final String DIAGNOSTIC = "android.permission.DIAGNOSTIC";
     field public static final String DISABLE_KEYGUARD = "android.permission.DISABLE_KEYGUARD";
     field public static final String DUMP = "android.permission.DUMP";
+    field public static final String ENFORCE_UPDATE_OWNERSHIP = "android.permission.ENFORCE_UPDATE_OWNERSHIP";
     field public static final String EXPAND_STATUS_BAR = "android.permission.EXPAND_STATUS_BAR";
     field public static final String FACTORY_TEST = "android.permission.FACTORY_TEST";
     field public static final String FOREGROUND_SERVICE = "android.permission.FOREGROUND_SERVICE";
@@ -11691,6 +11692,7 @@ package android.content.pm {
     method @Nullable public String getInstallingPackageName();
     method @Nullable public String getOriginatingPackageName();
     method public int getPackageSource();
+    method @Nullable public String getUpdateOwnerPackageName();
     method public void writeToParcel(@NonNull android.os.Parcel, int);
     field @NonNull public static final android.os.Parcelable.Creator<android.content.pm.InstallSourceInfo> CREATOR;
   }
@@ -11981,6 +11983,7 @@ package android.content.pm {
     method public int getParentSessionId();
     method public boolean isKeepApplicationEnabledSetting();
     method public boolean isMultiPackage();
+    method public boolean isRequestUpdateOwnership();
     method public boolean isStaged();
     method @NonNull public java.io.InputStream openRead(@NonNull String) throws java.io.IOException;
     method @NonNull public java.io.OutputStream openWrite(@NonNull String, long, long) throws java.io.IOException;
@@ -12036,6 +12039,7 @@ package android.content.pm {
     method public boolean isCommitted();
     method public boolean isKeepApplicationEnabledSetting();
     method public boolean isMultiPackage();
+    method public boolean isRequestUpdateOwnership();
     method public boolean isSealed();
     method public boolean isStaged();
     method public boolean isStagedSessionActive();
@@ -12074,6 +12078,7 @@ package android.content.pm {
     method public void setOriginatingUri(@Nullable android.net.Uri);
     method public void setPackageSource(int);
     method public void setReferrerUri(@Nullable android.net.Uri);
+    method @RequiresPermission(android.Manifest.permission.ENFORCE_UPDATE_OWNERSHIP) public void setRequestUpdateOwnership(boolean);
     method public void setRequireUserAction(int);
     method public void setSize(long);
     method public void setWhitelistedRestrictedPermissions(@Nullable java.util.Set<java.lang.String>);

@@ -3211,6 +3211,15 @@ class PackageManagerShellCommand extends ShellCommand {
                 case "--install-reason":
                     sessionParams.installReason = Integer.parseInt(getNextArg());
                     break;
+                case "--update-ownership":
+                    if (params.installerPackageName == null) {
+                        // Enabling update ownership enforcement needs an installer. Since the
+                        // default installer is null when using adb install, that effectively
+                        // disable this enforcement.
+                        params.installerPackageName = "com.android.shell";
+                    }
+                    sessionParams.installFlags |= PackageManager.INSTALL_REQUEST_UPDATE_OWNERSHIP;
+                    break;
                 case "--force-uuid":
                     sessionParams.installFlags |= PackageManager.INSTALL_FORCE_VOLUME_UUID;
                     sessionParams.volumeUuid = getNextArg();
@@ -4099,6 +4108,7 @@ class PackageManagerShellCommand extends ShellCommand {
         pw.println("      --install-reason: indicates why the app is being installed:");
         pw.println("          0=unknown, 1=admin policy, 2=device restore,");
         pw.println("          3=device setup, 4=user request");
+        pw.println("      --update-ownership: request the update ownership enforcement");
         pw.println("      --force-uuid: force install on to disk volume with given UUID");
         pw.println("      --apex: install an .apex file, not an .apk");
         pw.println("      --staged-ready-timeout: By default, staged sessions wait "
@@ -4122,7 +4132,7 @@ class PackageManagerShellCommand extends ShellCommand {
         pw.println("       [--referrer URI] [--abi ABI_NAME] [--force-sdk]");
         pw.println("       [--preload] [--instant] [--full] [--dont-kill]");
         pw.println("       [--force-uuid internal|UUID] [--pkg PACKAGE] [--apex] [-S BYTES]");
-        pw.println("       [--multi-package] [--staged]");
+        pw.println("       [--multi-package] [--staged] [--update-ownership]");
         pw.println("    Like \"install\", but starts an install session.  Use \"install-write\"");
         pw.println("    to push data into the session, and \"install-commit\" to finish.");
         pw.println("");
