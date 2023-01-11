@@ -16,6 +16,8 @@
 
 package com.android.wm.shell.bubbles;
 
+import static com.android.wm.shell.bubbles.Bubble.KEY_APP_BUBBLE;
+
 import static com.google.common.truth.Truth.assertThat;
 import static com.google.common.truth.Truth.assertWithMessage;
 
@@ -32,6 +34,7 @@ import static org.mockito.Mockito.when;
 
 import android.app.Notification;
 import android.app.PendingIntent;
+import android.content.Intent;
 import android.content.LocusId;
 import android.graphics.drawable.Icon;
 import android.os.Bundle;
@@ -94,6 +97,7 @@ public class BubbleDataTest extends ShellTestCase {
     private Bubble mBubbleInterruptive;
     private Bubble mBubbleDismissed;
     private Bubble mBubbleLocusId;
+    private Bubble mAppBubble;
 
     private BubbleData mBubbleData;
     private TestableBubblePositioner mPositioner;
@@ -178,6 +182,11 @@ public class BubbleDataTest extends ShellTestCase {
                 mBubbleMetadataFlagListener,
                 mPendingIntentCanceledListener,
                 mMainExecutor);
+
+        Intent appBubbleIntent = new Intent(mContext, BubblesTestActivity.class);
+        appBubbleIntent.setPackage(mContext.getPackageName());
+        mAppBubble = new Bubble(appBubbleIntent, new UserHandle(1), mMainExecutor);
+
         mPositioner = new TestableBubblePositioner(mContext,
                 mock(WindowManager.class));
         mBubbleData = new BubbleData(getContext(), mBubbleLogger, mPositioner,
@@ -1087,6 +1096,18 @@ public class BubbleDataTest extends ShellTestCase {
         // Verify no A bubbles in active or overflow.
         assertBubbleListContains(mBubbleC1, mBubbleB3);
         assertOverflowChangedTo(ImmutableList.of());
+    }
+
+    @Test
+    public void test_removeAppBubble_skipsOverflow() {
+        mBubbleData.notificationEntryUpdated(mAppBubble, true /* suppressFlyout*/,
+                false /* showInShade */);
+        assertThat(mBubbleData.getBubbleInStackWithKey(KEY_APP_BUBBLE)).isEqualTo(mAppBubble);
+
+        mBubbleData.dismissBubbleWithKey(KEY_APP_BUBBLE, Bubbles.DISMISS_USER_GESTURE);
+
+        assertThat(mBubbleData.getOverflowBubbleWithKey(KEY_APP_BUBBLE)).isNull();
+        assertThat(mBubbleData.getBubbleInStackWithKey(KEY_APP_BUBBLE)).isNull();
     }
 
     private void verifyUpdateReceived() {
