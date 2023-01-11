@@ -219,8 +219,10 @@ public class MockSystemServices {
 
         // Add the system user with a fake profile group already set up (this can happen in the real
         // world if a managed profile is added and then removed).
-        systemUserDataDir = addUser(UserHandle.USER_SYSTEM, UserInfo.FLAG_PRIMARY,
+        systemUserDataDir = addUser(UserHandle.USER_SYSTEM,
+                UserInfo.FLAG_PRIMARY | UserInfo.FLAG_MAIN,
                 UserManager.USER_TYPE_FULL_SYSTEM, UserHandle.USER_SYSTEM);
+        when(userManager.getMainUser()).thenReturn(UserHandle.SYSTEM);
 
         // System user is always running.
         setUserRunning(UserHandle.USER_SYSTEM, true);
