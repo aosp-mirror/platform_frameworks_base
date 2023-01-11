@@ -46,9 +46,7 @@ data class GetCredentialUiState(
   val isNoAccount: Boolean = false,
 )
 
-class GetCredentialViewModel(
-  credManRepo: CredentialManagerRepo = CredentialManagerRepo.getInstance()
-) : ViewModel() {
+class GetCredentialViewModel(private val credManRepo: CredentialManagerRepo) : ViewModel() {
 
   var uiState by mutableStateOf(credManRepo.getCredentialInitialUiState())
       private set
@@ -70,9 +68,7 @@ class GetCredentialViewModel(
         hidden = true,
       )
     } else {
-      CredentialManagerRepo.getInstance().onOptionSelected(
-        entry.providerId, entry.entryKey, entry.entrySubkey,
-      )
+      credManRepo.onOptionSelected(entry.providerId, entry.entryKey, entry.entrySubkey)
       dialogResult.tryEmit(DialogResult(ResultState.COMPLETE))
     }
   }
@@ -110,7 +106,7 @@ class GetCredentialViewModel(
                 "${entry.providerId}, key=${entry.entryKey}, subkey=${entry.entrySubkey}, " +
                 "resultCode=$resultCode, resultData=$resultData}"
         )
-        CredentialManagerRepo.getInstance().onOptionSelected(
+        credManRepo.onOptionSelected(
           entry.providerId, entry.entryKey, entry.entrySubkey,
           resultCode, resultData,
         )
@@ -144,7 +140,7 @@ class GetCredentialViewModel(
   }
 
   fun onCancel() {
-    CredentialManagerRepo.getInstance().onCancel()
+    credManRepo.onCancel()
     dialogResult.tryEmit(DialogResult(ResultState.NORMAL_CANCELED))
   }
 }

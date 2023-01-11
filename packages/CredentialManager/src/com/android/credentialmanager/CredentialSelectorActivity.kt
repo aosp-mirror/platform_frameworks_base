@@ -45,19 +45,19 @@ import kotlinx.coroutines.launch
 class CredentialSelectorActivity : ComponentActivity() {
   override fun onCreate(savedInstanceState: Bundle?) {
     super.onCreate(savedInstanceState)
-    CredentialManagerRepo.setup(this, intent)
+    val credManRepo = CredentialManagerRepo(this, intent)
     UserConfigRepo.setup(this)
-    val requestInfo = CredentialManagerRepo.getInstance().requestInfo
+    val requestInfo = credManRepo.requestInfo
     setContent {
       CredentialSelectorTheme {
-        CredentialManagerBottomSheet(DialogType.toDialogType(requestInfo.type))
+        CredentialManagerBottomSheet(DialogType.toDialogType(requestInfo.type), credManRepo)
       }
     }
   }
 
   @ExperimentalMaterialApi
   @Composable
-  fun CredentialManagerBottomSheet(dialogType: DialogType) {
+  fun CredentialManagerBottomSheet(dialogType: DialogType, credManRepo: CredentialManagerRepo) {
     val providerActivityResult = remember { mutableStateOf<ProviderActivityResult?>(null) }
     val launcher = rememberLauncherForActivityResult(
       ActivityResultContracts.StartIntentSenderForResult()
@@ -66,7 +66,9 @@ class CredentialSelectorActivity : ComponentActivity() {
     }
     when (dialogType) {
       DialogType.CREATE_PASSKEY -> {
-        val viewModel: CreateCredentialViewModel = viewModel()
+        val viewModel: CreateCredentialViewModel = viewModel{
+          CreateCredentialViewModel(credManRepo)
+        }
         lifecycleScope.launch {
           viewModel.observeDialogResult().collect{ dialogResult ->
             onCancel(dialogResult)
@@ -79,7 +81,9 @@ class CredentialSelectorActivity : ComponentActivity() {
         CreateCredentialScreen(viewModel = viewModel, providerActivityLauncher = launcher)
       }
       DialogType.GET_CREDENTIALS -> {
-        val viewModel: GetCredentialViewModel = viewModel()
+        val viewModel: GetCredentialViewModel = viewModel{
+          GetCredentialViewModel(credManRepo)
+        }
         lifecycleScope.launch {
           viewModel.observeDialogResult().collect{ dialogResult ->
             onCancel(dialogResult)
