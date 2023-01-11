@@ -45,6 +45,7 @@
 #include "SkVertices.h"
 #include "VectorDrawable.h"
 #include "include/gpu/GpuTypes.h" // from Skia
+#include "include/gpu/GrDirectContext.h"
 #include "pipeline/skia/AnimatedDrawables.h"
 #include "pipeline/skia/FunctorDrawable.h"
 
@@ -458,12 +459,43 @@ struct DrawVertices final : Op {
 struct DrawMesh final : Op {
     static const auto kType = Type::DrawMesh;
     DrawMesh(const SkMesh& mesh, sk_sp<SkBlender> blender, const SkPaint& paint)
-            : mesh(mesh), blender(std::move(blender)), paint(paint) {}
+            : cpuMesh(mesh), blender(std::move(blender)), paint(paint) {
+        isGpuBased = false;
+    }
 
-    SkMesh mesh;
+    SkMesh cpuMesh;
+    mutable SkMesh gpuMesh;
     sk_sp<SkBlender> blender;
     SkPaint paint;
-    void draw(SkCanvas* c, const SkMatrix&) const { c->drawMesh(mesh, blender, paint); }
+    mutable bool isGpuBased;
+    mutable GrDirectContext::DirectContextID contextId;
+    void draw(SkCanvas* c, const SkMatrix&) const {
+        GrDirectContext* directContext = c->recordingContext()->asDirectContext();
+        GrDirectContext::DirectContextID id = directContext->directContextID();
+        if (!isGpuBased || contextId != id) {
+            sk_sp<SkMesh::VertexBuffer> vb =
+                    SkMesh::CopyVertexBuffer(directContext, cpuMesh.refVertexBuffer());
+            if (!cpuMesh.indexBuffer()) {
+                gpuMesh = SkMesh::Make(cpuMesh.refSpec(), cpuMesh.mode(), vb, cpuMesh.vertexCount(),
+                                       cpuMesh.vertexOffset(), cpuMesh.refUniforms(),
+                                       cpuMesh.bounds())
+                                  .mesh;
+            } else {
+                sk_sp<SkMesh::IndexBuffer> ib =
+                        SkMesh::CopyIndexBuffer(directContext, cpuMesh.refIndexBuffer());
+                gpuMesh = SkMesh::MakeIndexed(cpuMesh.refSpec(), cpuMesh.mode(), vb,
+                                              cpuMesh.vertexCount(), cpuMesh.vertexOffset(), ib,
+                                              cpuMesh.indexCount(), cpuMesh.indexOffset(),
+                                              cpuMesh.refUniforms(), cpuMesh.bounds())
+                                  .mesh;
+            }
+
+            isGpuBased = true;
+            contextId = id;
+        }
+
+        c->drawMesh(gpuMesh, blender, paint);
+    }
 };
 struct DrawAtlas final : Op {
     static const auto kType = Type::DrawAtlas;
