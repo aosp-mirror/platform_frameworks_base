@@ -41,7 +41,9 @@ public class RecoverySnapshotListenersStorageTest {
         int recoveryAgentUid = 1000;
         PendingIntent intent = PendingIntent.getBroadcast(
                 InstrumentationRegistry.getTargetContext(), /*requestCode=*/ 1,
-                new Intent(), /*flags=*/ PendingIntent.FLAG_MUTABLE_UNAUDITED);
+                new Intent()
+                        .setPackage(InstrumentationRegistry.getTargetContext().getPackageName()),
+                /*flags=*/ PendingIntent.FLAG_MUTABLE);
         mStorage.setSnapshotListener(recoveryAgentUid, intent);
 
         assertTrue(mStorage.hasListener(recoveryAgentUid));
@@ -54,7 +56,9 @@ public class RecoverySnapshotListenersStorageTest {
         int recoveryAgentUid = 1000;
         mStorage.recoverySnapshotAvailable(recoveryAgentUid);
         PendingIntent intent = PendingIntent.getBroadcast(
-                context, /*requestCode=*/ 0, new Intent(TEST_INTENT_ACTION), /*flags=*/PendingIntent.FLAG_MUTABLE_UNAUDITED);
+                context, /*requestCode=*/ 0,
+                new Intent(TEST_INTENT_ACTION).setPackage(context.getPackageName()),
+                /*flags=*/PendingIntent.FLAG_MUTABLE);
         CountDownLatch latch = new CountDownLatch(1);
         context.registerReceiver(new BroadcastReceiver() {
             @Override
@@ -75,7 +79,9 @@ public class RecoverySnapshotListenersStorageTest {
         int recoveryAgentUid = 1000;
         mStorage.recoverySnapshotAvailable(recoveryAgentUid);
         PendingIntent intent = PendingIntent.getBroadcast(
-                context, /*requestCode=*/ 0, new Intent(TEST_INTENT_ACTION), /*flags=*/PendingIntent.FLAG_MUTABLE_UNAUDITED);
+                context, /*requestCode=*/ 0,
+                new Intent(TEST_INTENT_ACTION).setPackage(context.getPackageName()),
+                /*flags=*/PendingIntent.FLAG_MUTABLE);
         CountDownLatch latch = new CountDownLatch(2);
         BroadcastReceiver broadcastReceiver = new BroadcastReceiver() {
             @Override

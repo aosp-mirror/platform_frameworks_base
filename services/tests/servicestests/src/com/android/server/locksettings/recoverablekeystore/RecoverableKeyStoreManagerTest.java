@@ -1073,7 +1073,9 @@ public class RecoverableKeyStoreManagerTest {
         int uid = Binder.getCallingUid();
         PendingIntent intent = PendingIntent.getBroadcast(
                 InstrumentationRegistry.getTargetContext(), /*requestCode=*/1,
-                new Intent(), /*flags=*/ PendingIntent.FLAG_MUTABLE_UNAUDITED);
+                new Intent()
+                        .setPackage(InstrumentationRegistry.getTargetContext().getPackageName()),
+                /*flags=*/ PendingIntent.FLAG_MUTABLE);
         mRecoverableKeyStoreManager.setSnapshotCreatedPendingIntent(intent);
         verify(mMockListenersStorage).setSnapshotListener(eq(uid), any(PendingIntent.class));
     }
