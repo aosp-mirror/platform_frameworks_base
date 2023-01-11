@@ -423,6 +423,21 @@ public class LockSettingsServiceTests extends BaseLockSettingsServiceTests {
         checkPasswordHistoryLength(userId, 3);
     }
 
+    @Test(expected=NullPointerException.class)
+    public void testSetBooleanRejectsNullKey() {
+        mService.setBoolean(null, false, 0);
+    }
+
+    @Test(expected=NullPointerException.class)
+    public void testSetLongRejectsNullKey() {
+        mService.setLong(null, 0, 0);
+    }
+
+    @Test(expected=NullPointerException.class)
+    public void testSetStringRejectsNullKey() {
+        mService.setString(null, "value", 0);
+    }
+
     private void checkPasswordHistoryLength(int userId, int expectedLen) {
         String history = mService.getString(LockPatternUtils.PASSWORD_HISTORY_KEY, "", userId);
         String[] hashes = TextUtils.split(history, LockPatternUtils.PASSWORD_HISTORY_DELIMITER);
