@@ -30,6 +30,7 @@ import com.android.server.SystemConfig;
 import com.android.server.compat.PlatformCompat;
 import com.android.server.pm.dex.ArtManagerService;
 import com.android.server.pm.dex.DexManager;
+import com.android.server.pm.dex.DynamicCodeLogger;
 import com.android.server.pm.dex.ViewCompiler;
 import com.android.server.pm.parsing.PackageParser2;
 import com.android.server.pm.permission.LegacyPermissionManagerInternal;
@@ -106,6 +107,7 @@ public class PackageManagerServiceInjector {
     private final Singleton<PackageDexOptimizer>
             mPackageDexOptimizerProducer;
     private final Singleton<DexManager> mDexManagerProducer;
+    private final Singleton<DynamicCodeLogger> mDynamicCodeLoggerProducer;
     private final Singleton<ArtManagerService>
             mArtManagerServiceProducer;
     private final Singleton<ApexManager> mApexManagerProducer;
@@ -154,6 +156,7 @@ public class PackageManagerServiceInjector {
             Producer<SystemConfig> systemConfigProducer,
             Producer<PackageDexOptimizer> packageDexOptimizerProducer,
             Producer<DexManager> dexManagerProducer,
+            Producer<DynamicCodeLogger> dynamicCodeLoggerProducer,
             Producer<ArtManagerService> artManagerServiceProducer,
             Producer<ApexManager> apexManagerProducer,
             Producer<ViewCompiler> viewCompilerProducer,
@@ -200,6 +203,7 @@ public class PackageManagerServiceInjector {
         mPackageDexOptimizerProducer = new Singleton<>(
                 packageDexOptimizerProducer);
         mDexManagerProducer = new Singleton<>(dexManagerProducer);
+        mDynamicCodeLoggerProducer = new Singleton<>(dynamicCodeLoggerProducer);
         mArtManagerServiceProducer = new Singleton<>(
                 artManagerServiceProducer);
         mApexManagerProducer = new Singleton<>(apexManagerProducer);
@@ -312,6 +316,10 @@ public class PackageManagerServiceInjector {
 
     public DexManager getDexManager() {
         return mDexManagerProducer.get(this, mPackageManager);
+    }
+
+    public DynamicCodeLogger getDynamicCodeLogger() {
+        return mDynamicCodeLoggerProducer.get(this, mPackageManager);
     }
 
     public ArtManagerService getArtManagerService() {
