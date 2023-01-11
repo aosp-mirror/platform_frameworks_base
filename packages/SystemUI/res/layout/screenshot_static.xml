@@ -93,13 +93,10 @@
         app:layout_constraintBottom_toBottomOf="@id/screenshot_preview_border"/>
     <ImageView
         android:id="@+id/screenshot_badge"
-        android:layout_width="24dp"
-        android:layout_height="24dp"
-        android:padding="4dp"
+        android:layout_width="48dp"
+        android:layout_height="48dp"
         android:visibility="gone"
-        android:background="@drawable/overlay_badge_background"
         android:elevation="8dp"
-        android:src="@drawable/overlay_cancel"
         app:layout_constraintBottom_toBottomOf="@id/screenshot_preview_border"
         app:layout_constraintEnd_toEndOf="@id/screenshot_preview_border"/>
     <FrameLayout
