@@ -127,42 +127,4 @@ class LaunchBubbleFromLockScreen(flicker: FlickerTest) : BaseBubbleScreen(flicke
         Assume.assumeTrue(flicker.scenario.isGesturalNavigation)
         super.navBarWindowIsAlwaysVisible()
     }
-
-    /** {@inheritDoc} */
-    @FlakyTest(bugId = 242088970)
-    @Test
-    override fun taskBarLayerIsVisibleAtStartAndEnd() = super.taskBarLayerIsVisibleAtStartAndEnd()
-
-    /** {@inheritDoc} */
-    @Postsubmit
-    @Test
-    override fun taskBarWindowIsAlwaysVisible() = super.taskBarWindowIsAlwaysVisible()
-
-    /** {@inheritDoc} */
-    @FlakyTest(bugId = 242088970)
-    @Test
-    override fun statusBarLayerIsVisibleAtStartAndEnd() =
-        super.statusBarLayerIsVisibleAtStartAndEnd()
-
-    /** {@inheritDoc} */
-    @FlakyTest(bugId = 242088970)
-    @Test
-    override fun statusBarLayerPositionAtStartAndEnd() = super.statusBarLayerPositionAtStartAndEnd()
-
-    /** {@inheritDoc} */
-    @FlakyTest(bugId = 242088970)
-    @Test
-    override fun statusBarWindowIsAlwaysVisible() = super.statusBarWindowIsAlwaysVisible()
-
-    /** {@inheritDoc} */
-    @FlakyTest(bugId = 242088970)
-    @Test
-    override fun visibleWindowsShownMoreThanOneConsecutiveEntry() =
-        super.visibleWindowsShownMoreThanOneConsecutiveEntry()
-
-    @FlakyTest(bugId = 251217773)
-    @Test
-    override fun entireScreenCovered() {
-        super.entireScreenCovered()
-    }
 }
