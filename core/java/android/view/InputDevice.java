@@ -446,6 +446,7 @@ public final class InputDevice implements Parcelable {
      */
     public static final int KEYBOARD_TYPE_ALPHABETIC = 2;
 
+    // Cap motion ranges to prevent attacks (b/25637534)
     private static final int MAX_RANGES = 1000;
 
     private static final int VIBRATOR_ID_ALL = -1;
