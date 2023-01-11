@@ -5050,7 +5050,10 @@ public class PackageManagerService extends IPackageManager.Stub
             }
             if (pi != null) {
                 try {
-                    pi.sendIntent(null, success ? 1 : 0, null, null, null);
+                    final BroadcastOptions options = BroadcastOptions.makeBasic();
+                    options.setPendingIntentBackgroundActivityLaunchAllowed(false);
+                    pi.sendIntent(null, success ? 1 : 0, null /* intent */, null /* onFinished*/,
+                            null /* handler */, null /* requiredPermission */, options.toBundle());
                 } catch (SendIntentException e) {
                     Slog.w(TAG, e);
                 }
@@ -13309,7 +13312,10 @@ public class PackageManagerService extends IPackageManager.Stub
         fillIn.putExtra(PackageInstaller.EXTRA_STATUS,
                 PackageManager.installStatusToPublicStatus(returnCode));
         try {
-            target.sendIntent(context, 0, fillIn, null, null);
+            final BroadcastOptions options = BroadcastOptions.makeBasic();
+            options.setPendingIntentBackgroundActivityLaunchAllowed(false);
+            target.sendIntent(context, 0, fillIn, null /* onFinished*/,
+                    null /* handler */, null /* requiredPermission */, options.toBundle());
         } catch (SendIntentException ignored) {
         }
     }
