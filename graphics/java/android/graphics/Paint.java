@@ -3151,10 +3151,10 @@ public class Paint {
      * @see #getRunAdvance(char[], int, int, int, int, boolean, int) for more details.
      *
      * @param text the text to measure. Cannot be null.
-     * @param start the index of the start of the range to measure
-     * @param end the index + 1 of the end of the range to measure
-     * @param contextStart the index of the start of the shaping context
-     * @param contextEnd the index + 1 of the end of the shaping context
+     * @param start the start index of the range to measure, inclusive
+     * @param end the end index of the range to measure, exclusive
+     * @param contextStart the start index of the shaping context, inclusive
+     * @param contextEnd the end index of the shaping context, exclusive
      * @param isRtl whether the run is in RTL direction
      * @param offset index of caret position
      * @param advances the array that receives the computed character advances
