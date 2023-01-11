@@ -21,10 +21,12 @@ import android.os.OperationCanceledException;
 import android.os.OutcomeReceiver;
 import android.security.rkp.IGetKeyCallback;
 import android.security.rkp.IRegistration;
+import android.security.rkp.IStoreUpgradedKeyCallback;
 import android.security.rkp.service.RegistrationProxy;
 import android.security.rkp.service.RemotelyProvisionedKey;
 import android.util.Log;
 
+import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.Executor;
 
@@ -36,8 +38,10 @@ import java.util.concurrent.Executor;
  */
 final class RemoteProvisioningRegistration extends IRegistration.Stub {
     static final String TAG = RemoteProvisioningService.TAG;
-    private final ConcurrentHashMap<IGetKeyCallback, CancellationSignal> mOperations =
+    private final ConcurrentHashMap<IGetKeyCallback, CancellationSignal> mGetKeyOperations =
             new ConcurrentHashMap<>();
+    private final Set<IStoreUpgradedKeyCallback> mStoreUpgradedKeyOperations =
+            ConcurrentHashMap.newKeySet();
     private final RegistrationProxy mRegistration;
     private final Executor mExecutor;
 
@@ -49,7 +53,7 @@ final class RemoteProvisioningRegistration extends IRegistration.Stub {
 
         @Override
         public void onResult(RemotelyProvisionedKey result) {
-            mOperations.remove(mCallback);
+            mGetKeyOperations.remove(mCallback);
             Log.i(TAG, "Successfully fetched key for client " + mCallback.hashCode());
             android.security.rkp.RemotelyProvisionedKey parcelable =
                     new android.security.rkp.RemotelyProvisionedKey();
@@ -60,7 +64,7 @@ final class RemoteProvisioningRegistration extends IRegistration.Stub {
 
         @Override
         public void onError(Exception e) {
-            mOperations.remove(mCallback);
+            mGetKeyOperations.remove(mCallback);
             if (e instanceof OperationCanceledException) {
                 Log.i(TAG, "Operation cancelled for client " + mCallback.hashCode());
                 wrapCallback(mCallback::onCancel);
@@ -79,7 +83,7 @@ final class RemoteProvisioningRegistration extends IRegistration.Stub {
     @Override
     public void getKey(int keyId, IGetKeyCallback callback) {
         CancellationSignal cancellationSignal = new CancellationSignal();
-        if (mOperations.putIfAbsent(callback, cancellationSignal) != null) {
+        if (mGetKeyOperations.putIfAbsent(callback, cancellationSignal) != null) {
             Log.e(TAG, "Client can only request one call at a time " + callback.hashCode());
             throw new IllegalArgumentException(
                     "Callback is already associated with an existing operation: "
@@ -92,14 +96,14 @@ final class RemoteProvisioningRegistration extends IRegistration.Stub {
                     new GetKeyReceiver(callback));
         } catch (Exception e) {
             Log.e(TAG, "getKeyAsync threw an exception for client " + callback.hashCode(), e);
-            mOperations.remove(callback);
+            mGetKeyOperations.remove(callback);
             wrapCallback(() -> callback.onError(e.getMessage()));
         }
     }
 
     @Override
     public void cancelGetKey(IGetKeyCallback callback) {
-        CancellationSignal cancellationSignal = mOperations.remove(callback);
+        CancellationSignal cancellationSignal = mGetKeyOperations.remove(callback);
         if (cancellationSignal == null) {
             throw new IllegalArgumentException(
                     "Invalid client in cancelGetKey: " + callback.hashCode());
@@ -110,9 +114,35 @@ final class RemoteProvisioningRegistration extends IRegistration.Stub {
     }
 
     @Override
-    public void storeUpgradedKey(byte[] oldKeyBlob, byte[] newKeyBlob) {
-        // TODO(b/262748535)
-        Log.e(TAG, "RegistrationBinder.storeUpgradedKey NOT YET IMPLEMENTED");
+    public void storeUpgradedKeyAsync(byte[] oldKeyBlob, byte[] newKeyBlob,
+            IStoreUpgradedKeyCallback callback) {
+        if (!mStoreUpgradedKeyOperations.add(callback)) {
+            throw new IllegalArgumentException(
+                    "Callback is already associated with an existing operation: "
+                            + callback.hashCode());
+        }
+
+        try {
+            mRegistration.storeUpgradedKeyAsync(oldKeyBlob, newKeyBlob, mExecutor,
+                    new OutcomeReceiver<>() {
+                        @Override
+                        public void onResult(Void result) {
+                            mStoreUpgradedKeyOperations.remove(callback);
+                            wrapCallback(callback::onSuccess);
+                        }
+
+                        @Override
+                        public void onError(Exception e) {
+                            mStoreUpgradedKeyOperations.remove(callback);
+                            wrapCallback(() -> callback.onError(e.getMessage()));
+                        }
+                    });
+        } catch (Exception e) {
+            Log.e(TAG, "storeUpgradedKeyAsync threw an exception for client "
+                    + callback.hashCode(), e);
+            mStoreUpgradedKeyOperations.remove(callback);
+            wrapCallback(() -> callback.onError(e.getMessage()));
+        }
     }
 
     interface CallbackRunner {
