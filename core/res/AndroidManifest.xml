@@ -6652,7 +6652,7 @@
     <permission android:name="android.permission.USE_FULL_SCREEN_INTENT"
                 android:label="@string/permlab_fullScreenIntent"
                 android:description="@string/permdesc_fullScreenIntent"
-                android:protectionLevel="normal" />
+                android:protectionLevel="normal|appop" />
 
     <!-- @SystemApi Allows requesting the framework broadcast the
          {@link Intent#ACTION_DEVICE_CUSTOMIZATION_READY} intent.

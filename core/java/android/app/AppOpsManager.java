@@ -1454,9 +1454,16 @@ public class AppOpsManager {
     public static final int OP_BODY_SENSORS_WRIST_TEMPERATURE =
             AppProtoEnums.APP_OP_BODY_SENSORS_WRIST_TEMPERATURE;
 
+    /**
+     * Send an intent to launch instead of posting the notification to the status bar.
+     *
+     * @hide
+     */
+    public static final int OP_USE_FULL_SCREEN_INTENT = AppProtoEnums.APP_OP_USE_FULL_SCREEN_INTENT;
+
     /** @hide */
     @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
-    public static final int _NUM_OP = 133;
+    public static final int _NUM_OP = 134;
 
     /** Access to coarse location information. */
     public static final String OPSTR_COARSE_LOCATION = "android:coarse_location";
@@ -2043,6 +2050,13 @@ public class AppOpsManager {
     public static final String OPSTR_BODY_SENSORS_WRIST_TEMPERATURE =
             "android:body_sensors_wrist_temperature";
 
+    /**
+     * Send an intent to launch instead of posting the notification to the status bar.
+     *
+     * @hide
+     */
+    public static final String OPSTR_USE_FULL_SCREEN_INTENT = "android:use_full_screen_intent";
+
     /** {@link #sAppOpsToNote} not initialized yet for this op */
     private static final byte SHOULD_COLLECT_NOTE_OP_NOT_INITIALIZED = 0;
     /** Should not collect noting of this app-op in {@link #sAppOpsToNote} */
@@ -2142,6 +2156,7 @@ public class AppOpsManager {
             OP_FOREGROUND_SERVICE_SPECIAL_USE,
             OP_CAPTURE_CONSENTLESS_BUGREPORT_ON_USERDEBUG_BUILD,
             OP_BODY_SENSORS_WRIST_TEMPERATURE,
+            OP_USE_FULL_SCREEN_INTENT
     };
 
     static final AppOpInfo[] sAppOpInfos = new AppOpInfo[]{
@@ -2560,7 +2575,10 @@ public class AppOpsManager {
                 OPSTR_BODY_SENSORS_WRIST_TEMPERATURE,
                 "BODY_SENSORS_WRIST_TEMPERATURE")
                 .setPermission(Manifest.permission.BODY_SENSORS_WRIST_TEMPERATURE)
-                .setDefaultMode(AppOpsManager.MODE_ALLOWED).build()
+                .setDefaultMode(AppOpsManager.MODE_ALLOWED).build(),
+        new AppOpInfo.Builder(OP_USE_FULL_SCREEN_INTENT, OPSTR_USE_FULL_SCREEN_INTENT,
+                "USE_FULL_SCREEN_INTENT").setPermission(Manifest.permission.USE_FULL_SCREEN_INTENT)
+                .build()
     };
 
     // The number of longs needed to form a full bitmask of app ops
