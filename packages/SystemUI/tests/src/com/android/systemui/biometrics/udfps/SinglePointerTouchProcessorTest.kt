@@ -221,6 +221,14 @@ class SinglePointerTouchProcessorTest(val testCase: TestCase) : SysuiTestCase() 
 private const val ROTATION_0_NATIVE_DISPLAY_WIDTH = 400
 private const val ROTATION_0_NATIVE_DISPLAY_HEIGHT = 600
 
+/* Placeholder touch parameters. */
+private const val POINTER_ID = 42
+private const val NATIVE_MINOR = 2.71828f
+private const val NATIVE_MAJOR = 3.14f
+private const val ORIENTATION = 1.2345f
+private const val TIME = 12345699L
+private const val GESTURE_START = 12345600L
+
 /*
  * ROTATION_0 map:
  * _ _ _ _
@@ -244,6 +252,7 @@ private val ROTATION_0_NATIVE_SENSOR_BOUNDS =
 private val ROTATION_0_INPUTS =
     OrientationBasedInputs(
         rotation = Surface.ROTATION_0,
+        nativeOrientation = ORIENTATION,
         nativeXWithinSensor = ROTATION_0_NATIVE_SENSOR_BOUNDS.exactCenterX(),
         nativeYWithinSensor = ROTATION_0_NATIVE_SENSOR_BOUNDS.exactCenterY(),
         nativeXOutsideSensor = 250f,
@@ -271,6 +280,7 @@ private val ROTATION_90_NATIVE_SENSOR_BOUNDS =
 private val ROTATION_90_INPUTS =
     OrientationBasedInputs(
         rotation = Surface.ROTATION_90,
+        nativeOrientation = (ORIENTATION - Math.PI.toFloat() / 2),
         nativeXWithinSensor = ROTATION_90_NATIVE_SENSOR_BOUNDS.exactCenterX(),
         nativeYWithinSensor = ROTATION_90_NATIVE_SENSOR_BOUNDS.exactCenterY(),
         nativeXOutsideSensor = 150f,
@@ -304,19 +314,12 @@ private val ROTATION_270_NATIVE_SENSOR_BOUNDS =
 private val ROTATION_270_INPUTS =
     OrientationBasedInputs(
         rotation = Surface.ROTATION_270,
+        nativeOrientation = (ORIENTATION + Math.PI.toFloat() / 2),
         nativeXWithinSensor = ROTATION_270_NATIVE_SENSOR_BOUNDS.exactCenterX(),
         nativeYWithinSensor = ROTATION_270_NATIVE_SENSOR_BOUNDS.exactCenterY(),
         nativeXOutsideSensor = 450f,
         nativeYOutsideSensor = 250f,
     )
-
-/* Placeholder touch parameters. */
-private const val POINTER_ID = 42
-private const val NATIVE_MINOR = 2.71828f
-private const val NATIVE_MAJOR = 3.14f
-private const val ORIENTATION = 1.23f
-private const val TIME = 12345699L
-private const val GESTURE_START = 12345600L
 
 /* Template [MotionEvent]. */
 private val MOTION_EVENT =
@@ -352,6 +355,7 @@ private val NORMALIZED_TOUCH_DATA =
  */
 private data class OrientationBasedInputs(
     @Rotation val rotation: Int,
+    val nativeOrientation: Float,
     val nativeXWithinSensor: Float,
     val nativeYWithinSensor: Float,
     val nativeXOutsideSensor: Float,
@@ -404,6 +408,7 @@ private fun genPositiveTestCases(
                     y = nativeY * scaleFactor,
                     minor = NATIVE_MINOR * scaleFactor,
                     major = NATIVE_MAJOR * scaleFactor,
+                    orientation = orientation.nativeOrientation
                 )
             val expectedTouchData =
                 NORMALIZED_TOUCH_DATA.copy(
