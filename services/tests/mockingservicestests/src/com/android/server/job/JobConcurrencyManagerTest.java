@@ -30,6 +30,7 @@ import static com.android.server.job.JobConcurrencyManager.WORK_TYPE_EJ;
 import static com.android.server.job.JobConcurrencyManager.WORK_TYPE_FGS;
 import static com.android.server.job.JobConcurrencyManager.WORK_TYPE_NONE;
 import static com.android.server.job.JobConcurrencyManager.WORK_TYPE_TOP;
+import static com.android.server.job.JobConcurrencyManager.WORK_TYPE_UI;
 
 import static junit.framework.Assert.assertEquals;
 import static junit.framework.Assert.assertFalse;
@@ -854,6 +855,9 @@ public final class JobConcurrencyManagerTest {
                     break;
                 case WORK_TYPE_FGS:
                     workTypeString = "fgs";
+                    break;
+                case WORK_TYPE_UI:
+                    workTypeString = "ui";
                     break;
                 case WORK_TYPE_EJ:
                     workTypeString = "ej";

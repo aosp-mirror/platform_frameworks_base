@@ -158,33 +158,37 @@ class JobConcurrencyManager {
      * state (excluding {@link ActivityManager#PROCESS_STATE_TOP} for a currently active user.
      */
     static final int WORK_TYPE_FGS = 1 << 1;
+    /** The job is allowed to run as a user-initiated job for a currently active user. */
+    static final int WORK_TYPE_UI = 1 << 2;
     /** The job is allowed to run as an expedited job for a currently active user. */
-    static final int WORK_TYPE_EJ = 1 << 2;
+    static final int WORK_TYPE_EJ = 1 << 3;
     /**
      * The job does not satisfy any of the conditions for {@link #WORK_TYPE_TOP},
      * {@link #WORK_TYPE_FGS}, or {@link #WORK_TYPE_EJ}, but is for a currently active user, so
      * can run as a background job.
      */
-    static final int WORK_TYPE_BG = 1 << 3;
+    static final int WORK_TYPE_BG = 1 << 4;
     /**
      * The job is for an app in a {@link ActivityManager#PROCESS_STATE_FOREGROUND_SERVICE} or higher
-     * state, or is allowed to run as an expedited job, but is for a completely background user.
+     * state, or is allowed to run as an expedited or user-initiated job,
+     * but is for a completely background user.
      */
-    static final int WORK_TYPE_BGUSER_IMPORTANT = 1 << 4;
+    static final int WORK_TYPE_BGUSER_IMPORTANT = 1 << 5;
     /**
      * The job does not satisfy any of the conditions for {@link #WORK_TYPE_TOP},
      * {@link #WORK_TYPE_FGS}, or {@link #WORK_TYPE_EJ}, but is for a completely background user,
      * so can run as a background user job.
      */
-    static final int WORK_TYPE_BGUSER = 1 << 5;
+    static final int WORK_TYPE_BGUSER = 1 << 6;
     @VisibleForTesting
-    static final int NUM_WORK_TYPES = 6;
+    static final int NUM_WORK_TYPES = 7;
     private static final int ALL_WORK_TYPES = (1 << NUM_WORK_TYPES) - 1;
 
     @IntDef(prefix = {"WORK_TYPE_"}, flag = true, value = {
             WORK_TYPE_NONE,
             WORK_TYPE_TOP,
             WORK_TYPE_FGS,
+            WORK_TYPE_UI,
             WORK_TYPE_EJ,
             WORK_TYPE_BG,
             WORK_TYPE_BGUSER_IMPORTANT,
@@ -203,6 +207,8 @@ class JobConcurrencyManager {
                 return "TOP";
             case WORK_TYPE_FGS:
                 return "FGS";
+            case WORK_TYPE_UI:
+                return "UI";
             case WORK_TYPE_EJ:
                 return "EJ";
             case WORK_TYPE_BG:
@@ -238,8 +244,9 @@ class JobConcurrencyManager {
                             // defaultMin
                             List.of(Pair.create(WORK_TYPE_TOP, .4f),
                                     Pair.create(WORK_TYPE_FGS, .2f),
-                                    Pair.create(WORK_TYPE_EJ, .2f), Pair.create(WORK_TYPE_BG, .1f),
-                                    Pair.create(WORK_TYPE_BGUSER_IMPORTANT, .1f)),
+                                    Pair.create(WORK_TYPE_UI, .1f),
+                                    Pair.create(WORK_TYPE_EJ, .1f), Pair.create(WORK_TYPE_BG, .05f),
+                                    Pair.create(WORK_TYPE_BGUSER_IMPORTANT, .05f)),
                             // defaultMax
                             List.of(Pair.create(WORK_TYPE_BG, .5f),
                                     Pair.create(WORK_TYPE_BGUSER_IMPORTANT, .25f),
@@ -250,6 +257,7 @@ class JobConcurrencyManager {
                             // defaultMin
                             List.of(Pair.create(WORK_TYPE_TOP, .4f),
                                     Pair.create(WORK_TYPE_FGS, .1f),
+                                    Pair.create(WORK_TYPE_UI, .1f),
                                     Pair.create(WORK_TYPE_EJ, .1f), Pair.create(WORK_TYPE_BG, .1f),
                                     Pair.create(WORK_TYPE_BGUSER_IMPORTANT, .1f)),
                             // defaultMax
@@ -260,8 +268,9 @@ class JobConcurrencyManager {
                     new WorkTypeConfig("screen_on_low", DEFAULT_CONCURRENCY_LIMIT,
                             /* defaultMaxTotal */  DEFAULT_CONCURRENCY_LIMIT * 4 / 10,
                             // defaultMin
-                            List.of(Pair.create(WORK_TYPE_TOP, 2.0f / 3),
+                            List.of(Pair.create(WORK_TYPE_TOP, .6f),
                                     Pair.create(WORK_TYPE_FGS, .1f),
+                                    Pair.create(WORK_TYPE_UI, .1f),
                                     Pair.create(WORK_TYPE_EJ, .1f)),
                             // defaultMax
                             List.of(Pair.create(WORK_TYPE_BG, 1.0f / 3),
@@ -271,9 +280,10 @@ class JobConcurrencyManager {
                     new WorkTypeConfig("screen_on_critical", DEFAULT_CONCURRENCY_LIMIT,
                             /* defaultMaxTotal */  DEFAULT_CONCURRENCY_LIMIT * 4 / 10,
                             // defaultMin
-                            List.of(Pair.create(WORK_TYPE_TOP, 2.0f / 3),
+                            List.of(Pair.create(WORK_TYPE_TOP, .7f),
                                     Pair.create(WORK_TYPE_FGS, .1f),
-                                    Pair.create(WORK_TYPE_EJ, .1f)),
+                                    Pair.create(WORK_TYPE_UI, .1f),
+                                    Pair.create(WORK_TYPE_EJ, .05f)),
                             // defaultMax
                             List.of(Pair.create(WORK_TYPE_BG, 1.0f / 6),
                                     Pair.create(WORK_TYPE_BGUSER_IMPORTANT, 1.0f / 6),
@@ -287,8 +297,9 @@ class JobConcurrencyManager {
                             // defaultMin
                             List.of(Pair.create(WORK_TYPE_TOP, .3f),
                                     Pair.create(WORK_TYPE_FGS, .2f),
-                                    Pair.create(WORK_TYPE_EJ, .3f), Pair.create(WORK_TYPE_BG, .2f),
-                                    Pair.create(WORK_TYPE_BGUSER_IMPORTANT, .1f)),
+                                    Pair.create(WORK_TYPE_UI, .2f),
+                                    Pair.create(WORK_TYPE_EJ, .15f), Pair.create(WORK_TYPE_BG, .1f),
+                                    Pair.create(WORK_TYPE_BGUSER_IMPORTANT, .05f)),
                             // defaultMax
                             List.of(Pair.create(WORK_TYPE_BG, .6f),
                                     Pair.create(WORK_TYPE_BGUSER_IMPORTANT, .2f),
@@ -299,8 +310,9 @@ class JobConcurrencyManager {
                             // defaultMin
                             List.of(Pair.create(WORK_TYPE_TOP, .3f),
                                     Pair.create(WORK_TYPE_FGS, .2f),
-                                    Pair.create(WORK_TYPE_EJ, .3f), Pair.create(WORK_TYPE_BG, .2f),
-                                    Pair.create(WORK_TYPE_BGUSER_IMPORTANT, .1f)),
+                                    Pair.create(WORK_TYPE_UI, .2f),
+                                    Pair.create(WORK_TYPE_EJ, .15f), Pair.create(WORK_TYPE_BG, .1f),
+                                    Pair.create(WORK_TYPE_BGUSER_IMPORTANT, .05f)),
                             // defaultMax
                             List.of(Pair.create(WORK_TYPE_BG, .5f),
                                     Pair.create(WORK_TYPE_BGUSER_IMPORTANT, .1f),
@@ -309,9 +321,11 @@ class JobConcurrencyManager {
                     new WorkTypeConfig("screen_off_low", DEFAULT_CONCURRENCY_LIMIT,
                             /* defaultMaxTotal */  DEFAULT_CONCURRENCY_LIMIT * 6 / 10,
                             // defaultMin
-                            List.of(Pair.create(WORK_TYPE_TOP, .4f),
-                                    Pair.create(WORK_TYPE_FGS, .1f),
-                                    Pair.create(WORK_TYPE_EJ, .2f), Pair.create(WORK_TYPE_BG, .1f)),
+                            List.of(Pair.create(WORK_TYPE_TOP, .3f),
+                                    Pair.create(WORK_TYPE_FGS, .15f),
+                                    Pair.create(WORK_TYPE_UI, .15f),
+                                    Pair.create(WORK_TYPE_EJ, .1f), Pair.create(WORK_TYPE_BG, .05f),
+                                    Pair.create(WORK_TYPE_BGUSER_IMPORTANT, .05f)),
                             // defaultMax
                             List.of(Pair.create(WORK_TYPE_BG, .25f),
                                     Pair.create(WORK_TYPE_BGUSER_IMPORTANT, .1f),
@@ -320,9 +334,10 @@ class JobConcurrencyManager {
                     new WorkTypeConfig("screen_off_critical", DEFAULT_CONCURRENCY_LIMIT,
                             /* defaultMaxTotal */  DEFAULT_CONCURRENCY_LIMIT * 4 / 10,
                             // defaultMin
-                            List.of(Pair.create(WORK_TYPE_TOP, .5f),
+                            List.of(Pair.create(WORK_TYPE_TOP, .3f),
                                     Pair.create(WORK_TYPE_FGS, .1f),
-                                    Pair.create(WORK_TYPE_EJ, .1f)),
+                                    Pair.create(WORK_TYPE_UI, .1f),
+                                    Pair.create(WORK_TYPE_EJ, .05f)),
                             // defaultMax
                             List.of(Pair.create(WORK_TYPE_BG, .1f),
                                     Pair.create(WORK_TYPE_BGUSER_IMPORTANT, .1f),
@@ -2078,10 +2093,12 @@ class JobConcurrencyManager {
 
             if (js.shouldTreatAsExpeditedJob()) {
                 classification |= WORK_TYPE_EJ;
+            } else if (js.shouldTreatAsUserInitiatedJob()) {
+                classification |= WORK_TYPE_UI;
             }
         } else {
             if (js.lastEvaluatedBias >= JobInfo.BIAS_FOREGROUND_SERVICE
-                    || js.shouldTreatAsExpeditedJob()) {
+                    || js.shouldTreatAsExpeditedJob() || js.shouldTreatAsUserInitiatedJob()) {
                 classification |= WORK_TYPE_BGUSER_IMPORTANT;
             }
             // BGUSER_IMPORTANT jobs can also run as BGUSER jobs, so not an 'else' here.
@@ -2101,6 +2118,7 @@ class JobConcurrencyManager {
         static final String KEY_PREFIX_MAX_RATIO = KEY_PREFIX_MAX + "ratio_";
         private static final String KEY_PREFIX_MAX_RATIO_TOP = KEY_PREFIX_MAX_RATIO + "top_";
         private static final String KEY_PREFIX_MAX_RATIO_FGS = KEY_PREFIX_MAX_RATIO + "fgs_";
+        private static final String KEY_PREFIX_MAX_RATIO_UI = KEY_PREFIX_MAX_RATIO + "ui_";
         private static final String KEY_PREFIX_MAX_RATIO_EJ = KEY_PREFIX_MAX_RATIO + "ej_";
         private static final String KEY_PREFIX_MAX_RATIO_BG = KEY_PREFIX_MAX_RATIO + "bg_";
         private static final String KEY_PREFIX_MAX_RATIO_BGUSER = KEY_PREFIX_MAX_RATIO + "bguser_";
@@ -2110,6 +2128,7 @@ class JobConcurrencyManager {
         static final String KEY_PREFIX_MIN_RATIO = KEY_PREFIX_MIN + "ratio_";
         private static final String KEY_PREFIX_MIN_RATIO_TOP = KEY_PREFIX_MIN_RATIO + "top_";
         private static final String KEY_PREFIX_MIN_RATIO_FGS = KEY_PREFIX_MIN_RATIO + "fgs_";
+        private static final String KEY_PREFIX_MIN_RATIO_UI = KEY_PREFIX_MIN_RATIO + "ui_";
         private static final String KEY_PREFIX_MIN_RATIO_EJ = KEY_PREFIX_MIN_RATIO + "ej_";
         private static final String KEY_PREFIX_MIN_RATIO_BG = KEY_PREFIX_MIN_RATIO + "bg_";
         private static final String KEY_PREFIX_MIN_RATIO_BGUSER = KEY_PREFIX_MIN_RATIO + "bguser_";
@@ -2190,6 +2209,9 @@ class JobConcurrencyManager {
             final int maxFgs = getMaxValue(properties,
                     KEY_PREFIX_MAX_RATIO_FGS + mConfigIdentifier, WORK_TYPE_FGS, oneIntBits);
             mMaxAllowedSlots.put(WORK_TYPE_FGS, maxFgs);
+            final int maxUi = getMaxValue(properties,
+                    KEY_PREFIX_MAX_RATIO_UI + mConfigIdentifier, WORK_TYPE_UI, oneIntBits);
+            mMaxAllowedSlots.put(WORK_TYPE_UI, maxUi);
             final int maxEj = getMaxValue(properties,
                     KEY_PREFIX_MAX_RATIO_EJ + mConfigIdentifier, WORK_TYPE_EJ, oneIntBits);
             mMaxAllowedSlots.put(WORK_TYPE_EJ, maxEj);
@@ -2218,6 +2240,12 @@ class JobConcurrencyManager {
                     0, Math.min(maxFgs, remaining));
             mMinReservedSlots.put(WORK_TYPE_FGS, minFgs);
             remaining -= minFgs;
+            // Ensure ui is in the range [0, min(maxUi, remaining)]
+            final int minUi = getMinValue(properties,
+                    KEY_PREFIX_MIN_RATIO_UI + mConfigIdentifier, WORK_TYPE_UI,
+                    0, Math.min(maxUi, remaining));
+            mMinReservedSlots.put(WORK_TYPE_UI, minUi);
+            remaining -= minUi;
             // Ensure ej is in the range [0, min(maxEj, remaining)]
             final int minEj = getMinValue(properties,
                     KEY_PREFIX_MIN_RATIO_EJ + mConfigIdentifier, WORK_TYPE_EJ,
@@ -2293,6 +2321,12 @@ class JobConcurrencyManager {
                     .println();
             pw.print(KEY_PREFIX_MAX_RATIO_FGS + mConfigIdentifier,
                             mMaxAllowedSlots.get(WORK_TYPE_FGS))
+                    .println();
+            pw.print(KEY_PREFIX_MIN_RATIO_UI + mConfigIdentifier,
+                            mMinReservedSlots.get(WORK_TYPE_UI))
+                    .println();
+            pw.print(KEY_PREFIX_MAX_RATIO_UI + mConfigIdentifier,
+                            mMaxAllowedSlots.get(WORK_TYPE_UI))
                     .println();
             pw.print(KEY_PREFIX_MIN_RATIO_EJ + mConfigIdentifier,
                             mMinReservedSlots.get(WORK_TYPE_EJ))

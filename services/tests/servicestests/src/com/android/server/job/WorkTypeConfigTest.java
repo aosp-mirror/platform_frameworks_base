@@ -21,6 +21,7 @@ import static com.android.server.job.JobConcurrencyManager.WORK_TYPE_BGUSER_IMPO
 import static com.android.server.job.JobConcurrencyManager.WORK_TYPE_EJ;
 import static com.android.server.job.JobConcurrencyManager.WORK_TYPE_FGS;
 import static com.android.server.job.JobConcurrencyManager.WORK_TYPE_TOP;
+import static com.android.server.job.JobConcurrencyManager.WORK_TYPE_UI;
 import static com.android.server.job.JobConcurrencyManager.workTypeToString;
 
 import static org.junit.Assert.assertEquals;
@@ -47,6 +48,7 @@ public class WorkTypeConfigTest {
     private static final String KEY_MAX_TOTAL = "concurrency_max_total_test";
     private static final String KEY_MAX_RATIO_TOP = "concurrency_max_ratio_top_test";
     private static final String KEY_MAX_RATIO_FGS = "concurrency_max_ratio_fgs_test";
+    private static final String KEY_MAX_RATIO_UI = "concurrency_max_ratio_ui_test";
     private static final String KEY_MAX_RATIO_EJ = "concurrency_max_ratio_ej_test";
     private static final String KEY_MAX_RATIO_BG = "concurrency_max_ratio_bg_test";
     private static final String KEY_MAX_RATIO_BGUSER_IMPORTANT =
@@ -54,6 +56,7 @@ public class WorkTypeConfigTest {
     private static final String KEY_MAX_RATIO_BGUSER = "concurrency_max_ratio_bguser_test";
     private static final String KEY_MIN_RATIO_TOP = "concurrency_min_ratio_top_test";
     private static final String KEY_MIN_RATIO_FGS = "concurrency_min_ratio_fgs_test";
+    private static final String KEY_MIN_RATIO_UI = "concurrency_min_ratio_ui_test";
     private static final String KEY_MIN_RATIO_EJ = "concurrency_min_ratio_ej_test";
     private static final String KEY_MIN_RATIO_BG = "concurrency_min_ratio_bg_test";
     private static final String KEY_MIN_RATIO_BGUSER_IMPORTANT =
@@ -326,31 +329,35 @@ public class WorkTypeConfigTest {
                 /* max */ List.of(Pair.create(WORK_TYPE_TOP, 16), Pair.create(WORK_TYPE_BG, 16)));
 
         check(new DeviceConfig.Properties.Builder(DeviceConfig.NAMESPACE_JOB_SCHEDULER)
-                        .setInt(KEY_MAX_TOTAL, 16)
+                        .setInt(KEY_MAX_TOTAL, 32)
                         .setFloat(KEY_MAX_RATIO_TOP, 1f)
-                        .setFloat(KEY_MIN_RATIO_TOP, 1.0f / 16)
-                        .setFloat(KEY_MAX_RATIO_FGS, 15.0f / 16)
-                        .setFloat(KEY_MIN_RATIO_FGS, 2.0f / 16)
-                        .setFloat(KEY_MAX_RATIO_EJ, 14.0f / 16)
-                        .setFloat(KEY_MIN_RATIO_EJ, 3.0f / 16)
-                        .setFloat(KEY_MAX_RATIO_BG, 13.0f / 16)
-                        .setFloat(KEY_MIN_RATIO_BG, 3.0f / 16)
-                        .setFloat(KEY_MAX_RATIO_BGUSER_IMPORTANT, 12.0f / 16)
-                        .setFloat(KEY_MIN_RATIO_BGUSER_IMPORTANT, 2.0f / 16)
-                        .setFloat(KEY_MAX_RATIO_BGUSER, 11.0f / 16)
-                        .setFloat(KEY_MIN_RATIO_BGUSER, 2.0f / 16)
+                        .setFloat(KEY_MIN_RATIO_TOP, 1.0f / 32)
+                        .setFloat(KEY_MAX_RATIO_FGS, 15.0f / 32)
+                        .setFloat(KEY_MIN_RATIO_FGS, 2.0f / 32)
+                        .setFloat(KEY_MAX_RATIO_UI, 10.0f / 32)
+                        .setFloat(KEY_MIN_RATIO_UI, 4.0f / 32)
+                        .setFloat(KEY_MAX_RATIO_EJ, 14.0f / 32)
+                        .setFloat(KEY_MIN_RATIO_EJ, 3.0f / 32)
+                        .setFloat(KEY_MAX_RATIO_BG, 13.0f / 32)
+                        .setFloat(KEY_MIN_RATIO_BG, 3.0f / 32)
+                        .setFloat(KEY_MAX_RATIO_BGUSER_IMPORTANT, 12.0f / 32)
+                        .setFloat(KEY_MIN_RATIO_BGUSER_IMPORTANT, 2.0f / 32)
+                        .setFloat(KEY_MAX_RATIO_BGUSER, 11.0f / 32)
+                        .setFloat(KEY_MIN_RATIO_BGUSER, 2.0f / 32)
                         .build(),
-                /* limit */ 16,
+                /* limit */ 32,
                 /*default*/ 9,
                 /* min */ List.of(Pair.create(WORK_TYPE_BG, .99f)),
                 /* max */ List.of(Pair.create(WORK_TYPE_BG, 1f)),
-                /*expected*/ true, 16,
+                /*expected*/ true, 32,
                 /* min */ List.of(Pair.create(WORK_TYPE_TOP, 1), Pair.create(WORK_TYPE_FGS, 2),
+                        Pair.create(WORK_TYPE_UI, 4),
                         Pair.create(WORK_TYPE_EJ, 3), Pair.create(WORK_TYPE_BG, 3),
                         Pair.create(WORK_TYPE_BGUSER_IMPORTANT, 2),
                         Pair.create(WORK_TYPE_BGUSER, 2)),
                 /* max */
-                List.of(Pair.create(WORK_TYPE_TOP, 16), Pair.create(WORK_TYPE_FGS, 15),
+                List.of(Pair.create(WORK_TYPE_TOP, 32), Pair.create(WORK_TYPE_FGS, 15),
+                        Pair.create(WORK_TYPE_UI, 10),
                         Pair.create(WORK_TYPE_EJ, 14), Pair.create(WORK_TYPE_BG, 13),
                         Pair.create(WORK_TYPE_BGUSER_IMPORTANT, 12),
                         Pair.create(WORK_TYPE_BGUSER, 11)));
