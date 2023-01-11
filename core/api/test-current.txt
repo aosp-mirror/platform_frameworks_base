@@ -3322,6 +3322,14 @@ package android.view.inputmethod {
 
   public abstract class HandwritingGesture {
     method public final int getGestureType();
+    field public static final int GESTURE_TYPE_DELETE = 4; // 0x4
+    field public static final int GESTURE_TYPE_DELETE_RANGE = 64; // 0x40
+    field public static final int GESTURE_TYPE_INSERT = 2; // 0x2
+    field public static final int GESTURE_TYPE_JOIN_OR_SPLIT = 16; // 0x10
+    field public static final int GESTURE_TYPE_NONE = 0; // 0x0
+    field public static final int GESTURE_TYPE_REMOVE_SPACE = 8; // 0x8
+    field public static final int GESTURE_TYPE_SELECT = 1; // 0x1
+    field public static final int GESTURE_TYPE_SELECT_RANGE = 32; // 0x20
   }
 
   public final class InlineSuggestion implements android.os.Parcelable {
