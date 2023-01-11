@@ -20,6 +20,7 @@ import android.app.PendingIntent
 import android.content.res.Configuration
 import android.testing.AndroidTestingRunner
 import android.testing.TestableLooper
+import android.util.MathUtils.abs
 import androidx.test.filters.SmallTest
 import com.android.internal.logging.InstanceId
 import com.android.systemui.SysuiTestCase
@@ -31,14 +32,11 @@ import com.android.systemui.media.controls.models.player.MediaData
 import com.android.systemui.media.controls.models.recommendation.SmartspaceMediaData
 import com.android.systemui.media.controls.pipeline.EMPTY_SMARTSPACE_MEDIA_DATA
 import com.android.systemui.media.controls.pipeline.MediaDataManager
-import com.android.systemui.media.controls.ui.MediaCarouselController.Companion.ANIMATION_BASE_DURATION
-import com.android.systemui.media.controls.ui.MediaCarouselController.Companion.DURATION
-import com.android.systemui.media.controls.ui.MediaCarouselController.Companion.PAGINATION_DELAY
-import com.android.systemui.media.controls.ui.MediaCarouselController.Companion.TRANSFORM_BEZIER
 import com.android.systemui.media.controls.ui.MediaHierarchyManager.Companion.LOCATION_QS
 import com.android.systemui.media.controls.util.MediaUiEventLogger
 import com.android.systemui.plugins.ActivityStarter
 import com.android.systemui.plugins.FalsingManager
+import com.android.systemui.qs.PageIndicator
 import com.android.systemui.statusbar.notification.collection.provider.OnReorderingAllowedListener
 import com.android.systemui.statusbar.notification.collection.provider.VisualStabilityProvider
 import com.android.systemui.statusbar.policy.ConfigurationController
@@ -56,6 +54,7 @@ import org.junit.runner.RunWith
 import org.mockito.ArgumentCaptor
 import org.mockito.Captor
 import org.mockito.Mock
+import org.mockito.Mockito.floatThat
 import org.mockito.Mockito.mock
 import org.mockito.Mockito.verify
 import org.mockito.Mockito.`when` as whenever
@@ -86,6 +85,8 @@ class MediaCarouselControllerTest : SysuiTestCase() {
     @Mock lateinit var debugLogger: MediaCarouselControllerLogger
     @Mock lateinit var mediaViewController: MediaViewController
     @Mock lateinit var smartspaceMediaData: SmartspaceMediaData
+    @Mock lateinit var mediaCarousel: MediaScrollView
+    @Mock lateinit var pageIndicator: PageIndicator
     @Captor lateinit var listener: ArgumentCaptor<MediaDataManager.Listener>
     @Captor
     lateinit var configListener: ArgumentCaptor<ConfigurationController.ConfigurationListener>
@@ -647,25 +648,22 @@ class MediaCarouselControllerTest : SysuiTestCase() {
     @Test
     fun testSetCurrentState_UpdatePageIndicatorAlphaWhenSquish() {
         val delta = 0.0001F
-        val paginationSquishMiddle =
-            TRANSFORM_BEZIER.getInterpolation(
-                (PAGINATION_DELAY + DURATION / 2) / ANIMATION_BASE_DURATION
-            )
-        val paginationSquishEnd =
-            TRANSFORM_BEZIER.getInterpolation(
-                (PAGINATION_DELAY + DURATION) / ANIMATION_BASE_DURATION
-            )
+        mediaCarouselController.mediaCarousel = mediaCarousel
+        mediaCarouselController.pageIndicator = pageIndicator
+        whenever(mediaCarousel.measuredHeight).thenReturn(100)
+        whenever(pageIndicator.translationY).thenReturn(80F)
+        whenever(pageIndicator.height).thenReturn(10)
         whenever(mediaHostStatesManager.mediaHostStates)
             .thenReturn(mutableMapOf(LOCATION_QS to mediaHostState))
         whenever(mediaHostState.visible).thenReturn(true)
         mediaCarouselController.currentEndLocation = LOCATION_QS
-        whenever(mediaHostState.squishFraction).thenReturn(paginationSquishMiddle)
+        whenever(mediaHostState.squishFraction).thenReturn(0.938F)
         mediaCarouselController.updatePageIndicatorAlpha()
-        assertEquals(mediaCarouselController.pageIndicator.alpha, 0.5F, delta)
+        verify(pageIndicator).alpha = floatThat { abs(it - 0.5F) < delta }
 
-        whenever(mediaHostState.squishFraction).thenReturn(paginationSquishEnd)
+        whenever(mediaHostState.squishFraction).thenReturn(1.0F)
         mediaCarouselController.updatePageIndicatorAlpha()
-        assertEquals(mediaCarouselController.pageIndicator.alpha, 1.0F, delta)
+        verify(pageIndicator).alpha = floatThat { abs(it - 1.0F) < delta }
     }
 
     @Ignore("b/253229241")
