@@ -16,6 +16,7 @@
 
 package com.android.systemui.stylus
 
+import android.app.Notification
 import android.hardware.BatteryState
 import android.hardware.input.InputManager
 import android.os.Handler
@@ -28,10 +29,13 @@ import com.android.systemui.SysuiTestCase
 import com.android.systemui.util.mockito.any
 import com.android.systemui.util.mockito.eq
 import com.android.systemui.util.mockito.whenever
+import junit.framework.Assert.assertEquals
 import org.junit.Before
 import org.junit.Ignore
 import org.junit.Test
 import org.junit.runner.RunWith
+import org.mockito.ArgumentCaptor
+import org.mockito.Captor
 import org.mockito.Mock
 import org.mockito.Mockito.inOrder
 import org.mockito.Mockito.times
@@ -46,6 +50,7 @@ class StylusUsiPowerUiTest : SysuiTestCase() {
     @Mock lateinit var inputManager: InputManager
     @Mock lateinit var handler: Handler
     @Mock lateinit var btStylusDevice: InputDevice
+    @Captor lateinit var notificationCaptor: ArgumentCaptor<Notification>
 
     private lateinit var stylusUsiPowerUi: StylusUsiPowerUI
 
@@ -70,7 +75,8 @@ class StylusUsiPowerUiTest : SysuiTestCase() {
     fun updateBatteryState_capacityBelowThreshold_notifies() {
         stylusUsiPowerUi.updateBatteryState(FixedCapacityBatteryState(0.1f))
 
-        verify(notificationManager, times(1)).notify(eq(R.string.stylus_battery_low), any())
+        verify(notificationManager, times(1))
+            .notify(eq(R.string.stylus_battery_low_percentage), any())
         verifyNoMoreInteractions(notificationManager)
     }
 
@@ -78,7 +84,7 @@ class StylusUsiPowerUiTest : SysuiTestCase() {
     fun updateBatteryState_capacityAboveThreshold_cancelsNotificattion() {
         stylusUsiPowerUi.updateBatteryState(FixedCapacityBatteryState(0.8f))
 
-        verify(notificationManager, times(1)).cancel(R.string.stylus_battery_low)
+        verify(notificationManager, times(1)).cancel(R.string.stylus_battery_low_percentage)
         verifyNoMoreInteractions(notificationManager)
     }
 
@@ -88,8 +94,9 @@ class StylusUsiPowerUiTest : SysuiTestCase() {
         stylusUsiPowerUi.updateBatteryState(FixedCapacityBatteryState(0.8f))
 
         inOrder(notificationManager).let {
-            it.verify(notificationManager, times(1)).notify(eq(R.string.stylus_battery_low), any())
-            it.verify(notificationManager, times(1)).cancel(R.string.stylus_battery_low)
+            it.verify(notificationManager, times(1))
+                .notify(eq(R.string.stylus_battery_low_percentage), any())
+            it.verify(notificationManager, times(1)).cancel(R.string.stylus_battery_low_percentage)
             it.verifyNoMoreInteractions()
         }
     }
@@ -99,7 +106,16 @@ class StylusUsiPowerUiTest : SysuiTestCase() {
         stylusUsiPowerUi.updateBatteryState(FixedCapacityBatteryState(0.1f))
         stylusUsiPowerUi.updateBatteryState(FixedCapacityBatteryState(0.15f))
 
-        verify(notificationManager, times(2)).notify(eq(R.string.stylus_battery_low), any())
+        verify(notificationManager, times(2))
+            .notify(eq(R.string.stylus_battery_low_percentage), notificationCaptor.capture())
+        assertEquals(
+            notificationCaptor.value.extras.getString(Notification.EXTRA_TITLE),
+            context.getString(R.string.stylus_battery_low_percentage, "15%")
+        )
+        assertEquals(
+            notificationCaptor.value.extras.getString(Notification.EXTRA_TEXT),
+            context.getString(R.string.stylus_battery_low_subtitle)
+        )
         verifyNoMoreInteractions(notificationManager)
     }
 
@@ -110,9 +126,11 @@ class StylusUsiPowerUiTest : SysuiTestCase() {
         stylusUsiPowerUi.updateBatteryState(FixedCapacityBatteryState(0.1f))
 
         inOrder(notificationManager).let {
-            it.verify(notificationManager, times(1)).notify(eq(R.string.stylus_battery_low), any())
-            it.verify(notificationManager, times(1)).cancel(R.string.stylus_battery_low)
-            it.verify(notificationManager, times(1)).notify(eq(R.string.stylus_battery_low), any())
+            it.verify(notificationManager, times(1))
+                .notify(eq(R.string.stylus_battery_low_percentage), any())
+            it.verify(notificationManager, times(1)).cancel(R.string.stylus_battery_low_percentage)
+            it.verify(notificationManager, times(1))
+                .notify(eq(R.string.stylus_battery_low_percentage), any())
             it.verifyNoMoreInteractions()
         }
     }
@@ -121,7 +139,7 @@ class StylusUsiPowerUiTest : SysuiTestCase() {
     fun updateSuppression_noExistingNotification_cancelsNotification() {
         stylusUsiPowerUi.updateSuppression(true)
 
-        verify(notificationManager, times(1)).cancel(R.string.stylus_battery_low)
+        verify(notificationManager, times(1)).cancel(R.string.stylus_battery_low_percentage)
         verifyNoMoreInteractions(notificationManager)
     }
 
@@ -132,8 +150,9 @@ class StylusUsiPowerUiTest : SysuiTestCase() {
         stylusUsiPowerUi.updateSuppression(true)
 
         inOrder(notificationManager).let {
-            it.verify(notificationManager, times(1)).notify(eq(R.string.stylus_battery_low), any())
-            it.verify(notificationManager, times(1)).cancel(R.string.stylus_battery_low)
+            it.verify(notificationManager, times(1))
+                .notify(eq(R.string.stylus_battery_low_percentage), any())
+            it.verify(notificationManager, times(1)).cancel(R.string.stylus_battery_low_percentage)
             it.verifyNoMoreInteractions()
         }
     }
@@ -156,7 +175,7 @@ class StylusUsiPowerUiTest : SysuiTestCase() {
 
         stylusUsiPowerUi.refresh()
 
-        verify(notificationManager).cancel(R.string.stylus_battery_low)
+        verify(notificationManager).cancel(R.string.stylus_battery_low_percentage)
     }
 
     class FixedCapacityBatteryState(private val capacity: Float) : BatteryState() {
