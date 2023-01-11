@@ -338,7 +338,8 @@ object Flags {
     // TODO(b/254512758): Tracking Bug
     @JvmField val ROUNDED_BOX_RIPPLE = releasedFlag(1002, "rounded_box_ripple")
 
-    val SHOW_LOWLIGHT_ON_DIRECT_BOOT = unreleasedFlag(1003, "show_lowlight_on_direct_boot")
+    // TODO(b/265045965): Tracking Bug
+    val SHOW_LOWLIGHT_ON_DIRECT_BOOT = releasedFlag(1003, "show_lowlight_on_direct_boot")
 
     // 1100 - windowing
     @Keep
