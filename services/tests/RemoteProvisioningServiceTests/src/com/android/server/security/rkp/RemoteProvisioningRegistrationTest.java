@@ -34,7 +34,9 @@ import static org.mockito.Mockito.verifyNoMoreInteractions;
 import android.os.CancellationSignal;
 import android.os.OperationCanceledException;
 import android.os.OutcomeReceiver;
+import android.os.RemoteException;
 import android.security.rkp.IGetKeyCallback;
+import android.security.rkp.IStoreUpgradedKeyCallback;
 import android.security.rkp.service.RegistrationProxy;
 import android.security.rkp.service.RemotelyProvisionedKey;
 
@@ -69,6 +71,12 @@ public class RemoteProvisioningRegistrationTest {
     static Answer<Void> answerGetKeyAsync(
             VoidAnswer4<Integer, CancellationSignal, Executor,
                     OutcomeReceiver<RemotelyProvisionedKey, Exception>> answer) {
+        return answerVoid(answer);
+    }
+
+    // answerVoid wrapper for mocking storeUpgradeKeyAsync.
+    static Answer<Void> answerStoreUpgradedKeyAsync(
+            VoidAnswer4<byte[], byte[], Executor, OutcomeReceiver<Void, Exception>> answer) {
         return answerVoid(answer);
     }
 
@@ -178,16 +186,63 @@ public class RemoteProvisioningRegistrationTest {
 
     @Test
     public void storeUpgradedKeySuccess() throws Exception {
-        // TODO(b/262748535)
+        doAnswer(
+                answerStoreUpgradedKeyAsync((oldBlob, newBlob, executor, receiver) ->
+                        executor.execute(() -> receiver.onResult(null))))
+                .when(mRegistrationProxy)
+                .storeUpgradedKeyAsync(any(), any(), any(), any());
+
+        IStoreUpgradedKeyCallback callback = mock(IStoreUpgradedKeyCallback.class);
+        mRegistration.storeUpgradedKeyAsync(new byte[0], new byte[0], callback);
+        verify(callback).onSuccess();
+        verifyNoMoreInteractions(callback);
     }
 
     @Test
     public void storeUpgradedKeyFails() throws Exception {
-        // TODO(b/262748535)
+        final String errorString = "this is a failure";
+        doAnswer(
+                answerStoreUpgradedKeyAsync((oldBlob, newBlob, executor, receiver) ->
+                        executor.execute(() -> receiver.onError(new RemoteException(errorString)))))
+                .when(mRegistrationProxy)
+                .storeUpgradedKeyAsync(any(), any(), any(), any());
+
+        IStoreUpgradedKeyCallback callback = mock(IStoreUpgradedKeyCallback.class);
+        mRegistration.storeUpgradedKeyAsync(new byte[0], new byte[0], callback);
+        verify(callback).onError(errorString);
+        verifyNoMoreInteractions(callback);
     }
 
     @Test
-    public void storeUpgradedCatchesExceptionFromProxy() throws Exception {
-        // TODO(b/262748535)
+    public void storeUpgradedKeyHandlesException() throws Exception {
+        final String errorString = "all aboard the failboat, toot toot";
+        doThrow(new IllegalArgumentException(errorString))
+                .when(mRegistrationProxy)
+                .storeUpgradedKeyAsync(any(), any(), any(), any());
+
+        IStoreUpgradedKeyCallback callback = mock(IStoreUpgradedKeyCallback.class);
+        mRegistration.storeUpgradedKeyAsync(new byte[0], new byte[0], callback);
+        verify(callback).onError(errorString);
+        verifyNoMoreInteractions(callback);
     }
+
+    @Test
+    public void storeUpgradedKeyDuplicateCallback() throws Exception {
+        IStoreUpgradedKeyCallback callback = mock(IStoreUpgradedKeyCallback.class);
+
+        doAnswer(
+                answerStoreUpgradedKeyAsync((oldBlob, newBlob, executor, receiver) -> {
+                    assertThrows(IllegalArgumentException.class,
+                            () -> mRegistration.storeUpgradedKeyAsync(new byte[0], new byte[0],
+                                    callback));
+                    executor.execute(() -> receiver.onResult(null));
+                }))
+                .when(mRegistrationProxy)
+                .storeUpgradedKeyAsync(any(), any(), any(), any());
+
+        mRegistration.storeUpgradedKeyAsync(new byte[0], new byte[0], callback);
+        verify(callback).onSuccess();
+        verifyNoMoreInteractions(callback);
+    }
+
 }
