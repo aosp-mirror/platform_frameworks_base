@@ -6684,6 +6684,10 @@ public class ActivityManagerService extends IActivityManager.Stub
 
     @Override
     public void appNotResponding(final String reason) {
+        appNotResponding(reason, /*isContinuousAnr*/ false);
+    }
+
+    public void appNotResponding(final String reason, boolean isContinuousAnr) {
         TimeoutRecord timeoutRecord = TimeoutRecord.forApp("App requested: " + reason);
         final int callingPid = Binder.getCallingPid();
 
@@ -6696,7 +6700,7 @@ public class ActivityManagerService extends IActivityManager.Stub
             }
 
             mAnrHelper.appNotResponding(app, null, app.info, null, null, false,
-                    timeoutRecord);
+                    timeoutRecord, isContinuousAnr);
         }
     }
 
@@ -18325,7 +18329,8 @@ public class ActivityManagerService extends IActivityManager.Stub
                     }
                 }
                 mAnrHelper.appNotResponding(proc, activityShortComponentName, aInfo,
-                        parentShortComponentName, parentProcess, aboveSystem, timeoutRecord);
+                        parentShortComponentName, parentProcess, aboveSystem, timeoutRecord,
+                        /*isContinuousAnr*/ true);
             }
 
             return true;

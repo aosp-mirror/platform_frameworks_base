@@ -169,8 +169,10 @@ final class AppNotRespondingDialog extends BaseErrorDialog implements View.OnCli
                             errState.getDialogController().clearAnrDialogs();
                         }
                         mService.mServices.scheduleServiceTimeoutLocked(app);
-                        // If the app remains unresponsive, show the dialog again after a delay.
-                        mService.mInternal.rescheduleAnrDialog(mData);
+                        if (mData.isContinuousAnr) {
+                            // If the app remains unresponsive, show the dialog again after a delay.
+                            mService.mInternal.rescheduleAnrDialog(mData);
+                        }
                     }
                     break;
             }
@@ -197,10 +199,17 @@ final class AppNotRespondingDialog extends BaseErrorDialog implements View.OnCli
         final ApplicationInfo aInfo;
         final boolean aboveSystem;
 
-        Data(ProcessRecord proc, ApplicationInfo aInfo, boolean aboveSystem) {
+        // If true, then even if the user presses "WAIT" on the ANR dialog,
+        // we'll show it again until the app start responding again.
+        // (we only use it for input dispatch ANRs)
+        final boolean isContinuousAnr;
+
+        Data(ProcessRecord proc, ApplicationInfo aInfo, boolean aboveSystem,
+                boolean isContinuousAnr) {
             this.proc = proc;
             this.aInfo = aInfo;
             this.aboveSystem = aboveSystem;
+            this.isContinuousAnr = isContinuousAnr;
         }
     }
 }
