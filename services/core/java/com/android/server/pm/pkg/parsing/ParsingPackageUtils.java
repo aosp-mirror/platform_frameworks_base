@@ -247,6 +247,9 @@ public class ParsingPackageUtils {
     private static final String MAX_NUM_COMPONENTS_ERR_MSG =
             "Total number of components has exceeded the maximum number: " + MAX_NUM_COMPONENTS;
 
+    /** The maximum permission name length. */
+    private static final int MAX_PERMISSION_NAME_LENGTH = 512;
+
     @IntDef(flag = true, prefix = { "PARSE_" }, value = {
             PARSE_CHATTY,
             PARSE_COLLECT_CERTIFICATES,
@@ -1275,6 +1278,11 @@ public class ParsingPackageUtils {
             // that may change.
             String name = sa.getNonResourceString(
                     R.styleable.AndroidManifestUsesPermission_name);
+            if (TextUtils.length(name) > MAX_PERMISSION_NAME_LENGTH) {
+                return input.error(INSTALL_PARSE_FAILED_MANIFEST_MALFORMED,
+                        "The name in the <uses-permission> is greater than "
+                                + MAX_PERMISSION_NAME_LENGTH);
+            }
 
             int maxSdkVersion = 0;
             TypedValue val = sa.peekValue(
