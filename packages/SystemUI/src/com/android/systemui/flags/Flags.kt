@@ -207,6 +207,9 @@ object Flags {
     val AUTO_PIN_CONFIRMATION =
         unreleasedFlag(224, "auto_pin_confirmation", "auto_pin_confirmation")
 
+    // TODO(b/262859270): Tracking Bug
+    @JvmField val FALSING_OFF_FOR_UNFOLDED = releasedFlag(225, "falsing_off_for_unfolded")
+
     // 300 - power menu
     // TODO(b/254512600): Tracking Bug
     @JvmField val POWER_MENU_LITE = releasedFlag(300, "power_menu_lite")
