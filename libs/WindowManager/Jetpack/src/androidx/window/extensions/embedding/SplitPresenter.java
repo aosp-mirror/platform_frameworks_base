@@ -555,9 +555,9 @@ class SplitPresenter extends JetpackTaskFragmentOrganizer {
         final Function<SplitAttributesCalculatorParams, SplitAttributes> calculator =
                 mController.getSplitAttributesCalculator();
         final SplitAttributes defaultSplitAttributes = rule.getDefaultSplitAttributes();
-        final boolean isDefaultMinSizeSatisfied = rule.checkParentMetrics(taskWindowMetrics);
+        final boolean areDefaultConstraintsSatisfied = rule.checkParentMetrics(taskWindowMetrics);
         if (calculator == null) {
-            if (!isDefaultMinSizeSatisfied) {
+            if (!areDefaultConstraintsSatisfied) {
                 return EXPAND_CONTAINERS_ATTRIBUTES;
             }
             return sanitizeSplitAttributes(taskProperties, defaultSplitAttributes,
@@ -568,7 +568,7 @@ class SplitPresenter extends JetpackTaskFragmentOrganizer {
                         taskConfiguration.windowConfiguration);
         final SplitAttributesCalculatorParams params = new SplitAttributesCalculatorParams(
                 taskWindowMetrics, taskConfiguration, windowLayoutInfo, defaultSplitAttributes,
-                isDefaultMinSizeSatisfied, rule.getTag());
+                areDefaultConstraintsSatisfied, rule.getTag());
         final SplitAttributes splitAttributes = calculator.apply(params);
         return sanitizeSplitAttributes(taskProperties, splitAttributes, minDimensionsPair);
     }
