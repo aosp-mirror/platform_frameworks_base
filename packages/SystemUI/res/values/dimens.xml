@@ -1623,6 +1623,8 @@
     <dimen name="dream_overlay_status_bar_ambient_text_shadow_dx">0.5dp</dimen>
     <dimen name="dream_overlay_status_bar_ambient_text_shadow_dy">0.5dp</dimen>
     <dimen name="dream_overlay_status_bar_ambient_text_shadow_radius">2dp</dimen>
+    <dimen name="dream_overlay_icon_inset_dimen">0dp</dimen>
+    <dimen name="dream_overlay_status_bar_marginTop">22dp</dimen>
 
     <!-- Default device corner radius, used for assist UI -->
     <dimen name="config_rounded_mask_size">0px</dimen>
