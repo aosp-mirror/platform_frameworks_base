@@ -497,6 +497,10 @@ object Flags {
     val APP_PANELS_ALL_APPS_ALLOWED =
         unreleasedFlag(2001, "app_panels_all_apps_allowed", teamfood = true)
 
+    @JvmField
+    val CONTROLS_MANAGEMENT_NEW_FLOWS =
+        unreleasedFlag(2002, "controls_management_new_flows", teamfood = true)
+
     // 2100 - Falsing Manager
     @JvmField val FALSING_FOR_LONG_TAPS = releasedFlag(2100, "falsing_for_long_taps")
 
@@ -539,6 +543,5 @@ object Flags {
 
     // 2600 - keyboard shortcut
     // TODO(b/259352579): Tracking Bug
-    @JvmField
-    val SHORTCUT_LIST_SEARCH_LAYOUT = unreleasedFlag(2600, "shortcut_list_search_layout")
+    @JvmField val SHORTCUT_LIST_SEARCH_LAYOUT = unreleasedFlag(2600, "shortcut_list_search_layout")
 }
