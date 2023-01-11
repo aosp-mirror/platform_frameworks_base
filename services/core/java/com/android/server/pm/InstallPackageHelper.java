@@ -1107,7 +1107,7 @@ final class InstallPackageHelper {
             if (onExternal) {
                 Slog.i(TAG, "Static shared libs can only be installed on internal storage.");
                 throw new PrepareFailure(INSTALL_FAILED_INVALID_INSTALL_LOCATION,
-                        "Packages declaring static-shared libs cannot be updated");
+                        "Static shared libs can only be installed on internal storage.");
             }
         }
 
