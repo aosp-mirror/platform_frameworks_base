@@ -125,7 +125,9 @@ class CreateCredentialViewModel(
 
   fun onEntrySelectedFromMoreOptionScreen(activeEntry: ActiveEntry) {
     uiState = uiState.copy(
-      currentScreenState = CreateScreenState.MORE_OPTIONS_ROW_INTRO,
+      currentScreenState = if (
+        activeEntry.activeProvider.id == UserConfigRepo.getInstance().getDefaultProviderId()
+      ) CreateScreenState.CREATION_OPTION_SELECTION else CreateScreenState.MORE_OPTIONS_ROW_INTRO,
       activeEntry = activeEntry
     )
   }
