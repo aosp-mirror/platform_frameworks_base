@@ -191,6 +191,11 @@ public abstract class ProviderSession<T, R>
         return mProviderResponse != null || mProviderResponseSet;
     }
 
+    protected void invokeCallbackWithError(String errorType, @Nullable String errorMessage) {
+        // TODO: Determine what the error message should be
+        mCallbacks.onFinalErrorReceived(mComponentName, errorType, errorMessage);
+    }
+
     /** Update the response state stored with the provider session. */
     @Nullable protected R getProviderResponse() {
         return mProviderResponse;

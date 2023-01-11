@@ -20,6 +20,7 @@ import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.content.ComponentName;
 import android.content.Context;
+import android.credentials.CreateCredentialException;
 import android.credentials.CreateCredentialRequest;
 import android.credentials.CreateCredentialResponse;
 import android.credentials.CredentialManager;
@@ -98,8 +99,7 @@ public final class CreateRequestSession extends RequestSession<CreateCredentialR
         if (response != null) {
             respondToClientWithResponseAndFinish(response);
         } else {
-            // TODO("Replace with properly defined error type)
-            respondToClientWithErrorAndFinish("unknown_type",
+            respondToClientWithErrorAndFinish(CreateCredentialException.TYPE_NO_CREDENTIAL,
                     "Invalid response");
         }
     }
@@ -113,7 +113,7 @@ public final class CreateRequestSession extends RequestSession<CreateCredentialR
     @Override
     public void onUiCancellation() {
         // TODO("Replace with properly defined error type")
-        respondToClientWithErrorAndFinish("user_cancelled",
+        respondToClientWithErrorAndFinish(CreateCredentialException.TYPE_NO_CREDENTIAL,
                 "User cancelled the selector");
     }
 
