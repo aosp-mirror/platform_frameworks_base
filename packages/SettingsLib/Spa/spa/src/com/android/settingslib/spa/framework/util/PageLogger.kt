@@ -18,55 +18,41 @@ package com.android.settingslib.spa.framework.util
 
 import android.os.Bundle
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.remember
-import androidx.compose.ui.platform.LocalLifecycleOwner
 import androidx.core.os.bundleOf
-import androidx.lifecycle.Lifecycle
-import androidx.lifecycle.LifecycleEventObserver
 import com.android.settingslib.spa.framework.common.LOG_DATA_DISPLAY_NAME
 import com.android.settingslib.spa.framework.common.LOG_DATA_SESSION_NAME
 import com.android.settingslib.spa.framework.common.LogCategory
 import com.android.settingslib.spa.framework.common.LogEvent
+import com.android.settingslib.spa.framework.common.SettingsPage
 import com.android.settingslib.spa.framework.common.SettingsPageProvider
 import com.android.settingslib.spa.framework.common.SpaEnvironmentFactory
 import com.android.settingslib.spa.framework.common.createSettingsPage
+import com.android.settingslib.spa.framework.compose.LifecycleEffect
 import com.android.settingslib.spa.framework.compose.LocalNavController
+import com.android.settingslib.spa.framework.compose.NavControllerWrapper
 
 @Composable
 internal fun SettingsPageProvider.PageEvent(arguments: Bundle? = null) {
     val page = remember(arguments) { createSettingsPage(arguments) }
-    val lifecycleOwner = LocalLifecycleOwner.current
     val navController = LocalNavController.current
-    DisposableEffect(lifecycleOwner) {
-        val observer = LifecycleEventObserver { _, event ->
-            val logPageEvent: (event: LogEvent) -> Unit = {
-                SpaEnvironmentFactory.instance.logger.event(
-                    id = page.id,
-                    event = it,
-                    category = LogCategory.FRAMEWORK,
-                    extraData = bundleOf(
-                        LOG_DATA_DISPLAY_NAME to page.displayName,
-                        LOG_DATA_SESSION_NAME to navController.sessionSourceName,
-                    ).apply {
-                        val normArguments = parameter.normalize(arguments)
-                        if (normArguments != null) putAll(normArguments)
-                    }
-                )
-            }
-            if (event == Lifecycle.Event.ON_START) {
-                logPageEvent(LogEvent.PAGE_ENTER)
-            } else if (event == Lifecycle.Event.ON_STOP) {
-                logPageEvent(LogEvent.PAGE_LEAVE)
-            }
-        }
+    LifecycleEffect(
+        onStart = { page.logPageEvent(LogEvent.PAGE_ENTER, navController) },
+        onStop = { page.logPageEvent(LogEvent.PAGE_LEAVE, navController) },
+    )
+}
 
-        // Add the observer to the lifecycle
-        lifecycleOwner.lifecycle.addObserver(observer)
-
-        // When the effect leaves the Composition, remove the observer
-        onDispose {
-            lifecycleOwner.lifecycle.removeObserver(observer)
+private fun SettingsPage.logPageEvent(event: LogEvent, navController: NavControllerWrapper) {
+    SpaEnvironmentFactory.instance.logger.event(
+        id = id,
+        event = event,
+        category = LogCategory.FRAMEWORK,
+        extraData = bundleOf(
+            LOG_DATA_DISPLAY_NAME to displayName,
+            LOG_DATA_SESSION_NAME to navController.sessionSourceName,
+        ).apply {
+            val normArguments = parameter.normalize(arguments)
+            if (normArguments != null) putAll(normArguments)
         }
-    }
+    )
 }

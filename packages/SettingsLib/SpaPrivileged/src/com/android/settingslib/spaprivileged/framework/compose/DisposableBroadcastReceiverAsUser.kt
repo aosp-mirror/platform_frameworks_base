@@ -22,11 +22,9 @@ import android.content.Intent
 import android.content.IntentFilter
 import android.os.UserHandle
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.DisposableEffect
+import androidx.compose.runtime.remember
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.platform.LocalLifecycleOwner
-import androidx.lifecycle.Lifecycle
-import androidx.lifecycle.LifecycleEventObserver
+import com.android.settingslib.spa.framework.compose.LifecycleEffect
 
 /**
  * A [BroadcastReceiver] which registered when on start and unregistered when on stop.
@@ -39,28 +37,22 @@ fun DisposableBroadcastReceiverAsUser(
     onReceive: (Intent) -> Unit,
 ) {
     val context = LocalContext.current
-    val lifecycleOwner = LocalLifecycleOwner.current
-    DisposableEffect(lifecycleOwner) {
-        val broadcastReceiver = object : BroadcastReceiver() {
+    val broadcastReceiver = remember {
+        object : BroadcastReceiver() {
             override fun onReceive(context: Context, intent: Intent) {
                 onReceive(intent)
             }
         }
-        val observer = LifecycleEventObserver { _, event ->
-            if (event == Lifecycle.Event.ON_START) {
-                context.registerReceiverAsUser(
-                    broadcastReceiver, userHandle, intentFilter, null, null
-                )
-                onStart()
-            } else if (event == Lifecycle.Event.ON_STOP) {
-                context.unregisterReceiver(broadcastReceiver)
-            }
-        }
-
-        lifecycleOwner.lifecycle.addObserver(observer)
-
-        onDispose {
-            lifecycleOwner.lifecycle.removeObserver(observer)
-        }
     }
+    LifecycleEffect(
+        onStart = {
+            context.registerReceiverAsUser(
+                broadcastReceiver, userHandle, intentFilter, null, null
+            )
+            onStart()
+        },
+        onStop = {
+            context.unregisterReceiver(broadcastReceiver)
+        },
+    )
 }
