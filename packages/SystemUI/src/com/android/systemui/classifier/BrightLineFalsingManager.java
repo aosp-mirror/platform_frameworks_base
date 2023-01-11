@@ -176,7 +176,8 @@ public class BrightLineFalsingManager implements FalsingManager {
     private @Classifier.InteractionType int mPriorInteractionType = Classifier.GENERIC;
 
     @Inject
-    public BrightLineFalsingManager(FalsingDataProvider falsingDataProvider,
+    public BrightLineFalsingManager(
+            FalsingDataProvider falsingDataProvider,
             MetricsLogger metricsLogger,
             @Named(BRIGHT_LINE_GESTURE_CLASSIFERS) Set<FalsingClassifier> classifiers,
             SingleTapClassifier singleTapClassifier, LongTapClassifier longTapClassifier,
@@ -399,7 +400,9 @@ public class BrightLineFalsingManager implements FalsingManager {
                 || mDataProvider.isJustUnlockedWithFace()
                 || mDataProvider.isDocked()
                 || mAccessibilityManager.isTouchExplorationEnabled()
-                || mDataProvider.isA11yAction();
+                || mDataProvider.isA11yAction()
+                || (mFeatureFlags.isEnabled(Flags.FALSING_OFF_FOR_UNFOLDED)
+                    && !mDataProvider.isFolded());
     }
 
     @Override
