@@ -11773,6 +11773,7 @@ package android.service.euicc {
     method public int onEraseSubscriptions(int, @android.telephony.euicc.EuiccCardManager.ResetOption int);
     method public abstract android.service.euicc.GetDefaultDownloadableSubscriptionListResult onGetDefaultDownloadableSubscriptionList(int, boolean);
     method public abstract android.service.euicc.GetDownloadableSubscriptionMetadataResult onGetDownloadableSubscriptionMetadata(int, android.telephony.euicc.DownloadableSubscription, boolean);
+    method @NonNull public android.service.euicc.GetDownloadableSubscriptionMetadataResult onGetDownloadableSubscriptionMetadata(int, int, @NonNull android.telephony.euicc.DownloadableSubscription, boolean);
     method public abstract String onGetEid(int);
     method @NonNull public abstract android.telephony.euicc.EuiccInfo onGetEuiccInfo(int);
     method @NonNull public abstract android.service.euicc.GetEuiccProfileInfoListResult onGetEuiccProfileInfoList(int);
