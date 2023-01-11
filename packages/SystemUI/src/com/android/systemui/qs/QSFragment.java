@@ -68,6 +68,7 @@ import com.android.systemui.statusbar.phone.KeyguardBypassController;
 import com.android.systemui.statusbar.policy.BrightnessMirrorController;
 import com.android.systemui.statusbar.policy.RemoteInputQuickSettingsDisabler;
 import com.android.systemui.util.LifecycleFragment;
+import com.android.systemui.util.Utils;
 
 import java.io.PrintWriter;
 import java.util.Arrays;
@@ -683,7 +684,7 @@ public class QSFragment extends LifecycleFragment implements QS, CommandQueue.Ca
         } else {
             mQsMediaHost.setSquishFraction(mSquishinessFraction);
         }
-
+        updateMediaPositions();
     }
 
     private void setAlphaAnimationProgress(float progress) {
@@ -756,6 +757,22 @@ public class QSFragment extends LifecycleFragment implements QS, CommandQueue.Ca
                 left + getView().getMeasuredWidth(),
                 top + mQSPanelScrollView.getMeasuredHeight()
                         - mQSPanelController.getPaddingBottom());
+    }
+
+    private void updateMediaPositions() {
+        if (Utils.useQsMediaPlayer(getContext())) {
+            View hostView = mQsMediaHost.getHostView();
+            // Make sure the media appears a bit from the top to make it look nicer
+            if (mLastQSExpansion > 0 && !isKeyguardState() && !mQqsMediaHost.getVisible()
+                    && !mQSPanelController.shouldUseHorizontalLayout() && !mInSplitShade) {
+                float interpolation = 1.0f - mLastQSExpansion;
+                interpolation = Interpolators.ACCELERATE.getInterpolation(interpolation);
+                float translationY = -hostView.getHeight() * 1.3f * interpolation;
+                hostView.setTranslationY(translationY);
+            } else {
+                hostView.setTranslationY(0);
+            }
+        }
     }
 
     private boolean headerWillBeAnimating() {
