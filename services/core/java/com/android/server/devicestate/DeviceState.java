@@ -72,12 +72,19 @@ public final class DeviceState {
      */
     public static final int FLAG_CANCEL_WHEN_REQUESTER_NOT_ON_TOP = 1 << 3;
 
+    /**
+     * This flag indicates that the corresponding state should be disabled when the device is
+     * overheating and reaching the critical status.
+     */
+    public static final int FLAG_DISABLE_WHEN_THERMAL_STATUS_CRITICAL = 1 << 4;
+
     /** @hide */
     @IntDef(prefix = {"FLAG_"}, flag = true, value = {
             FLAG_CANCEL_OVERRIDE_REQUESTS,
             FLAG_APP_INACCESSIBLE,
             FLAG_EMULATED_ONLY,
-            FLAG_CANCEL_WHEN_REQUESTER_NOT_ON_TOP
+            FLAG_CANCEL_WHEN_REQUESTER_NOT_ON_TOP,
+            FLAG_DISABLE_WHEN_THERMAL_STATUS_CRITICAL
     })
     @Retention(RetentionPolicy.SOURCE)
     public @interface DeviceStateFlags {}

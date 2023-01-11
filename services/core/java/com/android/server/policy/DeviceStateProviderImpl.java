@@ -27,6 +27,7 @@ import android.hardware.SensorEvent;
 import android.hardware.SensorEventListener;
 import android.hardware.SensorManager;
 import android.os.Environment;
+import android.os.PowerManager;
 import android.util.ArrayMap;
 import android.util.ArraySet;
 import android.util.Slog;
@@ -80,7 +81,8 @@ import javax.xml.datatype.DatatypeConfigurationException;
  * provided.
  */
 public final class DeviceStateProviderImpl implements DeviceStateProvider,
-        InputManagerInternal.LidSwitchCallback, SensorEventListener {
+        InputManagerInternal.LidSwitchCallback, SensorEventListener,
+        PowerManager.OnThermalStatusChangedListener {
     private static final String TAG = "DeviceStateProviderImpl";
     private static final boolean DEBUG = false;
 
@@ -99,6 +101,8 @@ public final class DeviceStateProviderImpl implements DeviceStateProvider,
     private static final String FLAG_EMULATED_ONLY = "FLAG_EMULATED_ONLY";
     private static final String FLAG_CANCEL_WHEN_REQUESTER_NOT_ON_TOP =
             "FLAG_CANCEL_WHEN_REQUESTER_NOT_ON_TOP";
+    private static final String FLAG_DISABLE_WHEN_THERMAL_STATUS_CRITICAL =
+            "FLAG_DISABLE_WHEN_THERMAL_STATUS_CRITICAL";
 
     /** Interface that allows reading the device state configuration. */
     interface ReadableConfig {
@@ -158,6 +162,9 @@ public final class DeviceStateProviderImpl implements DeviceStateProvider,
                                 case FLAG_CANCEL_WHEN_REQUESTER_NOT_ON_TOP:
                                     flags |= DeviceState.FLAG_CANCEL_WHEN_REQUESTER_NOT_ON_TOP;
                                     break;
+                                case FLAG_DISABLE_WHEN_THERMAL_STATUS_CRITICAL:
+                                    flags |= DeviceState.FLAG_DISABLE_WHEN_THERMAL_STATUS_CRITICAL;
+                                    break;
                                 default:
                                     Slog.w(TAG, "Parsed unknown flag with name: "
                                             + configFlagString);
@@ -200,6 +207,8 @@ public final class DeviceStateProviderImpl implements DeviceStateProvider,
     private Boolean mIsLidOpen;
     @GuardedBy("mLock")
     private final Map<Sensor, SensorEvent> mLatestSensorEvent = new ArrayMap<>();
+    @GuardedBy("mLock")
+    private @PowerManager.ThermalStatus int mThermalStatus = PowerManager.THERMAL_STATUS_NONE;
 
     private DeviceStateProviderImpl(@NonNull Context context,
             @NonNull List<DeviceState> deviceStates,
@@ -214,6 +223,16 @@ public final class DeviceStateProviderImpl implements DeviceStateProvider,
         mOrderedStates = orderedStates;
 
         setStateConditions(deviceStates, stateConditions);
+
+        // If any of the device states are thermal sensitive, i.e. it should be disabled when the
+        // device is overheating, then we will update the list of supported states when thermal
+        // status changes.
+        if (hasThermalSensitiveState(deviceStates)) {
+            PowerManager powerManager = context.getSystemService(PowerManager.class);
+            if (powerManager != null) {
+                powerManager.addThermalStatusListener(this);
+            }
+        }
     }
 
     private void setStateConditions(@NonNull List<DeviceState> deviceStates,
@@ -353,16 +372,25 @@ public final class DeviceStateProviderImpl implements DeviceStateProvider,
 
     /** Notifies the listener that the set of supported device states has changed. */
     private void notifySupportedStatesChanged() {
-        DeviceState[] supportedStates;
+        List<DeviceState> supportedStates = new ArrayList<>();
+        Listener listener;
         synchronized (mLock) {
             if (mListener == null) {
                 return;
             }
-
-            supportedStates = Arrays.copyOf(mOrderedStates, mOrderedStates.length);
+            listener = mListener;
+            for (DeviceState deviceState : mOrderedStates) {
+                if (isThermalStatusCriticalOrAbove(mThermalStatus)
+                        && deviceState.hasFlag(
+                                DeviceState.FLAG_DISABLE_WHEN_THERMAL_STATUS_CRITICAL)) {
+                    continue;
+                }
+                supportedStates.add(deviceState);
+            }
         }
 
-        mListener.onSupportedDeviceStatesChanged(supportedStates);
+        listener.onSupportedDeviceStatesChanged(
+                supportedStates.toArray(new DeviceState[supportedStates.size()]));
     }
 
     /** Computes the current device state and notifies the listener of a change, if needed. */
@@ -644,5 +672,44 @@ public final class DeviceStateProviderImpl implements DeviceStateProvider,
         public InputStream openRead() throws IOException {
             return new FileInputStream(mFile);
         }
+    }
+
+    @Override
+    public void onThermalStatusChanged(@PowerManager.ThermalStatus int thermalStatus) {
+        int previousThermalStatus;
+        synchronized (mLock) {
+            previousThermalStatus = mThermalStatus;
+            mThermalStatus = thermalStatus;
+        }
+
+        boolean isThermalStatusCriticalOrAbove = isThermalStatusCriticalOrAbove(thermalStatus);
+        boolean isPreviousThermalStatusCriticalOrAbove =
+                isThermalStatusCriticalOrAbove(previousThermalStatus);
+        if (isThermalStatusCriticalOrAbove != isPreviousThermalStatusCriticalOrAbove) {
+            Slog.i(TAG, "Updating supported device states due to thermal status change."
+                    + " isThermalStatusCriticalOrAbove: " + isThermalStatusCriticalOrAbove);
+            notifySupportedStatesChanged();
+        }
+    }
+
+    private static boolean isThermalStatusCriticalOrAbove(
+            @PowerManager.ThermalStatus int thermalStatus) {
+        switch (thermalStatus) {
+            case PowerManager.THERMAL_STATUS_CRITICAL:
+            case PowerManager.THERMAL_STATUS_EMERGENCY:
+            case PowerManager.THERMAL_STATUS_SHUTDOWN:
+                return true;
+            default:
+                return false;
+        }
+    }
+
+    private static boolean hasThermalSensitiveState(List<DeviceState> deviceStates) {
+        for (DeviceState state : deviceStates) {
+            if (state.hasFlag(DeviceState.FLAG_DISABLE_WHEN_THERMAL_STATUS_CRITICAL)) {
+                return true;
+            }
+        }
+        return false;
     }
 }
