@@ -380,7 +380,8 @@ public class CentralSurfacesImplTest extends SysuiTestCase {
         }).when(mStatusBarKeyguardViewManager).addAfterKeyguardGoneRunnable(any());
 
         mWakefulnessLifecycle =
-                new WakefulnessLifecycle(mContext, mIWallpaperManager, mDumpManager);
+                new WakefulnessLifecycle(mContext, mIWallpaperManager, mFakeSystemClock,
+                        mDumpManager);
         mWakefulnessLifecycle.dispatchStartedWakingUp(PowerManager.WAKE_REASON_UNKNOWN);
         mWakefulnessLifecycle.dispatchFinishedWakingUp();
 

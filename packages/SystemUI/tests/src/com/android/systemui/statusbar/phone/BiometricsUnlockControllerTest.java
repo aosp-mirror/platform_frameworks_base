@@ -16,6 +16,8 @@
 
 package com.android.systemui.statusbar.phone;
 
+import static com.android.systemui.statusbar.phone.BiometricUnlockController.MODE_WAKE_AND_UNLOCK;
+
 import static com.google.common.truth.Truth.assertThat;
 
 import static org.mockito.ArgumentMatchers.any;
@@ -57,6 +59,7 @@ import com.android.systemui.statusbar.NotificationMediaManager;
 import com.android.systemui.statusbar.NotificationShadeWindowController;
 import com.android.systemui.statusbar.VibratorHelper;
 import com.android.systemui.statusbar.policy.KeyguardStateController;
+import com.android.systemui.util.time.FakeSystemClock;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -122,6 +125,7 @@ public class BiometricsUnlockControllerTest extends SysuiTestCase {
     private VibratorHelper mVibratorHelper;
     @Mock
     private BiometricUnlockLogger mLogger;
+    private final FakeSystemClock mSystemClock = new FakeSystemClock();
     private BiometricUnlockController mBiometricUnlockController;
 
     @Before
@@ -144,7 +148,9 @@ public class BiometricsUnlockControllerTest extends SysuiTestCase {
                 mMetricsLogger, mDumpManager, mPowerManager, mLogger,
                 mNotificationMediaManager, mWakefulnessLifecycle, mScreenLifecycle,
                 mAuthController, mStatusBarStateController, mKeyguardUnlockAnimationController,
-                mSessionTracker, mLatencyTracker, mScreenOffAnimationController, mVibratorHelper);
+                mSessionTracker, mLatencyTracker, mScreenOffAnimationController, mVibratorHelper,
+                mSystemClock
+        );
         mBiometricUnlockController.setKeyguardViewController(mStatusBarKeyguardViewManager);
         mBiometricUnlockController.addBiometricModeListener(mBiometricModeListener);
         when(mUpdateMonitor.getStrongAuthTracker()).thenReturn(mStrongAuthTracker);
@@ -207,7 +213,7 @@ public class BiometricsUnlockControllerTest extends SysuiTestCase {
 
         verify(mKeyguardViewMediator).onWakeAndUnlocking();
         assertThat(mBiometricUnlockController.getMode())
-                .isEqualTo(BiometricUnlockController.MODE_WAKE_AND_UNLOCK);
+                .isEqualTo(MODE_WAKE_AND_UNLOCK);
     }
 
     @Test
@@ -456,5 +462,84 @@ public class BiometricsUnlockControllerTest extends SysuiTestCase {
 
         // THEN wakeup the device
         verify(mPowerManager).wakeUp(anyLong(), anyInt(), anyString());
+    }
+
+    @Test
+    public void onSideFingerprintSuccess_recentPowerButtonPress_noHaptic() {
+        // GIVEN side fingerprint enrolled, last wake reason was power button
+        when(mAuthController.isSfpsEnrolled(anyInt())).thenReturn(true);
+        when(mWakefulnessLifecycle.getLastWakeReason())
+                .thenReturn(PowerManager.WAKE_REASON_POWER_BUTTON);
+
+        // GIVEN last wake time just occurred
+        when(mWakefulnessLifecycle.getLastWakeTime()).thenReturn(mSystemClock.uptimeMillis());
+
+        // WHEN biometric fingerprint succeeds
+        givenFingerprintModeUnlockCollapsing();
+        mBiometricUnlockController.startWakeAndUnlock(BiometricSourceType.FINGERPRINT,
+                true);
+
+        // THEN DO NOT vibrate the device
+        verify(mVibratorHelper, never()).vibrateAuthSuccess(anyString());
+    }
+
+    @Test
+    public void onSideFingerprintSuccess_oldPowerButtonPress_playHaptic() {
+        // GIVEN side fingerprint enrolled, last wake reason was power button
+        when(mAuthController.isSfpsEnrolled(anyInt())).thenReturn(true);
+        when(mWakefulnessLifecycle.getLastWakeReason())
+                .thenReturn(PowerManager.WAKE_REASON_POWER_BUTTON);
+
+        // GIVEN last wake time was 500ms ago
+        when(mWakefulnessLifecycle.getLastWakeTime()).thenReturn(mSystemClock.uptimeMillis());
+        mSystemClock.advanceTime(500);
+
+        // WHEN biometric fingerprint succeeds
+        givenFingerprintModeUnlockCollapsing();
+        mBiometricUnlockController.startWakeAndUnlock(BiometricSourceType.FINGERPRINT,
+                true);
+
+        // THEN vibrate the device
+        verify(mVibratorHelper).vibrateAuthSuccess(anyString());
+    }
+
+    @Test
+    public void onSideFingerprintSuccess_recentGestureWakeUp_playHaptic() {
+        // GIVEN side fingerprint enrolled, wakeup just happened
+        when(mAuthController.isSfpsEnrolled(anyInt())).thenReturn(true);
+        when(mWakefulnessLifecycle.getLastWakeTime()).thenReturn(mSystemClock.uptimeMillis());
+
+        // GIVEN last wake reason was from a gesture
+        when(mWakefulnessLifecycle.getLastWakeReason())
+                .thenReturn(PowerManager.WAKE_REASON_GESTURE);
+
+        // WHEN biometric fingerprint succeeds
+        givenFingerprintModeUnlockCollapsing();
+        mBiometricUnlockController.startWakeAndUnlock(BiometricSourceType.FINGERPRINT,
+                true);
+
+        // THEN vibrate the device
+        verify(mVibratorHelper).vibrateAuthSuccess(anyString());
+    }
+
+    @Test
+    public void onSideFingerprintFail_alwaysPlaysHaptic() {
+        // GIVEN side fingerprint enrolled, last wake reason was recent power button
+        when(mAuthController.isSfpsEnrolled(anyInt())).thenReturn(true);
+        when(mWakefulnessLifecycle.getLastWakeReason())
+                .thenReturn(PowerManager.WAKE_REASON_POWER_BUTTON);
+        when(mWakefulnessLifecycle.getLastWakeTime()).thenReturn(mSystemClock.uptimeMillis());
+
+        // WHEN biometric fingerprint fails
+        mBiometricUnlockController.onBiometricAuthFailed(BiometricSourceType.FINGERPRINT);
+
+        // THEN always vibrate the device
+        verify(mVibratorHelper).vibrateAuthError(anyString());
+    }
+
+    private void givenFingerprintModeUnlockCollapsing() {
+        when(mUpdateMonitor.isUnlockingWithBiometricAllowed(anyBoolean())).thenReturn(true);
+        when(mUpdateMonitor.isDeviceInteractive()).thenReturn(true);
+        when(mKeyguardStateController.isShowing()).thenReturn(true);
     }
 }
