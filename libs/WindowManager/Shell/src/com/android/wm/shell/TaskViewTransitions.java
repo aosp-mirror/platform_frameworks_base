@@ -41,7 +41,7 @@ import java.util.ArrayList;
 public class TaskViewTransitions implements Transitions.TransitionHandler {
     private static final String TAG = "TaskViewTransitions";
 
-    private final ArrayList<TaskView> mTaskViews = new ArrayList<>();
+    private final ArrayList<TaskViewTaskController> mTaskViews = new ArrayList<>();
     private final ArrayList<PendingTransition> mPending = new ArrayList<>();
     private final Transitions mTransitions;
     private final boolean[] mRegistered = new boolean[]{ false };
@@ -54,11 +54,12 @@ public class TaskViewTransitions implements Transitions.TransitionHandler {
     private static class PendingTransition {
         final @WindowManager.TransitionType int mType;
         final WindowContainerTransaction mWct;
-        final @NonNull TaskView mTaskView;
+        final @NonNull TaskViewTaskController mTaskView;
         IBinder mClaimed;
 
         PendingTransition(@WindowManager.TransitionType int type,
-                @Nullable WindowContainerTransaction wct, @NonNull TaskView taskView) {
+                @Nullable WindowContainerTransaction wct,
+                @NonNull TaskViewTaskController taskView) {
             mType = type;
             mWct = wct;
             mTaskView = taskView;
@@ -72,7 +73,7 @@ public class TaskViewTransitions implements Transitions.TransitionHandler {
         // TODO(210041388): register here once we have an explicit ordering mechanism.
     }
 
-    void addTaskView(TaskView tv) {
+    void addTaskView(TaskViewTaskController tv) {
         synchronized (mRegistered) {
             if (!mRegistered[0]) {
                 mRegistered[0] = true;
@@ -82,7 +83,7 @@ public class TaskViewTransitions implements Transitions.TransitionHandler {
         mTaskViews.add(tv);
     }
 
-    void removeTaskView(TaskView tv) {
+    void removeTaskView(TaskViewTaskController tv) {
         mTaskViews.remove(tv);
         // Note: Don't unregister handler since this is a singleton with lifetime bound to Shell
     }
@@ -101,7 +102,8 @@ public class TaskViewTransitions implements Transitions.TransitionHandler {
      *               if there is a match earlier. The idea behind this is to check the state of
      *               the taskviews "as if all transitions already happened".
      */
-    private PendingTransition findPending(TaskView taskView, boolean closing, boolean latest) {
+    private PendingTransition findPending(TaskViewTaskController taskView, boolean closing,
+            boolean latest) {
         for (int i = mPending.size() - 1; i >= 0; --i) {
             if (mPending.get(i).mTaskView != taskView) continue;
             if (Transitions.isClosingType(mPending.get(i).mType) == closing) {
@@ -134,7 +136,7 @@ public class TaskViewTransitions implements Transitions.TransitionHandler {
         if (triggerTask == null) {
             return null;
         }
-        final TaskView taskView = findTaskView(triggerTask);
+        final TaskViewTaskController taskView = findTaskView(triggerTask);
         if (taskView == null) return null;
         // Opening types should all be initiated by shell
         if (!Transitions.isClosingType(request.getType())) return null;
@@ -150,7 +152,7 @@ public class TaskViewTransitions implements Transitions.TransitionHandler {
         return new WindowContainerTransaction();
     }
 
-    private TaskView findTaskView(ActivityManager.RunningTaskInfo taskInfo) {
+    private TaskViewTaskController findTaskView(ActivityManager.RunningTaskInfo taskInfo) {
         for (int i = 0; i < mTaskViews.size(); ++i) {
             if (mTaskViews.get(i).getTaskInfo() == null) continue;
             if (taskInfo.token.equals(mTaskViews.get(i).getTaskInfo().token)) {
@@ -160,12 +162,12 @@ public class TaskViewTransitions implements Transitions.TransitionHandler {
         return null;
     }
 
-    void startTaskView(WindowContainerTransaction wct, TaskView taskView) {
+    void startTaskView(WindowContainerTransaction wct, TaskViewTaskController taskView) {
         mPending.add(new PendingTransition(TRANSIT_OPEN, wct, taskView));
         startNextTransition();
     }
 
-    void setTaskViewVisible(TaskView taskView, boolean visible) {
+    void setTaskViewVisible(TaskViewTaskController taskView, boolean visible) {
         PendingTransition pending = findPending(taskView, !visible, true /* latest */);
         if (pending != null) {
             // Already opening or creating a task, so no need to do anything here.
@@ -203,7 +205,7 @@ public class TaskViewTransitions implements Transitions.TransitionHandler {
         PendingTransition pending = findPending(transition);
         if (pending == null) return false;
         mPending.remove(pending);
-        TaskView taskView = pending.mTaskView;
+        TaskViewTaskController taskView = pending.mTaskView;
         final ArrayList<TransitionInfo.Change> tasks = new ArrayList<>();
         for (int i = 0; i < info.getChanges().size(); ++i) {
             final TransitionInfo.Change chg = info.getChanges().get(i);
@@ -219,7 +221,7 @@ public class TaskViewTransitions implements Transitions.TransitionHandler {
             TransitionInfo.Change chg = tasks.get(i);
             if (Transitions.isClosingType(chg.getMode())) {
                 final boolean isHide = chg.getMode() == TRANSIT_TO_BACK;
-                TaskView tv = findTaskView(chg.getTaskInfo());
+                TaskViewTaskController tv = findTaskView(chg.getTaskInfo());
                 if (tv == null) {
                     throw new IllegalStateException("TaskView transition is closing a "
                             + "non-taskview task ");
@@ -232,7 +234,7 @@ public class TaskViewTransitions implements Transitions.TransitionHandler {
             } else if (Transitions.isOpeningType(chg.getMode())) {
                 final boolean taskIsNew = chg.getMode() == TRANSIT_OPEN;
                 if (wct == null) wct = new WindowContainerTransaction();
-                TaskView tv = taskView;
+                TaskViewTaskController tv = taskView;
                 if (!taskIsNew) {
                     tv = findTaskView(chg.getTaskInfo());
                     if (tv == null) {
