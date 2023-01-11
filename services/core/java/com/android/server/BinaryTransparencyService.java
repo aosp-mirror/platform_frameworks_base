@@ -531,27 +531,30 @@ public class BinaryTransparencyService extends SystemService {
                         pw.println("|--> Pre-installed package install location: "
                                 + origPackageFilepath);
 
-                        if (useSha256) {
-                            String sha256Digest = PackageUtils.computeSha256DigestForLargeFile(
-                                    origPackageFilepath, PackageUtils.createLargeFileBuffer());
-                            pw.println("|--> Pre-installed package SHA-256 digest: "
-                                    + sha256Digest);
-                        }
+                        if (!origPackageFilepath.equals(APEX_PRELOAD_LOCATION_ERROR)) {
+                            if (useSha256) {
+                                String sha256Digest = PackageUtils.computeSha256DigestForLargeFile(
+                                        origPackageFilepath, PackageUtils.createLargeFileBuffer());
+                                pw.println("|--> Pre-installed package SHA-256 digest: "
+                                        + sha256Digest);
+                            }
 
-
-                        Map<Integer, byte[]> contentDigests = computeApkContentDigest(
-                                origPackageFilepath);
-                        if (contentDigests == null) {
-                            pw.println("ERROR: Failed to compute package content digest for "
-                                    + origPackageFilepath);
-                        } else {
-                            for (Map.Entry<Integer, byte[]> entry : contentDigests.entrySet()) {
-                                Integer algorithmId = entry.getKey();
-                                byte[] contentDigest = entry.getValue();
-                                pw.println("|--> Pre-installed package content digest: "
-                                        + HexEncoding.encodeToString(contentDigest, false));
-                                pw.println("|--> Pre-installed package content digest algorithm: "
-                                        + translateContentDigestAlgorithmIdToString(algorithmId));
+                            Map<Integer, byte[]> contentDigests = computeApkContentDigest(
+                                    origPackageFilepath);
+                            if (contentDigests == null) {
+                                pw.println("|--> ERROR: Failed to compute package content digest "
+                                        + "for " + origPackageFilepath);
+                            } else {
+                                for (Map.Entry<Integer, byte[]> entry : contentDigests.entrySet()) {
+                                    Integer algorithmId = entry.getKey();
+                                    byte[] contentDigest = entry.getValue();
+                                    pw.println("|--> Pre-installed package content digest: "
+                                            + HexEncoding.encodeToString(contentDigest, false));
+                                    pw.println("|--> Pre-installed package content digest "
+                                            + "algorithm: "
+                                            + translateContentDigestAlgorithmIdToString(
+                                                    algorithmId));
+                                }
                             }
                         }
                     }
