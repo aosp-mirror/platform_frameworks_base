@@ -45,7 +45,6 @@ import com.android.systemui.keyguard.ui.viewmodel.KeyguardQuickAffordanceViewMod
 import com.android.systemui.lifecycle.repeatWhenAttached
 import com.android.systemui.plugins.FalsingManager
 import com.android.systemui.statusbar.VibratorHelper
-import com.android.systemui.util.kotlin.pairwise
 import kotlin.math.pow
 import kotlin.math.sqrt
 import kotlin.time.Duration.Companion.milliseconds
@@ -129,18 +128,6 @@ object KeyguardBottomAreaViewBinder {
                 }
 
                 launch {
-                    viewModel.startButton
-                        .map { it.isActivated }
-                        .pairwise()
-                        .collect { (prev, next) ->
-                            when {
-                                !prev && next -> vibratorHelper?.vibrate(Vibrations.Activated)
-                                prev && !next -> vibratorHelper?.vibrate(Vibrations.Deactivated)
-                            }
-                        }
-                }
-
-                launch {
                     viewModel.endButton.collect { buttonModel ->
                         updateButton(
                             view = endButton,
@@ -150,18 +137,6 @@ object KeyguardBottomAreaViewBinder {
                             vibratorHelper = vibratorHelper,
                         )
                     }
-                }
-
-                launch {
-                    viewModel.endButton
-                        .map { it.isActivated }
-                        .pairwise()
-                        .collect { (prev, next) ->
-                            when {
-                                !prev && next -> vibratorHelper?.vibrate(Vibrations.Activated)
-                                prev && !next -> vibratorHelper?.vibrate(Vibrations.Deactivated)
-                            }
-                        }
                 }
 
                 launch {
@@ -383,6 +358,13 @@ object KeyguardBottomAreaViewBinder {
                                 .setDuration(longPressDurationMs)
                                 .withEndAction {
                                     view.setOnClickListener {
+                                        vibratorHelper?.vibrate(
+                                            if (viewModel.isActivated) {
+                                                Vibrations.Activated
+                                            } else {
+                                                Vibrations.Deactivated
+                                            }
+                                        )
                                         viewModel.onClicked(
                                             KeyguardQuickAffordanceViewModel.OnClickedParameters(
                                                 configKey = viewModel.configKey,
