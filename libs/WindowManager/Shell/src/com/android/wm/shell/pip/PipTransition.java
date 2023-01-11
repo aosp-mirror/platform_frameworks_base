@@ -662,8 +662,8 @@ public class PipTransition extends PipTransitionController {
             }
 
             // Please file a bug to handle the unexpected transition type.
-            throw new IllegalStateException("Entering PIP with unexpected transition type="
-                    + transitTypeToString(transitType));
+            android.util.Slog.e(TAG, "Found new PIP in transition with mis-matched type="
+                    + transitTypeToString(transitType), new Throwable());
         }
         return false;
     }
