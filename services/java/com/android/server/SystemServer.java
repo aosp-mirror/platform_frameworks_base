@@ -146,6 +146,7 @@ import com.android.server.logcat.LogcatManagerService;
 import com.android.server.media.MediaRouterService;
 import com.android.server.media.metrics.MediaMetricsManagerService;
 import com.android.server.media.projection.MediaProjectionManagerService;
+import com.android.server.net.NetworkManagementService;
 import com.android.server.net.NetworkPolicyManagerService;
 import com.android.server.net.watchlist.NetworkWatchlistService;
 import com.android.server.notification.NotificationManagerService;
