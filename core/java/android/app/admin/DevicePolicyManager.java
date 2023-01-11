@@ -2417,6 +2417,7 @@ public class DevicePolicyManager {
      * applied (cross profile intent filters updated). Only usesd for CTS tests.
      * @hide
      */
+    @SuppressLint("ActionValue")
     @TestApi
     @SdkConstant(SdkConstantType.BROADCAST_INTENT_ACTION)
     public static final String ACTION_DATA_SHARING_RESTRICTION_APPLIED =
@@ -2427,6 +2428,7 @@ public class DevicePolicyManager {
      * has been changed.
      * @hide
      */
+    @SuppressLint("ActionValue")
     @TestApi
     @SdkConstant(SdkConstantType.BROADCAST_INTENT_ACTION)
     public static final String ACTION_DEVICE_POLICY_CONSTANTS_CHANGED =
