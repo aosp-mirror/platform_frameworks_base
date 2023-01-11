@@ -109,6 +109,8 @@ public class RemoteInputView extends LinearLayout implements View.OnClickListene
     private static final long FOCUS_ANIMATION_FADE_IN_DELAY = 33;
     private static final long FOCUS_ANIMATION_FADE_IN_DURATION = 83;
     private static final float FOCUS_ANIMATION_MIN_SCALE = 0.5f;
+    private static final long DEFOCUS_ANIMATION_FADE_OUT_DELAY = 120;
+    private static final long DEFOCUS_ANIMATION_CROSSFADE_DELAY = 180;
 
     public final Object mToken = new Object();
 
@@ -421,7 +423,7 @@ public class RemoteInputView extends LinearLayout implements View.OnClickListene
     }
 
     @VisibleForTesting
-    void onDefocus(boolean animate, boolean logClose) {
+    void onDefocus(boolean animate, boolean logClose, @Nullable Runnable doAfterDefocus) {
         mController.removeRemoteInput(mEntry, mToken);
         mEntry.remoteInputText = mEditText.getText();
 
@@ -431,18 +433,20 @@ public class RemoteInputView extends LinearLayout implements View.OnClickListene
             ViewGroup parent = (ViewGroup) getParent();
             if (animate && parent != null && mIsFocusAnimationFlagActive) {
 
-
                 ViewGroup grandParent = (ViewGroup) parent.getParent();
                 ViewGroupOverlay overlay = parent.getOverlay();
+                View actionsContainer = getActionsContainerLayout();
+                int actionsContainerHeight =
+                        actionsContainer != null ? actionsContainer.getHeight() : 0;
 
                 // After adding this RemoteInputView to the overlay of the parent (and thus removing
                 // it from the parent itself), the parent will shrink in height. This causes the
                 // overlay to be moved. To correct the position of the overlay we need to offset it.
-                int overlayOffsetY = getMaxSiblingHeight() - getHeight();
+                int overlayOffsetY = actionsContainerHeight - getHeight();
                 overlay.add(this);
                 if (grandParent != null) grandParent.setClipChildren(false);
 
-                Animator animator = getDefocusAnimator(overlayOffsetY);
+                Animator animator = getDefocusAnimator(actionsContainer, overlayOffsetY);
                 View self = this;
                 animator.addListener(new AnimatorListenerAdapter() {
                     @Override
@@ -454,8 +458,12 @@ public class RemoteInputView extends LinearLayout implements View.OnClickListene
                         if (mWrapper != null) {
                             mWrapper.setRemoteInputVisible(false);
                         }
+                        if (doAfterDefocus != null) {
+                            doAfterDefocus.run();
+                        }
                     }
                 });
+                if (actionsContainer != null) actionsContainer.setAlpha(0f);
                 animator.start();
 
             } else if (animate && mRevealParams != null && mRevealParams.radius > 0) {
@@ -474,6 +482,7 @@ public class RemoteInputView extends LinearLayout implements View.OnClickListene
                 reveal.start();
             } else {
                 setVisibility(GONE);
+                if (doAfterDefocus != null) doAfterDefocus.run();
                 if (mWrapper != null) {
                     mWrapper.setRemoteInputVisible(false);
                 }
@@ -596,10 +605,8 @@ public class RemoteInputView extends LinearLayout implements View.OnClickListene
 
     /**
      * Focuses the RemoteInputView and animates its appearance
-     *
-     * @param crossFadeView view that will be crossfaded during the appearance animation
      */
-    public void focusAnimated(View crossFadeView) {
+    public void focusAnimated() {
         if (!mIsFocusAnimationFlagActive && getVisibility() != VISIBLE
                 && mRevealParams != null) {
             android.animation.Animator animator = mRevealParams.createCircularRevealAnimator(this);
@@ -609,7 +616,7 @@ public class RemoteInputView extends LinearLayout implements View.OnClickListene
         } else if (mIsFocusAnimationFlagActive && getVisibility() != VISIBLE) {
             mIsAnimatingAppearance = true;
             setAlpha(0f);
-            Animator focusAnimator = getFocusAnimator(crossFadeView);
+            Animator focusAnimator = getFocusAnimator(getActionsContainerLayout());
             focusAnimator.addListener(new AnimatorListenerAdapter() {
                 @Override
                 public void onAnimationEnd(Animator animation, boolean isReverse) {
@@ -661,6 +668,23 @@ public class RemoteInputView extends LinearLayout implements View.OnClickListene
     }
 
     private void reset() {
+        if (mIsFocusAnimationFlagActive) {
+            mProgressBar.setVisibility(INVISIBLE);
+            mResetting = true;
+            mSending = false;
+            onDefocus(true /* animate */, false /* logClose */, () -> {
+                mEntry.remoteInputTextWhenReset = SpannedString.valueOf(mEditText.getText());
+                mEditText.getText().clear();
+                mEditText.setEnabled(isAggregatedVisible());
+                mSendButton.setVisibility(VISIBLE);
+                mController.removeSpinning(mEntry.getKey(), mToken);
+                updateSendButton();
+                setAttachment(null);
+                mResetting = false;
+            });
+            return;
+        }
+
         mResetting = true;
         mSending = false;
         mEntry.remoteInputTextWhenReset = SpannedString.valueOf(mEditText.getText());
@@ -671,7 +695,7 @@ public class RemoteInputView extends LinearLayout implements View.OnClickListene
         mProgressBar.setVisibility(INVISIBLE);
         mController.removeSpinning(mEntry.getKey(), mToken);
         updateSendButton();
-        onDefocus(false /* animate */, false /* logClose */);
+        onDefocus(false /* animate */, false /* logClose */, null /* doAfterDefocus */);
         setAttachment(null);
 
         mResetting = false;
@@ -825,23 +849,22 @@ public class RemoteInputView extends LinearLayout implements View.OnClickListene
     }
 
     /**
-     * @return max sibling height (0 in case of no siblings)
+     * @return action button container view (i.e. ViewGroup containing Reply button etc.)
      */
-    public int getMaxSiblingHeight() {
+    public View getActionsContainerLayout() {
         ViewGroup parentView = (ViewGroup) getParent();
-        int maxHeight = 0;
-        if (parentView == null) return 0;
-        for (int i = 0; i < parentView.getChildCount(); i++) {
-            View siblingView = parentView.getChildAt(i);
-            if (siblingView != this) maxHeight = Math.max(maxHeight, siblingView.getHeight());
-        }
-        return maxHeight;
+        if (parentView == null) return null;
+        return parentView.findViewById(com.android.internal.R.id.actions_container_layout);
     }
 
     /**
      * Creates an animator for the focus animation.
+     *
+     * @param fadeOutView View that will be faded out during the focus animation.
      */
-    private Animator getFocusAnimator(View crossFadeView) {
+    private Animator getFocusAnimator(@Nullable View fadeOutView) {
+        final AnimatorSet animatorSet = new AnimatorSet();
+
         final Animator alphaAnimator = ObjectAnimator.ofFloat(this, View.ALPHA, 0f, 1f);
         alphaAnimator.setStartDelay(FOCUS_ANIMATION_FADE_IN_DELAY);
         alphaAnimator.setDuration(FOCUS_ANIMATION_FADE_IN_DURATION);
@@ -854,30 +877,36 @@ public class RemoteInputView extends LinearLayout implements View.OnClickListene
         scaleAnimator.setDuration(FOCUS_ANIMATION_TOTAL_DURATION);
         scaleAnimator.setInterpolator(InterpolatorsAndroidX.FAST_OUT_SLOW_IN);
 
-        final Animator crossFadeViewAlphaAnimator =
-                ObjectAnimator.ofFloat(crossFadeView, View.ALPHA, 1f, 0f);
-        crossFadeViewAlphaAnimator.setDuration(FOCUS_ANIMATION_CROSSFADE_DURATION);
-        crossFadeViewAlphaAnimator.setInterpolator(InterpolatorsAndroidX.LINEAR);
-        alphaAnimator.addListener(new AnimatorListenerAdapter() {
-            @Override
-            public void onAnimationEnd(Animator animation, boolean isReverse) {
-                crossFadeView.setAlpha(1f);
-            }
-        });
-
-        final AnimatorSet animatorSet = new AnimatorSet();
-        animatorSet.playTogether(alphaAnimator, scaleAnimator, crossFadeViewAlphaAnimator);
+        if (fadeOutView == null) {
+            animatorSet.playTogether(alphaAnimator, scaleAnimator);
+        } else {
+            final Animator fadeOutViewAlphaAnimator =
+                    ObjectAnimator.ofFloat(fadeOutView, View.ALPHA, 1f, 0f);
+            fadeOutViewAlphaAnimator.setDuration(FOCUS_ANIMATION_CROSSFADE_DURATION);
+            fadeOutViewAlphaAnimator.setInterpolator(InterpolatorsAndroidX.LINEAR);
+            animatorSet.addListener(new AnimatorListenerAdapter() {
+                @Override
+                public void onAnimationEnd(Animator animation, boolean isReverse) {
+                    fadeOutView.setAlpha(1f);
+                }
+            });
+            animatorSet.playTogether(alphaAnimator, scaleAnimator, fadeOutViewAlphaAnimator);
+        }
         return animatorSet;
     }
 
     /**
      * Creates an animator for the defocus animation.
      *
-     * @param offsetY The RemoteInputView will be offset by offsetY during the animation
+     * @param fadeInView View that will be faded in during the defocus animation.
+     * @param offsetY    The RemoteInputView will be offset by offsetY during the animation
      */
-    private Animator getDefocusAnimator(int offsetY) {
+    private Animator getDefocusAnimator(@Nullable View fadeInView, int offsetY) {
+        final AnimatorSet animatorSet = new AnimatorSet();
+
         final Animator alphaAnimator = ObjectAnimator.ofFloat(this, View.ALPHA, 1f, 0f);
-        alphaAnimator.setDuration(FOCUS_ANIMATION_CROSSFADE_DURATION);
+        alphaAnimator.setDuration(FOCUS_ANIMATION_FADE_IN_DURATION);
+        alphaAnimator.setStartDelay(DEFOCUS_ANIMATION_FADE_OUT_DELAY);
         alphaAnimator.setInterpolator(InterpolatorsAndroidX.LINEAR);
 
         ValueAnimator scaleAnimator = ValueAnimator.ofFloat(1f, FOCUS_ANIMATION_MIN_SCALE);
@@ -893,8 +922,17 @@ public class RemoteInputView extends LinearLayout implements View.OnClickListene
             }
         });
 
-        final AnimatorSet animatorSet = new AnimatorSet();
-        animatorSet.playTogether(alphaAnimator, scaleAnimator);
+        if (fadeInView == null) {
+            animatorSet.playTogether(alphaAnimator, scaleAnimator);
+        } else {
+            fadeInView.forceHasOverlappingRendering(false);
+            Animator fadeInViewAlphaAnimator =
+                    ObjectAnimator.ofFloat(fadeInView, View.ALPHA, 0f, 1f);
+            fadeInViewAlphaAnimator.setDuration(FOCUS_ANIMATION_FADE_IN_DURATION);
+            fadeInViewAlphaAnimator.setInterpolator(InterpolatorsAndroidX.LINEAR);
+            fadeInViewAlphaAnimator.setStartDelay(DEFOCUS_ANIMATION_CROSSFADE_DELAY);
+            animatorSet.playTogether(alphaAnimator, scaleAnimator, fadeInViewAlphaAnimator);
+        }
         return animatorSet;
     }
 
@@ -1011,7 +1049,8 @@ public class RemoteInputView extends LinearLayout implements View.OnClickListene
             if (isFocusable() && isEnabled()) {
                 setInnerFocusable(false);
                 if (mRemoteInputView != null) {
-                    mRemoteInputView.onDefocus(animate, true /* logClose */);
+                    mRemoteInputView
+                            .onDefocus(animate, true /* logClose */, null /* doAfterDefocus */);
                 }
                 mShowImeOnInputConnection = false;
             }
