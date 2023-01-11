@@ -7038,6 +7038,16 @@ public class UserManagerService extends IUserManager.Stub {
         }
 
         @Override
+        public boolean assignUserToExtraDisplay(int userId, int displayId) {
+            return mUserVisibilityMediator.assignUserToExtraDisplay(userId, displayId);
+        }
+
+        @Override
+        public boolean unassignUserFromExtraDisplay(int userId, int displayId) {
+            return mUserVisibilityMediator.unassignUserFromExtraDisplay(userId, displayId);
+        }
+
+        @Override
         public void unassignUserFromDisplayOnStop(@UserIdInt int userId) {
             mUserVisibilityMediator.unassignUserFromDisplayOnStop(userId);
         }
