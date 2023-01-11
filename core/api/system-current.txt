@@ -15661,6 +15661,7 @@ package android.telephony.ims {
     field public static final String SERVICE_ID_POST_CALL = "org.3gpp.urn:urn-7:3gpp-service.ims.icsi.gsma.callunanswered";
     field public static final String SERVICE_ID_SHARED_MAP = "org.3gpp.urn:urn-7:3gpp-service.ims.icsi.gsma.sharedmap";
     field public static final String SERVICE_ID_SHARED_SKETCH = "org.3gpp.urn:urn-7:3gpp-service.ims.icsi.gsma.sharedsketch";
+    field public static final String SERVICE_ID_SLM = "org.openmobilealliance:StandaloneMsg";
     field public static final String TUPLE_BASIC_STATUS_CLOSED = "closed";
     field public static final String TUPLE_BASIC_STATUS_OPEN = "open";
   }
