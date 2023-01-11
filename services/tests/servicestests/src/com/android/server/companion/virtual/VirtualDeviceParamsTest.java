@@ -27,6 +27,7 @@ import android.companion.virtual.VirtualDeviceParams;
 import android.companion.virtual.sensor.VirtualSensorConfig;
 import android.os.Parcel;
 import android.os.UserHandle;
+import android.platform.test.annotations.Presubmit;
 
 import androidx.test.ext.junit.runners.AndroidJUnit4;
 
@@ -36,6 +37,7 @@ import org.junit.runner.RunWith;
 import java.util.List;
 import java.util.Set;
 
+@Presubmit
 @RunWith(AndroidJUnit4.class)
 public class VirtualDeviceParamsTest {
 
