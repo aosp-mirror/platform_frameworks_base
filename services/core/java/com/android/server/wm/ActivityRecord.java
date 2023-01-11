@@ -727,6 +727,7 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
     /**
      * When set to true, the IME insets will be frozen until the next app becomes IME input target.
      * @see InsetsPolicy#adjustVisibilityForIme
+     * @see ImeInsetsSourceProvider#updateClientVisibility
      */
     boolean mImeInsetsFrozenUntilStartInput;
 
@@ -1576,7 +1577,6 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
         if (newParent != null) {
             if (isState(RESUMED)) {
                 newParent.setResumedActivity(this, "onParentChanged");
-                mImeInsetsFrozenUntilStartInput = false;
             }
             mLetterboxUiController.onActivityParentChanged(newParent);
         }
@@ -8872,13 +8872,6 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
                 restartProcessIfVisible();
             }
         }
-    }
-
-    @Override
-    void onResize() {
-        // Reset freezing IME insets flag when the activity resized.
-        mImeInsetsFrozenUntilStartInput = false;
-        super.onResize();
     }
 
     private boolean applyAspectRatio(Rect outBounds, Rect containingAppBounds,

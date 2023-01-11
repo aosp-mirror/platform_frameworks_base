@@ -6267,13 +6267,6 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
     }
 
     @Override
-    public void unfreezeInsetsAfterStartInput() {
-        if (mActivityRecord != null) {
-            mActivityRecord.mImeInsetsFrozenUntilStartInput = false;
-        }
-    }
-
-    @Override
     public boolean isInputMethodClientFocus(int uid, int pid) {
         return getDisplayContent().isInputMethodClientFocus(uid, pid);
     }
