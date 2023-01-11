@@ -598,3 +598,12 @@ java_library {
     ],
     visibility: ["//visibility:public"],
 }
+
+java_api_contribution {
+    name: "frameworks-base-core-api-module-lib-stubs",
+    api_surface: "module-lib",
+    api_file: "core/api/module-lib-current.txt",
+    visibility: [
+        "//build/orchestrator/apis",
+    ],
+}
