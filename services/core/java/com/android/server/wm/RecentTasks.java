@@ -976,7 +976,7 @@ class RecentTasks {
                 continue;
             }
 
-            res.add(createRecentTaskInfo(task, true /* stripExtras */));
+            res.add(createRecentTaskInfo(task, true /* stripExtras */, getTasksAllowed));
         }
         return res;
     }
@@ -1889,7 +1889,8 @@ class RecentTasks {
     /**
      * Creates a new RecentTaskInfo from a Task.
      */
-    ActivityManager.RecentTaskInfo createRecentTaskInfo(Task tr, boolean stripExtras) {
+    ActivityManager.RecentTaskInfo createRecentTaskInfo(Task tr, boolean stripExtras,
+            boolean getTasksAllowed) {
         final ActivityManager.RecentTaskInfo rti = new ActivityManager.RecentTaskInfo();
         // If the recent Task is detached, we consider it will be re-attached to the default
         // TaskDisplayArea because we currently only support recent overview in the default TDA.
@@ -1901,6 +1902,9 @@ class RecentTasks {
         rti.id = rti.isRunning ? rti.taskId : INVALID_TASK_ID;
         rti.persistentId = rti.taskId;
         rti.lastSnapshotData.set(tr.mLastTaskSnapshotData);
+        if (!getTasksAllowed) {
+            Task.trimIneffectiveInfo(tr, rti);
+        }
 
         // Fill in organized child task info for the task created by organizer.
         if (tr.mCreatedByOrganizer) {

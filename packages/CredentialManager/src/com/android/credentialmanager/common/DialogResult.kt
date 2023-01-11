@@ -18,7 +18,8 @@ package com.android.credentialmanager.common
 
 enum class ResultState {
   COMPLETE,
-  CANCELED,
+  NORMAL_CANCELED,
+  LAUNCH_SETTING_CANCELED
 }
 
 data class DialogResult(

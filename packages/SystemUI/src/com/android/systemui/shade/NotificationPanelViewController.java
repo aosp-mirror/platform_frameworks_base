@@ -145,6 +145,8 @@ import com.android.systemui.keyguard.shared.model.TransitionState;
 import com.android.systemui.keyguard.shared.model.TransitionStep;
 import com.android.systemui.keyguard.ui.viewmodel.DreamingToLockscreenTransitionViewModel;
 import com.android.systemui.keyguard.ui.viewmodel.KeyguardBottomAreaViewModel;
+import com.android.systemui.keyguard.ui.viewmodel.LockscreenToDreamingTransitionViewModel;
+import com.android.systemui.keyguard.ui.viewmodel.LockscreenToOccludedTransitionViewModel;
 import com.android.systemui.keyguard.ui.viewmodel.OccludedToLockscreenTransitionViewModel;
 import com.android.systemui.media.controls.pipeline.MediaDataManager;
 import com.android.systemui.media.controls.ui.KeyguardMediaController;
@@ -689,12 +691,16 @@ public final class NotificationPanelViewController implements Dumpable {
     private boolean mExpandLatencyTracking;
     private DreamingToLockscreenTransitionViewModel mDreamingToLockscreenTransitionViewModel;
     private OccludedToLockscreenTransitionViewModel mOccludedToLockscreenTransitionViewModel;
+    private LockscreenToDreamingTransitionViewModel mLockscreenToDreamingTransitionViewModel;
+    private LockscreenToOccludedTransitionViewModel mLockscreenToOccludedTransitionViewModel;
 
     private KeyguardTransitionInteractor mKeyguardTransitionInteractor;
     private CoroutineDispatcher mMainDispatcher;
-    private boolean mIsToLockscreenTransitionRunning = false;
+    private boolean mIsOcclusionTransitionRunning = false;
     private int mDreamingToLockscreenTransitionTranslationY;
     private int mOccludedToLockscreenTransitionTranslationY;
+    private int mLockscreenToDreamingTransitionTranslationY;
+    private int mLockscreenToOccludedTransitionTranslationY;
     private boolean mUnocclusionTransitionFlagEnabled = false;
 
     private final Runnable mFlingCollapseRunnable = () -> fling(0, false /* expand */,
@@ -713,13 +719,25 @@ public final class NotificationPanelViewController implements Dumpable {
 
     private final Consumer<TransitionStep> mDreamingToLockscreenTransition =
             (TransitionStep step) -> {
-                mIsToLockscreenTransitionRunning =
+                mIsOcclusionTransitionRunning =
                     step.getTransitionState() == TransitionState.RUNNING;
             };
 
     private final Consumer<TransitionStep> mOccludedToLockscreenTransition =
             (TransitionStep step) -> {
-                mIsToLockscreenTransitionRunning =
+                mIsOcclusionTransitionRunning =
+                    step.getTransitionState() == TransitionState.RUNNING;
+            };
+
+    private final Consumer<TransitionStep> mLockscreenToDreamingTransition =
+            (TransitionStep step) -> {
+                mIsOcclusionTransitionRunning =
+                    step.getTransitionState() == TransitionState.RUNNING;
+            };
+
+    private final Consumer<TransitionStep> mLockscreenToOccludedTransition =
+            (TransitionStep step) -> {
+                mIsOcclusionTransitionRunning =
                     step.getTransitionState() == TransitionState.RUNNING;
             };
 
@@ -794,6 +812,8 @@ public final class NotificationPanelViewController implements Dumpable {
             AlternateBouncerInteractor alternateBouncerInteractor,
             DreamingToLockscreenTransitionViewModel dreamingToLockscreenTransitionViewModel,
             OccludedToLockscreenTransitionViewModel occludedToLockscreenTransitionViewModel,
+            LockscreenToDreamingTransitionViewModel lockscreenToDreamingTransitionViewModel,
+            LockscreenToOccludedTransitionViewModel lockscreenToOccludedTransitionViewModel,
             @Main CoroutineDispatcher mainDispatcher,
             KeyguardTransitionInteractor keyguardTransitionInteractor,
             DumpManager dumpManager) {
@@ -813,6 +833,8 @@ public final class NotificationPanelViewController implements Dumpable {
         mGutsManager = gutsManager;
         mDreamingToLockscreenTransitionViewModel = dreamingToLockscreenTransitionViewModel;
         mOccludedToLockscreenTransitionViewModel = occludedToLockscreenTransitionViewModel;
+        mLockscreenToDreamingTransitionViewModel = lockscreenToDreamingTransitionViewModel;
+        mLockscreenToOccludedTransitionViewModel = lockscreenToOccludedTransitionViewModel;
         mKeyguardTransitionInteractor = keyguardTransitionInteractor;
         mView.addOnAttachStateChangeListener(new View.OnAttachStateChangeListener() {
             @Override
@@ -1121,22 +1143,44 @@ public final class NotificationPanelViewController implements Dumpable {
             collectFlow(mView, mKeyguardTransitionInteractor.getDreamingToLockscreenTransition(),
                     mDreamingToLockscreenTransition, mMainDispatcher);
             collectFlow(mView, mDreamingToLockscreenTransitionViewModel.getLockscreenAlpha(),
-                    toLockscreenTransitionAlpha(mNotificationStackScrollLayoutController),
+                    setTransitionAlpha(mNotificationStackScrollLayoutController),
                     mMainDispatcher);
             collectFlow(mView, mDreamingToLockscreenTransitionViewModel.lockscreenTranslationY(
                     mDreamingToLockscreenTransitionTranslationY),
-                    toLockscreenTransitionY(mNotificationStackScrollLayoutController),
+                    setTransitionY(mNotificationStackScrollLayoutController),
                     mMainDispatcher);
 
             // Occluded->Lockscreen
             collectFlow(mView, mKeyguardTransitionInteractor.getOccludedToLockscreenTransition(),
                     mOccludedToLockscreenTransition, mMainDispatcher);
             collectFlow(mView, mOccludedToLockscreenTransitionViewModel.getLockscreenAlpha(),
-                    toLockscreenTransitionAlpha(mNotificationStackScrollLayoutController),
+                    setTransitionAlpha(mNotificationStackScrollLayoutController),
                     mMainDispatcher);
             collectFlow(mView, mOccludedToLockscreenTransitionViewModel.lockscreenTranslationY(
                     mOccludedToLockscreenTransitionTranslationY),
-                    toLockscreenTransitionY(mNotificationStackScrollLayoutController),
+                    setTransitionY(mNotificationStackScrollLayoutController),
+                    mMainDispatcher);
+
+            // Lockscreen->Dreaming
+            collectFlow(mView, mKeyguardTransitionInteractor.getLockscreenToDreamingTransition(),
+                    mLockscreenToDreamingTransition, mMainDispatcher);
+            collectFlow(mView, mLockscreenToDreamingTransitionViewModel.getLockscreenAlpha(),
+                    setTransitionAlpha(mNotificationStackScrollLayoutController),
+                    mMainDispatcher);
+            collectFlow(mView, mLockscreenToDreamingTransitionViewModel.lockscreenTranslationY(
+                    mLockscreenToDreamingTransitionTranslationY),
+                    setTransitionY(mNotificationStackScrollLayoutController),
+                    mMainDispatcher);
+
+            // Lockscreen->Occluded
+            collectFlow(mView, mKeyguardTransitionInteractor.getLockscreenToOccludedTransition(),
+                    mLockscreenToOccludedTransition, mMainDispatcher);
+            collectFlow(mView, mLockscreenToOccludedTransitionViewModel.getLockscreenAlpha(),
+                    setTransitionAlpha(mNotificationStackScrollLayoutController),
+                    mMainDispatcher);
+            collectFlow(mView, mLockscreenToOccludedTransitionViewModel.lockscreenTranslationY(
+                    mLockscreenToOccludedTransitionTranslationY),
+                    setTransitionY(mNotificationStackScrollLayoutController),
                     mMainDispatcher);
         }
     }
@@ -1177,6 +1221,10 @@ public final class NotificationPanelViewController implements Dumpable {
                 R.dimen.dreaming_to_lockscreen_transition_lockscreen_translation_y);
         mOccludedToLockscreenTransitionTranslationY = mResources.getDimensionPixelSize(
                 R.dimen.occluded_to_lockscreen_transition_lockscreen_translation_y);
+        mLockscreenToDreamingTransitionTranslationY = mResources.getDimensionPixelSize(
+                R.dimen.lockscreen_to_dreaming_transition_lockscreen_translation_y);
+        mLockscreenToOccludedTransitionTranslationY = mResources.getDimensionPixelSize(
+                R.dimen.lockscreen_to_occluded_transition_lockscreen_translation_y);
     }
 
     private void updateViewControllers(KeyguardStatusView keyguardStatusView,
@@ -1840,7 +1888,7 @@ public final class NotificationPanelViewController implements Dumpable {
     }
 
     private void updateClock() {
-        if (mIsToLockscreenTransitionRunning) {
+        if (mIsOcclusionTransitionRunning) {
             return;
         }
         float alpha = mClockPositionResult.clockAlpha * mKeyguardOnlyContentAlpha;
@@ -2731,7 +2779,7 @@ public final class NotificationPanelViewController implements Dumpable {
         } else if (statusBarState == KEYGUARD
                 || statusBarState == StatusBarState.SHADE_LOCKED) {
             mKeyguardBottomArea.setVisibility(View.VISIBLE);
-            if (!mIsToLockscreenTransitionRunning) {
+            if (!mIsOcclusionTransitionRunning) {
                 mKeyguardBottomArea.setAlpha(1f);
             }
         } else {
@@ -3600,7 +3648,7 @@ public final class NotificationPanelViewController implements Dumpable {
     }
 
     private void updateNotificationTranslucency() {
-        if (mIsToLockscreenTransitionRunning) {
+        if (mIsOcclusionTransitionRunning) {
             return;
         }
         float alpha = 1f;
@@ -3658,7 +3706,7 @@ public final class NotificationPanelViewController implements Dumpable {
     }
 
     private void updateKeyguardBottomAreaAlpha() {
-        if (mIsToLockscreenTransitionRunning) {
+        if (mIsOcclusionTransitionRunning) {
             return;
         }
         // There are two possible panel expansion behaviors:
@@ -5890,7 +5938,7 @@ public final class NotificationPanelViewController implements Dumpable {
         mCurrentPanelState = state;
     }
 
-    private Consumer<Float> toLockscreenTransitionAlpha(
+    private Consumer<Float> setTransitionAlpha(
             NotificationStackScrollLayoutController stackScroller) {
         return (Float alpha) -> {
             mKeyguardStatusViewController.setAlpha(alpha);
@@ -5908,7 +5956,7 @@ public final class NotificationPanelViewController implements Dumpable {
         };
     }
 
-    private Consumer<Float> toLockscreenTransitionY(
+    private Consumer<Float> setTransitionY(
                 NotificationStackScrollLayoutController stackScroller) {
         return (Float translationY) -> {
             mKeyguardStatusViewController.setTranslationY(translationY,  /* excludeMedia= */false);

@@ -242,7 +242,7 @@ class CreateFlowUtils {
           packageName = it.providerFlattenedComponentName
         }
         val pkgInfo = packageManager
-                .getPackageInfo(packageName,
+                .getPackageInfo(packageName!!,
                         PackageManager.PackageInfoFlags.of(0))
         DisabledProviderInfo(
                 icon = pkgInfo.applicationInfo.loadIcon(packageManager)!!,
@@ -264,7 +264,7 @@ class CreateFlowUtils {
       val createCredentialRequest = requestInfo.createCredentialRequest
       val createCredentialRequestJetpack = createCredentialRequest?.let {
         CreateCredentialRequest.createFrom(
-                it
+                it.type, it.credentialData, it.candidateQueryData, it.requireSystemProvider()
         )
       }
       when (createCredentialRequestJetpack) {
@@ -431,6 +431,7 @@ class CreateFlowUtils {
                 totalCredentialCount = CredentialCountInformation.getTotalCount(
                         createEntry.credentialCountInformationList) ?: 0,
                 lastUsedTimeMillis = createEntry.lastUsedTimeMillis ?: 0,
+                footerDescription = createEntry.footerDescription?.toString()
         )
       }
     }

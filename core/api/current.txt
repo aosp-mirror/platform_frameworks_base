@@ -8640,6 +8640,9 @@ package android.app.job {
     method public void jobFinished(android.app.job.JobParameters, boolean);
     method public abstract boolean onStartJob(android.app.job.JobParameters);
     method public abstract boolean onStopJob(android.app.job.JobParameters);
+    method public void setNotification(@NonNull android.app.job.JobParameters, int, @NonNull android.app.Notification, int);
+    method public void updateEstimatedNetworkBytes(@NonNull android.app.job.JobParameters, @Nullable android.app.job.JobWorkItem, long, long);
+    method public void updateTransferredNetworkBytes(@NonNull android.app.job.JobParameters, @Nullable android.app.job.JobWorkItem, long, long);
   }
 
   public final class JobWorkItem implements android.os.Parcelable {
@@ -17715,8 +17718,8 @@ package android.hardware {
     method public boolean flush(android.hardware.SensorEventListener);
     method public static float getAltitude(float, float);
     method public static void getAngleChange(float[], float[], float[]);
-    method public android.hardware.Sensor getDefaultSensor(int);
-    method public android.hardware.Sensor getDefaultSensor(int, boolean);
+    method @Nullable public android.hardware.Sensor getDefaultSensor(int);
+    method @Nullable public android.hardware.Sensor getDefaultSensor(int, boolean);
     method public java.util.List<android.hardware.Sensor> getDynamicSensorList(int);
     method public static float getInclination(float[]);
     method public static float[] getOrientation(float[], float[]);
@@ -36397,6 +36400,7 @@ package android.provider {
     field public static final String ACTION_PROCESS_WIFI_EASY_CONNECT_URI = "android.settings.PROCESS_WIFI_EASY_CONNECT_URI";
     field public static final String ACTION_QUICK_ACCESS_WALLET_SETTINGS = "android.settings.QUICK_ACCESS_WALLET_SETTINGS";
     field public static final String ACTION_QUICK_LAUNCH_SETTINGS = "android.settings.QUICK_LAUNCH_SETTINGS";
+    field public static final String ACTION_REGIONAL_PREFERENCES_SETTINGS = "android.settings.REGIONAL_PREFERENCES_SETTINGS";
     field public static final String ACTION_REQUEST_IGNORE_BATTERY_OPTIMIZATIONS = "android.settings.REQUEST_IGNORE_BATTERY_OPTIMIZATIONS";
     field public static final String ACTION_REQUEST_MANAGE_MEDIA = "android.settings.REQUEST_MANAGE_MEDIA";
     field public static final String ACTION_REQUEST_SCHEDULE_EXACT_ALARM = "android.settings.REQUEST_SCHEDULE_EXACT_ALARM";
@@ -40437,7 +40441,7 @@ package android.service.quicksettings {
     method public void onTileRemoved();
     method public static final void requestListeningState(android.content.Context, android.content.ComponentName);
     method public final void showDialog(android.app.Dialog);
-    method public final void startActivityAndCollapse(android.content.Intent);
+    method @Deprecated public final void startActivityAndCollapse(android.content.Intent);
     method public final void startActivityAndCollapse(@NonNull android.app.PendingIntent);
     method public final void unlockAndRun(Runnable);
     field public static final String ACTION_QS_TILE = "android.service.quicksettings.action.QS_TILE";
@@ -41306,6 +41310,7 @@ package android.telecom {
     method public void disconnect(@NonNull android.telecom.DisconnectCause, @NonNull java.util.concurrent.Executor, @NonNull android.os.OutcomeReceiver<java.lang.Void,android.telecom.CallException>);
     method @NonNull public android.os.ParcelUuid getCallId();
     method public void rejectCall(@NonNull java.util.concurrent.Executor, @NonNull android.os.OutcomeReceiver<java.lang.Void,android.telecom.CallException>);
+    method public void requestCallEndpointChange(@NonNull android.telecom.CallEndpoint, @NonNull java.util.concurrent.Executor, @NonNull android.os.OutcomeReceiver<java.lang.Void,android.telecom.CallException>);
     method public void setActive(@NonNull java.util.concurrent.Executor, @NonNull android.os.OutcomeReceiver<java.lang.Void,android.telecom.CallException>);
     method public void setInactive(@NonNull java.util.concurrent.Executor, @NonNull android.os.OutcomeReceiver<java.lang.Void,android.telecom.CallException>);
     method public void startCallStreaming(@NonNull java.util.concurrent.Executor, @NonNull android.os.OutcomeReceiver<java.lang.Void,android.telecom.CallException>);
@@ -41343,10 +41348,12 @@ package android.telecom {
 
   public interface CallEventCallback {
     method public void onAnswer(int, @NonNull java.util.function.Consumer<java.lang.Boolean>);
-    method public void onCallAudioStateChanged(@NonNull android.telecom.CallAudioState);
+    method public void onAvailableCallEndpointsChanged(@NonNull java.util.List<android.telecom.CallEndpoint>);
+    method public void onCallEndpointChanged(@NonNull android.telecom.CallEndpoint);
     method public void onCallStreamingFailed(int);
     method public void onCallStreamingStarted(@NonNull java.util.function.Consumer<java.lang.Boolean>);
     method public void onDisconnect(@NonNull java.util.function.Consumer<java.lang.Boolean>);
+    method public void onMuteStateChanged(boolean);
     method public void onReject(@NonNull java.util.function.Consumer<java.lang.Boolean>);
     method public void onSetActive(@NonNull java.util.function.Consumer<java.lang.Boolean>);
     method public void onSetInactive(@NonNull java.util.function.Consumer<java.lang.Boolean>);
@@ -50536,6 +50543,8 @@ package android.view {
     field public static final int AXIS_GENERIC_7 = 38; // 0x26
     field public static final int AXIS_GENERIC_8 = 39; // 0x27
     field public static final int AXIS_GENERIC_9 = 40; // 0x28
+    field public static final int AXIS_GESTURE_SCROLL_X_DISTANCE = 50; // 0x32
+    field public static final int AXIS_GESTURE_SCROLL_Y_DISTANCE = 51; // 0x33
     field public static final int AXIS_GESTURE_X_OFFSET = 48; // 0x30
     field public static final int AXIS_GESTURE_Y_OFFSET = 49; // 0x31
     field public static final int AXIS_HAT_X = 15; // 0xf

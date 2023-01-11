@@ -173,6 +173,10 @@ class RunningTasks implements Consumer<Task> {
         }
         // Fill in some deprecated values
         rti.id = rti.taskId;
+
+        if (!mAllowed) {
+            Task.trimIneffectiveInfo(task, rti);
+        }
         return rti;
     }
 }

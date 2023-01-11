@@ -21,18 +21,17 @@ import com.android.systemui.shade.ShadeExpansionStateManager
 import com.android.systemui.statusbar.phone.SystemUIDialogManager
 
 /**
- * Class that coordinates non-HBM animations for non keyguard, enrollment or biometric prompt
- * states.
+ * Class that coordinates non-HBM animations for non keyguard, or biometric prompt states.
  *
- * Currently only shows the fp drawable.
+ * Currently doesn't draw anything.
  */
-class UdfpsFpmOtherViewController(
-    view: UdfpsFpmOtherView,
+class UdfpsFpmEmptyViewController(
+    view: UdfpsFpmEmptyView,
     statusBarStateController: StatusBarStateController,
     shadeExpansionStateManager: ShadeExpansionStateManager,
     systemUIDialogManager: SystemUIDialogManager,
     dumpManager: DumpManager
-) : UdfpsAnimationViewController<UdfpsFpmOtherView>(
+) : UdfpsAnimationViewController<UdfpsFpmEmptyView>(
     view,
     statusBarStateController,
     shadeExpansionStateManager,

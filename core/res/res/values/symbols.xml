@@ -352,6 +352,7 @@
   <java-symbol type="bool" name="config_restartRadioAfterProvisioning" />
   <java-symbol type="bool" name="config_speed_up_audio_on_mt_calls" />
   <java-symbol type="bool" name="config_useFixedVolume" />
+  <java-symbol type="bool" name="config_isMainUserPermanentAdmin"/>
   <java-symbol type="bool" name="config_enableMultiUserUI"/>
   <java-symbol type="bool" name="config_enableMultipleAdmins"/>
   <java-symbol type="bool" name="config_enableNewAutoSelectNetworkUI"/>
@@ -1684,6 +1685,8 @@
   <java-symbol type="bool" name="config_lockUiMode" />
   <java-symbol type="bool" name="config_reverseDefaultRotation" />
   <java-symbol type="bool" name="config_perDisplayFocusEnabled" />
+  <java-symbol type="bool" name="config_enableMotionPrediction" />
+  <java-symbol type="integer" name="config_motionPredictionOffsetNanos" />
   <java-symbol type="bool" name="config_showNavigationBar" />
   <java-symbol type="bool" name="config_supportAutoRotation" />
   <java-symbol type="bool" name="config_dockedStackDividerFreeSnapMode" />

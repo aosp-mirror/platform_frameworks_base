@@ -30,6 +30,7 @@ import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.content.pm.ResolveInfo;
 import android.content.pm.UserInfo;
+import android.content.pm.UserProperties;
 import android.os.Process;
 import android.text.TextUtils;
 import android.util.Pair;
@@ -147,8 +148,6 @@ public class CrossProfileIntentResolverEngine {
             return crossProfileDomainInfos;
         }
 
-        UserInfo userInfo = mUserManagerInternal.getUserInfo(userId);
-
         // Grouping the CrossProfileIntentFilters based on targerId
         SparseArray<List<CrossProfileIntentFilter>> crossProfileIntentFiltersByUser =
                 new SparseArray<>();
@@ -183,11 +182,9 @@ public class CrossProfileIntentResolverEngine {
                 continue;
             }
 
-            UserInfo targetUserInfo = mUserManagerInternal.getUserInfo(targetUserId);
-
             // Choosing strategy based on source and target user
             CrossProfileResolver crossProfileResolver =
-                    chooseCrossProfileResolver(computer, userInfo, targetUserInfo);
+                    chooseCrossProfileResolver(computer, userId, targetUserId);
 
         /*
         If {@link CrossProfileResolver} is available for source,target pair we will call it to
@@ -234,23 +231,21 @@ public class CrossProfileIntentResolverEngine {
     /**
      * Returns {@link CrossProfileResolver} strategy based on source and target user
      * @param computer {@link Computer} instance used for resolution by {@link ComponentResolverApi}
-     * @param sourceUserInfo source user
-     * @param targetUserInfo target user
+     * @param sourceUserId source user
+     * @param targetUserId target user
      * @return {@code CrossProfileResolver} which has value if source and target have
      * strategy configured otherwise null.
      */
     @SuppressWarnings("unused")
     private CrossProfileResolver chooseCrossProfileResolver(@NonNull Computer computer,
-            UserInfo sourceUserInfo, UserInfo targetUserInfo) {
-        //todo change isCloneProfile to user properties b/241532322
+            @UserIdInt int sourceUserId, @UserIdInt int targetUserId) {
         /**
-         * If source or target user is clone profile, using {@link CloneProfileResolver}
-         * We would allow CloneProfileResolver only if flag
-         * SETTINGS_ALLOW_INTENT_REDIRECTION_FOR_CLONE_PROFILE is enabled
+         * If source or target user is clone profile, using {@link NoFilteringResolver}
+         * We would return NoFilteringResolver only if it is allowed(feature flag is set).
          */
-        if (sourceUserInfo.isCloneProfile() || targetUserInfo.isCloneProfile()) {
-            if (CloneProfileResolver.isIntentRedirectionForCloneProfileAllowed()) {
-                return new CloneProfileResolver(computer.getComponentResolver(),
+        if (shouldUseNoFilteringResolver(sourceUserId, targetUserId)) {
+            if (NoFilteringResolver.isIntentRedirectionAllowed()) {
+                return new NoFilteringResolver(computer.getComponentResolver(),
                         mUserManager);
             } else {
                 return null;
@@ -624,7 +619,6 @@ public class CrossProfileIntentResolverEngine {
             categorizeResolveInfoByTargetUser, int sourceUserId, int highestApprovalLevel) {
 
         List<CrossProfileDomainInfo> crossProfileDomainInfos = new ArrayList<>();
-        UserInfo sourceUserInfo = mUserManagerInternal.getUserInfo(sourceUserId);
 
         for (int index = 0; index < categorizeResolveInfoByTargetUser.size(); index++) {
 
@@ -634,8 +628,8 @@ public class CrossProfileIntentResolverEngine {
             } else {
                 // finding cross profile strategy based on source and target user
                 CrossProfileResolver crossProfileIntentResolver =
-                        chooseCrossProfileResolver(computer, sourceUserInfo, mUserManagerInternal
-                                .getUserInfo(categorizeResolveInfoByTargetUser.keyAt(index)));
+                        chooseCrossProfileResolver(computer, sourceUserId,
+                                categorizeResolveInfoByTargetUser.keyAt(index));
                 // if strategy is available call it and add its filtered results
                 if (crossProfileIntentResolver != null) {
                     crossProfileDomainInfos.addAll(crossProfileIntentResolver
@@ -677,5 +671,33 @@ public class CrossProfileIntentResolverEngine {
         return crossProfileDomainInfos.size() > 0
                 && crossProfileDomainInfos.get(0).mResolveInfo != null
                 && crossProfileDomainInfos.get(0).mResolveInfo.priority >= 0;
+    }
+
+    /**
+     * Deciding if we need to user {@link NoFilteringResolver} based on source and target user
+     * @param sourceUserId id of initiating user
+     * @param targetUserId id of cross profile linked user
+     * @return true if {@link NoFilteringResolver} is applicable in this case.
+     */
+    private boolean shouldUseNoFilteringResolver(@UserIdInt int sourceUserId,
+            @UserIdInt int targetUserId) {
+        return isNoFilteringPropertyConfiguredForUser(sourceUserId)
+                || isNoFilteringPropertyConfiguredForUser(targetUserId);
+    }
+
+    /**
+     * Check if configure property for cross profile intent resolution strategy for user is
+     * {@link UserProperties#CROSS_PROFILE_INTENT_RESOLUTION_STRATEGY_NO_FILTERING}
+     * @param userId id of user to check for property
+     * @return true if user have property set to
+     * {@link UserProperties#CROSS_PROFILE_INTENT_RESOLUTION_STRATEGY_NO_FILTERING}
+     */
+    private boolean isNoFilteringPropertyConfiguredForUser(@UserIdInt int userId) {
+        if (!mUserManager.isProfile(userId)) return false;
+        UserProperties userProperties = mUserManagerInternal.getUserProperties(userId);
+        if (userProperties == null) return false;
+
+        return userProperties.getCrossProfileIntentResolutionStrategy()
+                == UserProperties.CROSS_PROFILE_INTENT_RESOLUTION_STRATEGY_NO_FILTERING;
     }
 }

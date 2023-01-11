@@ -18,6 +18,7 @@ package android.hardware.usb;
 
 import android.app.PendingIntent;
 import android.content.ComponentName;
+import android.hardware.usb.IDisplayPortAltModeInfoListener;
 import android.hardware.usb.IUsbOperationInternal;
 import android.hardware.usb.UsbAccessory;
 import android.hardware.usb.UsbDevice;
@@ -184,4 +185,15 @@ interface IUsbManager
 
     /* Sets USB device connection handler. */
     void setUsbDeviceConnectionHandler(in ComponentName usbDeviceConnectionHandler);
+
+    /* Registers callback for Usb events */
+    @JavaPassthrough(annotation=
+            "@android.annotation.RequiresPermission(android.Manifest.permission.MANAGE_USB)")
+    boolean registerForDisplayPortEvents(IDisplayPortAltModeInfoListener listener);
+
+    /* Unregisters Usb event callback */
+    @JavaPassthrough(annotation=
+            "@android.annotation.RequiresPermission(android.Manifest.permission.MANAGE_USB)")
+    void unregisterForDisplayPortEvents(IDisplayPortAltModeInfoListener listener);
+
 }

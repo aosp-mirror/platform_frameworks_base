@@ -22,6 +22,7 @@ import android.annotation.IntRange;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.RequiresPermission;
+import android.annotation.StringDef;
 import android.annotation.SystemApi;
 import android.annotation.SystemService;
 import android.annotation.TestApi;
@@ -129,6 +130,20 @@ public final class TvInputManager {
         VIDEO_UNAVAILABLE_REASON_CAS_CARD_INVALID, VIDEO_UNAVAILABLE_REASON_CAS_BLACKOUT,
         VIDEO_UNAVAILABLE_REASON_CAS_REBOOTING, VIDEO_UNAVAILABLE_REASON_CAS_UNKNOWN})
     public @interface VideoUnavailableReason {}
+
+    /**
+     * @hide
+     */
+    public static final String TV_MESSAGE_TYPE_WATERMARK = "Watermark";
+    /**
+     * @hide
+     */
+    public static final String TV_MESSAGE_TYPE_ATSC_CC = "ATSC_CC";
+
+    /** @hide */
+    @Retention(RetentionPolicy.SOURCE)
+    @StringDef({TV_MESSAGE_TYPE_WATERMARK, TV_MESSAGE_TYPE_ATSC_CC})
+    public @interface TvMessageType {}
 
     static final int VIDEO_UNAVAILABLE_REASON_START = 0;
     static final int VIDEO_UNAVAILABLE_REASON_END = 18;
@@ -690,6 +705,17 @@ public final class TvInputManager {
         public void onTuned(Session session, Uri channelUri) {
         }
 
+        /**
+         * This is called when the session receives a new Tv Message
+         *
+         * @param type the type of {@link TvMessageType}
+         * @param data the raw data of the message
+         * @hide
+         */
+        public void onTvMessage(Session session, @TvInputManager.TvMessageType String type,
+                Bundle data) {
+        }
+
         // For the recording session only
         /**
          * This is called when the current recording session has stopped recording and created a
@@ -914,6 +940,19 @@ public final class TvInputManager {
                     if (mSession.mIAppNotificationEnabled
                             && mSession.getInteractiveAppSession() != null) {
                         mSession.getInteractiveAppSession().notifyTuned(channelUri);
+                    }
+                }
+            });
+        }
+
+        void postTvMessage(String type, Bundle data) {
+            mHandler.post(new Runnable() {
+                @Override
+                public void run() {
+                    mSessionCallback.onTvMessage(mSession, type, data);
+                    if (mSession.mIAppNotificationEnabled
+                            && mSession.getInteractiveAppSession() != null) {
+                        mSession.getInteractiveAppSession().notifyTvMessage(type, data);
                     }
                 }
             });
@@ -1375,6 +1414,18 @@ public final class TvInputManager {
                     }
                     record.postTuned(channelUri);
                     // TODO: synchronized and wrap the channelUri
+                }
+            }
+
+            @Override
+            public void onTvMessage(String type, Bundle data, int seq) {
+                synchronized (mSessionCallbackRecordMap) {
+                    SessionCallbackRecord record = mSessionCallbackRecordMap.get(seq);
+                    if (record == null) {
+                        Log.e(TAG, "Callback not found for seq " + seq);
+                        return;
+                    }
+                    record.postTvMessage(type, data);
                 }
             }
 

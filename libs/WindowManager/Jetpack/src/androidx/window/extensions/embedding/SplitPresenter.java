@@ -268,10 +268,11 @@ class SplitPresenter extends JetpackTaskFragmentOrganizer {
             container = mController.newContainer(activity, taskId);
             final int windowingMode = mController.getTaskContainer(taskId)
                     .getWindowingModeForSplitTaskFragment(bounds);
-            createTaskFragment(wct, container.getTaskFragmentToken(), activity.getActivityToken(),
-                    bounds, windowingMode);
+            final IBinder reparentActivityToken = activity.getActivityToken();
+            createTaskFragment(wct, container.getTaskFragmentToken(), reparentActivityToken,
+                    bounds, windowingMode, reparentActivityToken);
             wct.reparentActivityToTaskFragment(container.getTaskFragmentToken(),
-                    activity.getActivityToken());
+                    reparentActivityToken);
         } else {
             resizeTaskFragmentIfRegistered(wct, container, bounds);
             final int windowingMode = mController.getTaskContainer(taskId)

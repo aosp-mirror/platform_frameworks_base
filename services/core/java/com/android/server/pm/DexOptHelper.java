@@ -555,9 +555,9 @@ public final class DexOptHelper {
     private int performDexOptInternalWithDependenciesLI(
             AndroidPackage p, @NonNull PackageStateInternal pkgSetting, DexoptOptions options)
             throws LegacyDexoptDisabledException {
-        // System server gets a special path.
         if (PLATFORM_PACKAGE_NAME.equals(p.getPackageName())) {
-            return mPm.getDexManager().dexoptSystemServer(options);
+            // This needs to be done in odrefresh in early boot, for security reasons.
+            throw new IllegalArgumentException("Cannot dexopt the system server");
         }
 
         // Select the dex optimizer based on the force parameter.

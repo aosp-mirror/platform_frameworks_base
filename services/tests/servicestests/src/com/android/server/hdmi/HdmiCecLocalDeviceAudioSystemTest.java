@@ -175,6 +175,7 @@ public class HdmiCecLocalDeviceAudioSystemTest {
                 HdmiControlManager.VOLUME_CONTROL_ENABLED);
         mMyLooper = mTestLooper.getLooper();
         mHdmiControlService.setHdmiCecConfig(new FakeHdmiCecConfig(context));
+        mHdmiControlService.setDeviceConfig(new FakeDeviceConfigWrapper());
         mHdmiCecLocalDeviceAudioSystem = new HdmiCecLocalDeviceAudioSystem(mHdmiControlService);
         mHdmiCecLocalDevicePlayback = new HdmiCecLocalDevicePlayback(mHdmiControlService) {
             @Override

@@ -19,6 +19,18 @@
   public <init>();
 }
 
+# Needed to ensure callback field references are kept in their respective
+# owning classes when the downstream callback registrars only store weak refs.
+# TODO(b/264686688): Handle these cases with more targeted annotations.
+-keepclassmembers,allowaccessmodification class com.android.systemui.**, com.android.keyguard.** {
+  private com.android.keyguard.KeyguardUpdateMonitorCallback *;
+  private com.android.systemui.privacy.PrivacyItemController$Callback *;
+  private com.android.systemui.settings.UserTracker$Callback *;
+  private com.android.systemui.statusbar.phone.StatusBarWindowCallback *;
+  private com.android.systemui.util.service.Observer$Callback *;
+  private com.android.systemui.util.service.ObservableServiceConnection$Callback *;
+}
+
 -keepclasseswithmembers class * {
     public <init>(android.content.Context, android.util.AttributeSet);
 }

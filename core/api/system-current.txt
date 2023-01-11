@@ -3025,7 +3025,7 @@ package android.companion.virtual {
     method public int getDeviceId();
     method @Nullable public android.companion.virtual.sensor.VirtualSensor getVirtualSensor(int, @NonNull String);
     method public void launchPendingIntent(int, @NonNull android.app.PendingIntent, @NonNull java.util.concurrent.Executor, @NonNull java.util.function.IntConsumer);
-    method @RequiresPermission(android.Manifest.permission.CREATE_VIRTUAL_DEVICE) public void registerIntentInterceptor(@NonNull java.util.concurrent.Executor, @NonNull android.content.IntentFilter, @NonNull android.companion.virtual.VirtualDeviceManager.IntentInterceptorCallback);
+    method @RequiresPermission(android.Manifest.permission.CREATE_VIRTUAL_DEVICE) public void registerIntentInterceptor(@NonNull android.content.IntentFilter, @NonNull java.util.concurrent.Executor, @NonNull android.companion.virtual.VirtualDeviceManager.IntentInterceptorCallback);
     method public void removeActivityListener(@NonNull android.companion.virtual.VirtualDeviceManager.ActivityListener);
     method @NonNull @RequiresPermission(android.Manifest.permission.CREATE_VIRTUAL_DEVICE) public void setShowPointerIcon(boolean);
     method @RequiresPermission(android.Manifest.permission.CREATE_VIRTUAL_DEVICE) public void unregisterIntentInterceptor(@NonNull android.companion.virtual.VirtualDeviceManager.IntentInterceptorCallback);
@@ -5771,6 +5771,19 @@ package android.hardware.soundtrigger {
 
 package android.hardware.usb {
 
+  public final class DisplayPortAltModeInfo implements android.os.Parcelable {
+    method public int describeContents();
+    method public int getCableStatus();
+    method public int getNumberOfLanes();
+    method public int getPartnerSinkStatus();
+    method public void writeToParcel(@NonNull android.os.Parcel, int);
+    field @NonNull public static final android.os.Parcelable.Creator<android.hardware.usb.DisplayPortAltModeInfo> CREATOR;
+    field public static final int DISPLAYPORT_ALT_MODE_STATUS_CAPABLE = 2; // 0x2
+    field public static final int DISPLAYPORT_ALT_MODE_STATUS_ENABLED = 3; // 0x3
+    field public static final int DISPLAYPORT_ALT_MODE_STATUS_NOT_CAPABLE = 1; // 0x1
+    field public static final int DISPLAYPORT_ALT_MODE_STATUS_UNKNOWN = 0; // 0x0
+  }
+
   public class UsbDeviceConnection {
     method public boolean resetDevice();
   }
@@ -5779,8 +5792,10 @@ package android.hardware.usb {
     method @RequiresPermission(android.Manifest.permission.MANAGE_USB) public long getCurrentFunctions();
     method @NonNull @RequiresPermission(android.Manifest.permission.MANAGE_USB) public java.util.List<android.hardware.usb.UsbPort> getPorts();
     method @RequiresPermission(android.Manifest.permission.MANAGE_USB) public void grantPermission(android.hardware.usb.UsbDevice, String);
+    method @RequiresPermission(android.Manifest.permission.MANAGE_USB) public boolean registerDisplayPortAltModeInfoListener(@NonNull java.util.concurrent.Executor, @NonNull android.hardware.usb.UsbManager.DisplayPortAltModeInfoListener);
     method @RequiresPermission(android.Manifest.permission.MANAGE_USB) public void resetUsbGadget();
     method @RequiresPermission(android.Manifest.permission.MANAGE_USB) public void setCurrentFunctions(long);
+    method @RequiresPermission(android.Manifest.permission.MANAGE_USB) public void unregisterDisplayPortAltModeInfoListener(@NonNull android.hardware.usb.UsbManager.DisplayPortAltModeInfoListener);
     field @RequiresPermission(android.Manifest.permission.MANAGE_USB) public static final String ACTION_USB_ACCESSORY_HANDSHAKE = "android.hardware.usb.action.USB_ACCESSORY_HANDSHAKE";
     field @RequiresPermission(android.Manifest.permission.MANAGE_USB) public static final String ACTION_USB_PORT_CHANGED = "android.hardware.usb.action.USB_PORT_CHANGED";
     field @RequiresPermission(android.Manifest.permission.MANAGE_USB) public static final String ACTION_USB_PORT_COMPLIANCE_CHANGED = "android.hardware.usb.action.USB_PORT_COMPLIANCE_CHANGED";
@@ -5804,11 +5819,16 @@ package android.hardware.usb {
     field public static final String USB_FUNCTION_RNDIS = "rndis";
   }
 
+  public static interface UsbManager.DisplayPortAltModeInfoListener {
+    method public void onDisplayPortAltModeInfoChanged(@NonNull String, @NonNull android.hardware.usb.DisplayPortAltModeInfo);
+  }
+
   public final class UsbPort {
     method @CheckResult @RequiresPermission(android.Manifest.permission.MANAGE_USB) public int enableLimitPowerTransfer(boolean);
     method @CheckResult @RequiresPermission(android.Manifest.permission.MANAGE_USB) public int enableUsbData(boolean);
     method @CheckResult @RequiresPermission(android.Manifest.permission.MANAGE_USB) public int enableUsbDataWhileDocked();
     method @Nullable @RequiresPermission(android.Manifest.permission.MANAGE_USB) public android.hardware.usb.UsbPortStatus getStatus();
+    method public boolean isAltModeSupported(int);
     method @CheckResult @RequiresPermission(android.Manifest.permission.MANAGE_USB) public void resetUsbPort(@NonNull java.util.concurrent.Executor, @NonNull java.util.function.Consumer<java.lang.Integer>);
     method @RequiresPermission(android.Manifest.permission.MANAGE_USB) public void setRoles(int, int);
     method @CheckResult @RequiresPermission(android.Manifest.permission.MANAGE_USB) public boolean supportsComplianceWarnings();
@@ -5828,6 +5848,7 @@ package android.hardware.usb {
     field public static final int ENABLE_USB_DATA_WHILE_DOCKED_ERROR_OTHER = 5; // 0x5
     field public static final int ENABLE_USB_DATA_WHILE_DOCKED_ERROR_PORT_MISMATCH = 3; // 0x3
     field public static final int ENABLE_USB_DATA_WHILE_DOCKED_SUCCESS = 0; // 0x0
+    field public static final int FLAG_ALT_MODE_TYPE_DISPLAYPORT = 1; // 0x1
     field public static final int RESET_USB_PORT_ERROR_INTERNAL = 1; // 0x1
     field public static final int RESET_USB_PORT_ERROR_NOT_SUPPORTED = 2; // 0x2
     field public static final int RESET_USB_PORT_ERROR_OTHER = 4; // 0x4
@@ -5841,6 +5862,8 @@ package android.hardware.usb {
     method public int getCurrentDataRole();
     method public int getCurrentMode();
     method public int getCurrentPowerRole();
+    method @Nullable public android.hardware.usb.DisplayPortAltModeInfo getDisplayPortAltModeInfo();
+    method public int getPlugState();
     method public int getPowerBrickConnectionStatus();
     method public int getSupportedRoleCombinations();
     method public int getUsbDataStatus();
@@ -5870,6 +5893,11 @@ package android.hardware.usb {
     field public static final int MODE_DFP = 2; // 0x2
     field public static final int MODE_NONE = 0; // 0x0
     field public static final int MODE_UFP = 1; // 0x1
+    field public static final int PLUG_STATE_PLUGGED_ORIENTATION_FLIPPED = 4; // 0x4
+    field public static final int PLUG_STATE_PLUGGED_ORIENTATION_NORMAL = 3; // 0x3
+    field public static final int PLUG_STATE_PLUGGED_ORIENTATION_UNKNOWN = 2; // 0x2
+    field public static final int PLUG_STATE_UNKNOWN = 0; // 0x0
+    field public static final int PLUG_STATE_UNPLUGGED = 1; // 0x1
     field public static final int POWER_BRICK_STATUS_CONNECTED = 1; // 0x1
     field public static final int POWER_BRICK_STATUS_DISCONNECTED = 2; // 0x2
     field public static final int POWER_BRICK_STATUS_UNKNOWN = 0; // 0x0
@@ -10388,6 +10416,7 @@ package android.os {
     field public static final String DISALLOW_RUN_IN_BACKGROUND = "no_run_in_background";
     field public static final int REMOVE_RESULT_ALREADY_BEING_REMOVED = 2; // 0x2
     field public static final int REMOVE_RESULT_DEFERRED = 1; // 0x1
+    field public static final int REMOVE_RESULT_ERROR_MAIN_USER_PERMANENT_ADMIN = -5; // 0xfffffffb
     field public static final int REMOVE_RESULT_ERROR_SYSTEM_USER = -4; // 0xfffffffc
     field public static final int REMOVE_RESULT_ERROR_UNKNOWN = -1; // 0xffffffff
     field public static final int REMOVE_RESULT_ERROR_USER_NOT_FOUND = -3; // 0xfffffffd
@@ -10981,6 +11010,7 @@ package android.provider {
     field public static final String ACTION_NOTIFICATION_POLICY_ACCESS_DETAIL_SETTINGS = "android.settings.NOTIFICATION_POLICY_ACCESS_DETAIL_SETTINGS";
     field public static final String ACTION_REQUEST_ENABLE_CONTENT_CAPTURE = "android.settings.REQUEST_ENABLE_CONTENT_CAPTURE";
     field public static final String ACTION_SHOW_ADMIN_SUPPORT_DETAILS = "android.settings.SHOW_ADMIN_SUPPORT_DETAILS";
+    field public static final String ACTION_SHOW_RESTRICTED_SETTING_DIALOG = "android.settings.SHOW_RESTRICTED_SETTING_DIALOG";
     field public static final String ACTION_TETHER_PROVISIONING_UI = "android.settings.TETHER_PROVISIONING_UI";
     field public static final String ACTION_TETHER_SETTINGS = "android.settings.TETHER_SETTINGS";
     field public static final String ACTION_TETHER_UNSUPPORTED_CARRIER_UI = "android.settings.TETHER_UNSUPPORTED_CARRIER_UI";

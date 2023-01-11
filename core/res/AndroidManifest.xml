@@ -6986,7 +6986,7 @@
         @hide
       -->
     <permission android:name="android.permission.GET_APP_METADATA"
-                android:protectionLevel="signature" />
+                android:protectionLevel="signature|installer" />
 
     <!-- @SystemApi Allows the holder to call health connect migration APIs.
         @hide -->

@@ -653,6 +653,17 @@ public class TvView extends ViewGroup {
         mOnUnhandledInputEventListener = listener;
     }
 
+    /**
+     * Enables or disables TV message detecting in the streams of bound TV input.
+     *
+     * @param type The type of {@link android.media.tv.TvInputManager.TvMessageType}
+     * @param enabled {@code true} if you want to enable TV message detecting
+     *                {@code false} otherwise.
+     * @hide
+     */
+    public void setTvMessageEnabled(@TvInputManager.TvMessageType String type, boolean enabled) {
+    }
+
     @Override
     public boolean dispatchKeyEvent(KeyEvent event) {
         if (super.dispatchKeyEvent(event)) {
@@ -1094,6 +1105,17 @@ public class TvView extends ViewGroup {
          */
         public void onTuned(@NonNull String inputId, @NonNull Uri channelUri) {
         }
+
+        /**
+         * This is called when the session has been tuned to the given channel.
+         *
+         * @param type The type of {@link android.media.tv.TvInputManager.TvMessageType}
+         * @param data The raw data of the message
+         * @hide
+         */
+        public void onTvMessage(@NonNull String inputId, @TvInputManager.TvMessageType String type,
+                Bundle data) {
+        }
     }
 
     /**
@@ -1430,6 +1452,20 @@ public class TvView extends ViewGroup {
             }
             if (mCallback != null) {
                 mCallback.onTuned(mInputId, channelUri);
+            }
+        }
+
+        @Override
+        public void onTvMessage(Session session, String type, Bundle data) {
+            if (DEBUG) {
+                Log.d(TAG, "onTvMessage(type=" + type + ", data=" + data + ")");
+            }
+            if (this != mSessionCallback) {
+                Log.w(TAG, "onTvMessage - session not created");
+                return;
+            }
+            if (mCallback != null) {
+                mCallback.onTvMessage(mInputId, type, data);
             }
         }
     }

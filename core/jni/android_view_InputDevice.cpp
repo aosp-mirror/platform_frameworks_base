@@ -97,7 +97,6 @@ jobject android_view_InputDevice_create(JNIEnv* env, const InputDeviceInfo& devi
     return env->NewLocalRef(inputDeviceObj.get());
 }
 
-
 int register_android_view_InputDevice(JNIEnv* env)
 {
     gInputDeviceClassInfo.clazz = FindClassOrDie(env, "android/view/InputDevice");
@@ -108,9 +107,8 @@ int register_android_view_InputDevice(JNIEnv* env)
                                                   "String;ZIILandroid/view/KeyCharacterMap;Ljava/"
                                                   "lang/String;Ljava/lang/String;ZZZZZZ)V");
 
-    gInputDeviceClassInfo.addMotionRange = GetMethodIDOrDie(env, gInputDeviceClassInfo.clazz,
-            "addMotionRange", "(IIFFFFF)V");
-
+    gInputDeviceClassInfo.addMotionRange =
+            GetMethodIDOrDie(env, gInputDeviceClassInfo.clazz, "addMotionRange", "(IIFFFFF)V");
     return 0;
 }
 

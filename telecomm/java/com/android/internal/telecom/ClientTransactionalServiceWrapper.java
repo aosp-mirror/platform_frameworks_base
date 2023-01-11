@@ -22,14 +22,15 @@ import android.os.Binder;
 import android.os.OutcomeReceiver;
 import android.os.ResultReceiver;
 import android.telecom.CallAttributes;
-import android.telecom.CallAudioState;
 import android.telecom.CallControl;
+import android.telecom.CallEndpoint;
 import android.telecom.CallEventCallback;
 import android.telecom.CallException;
 import android.telecom.PhoneAccountHandle;
 import android.text.TextUtils;
 import android.util.Log;
 
+import java.util.List;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.Executor;
@@ -140,6 +141,9 @@ public class ClientTransactionalServiceWrapper {
         private static final String ON_REJECT = "onReject";
         private static final String ON_DISCONNECT = "onDisconnect";
         private static final String ON_STREAMING_STARTED = "onStreamingStarted";
+        private static final String ON_REQ_ENDPOINT_CHANGE = "onRequestEndpointChange";
+        private static final String ON_AVAILABLE_CALL_ENDPOINTS = "onAvailableCallEndpointsChanged";
+        private static final String ON_MUTE_STATE_CHANGED = "onMuteStateChanged";
 
         private void handleCallEventCallback(String action, String callId, int code,
                 ResultReceiver ackResultReceiver) {
@@ -246,14 +250,45 @@ public class ClientTransactionalServiceWrapper {
         }
 
         @Override
-        public void onCallAudioStateChanged(String callId, CallAudioState callAudioState) {
-            Log.i(TAG, TextUtils.formatSimple("onCallAudioStateChanged: callId=[%s]", callId));
+        public void onCallEndpointChanged(String callId, CallEndpoint endpoint) {
+            handleEndpointUpdate(callId, ON_REQ_ENDPOINT_CHANGE, endpoint);
+        }
+
+        @Override
+        public void onAvailableCallEndpointsChanged(String callId, List<CallEndpoint> endpoints) {
+            handleEndpointUpdate(callId, ON_AVAILABLE_CALL_ENDPOINTS, endpoints);
+        }
+
+        @Override
+        public void onMuteStateChanged(String callId, boolean isMuted) {
+            handleEndpointUpdate(callId, ON_MUTE_STATE_CHANGED, isMuted);
+        }
+
+        public void handleEndpointUpdate(String callId, String action, Object arg) {
+            Log.d(TAG, TextUtils.formatSimple("[%s], callId=[%s]", action, callId));
             // lookup the callEventCallback associated with the particular call
             TransactionalCall call = mCallIdToTransactionalCall.get(callId);
             if (call != null) {
                 CallEventCallback callback = call.getCallEventCallback();
                 Executor executor = call.getExecutor();
-                executor.execute(() -> callback.onCallAudioStateChanged(callAudioState));
+                final long identity = Binder.clearCallingIdentity();
+                try {
+                    executor.execute(() -> {
+                        switch (action) {
+                            case ON_REQ_ENDPOINT_CHANGE:
+                                callback.onCallEndpointChanged((CallEndpoint) arg);
+                                break;
+                            case ON_AVAILABLE_CALL_ENDPOINTS:
+                                callback.onAvailableCallEndpointsChanged((List<CallEndpoint>) arg);
+                                break;
+                            case ON_MUTE_STATE_CHANGED:
+                                callback.onMuteStateChanged((boolean) arg);
+                                break;
+                        }
+                    });
+                } finally {
+                    Binder.restoreCallingIdentity(identity);
+                }
             }
         }
 

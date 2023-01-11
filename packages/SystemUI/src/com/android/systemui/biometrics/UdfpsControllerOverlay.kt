@@ -33,6 +33,7 @@ import android.hardware.fingerprint.IUdfpsOverlayControllerCallback
 import android.os.Build
 import android.os.RemoteException
 import android.provider.Settings
+import android.util.FeatureFlagUtils
 import android.util.Log
 import android.util.RotationUtils
 import android.view.LayoutInflater
@@ -232,18 +233,30 @@ class UdfpsControllerOverlay @JvmOverloads constructor(
         return when (filteredRequestReason) {
             REASON_ENROLL_FIND_SENSOR,
             REASON_ENROLL_ENROLLING -> {
-                UdfpsEnrollViewController(
-                    view.addUdfpsView(R.layout.udfps_enroll_view) {
-                        updateSensorLocation(sensorBounds)
-                    },
-                    enrollHelper ?: throw IllegalStateException("no enrollment helper"),
-                    statusBarStateController,
-                    shadeExpansionStateManager,
-                    dialogManager,
-                    dumpManager,
-                    featureFlags,
-                    overlayParams.scaleFactor
-                )
+                if (FeatureFlagUtils.isEnabled(context,
+                                FeatureFlagUtils.SETTINGS_SHOW_UDFPS_ENROLL_IN_SETTINGS)) {
+                    // Enroll udfps UI is handled by settings, so use empty view here
+                    UdfpsFpmEmptyViewController(
+                            view.addUdfpsView(R.layout.udfps_fpm_empty_view),
+                            statusBarStateController,
+                            shadeExpansionStateManager,
+                            dialogManager,
+                            dumpManager
+                    )
+                } else {
+                    UdfpsEnrollViewController(
+                            view.addUdfpsView(R.layout.udfps_enroll_view) {
+                                updateSensorLocation(sensorBounds)
+                            },
+                            enrollHelper ?: throw IllegalStateException("no enrollment helper"),
+                            statusBarStateController,
+                            shadeExpansionStateManager,
+                            dialogManager,
+                            dumpManager,
+                            featureFlags,
+                            overlayParams.scaleFactor
+                    )
+                }
             }
             REASON_AUTH_KEYGUARD -> {
                 UdfpsKeyguardViewController(
@@ -277,8 +290,8 @@ class UdfpsControllerOverlay @JvmOverloads constructor(
             }
             REASON_AUTH_OTHER,
             REASON_AUTH_SETTINGS -> {
-                UdfpsFpmOtherViewController(
-                    view.addUdfpsView(R.layout.udfps_fpm_other_view),
+                UdfpsFpmEmptyViewController(
+                    view.addUdfpsView(R.layout.udfps_fpm_empty_view),
                     statusBarStateController,
                     shadeExpansionStateManager,
                     dialogManager,

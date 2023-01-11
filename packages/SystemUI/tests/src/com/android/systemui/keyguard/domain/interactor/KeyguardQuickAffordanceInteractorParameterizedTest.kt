@@ -44,6 +44,7 @@ import com.android.systemui.plugins.ActivityStarter
 import com.android.systemui.settings.FakeUserTracker
 import com.android.systemui.settings.UserFileManager
 import com.android.systemui.settings.UserTracker
+import com.android.systemui.statusbar.CommandQueue
 import com.android.systemui.statusbar.policy.KeyguardStateController
 import com.android.systemui.util.FakeSharedPreferences
 import com.android.systemui.util.mockito.any
@@ -216,6 +217,7 @@ class KeyguardQuickAffordanceInteractorParameterizedTest : SysuiTestCase() {
     @Mock private lateinit var animationController: ActivityLaunchAnimator.Controller
     @Mock private lateinit var expandable: Expandable
     @Mock private lateinit var launchAnimator: DialogLaunchAnimator
+    @Mock private lateinit var commandQueue: CommandQueue
 
     private lateinit var underTest: KeyguardQuickAffordanceInteractor
 
@@ -286,7 +288,11 @@ class KeyguardQuickAffordanceInteractorParameterizedTest : SysuiTestCase() {
             )
         underTest =
             KeyguardQuickAffordanceInteractor(
-                keyguardInteractor = KeyguardInteractor(repository = FakeKeyguardRepository()),
+                keyguardInteractor =
+                    KeyguardInteractor(
+                        repository = FakeKeyguardRepository(),
+                        commandQueue = commandQueue
+                    ),
                 registry =
                     FakeKeyguardQuickAffordanceRegistry(
                         mapOf(

@@ -19,6 +19,7 @@ package android.telecom;
 
 import android.annotation.NonNull;
 
+import java.util.List;
 import java.util.function.Consumer;
 
 /**
@@ -95,13 +96,6 @@ public interface CallEventCallback {
     void onDisconnect(@NonNull Consumer<Boolean> wasCompleted);
 
     /**
-     * update the client on the new {@link CallAudioState}
-     *
-     * @param callAudioState that is currently being used
-     */
-    void onCallAudioStateChanged(@NonNull CallAudioState callAudioState);
-
-    /**
      * Telecom is informing the client to set the call in streaming.
      *
      * @param wasCompleted The {@link Consumer} to be completed. If the client can stream the
@@ -118,4 +112,26 @@ public interface CallEventCallback {
      * @param reason Code to indicate the reason of this failure
      */
     void onCallStreamingFailed(@CallStreamingService.StreamingFailedReason int reason);
+
+    /**
+     * Telecom is informing the client the current {@link CallEndpoint} changed.
+     *
+     * @param newCallEndpoint The new {@link CallEndpoint} through which call media flows
+     *                       (i.e. speaker, bluetooth, etc.).
+     */
+    void onCallEndpointChanged(@NonNull CallEndpoint newCallEndpoint);
+
+    /**
+     * Telecom is informing the client that the available {@link CallEndpoint}s have changed.
+     *
+     * @param availableEndpoints The set of available {@link CallEndpoint}s reported by Telecom.
+     */
+    void onAvailableCallEndpointsChanged(@NonNull List<CallEndpoint> availableEndpoints);
+
+    /**
+     * Called when the mute state changes.
+     *
+     * @param isMuted The current mute state.
+     */
+    void onMuteStateChanged(boolean isMuted);
 }

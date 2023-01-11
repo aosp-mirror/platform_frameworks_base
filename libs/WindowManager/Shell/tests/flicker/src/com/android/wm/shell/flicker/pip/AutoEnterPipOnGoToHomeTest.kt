@@ -21,12 +21,7 @@ import android.platform.test.annotations.Presubmit
 import androidx.test.filters.RequiresDevice
 import com.android.server.wm.flicker.FlickerBuilder
 import com.android.server.wm.flicker.FlickerTest
-import com.android.server.wm.flicker.helpers.setRotation
-import com.android.server.wm.flicker.helpers.wakeUpAndGoToHomeScreen
 import com.android.server.wm.flicker.junit.FlickerParametersRunnerFactory
-import com.android.server.wm.flicker.rules.RemoveAllTasksButHomeRule
-import com.android.server.wm.flicker.rules.RemoveAllTasksButHomeRule.Companion.removeAllTasksButHome
-import com.android.server.wm.traces.common.service.PlatformConsts
 import org.junit.Assume
 import org.junit.FixMethodOrder
 import org.junit.Test
@@ -64,17 +59,12 @@ class AutoEnterPipOnGoToHomeTest(flicker: FlickerTest) : EnterPipTest(flicker) {
     override val transition: FlickerBuilder.() -> Unit
         get() = {
             setup {
-                removeAllTasksButHome()
-                device.wakeUpAndGoToHomeScreen()
                 pipApp.launchViaIntent(wmHelper)
                 pipApp.enableAutoEnterForPipActivity()
             }
             teardown {
                 // close gracefully so that onActivityUnpinned() can be called before force exit
                 pipApp.closePipWindow(wmHelper)
-
-                setRotation(PlatformConsts.Rotation.ROTATION_0)
-                RemoveAllTasksButHomeRule.removeAllTasksButHome()
                 pipApp.exit(wmHelper)
             }
             transitions { tapl.goHome() }

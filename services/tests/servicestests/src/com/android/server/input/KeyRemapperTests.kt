@@ -22,6 +22,7 @@ import android.hardware.input.IInputManager
 import android.hardware.input.InputManager
 import android.os.test.TestLooper
 import android.platform.test.annotations.Presubmit
+import android.provider.Settings
 import android.view.InputDevice
 import android.view.KeyEvent
 import androidx.test.core.app.ApplicationProvider
@@ -113,38 +114,75 @@ class KeyRemapperTests {
     }
 
     @Test
-    fun testKeyRemapping() {
-        val keyboard = createKeyboard(DEVICE_ID)
-        Mockito.`when`(iInputManager.getInputDevice(DEVICE_ID)).thenReturn(keyboard)
+    fun testKeyRemapping_whenRemappingEnabled() {
+        ModifierRemappingFlag(true).use {
+            val keyboard = createKeyboard(DEVICE_ID)
+            Mockito.`when`(iInputManager.getInputDevice(DEVICE_ID)).thenReturn(keyboard)
 
-        for (i in REMAPPABLE_KEYS.indices) {
-            val fromKeyCode = REMAPPABLE_KEYS[i]
-            val toKeyCode = REMAPPABLE_KEYS[(i + 1) % REMAPPABLE_KEYS.size]
-            mKeyRemapper.remapKey(fromKeyCode, toKeyCode)
+            for (i in REMAPPABLE_KEYS.indices) {
+                val fromKeyCode = REMAPPABLE_KEYS[i]
+                val toKeyCode = REMAPPABLE_KEYS[(i + 1) % REMAPPABLE_KEYS.size]
+                mKeyRemapper.remapKey(fromKeyCode, toKeyCode)
+                testLooper.dispatchNext()
+            }
+
+            val remapping = mKeyRemapper.keyRemapping
+            val expectedSize = REMAPPABLE_KEYS.size
+            assertEquals("Remapping size should be $expectedSize", expectedSize, remapping.size)
+
+            for (i in REMAPPABLE_KEYS.indices) {
+                val fromKeyCode = REMAPPABLE_KEYS[i]
+                val toKeyCode = REMAPPABLE_KEYS[(i + 1) % REMAPPABLE_KEYS.size]
+                assertEquals(
+                    "Remapping should include mapping from $fromKeyCode to $toKeyCode",
+                    toKeyCode,
+                    remapping.getOrDefault(fromKeyCode, -1)
+                )
+            }
+
+            mKeyRemapper.clearAllKeyRemappings()
             testLooper.dispatchNext()
-        }
 
-        val remapping = mKeyRemapper.keyRemapping
-        val expectedSize = REMAPPABLE_KEYS.size
-        assertEquals("Remapping size should be $expectedSize", expectedSize, remapping.size)
-
-        for (i in REMAPPABLE_KEYS.indices) {
-            val fromKeyCode = REMAPPABLE_KEYS[i]
-            val toKeyCode = REMAPPABLE_KEYS[(i + 1) % REMAPPABLE_KEYS.size]
             assertEquals(
-                "Remapping should include mapping from $fromKeyCode to $toKeyCode",
-                toKeyCode,
-                remapping.getOrDefault(fromKeyCode, -1)
+                "Remapping size should be 0 after clearAllModifierKeyRemappings",
+                0,
+                mKeyRemapper.keyRemapping.size
+            )
+        }
+    }
+
+    @Test
+    fun testKeyRemapping_whenRemappingDisabled() {
+        ModifierRemappingFlag(false).use {
+            val keyboard = createKeyboard(DEVICE_ID)
+            Mockito.`when`(iInputManager.getInputDevice(DEVICE_ID)).thenReturn(keyboard)
+
+            mKeyRemapper.remapKey(REMAPPABLE_KEYS[0], REMAPPABLE_KEYS[1])
+            testLooper.dispatchAll()
+
+            val remapping = mKeyRemapper.keyRemapping
+            assertEquals(
+                "Remapping should not be done if modifier key remapping is disabled",
+                0,
+                remapping.size
+            )
+        }
+    }
+
+    private inner class ModifierRemappingFlag constructor(enabled: Boolean) : AutoCloseable {
+        init {
+            Settings.Global.putString(
+                context.contentResolver,
+                "settings_new_keyboard_modifier_key", enabled.toString()
             )
         }
 
-        mKeyRemapper.clearAllKeyRemappings()
-        testLooper.dispatchNext()
-
-        assertEquals(
-            "Remapping size should be 0 after clearAllModifierKeyRemappings",
-            0,
-            mKeyRemapper.keyRemapping.size
-        )
+        override fun close() {
+            Settings.Global.putString(
+                context.contentResolver,
+                "settings_new_keyboard_modifier_key",
+                ""
+            )
+        }
     }
 }

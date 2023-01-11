@@ -894,11 +894,12 @@ public class MmTelFeature extends ImsFeature {
             "android.telephony.ims.feature.extra.IS_UNKNOWN_CALL";
 
     /** @hide */
-    @IntDef(flag = true,
-            value = {
-                    AUDIO_HANDLER_ANDROID,
-                    AUDIO_HANDLER_BASEBAND
-            })
+    @IntDef(
+        prefix = "AUDIO_HANDLER_",
+        value = {
+            AUDIO_HANDLER_ANDROID,
+            AUDIO_HANDLER_BASEBAND
+        })
     @Retention(RetentionPolicy.SOURCE)
     public @interface ImsAudioHandler {}
 

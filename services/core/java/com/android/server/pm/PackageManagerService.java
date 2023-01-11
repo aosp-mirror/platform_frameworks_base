@@ -4285,6 +4285,11 @@ public class PackageManagerService implements PackageSender, TestUtilityService 
 
         // Prune unused static shared libraries which have been cached a period of time
         schedulePruneUnusedStaticSharedLibraries(false /* delay */);
+
+        DexUseManagerLocal dexUseManager = DexOptHelper.getDexUseManagerLocal();
+        if (dexUseManager != null) {
+            dexUseManager.systemReady();
+        }
     }
 
     //TODO: b/111402650

@@ -19,6 +19,7 @@ package com.android.settingslib.spaprivileged.model.app
 import android.app.AppOpsManager
 import android.app.AppOpsManager.MODE_ALLOWED
 import android.app.AppOpsManager.MODE_ERRORED
+import android.app.AppOpsManager.MODE_IGNORED
 import android.content.Context
 import android.content.pm.ApplicationInfo
 import androidx.test.core.app.ApplicationProvider
@@ -56,7 +57,6 @@ class AppOpsControllerTest {
                 context = context,
                 app = APP,
                 op = OP,
-                modeForNotAllowed = MODE_ERRORED
             )
 
         controller.setAllowed(true)
@@ -71,12 +71,26 @@ class AppOpsControllerTest {
                 context = context,
                 app = APP,
                 op = OP,
-                modeForNotAllowed = MODE_ERRORED
             )
 
         controller.setAllowed(false)
 
         verify(appOpsManager).setMode(OP, APP.uid, APP.packageName, MODE_ERRORED)
+    }
+
+    @Test
+    fun setAllowed_setToFalseWithModeForNotAllowed() {
+        val controller =
+            AppOpsController(
+                context = context,
+                app = APP,
+                op = OP,
+                modeForNotAllowed = MODE_IGNORED,
+            )
+
+        controller.setAllowed(false)
+
+        verify(appOpsManager).setMode(OP, APP.uid, APP.packageName, MODE_IGNORED)
     }
 
     @Test
@@ -86,8 +100,7 @@ class AppOpsControllerTest {
                 context = context,
                 app = APP,
                 op = OP,
-                modeForNotAllowed = MODE_ERRORED,
-                setModeByUid = true
+                setModeByUid = true,
             )
 
         controller.setAllowed(true)
@@ -102,8 +115,7 @@ class AppOpsControllerTest {
                 context = context,
                 app = APP,
                 op = OP,
-                modeForNotAllowed = MODE_ERRORED,
-                setModeByUid = true
+                setModeByUid = true,
             )
 
         controller.setAllowed(false)
@@ -120,7 +132,6 @@ class AppOpsControllerTest {
                 context = context,
                 app = APP,
                 op = OP,
-                modeForNotAllowed = MODE_ERRORED
             )
 
         val mode = controller.getMode()

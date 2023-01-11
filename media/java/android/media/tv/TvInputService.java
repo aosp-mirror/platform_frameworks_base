@@ -2063,6 +2063,27 @@ public abstract class TvInputService extends Service {
         }
 
         /**
+         * Informs the application of the raw data from the TV message.
+         * @param type The {@link TvInputManager.TvMessageType} of message that was sent.
+         * @param data The data sent with the message.
+         * @hide
+         */
+        public void notifyTvMessage(@TvInputManager.TvMessageType String type, Bundle data) {
+        }
+
+        /**
+         * Called when the application enables or disables the detection of the specified message
+         * type.
+         * @param type The {@link TvInputManager.TvMessageType} of message that was sent.
+         * @param enabled {@code true} if you want to enable TV message detecting
+         *                {@code false} otherwise.
+         * @hide
+         */
+        public void onSetTvMessageEnabled(@TvInputManager.TvMessageType String type,
+                boolean enabled) {
+        }
+
+        /**
          * Called when the application requests to tune to a given channel for TV program recording.
          *
          * <p>The application may call this method before starting or after stopping recording, but

@@ -66,6 +66,7 @@ import com.android.systemui.classifier.FalsingCollectorFake;
 import com.android.systemui.colorextraction.SysuiColorExtractor;
 import com.android.systemui.dreams.DreamOverlayStateController;
 import com.android.systemui.dump.DumpManager;
+import com.android.systemui.flags.FeatureFlags;
 import com.android.systemui.navigationbar.NavigationModeController;
 import com.android.systemui.settings.UserTracker;
 import com.android.systemui.shade.NotificationShadeWindowControllerImpl;
@@ -134,6 +135,7 @@ public class KeyguardViewMediatorTest extends SysuiTestCase {
     private @Mock SysuiColorExtractor mColorExtractor;
     private @Mock AuthController mAuthController;
     private @Mock ShadeExpansionStateManager mShadeExpansionStateManager;
+    private @Mock FeatureFlags mFeatureFlags;
     private @Mock ShadeWindowLogger mShadeWindowLogger;
     private DeviceConfigProxy mDeviceConfig = new DeviceConfigProxyFake();
     private FakeExecutor mUiBgExecutor = new FakeExecutor(new FakeSystemClock());
@@ -510,6 +512,7 @@ public class KeyguardViewMediatorTest extends SysuiTestCase {
                 mScreenOnCoordinator,
                 mInteractionJankMonitor,
                 mDreamOverlayStateController,
+                mFeatureFlags,
                 () -> mShadeController,
                 () -> mNotificationShadeWindowController,
                 () -> mActivityLaunchAnimator,

@@ -48,7 +48,6 @@ public class TemporaryBrightnessStrategy implements DisplayBrightnessStrategy {
                 BrightnessUtils.constructDisplayBrightnessState(BrightnessReason.REASON_TEMPORARY,
                         mTemporaryScreenBrightness,
                         mTemporaryScreenBrightness);
-        mTemporaryScreenBrightness = Float.NaN;
         return displayBrightnessState;
     }
 

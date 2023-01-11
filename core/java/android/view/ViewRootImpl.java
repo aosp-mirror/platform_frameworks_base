@@ -227,6 +227,7 @@ import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Objects;
+import java.util.OptionalInt;
 import java.util.Queue;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.Executor;
@@ -920,14 +921,13 @@ public final class ViewRootImpl implements ViewParent,
     private String mTag = TAG;
 
     public ViewRootImpl(Context context, Display display) {
-        this(context, display, WindowManagerGlobal.getWindowSession(), new WindowLayout());
+        this(context, display, WindowManagerGlobal.getWindowSession());
     }
 
-    public ViewRootImpl(@UiContext Context context, Display display, IWindowSession session,
-            WindowLayout windowLayout) {
+    public ViewRootImpl(@UiContext Context context, Display display, IWindowSession session) {
         mContext = context;
         mWindowSession = session;
-        mWindowLayout = windowLayout;
+        mWindowLayout = new WindowLayout();
         mDisplay = display;
         mBasePackageName = context.getBasePackageName();
         mThread = Thread.currentThread();
@@ -10866,6 +10866,12 @@ public final class ViewRootImpl implements ViewParent,
         public View mSource;
         public long mLastEventTimeMillis;
         /**
+         * Keep track of action that caused the event.
+         * This is empty if there's no performing actions for pending events.
+         * This is zero if there're multiple events performed for pending events.
+         */
+        @NonNull public OptionalInt mAction = OptionalInt.empty();
+        /**
          * Override for {@link AccessibilityEvent#originStackTrace} to provide the stack trace
          * of the original {@link #runOrPost} call instead of one for sending the delayed event
          * from a looper.
@@ -10888,6 +10894,7 @@ public final class ViewRootImpl implements ViewParent,
                 AccessibilityEvent event = AccessibilityEvent.obtain();
                 event.setEventType(AccessibilityEvent.TYPE_WINDOW_CONTENT_CHANGED);
                 event.setContentChangeTypes(mChangeTypes);
+                if (mAction.isPresent()) event.setAction(mAction.getAsInt());
                 if (AccessibilityEvent.DEBUG_ORIGIN) event.originStackTrace = mOrigin;
                 source.sendAccessibilityEventUnchecked(event);
             } else {
@@ -10896,6 +10903,7 @@ public final class ViewRootImpl implements ViewParent,
             // In any case reset to initial state.
             source.resetSubtreeAccessibilityStateChanged();
             mChangeTypes = 0;
+            mAction = OptionalInt.empty();
             if (AccessibilityEvent.DEBUG_ORIGIN) mOrigin = null;
         }
 
@@ -10925,10 +10933,27 @@ public final class ViewRootImpl implements ViewParent,
                 }
                 mSource = (predecessor != null) ? predecessor : source;
                 mChangeTypes |= changeType;
+
+                final int performingAction = mAccessibilityManager.getPerformingAction();
+                if (performingAction != 0) {
+                    if (mAction.isEmpty()) {
+                        mAction = OptionalInt.of(performingAction);
+                    } else if (mAction.getAsInt() != performingAction) {
+                        // Multiple actions are performed for pending events. We cannot decide one
+                        // action here.
+                        // We're doing best effort to set action value, and it's fine to set
+                        // no action this case.
+                        mAction = OptionalInt.of(0);
+                    }
+                }
+
                 return;
             }
             mSource = source;
             mChangeTypes = changeType;
+            if (mAccessibilityManager.getPerformingAction() != 0) {
+                mAction = OptionalInt.of(mAccessibilityManager.getPerformingAction());
+            }
             if (AccessibilityEvent.DEBUG_ORIGIN) {
                 mOrigin = Thread.currentThread().getStackTrace();
             }

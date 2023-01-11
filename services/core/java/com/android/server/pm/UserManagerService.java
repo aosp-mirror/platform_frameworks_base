@@ -1834,6 +1834,23 @@ public class UserManagerService extends IUserManager.Stub {
     }
 
     /**
+     * Gets the current user id, or the target user id in case there is a started user switch.
+     *
+     * @return id of current or target foreground user, or {@link UserHandle#USER_NULL} if
+     * {@link ActivityManagerInternal} is not available yet.
+     */
+    @VisibleForTesting
+    int getCurrentOrTargetUserId() {
+        ActivityManagerInternal activityManagerInternal = getActivityManagerInternal();
+        if (activityManagerInternal == null) {
+            Slog.w(LOG_TAG, "getCurrentOrTargetUserId() called too early, ActivityManagerInternal"
+                    + " is not set yet");
+            return UserHandle.USER_NULL;
+        }
+        return activityManagerInternal.getCurrentUser().id;
+    }
+
+    /**
      * Gets whether the user is the current foreground user or a started profile of that user.
      *
      * <p>Doesn't perform any permission check.
@@ -5407,8 +5424,7 @@ public class UserManagerService extends IUserManager.Stub {
         final long ident = Binder.clearCallingIdentity();
         try {
             final UserData userData;
-            int currentUser = getCurrentUserId();
-            if (currentUser == userId) {
+            if (userId == getCurrentOrTargetUserId()) {
                 Slog.w(LOG_TAG, "Current user cannot be removed.");
                 return false;
             }
@@ -5423,6 +5439,12 @@ public class UserManagerService extends IUserManager.Stub {
                     if (userData == null) {
                         Slog.e(LOG_TAG, TextUtils.formatSimple(
                                 "Cannot remove user %d, invalid user id provided.", userId));
+                        return false;
+                    }
+
+                    if (isNonRemovableMainUser(userData.info)) {
+                        Slog.e(LOG_TAG, "Main user cannot be removed when "
+                                + "it's a permanent admin user.");
                         return false;
                     }
 
@@ -5528,6 +5550,12 @@ public class UserManagerService extends IUserManager.Stub {
                         Slog.e(LOG_TAG,
                                 "Cannot remove user " + userId + ", invalid user id provided.");
                         return UserManager.REMOVE_RESULT_ERROR_USER_NOT_FOUND;
+                    }
+
+                    if (isNonRemovableMainUser(userData.info)) {
+                        Slog.e(LOG_TAG, "Main user cannot be removed when "
+                                + "it's a permanent admin user.");
+                        return UserManager.REMOVE_RESULT_ERROR_MAIN_USER_PERMANENT_ADMIN;
                     }
 
                     if (mRemovingUserIds.get(userId)) {
@@ -6748,7 +6776,7 @@ public class UserManagerService extends IUserManager.Stub {
         public void removeAllUsers() {
             if (UserHandle.USER_SYSTEM == getCurrentUserId()) {
                 // Remove the non-system users straight away.
-                removeNonSystemUsers();
+                removeAllUsersExceptSystemAndPermanentAdminMain();
             } else {
                 // Switch to the system user first and then remove the other users.
                 BroadcastReceiver userSwitchedReceiver = new BroadcastReceiver() {
@@ -6760,7 +6788,7 @@ public class UserManagerService extends IUserManager.Stub {
                             return;
                         }
                         mContext.unregisterReceiver(this);
-                        removeNonSystemUsers();
+                        removeAllUsersExceptSystemAndPermanentAdminMain();
                     }
                 };
                 IntentFilter userSwitchedFilter = new IntentFilter();
@@ -7113,14 +7141,14 @@ public class UserManagerService extends IUserManager.Stub {
         throw new UserManager.CheckedUserOperationException(message, userOperationResult);
     }
 
-    /* Remove all the users except of the system one. */
-    private void removeNonSystemUsers() {
+    /* Remove all the users except the system and permanent admin main.*/
+    private void removeAllUsersExceptSystemAndPermanentAdminMain() {
         ArrayList<UserInfo> usersToRemove = new ArrayList<>();
         synchronized (mUsersLock) {
             final int userSize = mUsers.size();
             for (int i = 0; i < userSize; i++) {
                 UserInfo ui = mUsers.valueAt(i).info;
-                if (ui.id != UserHandle.USER_SYSTEM) {
+                if (ui.id != UserHandle.USER_SYSTEM && !isNonRemovableMainUser(ui)) {
                     usersToRemove.add(ui);
                 }
             }
@@ -7247,6 +7275,24 @@ public class UserManagerService extends IUserManager.Stub {
             mAmInternal = LocalServices.getService(ActivityManagerInternal.class);
         }
         return mAmInternal;
+    }
+
+    /**
+     * Returns true, when user has {@link UserInfo#FLAG_MAIN} and system property
+     * {@link com.android.internal.R.bool.isMainUserPermanentAdmin} is true.
+     */
+    private boolean isNonRemovableMainUser(UserInfo userInfo) {
+        return userInfo.isMain() && isMainUserPermanentAdmin();
+    }
+
+    /**
+     * Returns true, when {@link com.android.internal.R.bool.isMainUserPermanentAdmin} is true.
+     * If the main user is a permanent admin user it can't be deleted
+     * or downgraded to non-admin status.
+     */
+    private static boolean isMainUserPermanentAdmin() {
+        return Resources.getSystem()
+                .getBoolean(com.android.internal.R.bool.config_isMainUserPermanentAdmin);
     }
 
 }

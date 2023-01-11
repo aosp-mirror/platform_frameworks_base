@@ -59,7 +59,6 @@ import android.os.SystemProperties;
 import android.os.Trace;
 import android.os.UserHandle;
 import android.os.WorkSource;
-import android.os.storage.StorageManager;
 import android.util.Log;
 import android.util.Slog;
 import android.util.SparseArray;
@@ -184,10 +183,13 @@ public class PackageDexOptimizer {
     }
 
     boolean canOptimizePackage(@NonNull AndroidPackage pkg) {
+        // The system package has to be optimized during early boot by odrefresh instead.
+        if (PLATFORM_PACKAGE_NAME.equals(pkg.getPackageName())) {
+            return false;
+        }
+
         // We do not dexopt a package with no code.
-        // Note that the system package is marked as having no code, however we can
-        // still optimize it via dexoptSystemServerPath.
-        if (!PLATFORM_PACKAGE_NAME.equals(pkg.getPackageName()) && !pkg.isHasCode()) {
+        if (!pkg.isHasCode()) {
             return false;
         }
 
@@ -223,8 +225,8 @@ public class PackageDexOptimizer {
             PackageDexUsage.PackageUseInfo packageUseInfo, DexoptOptions options)
             throws LegacyDexoptDisabledException {
         if (PLATFORM_PACKAGE_NAME.equals(pkg.getPackageName())) {
-            throw new IllegalArgumentException("System server dexopting should be done via "
-                    + " DexManager and PackageDexOptimizer#dexoptSystemServerPath");
+            throw new IllegalArgumentException(
+                    "System server dexopting should be done via odrefresh");
         }
         if (pkg.getUid() == -1) {
             throw new IllegalArgumentException("Dexopt for " + pkg.getPackageName()
@@ -521,65 +523,6 @@ public class PackageDexOptimizer {
             Slog.w(TAG, "Failed to dexopt", e);
             return DEX_OPT_FAILED;
         }
-    }
-
-    /**
-     * Perform dexopt (if needed) on a system server code path).
-     */
-    @GuardedBy("mInstallLock")
-    @DexOptResult
-    public int dexoptSystemServerPath(String dexPath, PackageDexUsage.DexUseInfo dexUseInfo,
-            DexoptOptions options) throws LegacyDexoptDisabledException {
-        int dexoptFlags = DEXOPT_PUBLIC
-                | (options.isBootComplete() ? DEXOPT_BOOTCOMPLETE : 0)
-                | (options.isDexoptIdleBackgroundJob() ? DEXOPT_IDLE_BACKGROUND_JOB : 0);
-
-        int result = DEX_OPT_SKIPPED;
-        for (String isa : dexUseInfo.getLoaderIsas()) {
-            int dexoptNeeded = getDexoptNeeded(
-                    PackageManagerService.PLATFORM_PACKAGE_NAME,
-                    dexPath,
-                    isa,
-                    options.getCompilerFilter(),
-                    dexUseInfo.getClassLoaderContext(),
-                    PROFILE_ANALYSIS_DONT_OPTIMIZE_EMPTY_PROFILES,
-                    /* downgrade= */ false,
-                    dexoptFlags,
-                    /* oatDir= */ null);
-
-            if (dexoptNeeded == DexFile.NO_DEXOPT_NEEDED) {
-                continue;
-            }
-            try {
-                synchronized (mInstallLock) {
-                    boolean completed = getInstallerLI().dexopt(
-                            dexPath,
-                            android.os.Process.SYSTEM_UID,
-                            /* pkgName= */ "android",
-                            isa,
-                            dexoptNeeded,
-                            /* outputPath= */ null,
-                            dexoptFlags,
-                            options.getCompilerFilter(),
-                            StorageManager.UUID_PRIVATE_INTERNAL,
-                            dexUseInfo.getClassLoaderContext(),
-                            /* seInfo= */ null,
-                            /* downgrade= */ false,
-                            /* targetSdkVersion= */ 0,
-                            /* profileName= */ null,
-                            /* dexMetadataPath= */ null,
-                            getReasonName(options.getCompilationReason()));
-                    if (!completed) {
-                        return DEX_OPT_CANCELLED;
-                    }
-                }
-            } catch (InstallerException e) {
-                Slog.w(TAG, "Failed to dexopt", e);
-                return DEX_OPT_FAILED;
-            }
-            result = DEX_OPT_PERFORMED;
-        }
-        return result;
     }
 
     private String getAugmentedReasonName(int compilationReason, boolean useDexMetadata) {

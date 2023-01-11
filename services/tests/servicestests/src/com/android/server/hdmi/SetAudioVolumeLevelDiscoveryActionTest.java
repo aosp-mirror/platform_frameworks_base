@@ -89,6 +89,7 @@ public class SetAudioVolumeLevelDiscoveryActionTest {
         mLooper = mTestLooper.getLooper();
         mHdmiControlServiceSpy.setIoLooper(mLooper);
         mHdmiControlServiceSpy.setHdmiCecConfig(new FakeHdmiCecConfig(mContextSpy));
+        mHdmiControlServiceSpy.setDeviceConfig(new FakeDeviceConfigWrapper());
 
         mNativeWrapper = new FakeNativeWrapper();
         mNativeWrapper.setPhysicalAddress(mPhysicalAddress);

@@ -108,6 +108,7 @@ public class HdmiCecControllerTest {
         doAnswer(__ -> mCecVersion).when(mHdmiControlServiceSpy).getCecVersion();
         doNothing().when(mHdmiControlServiceSpy)
                 .writeStringSystemProperty(anyString(), anyString());
+        mHdmiControlServiceSpy.setDeviceConfig(new FakeDeviceConfigWrapper());
 
         mNativeWrapper = new FakeNativeWrapper();
         mHdmiCecController = HdmiCecController.createWithNativeWrapper(

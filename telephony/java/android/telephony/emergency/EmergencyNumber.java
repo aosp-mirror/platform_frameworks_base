@@ -25,6 +25,8 @@ import android.os.Parcel;
 import android.os.Parcelable;
 import android.telephony.CarrierConfigManager;
 import android.telephony.PhoneNumberUtils;
+import android.util.SparseArray;
+import android.util.SparseIntArray;
 
 import com.android.telephony.Rlog;
 
@@ -247,6 +249,17 @@ public final class EmergencyNumber implements Parcelable, Comparable<EmergencyNu
     private final List<String> mEmergencyUrns;
     private final int mEmergencyNumberSourceBitmask;
     private final int mEmergencyCallRouting;
+    /**
+     * The source of the EmergencyNumber in the order of precedence.
+     */
+    private static final int[] EMERGENCY_NUMBER_SOURCE_PRECEDENCE;
+    static {
+        EMERGENCY_NUMBER_SOURCE_PRECEDENCE = new int[4];
+        EMERGENCY_NUMBER_SOURCE_PRECEDENCE[0] = EMERGENCY_NUMBER_SOURCE_NETWORK_SIGNALING;
+        EMERGENCY_NUMBER_SOURCE_PRECEDENCE[1] = EMERGENCY_NUMBER_SOURCE_SIM;
+        EMERGENCY_NUMBER_SOURCE_PRECEDENCE[2] = EMERGENCY_NUMBER_SOURCE_DATABASE;
+        EMERGENCY_NUMBER_SOURCE_PRECEDENCE[3] = EMERGENCY_NUMBER_SOURCE_MODEM_CONFIG;
+    }
 
     /** @hide */
     public EmergencyNumber(@NonNull String number, @NonNull String countryIso, @NonNull String mnc,
@@ -601,19 +614,44 @@ public final class EmergencyNumber implements Parcelable, Comparable<EmergencyNu
      */
     public static void mergeSameNumbersInEmergencyNumberList(
             List<EmergencyNumber> emergencyNumberList) {
+        mergeSameNumbersInEmergencyNumberList(emergencyNumberList, false);
+    }
+
+    /**
+     * In-place merge same emergency numbers in the emergency number list.
+     *
+     * A unique EmergencyNumber has a unique combination of ‘number’, ‘mcc’ and 'mnc' fields.
+     * If mergeServiceCategoriesAndUrns is true ignore comparing of 'urns' and
+     * 'categories' fields and determine these fields from most precedent number. Else compare
+     * to get unique combination of EmergencyNumber.
+     * Multiple Emergency Number Sources should be merged into one bitfield for the
+     * same EmergencyNumber.
+     *
+     * @param emergencyNumberList the emergency number list to process
+     * @param mergeServiceCategoriesAndUrns {@code true} determine service category and urns
+     * from most precedent number. {@code false} compare those fields for determing duplicate.
+     *
+     * @hide
+     */
+    public static void mergeSameNumbersInEmergencyNumberList(
+            @NonNull List<EmergencyNumber> emergencyNumberList,
+            boolean mergeServiceCategoriesAndUrns) {
         if (emergencyNumberList == null) {
             return;
         }
+
         Set<Integer> duplicatedEmergencyNumberPosition = new HashSet<>();
         for (int i = 0; i < emergencyNumberList.size(); i++) {
             for (int j = 0; j < i; j++) {
-                if (areSameEmergencyNumbers(
-                        emergencyNumberList.get(i), emergencyNumberList.get(j))) {
-                    Rlog.e(LOG_TAG, "Found unexpected duplicate numbers: "
-                            + emergencyNumberList.get(i) + " vs " + emergencyNumberList.get(j));
+                if (areSameEmergencyNumbers(emergencyNumberList.get(i),
+                        emergencyNumberList.get(j), mergeServiceCategoriesAndUrns)) {
+                    Rlog.e(LOG_TAG, "Found unexpected duplicate numbers "
+                            + emergencyNumberList.get(i)
+                            + " vs " + emergencyNumberList.get(j));
                     // Set the merged emergency number in the current position
-                    emergencyNumberList.set(i, mergeSameEmergencyNumbers(
-                            emergencyNumberList.get(i), emergencyNumberList.get(j)));
+                    emergencyNumberList.set(i,
+                            mergeSameEmergencyNumbers(emergencyNumberList.get(i),
+                            emergencyNumberList.get(j), mergeServiceCategoriesAndUrns));
                     // Mark the emergency number has been merged
                     duplicatedEmergencyNumberPosition.add(j);
                 }
@@ -632,18 +670,24 @@ public final class EmergencyNumber implements Parcelable, Comparable<EmergencyNu
     /**
      * Check if two emergency numbers are the same.
      *
-     * A unique EmergencyNumber has a unique combination of ‘number’, ‘mcc’, 'mnc' and
-     * 'categories', and 'routing' fields. Multiple Emergency Number Sources should be
+     * A unique EmergencyNumber has a unique combination of ‘number’, ‘mcc’, 'mnc' fields.
+     * If mergeServiceCategoriesAndUrns is true ignore comparing of 'urns' and
+     * 'categories' fields and determine these fields from most precedent number. Else compare
+     * to get unique combination of EmergencyNumber.
+     * Multiple Emergency Number Sources should be
      * merged into one bitfield for the same EmergencyNumber.
      *
      * @param first first EmergencyNumber to compare
      * @param second second EmergencyNumber to compare
+     * @param ignoreServiceCategoryAndUrns {@code true} Ignore comparing of service category
+     * and Urns so that they can be determined from most precedent number. {@code false} compare
+     * those fields for determing duplicate.
      * @return true if they are the same EmergencyNumbers; false otherwise.
      *
      * @hide
      */
     public static boolean areSameEmergencyNumbers(@NonNull EmergencyNumber first,
-                                                  @NonNull EmergencyNumber second) {
+            @NonNull EmergencyNumber second, boolean ignoreServiceCategoryAndUrns) {
         if (!first.getNumber().equals(second.getNumber())) {
             return false;
         }
@@ -653,12 +697,14 @@ public final class EmergencyNumber implements Parcelable, Comparable<EmergencyNu
         if (!first.getMnc().equals(second.getMnc())) {
             return false;
         }
-        if (first.getEmergencyServiceCategoryBitmask()
-                != second.getEmergencyServiceCategoryBitmask()) {
-            return false;
-        }
-        if (!first.getEmergencyUrns().equals(second.getEmergencyUrns())) {
-            return false;
+        if (!ignoreServiceCategoryAndUrns) {
+            if (first.getEmergencyServiceCategoryBitmask()
+                    != second.getEmergencyServiceCategoryBitmask()) {
+                return false;
+            }
+            if (!first.getEmergencyUrns().equals(second.getEmergencyUrns())) {
+                return false;
+            }
         }
         // Never merge two numbers if one of them is from test mode but the other one is not;
         // This supports to remove a number from the test mode.
@@ -681,7 +727,7 @@ public final class EmergencyNumber implements Parcelable, Comparable<EmergencyNu
      */
     public static EmergencyNumber mergeSameEmergencyNumbers(@NonNull EmergencyNumber first,
                                                             @NonNull EmergencyNumber second) {
-        if (areSameEmergencyNumbers(first, second)) {
+        if (areSameEmergencyNumbers(first, second, false)) {
             int routing = first.getEmergencyCallRouting();
 
             if (second.isFromSources(EMERGENCY_NUMBER_SOURCE_DATABASE)) {
@@ -696,6 +742,115 @@ public final class EmergencyNumber implements Parcelable, Comparable<EmergencyNu
                     routing);
         }
         return null;
+    }
+
+    /**
+     * Get merged EmergencyUrns list from two same emergency numbers.
+     * By giving priority to the urns from first number.
+     *
+     * @param firstEmergencyUrns first number's Urns
+     * @param secondEmergencyUrns second number's Urns
+     * @return a merged Urns
+     *
+     * @hide
+     */
+    private static List<String> mergeEmergencyUrns(@NonNull List<String> firstEmergencyUrns,
+            @NonNull List<String> secondEmergencyUrns) {
+        List<String> mergedUrns = new ArrayList<String>();
+        mergedUrns.addAll(firstEmergencyUrns);
+        for (String urn : secondEmergencyUrns) {
+            if (!firstEmergencyUrns.contains(urn)) {
+                mergedUrns.add(urn);
+            }
+        }
+        return mergedUrns;
+    }
+
+    /**
+     * Get the highest precedence source of the given Emergency number. Then get service catergory
+     * and urns list fill in the respective map with key as source.
+     *
+     * @param num EmergencyNumber to get the source, service category & urns
+     * @param serviceCategoryArray Array to store the category of the given EmergencyNumber
+     * with key as highest precedence source
+     * @param urnsArray Array to store the list of Urns of the given EmergencyNumber
+     * with key as highest precedence source
+     *
+     * @hide
+     */
+    private static void fillServiceCategoryAndUrns(@NonNull EmergencyNumber num,
+            @NonNull SparseIntArray serviceCategoryArray,
+            @NonNull SparseArray<List<String>> urnsArray) {
+        int numberSrc = num.getEmergencyNumberSourceBitmask();
+        for (Integer source : EMERGENCY_NUMBER_SOURCE_PRECEDENCE) {
+            if ((numberSrc & source) == source) {
+                if (!num.isInEmergencyServiceCategories(EMERGENCY_SERVICE_CATEGORY_UNSPECIFIED)) {
+                    serviceCategoryArray.put(source, num.getEmergencyServiceCategoryBitmask());
+                }
+                urnsArray.put(source, num.getEmergencyUrns());
+                break;
+            }
+        }
+    }
+
+    /**
+     * Get a merged EmergencyNumber from two same emergency numbers from
+     * Emergency number list. Two emergency numbers are the same if
+     * {@link #areSameEmergencyNumbers} returns {@code true}.
+     *
+     * @param first first EmergencyNumber to compare
+     * @param second second EmergencyNumber to compare
+     * @param mergeServiceCategoriesAndUrns {@code true} then determine service category and urns
+     * Service catetory : set from most precedence source number(N/W, SIM, DB, modem_cfg)
+     * Urns : merge from both with first priority from most precedence source number
+     * {@code false} then call {@link #mergeSameEmergencyNumbers} to merge.
+     * @return a merged EmergencyNumber or null if they are not the same EmergencyNumber
+     *
+     * @hide
+     */
+    public static @NonNull EmergencyNumber mergeSameEmergencyNumbers(
+            @NonNull EmergencyNumber first, @NonNull EmergencyNumber second,
+            boolean mergeServiceCategoriesAndUrns) {
+        if (!mergeServiceCategoriesAndUrns) {
+            return mergeSameEmergencyNumbers(first, second);
+        }
+
+        int routing = first.getEmergencyCallRouting();
+        int serviceCategory = first.getEmergencyServiceCategoryBitmask();
+        List<String> mergedEmergencyUrns = new ArrayList<String>();
+        //Maps to store the service category and urns of both the first and second emergency number
+        // with key as most precedent source
+        SparseIntArray serviceCategoryArray = new SparseIntArray(2);
+        SparseArray<List<String>> urnsArray = new SparseArray(2);
+
+        fillServiceCategoryAndUrns(first, serviceCategoryArray, urnsArray);
+        fillServiceCategoryAndUrns(second, serviceCategoryArray, urnsArray);
+
+        if (second.isFromSources(EMERGENCY_NUMBER_SOURCE_DATABASE)) {
+            routing = second.getEmergencyCallRouting();
+        }
+
+        // Determine serviceCategory of most precedence number
+        for (int sourceOfCategory : EMERGENCY_NUMBER_SOURCE_PRECEDENCE) {
+            if (serviceCategoryArray.indexOfKey(sourceOfCategory) >= 0) {
+                serviceCategory = serviceCategoryArray.get(sourceOfCategory);
+                break;
+            }
+        }
+
+        // Merge Urns in precedence number
+        for (int sourceOfUrn : EMERGENCY_NUMBER_SOURCE_PRECEDENCE) {
+            if (urnsArray.contains(sourceOfUrn)) {
+                mergedEmergencyUrns = mergeEmergencyUrns(mergedEmergencyUrns,
+                        urnsArray.get(sourceOfUrn));
+            }
+        }
+
+        return new EmergencyNumber(first.getNumber(), first.getCountryIso(), first.getMnc(),
+                serviceCategory, mergedEmergencyUrns,
+                first.getEmergencyNumberSourceBitmask()
+                        | second.getEmergencyNumberSourceBitmask(),
+                routing);
     }
 
     /**

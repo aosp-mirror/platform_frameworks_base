@@ -9085,6 +9085,25 @@ public class Activity extends ContextThemeWrapper
                 state, sourceSpec, targetSpec, viewIds, uiTranslationSpec);
     }
 
+    /**
+     * If set, any activity launch in the same task will be overridden to the locale of activity
+     * that started the task.
+     *
+     * <p>Currently, Android supports per app languages, and system apps are able to start
+     * activities of another package on the same task, which may cause users to set different
+     * languages in different apps and display two different languages in one app.</p>
+     *
+     * <p>The <a href="https://developer.android.com/guide/topics/large-screens/activity-embedding">
+     * activity embedding feature</a> will align the locale with root activity automatically, but
+     * it doesn't land on the phone yet. If activity embedding land on the phone in the future,
+     * please consider adapting activity embedding directly.</p>
+     *
+     * @hide
+     */
+    public void enableTaskLocaleOverride() {
+        ActivityClient.getInstance().enableTaskLocaleOverride(mToken);
+    }
+
     class HostCallbacks extends FragmentHostCallback<Activity> {
         public HostCallbacks() {
             super(Activity.this /*activity*/);
