@@ -21,6 +21,8 @@ import android.hardware.input.InputManager;
 import android.os.Handler;
 import android.os.Looper;
 import android.os.Message;
+import android.util.ArrayMap;
+import android.util.FeatureFlagUtils;
 import android.view.InputDevice;
 
 import com.android.internal.annotations.GuardedBy;
@@ -65,16 +67,25 @@ final class KeyRemapper implements InputManager.InputDeviceListener {
     }
 
     public void remapKey(int fromKey, int toKey) {
+        if (!supportRemapping()) {
+            return;
+        }
         Message msg = Message.obtain(mHandler, MSG_REMAP_KEY, fromKey, toKey);
         mHandler.sendMessage(msg);
     }
 
     public void clearAllKeyRemappings() {
+        if (!supportRemapping()) {
+            return;
+        }
         Message msg = Message.obtain(mHandler, MSG_CLEAR_ALL_REMAPPING);
         mHandler.sendMessage(msg);
     }
 
     public Map<Integer, Integer> getKeyRemapping() {
+        if (!supportRemapping()) {
+            return new ArrayMap<>();
+        }
         synchronized (mDataStore) {
             return mDataStore.getKeyRemapping();
         }
@@ -124,6 +135,9 @@ final class KeyRemapper implements InputManager.InputDeviceListener {
 
     @Override
     public void onInputDeviceAdded(int deviceId) {
+        if (!supportRemapping()) {
+            return;
+        }
         InputManager inputManager = Objects.requireNonNull(
                 mContext.getSystemService(InputManager.class));
         InputDevice inputDevice = inputManager.getInputDevice(deviceId);
@@ -157,5 +171,10 @@ final class KeyRemapper implements InputManager.InputDeviceListener {
                 return true;
         }
         return false;
+    }
+
+    private boolean supportRemapping() {
+        return FeatureFlagUtils.isEnabled(mContext,
+                FeatureFlagUtils.SETTINGS_NEW_KEYBOARD_MODIFIER_KEY);
     }
 }

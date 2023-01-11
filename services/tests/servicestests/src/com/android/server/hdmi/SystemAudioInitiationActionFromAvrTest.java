@@ -168,6 +168,7 @@ public class SystemAudioInitiationActionFromAvrTest {
         Looper looper = mTestLooper.getLooper();
         hdmiControlService.setIoLooper(looper);
         hdmiControlService.setHdmiCecConfig(new FakeHdmiCecConfig(context));
+        hdmiControlService.setDeviceConfig(new FakeDeviceConfigWrapper());
         HdmiCecController.NativeWrapper nativeWrapper = new FakeNativeWrapper();
         HdmiCecController hdmiCecController = HdmiCecController.createWithNativeWrapper(
                 hdmiControlService, nativeWrapper, hdmiControlService.getAtomWriter());

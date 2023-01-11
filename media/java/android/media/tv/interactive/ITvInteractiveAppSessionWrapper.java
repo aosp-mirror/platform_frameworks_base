@@ -86,8 +86,9 @@ public class ITvInteractiveAppSessionWrapper
     private static final int DO_NOTIFY_RECORDING_STARTED = 30;
     private static final int DO_NOTIFY_RECORDING_STOPPED = 31;
     private static final int DO_NOTIFY_AD_BUFFER_CONSUMED = 32;
-    private static final int DO_SEND_RECORDING_INFO = 33;
-    private static final int DO_SEND_RECORDING_INFO_LIST = 34;
+    private static final int DO_NOTIFY_TV_MESSAGE = 33;
+    private static final int DO_SEND_RECORDING_INFO = 34;
+    private static final int DO_SEND_RECORDING_INFO_LIST = 35;
 
     private final HandlerCaller mCaller;
     private Session mSessionImpl;
@@ -211,6 +212,12 @@ public class ITvInteractiveAppSessionWrapper
             }
             case DO_NOTIFY_TRACKS_CHANGED: {
                 mSessionImpl.notifyTracksChanged((List<TvTrackInfo>) msg.obj);
+                break;
+            }
+            case DO_NOTIFY_TV_MESSAGE: {
+                SomeArgs args = (SomeArgs) msg.obj;
+                mSessionImpl.notifyTvMessage((String) args.arg1, (Bundle) args.arg2);
+                args.recycle();
                 break;
             }
             case DO_NOTIFY_VIDEO_AVAILABLE: {
@@ -387,6 +394,12 @@ public class ITvInteractiveAppSessionWrapper
     public void notifyTrackSelected(int type, final String trackId) {
         mCaller.executeOrSendMessage(
                 mCaller.obtainMessageOO(DO_NOTIFY_TRACK_SELECTED, type, trackId));
+    }
+
+    @Override
+    public void notifyTvMessage(String type, Bundle data) {
+        mCaller.executeOrSendMessage(
+                mCaller.obtainMessageOO(DO_NOTIFY_TRACK_SELECTED, type, data));
     }
 
     @Override

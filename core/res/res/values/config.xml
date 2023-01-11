@@ -2344,6 +2344,24 @@
          display, this value should be true. -->
     <bool name="config_perDisplayFocusEnabled">false</bool>
 
+    <!-- Whether the system enables motion prediction. Only enable this after confirming that the
+         model works well on your device. To enable system-based prediction, set this value to true.
+          -->
+    <bool name="config_enableMotionPrediction">true</bool>
+
+    <!-- Additional offset to use for motion prediction, in nanoseconds. A positive number indicates
+         that the prediction will take place further in the future. For example, suppose a
+         MotionEvent arrives with timestamp t=1, and the current expected presentation time is t=2.
+         Typically, the prediction will target the presentation time, t=2. If you'd like to make
+         prediction more aggressive, you could set the offset to a positive number.
+         Setting the offset to 1 here would mean that the prediction will be done for time t=3.
+         A negative number may also be provided, to make the prediction less aggressive. In general,
+         the offset here should represent some built-in hardware delays that may not be accounted
+         for by the "expected present time". See also:
+         https://developer.android.com/reference/android/view/
+                  Choreographer.FrameTimeline#getExpectedPresentationTimeNanos() -->
+    <integer name="config_motionPredictionOffsetNanos">0</integer>
+
     <!-- Whether a software navigation bar should be shown. NOTE: in the future this may be
          autodetected from the Configuration. -->
     <bool name="config_showNavigationBar">false</bool>
@@ -2703,6 +2721,10 @@
         Note: This list must be kept current with PACKAGE_WHITELIST_MODE_PROP in
         frameworks/base/services/core/java/com/android/server/pm/UserSystemPackageInstaller.java -->
     <integer name="config_userTypePackageWhitelistMode">13</integer> <!-- 1+4+8 -->
+
+    <!-- Whether the main user is a permanent admin user. If the main user is a permanent admin user
+     it can't be deleted or downgraded to non-admin status. -->
+    <bool name="config_isMainUserPermanentAdmin">false</bool>
 
     <!-- Whether UI for multi user should be shown -->
     <bool name="config_enableMultiUserUI">false</bool>

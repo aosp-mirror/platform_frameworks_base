@@ -29,6 +29,7 @@ import com.android.systemui.keyguard.WakefulnessLifecycle
 import com.android.systemui.keyguard.data.repository.FakeKeyguardRepository
 import com.android.systemui.keyguard.domain.interactor.KeyguardInteractor
 import com.android.systemui.shade.NotificationPanelViewController
+import com.android.systemui.statusbar.CommandQueue
 import com.android.systemui.statusbar.LightRevealScrim
 import com.android.systemui.statusbar.phone.CentralSurfaces
 import com.android.systemui.unfold.util.FoldableDeviceStates
@@ -73,6 +74,8 @@ class FoldAodAnimationControllerTest : SysuiTestCase() {
 
     @Mock lateinit var viewTreeObserver: ViewTreeObserver
 
+    @Mock private lateinit var commandQueue: CommandQueue
+
     @Captor private lateinit var foldStateListenerCaptor: ArgumentCaptor<FoldStateListener>
 
     private lateinit var deviceStates: FoldableDeviceStates
@@ -102,7 +105,8 @@ class FoldAodAnimationControllerTest : SysuiTestCase() {
             }
 
         keyguardRepository = FakeKeyguardRepository()
-        val keyguardInteractor = KeyguardInteractor(repository = keyguardRepository)
+        val keyguardInteractor =
+            KeyguardInteractor(repository = keyguardRepository, commandQueue = commandQueue)
 
         // Needs to be run on the main thread
         runBlocking(IMMEDIATE) {

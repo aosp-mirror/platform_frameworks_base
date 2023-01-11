@@ -811,6 +811,40 @@ public class TaskFragmentOrganizerControllerTest extends WindowTestsBase {
     }
 
     @Test
+    public void testApplyTransaction_createTaskFragment_withPairedActivityToken() {
+        final Task task = createTask(mDisplayContent);
+        final ActivityRecord activityAtBottom = createActivityRecord(task);
+        final int uid = Binder.getCallingUid();
+        activityAtBottom.info.applicationInfo.uid = uid;
+        activityAtBottom.getTask().effectiveUid = uid;
+        mTaskFragment = new TaskFragmentBuilder(mAtm)
+                .setParentTask(task)
+                .setFragmentToken(mFragmentToken)
+                .createActivityCount(1)
+                .build();
+        mWindowOrganizerController.mLaunchTaskFragments.put(mFragmentToken, mTaskFragment);
+        final IBinder fragmentToken1 = new Binder();
+        final TaskFragmentCreationParams params = new TaskFragmentCreationParams.Builder(
+                mOrganizerToken, fragmentToken1, activityAtBottom.token)
+                .setPairedActivityToken(activityAtBottom.token)
+                .build();
+        mTransaction.setTaskFragmentOrganizer(mIOrganizer);
+        mTransaction.createTaskFragment(params);
+        assertApplyTransactionAllowed(mTransaction);
+
+        // Successfully created a TaskFragment.
+        final TaskFragment taskFragment = mWindowOrganizerController.getTaskFragment(
+                fragmentToken1);
+        assertNotNull(taskFragment);
+        // The new TaskFragment should be positioned right above the paired activity.
+        assertEquals(task.mChildren.indexOf(activityAtBottom) + 1,
+                task.mChildren.indexOf(taskFragment));
+        // The top TaskFragment should remain on top.
+        assertEquals(task.mChildren.indexOf(taskFragment) + 1,
+                task.mChildren.indexOf(mTaskFragment));
+    }
+
+    @Test
     public void testApplyTransaction_enforceHierarchyChange_reparentChildren() {
         doReturn(true).when(mTaskFragment).isAttached();
 

@@ -1079,6 +1079,17 @@ public final class Settings {
             "android.settings.APP_LOCALE_SETTINGS";
 
     /**
+     * Activity Action: Show settings to allow configuration of regional preferences
+     * <p>
+     * Input: Nothing
+     * <p>
+     * Output: Nothing.
+     */
+    @SdkConstant(SdkConstantType.ACTIVITY_INTENT_ACTION)
+    public static final String ACTION_REGIONAL_PREFERENCES_SETTINGS =
+            "android.settings.REGIONAL_PREFERENCES_SETTINGS";
+
+    /**
      * Activity Action: Show settings to allow configuration of lockscreen.
      * <p>
      * In some cases, a matching Activity may not exist, so ensure you
@@ -2501,6 +2512,7 @@ public final class Settings {
      *
      * @hide
      */
+    @SystemApi
     @SdkConstant(SdkConstantType.BROADCAST_INTENT_ACTION)
     public static final String ACTION_SHOW_RESTRICTED_SETTING_DIALOG =
             "android.settings.SHOW_RESTRICTED_SETTING_DIALOG";
@@ -18088,6 +18100,14 @@ public final class Settings {
              * @hide
              */
             public static final int EARLY_UPDATES_STATUS_ABORTED = 4;
+
+            /**
+             * Whether dynamic color theming (e.g. Material You) is enabled for apps which support
+             * it.
+             *
+             * @hide
+             */
+            public static final String DYNAMIC_COLOR_THEME_ENABLED = "dynamic_color_theme_enabled";
         }
     }
 

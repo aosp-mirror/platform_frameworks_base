@@ -1504,6 +1504,21 @@ public final class TvInteractiveAppManager {
             }
         }
 
+        /**
+         * Notifies Interactive APP session when a new TV message is received.
+         */
+        public void notifyTvMessage(String type, Bundle data) {
+            if (mToken == null) {
+                Log.w(TAG, "The session has been already released");
+                return;
+            }
+            try {
+                mService.notifyTvMessage(mToken, type, data, mUserId);
+            } catch (RemoteException e) {
+                throw e.rethrowFromSystemServer();
+            }
+        }
+
         private void flushPendingEventsLocked() {
             mHandler.removeMessages(InputEventHandler.MSG_FLUSH_INPUT_EVENT);
 

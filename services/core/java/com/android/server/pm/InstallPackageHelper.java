@@ -2755,6 +2755,12 @@ final class InstallPackageHelper {
                             installerPackageName, null /*finishedReceiver*/,
                             updateUserIds, instantUserIds, null /* broadcastAllowList */, null);
                 }
+                // Send to PermissionController for all update users, even if it may not be running
+                // for some users
+                mPm.sendPackageBroadcast(Intent.ACTION_PACKAGE_ADDED, packageName,
+                        extras, 0 /*flags*/,
+                        mPm.mRequiredPermissionControllerPackage, null /*finishedReceiver*/,
+                        updateUserIds, instantUserIds, null /* broadcastAllowList */, null);
                 // Notify required verifier(s) that are not the installer of record for the package.
                 for (String verifierPackageName : mPm.mRequiredVerifierPackages) {
                     if (verifierPackageName != null && !verifierPackageName.equals(

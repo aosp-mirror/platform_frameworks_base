@@ -508,6 +508,9 @@ abstract class InsetsSourceProvider {
         }
         mClientVisible = clientVisible;
         updateVisibility();
+        // The visibility change needs a traversal to apply.
+        mDisplayContent.setLayoutNeeded();
+        mDisplayContent.mWmService.mWindowPlacerLocked.requestTraversal();
     }
 
     @VisibleForTesting

@@ -45,7 +45,7 @@ import com.android.credentialmanager.createflow.DisabledProviderInfo
 import com.android.credentialmanager.createflow.EnabledProviderInfo
 import com.android.credentialmanager.createflow.RequestDisplayInfo
 import com.android.credentialmanager.getflow.GetCredentialUiState
-import com.android.credentialmanager.jetpack.developer.CreatePasswordRequest.Companion.toBundle
+import com.android.credentialmanager.jetpack.developer.CreatePasswordRequest.Companion.toCredentialDataBundle
 import com.android.credentialmanager.jetpack.developer.CreatePublicKeyCredentialRequest
 import com.android.credentialmanager.jetpack.developer.PublicKeyCredential.Companion.TYPE_PUBLIC_KEY_CREDENTIAL
 import com.android.credentialmanager.jetpack.provider.Action
@@ -176,9 +176,11 @@ class CredentialManagerRepo(
               .setSaveEntries(
                   listOf<Entry>(
                       newCreateEntry("key1", "subkey-1", "elisa.beckett@gmail.com",
-                          20, 7, 27, 10L),
+                          20, 7, 27, 10L,
+                          "Optional footer description"),
                       newCreateEntry("key1", "subkey-2", "elisa.work@google.com",
-                          20, 7, 27, 12L),
+                          20, 7, 27, 12L,
+                      null),
                   )
               )
               .setRemoteEntry(
@@ -190,9 +192,11 @@ class CredentialManagerRepo(
               .setSaveEntries(
                   listOf<Entry>(
                       newCreateEntry("key1", "subkey-3", "elisa.beckett@dashlane.com",
-                          20, 7, 27, 11L),
+                          20, 7, 27, 11L,
+                          null),
                       newCreateEntry("key1", "subkey-4", "elisa.work@dashlane.com",
-                          20, 7, 27, 14L),
+                          20, 7, 27, 14L,
+                          null),
                   )
               )
               .build(),
@@ -325,7 +329,7 @@ class CredentialManagerRepo(
                 key,
                 subkey,
                 CredentialEntry.toSlice(credentialEntry),
-                null
+                Intent()
         )
   }
 
@@ -337,6 +341,7 @@ class CredentialManagerRepo(
             passkeyCount: Int,
             totalCredentialCount: Int,
             lastUsedTimeMillis: Long,
+            footerDescription: String?,
     ): Entry {
         val intent = Intent("com.androidauth.androidvault.CONFIRM_PASSWORD")
                 .setPackage("com.androidauth.androidvault")
@@ -348,7 +353,7 @@ class CredentialManagerRepo(
                 android.service.credentials.CallingAppInfo(
                         context.applicationInfo.packageName, SigningInfo()),
                 TYPE_PASSWORD_CREDENTIAL,
-                toBundle("beckett-bakert@gmail.com", "password123")
+                toCredentialDataBundle("beckett-bakert@gmail.com", "password123")
         )
         val fillInIntent = Intent().putExtra(
                 CredentialProviderService.EXTRA_CREATE_CREDENTIAL_REQUEST,
@@ -360,7 +365,7 @@ class CredentialManagerRepo(
                 listOf(
                         CredentialCountInformation.createPasswordCountInformation(passwordCount),
                         CredentialCountInformation.createPublicKeyCountInformation(passkeyCount),
-                ))
+                ), footerDescription)
         return Entry(
                 key,
                 subkey,
@@ -417,7 +422,7 @@ class CredentialManagerRepo(
             "                     \"residentKey\": \"required\",\n" +
             "                     \"requireResidentKey\": true\n" +
             "                   }}")
-    val credentialData = request.data
+    val credentialData = request.credentialData
     return RequestInfo.newCreateRequestInfo(
       Binder(),
       CreateCredentialRequest(
@@ -432,7 +437,7 @@ class CredentialManagerRepo(
   }
 
   private fun testCreatePasswordRequestInfo(): RequestInfo {
-    val data = toBundle("beckett-bakert@gmail.com", "password123")
+    val data = toCredentialDataBundle("beckett-bakert@gmail.com", "password123")
     return RequestInfo.newCreateRequestInfo(
       Binder(),
       CreateCredentialRequest(

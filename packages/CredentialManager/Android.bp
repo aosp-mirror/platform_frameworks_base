@@ -14,6 +14,11 @@ android_app {
     srcs: ["src/**/*.kt"],
     resource_dirs: ["res"],
 
+    dex_preopt: {
+        profile_guided: true,
+        profile: "profile.txt.prof",
+    },
+
     static_libs: [
         "androidx.activity_activity-compose",
         "androidx.appcompat_appcompat",

@@ -154,6 +154,7 @@ public abstract class BaseAbsoluteVolumeControlTest {
                 HdmiControlManager.CEC_SETTING_NAME_VOLUME_CONTROL_MODE,
                 HdmiControlManager.VOLUME_CONTROL_DISABLED);
         mHdmiControlService.setHdmiCecConfig(mHdmiCecConfig);
+        mHdmiControlService.setDeviceConfig(new FakeDeviceConfigWrapper());
 
         mNativeWrapper = new FakeNativeWrapper();
         mNativeWrapper.setPhysicalAddress(getPhysicalAddress());

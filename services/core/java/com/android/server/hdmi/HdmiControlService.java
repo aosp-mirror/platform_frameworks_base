@@ -86,6 +86,7 @@ import android.os.ShellCallback;
 import android.os.SystemClock;
 import android.os.SystemProperties;
 import android.os.UserHandle;
+import android.provider.DeviceConfig;
 import android.provider.Settings.Global;
 import android.sysprop.HdmiProperties;
 import android.text.TextUtils;
@@ -450,6 +451,9 @@ public class HdmiControlService extends SystemService {
     private boolean mWakeUpMessageReceived = false;
 
     @ServiceThreadOnly
+    private boolean mSoundbarModeFeatureFlagEnabled = false;
+
+    @ServiceThreadOnly
     private int mActivePortId = Constants.INVALID_PORT_ID;
 
     // Set to true while the input change by MHL is allowed.
@@ -469,6 +473,9 @@ public class HdmiControlService extends SystemService {
 
     @Nullable
     private TvInputManager mTvInputManager;
+
+    @Nullable
+    private DeviceConfigWrapper mDeviceConfig;
 
     @Nullable
     private PowerManagerWrapper mPowerManager;
@@ -525,6 +532,7 @@ public class HdmiControlService extends SystemService {
         mCecLocalDevices = deviceTypes;
         mSettingsObserver = new SettingsObserver(mHandler);
         mHdmiCecConfig = new HdmiCecConfig(context);
+        mDeviceConfig = new DeviceConfigWrapper();
         mAudioDeviceVolumeManager = audioDeviceVolumeManager;
     }
 
@@ -533,6 +541,7 @@ public class HdmiControlService extends SystemService {
         mCecLocalDevices = readDeviceTypes();
         mSettingsObserver = new SettingsObserver(mHandler);
         mHdmiCecConfig = new HdmiCecConfig(context);
+        mDeviceConfig = new DeviceConfigWrapper();
     }
 
     @VisibleForTesting
@@ -763,14 +772,6 @@ public class HdmiControlService extends SystemService {
                         }
                     }
                 }, mServiceThreadExecutor);
-        mHdmiCecConfig.registerChangeListener(HdmiControlManager.CEC_SETTING_NAME_SOUNDBAR_MODE,
-                new HdmiCecConfig.SettingChangeListener() {
-                    @Override
-                    public void onChange(String setting) {
-                        setSoundbarMode(mHdmiCecConfig.getIntValue(
-                                HdmiControlManager.CEC_SETTING_NAME_SOUNDBAR_MODE));
-                    }
-                }, mServiceThreadExecutor);
         mHdmiCecConfig.registerChangeListener(
                 HdmiControlManager.CEC_SETTING_NAME_SYSTEM_AUDIO_CONTROL,
                 new HdmiCecConfig.SettingChangeListener() {
@@ -819,9 +820,38 @@ public class HdmiControlService extends SystemService {
                                 HdmiControlManager.SETTING_NAME_EARC_ENABLED);
                         setEarcEnabled(enabled);
                     }
+                },
+                mServiceThreadExecutor);
+
+        mSoundbarModeFeatureFlagEnabled = mDeviceConfig.getBoolean(
+                Constants.DEVICE_CONFIG_FEATURE_FLAG_SOUNDBAR_MODE, false);
+
+        mDeviceConfig.addOnPropertiesChangedListener(getContext().getMainExecutor(),
+                new DeviceConfig.OnPropertiesChangedListener() {
+                    @Override
+                    public void onPropertiesChanged(DeviceConfig.Properties properties) {
+                        mSoundbarModeFeatureFlagEnabled = properties.getBoolean(
+                                Constants.DEVICE_CONFIG_FEATURE_FLAG_SOUNDBAR_MODE,
+                                false);
+                        boolean soundbarModeSetting = mHdmiCecConfig.getIntValue(
+                                HdmiControlManager.CEC_SETTING_NAME_SOUNDBAR_MODE)
+                                == SOUNDBAR_MODE_ENABLED;
+                        setSoundbarMode(soundbarModeSetting && mSoundbarModeFeatureFlagEnabled
+                                ? SOUNDBAR_MODE_ENABLED : SOUNDBAR_MODE_DISABLED);
+                    }
+                });
+        mHdmiCecConfig.registerChangeListener(HdmiControlManager.CEC_SETTING_NAME_SOUNDBAR_MODE,
+                new HdmiCecConfig.SettingChangeListener() {
+                    @Override
+                    public void onChange(String setting) {
+                        boolean soundbarModeSetting = mHdmiCecConfig.getIntValue(
+                                HdmiControlManager.CEC_SETTING_NAME_SOUNDBAR_MODE)
+                                == SOUNDBAR_MODE_ENABLED;
+                        setSoundbarMode(soundbarModeSetting && mSoundbarModeFeatureFlagEnabled
+                                ? SOUNDBAR_MODE_ENABLED : SOUNDBAR_MODE_DISABLED);
+                    }
                 }, mServiceThreadExecutor);
     }
-
     /** Returns true if the device screen is off */
     boolean isScreenOff() {
         return mDisplayManager.getDisplay(Display.DEFAULT_DISPLAY).getState() == Display.STATE_OFF;
@@ -920,6 +950,11 @@ public class HdmiControlService extends SystemService {
     }
 
     @VisibleForTesting
+    void setDeviceConfig(DeviceConfigWrapper deviceConfig) {
+        mDeviceConfig = deviceConfig;
+    }
+
+    @VisibleForTesting
     void setPowerManager(PowerManagerWrapper powerManager) {
         mPowerManager = powerManager;
     }
@@ -927,6 +962,10 @@ public class HdmiControlService extends SystemService {
     @VisibleForTesting
     void setPowerManagerInternal(PowerManagerInternalWrapper powerManagerInternal) {
         mPowerManagerInternal = powerManagerInternal;
+    }
+
+    DeviceConfigWrapper getDeviceConfig() {
+        return mDeviceConfig;
     }
 
     PowerManagerWrapper getPowerManager() {
@@ -1151,7 +1190,8 @@ public class HdmiControlService extends SystemService {
         if (mHdmiCecConfig.getIntValue(HdmiControlManager.CEC_SETTING_NAME_SOUNDBAR_MODE)
                 == SOUNDBAR_MODE_ENABLED
                 && !allLocalDeviceTypes.contains(HdmiDeviceInfo.DEVICE_AUDIO_SYSTEM)
-                && SystemProperties.getBoolean(Constants.PROPERTY_ARC_SUPPORT, true)) {
+                && SystemProperties.getBoolean(Constants.PROPERTY_ARC_SUPPORT, true)
+                && mSoundbarModeFeatureFlagEnabled) {
             allLocalDeviceTypes.add(HdmiDeviceInfo.DEVICE_AUDIO_SYSTEM);
         }
         return allLocalDeviceTypes;

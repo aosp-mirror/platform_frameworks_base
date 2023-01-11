@@ -129,6 +129,7 @@ public class DeviceSelectActionFromTvTest {
 
         mHdmiControlService.setIoLooper(mMyLooper);
         mHdmiControlService.setHdmiCecConfig(new FakeHdmiCecConfig(context));
+        mHdmiControlService.setDeviceConfig(new FakeDeviceConfigWrapper());
         mNativeWrapper = new FakeNativeWrapper();
         mHdmiCecController = HdmiCecController.createWithNativeWrapper(
                 mHdmiControlService, mNativeWrapper, mHdmiControlService.getAtomWriter());

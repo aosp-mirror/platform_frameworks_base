@@ -17,6 +17,7 @@
 package com.android.settingslib.spaprivileged.model.app
 
 import android.app.AppOpsManager.MODE_ALLOWED
+import android.app.AppOpsManager.MODE_ERRORED
 import android.app.AppOpsManager.Mode
 import android.content.Context
 import android.content.pm.ApplicationInfo
@@ -39,7 +40,7 @@ class AppOpsController(
     context: Context,
     private val app: ApplicationInfo,
     private val op: Int,
-    private val modeForNotAllowed: Int,
+    private val modeForNotAllowed: Int = MODE_ERRORED,
     private val setModeByUid: Boolean = false,
 ) : IAppOpsController {
     private val appOpsManager = context.appOpsManager

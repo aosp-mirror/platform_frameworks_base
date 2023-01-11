@@ -24,8 +24,6 @@ import androidx.activity.result.IntentSenderRequest
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
-import androidx.lifecycle.LiveData
-import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import com.android.credentialmanager.CredentialManagerRepo
 import com.android.credentialmanager.common.DialogResult
@@ -33,6 +31,9 @@ import com.android.credentialmanager.common.ProviderActivityResult
 import com.android.credentialmanager.common.ResultState
 import com.android.credentialmanager.jetpack.developer.PublicKeyCredential
 import com.android.internal.util.Preconditions
+import kotlinx.coroutines.channels.BufferOverflow
+import kotlinx.coroutines.flow.MutableSharedFlow
+import kotlinx.coroutines.flow.SharedFlow
 
 data class GetCredentialUiState(
   val providerInfoList: List<ProviderInfo>,
@@ -52,11 +53,11 @@ class GetCredentialViewModel(
   var uiState by mutableStateOf(credManRepo.getCredentialInitialUiState())
       private set
 
-  val dialogResult: MutableLiveData<DialogResult> by lazy {
-    MutableLiveData<DialogResult>()
-  }
+  val dialogResult: MutableSharedFlow<DialogResult> =
+    MutableSharedFlow(replay = 0, extraBufferCapacity = 1,
+      onBufferOverflow = BufferOverflow.DROP_OLDEST)
 
-  fun observeDialogResult(): LiveData<DialogResult> {
+  fun observeDialogResult(): SharedFlow<DialogResult> {
     return dialogResult
   }
 
@@ -72,7 +73,7 @@ class GetCredentialViewModel(
       CredentialManagerRepo.getInstance().onOptionSelected(
         entry.providerId, entry.entryKey, entry.entrySubkey,
       )
-      dialogResult.value = DialogResult(ResultState.COMPLETE)
+      dialogResult.tryEmit(DialogResult(ResultState.COMPLETE))
     }
   }
 
@@ -117,7 +118,7 @@ class GetCredentialViewModel(
         Log.w("Account Selector",
           "Illegal state: received a provider result but found no matching entry.")
       }
-      dialogResult.value = DialogResult(ResultState.COMPLETE)
+      dialogResult.tryEmit(DialogResult(ResultState.COMPLETE))
     }
   }
 
@@ -144,7 +145,7 @@ class GetCredentialViewModel(
 
   fun onCancel() {
     CredentialManagerRepo.getInstance().onCancel()
-    dialogResult.value = DialogResult(ResultState.CANCELED)
+    dialogResult.tryEmit(DialogResult(ResultState.NORMAL_CANCELED))
   }
 }
 

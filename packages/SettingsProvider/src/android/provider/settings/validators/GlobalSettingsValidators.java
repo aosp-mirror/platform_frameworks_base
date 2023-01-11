@@ -352,5 +352,6 @@ public class GlobalSettingsValidators {
                                 String.valueOf(Global.Wearable.EARLY_UPDATES_STATUS_SKIPPED),
                                 String.valueOf(Global.Wearable.EARLY_UPDATES_STATUS_ABORTED),
                           }));
+        VALIDATORS.put(Global.Wearable.DYNAMIC_COLOR_THEME_ENABLED, BOOLEAN_VALIDATOR);
     }
 }

@@ -26,11 +26,8 @@ import com.android.server.wm.flicker.FlickerTestFactory
 import com.android.server.wm.flicker.entireScreenCovered
 import com.android.server.wm.flicker.helpers.FixedOrientationAppHelper
 import com.android.server.wm.flicker.helpers.WindowUtils
-import com.android.server.wm.flicker.helpers.setRotation
-import com.android.server.wm.flicker.helpers.wakeUpAndGoToHomeScreen
 import com.android.server.wm.flicker.junit.FlickerParametersRunnerFactory
 import com.android.server.wm.flicker.navBarLayerPositionAtStartAndEnd
-import com.android.server.wm.flicker.rules.RemoveAllTasksButHomeRule
 import com.android.server.wm.flicker.testapp.ActivityOptions.Pip.ACTION_ENTER_PIP
 import com.android.server.wm.flicker.testapp.ActivityOptions.PortraitOnlyActivity.EXTRA_FIXED_ORIENTATION
 import com.android.server.wm.traces.common.ComponentNameMatcher
@@ -79,9 +76,6 @@ class EnterPipToOtherOrientationTest(flicker: FlickerTest) : PipTransition(flick
     override val transition: FlickerBuilder.() -> Unit
         get() = {
             setup {
-                RemoveAllTasksButHomeRule.removeAllTasksButHome()
-                device.wakeUpAndGoToHomeScreen()
-
                 // Launch a portrait only app on the fullscreen stack
                 testApp.launchViaIntent(
                     wmHelper,
@@ -95,8 +89,6 @@ class EnterPipToOtherOrientationTest(flicker: FlickerTest) : PipTransition(flick
                 )
             }
             teardown {
-                setRotation(PlatformConsts.Rotation.ROTATION_0)
-                RemoveAllTasksButHomeRule.removeAllTasksButHome()
                 pipApp.exit(wmHelper)
                 testApp.exit(wmHelper)
             }

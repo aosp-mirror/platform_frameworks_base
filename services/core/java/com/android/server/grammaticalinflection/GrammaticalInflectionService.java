@@ -21,6 +21,7 @@ import static android.content.res.Configuration.GRAMMATICAL_GENDER_NOT_SPECIFIED
 import android.app.IGrammaticalInflectionManager;
 import android.content.Context;
 import android.os.IBinder;
+import android.os.SystemProperties;
 
 import com.android.server.LocalServices;
 import com.android.server.SystemService;
@@ -34,6 +35,8 @@ import com.android.server.wm.ActivityTaskManagerInternal;
 public class GrammaticalInflectionService extends SystemService {
 
     private final ActivityTaskManagerInternal mActivityTaskManagerInternal;
+    private static final String GRAMMATICAL_INFLECTION_ENABLED =
+            "i18n.grammatical_Inflection.enabled";
 
     /**
      * Initializes the system service.
@@ -67,6 +70,10 @@ public class GrammaticalInflectionService extends SystemService {
 
     private void setRequestedApplicationGrammaticalGender(
             String appPackageName, int userId, int gender) {
+        if (!SystemProperties.getBoolean(GRAMMATICAL_INFLECTION_ENABLED, true)) {
+            return;
+        }
+
         final ActivityTaskManagerInternal.PackageConfigurationUpdater updater =
                 mActivityTaskManagerInternal.createPackageConfigurationUpdater(appPackageName,
                         userId);

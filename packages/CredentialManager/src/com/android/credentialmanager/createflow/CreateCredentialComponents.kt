@@ -78,8 +78,7 @@ fun CreateCredentialScreen(
                         disabledProviderList = uiState.disabledProviders,
                         sortedCreateOptionsPairs = uiState.sortedCreateOptionsPairs,
                         onOptionSelected = viewModel::onEntrySelectedFromFirstUseScreen,
-                        onDisabledPasswordManagerSelected =
-                        viewModel::onDisabledPasswordManagerSelected,
+                        onDisabledProvidersSelected = viewModel::onDisabledProvidersSelected,
                         onMoreOptionsSelected = viewModel::onMoreOptionsSelectedOnProviderSelection,
                     )
                     CreateScreenState.CREATION_OPTION_SELECTION -> CreationSelectionCard(
@@ -103,8 +102,7 @@ fun CreateCredentialScreen(
                         onBackCreationSelectionButtonSelected =
                         viewModel::onBackCreationSelectionButtonSelected,
                         onOptionSelected = viewModel::onEntrySelectedFromMoreOptionScreen,
-                        onDisabledPasswordManagerSelected =
-                        viewModel::onDisabledPasswordManagerSelected,
+                        onDisabledProvidersSelected = viewModel::onDisabledProvidersSelected,
                         onRemoteEntrySelected = viewModel::onEntrySelected,
                     )
                     CreateScreenState.MORE_OPTIONS_ROW_INTRO -> MoreOptionsRowIntroCard(
@@ -250,7 +248,7 @@ fun ProviderSelectionCard(
     disabledProviderList: List<DisabledProviderInfo>?,
     sortedCreateOptionsPairs: List<Pair<CreateOptionInfo, EnabledProviderInfo>>,
     onOptionSelected: (ActiveEntry) -> Unit,
-    onDisabledPasswordManagerSelected: () -> Unit,
+    onDisabledProvidersSelected: () -> Unit,
     onMoreOptionsSelected: () -> Unit,
 ) {
     ContainerCard() {
@@ -266,11 +264,12 @@ fun ProviderSelectionCard(
                 text = stringResource(
                     R.string.choose_provider_title,
                     when (requestDisplayInfo.type) {
-                        TYPE_PUBLIC_KEY_CREDENTIAL -> stringResource(R.string.create_your_passkeys)
-                        TYPE_PASSWORD_CREDENTIAL -> stringResource(R.string.save_your_password)
-                        else -> stringResource(R.string.save_your_sign_in_info)
-                    },
-                ),
+                        TYPE_PUBLIC_KEY_CREDENTIAL ->
+                            stringResource(R.string.passkeys)
+                        TYPE_PASSWORD_CREDENTIAL ->
+                            stringResource(R.string.passwords)
+                        else -> stringResource(R.string.sign_in_info)
+                    }),
                 style = MaterialTheme.typography.titleMedium,
                 modifier = Modifier.padding(horizontal = 24.dp)
                     .align(alignment = Alignment.CenterHorizontally),
@@ -318,8 +317,8 @@ fun ProviderSelectionCard(
                     item {
                         MoreOptionsDisabledProvidersRow(
                             disabledProviders = disabledProviderList,
-                            onDisabledPasswordManagerSelected =
-                            onDisabledPasswordManagerSelected,
+                            onDisabledProvidersSelected =
+                            onDisabledProvidersSelected,
                         )
                     }
                 }
@@ -363,7 +362,7 @@ fun MoreOptionsSelectionCard(
     onBackProviderSelectionButtonSelected: () -> Unit,
     onBackCreationSelectionButtonSelected: () -> Unit,
     onOptionSelected: (ActiveEntry) -> Unit,
-    onDisabledPasswordManagerSelected: () -> Unit,
+    onDisabledProvidersSelected: () -> Unit,
     onRemoteEntrySelected: (EntryInfo) -> Unit,
 ) {
     ContainerCard() {
@@ -436,8 +435,8 @@ fun MoreOptionsSelectionCard(
                         item {
                             MoreOptionsDisabledProvidersRow(
                                 disabledProviders = disabledProviderList,
-                                onDisabledPasswordManagerSelected =
-                                onDisabledPasswordManagerSelected,
+                                onDisabledProvidersSelected =
+                                onDisabledProvidersSelected,
                             )
                         }
                     }
@@ -606,27 +605,17 @@ fun CreationSelectionCard(
                     onClick = onConfirm
                 )
             }
-            Divider(
-                thickness = 1.dp,
-                color = Color.LightGray,
-                modifier = Modifier.padding(start = 24.dp, end = 24.dp, top = 18.dp)
-            )
-            if (createOptionInfo.userProviderDisplayName != null) {
+            if (createOptionInfo.footerDescription != null) {
+                Divider(
+                    thickness = 1.dp,
+                    color = Color.LightGray,
+                    modifier = Modifier.padding(start = 24.dp, end = 24.dp, top = 18.dp)
+                )
                 TextSecondary(
-                    text = stringResource(
-                        R.string.choose_create_option_description,
-                        requestDisplayInfo.appName,
-                        when (requestDisplayInfo.type) {
-                            TYPE_PUBLIC_KEY_CREDENTIAL -> stringResource(R.string.passkey)
-                            TYPE_PASSWORD_CREDENTIAL -> stringResource(R.string.password)
-                            else -> stringResource(R.string.sign_ins)
-                        },
-                        providerInfo.displayName,
-                        createOptionInfo.userProviderDisplayName
-                    ),
+                    text = createOptionInfo.footerDescription,
                     style = MaterialTheme.typography.bodyLarge,
                     modifier = Modifier.padding(
-                        start = 24.dp, top = 8.dp, bottom = 18.dp, end = 24.dp)
+                        start = 29.dp, top = 8.dp, bottom = 18.dp, end = 28.dp)
                 )
             }
             Divider(
@@ -891,11 +880,11 @@ fun MoreOptionsInfoRow(
 @Composable
 fun MoreOptionsDisabledProvidersRow(
     disabledProviders: List<ProviderInfo>?,
-    onDisabledPasswordManagerSelected: () -> Unit,
+    onDisabledProvidersSelected: () -> Unit,
 ) {
     if (disabledProviders != null && disabledProviders.isNotEmpty()) {
         Entry(
-            onClick = onDisabledPasswordManagerSelected,
+            onClick = onDisabledProvidersSelected,
             icon = {
                 Icon(
                     Icons.Filled.Add,

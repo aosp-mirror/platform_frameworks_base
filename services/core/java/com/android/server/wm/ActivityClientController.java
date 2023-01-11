@@ -1644,4 +1644,19 @@ class ActivityClientController extends IActivityClientController.Stub {
         }
         return false;
     }
+
+    @Override
+    public void enableTaskLocaleOverride(IBinder token) {
+        if (UserHandle.getAppId(Binder.getCallingUid()) != SYSTEM_UID) {
+            // Only allow system to align locale.
+            return;
+        }
+
+        synchronized (mGlobalLock) {
+            final ActivityRecord r = ActivityRecord.forTokenLocked(token);
+            if (r != null) {
+                r.getTask().mAlignActivityLocaleWithTask = true;
+            }
+        }
+    }
 }

@@ -29,7 +29,6 @@ import static com.android.dx.mockito.inline.extended.ExtendedMockito.mock;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.mockitoSession;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.spyOn;
 import static com.android.server.wallpaper.WallpaperManagerService.WALLPAPER;
-import static com.android.server.wallpaper.WallpaperManagerService.WALLPAPER_CROP;
 
 import static org.hamcrest.core.IsNot.not;
 import static org.junit.Assert.assertEquals;
@@ -76,12 +75,12 @@ import androidx.test.filters.FlakyTest;
 import androidx.test.platform.app.InstrumentationRegistry;
 import androidx.test.runner.AndroidJUnit4;
 
+import com.android.dx.mockito.inline.extended.ExtendedMockito;
 import com.android.dx.mockito.inline.extended.StaticMockitoSession;
 import com.android.internal.R;
 import com.android.modules.utils.TypedXmlPullParser;
 import com.android.modules.utils.TypedXmlSerializer;
 import com.android.server.LocalServices;
-import com.android.server.wallpaper.WallpaperManagerService.WallpaperData;
 import com.android.server.wm.WindowManagerInternal;
 
 import org.hamcrest.CoreMatchers;
@@ -114,6 +113,8 @@ import java.nio.charset.StandardCharsets;
 @FlakyTest(bugId = 129797242)
 @RunWith(AndroidJUnit4.class)
 public class WallpaperManagerServiceTests {
+
+    private static final String TAG = "WallpaperManagerServiceTests";
     private static final int DISPLAY_SIZE_DIMENSION = 100;
     private static StaticMockitoSession sMockitoSession;
 
@@ -138,6 +139,7 @@ public class WallpaperManagerServiceTests {
     public static void setUpClass() {
         sMockitoSession = mockitoSession()
                 .strictness(Strictness.LENIENT)
+                .spyStatic(WallpaperUtils.class)
                 .spyStatic(LocalServices.class)
                 .spyStatic(WallpaperManager.class)
                 .startMocking();
@@ -193,6 +195,11 @@ public class WallpaperManagerServiceTests {
     public void setUp() {
         MockitoAnnotations.initMocks(this);
 
+        ExtendedMockito.doAnswer(invocation ->  {
+            int userId = (invocation.getArgument(0));
+            return getWallpaperTestDir(userId);
+        }).when(() -> WallpaperUtils.getWallpaperDir(anyInt()));
+
         sContext.addMockSystemService(DisplayManager.class, mDisplayManager);
 
         final Display mockDisplay = mock(Display.class);
@@ -217,25 +224,23 @@ public class WallpaperManagerServiceTests {
         mService = null;
     }
 
+    private File getWallpaperTestDir(int userId) {
+        File tempDir = mTempDirs.get(userId);
+        if (tempDir == null) {
+            try {
+                tempDir = mFolder.newFolder(String.valueOf(userId));
+                mTempDirs.append(userId, tempDir);
+            } catch (IOException e) {
+                Log.e(TAG, "getWallpaperTestDir failed at userId= " + userId);
+            }
+        }
+        return tempDir;
+    }
+
     protected class TestWallpaperManagerService extends WallpaperManagerService {
-        private static final String TAG = "TestWallpaperManagerService";
 
         TestWallpaperManagerService(Context context) {
             super(context);
-        }
-
-        @Override
-        File getWallpaperDir(int userId) {
-            File tempDir = mTempDirs.get(userId);
-            if (tempDir == null) {
-                try {
-                    tempDir = mFolder.newFolder(String.valueOf(userId));
-                    mTempDirs.append(userId, tempDir);
-                } catch (IOException e) {
-                    Log.e(TAG, "getWallpaperDir failed at userId= " + userId);
-                }
-            }
-            return tempDir;
         }
 
         // Always return true for test
@@ -403,8 +408,7 @@ public class WallpaperManagerServiceTests {
 
     @Test
     public void testWallpaperManagerCallbackInRightOrder() throws RemoteException {
-        WallpaperData wallpaper = new WallpaperData(
-                USER_SYSTEM, mService.getWallpaperDir(USER_SYSTEM), WALLPAPER, WALLPAPER_CROP);
+        WallpaperData wallpaper = new WallpaperData(USER_SYSTEM, FLAG_SYSTEM);
         wallpaper.primaryColors = new WallpaperColors(Color.valueOf(Color.RED),
                 Color.valueOf(Color.BLUE), null);
 

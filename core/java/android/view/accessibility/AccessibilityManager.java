@@ -1275,6 +1275,15 @@ public final class AccessibilityManager {
     }
 
     /**
+     * Get the id of {@link AccessibilityNodeInfo.AccessibilityAction} currently being performed.
+     *
+     * @hide
+     */
+    public int getPerformingAction() {
+        return mPerformingAction;
+    }
+
+    /**
      * Registers a {@link HighTextContrastChangeListener} for changes in
      * the global high text contrast state of the system.
      *

@@ -97,6 +97,7 @@ public class SystemAudioAutoInitiationActionTest {
         mNativeWrapper = new FakeNativeWrapper();
         HdmiCecController hdmiCecController = HdmiCecController.createWithNativeWrapper(
                 mHdmiControlService, mNativeWrapper, mHdmiControlService.getAtomWriter());
+        mHdmiControlService.setDeviceConfig(new FakeDeviceConfigWrapper());
         mHdmiControlService.setCecController(hdmiCecController);
         mHdmiControlService.setHdmiMhlController(HdmiMhlControllerStub.create(mHdmiControlService));
         HdmiPortInfo[] hdmiPortInfos = new HdmiPortInfo[2];

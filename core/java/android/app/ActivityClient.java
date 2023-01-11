@@ -563,6 +563,14 @@ public class ActivityClient {
         }
     }
 
+    void enableTaskLocaleOverride(IBinder token) {
+        try {
+            getActivityClientController().enableTaskLocaleOverride(token);
+        } catch (RemoteException e) {
+            e.rethrowFromSystemServer();
+        }
+    }
+
     /**
      * Shows or hides a Camera app compat toggle for stretched issues with the requested state.
      *

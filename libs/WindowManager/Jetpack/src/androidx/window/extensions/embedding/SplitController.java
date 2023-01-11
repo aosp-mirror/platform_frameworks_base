@@ -1507,7 +1507,7 @@ public class SplitController implements JetpackTaskFragmentOrganizer.TaskFragmen
      * Returns the active split that has the provided containers as primary and secondary or as
      * secondary and primary, if available.
      */
-    @VisibleForTesting
+    @GuardedBy("mLock")
     @Nullable
     SplitContainer getActiveSplitForContainers(
             @NonNull TaskFragmentContainer firstContainer,

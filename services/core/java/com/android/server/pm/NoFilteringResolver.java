@@ -30,9 +30,10 @@ import java.util.List;
 import java.util.function.Function;
 
 /**
- * Cross Profile intent resolution strategy used for and to clone profile.
+ * Intent resolution strategy used when no filtering is required. As of now, the known use-case is
+ * clone profile.
  */
-public class CloneProfileResolver extends CrossProfileResolver {
+public class NoFilteringResolver extends CrossProfileResolver {
 
     /**
      * Feature flag to allow/restrict intent redirection from/to clone profile.
@@ -48,7 +49,7 @@ public class CloneProfileResolver extends CrossProfileResolver {
      * Returns true if intent redirection for clone profile feature flag is set
      * @return value of flag allow_intent_redirection_for_clone_profile
      */
-    public static boolean isIntentRedirectionForCloneProfileAllowed() {
+    public static boolean isIntentRedirectionAllowed() {
         final long token = Binder.clearCallingIdentity();
         try {
             return DeviceConfig.getBoolean(DeviceConfig.NAMESPACE_APP_CLONING,
@@ -58,13 +59,13 @@ public class CloneProfileResolver extends CrossProfileResolver {
         }
     }
 
-    public CloneProfileResolver(ComponentResolverApi componentResolver,
+    public NoFilteringResolver(ComponentResolverApi componentResolver,
             UserManagerService userManagerService) {
         super(componentResolver, userManagerService);
     }
 
     /**
-     * This is resolution strategy for Clone Profile.
+     * This is resolution strategy for when no filtering is required.
      * In case of clone profile, the profile is supposed to be transparent to end user. To end user
      * clone and owner profile should be part of same user space. Hence, the resolution strategy
      * would resolve intent in both profile and return combined result without any filtering of the
@@ -105,8 +106,8 @@ public class CloneProfileResolver extends CrossProfileResolver {
     }
 
     /**
-     * As clone and owner profile are going to be part of the same userspace, we need no filtering
-     * out of any clone profile's result
+     * In case of Clone profile, the clone and owner profile are going to be part of the same
+     * userspace, we need no filtering out of any clone profile's result.
      * @param intent request
      * @param crossProfileDomainInfos resolved in target user
      * @param flags for intent resolution
@@ -119,7 +120,7 @@ public class CloneProfileResolver extends CrossProfileResolver {
     public List<CrossProfileDomainInfo> filterResolveInfoWithDomainPreferredActivity(Intent intent,
             List<CrossProfileDomainInfo> crossProfileDomainInfos, long flags, int sourceUserId,
             int targetUserId, int highestApprovalLevel) {
-        // no filtering for clone profile
+        // no filtering
         return crossProfileDomainInfos;
     }
 }

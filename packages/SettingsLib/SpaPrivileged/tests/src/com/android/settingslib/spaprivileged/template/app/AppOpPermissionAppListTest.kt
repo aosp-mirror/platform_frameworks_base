@@ -314,7 +314,6 @@ class AppOpPermissionAppListTest {
 
         override val appOp = AppOpsManager.OP_MANAGE_MEDIA
         override val permission = PERMISSION
-        override val permissionHasAppopFlag = true
         override var broaderPermission: String? = null
 
         override var setModeByUid = false

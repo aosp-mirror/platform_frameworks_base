@@ -91,6 +91,7 @@ public class HdmiCecPowerStatusControllerTest {
 
         mHdmiControlService.setIoLooper(myLooper);
         mHdmiControlService.setHdmiCecConfig(new FakeHdmiCecConfig(contextSpy));
+        mHdmiControlService.setDeviceConfig(new FakeDeviceConfigWrapper());
         mNativeWrapper = new FakeNativeWrapper();
         HdmiCecController hdmiCecController = HdmiCecController.createWithNativeWrapper(
                 mHdmiControlService, mNativeWrapper, mHdmiControlService.getAtomWriter());

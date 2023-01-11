@@ -187,6 +187,7 @@ extern int register_android_view_InputQueue(JNIEnv* env);
 extern int register_android_view_KeyCharacterMap(JNIEnv *env);
 extern int register_android_view_KeyEvent(JNIEnv* env);
 extern int register_android_view_MotionEvent(JNIEnv* env);
+extern int register_android_view_MotionPredictor(JNIEnv* env);
 extern int register_android_view_PointerIcon(JNIEnv* env);
 extern int register_android_view_VelocityTracker(JNIEnv* env);
 extern int register_android_view_VerifiedKeyEvent(JNIEnv* env);
@@ -1643,6 +1644,7 @@ static const RegJNIRec gRegJNI[] = {
         REG_JNI(register_android_view_InputQueue),
         REG_JNI(register_android_view_KeyEvent),
         REG_JNI(register_android_view_MotionEvent),
+        REG_JNI(register_android_view_MotionPredictor),
         REG_JNI(register_android_view_PointerIcon),
         REG_JNI(register_android_view_VelocityTracker),
         REG_JNI(register_android_view_VerifiedKeyEvent),

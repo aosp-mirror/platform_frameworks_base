@@ -24,7 +24,7 @@ package com.android.credentialmanager.jetpack.developer
  * @throws IllegalArgumentException If [getCredentialOptions] is empty
  */
 class GetCredentialRequest constructor(
-        val getCredentialOptions: List<GetCredentialOption>,
+    val getCredentialOptions: List<GetCredentialOption>,
 ) {
 
     init {
@@ -61,7 +61,14 @@ class GetCredentialRequest constructor(
         @JvmStatic
         fun createFrom(from: android.credentials.GetCredentialRequest): GetCredentialRequest {
             return GetCredentialRequest(
-                    from.getCredentialOptions.map {GetCredentialOption.createFrom(it)}
+                from.getCredentialOptions.map {
+                    GetCredentialOption.createFrom(
+                        it.type,
+                        it.credentialRetrievalData,
+                        it.candidateQueryData,
+                        it.requireSystemProvider()
+                    )
+                }
             )
         }
     }

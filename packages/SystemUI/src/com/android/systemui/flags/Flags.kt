@@ -165,7 +165,7 @@ object Flags {
     // TODO(b/255618149): Tracking Bug
     @JvmField
     val CUSTOMIZABLE_LOCK_SCREEN_QUICK_AFFORDANCES =
-        unreleasedFlag(216, "customizable_lock_screen_quick_affordances", teamfood = false)
+        unreleasedFlag(216, "customizable_lock_screen_quick_affordances", teamfood = true)
 
     /** Shows chipbar UI whenever the device is unlocked by ActiveUnlock (watch). */
     // TODO(b/256513609): Tracking Bug
@@ -436,9 +436,6 @@ object Flags {
         unreleasedFlag(1206, "persist.wm.debug.predictive_back_bouncer_anim", teamfood = true)
 
     // 1300 - screenshots
-    // TODO(b/254512719): Tracking Bug
-    @JvmField val SCREENSHOT_REQUEST_PROCESSOR = releasedFlag(1300, "screenshot_request_processor")
-
     // TODO(b/254513155): Tracking Bug
     @JvmField
     val SCREENSHOT_WORK_PROFILE_POLICY =

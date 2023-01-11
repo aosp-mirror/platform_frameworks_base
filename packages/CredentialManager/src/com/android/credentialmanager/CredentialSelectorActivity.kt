@@ -16,7 +16,9 @@
 
 package com.android.credentialmanager
 
+import android.content.Intent
 import android.os.Bundle
+import android.provider.Settings
 import android.util.Log
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.rememberLauncherForActivityResult
@@ -26,7 +28,7 @@ import androidx.compose.material.ExperimentalMaterialApi
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.lifecycle.Observer
+import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.android.credentialmanager.common.DialogType
 import com.android.credentialmanager.common.DialogResult
@@ -37,6 +39,7 @@ import com.android.credentialmanager.createflow.CreateCredentialViewModel
 import com.android.credentialmanager.getflow.GetCredentialScreen
 import com.android.credentialmanager.getflow.GetCredentialViewModel
 import com.android.credentialmanager.ui.theme.CredentialSelectorTheme
+import kotlinx.coroutines.launch
 
 @ExperimentalMaterialApi
 class CredentialSelectorActivity : ComponentActivity() {
@@ -64,10 +67,11 @@ class CredentialSelectorActivity : ComponentActivity() {
     when (dialogType) {
       DialogType.CREATE_PASSKEY -> {
         val viewModel: CreateCredentialViewModel = viewModel()
-        viewModel.observeDialogResult().observe(
-          this@CredentialSelectorActivity,
-          onCancel
-        )
+        lifecycleScope.launch {
+          viewModel.observeDialogResult().collect{ dialogResult ->
+            onCancel(dialogResult)
+          }
+        }
         providerActivityResult.value?.let {
           viewModel.onProviderActivityResult(it)
           providerActivityResult.value = null
@@ -76,10 +80,11 @@ class CredentialSelectorActivity : ComponentActivity() {
       }
       DialogType.GET_CREDENTIALS -> {
         val viewModel: GetCredentialViewModel = viewModel()
-        viewModel.observeDialogResult().observe(
-          this@CredentialSelectorActivity,
-          onCancel
-        )
+        lifecycleScope.launch {
+          viewModel.observeDialogResult().collect{ dialogResult ->
+            onCancel(dialogResult)
+          }
+        }
         providerActivityResult.value?.let {
           viewModel.onProviderActivityResult(it)
           providerActivityResult.value = null
@@ -93,8 +98,12 @@ class CredentialSelectorActivity : ComponentActivity() {
     }
   }
 
-  private val onCancel = Observer<DialogResult> {
-    if (it.resultState == ResultState.COMPLETE || it.resultState == ResultState.CANCELED) {
+  private fun onCancel(dialogResut: DialogResult) {
+    if (dialogResut.resultState == ResultState
+        .COMPLETE || dialogResut.resultState == ResultState.NORMAL_CANCELED) {
+      this@CredentialSelectorActivity.finish()
+    } else if (dialogResut.resultState == ResultState.LAUNCH_SETTING_CANCELED) {
+      this@CredentialSelectorActivity.startActivity(Intent(Settings.ACTION_SYNC_SETTINGS))
       this@CredentialSelectorActivity.finish()
     }
   }

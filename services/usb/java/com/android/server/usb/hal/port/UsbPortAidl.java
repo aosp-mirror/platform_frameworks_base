@@ -35,6 +35,10 @@ import android.hardware.usb.IUsbCallback;
 import android.hardware.usb.PortRole;
 import android.hardware.usb.PortStatus;
 import android.hardware.usb.ComplianceWarning;
+import android.hardware.usb.DisplayPortAltModeInfo;
+import android.hardware.usb.AltModeData;
+import android.hardware.usb.AltModeData.DisplayPortAltModeData;
+import android.hardware.usb.DisplayPortAltModePinAssignment;
 import android.os.Build;
 import android.os.ServiceManager;
 import android.os.IBinder;
@@ -600,6 +604,47 @@ public final class UsbPortAidl implements UsbPortHal {
             return newComplianceWarnings.toArray();
         }
 
+        private int toSupportedAltModesInt(android.hardware.usb.AltModeData[] supportedAltModes) {
+            int supportedAltModesInt = 0;
+            for (android.hardware.usb.AltModeData altModeData : supportedAltModes) {
+                switch (altModeData.getTag()) {
+                    case AltModeData.displayPortAltModeData:
+                        supportedAltModesInt |= UsbPort.FLAG_ALT_MODE_TYPE_DISPLAYPORT;
+                        break;
+                }
+            }
+            return supportedAltModesInt;
+        }
+
+        private int toDisplayPortAltModeNumLanesInt(int pinAssignment) {
+            switch (pinAssignment) {
+                case DisplayPortAltModePinAssignment.A:
+                case DisplayPortAltModePinAssignment.C:
+                case DisplayPortAltModePinAssignment.E:
+                    return 4;
+                case DisplayPortAltModePinAssignment.B:
+                case DisplayPortAltModePinAssignment.D:
+                case DisplayPortAltModePinAssignment.F:
+                    return 2;
+                default:
+                    return 0;
+            }
+        }
+
+        private DisplayPortAltModeInfo formatDisplayPortAltModeInfo(
+                android.hardware.usb.AltModeData[] supportedAltModes) {
+            for (android.hardware.usb.AltModeData altModeData : supportedAltModes) {
+                if (altModeData.getTag() == AltModeData.displayPortAltModeData) {
+                    DisplayPortAltModeData displayPortData =
+                            altModeData.getDisplayPortAltModeData();
+                    return new DisplayPortAltModeInfo(displayPortData.partnerSinkStatus,
+                            displayPortData.cableStatus,
+                            toDisplayPortAltModeNumLanesInt(displayPortData.pinAssignment));
+                }
+            }
+            return null;
+        }
+
         @Override
         public void notifyPortStatusChange(
                android.hardware.usb.PortStatus[] currentPortStatus, int retval) {
@@ -635,7 +680,10 @@ public final class UsbPortAidl implements UsbPortHal {
                         current.powerTransferLimited,
                         current.powerBrickStatus,
                         current.supportsComplianceWarnings,
-                        formatComplianceWarnings(current.complianceWarnings));
+                        formatComplianceWarnings(current.complianceWarnings),
+                        current.plugOrientation,
+                        toSupportedAltModesInt(current.supportedAltModes),
+                        formatDisplayPortAltModeInfo(current.supportedAltModes));
                 newPortInfo.add(temp);
                 UsbPortManager.logAndPrint(Log.INFO, mPw, "ClientCallback AIDL V1: "
                         + current.portName);
