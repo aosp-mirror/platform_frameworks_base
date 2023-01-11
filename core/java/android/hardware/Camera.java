@@ -24,7 +24,6 @@ import android.annotation.SdkConstant;
 import android.annotation.SdkConstant.SdkConstantType;
 import android.app.ActivityThread;
 import android.app.AppOpsManager;
-import android.app.compat.CompatChanges;
 import android.compat.annotation.UnsupportedAppUsage;
 import android.content.Context;
 import android.graphics.ImageFormat;
@@ -42,7 +41,6 @@ import android.os.Message;
 import android.os.Process;
 import android.os.RemoteException;
 import android.os.ServiceManager;
-import android.os.SystemProperties;
 import android.renderscript.Allocation;
 import android.renderscript.Element;
 import android.renderscript.RSIllegalArgumentException;
@@ -279,14 +277,6 @@ public class Camera {
      */
     public native static int getNumberOfCameras();
 
-    private static final boolean sLandscapeToPortrait =
-            SystemProperties.getBoolean(CameraManager.LANDSCAPE_TO_PORTRAIT_PROP, false);
-
-    private static boolean shouldOverrideToPortrait() {
-        return CompatChanges.isChangeEnabled(CameraManager.OVERRIDE_FRONT_CAMERA_APP_COMPAT)
-                && sLandscapeToPortrait;
-    }
-
     /**
      * Returns the information about a particular camera.
      * If {@link #getNumberOfCameras()} returns N, the valid id is 0 to N-1.
@@ -296,7 +286,8 @@ public class Camera {
      *    low-level failure).
      */
     public static void getCameraInfo(int cameraId, CameraInfo cameraInfo) {
-        boolean overrideToPortrait = shouldOverrideToPortrait();
+        boolean overrideToPortrait = CameraManager.shouldOverrideToPortrait(
+                ActivityThread.currentApplication().getApplicationContext());
 
         _getCameraInfo(cameraId, overrideToPortrait, cameraInfo);
         IBinder b = ServiceManager.getService(Context.AUDIO_SERVICE);
@@ -493,7 +484,8 @@ public class Camera {
             mEventHandler = null;
         }
 
-        boolean overrideToPortrait = shouldOverrideToPortrait();
+        boolean overrideToPortrait = CameraManager.shouldOverrideToPortrait(
+                ActivityThread.currentApplication().getApplicationContext());
         return native_setup(new WeakReference<Camera>(this), cameraId,
                 ActivityThread.currentOpPackageName(), overrideToPortrait);
     }
