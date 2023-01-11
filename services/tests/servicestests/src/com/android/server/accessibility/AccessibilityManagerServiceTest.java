@@ -55,6 +55,7 @@ import android.graphics.drawable.Icon;
 import android.hardware.display.DisplayManagerGlobal;
 import android.os.Bundle;
 import android.os.IBinder;
+import android.os.LocaleList;
 import android.os.UserHandle;
 import android.provider.Settings;
 import android.testing.TestableContext;
@@ -488,7 +489,7 @@ public class AccessibilityManagerServiceTest {
         final int userid = 10;
         final int windowId = 100;
         final AccessibilityWindowAttributes attributes = new AccessibilityWindowAttributes(
-                new WindowManager.LayoutParams());
+                new WindowManager.LayoutParams(), LocaleList.getEmptyLocaleList());
 
         mA11yms.setAccessibilityWindowAttributes(displayId, windowId, userid, attributes);
 

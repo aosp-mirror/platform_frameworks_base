@@ -23,6 +23,7 @@ import android.annotation.UptimeMillisLong;
 import android.app.ActivityTaskManager;
 import android.graphics.Rect;
 import android.graphics.Region;
+import android.os.LocaleList;
 import android.os.Parcel;
 import android.os.Parcelable;
 import android.os.SystemClock;
@@ -131,6 +132,8 @@ public final class AccessibilityWindowInfo implements Parcelable {
     private long mTransitionTime;
 
     private int mConnectionId = UNDEFINED_CONNECTION_ID;
+
+    private LocaleList mLocales = LocaleList.getEmptyLocaleList();
 
     /**
      * Creates a new {@link AccessibilityWindowInfo}.
@@ -555,6 +558,26 @@ public final class AccessibilityWindowInfo implements Parcelable {
     }
 
     /**
+     * Sets the locales of the window. Locales are populated by the view root by default.
+     *
+     * @param locales The {@link android.os.LocaleList}.
+     *
+     * @hide
+     */
+    public void setLocales(@NonNull LocaleList locales) {
+        mLocales = locales;
+    }
+
+    /**
+     * Return the {@link android.os.LocaleList} of the window.
+     *
+     * @return the locales of the window.
+     */
+    public @NonNull LocaleList getLocales() {
+        return mLocales;
+    }
+
+    /**
      * Returns a cached instance if such is available or a new one is
      * created.
      *
@@ -676,6 +699,7 @@ public final class AccessibilityWindowInfo implements Parcelable {
         }
 
         parcel.writeInt(mConnectionId);
+        parcel.writeParcelable(mLocales, flags);
     }
 
     /**
@@ -706,6 +730,7 @@ public final class AccessibilityWindowInfo implements Parcelable {
         }
 
         mConnectionId = other.mConnectionId;
+        mLocales = other.mLocales;
     }
 
     private void initFromParcel(Parcel parcel) {
@@ -733,6 +758,7 @@ public final class AccessibilityWindowInfo implements Parcelable {
         }
 
         mConnectionId = parcel.readInt();
+        mLocales = parcel.readParcelable(null, LocaleList.class);
     }
 
     @Override

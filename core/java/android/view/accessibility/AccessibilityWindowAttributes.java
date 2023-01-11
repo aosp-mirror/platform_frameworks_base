@@ -17,10 +17,13 @@
 package android.view.accessibility;
 
 import android.annotation.NonNull;
+import android.os.LocaleList;
 import android.os.Parcel;
 import android.os.Parcelable;
 import android.text.TextUtils;
 import android.view.WindowManager;
+
+import java.util.Objects;
 
 /**
  * This class represents the attributes of a window needed for {@link AccessibilityWindowInfo}.
@@ -30,13 +33,22 @@ import android.view.WindowManager;
 public final class AccessibilityWindowAttributes implements Parcelable {
 
     private final CharSequence mWindowTitle;
+    private final LocaleList mLocales;
 
-    public AccessibilityWindowAttributes(@NonNull WindowManager.LayoutParams layoutParams) {
+    public AccessibilityWindowAttributes(@NonNull WindowManager.LayoutParams layoutParams,
+            @NonNull LocaleList locales) {
         mWindowTitle = populateWindowTitle(layoutParams);
+        mLocales = locales;
     }
 
     private AccessibilityWindowAttributes(Parcel in) {
         mWindowTitle = in.readCharSequence();
+        LocaleList inLocales = in.readParcelable(null, LocaleList.class);
+        if (inLocales != null) {
+            mLocales = inLocales;
+        } else {
+            mLocales = LocaleList.getEmptyLocaleList();
+        }
     }
 
     public CharSequence getWindowTitle() {
@@ -63,6 +75,10 @@ public final class AccessibilityWindowAttributes implements Parcelable {
         return  windowTitle;
     }
 
+    public @NonNull LocaleList getLocales() {
+        return mLocales;
+    }
+
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
@@ -70,12 +86,13 @@ public final class AccessibilityWindowAttributes implements Parcelable {
 
         AccessibilityWindowAttributes that = (AccessibilityWindowAttributes) o;
 
-        return TextUtils.equals(mWindowTitle, that.mWindowTitle);
+        return TextUtils.equals(mWindowTitle, that.mWindowTitle) && Objects.equals(
+                mLocales, that.mLocales);
     }
 
     @Override
     public int hashCode() {
-        return mWindowTitle.hashCode();
+        return Objects.hash(mWindowTitle, mLocales);
     }
 
     public static final Creator<AccessibilityWindowAttributes> CREATOR =
@@ -99,12 +116,14 @@ public final class AccessibilityWindowAttributes implements Parcelable {
     @Override
     public void writeToParcel(@NonNull Parcel parcel, int flags) {
         parcel.writeCharSequence(mWindowTitle);
+        parcel.writeParcelable(mLocales, flags);
     }
 
     @Override
     public String toString() {
         return "AccessibilityWindowAttributes{"
                 + "mAccessibilityWindowTitle=" + mWindowTitle
+                + "mLocales=" + mLocales
                 + '}';
     }
 }

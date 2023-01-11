@@ -1426,7 +1426,7 @@ public final class ViewRootImpl implements ViewParent,
                 != AccessibilityWindowInfo.UNDEFINED_WINDOW_ID;
         if (registered) {
             final AccessibilityWindowAttributes attributes = new AccessibilityWindowAttributes(
-                    mWindowAttributes);
+                    mWindowAttributes, mContext.getResources().getConfiguration().getLocales());
             if (!attributes.equals(mAccessibilityWindowAttributes)) {
                 mAccessibilityWindowAttributes = attributes;
                 mAccessibilityManager.setAccessibilityWindowAttributes(getDisplayId(),

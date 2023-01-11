@@ -454,6 +454,7 @@ public class AccessibilityWindowManager {
                 return;
             }
             windowInfo.title = attributes.getWindowTitle();
+            windowInfo.locales = attributes.getLocales();
         }
 
         private boolean shouldUpdateWindowsLocked(boolean forceSend,
@@ -780,6 +781,7 @@ public class AccessibilityWindowManager {
             reportedWindow.setPictureInPicture(window.inPictureInPicture);
             reportedWindow.setDisplayId(window.displayId);
             reportedWindow.setTaskId(window.taskId);
+            reportedWindow.setLocales(window.locales);
 
             final int parentId = findWindowIdLocked(userId, window.parentToken);
             if (parentId >= 0) {
