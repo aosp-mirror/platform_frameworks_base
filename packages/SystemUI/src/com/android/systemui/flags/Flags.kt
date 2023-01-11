@@ -75,9 +75,7 @@ object Flags {
         unreleasedFlag(119, "notification_memory_logging_enabled", teamfood = true)
 
     // TODO(b/254512731): Tracking Bug
-    @JvmField
-    val NOTIFICATION_DISMISSAL_FADE =
-        unreleasedFlag(113, "notification_dismissal_fade", teamfood = true)
+    @JvmField val NOTIFICATION_DISMISSAL_FADE = releasedFlag(113, "notification_dismissal_fade")
 
     // TODO(b/259558771): Tracking Bug
     val STABILITY_INDEX_FIX = releasedFlag(114, "stability_index_fix")
