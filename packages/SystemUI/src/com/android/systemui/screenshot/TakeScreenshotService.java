@@ -21,7 +21,6 @@ import static android.content.Intent.ACTION_CLOSE_SYSTEM_DIALOGS;
 
 import static com.android.internal.util.ScreenshotHelper.SCREENSHOT_MSG_PROCESS_COMPLETE;
 import static com.android.internal.util.ScreenshotHelper.SCREENSHOT_MSG_URI;
-import static com.android.systemui.flags.Flags.SCREENSHOT_REQUEST_PROCESSOR;
 import static com.android.systemui.flags.Flags.SCREENSHOT_WORK_PROFILE_POLICY;
 import static com.android.systemui.screenshot.LogConfig.DEBUG_CALLBACK;
 import static com.android.systemui.screenshot.LogConfig.DEBUG_DISMISS;
@@ -122,7 +121,6 @@ public class TakeScreenshotService extends Service {
         mContext = context;
         mBgExecutor = bgExecutor;
         mFeatureFlags = featureFlags;
-        mFeatureFlags.addListener(SCREENSHOT_REQUEST_PROCESSOR, FlagEvent::requestNoRestart);
         mFeatureFlags.addListener(SCREENSHOT_WORK_PROFILE_POLICY, FlagEvent::requestNoRestart);
         mProcessor = processor;
     }
@@ -224,14 +222,8 @@ public class TakeScreenshotService extends Service {
             return;
         }
 
-        if (mFeatureFlags.isEnabled(SCREENSHOT_REQUEST_PROCESSOR)) {
-            Log.d(TAG, "handleMessage: Using request processor");
-            mProcessor.processAsync(request,
-                    (r) -> dispatchToController(r, onSaved, callback));
-            return;
-        }
-
-        dispatchToController(request, onSaved, callback);
+        mProcessor.processAsync(request,
+                (r) -> dispatchToController(r, onSaved, callback));
     }
 
     private void dispatchToController(ScreenshotHelper.ScreenshotRequest request,

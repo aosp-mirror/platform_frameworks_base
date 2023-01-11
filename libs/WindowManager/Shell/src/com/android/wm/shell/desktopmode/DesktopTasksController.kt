@@ -84,8 +84,7 @@ class DesktopTasksController(
     fun showDesktopApps() {
         ProtoLog.v(WM_SHELL_DESKTOP_MODE, "showDesktopApps")
         val wct = WindowContainerTransaction()
-
-        bringDesktopAppsToFront(wct)
+        bringDesktopAppsToFront(wct, force = true)
 
         // Execute transaction if there are pending operations
         if (!wct.isEmpty) {
@@ -150,11 +149,11 @@ class DesktopTasksController(
             ?: WINDOWING_MODE_UNDEFINED
     }
 
-    private fun bringDesktopAppsToFront(wct: WindowContainerTransaction) {
+    private fun bringDesktopAppsToFront(wct: WindowContainerTransaction, force: Boolean = false) {
         val activeTasks = desktopModeTaskRepository.getActiveTasks()
 
         // Skip if all tasks are already visible
-        if (activeTasks.isNotEmpty() && activeTasks.all(desktopModeTaskRepository::isVisibleTask)) {
+        if (!force && activeTasks.all(desktopModeTaskRepository::isVisibleTask)) {
             ProtoLog.d(
                 WM_SHELL_DESKTOP_MODE,
                 "bringDesktopAppsToFront: active tasks are already in front, skipping."

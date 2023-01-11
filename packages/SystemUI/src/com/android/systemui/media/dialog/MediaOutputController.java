@@ -637,44 +637,21 @@ public class MediaOutputController implements LocalMediaManager.DeviceCallback,
             }
             // For the first time building list, to make sure the top device is the connected
             // device.
+            boolean needToHandleMutingExpectedDevice =
+                    hasMutingExpectedDevice() && !isCurrentConnectedDeviceRemote();
+            final MediaDevice connectedMediaDevice =
+                    needToHandleMutingExpectedDevice ? null
+                            : getCurrentConnectedMediaDevice();
             if (mMediaItemList.isEmpty()) {
-                boolean needToHandleMutingExpectedDevice =
-                        hasMutingExpectedDevice() && !isCurrentConnectedDeviceRemote();
-                final MediaDevice connectedMediaDevice =
-                        needToHandleMutingExpectedDevice ? null
-                                : getCurrentConnectedMediaDevice();
                 if (connectedMediaDevice == null) {
                     if (DEBUG) {
                         Log.d(TAG, "No connected media device or muting expected device exist.");
                     }
-                    if (needToHandleMutingExpectedDevice) {
-                        for (MediaDevice device : devices) {
-                            if (device.isMutingExpectedDevice()) {
-                                mMediaItemList.add(0, new MediaItem(device));
-                                mMediaItemList.add(1, new MediaItem(mContext.getString(
-                                        R.string.media_output_group_title_speakers_and_displays),
-                                        MediaItem.MediaItemType.TYPE_GROUP_DIVIDER));
-                            } else {
-                                mMediaItemList.add(new MediaItem(device));
-                            }
-                        }
-                        mMediaItemList.add(new MediaItem());
-                    } else {
-                        mMediaItemList.addAll(
-                                devices.stream().map(MediaItem::new).collect(Collectors.toList()));
-                        categorizeMediaItems(null);
-                    }
+                    categorizeMediaItems(null, devices, needToHandleMutingExpectedDevice);
                     return;
                 }
                 // selected device exist
-                for (MediaDevice device : devices) {
-                    if (TextUtils.equals(device.getId(), connectedMediaDevice.getId())) {
-                        mMediaItemList.add(0, new MediaItem(device));
-                    } else {
-                        mMediaItemList.add(new MediaItem(device));
-                    }
-                }
-                categorizeMediaItems(connectedMediaDevice);
+                categorizeMediaItems(connectedMediaDevice, devices, false);
                 return;
             }
             // To keep the same list order
@@ -708,28 +685,43 @@ public class MediaOutputController implements LocalMediaManager.DeviceCallback,
         }
     }
 
-    private void categorizeMediaItems(MediaDevice connectedMediaDevice) {
+    private void categorizeMediaItems(MediaDevice connectedMediaDevice, List<MediaDevice> devices,
+            boolean needToHandleMutingExpectedDevice) {
         synchronized (mMediaDevicesLock) {
             Set<String> selectedDevicesIds = getSelectedMediaDevice().stream().map(
                     MediaDevice::getId).collect(Collectors.toSet());
             if (connectedMediaDevice != null) {
                 selectedDevicesIds.add(connectedMediaDevice.getId());
             }
-            int latestSelected = 1;
-            for (MediaItem item : mMediaItemList) {
-                if (item.getMediaDevice().isPresent()) {
-                    MediaDevice device = item.getMediaDevice().get();
-                    if (selectedDevicesIds.contains(device.getId())) {
-                        latestSelected = mMediaItemList.indexOf(item) + 1;
-                    } else {
-                        mMediaItemList.add(latestSelected, new MediaItem(mContext.getString(
-                                R.string.media_output_group_title_speakers_and_displays),
-                                MediaItem.MediaItemType.TYPE_GROUP_DIVIDER));
-                        break;
+            boolean suggestedDeviceAdded = false;
+            boolean displayGroupAdded = false;
+            for (MediaDevice device : devices) {
+                if (needToHandleMutingExpectedDevice && device.isMutingExpectedDevice()) {
+                    mMediaItemList.add(0, new MediaItem(device));
+                } else if (!needToHandleMutingExpectedDevice && selectedDevicesIds.contains(
+                        device.getId())) {
+                    mMediaItemList.add(0, new MediaItem(device));
+                } else {
+                    if (device.isSuggestedDevice() && !suggestedDeviceAdded) {
+                        attachGroupDivider(mContext.getString(
+                                R.string.media_output_group_title_suggested_device));
+                        suggestedDeviceAdded = true;
+                    } else if (!device.isSuggestedDevice() && !displayGroupAdded) {
+                        attachGroupDivider(mContext.getString(
+                                R.string.media_output_group_title_speakers_and_displays));
+                        displayGroupAdded = true;
                     }
+                    mMediaItemList.add(new MediaItem(device));
                 }
             }
             mMediaItemList.add(new MediaItem());
+        }
+    }
+
+    private void attachGroupDivider(String title) {
+        synchronized (mMediaDevicesLock) {
+            mMediaItemList.add(
+                    new MediaItem(title, MediaItem.MediaItemType.TYPE_GROUP_DIVIDER));
         }
     }
 

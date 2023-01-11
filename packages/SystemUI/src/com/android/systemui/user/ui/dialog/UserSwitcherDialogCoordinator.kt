@@ -66,12 +66,6 @@ constructor(
     private fun startHandlingDialogShowRequests() {
         applicationScope.get().launch {
             interactor.get().dialogShowRequests.filterNotNull().collect { request ->
-                currentDialog?.let {
-                    if (it.isShowing) {
-                        it.cancel()
-                    }
-                }
-
                 val (dialog, dialogCuj) =
                     when (request) {
                         is ShowDialogRequestModel.ShowAddUserDialog ->
@@ -133,7 +127,10 @@ constructor(
                     }
                 currentDialog = dialog
 
-                if (request.dialogShower != null && dialogCuj != null) {
+                val controller = request.expandable?.dialogLaunchController(dialogCuj)
+                if (controller != null) {
+                    dialogLaunchAnimator.get().show(dialog, controller)
+                } else if (request.dialogShower != null && dialogCuj != null) {
                     request.dialogShower?.showDialog(dialog, dialogCuj)
                 } else {
                     dialog.show()

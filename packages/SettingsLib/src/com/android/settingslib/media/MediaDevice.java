@@ -184,6 +184,15 @@ public abstract class MediaDevice implements Comparable<MediaDevice> {
      */
     public abstract String getId();
 
+    /**
+     * Checks if device is suggested device from application
+     *
+     * @return true if device is suggested device
+     */
+    public boolean isSuggestedDevice() {
+        return false;
+    }
+
     void setConnectedRecord() {
         mConnectedRecord++;
         ConnectionRecordManager.getInstance().setConnectionRecord(mContext, getId(),
