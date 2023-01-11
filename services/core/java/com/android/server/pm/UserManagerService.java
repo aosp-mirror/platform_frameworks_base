@@ -5222,7 +5222,10 @@ public class UserManagerService extends IUserManager.Stub {
 
                 data.add(FrameworkStatsLog.buildStatsEvent(FrameworkStatsLog.MULTI_USER_INFO,
                         UserManager.getMaxSupportedUsers(),
-                        isUserSwitcherEnabled(deviceOwnerUserId)));
+                        isUserSwitcherEnabled(deviceOwnerUserId),
+                        UserManager.supportsMultipleUsers()
+                                && !hasUserRestriction(UserManager.DISALLOW_ADD_USER,
+                                deviceOwnerUserId)));
             }
         } else {
             Slogf.e(LOG_TAG, "Unexpected atom tag: %d", atomTag);
