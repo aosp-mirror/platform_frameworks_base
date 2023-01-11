@@ -6024,6 +6024,42 @@ public class PackageManagerService implements PackageSender, TestUtilityService 
         }
 
         @Override
+        public void relinquishUpdateOwnership(String targetPackage) {
+            final int callingUid = Binder.getCallingUid();
+            final int callingUserId = UserHandle.getUserId(callingUid);
+            final Computer snapshot = snapshotComputer();
+
+            final PackageStateInternal targetPackageState =
+                    snapshot.getPackageStateForInstalledAndFiltered(targetPackage, callingUid,
+                            callingUserId);
+            if (targetPackageState == null) {
+                throw new IllegalArgumentException("Unknown target package: " + targetPackage);
+            }
+
+            final String targetUpdateOwnerPackageName =
+                    targetPackageState.getInstallSource().mUpdateOwnerPackageName;
+            final PackageStateInternal targetUpdateOwnerPkgSetting =
+                    targetUpdateOwnerPackageName == null ? null
+                            : snapshot.getPackageStateInternal(targetUpdateOwnerPackageName);
+
+            if (targetUpdateOwnerPkgSetting == null) {
+                return;
+            }
+
+            final int callingAppId = UserHandle.getAppId(callingUid);
+            final int targetUpdateOwnerAppId = targetUpdateOwnerPkgSetting.getAppId();
+            if (callingAppId != Process.SYSTEM_UID
+                    && callingAppId != Process.SHELL_UID
+                    && callingAppId != targetUpdateOwnerAppId) {
+                throw new SecurityException("Caller is not the current update owner.");
+            }
+
+            commitPackageStateMutation(null /* initialState */, targetPackage,
+                    state -> state.setUpdateOwner(null /* updateOwnerPackageName */));
+            scheduleWriteSettings();
+        }
+
+        @Override
         public boolean setInstantAppCookie(String packageName, byte[] cookie, int userId) {
             if (HIDE_EPHEMERAL_APIS) {
                 return true;

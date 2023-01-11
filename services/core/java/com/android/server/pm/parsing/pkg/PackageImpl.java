@@ -1810,6 +1810,11 @@ public class PackageImpl implements ParsedPackage, AndroidPackageInternal,
     }
 
     @Override
+    public boolean isAllowUpdateOwnership() {
+        return getBoolean2(Booleans2.ALLOW_UPDATE_OWNERSHIP);
+    }
+
+    @Override
     public boolean isVmSafeMode() {
         return getBoolean(Booleans.VM_SAFE_MODE);
     }
@@ -2510,6 +2515,11 @@ public class PackageImpl implements ParsedPackage, AndroidPackageInternal,
     public PackageImpl setZygotePreloadName(@Nullable String zygotePreloadName) {
         this.zygotePreloadName = zygotePreloadName;
         return this;
+    }
+
+    @Override
+    public PackageImpl setAllowUpdateOwnership(boolean value) {
+        return setBoolean2(Booleans2.ALLOW_UPDATE_OWNERSHIP, value);
     }
 
     @Override
@@ -3726,5 +3736,6 @@ public class PackageImpl implements ParsedPackage, AndroidPackageInternal,
 
         private static final long STUB = 1L;
         private static final long APEX = 1L << 1;
+        private static final long ALLOW_UPDATE_OWNERSHIP = 1L << 2;
     }
 }

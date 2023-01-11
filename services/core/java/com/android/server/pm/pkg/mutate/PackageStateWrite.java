@@ -57,4 +57,7 @@ public interface PackageStateWrite {
 
     @NonNull
     PackageStateWrite setInstaller(@Nullable String installerPackageName, int installerPackageUid);
+
+    @NonNull
+    PackageStateWrite setUpdateOwner(@Nullable String updateOwnerPackageName);
 }
