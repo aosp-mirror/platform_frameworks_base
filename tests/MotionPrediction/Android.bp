@@ -26,6 +26,5 @@ package {
 android_app {
     name: "MotionPrediction",
     srcs: ["**/*.kt"],
-    platform_apis: true,
-    certificate: "platform",
+    sdk_version: "current",
 }
