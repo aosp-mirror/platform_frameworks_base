@@ -20,6 +20,8 @@ import static android.app.ActivityManager.StopUserOnSwitch;
 
 import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.annotation.PermissionMethod;
+import android.annotation.PermissionName;
 import android.annotation.UserIdInt;
 import android.app.ActivityManager.ProcessCapability;
 import android.app.ActivityManager.RestrictionLevel;
@@ -31,8 +33,6 @@ import android.content.Intent;
 import android.content.pm.ActivityInfo;
 import android.content.pm.ActivityPresentationInfo;
 import android.content.pm.ApplicationInfo;
-import android.content.pm.PermissionMethod;
-import android.content.pm.PermissionName;
 import android.content.pm.UserInfo;
 import android.net.Uri;
 import android.os.Bundle;
