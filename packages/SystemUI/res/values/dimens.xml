@@ -1041,8 +1041,6 @@
 
     <dimen name="ongoing_appops_dialog_side_padding">16dp</dimen>
 
-    <!-- Size of the RAT type for CellularTile -->
-
     <!-- Size of media cards in the QSPanel carousel -->
     <dimen name="qs_media_padding">16dp</dimen>
     <dimen name="qs_media_album_radius">14dp</dimen>
