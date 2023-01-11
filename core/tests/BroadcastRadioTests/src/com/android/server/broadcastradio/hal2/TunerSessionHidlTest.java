@@ -373,7 +373,7 @@ public final class TunerSessionHidlTest extends ExtendedRadioMockitoTestCase {
     }
 
     @Test
-    public void tune_withHalHasUnknownError_fails() throws Exception {
+    public void tune_withUnknownErrorFromHal_fails() throws Exception {
         openAidlClients(/* numClients= */ 1);
         ProgramSelector sel = TestUtils.makeFmSelector(AM_FM_FREQUENCY_LIST[1]);
         doAnswer(invocation -> Result.UNKNOWN_ERROR).when(mHalTunerSessionMock).tune(any());
@@ -382,7 +382,7 @@ public final class TunerSessionHidlTest extends ExtendedRadioMockitoTestCase {
             mTunerSessions[0].tune(sel);
         });
 
-        assertWithMessage("Exception for tuning when HAL has unknown error")
+        assertWithMessage("Unknown error HAL exception when tuning")
                 .that(thrown).hasMessageThat().contains(Result.toString(Result.UNKNOWN_ERROR));
     }
 
@@ -513,7 +513,7 @@ public final class TunerSessionHidlTest extends ExtendedRadioMockitoTestCase {
     }
 
     @Test
-    public void seek_withHalHasInternalError_fails() throws Exception {
+    public void seek_withInternalErrorFromHal_fails() throws Exception {
         openAidlClients(/* numClients= */ 1);
         doAnswer(invocation -> Result.INTERNAL_ERROR).when(mHalTunerSessionMock)
                 .scan(anyBoolean(), anyBoolean());
@@ -522,7 +522,7 @@ public final class TunerSessionHidlTest extends ExtendedRadioMockitoTestCase {
             mTunerSessions[0].seek(/* directionDown= */ true, /* skipSubChannel= */ false);
         });
 
-        assertWithMessage("Exception for seeking when HAL has internal error")
+        assertWithMessage("Internal error HAL exception when seeking")
                 .that(thrown).hasMessageThat().contains(Result.toString(Result.INTERNAL_ERROR));
     }
 
@@ -630,6 +630,32 @@ public final class TunerSessionHidlTest extends ExtendedRadioMockitoTestCase {
         mTunerSessions[0].startBackgroundScan();
 
         verify(mAidlTunerCallbackMocks[0], CALLBACK_TIMEOUT.times(0)).onBackgroundScanComplete();
+    }
+
+    @Test
+    public void startProgramListUpdates_forNonCurrentUser_doesNotStartUpdates() throws Exception {
+        openAidlClients(/* numClients= */ 1);
+        ProgramList.Filter filter = new ProgramList.Filter(new ArraySet<>(), new ArraySet<>(),
+                /* includeCategories= */ true, /* excludeModifications= */ false);
+        doReturn(false).when(() -> RadioServiceUserController.isCurrentOrSystemUser());
+
+        mTunerSessions[0].startProgramListUpdates(filter);
+
+        verify(mHalTunerSessionMock, never()).startProgramListUpdates(any());
+    }
+
+    @Test
+    public void startProgramListUpdates_withUnknownErrorFromHal_fails() throws Exception {
+        openAidlClients(/* numClients= */ 1);
+        doAnswer(invocation -> Result.UNKNOWN_ERROR).when(mHalTunerSessionMock)
+                .startProgramListUpdates(any());
+
+        ParcelableException thrown = assertThrows(ParcelableException.class, () -> {
+            mTunerSessions[0].startProgramListUpdates(/* filter= */ null);
+        });
+
+        assertWithMessage("Unknown error HAL exception when updating program list")
+                .that(thrown).hasMessageThat().contains(Result.toString(Result.UNKNOWN_ERROR));
     }
 
     @Test

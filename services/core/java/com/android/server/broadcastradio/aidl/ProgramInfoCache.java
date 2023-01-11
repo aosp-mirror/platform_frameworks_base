@@ -86,12 +86,8 @@ final class ProgramInfoCache {
     }
 
     @VisibleForTesting
-    boolean programInfosAreExactly(RadioManager.ProgramInfo... programInfos) {
-        Map<ProgramSelector.Identifier, RadioManager.ProgramInfo> expectedMap = new ArrayMap<>();
-        for (int i = 0; i < programInfos.length; i++) {
-            expectedMap.put(programInfos[i].getSelector().getPrimaryId(), programInfos[i]);
-        }
-        return expectedMap.equals(mProgramInfoMap);
+    List<RadioManager.ProgramInfo> toProgramInfoList() {
+        return new ArrayList<>(mProgramInfoMap.values());
     }
 
     @Override

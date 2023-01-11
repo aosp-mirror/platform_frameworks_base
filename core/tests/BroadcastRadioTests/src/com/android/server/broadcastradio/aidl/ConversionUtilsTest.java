@@ -328,7 +328,7 @@ public final class ConversionUtilsTest {
                 TEST_HAL_DAB_SID_EXT_ID, TEST_HAL_DAB_FREQUENCY_ID, TEST_SIGNAL_QUALITY);
         RadioManager.ProgramInfo dabInfo =
                 ConversionUtils.programInfoFromHalProgramInfo(halDabInfo);
-        ProgramListChunk halChunk = AidlTestUtils.makeProgramListChunk(purge, complete,
+        ProgramListChunk halChunk = AidlTestUtils.makeHalChunk(purge, complete,
                 new ProgramInfo[]{halDabInfo},
                 new ProgramIdentifier[]{TEST_HAL_VENDOR_ID, TEST_HAL_FM_FREQUENCY_ID});
 
@@ -353,7 +353,7 @@ public final class ConversionUtilsTest {
                         TEST_HAL_DAB_ENSEMBLE_ID, TEST_HAL_DAB_FREQUENCY_ID});
         ProgramInfo halDabInfo = AidlTestUtils.makeHalProgramInfo(halDabSelector,
                 TEST_HAL_DAB_SID_EXT_ID, TEST_HAL_DAB_ENSEMBLE_ID, TEST_SIGNAL_QUALITY);
-        ProgramListChunk halChunk = AidlTestUtils.makeProgramListChunk(purge, complete,
+        ProgramListChunk halChunk = AidlTestUtils.makeHalChunk(purge, complete,
                 new ProgramInfo[]{halDabInfo}, new ProgramIdentifier[]{TEST_HAL_FM_FREQUENCY_ID});
 
         ProgramList.Chunk chunk = ConversionUtils.chunkFromHalProgramListChunk(halChunk);
