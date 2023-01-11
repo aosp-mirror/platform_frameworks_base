@@ -357,6 +357,7 @@ final class SaveUi {
         params.width = WindowManager.LayoutParams.MATCH_PARENT;
         params.accessibilityTitle = context.getString(R.string.autofill_save_accessibility_title);
         params.windowAnimations = R.style.AutofillSaveAnimation;
+        params.setTrustedOverlay();
 
         show();
     }
