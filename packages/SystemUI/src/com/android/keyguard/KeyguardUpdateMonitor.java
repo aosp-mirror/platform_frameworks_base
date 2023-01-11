@@ -712,8 +712,11 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener, Dumpab
      */
     public void setKeyguardGoingAway(boolean goingAway) {
         mKeyguardGoingAway = goingAway;
-        // This is set specifically to stop face authentication from running.
-        updateBiometricListeningState(BIOMETRIC_ACTION_STOP, FACE_AUTH_STOPPED_KEYGUARD_GOING_AWAY);
+        if (mKeyguardGoingAway) {
+            updateFaceListeningState(BIOMETRIC_ACTION_STOP,
+                    FACE_AUTH_STOPPED_KEYGUARD_GOING_AWAY);
+        }
+        updateFingerprintListeningState(BIOMETRIC_ACTION_UPDATE);
     }
 
     /**
@@ -1951,9 +1954,9 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener, Dumpab
                 cb.onFinishedGoingToSleep(arg1);
             }
         }
-        // This is set specifically to stop face authentication from running.
-        updateBiometricListeningState(BIOMETRIC_ACTION_STOP,
+        updateFaceListeningState(BIOMETRIC_ACTION_STOP,
                 FACE_AUTH_STOPPED_FINISHED_GOING_TO_SLEEP);
+        updateFingerprintListeningState(BIOMETRIC_ACTION_UPDATE);
     }
 
     private void handleScreenTurnedOff() {
@@ -2719,7 +2722,7 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener, Dumpab
                     mFingerprintInteractiveToAuthProvider != null &&
                             mFingerprintInteractiveToAuthProvider.isEnabled(getCurrentUser());
             shouldListenSideFpsState =
-                    interactiveToAuthEnabled ? isDeviceInteractive() : true;
+                    interactiveToAuthEnabled ? isDeviceInteractive() && !mGoingToSleep : true;
         }
 
         boolean shouldListen = shouldListenKeyguardState && shouldListenUserState
