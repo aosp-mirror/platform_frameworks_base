@@ -2243,6 +2243,10 @@ public class ActivityTaskSupervisor implements RecentTasks.Callbacks {
         mHandler.sendEmptyMessageDelayed(SLEEP_TIMEOUT_MSG, SLEEP_TIMEOUT);
     }
 
+    boolean hasScheduledRestartTimeouts(ActivityRecord r) {
+        return mHandler.hasMessages(RESTART_ACTIVITY_PROCESS_TIMEOUT_MSG, r);
+    }
+
     void removeRestartTimeouts(ActivityRecord r) {
         mHandler.removeMessages(RESTART_ACTIVITY_PROCESS_TIMEOUT_MSG, r);
     }
