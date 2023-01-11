@@ -67,7 +67,7 @@ import org.junit.runners.Parameterized
 @RunWith(Parameterized::class)
 @Parameterized.UseParametersRunnerFactory(FlickerParametersRunnerFactory::class)
 @FixMethodOrder(MethodSorters.NAME_ASCENDING)
-class EnterPipToOtherOrientationTest(flicker: FlickerTest) : PipTransition(flicker) {
+open class EnterPipToOtherOrientationTest(flicker: FlickerTest) : PipTransition(flicker) {
     private val testApp = FixedOrientationAppHelper(instrumentation)
     private val startingBounds = WindowUtils.getDisplayBounds(PlatformConsts.Rotation.ROTATION_90)
     private val endingBounds = WindowUtils.getDisplayBounds(PlatformConsts.Rotation.ROTATION_0)

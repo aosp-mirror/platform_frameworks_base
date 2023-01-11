@@ -52,7 +52,7 @@ import org.junit.runners.Parameterized
 @RunWith(Parameterized::class)
 @Parameterized.UseParametersRunnerFactory(FlickerParametersRunnerFactory::class)
 @FixMethodOrder(MethodSorters.NAME_ASCENDING)
-class EnterPipOnUserLeaveHintTest(flicker: FlickerTest) : EnterPipTest(flicker) {
+open class EnterPipOnUserLeaveHintTest(flicker: FlickerTest) : EnterPipTest(flicker) {
     /** Defines the transition used to run the test */
     override val transition: FlickerBuilder.() -> Unit
         get() = {
