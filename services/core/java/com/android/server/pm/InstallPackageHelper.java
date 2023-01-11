@@ -99,6 +99,7 @@ import android.annotation.UserIdInt;
 import android.apex.ApexInfo;
 import android.app.AppOpsManager;
 import android.app.ApplicationPackageManager;
+import android.app.BroadcastOptions;
 import android.app.backup.IBackupManager;
 import android.content.ContentResolver;
 import android.content.Context;
@@ -636,7 +637,10 @@ final class InstallPackageHelper {
         fillIn.putExtra(PackageInstaller.EXTRA_STATUS,
                 PackageManager.installStatusToPublicStatus(returnCode));
         try {
-            target.sendIntent(context, 0, fillIn, null, null);
+            final BroadcastOptions options = BroadcastOptions.makeBasic();
+            options.setPendingIntentBackgroundActivityLaunchAllowed(false);
+            target.sendIntent(context, 0, fillIn, null /* onFinished*/, null /* handler */,
+                    null /* requiredPermission */, options.toBundle());
         } catch (IntentSender.SendIntentException ignored) {
         }
     }
