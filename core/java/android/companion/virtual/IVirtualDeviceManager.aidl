@@ -56,6 +56,14 @@ interface IVirtualDeviceManager {
      */
     int getDeviceIdForDisplayId(int displayId);
 
+   /**
+     * Checks whether the passed {@code deviceId} is a valid virtual device ID or not.
+     * {@link VirtualDeviceManager#DEVICE_ID_DEFAULT} is not valid as it is the ID of the default
+     * device which is not a virtual device. {@code deviceId} must correspond to a virtual device
+     * created by {@link VirtualDeviceManager#createVirtualDevice(int, VirtualDeviceParams)}.
+    */
+   boolean isValidVirtualDeviceId(int deviceId);
+
     /**
      * Returns the device policy for the given virtual device and policy type.
      */
