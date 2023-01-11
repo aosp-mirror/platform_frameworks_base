@@ -98,7 +98,6 @@ public class SettingsToPropertiesMapper {
         DeviceConfig.NAMESPACE_STORAGE_NATIVE_BOOT,
         DeviceConfig.NAMESPACE_SURFACE_FLINGER_NATIVE_BOOT,
         DeviceConfig.NAMESPACE_SWCODEC_NATIVE,
-        DeviceConfig.NAMESPACE_TETHERING,
         DeviceConfig.NAMESPACE_VENDOR_SYSTEM_NATIVE,
         DeviceConfig.NAMESPACE_VENDOR_SYSTEM_NATIVE_BOOT,
         DeviceConfig.NAMESPACE_VIRTUALIZATION_FRAMEWORK_NATIVE,
