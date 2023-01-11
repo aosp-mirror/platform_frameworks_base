@@ -41305,8 +41305,7 @@ package android.telecom {
     field public static final int ROUTE_WIRED_OR_EARPIECE = 5; // 0x5
   }
 
-  public final class CallControl implements java.lang.AutoCloseable {
-    method public void close();
+  public final class CallControl {
     method public void disconnect(@NonNull android.telecom.DisconnectCause, @NonNull java.util.concurrent.Executor, @NonNull android.os.OutcomeReceiver<java.lang.Void,android.telecom.CallException>);
     method @NonNull public android.os.ParcelUuid getCallId();
     method public void rejectCall(@NonNull java.util.concurrent.Executor, @NonNull android.os.OutcomeReceiver<java.lang.Void,android.telecom.CallException>);
