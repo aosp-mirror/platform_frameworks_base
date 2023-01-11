@@ -240,7 +240,9 @@
     <!-- Content description for the right boundary of the screenshot being cropped, with the current position as a percentage. [CHAR LIMIT=NONE] -->
     <string name="screenshot_right_boundary_pct">Right boundary <xliff:g id="percent" example="50">%1$d</xliff:g> percent</string>
     <!-- Notification displayed when a screenshot is saved in a work profile. [CHAR LIMIT=NONE] -->
-    <string name="screenshot_work_profile_notification" translatable="false">Work screenshots are saved in the work <xliff:g id="app" example="Files">%1$s</xliff:g> app</string>
+    <string name="screenshot_work_profile_notification">Work screenshots are saved in the <xliff:g id="app" example="Work Files">%1$s</xliff:g> app</string>
+    <!-- Default name referring to the app on the device that lets the user browse stored files. [CHAR LIMIT=NONE] -->
+    <string name="screenshot_default_files_app_name">Files</string>
 
     <!-- Notification title displayed for screen recording [CHAR LIMIT=50]-->
     <string name="screenrecord_name">Screen Recorder</string>
@@ -2412,6 +2414,8 @@
     <string name="media_output_dialog_volume_percentage"><xliff:g id="percentage" example="10">%1$d</xliff:g>%%</string>
     <!-- Title for Speakers and Displays group. [CHAR LIMIT=NONE] -->
     <string name="media_output_group_title_speakers_and_displays">Speakers &amp; Displays</string>
+    <!-- Title for Suggested Devices group. [CHAR LIMIT=NONE] -->
+    <string name="media_output_group_title_suggested_device">Suggested Devices</string>
 
     <!-- Media Output Broadcast Dialog -->
     <!-- Title for Broadcast First Notify Dialog [CHAR LIMIT=60] -->

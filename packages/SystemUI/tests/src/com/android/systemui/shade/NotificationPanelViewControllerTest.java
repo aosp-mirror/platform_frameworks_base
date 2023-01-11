@@ -107,6 +107,8 @@ import com.android.systemui.keyguard.domain.interactor.KeyguardBottomAreaInterac
 import com.android.systemui.keyguard.domain.interactor.KeyguardTransitionInteractor;
 import com.android.systemui.keyguard.ui.viewmodel.DreamingToLockscreenTransitionViewModel;
 import com.android.systemui.keyguard.ui.viewmodel.KeyguardBottomAreaViewModel;
+import com.android.systemui.keyguard.ui.viewmodel.LockscreenToDreamingTransitionViewModel;
+import com.android.systemui.keyguard.ui.viewmodel.LockscreenToOccludedTransitionViewModel;
 import com.android.systemui.keyguard.ui.viewmodel.OccludedToLockscreenTransitionViewModel;
 import com.android.systemui.media.controls.pipeline.MediaDataManager;
 import com.android.systemui.media.controls.ui.KeyguardMediaController;
@@ -293,6 +295,9 @@ public class NotificationPanelViewControllerTest extends SysuiTestCase {
     @Mock private KeyguardBottomAreaInteractor mKeyguardBottomAreaInteractor;
     @Mock private DreamingToLockscreenTransitionViewModel mDreamingToLockscreenTransitionViewModel;
     @Mock private OccludedToLockscreenTransitionViewModel mOccludedToLockscreenTransitionViewModel;
+    @Mock private LockscreenToDreamingTransitionViewModel mLockscreenToDreamingTransitionViewModel;
+    @Mock private LockscreenToOccludedTransitionViewModel mLockscreenToOccludedTransitionViewModel;
+
     @Mock private KeyguardTransitionInteractor mKeyguardTransitionInteractor;
     @Mock private CoroutineDispatcher mMainDispatcher;
     @Mock private MotionEvent mDownMotionEvent;
@@ -513,6 +518,8 @@ public class NotificationPanelViewControllerTest extends SysuiTestCase {
                 mKeyguardBottomAreaInteractor,
                 mDreamingToLockscreenTransitionViewModel,
                 mOccludedToLockscreenTransitionViewModel,
+                mLockscreenToDreamingTransitionViewModel,
+                mLockscreenToOccludedTransitionViewModel,
                 mMainDispatcher,
                 mKeyguardTransitionInteractor,
                 mDumpManager);

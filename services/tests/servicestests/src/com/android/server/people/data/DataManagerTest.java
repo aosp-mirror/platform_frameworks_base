@@ -1678,7 +1678,7 @@ public final class DataManagerTest {
                     mParentNotificationChannel.getImportance(),
                     null, null,
                     mParentNotificationChannel, null, null, true, 0, false, -1, false, null, null,
-                    false, false, false, null, 0, false);
+                    false, false, false, null, 0, false, 0);
             return true;
         }).when(mRankingMap).getRanking(eq(GENERIC_KEY),
                 any(NotificationListenerService.Ranking.class));
@@ -1704,7 +1704,7 @@ public final class DataManagerTest {
                     mNotificationChannel.getImportance(),
                     null, null,
                     mNotificationChannel, null, null, true, 0, false, -1, false, null, null, false,
-                    false, false, null, 0, false);
+                    false, false, null, 0, false, 0);
             return true;
         }).when(mRankingMap).getRanking(eq(CUSTOM_KEY),
                 any(NotificationListenerService.Ranking.class));
