@@ -25,7 +25,6 @@ import com.android.server.wm.flicker.FlickerBuilder
 import com.android.server.wm.flicker.FlickerTest
 import com.android.server.wm.flicker.FlickerTestFactory
 import com.android.server.wm.flicker.helpers.WindowUtils
-import com.android.server.wm.flicker.helpers.isShellTransitionsEnabled
 import com.android.server.wm.flicker.junit.FlickerParametersRunnerFactory
 import com.android.server.wm.flicker.testapp.ActivityOptions
 import com.android.server.wm.flicker.testapp.ActivityOptions.PortraitOnlyActivity.EXTRA_FIXED_ORIENTATION
@@ -104,22 +103,6 @@ open class SetRequestedOrientationWhilePinnedTest(flicker: FlickerTest) : PipTra
         flicker.assertWmEnd { hasRotation(PlatformConsts.Rotation.ROTATION_90) }
     }
 
-    /** {@inheritDoc} */
-    @Presubmit
-    @Test
-    override fun navBarLayerIsVisibleAtStartAndEnd() = super.navBarLayerIsVisibleAtStartAndEnd()
-
-    /** {@inheritDoc} */
-    @Presubmit
-    @Test
-    override fun statusBarLayerIsVisibleAtStartAndEnd() =
-        super.statusBarLayerIsVisibleAtStartAndEnd()
-
-    /** {@inheritDoc} */
-    @FlakyTest
-    @Test
-    override fun navBarLayerPositionAtStartAndEnd() = super.navBarLayerPositionAtStartAndEnd()
-
     @Presubmit
     @Test
     fun pipWindowInsideDisplay() {
@@ -132,22 +115,10 @@ open class SetRequestedOrientationWhilePinnedTest(flicker: FlickerTest) : PipTra
         flicker.assertWmEnd { isAppWindowOnTop(pipApp) }
     }
 
-    private fun pipLayerInsideDisplay_internal() {
-        flicker.assertLayersStart { visibleRegion(pipApp).coversAtMost(startingBounds) }
-    }
-
     @Presubmit
     @Test
     fun pipLayerInsideDisplay() {
-        Assume.assumeFalse(isShellTransitionsEnabled)
-        pipLayerInsideDisplay_internal()
-    }
-
-    @FlakyTest(bugId = 250527829)
-    @Test
-    fun pipLayerInsideDisplay_shellTransit() {
-        Assume.assumeTrue(isShellTransitionsEnabled)
-        pipLayerInsideDisplay_internal()
+        flicker.assertLayersStart { visibleRegion(pipApp).coversAtMost(startingBounds) }
     }
 
     @Presubmit
@@ -173,7 +144,9 @@ open class SetRequestedOrientationWhilePinnedTest(flicker: FlickerTest) : PipTra
     override fun taskBarWindowIsAlwaysVisible() = super.taskBarWindowIsAlwaysVisible()
 
     /** {@inheritDoc} */
-    @Postsubmit @Test override fun entireScreenCovered() = super.entireScreenCovered()
+    @FlakyTest(bugId = 264243884)
+    @Test
+    override fun entireScreenCovered() = super.entireScreenCovered()
 
     companion object {
         @Parameterized.Parameters(name = "{0}")

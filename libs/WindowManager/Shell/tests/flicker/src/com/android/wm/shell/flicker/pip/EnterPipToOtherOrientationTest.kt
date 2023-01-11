@@ -17,7 +17,6 @@
 package com.android.wm.shell.flicker.pip
 
 import android.app.Activity
-import android.platform.test.annotations.FlakyTest
 import android.platform.test.annotations.Presubmit
 import androidx.test.filters.RequiresDevice
 import com.android.server.wm.flicker.FlickerBuilder
@@ -27,10 +26,8 @@ import com.android.server.wm.flicker.entireScreenCovered
 import com.android.server.wm.flicker.helpers.FixedOrientationAppHelper
 import com.android.server.wm.flicker.helpers.WindowUtils
 import com.android.server.wm.flicker.junit.FlickerParametersRunnerFactory
-import com.android.server.wm.flicker.navBarLayerPositionAtStartAndEnd
 import com.android.server.wm.flicker.testapp.ActivityOptions.Pip.ACTION_ENTER_PIP
 import com.android.server.wm.flicker.testapp.ActivityOptions.PortraitOnlyActivity.EXTRA_FIXED_ORIENTATION
-import com.android.server.wm.traces.common.ComponentNameMatcher
 import com.android.server.wm.traces.common.service.PlatformConsts
 import com.android.wm.shell.flicker.pip.PipTransition.BroadcastActionTrigger.Companion.ORIENTATION_LANDSCAPE
 import com.android.wm.shell.flicker.pip.PipTransition.BroadcastActionTrigger.Companion.ORIENTATION_PORTRAIT
@@ -116,14 +113,6 @@ class EnterPipToOtherOrientationTest(flicker: FlickerTest) : PipTransition(flick
     }
 
     /**
-     * Checks that the [ComponentNameMatcher.NAV_BAR] has the correct position at the start and end
-     * of the transition
-     */
-    @FlakyTest
-    @Test
-    override fun navBarLayerPositionAtStartAndEnd() = flicker.navBarLayerPositionAtStartAndEnd()
-
-    /**
      * Checks that all parts of the screen are covered at the start and end of the transition
      *
      * TODO b/197726599 Prevents all states from being checked
@@ -131,12 +120,6 @@ class EnterPipToOtherOrientationTest(flicker: FlickerTest) : PipTransition(flick
     @Presubmit
     @Test
     fun entireScreenCoveredAtStartAndEnd() = flicker.entireScreenCovered(allStates = false)
-
-    @FlakyTest(bugId = 251219769)
-    @Test
-    override fun entireScreenCovered() {
-        super.entireScreenCovered()
-    }
 
     /** Checks [pipApp] window remains visible and on top throughout the transition */
     @Presubmit
