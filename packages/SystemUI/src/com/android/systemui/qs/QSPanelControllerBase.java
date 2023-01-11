@@ -372,18 +372,18 @@ public abstract class QSPanelControllerBase<T extends QSPanel> extends ViewContr
         if (mUsingHorizontalLayout) {
             // Only height remaining
             parameters.getDisappearSize().set(0.0f, 0.4f);
-            // Disappearing on the right side on the bottom
-            parameters.getGonePivot().set(1.0f, 1.0f);
+            // Disappearing on the right side on the top
+            parameters.getGonePivot().set(1.0f, 0.0f);
             // translating a bit horizontal
             parameters.getContentTranslationFraction().set(0.25f, 1.0f);
             parameters.setDisappearEnd(0.6f);
         } else {
             // Only width remaining
             parameters.getDisappearSize().set(1.0f, 0.0f);
-            // Disappearing on the bottom
-            parameters.getGonePivot().set(0.0f, 1.0f);
+            // Disappearing on the top
+            parameters.getGonePivot().set(0.0f, 0.0f);
             // translating a bit vertical
-            parameters.getContentTranslationFraction().set(0.0f, 1.05f);
+            parameters.getContentTranslationFraction().set(0.0f, 1f);
             parameters.setDisappearEnd(0.95f);
         }
         parameters.setFadeStartPosition(0.95f);
