@@ -56,7 +56,7 @@ import static android.view.Display.DEFAULT_DISPLAY;
 import static android.view.WindowManager.TRANSIT_NONE;
 import static android.view.WindowManager.TRANSIT_OPEN;
 import static android.view.WindowManager.TRANSIT_TO_FRONT;
-import static android.window.WindowContainerTransaction.HierarchyOp.HIERARCHY_OP_TYPE_START_ACTIVITY_IN_TASK_FRAGMENT;
+import static android.window.TaskFragmentOperation.OP_TYPE_START_ACTIVITY_IN_TASK_FRAGMENT;
 
 import static com.android.internal.protolog.ProtoLogGroup.WM_DEBUG_CONFIGURATION;
 import static com.android.internal.protolog.ProtoLogGroup.WM_DEBUG_TASKS;
@@ -2889,7 +2889,7 @@ class ActivityStarter {
         if (taskFragment.isOrganized()) {
             mService.mWindowOrganizerController.sendTaskFragmentOperationFailure(
                     taskFragment.getTaskFragmentOrganizer(), mRequest.errorCallbackToken,
-                    taskFragment, HIERARCHY_OP_TYPE_START_ACTIVITY_IN_TASK_FRAGMENT,
+                    taskFragment, OP_TYPE_START_ACTIVITY_IN_TASK_FRAGMENT,
                     new SecurityException(errMsg));
         } else {
             // If the taskFragment is not organized, just dump error message as warning logs.

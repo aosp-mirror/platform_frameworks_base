@@ -3664,14 +3664,13 @@ package android.window {
     ctor public WindowContainerTransaction();
     method @NonNull public android.window.WindowContainerTransaction clearLaunchAdjacentFlagRoot(@NonNull android.window.WindowContainerToken);
     method @NonNull public android.window.WindowContainerTransaction createTaskFragment(@NonNull android.window.TaskFragmentCreationParams);
-    method @NonNull public android.window.WindowContainerTransaction deleteTaskFragment(@NonNull android.window.WindowContainerToken);
+    method @NonNull public android.window.WindowContainerTransaction deleteTaskFragment(@NonNull android.os.IBinder);
     method public int describeContents();
     method @NonNull public android.window.WindowContainerTransaction finishActivity(@NonNull android.os.IBinder);
     method @NonNull public android.window.WindowContainerTransaction removeTask(@NonNull android.window.WindowContainerToken);
     method @NonNull public android.window.WindowContainerTransaction reorder(@NonNull android.window.WindowContainerToken, boolean);
     method @NonNull public android.window.WindowContainerTransaction reparent(@NonNull android.window.WindowContainerToken, @Nullable android.window.WindowContainerToken, boolean);
     method @NonNull public android.window.WindowContainerTransaction reparentActivityToTaskFragment(@NonNull android.os.IBinder, @NonNull android.os.IBinder);
-    method @NonNull public android.window.WindowContainerTransaction reparentChildren(@NonNull android.window.WindowContainerToken, @Nullable android.window.WindowContainerToken);
     method @NonNull public android.window.WindowContainerTransaction reparentTasks(@Nullable android.window.WindowContainerToken, @Nullable android.window.WindowContainerToken, @Nullable int[], @Nullable int[], boolean);
     method @NonNull public android.window.WindowContainerTransaction requestFocusOnTaskFragment(@NonNull android.os.IBinder);
     method @NonNull public android.window.WindowContainerTransaction scheduleFinishEnterPip(@NonNull android.window.WindowContainerToken, @NonNull android.graphics.Rect);

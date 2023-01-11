@@ -193,7 +193,7 @@ public class SplitPresenterTest {
                 OP_TYPE_SET_ANIMATION_PARAMS)
                 .setAnimationParams(animationParams)
                 .build();
-        verify(mTransaction).setTaskFragmentOperation(container.getTaskFragmentToken(),
+        verify(mTransaction).addTaskFragmentOperation(container.getTaskFragmentToken(),
                 expectedOperation);
         assertTrue(container.areLastRequestedAnimationParamsEqual(animationParams));
 
@@ -202,7 +202,7 @@ public class SplitPresenterTest {
         mPresenter.updateAnimationParams(mTransaction, container.getTaskFragmentToken(),
                 animationParams);
 
-        verify(mTransaction, never()).setTaskFragmentOperation(any(), any());
+        verify(mTransaction, never()).addTaskFragmentOperation(any(), any());
     }
 
     @Test
