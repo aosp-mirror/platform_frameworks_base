@@ -185,7 +185,7 @@ object Flags {
      * of the Alternate/Authentication Bouncer. No visual UI changes.
      */
     // TODO(b/260619425): Tracking Bug
-    @JvmField val MODERN_ALTERNATE_BOUNCER = unreleasedFlag(219, "modern_alternate_bouncer")
+    @JvmField val MODERN_ALTERNATE_BOUNCER = releasedFlag(219, "modern_alternate_bouncer")
 
     /** Flag to control the migration of face auth to modern architecture. */
     // TODO(b/262838215): Tracking bug
