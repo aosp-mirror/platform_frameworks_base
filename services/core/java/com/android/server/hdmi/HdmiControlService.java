@@ -4564,6 +4564,11 @@ public class HdmiControlService extends SystemService {
             startArcAction(false, new IHdmiControlCallback.Stub() {
                 @Override
                 public void onComplete(int result) throws RemoteException {
+                    if (result != HdmiControlManager.RESULT_SUCCESS) {
+                        Slog.w(TAG,
+                                "ARC termination before enabling eARC in the HAL failed with "
+                                        + "result: " + result);
+                    }
                     // Independently of the result (i.e. independently of whether the ARC RX device
                     // responded with <Terminate ARC> or not), we always end up terminating ARC in
                     // the HAL. As soon as we do that, we can enable eARC in the HAL.
