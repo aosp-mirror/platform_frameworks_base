@@ -117,17 +117,17 @@
     <string name="bluetooth_profile_opp" msgid="6692618568149493430">"Przesyłanie pliku"</string>
     <string name="bluetooth_profile_hid" msgid="2969922922664315866">"Urządzenie wejściowe"</string>
     <string name="bluetooth_profile_pan" msgid="1006235139308318188">"Dostęp do internetu"</string>
-    <string name="bluetooth_profile_pbap" msgid="4262303387989406171">"Udostępnianie kontaktów i historii połączeń"</string>
-    <string name="bluetooth_profile_pbap_summary" msgid="6466456791354759132">"Używaj w przypadku udostępniania kontaktów i historii połączeń"</string>
+    <string name="bluetooth_profile_pbap" msgid="7064307749579335765">"Udostępnianie kontaktów"</string>
+    <string name="bluetooth_profile_pbap_summary" msgid="2955819694801952056">"Używaj do udostępniania kontaktów"</string>
     <string name="bluetooth_profile_pan_nap" msgid="7871974753822470050">"Udostępnianie połączenia internetowego"</string>
     <string name="bluetooth_profile_map" msgid="8907204701162107271">"SMS-y"</string>
     <string name="bluetooth_profile_sap" msgid="8304170950447934386">"Dostęp do karty SIM"</string>
     <string name="bluetooth_profile_a2dp_high_quality" msgid="4739440941324792775">"Dźwięk HD: <xliff:g id="CODEC_NAME">%1$s</xliff:g>"</string>
     <string name="bluetooth_profile_a2dp_high_quality_unknown_codec" msgid="2477639096903834374">"Dźwięk HD"</string>
     <string name="bluetooth_profile_hearing_aid" msgid="58154575573984914">"Aparaty słuchowe"</string>
-    <string name="bluetooth_profile_le_audio" msgid="3237854988278539061">"LE Audio"</string>
+    <string name="bluetooth_profile_le_audio" msgid="5158149987518342036">"LE_AUDIO"</string>
     <string name="bluetooth_hearing_aid_profile_summary_connected" msgid="8191273236809964030">"Połączono z aparatami słuchowymi"</string>
-    <string name="bluetooth_le_audio_profile_summary_connected" msgid="6916226974453480650">"Połączono z LE Audio"</string>
+    <string name="bluetooth_le_audio_profile_summary_connected" msgid="3162538609379333442">"Połączono z LE_AUDIO"</string>
     <string name="bluetooth_a2dp_profile_summary_connected" msgid="7422607970115444153">"Połączono z funkcją audio multimediów"</string>
     <string name="bluetooth_headset_profile_summary_connected" msgid="2420981566026949688">"Połączono z funkcją audio telefonu"</string>
     <string name="bluetooth_opp_profile_summary_connected" msgid="2393521801478157362">"Połączono z serwerem transferu plików"</string>
@@ -226,7 +226,7 @@
     <string name="category_personal" msgid="6236798763159385225">"Osobiste"</string>
     <string name="category_work" msgid="4014193632325996115">"Służbowe"</string>
     <string name="development_settings_title" msgid="140296922921597393">"Opcje programisty"</string>
-    <string name="development_settings_enable" msgid="4285094651288242183">"Włącz opcje programisty"</string>
+    <string name="development_settings_enable" msgid="4285094651288242183">"Włącz opcje dla programistów"</string>
     <string name="development_settings_summary" msgid="8718917813868735095">"Ustaw opcje związane z programowaniem aplikacji."</string>
     <string name="development_settings_not_available" msgid="355070198089140951">"Opcje programisty są niedostępne dla tego użytkownika"</string>
     <string name="vpn_settings_not_available" msgid="2894137119965668920">"Ustawienia VPN są niedostępne dla tego użytkownika"</string>
@@ -381,7 +381,7 @@
     <string name="debug_layout_summary" msgid="8825829038287321978">"Pokazuj granice przycięcia, marginesy itd."</string>
     <string name="force_rtl_layout_all_locales" msgid="8690762598501599796">"Układ od prawej do lewej"</string>
     <string name="force_rtl_layout_all_locales_summary" msgid="6663016859517239880">"Wymuszaj układ ekranu od prawej do lewej dla wszystkich języków"</string>
-    <string name="window_blurs" msgid="6831008984828425106">"Zezwalaj na rozmycie na poziomie okna"</string>
+    <string name="window_blurs" msgid="6831008984828425106">"Zezwól na rozmycie na poziomie okna"</string>
     <string name="force_msaa" msgid="4081288296137775550">"Wymuszaj 4x MSAA"</string>
     <string name="force_msaa_summary" msgid="9070437493586769500">"Włączaj 4x MSAA w aplikacjach OpenGL ES 2.0"</string>
     <string name="show_non_rect_clip" msgid="7499758654867881817">"Debuguj operacje przycinania nieprostokątnego"</string>
@@ -408,7 +408,6 @@
     <string name="force_resizable_activities_summary" msgid="2490382056981583062">"Zezwalaj na zmianę rozmiaru wszystkich okien aktywności w trybie wielu okien niezależnie od ustawień w pliku manifestu"</string>
     <string name="enable_freeform_support" msgid="7599125687603914253">"Włącz dowolny rozmiar okien"</string>
     <string name="enable_freeform_support_summary" msgid="1822862728719276331">"Włącz obsługę eksperymentalnej funkcji dowolnego rozmiaru okien"</string>
-    <string name="desktop_mode" msgid="2389067840550544462">"Tryb pulpitu"</string>
     <string name="local_backup_password_title" msgid="4631017948933578709">"Hasło kopii zapasowej"</string>
     <string name="local_backup_password_summary_none" msgid="7646898032616361714">"Pełne kopie zapasowe na komputerze nie są obecnie chronione"</string>
     <string name="local_backup_password_summary_change" msgid="1707357670383995567">"Dotknij, by zmienić lub usunąć hasło pełnych kopii zapasowych na komputerze."</string>
@@ -477,13 +476,12 @@
     <string name="power_charging" msgid="6727132649743436802">"<xliff:g id="LEVEL">%1$s</xliff:g> – <xliff:g id="STATE">%2$s</xliff:g>"</string>
     <string name="power_remaining_charging_duration_only" msgid="8085099012811384899">"<xliff:g id="TIME">%1$s</xliff:g> do pełnego naładowania"</string>
     <string name="power_charging_duration" msgid="6127154952524919719">"<xliff:g id="LEVEL">%1$s</xliff:g> – <xliff:g id="TIME">%2$s</xliff:g> do pełnego naładowania"</string>
-    <string name="power_charging_limited" msgid="6971664137170239141">"<xliff:g id="LEVEL">%1$s</xliff:g> – ładowanie zostało wstrzymane"</string>
+    <string name="power_charging_limited" msgid="7956120998372505295">"<xliff:g id="LEVEL">%1$s</xliff:g> - Ładowanie tymczasowo ograniczone"</string>
     <string name="battery_info_status_unknown" msgid="268625384868401114">"Nieznane"</string>
     <string name="battery_info_status_charging" msgid="4279958015430387405">"Ładowanie"</string>
     <string name="battery_info_status_charging_fast" msgid="8027559755902954885">"Szybkie ładowanie"</string>
     <string name="battery_info_status_charging_slow" msgid="3190803837168962319">"Wolne ładowanie"</string>
     <string name="battery_info_status_charging_wireless" msgid="8924722966861282197">"Ładowanie bezprzewodowe"</string>
-    <string name="battery_info_status_charging_dock" msgid="8573274094093364791">"Ładowanie"</string>
     <string name="battery_info_status_discharging" msgid="6962689305413556485">"Nie podłączony"</string>
     <string name="battery_info_status_not_charging" msgid="3371084153747234837">"Podłączono, brak ładowania"</string>
     <string name="battery_info_status_full" msgid="1339002294876531312">"Naładowana"</string>
@@ -604,7 +602,7 @@
     <string name="guest_reset_and_restart_dialog_message" msgid="2764425635305200790">"Zostanie uruchomiona nowa sesja gościa. Wszystkie aplikacje i dane z obecnej sesji zostaną usunięte."</string>
     <string name="guest_exit_dialog_title" msgid="1846494656849381804">"Zamknąć tryb gościa?"</string>
     <string name="guest_exit_dialog_message" msgid="1743218864242719783">"Wszystkie aplikacje i dane z obecnej sesji gościa zostaną usunięte."</string>
-    <string name="guest_exit_dialog_button" msgid="1736401897067442044">"Zamknij"</string>
+    <string name="guest_exit_dialog_button" msgid="1736401897067442044">"Wyjdź"</string>
     <string name="guest_exit_dialog_title_non_ephemeral" msgid="7675327443743162986">"Zapisać aktywność gościa?"</string>
     <string name="guest_exit_dialog_message_non_ephemeral" msgid="223385323235719442">"Możesz zapisać aktywność z obecnej sesji lub usunąć wszystkie aplikacje i dane"</string>
     <string name="guest_exit_clear_data_button" msgid="3425812652180679014">"Usuń"</string>
@@ -613,8 +611,8 @@
     <string name="guest_reset_button" msgid="2515069346223503479">"Zresetuj sesję gościa"</string>
     <string name="guest_exit_quick_settings_button" msgid="1912362095913765471">"Zakończ tryb gościa"</string>
     <string name="guest_notification_ephemeral" msgid="7263252466950923871">"Cała aktywność zostanie usunięta po zamknięciu"</string>
-    <string name="guest_notification_non_ephemeral" msgid="6843799963012259330">"Możesz zapisać lub usunąć swoją aktywność podczas zamykania."</string>
-    <string name="guest_notification_non_ephemeral_non_first_login" msgid="8009307983766934876">"Zresetuj, aby teraz usunąć aktywność z tej sesji. Możesz też ją zapisać lub usunąć podczas zamykania sesji."</string>
+    <string name="guest_notification_non_ephemeral" msgid="6843799963012259330">"Możesz zapisać lub usunąć swoją aktywność podczas zamykania"</string>
+    <string name="guest_notification_non_ephemeral_non_first_login" msgid="8009307983766934876">"Zresetuj, aby usunąć aktywność w sesji w tym momencie. Możesz też ją zapisać lub usunąć podczas zamykania"</string>
     <string name="user_image_take_photo" msgid="467512954561638530">"Zrób zdjęcie"</string>
     <string name="user_image_choose_photo" msgid="1363820919146782908">"Wybierz obraz"</string>
     <string name="user_image_photo_selector" msgid="433658323306627093">"Wybierz zdjęcie"</string>
@@ -656,6 +654,11 @@
     <string name="accessibility_ethernet_disconnected" msgid="2832501530856497489">"Rozłączono z siecią Ethernet."</string>
     <string name="accessibility_ethernet_connected" msgid="6175942685957461563">"Ethernet."</string>
     <string name="accessibility_no_calling" msgid="3540827068323895748">"Brak połączenia."</string>
+    <string name="dream_complication_title_time" msgid="701747800712893499">"Godzina"</string>
+    <string name="dream_complication_title_date" msgid="8661176085446135789">"Data"</string>
+    <string name="dream_complication_title_weather" msgid="598609151677172783">"Pogoda"</string>
+    <string name="dream_complication_title_aqi" msgid="4587552608957834110">"Jakość powietrza"</string>
+    <string name="dream_complication_title_cast_info" msgid="4038776652841885084">"Obsada"</string>
     <string name="avatar_picker_title" msgid="8492884172713170652">"Wybierz zdjęcie profilowe"</string>
     <string name="default_user_icon_description" msgid="6554047177298972638">"Ikona domyślnego użytkownika"</string>
     <string name="physical_keyboard_title" msgid="4811935435315835220">"Klawiatura fizyczna"</string>
@@ -664,11 +667,11 @@
     <string name="turn_screen_on_title" msgid="3266937298097573424">"Włączanie ekranu"</string>
     <string name="allow_turn_screen_on" msgid="6194845766392742639">"Zezwalaj na włączanie ekranu"</string>
     <string name="allow_turn_screen_on_description" msgid="43834403291575164">"Zezwalaj na włączanie ekranu przez aplikację. Gdy przyznasz te uprawnienia, aplikacja będzie mogła w dowolnym momencie włączyć ekran bez Twojego wyraźnego pozwolenia."</string>
+    <string name="bt_le_audio_scan_qr_code" msgid="3521809854780392679">"Skaner kodów QR"</string>
+    <string name="bt_le_audio_scan_qr_code_scanner" msgid="4679500020630341107">"Aby odsłuchać, wyśrodkuj kod QR poniżej"</string>
+    <string name="bt_le_audio_qr_code_is_not_valid_format" msgid="6092191081849434734">"Nieprawidłowy format kodu QR"</string>
     <string name="bt_le_audio_broadcast_dialog_title" msgid="5392738488989777074">"Zatrzymaj transmisję aplikacji <xliff:g id="APP_NAME">%1$s</xliff:g>?"</string>
     <string name="bt_le_audio_broadcast_dialog_sub_title" msgid="268234802198852753">"Jeśli transmitujesz aplikację <xliff:g id="SWITCHAPP">%1$s</xliff:g> lub zmieniasz dane wyjściowe, Twoja obecna transmisja zostanie zakończona"</string>
     <string name="bt_le_audio_broadcast_dialog_switch_app" msgid="5749813313369517812">"Transmisja aplikacji <xliff:g id="SWITCHAPP">%1$s</xliff:g>"</string>
     <string name="bt_le_audio_broadcast_dialog_different_output" msgid="2638402023060391333">"Zmień dane wyjściowe"</string>
-    <string name="back_navigation_animation" msgid="8105467568421689484">"Animacje przewidywanego przejścia wstecz"</string>
-    <string name="back_navigation_animation_summary" msgid="741292224121599456">"Włącz animacje systemowe dla przewidywanego przejścia wstecz."</string>
-    <string name="back_navigation_animation_dialog" msgid="8696966520944625596">"To ustawienie uruchamia animacje systemowe dla przewidywanych gestów. Wymaga ustawienia w pliku manifestu wartości true w polu enableOnBackInvokedCallback dla każdej aplikacji."</string>
 </resources>

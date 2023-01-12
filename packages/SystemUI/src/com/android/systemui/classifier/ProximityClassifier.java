@@ -18,6 +18,7 @@ package com.android.systemui.classifier;
 
 import static com.android.internal.config.sysui.SystemUiDeviceConfigFlags.BRIGHTLINE_FALSING_PROXIMITY_PERCENT_COVERED_THRESHOLD;
 import static com.android.systemui.classifier.Classifier.BRIGHTNESS_SLIDER;
+import static com.android.systemui.classifier.Classifier.MEDIA_SEEKBAR;
 import static com.android.systemui.classifier.Classifier.QS_COLLAPSE;
 import static com.android.systemui.classifier.Classifier.QS_SWIPE_SIDE;
 import static com.android.systemui.classifier.Classifier.QUICK_SETTINGS;
@@ -119,7 +120,8 @@ class ProximityClassifier extends FalsingClassifier {
             @Classifier.InteractionType int interactionType,
             double historyBelief, double historyConfidence) {
         if (interactionType == QUICK_SETTINGS || interactionType == BRIGHTNESS_SLIDER
-                || interactionType == QS_COLLAPSE || interactionType == QS_SWIPE_SIDE) {
+                || interactionType == QS_COLLAPSE || interactionType == QS_SWIPE_SIDE
+                || interactionType == MEDIA_SEEKBAR) {
             return Result.passed(0);
         }
 

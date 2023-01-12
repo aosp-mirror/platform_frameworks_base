@@ -26,18 +26,18 @@
     <string name="keyguard_sim_error_message_short" msgid="633630844240494070">"ଅମାନ୍ୟ କାର୍ଡ।"</string>
     <string name="keyguard_charged" msgid="5478247181205188995">"ଚାର୍ଜ ହୋଇଗଲା"</string>
     <string name="keyguard_plugged_in_wireless" msgid="2537874724955057383">"ୱାୟାର୍‍ଲେସ୍‍ଭାବରେ <xliff:g id="PERCENTAGE">%s</xliff:g> • ଚାର୍ଜ ହୋଇଛି"</string>
-    <string name="keyguard_plugged_in_dock" msgid="2122073051904360987">"<xliff:g id="PERCENTAGE">%s</xliff:g> • ଚାର୍ଜ ହେଉଛି"</string>
+    <string name="keyguard_plugged_in_dock" msgid="449722738270908674">"<xliff:g id="PERCENTAGE">%s</xliff:g> • ଡକରୁ ଚାର୍ଜ ହେଉଛି"</string>
     <string name="keyguard_plugged_in" msgid="8169926454348380863">"<xliff:g id="PERCENTAGE">%s</xliff:g> • ଚାର୍ଜ ହେଉଛି"</string>
     <string name="keyguard_plugged_in_charging_fast" msgid="4386594091107340426">"<xliff:g id="PERCENTAGE">%s</xliff:g> • ଦ୍ରୁତ ଭାବେ ଚାର୍ଜ ହେଉଛି"</string>
     <string name="keyguard_plugged_in_charging_slowly" msgid="217655355424210">"<xliff:g id="PERCENTAGE">%s</xliff:g> • ଧୀରେ ଚାର୍ଜ ହେଉଛି"</string>
-    <string name="keyguard_plugged_in_charging_limited" msgid="1709413803451065875">"<xliff:g id="PERCENTAGE">%s</xliff:g> • ବେଟେରୀକୁ ସୁରକ୍ଷିତ ରଖିବା ପାଇଁ ଚାର୍ଜିଂକୁ ବିରତ କରାଯାଇଛି"</string>
+    <string name="keyguard_plugged_in_charging_limited" msgid="6091488837901216962">"<xliff:g id="PERCENTAGE">%s</xliff:g> • ଚାର୍ଜିଂ ଅସ୍ଥାୟୀ ଭାବେ ସୀମିତ କରାଯାଇଛି"</string>
     <string name="keyguard_instructions_when_pattern_disabled" msgid="8448804180089936954">"ଅନଲକ୍‌ କରିବା ପାଇଁ ମେନୁକୁ ଦବାନ୍ତୁ।"</string>
     <string name="keyguard_network_locked_message" msgid="407096292844868608">"ନେଟୱର୍କକୁ ଲକ୍‌ କରାଯାଇଛି"</string>
     <string name="keyguard_missing_sim_message_short" msgid="704159478161444907">"କୌଣସି SIM କାର୍ଡ ନାହିଁ"</string>
     <string name="keyguard_missing_sim_instructions" msgid="1162120926141335918">"ଗୋଟିଏ SIM କାର୍ଡ ଭର୍ତ୍ତି କରନ୍ତୁ।"</string>
     <string name="keyguard_missing_sim_instructions_long" msgid="2712623293749378570">"SIM କାର୍ଡ ନାହିଁ କିମ୍ବା ଖରାପ ଅଛି। SIM କାର୍ଡ ଭର୍ତ୍ତି କରନ୍ତୁ।"</string>
     <string name="keyguard_permanent_disabled_sim_message_short" msgid="5842745213110966962">"SIM କାର୍ଡଟିକୁ ବ୍ୟବହାର କରାଯାଇପାରିବ ନାହିଁ।"</string>
-    <string name="keyguard_permanent_disabled_sim_instructions" msgid="2490584154727897806">"ଆପଣଙ୍କ SIM କାର୍ଡକୁ ସ୍ଥାୟୀ ରୂପେ ଅକ୍ଷମ କରିଦିଆଯାଇଛି।\n ଅନ୍ୟ SIM କାର୍ଡ ପାଇଁ ଆପଣଙ୍କ ୱାୟରଲେସ ସେବା ପ୍ରଦାତାଙ୍କ ସହ କଣ୍ଟାକ୍ଟ କରନ୍ତୁ।"</string>
+    <string name="keyguard_permanent_disabled_sim_instructions" msgid="2490584154727897806">"ଆପଣଙ୍କ SIM କାର୍ଡକୁ ସ୍ଥାୟୀ ରୂପେ ଅକ୍ଷମ କରିଦିଆଯାଇଛି।\n ଅନ୍ୟ SIM କାର୍ଡ ପାଇଁ ଆପଣଙ୍କ ୱାୟରଲେସ୍‍ ସେବା ପ୍ରଦାତାଙ୍କ ସହ ଯୋଗାଯୋଗ କରନ୍ତୁ।"</string>
     <string name="keyguard_sim_locked_message" msgid="4343544458476911044">"SIM କାର୍ଡ ଲକ୍‍ ହୋଇଯାଇଛି।"</string>
     <string name="keyguard_sim_puk_locked_message" msgid="6253830777745450550">"SIM କାର୍ଡଟି PUK ଲକ୍‍ ହୋଇଯାଇଛି।"</string>
     <string name="keyguard_sim_unlock_progress_dialog_message" msgid="2394023844117630429">"SIM କାର୍ଡ ଅନଲକ୍‍ କରାଯାଉଛି…"</string>
@@ -57,8 +57,8 @@
     <string name="kg_sim_pin_instructions" msgid="1942424305184242951">"SIMର PIN ଲେଖନ୍ତୁ।"</string>
     <string name="kg_sim_pin_instructions_multi" msgid="3639863309953109649">"\"<xliff:g id="CARRIER">%1$s</xliff:g>\" ପାଇଁ SIMର PIN ଲେଖନ୍ତୁ।"</string>
     <string name="kg_sim_lock_esim_instructions" msgid="5577169988158738030">"<xliff:g id="PREVIOUS_MSG">%1$s</xliff:g> ବିନା ମୋବାଇଲ୍ ସେବାରେ ଡିଭାଇସ୍‌କୁ ବ୍ୟବହାର କରିବା ପାଇଁ eSIMକୁ ଅକ୍ଷମ କରନ୍ତୁ।"</string>
-    <string name="kg_puk_enter_puk_hint" msgid="3005288372875367017">"SIM ବର୍ତ୍ତମାନ ଅକ୍ଷମ ଅଟେ। ଜାରି ରଖିବାକୁ PUK କୋଡ ଲେଖନ୍ତୁ। ବିବରଣୀ ପାଇଁ ନିଜ କ୍ଯାରିଅରଙ୍କ ସହ କଣ୍ଟାକ୍ଟ କରନ୍ତୁ।"</string>
-    <string name="kg_puk_enter_puk_hint_multi" msgid="4876780689904862943">"SIM \"<xliff:g id="CARRIER">%1$s</xliff:g>\" ବର୍ତ୍ତମାନ ଅକ୍ଷମ କରାଯାଇଛି। ଜାରିରଖିବାକୁ PUK କୋଡ ଲେଖନ୍ତୁ। ବିବରଣୀ ପାଇଁ କ୍ଯାରିଅରଙ୍କ ସହ କଣ୍ଟାକ୍ଟ କରନ୍ତୁ।"</string>
+    <string name="kg_puk_enter_puk_hint" msgid="3005288372875367017">"SIM ବର୍ତ୍ତମାନ ଅକ୍ଷମ ଅଟେ। ଜାରି ରଖିବାକୁ PUK କୋଡ୍‍ ଏଣ୍ଟର୍ କରନ୍ତୁ। ବିବରଣୀ ପାଇଁ ନିଜ କେରିଅର୍‌ଙ୍କ ସହ ଯୋଗାଯୋଗ କରନ୍ତୁ।"</string>
+    <string name="kg_puk_enter_puk_hint_multi" msgid="4876780689904862943">"SIM \"<xliff:g id="CARRIER">%1$s</xliff:g>\" ବର୍ତ୍ତମାନ ଅକ୍ଷମ କରାଯାଇଛି। ଜାରିରଖିବାକୁ PUK କୋଡ୍‍ ଲେଖନ୍ତୁ। ବିବରଣୀ ପାଇଁ କେରିଅରଙ୍କ ସହ ଯୋଗାଯୋଗ କରନ୍ତୁ।"</string>
     <string name="kg_puk_enter_pin_hint" msgid="6028432138916150399">"ନିଜ ଇଚ୍ଛାର PIN କୋଡ୍‍ ଲେଖନ୍ତୁ"</string>
     <string name="kg_enter_confirm_pin_hint" msgid="4261064020391799132">"ନିଜ ଇଚ୍ଛାର PIN କୋଡ୍‍ ନିଶ୍ଚିତ କରନ୍ତୁ"</string>
     <string name="kg_sim_unlock_progress_dialog_message" msgid="4251352015304070326">"SIM କାର୍ଡ ଅନଲକ୍‍ କରାଯାଉଛି…"</string>
@@ -67,10 +67,16 @@
     <string name="kg_too_many_failed_pin_attempts_dialog_message" msgid="544687656831558971">"ଆପଣଙ୍କ PIN ଆପଣ <xliff:g id="NUMBER_0">%1$d</xliff:g>ଥର ଭୁଲ ଭାବେ ଟାଇପ୍‍ କରିଛନ୍ତି। \n\n<xliff:g id="NUMBER_1">%2$d</xliff:g> ସେକେଣ୍ଡ ପରେ ପୁଣି ଚେଷ୍ଟା କରନ୍ତୁ।"</string>
     <string name="kg_too_many_failed_password_attempts_dialog_message" msgid="190984061975729494">"ଆପଣଙ୍କ ପାସ୍‌ୱର୍ଡକୁ ଆପଣ <xliff:g id="NUMBER_0">%1$d</xliff:g> ଥର ଭୁଲ ଭାବେ ଟାଇପ୍ କରିଛନ୍ତି। \n\n<xliff:g id="NUMBER_1">%2$d</xliff:g> ସେକେଣ୍ଡ ପରେ ପୁଣି ଚେଷ୍ଟା କରନ୍ତୁ।"</string>
     <string name="kg_too_many_failed_pattern_attempts_dialog_message" msgid="4252405904570284368">"ଆପଣଙ୍କ ଲକ୍‍ ଖୋଲିବା ପାଟର୍ନକୁ ଆପଣ <xliff:g id="NUMBER_0">%1$d</xliff:g>ଥର ଭୁଲ ଭାବେ ଅଙ୍କନ କରିଛନ୍ତି। \n\n<xliff:g id="NUMBER_1">%2$d</xliff:g> ସେକେଣ୍ଡ ପରେ ପୁଣି ଚେଷ୍ଟା କରନ୍ତୁ।"</string>
-    <string name="kg_password_wrong_pin_code_pukked" msgid="8047350661459040581">"ଭୁଲ SIM PIN କୋଡ, ଆପଣଙ୍କ ଡିଭାଇସକୁ ଅନଲକ କରିବା ପାଇଁ ଏବେ ହିଁ ନିଜ କ୍ଯାରିଅରଙ୍କ ସହ କଣ୍ଟାକ୍ଟ କରନ୍ତୁ।"</string>
-    <string name="kg_password_wrong_pin_code" msgid="5629415765976820357">"{count,plural, =1{ଭୁଲ SIM PIN କୋଡ, ଆପଣଙ୍କ ଡିଭାଇସକୁ ଅନଲକ କରିବା ପାଇଁ ଆପଣ ଆପଣଙ୍କର କ୍ୟାରିଅର ସହ ନିଶ୍ଚିତରୂପେ କଣ୍ଟାକ୍ଟ କରିବା ପୂର୍ବରୁ ଆପଣଙ୍କ ପାଖରେ #ଟି ପ୍ରଚେଷ୍ଟା ବାକି ଅଛି।}other{ଭୁଲ SIM PIN କୋଡ, ଆପଣଙ୍କ ପାଖରେ #ଟି ପ୍ରଚେଷ୍ଟା ବାକି ଅଛି।}}"</string>
-    <string name="kg_password_wrong_puk_code_dead" msgid="3698285357028468617">"SIM ବ୍ୟବହାର କରାଯାଇପାରିବ ନାହିଁ। ନିଜ କ୍ଯାରିଅରଙ୍କ ସହ କଣ୍ଟାକ୍ଟ କରନ୍ତୁ।"</string>
-    <string name="kg_password_wrong_puk_code" msgid="6820515467645087827">"{count,plural, =1{ଭୁଲ SIM PUK କୋଡ, SIM ସ୍ଥାୟୀ ଭାବେ ବ୍ୟବହାର ଅଯୋଗ୍ୟ ହେବା ପୂର୍ବରୁ ଆପଣଙ୍କ ପାଖରେ #ଟି ପ୍ରଚେଷ୍ଟା ବାକି ଅଛି।}other{ଭୁଲ SIM PUK କୋଡ, SIM ସ୍ଥାୟୀ ଭାବେ ବ୍ୟବହାର ଅଯୋଗ୍ୟ ହେବା ପୂର୍ବରୁ ଆପଣଙ୍କ ପାଖରେ #ଟି ପ୍ରଚେଷ୍ଟା ବାକି ଅଛି।}}"</string>
+    <string name="kg_password_wrong_pin_code_pukked" msgid="8047350661459040581">"ଭୁଲ SIM PIN କୋଡ୍‌, ଆପଣଙ୍କ ଡିଭାଇସକୁ ଅନଲକ୍‌ କରିବା ପାଇଁ ଏବେ ହିଁ ନିଜ କେରିଅର୍‌ଙ୍କ ସହ ସମ୍ପର୍କ କରନ୍ତୁ।"</string>
+    <plurals name="kg_password_wrong_pin_code" formatted="false" msgid="7030584350995485026">
+      <item quantity="other">ଭୁଲ SIM PIN କୋଡ୍, ଆପଣଙ୍କର ଆଉ <xliff:g id="NUMBER_1">%d</xliff:g>ଟି ପ୍ରୟାସ ବାକି ରହିଛି।</item>
+      <item quantity="one">ଭୁଲ SIM PIN କୋଡ୍, ଡିଭାଇସ୍‍ ଅନଲକ୍‍ କରିବା ପାଇଁ କେରିଅରଙ୍କ ସହିତ ଯୋଗାଯୋଗ କରିବା ପୂର୍ବରୁ ଆପଣଙ୍କ ପାଖରେ ଆଉ <xliff:g id="NUMBER_0">%d</xliff:g>ଟି ପ୍ରୟାସ ବାକି ରହିଛି।</item>
+    </plurals>
+    <string name="kg_password_wrong_puk_code_dead" msgid="3698285357028468617">"SIM ବ୍ୟବହାର କରାଯାଇପାରିବ ନାହିଁ। ନିଜ କେରିଅର୍‌ଙ୍କ ସହ ଯୋଗାଯୋଗ କରନ୍ତୁ।"</string>
+    <plurals name="kg_password_wrong_puk_code" formatted="false" msgid="3937306685604862886">
+      <item quantity="other">ଭୁଲ SIM PUK କୋଡ୍‍, SIMଟି ଆଉ <xliff:g id="NUMBER_1">%d</xliff:g>ଟି ପ୍ରୟାସ ପରେ ସ୍ଥାୟୀ ଭାବେ ବ୍ୟବହାର କରାଯାଇରିବ ନାହିଁ।</item>
+      <item quantity="one">ଭୁଲ SIM PUK କୋଡ୍‍, SIMଟି ଆଉ <xliff:g id="NUMBER_0">%d</xliff:g>ଟି ପ୍ରୟାସ ପରେ ସ୍ଥାୟୀ ଭାବେ ବ୍ୟବହାର କରାଯାଇରିବ ନାହିଁ।</item>
+    </plurals>
     <string name="kg_password_pin_failed" msgid="5136259126330604009">"SIM PIN କାମ ବିଫଳ ହେଲା!"</string>
     <string name="kg_password_puk_failed" msgid="6778867411556937118">"SIM PUKର କାମ ବିଫଳ ହେଲା!"</string>
     <string name="accessibility_ime_switch_button" msgid="9082358310194861329">"ଇନପୁଟ୍‌ ପଦ୍ଧତି ବଦଳାନ୍ତୁ"</string>
@@ -84,9 +90,15 @@
     <string name="kg_prompt_reason_device_admin" msgid="6961159596224055685">"ଡିଭାଇସ୍‍ ଆଡମିନଙ୍କ ଦ୍ୱାରା ଲକ୍‍ କରାଯାଇଛି"</string>
     <string name="kg_prompt_reason_user_request" msgid="6015774877733717904">"ଡିଭାଇସ୍‍ ମାନୁଆଲ ଭାବେ ଲକ୍‍ କରାଗଲା"</string>
     <string name="kg_face_not_recognized" msgid="7903950626744419160">"ଚିହ୍ନଟ ହେଲାନାହିଁ"</string>
-    <string name="kg_face_sensor_privacy_enabled" msgid="939511161763558512">"ଫେସ ଅନଲକର ବ୍ୟବହାର ପାଇଁ ସେଟିଂସରେ କ୍ୟାମେରାକୁ ଆକ୍ସେସ ଦିଅ"</string>
-    <string name="kg_password_default_pin_message" msgid="1434544655827987873">"{count,plural, =1{SIM PIN ଲେଖନ୍ତୁ। ଆପଣଙ୍କ ଡିଭାଇସକୁ ଅନଲକ କରିବା ପାଇଁ ଆପଣ ଆପଣଙ୍କର କ୍ୟାରିଅର ସହ ନିଶ୍ଚିତରୂପେ କଣ୍ଟାକ୍ଟ କରିବା ପୂର୍ବରୁ ଆପଣଙ୍କ ପାଖରେ #ଟି ପ୍ରଚେଷ୍ଟା ବାକି ଅଛି।}other{SIM PIN ଲେଖନ୍ତୁ। ଆପଣଙ୍କ ପାଖରେ #ଟି ପ୍ରଚେଷ୍ଟା ବାକି ଅଛି।}}"</string>
-    <string name="kg_password_default_puk_message" msgid="1025139786449741950">"{count,plural, =1{SIMକୁ ବର୍ତ୍ତମାନ ଅକ୍ଷମ କରାଯାଇଛି। ଜାରି ରଖିବାକୁ PUK କୋଡ ଲେଖନ୍ତୁ। SIM ସ୍ଥାୟୀ ଭାବେ ବ୍ୟବହାର ଅଯୋଗ୍ୟ ହେବା ପୂର୍ବରୁ ଆପଣଙ୍କ ପାଖରେ #ଟି ପ୍ରଚେଷ୍ଟା ବାକି ଅଛି। ବିବରଣୀ ପାଇଁ କ୍ୟାରିଅର ସହ କଣ୍ଟାକ୍ଟ କରନ୍ତୁ।}other{SIMକୁ ବର୍ତ୍ତମାନ ଅକ୍ଷମ କରାଯାଇଛି। ଜାରି ରଖିବାକୁ PUK କୋଡ ଲେଖନ୍ତୁ। SIM ସ୍ଥାୟୀ ଭାବେ ବ୍ୟବହାର ଅଯୋଗ୍ୟ ହେବା ପୂର୍ବରୁ ଆପଣଙ୍କ ପାଖରେ #ଟି ପ୍ରଚେଷ୍ଟା ବାକି ଅଛି। ବିବରଣୀ ପାଇଁ କ୍ୟାରିଅର ସହ କଣ୍ଟାକ୍ଟ କରନ୍ତୁ।}}"</string>
+    <string name="kg_face_sensor_privacy_enabled" msgid="6513157891227284806">"ଫେସ ଅନଲକ ବ୍ୟବହାର କରିବା ପାଇଁ, ସେଟିଂସ ଏବଂ ଗୋପନୀୟତାରେ "<b>"କ୍ୟାମେରା ଆକ୍ସେସ"</b>"କୁ ଚାଲୁ କରନ୍ତୁ"</string>
+    <plurals name="kg_password_default_pin_message" formatted="false" msgid="7730152526369857818">
+      <item quantity="other">SIM PIN ପ୍ରବେଶ କରନ୍ତୁ। ଆପଣଙ୍କ ପାଇଁ <xliff:g id="NUMBER_1">%d</xliff:g>ଟି ପ୍ରୟାସ ବଳକା ଅଛି।</item>
+      <item quantity="one">SIM PIN ପ୍ରବେଶ କରନ୍ତୁ। ଆପଣଙ୍କ ଡିଭାଇସ୍‍କୁ ଅନଲକ୍ କରିବା ପାଇଁ ପାଖରେ ବଳକା ଥିବା <xliff:g id="NUMBER_0">%d</xliff:g>ଟି ପ୍ରୟାସର ବ୍ୟବହାର କରିବା ପୂର୍ବରୁ ନିଜର କେରିଅର୍‍ଙ୍କୁ ସମ୍ପର୍କ କରନ୍ତୁ।</item>
+    </plurals>
+    <plurals name="kg_password_default_puk_message" formatted="false" msgid="571308542462946935">
+      <item quantity="other">SIM କାର୍ଡକୁ ବର୍ତ୍ତମାନ ଅକ୍ଷମ କରିଦିଆଯାଇଛି। ଜାରି ରଖିବାକୁ PUK କୋଡ୍‍ ଲେଖନ୍ତୁ। ଆଉ <xliff:g id="_NUMBER_1">%d</xliff:g> ଥର ଭୁଲ କୋଡ୍‍ ଲେଖିବା ପରେ SIM କାର୍ଡ ସ୍ଥାୟୀ ଭାବେ ଅନୁପଯୋଗୀ ହୋଇଯିବ। ବିବରଣୀ ପାଇଁ କେରିଅର୍‌ର ସହ ଯୋଗାଯୋଗ କରନ୍ତୁ।</item>
+      <item quantity="one">SIM କାର୍ଡକୁ ବର୍ତ୍ତମାନ ଅକ୍ଷମ କରିଦିଆଯାଇଛି। ଜାରି ରଖିବାକୁ PUK କୋଡ୍‍ ଲେଖନ୍ତୁ। ଆଉ <xliff:g id="_NUMBER_0">%d</xliff:g> ଥର ଭୁଲ କୋଡ୍‍ ଲେଖିବା ପରେ SIM କାର୍ଡ ସ୍ଥାୟୀ ଭାବେ ଅନୁପଯୋଗୀ ହୋଇଯିବ। ବିବରଣୀ ପାଇଁ କେରିଅର୍‌ର ସହ ଯୋଗାଯୋଗ କରନ୍ତୁ।</item>
+    </plurals>
     <string name="clock_title_default" msgid="6342735240617459864">"ଡିଫଲ୍ଟ"</string>
     <string name="clock_title_bubble" msgid="2204559396790593213">"ବବଲ୍"</string>
     <string name="clock_title_analog" msgid="8409262532900918273">"ଆନାଲଗ୍"</string>

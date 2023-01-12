@@ -221,4 +221,33 @@ public class BatteryControllerTest extends SysuiTestCase {
 
         Assert.assertFalse(mBatteryController.isChargingSourceDock());
     }
+
+    @Test
+    public void batteryStateChanged_healthNotOverheated_outputsFalse() {
+        Intent intent = new Intent(Intent.ACTION_BATTERY_CHANGED);
+        intent.putExtra(BatteryManager.EXTRA_HEALTH, BatteryManager.BATTERY_HEALTH_GOOD);
+
+        mBatteryController.onReceive(getContext(), intent);
+
+        Assert.assertFalse(mBatteryController.isOverheated());
+    }
+
+    @Test
+    public void batteryStateChanged_healthOverheated_outputsTrue() {
+        Intent intent = new Intent(Intent.ACTION_BATTERY_CHANGED);
+        intent.putExtra(BatteryManager.EXTRA_HEALTH, BatteryManager.BATTERY_HEALTH_OVERHEAT);
+
+        mBatteryController.onReceive(getContext(), intent);
+
+        Assert.assertTrue(mBatteryController.isOverheated());
+    }
+
+    @Test
+    public void batteryStateChanged_noHealthGiven_outputsFalse() {
+        Intent intent = new Intent(Intent.ACTION_BATTERY_CHANGED);
+
+        mBatteryController.onReceive(getContext(), intent);
+
+        Assert.assertFalse(mBatteryController.isOverheated());
+    }
 }

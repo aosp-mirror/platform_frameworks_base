@@ -27,6 +27,7 @@ interface ControlsUiController {
     companion object {
         public const val TAG = "ControlsUiController"
         public const val EXTRA_ANIMATE = "extra_animate"
+        public const val EXIT_TO_DREAM = "extra_exit_to_dream"
     }
 
     fun show(parent: ViewGroup, onDismiss: Runnable, activityContext: Context)
@@ -34,7 +35,7 @@ interface ControlsUiController {
 
     /**
      * Returns the preferred activity to start, depending on if the user has favorited any
-     * controls.
+     * controls or whether there are any app providing panels.
      */
     fun resolveActivity(): Class<*>
 
@@ -52,9 +53,43 @@ interface ControlsUiController {
     )
 
     /**
-     * Returns the structure that is currently preferred by the user.
+     * Returns the element that is currently preferred by the user.
      *
-     * This structure will be the one that appears when the user first opens the controls activity.
+     * This element will be the one that appears when the user first opens the controls activity.
      */
-    fun getPreferredStructure(structures: List<StructureInfo>): StructureInfo
+    fun getPreferredSelectedItem(structures: List<StructureInfo>): SelectedItem
+}
+
+sealed class SelectedItem {
+
+    abstract val name: CharSequence
+    abstract val hasControls: Boolean
+    abstract val componentName: ComponentName
+
+    /**
+     * Represents the currently selected item for a structure.
+     */
+    data class StructureItem(val structure: StructureInfo) : SelectedItem() {
+        override val name: CharSequence = structure.structure
+        override val hasControls: Boolean = structure.controls.isNotEmpty()
+        override val componentName: ComponentName = structure.componentName
+    }
+
+    /**
+     * Represents the currently selected item for a service that provides a panel activity.
+     *
+     * The [componentName] is that of the service, as that is the expected identifier that should
+     * not change (to always provide proper migration).
+     */
+    data class PanelItem(
+            val appName: CharSequence,
+            override val componentName:
+            ComponentName
+    ) : SelectedItem() {
+        override val name: CharSequence = appName
+        override val hasControls: Boolean = true
+    }
+    companion object {
+        val EMPTY_SELECTION: SelectedItem = StructureItem(StructureInfo.EMPTY_STRUCTURE)
+    }
 }

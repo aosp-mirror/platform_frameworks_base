@@ -95,7 +95,7 @@
     <string name="bluetooth_disconnecting" msgid="7638892134401574338">"Се исклучува..."</string>
     <string name="bluetooth_connecting" msgid="5871702668260192755">"Се поврзува..."</string>
     <string name="bluetooth_connected" msgid="8065345572198502293">"Поврзан со <xliff:g id="ACTIVE_DEVICE">%1$s</xliff:g>"</string>
-    <string name="bluetooth_pairing" msgid="4269046942588193600">"Се спарува..."</string>
+    <string name="bluetooth_pairing" msgid="4269046942588193600">"Поврзување..."</string>
     <string name="bluetooth_connected_no_headset" msgid="2224101138659967604">"Поврзан со <xliff:g id="ACTIVE_DEVICE">%1$s</xliff:g> (без телефон)"</string>
     <string name="bluetooth_connected_no_a2dp" msgid="8566874395813947092">"Поврзан со <xliff:g id="ACTIVE_DEVICE">%1$s</xliff:g> (без аудиовизуелни содржини)"</string>
     <string name="bluetooth_connected_no_map" msgid="3381860077002724689">"Поврзан со <xliff:g id="ACTIVE_DEVICE">%1$s</xliff:g> (без пристап до пораките)"</string>
@@ -117,17 +117,17 @@
     <string name="bluetooth_profile_opp" msgid="6692618568149493430">"Пренос на датотека"</string>
     <string name="bluetooth_profile_hid" msgid="2969922922664315866">"Влезен уред"</string>
     <string name="bluetooth_profile_pan" msgid="1006235139308318188">"Пристап до интернет"</string>
-    <string name="bluetooth_profile_pbap" msgid="4262303387989406171">"Споделување контакти и историја на повици"</string>
-    <string name="bluetooth_profile_pbap_summary" msgid="6466456791354759132">"Користење на споделувањето контакти и историја на повици"</string>
+    <string name="bluetooth_profile_pbap" msgid="7064307749579335765">"Споделување контакти"</string>
+    <string name="bluetooth_profile_pbap_summary" msgid="2955819694801952056">"Користи за споделување контакти"</string>
     <string name="bluetooth_profile_pan_nap" msgid="7871974753822470050">"Споделување конекција на интернет"</string>
     <string name="bluetooth_profile_map" msgid="8907204701162107271">"Текстуални пораки"</string>
     <string name="bluetooth_profile_sap" msgid="8304170950447934386">"Пристап до SIM"</string>
     <string name="bluetooth_profile_a2dp_high_quality" msgid="4739440941324792775">"HD-аудио: <xliff:g id="CODEC_NAME">%1$s</xliff:g>"</string>
     <string name="bluetooth_profile_a2dp_high_quality_unknown_codec" msgid="2477639096903834374">"HD-аудио"</string>
     <string name="bluetooth_profile_hearing_aid" msgid="58154575573984914">"Слушни помагала"</string>
-    <string name="bluetooth_profile_le_audio" msgid="3237854988278539061">"LE-аудио"</string>
+    <string name="bluetooth_profile_le_audio" msgid="5158149987518342036">"LE_AUDIO"</string>
     <string name="bluetooth_hearing_aid_profile_summary_connected" msgid="8191273236809964030">"Поврзано со слушни помагала"</string>
-    <string name="bluetooth_le_audio_profile_summary_connected" msgid="6916226974453480650">"Поврзано на LE-аудио"</string>
+    <string name="bluetooth_le_audio_profile_summary_connected" msgid="3162538609379333442">"Поврзано на LE_AUDIO"</string>
     <string name="bluetooth_a2dp_profile_summary_connected" msgid="7422607970115444153">"Поврзан со аудио на медиуми"</string>
     <string name="bluetooth_headset_profile_summary_connected" msgid="2420981566026949688">"Поврзан со аудио на телефон"</string>
     <string name="bluetooth_opp_profile_summary_connected" msgid="2393521801478157362">"Поврзан со сервер за пренос на датотеки"</string>
@@ -255,12 +255,12 @@
     <string name="adb_pairing_device_dialog_pairing_code_label" msgid="3639239786669722731">"Код за спарување преку Wi‑Fi"</string>
     <string name="adb_pairing_device_dialog_failed_title" msgid="3426758947882091735">"Спарувањето е неуспешно"</string>
     <string name="adb_pairing_device_dialog_failed_msg" msgid="6611097519661997148">"Погрижете се уредот да биде поврзан на истата мрежа."</string>
-    <string name="adb_wireless_qrcode_summary" msgid="8051414549011801917">"Скенирајте QR-код за да го спарите уредот преку Wi‑Fi"</string>
-    <string name="adb_wireless_verifying_qrcode_text" msgid="6123192424916029207">"Се спарува уредот…"</string>
+    <string name="adb_wireless_qrcode_summary" msgid="8051414549011801917">"Спарете го уредот преку Wi‑Fi со скенирање QR-код"</string>
+    <string name="adb_wireless_verifying_qrcode_text" msgid="6123192424916029207">"Се спарува уред…"</string>
     <string name="adb_qrcode_pairing_device_failed_msg" msgid="6936292092592914132">"Уредот не успеа да се спари. Или QR-кодот беше погрешен или уредот не е поврзан на истата мрежа."</string>
     <string name="adb_wireless_ip_addr_preference_title" msgid="8335132107715311730">"IP-адреса и порта"</string>
     <string name="adb_wireless_qrcode_pairing_title" msgid="1906409667944674707">"Скенирајте QR-код"</string>
-    <string name="adb_wireless_qrcode_pairing_description" msgid="6014121407143607851">"Скенирајте QR-код за да го спарите уредот преку Wi‑Fi"</string>
+    <string name="adb_wireless_qrcode_pairing_description" msgid="6014121407143607851">"Спарете го уредот преку Wi‑Fi со скенирање QR-код"</string>
     <string name="adb_wireless_no_network_msg" msgid="2365795244718494658">"Поврзете се на Wi-Fi мрежа"</string>
     <string name="keywords_adb_wireless" msgid="6507505581882171240">"adb, отстранува грешка, програмер"</string>
     <string name="bugreport_in_power" msgid="8664089072534638709">"Кратенка за извештај за грешка"</string>
@@ -408,7 +408,6 @@
     <string name="force_resizable_activities_summary" msgid="2490382056981583062">"Направете сите активности да бидат со променлива големина за повеќе прозорци, без разлика на вредностите на манифестот."</string>
     <string name="enable_freeform_support" msgid="7599125687603914253">"Овозможи прозорци со слободна форма"</string>
     <string name="enable_freeform_support_summary" msgid="1822862728719276331">"Овозможи поддршка за експериментални прозорци со слободна форма."</string>
-    <string name="desktop_mode" msgid="2389067840550544462">"Режим за компјутер"</string>
     <string name="local_backup_password_title" msgid="4631017948933578709">"Лозинка за бекап на компјутер"</string>
     <string name="local_backup_password_summary_none" msgid="7646898032616361714">"Целосниот бекап на компјутерот во моментов не е заштитен"</string>
     <string name="local_backup_password_summary_change" msgid="1707357670383995567">"Допрете за да се промени или отстрани лозинката за целосен бекап на компјутерот"</string>
@@ -477,13 +476,12 @@
     <string name="power_charging" msgid="6727132649743436802">"<xliff:g id="LEVEL">%1$s</xliff:g> – <xliff:g id="STATE">%2$s</xliff:g>"</string>
     <string name="power_remaining_charging_duration_only" msgid="8085099012811384899">"<xliff:g id="TIME">%1$s</xliff:g> до полна батерија"</string>
     <string name="power_charging_duration" msgid="6127154952524919719">"<xliff:g id="LEVEL">%1$s</xliff:g> - <xliff:g id="TIME">%2$s</xliff:g> до полна батерија"</string>
-    <string name="power_charging_limited" msgid="6971664137170239141">"<xliff:g id="LEVEL">%1$s</xliff:g> - Полнењето е паузирано"</string>
+    <string name="power_charging_limited" msgid="7956120998372505295">"<xliff:g id="LEVEL">%1$s</xliff:g> - Полнењето е привремено ограничено"</string>
     <string name="battery_info_status_unknown" msgid="268625384868401114">"Непознато"</string>
     <string name="battery_info_status_charging" msgid="4279958015430387405">"Се полни"</string>
     <string name="battery_info_status_charging_fast" msgid="8027559755902954885">"Брзо полнење"</string>
     <string name="battery_info_status_charging_slow" msgid="3190803837168962319">"Бавно полнење"</string>
     <string name="battery_info_status_charging_wireless" msgid="8924722966861282197">"Се полни безжично"</string>
-    <string name="battery_info_status_charging_dock" msgid="8573274094093364791">"Се полни"</string>
     <string name="battery_info_status_discharging" msgid="6962689305413556485">"Не се полни"</string>
     <string name="battery_info_status_not_charging" msgid="3371084153747234837">"Поврзано, не се полни"</string>
     <string name="battery_info_status_full" msgid="1339002294876531312">"Полна"</string>
@@ -656,6 +654,11 @@
     <string name="accessibility_ethernet_disconnected" msgid="2832501530856497489">"Етернетот е исклучен."</string>
     <string name="accessibility_ethernet_connected" msgid="6175942685957461563">"Етернет."</string>
     <string name="accessibility_no_calling" msgid="3540827068323895748">"Без повици."</string>
+    <string name="dream_complication_title_time" msgid="701747800712893499">"Време"</string>
+    <string name="dream_complication_title_date" msgid="8661176085446135789">"Датум"</string>
+    <string name="dream_complication_title_weather" msgid="598609151677172783">"Временска прогноза"</string>
+    <string name="dream_complication_title_aqi" msgid="4587552608957834110">"Квалитет на воздух"</string>
+    <string name="dream_complication_title_cast_info" msgid="4038776652841885084">"Инфо за улогите"</string>
     <string name="avatar_picker_title" msgid="8492884172713170652">"Изберете профилна слика"</string>
     <string name="default_user_icon_description" msgid="6554047177298972638">"Икона за стандарден корисник"</string>
     <string name="physical_keyboard_title" msgid="4811935435315835220">"Физичка тастатура"</string>
@@ -664,11 +667,11 @@
     <string name="turn_screen_on_title" msgid="3266937298097573424">"Вклучување на екранот"</string>
     <string name="allow_turn_screen_on" msgid="6194845766392742639">"Дозволи вклучување на екранот"</string>
     <string name="allow_turn_screen_on_description" msgid="43834403291575164">"Дозволете апликација да го вклучи екранот. Ако дозволите, апликацијата може да го вклучи екранот во секое време без ваша намера."</string>
+    <string name="bt_le_audio_scan_qr_code" msgid="3521809854780392679">"Скенирајте QR-код"</string>
+    <string name="bt_le_audio_scan_qr_code_scanner" msgid="4679500020630341107">"За да започне слушањето, центрирајте го QR-кодот долу"</string>
+    <string name="bt_le_audio_qr_code_is_not_valid_format" msgid="6092191081849434734">"QR-кодот не е во важечки формат"</string>
     <string name="bt_le_audio_broadcast_dialog_title" msgid="5392738488989777074">"Да се прекине емитувањето на <xliff:g id="APP_NAME">%1$s</xliff:g>?"</string>
     <string name="bt_le_audio_broadcast_dialog_sub_title" msgid="268234802198852753">"Ако емитувате на <xliff:g id="SWITCHAPP">%1$s</xliff:g> или го промените излезот, тековното емитување ќе запре"</string>
     <string name="bt_le_audio_broadcast_dialog_switch_app" msgid="5749813313369517812">"Емитување на <xliff:g id="SWITCHAPP">%1$s</xliff:g>"</string>
     <string name="bt_le_audio_broadcast_dialog_different_output" msgid="2638402023060391333">"Променете излез"</string>
-    <string name="back_navigation_animation" msgid="8105467568421689484">"Анимации за движењето за враќање"</string>
-    <string name="back_navigation_animation_summary" msgid="741292224121599456">"Овозможете системски анимации за движењето за враќање."</string>
-    <string name="back_navigation_animation_dialog" msgid="8696966520944625596">"Поставкава ги овозможува системските анимации за предвидливи движења. Поставката треба да се постави на „точно“ преку апликација enableOnBackInvokedCallback во датотеката за манифест."</string>
 </resources>

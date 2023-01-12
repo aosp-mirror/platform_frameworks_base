@@ -19,16 +19,10 @@
     xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
     <string name="notification_channel_tv_pip" msgid="2576686079160402435">"ეკრანი ეკრანში"</string>
     <string name="pip_notification_unknown_title" msgid="2729870284350772311">"(პროგრამის სათაურის გარეშე)"</string>
-    <string name="pip_close" msgid="2955969519031223530">"დახურვა"</string>
+    <string name="pip_close" msgid="9135220303720555525">"PIP-ის დახურვა"</string>
     <string name="pip_fullscreen" msgid="7278047353591302554">"სრულ ეკრანზე"</string>
-    <string name="pip_move" msgid="158770205886688553">"გადაადგილება"</string>
-    <string name="pip_expand" msgid="1051966011679297308">"გაშლა"</string>
-    <string name="pip_collapse" msgid="3903295106641385962">"ჩაკეცვა"</string>
+    <string name="pip_move" msgid="1544227837964635439">"PIP გადატანა"</string>
+    <string name="pip_expand" msgid="7605396312689038178">"PIP-ის გაშლა"</string>
+    <string name="pip_collapse" msgid="5732233773786896094">"PIP-ის ჩაკეცვა"</string>
     <string name="pip_edu_text" msgid="3672999496647508701">" მართვის საშუალებებზე წვდომისთვის ორმაგად დააჭირეთ "<annotation icon="home_icon">" მთავარ ღილაკს "</annotation></string>
-    <string name="a11y_pip_menu_entered" msgid="5106343214776801614">"მენიუ „ეკრანი ეკრანში“."</string>
-    <string name="a11y_action_pip_move_left" msgid="6612980937817141583">"მარცხნივ გადატანა"</string>
-    <string name="a11y_action_pip_move_right" msgid="1119409122645529936">"მარჯვნივ გადატანა"</string>
-    <string name="a11y_action_pip_move_up" msgid="98502616918621959">"ზემოთ გადატანა"</string>
-    <string name="a11y_action_pip_move_down" msgid="3858802832725159740">"ქვემოთ გადატანა"</string>
-    <string name="a11y_action_pip_move_done" msgid="1486845365134416210">"მზადაა"</string>
 </resources>

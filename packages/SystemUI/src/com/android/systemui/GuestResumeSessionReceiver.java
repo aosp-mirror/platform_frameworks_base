@@ -17,23 +17,24 @@
 package com.android.systemui;
 
 import android.app.AlertDialog;
-import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.DialogInterface;
-import android.content.Intent;
-import android.content.IntentFilter;
 import android.content.pm.UserInfo;
 import android.os.UserHandle;
-import android.util.Log;
+
+import androidx.annotation.NonNull;
 
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.logging.UiEventLogger;
 import com.android.systemui.broadcast.BroadcastDispatcher;
+import com.android.systemui.dagger.qualifiers.Main;
 import com.android.systemui.qs.QSUserSwitcherEvent;
 import com.android.systemui.settings.UserTracker;
 import com.android.systemui.statusbar.phone.SystemUIDialog;
 import com.android.systemui.statusbar.policy.UserSwitcherController;
 import com.android.systemui.util.settings.SecureSettings;
+
+import java.util.concurrent.Executor;
 
 import javax.inject.Inject;
 
@@ -44,31 +45,66 @@ import dagger.assisted.AssistedInject;
 /**
  * Manages notification when a guest session is resumed.
  */
-public class GuestResumeSessionReceiver extends BroadcastReceiver {
-
-    private static final String TAG = GuestResumeSessionReceiver.class.getSimpleName();
+public class GuestResumeSessionReceiver {
 
     @VisibleForTesting
     public static final String SETTING_GUEST_HAS_LOGGED_IN = "systemui.guest_has_logged_in";
 
     @VisibleForTesting
     public AlertDialog mNewSessionDialog;
+    private final Executor mMainExecutor;
     private final UserTracker mUserTracker;
     private final SecureSettings mSecureSettings;
-    private final BroadcastDispatcher mBroadcastDispatcher;
     private final ResetSessionDialog.Factory mResetSessionDialogFactory;
     private final GuestSessionNotification mGuestSessionNotification;
 
+    @VisibleForTesting
+    public final UserTracker.Callback mUserChangedCallback =
+            new UserTracker.Callback() {
+                @Override
+                public void onUserChanged(int newUser, @NonNull Context userContext) {
+                    cancelDialog();
+
+                    UserInfo currentUser = mUserTracker.getUserInfo();
+                    if (!currentUser.isGuest()) {
+                        return;
+                    }
+
+                    int guestLoginState = mSecureSettings.getIntForUser(
+                            SETTING_GUEST_HAS_LOGGED_IN, 0, newUser);
+
+                    if (guestLoginState == 0) {
+                        // set 1 to indicate, 1st login
+                        guestLoginState = 1;
+                        mSecureSettings.putIntForUser(SETTING_GUEST_HAS_LOGGED_IN, guestLoginState,
+                                newUser);
+                    } else if (guestLoginState == 1) {
+                        // set 2 to indicate, 2nd or later login
+                        guestLoginState = 2;
+                        mSecureSettings.putIntForUser(SETTING_GUEST_HAS_LOGGED_IN, guestLoginState,
+                                newUser);
+                    }
+
+                    mGuestSessionNotification.createPersistentNotification(currentUser,
+                            (guestLoginState <= 1));
+
+                    if (guestLoginState > 1) {
+                        mNewSessionDialog = mResetSessionDialogFactory.create(newUser);
+                        mNewSessionDialog.show();
+                    }
+                }
+            };
+
     @Inject
     public GuestResumeSessionReceiver(
+            @Main Executor mainExecutor,
             UserTracker userTracker,
             SecureSettings secureSettings,
-            BroadcastDispatcher broadcastDispatcher,
             GuestSessionNotification guestSessionNotification,
             ResetSessionDialog.Factory resetSessionDialogFactory) {
+        mMainExecutor = mainExecutor;
         mUserTracker = userTracker;
         mSecureSettings = secureSettings;
-        mBroadcastDispatcher = broadcastDispatcher;
         mGuestSessionNotification = guestSessionNotification;
         mResetSessionDialogFactory = resetSessionDialogFactory;
     }
@@ -77,49 +113,7 @@ public class GuestResumeSessionReceiver extends BroadcastReceiver {
      * Register this receiver with the {@link BroadcastDispatcher}
      */
     public void register() {
-        IntentFilter f = new IntentFilter(Intent.ACTION_USER_SWITCHED);
-        mBroadcastDispatcher.registerReceiver(this, f, null /* handler */, UserHandle.SYSTEM);
-    }
-
-    @Override
-    public void onReceive(Context context, Intent intent) {
-        String action = intent.getAction();
-
-        if (Intent.ACTION_USER_SWITCHED.equals(action)) {
-            cancelDialog();
-
-            int userId = intent.getIntExtra(Intent.EXTRA_USER_HANDLE, UserHandle.USER_NULL);
-            if (userId == UserHandle.USER_NULL) {
-                Log.e(TAG, intent + " sent to " + TAG + " without EXTRA_USER_HANDLE");
-                return;
-            }
-
-            UserInfo currentUser = mUserTracker.getUserInfo();
-            if (!currentUser.isGuest()) {
-                return;
-            }
-
-            int guestLoginState = mSecureSettings.getIntForUser(
-                    SETTING_GUEST_HAS_LOGGED_IN, 0, userId);
-
-            if (guestLoginState == 0) {
-                // set 1 to indicate, 1st login
-                guestLoginState = 1;
-                mSecureSettings.putIntForUser(SETTING_GUEST_HAS_LOGGED_IN, guestLoginState, userId);
-            } else if (guestLoginState == 1) {
-                // set 2 to indicate, 2nd or later login
-                guestLoginState = 2;
-                mSecureSettings.putIntForUser(SETTING_GUEST_HAS_LOGGED_IN, guestLoginState, userId);
-            }
-
-            mGuestSessionNotification.createPersistentNotification(currentUser,
-                                                                   (guestLoginState <= 1));
-
-            if (guestLoginState > 1) {
-                mNewSessionDialog = mResetSessionDialogFactory.create(userId);
-                mNewSessionDialog.show();
-            }
-        }
+        mUserTracker.addCallback(mUserChangedCallback, mMainExecutor);
     }
 
     private void cancelDialog() {

@@ -117,17 +117,17 @@
     <string name="bluetooth_profile_opp" msgid="6692618568149493430">"Передавання файлів"</string>
     <string name="bluetooth_profile_hid" msgid="2969922922664315866">"Пристрій введення"</string>
     <string name="bluetooth_profile_pan" msgid="1006235139308318188">"Доступ до Інтернету"</string>
-    <string name="bluetooth_profile_pbap" msgid="4262303387989406171">"Доступ до контактів та історії дзвінків"</string>
-    <string name="bluetooth_profile_pbap_summary" msgid="6466456791354759132">"Використовуйте, щоб надсилати контакти й історію викликів"</string>
+    <string name="bluetooth_profile_pbap" msgid="7064307749579335765">"Надсилання контактів"</string>
+    <string name="bluetooth_profile_pbap_summary" msgid="2955819694801952056">"Використовувати для надсилання контактів"</string>
     <string name="bluetooth_profile_pan_nap" msgid="7871974753822470050">"Надання доступу до Інтернету"</string>
     <string name="bluetooth_profile_map" msgid="8907204701162107271">"Текстові повідомлення"</string>
     <string name="bluetooth_profile_sap" msgid="8304170950447934386">"Доступ до SIM-карти"</string>
     <string name="bluetooth_profile_a2dp_high_quality" msgid="4739440941324792775">"HD-аудіо: <xliff:g id="CODEC_NAME">%1$s</xliff:g>"</string>
     <string name="bluetooth_profile_a2dp_high_quality_unknown_codec" msgid="2477639096903834374">"HD-аудіо"</string>
     <string name="bluetooth_profile_hearing_aid" msgid="58154575573984914">"Слухові апарати"</string>
-    <string name="bluetooth_profile_le_audio" msgid="3237854988278539061">"LE Audio"</string>
+    <string name="bluetooth_profile_le_audio" msgid="5158149987518342036">"LE_AUDIO"</string>
     <string name="bluetooth_hearing_aid_profile_summary_connected" msgid="8191273236809964030">"Підключено до слухових апаратів"</string>
-    <string name="bluetooth_le_audio_profile_summary_connected" msgid="6916226974453480650">"Підключено до LE Audio"</string>
+    <string name="bluetooth_le_audio_profile_summary_connected" msgid="3162538609379333442">"Підключено до LE_AUDIO"</string>
     <string name="bluetooth_a2dp_profile_summary_connected" msgid="7422607970115444153">"Підключено до аудіоджерела"</string>
     <string name="bluetooth_headset_profile_summary_connected" msgid="2420981566026949688">"Підключено до звуку телеф."</string>
     <string name="bluetooth_opp_profile_summary_connected" msgid="2393521801478157362">"Підключ. до сервера передачі файлів"</string>
@@ -408,7 +408,6 @@
     <string name="force_resizable_activities_summary" msgid="2490382056981583062">"Масштабувати активність на кілька вікон, незалежно від значень у файлі маніфесту."</string>
     <string name="enable_freeform_support" msgid="7599125687603914253">"Увімкнути вікна довільного формату"</string>
     <string name="enable_freeform_support_summary" msgid="1822862728719276331">"Увімкнути експериментальні вікна довільного формату."</string>
-    <string name="desktop_mode" msgid="2389067840550544462">"Режим комп’ютера"</string>
     <string name="local_backup_password_title" msgid="4631017948933578709">"Пароль рез. копії на ПК"</string>
     <string name="local_backup_password_summary_none" msgid="7646898032616361714">"Повні резервні копії на комп’ютері наразі не захищені"</string>
     <string name="local_backup_password_summary_change" msgid="1707357670383995567">"Торкніться, щоб змінити або видалити пароль для повного резервного копіювання на комп’ютер"</string>
@@ -477,13 +476,12 @@
     <string name="power_charging" msgid="6727132649743436802">"<xliff:g id="LEVEL">%1$s</xliff:g> – <xliff:g id="STATE">%2$s</xliff:g>"</string>
     <string name="power_remaining_charging_duration_only" msgid="8085099012811384899">"<xliff:g id="TIME">%1$s</xliff:g> до повного заряду"</string>
     <string name="power_charging_duration" msgid="6127154952524919719">"<xliff:g id="LEVEL">%1$s</xliff:g> – <xliff:g id="TIME">%2$s</xliff:g> до повного заряду"</string>
-    <string name="power_charging_limited" msgid="6971664137170239141">"<xliff:g id="LEVEL">%1$s</xliff:g> - Заряджання призупинено"</string>
+    <string name="power_charging_limited" msgid="7956120998372505295">"<xliff:g id="LEVEL">%1$s</xliff:g> • Заряджання тимчасово обмежено"</string>
     <string name="battery_info_status_unknown" msgid="268625384868401114">"Невідомо"</string>
     <string name="battery_info_status_charging" msgid="4279958015430387405">"Заряджається"</string>
     <string name="battery_info_status_charging_fast" msgid="8027559755902954885">"Швидке заряджання"</string>
     <string name="battery_info_status_charging_slow" msgid="3190803837168962319">"Повільне заряджання"</string>
     <string name="battery_info_status_charging_wireless" msgid="8924722966861282197">"Бездротове заряджання"</string>
-    <string name="battery_info_status_charging_dock" msgid="8573274094093364791">"Заряджання"</string>
     <string name="battery_info_status_discharging" msgid="6962689305413556485">"Не заряджається"</string>
     <string name="battery_info_status_not_charging" msgid="3371084153747234837">"Підключено, не заряджається"</string>
     <string name="battery_info_status_full" msgid="1339002294876531312">"Заряджено"</string>
@@ -612,9 +610,9 @@
     <string name="guest_exit_button" msgid="5774985819191803960">"Вийти з режиму гостя"</string>
     <string name="guest_reset_button" msgid="2515069346223503479">"Скинути сеанс у режимі гостя"</string>
     <string name="guest_exit_quick_settings_button" msgid="1912362095913765471">"Вийти з режиму гостя"</string>
-    <string name="guest_notification_ephemeral" msgid="7263252466950923871">"Під час виходу буде видалено історію всіх дій"</string>
+    <string name="guest_notification_ephemeral" msgid="7263252466950923871">"Під час виходу буде видалено всі дії"</string>
     <string name="guest_notification_non_ephemeral" msgid="6843799963012259330">"Під час виходу можна зберегти або видалити ваші дії"</string>
-    <string name="guest_notification_non_ephemeral_non_first_login" msgid="8009307983766934876">"Можна скинути історію сеансу просто зараз або видалити чи зберегти її під час виходу."</string>
+    <string name="guest_notification_non_ephemeral_non_first_login" msgid="8009307983766934876">"Скиньте, щоб зараз видалити дії під час сеансу. Ви також можете зберегти чи видалити дії під час виходу."</string>
     <string name="user_image_take_photo" msgid="467512954561638530">"Зробити фотографію"</string>
     <string name="user_image_choose_photo" msgid="1363820919146782908">"Вибрати зображення"</string>
     <string name="user_image_photo_selector" msgid="433658323306627093">"Вибрати фотографію"</string>
@@ -656,6 +654,11 @@
     <string name="accessibility_ethernet_disconnected" msgid="2832501530856497489">"Ethernet відключено."</string>
     <string name="accessibility_ethernet_connected" msgid="6175942685957461563">"Ethernet."</string>
     <string name="accessibility_no_calling" msgid="3540827068323895748">"Виклики недоступні."</string>
+    <string name="dream_complication_title_time" msgid="701747800712893499">"Час"</string>
+    <string name="dream_complication_title_date" msgid="8661176085446135789">"Дата"</string>
+    <string name="dream_complication_title_weather" msgid="598609151677172783">"Погода"</string>
+    <string name="dream_complication_title_aqi" msgid="4587552608957834110">"Якість повітря"</string>
+    <string name="dream_complication_title_cast_info" msgid="4038776652841885084">"Акторський склад"</string>
     <string name="avatar_picker_title" msgid="8492884172713170652">"Виберіть зображення профілю"</string>
     <string name="default_user_icon_description" msgid="6554047177298972638">"Значок користувача за умовчанням"</string>
     <string name="physical_keyboard_title" msgid="4811935435315835220">"Фізична клавіатура"</string>
@@ -664,11 +667,11 @@
     <string name="turn_screen_on_title" msgid="3266937298097573424">"Увімкнення екрана"</string>
     <string name="allow_turn_screen_on" msgid="6194845766392742639">"Дозволити ввімкнення екрана"</string>
     <string name="allow_turn_screen_on_description" msgid="43834403291575164">"Дозвольте додатку вмикати екран. Якщо ви надасте цей дозвіл, додаток зможе будь-коли вмикати екран пристрою навіть без вашого явного наміру."</string>
+    <string name="bt_le_audio_scan_qr_code" msgid="3521809854780392679">"Сканування QR-коду"</string>
+    <string name="bt_le_audio_scan_qr_code_scanner" msgid="4679500020630341107">"Щоб почати слухати аудіо, наведіть камеру на QR-код нижче"</string>
+    <string name="bt_le_audio_qr_code_is_not_valid_format" msgid="6092191081849434734">"Недійсний формат QR-коду"</string>
     <string name="bt_le_audio_broadcast_dialog_title" msgid="5392738488989777074">"Зупинити трансляцію з додатка <xliff:g id="APP_NAME">%1$s</xliff:g>?"</string>
     <string name="bt_le_audio_broadcast_dialog_sub_title" msgid="268234802198852753">"Якщо ви зміните додаток (<xliff:g id="SWITCHAPP">%1$s</xliff:g>) або аудіовихід, поточну трансляцію буде припинено"</string>
     <string name="bt_le_audio_broadcast_dialog_switch_app" msgid="5749813313369517812">"Змінити додаток для трансляції на <xliff:g id="SWITCHAPP">%1$s</xliff:g>"</string>
     <string name="bt_le_audio_broadcast_dialog_different_output" msgid="2638402023060391333">"Змінити аудіовихід"</string>
-    <string name="back_navigation_animation" msgid="8105467568421689484">"Анімації з підказками для жесту \"Назад\""</string>
-    <string name="back_navigation_animation_summary" msgid="741292224121599456">"Увімкніть системну анімацію з підказками для жесту \"Назад\"."</string>
-    <string name="back_navigation_animation_dialog" msgid="8696966520944625596">"Якщо вибрати це налаштування, для жесту \"Назад\" відображатиметься анімація з підказками. У файлі маніфесту атрибуту enableOnBackInvokedCallback додатка потрібно присвоїти значення true."</string>
 </resources>

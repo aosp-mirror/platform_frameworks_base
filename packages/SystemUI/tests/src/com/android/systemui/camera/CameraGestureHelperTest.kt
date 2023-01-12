@@ -301,7 +301,7 @@ class CameraGestureHelperTest : SysuiTestCase() {
         val intent = intentCaptor.value
 
         assertThat(CameraIntents.isSecureCameraIntent(intent)).isEqualTo(isSecure)
-        assertThat(intent.getIntExtra(CameraGestureHelper.EXTRA_CAMERA_LAUNCH_SOURCE, -1))
+        assertThat(intent.getIntExtra(CameraIntents.EXTRA_LAUNCH_SOURCE, -1))
             .isEqualTo(source)
     }
 

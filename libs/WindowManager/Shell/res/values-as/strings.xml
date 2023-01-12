@@ -37,14 +37,14 @@
     <string name="activity_launch_on_secondary_display_failed_text" msgid="4226485344988071769">"গৌণ ডিছপ্লেত এপ্ লঞ্চ কৰিব নোৱাৰি।"</string>
     <string name="accessibility_divider" msgid="703810061635792791">"স্প্লিট স্ক্ৰীনৰ বিভাজক"</string>
     <string name="accessibility_action_divider_left_full" msgid="1792313656305328536">"বাওঁফালৰ স্ক্ৰীনখন সম্পূৰ্ণ স্ক্ৰীন কৰক"</string>
-    <string name="accessibility_action_divider_left_70" msgid="8859845045360659250">"বাওঁফালৰ স্ক্ৰীনখন ৭০% কৰক"</string>
-    <string name="accessibility_action_divider_left_50" msgid="3488317024557521561">"বাওঁফালৰ স্ক্ৰীনখন ৫০% কৰক"</string>
-    <string name="accessibility_action_divider_left_30" msgid="6023611335723838727">"বাওঁফালৰ স্ক্ৰীনখন ৩০% কৰক"</string>
+    <string name="accessibility_action_divider_left_70" msgid="8859845045360659250">"বাওঁফালৰ স্ক্ৰীণখন ৭০% কৰক"</string>
+    <string name="accessibility_action_divider_left_50" msgid="3488317024557521561">"বাওঁফালৰ স্ক্ৰীণখন ৫০% কৰক"</string>
+    <string name="accessibility_action_divider_left_30" msgid="6023611335723838727">"বাওঁফালৰ স্ক্ৰীণখন ৩০% কৰক"</string>
     <string name="accessibility_action_divider_right_full" msgid="3408505054325944903">"সোঁফালৰ স্ক্ৰীনখন সম্পূৰ্ণ স্ক্ৰীন কৰক"</string>
     <string name="accessibility_action_divider_top_full" msgid="3495871951082107594">"শীৰ্ষ স্ক্ৰীনখন সম্পূৰ্ণ স্ক্ৰীন কৰক"</string>
-    <string name="accessibility_action_divider_top_70" msgid="1779164068887875474">"শীর্ষ স্ক্ৰীনখন ৭০% কৰক"</string>
-    <string name="accessibility_action_divider_top_50" msgid="8649582798829048946">"শীর্ষ স্ক্ৰীনখন ৫০% কৰক"</string>
-    <string name="accessibility_action_divider_top_30" msgid="3572788224908570257">"শীর্ষ স্ক্ৰীনখন ৩০% কৰক"</string>
+    <string name="accessibility_action_divider_top_70" msgid="1779164068887875474">"শীর্ষ স্ক্ৰীণখন ৭০% কৰক"</string>
+    <string name="accessibility_action_divider_top_50" msgid="8649582798829048946">"শীর্ষ স্ক্ৰীণখন ৫০% কৰক"</string>
+    <string name="accessibility_action_divider_top_30" msgid="3572788224908570257">"শীর্ষ স্ক্ৰীণখন ৩০% কৰক"</string>
     <string name="accessibility_action_divider_bottom_full" msgid="2831868345092314060">"তলৰ স্ক্ৰীনখন সম্পূৰ্ণ স্ক্ৰীন কৰক"</string>
     <string name="one_handed_tutorial_title" msgid="4583241688067426350">"এখন হাতেৰে ব্যৱহাৰ কৰা ম’ড ব্যৱহাৰ কৰা"</string>
     <string name="one_handed_tutorial_description" msgid="3486582858591353067">"বাহিৰ হ’বলৈ স্ক্ৰীনখনৰ একেবাৰে তলৰ পৰা ওপৰলৈ ছোৱাইপ কৰক অথবা এপ্‌টোৰ ওপৰত যিকোনো ঠাইত টিপক"</string>
@@ -72,16 +72,13 @@
     <string name="notification_bubble_title" msgid="6082910224488253378">"বাবল"</string>
     <string name="manage_bubbles_text" msgid="7730624269650594419">"পৰিচালনা কৰক"</string>
     <string name="accessibility_bubble_dismissed" msgid="8367471990421247357">"বাবল অগ্ৰাহ্য কৰা হৈছে"</string>
-    <string name="restart_button_description" msgid="6712141648865547958">"উন্নত ভিউৰ বাবে এপ্‌টো ৰিষ্টাৰ্ট কৰিবলৈ টিপক।"</string>
+    <string name="restart_button_description" msgid="5887656107651190519">"এপ্‌টো ৰিষ্টাৰ্ট কৰিবলৈ আৰু পূৰ্ণ স্ক্ৰীন ব্যৱহাৰ কৰিবলৈ টিপক।"</string>
     <string name="camera_compat_treatment_suggested_button_description" msgid="8103916969024076767">"কেমেৰাৰ কোনো সমস্যা হৈছে নেকি?\nপুনৰ খাপ খোৱাবলৈ টিপক"</string>
     <string name="camera_compat_treatment_applied_button_description" msgid="2944157113330703897">"এইটো সমাধান কৰা নাই নেকি?\nপূৰ্বাৱস্থালৈ নিবলৈ টিপক"</string>
     <string name="camera_compat_dismiss_button_description" msgid="2795364433503817511">"কেমেৰাৰ কোনো সমস্যা নাই নেকি? অগ্ৰাহ্য কৰিবলৈ টিপক।"</string>
-    <string name="letterbox_education_dialog_title" msgid="7739895354143295358">"চাওক আৰু অধিক কৰক"</string>
-    <string name="letterbox_education_split_screen_text" msgid="6206339484068670830">"বিভাজিত স্ক্ৰীনৰ বাবে অন্য এটা এপ্‌ টানি আনি এৰক"</string>
-    <string name="letterbox_education_reposition_text" msgid="4589957299813220661">"এপ্‌টোৰ স্থান সলনি কৰিবলৈ ইয়াৰ বাহিৰত দুবাৰ টিপক"</string>
+    <string name="letterbox_education_dialog_title" msgid="6688664582871779215">"কিছুমান এপে প’ৰ্ট্ৰেইট ম’ডত বেছি ভালকৈ কাম কৰে"</string>
+    <string name="letterbox_education_dialog_subtext" msgid="4853542518367719562">"আপোনাৰ spaceৰ পৰা পাৰ্যমানে উপকৃত হ’বলৈ ইয়াৰে এটা বিকল্প চেষ্টা কৰি চাওক"</string>
+    <string name="letterbox_education_screen_rotation_text" msgid="5085786687366339027">"পূৰ্ণ স্ক্ৰীনলৈ যাবলৈ আপোনাৰ ডিভাইচটো ঘূৰাওক"</string>
+    <string name="letterbox_education_reposition_text" msgid="1068293354123934727">"এপ্‌টোৰ স্থান সলনি কৰিবলৈ ইয়াৰ কাষত দুবাৰ টিপক"</string>
     <string name="letterbox_education_got_it" msgid="4057634570866051177">"বুজি পালোঁ"</string>
-    <string name="letterbox_education_expand_button_description" msgid="1729796567101129834">"অধিক তথ্যৰ বাবে বিস্তাৰ কৰক।"</string>
-    <string name="maximize_button_text" msgid="1650859196290301963">"সৰ্বাধিক মাত্ৰালৈ বঢ়াওক"</string>
-    <string name="minimize_button_text" msgid="271592547935841753">"মিনিমাইজ কৰক"</string>
-    <string name="close_button_text" msgid="2913281996024033299">"বন্ধ কৰক"</string>
 </resources>

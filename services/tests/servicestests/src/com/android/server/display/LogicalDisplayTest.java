@@ -128,12 +128,12 @@ public class LogicalDisplayTest {
         verify(t).setDisplayFlags(any(), eq(SurfaceControl.DISPLAY_RECEIVES_INPUT));
         reset(t);
 
-        mLogicalDisplay.setPhase(LogicalDisplay.DISPLAY_PHASE_DISABLED);
+        mLogicalDisplay.setEnabledLocked(false);
         mLogicalDisplay.configureDisplayLocked(t, mDisplayDevice, false);
         verify(t).setDisplayFlags(any(), eq(0));
         reset(t);
 
-        mLogicalDisplay.setPhase(LogicalDisplay.DISPLAY_PHASE_ENABLED);
+        mLogicalDisplay.setEnabledLocked(true);
         mDisplayDeviceInfo.touch = DisplayDeviceInfo.TOUCH_EXTERNAL;
         mLogicalDisplay.configureDisplayLocked(t, mDisplayDevice, false);
         verify(t).setDisplayFlags(any(), eq(SurfaceControl.DISPLAY_RECEIVES_INPUT));

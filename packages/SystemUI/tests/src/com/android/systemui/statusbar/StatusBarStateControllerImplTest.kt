@@ -25,6 +25,7 @@ import com.android.internal.logging.testing.UiEventLoggerFake
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.dump.DumpManager
 import com.android.systemui.plugins.statusbar.StatusBarStateController
+import com.android.systemui.shade.ShadeExpansionStateManager
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
 import org.junit.Assert.assertTrue
@@ -48,6 +49,7 @@ class StatusBarStateControllerImplTest : SysuiTestCase() {
 
     @Mock lateinit var interactionJankMonitor: InteractionJankMonitor
     @Mock private lateinit var mockDarkAnimator: ObjectAnimator
+    @Mock private lateinit var shadeExpansionStateManager: ShadeExpansionStateManager
 
     private lateinit var controller: StatusBarStateControllerImpl
     private lateinit var uiEventLogger: UiEventLoggerFake
@@ -62,7 +64,7 @@ class StatusBarStateControllerImplTest : SysuiTestCase() {
         controller = object : StatusBarStateControllerImpl(
             uiEventLogger,
             mock(DumpManager::class.java),
-            interactionJankMonitor
+            interactionJankMonitor, shadeExpansionStateManager
         ) {
             override fun createDarkAnimator(): ObjectAnimator { return mockDarkAnimator }
         }

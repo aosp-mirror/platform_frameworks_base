@@ -250,6 +250,8 @@ final class ActivityManagerShellCommand extends ShellCommand {
                     return runForceStop(pw);
                 case "stop-app":
                     return runStopApp(pw);
+                case "clear-recent-apps":
+                    return runClearRecentApps(pw);
                 case "fgs-notification-rate-limit":
                     return runFgsNotificationRateLimit(pw);
                 case "crash":
@@ -1202,6 +1204,11 @@ final class ActivityManagerShellCommand extends ShellCommand {
             }
         }
         mInterface.stopAppForUser(getNextArgRequired(), userId);
+        return 0;
+    }
+
+    int runClearRecentApps(PrintWriter pw) throws RemoteException {
+        mTaskInterface.removeAllVisibleRecentTasks();
         return 0;
     }
 

@@ -63,8 +63,8 @@
     <string name="bubble_dismiss_text" msgid="8816558050659478158">"Lukk boblen"</string>
     <string name="bubbles_dont_bubble_conversation" msgid="310000317885712693">"Ikke vis samtaler i bobler"</string>
     <string name="bubbles_user_education_title" msgid="2112319053732691899">"Chat med bobler"</string>
-    <string name="bubbles_user_education_description" msgid="4215862563054175407">"Nye samtaler vises som flytende ikoner eller bobler. Trykk for å åpne en boble. Dra for å flytte den."</string>
-    <string name="bubbles_user_education_manage_title" msgid="7042699946735628035">"Kontroller bobler når som helst"</string>
+    <string name="bubbles_user_education_description" msgid="4215862563054175407">"Nye samtaler vises som flytende ikoner eller bobler. Trykk for å åpne bobler. Dra for å flytte dem."</string>
+    <string name="bubbles_user_education_manage_title" msgid="7042699946735628035">"Kontrollér bobler når som helst"</string>
     <string name="bubbles_user_education_manage" msgid="3460756219946517198">"Trykk på Administrer for å slå av bobler for denne appen"</string>
     <string name="bubbles_user_education_got_it" msgid="3382046149225428296">"Greit"</string>
     <string name="bubble_overflow_empty_title" msgid="2397251267073294968">"Ingen nylige bobler"</string>
@@ -72,16 +72,13 @@
     <string name="notification_bubble_title" msgid="6082910224488253378">"Boble"</string>
     <string name="manage_bubbles_text" msgid="7730624269650594419">"Administrer"</string>
     <string name="accessibility_bubble_dismissed" msgid="8367471990421247357">"Boblen er avvist."</string>
-    <string name="restart_button_description" msgid="6712141648865547958">"Trykk for å starte denne appen på nytt for bedre visning."</string>
+    <string name="restart_button_description" msgid="5887656107651190519">"Trykk for å starte denne appen på nytt og vise den i fullskjerm."</string>
     <string name="camera_compat_treatment_suggested_button_description" msgid="8103916969024076767">"Har du kameraproblemer?\nTrykk for å tilpasse"</string>
     <string name="camera_compat_treatment_applied_button_description" msgid="2944157113330703897">"Ble ikke problemet løst?\nTrykk for å gå tilbake"</string>
     <string name="camera_compat_dismiss_button_description" msgid="2795364433503817511">"Har du ingen kameraproblemer? Trykk for å lukke."</string>
-    <string name="letterbox_education_dialog_title" msgid="7739895354143295358">"Se og gjør mer"</string>
-    <string name="letterbox_education_split_screen_text" msgid="6206339484068670830">"Dra inn en annen app for å bruke delt skjerm"</string>
-    <string name="letterbox_education_reposition_text" msgid="4589957299813220661">"Dobbelttrykk utenfor en app for å flytte den"</string>
+    <string name="letterbox_education_dialog_title" msgid="6688664582871779215">"Noen apper fungerer best i stående format"</string>
+    <string name="letterbox_education_dialog_subtext" msgid="4853542518367719562">"Prøv et av disse alternativene for å få mest mulig ut av plassen din"</string>
+    <string name="letterbox_education_screen_rotation_text" msgid="5085786687366339027">"Roter enheten for å starte fullskjerm"</string>
+    <string name="letterbox_education_reposition_text" msgid="1068293354123934727">"Dobbelttrykk ved siden av en app for å flytte den"</string>
     <string name="letterbox_education_got_it" msgid="4057634570866051177">"Greit"</string>
-    <string name="letterbox_education_expand_button_description" msgid="1729796567101129834">"Vis for å få mer informasjon."</string>
-    <string name="maximize_button_text" msgid="1650859196290301963">"Maksimer"</string>
-    <string name="minimize_button_text" msgid="271592547935841753">"Minimer"</string>
-    <string name="close_button_text" msgid="2913281996024033299">"Lukk"</string>
 </resources>

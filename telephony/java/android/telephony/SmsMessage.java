@@ -1020,6 +1020,26 @@ public class SmsMessage {
     }
 
     /**
+     * Return the encoding type of a received SMS message, which is specified using ENCODING_*
+     * GSM: defined in android.telephony.SmsConstants
+     * CDMA: defined in android.telephony.cdma.UserData
+     *
+     * @hide
+     */
+    public int getReceivedEncodingType() {
+        return mWrappedSmsMessage.getReceivedEncodingType();
+    }
+
+    /**
+     * Check if format of the message is 3GPP.
+     *
+     * @hide
+     */
+    public boolean is3gpp() {
+        return (mWrappedSmsMessage instanceof com.android.internal.telephony.gsm.SmsMessage);
+    }
+
+    /**
      * Determines whether or not to use CDMA format for MO SMS.
      * If SMS over IMS is supported, then format is based on IMS SMS format,
      * otherwise format is based on current phone type.

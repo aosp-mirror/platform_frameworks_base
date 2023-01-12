@@ -40,6 +40,8 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.ArgumentCaptor;
 
+import java.util.ArrayList;
+
 /**
  * Tests for {@link ActivityEmbeddingAnimationRunner}.
  *
@@ -62,13 +64,13 @@ public class ActivityEmbeddingAnimationRunnerTests extends ActivityEmbeddingAnim
         final TransitionInfo.Change embeddingChange = createChange();
         embeddingChange.setFlags(FLAG_IN_TASK_WITH_EMBEDDED_ACTIVITY);
         info.addChange(embeddingChange);
-        doReturn(mAnimator).when(mAnimRunner).createAnimator(any(), any(), any(), any());
+        doReturn(mAnimator).when(mAnimRunner).createAnimator(any(), any(), any(), any(), any());
 
         mAnimRunner.startAnimation(mTransition, info, mStartTransaction, mFinishTransaction);
 
         final ArgumentCaptor<Runnable> finishCallback = ArgumentCaptor.forClass(Runnable.class);
         verify(mAnimRunner).createAnimator(eq(info), eq(mStartTransaction), eq(mFinishTransaction),
-                finishCallback.capture());
+                finishCallback.capture(), any());
         verify(mStartTransaction).apply();
         verify(mAnimator).start();
         verifyNoMoreInteractions(mFinishTransaction);
@@ -88,7 +90,8 @@ public class ActivityEmbeddingAnimationRunnerTests extends ActivityEmbeddingAnim
         info.addChange(embeddingChange);
         final Animator animator = mAnimRunner.createAnimator(
                 info, mStartTransaction, mFinishTransaction,
-                () -> mFinishCallback.onTransitionFinished(null /* wct */, null /* wctCB */));
+                () -> mFinishCallback.onTransitionFinished(null /* wct */, null /* wctCB */),
+                new ArrayList());
 
         // The animation should be empty when it is behind starting window.
         assertEquals(0, animator.getDuration());

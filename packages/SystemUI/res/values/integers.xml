@@ -28,4 +28,13 @@
 
     <!-- The time it takes for the over scroll release animation to complete, in milli seconds.  -->
     <integer name="lockscreen_shade_over_scroll_release_duration">0</integer>
+
+    <!-- Values for transition of QS Headers -->
+    <integer name="fade_out_complete_frame">14</integer>
+    <integer name="fade_in_start_frame">58</integer>
+    <!-- Percentage of displacement for items in QQS to guarantee matching with bottom of clock at
+         fade_out_complete_frame -->
+    <dimen name="percent_displacement_at_fade_out" format="float">0.1066</dimen>
+
+    <integer name="qs_carrier_max_em">7</integer>
 </resources>

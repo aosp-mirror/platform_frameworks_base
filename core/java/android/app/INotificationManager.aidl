@@ -159,6 +159,7 @@ interface INotificationManager
     void clearRequestedListenerHints(in INotificationListener token);
     void requestHintsFromListener(in INotificationListener token, int hints);
     int getHintsFromListener(in INotificationListener token);
+    int getHintsFromListenerNoToken();
     void requestInterruptionFilterFromListener(in INotificationListener token, int interruptionFilter);
     int getInterruptionFilterFromListener(in INotificationListener token);
     void setOnNotificationPostedTrimFromListener(in INotificationListener token, int trim);

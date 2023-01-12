@@ -117,17 +117,17 @@
     <string name="bluetooth_profile_opp" msgid="6692618568149493430">"Файл алмашуу"</string>
     <string name="bluetooth_profile_hid" msgid="2969922922664315866">"Киргизүү түзмөгү"</string>
     <string name="bluetooth_profile_pan" msgid="1006235139308318188">"Интернетке мүмкүнчүлүк алуу"</string>
-    <string name="bluetooth_profile_pbap" msgid="4262303387989406171">"Байланыштарды жана чалуу таржымалын бөлүшүү"</string>
-    <string name="bluetooth_profile_pbap_summary" msgid="6466456791354759132">"Байланыштарды жана чалуу таржымалын бөлүшүү үчүн колдонуу"</string>
+    <string name="bluetooth_profile_pbap" msgid="7064307749579335765">"Байланышты бөлүшүү"</string>
+    <string name="bluetooth_profile_pbap_summary" msgid="2955819694801952056">"Байланышты бөлүшүү үчүн колдонуу"</string>
     <string name="bluetooth_profile_pan_nap" msgid="7871974753822470050">"Интернет байланышын бөлүшүү"</string>
     <string name="bluetooth_profile_map" msgid="8907204701162107271">"SMS билдирүүлөрү"</string>
     <string name="bluetooth_profile_sap" msgid="8304170950447934386">"SIM картаны пайдалануу мүмкүнчүлүгү"</string>
     <string name="bluetooth_profile_a2dp_high_quality" msgid="4739440941324792775">"HD форматындагы аудио: <xliff:g id="CODEC_NAME">%1$s</xliff:g>"</string>
     <string name="bluetooth_profile_a2dp_high_quality_unknown_codec" msgid="2477639096903834374">"HD форматындагы аудио"</string>
     <string name="bluetooth_profile_hearing_aid" msgid="58154575573984914">"Угуу аппараттары"</string>
-    <string name="bluetooth_profile_le_audio" msgid="3237854988278539061">"LE аудио"</string>
+    <string name="bluetooth_profile_le_audio" msgid="5158149987518342036">"LE_AUDIO"</string>
     <string name="bluetooth_hearing_aid_profile_summary_connected" msgid="8191273236809964030">"Угуу аппараттарына туташып турат"</string>
-    <string name="bluetooth_le_audio_profile_summary_connected" msgid="6916226974453480650">"LE аудио менен туташты"</string>
+    <string name="bluetooth_le_audio_profile_summary_connected" msgid="3162538609379333442">"LE_AUDIO менен туташты"</string>
     <string name="bluetooth_a2dp_profile_summary_connected" msgid="7422607970115444153">"Медиа аудиого туташты"</string>
     <string name="bluetooth_headset_profile_summary_connected" msgid="2420981566026949688">"Телефон аудиосуна туташты"</string>
     <string name="bluetooth_opp_profile_summary_connected" msgid="2393521801478157362">"Файл өткөрүү серверине туташты"</string>
@@ -195,7 +195,7 @@
     <string name="tts_default_lang_summary" msgid="9042620014800063470">"Текстти окуй турган тилди тандоо"</string>
     <string name="tts_play_example_title" msgid="1599468547216481684">"Үлгүнү угуу"</string>
     <string name="tts_play_example_summary" msgid="634044730710636383">"Кепти синтездөөнүн кыскача көргөзмөсүн ойнотуу"</string>
-    <string name="tts_install_data_title" msgid="1829942496472751703">"Үнгө байланыштуу нерселерди орнотуу"</string>
+    <string name="tts_install_data_title" msgid="1829942496472751703">"Үн дайындарын орнотуу"</string>
     <string name="tts_install_data_summary" msgid="3608874324992243851">"Кеп синтезине керектүү үн дайындарын орнотуңуз"</string>
     <string name="tts_engine_security_warning" msgid="3372432853837988146">"Бул кепти синтездөө каражаты бардык айтыла турган текстти, анын ичинде сырсөздөр жана насыя карточкасынын номери сыяктуу жеке маалыматты, топтошу мүмкүн. Ал <xliff:g id="TTS_PLUGIN_ENGINE_NAME">%s</xliff:g> каражатынан алынат. Бул кепти синтездөө каражаты колдонулсунбу?"</string>
     <string name="tts_engine_network_required" msgid="8722087649733906851">"Бул тилде кеп синтезаторун иштетүү үчүн Интернетке туташуу керек."</string>
@@ -396,7 +396,7 @@
     <string name="overlay_display_devices_title" msgid="5411894622334469607">"Көмөкчү экрандардын эмуляциясы"</string>
     <string name="debug_applications_category" msgid="5394089406638954196">"Колдонмолор"</string>
     <string name="immediately_destroy_activities" msgid="1826287490705167403">"Аракеттер сакталбасын"</string>
-    <string name="immediately_destroy_activities_summary" msgid="6289590341144557614">"Колдонуучу чыгып кетери менен бардык аракеттер өчүп калат"</string>
+    <string name="immediately_destroy_activities_summary" msgid="6289590341144557614">"Колдонуучу чыгып кетери менен бардык аракеттер өчүрүлөт"</string>
     <string name="app_process_limit_title" msgid="8361367869453043007">"Фондогу процесстер чеги"</string>
     <string name="show_all_anrs" msgid="9160563836616468726">"Фондук режимдеги ANR"</string>
     <string name="show_all_anrs_summary" msgid="8562788834431971392">"Фондогу колдонмо жооп бербей жатат деп билдирип турат"</string>
@@ -408,7 +408,6 @@
     <string name="force_resizable_activities_summary" msgid="2490382056981583062">"Бир нече терезе режиминде өлчөмдү өзгөртүүгө уруксат берет (манифесттин маанилерине карабастан)"</string>
     <string name="enable_freeform_support" msgid="7599125687603914253">"Эркин формадагы терезелерди түзүүнү иштетүү"</string>
     <string name="enable_freeform_support_summary" msgid="1822862728719276331">"Эркин формадагы терезелерди түзүү боюнча сынамык функциясы иштетилет."</string>
-    <string name="desktop_mode" msgid="2389067840550544462">"Компьютер режими"</string>
     <string name="local_backup_password_title" msgid="4631017948933578709">"Камдык көчүрмөнүн сырсөзү"</string>
     <string name="local_backup_password_summary_none" msgid="7646898032616361714">"Толук камдык көчүрмөлөр учурда корголгон эмес"</string>
     <string name="local_backup_password_summary_change" msgid="1707357670383995567">"Иш тактасынын камдалган сырсөзүн өзгөртүү же алып салуу үчүн таптап коюңуз"</string>
@@ -477,13 +476,12 @@
     <string name="power_charging" msgid="6727132649743436802">"<xliff:g id="LEVEL">%1$s</xliff:g> - <xliff:g id="STATE">%2$s</xliff:g>"</string>
     <string name="power_remaining_charging_duration_only" msgid="8085099012811384899">"<xliff:g id="TIME">%1$s</xliff:g> кийин толук кубатталат"</string>
     <string name="power_charging_duration" msgid="6127154952524919719">"<xliff:g id="LEVEL">%1$s</xliff:g> – <xliff:g id="TIME">%2$s</xliff:g> кийин толук кубатталат"</string>
-    <string name="power_charging_limited" msgid="6971664137170239141">"<xliff:g id="LEVEL">%1$s</xliff:g> - Кубаттоо тындырылды"</string>
+    <string name="power_charging_limited" msgid="7956120998372505295">"<xliff:g id="LEVEL">%1$s</xliff:g> - Кубаттоо убактылуу чектелген"</string>
     <string name="battery_info_status_unknown" msgid="268625384868401114">"Белгисиз"</string>
     <string name="battery_info_status_charging" msgid="4279958015430387405">"Кубатталууда"</string>
     <string name="battery_info_status_charging_fast" msgid="8027559755902954885">"Ыкчам кубатталууда"</string>
     <string name="battery_info_status_charging_slow" msgid="3190803837168962319">"Жай кубатталууда"</string>
     <string name="battery_info_status_charging_wireless" msgid="8924722966861282197">"Зымсыз кубатталууда"</string>
-    <string name="battery_info_status_charging_dock" msgid="8573274094093364791">"Кубатталууда"</string>
     <string name="battery_info_status_discharging" msgid="6962689305413556485">"Кубат алган жок"</string>
     <string name="battery_info_status_not_charging" msgid="3371084153747234837">"Туташты, кубатталган жок"</string>
     <string name="battery_info_status_full" msgid="1339002294876531312">"Кубатталды"</string>
@@ -571,7 +569,7 @@
     <string name="user_add_user_item_title" msgid="2394272381086965029">"Колдонуучу"</string>
     <string name="user_add_profile_item_title" msgid="3111051717414643029">"Чектелген профайл"</string>
     <string name="user_add_user_title" msgid="5457079143694924885">"Жаңы колдонуучу кошосузбу?"</string>
-    <string name="user_add_user_message_long" msgid="1527434966294733380">"Эгер түзмөгүңүздү дагы бир адам колдонуп жаткан болсо, кошумча профилдерди түзүп коюңуз. Профилдин ээси аны өзү каалагандай тууралап, тушкагаздарды коюп, керектүү колдонмолорду орнотуп алат. Мындан тышкары, колдонуучулар түзмөктүн Wi‑Fi´ды өчүрүү/күйгүзүү сыяктуу жалпы параметрлерин өзгөртө алышат.\n\nПрофиль түзүлгөндөн кийин, аны тууралап алуу керек.\n\nЖалпы колдонмолорду баары жаңырта алат, бирок атайын мүмкүнчүлүктөр өз-өзүнчө жөндөлөт."</string>
+    <string name="user_add_user_message_long" msgid="1527434966294733380">"Эгер түзмөгүңүздү дагы бир адам колдонуп жаткан болсо, кошумча профилдерди түзүп коюңуз. Профилдин ээси аны өзү каалагандай жөндөп, тушкагаздарды коюп, керектүү колдонмолорду орнотуп алат. Мындан тышкары, колдонуучулар түзмөктүн Wi‑Fi´ды өчүрүү/күйгүзүү сыяктуу жалпы жөндөөлөрүн өзгөртө алат.\n\nПрофиль түзүлгөндөн кийин, аны жөндөп алуу керек.\n\nЖалпы колдонмолорду баары жаңырта алат, бирок атайын мүмкүнчүлүктөр өз-өзүнчө жөндөлөт."</string>
     <string name="user_add_user_message_short" msgid="3295959985795716166">"Жаңы колдонуучу кошулганда, ал өз мейкиндигин түзүп алышы керек.\n\nКолдонмолорду бир колдонуучу жаңыртканда, ал калган бардык колдонуучулар үчүн да жаңырат."</string>
     <string name="user_setup_dialog_title" msgid="8037342066381939995">"Профилди жөндөйсүзбү?"</string>
     <string name="user_setup_dialog_message" msgid="269931619868102841">"Өз мейкиндигин жөндөп алышы үчүн, түзмөктү колдонуучуга беришиңиз керек."</string>
@@ -600,21 +598,21 @@
     <string name="guest_reset_guest_confirm_button" msgid="2989915693215617237">"Баштапкы абалга келтирүү"</string>
     <string name="guest_remove_guest_confirm_button" msgid="7858123434954143879">"Өчүрүү"</string>
     <string name="guest_resetting" msgid="7822120170191509566">"Конок сеансы баштапкы абалга келтирилүүдө…"</string>
-    <string name="guest_reset_and_restart_dialog_title" msgid="3396657008451616041">"Конок сеансын баштапкы абалга келтиресизби?"</string>
-    <string name="guest_reset_and_restart_dialog_message" msgid="2764425635305200790">"Бул аракет жаңы конок сеансын баштап, учурдагы сеанстагы бардык колдонмолорду жана алардагы нерселерди жок кылат"</string>
+    <string name="guest_reset_and_restart_dialog_title" msgid="3396657008451616041">"Конок сеансы баштапкы абалга келтирилсинби?"</string>
+    <string name="guest_reset_and_restart_dialog_message" msgid="2764425635305200790">"Бул аракет жаңы конок сеансын баштап, учурдагы сеанстагы бардык колдонмолорду жана дайындарды жок кылат"</string>
     <string name="guest_exit_dialog_title" msgid="1846494656849381804">"Конок режиминен чыгасызбы?"</string>
-    <string name="guest_exit_dialog_message" msgid="1743218864242719783">"Учурдагы конок сеансындагы бардык колдонмолор менен алардагы нерселер өчүп калат"</string>
+    <string name="guest_exit_dialog_message" msgid="1743218864242719783">"Бул учурдагы конок сеансындагы колдонмолорду жана дайындарды жок кылат"</string>
     <string name="guest_exit_dialog_button" msgid="1736401897067442044">"Чыгуу"</string>
-    <string name="guest_exit_dialog_title_non_ephemeral" msgid="7675327443743162986">"Коноктун аракеттерин сактайсызбы?"</string>
-    <string name="guest_exit_dialog_message_non_ephemeral" msgid="223385323235719442">"Учурдагы сеанстагы аракеттерди сактап же бардык колдонмолорду жана алардагы нерселерди жок кылсаңыз болот"</string>
+    <string name="guest_exit_dialog_title_non_ephemeral" msgid="7675327443743162986">"Коноктун аракеттери сакталсынбы?"</string>
+    <string name="guest_exit_dialog_message_non_ephemeral" msgid="223385323235719442">"Учурдагы сеанстагы аракеттерди сактап же бардык колдонмолорду жана дайындарды жок кылсаңыз болот"</string>
     <string name="guest_exit_clear_data_button" msgid="3425812652180679014">"Өчүрүү"</string>
     <string name="guest_exit_save_data_button" msgid="3690974510644963547">"Сактоо"</string>
     <string name="guest_exit_button" msgid="5774985819191803960">"Конок режиминен чыгуу"</string>
     <string name="guest_reset_button" msgid="2515069346223503479">"Конок сеансын кайра коюу"</string>
     <string name="guest_exit_quick_settings_button" msgid="1912362095913765471">"Конок режиминен чыгуу"</string>
-    <string name="guest_notification_ephemeral" msgid="7263252466950923871">"Чыксаңыз, бардык аракеттер өчүп калат"</string>
+    <string name="guest_notification_ephemeral" msgid="7263252466950923871">"Чыксаңыз, бардык аракеттер өчүрүлөт"</string>
     <string name="guest_notification_non_ephemeral" msgid="6843799963012259330">"Чыгуудан мурун аракеттериңизди сактап же жок кылсаңыз болот"</string>
-    <string name="guest_notification_non_ephemeral_non_first_login" msgid="8009307983766934876">"Сеанстагы аракеттерди азыр өчүрсөңүз болот же чыгып баратып өчүрүп же сактап коюңуз"</string>
+    <string name="guest_notification_non_ephemeral_non_first_login" msgid="8009307983766934876">"Сеанстагы аракеттерди азыр жок кылуу үчүн баштапкы абалга келтириңиз, же болбосо чыгуу учурунда аракеттерди сактап же жок кылсаңыз болот"</string>
     <string name="user_image_take_photo" msgid="467512954561638530">"Сүрөткө тартуу"</string>
     <string name="user_image_choose_photo" msgid="1363820919146782908">"Сүрөт тандаңыз"</string>
     <string name="user_image_photo_selector" msgid="433658323306627093">"Сүрөт тандаңыз"</string>
@@ -656,6 +654,11 @@
     <string name="accessibility_ethernet_disconnected" msgid="2832501530856497489">"Ethernet ажырады."</string>
     <string name="accessibility_ethernet_connected" msgid="6175942685957461563">"Ethernet."</string>
     <string name="accessibility_no_calling" msgid="3540827068323895748">"Чалуу жок."</string>
+    <string name="dream_complication_title_time" msgid="701747800712893499">"Убакыт"</string>
+    <string name="dream_complication_title_date" msgid="8661176085446135789">"Күн"</string>
+    <string name="dream_complication_title_weather" msgid="598609151677172783">"Аба ырайы"</string>
+    <string name="dream_complication_title_aqi" msgid="4587552608957834110">"Абанын сапаты"</string>
+    <string name="dream_complication_title_cast_info" msgid="4038776652841885084">"Тышкы экранга чыгаруу маалыматы"</string>
     <string name="avatar_picker_title" msgid="8492884172713170652">"Профилдин сүрөтүн тандоо"</string>
     <string name="default_user_icon_description" msgid="6554047177298972638">"Демейки колдонуучунун сүрөтчөсү"</string>
     <string name="physical_keyboard_title" msgid="4811935435315835220">"Аппараттык баскычтоп"</string>
@@ -664,11 +667,11 @@
     <string name="turn_screen_on_title" msgid="3266937298097573424">"Экранды күйгүзүү"</string>
     <string name="allow_turn_screen_on" msgid="6194845766392742639">"Экранды күйгүзүүгө уруксат берүү"</string>
     <string name="allow_turn_screen_on_description" msgid="43834403291575164">"Колдонмого экранды күйгүзүүгө уруксат бериңиз. Уруксат берилсе, колдонмо экранды каалаган убакта сизден уруксат сурабастан күйгүзүшү мүмкүн."</string>
+    <string name="bt_le_audio_scan_qr_code" msgid="3521809854780392679">"QR кодун скандоо"</string>
+    <string name="bt_le_audio_scan_qr_code_scanner" msgid="4679500020630341107">"Угуп баштоо үчүн QR кодун борборго жайгаштырыңыз"</string>
+    <string name="bt_le_audio_qr_code_is_not_valid_format" msgid="6092191081849434734">"QR кодунун форматы жараксыз"</string>
     <string name="bt_le_audio_broadcast_dialog_title" msgid="5392738488989777074">"<xliff:g id="APP_NAME">%1$s</xliff:g> колдонмосунда кабарлоо токтотулсунбу?"</string>
     <string name="bt_le_audio_broadcast_dialog_sub_title" msgid="268234802198852753">"Эгер <xliff:g id="SWITCHAPP">%1$s</xliff:g> колдонмосунда кабарласаңыз же аудионун чыгуусун өзгөртсөңүз, учурдагы кабарлоо токтотулат"</string>
     <string name="bt_le_audio_broadcast_dialog_switch_app" msgid="5749813313369517812">"<xliff:g id="SWITCHAPP">%1$s</xliff:g> колдонмосунда кабарлоо"</string>
     <string name="bt_le_audio_broadcast_dialog_different_output" msgid="2638402023060391333">"Аудионун чыгуусун өзгөртүү"</string>
-    <string name="back_navigation_animation" msgid="8105467568421689484">"Божомолдонгон анимациялар"</string>
-    <string name="back_navigation_animation_summary" msgid="741292224121599456">"Божомолдоп билүү үчүн системанын анимацияларын иштетиңиз."</string>
-    <string name="back_navigation_animation_dialog" msgid="8696966520944625596">"Бул параметр жаңсоо анимациясын божомолдоп билүү үчүн системанын анимацияларын иштетет. Ал үчүн манифест файлындагы enableOnBackInvokedCallback параметри ар бир колдонмо үчүн \"true\" деп коюлушу керек."</string>
 </resources>

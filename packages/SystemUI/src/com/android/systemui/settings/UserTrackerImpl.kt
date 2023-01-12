@@ -108,6 +108,7 @@ class UserTrackerImpl internal constructor(
 
         val filter = IntentFilter().apply {
             addAction(Intent.ACTION_USER_SWITCHED)
+            addAction(Intent.ACTION_USER_INFO_CHANGED)
             // These get called when a managed profile goes in or out of quiet mode.
             addAction(Intent.ACTION_MANAGED_PROFILE_AVAILABLE)
             addAction(Intent.ACTION_MANAGED_PROFILE_UNAVAILABLE)
@@ -125,6 +126,7 @@ class UserTrackerImpl internal constructor(
             Intent.ACTION_USER_SWITCHED -> {
                 handleSwitchUser(intent.getIntExtra(Intent.EXTRA_USER_HANDLE, UserHandle.USER_NULL))
             }
+            Intent.ACTION_USER_INFO_CHANGED,
             Intent.ACTION_MANAGED_PROFILE_AVAILABLE,
             Intent.ACTION_MANAGED_PROFILE_UNAVAILABLE,
             Intent.ACTION_MANAGED_PROFILE_REMOVED,

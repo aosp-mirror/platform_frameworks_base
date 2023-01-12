@@ -26,11 +26,11 @@
     <string name="keyguard_sim_error_message_short" msgid="633630844240494070">"Yanlış Kart."</string>
     <string name="keyguard_charged" msgid="5478247181205188995">"Enerji yığılıb"</string>
     <string name="keyguard_plugged_in_wireless" msgid="2537874724955057383">"<xliff:g id="PERCENTAGE">%s</xliff:g> • Simsiz şəkildə batareya yığır"</string>
-    <string name="keyguard_plugged_in_dock" msgid="2122073051904360987">"<xliff:g id="PERCENTAGE">%s</xliff:g> • Şarj edilir"</string>
+    <string name="keyguard_plugged_in_dock" msgid="449722738270908674">"<xliff:g id="PERCENTAGE">%s</xliff:g> • Şarj Doku"</string>
     <string name="keyguard_plugged_in" msgid="8169926454348380863">"<xliff:g id="PERCENTAGE">%s</xliff:g> • Enerji yığır"</string>
     <string name="keyguard_plugged_in_charging_fast" msgid="4386594091107340426">"<xliff:g id="PERCENTAGE">%s</xliff:g> • Sürətlə enerji yığır"</string>
     <string name="keyguard_plugged_in_charging_slowly" msgid="217655355424210">"<xliff:g id="PERCENTAGE">%s</xliff:g> • Yavaş enerji yığır"</string>
-    <string name="keyguard_plugged_in_charging_limited" msgid="1709413803451065875">"<xliff:g id="PERCENTAGE">%s</xliff:g> • Batareyanı qorumaq üçün şarj durdurulub"</string>
+    <string name="keyguard_plugged_in_charging_limited" msgid="6091488837901216962">"<xliff:g id="PERCENTAGE">%s</xliff:g> • Şarj müvəqqəti məhdudlaşdırılıb"</string>
     <string name="keyguard_instructions_when_pattern_disabled" msgid="8448804180089936954">"Kilidi açmaq üçün Menyu düyməsinə basın."</string>
     <string name="keyguard_network_locked_message" msgid="407096292844868608">"Şəbəkə kilidlidir"</string>
     <string name="keyguard_missing_sim_message_short" msgid="704159478161444907">"SIM kart yoxdur."</string>
@@ -68,9 +68,15 @@
     <string name="kg_too_many_failed_password_attempts_dialog_message" msgid="190984061975729494">"Parolu <xliff:g id="NUMBER_0">%1$d</xliff:g> dəfə yanlış daxil etdiniz. \n\n<xliff:g id="NUMBER_1">%2$d</xliff:g> saniyə sonra yenidən cəhd edin."</string>
     <string name="kg_too_many_failed_pattern_attempts_dialog_message" msgid="4252405904570284368">"Kilid modelini <xliff:g id="NUMBER_0">%1$d</xliff:g> dəfə yanlış çəkdiniz. \n\n<xliff:g id="NUMBER_1">%2$d</xliff:g> saniyə sonra yenidən cəhd edin."</string>
     <string name="kg_password_wrong_pin_code_pukked" msgid="8047350661459040581">"Yanlış SIM PIN kodu  cihazın açılması üçün operatorla indi əlaqə saxlamalısınız."</string>
-    <string name="kg_password_wrong_pin_code" msgid="5629415765976820357">"{count,plural, =1{Yanlış SIM PIN kodu, # cəhdiniz qalıb, sonra cihazı kiliddən çıxarmaq üçün operatorla əlaqə saxlamalı olacaqsınız.}other{Yanlış SIM PIN kodu, # cəhdiniz qalıb. }}"</string>
+    <plurals name="kg_password_wrong_pin_code" formatted="false" msgid="7030584350995485026">
+      <item quantity="other">Yanlış SIM PIN kodu, <xliff:g id="NUMBER_1">%d</xliff:g> cəhdiniz qalır.</item>
+      <item quantity="one">Yanlış SIM PIN kodu, <xliff:g id="NUMBER_0">%d</xliff:g> cəhddən sonra cihazı kiliddən çıxarmaq üçün operatorla əlaqə saxlamalısınız.</item>
+    </plurals>
     <string name="kg_password_wrong_puk_code_dead" msgid="3698285357028468617">"SIM yararsızdır. Operatorla əlaqə saxlayın."</string>
-    <string name="kg_password_wrong_puk_code" msgid="6820515467645087827">"{count,plural, =1{Yanlış SIM PUK kodu, # cəhdiniz qalıb, sonra SIM kart həmişəlik yararsız olacaq.}other{Yanlış SIM PUK kodu, # cəhdiniz qalıb, sonra SIM kart həmişəlik yararsız olacaq.}}"</string>
+    <plurals name="kg_password_wrong_puk_code" formatted="false" msgid="3937306685604862886">
+      <item quantity="other">Yanlış SIM PUK kodu,<xliff:g id="NUMBER_1">%d</xliff:g> cəhddən sonra SIM kart həmişəlik yararsız olacaq.</item>
+      <item quantity="one">Yanlış SIM PUK kodu, <xliff:g id="NUMBER_0">%d</xliff:g> cəhddən sonra SIM kart həmişəlik yararsız olacaq.</item>
+    </plurals>
     <string name="kg_password_pin_failed" msgid="5136259126330604009">"SIM PIN əməliyyatı alınmadı!"</string>
     <string name="kg_password_puk_failed" msgid="6778867411556937118">"SIM PUK əməliyyatı alınmadı!"</string>
     <string name="accessibility_ime_switch_button" msgid="9082358310194861329">"Daxiletmə metoduna keçin"</string>
@@ -84,9 +90,15 @@
     <string name="kg_prompt_reason_device_admin" msgid="6961159596224055685">"Cihaz admin tərəfindən kilidlənib"</string>
     <string name="kg_prompt_reason_user_request" msgid="6015774877733717904">"Cihaz əl ilə kilidləndi"</string>
     <string name="kg_face_not_recognized" msgid="7903950626744419160">"Tanınmır"</string>
-    <string name="kg_face_sensor_privacy_enabled" msgid="939511161763558512">"Üz ilə Kiliddən Açmanı istifadə etmək üçün Ayarlarda kameraya girişi aktiv edin"</string>
-    <string name="kg_password_default_pin_message" msgid="1434544655827987873">"{count,plural, =1{SIM PIN kodunu daxil edin. # cəhdiniz qalıb, sonra cihazınızı kiliddən çıxarmaq üçün operatorunuzla əlaqə saxlamalı olacaqsınız.}other{SIM PIN kodunu daxil edin. # cəhdiniz qalıb.}}"</string>
-    <string name="kg_password_default_puk_message" msgid="1025139786449741950">"{count,plural, =1{SIM indi deaktivdir. Davam etmək üçün PUK kodunu daxil edin. # cəhdiniz qalıb, sonra SIM birdəfəlik yararsız olacaq. Ətraflı məlumat üçün operatorla əlaqə saxlayın.}other{SIM indi deaktivdir. Davam etmək üçün PUK kodunu daxil edin. # cəhdiniz qalıb, sonra SIM birdəfəlik yararsız olacaq. Ətraflı məlumat üçün operatorla əlaqə saxlayın.}}"</string>
+    <string name="kg_face_sensor_privacy_enabled" msgid="6513157891227284806">"Üz ilə Kiliddən Açma funksiyasını istifadə etmək üçün Ayarlar &gt; Məxfilik bölməsində "<b>"Kameraya girişi"</b>" aktiv edin"</string>
+    <plurals name="kg_password_default_pin_message" formatted="false" msgid="7730152526369857818">
+      <item quantity="other">SIM PIN-ni daxil edin. <xliff:g id="NUMBER_1">%d</xliff:g> cəhdiniz qalır.</item>
+      <item quantity="one">SIM PIN-ni daxil edin. Cihazınızı kiliddən çıxarmaq üçün operatorunuzla əlaqə saxlamadan öncə <xliff:g id="NUMBER_0">%d</xliff:g> cəhdiniz qalır.</item>
+    </plurals>
+    <plurals name="kg_password_default_puk_message" formatted="false" msgid="571308542462946935">
+      <item quantity="other">SIM indi deaktivdir. Davam etmək üçün PUK kodunu daxil edin. SIM birdəfəlik yararsız olmadan öncə <xliff:g id="_NUMBER_1">%d</xliff:g> cəhdiniz qalır. Ətraflı məlumat üçün operatorla əlaqə saxlayın.</item>
+      <item quantity="one">SIM indi deaktivdir. Davam etmək üçün PUK kodunu daxil edin. SIM birdəfəlik yararsız olmadan öncə <xliff:g id="_NUMBER_0">%d</xliff:g> cəhdiniz qalır. Ətraflı məlumat üçün operatorla əlaqə saxlayın.</item>
+    </plurals>
     <string name="clock_title_default" msgid="6342735240617459864">"Defolt"</string>
     <string name="clock_title_bubble" msgid="2204559396790593213">"Qabarcıq"</string>
     <string name="clock_title_analog" msgid="8409262532900918273">"Analoq"</string>

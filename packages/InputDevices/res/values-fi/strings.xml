@@ -3,7 +3,7 @@
     xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
     <string name="app_label" msgid="8016145283189546017">"Syöttölaitteet"</string>
     <string name="keyboard_layouts_label" msgid="6688773268302087545">"Android-näppäimistö"</string>
-    <string name="keyboard_layout_english_uk_label" msgid="6664258463319999632">"englanti (Yhdistynyt kuningaskunta)"</string>
+    <string name="keyboard_layout_english_uk_label" msgid="6664258463319999632">"englanti (Iso-Britannia)"</string>
     <string name="keyboard_layout_english_us_label" msgid="8994890249649106291">"englanti (Yhdysvallat)"</string>
     <string name="keyboard_layout_english_us_intl" msgid="3705168594034233583">"englanti (Yhdysvallat), kansainvälinen"</string>
     <string name="keyboard_layout_english_us_colemak_label" msgid="4194969610343455380">"englanti (Yhdysvallat), Colemak"</string>

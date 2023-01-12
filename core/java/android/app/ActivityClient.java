@@ -58,6 +58,15 @@ public class ActivityClient {
         }
     }
 
+    /** Reports {@link android.app.servertransaction.RefreshCallbackItem} is executed. */
+    public void activityRefreshed(IBinder token) {
+        try {
+            getActivityClientController().activityRefreshed(token);
+        } catch (RemoteException e) {
+            e.rethrowFromSystemServer();
+        }
+    }
+
     /**
      * Reports after {@link Activity#onTopResumedActivityChanged(boolean)} is called for losing the
      * top most position.
@@ -141,11 +150,11 @@ public class ActivityClient {
         }
     }
 
-    boolean navigateUpTo(IBinder token, Intent destIntent, int resultCode,
+    boolean navigateUpTo(IBinder token, Intent destIntent, String resolvedType, int resultCode,
             Intent resultData) {
         try {
-            return getActivityClientController().navigateUpTo(token, destIntent, resultCode,
-                    resultData);
+            return getActivityClientController().navigateUpTo(token, destIntent, resolvedType,
+                    resultCode, resultData);
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }
@@ -227,12 +236,13 @@ public class ActivityClient {
     }
 
     /**
-     * Returns the windowing mode of the task that hosts the activity, or {@code -1} if task is not
-     * found.
+     * Returns the {@link Configuration} of the task which hosts the Activity, or {@code null} if
+     * the task {@link Configuration} cannot be obtained.
      */
-    public int getTaskWindowingMode(IBinder activityToken) {
+    @Nullable
+    public Configuration getTaskConfiguration(IBinder activityToken) {
         try {
-            return getActivityClientController().getTaskWindowingMode(activityToken);
+            return getActivityClientController().getTaskConfiguration(activityToken);
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }
@@ -525,9 +535,9 @@ public class ActivityClient {
         }
     }
 
-    void onBackPressedOnTaskRoot(IBinder token, IRequestFinishCallback callback) {
+    void onBackPressed(IBinder token, IRequestFinishCallback callback) {
         try {
-            getActivityClientController().onBackPressedOnTaskRoot(token, callback);
+            getActivityClientController().onBackPressed(token, callback);
         } catch (RemoteException e) {
             e.rethrowFromSystemServer();
         }

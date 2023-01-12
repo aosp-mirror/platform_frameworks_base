@@ -21,13 +21,14 @@ import android.animation.AnimatorListenerAdapter
 import android.animation.ObjectAnimator
 import android.app.Activity
 import android.app.ActivityOptions
+import android.app.PendingIntent
 import android.content.ComponentName
 import android.content.Context
 import android.content.Intent
-import android.content.SharedPreferences
 import android.graphics.drawable.Drawable
 import android.graphics.drawable.LayerDrawable
 import android.service.controls.Control
+import android.service.controls.ControlsProviderService
 import android.util.Log
 import android.view.ContextThemeWrapper
 import android.view.LayoutInflater
@@ -37,18 +38,23 @@ import android.view.animation.AccelerateInterpolator
 import android.view.animation.DecelerateInterpolator
 import android.widget.AdapterView
 import android.widget.ArrayAdapter
+import android.widget.FrameLayout
 import android.widget.ImageView
 import android.widget.LinearLayout
 import android.widget.ListPopupWindow
 import android.widget.Space
 import android.widget.TextView
+import androidx.annotation.VisibleForTesting
+import com.android.systemui.Dumpable
 import com.android.systemui.R
 import com.android.systemui.controls.ControlsMetricsLogger
 import com.android.systemui.controls.ControlsServiceInfo
+import com.android.systemui.controls.settings.ControlsSettingsRepository
 import com.android.systemui.controls.CustomIconCache
-import com.android.systemui.controls.controller.ControlInfo
 import com.android.systemui.controls.controller.ControlsController
 import com.android.systemui.controls.controller.StructureInfo
+import com.android.systemui.controls.controller.StructureInfo.Companion.EMPTY_COMPONENT
+import com.android.systemui.controls.controller.StructureInfo.Companion.EMPTY_STRUCTURE
 import com.android.systemui.controls.management.ControlAdapter
 import com.android.systemui.controls.management.ControlsEditingActivity
 import com.android.systemui.controls.management.ControlsFavoritingActivity
@@ -57,13 +63,21 @@ import com.android.systemui.controls.management.ControlsProviderSelectorActivity
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.dagger.qualifiers.Background
 import com.android.systemui.dagger.qualifiers.Main
+import com.android.systemui.dump.DumpManager
 import com.android.systemui.globalactions.GlobalActionsPopupMenu
 import com.android.systemui.plugins.ActivityStarter
-import com.android.systemui.shade.ShadeController
+import com.android.systemui.settings.UserFileManager
+import com.android.systemui.settings.UserTracker
+import com.android.systemui.statusbar.policy.DeviceControlsControllerImpl
 import com.android.systemui.statusbar.policy.KeyguardStateController
+import com.android.systemui.util.asIndenting
 import com.android.systemui.util.concurrency.DelayableExecutor
+import com.android.systemui.util.indentIfPossible
+import com.android.wm.shell.TaskViewFactory
 import dagger.Lazy
+import java.io.PrintWriter
 import java.text.Collator
+import java.util.Optional
 import java.util.function.Consumer
 import javax.inject.Inject
 
@@ -76,40 +90,45 @@ class ControlsUiControllerImpl @Inject constructor (
         @Main val uiExecutor: DelayableExecutor,
         @Background val bgExecutor: DelayableExecutor,
         val controlsListingController: Lazy<ControlsListingController>,
-        @Main val sharedPreferences: SharedPreferences,
         val controlActionCoordinator: ControlActionCoordinator,
         private val activityStarter: ActivityStarter,
-        private val shadeController: ShadeController,
         private val iconCache: CustomIconCache,
         private val controlsMetricsLogger: ControlsMetricsLogger,
-        private val keyguardStateController: KeyguardStateController
-) : ControlsUiController {
+        private val keyguardStateController: KeyguardStateController,
+        private val userFileManager: UserFileManager,
+        private val userTracker: UserTracker,
+        private val taskViewFactory: Optional<TaskViewFactory>,
+        private val controlsSettingsRepository: ControlsSettingsRepository,
+        dumpManager: DumpManager
+) : ControlsUiController, Dumpable {
 
     companion object {
         private const val PREF_COMPONENT = "controls_component"
-        private const val PREF_STRUCTURE = "controls_structure"
+        private const val PREF_STRUCTURE_OR_APP_NAME = "controls_structure"
+        private const val PREF_IS_PANEL = "controls_is_panel"
 
         private const val FADE_IN_MILLIS = 200L
-
-        private val EMPTY_COMPONENT = ComponentName("", "")
-        private val EMPTY_STRUCTURE = StructureInfo(
-            EMPTY_COMPONENT,
-            "",
-            mutableListOf<ControlInfo>()
-        )
     }
 
-    private var selectedStructure: StructureInfo = EMPTY_STRUCTURE
+    private var selectedItem: SelectedItem = SelectedItem.EMPTY_SELECTION
     private lateinit var allStructures: List<StructureInfo>
     private val controlsById = mutableMapOf<ControlKey, ControlWithState>()
     private val controlViewsById = mutableMapOf<ControlKey, ControlViewHolder>()
     private lateinit var parent: ViewGroup
-    private lateinit var lastItems: List<SelectionItem>
     private var popup: ListPopupWindow? = null
     private var hidden = true
     private lateinit var onDismiss: Runnable
     private val popupThemedContext = ContextThemeWrapper(context, R.style.Control_ListPopupWindow)
     private var retainCache = false
+    private var lastSelections = emptyList<SelectionItem>()
+    private val sharedPreferences
+        get() = userFileManager.getSharedPreferences(
+            fileName = DeviceControlsControllerImpl.PREFS_CONTROLS_FILE,
+            mode = 0,
+            userId = userTracker.userId
+        )
+
+    private var taskViewController: PanelTaskViewController? = null
 
     private val collator = Collator.getInstance(context.resources.configuration.locales[0])
     private val localeComparator = compareBy<SelectionItem, CharSequence>(collator) {
@@ -119,16 +138,22 @@ class ControlsUiControllerImpl @Inject constructor (
     private val onSeedingComplete = Consumer<Boolean> {
         accepted ->
             if (accepted) {
-                selectedStructure = controlsController.get().getFavorites().maxByOrNull {
+                selectedItem = controlsController.get().getFavorites().maxByOrNull {
                     it.controls.size
-                } ?: EMPTY_STRUCTURE
-                updatePreferences(selectedStructure)
+                }?.let {
+                    SelectedItem.StructureItem(it)
+                } ?: SelectedItem.EMPTY_SELECTION
+                updatePreferences(selectedItem)
             }
             reload(parent)
     }
 
     private lateinit var activityContext: Context
     private lateinit var listingCallback: ControlsListingController.ControlsListingCallback
+
+    init {
+        dumpManager.registerDumpable(javaClass.name, this)
+    }
 
     private fun createCallback(
         onResult: (List<SelectionItem>) -> Unit
@@ -137,7 +162,15 @@ class ControlsUiControllerImpl @Inject constructor (
             override fun onServicesUpdated(serviceInfos: List<ControlsServiceInfo>) {
                 val lastItems = serviceInfos.map {
                     val uid = it.serviceInfo.applicationInfo.uid
-                    SelectionItem(it.loadLabel(), "", it.loadIcon(), it.componentName, uid)
+
+                    SelectionItem(
+                            it.loadLabel(),
+                            "",
+                            it.loadIcon(),
+                            it.componentName,
+                            uid,
+                            it.panelActivity
+                    )
                 }
                 uiExecutor.execute {
                     parent.removeAllViews()
@@ -151,11 +184,13 @@ class ControlsUiControllerImpl @Inject constructor (
 
     override fun resolveActivity(): Class<*> {
         val allStructures = controlsController.get().getFavorites()
-        val selectedStructure = getPreferredStructure(allStructures)
+        val selected = getPreferredSelectedItem(allStructures)
+        val anyPanels = controlsListingController.get().getCurrentServices()
+                .any { it.panelActivity != null }
 
         return if (controlsController.get().addSeedingFavoritesCallback(onSeedingComplete)) {
             ControlsActivity::class.java
-        } else if (selectedStructure.controls.isEmpty() && allStructures.size <= 1) {
+        } else if (!selected.hasControls && allStructures.size <= 1 && !anyPanels) {
             ControlsProviderSelectorActivity::class.java
         } else {
             ControlsActivity::class.java
@@ -177,24 +212,40 @@ class ControlsUiControllerImpl @Inject constructor (
         controlActionCoordinator.activityContext = activityContext
 
         allStructures = controlsController.get().getFavorites()
-        selectedStructure = getPreferredStructure(allStructures)
+        selectedItem = getPreferredSelectedItem(allStructures)
 
         if (controlsController.get().addSeedingFavoritesCallback(onSeedingComplete)) {
             listingCallback = createCallback(::showSeedingView)
-        } else if (selectedStructure.controls.isEmpty() && allStructures.size <= 1) {
+        } else if (
+                selectedItem !is SelectedItem.PanelItem &&
+                !selectedItem.hasControls &&
+                allStructures.size <= 1
+        ) {
             // only show initial view if there are really no favorites across any structure
-            listingCallback = createCallback(::showInitialSetupView)
+            listingCallback = createCallback(::initialView)
         } else {
-            selectedStructure.controls.map {
-                ControlWithState(selectedStructure.componentName, it, null)
-            }.associateByTo(controlsById) {
-                ControlKey(selectedStructure.componentName, it.ci.controlId)
+            val selected = selectedItem
+            if (selected is SelectedItem.StructureItem) {
+                selected.structure.controls.map {
+                    ControlWithState(selected.structure.componentName, it, null)
+                }.associateByTo(controlsById) {
+                    ControlKey(selected.structure.componentName, it.ci.controlId)
+                }
+                controlsController.get().subscribeToFavorites(selected.structure)
             }
             listingCallback = createCallback(::showControlsView)
-            controlsController.get().subscribeToFavorites(selectedStructure)
         }
 
         controlsListingController.get().addCallback(listingCallback)
+    }
+
+    private fun initialView(items: List<SelectionItem>) {
+        if (items.any { it.isPanel }) {
+            // We have at least a panel, so we'll end up showing that.
+            showControlsView(items)
+        } else {
+            showInitialSetupView(items)
+        }
     }
 
     private fun reload(parent: ViewGroup) {
@@ -202,6 +253,8 @@ class ControlsUiControllerImpl @Inject constructor (
 
         controlsListingController.get().removeCallback(listingCallback)
         controlsController.get().unsubscribe()
+        taskViewController?.dismiss()
+        taskViewController = null
 
         val fadeAnim = ObjectAnimator.ofFloat(parent, "alpha", 1.0f, 0.0f)
         fadeAnim.setInterpolator(AccelerateInterpolator(1.0f))
@@ -281,27 +334,98 @@ class ControlsUiControllerImpl @Inject constructor (
     private fun showControlsView(items: List<SelectionItem>) {
         controlViewsById.clear()
 
-        val itemsByComponent = items.associateBy { it.componentName }
-        val itemsWithStructure = mutableListOf<SelectionItem>()
-        allStructures.mapNotNullTo(itemsWithStructure) {
+        val (panels, structures) = items.partition { it.isPanel }
+        val panelComponents = panels.map { it.componentName }.toSet()
+
+        val itemsByComponent = structures.associateBy { it.componentName }
+                .filterNot { it.key in panelComponents }
+        val panelsAndStructures = mutableListOf<SelectionItem>()
+        allStructures.mapNotNullTo(panelsAndStructures) {
             itemsByComponent.get(it.componentName)?.copy(structure = it.structure)
         }
-        itemsWithStructure.sortWith(localeComparator)
+        panelsAndStructures.addAll(panels)
 
-        val selectionItem = findSelectionItem(selectedStructure, itemsWithStructure) ?: items[0]
+        panelsAndStructures.sortWith(localeComparator)
 
-        controlsMetricsLogger.refreshBegin(selectionItem.uid, !keyguardStateController.isUnlocked())
+        lastSelections = panelsAndStructures
 
-        createListView(selectionItem)
-        createDropDown(itemsWithStructure, selectionItem)
+        val selectionItem = findSelectionItem(selectedItem, panelsAndStructures)
+                ?: if (panels.isNotEmpty()) {
+                    // If we couldn't find a good selected item, but there's at least one panel,
+                    // show a panel.
+                    panels[0]
+                } else {
+                    items[0]
+                }
+        maybeUpdateSelectedItem(selectionItem)
+
+        createControlsSpaceFrame()
+
+        if (taskViewFactory.isPresent && selectionItem.isPanel) {
+            createPanelView(selectionItem.panelComponentName!!)
+        } else if (!selectionItem.isPanel) {
+            controlsMetricsLogger
+                    .refreshBegin(selectionItem.uid, !keyguardStateController.isUnlocked())
+            createListView(selectionItem)
+        } else {
+            Log.w(ControlsUiController.TAG, "Not TaskViewFactory to display panel $selectionItem")
+        }
+
+        createDropDown(panelsAndStructures, selectionItem)
         createMenu()
     }
 
-    private fun createMenu() {
-        val items = arrayOf(
-            context.resources.getString(R.string.controls_menu_add),
-            context.resources.getString(R.string.controls_menu_edit)
+    private fun createPanelView(componentName: ComponentName) {
+        val setting = controlsSettingsRepository
+                .allowActionOnTrivialControlsInLockscreen.value
+        val pendingIntent = PendingIntent.getActivityAsUser(
+                context,
+                0,
+                Intent()
+                        .setComponent(componentName)
+                        .putExtra(
+                                ControlsProviderService.EXTRA_LOCKSCREEN_ALLOW_TRIVIAL_CONTROLS,
+                                setting
+                        ),
+                PendingIntent.FLAG_IMMUTABLE or PendingIntent.FLAG_UPDATE_CURRENT,
+                null,
+                userTracker.userHandle
         )
+
+        parent.requireViewById<View>(R.id.controls_scroll_view).visibility = View.GONE
+        val container = parent.requireViewById<FrameLayout>(R.id.controls_panel)
+        container.visibility = View.VISIBLE
+        container.post {
+            taskViewFactory.get().create(activityContext, uiExecutor) { taskView ->
+                taskViewController = PanelTaskViewController(
+                        activityContext,
+                        uiExecutor,
+                        pendingIntent,
+                        taskView,
+                        onDismiss::run
+                ).also {
+                    container.addView(taskView)
+                    it.launchTaskView()
+                }
+            }
+        }
+    }
+
+    private fun createMenu() {
+        val isPanel = selectedItem is SelectedItem.PanelItem
+        val selectedStructure = (selectedItem as? SelectedItem.StructureItem)?.structure
+                ?: EMPTY_STRUCTURE
+
+        val items = if (isPanel) {
+            arrayOf(
+                    context.resources.getString(R.string.controls_menu_add),
+            )
+        } else {
+            arrayOf(
+                    context.resources.getString(R.string.controls_menu_add),
+                    context.resources.getString(R.string.controls_menu_edit)
+            )
+        }
         var adapter = ArrayAdapter<String>(context, R.layout.controls_more_item, items)
 
         val anchor = parent.requireViewById<ImageView>(R.id.controls_more)
@@ -322,7 +446,13 @@ class ControlsUiControllerImpl @Inject constructor (
                         ) {
                             when (pos) {
                                 // 0: Add Control
-                                0 -> startFavoritingActivity(selectedStructure)
+                                0 -> {
+                                    if (isPanel) {
+                                        startProviderSelectorActivity()
+                                    } else {
+                                        startFavoritingActivity(selectedStructure)
+                                    }
+                                }
                                 // 1: Edit controls
                                 1 -> startEditingActivity(selectedStructure)
                             }
@@ -344,6 +474,9 @@ class ControlsUiControllerImpl @Inject constructor (
             addAll(items)
         }
 
+        val iconSize = context.resources
+                .getDimensionPixelSize(R.dimen.controls_header_app_icon_size)
+
         /*
          * Default spinner widget does not work with the window type required
          * for this dialog. Use a textView with the ListPopupWindow to achieve
@@ -354,14 +487,21 @@ class ControlsUiControllerImpl @Inject constructor (
             // override the default color on the dropdown drawable
             (getBackground() as LayerDrawable).getDrawable(0)
                 .setTint(context.resources.getColor(R.color.control_spinner_dropdown, null))
-        }
-
-        if (items.size == 1) {
-            spinner.setBackground(null)
-            return
+            selected.icon.setBounds(0, 0, iconSize, iconSize)
+            compoundDrawablePadding = (iconSize / 2.4f).toInt()
+            setCompoundDrawablesRelative(selected.icon, null, null, null)
         }
 
         val anchor = parent.requireViewById<ViewGroup>(R.id.controls_header)
+        if (items.size == 1) {
+            spinner.setBackground(null)
+            anchor.setOnClickListener(null)
+            return
+        } else {
+            spinner.background = parent.context.resources
+                    .getDrawable(R.drawable.control_spinner_background)
+        }
+
         anchor.setOnClickListener(object : View.OnClickListener {
             override fun onClick(v: View) {
                 popup = GlobalActionsPopupMenu(
@@ -389,14 +529,20 @@ class ControlsUiControllerImpl @Inject constructor (
         })
     }
 
-    private fun createListView(selected: SelectionItem) {
-        val inflater = LayoutInflater.from(context)
+    private fun createControlsSpaceFrame() {
+        val inflater = LayoutInflater.from(activityContext)
         inflater.inflate(R.layout.controls_with_favorites, parent, true)
 
         parent.requireViewById<ImageView>(R.id.controls_close).apply {
             setOnClickListener { _: View -> onDismiss.run() }
             visibility = View.VISIBLE
         }
+    }
+
+    private fun createListView(selected: SelectionItem) {
+        if (selectedItem !is SelectedItem.StructureItem) return
+        val selectedStructure = (selectedItem as SelectedItem.StructureItem).structure
+        val inflater = LayoutInflater.from(activityContext)
 
         val maxColumns = ControlAdapter.findMaxColumns(activityContext.resources)
 
@@ -444,35 +590,51 @@ class ControlsUiControllerImpl @Inject constructor (
         }
     }
 
-    override fun getPreferredStructure(structures: List<StructureInfo>): StructureInfo {
-        if (structures.isEmpty()) return EMPTY_STRUCTURE
+    override fun getPreferredSelectedItem(structures: List<StructureInfo>): SelectedItem {
+        val sp = sharedPreferences
 
-        val component = sharedPreferences.getString(PREF_COMPONENT, null)?.let {
+        val component = sp.getString(PREF_COMPONENT, null)?.let {
             ComponentName.unflattenFromString(it)
         } ?: EMPTY_COMPONENT
-        val structure = sharedPreferences.getString(PREF_STRUCTURE, "")
-
-        return structures.firstOrNull {
-            component == it.componentName && structure == it.structure
-        } ?: structures.get(0)
+        val name = sp.getString(PREF_STRUCTURE_OR_APP_NAME, "")!!
+        val isPanel = sp.getBoolean(PREF_IS_PANEL, false)
+        return if (isPanel) {
+            SelectedItem.PanelItem(name, component)
+        } else {
+            if (structures.isEmpty()) return SelectedItem.EMPTY_SELECTION
+            SelectedItem.StructureItem(structures.firstOrNull {
+                component == it.componentName && name == it.structure
+            } ?: structures.get(0))
+        }
     }
 
-    private fun updatePreferences(si: StructureInfo) {
-        if (si == EMPTY_STRUCTURE) return
+    private fun updatePreferences(si: SelectedItem) {
         sharedPreferences.edit()
-            .putString(PREF_COMPONENT, si.componentName.flattenToString())
-            .putString(PREF_STRUCTURE, si.structure.toString())
-            .commit()
+                .putString(PREF_COMPONENT, si.componentName.flattenToString())
+                .putString(PREF_STRUCTURE_OR_APP_NAME, si.name.toString())
+                .putBoolean(PREF_IS_PANEL, si is SelectedItem.PanelItem)
+                .commit()
+    }
+
+    private fun maybeUpdateSelectedItem(item: SelectionItem): Boolean {
+        val newSelection = if (item.isPanel) {
+            SelectedItem.PanelItem(item.appName, item.componentName)
+        } else {
+            SelectedItem.StructureItem(allStructures.firstOrNull {
+                it.structure == item.structure && it.componentName == item.componentName
+            } ?: EMPTY_STRUCTURE)
+        }
+        return if (newSelection != selectedItem ) {
+            selectedItem = newSelection
+            updatePreferences(selectedItem)
+            true
+        } else {
+            false
+        }
     }
 
     private fun switchAppOrStructure(item: SelectionItem) {
-        val newSelection = allStructures.first {
-            it.structure == item.structure && it.componentName == item.componentName
-        }
-
-        if (newSelection != selectedStructure) {
-            selectedStructure = newSelection
-            updatePreferences(selectedStructure)
+        if (maybeUpdateSelectedItem(item)) {
             reload(parent)
         }
     }
@@ -496,6 +658,8 @@ class ControlsUiControllerImpl @Inject constructor (
 
         closeDialogs(true)
         controlsController.get().unsubscribe()
+        taskViewController?.dismiss()
+        taskViewController = null
 
         parent.removeAllViews()
         controlsById.clear()
@@ -536,20 +700,48 @@ class ControlsUiControllerImpl @Inject constructor (
         return row
     }
 
-    private fun findSelectionItem(si: StructureInfo, items: List<SelectionItem>): SelectionItem? =
-        items.firstOrNull {
-            it.componentName == si.componentName && it.structure == si.structure
+    private fun findSelectionItem(si: SelectedItem, items: List<SelectionItem>): SelectionItem? =
+        items.firstOrNull { it.matches(si) }
+
+    override fun dump(pw: PrintWriter, args: Array<out String>) {
+        pw.println("ControlsUiControllerImpl:")
+        pw.asIndenting().indentIfPossible {
+            println("hidden: $hidden")
+            println("selectedItem: $selectedItem")
+            println("lastSelections: $lastSelections")
+            println("setting: ${controlsSettingsRepository
+                    .allowActionOnTrivialControlsInLockscreen.value}")
         }
+    }
 }
 
-private data class SelectionItem(
+@VisibleForTesting
+internal data class SelectionItem(
     val appName: CharSequence,
     val structure: CharSequence,
     val icon: Drawable,
     val componentName: ComponentName,
-    val uid: Int
+    val uid: Int,
+    val panelComponentName: ComponentName?
 ) {
     fun getTitle() = if (structure.isEmpty()) { appName } else { structure }
+
+    val isPanel: Boolean = panelComponentName != null
+
+    fun matches(selectedItem: SelectedItem): Boolean {
+        if (componentName != selectedItem.componentName) {
+            // Not the same component so they are not the same.
+            return false
+        }
+        if (isPanel || selectedItem is SelectedItem.PanelItem) {
+            // As they have the same component, if [this.isPanel] then we may be migrating from
+            // device controls API into panel. Want this to match, even if the selectedItem is not
+            // a panel. We don't want to match on app name because that can change with locale.
+            return true
+        }
+        // Return true if we find a structure with the correct name
+        return structure == (selectedItem as SelectedItem.StructureItem).structure.structure
+    }
 }
 
 private class ItemAdapter(

@@ -26,11 +26,11 @@
     <string name="keyguard_sim_error_message_short" msgid="633630844240494070">"ልክ ያልሆነ ካርድ።"</string>
     <string name="keyguard_charged" msgid="5478247181205188995">"ባትሪ ሞልቷል"</string>
     <string name="keyguard_plugged_in_wireless" msgid="2537874724955057383">"<xliff:g id="PERCENTAGE">%s</xliff:g> • በገመድ አልባ ኃይል በመሙላት ላይ"</string>
-    <string name="keyguard_plugged_in_dock" msgid="2122073051904360987">"<xliff:g id="PERCENTAGE">%s</xliff:g> • ኃይል በመሙላት ላይ"</string>
+    <string name="keyguard_plugged_in_dock" msgid="449722738270908674">"<xliff:g id="PERCENTAGE">%s</xliff:g> • የባትሪ ኃይል መሙያ መትከያ"</string>
     <string name="keyguard_plugged_in" msgid="8169926454348380863">"<xliff:g id="PERCENTAGE">%s</xliff:g> • ኃይል በመሙላት ላይ"</string>
     <string name="keyguard_plugged_in_charging_fast" msgid="4386594091107340426">"<xliff:g id="PERCENTAGE">%s</xliff:g> • በፍጥነት ኃይልን በመሙላት ላይ"</string>
     <string name="keyguard_plugged_in_charging_slowly" msgid="217655355424210">"<xliff:g id="PERCENTAGE">%s</xliff:g> • በዝግታ ኃይልን በመሙላት ላይ"</string>
-    <string name="keyguard_plugged_in_charging_limited" msgid="1709413803451065875">"<xliff:g id="PERCENTAGE">%s</xliff:g> • ባትሪን ለመጠበቅ ኃይል መሙላት ባለበት ቆሟል"</string>
+    <string name="keyguard_plugged_in_charging_limited" msgid="6091488837901216962">"<xliff:g id="PERCENTAGE">%s</xliff:g> • ኃይል መሙላት ለጊዜው ተገድቧል"</string>
     <string name="keyguard_instructions_when_pattern_disabled" msgid="8448804180089936954">"ለመክፈት ምናሌ ተጫን።"</string>
     <string name="keyguard_network_locked_message" msgid="407096292844868608">"አውታረ መረብ ተቆልፏል"</string>
     <string name="keyguard_missing_sim_message_short" msgid="704159478161444907">"ምንም ሲም ካርድ የለም"</string>
@@ -68,9 +68,15 @@
     <string name="kg_too_many_failed_password_attempts_dialog_message" msgid="190984061975729494">"የይለፍ ቃልዎን <xliff:g id="NUMBER_0">%1$d</xliff:g> ጊዜ ትክክል ባልሆነ መንገድ ተይበዋል።\n\nበ<xliff:g id="NUMBER_1">%2$d</xliff:g> ሰኮንዶች ውስጥ እንደገና ይሞክሩ።"</string>
     <string name="kg_too_many_failed_pattern_attempts_dialog_message" msgid="4252405904570284368">"የመክፈቻ ስርዓተ ጥለቱን <xliff:g id="NUMBER_0">%1$d</xliff:g> ጊዜ ትክክል ባልሆነ መንገድ ስለውታል።\n\nበ<xliff:g id="NUMBER_1">%2$d</xliff:g> ሰኮንዶች ውስጥ እንደገና ይሞክሩ።"</string>
     <string name="kg_password_wrong_pin_code_pukked" msgid="8047350661459040581">"ልክ ያልሆነ የሲም ፒን ኮድ። አሁን መሣሪያዎን ለማስከፈት አገልግሎት አቅራቢዎን ማነጋገር አለብዎት።"</string>
-    <string name="kg_password_wrong_pin_code" msgid="5629415765976820357">"{count,plural, =1{የተሳሳተ የሲም ፒን ኮድ፣ መሣሪያዎን ለማስከፈት የአገልግሎት አቅራቢዎን ማነጋገር ግዴታ ከመሆኑ በፊት # ሙከራ ይቀርዎታል።}one{የተሳሳተ የሲም ፒን ኮድ፣ # ሙከራዎች ይቀሩዎታል። }other{የተሳሳተ የሲም ፒን ኮድ፣ # ሙከራዎች ይቀሩዎታል። }}"</string>
+    <plurals name="kg_password_wrong_pin_code" formatted="false" msgid="7030584350995485026">
+      <item quantity="one">ልክ ያልሆነ የሲም ፒን ኮድ፣ <xliff:g id="NUMBER_1">%d</xliff:g> ሙከራዎች ይቀረዎታል።</item>
+      <item quantity="other">ልክ ያልሆነ የሲም ፒን ኮድ፣ <xliff:g id="NUMBER_1">%d</xliff:g> ሙከራዎች ይቀረዎታል።</item>
+    </plurals>
     <string name="kg_password_wrong_puk_code_dead" msgid="3698285357028468617">"ሲሙ ጥቅም ላይ መዋል እይችልም። የአገልግሎት አቅራቢዎን ያነጋግሩ።"</string>
-    <string name="kg_password_wrong_puk_code" msgid="6820515467645087827">"{count,plural, =1{የተሳሳተ የሲም PUK ኮድ፣ ሲም በቋሚነት መጠቀም የማይቻል ከመሆኑ በፊት # ሙከራ ይቀርዎታል።}one{የተሳሳተ የሲም PUK ኮድ፣ ሲም በቋሚነት መጠቀም የማይቻል ከመሆኑ በፊት # ሙከራ ይቀርዎታል።}other{የተሳሳተ የሲም PUK ኮድ፣ ሲም በቋሚነት መጠቀም የማይቻል ከመሆኑ በፊት # ሙከራዎች ይቀሩዎታል።}}"</string>
+    <plurals name="kg_password_wrong_puk_code" formatted="false" msgid="3937306685604862886">
+      <item quantity="one">ልክ ያልሆነ የሲም ፒዩኬ ኮድ፣ ሲሙ እስከመጨረሻው የማይሰራ ከመሆኑ በፊት <xliff:g id="NUMBER_1">%d</xliff:g> ሙከራዎች ይቀረዎታል።</item>
+      <item quantity="other">ልክ ያልሆነ የሲም ፒዩኬ ኮድ፣ ሲሙ እስከመጨረሻው የማይሰራ ከመሆኑ በፊት <xliff:g id="NUMBER_1">%d</xliff:g> ሙከራዎች ይቀረዎታል።</item>
+    </plurals>
     <string name="kg_password_pin_failed" msgid="5136259126330604009">"የሲም ፒን ክወና አልተሳካም!"</string>
     <string name="kg_password_puk_failed" msgid="6778867411556937118">"የሲም PUK ክወና አልተሳካም!"</string>
     <string name="accessibility_ime_switch_button" msgid="9082358310194861329">"የግቤት ስልት ቀይር"</string>
@@ -84,9 +90,15 @@
     <string name="kg_prompt_reason_device_admin" msgid="6961159596224055685">"መሣሪያ በአስተዳዳሪ ተቆልፏል"</string>
     <string name="kg_prompt_reason_user_request" msgid="6015774877733717904">"መሣሪያ በተጠቃሚው ራሱ ተቆልፏል"</string>
     <string name="kg_face_not_recognized" msgid="7903950626744419160">"አልታወቀም"</string>
-    <string name="kg_face_sensor_privacy_enabled" msgid="939511161763558512">"በመልክ መክፈትን ለመጠቀም በቅንብሮች ውስጥ የካሜራ መዳረሻን ያብሩ"</string>
-    <string name="kg_password_default_pin_message" msgid="1434544655827987873">"{count,plural, =1{የሲም ፒን ያስገቡ። መሣሪያዎን ለማስከፈት የአገልግሎት አቅራቢዎን ማነጋገር ግዴታ ከመሆኑ በፊት # ሙከራ ይቀርዎታል።}one{የሲም ፒን ያስገቡ። # ቀሪ ሙከራዎች አሉዎት።}other{የሲም ፒን ያስገቡ። # ቀሪ ሙከራዎች አሉዎት።}}"</string>
-    <string name="kg_password_default_puk_message" msgid="1025139786449741950">"{count,plural, =1{ሲም አሁን ተሰናክሏል። ለመቀጠል የPUK ኮድ ያስገቡ። ሲም በቋሚነት መጠቀም የማይቻል ከመሆኑ በፊት # ሙከራ ይቀርዎታል። ዝርዝሮችን ለማግኘት የአገልግሎት አቅራቢን ያነጋግሩ።}one{ሲም አሁን ተሰናክሏል። ለመቀጠል የPUK ኮድ ያስገቡ። ሲም በቋሚነት መጠቀም የማይቻል ከመሆኑ በፊት # ሙከራዎች ይቀሩዎታል። ዝርዝሮችን ለማግኘት የአገልግሎት አቅራቢን ያነጋግሩ።}other{ሲም አሁን ተሰናክሏል። ለመቀጠል የPUK ኮድ ያስገቡ። ሲም በቋሚነት መጠቀም የማይቻል ከመሆኑ በፊት # ሙከራዎች ይቀሩዎታል። ዝርዝሮችን ለማግኘት የአገልግሎት አቅራቢን ያነጋግሩ።}}"</string>
+    <string name="kg_face_sensor_privacy_enabled" msgid="6513157891227284806">"በመልክ መክፈትን ለመጠቀም "<b>"የካሜራ መዳረሻ"</b>"ን በቅንብሮች እና ግላዊነት ውስጥ ያብሩ"</string>
+    <plurals name="kg_password_default_pin_message" formatted="false" msgid="7730152526369857818">
+      <item quantity="one">የሲም ፒን ያስገቡ። <xliff:g id="NUMBER_1">%d</xliff:g> ሙከራዎች ይቀረዎታል።</item>
+      <item quantity="other">የሲም ፒን ያስገቡ። <xliff:g id="NUMBER_1">%d</xliff:g> ሙከራዎች ይቀረዎታል።</item>
+    </plurals>
+    <plurals name="kg_password_default_puk_message" formatted="false" msgid="571308542462946935">
+      <item quantity="one">ሲም አሁን ተሰናክሏል። ለመቀጠል የPUK ኮድ ያስገቡ። ሲም እስከመጨረሻው መጠቀም የማይቻል ከመሆኑ በፊት <xliff:g id="_NUMBER_1">%d</xliff:g> ሙከራዎች ይቀረዎታል። ዝርዝሮችን ለማግኘት የአገልግሎት አቅራቢን ያነጋግሩ።</item>
+      <item quantity="other">ሲም አሁን ተሰናክሏል። ለመቀጠል የPUK ኮድ ያስገቡ። ሲም እስከመጨረሻው መጠቀም የማይቻል ከመሆኑ በፊት <xliff:g id="_NUMBER_1">%d</xliff:g> ሙከራዎች ይቀረዎታል። ዝርዝሮችን ለማግኘት የአገልግሎት አቅራቢን ያነጋግሩ።</item>
+    </plurals>
     <string name="clock_title_default" msgid="6342735240617459864">"ነባሪ"</string>
     <string name="clock_title_bubble" msgid="2204559396790593213">"አረፋ"</string>
     <string name="clock_title_analog" msgid="8409262532900918273">"አናሎግ"</string>

@@ -18,7 +18,9 @@
     android:layout_height="wrap_content"
     android:layout_gravity="center"
     android:gravity="center"
-    android:orientation="vertical">
+    android:orientation="vertical"
+    android:clickable="true"
+    >
 
     <ImageView
         android:id="@+id/task_icon"
@@ -27,12 +29,12 @@
         android:layout_margin="8dp"
         android:importantForAccessibility="no" />
 
-    <!-- TODO(b/240924926) use a custom view that will handle thumbnail cropping correctly -->
-    <!-- TODO(b/240924926) dynamically change the view size based on the screen size -->
-    <ImageView
+    <!-- This view size will be calculated in runtime -->
+    <com.android.systemui.mediaprojection.appselector.view.MediaProjectionTaskView
         android:id="@+id/task_thumbnail"
-        android:layout_width="100dp"
-        android:layout_height="216dp"
-        android:scaleType="centerCrop"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:clickable="false"
+        android:focusable="false"
         />
 </LinearLayout>

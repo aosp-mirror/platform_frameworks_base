@@ -23,11 +23,14 @@ import android.view.ViewGroup
 import android.view.ViewPropertyAnimator
 import android.view.WindowInsets
 import android.widget.FrameLayout
+import androidx.annotation.StringRes
+import com.android.keyguard.LockIconViewController
 import com.android.systemui.R
 import com.android.systemui.keyguard.ui.binder.KeyguardBottomAreaViewBinder
 import com.android.systemui.keyguard.ui.binder.KeyguardBottomAreaViewBinder.bind
 import com.android.systemui.keyguard.ui.viewmodel.KeyguardBottomAreaViewModel
 import com.android.systemui.plugins.FalsingManager
+import com.android.systemui.statusbar.VibratorHelper
 
 /**
  * Renders the bottom area of the lock-screen. Concerned primarily with the quick affordance UI
@@ -49,15 +52,32 @@ constructor(
         defStyleRes,
     ) {
 
+    interface MessageDisplayer {
+        fun display(@StringRes stringResourceId: Int)
+    }
+
     private var ambientIndicationArea: View? = null
     private lateinit var binding: KeyguardBottomAreaViewBinder.Binding
+    private var lockIconViewController: LockIconViewController? = null
 
     /** Initializes the view. */
     fun init(
         viewModel: KeyguardBottomAreaViewModel,
-        falsingManager: FalsingManager,
+        falsingManager: FalsingManager? = null,
+        lockIconViewController: LockIconViewController? = null,
+        messageDisplayer: MessageDisplayer? = null,
+        vibratorHelper: VibratorHelper? = null,
     ) {
-        binding = bind(this, viewModel, falsingManager)
+        binding =
+            bind(
+                this,
+                viewModel,
+                falsingManager,
+                vibratorHelper,
+            ) {
+                messageDisplayer?.display(it)
+            }
+        this.lockIconViewController = lockIconViewController
     }
 
     /**
@@ -113,5 +133,30 @@ constructor(
             setPadding(paddingLeft, paddingTop, paddingRight, bottom)
         }
         return insets
+    }
+
+    override fun onLayout(changed: Boolean, left: Int, top: Int, right: Int, bottom: Int) {
+        super.onLayout(changed, left, top, right, bottom)
+        findViewById<View>(R.id.ambient_indication_container)?.let {
+            val (ambientLeft, ambientTop) = it.locationOnScreen
+            if (binding.shouldConstrainToTopOfLockIcon()) {
+                // make top of ambient indication view the bottom of the lock icon
+                it.layout(
+                    ambientLeft,
+                    lockIconViewController?.bottom?.toInt() ?: 0,
+                    right - ambientLeft,
+                    ambientTop + it.measuredHeight
+                )
+            } else {
+                // make bottom of ambient indication view the top of the lock icon
+                val lockLocationTop = lockIconViewController?.top ?: 0
+                it.layout(
+                    ambientLeft,
+                    lockLocationTop.toInt() - it.measuredHeight,
+                    right - ambientLeft,
+                    lockLocationTop.toInt()
+                )
+            }
+        }
     }
 }

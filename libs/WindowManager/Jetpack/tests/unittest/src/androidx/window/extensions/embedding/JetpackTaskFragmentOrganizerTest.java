@@ -18,7 +18,6 @@ package androidx.window.extensions.embedding;
 
 import static android.app.WindowConfiguration.WINDOWING_MODE_UNDEFINED;
 
-import static androidx.window.extensions.embedding.EmbeddingTestUtils.TASK_ID;
 import static androidx.window.extensions.embedding.EmbeddingTestUtils.createTestTaskContainer;
 
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.spyOn;
@@ -26,10 +25,8 @@ import static com.android.dx.mockito.inline.extended.ExtendedMockito.verify;
 
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
-import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.never;
 
 import android.content.Intent;
 import android.content.res.Configuration;
@@ -85,42 +82,27 @@ public class JetpackTaskFragmentOrganizerTest {
 
     @Test
     public void testUnregisterOrganizer() {
-        mOrganizer.startOverrideSplitAnimation(TASK_ID);
-        mOrganizer.startOverrideSplitAnimation(TASK_ID + 1);
+        mOrganizer.overrideSplitAnimation();
         mOrganizer.unregisterOrganizer();
 
-        verify(mOrganizer).unregisterRemoteAnimations(TASK_ID);
-        verify(mOrganizer).unregisterRemoteAnimations(TASK_ID + 1);
+        verify(mOrganizer).unregisterRemoteAnimations();
     }
 
     @Test
-    public void testStartOverrideSplitAnimation() {
+    public void testOverrideSplitAnimation() {
         assertNull(mOrganizer.mAnimationController);
 
-        mOrganizer.startOverrideSplitAnimation(TASK_ID);
+        mOrganizer.overrideSplitAnimation();
 
         assertNotNull(mOrganizer.mAnimationController);
-        verify(mOrganizer).registerRemoteAnimations(TASK_ID,
-                mOrganizer.mAnimationController.mDefinition);
-    }
-
-    @Test
-    public void testStopOverrideSplitAnimation() {
-        mOrganizer.stopOverrideSplitAnimation(TASK_ID);
-
-        verify(mOrganizer, never()).unregisterRemoteAnimations(anyInt());
-
-        mOrganizer.startOverrideSplitAnimation(TASK_ID);
-        mOrganizer.stopOverrideSplitAnimation(TASK_ID);
-
-        verify(mOrganizer).unregisterRemoteAnimations(TASK_ID);
+        verify(mOrganizer).registerRemoteAnimations(mOrganizer.mAnimationController.mDefinition);
     }
 
     @Test
     public void testExpandTaskFragment() {
         final TaskContainer taskContainer = createTestTaskContainer();
         final TaskFragmentContainer container = new TaskFragmentContainer(null /* activity */,
-                new Intent(), taskContainer, mSplitController);
+                new Intent(), taskContainer, mSplitController, null /* pairedPrimaryContainer */);
         final TaskFragmentInfo info = createMockInfo(container);
         mOrganizer.mFragmentInfos.put(container.getTaskFragmentToken(), info);
         container.setInfo(mTransaction, info);
@@ -144,6 +126,6 @@ public class JetpackTaskFragmentOrganizerTest {
                 mock(WindowContainerToken.class), new Configuration(), 0 /* runningActivityCount */,
                 false /* isVisible */, new ArrayList<>(), new Point(),
                 false /* isTaskClearedForReuse */, false /* isTaskFragmentClearedForPip */,
-                new Point());
+                false /* isClearedForReorderActivityToFront */, new Point());
     }
 }

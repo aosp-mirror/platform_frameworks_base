@@ -19,6 +19,7 @@ package com.android.systemui.shade
 import android.annotation.IdRes
 import android.app.StatusBarManager
 import android.content.res.Configuration
+import android.os.Bundle
 import android.os.Trace
 import android.os.Trace.TRACE_TAG_APP
 import android.util.Pair
@@ -34,6 +35,8 @@ import com.android.systemui.animation.Interpolators
 import com.android.systemui.animation.ShadeInterpolation
 import com.android.systemui.battery.BatteryMeterView
 import com.android.systemui.battery.BatteryMeterViewController
+import com.android.systemui.demomode.DemoMode
+import com.android.systemui.demomode.DemoModeController
 import com.android.systemui.dump.DumpManager
 import com.android.systemui.flags.FeatureFlags
 import com.android.systemui.flags.Flags
@@ -43,7 +46,6 @@ import com.android.systemui.qs.carrier.QSCarrierGroup
 import com.android.systemui.qs.carrier.QSCarrierGroupController
 import com.android.systemui.shade.LargeScreenShadeHeaderController.Companion.HEADER_TRANSITION_ID
 import com.android.systemui.shade.LargeScreenShadeHeaderController.Companion.LARGE_SCREEN_HEADER_CONSTRAINT
-import com.android.systemui.shade.LargeScreenShadeHeaderController.Companion.LARGE_SCREEN_HEADER_TRANSITION_ID
 import com.android.systemui.shade.LargeScreenShadeHeaderController.Companion.QQS_HEADER_CONSTRAINT
 import com.android.systemui.shade.LargeScreenShadeHeaderController.Companion.QS_HEADER_CONSTRAINT
 import com.android.systemui.statusbar.phone.StatusBarContentInsetsProvider
@@ -53,6 +55,7 @@ import com.android.systemui.statusbar.phone.StatusIconContainer
 import com.android.systemui.statusbar.phone.dagger.CentralSurfacesComponent.CentralSurfacesScope
 import com.android.systemui.statusbar.phone.dagger.StatusBarViewModule.LARGE_SCREEN_BATTERY_CONTROLLER
 import com.android.systemui.statusbar.phone.dagger.StatusBarViewModule.LARGE_SCREEN_SHADE_HEADER
+import com.android.systemui.statusbar.policy.Clock
 import com.android.systemui.statusbar.policy.ConfigurationController
 import com.android.systemui.statusbar.policy.VariableDateView
 import com.android.systemui.statusbar.policy.VariableDateViewController
@@ -69,11 +72,9 @@ import javax.inject.Named
  * expansion of the headers in small screen portrait.
  *
  * [header] will be a [MotionLayout] if [Flags.COMBINED_QS_HEADERS] is enabled. In this case, the
- * [MotionLayout] has 2 transitions:
+ * [MotionLayout] has one transitions:
  * * [HEADER_TRANSITION_ID]: [QQS_HEADER_CONSTRAINT] <-> [QS_HEADER_CONSTRAINT] for portrait
  *   handheld device configuration.
- * * [LARGE_SCREEN_HEADER_TRANSITION_ID]: [LARGE_SCREEN_HEADER_CONSTRAINT] (to itself) for all
- *   other configurations
  */
 @CentralSurfacesScope
 class LargeScreenShadeHeaderController @Inject constructor(
@@ -89,7 +90,8 @@ class LargeScreenShadeHeaderController @Inject constructor(
     private val dumpManager: DumpManager,
     private val featureFlags: FeatureFlags,
     private val qsCarrierGroupControllerBuilder: QSCarrierGroupController.Builder,
-    private val combinedShadeHeadersConstraintManager: CombinedShadeHeadersConstraintManager
+    private val combinedShadeHeadersConstraintManager: CombinedShadeHeadersConstraintManager,
+    private val demoModeController: DemoModeController
 ) : ViewController<View>(header), Dumpable {
 
     companion object {
@@ -115,10 +117,6 @@ class LargeScreenShadeHeaderController @Inject constructor(
         }
     }
 
-    init {
-        loadConstraints()
-    }
-
     private val combinedHeaders = featureFlags.isEnabled(Flags.COMBINED_QS_HEADERS)
 
     private lateinit var iconManager: StatusBarIconController.TintedIconManager
@@ -126,7 +124,7 @@ class LargeScreenShadeHeaderController @Inject constructor(
     private lateinit var qsCarrierGroupController: QSCarrierGroupController
 
     private val batteryIcon: BatteryMeterView = header.findViewById(R.id.batteryRemainingIcon)
-    private val clock: TextView = header.findViewById(R.id.clock)
+    private val clock: Clock = header.findViewById(R.id.clock)
     private val date: TextView = header.findViewById(R.id.date)
     private val iconContainer: StatusIconContainer = header.findViewById(R.id.statusIcons)
     private val qsCarrierGroup: QSCarrierGroup = header.findViewById(R.id.carrier_group)
@@ -212,6 +210,14 @@ class LargeScreenShadeHeaderController @Inject constructor(
         view.onApplyWindowInsets(insets)
     }
 
+    private val demoModeReceiver = object : DemoMode {
+        override fun demoCommands() = listOf(DemoMode.COMMAND_CLOCK)
+        override fun dispatchDemoCommand(command: String, args: Bundle) =
+            clock.dispatchDemoCommand(command, args)
+        override fun onDemoModeStarted() = clock.onDemoModeStarted()
+        override fun onDemoModeFinished() = clock.onDemoModeFinished()
+    }
+
     private val chipVisibilityListener: ChipVisibilityListener = object : ChipVisibilityListener {
         override fun onChipVisibilityRefreshed(visible: Boolean) {
             if (header is MotionLayout) {
@@ -246,6 +252,8 @@ class LargeScreenShadeHeaderController @Inject constructor(
             qsCarrierGroup.updateTextAppearance(R.style.TextAppearance_QS_Status_Carriers)
             if (header is MotionLayout) {
                 loadConstraints()
+                header.minHeight = resources
+                        .getDimensionPixelSize(R.dimen.large_screen_shade_header_min_height)
                 lastInsets?.let { updateConstraintsForInsets(header, it) }
             }
             updateResources()
@@ -280,6 +288,9 @@ class LargeScreenShadeHeaderController @Inject constructor(
                     context.getString(com.android.internal.R.string.status_bar_alarm_clock)
             )
         }
+        if (combinedHeaders) {
+            privacyIconsController.onParentVisible()
+        }
     }
 
     override fun onViewAttached() {
@@ -289,11 +300,13 @@ class LargeScreenShadeHeaderController @Inject constructor(
             clock.addOnLayoutChangeListener { v, _, _, _, _, _, _, _, _ ->
                 val newPivot = if (v.isLayoutRtl) v.width.toFloat() else 0f
                 v.pivotX = newPivot
+                v.pivotY = v.height.toFloat() / 2
             }
         }
 
         dumpManager.registerDumpable(this)
         configurationController.addCallback(configurationControllerListener)
+        demoModeController.addCallback(demoModeReceiver)
 
         updateVisibility()
         updateTransition()
@@ -303,6 +316,7 @@ class LargeScreenShadeHeaderController @Inject constructor(
         privacyIconsController.chipVisibilityListener = null
         dumpManager.unregisterDumpable(this::class.java.simpleName)
         configurationController.removeCallback(configurationControllerListener)
+        demoModeController.removeCallback(demoModeReceiver)
     }
 
     fun disable(state1: Int, state2: Int, animate: Boolean) {
@@ -324,16 +338,11 @@ class LargeScreenShadeHeaderController @Inject constructor(
         if (header is MotionLayout) {
             // Use resources.getXml instead of passing the resource id due to bug b/205018300
             header.getConstraintSet(QQS_HEADER_CONSTRAINT)
-                .load(context, resources.getXml(R.xml.qqs_header))
-            val qsConstraints = if (featureFlags.isEnabled(Flags.NEW_HEADER)) {
-                R.xml.qs_header_new
-            } else {
-                R.xml.qs_header
-            }
+                    .load(context, resources.getXml(R.xml.qqs_header))
             header.getConstraintSet(QS_HEADER_CONSTRAINT)
-                .load(context, resources.getXml(qsConstraints))
+                    .load(context, resources.getXml(R.xml.qs_header))
             header.getConstraintSet(LARGE_SCREEN_HEADER_CONSTRAINT)
-                .load(context, resources.getXml(R.xml.large_screen_shade_header))
+                    .load(context, resources.getXml(R.xml.large_screen_shade_header))
         }
     }
 
@@ -422,9 +431,11 @@ class LargeScreenShadeHeaderController @Inject constructor(
         }
         header as MotionLayout
         if (largeScreenActive) {
-            header.setTransition(LARGE_SCREEN_HEADER_TRANSITION_ID)
-            header.getConstraintSet(LARGE_SCREEN_HEADER_CONSTRAINT).applyTo(header)
+            logInstantEvent("Large screen constraints set")
+            header.setTransition(HEADER_TRANSITION_ID)
+            header.transitionToStart()
         } else {
+            logInstantEvent("Small screen constraints set")
             header.setTransition(HEADER_TRANSITION_ID)
             header.transitionToStart()
             updatePosition()
@@ -434,13 +445,17 @@ class LargeScreenShadeHeaderController @Inject constructor(
 
     private fun updatePosition() {
         if (header is MotionLayout && !largeScreenActive && visible) {
-            Trace.instantForTrack(
-                TRACE_TAG_APP,
-                "LargeScreenHeaderController - updatePosition",
-                "position: $qsExpandedFraction"
-            )
+            logInstantEvent("updatePosition: $qsExpandedFraction")
             header.progress = qsExpandedFraction
         }
+    }
+
+    private fun logInstantEvent(message: String) {
+        Trace.instantForTrack(
+                TRACE_TAG_APP,
+                "LargeScreenHeaderController",
+                message
+        )
     }
 
     private fun updateListeners() {
@@ -520,4 +535,7 @@ class LargeScreenShadeHeaderController @Inject constructor(
             updateConstraints(LARGE_SCREEN_HEADER_CONSTRAINT, updates.largeScreenConstraintsChanges)
         }
     }
+
+    @VisibleForTesting
+    internal fun simulateViewDetached() = this.onViewDetached()
 }

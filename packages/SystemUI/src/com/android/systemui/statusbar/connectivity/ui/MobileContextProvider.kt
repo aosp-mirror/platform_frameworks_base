@@ -37,6 +37,13 @@ import javax.inject.Inject
  * own [Configuration] and track resources based on the full set of available mcc-mnc combinations.
  *
  * (for future reference: b/240555502 is the initiating bug for this)
+ *
+ * NOTE: MCC/MNC qualifiers are not sufficient to fully describe a network type icon qualified by
+ * network type + carrier ID. This class exists to keep the legacy behavior of using the MCC/MNC
+ * resource qualifiers working, but if a carrier-specific icon is requested, then the override
+ * provided by [MobileIconCarrierIdOverrides] will take precedence.
+ *
+ * TODO(b/258503704): consider removing this class in favor of the `carrierId` overrides
  */
 @SysUISingleton
 class MobileContextProvider

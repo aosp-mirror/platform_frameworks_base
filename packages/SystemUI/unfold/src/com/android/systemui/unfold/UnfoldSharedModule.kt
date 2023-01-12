@@ -28,6 +28,9 @@ import com.android.systemui.unfold.updates.hinge.HingeAngleProvider
 import com.android.systemui.unfold.updates.hinge.HingeSensorAngleProvider
 import com.android.systemui.unfold.util.ATraceLoggerTransitionProgressListener
 import com.android.systemui.unfold.util.ScaleAwareTransitionProgressProvider
+import com.android.systemui.unfold.util.UnfoldKeyguardVisibilityManager
+import com.android.systemui.unfold.util.UnfoldKeyguardVisibilityManagerImpl
+import com.android.systemui.unfold.util.UnfoldKeyguardVisibilityProvider
 import dagger.Module
 import dagger.Provides
 import java.util.Optional
@@ -57,7 +60,8 @@ class UnfoldSharedModule {
                 scaleAwareProviderFactory.wrap(baseProgressProvider).apply {
                     // Always present callback that logs animation beginning and end.
                     addCallback(tracingListener)
-                })
+                }
+            )
         }
 
     @Provides
@@ -77,4 +81,16 @@ class UnfoldSharedModule {
         } else {
             EmptyHingeAngleProvider
         }
+
+    @Provides
+    @Singleton
+    fun unfoldKeyguardVisibilityProvider(
+        impl: UnfoldKeyguardVisibilityManagerImpl
+    ): UnfoldKeyguardVisibilityProvider = impl
+
+    @Provides
+    @Singleton
+    fun unfoldKeyguardVisibilityManager(
+        impl: UnfoldKeyguardVisibilityManagerImpl
+    ): UnfoldKeyguardVisibilityManager = impl
 }

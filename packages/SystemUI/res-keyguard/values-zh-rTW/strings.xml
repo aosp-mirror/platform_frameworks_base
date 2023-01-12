@@ -26,11 +26,11 @@
     <string name="keyguard_sim_error_message_short" msgid="633630844240494070">"卡片無效。"</string>
     <string name="keyguard_charged" msgid="5478247181205188995">"充電完成"</string>
     <string name="keyguard_plugged_in_wireless" msgid="2537874724955057383">"<xliff:g id="PERCENTAGE">%s</xliff:g> • 無線充電"</string>
-    <string name="keyguard_plugged_in_dock" msgid="2122073051904360987">"<xliff:g id="PERCENTAGE">%s</xliff:g> • 充電中"</string>
+    <string name="keyguard_plugged_in_dock" msgid="449722738270908674">"<xliff:g id="PERCENTAGE">%s</xliff:g> • 正在座架上充電"</string>
     <string name="keyguard_plugged_in" msgid="8169926454348380863">"<xliff:g id="PERCENTAGE">%s</xliff:g> • 充電中"</string>
     <string name="keyguard_plugged_in_charging_fast" msgid="4386594091107340426">"<xliff:g id="PERCENTAGE">%s</xliff:g> • 快速充電中"</string>
     <string name="keyguard_plugged_in_charging_slowly" msgid="217655355424210">"<xliff:g id="PERCENTAGE">%s</xliff:g> • 慢速充電中"</string>
-    <string name="keyguard_plugged_in_charging_limited" msgid="1709413803451065875">"<xliff:g id="PERCENTAGE">%s</xliff:g> • 為保護電池，系統已暫停充電"</string>
+    <string name="keyguard_plugged_in_charging_limited" msgid="6091488837901216962">"<xliff:g id="PERCENTAGE">%s</xliff:g> • 已暫時限制充電"</string>
     <string name="keyguard_instructions_when_pattern_disabled" msgid="8448804180089936954">"按選單鍵解鎖。"</string>
     <string name="keyguard_network_locked_message" msgid="407096292844868608">"網路已鎖定"</string>
     <string name="keyguard_missing_sim_message_short" msgid="704159478161444907">"沒有 SIM 卡"</string>
@@ -68,9 +68,15 @@
     <string name="kg_too_many_failed_password_attempts_dialog_message" msgid="190984061975729494">"你已輸入錯誤的密碼 <xliff:g id="NUMBER_0">%1$d</xliff:g> 次。\n\n請在 <xliff:g id="NUMBER_1">%2$d</xliff:g> 秒後再試一次。"</string>
     <string name="kg_too_many_failed_pattern_attempts_dialog_message" msgid="4252405904570284368">"你已畫出錯誤的解鎖圖案 <xliff:g id="NUMBER_0">%1$d</xliff:g> 次。\n\n請在 <xliff:g id="NUMBER_1">%2$d</xliff:g> 秒後再試一次。"</string>
     <string name="kg_password_wrong_pin_code_pukked" msgid="8047350661459040581">"SIM 卡的 PIN 碼輸入錯誤，你現在必須請電信業者為裝置解鎖。"</string>
-    <string name="kg_password_wrong_pin_code" msgid="5629415765976820357">"{count,plural, =1{SIM 卡 PIN 碼輸入錯誤，您還可以再試 # 次。如果仍然失敗，就必須聯絡電信業者為裝置解鎖。}other{SIM 卡 PIN 碼輸入錯誤，您還可以再試 # 次。}}"</string>
+    <plurals name="kg_password_wrong_pin_code" formatted="false" msgid="7030584350995485026">
+      <item quantity="other">SIM 卡的 PIN 碼輸入錯誤，你還可以再試 <xliff:g id="NUMBER_1">%d</xliff:g> 次。</item>
+      <item quantity="one">SIM 卡的 PIN 碼輸入錯誤，你還可以再試 <xliff:g id="NUMBER_0">%d</xliff:g> 次。如果仍然失敗，就必須請電信業者為裝置解鎖。</item>
+    </plurals>
     <string name="kg_password_wrong_puk_code_dead" msgid="3698285357028468617">"SIM 卡無法使用，請與你的電信業者聯絡。"</string>
-    <string name="kg_password_wrong_puk_code" msgid="6820515467645087827">"{count,plural, =1{SIM 卡 PUK 碼輸入錯誤，您還可以再試 # 次，如果仍然失敗，SIM 卡將永久無法使用。}other{SIM 卡 PUK 碼輸入錯誤，您還可以再試 # 次，如果仍然失敗，SIM 卡將永久無法使用。}}"</string>
+    <plurals name="kg_password_wrong_puk_code" formatted="false" msgid="3937306685604862886">
+      <item quantity="other">SIM 卡的 PUK 碼輸入錯誤，你還可以再試 <xliff:g id="NUMBER_1">%d</xliff:g> 次。如果仍然失敗，SIM 卡將永久無法使用。</item>
+      <item quantity="one">SIM 卡的 PUK 碼輸入錯誤，你還可以再試 <xliff:g id="NUMBER_0">%d</xliff:g> 次。如果仍然失敗，SIM 卡將永久無法使用。</item>
+    </plurals>
     <string name="kg_password_pin_failed" msgid="5136259126330604009">"SIM 卡 PIN 碼解鎖失敗！"</string>
     <string name="kg_password_puk_failed" msgid="6778867411556937118">"SIM 卡 PUK 碼解鎖失敗！"</string>
     <string name="accessibility_ime_switch_button" msgid="9082358310194861329">"切換輸入法"</string>
@@ -84,9 +90,15 @@
     <string name="kg_prompt_reason_device_admin" msgid="6961159596224055685">"管理員已鎖定裝置"</string>
     <string name="kg_prompt_reason_user_request" msgid="6015774877733717904">"裝置已手動鎖定"</string>
     <string name="kg_face_not_recognized" msgid="7903950626744419160">"無法識別"</string>
-    <string name="kg_face_sensor_privacy_enabled" msgid="939511161763558512">"如要使用人臉解鎖功能，請在「設定」中開啟相機存取權。"</string>
-    <string name="kg_password_default_pin_message" msgid="1434544655827987873">"{count,plural, =1{請輸入 SIM 卡 PIN 碼，您還可以再試 # 次，如果仍然失敗，就必須聯絡電信業者為裝置解鎖。}other{輸入 SIM 卡 PIN 碼您還可以再試 # 次}}"</string>
-    <string name="kg_password_default_puk_message" msgid="1025139786449741950">"{count,plural, =1{SIM 卡現在已遭停用。請輸入 PUK 碼以繼續。您還可以再試 # 次，如果仍然失敗，SIM 卡將永久無法使用。詳情請洽詢電信業者。}other{SIM 卡現在已遭停用。請輸入 PUK 碼以繼續。您還可以再試 # 次，如果仍然失敗，SIM 卡將永久無法使用。詳情請洽詢電信業者。}}"</string>
+    <string name="kg_face_sensor_privacy_enabled" msgid="6513157891227284806">"如要使用人臉解鎖功能，請前往「設定」&gt;「隱私權」開啟"<b>"攝影機存取權"</b></string>
+    <plurals name="kg_password_default_pin_message" formatted="false" msgid="7730152526369857818">
+      <item quantity="other">請輸入 SIM 卡的 PIN 碼，你還可以再試 <xliff:g id="NUMBER_1">%d</xliff:g> 次。</item>
+      <item quantity="one">請輸入 SIM 卡的 PIN 碼，你還可以再試 <xliff:g id="NUMBER_0">%d</xliff:g> 次。如果仍然失敗，就必須請電信業者為裝置解鎖。</item>
+    </plurals>
+    <plurals name="kg_password_default_puk_message" formatted="false" msgid="571308542462946935">
+      <item quantity="other">SIM 卡現在已遭停用。請輸入 PUK 碼以繼續進行。你還可以再試 <xliff:g id="_NUMBER_1">%d</xliff:g> 次，如果仍然失敗，SIM 卡將永久無法使用。詳情請與電信業者聯絡。</item>
+      <item quantity="one">SIM 卡現在已遭停用。請輸入 PUK 碼以繼續進行。你還可以再試 <xliff:g id="_NUMBER_0">%d</xliff:g> 次，如果仍然失敗，SIM 卡將永久無法使用。詳情請與電信業者聯絡。</item>
+    </plurals>
     <string name="clock_title_default" msgid="6342735240617459864">"預設"</string>
     <string name="clock_title_bubble" msgid="2204559396790593213">"泡泡"</string>
     <string name="clock_title_analog" msgid="8409262532900918273">"類比"</string>

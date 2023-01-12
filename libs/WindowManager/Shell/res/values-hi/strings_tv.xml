@@ -19,16 +19,10 @@
     xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
     <string name="notification_channel_tv_pip" msgid="2576686079160402435">"पिक्चर में पिक्चर"</string>
     <string name="pip_notification_unknown_title" msgid="2729870284350772311">"(कोई शीर्षक कार्यक्रम नहीं)"</string>
-    <string name="pip_close" msgid="2955969519031223530">"बंद करें"</string>
+    <string name="pip_close" msgid="9135220303720555525">"PIP बंद करें"</string>
     <string name="pip_fullscreen" msgid="7278047353591302554">"फ़ुल स्‍क्रीन"</string>
-    <string name="pip_move" msgid="158770205886688553">"ले जाएं"</string>
-    <string name="pip_expand" msgid="1051966011679297308">"बड़ा करें"</string>
-    <string name="pip_collapse" msgid="3903295106641385962">"छोटा करें"</string>
+    <string name="pip_move" msgid="1544227837964635439">"पीआईपी को दूसरी जगह लेकर जाएं"</string>
+    <string name="pip_expand" msgid="7605396312689038178">"पीआईपी विंडो को बड़ा करें"</string>
+    <string name="pip_collapse" msgid="5732233773786896094">"पीआईपी विंडो को छोटा करें"</string>
     <string name="pip_edu_text" msgid="3672999496647508701">" कंट्रोल मेन्यू पर जाने के लिए, "<annotation icon="home_icon">" होम बटन"</annotation>" दो बार दबाएं"</string>
-    <string name="a11y_pip_menu_entered" msgid="5106343214776801614">"पिक्चर में पिक्चर मेन्यू."</string>
-    <string name="a11y_action_pip_move_left" msgid="6612980937817141583">"बाईं ओर ले जाएं"</string>
-    <string name="a11y_action_pip_move_right" msgid="1119409122645529936">"दाईं ओर ले जाएं"</string>
-    <string name="a11y_action_pip_move_up" msgid="98502616918621959">"ऊपर ले जाएं"</string>
-    <string name="a11y_action_pip_move_down" msgid="3858802832725159740">"नीचे ले जाएं"</string>
-    <string name="a11y_action_pip_move_done" msgid="1486845365134416210">"हो गया"</string>
 </resources>

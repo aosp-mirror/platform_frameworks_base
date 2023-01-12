@@ -8468,8 +8468,8 @@ public class Notification implements Parcelable
             }
 
             int maxAvatarSize = resources.getDimensionPixelSize(
-                    isLowRam ? R.dimen.notification_person_icon_max_size
-                            : R.dimen.notification_person_icon_max_size_low_ram);
+                    isLowRam ? R.dimen.notification_person_icon_max_size_low_ram
+                            : R.dimen.notification_person_icon_max_size);
             if (mUser != null && mUser.getIcon() != null) {
                 mUser.getIcon().scaleDownIfNecessary(maxAvatarSize, maxAvatarSize);
             }
@@ -9591,21 +9591,16 @@ public class Notification implements Parcelable
         @NonNull
         public ArrayList<Action> getActionsListWithSystemActions() {
             // Define the system actions we expect to see
-            final Action negativeAction = makeNegativeAction();
-            final Action answerAction = makeAnswerAction();
-            // Sort the expected actions into the correct order:
-            // * If there's no answer action, put the hang up / decline action at the end
-            // * Otherwise put the answer action at the end, and put the decline action at start.
-            final Action firstAction = answerAction == null ? null : negativeAction;
-            final Action lastAction = answerAction == null ? negativeAction : answerAction;
+            final Action firstAction = makeNegativeAction();
+            final Action lastAction = makeAnswerAction();
 
             // Start creating the result list.
             int nonContextualActionSlotsRemaining = MAX_ACTION_BUTTONS;
             ArrayList<Action> resultActions = new ArrayList<>(MAX_ACTION_BUTTONS);
-            if (firstAction != null) {
-                resultActions.add(firstAction);
-                --nonContextualActionSlotsRemaining;
-            }
+
+            // Always have a first action.
+            resultActions.add(firstAction);
+            --nonContextualActionSlotsRemaining;
 
             // Copy actions into the new list, correcting system actions.
             if (mBuilder.mActions != null) {
@@ -9621,14 +9616,14 @@ public class Notification implements Parcelable
                         --nonContextualActionSlotsRemaining;
                     }
                     // If there's exactly one action slot left, fill it with the lastAction.
-                    if (nonContextualActionSlotsRemaining == 1) {
+                    if (lastAction != null && nonContextualActionSlotsRemaining == 1) {
                         resultActions.add(lastAction);
                         --nonContextualActionSlotsRemaining;
                     }
                 }
             }
             // If there are any action slots left, the lastAction still needs to be added.
-            if (nonContextualActionSlotsRemaining >= 1) {
+            if (lastAction != null && nonContextualActionSlotsRemaining >= 1) {
                 resultActions.add(lastAction);
             }
             return resultActions;

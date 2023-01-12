@@ -44,6 +44,7 @@ public class KeyguardVisibilityHelper {
     private boolean mAnimateYPos;
     private boolean mKeyguardViewVisibilityAnimating;
     private boolean mLastOccludedState = false;
+    private boolean mIsUnoccludeTransitionFlagEnabled = false;
     private final AnimationProperties mAnimationProperties = new AnimationProperties();
 
     public KeyguardVisibilityHelper(View view,
@@ -60,6 +61,10 @@ public class KeyguardVisibilityHelper {
 
     public boolean isVisibilityAnimating() {
         return mKeyguardViewVisibilityAnimating;
+    }
+
+    public void setOcclusionTransitionFlagEnabled(boolean enabled) {
+        mIsUnoccludeTransitionFlagEnabled = enabled;
     }
 
     /**
@@ -129,7 +134,7 @@ public class KeyguardVisibilityHelper {
                 // since it may need to be cancelled due to keyguard lifecycle events.
                 mScreenOffAnimationController.animateInKeyguard(
                         mView, mAnimateKeyguardStatusViewVisibleEndRunnable);
-            } else if (mLastOccludedState && !isOccluded) {
+            } else if (!mIsUnoccludeTransitionFlagEnabled && mLastOccludedState && !isOccluded) {
                 // An activity was displayed over the lock screen, and has now gone away
                 mView.setVisibility(View.VISIBLE);
                 mView.setAlpha(0f);
@@ -142,7 +147,9 @@ public class KeyguardVisibilityHelper {
                         .start();
             } else {
                 mView.setVisibility(View.VISIBLE);
-                mView.setAlpha(1f);
+                if (!mIsUnoccludeTransitionFlagEnabled) {
+                    mView.setAlpha(1f);
+                }
             }
         } else {
             mView.setVisibility(View.GONE);

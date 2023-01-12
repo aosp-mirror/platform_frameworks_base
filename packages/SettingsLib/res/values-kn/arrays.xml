@@ -92,8 +92,6 @@
     <item msgid="1049450003868150455">"<xliff:g id="QUALCOMM">Qualcomm®</xliff:g> <xliff:g id="APTX">aptX™</xliff:g> ಆಡಿಯೋ"</item>
     <item msgid="2908219194098827570">"<xliff:g id="QUALCOMM">Qualcomm®</xliff:g> <xliff:g id="APTX_HD">aptX™ HD</xliff:g> ಆಡಿಯೋ"</item>
     <item msgid="3825367753087348007">"LDAC"</item>
-    <item msgid="328951785723550863">"LC3"</item>
-    <item msgid="506175145534048710">"Opus"</item>
   </string-array>
   <string-array name="bluetooth_a2dp_codec_summaries">
     <item msgid="8868109554557331312">"ಸಿಸ್ಟಂ ಆಯ್ಕೆಯನ್ನು ಬಳಸಿ (ಡಿಫಾಲ್ಟ್)"</item>
@@ -102,8 +100,6 @@
     <item msgid="8627333814413492563">"<xliff:g id="QUALCOMM">Qualcomm®</xliff:g> <xliff:g id="APTX">aptX™</xliff:g> ಆಡಿಯೋ"</item>
     <item msgid="3517061573669307965">"<xliff:g id="QUALCOMM">Qualcomm®</xliff:g> <xliff:g id="APTX_HD">aptX™ HD</xliff:g> ಆಡಿಯೋ"</item>
     <item msgid="2553206901068987657">"LDAC"</item>
-    <item msgid="3940992993241040716">"LC3"</item>
-    <item msgid="7940970833006181407">"Opus"</item>
   </string-array>
   <string-array name="bluetooth_a2dp_codec_sample_rate_titles">
     <item msgid="926809261293414607">"ಸಿಸ್ಟಂ ಆಯ್ಕೆಯನ್ನು ಬಳಸಿ (ಡಿಫಾಲ್ಟ್)"</item>
@@ -143,13 +139,13 @@
   </string-array>
   <string-array name="bluetooth_a2dp_codec_ldac_playback_quality_titles">
     <item msgid="1241278021345116816">"ಆಡಿಯೋ ಗುಣಮಟ್ಟಕ್ಕಾಗಿ (990kbps/909kbps) ಆಪ್ಟಿಮೈಸ್ ಮಾಡಲಾಗಿದೆ"</item>
-    <item msgid="3523665555859696539">"ಸಂತುಲಿತ ಆಡಿಯೋ ಮತ್ತು ಸಂಪರ್ಕದ ಗುಣಮಟ್ಟ (660kbps/606kbps)"</item>
+    <item msgid="3523665555859696539">"ಸಂತುಲಿತ ಆಡಿಯೊ ಮತ್ತು ಸಂಪರ್ಕದ ಗುಣಮಟ್ಟ (660kbps/606kbps)"</item>
     <item msgid="886408010459747589">"ಸಂಪರ್ಕದ ಗುಣಮಟ್ಟಕ್ಕಾಗಿ (330kbps/303kbps) ಆಪ್ಟಿಮೈಸ್ ಮಾಡಲಾಗಿದೆ"</item>
     <item msgid="3808414041654351577">"ಅತ್ಯುತ್ತಮ ಪ್ರಯತ್ನ (ಹೊಂದಿಸಬಹುದಾದ ಬಿಟ್ ಪ್ರಮಾಣ)"</item>
   </string-array>
   <string-array name="bluetooth_a2dp_codec_ldac_playback_quality_summaries">
-    <item msgid="804499336721569838">"ಆಡಿಯೋ ಗುಣಮಟ್ಟಕ್ಕಾಗಿ ಆಪ್ಟಿಮೈಸ್‌ ಮಾಡಲಾಗಿದೆ"</item>
-    <item msgid="7451422070435297462">"ಸಂತುಲಿತ ಆಡಿಯೋ ಮತ್ತು ಸಂಪರ್ಕದ ಗುಣಮಟ್ಟ"</item>
+    <item msgid="804499336721569838">"ಆಡಿಯೊ ಗುಣಮಟ್ಟಕ್ಕಾಗಿ ಆಪ್ಟಿಮೈಸ್‌ ಮಾಡಲಾಗಿದೆ"</item>
+    <item msgid="7451422070435297462">"ಸಂತುಲಿತ ಆಡಿಯೊ ಮತ್ತು ಸಂಪರ್ಕದ ಗುಣಮಟ್ಟ"</item>
     <item msgid="6173114545795428901">"ಸಂಪರ್ಕ ಗುಣಮಟ್ಟಕ್ಕಾಗಿ ಆಪ್ಟಿಮೈಸ್ ಮಾಡಲಾಗಿದೆ"</item>
     <item msgid="4349908264188040530">"ಅತ್ಯುತ್ತಮ ಪ್ರಯತ್ನ (ಹೊಂದಿಸಬಹುದಾದ ಬಿಟ್ ಪ್ರಮಾಣ)"</item>
   </string-array>
@@ -188,7 +184,7 @@
     <item msgid="7300881231043255746">"ಕೆರ್ನಲ್ ಮಾತ್ರ"</item>
   </string-array>
   <string-array name="select_logpersist_summaries">
-    <item msgid="97587758561106269">"ಆಫ್"</item>
+    <item msgid="97587758561106269">"ಆಫ್ ಆಗಿದೆ"</item>
     <item msgid="7126170197336963369">"ಎಲ್ಲಾ ಲಾಗ್ ಬಫರ್‌ಗಳು"</item>
     <item msgid="7167543126036181392">"ಎಲ್ಲಾ ಆದರೆ ರೇಡಿಯೊ ಲಾಗ್ ಬಫರ್‌ಗಳು"</item>
     <item msgid="5135340178556563979">"ಕೆರ್ನಲ್ ಲಾಗ್ ಬಫರ್ ಮಾತ್ರ"</item>

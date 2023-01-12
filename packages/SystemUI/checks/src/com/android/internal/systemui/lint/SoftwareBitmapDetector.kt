@@ -32,7 +32,8 @@ import org.jetbrains.uast.UReferenceExpression
 class SoftwareBitmapDetector : Detector(), SourceCodeScanner {
 
     override fun getApplicableReferenceNames(): List<String> {
-        return mutableListOf("ALPHA_8", "RGB_565", "ARGB_8888", "RGBA_F16", "RGBA_1010102")
+        return mutableListOf(
+            "ALPHA_8", "RGB_565", "ARGB_4444", "ARGB_8888", "RGBA_F16", "RGBA_1010102")
     }
 
     override fun visitReference(
@@ -40,14 +41,12 @@ class SoftwareBitmapDetector : Detector(), SourceCodeScanner {
             reference: UReferenceExpression,
             referenced: PsiElement
     ) {
-
         val evaluator = context.evaluator
         if (evaluator.isMemberInClass(referenced as? PsiField, "android.graphics.Bitmap.Config")) {
             context.report(
-                    ISSUE,
-                    referenced,
-                    context.getNameLocation(referenced),
-                    "Usage of Config.HARDWARE is highly encouraged."
+                    issue = ISSUE,
+                    location = context.getNameLocation(reference),
+                    message = "Replace software bitmap with `Config.HARDWARE`"
             )
         }
     }
@@ -56,12 +55,12 @@ class SoftwareBitmapDetector : Detector(), SourceCodeScanner {
         @JvmField
         val ISSUE: Issue =
             Issue.create(
-                id = "SoftwareBitmapDetector",
-                briefDescription = "Software bitmap detected. Please use Config.HARDWARE instead.",
-                explanation =
-                "Software bitmaps occupy twice as much memory, when compared to Config.HARDWARE. " +
-                        "In case you need to manipulate the pixels, please consider to either use" +
-                        "a shader (encouraged), or a short lived software bitmap.",
+                id = "SoftwareBitmap",
+                briefDescription = "Software bitmap",
+                explanation = """
+                        Software bitmaps occupy twice as much memory as `Config.HARDWARE` bitmaps \
+                        do. However, hardware bitmaps are read-only. If you need to manipulate the \
+                        pixels, use a shader (preferably) or a short lived software bitmap.""",
                 category = Category.PERFORMANCE,
                 priority = 8,
                 severity = Severity.WARNING,

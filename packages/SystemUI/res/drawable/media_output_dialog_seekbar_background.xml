@@ -17,7 +17,10 @@
 <layer-list xmlns:android="http://schemas.android.com/apk/res/android">
     <item android:id="@android:id/background">
         <shape>
-            <corners android:radius="28dp" />
+            <corners
+                     android:bottomRightRadius="28dp"
+                     android:topRightRadius="28dp"
+            />
             <solid android:color="@android:color/transparent" />
             <size
                 android:height="64dp"/>

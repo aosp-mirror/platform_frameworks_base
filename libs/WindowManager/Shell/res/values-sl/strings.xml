@@ -72,16 +72,13 @@
     <string name="notification_bubble_title" msgid="6082910224488253378">"Mehurček"</string>
     <string name="manage_bubbles_text" msgid="7730624269650594419">"Upravljanje"</string>
     <string name="accessibility_bubble_dismissed" msgid="8367471990421247357">"Oblaček je bil opuščen."</string>
-    <string name="restart_button_description" msgid="6712141648865547958">"Če želite boljši prikaz, se dotaknite za vnovični zagon te aplikacije."</string>
+    <string name="restart_button_description" msgid="5887656107651190519">"Dotaknite se za vnovični zagon te aplikacije in preklop v celozaslonski način."</string>
     <string name="camera_compat_treatment_suggested_button_description" msgid="8103916969024076767">"Težave s fotoaparatom?\nDotaknite se za vnovično prilagoditev"</string>
     <string name="camera_compat_treatment_applied_button_description" msgid="2944157113330703897">"To ni odpravilo težave?\nDotaknite se za povrnitev"</string>
     <string name="camera_compat_dismiss_button_description" msgid="2795364433503817511">"Nimate težav s fotoaparatom? Dotaknite se za opustitev."</string>
-    <string name="letterbox_education_dialog_title" msgid="7739895354143295358">"Oglejte si in naredite več"</string>
-    <string name="letterbox_education_split_screen_text" msgid="6206339484068670830">"Za razdeljeni zaslon povlecite sem še eno aplikacijo."</string>
-    <string name="letterbox_education_reposition_text" msgid="4589957299813220661">"Dvakrat se dotaknite zunaj aplikacije, če jo želite prestaviti."</string>
+    <string name="letterbox_education_dialog_title" msgid="6688664582871779215">"Nekatere aplikacije najbolje delujejo v navpični postavitvi"</string>
+    <string name="letterbox_education_dialog_subtext" msgid="4853542518367719562">"Poskusite eno od teh možnosti za čim boljši izkoristek prostora"</string>
+    <string name="letterbox_education_screen_rotation_text" msgid="5085786687366339027">"Če želite preklopiti v celozaslonski način, zasukajte napravo."</string>
+    <string name="letterbox_education_reposition_text" msgid="1068293354123934727">"Dvakrat se dotaknite ob aplikaciji, če jo želite prestaviti."</string>
     <string name="letterbox_education_got_it" msgid="4057634570866051177">"V redu"</string>
-    <string name="letterbox_education_expand_button_description" msgid="1729796567101129834">"Razširitev za več informacij"</string>
-    <string name="maximize_button_text" msgid="1650859196290301963">"Maksimiraj"</string>
-    <string name="minimize_button_text" msgid="271592547935841753">"Minimiraj"</string>
-    <string name="close_button_text" msgid="2913281996024033299">"Zapri"</string>
 </resources>

@@ -272,6 +272,9 @@ public final class CameraExtensionCharacteristics {
                     @Override
                     public void onServiceConnected(ComponentName component, IBinder binder) {
                         mProxy = ICameraExtensionsProxyService.Stub.asInterface(binder);
+                        if (mProxy == null) {
+                            throw new IllegalStateException("Camera Proxy service is null");
+                        }
                         try {
                             mSupportsAdvancedExtensions = mProxy.advancedExtensionsSupported();
                         } catch (RemoteException e) {

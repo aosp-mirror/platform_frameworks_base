@@ -26,11 +26,11 @@
     <string name="keyguard_sim_error_message_short" msgid="633630844240494070">"ბარათი არასწორია."</string>
     <string name="keyguard_charged" msgid="5478247181205188995">"დატენილია"</string>
     <string name="keyguard_plugged_in_wireless" msgid="2537874724955057383">"<xliff:g id="PERCENTAGE">%s</xliff:g> • იტენება უსადენოდ"</string>
-    <string name="keyguard_plugged_in_dock" msgid="2122073051904360987">"<xliff:g id="PERCENTAGE">%s</xliff:g> • იტენება"</string>
+    <string name="keyguard_plugged_in_dock" msgid="449722738270908674">"<xliff:g id="PERCENTAGE">%s</xliff:g> • დამტენი სამაგრი"</string>
     <string name="keyguard_plugged_in" msgid="8169926454348380863">"<xliff:g id="PERCENTAGE">%s</xliff:g> • იტენება"</string>
     <string name="keyguard_plugged_in_charging_fast" msgid="4386594091107340426">"<xliff:g id="PERCENTAGE">%s</xliff:g> • სწრაფად იტენება"</string>
     <string name="keyguard_plugged_in_charging_slowly" msgid="217655355424210">"<xliff:g id="PERCENTAGE">%s</xliff:g> • ნელა იტენება"</string>
-    <string name="keyguard_plugged_in_charging_limited" msgid="1709413803451065875">"<xliff:g id="PERCENTAGE">%s</xliff:g> • დატენვა ᲨეᲩერებულია ბატარეის დაცვის მიზნიᲗ"</string>
+    <string name="keyguard_plugged_in_charging_limited" msgid="6091488837901216962">"<xliff:g id="PERCENTAGE">%s</xliff:g> • დატენვა დროებით შეზღუდულია"</string>
     <string name="keyguard_instructions_when_pattern_disabled" msgid="8448804180089936954">"განსაბლოკად დააჭირეთ მენიუს."</string>
     <string name="keyguard_network_locked_message" msgid="407096292844868608">"ქსელი ჩაკეტილია"</string>
     <string name="keyguard_missing_sim_message_short" msgid="704159478161444907">"SIM ბარ. არაა"</string>
@@ -68,9 +68,15 @@
     <string name="kg_too_many_failed_password_attempts_dialog_message" msgid="190984061975729494">"თქვენ არასწორად აკრიფეთ პაროლი <xliff:g id="NUMBER_0">%1$d</xliff:g>-ჯერ. \n\nცადეთ ხელახლა <xliff:g id="NUMBER_1">%2$d</xliff:g> წამში."</string>
     <string name="kg_too_many_failed_pattern_attempts_dialog_message" msgid="4252405904570284368">"თქვენ არასწორად დახატეთ განბლოკვის ნიმუში <xliff:g id="NUMBER_0">%1$d</xliff:g>-ჯერ. \n\nცადეთ ხელახლა <xliff:g id="NUMBER_1">%2$d</xliff:g> წამში."</string>
     <string name="kg_password_wrong_pin_code_pukked" msgid="8047350661459040581">"SIM ბარათის PIN-კოდი არასწორია. ახლა თქვენი მოწყობილობის განსაბლოკად თქვენს ოპერატორთან დაკავშირება მოგიწევთ."</string>
-    <string name="kg_password_wrong_pin_code" msgid="5629415765976820357">"{count,plural, =1{SIM-ის PIN კოდი არასწორია. თქვენ დაგრჩათ # მცდელობა, რის შემდეგაც მოწყობილობის განსაბლოკად ოპერატორთან დაკავშირება მოგიწევთ.}other{SIM ბარათის PIN-კოდი არასწორია. თქვენ დაგრჩათ # მცდელობა. }}"</string>
+    <plurals name="kg_password_wrong_pin_code" formatted="false" msgid="7030584350995485026">
+      <item quantity="other">SIM ბარათის PIN-კოდი არასწორია. თქვენ დაგრჩათ <xliff:g id="NUMBER_1">%d</xliff:g> მცდელობა.</item>
+      <item quantity="one">SIM ბარათის PIN-კოდი არასწორია. თქვენ დაგრჩათ <xliff:g id="NUMBER_0">%d</xliff:g> მცდელობა, რომლის შემდეგაც თქვენი მოწყობილობის განსაბლოკად თქვენს ოპერატორთან დაკავშირება მოგიწევთ.</item>
+    </plurals>
     <string name="kg_password_wrong_puk_code_dead" msgid="3698285357028468617">"SIM ბარათი გამოუსადეგარია. დაუკავშირდით თქვენს ოპერატორს."</string>
-    <string name="kg_password_wrong_puk_code" msgid="6820515467645087827">"{count,plural, =1{SIM ბარათის PUK-კოდი არასწორია. თქვენ დაგრჩათ # მცდელობა, რის შემდეგაც თქვენი SIM სამუდამოდ გამოუსადეგარი გახდება.}other{არასწორი SIM ბარათის PUK-კოდი. თქვენ დაგრჩათ # მცდელობა, სანამ SIM ბარათი სამუდამოდ გამოუსადეგარი გახდება.}}"</string>
+    <plurals name="kg_password_wrong_puk_code" formatted="false" msgid="3937306685604862886">
+      <item quantity="other">SIM ბარათის PUK-კოდი არასწორია. თქვენ დაგრჩათ <xliff:g id="NUMBER_1">%d</xliff:g> მცდელობა, რომელთა შემდეგაც თქვენი SIM სამუდამოდ გამოუსადეგარი გახდება.</item>
+      <item quantity="one">SIM ბარათის PUK-კოდი არასწორია. თქვენ დაგრჩათ <xliff:g id="NUMBER_0">%d</xliff:g> მცდელობა, რომლის შემდეგაც თქვენი SIM სამუდამოდ გამოუსადეგარი გახდება.</item>
+    </plurals>
     <string name="kg_password_pin_failed" msgid="5136259126330604009">"SIM ბარათის PIN-კოდით განბლოკვა ვერ მოხერხდა!"</string>
     <string name="kg_password_puk_failed" msgid="6778867411556937118">"SIM ბარათის PUK-კოდით განბლოკვა ვერ მოხერხდა!"</string>
     <string name="accessibility_ime_switch_button" msgid="9082358310194861329">"შეყვანის მეთოდის გადართვა"</string>
@@ -84,9 +90,15 @@
     <string name="kg_prompt_reason_device_admin" msgid="6961159596224055685">"მოწყობილობა ჩაკეტილია ადმინისტრატორის მიერ"</string>
     <string name="kg_prompt_reason_user_request" msgid="6015774877733717904">"მოწყობილობა ხელით ჩაიკეტა"</string>
     <string name="kg_face_not_recognized" msgid="7903950626744419160">"არ არის ამოცნობილი"</string>
-    <string name="kg_face_sensor_privacy_enabled" msgid="939511161763558512">"სახით განბლოკვით სარგებლობისთვის, ჩართეთ კამერაზე წვდომა პარამეტრებში"</string>
-    <string name="kg_password_default_pin_message" msgid="1434544655827987873">"{count,plural, =1{შეიყვანეთ SIM ბარათის PIN-კოდი. თქვენ დაგრჩათ # მცდელობა, რის შემდეგაც მოწყობილობის განსაბლოკად დაგჭირდებათ თქვენს ოპერატორთან დაკავშირება.}other{შეიყვანეთ SIM ბარათის PIN-კოდი. თქვენ დაგრჩათ # მცდელობა.}}"</string>
-    <string name="kg_password_default_puk_message" msgid="1025139786449741950">"{count,plural, =1{SIM ბარათი ახლა გათიშულია. გასაგრძელებლად შეიყვანეთ PUK-კოდი. თქვენ დაგრჩათ # მცდელობა, სანამ SIM სამუდამოდ გამოუსადეგარი გახდება. დეტალური ინფორმაციისთვის დაუკავშირდით თქვენს ოპერატორს.}other{SIM ბარათი ახლა გათიშულია. გასაგრძელებლად შეიყვანეთ PUK-კოდი. თქვენ დაგრჩათ # მცდელობა, სანამ SIM სამუდამოდ გამოუსადეგარი გახდება. დეტალური ინფორმაციისთვის დაუკავშირდით თქვენს ოპერატორს.}}"</string>
+    <string name="kg_face_sensor_privacy_enabled" msgid="6513157891227284806">"იმისთვის, რომ სახით განბლოკვით ისარგებლოთ, ჩართეთ "<b>"კამერაზე წვდომა"</b>" პარამეტრებსა და კონფიდენციალურობაში"</string>
+    <plurals name="kg_password_default_pin_message" formatted="false" msgid="7730152526369857818">
+      <item quantity="other">შეიყვანეთ SIM ბარათის PIN-კოდი. თქვენ დაგრჩათ <xliff:g id="NUMBER_1">%d</xliff:g> მცდელობა.</item>
+      <item quantity="one">შეიყვანეთ SIM ბარათის PIN-კოდი. თქვენ დაგრჩათ <xliff:g id="NUMBER_0">%d</xliff:g> მცდელობა, რომლის შემდეგაც მოწყობილობის განსაბლოკად დაგჭირდებათ თქვენს ოპერატორთან დაკავშირება.</item>
+    </plurals>
+    <plurals name="kg_password_default_puk_message" formatted="false" msgid="571308542462946935">
+      <item quantity="other">SIM ბარათი ახლა დეაქტივირებულია. გასაგრძელებლად შეიყვანეთ PUK-კოდი. თქვენ დაგრჩათ <xliff:g id="_NUMBER_1">%d</xliff:g> მცდელობა, სანამ SIM სამუდამოდ გამოუსადეგარი გახდება. დეტალური ინფორმაციისთვის დაუკავშირდით თქვენს ოპერატორს.</item>
+      <item quantity="one">SIM ბარათი ახლა დეაქტივირებულია. გასაგრძელებლად შეიყვანეთ PUK-კოდი. თქვენ დაგრჩათ <xliff:g id="_NUMBER_0">%d</xliff:g> მცდელობა, სანამ SIM სამუდამოდ გამოუსადეგარი გახდება. დეტალური ინფორმაციისთვის დაუკავშირდით თქვენს ოპერატორს.</item>
+    </plurals>
     <string name="clock_title_default" msgid="6342735240617459864">"ნაგულისხმევი"</string>
     <string name="clock_title_bubble" msgid="2204559396790593213">"ბუშტი"</string>
     <string name="clock_title_analog" msgid="8409262532900918273">"ანალოგური"</string>

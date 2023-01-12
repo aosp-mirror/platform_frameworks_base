@@ -22,14 +22,21 @@ import com.android.systemui.keyguard.domain.interactor.KeyguardBottomAreaInterac
 import com.android.systemui.keyguard.domain.interactor.KeyguardInteractor
 import com.android.systemui.keyguard.domain.interactor.KeyguardQuickAffordanceInteractor
 import com.android.systemui.keyguard.domain.model.KeyguardQuickAffordanceModel
-import com.android.systemui.keyguard.domain.model.KeyguardQuickAffordancePosition
+import com.android.systemui.keyguard.shared.quickaffordance.ActivationState
+import com.android.systemui.keyguard.shared.quickaffordance.KeyguardQuickAffordancePosition
+import com.android.systemui.shared.keyguard.shared.model.KeyguardQuickAffordanceSlots
 import javax.inject.Inject
+import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.distinctUntilChanged
+import kotlinx.coroutines.flow.flatMapLatest
+import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.map
 
 /** View-model for the keyguard bottom area view */
+@OptIn(ExperimentalCoroutinesApi::class)
 class KeyguardBottomAreaViewModel
 @Inject
 constructor(
@@ -38,6 +45,20 @@ constructor(
     private val bottomAreaInteractor: KeyguardBottomAreaInteractor,
     private val burnInHelperWrapper: BurnInHelperWrapper,
 ) {
+    /**
+     * Whether this view-model instance is powering the preview experience that renders exclusively
+     * in the wallpaper picker application. This should _always_ be `false` for the real lock screen
+     * experience.
+     */
+    private val isInPreviewMode = MutableStateFlow(false)
+
+    /**
+     * ID of the slot that's currently selected in the preview that renders exclusively in the
+     * wallpaper picker application. This is ignored for the actual, real lock screen experience.
+     */
+    private val selectedPreviewSlotId =
+        MutableStateFlow(KeyguardQuickAffordanceSlots.SLOT_ID_BOTTOM_START)
+
     /**
      * Whether quick affordances are "opaque enough" to be considered visible to and interactive by
      * the user. If they are not interactive, user input should not be allowed on them.
@@ -65,7 +86,14 @@ constructor(
     val isOverlayContainerVisible: Flow<Boolean> =
         keyguardInteractor.isDozing.map { !it }.distinctUntilChanged()
     /** An observable for the alpha level for the entire bottom area. */
-    val alpha: Flow<Float> = bottomAreaInteractor.alpha.distinctUntilChanged()
+    val alpha: Flow<Float> =
+        isInPreviewMode.flatMapLatest { isInPreviewMode ->
+            if (isInPreviewMode) {
+                flowOf(1f)
+            } else {
+                bottomAreaInteractor.alpha.distinctUntilChanged()
+            }
+        }
     /** An observable for whether the indication area should be padded. */
     val isIndicationAreaPadded: Flow<Boolean> =
         combine(startButton, endButton) { startButtonModel, endButtonModel ->
@@ -89,25 +117,65 @@ constructor(
             .distinctUntilChanged()
     }
 
+    /**
+     * Returns whether the keyguard bottom area should be constrained to the top of the lock icon
+     */
+    fun shouldConstrainToTopOfLockIcon(): Boolean =
+        bottomAreaInteractor.shouldConstrainToTopOfLockIcon()
+
+    /**
+     * Puts this view-model in "preview mode", which means it's being used for UI that is rendering
+     * the lock screen preview in wallpaper picker / settings and not the real experience on the
+     * lock screen.
+     *
+     * @param initiallySelectedSlotId The ID of the initial slot to render as the selected one.
+     */
+    fun enablePreviewMode(initiallySelectedSlotId: String?) {
+        isInPreviewMode.value = true
+        onPreviewSlotSelected(
+            initiallySelectedSlotId ?: KeyguardQuickAffordanceSlots.SLOT_ID_BOTTOM_START
+        )
+    }
+
+    /**
+     * Notifies that a slot with the given ID has been selected in the preview experience that is
+     * rendering in the wallpaper picker. This is ignored for the real lock screen experience.
+     *
+     * @see enablePreviewMode
+     */
+    fun onPreviewSlotSelected(slotId: String) {
+        selectedPreviewSlotId.value = slotId
+    }
+
     private fun button(
         position: KeyguardQuickAffordancePosition
     ): Flow<KeyguardQuickAffordanceViewModel> {
-        return combine(
-                quickAffordanceInteractor.quickAffordance(position),
-                bottomAreaInteractor.animateDozingTransitions.distinctUntilChanged(),
-                areQuickAffordancesFullyOpaque,
-            ) { model, animateReveal, isFullyOpaque ->
-                model.toViewModel(
-                    animateReveal = animateReveal,
-                    isClickable = isFullyOpaque,
-                )
-            }
-            .distinctUntilChanged()
+        return isInPreviewMode.flatMapLatest { isInPreviewMode ->
+            combine(
+                    if (isInPreviewMode) {
+                        quickAffordanceInteractor.quickAffordanceAlwaysVisible(position = position)
+                    } else {
+                        quickAffordanceInteractor.quickAffordance(position = position)
+                    },
+                    bottomAreaInteractor.animateDozingTransitions.distinctUntilChanged(),
+                    areQuickAffordancesFullyOpaque,
+                    selectedPreviewSlotId,
+                ) { model, animateReveal, isFullyOpaque, selectedPreviewSlotId ->
+                    model.toViewModel(
+                        animateReveal = !isInPreviewMode && animateReveal,
+                        isClickable = isFullyOpaque && !isInPreviewMode,
+                        isSelected =
+                            (isInPreviewMode && selectedPreviewSlotId == position.toSlotId()),
+                    )
+                }
+                .distinctUntilChanged()
+        }
     }
 
     private fun KeyguardQuickAffordanceModel.toViewModel(
         animateReveal: Boolean,
         isClickable: Boolean,
+        isSelected: Boolean,
     ): KeyguardQuickAffordanceViewModel {
         return when (this) {
             is KeyguardQuickAffordanceModel.Visible ->
@@ -116,14 +184,16 @@ constructor(
                     isVisible = true,
                     animateReveal = animateReveal,
                     icon = icon,
-                    contentDescriptionResourceId = contentDescriptionResourceId,
                     onClicked = { parameters ->
-                        quickAffordanceInteractor.onQuickAffordanceClicked(
+                        quickAffordanceInteractor.onQuickAffordanceTriggered(
                             configKey = parameters.configKey,
-                            animationController = parameters.animationController,
+                            expandable = parameters.expandable,
                         )
                     },
                     isClickable = isClickable,
+                    isActivated = activationState is ActivationState.Active,
+                    isSelected = isSelected,
+                    useLongPress = quickAffordanceInteractor.useLongPress,
                 )
             is KeyguardQuickAffordanceModel.Hidden -> KeyguardQuickAffordanceViewModel()
         }

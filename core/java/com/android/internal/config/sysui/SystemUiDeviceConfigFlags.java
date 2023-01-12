@@ -556,6 +556,17 @@ public final class SystemUiDeviceConfigFlags {
             "show_stop_button_for_user_allowlisted_apps";
 
     /**
+     * (boolean) Whether the task manager should show apps running user-visible jobs.
+     */
+    public static final String TASK_MANAGER_SHOW_USER_VISIBLE_JOBS =
+            "task_manager_show_user_visible_jobs";
+
+    /**
+     * (boolean) Whether to show notification volume control slider separate from ring.
+     */
+    public static final String VOLUME_SEPARATE_NOTIFICATION = "volume_separate_notification";
+
+    /**
      * (boolean) Whether the clipboard overlay is enabled.
      */
     public static final String CLIPBOARD_OVERLAY_ENABLED = "clipboard_overlay_enabled";
@@ -577,6 +588,18 @@ public final class SystemUiDeviceConfigFlags {
      * (boolean) Whether to show smart chips (based on TextClassifier) in the clipboard overlay.
      */
     public static final String CLIPBOARD_OVERLAY_SHOW_ACTIONS = "clipboard_overlay_show_actions";
+
+    /**
+     * (boolean) Whether to ignore the source package for determining whether to use remote copy
+     * behavior in the clipboard UI.
+     */
+    public static final String CLIPBOARD_IGNORE_REMOTE_COPY_SOURCE =
+            "clipboard_ignore_remote_copy_source";
+
+    /**
+     * (boolean) Whether to combine the broadcasts APPWIDGET_ENABLED and APPWIDGET_UPDATE
+     */
+    public static final String COMBINED_BROADCAST_ENABLED = "combined_broadcast_enabled";
 
     private SystemUiDeviceConfigFlags() {
     }

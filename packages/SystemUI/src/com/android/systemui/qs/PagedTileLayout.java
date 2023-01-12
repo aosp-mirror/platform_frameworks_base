@@ -11,7 +11,6 @@ import android.content.Context;
 import android.content.res.Configuration;
 import android.os.Bundle;
 import android.util.AttributeSet;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -31,6 +30,7 @@ import com.android.systemui.R;
 import com.android.systemui.plugins.qs.QSTile;
 import com.android.systemui.qs.QSPanel.QSTileLayout;
 import com.android.systemui.qs.QSPanelControllerBase.TileRecord;
+import com.android.systemui.qs.logging.QSLogger;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -38,11 +38,9 @@ import java.util.Set;
 
 public class PagedTileLayout extends ViewPager implements QSTileLayout {
 
-    private static final boolean DEBUG = false;
     private static final String CURRENT_PAGE = "current_page";
     private static final int NO_PAGE = -1;
 
-    private static final String TAG = "PagedTileLayout";
     private static final int REVEAL_SCROLL_DURATION_MILLIS = 750;
     private static final float BOUNCE_ANIMATION_TENSION = 1.3f;
     private static final long BOUNCE_ANIMATION_DURATION = 450L;
@@ -55,6 +53,7 @@ public class PagedTileLayout extends ViewPager implements QSTileLayout {
     private final ArrayList<TileRecord> mTiles = new ArrayList<>();
     private final ArrayList<TileLayout> mPages = new ArrayList<>();
 
+    private QSLogger mLogger;
     @Nullable
     private PageIndicator mPageIndicator;
     private float mPageIndicatorPosition;
@@ -146,9 +145,15 @@ public class PagedTileLayout extends ViewPager implements QSTileLayout {
         }
         if (mLayoutOrientation != newConfig.orientation) {
             mLayoutOrientation = newConfig.orientation;
-            mDistributeTiles = true;
+            forceTilesRedistribution("orientation changed to " + mLayoutOrientation);
             setCurrentItem(0, false);
             mPageToRestore = 0;
+        } else {
+            // logging in case we missed redistribution because orientation was not changed
+            // while configuration changed, can be removed after b/255208946 is fixed
+            mLogger.d(
+                    "Orientation didn't change, tiles might be not redistributed, new config",
+                    newConfig);
         }
     }
 
@@ -226,7 +231,7 @@ public class PagedTileLayout extends ViewPager implements QSTileLayout {
             // Keep on drawing until the animation has finished.
             postInvalidateOnAnimation();
         } catch (NullPointerException e) {
-            Log.e(TAG, "FakeDragBy called before begin", e);
+            mLogger.logException("FakeDragBy called before begin", e);
             // If we were trying to fake drag, it means we just added a new tile to the last
             // page, so animate there.
             final int lastPageNumber = mPages.size() - 1;
@@ -246,7 +251,7 @@ public class PagedTileLayout extends ViewPager implements QSTileLayout {
             super.endFakeDrag();
         } catch (NullPointerException e) {
             // Not sure what's going on. Let's log it
-            Log.e(TAG, "endFakeDrag called without velocityTracker", e);
+            mLogger.logException("endFakeDrag called without velocityTracker", e);
         }
     }
 
@@ -304,14 +309,14 @@ public class PagedTileLayout extends ViewPager implements QSTileLayout {
     @Override
     public void addTile(TileRecord tile) {
         mTiles.add(tile);
-        mDistributeTiles = true;
+        forceTilesRedistribution("adding new tile");
         requestLayout();
     }
 
     @Override
     public void removeTile(TileRecord tile) {
         if (mTiles.remove(tile)) {
-            mDistributeTiles = true;
+            forceTilesRedistribution("removing tile");
             requestLayout();
         }
     }
@@ -364,17 +369,14 @@ public class PagedTileLayout extends ViewPager implements QSTileLayout {
     private void distributeTiles() {
         emptyAndInflateOrRemovePages();
 
-        final int tileCount = mPages.get(0).maxTiles();
-        if (DEBUG) Log.d(TAG, "Distributing tiles");
+        final int tilesPerPageCount = mPages.get(0).maxTiles();
         int index = 0;
-        final int NT = mTiles.size();
-        for (int i = 0; i < NT; i++) {
+        final int totalTilesCount = mTiles.size();
+        mLogger.logTileDistributionInProgress(tilesPerPageCount, totalTilesCount);
+        for (int i = 0; i < totalTilesCount; i++) {
             TileRecord tile = mTiles.get(i);
-            if (mPages.get(index).mRecords.size() == tileCount) index++;
-            if (DEBUG) {
-                Log.d(TAG, "Adding " + tile.tile.getClass().getSimpleName() + " to "
-                        + index);
-            }
+            if (mPages.get(index).mRecords.size() == tilesPerPageCount) index++;
+            mLogger.logTileDistributed(tile.tile.getClass().getSimpleName(), index);
             mPages.get(index).addTile(tile);
         }
     }
@@ -389,11 +391,11 @@ public class PagedTileLayout extends ViewPager implements QSTileLayout {
             return;
         }
         while (mPages.size() < numPages) {
-            if (DEBUG) Log.d(TAG, "Adding page");
+            mLogger.d("Adding new page");
             mPages.add(createTileLayout());
         }
         while (mPages.size() > numPages) {
-            if (DEBUG) Log.d(TAG, "Removing page");
+            mLogger.d("Removing page");
             mPages.remove(mPages.size() - 1);
         }
         mPageIndicator.setNumPages(mPages.size());
@@ -412,8 +414,12 @@ public class PagedTileLayout extends ViewPager implements QSTileLayout {
             changed |= mPages.get(i).updateResources();
         }
         if (changed) {
-            mDistributeTiles = true;
+            forceTilesRedistribution("resources in pages changed");
             requestLayout();
+        } else {
+            // logging in case we missed redistribution because number of column in updateResources
+            // was not changed, can be removed after b/255208946 is fixed
+            mLogger.d("resource in pages didn't change, tiles might be not redistributed");
         }
         return changed;
     }
@@ -425,7 +431,7 @@ public class PagedTileLayout extends ViewPager implements QSTileLayout {
         for (int i = 0; i < mPages.size(); i++) {
             if (mPages.get(i).setMinRows(minRows)) {
                 changed = true;
-                mDistributeTiles = true;
+                forceTilesRedistribution("minRows changed in page");
             }
         }
         return changed;
@@ -438,7 +444,7 @@ public class PagedTileLayout extends ViewPager implements QSTileLayout {
         for (int i = 0; i < mPages.size(); i++) {
             if (mPages.get(i).setMaxColumns(maxColumns)) {
                 changed = true;
-                mDistributeTiles = true;
+                forceTilesRedistribution("maxColumns in pages changed");
             }
         }
         return changed;
@@ -577,8 +583,8 @@ public class PagedTileLayout extends ViewPager implements QSTileLayout {
         });
         setOffscreenPageLimit(lastPageNumber); // Ensure the page to reveal has been inflated.
         int dx = getWidth() * lastPageNumber;
-        mScroller.startScroll(getScrollX(), getScrollY(), isLayoutRtl() ? -dx  : dx, 0,
-            REVEAL_SCROLL_DURATION_MILLIS);
+        mScroller.startScroll(getScrollX(), getScrollY(), isLayoutRtl() ? -dx : dx, 0,
+                REVEAL_SCROLL_DURATION_MILLIS);
         postInvalidateOnAnimation();
     }
 
@@ -705,14 +711,14 @@ public class PagedTileLayout extends ViewPager implements QSTileLayout {
     private final PagerAdapter mAdapter = new PagerAdapter() {
         @Override
         public void destroyItem(ViewGroup container, int position, Object object) {
-            if (DEBUG) Log.d(TAG, "Destantiating " + position);
+            mLogger.d("Destantiating page at", position);
             container.removeView((View) object);
             updateListening();
         }
 
         @Override
         public Object instantiateItem(ViewGroup container, int position) {
-            if (DEBUG) Log.d(TAG, "Instantiating " + position);
+            mLogger.d("Instantiating page at", position);
             if (isLayoutRtl()) {
                 position = mPages.size() - 1 - position;
             }
@@ -736,8 +742,22 @@ public class PagedTileLayout extends ViewPager implements QSTileLayout {
         }
     };
 
+    /**
+     * Force all tiles to be redistributed across pages.
+     * Should be called when one of the following changes: rows, columns, number of tiles.
+     */
+    public void forceTilesRedistribution(String reason) {
+        mLogger.d("forcing tile redistribution across pages, reason", reason);
+        mDistributeTiles = true;
+    }
+
+    public void setLogger(QSLogger qsLogger) {
+        mLogger = qsLogger;
+    }
+
     public interface PageListener {
         int INVALID_PAGE = -1;
+
         void onPageChanged(boolean isFirst, int pageNumber);
     }
 }

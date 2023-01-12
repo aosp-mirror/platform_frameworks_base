@@ -16,9 +16,9 @@
 
 package com.android.systemui.statusbar.phone.fragment
 
-import com.android.systemui.log.LogBuffer
-import com.android.systemui.log.LogLevel
 import com.android.systemui.log.dagger.CollapsedSbFragmentLog
+import com.android.systemui.plugins.log.LogBuffer
+import com.android.systemui.plugins.log.LogLevel
 import com.android.systemui.statusbar.DisableFlagsLogger
 import javax.inject.Inject
 

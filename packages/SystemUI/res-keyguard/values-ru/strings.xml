@@ -26,11 +26,11 @@
     <string name="keyguard_sim_error_message_short" msgid="633630844240494070">"Ошибка SIM-карты."</string>
     <string name="keyguard_charged" msgid="5478247181205188995">"Батарея заряжена"</string>
     <string name="keyguard_plugged_in_wireless" msgid="2537874724955057383">"<xliff:g id="PERCENTAGE">%s</xliff:g> • Беспроводная зарядка"</string>
-    <string name="keyguard_plugged_in_dock" msgid="2122073051904360987">"<xliff:g id="PERCENTAGE">%s</xliff:g> • Зарядка"</string>
+    <string name="keyguard_plugged_in_dock" msgid="449722738270908674">"<xliff:g id="PERCENTAGE">%s</xliff:g> • Зарядка от док-станции"</string>
     <string name="keyguard_plugged_in" msgid="8169926454348380863">"Идет зарядка (<xliff:g id="PERCENTAGE">%s</xliff:g>)"</string>
     <string name="keyguard_plugged_in_charging_fast" msgid="4386594091107340426">"Идет быстрая зарядка (<xliff:g id="PERCENTAGE">%s</xliff:g>)"</string>
     <string name="keyguard_plugged_in_charging_slowly" msgid="217655355424210">"Идет медленная зарядка (<xliff:g id="PERCENTAGE">%s</xliff:g>)"</string>
-    <string name="keyguard_plugged_in_charging_limited" msgid="1709413803451065875">"<xliff:g id="PERCENTAGE">%s</xliff:g> • Чтобы продлить срок службы батареи, зарядка приостановлена"</string>
+    <string name="keyguard_plugged_in_charging_limited" msgid="6091488837901216962">"<xliff:g id="PERCENTAGE">%s</xliff:g> • Зарядка временно ограничена"</string>
     <string name="keyguard_instructions_when_pattern_disabled" msgid="8448804180089936954">"Для разблокировки нажмите \"Меню\"."</string>
     <string name="keyguard_network_locked_message" msgid="407096292844868608">"Сеть заблокирована"</string>
     <string name="keyguard_missing_sim_message_short" msgid="704159478161444907">"Нет SIM-карты."</string>
@@ -68,9 +68,19 @@
     <string name="kg_too_many_failed_password_attempts_dialog_message" msgid="190984061975729494">"Вы ввели неверный пароль несколько раз (<xliff:g id="NUMBER_0">%1$d</xliff:g>).\n\nПовторите попытку через <xliff:g id="NUMBER_1">%2$d</xliff:g> сек."</string>
     <string name="kg_too_many_failed_pattern_attempts_dialog_message" msgid="4252405904570284368">"Вы начертили неверный графический ключ несколько раз (<xliff:g id="NUMBER_0">%1$d</xliff:g>).\n\nПовторите попытку через <xliff:g id="NUMBER_1">%2$d</xliff:g> сек."</string>
     <string name="kg_password_wrong_pin_code_pukked" msgid="8047350661459040581">"Неверный PIN-код. Обратитесь к оператору связи, чтобы разблокировать SIM-карту."</string>
-    <string name="kg_password_wrong_pin_code" msgid="5629415765976820357">"{count,plural, =1{Неверный PIN-код. Осталась # попытка. Если ввести неправильный PIN-код ещё раз, SIM-карта будет заблокирована и вам придется обратиться к оператору связи.}one{Неверный PIN-код. Осталась # попытка. }few{Неверный PIN-код. Осталось # попытки. }many{Неверный PIN-код. Осталось # попыток. }other{Неверный PIN-код. Осталось # попытки. }}"</string>
+    <plurals name="kg_password_wrong_pin_code" formatted="false" msgid="7030584350995485026">
+      <item quantity="one">Неверный PIN-код. Осталась <xliff:g id="NUMBER_1">%d</xliff:g> попытка.</item>
+      <item quantity="few">Неверный PIN-код. Осталось <xliff:g id="NUMBER_1">%d</xliff:g> попытки.</item>
+      <item quantity="many">Неверный PIN-код. Осталось <xliff:g id="NUMBER_1">%d</xliff:g> попыток.</item>
+      <item quantity="other">Неверный PIN-код. Осталось <xliff:g id="NUMBER_1">%d</xliff:g> попытки.</item>
+    </plurals>
     <string name="kg_password_wrong_puk_code_dead" msgid="3698285357028468617">"SIM-карта заблокирована навсегда. Обратитесь к оператору связи."</string>
-    <string name="kg_password_wrong_puk_code" msgid="6820515467645087827">"{count,plural, =1{Неверный PUK-код. Осталась # попытка. Если ввести неправильный PUK-код ещё раз, SIM-карта будет заблокирована навсегда.}one{Неверный PUK-код. Осталась # попытка. После того как попытки закончатся, SIM-карта будет заблокирована навсегда.}few{Неверный PUK-код. Осталось # попытки. После того как они закончатся, SIM-карта будет заблокирована навсегда.}many{Неверный PUK-код. Осталось # попыток. После того как они закончатся, SIM-карта будет заблокирована навсегда.}other{Неверный PUK-код. Осталось # попытки. После того как попытки закончатся, SIM-карта будет заблокирована навсегда.}}"</string>
+    <plurals name="kg_password_wrong_puk_code" formatted="false" msgid="3937306685604862886">
+      <item quantity="one">Неверный PUK-код. Осталась <xliff:g id="NUMBER_1">%d</xliff:g> попытка. После этого SIM-карта будет заблокирована навсегда.</item>
+      <item quantity="few">Неверный PUK-код. Осталось <xliff:g id="NUMBER_1">%d</xliff:g> попытки. После этого SIM-карта будет заблокирована навсегда.</item>
+      <item quantity="many">Неверный PUK-код. Осталось <xliff:g id="NUMBER_1">%d</xliff:g> попыток. После этого SIM-карта будет заблокирована навсегда.</item>
+      <item quantity="other">Неверный PUK-код. Осталось <xliff:g id="NUMBER_1">%d</xliff:g> попытки. После этого SIM-карта будет заблокирована навсегда.</item>
+    </plurals>
     <string name="kg_password_pin_failed" msgid="5136259126330604009">"Не удалось разблокировать SIM-карту"</string>
     <string name="kg_password_puk_failed" msgid="6778867411556937118">"Не удалось разблокировать SIM-карту"</string>
     <string name="accessibility_ime_switch_button" msgid="9082358310194861329">"Сменить способ ввода"</string>
@@ -84,9 +94,19 @@
     <string name="kg_prompt_reason_device_admin" msgid="6961159596224055685">"Устройство заблокировано администратором"</string>
     <string name="kg_prompt_reason_user_request" msgid="6015774877733717904">"Устройство было заблокировано вручную"</string>
     <string name="kg_face_not_recognized" msgid="7903950626744419160">"Не распознано"</string>
-    <string name="kg_face_sensor_privacy_enabled" msgid="939511161763558512">"В настройках разрешите фейсконтролю доступ к камере."</string>
-    <string name="kg_password_default_pin_message" msgid="1434544655827987873">"{count,plural, =1{Введите PIN-код. Осталась # попытка. Если указать неверный PIN-код ещё раз, SIM-карта будет заблокирована и вам придется обратиться к оператору связи.}one{Введите PIN-код SIM-карты. Осталась # попытка.}few{Введите PIN-код SIM-карты. Осталось # попытки.}many{Введите PIN-код SIM-карты. Осталось # попыток.}other{Введите PIN-код SIM-карты. Осталось # попытки.}}"</string>
-    <string name="kg_password_default_puk_message" msgid="1025139786449741950">"{count,plural, =1{SIM-карта заблокирована. Чтобы продолжить, введите PUK-код. Осталась # попытка. Если ввести неверный PUK-код, SIM-карта будет заблокирована навсегда. За подробной информацией обратитесь к оператору связи.}one{SIM-карта заблокирована. Чтобы продолжить, введите PUK-код. Осталась # попытка. После того как попытки закончатся, SIM-карта будет заблокирована навсегда. За подробной информацией обратитесь к оператору связи.}few{SIM-карта заблокирована. Чтобы продолжить, введите PUK-код. Осталось # попытки. После того как они закончатся, SIM-карта будет заблокирована навсегда. За подробной информацией обратитесь к оператору связи.}many{SIM-карта заблокирована. Чтобы продолжить, введите PUK-код. Осталось # попыток. После того как они закончатся, SIM-карта будет заблокирована навсегда. За подробной информацией обратитесь к оператору связи.}other{SIM-карта заблокирована. Чтобы продолжить, введите PUK-код. Осталось # попытки. После того как попытки закончатся, SIM-карта будет заблокирована навсегда. За подробной информацией обратитесь к оператору связи.}}"</string>
+    <string name="kg_face_sensor_privacy_enabled" msgid="6513157891227284806">"Чтобы использовать фейсконтроль, разрешите "<b>"доступ к камере"</b>". Для этого перейдите в настройки и нажмите \"Конфиденциальность\"."</string>
+    <plurals name="kg_password_default_pin_message" formatted="false" msgid="7730152526369857818">
+      <item quantity="one">Введите PIN-код. Осталась <xliff:g id="NUMBER_1">%d</xliff:g> попытка.</item>
+      <item quantity="few">Введите PIN-код. Осталось <xliff:g id="NUMBER_1">%d</xliff:g> попытки.</item>
+      <item quantity="many">Введите PIN-код. Осталось <xliff:g id="NUMBER_1">%d</xliff:g> попыток.</item>
+      <item quantity="other">Введите PIN-код. Осталось <xliff:g id="NUMBER_1">%d</xliff:g> попытки.</item>
+    </plurals>
+    <plurals name="kg_password_default_puk_message" formatted="false" msgid="571308542462946935">
+      <item quantity="one">SIM-карта отключена. Чтобы продолжить, введите PUK-код. Осталась <xliff:g id="_NUMBER_1">%d</xliff:g> попытка. После этого SIM-карта будет заблокирована навсегда. За подробной информацией обратитесь к оператору связи.</item>
+      <item quantity="few">SIM-карта отключена. Чтобы продолжить, введите PUK-код. Осталось <xliff:g id="_NUMBER_1">%d</xliff:g> попытки. После этого SIM-карта будет заблокирована навсегда. За подробной информацией обратитесь к оператору связи.</item>
+      <item quantity="many">SIM-карта отключена. Чтобы продолжить, введите PUK-код. Осталось <xliff:g id="_NUMBER_1">%d</xliff:g> попыток. После этого SIM-карта будет заблокирована навсегда. За подробной информацией обратитесь к оператору связи.</item>
+      <item quantity="other">SIM-карта отключена. Чтобы продолжить, введите PUK-код. Осталось <xliff:g id="_NUMBER_1">%d</xliff:g> попытки. После этого SIM-карта будет заблокирована навсегда. За подробной информацией обратитесь к оператору связи.</item>
+    </plurals>
     <string name="clock_title_default" msgid="6342735240617459864">"По умолчанию"</string>
     <string name="clock_title_bubble" msgid="2204559396790593213">"Пузырь"</string>
     <string name="clock_title_analog" msgid="8409262532900918273">"Стрелки"</string>

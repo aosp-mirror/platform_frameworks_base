@@ -72,16 +72,13 @@
     <string name="notification_bubble_title" msgid="6082910224488253378">"બબલ"</string>
     <string name="manage_bubbles_text" msgid="7730624269650594419">"મેનેજ કરો"</string>
     <string name="accessibility_bubble_dismissed" msgid="8367471990421247357">"બબલ છોડી દેવાયો."</string>
-    <string name="restart_button_description" msgid="6712141648865547958">"વધુ સારા વ્યૂ માટે, આ ઍપને ફરી શરૂ કરવા ટૅપ કરો."</string>
+    <string name="restart_button_description" msgid="5887656107651190519">"આ ઍપ ફરીથી ચાલુ કરવા માટે ટૅપ કરીને પૂર્ણ સ્ક્રીન કરો."</string>
     <string name="camera_compat_treatment_suggested_button_description" msgid="8103916969024076767">"કૅમેરામાં સમસ્યાઓ છે?\nફરીથી ફિટ કરવા માટે ટૅપ કરો"</string>
     <string name="camera_compat_treatment_applied_button_description" msgid="2944157113330703897">"સુધારો નથી થયો?\nપહેલાંના પર પાછું ફેરવવા માટે ટૅપ કરો"</string>
     <string name="camera_compat_dismiss_button_description" msgid="2795364433503817511">"કૅમેરામાં કોઈ સમસ્યા નથી? છોડી દેવા માટે ટૅપ કરો."</string>
-    <string name="letterbox_education_dialog_title" msgid="7739895354143295358">"જુઓ અને બીજું ઘણું કરો"</string>
-    <string name="letterbox_education_split_screen_text" msgid="6206339484068670830">"સ્ક્રીન વિભાજન માટે કોઈ અન્ય ઍપમાં ખેંચો"</string>
-    <string name="letterbox_education_reposition_text" msgid="4589957299813220661">"કોઈ ઍપની જગ્યા બદલવા માટે, તેની બહાર બે વાર ટૅપ કરો"</string>
+    <string name="letterbox_education_dialog_title" msgid="6688664582871779215">"અમુક ઍપ પોર્ટ્રેટ મોડમાં શ્રેષ્ઠ રીતે કાર્ય કરે છે"</string>
+    <string name="letterbox_education_dialog_subtext" msgid="4853542518367719562">"તમારી સ્પેસનો વધુને વધુ લાભ લેવા માટે, આ વિકલ્પોમાંથી કોઈ એક અજમાવો"</string>
+    <string name="letterbox_education_screen_rotation_text" msgid="5085786687366339027">"પૂર્ણ સ્ક્રીન મોડ લાગુ કરવા માટે, તમારા ડિવાઇસને ફેરવો"</string>
+    <string name="letterbox_education_reposition_text" msgid="1068293354123934727">"કોઈ ઍપની જગ્યા બદલવા માટે, તેની બાજુમાં બે વાર ટૅપ કરો"</string>
     <string name="letterbox_education_got_it" msgid="4057634570866051177">"સમજાઈ ગયું"</string>
-    <string name="letterbox_education_expand_button_description" msgid="1729796567101129834">"વધુ માહિતી માટે મોટું કરો."</string>
-    <string name="maximize_button_text" msgid="1650859196290301963">"મોટું કરો"</string>
-    <string name="minimize_button_text" msgid="271592547935841753">"નાનું કરો"</string>
-    <string name="close_button_text" msgid="2913281996024033299">"બંધ કરો"</string>
 </resources>

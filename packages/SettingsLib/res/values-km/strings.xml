@@ -117,17 +117,17 @@
     <string name="bluetooth_profile_opp" msgid="6692618568149493430">"ផ្ទេរ​ឯកសារ"</string>
     <string name="bluetooth_profile_hid" msgid="2969922922664315866">"ឧបករណ៍​បញ្ចូល"</string>
     <string name="bluetooth_profile_pan" msgid="1006235139308318188">"ការចូលប្រើ​អ៊ីនធឺណិត"</string>
-    <string name="bluetooth_profile_pbap" msgid="4262303387989406171">"ការចែករំលែកទំនាក់ទំនង និងប្រវត្តិហៅទូរសព្ទ"</string>
-    <string name="bluetooth_profile_pbap_summary" msgid="6466456791354759132">"ការប្រើសម្រាប់ការចែករំលែកទំនាក់ទំនង និងប្រវត្តិហៅទូរសព្ទ"</string>
+    <string name="bluetooth_profile_pbap" msgid="7064307749579335765">"ការ​ចែករំលែក​​ទំនាក់ទំនង"</string>
+    <string name="bluetooth_profile_pbap_summary" msgid="2955819694801952056">"ប្រើ​សម្រាប់​ការ​ចែករំលែក​ទំនាក់ទំនង"</string>
     <string name="bluetooth_profile_pan_nap" msgid="7871974753822470050">"ចែករំលែក​ការ​តភ្ជាប់​អ៊ីនធឺណិត"</string>
     <string name="bluetooth_profile_map" msgid="8907204701162107271">"សារ​ជាអក្សរ"</string>
     <string name="bluetooth_profile_sap" msgid="8304170950447934386">"ការចូលដំណើរការស៊ីម"</string>
     <string name="bluetooth_profile_a2dp_high_quality" msgid="4739440941324792775">"សំឡេងកម្រិត HD៖ <xliff:g id="CODEC_NAME">%1$s</xliff:g>"</string>
     <string name="bluetooth_profile_a2dp_high_quality_unknown_codec" msgid="2477639096903834374">"សំឡេងកម្រិត HD"</string>
     <string name="bluetooth_profile_hearing_aid" msgid="58154575573984914">"ឧបករណ៍​ជំនួយការ​ស្ដាប់"</string>
-    <string name="bluetooth_profile_le_audio" msgid="3237854988278539061">"LE audio"</string>
+    <string name="bluetooth_profile_le_audio" msgid="5158149987518342036">"LE_AUDIO"</string>
     <string name="bluetooth_hearing_aid_profile_summary_connected" msgid="8191273236809964030">"បាន​ភ្ជាប់ទៅ​ឧបករណ៍​ជំនួយការ​ស្ដាប់"</string>
-    <string name="bluetooth_le_audio_profile_summary_connected" msgid="6916226974453480650">"បានភ្ជាប់​ទៅ LE audio"</string>
+    <string name="bluetooth_le_audio_profile_summary_connected" msgid="3162538609379333442">"បានភ្ជាប់​ទៅ LE_AUDIO"</string>
     <string name="bluetooth_a2dp_profile_summary_connected" msgid="7422607970115444153">"បា​ន​ភ្ជាប់​ទៅ​អូឌីយ៉ូ​មេឌៀ"</string>
     <string name="bluetooth_headset_profile_summary_connected" msgid="2420981566026949688">"តភ្ជាប់​ទៅ​អូឌីយ៉ូ​ទូរស័ព្ទ"</string>
     <string name="bluetooth_opp_profile_summary_connected" msgid="2393521801478157362">"បាន​តភ្ជាប់​ទៅ​ម៉ាស៊ីន​មេ​ផ្ទេរ​ឯកសារ"</string>
@@ -408,7 +408,6 @@
     <string name="force_resizable_activities_summary" msgid="2490382056981583062">"ធ្វើឲ្យសកម្មភាពទាំងអស់អាចប្តូរទំហំបានសម្រាប់ពហុវិនដូ ដោយមិនគិតពីតម្លៃមេនីហ្វេសថ៍។"</string>
     <string name="enable_freeform_support" msgid="7599125687603914253">"បើកដំណើរការផ្ទាំងវិនដូទម្រង់សេរី"</string>
     <string name="enable_freeform_support_summary" msgid="1822862728719276331">"បើកឱ្យអាចប្រើផ្ទាំងវិនដូទម្រង់សេរីពិសោធន៍។"</string>
-    <string name="desktop_mode" msgid="2389067840550544462">"មុខងារកុំព្យូទ័រ"</string>
     <string name="local_backup_password_title" msgid="4631017948933578709">"ពាក្យ​សម្ងាត់​បម្រុង​ទុក​លើកុំព្យូទ័រ"</string>
     <string name="local_backup_password_summary_none" msgid="7646898032616361714">"បច្ចុប្បន្ន ការ​បម្រុង​ទុក​ពេញលេញនៅលើកុំព្យូទ័រមិន​ត្រូវ​បាន​ការពារ​ទេ"</string>
     <string name="local_backup_password_summary_change" msgid="1707357670383995567">"ប៉ះដើម្បីប្ដូរ ឬយកពាក្យសម្ងាត់ចេញសម្រាប់ការបម្រុងទុកពេញលេញលើកុំព្យូទ័រ"</string>
@@ -477,13 +476,12 @@
     <string name="power_charging" msgid="6727132649743436802">"<xliff:g id="LEVEL">%1$s</xliff:g> - <xliff:g id="STATE">%2$s</xliff:g>"</string>
     <string name="power_remaining_charging_duration_only" msgid="8085099012811384899">"<xliff:g id="TIME">%1$s</xliff:g> ទៀតទើបពេញ"</string>
     <string name="power_charging_duration" msgid="6127154952524919719">"<xliff:g id="LEVEL">%1$s</xliff:g> - នៅសល់ <xliff:g id="TIME">%2$s</xliff:g> ទៀតទើបពេញ"</string>
-    <string name="power_charging_limited" msgid="6971664137170239141">"<xliff:g id="LEVEL">%1$s</xliff:g> - ការសាកថ្មត្រូវបានផ្អាក"</string>
+    <string name="power_charging_limited" msgid="7956120998372505295">"<xliff:g id="LEVEL">%1$s</xliff:g> - បានដាក់កំហិតលើ​ការសាកថ្មជា​បណ្ដោះអាសន្ន"</string>
     <string name="battery_info_status_unknown" msgid="268625384868401114">"មិន​ស្គាល់"</string>
     <string name="battery_info_status_charging" msgid="4279958015430387405">"កំពុងសាក​ថ្ម"</string>
     <string name="battery_info_status_charging_fast" msgid="8027559755902954885">"កំពុងសាកថ្មយ៉ាងឆាប់រហ័ស"</string>
     <string name="battery_info_status_charging_slow" msgid="3190803837168962319">"កំពុង​សាកថ្មយឺត"</string>
     <string name="battery_info_status_charging_wireless" msgid="8924722966861282197">"កំពុង​សាកថ្ម​ឥតខ្សែ"</string>
-    <string name="battery_info_status_charging_dock" msgid="8573274094093364791">"កំពុងសាកថ្ម"</string>
     <string name="battery_info_status_discharging" msgid="6962689305413556485">"មិនកំពុង​សាក​ថ្ម"</string>
     <string name="battery_info_status_not_charging" msgid="3371084153747234837">"បានភ្ជាប់ មិនកំពុង​សាកថ្ម"</string>
     <string name="battery_info_status_full" msgid="1339002294876531312">"បាន​សាក​ថ្មពេញ"</string>
@@ -656,6 +654,11 @@
     <string name="accessibility_ethernet_disconnected" msgid="2832501530856497489">"បានផ្តាច់អ៊ីសឺរណិត។"</string>
     <string name="accessibility_ethernet_connected" msgid="6175942685957461563">"អ៊ីសឺរណិត។"</string>
     <string name="accessibility_no_calling" msgid="3540827068323895748">"គ្មាន​ការហៅ​ទូរសព្ទទេ​។"</string>
+    <string name="dream_complication_title_time" msgid="701747800712893499">"ម៉ោង"</string>
+    <string name="dream_complication_title_date" msgid="8661176085446135789">"កាលបរិច្ឆេទ"</string>
+    <string name="dream_complication_title_weather" msgid="598609151677172783">"អាកាសធាតុ"</string>
+    <string name="dream_complication_title_aqi" msgid="4587552608957834110">"គុណភាព​ខ្យល់"</string>
+    <string name="dream_complication_title_cast_info" msgid="4038776652841885084">"ព័ត៌មានអំពីការបញ្ជូន"</string>
     <string name="avatar_picker_title" msgid="8492884172713170652">"ជ្រើសរើស​រូបភាព​កម្រង​ព័ត៌មាន"</string>
     <string name="default_user_icon_description" msgid="6554047177298972638">"រូបអ្នកប្រើប្រាស់លំនាំដើម"</string>
     <string name="physical_keyboard_title" msgid="4811935435315835220">"ក្ដារចុច​រូបវន្ត"</string>
@@ -664,11 +667,11 @@
     <string name="turn_screen_on_title" msgid="3266937298097573424">"បើក​អេក្រង់"</string>
     <string name="allow_turn_screen_on" msgid="6194845766392742639">"អនុញ្ញាតឱ្យ​បើកអេក្រង់"</string>
     <string name="allow_turn_screen_on_description" msgid="43834403291575164">"អនុញ្ញាតឱ្យ​កម្មវិធី​បើកអេក្រង់។ ប្រសិនបើ​អនុញ្ញាត កម្មវិធី​អាចបើកអេក្រង់​បានគ្រប់ពេល ទោះបីជា​អ្នកគ្មានបំណង​ធ្វើអន្តរកម្មក៏ដោយ។"</string>
+    <string name="bt_le_audio_scan_qr_code" msgid="3521809854780392679">"ស្កេន​កូដ QR"</string>
+    <string name="bt_le_audio_scan_qr_code_scanner" msgid="4679500020630341107">"ដើម្បីចាប់ផ្ដើមស្ដាប់ សូមដាក់កូដ QR ខាងក្រោមឱ្យ​នៅចំកណ្ដាល"</string>
+    <string name="bt_le_audio_qr_code_is_not_valid_format" msgid="6092191081849434734">"កូដ QR មិនមែនជា​ទម្រង់​ដែលត្រឹមត្រូវ​ទេ"</string>
     <string name="bt_le_audio_broadcast_dialog_title" msgid="5392738488989777074">"បញ្ឈប់ការផ្សាយ <xliff:g id="APP_NAME">%1$s</xliff:g> ឬ?"</string>
     <string name="bt_le_audio_broadcast_dialog_sub_title" msgid="268234802198852753">"ប្រសិនបើអ្នក​ផ្សាយ <xliff:g id="SWITCHAPP">%1$s</xliff:g> ឬប្ដូរឧបករណ៍បញ្ចេញសំឡេង ការផ្សាយបច្ចុប្បន្នរបស់អ្នកនឹង​បញ្ឈប់"</string>
     <string name="bt_le_audio_broadcast_dialog_switch_app" msgid="5749813313369517812">"ការផ្សាយ <xliff:g id="SWITCHAPP">%1$s</xliff:g>"</string>
     <string name="bt_le_audio_broadcast_dialog_different_output" msgid="2638402023060391333">"ប្ដូរឧបករណ៍បញ្ចេញសំឡេង"</string>
-    <string name="back_navigation_animation" msgid="8105467568421689484">"ចលនា​ថយក្រោយ​ដែល​ព្យាករ"</string>
-    <string name="back_navigation_animation_summary" msgid="741292224121599456">"បើក​ចលនា​ប្រព័ន្ធ​សម្រាប់​ការ​ថយក្រោយ​ព្យាករ។"</string>
-    <string name="back_navigation_animation_dialog" msgid="8696966520944625596">"ការ​កំណត់នេះ​បើក​ចលនា​ប្រព័ន្ធ​សម្រាប់​ចលនាព្យាករ។ ចលនា​នេះ​ទាមទារ​ការ​កំណត់ enableOnBackInvokedCallback នៅ​ក្នុងកម្មវិធី​ទៅពិត​នៅ​ក្នុង​ឯកសារ​មេនីហ្វេសថ៍។"</string>
 </resources>

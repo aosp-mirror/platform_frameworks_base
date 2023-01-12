@@ -16,22 +16,26 @@
 
 package com.android.systemui.dreams.touch;
 
+import static com.android.systemui.dreams.complication.dagger.ComplicationHostViewModule.COMPLICATIONS_FADE_OUT_DELAY;
 import static com.android.systemui.dreams.complication.dagger.ComplicationHostViewModule.COMPLICATIONS_RESTORE_TIMEOUT;
 
-import android.os.Handler;
 import android.util.Log;
 import android.view.MotionEvent;
 import android.view.View;
 
+import androidx.annotation.Nullable;
+
 import com.android.systemui.dagger.qualifiers.Main;
+import com.android.systemui.dreams.DreamOverlayStateController;
 import com.android.systemui.dreams.complication.Complication;
 import com.android.systemui.statusbar.phone.StatusBarKeyguardViewManager;
 import com.android.systemui.touch.TouchInsetManager;
+import com.android.systemui.util.concurrency.DelayableExecutor;
 
 import com.google.common.util.concurrent.ListenableFuture;
 
+import java.util.ArrayDeque;
 import java.util.concurrent.ExecutionException;
-import java.util.concurrent.Executor;
 
 import javax.inject.Inject;
 import javax.inject.Named;
@@ -49,33 +53,58 @@ public class HideComplicationTouchHandler implements DreamTouchHandler {
     private static final String TAG = "HideComplicationHandler";
     private static final boolean DEBUG = Log.isLoggable(TAG, Log.DEBUG);
 
-    private final Complication.VisibilityController mVisibilityController;
     private final int mRestoreTimeout;
+    private final int mFadeOutDelay;
     private final StatusBarKeyguardViewManager mStatusBarKeyguardViewManager;
-    private final Handler mHandler;
-    private final Executor mExecutor;
+    private final DelayableExecutor mExecutor;
+    private final DreamOverlayStateController mOverlayStateController;
     private final TouchInsetManager mTouchInsetManager;
+    private final Complication.VisibilityController mVisibilityController;
+    private boolean mHidden = false;
+    @Nullable
+    private Runnable mHiddenCallback;
+    private final ArrayDeque<Runnable> mCancelCallbacks = new ArrayDeque<>();
+
 
     private final Runnable mRestoreComplications = new Runnable() {
         @Override
         public void run() {
-            mVisibilityController.setVisibility(View.VISIBLE, true);
+            mVisibilityController.setVisibility(View.VISIBLE);
+            mHidden = false;
+        }
+    };
+
+    private final Runnable mHideComplications = new Runnable() {
+        @Override
+        public void run() {
+            if (mOverlayStateController.areExitAnimationsRunning()) {
+                // Avoid interfering with the exit animations.
+                return;
+            }
+            mVisibilityController.setVisibility(View.INVISIBLE);
+            mHidden = true;
+            if (mHiddenCallback != null) {
+                mHiddenCallback.run();
+                mHiddenCallback = null;
+            }
         }
     };
 
     @Inject
     HideComplicationTouchHandler(Complication.VisibilityController visibilityController,
             @Named(COMPLICATIONS_RESTORE_TIMEOUT) int restoreTimeout,
+            @Named(COMPLICATIONS_FADE_OUT_DELAY) int fadeOutDelay,
             TouchInsetManager touchInsetManager,
             StatusBarKeyguardViewManager statusBarKeyguardViewManager,
-            @Main Executor executor,
-            @Main Handler handler) {
+            @Main DelayableExecutor executor,
+            DreamOverlayStateController overlayStateController) {
         mVisibilityController = visibilityController;
         mRestoreTimeout = restoreTimeout;
+        mFadeOutDelay = fadeOutDelay;
         mStatusBarKeyguardViewManager = statusBarKeyguardViewManager;
-        mHandler = handler;
         mTouchInsetManager = touchInsetManager;
         mExecutor = executor;
+        mOverlayStateController = overlayStateController;
     }
 
     @Override
@@ -87,7 +116,8 @@ public class HideComplicationTouchHandler implements DreamTouchHandler {
         final boolean bouncerShowing = mStatusBarKeyguardViewManager.isBouncerShowing();
 
         // If other sessions are interested in this touch, do not fade out elements.
-        if (session.getActiveSessionCount() > 1 || bouncerShowing) {
+        if (session.getActiveSessionCount() > 1 || bouncerShowing
+                || mOverlayStateController.areExitAnimationsRunning()) {
             if (DEBUG) {
                 Log.d(TAG, "not fading. Active session count: " + session.getActiveSessionCount()
                         + ". Bouncer showing: " + bouncerShowing);
@@ -115,8 +145,11 @@ public class HideComplicationTouchHandler implements DreamTouchHandler {
                 touchCheck.addListener(() -> {
                     try {
                         if (!touchCheck.get()) {
-                            mHandler.removeCallbacks(mRestoreComplications);
-                            mVisibilityController.setVisibility(View.INVISIBLE, true);
+                            // Cancel all pending callbacks.
+                            while (!mCancelCallbacks.isEmpty()) mCancelCallbacks.pop().run();
+                            mCancelCallbacks.add(
+                                    mExecutor.executeDelayed(
+                                            mHideComplications, mFadeOutDelay));
                         } else {
                             // If a touch occurred inside the dream overlay touch insets, do not
                             // handle the touch.
@@ -130,7 +163,23 @@ public class HideComplicationTouchHandler implements DreamTouchHandler {
                     || motionEvent.getAction() == MotionEvent.ACTION_UP) {
                 // End session and initiate delayed reappearance of the complications.
                 session.pop();
-                mHandler.postDelayed(mRestoreComplications, mRestoreTimeout);
+                runAfterHidden(() -> mCancelCallbacks.add(
+                        mExecutor.executeDelayed(mRestoreComplications,
+                                mRestoreTimeout)));
+            }
+        });
+    }
+
+    /**
+     * Triggers a runnable after complications have been hidden. Will override any previously set
+     * runnable currently waiting for hide to happen.
+     */
+    private void runAfterHidden(Runnable runnable) {
+        mExecutor.execute(() -> {
+            if (mHidden) {
+                runnable.run();
+            } else {
+                mHiddenCallback = runnable;
             }
         });
     }

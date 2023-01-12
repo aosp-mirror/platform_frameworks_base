@@ -361,6 +361,22 @@ class AmbientStateTest : SysuiTestCase() {
         assertThat(sut.isOnKeyguard).isFalse()
     }
     // endregion
+
+    // region mIsClosing
+    @Test
+    fun isClosing_whenShadeClosing_shouldReturnTrue() {
+        sut.setIsClosing(true)
+
+        assertThat(sut.isClosing).isTrue()
+    }
+
+    @Test
+    fun isClosing_whenShadeFinishClosing_shouldReturnFalse() {
+        sut.setIsClosing(false)
+
+        assertThat(sut.isClosing).isFalse()
+    }
+    // endregion
 }
 
 // region Arrange helper methods.

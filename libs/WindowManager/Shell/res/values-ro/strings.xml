@@ -17,20 +17,20 @@
 
 <resources xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
-    <string name="pip_phone_close" msgid="5783752637260411309">"Închide"</string>
-    <string name="pip_phone_expand" msgid="2579292903468287504">"Extinde"</string>
+    <string name="pip_phone_close" msgid="5783752637260411309">"Închideți"</string>
+    <string name="pip_phone_expand" msgid="2579292903468287504">"Extindeți"</string>
     <string name="pip_phone_settings" msgid="5468987116750491918">"Setări"</string>
-    <string name="pip_phone_enter_split" msgid="7042877263880641911">"Accesează ecranul împărțit"</string>
+    <string name="pip_phone_enter_split" msgid="7042877263880641911">"Accesați ecranul împărțit"</string>
     <string name="pip_menu_title" msgid="5393619322111827096">"Meniu"</string>
     <string name="pip_notification_title" msgid="1347104727641353453">"<xliff:g id="NAME">%s</xliff:g> este în modul picture-in-picture"</string>
-    <string name="pip_notification_message" msgid="8854051911700302620">"Dacă nu vrei ca <xliff:g id="NAME">%s</xliff:g> să folosească această funcție, atinge pentru a deschide setările și dezactiveaz-o."</string>
-    <string name="pip_play" msgid="3496151081459417097">"Redă"</string>
-    <string name="pip_pause" msgid="690688849510295232">"Întrerupe"</string>
-    <string name="pip_skip_to_next" msgid="8403429188794867653">"Treci la următorul"</string>
-    <string name="pip_skip_to_prev" msgid="7172158111196394092">"Treci la cel anterior"</string>
-    <string name="accessibility_action_pip_resize" msgid="4623966104749543182">"Redimensionează"</string>
-    <string name="accessibility_action_pip_stash" msgid="4060775037619702641">"Stochează"</string>
-    <string name="accessibility_action_pip_unstash" msgid="7467499339610437646">"Anulează stocarea"</string>
+    <string name="pip_notification_message" msgid="8854051911700302620">"Dacă nu doriți ca <xliff:g id="NAME">%s</xliff:g> să utilizeze această funcție, atingeți pentru a deschide setările și dezactivați-o."</string>
+    <string name="pip_play" msgid="3496151081459417097">"Redați"</string>
+    <string name="pip_pause" msgid="690688849510295232">"Întrerupeți"</string>
+    <string name="pip_skip_to_next" msgid="8403429188794867653">"Treceți la următorul"</string>
+    <string name="pip_skip_to_prev" msgid="7172158111196394092">"Treceți la cel anterior"</string>
+    <string name="accessibility_action_pip_resize" msgid="4623966104749543182">"Redimensionați"</string>
+    <string name="accessibility_action_pip_stash" msgid="4060775037619702641">"Stocați"</string>
+    <string name="accessibility_action_pip_unstash" msgid="7467499339610437646">"Anulați stocarea"</string>
     <string name="dock_forced_resizable" msgid="1749750436092293116">"Este posibil ca aplicația să nu funcționeze cu ecranul împărțit."</string>
     <string name="dock_non_resizeble_failed_to_dock_text" msgid="7408396418008948957">"Aplicația nu acceptă ecranul împărțit."</string>
     <string name="forced_resizable_secondary_display" msgid="1768046938673582671">"Este posibil ca aplicația să nu funcționeze pe un ecran secundar."</string>
@@ -47,41 +47,38 @@
     <string name="accessibility_action_divider_top_30" msgid="3572788224908570257">"Partea de sus: 30%"</string>
     <string name="accessibility_action_divider_bottom_full" msgid="2831868345092314060">"Partea de jos pe ecran complet"</string>
     <string name="one_handed_tutorial_title" msgid="4583241688067426350">"Folosirea modului cu o mână"</string>
-    <string name="one_handed_tutorial_description" msgid="3486582858591353067">"Pentru a ieși, glisează în sus din partea de jos a ecranului sau atinge oriunde deasupra ferestrei aplicației"</string>
-    <string name="accessibility_action_start_one_handed" msgid="5070337354072861426">"Activează modul cu o mână"</string>
-    <string name="accessibility_action_stop_one_handed" msgid="1369940261782179442">"Ieși din modul cu o mână"</string>
+    <string name="one_handed_tutorial_description" msgid="3486582858591353067">"Pentru a ieși, glisați în sus din partea de jos a ecranului sau atingeți oriunde deasupra ferestrei aplicației"</string>
+    <string name="accessibility_action_start_one_handed" msgid="5070337354072861426">"Activați modul cu o mână"</string>
+    <string name="accessibility_action_stop_one_handed" msgid="1369940261782179442">"Părăsiți modul cu o mână"</string>
     <string name="bubbles_settings_button_description" msgid="1301286017420516912">"Setări pentru baloanele <xliff:g id="APP_NAME">%1$s</xliff:g>"</string>
     <string name="bubble_overflow_button_content_description" msgid="8160974472718594382">"Suplimentar"</string>
-    <string name="bubble_accessibility_action_add_back" msgid="1830101076853540953">"Adaugă înapoi în stivă"</string>
+    <string name="bubble_accessibility_action_add_back" msgid="1830101076853540953">"Adăugați înapoi în stivă"</string>
     <string name="bubble_content_description_single" msgid="8495748092720065813">"<xliff:g id="NOTIFICATION_TITLE">%1$s</xliff:g> de la <xliff:g id="APP_NAME">%2$s</xliff:g>"</string>
     <string name="bubble_content_description_stack" msgid="8071515017164630429">"<xliff:g id="NOTIFICATION_TITLE">%1$s</xliff:g> de la <xliff:g id="APP_NAME">%2$s</xliff:g> și încă <xliff:g id="BUBBLE_COUNT">%3$d</xliff:g>"</string>
-    <string name="bubble_accessibility_action_move_top_left" msgid="2644118920500782758">"Mută în stânga sus"</string>
-    <string name="bubble_accessibility_action_move_top_right" msgid="5864594920870245525">"Mută în dreapta sus"</string>
-    <string name="bubble_accessibility_action_move_bottom_left" msgid="850271002773745634">"Mută în stânga jos"</string>
-    <string name="bubble_accessibility_action_move_bottom_right" msgid="2107626346109206352">"Mută în dreapta jos"</string>
+    <string name="bubble_accessibility_action_move_top_left" msgid="2644118920500782758">"Mutați în stânga sus"</string>
+    <string name="bubble_accessibility_action_move_top_right" msgid="5864594920870245525">"Mutați în dreapta sus"</string>
+    <string name="bubble_accessibility_action_move_bottom_left" msgid="850271002773745634">"Mutați în stânga jos"</string>
+    <string name="bubble_accessibility_action_move_bottom_right" msgid="2107626346109206352">"Mutați în dreapta jos"</string>
     <string name="bubbles_app_settings" msgid="3617224938701566416">"Setări <xliff:g id="NOTIFICATION_TITLE">%1$s</xliff:g>"</string>
-    <string name="bubble_dismiss_text" msgid="8816558050659478158">"Închide balonul"</string>
-    <string name="bubbles_dont_bubble_conversation" msgid="310000317885712693">"Nu afișa conversația în balon"</string>
+    <string name="bubble_dismiss_text" msgid="8816558050659478158">"Închideți balonul"</string>
+    <string name="bubbles_dont_bubble_conversation" msgid="310000317885712693">"Nu afișați conversația în balon"</string>
     <string name="bubbles_user_education_title" msgid="2112319053732691899">"Chat cu baloane"</string>
-    <string name="bubbles_user_education_description" msgid="4215862563054175407">"Conversațiile noi apar ca pictograme flotante sau baloane. Atinge pentru a deschide balonul. Trage pentru a-l muta."</string>
-    <string name="bubbles_user_education_manage_title" msgid="7042699946735628035">"Controlează oricând baloanele"</string>
-    <string name="bubbles_user_education_manage" msgid="3460756219946517198">"Atinge Gestionează pentru a dezactiva baloanele din această aplicație"</string>
+    <string name="bubbles_user_education_description" msgid="4215862563054175407">"Conversațiile noi apar ca pictograme flotante sau baloane. Atingeți pentru a deschide balonul. Trageți pentru a-l muta."</string>
+    <string name="bubbles_user_education_manage_title" msgid="7042699946735628035">"Controlați oricând baloanele"</string>
+    <string name="bubbles_user_education_manage" msgid="3460756219946517198">"Atingeți Gestionați pentru a dezactiva baloanele din această aplicație"</string>
     <string name="bubbles_user_education_got_it" msgid="3382046149225428296">"OK"</string>
     <string name="bubble_overflow_empty_title" msgid="2397251267073294968">"Nu există baloane recente"</string>
     <string name="bubble_overflow_empty_subtitle" msgid="2627417924958633713">"Baloanele recente și baloanele respinse vor apărea aici"</string>
     <string name="notification_bubble_title" msgid="6082910224488253378">"Balon"</string>
-    <string name="manage_bubbles_text" msgid="7730624269650594419">"Gestionează"</string>
+    <string name="manage_bubbles_text" msgid="7730624269650594419">"Gestionați"</string>
     <string name="accessibility_bubble_dismissed" msgid="8367471990421247357">"Balonul a fost respins."</string>
-    <string name="restart_button_description" msgid="6712141648865547958">"Atinge ca să repornești aplicația pentru o vizualizare mai bună."</string>
-    <string name="camera_compat_treatment_suggested_button_description" msgid="8103916969024076767">"Ai probleme cu camera foto?\nAtinge pentru a reîncadra"</string>
-    <string name="camera_compat_treatment_applied_button_description" msgid="2944157113330703897">"Nu ai remediat problema?\nAtinge pentru a reveni"</string>
-    <string name="camera_compat_dismiss_button_description" msgid="2795364433503817511">"Nu ai probleme cu camera foto? Atinge pentru a închide."</string>
-    <string name="letterbox_education_dialog_title" msgid="7739895354143295358">"Vezi și fă mai multe"</string>
-    <string name="letterbox_education_split_screen_text" msgid="6206339484068670830">"Trage în altă aplicație pentru a folosi ecranul împărțit"</string>
-    <string name="letterbox_education_reposition_text" msgid="4589957299813220661">"Atinge de două ori lângă o aplicație pentru a o repoziționa"</string>
+    <string name="restart_button_description" msgid="5887656107651190519">"Atingeți ca să reporniți aplicația și să treceți în modul ecran complet."</string>
+    <string name="camera_compat_treatment_suggested_button_description" msgid="8103916969024076767">"Aveți probleme cu camera foto?\nAtingeți pentru a reîncadra"</string>
+    <string name="camera_compat_treatment_applied_button_description" msgid="2944157113330703897">"Nu ați remediat problema?\nAtingeți pentru a reveni"</string>
+    <string name="camera_compat_dismiss_button_description" msgid="2795364433503817511">"Nu aveți probleme cu camera foto? Atingeți pentru a închide."</string>
+    <string name="letterbox_education_dialog_title" msgid="6688664582871779215">"Unele aplicații funcționează cel mai bine în orientarea portret"</string>
+    <string name="letterbox_education_dialog_subtext" msgid="4853542518367719562">"Încercați una dintre aceste opțiuni pentru a profita din plin de spațiu"</string>
+    <string name="letterbox_education_screen_rotation_text" msgid="5085786687366339027">"Rotiți dispozitivul pentru a trece în modul ecran complet"</string>
+    <string name="letterbox_education_reposition_text" msgid="1068293354123934727">"Atingeți de două ori lângă o aplicație pentru a o repoziționa"</string>
     <string name="letterbox_education_got_it" msgid="4057634570866051177">"OK"</string>
-    <string name="letterbox_education_expand_button_description" msgid="1729796567101129834">"Extinde pentru mai multe informații"</string>
-    <string name="maximize_button_text" msgid="1650859196290301963">"Maximizează"</string>
-    <string name="minimize_button_text" msgid="271592547935841753">"Minimizează"</string>
-    <string name="close_button_text" msgid="2913281996024033299">"Închide"</string>
 </resources>

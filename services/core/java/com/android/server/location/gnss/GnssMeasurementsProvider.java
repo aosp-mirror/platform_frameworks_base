@@ -113,6 +113,16 @@ public final class GnssMeasurementsProvider extends
     @Override
     protected boolean registerWithService(GnssMeasurementRequest request,
             Collection<GnssListenerRegistration> registrations) {
+        // The HAL doc does not specify if consecutive start() calls will be allowed.
+        // Some vendors may ignore the 2nd start() call if stop() is not called.
+        // Thus, here we always call stop() before calling start() to avoid being ignored.
+        if (mGnssNative.stopMeasurementCollection()) {
+            if (D) {
+                Log.d(TAG, "stopping gnss measurements");
+            }
+        } else {
+            Log.e(TAG, "error stopping gnss measurements");
+        }
         if (mGnssNative.startMeasurementCollection(request.isFullTracking(),
                 request.isCorrelationVectorOutputsEnabled(),
                 request.getIntervalMillis())) {

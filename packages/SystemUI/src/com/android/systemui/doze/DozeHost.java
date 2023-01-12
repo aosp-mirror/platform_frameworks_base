@@ -33,6 +33,18 @@ public interface DozeHost {
     boolean isProvisioned();
 
     /**
+     * Whether there's a pulse that's been requested but hasn't started transitioning to pulsing
+     * states yet.
+     */
+    boolean isPulsePending();
+
+    /**
+     * @param isPulsePending whether a pulse has been requested but hasn't started transitioning
+     *                       to the pulse state yet
+     */
+    void setPulsePending(boolean isPulsePending);
+
+    /**
      * Makes a current pulse last for twice as long.
      * @param reason why we're extending it.
      */

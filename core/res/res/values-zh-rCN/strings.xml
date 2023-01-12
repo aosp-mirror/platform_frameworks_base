@@ -21,6 +21,11 @@
 <resources xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
     <string name="byteShort" msgid="202579285008794431">"B"</string>
+    <string name="kilobyteShort" msgid="2214285521564195803">"kB"</string>
+    <string name="megabyteShort" msgid="6649361267635823443">"MB"</string>
+    <string name="gigabyteShort" msgid="7515809460261287991">"GB"</string>
+    <string name="terabyteShort" msgid="1822367128583886496">"TB"</string>
+    <string name="petabyteShort" msgid="5651571254228534832">"PB"</string>
     <string name="fileSizeSuffix" msgid="4233671691980131257">"<xliff:g id="NUMBER">%1$s</xliff:g> <xliff:g id="UNIT">%2$s</xliff:g>"</string>
     <string name="untitled" msgid="3381766946944136678">"&lt;未命名&gt;"</string>
     <string name="emptyPhoneNumber" msgid="5812172618020360048">"（无电话号码）"</string>
@@ -300,12 +305,12 @@
     <string name="permgroupdesc_calendar" msgid="6762751063361489379">"访问您的日历"</string>
     <string name="permgrouplab_sms" msgid="795737735126084874">"短信"</string>
     <string name="permgroupdesc_sms" msgid="5726462398070064542">"发送和查看短信"</string>
-    <string name="permgrouplab_storage" msgid="17339216290379241">"文件"</string>
-    <string name="permgroupdesc_storage" msgid="5378659041354582769">"访问您设备上的文件"</string>
-    <string name="permgrouplab_readMediaAural" msgid="1858331312624942053">"音乐和音频"</string>
-    <string name="permgroupdesc_readMediaAural" msgid="7565467343667089595">"访问您设备上的音乐和音频"</string>
-    <string name="permgrouplab_readMediaVisual" msgid="4724874717811908660">"照片和视频"</string>
-    <string name="permgroupdesc_readMediaVisual" msgid="4080463241903508688">"访问您设备上的照片和视频"</string>
+    <string name="permgrouplab_storage" msgid="9173334109512154196">"文件和文档"</string>
+    <string name="permgroupdesc_storage" msgid="8352226729501080525">"访问您设备上的文件和文档"</string>
+    <string name="permgrouplab_readMediaAural" msgid="5885210465560755316">"音乐和其他音频"</string>
+    <string name="permgroupdesc_readMediaAural" msgid="1170143315714662822">"访问您设备上的音频文件"</string>
+    <string name="permgrouplab_readMediaVisual" msgid="9137695801926624061">"照片和视频"</string>
+    <string name="permgroupdesc_readMediaVisual" msgid="173787212014117477">"访问您设备上的图片和视频文件"</string>
     <string name="permgrouplab_microphone" msgid="2480597427667420076">"麦克风"</string>
     <string name="permgroupdesc_microphone" msgid="1047786732792487722">"录制音频"</string>
     <string name="permgrouplab_activityRecognition" msgid="3324466667921775766">"身体活动"</string>
@@ -581,14 +586,13 @@
     <string name="screen_lock_app_setting_name" msgid="6054944352976789228">"使用屏幕锁定凭据"</string>
     <string name="screen_lock_dialog_default_subtitle" msgid="120359538048533695">"输入您的屏幕锁定凭据才能继续"</string>
     <string name="fingerprint_acquired_partial" msgid="4323789264604479684">"请用力按住传感器"</string>
-    <string name="fingerprint_acquired_insufficient" msgid="623888149088216458">"无法识别指纹，请重试。"</string>
+    <string name="fingerprint_acquired_insufficient" msgid="2545149524031515411">"无法处理指纹，请重试。"</string>
     <string name="fingerprint_acquired_imager_dirty" msgid="1770676120848224250">"请清洁指纹传感器，然后重试"</string>
     <string name="fingerprint_acquired_imager_dirty_alt" msgid="9169582140486372897">"请清洁传感器，然后重试"</string>
     <string name="fingerprint_acquired_too_fast" msgid="1628459767349116104">"请用力按住传感器"</string>
     <string name="fingerprint_acquired_too_slow" msgid="6683510291554497580">"手指移动太慢，请重试。"</string>
     <string name="fingerprint_acquired_already_enrolled" msgid="2285166003936206785">"请试试其他指纹"</string>
     <string name="fingerprint_acquired_too_bright" msgid="3863560181670915607">"光线太亮"</string>
-    <string name="fingerprint_acquired_power_press" msgid="3107864151278434961">"检测到按下“电源”按钮的操作"</string>
     <string name="fingerprint_acquired_try_adjusting" msgid="3667006071003809364">"请尝试调整指纹"</string>
     <string name="fingerprint_acquired_immobile" msgid="1621891895241888048">"请在每次放手指时略微更改手指的位置"</string>
   <string-array name="fingerprint_acquired_vendor">
@@ -600,17 +604,16 @@
     <string name="face_authenticated_confirmation_required" msgid="6872632732508013755">"面孔已验证，请按确认按钮"</string>
     <string name="fingerprint_error_hw_not_available" msgid="4571700896929561202">"指纹硬件无法使用。"</string>
     <string name="fingerprint_error_no_space" msgid="7285481581905967580">"无法设置指纹"</string>
-    <string name="fingerprint_error_timeout" msgid="7361192266621252164">"指纹设置已超时，请重试。"</string>
+    <string name="fingerprint_error_timeout" msgid="2946635815726054226">"指纹录入操作超时，请重试。"</string>
     <string name="fingerprint_error_canceled" msgid="540026881380070750">"指纹操作已取消。"</string>
     <string name="fingerprint_error_user_canceled" msgid="7685676229281231614">"用户取消了指纹操作。"</string>
-    <string name="fingerprint_error_lockout" msgid="6626753679019351368">"尝试次数过多，请通过屏幕锁定功能解锁。"</string>
-    <string name="fingerprint_error_lockout_permanent" msgid="9060651300306264843">"尝试次数过多，请通过屏幕锁定功能解锁。"</string>
-    <string name="fingerprint_error_unable_to_process" msgid="2446280592818621224">"无法处理指纹，请重试。"</string>
+    <string name="fingerprint_error_lockout" msgid="7853461265604738671">"尝试次数过多，请稍后重试。"</string>
+    <string name="fingerprint_error_lockout_permanent" msgid="3895478283943513746">"尝试次数过多。指纹传感器已停用。"</string>
+    <string name="fingerprint_error_unable_to_process" msgid="1148553603490048742">"请重试。"</string>
     <string name="fingerprint_error_no_fingerprints" msgid="8671811719699072411">"未注册任何指纹。"</string>
     <string name="fingerprint_error_hw_not_present" msgid="578914350967423382">"此设备没有指纹传感器。"</string>
     <string name="fingerprint_error_security_update_required" msgid="7750187320640856433">"传感器已暂时停用。"</string>
     <string name="fingerprint_error_bad_calibration" msgid="4385512597740168120">"无法使用指纹传感器。请联系维修服务提供商"</string>
-    <string name="fingerprint_error_power_pressed" msgid="5479524500542129414">"已按下电源按钮"</string>
     <string name="fingerprint_name_template" msgid="8941662088160289778">"手指 <xliff:g id="FINGERID">%d</xliff:g>"</string>
     <string name="fingerprint_app_setting_name" msgid="4253767877095495844">"使用指纹"</string>
     <string name="fingerprint_or_screen_lock_app_setting_name" msgid="3501743523487644907">"使用指纹或屏幕锁定凭据"</string>
@@ -631,33 +634,26 @@
     <string name="fingerprint_recalibrate_notification_name" msgid="1414578431898579354">"指纹解锁"</string>
     <string name="fingerprint_recalibrate_notification_title" msgid="2406561052064558497">"无法使用指纹传感器"</string>
     <string name="fingerprint_recalibrate_notification_content" msgid="8519935717822194943">"请联系维修服务提供商。"</string>
-    <string name="face_acquired_insufficient" msgid="6889245852748492218">"无法创建您的脸部模型，请重试。"</string>
+    <string name="face_acquired_insufficient" msgid="2150805835949162453">"无法捕获准确的人脸数据，请重试。"</string>
     <string name="face_acquired_too_bright" msgid="8070756048978079164">"亮度过高，请尝试使用较柔和的亮度。"</string>
-    <string name="face_acquired_too_dark" msgid="8539853432479385326">"光线不足"</string>
-    <string name="face_acquired_too_close" msgid="4453646176196302462">"请将手机拿远一点"</string>
-    <string name="face_acquired_too_far" msgid="2922278214231064859">"请将手机拿近一点"</string>
-    <string name="face_acquired_too_high" msgid="8278815780046368576">"请将手机举高一点"</string>
-    <string name="face_acquired_too_low" msgid="4075391872960840081">"请将手机拿低一点"</string>
-    <string name="face_acquired_too_right" msgid="6245286514593540859">"请将手机向左移动"</string>
-    <string name="face_acquired_too_left" msgid="9201762240918405486">"请将手机向右移动"</string>
+    <string name="face_acquired_too_dark" msgid="252573548464426546">"亮度不足，请尝试将光线调亮。"</string>
+    <string name="face_acquired_too_close" msgid="1628767882971469833">"请将手机拿远一点。"</string>
+    <string name="face_acquired_too_far" msgid="5098567726427173896">"请将手机拿近一点。"</string>
+    <string name="face_acquired_too_high" msgid="4868033653626081839">"请将手机举高一点。"</string>
+    <string name="face_acquired_too_low" msgid="1512237819632165945">"请将手机拿低一点。"</string>
+    <string name="face_acquired_too_right" msgid="2513391513020932655">"请将手机向左移动。"</string>
+    <string name="face_acquired_too_left" msgid="8882499346502714350">"请将手机向右移动。"</string>
     <string name="face_acquired_poor_gaze" msgid="4427153558773628020">"请直视您的设备。"</string>
-    <string name="face_acquired_not_detected" msgid="1057966913397548150">"看不清您的脸部，请将手机举到与眼睛齐平的位置。"</string>
+    <string name="face_acquired_not_detected" msgid="2945945257956443257">"请将你的面部正对手机。"</string>
     <string name="face_acquired_too_much_motion" msgid="8199691445085189528">"摄像头过于晃动。请将手机拿稳。"</string>
     <string name="face_acquired_recalibrate" msgid="8724013080976469746">"请重新注册您的面孔。"</string>
-    <string name="face_acquired_too_different" msgid="2520389515612972889">"无法识别人脸，请重试。"</string>
-    <string name="face_acquired_too_similar" msgid="8882920552674125694">"请略微调整头部的位置"</string>
-    <string name="face_acquired_pan_too_extreme" msgid="5417928604710621088">"请尽量直视手机"</string>
-    <string name="face_acquired_tilt_too_extreme" msgid="5715715666540716620">"请尽量直视手机"</string>
-    <string name="face_acquired_roll_too_extreme" msgid="8261939882838881194">"请尽量直视手机"</string>
+    <string name="face_acquired_too_different" msgid="4699657338753282542">"已无法识别人脸，请重试。"</string>
+    <string name="face_acquired_too_similar" msgid="7684650785108399370">"与先前的姿势太相近，请换一个姿势。"</string>
+    <string name="face_acquired_pan_too_extreme" msgid="7822191262299152527">"请将您的头稍微上下倾斜。"</string>
+    <string name="face_acquired_tilt_too_extreme" msgid="8618210742620248049">"请稍微抬头或低头。"</string>
+    <string name="face_acquired_roll_too_extreme" msgid="1442830503572636825">"请将您的头稍微左右旋转。"</string>
     <string name="face_acquired_obscured" msgid="4917643294953326639">"请移除所有遮挡您面部的物体。"</string>
     <string name="face_acquired_sensor_dirty" msgid="8968391891086721678">"请将屏幕顶部（包括黑色条栏）清理干净"</string>
-    <!-- no translation found for face_acquired_dark_glasses_detected (5643703296620631986) -->
-    <skip />
-    <!-- no translation found for face_acquired_mouth_covering_detected (8219428572168642593) -->
-    <skip />
-    <string name="face_acquired_recalibrate_alt" msgid="5702674220280332115">"无法创建您的脸部模型，请重试。"</string>
-    <string name="face_acquired_dark_glasses_detected_alt" msgid="4052123776406041972">"检测到墨镜，您的脸部必须完全可见。"</string>
-    <string name="face_acquired_mouth_covering_detected_alt" msgid="1122294982850589766">"检测到脸部有遮挡物，您的脸部必须完全可见。"</string>
   <string-array name="face_acquired_vendor">
   </string-array>
     <string name="face_error_hw_not_available" msgid="5085202213036026288">"无法验证人脸。硬件无法使用。"</string>
@@ -1245,9 +1241,10 @@
     <string name="android_preparing_apk" msgid="589736917792300956">"正在准备升级<xliff:g id="APPNAME">%1$s</xliff:g>。"</string>
     <string name="android_upgrading_starting_apps" msgid="6206161195076057075">"正在启动应用。"</string>
     <string name="android_upgrading_complete" msgid="409800058018374746">"即将完成启动。"</string>
+    <string name="fp_power_button_enrollment_title" msgid="3574363228413259548">"要继续设置吗？"</string>
     <string name="fp_power_button_enrollment_message" msgid="5648173517663246140">"您已按电源按钮，这通常会关闭屏幕。\n\n请尝试在设置指纹时轻轻按一下。"</string>
-    <string name="fp_power_button_enrollment_title" msgid="6976841690455338563">"若要结束设置，请关闭屏幕"</string>
-    <string name="fp_power_button_enrollment_button_text" msgid="3199783266386029200">"关闭"</string>
+    <string name="fp_power_button_enrollment_positive_button" msgid="2095415838459356833">"关闭屏幕"</string>
+    <string name="fp_power_button_enrollment_negative_button" msgid="6558436406362486747">"继续设置"</string>
     <string name="fp_power_button_bp_title" msgid="5585506104526820067">"要继续验证您的指纹吗？"</string>
     <string name="fp_power_button_bp_message" msgid="2983163038168903393">"您已按电源按钮，这通常会关闭屏幕。\n\n请尝试轻轻按一下来验证您的指纹。"</string>
     <string name="fp_power_button_bp_positive_button" msgid="728945472408552251">"关闭屏幕"</string>
@@ -1400,16 +1397,16 @@
     <string name="ext_media_new_notification_message" msgid="6095403121990786986">"点按即可进行设置"</string>
     <string name="ext_media_new_notification_message" product="tv" msgid="216863352100263668">"选择即可设置"</string>
     <string name="ext_media_new_notification_message" product="automotive" msgid="5140127881613227162">"您可能需要重新格式化设备。点按即可弹出。"</string>
-    <string name="ext_media_ready_notification_message" msgid="7509496364380197369">"用于存储照片、视频和音乐等"</string>
+    <string name="ext_media_ready_notification_message" msgid="777258143284919261">"可用于传输照片和媒体文件"</string>
     <string name="ext_media_ready_notification_message" product="tv" msgid="8847134811163165935">"浏览媒体文件"</string>
     <string name="ext_media_unmountable_notification_title" msgid="4895444667278979910">"<xliff:g id="NAME">%s</xliff:g>出现问题"</string>
     <string name="ext_media_unmountable_notification_title" product="automotive" msgid="3142723758949023280">"<xliff:g id="NAME">%s</xliff:g>无法使用"</string>
     <string name="ext_media_unmountable_notification_message" msgid="3256290114063126205">"点按即可修正问题"</string>
     <string name="ext_media_unmountable_notification_message" product="tv" msgid="3003611129979934633">"<xliff:g id="NAME">%s</xliff:g>已损坏。选择即可进行修正。"</string>
     <string name="ext_media_unmountable_notification_message" product="automotive" msgid="2274596120715020680">"您可能需要重新格式化设备。点按即可弹出。"</string>
-    <string name="ext_media_unsupported_notification_title" msgid="3487534182861251401">"检测到<xliff:g id="NAME">%s</xliff:g>"</string>
+    <string name="ext_media_unsupported_notification_title" msgid="4358280700537030333">"<xliff:g id="NAME">%s</xliff:g>不受支持"</string>
     <string name="ext_media_unsupported_notification_title" product="automotive" msgid="6004193172658722381">"<xliff:g id="NAME">%s</xliff:g>无法使用"</string>
-    <string name="ext_media_unsupported_notification_message" msgid="8463636521459807981">"点按即可设置。"</string>
+    <string name="ext_media_unsupported_notification_message" msgid="917738524888367560">"该设备不支持此<xliff:g id="NAME">%s</xliff:g>。点按即可使用支持的格式进行设置。"</string>
     <string name="ext_media_unsupported_notification_message" product="tv" msgid="1595482802187036532">"选择即可使用支持的格式设置<xliff:g id="NAME">%s</xliff:g>。"</string>
     <string name="ext_media_unsupported_notification_message" product="automotive" msgid="3412494732736336330">"您可能需要重新格式化设备"</string>
     <string name="ext_media_badremoval_notification_title" msgid="4114625551266196872">"<xliff:g id="NAME">%s</xliff:g>已意外移除"</string>
@@ -1479,7 +1476,7 @@
     <string name="sync_binding_label" msgid="469249309424662147">"同步"</string>
     <string name="accessibility_binding_label" msgid="1974602776545801715">"无障碍"</string>
     <string name="wallpaper_binding_label" msgid="1197440498000786738">"壁纸"</string>
-    <string name="chooser_wallpaper" msgid="3082405680079923708">"更换壁纸"</string>
+    <string name="chooser_wallpaper" msgid="3082405680079923708">"更改壁纸"</string>
     <string name="notification_listener_binding_label" msgid="2702165274471499713">"通知侦听器"</string>
     <string name="vr_listener_binding_label" msgid="8013112996671206429">"VR 监听器"</string>
     <string name="condition_provider_service_binding_label" msgid="8490641013951857673">"条件提供程序"</string>
@@ -1557,7 +1554,7 @@
     <string name="content_description_sliding_handle" msgid="982510275422590757">"滑动手柄。触摸并按住。"</string>
     <string name="description_target_unlock_tablet" msgid="7431571180065859551">"滑动解锁。"</string>
     <string name="action_bar_home_description" msgid="1501655419158631974">"导航首页"</string>
-    <string name="action_bar_up_description" msgid="6611579697195026932">"返回"</string>
+    <string name="action_bar_up_description" msgid="6611579697195026932">"向上导航"</string>
     <string name="action_menu_overflow_description" msgid="4579536843510088170">"更多选项"</string>
     <string name="action_bar_home_description_format" msgid="5087107531331621803">"%1$s：%2$s"</string>
     <string name="action_bar_home_subtitle_description_format" msgid="4346835454749569826">"%1$s - %2$s：%3$s"</string>
@@ -1608,15 +1605,15 @@
     <string name="default_audio_route_name" product="tv" msgid="4908971385068087367">"电视"</string>
     <string name="default_audio_route_name" product="default" msgid="9213546147739983977">"手机"</string>
     <string name="default_audio_route_name_dock_speakers" msgid="1551166029093995289">"基座扬声器"</string>
-    <string name="default_audio_route_name_external_device" msgid="8124229858618975">"外部设备"</string>
+    <string name="default_audio_route_name_external_device" msgid="5474470558160717850">"HDMI"</string>
     <string name="default_audio_route_name_headphones" msgid="6954070994792640762">"耳机"</string>
     <string name="default_audio_route_name_usb" msgid="895668743163316932">"USB"</string>
     <string name="default_audio_route_category_name" msgid="5241740395748134483">"系统"</string>
     <string name="bluetooth_a2dp_audio_route_name" msgid="4214648773120426288">"蓝牙音频"</string>
     <string name="wireless_display_route_description" msgid="8297563323032966831">"无线显示"</string>
-    <string name="media_route_button_content_description" msgid="2299223698196869956">"投放"</string>
+    <string name="media_route_button_content_description" msgid="2299223698196869956">"投射"</string>
     <string name="media_route_chooser_title" msgid="6646594924991269208">"连接到设备"</string>
-    <string name="media_route_chooser_title_for_remote_display" msgid="3105906508794326446">"将屏幕投放到设备上"</string>
+    <string name="media_route_chooser_title_for_remote_display" msgid="3105906508794326446">"将屏幕投射到设备上"</string>
     <string name="media_route_chooser_searching" msgid="6119673534251329535">"正在搜索设备…"</string>
     <string name="media_route_chooser_extended_settings" msgid="2506352159381327741">"设置"</string>
     <string name="media_route_controller_disconnect" msgid="7362617572732576959">"断开连接"</string>
@@ -1681,7 +1678,7 @@
     <string name="accessibility_shortcut_off" msgid="3651336255403648739">"不开启"</string>
     <string name="accessibility_shortcut_menu_item_status_on" msgid="6608392117189732543">"已开启"</string>
     <string name="accessibility_shortcut_menu_item_status_off" msgid="5531598275559472393">"已关闭"</string>
-    <string name="accessibility_enable_service_title" msgid="3931558336268541484">"要允许“<xliff:g id="SERVICE">%1$s</xliff:g>”完全控制您的设备吗？"</string>
+    <string name="accessibility_enable_service_title" msgid="3931558336268541484">"要允许<xliff:g id="SERVICE">%1$s</xliff:g>完全控制您的设备吗？"</string>
     <string name="accessibility_service_warning_description" msgid="291674995220940133">"对于能满足您的无障碍功能需求的应用，可授予其完全控制权限；但对大部分应用来说，都不适合授予此权限。"</string>
     <string name="accessibility_service_screen_control_title" msgid="190017412626919776">"查看和控制屏幕"</string>
     <string name="accessibility_service_screen_control_description" msgid="6946315917771791525">"此功能可以读出屏幕上的所有内容，并在其他应用上层显示内容。"</string>
@@ -1922,7 +1919,6 @@
     <string name="country_selection_title" msgid="5221495687299014379">"区域偏好设置"</string>
     <string name="search_language_hint" msgid="7004225294308793583">"输入语言名称"</string>
     <string name="language_picker_section_suggested" msgid="6556199184638990447">"建议语言"</string>
-    <string name="language_picker_regions_section_suggested" msgid="6080131515268225316">"推荐地区"</string>
     <string name="language_picker_section_all" msgid="1985809075777564284">"所有语言"</string>
     <string name="region_picker_section_all" msgid="756441309928774155">"所有国家/地区"</string>
     <string name="locale_search_menu" msgid="6258090710176422934">"搜索"</string>
@@ -1940,19 +1936,18 @@
     <string name="app_streaming_blocked_title_for_camera_dialog" msgid="3935701653713853065">"无法使用摄像头"</string>
     <string name="app_streaming_blocked_title_for_fingerprint_dialog" msgid="3516853717714141951">"继续在手机上操作"</string>
     <string name="app_streaming_blocked_title_for_microphone_dialog" msgid="544822455127171206">"无法使用麦克风"</string>
-    <string name="app_streaming_blocked_title_for_playstore_dialog" msgid="8149823099822897538">"无法使用 Play 商店"</string>
     <string name="app_streaming_blocked_title_for_settings_dialog" product="tv" msgid="196994247017450357">"无法使用 Android TV 设置"</string>
     <string name="app_streaming_blocked_title_for_settings_dialog" product="tablet" msgid="8222710146267948647">"无法使用平板电脑设置"</string>
     <string name="app_streaming_blocked_title_for_settings_dialog" product="default" msgid="6895719984375299791">"无法使用手机设置"</string>
-    <string name="app_streaming_blocked_message" product="tv" msgid="4003011766528814377">"目前无法在您的<xliff:g id="DEVICE">%1$s</xliff:g>上访问此内容。您可以尝试在 Android TV 设备上访问。"</string>
-    <string name="app_streaming_blocked_message" product="tablet" msgid="4242053045964946062">"目前无法在您的<xliff:g id="DEVICE">%1$s</xliff:g>上访问此内容。您可以尝试在平板电脑上访问。"</string>
-    <string name="app_streaming_blocked_message" product="default" msgid="6159168735030739398">"目前无法在您的<xliff:g id="DEVICE">%1$s</xliff:g>上访问此内容。您可以尝试在手机上访问。"</string>
+    <string name="app_streaming_blocked_message" product="tv" msgid="5024599278277957935">"无法在您的<xliff:g id="DEVICE">%1$s</xliff:g>上访问此应用，您可以尝试在 Android TV 设备上访问。"</string>
+    <string name="app_streaming_blocked_message" product="tablet" msgid="7491114163056552686">"无法在您的<xliff:g id="DEVICE">%1$s</xliff:g>上访问此应用，您可以尝试在平板电脑上访问。"</string>
+    <string name="app_streaming_blocked_message" product="default" msgid="1245180131667647277">"无法在您的<xliff:g id="DEVICE">%1$s</xliff:g>上访问此应用，您可以尝试在手机上访问。"</string>
+    <string name="app_streaming_blocked_message_for_permission_dialog" product="tv" msgid="6306583663205997979">"目前无法在您的<xliff:g id="DEVICE">%1$s</xliff:g>上访问此应用，您可以尝试在 Android TV 设备上访问。"</string>
+    <string name="app_streaming_blocked_message_for_permission_dialog" product="tablet" msgid="6545624942642129664">"目前无法在您的<xliff:g id="DEVICE">%1$s</xliff:g>上访问此应用，您可以尝试在平板电脑上访问。"</string>
+    <string name="app_streaming_blocked_message_for_permission_dialog" product="default" msgid="8462740631707923000">"目前无法在您的<xliff:g id="DEVICE">%1$s</xliff:g>上访问此应用，您可以尝试在手机上访问。"</string>
     <string name="app_streaming_blocked_message_for_fingerprint_dialog" product="tv" msgid="3470977315395784567">"此应用要求进行额外的安全性验证，您可以尝试在 Android TV 设备上访问。"</string>
     <string name="app_streaming_blocked_message_for_fingerprint_dialog" product="tablet" msgid="698460091901465092">"此应用要求进行额外的安全性验证，您可以尝试在平板电脑上访问。"</string>
     <string name="app_streaming_blocked_message_for_fingerprint_dialog" product="default" msgid="8552691971910603907">"此应用要求进行额外的安全性验证，您可以尝试在手机上访问。"</string>
-    <string name="app_streaming_blocked_message_for_settings_dialog" product="tv" msgid="820334666354451145">"无法在您的<xliff:g id="DEVICE">%1$s</xliff:g>上访问此设置，您可以尝试在 Android TV 设备上访问。"</string>
-    <string name="app_streaming_blocked_message_for_settings_dialog" product="tablet" msgid="3286849551133045896">"无法在您的<xliff:g id="DEVICE">%1$s</xliff:g>上访问此设置，您可以尝试在平板电脑上访问。"</string>
-    <string name="app_streaming_blocked_message_for_settings_dialog" product="default" msgid="6264287556598916295">"无法在您的<xliff:g id="DEVICE">%1$s</xliff:g>上访问此设置，您可以尝试在手机上访问。"</string>
     <string name="deprecated_target_sdk_message" msgid="5203207875657579953">"此应用专为旧版 Android 打造，因此可能无法正常运行。请尝试检查更新或与开发者联系。"</string>
     <string name="deprecated_target_sdk_app_store" msgid="8456784048558808909">"检查更新"</string>
     <string name="new_sms_notification_title" msgid="6528758221319927107">"您有新消息"</string>
@@ -1962,7 +1957,7 @@
     <string name="profile_encrypted_message" msgid="1128512616293157802">"点按即可解锁工作资料"</string>
     <string name="usb_mtp_launch_notification_title" msgid="774319638256707227">"已连接到<xliff:g id="PRODUCT_NAME">%1$s</xliff:g>"</string>
     <string name="usb_mtp_launch_notification_description" msgid="6942535713629852684">"点按即可查看文件"</string>
-    <string name="pin_target" msgid="8036028973110156895">"置顶"</string>
+    <string name="pin_target" msgid="8036028973110156895">"固定"</string>
     <string name="pin_specific_target" msgid="7824671240625957415">"将<xliff:g id="LABEL">%1$s</xliff:g>置顶"</string>
     <string name="unpin_target" msgid="3963318576590204447">"取消固定"</string>
     <string name="unpin_specific_target" msgid="3859828252160908146">"取消置顶<xliff:g id="LABEL">%1$s</xliff:g>"</string>
@@ -2045,8 +2040,7 @@
     <string name="log_access_confirmation_title" msgid="2343578467290592708">"允许“<xliff:g id="LOG_ACCESS_APP_NAME">%s</xliff:g>”访问所有设备日志吗？"</string>
     <string name="log_access_confirmation_allow" msgid="5302517782599389507">"允许访问一次"</string>
     <string name="log_access_confirmation_deny" msgid="7685790957455099845">"不允许"</string>
-    <string name="log_access_confirmation_body" product="default" msgid="1806692062668620735">"设备日志会记录设备上发生的活动。应用可以使用这些日志查找和修复问题。\n\n部分日志可能包含敏感信息，因此请仅允许您信任的应用访问所有设备日志。\n\n如果您不授予此应用访问所有设备日志的权限，它仍然可以访问自己的日志。您的设备制造商可能仍然能够访问设备上的部分日志或信息。"</string>
-    <string name="log_access_confirmation_body" product="tv" msgid="7379536536425265262">"设备日志会记录设备上发生的活动。应用可以使用这些日志查找和修复问题。\n\n部分日志可能包含敏感信息，因此请仅允许您信任的应用访问所有设备日志。\n\n如果您不授予此应用访问所有设备日志的权限，它仍然可以访问自己的日志。您的设备制造商可能仍然能够访问设备上的部分日志或信息。\n\n如需了解详情，请访问 g.co/android/devicelogs。"</string>
+    <string name="log_access_confirmation_body" msgid="6581985716241928135">"设备日志会记录设备上发生的活动。应用可以使用这些日志查找和修复问题。\n\n部分日志可能包含敏感信息，因此请仅允许您信任的应用访问所有设备日志。\n\n如果您不授予此应用访问所有设备日志的权限，它仍然可以访问自己的日志。您的设备制造商可能仍然能够访问您设备上的部分日志或信息。了解详情"</string>
     <string name="log_access_do_not_show_again" msgid="1058690599083091552">"不再显示"</string>
     <string name="slices_permission_request" msgid="3677129866636153406">"“<xliff:g id="APP_0">%1$s</xliff:g>”想要显示“<xliff:g id="APP_2">%2$s</xliff:g>”图块"</string>
     <string name="screenshot_edit" msgid="7408934887203689207">"编辑"</string>
@@ -2059,7 +2053,8 @@
     <string name="zen_upgrade_notification_title" msgid="8198167698095298717">"“勿扰”设置有变更"</string>
     <string name="zen_upgrade_notification_content" msgid="5228458567180124005">"点按即可查看屏蔽内容。"</string>
     <string name="review_notification_settings_title" msgid="5102557424459810820">"查看通知设置"</string>
-    <string name="review_notification_settings_text" msgid="5916244866751849279">"从 Android 13 开始，您安装的应用需要您授予相应权限才能发送通知。点按即可为现有应用更改此权限。"</string>
+    <!-- no translation found for review_notification_settings_text (5916244866751849279) -->
+    <skip />
     <string name="review_notification_settings_remind_me_action" msgid="1081081018678480907">"稍后提醒我"</string>
     <string name="review_notification_settings_dismiss" msgid="4160916504616428294">"关闭"</string>
     <string name="notification_app_name_system" msgid="3045196791746735601">"系统"</string>
@@ -2287,6 +2282,5 @@
     <string name="notification_action_check_bg_apps" msgid="4758877443365362532">"查看使用中的应用"</string>
     <string name="vdm_camera_access_denied" product="default" msgid="6102378580971542473">"无法从<xliff:g id="DEVICE">%1$s</xliff:g>上访问手机的摄像头"</string>
     <string name="vdm_camera_access_denied" product="tablet" msgid="6895968310395249076">"无法从<xliff:g id="DEVICE">%1$s</xliff:g>上访问平板电脑的摄像头"</string>
-    <string name="vdm_secure_window" msgid="161700398158812314">"流式传输时无法访问此内容。您可以尝试在手机上访问。"</string>
-    <string name="system_locale_title" msgid="711882686834677268">"系统默认设置"</string>
+    <string name="system_locale_title" msgid="3978041860457277638">"系统语言"</string>
 </resources>

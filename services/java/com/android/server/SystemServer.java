@@ -1838,7 +1838,8 @@ public final class SystemServer implements Dumpable {
                 t.traceBegin("StartStatusBarManagerService");
                 try {
                     statusBar = new StatusBarManagerService(context);
-                    ServiceManager.addService(Context.STATUS_BAR_SERVICE, statusBar);
+                    ServiceManager.addService(Context.STATUS_BAR_SERVICE, statusBar, false,
+                            DUMP_FLAG_PRIORITY_NORMAL | DUMP_FLAG_PROTO);
                 } catch (Throwable e) {
                     reportWtf("starting StatusBarManagerService", e);
                 }

@@ -42,7 +42,7 @@ interface IWallpaperEngine {
     @UnsupportedAppUsage
     oneway void destroy();
     oneway void setZoomOut(float scale);
-    oneway void scalePreview(in Rect positionInWindow);
+    oneway void resizePreview(in Rect positionInWindow);
     oneway void removeLocalColorsAreas(in List<RectF> regions);
     oneway void addLocalColorsAreas(in List<RectF> regions);
     SurfaceControl mirrorSurfaceControl();

@@ -22,6 +22,7 @@ import static android.net.wifi.WifiManager.TrafficStateCallback.DATA_ACTIVITY_IN
 import static android.net.wifi.WifiManager.TrafficStateCallback.DATA_ACTIVITY_INOUT;
 import static android.net.wifi.WifiManager.TrafficStateCallback.DATA_ACTIVITY_NONE;
 import static android.net.wifi.WifiManager.TrafficStateCallback.DATA_ACTIVITY_OUT;
+import static android.telephony.SubscriptionManager.INVALID_SUBSCRIPTION_ID;
 
 import android.annotation.Nullable;
 import android.content.BroadcastReceiver;
@@ -38,6 +39,7 @@ import android.net.wifi.WifiManager;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Handler;
+import android.os.HandlerExecutor;
 import android.os.Looper;
 import android.provider.Settings;
 import android.telephony.CarrierConfigManager;
@@ -71,11 +73,12 @@ import com.android.systemui.dagger.qualifiers.Main;
 import com.android.systemui.demomode.DemoMode;
 import com.android.systemui.demomode.DemoModeController;
 import com.android.systemui.dump.DumpManager;
-import com.android.systemui.log.LogBuffer;
-import com.android.systemui.log.LogLevel;
 import com.android.systemui.log.dagger.StatusBarNetworkControllerLog;
+import com.android.systemui.plugins.log.LogBuffer;
+import com.android.systemui.plugins.log.LogLevel;
 import com.android.systemui.qs.tiles.dialog.InternetDialogFactory;
-import com.android.systemui.settings.CurrentUserTracker;
+import com.android.systemui.settings.UserTracker;
+import com.android.systemui.statusbar.pipeline.StatusBarPipelineFlags;
 import com.android.systemui.statusbar.policy.ConfigurationController;
 import com.android.systemui.statusbar.policy.DataSaverController;
 import com.android.systemui.statusbar.policy.DataSaverControllerImpl;
@@ -128,7 +131,7 @@ public class NetworkControllerImpl extends BroadcastReceiver
     private final boolean mHasMobileDataFeature;
     private final SubscriptionDefaults mSubDefaults;
     private final DataSaverController mDataSaverController;
-    private final CurrentUserTracker mUserTracker;
+    private final UserTracker mUserTracker;
     private final BroadcastDispatcher mBroadcastDispatcher;
     private final DemoModeController mDemoModeController;
     private final Object mLock = new Object();
@@ -139,7 +142,7 @@ public class NetworkControllerImpl extends BroadcastReceiver
     private final MobileSignalControllerFactory mMobileFactory;
 
     private TelephonyCallback.ActiveDataSubscriptionIdListener mPhoneStateListener;
-    private int mActiveMobileDataSubscription = SubscriptionManager.INVALID_SUBSCRIPTION_ID;
+    private int mActiveMobileDataSubscription = INVALID_SUBSCRIPTION_ID;
 
     // Subcontrollers.
     @VisibleForTesting
@@ -191,6 +194,7 @@ public class NetworkControllerImpl extends BroadcastReceiver
     private final Executor mBgExecutor;
     // Handler that all callbacks are made on.
     private final CallbackHandler mCallbackHandler;
+    private final StatusBarPipelineFlags mStatusBarPipelineFlags;
 
     private int mEmergencySource;
     private boolean mIsEmergency;
@@ -212,6 +216,14 @@ public class NetworkControllerImpl extends BroadcastReceiver
                 }
             };
 
+    private final UserTracker.Callback mUserChangedCallback =
+            new UserTracker.Callback() {
+                @Override
+                public void onUserChanged(int newUser, @NonNull Context userContext) {
+                    NetworkControllerImpl.this.onUserSwitched(newUser);
+                }
+            };
+
     /**
      * Construct this controller object and register for updates.
      */
@@ -224,11 +236,13 @@ public class NetworkControllerImpl extends BroadcastReceiver
             CallbackHandler callbackHandler,
             DeviceProvisionedController deviceProvisionedController,
             BroadcastDispatcher broadcastDispatcher,
+            UserTracker userTracker,
             ConnectivityManager connectivityManager,
             TelephonyManager telephonyManager,
             TelephonyListenerManager telephonyListenerManager,
             @Nullable WifiManager wifiManager,
             AccessPointControllerImpl accessPointController,
+            StatusBarPipelineFlags statusBarPipelineFlags,
             DemoModeController demoModeController,
             CarrierConfigTracker carrierConfigTracker,
             WifiStatusTrackerFactory trackerFactory,
@@ -247,10 +261,12 @@ public class NetworkControllerImpl extends BroadcastReceiver
                 bgExecutor,
                 callbackHandler,
                 accessPointController,
+                statusBarPipelineFlags,
                 new DataUsageController(context),
                 new SubscriptionDefaults(),
                 deviceProvisionedController,
                 broadcastDispatcher,
+                userTracker,
                 demoModeController,
                 carrierConfigTracker,
                 trackerFactory,
@@ -273,10 +289,12 @@ public class NetworkControllerImpl extends BroadcastReceiver
             Executor bgExecutor,
             CallbackHandler callbackHandler,
             AccessPointControllerImpl accessPointController,
+            StatusBarPipelineFlags statusBarPipelineFlags,
             DataUsageController dataUsageController,
             SubscriptionDefaults defaultsHandler,
             DeviceProvisionedController deviceProvisionedController,
             BroadcastDispatcher broadcastDispatcher,
+            UserTracker userTracker,
             DemoModeController demoModeController,
             CarrierConfigTracker carrierConfigTracker,
             WifiStatusTrackerFactory trackerFactory,
@@ -293,6 +311,7 @@ public class NetworkControllerImpl extends BroadcastReceiver
         mBgLooper = bgLooper;
         mBgExecutor = bgExecutor;
         mCallbackHandler = callbackHandler;
+        mStatusBarPipelineFlags = statusBarPipelineFlags;
         mDataSaverController = new DataSaverControllerImpl(context);
         mBroadcastDispatcher = broadcastDispatcher;
         mMobileFactory = mobileFactory;
@@ -333,13 +352,9 @@ public class NetworkControllerImpl extends BroadcastReceiver
 
         // AIRPLANE_MODE_CHANGED is sent at boot; we've probably already missed it
         updateAirplaneMode(true /* force callback */);
-        mUserTracker = new CurrentUserTracker(broadcastDispatcher) {
-            @Override
-            public void onUserSwitched(int newUserId) {
-                NetworkControllerImpl.this.onUserSwitched(newUserId);
-            }
-        };
-        mUserTracker.startTracking();
+        mUserTracker = userTracker;
+        mUserTracker.addCallback(mUserChangedCallback, new HandlerExecutor(mMainHandler));
+
         deviceProvisionedController.addCallback(new DeviceProvisionedListener() {
             @Override
             public void onUserSetupChanged() {
@@ -503,6 +518,7 @@ public class NetworkControllerImpl extends BroadcastReceiver
         filter.addAction(TelephonyManager.ACTION_DEFAULT_DATA_SUBSCRIPTION_CHANGED);
         filter.addAction(TelephonyManager.ACTION_DEFAULT_VOICE_SUBSCRIPTION_CHANGED);
         filter.addAction(TelephonyManager.ACTION_SERVICE_PROVIDERS_UPDATED);
+        filter.addAction(TelephonyManager.ACTION_SUBSCRIPTION_CARRIER_IDENTITY_CHANGED);
         filter.addAction(WifiManager.WIFI_STATE_CHANGED_ACTION);
         mBroadcastDispatcher.registerReceiverWithHandler(this, filter, mReceiverHandler);
         mListening = true;
@@ -793,6 +809,20 @@ public class NetworkControllerImpl extends BroadcastReceiver
                 mConfig = Config.readConfig(mContext);
                 mReceiverHandler.post(this::handleConfigurationChanged);
                 break;
+
+            case TelephonyManager.ACTION_SUBSCRIPTION_CARRIER_IDENTITY_CHANGED: {
+                // Notify the relevant MobileSignalController of the change
+                int subId = intent.getIntExtra(
+                        TelephonyManager.EXTRA_SUBSCRIPTION_ID,
+                        INVALID_SUBSCRIPTION_ID
+                );
+                if (SubscriptionManager.isValidSubscriptionId(subId)) {
+                    if (mMobileSignalControllers.indexOfKey(subId) >= 0) {
+                        mMobileSignalControllers.get(subId).handleBroadcast(intent);
+                    }
+                }
+            }
+            break;
             case Intent.ACTION_SIM_STATE_CHANGED:
                 // Avoid rebroadcast because SysUI is direct boot aware.
                 if (intent.getBooleanExtra(Intent.EXTRA_REBROADCAST_ON_UNLOCK, false)) {
@@ -820,7 +850,7 @@ public class NetworkControllerImpl extends BroadcastReceiver
                 break;
             default:
                 int subId = intent.getIntExtra(SubscriptionManager.EXTRA_SUBSCRIPTION_INDEX,
-                        SubscriptionManager.INVALID_SUBSCRIPTION_ID);
+                        INVALID_SUBSCRIPTION_ID);
                 if (SubscriptionManager.isValidSubscriptionId(subId)) {
                     if (mMobileSignalControllers.indexOfKey(subId) >= 0) {
                         mMobileSignalControllers.get(subId).handleBroadcast(intent);
@@ -1272,7 +1302,7 @@ public class NetworkControllerImpl extends BroadcastReceiver
             }
         }
         String wifi = args.getString("wifi");
-        if (wifi != null) {
+        if (wifi != null && !mStatusBarPipelineFlags.runNewWifiIconBackend()) {
             boolean show = wifi.equals("show");
             String level = args.getString("level");
             if (level != null) {
@@ -1307,7 +1337,7 @@ public class NetworkControllerImpl extends BroadcastReceiver
             mWifiSignalController.notifyListeners();
         }
         String sims = args.getString("sims");
-        if (sims != null) {
+        if (sims != null && !mStatusBarPipelineFlags.useNewMobileIcons()) {
             int num = MathUtils.constrain(Integer.parseInt(sims), 1, 8);
             List<SubscriptionInfo> subs = new ArrayList<>();
             if (num != mMobileSignalControllers.size()) {
@@ -1330,12 +1360,15 @@ public class NetworkControllerImpl extends BroadcastReceiver
             mCallbackHandler.setNoSims(mHasNoSubs, mSimDetected);
         }
         String mobile = args.getString("mobile");
-        if (mobile != null) {
+        if (mobile != null && !mStatusBarPipelineFlags.useNewMobileIcons()) {
             boolean show = mobile.equals("show");
             String datatype = args.getString("datatype");
             String slotString = args.getString("slot");
             int slot = TextUtils.isEmpty(slotString) ? 0 : Integer.parseInt(slotString);
             slot = MathUtils.constrain(slot, 0, 8);
+            String carrierIdString = args.getString("carrierid");
+            int carrierId = TextUtils.isEmpty(carrierIdString) ? 0
+                    : Integer.parseInt(carrierIdString);
             // Ensure we have enough sim slots
             List<SubscriptionInfo> subs = new ArrayList<>();
             while (mMobileSignalControllers.size() <= slot) {
@@ -1347,6 +1380,9 @@ public class NetworkControllerImpl extends BroadcastReceiver
             }
             // Hack to index linearly for easy use.
             MobileSignalController controller = mMobileSignalControllers.valueAt(slot);
+            if (carrierId != 0) {
+                controller.getState().setCarrierId(carrierId);
+            }
             controller.getState().dataSim = datatype != null;
             controller.getState().isDefault = datatype != null;
             controller.getState().dataConnected = datatype != null;
@@ -1409,7 +1445,7 @@ public class NetworkControllerImpl extends BroadcastReceiver
             controller.notifyListeners();
         }
         String carrierNetworkChange = args.getString("carriernetworkchange");
-        if (carrierNetworkChange != null) {
+        if (carrierNetworkChange != null && !mStatusBarPipelineFlags.useNewMobileIcons()) {
             boolean show = carrierNetworkChange.equals("show");
             for (int i = 0; i < mMobileSignalControllers.size(); i++) {
                 MobileSignalController controller = mMobileSignalControllers.valueAt(i);

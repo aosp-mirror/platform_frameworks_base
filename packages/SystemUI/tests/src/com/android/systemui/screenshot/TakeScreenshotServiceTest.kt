@@ -33,7 +33,6 @@ import android.view.WindowManager.ScreenshotSource.SCREENSHOT_KEY_CHORD
 import android.view.WindowManager.ScreenshotSource.SCREENSHOT_OVERVIEW
 import android.view.WindowManager.TAKE_SCREENSHOT_FULLSCREEN
 import android.view.WindowManager.TAKE_SCREENSHOT_PROVIDED_IMAGE
-import android.view.WindowManager.TAKE_SCREENSHOT_SELECTED_REGION
 import androidx.test.filters.SmallTest
 import com.android.internal.logging.testing.UiEventLoggerFake
 import com.android.internal.util.ScreenshotHelper
@@ -63,7 +62,7 @@ import org.mockito.Mockito.verifyZeroInteractions
 import org.mockito.Mockito.`when` as whenever
 
 private const val USER_ID = 1
-private const val TASK_ID = 1
+private const val TASK_ID = 11
 
 @RunWith(AndroidTestingRunner::class)
 @SmallTest
@@ -172,28 +171,6 @@ class TakeScreenshotServiceTest : SysuiTestCase() {
             logEvent.eventId, SCREENSHOT_REQUESTED_KEY_CHORD.id)
         assertEquals("Expected supplied package name",
             topComponent.packageName, eventLogger.get(0).packageName)
-    }
-
-    @Test
-    fun takeScreenshotPartial() {
-        val request = ScreenshotRequest(
-            TAKE_SCREENSHOT_SELECTED_REGION,
-            SCREENSHOT_KEY_CHORD,
-            /* topComponent = */ null)
-
-        service.handleRequest(request, { /* onSaved */ }, callback)
-
-        verify(controller, times(1)).takeScreenshotPartial(
-            /* topComponent = */ isNull(),
-            /* onSavedListener = */ any(),
-            /* requestCallback = */ any())
-
-        assertEquals("Expected one UiEvent", eventLogger.numLogs(), 1)
-        val logEvent = eventLogger.get(0)
-
-        assertEquals("Expected SCREENSHOT_REQUESTED UiEvent",
-            logEvent.eventId, SCREENSHOT_REQUESTED_KEY_CHORD.id)
-        assertEquals("Expected empty package name in UiEvent", "", eventLogger.get(0).packageName)
     }
 
     @Test

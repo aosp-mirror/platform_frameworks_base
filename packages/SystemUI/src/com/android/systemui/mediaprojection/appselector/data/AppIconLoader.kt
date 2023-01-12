@@ -19,13 +19,14 @@ package com.android.systemui.mediaprojection.appselector.data
 import android.content.ComponentName
 import android.content.Context
 import android.content.pm.PackageManager
-import android.content.pm.PackageManager.ComponentInfoFlags
 import android.graphics.drawable.Drawable
 import android.os.UserHandle
 import com.android.launcher3.icons.BaseIconFactory.IconOptions
 import com.android.launcher3.icons.IconFactory
 import com.android.systemui.dagger.qualifiers.Background
+import com.android.systemui.shared.system.PackageManagerWrapper
 import javax.inject.Inject
+import javax.inject.Provider
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.withContext
 
@@ -38,14 +39,18 @@ class IconLoaderLibAppIconLoader
 constructor(
     @Background private val backgroundDispatcher: CoroutineDispatcher,
     private val context: Context,
-    private val packageManager: PackageManager
+    // Use wrapper to access hidden API that allows to get ActivityInfo for any user id
+    private val packageManagerWrapper: PackageManagerWrapper,
+    private val packageManager: PackageManager,
+    private val iconFactoryProvider: Provider<IconFactory>
 ) : AppIconLoader {
 
     override suspend fun loadIcon(userId: Int, component: ComponentName): Drawable? =
         withContext(backgroundDispatcher) {
-            IconFactory.obtain(context).use<IconFactory, Drawable?> { iconFactory ->
-                val activityInfo = packageManager
-                        .getActivityInfo(component, ComponentInfoFlags.of(0))
+            iconFactoryProvider.get().use<IconFactory, Drawable?> { iconFactory ->
+                val activityInfo =
+                    packageManagerWrapper.getActivityInfo(component, userId)
+                        ?: return@withContext null
                 val icon = activityInfo.loadIcon(packageManager) ?: return@withContext null
                 val userHandler = UserHandle.of(userId)
                 val options = IconOptions().apply { setUser(userHandler) }

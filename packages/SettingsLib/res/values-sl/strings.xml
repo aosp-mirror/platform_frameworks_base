@@ -117,17 +117,17 @@
     <string name="bluetooth_profile_opp" msgid="6692618568149493430">"Prenos datoteke"</string>
     <string name="bluetooth_profile_hid" msgid="2969922922664315866">"Vnosna naprava"</string>
     <string name="bluetooth_profile_pan" msgid="1006235139308318188">"Internetni dostop"</string>
-    <string name="bluetooth_profile_pbap" msgid="4262303387989406171">"Deljenje stikov in zgodovine klicev"</string>
-    <string name="bluetooth_profile_pbap_summary" msgid="6466456791354759132">"Uporabite za deljenje stikov in zgodovine klicev."</string>
+    <string name="bluetooth_profile_pbap" msgid="7064307749579335765">"Deljenje stikov"</string>
+    <string name="bluetooth_profile_pbap_summary" msgid="2955819694801952056">"Uporabi za deljenje stikov"</string>
     <string name="bluetooth_profile_pan_nap" msgid="7871974753822470050">"Deljenje internetne povezave"</string>
     <string name="bluetooth_profile_map" msgid="8907204701162107271">"Sporočila SMS"</string>
     <string name="bluetooth_profile_sap" msgid="8304170950447934386">"Dostop do kartice SIM"</string>
     <string name="bluetooth_profile_a2dp_high_quality" msgid="4739440941324792775">"Zvok visoke kakovosti: <xliff:g id="CODEC_NAME">%1$s</xliff:g>"</string>
     <string name="bluetooth_profile_a2dp_high_quality_unknown_codec" msgid="2477639096903834374">"Zvok visoke kakovosti"</string>
     <string name="bluetooth_profile_hearing_aid" msgid="58154575573984914">"Slušni pripomočki"</string>
-    <string name="bluetooth_profile_le_audio" msgid="3237854988278539061">"LE Audio"</string>
+    <string name="bluetooth_profile_le_audio" msgid="5158149987518342036">"LE_AUDIO"</string>
     <string name="bluetooth_hearing_aid_profile_summary_connected" msgid="8191273236809964030">"Povezava s slušnimi pripomočki je vzpostavljena"</string>
-    <string name="bluetooth_le_audio_profile_summary_connected" msgid="6916226974453480650">"Povezano s profilom LE Audio"</string>
+    <string name="bluetooth_le_audio_profile_summary_connected" msgid="3162538609379333442">"Povezano s profilom LE_AUDIO"</string>
     <string name="bluetooth_a2dp_profile_summary_connected" msgid="7422607970115444153">"Povezan s profilom za predstavnostni zvok"</string>
     <string name="bluetooth_headset_profile_summary_connected" msgid="2420981566026949688">"Povezava s profilom za zvok telefona vzpostavljena"</string>
     <string name="bluetooth_opp_profile_summary_connected" msgid="2393521801478157362">"Povezava s strežnikom za prenos datotek je vzpostavljena"</string>
@@ -408,7 +408,6 @@
     <string name="force_resizable_activities_summary" msgid="2490382056981583062">"Poskrbi, da je ne glede na vrednosti v manifestu mogoče vsem aktivnostim spremeniti velikost za način z več okni."</string>
     <string name="enable_freeform_support" msgid="7599125687603914253">"Omogoči okna svobodne oblike"</string>
     <string name="enable_freeform_support_summary" msgid="1822862728719276331">"Omogoči podporo za poskusna okna svobodne oblike."</string>
-    <string name="desktop_mode" msgid="2389067840550544462">"Namizni način"</string>
     <string name="local_backup_password_title" msgid="4631017948933578709">"Geslo za varnostno kopijo namizja"</string>
     <string name="local_backup_password_summary_none" msgid="7646898032616361714">"Popolne varnostne kopije namizja trenutno niso zaščitene."</string>
     <string name="local_backup_password_summary_change" msgid="1707357670383995567">"Dotaknite se, če želite spremeniti ali odstraniti geslo za popolno varnostno kopiranje namizja"</string>
@@ -477,13 +476,12 @@
     <string name="power_charging" msgid="6727132649743436802">"<xliff:g id="LEVEL">%1$s</xliff:g> – <xliff:g id="STATE">%2$s</xliff:g>"</string>
     <string name="power_remaining_charging_duration_only" msgid="8085099012811384899">"Še <xliff:g id="TIME">%1$s</xliff:g> do napolnjenosti"</string>
     <string name="power_charging_duration" msgid="6127154952524919719">"<xliff:g id="LEVEL">%1$s</xliff:g> – še <xliff:g id="TIME">%2$s</xliff:g> do napolnjenosti"</string>
-    <string name="power_charging_limited" msgid="6971664137170239141">"<xliff:g id="LEVEL">%1$s</xliff:g> – Polnjenje je začasno zaustavljeno"</string>
+    <string name="power_charging_limited" msgid="7956120998372505295">"<xliff:g id="LEVEL">%1$s</xliff:g> – Začasno omejeno polnjenje"</string>
     <string name="battery_info_status_unknown" msgid="268625384868401114">"Neznano"</string>
     <string name="battery_info_status_charging" msgid="4279958015430387405">"Polnjenje"</string>
     <string name="battery_info_status_charging_fast" msgid="8027559755902954885">"Hitro polnjenje"</string>
     <string name="battery_info_status_charging_slow" msgid="3190803837168962319">"Počasno polnjenje"</string>
     <string name="battery_info_status_charging_wireless" msgid="8924722966861282197">"Brezžično polnjenje"</string>
-    <string name="battery_info_status_charging_dock" msgid="8573274094093364791">"Polnjenje"</string>
     <string name="battery_info_status_discharging" msgid="6962689305413556485">"Se ne polni"</string>
     <string name="battery_info_status_not_charging" msgid="3371084153747234837">"Povezano, se ne polni"</string>
     <string name="battery_info_status_full" msgid="1339002294876531312">"Napolnjeno"</string>
@@ -570,7 +568,7 @@
     <string name="user_add_profile_item_summary" msgid="5418602404308968028">"Dostop do aplikacij in vsebine iz vašega računa lahko omejite"</string>
     <string name="user_add_user_item_title" msgid="2394272381086965029">"Uporabnik"</string>
     <string name="user_add_profile_item_title" msgid="3111051717414643029">"Omejen profil"</string>
-    <string name="user_add_user_title" msgid="5457079143694924885">"Želite dodati uporabnika?"</string>
+    <string name="user_add_user_title" msgid="5457079143694924885">"Dodajanje novega uporabnika?"</string>
     <string name="user_add_user_message_long" msgid="1527434966294733380">"To napravo lahko delite z drugimi tako, da ustvarite dodatne uporabnike. Vsak ima svoj prostor, ki ga lahko prilagodi z aplikacijami, ozadji in drugim. Uporabniki lahko tudi prilagodijo nastavitve naprave, ki vplivajo na vse, na primer nastavitve omrežja Wi-Fi.\n\nKo dodate novega uporabnika, mora ta nastaviti svoj prostor.\n\nVsak uporabnik lahko posodobi aplikacije za vse druge uporabnike. Nastavitve in storitve funkcij za ljudi s posebnimi potrebami morda ne bodo prenesene v prostor novega uporabnika."</string>
     <string name="user_add_user_message_short" msgid="3295959985795716166">"Ko dodate novega uporabnika, mora ta nastaviti svoj prostor.\n\nVsak uporabnik lahko posodobi aplikacije za vse druge uporabnike."</string>
     <string name="user_setup_dialog_title" msgid="8037342066381939995">"Želite uporabnika nastaviti zdaj?"</string>
@@ -602,7 +600,7 @@
     <string name="guest_resetting" msgid="7822120170191509566">"Ponastavljanje gosta …"</string>
     <string name="guest_reset_and_restart_dialog_title" msgid="3396657008451616041">"Želite ponastaviti sejo gosta?"</string>
     <string name="guest_reset_and_restart_dialog_message" msgid="2764425635305200790">"S tem boste začeli novo sejo gosta ter izbrisali vse aplikacije in podatke v trenutni seji."</string>
-    <string name="guest_exit_dialog_title" msgid="1846494656849381804">"Želite zapreti način za goste?"</string>
+    <string name="guest_exit_dialog_title" msgid="1846494656849381804">"Zapri način za goste"</string>
     <string name="guest_exit_dialog_message" msgid="1743218864242719783">"S tem boste izbrisali aplikacije in podatke v trenutni seji gosta."</string>
     <string name="guest_exit_dialog_button" msgid="1736401897067442044">"Zapri"</string>
     <string name="guest_exit_dialog_title_non_ephemeral" msgid="7675327443743162986">"Želite shraniti dejavnost gosta?"</string>
@@ -612,9 +610,9 @@
     <string name="guest_exit_button" msgid="5774985819191803960">"Zapri način za goste"</string>
     <string name="guest_reset_button" msgid="2515069346223503479">"Ponastavi sejo gosta"</string>
     <string name="guest_exit_quick_settings_button" msgid="1912362095913765471">"Zapri sejo gosta"</string>
-    <string name="guest_notification_ephemeral" msgid="7263252466950923871">"Ko zaprete način za goste, bo vsa dejavnost izbrisana."</string>
-    <string name="guest_notification_non_ephemeral" msgid="6843799963012259330">"Ob zaprtju načina lahko shranite ali izbrišete dejavnost."</string>
-    <string name="guest_notification_non_ephemeral_non_first_login" msgid="8009307983766934876">"Ponastavite za izbris dejavnosti v seji zdaj, lahko pa jo shranite ali izbrišete, ko zaprete način za goste."</string>
+    <string name="guest_notification_ephemeral" msgid="7263252466950923871">"Ko zaprete sejo, bo vsa dejavnost izbrisana."</string>
+    <string name="guest_notification_non_ephemeral" msgid="6843799963012259330">"Ko zaprete sejo, lahko shranite ali izbrišete dejavnost."</string>
+    <string name="guest_notification_non_ephemeral_non_first_login" msgid="8009307983766934876">"Ponastavite, če želite dejavnost v seji izbrisati zdaj, lahko pa jo shranite ali izbrišete, ko zaprete sejo."</string>
     <string name="user_image_take_photo" msgid="467512954561638530">"Fotografiranje"</string>
     <string name="user_image_choose_photo" msgid="1363820919146782908">"Izberi sliko"</string>
     <string name="user_image_photo_selector" msgid="433658323306627093">"Izbira fotografije"</string>
@@ -656,6 +654,11 @@
     <string name="accessibility_ethernet_disconnected" msgid="2832501530856497489">"Ethernetna povezava je prekinjena."</string>
     <string name="accessibility_ethernet_connected" msgid="6175942685957461563">"Ethernet"</string>
     <string name="accessibility_no_calling" msgid="3540827068323895748">"Klicanje ni mogoče."</string>
+    <string name="dream_complication_title_time" msgid="701747800712893499">"Ura"</string>
+    <string name="dream_complication_title_date" msgid="8661176085446135789">"Datum"</string>
+    <string name="dream_complication_title_weather" msgid="598609151677172783">"Vreme"</string>
+    <string name="dream_complication_title_aqi" msgid="4587552608957834110">"Kakovost zraka"</string>
+    <string name="dream_complication_title_cast_info" msgid="4038776652841885084">"O zasedbi"</string>
     <string name="avatar_picker_title" msgid="8492884172713170652">"Izbira profilne slike"</string>
     <string name="default_user_icon_description" msgid="6554047177298972638">"Privzeta ikona uporabnika"</string>
     <string name="physical_keyboard_title" msgid="4811935435315835220">"Fizična tipkovnica"</string>
@@ -664,11 +667,11 @@
     <string name="turn_screen_on_title" msgid="3266937298097573424">"Vklop zaslona"</string>
     <string name="allow_turn_screen_on" msgid="6194845766392742639">"Dovoli vklop zaslona"</string>
     <string name="allow_turn_screen_on_description" msgid="43834403291575164">"Dovolite aplikaciji, da vklopi zaslon. Če ji to odobrite, lahko aplikacija kadar koli brez vašega eksplicitnega namena vklopi zaslon."</string>
+    <string name="bt_le_audio_scan_qr_code" msgid="3521809854780392679">"Optično branje kode QR"</string>
+    <string name="bt_le_audio_scan_qr_code_scanner" msgid="4679500020630341107">"Če želite začeti poslušati, postavite spodnjo kodo QR na sredino."</string>
+    <string name="bt_le_audio_qr_code_is_not_valid_format" msgid="6092191081849434734">"Koda QR nima pravilne oblike zapisa."</string>
     <string name="bt_le_audio_broadcast_dialog_title" msgid="5392738488989777074">"Želite ustaviti oddajanje aplikacije <xliff:g id="APP_NAME">%1$s</xliff:g>?"</string>
     <string name="bt_le_audio_broadcast_dialog_sub_title" msgid="268234802198852753">"Če oddajate aplikacijo <xliff:g id="SWITCHAPP">%1$s</xliff:g> ali spremenite izhod, bo trenutno oddajanje ustavljeno."</string>
     <string name="bt_le_audio_broadcast_dialog_switch_app" msgid="5749813313369517812">"Oddajaj aplikacijo <xliff:g id="SWITCHAPP">%1$s</xliff:g>"</string>
     <string name="bt_le_audio_broadcast_dialog_different_output" msgid="2638402023060391333">"Sprememba izhoda"</string>
-    <string name="back_navigation_animation" msgid="8105467568421689484">"Animacije poteze za nazaj s predvidevanjem"</string>
-    <string name="back_navigation_animation_summary" msgid="741292224121599456">"Omogoči sistemske animacije za potezo za nazaj s predvidevanjem."</string>
-    <string name="back_navigation_animation_dialog" msgid="8696966520944625596">"Ta nastavitev omogoča sistemske animacije za animacijo poteze s predvidevanjem. V datoteki manifesta mora biti parameter »enableOnBackInvokedCallback« za posamezno aplikacijo nastavljen na »true«."</string>
 </resources>

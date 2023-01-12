@@ -26,11 +26,11 @@
     <string name="keyguard_sim_error_message_short" msgid="633630844240494070">"بطاقة غير صالحة."</string>
     <string name="keyguard_charged" msgid="5478247181205188995">"تم الشحن"</string>
     <string name="keyguard_plugged_in_wireless" msgid="2537874724955057383">"<xliff:g id="PERCENTAGE">%s</xliff:g> • جارٍ الشحن لاسلكيًا"</string>
-    <string name="keyguard_plugged_in_dock" msgid="2122073051904360987">"<xliff:g id="PERCENTAGE">%s</xliff:g> • جارٍ الشحن"</string>
+    <string name="keyguard_plugged_in_dock" msgid="449722738270908674">"<xliff:g id="PERCENTAGE">%s</xliff:g> • جارٍ الشحن على وحدة الإرساء"</string>
     <string name="keyguard_plugged_in" msgid="8169926454348380863">"<xliff:g id="PERCENTAGE">%s</xliff:g> • جارٍ الشحن"</string>
     <string name="keyguard_plugged_in_charging_fast" msgid="4386594091107340426">"<xliff:g id="PERCENTAGE">%s</xliff:g> • جارٍ الشحن سريعًا"</string>
     <string name="keyguard_plugged_in_charging_slowly" msgid="217655355424210">"<xliff:g id="PERCENTAGE">%s</xliff:g> • جارٍ الشحن ببطء"</string>
-    <string name="keyguard_plugged_in_charging_limited" msgid="1709413803451065875">"<xliff:g id="PERCENTAGE">%s</xliff:g> • تم إيقاف الشحن مؤقتًا لحماية البطارية"</string>
+    <string name="keyguard_plugged_in_charging_limited" msgid="6091488837901216962">"<xliff:g id="PERCENTAGE">%s</xliff:g> • الشحن محدود مؤقتًا"</string>
     <string name="keyguard_instructions_when_pattern_disabled" msgid="8448804180089936954">"اضغط على \"القائمة\" لإلغاء التأمين."</string>
     <string name="keyguard_network_locked_message" msgid="407096292844868608">"الشبكة مؤمّنة"</string>
     <string name="keyguard_missing_sim_message_short" msgid="704159478161444907">"‏ليست هناك شريحة SIM"</string>
@@ -50,7 +50,7 @@
     <string name="error_disable_esim_title" msgid="3802652622784813119">"‏يتعذّر إيقاف eSIM."</string>
     <string name="error_disable_esim_msg" msgid="2441188596467999327">"‏يتعذّر إيقاف eSIM بسبب خطأ."</string>
     <string name="keyboardview_keycode_enter" msgid="6727192265631761174">"Enter"</string>
-    <string name="kg_wrong_pattern" msgid="5907301342430102842">"النقش غير صحيح."</string>
+    <string name="kg_wrong_pattern" msgid="5907301342430102842">"النقش غير صحيح"</string>
     <string name="kg_wrong_password" msgid="4143127991071670512">"كلمة مرور غير صحيحة"</string>
     <string name="kg_wrong_pin" msgid="4160978845968732624">"رقم تعريف شخصي خاطئ"</string>
     <string name="kg_too_many_failed_attempts_countdown" msgid="2038195171919795529">"{count,plural, =1{أعِد المحاولة خلال ثانية واحدة.}zero{أعِد المحاولة خلال # ثانية.}two{أعِد المحاولة خلال ثانيتين.}few{أعِد المحاولة خلال # ثوانٍ.}many{أعِد المحاولة خلال # ثانية.}other{أعِد المحاولة خلال # ثانية.}}"</string>
@@ -68,9 +68,23 @@
     <string name="kg_too_many_failed_password_attempts_dialog_message" msgid="190984061975729494">"لقد كتبت كلمة المرور بشكل غير صحيح <xliff:g id="NUMBER_0">%1$d</xliff:g> مرة. \n\nأعد المحاولة خلال <xliff:g id="NUMBER_1">%2$d</xliff:g> ثانية."</string>
     <string name="kg_too_many_failed_pattern_attempts_dialog_message" msgid="4252405904570284368">"لقد رسمت نقش فتح القفل بطريقة غير صحيحة <xliff:g id="NUMBER_0">%1$d</xliff:g> مرة. \n\nأعد المحاولة خلال <xliff:g id="NUMBER_1">%2$d</xliff:g> ثانية."</string>
     <string name="kg_password_wrong_pin_code_pukked" msgid="8047350661459040581">"‏رمز \"رقم التعريف الشخصي\" لشريحة SIM غير صحيح، ويلزمك الاتصال الآن بمشغّل شبكة الجوّال لإلغاء قفل الجهاز."</string>
-    <string name="kg_password_wrong_pin_code" msgid="5629415765976820357">"{count,plural, =1{‏رقم التعريف الشخصي لشريحة SIM غير صحيح. تتبقّى لديك محاولة واحدة يجب بعدها الاتصال بمشغّل شبكة الجوّال لفتح قفل الجهاز.}zero{‏رمز رقم التعريف الشخصي لشريحة SIM غير صحيح. تتبقّى لديك # محاولة. }two{‏رمز رقم التعريف الشخصي لشريحة SIM غير صحيح. تتبقّى لديك محاولتان. }few{‏رمز رقم التعريف الشخصي لشريحة SIM غير صحيح. تتبقّى لديك # محاولات. }many{‏رمز رقم التعريف الشخصي لشريحة SIM غير صحيح. تتبقّى لديك # محاولة. }other{‏رمز رقم التعريف الشخصي لشريحة SIM غير صحيح. تتبقّى لديك # محاولة. }}"</string>
+    <plurals name="kg_password_wrong_pin_code" formatted="false" msgid="7030584350995485026">
+      <item quantity="zero">‏رمز رقم التعريف الشخصي لشريحة SIM غير صحيح، ولم تتبق لديك أي محاولات (<xliff:g id="NUMBER_1">%d</xliff:g>).</item>
+      <item quantity="two">‏رمز رقم التعريف الشخصي لشريحة SIM غير صحيح، ويتبقى لديك محاولتان (<xliff:g id="NUMBER_1">%d</xliff:g>).</item>
+      <item quantity="few">‏رمز رقم التعريف الشخصي لشريحة SIM غير صحيح، ويتبقى لديك <xliff:g id="NUMBER_1">%d</xliff:g> محاولات.</item>
+      <item quantity="many">‏رمز رقم التعريف الشخصي لشريحة SIM غير صحيح، ويتبقى لديك <xliff:g id="NUMBER_1">%d</xliff:g> محاولة.</item>
+      <item quantity="other">‏رمز رقم التعريف الشخصي لشريحة SIM غير صحيح، ويتبقى لديك <xliff:g id="NUMBER_1">%d</xliff:g> محاولة.</item>
+      <item quantity="one">‏رمز \"رقم التعريف الشخصي\" لشريحة SIM غير صحيح، ويتبقى لديك محاولة واحدة (<xliff:g id="NUMBER_0">%d</xliff:g>) يتعين عليك بعدها الاتصال بمشغّل شبكة الجوّال لإلغاء قفل الجهاز.</item>
+    </plurals>
     <string name="kg_password_wrong_puk_code_dead" msgid="3698285357028468617">"‏شريحة SIM غير صالحة للاستخدام. يُرجى الاتصال بمشغّل شبكة الجوّال."</string>
-    <string name="kg_password_wrong_puk_code" msgid="6820515467645087827">"{count,plural, =1{‏رمز PUK لشريحة SIM غير صحيح. تتبقّى لديك محاولة واحدة قبل أن تصبح شريحة SIM غير صالحة للاستخدام نهائيًا.}zero{‏رمز PUK لشريحة SIM غير صحيح. تتبقّى لديك # محاولة قبل أن تصبح شريحة SIM غير صالحة للاستخدام نهائيًا.}two{‏رمز PUK لشريحة SIM غير صحيح. تتبقّى لديك محاولتان قبل أن تصبح شريحة SIM غير صالحة للاستخدام نهائيًا.}few{‏رمز PUK لشريحة SIM غير صحيح. تتبقّى لديك # محاولات قبل أن تصبح شريحة SIM غير صالحة للاستخدام نهائيًا.}many{‏رمز PUK لشريحة SIM غير صحيح. تتبقّى لديك # محاولة قبل أن تصبح شريحة SIM غير صالحة للاستخدام نهائيًا.}other{‏رمز PUK لشريحة SIM غير صحيح. تتبقّى لديك # محاولة قبل أن تصبح شريحة SIM غير صالحة للاستخدام نهائيًا.}}"</string>
+    <plurals name="kg_password_wrong_puk_code" formatted="false" msgid="3937306685604862886">
+      <item quantity="zero">‏رمز PUK لشريحة SIM غير صحيح، ولم تتبق لديك أي محاولات (<xliff:g id="NUMBER_1">%d</xliff:g>) تصبح بعدها شريحة SIM غير صالحة للاستخدام بشكل دائم.</item>
+      <item quantity="two">‏رمز PUK لشريحة SIM غير صحيح، ويتبقى لديك محاولتان (<xliff:g id="NUMBER_1">%d</xliff:g>) تصبح بعدها شريحة SIM غير صالحة للاستخدام بشكل دائم.</item>
+      <item quantity="few">‏رمز PUK لشريحة SIM غير صحيح، ويتبقى لديك <xliff:g id="NUMBER_1">%d</xliff:g> محاولات تصبح بعدها شريحة SIM غير صالحة للاستخدام بشكل دائم.</item>
+      <item quantity="many">‏رمز PUK لشريحة SIM غير صحيح، ويتبقى لديك <xliff:g id="NUMBER_1">%d</xliff:g> محاولة تصبح بعدها شريحة SIM غير صالحة للاستخدام بشكل دائم.</item>
+      <item quantity="other">‏رمز PUK لشريحة SIM غير صحيح، ويتبقى لديك <xliff:g id="NUMBER_1">%d</xliff:g> من المحاولات تصبح بعدها شريحة SIM غير صالحة للاستخدام بشكل دائم.</item>
+      <item quantity="one">‏رمز PUK لشريحة SIM غير صالح، ويتبقى لديك محاولة واحدة (<xliff:g id="NUMBER_0">%d</xliff:g>)، تصبح بعدها شريحة SIM غير صالحة للاستخدام بشكل دائم.</item>
+    </plurals>
     <string name="kg_password_pin_failed" msgid="5136259126330604009">"‏تعذّر إتمام عملية \"رقم التعريف الشخصي\" لشريحة SIM"</string>
     <string name="kg_password_puk_failed" msgid="6778867411556937118">"‏تعذّر إتمام عملية PUK لشريحة SIM"</string>
     <string name="accessibility_ime_switch_button" msgid="9082358310194861329">"تبديل أسلوب الإدخال"</string>
@@ -84,9 +98,23 @@
     <string name="kg_prompt_reason_device_admin" msgid="6961159596224055685">"اختار المشرف قفل الجهاز"</string>
     <string name="kg_prompt_reason_user_request" msgid="6015774877733717904">"تم حظر الجهاز يدويًا"</string>
     <string name="kg_face_not_recognized" msgid="7903950626744419160">"لم يتم التعرّف عليه."</string>
-    <string name="kg_face_sensor_privacy_enabled" msgid="939511161763558512">"يجب منح الكاميرا إذن الوصول في \"الإعدادات\"."</string>
-    <string name="kg_password_default_pin_message" msgid="1434544655827987873">"{count,plural, =1{‏أدخِل رقم التعريف الشخصي لشريحة SIM. تتبقّى لديك محاولة واحدة ويجب بعدها التواصل مع مشغّل شبكة الجوّال لفتح قفل الجهاز.}zero{‏أدخِل رقم التعريف الشخصي لشريحة SIM. تتبقّى لديك # محاولة.}two{‏أدخِل رقم التعريف الشخصي لشريحة SIM. تتبقّى لديك محاولتان.}few{‏أدخِل رقم التعريف الشخصي لشريحة SIM. تتبقّى لديك # محاولات.}many{‏أدخِل رقم التعريف الشخصي لشريحة SIM. تتبقّى لديك # محاولةً.}other{‏أدخِل رقم التعريف الشخصي لشريحة SIM. تتبقّى لديك # محاولة.}}"</string>
-    <string name="kg_password_default_puk_message" msgid="1025139786449741950">"{count,plural, =1{‏تم إيقاف شريحة SIM الآن. يجب إدخال رمز PUK للمتابعة. وتتبقّى لديك محاولة واحدة قبل أن تصبح شريحة SIM غير صالحة للاستخدام نهائيًا. يمكنك التواصل مع مشغِّل شبكة الجوّال لمعرفة التفاصيل.}zero{‏تم إيقاف شريحة SIM الآن. يجب إدخال رمز PUK للمتابعة. وتتبقّى لديك # محاولة قبل أن تصبح شريحة SIM غير صالحة للاستخدام نهائيًا. يمكنك التواصل مع مشغِّل شبكة الجوّال لمعرفة التفاصيل.}two{‏تم إيقاف شريحة SIM الآن. يجب إدخال رمز PUK للمتابعة. وتتبقّى لديك محاولتان قبل أن تصبح شريحة SIM غير صالحة للاستخدام نهائيًا. يمكنك التواصل مع مشغِّل شبكة الجوّال لمعرفة التفاصيل.}few{‏تم إيقاف شريحة SIM الآن. يجب إدخال رمز PUK للمتابعة. وتتبقّى لديك # محاولات قبل أن تصبح شريحة SIM غير صالحة للاستخدام نهائيًا. يمكنك التواصل مع مشغِّل شبكة الجوّال لمعرفة التفاصيل.}many{‏تم إيقاف شريحة SIM الآن. يجب إدخال رمز PUK للمتابعة. وتتبقّى لديك # محاولةً قبل أن تصبح شريحة SIM غير صالحة للاستخدام نهائيًا. يمكنك التواصل مع مشغِّل شبكة الجوّال لمعرفة التفاصيل.}other{‏تم إيقاف شريحة SIM الآن. يجب إدخال رمز PUK للمتابعة. وتتبقّى لديك # محاولة قبل أن تصبح شريحة SIM غير صالحة للاستخدام نهائيًا. يمكنك التواصل مع مشغِّل شبكة الجوّال لمعرفة التفاصيل.}}"</string>
+    <string name="kg_face_sensor_privacy_enabled" msgid="6513157891227284806">"‏لاستخدام ميزة \"فتح الجهاز بالتعرف على الوجه\"، عليك منح إذن "<b>"الوصول إلى الكاميرا"</b>" في الإعدادات &gt; الخصوصية."</string>
+    <plurals name="kg_password_default_pin_message" formatted="false" msgid="7730152526369857818">
+      <item quantity="zero">‏أدخل رقم التعريف الشخصي لشريحة SIM. تتبقى لديك <xliff:g id="NUMBER_1">%d</xliff:g> محاولة.</item>
+      <item quantity="two">‏أدخل رقم التعريف الشخصي لشريحة SIM. تتبقى لديك محاولتان (<xliff:g id="NUMBER_1">%d</xliff:g>).</item>
+      <item quantity="few">‏أدخل رقم التعريف الشخصي لشريحة SIM. تتبقى لديك <xliff:g id="NUMBER_1">%d</xliff:g> محاولات.</item>
+      <item quantity="many">‏أدخل رقم التعريف الشخصي لشريحة SIM. تتبقى لديك <xliff:g id="NUMBER_1">%d</xliff:g> محاولة.</item>
+      <item quantity="other">‏أدخل رقم التعريف الشخصي لشريحة SIM. تتبقى لديك <xliff:g id="NUMBER_1">%d</xliff:g> محاولة.</item>
+      <item quantity="one">‏أدخل رقم التعريف الشخصي لشريحة SIM. تتبقى لديك محاولة واحدة (<xliff:g id="NUMBER_0">%d</xliff:g>) يجب أن تتصل بعدها بمشغّل شبكة الجوّال لفتح الجهاز.</item>
+    </plurals>
+    <plurals name="kg_password_default_puk_message" formatted="false" msgid="571308542462946935">
+      <item quantity="zero">‏تم إيقاف شريحة SIM الآن. أدخل رمز PUK للمتابعة، وتتبقى لديك <xliff:g id="_NUMBER_1">%d</xliff:g> محاولة قبل أن تصبح شريحة SIM غير صالحة للاستخدام نهائيًا. ويمكنك الاتصال بمشغل شبكة الجوّال لمعرفة التفاصيل.</item>
+      <item quantity="two">‏تم إيقاف شريحة SIM الآن. أدخل رمز PUK للمتابعة، وتتبقى لديك محاولتان (<xliff:g id="_NUMBER_1">%d</xliff:g>) قبل أن تصبح شريحة SIM غير صالحة للاستخدام نهائيًا. ويمكنك الاتصال بمشغل شبكة الجوّال لمعرفة التفاصيل.</item>
+      <item quantity="few">‏تم إيقاف شريحة SIM الآن. أدخل رمز PUK للمتابعة، وتتبقى لديك <xliff:g id="_NUMBER_1">%d</xliff:g> محاولات قبل أن تصبح شريحة SIM غير صالحة للاستخدام نهائيًا. ويمكنك الاتصال بمشغل شبكة الجوّال لمعرفة التفاصيل.</item>
+      <item quantity="many">‏تم إيقاف شريحة SIM الآن. أدخل رمز PUK للمتابعة، وتتبقى لديك <xliff:g id="_NUMBER_1">%d</xliff:g> محاولة قبل أن تصبح شريحة SIM غير صالحة للاستخدام نهائيًا. ويمكنك الاتصال بمشغل شبكة الجوّال لمعرفة التفاصيل.</item>
+      <item quantity="other">‏تم إيقاف شريحة SIM الآن. أدخل رمز PUK للمتابعة، وتتبقى لديك <xliff:g id="_NUMBER_1">%d</xliff:g> محاولة قبل أن تصبح شريحة SIM غير صالحة للاستخدام نهائيًا. ويمكنك الاتصال بمشغل شبكة الجوّال لمعرفة التفاصيل.</item>
+      <item quantity="one">‏تم إيقاف شريحة SIM الآن. أدخل رمز PUK للمتابعة، وتتبقى لديك محاولة واحدة (<xliff:g id="_NUMBER_0">%d</xliff:g>) قبل أن تصبح شريحة SIM غير صالحة للاستخدام نهائيًا. ويمكنك الاتصال بمشغل شبكة الجوّال لمعرفة التفاصيل.</item>
+    </plurals>
     <string name="clock_title_default" msgid="6342735240617459864">"تلقائي"</string>
     <string name="clock_title_bubble" msgid="2204559396790593213">"فقاعة"</string>
     <string name="clock_title_analog" msgid="8409262532900918273">"ساعة تقليدية"</string>

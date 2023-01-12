@@ -27,6 +27,7 @@ import androidx.test.filters.SmallTest
 import com.android.systemui.R
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.plugins.qs.QSTile
+import com.android.systemui.qs.logging.QSLogger
 import com.android.systemui.qs.tileimpl.QSIconViewImpl
 import com.android.systemui.qs.tileimpl.QSTileViewImpl
 import com.google.common.truth.Truth.assertThat
@@ -34,6 +35,7 @@ import org.junit.After
 import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
+import org.mockito.Mock
 import org.mockito.Mockito.mock
 import org.mockito.Mockito.verify
 import org.mockito.MockitoAnnotations
@@ -42,6 +44,9 @@ import org.mockito.MockitoAnnotations
 @RunWithLooper
 @SmallTest
 class QSPanelTest : SysuiTestCase() {
+
+    @Mock private lateinit var qsLogger: QSLogger
+
     private lateinit var testableLooper: TestableLooper
     private lateinit var qsPanel: QSPanel
 
@@ -57,7 +62,7 @@ class QSPanelTest : SysuiTestCase() {
             qsPanel = QSPanel(context, null)
             qsPanel.mUsingMediaPlayer = true
 
-            qsPanel.initialize()
+            qsPanel.initialize(qsLogger)
             // QSPanel inflates a footer inside of it, mocking it here
             footer = LinearLayout(context).apply { id = R.id.qs_footer }
             qsPanel.addView(footer, MATCH_PARENT, 100)

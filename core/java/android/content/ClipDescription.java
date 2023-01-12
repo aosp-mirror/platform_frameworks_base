@@ -139,20 +139,28 @@ public class ClipDescription implements Parcelable {
      * password or credit card number.
      * <p>
      * Type: boolean
-     * </p>
      * <p>
      * This extra can be used to indicate that a ClipData contains sensitive information that
      * should be redacted or hidden from view until a user takes explicit action to reveal it
      * (e.g., by pasting).
-     * </p>
      * <p>
      * Adding this extra does not change clipboard behavior or add additional security to
      * the ClipData. Its purpose is essentially a rendering hint from the source application,
      * asking that the data within be obfuscated or redacted, unless the user has taken action
      * to make it visible.
-     * </p>
      */
     public static final String EXTRA_IS_SENSITIVE = "android.content.extra.IS_SENSITIVE";
+
+    /** Indicates that a ClipData's source is a remote device.
+     * <p>
+     *     Type: boolean
+     * <p>
+     *     This extra can be used to indicate that a ClipData comes from a separate device rather
+     *     than being local. It is a rendering hint that can be used to take different behavior
+     *     based on the source device of copied data.
+     * @hide
+     */
+    public static final String EXTRA_IS_REMOTE_DEVICE = "android.content.extra.IS_REMOTE_DEVICE";
 
     /** @hide */
     @Retention(RetentionPolicy.SOURCE)

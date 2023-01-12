@@ -15,6 +15,8 @@
  */
 package com.android.systemui.unfold.progress
 
+import android.os.Trace
+import android.os.Trace.TRACE_TAG_APP
 import android.util.Log
 import androidx.dynamicanimation.animation.DynamicAnimation
 import androidx.dynamicanimation.animation.FloatPropertyCompat
@@ -30,6 +32,7 @@ import com.android.systemui.unfold.updates.FOLD_UPDATE_UNFOLDED_SCREEN_AVAILABLE
 import com.android.systemui.unfold.updates.FoldStateProvider
 import com.android.systemui.unfold.updates.FoldStateProvider.FoldUpdate
 import com.android.systemui.unfold.updates.FoldStateProvider.FoldUpdatesListener
+import com.android.systemui.unfold.updates.name
 
 /** Maps fold updates to unfold transition progress using DynamicAnimation. */
 class PhysicsBasedUnfoldTransitionProgressProvider(
@@ -116,12 +119,17 @@ class PhysicsBasedUnfoldTransitionProgressProvider(
         }
 
         if (DEBUG) {
-            Log.d(TAG, "onFoldUpdate = $update")
+            Log.d(TAG, "onFoldUpdate = ${update.name()}")
+            Trace.traceCounter(Trace.TRACE_TAG_APP, "fold_update", update)
         }
     }
 
     private fun cancelTransition(endValue: Float, animate: Boolean) {
         if (isTransitionRunning && animate) {
+            if (endValue == 1.0f && !isAnimatedCancelRunning) {
+                listeners.forEach { it.onTransitionFinishing() }
+            }
+
             isAnimatedCancelRunning = true
             springAnimation.animateToFinalPosition(endValue)
         } else {
@@ -150,7 +158,10 @@ class PhysicsBasedUnfoldTransitionProgressProvider(
     }
 
     private fun onStartTransition() {
+        Trace.beginSection( "$TAG#onStartTransition")
         listeners.forEach { it.onTransitionStarted() }
+        Trace.endSection()
+
         isTransitionRunning = true
 
         if (DEBUG) {
@@ -203,6 +214,6 @@ class PhysicsBasedUnfoldTransitionProgressProvider(
 private const val TAG = "PhysicsBasedUnfoldTransitionProgressProvider"
 private const val DEBUG = true
 
-private const val SPRING_STIFFNESS = 200.0f
+private const val SPRING_STIFFNESS = 600.0f
 private const val MINIMAL_VISIBLE_CHANGE = 0.001f
 private const val FINAL_HINGE_ANGLE_POSITION = 165f

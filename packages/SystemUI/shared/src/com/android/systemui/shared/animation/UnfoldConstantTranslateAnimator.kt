@@ -16,6 +16,7 @@
 package com.android.systemui.shared.animation
 
 import android.view.View
+import android.view.View.LAYOUT_DIRECTION_RTL
 import android.view.ViewGroup
 import com.android.systemui.shared.animation.UnfoldConstantTranslateAnimator.ViewIdToTranslate
 import com.android.systemui.unfold.UnfoldTransitionProgressProvider
@@ -58,9 +59,15 @@ class UnfoldConstantTranslateAnimator(
         // progress == 0 -> -translationMax
         // progress == 1 -> 0
         val xTrans = (progress - 1f) * translationMax
+        val rtlMultiplier =
+            if (rootView.getLayoutDirection() == LAYOUT_DIRECTION_RTL) {
+                -1
+            } else {
+                1
+            }
         viewsToTranslate.forEach { (view, direction, shouldBeAnimated) ->
             if (shouldBeAnimated()) {
-                view.get()?.translationX = xTrans * direction.multiplier
+                view.get()?.translationX = xTrans * direction.multiplier * rtlMultiplier
             }
         }
     }
@@ -90,7 +97,7 @@ class UnfoldConstantTranslateAnimator(
 
     /** Direction of the animation. */
     enum class Direction(val multiplier: Float) {
-        LEFT(-1f),
-        RIGHT(1f),
+        START(-1f),
+        END(1f),
     }
 }

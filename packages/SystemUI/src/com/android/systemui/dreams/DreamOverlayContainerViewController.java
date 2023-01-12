@@ -29,17 +29,20 @@ import android.util.MathUtils;
 import android.view.View;
 import android.view.ViewGroup;
 
+import androidx.annotation.NonNull;
+
 import com.android.systemui.R;
 import com.android.systemui.animation.Interpolators;
 import com.android.systemui.dagger.qualifiers.Main;
 import com.android.systemui.dreams.complication.ComplicationHostViewController;
 import com.android.systemui.dreams.dagger.DreamOverlayComponent;
 import com.android.systemui.dreams.dagger.DreamOverlayModule;
-import com.android.systemui.keyguard.domain.interactor.BouncerCallbackInteractor;
+import com.android.systemui.keyguard.domain.interactor.PrimaryBouncerCallbackInteractor;
 import com.android.systemui.statusbar.BlurUtils;
 import com.android.systemui.statusbar.phone.KeyguardBouncer;
 import com.android.systemui.statusbar.phone.StatusBarKeyguardViewManager;
 import com.android.systemui.util.ViewController;
+import com.android.systemui.util.concurrency.DelayableExecutor;
 
 import java.util.Arrays;
 
@@ -54,6 +57,8 @@ public class DreamOverlayContainerViewController extends ViewController<DreamOve
     private final DreamOverlayStatusBarViewController mStatusBarViewController;
     private final StatusBarKeyguardViewManager mStatusBarKeyguardViewManager;
     private final BlurUtils mBlurUtils;
+    private final DreamOverlayAnimationsController mDreamOverlayAnimationsController;
+    private final DreamOverlayStateController mStateController;
 
     private final ComplicationHostViewController mComplicationHostViewController;
 
@@ -74,14 +79,14 @@ public class DreamOverlayContainerViewController extends ViewController<DreamOve
     // Main thread handler used to schedule periodic tasks (e.g. burn-in protection updates).
     private final Handler mHandler;
     private final int mDreamOverlayMaxTranslationY;
-    private final BouncerCallbackInteractor mBouncerCallbackInteractor;
+    private final PrimaryBouncerCallbackInteractor mPrimaryBouncerCallbackInteractor;
 
     private long mJitterStartTimeMillis;
 
     private boolean mBouncerAnimating;
 
-    private final KeyguardBouncer.BouncerExpansionCallback mBouncerExpansionCallback =
-            new KeyguardBouncer.BouncerExpansionCallback() {
+    private final KeyguardBouncer.PrimaryBouncerExpansionCallback mBouncerExpansionCallback =
+            new KeyguardBouncer.PrimaryBouncerExpansionCallback() {
 
                 @Override
                 public void onStartingToShow() {
@@ -134,12 +139,16 @@ public class DreamOverlayContainerViewController extends ViewController<DreamOve
             @Named(DreamOverlayModule.BURN_IN_PROTECTION_UPDATE_INTERVAL) long
                     burnInProtectionUpdateInterval,
             @Named(DreamOverlayModule.MILLIS_UNTIL_FULL_JITTER) long millisUntilFullJitter,
-            BouncerCallbackInteractor bouncerCallbackInteractor) {
+            PrimaryBouncerCallbackInteractor primaryBouncerCallbackInteractor,
+            DreamOverlayAnimationsController animationsController,
+            DreamOverlayStateController stateController) {
         super(containerView);
         mDreamOverlayContentView = contentView;
         mStatusBarViewController = statusBarViewController;
         mStatusBarKeyguardViewManager = statusBarKeyguardViewManager;
         mBlurUtils = blurUtils;
+        mDreamOverlayAnimationsController = animationsController;
+        mStateController = stateController;
 
         mComplicationHostViewController = complicationHostViewController;
         mDreamOverlayMaxTranslationY = resources.getDimensionPixelSize(
@@ -154,34 +163,42 @@ public class DreamOverlayContainerViewController extends ViewController<DreamOve
         mMaxBurnInOffset = maxBurnInOffset;
         mBurnInProtectionUpdateInterval = burnInProtectionUpdateInterval;
         mMillisUntilFullJitter = millisUntilFullJitter;
-        mBouncerCallbackInteractor = bouncerCallbackInteractor;
+        mPrimaryBouncerCallbackInteractor = primaryBouncerCallbackInteractor;
     }
 
     @Override
     protected void onInit() {
         mStatusBarViewController.init();
         mComplicationHostViewController.init();
+        mDreamOverlayAnimationsController.init(mView);
     }
 
     @Override
     protected void onViewAttached() {
         mJitterStartTimeMillis = System.currentTimeMillis();
         mHandler.postDelayed(this::updateBurnInOffsets, mBurnInProtectionUpdateInterval);
-        final KeyguardBouncer bouncer = mStatusBarKeyguardViewManager.getBouncer();
+        final KeyguardBouncer bouncer = mStatusBarKeyguardViewManager.getPrimaryBouncer();
         if (bouncer != null) {
             bouncer.addBouncerExpansionCallback(mBouncerExpansionCallback);
         }
-        mBouncerCallbackInteractor.addBouncerExpansionCallback(mBouncerExpansionCallback);
+        mPrimaryBouncerCallbackInteractor.addBouncerExpansionCallback(mBouncerExpansionCallback);
+
+        // Start dream entry animations. Skip animations for low light clock.
+        if (!mStateController.isLowLightActive()) {
+            mDreamOverlayAnimationsController.startEntryAnimations();
+        }
     }
 
     @Override
     protected void onViewDetached() {
         mHandler.removeCallbacks(this::updateBurnInOffsets);
-        final KeyguardBouncer bouncer = mStatusBarKeyguardViewManager.getBouncer();
+        final KeyguardBouncer bouncer = mStatusBarKeyguardViewManager.getPrimaryBouncer();
         if (bouncer != null) {
             bouncer.removeBouncerExpansionCallback(mBouncerExpansionCallback);
         }
-        mBouncerCallbackInteractor.removeBouncerExpansionCallback(mBouncerExpansionCallback);
+        mPrimaryBouncerCallbackInteractor.removeBouncerExpansionCallback(mBouncerExpansionCallback);
+
+        mDreamOverlayAnimationsController.cancelAnimations();
     }
 
     View getContainerView() {
@@ -237,5 +254,16 @@ public class DreamOverlayContainerViewController extends ViewController<DreamOve
                 position == POSITION_TOP ? getDreamYPositionScaledExpansion(expansion)
                         : aboutToShowBouncerProgress(expansion + 0.03f));
         return MathUtils.lerp(-mDreamOverlayMaxTranslationY, 0, fraction);
+    }
+
+    /**
+     * Handle the dream waking up and run any necessary animations.
+     *
+     * @param onAnimationEnd Callback to trigger once animations are finished.
+     * @param callbackExecutor Executor to execute the callback on.
+     */
+    public void wakeUp(@NonNull Runnable onAnimationEnd,
+            @NonNull DelayableExecutor callbackExecutor) {
+        mDreamOverlayAnimationsController.wakeUp(onAnimationEnd, callbackExecutor);
     }
 }

@@ -66,6 +66,8 @@ class NotificationQSContainerControllerTest : SysuiTestCase() {
     @Mock
     private lateinit var largeScreenShadeHeaderController: LargeScreenShadeHeaderController
     @Mock
+    private lateinit var shadeExpansionStateManager: ShadeExpansionStateManager
+    @Mock
     private lateinit var featureFlags: FeatureFlags
     @Captor
     lateinit var navigationModeCaptor: ArgumentCaptor<ModeChangedListener>
@@ -96,6 +98,7 @@ class NotificationQSContainerControllerTest : SysuiTestCase() {
                 navigationModeController,
                 overviewProxyService,
                 largeScreenShadeHeaderController,
+                shadeExpansionStateManager,
                 featureFlags,
                 delayableExecutor
         )
@@ -380,6 +383,7 @@ class NotificationQSContainerControllerTest : SysuiTestCase() {
                 navigationModeController,
                 overviewProxyService,
                 largeScreenShadeHeaderController,
+                shadeExpansionStateManager,
                 featureFlags,
                 delayableExecutor
         )

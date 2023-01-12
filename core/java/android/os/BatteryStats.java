@@ -962,7 +962,7 @@ public abstract class BatteryStats implements Parcelable {
          * also be bumped.
          */
         static final String[] USER_ACTIVITY_TYPES = {
-            "other", "button", "touch", "accessibility", "attention"
+            "other", "button", "touch", "accessibility", "attention", "faceDown", "deviceState"
         };
 
         public static final int NUM_USER_ACTIVITY_TYPES = USER_ACTIVITY_TYPES.length;

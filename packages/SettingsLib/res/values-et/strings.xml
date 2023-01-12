@@ -117,17 +117,17 @@
     <string name="bluetooth_profile_opp" msgid="6692618568149493430">"Failiedastus"</string>
     <string name="bluetooth_profile_hid" msgid="2969922922664315866">"Sisendseade"</string>
     <string name="bluetooth_profile_pan" msgid="1006235139308318188">"Juurdepääs internetile"</string>
-    <string name="bluetooth_profile_pbap" msgid="4262303387989406171">"Kontaktide ja kõneajaloo jagamine"</string>
-    <string name="bluetooth_profile_pbap_summary" msgid="6466456791354759132">"Kasutage kontaktide ja kõneajaloo jagamiseks"</string>
+    <string name="bluetooth_profile_pbap" msgid="7064307749579335765">"Kontaktide jagamine"</string>
+    <string name="bluetooth_profile_pbap_summary" msgid="2955819694801952056">"Kasutamine kontaktide jagamiseks"</string>
     <string name="bluetooth_profile_pan_nap" msgid="7871974753822470050">"Interneti-ühenduse jagamine"</string>
     <string name="bluetooth_profile_map" msgid="8907204701162107271">"Tekstsõnumid"</string>
     <string name="bluetooth_profile_sap" msgid="8304170950447934386">"Juurdepääs SIM-ile"</string>
     <string name="bluetooth_profile_a2dp_high_quality" msgid="4739440941324792775">"HD-heli: <xliff:g id="CODEC_NAME">%1$s</xliff:g>"</string>
     <string name="bluetooth_profile_a2dp_high_quality_unknown_codec" msgid="2477639096903834374">"HD-heli"</string>
     <string name="bluetooth_profile_hearing_aid" msgid="58154575573984914">"Kuuldeaparaadid"</string>
-    <string name="bluetooth_profile_le_audio" msgid="3237854988278539061">"LE Audio"</string>
+    <string name="bluetooth_profile_le_audio" msgid="5158149987518342036">"LE_AUDIO"</string>
     <string name="bluetooth_hearing_aid_profile_summary_connected" msgid="8191273236809964030">"Kuuldeaparaatidega ühendatud"</string>
-    <string name="bluetooth_le_audio_profile_summary_connected" msgid="6916226974453480650">"Ühendatud üksusega LE Audio"</string>
+    <string name="bluetooth_le_audio_profile_summary_connected" msgid="3162538609379333442">"Ühendatud üksusega LE_AUDIO"</string>
     <string name="bluetooth_a2dp_profile_summary_connected" msgid="7422607970115444153">"Ühendatud meediumiheliga"</string>
     <string name="bluetooth_headset_profile_summary_connected" msgid="2420981566026949688">"Ühendatud telefoniheliga"</string>
     <string name="bluetooth_opp_profile_summary_connected" msgid="2393521801478157362">"Ühendatud failiedastuse serveriga"</string>
@@ -408,7 +408,6 @@
     <string name="force_resizable_activities_summary" msgid="2490382056981583062">"Muudetakse kõigi tegevuste suurused mitme aknaga vaates muudetavaks (manifesti väärtustest olenemata)."</string>
     <string name="enable_freeform_support" msgid="7599125687603914253">"Luba vabas vormis aknad"</string>
     <string name="enable_freeform_support_summary" msgid="1822862728719276331">"Lubatakse katseliste vabavormis akende tugi."</string>
-    <string name="desktop_mode" msgid="2389067840550544462">"Lauaarvuti režiim"</string>
     <string name="local_backup_password_title" msgid="4631017948933578709">"Arvutivarunduse parool"</string>
     <string name="local_backup_password_summary_none" msgid="7646898032616361714">"Täielikud arvutivarundused pole praegu kaitstud"</string>
     <string name="local_backup_password_summary_change" msgid="1707357670383995567">"Puudutage täielike arvutivarunduste parooli muutmiseks või eemaldamiseks"</string>
@@ -477,13 +476,12 @@
     <string name="power_charging" msgid="6727132649743436802">"<xliff:g id="LEVEL">%1$s</xliff:g> – <xliff:g id="STATE">%2$s</xliff:g>"</string>
     <string name="power_remaining_charging_duration_only" msgid="8085099012811384899">"Täislaadimiseks kulub <xliff:g id="TIME">%1$s</xliff:g>"</string>
     <string name="power_charging_duration" msgid="6127154952524919719">"<xliff:g id="LEVEL">%1$s</xliff:g> – täislaadimiseks kulub <xliff:g id="TIME">%2$s</xliff:g>"</string>
-    <string name="power_charging_limited" msgid="6971664137170239141">"<xliff:g id="LEVEL">%1$s</xliff:g> – laadimine on peatatud"</string>
+    <string name="power_charging_limited" msgid="7956120998372505295">"<xliff:g id="LEVEL">%1$s</xliff:g> – laadimine on ajutiselt piiratud"</string>
     <string name="battery_info_status_unknown" msgid="268625384868401114">"Tundmatu"</string>
     <string name="battery_info_status_charging" msgid="4279958015430387405">"Laadimine"</string>
     <string name="battery_info_status_charging_fast" msgid="8027559755902954885">"Kiirlaadimine"</string>
     <string name="battery_info_status_charging_slow" msgid="3190803837168962319">"Aeglaselt laadimine"</string>
     <string name="battery_info_status_charging_wireless" msgid="8924722966861282197">"Juhtmevaba laadimine"</string>
-    <string name="battery_info_status_charging_dock" msgid="8573274094093364791">"Laadimine"</string>
     <string name="battery_info_status_discharging" msgid="6962689305413556485">"Ei lae"</string>
     <string name="battery_info_status_not_charging" msgid="3371084153747234837">"Ühendatud, ei laeta"</string>
     <string name="battery_info_status_full" msgid="1339002294876531312">"Laetud"</string>
@@ -601,7 +599,7 @@
     <string name="guest_remove_guest_confirm_button" msgid="7858123434954143879">"Eemalda"</string>
     <string name="guest_resetting" msgid="7822120170191509566">"Külastajaseansi lähtestamine …"</string>
     <string name="guest_reset_and_restart_dialog_title" msgid="3396657008451616041">"Kas lähtestada külastajaseanss?"</string>
-    <string name="guest_reset_and_restart_dialog_message" msgid="2764425635305200790">"See alustab uut külastajaseanssi ning kustutab kõik praeguse seansi rakendused ja andmed."</string>
+    <string name="guest_reset_and_restart_dialog_message" msgid="2764425635305200790">"See alustab uut külastajaseanssi ning kustutab kõik praeguse seansi rakendused ja andmed"</string>
     <string name="guest_exit_dialog_title" msgid="1846494656849381804">"Kas väljuda külalisrežiimist?"</string>
     <string name="guest_exit_dialog_message" msgid="1743218864242719783">"See kustutab praeguse külastajaseansi rakendused ja andmed"</string>
     <string name="guest_exit_dialog_button" msgid="1736401897067442044">"Välju"</string>
@@ -613,8 +611,8 @@
     <string name="guest_reset_button" msgid="2515069346223503479">"Lähtesta külastajaseanss"</string>
     <string name="guest_exit_quick_settings_button" msgid="1912362095913765471">"Välju külastajaseansist"</string>
     <string name="guest_notification_ephemeral" msgid="7263252466950923871">"Kõik tegevused kustutatakse väljumisel"</string>
-    <string name="guest_notification_non_ephemeral" msgid="6843799963012259330">"Võite tegevused salvestada või kustutada väljumisel."</string>
-    <string name="guest_notification_non_ephemeral_non_first_login" msgid="8009307983766934876">"Seansi tegevuste kohe kustutamiseks lähtestage; või salvestage või kustutage need väljumisel."</string>
+    <string name="guest_notification_non_ephemeral" msgid="6843799963012259330">"Võite tegevused salvestada või kustutada väljumisel"</string>
+    <string name="guest_notification_non_ephemeral_non_first_login" msgid="8009307983766934876">"Lähtestage, et seansi tegevused kohe kustutada; samuti võite tegevused salvestada või kustutada väljumisel"</string>
     <string name="user_image_take_photo" msgid="467512954561638530">"Pildistage"</string>
     <string name="user_image_choose_photo" msgid="1363820919146782908">"Valige pilt"</string>
     <string name="user_image_photo_selector" msgid="433658323306627093">"Valige foto"</string>
@@ -656,6 +654,11 @@
     <string name="accessibility_ethernet_disconnected" msgid="2832501530856497489">"Etherneti-ühendus on katkestatud."</string>
     <string name="accessibility_ethernet_connected" msgid="6175942685957461563">"Ethernet."</string>
     <string name="accessibility_no_calling" msgid="3540827068323895748">"Helistamine pole võimalik."</string>
+    <string name="dream_complication_title_time" msgid="701747800712893499">"Kellaaeg"</string>
+    <string name="dream_complication_title_date" msgid="8661176085446135789">"Kuupäev"</string>
+    <string name="dream_complication_title_weather" msgid="598609151677172783">"Ilm"</string>
+    <string name="dream_complication_title_aqi" msgid="4587552608957834110">"Õhukvaliteet"</string>
+    <string name="dream_complication_title_cast_info" msgid="4038776652841885084">"Osatäitjate teave"</string>
     <string name="avatar_picker_title" msgid="8492884172713170652">"Valige profiilipilt"</string>
     <string name="default_user_icon_description" msgid="6554047177298972638">"Vaikekasutajaikoon"</string>
     <string name="physical_keyboard_title" msgid="4811935435315835220">"Füüsiline klaviatuur"</string>
@@ -664,11 +667,11 @@
     <string name="turn_screen_on_title" msgid="3266937298097573424">"Ekraani sisselülitamine"</string>
     <string name="allow_turn_screen_on" msgid="6194845766392742639">"Luba ekraani sisselülitamine"</string>
     <string name="allow_turn_screen_on_description" msgid="43834403291575164">"Rakendusel lubatakse ekraan sisse lülitada. Kui annate loa, võib rakendus ekraani igal ajal sisse lülitada ilma teie sõnaselge kavatsuseta."</string>
+    <string name="bt_le_audio_scan_qr_code" msgid="3521809854780392679">"QR-koodi skannimine"</string>
+    <string name="bt_le_audio_scan_qr_code_scanner" msgid="4679500020630341107">"Kuulamise alustamiseks paigutage QR-kood allpool keskele"</string>
+    <string name="bt_le_audio_qr_code_is_not_valid_format" msgid="6092191081849434734">"QR-kood ei ole sobilik vorming"</string>
     <string name="bt_le_audio_broadcast_dialog_title" msgid="5392738488989777074">"Kas peatada rakenduse <xliff:g id="APP_NAME">%1$s</xliff:g> ülekandmine?"</string>
     <string name="bt_le_audio_broadcast_dialog_sub_title" msgid="268234802198852753">"Kui kannate rakendust <xliff:g id="SWITCHAPP">%1$s</xliff:g> üle või muudate väljundit, peatatakse teie praegune ülekanne"</string>
     <string name="bt_le_audio_broadcast_dialog_switch_app" msgid="5749813313369517812">"Rakenduse <xliff:g id="SWITCHAPP">%1$s</xliff:g> ülekandmine"</string>
     <string name="bt_le_audio_broadcast_dialog_different_output" msgid="2638402023060391333">"Väljundi muutmine"</string>
-    <string name="back_navigation_animation" msgid="8105467568421689484">"Tagasiliigutuse prognoosi animatsioon"</string>
-    <string name="back_navigation_animation_summary" msgid="741292224121599456">"Lubage süsteemi animatsioonid, et näha prognoositud tagasiliigutusi."</string>
-    <string name="back_navigation_animation_dialog" msgid="8696966520944625596">"See seade võimaldab süsteemi animatsioonidel prognoosida tagasiliigutusi. See nõuab manifestifailis rakendusepõhise atribuudi enableOnBackInvokedCallback määramist tõeseks."</string>
 </resources>

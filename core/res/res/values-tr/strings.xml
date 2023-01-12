@@ -21,6 +21,11 @@
 <resources xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
     <string name="byteShort" msgid="202579285008794431">"B"</string>
+    <string name="kilobyteShort" msgid="2214285521564195803">"kB"</string>
+    <string name="megabyteShort" msgid="6649361267635823443">"MB"</string>
+    <string name="gigabyteShort" msgid="7515809460261287991">"GB"</string>
+    <string name="terabyteShort" msgid="1822367128583886496">"TB"</string>
+    <string name="petabyteShort" msgid="5651571254228534832">"PB"</string>
     <string name="fileSizeSuffix" msgid="4233671691980131257">"<xliff:g id="NUMBER">%1$s</xliff:g> <xliff:g id="UNIT">%2$s</xliff:g>"</string>
     <string name="untitled" msgid="3381766946944136678">"&lt;Adsız&gt;"</string>
     <string name="emptyPhoneNumber" msgid="5812172618020360048">"(Telefon numarası yok)"</string>
@@ -300,12 +305,12 @@
     <string name="permgroupdesc_calendar" msgid="6762751063361489379">"takviminize erişme"</string>
     <string name="permgrouplab_sms" msgid="795737735126084874">"SMS"</string>
     <string name="permgroupdesc_sms" msgid="5726462398070064542">"SMS mesajları gönderme ve görüntüleme"</string>
-    <string name="permgrouplab_storage" msgid="17339216290379241">"Dosyalar"</string>
-    <string name="permgroupdesc_storage" msgid="5378659041354582769">"cihazınızdaki dosyalara erişme"</string>
-    <string name="permgrouplab_readMediaAural" msgid="1858331312624942053">"Müzik ve ses"</string>
-    <string name="permgroupdesc_readMediaAural" msgid="7565467343667089595">"cihazınızdaki müziklere ve seslere erişme"</string>
-    <string name="permgrouplab_readMediaVisual" msgid="4724874717811908660">"Fotoğraflar ve videolar"</string>
-    <string name="permgroupdesc_readMediaVisual" msgid="4080463241903508688">"cihazınızdaki fotoğraflara ve videolara erişme"</string>
+    <string name="permgrouplab_storage" msgid="9173334109512154196">"Dosyalar ve dokümanlar"</string>
+    <string name="permgroupdesc_storage" msgid="8352226729501080525">"cihazınızdaki dosyalara ve dokümanlara erişme"</string>
+    <string name="permgrouplab_readMediaAural" msgid="5885210465560755316">"Müzik ve diğer sesler"</string>
+    <string name="permgroupdesc_readMediaAural" msgid="1170143315714662822">"cihazınızdaki ses dosyalarına erişme"</string>
+    <string name="permgrouplab_readMediaVisual" msgid="9137695801926624061">"Fotoğraflar ve videolar"</string>
+    <string name="permgroupdesc_readMediaVisual" msgid="173787212014117477">"cihazınızdaki resim ve video dosyalarına erişme"</string>
     <string name="permgrouplab_microphone" msgid="2480597427667420076">"Mikrofon"</string>
     <string name="permgroupdesc_microphone" msgid="1047786732792487722">"ses kaydetme"</string>
     <string name="permgrouplab_activityRecognition" msgid="3324466667921775766">"Fiziksel aktivite"</string>
@@ -581,14 +586,13 @@
     <string name="screen_lock_app_setting_name" msgid="6054944352976789228">"Ekran kilidi kullan"</string>
     <string name="screen_lock_dialog_default_subtitle" msgid="120359538048533695">"Devam etmek için ekran kilidinizi girin"</string>
     <string name="fingerprint_acquired_partial" msgid="4323789264604479684">"Sensöre sıkıca bastırın"</string>
-    <string name="fingerprint_acquired_insufficient" msgid="623888149088216458">"Parmak izi tanınamadı. Tekrar deneyin."</string>
+    <string name="fingerprint_acquired_insufficient" msgid="2545149524031515411">"Parmak izi işlenemedi. Lütfen tekrar deneyin."</string>
     <string name="fingerprint_acquired_imager_dirty" msgid="1770676120848224250">"Parmak izi sensörünü temizleyip tekrar deneyin"</string>
     <string name="fingerprint_acquired_imager_dirty_alt" msgid="9169582140486372897">"Sensörü temizleyip tekrar deneyin"</string>
     <string name="fingerprint_acquired_too_fast" msgid="1628459767349116104">"Sensöre sıkıca bastırın"</string>
     <string name="fingerprint_acquired_too_slow" msgid="6683510291554497580">"Parmak hareketi çok yavaştı. Lütfen tekrar deneyin."</string>
     <string name="fingerprint_acquired_already_enrolled" msgid="2285166003936206785">"Başka bir parmak izi deneyin"</string>
     <string name="fingerprint_acquired_too_bright" msgid="3863560181670915607">"Çok parlak"</string>
-    <string name="fingerprint_acquired_power_press" msgid="3107864151278434961">"Güç düğmesine basma algılandı"</string>
     <string name="fingerprint_acquired_try_adjusting" msgid="3667006071003809364">"Ayarlamayı deneyin"</string>
     <string name="fingerprint_acquired_immobile" msgid="1621891895241888048">"Her defasında parmağınızın konumunu biraz değiştirin"</string>
   <string-array name="fingerprint_acquired_vendor">
@@ -600,17 +604,16 @@
     <string name="face_authenticated_confirmation_required" msgid="6872632732508013755">"Yüz kimliği doğrulandı, lütfen onayla\'ya basın"</string>
     <string name="fingerprint_error_hw_not_available" msgid="4571700896929561202">"Parmak izi donanımı kullanılamıyor."</string>
     <string name="fingerprint_error_no_space" msgid="7285481581905967580">"Parmak izi ayarlanamıyor"</string>
-    <string name="fingerprint_error_timeout" msgid="7361192266621252164">"Parmak izi kurulumu zaman aşımına uğradı. Tekrar deneyin."</string>
+    <string name="fingerprint_error_timeout" msgid="2946635815726054226">"Parmak izi için zaman aşımı oluştu. Tekrar deneyin."</string>
     <string name="fingerprint_error_canceled" msgid="540026881380070750">"Parmak izi işlemi iptal edildi."</string>
     <string name="fingerprint_error_user_canceled" msgid="7685676229281231614">"Parmak izi işlemi kullanıcı tarafından iptal edildi."</string>
-    <string name="fingerprint_error_lockout" msgid="6626753679019351368">"Çok fazla deneme yapıldı. Bunun yerine ekran kilidini kullanın."</string>
-    <string name="fingerprint_error_lockout_permanent" msgid="9060651300306264843">"Çok fazla deneme yapıldı. Bunun yerine ekran kilidini kullanın."</string>
-    <string name="fingerprint_error_unable_to_process" msgid="2446280592818621224">"Parmak izi işlenemiyor. Tekrar deneyin."</string>
+    <string name="fingerprint_error_lockout" msgid="7853461265604738671">"Çok fazla deneme yapıldı. Daha sonra tekrar deneyin."</string>
+    <string name="fingerprint_error_lockout_permanent" msgid="3895478283943513746">"Çok fazla deneme yapıldı. Parmak izi sensörü devre dışı bırakıldı."</string>
+    <string name="fingerprint_error_unable_to_process" msgid="1148553603490048742">"Tekrar deneyin."</string>
     <string name="fingerprint_error_no_fingerprints" msgid="8671811719699072411">"Parmak izi kaydedilmedi."</string>
     <string name="fingerprint_error_hw_not_present" msgid="578914350967423382">"Bu cihazda parmak izi sensörü yok."</string>
     <string name="fingerprint_error_security_update_required" msgid="7750187320640856433">"Sensör geçici olarak devre dışı bırakıldı."</string>
     <string name="fingerprint_error_bad_calibration" msgid="4385512597740168120">"Parmak izi sensörü kullanılamıyor. Bir onarım hizmeti sağlayıcıyı ziyaret edin"</string>
-    <string name="fingerprint_error_power_pressed" msgid="5479524500542129414">"Güç düğmesine basıldı"</string>
     <string name="fingerprint_name_template" msgid="8941662088160289778">"<xliff:g id="FINGERID">%d</xliff:g>. parmak"</string>
     <string name="fingerprint_app_setting_name" msgid="4253767877095495844">"Parmak izi kullan"</string>
     <string name="fingerprint_or_screen_lock_app_setting_name" msgid="3501743523487644907">"Parmak izi veya ekran kilidi kullan"</string>
@@ -623,7 +626,7 @@
     <string name="face_recalibrate_notification_name" msgid="7311163114750748686">"Yüz Tanıma Kilidi"</string>
     <string name="face_recalibrate_notification_title" msgid="2524791952735579082">"Yüz Tanıma Kilidi sorunu"</string>
     <string name="face_recalibrate_notification_content" msgid="3064513770251355594">"Yüz modelinizi silmek için dokunup ardından yüzünüzü yeniden ekleyin"</string>
-    <string name="face_setup_notification_title" msgid="8843461561970741790">"Yüz Tanıma Kilidi\'ni kurun"</string>
+    <string name="face_setup_notification_title" msgid="8843461561970741790">"Yüz Tanıma Kilidi\'ni kurma"</string>
     <string name="face_setup_notification_content" msgid="5463999831057751676">"Telefonunuza bakarak kilidini açın"</string>
     <string name="face_sensor_privacy_enabled" msgid="7407126963510598508">"Yüz Tanıma Kilidi\'ni kullanmak için Ayarlar &gt; Gizlilik bölümünden "<b>"Kamera erişimi"</b>"\'ni açın"</string>
     <string name="fingerprint_setup_notification_title" msgid="2002630611398849495">"Kilidi açmak için daha fazla yöntem ayarlayın"</string>
@@ -631,33 +634,26 @@
     <string name="fingerprint_recalibrate_notification_name" msgid="1414578431898579354">"Parmak İzi Kilidi"</string>
     <string name="fingerprint_recalibrate_notification_title" msgid="2406561052064558497">"Parmak izi sensörü kullanılamıyor"</string>
     <string name="fingerprint_recalibrate_notification_content" msgid="8519935717822194943">"Bir onarım hizmeti sağlayıcıyı ziyaret edin."</string>
-    <string name="face_acquired_insufficient" msgid="6889245852748492218">"Yüzünüzün modeli oluşturulamıyor. Tekrar deneyin."</string>
+    <string name="face_acquired_insufficient" msgid="2150805835949162453">"Doğru yüz verileri yakalanamadı. Tekrar deneyin."</string>
     <string name="face_acquired_too_bright" msgid="8070756048978079164">"Çok parlak. Parlaklığı daha az bir ışıklandırma deneyin."</string>
-    <string name="face_acquired_too_dark" msgid="8539853432479385326">"Yeterli ışık yok"</string>
-    <string name="face_acquired_too_close" msgid="4453646176196302462">"Telefonu uzaklaştırın"</string>
-    <string name="face_acquired_too_far" msgid="2922278214231064859">"Telefonu yaklaştırın"</string>
-    <string name="face_acquired_too_high" msgid="8278815780046368576">"Telefonu daha yukarı kaldırın"</string>
-    <string name="face_acquired_too_low" msgid="4075391872960840081">"Telefonu daha aşağı indirin"</string>
-    <string name="face_acquired_too_right" msgid="6245286514593540859">"Telefonu solunuza kaydırın"</string>
-    <string name="face_acquired_too_left" msgid="9201762240918405486">"Telefonu sağınıza kaydırın"</string>
+    <string name="face_acquired_too_dark" msgid="252573548464426546">"Çok karanlık. Daha parlak ışıkta deneyin."</string>
+    <string name="face_acquired_too_close" msgid="1628767882971469833">"Telefonu uzaklaştırın."</string>
+    <string name="face_acquired_too_far" msgid="5098567726427173896">"Telefonu yaklaştırın."</string>
+    <string name="face_acquired_too_high" msgid="4868033653626081839">"Telefonu yukarı kaldırın."</string>
+    <string name="face_acquired_too_low" msgid="1512237819632165945">"Telefonu aşağı indirin."</string>
+    <string name="face_acquired_too_right" msgid="2513391513020932655">"Telefonu sola hareket ettirin."</string>
+    <string name="face_acquired_too_left" msgid="8882499346502714350">"Telefonu sağa hareket ettirin."</string>
     <string name="face_acquired_poor_gaze" msgid="4427153558773628020">"Lütfen cihazınıza daha doğrudan bakın."</string>
-    <string name="face_acquired_not_detected" msgid="1057966913397548150">"Yüzünüz görünmüyor. Telefonunuzu göz hizasında tutun."</string>
+    <string name="face_acquired_not_detected" msgid="2945945257956443257">"Yüzünüz telefonun tam karşısına gelmelidir."</string>
     <string name="face_acquired_too_much_motion" msgid="8199691445085189528">"Çok fazla hareket ediyorsunuz. Telefonu sabit tutun."</string>
     <string name="face_acquired_recalibrate" msgid="8724013080976469746">"Lütfen yüzünüzü yeniden kaydedin."</string>
-    <string name="face_acquired_too_different" msgid="2520389515612972889">"Yüz tanınamadı. Tekrar deneyin."</string>
-    <string name="face_acquired_too_similar" msgid="8882920552674125694">"Başınızın konumunu hafifçe değiştirin"</string>
-    <string name="face_acquired_pan_too_extreme" msgid="5417928604710621088">"Telefonunuza daha doğrudan bakın"</string>
-    <string name="face_acquired_tilt_too_extreme" msgid="5715715666540716620">"Telefonunuza daha doğrudan bakın"</string>
-    <string name="face_acquired_roll_too_extreme" msgid="8261939882838881194">"Telefonunuza daha doğrudan bakın"</string>
+    <string name="face_acquired_too_different" msgid="4699657338753282542">"Yüz artık tanınamıyor. Tekrar deneyin."</string>
+    <string name="face_acquired_too_similar" msgid="7684650785108399370">"Duruşunuz çok benzer, lütfen pozunuzu değiştirin."</string>
+    <string name="face_acquired_pan_too_extreme" msgid="7822191262299152527">"Başınızı biraz daha az çevirin."</string>
+    <string name="face_acquired_tilt_too_extreme" msgid="8618210742620248049">"Başınızı biraz daha az eğin."</string>
+    <string name="face_acquired_roll_too_extreme" msgid="1442830503572636825">"Başınızı biraz daha az çevirin."</string>
     <string name="face_acquired_obscured" msgid="4917643294953326639">"Yüzünüzün görünmesini engelleyen şeyleri kaldırın."</string>
     <string name="face_acquired_sensor_dirty" msgid="8968391891086721678">"Siyah çubuk da dahil olmak üzere ekranınızın üst kısmını temizleyin"</string>
-    <!-- no translation found for face_acquired_dark_glasses_detected (5643703296620631986) -->
-    <skip />
-    <!-- no translation found for face_acquired_mouth_covering_detected (8219428572168642593) -->
-    <skip />
-    <string name="face_acquired_recalibrate_alt" msgid="5702674220280332115">"Yüzünüzün modeli oluşturulamıyor. Tekrar deneyin."</string>
-    <string name="face_acquired_dark_glasses_detected_alt" msgid="4052123776406041972">"Koyu renk gözlükler algılandı. Yüzünüz tamamen görünür olmalıdır."</string>
-    <string name="face_acquired_mouth_covering_detected_alt" msgid="1122294982850589766">"Yüzünüzü kapattığınız algılandı. Yüzünüz tamamen görünür olmalıdır."</string>
   <string-array name="face_acquired_vendor">
   </string-array>
     <string name="face_error_hw_not_available" msgid="5085202213036026288">"Yüz doğrulanamıyor. Donanım kullanılamıyor."</string>
@@ -1245,9 +1241,10 @@
     <string name="android_preparing_apk" msgid="589736917792300956">"<xliff:g id="APPNAME">%1$s</xliff:g> hazırlanıyor."</string>
     <string name="android_upgrading_starting_apps" msgid="6206161195076057075">"Uygulamalar başlatılıyor"</string>
     <string name="android_upgrading_complete" msgid="409800058018374746">"Açılış tamamlanıyor."</string>
+    <string name="fp_power_button_enrollment_title" msgid="3574363228413259548">"Kuruluma devam edilsin mi?"</string>
     <string name="fp_power_button_enrollment_message" msgid="5648173517663246140">"Güç düğmesine bastınız. Bu düğmeye basıldığında genellikle ekran kapanır.\n\nParmak izinizi tanımlarken hafifçe dokunmayı deneyin."</string>
-    <string name="fp_power_button_enrollment_title" msgid="6976841690455338563">"Ekranı kapatarak kurulumu sonlandırın"</string>
-    <string name="fp_power_button_enrollment_button_text" msgid="3199783266386029200">"Kapat"</string>
+    <string name="fp_power_button_enrollment_positive_button" msgid="2095415838459356833">"Ekranı kapat"</string>
+    <string name="fp_power_button_enrollment_negative_button" msgid="6558436406362486747">"Kuruluma devam et"</string>
     <string name="fp_power_button_bp_title" msgid="5585506104526820067">"Parmak izi doğrulamaya devam edilsin mi?"</string>
     <string name="fp_power_button_bp_message" msgid="2983163038168903393">"Güç düğmesine bastınız. Bu düğmeye basıldığında genellikle ekran kapanır.\n\nParmak izinizi doğrulamak için hafifçe dokunmayı deneyin."</string>
     <string name="fp_power_button_bp_positive_button" msgid="728945472408552251">"Ekranı kapat"</string>
@@ -1400,16 +1397,16 @@
     <string name="ext_media_new_notification_message" msgid="6095403121990786986">"Ayarlamak için dokunun"</string>
     <string name="ext_media_new_notification_message" product="tv" msgid="216863352100263668">"Kurmak için harici medyayı seçin"</string>
     <string name="ext_media_new_notification_message" product="automotive" msgid="5140127881613227162">"Cihazı yeniden biçimlendirmeniz gerekebilir. Çıkarmak için dokunun."</string>
-    <string name="ext_media_ready_notification_message" msgid="7509496364380197369">"Fotoğraf, video, müzik ve daha fazlasını depolamak için"</string>
+    <string name="ext_media_ready_notification_message" msgid="777258143284919261">"Fotoğraf ve medya aktarmak için"</string>
     <string name="ext_media_ready_notification_message" product="tv" msgid="8847134811163165935">"Medya dosyalarına göz atın"</string>
     <string name="ext_media_unmountable_notification_title" msgid="4895444667278979910">"<xliff:g id="NAME">%s</xliff:g> medyasında sorun oluştu"</string>
     <string name="ext_media_unmountable_notification_title" product="automotive" msgid="3142723758949023280">"<xliff:g id="NAME">%s</xliff:g> çalışmıyor"</string>
     <string name="ext_media_unmountable_notification_message" msgid="3256290114063126205">"Düzeltmek için dokunun"</string>
     <string name="ext_media_unmountable_notification_message" product="tv" msgid="3003611129979934633">"<xliff:g id="NAME">%s</xliff:g> bozuk. Düzeltmek için seçin."</string>
     <string name="ext_media_unmountable_notification_message" product="automotive" msgid="2274596120715020680">"Cihazı yeniden biçimlendirmeniz gerekebilir. Çıkarmak için dokunun."</string>
-    <string name="ext_media_unsupported_notification_title" msgid="3487534182861251401">"<xliff:g id="NAME">%s</xliff:g> algılandı"</string>
+    <string name="ext_media_unsupported_notification_title" msgid="4358280700537030333">"Desteklenmeyen <xliff:g id="NAME">%s</xliff:g>"</string>
     <string name="ext_media_unsupported_notification_title" product="automotive" msgid="6004193172658722381">"<xliff:g id="NAME">%s</xliff:g> çalışmıyor"</string>
-    <string name="ext_media_unsupported_notification_message" msgid="8463636521459807981">"Ayarlamak için dokunun."</string>
+    <string name="ext_media_unsupported_notification_message" msgid="917738524888367560">"Bu cihaz, bu <xliff:g id="NAME">%s</xliff:g> ortamını desteklemiyor. Desteklenen bir biçimde kurmak için dokunun."</string>
     <string name="ext_media_unsupported_notification_message" product="tv" msgid="1595482802187036532">"<xliff:g id="NAME">%s</xliff:g> kurulumunu desteklenen biçimde yapmak için seçin."</string>
     <string name="ext_media_unsupported_notification_message" product="automotive" msgid="3412494732736336330">"Cihazı yeniden biçimlendirmeniz gerekebilir"</string>
     <string name="ext_media_badremoval_notification_title" msgid="4114625551266196872">"<xliff:g id="NAME">%s</xliff:g> beklenmedik şekilde çıkarıldı"</string>
@@ -1591,7 +1588,7 @@
     <string name="validity_period" msgid="1717724283033175968">"Geçerlilik:"</string>
     <string name="issued_on" msgid="5855489688152497307">"Yayınlanma tarihi:"</string>
     <string name="expires_on" msgid="1623640879705103121">"Sona erme tarihi:"</string>
-    <string name="serial_number" msgid="3479576915806623429">"Seri numarası:"</string>
+    <string name="serial_number" msgid="3479576915806623429">"Seri numara:"</string>
     <string name="fingerprints" msgid="148690767172613723">"Parmak izleri:"</string>
     <string name="sha256_fingerprint" msgid="7103976380961964600">"SHA-256 parmak izi:"</string>
     <string name="sha1_fingerprint" msgid="2339915142825390774">"SHA-1 parmak izi:"</string>
@@ -1608,7 +1605,7 @@
     <string name="default_audio_route_name" product="tv" msgid="4908971385068087367">"TV"</string>
     <string name="default_audio_route_name" product="default" msgid="9213546147739983977">"Telefon"</string>
     <string name="default_audio_route_name_dock_speakers" msgid="1551166029093995289">"Yuva hoparlörleri"</string>
-    <string name="default_audio_route_name_external_device" msgid="8124229858618975">"Harici Cihaz"</string>
+    <string name="default_audio_route_name_external_device" msgid="5474470558160717850">"HDMI"</string>
     <string name="default_audio_route_name_headphones" msgid="6954070994792640762">"Kulaklıklar"</string>
     <string name="default_audio_route_name_usb" msgid="895668743163316932">"USB"</string>
     <string name="default_audio_route_category_name" msgid="5241740395748134483">"Sistem"</string>
@@ -1922,7 +1919,6 @@
     <string name="country_selection_title" msgid="5221495687299014379">"Bölge tercihi"</string>
     <string name="search_language_hint" msgid="7004225294308793583">"Dil adını yazın"</string>
     <string name="language_picker_section_suggested" msgid="6556199184638990447">"Önerilen"</string>
-    <string name="language_picker_regions_section_suggested" msgid="6080131515268225316">"Önerilen"</string>
     <string name="language_picker_section_all" msgid="1985809075777564284">"Tüm diller"</string>
     <string name="region_picker_section_all" msgid="756441309928774155">"Tüm bölgeler"</string>
     <string name="locale_search_menu" msgid="6258090710176422934">"Ara"</string>
@@ -1940,19 +1936,18 @@
     <string name="app_streaming_blocked_title_for_camera_dialog" msgid="3935701653713853065">"Kamera kullanılamıyor"</string>
     <string name="app_streaming_blocked_title_for_fingerprint_dialog" msgid="3516853717714141951">"İşleme telefonda devam edin"</string>
     <string name="app_streaming_blocked_title_for_microphone_dialog" msgid="544822455127171206">"Mikrofon kullanılamıyor"</string>
-    <string name="app_streaming_blocked_title_for_playstore_dialog" msgid="8149823099822897538">"Play Store kullanılamıyor"</string>
     <string name="app_streaming_blocked_title_for_settings_dialog" product="tv" msgid="196994247017450357">"Android TV ayarları kullanılamıyor"</string>
     <string name="app_streaming_blocked_title_for_settings_dialog" product="tablet" msgid="8222710146267948647">"Tablet ayarları kullanılamıyor"</string>
     <string name="app_streaming_blocked_title_for_settings_dialog" product="default" msgid="6895719984375299791">"Telefon ayarları kullanılamıyor"</string>
-    <string name="app_streaming_blocked_message" product="tv" msgid="4003011766528814377">"Bu uygulamaya şu anda <xliff:g id="DEVICE">%1$s</xliff:g> cihazınızdan erişilemiyor. Bunun yerine Android TV cihazınızı kullanmayı deneyin."</string>
-    <string name="app_streaming_blocked_message" product="tablet" msgid="4242053045964946062">"Bu uygulamaya şu anda <xliff:g id="DEVICE">%1$s</xliff:g> cihazınızdan erişilemiyor. Bunun yerine tabletinizi kullanmayı deneyin."</string>
-    <string name="app_streaming_blocked_message" product="default" msgid="6159168735030739398">"Bu uygulamaya şu anda <xliff:g id="DEVICE">%1$s</xliff:g> cihazınızdan erişilemiyor. Bunun yerine telefonunuzu kullanmayı deneyin."</string>
+    <string name="app_streaming_blocked_message" product="tv" msgid="5024599278277957935">"Bu uygulamaya <xliff:g id="DEVICE">%1$s</xliff:g> cihazınızdan erişilemiyor. Bunun yerine Android TV cihazınızı kullanmayı deneyin."</string>
+    <string name="app_streaming_blocked_message" product="tablet" msgid="7491114163056552686">"Bu uygulamaya <xliff:g id="DEVICE">%1$s</xliff:g> cihazınızdan erişilemiyor. Bunun yerine tabletinizi kullanmayı deneyin."</string>
+    <string name="app_streaming_blocked_message" product="default" msgid="1245180131667647277">"Bu uygulamaya <xliff:g id="DEVICE">%1$s</xliff:g> cihazınızdan erişilemiyor. Bunun yerine telefonunuzu kullanmayı deneyin."</string>
+    <string name="app_streaming_blocked_message_for_permission_dialog" product="tv" msgid="6306583663205997979">"Bu uygulamaya şu anda <xliff:g id="DEVICE">%1$s</xliff:g> cihazınızdan erişilemiyor. Bunun yerine Android TV cihazınızı kullanmayı deneyin."</string>
+    <string name="app_streaming_blocked_message_for_permission_dialog" product="tablet" msgid="6545624942642129664">"Bu uygulamaya şu anda <xliff:g id="DEVICE">%1$s</xliff:g> cihazınızdan erişilemiyor. Bunun yerine tabletinizi kullanmayı deneyin."</string>
+    <string name="app_streaming_blocked_message_for_permission_dialog" product="default" msgid="8462740631707923000">"Bu uygulamaya şu anda <xliff:g id="DEVICE">%1$s</xliff:g> cihazınızdan erişilemiyor. Bunun yerine telefonunuzu kullanmayı deneyin."</string>
     <string name="app_streaming_blocked_message_for_fingerprint_dialog" product="tv" msgid="3470977315395784567">"Bu uygulama daha fazla güvenlik istiyor. Bunun yerine Android TV cihazınızı kullanmayı deneyin."</string>
     <string name="app_streaming_blocked_message_for_fingerprint_dialog" product="tablet" msgid="698460091901465092">"Bu uygulama daha fazla güvenlik istiyor. Bunun yerine tabletinizi kullanmayı deneyin."</string>
     <string name="app_streaming_blocked_message_for_fingerprint_dialog" product="default" msgid="8552691971910603907">"Bu uygulama daha fazla güvenlik istiyor. Bunun yerine telefonunuzu kullanmayı deneyin."</string>
-    <string name="app_streaming_blocked_message_for_settings_dialog" product="tv" msgid="820334666354451145">"Bu uygulamaya <xliff:g id="DEVICE">%1$s</xliff:g> cihazınızdan erişilemiyor. Bunun yerine Android TV cihazınızı kullanmayı deneyin."</string>
-    <string name="app_streaming_blocked_message_for_settings_dialog" product="tablet" msgid="3286849551133045896">"Bu uygulamaya <xliff:g id="DEVICE">%1$s</xliff:g> cihazınızdan erişilemiyor. Bunun yerine tabletinizi kullanmayı deneyin."</string>
-    <string name="app_streaming_blocked_message_for_settings_dialog" product="default" msgid="6264287556598916295">"Bu uygulamaya <xliff:g id="DEVICE">%1$s</xliff:g> cihazınızdan erişilemiyor. Bunun yerine telefonunuzu kullanmayı deneyin."</string>
     <string name="deprecated_target_sdk_message" msgid="5203207875657579953">"Bu uygulama Android\'in daha eski bir sürümü için oluşturuldu ve düzgün çalışmayabilir. Güncellemeleri kontrol etmeyi deneyin veya geliştiriciyle iletişime geçin."</string>
     <string name="deprecated_target_sdk_app_store" msgid="8456784048558808909">"Güncellemeleri denetle"</string>
     <string name="new_sms_notification_title" msgid="6528758221319927107">"Yeni mesajlarınız var"</string>
@@ -2045,8 +2040,7 @@
     <string name="log_access_confirmation_title" msgid="2343578467290592708">"<xliff:g id="LOG_ACCESS_APP_NAME">%s</xliff:g> uygulamasının tüm cihaz günlüklerine erişmesine izin verilsin mi?"</string>
     <string name="log_access_confirmation_allow" msgid="5302517782599389507">"Tek seferlik erişim izni ver"</string>
     <string name="log_access_confirmation_deny" msgid="7685790957455099845">"İzin verme"</string>
-    <string name="log_access_confirmation_body" product="default" msgid="1806692062668620735">"Cihaz günlükleri, cihazınızda olanları kaydeder. Uygulamalar, sorunları bulup düzeltmek için bu günlükleri kullanabilir.\n\nBazı günlükler hassas bilgiler içerebileceği için yalnızca güvendiğiniz uygulamaların tüm cihaz günlüklerine erişmesine izin verin. \n\nBu uygulamanın tüm cihaz günlüklerine erişmesine izin vermeseniz de kendi günlüklerine erişmeye devam edebilir. Ayrıca, cihaz üreticiniz de cihazınızdaki bazı günlüklere veya bilgilere erişmeye devam edebilir."</string>
-    <string name="log_access_confirmation_body" product="tv" msgid="7379536536425265262">"Cihaz günlükleri, cihazınızda olanları kaydeder. Uygulamalar, sorunları bulup düzeltmek için bu günlükleri kullanabilir.\n\nBazı günlükler hassas bilgiler içerebileceği için yalnızca güvendiğiniz uygulamaların tüm cihaz günlüklerine erişmesine izin verin. \n\nBu uygulamanın tüm cihaz günlüklerine erişmesine izin vermeseniz de kendi günlüklerine erişmeye devam edebilir. Ayrıca, cihaz üreticiniz de cihazınızdaki bazı günlüklere veya bilgilere erişmeye devam edebilir.\n\nDaha fazla bilgiyi g.co/android/devicelogs sayfasında bulabilirsiniz."</string>
+    <string name="log_access_confirmation_body" msgid="6581985716241928135">"Cihaz günlükleri, cihazınızda olanları kaydeder. Uygulamalar, sorunları bulup düzeltmek için bu günlükleri kullanabilir.\n\nBazı günlükler hassas bilgiler içerebileceği için yalnızca güvendiğiniz uygulamaların tüm cihaz günlüklerine erişmesine izin verin. \n\nBu uygulamanın tüm cihaz günlüklerine erişmesine izin vermeseniz de kendi günlüklerine erişmeye devam edebilir. Ayrıca, cihaz üreticiniz de cihazınızdaki bazı günlüklere veya bilgilere erişmeye devam edebilir. Daha fazla bilgi"</string>
     <string name="log_access_do_not_show_again" msgid="1058690599083091552">"Bir daha gösterme"</string>
     <string name="slices_permission_request" msgid="3677129866636153406">"<xliff:g id="APP_0">%1$s</xliff:g> uygulaması, <xliff:g id="APP_2">%2$s</xliff:g> dilimlerini göstermek istiyor"</string>
     <string name="screenshot_edit" msgid="7408934887203689207">"Düzenle"</string>
@@ -2059,7 +2053,8 @@
     <string name="zen_upgrade_notification_title" msgid="8198167698095298717">"Rahatsız Etmeyin modu değişti"</string>
     <string name="zen_upgrade_notification_content" msgid="5228458567180124005">"Nelerin engellendiğini kontrol etmek için dokunun."</string>
     <string name="review_notification_settings_title" msgid="5102557424459810820">"Bildirim ayarlarını inceleyin"</string>
-    <string name="review_notification_settings_text" msgid="5916244866751849279">"Android 13\'te başlayarak yüklediğiniz uygulamaların bildirim gönderebilmesi için izniniz gereklidir. Mevcut uygulamalarda bu izni değiştirmek için dokunun."</string>
+    <!-- no translation found for review_notification_settings_text (5916244866751849279) -->
+    <skip />
     <string name="review_notification_settings_remind_me_action" msgid="1081081018678480907">"Sonra hatırlat"</string>
     <string name="review_notification_settings_dismiss" msgid="4160916504616428294">"Kapat"</string>
     <string name="notification_app_name_system" msgid="3045196791746735601">"Sistem"</string>
@@ -2073,11 +2068,11 @@
     <string name="notification_feedback_indicator_promoted" msgid="9030204303764698640">"Bu bildirimin önem derecesi yükseltildi. Geri bildirimde bulunmak için dokunun."</string>
     <string name="notification_feedback_indicator_demoted" msgid="8880309924296450875">"Bu bildirimin önem derecesi düşürüldü. Geri bildirimde bulunmak için dokunun."</string>
     <string name="nas_upgrade_notification_title" msgid="8436359459300146555">"Gelişmiş bildirimler"</string>
-    <string name="nas_upgrade_notification_content" msgid="5157550369837103337">"Önerilen işlemler ve yanıtlar artık gelişmiş bildirimler tarafından sağlanıyor. Android Uyarlanabilir Bildirimler artık desteklenmiyor."</string>
+    <string name="nas_upgrade_notification_content" msgid="5157550369837103337">"Önerilen işlemler ve yanıtlar artık gelişmiş bildirimler tarafından sağlanıyor. Android Uyarlamalı Bildirimler artık desteklenmiyor."</string>
     <string name="nas_upgrade_notification_enable_action" msgid="3046406808378726874">"Tamam"</string>
     <string name="nas_upgrade_notification_disable_action" msgid="3794833210043497982">"Kapat"</string>
     <string name="nas_upgrade_notification_learn_more_action" msgid="7011130656195423947">"Daha fazla bilgi"</string>
-    <string name="nas_upgrade_notification_learn_more_content" msgid="3735480566983530650">"Gelişmiş bildirimler, Android 12\'de Android Uyarlanabilir Bildirimler\'in yerini aldı. Bu özellik, önerilen işlem ve yanıtları gösterir ve bildirimlerinizi organize eder.\n\nGelişmiş bildirimler, kişiler ve mesajlar gibi kişisel bilgiler dahil olmak üzere tüm bildirim içeriklerine erişebilir. Bu özellik ayrıca bildirimleri kapatabilir veya telefon aramalarını yanıtlamak ve Rahatsız Etmeyin modunu kontrol etmek gibi işlemlerle bildirimlere yanıt verebilir."</string>
+    <string name="nas_upgrade_notification_learn_more_content" msgid="3735480566983530650">"Gelişmiş bildirimler, Android 12\'de Android Uyarlamalı Bildirimler\'in yerini aldı. Bu özellik, önerilen işlem ve yanıtları gösterir ve bildirimlerinizi organize eder.\n\nGelişmiş bildirimler, kişiler ve mesajlar gibi kişisel bilgiler dahil olmak üzere tüm bildirim içeriklerine erişebilir. Bu özellik ayrıca bildirimleri kapatabilir veya telefon aramalarını yanıtlamak ve Rahatsız Etmeyin modunu kontrol etmek gibi işlemlerle bildirimlere yanıt verebilir."</string>
     <string name="dynamic_mode_notification_channel_name" msgid="2986926422100223328">"Rutin Modu bilgi bildirimi"</string>
     <string name="dynamic_mode_notification_title" msgid="9205715501274608016">"Pil normal şarjdan önce bitebilir"</string>
     <string name="dynamic_mode_notification_summary" msgid="4141614604437372157">"Pilin ömrünü uzatmak için Pil Tasarrufu etkinleştirildi"</string>
@@ -2287,6 +2282,5 @@
     <string name="notification_action_check_bg_apps" msgid="4758877443365362532">"Etkin uygulamaları kontrol edin"</string>
     <string name="vdm_camera_access_denied" product="default" msgid="6102378580971542473">"<xliff:g id="DEVICE">%1$s</xliff:g> cihazınızdan telefonun kamerasına erişilemiyor"</string>
     <string name="vdm_camera_access_denied" product="tablet" msgid="6895968310395249076">"<xliff:g id="DEVICE">%1$s</xliff:g> cihazınızdan tabletin kamerasına erişilemiyor"</string>
-    <string name="vdm_secure_window" msgid="161700398158812314">"Canlı oynatılırken bu içeriğe erişilemez. Bunun yerine telefonunuzu kullanmayı deneyin."</string>
-    <string name="system_locale_title" msgid="711882686834677268">"Sistem varsayılanı"</string>
+    <string name="system_locale_title" msgid="3978041860457277638">"Sistem dili"</string>
 </resources>

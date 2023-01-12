@@ -72,16 +72,13 @@
     <string name="notification_bubble_title" msgid="6082910224488253378">"Qabarcıq"</string>
     <string name="manage_bubbles_text" msgid="7730624269650594419">"İdarə edin"</string>
     <string name="accessibility_bubble_dismissed" msgid="8367471990421247357">"Qabarcıqdan imtina edilib."</string>
-    <string name="restart_button_description" msgid="6712141648865547958">"Toxunaraq bu tətbiqi yenidən başladın ki, daha görüntü əldə edəsiniz."</string>
+    <string name="restart_button_description" msgid="5887656107651190519">"Bu tətbiqi sıfırlayaraq tam ekrana keçmək üçün toxunun."</string>
     <string name="camera_compat_treatment_suggested_button_description" msgid="8103916969024076767">"Kamera problemi var?\nBərpa etmək üçün toxunun"</string>
     <string name="camera_compat_treatment_applied_button_description" msgid="2944157113330703897">"Düzəltməmisiniz?\nGeri qaytarmaq üçün toxunun"</string>
     <string name="camera_compat_dismiss_button_description" msgid="2795364433503817511">"Kamera problemi yoxdur? Qapatmaq üçün toxunun."</string>
-    <string name="letterbox_education_dialog_title" msgid="7739895354143295358">"Ardını görün və edin"</string>
-    <string name="letterbox_education_split_screen_text" msgid="6206339484068670830">"Bölünmüş ekrandan istifadə etmək üçün başqa tətbiqi sürüşdürüb gətirin"</string>
-    <string name="letterbox_education_reposition_text" msgid="4589957299813220661">"Tətbiqin yerini dəyişmək üçün kənarına iki dəfə toxunun"</string>
+    <string name="letterbox_education_dialog_title" msgid="6688664582871779215">"Bəzi tətbiqlər portret rejimində daha yaxşı işləyir"</string>
+    <string name="letterbox_education_dialog_subtext" msgid="4853542518367719562">"Məkanınızdan maksimum yararlanmaq üçün bu seçimlərdən birini sınayın"</string>
+    <string name="letterbox_education_screen_rotation_text" msgid="5085786687366339027">"Tam ekrana keçmək üçün cihazınızı fırladın"</string>
+    <string name="letterbox_education_reposition_text" msgid="1068293354123934727">"Tətbiqin yerini dəyişmək üçün yanına iki dəfə toxunun"</string>
     <string name="letterbox_education_got_it" msgid="4057634570866051177">"Anladım"</string>
-    <string name="letterbox_education_expand_button_description" msgid="1729796567101129834">"Ətraflı məlumat üçün genişləndirin."</string>
-    <string name="maximize_button_text" msgid="1650859196290301963">"Böyüdün"</string>
-    <string name="minimize_button_text" msgid="271592547935841753">"Kiçildin"</string>
-    <string name="close_button_text" msgid="2913281996024033299">"Bağlayın"</string>
 </resources>

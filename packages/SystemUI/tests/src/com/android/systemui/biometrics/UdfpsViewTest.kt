@@ -40,8 +40,8 @@ import org.mockito.Mock
 import org.mockito.Mockito.never
 import org.mockito.Mockito.nullable
 import org.mockito.Mockito.verify
-import org.mockito.Mockito.`when` as whenever
 import org.mockito.junit.MockitoJUnit
+import org.mockito.Mockito.`when` as whenever
 
 private const val SENSOR_X = 50
 private const val SENSOR_Y = 250
@@ -68,7 +68,8 @@ class UdfpsViewTest : SysuiTestCase() {
         view = LayoutInflater.from(context).inflate(R.layout.udfps_view, null) as UdfpsView
         view.animationViewController = animationViewController
         val sensorBounds = SensorLocationInternal("", SENSOR_X, SENSOR_Y, SENSOR_RADIUS).rect
-        view.overlayParams = UdfpsOverlayParams(sensorBounds, 1920, 1080, 1f, Surface.ROTATION_0)
+        view.overlayParams = UdfpsOverlayParams(sensorBounds, sensorBounds, 1920,
+            1080, 1f, Surface.ROTATION_0)
         view.setUdfpsDisplayModeProvider(hbmProvider)
         ViewUtils.attachView(view)
     }

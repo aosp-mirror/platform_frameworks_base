@@ -72,16 +72,13 @@
     <string name="notification_bubble_title" msgid="6082910224488253378">"Көпіршік"</string>
     <string name="manage_bubbles_text" msgid="7730624269650594419">"Басқару"</string>
     <string name="accessibility_bubble_dismissed" msgid="8367471990421247357">"Қалқыма хабар жабылды."</string>
-    <string name="restart_button_description" msgid="6712141648865547958">"Ыңғайлы көріністі реттеу үшін қолданбаны түртіп, өшіріп қосыңыз."</string>
+    <string name="restart_button_description" msgid="5887656107651190519">"Бұл қолданбаны қайта қосып, толық экранға өту үшін түртіңіз."</string>
     <string name="camera_compat_treatment_suggested_button_description" msgid="8103916969024076767">"Камерада қателер шықты ма?\nЖөндеу үшін түртіңіз."</string>
     <string name="camera_compat_treatment_applied_button_description" msgid="2944157113330703897">"Жөнделмеді ме?\nҚайтару үшін түртіңіз."</string>
     <string name="camera_compat_dismiss_button_description" msgid="2795364433503817511">"Камерада қателер шықпады ма? Жабу үшін түртіңіз."</string>
-    <string name="letterbox_education_dialog_title" msgid="7739895354143295358">"Қосымша ақпаратты қарап, әрекеттер жасау"</string>
-    <string name="letterbox_education_split_screen_text" msgid="6206339484068670830">"Экранды бөлу үшін басқа қолданбаға сүйреңіз."</string>
-    <string name="letterbox_education_reposition_text" msgid="4589957299813220661">"Қолданбаның орнын өзгерту үшін одан тыс жерді екі рет түртіңіз."</string>
+    <string name="letterbox_education_dialog_title" msgid="6688664582871779215">"Кейбір қолданба портреттік режимде жақсы жұмыс істейді"</string>
+    <string name="letterbox_education_dialog_subtext" msgid="4853542518367719562">"Экранды тиімді пайдалану үшін мына опциялардың бірін байқап көріңіз."</string>
+    <string name="letterbox_education_screen_rotation_text" msgid="5085786687366339027">"Толық экранға ауысу үшін құрылғыңызды бұрыңыз."</string>
+    <string name="letterbox_education_reposition_text" msgid="1068293354123934727">"Қолданбаның орнын ауыстыру үшін жанынан екі рет түртіңіз."</string>
     <string name="letterbox_education_got_it" msgid="4057634570866051177">"Түсінікті"</string>
-    <string name="letterbox_education_expand_button_description" msgid="1729796567101129834">"Толығырақ ақпарат алу үшін терезені жайыңыз."</string>
-    <string name="maximize_button_text" msgid="1650859196290301963">"Жаю"</string>
-    <string name="minimize_button_text" msgid="271592547935841753">"Кішірейту"</string>
-    <string name="close_button_text" msgid="2913281996024033299">"Жабу"</string>
 </resources>

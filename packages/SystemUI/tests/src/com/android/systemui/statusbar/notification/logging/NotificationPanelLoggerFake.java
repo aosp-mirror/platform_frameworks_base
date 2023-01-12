@@ -40,6 +40,10 @@ public class NotificationPanelLoggerFake implements NotificationPanelLogger {
                 NotificationPanelLogger.toNotificationProto(visibleNotifications)));
     }
 
+    @Override
+    public void logNotificationDrag(NotificationEntry draggedNotification) {
+    }
+
     public static class CallRecord {
         public boolean isLockscreen;
         public Notifications.NotificationList list;

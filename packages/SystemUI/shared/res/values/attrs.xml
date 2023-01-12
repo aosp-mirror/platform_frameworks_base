@@ -20,12 +20,6 @@
 -->
 
 <resources>
-    <declare-styleable name="AnimatableClockView">
-        <attr name="dozeWeight" format="integer" />
-        <attr name="lockScreenWeight" format="integer" />
-        <attr name="chargeAnimationDelay" format="integer" />
-    </declare-styleable>
-
     <declare-styleable name="DoubleShadowAttrDeclare">
         <attr name="keyShadowBlur" format="dimension" />
         <attr name="keyShadowOffsetX" format="dimension" />

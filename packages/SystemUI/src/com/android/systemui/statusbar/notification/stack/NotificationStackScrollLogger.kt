@@ -1,8 +1,9 @@
 package com.android.systemui.statusbar.notification.stack
 
-import com.android.systemui.log.LogBuffer
-import com.android.systemui.log.LogLevel.INFO
 import com.android.systemui.log.dagger.NotificationHeadsUpLog
+import com.android.systemui.plugins.log.LogBuffer
+import com.android.systemui.plugins.log.LogLevel.DEBUG
+import com.android.systemui.plugins.log.LogLevel.INFO
 import com.android.systemui.statusbar.notification.collection.NotificationEntry
 import com.android.systemui.statusbar.notification.logKey
 import com.android.systemui.statusbar.notification.stack.NotificationStackScrollLayout.AnimationEvent.ANIMATION_TYPE_ADD
@@ -10,6 +11,7 @@ import com.android.systemui.statusbar.notification.stack.NotificationStackScroll
 import com.android.systemui.statusbar.notification.stack.NotificationStackScrollLayout.AnimationEvent.ANIMATION_TYPE_HEADS_UP_DISAPPEAR
 import com.android.systemui.statusbar.notification.stack.NotificationStackScrollLayout.AnimationEvent.ANIMATION_TYPE_HEADS_UP_DISAPPEAR_CLICK
 import com.android.systemui.statusbar.notification.stack.NotificationStackScrollLayout.AnimationEvent.ANIMATION_TYPE_HEADS_UP_OTHER
+import com.google.errorprone.annotations.CompileTimeConstant
 import javax.inject.Inject
 
 class NotificationStackScrollLogger @Inject constructor(
@@ -54,6 +56,25 @@ class NotificationStackScrollLogger @Inject constructor(
         }, {
             "HUN animation skipped for unexpected hun state: " +
                     "key: $str1 expected: $bool1 actual: $bool2"
+        })
+    }
+
+    fun d(@CompileTimeConstant msg: String) = buffer.log(TAG, DEBUG, msg)
+
+    fun logEmptySpaceClick(
+        isBelowLastNotification: Boolean,
+        statusBarState: Int,
+        touchIsClick: Boolean,
+        motionEventDesc: String
+    ) {
+        buffer.log(TAG, DEBUG, {
+            int1 = statusBarState
+            bool1 = touchIsClick
+            bool2 = isBelowLastNotification
+            str1 = motionEventDesc
+        }, {
+            "handleEmptySpaceClick: statusBarState: $int1 isTouchAClick: $bool1 " +
+                    "isTouchBelowNotification: $bool2 motionEvent: $str1"
         })
     }
 }

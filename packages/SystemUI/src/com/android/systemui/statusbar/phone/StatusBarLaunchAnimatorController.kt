@@ -31,7 +31,7 @@ class StatusBarLaunchAnimatorController(
         delegate.onLaunchAnimationStart(isExpandingFullyAbove)
         centralSurfaces.notificationPanelViewController.setIsLaunchAnimationRunning(true)
         if (!isExpandingFullyAbove) {
-            centralSurfaces.collapsePanelWithDuration(
+            centralSurfaces.notificationPanelViewController.collapseWithDuration(
                 ActivityLaunchAnimator.TIMINGS.totalDuration.toInt())
         }
     }

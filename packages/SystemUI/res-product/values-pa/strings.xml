@@ -43,6 +43,4 @@
     <string name="global_action_lock_message" product="default" msgid="7092460751050168771">"ਹੋਰ ਵਿਕਲਪਾਂ ਲਈ ਆਪਣਾ ਫ਼ੋਨ ਅਣਲਾਕ ਕਰੋ"</string>
     <string name="global_action_lock_message" product="tablet" msgid="1024230056230539493">"ਹੋਰ ਵਿਕਲਪਾਂ ਲਈ ਆਪਣਾ ਟੈਬਲੈੱਟ ਅਣਲਾਕ ਕਰੋ"</string>
     <string name="global_action_lock_message" product="device" msgid="3165224897120346096">"ਹੋਰ ਵਿਕਲਪਾਂ ਲਈ ਆਪਣਾ ਡੀਵਾਈਸ ਅਣਲਾਕ ਕਰੋ"</string>
-    <string name="media_transfer_playing_this_device" product="default" msgid="5795784619523545556">"ਇਸ ਫ਼ੋਨ \'ਤੇ ਚਲਾਇਆ ਜਾ ਰਿਹਾ ਹੈ"</string>
-    <string name="media_transfer_playing_this_device" product="tablet" msgid="222514408550408633">"ਇਸ ਟੈਬਲੈੱਟ \'ਤੇ ਚਲਾਇਆ ਜਾ ਰਿਹਾ ਹੈ"</string>
 </resources>

@@ -44,14 +44,11 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
-import android.content.BroadcastReceiver;
 import android.content.Context;
-import android.content.IntentFilter;
 import android.content.res.Resources;
 import android.hardware.display.DisplayManagerGlobal;
 import android.os.Handler;
 import android.os.SystemClock;
-import android.os.UserHandle;
 import android.provider.DeviceConfig;
 import android.telecom.TelecomManager;
 import android.testing.AndroidTestingRunner;
@@ -61,6 +58,7 @@ import android.view.Display;
 import android.view.DisplayInfo;
 import android.view.MotionEvent;
 import android.view.View;
+import android.view.ViewRootImpl;
 import android.view.ViewTreeObserver;
 import android.view.WindowInsets;
 import android.view.WindowManager;
@@ -72,15 +70,14 @@ import androidx.test.filters.SmallTest;
 
 import com.android.internal.logging.MetricsLogger;
 import com.android.internal.logging.UiEventLogger;
-import com.android.keyguard.KeyguardViewController;
 import com.android.systemui.SysuiTestCase;
 import com.android.systemui.SysuiTestableContext;
 import com.android.systemui.accessibility.AccessibilityButtonModeObserver;
 import com.android.systemui.accessibility.AccessibilityButtonTargetsObserver;
 import com.android.systemui.accessibility.SystemActions;
 import com.android.systemui.assist.AssistManager;
-import com.android.systemui.broadcast.BroadcastDispatcher;
 import com.android.systemui.dump.DumpManager;
+import com.android.systemui.keyguard.WakefulnessLifecycle;
 import com.android.systemui.model.SysUiState;
 import com.android.systemui.navigationbar.buttons.ButtonDispatcher;
 import com.android.systemui.navigationbar.buttons.DeadZone;
@@ -118,6 +115,7 @@ import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 
 import java.util.Optional;
+import java.util.concurrent.Executor;
 
 @RunWith(AndroidTestingRunner.class)
 @RunWithLooper(setAsMainLooper = true)
@@ -165,7 +163,7 @@ public class NavigationBarTest extends SysuiTestCase {
     @Mock
     private Handler mHandler;
     @Mock
-    private BroadcastDispatcher mBroadcastDispatcher;
+    private UserTracker mUserTracker;
     @Mock
     private UiEventLogger mUiEventLogger;
     @Mock
@@ -194,11 +192,15 @@ public class NavigationBarTest extends SysuiTestCase {
     @Mock
     private CentralSurfaces mCentralSurfaces;
     @Mock
-    private KeyguardViewController mKeyguardViewController;
+    private KeyguardStateController mKeyguardStateController;
     @Mock
     private UserContextProvider mUserContextProvider;
     @Mock
+    private WakefulnessLifecycle mWakefulnessLifecycle;
+    @Mock
     private Resources mResources;
+    @Mock
+    private ViewRootImpl mViewRootImpl;
     private FakeExecutor mFakeExecutor = new FakeExecutor(new FakeSystemClock());
     private DeviceConfigProxyFake mDeviceConfigProxyFake = new DeviceConfigProxyFake();
 
@@ -225,6 +227,7 @@ public class NavigationBarTest extends SysuiTestCase {
         when(mUserContextProvider.createCurrentUserContext(any(Context.class)))
                 .thenReturn(mContext);
         when(mNavigationBarView.getResources()).thenReturn(mResources);
+        when(mNavigationBarView.getViewRootImpl()).thenReturn(mViewRootImpl);
         setupSysuiDependency();
         // This class inflates views that call Dependency.get, thus these injections are still
         // necessary.
@@ -240,8 +243,8 @@ public class NavigationBarTest extends SysuiTestCase {
                     mock(AccessibilityButtonTargetsObserver.class),
                     mSystemActions, mOverviewProxyService,
                     () -> mock(AssistManager.class), () -> Optional.of(mCentralSurfaces),
-                    mKeyguardViewController, mock(NavigationModeController.class),
-                    mock(UserTracker.class), mock(DumpManager.class)));
+                    mKeyguardStateController, mock(NavigationModeController.class),
+                    mock(UserTracker.class), mock(DumpManager.class), mock(CommandQueue.class)));
             mNavigationBar = createNavBar(mContext);
             mExternalDisplayNavigationBar = createNavBar(mSysuiTestableContextExternal);
         });
@@ -309,14 +312,10 @@ public class NavigationBarTest extends SysuiTestCase {
     }
 
     @Test
-    public void testRegisteredWithDispatcher() {
+    public void testRegisteredWithUserTracker() {
         mNavigationBar.init();
         mNavigationBar.onViewAttached();
-        verify(mBroadcastDispatcher).registerReceiverWithHandler(
-                any(BroadcastReceiver.class),
-                any(IntentFilter.class),
-                any(Handler.class),
-                any(UserHandle.class));
+        verify(mUserTracker).addCallback(any(UserTracker.Callback.class), any(Executor.class));
     }
 
     @Test
@@ -380,7 +379,7 @@ public class NavigationBarTest extends SysuiTestCase {
 
         // Verify navbar didn't alter and showing back icon when the keyguard is showing without
         // requesting IME insets visible.
-        doReturn(true).when(mKeyguardViewController).isShowing();
+        doReturn(true).when(mKeyguardStateController).isShowing();
         mNavigationBar.setImeWindowStatus(DEFAULT_DISPLAY, null, IME_VISIBLE,
                 BACK_DISPOSITION_DEFAULT, true);
         assertFalse((mNavigationBar.getNavigationIconHints() & NAVIGATION_HINT_BACK_ALT) != 0);
@@ -432,6 +431,12 @@ public class NavigationBarTest extends SysuiTestCase {
         verify(mNavigationBarView).setVisibility(View.INVISIBLE);
     }
 
+    @Test
+    public void testOnInit_readCurrentSysuiState() {
+        mNavigationBar.init();
+        verify(mNavBarHelper, times(1)).getCurrentSysuiState();
+    }
+
     private NavigationBar createNavBar(Context context) {
         DeviceProvisionedController deviceProvisionedController =
                 mock(DeviceProvisionedController.class);
@@ -451,7 +456,7 @@ public class NavigationBarTest extends SysuiTestCase {
                 mStatusBarStateController,
                 mStatusBarKeyguardViewManager,
                 mMockSysUiState,
-                mBroadcastDispatcher,
+                mUserTracker,
                 mCommandQueue,
                 Optional.of(mock(Pip.class)),
                 Optional.of(mock(Recents.class)),
@@ -475,7 +480,8 @@ public class NavigationBarTest extends SysuiTestCase {
                 mNavigationBarTransitions,
                 mEdgeBackGestureHandler,
                 Optional.of(mock(BackAnimation.class)),
-                mUserContextProvider));
+                mUserContextProvider,
+                mWakefulnessLifecycle));
     }
 
     private void processAllMessages() {

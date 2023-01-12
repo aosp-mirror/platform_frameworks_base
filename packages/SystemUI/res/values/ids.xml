@@ -142,6 +142,9 @@
 
     <item type="id" name="row_tag_for_content_view" />
 
+    <!-- Chipbar -->
+    <item type="id" name="tag_chipbar_info"/>
+
     <!-- Optional cancel button on Keyguard -->
     <item type="id" name="cancel_button"/>
 
@@ -188,5 +191,11 @@
     <item type="id" name="face_scanning_anim"/>
 
     <item type="id" name="qqs_tile_layout"/>
+
+    <!-- The buttons in the Quick Settings footer actions.-->
+    <item type="id" name="multi_user_switch"/>
+    <item type="id" name="pm_lite"/>
+    <item type="id" name="settings_button_container"/>
+
 </resources>
 

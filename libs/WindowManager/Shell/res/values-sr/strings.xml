@@ -72,16 +72,13 @@
     <string name="notification_bubble_title" msgid="6082910224488253378">"Облачић"</string>
     <string name="manage_bubbles_text" msgid="7730624269650594419">"Управљајте"</string>
     <string name="accessibility_bubble_dismissed" msgid="8367471990421247357">"Облачић је одбачен."</string>
-    <string name="restart_button_description" msgid="6712141648865547958">"Додирните да бисте рестартовали ову апликацију ради бољег приказа."</string>
+    <string name="restart_button_description" msgid="5887656107651190519">"Додирните да бисте рестартовали апликацију и прешли у режим целог екрана."</string>
     <string name="camera_compat_treatment_suggested_button_description" msgid="8103916969024076767">"Имате проблема са камером?\nДодирните да бисте поново уклопили"</string>
     <string name="camera_compat_treatment_applied_button_description" msgid="2944157113330703897">"Проблем није решен?\nДодирните да бисте вратили"</string>
     <string name="camera_compat_dismiss_button_description" msgid="2795364433503817511">"Немате проблема са камером? Додирните да бисте одбацили."</string>
-    <string name="letterbox_education_dialog_title" msgid="7739895354143295358">"Видите и урадите више"</string>
-    <string name="letterbox_education_split_screen_text" msgid="6206339484068670830">"Превуците другу апликацију да бисте користили подељени екран"</string>
-    <string name="letterbox_education_reposition_text" msgid="4589957299813220661">"Двапут додирните изван апликације да бисте променили њену позицију"</string>
+    <string name="letterbox_education_dialog_title" msgid="6688664582871779215">"Неке апликације најбоље функционишу у усправном режиму"</string>
+    <string name="letterbox_education_dialog_subtext" msgid="4853542518367719562">"Испробајте једну од ових опција да бисте на најбољи начин искористили простор"</string>
+    <string name="letterbox_education_screen_rotation_text" msgid="5085786687366339027">"Ротирајте уређај за приказ преко целог екрана"</string>
+    <string name="letterbox_education_reposition_text" msgid="1068293354123934727">"Двапут додирните поред апликације да бисте променили њену позицију"</string>
     <string name="letterbox_education_got_it" msgid="4057634570866051177">"Важи"</string>
-    <string name="letterbox_education_expand_button_description" msgid="1729796567101129834">"Проширите за још информација."</string>
-    <string name="maximize_button_text" msgid="1650859196290301963">"Увећајте"</string>
-    <string name="minimize_button_text" msgid="271592547935841753">"Умањите"</string>
-    <string name="close_button_text" msgid="2913281996024033299">"Затворите"</string>
 </resources>

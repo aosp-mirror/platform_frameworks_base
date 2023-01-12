@@ -549,7 +549,7 @@ public class SettingsHelper {
 
         try {
             IActivityManager am = ActivityManager.getService();
-            Configuration config = am.getConfiguration();
+            final Configuration config = new Configuration();
             config.setLocales(merged);
             // indicate this isn't some passing default - the user wants this remembered
             config.userSetLocale = true;

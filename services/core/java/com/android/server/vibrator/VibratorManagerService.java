@@ -852,8 +852,8 @@ public class VibratorManagerService extends IVibratorManagerService.Stub {
         }
 
         Vibration currentVibration = mCurrentVibration.getVibration();
-        if (currentVibration.hasEnded()) {
-            // Current vibration is finishing up, it should not block incoming vibrations.
+        if (currentVibration.hasEnded() || mCurrentVibration.wasNotifiedToCancel()) {
+            // Current vibration has ended or is cancelling, should not block incoming vibrations.
             return null;
         }
 

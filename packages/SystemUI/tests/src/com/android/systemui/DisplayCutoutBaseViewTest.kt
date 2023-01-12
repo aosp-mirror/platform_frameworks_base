@@ -16,6 +16,7 @@
 
 package com.android.systemui
 
+import android.content.Context
 import android.graphics.Canvas
 import android.graphics.Insets
 import android.graphics.Path
@@ -48,6 +49,7 @@ class DisplayCutoutBaseViewTest : SysuiTestCase() {
     @Mock private lateinit var mockCanvas: Canvas
     @Mock private lateinit var mockRootView: View
     @Mock private lateinit var mockDisplay: Display
+    @Mock private lateinit var mockContext: Context
 
     private lateinit var cutoutBaseView: DisplayCutoutBaseView
     private val cutout: DisplayCutout = DisplayCutout.Builder()
@@ -168,7 +170,9 @@ class DisplayCutoutBaseViewTest : SysuiTestCase() {
                 R.bool.config_fillMainBuiltInDisplayCutout, fillCutout)
 
         cutoutBaseView = spy(DisplayCutoutBaseView(mContext))
-        whenever(cutoutBaseView.display).thenReturn(mockDisplay)
+
+        whenever(cutoutBaseView.context).thenReturn(mockContext)
+        whenever(mockContext.display).thenReturn(mockDisplay)
         whenever(mockDisplay.uniqueId).thenReturn("mockDisplayUniqueId")
         whenever(cutoutBaseView.rootView).thenReturn(mockRootView)
         whenever(cutoutBaseView.getPhysicalPixelDisplaySizeRatio()).thenReturn(1f)

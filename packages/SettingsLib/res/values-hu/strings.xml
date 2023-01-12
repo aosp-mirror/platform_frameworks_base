@@ -117,17 +117,17 @@
     <string name="bluetooth_profile_opp" msgid="6692618568149493430">"Fájlátvitel"</string>
     <string name="bluetooth_profile_hid" msgid="2969922922664315866">"Beviteli eszköz"</string>
     <string name="bluetooth_profile_pan" msgid="1006235139308318188">"Internetelérés"</string>
-    <string name="bluetooth_profile_pbap" msgid="4262303387989406171">"Névjegyek és hívásnapló megosztása"</string>
-    <string name="bluetooth_profile_pbap_summary" msgid="6466456791354759132">"Névjegyek és hívásnapló megosztásához használható"</string>
+    <string name="bluetooth_profile_pbap" msgid="7064307749579335765">"Névjegyek megosztása"</string>
+    <string name="bluetooth_profile_pbap_summary" msgid="2955819694801952056">"Használja a névjegyek megosztására"</string>
     <string name="bluetooth_profile_pan_nap" msgid="7871974753822470050">"Internetkapcsolat megosztása"</string>
     <string name="bluetooth_profile_map" msgid="8907204701162107271">"Szöveges üzenetek"</string>
     <string name="bluetooth_profile_sap" msgid="8304170950447934386">"SIM-elérés"</string>
     <string name="bluetooth_profile_a2dp_high_quality" msgid="4739440941324792775">"HD audio: <xliff:g id="CODEC_NAME">%1$s</xliff:g>"</string>
     <string name="bluetooth_profile_a2dp_high_quality_unknown_codec" msgid="2477639096903834374">"HD audio"</string>
     <string name="bluetooth_profile_hearing_aid" msgid="58154575573984914">"Hallókészülékek"</string>
-    <string name="bluetooth_profile_le_audio" msgid="3237854988278539061">"Alacsony energiaszintű hangátvitel"</string>
+    <string name="bluetooth_profile_le_audio" msgid="5158149987518342036">"LE_AUDIO"</string>
     <string name="bluetooth_hearing_aid_profile_summary_connected" msgid="8191273236809964030">"Hallókészülékhez csatlakoztatva"</string>
-    <string name="bluetooth_le_audio_profile_summary_connected" msgid="6916226974453480650">"Csatlakoztatva az alacsony energiaszintű hangátvitelhez"</string>
+    <string name="bluetooth_le_audio_profile_summary_connected" msgid="3162538609379333442">"Csatlakoztatva ehhez: LE_AUDIO"</string>
     <string name="bluetooth_a2dp_profile_summary_connected" msgid="7422607970115444153">"Csatlakoztatva az eszköz hangjához"</string>
     <string name="bluetooth_headset_profile_summary_connected" msgid="2420981566026949688">"Csatlakoztatva a telefon hangjához"</string>
     <string name="bluetooth_opp_profile_summary_connected" msgid="2393521801478157362">"Csatlakozva a fájlküldő szerverhez"</string>
@@ -408,7 +408,6 @@
     <string name="force_resizable_activities_summary" msgid="2490382056981583062">"Legyen az összes tevékenység átméretezhető a többablakos megjelenítés érdekében a jegyzékértékektől függetlenül."</string>
     <string name="enable_freeform_support" msgid="7599125687603914253">"Szabad formájú ablakok engedélyezése"</string>
     <string name="enable_freeform_support_summary" msgid="1822862728719276331">"Kísérleti, szabad formájú ablakok támogatásának engedélyezése."</string>
-    <string name="desktop_mode" msgid="2389067840550544462">"Asztali üzemmód"</string>
     <string name="local_backup_password_title" msgid="4631017948933578709">"Asztali mentés jelszava"</string>
     <string name="local_backup_password_summary_none" msgid="7646898032616361714">"Az asztali teljes biztonsági mentések jelenleg nem védettek."</string>
     <string name="local_backup_password_summary_change" msgid="1707357670383995567">"Koppintson ide az asztali teljes mentések jelszavának módosításához vagy eltávolításához"</string>
@@ -477,13 +476,12 @@
     <string name="power_charging" msgid="6727132649743436802">"<xliff:g id="LEVEL">%1$s</xliff:g> – <xliff:g id="STATE">%2$s</xliff:g>"</string>
     <string name="power_remaining_charging_duration_only" msgid="8085099012811384899">"<xliff:g id="TIME">%1$s</xliff:g> a teljes töltöttségig"</string>
     <string name="power_charging_duration" msgid="6127154952524919719">"<xliff:g id="LEVEL">%1$s</xliff:g> – <xliff:g id="TIME">%2$s</xliff:g> a teljes töltöttségig"</string>
-    <string name="power_charging_limited" msgid="6971664137170239141">"<xliff:g id="LEVEL">%1$s</xliff:g> – A töltés szünetel"</string>
+    <string name="power_charging_limited" msgid="7956120998372505295">"<xliff:g id="LEVEL">%1$s</xliff:g> – Töltés ideiglenesen korlátozva"</string>
     <string name="battery_info_status_unknown" msgid="268625384868401114">"Ismeretlen"</string>
     <string name="battery_info_status_charging" msgid="4279958015430387405">"Töltés"</string>
     <string name="battery_info_status_charging_fast" msgid="8027559755902954885">"Gyorstöltés"</string>
     <string name="battery_info_status_charging_slow" msgid="3190803837168962319">"Lassú töltés"</string>
     <string name="battery_info_status_charging_wireless" msgid="8924722966861282197">"Vezeték nélküli töltés"</string>
-    <string name="battery_info_status_charging_dock" msgid="8573274094093364791">"Töltés…"</string>
     <string name="battery_info_status_discharging" msgid="6962689305413556485">"Nem tölt"</string>
     <string name="battery_info_status_not_charging" msgid="3371084153747234837">"Csatlakoztatva, nem töltődik"</string>
     <string name="battery_info_status_full" msgid="1339002294876531312">"Feltöltve"</string>
@@ -614,7 +612,7 @@
     <string name="guest_exit_quick_settings_button" msgid="1912362095913765471">"Vendég kiléptetése"</string>
     <string name="guest_notification_ephemeral" msgid="7263252466950923871">"A kilépéssel minden tevékenység törlődik"</string>
     <string name="guest_notification_non_ephemeral" msgid="6843799963012259330">"A kilépéskor mentheti vagy törölheti a tevékenységeket"</string>
-    <string name="guest_notification_non_ephemeral_non_first_login" msgid="8009307983766934876">"Visszaállítással azonnal törölheti, illetve kilépéskor mentheti vagy törölheti a tevékenységeket"</string>
+    <string name="guest_notification_non_ephemeral_non_first_login" msgid="8009307983766934876">"Visszaállítással azonnal törölheti a munkamenethez tartozó tevékenységeket, illetve kilépéskor mentheti vagy törölheti a tevékenységeket"</string>
     <string name="user_image_take_photo" msgid="467512954561638530">"Fotó készítése"</string>
     <string name="user_image_choose_photo" msgid="1363820919146782908">"Kép kiválasztása"</string>
     <string name="user_image_photo_selector" msgid="433658323306627093">"Fotó kiválasztása"</string>
@@ -656,6 +654,11 @@
     <string name="accessibility_ethernet_disconnected" msgid="2832501530856497489">"Ethernet leválasztva."</string>
     <string name="accessibility_ethernet_connected" msgid="6175942685957461563">"Ethernet."</string>
     <string name="accessibility_no_calling" msgid="3540827068323895748">"Nem kezdeményezhet hanghívást."</string>
+    <string name="dream_complication_title_time" msgid="701747800712893499">"Idő"</string>
+    <string name="dream_complication_title_date" msgid="8661176085446135789">"Dátum"</string>
+    <string name="dream_complication_title_weather" msgid="598609151677172783">"Időjárás"</string>
+    <string name="dream_complication_title_aqi" msgid="4587552608957834110">"Levegőminőség"</string>
+    <string name="dream_complication_title_cast_info" msgid="4038776652841885084">"Átküldési információ"</string>
     <string name="avatar_picker_title" msgid="8492884172713170652">"Profilkép választása"</string>
     <string name="default_user_icon_description" msgid="6554047177298972638">"Alapértelmezett felhasználó ikonja"</string>
     <string name="physical_keyboard_title" msgid="4811935435315835220">"Fizikai billentyűzet"</string>
@@ -664,11 +667,11 @@
     <string name="turn_screen_on_title" msgid="3266937298097573424">"Képernyő bekapcsolása"</string>
     <string name="allow_turn_screen_on" msgid="6194845766392742639">"A képernyő bekapcsolásának engedélyezése"</string>
     <string name="allow_turn_screen_on_description" msgid="43834403291575164">"A képernyő bekapcsolásának engedélyezése az adott alkalmazás számára. Ha megadja az engedélyt, az alkalmazás az Ön kifejezett szándéka nélkül, bármikor bekapcsolhatja a képernyőt."</string>
+    <string name="bt_le_audio_scan_qr_code" msgid="3521809854780392679">"QR-kód beolvasása"</string>
+    <string name="bt_le_audio_scan_qr_code_scanner" msgid="4679500020630341107">"A hallgatás megkezdéséhez igazítsa a QR-kódot az alábbi panel közepére"</string>
+    <string name="bt_le_audio_qr_code_is_not_valid_format" msgid="6092191081849434734">"A QR-kód formátuma nem érvényes"</string>
     <string name="bt_le_audio_broadcast_dialog_title" msgid="5392738488989777074">"Leállítja a(z) <xliff:g id="APP_NAME">%1$s</xliff:g> közvetítését?"</string>
     <string name="bt_le_audio_broadcast_dialog_sub_title" msgid="268234802198852753">"A(z) <xliff:g id="SWITCHAPP">%1$s</xliff:g> közvetítése vagy a kimenet módosítása esetén a jelenlegi közvetítés leáll"</string>
     <string name="bt_le_audio_broadcast_dialog_switch_app" msgid="5749813313369517812">"<xliff:g id="SWITCHAPP">%1$s</xliff:g> közvetítése"</string>
     <string name="bt_le_audio_broadcast_dialog_different_output" msgid="2638402023060391333">"Kimenet módosítása"</string>
-    <string name="back_navigation_animation" msgid="8105467568421689484">"Prediktív „vissza” kézmozdulat-animációk"</string>
-    <string name="back_navigation_animation_summary" msgid="741292224121599456">"Rendszeranimációk engedélyezése prediktív „vissza” kézmozdulatok esetén."</string>
-    <string name="back_navigation_animation_dialog" msgid="8696966520944625596">"A beállítás engedélyezi a rendszeranimációkat a prediktív kézmozdulat-animációk esetén. A használatukhoz az enableOnBackInvokedCallback beállítást true értékre kell állítani az egyes alkalmazások manifestfájljaiban."</string>
 </resources>

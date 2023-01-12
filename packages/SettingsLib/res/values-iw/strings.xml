@@ -117,17 +117,17 @@
     <string name="bluetooth_profile_opp" msgid="6692618568149493430">"העברת קבצים"</string>
     <string name="bluetooth_profile_hid" msgid="2969922922664315866">"מכשיר קלט"</string>
     <string name="bluetooth_profile_pan" msgid="1006235139308318188">"גישה לאינטרנט"</string>
-    <string name="bluetooth_profile_pbap" msgid="4262303387989406171">"שיתוף אנשי הקשר והיסטוריית השיחות"</string>
-    <string name="bluetooth_profile_pbap_summary" msgid="6466456791354759132">"ההגדרה משמשת לשיתוף של אנשי הקשר והיסטוריית השיחות"</string>
+    <string name="bluetooth_profile_pbap" msgid="7064307749579335765">"שיתוף אנשי קשר"</string>
+    <string name="bluetooth_profile_pbap_summary" msgid="2955819694801952056">"שימוש עבור שיתוף אנשי קשר"</string>
     <string name="bluetooth_profile_pan_nap" msgid="7871974753822470050">"שיתוף חיבור לאינטרנט"</string>
     <string name="bluetooth_profile_map" msgid="8907204701162107271">"הודעות טקסט"</string>
     <string name="bluetooth_profile_sap" msgid="8304170950447934386">"‏גישה ל-SIM"</string>
     <string name="bluetooth_profile_a2dp_high_quality" msgid="4739440941324792775">"‏אודיו באיכות HD: <xliff:g id="CODEC_NAME">%1$s</xliff:g>"</string>
     <string name="bluetooth_profile_a2dp_high_quality_unknown_codec" msgid="2477639096903834374">"‏אודיו באיכות HD"</string>
     <string name="bluetooth_profile_hearing_aid" msgid="58154575573984914">"מכשירי שמיעה"</string>
-    <string name="bluetooth_profile_le_audio" msgid="3237854988278539061">"LE Audio"</string>
+    <string name="bluetooth_profile_le_audio" msgid="5158149987518342036">"LE_AUDIO"</string>
     <string name="bluetooth_hearing_aid_profile_summary_connected" msgid="8191273236809964030">"מחובר אל מכשירי שמיעה"</string>
-    <string name="bluetooth_le_audio_profile_summary_connected" msgid="6916226974453480650">"‏מחובר אל LE audio"</string>
+    <string name="bluetooth_le_audio_profile_summary_connected" msgid="3162538609379333442">"‏מחובר אל LE_AUDIO"</string>
     <string name="bluetooth_a2dp_profile_summary_connected" msgid="7422607970115444153">"מחובר לאודיו של מדיה"</string>
     <string name="bluetooth_headset_profile_summary_connected" msgid="2420981566026949688">"מחובר לאודיו של הטלפון"</string>
     <string name="bluetooth_opp_profile_summary_connected" msgid="2393521801478157362">"מחובר לשרת העברת קבצים"</string>
@@ -408,7 +408,6 @@
     <string name="force_resizable_activities_summary" msgid="2490382056981583062">"מאפשר יכולת קביעת גודל של כל הפעילויות לריבוי חלונות, ללא קשר לערך המניפסט."</string>
     <string name="enable_freeform_support" msgid="7599125687603914253">"הפעלת האפשרות לשנות את הגודל והמיקום של החלונות"</string>
     <string name="enable_freeform_support_summary" msgid="1822862728719276331">"הפעלת תמיכה בתכונה הניסיונית של שינוי הגודל והמיקום של החלונות."</string>
-    <string name="desktop_mode" msgid="2389067840550544462">"ממשק המחשב"</string>
     <string name="local_backup_password_title" msgid="4631017948933578709">"סיסמת גיבוי שולחן העבודה"</string>
     <string name="local_backup_password_summary_none" msgid="7646898032616361714">"גיבויים מלאים בשולחן העבודה אינם מוגנים כעת"</string>
     <string name="local_backup_password_summary_change" msgid="1707357670383995567">"יש להקיש כדי לשנות או להסיר את הסיסמה לגיבויים מלאים בשולחן העבודה"</string>
@@ -477,13 +476,12 @@
     <string name="power_charging" msgid="6727132649743436802">"<xliff:g id="LEVEL">%1$s</xliff:g>‏ – <xliff:g id="STATE">%2$s</xliff:g>"</string>
     <string name="power_remaining_charging_duration_only" msgid="8085099012811384899">"הזמן הנותר לטעינה מלאה: <xliff:g id="TIME">%1$s</xliff:g>"</string>
     <string name="power_charging_duration" msgid="6127154952524919719">"<xliff:g id="LEVEL">%1$s</xliff:g> – הזמן הנותר לטעינה מלאה: <xliff:g id="TIME">%2$s</xliff:g>"</string>
-    <string name="power_charging_limited" msgid="6971664137170239141">"<xliff:g id="LEVEL">%1$s</xliff:g> – הטעינה הושהתה"</string>
+    <string name="power_charging_limited" msgid="7956120998372505295">"<xliff:g id="LEVEL">%1$s</xliff:g> – הטעינה מוגבלת זמנית"</string>
     <string name="battery_info_status_unknown" msgid="268625384868401114">"לא ידוע"</string>
     <string name="battery_info_status_charging" msgid="4279958015430387405">"בטעינה"</string>
     <string name="battery_info_status_charging_fast" msgid="8027559755902954885">"הסוללה נטענת מהר"</string>
     <string name="battery_info_status_charging_slow" msgid="3190803837168962319">"הסוללה נטענת לאט"</string>
     <string name="battery_info_status_charging_wireless" msgid="8924722966861282197">"בטעינה אלחוטית"</string>
-    <string name="battery_info_status_charging_dock" msgid="8573274094093364791">"טעינה"</string>
     <string name="battery_info_status_discharging" msgid="6962689305413556485">"לא בטעינה"</string>
     <string name="battery_info_status_not_charging" msgid="3371084153747234837">"מחובר, לא בטעינה"</string>
     <string name="battery_info_status_full" msgid="1339002294876531312">"הסוללה טעונה"</string>
@@ -656,6 +654,11 @@
     <string name="accessibility_ethernet_disconnected" msgid="2832501530856497489">"אתרנט מנותק."</string>
     <string name="accessibility_ethernet_connected" msgid="6175942685957461563">"אתרנט."</string>
     <string name="accessibility_no_calling" msgid="3540827068323895748">"אין שיחות."</string>
+    <string name="dream_complication_title_time" msgid="701747800712893499">"שעה"</string>
+    <string name="dream_complication_title_date" msgid="8661176085446135789">"תאריך"</string>
+    <string name="dream_complication_title_weather" msgid="598609151677172783">"מזג אוויר"</string>
+    <string name="dream_complication_title_aqi" msgid="4587552608957834110">"איכות האוויר"</string>
+    <string name="dream_complication_title_cast_info" msgid="4038776652841885084">"פרטי ההעברה"</string>
     <string name="avatar_picker_title" msgid="8492884172713170652">"בחירה של תמונת פרופיל"</string>
     <string name="default_user_icon_description" msgid="6554047177298972638">"סמל המשתמש שמוגדר כברירת מחדל"</string>
     <string name="physical_keyboard_title" msgid="4811935435315835220">"מקלדת פיזית"</string>
@@ -664,11 +667,11 @@
     <string name="turn_screen_on_title" msgid="3266937298097573424">"הפעלת המסך"</string>
     <string name="allow_turn_screen_on" msgid="6194845766392742639">"הרשאה להפעלת המסך"</string>
     <string name="allow_turn_screen_on_description" msgid="43834403291575164">"הרשאה לאפליקציה להפעיל את המסך. אם מעניקים את ההרשאה, האפליקציה יכולה להפעיל את המסך בכל זמן, גם בלי שמתכוונים לכך במפורש."</string>
+    <string name="bt_le_audio_scan_qr_code" msgid="3521809854780392679">"‏סריקת קוד QR"</string>
+    <string name="bt_le_audio_scan_qr_code_scanner" msgid="4679500020630341107">"‏כדי להתחיל בהאזנה, צריך להציב את קוד ה‑QR במרכז החלון שבהמשך"</string>
+    <string name="bt_le_audio_qr_code_is_not_valid_format" msgid="6092191081849434734">"‏הפורמט של קוד ה‑QR לא תקין"</string>
     <string name="bt_le_audio_broadcast_dialog_title" msgid="5392738488989777074">"האם להפסיק לשדר את התוכן מאפליקציית <xliff:g id="APP_NAME">%1$s</xliff:g>?"</string>
     <string name="bt_le_audio_broadcast_dialog_sub_title" msgid="268234802198852753">"אם משדרים את התוכן מאפליקציית <xliff:g id="SWITCHAPP">%1$s</xliff:g> או משנים את הפלט, השידור הנוכחי יפסיק לפעול"</string>
     <string name="bt_le_audio_broadcast_dialog_switch_app" msgid="5749813313369517812">"שידור תוכן מאפליקציית <xliff:g id="SWITCHAPP">%1$s</xliff:g>"</string>
     <string name="bt_le_audio_broadcast_dialog_different_output" msgid="2638402023060391333">"שינוי הפלט"</string>
-    <string name="back_navigation_animation" msgid="8105467568421689484">"חיזוי אנימציה של תנועת החזרה"</string>
-    <string name="back_navigation_animation_summary" msgid="741292224121599456">"הפעלת אנימציות מערכת עבור חיזוי של תנועת החזרה."</string>
-    <string name="back_navigation_animation_dialog" msgid="8696966520944625596">"‏ההגדרה הזו מפעילה אנימציות מערכת עבור חיזוי אנימציה של תנועת החזרה. היא מחייבת הגדרה בכל אפליקציה של ערך true בשדה enableOnBackInvokedCallback בקובץ המניפסט."</string>
 </resources>

@@ -57,6 +57,7 @@ public class AppWidgetXmlUtil {
     private static final String ATTR_WIDGET_CATEGORY = "widget_category";
     private static final String ATTR_WIDGET_FEATURES = "widget_features";
     private static final String ATTR_DESCRIPTION_RES = "description_res";
+    private static final String ATTR_PROVIDER_INHERITANCE = "provider_inheritance";
     private static final String ATTR_OS_FINGERPRINT = "os_fingerprint";
 
     /**
@@ -93,6 +94,7 @@ public class AppWidgetXmlUtil {
         out.attributeInt(null, ATTR_WIDGET_CATEGORY, info.widgetCategory);
         out.attributeInt(null, ATTR_WIDGET_FEATURES, info.widgetFeatures);
         out.attributeInt(null, ATTR_DESCRIPTION_RES, info.descriptionRes);
+        out.attributeBoolean(null, ATTR_PROVIDER_INHERITANCE, info.isExtendedFromAppWidgetProvider);
         out.attribute(null, ATTR_OS_FINGERPRINT, Build.FINGERPRINT);
     }
 
@@ -133,6 +135,8 @@ public class AppWidgetXmlUtil {
         info.widgetCategory = parser.getAttributeInt(null, ATTR_WIDGET_CATEGORY, 0);
         info.widgetFeatures = parser.getAttributeInt(null, ATTR_WIDGET_FEATURES, 0);
         info.descriptionRes = parser.getAttributeInt(null, ATTR_DESCRIPTION_RES, 0);
+        info.isExtendedFromAppWidgetProvider = parser.getAttributeBoolean(null,
+            ATTR_PROVIDER_INHERITANCE, false);
         return info;
     }
 }

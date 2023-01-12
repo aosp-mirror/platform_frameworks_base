@@ -72,16 +72,13 @@
     <string name="notification_bubble_title" msgid="6082910224488253378">"Borrel"</string>
     <string name="manage_bubbles_text" msgid="7730624269650594419">"Bestuur"</string>
     <string name="accessibility_bubble_dismissed" msgid="8367471990421247357">"Borrel is toegemaak."</string>
-    <string name="restart_button_description" msgid="6712141648865547958">"Tik om hierdie program te herbegin vir ’n beter aansig."</string>
+    <string name="restart_button_description" msgid="5887656107651190519">"Tik om hierdie program te herbegin en maak volskerm oop."</string>
     <string name="camera_compat_treatment_suggested_button_description" msgid="8103916969024076767">"Kamerakwessies?\nTik om aan te pas"</string>
     <string name="camera_compat_treatment_applied_button_description" msgid="2944157113330703897">"Nie opgelos nie?\nTik om terug te stel"</string>
     <string name="camera_compat_dismiss_button_description" msgid="2795364433503817511">"Geen kamerakwessies nie? Tik om toe te maak."</string>
-    <string name="letterbox_education_dialog_title" msgid="7739895354143295358">"Sien en doen meer"</string>
-    <string name="letterbox_education_split_screen_text" msgid="6206339484068670830">"Sleep ’n ander program in vir verdeelde skerm"</string>
-    <string name="letterbox_education_reposition_text" msgid="4589957299813220661">"Dubbeltik buite ’n program om dit te herposisioneer"</string>
+    <string name="letterbox_education_dialog_title" msgid="6688664582871779215">"Sommige programme werk beter in portret"</string>
+    <string name="letterbox_education_dialog_subtext" msgid="4853542518367719562">"Probeer een van hierdie opsies om jou spasie ten beste te benut"</string>
+    <string name="letterbox_education_screen_rotation_text" msgid="5085786687366339027">"Draai jou toestel om dit volskerm te maak"</string>
+    <string name="letterbox_education_reposition_text" msgid="1068293354123934727">"Dubbeltik langs ’n program om dit te herposisioneer"</string>
     <string name="letterbox_education_got_it" msgid="4057634570866051177">"Het dit"</string>
-    <string name="letterbox_education_expand_button_description" msgid="1729796567101129834">"Vou uit vir meer inligting."</string>
-    <string name="maximize_button_text" msgid="1650859196290301963">"Maksimeer"</string>
-    <string name="minimize_button_text" msgid="271592547935841753">"Maak klein"</string>
-    <string name="close_button_text" msgid="2913281996024033299">"Maak toe"</string>
 </resources>

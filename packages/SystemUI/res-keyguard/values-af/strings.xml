@@ -26,11 +26,11 @@
     <string name="keyguard_sim_error_message_short" msgid="633630844240494070">"Ongeldige kaart."</string>
     <string name="keyguard_charged" msgid="5478247181205188995">"Gelaai"</string>
     <string name="keyguard_plugged_in_wireless" msgid="2537874724955057383">"<xliff:g id="PERCENTAGE">%s</xliff:g> • Laai tans draadloos"</string>
-    <string name="keyguard_plugged_in_dock" msgid="2122073051904360987">"<xliff:g id="PERCENTAGE">%s</xliff:g> • Laai tans"</string>
+    <string name="keyguard_plugged_in_dock" msgid="449722738270908674">"<xliff:g id="PERCENTAGE">%s</xliff:g> • Laaidok"</string>
     <string name="keyguard_plugged_in" msgid="8169926454348380863">"<xliff:g id="PERCENTAGE">%s</xliff:g> • Laai tans"</string>
     <string name="keyguard_plugged_in_charging_fast" msgid="4386594091107340426">"<xliff:g id="PERCENTAGE">%s</xliff:g> • Laai tans vinnig"</string>
     <string name="keyguard_plugged_in_charging_slowly" msgid="217655355424210">"<xliff:g id="PERCENTAGE">%s</xliff:g> • Laai tans stadig"</string>
-    <string name="keyguard_plugged_in_charging_limited" msgid="1709413803451065875">"<xliff:g id="PERCENTAGE">%s</xliff:g> • Laaiproses is onderbreek om battery te beskerm"</string>
+    <string name="keyguard_plugged_in_charging_limited" msgid="6091488837901216962">"<xliff:g id="PERCENTAGE">%s</xliff:g> • Laaiproses word tydelik beperk"</string>
     <string name="keyguard_instructions_when_pattern_disabled" msgid="8448804180089936954">"Druk Kieslys om te ontsluit."</string>
     <string name="keyguard_network_locked_message" msgid="407096292844868608">"Netwerk is gesluit"</string>
     <string name="keyguard_missing_sim_message_short" msgid="704159478161444907">"Geen SIM-kaart nie"</string>
@@ -68,9 +68,15 @@
     <string name="kg_too_many_failed_password_attempts_dialog_message" msgid="190984061975729494">"Jy het jou wagwoord <xliff:g id="NUMBER_0">%1$d</xliff:g> keer verkeerd ingetik. \n\nProbeer weer oor <xliff:g id="NUMBER_1">%2$d</xliff:g> sekondes."</string>
     <string name="kg_too_many_failed_pattern_attempts_dialog_message" msgid="4252405904570284368">"Jy het jou ontsluitpatroon <xliff:g id="NUMBER_0">%1$d</xliff:g> keer verkeerd geteken. \n\nProbeer weer oor <xliff:g id="NUMBER_1">%2$d</xliff:g> sekondes."</string>
     <string name="kg_password_wrong_pin_code_pukked" msgid="8047350661459040581">"Verkeerde SIM-PIN-kode. Jy sal nou jou diensverskaffer moet kontak om jou toestel te ontsluit."</string>
-    <string name="kg_password_wrong_pin_code" msgid="5629415765976820357">"{count,plural, =1{Verkeerde PIN-kode vir SIM. Jy het # poging oor voordat jy jou diensverskaffer moet kontak om jou toestel te ontsluit.}other{Verkeerde PIN-kode vir SIM. Jy het # pogings oor. }}"</string>
+    <plurals name="kg_password_wrong_pin_code" formatted="false" msgid="7030584350995485026">
+      <item quantity="other">Verkeerde SIM-PIN-kode. Jy het <xliff:g id="NUMBER_1">%d</xliff:g> pogings oor.</item>
+      <item quantity="one">Verkeerde SIM-PIN-kode. Jy het <xliff:g id="NUMBER_0">%d</xliff:g> oorblywende poging voordat jy jou diensverskaffer sal moet kontak om jou toestel te ontsluit.</item>
+    </plurals>
     <string name="kg_password_wrong_puk_code_dead" msgid="3698285357028468617">"SIM is onbruikbaar. Kontak jou diensverskaffer."</string>
-    <string name="kg_password_wrong_puk_code" msgid="6820515467645087827">"{count,plural, =1{Verkeerde PUK-kode vir SIM. Jy het # poging oor voordat SIM permanent onbruikbaar word.}other{Verkeerde PUK-kode vir SIM. Jy het # pogings oor voordat SIM permanent onbruikbaar word.}}"</string>
+    <plurals name="kg_password_wrong_puk_code" formatted="false" msgid="3937306685604862886">
+      <item quantity="other">Verkeerde SIM-PUK-kode. Jy het <xliff:g id="NUMBER_1">%d</xliff:g> pogings oor voordat SIM permanent onbruikbaar word.</item>
+      <item quantity="one">Verkeerde SIM-PUK-kode. Jy het <xliff:g id="NUMBER_0">%d</xliff:g> poging oor voordat SIM permanent onbruikbaar word.</item>
+    </plurals>
     <string name="kg_password_pin_failed" msgid="5136259126330604009">"SIM-PIN-bewerking het misluk!"</string>
     <string name="kg_password_puk_failed" msgid="6778867411556937118">"SIM-PUK-bewerking het misluk!"</string>
     <string name="accessibility_ime_switch_button" msgid="9082358310194861329">"Wissel invoermetode"</string>
@@ -84,9 +90,15 @@
     <string name="kg_prompt_reason_device_admin" msgid="6961159596224055685">"Toestel is deur administrateur gesluit"</string>
     <string name="kg_prompt_reason_user_request" msgid="6015774877733717904">"Toestel is handmatig gesluit"</string>
     <string name="kg_face_not_recognized" msgid="7903950626744419160">"Nie herken nie"</string>
-    <string name="kg_face_sensor_privacy_enabled" msgid="939511161763558512">"Skakel kameratoegang aan om Gesigslot te gebruik"</string>
-    <string name="kg_password_default_pin_message" msgid="1434544655827987873">"{count,plural, =1{Voer SIM se PIN in. Jy het # poging oor voordat jy jou diensverskaffer moet kontak om jou toestel te ontsluit.}other{Voer SIM se PIN in. Jy het # pogings oor.}}"</string>
-    <string name="kg_password_default_puk_message" msgid="1025139786449741950">"{count,plural, =1{SIM is nou gedeaktiveer. Voer PUK-kode in om voort te gaan. Jy het # poging oor voordat die SIM permanent onbruikbaar word. Kontak die diensverskaffer vir besonderhede.}other{SIM is nou gedeaktiveer. Voer PUK-kode in om voort te gaan. Jy het # pogings oor voordat die SIM permanent onbruikbaar word. Kontak die diensverskaffer vir besonderhede.}}"</string>
+    <string name="kg_face_sensor_privacy_enabled" msgid="6513157891227284806">"Skakel "<b>"kameratoegang"</b>" in Instellings &gt; Privaatheid aan om Gesigslot te gebruik"</string>
+    <plurals name="kg_password_default_pin_message" formatted="false" msgid="7730152526369857818">
+      <item quantity="other">Voer SIM-PIN in. Jy het <xliff:g id="NUMBER_1">%d</xliff:g> pogings oor.</item>
+      <item quantity="one">Voer SIM-PIN in. Jy het <xliff:g id="NUMBER_0">%d</xliff:g> poging oor voordat jy jou diensverskaffer moet kontak om jou toestel te ontsluit.</item>
+    </plurals>
+    <plurals name="kg_password_default_puk_message" formatted="false" msgid="571308542462946935">
+      <item quantity="other">SIM is nou gedeaktiveer. Voer PUK-kode in om voort te gaan. Jy het <xliff:g id="_NUMBER_1">%d</xliff:g> pogings oor voordat die SIM permanent onbruikbaar word. Kontak die diensverskaffer vir besonderhede.</item>
+      <item quantity="one">SIM is nou gedeaktiveer. Voer PUK-kode in om voort te gaan. Jy het <xliff:g id="_NUMBER_0">%d</xliff:g> poging oor voordat die SIM permanent onbruikbaar word. Kontak die diensverskaffer vir besonderhede.</item>
+    </plurals>
     <string name="clock_title_default" msgid="6342735240617459864">"Verstek"</string>
     <string name="clock_title_bubble" msgid="2204559396790593213">"Borrel"</string>
     <string name="clock_title_analog" msgid="8409262532900918273">"Analoog"</string>

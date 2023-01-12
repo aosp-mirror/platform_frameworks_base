@@ -41,7 +41,6 @@ import android.window.WindowContainerToken;
 import android.window.WindowContainerTransaction;
 
 import com.android.wm.shell.common.SyncTransactionQueue;
-import com.android.wm.shell.transition.Transitions;
 
 import java.io.PrintWriter;
 import java.util.concurrent.Executor;
@@ -123,7 +122,7 @@ public class TaskView extends SurfaceView implements SurfaceHolder.Callback,
 
     /** Until all users are converted, we may have mixed-use (eg. Car). */
     private boolean isUsingShellTransitions() {
-        return mTaskViewTransitions != null && Transitions.ENABLE_SHELL_TRANSITIONS;
+        return mTaskViewTransitions != null && mTaskViewTransitions.isEnabled();
     }
 
     /**
@@ -225,16 +224,6 @@ public class TaskView extends SurfaceView implements SurfaceHolder.Callback,
         mObscuredTouchRegion = obscuredRegion;
     }
 
-    private void onLocationChanged(WindowContainerTransaction wct) {
-        // Update based on the screen bounds
-        getBoundsOnScreen(mTmpRect);
-        getRootView().getBoundsOnScreen(mTmpRootRect);
-        if (!mTmpRootRect.contains(mTmpRect)) {
-            mTmpRect.offsetTo(0, 0);
-        }
-        wct.setBounds(mTaskToken, mTmpRect);
-    }
-
     /**
      * Call when view position or size has changed. Do not call when animating.
      */
@@ -247,8 +236,13 @@ public class TaskView extends SurfaceView implements SurfaceHolder.Callback,
         if (isUsingShellTransitions() && mTaskViewTransitions.hasPending()) return;
 
         WindowContainerTransaction wct = new WindowContainerTransaction();
-        onLocationChanged(wct);
+        updateWindowBounds(wct);
         mSyncQueue.queue(wct);
+    }
+
+    private void updateWindowBounds(WindowContainerTransaction wct) {
+        getBoundsOnScreen(mTmpRect);
+        wct.setBounds(mTaskToken, mTmpRect);
     }
 
     /**
@@ -574,7 +568,7 @@ public class TaskView extends SurfaceView implements SurfaceHolder.Callback,
                     .apply();
 
             // TODO: determine if this is really necessary or not
-            onLocationChanged(wct);
+            updateWindowBounds(wct);
         } else {
             // The surface has already been destroyed before the task has appeared,
             // so go ahead and hide the task entirely

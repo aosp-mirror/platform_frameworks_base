@@ -117,17 +117,17 @@
     <string name="bluetooth_profile_opp" msgid="6692618568149493430">"Transferência do ficheiro"</string>
     <string name="bluetooth_profile_hid" msgid="2969922922664315866">"Dispositivo de entrada"</string>
     <string name="bluetooth_profile_pan" msgid="1006235139308318188">"Acesso à internet"</string>
-    <string name="bluetooth_profile_pbap" msgid="4262303387989406171">"Part. histórico de chamadas e contactos"</string>
-    <string name="bluetooth_profile_pbap_summary" msgid="6466456791354759132">"Usar para partilha do histórico de chamadas e dos contactos"</string>
+    <string name="bluetooth_profile_pbap" msgid="7064307749579335765">"Partilha de contactos"</string>
+    <string name="bluetooth_profile_pbap_summary" msgid="2955819694801952056">"Utilizar para a partilha de contactos"</string>
     <string name="bluetooth_profile_pan_nap" msgid="7871974753822470050">"Partilha da ligação à internet"</string>
     <string name="bluetooth_profile_map" msgid="8907204701162107271">"Mensagens de texto"</string>
     <string name="bluetooth_profile_sap" msgid="8304170950447934386">"Acesso ao SIM"</string>
     <string name="bluetooth_profile_a2dp_high_quality" msgid="4739440941324792775">"Áudio HD: <xliff:g id="CODEC_NAME">%1$s</xliff:g>"</string>
     <string name="bluetooth_profile_a2dp_high_quality_unknown_codec" msgid="2477639096903834374">"Áudio HD"</string>
     <string name="bluetooth_profile_hearing_aid" msgid="58154575573984914">"Aparelhos auditivos"</string>
-    <string name="bluetooth_profile_le_audio" msgid="3237854988278539061">"LE Audio"</string>
+    <string name="bluetooth_profile_le_audio" msgid="5158149987518342036">"LE_AUDIO"</string>
     <string name="bluetooth_hearing_aid_profile_summary_connected" msgid="8191273236809964030">"Ligado a aparelhos auditivos"</string>
-    <string name="bluetooth_le_audio_profile_summary_connected" msgid="6916226974453480650">"Ligado a LE Audio"</string>
+    <string name="bluetooth_le_audio_profile_summary_connected" msgid="3162538609379333442">"Ligado a LE_AUDIO"</string>
     <string name="bluetooth_a2dp_profile_summary_connected" msgid="7422607970115444153">"Ligado ao áudio de multimédia"</string>
     <string name="bluetooth_headset_profile_summary_connected" msgid="2420981566026949688">"Ligado ao áudio do telefone"</string>
     <string name="bluetooth_opp_profile_summary_connected" msgid="2393521801478157362">"Ligado ao servidor de transferência de ficheiros"</string>
@@ -184,22 +184,22 @@
     <string name="launch_defaults_some" msgid="3631650616557252926">"Algumas predefinições definidas"</string>
     <string name="launch_defaults_none" msgid="8049374306261262709">"Nenhuma predefinição definida"</string>
     <string name="tts_settings" msgid="8130616705989351312">"Definições de texto para voz"</string>
-    <string name="tts_settings_title" msgid="7602210956640483039">"Saída de conversão de texto em voz"</string>
+    <string name="tts_settings_title" msgid="7602210956640483039">"Saída de síntese de voz"</string>
     <string name="tts_default_rate_title" msgid="3964187817364304022">"Taxa de voz"</string>
     <string name="tts_default_rate_summary" msgid="3781937042151716987">"Velocidade a que o texto é falado"</string>
     <string name="tts_default_pitch_title" msgid="6988592215554485479">"Tonalidade"</string>
     <string name="tts_default_pitch_summary" msgid="9132719475281551884">"Afeta o tom da voz sintetizada"</string>
     <string name="tts_default_lang_title" msgid="4698933575028098940">"Idioma"</string>
-    <string name="tts_lang_use_system" msgid="6312945299804012406">"Usar idioma do sistema"</string>
+    <string name="tts_lang_use_system" msgid="6312945299804012406">"Utilizar idioma do sistema"</string>
     <string name="tts_lang_not_selected" msgid="7927823081096056147">"Idioma não selecionado"</string>
     <string name="tts_default_lang_summary" msgid="9042620014800063470">"Define a voz do idioma específico para o texto lido"</string>
     <string name="tts_play_example_title" msgid="1599468547216481684">"Ouvir um exemplo"</string>
-    <string name="tts_play_example_summary" msgid="634044730710636383">"Reproduzir uma breve demonstração de conversão de texto em voz"</string>
+    <string name="tts_play_example_summary" msgid="634044730710636383">"Reproduzir uma breve demonstração de síntese de voz"</string>
     <string name="tts_install_data_title" msgid="1829942496472751703">"Instalar dados de voz"</string>
-    <string name="tts_install_data_summary" msgid="3608874324992243851">"Instalar os dados de voz necessários para a conversão de texto em voz"</string>
+    <string name="tts_install_data_summary" msgid="3608874324992243851">"Instalar os dados de voz necessários para a síntese de voz"</string>
     <string name="tts_engine_security_warning" msgid="3372432853837988146">"Este motor de síntese de discurso pode permitir a recolha de todo o texto que será falado, incluindo dados pessoais, como palavras-passe e números de cartão de crédito. O serviço é fornecido com o motor <xliff:g id="TTS_PLUGIN_ENGINE_NAME">%s</xliff:g>. Permitir a utilização deste motor de síntese de discurso?"</string>
-    <string name="tts_engine_network_required" msgid="8722087649733906851">"Este idioma requer uma ligação de rede ativa para uma saída de conversão de texto em voz."</string>
-    <string name="tts_default_sample_string" msgid="6388016028292967973">"Exemplo de conversão de texto em voz."</string>
+    <string name="tts_engine_network_required" msgid="8722087649733906851">"Este idioma requer uma ligação de rede ativa para uma saída de síntese de voz."</string>
+    <string name="tts_default_sample_string" msgid="6388016028292967973">"Exemplo de síntese de voz."</string>
     <string name="tts_status_title" msgid="8190784181389278640">"Estado do idioma predefinido"</string>
     <string name="tts_status_ok" msgid="8583076006537547379">"<xliff:g id="LOCALE">%1$s</xliff:g> é totalmente suportado"</string>
     <string name="tts_status_requires_network" msgid="8327617638884678896">"<xliff:g id="LOCALE">%1$s</xliff:g> necessita de ligação de rede"</string>
@@ -273,7 +273,7 @@
     <string name="oem_unlock_enable_summary" msgid="5857388174390953829">"Permitir o desbloqueio do carregador de arranque"</string>
     <string name="confirm_enable_oem_unlock_title" msgid="8249318129774367535">"Permitir o desbloqueio de OEM?"</string>
     <string name="confirm_enable_oem_unlock_text" msgid="854131050791011970">"AVISO: as funcionalidades de proteção do dispositivo não funcionam neste dispositivo enquanto esta definição estiver ativada."</string>
-    <string name="mock_location_app" msgid="6269380172542248304">"Selecionar app de localização fictícia"</string>
+    <string name="mock_location_app" msgid="6269380172542248304">"Selecionar aplicação de localização fictícia"</string>
     <string name="mock_location_app_not_set" msgid="6972032787262831155">"Aplicação de localização fictícia não definida"</string>
     <string name="mock_location_app_set" msgid="4706722469342913843">"Aplicação de localização fictícia: <xliff:g id="APP_NAME">%1$s</xliff:g>"</string>
     <string name="debug_networking_category" msgid="6829757985772659599">"Redes"</string>
@@ -408,7 +408,6 @@
     <string name="force_resizable_activities_summary" msgid="2490382056981583062">"Tornar todas as atividades redimensionáveis para várias janelas, independentemente dos valores do manifesto."</string>
     <string name="enable_freeform_support" msgid="7599125687603914253">"Ativar janelas de forma livre"</string>
     <string name="enable_freeform_support_summary" msgid="1822862728719276331">"Ativar a compatibilidade com janelas de forma livre experimentais."</string>
-    <string name="desktop_mode" msgid="2389067840550544462">"Ambiente de trabalho"</string>
     <string name="local_backup_password_title" msgid="4631017948933578709">"Palavra-passe cópia do computador"</string>
     <string name="local_backup_password_summary_none" msgid="7646898032616361714">"As cópias de segurança completas no ambiente de trabalho não estão atualmente protegidas"</string>
     <string name="local_backup_password_summary_change" msgid="1707357670383995567">"Tocar para alterar ou remover a palavra-passe para cópias de segurança completas no ambiente de trabalho"</string>
@@ -477,13 +476,12 @@
     <string name="power_charging" msgid="6727132649743436802">"<xliff:g id="LEVEL">%1$s</xliff:g> – <xliff:g id="STATE">%2$s</xliff:g>"</string>
     <string name="power_remaining_charging_duration_only" msgid="8085099012811384899">"<xliff:g id="TIME">%1$s</xliff:g> até à carga máxima"</string>
     <string name="power_charging_duration" msgid="6127154952524919719">"<xliff:g id="LEVEL">%1$s</xliff:g> – <xliff:g id="TIME">%2$s</xliff:g> até à carga máxima"</string>
-    <string name="power_charging_limited" msgid="6971664137170239141">"<xliff:g id="LEVEL">%1$s</xliff:g> – O carregamento está pausado"</string>
+    <string name="power_charging_limited" msgid="7956120998372505295">"<xliff:g id="LEVEL">%1$s</xliff:g> – Carregamento limitado temporariamente"</string>
     <string name="battery_info_status_unknown" msgid="268625384868401114">"Desconhecido"</string>
     <string name="battery_info_status_charging" msgid="4279958015430387405">"A carregar"</string>
     <string name="battery_info_status_charging_fast" msgid="8027559755902954885">"Carregamento rápido"</string>
     <string name="battery_info_status_charging_slow" msgid="3190803837168962319">"Carregamento lento"</string>
     <string name="battery_info_status_charging_wireless" msgid="8924722966861282197">"A carregar sem fios"</string>
-    <string name="battery_info_status_charging_dock" msgid="8573274094093364791">"A carregar"</string>
     <string name="battery_info_status_discharging" msgid="6962689305413556485">"Não está a carregar"</string>
     <string name="battery_info_status_not_charging" msgid="3371084153747234837">"Ligado, não está a carregar"</string>
     <string name="battery_info_status_full" msgid="1339002294876531312">"Carregada"</string>
@@ -571,7 +569,7 @@
     <string name="user_add_user_item_title" msgid="2394272381086965029">"Utilizador"</string>
     <string name="user_add_profile_item_title" msgid="3111051717414643029">"Perfil restrito"</string>
     <string name="user_add_user_title" msgid="5457079143694924885">"Adicionar novo utilizador?"</string>
-    <string name="user_add_user_message_long" msgid="1527434966294733380">"Pode partilhar este dispositivo com outras pessoas ao criar utilizadores adicionais. Cada utilizador possui o seu próprio espaço, que pode ser personalizado com apps, imagens de fundo, etc. Os utilizadores também podem ajustar as definições do dispositivo, como o Wi‑Fi, que afetam os restantes utilizadores.\n\nAo adicionar um novo utilizador, essa pessoa tem de configurar o respetivo espaço.\n\nQualquer utilizador pode atualizar apps para todos os outros utilizadores. Os serviços e as definições de acessibilidade podem não ser transferidos para o novo utilizador."</string>
+    <string name="user_add_user_message_long" msgid="1527434966294733380">"Pode partilhar este dispositivo com outras pessoas ao criar utilizadores adicionais. Cada utilizador possui o seu próprio espaço, que pode ser personalizado com aplicações, imagens de fundo, etc. Os utilizadores também podem ajustar as definições do dispositivo, como o Wi‑Fi, que afetam os restantes utilizadores.\n\nAo adicionar um novo utilizador, essa pessoa tem de configurar o respetivo espaço.\n\nQualquer utilizador pode atualizar aplicações para todos os outros utilizadores. Os serviços e as definições de acessibilidade podem não ser transferidos para o novo utilizador."</string>
     <string name="user_add_user_message_short" msgid="3295959985795716166">"Ao adicionar um novo utilizador, essa pessoa tem de configurar o respetivo espaço.\n\nQualquer utilizador pode atualizar aplicações para todos os outros utilizadores."</string>
     <string name="user_setup_dialog_title" msgid="8037342066381939995">"Configurar o utilizador agora?"</string>
     <string name="user_setup_dialog_message" msgid="269931619868102841">"Certifique-se de que a pessoa está disponível para levar o dispositivo e configurar o seu espaço"</string>
@@ -602,19 +600,19 @@
     <string name="guest_resetting" msgid="7822120170191509566">"A repor o convidado…"</string>
     <string name="guest_reset_and_restart_dialog_title" msgid="3396657008451616041">"Repor sessão de convidado?"</string>
     <string name="guest_reset_and_restart_dialog_message" msgid="2764425635305200790">"Esta ação inicia uma nova sessão de convidado e elimina todas as apps e dados da sessão atual"</string>
-    <string name="guest_exit_dialog_title" msgid="1846494656849381804">"Sair do modo convidado?"</string>
+    <string name="guest_exit_dialog_title" msgid="1846494656849381804">"Sair do modo de convidado?"</string>
     <string name="guest_exit_dialog_message" msgid="1743218864242719783">"Esta ação elimina as apps e os dados da sessão de convidado atual"</string>
     <string name="guest_exit_dialog_button" msgid="1736401897067442044">"Sair"</string>
     <string name="guest_exit_dialog_title_non_ephemeral" msgid="7675327443743162986">"Guardar atividade de convidado?"</string>
     <string name="guest_exit_dialog_message_non_ephemeral" msgid="223385323235719442">"Pode guardar a atividade da sessão atual ou eliminar todas as apps e dados"</string>
     <string name="guest_exit_clear_data_button" msgid="3425812652180679014">"Eliminar"</string>
     <string name="guest_exit_save_data_button" msgid="3690974510644963547">"Guardar"</string>
-    <string name="guest_exit_button" msgid="5774985819191803960">"Sair do modo convidado"</string>
+    <string name="guest_exit_button" msgid="5774985819191803960">"Sair do modo de convidado"</string>
     <string name="guest_reset_button" msgid="2515069346223503479">"Repor sessão de convidado"</string>
     <string name="guest_exit_quick_settings_button" msgid="1912362095913765471">"Sair do modo de convidado"</string>
     <string name="guest_notification_ephemeral" msgid="7263252466950923871">"Toda a atividade é eliminada ao sair"</string>
     <string name="guest_notification_non_ephemeral" msgid="6843799963012259330">"Pode guardar ou eliminar a sua atividade ao sair"</string>
-    <string name="guest_notification_non_ephemeral_non_first_login" msgid="8009307983766934876">"Reponha para eliminar agora a atividade da sessão. Pode ainda guardar ou eliminar a atividade ao sair"</string>
+    <string name="guest_notification_non_ephemeral_non_first_login" msgid="8009307983766934876">"Reponha para eliminar agora a atividade da sessão. Em alternativa, pode guardar ou eliminar a atividade ao sair"</string>
     <string name="user_image_take_photo" msgid="467512954561638530">"Tirar uma foto"</string>
     <string name="user_image_choose_photo" msgid="1363820919146782908">"Escolher uma imagem"</string>
     <string name="user_image_photo_selector" msgid="433658323306627093">"Selecionar foto"</string>
@@ -656,6 +654,11 @@
     <string name="accessibility_ethernet_disconnected" msgid="2832501530856497489">"Ethernet desligada."</string>
     <string name="accessibility_ethernet_connected" msgid="6175942685957461563">"Ethernet."</string>
     <string name="accessibility_no_calling" msgid="3540827068323895748">"Sem chamadas."</string>
+    <string name="dream_complication_title_time" msgid="701747800712893499">"Hora"</string>
+    <string name="dream_complication_title_date" msgid="8661176085446135789">"Data"</string>
+    <string name="dream_complication_title_weather" msgid="598609151677172783">"Meteorologia"</string>
+    <string name="dream_complication_title_aqi" msgid="4587552608957834110">"Qualidade do ar"</string>
+    <string name="dream_complication_title_cast_info" msgid="4038776652841885084">"Info. de transmissão"</string>
     <string name="avatar_picker_title" msgid="8492884172713170652">"Escolha uma imagem do perfil"</string>
     <string name="default_user_icon_description" msgid="6554047177298972638">"Ícone do utilizador predefinido"</string>
     <string name="physical_keyboard_title" msgid="4811935435315835220">"Teclado físico"</string>
@@ -664,11 +667,11 @@
     <string name="turn_screen_on_title" msgid="3266937298097573424">"Ative o ecrã"</string>
     <string name="allow_turn_screen_on" msgid="6194845766392742639">"Permitir a ativação do ecrã"</string>
     <string name="allow_turn_screen_on_description" msgid="43834403291575164">"Permita que uma app ative o ecrã. Se a autorização for concedida, a app pode ativar o ecrã em qualquer altura sem a sua intenção explícita."</string>
+    <string name="bt_le_audio_scan_qr_code" msgid="3521809854780392679">"Leia o código QR"</string>
+    <string name="bt_le_audio_scan_qr_code_scanner" msgid="4679500020630341107">"Para começar a ouvir, centre o código QR abaixo"</string>
+    <string name="bt_le_audio_qr_code_is_not_valid_format" msgid="6092191081849434734">"O código QR não é um formato válido"</string>
     <string name="bt_le_audio_broadcast_dialog_title" msgid="5392738488989777074">"Interromper a transmissão da app <xliff:g id="APP_NAME">%1$s</xliff:g>?"</string>
     <string name="bt_le_audio_broadcast_dialog_sub_title" msgid="268234802198852753">"Se transmitir a app <xliff:g id="SWITCHAPP">%1$s</xliff:g> ou alterar a saída, a sua transmissão atual é interrompida"</string>
     <string name="bt_le_audio_broadcast_dialog_switch_app" msgid="5749813313369517812">"Transmita a app <xliff:g id="SWITCHAPP">%1$s</xliff:g>"</string>
     <string name="bt_le_audio_broadcast_dialog_different_output" msgid="2638402023060391333">"Altere a saída"</string>
-    <string name="back_navigation_animation" msgid="8105467568421689484">"Animações de gestos para voltar preditivos"</string>
-    <string name="back_navigation_animation_summary" msgid="741292224121599456">"Ative as animações do sistema para gestos para voltar preditivos."</string>
-    <string name="back_navigation_animation_dialog" msgid="8696966520944625596">"Esta definição ativa animações do sistema para a animação de gestos preditivos. Requer a definição do atributo enableOnBackInvokedCallback por app como verdadeiro no ficheiro de manifesto."</string>
 </resources>

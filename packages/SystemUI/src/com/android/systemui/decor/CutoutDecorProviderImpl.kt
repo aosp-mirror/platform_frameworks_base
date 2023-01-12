@@ -59,7 +59,7 @@ class CutoutDecorProviderImpl(
         (view as? DisplayCutoutView)?.let { cutoutView ->
             cutoutView.setColor(tintColor)
             cutoutView.updateRotation(rotation)
-            cutoutView.onDisplayChanged(displayUniqueId)
+            cutoutView.updateConfiguration(displayUniqueId)
         }
     }
 }

@@ -26,11 +26,11 @@
     <string name="keyguard_sim_error_message_short" msgid="633630844240494070">"गलत कार्ड."</string>
     <string name="keyguard_charged" msgid="5478247181205188995">"चार्ज हो गई है"</string>
     <string name="keyguard_plugged_in_wireless" msgid="2537874724955057383">"<xliff:g id="PERCENTAGE">%s</xliff:g> • वायरलेस तरीके से चार्ज हो रहा है"</string>
-    <string name="keyguard_plugged_in_dock" msgid="2122073051904360987">"<xliff:g id="PERCENTAGE">%s</xliff:g> • चार्ज हो रहा है"</string>
+    <string name="keyguard_plugged_in_dock" msgid="449722738270908674">"<xliff:g id="PERCENTAGE">%s</xliff:g> • डॉक पर चार्ज हो रहा है"</string>
     <string name="keyguard_plugged_in" msgid="8169926454348380863">"<xliff:g id="PERCENTAGE">%s</xliff:g> • चार्ज हो रहा है"</string>
     <string name="keyguard_plugged_in_charging_fast" msgid="4386594091107340426">"<xliff:g id="PERCENTAGE">%s</xliff:g> • तेज़ चार्ज हो रहा है"</string>
     <string name="keyguard_plugged_in_charging_slowly" msgid="217655355424210">"<xliff:g id="PERCENTAGE">%s</xliff:g> • धीरे चार्ज हो रहा है"</string>
-    <string name="keyguard_plugged_in_charging_limited" msgid="1709413803451065875">"<xliff:g id="PERCENTAGE">%s</xliff:g> • बैटरी को सुरक्षित रखने के लिए, चार्जिंग को रोका गया है"</string>
+    <string name="keyguard_plugged_in_charging_limited" msgid="6091488837901216962">"<xliff:g id="PERCENTAGE">%s</xliff:g> • कुछ समय के लिए चार्जिंग रोक दी गई"</string>
     <string name="keyguard_instructions_when_pattern_disabled" msgid="8448804180089936954">"लॉक खोलने के लिए मेन्यू दबाएं."</string>
     <string name="keyguard_network_locked_message" msgid="407096292844868608">"नेटवर्क लॉक किया हुआ है"</string>
     <string name="keyguard_missing_sim_message_short" msgid="704159478161444907">"कोई सिम कार्ड नहीं है"</string>
@@ -68,9 +68,15 @@
     <string name="kg_too_many_failed_password_attempts_dialog_message" msgid="190984061975729494">"आप अपना पासवर्ड <xliff:g id="NUMBER_0">%1$d</xliff:g> बार गलत तरीके से लिख चुके हैं. \n\n<xliff:g id="NUMBER_1">%2$d</xliff:g> सेकंड में फिर से कोशिश करें."</string>
     <string name="kg_too_many_failed_pattern_attempts_dialog_message" msgid="4252405904570284368">"आपने अपने लॉक खोलने के पैटर्न को <xliff:g id="NUMBER_0">%1$d</xliff:g> बार गलत तरीके से ड्रॉ किया है. \n\n <xliff:g id="NUMBER_1">%2$d</xliff:g> सेकंड में फिर से कोशिश करें."</string>
     <string name="kg_password_wrong_pin_code_pukked" msgid="8047350661459040581">"गलत SIM पिन कोड, अपने डिवाइस को अनलॉक करने के लिए अब आपको अपनी मोबाइल और इंटरनेट सेवा देने वाली कंपनी से संपर्क करना होगा."</string>
-    <string name="kg_password_wrong_pin_code" msgid="5629415765976820357">"{count,plural, =1{आपने सिम का गलत पिन कोड डाला है. आपके पास # मौका बचा है. अगर फिर भी डिवाइस अनलॉक नहीं होता है, तो आपको मोबाइल और इंटरनेट सेवा देने वाली कंपनी से संपर्क करना होगा.}one{आपने सिम का गलत पिन कोड डाला है. आपके पास # मौका बचा है. }other{आपने सिम का गलत पिन कोड डाला है. आपके पास # मौके बचे हैं. }}"</string>
+    <plurals name="kg_password_wrong_pin_code" formatted="false" msgid="7030584350995485026">
+      <item quantity="one">गलत सिम पिन कोड, आप <xliff:g id="NUMBER_1">%d</xliff:g> बार और कोशिश कर सकते हैं.</item>
+      <item quantity="other">गलत सिम पिन कोड, आप <xliff:g id="NUMBER_1">%d</xliff:g> बार और कोशिश कर सकते हैं.</item>
+    </plurals>
     <string name="kg_password_wrong_puk_code_dead" msgid="3698285357028468617">"SIM बेकार हो गया है. अपनी मोबाइल और इंटरनेट सेवा देने वाली कंपनी से संपर्क करें."</string>
-    <string name="kg_password_wrong_puk_code" msgid="6820515467645087827">"{count,plural, =1{आपने सिम का गलत PUK कोड डाला है. आपके पास # मौका बचा है. इसके बाद, सिम हमेशा के लिए बंद हो जाएगा.}one{आपने सिम का गलत PUK कोड डाला है. आपके पास # मौका बचा है. इसके बाद, सिम हमेशा के लिए बंद हो जाएगा.}other{आपने सिम का गलत PUK कोड डाला है. आपके पास # मौके बचे हैं. इसके बाद, सिम हमेशा के लिए बंद हो जाएगा.}}"</string>
+    <plurals name="kg_password_wrong_puk_code" formatted="false" msgid="3937306685604862886">
+      <item quantity="one">SIM PUK कोड गलत है, SIM के हमेशा के लिए बेकार हो जाने से पहले आप <xliff:g id="NUMBER_1">%d</xliff:g> बार और कोशिश कर सकते हैं.</item>
+      <item quantity="other">SIM PUK कोड गलत है, SIM के हमेशा के लिए बेकार हो जाने से पहले आप <xliff:g id="NUMBER_1">%d</xliff:g> बार और कोशिश कर सकते हैं.</item>
+    </plurals>
     <string name="kg_password_pin_failed" msgid="5136259126330604009">"SIM पिन की कार्यवाही विफल रही!"</string>
     <string name="kg_password_puk_failed" msgid="6778867411556937118">"SIM PUK की कार्यवाही विफल रही!"</string>
     <string name="accessibility_ime_switch_button" msgid="9082358310194861329">"इनपुट का तरीका बदलें"</string>
@@ -84,9 +90,15 @@
     <string name="kg_prompt_reason_device_admin" msgid="6961159596224055685">"व्यवस्थापक ने डिवाइस को लॉक किया है"</string>
     <string name="kg_prompt_reason_user_request" msgid="6015774877733717904">"डिवाइस को मैन्युअल रूप से लॉक किया गया था"</string>
     <string name="kg_face_not_recognized" msgid="7903950626744419160">"पहचान नहीं हो पाई"</string>
-    <string name="kg_face_sensor_privacy_enabled" msgid="939511161763558512">"\'फ़ेस अनलॉक\' इस्तेमाल करने के लिए, सेटिंग में जाकर कैमरे का ऐक्सेस चालू करें"</string>
-    <string name="kg_password_default_pin_message" msgid="1434544655827987873">"{count,plural, =1{सिम का पिन डालें. आपके पास # मौका बचा है. अगर फिर भी डिवाइस अनलॉक नहीं होता है, तो आपको मोबाइल और इंटरनेट सेवा देने वाली कंपनी से संपर्क करना होगा.}one{सिम का पिन डालें. आपके पास # मौका बचा है.}other{सिम का पिन डालें. आपके पास # मौके बचे हैं.}}"</string>
-    <string name="kg_password_default_puk_message" msgid="1025139786449741950">"{count,plural, =1{सिम बंद कर दिया गया है. जारी रखने के लिए PUK कोड डालें. आपके पास # मौका बचा है. इसके बाद, सिम हमेशा के लिए बंद हो जाएगा. ज़्यादा जानकारी के लिए, मोबाइल और इंटरनेट सेवा देने वाली कंपनी से संपर्क करें.}one{सिम बंद कर दिया गया है. जारी रखने के लिए PUK कोड डालें. आपके पास # मौका बचा है. इसके बाद, सिम हमेशा के लिए बंद हो जाएगा. ज़्यादा जानकारी के लिए, मोबाइल और इंटरनेट सेवा देने वाली कंपनी से संपर्क करें.}other{सिम बंद कर दिया गया है. जारी रखने के लिए PUK कोड डालें. आपके पास # मौके बचे हैं. इसके बाद, सिम हमेशा के लिए बंद हो जाएगा. ज़्यादा जानकारी के लिए, मोबाइल और इंटरनेट सेवा देने वाली कंपनी से संपर्क करें.}}"</string>
+    <string name="kg_face_sensor_privacy_enabled" msgid="6513157891227284806">"फ़ेस अनलॉक की सुविधा का इस्तेमाल करने के लिए, सेटिंग और निजता में जाकर, "<b>"कैमरे का ऐक्सेस"</b>" चालू करें"</string>
+    <plurals name="kg_password_default_pin_message" formatted="false" msgid="7730152526369857818">
+      <item quantity="one">सिम का पिन डालें. आपके पास <xliff:g id="NUMBER_1">%d</xliff:g> मौके बचे हैं.</item>
+      <item quantity="other">सिम का पिन डालें. आपके पास <xliff:g id="NUMBER_1">%d</xliff:g> मौके बचे हैं.</item>
+    </plurals>
+    <plurals name="kg_password_default_puk_message" formatted="false" msgid="571308542462946935">
+      <item quantity="one">सिम बंद कर दिया गया है. जारी रखने के लिए PUK कोड डालें. आपके पास <xliff:g id="_NUMBER_1">%d</xliff:g> मौके बचे हैं, उसके बाद, सिम हमेशा के लिए काम करना बंद कर देगा. जानकारी के लिए, मोबाइल और इंटरनेट सेवा देने वाली कंपनी से संपर्क करें.</item>
+      <item quantity="other">सिम बंद कर दिया गया है. जारी रखने के लिए PUK कोड डालें. आपके पास <xliff:g id="_NUMBER_1">%d</xliff:g> मौके बचे हैं, उसके बाद, सिम हमेशा के लिए काम करना बंद कर देगा. जानकारी के लिए, मोबाइल और इंटरनेट सेवा देने वाली कंपनी से संपर्क करें.</item>
+    </plurals>
     <string name="clock_title_default" msgid="6342735240617459864">"डिफ़ॉल्ट"</string>
     <string name="clock_title_bubble" msgid="2204559396790593213">"बबल"</string>
     <string name="clock_title_analog" msgid="8409262532900918273">"एनालॉग"</string>

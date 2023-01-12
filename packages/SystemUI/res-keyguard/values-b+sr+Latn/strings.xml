@@ -26,11 +26,11 @@
     <string name="keyguard_sim_error_message_short" msgid="633630844240494070">"Nevažeća kartica."</string>
     <string name="keyguard_charged" msgid="5478247181205188995">"Napunjena je"</string>
     <string name="keyguard_plugged_in_wireless" msgid="2537874724955057383">"<xliff:g id="PERCENTAGE">%s</xliff:g> • Bežično punjenje"</string>
-    <string name="keyguard_plugged_in_dock" msgid="2122073051904360987">"<xliff:g id="PERCENTAGE">%s</xliff:g> • Puni se"</string>
+    <string name="keyguard_plugged_in_dock" msgid="449722738270908674">"<xliff:g id="PERCENTAGE">%s</xliff:g> • Bazna stanica za punjenje"</string>
     <string name="keyguard_plugged_in" msgid="8169926454348380863">"<xliff:g id="PERCENTAGE">%s</xliff:g> • Puni se"</string>
     <string name="keyguard_plugged_in_charging_fast" msgid="4386594091107340426">"<xliff:g id="PERCENTAGE">%s</xliff:g> • Brzo se puni"</string>
     <string name="keyguard_plugged_in_charging_slowly" msgid="217655355424210">"<xliff:g id="PERCENTAGE">%s</xliff:g> • Sporo se puni"</string>
-    <string name="keyguard_plugged_in_charging_limited" msgid="1709413803451065875">"<xliff:g id="PERCENTAGE">%s</xliff:g> • Punjenje je pauzirano da bi se zaštitila baterija"</string>
+    <string name="keyguard_plugged_in_charging_limited" msgid="6091488837901216962">"<xliff:g id="PERCENTAGE">%s</xliff:g> • Punjenje je privremeno ograničeno"</string>
     <string name="keyguard_instructions_when_pattern_disabled" msgid="8448804180089936954">"Pritisnite Meni da biste otključali."</string>
     <string name="keyguard_network_locked_message" msgid="407096292844868608">"Mreža je zaključana"</string>
     <string name="keyguard_missing_sim_message_short" msgid="704159478161444907">"Nema SIM kartice"</string>
@@ -68,9 +68,17 @@
     <string name="kg_too_many_failed_password_attempts_dialog_message" msgid="190984061975729494">"Uneli ste pogrešnu lozinku <xliff:g id="NUMBER_0">%1$d</xliff:g> puta. \n\nProbajte ponovo za <xliff:g id="NUMBER_1">%2$d</xliff:g> sek."</string>
     <string name="kg_too_many_failed_pattern_attempts_dialog_message" msgid="4252405904570284368">"Nacrtali ste netačan šablon za otključavanje <xliff:g id="NUMBER_0">%1$d</xliff:g> puta. \n\nProbajte ponovo za <xliff:g id="NUMBER_1">%2$d</xliff:g> sek."</string>
     <string name="kg_password_wrong_pin_code_pukked" msgid="8047350661459040581">"Netačan PIN kôd za SIM. Sada morate da kontaktirate mobilnog operatera da biste otključali uređaj."</string>
-    <string name="kg_password_wrong_pin_code" msgid="5629415765976820357">"{count,plural, =1{Netačan PIN za SIM kôd. Imate još # pokušaj, a onda morate da se obratite mobilnom operateru da biste otključali uređaj.}one{Netačan PIN za SIM kôd. Imate još # pokušaj. }few{Netačan PIN za SIM kôd. Imate još # pokušaja. }other{Netačan PIN za SIM kôd. Imate još # pokušaja. }}"</string>
+    <plurals name="kg_password_wrong_pin_code" formatted="false" msgid="7030584350995485026">
+      <item quantity="one">Netačan PIN kôd za SIM. Imate još <xliff:g id="NUMBER_1">%d</xliff:g> pokušaj.</item>
+      <item quantity="few">Netačan PIN kôd za SIM. Imate još <xliff:g id="NUMBER_1">%d</xliff:g> pokušaja.</item>
+      <item quantity="other">Netačan PIN kôd za SIM. Imate još <xliff:g id="NUMBER_1">%d</xliff:g> pokušaja.</item>
+    </plurals>
     <string name="kg_password_wrong_puk_code_dead" msgid="3698285357028468617">"SIM kartica je neupotrebljiva. Kontaktirajte mobilnog operatera."</string>
-    <string name="kg_password_wrong_puk_code" msgid="6820515467645087827">"{count,plural, =1{Netačan SIM PUK kôd. Imate još # pokušaj pre nego što SIM kartica postane trajno neupotrebljiva.}one{Netačan PUK kôd za SIM. Imate još # pokušaj pre nego što SIM kartica postane trajno neupotrebljiva.}few{Netačan PUK kôd za SIM. Imate još # pokušaja pre nego što SIM kartica postane trajno neupotrebljiva.}other{Netačan PUK kôd za SIM. Imate još # pokušaja pre nego što SIM kartica postane trajno neupotrebljiva.}}"</string>
+    <plurals name="kg_password_wrong_puk_code" formatted="false" msgid="3937306685604862886">
+      <item quantity="one">Netačan PUK kôd za SIM. Imate još <xliff:g id="NUMBER_1">%d</xliff:g> pokušaj pre nego što SIM kartica postane trajno neupotrebljiva.</item>
+      <item quantity="few">Netačan PUK kôd za SIM. Imate još <xliff:g id="NUMBER_1">%d</xliff:g> pokušaja pre nego što SIM kartica postane trajno neupotrebljiva.</item>
+      <item quantity="other">Netačan PUK kôd za SIM. Imate još <xliff:g id="NUMBER_1">%d</xliff:g> pokušaja pre nego što SIM kartica postane trajno neupotrebljiva.</item>
+    </plurals>
     <string name="kg_password_pin_failed" msgid="5136259126330604009">"Radnja sa PIN kodom za SIM nije uspela!"</string>
     <string name="kg_password_puk_failed" msgid="6778867411556937118">"Radnja sa PUK kodom za SIM nije uspela!"</string>
     <string name="accessibility_ime_switch_button" msgid="9082358310194861329">"Promeni metod unosa"</string>
@@ -84,9 +92,17 @@
     <string name="kg_prompt_reason_device_admin" msgid="6961159596224055685">"Administrator je zaključao uređaj"</string>
     <string name="kg_prompt_reason_user_request" msgid="6015774877733717904">"Uređaj je ručno zaključan"</string>
     <string name="kg_face_not_recognized" msgid="7903950626744419160">"Nije prepoznat"</string>
-    <string name="kg_face_sensor_privacy_enabled" msgid="939511161763558512">"Otključavanje licem traži pristup kameri u Podešavanjima"</string>
-    <string name="kg_password_default_pin_message" msgid="1434544655827987873">"{count,plural, =1{Unesite PIN za SIM. Još # pokušaj i moraćete da se obratite mobilnom operateru da biste otključali uređaj.}one{Unesite PIN za SIM. Imate još # pokušaj.}few{Unesite PIN za SIM. Imate još # pokušaja.}other{Unesite PIN za SIM. Imate još # pokušaja.}}"</string>
-    <string name="kg_password_default_puk_message" msgid="1025139786449741950">"{count,plural, =1{SIM je sada onemogućen. Unesite PUK kôd da biste nastavili. Imate još # pokušaj pre nego što SIM postane trajno neupotrebljiv. Detaljne informacije potražite od mobilnog operatera.}one{SIM je sada onemogućen. Unesite PUK kôd da biste nastavili. Imate još # pokušaj pre nego što SIM postane trajno neupotrebljiv. Detaljne informacije potražite od mobilnog operatera.}few{SIM je sada onemogućen. Unesite PUK kôd da biste nastavili. Imate još # pokušaja pre nego što SIM postane trajno neupotrebljiv. Detaljne informacije potražite od mobilnog operatera.}other{SIM je sada onemogućen. Unesite PUK kôd da biste nastavili. Imate još # pokušaja pre nego što SIM postane trajno neupotrebljiv. Detaljne informacije potražite od mobilnog operatera.}}"</string>
+    <string name="kg_face_sensor_privacy_enabled" msgid="6513157891227284806">"Da biste koristili otključavanje licem, uključite "<b>"pristup kameri"</b>" u odeljku Podešavanja &gt; Privatnost"</string>
+    <plurals name="kg_password_default_pin_message" formatted="false" msgid="7730152526369857818">
+      <item quantity="one">Unesite PIN za SIM. Imate još <xliff:g id="NUMBER_1">%d</xliff:g> pokušaj.</item>
+      <item quantity="few">Unesite PIN za SIM. Imate još <xliff:g id="NUMBER_1">%d</xliff:g> pokušaja.</item>
+      <item quantity="other">Unesite PIN za SIM. Imate još <xliff:g id="NUMBER_1">%d</xliff:g> pokušaja.</item>
+    </plurals>
+    <plurals name="kg_password_default_puk_message" formatted="false" msgid="571308542462946935">
+      <item quantity="one">SIM je sada onemogućen. Unesite PUK kôd da biste nastavili. Imate još <xliff:g id="_NUMBER_1">%d</xliff:g> pokušaj pre nego što SIM postane trajno neupotrebljiv. Detaljne informacije potražite od mobilnog operatera.</item>
+      <item quantity="few">SIM je sada onemogućen. Unesite PUK kôd da biste nastavili. Imate još <xliff:g id="_NUMBER_1">%d</xliff:g> pokušaja pre nego što SIM postane trajno neupotrebljiv. Detaljne informacije potražite od mobilnog operatera.</item>
+      <item quantity="other">SIM je sada onemogućen. Unesite PUK kôd da biste nastavili. Imate još <xliff:g id="_NUMBER_1">%d</xliff:g> pokušaja pre nego što SIM postane trajno neupotrebljiv. Detaljne informacije potražite od mobilnog operatera.</item>
+    </plurals>
     <string name="clock_title_default" msgid="6342735240617459864">"Podrazumevani"</string>
     <string name="clock_title_bubble" msgid="2204559396790593213">"Mehurići"</string>
     <string name="clock_title_analog" msgid="8409262532900918273">"Analogni"</string>

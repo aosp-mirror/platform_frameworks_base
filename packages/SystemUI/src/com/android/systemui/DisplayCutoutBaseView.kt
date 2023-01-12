@@ -86,27 +86,35 @@ open class DisplayCutoutBaseView : View, RegionInterceptableView {
         onUpdate()
     }
 
-    fun onDisplayChanged(newDisplayUniqueId: String?) {
+    fun updateConfiguration(newDisplayUniqueId: String?) {
+        val info = DisplayInfo()
+        context.display?.getDisplayInfo(info)
         val oldMode: Display.Mode? = displayMode
-        val display: Display? = context.display
-        displayMode = display?.mode
+        displayMode = info.mode
 
-        if (displayUniqueId != display?.uniqueId) {
-            displayUniqueId = display?.uniqueId
-            shouldDrawCutout = DisplayCutout.getFillBuiltInDisplayCutout(
-                context.resources, displayUniqueId
-            )
-        }
+        updateDisplayUniqueId(info.uniqueId)
 
         // Skip if display mode or cutout hasn't changed.
         if (!displayModeChanged(oldMode, displayMode) &&
-                display?.cutout == displayInfo.displayCutout) {
+                displayInfo.displayCutout == info.displayCutout &&
+                displayRotation == info.rotation) {
             return
         }
-        if (newDisplayUniqueId == display?.uniqueId) {
+        if (newDisplayUniqueId == info.uniqueId) {
+            displayRotation = info.rotation
             updateCutout()
             updateProtectionBoundingPath()
             onUpdate()
+        }
+    }
+
+    open fun updateDisplayUniqueId(newDisplayUniqueId: String?) {
+        if (displayUniqueId != newDisplayUniqueId) {
+            displayUniqueId = newDisplayUniqueId
+            shouldDrawCutout = DisplayCutout.getFillBuiltInDisplayCutout(
+                    context.resources, displayUniqueId
+            )
+            invalidate()
         }
     }
 
@@ -161,7 +169,7 @@ open class DisplayCutoutBaseView : View, RegionInterceptableView {
             return
         }
         cutoutPath.reset()
-        display.getDisplayInfo(displayInfo)
+        context.display?.getDisplayInfo(displayInfo)
         displayInfo.displayCutout?.cutoutPath?.let { path -> cutoutPath.set(path) }
         invalidate()
     }

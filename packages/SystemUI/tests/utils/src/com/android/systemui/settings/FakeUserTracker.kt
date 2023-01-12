@@ -26,20 +26,24 @@ import java.util.concurrent.Executor
 
 /** A fake [UserTracker] to be used in tests. */
 class FakeUserTracker(
-    userId: Int = 0,
-    userHandle: UserHandle = UserHandle.of(userId),
-    userInfo: UserInfo = mock(),
-    userProfiles: List<UserInfo> = emptyList(),
+    private var _userId: Int = 0,
+    private var _userHandle: UserHandle = UserHandle.of(_userId),
+    private var _userInfo: UserInfo = mock(),
+    private var _userProfiles: List<UserInfo> = emptyList(),
     userContentResolver: ContentResolver = MockContentResolver(),
     userContext: Context = mock(),
     private val onCreateCurrentUserContext: (Context) -> Context = { mock() },
 ) : UserTracker {
     val callbacks = mutableListOf<UserTracker.Callback>()
 
-    override val userId: Int = userId
-    override val userHandle: UserHandle = userHandle
-    override val userInfo: UserInfo = userInfo
-    override val userProfiles: List<UserInfo> = userProfiles
+    override val userId: Int
+        get() = _userId
+    override val userHandle: UserHandle
+        get() = _userHandle
+    override val userInfo: UserInfo
+        get() = _userInfo
+    override val userProfiles: List<UserInfo>
+        get() = _userProfiles
 
     override val userContentResolver: ContentResolver = userContentResolver
     override val userContext: Context = userContext
@@ -54,5 +58,19 @@ class FakeUserTracker(
 
     override fun createCurrentUserContext(context: Context): Context {
         return onCreateCurrentUserContext(context)
+    }
+
+    fun set(userInfos: List<UserInfo>, selectedUserIndex: Int) {
+        _userProfiles = userInfos
+        _userInfo = userInfos[selectedUserIndex]
+        _userId = _userInfo.id
+        _userHandle = UserHandle.of(_userId)
+
+        val copy = callbacks.toList()
+        copy.forEach { it.onUserChanged(_userId, userContext) }
+    }
+
+    fun onProfileChanged() {
+        callbacks.forEach { it.onProfilesChanged(_userProfiles) }
     }
 }

@@ -22,5 +22,5 @@
     <string name="install_carrier_app_description" msgid="4014303558674923797">"ଆପଣଙ୍କ ନୂଆ SIM କାର୍ଡ ଠିକ୍ ଭାବେ କାମ କରିବା ପାଇଁ, ଆପଣଙ୍କୁ <xliff:g id="ID_1">%1$s</xliff:g> ଆପ୍ ଇନଷ୍ଟଲ୍ କରିବାକୁ ହେବ"</string>
     <string name="install_carrier_app_description_default" msgid="7356830245205847840">"ଆପଣଙ୍କ ନୂଆ SIM କାର୍ଡ ଠିକ୍ ଭାବେ କାମ କରିବା ପାଇଁ, ଆପଣଙ୍କୁ ମୋବାଇଲ୍ କମ୍ପାନୀ ଆପ୍ ଇନଷ୍ଟଲ୍ କରିବାକୁ ହେବ"</string>
     <string name="install_carrier_app_defer_action" msgid="2558576736886876209">"ଏବେ ନୁହେଁ"</string>
-    <string name="install_carrier_app_download_action" msgid="7859229305958538064">"ଆପ୍ ଡାଉନଲୋଡ କରନ୍ତୁ"</string>
+    <string name="install_carrier_app_download_action" msgid="7859229305958538064">"ଆପ୍ ଡାଉନଲୋଡ୍ କରନ୍ତୁ"</string>
 </resources>

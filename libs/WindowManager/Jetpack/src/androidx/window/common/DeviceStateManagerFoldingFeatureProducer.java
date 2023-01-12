@@ -155,6 +155,7 @@ public final class DeviceStateManagerFoldingFeatureProducer
      * Adds the data to the storeFeaturesConsumer when the data is ready.
      * @param storeFeaturesConsumer a consumer to collect the data when it is first available.
      */
+    @Override
     public void getData(Consumer<List<CommonFoldingFeature>> storeFeaturesConsumer) {
         mRawFoldSupplier.getData((String displayFeaturesString) -> {
             if (TextUtils.isEmpty(displayFeaturesString)) {

@@ -20,7 +20,6 @@ import android.testing.AndroidTestingRunner
 import androidx.test.filters.SmallTest
 import com.android.systemui.SysuiTestCase
 import com.google.common.truth.Truth.assertThat
-import java.lang.IllegalStateException
 import org.junit.Assert.fail
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -29,12 +28,12 @@ import org.junit.runner.RunWith
 @RunWith(AndroidTestingRunner::class)
 class FakeFeatureFlagsTest : SysuiTestCase() {
 
-    private val unreleasedFlag = UnreleasedFlag(-1000)
-    private val releasedFlag = ReleasedFlag(-1001)
-    private val stringFlag = StringFlag(-1002)
-    private val resourceBooleanFlag = ResourceBooleanFlag(-1003, resourceId = -1)
-    private val resourceStringFlag = ResourceStringFlag(-1004, resourceId = -1)
-    private val sysPropBooleanFlag = SysPropBooleanFlag(-1005, name = "test")
+    private val unreleasedFlag = UnreleasedFlag(-1000, "-1000", "test")
+    private val releasedFlag = ReleasedFlag(-1001, "-1001", "test")
+    private val stringFlag = StringFlag(-1002, "-1002", "test")
+    private val resourceBooleanFlag = ResourceBooleanFlag(-1003, "-1003", "test", resourceId = -1)
+    private val resourceStringFlag = ResourceStringFlag(-1004, "-1004", "test", resourceId = -1)
+    private val sysPropBooleanFlag = SysPropBooleanFlag(-1005, "test", "test")
 
     /**
      * FakeFeatureFlags does not honor any default values. All flags which are accessed must be
@@ -47,7 +46,7 @@ class FakeFeatureFlagsTest : SysuiTestCase() {
             assertThat(flags.isEnabled(Flags.TEAMFOOD)).isFalse()
             fail("Expected an exception when accessing an unspecified flag.")
         } catch (ex: IllegalStateException) {
-            assertThat(ex.message).contains("TEAMFOOD")
+            assertThat(ex.message).contains("id=1")
         }
         try {
             assertThat(flags.isEnabled(unreleasedFlag)).isFalse()

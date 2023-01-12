@@ -26,11 +26,11 @@
     <string name="keyguard_sim_error_message_short" msgid="633630844240494070">"Ógilt kort."</string>
     <string name="keyguard_charged" msgid="5478247181205188995">"Fullhlaðin"</string>
     <string name="keyguard_plugged_in_wireless" msgid="2537874724955057383">"<xliff:g id="PERCENTAGE">%s</xliff:g> • Í þráðlausri hleðslu"</string>
-    <string name="keyguard_plugged_in_dock" msgid="2122073051904360987">"<xliff:g id="PERCENTAGE">%s</xliff:g> • Í hleðslu"</string>
+    <string name="keyguard_plugged_in_dock" msgid="449722738270908674">"<xliff:g id="PERCENTAGE">%s</xliff:g> • Hleður í dokku"</string>
     <string name="keyguard_plugged_in" msgid="8169926454348380863">"<xliff:g id="PERCENTAGE">%s</xliff:g> • Í hleðslu"</string>
     <string name="keyguard_plugged_in_charging_fast" msgid="4386594091107340426">"<xliff:g id="PERCENTAGE">%s</xliff:g> • Hröð hleðsla"</string>
     <string name="keyguard_plugged_in_charging_slowly" msgid="217655355424210">"<xliff:g id="PERCENTAGE">%s</xliff:g> • Hæg hleðsla"</string>
-    <string name="keyguard_plugged_in_charging_limited" msgid="1709413803451065875">"<xliff:g id="PERCENTAGE">%s</xliff:g> • Gert var hlé á hleðslu til að vernda rafhlöðuna"</string>
+    <string name="keyguard_plugged_in_charging_limited" msgid="6091488837901216962">"<xliff:g id="PERCENTAGE">%s</xliff:g> • Hleðsla takmörkuð tímabundið"</string>
     <string name="keyguard_instructions_when_pattern_disabled" msgid="8448804180089936954">"Ýttu á valmyndarhnappinn til að taka úr lás."</string>
     <string name="keyguard_network_locked_message" msgid="407096292844868608">"Net læst"</string>
     <string name="keyguard_missing_sim_message_short" msgid="704159478161444907">"Ekkert SIM-kort"</string>
@@ -68,9 +68,15 @@
     <string name="kg_too_many_failed_password_attempts_dialog_message" msgid="190984061975729494">"Þú hefur slegið inn rangt aðgangsorð <xliff:g id="NUMBER_0">%1$d</xliff:g> sinnum. \n\nReyndu aftur eftir <xliff:g id="NUMBER_1">%2$d</xliff:g> sekúndur."</string>
     <string name="kg_too_many_failed_pattern_attempts_dialog_message" msgid="4252405904570284368">"Þú hefur teiknað rangt opnunarmynstur <xliff:g id="NUMBER_0">%1$d</xliff:g> sinnum. \n\nReyndu aftur eftir <xliff:g id="NUMBER_1">%2$d</xliff:g> sekúndur."</string>
     <string name="kg_password_wrong_pin_code_pukked" msgid="8047350661459040581">"Rangt PIN-númer SIM-korts. Nú þarftu að hafa samband við símafyrirtækið til að opna fyrir tækið."</string>
-    <string name="kg_password_wrong_pin_code" msgid="5629415765976820357">"{count,plural, =1{Rangt PIN-númer SIM-korts. Þú átt # tilraun eftir áður en þú þarft að hafa samband við símafyrirtækið þitt til að taka tækið úr lás.}one{Rangt PIN-númer SIM-korts. Þú átt # tilraun eftir. }other{Rangt PIN-númer SIM-korts. Þú átt # tilraunir eftir. }}"</string>
+    <plurals name="kg_password_wrong_pin_code" formatted="false" msgid="7030584350995485026">
+      <item quantity="one">Rangt PIN-númer SIM-korts. Þú átt <xliff:g id="NUMBER_1">%d</xliff:g> tilraun eftir.</item>
+      <item quantity="other">Rangt PIN-númer SIM-korts. Þú átt <xliff:g id="NUMBER_1">%d</xliff:g> tilraunir eftir.</item>
+    </plurals>
     <string name="kg_password_wrong_puk_code_dead" msgid="3698285357028468617">"SIM-kortið er ónothæft. Hafðu samband við símafyrirtækið þitt."</string>
-    <string name="kg_password_wrong_puk_code" msgid="6820515467645087827">"{count,plural, =1{Rangt PUK-númer SIM-korts. Þú átt # tilraun eftir áður en SIM-kortið verður ónothæft til frambúðar.}one{Rangt PUK-númer SIM-korts. Þú átt # tilraun eftir áður en SIM-kortið verður ónothæft til frambúðar.}other{Rangt PUK-númer SIM-korts. Þú átt # tilraunir eftir áður en SIM-kortið verður ónothæft til frambúðar.}}"</string>
+    <plurals name="kg_password_wrong_puk_code" formatted="false" msgid="3937306685604862886">
+      <item quantity="one">Rangt PUK-númer SIM-korts. Þú átt <xliff:g id="NUMBER_1">%d</xliff:g> tilraun eftir áður en SIM-kortið verður ónothæft til frambúðar.</item>
+      <item quantity="other">Rangt PUK-númer SIM-korts. Þú átt <xliff:g id="NUMBER_1">%d</xliff:g> tilraunir eftir áður en SIM-kortið verður ónothæft til frambúðar.</item>
+    </plurals>
     <string name="kg_password_pin_failed" msgid="5136259126330604009">"PIN-aðgerð SIM-korts mistókst!"</string>
     <string name="kg_password_puk_failed" msgid="6778867411556937118">"PUK-aðgerð SIM-korts mistókst!"</string>
     <string name="accessibility_ime_switch_button" msgid="9082358310194861329">"Skipta um innsláttaraðferð"</string>
@@ -84,9 +90,15 @@
     <string name="kg_prompt_reason_device_admin" msgid="6961159596224055685">"Kerfisstjóri læsti tæki"</string>
     <string name="kg_prompt_reason_user_request" msgid="6015774877733717904">"Tækinu var læst handvirkt"</string>
     <string name="kg_face_not_recognized" msgid="7903950626744419160">"Þekktist ekki"</string>
-    <string name="kg_face_sensor_privacy_enabled" msgid="939511161763558512">"Kveiktu á myndavélaaðgangi í stillingum til að nota andlitskenni"</string>
-    <string name="kg_password_default_pin_message" msgid="1434544655827987873">"{count,plural, =1{Sláðu inn PIN-númer SIM-korts. Þú átt # tilraun eftir áður en þú þarft að hafa samband við símafyrirtækið þitt til að taka tækið úr lás.}one{Sláðu inn PIN-númer SIM-kortsins. Þú átt # tilraun eftir.}other{Sláðu inn PIN-númer SIM-kortsins. Þú átt # tilraunir eftir.}}"</string>
-    <string name="kg_password_default_puk_message" msgid="1025139786449741950">"{count,plural, =1{SIM-kortið er nú óvirkt. Sláðu inn PUK-númer til að halda áfram. Þú átt # tilraun eftir þar til SIM-kortið verður ónothæft til frambúðar. Hafðu samband við símafyrirtækið til að fá upplýsingar.}one{SIM-kortið er nú óvirkt. Sláðu inn PUK-númer til að halda áfram. Þú átt # tilraun eftir þar til SIM-kortið verður ónothæft til frambúðar. Hafðu samband við símafyrirtækið til að fá upplýsingar.}other{SIM-kortið er nú óvirkt. Sláðu inn PUK-númer til að halda áfram. Þú átt # tilraunir eftir þar til SIM-kortið verður ónothæft til frambúðar. Hafðu samband við símafyrirtækið til að fá upplýsingar.}}"</string>
+    <string name="kg_face_sensor_privacy_enabled" msgid="6513157891227284806">"Þú verður að kveikja á "<b>"aðgangi að myndavél"</b>" í „Stillingar &gt; persónuvernd“ til að nota andlitskenni"</string>
+    <plurals name="kg_password_default_pin_message" formatted="false" msgid="7730152526369857818">
+      <item quantity="one">Sláðu inn PIN-númer SIM-korts. Þú átt <xliff:g id="NUMBER_1">%d</xliff:g> tilraun eftir.</item>
+      <item quantity="other">Sláðu inn PIN-númer SIM-korts. Þú átt <xliff:g id="NUMBER_1">%d</xliff:g> tilraunir eftir.</item>
+    </plurals>
+    <plurals name="kg_password_default_puk_message" formatted="false" msgid="571308542462946935">
+      <item quantity="one">SIM-kortið er nú óvirkt. Sláðu inn PUK-númer til að halda áfram. Það er <xliff:g id="_NUMBER_1">%d</xliff:g> tilraun eftir þar til SIM-kortið verður ónothæft til frambúðar. Hafðu samband við símafyrirtækið til að fá upplýsingar.</item>
+      <item quantity="other">SIM-kortið er nú óvirkt. Sláðu inn PUK-númer til að halda áfram. Það eru <xliff:g id="_NUMBER_1">%d</xliff:g> tilraunir eftir þar til SIM-kortið verður ónothæft til frambúðar. Hafðu samband við símafyrirtækið til að fá upplýsingar.</item>
+    </plurals>
     <string name="clock_title_default" msgid="6342735240617459864">"Sjálfgefið"</string>
     <string name="clock_title_bubble" msgid="2204559396790593213">"Blaðra"</string>
     <string name="clock_title_analog" msgid="8409262532900918273">"Með vísum"</string>
