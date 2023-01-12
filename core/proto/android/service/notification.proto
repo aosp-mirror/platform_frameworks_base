@@ -110,11 +110,20 @@ message ManagedServicesProto {
     // All of this type/caption enabled for current profiles.
     repeated android.content.ComponentNameProto enabled = 3;
 
-
     repeated ManagedServiceInfoProto live_services = 4;
 
+    // Was: repeated ComponentNameProto, when snoozed services were not per-user-id.
+    reserved 5;
+
+    message SnoozedServices {
+        option (android.msg_privacy).dest = DEST_AUTOMATIC;
+
+        optional int32 user_id = 1;
+        repeated android.content.ComponentNameProto snoozed = 2;
+    }
+
     // Snoozed for current profiles.
-    repeated android.content.ComponentNameProto snoozed = 5;
+    repeated SnoozedServices snoozed = 6;
 }
 
 message RankingHelperProto {
