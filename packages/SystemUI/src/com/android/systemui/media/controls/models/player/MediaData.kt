@@ -88,7 +88,10 @@ data class MediaData(
     val instanceId: InstanceId,
 
     /** The UID of the app, used for logging */
-    val appUid: Int
+    val appUid: Int,
+
+    /** Whether explicit indicator exists */
+    val isExplicit: Boolean = false,
 ) {
     companion object {
         /** Media is playing on the local device */

@@ -50,7 +50,6 @@ import android.os.Process;
 import android.os.Trace;
 import android.text.TextUtils;
 import android.util.Log;
-import android.util.Pair;
 import android.view.Gravity;
 import android.view.View;
 import android.view.ViewGroup;
@@ -68,6 +67,7 @@ import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.graphics.ColorUtils;
 import com.android.internal.jank.InteractionJankMonitor;
 import com.android.internal.logging.InstanceId;
+import com.android.internal.widget.CachingIconView;
 import com.android.settingslib.widget.AdaptiveIcon;
 import com.android.systemui.ActivityIntentHelper;
 import com.android.systemui.R;
@@ -113,6 +113,8 @@ import com.android.systemui.util.ColorUtilKt;
 import com.android.systemui.util.animation.TransitionLayout;
 import com.android.systemui.util.time.SystemClock;
 
+import dagger.Lazy;
+
 import java.net.URISyntaxException;
 import java.util.ArrayList;
 import java.util.List;
@@ -120,7 +122,7 @@ import java.util.concurrent.Executor;
 
 import javax.inject.Inject;
 
-import dagger.Lazy;
+import kotlin.Triple;
 import kotlin.Unit;
 
 /**
@@ -398,10 +400,11 @@ public class MediaControlPanel {
 
         TextView titleText = mMediaViewHolder.getTitleText();
         TextView artistText = mMediaViewHolder.getArtistText();
+        CachingIconView explicitIndicator = mMediaViewHolder.getExplicitIndicator();
         AnimatorSet enter = loadAnimator(R.anim.media_metadata_enter,
-                Interpolators.EMPHASIZED_DECELERATE, titleText, artistText);
+                Interpolators.EMPHASIZED_DECELERATE, titleText, artistText, explicitIndicator);
         AnimatorSet exit = loadAnimator(R.anim.media_metadata_exit,
-                Interpolators.EMPHASIZED_ACCELERATE, titleText, artistText);
+                Interpolators.EMPHASIZED_ACCELERATE, titleText, artistText, explicitIndicator);
 
         MultiRippleView multiRippleView = vh.getMultiRippleView();
         mMultiRippleController = new MultiRippleController(multiRippleView);
@@ -664,11 +667,15 @@ public class MediaControlPanel {
     private boolean bindSongMetadata(MediaData data) {
         TextView titleText = mMediaViewHolder.getTitleText();
         TextView artistText = mMediaViewHolder.getArtistText();
+        ConstraintSet expandedSet = mMediaViewController.getExpandedLayout();
+        ConstraintSet collapsedSet = mMediaViewController.getCollapsedLayout();
         return mMetadataAnimationHandler.setNext(
-            Pair.create(data.getSong(), data.getArtist()),
+            new Triple(data.getSong(), data.getArtist(), data.isExplicit()),
             () -> {
                 titleText.setText(data.getSong());
                 artistText.setText(data.getArtist());
+                setVisibleAndAlpha(expandedSet, R.id.media_explicit_indicator, data.isExplicit());
+                setVisibleAndAlpha(collapsedSet, R.id.media_explicit_indicator, data.isExplicit());
 
                 // refreshState is required here to resize the text views (and prevent ellipsis)
                 mMediaViewController.refreshState();

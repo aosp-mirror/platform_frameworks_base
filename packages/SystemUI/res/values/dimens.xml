@@ -1055,6 +1055,7 @@
     <dimen name="qs_media_disabled_seekbar_height">1dp</dimen>
     <dimen name="qs_media_enabled_seekbar_height">2dp</dimen>
     <dimen name="qs_media_app_icon_size">24dp</dimen>
+    <dimen name="qs_media_explicit_indicator_icon_size">13dp</dimen>
 
     <dimen name="qs_media_session_enabled_seekbar_vertical_padding">15dp</dimen>
     <dimen name="qs_media_session_disabled_seekbar_vertical_padding">16dp</dimen>
