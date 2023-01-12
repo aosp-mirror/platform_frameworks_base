@@ -7578,7 +7578,7 @@
             </intent-filter>
         </service>
 
-        <service android:name="com.android.server.art.BackgroundDexOptJobService"
+        <service android:name="com.android.server.art.BackgroundDexoptJobService"
                  android:permission="android.permission.BIND_JOB_SERVICE" >
         </service>
 
