@@ -334,6 +334,41 @@ public class DesktopModeControllerTest extends ShellTestCase {
     }
 
     @Test
+    public void testGetVisibleTaskCount_noTasks_returnsZero() {
+        assertThat(mController.getVisibleTaskCount()).isEqualTo(0);
+    }
+
+    @Test
+    public void testGetVisibleTaskCount_twoTasks_bothVisible_returnsTwo() {
+        RunningTaskInfo task1 = createFreeformTask();
+        mDesktopModeTaskRepository.addActiveTask(task1.taskId);
+        mDesktopModeTaskRepository.addOrMoveFreeformTaskToTop(task1.taskId);
+        mDesktopModeTaskRepository.updateVisibleFreeformTasks(task1.taskId, true /* visible */);
+
+        RunningTaskInfo task2 = createFreeformTask();
+        mDesktopModeTaskRepository.addActiveTask(task2.taskId);
+        mDesktopModeTaskRepository.addOrMoveFreeformTaskToTop(task2.taskId);
+        mDesktopModeTaskRepository.updateVisibleFreeformTasks(task2.taskId, true /* visible */);
+
+        assertThat(mController.getVisibleTaskCount()).isEqualTo(2);
+    }
+
+    @Test
+    public void testGetVisibleTaskCount_twoTasks_oneVisible_returnsOne() {
+        RunningTaskInfo task1 = createFreeformTask();
+        mDesktopModeTaskRepository.addActiveTask(task1.taskId);
+        mDesktopModeTaskRepository.addOrMoveFreeformTaskToTop(task1.taskId);
+        mDesktopModeTaskRepository.updateVisibleFreeformTasks(task1.taskId, true /* visible */);
+
+        RunningTaskInfo task2 = createFreeformTask();
+        mDesktopModeTaskRepository.addActiveTask(task2.taskId);
+        mDesktopModeTaskRepository.addOrMoveFreeformTaskToTop(task2.taskId);
+        mDesktopModeTaskRepository.updateVisibleFreeformTasks(task2.taskId, false /* visible */);
+
+        assertThat(mController.getVisibleTaskCount()).isEqualTo(1);
+    }
+
+    @Test
     public void testHandleTransitionRequest_desktopModeNotActive_returnsNull() {
         when(DesktopModeStatus.isActive(any())).thenReturn(false);
         WindowContainerTransaction wct = mController.handleRequest(

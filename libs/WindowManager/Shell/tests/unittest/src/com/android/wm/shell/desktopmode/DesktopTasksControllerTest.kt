@@ -197,6 +197,27 @@ class DesktopTasksControllerTest : ShellTestCase() {
     }
 
     @Test
+    fun getVisibleTaskCount_noTasks_returnsZero() {
+        assertThat(controller.getVisibleTaskCount()).isEqualTo(0)
+    }
+
+    @Test
+    fun getVisibleTaskCount_twoTasks_bothVisible_returnsTwo() {
+        setUpHomeTask()
+        setUpFreeformTask().also(::markTaskVisible)
+        setUpFreeformTask().also(::markTaskVisible)
+        assertThat(controller.getVisibleTaskCount()).isEqualTo(2)
+    }
+
+    @Test
+    fun getVisibleTaskCount_twoTasks_oneVisible_returnsOne() {
+        setUpHomeTask()
+        setUpFreeformTask().also(::markTaskVisible)
+        setUpFreeformTask().also(::markTaskHidden)
+        assertThat(controller.getVisibleTaskCount()).isEqualTo(1)
+    }
+
+    @Test
     fun moveToDesktop() {
         val task = setUpFullscreenTask()
         controller.moveToDesktop(task)
@@ -224,7 +245,7 @@ class DesktopTasksControllerTest : ShellTestCase() {
             assertThat(hierarchyOps).hasSize(3)
             assertReorderSequence(homeTask, freeformTask, fullscreenTask)
             assertThat(changes[fullscreenTask.token.asBinder()]?.windowingMode)
-                    .isEqualTo(WINDOWING_MODE_FREEFORM)
+                .isEqualTo(WINDOWING_MODE_FREEFORM)
         }
     }
 
