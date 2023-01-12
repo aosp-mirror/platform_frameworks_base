@@ -45979,6 +45979,7 @@ package android.telephony.ims {
     field public static final int METHOD_PUBLISH = 2; // 0x2
     field public static final int METHOD_REGISTER = 1; // 0x1
     field public static final int METHOD_SUBSCRIBE = 3; // 0x3
+    field public static final int METHOD_UNKNOWN = 0; // 0x0
   }
 
 }
