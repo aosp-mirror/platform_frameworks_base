@@ -1926,13 +1926,23 @@ public class KeyguardViewMediator implements CoreStartable, Dumpable,
             return;
         }
 
-        // if the keyguard is already showing, don't bother. check flags in both files
-        // to account for the hiding animation which results in a delay and discrepancy
-        // between flags
+        // If the keyguard is already showing, see if we don't need to bother re-showing it. Check
+        // flags in both files to account for the hiding animation which results in a delay and
+        // discrepancy between flags.
         if (mShowing && mKeyguardStateController.isShowing()) {
-            if (DEBUG) Log.d(TAG, "doKeyguard: not showing because it is already showing");
-            resetStateLocked();
-            return;
+            if (mPM.isInteractive()) {
+                // It's already showing, and we're not trying to show it while the screen is off.
+                // We can simply reset all of the views.
+                if (DEBUG) Log.d(TAG, "doKeyguard: not showing because it is already showing");
+                resetStateLocked();
+                return;
+            } else {
+                // We are trying to show the keyguard while the screen is off - this results from
+                // race conditions involving locking while unlocking. Don't short-circuit here and
+                // ensure the keyguard is fully re-shown.
+                Log.e(TAG,
+                        "doKeyguard: already showing, but re-showing since we're not interactive");
+            }
         }
 
         // In split system user mode, we never unlock system user.
