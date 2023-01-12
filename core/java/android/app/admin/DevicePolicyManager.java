@@ -6787,6 +6787,8 @@ public class DevicePolicyManager {
      * {@link #ENCRYPTION_STATUS_UNSUPPORTED}, {@link #ENCRYPTION_STATUS_INACTIVE},
      * {@link #ENCRYPTION_STATUS_ACTIVATING}, {@link #ENCRYPTION_STATUS_ACTIVE_DEFAULT_KEY},
      * {@link #ENCRYPTION_STATUS_ACTIVE}, or {@link #ENCRYPTION_STATUS_ACTIVE_PER_USER}.
+     *
+     * @throws SecurityException if called on a parent instance.
      */
     public int getStorageEncryptionStatus() {
         throwIfParentInstance("getStorageEncryptionStatus");

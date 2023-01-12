@@ -57,6 +57,7 @@
             android:layout_width="@dimen/dream_overlay_status_bar_icon_size"
             android:layout_height="match_parent"
             android:layout_marginStart="@dimen/dream_overlay_status_icon_margin"
+            android:layout_marginTop="@dimen/dream_overlay_status_bar_marginTop"
             android:src="@drawable/ic_alarm"
             android:tint="@android:color/white"
             android:visibility="gone"
@@ -67,6 +68,7 @@
             android:layout_width="@dimen/dream_overlay_status_bar_icon_size"
             android:layout_height="match_parent"
             android:layout_marginStart="@dimen/dream_overlay_status_icon_margin"
+            android:layout_marginTop="@dimen/dream_overlay_status_bar_marginTop"
             android:src="@drawable/ic_qs_dnd_on"
             android:tint="@android:color/white"
             android:visibility="gone"
@@ -77,6 +79,7 @@
             android:layout_width="@dimen/dream_overlay_status_bar_icon_size"
             android:layout_height="match_parent"
             android:layout_marginStart="@dimen/dream_overlay_status_icon_margin"
+            android:layout_marginTop="@dimen/dream_overlay_status_bar_marginTop"
             android:src="@drawable/ic_signal_wifi_off"
             android:visibility="gone"
             android:contentDescription="@string/dream_overlay_status_bar_wifi_off" />

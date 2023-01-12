@@ -159,8 +159,13 @@ constructor(
      * bug report more actionable, so using the [log] with a messagePrinter to add more detail to
      * every log may do more to improve overall logging than adding more logs with this method.
      */
-    fun log(tag: String, level: LogLevel, @CompileTimeConstant message: String) =
-        log(tag, level, { str1 = message }, { str1!! })
+    @JvmOverloads
+    fun log(
+        tag: String,
+        level: LogLevel,
+        @CompileTimeConstant message: String,
+        exception: Throwable? = null,
+    ) = log(tag, level, { str1 = message }, { str1!! }, exception)
 
     /**
      * You should call [log] instead of this method.

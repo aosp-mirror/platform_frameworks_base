@@ -49,109 +49,135 @@ class QSLogger @Inject constructor(@QSLog private val buffer: LogBuffer) :
     }
 
     fun logTileAdded(tileSpec: String) {
-        log(DEBUG, {
-            str1 = tileSpec
-        }, {
-            "[$str1] Tile added"
-        })
+        buffer.log(TAG, DEBUG, { str1 = tileSpec }, { "[$str1] Tile added" })
     }
 
     fun logTileDestroyed(tileSpec: String, reason: String) {
-        log(DEBUG, {
-            str1 = tileSpec
-            str2 = reason
-        }, {
-            "[$str1] Tile destroyed. Reason: $str2"
-        })
+        buffer.log(
+            TAG,
+            DEBUG,
+            {
+                str1 = tileSpec
+                str2 = reason
+            },
+            { "[$str1] Tile destroyed. Reason: $str2" }
+        )
     }
 
     fun logTileChangeListening(tileSpec: String, listening: Boolean) {
-        log(VERBOSE, {
-            bool1 = listening
-            str1 = tileSpec
-        }, {
-            "[$str1] Tile listening=$bool1"
-        })
+        buffer.log(
+            TAG,
+            VERBOSE,
+            {
+                bool1 = listening
+                str1 = tileSpec
+            },
+            { "[$str1] Tile listening=$bool1" }
+        )
     }
 
     fun logAllTilesChangeListening(listening: Boolean, containerName: String, allSpecs: String) {
-        log(DEBUG, {
-            bool1 = listening
-            str1 = containerName
-            str2 = allSpecs
-        }, {
-            "Tiles listening=$bool1 in $str1. $str2"
-        })
+        buffer.log(
+            TAG,
+            DEBUG,
+            {
+                bool1 = listening
+                str1 = containerName
+                str2 = allSpecs
+            },
+            { "Tiles listening=$bool1 in $str1. $str2" }
+        )
     }
 
     fun logTileClick(tileSpec: String, statusBarState: Int, state: Int, eventId: Int) {
-        log(DEBUG, {
-            str1 = tileSpec
-            int1 = eventId
-            str2 = StatusBarState.toString(statusBarState)
-            str3 = toStateString(state)
-        }, {
-            "[$str1][$int1] Tile clicked. StatusBarState=$str2. TileState=$str3"
-        })
+        buffer.log(
+            TAG,
+            DEBUG,
+            {
+                str1 = tileSpec
+                int1 = eventId
+                str2 = StatusBarState.toString(statusBarState)
+                str3 = toStateString(state)
+            },
+            { "[$str1][$int1] Tile clicked. StatusBarState=$str2. TileState=$str3" }
+        )
     }
 
     fun logHandleClick(tileSpec: String, eventId: Int) {
-        log(DEBUG, {
-            str1 = tileSpec
-            int1 = eventId
-        }, {
-            "[$str1][$int1] Tile handling click."
-        })
+        buffer.log(
+            TAG,
+            DEBUG,
+            {
+                str1 = tileSpec
+                int1 = eventId
+            },
+            { "[$str1][$int1] Tile handling click." }
+        )
     }
 
     fun logTileSecondaryClick(tileSpec: String, statusBarState: Int, state: Int, eventId: Int) {
-        log(DEBUG, {
-            str1 = tileSpec
-            int1 = eventId
-            str2 = StatusBarState.toString(statusBarState)
-            str3 = toStateString(state)
-        }, {
-            "[$str1][$int1] Tile secondary clicked. StatusBarState=$str2. TileState=$str3"
-        })
+        buffer.log(
+            TAG,
+            DEBUG,
+            {
+                str1 = tileSpec
+                int1 = eventId
+                str2 = StatusBarState.toString(statusBarState)
+                str3 = toStateString(state)
+            },
+            { "[$str1][$int1] Tile secondary clicked. StatusBarState=$str2. TileState=$str3" }
+        )
     }
 
     fun logHandleSecondaryClick(tileSpec: String, eventId: Int) {
-        log(DEBUG, {
-            str1 = tileSpec
-            int1 = eventId
-        }, {
-            "[$str1][$int1] Tile handling secondary click."
-        })
+        buffer.log(
+            TAG,
+            DEBUG,
+            {
+                str1 = tileSpec
+                int1 = eventId
+            },
+            { "[$str1][$int1] Tile handling secondary click." }
+        )
     }
 
     fun logTileLongClick(tileSpec: String, statusBarState: Int, state: Int, eventId: Int) {
-        log(DEBUG, {
-            str1 = tileSpec
-            int1 = eventId
-            str2 = StatusBarState.toString(statusBarState)
-            str3 = toStateString(state)
-        }, {
-            "[$str1][$int1] Tile long clicked. StatusBarState=$str2. TileState=$str3"
-        })
+        buffer.log(
+            TAG,
+            DEBUG,
+            {
+                str1 = tileSpec
+                int1 = eventId
+                str2 = StatusBarState.toString(statusBarState)
+                str3 = toStateString(state)
+            },
+            { "[$str1][$int1] Tile long clicked. StatusBarState=$str2. TileState=$str3" }
+        )
     }
 
     fun logHandleLongClick(tileSpec: String, eventId: Int) {
-        log(DEBUG, {
-            str1 = tileSpec
-            int1 = eventId
-        }, {
-            "[$str1][$int1] Tile handling long click."
-        })
+        buffer.log(
+            TAG,
+            DEBUG,
+            {
+                str1 = tileSpec
+                int1 = eventId
+            },
+            { "[$str1][$int1] Tile handling long click." }
+        )
     }
 
     fun logInternetTileUpdate(tileSpec: String, lastType: Int, callback: String) {
-        log(VERBOSE, {
-            str1 = tileSpec
-            int1 = lastType
-            str2 = callback
-        }, {
-            "[$str1] mLastTileState=$int1, Callback=$str2."
-        })
+        buffer.log(
+            TAG,
+            VERBOSE,
+            {
+                str1 = tileSpec
+                int1 = lastType
+                str2 = callback
+            },
+            { "[$str1] mLastTileState=$int1, Callback=$str2." }
+        )
     }
 
     // TODO(b/250618218): Remove this method once we know the root cause of b/250618218.
@@ -167,58 +193,75 @@ class QSLogger @Inject constructor(@QSLog private val buffer: LogBuffer) :
         if (tileSpec != "internet") {
             return
         }
-        log(VERBOSE, {
-            str1 = tileSpec
-            int1 = state
-            bool1 = disabledByPolicy
-            int2 = color
-        }, {
-            "[$str1] state=$int1, disabledByPolicy=$bool1, color=$int2."
-        })
+        buffer.log(
+            TAG,
+            VERBOSE,
+            {
+                str1 = tileSpec
+                int1 = state
+                bool1 = disabledByPolicy
+                int2 = color
+            },
+            { "[$str1] state=$int1, disabledByPolicy=$bool1, color=$int2." }
+        )
     }
 
     fun logTileUpdated(tileSpec: String, state: QSTile.State) {
-        log(VERBOSE, {
-            str1 = tileSpec
-            str2 = state.label?.toString()
-            str3 = state.icon?.toString()
-            int1 = state.state
-            if (state is QSTile.SignalState) {
-                bool1 = true
-                bool2 = state.activityIn
-                bool3 = state.activityOut
+        buffer.log(
+            TAG,
+            VERBOSE,
+            {
+                str1 = tileSpec
+                str2 = state.label?.toString()
+                str3 = state.icon?.toString()
+                int1 = state.state
+                if (state is QSTile.SignalState) {
+                    bool1 = true
+                    bool2 = state.activityIn
+                    bool3 = state.activityOut
+                }
+            },
+            {
+                "[$str1] Tile updated. Label=$str2. State=$int1. Icon=$str3." +
+                    if (bool1) " Activity in/out=$bool2/$bool3" else ""
             }
-        }, {
-            "[$str1] Tile updated. Label=$str2. State=$int1. Icon=$str3." +
-                if (bool1) " Activity in/out=$bool2/$bool3" else ""
-        })
+        )
     }
 
     fun logPanelExpanded(expanded: Boolean, containerName: String) {
-        log(DEBUG, {
-            str1 = containerName
-            bool1 = expanded
-        }, {
-            "$str1 expanded=$bool1"
-        })
+        buffer.log(
+            TAG,
+            DEBUG,
+            {
+                str1 = containerName
+                bool1 = expanded
+            },
+            { "$str1 expanded=$bool1" }
+        )
     }
 
     fun logOnViewAttached(orientation: Int, containerName: String) {
-        log(DEBUG, {
-            str1 = containerName
-            int1 = orientation
-        }, {
-            "onViewAttached: $str1 orientation $int1"
-        })
+        buffer.log(
+            TAG,
+            DEBUG,
+            {
+                str1 = containerName
+                int1 = orientation
+            },
+            { "onViewAttached: $str1 orientation $int1" }
+        )
     }
 
     fun logOnViewDetached(orientation: Int, containerName: String) {
-        log(DEBUG, {
-            str1 = containerName
-            int1 = orientation
-        }, {
-            "onViewDetached: $str1 orientation $int1"
-        })
+        buffer.log(
+            TAG,
+            DEBUG,
+            {
+                str1 = containerName
+                int1 = orientation
+            },
+            { "onViewDetached: $str1 orientation $int1" }
+        )
     }
 
     fun logOnConfigurationChanged(
@@ -226,13 +269,16 @@ class QSLogger @Inject constructor(@QSLog private val buffer: LogBuffer) :
         newOrientation: Int,
         containerName: String
     ) {
-        log(DEBUG, {
-            str1 = containerName
-            int1 = lastOrientation
-            int2 = newOrientation
-        }, {
-            "configuration change: $str1 orientation was $int1, now $int2"
-        })
+        buffer.log(
+            TAG,
+            DEBUG,
+            {
+                str1 = containerName
+                int1 = lastOrientation
+                int2 = newOrientation
+            },
+            { "configuration change: $str1 orientation was $int1, now $int2" }
+        )
     }
 
     fun logSwitchTileLayout(
@@ -241,32 +287,41 @@ class QSLogger @Inject constructor(@QSLog private val buffer: LogBuffer) :
         force: Boolean,
         containerName: String
     ) {
-        log(DEBUG, {
-            str1 = containerName
-            bool1 = after
-            bool2 = before
-            bool3 = force
-        }, {
-            "change tile layout: $str1 horizontal=$bool1 (was $bool2), force? $bool3"
-        })
+        buffer.log(
+            TAG,
+            DEBUG,
+            {
+                str1 = containerName
+                bool1 = after
+                bool2 = before
+                bool3 = force
+            },
+            { "change tile layout: $str1 horizontal=$bool1 (was $bool2), force? $bool3" }
+        )
     }
 
     fun logTileDistributionInProgress(tilesPerPageCount: Int, totalTilesCount: Int) {
-        log(DEBUG, {
-            int1 = tilesPerPageCount
-            int2 = totalTilesCount
-        }, {
-            "Distributing tiles: [tilesPerPageCount=$int1] [totalTilesCount=$int2]"
-        })
+        buffer.log(
+            TAG,
+            DEBUG,
+            {
+                int1 = tilesPerPageCount
+                int2 = totalTilesCount
+            },
+            { "Distributing tiles: [tilesPerPageCount=$int1] [totalTilesCount=$int2]" }
+        )
     }
 
     fun logTileDistributed(tileName: String, pageIndex: Int) {
-        log(DEBUG, {
-            str1 = tileName
-            int1 = pageIndex
-        }, {
-            "Adding $str1 to page number $int1"
-        })
+        buffer.log(
+            TAG,
+            DEBUG,
+            {
+                str1 = tileName
+                int1 = pageIndex
+            },
+            { "Adding $str1 to page number $int1" }
+        )
     }
 
     private fun toStateString(state: Int): String {
@@ -276,13 +331,5 @@ class QSLogger @Inject constructor(@QSLog private val buffer: LogBuffer) :
             Tile.STATE_UNAVAILABLE -> "unavailable"
             else -> "wrong state"
         }
-    }
-
-    private inline fun log(
-        logLevel: LogLevel,
-        initializer: LogMessage.() -> Unit,
-        noinline printer: LogMessage.() -> String
-    ) {
-        buffer.log(TAG, logLevel, initializer, printer)
     }
 }

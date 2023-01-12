@@ -105,6 +105,13 @@ public class AudioSystemAdapter implements AudioSystem.RoutingUpdateCallback,
         }
     }
 
+    public void clearRoutingCache() {
+        if (DEBUG_CACHE) {
+            Log.d(TAG, "---- routing cache clear (from java) ----------");
+        }
+        invalidateRoutingCache();
+    }
+
     /**
      * Implementation of AudioSystem.VolumeRangeInitRequestCallback
      */
@@ -337,6 +344,7 @@ public class AudioSystemAdapter implements AudioSystem.RoutingUpdateCallback,
      * @return
      */
     public int setParameters(String keyValuePairs) {
+        invalidateRoutingCache();
         return AudioSystem.setParameters(keyValuePairs);
     }
 

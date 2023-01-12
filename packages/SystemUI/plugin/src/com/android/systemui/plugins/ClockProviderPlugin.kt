@@ -71,9 +71,6 @@ interface ClockController {
 
     /** Optional method for dumping debug information */
     fun dump(pw: PrintWriter) {}
-
-    /** Optional method for debug logging */
-    fun setLogBuffer(logBuffer: LogBuffer) {}
 }
 
 /** Interface for a specific clock face version rendered by the clock */
@@ -83,6 +80,9 @@ interface ClockFaceController {
 
     /** Events specific to this clock face */
     val events: ClockFaceEvents
+
+    /** Some clocks may log debug information */
+    var logBuffer: LogBuffer?
 }
 
 /** Events that should call when various rendering parameters change */

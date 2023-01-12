@@ -29,6 +29,18 @@ constructor(
     private val dumpManager: DumpManager,
     private val systemClock: SystemClock,
 ) {
+    private val existingBuffers = mutableMapOf<String, TableLogBuffer>()
+
+    /**
+     * Creates a new [TableLogBuffer]. This method should only be called from static contexts, where
+     * it is guaranteed only to be created one time. See [getOrCreate] for a cache-aware method of
+     * obtaining a buffer.
+     *
+     * @param name a unique table name
+     * @param maxSize the buffer max size. See [adjustMaxSize]
+     *
+     * @return a new [TableLogBuffer] registered with [DumpManager]
+     */
     fun create(
         name: String,
         maxSize: Int,
@@ -37,4 +49,23 @@ constructor(
         dumpManager.registerNormalDumpable(name, tableBuffer)
         return tableBuffer
     }
+
+    /**
+     * Log buffers are retained indefinitely by [DumpManager], so that they can be represented in
+     * bugreports. Because of this, many of them are created statically in the Dagger graph.
+     *
+     * In the case where you have to create a logbuffer with a name only known at runtime, this
+     * method can be used to lazily create a table log buffer which is then cached for reuse.
+     *
+     * @return a [TableLogBuffer] suitable for reuse
+     */
+    fun getOrCreate(
+        name: String,
+        maxSize: Int,
+    ): TableLogBuffer =
+        existingBuffers.getOrElse(name) {
+            val buffer = create(name, maxSize)
+            existingBuffers[name] = buffer
+            buffer
+        }
 }
