@@ -43,8 +43,8 @@ import java.util.function.Consumer;
  * The text bounds information of a slice of text in the editor.
  *
  * <p> This class provides IME the layout information of the text within the range from
- * {@link #getStart()} to {@link #getEnd()}. It's intended to be used by IME as a supplementary API
- * to support handwriting gestures.
+ * {@link #getStartIndex()} to {@link #getEndIndex()}. It's intended to be used by IME as a
+ * supplementary API to support handwriting gestures.
  * </p>
  */
 public final class TextBoundsInfo implements Parcelable {
@@ -168,16 +168,13 @@ public final class TextBoundsInfo implements Parcelable {
     private final SegmentFinder mGraphemeSegmentFinder;
 
     /**
-     * Returns a new instance of {@link android.graphics.Matrix} that indicates the transformation
+     * Set the given {@link android.graphics.Matrix} to be the transformation
      * matrix that is to be applied other positional data in this class.
-     *
-     * @return a new instance (copy) of the transformation matrix.
      */
     @NonNull
-    public Matrix getMatrix() {
-        final Matrix matrix = new Matrix();
+    public void getMatrix(@NonNull Matrix matrix) {
+        Objects.requireNonNull(matrix);
         matrix.setValues(mMatrixValues);
-        return matrix;
     }
 
     /**
@@ -186,7 +183,7 @@ public final class TextBoundsInfo implements Parcelable {
      *
      * @see Builder#setStartAndEnd(int, int)
      */
-    public int getStart() {
+    public int getStartIndex() {
         return mStart;
     }
 
@@ -196,28 +193,28 @@ public final class TextBoundsInfo implements Parcelable {
      *
      * @see Builder#setStartAndEnd(int, int)
      */
-    public int getEnd() {
+    public int getEndIndex() {
         return mEnd;
     }
 
     /**
-     * Return the bounds of the character at the given {@code index}, in the coordinates of the
-     * editor.
+     * Set the bounds of the character at the given {@code index} to the given {@link RectF}, in
+     * the coordinates of the editor.
      *
      * @param index the index of the queried character.
-     * @return the bounding box of the queried character.
+     * @param bounds the {@link RectF} used to receive the result.
      *
      * @throws IndexOutOfBoundsException if the given {@code index} is out of the range from
      * the {@code start} to the {@code end}.
      */
     @NonNull
-    public RectF getCharacterBounds(int index) {
+    public void getCharacterBounds(int index, @NonNull RectF bounds) {
         if (index < mStart || index >= mEnd) {
             throw new IndexOutOfBoundsException("Index is out of the bounds of "
                     + "[" + mStart + ", " + mEnd + ").");
         }
         final int offset = 4 * (index - mStart);
-        return new RectF(mCharacterBounds[offset], mCharacterBounds[offset + 1],
+        bounds.set(mCharacterBounds[offset], mCharacterBounds[offset + 1],
                 mCharacterBounds[offset + 2], mCharacterBounds[offset + 3]);
     }
 
@@ -331,6 +328,16 @@ public final class TextBoundsInfo implements Parcelable {
      * the {@link TextBoundsInfo}'s range is from index 5 to 15. If the associated
      * {@link SegmentFinder} only identifies one line range from 7 to 12. Then this method
      * won't check the text in the ranges of [5, 7) and [12, 15).
+     * </p>
+     *
+     * <p> Under the following conditions, this method will return -1 indicating that no valid
+     * character is found:
+     * <ul>
+     *   <li> The given {@code y} coordinate is above the first line or below the last line (the
+     *   first line or the last line is identified by the {@link SegmentFinder} returned from
+     *   {@link #getLineSegmentFinder()}). </li>
+     *   <li> There is no character in this {@link TextBoundsInfo}. </li>
+     * </ul>
      * </p>
      *
      * @param x the x coordinates of the interested location, in the editor's coordinates.
@@ -990,14 +997,25 @@ public final class TextBoundsInfo implements Parcelable {
     public static final class Builder {
         private final float[] mMatrixValues = new float[9];
         private boolean mMatrixInitialized;
-        private int mStart;
-        private int mEnd;
+        private int mStart = -1;
+        private int mEnd = -1;
         private float[] mCharacterBounds;
         private int[] mCharacterFlags;
         private int[] mCharacterBidiLevels;
         private SegmentFinder mLineSegmentFinder;
         private SegmentFinder mWordSegmentFinder;
         private SegmentFinder mGraphemeSegmentFinder;
+
+        /**
+         * Create a builder for {@link TextBoundsInfo}.
+         * @param start the start index of the {@link TextBoundsInfo}, inclusive.
+         * @param end the end index of the {@link TextBoundsInfo}, exclusive.
+         * @throws IllegalArgumentException if the given {@code start} or {@code end} is negative,
+         * or {@code end} is smaller than the {@code start}.
+         */
+        public Builder(int start, int end) {
+            setStartAndEnd(start, end);
+        }
 
         /** Clear all the parameters set on this {@link Builder} to reuse it. */
         @NonNull
@@ -1152,7 +1170,7 @@ public final class TextBoundsInfo implements Parcelable {
          *
          * @see #getGraphemeSegmentFinder()
          * @see SegmentFinder
-         * @see SegmentFinder.DefaultSegmentFinder
+         * @see SegmentFinder.PrescribedSegmentFinder
          */
         @NonNull
         public Builder setGraphemeSegmentFinder(@NonNull SegmentFinder graphemeSegmentFinder) {
@@ -1171,7 +1189,7 @@ public final class TextBoundsInfo implements Parcelable {
          *
          * @see #getWordSegmentFinder()
          * @see SegmentFinder
-         * @see SegmentFinder.DefaultSegmentFinder
+         * @see SegmentFinder.PrescribedSegmentFinder
          */
         @NonNull
         public Builder setWordSegmentFinder(@NonNull SegmentFinder wordSegmentFinder) {
@@ -1193,7 +1211,7 @@ public final class TextBoundsInfo implements Parcelable {
          *
          * @see #getLineSegmentFinder()
          * @see SegmentFinder
-         * @see SegmentFinder.DefaultSegmentFinder
+         * @see SegmentFinder.PrescribedSegmentFinder
          */
         @NonNull
         public Builder setLineSegmentFinder(@NonNull SegmentFinder lineSegmentFinder) {
@@ -1360,7 +1378,7 @@ public final class TextBoundsInfo implements Parcelable {
                 breaks = GrowingArrayUtils.append(breaks, count++, start + offset);
             }
         }
-        return new SegmentFinder.DefaultSegmentFinder(Arrays.copyOf(breaks, count));
+        return new SegmentFinder.PrescribedSegmentFinder(Arrays.copyOf(breaks, count));
     }
 
     /**

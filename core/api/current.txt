@@ -46637,8 +46637,8 @@ package android.text {
     field public static final int DONE = -1; // 0xffffffff
   }
 
-  public static class SegmentFinder.DefaultSegmentFinder extends android.text.SegmentFinder {
-    ctor public SegmentFinder.DefaultSegmentFinder(@NonNull int[]);
+  public static class SegmentFinder.PrescribedSegmentFinder extends android.text.SegmentFinder {
+    ctor public SegmentFinder.PrescribedSegmentFinder(@NonNull int[]);
     method public int nextEndBoundary(@IntRange(from=0) int);
     method public int nextStartBoundary(@IntRange(from=0) int);
     method public int previousEndBoundary(@IntRange(from=0) int);
@@ -55099,15 +55099,15 @@ package android.view.inputmethod {
   public final class TextBoundsInfo implements android.os.Parcelable {
     method public int describeContents();
     method @IntRange(from=0, to=125) public int getCharacterBidiLevel(int);
-    method @NonNull public android.graphics.RectF getCharacterBounds(int);
+    method @NonNull public void getCharacterBounds(int, @NonNull android.graphics.RectF);
     method public int getCharacterFlags(int);
-    method public int getEnd();
+    method public int getEndIndex();
     method @NonNull public android.text.SegmentFinder getGraphemeSegmentFinder();
     method @NonNull public android.text.SegmentFinder getLineSegmentFinder();
-    method @NonNull public android.graphics.Matrix getMatrix();
+    method @NonNull public void getMatrix(@NonNull android.graphics.Matrix);
     method public int getOffsetForPosition(float, float);
     method @Nullable public int[] getRangeForRect(@NonNull android.graphics.RectF, @NonNull android.text.SegmentFinder, @NonNull android.text.Layout.TextInclusionStrategy);
-    method public int getStart();
+    method public int getStartIndex();
     method @NonNull public android.text.SegmentFinder getWordSegmentFinder();
     method public void writeToParcel(@NonNull android.os.Parcel, int);
     field @NonNull public static final android.os.Parcelable.Creator<android.view.inputmethod.TextBoundsInfo> CREATOR;
@@ -55118,7 +55118,7 @@ package android.view.inputmethod {
   }
 
   public static final class TextBoundsInfo.Builder {
-    ctor public TextBoundsInfo.Builder();
+    ctor public TextBoundsInfo.Builder(int, int);
     method @NonNull public android.view.inputmethod.TextBoundsInfo build();
     method @NonNull public android.view.inputmethod.TextBoundsInfo.Builder clear();
     method @NonNull public android.view.inputmethod.TextBoundsInfo.Builder setCharacterBidiLevel(@NonNull int[]);
