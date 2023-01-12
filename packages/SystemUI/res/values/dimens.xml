@@ -1302,6 +1302,9 @@
     <!-- LOCKSCREEN -> DREAMING transition: Amount to shift lockscreen content on entering -->
     <dimen name="lockscreen_to_dreaming_transition_lockscreen_translation_y">-40dp</dimen>
 
+    <!-- GONE -> DREAMING transition: Amount to shift lockscreen content on entering -->
+    <dimen name="gone_to_dreaming_transition_lockscreen_translation_y">-40dp</dimen>
+
     <!-- LOCKSCREEN -> OCCLUDED transition: Amount to shift lockscreen content on entering -->
     <dimen name="lockscreen_to_occluded_transition_lockscreen_translation_y">-40dp</dimen>
 
