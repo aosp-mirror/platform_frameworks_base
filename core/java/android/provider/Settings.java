@@ -5671,6 +5671,36 @@ public final class Settings {
         public static final String LOCALE_PREFERENCES = "locale_preferences";
 
         /**
+         * Setting to enable camera flash notification feature.
+         * <ul>
+         *     <li> 0 = Off
+         *     <li> 1 = On
+         * </ul>
+         * @hide
+         */
+        public static final String CAMERA_FLASH_NOTIFICATION = "camera_flash_notification";
+
+        /**
+         * Setting to enable screen flash notification feature.
+         * <ul>
+         *     <li> 0 = Off
+         *     <li> 1 = On
+         * </ul>
+         *  @hide
+         */
+        public static final String SCREEN_FLASH_NOTIFICATION = "screen_flash_notification";
+
+        /**
+         * Integer property that specifes the color for screen flash notification as a
+         * packed 32-bit color.
+         *
+         * @see android.graphics.Color#argb
+         * @hide
+         */
+        public static final String SCREEN_FLASH_NOTIFICATION_COLOR =
+                "screen_flash_notification_color_global";
+
+        /**
          * IMPORTANT: If you add a new public settings you also have to add it to
          * PUBLIC_SETTINGS below. If the new setting is hidden you have to add
          * it to PRIVATE_SETTINGS below. Also add a validator that can validate
@@ -5803,6 +5833,9 @@ public final class Settings {
             PRIVATE_SETTINGS.add(TOUCHPAD_NATURAL_SCROLLING);
             PRIVATE_SETTINGS.add(TOUCHPAD_TAP_TO_CLICK);
             PRIVATE_SETTINGS.add(TOUCHPAD_RIGHT_CLICK_ZONE);
+            PRIVATE_SETTINGS.add(CAMERA_FLASH_NOTIFICATION);
+            PRIVATE_SETTINGS.add(SCREEN_FLASH_NOTIFICATION);
+            PRIVATE_SETTINGS.add(SCREEN_FLASH_NOTIFICATION_COLOR);
         }
 
         /**
