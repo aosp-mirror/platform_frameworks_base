@@ -668,6 +668,16 @@
         <item>17</item> <!-- WAKE_REASON_BIOMETRIC -->
     </integer-array>
 
+    <!-- Whether to support posture listening for face auth, default is 0(DEVICE_POSTURE_UNKNOWN)
+         means systemui will try listening on all postures.
+         0 : DEVICE_POSTURE_UNKNOWN
+         1 : DEVICE_POSTURE_CLOSED
+         2 : DEVICE_POSTURE_HALF_OPENED
+         3 : DEVICE_POSTURE_OPENED
+         4 : DEVICE_POSTURE_FLIPPED
+    -->
+    <integer name="config_face_auth_supported_posture">0</integer>
+
     <!-- Whether the communal service should be enabled -->
     <bool name="config_communalServiceEnabled">false</bool>
 
