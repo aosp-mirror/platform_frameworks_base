@@ -21,7 +21,6 @@ import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.SdkConstant;
-import android.annotation.SuppressLint;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
@@ -109,8 +108,6 @@ public abstract class PolicyUpdatesReceiver extends BroadcastReceiver {
     public static final String ACTION_DEVICE_POLICY_CHANGED =
             "android.app.admin.action.DEVICE_POLICY_CHANGED";
 
-    // TODO(b/264510719): Remove once API linter is fixed
-    @SuppressLint("ActionValue")
     /**
      * A string extra holding the package name the policy applies to, (see
      * {@link PolicyUpdatesReceiver#onPolicyChanged} and
@@ -119,8 +116,6 @@ public abstract class PolicyUpdatesReceiver extends BroadcastReceiver {
     public static final String EXTRA_PACKAGE_NAME =
             "android.app.admin.extra.PACKAGE_NAME";
 
-    // TODO(b/264510719): Remove once API linter is fixed
-    @SuppressLint("ActionValue")
     /**
      * A string extra holding the permission name the policy applies to, (see
      * {@link PolicyUpdatesReceiver#onPolicyChanged} and
