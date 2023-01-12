@@ -13107,13 +13107,15 @@ public class ActivityManagerService extends IActivityManager.Stub
             String resolvedType, IServiceConnection connection, int flags, String instanceName,
             String callingPackage, int userId) throws TransactionTooLargeException {
         return bindServiceInstance(caller, token, service, resolvedType, connection, flags,
-                instanceName, false, INVALID_UID, null, callingPackage, userId);
+                instanceName, false, INVALID_UID, null, null, callingPackage, userId);
     }
 
     private int bindServiceInstance(IApplicationThread caller, IBinder token, Intent service,
             String resolvedType, IServiceConnection connection, int flags, String instanceName,
             boolean isSdkSandboxService, int sdkSandboxClientAppUid,
-            String sdkSandboxClientAppPackage, String callingPackage, int userId)
+            String sdkSandboxClientAppPackage,
+            IApplicationThread sdkSandboxClientApplicationThread,
+            String callingPackage, int userId)
             throws TransactionTooLargeException {
         enforceNotIsolatedCaller("bindService");
         enforceAllowedToStartOrBindServiceIfSdkSandbox(service);
@@ -13152,7 +13154,8 @@ public class ActivityManagerService extends IActivityManager.Stub
             synchronized (this) {
                 return mServices.bindServiceLocked(caller, token, service, resolvedType, connection,
                         flags, instanceName, isSdkSandboxService, sdkSandboxClientAppUid,
-                        sdkSandboxClientAppPackage, callingPackage, userId);
+                        sdkSandboxClientAppPackage, sdkSandboxClientApplicationThread,
+                        callingPackage, userId);
             }
         } finally {
             Trace.traceEnd(Trace.TRACE_TAG_ACTIVITY_MANAGER);
@@ -16959,7 +16962,8 @@ public class ActivityManagerService extends IActivityManager.Stub
 
         @Override
         public boolean bindSdkSandboxService(Intent service, ServiceConnection conn,
-                int clientAppUid, String clientAppPackage, String processName, int flags)
+                int clientAppUid, IBinder clientApplicationThread, String clientAppPackage,
+                String processName, int flags)
                 throws RemoteException {
             if (service == null) {
                 throw new IllegalArgumentException("intent is null");
@@ -16984,14 +16988,40 @@ public class ActivityManagerService extends IActivityManager.Stub
             }
 
             Handler handler = mContext.getMainThreadHandler();
-
+            IApplicationThread clientApplicationThreadVerified = null;
+            if (clientApplicationThread != null) {
+                // Make sure this is a valid application process
+                synchronized (this) {
+                    final ProcessRecord rec = getRecordForAppLOSP(clientApplicationThread);
+                    if (rec == null) {
+                        // This could happen if the calling process has disappeared; no need for the
+                        // sandbox to be even started in this case.
+                        Slog.i(TAG, "clientApplicationThread process not found.");
+                        return false;
+                    }
+                    if (rec.info.uid != clientAppUid) {
+                        throw new IllegalArgumentException("clientApplicationThread does not match "
+                                + " client uid");
+                    }
+                    clientApplicationThreadVerified = rec.getThread();
+                }
+            }
             final IServiceConnection sd = mContext.getServiceDispatcher(conn, handler, flags);
             service.prepareToLeaveProcess(mContext);
             return ActivityManagerService.this.bindServiceInstance(
                     mContext.getIApplicationThread(), mContext.getActivityToken(), service,
                     service.resolveTypeIfNeeded(mContext.getContentResolver()), sd, flags,
                     processName, /*isSdkSandboxService*/ true, clientAppUid, clientAppPackage,
-                    mContext.getOpPackageName(), UserHandle.getUserId(clientAppUid)) != 0;
+                    clientApplicationThreadVerified, mContext.getOpPackageName(),
+                    UserHandle.getUserId(clientAppUid)) != 0;
+        }
+
+        @Override
+        public boolean bindSdkSandboxService(Intent service, ServiceConnection conn,
+                int clientAppUid, String clientAppPackage, String processName, int flags)
+                throws RemoteException {
+            return bindSdkSandboxService(service, conn, clientAppUid,
+                    null /* clientApplicationThread */, clientAppPackage, processName, flags);
         }
 
         @Override

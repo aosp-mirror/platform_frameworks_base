@@ -1063,7 +1063,7 @@ final class ServiceRecord extends Binder implements ComponentName.WithComponentN
     }
 
     public AppBindRecord retrieveAppBindingLocked(Intent intent,
-            ProcessRecord app) {
+            ProcessRecord app, ProcessRecord attributedApp) {
         Intent.FilterComparison filter = new Intent.FilterComparison(intent);
         IntentBindRecord i = bindings.get(filter);
         if (i == null) {
@@ -1074,7 +1074,7 @@ final class ServiceRecord extends Binder implements ComponentName.WithComponentN
         if (a != null) {
             return a;
         }
-        a = new AppBindRecord(this, i, app);
+        a = new AppBindRecord(this, i, app, attributedApp);
         i.apps.put(app, a);
         return a;
     }

@@ -2452,7 +2452,7 @@ public class MockingOomAdjusterTests {
         if (record == null) {
             record = makeServiceRecord(service);
         }
-        AppBindRecord binding = new AppBindRecord(record, null, client);
+        AppBindRecord binding = new AppBindRecord(record, null, client, null);
         ConnectionRecord cr = spy(new ConnectionRecord(binding,
                 mock(ActivityServiceConnectionsHolder.class),
                 mock(IServiceConnection.class), bindFlags,
