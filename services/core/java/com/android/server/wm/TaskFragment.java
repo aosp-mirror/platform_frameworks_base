@@ -2813,7 +2813,7 @@ class TaskFragment extends WindowContainer<WindowContainer> {
     void removeImmediately() {
         mIsRemovalRequested = false;
         resetAdjacentTaskFragment();
-        cleanUp();
+        cleanUpEmbeddedTaskFragment();
         final boolean shouldExecuteAppTransition =
                 mClearedTaskFragmentForPip && isTaskVisibleRequested();
         super.removeImmediately();
@@ -2830,10 +2830,20 @@ class TaskFragment extends WindowContainer<WindowContainer> {
     }
 
     /** Called on remove to cleanup. */
-    private void cleanUp() {
-        if (mIsEmbedded) {
-            mAtmService.mWindowOrganizerController.cleanUpEmbeddedTaskFragment(this);
+    private void cleanUpEmbeddedTaskFragment() {
+        if (!mIsEmbedded) {
+            return;
         }
+        mAtmService.mWindowOrganizerController.cleanUpEmbeddedTaskFragment(this);
+        final Task task = getTask();
+        if (task == null) {
+            return;
+        }
+        task.forAllLeafTaskFragments(taskFragment -> {
+            if (taskFragment.getCompanionTaskFragment() == this) {
+                taskFragment.setCompanionTaskFragment(null /* companionTaskFragment */);
+            }
+        }, false /* traverseTopToBottom */);
     }
 
     @Override

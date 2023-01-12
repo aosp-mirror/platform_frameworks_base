@@ -424,6 +424,9 @@ public class SplitController implements JetpackTaskFragmentOrganizer.TaskFragmen
             // All overrides will be cleanup.
             container.setLastRequestedBounds(null /* bounds */);
             container.setLastRequestedWindowingMode(WINDOWING_MODE_UNDEFINED);
+            container.clearLastAdjacentTaskFragment();
+            container.setLastCompanionTaskFragment(null /* fragmentToken */);
+            container.setLastRequestAnimationParams(TaskFragmentAnimationParams.DEFAULT);
             cleanupForEnterPip(wct, container);
         } else if (wasInPip) {
             // Exit PIP.

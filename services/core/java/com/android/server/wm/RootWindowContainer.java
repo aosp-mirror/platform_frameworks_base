@@ -136,6 +136,7 @@ import android.view.Display;
 import android.view.DisplayInfo;
 import android.view.SurfaceControl;
 import android.view.WindowManager;
+import android.window.TaskFragmentAnimationParams;
 import android.window.WindowContainerToken;
 
 import com.android.internal.annotations.VisibleForTesting;
@@ -2082,6 +2083,8 @@ class RootWindowContainer extends WindowContainer<DisplayContent>
                     return;
                 }
                 tf.resetAdjacentTaskFragment();
+                tf.setCompanionTaskFragment(null /* companionTaskFragment */);
+                tf.setAnimationParams(TaskFragmentAnimationParams.DEFAULT);
                 if (tf.getTopNonFinishingActivity() != null) {
                     // When the Task is entering picture-in-picture, we should clear all override
                     // from the client organizer, so the PIP activity can get the correct config

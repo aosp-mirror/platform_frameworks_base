@@ -154,7 +154,7 @@ class JetpackTaskFragmentOrganizer extends TaskFragmentOrganizer {
                 activityOptions);
 
         // Set adjacent to each other so that the containers below will be invisible.
-        setAdjacentTaskFragments(wct, launchingFragmentToken, secondaryFragmentToken, rule);
+        setAdjacentTaskFragmentsWithRule(wct, launchingFragmentToken, secondaryFragmentToken, rule);
         setCompanionTaskFragment(wct, launchingFragmentToken, secondaryFragmentToken, rule,
                 false /* isStacked */);
     }
@@ -167,7 +167,7 @@ class JetpackTaskFragmentOrganizer extends TaskFragmentOrganizer {
     void expandTaskFragment(@NonNull WindowContainerTransaction wct,
             @NonNull IBinder fragmentToken) {
         resizeTaskFragment(wct, fragmentToken, new Rect());
-        setAdjacentTaskFragments(wct, fragmentToken, null /* secondary */, null /* splitRule */);
+        clearAdjacentTaskFragments(wct, fragmentToken);
         updateWindowingMode(wct, fragmentToken, WINDOWING_MODE_UNDEFINED);
         updateAnimationParams(wct, fragmentToken, TaskFragmentAnimationParams.DEFAULT);
     }
@@ -238,24 +238,35 @@ class JetpackTaskFragmentOrganizer extends TaskFragmentOrganizer {
         wct.reparentActivityToTaskFragment(fragmentToken, reparentActivityToken);
     }
 
-    void setAdjacentTaskFragments(@NonNull WindowContainerTransaction wct,
-            @NonNull IBinder primary, @Nullable IBinder secondary, @Nullable SplitRule splitRule) {
-        if (secondary == null) {
-            wct.clearAdjacentTaskFragments(primary);
-            return;
-        }
-
+    /**
+     * Sets the two given TaskFragments as adjacent to each other with respecting the given
+     * {@link SplitRule} for {@link WindowContainerTransaction.TaskFragmentAdjacentParams}.
+     */
+    void setAdjacentTaskFragmentsWithRule(@NonNull WindowContainerTransaction wct,
+            @NonNull IBinder primary, @NonNull IBinder secondary, @NonNull SplitRule splitRule) {
         WindowContainerTransaction.TaskFragmentAdjacentParams adjacentParams = null;
         final boolean finishSecondaryWithPrimary =
-                splitRule != null && SplitContainer.shouldFinishSecondaryWithPrimary(splitRule);
+                SplitContainer.shouldFinishSecondaryWithPrimary(splitRule);
         final boolean finishPrimaryWithSecondary =
-                splitRule != null && SplitContainer.shouldFinishPrimaryWithSecondary(splitRule);
+                SplitContainer.shouldFinishPrimaryWithSecondary(splitRule);
         if (finishSecondaryWithPrimary || finishPrimaryWithSecondary) {
             adjacentParams = new WindowContainerTransaction.TaskFragmentAdjacentParams();
             adjacentParams.setShouldDelayPrimaryLastActivityRemoval(finishSecondaryWithPrimary);
             adjacentParams.setShouldDelaySecondaryLastActivityRemoval(finishPrimaryWithSecondary);
         }
+        setAdjacentTaskFragments(wct, primary, secondary, adjacentParams);
+    }
+
+    void setAdjacentTaskFragments(@NonNull WindowContainerTransaction wct,
+            @NonNull IBinder primary, @NonNull IBinder secondary,
+            @Nullable WindowContainerTransaction.TaskFragmentAdjacentParams adjacentParams) {
         wct.setAdjacentTaskFragments(primary, secondary, adjacentParams);
+    }
+
+    void clearAdjacentTaskFragments(@NonNull WindowContainerTransaction wct,
+            @NonNull IBinder fragmentToken) {
+        // Clear primary will also clear secondary.
+        wct.clearAdjacentTaskFragments(fragmentToken);
     }
 
     void setCompanionTaskFragment(@NonNull WindowContainerTransaction wct,
@@ -268,7 +279,7 @@ class JetpackTaskFragmentOrganizer extends TaskFragmentOrganizer {
         } else {
             finishPrimaryWithSecondary = shouldFinishPrimaryWithSecondary(splitRule);
         }
-        wct.setCompanionTaskFragment(primary, finishPrimaryWithSecondary ? secondary : null);
+        setCompanionTaskFragment(wct, primary, finishPrimaryWithSecondary ? secondary : null);
 
         final boolean finishSecondaryWithPrimary;
         if (isStacked) {
@@ -277,7 +288,12 @@ class JetpackTaskFragmentOrganizer extends TaskFragmentOrganizer {
         } else {
             finishSecondaryWithPrimary = shouldFinishSecondaryWithPrimary(splitRule);
         }
-        wct.setCompanionTaskFragment(secondary, finishSecondaryWithPrimary ? primary : null);
+        setCompanionTaskFragment(wct, secondary, finishSecondaryWithPrimary ? primary : null);
+    }
+
+    void setCompanionTaskFragment(@NonNull WindowContainerTransaction wct, @NonNull IBinder primary,
+            @Nullable IBinder secondary) {
+        wct.setCompanionTaskFragment(primary, secondary);
     }
 
     void resizeTaskFragment(@NonNull WindowContainerTransaction wct, @NonNull IBinder fragmentToken,

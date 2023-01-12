@@ -39,6 +39,7 @@ import com.android.internal.annotations.VisibleForTesting;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Objects;
 
 /**
  * Client-side container for a stack of activities. Corresponds to an instance of TaskFragment
@@ -114,6 +115,27 @@ class TaskFragmentContainer {
      */
     @NonNull
     private TaskFragmentAnimationParams mLastAnimationParams = TaskFragmentAnimationParams.DEFAULT;
+
+    /**
+     * TaskFragment token that was requested last via
+     * {@link android.window.TaskFragmentOperation#OP_TYPE_SET_ADJACENT_TASK_FRAGMENTS}.
+     */
+    @Nullable
+    private IBinder mLastAdjacentTaskFragment;
+
+    /**
+     * {@link WindowContainerTransaction.TaskFragmentAdjacentParams} token that was requested last
+     * via {@link android.window.TaskFragmentOperation#OP_TYPE_SET_ADJACENT_TASK_FRAGMENTS}.
+     */
+    @Nullable
+    private WindowContainerTransaction.TaskFragmentAdjacentParams mLastAdjacentParams;
+
+    /**
+     * TaskFragment token that was requested last via
+     * {@link android.window.TaskFragmentOperation#OP_TYPE_SET_COMPANION_TASK_FRAGMENT}.
+     */
+    @Nullable
+    private IBinder mLastCompanionTaskFragment;
 
     /**
      * When the TaskFragment has appeared in server, but is empty, we should remove the TaskFragment
@@ -571,6 +593,7 @@ class TaskFragmentContainer {
     /**
      * Checks if last requested bounds are equal to the provided value.
      * The requested bounds are relative bounds in parent coordinate.
+     * @see WindowContainerTransaction#setRelativeBounds
      */
     boolean areLastRequestedBoundsEqual(@Nullable Rect relBounds) {
         return (relBounds == null && mLastRequestedBounds.isEmpty())
@@ -580,6 +603,7 @@ class TaskFragmentContainer {
     /**
      * Updates the last requested bounds.
      * The requested bounds are relative bounds in parent coordinate.
+     * @see WindowContainerTransaction#setRelativeBounds
      */
     void setLastRequestedBounds(@Nullable Rect relBounds) {
         if (relBounds == null) {
@@ -589,13 +613,9 @@ class TaskFragmentContainer {
         }
     }
 
-    @NonNull
-    Rect getLastRequestedBounds() {
-        return mLastRequestedBounds;
-    }
-
     /**
      * Checks if last requested windowing mode is equal to the provided value.
+     * @see WindowContainerTransaction#setWindowingMode
      */
     boolean isLastRequestedWindowingModeEqual(@WindowingMode int windowingMode) {
         return mLastRequestedWindowingMode == windowingMode;
@@ -603,6 +623,7 @@ class TaskFragmentContainer {
 
     /**
      * Updates the last requested windowing mode.
+     * @see WindowContainerTransaction#setWindowingMode
      */
     void setLastRequestedWindowingMode(@WindowingMode int windowingModes) {
         mLastRequestedWindowingMode = windowingModes;
@@ -610,6 +631,7 @@ class TaskFragmentContainer {
 
     /**
      * Checks if last requested {@link TaskFragmentAnimationParams} are equal to the provided value.
+     * @see android.window.TaskFragmentOperation#OP_TYPE_SET_ANIMATION_PARAMS
      */
     boolean areLastRequestedAnimationParamsEqual(
             @NonNull TaskFragmentAnimationParams animationParams) {
@@ -618,9 +640,64 @@ class TaskFragmentContainer {
 
     /**
      * Updates the last requested {@link TaskFragmentAnimationParams}.
+     * @see android.window.TaskFragmentOperation#OP_TYPE_SET_ANIMATION_PARAMS
      */
     void setLastRequestAnimationParams(@NonNull TaskFragmentAnimationParams animationParams) {
         mLastAnimationParams = animationParams;
+    }
+
+    /**
+     * Checks if last requested adjacent TaskFragment token and params are equal to the provided
+     * values.
+     * @see android.window.TaskFragmentOperation#OP_TYPE_SET_ADJACENT_TASK_FRAGMENTS
+     * @see android.window.TaskFragmentOperation#OP_TYPE_CLEAR_ADJACENT_TASK_FRAGMENTS
+     */
+    boolean isLastAdjacentTaskFragmentEqual(@Nullable IBinder fragmentToken,
+            @Nullable WindowContainerTransaction.TaskFragmentAdjacentParams params) {
+        return Objects.equals(mLastAdjacentTaskFragment, fragmentToken)
+                && Objects.equals(mLastAdjacentParams, params);
+    }
+
+    /**
+     * Updates the last requested adjacent TaskFragment token and params.
+     * @see android.window.TaskFragmentOperation#OP_TYPE_SET_ADJACENT_TASK_FRAGMENTS
+     */
+    void setLastAdjacentTaskFragment(@NonNull IBinder fragmentToken,
+            @NonNull WindowContainerTransaction.TaskFragmentAdjacentParams params) {
+        mLastAdjacentTaskFragment = fragmentToken;
+        mLastAdjacentParams = params;
+    }
+
+    /**
+     * Clears the last requested adjacent TaskFragment token and params.
+     * @see android.window.TaskFragmentOperation#OP_TYPE_CLEAR_ADJACENT_TASK_FRAGMENTS
+     */
+    void clearLastAdjacentTaskFragment() {
+        final TaskFragmentContainer lastAdjacentTaskFragment = mLastAdjacentTaskFragment != null
+                ? mController.getContainer(mLastAdjacentTaskFragment)
+                : null;
+        mLastAdjacentTaskFragment = null;
+        mLastAdjacentParams = null;
+        if (lastAdjacentTaskFragment != null) {
+            // Clear the previous adjacent TaskFragment as well.
+            lastAdjacentTaskFragment.clearLastAdjacentTaskFragment();
+        }
+    }
+
+    /**
+     * Checks if last requested companion TaskFragment token is equal to the provided value.
+     * @see android.window.TaskFragmentOperation#OP_TYPE_SET_COMPANION_TASK_FRAGMENT
+     */
+    boolean isLastCompanionTaskFragmentEqual(@Nullable IBinder fragmentToken) {
+        return Objects.equals(mLastCompanionTaskFragment, fragmentToken);
+    }
+
+    /**
+     * Updates the last requested companion TaskFragment token.
+     * @see android.window.TaskFragmentOperation#OP_TYPE_SET_COMPANION_TASK_FRAGMENT
+     */
+    void setLastCompanionTaskFragment(@Nullable IBinder fragmentToken) {
+        mLastCompanionTaskFragment = fragmentToken;
     }
 
     /** Gets the parent leaf Task id. */
