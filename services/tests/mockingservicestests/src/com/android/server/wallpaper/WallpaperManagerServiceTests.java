@@ -28,7 +28,7 @@ import static com.android.dx.mockito.inline.extended.ExtendedMockito.doReturn;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.mock;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.mockitoSession;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.spyOn;
-import static com.android.server.wallpaper.WallpaperManagerService.WALLPAPER;
+import static com.android.server.wallpaper.WallpaperUtils.WALLPAPER;
 
 import static org.hamcrest.core.IsNot.not;
 import static org.junit.Assert.assertEquals;

@@ -32,7 +32,14 @@ import static android.os.ParcelFileDescriptor.MODE_TRUNCATE;
 import static android.view.Display.DEFAULT_DISPLAY;
 import static android.view.WindowManager.LayoutParams.TYPE_WALLPAPER;
 
+import static com.android.server.wallpaper.WallpaperUtils.RECORD_FILE;
+import static com.android.server.wallpaper.WallpaperUtils.RECORD_LOCK_FILE;
+import static com.android.server.wallpaper.WallpaperUtils.WALLPAPER;
+import static com.android.server.wallpaper.WallpaperUtils.WALLPAPER_CROP;
+import static com.android.server.wallpaper.WallpaperUtils.WALLPAPER_INFO;
+import static com.android.server.wallpaper.WallpaperUtils.WALLPAPER_LOCK_ORIG;
 import static com.android.server.wallpaper.WallpaperUtils.getWallpaperDir;
+import static com.android.server.wallpaper.WallpaperUtils.makeWallpaperIdLocked;
 
 import android.annotation.NonNull;
 import android.app.ActivityManager;
@@ -199,20 +206,6 @@ public class WallpaperManagerService extends IWallpaperManager.Stub
      */
     private static final long MIN_WALLPAPER_CRASH_TIME = 10000;
     private static final int MAX_WALLPAPER_COMPONENT_LOG_LENGTH = 128;
-    static final String WALLPAPER = "wallpaper_orig";
-    static final String WALLPAPER_CROP = "wallpaper";
-    static final String WALLPAPER_LOCK_ORIG = "wallpaper_lock_orig";
-    static final String WALLPAPER_LOCK_CROP = "wallpaper_lock";
-    static final String WALLPAPER_INFO = "wallpaper_info.xml";
-    private static final String RECORD_FILE = "decode_record";
-    private static final String RECORD_LOCK_FILE = "decode_lock_record";
-
-    // All the various per-user state files we need to be aware of
-    private static final String[] sPerUserFiles = new String[] {
-        WALLPAPER, WALLPAPER_CROP,
-        WALLPAPER_LOCK_ORIG, WALLPAPER_LOCK_CROP,
-        WALLPAPER_INFO
-    };
 
     /**
      * Observes the wallpaper for changes and notifies all IWallpaperServiceCallbacks
@@ -892,12 +885,6 @@ public class WallpaperManagerService extends IWallpaperManager.Stub
     private boolean mShuttingDown;
 
     /**
-     * ID of the current wallpaper, changed every time anything sets a wallpaper.
-     * This is used for external detection of wallpaper update activity.
-     */
-    private int mWallpaperId;
-
-    /**
      * Name of the component used to display bitmap wallpapers from either the gallery or
      * built-in wallpapers.
      */
@@ -977,13 +964,6 @@ public class WallpaperManagerService extends IWallpaperManager.Stub
             final DisplayData wpdData = mDisplayDatas.valueAt(i);
             action.accept(wpdData);
         }
-    }
-
-    int makeWallpaperIdLocked() {
-        do {
-            ++mWallpaperId;
-        } while (mWallpaperId == 0);
-        return mWallpaperId;
     }
 
     private boolean supportsMultiDisplay(WallpaperConnection connection) {
@@ -1855,11 +1835,9 @@ public class WallpaperManagerService extends IWallpaperManager.Stub
                         final TimingsTraceAndSlog t = new TimingsTraceAndSlog(TAG);
                         t.traceBegin("Wallpaper_selinux_restorecon-" + userId);
                         try {
-                            final File wallpaperDir = getWallpaperDir(userId);
-                            for (String filename : sPerUserFiles) {
-                                File f = new File(wallpaperDir, filename);
-                                if (f.exists()) {
-                                    SELinux.restorecon(f);
+                            for (File file: WallpaperUtils.getWallpaperFiles(userId)) {
+                                if (file.exists()) {
+                                    SELinux.restorecon(file);
                                 }
                             }
                         } finally {
@@ -1875,12 +1853,9 @@ public class WallpaperManagerService extends IWallpaperManager.Stub
     void onRemoveUser(int userId) {
         if (userId < 1) return;
 
-        final File wallpaperDir = getWallpaperDir(userId);
         synchronized (mLock) {
             stopObserversLocked(userId);
-            for (String filename : sPerUserFiles) {
-                new File(wallpaperDir, filename).delete();
-            }
+            WallpaperUtils.getWallpaperFiles(userId).forEach(File::delete);
             mUserRestorecon.delete(userId);
         }
     }
@@ -3671,8 +3646,8 @@ public class WallpaperManagerService extends IWallpaperManager.Stub
         final int id = parser.getAttributeInt(null, "id", -1);
         if (id != -1) {
             wallpaper.wallpaperId = id;
-            if (id > mWallpaperId) {
-                mWallpaperId = id;
+            if (id > WallpaperUtils.getCurrentWallpaperId()) {
+                WallpaperUtils.setCurrentWallpaperId(id);
             }
         } else {
             wallpaper.wallpaperId = makeWallpaperIdLocked();
