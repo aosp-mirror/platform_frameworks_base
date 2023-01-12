@@ -229,6 +229,15 @@ class ControlsUiControllerImplTest : SysuiTestCase() {
     }
 
     @Test
+    fun testPanelBindsForPanel() {
+        val panel = SelectedItem.PanelItem("App name", ComponentName("pkg", "cls"))
+        setUpPanel(panel)
+
+        underTest.show(parent, {}, context)
+        verify(controlsController).bindComponentForPanel(panel.componentName)
+    }
+
+    @Test
     fun testPanelCallsTaskViewFactoryCreate() {
         mockLayoutInflater()
         val panel = SelectedItem.PanelItem("App name", ComponentName("pkg", "cls"))

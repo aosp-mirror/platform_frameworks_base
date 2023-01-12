@@ -479,6 +479,10 @@ class ControlsControllerImpl @Inject constructor (
         bindingController.unsubscribe()
     }
 
+    override fun bindComponentForPanel(componentName: ComponentName) {
+        bindingController.bindServiceForPanel(componentName)
+    }
+
     override fun addFavorite(
         componentName: ComponentName,
         structureName: CharSequence,
