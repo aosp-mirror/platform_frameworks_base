@@ -1264,9 +1264,9 @@ public abstract class TvInteractiveAppService extends Service {
         }
 
         /**
-         * Gets the recording info list for the specified recording type
+         * Gets a list of {@link TvRecordingInfo} for the specified recording type.
          *
-         * @hide
+         * @param type The type of recording to retrieve.
          */
         @CallSuper
         public void requestTvRecordingInfoList(@NonNull @TvRecordingInfo.TvRecordingListType

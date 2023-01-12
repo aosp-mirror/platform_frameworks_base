@@ -1083,6 +1083,19 @@ public class TvInteractiveAppView extends ViewGroup {
                 @NonNull String iAppServiceId,
                 @NonNull String recordingId) {
         }
+
+        /**
+         * This is called when
+         * {@link TvInteractiveAppService.Session#requestTvRecordingInfoList(int)} is
+         * called.
+         *
+         * @param iAppServiceId The ID of the TV interactive app service bound to this view.
+         * @param type The type of recording requested to retrieve.
+         */
+        public void onRequestTvRecordingInfoList(
+                @NonNull String iAppServiceId,
+                @NonNull @TvRecordingInfo.TvRecordingListType int type) {
+        }
     }
 
     /**
@@ -1494,6 +1507,21 @@ public class TvInteractiveAppView extends ViewGroup {
             }
             if (mCallback != null) {
                 mCallback.onRequestTvRecordingInfo(mIAppServiceId, recordingId);
+            }
+        }
+
+        @Override
+        public void onRequestTvRecordingInfoList(Session session,
+                int type) {
+            if (DEBUG) {
+                Log.d(TAG, "onRequestRecordingInfoList");
+            }
+            if (this != mSessionCallback) {
+                Log.w(TAG, "onRequestRecordingInfoList - session not created");
+                return;
+            }
+            if (mCallback != null) {
+                mCallback.onRequestTvRecordingInfoList(mIAppServiceId, type);
             }
         }
 

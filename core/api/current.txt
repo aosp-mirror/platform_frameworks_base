@@ -27405,6 +27405,7 @@ package android.media.tv.interactive {
     method @CallSuper public void requestStreamVolume();
     method @CallSuper public void requestTrackInfoList();
     method @CallSuper public void requestTvRecordingInfo(@NonNull String);
+    method @CallSuper public void requestTvRecordingInfoList(@NonNull int);
     method @CallSuper public void sendPlaybackCommandRequest(@NonNull String, @Nullable android.os.Bundle);
     method @CallSuper public void setMediaViewEnabled(boolean);
     method @CallSuper public void setTvRecordingInfo(@NonNull String, @NonNull android.media.tv.TvRecordingInfo);
@@ -27483,6 +27484,7 @@ package android.media.tv.interactive {
     method public void onRequestStreamVolume(@NonNull String);
     method public void onRequestTrackInfoList(@NonNull String);
     method public void onRequestTvRecordingInfo(@NonNull String, @NonNull String);
+    method public void onRequestTvRecordingInfoList(@NonNull String, @NonNull int);
     method public void onSetTvRecordingInfo(@NonNull String, @NonNull String, @NonNull android.media.tv.TvRecordingInfo);
     method public void onSetVideoBounds(@NonNull String, @NonNull android.graphics.Rect);
     method public void onStateChanged(@NonNull String, int, int);
