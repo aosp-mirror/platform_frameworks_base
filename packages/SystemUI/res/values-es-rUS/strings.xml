@@ -628,7 +628,7 @@
     <string name="right_keycode" msgid="2480715509844798438">"Clave de código derecho"</string>
     <string name="left_icon" msgid="5036278531966897006">"Ícono izquierdo"</string>
     <string name="right_icon" msgid="1103955040645237425">"Ícono derecho"</string>
-    <string name="drag_to_add_tiles" msgid="8933270127508303672">"Mantén presionado y arrastra para agregar mosaicos"</string>
+    <string name="drag_to_add_tiles" msgid="8933270127508303672">"Mantén presionado y arrastra para agregar tarjetas"</string>
     <string name="drag_to_rearrange_tiles" msgid="2143204300089638620">"Mantén presionado y arrastra para reorganizar los mosaicos"</string>
     <string name="drag_to_remove_tiles" msgid="4682194717573850385">"Arrastra aquí para quitar"</string>
     <string name="drag_to_remove_disabled" msgid="933046987838658850">"Necesitas al menos <xliff:g id="MIN_NUM_TILES">%1$d</xliff:g> tarjetas"</string>

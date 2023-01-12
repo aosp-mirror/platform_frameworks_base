@@ -757,10 +757,10 @@
     <string name="accessibility_floating_button_migration_tooltip" msgid="5217151214439341902">"Атайын мүмкүнчүлүктөрдү ачуу үчүн басыңыз. Бул баскычты Жөндөөлөрдөн өзгөртүңүз.\n\n"<annotation id="link">"Жөндөөлөрдү көрүү"</annotation></string>
     <string name="accessibility_floating_button_docking_tooltip" msgid="6814897496767461517">"Баскычты убактылуу жашыра туруу үчүн экрандын четине жылдырыңыз"</string>
     <string name="accessibility_floating_button_action_move_top_left" msgid="6253520703618545705">"Жогорку сол жакка жылдыруу"</string>
-    <string name="accessibility_floating_button_action_move_top_right" msgid="6106225581993479711">"Жогорку оң жакка жылдырыңыз"</string>
+    <string name="accessibility_floating_button_action_move_top_right" msgid="6106225581993479711">"Жогорку оң жакка жылдыруу"</string>
     <string name="accessibility_floating_button_action_move_bottom_left" msgid="8063394111137429725">"Төмөнкү сол жакка жылдыруу"</string>
-    <string name="accessibility_floating_button_action_move_bottom_right" msgid="6196904373227440500">"Төмөнкү оң жакка жылдырыңыз"</string>
-    <string name="accessibility_floating_button_action_move_to_edge_and_hide_to_half" msgid="662401168245782658">"Ичине жылдырып, көрсөтүңүз"</string>
+    <string name="accessibility_floating_button_action_move_bottom_right" msgid="6196904373227440500">"Төмөнкү оң жакка жылдыруу"</string>
+    <string name="accessibility_floating_button_action_move_to_edge_and_hide_to_half" msgid="662401168245782658">"Четке жылдырып, жашыруу"</string>
     <string name="accessibility_floating_button_action_move_out_edge_and_show" msgid="8354760891651663326">"Сыртка жылдырып, көрсөтүңүз"</string>
     <string name="accessibility_floating_button_action_double_tap_to_toggle" msgid="7976492639670692037">"өчүрүү/күйгүзүү"</string>
     <string name="quick_controls_title" msgid="6839108006171302273">"Түзмөктү башкаруу элементтери"</string>

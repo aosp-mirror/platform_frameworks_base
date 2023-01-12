@@ -1470,15 +1470,9 @@ class ShortcutPackage extends ShortcutPackageItem {
         }
 
         // Then make sure none of the activities have more than the max number of shortcuts.
-        int total = 0;
         for (int i = counts.size() - 1; i >= 0; i--) {
-            int count = counts.valueAt(i);
-            service.enforceMaxActivityShortcuts(count);
-            total += count;
+            service.enforceMaxActivityShortcuts(counts.valueAt(i));
         }
-
-        // Finally make sure that the app doesn't have more than the max number of shortcuts.
-        service.enforceMaxAppShortcuts(total);
     }
 
     /**
