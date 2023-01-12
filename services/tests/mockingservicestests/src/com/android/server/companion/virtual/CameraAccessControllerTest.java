@@ -39,6 +39,7 @@ import android.hardware.camera2.CameraInjectionSession;
 import android.hardware.camera2.CameraManager;
 import android.os.Process;
 import android.os.UserManager;
+import android.platform.test.annotations.Presubmit;
 import android.testing.TestableContext;
 import android.util.ArraySet;
 
@@ -59,6 +60,7 @@ import org.mockito.MockitoAnnotations;
 import java.util.ArrayList;
 import java.util.List;
 
+@Presubmit
 @RunWith(AndroidJUnit4.class)
 public class CameraAccessControllerTest {
     private static final String FRONT_CAMERA = "0";

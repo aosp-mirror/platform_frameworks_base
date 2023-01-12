@@ -23,13 +23,16 @@ import static org.junit.Assert.fail;
 import android.graphics.PixelFormat;
 import android.hardware.camera2.params.InputConfiguration;
 import android.os.ParcelFileDescriptor;
+import android.platform.test.annotations.Presubmit;
 import android.util.Log;
 
 import androidx.annotation.NonNull;
+import androidx.test.runner.AndroidJUnit4;
 
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
+import org.junit.runner.RunWith;
 
 import java.io.ByteArrayInputStream;
 import java.io.FileInputStream;
@@ -38,6 +41,8 @@ import java.io.InputStream;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
+@Presubmit
+@RunWith(AndroidJUnit4.class)
 public class VirtualCameraOutputTest {
 
     private static final String TAG = "VirtualCameraOutputTest";

@@ -26,6 +26,7 @@ import static org.mockito.Mockito.verify;
 import static java.util.concurrent.TimeUnit.MILLISECONDS;
 
 import android.os.Parcel;
+import android.platform.test.annotations.Presubmit;
 
 import androidx.test.runner.AndroidJUnit4;
 
@@ -42,6 +43,7 @@ import org.mockito.junit.MockitoRule;
 
 import java.time.Duration;
 
+@Presubmit
 @RunWith(AndroidJUnit4.class)
 public class VirtualSensorConfigTest {
 

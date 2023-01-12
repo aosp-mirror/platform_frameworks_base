@@ -25,12 +25,14 @@ import static org.junit.Assert.assertThrows;
 
 import android.companion.virtual.VirtualDevice;
 import android.os.Parcel;
+import android.platform.test.annotations.Presubmit;
 
 import androidx.test.ext.junit.runners.AndroidJUnit4;
 
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
+@Presubmit
 @RunWith(AndroidJUnit4.class)
 public class VirtualDeviceTest {
 
