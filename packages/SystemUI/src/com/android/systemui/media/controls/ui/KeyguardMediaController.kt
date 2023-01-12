@@ -130,7 +130,12 @@ constructor(
     private var splitShadeContainer: ViewGroup? = null
 
     /** Track the media player setting status on lock screen. */
-    private var allowMediaPlayerOnLockScreen: Boolean = true
+    private var allowMediaPlayerOnLockScreen: Boolean =
+        secureSettings.getBoolForUser(
+            Settings.Secure.MEDIA_CONTROLS_LOCK_SCREEN,
+            true,
+            UserHandle.USER_CURRENT
+        )
     private val lockScreenMediaPlayerUri =
         secureSettings.getUriFor(Settings.Secure.MEDIA_CONTROLS_LOCK_SCREEN)
 
