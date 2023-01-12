@@ -91,6 +91,15 @@ final class AppsFilterUtils {
         return false;
     }
 
+    public static boolean canQueryAsUpdateOwner(PackageStateInternal querying,
+            AndroidPackage potentialTarget) {
+        final InstallSource installSource = querying.getInstallSource();
+        if (potentialTarget.getPackageName().equals(installSource.mUpdateOwnerPackageName)) {
+            return true;
+        }
+        return false;
+    }
+
     public static boolean canQueryViaUsesLibrary(AndroidPackage querying,
             AndroidPackage potentialTarget) {
         if (potentialTarget.getLibraryNames().isEmpty()) {
