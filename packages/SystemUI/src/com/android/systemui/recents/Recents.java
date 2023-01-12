@@ -65,14 +65,14 @@ public class Recents implements CoreStartable, CommandQueue.Callbacks {
     }
 
     @Override
-    public void showRecentApps(boolean triggeredFromAltTab) {
+    public void showRecentApps(boolean triggeredFromAltTab, boolean forward) {
         // Ensure the device has been provisioned before allowing the user to interact with
         // recents
         if (!isUserSetup()) {
             return;
         }
 
-        mImpl.showRecentApps(triggeredFromAltTab);
+        mImpl.showRecentApps(triggeredFromAltTab, forward);
     }
 
     @Override

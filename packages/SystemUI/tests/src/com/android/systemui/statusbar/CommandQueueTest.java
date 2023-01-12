@@ -209,9 +209,9 @@ public class CommandQueueTest extends SysuiTestCase {
 
     @Test
     public void testShowRecentApps() {
-        mCommandQueue.showRecentApps(true);
+        mCommandQueue.showRecentApps(true, false);
         waitForIdleSync();
-        verify(mCallbacks).showRecentApps(eq(true));
+        verify(mCallbacks).showRecentApps(eq(true), eq(false));
     }
 
     @Test
