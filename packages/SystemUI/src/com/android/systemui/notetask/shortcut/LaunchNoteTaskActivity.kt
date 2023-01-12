@@ -45,8 +45,8 @@ constructor(
         fun newIntent(context: Context): Intent {
             return Intent(context, LaunchNoteTaskActivity::class.java).apply {
                 // Intent's action must be set in shortcuts, or an exception will be thrown.
-                // TODO(b/254606432): Use Intent.ACTION_NOTES instead.
-                action = NoteTaskIntentResolver.NOTES_ACTION
+                // TODO(b/254606432): Use Intent.ACTION_CREATE_NOTE instead.
+                action = NoteTaskIntentResolver.ACTION_CREATE_NOTE
             }
         }
     }
