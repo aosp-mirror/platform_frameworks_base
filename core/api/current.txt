@@ -919,6 +919,7 @@ package android {
     field public static final int isAlwaysSyncable = 16843571; // 0x1010333
     field public static final int isAsciiCapable = 16843753; // 0x10103e9
     field public static final int isAuxiliary = 16843647; // 0x101037f
+    field public static final int isCredential;
     field public static final int isDefault = 16843297; // 0x1010221
     field public static final int isFeatureSplit = 16844123; // 0x101055b
     field public static final int isGame = 16843764; // 0x10103f4
