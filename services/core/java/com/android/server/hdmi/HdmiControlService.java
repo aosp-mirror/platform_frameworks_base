@@ -18,6 +18,7 @@ package com.android.server.hdmi;
 
 import static android.hardware.hdmi.HdmiControlManager.DEVICE_EVENT_ADD_DEVICE;
 import static android.hardware.hdmi.HdmiControlManager.DEVICE_EVENT_REMOVE_DEVICE;
+import static android.hardware.hdmi.HdmiControlManager.EARC_FEATURE_DISABLED;
 import static android.hardware.hdmi.HdmiControlManager.EARC_FEATURE_ENABLED;
 import static android.hardware.hdmi.HdmiControlManager.HDMI_CEC_CONTROL_ENABLED;
 import static android.hardware.hdmi.HdmiControlManager.SOUNDBAR_MODE_DISABLED;
@@ -454,6 +455,9 @@ public class HdmiControlService extends SystemService {
     private boolean mSoundbarModeFeatureFlagEnabled = false;
 
     @ServiceThreadOnly
+    private boolean mEarcTxFeatureFlagEnabled = false;
+
+    @ServiceThreadOnly
     private int mActivePortId = Constants.INVALID_PORT_ID;
 
     // Set to true while the input change by MHL is allowed.
@@ -666,9 +670,18 @@ public class HdmiControlService extends SystemService {
         setProhibitMode(false);
         mHdmiControlEnabled = mHdmiCecConfig.getIntValue(
                 HdmiControlManager.CEC_SETTING_NAME_HDMI_CEC_ENABLED);
+
+        mSoundbarModeFeatureFlagEnabled = mDeviceConfig.getBoolean(
+                Constants.DEVICE_CONFIG_FEATURE_FLAG_SOUNDBAR_MODE, false);
+        mEarcTxFeatureFlagEnabled = mDeviceConfig.getBoolean(
+                Constants.DEVICE_CONFIG_FEATURE_FLAG_ENABLE_EARC_TX, false);
+
         synchronized (mLock) {
             mEarcEnabled = (mHdmiCecConfig.getIntValue(
                     HdmiControlManager.SETTING_NAME_EARC_ENABLED) == EARC_FEATURE_ENABLED);
+            if (isTvDevice()) {
+                mEarcEnabled &= mEarcTxFeatureFlagEnabled;
+            }
         }
         setHdmiCecVolumeControlEnabledInternal(getHdmiCecConfig().getIntValue(
                 HdmiControlManager.CEC_SETTING_NAME_VOLUME_CONTROL_MODE));
@@ -812,19 +825,41 @@ public class HdmiControlService extends SystemService {
                         }
                     }
                 }, mServiceThreadExecutor);
+
+        if (isTvDevice()) {
+            mDeviceConfig.addOnPropertiesChangedListener(getContext().getMainExecutor(),
+                    new DeviceConfig.OnPropertiesChangedListener() {
+                        @Override
+                        public void onPropertiesChanged(DeviceConfig.Properties properties) {
+                            mEarcTxFeatureFlagEnabled = properties.getBoolean(
+                                    Constants.DEVICE_CONFIG_FEATURE_FLAG_ENABLE_EARC_TX,
+                                    false);
+                            boolean earcEnabledSetting = mHdmiCecConfig.getIntValue(
+                                    HdmiControlManager.SETTING_NAME_EARC_ENABLED)
+                                    == EARC_FEATURE_ENABLED;
+                            setEarcEnabled(earcEnabledSetting && mEarcTxFeatureFlagEnabled
+                                    ? EARC_FEATURE_ENABLED : EARC_FEATURE_DISABLED);
+                        }
+                    });
+        }
+
         mHdmiCecConfig.registerChangeListener(HdmiControlManager.SETTING_NAME_EARC_ENABLED,
                 new HdmiCecConfig.SettingChangeListener() {
                     @Override
                     public void onChange(String setting) {
-                        @HdmiControlManager.HdmiCecControl int enabled = mHdmiCecConfig.getIntValue(
-                                HdmiControlManager.SETTING_NAME_EARC_ENABLED);
-                        setEarcEnabled(enabled);
+                        if (isTvDevice()) {
+                            boolean earcEnabledSetting = mHdmiCecConfig.getIntValue(
+                                    HdmiControlManager.SETTING_NAME_EARC_ENABLED)
+                                    == EARC_FEATURE_ENABLED;
+                            setEarcEnabled(earcEnabledSetting && mEarcTxFeatureFlagEnabled
+                                    ? EARC_FEATURE_ENABLED : EARC_FEATURE_DISABLED);
+                        } else {
+                            setEarcEnabled(mHdmiCecConfig.getIntValue(
+                                    HdmiControlManager.SETTING_NAME_EARC_ENABLED));
+                        }
                     }
                 },
                 mServiceThreadExecutor);
-
-        mSoundbarModeFeatureFlagEnabled = mDeviceConfig.getBoolean(
-                Constants.DEVICE_CONFIG_FEATURE_FLAG_SOUNDBAR_MODE, false);
 
         mDeviceConfig.addOnPropertiesChangedListener(getContext().getMainExecutor(),
                 new DeviceConfig.OnPropertiesChangedListener() {
