@@ -47,6 +47,9 @@ per-file *Alarm* = file:/apex/jobscheduler/OWNERS
 # AppOps
 per-file *AppOp* = file:/core/java/android/permission/OWNERS
 
+# Backup and Restore
+per-file IBackupAgent.aidl = file:/services/backup/OWNERS
+
 # LocaleManager
 per-file *Locale* = file:/services/core/java/com/android/server/locales/OWNERS
 
