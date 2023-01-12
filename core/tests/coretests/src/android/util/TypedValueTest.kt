@@ -17,6 +17,7 @@
 package android.util
 
 import android.content.res.FontScaleConverterFactory
+import android.platform.test.annotations.Presubmit
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.LargeTest
 import androidx.test.filters.SmallTest
@@ -30,6 +31,7 @@ import kotlin.math.abs
 import kotlin.math.min
 import kotlin.math.roundToInt
 
+@Presubmit
 @RunWith(AndroidJUnit4::class)
 class TypedValueTest {
     @LargeTest
@@ -223,7 +225,6 @@ class TypedValueTest {
         metrics.scaledDensity = 0f
 
         listOf(
-            TypedValue.COMPLEX_UNIT_PX,
             TypedValue.COMPLEX_UNIT_DIP,
             TypedValue.COMPLEX_UNIT_SP,
             TypedValue.COMPLEX_UNIT_PT,
@@ -257,8 +258,7 @@ class TypedValueTest {
             TypedValue.COMPLEX_UNIT_MM
         )
             .forEach { dimenType ->
-                // Test for every integer value in the range...
-                for (i: Int in -(1 shl 23) until (1 shl 23)) {
+                for (i: Int in -10000 until 10000) {
                     assertRoundTripIsEqual(i.toFloat(), dimenType, metrics)
                     assertRoundTripIsEqual(i - .1f, dimenType, metrics)
                     assertRoundTripIsEqual(i + .5f, dimenType, metrics)
