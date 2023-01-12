@@ -22,8 +22,10 @@ import androidx.test.filters.RequiresDevice
 import com.android.server.wm.flicker.FlickerBuilder
 import com.android.server.wm.flicker.FlickerTest
 import com.android.server.wm.flicker.FlickerTestFactory
+import com.android.server.wm.flicker.helpers.isShellTransitionsEnabled
 import com.android.server.wm.flicker.junit.FlickerParametersRunnerFactory
 import com.android.server.wm.traces.common.service.PlatformConsts
+import org.junit.Assume
 import org.junit.FixMethodOrder
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -74,10 +76,19 @@ open class ExitPipViaExpandButtonClickTest(flicker: FlickerTest) : ExitPipToAppT
         }
 
     /** {@inheritDoc} */
-    @Presubmit @Test override fun entireScreenCovered() = super.entireScreenCovered()
+    @FlakyTest(bugId = 197726610)
+    @Test
+    override fun pipLayerExpands() {
+        Assume.assumeFalse(isShellTransitionsEnabled)
+        super.pipLayerExpands()
+    }
 
-    /** {@inheritDoc} */
-    @FlakyTest(bugId = 197726610) @Test override fun pipLayerExpands() = super.pipLayerExpands()
+    @Presubmit
+    @Test
+    fun pipLayerExpands_ShellTransit() {
+        Assume.assumeTrue(isShellTransitionsEnabled)
+        super.pipLayerExpands()
+    }
 
     companion object {
         /**

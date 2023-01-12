@@ -16,7 +16,6 @@
 
 package com.android.wm.shell.flicker.pip
 
-import android.platform.test.annotations.FlakyTest
 import android.platform.test.annotations.Presubmit
 import androidx.test.filters.RequiresDevice
 import com.android.server.wm.flicker.FlickerBuilder
@@ -24,11 +23,8 @@ import com.android.server.wm.flicker.FlickerTest
 import com.android.server.wm.flicker.FlickerTestFactory
 import com.android.server.wm.flicker.helpers.SimpleAppHelper
 import com.android.server.wm.flicker.helpers.WindowUtils
-import com.android.server.wm.flicker.helpers.isShellTransitionsEnabled
 import com.android.server.wm.flicker.helpers.setRotation
 import com.android.server.wm.flicker.junit.FlickerParametersRunnerFactory
-import org.junit.Assume
-import org.junit.Before
 import org.junit.FixMethodOrder
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -66,11 +62,6 @@ open class PipRotationTest(flicker: FlickerTest) : PipTransition(flicker) {
     private val screenBoundsStart = WindowUtils.getDisplayBounds(flicker.scenario.startRotation)
     private val screenBoundsEnd = WindowUtils.getDisplayBounds(flicker.scenario.endRotation)
 
-    @Before
-    open fun before() {
-        Assume.assumeFalse(isShellTransitionsEnabled)
-    }
-
     override val transition: FlickerBuilder.() -> Unit
         get() = buildTransition {
             setup {
@@ -79,11 +70,6 @@ open class PipRotationTest(flicker: FlickerTest) : PipTransition(flicker) {
             }
             transitions { setRotation(flicker.scenario.endRotation) }
         }
-
-    /** Checks the position of the navigation bar at the start and end of the transition */
-    @FlakyTest(bugId = 240499181)
-    @Test
-    override fun navBarLayerPositionAtStartAndEnd() = super.navBarLayerPositionAtStartAndEnd()
 
     /** Checks that [testApp] layer is within [screenBoundsStart] at the start of the transition */
     @Presubmit
