@@ -75,6 +75,8 @@ import com.android.systemui.util.NotificationChannels;
 import com.android.systemui.util.settings.GlobalSettings;
 import com.android.systemui.volume.Events;
 
+import dagger.Lazy;
+
 import java.io.PrintWriter;
 import java.lang.ref.WeakReference;
 import java.text.NumberFormat;
@@ -82,8 +84,6 @@ import java.util.Locale;
 import java.util.Objects;
 
 import javax.inject.Inject;
-
-import dagger.Lazy;
 
 /**
  */
@@ -132,7 +132,6 @@ public class PowerNotificationWarnings implements PowerUI.WarningsUI {
     private static final String ACTION_AUTO_SAVER_NO_THANKS =
             "PNW.autoSaverNoThanks";
 
-    private static final String ACTION_ENABLE_SEVERE_BATTERY_DIALOG = "PNW.enableSevereDialog";
     private static final String EXTRA_SCHEDULED_BY_PERCENTAGE =
             "extra_scheduled_by_percentage";
     public static final String BATTERY_SAVER_SCHEDULE_SCREEN_INTENT_ACTION =
@@ -155,7 +154,6 @@ public class PowerNotificationWarnings implements PowerUI.WarningsUI {
     private final Intent mOpenBatterySettings = settings(Intent.ACTION_POWER_USAGE_SUMMARY);
     private final Intent mOpenBatterySaverSettings =
             settings(Settings.ACTION_BATTERY_SAVER_SETTINGS);
-    private final boolean mUseSevereDialog;
 
     private int mBatteryLevel;
     private int mBucket;
@@ -177,7 +175,6 @@ public class PowerNotificationWarnings implements PowerUI.WarningsUI {
     private ActivityStarter mActivityStarter;
     private final BroadcastSender mBroadcastSender;
     private final UiEventLogger mUiEventLogger;
-    private GlobalSettings mGlobalSettings;
     private final UserTracker mUserTracker;
     private final Lazy<BatteryController> mBatteryControllerLazy;
     private final DialogLaunchAnimator mDialogLaunchAnimator;
@@ -198,9 +195,7 @@ public class PowerNotificationWarnings implements PowerUI.WarningsUI {
         mBroadcastSender = broadcastSender;
         mBatteryControllerLazy = batteryControllerLazy;
         mDialogLaunchAnimator = dialogLaunchAnimator;
-        mUseSevereDialog = mContext.getResources().getBoolean(R.bool.config_severe_battery_dialog);
         mUiEventLogger = uiEventLogger;
-        mGlobalSettings = globalSettings;
         mUserTracker = userTracker;
     }
 
@@ -287,20 +282,6 @@ public class PowerNotificationWarnings implements PowerUI.WarningsUI {
     }
 
     protected void showWarningNotification() {
-        if (mGlobalSettings.getInt(Global.LOW_POWER_MODE_REMINDER_ENABLED, 1) == 0) {
-            return;
-        }
-        if (showSevereLowBatteryDialog()) {
-            mBroadcastSender.sendBroadcast(new Intent(ACTION_ENABLE_SEVERE_BATTERY_DIALOG)
-                    .setPackage(mContext.getPackageName())
-                    .putExtra(EXTRA_SCHEDULED_BY_PERCENTAGE, isScheduledByPercentage())
-                    .addFlags(Intent.FLAG_RECEIVER_REGISTERED_ONLY
-                            | Intent.FLAG_RECEIVER_FOREGROUND));
-            // Reset the state once dialog been enabled
-            dismissLowBatteryNotification();
-            mPlaySound = false;
-            return;
-        }
         if (isScheduledByPercentage()) {
             return;
         }
@@ -347,10 +328,6 @@ public class PowerNotificationWarnings implements PowerUI.WarningsUI {
         final Notification n = nb.build();
         mNoMan.cancelAsUser(TAG_BATTERY, SystemMessage.NOTE_BAD_CHARGER, UserHandle.ALL);
         mNoMan.notifyAsUser(TAG_BATTERY, SystemMessage.NOTE_POWER_LOW, n, UserHandle.ALL);
-    }
-
-    private boolean showSevereLowBatteryDialog() {
-        return mBucket < -1 && mUseSevereDialog;
     }
 
     /**
