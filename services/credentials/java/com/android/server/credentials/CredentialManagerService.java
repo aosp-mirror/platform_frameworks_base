@@ -269,11 +269,13 @@ public final class CredentialManagerService
             ICancellationSignal cancelTransport = CancellationSignal.createTransport();
 
             int userId = UserHandle.getCallingUserId();
+            int callingUid = Binder.getCallingUid();
             // New request session, scoped for this request only.
             final GetRequestSession session =
                     new GetRequestSession(
                             getContext(),
                             userId,
+                            callingUid,
                             callback,
                             request,
                             constructCallingAppInfo(callingPackage, userId));
@@ -319,10 +321,12 @@ public final class CredentialManagerService
 
             // New request session, scoped for this request only.
             int userId = UserHandle.getCallingUserId();
+            int callingUid = Binder.getCallingUid();
             final CreateRequestSession session =
                     new CreateRequestSession(
                             getContext(),
                             userId,
+                            callingUid,
                             request,
                             callback,
                             constructCallingAppInfo(callingPackage, userId));
@@ -434,10 +438,12 @@ public final class CredentialManagerService
 
             // New request session, scoped for this request only.
             int userId = UserHandle.getCallingUserId();
+            int callingUid = Binder.getCallingUid();
             final ClearRequestSession session =
                     new ClearRequestSession(
                             getContext(),
                             userId,
+                            callingUid,
                             callback,
                             request,
                             constructCallingAppInfo(callingPackage, userId));

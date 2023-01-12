@@ -41,10 +41,10 @@ public final class GetRequestSession extends RequestSession<GetCredentialRequest
         implements ProviderSession.ProviderInternalCallback<GetCredentialResponse> {
     private static final String TAG = "GetRequestSession";
 
-    public GetRequestSession(Context context, int userId,
+    public GetRequestSession(Context context, int userId, int callingUid,
             IGetCredentialCallback callback, GetCredentialRequest request,
             CallingAppInfo callingAppInfo) {
-        super(context, userId, request, callback, RequestInfo.TYPE_GET, callingAppInfo);
+        super(context, userId, callingUid, request, callback, RequestInfo.TYPE_GET, callingAppInfo);
     }
 
     /**
@@ -104,8 +104,10 @@ public final class GetRequestSession extends RequestSession<GetCredentialRequest
     private void respondToClientWithResponseAndFinish(GetCredentialResponse response) {
         try {
             mClientCallback.onResponse(response);
+            logApiCalled(RequestType.GET_CREDENTIALS, /* isSuccessful */ true);
         } catch (RemoteException e) {
             Log.i(TAG, "Issue while responding to client with a response : " + e.getMessage());
+            logApiCalled(RequestType.GET_CREDENTIALS, /* isSuccessful */ false);
         }
         finishSession();
     }
@@ -117,6 +119,7 @@ public final class GetRequestSession extends RequestSession<GetCredentialRequest
             Log.i(TAG, "Issue while responding to client with error : " + e.getMessage());
 
         }
+        logApiCalled(RequestType.GET_CREDENTIALS, /* isSuccessful */ false);
         finishSession();
     }
 
