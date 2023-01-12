@@ -76,8 +76,8 @@ public final class GetRequestSession extends RequestSession<GetCredentialRequest
                     mRequestId, mClientRequest, mClientAppInfo.getPackageName()),
                     providerDataList));
         } catch (RemoteException e) {
-            Log.i(TAG, "Issue with invoking pending intent: " + e.getMessage());
-            // TODO: Propagate failure
+            respondToClientWithErrorAndFinish(
+                    GetCredentialException.TYPE_UNKNOWN, "Unable to instantiate selector");
         }
     }
 
@@ -122,8 +122,7 @@ public final class GetRequestSession extends RequestSession<GetCredentialRequest
 
     @Override
     public void onUiCancellation() {
-        // TODO("Replace with user cancelled error type when ready")
-        respondToClientWithErrorAndFinish(GetCredentialException.TYPE_NO_CREDENTIAL,
+        respondToClientWithErrorAndFinish(GetCredentialException.TYPE_USER_CANCELED,
                 "User cancelled the selector");
     }
 

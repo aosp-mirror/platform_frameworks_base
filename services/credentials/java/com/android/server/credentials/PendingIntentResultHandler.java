@@ -39,6 +39,12 @@ public class PendingIntentResultHandler {
         return pendingIntentResponse.getResultCode() == Activity.RESULT_OK;
     }
 
+    /** Returns true if the pending intent was cancelled by the user. */
+    public static boolean isCancelledResponse(
+            ProviderPendingIntentResponse pendingIntentResponse) {
+        return pendingIntentResponse.getResultCode() == Activity.RESULT_CANCELED;
+    }
+
     /** Extracts the {@link CredentialsResponseContent} object added to the result data. */
     public static CredentialsResponseContent extractResponseContent(Intent resultData) {
         if (resultData == null) {
