@@ -22,6 +22,7 @@ import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.dagger.qualifiers.Application
 import com.android.systemui.demomode.DemoMode.COMMAND_NETWORK
 import com.android.systemui.demomode.DemoModeController
+import com.android.systemui.statusbar.pipeline.mobile.data.repository.MobileConnectionRepository.Companion.DEFAULT_NUM_LEVELS
 import com.android.systemui.statusbar.pipeline.wifi.data.repository.demo.model.FakeWifiEventModel
 import javax.inject.Inject
 import kotlinx.coroutines.CoroutineScope
@@ -43,10 +44,10 @@ constructor(
 
     private fun Bundle.toWifiEvent(): FakeWifiEventModel? {
         val wifi = getString("wifi") ?: return null
-        return if (wifi == "show") {
-            activeWifiEvent()
-        } else {
-            FakeWifiEventModel.WifiDisabled
+        return when (wifi) {
+            "show" -> activeWifiEvent()
+            "carriermerged" -> carrierMergedWifiEvent()
+            else -> FakeWifiEventModel.WifiDisabled
         }
     }
 
@@ -64,6 +65,14 @@ constructor(
         )
     }
 
+    private fun Bundle.carrierMergedWifiEvent(): FakeWifiEventModel.CarrierMerged {
+        val subId = getString("slot")?.toInt() ?: DEFAULT_CARRIER_MERGED_SUB_ID
+        val level = getString("level")?.toInt() ?: 0
+        val numberOfLevels = getString("numlevels")?.toInt() ?: DEFAULT_NUM_LEVELS
+
+        return FakeWifiEventModel.CarrierMerged(subId, level, numberOfLevels)
+    }
+
     private fun String.toActivity(): Int =
         when (this) {
             "inout" -> WifiManager.TrafficStateCallback.DATA_ACTIVITY_INOUT
@@ -71,4 +80,8 @@ constructor(
             "out" -> WifiManager.TrafficStateCallback.DATA_ACTIVITY_OUT
             else -> WifiManager.TrafficStateCallback.DATA_ACTIVITY_NONE
         }
+
+    companion object {
+        const val DEFAULT_CARRIER_MERGED_SUB_ID = 10
+    }
 }
