@@ -5905,7 +5905,7 @@ package android.app {
     ctor public LocaleConfig(@NonNull android.content.Context);
     ctor public LocaleConfig(@NonNull android.os.LocaleList);
     method public int describeContents();
-    method @NonNull public static android.app.LocaleConfig fromResources(@NonNull android.content.Context);
+    method @NonNull public static android.app.LocaleConfig fromContextIgnoringOverride(@NonNull android.content.Context);
     method public int getStatus();
     method @Nullable public android.os.LocaleList getSupportedLocales();
     method public void writeToParcel(@NonNull android.os.Parcel, int);
