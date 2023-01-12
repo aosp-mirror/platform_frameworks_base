@@ -11876,6 +11876,7 @@ package android.content.pm {
   public class PackageInstaller {
     method public void abandonSession(int);
     method public void checkInstallConstraints(@NonNull java.util.List<java.lang.String>, @NonNull android.content.pm.PackageInstaller.InstallConstraints, @NonNull java.util.concurrent.Executor, @NonNull java.util.function.Consumer<android.content.pm.PackageInstaller.InstallConstraintsResult>);
+    method public void commitSessionAfterInstallConstraintsAreMet(int, @NonNull android.content.IntentSender, @NonNull android.content.pm.PackageInstaller.InstallConstraints, long);
     method public int createSession(@NonNull android.content.pm.PackageInstaller.SessionParams) throws java.io.IOException;
     method @Deprecated @Nullable public android.content.pm.PackageInstaller.SessionInfo getActiveStagedSession();
     method @NonNull public java.util.List<android.content.pm.PackageInstaller.SessionInfo> getActiveStagedSessions();
@@ -11920,6 +11921,7 @@ package android.content.pm {
     field public static final int STATUS_FAILURE_INCOMPATIBLE = 7; // 0x7
     field public static final int STATUS_FAILURE_INVALID = 4; // 0x4
     field public static final int STATUS_FAILURE_STORAGE = 6; // 0x6
+    field public static final int STATUS_FAILURE_TIMEOUT = 8; // 0x8
     field public static final int STATUS_PENDING_USER_ACTION = -1; // 0xffffffff
     field public static final int STATUS_SUCCESS = 0; // 0x0
   }

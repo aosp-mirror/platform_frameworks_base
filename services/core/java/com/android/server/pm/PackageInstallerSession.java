@@ -1842,6 +1842,60 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
         dispatchSessionSealed();
     }
 
+    @Override
+    public void seal() {
+        assertNotChild("seal");
+        assertCallerIsOwnerOrRoot();
+        try {
+            sealInternal();
+            for (var child : getChildSessions()) {
+                child.sealInternal();
+            }
+        } catch (PackageManagerException e) {
+            throw new IllegalStateException("Package is not valid", e);
+        }
+    }
+
+    private void sealInternal() throws PackageManagerException {
+        synchronized (mLock) {
+            sealLocked();
+        }
+    }
+
+    @Override
+    public List<String> fetchPackageNames() {
+        assertNotChild("fetchPackageNames");
+        assertCallerIsOwnerOrRoot();
+        var sessions = getSelfOrChildSessions();
+        var result = new ArrayList<String>(sessions.size());
+        for (var s : sessions) {
+            result.add(s.fetchPackageName());
+        }
+        return result;
+    }
+
+    private String fetchPackageName() {
+        assertSealed("fetchPackageName");
+        synchronized (mLock) {
+            final ParseTypeImpl input = ParseTypeImpl.forDefaultParsing();
+            final List<File> addedFiles = getAddedApksLocked();
+            for (File addedFile : addedFiles) {
+                final ParseResult<ApkLite> result =
+                        ApkLiteParseUtils.parseApkLite(input.reset(), addedFile, 0);
+                if (result.isError()) {
+                    throw new IllegalStateException(
+                            "Can't parse package for session=" + sessionId, result.getException());
+                }
+                final ApkLite apk = result.getResult();
+                var packageName = apk.getPackageName();
+                if (packageName != null) {
+                    return packageName;
+                }
+            }
+            throw new IllegalStateException("Can't fetch package name for session=" + sessionId);
+        }
+    }
+
     /**
      * Kicks off the install flow. The first step is to persist 'sealed' flags
      * to prevent mutations of hard links created later.
@@ -2093,6 +2147,11 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
         synchronized (mLock) {
             return getChildSessionsLocked();
         }
+    }
+
+    @NonNull
+    private List<PackageInstallerSession> getSelfOrChildSessions() {
+        return isMultiPackage() ? getChildSessions() : Collections.singletonList(this);
     }
 
     /**
