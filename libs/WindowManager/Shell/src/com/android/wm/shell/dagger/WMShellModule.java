@@ -49,6 +49,7 @@ import com.android.wm.shell.common.TransactionPool;
 import com.android.wm.shell.common.annotations.ShellBackgroundThread;
 import com.android.wm.shell.common.annotations.ShellMainThread;
 import com.android.wm.shell.desktopmode.DesktopModeController;
+import com.android.wm.shell.desktopmode.DesktopModeStatus;
 import com.android.wm.shell.desktopmode.DesktopModeTaskRepository;
 import com.android.wm.shell.desktopmode.DesktopTasksController;
 import com.android.wm.shell.draganddrop.DragAndDropController;
@@ -93,6 +94,7 @@ import com.android.wm.shell.unfold.animation.SplitTaskUnfoldAnimator;
 import com.android.wm.shell.unfold.animation.UnfoldTaskAnimator;
 import com.android.wm.shell.unfold.qualifier.UnfoldShellTransition;
 import com.android.wm.shell.unfold.qualifier.UnfoldTransition;
+import com.android.wm.shell.windowdecor.CaptionWindowDecorViewModel;
 import com.android.wm.shell.windowdecor.DesktopModeWindowDecorViewModel;
 import com.android.wm.shell.windowdecor.WindowDecorViewModel;
 
@@ -192,7 +194,8 @@ public abstract class WMShellModule {
             SyncTransactionQueue syncQueue,
             Optional<DesktopModeController> desktopModeController,
             Optional<DesktopTasksController> desktopTasksController) {
-        return new DesktopModeWindowDecorViewModel(
+        if (DesktopModeStatus.isAnyEnabled()) {
+            return new DesktopModeWindowDecorViewModel(
                     context,
                     mainHandler,
                     mainChoreographer,
@@ -201,6 +204,14 @@ public abstract class WMShellModule {
                     syncQueue,
                     desktopModeController,
                     desktopTasksController);
+        }
+        return new CaptionWindowDecorViewModel(
+                    context,
+                    mainHandler,
+                    mainChoreographer,
+                    taskOrganizer,
+                    displayController,
+                    syncQueue);
     }
 
     //
