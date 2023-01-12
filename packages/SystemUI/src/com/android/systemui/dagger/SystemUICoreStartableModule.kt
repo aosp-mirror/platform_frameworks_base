@@ -28,6 +28,7 @@ import com.android.systemui.biometrics.AuthController
 import com.android.systemui.biometrics.UdfpsOverlay
 import com.android.systemui.clipboardoverlay.ClipboardListener
 import com.android.systemui.dagger.qualifiers.PerUser
+import com.android.systemui.dreams.DreamMonitor
 import com.android.systemui.globalactions.GlobalActionsComponent
 import com.android.systemui.keyboard.KeyboardUI
 import com.android.systemui.keyguard.KeyguardViewMediator
@@ -293,4 +294,10 @@ abstract class SystemUICoreStartableModule {
     @IntoMap
     @ClassKey(StylusUsiPowerStartable::class)
     abstract fun bindStylusUsiPowerStartable(sysui: StylusUsiPowerStartable): CoreStartable
+
+    /**Inject into DreamMonitor */
+    @Binds
+    @IntoMap
+    @ClassKey(DreamMonitor::class)
+    abstract fun bindDreamMonitor(sysui: DreamMonitor): CoreStartable
 }
