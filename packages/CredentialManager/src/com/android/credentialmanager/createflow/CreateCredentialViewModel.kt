@@ -52,10 +52,9 @@ data class CreateCredentialUiState(
 )
 
 class CreateCredentialViewModel(
-  credManRepo: CredentialManagerRepo = CredentialManagerRepo.getInstance(),
-  userConfigRepo: UserConfigRepo = UserConfigRepo.getInstance()
+  private val credManRepo: CredentialManagerRepo,
+  userConfigRepo: UserConfigRepo = UserConfigRepo.getInstance(),
 ) : ViewModel() {
-
   var providerEnableListUiState = credManRepo.getCreateProviderEnableListInitialUiState()
 
   var providerDisableListUiState = credManRepo.getCreateProviderDisableListInitialUiState()
@@ -142,12 +141,12 @@ class CreateCredentialViewModel(
   }
 
   fun onDisabledProvidersSelected() {
-    CredentialManagerRepo.getInstance().onCancel()
+    credManRepo.onCancel()
     dialogResult.tryEmit(DialogResult(ResultState.LAUNCH_SETTING_CANCELED))
   }
 
   fun onCancel() {
-    CredentialManagerRepo.getInstance().onCancel()
+    credManRepo.onCancel()
     dialogResult.tryEmit(DialogResult(ResultState.NORMAL_CANCELED))
   }
 
@@ -189,7 +188,7 @@ class CreateCredentialViewModel(
         hidden = true,
       )
     } else {
-      CredentialManagerRepo.getInstance().onOptionSelected(
+      credManRepo.onOptionSelected(
         providerId,
         entryKey,
         entrySubkey
@@ -243,7 +242,7 @@ class CreateCredentialViewModel(
                 "$providerId, key=${entry.entryKey}, subkey=${entry.entrySubkey}, " +
                 "resultCode=$resultCode, resultData=$resultData}"
         )
-        CredentialManagerRepo.getInstance().onOptionSelected(
+        credManRepo.onOptionSelected(
           providerId, entry.entryKey, entry.entrySubkey, resultCode, resultData,
         )
       } else {
