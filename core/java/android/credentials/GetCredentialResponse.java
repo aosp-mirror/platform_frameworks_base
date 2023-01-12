@@ -19,7 +19,6 @@ package android.credentials;
 import static java.util.Objects.requireNonNull;
 
 import android.annotation.NonNull;
-import android.annotation.Nullable;
 import android.os.Parcel;
 import android.os.Parcelable;
 
@@ -33,14 +32,14 @@ public final class GetCredentialResponse implements Parcelable {
     /**
      * The credential that can be used to authenticate the user.
      */
-    @Nullable
+    @NonNull
     private final Credential mCredential;
 
     /**
      * Returns the credential that can be used to authenticate the user, or {@code null} if no
      * credential is available.
      */
-    @Nullable
+    @NonNull
     public Credential getCredential() {
         return mCredential;
     }
@@ -67,13 +66,6 @@ public final class GetCredentialResponse implements Parcelable {
      */
     public GetCredentialResponse(@NonNull Credential credential) {
         mCredential = requireNonNull(credential, "credential must not be null");
-    }
-
-    /**
-     * Constructs a {@link GetCredentialResponse}.
-     */
-    public GetCredentialResponse() {
-        mCredential = null;
     }
 
     private GetCredentialResponse(@NonNull Parcel in) {
