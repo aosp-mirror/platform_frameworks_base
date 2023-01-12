@@ -1080,7 +1080,6 @@ public abstract class Service extends ContextWrapper implements ComponentCallbac
             if (mForegroundServiceTraceTitle != null) {
                 Trace.asyncTraceForTrackEnd(TRACE_TAG_ACTIVITY_MANAGER,
                         TRACE_TRACK_NAME_FOREGROUND_SERVICE,
-                        mForegroundServiceTraceTitle,
                         System.identityHashCode(this));
                 mForegroundServiceTraceTitle = null;
             }
