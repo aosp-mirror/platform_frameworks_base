@@ -24,11 +24,14 @@ import static org.mockito.Mockito.when;
 
 import android.content.Context;
 import android.hardware.usb.UsbManager;
+import android.os.Binder;
 import android.os.RemoteException;
 import android.util.Log;
 
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
+
+import java.util.concurrent.atomic.AtomicInteger;
 
 /**
  * Unit tests lib for {@link android.hardware.usb.UsbManager}.
@@ -41,6 +44,11 @@ public class UsbManagerTestLib {
     private UsbManager mUsbManagerSys;
     private UsbManager mUsbManagerMock;
     @Mock private android.hardware.usb.IUsbManager mMockUsbService;
+
+    /**
+     * Counter for tracking UsbOperation operations.
+     */
+    private static final AtomicInteger sUsbOperationCount = new AtomicInteger();
 
     public UsbManagerTestLib(Context context) {
         MockitoAnnotations.initMocks(this);
@@ -82,10 +90,11 @@ public class UsbManagerTestLib {
     }
 
     private void testSetCurrentFunctionsMock_Matched(long functions) {
+        int operationId = sUsbOperationCount.incrementAndGet() + Binder.getCallingUid();
         try {
             setCurrentFunctions(functions);
 
-            verify(mMockUsbService).setCurrentFunctions(eq(functions));
+            verify(mMockUsbService).setCurrentFunctions(eq(functions), operationId);
         } catch (RemoteException remEx) {
             Log.w(TAG, "RemoteException");
         }
@@ -106,9 +115,10 @@ public class UsbManagerTestLib {
     }
 
     public void testSetCurrentFunctionsEx(long functions) throws Exception {
+        int operationId = sUsbOperationCount.incrementAndGet() + Binder.getCallingUid();
         setCurrentFunctions(functions);
 
-        verify(mMockUsbService).setCurrentFunctions(eq(functions));
+        verify(mMockUsbService).setCurrentFunctions(eq(functions), operationId);
     }
 
     public void testGetCurrentFunctions_shouldMatched() {

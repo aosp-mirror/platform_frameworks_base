@@ -605,16 +605,16 @@ public class UsbService extends IUsbManager.Stub {
     }
 
     @Override
-    public void setCurrentFunctions(long functions) {
+    public void setCurrentFunctions(long functions, int operationId) {
         mContext.enforceCallingOrSelfPermission(android.Manifest.permission.MANAGE_USB, null);
         Preconditions.checkArgument(UsbManager.areSettableFunctions(functions));
         Preconditions.checkState(mDeviceManager != null);
-        mDeviceManager.setCurrentFunctions(functions);
+        mDeviceManager.setCurrentFunctions(functions, operationId);
     }
 
     @Override
-    public void setCurrentFunction(String functions, boolean usbDataUnlocked) {
-        setCurrentFunctions(UsbManager.usbFunctionsFromString(functions));
+    public void setCurrentFunction(String functions, boolean usbDataUnlocked, int operationId) {
+        setCurrentFunctions(UsbManager.usbFunctionsFromString(functions), operationId);
     }
 
     @Override
