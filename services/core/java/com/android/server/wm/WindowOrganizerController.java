@@ -21,6 +21,7 @@ import static android.app.ActivityManager.isStartResultSuccessful;
 import static android.app.WindowConfiguration.WINDOWING_MODE_UNDEFINED;
 import static android.app.WindowConfiguration.WINDOW_CONFIG_BOUNDS;
 import static android.view.Display.DEFAULT_DISPLAY;
+import static android.window.TaskFragmentOperation.OP_TYPE_CLEAR_ADJACENT_TASK_FRAGMENTS;
 import static android.window.TaskFragmentOperation.OP_TYPE_CREATE_TASK_FRAGMENT;
 import static android.window.TaskFragmentOperation.OP_TYPE_DELETE_TASK_FRAGMENT;
 import static android.window.TaskFragmentOperation.OP_TYPE_REPARENT_ACTIVITY_TO_TASK_FRAGMENT;
@@ -1167,34 +1168,50 @@ class WindowOrganizerController extends IWindowOrganizerController.Stub
             }
             case OP_TYPE_SET_ADJACENT_TASK_FRAGMENTS: {
                 final IBinder secondaryFragmentToken = operation.getSecondaryFragmentToken();
-                final TaskFragment secondaryTaskFragment = secondaryFragmentToken != null
-                        ? mLaunchTaskFragments.get(secondaryFragmentToken)
-                        : null;
-                taskFragment.setAdjacentTaskFragment(secondaryTaskFragment);
-                effects |= TRANSACT_EFFECTS_LIFECYCLE;
-
-                // Clear the focused app if the focused app is no longer visible after reset the
-                // adjacent TaskFragments.
-                if (secondaryTaskFragment == null
-                        && taskFragment.getDisplayContent().mFocusedApp != null
-                        && taskFragment.hasChild(taskFragment.getDisplayContent().mFocusedApp)
-                        && !taskFragment.shouldBeVisible(null /* starting */)) {
-                    taskFragment.getDisplayContent().setFocusedApp(null);
+                final TaskFragment secondaryTaskFragment =
+                        mLaunchTaskFragments.get(secondaryFragmentToken);
+                if (secondaryTaskFragment == null) {
+                    final Throwable exception = new IllegalArgumentException(
+                            "SecondaryFragmentToken must be set for setAdjacentTaskFragments.");
+                    sendTaskFragmentOperationFailure(organizer, errorCallbackToken, taskFragment,
+                            opType, exception);
+                    break;
+                }
+                if (taskFragment.getAdjacentTaskFragment() != secondaryTaskFragment) {
+                    // Only have lifecycle effect if the adjacent changed.
+                    taskFragment.setAdjacentTaskFragment(secondaryTaskFragment);
+                    effects |= TRANSACT_EFFECTS_LIFECYCLE;
                 }
 
                 final Bundle bundle = hop.getLaunchOptions();
                 final WindowContainerTransaction.TaskFragmentAdjacentParams adjacentParams =
-                        bundle != null ? new WindowContainerTransaction.TaskFragmentAdjacentParams(
-                                bundle) : null;
-                if (adjacentParams == null) {
+                        bundle != null
+                                ? new WindowContainerTransaction.TaskFragmentAdjacentParams(bundle)
+                                : null;
+                taskFragment.setDelayLastActivityRemoval(adjacentParams != null
+                        && adjacentParams.shouldDelayPrimaryLastActivityRemoval());
+                secondaryTaskFragment.setDelayLastActivityRemoval(adjacentParams != null
+                        && adjacentParams.shouldDelaySecondaryLastActivityRemoval());
+                break;
+            }
+            case OP_TYPE_CLEAR_ADJACENT_TASK_FRAGMENTS: {
+                final TaskFragment adjacentTaskFragment = taskFragment.getAdjacentTaskFragment();
+                if (adjacentTaskFragment == null) {
                     break;
                 }
+                taskFragment.resetAdjacentTaskFragment();
+                effects |= TRANSACT_EFFECTS_LIFECYCLE;
 
-                taskFragment.setDelayLastActivityRemoval(
-                        adjacentParams.shouldDelayPrimaryLastActivityRemoval());
-                if (secondaryTaskFragment != null) {
-                    secondaryTaskFragment.setDelayLastActivityRemoval(
-                            adjacentParams.shouldDelaySecondaryLastActivityRemoval());
+                // Clear the focused app if the focused app is no longer visible after reset the
+                // adjacent TaskFragments.
+                final ActivityRecord focusedApp = taskFragment.getDisplayContent().mFocusedApp;
+                final TaskFragment focusedTaskFragment = focusedApp != null
+                        ? focusedApp.getTaskFragment()
+                        : null;
+                if ((focusedTaskFragment == taskFragment
+                        || focusedTaskFragment == adjacentTaskFragment)
+                        && !focusedTaskFragment.shouldBeVisible(null /* starting */)) {
+                    focusedTaskFragment.getDisplayContent().setFocusedApp(null /* newFocus */);
                 }
                 break;
             }
@@ -1528,6 +1545,9 @@ class WindowOrganizerController extends IWindowOrganizerController.Stub
             throw new IllegalArgumentException("setAdjacentRootsHierarchyOp: Not created by"
                     + " organizer root1=" + root1 + " root2=" + root2);
         }
+        if (root1.getAdjacentTaskFragment() == root2) {
+            return TRANSACT_EFFECTS_NONE;
+        }
         root1.setAdjacentTaskFragment(root2);
         return TRANSACT_EFFECTS_LIFECYCLE;
     }
@@ -1538,7 +1558,9 @@ class WindowOrganizerController extends IWindowOrganizerController.Stub
             throw new IllegalArgumentException("clearAdjacentRootsHierarchyOp: Not created by"
                     + " organizer root=" + root);
         }
-
+        if (root.getAdjacentTaskFragment() == null) {
+            return TRANSACT_EFFECTS_NONE;
+        }
         root.resetAdjacentTaskFragment();
         return TRANSACT_EFFECTS_LIFECYCLE;
     }

@@ -58,14 +58,17 @@ public final class TaskFragmentOperation implements Parcelable {
     /** Sets two TaskFragments adjacent to each other. */
     public static final int OP_TYPE_SET_ADJACENT_TASK_FRAGMENTS = 4;
 
+    /** Clears the adjacent TaskFragments relationship. */
+    public static final int OP_TYPE_CLEAR_ADJACENT_TASK_FRAGMENTS = 5;
+
     /** Requests focus on the top running Activity in the given TaskFragment. */
-    public static final int OP_TYPE_REQUEST_FOCUS_ON_TASK_FRAGMENT = 5;
+    public static final int OP_TYPE_REQUEST_FOCUS_ON_TASK_FRAGMENT = 6;
 
     /** Sets a given TaskFragment to have a companion TaskFragment. */
-    public static final int OP_TYPE_SET_COMPANION_TASK_FRAGMENT = 6;
+    public static final int OP_TYPE_SET_COMPANION_TASK_FRAGMENT = 7;
 
     /** Sets the {@link TaskFragmentAnimationParams} for the given TaskFragment. */
-    public static final int OP_TYPE_SET_ANIMATION_PARAMS = 7;
+    public static final int OP_TYPE_SET_ANIMATION_PARAMS = 8;
 
     @IntDef(prefix = { "OP_TYPE_" }, value = {
             OP_TYPE_UNKNOWN,
@@ -74,6 +77,7 @@ public final class TaskFragmentOperation implements Parcelable {
             OP_TYPE_START_ACTIVITY_IN_TASK_FRAGMENT,
             OP_TYPE_REPARENT_ACTIVITY_TO_TASK_FRAGMENT,
             OP_TYPE_SET_ADJACENT_TASK_FRAGMENTS,
+            OP_TYPE_CLEAR_ADJACENT_TASK_FRAGMENTS,
             OP_TYPE_REQUEST_FOCUS_ON_TASK_FRAGMENT,
             OP_TYPE_SET_COMPANION_TASK_FRAGMENT,
             OP_TYPE_SET_ANIMATION_PARAMS
