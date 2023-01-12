@@ -2291,7 +2291,7 @@ final class InstallPackageHelper {
                 }
             }
             installRequest.setName(pkgName);
-            installRequest.setUid(pkg.getUid());
+            installRequest.setAppId(pkg.getUid());
             installRequest.setPkg(pkg);
             installRequest.setReturnCode(PackageManager.INSTALL_SUCCEEDED);
             //to update install status
@@ -2776,7 +2776,7 @@ final class InstallPackageHelper {
             }
 
             Bundle extras = new Bundle();
-            extras.putInt(Intent.EXTRA_UID, request.getUid());
+            extras.putInt(Intent.EXTRA_UID, request.getAppId());
             if (update) {
                 extras.putBoolean(Intent.EXTRA_REPLACING, true);
             }
@@ -2799,7 +2799,7 @@ final class InstallPackageHelper {
 
                 // Send PACKAGE_ADDED broadcast for users that see the package for the first time
                 // sendPackageAddedForNewUsers also deals with system apps
-                int appId = UserHandle.getAppId(request.getUid());
+                int appId = UserHandle.getAppId(request.getAppId());
                 boolean isSystem = request.isInstallSystem();
                 mPm.sendPackageAddedForNewUsers(mPm.snapshotComputer(), packageName,
                         isSystem || virtualPreload, virtualPreload /*startReceiver*/, appId,
@@ -2944,9 +2944,9 @@ final class InstallPackageHelper {
             }
 
             if (allNewUsers && !update) {
-                mPm.notifyPackageAdded(packageName, request.getUid());
+                mPm.notifyPackageAdded(packageName, request.getAppId());
             } else {
-                mPm.notifyPackageChanged(packageName, request.getUid());
+                mPm.notifyPackageChanged(packageName, request.getAppId());
             }
 
             // Log current value of "unknown sources" setting

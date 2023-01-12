@@ -81,7 +81,7 @@ final class InstallRequest {
     /** Package Installed Info */
     @Nullable
     private String mName;
-    private int mUid = INVALID_UID;
+    private int mAppId = INVALID_UID;
     // The set of users that originally had this package installed.
     @Nullable
     private int[] mOrigUsers;
@@ -158,7 +158,7 @@ final class InstallRequest {
             mUserId = user.getIdentifier();
         } else {
             // APEX
-            mUserId = INVALID_UID;
+            mUserId = UserHandle.USER_SYSTEM;
         }
         mInstallArgs = null;
         mParsedPackage = parsedPackage;
@@ -367,8 +367,8 @@ final class InstallRequest {
         return mOrigUsers;
     }
 
-    public int getUid() {
-        return mUid;
+    public int getAppId() {
+        return mAppId;
     }
 
     @Nullable
@@ -648,8 +648,8 @@ final class InstallRequest {
         mPkg = pkg;
     }
 
-    public void setUid(int uid) {
-        mUid = uid;
+    public void setAppId(int appId) {
+        mAppId = appId;
     }
 
     public void setNewUsers(int[] newUsers) {
@@ -773,10 +773,10 @@ final class InstallRequest {
         }
     }
 
-    public void onInstallCompleted(int userId) {
+    public void onInstallCompleted() {
         if (getReturnCode() == INSTALL_SUCCEEDED) {
             if (mPackageMetrics != null) {
-                mPackageMetrics.onInstallSucceed(userId);
+                mPackageMetrics.onInstallSucceed();
             }
         }
     }
