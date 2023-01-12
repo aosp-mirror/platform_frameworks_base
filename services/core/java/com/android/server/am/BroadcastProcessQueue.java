@@ -747,7 +747,7 @@ class BroadcastProcessQueue {
      * be delivered at some point in the future.
      */
     public boolean isIdle() {
-        return !isActive() && isEmpty();
+        return (!isActive() && isEmpty()) || isDeferredUntilActive();
     }
 
     /**
@@ -769,7 +769,8 @@ class BroadcastProcessQueue {
         final boolean nextOffloadBeyond = (nextOffload == null)
                 || ((BroadcastRecord) nextOffload.arg1).enqueueTime > barrierTime;
 
-        return activeBeyond && nextBeyond && nextUrgentBeyond && nextOffloadBeyond;
+        return (activeBeyond && nextBeyond && nextUrgentBeyond && nextOffloadBeyond)
+                || isDeferredUntilActive();
     }
 
     public boolean isRunnable() {
