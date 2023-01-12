@@ -48,8 +48,6 @@ constructor(
     private val keyguardTransitionRepository: KeyguardTransitionRepository,
 ) : TransitionInteractor(FromLockscreenTransitionInteractor::class.simpleName!!) {
 
-    private var transitionId: UUID? = null
-
     override fun start() {
         listenForLockscreenToGone()
         listenForLockscreenToOccluded()
@@ -104,6 +102,7 @@ constructor(
 
     /* Starts transitions when manually dragging up the bouncer from the lockscreen. */
     private fun listenForLockscreenToBouncerDragging() {
+        var transitionId: UUID? = null
         scope.launch {
             shadeRepository.shadeModel
                 .sample(
@@ -114,25 +113,43 @@ constructor(
                     ),
                     ::toTriple
                 )
-                .collect { triple ->
-                    val (shadeModel, keyguardState, statusBarState) = triple
-
+                .collect { (shadeModel, keyguardState, statusBarState) ->
                     val id = transitionId
                     if (id != null) {
                         // An existing `id` means a transition is started, and calls to
-                        // `updateTransition` will control it until FINISHED
-                        keyguardTransitionRepository.updateTransition(
-                            id,
-                            1f - shadeModel.expansionAmount,
-                            if (
-                                shadeModel.expansionAmount == 0f || shadeModel.expansionAmount == 1f
-                            ) {
-                                transitionId = null
+                        // `updateTransition` will control it until FINISHED or CANCELED
+                        var nextState =
+                            if (shadeModel.expansionAmount == 0f) {
                                 TransitionState.FINISHED
+                            } else if (shadeModel.expansionAmount == 1f) {
+                                TransitionState.CANCELED
                             } else {
                                 TransitionState.RUNNING
                             }
+                        keyguardTransitionRepository.updateTransition(
+                            id,
+                            1f - shadeModel.expansionAmount,
+                            nextState,
                         )
+
+                        if (
+                            nextState == TransitionState.CANCELED ||
+                                nextState == TransitionState.FINISHED
+                        ) {
+                            transitionId = null
+                        }
+
+                        // If canceled, just put the state back
+                        if (nextState == TransitionState.CANCELED) {
+                            keyguardTransitionRepository.startTransition(
+                                TransitionInfo(
+                                    ownerName = name,
+                                    from = KeyguardState.BOUNCER,
+                                    to = KeyguardState.LOCKSCREEN,
+                                    animator = getAnimator(0.milliseconds)
+                                )
+                            )
+                        }
                     } else {
                         // TODO (b/251849525): Remove statusbarstate check when that state is
                         // integrated into KeyguardTransitionRepository

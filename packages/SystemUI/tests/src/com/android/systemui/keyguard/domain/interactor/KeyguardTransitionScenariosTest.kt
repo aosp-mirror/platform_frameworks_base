@@ -38,6 +38,7 @@ import com.android.systemui.util.mockito.withArgCaptor
 import com.google.common.truth.Truth.assertThat
 import kotlinx.coroutines.cancelChildren
 import kotlinx.coroutines.test.TestScope
+import kotlinx.coroutines.test.advanceUntilIdle
 import kotlinx.coroutines.test.runCurrent
 import kotlinx.coroutines.test.runTest
 import org.junit.Before
@@ -177,7 +178,7 @@ class KeyguardTransitionScenariosTest : SysuiTestCase() {
             keyguardRepository.setDreamingWithOverlay(false)
             // AND occluded has stopped
             keyguardRepository.setKeyguardOccluded(false)
-            runCurrent()
+            advanceUntilIdle()
 
             val info =
                 withArgCaptor<TransitionInfo> {
@@ -506,10 +507,53 @@ class KeyguardTransitionScenariosTest : SysuiTestCase() {
                 withArgCaptor<TransitionInfo> {
                     verify(mockTransitionRepository).startTransition(capture())
                 }
-            // THEN a transition to DOZING should occur
+            // THEN a transition to AOD should occur
             assertThat(info.ownerName).isEqualTo("FromGoneTransitionInteractor")
             assertThat(info.from).isEqualTo(KeyguardState.GONE)
             assertThat(info.to).isEqualTo(KeyguardState.AOD)
+            assertThat(info.animator).isNotNull()
+
+            coroutineContext.cancelChildren()
+        }
+
+    @Test
+    fun `GONE to DREAMING`() =
+        testScope.runTest {
+            // GIVEN a device that is not dreaming or dozing
+            keyguardRepository.setDreamingWithOverlay(false)
+            keyguardRepository.setDozeTransitionModel(
+                DozeTransitionModel(from = DozeStateModel.DOZE, to = DozeStateModel.FINISH)
+            )
+            runCurrent()
+
+            // GIVEN a prior transition has run to GONE
+            runner.startTransition(
+                testScope,
+                TransitionInfo(
+                    ownerName = "",
+                    from = KeyguardState.LOCKSCREEN,
+                    to = KeyguardState.GONE,
+                    animator =
+                        ValueAnimator().apply {
+                            duration = 10
+                            interpolator = Interpolators.LINEAR
+                        },
+                )
+            )
+            reset(mockTransitionRepository)
+
+            // WHEN the device begins to dream
+            keyguardRepository.setDreamingWithOverlay(true)
+            advanceUntilIdle()
+
+            val info =
+                withArgCaptor<TransitionInfo> {
+                    verify(mockTransitionRepository).startTransition(capture())
+                }
+            // THEN a transition to DREAMING should occur
+            assertThat(info.ownerName).isEqualTo("FromGoneTransitionInteractor")
+            assertThat(info.from).isEqualTo(KeyguardState.GONE)
+            assertThat(info.to).isEqualTo(KeyguardState.DREAMING)
             assertThat(info.animator).isNotNull()
 
             coroutineContext.cancelChildren()
