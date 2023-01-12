@@ -22,7 +22,6 @@ import android.telephony.TelephonyManager
 import com.android.systemui.log.table.TableLogBuffer
 import com.android.systemui.statusbar.pipeline.mobile.data.model.MobileConnectionModel
 import com.android.systemui.statusbar.pipeline.mobile.data.model.NetworkNameModel
-import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.StateFlow
 
 /**
@@ -50,7 +49,7 @@ interface MobileConnectionRepository {
      * A flow that aggregates all necessary callbacks from [TelephonyCallback] into a single
      * listener + model.
      */
-    val connectionInfo: Flow<MobileConnectionModel>
+    val connectionInfo: StateFlow<MobileConnectionModel>
 
     /** The total number of levels. Used with [SignalDrawable]. */
     val numberOfLevels: StateFlow<Int>

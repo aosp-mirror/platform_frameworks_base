@@ -16,11 +16,12 @@
 
 package com.android.systemui.statusbar.pipeline.wifi.data.model
 
+import android.telephony.SubscriptionManager.INVALID_SUBSCRIPTION_ID
 import androidx.test.filters.SmallTest
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.log.table.TableRowLogger
 import com.android.systemui.statusbar.pipeline.wifi.data.model.WifiNetworkModel.Active.Companion.MAX_VALID_LEVEL
-import com.android.systemui.statusbar.pipeline.wifi.data.model.WifiNetworkModel.Active.Companion.MIN_VALID_LEVEL
+import com.android.systemui.statusbar.pipeline.wifi.data.model.WifiNetworkModel.Companion.MIN_VALID_LEVEL
 import com.google.common.truth.Truth.assertThat
 import org.junit.Test
 
@@ -44,7 +45,51 @@ class WifiNetworkModelTest : SysuiTestCase() {
         WifiNetworkModel.Active(NETWORK_ID, level = MAX_VALID_LEVEL + 1)
     }
 
+    @Test(expected = IllegalArgumentException::class)
+    fun carrierMerged_invalidSubId_exceptionThrown() {
+        WifiNetworkModel.CarrierMerged(NETWORK_ID, INVALID_SUBSCRIPTION_ID, 1)
+    }
+
     // Non-exhaustive logDiffs test -- just want to make sure the logging logic isn't totally broken
+
+    @Test
+    fun logDiffs_carrierMergedToInactive_resetsAllFields() {
+        val logger = TestLogger()
+        val prevVal =
+            WifiNetworkModel.CarrierMerged(
+                networkId = 5,
+                subscriptionId = 3,
+                level = 1,
+            )
+
+        WifiNetworkModel.Inactive.logDiffs(prevVal, logger)
+
+        assertThat(logger.changes).contains(Pair(COL_NETWORK_TYPE, TYPE_INACTIVE))
+        assertThat(logger.changes).contains(Pair(COL_NETWORK_ID, NETWORK_ID_DEFAULT.toString()))
+        assertThat(logger.changes).contains(Pair(COL_VALIDATED, "false"))
+        assertThat(logger.changes).contains(Pair(COL_LEVEL, LEVEL_DEFAULT.toString()))
+        assertThat(logger.changes).contains(Pair(COL_SSID, "null"))
+    }
+
+    @Test
+    fun logDiffs_inactiveToCarrierMerged_logsAllFields() {
+        val logger = TestLogger()
+        val carrierMerged =
+            WifiNetworkModel.CarrierMerged(
+                networkId = 6,
+                subscriptionId = 3,
+                level = 2,
+            )
+
+        carrierMerged.logDiffs(prevVal = WifiNetworkModel.Inactive, logger)
+
+        assertThat(logger.changes).contains(Pair(COL_NETWORK_TYPE, TYPE_CARRIER_MERGED))
+        assertThat(logger.changes).contains(Pair(COL_NETWORK_ID, "6"))
+        assertThat(logger.changes).contains(Pair(COL_SUB_ID, "3"))
+        assertThat(logger.changes).contains(Pair(COL_VALIDATED, "true"))
+        assertThat(logger.changes).contains(Pair(COL_LEVEL, "2"))
+        assertThat(logger.changes).contains(Pair(COL_SSID, "null"))
+    }
 
     @Test
     fun logDiffs_inactiveToActive_logsAllActiveFields() {
@@ -95,8 +140,14 @@ class WifiNetworkModelTest : SysuiTestCase() {
                 level = 3,
                 ssid = "Test SSID"
             )
+        val prevVal =
+            WifiNetworkModel.CarrierMerged(
+                networkId = 5,
+                subscriptionId = 3,
+                level = 1,
+            )
 
-        activeNetwork.logDiffs(prevVal = WifiNetworkModel.CarrierMerged, logger)
+        activeNetwork.logDiffs(prevVal, logger)
 
         assertThat(logger.changes).contains(Pair(COL_NETWORK_TYPE, TYPE_ACTIVE))
         assertThat(logger.changes).contains(Pair(COL_NETWORK_ID, "5"))
@@ -105,7 +156,7 @@ class WifiNetworkModelTest : SysuiTestCase() {
         assertThat(logger.changes).contains(Pair(COL_SSID, "Test SSID"))
     }
     @Test
-    fun logDiffs_activeToCarrierMerged_resetsAllActiveFields() {
+    fun logDiffs_activeToCarrierMerged_logsAllFields() {
         val logger = TestLogger()
         val activeNetwork =
             WifiNetworkModel.Active(
@@ -114,13 +165,20 @@ class WifiNetworkModelTest : SysuiTestCase() {
                 level = 3,
                 ssid = "Test SSID"
             )
+        val carrierMerged =
+            WifiNetworkModel.CarrierMerged(
+                networkId = 6,
+                subscriptionId = 3,
+                level = 2,
+            )
 
-        WifiNetworkModel.CarrierMerged.logDiffs(prevVal = activeNetwork, logger)
+        carrierMerged.logDiffs(prevVal = activeNetwork, logger)
 
         assertThat(logger.changes).contains(Pair(COL_NETWORK_TYPE, TYPE_CARRIER_MERGED))
-        assertThat(logger.changes).contains(Pair(COL_NETWORK_ID, NETWORK_ID_DEFAULT.toString()))
-        assertThat(logger.changes).contains(Pair(COL_VALIDATED, "false"))
-        assertThat(logger.changes).contains(Pair(COL_LEVEL, LEVEL_DEFAULT.toString()))
+        assertThat(logger.changes).contains(Pair(COL_NETWORK_ID, "6"))
+        assertThat(logger.changes).contains(Pair(COL_SUB_ID, "3"))
+        assertThat(logger.changes).contains(Pair(COL_VALIDATED, "true"))
+        assertThat(logger.changes).contains(Pair(COL_LEVEL, "2"))
         assertThat(logger.changes).contains(Pair(COL_SSID, "null"))
     }
 

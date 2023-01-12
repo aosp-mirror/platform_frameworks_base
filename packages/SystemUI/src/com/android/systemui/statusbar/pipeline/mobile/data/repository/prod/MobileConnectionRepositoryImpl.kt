@@ -38,7 +38,6 @@ import com.android.systemui.common.coroutine.ConflatedCallbackFlow.conflatedCall
 import com.android.systemui.dagger.qualifiers.Application
 import com.android.systemui.dagger.qualifiers.Background
 import com.android.systemui.log.table.TableLogBuffer
-import com.android.systemui.log.table.TableLogBufferFactory
 import com.android.systemui.log.table.logDiffsForTable
 import com.android.systemui.statusbar.pipeline.mobile.data.model.MobileConnectionModel
 import com.android.systemui.statusbar.pipeline.mobile.data.model.NetworkNameModel
@@ -70,6 +69,10 @@ import kotlinx.coroutines.flow.merge
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.flow.stateIn
 
+/**
+ * A repository implementation for a typical mobile connection (as opposed to a carrier merged
+ * connection -- see [CarrierMergedConnectionRepository]).
+ */
 @Suppress("EXPERIMENTAL_IS_NOT_ENABLED")
 @OptIn(ExperimentalCoroutinesApi::class)
 class MobileConnectionRepositoryImpl(
@@ -298,18 +301,16 @@ class MobileConnectionRepositoryImpl(
         private val logger: ConnectivityPipelineLogger,
         private val globalSettings: GlobalSettings,
         private val mobileMappingsProxy: MobileMappingsProxy,
-        private val logFactory: TableLogBufferFactory,
         @Background private val bgDispatcher: CoroutineDispatcher,
         @Application private val scope: CoroutineScope,
     ) {
         fun build(
             subId: Int,
+            mobileLogger: TableLogBuffer,
             defaultNetworkName: NetworkNameModel,
             networkNameSeparator: String,
             globalMobileDataSettingChangedEvent: Flow<Unit>,
         ): MobileConnectionRepository {
-            val mobileLogger = logFactory.getOrCreate(tableBufferLogName(subId), 100)
-
             return MobileConnectionRepositoryImpl(
                 context,
                 subId,
@@ -326,9 +327,5 @@ class MobileConnectionRepositoryImpl(
                 scope,
             )
         }
-    }
-
-    companion object {
-        fun tableBufferLogName(subId: Int): String = "MobileConnectionLog [$subId]"
     }
 }
