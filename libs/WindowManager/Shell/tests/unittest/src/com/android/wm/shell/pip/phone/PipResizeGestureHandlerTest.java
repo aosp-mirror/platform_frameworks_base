@@ -37,7 +37,7 @@ import com.android.wm.shell.common.FloatingContentCoordinator;
 import com.android.wm.shell.common.ShellExecutor;
 import com.android.wm.shell.pip.PipBoundsAlgorithm;
 import com.android.wm.shell.pip.PipBoundsState;
-import com.android.wm.shell.pip.PipKeepClearAlgorithm;
+import com.android.wm.shell.pip.PipKeepClearAlgorithmInterface;
 import com.android.wm.shell.pip.PipSnapAlgorithm;
 import com.android.wm.shell.pip.PipTaskOrganizer;
 import com.android.wm.shell.pip.PipTransitionController;
@@ -90,8 +90,8 @@ public class PipResizeGestureHandlerTest extends ShellTestCase {
         MockitoAnnotations.initMocks(this);
         mPipBoundsState = new PipBoundsState(mContext);
         final PipSnapAlgorithm pipSnapAlgorithm = new PipSnapAlgorithm();
-        final PipKeepClearAlgorithm pipKeepClearAlgorithm =
-                new PipKeepClearAlgorithm() {};
+        final PipKeepClearAlgorithmInterface pipKeepClearAlgorithm =
+                new PipKeepClearAlgorithmInterface() {};
         final PipBoundsAlgorithm pipBoundsAlgorithm = new PipBoundsAlgorithm(mContext,
                 mPipBoundsState, pipSnapAlgorithm, pipKeepClearAlgorithm);
         final PipMotionHelper motionHelper = new PipMotionHelper(mContext, mPipBoundsState,
