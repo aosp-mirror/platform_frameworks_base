@@ -30,7 +30,6 @@ import com.android.systemui.util.mockito.any
 import com.android.systemui.util.mockito.whenever
 import java.util.concurrent.Executor
 import org.junit.Before
-import org.junit.Ignore
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.mockito.Mock
@@ -82,8 +81,8 @@ class StylusManagerTest : SysuiTestCase() {
         whenever(stylusDevice.supportsSource(InputDevice.SOURCE_STYLUS)).thenReturn(true)
         whenever(btStylusDevice.supportsSource(InputDevice.SOURCE_STYLUS)).thenReturn(true)
 
-        // whenever(stylusDevice.bluetoothAddress).thenReturn(null)
-        // whenever(btStylusDevice.bluetoothAddress).thenReturn(STYLUS_BT_ADDRESS)
+        whenever(stylusDevice.bluetoothAddress).thenReturn(null)
+        whenever(btStylusDevice.bluetoothAddress).thenReturn(STYLUS_BT_ADDRESS)
 
         whenever(inputManager.getInputDevice(OTHER_DEVICE_ID)).thenReturn(otherDevice)
         whenever(inputManager.getInputDevice(STYLUS_DEVICE_ID)).thenReturn(stylusDevice)
@@ -170,7 +169,6 @@ class StylusManagerTest : SysuiTestCase() {
     }
 
     @Test
-    @Ignore("b/257936830 until bt APIs")
     fun onInputDeviceAdded_btStylus_firstUsed_callsCallbacksOnStylusFirstUsed() {
         stylusManager.onInputDeviceAdded(BT_STYLUS_DEVICE_ID)
 
@@ -178,7 +176,6 @@ class StylusManagerTest : SysuiTestCase() {
     }
 
     @Test
-    @Ignore("b/257936830 until bt APIs")
     fun onInputDeviceAdded_btStylus_firstUsed_setsFlag() {
         stylusManager.onInputDeviceAdded(BT_STYLUS_DEVICE_ID)
 
@@ -186,7 +183,6 @@ class StylusManagerTest : SysuiTestCase() {
     }
 
     @Test
-    @Ignore("b/257936830 until bt APIs")
     fun onInputDeviceAdded_btStylus_callsCallbacksWithAddress() {
         stylusManager.onInputDeviceAdded(BT_STYLUS_DEVICE_ID)
 
@@ -215,10 +211,9 @@ class StylusManagerTest : SysuiTestCase() {
     }
 
     @Test
-    @Ignore("b/257936830 until bt APIs")
     fun onInputDeviceChanged_multipleRegisteredCallbacks_callsAll() {
         stylusManager.onInputDeviceAdded(STYLUS_DEVICE_ID)
-        // whenever(stylusDevice.bluetoothAddress).thenReturn(STYLUS_BT_ADDRESS)
+        whenever(stylusDevice.bluetoothAddress).thenReturn(STYLUS_BT_ADDRESS)
         stylusManager.registerCallback(otherStylusCallback)
 
         stylusManager.onInputDeviceChanged(STYLUS_DEVICE_ID)
@@ -230,10 +225,9 @@ class StylusManagerTest : SysuiTestCase() {
     }
 
     @Test
-    @Ignore("b/257936830 until bt APIs")
     fun onInputDeviceChanged_stylusNewBtConnection_callsCallbacks() {
         stylusManager.onInputDeviceAdded(STYLUS_DEVICE_ID)
-        // whenever(stylusDevice.bluetoothAddress).thenReturn(STYLUS_BT_ADDRESS)
+        whenever(stylusDevice.bluetoothAddress).thenReturn(STYLUS_BT_ADDRESS)
 
         stylusManager.onInputDeviceChanged(STYLUS_DEVICE_ID)
 
@@ -242,10 +236,9 @@ class StylusManagerTest : SysuiTestCase() {
     }
 
     @Test
-    @Ignore("b/257936830 until bt APIs")
     fun onInputDeviceChanged_stylusLostBtConnection_callsCallbacks() {
         stylusManager.onInputDeviceAdded(BT_STYLUS_DEVICE_ID)
-        // whenever(btStylusDevice.bluetoothAddress).thenReturn(null)
+        whenever(btStylusDevice.bluetoothAddress).thenReturn(null)
 
         stylusManager.onInputDeviceChanged(BT_STYLUS_DEVICE_ID)
 
@@ -254,7 +247,6 @@ class StylusManagerTest : SysuiTestCase() {
     }
 
     @Test
-    @Ignore("b/257936830 until bt APIs")
     fun onInputDeviceChanged_btConnection_stylusAlreadyBtConnected_onlyCallsListenersOnce() {
         stylusManager.onInputDeviceAdded(BT_STYLUS_DEVICE_ID)
 
@@ -265,7 +257,6 @@ class StylusManagerTest : SysuiTestCase() {
     }
 
     @Test
-    @Ignore("b/257936830 until bt APIs")
     fun onInputDeviceChanged_noBtConnection_stylusNeverBtConnected_doesNotCallCallbacks() {
         stylusManager.onInputDeviceAdded(STYLUS_DEVICE_ID)
 
@@ -317,7 +308,6 @@ class StylusManagerTest : SysuiTestCase() {
     }
 
     @Test
-    @Ignore("b/257936830 until bt APIs")
     fun onInputDeviceRemoved_btStylus_callsCallbacks() {
         stylusManager.onInputDeviceAdded(BT_STYLUS_DEVICE_ID)
 
@@ -331,7 +321,6 @@ class StylusManagerTest : SysuiTestCase() {
     }
 
     @Test
-    @Ignore("b/257936830 until bt APIs")
     fun onStylusBluetoothConnected_registersMetadataListener() {
         stylusManager.onInputDeviceAdded(BT_STYLUS_DEVICE_ID)
 
@@ -339,7 +328,6 @@ class StylusManagerTest : SysuiTestCase() {
     }
 
     @Test
-    @Ignore("b/257936830 until bt APIs")
     fun onStylusBluetoothConnected_noBluetoothDevice_doesNotRegisterMetadataListener() {
         whenever(bluetoothAdapter.getRemoteDevice(STYLUS_BT_ADDRESS)).thenReturn(null)
 
@@ -349,7 +337,6 @@ class StylusManagerTest : SysuiTestCase() {
     }
 
     @Test
-    @Ignore("b/257936830 until bt APIs")
     fun onStylusBluetoothDisconnected_unregistersMetadataListener() {
         stylusManager.onInputDeviceAdded(BT_STYLUS_DEVICE_ID)
 
@@ -359,7 +346,6 @@ class StylusManagerTest : SysuiTestCase() {
     }
 
     @Test
-    @Ignore("b/257936830 until bt APIs")
     fun onMetadataChanged_multipleRegisteredBatteryCallbacks_executesAll() {
         stylusManager.onInputDeviceAdded(BT_STYLUS_DEVICE_ID)
         stylusManager.registerBatteryCallback(otherStylusBatteryCallback)
@@ -377,7 +363,6 @@ class StylusManagerTest : SysuiTestCase() {
     }
 
     @Test
-    @Ignore("b/257936830 until bt APIs")
     fun onMetadataChanged_chargingStateTrue_executesBatteryCallbacks() {
         stylusManager.onInputDeviceAdded(BT_STYLUS_DEVICE_ID)
 
@@ -392,7 +377,6 @@ class StylusManagerTest : SysuiTestCase() {
     }
 
     @Test
-    @Ignore("b/257936830 until bt APIs")
     fun onMetadataChanged_chargingStateFalse_executesBatteryCallbacks() {
         stylusManager.onInputDeviceAdded(BT_STYLUS_DEVICE_ID)
 
@@ -407,7 +391,6 @@ class StylusManagerTest : SysuiTestCase() {
     }
 
     @Test
-    @Ignore("b/257936830 until bt APIs")
     fun onMetadataChanged_chargingStateNoDevice_doesNotExecuteBatteryCallbacks() {
         stylusManager.onMetadataChanged(
             bluetoothDevice,
@@ -419,7 +402,6 @@ class StylusManagerTest : SysuiTestCase() {
     }
 
     @Test
-    @Ignore("b/257936830 until bt APIs")
     fun onMetadataChanged_notChargingState_doesNotExecuteBatteryCallbacks() {
         stylusManager.onInputDeviceAdded(BT_STYLUS_DEVICE_ID)
 
@@ -434,7 +416,6 @@ class StylusManagerTest : SysuiTestCase() {
     }
 
     @Test
-    @Ignore("TODO(b/261826950): remove on main")
     fun onBatteryStateChanged_batteryPresent_stylusNeverUsed_updateEverUsedFlag() {
         whenever(batteryState.isPresent).thenReturn(true)
 
@@ -444,7 +425,6 @@ class StylusManagerTest : SysuiTestCase() {
     }
 
     @Test
-    @Ignore("TODO(b/261826950): remove on main")
     fun onBatteryStateChanged_batteryPresent_stylusNeverUsed_executesStylusFirstUsed() {
         whenever(batteryState.isPresent).thenReturn(true)
 
@@ -454,7 +434,6 @@ class StylusManagerTest : SysuiTestCase() {
     }
 
     @Test
-    @Ignore("TODO(b/261826950): remove on main")
     fun onBatteryStateChanged_batteryPresent_stylusUsed_doesNotUpdateEverUsedFlag() {
         whenever(inputManager.isStylusEverUsed(mContext)).thenReturn(true)
         whenever(batteryState.isPresent).thenReturn(true)
@@ -465,7 +444,6 @@ class StylusManagerTest : SysuiTestCase() {
     }
 
     @Test
-    @Ignore("TODO(b/261826950): remove on main")
     fun onBatteryStateChanged_batteryNotPresent_doesNotUpdateEverUsedFlag() {
         whenever(batteryState.isPresent).thenReturn(false)
 
