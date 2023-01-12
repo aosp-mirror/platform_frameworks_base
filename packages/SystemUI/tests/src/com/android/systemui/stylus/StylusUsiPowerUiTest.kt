@@ -180,12 +180,12 @@ class StylusUsiPowerUiTest : SysuiTestCase() {
 
     @Test
     @Ignore("TODO(b/257936830): get bt address once input api available")
-    fun refresh_hasConnectedBluetoothStylus_doesNotNotify() {
+    fun refresh_hasConnectedBluetoothStylus_cancelsNotification() {
         whenever(inputManager.inputDeviceIds).thenReturn(intArrayOf(0))
 
         stylusUsiPowerUi.refresh()
 
-        verifyNoMoreInteractions(notificationManager)
+        verify(notificationManager).cancel(R.string.stylus_battery_low_percentage)
     }
 
     @Test
