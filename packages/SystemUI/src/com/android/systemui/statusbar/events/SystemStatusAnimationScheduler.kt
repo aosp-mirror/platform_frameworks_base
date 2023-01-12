@@ -54,7 +54,7 @@ import javax.inject.Inject
  * their respective views based on the progress of the animator. Interpolation differences TBD
  */
 @SysUISingleton
-class SystemStatusAnimationScheduler @Inject constructor(
+open class SystemStatusAnimationScheduler @Inject constructor(
     private val coordinator: SystemEventCoordinator,
     private val chipAnimationController: SystemEventChipAnimationController,
     private val statusBarWindowController: StatusBarWindowController,
@@ -66,7 +66,7 @@ class SystemStatusAnimationScheduler @Inject constructor(
     companion object {
         private const val PROPERTY_ENABLE_IMMERSIVE_INDICATOR = "enable_immersive_indicator"
     }
-    private fun isImmersiveIndicatorEnabled(): Boolean {
+    public fun isImmersiveIndicatorEnabled(): Boolean {
         return DeviceConfig.getBoolean(DeviceConfig.NAMESPACE_PRIVACY,
                 PROPERTY_ENABLE_IMMERSIVE_INDICATOR, true)
     }
@@ -76,18 +76,22 @@ class SystemStatusAnimationScheduler @Inject constructor(
 
     /** True if the persistent privacy dot should be active */
     var hasPersistentDot = false
-        private set
+        protected set
 
     private var scheduledEvent: StatusEvent? = null
     private var cancelExecutionRunnable: Runnable? = null
     private val listeners = mutableSetOf<SystemStatusAnimationCallback>()
+
+    fun getListeners(): MutableSet<SystemStatusAnimationCallback> {
+        return listeners
+    }
 
     init {
         coordinator.attachScheduler(this)
         dumpManager.registerDumpable(TAG, this)
     }
 
-    fun onStatusEvent(event: StatusEvent) {
+    open fun onStatusEvent(event: StatusEvent) {
         // Ignore any updates until the system is up and running
         if (isTooEarly() || !isImmersiveIndicatorEnabled()) {
             return
@@ -139,7 +143,7 @@ class SystemStatusAnimationScheduler @Inject constructor(
         }
     }
 
-    private fun isTooEarly(): Boolean {
+    public fun isTooEarly(): Boolean {
         return systemClock.uptimeMillis() - Process.getStartUptimeMillis() < MIN_UPTIME
     }
 
