@@ -51432,6 +51432,7 @@ package android.view {
     method public boolean isAutoHandwritingEnabled();
     method public boolean isClickable();
     method public boolean isContextClickable();
+    method public boolean isCredential();
     method public boolean isDirty();
     method @Deprecated public boolean isDrawingCacheEnabled();
     method public boolean isDuplicateParentStateEnabled();
@@ -51665,6 +51666,7 @@ package android.view {
     method public void setImportantForAccessibility(int);
     method public void setImportantForAutofill(int);
     method public void setImportantForContentCapture(int);
+    method public void setIsCredential(boolean);
     method public void setKeepScreenOn(boolean);
     method public void setKeyboardNavigationCluster(boolean);
     method public void setLabelFor(@IdRes int);

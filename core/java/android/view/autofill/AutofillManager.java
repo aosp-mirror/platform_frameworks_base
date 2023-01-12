@@ -60,7 +60,6 @@ import android.os.Looper;
 import android.os.Parcelable;
 import android.os.RemoteException;
 import android.os.SystemClock;
-import android.provider.DeviceConfig;
 import android.service.autofill.AutofillService;
 import android.service.autofill.FillCallback;
 import android.service.autofill.FillEventHistory;
@@ -450,88 +449,6 @@ public final class AutofillManager {
     @Retention(RetentionPolicy.SOURCE)
     public @interface SmartSuggestionMode {}
 
-    /**
-     * {@code DeviceConfig} property used to set which Smart Suggestion modes for Augmented Autofill
-     * are available.
-     *
-     * @hide
-     */
-    @TestApi
-    public static final String DEVICE_CONFIG_AUTOFILL_SMART_SUGGESTION_SUPPORTED_MODES =
-            "smart_suggestion_supported_modes";
-
-    /**
-     * Sets how long (in ms) the augmented autofill service is bound while idle.
-     *
-     * <p>Use {@code 0} to keep it permanently bound.
-     *
-     * @hide
-     */
-    public static final String DEVICE_CONFIG_AUGMENTED_SERVICE_IDLE_UNBIND_TIMEOUT =
-            "augmented_service_idle_unbind_timeout";
-
-    /**
-     * Sets how long (in ms) the augmented autofill service request is killed if not replied.
-     *
-     * @hide
-     */
-    public static final String DEVICE_CONFIG_AUGMENTED_SERVICE_REQUEST_TIMEOUT =
-            "augmented_service_request_timeout";
-
-    /**
-     * Sets allowed list for the autofill compatibility mode.
-     *
-     * The list of packages is {@code ":"} colon delimited, and each entry has the name of the
-     * package and an optional list of url bar resource ids (the list is delimited by
-     * brackets&mdash{@code [} and {@code ]}&mdash and is also comma delimited).
-     *
-     * <p>For example, a list with 3 packages {@code p1}, {@code p2}, and {@code p3}, where
-     * package {@code p1} have one id ({@code url_bar}, {@code p2} has none, and {@code p3 }
-     * have 2 ids {@code url_foo} and {@code url_bas}) would be
-     * {@code p1[url_bar]:p2:p3[url_foo,url_bas]}
-     *
-     * @hide
-     */
-    @TestApi
-    public static final String DEVICE_CONFIG_AUTOFILL_COMPAT_MODE_ALLOWED_PACKAGES =
-            "compat_mode_allowed_packages";
-
-    /**
-     * Sets the fill dialog feature enabled or not.
-     *
-     * @hide
-     */
-    @TestApi
-    public static final String DEVICE_CONFIG_AUTOFILL_DIALOG_ENABLED =
-            "autofill_dialog_enabled";
-
-    /**
-     * Sets the autofill hints allowed list for the fields that can trigger the fill dialog
-     * feature at Activity starting.
-     *
-     * The list of autofill hints is {@code ":"} colon delimited.
-     *
-     * <p>For example, a list with 3 hints {@code password}, {@code phone}, and
-     * {@code emailAddress}, would be {@code password:phone:emailAddress}
-     *
-     * Note: By default the password field is enabled even there is no password hint in the list
-     *
-     * @see View#setAutofillHints(String...)
-     * @hide
-     */
-    public static final String DEVICE_CONFIG_AUTOFILL_DIALOG_HINTS =
-            "autofill_dialog_hints";
-
-    /**
-     * Sets a value of delay time to show up the inline tooltip view.
-     *
-     * @hide
-     */
-    public static final String DEVICE_CONFIG_AUTOFILL_TOOLTIP_SHOW_UP_DELAY =
-            "autofill_inline_tooltip_first_show_delay";
-
-    private static final String DIALOG_HINTS_DELIMITER = ":";
-
     /** @hide */
     public static final int RESULT_OK = 0;
     /** @hide */
@@ -633,9 +550,6 @@ public final class AutofillManager {
      * {@hide}
      */
     public static final int NO_SESSION = Integer.MAX_VALUE;
-
-    private static final boolean HAS_FILL_DIALOG_UI_FEATURE_DEFAULT = false;
-    private static final String FILL_DIALOG_ENABLED_DEFAULT_HINTS = "";
 
     private final IAutoFillManager mService;
 
@@ -891,11 +805,8 @@ public final class AutofillManager {
         mOptions = context.getAutofillOptions();
         mIsFillRequested = new AtomicBoolean(false);
 
-        mIsFillDialogEnabled = DeviceConfig.getBoolean(
-                DeviceConfig.NAMESPACE_AUTOFILL,
-                DEVICE_CONFIG_AUTOFILL_DIALOG_ENABLED,
-                HAS_FILL_DIALOG_UI_FEATURE_DEFAULT);
-        mFillDialogEnabledHints = getFillDialogEnabledHints();
+        mIsFillDialogEnabled = AutofillFeatureFlags.isFillDialogEnabled();
+        mFillDialogEnabledHints = AutofillFeatureFlags.getFillDialogEnabledHints();
         if (sDebug) {
             Log.d(TAG, "Fill dialog is enabled:" + mIsFillDialogEnabled
                     + ", hints=" + Arrays.toString(mFillDialogEnabledHints));
@@ -905,19 +816,6 @@ public final class AutofillManager {
             sDebug = (mOptions.loggingLevel & FLAG_ADD_CLIENT_DEBUG) != 0;
             sVerbose = (mOptions.loggingLevel & FLAG_ADD_CLIENT_VERBOSE) != 0;
         }
-    }
-
-    private String[] getFillDialogEnabledHints() {
-        final String dialogHints = DeviceConfig.getString(
-                DeviceConfig.NAMESPACE_AUTOFILL,
-                DEVICE_CONFIG_AUTOFILL_DIALOG_HINTS,
-                FILL_DIALOG_ENABLED_DEFAULT_HINTS);
-        if (TextUtils.isEmpty(dialogHints)) {
-            return new String[0];
-        }
-
-        return ArrayUtils.filter(dialogHints.split(DIALOG_HINTS_DELIMITER), String[]::new,
-                (str) -> !TextUtils.isEmpty(str));
     }
 
     /**
@@ -1190,16 +1088,28 @@ public final class AutofillManager {
     }
 
     /**
-     * The {@link #DEVICE_CONFIG_AUTOFILL_DIALOG_ENABLED} is {@code true} or the view have
-     * the allowed autofill hints, performs a fill request to know there is any field supported
-     * fill dialog.
+     * The {@link AutofillFeatureFlags#DEVICE_CONFIG_AUTOFILL_DIALOG_ENABLED} is {@code true} or
+     * the view have the allowed autofill hints, performs a fill request to know there is any field
+     * supported fill dialog.
      *
      * @hide
      */
     public void notifyViewEnteredForFillDialog(View v) {
+        if (sDebug) {
+            Log.d(TAG, "notifyViewEnteredForFillDialog:" + v.getAutofillId());
+        }
         if (!hasAutofillFeature()) {
             return;
         }
+        if (AutofillFeatureFlags.isFillDialogDisabledForCredentialManager()
+                && v.isCredential()) {
+            if (sDebug) {
+                Log.d(TAG, "Ignoring Fill Dialog request since important for credMan:"
+                        + v.getAutofillId().toString());
+            }
+            return;
+        }
+
         synchronized (mLock) {
             if (mTrackedViews != null) {
                 // To support the fill dialog can show for the autofillable Views in
@@ -1227,8 +1137,8 @@ public final class AutofillManager {
             synchronized (mLock) {
                 // To match the id of the IME served view, used AutofillId.NO_AUTOFILL_ID on prefill
                 // request, because IME will reset the id of IME served view to 0 when activity
-                // start and does not focus on any view. If the id of the prefill request is
-                // not match to the IME served view's, Autofill will be blocking to wait inline
+                // start and does not focus on any view. If the id of the prefill request does
+                // not match the IME served view's, Autofill will be blocking to wait inline
                 // request from the IME.
                 notifyViewEnteredLocked(/* view= */ null, AutofillId.NO_AUTOFILL_ID,
                         /* bounds= */ null,  /* value= */ null, flags);
@@ -4075,6 +3985,7 @@ public final class AutofillManager {
             }
         }
 
+        @Override
         public void notifyFillDialogTriggerIds(List<AutofillId> ids) {
             final AutofillManager afm = mAfm.get();
             if (afm != null) {
