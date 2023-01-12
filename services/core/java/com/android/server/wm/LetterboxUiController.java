@@ -17,12 +17,18 @@
 package com.android.server.wm;
 
 import static android.app.WindowConfiguration.WINDOWING_MODE_FULLSCREEN;
+import static android.content.pm.ActivityInfo.OVERRIDE_CAMERA_COMPAT_DISABLE_FORCE_ROTATION;
+import static android.content.pm.ActivityInfo.OVERRIDE_CAMERA_COMPAT_DISABLE_REFRESH;
+import static android.content.pm.ActivityInfo.OVERRIDE_CAMERA_COMPAT_ENABLE_REFRESH_VIA_PAUSE;
 import static android.content.pm.ActivityInfo.OVERRIDE_ENABLE_COMPAT_IGNORE_REQUESTED_ORIENTATION;
 import static android.content.pm.ActivityInfo.SCREEN_ORIENTATION_UNSPECIFIED;
 import static android.content.pm.ActivityInfo.screenOrientationToString;
 import static android.content.res.Configuration.ORIENTATION_LANDSCAPE;
 import static android.content.res.Configuration.ORIENTATION_PORTRAIT;
 import static android.view.WindowManager.LayoutParams.FLAG_SHOW_WALLPAPER;
+import static android.view.WindowManager.PROPERTY_CAMERA_COMPAT_ALLOW_FORCE_ROTATION;
+import static android.view.WindowManager.PROPERTY_CAMERA_COMPAT_ALLOW_REFRESH;
+import static android.view.WindowManager.PROPERTY_CAMERA_COMPAT_ENABLE_REFRESH_VIA_PAUSE;
 import static android.view.WindowManager.PROPERTY_COMPAT_IGNORE_REQUESTED_ORIENTATION;
 
 import static com.android.internal.util.FrameworkStatsLog.APP_COMPAT_STATE_CHANGED__LETTERBOX_POSITION__BOTTOM;
@@ -132,6 +138,15 @@ final class LetterboxUiController {
     @Nullable
     private Letterbox mLetterbox;
 
+    @Nullable
+    private final Boolean mBooleanPropertyCameraCompatAllowForceRotation;
+
+    @Nullable
+    private final Boolean mBooleanPropertyCameraCompatAllowRefresh;
+
+    @Nullable
+    private final Boolean mBooleanPropertyCameraCompatEnableRefreshViaPause;
+
     // Whether activity "refresh" was requested but not finished in
     // ActivityRecord#activityResumedLocked following the camera compat force rotation in
     // DisplayRotationCompatPolicy.
@@ -154,8 +169,33 @@ final class LetterboxUiController {
                 readComponentProperty(packageManager, mActivityRecord.packageName,
                         mLetterboxConfiguration::isPolicyForIgnoringRequestedOrientationEnabled,
                         PROPERTY_COMPAT_IGNORE_REQUESTED_ORIENTATION);
+        mBooleanPropertyCameraCompatAllowForceRotation =
+                readComponentProperty(packageManager, mActivityRecord.packageName,
+                        () -> mLetterboxConfiguration.isCameraCompatTreatmentEnabled(
+                                /* checkDeviceConfig */ true),
+                        PROPERTY_CAMERA_COMPAT_ALLOW_FORCE_ROTATION);
+        mBooleanPropertyCameraCompatAllowRefresh =
+                readComponentProperty(packageManager, mActivityRecord.packageName,
+                        () -> mLetterboxConfiguration.isCameraCompatTreatmentEnabled(
+                                /* checkDeviceConfig */ true),
+                        PROPERTY_CAMERA_COMPAT_ALLOW_REFRESH);
+        mBooleanPropertyCameraCompatEnableRefreshViaPause =
+                readComponentProperty(packageManager, mActivityRecord.packageName,
+                        () -> mLetterboxConfiguration.isCameraCompatTreatmentEnabled(
+                                /* checkDeviceConfig */ true),
+                        PROPERTY_CAMERA_COMPAT_ENABLE_REFRESH_VIA_PAUSE);
     }
 
+    /**
+     * Reads a {@link Boolean} component property fot a given {@code packageName} and a {@code
+     * propertyName}. Returns {@code null} if {@code gatingCondition} is {@code false} or if the
+     * property isn't specified for the package.
+     *
+     * <p>Return value is {@link Boolean} rather than {@code boolean} so we can know when the
+     * property is unset. Particularly, when this returns {@code null}, {@link
+     * #shouldEnableWithOverrideAndProperty} will check the value of override for the final
+     * decision.
+     */
     @Nullable
     private static Boolean readComponentProperty(PackageManager packageManager, String packageName,
             BooleanSupplier gatingCondition, String propertyName) {
@@ -210,15 +250,11 @@ final class LetterboxUiController {
      * </ul>
      */
     boolean shouldIgnoreRequestedOrientation(@ScreenOrientation int requestedOrientation) {
-        if (!mLetterboxConfiguration.isPolicyForIgnoringRequestedOrientationEnabled()) {
-            return false;
-        }
-        if (Boolean.FALSE.equals(mBooleanPropertyIgnoreRequestedOrientation)) {
-            return false;
-        }
-        if (!Boolean.TRUE.equals(mBooleanPropertyIgnoreRequestedOrientation)
-                && !mActivityRecord.info.isChangeEnabled(
-                        OVERRIDE_ENABLE_COMPAT_IGNORE_REQUESTED_ORIENTATION)) {
+        if (!shouldEnableWithOverrideAndProperty(
+                /* gatingCondition */ mLetterboxConfiguration
+                        ::isPolicyForIgnoringRequestedOrientationEnabled,
+                OVERRIDE_ENABLE_COMPAT_IGNORE_REQUESTED_ORIENTATION,
+                mBooleanPropertyIgnoreRequestedOrientation)) {
             return false;
         }
         if (mIsRelauchingAfterRequestedOrientationChanged) {
@@ -260,6 +296,109 @@ final class LetterboxUiController {
 
     void setIsRefreshAfterRotationRequested(boolean isRequested) {
         mIsRefreshAfterRotationRequested = isRequested;
+    }
+
+    /**
+     * Whether activity is eligible for activity "refresh" after camera compat force rotation
+     * treatment. See {@link DisplayRotationCompatPolicy} for context.
+     *
+     * <p>This treatment is enabled when the following conditions are met:
+     * <ul>
+     *     <li>Flag gating the camera compat treatment is enabled.
+     *     <li>Activity isn't opted out by the device manufacturer with override or by the app
+     *     developers with the component property.
+     * </ul>
+     */
+    boolean shouldRefreshActivityForCameraCompat() {
+        return shouldEnableWithOptOutOverrideAndProperty(
+                /* gatingCondition */ () -> mLetterboxConfiguration
+                        .isCameraCompatTreatmentEnabled(/* checkDeviceConfig */ true),
+                OVERRIDE_CAMERA_COMPAT_DISABLE_REFRESH,
+                mBooleanPropertyCameraCompatAllowRefresh);
+    }
+
+    /**
+     * Whether activity should be "refreshed" after the camera compat force rotation treatment
+     * using the "resumed -> paused -> resumed" cycle rather than the "resumed -> ... -> stopped
+     * -> ... -> resumed" cycle. See {@link DisplayRotationCompatPolicy} for context.
+     *
+     * <p>This treatment is enabled when the following conditions are met:
+     * <ul>
+     *     <li>Flag gating the camera compat treatment is enabled.
+     *     <li>Activity "refresh" via "resumed -> paused -> resumed" cycle isn't disabled with the
+     *     component property by the app developers.
+     *     <li>Activity "refresh" via "resumed -> paused -> resumed" cycle is enabled by the device
+     *     manufacturer with override / by the app developers with the component property.
+     * </ul>
+     */
+    boolean shouldRefreshActivityViaPauseForCameraCompat() {
+        return shouldEnableWithOverrideAndProperty(
+                /* gatingCondition */ () -> mLetterboxConfiguration
+                        .isCameraCompatTreatmentEnabled(/* checkDeviceConfig */ true),
+                OVERRIDE_CAMERA_COMPAT_ENABLE_REFRESH_VIA_PAUSE,
+                mBooleanPropertyCameraCompatEnableRefreshViaPause);
+    }
+
+    /**
+     * Whether activity is eligible for camera compat force rotation treatment. See {@link
+     * DisplayRotationCompatPolicy} for context.
+     *
+     * <p>This treatment is enabled when the following conditions are met:
+     * <ul>
+     *     <li>Flag gating the camera compat treatment is enabled.
+     *     <li>Activity isn't opted out by the device manufacturer with override or by the app
+     *     developers with the component property.
+     * </ul>
+     */
+    boolean shouldForceRotateForCameraCompat() {
+        return shouldEnableWithOptOutOverrideAndProperty(
+                /* gatingCondition */ () -> mLetterboxConfiguration
+                        .isCameraCompatTreatmentEnabled(/* checkDeviceConfig */ true),
+                OVERRIDE_CAMERA_COMPAT_DISABLE_FORCE_ROTATION,
+                mBooleanPropertyCameraCompatAllowForceRotation);
+    }
+
+    /**
+     * Returns {@code true} when the following conditions are met:
+     * <ul>
+     *     <li>{@code gatingCondition} isn't {@code false}
+     *     <li>OEM didn't opt out with a {@code overrideChangeId} override
+     *     <li>App developers didn't opt out with a component {@code property}
+     * </ul>
+     *
+     * <p>This is used for the treatments that are enabled based with the heuristic but can be
+     * disabled on per-app basis by OEMs or app developers.
+     */
+    private boolean shouldEnableWithOptOutOverrideAndProperty(BooleanSupplier gatingCondition,
+            long overrideChangeId, Boolean property) {
+        if (!gatingCondition.getAsBoolean()) {
+            return false;
+        }
+        return !Boolean.FALSE.equals(property)
+                && !mActivityRecord.info.isChangeEnabled(overrideChangeId);
+    }
+
+    /**
+     * Returns {@code true} when the following conditions are met:
+     * <ul>
+     *     <li>{@code gatingCondition} isn't {@code false}
+     *     <li>App developers didn't opt out with a component {@code property}
+     *     <li>App developers opted in with a component {@code property} or an OEM opted in with a
+     *     component {@code property}
+     * </ul>
+     *
+     * <p>This is used for the treatments that are enabled only on per-app basis.
+     */
+    private boolean shouldEnableWithOverrideAndProperty(BooleanSupplier gatingCondition,
+            long overrideChangeId, Boolean property) {
+        if (!gatingCondition.getAsBoolean()) {
+            return false;
+        }
+        if (Boolean.FALSE.equals(property)) {
+            return false;
+        }
+        return Boolean.TRUE.equals(property)
+                || mActivityRecord.info.isChangeEnabled(overrideChangeId);
     }
 
     boolean hasWallpaperBackgroundForLetterbox() {

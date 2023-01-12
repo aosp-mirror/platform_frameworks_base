@@ -26,9 +26,11 @@ import com.android.systemui.log.dagger.BouncerLog
 import com.android.systemui.log.table.TableLogBuffer
 import com.android.systemui.log.table.logDiffsForTable
 import com.android.systemui.statusbar.phone.KeyguardBouncer
+import com.android.systemui.util.time.SystemClock
 import javax.inject.Inject
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.filterNotNull
 import kotlinx.coroutines.flow.launchIn
@@ -44,6 +46,7 @@ class KeyguardBouncerRepository
 @Inject
 constructor(
     private val viewMediatorCallback: ViewMediatorCallback,
+    private val clock: SystemClock,
     @Application private val applicationScope: CoroutineScope,
     @BouncerLog private val buffer: TableLogBuffer,
 ) {
@@ -94,12 +97,33 @@ constructor(
         setUpLogging()
     }
 
+    /** Values associated with the AlternateBouncer */
+    private val _isAlternateBouncerVisible = MutableStateFlow(false)
+    val isAlternateBouncerVisible = _isAlternateBouncerVisible.asStateFlow()
+    var lastAlternateBouncerVisibleTime: Long = NOT_VISIBLE
+    private val _isAlternateBouncerUIAvailable = MutableStateFlow<Boolean>(false)
+    val isAlternateBouncerUIAvailable: StateFlow<Boolean> =
+        _isAlternateBouncerUIAvailable.asStateFlow()
+
     fun setPrimaryScrimmed(isScrimmed: Boolean) {
         _primaryBouncerScrimmed.value = isScrimmed
     }
 
     fun setPrimaryVisible(isVisible: Boolean) {
         _primaryBouncerVisible.value = isVisible
+    }
+
+    fun setAlternateVisible(isVisible: Boolean) {
+        if (isVisible && !_isAlternateBouncerVisible.value) {
+            lastAlternateBouncerVisibleTime = clock.uptimeMillis()
+        } else if (!isVisible) {
+            lastAlternateBouncerVisibleTime = NOT_VISIBLE
+        }
+        _isAlternateBouncerVisible.value = isVisible
+    }
+
+    fun setAlternateBouncerUIAvailable(isAvailable: Boolean) {
+        _isAlternateBouncerUIAvailable.value = isAvailable
     }
 
     fun setPrimaryShow(keyguardBouncerModel: KeyguardBouncerModel?) {
@@ -201,5 +225,9 @@ constructor(
         resourceUpdateRequests
             .logDiffsForTable(buffer, "", "ResourceUpdateRequests", false)
             .launchIn(applicationScope)
+    }
+
+    companion object {
+        private const val NOT_VISIBLE = -1L
     }
 }

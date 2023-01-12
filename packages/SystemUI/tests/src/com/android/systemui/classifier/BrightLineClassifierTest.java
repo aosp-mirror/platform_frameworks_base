@@ -106,6 +106,7 @@ public class BrightLineClassifierTest extends SysuiTestCase {
         mClassifiers.add(mClassifierB);
         when(mFalsingDataProvider.getRecentMotionEvents()).thenReturn(mMotionEventList);
         when(mKeyguardStateController.isShowing()).thenReturn(true);
+        when(mFalsingDataProvider.isFolded()).thenReturn(true);
         mBrightLineFalsingManager = new BrightLineFalsingManager(mFalsingDataProvider,
                 mMetricsLogger, mClassifiers, mSingleTapClassfier, mLongTapClassifier,
                 mDoubleTapClassifier, mHistoryTracker, mKeyguardStateController,
@@ -121,6 +122,7 @@ public class BrightLineClassifierTest extends SysuiTestCase {
         mGestureFinalizedListener = gestureCompleteListenerCaptor.getValue();
         mFakeFeatureFlags.set(Flags.FALSING_FOR_LONG_TAPS, true);
         mFakeFeatureFlags.set(Flags.MEDIA_FALSING_PENALTY, true);
+        mFakeFeatureFlags.set(Flags.FALSING_OFF_FOR_UNFOLDED, true);
     }
 
     @Test

@@ -57,7 +57,9 @@ constructor(
      * If the keyguard is locked, notes will open as a full screen experience. A locked device has
      * no contextual information which let us use the whole screen space available.
      *
-     * If no in multi-window or the keyguard is unlocked, notes will open as a floating experience.
+     * If no in multi-window or the keyguard is unlocked, notes will open as a bubble OR it will be
+     * collapsed if the notes bubble is already opened.
+     *
      * That will let users open other apps in full screen, and take contextual notes.
      */
     fun showNoteTask(isInMultiWindowMode: Boolean = false) {
@@ -75,7 +77,7 @@ constructor(
             context.startActivity(intent)
         } else {
             // TODO(b/254606432): Should include Intent.EXTRA_FLOATING_WINDOW_MODE parameter.
-            bubbles.showAppBubble(intent)
+            bubbles.showOrHideAppBubble(intent)
         }
     }
 

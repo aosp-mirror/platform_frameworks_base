@@ -41,6 +41,7 @@ import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.dagger.qualifiers.Main
 import com.android.systemui.dreams.DreamOverlayStateController
 import com.android.systemui.keyguard.WakefulnessLifecycle
+import com.android.systemui.media.controls.pipeline.MediaDataManager
 import com.android.systemui.media.dream.MediaDreamComplication
 import com.android.systemui.plugins.statusbar.StatusBarStateController
 import com.android.systemui.shade.ShadeStateEvents
@@ -93,6 +94,7 @@ constructor(
     private val keyguardStateController: KeyguardStateController,
     private val bypassController: KeyguardBypassController,
     private val mediaCarouselController: MediaCarouselController,
+    private val mediaManager: MediaDataManager,
     private val keyguardViewController: KeyguardViewController,
     private val dreamOverlayStateController: DreamOverlayStateController,
     configurationController: ConfigurationController,
@@ -224,9 +226,9 @@ constructor(
 
     private var inSplitShade = false
 
-    /** Is there any active media in the carousel? */
-    private var hasActiveMedia: Boolean = false
-        get() = mediaHosts.get(LOCATION_QQS)?.visible == true
+    /** Is there any active media or recommendation in the carousel? */
+    private var hasActiveMediaOrRecommendation: Boolean = false
+        get() = mediaManager.hasActiveMediaOrRecommendation()
 
     /** Are we currently waiting on an animation to start? */
     private var animationPending: Boolean = false
@@ -582,12 +584,8 @@ constructor(
         val viewHost = createUniqueObjectHost()
         mediaObject.hostView = viewHost
         mediaObject.addVisibilityChangeListener {
-            // If QQS changes visibility, we need to force an update to ensure the transition
-            // goes into the correct state
-            val stateUpdate = mediaObject.location == LOCATION_QQS
-
             // Never animate because of a visibility change, only state changes should do that
-            updateDesiredLocation(forceNoAnimation = true, forceStateUpdate = stateUpdate)
+            updateDesiredLocation(forceNoAnimation = true)
         }
         mediaHosts[mediaObject.location] = mediaObject
         if (mediaObject.location == desiredLocation) {
@@ -908,7 +906,7 @@ constructor(
     fun isCurrentlyInGuidedTransformation(): Boolean {
         return hasValidStartAndEndLocations() &&
             getTransformationProgress() >= 0 &&
-            areGuidedTransitionHostsVisible()
+            (areGuidedTransitionHostsVisible() || !hasActiveMediaOrRecommendation)
     }
 
     private fun hasValidStartAndEndLocations(): Boolean {
@@ -965,7 +963,7 @@ constructor(
     private fun getQSTransformationProgress(): Float {
         val currentHost = getHost(desiredLocation)
         val previousHost = getHost(previousLocation)
-        if (hasActiveMedia && (currentHost?.location == LOCATION_QS && !inSplitShade)) {
+        if (currentHost?.location == LOCATION_QS && !inSplitShade) {
             if (previousHost?.location == LOCATION_QQS) {
                 if (previousHost.visible || statusbarState != StatusBarState.KEYGUARD) {
                     return qsExpansion
@@ -1028,7 +1026,8 @@ constructor(
     private fun updateHostAttachment() =
         traceSection("MediaHierarchyManager#updateHostAttachment") {
             var newLocation = resolveLocationForFading()
-            var canUseOverlay = !isCurrentlyFading()
+            // Don't use the overlay when fading or when we don't have active media
+            var canUseOverlay = !isCurrentlyFading() && hasActiveMediaOrRecommendation
             if (isCrossFadeAnimatorRunning) {
                 if (
                     getHost(newLocation)?.visible == true &&
@@ -1122,7 +1121,6 @@ constructor(
                 dreamOverlayActive && dreamMediaComplicationActive -> LOCATION_DREAM_OVERLAY
                 (qsExpansion > 0.0f || inSplitShade) && !onLockscreen -> LOCATION_QS
                 qsExpansion > 0.4f && onLockscreen -> LOCATION_QS
-                !hasActiveMedia -> LOCATION_QS
                 onLockscreen && isSplitShadeExpanding() -> LOCATION_QS
                 onLockscreen && isTransformingToFullShadeAndInQQS() -> LOCATION_QQS
                 onLockscreen && allowMediaPlayerOnLockScreen -> LOCATION_LOCKSCREEN

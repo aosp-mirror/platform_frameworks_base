@@ -103,6 +103,7 @@ import com.android.systemui.flags.FeatureFlags;
 import com.android.systemui.fragments.FragmentHostManager;
 import com.android.systemui.fragments.FragmentService;
 import com.android.systemui.keyguard.KeyguardUnlockAnimationController;
+import com.android.systemui.keyguard.domain.interactor.AlternateBouncerInteractor;
 import com.android.systemui.keyguard.domain.interactor.KeyguardBottomAreaInteractor;
 import com.android.systemui.keyguard.domain.interactor.KeyguardTransitionInteractor;
 import com.android.systemui.keyguard.ui.viewmodel.DreamingToLockscreenTransitionViewModel;
@@ -300,6 +301,7 @@ public class NotificationPanelViewControllerTest extends SysuiTestCase {
 
     @Mock private KeyguardTransitionInteractor mKeyguardTransitionInteractor;
     @Mock private CoroutineDispatcher mMainDispatcher;
+    @Mock private AlternateBouncerInteractor mAlternateBouncerInteractor;
     @Mock private MotionEvent mDownMotionEvent;
     @Captor
     private ArgumentCaptor<NotificationStackScrollLayout.OnEmptySpaceClickListener>
@@ -516,6 +518,7 @@ public class NotificationPanelViewControllerTest extends SysuiTestCase {
                 systemClock,
                 mKeyguardBottomAreaViewModel,
                 mKeyguardBottomAreaInteractor,
+                mAlternateBouncerInteractor,
                 mDreamingToLockscreenTransitionViewModel,
                 mOccludedToLockscreenTransitionViewModel,
                 mLockscreenToDreamingTransitionViewModel,
