@@ -1020,6 +1020,17 @@ public class SmsMessage {
     }
 
     /**
+     * Return the encoding type of a received SMS message, which is specified using ENCODING_*
+     * GSM: defined in android.telephony.SmsConstants
+     * CDMA: defined in android.telephony.cdma.UserData
+     *
+     * @hide
+     */
+    public int getReceivedEncodingType() {
+        return mWrappedSmsMessage.getReceivedEncodingType();
+    }
+
+    /**
      * Determines whether or not to use CDMA format for MO SMS.
      * If SMS over IMS is supported, then format is based on IMS SMS format,
      * otherwise format is based on current phone type.
