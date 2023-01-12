@@ -609,6 +609,7 @@ class InstallingSession {
                 // processApkInstallRequests() fails. Need a way to keep info stored in apexd
                 // and PMS in sync in the face of install failures.
                 request.setApexInfo(apexInfo);
+                request.setApexModuleName(apexInfo.moduleName);
                 mPm.mHandler.post(() -> processApkInstallRequests(true, requests));
                 return;
             }

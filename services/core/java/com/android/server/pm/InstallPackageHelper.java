@@ -367,9 +367,10 @@ final class InstallPackageHelper {
 
         if ((scanFlags & SCAN_AS_APK_IN_APEX) != 0) {
             boolean isFactory = (scanFlags & SCAN_AS_FACTORY) != 0;
-            pkgSetting.getPkgState().setApkInApex(true);
             pkgSetting.getPkgState().setApkInUpdatedApex(!isFactory);
         }
+
+        pkgSetting.getPkgState().setApexModuleName(request.getApexModuleName());
 
         // TODO(toddke): Consider a method specifically for modifying the Package object
         // post scan; or, moving this stuff out of the Package object since it has nothing
@@ -1716,6 +1717,7 @@ final class InstallPackageHelper {
                                 + ", old=" + oldPackage);
                     }
                     request.setReturnCode(PackageManager.INSTALL_SUCCEEDED);
+                    request.setApexModuleName(oldPackageState.getApexModuleName());
                     targetParseFlags = systemParseFlags;
                     targetScanFlags = systemScanFlags;
                 } else { // non system replace
@@ -3172,7 +3174,7 @@ final class InstallPackageHelper {
         final RemovePackageHelper removePackageHelper = new RemovePackageHelper(mPm);
         removePackageHelper.removePackage(stubPkg, true /*chatty*/);
         try {
-            return scanSystemPackageTracedLI(scanFile, parseFlags, scanFlags);
+            return scanSystemPackageTracedLI(scanFile, parseFlags, scanFlags, null);
         } catch (PackageManagerException e) {
             Slog.w(TAG, "Failed to install compressed system package:" + stubPkg.getPackageName(),
                     e);
@@ -3304,7 +3306,7 @@ final class InstallPackageHelper {
                         | ParsingPackageUtils.PARSE_IS_SYSTEM_DIR;
         @PackageManagerService.ScanFlags int scanFlags = mPm.getSystemPackageScanFlags(codePath);
         final AndroidPackage pkg = scanSystemPackageTracedLI(
-                codePath, parseFlags, scanFlags);
+                codePath, parseFlags, scanFlags, null);
 
         synchronized (mPm.mLock) {
             PackageSetting pkgSetting = mPm.mSettings.getPackageLPr(pkg.getPackageName());
@@ -3484,7 +3486,7 @@ final class InstallPackageHelper {
                 try {
                     final File codePath = new File(pkg.getPath());
                     synchronized (mPm.mInstallLock) {
-                        scanSystemPackageTracedLI(codePath, 0, scanFlags);
+                        scanSystemPackageTracedLI(codePath, 0, scanFlags, null);
                     }
                 } catch (PackageManagerException e) {
                     Slog.e(TAG, "Failed to parse updated, ex-system package: "
@@ -3563,7 +3565,8 @@ final class InstallPackageHelper {
 
             if (throwable == null) {
                 try {
-                    addForInitLI(parseResult.parsedPackage, newParseFlags, newScanFlags, null);
+                    addForInitLI(parseResult.parsedPackage, newParseFlags, newScanFlags, null,
+                            new ApexManager.ActiveApexInfo(ai));
                     AndroidPackage pkg = parseResult.parsedPackage.hideAsFinal();
                     if (ai.isFactory && !ai.isActive) {
                         disableSystemPackageLPw(pkg);
@@ -3585,8 +3588,8 @@ final class InstallPackageHelper {
 
     @GuardedBy({"mPm.mInstallLock", "mPm.mLock"})
     public void installPackagesFromDir(File scanDir, int parseFlags,
-            int scanFlags, PackageParser2 packageParser,
-            ExecutorService executorService) {
+            int scanFlags, PackageParser2 packageParser, ExecutorService executorService,
+            @Nullable ApexManager.ActiveApexInfo apexInfo) {
         final File[] files = scanDir.listFiles();
         if (ArrayUtils.isEmpty(files)) {
             Log.d(TAG, "No files in app dir " + scanDir);
@@ -3634,7 +3637,7 @@ final class InstallPackageHelper {
                 }
                 try {
                     addForInitLI(parseResult.parsedPackage, parseFlags, scanFlags,
-                            new UserHandle(UserHandle.USER_SYSTEM));
+                            new UserHandle(UserHandle.USER_SYSTEM), apexInfo);
                 } catch (PackageManagerException e) {
                     errorCode = e.error;
                     errorMsg = "Failed to scan " + parseResult.scanFile + ": " + e.getMessage();
@@ -3697,7 +3700,7 @@ final class InstallPackageHelper {
             try {
                 synchronized (mPm.mInstallLock) {
                     final AndroidPackage newPkg = scanSystemPackageTracedLI(
-                            scanFile, reparseFlags, rescanFlags);
+                            scanFile, reparseFlags, rescanFlags, null);
                     // We rescanned a stub, add it to the list of stubbed system packages
                     if (newPkg.isStub()) {
                         stubSystemApps.add(packageName);
@@ -3716,10 +3719,11 @@ final class InstallPackageHelper {
      */
     @GuardedBy("mPm.mInstallLock")
     public AndroidPackage scanSystemPackageTracedLI(File scanFile, final int parseFlags,
-            int scanFlags) throws PackageManagerException {
+            int scanFlags, @Nullable ApexManager.ActiveApexInfo apexInfo)
+            throws PackageManagerException {
         Trace.traceBegin(TRACE_TAG_PACKAGE_MANAGER, "scanPackage [" + scanFile.toString() + "]");
         try {
-            return scanSystemPackageLI(scanFile, parseFlags, scanFlags);
+            return scanSystemPackageLI(scanFile, parseFlags, scanFlags, apexInfo);
         } finally {
             Trace.traceEnd(TRACE_TAG_PACKAGE_MANAGER);
         }
@@ -3730,7 +3734,8 @@ final class InstallPackageHelper {
      *  Returns {@code null} in case of errors and the error code is stored in mLastScanError
      */
     @GuardedBy("mPm.mInstallLock")
-    private AndroidPackage scanSystemPackageLI(File scanFile, int parseFlags, int scanFlags)
+    private AndroidPackage scanSystemPackageLI(File scanFile, int parseFlags, int scanFlags,
+            @Nullable ApexManager.ActiveApexInfo apexInfo)
             throws PackageManagerException {
         if (DEBUG_INSTALL) Slog.d(TAG, "Parsing: " + scanFile);
 
@@ -3748,7 +3753,7 @@ final class InstallPackageHelper {
         }
 
         return addForInitLI(parsedPackage, parseFlags, scanFlags,
-                new UserHandle(UserHandle.USER_SYSTEM));
+                new UserHandle(UserHandle.USER_SYSTEM), apexInfo);
     }
 
     /**
@@ -3768,7 +3773,26 @@ final class InstallPackageHelper {
     private AndroidPackage addForInitLI(ParsedPackage parsedPackage,
             @ParsingPackageUtils.ParseFlags int parseFlags,
             @PackageManagerService.ScanFlags int scanFlags,
-            @Nullable UserHandle user) throws PackageManagerException {
+            @Nullable UserHandle user, @Nullable ApexManager.ActiveApexInfo activeApexInfo)
+            throws PackageManagerException {
+        PackageSetting disabledPkgSetting;
+        synchronized (mPm.mLock) {
+            disabledPkgSetting =
+                    mPm.mSettings.getDisabledSystemPkgLPr(parsedPackage.getPackageName());
+            if (activeApexInfo != null && disabledPkgSetting != null) {
+                // When a disabled system package is scanned, its final PackageSetting is actually
+                // skipped and not added to any data structures, instead relying on the disabled
+                // setting read from the persisted Settings XML file. This persistence does not
+                // include the APEX module name, so here, re-set it from the active APEX info.
+                //
+                // This also has the (beneficial) side effect where if a package disappears from an
+                // APEX, leaving only a /data copy, it will lose its apexModuleName.
+                //
+                // This must be done before scanSystemPackageLI as that will throw in the case of a
+                // system -> data package.
+                disabledPkgSetting.setApexModuleName(activeApexInfo.apexModuleName);
+            }
+        }
 
         final Pair<ScanResult, Boolean> scanResultPair = scanSystemPackageLI(
                 parsedPackage, parseFlags, scanFlags, user);
@@ -3776,6 +3800,24 @@ final class InstallPackageHelper {
         boolean shouldHideSystemApp = scanResultPair.second;
         final InstallRequest installRequest = new InstallRequest(
                 parsedPackage, parseFlags, scanFlags, user, scanResult);
+
+        String existingApexModuleName = null;
+        synchronized (mPm.mLock) {
+            var existingPkgSetting = mPm.mSettings.getPackageLPr(parsedPackage.getPackageName());
+            if (existingPkgSetting != null) {
+                existingApexModuleName = existingPkgSetting.getApexModuleName();
+            }
+        }
+
+        if (activeApexInfo != null) {
+            installRequest.setApexModuleName(activeApexInfo.apexModuleName);
+        } else {
+            if (disabledPkgSetting != null) {
+                installRequest.setApexModuleName(disabledPkgSetting.getApexModuleName());
+            } else if (existingApexModuleName != null) {
+                installRequest.setApexModuleName(existingApexModuleName);
+            }
+        }
 
         synchronized (mPm.mLock) {
             boolean appIdCreated = false;

@@ -1262,6 +1262,12 @@ public class PackageSetting extends SettingBase implements PackageStateInternal 
         return pkgState.isApkInUpdatedApex();
     }
 
+    @Nullable
+    @Override
+    public String getApexModuleName() {
+        return pkgState.getApexModuleName();
+    }
+
     public PackageSetting setDomainSetId(@NonNull UUID domainSetId) {
         mDomainSetId = domainSetId;
         onChanged();
@@ -1314,6 +1320,11 @@ public class PackageSetting extends SettingBase implements PackageStateInternal 
     public PackageSetting setUsesStaticLibrariesVersions(long[] usesStaticLibrariesVersions) {
         this.usesStaticLibrariesVersions = usesStaticLibrariesVersions;
         onChanged();
+        return this;
+    }
+
+    public PackageSetting setApexModuleName(@Nullable String apexModuleName) {
+        pkgState.setApexModuleName(apexModuleName);
         return this;
     }
 

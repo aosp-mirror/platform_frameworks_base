@@ -158,7 +158,7 @@ public final class StorageEventHelper extends StorageEventListener {
                 final AndroidPackage pkg;
                 try {
                     pkg = installPackageHelper.scanSystemPackageTracedLI(
-                            ps.getPath(), parseFlags, SCAN_INITIAL);
+                            ps.getPath(), parseFlags, SCAN_INITIAL, null);
                     loaded.add(pkg);
 
                 } catch (PackageManagerException e) {
