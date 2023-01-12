@@ -220,6 +220,8 @@ final class BroadcastRecord extends Binder {
 
     boolean mIsReceiverAppRunning; // Was the receiver's app already running.
 
+    boolean mWasReceiverAppStopped; // Was the receiver app stopped prior to starting
+
     // Private refcount-management bookkeeping; start > 0
     static AtomicInteger sNextToken = new AtomicInteger(1);
 

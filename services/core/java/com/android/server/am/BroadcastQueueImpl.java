@@ -29,6 +29,8 @@ import static com.android.internal.util.FrameworkStatsLog.BROADCAST_DELIVERY_EVE
 import static com.android.internal.util.FrameworkStatsLog.BROADCAST_DELIVERY_EVENT_REPORTED__PROC_START_TYPE__PROCESS_START_TYPE_WARM;
 import static com.android.internal.util.FrameworkStatsLog.BROADCAST_DELIVERY_EVENT_REPORTED__RECEIVER_TYPE__MANIFEST;
 import static com.android.internal.util.FrameworkStatsLog.BROADCAST_DELIVERY_EVENT_REPORTED__RECEIVER_TYPE__RUNTIME;
+import static com.android.internal.util.FrameworkStatsLog.SERVICE_REQUEST_EVENT_REPORTED__PACKAGE_STOPPED_STATE__PACKAGE_STATE_NORMAL;
+import static com.android.internal.util.FrameworkStatsLog.SERVICE_REQUEST_EVENT_REPORTED__PACKAGE_STOPPED_STATE__PACKAGE_STATE_STOPPED;
 import static com.android.server.am.ActivityManagerDebugConfig.DEBUG_BROADCAST;
 import static com.android.server.am.ActivityManagerDebugConfig.DEBUG_BROADCAST_DEFERRAL;
 import static com.android.server.am.ActivityManagerDebugConfig.DEBUG_BROADCAST_LIGHT;
@@ -51,6 +53,7 @@ import android.content.ContentResolver;
 import android.content.IIntentReceiver;
 import android.content.Intent;
 import android.content.pm.ActivityInfo;
+import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageManager;
 import android.content.pm.ResolveInfo;
 import android.content.pm.UserInfo;
@@ -588,6 +591,11 @@ public class BroadcastQueueImpl extends BroadcastQueue {
         final long elapsed = finishTime - r.receiverTime;
         r.state = BroadcastRecord.IDLE;
         final int curIndex = r.nextReceiver - 1;
+
+        final int packageState = r.mWasReceiverAppStopped
+                ? SERVICE_REQUEST_EVENT_REPORTED__PACKAGE_STOPPED_STATE__PACKAGE_STATE_STOPPED
+                : SERVICE_REQUEST_EVENT_REPORTED__PACKAGE_STOPPED_STATE__PACKAGE_STATE_NORMAL;
+
         if (curIndex >= 0 && curIndex < r.receivers.size() && r.curApp != null) {
             final Object curReceiver = r.receivers.get(curIndex);
             FrameworkStatsLog.write(BROADCAST_DELIVERY_EVENT_REPORTED, r.curApp.uid,
@@ -601,7 +609,8 @@ public class BroadcastQueueImpl extends BroadcastQueue {
                     : BROADCAST_DELIVERY_EVENT_REPORTED__PROC_START_TYPE__PROCESS_START_TYPE_COLD,
                     r.dispatchTime - r.enqueueTime,
                     r.receiverTime - r.dispatchTime,
-                    finishTime - r.receiverTime);
+                    finishTime - r.receiverTime,
+                    packageState);
         }
         if (state == BroadcastRecord.IDLE) {
             Slog.w(TAG_BROADCAST, "finishReceiver [" + mQueueName + "] called but state is IDLE");
@@ -664,6 +673,7 @@ public class BroadcastQueueImpl extends BroadcastQueue {
         r.curReceiver = null;
         r.curApp = null;
         r.curFilteredExtras = null;
+        r.mWasReceiverAppStopped = false;
         mPendingBroadcast = null;
 
         r.resultCode = resultCode;
@@ -778,7 +788,8 @@ public class BroadcastQueueImpl extends BroadcastQueue {
                     intent.getAction(),
                     BROADCAST_DELIVERY_EVENT_REPORTED__RECEIVER_TYPE__RUNTIME,
                     BROADCAST_DELIVERY_EVENT_REPORTED__PROC_START_TYPE__PROCESS_START_TYPE_WARM,
-                    dispatchDelay, receiveDelay, 0 /* finish_delay */);
+                    dispatchDelay, receiveDelay, 0 /* finish_delay */,
+                    SERVICE_REQUEST_EVENT_REPORTED__PACKAGE_STOPPED_STATE__PACKAGE_STATE_NORMAL);
         }
     }
 
@@ -1436,6 +1447,9 @@ public class BroadcastQueueImpl extends BroadcastQueue {
             // restart the application.
         }
 
+        // Registered whether we're bringing this package out of a stopped state
+        r.mWasReceiverAppStopped =
+                (info.activityInfo.applicationInfo.flags & ApplicationInfo.FLAG_STOPPED) != 0;
         // Not running -- get it started, to be executed when the app comes up.
         if (DEBUG_BROADCAST)  Slog.v(TAG_BROADCAST,
                 "Need to start app ["
