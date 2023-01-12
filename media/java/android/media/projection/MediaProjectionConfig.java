@@ -98,24 +98,12 @@ public final class MediaProjectionConfig implements Parcelable {
     }
 
     /**
-     * Returns an instance which restricts the user to capturing a particular display.
-     *
-     * @param displayId The id of the display to capture. Only supports values of
-     *                  {@link android.view.Display#DEFAULT_DISPLAY}.
-     * @throws IllegalArgumentException If the given {@code displayId} is outside the range of
-     * supported values.
+     * Returns an instance which restricts the user to capturing the default display.
      */
     @NonNull
-    public static MediaProjectionConfig createConfigForDisplay(
-            @IntRange(from = DEFAULT_DISPLAY, to = DEFAULT_DISPLAY) int displayId) {
-        if (displayId != DEFAULT_DISPLAY) {
-            throw new IllegalArgumentException(
-                    "A config for capturing the non-default display is not supported; requested "
-                            + "display id "
-                            + displayId);
-        }
+    public static MediaProjectionConfig createConfigForDefaultDisplay() {
         MediaProjectionConfig config = new MediaProjectionConfig(CAPTURE_REGION_FIXED_DISPLAY);
-        config.mDisplayToCapture = displayId;
+        config.mDisplayToCapture = DEFAULT_DISPLAY;
         return config;
     }
 
@@ -279,10 +267,10 @@ public final class MediaProjectionConfig implements Parcelable {
     };
 
     @DataClass.Generated(
-            time = 1671030124845L,
+            time = 1673548980960L,
             codegenVersion = "1.0.23",
             sourceFile = "frameworks/base/media/java/android/media/projection/MediaProjectionConfig.java",
-            inputSignatures = "public static final  int CAPTURE_REGION_USER_CHOICE\npublic static final  int CAPTURE_REGION_FIXED_DISPLAY\nprivate @android.annotation.IntRange int mDisplayToCapture\nprivate @android.media.projection.MediaProjectionConfig.CaptureRegion int mRegionToCapture\npublic static @android.annotation.NonNull android.media.projection.MediaProjectionConfig createConfigForDisplay(int)\npublic static @android.annotation.NonNull android.media.projection.MediaProjectionConfig createConfigForUserChoice()\nprivate static @android.annotation.NonNull java.lang.String captureRegionToString(int)\npublic @java.lang.Override java.lang.String toString()\nclass MediaProjectionConfig extends java.lang.Object implements [android.os.Parcelable]\n@com.android.internal.util.DataClass(genEqualsHashCode=true, genAidl=true, genSetters=false, genConstructor=false, genBuilder=false, genToString=false, genHiddenConstDefs=true, genHiddenGetters=true, genConstDefs=false)")
+            inputSignatures = "public static final  int CAPTURE_REGION_USER_CHOICE\npublic static final  int CAPTURE_REGION_FIXED_DISPLAY\nprivate @android.annotation.IntRange int mDisplayToCapture\nprivate @android.media.projection.MediaProjectionConfig.CaptureRegion int mRegionToCapture\npublic static @android.annotation.NonNull android.media.projection.MediaProjectionConfig createConfigForDefaultDisplay()\npublic static @android.annotation.NonNull android.media.projection.MediaProjectionConfig createConfigForUserChoice()\nprivate static @android.annotation.NonNull java.lang.String captureRegionToString(int)\npublic @java.lang.Override java.lang.String toString()\nclass MediaProjectionConfig extends java.lang.Object implements [android.os.Parcelable]\n@com.android.internal.util.DataClass(genEqualsHashCode=true, genAidl=true, genSetters=false, genConstructor=false, genBuilder=false, genToString=false, genHiddenConstDefs=true, genHiddenGetters=true, genConstDefs=false)")
     @Deprecated
     private void __metadata() {}
 

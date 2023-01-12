@@ -17,7 +17,6 @@
 package android.media.projection;
 
 import static android.media.projection.MediaProjectionManager.EXTRA_MEDIA_PROJECTION_CONFIG;
-import static android.view.Display.DEFAULT_DISPLAY;
 
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.doReturn;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.mockitoSession;
@@ -59,7 +58,7 @@ public class MediaProjectionManagerTest {
     private Context mContext;
     private MockitoSession mMockingSession;
     private static final MediaProjectionConfig DISPLAY_CONFIG =
-            MediaProjectionConfig.createConfigForDisplay(DEFAULT_DISPLAY);
+            MediaProjectionConfig.createConfigForDefaultDisplay();
     private static final MediaProjectionConfig USERS_CHOICE_CONFIG =
             MediaProjectionConfig.createConfigForUserChoice();
 

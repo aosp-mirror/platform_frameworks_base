@@ -25816,7 +25816,7 @@ package android.media.projection {
   }
 
   public final class MediaProjectionConfig implements android.os.Parcelable {
-    method @NonNull public static android.media.projection.MediaProjectionConfig createConfigForDisplay(@IntRange(from=android.view.Display.DEFAULT_DISPLAY, to=android.view.Display.DEFAULT_DISPLAY) int);
+    method @NonNull public static android.media.projection.MediaProjectionConfig createConfigForDefaultDisplay();
     method @NonNull public static android.media.projection.MediaProjectionConfig createConfigForUserChoice();
     method public int describeContents();
     method public void writeToParcel(@NonNull android.os.Parcel, int);
