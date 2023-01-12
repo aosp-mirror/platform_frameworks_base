@@ -74,8 +74,8 @@ public class ResourcesManagerService extends SystemService {
         @Override
         protected void dump(@NonNull FileDescriptor fd,
                 @NonNull PrintWriter pw, @Nullable String[] args) {
-            try {
-                mActivityManagerService.dumpAllResources(ParcelFileDescriptor.dup(fd), pw);
+            try (ParcelFileDescriptor pfd = ParcelFileDescriptor.dup(fd)) {
+                mActivityManagerService.dumpAllResources(pfd, pw);
             } catch (Exception e) {
                 pw.println("Exception while trying to dump all resources: " + e.getMessage());
                 e.printStackTrace(pw);
