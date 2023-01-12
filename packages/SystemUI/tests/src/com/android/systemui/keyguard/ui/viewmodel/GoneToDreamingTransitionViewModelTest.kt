@@ -20,14 +20,14 @@ import androidx.test.filters.SmallTest
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.animation.Interpolators.EMPHASIZED_ACCELERATE
 import com.android.systemui.keyguard.data.repository.FakeKeyguardTransitionRepository
-import com.android.systemui.keyguard.domain.interactor.FromLockscreenTransitionInteractor.Companion.TO_DREAMING_DURATION
+import com.android.systemui.keyguard.domain.interactor.FromGoneTransitionInteractor.Companion.TO_DREAMING_DURATION
 import com.android.systemui.keyguard.domain.interactor.KeyguardTransitionInteractor
 import com.android.systemui.keyguard.shared.model.AnimationParams
 import com.android.systemui.keyguard.shared.model.KeyguardState
 import com.android.systemui.keyguard.shared.model.TransitionState
 import com.android.systemui.keyguard.shared.model.TransitionStep
-import com.android.systemui.keyguard.ui.viewmodel.LockscreenToDreamingTransitionViewModel.Companion.LOCKSCREEN_ALPHA
-import com.android.systemui.keyguard.ui.viewmodel.LockscreenToDreamingTransitionViewModel.Companion.LOCKSCREEN_TRANSLATION_Y
+import com.android.systemui.keyguard.ui.viewmodel.GoneToDreamingTransitionViewModel.Companion.LOCKSCREEN_ALPHA
+import com.android.systemui.keyguard.ui.viewmodel.GoneToDreamingTransitionViewModel.Companion.LOCKSCREEN_TRANSLATION_Y
 import com.google.common.truth.Truth.assertThat
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
@@ -40,15 +40,15 @@ import org.junit.runners.JUnit4
 
 @SmallTest
 @RunWith(JUnit4::class)
-class LockscreenToDreamingTransitionViewModelTest : SysuiTestCase() {
-    private lateinit var underTest: LockscreenToDreamingTransitionViewModel
+class GoneToDreamingTransitionViewModelTest : SysuiTestCase() {
+    private lateinit var underTest: GoneToDreamingTransitionViewModel
     private lateinit var repository: FakeKeyguardTransitionRepository
 
     @Before
     fun setUp() {
         repository = FakeKeyguardTransitionRepository()
         val interactor = KeyguardTransitionInteractor(repository)
-        underTest = LockscreenToDreamingTransitionViewModel(interactor)
+        underTest = GoneToDreamingTransitionViewModel(interactor)
     }
 
     @Test
@@ -67,7 +67,8 @@ class LockscreenToDreamingTransitionViewModelTest : SysuiTestCase() {
             repository.sendTransitionStep(step(1f))
 
             // Only three values should be present, since the dream overlay runs for a small
-            // fraction of the overall animation time
+            // fraction
+            // of the overall animation time
             assertThat(values.size).isEqualTo(3)
             assertThat(values[0]).isEqualTo(1f - animValue(0f, LOCKSCREEN_ALPHA))
             assertThat(values[1]).isEqualTo(1f - animValue(0.1f, LOCKSCREEN_ALPHA))
@@ -91,8 +92,8 @@ class LockscreenToDreamingTransitionViewModelTest : SysuiTestCase() {
             repository.sendTransitionStep(step(0.5f))
             // ...up to here
             repository.sendTransitionStep(step(1f))
-            // And a final reset event on FINISHED
-            repository.sendTransitionStep(step(1f, TransitionState.FINISHED))
+            // And a final reset event on CANCEL
+            repository.sendTransitionStep(step(0.8f, TransitionState.CANCELED))
 
             assertThat(values.size).isEqualTo(4)
             assertThat(values[0])
@@ -114,7 +115,6 @@ class LockscreenToDreamingTransitionViewModelTest : SysuiTestCase() {
                     ) * pixels
                 )
             assertThat(values[3]).isEqualTo(0f)
-
             job.cancel()
         }
 
@@ -131,11 +131,11 @@ class LockscreenToDreamingTransitionViewModelTest : SysuiTestCase() {
         state: TransitionState = TransitionState.RUNNING
     ): TransitionStep {
         return TransitionStep(
-            from = KeyguardState.LOCKSCREEN,
+            from = KeyguardState.GONE,
             to = KeyguardState.DREAMING,
             value = value,
             transitionState = state,
-            ownerName = "LockscreenToDreamingTransitionViewModelTest"
+            ownerName = "GoneToDreamingTransitionViewModelTest"
         )
     }
 }

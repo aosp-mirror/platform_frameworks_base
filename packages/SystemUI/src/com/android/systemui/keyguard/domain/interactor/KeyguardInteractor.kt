@@ -32,12 +32,15 @@ import com.android.systemui.keyguard.shared.model.StatusBarState
 import com.android.systemui.keyguard.shared.model.WakefulnessModel
 import com.android.systemui.statusbar.CommandQueue
 import com.android.systemui.statusbar.CommandQueue.Callbacks
-import com.android.systemui.util.kotlin.sample
 import javax.inject.Inject
 import kotlinx.coroutines.channels.awaitClose
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.filter
+import kotlinx.coroutines.flow.flatMapLatest
+import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.merge
 
 /**
@@ -89,15 +92,23 @@ constructor(
     /**
      * Dozing and dreaming have overlapping events. If the doze state remains in FINISH, it means
      * that doze mode is not running and DREAMING is ok to commence.
+     *
+     * Allow a brief moment to prevent rapidly oscillating between true/false signals.
      */
     val isAbleToDream: Flow<Boolean> =
         merge(isDreaming, isDreamingWithOverlay)
-            .sample(
+            .combine(
                 dozeTransitionModel,
                 { isDreaming, dozeTransitionModel ->
                     isDreaming && isDozeOff(dozeTransitionModel.to)
                 }
             )
+            .flatMapLatest { isAbleToDream ->
+                flow {
+                    delay(50)
+                    emit(isAbleToDream)
+                }
+            }
             .distinctUntilChanged()
 
     /** Whether the keyguard is showing or not. */
