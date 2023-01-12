@@ -335,13 +335,33 @@ public class LogModule {
     }
 
     /**
-     * Provides a {@link LogBuffer} for keyguard clock logs.
+     * Provides a {@link LogBuffer} for general keyguard clock logs.
      */
     @Provides
     @SysUISingleton
     @KeyguardClockLog
     public static LogBuffer provideKeyguardClockLog(LogBufferFactory factory) {
-        return factory.create("KeyguardClockLog", 500);
+        return factory.create("KeyguardClockLog", 100);
+    }
+
+    /**
+     * Provides a {@link LogBuffer} for keyguard small clock logs.
+     */
+    @Provides
+    @SysUISingleton
+    @KeyguardSmallClockLog
+    public static LogBuffer provideKeyguardSmallClockLog(LogBufferFactory factory) {
+        return factory.create("KeyguardSmallClockLog", 100);
+    }
+
+    /**
+     * Provides a {@link LogBuffer} for keyguard large clock logs.
+     */
+    @Provides
+    @SysUISingleton
+    @KeyguardLargeClockLog
+    public static LogBuffer provideKeyguardLargeClockLog(LogBufferFactory factory) {
+        return factory.create("KeyguardLargeClockLog", 100);
     }
 
     /**

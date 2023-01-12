@@ -154,9 +154,7 @@ public class AutoTileManager implements UserAwareController {
         if (!mAutoTracker.isAdded(SAVER)) {
             mDataSaverController.addCallback(mDataSaverListener);
         }
-        if (!mAutoTracker.isAdded(WORK)) {
-            mManagedProfileController.addCallback(mProfileCallback);
-        }
+        mManagedProfileController.addCallback(mProfileCallback);
         if (!mAutoTracker.isAdded(NIGHT)
                 && ColorDisplayManager.isNightDisplayAvailable(mContext)) {
             mNightDisplayListener.setCallback(mNightDisplayCallback);
@@ -275,18 +273,18 @@ public class AutoTileManager implements UserAwareController {
         return mCurrentUser.getIdentifier();
     }
 
-    public void unmarkTileAsAutoAdded(String tabSpec) {
-        mAutoTracker.setTileRemoved(tabSpec);
-    }
-
     private final ManagedProfileController.Callback mProfileCallback =
             new ManagedProfileController.Callback() {
                 @Override
                 public void onManagedProfileChanged() {
-                    if (mAutoTracker.isAdded(WORK)) return;
                     if (mManagedProfileController.hasActiveProfile()) {
+                        if (mAutoTracker.isAdded(WORK)) return;
                         mHost.addTile(WORK);
                         mAutoTracker.setTileAdded(WORK);
+                    } else {
+                        if (!mAutoTracker.isAdded(WORK)) return;
+                        mHost.removeTile(WORK);
+                        mAutoTracker.setTileRemoved(WORK);
                     }
                 }
 
@@ -429,7 +427,7 @@ public class AutoTileManager implements UserAwareController {
                 initSafetyTile();
             } else if (!isSafetyCenterEnabled && mAutoTracker.isAdded(mSafetySpec)) {
                 mHost.removeTile(mSafetySpec);
-                mHost.unmarkTileAsAutoAdded(mSafetySpec);
+                mAutoTracker.setTileRemoved(mSafetySpec);
             }
         }
     };

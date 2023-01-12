@@ -141,6 +141,7 @@ import com.android.settingslib.fuelgauge.BatteryStatus;
 import com.android.systemui.Dumpable;
 import com.android.systemui.R;
 import com.android.systemui.biometrics.AuthController;
+import com.android.systemui.biometrics.FingerprintInteractiveToAuthProvider;
 import com.android.systemui.broadcast.BroadcastDispatcher;
 import com.android.systemui.dagger.SysUISingleton;
 import com.android.systemui.dagger.qualifiers.Background;
@@ -170,6 +171,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.Optional;
 import java.util.Set;
 import java.util.TimeZone;
 import java.util.concurrent.Executor;
@@ -345,13 +347,11 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener, Dumpab
     private final ArrayList<WeakReference<KeyguardUpdateMonitorCallback>>
             mCallbacks = Lists.newArrayList();
     private ContentObserver mDeviceProvisionedObserver;
-    private ContentObserver mSfpsRequireScreenOnToAuthPrefObserver;
     private final ContentObserver mTimeFormatChangeObserver;
 
     private boolean mSwitchingUser;
 
     private boolean mDeviceInteractive;
-    private boolean mSfpsRequireScreenOnToAuthPrefEnabled;
     private final SubscriptionManager mSubscriptionManager;
     private final TelephonyListenerManager mTelephonyListenerManager;
     private final TrustManager mTrustManager;
@@ -384,6 +384,7 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener, Dumpab
     private boolean mLogoutEnabled;
     private boolean mIsFaceEnrolled;
     private int mActiveMobileDataSubscription = SubscriptionManager.INVALID_SUBSCRIPTION_ID;
+    private FingerprintInteractiveToAuthProvider mFingerprintInteractiveToAuthProvider;
 
     /**
      * Short delay before restarting fingerprint authentication after a successful try. This should
@@ -711,8 +712,18 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener, Dumpab
      */
     public void setKeyguardGoingAway(boolean goingAway) {
         mKeyguardGoingAway = goingAway;
-        // This is set specifically to stop face authentication from running.
-        updateBiometricListeningState(BIOMETRIC_ACTION_STOP, FACE_AUTH_STOPPED_KEYGUARD_GOING_AWAY);
+        if (mKeyguardGoingAway) {
+            updateFaceListeningState(BIOMETRIC_ACTION_STOP,
+                    FACE_AUTH_STOPPED_KEYGUARD_GOING_AWAY);
+        }
+        updateFingerprintListeningState(BIOMETRIC_ACTION_UPDATE);
+    }
+
+    /**
+     * Whether keyguard is going away due to screen off or device entry.
+     */
+    public boolean isKeyguardGoingAway() {
+        return mKeyguardGoingAway;
     }
 
     /**
@@ -1943,9 +1954,9 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener, Dumpab
                 cb.onFinishedGoingToSleep(arg1);
             }
         }
-        // This is set specifically to stop face authentication from running.
-        updateBiometricListeningState(BIOMETRIC_ACTION_STOP,
+        updateFaceListeningState(BIOMETRIC_ACTION_STOP,
                 FACE_AUTH_STOPPED_FINISHED_GOING_TO_SLEEP);
+        updateFingerprintListeningState(BIOMETRIC_ACTION_UPDATE);
     }
 
     private void handleScreenTurnedOff() {
@@ -2048,7 +2059,8 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener, Dumpab
             @Nullable FaceManager faceManager,
             @Nullable FingerprintManager fingerprintManager,
             @Nullable BiometricManager biometricManager,
-            FaceWakeUpTriggersConfig faceWakeUpTriggersConfig) {
+            FaceWakeUpTriggersConfig faceWakeUpTriggersConfig,
+            Optional<FingerprintInteractiveToAuthProvider> interactiveToAuthProvider) {
         mContext = context;
         mSubscriptionManager = subscriptionManager;
         mUserTracker = userTracker;
@@ -2311,30 +2323,7 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener, Dumpab
                 Settings.System.getUriFor(Settings.System.TIME_12_24),
                 false, mTimeFormatChangeObserver, UserHandle.USER_ALL);
 
-        updateSfpsRequireScreenOnToAuthPref();
-        mSfpsRequireScreenOnToAuthPrefObserver = new ContentObserver(mHandler) {
-            @Override
-            public void onChange(boolean selfChange) {
-                updateSfpsRequireScreenOnToAuthPref();
-            }
-        };
-
-        mContext.getContentResolver().registerContentObserver(
-                mSecureSettings.getUriFor(
-                        Settings.Secure.SFPS_REQUIRE_SCREEN_ON_TO_AUTH_ENABLED),
-                false,
-                mSfpsRequireScreenOnToAuthPrefObserver,
-                getCurrentUser());
-    }
-
-    protected void updateSfpsRequireScreenOnToAuthPref() {
-        final int defaultSfpsRequireScreenOnToAuthValue =
-                mContext.getResources().getBoolean(
-                        com.android.internal.R.bool.config_requireScreenOnToAuthEnabled) ? 1 : 0;
-        mSfpsRequireScreenOnToAuthPrefEnabled = mSecureSettings.getIntForUser(
-                Settings.Secure.SFPS_REQUIRE_SCREEN_ON_TO_AUTH_ENABLED,
-                defaultSfpsRequireScreenOnToAuthValue,
-                getCurrentUser()) != 0;
+        mFingerprintInteractiveToAuthProvider = interactiveToAuthProvider.orElse(null);
     }
 
     private void initializeSimState() {
@@ -2729,8 +2718,11 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener, Dumpab
 
         boolean shouldListenSideFpsState = true;
         if (isSideFps) {
+            final boolean interactiveToAuthEnabled =
+                    mFingerprintInteractiveToAuthProvider != null &&
+                            mFingerprintInteractiveToAuthProvider.isEnabled(getCurrentUser());
             shouldListenSideFpsState =
-                    mSfpsRequireScreenOnToAuthPrefEnabled ? isDeviceInteractive() : true;
+                    interactiveToAuthEnabled ? isDeviceInteractive() && !mGoingToSleep : true;
         }
 
         boolean shouldListen = shouldListenKeyguardState && shouldListenUserState
@@ -3845,11 +3837,6 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener, Dumpab
             mContext.getContentResolver().unregisterContentObserver(mTimeFormatChangeObserver);
         }
 
-        if (mSfpsRequireScreenOnToAuthPrefObserver != null) {
-            mContext.getContentResolver().unregisterContentObserver(
-                    mSfpsRequireScreenOnToAuthPrefObserver);
-        }
-
         try {
             ActivityManager.getService().unregisterUserSwitchObserver(mUserSwitchObserver);
         } catch (RemoteException e) {
@@ -3926,8 +3913,14 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener, Dumpab
             } else if (isSfpsSupported()) {
                 pw.println("        sfpsEnrolled=" + isSfpsEnrolled());
                 pw.println("        shouldListenForSfps=" + shouldListenForFingerprint(false));
-                pw.println("        mSfpsRequireScreenOnToAuthPrefEnabled="
-                        + mSfpsRequireScreenOnToAuthPrefEnabled);
+                if (isSfpsEnrolled()) {
+                    final boolean interactiveToAuthEnabled =
+                                    mFingerprintInteractiveToAuthProvider != null &&
+                                            mFingerprintInteractiveToAuthProvider
+                                            .isEnabled(getCurrentUser());
+                    pw.println("        interactiveToAuthEnabled="
+                            + interactiveToAuthEnabled);
+                }
             }
             new DumpsysTableLogger(
                     "KeyguardFingerprintListen",

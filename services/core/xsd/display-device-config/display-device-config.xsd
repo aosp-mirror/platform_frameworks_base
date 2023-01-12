@@ -464,6 +464,14 @@
     </xs:complexType>
 
     <xs:complexType name="refreshRateConfigs">
+        <xs:element name="defaultRefreshRate" type="xs:nonNegativeInteger"
+                    minOccurs="0" maxOccurs="1">
+            <xs:annotation name="final"/>
+        </xs:element>
+        <xs:element name="defaultPeakRefreshRate" type="xs:nonNegativeInteger"
+                    minOccurs="0" maxOccurs="1">
+            <xs:annotation name="final"/>
+        </xs:element>
         <xs:element name="lowerBlockingZoneConfigs" type="blockingZoneConfig"
                     minOccurs="0" maxOccurs="1">
             <xs:annotation name="final"/>

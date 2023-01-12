@@ -1139,7 +1139,6 @@ package android.hardware.camera2 {
   public final class CameraManager {
     method public String[] getCameraIdListNoLazy() throws android.hardware.camera2.CameraAccessException;
     method @RequiresPermission(allOf={android.Manifest.permission.SYSTEM_CAMERA, android.Manifest.permission.CAMERA}) public void openCamera(@NonNull String, int, @NonNull java.util.concurrent.Executor, @NonNull android.hardware.camera2.CameraDevice.StateCallback) throws android.hardware.camera2.CameraAccessException;
-    field public static final long OVERRIDE_FRONT_CAMERA_APP_COMPAT = 250678880L; // 0xef10e60L
   }
 
   public abstract static class CameraManager.AvailabilityCallback {

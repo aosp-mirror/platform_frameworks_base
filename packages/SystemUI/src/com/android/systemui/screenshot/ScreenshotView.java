@@ -1090,7 +1090,7 @@ public class ScreenshotView extends FrameLayout implements
         mScreenshotBadge.setVisibility(View.GONE);
         mScreenshotBadge.setImageDrawable(null);
         mPendingSharedTransition = false;
-        mActionsContainerBackground.setVisibility(View.GONE);
+        mActionsContainerBackground.setVisibility(View.INVISIBLE);
         mActionsContainer.setVisibility(View.GONE);
         mDismissButton.setVisibility(View.GONE);
         mScrollingScrim.setVisibility(View.GONE);

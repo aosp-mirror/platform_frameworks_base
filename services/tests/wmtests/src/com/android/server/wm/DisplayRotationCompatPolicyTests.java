@@ -155,6 +155,18 @@ public final class DisplayRotationCompatPolicyTests extends WindowTestsBase {
     }
 
     @Test
+    public void testTreatmentDisabledPerApp_noForceRotationOrRefresh()
+            throws Exception {
+        configureActivity(SCREEN_ORIENTATION_PORTRAIT);
+        when(mActivity.mLetterboxUiController.shouldForceRotateForCameraCompat())
+                .thenReturn(false);
+
+        mCameraAvailabilityCallback.onCameraOpened(CAMERA_ID_1, TEST_PACKAGE_1);
+
+        assertNoForceRotationOrRefresh();
+    }
+
+    @Test
     public void testMultiWindowMode_returnUnspecified_noForceRotationOrRefresh() throws Exception {
         configureActivity(SCREEN_ORIENTATION_PORTRAIT);
         final TestSplitOrganizer organizer = new TestSplitOrganizer(mAtm, mDisplayContent);
@@ -327,7 +339,21 @@ public final class DisplayRotationCompatPolicyTests extends WindowTestsBase {
     }
 
     @Test
-    public void testOnActivityConfigurationChanging_refreshDisabled_noRefresh() throws Exception {
+    public void testOnActivityConfigurationChanging_refreshDisabledViaFlag_noRefresh()
+            throws Exception {
+        configureActivity(SCREEN_ORIENTATION_PORTRAIT);
+        when(mActivity.mLetterboxUiController.shouldRefreshActivityForCameraCompat())
+                .thenReturn(false);
+
+        mCameraAvailabilityCallback.onCameraOpened(CAMERA_ID_1, TEST_PACKAGE_1);
+        callOnActivityConfigurationChanging(mActivity, /* isDisplayRotationChanging */ true);
+
+        assertActivityRefreshRequested(/* refreshRequested */ false);
+    }
+
+    @Test
+    public void testOnActivityConfigurationChanging_refreshDisabledPerApp_noRefresh()
+            throws Exception {
         when(mLetterboxConfiguration.isCameraCompatRefreshEnabled()).thenReturn(false);
 
         configureActivity(SCREEN_ORIENTATION_PORTRAIT);
@@ -355,6 +381,19 @@ public final class DisplayRotationCompatPolicyTests extends WindowTestsBase {
                 .thenReturn(false);
 
         configureActivity(SCREEN_ORIENTATION_PORTRAIT);
+
+        mCameraAvailabilityCallback.onCameraOpened(CAMERA_ID_1, TEST_PACKAGE_1);
+        callOnActivityConfigurationChanging(mActivity, /* isDisplayRotationChanging */ true);
+
+        assertActivityRefreshRequested(/* refreshRequested */ true, /* cycleThroughStop */ false);
+    }
+
+    @Test
+    public void testOnActivityConfigurationChanging_cycleThroughStopDisabledForApp()
+            throws Exception {
+        configureActivity(SCREEN_ORIENTATION_PORTRAIT);
+        when(mActivity.mLetterboxUiController.shouldRefreshActivityViaPauseForCameraCompat())
+                .thenReturn(true);
 
         mCameraAvailabilityCallback.onCameraOpened(CAMERA_ID_1, TEST_PACKAGE_1);
         callOnActivityConfigurationChanging(mActivity, /* isDisplayRotationChanging */ true);

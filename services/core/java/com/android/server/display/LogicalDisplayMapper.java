@@ -372,12 +372,23 @@ class LogicalDisplayMapper implements DisplayDeviceRepository.Listener {
     void setDeviceStateLocked(int state, boolean isOverrideActive) {
         Slog.i(TAG, "Requesting Transition to state: " + state + ", from state=" + mDeviceState
                 + ", interactive=" + mInteractive + ", mBootCompleted=" + mBootCompleted);
+        mPendingDeviceState = state;
+
+        if (!mBootCompleted) {
+            // The boot animation might still be in progress, we do not want to switch states now
+            // as the boot animation would end up with an incorrect size.
+            if (DEBUG) {
+                Slog.d(TAG, "Postponing transition to state: " + mPendingDeviceState
+                        + " until boot is completed");
+            }
+            return;
+        }
+
         // As part of a state transition, we may need to turn off some displays temporarily so that
         // the transition is smooth. Plus, on some devices, only one internal displays can be
         // on at a time. We use LogicalDisplay.setIsInTransition to mark a display that needs to be
         // temporarily turned off.
         resetLayoutLocked(mDeviceState, state, /* isStateChangeStarting= */ true);
-        mPendingDeviceState = state;
         final boolean wakeDevice = shouldDeviceBeWoken(mPendingDeviceState, mDeviceState,
                 mInteractive, mBootCompleted);
         final boolean sleepDevice = shouldDeviceBePutToSleep(mPendingDeviceState, mDeviceState,
@@ -424,6 +435,9 @@ class LogicalDisplayMapper implements DisplayDeviceRepository.Listener {
     void onBootCompleted() {
         synchronized (mSyncRoot) {
             mBootCompleted = true;
+            if (mPendingDeviceState != DeviceStateManager.INVALID_DEVICE_STATE) {
+                setDeviceStateLocked(mPendingDeviceState, /* isOverrideActive= */ false);
+            }
         }
     }
 
@@ -926,6 +940,15 @@ class LogicalDisplayMapper implements DisplayDeviceRepository.Listener {
         final int layerStack = assignLayerStackLocked(displayId);
         final LogicalDisplay display = new LogicalDisplay(displayId, layerStack, device);
         display.updateLocked(mDisplayDeviceRepo);
+
+        final DisplayInfo info = display.getDisplayInfoLocked();
+        if (info.type == Display.TYPE_INTERNAL && mDeviceStateToLayoutMap.size() > 1) {
+            // If this is an internal display and the device uses a display layout configuration,
+            // the display should be disabled as later we will receive a device state update, which
+            // will tell us which internal displays should be enabled and which should be disabled.
+            display.setEnabledLocked(false);
+        }
+
         mLogicalDisplays.put(displayId, display);
         return display;
     }

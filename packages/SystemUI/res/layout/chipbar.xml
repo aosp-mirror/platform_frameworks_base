@@ -23,6 +23,7 @@
     android:layout_width="wrap_content"
     android:layout_height="wrap_content">
 
+    <!-- Extra marginBottom to give room for the drop shadow. -->
     <LinearLayout
         android:id="@+id/chipbar_inner"
         android:orientation="horizontal"
@@ -33,6 +34,8 @@
         android:layout_marginTop="20dp"
         android:layout_marginStart="@dimen/notification_side_paddings"
         android:layout_marginEnd="@dimen/notification_side_paddings"
+        android:translationZ="4dp"
+        android:layout_marginBottom="8dp"
         android:clipToPadding="false"
         android:gravity="center_vertical"
         android:alpha="0.0"

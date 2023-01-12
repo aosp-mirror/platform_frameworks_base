@@ -94,7 +94,7 @@ constructor(
     private var currentCarouselWidth: Int = 0
 
     /** The current height of the carousel */
-    private var currentCarouselHeight: Int = 0
+    @VisibleForTesting var currentCarouselHeight: Int = 0
 
     /** Are we currently showing only active players */
     private var currentlyShowingOnlyActive: Boolean = false
@@ -128,14 +128,14 @@ constructor(
     /** The measured height of the carousel */
     private var carouselMeasureHeight: Int = 0
     private var desiredHostState: MediaHostState? = null
-    private val mediaCarousel: MediaScrollView
+    @VisibleForTesting var mediaCarousel: MediaScrollView
     val mediaCarouselScrollHandler: MediaCarouselScrollHandler
     val mediaFrame: ViewGroup
     @VisibleForTesting
     lateinit var settingsButton: View
         private set
     private val mediaContent: ViewGroup
-    @VisibleForTesting val pageIndicator: PageIndicator
+    @VisibleForTesting var pageIndicator: PageIndicator
     private val visualStabilityCallback: OnReorderingAllowedListener
     private var needsReordering: Boolean = false
     private var keysNeedRemoval = mutableSetOf<String>()
@@ -160,25 +160,20 @@ constructor(
         }
 
     companion object {
-        const val ANIMATION_BASE_DURATION = 2200f
-        const val DURATION = 167f
-        const val DETAILS_DELAY = 1067f
-        const val CONTROLS_DELAY = 1400f
-        const val PAGINATION_DELAY = 1900f
-        const val MEDIATITLES_DELAY = 1000f
-        const val MEDIACONTAINERS_DELAY = 967f
         val TRANSFORM_BEZIER = PathInterpolator(0.68F, 0F, 0F, 1F)
-        val REVERSE_BEZIER = PathInterpolator(0F, 0.68F, 1F, 0F)
 
-        fun calculateAlpha(squishinessFraction: Float, delay: Float, duration: Float): Float {
-            val transformStartFraction = delay / ANIMATION_BASE_DURATION
-            val transformDurationFraction = duration / ANIMATION_BASE_DURATION
-            val squishinessToTime = REVERSE_BEZIER.getInterpolation(squishinessFraction)
-            return MathUtils.constrain(
-                (squishinessToTime - transformStartFraction) / transformDurationFraction,
-                0F,
-                1F
-            )
+        fun calculateAlpha(
+            squishinessFraction: Float,
+            startPosition: Float,
+            endPosition: Float
+        ): Float {
+            val transformFraction =
+                MathUtils.constrain(
+                    (squishinessFraction - startPosition) / (endPosition - startPosition),
+                    0F,
+                    1F
+                )
+            return TRANSFORM_BEZIER.getInterpolation(transformFraction)
         }
     }
 
@@ -813,7 +808,12 @@ constructor(
         val squishFraction = hostStates[currentEndLocation]?.squishFraction ?: 1.0F
         val endAlpha =
             (if (endIsVisible) 1.0f else 0.0f) *
-                calculateAlpha(squishFraction, PAGINATION_DELAY, DURATION)
+                calculateAlpha(
+                    squishFraction,
+                    (pageIndicator.translationY + pageIndicator.height) /
+                        mediaCarousel.measuredHeight,
+                    1F
+                )
         var alpha = 1.0f
         if (!endIsVisible || !startIsVisible) {
             var progress = currentTransitionProgress
@@ -839,7 +839,8 @@ constructor(
         pageIndicator.translationX = translationX + mediaCarouselScrollHandler.contentTranslation
         val layoutParams = pageIndicator.layoutParams as ViewGroup.MarginLayoutParams
         pageIndicator.translationY =
-            (currentCarouselHeight - pageIndicator.height - layoutParams.bottomMargin).toFloat()
+            (mediaCarousel.measuredHeight - pageIndicator.height - layoutParams.bottomMargin)
+                .toFloat()
     }
 
     /** Update the dimension of this carousel. */

@@ -18,6 +18,7 @@ package com.android.systemui.biometrics;
 
 import static android.hardware.biometrics.BiometricAuthenticator.TYPE_FACE;
 import static android.hardware.biometrics.BiometricAuthenticator.TYPE_FINGERPRINT;
+import static android.hardware.fingerprint.FingerprintSensorProperties.TYPE_REAR;
 
 import static com.android.systemui.keyguard.WakefulnessLifecycle.WAKEFULNESS_AWAKE;
 import static com.android.systemui.keyguard.WakefulnessLifecycle.WAKEFULNESS_GOING_TO_SLEEP;
@@ -76,6 +77,7 @@ import com.android.systemui.dagger.qualifiers.Background;
 import com.android.systemui.dagger.qualifiers.Main;
 import com.android.systemui.doze.DozeReceiver;
 import com.android.systemui.keyguard.WakefulnessLifecycle;
+import com.android.systemui.keyguard.data.repository.BiometricType;
 import com.android.systemui.plugins.statusbar.StatusBarStateController;
 import com.android.systemui.statusbar.CommandQueue;
 import com.android.systemui.statusbar.VibratorHelper;
@@ -85,8 +87,10 @@ import com.android.systemui.util.concurrency.Execution;
 import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
 
@@ -150,6 +154,7 @@ public class AuthController implements CoreStartable,  CommandQueue.Callbacks,
     @Nullable private List<FingerprintSensorPropertiesInternal> mUdfpsProps;
     @Nullable private List<FingerprintSensorPropertiesInternal> mSidefpsProps;
 
+    @NonNull private final Map<Integer, Boolean> mFpEnrolledForUser = new HashMap<>();
     @NonNull private final SparseBooleanArray mUdfpsEnrolledForUser;
     @NonNull private final SparseBooleanArray mSfpsEnrolledForUser;
     @NonNull private final SensorPrivacyManager mSensorPrivacyManager;
@@ -160,7 +165,6 @@ public class AuthController implements CoreStartable,  CommandQueue.Callbacks,
     @NonNull private final InteractionJankMonitor mInteractionJankMonitor;
     private final @Background DelayableExecutor mBackgroundExecutor;
     private final DisplayInfo mCachedDisplayInfo = new DisplayInfo();
-
 
     private final VibratorHelper mVibratorHelper;
 
@@ -331,27 +335,35 @@ public class AuthController implements CoreStartable,  CommandQueue.Callbacks,
         mExecution.assertIsMainThread();
         Log.d(TAG, "handleEnrollmentsChanged, userId: " + userId + ", sensorId: " + sensorId
                 + ", hasEnrollments: " + hasEnrollments);
-        if (mUdfpsProps == null) {
-            Log.d(TAG, "handleEnrollmentsChanged, mUdfpsProps is null");
-        } else {
-            for (FingerprintSensorPropertiesInternal prop : mUdfpsProps) {
+        BiometricType sensorBiometricType = BiometricType.UNKNOWN;
+        if (mFpProps != null) {
+            for (FingerprintSensorPropertiesInternal prop: mFpProps) {
                 if (prop.sensorId == sensorId) {
-                    mUdfpsEnrolledForUser.put(userId, hasEnrollments);
+                    mFpEnrolledForUser.put(userId, hasEnrollments);
+                    if (prop.isAnyUdfpsType()) {
+                        sensorBiometricType = BiometricType.UNDER_DISPLAY_FINGERPRINT;
+                        mUdfpsEnrolledForUser.put(userId, hasEnrollments);
+                    } else if (prop.isAnySidefpsType()) {
+                        sensorBiometricType = BiometricType.SIDE_FINGERPRINT;
+                        mSfpsEnrolledForUser.put(userId, hasEnrollments);
+                    } else if (prop.sensorType == TYPE_REAR) {
+                        sensorBiometricType = BiometricType.REAR_FINGERPRINT;
+                    }
+                    break;
                 }
             }
         }
-
-        if (mSidefpsProps == null) {
-            Log.d(TAG, "handleEnrollmentsChanged, mSidefpsProps is null");
-        } else {
-            for (FingerprintSensorPropertiesInternal prop : mSidefpsProps) {
+        if (mFaceProps != null && sensorBiometricType == BiometricType.UNKNOWN) {
+            for (FaceSensorPropertiesInternal prop : mFaceProps) {
                 if (prop.sensorId == sensorId) {
-                    mSfpsEnrolledForUser.put(userId, hasEnrollments);
+                    sensorBiometricType = BiometricType.FACE;
+                    break;
                 }
             }
         }
         for (Callback cb : mCallbacks) {
             cb.onEnrollmentsChanged();
+            cb.onEnrollmentsChanged(sensorBiometricType, userId, hasEnrollments);
         }
     }
 
@@ -604,6 +616,11 @@ public class AuthController implements CoreStartable,  CommandQueue.Callbacks,
         }
     }
 
+    /** Get FP sensor properties */
+    public @Nullable List<FingerprintSensorPropertiesInternal> getFingerprintProperties() {
+        return mFpProps;
+    }
+
     /**
      * @return where the face sensor exists in pixels in the current device orientation. Returns
      * null if no face sensor exists.
@@ -828,7 +845,7 @@ public class AuthController implements CoreStartable,  CommandQueue.Callbacks,
     }
 
     @Override
-    public void setBiometicContextListener(IBiometricContextListener listener) {
+    public void setBiometricContextListener(IBiometricContextListener listener) {
         mBiometricContextListener = listener;
         notifyDozeChanged(mStatusBarStateController.isDozing(),
                 mWakefulnessLifecycle.getWakefulness());
@@ -1081,6 +1098,13 @@ public class AuthController implements CoreStartable,  CommandQueue.Callbacks,
         return mSfpsEnrolledForUser.get(userId);
     }
 
+    /**
+     * Whether the passed userId has enrolled at least one fingerprint.
+     */
+    public boolean isFingerprintEnrolled(int userId) {
+        return mFpEnrolledForUser.getOrDefault(userId, false);
+    }
+
     private void showDialog(SomeArgs args, boolean skipAnimation, Bundle savedState) {
         mCurrentDialogArgs = args;
 
@@ -1261,6 +1285,16 @@ public class AuthController implements CoreStartable,  CommandQueue.Callbacks,
          * enrollment.
          */
         default void onEnrollmentsChanged() {}
+
+        /**
+         * Called when UDFPS enrollments have changed. This is called after boot and on changes to
+         * enrollment.
+         */
+        default void onEnrollmentsChanged(
+                @NonNull BiometricType biometricType,
+                int userId,
+                boolean hasEnrollments
+        ) {}
 
         /**
          * Called when the biometric prompt starts showing.

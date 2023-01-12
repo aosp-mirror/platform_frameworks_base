@@ -33,6 +33,7 @@ import com.android.systemui.Dumpable;
 import com.android.systemui.R;
 import com.android.systemui.dagger.SysUISingleton;
 import com.android.systemui.dump.DumpManager;
+import com.android.systemui.util.time.SystemClock;
 
 import java.io.PrintWriter;
 import java.lang.annotation.Retention;
@@ -63,6 +64,7 @@ public class WakefulnessLifecycle extends Lifecycle<WakefulnessLifecycle.Observe
 
     private final Context mContext;
     private final DisplayMetrics mDisplayMetrics;
+    private final SystemClock mSystemClock;
 
     @Nullable
     private final IWallpaperManager mWallpaperManagerService;
@@ -70,6 +72,9 @@ public class WakefulnessLifecycle extends Lifecycle<WakefulnessLifecycle.Observe
     private int mWakefulness = WAKEFULNESS_AWAKE;
 
     private @PowerManager.WakeReason int mLastWakeReason = PowerManager.WAKE_REASON_UNKNOWN;
+
+    public static final long UNKNOWN_LAST_WAKE_TIME = -1;
+    private long mLastWakeTime = UNKNOWN_LAST_WAKE_TIME;
 
     @Nullable
     private Point mLastWakeOriginLocation = null;
@@ -84,10 +89,12 @@ public class WakefulnessLifecycle extends Lifecycle<WakefulnessLifecycle.Observe
     public WakefulnessLifecycle(
             Context context,
             @Nullable IWallpaperManager wallpaperManagerService,
+            SystemClock systemClock,
             DumpManager dumpManager) {
         mContext = context;
         mDisplayMetrics = context.getResources().getDisplayMetrics();
         mWallpaperManagerService = wallpaperManagerService;
+        mSystemClock = systemClock;
 
         dumpManager.registerDumpable(getClass().getSimpleName(), this);
     }
@@ -104,6 +111,14 @@ public class WakefulnessLifecycle extends Lifecycle<WakefulnessLifecycle.Observe
     }
 
     /**
+     * Returns the most recent time (in device uptimeMillis) the display woke up.
+     * Returns {@link UNKNOWN_LAST_WAKE_TIME} if there hasn't been a wakeup yet.
+     */
+    public long getLastWakeTime() {
+        return mLastWakeTime;
+    }
+
+    /**
      * Returns the most recent reason the device went to sleep up. This is one of
      * PowerManager.GO_TO_SLEEP_REASON_*.
      */
@@ -117,6 +132,7 @@ public class WakefulnessLifecycle extends Lifecycle<WakefulnessLifecycle.Observe
         }
         setWakefulness(WAKEFULNESS_WAKING);
         mLastWakeReason = pmWakeReason;
+        mLastWakeTime = mSystemClock.uptimeMillis();
         updateLastWakeOriginLocation();
 
         if (mWallpaperManagerService != null) {
