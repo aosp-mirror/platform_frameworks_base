@@ -16,7 +16,7 @@
 
 package android.app.activity;
 
-import static android.companion.virtual.VirtualDeviceManager.DEVICE_ID_INVALID;
+import static android.content.Context.DEVICE_ID_INVALID;
 import static android.content.Intent.ACTION_EDIT;
 import static android.content.Intent.ACTION_VIEW;
 import static android.content.res.Configuration.ORIENTATION_LANDSCAPE;
