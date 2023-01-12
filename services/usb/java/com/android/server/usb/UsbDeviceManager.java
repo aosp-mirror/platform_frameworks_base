@@ -510,7 +510,6 @@ public class UsbDeviceManager implements ActivityTaskManagerInternal.ScreenObser
         private boolean mUsbAccessoryConnected;
         private boolean mSourcePower;
         private boolean mSinkPower;
-        private boolean mConfigured;
         private boolean mAudioAccessoryConnected;
         private boolean mAudioAccessorySupported;
 
@@ -543,7 +542,12 @@ public class UsbDeviceManager implements ActivityTaskManagerInternal.ScreenObser
         private final UsbPermissionManager mPermissionManager;
         private NotificationManager mNotificationManager;
 
+        /**
+         * Do not debounce for the first disconnect after resetUsbGadget.
+         */
+        protected boolean mResetUsbGadgetDisableDebounce;
         protected boolean mConnected;
+        protected boolean mConfigured;
         protected long mScreenUnlockedFunctions;
         protected boolean mBootCompleted;
         protected boolean mCurrentFunctionsApplied;
@@ -650,15 +654,29 @@ public class UsbDeviceManager implements ActivityTaskManagerInternal.ScreenObser
                 Slog.e(TAG, "unknown state " + state);
                 return;
             }
-            if (configured == 0) removeMessages(MSG_UPDATE_STATE);
             if (connected == 1) removeMessages(MSG_FUNCTION_SWITCH_TIMEOUT);
             Message msg = Message.obtain(this, MSG_UPDATE_STATE);
             msg.arg1 = connected;
             msg.arg2 = configured;
-            // debounce disconnects to avoid problems bringing up USB tethering
-            sendMessageDelayed(msg,
+            if (DEBUG) {
+                Slog.i(TAG, "mResetUsbGadgetDisableDebounce:" + mResetUsbGadgetDisableDebounce
+                       + " connected:" + connected + "configured:" + configured);
+            }
+            if (mResetUsbGadgetDisableDebounce) {
+                // Do not debounce disconnect after resetUsbGadget.
+                sendMessage(msg);
+                if (connected == 1) mResetUsbGadgetDisableDebounce = false;
+            } else {
+                if (configured == 0) {
+                    removeMessages(MSG_UPDATE_STATE);
+                    if (DEBUG) Slog.i(TAG, "removeMessages MSG_UPDATE_STATE");
+                }
+                if (connected == 1) removeMessages(MSG_FUNCTION_SWITCH_TIMEOUT);
+                // debounce disconnects to avoid problems bringing up USB tethering.
+                sendMessageDelayed(msg,
                     (connected == 0) ? (mScreenLocked ? DEVICE_STATE_UPDATE_DELAY
                                                       : DEVICE_STATE_UPDATE_DELAY_EXT) : 0);
+            }
         }
 
         public void updateHostState(UsbPort port, UsbPortStatus status) {
@@ -904,7 +922,10 @@ public class UsbDeviceManager implements ActivityTaskManagerInternal.ScreenObser
                 case MSG_UPDATE_STATE:
                     mConnected = (msg.arg1 == 1);
                     mConfigured = (msg.arg2 == 1);
-
+                    if (DEBUG) {
+                        Slog.i(TAG, "handleMessage MSG_UPDATE_STATE " + "mConnected:" + mConnected
+                               + " mConfigured:" + mConfigured);
+                    }
                     updateUsbNotification(false);
                     updateAdbNotification(false);
                     if (mBootCompleted) {
@@ -2010,12 +2031,19 @@ public class UsbDeviceManager implements ActivityTaskManagerInternal.ScreenObser
                         }
 
                         try {
+                            // MSG_ACCESSORY_MODE_ENTER_TIMEOUT has to be removed to allow exiting
+                            // AOAP mode during resetUsbGadget.
+                            removeMessages(MSG_ACCESSORY_MODE_ENTER_TIMEOUT);
+                            if (mConfigured) {
+                                mResetUsbGadgetDisableDebounce = true;
+                            }
                             android.hardware.usb.gadget.V1_1.IUsbGadget gadgetProxy =
                                     android.hardware.usb.gadget.V1_1.IUsbGadget
                                             .castFrom(mGadgetProxy);
                             gadgetProxy.reset();
                         } catch (RemoteException e) {
                             Slog.e(TAG, "reset Usb Gadget failed", e);
+                            mResetUsbGadgetDisableDebounce = false;
                         }
                     }
                     break;
