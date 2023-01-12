@@ -3048,8 +3048,11 @@ class ContextImpl extends Context {
             throw new UnsupportedOperationException(
                     "Cannot update device ID on a Context created with createDeviceContext()");
         }
-        mDeviceId = updatedDeviceId;
-        notifyOnDeviceChangedListeners(updatedDeviceId);
+
+        if (mDeviceId != updatedDeviceId) {
+            mDeviceId = updatedDeviceId;
+            notifyOnDeviceChangedListeners(updatedDeviceId);
+        }
     }
 
     @Override
