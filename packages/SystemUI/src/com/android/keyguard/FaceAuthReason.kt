@@ -50,6 +50,7 @@ import com.android.keyguard.InternalFaceAuthReasons.KEYGUARD_RESET
 import com.android.keyguard.InternalFaceAuthReasons.KEYGUARD_VISIBILITY_CHANGED
 import com.android.keyguard.InternalFaceAuthReasons.NON_STRONG_BIOMETRIC_ALLOWED_CHANGED
 import com.android.keyguard.InternalFaceAuthReasons.OCCLUDING_APP_REQUESTED
+import com.android.keyguard.InternalFaceAuthReasons.POSTURE_CHANGED
 import com.android.keyguard.InternalFaceAuthReasons.PRIMARY_BOUNCER_SHOWN
 import com.android.keyguard.InternalFaceAuthReasons.PRIMARY_BOUNCER_SHOWN_OR_WILL_BE_SHOWN
 import com.android.keyguard.InternalFaceAuthReasons.RETRY_AFTER_HW_UNAVAILABLE
@@ -126,6 +127,7 @@ private object InternalFaceAuthReasons {
     const val STRONG_AUTH_ALLOWED_CHANGED = "Face auth stopped because strong auth allowed changed"
     const val NON_STRONG_BIOMETRIC_ALLOWED_CHANGED =
         "Face auth stopped because non strong biometric allowed changed"
+    const val POSTURE_CHANGED = "Face auth started/stopped due to device posture changed."
 }
 
 /**
@@ -173,6 +175,7 @@ constructor(private val id: Int, val reason: String, var extraInfo: Int = 0) :
             return PowerManager.wakeReasonToString(extraInfo)
         }
     },
+    @UiEvent(doc = POSTURE_CHANGED) FACE_AUTH_UPDATED_POSTURE_CHANGED(1265, POSTURE_CHANGED),
     @Deprecated(
         "Not a face auth trigger.",
         ReplaceWith(
