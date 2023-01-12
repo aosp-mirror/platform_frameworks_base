@@ -73,6 +73,7 @@ import static android.view.WindowManager.LayoutParams.PRIVATE_FLAG_FIT_INSETS_CO
 import static android.view.WindowManager.LayoutParams.PRIVATE_FLAG_FORCE_DECOR_VIEW_VISIBILITY;
 import static android.view.WindowManager.LayoutParams.PRIVATE_FLAG_INSET_PARENT_FRAME_BY_IME;
 import static android.view.WindowManager.LayoutParams.PRIVATE_FLAG_LAYOUT_SIZE_EXTENDED_BY_CUTOUT;
+import static android.view.WindowManager.LayoutParams.PRIVATE_FLAG_OPTIMIZE_MEASURE;
 import static android.view.WindowManager.LayoutParams.SOFT_INPUT_ADJUST_RESIZE;
 import static android.view.WindowManager.LayoutParams.SOFT_INPUT_MASK_ADJUST;
 import static android.view.WindowManager.LayoutParams.TYPE_APPLICATION_STARTING;
@@ -2766,7 +2767,7 @@ public final class ViewRootImpl implements ViewParent,
      * TODO(b/260382739): Apply this to all windows.
      */
     private static boolean shouldOptimizeMeasure(final WindowManager.LayoutParams lp) {
-        return lp.type == TYPE_NOTIFICATION_SHADE;
+        return (lp.privateFlags & PRIVATE_FLAG_OPTIMIZE_MEASURE) != 0;
     }
 
     private Rect getWindowBoundsInsetSystemBars() {
