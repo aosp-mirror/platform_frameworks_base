@@ -1,0 +1,59 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/footerlayout"
+    android:layout_width="match_parent"
+    android:layout_height="@dimen/grid_item_btn_view_height"
+    android:layout_alignParentBottom="true"
+    android:layout_gravity="bottom"
+    android:layoutDirection="ltr"
+    android:orientation="vertical"
+    android:visibility="gone">
+
+  <View
+      android:id="@+id/top_listDivider"
+      android:layout_width="match_parent"
+      android:layout_height="1dp"
+      android:background="?android:attr/listDivider"/>
+
+  <LinearLayout
+      android:layout_width="match_parent"
+      android:layout_height="match_parent"
+      android:layout_weight="1"
+      android:orientation="horizontal">
+
+    <ImageButton
+        android:id="@+id/menu_prev_button"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_weight="1"
+        android:background="@drawable/footer_button_background_left"
+        android:contentDescription="@string/previous_button_content_description"
+        android:scaleType="centerInside"
+        android:src="@drawable/ic_arrow_back_24dp"
+        android:tint="@color/footer_icon_tint_color"/>
+
+    <View
+        android:layout_width="1dp"
+        android:layout_height="match_parent"
+        android:background="?android:attr/listDivider"/>
+
+    <ImageButton
+        android:id="@+id/menu_next_button"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_weight="1"
+        android:background="@drawable/footer_button_background_right"
+        android:contentDescription="@string/next_button_content_description"
+        android:scaleType="centerInside"
+        android:src="@drawable/ic_arrow_forward_24dp"
+        android:tint="@color/footer_icon_tint_color"/>
+
+  </LinearLayout>
+
+  <View
+      android:id="@+id/bottom_listDivider"
+      android:layout_width="match_parent"
+      android:layout_height="1dp"
+      android:background="?android:attr/listDivider"/>
+
+</LinearLayout>

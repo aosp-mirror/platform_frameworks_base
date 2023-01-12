@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:paddingTop="@dimen/grid_item_padding"
+    android:paddingBottom="@dimen/grid_item_padding"
+    android:gravity="center">
+
+  <ImageButton
+      android:id="@+id/shortcutIconBtn"
+      android:layout_width="@dimen/image_button_width"
+      android:layout_height="@dimen/image_button_height"
+      android:layout_alignParentTop="true"
+      android:layout_centerHorizontal="true"
+      android:scaleType="fitCenter"></ImageButton>
+
+<TextView
+      android:id="@+id/shortcutLabel"
+      android:layout_width="match_parent"
+      android:layout_height="wrap_content"
+      android:layout_marginTop="@dimen/grid_item_text_view_margin_top"
+      android:layout_below="@+id/shortcutIconBtn"
+      android:layout_centerHorizontal="true"
+      android:ellipsize="end"
+      android:gravity="center_horizontal"
+      android:importantForAccessibility="no"
+      android:lines="2"
+      android:textSize="@dimen/label_text_size"
+      android:textAlignment="center"
+      android:textAppearance="@android:style/TextAppearance.DeviceDefault.Widget.Button"/>
+
+</RelativeLayout>
