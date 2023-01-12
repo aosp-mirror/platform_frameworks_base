@@ -52,8 +52,8 @@ constructor(
         eventTimeMillis: Long,
         batteryState: BatteryState
     ) {
-        if (batteryState.isPresent) {
-            stylusUsiPowerUi.updateBatteryState(batteryState)
+        if (batteryState.isPresent && batteryState.capacity > 0f) {
+            stylusUsiPowerUi.updateBatteryState(deviceId, batteryState)
         }
     }
 
@@ -61,6 +61,7 @@ constructor(
         if (!featureFlags.isEnabled(Flags.ENABLE_USI_BATTERY_NOTIFICATIONS)) return
         if (!hostDeviceSupportsStylusInput()) return
 
+        stylusUsiPowerUi.init()
         stylusManager.registerCallback(this)
         stylusManager.startListener()
     }
