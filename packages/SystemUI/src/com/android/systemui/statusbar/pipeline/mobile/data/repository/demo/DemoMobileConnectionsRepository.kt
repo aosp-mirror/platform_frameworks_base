@@ -149,7 +149,7 @@ constructor(
     }
 
     private fun createDemoMobileConnectionRepo(subId: Int): DemoMobileConnectionRepository {
-        val tableLogBuffer = logFactory.create("DemoMobileConnectionLog [$subId]", 100)
+        val tableLogBuffer = logFactory.getOrCreate("DemoMobileConnectionLog [$subId]", 100)
 
         return DemoMobileConnectionRepository(
             subId,

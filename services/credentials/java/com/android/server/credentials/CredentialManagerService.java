@@ -26,7 +26,9 @@ import android.content.Context;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
 import android.credentials.ClearCredentialStateRequest;
+import android.credentials.CreateCredentialException;
 import android.credentials.CreateCredentialRequest;
+import android.credentials.GetCredentialException;
 import android.credentials.GetCredentialOption;
 import android.credentials.GetCredentialRequest;
 import android.credentials.IClearCredentialStateCallback;
@@ -50,6 +52,7 @@ import android.service.credentials.CredentialProviderInfo;
 import android.text.TextUtils;
 import android.util.Log;
 import android.util.Slog;
+import android.util.SparseArray;
 
 import com.android.internal.annotations.GuardedBy;
 import com.android.server.infra.AbstractMasterSystemService;
@@ -73,6 +76,16 @@ public final class CredentialManagerService
 
     private static final String TAG = "CredManSysService";
 
+    private final Context mContext;
+
+    /**
+     * Cache of system service list per user id.
+     */
+    @GuardedBy("mLock")
+    private final SparseArray<List<CredentialManagerServiceImpl>> mSystemServicesCacheList =
+            new SparseArray<>();
+
+
     public CredentialManagerService(@NonNull Context context) {
         super(
                 context,
@@ -80,6 +93,20 @@ public final class CredentialManagerService
                         context, Settings.Secure.CREDENTIAL_SERVICE, /* isMultipleMode= */ true),
                 null,
                 PACKAGE_UPDATE_POLICY_REFRESH_EAGER);
+        mContext = context;
+    }
+
+    @NonNull
+    @GuardedBy("mLock")
+    private List<CredentialManagerServiceImpl> constructSystemServiceListLocked(
+            int resolvedUserId) {
+        List<CredentialManagerServiceImpl> services = new ArrayList<>();
+        List<CredentialProviderInfo> credentialProviderInfos =
+                CredentialProviderInfo.getAvailableSystemServices(mContext, resolvedUserId);
+        credentialProviderInfos.forEach(info -> {
+            services.add(new CredentialManagerServiceImpl(this, mLock, resolvedUserId, info));
+        });
+        return services;
     }
 
     @Override
@@ -105,8 +132,10 @@ public final class CredentialManagerService
     }
 
     @Override // from AbstractMasterSystemService
+    @GuardedBy("mLock")
     protected List<CredentialManagerServiceImpl> newServiceListLocked(
             int resolvedUserId, boolean disabled, String[] serviceNames) {
+        getOrConstructSystemServiceListLock(resolvedUserId);
         if (serviceNames == null || serviceNames.length == 0) {
             Slog.i(TAG, "serviceNames sent in newServiceListLocked is null, or empty");
             return new ArrayList<>();
@@ -155,13 +184,24 @@ public final class CredentialManagerService
         // TODO("Iterate over system services and remove if needed")
     }
 
+    @GuardedBy("mLock")
+    private List<CredentialManagerServiceImpl> getOrConstructSystemServiceListLock(
+            int resolvedUserId) {
+        List<CredentialManagerServiceImpl> services = mSystemServicesCacheList.get(resolvedUserId);
+        if (services == null || services.size() == 0) {
+            services = constructSystemServiceListLocked(resolvedUserId);
+            mSystemServicesCacheList.put(resolvedUserId, services);
+        }
+        return services;
+    }
+
     private void runForUser(@NonNull final Consumer<CredentialManagerServiceImpl> c) {
         final int userId = UserHandle.getCallingUserId();
         final long origId = Binder.clearCallingIdentity();
         try {
             synchronized (mLock) {
                 final List<CredentialManagerServiceImpl> services =
-                        getServiceListForUserLocked(userId);
+                        getAllCredentialProviderServicesLocked(userId);
                 for (CredentialManagerServiceImpl s : services) {
                     c.accept(s);
                 }
@@ -169,6 +209,19 @@ public final class CredentialManagerService
         } finally {
             Binder.restoreCallingIdentity(origId);
         }
+    }
+
+    @GuardedBy("mLock")
+    private List<CredentialManagerServiceImpl> getAllCredentialProviderServicesLocked(
+            int userId) {
+        List<CredentialManagerServiceImpl> concatenatedServices = new ArrayList<>();
+        List<CredentialManagerServiceImpl> userConfigurableServices =
+                getServiceListForUserLocked(userId);
+        if (userConfigurableServices != null && !userConfigurableServices.isEmpty()) {
+            concatenatedServices.addAll(userConfigurableServices);
+        }
+        concatenatedServices.addAll(getOrConstructSystemServiceListLock(userId));
+        return concatenatedServices;
     }
 
     @SuppressWarnings("GuardedBy") // ErrorProne requires initiateProviderSessionForRequestLocked
@@ -235,8 +288,8 @@ public final class CredentialManagerService
 
             if (providerSessions.isEmpty()) {
                 try {
-                    // TODO("Replace with properly defined error type")
-                    callback.onError("unknown_type", "No providers available to fulfill request.");
+                    callback.onError(GetCredentialException.TYPE_NO_CREDENTIAL,
+                            "No credentials available on this device.");
                 } catch (RemoteException e) {
                     Log.i(
                             TAG,
@@ -248,14 +301,10 @@ public final class CredentialManagerService
 
             // Iterate over all provider sessions and invoke the request
             providerSessions.forEach(
-                    providerGetSession -> {
-                        providerGetSession
-                                .getRemoteCredentialService()
-                                .onBeginGetCredential(
-                                        (BeginGetCredentialRequest)
-                                                providerGetSession.getProviderRequest(),
-                                        /* callback= */ providerGetSession);
-                    });
+                    providerGetSession -> providerGetSession
+                    .getRemoteCredentialService().onBeginGetCredential(
+                    (BeginGetCredentialRequest) providerGetSession.getProviderRequest(),
+                    /*callback=*/providerGetSession));
             return cancelTransport;
         }
 
@@ -284,8 +333,8 @@ public final class CredentialManagerService
 
             if (providerSessions.isEmpty()) {
                 try {
-                    // TODO("Replace with properly defined error type")
-                    callback.onError("unknown_type", "No providers available to fulfill request.");
+                    callback.onError(CreateCredentialException.TYPE_NO_CREDENTIAL,
+                            "No credentials available on this device.");
                 } catch (RemoteException e) {
                     Log.i(
                             TAG,
@@ -297,14 +346,12 @@ public final class CredentialManagerService
 
             // Iterate over all provider sessions and invoke the request
             providerSessions.forEach(
-                    providerCreateSession -> {
-                        providerCreateSession
-                                .getRemoteCredentialService()
-                                .onCreateCredential(
-                                        (BeginCreateCredentialRequest)
-                                                providerCreateSession.getProviderRequest(),
-                                        /* callback= */ providerCreateSession);
-                    });
+                    providerCreateSession -> providerCreateSession
+                            .getRemoteCredentialService()
+                            .onCreateCredential(
+                                    (BeginCreateCredentialRequest)
+                                            providerCreateSession.getProviderRequest(),
+                                    /* callback= */ providerCreateSession));
             return cancelTransport;
         }
 
@@ -402,7 +449,8 @@ public final class CredentialManagerService
             if (providerSessions.isEmpty()) {
                 try {
                     // TODO("Replace with properly defined error type")
-                    callback.onError("unknown_type", "No providers available to fulfill request.");
+                    callback.onError("UNKNOWN", "No crdentials available on this "
+                            + "device");
                 } catch (RemoteException e) {
                     Log.i(
                             TAG,

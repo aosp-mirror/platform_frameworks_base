@@ -66,8 +66,10 @@ import android.graphics.Color;
 import android.graphics.Rect;
 import android.os.IBinder;
 import android.platform.test.annotations.Presubmit;
+import android.util.DisplayMetrics;
 import android.util.Pair;
 import android.util.Size;
+import android.view.WindowMetrics;
 import android.window.TaskFragmentAnimationParams;
 import android.window.TaskFragmentInfo;
 import android.window.TaskFragmentOperation;
@@ -101,7 +103,6 @@ import java.util.ArrayList;
 @RunWith(AndroidJUnit4.class)
 public class SplitPresenterTest {
 
-    @Mock
     private Activity mActivity;
     @Mock
     private Resources mActivityResources;
@@ -193,7 +194,7 @@ public class SplitPresenterTest {
                 OP_TYPE_SET_ANIMATION_PARAMS)
                 .setAnimationParams(animationParams)
                 .build();
-        verify(mTransaction).setTaskFragmentOperation(container.getTaskFragmentToken(),
+        verify(mTransaction).addTaskFragmentOperation(container.getTaskFragmentToken(),
                 expectedOperation);
         assertTrue(container.areLastRequestedAnimationParamsEqual(animationParams));
 
@@ -202,7 +203,7 @@ public class SplitPresenterTest {
         mPresenter.updateAnimationParams(mTransaction, container.getTaskFragmentToken(),
                 animationParams);
 
-        verify(mTransaction, never()).setTaskFragmentOperation(any(), any());
+        verify(mTransaction, never()).addTaskFragmentOperation(any(), any());
     }
 
     @Test
@@ -569,6 +570,21 @@ public class SplitPresenterTest {
 
         assertEquals(splitAttributes, mPresenter.computeSplitAttributes(taskProperties,
                 splitPairRule, null /* minDimensionsPair */));
+    }
+
+    @Test
+    public void testGetTaskWindowMetrics() {
+        final Configuration taskConfig = new Configuration();
+        taskConfig.windowConfiguration.setBounds(TASK_BOUNDS);
+        taskConfig.densityDpi = 123;
+        final TaskContainer.TaskProperties taskProperties = new TaskContainer.TaskProperties(
+                DEFAULT_DISPLAY, taskConfig);
+        doReturn(taskProperties).when(mPresenter).getTaskProperties(mActivity);
+
+        final WindowMetrics windowMetrics = mPresenter.getTaskWindowMetrics(mActivity);
+        assertEquals(TASK_BOUNDS, windowMetrics.getBounds());
+        assertEquals(123 * DisplayMetrics.DENSITY_DEFAULT_SCALE,
+                windowMetrics.getDensity(), 0f);
     }
 
     private Activity createMockActivity() {

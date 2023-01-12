@@ -94,9 +94,19 @@ class LaunchBubbleFromLockScreen(flicker: FlickerTest) : BaseBubbleScreen(flicke
         flicker.assertLayersEnd { this.isVisible(testApp) }
     }
 
-    @Postsubmit @Test fun navBarLayerIsVisibleAtEnd() = flicker.navBarLayerIsVisibleAtEnd()
+    @Postsubmit
+    @Test
+    fun navBarLayerIsVisibleAtEnd() {
+        Assume.assumeFalse(flicker.scenario.isTablet)
+        flicker.navBarLayerIsVisibleAtEnd()
+    }
 
-    @Postsubmit @Test fun navBarLayerPositionAtEnd() = flicker.navBarLayerPositionAtEnd()
+    @Postsubmit
+    @Test
+    fun navBarLayerPositionAtEnd() {
+        Assume.assumeFalse(flicker.scenario.isTablet)
+        flicker.navBarLayerPositionAtEnd()
+    }
 
     /** {@inheritDoc} */
     @FlakyTest
@@ -126,43 +136,5 @@ class LaunchBubbleFromLockScreen(flicker: FlickerTest) : BaseBubbleScreen(flicke
     override fun navBarWindowIsAlwaysVisible() {
         Assume.assumeTrue(flicker.scenario.isGesturalNavigation)
         super.navBarWindowIsAlwaysVisible()
-    }
-
-    /** {@inheritDoc} */
-    @FlakyTest(bugId = 242088970)
-    @Test
-    override fun taskBarLayerIsVisibleAtStartAndEnd() = super.taskBarLayerIsVisibleAtStartAndEnd()
-
-    /** {@inheritDoc} */
-    @Postsubmit
-    @Test
-    override fun taskBarWindowIsAlwaysVisible() = super.taskBarWindowIsAlwaysVisible()
-
-    /** {@inheritDoc} */
-    @FlakyTest(bugId = 242088970)
-    @Test
-    override fun statusBarLayerIsVisibleAtStartAndEnd() =
-        super.statusBarLayerIsVisibleAtStartAndEnd()
-
-    /** {@inheritDoc} */
-    @FlakyTest(bugId = 242088970)
-    @Test
-    override fun statusBarLayerPositionAtStartAndEnd() = super.statusBarLayerPositionAtStartAndEnd()
-
-    /** {@inheritDoc} */
-    @FlakyTest(bugId = 242088970)
-    @Test
-    override fun statusBarWindowIsAlwaysVisible() = super.statusBarWindowIsAlwaysVisible()
-
-    /** {@inheritDoc} */
-    @FlakyTest(bugId = 242088970)
-    @Test
-    override fun visibleWindowsShownMoreThanOneConsecutiveEntry() =
-        super.visibleWindowsShownMoreThanOneConsecutiveEntry()
-
-    @FlakyTest(bugId = 251217773)
-    @Test
-    override fun entireScreenCovered() {
-        super.entireScreenCovered()
     }
 }

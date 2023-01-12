@@ -829,12 +829,10 @@ static void android_view_ThreadedRenderer_setDisplayDensityDpi(JNIEnv*, jclass, 
     DeviceInfo::setDensity(density);
 }
 
-static void android_view_ThreadedRenderer_initDisplayInfo(JNIEnv* env, jclass, jint physicalWidth,
-                                                          jint physicalHeight, jfloat refreshRate,
-                                                          jint wideColorDataspace,
-                                                          jlong appVsyncOffsetNanos,
-                                                          jlong presentationDeadlineNanos,
-                                                          jboolean supportFp16ForHdr) {
+static void android_view_ThreadedRenderer_initDisplayInfo(
+        JNIEnv* env, jclass, jint physicalWidth, jint physicalHeight, jfloat refreshRate,
+        jint wideColorDataspace, jlong appVsyncOffsetNanos, jlong presentationDeadlineNanos,
+        jboolean supportFp16ForHdr, jboolean supportMixedColorSpaces) {
     DeviceInfo::setWidth(physicalWidth);
     DeviceInfo::setHeight(physicalHeight);
     DeviceInfo::setRefreshRate(refreshRate);
@@ -842,6 +840,7 @@ static void android_view_ThreadedRenderer_initDisplayInfo(JNIEnv* env, jclass, j
     DeviceInfo::setAppVsyncOffsetNanos(appVsyncOffsetNanos);
     DeviceInfo::setPresentationDeadlineNanos(presentationDeadlineNanos);
     DeviceInfo::setSupportFp16ForHdr(supportFp16ForHdr);
+    DeviceInfo::setSupportMixedColorSpaces(supportMixedColorSpaces);
 }
 
 static void android_view_ThreadedRenderer_setDrawingEnabled(JNIEnv*, jclass, jboolean enabled) {
@@ -991,7 +990,7 @@ static const JNINativeMethod gMethods[] = {
         {"nSetForceDark", "(JZ)V", (void*)android_view_ThreadedRenderer_setForceDark},
         {"nSetDisplayDensityDpi", "(I)V",
          (void*)android_view_ThreadedRenderer_setDisplayDensityDpi},
-        {"nInitDisplayInfo", "(IIFIJJZ)V", (void*)android_view_ThreadedRenderer_initDisplayInfo},
+        {"nInitDisplayInfo", "(IIFIJJZZ)V", (void*)android_view_ThreadedRenderer_initDisplayInfo},
         {"preload", "()V", (void*)android_view_ThreadedRenderer_preload},
         {"isWebViewOverlaysEnabled", "()Z",
          (void*)android_view_ThreadedRenderer_isWebViewOverlaysEnabled},

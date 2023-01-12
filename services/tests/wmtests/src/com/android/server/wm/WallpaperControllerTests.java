@@ -393,7 +393,7 @@ public class WallpaperControllerTests extends WindowTestsBase {
         dc.updateOrientation();
         dc.sendNewConfiguration();
         spyOn(wallpaperWindow);
-        doReturn(new Rect(0, 0, width, height)).when(wallpaperWindow).getLastReportedBounds();
+        doReturn(new Rect(0, 0, width, height)).when(wallpaperWindow).getParentFrame();
     }
 
     @Test

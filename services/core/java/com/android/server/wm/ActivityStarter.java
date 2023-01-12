@@ -56,7 +56,7 @@ import static android.view.Display.DEFAULT_DISPLAY;
 import static android.view.WindowManager.TRANSIT_NONE;
 import static android.view.WindowManager.TRANSIT_OPEN;
 import static android.view.WindowManager.TRANSIT_TO_FRONT;
-import static android.window.WindowContainerTransaction.HierarchyOp.HIERARCHY_OP_TYPE_START_ACTIVITY_IN_TASK_FRAGMENT;
+import static android.window.TaskFragmentOperation.OP_TYPE_START_ACTIVITY_IN_TASK_FRAGMENT;
 
 import static com.android.internal.protolog.ProtoLogGroup.WM_DEBUG_CONFIGURATION;
 import static com.android.internal.protolog.ProtoLogGroup.WM_DEBUG_TASKS;
@@ -125,6 +125,7 @@ import android.service.voice.IVoiceInteractionSession;
 import android.text.TextUtils;
 import android.util.Pools.SynchronizedPool;
 import android.util.Slog;
+import android.widget.Toast;
 import android.window.RemoteTransition;
 
 import com.android.internal.annotations.VisibleForTesting;
@@ -132,6 +133,7 @@ import com.android.internal.app.HeavyWeightSwitcherActivity;
 import com.android.internal.app.IVoiceInteractor;
 import com.android.internal.protolog.common.ProtoLog;
 import com.android.internal.util.FrameworkStatsLog;
+import com.android.server.UiThread;
 import com.android.server.am.PendingIntentRecord;
 import com.android.server.pm.InstantAppResolver;
 import com.android.server.power.ShutdownCheckPoints;
@@ -167,6 +169,13 @@ class ActivityStarter {
     @ChangeId
     @EnabledSince(targetSdkVersion = Build.VERSION_CODES.TIRAMISU)
     static final long ENABLE_PENDING_INTENT_BAL_OPTION = 192341120L;
+
+    /**
+     * Feature flag for go/activity-security rules
+     */
+    @ChangeId
+    @EnabledSince(targetSdkVersion = Build.VERSION_CODES.UPSIDE_DOWN_CAKE)
+    static final long ASM_RESTRICTIONS = 230590090L;
 
     private final ActivityTaskManagerService mService;
     private final RootWindowContainer mRootWindowContainer;
@@ -1859,7 +1868,7 @@ class ActivityStarter {
         }
 
         if (!checkActivitySecurityModel(r, newTask, targetTask)) {
-            return START_SUCCESS;
+            return START_ABORTED;
         }
 
         return START_SUCCESS;
@@ -1925,11 +1934,6 @@ class ActivityStarter {
                 : targetTask.getActivity(ar ->
                         !ar.isState(FINISHING) && !ar.isAlwaysOnTop());
 
-        Slog.i(TAG, "Launching r: " + r
-                + " from background: " + mSourceRecord
-                + ". New task: " + newTask
-                + ". Top activity: " + targetTopActivity);
-
         int action = newTask || mSourceRecord == null
                 ? FrameworkStatsLog.ACTIVITY_ACTION_BLOCKED__ACTION__ACTIVITY_START_NEW_TASK
                 : (mSourceRecord.getTask().equals(targetTask)
@@ -1965,7 +1969,29 @@ class ActivityStarter {
                         && !targetTask.equals(mSourceRecord.getTask()) && targetTask.isVisible()
         );
 
-        return false;
+        boolean shouldBlockActivityStart =
+                ActivitySecurityModelFeatureFlags.shouldBlockActivityStart(mCallingUid);
+
+        if (ActivitySecurityModelFeatureFlags.shouldShowToast(mCallingUid)) {
+            UiThread.getHandler().post(() -> Toast.makeText(mService.mContext,
+                    (shouldBlockActivityStart
+                            ? "Activity start blocked by "
+                            : "Activity start would be blocked by ")
+                            + ActivitySecurityModelFeatureFlags.DOC_LINK,
+                    Toast.LENGTH_SHORT).show());
+        }
+
+
+        if (shouldBlockActivityStart) {
+            Slog.e(TAG, "Abort Launching r: " + r
+                    + " as source: " + mSourceRecord
+                    + "is in background. New task: " + newTask
+                    + ". Top activity: " + targetTopActivity);
+
+            return false;
+        }
+
+        return true;
     }
 
     /**
@@ -2889,7 +2915,7 @@ class ActivityStarter {
         if (taskFragment.isOrganized()) {
             mService.mWindowOrganizerController.sendTaskFragmentOperationFailure(
                     taskFragment.getTaskFragmentOrganizer(), mRequest.errorCallbackToken,
-                    taskFragment, HIERARCHY_OP_TYPE_START_ACTIVITY_IN_TASK_FRAGMENT,
+                    taskFragment, OP_TYPE_START_ACTIVITY_IN_TASK_FRAGMENT,
                     new SecurityException(errMsg));
         } else {
             // If the taskFragment is not organized, just dump error message as warning logs.

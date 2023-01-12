@@ -147,6 +147,14 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content" />
 
+    <!-- Explicit Indicator -->
+    <com.android.internal.widget.CachingIconView
+        android:id="@+id/media_explicit_indicator"
+        android:layout_width="@dimen/qs_media_explicit_indicator_icon_size"
+        android:layout_height="@dimen/qs_media_explicit_indicator_icon_size"
+        android:src="@drawable/ic_media_explicit_indicator"
+        />
+
     <!-- Artist name -->
     <TextView
         android:id="@+id/header_artist"

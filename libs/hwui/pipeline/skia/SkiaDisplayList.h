@@ -22,6 +22,7 @@
 #include "RenderNodeDrawable.h"
 #include "TreeInfo.h"
 #include "hwui/AnimatedImageDrawable.h"
+#include "hwui/LottieDrawable.h"
 #include "utils/LinearAllocator.h"
 #include "utils/Pair.h"
 
@@ -186,6 +187,8 @@ public:
         return mHasHolePunches;
     }
 
+    // TODO(b/257304231): create common base class for Lotties and AnimatedImages
+    std::vector<LottieDrawable*> mLotties;
     std::vector<AnimatedImageDrawable*> mAnimatedImages;
     DisplayListData mDisplayList;
 

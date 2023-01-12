@@ -68,11 +68,6 @@ public abstract class VirtualDeviceManagerInternal {
     public abstract void onAppsOnVirtualDeviceChanged();
 
     /**
-     * Validate the virtual device.
-     */
-    public abstract boolean isValidVirtualDevice(IVirtualDevice virtualDevice);
-
-    /**
      * Gets the owner uid for a deviceId.
      *
      * @param deviceId which device we're asking about

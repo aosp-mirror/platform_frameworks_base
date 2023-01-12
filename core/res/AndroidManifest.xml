@@ -3993,6 +3993,18 @@
     <permission android:name="android.permission.LIST_ENABLED_CREDENTIAL_PROVIDERS"
         android:protectionLevel="signature|privileged" />
 
+    <!-- Allows a system application to be registered with credential manager without
+         having to be enabled by the user.
+         @hide -->
+    <permission android:name="android.permission.SYSTEM_CREDENTIAL_PROVIDER"
+                android:protectionLevel="signature|privileged" />
+
+    <!-- Allows an application to be able to store and retrieve credentials from a remote
+         device.
+         @hide -->
+    <permission android:name="android.permission.HYBRID_CREDENTIAL_PROVIDER"
+                android:protectionLevel="signature|privileged" />
+
     <!-- ========================================= -->
     <!-- Permissions for special development tools -->
     <!-- ========================================= -->
@@ -6815,6 +6827,16 @@
                 android:protectionLevel="normal" />
     <uses-permission android:name="android.permission.UPDATE_PACKAGES_WITHOUT_USER_ACTION"/>
 
+    <!-- Allows an application to indicate via {@link
+         android.content.pm.PackageInstaller.SessionParams#setRequestUpdateOwnership}
+         that it has the intention of becoming the update owner.
+         <p>Protection level: normal
+         -->
+    <permission android:name="android.permission.ENFORCE_UPDATE_OWNERSHIP"
+                android:protectionLevel="normal" />
+    <uses-permission android:name="android.permission.ENFORCE_UPDATE_OWNERSHIP" />
+
+
     <!-- Allows an application to take screenshots of layers that normally would be blacked out when
          a screenshot is taken. Specifically, layers that have the flag
          {@link android.view.SurfaceControl#SECURE} will be screenshot if the caller requests to
@@ -6885,7 +6907,7 @@
          @hide
     -->
     <permission android:name="android.permission.ACCESS_AMBIENT_CONTEXT_EVENT"
-                android:protectionLevel="internal|role"/>
+                android:protectionLevel="signature|privileged|role"/>
 
     <!-- @SystemApi Required by a AmbientContextEventDetectionService
          to ensure that only the service with this permission can bind to it.

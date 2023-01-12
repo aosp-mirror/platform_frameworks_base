@@ -33,10 +33,12 @@ import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.pm.ApplicationInfo;
+import android.content.pm.InstallSourceInfo;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageInstaller;
 import android.content.pm.PackageInstaller.SessionInfo;
 import android.content.pm.PackageManager;
+import android.content.pm.PackageManager.ApplicationInfoFlags;
 import android.content.pm.PackageManager.NameNotFoundException;
 import android.graphics.drawable.BitmapDrawable;
 import android.net.Uri;
@@ -47,9 +49,11 @@ import android.os.Process;
 import android.os.UserHandle;
 import android.os.UserManager;
 import android.provider.Settings;
+import android.text.TextUtils;
 import android.util.Log;
 import android.view.View;
 import android.widget.Button;
+import android.widget.TextView;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.StringRes;
@@ -88,6 +92,7 @@ public class PackageInstallerActivity extends AlertActivity {
     private int mOriginatingUid = Process.INVALID_UID;
     private String mOriginatingPackage; // The package name corresponding to #mOriginatingUid
     private int mActivityResultCode = Activity.RESULT_CANCELED;
+    private int mPendingUserActionReason = -1;
 
     private final boolean mLocalLOGV = false;
     PackageManager mPm;
@@ -132,10 +137,27 @@ public class PackageInstallerActivity extends AlertActivity {
     private boolean mEnableOk = false;
 
     private void startInstallConfirm() {
-        View viewToEnable;
+        TextView viewToEnable;
 
         if (mAppInfo != null) {
             viewToEnable = requireViewById(R.id.install_confirm_question_update);
+
+            final CharSequence existingUpdateOwnerLabel = getExistingUpdateOwnerLabel();
+            final CharSequence requestedUpdateOwnerLabel = getApplicationLabel(mCallingPackage);
+            if (!TextUtils.isEmpty(existingUpdateOwnerLabel)) {
+                if (mPendingUserActionReason == PackageInstaller.REASON_OWNERSHIP_CHANGED) {
+                    viewToEnable.setText(
+                            getString(R.string.install_confirm_question_update_owner_changed,
+                                    existingUpdateOwnerLabel, requestedUpdateOwnerLabel));
+                } else if (mPendingUserActionReason == PackageInstaller.REASON_REMIND_OWNERSHIP
+                        || mPendingUserActionReason
+                        == PackageInstaller.REASON_CONFIRM_PACKAGE_CHANGE) {
+                    viewToEnable.setText(
+                            getString(R.string.install_confirm_question_update_owner_reminder,
+                                    existingUpdateOwnerLabel, requestedUpdateOwnerLabel));
+                }
+            }
+
             mOk.setText(R.string.update);
         } else {
             // This is a new application with no permissions.
@@ -147,6 +169,27 @@ public class PackageInstallerActivity extends AlertActivity {
         mEnableOk = true;
         mOk.setEnabled(true);
         mOk.setFilterTouchesWhenObscured(true);
+    }
+
+    private CharSequence getExistingUpdateOwnerLabel() {
+        try {
+            final String packageName = mPkgInfo.packageName;
+            final InstallSourceInfo sourceInfo = mPm.getInstallSourceInfo(packageName);
+            final String existingUpdateOwner = sourceInfo.getUpdateOwnerPackageName();
+            return getApplicationLabel(existingUpdateOwner);
+        } catch (NameNotFoundException e) {
+            return null;
+        }
+    }
+
+    private CharSequence getApplicationLabel(String packageName) {
+        try {
+            final ApplicationInfo appInfo = mPm.getApplicationInfo(packageName,
+                    ApplicationInfoFlags.of(0));
+            return mPm.getApplicationLabel(appInfo);
+        } catch (NameNotFoundException e) {
+            return null;
+        }
     }
 
     /**
@@ -344,6 +387,7 @@ public class PackageInstallerActivity extends AlertActivity {
             packageSource = Uri.fromFile(new File(resolvedBaseCodePath));
             mOriginatingURI = null;
             mReferrerURI = null;
+            mPendingUserActionReason = info.getPendingUserActionReason();
         } else if (PackageInstaller.ACTION_CONFIRM_PRE_APPROVAL.equals(action)) {
             final int sessionId = intent.getIntExtra(PackageInstaller.EXTRA_SESSION_ID,
                     -1 /* defaultValue */);
@@ -358,11 +402,13 @@ public class PackageInstallerActivity extends AlertActivity {
             packageSource = info;
             mOriginatingURI = null;
             mReferrerURI = null;
+            mPendingUserActionReason = info.getPendingUserActionReason();
         } else {
             mSessionId = -1;
             packageSource = intent.getData();
             mOriginatingURI = intent.getParcelableExtra(Intent.EXTRA_ORIGINATING_URI);
             mReferrerURI = intent.getParcelableExtra(Intent.EXTRA_REFERRER);
+            mPendingUserActionReason = PackageInstaller.REASON_CONFIRM_PACKAGE_CHANGE;
         }
 
         // if there's nothing to do, quietly slip into the ether

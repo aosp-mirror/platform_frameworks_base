@@ -22,13 +22,6 @@ import android.view.View
 import androidx.test.filters.SmallTest
 import com.android.systemui.R
 import com.android.systemui.SysuiTestCase
-import com.android.systemui.media.controls.ui.MediaCarouselController.Companion.ANIMATION_BASE_DURATION
-import com.android.systemui.media.controls.ui.MediaCarouselController.Companion.CONTROLS_DELAY
-import com.android.systemui.media.controls.ui.MediaCarouselController.Companion.DETAILS_DELAY
-import com.android.systemui.media.controls.ui.MediaCarouselController.Companion.DURATION
-import com.android.systemui.media.controls.ui.MediaCarouselController.Companion.MEDIACONTAINERS_DELAY
-import com.android.systemui.media.controls.ui.MediaCarouselController.Companion.MEDIATITLES_DELAY
-import com.android.systemui.media.controls.ui.MediaCarouselController.Companion.TRANSFORM_BEZIER
 import com.android.systemui.util.animation.MeasurementInput
 import com.android.systemui.util.animation.TransitionLayout
 import com.android.systemui.util.animation.TransitionViewState
@@ -60,9 +53,10 @@ class MediaViewControllerTest : SysuiTestCase() {
     @Mock private lateinit var controlWidgetState: WidgetState
     @Mock private lateinit var bgWidgetState: WidgetState
     @Mock private lateinit var mediaTitleWidgetState: WidgetState
+    @Mock private lateinit var mediaSubTitleWidgetState: WidgetState
     @Mock private lateinit var mediaContainerWidgetState: WidgetState
 
-    val delta = 0.0001F
+    val delta = 0.1F
 
     private lateinit var mediaViewController: MediaViewController
 
@@ -76,10 +70,11 @@ class MediaViewControllerTest : SysuiTestCase() {
     @Test
     fun testObtainViewState_applySquishFraction_toPlayerTransitionViewState_height() {
         mediaViewController.attach(player, MediaViewController.TYPE.PLAYER)
-        player.measureState = TransitionViewState().apply {
-            this.height = 100
-            this.measureHeight = 100
-        }
+        player.measureState =
+            TransitionViewState().apply {
+                this.height = 100
+                this.measureHeight = 100
+            }
         mediaHostStateHolder.expansion = 1f
         val widthMeasureSpec = View.MeasureSpec.makeMeasureSpec(100, View.MeasureSpec.EXACTLY)
         val heightMeasureSpec = View.MeasureSpec.makeMeasureSpec(100, View.MeasureSpec.EXACTLY)
@@ -128,29 +123,21 @@ class MediaViewControllerTest : SysuiTestCase() {
                     R.id.header_artist to detailWidgetState
                 )
             )
-
-        val detailSquishMiddle =
-            TRANSFORM_BEZIER.getInterpolation(
-                (DETAILS_DELAY + DURATION / 2) / ANIMATION_BASE_DURATION
-            )
-        mediaViewController.squishViewState(mockViewState, detailSquishMiddle)
+        whenever(mockCopiedState.measureHeight).thenReturn(200)
+        // detail widgets occupy [90, 100]
+        whenever(detailWidgetState.y).thenReturn(90F)
+        whenever(detailWidgetState.height).thenReturn(10)
+        // control widgets occupy [150, 170]
+        whenever(controlWidgetState.y).thenReturn(150F)
+        whenever(controlWidgetState.height).thenReturn(20)
+        // in current beizer, when the progress reach 0.38, the result will be 0.5
+        mediaViewController.squishViewState(mockViewState, 119F / 200F)
         verify(detailWidgetState).alpha = floatThat { kotlin.math.abs(it - 0.5F) < delta }
-
-        val detailSquishEnd =
-            TRANSFORM_BEZIER.getInterpolation((DETAILS_DELAY + DURATION) / ANIMATION_BASE_DURATION)
-        mediaViewController.squishViewState(mockViewState, detailSquishEnd)
+        mediaViewController.squishViewState(mockViewState, 150F / 200F)
         verify(detailWidgetState).alpha = floatThat { kotlin.math.abs(it - 1.0F) < delta }
-
-        val controlSquishMiddle =
-            TRANSFORM_BEZIER.getInterpolation(
-                (CONTROLS_DELAY + DURATION / 2) / ANIMATION_BASE_DURATION
-            )
-        mediaViewController.squishViewState(mockViewState, controlSquishMiddle)
+        mediaViewController.squishViewState(mockViewState, 181.4F / 200F)
         verify(controlWidgetState).alpha = floatThat { kotlin.math.abs(it - 0.5F) < delta }
-
-        val controlSquishEnd =
-            TRANSFORM_BEZIER.getInterpolation((CONTROLS_DELAY + DURATION) / ANIMATION_BASE_DURATION)
-        mediaViewController.squishViewState(mockViewState, controlSquishEnd)
+        mediaViewController.squishViewState(mockViewState, 200F / 200F)
         verify(controlWidgetState).alpha = floatThat { kotlin.math.abs(it - 1.0F) < delta }
     }
 
@@ -161,36 +148,33 @@ class MediaViewControllerTest : SysuiTestCase() {
             .thenReturn(
                 mutableMapOf(
                     R.id.media_title1 to mediaTitleWidgetState,
+                    R.id.media_subtitle1 to mediaSubTitleWidgetState,
                     R.id.media_cover1_container to mediaContainerWidgetState
                 )
             )
+        whenever(mockCopiedState.measureHeight).thenReturn(360)
+        // media container widgets occupy [20, 300]
+        whenever(mediaContainerWidgetState.y).thenReturn(20F)
+        whenever(mediaContainerWidgetState.height).thenReturn(280)
+        // media title widgets occupy [320, 330]
+        whenever(mediaTitleWidgetState.y).thenReturn(320F)
+        whenever(mediaTitleWidgetState.height).thenReturn(10)
+        // media subtitle widgets occupy [340, 350]
+        whenever(mediaSubTitleWidgetState.y).thenReturn(340F)
+        whenever(mediaSubTitleWidgetState.height).thenReturn(10)
 
-        val containerSquishMiddle =
-            TRANSFORM_BEZIER.getInterpolation(
-                (MEDIACONTAINERS_DELAY + DURATION / 2) / ANIMATION_BASE_DURATION
-            )
-        mediaViewController.squishViewState(mockViewState, containerSquishMiddle)
+        // in current beizer, when the progress reach 0.38, the result will be 0.5
+        mediaViewController.squishViewState(mockViewState, 307.6F / 360F)
         verify(mediaContainerWidgetState).alpha = floatThat { kotlin.math.abs(it - 0.5F) < delta }
-
-        val containerSquishEnd =
-            TRANSFORM_BEZIER.getInterpolation(
-                (MEDIACONTAINERS_DELAY + DURATION) / ANIMATION_BASE_DURATION
-            )
-        mediaViewController.squishViewState(mockViewState, containerSquishEnd)
+        mediaViewController.squishViewState(mockViewState, 320F / 360F)
         verify(mediaContainerWidgetState).alpha = floatThat { kotlin.math.abs(it - 1.0F) < delta }
-
-        val titleSquishMiddle =
-            TRANSFORM_BEZIER.getInterpolation(
-                (MEDIATITLES_DELAY + DURATION / 2) / ANIMATION_BASE_DURATION
-            )
-        mediaViewController.squishViewState(mockViewState, titleSquishMiddle)
+        // media title and media subtitle are in same widget group, should be calculate together and
+        // have same alpha
+        mediaViewController.squishViewState(mockViewState, 353.8F / 360F)
         verify(mediaTitleWidgetState).alpha = floatThat { kotlin.math.abs(it - 0.5F) < delta }
-
-        val titleSquishEnd =
-            TRANSFORM_BEZIER.getInterpolation(
-                (MEDIATITLES_DELAY + DURATION) / ANIMATION_BASE_DURATION
-            )
-        mediaViewController.squishViewState(mockViewState, titleSquishEnd)
+        verify(mediaSubTitleWidgetState).alpha = floatThat { kotlin.math.abs(it - 0.5F) < delta }
+        mediaViewController.squishViewState(mockViewState, 360F / 360F)
         verify(mediaTitleWidgetState).alpha = floatThat { kotlin.math.abs(it - 1.0F) < delta }
+        verify(mediaSubTitleWidgetState).alpha = floatThat { kotlin.math.abs(it - 1.0F) < delta }
     }
 }

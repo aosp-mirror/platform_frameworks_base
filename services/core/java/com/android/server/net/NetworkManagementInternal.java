@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.android.server;
+package com.android.server.net;
 
 /**
  * NetworkManagement local system service interface.

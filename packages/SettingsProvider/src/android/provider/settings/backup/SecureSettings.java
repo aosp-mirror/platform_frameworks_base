@@ -123,7 +123,7 @@ public class SecureSettings {
         Settings.Secure.FINGERPRINT_SIDE_FPS_BP_POWER_WINDOW,
         Settings.Secure.FINGERPRINT_SIDE_FPS_ENROLL_TAP_WINDOW,
         Settings.Secure.FINGERPRINT_SIDE_FPS_AUTH_DOWNTIME,
-        Settings.Secure.SFPS_REQUIRE_SCREEN_ON_TO_AUTH_ENABLED,
+        Settings.Secure.SFPS_PERFORMANT_AUTH_ENABLED,
         Settings.Secure.ACTIVE_UNLOCK_ON_WAKE,
         Settings.Secure.ACTIVE_UNLOCK_ON_UNLOCK_INTENT,
         Settings.Secure.ACTIVE_UNLOCK_ON_BIOMETRIC_FAIL,

@@ -66,6 +66,21 @@
         app:layout_constraintTop_toBottomOf="@id/icon"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintHorizontal_bias="0" />
+
+    <Constraint
+        android:id="@+id/media_explicit_indicator"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginEnd="@dimen/qs_media_info_spacing"
+        android:layout_marginBottom="@dimen/qs_media_padding"
+        android:layout_marginTop="0dp"
+        app:layout_constraintStart_toStartOf="@id/header_title"
+        app:layout_constraintEnd_toStartOf="@id/header_artist"
+        app:layout_constraintTop_toTopOf="@id/header_artist"
+        app:layout_constraintBottom_toTopOf="@id/media_action_barrier_top"
+        app:layout_constraintHorizontal_bias="0"
+        app:layout_constraintHorizontal_chainStyle="packed" />
+
     <Constraint
         android:id="@+id/header_artist"
         android:layout_width="wrap_content"
@@ -75,9 +90,8 @@
         app:layout_constraintEnd_toStartOf="@id/action_button_guideline"
         app:layout_constrainedWidth="true"
         app:layout_constraintTop_toBottomOf="@id/header_title"
-        app:layout_constraintStart_toStartOf="@id/header_title"
-        app:layout_constraintVertical_bias="0"
-        app:layout_constraintHorizontal_bias="0" />
+        app:layout_constraintStart_toEndOf="@id/media_explicit_indicator"
+        app:layout_constraintVertical_bias="0" />
 
     <Constraint
         android:id="@+id/actionPlayPause"

@@ -14,22 +14,26 @@
  * limitations under the License.
  */
 
-package android.content.pm;
-
-import static java.lang.annotation.ElementType.FIELD;
-import static java.lang.annotation.ElementType.LOCAL_VARIABLE;
-import static java.lang.annotation.ElementType.METHOD;
-import static java.lang.annotation.ElementType.PARAMETER;
-import static java.lang.annotation.RetentionPolicy.CLASS;
-
-import java.lang.annotation.Retention;
-import java.lang.annotation.Target;
+package android.security.rkp;
 
 /**
- * Denotes that the annotated {@link String} represents a permission name.
+ * Callback interface for storing an upgraded remotely provisioned key blob.
+ * {@link IRegistration}.
  *
  * @hide
  */
-@Retention(CLASS)
-@Target({PARAMETER, METHOD, LOCAL_VARIABLE, FIELD})
-public @interface PermissionName {}
+oneway interface IStoreUpgradedKeyCallback {
+    /**
+     * Called in response to {@link IRegistration.storeUpgradedKeyAsync}, indicating
+     * a remotely-provisioned key is available.
+     */
+    void onSuccess();
+
+    /**
+     * Called when an error has occurred while trying to store an upgraded
+     * remotely provisioned key.
+     *
+     * @param error A description of what failed, suitable for logging.
+     */
+    void onError(String error);
+}

@@ -188,6 +188,11 @@ void SkiaRecordingCanvas::drawWebViewFunctor(int functor) {
 #endif
 }
 
+void SkiaRecordingCanvas::drawLottie(LottieDrawable* lottie) {
+    drawDrawable(lottie);
+    mDisplayList->mLotties.push_back(lottie);
+}
+
 void SkiaRecordingCanvas::drawVectorDrawable(VectorDrawableRoot* tree) {
     mRecorder.drawVectorDrawable(tree);
     SkMatrix mat;

@@ -3050,6 +3050,9 @@ public final class Settings implements Watchable, Snappable {
         if (installSource.mInstallerPackageUid != INVALID_UID) {
             serializer.attributeInt(null, "installerUid", installSource.mInstallerPackageUid);
         }
+        if (installSource.mUpdateOwnerPackageName != null) {
+            serializer.attribute(null, "updateOwner", installSource.mUpdateOwnerPackageName);
+        }
         if (installSource.mInstallerAttributionTag != null) {
             serializer.attribute(null, "installerAttributionTag",
                     installSource.mInstallerAttributionTag);
@@ -3880,6 +3883,7 @@ public final class Settings implements Watchable, Snappable {
         String systemStr = null;
         String installerPackageName = null;
         int installerPackageUid = INVALID_UID;
+        String updateOwnerPackageName = null;
         String installerAttributionTag = null;
         int packageSource = PackageInstaller.PACKAGE_SOURCE_UNSPECIFIED;
         boolean isOrphaned = false;
@@ -3923,6 +3927,7 @@ public final class Settings implements Watchable, Snappable {
             versionCode = parser.getAttributeLong(null, "version", 0);
             installerPackageName = parser.getAttributeValue(null, "installer");
             installerPackageUid = parser.getAttributeInt(null, "installerUid", INVALID_UID);
+            updateOwnerPackageName = parser.getAttributeValue(null, "updateOwner");
             installerAttributionTag = parser.getAttributeValue(null, "installerAttributionTag");
             packageSource = parser.getAttributeInt(null, "packageSource",
                     PackageInstaller.PACKAGE_SOURCE_UNSPECIFIED);
@@ -4065,8 +4070,9 @@ public final class Settings implements Watchable, Snappable {
         if (packageSetting != null) {
             InstallSource installSource = InstallSource.create(
                     installInitiatingPackageName, installOriginatingPackageName,
-                    installerPackageName, installerPackageUid, installerAttributionTag,
-                    packageSource, isOrphaned, installInitiatorUninstalled);
+                    installerPackageName, installerPackageUid, updateOwnerPackageName,
+                    installerAttributionTag, packageSource, isOrphaned,
+                    installInitiatorUninstalled);
             packageSetting.setInstallSource(installSource)
                     .setVolumeUuid(volumeUuid)
                     .setCategoryOverride(categoryHint)
@@ -4734,6 +4740,8 @@ public final class Settings implements Watchable, Snappable {
             pw.print(ps.getInstallSource().mInstallerPackageName != null
                     ? ps.getInstallSource().mInstallerPackageName : "?");
             pw.print(ps.getInstallSource().mInstallerPackageUid);
+            pw.print(ps.getInstallSource().mUpdateOwnerPackageName != null
+                    ? ps.getInstallSource().mUpdateOwnerPackageName : "?");
             pw.print(ps.getInstallSource().mInstallerAttributionTag != null
                     ? "(" + ps.getInstallSource().mInstallerAttributionTag + ")" : "");
             pw.print(",");
@@ -5016,6 +5024,10 @@ public final class Settings implements Watchable, Snappable {
         if (ps.getInstallSource().mInstallerPackageUid != INVALID_UID) {
             pw.print(prefix); pw.print("  installerPackageUid=");
             pw.println(ps.getInstallSource().mInstallerPackageUid);
+        }
+        if (ps.getInstallSource().mUpdateOwnerPackageName != null) {
+            pw.print(prefix); pw.print("  updateOwnerPackageName=");
+            pw.println(ps.getInstallSource().mUpdateOwnerPackageName);
         }
         if (ps.getInstallSource().mInstallerAttributionTag != null) {
             pw.print(prefix); pw.print("  installerAttributionTag=");

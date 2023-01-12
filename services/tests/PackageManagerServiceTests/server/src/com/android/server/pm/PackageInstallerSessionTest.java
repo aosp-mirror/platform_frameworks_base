@@ -167,8 +167,8 @@ public class PackageInstallerSessionTest {
             params.isMultiPackage = true;
         }
         InstallSource installSource = InstallSource.create("testInstallInitiator",
-                "testInstallOriginator", "testInstaller", -1, "testAttributionTag",
-                PackageInstaller.PACKAGE_SOURCE_UNSPECIFIED);
+                "testInstallOriginator", "testInstaller", -1, "testUpdateOwner",
+                "testAttributionTag", PackageInstaller.PACKAGE_SOURCE_UNSPECIFIED);
         return new PackageInstallerSession(
                 /* callback */ null,
                 /* context */null,

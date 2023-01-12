@@ -20,13 +20,13 @@ import static android.app.ActivityManager.START_CANCELED;
 import static android.app.WindowConfiguration.WINDOWING_MODE_MULTI_WINDOW;
 import static android.app.WindowConfiguration.WINDOWING_MODE_UNDEFINED;
 import static android.view.Display.DEFAULT_DISPLAY;
+import static android.window.TaskFragmentOperation.OP_TYPE_CREATE_TASK_FRAGMENT;
 import static android.window.TaskFragmentTransaction.TYPE_ACTIVITY_REPARENTED_TO_TASK;
 import static android.window.TaskFragmentTransaction.TYPE_TASK_FRAGMENT_APPEARED;
 import static android.window.TaskFragmentTransaction.TYPE_TASK_FRAGMENT_ERROR;
 import static android.window.TaskFragmentTransaction.TYPE_TASK_FRAGMENT_INFO_CHANGED;
 import static android.window.TaskFragmentTransaction.TYPE_TASK_FRAGMENT_PARENT_INFO_CHANGED;
 import static android.window.TaskFragmentTransaction.TYPE_TASK_FRAGMENT_VANISHED;
-import static android.window.WindowContainerTransaction.HierarchyOp.HIERARCHY_OP_TYPE_CREATE_TASK_FRAGMENT;
 
 import static androidx.window.extensions.embedding.EmbeddingTestUtils.DEFAULT_FINISH_PRIMARY_WITH_SECONDARY;
 import static androidx.window.extensions.embedding.EmbeddingTestUtils.DEFAULT_FINISH_SECONDARY_WITH_PRIMARY;
@@ -1139,7 +1139,7 @@ public class SplitControllerTest {
         final TaskFragmentTransaction transaction = new TaskFragmentTransaction();
         final IBinder errorToken = new Binder();
         final TaskFragmentInfo info = mock(TaskFragmentInfo.class);
-        final int opType = HIERARCHY_OP_TYPE_CREATE_TASK_FRAGMENT;
+        final int opType = OP_TYPE_CREATE_TASK_FRAGMENT;
         final Exception exception = new SecurityException("test");
         final Bundle errorBundle = TaskFragmentOrganizer.putErrorInfoInBundle(exception, info,
                 opType);

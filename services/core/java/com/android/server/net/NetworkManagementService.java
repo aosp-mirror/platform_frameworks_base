@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.android.server;
+package com.android.server.net;
 
 import static android.Manifest.permission.CONNECTIVITY_INTERNAL;
 import static android.net.ConnectivityManager.FIREWALL_CHAIN_DOZABLE;
@@ -82,6 +82,8 @@ import com.android.internal.util.HexDump;
 import com.android.internal.util.Preconditions;
 import com.android.net.module.util.NetdUtils;
 import com.android.net.module.util.NetdUtils.ModifyOperation;
+import com.android.server.FgThread;
+import com.android.server.LocalServices;
 
 import com.google.android.collect.Maps;
 

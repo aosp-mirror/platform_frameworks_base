@@ -21,10 +21,15 @@ import android.hardware.broadcastradio.ProgramIdentifier;
 import android.hardware.broadcastradio.ProgramInfo;
 import android.hardware.broadcastradio.ProgramListChunk;
 import android.hardware.broadcastradio.VendorKeyValue;
+import android.hardware.radio.ProgramList;
 import android.hardware.radio.ProgramSelector;
 import android.hardware.radio.RadioManager;
 import android.hardware.radio.RadioMetadata;
+import android.os.RemoteException;
 import android.util.ArrayMap;
+import android.util.ArraySet;
+
+import java.util.List;
 
 final class AidlTestUtils {
 
@@ -94,6 +99,14 @@ final class AidlTestUtils {
         return makeHalProgramInfo(hwSel, hwSel.primaryId, hwSel.primaryId, hwSignalQuality);
     }
 
+    static ProgramInfo programInfoToHalProgramInfo(RadioManager.ProgramInfo info) {
+        return makeHalProgramInfo(
+                ConversionUtils.programSelectorToHalProgramSelector(info.getSelector()),
+                ConversionUtils.identifierToHalProgramIdentifier(info.getLogicallyTunedTo()),
+                ConversionUtils.identifierToHalProgramIdentifier(info.getPhysicallyTunedTo()),
+                info.getSignalStrength());
+    }
+
     static ProgramInfo makeHalProgramInfo(
             android.hardware.broadcastradio.ProgramSelector hwSel,
             ProgramIdentifier logicallyTunedTo, ProgramIdentifier physicallyTunedTo,
@@ -108,7 +121,23 @@ final class AidlTestUtils {
         return hwInfo;
     }
 
-    static ProgramListChunk makeProgramListChunk(boolean purge, boolean complete,
+    static ProgramListChunk makeHalChunk(boolean purge, boolean complete,
+            List<RadioManager.ProgramInfo> modified, List<ProgramSelector.Identifier> removed) {
+        ProgramInfo[] halModified =
+                new android.hardware.broadcastradio.ProgramInfo[modified.size()];
+        for (int i = 0; i < modified.size(); i++) {
+            halModified[i] = programInfoToHalProgramInfo(modified.get(i));
+        }
+
+        ProgramIdentifier[] halRemoved =
+                new android.hardware.broadcastradio.ProgramIdentifier[removed.size()];
+        for (int i = 0; i < removed.size(); i++) {
+            halRemoved[i] = ConversionUtils.identifierToHalProgramIdentifier(removed.get(i));
+        }
+        return makeHalChunk(purge, complete, halModified, halRemoved);
+    }
+
+    static ProgramListChunk makeHalChunk(boolean purge, boolean complete,
             ProgramInfo[] modified, ProgramIdentifier[] removed) {
         ProgramListChunk halChunk = new ProgramListChunk();
         halChunk.purge = purge;
@@ -116,6 +145,21 @@ final class AidlTestUtils {
         halChunk.modified = modified;
         halChunk.removed = removed;
         return halChunk;
+    }
+
+    static ProgramList.Chunk makeChunk(boolean purge, boolean complete,
+            List<RadioManager.ProgramInfo> modified,
+            List<ProgramSelector.Identifier> removed) throws RemoteException {
+        ArraySet<RadioManager.ProgramInfo> modifiedSet = new ArraySet<>();
+        if (modified != null) {
+            modifiedSet.addAll(modified);
+        }
+        ArraySet<ProgramSelector.Identifier> removedSet = new ArraySet<>();
+        if (removed != null) {
+            removedSet.addAll(removed);
+        }
+        ProgramList.Chunk chunk = new ProgramList.Chunk(purge, complete, modifiedSet, removedSet);
+        return chunk;
     }
 
     static VendorKeyValue makeVendorKeyValue(String vendorKey, String vendorValue) {

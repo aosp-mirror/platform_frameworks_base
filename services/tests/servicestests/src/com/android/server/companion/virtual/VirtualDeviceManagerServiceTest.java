@@ -369,6 +369,21 @@ public class VirtualDeviceManagerServiceTest {
     }
 
     @Test
+    public void isDeviceIdValid_defaultDeviceId_returnsFalse() {
+        assertThat(mVdm.isValidVirtualDeviceId(DEVICE_ID_DEFAULT)).isFalse();
+    }
+
+    @Test
+    public void isDeviceIdValid_validVirtualDeviceId_returnsTrue() {
+        assertThat(mVdm.isValidVirtualDeviceId(mDeviceImpl.getDeviceId())).isTrue();
+    }
+
+    @Test
+    public void isDeviceIdValid_nonExistentDeviceId_returnsFalse() {
+        assertThat(mVdm.isValidVirtualDeviceId(mDeviceImpl.getDeviceId() + 1)).isFalse();
+    }
+
+    @Test
     public void getDevicePolicy_invalidDeviceId_returnsDefault() {
         assertThat(mVdm.getDevicePolicy(DEVICE_ID_INVALID, POLICY_TYPE_SENSORS))
                 .isEqualTo(DEVICE_POLICY_DEFAULT);

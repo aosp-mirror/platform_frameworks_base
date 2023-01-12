@@ -139,15 +139,6 @@ public class VirtualDeviceManagerService extends SystemService {
                 mActivityInterceptorCallback);
     }
 
-    @GuardedBy("mVirtualDeviceManagerLock")
-    private boolean isValidVirtualDeviceLocked(IVirtualDevice virtualDevice) {
-        try {
-            return mVirtualDevices.contains(virtualDevice.getDeviceId());
-        } catch (RemoteException e) {
-            throw e.rethrowFromSystemServer();
-        }
-    }
-
     void onCameraAccessBlocked(int appUid) {
         synchronized (mVirtualDeviceManagerLock) {
             for (int i = 0; i < mVirtualDevices.size(); i++) {
@@ -347,6 +338,14 @@ public class VirtualDeviceManagerService extends SystemService {
             return VirtualDeviceManager.DEVICE_ID_DEFAULT;
         }
 
+        // Binder call
+        @Override
+        public boolean isValidVirtualDeviceId(int deviceId) {
+            synchronized (mVirtualDeviceManagerLock) {
+                return mVirtualDevices.contains(deviceId);
+            }
+        }
+
         @Override // Binder call
         public int getAudioPlaybackSessionId(int deviceId) {
             synchronized (mVirtualDeviceManagerLock) {
@@ -443,13 +442,6 @@ public class VirtualDeviceManagerService extends SystemService {
                 mAppsOnVirtualDeviceListeners = new ArrayList<>();
         @GuardedBy("mVirtualDeviceManagerLock")
         private final ArraySet<Integer> mAllUidsOnVirtualDevice = new ArraySet<>();
-
-        @Override
-        public boolean isValidVirtualDevice(IVirtualDevice virtualDevice) {
-            synchronized (mVirtualDeviceManagerLock) {
-                return isValidVirtualDeviceLocked(virtualDevice);
-            }
-        }
 
         @Override
         public int getDeviceOwnerUid(int deviceId) {

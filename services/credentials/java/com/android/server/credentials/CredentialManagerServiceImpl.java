@@ -58,7 +58,18 @@ public final class CredentialManagerServiceImpl extends
         return mInfo.getServiceInfo().getComponentName();
     }
 
-    @Override // from PerUserSystemService
+    CredentialManagerServiceImpl(
+            @NonNull CredentialManagerService master,
+            @NonNull Object lock, int userId, CredentialProviderInfo providerInfo) {
+        super(master, lock, userId);
+        Log.i(TAG, "in CredentialManagerServiceImpl constructed with system constructor: "
+                + providerInfo.isSystemProvider()
+                + " , " + providerInfo.getServiceInfo() == null ? "" :
+                providerInfo.getServiceInfo().getComponentName().flattenToString());
+        mInfo = providerInfo;
+    }
+
+    @Override // from PerUserSystemService when a new setting based service is to be created
     @GuardedBy("mLock")
     protected ServiceInfo newServiceInfoLocked(@NonNull ComponentName serviceComponent)
             throws PackageManager.NameNotFoundException {
@@ -71,7 +82,9 @@ public final class CredentialManagerServiceImpl extends
             Log.i(TAG, "newServiceInfoLocked with null mInfo , "
                     + serviceComponent.getPackageName());
         }
-        mInfo = new CredentialProviderInfo(getContext(), serviceComponent, mUserId);
+        mInfo = new CredentialProviderInfo(
+                getContext(), serviceComponent,
+                mUserId, /*isSystemProvider=*/false);
         return mInfo.getServiceInfo();
     }
 

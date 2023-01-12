@@ -3068,12 +3068,6 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
         return mLastReportedConfiguration.getMergedConfiguration();
     }
 
-    /** Returns the last window configuration bounds reported to the client. */
-    Rect getLastReportedBounds() {
-        final Rect bounds = getLastReportedConfiguration().windowConfiguration.getBounds();
-        return !bounds.isEmpty() ? bounds : getBounds();
-    }
-
     void adjustStartingWindowFlags() {
         if (mAttrs.type == TYPE_BASE_APPLICATION && mActivityRecord != null
                 && mActivityRecord.mStartingWindow != null) {
@@ -4390,6 +4384,9 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
             pw.print("null");
         }
 
+        if (mXOffset != 0 || mYOffset != 0) {
+            pw.println(prefix + "mXOffset=" + mXOffset + " mYOffset=" + mYOffset);
+        }
         if (mHScale != 1 || mVScale != 1) {
             pw.println(prefix + "mHScale=" + mHScale
                     + " mVScale=" + mVScale);
@@ -5527,7 +5524,7 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
                 mSurfacePosition);
 
         if (mWallpaperScale != 1f) {
-            final Rect bounds = getLastReportedBounds();
+            final Rect bounds = getParentFrame();
             Matrix matrix = mTmpMatrix;
             matrix.setTranslate(mXOffset, mYOffset);
             matrix.postScale(mWallpaperScale, mWallpaperScale, bounds.exactCenterX(),
@@ -5639,6 +5636,14 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
                     && getParent() != null
                     && imeTarget.compareTo(this) <= 0;
             return inTokenWithAndAboveImeTarget;
+        }
+
+        // The condition is for the system dialog not belonging to any Activity.
+        // (^FLAG_NOT_FOCUSABLE & FLAG_ALT_FOCUSABLE_IM) means the dialog is still focusable but
+        // should be placed above the IME window.
+        if ((mAttrs.flags & (FLAG_NOT_FOCUSABLE | FLAG_ALT_FOCUSABLE_IM))
+                == FLAG_ALT_FOCUSABLE_IM && isTrustedOverlay() && canAddInternalSystemWindow()) {
+            return true;
         }
         return false;
     }
@@ -6259,13 +6264,6 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
     @Override
     public ActivityRecord getActivityRecord() {
         return mActivityRecord;
-    }
-
-    @Override
-    public void unfreezeInsetsAfterStartInput() {
-        if (mActivityRecord != null) {
-            mActivityRecord.mImeInsetsFrozenUntilStartInput = false;
-        }
     }
 
     @Override

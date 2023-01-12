@@ -19,6 +19,7 @@ package com.android.server.credentials;
 import android.annotation.Nullable;
 import android.content.ComponentName;
 import android.content.Context;
+import android.credentials.GetCredentialException;
 import android.credentials.GetCredentialRequest;
 import android.credentials.GetCredentialResponse;
 import android.credentials.IGetCredentialCallback;
@@ -93,8 +94,7 @@ public final class GetRequestSession extends RequestSession<GetCredentialRequest
         if (response != null) {
             respondToClientWithResponseAndFinish(response);
         } else {
-            // TODO("Replace with no credentials/unknown type when ready)
-            respondToClientWithErrorAndFinish("unknown_type",
+            respondToClientWithErrorAndFinish(GetCredentialException.TYPE_NO_CREDENTIAL,
                     "Invalid response from provider");
         }
     }
@@ -108,29 +108,28 @@ public final class GetRequestSession extends RequestSession<GetCredentialRequest
     }
 
     private void respondToClientWithResponseAndFinish(GetCredentialResponse response) {
-        Log.i(TAG, "respondToClientWithResponseAndFinish");
         try {
             mClientCallback.onResponse(response);
         } catch (RemoteException e) {
-            e.printStackTrace();
+            Log.i(TAG, "Issue while responding to client with a response : " + e.getMessage());
         }
         finishSession();
     }
 
     private void respondToClientWithErrorAndFinish(String errorType, String errorMsg) {
-        Log.i(TAG, "respondToClientWithErrorAndFinish");
         try {
             mClientCallback.onError(errorType, errorMsg);
         } catch (RemoteException e) {
-            e.printStackTrace();
+            Log.i(TAG, "Issue while responding to client with error : " + e.getMessage());
+
         }
         finishSession();
     }
 
     @Override
     public void onUiCancellation() {
-        // TODO("Replace with properly defined error type")
-        respondToClientWithErrorAndFinish("user_canceled",
+        // TODO("Replace with user cancelled error type when ready")
+        respondToClientWithErrorAndFinish(GetCredentialException.TYPE_NO_CREDENTIAL,
                 "User cancelled the selector");
     }
 }

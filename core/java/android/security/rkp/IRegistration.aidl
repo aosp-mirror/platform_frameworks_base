@@ -17,6 +17,7 @@
 package android.security.rkp;
 
 import android.security.rkp.IGetKeyCallback;
+import android.security.rkp.IStoreUpgradedKeyCallback;
 
 /**
  * This interface is associated with the registration of an
@@ -70,16 +71,18 @@ oneway interface IRegistration {
      * mechanism, see the documentation for IKeyMintDevice.upgradeKey.
      *
      * Once a key has been upgraded, the IRegistration where the key is stored
-     * needs to be told about the new blob. After calling storeUpgradedKey,
+     * needs to be told about the new blob. After calling storeUpgradedKeyAsync,
      * getKey will return the new key blob instead of the old one.
      *
      * Note that this function does NOT extend the lifetime of key blobs. The
      * certificate for the key is unchanged, and the key will still expire at
-     * the same time it would have if storeUpgradedKey had never been called.
+     * the same time it would have if storeUpgradedKeyAsync had never been called.
      *
      * @param oldKeyBlob The old key blob to be replaced by {@code newKeyBlob}.
-     *
      * @param newKeyblob The new blob to replace {@code oldKeyBlob}.
+     * @param callback Receives the result of the call. A callback must only
+     * be used with one {@code storeUpgradedKeyAsync} call at a time.
      */
-    void storeUpgradedKey(in byte[] oldKeyBlob, in byte[] newKeyBlob);
+    void storeUpgradedKeyAsync(
+            in byte[] oldKeyBlob, in byte[] newKeyBlob, IStoreUpgradedKeyCallback callback);
 }

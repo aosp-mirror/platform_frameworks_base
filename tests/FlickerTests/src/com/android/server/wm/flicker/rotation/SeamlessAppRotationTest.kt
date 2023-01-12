@@ -16,7 +16,6 @@
 
 package com.android.server.wm.flicker.rotation
 
-import android.platform.test.annotations.FlakyTest
 import android.platform.test.annotations.IwTest
 import android.platform.test.annotations.Presubmit
 import android.view.WindowManager
@@ -201,11 +200,6 @@ open class SeamlessAppRotationTest(flicker: FlickerTest) : RotationTransition(fl
         flicker.assertEventLog { this.focusDoesNotChange() }
     }
 
-    /** {@inheritDoc} */
-    @FlakyTest
-    @Test
-    override fun navBarLayerPositionAtStartAndEnd() = super.navBarLayerPositionAtStartAndEnd()
-
     @Test
     @IwTest(focusArea = "framework")
     override fun cujCompleted() {
@@ -224,6 +218,7 @@ open class SeamlessAppRotationTest(flicker: FlickerTest) : RotationTransition(fl
         runAndIgnoreAssumptionViolation { appLayerAlwaysVisible() }
         runAndIgnoreAssumptionViolation { navBarLayerIsVisibleAtStartAndEnd() }
         runAndIgnoreAssumptionViolation { navBarWindowIsAlwaysVisible() }
+        runAndIgnoreAssumptionViolation { navBarLayerPositionAtStartAndEnd() }
         runAndIgnoreAssumptionViolation { taskBarLayerIsVisibleAtStartAndEnd() }
         runAndIgnoreAssumptionViolation { taskBarWindowIsAlwaysVisible() }
     }

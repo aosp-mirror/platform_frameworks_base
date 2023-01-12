@@ -83,7 +83,7 @@ public abstract class AccessibilityDisplayProxy {
      * @param displayId the id of the display to proxy.
      * @param executor the executor used to execute proxy callbacks.
      * @param installedAndEnabledServices the list of infos representing the installed and
-     *                                    enabled a11y services.
+     *                                    enabled accessibility services.
      */
     public AccessibilityDisplayProxy(int displayId, @NonNull Executor executor,
             @NonNull List<AccessibilityServiceInfo> installedAndEnabledServices) {
@@ -147,19 +147,27 @@ public abstract class AccessibilityDisplayProxy {
     }
 
     /**
-     * Gets the focus of the window specified by {@code windowInfo}.
+     * Gets the node with focus, in this display.
      *
-     * @param windowInfo the window to search
-     * @param focus The focus to find. One of {@link AccessibilityNodeInfo#FOCUS_INPUT} or
+     * <p>For {@link AccessibilityNodeInfo#FOCUS_INPUT}, this returns the input-focused node in the
+     * proxy display if this display can receive unspecified input events (input that does not
+     * specify a target display.)
+     *
+     * <p>For {@link AccessibilityNodeInfo#FOCUS_ACCESSIBILITY}, this returns the
+     * accessibility-focused node in the proxy display if the display has accessibility focus.
+     * @param focusType The focus to find. One of {@link AccessibilityNodeInfo#FOCUS_INPUT} or
      * {@link AccessibilityNodeInfo#FOCUS_ACCESSIBILITY}.
      * @return The node info of the focused view or null.
-     * @hide
-     * TODO(254545943): Do not expose until support for accessibility focus and/or input is in place
+
      */
     @Nullable
-    public AccessibilityNodeInfo findFocus(@NonNull AccessibilityWindowInfo windowInfo, int focus) {
-        AccessibilityNodeInfo windowRoot = windowInfo.getRoot();
-        return windowRoot != null ? windowRoot.findFocus(focus) : null;
+    public AccessibilityNodeInfo findFocus(int focusType) {
+        // TODO(264423198): Support querying the focused node of the proxy's display even if it is
+        // not the top-focused display and can't receive untargeted input events.
+        // TODO(254545943): Separate accessibility focus between proxy and phone state.
+        return AccessibilityInteractionClient.getInstance().findFocus(mConnectionId,
+                AccessibilityWindowInfo.ANY_WINDOW_ID, AccessibilityNodeInfo.ROOT_NODE_ID,
+                focusType);
     }
 
     /**
@@ -177,10 +185,10 @@ public abstract class AccessibilityDisplayProxy {
      * Sets the list of {@link AccessibilityServiceInfo}s describing the services interested in the
      * {@link AccessibilityDisplayProxy}'s display.
      *
-     * <p>These represent a11y features and services that are installed and running. These should
-     * not include {@link AccessibilityService}s installed on the phone.
+     * <p>These represent accessibility features and services that are installed and running. These
+     * should not include {@link AccessibilityService}s installed on the phone.
      *
-     * @param installedAndEnabledServices the list of installed and running a11y services.
+     * @param installedAndEnabledServices the list of installed and running accessibility services.
      */
     public void setInstalledAndEnabledServices(
             @NonNull List<AccessibilityServiceInfo> installedAndEnabledServices) {

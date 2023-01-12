@@ -88,6 +88,7 @@ package android {
     field public static final String DIAGNOSTIC = "android.permission.DIAGNOSTIC";
     field public static final String DISABLE_KEYGUARD = "android.permission.DISABLE_KEYGUARD";
     field public static final String DUMP = "android.permission.DUMP";
+    field public static final String ENFORCE_UPDATE_OWNERSHIP = "android.permission.ENFORCE_UPDATE_OWNERSHIP";
     field public static final String EXPAND_STATUS_BAR = "android.permission.EXPAND_STATUS_BAR";
     field public static final String FACTORY_TEST = "android.permission.FACTORY_TEST";
     field public static final String FOREGROUND_SERVICE = "android.permission.FOREGROUND_SERVICE";
@@ -384,6 +385,7 @@ package android {
     field public static final int allowTaskReparenting = 16843268; // 0x1010204
     field public static final int allowUndo = 16843999; // 0x10104df
     field public static final int allowUntrustedActivityEmbedding = 16844393; // 0x1010669
+    field public static final int allowUpdateOwnership;
     field public static final int alpha = 16843551; // 0x101031f
     field public static final int alphabeticModifiers = 16844110; // 0x101054e
     field public static final int alphabeticShortcut = 16843235; // 0x10101e3
@@ -11691,6 +11693,7 @@ package android.content.pm {
     method @Nullable public String getInstallingPackageName();
     method @Nullable public String getOriginatingPackageName();
     method public int getPackageSource();
+    method @Nullable public String getUpdateOwnerPackageName();
     method public void writeToParcel(@NonNull android.os.Parcel, int);
     field @NonNull public static final android.os.Parcelable.Creator<android.content.pm.InstallSourceInfo> CREATOR;
   }
@@ -11981,6 +11984,7 @@ package android.content.pm {
     method public int getParentSessionId();
     method public boolean isKeepApplicationEnabledSetting();
     method public boolean isMultiPackage();
+    method public boolean isRequestUpdateOwnership();
     method public boolean isStaged();
     method @NonNull public java.io.InputStream openRead(@NonNull String) throws java.io.IOException;
     method @NonNull public java.io.OutputStream openWrite(@NonNull String, long, long) throws java.io.IOException;
@@ -12036,6 +12040,7 @@ package android.content.pm {
     method public boolean isCommitted();
     method public boolean isKeepApplicationEnabledSetting();
     method public boolean isMultiPackage();
+    method public boolean isRequestUpdateOwnership();
     method public boolean isSealed();
     method public boolean isStaged();
     method public boolean isStagedSessionActive();
@@ -12074,6 +12079,7 @@ package android.content.pm {
     method public void setOriginatingUri(@Nullable android.net.Uri);
     method public void setPackageSource(int);
     method public void setReferrerUri(@Nullable android.net.Uri);
+    method @RequiresPermission(android.Manifest.permission.ENFORCE_UPDATE_OWNERSHIP) public void setRequestUpdateOwnership(boolean);
     method public void setRequireUserAction(int);
     method public void setSize(long);
     method public void setWhitelistedRestrictedPermissions(@Nullable java.util.Set<java.lang.String>);
@@ -12252,6 +12258,7 @@ package android.content.pm {
     method @NonNull public java.util.List<android.content.pm.PackageManager.Property> queryProviderProperty(@NonNull String);
     method @NonNull public java.util.List<android.content.pm.PackageManager.Property> queryReceiverProperty(@NonNull String);
     method @NonNull public java.util.List<android.content.pm.PackageManager.Property> queryServiceProperty(@NonNull String);
+    method public void relinquishUpdateOwnership(@NonNull String);
     method @Deprecated public abstract void removePackageFromPreferred(@NonNull String);
     method public abstract void removePermission(@NonNull String);
     method @RequiresPermission(value="android.permission.WHITELIST_RESTRICTED_PERMISSIONS", conditional=true) public boolean removeWhitelistedRestrictedPermission(@NonNull String, @NonNull String, int);
@@ -12686,7 +12693,7 @@ package android.content.pm {
     field public static final int FLAG_USE_APP_ZYGOTE = 8; // 0x8
     field @RequiresPermission(allOf={android.Manifest.permission.FOREGROUND_SERVICE_CAMERA}, anyOf={android.Manifest.permission.CAMERA}, conditional=true) public static final int FOREGROUND_SERVICE_TYPE_CAMERA = 64; // 0x40
     field @RequiresPermission(allOf={android.Manifest.permission.FOREGROUND_SERVICE_CONNECTED_DEVICE}, anyOf={android.Manifest.permission.BLUETOOTH_CONNECT, android.Manifest.permission.CHANGE_NETWORK_STATE, android.Manifest.permission.CHANGE_WIFI_STATE, android.Manifest.permission.CHANGE_WIFI_MULTICAST_STATE, android.Manifest.permission.NFC, android.Manifest.permission.TRANSMIT_IR}, conditional=true) public static final int FOREGROUND_SERVICE_TYPE_CONNECTED_DEVICE = 16; // 0x10
-    field @Deprecated @RequiresPermission(value=android.Manifest.permission.FOREGROUND_SERVICE_DATA_SYNC, conditional=true) public static final int FOREGROUND_SERVICE_TYPE_DATA_SYNC = 1; // 0x1
+    field @RequiresPermission(value=android.Manifest.permission.FOREGROUND_SERVICE_DATA_SYNC, conditional=true) public static final int FOREGROUND_SERVICE_TYPE_DATA_SYNC = 1; // 0x1
     field @RequiresPermission(android.Manifest.permission.FOREGROUND_SERVICE_FILE_MANAGEMENT) public static final int FOREGROUND_SERVICE_TYPE_FILE_MANAGEMENT = 4096; // 0x1000
     field @RequiresPermission(allOf={android.Manifest.permission.FOREGROUND_SERVICE_HEALTH}, anyOf={android.Manifest.permission.ACTIVITY_RECOGNITION, android.Manifest.permission.BODY_SENSORS, android.Manifest.permission.HIGH_SAMPLING_RATE_SENSORS}) public static final int FOREGROUND_SERVICE_TYPE_HEALTH = 256; // 0x100
     field @RequiresPermission(allOf={android.Manifest.permission.FOREGROUND_SERVICE_LOCATION}, anyOf={android.Manifest.permission.ACCESS_COARSE_LOCATION, android.Manifest.permission.ACCESS_FINE_LOCATION}, conditional=true) public static final int FOREGROUND_SERVICE_TYPE_LOCATION = 8; // 0x8
@@ -13251,6 +13258,7 @@ package android.credentials {
     ctor public ClearCredentialStateException(@NonNull String, @Nullable Throwable);
     ctor public ClearCredentialStateException(@NonNull String);
     method @NonNull public String getType();
+    field @NonNull public static final String TYPE_UNKNOWN = "android.credentials.ClearCredentialStateException.TYPE_UNKNOWN";
   }
 
   public final class ClearCredentialStateRequest implements android.os.Parcelable {
@@ -13267,7 +13275,10 @@ package android.credentials {
     ctor public CreateCredentialException(@NonNull String, @Nullable Throwable);
     ctor public CreateCredentialException(@NonNull String);
     method @NonNull public String getType();
+    field @NonNull public static final String TYPE_INTERRUPTED = "android.credentials.CreateCredentialException.TYPE_INTERRUPTED";
     field @NonNull public static final String TYPE_NO_CREDENTIAL = "android.credentials.CreateCredentialException.TYPE_NO_CREDENTIAL";
+    field @NonNull public static final String TYPE_UNKNOWN = "android.credentials.CreateCredentialException.TYPE_UNKNOWN";
+    field @NonNull public static final String TYPE_USER_CANCELED = "android.credentials.CreateCredentialException.TYPE_USER_CANCELED";
   }
 
   public final class CreateCredentialRequest implements android.os.Parcelable {
@@ -13311,7 +13322,10 @@ package android.credentials {
     ctor public GetCredentialException(@NonNull String, @Nullable Throwable);
     ctor public GetCredentialException(@NonNull String);
     method @NonNull public String getType();
+    field @NonNull public static final String TYPE_INTERRUPTED = "android.credentials.GetCredentialException.TYPE_INTERRUPTED";
     field @NonNull public static final String TYPE_NO_CREDENTIAL = "android.credentials.GetCredentialException.TYPE_NO_CREDENTIAL";
+    field @NonNull public static final String TYPE_UNKNOWN = "android.credentials.GetCredentialException.TYPE_UNKNOWN";
+    field @NonNull public static final String TYPE_USER_CANCELED = "android.credentials.GetCredentialException.TYPE_USER_CANCELED";
   }
 
   public final class GetCredentialOption implements android.os.Parcelable {
@@ -21959,6 +21973,7 @@ package android.media {
     field public static final int PLUGIN_STATUS_PHYSICAL_MODULE_CHANGED = 0; // 0x0
     field public static final int PLUGIN_STATUS_SESSION_NUMBER_CHANGED = 1; // 0x1
     field public static final int SCRAMBLING_MODE_AES128 = 9; // 0x9
+    field public static final int SCRAMBLING_MODE_AES_CBC = 14; // 0xe
     field public static final int SCRAMBLING_MODE_AES_ECB = 10; // 0xa
     field public static final int SCRAMBLING_MODE_AES_SCTE52 = 11; // 0xb
     field public static final int SCRAMBLING_MODE_DVB_CISSA_V1 = 6; // 0x6
@@ -33197,6 +33212,7 @@ package android.os {
     field public static final String DISALLOW_CONFIG_CELL_BROADCASTS = "no_config_cell_broadcasts";
     field public static final String DISALLOW_CONFIG_CREDENTIALS = "no_config_credentials";
     field public static final String DISALLOW_CONFIG_DATE_TIME = "no_config_date_time";
+    field public static final String DISALLOW_CONFIG_DEFAULT_APPS = "disallow_config_default_apps";
     field public static final String DISALLOW_CONFIG_LOCALE = "no_config_locale";
     field public static final String DISALLOW_CONFIG_LOCATION = "no_config_location";
     field public static final String DISALLOW_CONFIG_MOBILE_NETWORKS = "no_config_mobile_networks";
@@ -53772,6 +53788,7 @@ package android.view.accessibility {
     method public int getDisplayId();
     method public int getId();
     method public int getLayer();
+    method @NonNull public android.os.LocaleList getLocales();
     method public android.view.accessibility.AccessibilityWindowInfo getParent();
     method public void getRegionInScreen(@NonNull android.graphics.Region);
     method public android.view.accessibility.AccessibilityNodeInfo getRoot();

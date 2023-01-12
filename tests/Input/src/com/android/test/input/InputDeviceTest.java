@@ -69,7 +69,7 @@ public class InputDeviceTest {
     }
 
     private void assertInputDeviceParcelUnparcel(KeyCharacterMap keyCharacterMap) {
-        final InputDevice device = new InputDevice.Builder()
+        final InputDevice.Builder deviceBuilder = new InputDevice.Builder()
                 .setId(DEVICE_ID)
                 .setGeneration(42)
                 .setControllerNumber(43)
@@ -88,8 +88,20 @@ public class InputDeviceTest {
                 .setHasBattery(true)
                 .setKeyboardLanguageTag("en-US")
                 .setKeyboardLayoutType("qwerty")
-                .setSupportsUsi(true)
-                .build();
+                .setSupportsUsi(true);
+
+        for (int i = 0; i < 30; i++) {
+            deviceBuilder.addMotionRange(
+                    MotionEvent.AXIS_GENERIC_1,
+                    InputDevice.SOURCE_UNKNOWN,
+                    i,
+                    i + 1,
+                    i + 2,
+                    i + 3,
+                    i + 4);
+        }
+
+        final InputDevice device = deviceBuilder.build();
 
         Parcel parcel = Parcel.obtain();
         device.writeToParcel(parcel, 0);

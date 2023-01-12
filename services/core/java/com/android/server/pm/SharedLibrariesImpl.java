@@ -17,6 +17,7 @@
 package com.android.server.pm;
 
 import static android.content.pm.PackageManager.INSTALL_FAILED_MISSING_SHARED_LIBRARY;
+import static android.content.pm.PackageManager.INSTALL_FAILED_SHARED_LIBRARY_BAD_CERTIFICATE_DIGEST;
 
 import static com.android.server.pm.PackageManagerService.PLATFORM_PACKAGE_NAME;
 import static com.android.server.pm.PackageManagerService.SCAN_BOOTING;
@@ -1035,8 +1036,17 @@ public final class SharedLibrariesImpl implements SharedLibrariesRead, Watchable
                     } else {
                         // lib signing cert could have rotated beyond the one expected, check to see
                         // if the new one has been blessed by the old
-                        byte[] digestBytes = HexEncoding.decode(
-                                expectedCertDigests[0], false /* allowSingleChar */);
+                        final byte[] digestBytes;
+                        try {
+                            digestBytes = HexEncoding.decode(
+                                    expectedCertDigests[0], false /* allowSingleChar */);
+                        } catch (IllegalArgumentException e) {
+                            throw new PackageManagerException(
+                                    INSTALL_FAILED_SHARED_LIBRARY_BAD_CERTIFICATE_DIGEST,
+                                    "Package " + packageName + " declares bad certificate digest "
+                                            + "for " + libraryType + " library " + libName
+                                            + "; failing!");
+                        }
                         if (!libPkg.hasSha256Certificate(digestBytes)) {
                             throw new PackageManagerException(INSTALL_FAILED_MISSING_SHARED_LIBRARY,
                                     "Package " + packageName + " requires differently signed "

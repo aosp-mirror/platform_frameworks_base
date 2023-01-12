@@ -18,6 +18,7 @@ package com.android.wm.shell.flicker.pip
 
 import android.app.Instrumentation
 import android.content.Intent
+import android.platform.test.annotations.Postsubmit
 import com.android.server.wm.flicker.FlickerBuilder
 import com.android.server.wm.flicker.FlickerTest
 import com.android.server.wm.flicker.helpers.PipAppHelper
@@ -25,8 +26,11 @@ import com.android.server.wm.flicker.helpers.WindowUtils
 import com.android.server.wm.flicker.helpers.setRotation
 import com.android.server.wm.flicker.rules.RemoveAllTasksButHomeRule.Companion.removeAllTasksButHome
 import com.android.server.wm.flicker.testapp.ActivityOptions
+import com.android.server.wm.traces.common.ComponentNameMatcher
 import com.android.server.wm.traces.common.service.PlatformConsts
 import com.android.wm.shell.flicker.BaseTest
+import com.google.common.truth.Truth
+import org.junit.Test
 
 abstract class PipTransition(flicker: FlickerTest) : BaseTest(flicker) {
     protected val pipApp = PipAppHelper(instrumentation)
@@ -56,7 +60,6 @@ abstract class PipTransition(flicker: FlickerTest) : BaseTest(flicker) {
      * Gets a configuration that handles basic setup and teardown of pip tests and that launches the
      * Pip app for test
      *
-     * @param eachRun If the pip app should be launched in each run (otherwise only 1x per test)
      * @param stringExtras Arguments to pass to the PIP launch intent
      * @param extraSpec Additional segment of flicker specification
      */
@@ -76,6 +79,23 @@ abstract class PipTransition(flicker: FlickerTest) : BaseTest(flicker) {
             }
 
             extraSpec(this)
+        }
+    }
+
+    @Postsubmit
+    @Test
+    fun hasAtMostOnePipDismissOverlayWindow() {
+        val matcher = ComponentNameMatcher("", "pip-dismiss-overlay")
+        flicker.assertWm {
+            val overlaysPerState = trace.entries.map { entry ->
+                entry.windowStates.count { window ->
+                    matcher.windowMatchesAnyOf(window)
+                } <= 1
+            }
+
+            Truth.assertWithMessage("Number of dismiss overlays per state")
+                .that(overlaysPerState)
+                .doesNotContain(false)
         }
     }
 }

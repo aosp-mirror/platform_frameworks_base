@@ -149,7 +149,8 @@ public class UserRestrictionsUtils {
             UserManager.DISALLOW_WIFI_DIRECT,
             UserManager.DISALLOW_ADD_WIFI_CONFIG,
             UserManager.DISALLOW_CELLULAR_2G,
-            UserManager.DISALLOW_ULTRA_WIDEBAND_RADIO
+            UserManager.DISALLOW_ULTRA_WIDEBAND_RADIO,
+            UserManager.DISALLOW_CONFIG_DEFAULT_APPS
     });
 
     public static final Set<String> DEPRECATED_USER_RESTRICTIONS = Sets.newArraySet(

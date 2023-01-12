@@ -3592,6 +3592,9 @@ package android.content.pm {
     field public static final int LOCATION_DATA_APP = 0; // 0x0
     field public static final int LOCATION_MEDIA_DATA = 2; // 0x2
     field public static final int LOCATION_MEDIA_OBB = 1; // 0x1
+    field public static final int REASON_CONFIRM_PACKAGE_CHANGE = 0; // 0x0
+    field public static final int REASON_OWNERSHIP_CHANGED = 1; // 0x1
+    field public static final int REASON_REMIND_OWNERSHIP = 2; // 0x2
   }
 
   public static class PackageInstaller.InstallInfo {
@@ -3621,6 +3624,7 @@ package android.content.pm {
     method public boolean getInstallAsFullApp(boolean);
     method public boolean getInstallAsInstantApp(boolean);
     method public boolean getInstallAsVirtualPreload();
+    method public int getPendingUserActionReason();
     method public boolean getRequestDowngrade();
     method public int getRollbackDataPolicy();
     method @NonNull public java.util.Set<java.lang.String> getWhitelistedRestrictedPermissions();
@@ -11769,6 +11773,7 @@ package android.service.euicc {
     method public int onEraseSubscriptions(int, @android.telephony.euicc.EuiccCardManager.ResetOption int);
     method public abstract android.service.euicc.GetDefaultDownloadableSubscriptionListResult onGetDefaultDownloadableSubscriptionList(int, boolean);
     method public abstract android.service.euicc.GetDownloadableSubscriptionMetadataResult onGetDownloadableSubscriptionMetadata(int, android.telephony.euicc.DownloadableSubscription, boolean);
+    method @NonNull public android.service.euicc.GetDownloadableSubscriptionMetadataResult onGetDownloadableSubscriptionMetadata(int, int, @NonNull android.telephony.euicc.DownloadableSubscription, boolean);
     method public abstract String onGetEid(int);
     method @NonNull public abstract android.telephony.euicc.EuiccInfo onGetEuiccInfo(int);
     method @NonNull public abstract android.service.euicc.GetEuiccProfileInfoListResult onGetEuiccProfileInfoList(int);
@@ -16531,6 +16536,7 @@ package android.view.accessibility {
 
   public abstract class AccessibilityDisplayProxy {
     ctor public AccessibilityDisplayProxy(int, @NonNull java.util.concurrent.Executor, @NonNull java.util.List<android.accessibilityservice.AccessibilityServiceInfo>);
+    method @Nullable public android.view.accessibility.AccessibilityNodeInfo findFocus(int);
     method public int getDisplayId();
     method @NonNull public final java.util.List<android.accessibilityservice.AccessibilityServiceInfo> getInstalledAndEnabledServices();
     method @NonNull public java.util.List<android.view.accessibility.AccessibilityWindowInfo> getWindows();

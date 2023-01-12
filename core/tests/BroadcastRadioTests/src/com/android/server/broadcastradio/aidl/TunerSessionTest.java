@@ -37,7 +37,9 @@ import android.graphics.Bitmap;
 import android.hardware.broadcastradio.IBroadcastRadio;
 import android.hardware.broadcastradio.ITunerCallback;
 import android.hardware.broadcastradio.IdentifierType;
+import android.hardware.broadcastradio.ProgramFilter;
 import android.hardware.broadcastradio.ProgramInfo;
+import android.hardware.broadcastradio.ProgramListChunk;
 import android.hardware.broadcastradio.Result;
 import android.hardware.broadcastradio.VendorKeyValue;
 import android.hardware.radio.ProgramList;
@@ -61,8 +63,10 @@ import org.junit.Test;
 import org.mockito.Mock;
 import org.mockito.verification.VerificationWithTimeout;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 /**
  * Tests for AIDL HAL TunerSession.
@@ -72,7 +76,7 @@ public final class TunerSessionTest extends ExtendedRadioMockitoTestCase {
     private static final int TARGET_SDK_VERSION = Build.VERSION_CODES.CUR_DEVELOPMENT;
     private static final VerificationWithTimeout CALLBACK_TIMEOUT =
             timeout(/* millis= */ 200);
-    private static final int SIGNAL_QUALITY = 1;
+    private static final int SIGNAL_QUALITY = 90;
     private static final long AM_FM_FREQUENCY_SPACING = 500;
     private static final long[] AM_FM_FREQUENCY_LIST = {97_500, 98_100, 99_100};
     private static final RadioManager.FmBandDescriptor FM_BAND_DESCRIPTOR =
@@ -83,6 +87,27 @@ public final class TunerSessionTest extends ExtendedRadioMockitoTestCase {
     private static final RadioManager.BandConfig FM_BAND_CONFIG =
             new RadioManager.FmBandConfig(FM_BAND_DESCRIPTOR);
     private static final int UNSUPPORTED_CONFIG_FLAG = 0;
+
+    private static final ProgramSelector.Identifier TEST_FM_FREQUENCY_ID =
+            new ProgramSelector.Identifier(ProgramSelector.IDENTIFIER_TYPE_AMFM_FREQUENCY,
+                    /* value= */ 88_500);
+    private static final ProgramSelector.Identifier TEST_RDS_PI_ID =
+            new ProgramSelector.Identifier(ProgramSelector.IDENTIFIER_TYPE_RDS_PI,
+                    /* value= */ 15_019);
+
+    private static final RadioManager.ProgramInfo TEST_FM_INFO = AidlTestUtils.makeProgramInfo(
+            AidlTestUtils.makeProgramSelector(ProgramSelector.PROGRAM_TYPE_FM,
+                    TEST_FM_FREQUENCY_ID), TEST_FM_FREQUENCY_ID, TEST_FM_FREQUENCY_ID,
+            SIGNAL_QUALITY);
+    private static final RadioManager.ProgramInfo TEST_FM_INFO_MODIFIED =
+            AidlTestUtils.makeProgramInfo(AidlTestUtils.makeProgramSelector(
+                    ProgramSelector.PROGRAM_TYPE_FM, TEST_FM_FREQUENCY_ID), TEST_FM_FREQUENCY_ID,
+                    TEST_FM_FREQUENCY_ID, /* signalQuality= */ 100);
+    private static final RadioManager.ProgramInfo TEST_RDS_INFO = AidlTestUtils.makeProgramInfo(
+            AidlTestUtils.makeProgramSelector(ProgramSelector.PROGRAM_TYPE_FM, TEST_RDS_PI_ID),
+            TEST_RDS_PI_ID, new ProgramSelector.Identifier(
+                    ProgramSelector.IDENTIFIER_TYPE_AMFM_FREQUENCY, /* value= */ 89_500),
+            SIGNAL_QUALITY);
 
     // Mocks
     @Mock private IBroadcastRadio mBroadcastRadioMock;
@@ -393,7 +418,7 @@ public final class TunerSessionTest extends ExtendedRadioMockitoTestCase {
     }
 
     @Test
-    public void tune_withHalHasUnknownError_fails() throws Exception {
+    public void tune_withUnknownErrorFromHal_fails() throws Exception {
         openAidlClients(/* numClients= */ 1);
         ProgramSelector sel = AidlTestUtils.makeFmSelector(AM_FM_FREQUENCY_LIST[1]);
         doThrow(new ServiceSpecificException(Result.UNKNOWN_ERROR))
@@ -403,7 +428,7 @@ public final class TunerSessionTest extends ExtendedRadioMockitoTestCase {
             mTunerSessions[0].tune(sel);
         });
 
-        assertWithMessage("Exception for tuning when HAL has unknown error")
+        assertWithMessage("Unknown error HAL exception when tuning")
                 .that(thrown).hasMessageThat().contains("UNKNOWN_ERROR");
     }
 
@@ -536,7 +561,7 @@ public final class TunerSessionTest extends ExtendedRadioMockitoTestCase {
     }
 
     @Test
-    public void seek_withHalHasInternalError_fails() throws Exception {
+    public void seek_withInternalErrorFromHal_fails() throws Exception {
         openAidlClients(/* numClients= */ 1);
         doThrow(new ServiceSpecificException(Result.INTERNAL_ERROR))
                 .when(mBroadcastRadioMock).seek(anyBoolean(), anyBoolean());
@@ -545,7 +570,7 @@ public final class TunerSessionTest extends ExtendedRadioMockitoTestCase {
             mTunerSessions[0].seek(/* directionDown= */ true, /* skipSubChannel= */ false);
         });
 
-        assertWithMessage("Exception for seeking when HAL has internal error")
+        assertWithMessage("Internal error HAL exception when seeking")
                 .that(thrown).hasMessageThat().contains("INTERNAL_ERROR");
     }
 
@@ -644,11 +669,276 @@ public final class TunerSessionTest extends ExtendedRadioMockitoTestCase {
     }
 
     @Test
+    public void startProgramListUpdates_withEmptyFilter() throws Exception {
+        openAidlClients(/* numClients= */ 1);
+        ProgramList.Filter filter = new ProgramList.Filter(new ArraySet<>(), new ArraySet<>(),
+                /* includeCategories= */ true, /* excludeModifications= */ false);
+        ProgramFilter halFilter = ConversionUtils.filterToHalProgramFilter(filter);
+        List<RadioManager.ProgramInfo> modified = List.of(TEST_FM_INFO, TEST_RDS_INFO);
+        List<ProgramSelector.Identifier> removed = new ArrayList<>();
+        ProgramListChunk halProgramList = AidlTestUtils.makeHalChunk(/* purge= */ true,
+                /* complete= */ true, modified, removed);
+        ProgramList.Chunk expectedProgramList =
+                AidlTestUtils.makeChunk(/* purge= */ true, /* complete= */ true, modified, removed);
+
+        mTunerSessions[0].startProgramListUpdates(filter);
+        mHalTunerCallback.onProgramListUpdated(halProgramList);
+
+        verify(mBroadcastRadioMock).startProgramListUpdates(halFilter);
+        verify(mAidlTunerCallbackMocks[0], CALLBACK_TIMEOUT)
+                .onProgramListUpdated(expectedProgramList);
+    }
+
+    @Test
+    public void startProgramListUpdates_withCallbackCalledForMultipleTimes() throws Exception {
+        openAidlClients(/* numClients= */ 1);
+        ProgramList.Filter filter = new ProgramList.Filter(new ArraySet<>(), new ArraySet<>(),
+                /* includeCategories= */ true, /* excludeModifications= */ false);
+        mTunerSessions[0].startProgramListUpdates(filter);
+        mHalTunerCallback.onProgramListUpdated(AidlTestUtils.makeHalChunk(/* purge= */ true,
+                /* complete= */ true, List.of(TEST_FM_INFO, TEST_RDS_INFO), new ArrayList<>()));
+        verify(mAidlTunerCallbackMocks[0], CALLBACK_TIMEOUT).onProgramListUpdated(
+                AidlTestUtils.makeChunk(/* purge= */ true, /* complete= */ true,
+                        List.of(TEST_FM_INFO, TEST_RDS_INFO), new ArrayList<>()));
+
+        mHalTunerCallback.onProgramListUpdated(AidlTestUtils.makeHalChunk(/* purge= */ false,
+                /* complete= */ true, List.of(TEST_FM_INFO_MODIFIED), List.of(TEST_RDS_PI_ID)));
+
+        verify(mAidlTunerCallbackMocks[0], CALLBACK_TIMEOUT).onProgramListUpdated(
+                AidlTestUtils.makeChunk(/* purge= */ false, /* complete= */ true,
+                        List.of(TEST_FM_INFO_MODIFIED), List.of(TEST_RDS_PI_ID)));
+    }
+
+    @Test
+    public void startProgramListUpdates_withTheSameFilterForMultipleTimes() throws Exception {
+        openAidlClients(/* numClients= */ 1);
+        ProgramList.Filter filter = new ProgramList.Filter(new ArraySet<>(), new ArraySet<>(),
+                /* includeCategories= */ true, /* excludeModifications= */ false);
+        mTunerSessions[0].startProgramListUpdates(filter);
+        mHalTunerCallback.onProgramListUpdated(AidlTestUtils.makeHalChunk(/* purge= */ true,
+                /* complete= */ true, List.of(TEST_FM_INFO, TEST_RDS_INFO), new ArrayList<>()));
+        verify(mAidlTunerCallbackMocks[0], CALLBACK_TIMEOUT).onProgramListUpdated(
+                AidlTestUtils.makeChunk(/* purge= */ true, /* complete= */ true,
+                        List.of(TEST_FM_INFO, TEST_RDS_INFO), new ArrayList<>()));
+        mHalTunerCallback.onProgramListUpdated(AidlTestUtils.makeHalChunk(/* purge= */ false,
+                /* complete= */ true, List.of(TEST_FM_INFO_MODIFIED), List.of(TEST_RDS_PI_ID)));
+        verify(mAidlTunerCallbackMocks[0], CALLBACK_TIMEOUT).onProgramListUpdated(
+                AidlTestUtils.makeChunk(/* purge= */ false, /* complete= */ true,
+                        List.of(TEST_FM_INFO_MODIFIED), List.of(TEST_RDS_PI_ID)));
+
+        mTunerSessions[0].startProgramListUpdates(filter);
+
+        verify(mBroadcastRadioMock).startProgramListUpdates(any());
+        verify(mAidlTunerCallbackMocks[0], CALLBACK_TIMEOUT).onProgramListUpdated(
+                AidlTestUtils.makeChunk(/* purge= */ true, /* complete= */ true,
+                        List.of(TEST_FM_INFO_MODIFIED), new ArrayList<>()));
+    }
+
+    @Test
+    public void startProgramListUpdates_withNullFilter() throws Exception {
+        openAidlClients(/* numClients= */ 1);
+
+        mTunerSessions[0].startProgramListUpdates(/* filter= */ null);
+        mHalTunerCallback.onProgramListUpdated(AidlTestUtils.makeHalChunk(/* purge= */ true,
+                /* complete= */ true, List.of(TEST_FM_INFO, TEST_RDS_INFO), new ArrayList<>()));
+
+        verify(mBroadcastRadioMock).startProgramListUpdates(any());
+        verify(mAidlTunerCallbackMocks[0], CALLBACK_TIMEOUT).onProgramListUpdated(
+                AidlTestUtils.makeChunk(/* purge= */ true, /* complete= */ true,
+                        List.of(TEST_FM_INFO, TEST_RDS_INFO), new ArrayList<>()));
+
+        mHalTunerCallback.onProgramListUpdated(AidlTestUtils.makeHalChunk(/* purge= */ false,
+                /* complete= */ true, List.of(TEST_FM_INFO_MODIFIED), List.of(TEST_RDS_PI_ID)));
+
+        verify(mAidlTunerCallbackMocks[0], CALLBACK_TIMEOUT).onProgramListUpdated(
+                AidlTestUtils.makeChunk(/* purge= */ false, /* complete= */ true,
+                        List.of(TEST_FM_INFO_MODIFIED), List.of(TEST_RDS_PI_ID)));
+    }
+
+    @Test
+    public void startProgramListUpdates_withIdFilter() throws Exception {
+        openAidlClients(/* numClients= */ 1);
+        ProgramList.Filter idFilter = new ProgramList.Filter(new ArraySet<>(),
+                Set.of(TEST_RDS_PI_ID), /* includeCategories= */ true,
+                /* excludeModifications= */ true);
+        ProgramFilter halFilter = ConversionUtils.filterToHalProgramFilter(idFilter);
+
+        mTunerSessions[0].startProgramListUpdates(idFilter);
+        mHalTunerCallback.onProgramListUpdated(AidlTestUtils.makeHalChunk(/* purge= */ false,
+                /* complete= */ true, List.of(TEST_RDS_INFO), new ArrayList<>()));
+
+        verify(mBroadcastRadioMock).startProgramListUpdates(halFilter);
+        verify(mAidlTunerCallbackMocks[0], CALLBACK_TIMEOUT).onProgramListUpdated(
+                AidlTestUtils.makeChunk(/* purge= */ false, /* complete= */ true,
+                        List.of(TEST_RDS_INFO), new ArrayList<>()));
+
+        mHalTunerCallback.onProgramListUpdated(AidlTestUtils.makeHalChunk(/* purge= */ false,
+                /* complete= */ true, List.of(TEST_FM_INFO), new ArrayList<>()));
+
+        verify(mAidlTunerCallbackMocks[0], CALLBACK_TIMEOUT).onProgramListUpdated(any());
+    }
+
+    @Test
+    public void startProgramListUpdates_withFilterExcludingModifications() throws Exception {
+        openAidlClients(/* numClients= */ 1);
+        ProgramList.Filter filterExcludingModifications = new ProgramList.Filter(
+                Set.of(ProgramSelector.IDENTIFIER_TYPE_AMFM_FREQUENCY), new ArraySet<>(),
+                /* includeCategories= */ true, /* excludeModifications= */ true);
+        ProgramFilter halFilter =
+                ConversionUtils.filterToHalProgramFilter(filterExcludingModifications);
+
+        mTunerSessions[0].startProgramListUpdates(filterExcludingModifications);
+        mHalTunerCallback.onProgramListUpdated(AidlTestUtils.makeHalChunk(/* purge= */ false,
+                /* complete= */ true, List.of(TEST_FM_INFO), new ArrayList<>()));
+
+        verify(mBroadcastRadioMock).startProgramListUpdates(halFilter);
+        verify(mAidlTunerCallbackMocks[0], CALLBACK_TIMEOUT).onProgramListUpdated(
+                AidlTestUtils.makeChunk(/* purge= */ false, /* complete= */ true,
+                        List.of(TEST_FM_INFO), new ArrayList<>()));
+
+        mHalTunerCallback.onProgramListUpdated(AidlTestUtils.makeHalChunk(/* purge= */ false,
+                /* complete= */ true, List.of(TEST_FM_INFO_MODIFIED), new ArrayList<>()));
+
+        verify(mAidlTunerCallbackMocks[0], CALLBACK_TIMEOUT).onProgramListUpdated(any());
+    }
+
+    @Test
+    public void startProgramListUpdates_withFilterIncludingModifications() throws Exception {
+        openAidlClients(/* numClients= */ 1);
+        ProgramList.Filter filterIncludingModifications = new ProgramList.Filter(
+                Set.of(ProgramSelector.IDENTIFIER_TYPE_AMFM_FREQUENCY), new ArraySet<>(),
+                /* includeCategories= */ true, /* excludeModifications= */ false);
+        ProgramFilter halFilter =
+                ConversionUtils.filterToHalProgramFilter(filterIncludingModifications);
+
+        mTunerSessions[0].startProgramListUpdates(filterIncludingModifications);
+        mHalTunerCallback.onProgramListUpdated(AidlTestUtils.makeHalChunk(/* purge= */ false,
+                /* complete= */ true, List.of(TEST_FM_INFO), new ArrayList<>()));
+
+        verify(mBroadcastRadioMock).startProgramListUpdates(halFilter);
+        verify(mAidlTunerCallbackMocks[0], CALLBACK_TIMEOUT).onProgramListUpdated(
+                AidlTestUtils.makeChunk(/* purge= */ false, /* complete= */ true,
+                        List.of(TEST_FM_INFO), new ArrayList<>()));
+
+        mHalTunerCallback.onProgramListUpdated(AidlTestUtils.makeHalChunk(/* purge= */ false,
+                /* complete= */ true, List.of(TEST_FM_INFO_MODIFIED), new ArrayList<>()));
+
+        verify(mAidlTunerCallbackMocks[0], CALLBACK_TIMEOUT).onProgramListUpdated(
+                AidlTestUtils.makeChunk(/* purge= */ false, /* complete= */ true,
+                        List.of(TEST_FM_INFO_MODIFIED), new ArrayList<>()));
+    }
+
+    @Test
+    public void onProgramListUpdated_afterSessionClosed_doesNotUpdates() throws Exception {
+        openAidlClients(/* numClients= */ 1);
+        ProgramList.Filter filter = new ProgramList.Filter(new ArraySet<>(), new ArraySet<>(),
+                /* includeCategories= */ true, /* excludeModifications= */ false);
+        mTunerSessions[0].startProgramListUpdates(filter);
+
+        mTunerSessions[0].close();
+
+        verify(mBroadcastRadioMock).stopProgramListUpdates();
+
+        mHalTunerCallback.onProgramListUpdated(AidlTestUtils.makeHalChunk(/* purge= */ false,
+                /* complete= */ true, List.of(TEST_FM_INFO), new ArrayList<>()));
+
+        verify(mAidlTunerCallbackMocks[0], CALLBACK_TIMEOUT.times(0)).onProgramListUpdated(any());
+    }
+
+    @Test
+    public void startProgramListUpdates_forMultipleSessions() throws Exception {
+        int numSessions = 3;
+        openAidlClients(numSessions);
+        ProgramList.Filter fmIdFilter = new ProgramList.Filter(new ArraySet<>(),
+                Set.of(TEST_FM_FREQUENCY_ID), /* includeCategories= */ false,
+                /* excludeModifications= */ true);
+        ProgramList.Filter filterExcludingCategories = new ProgramList.Filter(new ArraySet<>(),
+                new ArraySet<>(), /* includeCategories= */ true,
+                /* excludeModifications= */ true);
+        ProgramList.Filter rdsTypeFilter = new ProgramList.Filter(
+                Set.of(ProgramSelector.IDENTIFIER_TYPE_RDS_PI), new ArraySet<>(),
+                /* includeCategories= */ true, /* excludeModifications= */ false);
+
+        mTunerSessions[0].startProgramListUpdates(fmIdFilter);
+
+        ProgramFilter halFilter = ConversionUtils.filterToHalProgramFilter(fmIdFilter);
+        verify(mBroadcastRadioMock).startProgramListUpdates(halFilter);
+
+        mTunerSessions[1].startProgramListUpdates(filterExcludingCategories);
+
+        halFilter.identifiers = new android.hardware.broadcastradio.ProgramIdentifier[]{};
+        halFilter.includeCategories = true;
+        verify(mBroadcastRadioMock).startProgramListUpdates(halFilter);
+
+        mTunerSessions[2].startProgramListUpdates(rdsTypeFilter);
+
+        halFilter.excludeModifications = false;
+        verify(mBroadcastRadioMock).startProgramListUpdates(halFilter);
+    }
+
+    @Test
+    public void onProgramListUpdated_forMultipleSessions() throws Exception {
+        int numSessions = 3;
+        openAidlClients(numSessions);
+        List<ProgramList.Filter> filters = List.of(new ProgramList.Filter(
+                        Set.of(ProgramSelector.IDENTIFIER_TYPE_RDS_PI), new ArraySet<>(),
+                        /* includeCategories= */ true, /* excludeModifications= */ false),
+                new ProgramList.Filter(new ArraySet<>(), Set.of(TEST_FM_FREQUENCY_ID),
+                        /* includeCategories= */ false, /* excludeModifications= */ true),
+                new ProgramList.Filter(new ArraySet<>(), new ArraySet<>(),
+                        /* includeCategories= */ true, /* excludeModifications= */ true));
+
+        for (int index = 0; index < numSessions; index++) {
+            mTunerSessions[index].startProgramListUpdates(filters.get(index));
+        }
+
+        mHalTunerCallback.onProgramListUpdated(AidlTestUtils.makeHalChunk(/* purge= */ false,
+                /* complete= */ true, List.of(TEST_FM_INFO, TEST_RDS_INFO), new ArrayList<>()));
+
+        verify(mAidlTunerCallbackMocks[0], CALLBACK_TIMEOUT)
+                .onProgramListUpdated(AidlTestUtils.makeChunk(/* purge= */ false,
+                        /* complete= */ true, List.of(TEST_RDS_INFO), new ArrayList<>()));
+        verify(mAidlTunerCallbackMocks[1], CALLBACK_TIMEOUT)
+                .onProgramListUpdated(AidlTestUtils.makeChunk(/* purge= */ false,
+                        /* complete= */ true, List.of(TEST_FM_INFO), new ArrayList<>()));
+        verify(mAidlTunerCallbackMocks[2], CALLBACK_TIMEOUT)
+                .onProgramListUpdated(AidlTestUtils.makeChunk(/* purge= */ false,
+                        /* complete= */ true, List.of(TEST_RDS_INFO, TEST_FM_INFO),
+                        new ArrayList<>()));
+    }
+
+    @Test
+    public void startProgramListUpdates_forNonCurrentUser_doesNotStartUpdates() throws Exception {
+        openAidlClients(/* numClients= */ 1);
+        ProgramList.Filter filter = new ProgramList.Filter(new ArraySet<>(), new ArraySet<>(),
+                /* includeCategories= */ true, /* excludeModifications= */ false);
+        doReturn(false).when(() -> RadioServiceUserController.isCurrentOrSystemUser());
+
+        mTunerSessions[0].startProgramListUpdates(filter);
+
+        verify(mBroadcastRadioMock, never()).startProgramListUpdates(any());
+    }
+
+    @Test
+    public void startProgramListUpdates_withUnknownErrorFromHal_fails() throws Exception {
+        openAidlClients(/* numClients= */ 1);
+        doThrow(new ServiceSpecificException(Result.UNKNOWN_ERROR))
+                .when(mBroadcastRadioMock).startProgramListUpdates(any());
+
+        ParcelableException thrown = assertThrows(ParcelableException.class, () -> {
+            mTunerSessions[0].startProgramListUpdates(/* filter= */ null);
+        });
+
+        assertWithMessage("Unknown error HAL exception when updating program list")
+                .that(thrown).hasMessageThat().contains("UNKNOWN_ERROR");
+    }
+
+    @Test
     public void stopProgramListUpdates() throws Exception {
         openAidlClients(/* numClients= */ 1);
-        ProgramList.Filter aidlFilter = new ProgramList.Filter(new ArraySet<>(), new ArraySet<>(),
+        ProgramList.Filter filter = new ProgramList.Filter(new ArraySet<>(), new ArraySet<>(),
                 /* includeCategories= */ true, /* excludeModifications= */ false);
-        mTunerSessions[0].startProgramListUpdates(aidlFilter);
+        mTunerSessions[0].startProgramListUpdates(filter);
 
         mTunerSessions[0].stopProgramListUpdates();
 
@@ -658,9 +948,9 @@ public final class TunerSessionTest extends ExtendedRadioMockitoTestCase {
     @Test
     public void stopProgramListUpdates_forNonCurrentUser_doesNotStopUpdates() throws Exception {
         openAidlClients(/* numClients= */ 1);
-        ProgramList.Filter aidlFilter = new ProgramList.Filter(new ArraySet<>(), new ArraySet<>(),
+        ProgramList.Filter filter = new ProgramList.Filter(new ArraySet<>(), new ArraySet<>(),
                 /* includeCategories= */ true, /* excludeModifications= */ false);
-        mTunerSessions[0].startProgramListUpdates(aidlFilter);
+        mTunerSessions[0].startProgramListUpdates(filter);
         doReturn(false).when(() -> RadioServiceUserController.isCurrentOrSystemUser());
 
         mTunerSessions[0].stopProgramListUpdates();

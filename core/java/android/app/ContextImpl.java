@@ -26,9 +26,7 @@ import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.UiContext;
-import android.companion.virtual.VirtualDevice;
 import android.companion.virtual.VirtualDeviceManager;
-import android.companion.virtual.VirtualDeviceParams;
 import android.compat.annotation.UnsupportedAppUsage;
 import android.content.AttributionSource;
 import android.content.AutofillOptions;
@@ -2742,9 +2740,12 @@ class ContextImpl extends Context {
 
     @Override
     public @NonNull Context createDeviceContext(int deviceId) {
-        if (!isValidDeviceId(deviceId)) {
-            throw new IllegalArgumentException(
-                    "Not a valid ID of the default device or any virtual device: " + deviceId);
+        if (deviceId != VirtualDeviceManager.DEVICE_ID_DEFAULT) {
+            VirtualDeviceManager vdm = getSystemService(VirtualDeviceManager.class);
+            if (!vdm.isValidVirtualDeviceId(deviceId)) {
+                throw new IllegalArgumentException(
+                        "Not a valid ID of the default device or any virtual device: " + deviceId);
+            }
         }
 
         ContextImpl context = new ContextImpl(this, mMainThread, mPackageInfo, mParams,
@@ -2755,31 +2756,6 @@ class ContextImpl extends Context {
         context.mDeviceId = deviceId;
         context.mIsExplicitDeviceId = true;
         return context;
-    }
-
-    /**
-     * Checks whether the passed {@code deviceId} is valid or not.
-     * {@link VirtualDeviceManager#DEVICE_ID_DEFAULT} is valid as it is the ID of the default
-     * device when no additional virtual devices exist. If {@code deviceId} is the id of
-     * a virtual device, it should correspond to a virtual device created by
-     * {@link VirtualDeviceManager#createVirtualDevice(int, VirtualDeviceParams)}.
-     */
-    private boolean isValidDeviceId(int deviceId) {
-        if (deviceId == VirtualDeviceManager.DEVICE_ID_DEFAULT) {
-            return true;
-        }
-        if (deviceId > VirtualDeviceManager.DEVICE_ID_DEFAULT) {
-            VirtualDeviceManager vdm = getSystemService(VirtualDeviceManager.class);
-            if (vdm != null) {
-                List<VirtualDevice> virtualDevices = vdm.getVirtualDevices();
-                for (int i = 0; i < virtualDevices.size(); i++) {
-                    if (virtualDevices.get(i).getDeviceId() == deviceId) {
-                        return true;
-                    }
-                }
-            }
-        }
-        return false;
     }
 
     @NonNull
@@ -3044,10 +3020,13 @@ class ContextImpl extends Context {
 
     @Override
     public void updateDeviceId(int updatedDeviceId) {
-        if (!isValidDeviceId(updatedDeviceId)) {
-            throw new IllegalArgumentException(
-                    "Not a valid ID of the default device or any virtual device: "
-                            + updatedDeviceId);
+        if (updatedDeviceId != VirtualDeviceManager.DEVICE_ID_DEFAULT) {
+            VirtualDeviceManager vdm = getSystemService(VirtualDeviceManager.class);
+            if (!vdm.isValidVirtualDeviceId(updatedDeviceId)) {
+                throw new IllegalArgumentException(
+                        "Not a valid ID of the default device or any virtual device: "
+                                + updatedDeviceId);
+            }
         }
         if (mIsExplicitDeviceId) {
             throw new UnsupportedOperationException(

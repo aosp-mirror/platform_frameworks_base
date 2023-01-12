@@ -555,6 +555,7 @@ public final class InputDevice implements Parcelable {
         private String mKeyboardLanguageTag = null;
         private String mKeyboardLayoutType = null;
         private boolean mSupportsUsi = false;
+        private List<MotionRange> mMotionRanges = new ArrayList<>();
 
         /** @see InputDevice#getId() */
         public Builder setId(int id) {
@@ -670,12 +671,50 @@ public final class InputDevice implements Parcelable {
             return this;
         }
 
+        /** @see InputDevice#getMotionRanges() */
+        public Builder addMotionRange(int axis, int source,
+                float min, float max, float flat, float fuzz, float resolution) {
+            mMotionRanges.add(new MotionRange(axis, source, min, max, flat, fuzz, resolution));
+            return this;
+        }
+
         /** Build {@link InputDevice}. */
         public InputDevice build() {
-            return new InputDevice(mId, mGeneration, mControllerNumber, mName, mVendorId,
-                    mProductId, mDescriptor, mIsExternal, mSources, mKeyboardType, mKeyCharacterMap,
-                    mKeyboardLanguageTag, mKeyboardLayoutType, mHasVibrator, mHasMicrophone,
-                    mHasButtonUnderPad, mHasSensor, mHasBattery, mSupportsUsi);
+            InputDevice device = new InputDevice(
+                    mId,
+                    mGeneration,
+                    mControllerNumber,
+                    mName,
+                    mVendorId,
+                    mProductId,
+                    mDescriptor,
+                    mIsExternal,
+                    mSources,
+                    mKeyboardType,
+                    mKeyCharacterMap,
+                    mKeyboardLanguageTag,
+                    mKeyboardLayoutType,
+                    mHasVibrator,
+                    mHasMicrophone,
+                    mHasButtonUnderPad,
+                    mHasSensor,
+                    mHasBattery,
+                    mSupportsUsi);
+
+            final int numRanges = mMotionRanges.size();
+            for (int i = 0; i < numRanges; i++) {
+                final MotionRange range = mMotionRanges.get(i);
+                device.addMotionRange(
+                        range.getAxis(),
+                        range.getSource(),
+                        range.getMin(),
+                        range.getMax(),
+                        range.getFlat(),
+                        range.getFuzz(),
+                        range.getResolution());
+            }
+
+            return device;
         }
     }
 
@@ -1378,7 +1417,8 @@ public final class InputDevice implements Parcelable {
         out.writeInt(mHasBattery ? 1 : 0);
         out.writeInt(mSupportsUsi ? 1 : 0);
 
-        final int numRanges = mMotionRanges.size();
+        int numRanges = mMotionRanges.size();
+        numRanges = numRanges > MAX_RANGES ? MAX_RANGES : numRanges;
         out.writeInt(numRanges);
         for (int i = 0; i < numRanges; i++) {
             MotionRange range = mMotionRanges.get(i);

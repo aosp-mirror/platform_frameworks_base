@@ -616,6 +616,7 @@ public class AppDataHelper {
                 Slog.w(TAG, String.valueOf(e));
             }
             mPm.getDexManager().notifyPackageDataDestroyed(pkg.getPackageName(), userId);
+            mPm.getDynamicCodeLogger().notifyPackageDataDestroyed(pkg.getPackageName(), userId);
         }
     }
 

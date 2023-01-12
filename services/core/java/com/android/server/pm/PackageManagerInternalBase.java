@@ -49,7 +49,6 @@ import android.util.SparseArray;
 
 import com.android.server.pm.Installer.LegacyDexoptDisabledException;
 import com.android.server.pm.dex.DexManager;
-import com.android.server.pm.dex.DynamicCodeLogger;
 import com.android.server.pm.permission.PermissionManagerServiceInternal;
 import com.android.server.pm.pkg.AndroidPackage;
 import com.android.server.pm.pkg.PackageStateInternal;
@@ -772,11 +771,5 @@ abstract class PackageManagerInternalBase extends PackageManagerInternal {
     @Deprecated
     public final void shutdown() {
         mService.shutdown();
-    }
-
-    @Override
-    @Deprecated
-    public final DynamicCodeLogger getDynamicCodeLogger() {
-        return getDexManager().getDynamicCodeLogger();
     }
 }

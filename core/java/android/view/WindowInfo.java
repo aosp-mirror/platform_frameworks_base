@@ -20,6 +20,7 @@ import android.app.ActivityTaskManager;
 import android.graphics.Matrix;
 import android.graphics.Region;
 import android.os.IBinder;
+import android.os.LocaleList;
 import android.os.Parcel;
 import android.os.Parcelable;
 import android.util.Pools;
@@ -60,6 +61,8 @@ public class WindowInfo implements Parcelable {
 
     public MagnificationSpec mMagnificationSpec = new MagnificationSpec();
 
+    public LocaleList locales = LocaleList.getEmptyLocaleList();
+
     private WindowInfo() {
         /* do nothing - hide constructor */
     }
@@ -99,6 +102,7 @@ public class WindowInfo implements Parcelable {
             }
         }
         window.mMagnificationSpec.setTo(other.mMagnificationSpec);
+        window.locales = other.locales;
         return window;
     }
 
@@ -136,6 +140,7 @@ public class WindowInfo implements Parcelable {
             parcel.writeInt(0);
         }
         mMagnificationSpec.writeToParcel(parcel, flags);
+        parcel.writeParcelable(locales, flags);
     }
 
     @Override
@@ -160,6 +165,7 @@ public class WindowInfo implements Parcelable {
         matrix.setValues(mTransformMatrix);
         builder.append(", mTransformMatrix=").append(matrix);
         builder.append(", mMagnificationSpec=").append(mMagnificationSpec);
+        builder.append(", locales=").append(locales);
         builder.append(']');
         return builder.toString();
     }
@@ -187,6 +193,7 @@ public class WindowInfo implements Parcelable {
             parcel.readBinderList(childTokens);
         }
         mMagnificationSpec = MagnificationSpec.CREATOR.createFromParcel(parcel);
+        locales = parcel.readParcelable(null, LocaleList.class);
     }
 
     private void clear() {
@@ -210,6 +217,7 @@ public class WindowInfo implements Parcelable {
         mMagnificationSpec.clear();
         title = null;
         accessibilityIdOfAnchor = AccessibilityNodeInfo.UNDEFINED_NODE_ID;
+        locales = LocaleList.getEmptyLocaleList();
     }
 
     public static final @android.annotation.NonNull Parcelable.Creator<WindowInfo> CREATOR =
