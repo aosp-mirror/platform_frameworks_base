@@ -104,6 +104,12 @@ public class JobParameters implements Parcelable {
      */
     public static final int INTERNAL_STOP_REASON_USER_UI_STOP =
             JobProtoEnums.INTERNAL_STOP_REASON_USER_UI_STOP; // 11.
+    /**
+     * The app didn't respond quickly enough from JobScheduler's perspective.
+     * @hide
+     */
+    public static final int INTERNAL_STOP_REASON_ANR =
+            JobProtoEnums.INTERNAL_STOP_REASON_ANR; // 12.
 
     /**
      * All the stop reason codes. This should be regarded as an immutable array at runtime.
@@ -128,6 +134,7 @@ public class JobParameters implements Parcelable {
             INTERNAL_STOP_REASON_RTC_UPDATED,
             INTERNAL_STOP_REASON_SUCCESSFUL_FINISH,
             INTERNAL_STOP_REASON_USER_UI_STOP,
+            INTERNAL_STOP_REASON_ANR,
     };
 
     /**
@@ -149,6 +156,7 @@ public class JobParameters implements Parcelable {
             case INTERNAL_STOP_REASON_RTC_UPDATED: return "rtc_updated";
             case INTERNAL_STOP_REASON_SUCCESSFUL_FINISH: return "successful_finish";
             case INTERNAL_STOP_REASON_USER_UI_STOP: return "user_ui_stop";
+            case INTERNAL_STOP_REASON_ANR: return "anr";
             default: return "unknown:" + reasonCode;
         }
     }
