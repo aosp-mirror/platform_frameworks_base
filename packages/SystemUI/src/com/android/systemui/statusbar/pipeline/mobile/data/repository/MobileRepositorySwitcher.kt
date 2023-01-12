@@ -142,6 +142,11 @@ constructor(
     override val defaultMobileIconGroup: Flow<SignalIcon.MobileIconGroup> =
         activeRepo.flatMapLatest { it.defaultMobileIconGroup }
 
+    override val defaultDataSubId: StateFlow<Int> =
+        activeRepo
+            .flatMapLatest { it.defaultDataSubId }
+            .stateIn(scope, SharingStarted.WhileSubscribed(), realRepository.defaultDataSubId.value)
+
     override val defaultMobileNetworkConnectivity: StateFlow<MobileConnectivityModel> =
         activeRepo
             .flatMapLatest { it.defaultMobileNetworkConnectivity }

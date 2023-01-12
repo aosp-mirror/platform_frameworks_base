@@ -59,6 +59,9 @@ class FakeMobileConnectionsRepository(
     override val activeMobileDataSubscriptionId = _activeMobileDataSubscriptionId
     override val activeSubChangedInGroupEvent: MutableSharedFlow<Unit> = MutableSharedFlow()
 
+    private val _defaultDataSubId = MutableStateFlow(INVALID_SUBSCRIPTION_ID)
+    override val defaultDataSubId = _defaultDataSubId
+
     private val _mobileConnectivity = MutableStateFlow(MobileConnectivityModel())
     override val defaultMobileNetworkConnectivity = _mobileConnectivity
 
@@ -81,6 +84,10 @@ class FakeMobileConnectionsRepository(
 
     fun setSubscriptions(subs: List<SubscriptionModel>) {
         _subscriptions.value = subs
+    }
+
+    fun setDefaultDataSubId(id: Int) {
+        _defaultDataSubId.value = id
     }
 
     fun setMobileConnectivity(model: MobileConnectivityModel) {
