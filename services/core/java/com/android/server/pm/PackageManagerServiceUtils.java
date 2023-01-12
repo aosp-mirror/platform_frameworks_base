@@ -33,6 +33,7 @@ import static com.android.server.pm.PackageManagerService.RANDOM_DIR_PREFIX;
 import static com.android.server.pm.PackageManagerService.STUB_SUFFIX;
 import static com.android.server.pm.PackageManagerService.TAG;
 
+import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.UserIdInt;
@@ -113,6 +114,8 @@ import java.io.FilenameFilter;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.PrintWriter;
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
 import java.nio.file.Path;
 import java.security.SecureRandom;
 import java.security.cert.CertificateEncodingException;
@@ -146,6 +149,29 @@ public class PackageManagerServiceUtils {
     // A proper fix should be implemented in master instead.
     public static final ThreadLocal<Boolean> DISABLE_ENFORCE_INTENTS_TO_MATCH_INTENT_FILTERS =
             ThreadLocal.withInitial(() -> false);
+
+    /**
+     * Type used with {@link #canJoinSharedUserId(String, SigningDetails, SharedUserSetting, int)}
+     * when the package attempting to join the sharedUserId is a new install.
+     */
+    public static final int SHARED_USER_ID_JOIN_TYPE_INSTALL = 0;
+    /**
+     * Type used with {@link #canJoinSharedUserId(String, SigningDetails, SharedUserSetting, int)}
+     * when the package attempting to join the sharedUserId is an update.
+     */
+    public static final int SHARED_USER_ID_JOIN_TYPE_UPDATE = 1;
+    /**
+     * Type used with {@link #canJoinSharedUserId(String, SigningDetails, SharedUserSetting, int)}
+     * when the package attempting to join the sharedUserId is a part of the system image.
+     */
+    public static final int SHARED_USER_ID_JOIN_TYPE_SYSTEM = 2;
+    @IntDef(prefix = { "TYPE_" }, value = {
+            SHARED_USER_ID_JOIN_TYPE_INSTALL,
+            SHARED_USER_ID_JOIN_TYPE_UPDATE,
+            SHARED_USER_ID_JOIN_TYPE_SYSTEM,
+    })
+    @Retention(RetentionPolicy.SOURCE)
+    public @interface SharedUserIdJoinType {}
 
     /**
      * Components of apps targeting Android T and above will stop receiving intents from
@@ -575,17 +601,9 @@ public class PackageManagerServiceUtils {
             // the older ones.  We check to see if either the new package is signed by an older cert
             // with which the current sharedUser is ok, or if it is signed by a newer one, and is ok
             // with being sharedUser with the existing signing cert.
-            boolean match = canJoinSharedUserId(parsedSignatures,
-                    sharedUserSetting.getSigningDetails());
-            // Special case: if the sharedUserId capability check failed it could be due to this
-            // being the only package in the sharedUserId so far and the lineage being updated to
-            // deny the sharedUserId capability of the previous key in the lineage.
-            final ArraySet<PackageStateInternal> susPackageStates =
-                    (ArraySet<PackageStateInternal>) sharedUserSetting.getPackageStates();
-            if (!match && susPackageStates.size() == 1
-                    && susPackageStates.valueAt(0).getPackageName().equals(packageName)) {
-                match = true;
-            }
+            boolean match = canJoinSharedUserId(packageName, parsedSignatures, sharedUserSetting,
+                    pkgSetting.getSigningDetails().getSignatures() != null
+                            ? SHARED_USER_ID_JOIN_TYPE_UPDATE : SHARED_USER_ID_JOIN_TYPE_INSTALL);
             if (!match && compareCompat) {
                 match = matchSignaturesCompat(
                         packageName, sharedUserSetting.signatures, parsedSignatures);
@@ -608,36 +626,6 @@ public class PackageManagerServiceUtils {
                         + " has no signatures that match those in shared user "
                         + sharedUserSetting.name + "; ignoring!");
             }
-            // It is possible that this package contains a lineage that blocks sharedUserId access
-            // to an already installed package in the sharedUserId signed with a previous key.
-            // Iterate over all of the packages in the sharedUserId and ensure any that are signed
-            // with a key in this package's lineage have the SHARED_USER_ID capability granted.
-            if (parsedSignatures.hasPastSigningCertificates()) {
-                for (int i = 0; i < susPackageStates.size(); i++) {
-                    PackageStateInternal shUidPkgSetting = susPackageStates.valueAt(i);
-                    // if the current package in the sharedUserId is the package being updated then
-                    // skip this check as the update may revoke the sharedUserId capability from
-                    // the key with which this app was previously signed.
-                    if (packageName.equals(shUidPkgSetting.getPackageName())) {
-                        continue;
-                    }
-                    SigningDetails shUidSigningDetails =
-                            shUidPkgSetting.getSigningDetails();
-                    // The capability check only needs to be performed against the package if it is
-                    // signed with a key that is in the lineage of the package being installed.
-                    if (parsedSignatures.hasAncestor(shUidSigningDetails)) {
-                        if (!parsedSignatures.checkCapability(shUidSigningDetails,
-                                SigningDetails.CertCapabilities.SHARED_USER_ID)) {
-                            throw new PackageManagerException(
-                                    INSTALL_FAILED_SHARED_USER_INCOMPATIBLE,
-                                    "Package " + packageName
-                                            + " revoked the sharedUserId capability from the"
-                                            + " signing key used to sign "
-                                            + shUidPkgSetting.getPackageName());
-                        }
-                    }
-                }
-            }
             // If the lineage of this package diverges from the lineage of the sharedUserId then
             // do not allow the installation to proceed.
             if (!parsedSignatures.hasCommonAncestor(
@@ -651,25 +639,97 @@ public class PackageManagerServiceUtils {
     }
 
     /**
-     * Returns whether the package with {@code packageSigningDetails} can join the sharedUserId
-     * with {@code sharedUserSigningDetails}.
+     * Returns whether the package {@code packageName} can join the sharedUserId based on the
+     * settings in {@code sharedUserSetting}.
      * <p>
      * A sharedUserId maintains a shared {@link SigningDetails} containing the full lineage and
      * capabilities for each package in the sharedUserId. A package can join the sharedUserId if
      * its current signer is the same as the shared signer, or if the current signer of either
      * is in the signing lineage of the other with the {@link
      * SigningDetails.CertCapabilities#SHARED_USER_ID} capability granted to that previous signer
-     * in the lineage.
+     * in the lineage. In the case of a key compromise, an app signed with a lineage revoking
+     * this capability from a previous signing key can still join the sharedUserId with another
+     * app signed with this previous key if the joining app is being updated; however, a new
+     * install will not be allowed until all apps have rotated off the key with the capability
+     * revoked.
      *
+     * @param packageName           the name of the package seeking to join the sharedUserId
      * @param packageSigningDetails the {@code SigningDetails} of the package seeking to join the
-     *                             sharedUserId
-     * @param sharedUserSigningDetails the {@code SigningDetails} of the sharedUserId
+     *                              sharedUserId
+     * @param sharedUserSetting     the {@code SharedUserSetting} for the sharedUserId {@code
+     *                              packageName} is seeking to join
+     * @param joinType              the type of join (install, update, system, etc)
      * @return true if the package seeking to join the sharedUserId meets the requirements
      */
-    public static boolean canJoinSharedUserId(@NonNull SigningDetails packageSigningDetails,
-            @NonNull SigningDetails sharedUserSigningDetails) {
-        return packageSigningDetails.checkCapability(sharedUserSigningDetails, SHARED_USER_ID)
-                || sharedUserSigningDetails.checkCapability(packageSigningDetails, SHARED_USER_ID);
+    public static boolean canJoinSharedUserId(@NonNull String packageName,
+            @NonNull SigningDetails packageSigningDetails,
+            @NonNull SharedUserSetting sharedUserSetting, @SharedUserIdJoinType int joinType) {
+        SigningDetails sharedUserSigningDetails = sharedUserSetting.getSigningDetails();
+        boolean capabilityGranted =
+                packageSigningDetails.checkCapability(sharedUserSigningDetails, SHARED_USER_ID)
+                        || sharedUserSigningDetails.checkCapability(packageSigningDetails,
+                        SHARED_USER_ID);
+
+        // If the current signer for either the package or the sharedUserId is the current signer
+        // of the other or in the lineage of the other with the SHARED_USER_ID capability granted,
+        // then a system and update join type can proceed; an install join type is not allowed here
+        // since the sharedUserId may contain packages that are signed with a key untrusted by
+        // the new package.
+        if (capabilityGranted && joinType != SHARED_USER_ID_JOIN_TYPE_INSTALL) {
+            return true;
+        }
+
+        // If the package is signed with a key that is no longer trusted by the sharedUserId, then
+        // the join should not be allowed unless this is a system join type; system packages can
+        // join the sharedUserId as long as they share a common lineage.
+        if (!capabilityGranted && sharedUserSigningDetails.hasAncestor(packageSigningDetails)) {
+            if (joinType == SHARED_USER_ID_JOIN_TYPE_SYSTEM) {
+                return true;
+            }
+            return false;
+        }
+
+        // If the package is signed with a rotated key that no longer trusts the sharedUserId key,
+        // then allow system and update join types to rotate away from an untrusted key; install
+        // join types are not allowed since a new package that doesn't trust a previous key
+        // shouldn't be allowed to join until all packages in the sharedUserId have rotated off the
+        // untrusted key.
+        if (!capabilityGranted && packageSigningDetails.hasAncestor(sharedUserSigningDetails)) {
+            if (joinType != SHARED_USER_ID_JOIN_TYPE_INSTALL) {
+                return true;
+            }
+            return false;
+        }
+
+        // If the capability is not granted and the package signatures are not an ancestor
+        // or descendant of the sharedUserId signatures, then do not allow any join type to join
+        // the sharedUserId since there are no common signatures.
+        if (!capabilityGranted) {
+            return false;
+        }
+
+        // At this point this is a new install with the capability granted; ensure the current
+        // packages in the sharedUserId are all signed by a key trusted by the new package.
+        final ArraySet<PackageStateInternal> susPackageStates =
+                (ArraySet<PackageStateInternal>) sharedUserSetting.getPackageStates();
+        if (packageSigningDetails.hasPastSigningCertificates()) {
+            for (PackageStateInternal shUidPkgSetting : susPackageStates) {
+                SigningDetails shUidSigningDetails = shUidPkgSetting.getSigningDetails();
+                // The capability check only needs to be performed against the package if it is
+                // signed with a key that is in the lineage of the package being installed.
+                if (packageSigningDetails.hasAncestor(shUidSigningDetails)) {
+                    if (!packageSigningDetails.checkCapability(shUidSigningDetails,
+                            SigningDetails.CertCapabilities.SHARED_USER_ID)) {
+                        Slog.d(TAG, "Package " + packageName
+                                + " revoked the sharedUserId capability from the"
+                                + " signing key used to sign "
+                                + shUidPkgSetting.getPackageName());
+                        return false;
+                    }
+                }
+            }
+        }
+        return true;
     }
 
     /**
