@@ -2432,13 +2432,12 @@ static void android_media_MediaCodec_native_queueLinearBlock(
             throwExceptionAsNecessary(env, BAD_VALUE);
             return;
         }
-        NativeCryptoInfo cryptoInfo = [env, cryptoInfoObj, size]{
-            if (cryptoInfoObj == nullptr) {
-                return NativeCryptoInfo{size};
-            } else {
-                return NativeCryptoInfo{env, cryptoInfoObj};
-            }
-        }();
+        auto cryptoInfo =
+                cryptoInfoObj ? NativeCryptoInfo{size} : NativeCryptoInfo{env, cryptoInfoObj};
+        if (env->ExceptionCheck()) {
+            // Creation of cryptoInfo failed. Let the exception bubble up.
+            return;
+        }
         err = codec->queueEncryptedLinearBlock(
                 index,
                 memory,
