@@ -42,4 +42,7 @@ class MediaFlags @Inject constructor(private val featureFlags: FeatureFlags) {
      * [android.app.StatusBarManager.registerNearbyMediaDevicesProvider] for more information.
      */
     fun areNearbyMediaDevicesEnabled() = featureFlags.isEnabled(Flags.MEDIA_NEARBY_DEVICES)
+
+    /** Check whether we show explicit indicator on UMO */
+    fun isExplicitIndicatorEnabled() = featureFlags.isEnabled(Flags.MEDIA_EXPLICIT_INDICATOR)
 }

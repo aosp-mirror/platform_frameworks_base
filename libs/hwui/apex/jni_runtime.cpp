@@ -37,6 +37,7 @@ extern int register_android_graphics_CreateJavaOutputStreamAdaptor(JNIEnv* env);
 extern int register_android_graphics_Graphics(JNIEnv* env);
 extern int register_android_graphics_ImageDecoder(JNIEnv*);
 extern int register_android_graphics_drawable_AnimatedImageDrawable(JNIEnv*);
+extern int register_android_graphics_drawable_LottieDrawable(JNIEnv*);
 extern int register_android_graphics_Interpolator(JNIEnv* env);
 extern int register_android_graphics_MaskFilter(JNIEnv* env);
 extern int register_android_graphics_Movie(JNIEnv* env);
@@ -117,6 +118,7 @@ extern int register_android_graphics_HardwareBufferRenderer(JNIEnv* env);
             REG_JNI(register_android_graphics_HardwareRendererObserver),
             REG_JNI(register_android_graphics_ImageDecoder),
             REG_JNI(register_android_graphics_drawable_AnimatedImageDrawable),
+            REG_JNI(register_android_graphics_drawable_LottieDrawable),
             REG_JNI(register_android_graphics_Interpolator),
             REG_JNI(register_android_graphics_MaskFilter),
             REG_JNI(register_android_graphics_Matrix),

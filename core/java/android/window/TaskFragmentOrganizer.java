@@ -55,7 +55,7 @@ public class TaskFragmentOrganizer extends WindowOrganizer {
     public static final String KEY_ERROR_CALLBACK_TASK_FRAGMENT_INFO = "task_fragment_info";
 
     /**
-     * Key to the {@link WindowContainerTransaction.HierarchyOp} in
+     * Key to the {@link TaskFragmentOperation.OperationType} in
      * {@link TaskFragmentTransaction.Change#getErrorBundle()}.
      */
     public static final String KEY_ERROR_CALLBACK_OP_TYPE = "operation_type";
@@ -112,7 +112,7 @@ public class TaskFragmentOrganizer extends WindowOrganizer {
      * @hide
      */
     public static @NonNull Bundle putErrorInfoInBundle(@NonNull Throwable exception,
-            @Nullable TaskFragmentInfo info, int opType) {
+            @Nullable TaskFragmentInfo info, @TaskFragmentOperation.OperationType int opType) {
         final Bundle errorBundle = new Bundle();
         errorBundle.putSerializable(KEY_ERROR_CALLBACK_THROWABLE, exception);
         if (info != null) {

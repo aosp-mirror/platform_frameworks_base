@@ -114,8 +114,6 @@ object Flags {
     // ** Flag retired **
     // public static final BooleanFlag KEYGUARD_LAYOUT =
     //         new BooleanFlag(200, true);
-    // TODO(b/254512713): Tracking Bug
-    @JvmField val LOCKSCREEN_ANIMATIONS = releasedFlag(201, "lockscreen_animations")
 
     // TODO(b/254512750): Tracking Bug
     val NEW_UNLOCK_SWIPE_ANIMATION = releasedFlag(202, "new_unlock_swipe_animation")
@@ -209,6 +207,9 @@ object Flags {
     val AUTO_PIN_CONFIRMATION =
         unreleasedFlag(224, "auto_pin_confirmation", "auto_pin_confirmation")
 
+    // TODO(b/262859270): Tracking Bug
+    @JvmField val FALSING_OFF_FOR_UNFOLDED = releasedFlag(225, "falsing_off_for_unfolded")
+
     // 300 - power menu
     // TODO(b/254512600): Tracking Bug
     @JvmField val POWER_MENU_LITE = releasedFlag(300, "power_menu_lite")
@@ -260,10 +261,11 @@ object Flags {
 
     // TODO(b/256614751): Tracking Bug
     val NEW_STATUS_BAR_MOBILE_ICONS_BACKEND =
-        unreleasedFlag(608, "new_status_bar_mobile_icons_backend")
+        unreleasedFlag(608, "new_status_bar_mobile_icons_backend", teamfood = true)
 
     // TODO(b/256613548): Tracking Bug
-    val NEW_STATUS_BAR_WIFI_ICON_BACKEND = unreleasedFlag(609, "new_status_bar_wifi_icon_backend")
+    val NEW_STATUS_BAR_WIFI_ICON_BACKEND =
+        unreleasedFlag(609, "new_status_bar_wifi_icon_backend", teamfood = true)
 
     // TODO(b/256623670): Tracking Bug
     @JvmField
@@ -302,7 +304,7 @@ object Flags {
 
     // 900 - media
     // TODO(b/254512697): Tracking Bug
-    val MEDIA_TAP_TO_TRANSFER = unreleasedFlag(900, "media_tap_to_transfer", teamfood = true)
+    val MEDIA_TAP_TO_TRANSFER = releasedFlag(900, "media_tap_to_transfer")
 
     // TODO(b/254512502): Tracking Bug
     val MEDIA_SESSION_ACTIONS = unreleasedFlag(901, "media_session_actions")
@@ -332,13 +334,17 @@ object Flags {
     val MEDIA_TTT_RECEIVER_SUCCESS_RIPPLE =
         unreleasedFlag(910, "media_ttt_receiver_success_ripple", teamfood = true)
 
+    // TODO(b/263512203): Tracking Bug
+    val MEDIA_EXPLICIT_INDICATOR = unreleasedFlag(911, "media_explicit_indicator", teamfood = true)
+
     // 1000 - dock
     val SIMULATE_DOCK_THROUGH_CHARGING = releasedFlag(1000, "simulate_dock_through_charging")
 
     // TODO(b/254512758): Tracking Bug
     @JvmField val ROUNDED_BOX_RIPPLE = releasedFlag(1002, "rounded_box_ripple")
 
-    val SHOW_LOWLIGHT_ON_DIRECT_BOOT = unreleasedFlag(1003, "show_lowlight_on_direct_boot")
+    // TODO(b/265045965): Tracking Bug
+    val SHOW_LOWLIGHT_ON_DIRECT_BOOT = releasedFlag(1003, "show_lowlight_on_direct_boot")
 
     // 1100 - windowing
     @Keep

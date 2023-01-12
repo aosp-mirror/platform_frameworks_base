@@ -1102,6 +1102,41 @@ public class ActivityInfo extends ComponentInfo implements Parcelable {
     public static final long ALWAYS_SANDBOX_DISPLAY_APIS = 185004937L; // buganizer id
 
     /**
+     * This change id excludes the packages it is applied to from the camera compat force rotation
+     * treatment. See com.android.server.wm.DisplayRotationCompatPolicy for context.
+     * @hide
+     */
+    @ChangeId
+    @Overridable
+    @Disabled
+    public static final long OVERRIDE_CAMERA_COMPAT_DISABLE_FORCE_ROTATION =
+            263959004L; // buganizer id
+
+    /**
+     * This change id excludes the packages it is applied to from activity refresh after camera
+     * compat force rotation treatment. See com.android.server.wm.DisplayRotationCompatPolicy for
+     * context.
+     * @hide
+     */
+    @ChangeId
+    @Overridable
+    @Disabled
+    public static final long OVERRIDE_CAMERA_COMPAT_DISABLE_REFRESH = 264304459L; // buganizer id
+
+    /**
+     * This change id makes the packages it is applied to do activity refresh after camera compat
+     * force rotation treatment using "resumed -> paused -> resumed" cycle rather than "resumed ->
+     * ... -> stopped -> ... -> resumed" cycle. See
+     * com.android.server.wm.DisplayRotationCompatPolicy for context.
+     * @hide
+     */
+    @ChangeId
+    @Overridable
+    @Disabled
+    public static final long OVERRIDE_CAMERA_COMPAT_ENABLE_REFRESH_VIA_PAUSE =
+            264301586L; // buganizer id
+
+    /**
      * This change id is the gatekeeper for all treatments that force a given min aspect ratio.
      * Enabling this change will allow the following min aspect ratio treatments to be applied:
      * OVERRIDE_MIN_ASPECT_RATIO_MEDIUM

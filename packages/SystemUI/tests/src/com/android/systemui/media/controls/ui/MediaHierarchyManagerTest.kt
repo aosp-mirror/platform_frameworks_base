@@ -29,6 +29,7 @@ import com.android.systemui.SysuiTestCase
 import com.android.systemui.controls.controller.ControlsControllerImplTest.Companion.eq
 import com.android.systemui.dreams.DreamOverlayStateController
 import com.android.systemui.keyguard.WakefulnessLifecycle
+import com.android.systemui.media.controls.pipeline.MediaDataManager
 import com.android.systemui.media.dream.MediaDreamComplication
 import com.android.systemui.plugins.statusbar.StatusBarStateController
 import com.android.systemui.shade.ShadeExpansionStateManager
@@ -76,6 +77,7 @@ class MediaHierarchyManagerTest : SysuiTestCase() {
     @Mock private lateinit var mediaCarouselScrollHandler: MediaCarouselScrollHandler
     @Mock private lateinit var wakefulnessLifecycle: WakefulnessLifecycle
     @Mock private lateinit var keyguardViewController: KeyguardViewController
+    @Mock private lateinit var mediaDataManager: MediaDataManager
     @Mock private lateinit var uniqueObjectHostView: UniqueObjectHostView
     @Mock private lateinit var dreamOverlayStateController: DreamOverlayStateController
     @Captor
@@ -110,6 +112,7 @@ class MediaHierarchyManagerTest : SysuiTestCase() {
                 keyguardStateController,
                 bypassController,
                 mediaCarouselController,
+                mediaDataManager,
                 keyguardViewController,
                 dreamOverlayStateController,
                 configurationController,
@@ -125,6 +128,7 @@ class MediaHierarchyManagerTest : SysuiTestCase() {
         setupHost(qsHost, MediaHierarchyManager.LOCATION_QS, QS_TOP)
         setupHost(qqsHost, MediaHierarchyManager.LOCATION_QQS, QQS_TOP)
         whenever(statusBarStateController.state).thenReturn(StatusBarState.SHADE)
+        whenever(mediaDataManager.hasActiveMedia()).thenReturn(true)
         whenever(mediaCarouselController.mediaCarouselScrollHandler)
             .thenReturn(mediaCarouselScrollHandler)
         val observer = wakefullnessObserver.value
@@ -357,14 +361,28 @@ class MediaHierarchyManagerTest : SysuiTestCase() {
     }
 
     @Test
-    fun isCurrentlyInGuidedTransformation_hostNotVisible_returnsTrue() {
+    fun isCurrentlyInGuidedTransformation_hostNotVisible_returnsFalse_with_active() {
         goToLockscreen()
         enterGuidedTransformation()
         whenever(lockHost.visible).thenReturn(false)
         whenever(qsHost.visible).thenReturn(true)
         whenever(qqsHost.visible).thenReturn(true)
+        whenever(mediaDataManager.hasActiveMediaOrRecommendation()).thenReturn(true)
 
         assertThat(mediaHierarchyManager.isCurrentlyInGuidedTransformation()).isFalse()
+    }
+
+    @Test
+    fun isCurrentlyInGuidedTransformation_hostNotVisible_returnsTrue_without_active() {
+        // To keep the appearing behavior, we need to be in a guided transition
+        goToLockscreen()
+        enterGuidedTransformation()
+        whenever(lockHost.visible).thenReturn(false)
+        whenever(qsHost.visible).thenReturn(true)
+        whenever(qqsHost.visible).thenReturn(true)
+        whenever(mediaDataManager.hasActiveMediaOrRecommendation()).thenReturn(false)
+
+        assertThat(mediaHierarchyManager.isCurrentlyInGuidedTransformation()).isTrue()
     }
 
     @Test

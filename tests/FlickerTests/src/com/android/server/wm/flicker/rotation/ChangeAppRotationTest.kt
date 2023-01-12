@@ -16,7 +16,6 @@
 
 package com.android.server.wm.flicker.rotation
 
-import android.platform.test.annotations.FlakyTest
 import android.platform.test.annotations.IwTest
 import android.platform.test.annotations.Presubmit
 import androidx.test.filters.RequiresDevice
@@ -120,11 +119,6 @@ open class ChangeAppRotationTest(flicker: FlickerTest) : RotationTransition(flic
     fun rotationLayerAppearsAndVanishes() {
         rotationLayerAppearsAndVanishesAssertion()
     }
-
-    /** {@inheritDoc} */
-    @FlakyTest(bugId = 206753786)
-    @Test
-    override fun navBarLayerPositionAtStartAndEnd() = super.navBarLayerPositionAtStartAndEnd()
 
     @Test
     @IwTest(focusArea = "framework")

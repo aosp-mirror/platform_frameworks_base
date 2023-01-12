@@ -544,6 +544,46 @@ public class PackageInstaller {
     @Retention(RetentionPolicy.SOURCE)
     @interface PackageSourceType{}
 
+    /**
+     * Indicate the user intervention is required when the installer attempts to commit the session.
+     * This is the default case.
+     *
+     * @hide
+     */
+    @SystemApi
+    public static final int REASON_CONFIRM_PACKAGE_CHANGE = 0;
+
+    /**
+     * Indicate the user intervention is required because the update ownership enforcement is
+     * enabled, and the update owner will change.
+     *
+     * @see PackageInstaller.SessionParams#setRequestUpdateOwnership
+     * @see InstallSourceInfo#getUpdateOwnerPackageName
+     * @hide
+     */
+    @SystemApi
+    public static final int REASON_OWNERSHIP_CHANGED = 1;
+
+    /**
+     * Indicate the user intervention is required because the update ownership enforcement is
+     * enabled, and remind the update owner will retain.
+     *
+     * @see PackageInstaller.SessionParams#setRequestUpdateOwnership
+     * @see InstallSourceInfo#getUpdateOwnerPackageName
+     * @hide
+     */
+    @SystemApi
+    public static final int REASON_REMIND_OWNERSHIP = 2;
+
+    /** @hide */
+    @IntDef(prefix = { "REASON_" }, value = {
+            REASON_CONFIRM_PACKAGE_CHANGE,
+            REASON_OWNERSHIP_CHANGED,
+            REASON_REMIND_OWNERSHIP,
+    })
+    @Retention(RetentionPolicy.SOURCE)
+    public @interface UserActionReason {}
+
     /** Default set of checksums - includes all available checksums.
      * @see Session#requestChecksums  */
     private static final int DEFAULT_CHECKSUMS =
@@ -1910,6 +1950,20 @@ public class PackageInstaller {
                 throw e.rethrowFromSystemServer();
             }
         }
+
+        /**
+         * @return {@code true} if the installer requested the update ownership enforcement
+         * for the packages in this session.
+         *
+         * @see PackageInstaller.SessionParams#setRequestUpdateOwnership
+         */
+        public boolean isRequestUpdateOwnership() {
+            try {
+                return mSession.isRequestUpdateOwnership();
+            } catch (RemoteException e) {
+                throw e.rethrowFromSystemServer();
+            }
+        }
     }
 
     /**
@@ -2672,9 +2726,18 @@ public class PackageInstaller {
          *              Android S ({@link android.os.Build.VERSION_CODES#S API 31})</li>
          *          </ul>
          *     </li>
-         *     <li>The installer is the {@link InstallSourceInfo#getInstallingPackageName()
-         *     installer of record} of an existing version of the app (in other words, this install
-         *     session is an app update) or the installer is updating itself.</li>
+         *     <li>The installer is:
+         *         <ul>
+         *             <li>The {@link InstallSourceInfo#getUpdateOwnerPackageName() update owner}
+         *             of an existing version of the app (in other words, this install session is
+         *             an app update) if the update ownership enforcement is enabled.</li>
+         *             <li>The {@link InstallSourceInfo#getInstallingPackageName() installer of
+         *             record} of an existing version of the app (in other words, this install
+         *             session is an app update) if the update ownership enforcement isn't
+         *             enabled.</li>
+         *             <li>Updating itself.</li>
+         *         </ul>
+         *     </li>>
          *     <li>The installer declares the
          *     {@link android.Manifest.permission#UPDATE_PACKAGES_WITHOUT_USER_ACTION
          *     UPDATE_PACKAGES_WITHOUT_USER_ACTION} permission.</li>
@@ -2711,6 +2774,30 @@ public class PackageInstaller {
          */
         public void setKeepApplicationEnabledSetting() {
             this.keepApplicationEnabledSetting = true;
+        }
+
+        /**
+         * Optionally indicate whether the package being installed needs the update ownership
+         * enforcement. Once the update ownership enforcement is enabled, the other installers
+         * will need the user action to update the package even if the installers have been
+         * granted the {@link android.Manifest.permission#INSTALL_PACKAGES INSTALL_PACKAGES}
+         * permission. Default to {@code false}.
+         *
+         * The update ownership enforcement can only be enabled on initial installation. Set
+         * this to {@code true} on package update indicates the installer package wants to be
+         * the update owner if the update ownership enforcement has enabled.
+         *
+         * Note: To enable the update ownership enforcement, the installer must have the
+         * {@link android.Manifest.permission#ENFORCE_UPDATE_OWNERSHIP ENFORCE_UPDATE_OWNERSHIP}
+         * permission.
+         */
+        @RequiresPermission(Manifest.permission.ENFORCE_UPDATE_OWNERSHIP)
+        public void setRequestUpdateOwnership(boolean enable) {
+            if (enable) {
+                this.installFlags |= PackageManager.INSTALL_REQUEST_UPDATE_OWNERSHIP;
+            } else {
+                this.installFlags &= ~PackageManager.INSTALL_REQUEST_UPDATE_OWNERSHIP;
+            }
         }
 
         /** {@hide} */
@@ -2987,6 +3074,9 @@ public class PackageInstaller {
         /** @hide */
         public boolean keepApplicationEnabledSetting;
 
+        /** @hide */
+        public int pendingUserActionReason;
+
         /** {@hide} */
         @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
         public SessionInfo() {
@@ -3041,6 +3131,7 @@ public class PackageInstaller {
             installerUid = source.readInt();
             packageSource = source.readInt();
             keepApplicationEnabledSetting = source.readBoolean();
+            pendingUserActionReason = source.readInt();
         }
 
         /**
@@ -3585,6 +3676,25 @@ public class PackageInstaller {
             return isPreapprovalRequested;
         }
 
+        /**
+         * @return {@code true} if the installer requested the update ownership enforcement
+         * for the packages in this session.
+         *
+         * @see PackageInstaller.SessionParams#setRequestUpdateOwnership
+         */
+        public boolean isRequestUpdateOwnership() {
+            return (installFlags & PackageManager.INSTALL_REQUEST_UPDATE_OWNERSHIP) != 0;
+        }
+
+        /**
+         * Return the reason for requiring the user action.
+         * @hide
+         */
+        @SystemApi
+        public @UserActionReason int getPendingUserActionReason() {
+            return pendingUserActionReason;
+        }
+
         @Override
         public int describeContents() {
             return 0;
@@ -3635,6 +3745,7 @@ public class PackageInstaller {
             dest.writeInt(installerUid);
             dest.writeInt(packageSource);
             dest.writeBoolean(keepApplicationEnabledSetting);
+            dest.writeInt(pendingUserActionReason);
         }
 
         public static final Parcelable.Creator<SessionInfo>

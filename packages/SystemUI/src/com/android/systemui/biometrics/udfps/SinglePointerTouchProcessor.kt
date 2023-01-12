@@ -27,6 +27,8 @@ import com.android.systemui.biometrics.udfps.TouchProcessorResult.ProcessedTouch
 import com.android.systemui.dagger.SysUISingleton
 import javax.inject.Inject
 
+private val SUPPORTED_ROTATIONS = setOf(Surface.ROTATION_90, Surface.ROTATION_270)
+
 /**
  * TODO(b/259140693): Consider using an object pool of TouchProcessorResult to avoid allocations.
  */
@@ -129,17 +131,25 @@ private fun MotionEvent.normalize(
     val nativeY = naturalTouch.y / overlayParams.scaleFactor
     val nativeMinor: Float = getTouchMinor(pointerIndex) / overlayParams.scaleFactor
     val nativeMajor: Float = getTouchMajor(pointerIndex) / overlayParams.scaleFactor
+    var nativeOrientation: Float = getOrientation(pointerIndex)
+    if (SUPPORTED_ROTATIONS.contains(overlayParams.rotation)) {
+        nativeOrientation = toRadVerticalFromRotated(nativeOrientation.toDouble()).toFloat()
+    }
     return NormalizedTouchData(
         pointerId = getPointerId(pointerIndex),
         x = nativeX,
         y = nativeY,
         minor = nativeMinor,
         major = nativeMajor,
-        // TODO(b/259311354): touch orientation should be reported relative to Surface.ROTATION_O.
-        orientation = getOrientation(pointerIndex),
+        orientation = nativeOrientation,
         time = eventTime,
         gestureStart = downTime,
     )
+}
+
+private fun toRadVerticalFromRotated(rad: Double): Double {
+    val piBound = ((rad % Math.PI) + Math.PI / 2) % Math.PI
+    return if (piBound < Math.PI / 2.0) piBound else piBound - Math.PI
 }
 
 /**
@@ -152,7 +162,7 @@ private fun MotionEvent.rotateToNaturalOrientation(
 ): PointF {
     val touchPoint = PointF(getRawX(pointerIndex), getRawY(pointerIndex))
     val rot = overlayParams.rotation
-    if (rot == Surface.ROTATION_90 || rot == Surface.ROTATION_270) {
+    if (SUPPORTED_ROTATIONS.contains(rot)) {
         RotationUtils.rotatePointF(
             touchPoint,
             RotationUtils.deltaRotation(rot, Surface.ROTATION_0),

@@ -26,6 +26,7 @@ import android.media.audiopolicy.AudioMixingRule;
 import android.media.audiopolicy.AudioPolicy;
 import android.os.Bundle;
 import android.os.Looper;
+import android.os.RemoteCallback;
 import android.util.Log;
 
 // This activity will register a dynamic audio policy to intercept media playback and launch
@@ -71,19 +72,29 @@ public class AudioPolicyDeathTestActivity extends Activity  {
         mAudioPolicy = audioPolicyBuilder.build();
 
         int result = mAudioManager.registerAudioPolicy(mAudioPolicy);
-        if (result != AudioManager.SUCCESS) {
+        if (result == AudioManager.SUCCESS) {
+            AudioRecord audioRecord = mAudioPolicy.createAudioRecordSink(audioMix);
+            if (audioRecord != null && audioRecord.getState() != AudioRecord.STATE_UNINITIALIZED) {
+                int captureDurationMs = getIntent().getIntExtra(
+                                getString(R.string.capture_duration_key), RECORD_TIME_MS);
+                AudioCapturingThread thread =
+                        new AudioCapturingThread(audioRecord, captureDurationMs);
+                thread.start();
+            } else {
+                Log.w(TAG, "AudioRecord creation failed");
+                result = AudioManager.ERROR_NO_INIT;
+            }
+        } else {
             Log.w(TAG, "registerAudioPolicy failed, status: " + result);
-            return;
-        }
-        AudioRecord audioRecord = mAudioPolicy.createAudioRecordSink(audioMix);
-        if (audioRecord == null) {
-            Log.w(TAG, "AudioRecord creation failed");
-            return;
         }
 
-        int captureDurationMs = getIntent().getIntExtra("captureDurationMs", RECORD_TIME_MS);
-        AudioCapturingThread thread = new AudioCapturingThread(audioRecord, captureDurationMs);
-        thread.start();
+        RemoteCallback cb =
+                (RemoteCallback) getIntent().getExtras().get(getString(R.string.callback_key));
+        Bundle res = new Bundle();
+        res.putInt(getString(R.string.status_key), result);
+        Log.i(TAG, "policy " + (result ==  AudioManager.SUCCESS ? "" : "un")
+                + "successfully registered");
+        cb.sendResult(res);
     }
 
     @Override

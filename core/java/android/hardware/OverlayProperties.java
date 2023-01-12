@@ -59,6 +59,16 @@ public final class OverlayProperties implements Parcelable {
     }
 
     /**
+     * @return True if the device can support mixed colorspaces, false otherwise.
+     */
+    public boolean supportMixedColorSpaces() {
+        if (mNativeObject == 0) {
+            return false;
+        }
+        return nSupportMixedColorSpaces(mNativeObject);
+    }
+
+    /**
      * Release the local reference.
      */
     public void release() {
@@ -106,6 +116,7 @@ public final class OverlayProperties implements Parcelable {
 
     private static native long nGetDestructor();
     private static native boolean nSupportFp16ForHdr(long nativeObject);
+    private static native boolean nSupportMixedColorSpaces(long nativeObject);
     private static native void nWriteOverlayPropertiesToParcel(long nativeObject, Parcel dest);
     private static native long nReadOverlayPropertiesFromParcel(Parcel in);
 }

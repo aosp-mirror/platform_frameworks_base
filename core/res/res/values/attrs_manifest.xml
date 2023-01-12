@@ -1783,6 +1783,14 @@
     -->
     <attr name="attributionTags" format="string" />
 
+    <!-- Default value <code>true</code> allows an installer to enable update
+         ownership enforcement for this package via {@link
+         android.content.pm.PackageInstaller.SessionParams#setRequestUpdateOwnership}
+         during initial installation. This overrides the installer's use of {@link
+         android.content.pm.PackageInstaller.SessionParams#setRequestUpdateOwnership}.
+    -->
+    <attr name="allowUpdateOwnership" format="boolean" />
+
     <!-- The <code>manifest</code> tag is the root of an
          <code>AndroidManifest.xml</code> file,
          describing the contents of an Android package (.apk) file.  One
@@ -1820,6 +1828,7 @@
         <attr name="isSplitRequired" />
         <attr name="requiredSplitTypes" />
         <attr name="splitTypes" />
+        <attr name="allowUpdateOwnership" />
     </declare-styleable>
 
     <!-- The <code>application</code> tag describes application-level components

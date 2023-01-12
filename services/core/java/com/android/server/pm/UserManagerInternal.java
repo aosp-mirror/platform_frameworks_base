@@ -388,8 +388,8 @@ public abstract class UserManagerInternal {
      * and the user is {@link UserManager#isUserVisible() visible}.
      *
      * <p><b>NOTE: </b>this method is meant to be used only by {@code UserController} (when a user
-     * is started). If other clients (like {@code CarService} need to explicitly change the user /
-     * display assignment, we'll need to provide other APIs.
+     * is started); for extra unassignments, callers should call {@link
+     * #assignUserToExtraDisplay(int, int)} instead.
      *
      * <p><b>NOTE: </b>this method doesn't validate if the display exists, it's up to the caller to
      * pass a valid display id.
@@ -398,13 +398,41 @@ public abstract class UserManagerInternal {
             @UserIdInt int profileGroupId, @UserStartMode int userStartMode, int displayId);
 
     /**
+     * Assigns an extra display to the given user, so the user is visible on that display.
+     *
+     * <p>This method is meant to be used on automotive builds where a passenger zone has more than
+     * one display (for example, the "main" display and a smaller display used for input).
+     *
+     * <p><b>NOTE: </b>this call will be ignored on devices that do not
+     * {@link UserManager#isVisibleBackgroundUsersSupported() support visible background users}.
+     *
+     * @return whether the operation succeeded, in which case the user would be visible on the
+     * display.
+     */
+    public abstract boolean assignUserToExtraDisplay(@UserIdInt int userId, int displayId);
+
+    /**
      * Unassigns a user from its current display when it's stopping.
      *
      * <p><b>NOTE: </b>this method is meant to be used only by {@code UserController} (when a user
-     * is stopped). If other clients (like {@code CarService} need to explicitly change the user /
-     * display assignment, we'll need to provide other APIs.
+     * is stopped); for extra unassignments, callers should call
+     * {@link #unassignUserFromExtraDisplay(int, int)} instead.
      */
     public abstract void unassignUserFromDisplayOnStop(@UserIdInt int userId);
+
+    /**
+     * Unassigns the extra display from the given user.
+     *
+     * <p>This method is meant to be used on automotive builds where a passenger zone has more than
+     * one display (for example, the "main" display and a smaller display used for input).
+     *
+     * <p><b>NOTE: </b>this call will be ignored on devices that do not
+     * {@link UserManager#isVisibleBackgroundUsersSupported() support visible background users}.
+     *
+     * @return whether the operation succeeded, i.e., the user was previously
+     *         {@link #assignUserToExtraDisplay(int, int) assigned to an extra display}.
+     */
+    public abstract boolean unassignUserFromExtraDisplay(@UserIdInt int userId, int displayId);
 
     /**
      * Returns {@code true} if the user is visible (as defined by

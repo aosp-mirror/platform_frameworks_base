@@ -78,6 +78,7 @@ cc_defaults {
                 "external/skia/src/utils",
                 "external/skia/src/gpu",
                 "external/skia/src/shaders",
+                "external/skia/modules/skottie",
             ],
         },
         host: {
@@ -375,6 +376,7 @@ cc_defaults {
         "external/skia/src/effects",
         "external/skia/src/image",
         "external/skia/src/images",
+        "external/skia/modules/skottie",
     ],
 
     shared_libs: [
@@ -402,6 +404,7 @@ cc_defaults {
                 "jni/BitmapRegionDecoder.cpp",
                 "jni/GIFMovie.cpp",
                 "jni/GraphicsStatsService.cpp",
+                "jni/LottieDrawable.cpp",
                 "jni/Movie.cpp",
                 "jni/MovieImpl.cpp",
                 "jni/pdf/PdfDocument.cpp",
@@ -509,6 +512,7 @@ cc_defaults {
         "hwui/BlurDrawLooper.cpp",
         "hwui/Canvas.cpp",
         "hwui/ImageDecoder.cpp",
+        "hwui/LottieDrawable.cpp",
         "hwui/MinikinSkia.cpp",
         "hwui/MinikinUtils.cpp",
         "hwui/PaintImpl.cpp",

@@ -214,6 +214,8 @@ interface IPackageManager {
     @UnsupportedAppUsage
     void setInstallerPackageName(in String targetPackage, in String installerPackageName);
 
+    void relinquishUpdateOwnership(in String targetPackage);
+
     void setApplicationCategoryHint(String packageName, int categoryHint, String callerPackageName);
 
     /** @deprecated rawr, don't call AIDL methods directly! */

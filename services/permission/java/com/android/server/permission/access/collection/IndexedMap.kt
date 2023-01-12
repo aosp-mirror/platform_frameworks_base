@@ -148,6 +148,13 @@ inline fun <K, V> IndexedMap<K, V>.retainAllIndexed(predicate: (Int, K, V) -> Bo
     return isChanged
 }
 
+inline fun <K, V, R> IndexedMap<K, V>.mapIndexed(transform: (Int, K, V) -> R): IndexedList<R> =
+    IndexedList<R>().also { destination ->
+        forEachIndexed { index, key, value ->
+            transform(index, key, value).let { destination += it }
+        }
+    }
+
 inline fun <K, V, R> IndexedMap<K, V>.mapNotNullIndexed(
     transform: (Int, K, V) -> R?
 ): IndexedList<R> =

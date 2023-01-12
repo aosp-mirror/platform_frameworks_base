@@ -335,10 +335,6 @@ class EmbeddedWindowController {
         }
 
         @Override
-        public void unfreezeInsetsAfterStartInput() {
-        }
-
-        @Override
         public InsetsControlTarget getImeControlTarget() {
             return mWmService.getDefaultDisplayContentLocked().mRemoteInsetsControlTarget;
         }

@@ -76,14 +76,18 @@ public class SystemActionPerformerTest {
     private static final String DESCRIPTION1 = "description1";
     private static final String DESCRIPTION2 = "description2";
     private static final PendingIntent TEST_PENDING_INTENT_1 = PendingIntent.getBroadcast(
-            InstrumentationRegistry.getTargetContext(), 0, new Intent(INTENT_ACTION1), PendingIntent.FLAG_MUTABLE_UNAUDITED);
+            InstrumentationRegistry.getTargetContext(), 0, new Intent(INTENT_ACTION1)
+                    .setPackage(InstrumentationRegistry.getTargetContext().getPackageName()),
+            PendingIntent.FLAG_MUTABLE_UNAUDITED);
     private static final RemoteAction NEW_TEST_ACTION_1 = new RemoteAction(
             Icon.createWithContentUri("content://test"),
             LABEL_1,
             DESCRIPTION1,
             TEST_PENDING_INTENT_1);
     private static final PendingIntent TEST_PENDING_INTENT_2 = PendingIntent.getBroadcast(
-            InstrumentationRegistry.getTargetContext(), 0, new Intent(INTENT_ACTION2), PendingIntent.FLAG_MUTABLE_UNAUDITED);
+            InstrumentationRegistry.getTargetContext(), 0, new Intent(INTENT_ACTION2)
+                    .setPackage(InstrumentationRegistry.getTargetContext().getPackageName()),
+            PendingIntent.FLAG_MUTABLE_UNAUDITED);
     private static final RemoteAction NEW_TEST_ACTION_2 = new RemoteAction(
             Icon.createWithContentUri("content://test"),
             LABEL_2,

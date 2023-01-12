@@ -3890,4 +3890,14 @@ public class ApplicationPackageManager extends PackageManager {
         return Settings.Global.getInt(mContext.getContentResolver(),
                 Settings.Global.SHOW_NEW_APP_INSTALLED_NOTIFICATION_ENABLED, 0) == 1;
     }
+
+    @Override
+    public void relinquishUpdateOwnership(String targetPackage) {
+        Objects.requireNonNull(targetPackage);
+        try {
+            mPM.relinquishUpdateOwnership(targetPackage);
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
 }

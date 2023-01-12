@@ -2470,6 +2470,8 @@
     <string name="media_transfer_failed">Something went wrong. Try again.</string>
     <!-- Text to indicate that a media transfer is currently in-progress, aka loading. [CHAR LIMIT=NONE] -->
     <string name="media_transfer_loading">Loading</string>
+    <!-- Default name of the device. [CHAR LIMIT=30] -->
+    <string name="media_ttt_default_device_type">tablet</string>
 
     <!-- Error message indicating that a control timed out while waiting for an update [CHAR_LIMIT=30] -->
     <string name="controls_error_timeout">Inactive, check app</string>
@@ -2518,6 +2520,8 @@
     <string name="media_output_dialog_volume_percentage"><xliff:g id="percentage" example="10">%1$d</xliff:g>%%</string>
     <!-- Title for Speakers and Displays group. [CHAR LIMIT=NONE] -->
     <string name="media_output_group_title_speakers_and_displays">Speakers &amp; Displays</string>
+    <!-- Title for Suggested Devices group. [CHAR LIMIT=NONE] -->
+    <string name="media_output_group_title_suggested_device">Suggested Devices</string>
 
     <!-- Media Output Broadcast Dialog -->
     <!-- Title for Broadcast First Notify Dialog [CHAR LIMIT=60] -->
@@ -2887,6 +2891,9 @@
     <!-- Text for education page content description for unfolded animation. [CHAR_LIMIT=NONE] -->
     <string name="rear_display_accessibility_unfolded_animation">Foldable device being flipped around</string>
 
-    <!-- Title for notification of low stylus battery. [CHAR_LIMIT=NONE] -->
-    <string name="stylus_battery_low">Stylus battery low</string>
+    <!-- Title for notification of low stylus battery with percentage. "percentage" is
+        the value of the battery capacity remaining [CHAR LIMIT=none]-->
+    <string name="stylus_battery_low_percentage"><xliff:g id="percentage" example="16%">%s</xliff:g> battery remaining</string>
+    <!-- Subtitle for the notification sent when a stylus battery is low. [CHAR LIMIT=none]-->
+    <string name="stylus_battery_low_subtitle">Connect your stylus to a charger</string>
 </resources>

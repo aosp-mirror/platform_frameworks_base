@@ -258,6 +258,26 @@ public final class VirtualDeviceManager {
     }
 
     /**
+     * Checks whether the passed {@code deviceId} is a valid virtual device ID or not.
+     * {@link VirtualDeviceManager#DEVICE_ID_DEFAULT} is not valid as it is the ID of the default
+     * device which is not a virtual device. {@code deviceId} must correspond to a virtual device
+     * created by {@link VirtualDeviceManager#createVirtualDevice(int, VirtualDeviceParams)}.
+     *
+     * @hide
+     */
+    public boolean isValidVirtualDeviceId(int deviceId) {
+        if (mService == null) {
+            Log.w(TAG, "Failed to retrieve virtual devices; no virtual device manager service.");
+            return false;
+        }
+        try {
+            return mService.isValidVirtualDeviceId(deviceId);
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
+    /**
      * Returns device-specific audio session id for audio playback.
      *
      * @param deviceId - id of the virtual audio device

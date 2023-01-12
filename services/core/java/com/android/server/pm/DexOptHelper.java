@@ -41,6 +41,7 @@ import android.annotation.Nullable;
 import android.annotation.RequiresPermission;
 import android.app.ActivityManager;
 import android.app.AppGlobals;
+import android.content.Context;
 import android.content.Intent;
 import android.content.pm.ResolveInfo;
 import android.content.pm.SharedLibraryInfo;
@@ -84,8 +85,10 @@ import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
+import java.util.concurrent.Executor;
 import java.util.concurrent.TimeUnit;
 import java.util.function.Predicate;
 
@@ -416,17 +419,22 @@ public final class DexOptHelper {
             return true;
         }
 
+        @DexOptResult int dexoptStatus;
         if (options.isDexoptOnlySecondaryDex()) {
-            // TODO(b/251903639): Call into ART Service.
-            try {
-                return mPm.getDexManager().dexoptSecondaryDex(options);
-            } catch (LegacyDexoptDisabledException e) {
-                throw new RuntimeException(e);
+            Optional<Integer> artSrvRes = performDexOptWithArtService(options, 0 /* extraFlags */);
+            if (artSrvRes.isPresent()) {
+                dexoptStatus = artSrvRes.get();
+            } else {
+                try {
+                    return mPm.getDexManager().dexoptSecondaryDex(options);
+                } catch (LegacyDexoptDisabledException e) {
+                    throw new RuntimeException(e);
+                }
             }
         } else {
-            int dexoptStatus = performDexOptWithStatus(options);
-            return dexoptStatus != PackageDexOptimizer.DEX_OPT_FAILED;
+            dexoptStatus = performDexOptWithStatus(options);
         }
+        return dexoptStatus != PackageDexOptimizer.DEX_OPT_FAILED;
     }
 
     /**
@@ -455,7 +463,8 @@ public final class DexOptHelper {
     // if the package can now be considered up to date for the given filter.
     @DexOptResult
     private int performDexOptInternal(DexoptOptions options) {
-        Optional<Integer> artSrvRes = performDexOptWithArtService(options);
+        Optional<Integer> artSrvRes =
+                performDexOptWithArtService(options, ArtFlags.FLAG_SHOULD_INCLUDE_DEPENDENCIES);
         if (artSrvRes.isPresent()) {
             return artSrvRes.get();
         }
@@ -492,7 +501,8 @@ public final class DexOptHelper {
      * @return a {@link DexOptResult}, or empty if the request isn't supported so that it is
      *     necessary to fall back to the legacy code paths.
      */
-    private Optional<Integer> performDexOptWithArtService(DexoptOptions options) {
+    private Optional<Integer> performDexOptWithArtService(DexoptOptions options,
+            /*@OptimizeFlags*/ int extraFlags) {
         ArtManagerLocal artManager = getArtManagerLocal();
         if (artManager == null) {
             return Optional.empty();
@@ -512,39 +522,17 @@ public final class DexOptHelper {
                 return Optional.of(PackageDexOptimizer.DEX_OPT_SKIPPED);
             }
 
-            // TODO(b/245301593): Delete the conditional when ART Service supports
-            // FLAG_SHOULD_INCLUDE_DEPENDENCIES and we can just set it unconditionally.
-            /*@OptimizeFlags*/ int extraFlags = ops.getUsesLibraries().isEmpty()
-                    ? 0
-                    : ArtFlags.FLAG_SHOULD_INCLUDE_DEPENDENCIES;
-
             OptimizeParams params = options.convertToOptimizeParams(extraFlags);
             if (params == null) {
                 return Optional.empty();
             }
 
-            // TODO(b/251903639): Either remove controlDexOptBlocking, or don't ignore it here.
             OptimizeResult result;
             try {
                 result = artManager.optimizePackage(snapshot, options.getPackageName(), params);
             } catch (UnsupportedOperationException e) {
                 reportArtManagerFallback(options.getPackageName(), e.toString());
                 return Optional.empty();
-            }
-
-            // TODO(b/251903639): Move this to ArtManagerLocal.addOptimizePackageDoneCallback when
-            // it is implemented.
-            for (OptimizeResult.PackageOptimizeResult pkgRes : result.getPackageOptimizeResults()) {
-                PackageState ps = snapshot.getPackageState(pkgRes.getPackageName());
-                AndroidPackage ap = ps != null ? ps.getAndroidPackage() : null;
-                if (ap != null) {
-                    CompilerStats.PackageStats stats = mPm.getOrCreateCompilerPackageStats(ap);
-                    for (OptimizeResult.DexContainerFileOptimizeResult dexRes :
-                            pkgRes.getDexContainerFileOptimizeResults()) {
-                        stats.setCompileTime(
-                                dexRes.getDexContainerFile(), dexRes.getDex2oatWallTimeMillis());
-                    }
-                }
             }
 
             return Optional.of(convertToDexOptResult(result));
@@ -628,7 +616,8 @@ public final class DexOptHelper {
         // performDexOptWithArtService ignores the snapshot and takes its own, so it can race with
         // the package checks above, but at worst the effect is only a bit less friendly error
         // below.
-        Optional<Integer> artSrvRes = performDexOptWithArtService(options);
+        Optional<Integer> artSrvRes =
+                performDexOptWithArtService(options, ArtFlags.FLAG_SHOULD_INCLUDE_DEPENDENCIES);
         int res;
         if (artSrvRes.isPresent()) {
             res = artSrvRes.get();
@@ -963,6 +952,51 @@ public final class DexOptHelper {
         } catch (ManagerNotFoundException e) {
             throw new RuntimeException(e);
         }
+    }
+
+    private static class OptimizePackageDoneHandler
+            implements ArtManagerLocal.OptimizePackageDoneCallback {
+        @NonNull private final PackageManagerService mPm;
+
+        OptimizePackageDoneHandler(@NonNull PackageManagerService pm) { mPm = pm; }
+
+        /**
+         * Called after every package optimization operation done by {@link ArtManagerLocal}.
+         */
+        @Override
+        public void onOptimizePackageDone(@NonNull OptimizeResult result) {
+            for (OptimizeResult.PackageOptimizeResult pkgRes : result.getPackageOptimizeResults()) {
+                CompilerStats.PackageStats stats =
+                        mPm.getOrCreateCompilerPackageStats(pkgRes.getPackageName());
+                for (OptimizeResult.DexContainerFileOptimizeResult dexRes :
+                        pkgRes.getDexContainerFileOptimizeResults()) {
+                    stats.setCompileTime(
+                            dexRes.getDexContainerFile(), dexRes.getDex2oatWallTimeMillis());
+                }
+            }
+
+            synchronized (mPm.mLock) {
+                mPm.getPackageUsage().maybeWriteAsync(mPm.mSettings.getPackagesLocked());
+                mPm.mCompilerStats.maybeWriteAsync();
+            }
+        }
+    }
+
+    /**
+     * Initializes {@link ArtManagerLocal} before {@link getArtManagerLocal} is called.
+     */
+    public static void initializeArtManagerLocal(
+            @NonNull Context systemContext, @NonNull PackageManagerService pm) {
+        if (!useArtService()) {
+            return;
+        }
+
+        ArtManagerLocal artManager = new ArtManagerLocal(systemContext);
+        // There doesn't appear to be any checks that @NonNull is heeded, so use requireNonNull
+        // below to ensure we don't store away a null that we'll fail on later.
+        artManager.addOptimizePackageDoneCallback(false /* onlyIncludeUpdates */,
+                Runnable::run, new OptimizePackageDoneHandler(Objects.requireNonNull(pm)));
+        LocalManagerRegistry.addManager(ArtManagerLocal.class, artManager);
     }
 
     /**

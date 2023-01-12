@@ -18,7 +18,6 @@ package com.android.wm.shell.flicker.bubble
 
 import android.content.Context
 import android.graphics.Point
-import android.platform.test.annotations.Postsubmit
 import android.platform.test.annotations.Presubmit
 import android.util.DisplayMetrics
 import android.view.WindowManager
@@ -74,20 +73,4 @@ open class DismissBubbleScreen(flicker: FlickerTest) : BaseBubbleScreen(flicker)
     open fun testAppIsAlwaysVisible() {
         flicker.assertLayers { this.isVisible(testApp) }
     }
-
-    /** {@inheritDoc} */
-    @Postsubmit
-    @Test
-    override fun taskBarLayerIsVisibleAtStartAndEnd() = super.taskBarLayerIsVisibleAtStartAndEnd()
-
-    /** {@inheritDoc} */
-    @Postsubmit
-    @Test
-    override fun taskBarWindowIsAlwaysVisible() = super.taskBarWindowIsAlwaysVisible()
-
-    /** {@inheritDoc} */
-    @Postsubmit
-    @Test
-    override fun visibleLayersShownMoreThanOneConsecutiveEntry() =
-        super.visibleLayersShownMoreThanOneConsecutiveEntry()
 }

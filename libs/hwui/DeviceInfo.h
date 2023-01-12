@@ -62,6 +62,9 @@ public:
     static void setSupportFp16ForHdr(bool supportFp16ForHdr);
     static bool isSupportFp16ForHdr() { return get()->mSupportFp16ForHdr; };
 
+    static void setSupportMixedColorSpaces(bool supportMixedColorSpaces);
+    static bool isSupportMixedColorSpaces() { return get()->mSupportMixedColorSpaces; };
+
     // this value is only valid after the GPU has been initialized and there is a valid graphics
     // context or if you are using the HWUI_NULL_GPU
     int maxTextureSize() const;
@@ -92,6 +95,7 @@ private:
     int mMaxTextureSize;
     sk_sp<SkColorSpace> mWideColorSpace = SkColorSpace::MakeSRGB();
     bool mSupportFp16ForHdr = false;
+    bool mSupportMixedColorSpaces = false;
     SkColorType mWideColorType = SkColorType::kN32_SkColorType;
     int mDisplaysSize = 0;
     int mPhysicalDisplayIndex = -1;

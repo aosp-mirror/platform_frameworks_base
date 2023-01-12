@@ -73,6 +73,7 @@ import com.android.server.pm.UserManagerInternal
 import com.android.server.pm.UserManagerService
 import com.android.server.pm.parsing.pkg.AndroidPackageUtils
 import com.android.server.pm.permission.LegacyPermission
+import com.android.server.pm.permission.Permission as LegacyPermission2
 import com.android.server.pm.permission.LegacyPermissionSettings
 import com.android.server.pm.permission.LegacyPermissionState
 import com.android.server.pm.permission.PermissionManagerServiceInterface
@@ -1673,40 +1674,77 @@ class PermissionService(
         context.getSystemService(PermissionControllerManager::class.java)!!.dump(fd, args)
     }
 
-    override fun getPermissionTEMP(
-        permissionName: String
-    ): com.android.server.pm.permission.Permission? {
-        // TODO("Not yet implemented")
-        return null
+    override fun getPermissionTEMP(permissionName: String): LegacyPermission2? {
+        val permission = service.getState {
+            with(policy) { getPermissions()[permissionName] }
+        } ?: return null
+
+        return LegacyPermission2(
+            permission.permissionInfo, permission.type, permission.isReconciled, permission.appId,
+            permission.gids, permission.areGidsPerUser
+        )
     }
 
-    override fun getLegacyPermissions(): List<LegacyPermission> {
-        // TODO("Not yet implemented")
-        return emptyList()
-    }
+    override fun getLegacyPermissions(): List<LegacyPermission> =
+        service.getState {
+            with(policy) { getPermissions() }
+        }.mapIndexed { _, _, permission ->
+            LegacyPermission(
+                permission.permissionInfo, permission.type, permission.appId, permission.gids
+            )
+        }
 
     override fun readLegacyPermissionsTEMP(legacyPermissionSettings: LegacyPermissionSettings) {
         // Package settings has been read when this method is called.
         service.initialize()
-        // TODO("Not yet implemented")
     }
 
     override fun writeLegacyPermissionsTEMP(legacyPermissionSettings: LegacyPermissionSettings) {
-        // TODO("Not yet implemented")
+        service.getState {
+            val permissions = with(policy) { getPermissions() }
+            legacyPermissionSettings.replacePermissions(toLegacyPermissions(permissions))
+            val permissionTrees = with(policy) { getPermissionTrees() }
+            legacyPermissionSettings.replacePermissionTrees(toLegacyPermissions(permissionTrees))
+        }
     }
+
+    private fun toLegacyPermissions(
+        permissions: IndexedMap<String, Permission>
+    ): List<LegacyPermission> =
+        permissions.mapIndexed { _, _, permission ->
+            // We don't need to provide UID and GIDs, which are only retrieved when dumping.
+            LegacyPermission(
+                permission.permissionInfo, permission.type, 0, EmptyArray.INT
+            )
+        }
 
     override fun getLegacyPermissionState(appId: Int): LegacyPermissionState {
-        // TODO("Not yet implemented")
-        return LegacyPermissionState()
+        val legacyState = LegacyPermissionState()
+        val userIds = userManagerService.userIdsIncludingPreCreated
+        service.getState {
+            val permissions = with(policy) { getPermissions() }
+            userIds.forEachIndexed { _, userId ->
+                val permissionFlags = with(policy) { getUidPermissionFlags(appId, userId) }
+                    ?: return@forEachIndexed
+
+                permissionFlags.forEachIndexed permissionFlags@{ _, permissionName, flags ->
+                    val permission = permissions[permissionName] ?: return@permissionFlags
+                    val legacyPermissionState = LegacyPermissionState.PermissionState(
+                        permissionName,
+                        permission.isRuntime,
+                        PermissionFlags.isPermissionGranted(flags),
+                        PermissionFlags.toApiFlags(flags)
+                    )
+                    legacyState.putPermissionState(legacyPermissionState, userId)
+                }
+            }
+        }
+        return legacyState
     }
 
-    override fun readLegacyPermissionStateTEMP() {
-        // TODO("Not yet implemented")
-    }
+    override fun readLegacyPermissionStateTEMP() {}
 
-    override fun writeLegacyPermissionStateTEMP() {
-        // TODO("Not yet implemented")
-    }
+    override fun writeLegacyPermissionStateTEMP() {}
 
     override fun onSystemReady() {
         // TODO STOPSHIP privappPermissionsViolationsfix check

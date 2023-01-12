@@ -3717,9 +3717,11 @@ public class AudioService extends IAudioService.Stub
             setRingerMode(getNewRingerMode(stream, index, flags),
                     TAG + ".onSetStreamVolume", false /*external*/);
         }
-        // setting non-zero volume for a muted stream unmutes the stream and vice versa,
+        // setting non-zero volume for a muted stream unmutes the stream and vice versa
+        // (only when changing volume for the current device),
         // except for BT SCO stream where only explicit mute is allowed to comply to BT requirements
-        if (streamType != AudioSystem.STREAM_BLUETOOTH_SCO) {
+        if ((streamType != AudioSystem.STREAM_BLUETOOTH_SCO)
+                && (getDeviceForStream(stream) == device)) {
             mStreamStates[stream].mute(index == 0);
         }
     }

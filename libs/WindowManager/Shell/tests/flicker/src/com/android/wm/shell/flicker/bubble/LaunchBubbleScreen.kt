@@ -16,6 +16,7 @@
 
 package com.android.wm.shell.flicker.bubble
 
+import android.platform.test.annotations.Presubmit
 import androidx.test.filters.RequiresDevice
 import androidx.test.uiautomator.By
 import androidx.test.uiautomator.Until
@@ -57,6 +58,7 @@ open class LaunchBubbleScreen(flicker: FlickerTest) : BaseBubbleScreen(flicker) 
             }
         }
 
+    @Presubmit
     @Test
     open fun testAppIsAlwaysVisible() {
         flicker.assertLayers { this.isVisible(testApp) }

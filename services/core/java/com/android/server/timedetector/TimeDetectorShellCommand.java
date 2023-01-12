@@ -15,7 +15,9 @@
  */
 package com.android.server.timedetector;
 
+import static android.app.timedetector.TimeDetector.SHELL_COMMAND_CLEAR_NETWORK_TIME;
 import static android.app.timedetector.TimeDetector.SHELL_COMMAND_CONFIRM_TIME;
+import static android.app.timedetector.TimeDetector.SHELL_COMMAND_GET_NETWORK_TIME;
 import static android.app.timedetector.TimeDetector.SHELL_COMMAND_GET_TIME_STATE;
 import static android.app.timedetector.TimeDetector.SHELL_COMMAND_IS_AUTO_DETECTION_ENABLED;
 import static android.app.timedetector.TimeDetector.SHELL_COMMAND_SERVICE_NAME;
@@ -70,6 +72,10 @@ class TimeDetectorShellCommand extends ShellCommand {
                 return runSuggestTelephonyTime();
             case SHELL_COMMAND_SUGGEST_NETWORK_TIME:
                 return runSuggestNetworkTime();
+            case SHELL_COMMAND_GET_NETWORK_TIME:
+                return runGetNetworkTime();
+            case SHELL_COMMAND_CLEAR_NETWORK_TIME:
+                return runClearNetworkTime();
             case SHELL_COMMAND_SUGGEST_GNSS_TIME:
                 return runSuggestGnssTime();
             case SHELL_COMMAND_SUGGEST_EXTERNAL_TIME:
@@ -120,6 +126,18 @@ class TimeDetectorShellCommand extends ShellCommand {
         return runSuggestTime(
                 () -> NetworkTimeSuggestion.parseCommandLineArg(this),
                 mInterface::suggestNetworkTime);
+    }
+
+    private int runGetNetworkTime() {
+        NetworkTimeSuggestion networkTimeSuggestion = mInterface.getLatestNetworkSuggestion();
+        final PrintWriter pw = getOutPrintWriter();
+        pw.println(networkTimeSuggestion);
+        return 0;
+    }
+
+    private int runClearNetworkTime() {
+        mInterface.clearNetworkTime();
+        return 0;
     }
 
     private int runSuggestGnssTime() {
@@ -196,6 +214,10 @@ class TimeDetectorShellCommand extends ShellCommand {
         pw.printf("    Sets the current time state for tests.\n");
         pw.printf("  %s <unix epoch time options>\n", SHELL_COMMAND_CONFIRM_TIME);
         pw.printf("    Tries to confirms the time, raising the confidence.\n");
+        pw.printf("  %s\n", SHELL_COMMAND_GET_NETWORK_TIME);
+        pw.printf("    Prints the network time information held by the detector.\n");
+        pw.printf("  %s\n", SHELL_COMMAND_CLEAR_NETWORK_TIME);
+        pw.printf("    Clears the network time information held by the detector.\n");
         pw.println();
         ManualTimeSuggestion.printCommandLineOpts(pw);
         pw.println();

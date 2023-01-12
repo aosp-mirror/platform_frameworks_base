@@ -31,22 +31,26 @@ import org.junit.Test
 @RequiresDevice
 class TvPipMenuTests : TvPipTestBase() {
 
-    private val systemUiResources =
+    private val systemUiResources by lazy {
         packageManager.getResourcesForApplication(SYSTEM_UI_PACKAGE_NAME)
-    private val pipBoundsWhileInMenu: Rect =
+    }
+    private val pipBoundsWhileInMenu: Rect by lazy {
         systemUiResources.run {
             val bounds =
                 getString(getIdentifier("pip_menu_bounds", "string", SYSTEM_UI_PACKAGE_NAME))
             Rect.unflattenFromString(bounds) ?: error("Could not retrieve PiP menu bounds")
         }
-    private val playButtonDescription =
+    }
+    private val playButtonDescription by lazy {
         systemUiResources.run {
             getString(getIdentifier("pip_play", "string", SYSTEM_UI_PACKAGE_NAME))
         }
-    private val pauseButtonDescription =
+    }
+    private val pauseButtonDescription by lazy {
         systemUiResources.run {
             getString(getIdentifier("pip_pause", "string", SYSTEM_UI_PACKAGE_NAME))
         }
+    }
 
     @Before
     fun tvPipMenuTestsTestUp() {

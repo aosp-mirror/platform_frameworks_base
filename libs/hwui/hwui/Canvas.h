@@ -60,6 +60,7 @@ typedef uirenderer::VectorDrawable::Tree VectorDrawableRoot;
 typedef std::function<void(uint16_t* text, float* positions)> ReadGlyphFunc;
 
 class AnimatedImageDrawable;
+class LottieDrawable;
 class Bitmap;
 class Paint;
 struct Typeface;
@@ -242,6 +243,7 @@ public:
                                const Paint* paint) = 0;
 
     virtual double drawAnimatedImage(AnimatedImageDrawable* imgDrawable) = 0;
+    virtual void drawLottie(LottieDrawable* lottieDrawable) = 0;
     virtual void drawPicture(const SkPicture& picture) = 0;
 
     /**

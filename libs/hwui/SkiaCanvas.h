@@ -19,19 +19,19 @@
 #ifdef __ANDROID__ // Layoutlib does not support hardware acceleration
 #include "DeferredLayerUpdater.h"
 #endif
-#include "RenderNode.h"
-#include "VectorDrawable.h"
-#include "hwui/Canvas.h"
-#include "hwui/Paint.h"
-#include "hwui/BlurDrawLooper.h"
-
 #include <SkCanvas.h>
-#include <SkDeque.h>
-#include "pipeline/skia/AnimatedDrawables.h"
-#include "src/core/SkArenaAlloc.h"
 
 #include <cassert>
+#include <deque>
 #include <optional>
+
+#include "RenderNode.h"
+#include "VectorDrawable.h"
+#include "hwui/BlurDrawLooper.h"
+#include "hwui/Canvas.h"
+#include "hwui/Paint.h"
+#include "pipeline/skia/AnimatedDrawables.h"
+#include "src/core/SkArenaAlloc.h"
 
 enum class SkBlendMode;
 class SkRRect;
@@ -145,6 +145,7 @@ public:
                                float dstTop, float dstRight, float dstBottom,
                                const Paint* paint) override;
     virtual double drawAnimatedImage(AnimatedImageDrawable* imgDrawable) override;
+    virtual void drawLottie(LottieDrawable* lottieDrawable) override;
 
     virtual void drawVectorDrawable(VectorDrawableRoot* vectorDrawable) override;
 
@@ -211,6 +212,9 @@ private:
         int saveCount;
         SaveFlags::Flags saveFlags;
         size_t clipIndex;
+
+        SaveRec(int saveCount, SaveFlags::Flags saveFlags, size_t clipIndex)
+                : saveCount(saveCount), saveFlags(saveFlags), clipIndex(clipIndex) {}
     };
 
     const SaveRec* currentSaveRec() const;
@@ -224,11 +228,11 @@ private:
 
     class Clip;
 
-    std::unique_ptr<SkCanvas> mCanvasOwned;    // might own a canvas we allocated
-    SkCanvas* mCanvas;                         // we do NOT own this canvas, it must survive us
-                                               // unless it is the same as mCanvasOwned.get()
-    std::unique_ptr<SkDeque> mSaveStack;       // lazily allocated, tracks partial saves.
-    std::vector<Clip> mClipStack;              // tracks persistent clips.
+    std::unique_ptr<SkCanvas> mCanvasOwned;  // Might own a canvas we allocated.
+    SkCanvas* mCanvas;                       // We do NOT own this canvas, it must survive us
+                                             // unless it is the same as mCanvasOwned.get().
+    std::unique_ptr<std::deque<SaveRec>> mSaveStack;  // Lazily allocated, tracks partial saves.
+    std::vector<Clip> mClipStack;                     // Tracks persistent clips.
     sk_sp<PaintFilter> mPaintFilter;
 };
 

@@ -39,6 +39,8 @@ import static org.mockito.Mockito.when;
 
 import android.app.PropertyInvalidatedCache;
 import android.companion.virtual.IVirtualDevice;
+import android.companion.virtual.IVirtualDeviceManager;
+import android.companion.virtual.VirtualDeviceManager;
 import android.compat.testing.PlatformCompatChangeRule;
 import android.content.Context;
 import android.content.ContextWrapper;
@@ -173,6 +175,7 @@ public class DisplayManagerServiceTest {
 
     private final DisplayManagerService.Injector mBasicInjector = new BasicInjector();
 
+    @Mock IVirtualDeviceManager mIVirtualDeviceManager;
     @Mock InputManagerInternal mMockInputManagerInternal;
     @Mock VirtualDeviceManagerInternal mMockVirtualDeviceManagerInternal;
     @Mock IVirtualDisplayCallback.Stub mMockAppToken;
@@ -202,6 +205,8 @@ public class DisplayManagerServiceTest {
 
         mContext = spy(new ContextWrapper(ApplicationProvider.getApplicationContext()));
 
+        VirtualDeviceManager vdm = new VirtualDeviceManager(mIVirtualDeviceManager, mContext);
+        when(mContext.getSystemService(VirtualDeviceManager.class)).thenReturn(vdm);
         // Disable binder caches in this process.
         PropertyInvalidatedCache.disableForTestMode();
         setUpDisplay();
@@ -727,10 +732,8 @@ public class DisplayManagerServiceTest {
         when(mMockAppToken.asBinder()).thenReturn(mMockAppToken);
 
         IVirtualDevice virtualDevice = mock(IVirtualDevice.class);
-        when(mMockVirtualDeviceManagerInternal.isValidVirtualDevice(virtualDevice))
-                .thenReturn(true);
         when(virtualDevice.getDeviceId()).thenReturn(1);
-
+        when(mIVirtualDeviceManager.isValidVirtualDeviceId(1)).thenReturn(true);
         // Create a first virtual display. A display group should be created for this display on the
         // virtual device.
         final VirtualDisplayConfig.Builder builder1 =
@@ -780,9 +783,8 @@ public class DisplayManagerServiceTest {
         when(mMockAppToken.asBinder()).thenReturn(mMockAppToken);
 
         IVirtualDevice virtualDevice = mock(IVirtualDevice.class);
-        when(mMockVirtualDeviceManagerInternal.isValidVirtualDevice(virtualDevice))
-                .thenReturn(true);
         when(virtualDevice.getDeviceId()).thenReturn(1);
+        when(mIVirtualDeviceManager.isValidVirtualDeviceId(1)).thenReturn(true);
 
         // Create a first virtual display. A display group should be created for this display on the
         // virtual device.
@@ -805,6 +807,8 @@ public class DisplayManagerServiceTest {
                 new VirtualDisplayConfig.Builder(VIRTUAL_DISPLAY_NAME, 600, 800, 320)
                         .setFlags(VIRTUAL_DISPLAY_FLAG_OWN_DISPLAY_GROUP)
                         .setUniqueId("uniqueId --- own display group");
+
+        when(mIVirtualDeviceManager.isValidVirtualDeviceId(1)).thenReturn(true);
 
         int displayId2 =
                 localService.createVirtualDisplay(
@@ -832,9 +836,8 @@ public class DisplayManagerServiceTest {
         when(mMockAppToken.asBinder()).thenReturn(mMockAppToken);
 
         IVirtualDevice virtualDevice = mock(IVirtualDevice.class);
-        when(mMockVirtualDeviceManagerInternal.isValidVirtualDevice(virtualDevice))
-                .thenReturn(true);
         when(virtualDevice.getDeviceId()).thenReturn(1);
+        when(mIVirtualDeviceManager.isValidVirtualDeviceId(1)).thenReturn(true);
 
         // Allow an ALWAYS_UNLOCKED display to be created.
         when(mContext.checkCallingPermission(ADD_TRUSTED_DISPLAY))
@@ -1062,7 +1065,7 @@ public class DisplayManagerServiceTest {
      * a virtual device, even if ADD_TRUSTED_DISPLAY is not granted.
      */
     @Test
-    public void testOwnDisplayGroup_allowCreationWithVirtualDevice() {
+    public void testOwnDisplayGroup_allowCreationWithVirtualDevice()  throws Exception {
         DisplayManagerService displayManager =
                 new DisplayManagerService(mContext, mBasicInjector);
         DisplayManagerInternal localService = displayManager.new LocalService();
@@ -1081,8 +1084,8 @@ public class DisplayManagerServiceTest {
         builder.setUniqueId("uniqueId --- OWN_DISPLAY_GROUP");
 
         IVirtualDevice virtualDevice = mock(IVirtualDevice.class);
-        when(mMockVirtualDeviceManagerInternal.isValidVirtualDevice(virtualDevice))
-            .thenReturn(true);
+        when(virtualDevice.getDeviceId()).thenReturn(1);
+        when(mIVirtualDeviceManager.isValidVirtualDeviceId(1)).thenReturn(true);
 
         int displayId = localService.createVirtualDisplay(builder.build(),
                 mMockAppToken /* callback */, virtualDevice /* virtualDeviceToken */,

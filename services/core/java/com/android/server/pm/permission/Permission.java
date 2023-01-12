@@ -105,6 +105,15 @@ public final class Permission {
         mType = type;
     }
 
+    public Permission(@NonNull PermissionInfo permissionInfo, @PermissionType int type,
+            boolean reconciled, int uid, int[] gids, boolean gidsPerUser) {
+        this(permissionInfo, type);
+        mReconciled = reconciled;
+        mUid = uid;
+        mGids = gids;
+        mGidsPerUser = gidsPerUser;
+    }
+
     @NonNull
     public PermissionInfo getPermissionInfo() {
         return mPermissionInfo;

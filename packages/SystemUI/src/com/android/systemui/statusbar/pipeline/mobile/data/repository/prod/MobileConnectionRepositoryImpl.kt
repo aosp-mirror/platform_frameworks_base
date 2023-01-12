@@ -308,7 +308,7 @@ class MobileConnectionRepositoryImpl(
             networkNameSeparator: String,
             globalMobileDataSettingChangedEvent: Flow<Unit>,
         ): MobileConnectionRepository {
-            val mobileLogger = logFactory.create(tableBufferLogName(subId), 100)
+            val mobileLogger = logFactory.getOrCreate(tableBufferLogName(subId), 100)
 
             return MobileConnectionRepositoryImpl(
                 context,

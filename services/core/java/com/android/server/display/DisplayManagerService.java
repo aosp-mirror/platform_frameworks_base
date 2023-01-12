@@ -47,6 +47,7 @@ import android.annotation.UserIdInt;
 import android.app.AppOpsManager;
 import android.app.compat.CompatChanges;
 import android.companion.virtual.IVirtualDevice;
+import android.companion.virtual.VirtualDeviceManager;
 import android.compat.annotation.ChangeId;
 import android.compat.annotation.EnabledSince;
 import android.content.BroadcastReceiver;
@@ -1281,12 +1282,17 @@ public final class DisplayManagerService extends SystemService {
         final Surface surface = virtualDisplayConfig.getSurface();
         int flags = virtualDisplayConfig.getFlags();
         if (virtualDevice != null) {
-            final VirtualDeviceManagerInternal vdm =
-                    getLocalService(VirtualDeviceManagerInternal.class);
-            if (!vdm.isValidVirtualDevice(virtualDevice)) {
-                throw new SecurityException("Invalid virtual device");
+            final VirtualDeviceManager vdm = mContext.getSystemService(VirtualDeviceManager.class);
+            try {
+                if (!vdm.isValidVirtualDeviceId(virtualDevice.getDeviceId())) {
+                    throw new SecurityException("Invalid virtual device");
+                }
+            } catch (RemoteException ex) {
+                throw new SecurityException("Unable to validate virtual device");
             }
-            flags |= vdm.getBaseVirtualDisplayFlags(virtualDevice);
+            final VirtualDeviceManagerInternal localVdm =
+                    getLocalService(VirtualDeviceManagerInternal.class);
+            flags |= localVdm.getBaseVirtualDisplayFlags(virtualDevice);
         }
 
         if (surface != null && surface.isSingleBuffered()) {

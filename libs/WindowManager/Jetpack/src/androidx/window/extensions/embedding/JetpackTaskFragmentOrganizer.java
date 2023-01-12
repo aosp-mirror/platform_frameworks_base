@@ -310,16 +310,12 @@ class JetpackTaskFragmentOrganizer extends TaskFragmentOrganizer {
                 OP_TYPE_SET_ANIMATION_PARAMS)
                 .setAnimationParams(animationParams)
                 .build();
-        wct.setTaskFragmentOperation(fragmentToken, operation);
+        wct.addTaskFragmentOperation(fragmentToken, operation);
     }
 
     void deleteTaskFragment(@NonNull WindowContainerTransaction wct,
             @NonNull IBinder fragmentToken) {
-        if (!mFragmentInfos.containsKey(fragmentToken)) {
-            throw new IllegalArgumentException(
-                    "Can't find an existing TaskFragment with fragmentToken=" + fragmentToken);
-        }
-        wct.deleteTaskFragment(mFragmentInfos.get(fragmentToken).getToken());
+        wct.deleteTaskFragment(fragmentToken);
     }
 
     void updateTaskFragmentInfo(@NonNull TaskFragmentInfo taskFragmentInfo) {

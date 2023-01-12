@@ -17,6 +17,7 @@
 package com.android.server.job;
 
 import static android.text.format.DateUtils.MINUTE_IN_MILLIS;
+import static android.util.DataUnit.GIGABYTES;
 
 import static com.android.server.job.JobSchedulerService.RESTRICTED_INDEX;
 import static com.android.server.job.JobSchedulerService.sElapsedRealtimeClock;
@@ -58,6 +59,7 @@ import com.android.internal.annotations.GuardedBy;
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.app.IBatteryStats;
 import com.android.internal.app.procstats.ProcessStats;
+import com.android.internal.util.MemInfoReader;
 import com.android.internal.util.StatLogger;
 import com.android.server.JobSchedulerBackgroundThread;
 import com.android.server.LocalServices;
@@ -85,11 +87,33 @@ class JobConcurrencyManager {
     private static final boolean DEBUG = JobSchedulerService.DEBUG;
 
     /** The maximum number of concurrent jobs we'll aim to run at one time. */
-    public static final int STANDARD_CONCURRENCY_LIMIT = 16;
+    @VisibleForTesting
+    static final int MAX_CONCURRENCY_LIMIT = 64;
     /** The maximum number of objects we should retain in memory when not in use. */
-    private static final int MAX_RETAINED_OBJECTS = (int) (1.5 * STANDARD_CONCURRENCY_LIMIT);
+    private static final int MAX_RETAINED_OBJECTS = (int) (1.5 * MAX_CONCURRENCY_LIMIT);
 
     static final String CONFIG_KEY_PREFIX_CONCURRENCY = "concurrency_";
+    private static final String KEY_CONCURRENCY_LIMIT = CONFIG_KEY_PREFIX_CONCURRENCY + "limit";
+    @VisibleForTesting
+    static final int DEFAULT_CONCURRENCY_LIMIT;
+
+    static {
+        if (ActivityManager.isLowRamDeviceStatic()) {
+            DEFAULT_CONCURRENCY_LIMIT = 8;
+        } else {
+            final long ramBytes = new MemInfoReader().getTotalSize();
+            if (ramBytes <= GIGABYTES.toBytes(6)) {
+                DEFAULT_CONCURRENCY_LIMIT = 16;
+            } else if (ramBytes <= GIGABYTES.toBytes(8)) {
+                DEFAULT_CONCURRENCY_LIMIT = 20;
+            } else if (ramBytes <= GIGABYTES.toBytes(12)) {
+                DEFAULT_CONCURRENCY_LIMIT = 32;
+            } else {
+                DEFAULT_CONCURRENCY_LIMIT = 40;
+            }
+        }
+    }
+
     private static final String KEY_SCREEN_OFF_ADJUSTMENT_DELAY_MS =
             CONFIG_KEY_PREFIX_CONCURRENCY + "screen_off_adjustment_delay_ms";
     private static final long DEFAULT_SCREEN_OFF_ADJUSTMENT_DELAY_MS = 30_000;
@@ -100,7 +124,7 @@ class JobConcurrencyManager {
     @VisibleForTesting
     static final String KEY_PKG_CONCURRENCY_LIMIT_REGULAR =
             CONFIG_KEY_PREFIX_CONCURRENCY + "pkg_concurrency_limit_regular";
-    private static final int DEFAULT_PKG_CONCURRENCY_LIMIT_REGULAR = STANDARD_CONCURRENCY_LIMIT / 2;
+    private static final int DEFAULT_PKG_CONCURRENCY_LIMIT_REGULAR = DEFAULT_CONCURRENCY_LIMIT / 2;
     @VisibleForTesting
     static final String KEY_ENABLE_MAX_WAIT_TIME_BYPASS =
             CONFIG_KEY_PREFIX_CONCURRENCY + "enable_max_wait_time_bypass";
@@ -209,84 +233,100 @@ class JobConcurrencyManager {
 
     private static final WorkConfigLimitsPerMemoryTrimLevel CONFIG_LIMITS_SCREEN_ON =
             new WorkConfigLimitsPerMemoryTrimLevel(
-                    new WorkTypeConfig("screen_on_normal", 11,
+                    new WorkTypeConfig("screen_on_normal", DEFAULT_CONCURRENCY_LIMIT,
+                            /* defaultMaxTotal */  DEFAULT_CONCURRENCY_LIMIT * 3 / 4,
                             // defaultMin
-                            List.of(Pair.create(WORK_TYPE_TOP, 4), Pair.create(WORK_TYPE_FGS, 1),
-                                    Pair.create(WORK_TYPE_EJ, 3), Pair.create(WORK_TYPE_BG, 2),
-                                    Pair.create(WORK_TYPE_BGUSER_IMPORTANT, 1)),
+                            List.of(Pair.create(WORK_TYPE_TOP, .4f),
+                                    Pair.create(WORK_TYPE_FGS, .2f),
+                                    Pair.create(WORK_TYPE_EJ, .2f), Pair.create(WORK_TYPE_BG, .1f),
+                                    Pair.create(WORK_TYPE_BGUSER_IMPORTANT, .1f)),
                             // defaultMax
-                            List.of(Pair.create(WORK_TYPE_BG, 6),
-                                    Pair.create(WORK_TYPE_BGUSER_IMPORTANT, 2),
-                                    Pair.create(WORK_TYPE_BGUSER, 3))
+                            List.of(Pair.create(WORK_TYPE_BG, .5f),
+                                    Pair.create(WORK_TYPE_BGUSER_IMPORTANT, .25f),
+                                    Pair.create(WORK_TYPE_BGUSER, .2f))
                     ),
-                    new WorkTypeConfig("screen_on_moderate", 9,
+                    new WorkTypeConfig("screen_on_moderate", DEFAULT_CONCURRENCY_LIMIT,
+                            /* defaultMaxTotal */  DEFAULT_CONCURRENCY_LIMIT / 2,
                             // defaultMin
-                            List.of(Pair.create(WORK_TYPE_TOP, 4), Pair.create(WORK_TYPE_FGS, 1),
-                                    Pair.create(WORK_TYPE_EJ, 2), Pair.create(WORK_TYPE_BG, 1),
-                                    Pair.create(WORK_TYPE_BGUSER_IMPORTANT, 1)),
+                            List.of(Pair.create(WORK_TYPE_TOP, .4f),
+                                    Pair.create(WORK_TYPE_FGS, .1f),
+                                    Pair.create(WORK_TYPE_EJ, .1f), Pair.create(WORK_TYPE_BG, .1f),
+                                    Pair.create(WORK_TYPE_BGUSER_IMPORTANT, .1f)),
                             // defaultMax
-                            List.of(Pair.create(WORK_TYPE_BG, 4),
-                                    Pair.create(WORK_TYPE_BGUSER_IMPORTANT, 1),
-                                    Pair.create(WORK_TYPE_BGUSER, 1))
+                            List.of(Pair.create(WORK_TYPE_BG, .4f),
+                                    Pair.create(WORK_TYPE_BGUSER_IMPORTANT, .1f),
+                                    Pair.create(WORK_TYPE_BGUSER, .1f))
                     ),
-                    new WorkTypeConfig("screen_on_low", 6,
+                    new WorkTypeConfig("screen_on_low", DEFAULT_CONCURRENCY_LIMIT,
+                            /* defaultMaxTotal */  DEFAULT_CONCURRENCY_LIMIT * 4 / 10,
                             // defaultMin
-                            List.of(Pair.create(WORK_TYPE_TOP, 4), Pair.create(WORK_TYPE_FGS, 1),
-                                    Pair.create(WORK_TYPE_EJ, 1)),
+                            List.of(Pair.create(WORK_TYPE_TOP, 2.0f / 3),
+                                    Pair.create(WORK_TYPE_FGS, .1f),
+                                    Pair.create(WORK_TYPE_EJ, .1f)),
                             // defaultMax
-                            List.of(Pair.create(WORK_TYPE_BG, 2),
-                                    Pair.create(WORK_TYPE_BGUSER_IMPORTANT, 1),
-                                    Pair.create(WORK_TYPE_BGUSER, 1))
+                            List.of(Pair.create(WORK_TYPE_BG, 1.0f / 3),
+                                    Pair.create(WORK_TYPE_BGUSER_IMPORTANT, 1.0f / 6),
+                                    Pair.create(WORK_TYPE_BGUSER, 1.0f / 6))
                     ),
-                    new WorkTypeConfig("screen_on_critical", 6,
+                    new WorkTypeConfig("screen_on_critical", DEFAULT_CONCURRENCY_LIMIT,
+                            /* defaultMaxTotal */  DEFAULT_CONCURRENCY_LIMIT * 4 / 10,
                             // defaultMin
-                            List.of(Pair.create(WORK_TYPE_TOP, 4), Pair.create(WORK_TYPE_FGS, 1),
-                                    Pair.create(WORK_TYPE_EJ, 1)),
+                            List.of(Pair.create(WORK_TYPE_TOP, 2.0f / 3),
+                                    Pair.create(WORK_TYPE_FGS, .1f),
+                                    Pair.create(WORK_TYPE_EJ, .1f)),
                             // defaultMax
-                            List.of(Pair.create(WORK_TYPE_BG, 1),
-                                    Pair.create(WORK_TYPE_BGUSER_IMPORTANT, 1),
-                                    Pair.create(WORK_TYPE_BGUSER, 1))
+                            List.of(Pair.create(WORK_TYPE_BG, 1.0f / 6),
+                                    Pair.create(WORK_TYPE_BGUSER_IMPORTANT, 1.0f / 6),
+                                    Pair.create(WORK_TYPE_BGUSER, 1.0f / 6))
                     )
             );
     private static final WorkConfigLimitsPerMemoryTrimLevel CONFIG_LIMITS_SCREEN_OFF =
             new WorkConfigLimitsPerMemoryTrimLevel(
-                    new WorkTypeConfig("screen_off_normal", 16,
+                    new WorkTypeConfig("screen_off_normal", DEFAULT_CONCURRENCY_LIMIT,
+                            /* defaultMaxTotal */  DEFAULT_CONCURRENCY_LIMIT,
                             // defaultMin
-                            List.of(Pair.create(WORK_TYPE_TOP, 4), Pair.create(WORK_TYPE_FGS, 2),
-                                    Pair.create(WORK_TYPE_EJ, 3), Pair.create(WORK_TYPE_BG, 2),
-                                    Pair.create(WORK_TYPE_BGUSER_IMPORTANT, 1)),
+                            List.of(Pair.create(WORK_TYPE_TOP, .3f),
+                                    Pair.create(WORK_TYPE_FGS, .2f),
+                                    Pair.create(WORK_TYPE_EJ, .3f), Pair.create(WORK_TYPE_BG, .2f),
+                                    Pair.create(WORK_TYPE_BGUSER_IMPORTANT, .1f)),
                             // defaultMax
-                            List.of(Pair.create(WORK_TYPE_BG, 10),
-                                    Pair.create(WORK_TYPE_BGUSER_IMPORTANT, 2),
-                                    Pair.create(WORK_TYPE_BGUSER, 3))
+                            List.of(Pair.create(WORK_TYPE_BG, .6f),
+                                    Pair.create(WORK_TYPE_BGUSER_IMPORTANT, .2f),
+                                    Pair.create(WORK_TYPE_BGUSER, .2f))
                     ),
-                    new WorkTypeConfig("screen_off_moderate", 14,
+                    new WorkTypeConfig("screen_off_moderate", DEFAULT_CONCURRENCY_LIMIT,
+                            /* defaultMaxTotal */  DEFAULT_CONCURRENCY_LIMIT * 9 / 10,
                             // defaultMin
-                            List.of(Pair.create(WORK_TYPE_TOP, 4), Pair.create(WORK_TYPE_FGS, 2),
-                                    Pair.create(WORK_TYPE_EJ, 3), Pair.create(WORK_TYPE_BG, 2),
-                                    Pair.create(WORK_TYPE_BGUSER_IMPORTANT, 1)),
+                            List.of(Pair.create(WORK_TYPE_TOP, .3f),
+                                    Pair.create(WORK_TYPE_FGS, .2f),
+                                    Pair.create(WORK_TYPE_EJ, .3f), Pair.create(WORK_TYPE_BG, .2f),
+                                    Pair.create(WORK_TYPE_BGUSER_IMPORTANT, .1f)),
                             // defaultMax
-                            List.of(Pair.create(WORK_TYPE_BG, 7),
-                                    Pair.create(WORK_TYPE_BGUSER_IMPORTANT, 1),
-                                    Pair.create(WORK_TYPE_BGUSER, 1))
+                            List.of(Pair.create(WORK_TYPE_BG, .5f),
+                                    Pair.create(WORK_TYPE_BGUSER_IMPORTANT, .1f),
+                                    Pair.create(WORK_TYPE_BGUSER, .1f))
                     ),
-                    new WorkTypeConfig("screen_off_low", 9,
+                    new WorkTypeConfig("screen_off_low", DEFAULT_CONCURRENCY_LIMIT,
+                            /* defaultMaxTotal */  DEFAULT_CONCURRENCY_LIMIT * 6 / 10,
                             // defaultMin
-                            List.of(Pair.create(WORK_TYPE_TOP, 4), Pair.create(WORK_TYPE_FGS, 1),
-                                    Pair.create(WORK_TYPE_EJ, 2), Pair.create(WORK_TYPE_BG, 1)),
+                            List.of(Pair.create(WORK_TYPE_TOP, .4f),
+                                    Pair.create(WORK_TYPE_FGS, .1f),
+                                    Pair.create(WORK_TYPE_EJ, .2f), Pair.create(WORK_TYPE_BG, .1f)),
                             // defaultMax
-                            List.of(Pair.create(WORK_TYPE_BG, 3),
-                                    Pair.create(WORK_TYPE_BGUSER_IMPORTANT, 1),
-                                    Pair.create(WORK_TYPE_BGUSER, 1))
+                            List.of(Pair.create(WORK_TYPE_BG, .25f),
+                                    Pair.create(WORK_TYPE_BGUSER_IMPORTANT, .1f),
+                                    Pair.create(WORK_TYPE_BGUSER, .1f))
                     ),
-                    new WorkTypeConfig("screen_off_critical", 6,
+                    new WorkTypeConfig("screen_off_critical", DEFAULT_CONCURRENCY_LIMIT,
+                            /* defaultMaxTotal */  DEFAULT_CONCURRENCY_LIMIT * 4 / 10,
                             // defaultMin
-                            List.of(Pair.create(WORK_TYPE_TOP, 4), Pair.create(WORK_TYPE_FGS, 1),
-                                    Pair.create(WORK_TYPE_EJ, 1)),
+                            List.of(Pair.create(WORK_TYPE_TOP, .5f),
+                                    Pair.create(WORK_TYPE_FGS, .1f),
+                                    Pair.create(WORK_TYPE_EJ, .1f)),
                             // defaultMax
-                            List.of(Pair.create(WORK_TYPE_BG, 1),
-                                    Pair.create(WORK_TYPE_BGUSER_IMPORTANT, 1),
-                                    Pair.create(WORK_TYPE_BGUSER, 1))
+                            List.of(Pair.create(WORK_TYPE_BG, .1f),
+                                    Pair.create(WORK_TYPE_BGUSER_IMPORTANT, .1f),
+                                    Pair.create(WORK_TYPE_BGUSER, .1f))
                     )
             );
 
@@ -356,6 +396,12 @@ class JobConcurrencyManager {
 
     /** Wait for this long after screen off before adjusting the job concurrency. */
     private long mScreenOffAdjustmentDelayMs = DEFAULT_SCREEN_OFF_ADJUSTMENT_DELAY_MS;
+
+    /**
+     * The maximum number of jobs we'll attempt to have running at one time. This may occasionally
+     * be exceeded based on other factors.
+     */
+    private int mSteadyStateConcurrencyLimit = DEFAULT_CONCURRENCY_LIMIT;
 
     /**
      * The maximum number of expedited jobs a single userId-package can have running simultaneously.
@@ -451,7 +497,7 @@ class JobConcurrencyManager {
     void onThirdPartyAppsCanStart() {
         final IBatteryStats batteryStats = IBatteryStats.Stub.asInterface(
                 ServiceManager.getService(BatteryStats.SERVICE_NAME));
-        for (int i = 0; i < STANDARD_CONCURRENCY_LIMIT; i++) {
+        for (int i = 0; i < mSteadyStateConcurrencyLimit; ++i) {
             mIdleContexts.add(
                     mInjector.createJobServiceContext(mService, this,
                             mNotificationCoordinator, batteryStats,
@@ -778,13 +824,14 @@ class JobConcurrencyManager {
         }
         preferredUidOnly.sort(sDeterminationComparator);
         stoppable.sort(sDeterminationComparator);
-        for (int i = numRunningJobs; i < STANDARD_CONCURRENCY_LIMIT; ++i) {
+        for (int i = numRunningJobs; i < mSteadyStateConcurrencyLimit; ++i) {
             final JobServiceContext jsc;
             final int numIdleContexts = mIdleContexts.size();
             if (numIdleContexts > 0) {
                 jsc = mIdleContexts.removeAt(numIdleContexts - 1);
             } else {
-                Slog.wtf(TAG, "Had fewer than " + STANDARD_CONCURRENCY_LIMIT + " in existence");
+                // This could happen if the config is changed at runtime.
+                Slog.w(TAG, "Had fewer than " + mSteadyStateConcurrencyLimit + " in existence");
                 jsc = createNewJobServiceContext();
             }
 
@@ -850,7 +897,7 @@ class JobConcurrencyManager {
             ContextAssignment selectedContext = null;
             final int allWorkTypes = getJobWorkTypes(nextPending);
             final boolean pkgConcurrencyOkay = !isPkgConcurrencyLimitedLocked(nextPending);
-            final boolean isInOverage = projectedRunningCount > STANDARD_CONCURRENCY_LIMIT;
+            final boolean isInOverage = projectedRunningCount > mSteadyStateConcurrencyLimit;
             boolean startingJob = false;
             if (idle.size() > 0) {
                 final int idx = idle.size() - 1;
@@ -1398,7 +1445,7 @@ class JobConcurrencyManager {
             noteConcurrency();
             return;
         }
-        if (mActiveServices.size() >= STANDARD_CONCURRENCY_LIMIT) {
+        if (mActiveServices.size() >= mSteadyStateConcurrencyLimit) {
             final boolean respectConcurrencyLimit;
             if (!mMaxWaitTimeBypassEnabled) {
                 respectConcurrencyLimit = true;
@@ -1801,23 +1848,27 @@ class JobConcurrencyManager {
         DeviceConfig.Properties properties =
                 DeviceConfig.getProperties(DeviceConfig.NAMESPACE_JOB_SCHEDULER);
 
+        // Concurrency limit should be in the range [8, MAX_CONCURRENCY_LIMIT].
+        mSteadyStateConcurrencyLimit = Math.max(8, Math.min(MAX_CONCURRENCY_LIMIT,
+                properties.getInt(KEY_CONCURRENCY_LIMIT, DEFAULT_CONCURRENCY_LIMIT)));
+
         mScreenOffAdjustmentDelayMs = properties.getLong(
                 KEY_SCREEN_OFF_ADJUSTMENT_DELAY_MS, DEFAULT_SCREEN_OFF_ADJUSTMENT_DELAY_MS);
 
-        CONFIG_LIMITS_SCREEN_ON.normal.update(properties);
-        CONFIG_LIMITS_SCREEN_ON.moderate.update(properties);
-        CONFIG_LIMITS_SCREEN_ON.low.update(properties);
-        CONFIG_LIMITS_SCREEN_ON.critical.update(properties);
+        CONFIG_LIMITS_SCREEN_ON.normal.update(properties, mSteadyStateConcurrencyLimit);
+        CONFIG_LIMITS_SCREEN_ON.moderate.update(properties, mSteadyStateConcurrencyLimit);
+        CONFIG_LIMITS_SCREEN_ON.low.update(properties, mSteadyStateConcurrencyLimit);
+        CONFIG_LIMITS_SCREEN_ON.critical.update(properties, mSteadyStateConcurrencyLimit);
 
-        CONFIG_LIMITS_SCREEN_OFF.normal.update(properties);
-        CONFIG_LIMITS_SCREEN_OFF.moderate.update(properties);
-        CONFIG_LIMITS_SCREEN_OFF.low.update(properties);
-        CONFIG_LIMITS_SCREEN_OFF.critical.update(properties);
+        CONFIG_LIMITS_SCREEN_OFF.normal.update(properties, mSteadyStateConcurrencyLimit);
+        CONFIG_LIMITS_SCREEN_OFF.moderate.update(properties, mSteadyStateConcurrencyLimit);
+        CONFIG_LIMITS_SCREEN_OFF.low.update(properties, mSteadyStateConcurrencyLimit);
+        CONFIG_LIMITS_SCREEN_OFF.critical.update(properties, mSteadyStateConcurrencyLimit);
 
-        // Package concurrency limits must in the range [1, STANDARD_CONCURRENCY_LIMIT].
-        mPkgConcurrencyLimitEj = Math.max(1, Math.min(STANDARD_CONCURRENCY_LIMIT,
+        // Package concurrency limits must in the range [1, mSteadyStateConcurrencyLimit].
+        mPkgConcurrencyLimitEj = Math.max(1, Math.min(mSteadyStateConcurrencyLimit,
                 properties.getInt(KEY_PKG_CONCURRENCY_LIMIT_EJ, DEFAULT_PKG_CONCURRENCY_LIMIT_EJ)));
-        mPkgConcurrencyLimitRegular = Math.max(1, Math.min(STANDARD_CONCURRENCY_LIMIT,
+        mPkgConcurrencyLimitRegular = Math.max(1, Math.min(mSteadyStateConcurrencyLimit,
                 properties.getInt(
                         KEY_PKG_CONCURRENCY_LIMIT_REGULAR, DEFAULT_PKG_CONCURRENCY_LIMIT_REGULAR)));
 
@@ -1838,6 +1889,7 @@ class JobConcurrencyManager {
         try {
             pw.println("Configuration:");
             pw.increaseIndent();
+            pw.print(KEY_CONCURRENCY_LIMIT, mSteadyStateConcurrencyLimit).println();
             pw.print(KEY_SCREEN_OFF_ADJUSTMENT_DELAY_MS, mScreenOffAdjustmentDelayMs).println();
             pw.print(KEY_PKG_CONCURRENCY_LIMIT_EJ, mPkgConcurrencyLimitEj).println();
             pw.print(KEY_PKG_CONCURRENCY_LIMIT_REGULAR, mPkgConcurrencyLimitRegular).println();
@@ -2041,128 +2093,179 @@ class JobConcurrencyManager {
 
     @VisibleForTesting
     static class WorkTypeConfig {
-        @VisibleForTesting
-        static final String KEY_PREFIX_MAX = CONFIG_KEY_PREFIX_CONCURRENCY + "max_";
-        @VisibleForTesting
-        static final String KEY_PREFIX_MIN = CONFIG_KEY_PREFIX_CONCURRENCY + "min_";
+        private static final String KEY_PREFIX_MAX = CONFIG_KEY_PREFIX_CONCURRENCY + "max_";
+        private static final String KEY_PREFIX_MIN = CONFIG_KEY_PREFIX_CONCURRENCY + "min_";
         @VisibleForTesting
         static final String KEY_PREFIX_MAX_TOTAL = CONFIG_KEY_PREFIX_CONCURRENCY + "max_total_";
-        private static final String KEY_PREFIX_MAX_TOP = CONFIG_KEY_PREFIX_CONCURRENCY + "max_top_";
-        private static final String KEY_PREFIX_MAX_FGS = CONFIG_KEY_PREFIX_CONCURRENCY + "max_fgs_";
-        private static final String KEY_PREFIX_MAX_EJ = CONFIG_KEY_PREFIX_CONCURRENCY + "max_ej_";
-        private static final String KEY_PREFIX_MAX_BG = CONFIG_KEY_PREFIX_CONCURRENCY + "max_bg_";
-        private static final String KEY_PREFIX_MAX_BGUSER =
-                CONFIG_KEY_PREFIX_CONCURRENCY + "max_bguser_";
-        private static final String KEY_PREFIX_MAX_BGUSER_IMPORTANT =
-                CONFIG_KEY_PREFIX_CONCURRENCY + "max_bguser_important_";
-        private static final String KEY_PREFIX_MIN_TOP = CONFIG_KEY_PREFIX_CONCURRENCY + "min_top_";
-        private static final String KEY_PREFIX_MIN_FGS = CONFIG_KEY_PREFIX_CONCURRENCY + "min_fgs_";
-        private static final String KEY_PREFIX_MIN_EJ = CONFIG_KEY_PREFIX_CONCURRENCY + "min_ej_";
-        private static final String KEY_PREFIX_MIN_BG = CONFIG_KEY_PREFIX_CONCURRENCY + "min_bg_";
-        private static final String KEY_PREFIX_MIN_BGUSER =
-                CONFIG_KEY_PREFIX_CONCURRENCY + "min_bguser_";
-        private static final String KEY_PREFIX_MIN_BGUSER_IMPORTANT =
-                CONFIG_KEY_PREFIX_CONCURRENCY + "min_bguser_important_";
+        @VisibleForTesting
+        static final String KEY_PREFIX_MAX_RATIO = KEY_PREFIX_MAX + "ratio_";
+        private static final String KEY_PREFIX_MAX_RATIO_TOP = KEY_PREFIX_MAX_RATIO + "top_";
+        private static final String KEY_PREFIX_MAX_RATIO_FGS = KEY_PREFIX_MAX_RATIO + "fgs_";
+        private static final String KEY_PREFIX_MAX_RATIO_EJ = KEY_PREFIX_MAX_RATIO + "ej_";
+        private static final String KEY_PREFIX_MAX_RATIO_BG = KEY_PREFIX_MAX_RATIO + "bg_";
+        private static final String KEY_PREFIX_MAX_RATIO_BGUSER = KEY_PREFIX_MAX_RATIO + "bguser_";
+        private static final String KEY_PREFIX_MAX_RATIO_BGUSER_IMPORTANT =
+                KEY_PREFIX_MAX_RATIO + "bguser_important_";
+        @VisibleForTesting
+        static final String KEY_PREFIX_MIN_RATIO = KEY_PREFIX_MIN + "ratio_";
+        private static final String KEY_PREFIX_MIN_RATIO_TOP = KEY_PREFIX_MIN_RATIO + "top_";
+        private static final String KEY_PREFIX_MIN_RATIO_FGS = KEY_PREFIX_MIN_RATIO + "fgs_";
+        private static final String KEY_PREFIX_MIN_RATIO_EJ = KEY_PREFIX_MIN_RATIO + "ej_";
+        private static final String KEY_PREFIX_MIN_RATIO_BG = KEY_PREFIX_MIN_RATIO + "bg_";
+        private static final String KEY_PREFIX_MIN_RATIO_BGUSER = KEY_PREFIX_MIN_RATIO + "bguser_";
+        private static final String KEY_PREFIX_MIN_RATIO_BGUSER_IMPORTANT =
+                KEY_PREFIX_MIN_RATIO + "bguser_important_";
         private final String mConfigIdentifier;
 
         private int mMaxTotal;
         private final SparseIntArray mMinReservedSlots = new SparseIntArray(NUM_WORK_TYPES);
         private final SparseIntArray mMaxAllowedSlots = new SparseIntArray(NUM_WORK_TYPES);
         private final int mDefaultMaxTotal;
-        private final SparseIntArray mDefaultMinReservedSlots = new SparseIntArray(NUM_WORK_TYPES);
-        private final SparseIntArray mDefaultMaxAllowedSlots = new SparseIntArray(NUM_WORK_TYPES);
+        // We use SparseIntArrays to store floats because there is currently no SparseFloatArray
+        // available, and it doesn't seem worth it to add such a data structure just for this
+        // use case. We don't use SparseDoubleArrays because DeviceConfig only supports floats and
+        // converting between floats and ints is more straightforward than floats and doubles.
+        private final SparseIntArray mDefaultMinReservedSlotsRatio =
+                new SparseIntArray(NUM_WORK_TYPES);
+        private final SparseIntArray mDefaultMaxAllowedSlotsRatio =
+                new SparseIntArray(NUM_WORK_TYPES);
 
-        WorkTypeConfig(@NonNull String configIdentifier, int defaultMaxTotal,
-                List<Pair<Integer, Integer>> defaultMin, List<Pair<Integer, Integer>> defaultMax) {
+        WorkTypeConfig(@NonNull String configIdentifier,
+                int steadyStateConcurrencyLimit, int defaultMaxTotal,
+                List<Pair<Integer, Float>> defaultMinRatio,
+                List<Pair<Integer, Float>> defaultMaxRatio) {
             mConfigIdentifier = configIdentifier;
-            mDefaultMaxTotal = mMaxTotal = Math.min(defaultMaxTotal, STANDARD_CONCURRENCY_LIMIT);
+            mDefaultMaxTotal = mMaxTotal = Math.min(defaultMaxTotal, steadyStateConcurrencyLimit);
             int numReserved = 0;
-            for (int i = defaultMin.size() - 1; i >= 0; --i) {
-                mDefaultMinReservedSlots.put(defaultMin.get(i).first, defaultMin.get(i).second);
-                numReserved += defaultMin.get(i).second;
+            for (int i = defaultMinRatio.size() - 1; i >= 0; --i) {
+                final float ratio = defaultMinRatio.get(i).second;
+                final int wt = defaultMinRatio.get(i).first;
+                if (ratio < 0 || 1 <= ratio) {
+                    // 1 means to reserve everything. This shouldn't be allowed.
+                    // We only create new configs on boot, so this should trigger during development
+                    // (before the code gets checked in), so this makes sure the hard-coded defaults
+                    // make sense. DeviceConfig values will be handled gracefully in update().
+                    throw new IllegalArgumentException("Invalid default min ratio: wt=" + wt
+                            + " minRatio=" + ratio);
+                }
+                mDefaultMinReservedSlotsRatio.put(wt, Float.floatToRawIntBits(ratio));
+                numReserved += mMaxTotal * ratio;
             }
             if (mDefaultMaxTotal < 0 || numReserved > mDefaultMaxTotal) {
                 // We only create new configs on boot, so this should trigger during development
                 // (before the code gets checked in), so this makes sure the hard-coded defaults
                 // make sense. DeviceConfig values will be handled gracefully in update().
                 throw new IllegalArgumentException("Invalid default config: t=" + defaultMaxTotal
-                        + " min=" + defaultMin + " max=" + defaultMax);
+                        + " min=" + defaultMinRatio + " max=" + defaultMaxRatio);
             }
-            for (int i = defaultMax.size() - 1; i >= 0; --i) {
-                mDefaultMaxAllowedSlots.put(defaultMax.get(i).first, defaultMax.get(i).second);
+            for (int i = defaultMaxRatio.size() - 1; i >= 0; --i) {
+                final float ratio = defaultMaxRatio.get(i).second;
+                final int wt = defaultMaxRatio.get(i).first;
+                final float minRatio =
+                        Float.intBitsToFloat(mDefaultMinReservedSlotsRatio.get(wt, 0));
+                if (ratio < minRatio || ratio <= 0) {
+                    // Max ratio shouldn't be <= 0 or less than minRatio.
+                    throw new IllegalArgumentException("Invalid default config:"
+                            + " t=" + defaultMaxTotal
+                            + " min=" + defaultMinRatio + " max=" + defaultMaxRatio);
+                }
+                mDefaultMaxAllowedSlotsRatio.put(wt, Float.floatToRawIntBits(ratio));
             }
             update(new DeviceConfig.Properties.Builder(
-                    DeviceConfig.NAMESPACE_JOB_SCHEDULER).build());
+                    DeviceConfig.NAMESPACE_JOB_SCHEDULER).build(), steadyStateConcurrencyLimit);
         }
 
-        void update(@NonNull DeviceConfig.Properties properties) {
-            // Ensure total in the range [1, STANDARD_CONCURRENCY_LIMIT].
-            mMaxTotal = Math.max(1, Math.min(STANDARD_CONCURRENCY_LIMIT,
+        void update(@NonNull DeviceConfig.Properties properties, int steadyStateConcurrencyLimit) {
+            // Ensure total in the range [1, mSteadyStateConcurrencyLimit].
+            mMaxTotal = Math.max(1, Math.min(steadyStateConcurrencyLimit,
                     properties.getInt(KEY_PREFIX_MAX_TOTAL + mConfigIdentifier, mDefaultMaxTotal)));
+
+            final int oneIntBits = Float.floatToIntBits(1);
 
             mMaxAllowedSlots.clear();
             // Ensure they're in the range [1, total].
-            final int maxTop = Math.max(1, Math.min(mMaxTotal,
-                    properties.getInt(KEY_PREFIX_MAX_TOP + mConfigIdentifier,
-                            mDefaultMaxAllowedSlots.get(WORK_TYPE_TOP, mMaxTotal))));
+            final int maxTop = getMaxValue(properties,
+                    KEY_PREFIX_MAX_RATIO_TOP + mConfigIdentifier, WORK_TYPE_TOP, oneIntBits);
             mMaxAllowedSlots.put(WORK_TYPE_TOP, maxTop);
-            final int maxFgs = Math.max(1, Math.min(mMaxTotal,
-                    properties.getInt(KEY_PREFIX_MAX_FGS + mConfigIdentifier,
-                            mDefaultMaxAllowedSlots.get(WORK_TYPE_FGS, mMaxTotal))));
+            final int maxFgs = getMaxValue(properties,
+                    KEY_PREFIX_MAX_RATIO_FGS + mConfigIdentifier, WORK_TYPE_FGS, oneIntBits);
             mMaxAllowedSlots.put(WORK_TYPE_FGS, maxFgs);
-            final int maxEj = Math.max(1, Math.min(mMaxTotal,
-                    properties.getInt(KEY_PREFIX_MAX_EJ + mConfigIdentifier,
-                            mDefaultMaxAllowedSlots.get(WORK_TYPE_EJ, mMaxTotal))));
+            final int maxEj = getMaxValue(properties,
+                    KEY_PREFIX_MAX_RATIO_EJ + mConfigIdentifier, WORK_TYPE_EJ, oneIntBits);
             mMaxAllowedSlots.put(WORK_TYPE_EJ, maxEj);
-            final int maxBg = Math.max(1, Math.min(mMaxTotal,
-                    properties.getInt(KEY_PREFIX_MAX_BG + mConfigIdentifier,
-                            mDefaultMaxAllowedSlots.get(WORK_TYPE_BG, mMaxTotal))));
+            final int maxBg = getMaxValue(properties,
+                    KEY_PREFIX_MAX_RATIO_BG + mConfigIdentifier, WORK_TYPE_BG, oneIntBits);
             mMaxAllowedSlots.put(WORK_TYPE_BG, maxBg);
-            final int maxBgUserImp = Math.max(1, Math.min(mMaxTotal,
-                    properties.getInt(KEY_PREFIX_MAX_BGUSER_IMPORTANT + mConfigIdentifier,
-                            mDefaultMaxAllowedSlots.get(WORK_TYPE_BGUSER_IMPORTANT, mMaxTotal))));
+            final int maxBgUserImp = getMaxValue(properties,
+                    KEY_PREFIX_MAX_RATIO_BGUSER_IMPORTANT + mConfigIdentifier,
+                    WORK_TYPE_BGUSER_IMPORTANT, oneIntBits);
             mMaxAllowedSlots.put(WORK_TYPE_BGUSER_IMPORTANT, maxBgUserImp);
-            final int maxBgUser = Math.max(1, Math.min(mMaxTotal,
-                    properties.getInt(KEY_PREFIX_MAX_BGUSER + mConfigIdentifier,
-                            mDefaultMaxAllowedSlots.get(WORK_TYPE_BGUSER, mMaxTotal))));
+            final int maxBgUser = getMaxValue(properties,
+                    KEY_PREFIX_MAX_RATIO_BGUSER + mConfigIdentifier, WORK_TYPE_BGUSER, oneIntBits);
             mMaxAllowedSlots.put(WORK_TYPE_BGUSER, maxBgUser);
 
             int remaining = mMaxTotal;
             mMinReservedSlots.clear();
             // Ensure top is in the range [1, min(maxTop, total)]
-            final int minTop = Math.max(1, Math.min(Math.min(maxTop, mMaxTotal),
-                    properties.getInt(KEY_PREFIX_MIN_TOP + mConfigIdentifier,
-                            mDefaultMinReservedSlots.get(WORK_TYPE_TOP))));
+            final int minTop = getMinValue(properties,
+                    KEY_PREFIX_MIN_RATIO_TOP + mConfigIdentifier, WORK_TYPE_TOP,
+                    1, Math.min(maxTop, mMaxTotal));
             mMinReservedSlots.put(WORK_TYPE_TOP, minTop);
             remaining -= minTop;
             // Ensure fgs is in the range [0, min(maxFgs, remaining)]
-            final int minFgs = Math.max(0, Math.min(Math.min(maxFgs, remaining),
-                    properties.getInt(KEY_PREFIX_MIN_FGS + mConfigIdentifier,
-                            mDefaultMinReservedSlots.get(WORK_TYPE_FGS))));
+            final int minFgs = getMinValue(properties,
+                    KEY_PREFIX_MIN_RATIO_FGS + mConfigIdentifier, WORK_TYPE_FGS,
+                    0, Math.min(maxFgs, remaining));
             mMinReservedSlots.put(WORK_TYPE_FGS, minFgs);
             remaining -= minFgs;
             // Ensure ej is in the range [0, min(maxEj, remaining)]
-            final int minEj = Math.max(0, Math.min(Math.min(maxEj, remaining),
-                    properties.getInt(KEY_PREFIX_MIN_EJ + mConfigIdentifier,
-                            mDefaultMinReservedSlots.get(WORK_TYPE_EJ))));
+            final int minEj = getMinValue(properties,
+                    KEY_PREFIX_MIN_RATIO_EJ + mConfigIdentifier, WORK_TYPE_EJ,
+                    0, Math.min(maxEj, remaining));
             mMinReservedSlots.put(WORK_TYPE_EJ, minEj);
             remaining -= minEj;
             // Ensure bg is in the range [0, min(maxBg, remaining)]
-            final int minBg = Math.max(0, Math.min(Math.min(maxBg, remaining),
-                    properties.getInt(KEY_PREFIX_MIN_BG + mConfigIdentifier,
-                            mDefaultMinReservedSlots.get(WORK_TYPE_BG))));
+            final int minBg = getMinValue(properties,
+                    KEY_PREFIX_MIN_RATIO_BG + mConfigIdentifier, WORK_TYPE_BG,
+                    0, Math.min(maxBg, remaining));
             mMinReservedSlots.put(WORK_TYPE_BG, minBg);
             remaining -= minBg;
             // Ensure bg user imp is in the range [0, min(maxBgUserImp, remaining)]
-            final int minBgUserImp = Math.max(0, Math.min(Math.min(maxBgUserImp, remaining),
-                    properties.getInt(KEY_PREFIX_MIN_BGUSER_IMPORTANT + mConfigIdentifier,
-                            mDefaultMinReservedSlots.get(WORK_TYPE_BGUSER_IMPORTANT, 0))));
+            final int minBgUserImp = getMinValue(properties,
+                    KEY_PREFIX_MIN_RATIO_BGUSER_IMPORTANT + mConfigIdentifier,
+                    WORK_TYPE_BGUSER_IMPORTANT, 0, Math.min(maxBgUserImp, remaining));
             mMinReservedSlots.put(WORK_TYPE_BGUSER_IMPORTANT, minBgUserImp);
+            remaining -= minBgUserImp;
             // Ensure bg user is in the range [0, min(maxBgUser, remaining)]
-            final int minBgUser = Math.max(0, Math.min(Math.min(maxBgUser, remaining),
-                    properties.getInt(KEY_PREFIX_MIN_BGUSER + mConfigIdentifier,
-                            mDefaultMinReservedSlots.get(WORK_TYPE_BGUSER, 0))));
+            final int minBgUser = getMinValue(properties,
+                    KEY_PREFIX_MIN_RATIO_BGUSER + mConfigIdentifier, WORK_TYPE_BGUSER,
+                    0, Math.min(maxBgUser, remaining));
             mMinReservedSlots.put(WORK_TYPE_BGUSER, minBgUser);
+        }
+
+        /**
+         * Return the calculated max value for the work type.
+         * @param defaultFloatInIntBits A {@code float} value in int bits representation (using
+         *                              {@link Float#floatToIntBits(float)}.
+         */
+        private int getMaxValue(@NonNull DeviceConfig.Properties properties, @NonNull String key,
+                int workType, int defaultFloatInIntBits) {
+            final float maxRatio = Math.min(1, properties.getFloat(key,
+                    Float.intBitsToFloat(
+                            mDefaultMaxAllowedSlotsRatio.get(workType, defaultFloatInIntBits))));
+            // Max values should be in  the range [1, total].
+            return Math.max(1, (int) (mMaxTotal * maxRatio));
+        }
+
+        /**
+         * Return the calculated min value for the work type.
+         */
+        private int getMinValue(@NonNull DeviceConfig.Properties properties, @NonNull String key,
+                int workType, int lowerLimit, int upperLimit) {
+            final float minRatio = Math.min(1,
+                    properties.getFloat(key,
+                            Float.intBitsToFloat(mDefaultMinReservedSlotsRatio.get(workType))));
+            return Math.max(lowerLimit, Math.min(upperLimit, (int) (mMaxTotal * minRatio)));
         }
 
         int getMaxTotal() {
@@ -2179,29 +2282,37 @@ class JobConcurrencyManager {
 
         void dump(IndentingPrintWriter pw) {
             pw.print(KEY_PREFIX_MAX_TOTAL + mConfigIdentifier, mMaxTotal).println();
-            pw.print(KEY_PREFIX_MIN_TOP + mConfigIdentifier, mMinReservedSlots.get(WORK_TYPE_TOP))
+            pw.print(KEY_PREFIX_MIN_RATIO_TOP + mConfigIdentifier,
+                            mMinReservedSlots.get(WORK_TYPE_TOP))
                     .println();
-            pw.print(KEY_PREFIX_MAX_TOP + mConfigIdentifier, mMaxAllowedSlots.get(WORK_TYPE_TOP))
+            pw.print(KEY_PREFIX_MAX_RATIO_TOP + mConfigIdentifier,
+                            mMaxAllowedSlots.get(WORK_TYPE_TOP))
                     .println();
-            pw.print(KEY_PREFIX_MIN_FGS + mConfigIdentifier, mMinReservedSlots.get(WORK_TYPE_FGS))
+            pw.print(KEY_PREFIX_MIN_RATIO_FGS + mConfigIdentifier,
+                            mMinReservedSlots.get(WORK_TYPE_FGS))
                     .println();
-            pw.print(KEY_PREFIX_MAX_FGS + mConfigIdentifier, mMaxAllowedSlots.get(WORK_TYPE_FGS))
+            pw.print(KEY_PREFIX_MAX_RATIO_FGS + mConfigIdentifier,
+                            mMaxAllowedSlots.get(WORK_TYPE_FGS))
                     .println();
-            pw.print(KEY_PREFIX_MIN_EJ + mConfigIdentifier, mMinReservedSlots.get(WORK_TYPE_EJ))
+            pw.print(KEY_PREFIX_MIN_RATIO_EJ + mConfigIdentifier,
+                            mMinReservedSlots.get(WORK_TYPE_EJ))
                     .println();
-            pw.print(KEY_PREFIX_MAX_EJ + mConfigIdentifier, mMaxAllowedSlots.get(WORK_TYPE_EJ))
+            pw.print(KEY_PREFIX_MAX_RATIO_EJ + mConfigIdentifier,
+                            mMaxAllowedSlots.get(WORK_TYPE_EJ))
                     .println();
-            pw.print(KEY_PREFIX_MIN_BG + mConfigIdentifier, mMinReservedSlots.get(WORK_TYPE_BG))
+            pw.print(KEY_PREFIX_MIN_RATIO_BG + mConfigIdentifier,
+                            mMinReservedSlots.get(WORK_TYPE_BG))
                     .println();
-            pw.print(KEY_PREFIX_MAX_BG + mConfigIdentifier, mMaxAllowedSlots.get(WORK_TYPE_BG))
+            pw.print(KEY_PREFIX_MAX_RATIO_BG + mConfigIdentifier,
+                            mMaxAllowedSlots.get(WORK_TYPE_BG))
                     .println();
-            pw.print(KEY_PREFIX_MIN_BGUSER + mConfigIdentifier,
+            pw.print(KEY_PREFIX_MIN_RATIO_BGUSER + mConfigIdentifier,
                     mMinReservedSlots.get(WORK_TYPE_BGUSER_IMPORTANT)).println();
-            pw.print(KEY_PREFIX_MAX_BGUSER + mConfigIdentifier,
+            pw.print(KEY_PREFIX_MAX_RATIO_BGUSER + mConfigIdentifier,
                     mMaxAllowedSlots.get(WORK_TYPE_BGUSER_IMPORTANT)).println();
-            pw.print(KEY_PREFIX_MIN_BGUSER + mConfigIdentifier,
+            pw.print(KEY_PREFIX_MIN_RATIO_BGUSER + mConfigIdentifier,
                     mMinReservedSlots.get(WORK_TYPE_BGUSER)).println();
-            pw.print(KEY_PREFIX_MAX_BGUSER + mConfigIdentifier,
+            pw.print(KEY_PREFIX_MAX_RATIO_BGUSER + mConfigIdentifier,
                     mMaxAllowedSlots.get(WORK_TYPE_BGUSER)).println();
         }
     }

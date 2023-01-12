@@ -78,6 +78,7 @@ public:
                             uirenderer::CanvasPropertyPaint* paint) override;
     virtual void drawRipple(const RippleDrawableParams& params) override;
 
+    virtual void drawLottie(LottieDrawable* lottieDrawable) override;
     virtual void drawVectorDrawable(VectorDrawableRoot* vectorDrawable) override;
 
     virtual void enableZ(bool enableZ) override;

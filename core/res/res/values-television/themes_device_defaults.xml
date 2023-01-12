@@ -14,6 +14,7 @@
      limitations under the License.
 -->
 <resources>
+    <style name="Theme.DeviceDefault.Dialog" parent="Theme.Leanback.Dialog" />
     <style name="Theme.DeviceDefault.Dialog.Alert" parent="Theme.Leanback.Dialog.Alert" />
     <style name="Theme.DeviceDefault.Dialog.AppError" parent="Theme.Leanback.Dialog.AppError" />
     <style name="Theme.DeviceDefault.Light.Dialog.Alert" parent="Theme.Leanback.Dialog.Alert" />

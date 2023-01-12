@@ -1476,20 +1476,15 @@ public class UserManagerService extends IUserManager.Stub {
     @Override
     public void revokeUserAdmin(@UserIdInt int userId) {
         checkManageUserAndAcrossUsersFullPermission("revoke admin privileges");
-
         synchronized (mPackagesLock) {
-            UserInfo info;
             synchronized (mUsersLock) {
-                info = getUserInfoLU(userId);
-            }
-            if (info == null || !info.isAdmin()) {
-                // Exit if no user found with that id, or the user is not an Admin.
-                return;
-            }
-
-            info.flags ^= UserInfo.FLAG_ADMIN;
-            synchronized (mUsersLock) {
-                writeUserLP(getUserDataLU(info.id));
+                UserData user = getUserDataLU(userId);
+                if (user == null || !user.info.isAdmin()) {
+                    // Exit if no user found with that id, or the user is not an Admin.
+                    return;
+                }
+                user.info.flags ^= UserInfo.FLAG_ADMIN;
+                writeUserLP(user);
             }
         }
     }
@@ -1831,23 +1826,6 @@ public class UserManagerService extends IUserManager.Stub {
             return UserHandle.USER_NULL;
         }
         return activityManagerInternal.getCurrentUserId();
-    }
-
-    /**
-     * Gets the current user id, or the target user id in case there is a started user switch.
-     *
-     * @return id of current or target foreground user, or {@link UserHandle#USER_NULL} if
-     * {@link ActivityManagerInternal} is not available yet.
-     */
-    @VisibleForTesting
-    int getCurrentOrTargetUserId() {
-        ActivityManagerInternal activityManagerInternal = getActivityManagerInternal();
-        if (activityManagerInternal == null) {
-            Slog.w(LOG_TAG, "getCurrentOrTargetUserId() called too early, ActivityManagerInternal"
-                    + " is not set yet");
-            return UserHandle.USER_NULL;
-        }
-        return activityManagerInternal.getCurrentUser().id;
     }
 
     /**
@@ -5424,7 +5402,8 @@ public class UserManagerService extends IUserManager.Stub {
         final long ident = Binder.clearCallingIdentity();
         try {
             final UserData userData;
-            if (userId == getCurrentOrTargetUserId()) {
+            int currentUser = getCurrentUserId();
+            if (currentUser == userId) {
                 Slog.w(LOG_TAG, "Current user cannot be removed.");
                 return false;
             }
@@ -7040,6 +7019,16 @@ public class UserManagerService extends IUserManager.Stub {
                 @UserIdInt int profileGroupId, @UserStartMode int userStartMode, int displayId) {
             return mUserVisibilityMediator.assignUserToDisplayOnStart(userId, profileGroupId,
                     userStartMode, displayId);
+        }
+
+        @Override
+        public boolean assignUserToExtraDisplay(int userId, int displayId) {
+            return mUserVisibilityMediator.assignUserToExtraDisplay(userId, displayId);
+        }
+
+        @Override
+        public boolean unassignUserFromExtraDisplay(int userId, int displayId) {
+            return mUserVisibilityMediator.unassignUserFromExtraDisplay(userId, displayId);
         }
 
         @Override

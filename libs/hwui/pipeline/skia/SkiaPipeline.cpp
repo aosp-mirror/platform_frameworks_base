@@ -36,6 +36,7 @@
 #include <SkStream.h>
 #include <SkString.h>
 #include <SkTypeface.h>
+#include "include/gpu/GpuTypes.h" // from Skia
 #include <android-base/properties.h>
 #include <unistd.h>
 
@@ -187,7 +188,7 @@ bool SkiaPipeline::createOrUpdateLayer(RenderNode* node, const DamageAccumulator
         SkSurfaceProps props(0, kUnknown_SkPixelGeometry);
         SkASSERT(mRenderThread.getGrContext() != nullptr);
         node->setLayerSurface(SkSurface::MakeRenderTarget(mRenderThread.getGrContext(),
-                                                          SkBudgeted::kYes, info, 0,
+                                                          skgpu::Budgeted::kYes, info, 0,
                                                           this->getSurfaceOrigin(), &props));
         if (node->getLayerSurface()) {
             // update the transform in window of the layer to reset its origin wrt light source

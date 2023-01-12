@@ -89,25 +89,27 @@ public class BrightLineFalsingManagerTest extends SysuiTestCase {
         mClassifiers.add(mClassifierA);
         when(mFalsingDataProvider.getRecentMotionEvents()).thenReturn(mMotionEventList);
         when(mKeyguardStateController.isShowing()).thenReturn(true);
+        when(mFalsingDataProvider.isFolded()).thenReturn(true);
         mBrightLineFalsingManager = new BrightLineFalsingManager(mFalsingDataProvider,
                 mMetricsLogger, mClassifiers, mSingleTapClassifier, mLongTapClassifier,
                 mDoubleTapClassifier, mHistoryTracker, mKeyguardStateController,
                 mAccessibilityManager, false, mFakeFeatureFlags);
         mFakeFeatureFlags.set(Flags.FALSING_FOR_LONG_TAPS, true);
+        mFakeFeatureFlags.set(Flags.FALSING_OFF_FOR_UNFOLDED, true);
     }
 
     @Test
     public void testA11yDisablesGesture() {
-        assertThat(mBrightLineFalsingManager.isFalseTap(1)).isTrue();
+        assertThat(mBrightLineFalsingManager.isFalseTouch(Classifier.GENERIC)).isTrue();
         when(mAccessibilityManager.isTouchExplorationEnabled()).thenReturn(true);
-        assertThat(mBrightLineFalsingManager.isFalseTap(1)).isFalse();
+        assertThat(mBrightLineFalsingManager.isFalseTouch(Classifier.GENERIC)).isFalse();
     }
 
     @Test
     public void testA11yDisablesTap() {
-        assertThat(mBrightLineFalsingManager.isFalseTouch(Classifier.GENERIC)).isTrue();
+        assertThat(mBrightLineFalsingManager.isFalseTap(1)).isTrue();
         when(mAccessibilityManager.isTouchExplorationEnabled()).thenReturn(true);
-        assertThat(mBrightLineFalsingManager.isFalseTouch(Classifier.GENERIC)).isFalse();
+        assertThat(mBrightLineFalsingManager.isFalseTap(1)).isFalse();
     }
 
 
@@ -178,5 +180,12 @@ public class BrightLineFalsingManagerTest extends SysuiTestCase {
         assertThat(mBrightLineFalsingManager.isFalseTap(1)).isTrue();
         when(mFalsingDataProvider.isA11yAction()).thenReturn(true);
         assertThat(mBrightLineFalsingManager.isFalseTap(1)).isFalse();
+    }
+
+    @Test
+    public void testSkipUnfolded() {
+        assertThat(mBrightLineFalsingManager.isFalseTouch(Classifier.GENERIC)).isTrue();
+        when(mFalsingDataProvider.isFolded()).thenReturn(false);
+        assertThat(mBrightLineFalsingManager.isFalseTouch(Classifier.GENERIC)).isFalse();
     }
 }

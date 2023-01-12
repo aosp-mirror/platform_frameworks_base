@@ -327,7 +327,9 @@ public class ShortcutManagerTest8 extends BaseShortcutManagerTest {
     }
 
     private IntentSender makeResultIntent() {
-        return PendingIntent.getActivity(getTestContext(), 0, new Intent(), PendingIntent.FLAG_MUTABLE_UNAUDITED).getIntentSender();
+        return PendingIntent.getActivity(getTestContext(), 0,
+                new Intent().setPackage(getTestContext().getPackageName()),
+                PendingIntent.FLAG_MUTABLE).getIntentSender();
     }
 
     public void testRequestPinShortcut_withCallback() {

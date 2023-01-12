@@ -28,6 +28,7 @@ import static org.mockito.Mockito.mock;
 import android.app.ActivityTaskManager;
 import android.graphics.Matrix;
 import android.os.IBinder;
+import android.os.LocaleList;
 import android.os.Parcel;
 import android.platform.test.annotations.Presubmit;
 import android.text.TextUtils;
@@ -41,6 +42,7 @@ import org.junit.runner.RunWith;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Locale;
 
 /**
  * Class for testing {@link WindowInfo}.
@@ -48,6 +50,7 @@ import java.util.Arrays;
 @Presubmit
 @RunWith(AndroidJUnit4.class)
 public class WindowInfoTest {
+    private static final LocaleList TEST_LOCALES = new LocaleList(Locale.ROOT);
 
     @SmallTest
     @Test
@@ -129,6 +132,7 @@ public class WindowInfoTest {
         assertTrue(windowinfo.regionInScreen.isEmpty());
         assertEquals(windowinfo.mTransformMatrix.length, 9);
         assertTrue(windowinfo.mMagnificationSpec.isNop());
+        assertEquals(windowinfo.locales, LocaleList.getEmptyLocaleList());
     }
 
     private boolean areWindowsEqual(WindowInfo w1, WindowInfo w2) {
@@ -141,6 +145,7 @@ public class WindowInfoTest {
         equality &= w1.mMagnificationSpec.equals(w2.mMagnificationSpec);
         equality &= Arrays.equals(w1.mTransformMatrix, w2.mTransformMatrix);
         equality &= TextUtils.equals(w1.title, w2.title);
+        equality &= w1.locales.equals(w2.locales);
         return equality;
     }
 
@@ -164,5 +169,6 @@ public class WindowInfoTest {
         windowInfo.mMagnificationSpec.offsetX = 100f;
         windowInfo.mMagnificationSpec.offsetY = 200f;
         Matrix.IDENTITY_MATRIX.getValues(windowInfo.mTransformMatrix);
+        windowInfo.locales = TEST_LOCALES;
     }
 }

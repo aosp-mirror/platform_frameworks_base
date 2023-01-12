@@ -69,6 +69,16 @@ static jboolean android_hardware_OverlayProperties_supportFp16ForHdr(JNIEnv* env
     return false;
 }
 
+static jboolean android_hardware_OverlayProperties_supportMixedColorSpaces(JNIEnv* env,
+                                                                           jobject thiz,
+                                                                           jlong nativeObject) {
+    gui::OverlayProperties* properties = reinterpret_cast<gui::OverlayProperties*>(nativeObject);
+    if (properties != nullptr && properties->supportMixedColorSpaces) {
+        return true;
+    }
+    return false;
+}
+
 // ----------------------------------------------------------------------------
 // Serialization
 // ----------------------------------------------------------------------------
@@ -128,6 +138,8 @@ static const JNINativeMethod gMethods[] = {
     { "nGetDestructor", "()J", (void*) android_hardware_OverlayProperties_getDestructor },
     { "nSupportFp16ForHdr",  "(J)Z",
             (void*)  android_hardware_OverlayProperties_supportFp16ForHdr },
+    { "nSupportMixedColorSpaces", "(J)Z",
+            (void*) android_hardware_OverlayProperties_supportMixedColorSpaces },
     { "nWriteOverlayPropertiesToParcel", "(JLandroid/os/Parcel;)V",
             (void*) android_hardware_OverlayProperties_write },
     { "nReadOverlayPropertiesFromParcel", "(Landroid/os/Parcel;)J",

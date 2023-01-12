@@ -18,6 +18,7 @@ package com.android.server.timedetector;
 
 import android.annotation.IntDef;
 import android.annotation.NonNull;
+import android.annotation.Nullable;
 import android.annotation.UserIdInt;
 import android.app.time.ExternalTimeSuggestion;
 import android.app.time.TimeState;
@@ -102,6 +103,20 @@ public interface TimeDetectorStrategy extends Dumpable {
 
     /** Processes the suggested time from network sources. */
     void suggestNetworkTime(@NonNull NetworkTimeSuggestion timeSuggestion);
+
+    /**
+     * Returns the latest (accepted) network time suggestion. Returns {@code null} if there isn't
+     * one.
+     */
+    @Nullable
+    NetworkTimeSuggestion getLatestNetworkSuggestion();
+
+    /**
+     * Clears the latest network time suggestion, leaving none. The remaining time signals from
+     * other sources will be reassessed causing the device's time to be updated if config and
+     * settings allow.
+     */
+    void clearLatestNetworkSuggestion();
 
     /** Processes the suggested time from gnss sources. */
     void suggestGnssTime(@NonNull GnssTimeSuggestion timeSuggestion);

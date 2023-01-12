@@ -300,6 +300,8 @@ public class PackageSetting extends SettingBase implements PackageStateInternal 
                     installSource.mInitiatingPackageName);
             proto.write(PackageProto.InstallSourceProto.ORIGINATING_PACKAGE_NAME,
                     installSource.mOriginatingPackageName);
+            proto.write(PackageProto.InstallSourceProto.UPDATE_OWNER_PACKAGE_NAME,
+                    installSource.mUpdateOwnerPackageName);
             proto.end(sourceToken);
         }
         proto.write(PackageProto.StatesProto.IS_LOADING, isLoading());
@@ -364,6 +366,12 @@ public class PackageSetting extends SettingBase implements PackageStateInternal 
             int installerPackageUid) {
         installSource = installSource.setInstallerPackage(installerPackageName,
                 installerPackageUid);
+        onChanged();
+        return this;
+    }
+
+    public PackageSetting setUpdateOwnerPackage(@Nullable String updateOwnerPackageName) {
+        installSource = installSource.setUpdateOwnerPackageName(updateOwnerPackageName);
         onChanged();
         return this;
     }

@@ -26,6 +26,8 @@ import android.annotation.DrawableRes;
 import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.annotation.PermissionMethod;
+import android.annotation.PermissionName;
 import android.annotation.RequiresPermission;
 import android.annotation.StringDef;
 import android.annotation.StringRes;
@@ -53,8 +55,6 @@ import android.compat.annotation.EnabledSince;
 import android.compat.annotation.UnsupportedAppUsage;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageManager;
-import android.content.pm.PermissionMethod;
-import android.content.pm.PermissionName;
 import android.content.res.AssetManager;
 import android.content.res.ColorStateList;
 import android.content.res.Configuration;
@@ -408,7 +408,12 @@ public abstract class Context {
      * will cause the isolated service to be co-located in the same shared isolated process.
      *
      * Note that the shared isolated process is scoped to the calling app; once created, only
-     * the calling app can bind additional isolated services into the shared process.
+     * the calling app can bind additional isolated services into the shared process. However,
+     * the services themselves can come from different APKs and therefore different vendors.
+     *
+     * Only services that set the {@link android.R.attr#allowSharedIsolatedProcess} attribute
+     * to {@code true} are allowed to be bound into a shared isolated process.
+     *
      */
     public static final int BIND_SHARED_ISOLATED_PROCESS = 0x00002000;
 

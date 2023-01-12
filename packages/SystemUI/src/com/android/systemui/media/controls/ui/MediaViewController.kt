@@ -24,11 +24,6 @@ import com.android.systemui.R
 import com.android.systemui.media.controls.models.GutsViewHolder
 import com.android.systemui.media.controls.models.player.MediaViewHolder
 import com.android.systemui.media.controls.models.recommendation.RecommendationViewHolder
-import com.android.systemui.media.controls.ui.MediaCarouselController.Companion.CONTROLS_DELAY
-import com.android.systemui.media.controls.ui.MediaCarouselController.Companion.DETAILS_DELAY
-import com.android.systemui.media.controls.ui.MediaCarouselController.Companion.DURATION
-import com.android.systemui.media.controls.ui.MediaCarouselController.Companion.MEDIACONTAINERS_DELAY
-import com.android.systemui.media.controls.ui.MediaCarouselController.Companion.MEDIATITLES_DELAY
 import com.android.systemui.media.controls.ui.MediaCarouselController.Companion.calculateAlpha
 import com.android.systemui.statusbar.policy.ConfigurationController
 import com.android.systemui.util.animation.MeasurementOutput
@@ -36,6 +31,8 @@ import com.android.systemui.util.animation.TransitionLayout
 import com.android.systemui.util.animation.TransitionLayoutController
 import com.android.systemui.util.animation.TransitionViewState
 import com.android.systemui.util.traceSection
+import java.lang.Float.max
+import java.lang.Float.min
 import javax.inject.Inject
 
 /**
@@ -80,6 +77,7 @@ constructor(
             setOf(
                 R.id.header_title,
                 R.id.header_artist,
+                R.id.media_explicit_indicator,
                 R.id.actionPlayPause,
             )
 
@@ -304,39 +302,106 @@ constructor(
         val squishedViewState = viewState.copy()
         val squishedHeight = (squishedViewState.measureHeight * squishFraction).toInt()
         squishedViewState.height = squishedHeight
-        controlIds.forEach { id ->
-            squishedViewState.widgetStates.get(id)?.let { state ->
-                state.alpha = calculateAlpha(squishFraction, CONTROLS_DELAY, DURATION)
-            }
-        }
-
-        detailIds.forEach { id ->
-            squishedViewState.widgetStates.get(id)?.let { state ->
-                state.alpha = calculateAlpha(squishFraction, DETAILS_DELAY, DURATION)
-            }
-        }
-
         // We are not overriding the squishedViewStates height but only the children to avoid
         // them remeasuring the whole view. Instead it just remains as the original size
         backgroundIds.forEach { id ->
-            squishedViewState.widgetStates.get(id)?.let { state ->
-                state.height = squishedHeight
-            }
+            squishedViewState.widgetStates.get(id)?.let { state -> state.height = squishedHeight }
         }
 
-        RecommendationViewHolder.mediaContainersIds.forEach { id ->
-            squishedViewState.widgetStates.get(id)?.let { state ->
-                state.alpha = calculateAlpha(squishFraction, MEDIACONTAINERS_DELAY, DURATION)
-            }
-        }
-
-        RecommendationViewHolder.mediaTitlesAndSubtitlesIds.forEach { id ->
-            squishedViewState.widgetStates.get(id)?.let { state ->
-                state.alpha = calculateAlpha(squishFraction, MEDIATITLES_DELAY, DURATION)
-            }
-        }
-
+        // media player
+        val controlsTop =
+            calculateWidgetGroupAlphaForSquishiness(
+                controlIds,
+                squishedViewState.measureHeight.toFloat(),
+                squishedViewState,
+                squishFraction
+            )
+        calculateWidgetGroupAlphaForSquishiness(
+            detailIds,
+            controlsTop,
+            squishedViewState,
+            squishFraction
+        )
+        // recommendation card
+        val titlesTop =
+            calculateWidgetGroupAlphaForSquishiness(
+                RecommendationViewHolder.mediaTitlesAndSubtitlesIds,
+                squishedViewState.measureHeight.toFloat(),
+                squishedViewState,
+                squishFraction
+            )
+        calculateWidgetGroupAlphaForSquishiness(
+            RecommendationViewHolder.mediaContainersIds,
+            titlesTop,
+            squishedViewState,
+            squishFraction
+        )
         return squishedViewState
+    }
+
+    /**
+     * This function is to make each widget in UMO disappear before being clipped by squished UMO
+     *
+     * The general rule is that widgets in UMO has been divided into several groups, and widgets in
+     * one group have the same alpha during squishing It will change from alpha 0.0 when the visible
+     * bottom of UMO reach the bottom of this group It will change to alpha 1.0 when the visible
+     * bottom of UMO reach the top of the group below e.g.Album title, artist title and play-pause
+     * button will change alpha together.
+     * ```
+     *     And their alpha becomes 1.0 when the visible bottom of UMO reach the top of controls,
+     *     including progress bar, next button, previous button
+     * ```
+     * widgetGroupIds: a group of widgets have same state during UMO is squished,
+     * ```
+     *     e.g. Album title, artist title and play-pause button
+     * ```
+     * groupEndPosition: the height of UMO, when the height reaches this value,
+     * ```
+     *     widgets in this group should have 1.0 as alpha
+     *     e.g., the group of album title, artist title and play-pause button will become fully
+     *         visible when the height of UMO reaches the top of controls group
+     *         (progress bar, previous button and next button)
+     * ```
+     * squishedViewState: hold the widgetState of each widget, which will be modified
+     * squishFraction: the squishFraction of UMO
+     */
+    private fun calculateWidgetGroupAlphaForSquishiness(
+        widgetGroupIds: Set<Int>,
+        groupEndPosition: Float,
+        squishedViewState: TransitionViewState,
+        squishFraction: Float
+    ): Float {
+        val nonsquishedHeight = squishedViewState.measureHeight
+        var groupTop = squishedViewState.measureHeight.toFloat()
+        var groupBottom = 0F
+        widgetGroupIds.forEach { id ->
+            squishedViewState.widgetStates.get(id)?.let { state ->
+                groupTop = min(groupTop, state.y)
+                groupBottom = max(groupBottom, state.y + state.height)
+            }
+        }
+        // startPosition means to the height of squished UMO where the widget alpha should start
+        // changing from 0.0
+        // generally, it equals to the bottom of widgets, so that we can meet the requirement that
+        // widget should not go beyond the bounds of background
+        // endPosition means to the height of squished UMO where the widget alpha should finish
+        // changing alpha to 1.0
+        var startPosition = groupBottom
+        val endPosition = groupEndPosition
+        if (startPosition == endPosition) {
+            startPosition = (endPosition - 0.2 * (groupBottom - groupTop)).toFloat()
+        }
+        widgetGroupIds.forEach { id ->
+            squishedViewState.widgetStates.get(id)?.let { state ->
+                state.alpha =
+                    calculateAlpha(
+                        squishFraction,
+                        startPosition / nonsquishedHeight,
+                        endPosition / nonsquishedHeight
+                    )
+            }
+        }
+        return groupTop // used for the widget group above this group
     }
 
     /**
@@ -544,11 +609,13 @@ constructor(
         overrideSize?.let {
             // To be safe we're using a maximum here. The override size should always be set
             // properly though.
-            if (result.measureHeight != it.measuredHeight
-                    || result.measureWidth != it.measuredWidth) {
+            if (
+                result.measureHeight != it.measuredHeight || result.measureWidth != it.measuredWidth
+            ) {
                 result.measureHeight = Math.max(it.measuredHeight, result.measureHeight)
                 result.measureWidth = Math.max(it.measuredWidth, result.measureWidth)
-                // The measureHeight and the shown height should both be set to the overridden height
+                // The measureHeight and the shown height should both be set to the overridden
+                // height
                 result.height = result.measureHeight
                 result.width = result.measureWidth
                 // Make sure all background views are also resized such that their size is correct

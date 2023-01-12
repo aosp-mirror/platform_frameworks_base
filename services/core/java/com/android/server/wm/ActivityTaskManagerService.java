@@ -859,6 +859,8 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
             mRecentTasks.onSystemReadyLocked();
             mTaskSupervisor.onSystemReady();
             mActivityClientController.onSystemReady();
+            // TODO(b/258792202) Cleanup once ASM is ready to launch
+            ActivitySecurityModelFeatureFlags.initialize(mContext.getMainExecutor(), pm);
         }
     }
 
@@ -1495,7 +1497,7 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
         a.persistableMode = ActivityInfo.PERSIST_NEVER;
         a.screenOrientation = ActivityInfo.SCREEN_ORIENTATION_UNSPECIFIED;
         a.colorMode = ActivityInfo.COLOR_MODE_DEFAULT;
-        a.flags |= ActivityInfo.FLAG_EXCLUDE_FROM_RECENTS;
+        a.flags |= ActivityInfo.FLAG_EXCLUDE_FROM_RECENTS | ActivityInfo.FLAG_NO_HISTORY;
         a.resizeMode = RESIZE_MODE_UNRESIZEABLE;
         a.configChanges = 0xffffffff;
 

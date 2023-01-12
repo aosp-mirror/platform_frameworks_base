@@ -4981,6 +4981,7 @@ public class ComputerEngine implements Computer {
         String installerPackageName;
         String initiatingPackageName;
         String originatingPackageName;
+        String updateOwnerPackageName;
 
         final InstallSource installSource = getInstallSource(packageName, callingUid, userId);
         if (installSource == null) {
@@ -4993,6 +4994,15 @@ public class ComputerEngine implements Computer {
             if (ps == null
                     || shouldFilterApplicationIncludingUninstalled(ps, callingUid, userId)) {
                 installerPackageName = null;
+            }
+        }
+
+        updateOwnerPackageName = installSource.mUpdateOwnerPackageName;
+        if (updateOwnerPackageName != null) {
+            final PackageStateInternal ps = mSettings.getPackage(updateOwnerPackageName);
+            if (ps == null
+                    || shouldFilterApplicationIncludingUninstalled(ps, callingUid, userId)) {
+                updateOwnerPackageName = null;
             }
         }
 
@@ -5052,7 +5062,8 @@ public class ComputerEngine implements Computer {
         }
 
         return new InstallSourceInfo(initiatingPackageName, initiatingPackageSigningInfo,
-                originatingPackageName, installerPackageName, installSource.mPackageSource);
+                originatingPackageName, installerPackageName, updateOwnerPackageName,
+                installSource.mPackageSource);
     }
 
     @PackageManager.EnabledState

@@ -81,7 +81,7 @@ static std::map<int, int> TOOL_TYPE_MAPPING = {
 static std::map<int, int> DPAD_KEY_CODE_MAPPING = {
         {AKEYCODE_DPAD_DOWN, KEY_DOWN},     {AKEYCODE_DPAD_UP, KEY_UP},
         {AKEYCODE_DPAD_LEFT, KEY_LEFT},     {AKEYCODE_DPAD_RIGHT, KEY_RIGHT},
-        {AKEYCODE_DPAD_CENTER, KEY_SELECT},
+        {AKEYCODE_DPAD_CENTER, KEY_SELECT}, {AKEYCODE_BACK, KEY_BACK},
 };
 
 // Keycode mapping from https://source.android.com/devices/input/keyboard-devices
@@ -378,7 +378,7 @@ static bool writeKeyEvent(jint fd, jint androidKeyCode, jint action,
                           const std::map<int, int>& keyCodeMapping) {
     auto keyCodeIterator = keyCodeMapping.find(androidKeyCode);
     if (keyCodeIterator == keyCodeMapping.end()) {
-        ALOGE("No supportive native keycode for androidKeyCode %d", androidKeyCode);
+        ALOGE("Unsupported native keycode for androidKeyCode %d", androidKeyCode);
         return false;
     }
     auto actionIterator = KEY_ACTION_MAPPING.find(action);

@@ -178,8 +178,6 @@ import com.android.systemui.volume.VolumeComponent;
 import com.android.wm.shell.bubbles.Bubbles;
 import com.android.wm.shell.startingsurface.StartingSurface;
 
-import dagger.Lazy;
-
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -191,6 +189,8 @@ import org.mockito.MockitoAnnotations;
 import java.io.ByteArrayOutputStream;
 import java.io.PrintWriter;
 import java.util.Optional;
+
+import dagger.Lazy;
 
 @SmallTest
 @RunWith(AndroidTestingRunner.class)
@@ -380,7 +380,8 @@ public class CentralSurfacesImplTest extends SysuiTestCase {
         }).when(mStatusBarKeyguardViewManager).addAfterKeyguardGoneRunnable(any());
 
         mWakefulnessLifecycle =
-                new WakefulnessLifecycle(mContext, mIWallpaperManager, mDumpManager);
+                new WakefulnessLifecycle(mContext, mIWallpaperManager, mFakeSystemClock,
+                        mDumpManager);
         mWakefulnessLifecycle.dispatchStartedWakingUp(PowerManager.WAKE_REASON_UNKNOWN);
         mWakefulnessLifecycle.dispatchFinishedWakingUp();
 

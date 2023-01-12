@@ -22,6 +22,8 @@ import android.annotation.IntDef;
 import android.annotation.IntRange;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.annotation.PermissionMethod;
+import android.annotation.PermissionName;
 import android.annotation.RequiresPermission;
 import android.annotation.SdkConstant;
 import android.annotation.SdkConstant.SdkConstantType;
@@ -48,7 +50,6 @@ import android.content.Intent;
 import android.content.pm.ActivityInfo;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageManager;
-import android.content.pm.PermissionName;
 import android.content.pm.ResolveInfo;
 import android.content.res.Configuration;
 import android.content.res.Resources;
@@ -9986,11 +9987,10 @@ public final class Settings {
                 "fingerprint_side_fps_auth_downtime";
 
         /**
-         * Whether or not a SFPS device is required to be interactive for auth to unlock the device.
+         * Whether or not a SFPS device is enabling the performant auth setting.
          * @hide
          */
-        public static final String SFPS_REQUIRE_SCREEN_ON_TO_AUTH_ENABLED =
-                "sfps_require_screen_on_to_auth_enabled";
+        public static final String SFPS_PERFORMANT_AUTH_ENABLED = "sfps_performant_auth_enabled";
 
         /**
          * Whether or not debugging is enabled.
@@ -18503,6 +18503,8 @@ public final class Settings {
          * @see #checkCallingPermission
          * @hide
          */
+        @PermissionMethod(orSelf = true)
+        @PackageManager.PermissionResult
         public static int checkCallingOrSelfPermission(@NonNull @PermissionName String permission) {
             return ActivityThread.currentApplication()
                .getApplicationContext().checkCallingOrSelfPermission(permission);

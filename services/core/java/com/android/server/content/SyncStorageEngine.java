@@ -21,6 +21,7 @@ import static com.android.server.content.SyncLogger.logSafe;
 import android.accounts.Account;
 import android.accounts.AccountAndUser;
 import android.accounts.AccountManager;
+import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.app.backup.BackupManager;
 import android.content.ComponentName;
@@ -572,6 +573,11 @@ public class SyncStorageEngine {
             throw new IllegalStateException("not initialized");
         }
         return sSyncStorageEngine;
+    }
+
+    @NonNull
+    File getSyncDir() {
+        return mSyncDir;
     }
 
     protected void setOnSyncRequestListener(OnSyncRequestListener listener) {

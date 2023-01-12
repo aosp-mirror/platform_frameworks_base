@@ -138,6 +138,6 @@ public final class ClearRequestSession extends RequestSession<ClearCredentialSta
             }
         }
         // TODO: Replace with properly defined error type
-        respondToClientWithErrorAndFinish("unknown", "All providers failed");
+        respondToClientWithErrorAndFinish("UNKNOWN", "All providers failed");
     }
 }

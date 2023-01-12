@@ -316,6 +316,21 @@ public final class TimeDetectorStrategyImpl implements TimeDetectorStrategy {
     }
 
     @Override
+    @Nullable
+    public synchronized NetworkTimeSuggestion getLatestNetworkSuggestion() {
+        return mLastNetworkSuggestion.get();
+    }
+
+    @Override
+    public synchronized void clearLatestNetworkSuggestion() {
+        mLastNetworkSuggestion.set(null);
+
+        // The loss of network time may change the time signal to use to set the system clock.
+        String reason = "Network time cleared";
+        doAutoTimeDetection(reason);
+    }
+
+    @Override
     @NonNull
     public synchronized TimeState getTimeState() {
         boolean userShouldConfirmTime = mEnvironment.systemClockConfidence() < TIME_CONFIDENCE_HIGH;
@@ -1061,15 +1076,6 @@ public final class TimeDetectorStrategyImpl implements TimeDetectorStrategy {
     @Nullable
     public synchronized TelephonyTimeSuggestion getLatestTelephonySuggestion(int slotIndex) {
         return mSuggestionBySlotIndex.get(slotIndex);
-    }
-
-    /**
-     * A method used to inspect state during tests. Not intended for general use.
-     */
-    @VisibleForTesting
-    @Nullable
-    public synchronized NetworkTimeSuggestion getLatestNetworkSuggestion() {
-        return mLastNetworkSuggestion.get();
     }
 
     /**

@@ -85,6 +85,7 @@ public class DexManagerTests {
 
     private final Object mInstallLock = new Object();
 
+    private DynamicCodeLogger mDynamicCodeLogger;
     private DexManager mDexManager;
 
     private TestData mFooUser0;
@@ -158,8 +159,9 @@ public class DexManagerTests {
             .when(mockContext)
                 .getSystemService(PowerManager.class);
 
-        mDexManager = new DexManager(mockContext, /*PackageDexOptimizer*/ null,
-                mInstaller, mInstallLock, mPM);
+        mDynamicCodeLogger = new DynamicCodeLogger(mInstaller);
+        mDexManager = new DexManager(mockContext, /*PackageDexOptimizer*/ null, mInstaller,
+                mInstallLock, mDynamicCodeLogger, mPM);
 
         // Foo and Bar are available to user0.
         // Only Bar is available to user1;
@@ -452,6 +454,7 @@ public class DexManagerTests {
         notifyDexLoad(mBarUser1, mBarUser1.getSecondaryDexPaths(), mUser1);
 
         mDexManager.notifyPackageDataDestroyed(mBarUser0.getPackageName(), mUser0);
+        mDynamicCodeLogger.notifyPackageDataDestroyed(mBarUser0.getPackageName(), mUser0);
 
         // Data for user 1 should still be present
         PackageUseInfo pui = getPackageUseInfo(mBarUser1);
@@ -474,6 +477,7 @@ public class DexManagerTests {
         notifyDexLoad(mBarUser0, mFooUser0.getBaseAndSplitDexPaths(), mUser0);
 
         mDexManager.notifyPackageDataDestroyed(mFooUser0.getPackageName(), mUser0);
+        mDynamicCodeLogger.notifyPackageDataDestroyed(mFooUser0.getPackageName(), mUser0);
 
         // Foo should still be around since it's used by other apps but with no
         // secondary dex info.
@@ -491,6 +495,7 @@ public class DexManagerTests {
         notifyDexLoad(mFooUser0, fooSecondaries, mUser0);
 
         mDexManager.notifyPackageDataDestroyed(mFooUser0.getPackageName(), mUser0);
+        mDynamicCodeLogger.notifyPackageDataDestroyed(mFooUser0.getPackageName(), mUser0);
 
         // Foo should not be around since all its secondary dex info were deleted
         // and it is not used by other apps.
@@ -505,6 +510,8 @@ public class DexManagerTests {
         notifyDexLoad(mBarUser1, mBarUser1.getSecondaryDexPaths(), mUser1);
 
         mDexManager.notifyPackageDataDestroyed(mBarUser0.getPackageName(), UserHandle.USER_ALL);
+        mDynamicCodeLogger.notifyPackageDataDestroyed(
+                mBarUser0.getPackageName(), UserHandle.USER_ALL);
 
         // Bar should not be around since it was removed for all users.
         assertNoUseInfo(mBarUser0);
@@ -906,8 +913,7 @@ public class DexManagerTests {
     }
 
     private PackageDynamicCode getPackageDynamicCodeInfo(TestData testData) {
-        return mDexManager.getDynamicCodeLogger()
-                .getPackageDynamicCodeInfo(testData.getPackageName());
+        return mDynamicCodeLogger.getPackageDynamicCodeInfo(testData.getPackageName());
     }
 
     private void assertNoUseInfo(TestData testData) {

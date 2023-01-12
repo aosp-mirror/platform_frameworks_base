@@ -144,7 +144,7 @@ public final class ProviderGetSession extends ProviderSession<BeginGetCredential
 
     public ProviderGetSession(Context context,
             CredentialProviderInfo info,
-            ProviderInternalCallback callbacks,
+            ProviderInternalCallback<GetCredentialResponse> callbacks,
             int userId, RemoteCredentialService remoteCredentialService,
             BeginGetCredentialRequest beginGetRequest,
             android.credentials.GetCredentialRequest completeGetRequest) {
@@ -195,9 +195,7 @@ public final class ProviderGetSession extends ProviderSession<BeginGetCredential
                 CredentialEntry credentialEntry = mUiCredentialEntries.get(entryKey);
                 if (credentialEntry == null) {
                     Log.i(TAG, "Unexpected credential entry key");
-                    // TODO("Replace with no credentials/unknown exception")
-                    invokeCallbackWithError("unknown_type",
-                            "Issue while retrieving credential");
+                    invokeCallbackOnInternalInvalidState();
                     return;
                 }
                 onCredentialEntrySelected(credentialEntry, providerPendingIntentResponse);
@@ -206,9 +204,7 @@ public final class ProviderGetSession extends ProviderSession<BeginGetCredential
                 Action actionEntry = mUiActionsEntries.get(entryKey);
                 if (actionEntry == null) {
                     Log.i(TAG, "Unexpected action entry key");
-                    // TODO("Replace with no credentials/unknown exception")
-                    invokeCallbackWithError("unknown_type",
-                            "Issue while retrieving credential");
+                    invokeCallbackOnInternalInvalidState();
                     return;
                 }
                 onActionEntrySelected(providerPendingIntentResponse);
@@ -218,9 +214,7 @@ public final class ProviderGetSession extends ProviderSession<BeginGetCredential
                     onAuthenticationEntrySelected(providerPendingIntentResponse);
                 } else {
                     Log.i(TAG, "Unexpected authentication entry key");
-                    // TODO("Replace with no credentials/unknown exception")
-                    invokeCallbackWithError("unknown_type",
-                            "Issue while retrieving credential");
+                    invokeCallbackOnInternalInvalidState();
                 }
                 break;
             case REMOTE_ENTRY_KEY:
@@ -228,19 +222,12 @@ public final class ProviderGetSession extends ProviderSession<BeginGetCredential
                     onRemoteEntrySelected(providerPendingIntentResponse);
                 } else {
                     Log.i(TAG, "Unexpected remote entry key");
-                    // TODO("Replace with no credentials/unknown exception")
-                    invokeCallbackWithError("unknown_type",
-                            "Issue while retrieving credential");
+                    invokeCallbackOnInternalInvalidState();
                 }
                 break;
             default:
                 Log.i(TAG, "Unsupported entry type selected");
         }
-    }
-
-    private void invokeCallbackWithError(String errorType, @Nullable String errorMessage) {
-        // TODO: Determine what the error message should be
-        mCallbacks.onFinalErrorReceived(mComponentName, errorType, errorMessage);
     }
 
     @Override // Call from request session to data to be shown on the UI
@@ -369,14 +356,10 @@ public final class ProviderGetSession extends ProviderSession<BeginGetCredential
             }
 
             Log.i(TAG, "Pending intent response contains no credential, or error");
-            // TODO("Replace with no credentials/unknown error when ready)
-            invokeCallbackWithError("unknown_type",
-                    "Issue while retrieving credential");
+            invokeCallbackOnInternalInvalidState();
         }
         Log.i(TAG, "CredentialEntry does not have a credential or a pending intent result");
-        // TODO("Replace with no credentials/unknown error when ready)
-        invokeCallbackWithError("unknown_type",
-                "Error encountered while retrieving the credential");
+        invokeCallbackOnInternalInvalidState();
     }
 
     private void onAuthenticationEntrySelected(
@@ -401,9 +384,7 @@ public final class ProviderGetSession extends ProviderSession<BeginGetCredential
         }
 
         Log.i(TAG, "No error or respond found in pending intent response");
-        // TODO("Replace with no credentials/unknown error when ready)
-        invokeCallbackWithError("unknown type", "Issue"
-                + " while retrieving credential");
+        invokeCallbackOnInternalInvalidState();
     }
 
     private void onActionEntrySelected(ProviderPendingIntentResponse
@@ -430,7 +411,7 @@ public final class ProviderGetSession extends ProviderSession<BeginGetCredential
             ProviderPendingIntentResponse pendingIntentResponse) {
         if (pendingIntentResponse == null) {
             Log.i(TAG, "pendingIntentResponse is null");
-            return null;
+            return new GetCredentialException(GetCredentialException.TYPE_NO_CREDENTIAL);
         }
         if (PendingIntentResultHandler.isValidResponse(pendingIntentResponse)) {
             GetCredentialException exception = PendingIntentResultHandler
@@ -441,9 +422,19 @@ public final class ProviderGetSession extends ProviderSession<BeginGetCredential
             }
         } else {
             Log.i(TAG, "Pending intent result code not Activity.RESULT_OK");
-            // TODO("Update with unknown exception when ready")
-            return new GetCredentialException("unknown");
+            return new GetCredentialException(GetCredentialException.TYPE_NO_CREDENTIAL);
         }
         return null;
+    }
+
+    /**
+     * When an invalid state occurs, e.g. entry mismatch or no response from provider,
+     * we send back a TYPE_NO_CREDENTIAL error as to the developer, it is the same as not
+     * getting any credentials back.
+     */
+    private void invokeCallbackOnInternalInvalidState() {
+        mCallbacks.onFinalErrorReceived(mComponentName,
+                GetCredentialException.TYPE_NO_CREDENTIAL,
+                null);
     }
 }

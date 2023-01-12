@@ -37,6 +37,11 @@
     <string name="install_confirm_question">Do you want to install this app?</string>
     <!-- Message for updating an existing app [CHAR LIMIT=NONE] -->
     <string name="install_confirm_question_update">Do you want to update this app?</string>
+    <!-- TODO(b/244413073) Revise the description after getting UX input and UXR on this. -->
+    <!-- Message for updating an existing app when updating owner changed [CHAR LIMIT=NONE] -->
+    <string name="install_confirm_question_update_owner_changed">Updates to this app are currently managed by <xliff:g id="existing_update_owner">%1$s</xliff:g>.\n\nBy updating, you\'ll get future updates from <xliff:g id="new_update_owner">%2$s</xliff:g> instead.</string>
+    <!-- Message for updating an existing app with update owner reminder [CHAR LIMIT=NONE] -->
+    <string name="install_confirm_question_update_owner_reminder">Updates to this app are currently managed by <xliff:g id="existing_update_owner">%1$s</xliff:g>.\n\nDo you want to install this update from <xliff:g id="new_update_owner">%2$s</xliff:g>.</string>
     <!-- [CHAR LIMIT=100] -->
     <string name="install_failed">App not installed.</string>
     <!-- Reason displayed when installation fails because the package was blocked

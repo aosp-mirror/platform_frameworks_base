@@ -30,6 +30,7 @@ import android.content.res.Configuration;
 import android.graphics.Rect;
 import android.os.Bundle;
 import android.os.IBinder;
+import android.util.DisplayMetrics;
 import android.util.LayoutDirection;
 import android.util.Pair;
 import android.util.Size;
@@ -555,9 +556,9 @@ class SplitPresenter extends JetpackTaskFragmentOrganizer {
         final Function<SplitAttributesCalculatorParams, SplitAttributes> calculator =
                 mController.getSplitAttributesCalculator();
         final SplitAttributes defaultSplitAttributes = rule.getDefaultSplitAttributes();
-        final boolean isDefaultMinSizeSatisfied = rule.checkParentMetrics(taskWindowMetrics);
+        final boolean areDefaultConstraintsSatisfied = rule.checkParentMetrics(taskWindowMetrics);
         if (calculator == null) {
-            if (!isDefaultMinSizeSatisfied) {
+            if (!areDefaultConstraintsSatisfied) {
                 return EXPAND_CONTAINERS_ATTRIBUTES;
             }
             return sanitizeSplitAttributes(taskProperties, defaultSplitAttributes,
@@ -567,8 +568,8 @@ class SplitPresenter extends JetpackTaskFragmentOrganizer {
                 .getCurrentWindowLayoutInfo(taskProperties.getDisplayId(),
                         taskConfiguration.windowConfiguration);
         final SplitAttributesCalculatorParams params = new SplitAttributesCalculatorParams(
-                taskWindowMetrics, taskConfiguration, defaultSplitAttributes,
-                isDefaultMinSizeSatisfied, windowLayoutInfo, rule.getTag());
+                taskWindowMetrics, taskConfiguration, windowLayoutInfo, defaultSplitAttributes,
+                areDefaultConstraintsSatisfied, rule.getTag());
         final SplitAttributes splitAttributes = calculator.apply(params);
         return sanitizeSplitAttributes(taskProperties, splitAttributes, minDimensionsPair);
     }
@@ -972,6 +973,7 @@ class SplitPresenter extends JetpackTaskFragmentOrganizer {
     private static WindowMetrics getTaskWindowMetrics(@NonNull Configuration taskConfiguration) {
         final Rect taskBounds = taskConfiguration.windowConfiguration.getBounds();
         // TODO(b/190433398): Supply correct insets.
-        return new WindowMetrics(taskBounds, WindowInsets.CONSUMED);
+        final float density = taskConfiguration.densityDpi * DisplayMetrics.DENSITY_DEFAULT_SCALE;
+        return new WindowMetrics(taskBounds, WindowInsets.CONSUMED, density);
     }
 }

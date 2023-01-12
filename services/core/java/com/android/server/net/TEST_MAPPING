@@ -15,7 +15,7 @@
   "presubmit": [
     {
       "name": "FrameworksServicesTests",
-      "file_patterns": ["(/|^)NetworkPolicy[^/]*\\.java"],
+      "file_patterns": ["(/|^)Network(Policy|Management)[^/]*\\.java"],
       "options": [
         {
           "include-filter": "com.android.server.net."

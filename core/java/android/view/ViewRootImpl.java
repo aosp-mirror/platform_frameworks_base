@@ -1110,6 +1110,8 @@ public final class ViewRootImpl implements ViewParent,
         // Update the last resource config in case the resource configuration was changed while
         // activity relaunched.
         updateLastConfigurationFromResources(getConfiguration());
+        // Make sure to report the completion of draw for relaunch with preserved window.
+        reportNextDraw("rebuilt");
     }
 
     private Configuration getConfiguration() {
@@ -1424,7 +1426,7 @@ public final class ViewRootImpl implements ViewParent,
                 != AccessibilityWindowInfo.UNDEFINED_WINDOW_ID;
         if (registered) {
             final AccessibilityWindowAttributes attributes = new AccessibilityWindowAttributes(
-                    mWindowAttributes);
+                    mWindowAttributes, mContext.getResources().getConfiguration().getLocales());
             if (!attributes.equals(mAccessibilityWindowAttributes)) {
                 mAccessibilityWindowAttributes = attributes;
                 mAccessibilityManager.setAccessibilityWindowAttributes(getDisplayId(),
