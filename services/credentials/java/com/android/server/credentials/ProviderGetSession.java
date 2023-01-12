@@ -275,7 +275,8 @@ public final class ProviderGetSession extends ProviderSession<BeginGetCredential
         String entryId = generateEntryId();
         Entry authEntry = new Entry(
                 AUTHENTICATION_ACTION_ENTRY_KEY, entryId,
-                authenticationAction.getSlice());
+                authenticationAction.getSlice(),
+                setUpFillInIntentForAuthentication());
         mUiAuthenticationAction = new Pair<>(entryId, authenticationAction);
         return authEntry;
     }
@@ -308,6 +309,15 @@ public final class ProviderGetSession extends ProviderSession<BeginGetCredential
                 return intent;
             }
         }
+        return intent;
+    }
+
+    private Intent setUpFillInIntentForAuthentication() {
+        Intent intent = new Intent();
+        intent.putExtra(
+                CredentialProviderService
+                        .EXTRA_BEGIN_GET_CREDENTIAL_REQUEST,
+                mProviderRequest);
         return intent;
     }
 
@@ -365,7 +375,6 @@ public final class ProviderGetSession extends ProviderSession<BeginGetCredential
     private void onAuthenticationEntrySelected(
             @Nullable ProviderPendingIntentResponse providerPendingIntentResponse) {
         //TODO: Other provider intent statuses
-        // Check if pending intent has an error
         GetCredentialException exception = maybeGetPendingIntentException(
                 providerPendingIntentResponse);
         if (exception != null) {

@@ -18,7 +18,6 @@ package com.android.server.credentials;
 
 import android.annotation.NonNull;
 import android.annotation.UserIdInt;
-import android.content.ComponentName;
 import android.content.Context;
 import android.credentials.ui.ProviderData;
 import android.credentials.ui.UserSelectionDialogResult;
@@ -98,41 +97,6 @@ abstract class RequestSession<T, U> implements CredentialManagerUi.CredentialMan
         finishSession();
     }
 
-    protected void onProviderStatusChanged(ProviderSession.Status status,
-            ComponentName componentName) {
-        Log.i(TAG, "in onStatusChanged with status: " + status);
-        if (ProviderSession.isTerminatingStatus(status)) {
-            Log.i(TAG, "in onStatusChanged terminating status");
-            onProviderTerminated(componentName);
-            //TODO: Check if this was the provider we were waiting for and can invoke the UI now
-        } else if (ProviderSession.isCompletionStatus(status)) {
-            Log.i(TAG, "in onStatusChanged isCompletionStatus status");
-            onProviderResponseComplete(componentName);
-        } else if (ProviderSession.isUiInvokingStatus(status)) {
-            Log.i(TAG, "in onStatusChanged isUiInvokingStatus status");
-            onProviderResponseRequiresUi();
-        }
-    }
-
-    protected void onProviderTerminated(ComponentName componentName) {
-        //TODO: Implement
-    }
-
-    protected void onProviderResponseComplete(ComponentName componentName) {
-        //TODO: Implement
-    }
-
-    protected void onProviderResponseRequiresUi() {
-        Log.i(TAG, "in onProviderResponseComplete");
-        // TODO: Determine whether UI has already been invoked, and deal accordingly
-        if (!isAnyProviderPending()) {
-            Log.i(TAG, "in onProviderResponseComplete - isResponseCompleteAcrossProviders");
-            getProviderDataAndInitiateUi();
-        } else {
-            Log.i(TAG, "Can't invoke UI - waiting on some providers");
-        }
-    }
-
     protected void finishSession() {
         Log.i(TAG, "finishing session");
         clearProviderSessions();
@@ -144,7 +108,7 @@ abstract class RequestSession<T, U> implements CredentialManagerUi.CredentialMan
         mProviders.clear();
     }
 
-    boolean isAnyProviderPending() {
+    protected boolean isAnyProviderPending() {
         for (ProviderSession session : mProviders.values()) {
             if (ProviderSession.isStatusWaitingForRemoteResponse(session.getStatus())) {
                 return true;
@@ -153,7 +117,22 @@ abstract class RequestSession<T, U> implements CredentialManagerUi.CredentialMan
         return false;
     }
 
-    private void getProviderDataAndInitiateUi() {
+    /**
+     * Returns true if at least one provider is ready for UI invocation, and no
+     * provider is pending a response.
+     */
+    boolean isUiInvocationNeeded() {
+        for (ProviderSession session : mProviders.values()) {
+            if (ProviderSession.isUiInvokingStatus(session.getStatus())) {
+                return true;
+            } else if (ProviderSession.isStatusWaitingForRemoteResponse(session.getStatus())) {
+                return false;
+            }
+        }
+        return false;
+    }
+
+    void getProviderDataAndInitiateUi() {
         Log.i(TAG, "In getProviderDataAndInitiateUi");
         Log.i(TAG, "In getProviderDataAndInitiateUi providers size: " + mProviders.size());
 

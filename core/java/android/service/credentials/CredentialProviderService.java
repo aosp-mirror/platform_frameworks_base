@@ -125,6 +125,33 @@ public abstract class CredentialProviderService extends Service {
     public static final String EXTRA_CREATE_CREDENTIAL_EXCEPTION =
             "android.service.credentials.extra.CREATE_CREDENTIAL_EXCEPTION";
 
+    /**
+     * Intent extra: The {@link BeginGetCredentialRequest} attached with
+     * the {@code pendingIntent} that is invoked when the user selects an
+     * authentication entry (intending to unlock the provider app) on the UI.
+     *
+     * <p>When a provider app receives a {@link BeginGetCredentialRequest} through the
+     * {@link CredentialProviderService#onBeginGetCredential} call, it can construct the
+     * {@link BeginGetCredentialResponse} with either an authentication {@link Action} (if the app
+     * is locked), or a {@link CredentialsResponseContent} (if the app is unlocked). In the former
+     * case, i.e. the app is locked, user will be shown the authentication action. When selected,
+     * the underlying {@link PendingIntent} will be invoked which will lead the user to provider's
+     * unlock activity. This pending intent will also contain the original
+     * {@link BeginGetCredentialRequest} to be retrieved and processed after the unlock
+     * flow is complete.
+     *
+     * <p>After the app is unlocked, the {@link BeginGetCredentialResponse} must be constructed
+     * using a {@link CredentialsResponseContent}, which must be set on an {@link Intent} as an
+     * intent extra against CredentialProviderService#EXTRA_CREDENTIALS_RESPONSE_CONTENT}.
+     * This intent should then be set as a result through {@link android.app.Activity#setResult}
+     * before finishing the activity.
+     *
+     * <p>
+     * Type: {@link BeginGetCredentialRequest}
+     */
+    public static final String EXTRA_BEGIN_GET_CREDENTIAL_REQUEST =
+            "android.service.credentials.extra.BEGIN_GET_CREDENTIAL_REQUEST";
+
     private static final String TAG = "CredProviderService";
 
     public static final String CAPABILITY_META_DATA_KEY = "android.credentials.capabilities";

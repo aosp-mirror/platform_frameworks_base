@@ -44,6 +44,7 @@ import com.android.credentialmanager.jetpack.developer.CreatePasswordRequest
 import com.android.credentialmanager.jetpack.developer.CreatePublicKeyCredentialRequest
 import com.android.credentialmanager.jetpack.developer.PublicKeyCredential.Companion.TYPE_PUBLIC_KEY_CREDENTIAL
 import com.android.credentialmanager.jetpack.provider.Action
+import com.android.credentialmanager.jetpack.provider.AuthenticationAction
 import com.android.credentialmanager.jetpack.provider.CredentialCountInformation
 import com.android.credentialmanager.jetpack.provider.CredentialEntry
 import com.android.credentialmanager.jetpack.provider.CreateEntry
@@ -140,16 +141,20 @@ class GetFlowUtils {
             providerIcon: Drawable,
             authEntry: Entry?,
     ): AuthenticationEntryInfo? {
-      // TODO: should also call fromSlice after getting the official jetpack code.
-
       if (authEntry == null) {
         return null
       }
+      val authStructuredEntry = AuthenticationAction.fromSlice(
+              authEntry!!.slice)
+      if (authStructuredEntry == null) {
+        return null
+      }
+
       return AuthenticationEntryInfo(
               providerId = providerId,
               entryKey = authEntry.key,
               entrySubkey = authEntry.subkey,
-              pendingIntent = authEntry.pendingIntent,
+              pendingIntent = authStructuredEntry.pendingIntent,
               fillInIntent = authEntry.frameworkExtrasIntent,
               title = providerDisplayName,
               icon = providerIcon,
