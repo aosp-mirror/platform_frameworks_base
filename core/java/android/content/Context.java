@@ -6859,6 +6859,26 @@ public abstract class Context {
             @CreatePackageOptions int flags) throws PackageManager.NameNotFoundException;
 
     /**
+     * Creates a context given an {@link android.content.pm.ApplicationInfo}.
+     *
+     * Context created is for an sdk library that is being loaded in sdk sandbox.
+     *
+     * @param sdkInfo information regarding the sdk library being loaded.
+     *
+     * @throws PackageManager.NameNotFoundException if there is no application with
+     * the given package name.
+     * @throws SecurityException if caller is not a SdkSandbox process.
+     *
+     * @hide
+     */
+    @SystemApi(client = SystemApi.Client.MODULE_LIBRARIES)
+    @NonNull
+    public Context createContextForSdkInSandbox(@NonNull ApplicationInfo sdkInfo,
+            @CreatePackageOptions int flags) throws PackageManager.NameNotFoundException {
+        throw new RuntimeException("Not implemented. Must override in a subclass.");
+    }
+
+    /**
      * Return a new Context object for the given split name. The new Context has a ClassLoader and
      * Resources object that can access the split's and all of its dependencies' code/resources.
      * Each call to this method returns a new instance of a Context object;

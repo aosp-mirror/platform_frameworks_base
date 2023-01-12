@@ -1073,6 +1073,15 @@ public class ContextWrapper extends Context {
 
     /** @hide */
     @Override
+    @SystemApi(client = SystemApi.Client.MODULE_LIBRARIES)
+    @NonNull
+    public Context createContextForSdkInSandbox(@NonNull ApplicationInfo sdkInfo, int flags)
+            throws PackageManager.NameNotFoundException {
+        return mBase.createContextForSdkInSandbox(sdkInfo, flags);
+    }
+
+    /** @hide */
+    @Override
     public Context createContextForSplit(String splitName)
             throws PackageManager.NameNotFoundException {
         return mBase.createContextForSplit(splitName);

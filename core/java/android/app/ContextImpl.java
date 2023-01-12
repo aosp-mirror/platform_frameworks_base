@@ -2582,6 +2582,22 @@ class ContextImpl extends Context {
     }
 
     @Override
+    public Context createContextForSdkInSandbox(ApplicationInfo sdkInfo, int flags)
+            throws NameNotFoundException {
+        if (!Process.isSdkSandbox()) {
+            throw new SecurityException("API can only be called from SdkSandbox process");
+        }
+
+        ContextImpl ctx = (ContextImpl) createApplicationContext(sdkInfo, flags);
+
+        // Set sandbox app's context as the application context for sdk context
+        ctx.mPackageInfo.makeApplicationInner(/*forceDefaultAppClass=*/false,
+                /*instrumentation=*/null);
+
+        return ctx;
+    }
+
+    @Override
     public Context createPackageContext(String packageName, int flags)
             throws NameNotFoundException {
         return createPackageContextAsUser(packageName, flags, mUser);
