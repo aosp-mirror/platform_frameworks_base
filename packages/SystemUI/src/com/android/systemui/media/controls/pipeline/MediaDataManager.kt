@@ -848,7 +848,7 @@ class MediaDataManager(
                     notificationKey = key,
                     hasCheckedForResume = hasCheckedForResume,
                     isPlaying = isPlaying,
-                    isClearable = sbn.isClearable(),
+                    isClearable = !sbn.isOngoing,
                     lastActive = lastActive,
                     instanceId = instanceId,
                     appUid = appUid
