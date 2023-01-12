@@ -2975,18 +2975,11 @@ package android.companion {
   }
 
   public final class CompanionDeviceManager {
-    method @RequiresPermission("android.permission.MANAGE_COMPANION_DEVICES") public void addOnAssociationsChangedListener(@NonNull java.util.concurrent.Executor, @NonNull android.companion.CompanionDeviceManager.OnAssociationsChangedListener);
     method @RequiresPermission(android.Manifest.permission.ASSOCIATE_COMPANION_DEVICES) public void associate(@NonNull String, @NonNull android.net.MacAddress, @NonNull byte[]);
     method @RequiresPermission("android.permission.MANAGE_COMPANION_DEVICES") public boolean canPairWithoutPrompt(@NonNull String, @NonNull String, @NonNull android.os.UserHandle);
-    method @NonNull @RequiresPermission("android.permission.MANAGE_COMPANION_DEVICES") public java.util.List<android.companion.AssociationInfo> getAllAssociations();
     method @RequiresPermission("android.permission.MANAGE_COMPANION_DEVICES") public boolean isDeviceAssociatedForWifiConnection(@NonNull String, @NonNull android.net.MacAddress, @NonNull android.os.UserHandle);
     method @RequiresPermission(android.Manifest.permission.REQUEST_COMPANION_SELF_MANAGED) public void notifyDeviceAppeared(int);
     method @RequiresPermission(android.Manifest.permission.REQUEST_COMPANION_SELF_MANAGED) public void notifyDeviceDisappeared(int);
-    method @RequiresPermission("android.permission.MANAGE_COMPANION_DEVICES") public void removeOnAssociationsChangedListener(@NonNull android.companion.CompanionDeviceManager.OnAssociationsChangedListener);
-  }
-
-  public static interface CompanionDeviceManager.OnAssociationsChangedListener {
-    method public void onAssociationsChanged(@NonNull java.util.List<android.companion.AssociationInfo>);
   }
 
 }
