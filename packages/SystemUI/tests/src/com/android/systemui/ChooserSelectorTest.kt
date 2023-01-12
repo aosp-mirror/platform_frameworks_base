@@ -148,7 +148,7 @@ class ChooserSelectorTest : SysuiTestCase() {
 
         // Act
         whenever(mockFeatureFlags.isEnabled(any<UnreleasedFlag>())).thenReturn(true)
-        flagListener.value.onFlagChanged(TestFlagEvent(Flags.CHOOSER_UNBUNDLED.id))
+        flagListener.value.onFlagChanged(TestFlagEvent(Flags.CHOOSER_UNBUNDLED.name))
 
         // Assert
         verify(mockPackageManager, times(2)).setComponentEnabledSetting(
@@ -175,7 +175,7 @@ class ChooserSelectorTest : SysuiTestCase() {
 
         // Act
         whenever(mockFeatureFlags.isEnabled(any<UnreleasedFlag>())).thenReturn(false)
-        flagListener.value.onFlagChanged(TestFlagEvent(Flags.CHOOSER_UNBUNDLED.id))
+        flagListener.value.onFlagChanged(TestFlagEvent(Flags.CHOOSER_UNBUNDLED.name))
 
         // Assert
         verify(mockPackageManager, times(2)).setComponentEnabledSetting(
@@ -198,13 +198,13 @@ class ChooserSelectorTest : SysuiTestCase() {
 
         // Act
         whenever(mockFeatureFlags.isEnabled(any<UnreleasedFlag>())).thenReturn(false)
-        flagListener.value.onFlagChanged(TestFlagEvent(Flags.CHOOSER_UNBUNDLED.id + 1))
+        flagListener.value.onFlagChanged(TestFlagEvent("other flag"))
 
         // Assert
         verifyZeroInteractions(mockPackageManager)
     }
 
-    private class TestFlagEvent(override val flagId: Int) : FlagListenable.FlagEvent {
+    private class TestFlagEvent(override val flagName: String) : FlagListenable.FlagEvent {
         override fun requestNoRestart() {}
     }
 }

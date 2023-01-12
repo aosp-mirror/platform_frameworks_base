@@ -23,12 +23,11 @@ import android.content.res.Resources
 import android.content.res.Resources.NotFoundException
 import android.test.suitebuilder.annotation.SmallTest
 import com.android.systemui.SysuiTestCase
-import com.android.systemui.statusbar.commandline.CommandRegistry
-import com.android.systemui.util.DeviceConfigProxyFake
 import com.android.systemui.util.mockito.any
 import com.android.systemui.util.mockito.eq
 import com.android.systemui.util.mockito.nullable
 import com.android.systemui.util.mockito.withArgCaptor
+import com.android.systemui.util.settings.GlobalSettings
 import com.android.systemui.util.settings.SecureSettings
 import com.google.common.truth.Truth.assertThat
 import org.junit.Assert
@@ -62,21 +61,20 @@ class FeatureFlagsDebugTest : SysuiTestCase() {
     @Mock
     private lateinit var mockContext: Context
     @Mock
+    private lateinit var globalSettings: GlobalSettings
+    @Mock
     private lateinit var secureSettings: SecureSettings
     @Mock
     private lateinit var systemProperties: SystemPropertiesHelper
     @Mock
     private lateinit var resources: Resources
     @Mock
-    private lateinit var commandRegistry: CommandRegistry
-    @Mock
     private lateinit var restarter: Restarter
-    private val flagMap = mutableMapOf<Int, Flag<*>>()
+    private val flagMap = mutableMapOf<String, Flag<*>>()
     private lateinit var broadcastReceiver: BroadcastReceiver
-    private lateinit var clearCacheAction: Consumer<Int>
+    private lateinit var clearCacheAction: Consumer<String>
     private val serverFlagReader = ServerFlagReaderFake()
 
-    private val deviceConfig = DeviceConfigProxyFake()
     private val teamfoodableFlagA = UnreleasedFlag(
         500, name = "a", namespace = "test", teamfood = true
     )
@@ -87,11 +85,13 @@ class FeatureFlagsDebugTest : SysuiTestCase() {
     @Before
     fun setup() {
         MockitoAnnotations.initMocks(this)
-        flagMap.put(teamfoodableFlagA.id, teamfoodableFlagA)
-        flagMap.put(teamfoodableFlagB.id, teamfoodableFlagB)
+        flagMap.put(Flags.TEAMFOOD.name, Flags.TEAMFOOD)
+        flagMap.put(teamfoodableFlagA.name, teamfoodableFlagA)
+        flagMap.put(teamfoodableFlagB.name, teamfoodableFlagB)
         mFeatureFlagsDebug = FeatureFlagsDebug(
             flagManager,
             mockContext,
+            globalSettings,
             secureSettings,
             systemProperties,
             resources,
@@ -110,14 +110,14 @@ class FeatureFlagsDebugTest : SysuiTestCase() {
         clearCacheAction = withArgCaptor {
             verify(flagManager).clearCacheAction = capture()
         }
-        whenever(flagManager.idToSettingsKey(any())).thenAnswer { "key-${it.arguments[0]}" }
+        whenever(flagManager.nameToSettingsKey(any())).thenAnswer { "key-${it.arguments[0]}" }
     }
 
     @Test
     fun readBooleanFlag() {
         // Remember that the TEAMFOOD flag is id#1 and has special behavior.
-        whenever(flagManager.readFlagValue<Boolean>(eq(3), any())).thenReturn(true)
-        whenever(flagManager.readFlagValue<Boolean>(eq(4), any())).thenReturn(false)
+        whenever(flagManager.readFlagValue<Boolean>(eq("3"), any())).thenReturn(true)
+        whenever(flagManager.readFlagValue<Boolean>(eq("4"), any())).thenReturn(false)
 
         assertThat(
             mFeatureFlagsDebug.isEnabled(
@@ -141,7 +141,7 @@ class FeatureFlagsDebugTest : SysuiTestCase() {
             mFeatureFlagsDebug.isEnabled(
                 ReleasedFlag(
                     4,
-                    name = "3",
+                    name = "4",
                     namespace = "test"
                 )
             )
@@ -150,7 +150,7 @@ class FeatureFlagsDebugTest : SysuiTestCase() {
             mFeatureFlagsDebug.isEnabled(
                 UnreleasedFlag(
                     5,
-                    name = "4",
+                    name = "5",
                     namespace = "test"
                 )
             )
@@ -159,7 +159,8 @@ class FeatureFlagsDebugTest : SysuiTestCase() {
 
     @Test
     fun teamFoodFlag_False() {
-        whenever(flagManager.readFlagValue<Boolean>(eq(1), any())).thenReturn(false)
+        whenever(flagManager.readFlagValue<Boolean>(
+            eq(Flags.TEAMFOOD.name), any())).thenReturn(false)
         assertThat(mFeatureFlagsDebug.isEnabled(teamfoodableFlagA)).isFalse()
         assertThat(mFeatureFlagsDebug.isEnabled(teamfoodableFlagB)).isTrue()
 
@@ -170,7 +171,8 @@ class FeatureFlagsDebugTest : SysuiTestCase() {
 
     @Test
     fun teamFoodFlag_True() {
-        whenever(flagManager.readFlagValue<Boolean>(eq(1), any())).thenReturn(true)
+        whenever(flagManager.readFlagValue<Boolean>(
+            eq(Flags.TEAMFOOD.name), any())).thenReturn(true)
         assertThat(mFeatureFlagsDebug.isEnabled(teamfoodableFlagA)).isTrue()
         assertThat(mFeatureFlagsDebug.isEnabled(teamfoodableFlagB)).isTrue()
 
@@ -181,11 +183,12 @@ class FeatureFlagsDebugTest : SysuiTestCase() {
 
     @Test
     fun teamFoodFlag_Overridden() {
-        whenever(flagManager.readFlagValue<Boolean>(eq(teamfoodableFlagA.id), any()))
+        whenever(flagManager.readFlagValue<Boolean>(eq(teamfoodableFlagA.name), any()))
             .thenReturn(true)
-        whenever(flagManager.readFlagValue<Boolean>(eq(teamfoodableFlagB.id), any()))
+        whenever(flagManager.readFlagValue<Boolean>(eq(teamfoodableFlagB.name), any()))
             .thenReturn(false)
-        whenever(flagManager.readFlagValue<Boolean>(eq(1), any())).thenReturn(true)
+        whenever(flagManager.readFlagValue<Boolean>(
+            eq(Flags.TEAMFOOD.name), any())).thenReturn(true)
         assertThat(mFeatureFlagsDebug.isEnabled(teamfoodableFlagA)).isTrue()
         assertThat(mFeatureFlagsDebug.isEnabled(teamfoodableFlagB)).isFalse()
 
@@ -202,8 +205,8 @@ class FeatureFlagsDebugTest : SysuiTestCase() {
         whenever(resources.getBoolean(1004)).thenAnswer { throw NameNotFoundException() }
         whenever(resources.getBoolean(1005)).thenAnswer { throw NameNotFoundException() }
 
-        whenever(flagManager.readFlagValue<Boolean>(eq(3), any())).thenReturn(true)
-        whenever(flagManager.readFlagValue<Boolean>(eq(5), any())).thenReturn(false)
+        whenever(flagManager.readFlagValue<Boolean>(eq("3"), any())).thenReturn(true)
+        whenever(flagManager.readFlagValue<Boolean>(eq("5"), any())).thenReturn(false)
 
         assertThat(
             mFeatureFlagsDebug.isEnabled(
@@ -255,8 +258,8 @@ class FeatureFlagsDebugTest : SysuiTestCase() {
 
     @Test
     fun readStringFlag() {
-        whenever(flagManager.readFlagValue<String>(eq(3), any())).thenReturn("foo")
-        whenever(flagManager.readFlagValue<String>(eq(4), any())).thenReturn("bar")
+        whenever(flagManager.readFlagValue<String>(eq("3"), any())).thenReturn("foo")
+        whenever(flagManager.readFlagValue<String>(eq("4"), any())).thenReturn("bar")
         assertThat(mFeatureFlagsDebug.getString(StringFlag(1, "1", "test", "biz"))).isEqualTo("biz")
         assertThat(mFeatureFlagsDebug.getString(StringFlag(2, "2", "test", "baz"))).isEqualTo("baz")
         assertThat(mFeatureFlagsDebug.getString(StringFlag(3, "3", "test", "buz"))).isEqualTo("foo")
@@ -272,9 +275,9 @@ class FeatureFlagsDebugTest : SysuiTestCase() {
         whenever(resources.getString(1005)).thenAnswer { throw NameNotFoundException() }
         whenever(resources.getString(1006)).thenAnswer { throw NameNotFoundException() }
 
-        whenever(flagManager.readFlagValue<String>(eq(3), any())).thenReturn("override3")
-        whenever(flagManager.readFlagValue<String>(eq(4), any())).thenReturn("override4")
-        whenever(flagManager.readFlagValue<String>(eq(6), any())).thenReturn("override6")
+        whenever(flagManager.readFlagValue<String>(eq("3"), any())).thenReturn("override3")
+        whenever(flagManager.readFlagValue<String>(eq("4"), any())).thenReturn("override4")
+        whenever(flagManager.readFlagValue<String>(eq("6"), any())).thenReturn("override6")
 
         assertThat(
             mFeatureFlagsDebug.getString(
@@ -322,8 +325,8 @@ class FeatureFlagsDebugTest : SysuiTestCase() {
 
     @Test
     fun readIntFlag() {
-        whenever(flagManager.readFlagValue<Int>(eq(3), any())).thenReturn(22)
-        whenever(flagManager.readFlagValue<Int>(eq(4), any())).thenReturn(48)
+        whenever(flagManager.readFlagValue<Int>(eq("3"), any())).thenReturn(22)
+        whenever(flagManager.readFlagValue<Int>(eq("4"), any())).thenReturn(48)
         assertThat(mFeatureFlagsDebug.getInt(IntFlag(1, "1", "test", 12))).isEqualTo(12)
         assertThat(mFeatureFlagsDebug.getInt(IntFlag(2, "2", "test", 93))).isEqualTo(93)
         assertThat(mFeatureFlagsDebug.getInt(IntFlag(3, "3", "test", 8))).isEqualTo(22)
@@ -368,12 +371,12 @@ class FeatureFlagsDebugTest : SysuiTestCase() {
         broadcastReceiver.onReceive(mockContext, Intent())
         broadcastReceiver.onReceive(mockContext, Intent("invalid action"))
         broadcastReceiver.onReceive(mockContext, Intent(FlagManager.ACTION_SET_FLAG))
-        setByBroadcast(0, false) // unknown id does nothing
-        setByBroadcast(1, "string") // wrong type does nothing
-        setByBroadcast(2, 123) // wrong type does nothing
-        setByBroadcast(3, false) // wrong type does nothing
-        setByBroadcast(4, 123) // wrong type does nothing
-        verifyNoMoreInteractions(flagManager, secureSettings)
+        setByBroadcast("0", false) // unknown id does nothing
+        setByBroadcast("1", "string") // wrong type does nothing
+        setByBroadcast("2", 123) // wrong type does nothing
+        setByBroadcast("3", false) // wrong type does nothing
+        setByBroadcast("4", 123) // wrong type does nothing
+        verifyNoMoreInteractions(flagManager, globalSettings)
     }
 
     @Test
@@ -383,16 +386,16 @@ class FeatureFlagsDebugTest : SysuiTestCase() {
         // trying to erase an id not in the map does nothing
         broadcastReceiver.onReceive(
             mockContext,
-            Intent(FlagManager.ACTION_SET_FLAG).putExtra(FlagManager.EXTRA_ID, 0)
+            Intent(FlagManager.ACTION_SET_FLAG).putExtra(FlagManager.EXTRA_NAME, "")
         )
-        verifyNoMoreInteractions(flagManager, secureSettings)
+        verifyNoMoreInteractions(flagManager, globalSettings)
 
         // valid id with no value puts empty string in the setting
         broadcastReceiver.onReceive(
             mockContext,
-            Intent(FlagManager.ACTION_SET_FLAG).putExtra(FlagManager.EXTRA_ID, 1)
+            Intent(FlagManager.ACTION_SET_FLAG).putExtra(FlagManager.EXTRA_NAME, "1")
         )
-        verifyPutData(1, "", numReads = 0)
+        verifyPutData("1", "", numReads = 0)
     }
 
     @Test
@@ -402,51 +405,51 @@ class FeatureFlagsDebugTest : SysuiTestCase() {
         addFlag(ResourceBooleanFlag(3, "3", "test", 1003))
         addFlag(ResourceBooleanFlag(4, "4", "test", 1004))
 
-        setByBroadcast(1, false)
-        verifyPutData(1, "{\"type\":\"boolean\",\"value\":false}")
+        setByBroadcast("1", false)
+        verifyPutData("1", "{\"type\":\"boolean\",\"value\":false}")
 
-        setByBroadcast(2, true)
-        verifyPutData(2, "{\"type\":\"boolean\",\"value\":true}")
+        setByBroadcast("2", true)
+        verifyPutData("2", "{\"type\":\"boolean\",\"value\":true}")
 
-        setByBroadcast(3, false)
-        verifyPutData(3, "{\"type\":\"boolean\",\"value\":false}")
+        setByBroadcast("3", false)
+        verifyPutData("3", "{\"type\":\"boolean\",\"value\":false}")
 
-        setByBroadcast(4, true)
-        verifyPutData(4, "{\"type\":\"boolean\",\"value\":true}")
+        setByBroadcast("4", true)
+        verifyPutData("4", "{\"type\":\"boolean\",\"value\":true}")
     }
 
     @Test
     fun setStringFlag() {
-        addFlag(StringFlag(1, "flag1", "1", "test"))
+        addFlag(StringFlag(1, "1", "1", "test"))
         addFlag(ResourceStringFlag(2, "2", "test", 1002))
 
-        setByBroadcast(1, "override1")
-        verifyPutData(1, "{\"type\":\"string\",\"value\":\"override1\"}")
+        setByBroadcast("1", "override1")
+        verifyPutData("1", "{\"type\":\"string\",\"value\":\"override1\"}")
 
-        setByBroadcast(2, "override2")
-        verifyPutData(2, "{\"type\":\"string\",\"value\":\"override2\"}")
+        setByBroadcast("2", "override2")
+        verifyPutData("2", "{\"type\":\"string\",\"value\":\"override2\"}")
     }
 
     @Test
     fun setFlag_ClearsCache() {
         val flag1 = addFlag(StringFlag(1, "1", "test", "flag1"))
-        whenever(flagManager.readFlagValue<String>(eq(1), any())).thenReturn("original")
+        whenever(flagManager.readFlagValue<String>(eq("1"), any())).thenReturn("original")
 
         // gets the flag & cache it
         assertThat(mFeatureFlagsDebug.getString(flag1)).isEqualTo("original")
-        verify(flagManager).readFlagValue(eq(1), eq(StringFlagSerializer))
+        verify(flagManager, times(1)).readFlagValue(eq("1"), eq(StringFlagSerializer))
 
         // hit the cache
         assertThat(mFeatureFlagsDebug.getString(flag1)).isEqualTo("original")
         verifyNoMoreInteractions(flagManager)
 
         // set the flag
-        setByBroadcast(1, "new")
-        verifyPutData(1, "{\"type\":\"string\",\"value\":\"new\"}", numReads = 2)
-        whenever(flagManager.readFlagValue<String>(eq(1), any())).thenReturn("new")
+        setByBroadcast("1", "new")
+        verifyPutData("1", "{\"type\":\"string\",\"value\":\"new\"}", numReads = 2)
+        whenever(flagManager.readFlagValue<String>(eq("1"), any())).thenReturn("new")
 
         assertThat(mFeatureFlagsDebug.getString(flag1)).isEqualTo("new")
-        verify(flagManager, times(3)).readFlagValue(eq(1), eq(StringFlagSerializer))
+        verify(flagManager, times(3)).readFlagValue(eq("1"), eq(StringFlagSerializer))
     }
 
     @Test
@@ -463,7 +466,6 @@ class FeatureFlagsDebugTest : SysuiTestCase() {
         val flag = UnreleasedFlag(100, name = "100", namespace = "test")
 
         serverFlagReader.setFlagValue(flag.namespace, flag.name, true)
-
         assertThat(mFeatureFlagsDebug.isEnabled(flag)).isTrue()
     }
 
@@ -503,26 +505,26 @@ class FeatureFlagsDebugTest : SysuiTestCase() {
         assertThat(dump).contains(" sysui_flag_7: [length=9] \"override7\"\n")
     }
 
-    private fun verifyPutData(id: Int, data: String, numReads: Int = 1) {
-        inOrder(flagManager, secureSettings).apply {
-            verify(flagManager, times(numReads)).readFlagValue(eq(id), any<FlagSerializer<*>>())
-            verify(flagManager).idToSettingsKey(eq(id))
-            verify(secureSettings).putStringForUser(eq("key-$id"), eq(data), anyInt())
-            verify(flagManager).dispatchListenersAndMaybeRestart(eq(id), any())
+    private fun verifyPutData(name: String, data: String, numReads: Int = 1) {
+        inOrder(flagManager, globalSettings).apply {
+            verify(flagManager, times(numReads)).readFlagValue(eq(name), any<FlagSerializer<*>>())
+            verify(flagManager).nameToSettingsKey(eq(name))
+            verify(globalSettings).putStringForUser(eq("key-$name"), eq(data), anyInt())
+            verify(flagManager).dispatchListenersAndMaybeRestart(eq(name), any())
         }.verifyNoMoreInteractions()
-        verifyNoMoreInteractions(flagManager, secureSettings)
+        verifyNoMoreInteractions(flagManager, globalSettings)
     }
 
-    private fun setByBroadcast(id: Int, value: Serializable?) {
+    private fun setByBroadcast(name: String, value: Serializable?) {
         val intent = Intent(FlagManager.ACTION_SET_FLAG)
-        intent.putExtra(FlagManager.EXTRA_ID, id)
+        intent.putExtra(FlagManager.EXTRA_NAME, name)
         intent.putExtra(FlagManager.EXTRA_VALUE, value)
         broadcastReceiver.onReceive(mockContext, intent)
     }
 
     private fun <F : Flag<*>> addFlag(flag: F): F {
-        val old = flagMap.put(flag.id, flag)
-        check(old == null) { "Flag ${flag.id} already registered" }
+        val old = flagMap.put(flag.name, flag)
+        check(old == null) { "Flag ${flag.name} already registered" }
         return flag
     }
 

@@ -21,18 +21,16 @@ import static com.android.systemui.flags.FlagsCommonModule.ALL_FLAGS;
 import static java.util.Objects.requireNonNull;
 
 import android.content.res.Resources;
-import android.util.SparseArray;
-import android.util.SparseBooleanArray;
 
 import androidx.annotation.NonNull;
 
 import com.android.systemui.dagger.SysUISingleton;
 import com.android.systemui.dagger.qualifiers.Main;
-import com.android.systemui.util.DeviceConfigProxy;
 
 import org.jetbrains.annotations.NotNull;
 
 import java.io.PrintWriter;
+import java.util.HashMap;
 import java.util.Map;
 
 import javax.inject.Inject;
@@ -50,12 +48,11 @@ public class FeatureFlagsRelease implements FeatureFlags {
 
     private final Resources mResources;
     private final SystemPropertiesHelper mSystemProperties;
-    private final DeviceConfigProxy mDeviceConfigProxy;
     private final ServerFlagReader mServerFlagReader;
     private final Restarter mRestarter;
-    private final Map<Integer, Flag<?>> mAllFlags;
-    SparseBooleanArray mBooleanCache = new SparseBooleanArray();
-    SparseArray<String> mStringCache = new SparseArray<>();
+    private final Map<String, Flag<?>> mAllFlags;
+    private final Map<String, Boolean> mBooleanCache = new HashMap<>();
+    private final Map<String, String> mStringCache = new HashMap<>();
 
     private final ServerFlagReader.ChangeListener mOnPropertiesChanged =
             new ServerFlagReader.ChangeListener() {
@@ -69,13 +66,11 @@ public class FeatureFlagsRelease implements FeatureFlags {
     public FeatureFlagsRelease(
             @Main Resources resources,
             SystemPropertiesHelper systemProperties,
-            DeviceConfigProxy deviceConfigProxy,
             ServerFlagReader serverFlagReader,
-            @Named(ALL_FLAGS) Map<Integer, Flag<?>> allFlags,
+            @Named(ALL_FLAGS) Map<String, Flag<?>> allFlags,
             Restarter restarter) {
         mResources = resources;
         mSystemProperties = systemProperties;
-        mDeviceConfigProxy = deviceConfigProxy;
         mServerFlagReader = serverFlagReader;
         mAllFlags = allFlags;
         mRestarter = restarter;
@@ -106,50 +101,48 @@ public class FeatureFlagsRelease implements FeatureFlags {
 
     @Override
     public boolean isEnabled(ResourceBooleanFlag flag) {
-        int cacheIndex = mBooleanCache.indexOfKey(flag.getId());
-        if (cacheIndex < 0) {
-            return isEnabled(flag.getId(), mResources.getBoolean(flag.getResourceId()));
+        if (!mBooleanCache.containsKey(flag.getName())) {
+            return isEnabled(flag.getName(), mResources.getBoolean(flag.getResourceId()));
         }
 
-        return mBooleanCache.valueAt(cacheIndex);
+        return mBooleanCache.get(flag.getName());
     }
 
     @Override
     public boolean isEnabled(SysPropBooleanFlag flag) {
-        int cacheIndex = mBooleanCache.indexOfKey(flag.getId());
-        if (cacheIndex < 0) {
+        if (!mBooleanCache.containsKey(flag.getName())) {
             return isEnabled(
-                    flag.getId(), mSystemProperties.getBoolean(flag.getName(), flag.getDefault()));
+                    flag.getName(),
+                    mSystemProperties.getBoolean(flag.getName(), flag.getDefault()));
         }
 
-        return mBooleanCache.valueAt(cacheIndex);
+        return mBooleanCache.get(flag.getName());
     }
 
-    private boolean isEnabled(int key, boolean defaultValue) {
-        mBooleanCache.append(key, defaultValue);
+    private boolean isEnabled(String name, boolean defaultValue) {
+        mBooleanCache.put(name, defaultValue);
         return defaultValue;
     }
 
     @NonNull
     @Override
     public String getString(@NonNull StringFlag flag) {
-        return getString(flag.getId(), flag.getDefault());
+        return getString(flag.getName(), flag.getDefault());
     }
 
     @NonNull
     @Override
     public String getString(@NonNull ResourceStringFlag flag) {
-        int cacheIndex = mStringCache.indexOfKey(flag.getId());
-        if (cacheIndex < 0) {
-            return getString(flag.getId(),
+        if (!mStringCache.containsKey(flag.getName())) {
+            return getString(flag.getName(),
                     requireNonNull(mResources.getString(flag.getResourceId())));
         }
 
-        return mStringCache.valueAt(cacheIndex);
+        return mStringCache.get(flag.getName());
     }
 
-    private String getString(int key, String defaultValue) {
-        mStringCache.append(key, defaultValue);
+    private String getString(String name, String defaultValue) {
+        mStringCache.put(name, defaultValue);
         return defaultValue;
     }
 
@@ -169,11 +162,17 @@ public class FeatureFlagsRelease implements FeatureFlags {
     public void dump(@NonNull PrintWriter pw, @NonNull String[] args) {
         pw.println("can override: false");
         Map<String, Flag<?>> knownFlags = FlagsFactory.INSTANCE.getKnownFlags();
+        pw.println("Booleans: ");
         for (Map.Entry<String, Flag<?>> nameToFlag : knownFlags.entrySet()) {
             Flag<?> flag = nameToFlag.getValue();
-            int id = flag.getId();
+            if (!(flag instanceof BooleanFlag)
+                    || !(flag instanceof ResourceBooleanFlag)
+                    || !(flag instanceof SysPropBooleanFlag)) {
+                continue;
+            }
+
             boolean def = false;
-            if (mBooleanCache.indexOfKey(flag.getId()) < 0) {
+            if (!mBooleanCache.containsKey(flag.getName())) {
                 if (flag instanceof SysPropBooleanFlag) {
                     SysPropBooleanFlag f = (SysPropBooleanFlag) flag;
                     def = mSystemProperties.getBoolean(f.getName(), f.getDefault());
@@ -185,15 +184,32 @@ public class FeatureFlagsRelease implements FeatureFlags {
                     def = f.getDefault();
                 }
             }
-            pw.println("  sysui_flag_" + id + ": " + (mBooleanCache.get(id, def)));
+            pw.println(
+                    "  " + flag.getName() + ": "
+                            + (mBooleanCache.getOrDefault(flag.getName(), def)));
         }
-        int numStrings = mStringCache.size();
-        pw.println("Strings: " + numStrings);
-        for (int i = 0; i < numStrings; i++) {
-            final int id = mStringCache.keyAt(i);
-            final String value = mStringCache.valueAt(i);
-            final int length = value.length();
-            pw.println("  sysui_flag_" + id + ": [length=" + length + "] \"" + value + "\"");
+
+        pw.println("Strings: ");
+        for (Map.Entry<String, Flag<?>> nameToFlag : knownFlags.entrySet()) {
+            Flag<?> flag = nameToFlag.getValue();
+            if (!(flag instanceof StringFlag)
+                    || !(flag instanceof ResourceStringFlag)) {
+                continue;
+            }
+
+            String def = "";
+            if (!mBooleanCache.containsKey(flag.getName())) {
+                if (flag instanceof ResourceStringFlag) {
+                    ResourceStringFlag f = (ResourceStringFlag) flag;
+                    def = mResources.getString(f.getResourceId());
+                } else if (flag instanceof StringFlag) {
+                    StringFlag f = (StringFlag) flag;
+                    def = f.getDefault();
+                }
+            }
+            String value = mStringCache.getOrDefault(flag.getName(), def);
+            pw.println(
+                    "  " + flag.getName() + ": [length=" + value.length() + "] \"" + value + "\"");
         }
     }
 }
