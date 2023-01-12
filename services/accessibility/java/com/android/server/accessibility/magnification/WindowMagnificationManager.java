@@ -632,7 +632,7 @@ public class WindowMagnificationManager implements
      * @param clear {@true} Clears the state of window magnification.
      * @return {@code true} if the magnification is turned to be disabled successfully
      */
-    boolean disableWindowMagnification(int displayId, boolean clear) {
+    public boolean disableWindowMagnification(int displayId, boolean clear) {
         return disableWindowMagnification(displayId, clear, STUB_ANIMATION_CALLBACK);
     }
 
@@ -697,7 +697,6 @@ public class WindowMagnificationManager implements
      * @param displayId The logical display id.
      * @return {@code true} if the window magnification is enabled.
      */
-    @VisibleForTesting
     public boolean isWindowMagnifierEnabled(int displayId) {
         synchronized (mLock) {
             WindowMagnifier magnifier = mWindowMagnifiers.get(displayId);
