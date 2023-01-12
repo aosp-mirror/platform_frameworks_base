@@ -411,7 +411,6 @@
 
         <service android:name=".screenshot.ScreenshotCrossProfileService"
                  android:permission="com.android.systemui.permission.SELF"
-                 android:process=":screenshot_cross_profile"
                  android:exported="false" />
 
         <service android:name=".screenrecord.RecordingService" />
