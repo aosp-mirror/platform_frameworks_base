@@ -263,9 +263,9 @@ public final class ProviderCreateSession extends ProviderSession<
                 Log.i(TAG, "Pending intent contains provider exception");
                 return exception;
             }
+        } else if (PendingIntentResultHandler.isCancelledResponse(pendingIntentResponse)) {
+            return new CreateCredentialException(CreateCredentialException.TYPE_USER_CANCELED);
         } else {
-            Log.i(TAG, "Pending intent result code not Activity.RESULT_OK");
-            // TODO("Update with unknown exception when ready")
             return new CreateCredentialException(CreateCredentialException.TYPE_NO_CREDENTIAL);
         }
         return null;
@@ -273,12 +273,11 @@ public final class ProviderCreateSession extends ProviderSession<
 
     /**
      * When an invalid state occurs, e.g. entry mismatch or no response from provider,
-     * we send back a TYPE_NO_CREDENTIAL error as to the developer, it is the same as not
-     * getting any credentials back.
+     * we send back a TYPE_UNKNOWN error as to the developer.
      */
     private void invokeCallbackOnInternalInvalidState() {
         mCallbacks.onFinalErrorReceived(mComponentName,
-                CreateCredentialException.TYPE_NO_CREDENTIAL,
+                CreateCredentialException.TYPE_UNKNOWN,
                 null);
     }
 }

@@ -81,8 +81,9 @@ public final class CreateRequestSession extends RequestSession<CreateCredentialR
                             mClientAppInfo.getPackageName()),
                     providerDataList));
         } catch (RemoteException e) {
-            Log.i(TAG, "Issue with invoking pending intent: " + e.getMessage());
-            // TODO: Propagate failure
+            respondToClientWithErrorAndFinish(
+                    CreateCredentialException.TYPE_UNKNOWN,
+                    "Unable to invoke selector");
         }
     }
 
@@ -112,8 +113,7 @@ public final class CreateRequestSession extends RequestSession<CreateCredentialR
 
     @Override
     public void onUiCancellation() {
-        // TODO("Replace with properly defined error type")
-        respondToClientWithErrorAndFinish(CreateCredentialException.TYPE_NO_CREDENTIAL,
+        respondToClientWithErrorAndFinish(CreateCredentialException.TYPE_USER_CANCELED,
                 "User cancelled the selector");
     }
 
