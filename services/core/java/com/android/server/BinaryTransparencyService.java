@@ -93,10 +93,8 @@ import java.io.PrintWriter;
 import java.security.PublicKey;
 import java.security.cert.CertificateException;
 import java.util.ArrayList;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 import java.util.concurrent.Executors;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.stream.Collectors;
@@ -300,15 +298,16 @@ public class BinaryTransparencyService extends SystemService {
                     + " and is now updated to: " + currentTimeMs);
             mMeasurementsLastRecordedMs = currentTimeMs;
 
-            Set<String> packagesMeasured = new HashSet<>();
+            Bundle packagesMeasured = new Bundle();
 
             // measure all APEXs first
             if (DEBUG) {
                 Slog.d(TAG, "Measuring APEXs...");
             }
-            List<IBinaryTransparencyService.ApexInfo> allApexInfo = collectAllApexInfo();
+            List<IBinaryTransparencyService.ApexInfo> allApexInfo = collectAllApexInfo(
+                    /* includeTestOnly */ false);
             for (IBinaryTransparencyService.ApexInfo apexInfo : allApexInfo) {
-                packagesMeasured.add(apexInfo.packageName);
+                packagesMeasured.putBoolean(apexInfo.packageName, true);
 
                 recordApexInfo(apexInfo);
             }
@@ -321,7 +320,7 @@ public class BinaryTransparencyService extends SystemService {
             List<IBinaryTransparencyService.AppInfo> allUpdatedPreloadInfo =
                     collectAllUpdatedPreloadInfo(packagesMeasured);
             for (IBinaryTransparencyService.AppInfo appInfo : allUpdatedPreloadInfo) {
-                packagesMeasured.add(appInfo.packageName);
+                packagesMeasured.putBoolean(appInfo.packageName, true);
                 writeAppInfoToLog(appInfo);
             }
             if (DEBUG) {
@@ -334,7 +333,7 @@ public class BinaryTransparencyService extends SystemService {
                 List<IBinaryTransparencyService.AppInfo> allMbaInfo =
                         collectAllMbaInfo(packagesMeasured);
                 for (IBinaryTransparencyService.AppInfo appInfo : allUpdatedPreloadInfo) {
-                    packagesMeasured.add(appInfo.packageName);
+                    packagesMeasured.putBoolean(appInfo.packageName, true);
                     writeAppInfoToLog(appInfo);
                 }
             }
@@ -345,7 +344,9 @@ public class BinaryTransparencyService extends SystemService {
             }
         }
 
-        private List<IBinaryTransparencyService.ApexInfo> collectAllApexInfo() {
+        @Override
+        public List<IBinaryTransparencyService.ApexInfo> collectAllApexInfo(
+                boolean includeTestOnly) {
             var results = new ArrayList<IBinaryTransparencyService.ApexInfo>();
             for (PackageInfo packageInfo : getCurrentInstalledApexs()) {
                 PackageState packageState = mPackageManagerInternal.getPackageStateInternal(
@@ -371,13 +372,19 @@ public class BinaryTransparencyService extends SystemService {
                 apexInfo.signerDigests =
                         computePackageSignerSha256Digests(packageState.getSigningInfo());
 
+                if (includeTestOnly) {
+                    apexInfo.moduleName = apexPackageNameToModuleName(
+                            packageState.getPackageName());
+                }
+
                 results.add(apexInfo);
             }
             return results;
         }
 
-        private List<IBinaryTransparencyService.AppInfo> collectAllUpdatedPreloadInfo(
-                Set<String> packagesToSkip) {
+        @Override
+        public List<IBinaryTransparencyService.AppInfo> collectAllUpdatedPreloadInfo(
+                Bundle packagesToSkip) {
             final var results = new ArrayList<IBinaryTransparencyService.AppInfo>();
 
             PackageManager pm = mContext.getPackageManager();
@@ -385,7 +392,7 @@ public class BinaryTransparencyService extends SystemService {
                 if (!packageState.isUpdatedSystemApp()) {
                     return;
                 }
-                if (packagesToSkip.contains(packageState.getPackageName())) {
+                if (packagesToSkip.containsKey(packageState.getPackageName())) {
                     return;
                 }
 
@@ -413,11 +420,10 @@ public class BinaryTransparencyService extends SystemService {
             return results;
         }
 
-        private List<IBinaryTransparencyService.AppInfo> collectAllMbaInfo(
-                Set<String> packagesToSkip) {
+        public List<IBinaryTransparencyService.AppInfo> collectAllMbaInfo(Bundle packagesToSkip) {
             var results = new ArrayList<IBinaryTransparencyService.AppInfo>();
             for (PackageInfo packageInfo : getNewlyInstalledMbas()) {
-                if (packagesToSkip.contains(packageInfo.packageName)) {
+                if (packagesToSkip.containsKey(packageInfo.packageName)) {
                     continue;
                 }
                 PackageState packageState = mPackageManagerInternal.getPackageStateInternal(
@@ -1654,11 +1660,7 @@ public class BinaryTransparencyService extends SystemService {
     private String getOriginalApexPreinstalledLocation(String packageName,
             String currentInstalledLocation) {
         try {
-            // It appears that only apexd knows the preinstalled location, and it uses module name
-            // as the identifier instead of package name. Given the input is a package name, we
-            // need to covert to module name.
-            final String moduleName = ApexManager.getInstance().getApexModuleNameForPackageName(
-                    packageName);
+            final String moduleName = apexPackageNameToModuleName(packageName);
             IApexService apexService = IApexService.Stub.asInterface(
                     Binder.allowBlocking(ServiceManager.waitForService("apexservice")));
             for (ApexInfo info : apexService.getAllPackages()) {
@@ -1670,6 +1672,13 @@ public class BinaryTransparencyService extends SystemService {
             Slog.e(TAG, "Unable to get package list from apexservice", e);
         }
         return APEX_PRELOAD_LOCATION_ERROR;
+    }
+
+    private String apexPackageNameToModuleName(String packageName) {
+        // It appears that only apexd knows the preinstalled location, and it uses module name as
+        // the identifier instead of package name. Given the input is a package name, we need to
+        // covert to module name.
+        return ApexManager.getInstance().getApexModuleNameForPackageName(packageName);
     }
 
     /**

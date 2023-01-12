@@ -16,6 +16,8 @@
 
 package com.android.internal.os;
 
+import android.os.Bundle;
+
 /**
  * "Backend" interface used by {@link android.os.BinaryTransparencyManager} to talk to the
  * BinaryTransparencyService that actually implements the measurement and information aggregation
@@ -36,6 +38,9 @@ interface IBinaryTransparencyService {
         byte[] digest;
         int digestAlgorithm;
         String[] signerDigests;
+
+        // Test only
+        String moduleName;
     }
 
     parcelable AppInfo {
@@ -50,4 +55,8 @@ interface IBinaryTransparencyService {
         String installer;
         String originator;
     }
+
+    /** Test only */
+    List<ApexInfo> collectAllApexInfo(boolean includeTestOnly);
+    List<AppInfo> collectAllUpdatedPreloadInfo(in Bundle packagesToSkip);
 }
