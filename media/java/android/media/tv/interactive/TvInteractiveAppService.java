@@ -30,6 +30,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.graphics.PixelFormat;
 import android.graphics.Rect;
+import android.media.PlaybackParams;
 import android.media.tv.AdBuffer;
 import android.media.tv.AdRequest;
 import android.media.tv.AdResponse;
@@ -181,6 +182,78 @@ public abstract class TvInteractiveAppService extends Service {
      */
     public static final String COMMAND_PARAMETER_KEY_CHANGE_CHANNEL_QUIETLY =
             "command_change_channel_quietly";
+
+    /** @hide */
+    @Retention(RetentionPolicy.SOURCE)
+    @StringDef(prefix = "TIME_SHIFT_COMMAND_TYPE_", value = {
+            TIME_SHIFT_COMMAND_TYPE_PLAY,
+            TIME_SHIFT_COMMAND_TYPE_PAUSE,
+            TIME_SHIFT_COMMAND_TYPE_RESUME,
+            TIME_SHIFT_COMMAND_TYPE_SEEK_TO,
+            TIME_SHIFT_COMMAND_TYPE_SET_PLAYBACK_PARAMS,
+    })
+    public @interface TimeShiftCommandType {}
+
+    /**
+     * Time shift command type: play.
+     *
+     * @see TvView#timeShiftPlay(String, Uri)
+     * @hide
+     */
+    public static final String TIME_SHIFT_COMMAND_TYPE_PLAY = "play";
+    /**
+     * Time shift command type: pause.
+     *
+     * @see TvView#timeShiftPause()
+     * @hide
+     */
+    public static final String TIME_SHIFT_COMMAND_TYPE_PAUSE = "pause";
+    /**
+     * Time shift command type: resume.
+     *
+     * @see TvView#timeShiftResume()
+     * @hide
+     */
+    public static final String TIME_SHIFT_COMMAND_TYPE_RESUME = "resume";
+    /**
+     * Time shift command type: seek to.
+     *
+     * @see TvView#timeShiftSeekTo(long)
+     * @hide
+     */
+    public static final String TIME_SHIFT_COMMAND_TYPE_SEEK_TO = "seek_to";
+    /**
+     * Time shift command type: set playback params.
+     *
+     * @see TvView#timeShiftSetPlaybackParams(PlaybackParams)
+     * @hide
+     */
+    public static final String TIME_SHIFT_COMMAND_TYPE_SET_PLAYBACK_PARAMS = "set_playback_params";
+
+    /**
+     * Time shift command parameter: program URI.
+     * <p>Type: android.net.Uri
+     *
+     * @see #TIME_SHIFT_COMMAND_TYPE_PLAY
+     * @hide
+     */
+    public static final String COMMAND_PARAMETER_KEY_PROGRAM_URI = "command_program_uri";
+    /**
+     * Time shift command parameter: time position for time shifting, in milliseconds.
+     * <p>Type: long
+     *
+     * @see #TIME_SHIFT_COMMAND_TYPE_SEEK_TO
+     * @hide
+     */
+    public static final String COMMAND_PARAMETER_KEY_TIME_POSITION = "command_time_position";
+    /**
+     * Time shift command parameter: playback params.
+     * <p>Type: android.media.PlaybackParams
+     *
+     * @see #TIME_SHIFT_COMMAND_TYPE_SET_PLAYBACK_PARAMS
+     * @hide
+     */
+    public static final String COMMAND_PARAMETER_KEY_PLAYBACK_PARAMS = "command_playback_params";
 
     private final Handler mServiceHandler = new ServiceHandler();
     private final RemoteCallbackList<ITvInteractiveAppServiceCallback> mCallbacks =
@@ -520,6 +593,44 @@ public abstract class TvInteractiveAppService extends Service {
         }
 
         /**
+         * Called when the time shift {@link android.media.PlaybackParams} is set or changed.
+         *
+         * @see TvView#timeShiftSetPlaybackParams(PlaybackParams)
+         * @hide
+         */
+        public void onTimeShiftPlaybackParams(@NonNull PlaybackParams params) {
+        }
+
+        /**
+         * Called when time shift status is changed.
+         *
+         * @see TvView.TvInputCallback#onTimeShiftStatusChanged(String, int)
+         * @see android.media.tv.TvInputService.Session#notifyTimeShiftStatusChanged(int)
+         * @hide
+         */
+        public void onTimeShiftStatusChanged(
+                @NonNull String inputId, @TvInputManager.TimeShiftStatus int status) {
+        }
+
+        /**
+         * Called when time shift start position is changed.
+         *
+         * @see TvView.TimeShiftPositionCallback#onTimeShiftStartPositionChanged(String, long)
+         * @hide
+         */
+        public void onTimeShiftStartPositionChanged(@NonNull String inputId, long timeMs) {
+        }
+
+        /**
+         * Called when time shift current position is changed.
+         *
+         * @see TvView.TimeShiftPositionCallback#onTimeShiftCurrentPositionChanged(String, long)
+         * @hide
+         */
+        public void onTimeShiftCurrentPositionChanged(@NonNull String inputId, long timeMs) {
+        }
+
+        /**
          * Called when the application sets the surface.
          *
          * <p>The TV Interactive App service should render interactive app UI onto the given
@@ -814,6 +925,35 @@ public abstract class TvInteractiveAppService extends Service {
                         }
                     } catch (RemoteException e) {
                         Log.w(TAG, "error in requestCommand", e);
+                    }
+                }
+            });
+        }
+
+        /**
+         * Sends a specific time shift command to be processed by the related TV input.
+         *
+         * @param cmdType type of the specific command
+         * @param parameters parameters of the specific command
+         * @hide
+         */
+        @CallSuper
+        public void sendTimeShiftCommandRequest(
+                @TimeShiftCommandType @NonNull String cmdType, @Nullable Bundle parameters) {
+            executeOrPostRunnableOnMainThread(new Runnable() {
+                @MainThread
+                @Override
+                public void run() {
+                    try {
+                        if (DEBUG) {
+                            Log.d(TAG, "requestTimeShiftCommand (cmdType=" + cmdType
+                                    + ", parameters=" + parameters.toString() + ")");
+                        }
+                        if (mSessionCallback != null) {
+                            mSessionCallback.onTimeShiftCommandRequest(cmdType, parameters);
+                        }
+                    } catch (RemoteException e) {
+                        Log.w(TAG, "error in requestTimeShiftCommand", e);
                     }
                 }
             });
@@ -1327,6 +1467,34 @@ public abstract class TvInteractiveAppService extends Service {
          */
         void notifyRecordingStopped(String recordingId) {
             onRecordingStopped(recordingId);
+        }
+
+        /**
+         * Calls {@link #onTimeShiftPlaybackParams(PlaybackParams)}.
+         */
+        void notifyTimeShiftPlaybackParams(PlaybackParams params) {
+            onTimeShiftPlaybackParams(params);
+        }
+
+        /**
+         * Calls {@link #onTimeShiftStatusChanged(String, int)}.
+         */
+        void notifyTimeShiftStatusChanged(String inputId, int status) {
+            onTimeShiftStatusChanged(inputId, status);
+        }
+
+        /**
+         * Calls {@link #onTimeShiftStartPositionChanged(String, long)}.
+         */
+        void notifyTimeShiftStartPositionChanged(String inputId, long timeMs) {
+            onTimeShiftStartPositionChanged(inputId, timeMs);
+        }
+
+        /**
+         * Calls {@link #onTimeShiftCurrentPositionChanged(String, long)}.
+         */
+        void notifyTimeShiftCurrentPositionChanged(String inputId, long timeMs) {
+            onTimeShiftCurrentPositionChanged(inputId, timeMs);
         }
 
         /**

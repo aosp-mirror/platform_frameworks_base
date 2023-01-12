@@ -41,6 +41,7 @@ oneway interface ITvInteractiveAppClient {
     void onTeletextAppStateChanged(int state, int seq);
     void onAdBuffer(in AdBuffer buffer, int seq);
     void onCommandRequest(in String cmdType, in Bundle parameters, int seq);
+    void onTimeShiftCommandRequest(in String cmdType, in Bundle parameters, int seq);
     void onSetVideoBounds(in Rect rect, int seq);
     void onRequestCurrentChannelUri(int seq);
     void onRequestCurrentChannelLcn(int seq);

@@ -23,6 +23,7 @@ import android.annotation.Nullable;
 import android.annotation.SystemService;
 import android.content.Context;
 import android.graphics.Rect;
+import android.media.PlaybackParams;
 import android.media.tv.AdBuffer;
 import android.media.tv.AdRequest;
 import android.media.tv.AdResponse;
@@ -401,6 +402,21 @@ public final class TvInteractiveAppManager {
                         return;
                     }
                     record.postCommandRequest(cmdType, parameters);
+                }
+            }
+
+            @Override
+            public void onTimeShiftCommandRequest(
+                    @TvInteractiveAppService.TimeShiftCommandType String cmdType,
+                    Bundle parameters,
+                    int seq) {
+                synchronized (mSessionCallbackRecordMap) {
+                    SessionCallbackRecord record = mSessionCallbackRecordMap.get(seq);
+                    if (record == null) {
+                        Log.e(TAG, "Callback not found for seq " + seq);
+                        return;
+                    }
+                    record.postTimeShiftCommandRequest(cmdType, parameters);
                 }
             }
 
@@ -1182,6 +1198,55 @@ public final class TvInteractiveAppManager {
             }
         }
 
+        void notifyTimeShiftPlaybackParams(@NonNull PlaybackParams params) {
+            if (mToken == null) {
+                Log.w(TAG, "The session has been already released");
+                return;
+            }
+            try {
+                mService.notifyTimeShiftPlaybackParams(mToken, params, mUserId);
+            } catch (RemoteException e) {
+                throw e.rethrowFromSystemServer();
+            }
+        }
+
+        void notifyTimeShiftStatusChanged(
+                @NonNull String inputId, @TvInputManager.TimeShiftStatus int status) {
+            if (mToken == null) {
+                Log.w(TAG, "The session has been already released");
+                return;
+            }
+            try {
+                mService.notifyTimeShiftStatusChanged(mToken, inputId, status, mUserId);
+            } catch (RemoteException e) {
+                throw e.rethrowFromSystemServer();
+            }
+        }
+
+        void notifyTimeShiftStartPositionChanged(@NonNull String inputId, long timeMs) {
+            if (mToken == null) {
+                Log.w(TAG, "The session has been already released");
+                return;
+            }
+            try {
+                mService.notifyTimeShiftStartPositionChanged(mToken, inputId, timeMs, mUserId);
+            } catch (RemoteException e) {
+                throw e.rethrowFromSystemServer();
+            }
+        }
+
+        void notifyTimeShiftCurrentPositionChanged(@NonNull String inputId, long timeMs) {
+            if (mToken == null) {
+                Log.w(TAG, "The session has been already released");
+                return;
+            }
+            try {
+                mService.notifyTimeShiftCurrentPositionChanged(mToken, inputId, timeMs, mUserId);
+            } catch (RemoteException e) {
+                throw e.rethrowFromSystemServer();
+            }
+        }
+
         /**
          * Sets the {@link android.view.Surface} for this session.
          *
@@ -1795,6 +1860,17 @@ public final class TvInteractiveAppManager {
             });
         }
 
+        void postTimeShiftCommandRequest(
+                final @TvInteractiveAppService.TimeShiftCommandType String cmdType,
+                final Bundle parameters) {
+            mHandler.post(new Runnable() {
+                @Override
+                public void run() {
+                    mSessionCallback.onTimeShiftCommandRequest(mSession, cmdType, parameters);
+                }
+            });
+        }
+
         void postSetVideoBounds(Rect rect) {
             mHandler.post(new Runnable() {
                 @Override
@@ -1999,6 +2075,20 @@ public final class TvInteractiveAppManager {
         public void onCommandRequest(
                 Session session,
                 @TvInteractiveAppService.PlaybackCommandType String cmdType,
+                Bundle parameters) {
+        }
+
+        /**
+         * This is called when {@link TvInteractiveAppService.Session#requestTimeShiftCommand} is
+         * called.
+         *
+         * @param session A {@link TvInteractiveAppManager.Session} associated with this callback.
+         * @param cmdType type of the time shift command.
+         * @param parameters parameters of the command.
+         */
+        public void onTimeShiftCommandRequest(
+                Session session,
+                @TvInteractiveAppService.TimeShiftCommandType String cmdType,
                 Bundle parameters) {
         }
 
