@@ -57,6 +57,7 @@ import com.android.systemui.flags.Flags;
 import com.android.systemui.model.SysUiState;
 import com.android.systemui.recents.OverviewProxyService;
 import com.android.systemui.shared.system.QuickStepContract;
+import com.android.systemui.shared.system.TaskStackChangeListeners;
 import com.android.systemui.statusbar.CommandQueue;
 import com.android.systemui.statusbar.CommandQueue.Callbacks;
 import com.android.systemui.statusbar.phone.AutoHideController;
@@ -88,7 +89,6 @@ public class NavigationBarController implements
     private FeatureFlags mFeatureFlags;
     private final DisplayManager mDisplayManager;
     private final TaskbarDelegate mTaskbarDelegate;
-    private final StatusBarKeyguardViewManager mStatusBarKeyguardViewManager;
     private int mNavMode;
     @VisibleForTesting boolean mIsTablet;
 
@@ -112,10 +112,10 @@ public class NavigationBarController implements
             NavBarHelper navBarHelper,
             TaskbarDelegate taskbarDelegate,
             NavigationBarComponent.Factory navigationBarComponentFactory,
-            StatusBarKeyguardViewManager statusBarKeyguardViewManager,
             DumpManager dumpManager,
             AutoHideController autoHideController,
             LightBarController lightBarController,
+            TaskStackChangeListeners taskStackChangeListeners,
             Optional<Pip> pipOptional,
             Optional<BackAnimation> backAnimation,
             FeatureFlags featureFlags) {
@@ -129,11 +129,10 @@ public class NavigationBarController implements
         mConfigChanges.applyNewConfig(mContext.getResources());
         mNavMode = navigationModeController.addListener(this);
         mTaskbarDelegate = taskbarDelegate;
-        mStatusBarKeyguardViewManager = statusBarKeyguardViewManager;
         mTaskbarDelegate.setDependencies(commandQueue, overviewProxyService,
                 navBarHelper, navigationModeController, sysUiFlagsContainer,
                 dumpManager, autoHideController, lightBarController, pipOptional,
-                backAnimation.orElse(null));
+                backAnimation.orElse(null), taskStackChangeListeners);
         mIsTablet = isTablet(mContext);
         dumpManager.registerDumpable(this);
     }
