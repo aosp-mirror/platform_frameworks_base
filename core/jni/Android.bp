@@ -327,6 +327,10 @@ cc_library_shared {
                 "libdl_android",
                 "libtimeinstate",
                 "server_configurable_flags",
+                "libimage_io",
+                "libjpegdecoder",
+                "libjpegencoder",
+                "libjpegrecoverymap",
             ],
             export_shared_lib_headers: [
                 // our headers include libnativewindow's public headers
@@ -380,6 +384,10 @@ cc_library_shared {
                 "libwebp-decode",
                 "libwebp-encode",
                 "libwuffs_mirror_release_c",
+                "libimage_io",
+                "libjpegdecoder",
+                "libjpegencoder",
+                "libjpegrecoverymap",
             ],
         },
         host_linux: {
