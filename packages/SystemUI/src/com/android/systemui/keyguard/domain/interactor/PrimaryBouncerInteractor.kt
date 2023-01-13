@@ -32,11 +32,11 @@ import com.android.systemui.dagger.qualifiers.Main
 import com.android.systemui.keyguard.DismissCallbackRegistry
 import com.android.systemui.keyguard.data.BouncerView
 import com.android.systemui.keyguard.data.repository.KeyguardBouncerRepository
+import com.android.systemui.keyguard.shared.constants.KeyguardBouncerConstants
 import com.android.systemui.keyguard.shared.model.BouncerShowMessageModel
 import com.android.systemui.keyguard.shared.model.KeyguardBouncerModel
 import com.android.systemui.plugins.ActivityStarter
 import com.android.systemui.shared.system.SysUiStatsLog
-import com.android.systemui.statusbar.phone.KeyguardBouncer
 import com.android.systemui.statusbar.phone.KeyguardBypassController
 import com.android.systemui.statusbar.policy.KeyguardStateController
 import javax.inject.Inject
@@ -143,7 +143,7 @@ constructor(
         Trace.beginSection("KeyguardBouncer#show")
         repository.setPrimaryScrimmed(isScrimmed)
         if (isScrimmed) {
-            setPanelExpansion(KeyguardBouncer.EXPANSION_VISIBLE)
+            setPanelExpansion(KeyguardBouncerConstants.EXPANSION_VISIBLE)
         }
 
         if (resumeBouncer) {
@@ -204,14 +204,14 @@ constructor(
         }
 
         if (
-            expansion == KeyguardBouncer.EXPANSION_VISIBLE &&
-                oldExpansion != KeyguardBouncer.EXPANSION_VISIBLE
+            expansion == KeyguardBouncerConstants.EXPANSION_VISIBLE &&
+                oldExpansion != KeyguardBouncerConstants.EXPANSION_VISIBLE
         ) {
             falsingCollector.onBouncerShown()
             primaryBouncerCallbackInteractor.dispatchFullyShown()
         } else if (
-            expansion == KeyguardBouncer.EXPANSION_HIDDEN &&
-                oldExpansion != KeyguardBouncer.EXPANSION_HIDDEN
+            expansion == KeyguardBouncerConstants.EXPANSION_HIDDEN &&
+                oldExpansion != KeyguardBouncerConstants.EXPANSION_HIDDEN
         ) {
             /*
              * There are cases where #hide() was not invoked, such as when
@@ -222,8 +222,8 @@ constructor(
             DejankUtils.postAfterTraversal { primaryBouncerCallbackInteractor.dispatchReset() }
             primaryBouncerCallbackInteractor.dispatchFullyHidden()
         } else if (
-            expansion != KeyguardBouncer.EXPANSION_VISIBLE &&
-                oldExpansion == KeyguardBouncer.EXPANSION_VISIBLE
+            expansion != KeyguardBouncerConstants.EXPANSION_VISIBLE &&
+                oldExpansion == KeyguardBouncerConstants.EXPANSION_VISIBLE
         ) {
             primaryBouncerCallbackInteractor.dispatchStartingToHide()
             repository.setPrimaryStartingToHide(true)
@@ -303,7 +303,7 @@ constructor(
     fun isFullyShowing(): Boolean {
         return (repository.primaryBouncerShowingSoon.value ||
             repository.primaryBouncerVisible.value) &&
-            repository.panelExpansionAmount.value == KeyguardBouncer.EXPANSION_VISIBLE &&
+            repository.panelExpansionAmount.value == KeyguardBouncerConstants.EXPANSION_VISIBLE &&
             repository.primaryBouncerStartingDisappearAnimation.value == null
     }
 
@@ -315,8 +315,8 @@ constructor(
     /** If bouncer expansion is between 0f and 1f non-inclusive. */
     fun isInTransit(): Boolean {
         return repository.primaryBouncerShowingSoon.value ||
-            repository.panelExpansionAmount.value != KeyguardBouncer.EXPANSION_HIDDEN &&
-                repository.panelExpansionAmount.value != KeyguardBouncer.EXPANSION_VISIBLE
+            repository.panelExpansionAmount.value != KeyguardBouncerConstants.EXPANSION_HIDDEN &&
+                repository.panelExpansionAmount.value != KeyguardBouncerConstants.EXPANSION_VISIBLE
     }
 
     /** Return whether bouncer is animating away. */

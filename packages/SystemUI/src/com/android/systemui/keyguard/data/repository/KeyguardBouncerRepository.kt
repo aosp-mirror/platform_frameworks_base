@@ -20,6 +20,7 @@ import android.os.Build
 import com.android.keyguard.ViewMediatorCallback
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.dagger.qualifiers.Application
+import com.android.systemui.keyguard.shared.constants.KeyguardBouncerConstants.EXPANSION_HIDDEN
 import com.android.systemui.keyguard.shared.model.BouncerShowMessageModel
 import com.android.systemui.keyguard.shared.model.KeyguardBouncerModel
 import com.android.systemui.log.dagger.BouncerLog
@@ -73,7 +74,7 @@ constructor(
      *      1f = panel fully showing = bouncer fully hidden
      * ```
      */
-    private val _panelExpansionAmount = MutableStateFlow(KeyguardBouncer.EXPANSION_HIDDEN)
+    private val _panelExpansionAmount = MutableStateFlow(EXPANSION_HIDDEN)
     val panelExpansionAmount = _panelExpansionAmount.asStateFlow()
     private val _keyguardPosition = MutableStateFlow(0f)
     val keyguardPosition = _keyguardPosition.asStateFlow()
