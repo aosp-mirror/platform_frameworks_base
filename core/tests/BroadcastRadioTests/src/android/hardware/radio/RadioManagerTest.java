@@ -777,6 +777,12 @@ public final class RadioManagerTest {
     }
 
     @Test
+    public void toString_forModuleProperties() {
+        assertWithMessage("Module properties string").that(AMFM_PROPERTIES.toString())
+                .contains(AM_BAND_DESCRIPTOR.toString() + ", " + FM_BAND_DESCRIPTOR.toString());
+    }
+
+    @Test
     public void writeToParcel_forModulePropertiesWithNullDabFrequencyTable() {
         Parcel parcel = Parcel.obtain();
 

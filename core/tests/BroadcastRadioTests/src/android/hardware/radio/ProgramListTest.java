@@ -22,18 +22,21 @@ import static org.junit.Assert.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.ArgumentMatchers.anyInt;
+import static org.mockito.Mockito.after;
 import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.timeout;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 import android.content.Context;
+import android.content.pm.ApplicationInfo;
+import android.os.Build;
 import android.os.Parcel;
 import android.os.RemoteException;
 import android.util.ArraySet;
-
-import androidx.test.InstrumentationRegistry;
 
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -48,10 +51,11 @@ import java.util.concurrent.Executor;
 @RunWith(MockitoJUnitRunner.class)
 public final class ProgramListTest {
 
-    public final Context mContext = InstrumentationRegistry.getContext();
+    private static final int TEST_TARGET_SDK_VERSION = Build.VERSION_CODES.CUR_DEVELOPMENT;
 
     private static final int CREATOR_ARRAY_SIZE = 3;
-    private static final VerificationWithTimeout CALLBACK_TIMEOUT = timeout(/* millis= */ 500);
+    private static final int TIMEOUT_MS = 500;
+    private static final VerificationWithTimeout CALLBACK_TIMEOUT = timeout(TIMEOUT_MS);
 
     private static final boolean IS_PURGE = false;
     private static final boolean IS_COMPLETE = true;
@@ -95,6 +99,7 @@ public final class ProgramListTest {
             command.run();
         }
     };
+    private final ApplicationInfo mApplicationInfo = new ApplicationInfo();
 
     private RadioTuner mRadioTuner;
     private ITunerCallback mTunerCallback;
@@ -102,6 +107,8 @@ public final class ProgramListTest {
 
     private ProgramList.ListCallback[] mListCallbackMocks;
     private ProgramList.OnCompleteListener[] mOnCompleteListenerMocks;
+    @Mock
+    private Context mContextMock;
     @Mock
     private IRadioService mRadioServiceMock;
     @Mock
@@ -268,6 +275,18 @@ public final class ProgramListTest {
     }
 
     @Test
+    public void getProgramList_forTunerAdapterWhenListNotReady_fails() throws Exception {
+        Map<String, String> parameters = Map.of("ParameterKeyMock", "ParameterValueMock");
+        createRadioTuner();
+
+        IllegalStateException thrown = assertThrows(IllegalStateException.class,
+                () -> mRadioTuner.getProgramList(parameters));
+
+        assertWithMessage("Exception for getting program list when not ready")
+                .that(thrown).hasMessageThat().contains("Program list is not ready yet");
+    }
+
+    @Test
     public void getProgramList_forTunerAdapterWhenServiceDied_fails() throws Exception {
         Map<String, String> parameters = Map.of("ParameterKeyMock", "ParameterValueMock");
         createRadioTuner();
@@ -287,6 +306,19 @@ public final class ProgramListTest {
         mRadioTuner.getDynamicProgramList(TEST_FILTER);
 
         verify(mTunerMock).startProgramListUpdates(TEST_FILTER);
+    }
+
+    @Test
+    public void getDynamicProgramList_forTunerNotSupportingProgramList_returnsNull()
+            throws Exception {
+        createRadioTuner();
+        doThrow(new UnsupportedOperationException())
+                .when(mTunerMock).startProgramListUpdates(any());
+
+        ProgramList nullProgramList = mRadioTuner.getDynamicProgramList(TEST_FILTER);
+
+        assertWithMessage("Exception for radio HAL client not supporting program list")
+                .that(nullProgramList).isNull();
     }
 
     @Test
@@ -346,7 +378,7 @@ public final class ProgramListTest {
 
         mTunerCallback.onProgramListUpdated(FM_ADD_INCOMPLETE_CHUNK);
 
-        verify(mOnCompleteListenerMocks[0], CALLBACK_TIMEOUT.times(0)).onComplete();
+        verify(mOnCompleteListenerMocks[0], after(TIMEOUT_MS).never()).onComplete();
     }
 
     @Test
@@ -364,6 +396,22 @@ public final class ProgramListTest {
         verify(mListCallbackMocks[0], CALLBACK_TIMEOUT).onItemRemoved(RDS_IDENTIFIER);
         assertWithMessage("Program list after purge chunk applied")
                 .that(mProgramList.toList()).isEmpty();
+    }
+
+    @Test
+    public void onProgramListUpdated_afterProgramListClosed_notInvokeMockedCallbacks()
+            throws Exception {
+        createRadioTuner();
+        mProgramList = mRadioTuner.getDynamicProgramList(TEST_FILTER);
+        registerListCallbacks(/* numCallbacks= */ 1);
+        addOnCompleteListeners(/* numListeners= */ 1);
+        mProgramList.close();
+
+        mTunerCallback.onProgramListUpdated(FM_RDS_ADD_CHUNK);
+
+        verify(mListCallbackMocks[0], after(TIMEOUT_MS).never()).onItemChanged(any());
+        verify(mListCallbackMocks[0], never()).onItemChanged(any());
+        verify(mOnCompleteListenerMocks[0], never()).onComplete();
     }
 
     @Test
@@ -410,6 +458,41 @@ public final class ProgramListTest {
     }
 
     @Test
+    public void onBackgroundScanComplete_whenProgramListReady_invokesMockedCallback()
+            throws Exception {
+        createRadioTuner();
+        mProgramList = mRadioTuner.getDynamicProgramList(TEST_FILTER);
+        mTunerCallback.onProgramListUpdated(FM_RDS_ADD_CHUNK);
+
+        mTunerCallback.onBackgroundScanComplete();
+
+        verify(mTunerCallbackMock, CALLBACK_TIMEOUT).onBackgroundScanComplete();
+    }
+
+    @Test
+    public void onBackgroundScanComplete_whenProgramListNotReady_notInvokeMockedCallback()
+            throws Exception {
+        createRadioTuner();
+        mProgramList = mRadioTuner.getDynamicProgramList(TEST_FILTER);
+
+        mTunerCallback.onBackgroundScanComplete();
+
+        verify(mTunerCallbackMock, after(TIMEOUT_MS).never()).onBackgroundScanComplete();
+    }
+
+    @Test
+    public void onBackgroundScanComplete_afterProgramListReady_invokesMockedCallback()
+            throws Exception {
+        createRadioTuner();
+        mProgramList = mRadioTuner.getDynamicProgramList(TEST_FILTER);
+
+        mTunerCallback.onBackgroundScanComplete();
+        mTunerCallback.onProgramListUpdated(FM_RDS_ADD_CHUNK);
+
+        verify(mTunerCallbackMock, CALLBACK_TIMEOUT).onBackgroundScanComplete();
+    }
+
+    @Test
     public void unregisterListCallback_withProgramUpdated_notInvokesCallback() throws Exception {
         createRadioTuner();
         mProgramList = mRadioTuner.getDynamicProgramList(TEST_FILTER);
@@ -418,7 +501,7 @@ public final class ProgramListTest {
         mProgramList.unregisterListCallback(mListCallbackMocks[0]);
         mTunerCallback.onProgramListUpdated(FM_ADD_INCOMPLETE_CHUNK);
 
-        verify(mListCallbackMocks[0], CALLBACK_TIMEOUT.times(0)).onItemChanged(any());
+        verify(mListCallbackMocks[0], after(TIMEOUT_MS).never()).onItemChanged(any());
     }
 
     @Test
@@ -457,7 +540,7 @@ public final class ProgramListTest {
         mProgramList.removeOnCompleteListener(mOnCompleteListenerMocks[0]);
         mTunerCallback.onProgramListUpdated(FM_RDS_ADD_CHUNK);
 
-        verify(mOnCompleteListenerMocks[0], CALLBACK_TIMEOUT.times(0)).onComplete();
+        verify(mOnCompleteListenerMocks[0], after(TIMEOUT_MS).never()).onComplete();
     }
 
     @Test
@@ -484,7 +567,10 @@ public final class ProgramListTest {
     }
 
     private void createRadioTuner() throws Exception {
-        RadioManager radioManager = new RadioManager(mContext, mRadioServiceMock);
+        mApplicationInfo.targetSdkVersion = TEST_TARGET_SDK_VERSION;
+        when(mContextMock.getApplicationInfo()).thenReturn(mApplicationInfo);
+        RadioManager radioManager = new RadioManager(mContextMock, mRadioServiceMock);
+
         RadioManager.BandConfig band = new RadioManager.FmBandConfig(
                 new RadioManager.FmBandDescriptor(RadioManager.REGION_ITU_1, RadioManager.BAND_FM,
                         /* lowerLimit= */ 87500, /* upperLimit= */ 108000, /* spacing= */ 200,
