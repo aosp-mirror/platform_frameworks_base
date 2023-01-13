@@ -29,11 +29,8 @@ import android.app.job.JobService;
 import android.compat.annotation.ChangeId;
 import android.content.ComponentName;
 import android.content.Context;
-import android.content.pm.ApexStagedEvent;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.IBackgroundInstallControlService;
-import android.content.pm.IPackageManagerNative;
-import android.content.pm.IStagedApexObserver;
 import android.content.pm.InstallSourceInfo;
 import android.content.pm.ModuleInfo;
 import android.content.pm.PackageInfo;
@@ -132,6 +129,7 @@ public class BinaryTransparencyService extends SystemService {
     private String mVbmetaDigest;
     // the system time (in ms) the last measurement was taken
     private long mMeasurementsLastRecordedMs;
+    private PackageManagerInternal mPackageManagerInternal;
 
     /**
      * Guards whether or not measurements of MBA to be performed. When this change is enabled,
@@ -1049,6 +1047,7 @@ public class BinaryTransparencyService extends SystemService {
         mServiceImpl = new BinaryTransparencyServiceImpl();
         mVbmetaDigest = VBMETA_DIGEST_UNINITIALIZED;
         mMeasurementsLastRecordedMs = 0;
+        mPackageManagerInternal = LocalServices.getService(PackageManagerInternal.class);
     }
 
     /**
@@ -1063,6 +1062,38 @@ public class BinaryTransparencyService extends SystemService {
         } catch (Throwable t) {
             Slog.e(TAG, "Failed to start BinaryTransparencyService.", t);
         }
+
+        // register a package observer to detect updates to preloads
+        mPackageManagerInternal.getPackageList(new PackageManagerInternal.PackageListObserver() {
+            @Override
+            public void onPackageAdded(String packageName, int uid) {
+
+            }
+
+            @Override
+            public void onPackageChanged(String packageName, int uid) {
+                // check if the updated package is a preloaded app.
+                PackageManager pm = mContext.getPackageManager();
+                try {
+                    pm.getPackageInfo(packageName, PackageManager.PackageInfoFlags.of(
+                            PackageManager.MATCH_FACTORY_ONLY));
+                } catch (PackageManager.NameNotFoundException e) {
+                    // this means that this package is not a preloaded app
+                    return;
+                }
+
+                Slog.d(TAG, "Preload " + packageName + " was updated. Scheduling measurement...");
+                UpdateMeasurementsJobService.scheduleBinaryMeasurements(mContext,
+                        BinaryTransparencyService.this);
+            }
+
+            @Override
+            public void onPackageRemoved(String packageName, int uid) {
+
+            }
+        });
+
+        // TODO(b/264428429): Register observer for updates to APEXs.
     }
 
     /**
@@ -1073,22 +1104,19 @@ public class BinaryTransparencyService extends SystemService {
      */
     @Override
     public void onBootPhase(int phase) {
-        // so far we are only doing things in the PHASE_BOOT_COMPLETED phase
-        if (phase != PHASE_BOOT_COMPLETED) {
-            return;
+
+        // we are only interested in doing things at PHASE_BOOT_COMPLETED
+        if (phase == PHASE_BOOT_COMPLETED) {
+            Slog.i(TAG, "Boot completed. Getting VBMeta Digest.");
+            getVBMetaDigestInformation();
+
+            // to avoid the risk of holding up boot time, computations to measure APEX, Module, and
+            // MBA digests are scheduled here, but only executed when the device is idle and plugged
+            // in.
+            Slog.i(TAG, "Scheduling measurements to be taken.");
+            UpdateMeasurementsJobService.scheduleBinaryMeasurements(mContext,
+                    BinaryTransparencyService.this);
         }
-
-        Slog.i(TAG, "Boot completed. Getting VBMeta Digest.");
-        getVBMetaDigestInformation();
-
-        // to avoid the risk of holding up boot time, computations to measure APEX, Module, and
-        // MBA digests are scheduled here, but only executed when the device is idle and plugged
-        // in.
-        Slog.i(TAG, "Scheduling measurements to be taken.");
-        UpdateMeasurementsJobService.scheduleBinaryMeasurements(mContext,
-                BinaryTransparencyService.this);
-
-        registerPackageUpdateObservers();
     }
 
     /**
@@ -1182,67 +1210,6 @@ public class BinaryTransparencyService extends SystemService {
         mVbmetaDigest = SystemProperties.get(SYSPROP_NAME_VBETA_DIGEST, VBMETA_DIGEST_UNAVAILABLE);
         Slog.d(TAG, String.format("VBMeta Digest: %s", mVbmetaDigest));
         FrameworkStatsLog.write(FrameworkStatsLog.VBMETA_DIGEST_REPORTED, mVbmetaDigest);
-    }
-
-    /**
-     * Register observers for APK and APEX updates.
-     * The observers will be invoked when i) APK update and ii) APEX staging happens. This will
-     * then be used as signals to schedule measurement for the relevant binaries.
-     */
-    private void registerPackageUpdateObservers() {
-        Slog.d(TAG, "Registering APK updates...");
-        // first, register a package observer to detect updates to preloads
-        PackageManagerInternal pmi = LocalServices.getService(PackageManagerInternal.class);
-        pmi.getPackageList(new PackageManagerInternal.PackageListObserver() {
-            @Override
-            public void onPackageAdded(String packageName, int uid) {
-            }
-
-            @Override
-            public void onPackageChanged(String packageName, int uid) {
-                // check if the updated package is a preloaded app.
-                PackageManager pm = mContext.getPackageManager();
-                try {
-                    pm.getPackageInfo(packageName, PackageManager.PackageInfoFlags.of(
-                            PackageManager.MATCH_FACTORY_ONLY));
-                } catch (PackageManager.NameNotFoundException e) {
-                    // this means that this package is not a preloaded app
-                    return;
-                }
-
-                Slog.d(TAG, "Preload " + packageName + " was updated. Scheduling measurement...");
-                UpdateMeasurementsJobService.scheduleBinaryMeasurements(mContext,
-                        BinaryTransparencyService.this);
-            }
-
-            @Override
-            public void onPackageRemoved(String packageName, int uid) {
-            }
-        });
-
-        // then, register an observer for staged APEXs
-        Slog.d(TAG, "Registering APEX updates...");
-        IPackageManagerNative iPackageManagerNative = IPackageManagerNative.Stub.asInterface(
-                ServiceManager.getService("package_native"));
-        if (iPackageManagerNative == null) {
-            Slog.e(TAG, "IPackageManagerNative is null");
-            return;
-        }
-
-        try {
-            iPackageManagerNative.registerStagedApexObserver(new IStagedApexObserver.Stub() {
-                @Override
-                public void onApexStaged(ApexStagedEvent event) throws RemoteException {
-                    Slog.d(TAG, "A new APEX has been staged for update. There are currently "
-                            + event.stagedApexModuleNames.length + " APEX(s) staged for update. "
-                            + "Scheduling measurement...");
-                    UpdateMeasurementsJobService.scheduleBinaryMeasurements(mContext,
-                            BinaryTransparencyService.this);
-                }
-            });
-        } catch (RemoteException e) {
-            Slog.e(TAG, "Failed to register a StagedApexObserver.");
-        }
     }
 
     private String translateContentDigestAlgorithmIdToString(int algorithmId) {
