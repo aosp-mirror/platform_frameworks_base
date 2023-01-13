@@ -539,7 +539,8 @@ public final class BackgroundInstallControlServiceTest {
             NoSuchFieldException, PackageManager.NameNotFoundException {
         assertNull(mBackgroundInstallControlService.getBackgroundInstalledPackages());
         InstallSourceInfo installSourceInfo = new InstallSourceInfo(
-                /* initiatingPackageName = */ null, /* initiatingPackageSigningInfo = */ null,
+                /* initiatingPackageName = */ INSTALLER_NAME_1,
+                /* initiatingPackageSigningInfo = */ null,
                 /* originatingPackageName = */ null,
                 /* installingPackageName = */ INSTALLER_NAME_1);
         assertEquals(installSourceInfo.getInstallingPackageName(), INSTALLER_NAME_1);
@@ -575,7 +576,8 @@ public final class BackgroundInstallControlServiceTest {
             NoSuchFieldException, PackageManager.NameNotFoundException {
         assertNull(mBackgroundInstallControlService.getBackgroundInstalledPackages());
         InstallSourceInfo installSourceInfo = new InstallSourceInfo(
-                /* initiatingPackageName = */ null, /* initiatingPackageSigningInfo = */ null,
+                /* initiatingPackageName = */ INSTALLER_NAME_1,
+                /* initiatingPackageSigningInfo = */ null,
                 /* originatingPackageName = */ null,
                 /* installingPackageName = */ INSTALLER_NAME_1);
         assertEquals(installSourceInfo.getInstallingPackageName(), INSTALLER_NAME_1);
@@ -619,7 +621,8 @@ public final class BackgroundInstallControlServiceTest {
             NoSuchFieldException, PackageManager.NameNotFoundException {
         assertNull(mBackgroundInstallControlService.getBackgroundInstalledPackages());
         InstallSourceInfo installSourceInfo = new InstallSourceInfo(
-                /* initiatingPackageName = */ null, /* initiatingPackageSigningInfo = */ null,
+                /* initiatingPackageName = */ INSTALLER_NAME_1,
+                /* initiatingPackageSigningInfo = */ null,
                 /* originatingPackageName = */ null,
                 /* installingPackageName = */ INSTALLER_NAME_1);
         assertEquals(installSourceInfo.getInstallingPackageName(), INSTALLER_NAME_1);
@@ -667,7 +670,8 @@ public final class BackgroundInstallControlServiceTest {
             NoSuchFieldException, PackageManager.NameNotFoundException {
         assertNull(mBackgroundInstallControlService.getBackgroundInstalledPackages());
         InstallSourceInfo installSourceInfo = new InstallSourceInfo(
-                /* initiatingPackageName = */ null, /* initiatingPackageSigningInfo = */ null,
+                /* initiatingPackageName = */ INSTALLER_NAME_1,
+                /* initiatingPackageSigningInfo = */ null,
                 /* originatingPackageName = */ null,
                 /* installingPackageName = */ INSTALLER_NAME_1);
         assertEquals(installSourceInfo.getInstallingPackageName(), INSTALLER_NAME_1);
@@ -711,7 +715,52 @@ public final class BackgroundInstallControlServiceTest {
         assertEquals(1, packages.size());
         assertTrue(packages.contains(USER_ID_1, PACKAGE_NAME_1));
     }
+    @Test
+    public void testHandleUsageEvent_packageAddedThroughAdb() throws
+            NoSuchFieldException, PackageManager.NameNotFoundException {
+        assertNull(mBackgroundInstallControlService.getBackgroundInstalledPackages());
+        InstallSourceInfo installSourceInfo = new InstallSourceInfo(
+                /* initiatingPackageName = */ null, //currently ADB installer sets field to null
+                /* initiatingPackageSigningInfo = */ null,
+                /* originatingPackageName = */ null,
+                /* installingPackageName = */ INSTALLER_NAME_1);
+        // b/265203007
+        when(mPackageManager.getInstallSourceInfo(anyString())).thenReturn(installSourceInfo);
+        ApplicationInfo appInfo = mock(ApplicationInfo.class);
 
+        when(mPackageManager.getApplicationInfoAsUser(
+                eq(PACKAGE_NAME_1),
+                any(),
+                anyInt())
+        ).thenReturn(appInfo);
+
+        long createTimestamp = PACKAGE_ADD_TIMESTAMP_1
+                - (System.currentTimeMillis() - SystemClock.uptimeMillis());
+        FieldSetter.setField(appInfo,
+                ApplicationInfo.class.getDeclaredField("createTimestamp"),
+                createTimestamp);
+
+        int uid = USER_ID_1 * UserHandle.PER_USER_RANGE;
+        assertEquals(USER_ID_1, UserHandle.getUserId(uid));
+
+        // The following  usage events generation is the same as
+        // testHandleUsageEvent_packageAddedOutsideTimeFrame2 test. The only difference is that
+        // for ADB installs the initiatingPackageName is null, despite being detected as a
+        // background install. Since we do not want to treat side-loaded apps as background install
+        // getBackgroundInstalledPackages() is expected to return null
+        doReturn(PackageManager.PERMISSION_GRANTED).when(mPermissionManager).checkPermission(
+                anyString(), anyString(), anyInt());
+        generateUsageEvent(UsageEvents.Event.ACTIVITY_RESUMED,
+                USER_ID_1, INSTALLER_NAME_1, USAGE_EVENT_TIMESTAMP_2);
+        generateUsageEvent(Event.ACTIVITY_STOPPED,
+                USER_ID_1, INSTALLER_NAME_1, USAGE_EVENT_TIMESTAMP_3);
+
+        mPackageListObserver.onPackageAdded(PACKAGE_NAME_1, uid);
+        mTestLooper.dispatchAll();
+
+        var packages = mBackgroundInstallControlService.getBackgroundInstalledPackages();
+        assertNull(packages);
+    }
     @Test
     public void testPackageRemoved() {
         assertNull(mBackgroundInstallControlService.getBackgroundInstalledPackages());

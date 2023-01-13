@@ -22,6 +22,7 @@ import android.app.usage.UsageStatsManagerInternal;
 import android.content.Context;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.IBackgroundInstallControlService;
+import android.content.pm.InstallSourceInfo;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
 import android.content.pm.PackageManagerInternal;
@@ -183,10 +184,12 @@ public class BackgroundInstallControlService extends SystemService {
             return;
         }
 
-        String installerPackageName = null;
+        String installerPackageName;
+        String initiatingPackageName;
         try {
-            installerPackageName = mPackageManager
-                    .getInstallSourceInfo(packageName).getInstallingPackageName();
+            final InstallSourceInfo installInfo = mPackageManager.getInstallSourceInfo(packageName);
+            installerPackageName = installInfo.getInstallingPackageName();
+            initiatingPackageName = installInfo.getInitiatingPackageName();
         } catch (PackageManager.NameNotFoundException e) {
             Slog.w(TAG, "Package's installer not found " + packageName);
             return;
@@ -196,13 +199,20 @@ public class BackgroundInstallControlService extends SystemService {
         final long installTimestamp = System.currentTimeMillis()
                 - (SystemClock.uptimeMillis() - appInfo.createTimestamp);
 
-        if (wasForegroundInstallation(installerPackageName, userId, installTimestamp)) {
+        if (installedByAdb(initiatingPackageName)
+                || wasForegroundInstallation(installerPackageName, userId, installTimestamp)) {
             return;
         }
 
         initBackgroundInstalledPackages();
         mBackgroundInstalledPackages.add(userId, packageName);
         writeBackgroundInstalledPackagesToDisk();
+    }
+
+    // ADB sets installerPackageName to null, this creates a loophole to bypass BIC which will be
+    // addressed with b/265203007
+    private boolean installedByAdb(String initiatingPackageName) {
+        return initiatingPackageName == null;
     }
 
     private boolean wasForegroundInstallation(String installerPackageName,
