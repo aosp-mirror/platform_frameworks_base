@@ -153,6 +153,7 @@ import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.concurrent.CountDownLatch;
 import java.util.function.Consumer;
 import java.util.function.Predicate;
 
@@ -242,6 +243,7 @@ public class JobSchedulerService extends com.android.server.SystemService
     final Object mLock = new Object();
     /** Master list of jobs. */
     final JobStore mJobs;
+    private final CountDownLatch mJobStoreLoadedLatch;
     /** Tracking the standby bucket state of each app */
     final StandbyTracker mStandbyTracker;
     /** Tracking amount of time each package runs for. */
@@ -2044,7 +2046,9 @@ public class JobSchedulerService extends com.android.server.SystemService
         publishLocalService(JobSchedulerInternal.class, new LocalService());
 
         // Initialize the job store and set up any persisted jobs
-        mJobs = JobStore.initAndGet(this);
+        mJobStoreLoadedLatch = new CountDownLatch(1);
+        mJobs = JobStore.get(this);
+        mJobs.initAsync(mJobStoreLoadedLatch);
 
         mBatteryStateTracker = new BatteryStateTracker();
         mBatteryStateTracker.startTracking();
@@ -2112,7 +2116,7 @@ public class JobSchedulerService extends com.android.server.SystemService
 
                     // And kick off the work to update the affected jobs, using a secondary
                     // thread instead of chugging away here on the main looper thread.
-                    new Thread(mJobTimeUpdater, "JobSchedulerTimeSetReceiver").start();
+                    mJobs.runWorkAsync(mJobTimeUpdater);
                 }
             }
         }
@@ -2150,7 +2154,15 @@ public class JobSchedulerService extends com.android.server.SystemService
 
     @Override
     public void onBootPhase(int phase) {
-        if (PHASE_SYSTEM_SERVICES_READY == phase) {
+        if (PHASE_LOCK_SETTINGS_READY == phase) {
+            // This is the last phase before PHASE_SYSTEM_SERVICES_READY. We need to ensure that
+            // persisted jobs are loaded before we can proceed to PHASE_SYSTEM_SERVICES_READY.
+            try {
+                mJobStoreLoadedLatch.await();
+            } catch (InterruptedException e) {
+                Slog.e(TAG, "Couldn't wait on job store loading latch");
+            }
+        } else if (PHASE_SYSTEM_SERVICES_READY == phase) {
             mConstantsObserver.start();
             for (StateController controller : mControllers) {
                 controller.onSystemServicesReady();
