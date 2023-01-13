@@ -135,7 +135,7 @@ constructor(
 
     override suspend fun getPickerScreenState(): KeyguardQuickAffordanceConfig.PickerScreenState =
         if (flashlightController.isAvailable) {
-            KeyguardQuickAffordanceConfig.PickerScreenState.Default
+            KeyguardQuickAffordanceConfig.PickerScreenState.Default()
         } else {
             KeyguardQuickAffordanceConfig.PickerScreenState.UnavailableOnDevice
         }
