@@ -34,6 +34,7 @@ parcelable ReceiverInfo {
     Intent intent;
     String data;
     Bundle extras;
+    boolean assumeDelivered;
     int sendingUser;
     int processState;
     int resultCode;
