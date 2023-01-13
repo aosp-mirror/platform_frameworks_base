@@ -1796,8 +1796,6 @@ public class CarrierConfigManager {
      * Instead, each sim carrier should have a single country code, apply per carrier based iso
      * code as an override. The overridden value can be read from
      * {@link TelephonyManager#getSimCountryIso()} and {@link SubscriptionInfo#getCountryIso()}
-     *
-     * @hide
      */
     public static final String KEY_SIM_COUNTRY_ISO_OVERRIDE_STRING =
             "sim_country_iso_override_string";
