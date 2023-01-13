@@ -35,11 +35,21 @@ final class HdmiEarcController {
 
     private final HdmiControlService mService;
 
-    private EArcHalWrapper mEArcAidl;
+    private EArcNativeWrapper mEArcNativeWrapperImpl;
 
-    private final class EArcHalWrapper implements IBinder.DeathRecipient {
+    protected interface EArcNativeWrapper {
+        boolean nativeInit();
+        void nativeSetEArcEnabled(boolean enabled);
+        boolean nativeIsEArcEnabled();
+        void nativeSetCallback(EarcAidlCallback callback);
+        byte nativeGetState(int portId);
+        byte[] nativeGetLastReportedAudioCapabilities(int portId);
+    }
+
+    private static final class EArcNativeWrapperImpl implements EArcNativeWrapper,
+            IBinder.DeathRecipient {
         private IEArc mEArc;
-        private IEArcCallback mEArcCallback;
+        private EarcAidlCallback mEArcCallback;
 
         @Override
         public void binderDied() {
@@ -65,10 +75,12 @@ final class HdmiEarcController {
             return true;
         }
 
+        @Override
         public boolean nativeInit() {
             return connectToHal();
         }
 
+        @Override
         public void nativeSetEArcEnabled(boolean enabled) {
             try {
                 mEArc.setEArcEnabled(enabled);
@@ -80,6 +92,7 @@ final class HdmiEarcController {
             }
         }
 
+        @Override
         public boolean nativeIsEArcEnabled() {
             try {
                 return mEArc.isEArcEnabled();
@@ -89,7 +102,8 @@ final class HdmiEarcController {
             }
         }
 
-        public void nativeSetCallback(IEArcCallback callback) {
+        @Override
+        public void nativeSetCallback(EarcAidlCallback callback) {
             mEArcCallback = callback;
             try {
                 mEArc.setCallback(callback);
@@ -98,6 +112,7 @@ final class HdmiEarcController {
             }
         }
 
+        @Override
         public byte nativeGetState(int portId) {
             try {
                 return mEArc.getState(portId);
@@ -107,6 +122,7 @@ final class HdmiEarcController {
             }
         }
 
+        @Override
         public byte[] nativeGetLastReportedAudioCapabilities(int portId) {
             try {
                 return mEArc.getLastReportedAudioCapabilities(portId);
@@ -119,8 +135,9 @@ final class HdmiEarcController {
     }
 
     // Private constructor. Use HdmiEarcController.create().
-    private HdmiEarcController(HdmiControlService service) {
+    private HdmiEarcController(HdmiControlService service, EArcNativeWrapper nativeWrapper) {
         mService = service;
+        mEArcNativeWrapperImpl = nativeWrapper;
     }
 
     /**
@@ -134,20 +151,26 @@ final class HdmiEarcController {
      *         returns {@code null}.
      */
     static HdmiEarcController create(HdmiControlService service) {
-        // TODO add the native wrapper and return null if eARC HAL is not present.
-        HdmiEarcController controller = new HdmiEarcController(service);
-        if (!controller.init()) {
+        return createWithNativeWrapper(service, new EArcNativeWrapperImpl());
+    }
+
+    /**
+     * A factory method with injection of native methods for testing.
+     */
+    static HdmiEarcController createWithNativeWrapper(HdmiControlService service,
+            EArcNativeWrapper nativeWrapper) {
+        HdmiEarcController controller = new HdmiEarcController(service, nativeWrapper);
+        if (!controller.init(nativeWrapper)) {
             HdmiLogger.warning("Could not connect to eARC AIDL HAL.");
             return null;
         }
         return controller;
     }
 
-    private boolean init() {
-        mEArcAidl = new EArcHalWrapper();
-        if (mEArcAidl.nativeInit()) {
+    private boolean init(EArcNativeWrapper nativeWrapper) {
+        if (nativeWrapper.nativeInit()) {
             mControlHandler = new Handler(mService.getServiceLooper());
-            mEArcAidl.nativeSetCallback(new EarcAidlCallback());
+            mEArcNativeWrapperImpl.nativeSetCallback(new EarcAidlCallback());
             return true;
         }
         return false;
@@ -171,7 +194,7 @@ final class HdmiEarcController {
     @HdmiAnnotations.ServiceThreadOnly
     void setEarcEnabled(boolean enabled) {
         assertRunOnServiceThread();
-        mEArcAidl.nativeSetEArcEnabled(enabled);
+        mEArcNativeWrapperImpl.nativeSetEArcEnabled(enabled);
     }
 
     /**
@@ -182,7 +205,7 @@ final class HdmiEarcController {
     @HdmiAnnotations.ServiceThreadOnly
     @Constants.EarcStatus
     int getState(int portId) {
-        return mEArcAidl.nativeGetState(portId);
+        return mEArcNativeWrapperImpl.nativeGetState(portId);
     }
 
     /**
@@ -192,7 +215,7 @@ final class HdmiEarcController {
      */
     @HdmiAnnotations.ServiceThreadOnly
     byte[] getLastReportedCaps(int portId) {
-        return mEArcAidl.nativeGetLastReportedAudioCapabilities(portId);
+        return mEArcNativeWrapperImpl.nativeGetLastReportedAudioCapabilities(portId);
     }
 
     final class EarcAidlCallback extends IEArcCallback.Stub {
