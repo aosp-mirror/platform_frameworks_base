@@ -170,6 +170,7 @@ class ScreenRotationAnimation {
                 if (!isCustomRotate()) {
                     mStartLuma = TransitionAnimation.getBorderLuma(hardwareBuffer, colorSpace);
                 }
+                hardwareBuffer.close();
             }
 
             t.setLayer(mAnimLeash, SCREEN_FREEZE_LAYER_BASE);
