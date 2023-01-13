@@ -363,6 +363,7 @@ public:
             std::map<PointerIconStyle, SpriteIcon>* outResources,
             std::map<PointerIconStyle, PointerAnimation>* outAnimationResources, int32_t displayId);
     virtual PointerIconStyle getDefaultPointerIconId();
+    virtual PointerIconStyle getDefaultStylusIconId();
     virtual PointerIconStyle getCustomPointerIconId();
     virtual void onPointerDisplayIdChanged(int32_t displayId, float xPos, float yPos);
 
@@ -1603,6 +1604,11 @@ void NativeInputManager::loadAdditionalMouseResources(
 
 PointerIconStyle NativeInputManager::getDefaultPointerIconId() {
     return PointerIconStyle::TYPE_ARROW;
+}
+
+PointerIconStyle NativeInputManager::getDefaultStylusIconId() {
+    // TODO: add resource for default stylus icon and change this
+    return PointerIconStyle::TYPE_CROSSHAIR;
 }
 
 PointerIconStyle NativeInputManager::getCustomPointerIconId() {

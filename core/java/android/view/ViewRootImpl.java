@@ -772,7 +772,12 @@ public final class ViewRootImpl implements ViewParent,
     private long mFpsPrevTime = -1;
     private int mFpsNumFrames;
 
-    private int mPointerIconType = PointerIcon.TYPE_NOT_SPECIFIED;
+    /**
+     * The resolved pointer icon type requested by this window.
+     * A null value indicates the resolved pointer icon has not yet been calculated.
+     */
+    @Nullable
+    private Integer mPointerIconType = null;
     private PointerIcon mCustomPointerIcon = null;
 
     /**
@@ -6905,13 +6910,13 @@ public final class ViewRootImpl implements ViewParent,
                         || event.getActionMasked() == MotionEvent.ACTION_HOVER_EXIT) {
                     // Other apps or the window manager may change the icon type outside of
                     // this app, therefore the icon type has to be reset on enter/exit event.
-                    mPointerIconType = PointerIcon.TYPE_NOT_SPECIFIED;
+                    mPointerIconType = null;
                 }
 
                 if (event.getActionMasked() != MotionEvent.ACTION_HOVER_EXIT) {
                     if (!updatePointerIcon(event) &&
                             event.getActionMasked() == MotionEvent.ACTION_HOVER_MOVE) {
-                        mPointerIconType = PointerIcon.TYPE_NOT_SPECIFIED;
+                        mPointerIconType = null;
                     }
                 }
             }
@@ -6950,7 +6955,7 @@ public final class ViewRootImpl implements ViewParent,
     }
 
     private void resetPointerIcon(MotionEvent event) {
-        mPointerIconType = PointerIcon.TYPE_NOT_SPECIFIED;
+        mPointerIconType = null;
         updatePointerIcon(event);
     }
 
@@ -6980,9 +6985,9 @@ public final class ViewRootImpl implements ViewParent,
         }
 
         final int pointerType = (pointerIcon != null) ?
-                pointerIcon.getType() : PointerIcon.TYPE_DEFAULT;
+                pointerIcon.getType() : PointerIcon.TYPE_NOT_SPECIFIED;
 
-        if (mPointerIconType != pointerType) {
+        if (mPointerIconType == null || mPointerIconType != pointerType) {
             mPointerIconType = pointerType;
             mCustomPointerIcon = null;
             if (mPointerIconType != PointerIcon.TYPE_CUSTOM) {
