@@ -404,6 +404,13 @@ public class ActivityManager {
     public static final int START_FLAG_NATIVE_DEBUGGING = 1<<3;
 
     /**
+     * Flag for IActivityManaqer.startActivity: launch the app for
+     * debugging and suspend threads.
+     * @hide
+     */
+    public static final int START_FLAG_DEBUG_SUSPEND = 1 << 4;
+
+    /**
      * Result for IActivityManaqer.broadcastIntent: success!
      * @hide
      */
