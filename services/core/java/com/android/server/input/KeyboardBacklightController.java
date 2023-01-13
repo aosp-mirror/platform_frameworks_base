@@ -17,7 +17,6 @@
 package com.android.server.input;
 
 import android.annotation.BinderThread;
-import android.annotation.ColorInt;
 import android.content.Context;
 import android.graphics.Color;
 import android.hardware.input.IKeyboardBacklightListener;
@@ -29,6 +28,7 @@ import android.os.IBinder;
 import android.os.Looper;
 import android.os.Message;
 import android.os.RemoteException;
+import android.os.SystemClock;
 import android.util.IndentingPrintWriter;
 import android.util.Log;
 import android.util.Slog;
@@ -39,9 +39,10 @@ import com.android.internal.annotations.GuardedBy;
 import com.android.internal.annotations.VisibleForTesting;
 
 import java.io.PrintWriter;
+import java.time.Duration;
+import java.util.Arrays;
 import java.util.Objects;
 import java.util.OptionalInt;
-import java.util.TreeSet;
 
 /**
  * A thread-safe component of {@link InputManagerService} responsible for managing the keyboard
@@ -59,12 +60,20 @@ final class KeyboardBacklightController implements
     private enum Direction {
         DIRECTION_UP, DIRECTION_DOWN
     }
-    private static final int MSG_INCREMENT_KEYBOARD_BACKLIGHT = 1;
-    private static final int MSG_DECREMENT_KEYBOARD_BACKLIGHT = 2;
+    private static final int MSG_UPDATE_EXISTING_DEVICES = 1;
+    private static final int MSG_INCREMENT_KEYBOARD_BACKLIGHT = 2;
+    private static final int MSG_DECREMENT_KEYBOARD_BACKLIGHT = 3;
+    private static final int MSG_NOTIFY_USER_ACTIVITY = 4;
+    private static final int MSG_NOTIFY_USER_INACTIVITY = 5;
+    private static final int MSG_INTERACTIVE_STATE_CHANGED = 6;
     private static final int MAX_BRIGHTNESS = 255;
     private static final int NUM_BRIGHTNESS_CHANGE_STEPS = 10;
+
     @VisibleForTesting
-    static final TreeSet<Integer> BRIGHTNESS_LEVELS = new TreeSet<>();
+    static final long USER_INACTIVITY_THRESHOLD_MILLIS = Duration.ofSeconds(30).toMillis();
+
+    @VisibleForTesting
+    static final int[] BRIGHTNESS_VALUE_FOR_LEVEL = new int[NUM_BRIGHTNESS_CHANGE_STEPS + 1];
 
     private final Context mContext;
     private final NativeInputManagerService mNative;
@@ -72,7 +81,12 @@ final class KeyboardBacklightController implements
     @GuardedBy("mDataStore")
     private final PersistentDataStore mDataStore;
     private final Handler mHandler;
-    private final SparseArray<Light> mKeyboardBacklights = new SparseArray<>();
+    // Always access on handler thread or need to lock this for synchronization.
+    private final SparseArray<KeyboardBacklightState> mKeyboardBacklights = new SparseArray<>(1);
+    // Maintains state if all backlights should be on or turned off
+    private boolean mIsBacklightOn = false;
+    // Maintains state if currently the device is interactive or not
+    private boolean mIsInteractive = true;
 
     // List of currently registered keyboard backlight listeners
     @GuardedBy("mKeyboardBacklightListenerRecords")
@@ -84,8 +98,8 @@ final class KeyboardBacklightController implements
         // device brightness range to [0-255]
         // Levels are: 0, 25, 51, ..., 255
         for (int i = 0; i <= NUM_BRIGHTNESS_CHANGE_STEPS; i++) {
-            BRIGHTNESS_LEVELS.add(
-                    (int) Math.floor(((float) i * MAX_BRIGHTNESS) / NUM_BRIGHTNESS_CHANGE_STEPS));
+            BRIGHTNESS_VALUE_FOR_LEVEL[i] = (int) Math.floor(
+                    ((float) i * MAX_BRIGHTNESS) / NUM_BRIGHTNESS_CHANGE_STEPS);
         }
     }
 
@@ -102,10 +116,10 @@ final class KeyboardBacklightController implements
         InputManager inputManager = Objects.requireNonNull(
                 mContext.getSystemService(InputManager.class));
         inputManager.registerInputDeviceListener(this, mHandler);
-        // Circle through all the already added input devices
-        for (int deviceId : inputManager.getInputDeviceIds()) {
-            onInputDeviceAdded(deviceId);
-        }
+
+        Message msg = Message.obtain(mHandler, MSG_UPDATE_EXISTING_DEVICES,
+                inputManager.getInputDeviceIds());
+        mHandler.sendMessage(msg);
     }
 
     @Override
@@ -120,37 +134,41 @@ final class KeyboardBacklightController implements
         mHandler.sendMessage(msg);
     }
 
+    @Override
+    public void notifyUserActivity() {
+        Message msg = Message.obtain(mHandler, MSG_NOTIFY_USER_ACTIVITY);
+        mHandler.sendMessage(msg);
+    }
+
+    @Override
+    public void onInteractiveChanged(boolean isInteractive) {
+        Message msg = Message.obtain(mHandler, MSG_INTERACTIVE_STATE_CHANGED, isInteractive);
+        mHandler.sendMessage(msg);
+    }
+
     private void updateKeyboardBacklight(int deviceId, Direction direction) {
         InputDevice inputDevice = getInputDevice(deviceId);
-        Light keyboardBacklight = mKeyboardBacklights.get(deviceId);
-        if (inputDevice == null || keyboardBacklight == null) {
+        KeyboardBacklightState state = mKeyboardBacklights.get(deviceId);
+        if (inputDevice == null || state == null) {
             return;
         }
+        Light keyboardBacklight = state.mLight;
         // Follow preset levels of brightness defined in BRIGHTNESS_LEVELS
-        int currBrightness = BRIGHTNESS_LEVELS.floor(Color.alpha(
-                mNative.getLightColor(deviceId, keyboardBacklight.getId())));
-        int newBrightness;
+        final int currBrightnessLevel = state.mBrightnessLevel;
+        final int newBrightnessLevel;
         if (direction == Direction.DIRECTION_UP) {
-            newBrightness = currBrightness != MAX_BRIGHTNESS ? BRIGHTNESS_LEVELS.higher(
-                    currBrightness) : currBrightness;
+            newBrightnessLevel = Math.min(currBrightnessLevel + 1, NUM_BRIGHTNESS_CHANGE_STEPS);
         } else {
-            newBrightness = currBrightness != 0 ? BRIGHTNESS_LEVELS.lower(currBrightness)
-                    : currBrightness;
+            newBrightnessLevel = Math.max(currBrightnessLevel - 1, 0);
         }
-        @ColorInt int newColor = Color.argb(newBrightness, 0, 0, 0);
-        mNative.setLightColor(deviceId, keyboardBacklight.getId(), newColor);
-        if (DEBUG) {
-            Slog.d(TAG, "Changing brightness from " + currBrightness + " to " + newBrightness);
-        }
-
-        notifyKeyboardBacklightChanged(deviceId, BRIGHTNESS_LEVELS.headSet(newBrightness).size(),
-                true/* isTriggeredByKeyPress */);
+        updateBacklightState(deviceId, keyboardBacklight, newBrightnessLevel,
+                true /* isTriggeredByKeyPress */);
 
         synchronized (mDataStore) {
             try {
                 mDataStore.setKeyboardBacklightBrightness(inputDevice.getDescriptor(),
                         keyboardBacklight.getId(),
-                        newBrightness);
+                        BRIGHTNESS_VALUE_FOR_LEVEL[newBrightnessLevel]);
             } finally {
                 mDataStore.saveIfNeeded();
             }
@@ -163,22 +181,82 @@ final class KeyboardBacklightController implements
             brightness = mDataStore.getKeyboardBacklightBrightness(
                     inputDevice.getDescriptor(), keyboardBacklight.getId());
         }
-        if (!brightness.isEmpty()) {
-            mNative.setLightColor(inputDevice.getId(), keyboardBacklight.getId(),
-                    Color.argb(brightness.getAsInt(), 0, 0, 0));
+        if (brightness.isPresent()) {
+            int brightnessValue = Math.max(0, Math.min(MAX_BRIGHTNESS, brightness.getAsInt()));
+            int brightnessLevel = Arrays.binarySearch(BRIGHTNESS_VALUE_FOR_LEVEL, brightnessValue);
+            updateBacklightState(inputDevice.getId(), keyboardBacklight, brightnessLevel,
+                    false /* isTriggeredByKeyPress */);
             if (DEBUG) {
                 Slog.d(TAG, "Restoring brightness level " + brightness.getAsInt());
             }
         }
     }
 
+    private void handleUserActivity() {
+        // Ignore user activity if device is not interactive. When device becomes interactive, we
+        // will send another user activity to turn backlight on.
+        if (!mIsInteractive) {
+            return;
+        }
+        if (!mIsBacklightOn) {
+            mIsBacklightOn = true;
+            for (int i = 0; i < mKeyboardBacklights.size(); i++) {
+                int deviceId = mKeyboardBacklights.keyAt(i);
+                KeyboardBacklightState state = mKeyboardBacklights.valueAt(i);
+                updateBacklightState(deviceId, state.mLight, state.mBrightnessLevel,
+                        false /* isTriggeredByKeyPress */);
+            }
+        }
+        mHandler.removeMessages(MSG_NOTIFY_USER_INACTIVITY);
+        mHandler.sendEmptyMessageAtTime(MSG_NOTIFY_USER_INACTIVITY,
+                SystemClock.uptimeMillis() + USER_INACTIVITY_THRESHOLD_MILLIS);
+    }
+
+    private void handleUserInactivity() {
+        if (mIsBacklightOn) {
+            mIsBacklightOn = false;
+            for (int i = 0; i < mKeyboardBacklights.size(); i++) {
+                int deviceId = mKeyboardBacklights.keyAt(i);
+                KeyboardBacklightState state = mKeyboardBacklights.valueAt(i);
+                updateBacklightState(deviceId, state.mLight, state.mBrightnessLevel,
+                        false /* isTriggeredByKeyPress */);
+            }
+        }
+    }
+
+    @VisibleForTesting
+    public void handleInteractiveStateChange(boolean isInteractive) {
+        // Interactive state changes should force the keyboard to turn on/off irrespective of
+        // whether time out occurred or not.
+        mIsInteractive = isInteractive;
+        if (isInteractive) {
+            handleUserActivity();
+        } else {
+            handleUserInactivity();
+        }
+    }
+
     private boolean handleMessage(Message msg) {
         switch (msg.what) {
+            case MSG_UPDATE_EXISTING_DEVICES:
+                for (int deviceId : (int[]) msg.obj) {
+                    onInputDeviceAdded(deviceId);
+                }
+                return true;
             case MSG_INCREMENT_KEYBOARD_BACKLIGHT:
                 updateKeyboardBacklight((int) msg.obj, Direction.DIRECTION_UP);
                 return true;
             case MSG_DECREMENT_KEYBOARD_BACKLIGHT:
                 updateKeyboardBacklight((int) msg.obj, Direction.DIRECTION_DOWN);
+                return true;
+            case MSG_NOTIFY_USER_ACTIVITY:
+                handleUserActivity();
+                return true;
+            case MSG_NOTIFY_USER_INACTIVITY:
+                handleUserInactivity();
+                return true;
+            case MSG_INTERACTIVE_STATE_CHANGED:
+                handleInteractiveStateChange((boolean) msg.obj);
                 return true;
         }
         return false;
@@ -208,12 +286,12 @@ final class KeyboardBacklightController implements
             mKeyboardBacklights.remove(deviceId);
             return;
         }
-        final Light oldBacklight = mKeyboardBacklights.get(deviceId);
-        if (oldBacklight != null && oldBacklight.getId() == keyboardBacklight.getId()) {
+        KeyboardBacklightState state = mKeyboardBacklights.get(deviceId);
+        if (state != null && state.mLight.getId() == keyboardBacklight.getId()) {
             return;
         }
         // The keyboard backlight was added or changed.
-        mKeyboardBacklights.put(deviceId, keyboardBacklight);
+        mKeyboardBacklights.put(deviceId, new KeyboardBacklightState(keyboardBacklight));
         restoreBacklightBrightness(inputDevice, keyboardBacklight);
     }
 
@@ -275,13 +353,29 @@ final class KeyboardBacklightController implements
         }
     }
 
-    private void notifyKeyboardBacklightChanged(int deviceId, int currentBacklightLevel,
+    private void updateBacklightState(int deviceId, Light light, int brightnessLevel,
             boolean isTriggeredByKeyPress) {
+        KeyboardBacklightState state = mKeyboardBacklights.get(deviceId);
+        if (state == null) {
+            return;
+        }
+
+        mNative.setLightColor(deviceId, light.getId(),
+                mIsBacklightOn ? Color.argb(BRIGHTNESS_VALUE_FOR_LEVEL[brightnessLevel], 0, 0, 0)
+                        : 0);
+        if (DEBUG) {
+            Slog.d(TAG, "Changing state from " + state.mBrightnessLevel + " to " + brightnessLevel
+                    + "(isBacklightOn = " + mIsBacklightOn + ")");
+        }
+        state.mBrightnessLevel = brightnessLevel;
+
         synchronized (mKeyboardBacklightListenerRecords) {
             for (int i = 0; i < mKeyboardBacklightListenerRecords.size(); i++) {
+                IKeyboardBacklightState callbackState = new IKeyboardBacklightState();
+                callbackState.brightnessLevel = brightnessLevel;
+                callbackState.maxBrightnessLevel = NUM_BRIGHTNESS_CHANGE_STEPS;
                 mKeyboardBacklightListenerRecords.valueAt(i).notifyKeyboardBacklightChanged(
-                        deviceId, new KeyboardBacklightState(currentBacklightLevel),
-                        isTriggeredByKeyPress);
+                        deviceId, callbackState, isTriggeredByKeyPress);
             }
         }
     }
@@ -295,11 +389,14 @@ final class KeyboardBacklightController implements
     @Override
     public void dump(PrintWriter pw) {
         IndentingPrintWriter ipw = new IndentingPrintWriter(pw);
-        ipw.println(TAG + ": " + mKeyboardBacklights.size() + " keyboard backlights");
+        ipw.println(
+                TAG + ": " + mKeyboardBacklights.size() + " keyboard backlights, isBacklightOn = "
+                        + mIsBacklightOn);
+
         ipw.increaseIndent();
         for (int i = 0; i < mKeyboardBacklights.size(); i++) {
-            Light light = mKeyboardBacklights.get(i);
-            ipw.println(i + ": { id: " + light.getId() + ", name: " + light.getName() + " }");
+            KeyboardBacklightState state = mKeyboardBacklights.valueAt(i);
+            ipw.println(i + ": " + state.toString());
         }
         ipw.decreaseIndent();
     }
@@ -334,17 +431,18 @@ final class KeyboardBacklightController implements
         }
     }
 
-    private static class KeyboardBacklightState extends IKeyboardBacklightState {
+    private static class KeyboardBacklightState {
+        private final Light mLight;
+        private int mBrightnessLevel;
 
-        KeyboardBacklightState(int brightnessLevel) {
-            this.brightnessLevel = brightnessLevel;
-            this.maxBrightnessLevel = NUM_BRIGHTNESS_CHANGE_STEPS;
+        KeyboardBacklightState(Light light) {
+            mLight = light;
         }
 
         @Override
         public String toString() {
-            return "KeyboardBacklightState{brightnessLevel=" + brightnessLevel
-                    + ", maxBrightnessLevel=" + maxBrightnessLevel
+            return "KeyboardBacklightState{Light=" + mLight.getId()
+                    + ", BrightnessLevel=" + mBrightnessLevel
                     + "}";
         }
     }

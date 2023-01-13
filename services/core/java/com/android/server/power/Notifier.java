@@ -737,6 +737,7 @@ public class Notifier {
         }
         TelephonyManager tm = mContext.getSystemService(TelephonyManager.class);
         tm.notifyUserActivity();
+        mInputManagerInternal.notifyUserActivity();
         mPolicy.userActivity(displayGroupId, event);
         mFaceDownDetector.userActivity(event);
         mScreenUndimDetector.userActivity(displayGroupId);
