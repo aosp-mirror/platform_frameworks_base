@@ -214,6 +214,11 @@ object Flags {
     val ENABLE_WALLET_CONTEXTUAL_LOYALTY_CARDS =
         unreleasedFlag(226, "enable_wallet_contextual_loyalty_cards", teamfood = false)
 
+    // TODO(b/242908637): Tracking Bug
+    @JvmField
+    val WALLPAPER_FULLSCREEN_PREVIEW =
+        unreleasedFlag(227, "wallpaper_fullscreen_preview", teamfood = true)
+
     // 300 - power menu
     // TODO(b/254512600): Tracking Bug
     @JvmField val POWER_MENU_LITE = releasedFlag(300, "power_menu_lite")
