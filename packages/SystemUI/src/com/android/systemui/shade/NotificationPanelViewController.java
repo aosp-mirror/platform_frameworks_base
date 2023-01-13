@@ -704,7 +704,7 @@ public final class NotificationPanelViewController implements Dumpable {
         updatePanelExpansionAndVisibility();
     };
     private final Runnable mMaybeHideExpandedRunnable = () -> {
-        if (getExpansionFraction() == 0.0f) {
+        if (getExpandedFraction() == 0.0f) {
             postToView(mHideExpandedRunnable);
         }
     };
@@ -5368,10 +5368,6 @@ public final class NotificationPanelViewController implements Dumpable {
         }
         InteractionJankMonitor.getInstance().cancel(
                 InteractionJankMonitor.CUJ_NOTIFICATION_SHADE_EXPAND_COLLAPSE);
-    }
-
-    private float getExpansionFraction() {
-        return mExpandedFraction;
     }
 
     private ShadeExpansionStateManager getShadeExpansionStateManager() {
