@@ -28,7 +28,6 @@ class LaunchableImageView : ImageView, LaunchableView {
         LaunchableViewDelegate(
             this,
             superSetVisibility = { super.setVisibility(it) },
-            superSetTransitionVisibility = { super.setTransitionVisibility(it) },
         )
 
     constructor(context: Context?) : super(context)
@@ -52,9 +51,5 @@ class LaunchableImageView : ImageView, LaunchableView {
 
     override fun setVisibility(visibility: Int) {
         delegate.setVisibility(visibility)
-    }
-
-    override fun setTransitionVisibility(visibility: Int) {
-        delegate.setTransitionVisibility(visibility)
     }
 }
