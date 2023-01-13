@@ -3181,7 +3181,8 @@ public final class ActiveServices {
     int bindServiceLocked(IApplicationThread caller, IBinder token, Intent service,
             String resolvedType, final IServiceConnection connection, int flags,
             String instanceName, boolean isSdkSandboxService, int sdkSandboxClientAppUid,
-            String sdkSandboxClientAppPackage, String callingPackage, final int userId)
+            String sdkSandboxClientAppPackage, IApplicationThread sdkSandboxClientApplicationThread,
+            String callingPackage, final int userId)
             throws TransactionTooLargeException {
         if (DEBUG_SERVICE) Slog.v(TAG_SERVICE, "bindService: " + service
                 + " type=" + resolvedType + " conn=" + connection.asBinder()
@@ -3271,6 +3272,10 @@ public final class ActiveServices {
         final boolean allowInstant = (flags & Context.BIND_ALLOW_INSTANT) != 0;
         final boolean inSharedIsolatedProcess = (flags & Context.BIND_SHARED_ISOLATED_PROCESS) != 0;
 
+        ProcessRecord attributedApp = null;
+        if (sdkSandboxClientAppUid > 0) {
+            attributedApp = mAm.getRecordForAppLOSP(sdkSandboxClientApplicationThread);
+        }
         ServiceLookupResult res = retrieveServiceLocked(service, instanceName,
                 isSdkSandboxService, sdkSandboxClientAppUid, sdkSandboxClientAppPackage,
                 resolvedType, callingPackage, callingPid, callingUid, userId, true, callerFg,
@@ -3283,7 +3288,7 @@ public final class ActiveServices {
             return -1;
         }
         ServiceRecord s = res.record;
-        final AppBindRecord b = s.retrieveAppBindingLocked(service, callerApp);
+        final AppBindRecord b = s.retrieveAppBindingLocked(service, callerApp, attributedApp);
         final ProcessServiceRecord clientPsr = b.client.mServices;
         if (clientPsr.numberOfConnections() >= mAm.mConstants.mMaxServiceConnectionsPerProcess) {
             Slog.w(TAG, "bindService exceeded max service connection number per process, "

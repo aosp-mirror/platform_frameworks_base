@@ -16,11 +16,13 @@
 
 #pragma once
 
-#include "CanvasTransform.h"
-#include "hwui/Bitmap.h"
-#include "utils/Macros.h"
-#include "utils/TypeLogic.h"
+#include <SkRuntimeEffect.h>
+#include <log/log.h>
 
+#include <cstdlib>
+#include <vector>
+
+#include "CanvasTransform.h"
 #include "SkCanvas.h"
 #include "SkCanvasVirtualEnforcer.h"
 #include "SkDrawable.h"
@@ -28,11 +30,11 @@
 #include "SkPaint.h"
 #include "SkPath.h"
 #include "SkRect.h"
-
+#include "hwui/Bitmap.h"
 #include "pipeline/skia/AnimatedDrawables.h"
-
-#include <SkRuntimeEffect.h>
-#include <vector>
+#include "utils/AutoMalloc.h"
+#include "utils/Macros.h"
+#include "utils/TypeLogic.h"
 
 enum class SkBlendMode;
 class SkRRect;
@@ -145,7 +147,7 @@ private:
     template <typename Fn, typename... Args>
     void map(const Fn[], Args...) const;
 
-    SkAutoTMalloc<uint8_t> fBytes;
+    AutoTMalloc<uint8_t> fBytes;
     size_t fUsed = 0;
     size_t fReserved = 0;
 

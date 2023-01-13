@@ -662,9 +662,7 @@ public final class CompanionDeviceManager {
      * @return the associations list
      * @see #addOnAssociationsChangedListener(Executor, OnAssociationsChangedListener)
      * @see #removeOnAssociationsChangedListener(OnAssociationsChangedListener)
-     * @hide
      */
-    @SystemApi
     @UserHandleAware
     @RequiresPermission(android.Manifest.permission.MANAGE_COMPANION_DEVICES)
     public @NonNull List<AssociationInfo> getAllAssociations() {
@@ -678,10 +676,7 @@ public final class CompanionDeviceManager {
 
     /**
      * Listener for any changes to {@link AssociationInfo}.
-     *
-     * @hide
      */
-    @SystemApi
     public interface OnAssociationsChangedListener {
         /**
          * Invoked when a change occurs to any of the associations for the user (including adding
@@ -696,9 +691,7 @@ public final class CompanionDeviceManager {
      * Register listener for any changes to {@link AssociationInfo}.
      *
      * @see #getAllAssociations()
-     * @hide
      */
-    @SystemApi
     @UserHandleAware
     @RequiresPermission(android.Manifest.permission.MANAGE_COMPANION_DEVICES)
     public void addOnAssociationsChangedListener(
@@ -720,9 +713,7 @@ public final class CompanionDeviceManager {
      * Unregister listener for any changes to {@link AssociationInfo}.
      *
      * @see #getAllAssociations()
-     * @hide
      */
-    @SystemApi
     @UserHandleAware
     @RequiresPermission(android.Manifest.permission.MANAGE_COMPANION_DEVICES)
     public void removeOnAssociationsChangedListener(

@@ -18,17 +18,21 @@ package com.android.systemui.stylus
 
 import android.Manifest
 import android.app.PendingIntent
+import android.content.ActivityNotFoundException
 import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
 import android.content.IntentFilter
 import android.hardware.BatteryState
 import android.hardware.input.InputManager
+import android.os.Bundle
 import android.os.Handler
 import android.os.UserHandle
+import android.util.Log
 import android.view.InputDevice
 import androidx.core.app.NotificationCompat
 import androidx.core.app.NotificationManagerCompat
+import com.android.internal.annotations.VisibleForTesting
 import com.android.systemui.R
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.dagger.qualifiers.Background
@@ -53,6 +57,7 @@ constructor(
     // These values must only be accessed on the handler.
     private var batteryCapacity = 1.0f
     private var suppressed = false
+    private var inputDeviceId: Int? = null
 
     fun init() {
         val filter =
@@ -87,10 +92,12 @@ constructor(
         }
     }
 
-    fun updateBatteryState(batteryState: BatteryState) {
+    fun updateBatteryState(deviceId: Int, batteryState: BatteryState) {
         handler.post updateBattery@{
-            if (batteryState.capacity == batteryCapacity) return@updateBattery
+            if (batteryState.capacity == batteryCapacity || batteryState.capacity <= 0f)
+                return@updateBattery
 
+            inputDeviceId = deviceId
             batteryCapacity = batteryState.capacity
             refresh()
         }
@@ -150,23 +157,41 @@ constructor(
     }
 
     private fun getPendingBroadcast(action: String): PendingIntent? {
-        return PendingIntent.getBroadcastAsUser(
+        return PendingIntent.getBroadcast(
             context,
             0,
-            Intent(action),
+            Intent(action).setPackage(context.packageName),
             PendingIntent.FLAG_IMMUTABLE,
-            UserHandle.CURRENT
         )
     }
 
-    private val receiver: BroadcastReceiver =
+    @VisibleForTesting
+    internal val receiver: BroadcastReceiver =
         object : BroadcastReceiver() {
             override fun onReceive(context: Context, intent: Intent) {
                 when (intent.action) {
                     ACTION_DISMISSED_LOW_BATTERY -> updateSuppression(true)
                     ACTION_CLICKED_LOW_BATTERY -> {
                         updateSuppression(true)
-                        // TODO(b/261584943): open USI device details page
+                        if (inputDeviceId == null) return
+
+                        val args = Bundle()
+                        args.putInt(KEY_DEVICE_INPUT_ID, inputDeviceId!!)
+                        try {
+                            context.startActivity(
+                                Intent(ACTION_STYLUS_USI_DETAILS)
+                                    .putExtra(KEY_SETTINGS_FRAGMENT_ARGS, args)
+                                    .addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP)
+                                    .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+                            )
+                        } catch (e: ActivityNotFoundException) {
+                            // In the rare scenario where the Settings app manifest doesn't contain
+                            // the USI details activity, ignore the intent.
+                            Log.e(
+                                StylusUsiPowerUI::class.java.simpleName,
+                                "Cannot open USI details page."
+                            )
+                        }
                     }
                 }
             }
@@ -179,7 +204,11 @@ constructor(
 
         private val USI_NOTIFICATION_ID = R.string.stylus_battery_low_percentage
 
-        private const val ACTION_DISMISSED_LOW_BATTERY = "StylusUsiPowerUI.dismiss"
-        private const val ACTION_CLICKED_LOW_BATTERY = "StylusUsiPowerUI.click"
+        @VisibleForTesting const val ACTION_DISMISSED_LOW_BATTERY = "StylusUsiPowerUI.dismiss"
+        @VisibleForTesting const val ACTION_CLICKED_LOW_BATTERY = "StylusUsiPowerUI.click"
+        @VisibleForTesting
+        const val ACTION_STYLUS_USI_DETAILS = "com.android.settings.STYLUS_USI_DETAILS_SETTINGS"
+        @VisibleForTesting const val KEY_DEVICE_INPUT_ID = "device_input_id"
+        @VisibleForTesting const val KEY_SETTINGS_FRAGMENT_ARGS = ":settings:show_fragment_args"
     }
 }

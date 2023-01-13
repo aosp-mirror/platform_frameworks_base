@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<resources>
+  <color name="power_color">#dadce0</color>
+  <color name="quick_settings_color">#78d9ec</color>
+  <color name="a11y_settings_color">#d9affe</color>
+  <color name="recent_apps_color">#f0a5dd</color>
+  <color name="lockscreen_color">#85e4a0</color>
+  <color name="volume_color">#7ae3d4</color>
+  <color name="notifications_color">#f496ac</color>
+  <color name="screenshot_color">#adcbff</color>
+  <color name="assistant_color">#F1F3F4</color>
+  <color name="brightness_color">#fdd663</color>
+
+  <color name="ripple_material_color">#10FFFFFF</color>
+
+  <color name="overlay_bg_color">#313235</color>
+  <color name="footer_icon_color">#E8EAED</color>
+  <color name="footer_icon_enabled_color">#E8EAED</color>
+  <color name="footer_icon_disabled_color">#5F6368</color>
+  <color name="colorControlNormal">#202124</color>
+
+</resources>

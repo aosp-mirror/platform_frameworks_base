@@ -76,15 +76,9 @@ public final class GetRequestSession extends RequestSession<GetCredentialRequest
                     mRequestId, mClientRequest, mClientAppInfo.getPackageName()),
                     providerDataList));
         } catch (RemoteException e) {
-            Log.i(TAG, "Issue with invoking pending intent: " + e.getMessage());
-            // TODO: Propagate failure
+            respondToClientWithErrorAndFinish(
+                    GetCredentialException.TYPE_UNKNOWN, "Unable to instantiate selector");
         }
-    }
-
-    @Override // from provider session
-    public void onProviderStatusChanged(ProviderSession.Status status,
-            ComponentName componentName) {
-        super.onProviderStatusChanged(status, componentName);
     }
 
     @Override
@@ -128,8 +122,25 @@ public final class GetRequestSession extends RequestSession<GetCredentialRequest
 
     @Override
     public void onUiCancellation() {
-        // TODO("Replace with user cancelled error type when ready")
-        respondToClientWithErrorAndFinish(GetCredentialException.TYPE_NO_CREDENTIAL,
+        respondToClientWithErrorAndFinish(GetCredentialException.TYPE_USER_CANCELED,
                 "User cancelled the selector");
+    }
+
+    @Override
+    public void onProviderStatusChanged(ProviderSession.Status status,
+            ComponentName componentName) {
+        Log.i(TAG, "in onStatusChanged with status: " + status);
+        if (!isAnyProviderPending()) {
+            // If all provider responses have been received, we can either need the UI,
+            // or we need to respond with error. The only other case is the entry being
+            // selected after the UI has been invoked which has a separate code path.
+            if (isUiInvocationNeeded()) {
+                Log.i(TAG, "in onProviderStatusChanged - isUiInvocationNeeded");
+                getProviderDataAndInitiateUi();
+            } else {
+                respondToClientWithErrorAndFinish(GetCredentialException.TYPE_NO_CREDENTIAL,
+                        "No credentials available");
+            }
+        }
     }
 }

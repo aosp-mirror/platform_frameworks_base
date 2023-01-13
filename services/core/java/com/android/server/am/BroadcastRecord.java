@@ -88,6 +88,7 @@ final class BroadcastRecord extends Binder {
     final boolean interactive; // originated from user interaction?
     final boolean initialSticky; // initial broadcast from register to sticky?
     final boolean prioritized; // contains more than one priority tranche
+    final boolean deferUntilActive; // infinitely deferrable broadcast
     final int userId;       // user id this broadcast was for
     final @Nullable String resolvedType; // the resolved data type
     final @Nullable String[] requiredPermissions; // permissions the caller has required
@@ -97,6 +98,7 @@ final class BroadcastRecord extends Binder {
     final @Nullable BroadcastOptions options; // BroadcastOptions supplied by caller
     final @NonNull List<Object> receivers;   // contains BroadcastFilter and ResolveInfo
     final @DeliveryState int[] delivery;   // delivery state of each receiver
+    final boolean[] deferredUntilActive; // whether each receiver is infinitely deferred
     final int[] blockedUntilTerminalCount; // blocked until count of each receiver
     @Nullable ProcessRecord resultToApp; // who receives final result if non-null
     @Nullable IIntentReceiver resultTo; // who receives final result if non-null
@@ -130,6 +132,7 @@ final class BroadcastRecord extends Binder {
     int manifestCount;      // number of manifest receivers dispatched.
     int manifestSkipCount;  // number of manifest receivers skipped.
     int terminalCount;      // number of receivers in terminal state.
+    int deferredCount;      // number of receivers in deferred state.
     @Nullable BroadcastQueue queue;   // the outbound queue handling this broadcast
 
     // if set to true, app's process will be temporarily allowed to start activities from background
@@ -168,6 +171,8 @@ final class BroadcastRecord extends Binder {
     static final int DELIVERY_SCHEDULED = 4;
     /** Terminal state: failure to dispatch */
     static final int DELIVERY_FAILURE = 5;
+    /** Intermediate state: currently deferred while app is cached */
+    static final int DELIVERY_DEFERRED = 6;
 
     @IntDef(flag = false, prefix = { "DELIVERY_" }, value = {
             DELIVERY_PENDING,
@@ -176,6 +181,7 @@ final class BroadcastRecord extends Binder {
             DELIVERY_TIMEOUT,
             DELIVERY_SCHEDULED,
             DELIVERY_FAILURE,
+            DELIVERY_DEFERRED,
     })
     @Retention(RetentionPolicy.SOURCE)
     public @interface DeliveryState {}
@@ -188,6 +194,7 @@ final class BroadcastRecord extends Binder {
             case DELIVERY_TIMEOUT: return "TIMEOUT";
             case DELIVERY_SCHEDULED: return "SCHEDULED";
             case DELIVERY_FAILURE: return "FAILURE";
+            case DELIVERY_DEFERRED: return "DEFERRED";
             default: return Integer.toString(deliveryState);
         }
     }
@@ -388,6 +395,8 @@ final class BroadcastRecord extends Binder {
         options = _options;
         receivers = (_receivers != null) ? _receivers : EMPTY_RECEIVERS;
         delivery = new int[_receivers != null ? _receivers.size() : 0];
+        deferUntilActive = options != null ? options.isDeferUntilActive() : false;
+        deferredUntilActive = new boolean[deferUntilActive ? delivery.length : 0];
         blockedUntilTerminalCount = calculateBlockedUntilTerminalCount(receivers, _serialized);
         scheduledTime = new long[delivery.length];
         terminalTime = new long[delivery.length];
@@ -443,6 +452,8 @@ final class BroadcastRecord extends Binder {
         options = from.options;
         receivers = from.receivers;
         delivery = from.delivery;
+        deferUntilActive = from.deferUntilActive;
+        deferredUntilActive = from.deferredUntilActive;
         blockedUntilTerminalCount = from.blockedUntilTerminalCount;
         scheduledTime = from.scheduledTime;
         terminalTime = from.terminalTime;
@@ -606,7 +617,7 @@ final class BroadcastRecord extends Binder {
      */
     void setDeliveryState(int index, @DeliveryState int deliveryState) {
         delivery[index] = deliveryState;
-
+        if (deferUntilActive) deferredUntilActive[index] = false;
         switch (deliveryState) {
             case DELIVERY_DELIVERED:
             case DELIVERY_SKIPPED:
@@ -616,6 +627,9 @@ final class BroadcastRecord extends Binder {
                 break;
             case DELIVERY_SCHEDULED:
                 scheduledTime[index] = SystemClock.uptimeMillis();
+                break;
+            case DELIVERY_DEFERRED:
+                if (deferUntilActive) deferredUntilActive[index] = true;
                 break;
         }
     }
@@ -645,6 +659,10 @@ final class BroadcastRecord extends Binder {
 
     boolean isOffload() {
         return (intent.getFlags() & Intent.FLAG_RECEIVER_OFFLOAD) != 0;
+    }
+
+    boolean isDeferUntilActive() {
+        return deferUntilActive;
     }
 
     /**

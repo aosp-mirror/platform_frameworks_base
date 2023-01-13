@@ -30,7 +30,7 @@ please see styles_device_defaults.xml.
  -->
 <resources>
     <!-- Global Theme Styles -->
-    <eat-comment />
+    <eat-comment/>
 
     <style name="WindowTitleBackground">
         <item name="background">@drawable/title_bar</item>
@@ -69,6 +69,19 @@ please see styles_device_defaults.xml.
         <item name="needsDefaultBackgrounds">false</item>
     </style>
 
+    <!-- Base style for the alert dialog with emergency call button   -->
+    <style name="AlertDialogWithEmergencyButton" parent="AlertDialog">
+        <item name="buttonBarNeutralButtonStyle">@style/AlertDialogEmergencyButtonStyle</item>
+    </style>
+
+    <style name="AlertDialogEmergencyButtonStyle" parent="AlertDialogWithEmergencyButton">
+        <item name="background">@drawable/work_mode_emergency_button_background</item>
+        <item name="textColor">@color/text_color_on_accent_device_default</item>
+        <item name="paddingLeft">15dip</item>
+        <item name="paddingRight">15dip</item>
+        <item name="layout_marginStart">10dip</item>
+    </style>
+
     <style name="Widget.PreferenceFrameLayout">
         <item name="borderTop">0dip</item>
         <item name="borderBottom">0dip</item>
@@ -77,7 +90,7 @@ please see styles_device_defaults.xml.
     </style>
 
     <!-- Base style for animations.  This style specifies no animations. -->
-    <style name="Animation" />
+    <style name="Animation"/>
 
     <!-- Standard animations for a full-screen window or activity. -->
     <style name="Animation.Activity">
@@ -231,7 +244,7 @@ please see styles_device_defaults.xml.
     </style>
 
     <!-- A special animation value used internally for popup windows. -->
-    <style name="Animation.PopupWindow" />
+    <style name="Animation.PopupWindow"/>
 
     <!-- Window animations used for action mode UI in overlay mode. -->
     <style name="Animation.PopupWindow.ActionMode">
@@ -503,7 +516,8 @@ please see styles_device_defaults.xml.
         <item name="textEditSidePasteWindowLayout">?attr/textEditSidePasteWindowLayout</item>
         <item name="textEditSideNoPasteWindowLayout">?attr/textEditSideNoPasteWindowLayout</item>
         <item name="textEditSuggestionItemLayout">?attr/textEditSuggestionItemLayout</item>
-        <item name="textEditSuggestionContainerLayout">?attr/textEditSuggestionContainerLayout</item>
+        <item name="textEditSuggestionContainerLayout">?attr/textEditSuggestionContainerLayout
+        </item>
         <item name="textEditSuggestionHighlightStyle">?attr/textEditSuggestionHighlightStyle</item>
         <item name="textCursorDrawable">?attr/textCursorDrawable</item>
         <item name="breakStrategy">high_quality</item>
@@ -593,7 +607,8 @@ please see styles_device_defaults.xml.
         <item name="weekNumberColor">#33FFFFFF</item>
         <item name="weekSeparatorLineColor">#19FFFFFF</item>
         <item name="selectedDateVerticalBar">@drawable/day_picker_week_view_dayline_holo</item>
-        <item name="weekDayTextAppearance">@style/TextAppearance.Small.CalendarViewWeekDayView</item>
+        <item name="weekDayTextAppearance">@style/TextAppearance.Small.CalendarViewWeekDayView
+        </item>
         <item name="dateTextAppearance">?attr/textAppearanceSmall</item>
         <item name="calendarViewMode">holo</item>
     </style>
@@ -689,12 +704,12 @@ please see styles_device_defaults.xml.
     </style>
 
     <style name="Widget.ListView.DropDown">
-    	<item name="cacheColorHint">@null</item>
+        <item name="cacheColorHint">@null</item>
         <item name="divider">@drawable/divider_horizontal_bright_opaque</item>
     </style>
 
     <style name="Widget.ListView.Menu" parent="Widget.Holo.ListView">
-		<item name="cacheColorHint">@null</item>
+        <item name="cacheColorHint">@null</item>
         <item name="scrollbars">vertical</item>
         <item name="fadingEdge">none</item>
         <!-- Light background for the list in menus, so the divider for bright themes -->
@@ -819,7 +834,7 @@ please see styles_device_defaults.xml.
     </style>
 
     <!-- Text Appearances -->
-    <eat-comment />
+    <eat-comment/>
 
     <style name="TextAppearance">
         <item name="textColor">?textColorPrimary</item>
@@ -878,9 +893,9 @@ please see styles_device_defaults.xml.
         <item name="textColorLink">?textColorLinkInverse</item>
     </style>
 
-    <style name="TextAppearance.Theme.Dialog" parent="TextAppearance.Theme" />
+    <style name="TextAppearance.Theme.Dialog" parent="TextAppearance.Theme"/>
 
-    <style name="TextAppearance.Widget" />
+    <style name="TextAppearance.Widget"/>
 
     <style name="TextAppearance.Widget.Button" parent="TextAppearance.Small.Inverse">
         <item name="textColor">@color/primary_text_light_nodisable</item>
@@ -946,22 +961,22 @@ please see styles_device_defaults.xml.
     </style>
 
     <!-- @hide -->
-     <style name="TextAppearance.SearchResult">
-         <item name="textStyle">normal</item>
-         <item name="textColor">?textColorPrimaryInverse</item>
-         <item name="textColorHint">?textColorHintInverse</item>
-     </style>
+    <style name="TextAppearance.SearchResult">
+        <item name="textStyle">normal</item>
+        <item name="textColor">?textColorPrimaryInverse</item>
+        <item name="textColorHint">?textColorHintInverse</item>
+    </style>
 
-     <!-- @hide -->
-     <style name="TextAppearance.SearchResult.Title">
-         <item name="textSize">18sp</item>
-     </style>
+    <!-- @hide -->
+    <style name="TextAppearance.SearchResult.Title">
+        <item name="textSize">18sp</item>
+    </style>
 
-     <!-- @hide -->
-     <style name="TextAppearance.SearchResult.Subtitle">
-         <item name="textSize">14sp</item>
-         <item name="textColor">?textColorSecondaryInverse</item>
-     </style>
+    <!-- @hide -->
+    <style name="TextAppearance.SearchResult.Subtitle">
+        <item name="textSize">14sp</item>
+        <item name="textColor">?textColorSecondaryInverse</item>
+    </style>
 
     <style name="TextAppearance.WindowTitle">
         <item name="textColor">#fff</item>
@@ -1165,7 +1180,7 @@ please see styles_device_defaults.xml.
     </style>
 
     <!-- Other Misc Styles -->
-    <eat-comment />
+    <eat-comment/>
 
     <style name="MediaButton">
         <item name="background">@null</item>
@@ -1298,10 +1313,12 @@ please see styles_device_defaults.xml.
         <item name="textColor">?attr/textColorSecondary</item>
     </style>
 
-    <style name="TextAppearance.Widget.Toolbar.Title" parent="TextAppearance.Widget.ActionBar.Title">
+    <style name="TextAppearance.Widget.Toolbar.Title"
+           parent="TextAppearance.Widget.ActionBar.Title">
     </style>
 
-    <style name="TextAppearance.Widget.Toolbar.Subtitle" parent="TextAppearance.Widget.ActionBar.Subtitle">
+    <style name="TextAppearance.Widget.Toolbar.Subtitle"
+           parent="TextAppearance.Widget.ActionBar.Subtitle">
     </style>
 
     <style name="Widget.ActionButton">
@@ -1527,8 +1544,8 @@ please see styles_device_defaults.xml.
 
     <!-- The style for normal action button on notification -->
     <style name="NotificationAction" parent="Widget.Material.Light.Button.Borderless.Small">
-      <item name="textColor">@color/notification_action_button_text_color</item>
-      <item name="background">@drawable/notification_material_action_background</item>
+        <item name="textColor">@color/notification_action_button_text_color</item>
+        <item name="background">@drawable/notification_material_action_background</item>
     </style>
 
     <!-- The style for emphasized action button on notification: Colored bordered ink button -->
@@ -1539,6 +1556,6 @@ please see styles_device_defaults.xml.
 
     <!-- The style for disabled action button on notification -->
     <style name="NotificationTombstoneAction" parent="NotificationAction">
-      <item name="textColor">#555555</item>
+        <item name="textColor">#555555</item>
     </style>
 </resources>

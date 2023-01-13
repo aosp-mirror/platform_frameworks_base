@@ -275,7 +275,8 @@ public final class ProviderGetSession extends ProviderSession<BeginGetCredential
         String entryId = generateEntryId();
         Entry authEntry = new Entry(
                 AUTHENTICATION_ACTION_ENTRY_KEY, entryId,
-                authenticationAction.getSlice());
+                authenticationAction.getSlice(),
+                setUpFillInIntentForAuthentication());
         mUiAuthenticationAction = new Pair<>(entryId, authenticationAction);
         return authEntry;
     }
@@ -308,6 +309,15 @@ public final class ProviderGetSession extends ProviderSession<BeginGetCredential
                 return intent;
             }
         }
+        return intent;
+    }
+
+    private Intent setUpFillInIntentForAuthentication() {
+        Intent intent = new Intent();
+        intent.putExtra(
+                CredentialProviderService
+                        .EXTRA_BEGIN_GET_CREDENTIAL_REQUEST,
+                mProviderRequest);
         return intent;
     }
 
@@ -365,7 +375,6 @@ public final class ProviderGetSession extends ProviderSession<BeginGetCredential
     private void onAuthenticationEntrySelected(
             @Nullable ProviderPendingIntentResponse providerPendingIntentResponse) {
         //TODO: Other provider intent statuses
-        // Check if pending intent has an error
         GetCredentialException exception = maybeGetPendingIntentException(
                 providerPendingIntentResponse);
         if (exception != null) {
@@ -420,8 +429,9 @@ public final class ProviderGetSession extends ProviderSession<BeginGetCredential
                 Log.i(TAG, "Pending intent contains provider exception");
                 return exception;
             }
+        } else if (PendingIntentResultHandler.isCancelledResponse(pendingIntentResponse)) {
+            return new GetCredentialException(GetCredentialException.TYPE_USER_CANCELED);
         } else {
-            Log.i(TAG, "Pending intent result code not Activity.RESULT_OK");
             return new GetCredentialException(GetCredentialException.TYPE_NO_CREDENTIAL);
         }
         return null;
@@ -429,12 +439,10 @@ public final class ProviderGetSession extends ProviderSession<BeginGetCredential
 
     /**
      * When an invalid state occurs, e.g. entry mismatch or no response from provider,
-     * we send back a TYPE_NO_CREDENTIAL error as to the developer, it is the same as not
-     * getting any credentials back.
+     * we send back a TYPE_UNKNOWN error as to the developer.
      */
     private void invokeCallbackOnInternalInvalidState() {
         mCallbacks.onFinalErrorReceived(mComponentName,
-                GetCredentialException.TYPE_NO_CREDENTIAL,
-                null);
+                GetCredentialException.TYPE_UNKNOWN, null);
     }
 }

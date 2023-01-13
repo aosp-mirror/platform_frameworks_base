@@ -20,6 +20,17 @@ package {
 
 android_app {
     name: "AccessibilityMenu",
+
+    static_libs: [
+        "androidx.coordinatorlayout_coordinatorlayout",
+        "androidx.core_core",
+        "androidx.viewpager_viewpager",
+    ],
+
+    uses_libs: [
+        "org.apache.http.legacy",
+    ],
+
     srcs: [
         "src/**/*.java",
     ],

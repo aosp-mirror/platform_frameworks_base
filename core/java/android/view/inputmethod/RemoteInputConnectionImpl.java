@@ -1106,7 +1106,7 @@ final class RemoteInputConnectionImpl extends IRemoteInputConnection.Stub {
     @Dispatching(cancellable = true)
     @Override
     public void requestTextBoundsInfo(
-            InputConnectionCommandHeader header, RectF rectF,
+            InputConnectionCommandHeader header, RectF bounds,
             @NonNull ResultReceiver resultReceiver) {
         dispatchWithTracing("requestTextBoundsInfo", () -> {
             if (header.mSessionId != mCurrentSessionId.get()) {
@@ -1121,7 +1121,7 @@ final class RemoteInputConnectionImpl extends IRemoteInputConnection.Stub {
             }
 
             ic.requestTextBoundsInfo(
-                    rectF,
+                    bounds,
                     Runnable::run,
                     (textBoundsInfoResult) -> {
                         final int resultCode = textBoundsInfoResult.getResultCode();

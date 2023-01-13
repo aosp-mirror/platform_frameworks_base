@@ -202,15 +202,7 @@ public class SoundDoseHelper {
                 }
             }
             mCurrentCsd = currentCsd;
-            mDoseRecords.addAll(Arrays.asList(records));
-            long totalDuration = 0;
-            for (SoundDoseRecord record : records) {
-                Log.i(TAG, "  new record: csd=" + record.value
-                        + " averageMel=" + record.averageMel + " timestamp=" + record.timestamp
-                        + " duration=" + record.duration);
-                totalDuration += record.duration;
-            }
-            mLogger.enqueue(SoundDoseEvent.getDoseUpdateEvent(currentCsd, totalDuration));
+            updateSoundDoseRecords(records, currentCsd);
         }
     };
 
@@ -624,6 +616,29 @@ public class SoundDoseHelper {
             case SAFE_MEDIA_VOLUME_ACTIVE: return "SAFE_MEDIA_VOLUME_ACTIVE";
         }
         return null;
+    }
+
+    private void updateSoundDoseRecords(SoundDoseRecord[] newRecords, float currentCsd) {
+        long totalDuration = 0;
+        for (SoundDoseRecord record : newRecords) {
+            Log.i(TAG, "  new record: " + record);
+            totalDuration += record.duration;
+
+            if (record.value < 0) {
+                // Negative value means the record timestamp exceeded the CSD rolling window size
+                // and needs to be removed
+                if (!mDoseRecords.removeIf(
+                        r -> r.value == -record.value && r.timestamp == record.timestamp
+                                && r.averageMel == record.averageMel
+                                && r.duration == record.duration)) {
+                    Log.w(TAG, "Could not find cached record to remove: " + record);
+                }
+            } else {
+                mDoseRecords.add(record);
+            }
+        }
+
+        mLogger.enqueue(SoundDoseEvent.getDoseUpdateEvent(currentCsd, totalDuration));
     }
 
     // StreamVolumeCommand contains the information needed to defer the process of

@@ -357,6 +357,11 @@ public class BroadcastQueueTest {
             }
             receiversToSkip.add(o);
         }
+        public boolean disallowBackgroundStart(BroadcastRecord r) {
+            // Ignored
+            return false;
+        }
+
     }
 
     private class TestInjector extends Injector {

@@ -152,22 +152,6 @@ class CredentialManagerRepo(
     return CreateFlowUtils.toRequestDisplayInfo(requestInfo, context)
   }
 
-  companion object {
-    // TODO: find a way to resolve this static field leak problem
-    lateinit var repo: CredentialManagerRepo
-
-    fun setup(
-      context: Context,
-      intent: Intent,
-    ) {
-      repo = CredentialManagerRepo(context, intent)
-    }
-
-    fun getInstance(): CredentialManagerRepo {
-      return repo
-    }
-  }
-
   // TODO: below are prototype functionalities. To be removed for productionization.
   private fun testCreateCredentialEnabledProviderList(): List<CreateCredentialProviderData> {
       return listOf(

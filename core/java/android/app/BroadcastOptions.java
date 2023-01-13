@@ -63,6 +63,7 @@ public class BroadcastOptions extends ComponentOptions {
     private long mRequireCompatChangeId = CHANGE_INVALID;
     private boolean mRequireCompatChangeEnabled = true;
     private boolean mIsAlarmBroadcast = false;
+    private boolean mIsDeferUntilActive = false;
     private long mIdForResponseEvent;
     private @Nullable IntentFilter mRemoveMatchingFilter;
     private @DeliveryGroupPolicy int mDeliveryGroupPolicy;
@@ -201,6 +202,12 @@ public class BroadcastOptions extends ComponentOptions {
             "android:broadcast.removeMatchingFilter";
 
     /**
+     * Corresponds to {@link #setDeferUntilActive(boolean)}.
+     */
+    private static final String KEY_DEFER_UNTIL_ACTIVE =
+            "android:broadcast.deferuntilactive";
+
+    /**
      * Corresponds to {@link #setDeliveryGroupPolicy(int)}.
      */
     private static final String KEY_DELIVERY_GROUP_POLICY =
@@ -320,6 +327,7 @@ public class BroadcastOptions extends ComponentOptions {
                 BundleMerger.class);
         mDeliveryGroupMatchingFilter = opts.getParcelable(KEY_DELIVERY_GROUP_MATCHING_FILTER,
                 IntentFilter.class);
+        mIsDeferUntilActive = opts.getBoolean(KEY_DEFER_UNTIL_ACTIVE, false);
     }
 
     /**
@@ -700,6 +708,41 @@ public class BroadcastOptions extends ComponentOptions {
     }
 
     /**
+     * Sets whether the broadcast should not run until the process is in an active process state
+     * (ie, a process exists for the app and the app is not in a cached process state).
+     *
+     * Whether an app's process state is considered active is independent of its standby bucket.
+     *
+     * A broadcast that is deferred until the process is active will not execute until the process
+     * is brought to an active state by some other action, like a job, alarm, or service binding. As
+     * a result, the broadcast may be delayed indefinitely. This deferral only applies to runtime
+     * registered receivers of a broadcast. Any manifest receivers will run immediately, similar to
+     * how a manifest receiver would start a new process in order to run a broadcast receiver.
+     *
+     * Ordered broadcasts, alarm broadcasts, interactive broadcasts, and manifest broadcasts are
+     * never deferred.
+     *
+     * Unordered broadcasts and unordered broadcasts with completion callbacks may be
+     * deferred. Completion callbacks for broadcasts deferred until active are
+     * best-effort. Completion callbacks will run when all eligible processes have finished
+     * executing the broadcast. Processes in inactive process states that defer the broadcast are
+     * not considered eligible and may not execute the broadcast prior to the completion callback.
+     *
+     * @hide
+     */
+    @SystemApi
+    public @NonNull BroadcastOptions setDeferUntilActive(boolean shouldDefer) {
+        mIsDeferUntilActive = shouldDefer;
+        return this;
+    }
+
+    /** @hide */
+    @SystemApi
+    public boolean isDeferUntilActive() {
+        return mIsDeferUntilActive;
+    }
+
+    /**
      * When enqueuing this broadcast, remove all pending broadcasts previously
      * sent by this app which match the given filter.
      * <p>
@@ -962,6 +1005,9 @@ public class BroadcastOptions extends ComponentOptions {
         }
         if (mDeliveryGroupMatchingFilter != null) {
             b.putParcelable(KEY_DELIVERY_GROUP_MATCHING_FILTER, mDeliveryGroupMatchingFilter);
+        }
+        if (mIsDeferUntilActive) {
+            b.putBoolean(KEY_DEFER_UNTIL_ACTIVE, mIsDeferUntilActive);
         }
         return b.isEmpty() ? null : b;
     }

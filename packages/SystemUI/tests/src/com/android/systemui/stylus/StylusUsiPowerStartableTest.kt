@@ -85,6 +85,13 @@ class StylusUsiPowerStartableTest : SysuiTestCase() {
     }
 
     @Test
+    fun start_initStylusUsiPowerUi() {
+        startable.start()
+
+        verify(stylusUsiPowerUi, times(1)).init()
+    }
+
+    @Test
     fun onStylusBluetoothConnected_refreshesNotification() {
         startable.onStylusBluetoothConnected(STYLUS_DEVICE_ID, "ANY")
 
@@ -99,13 +106,21 @@ class StylusUsiPowerStartableTest : SysuiTestCase() {
     }
 
     @Test
-    fun onStylusUsiBatteryStateChanged_batteryPresent_refreshesNotification() {
-        val batteryState = mock(BatteryState::class.java)
-        whenever(batteryState.isPresent).thenReturn(true)
+    fun onStylusUsiBatteryStateChanged_batteryPresentValidCapacity_refreshesNotification() {
+        val batteryState = FixedCapacityBatteryState(0.1f)
 
         startable.onStylusUsiBatteryStateChanged(STYLUS_DEVICE_ID, 123, batteryState)
 
-        verify(stylusUsiPowerUi, times(1)).updateBatteryState(batteryState)
+        verify(stylusUsiPowerUi, times(1)).updateBatteryState(STYLUS_DEVICE_ID, batteryState)
+    }
+
+    @Test
+    fun onStylusUsiBatteryStateChanged_batteryPresentInvalidCapacity_noop() {
+        val batteryState = FixedCapacityBatteryState(0f)
+
+        startable.onStylusUsiBatteryStateChanged(STYLUS_DEVICE_ID, 123, batteryState)
+
+        verifyNoMoreInteractions(stylusUsiPowerUi)
     }
 
     @Test

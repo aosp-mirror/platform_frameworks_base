@@ -2653,6 +2653,10 @@
             <flag name="noExcludeDescendants" value="0x8" />
         </attr>
 
+        <!-- Boolean that hints the Android System that the view is credntial and associated with
+             CredentialManager -->
+        <attr name="isCredential" format="boolean" />
+
         <!-- Hints the Android System whether the this View should be considered a scroll capture target. -->
         <attr name="scrollCaptureHint">
             <!-- Let the Android System  determine if the view can be a scroll capture target. -->

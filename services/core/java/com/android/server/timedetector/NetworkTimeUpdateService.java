@@ -358,10 +358,50 @@ public class NetworkTimeUpdateService extends Binder {
         @NonNull
         private final LocalLog mLocalDebugLog = new LocalLog(30, false /* useLocalTimestamps */);
 
+        /**
+         * The usual interval between refresh attempts. Always used after a successful request.
+         *
+         * <p>The value also determines whether a network time result is considered fresh.
+         * Refreshes only take place from this class when the latest time result is considered too
+         * old.
+         */
         private final int mNormalPollingIntervalMillis;
+
+        /**
+         * A shortened interval between refresh attempts used after a failure to refresh.
+         * Always shorter than {@link #mNormalPollingIntervalMillis} and only used when {@link
+         * #mTryAgainTimesMax} != 0.
+         *
+         * <p>This value is also the lower bound for the interval allowed between successive
+         * refreshes when the latest time result is missing or too old, e.g. a refresh may not be
+         * triggered when network connectivity is restored if the last attempt was too recent.
+         */
         private final int mShortPollingIntervalMillis;
+
+        /**
+         * The number of times {@link #mShortPollingIntervalMillis} can be used after successive
+         * failures before switching back to using {@link #mNormalPollingIntervalMillis} once before
+         * repeating. When this value is negative, the refresh algorithm will continue to use {@link
+         * #mShortPollingIntervalMillis} until a successful refresh.
+         */
         private final int mTryAgainTimesMax;
+
         private final NtpTrustedTime mNtpTrustedTime;
+
+        /**
+         * Records the time of the last refresh attempt (successful or otherwise) by this service.
+         * This is used when scheduling the next refresh attempt. In cases where {@link
+         * #refreshIfRequiredAndReschedule} is called too frequently, this will prevent each call
+         * resulting in a network request. See also {@link #mShortPollingIntervalMillis}.
+         *
+         * <p>Time servers are a shared resource and so Android should avoid loading them.
+         * Generally, a refresh attempt will succeed and the service won't need to make further
+         * requests and this field will not limit requests.
+         */
+        // This field is only updated and accessed by the mHandler thread (except dump()).
+        @GuardedBy("this")
+        @ElapsedRealtimeLong
+        private Long mLastRefreshAttemptElapsedRealtimeMillis;
 
         /**
          * Keeps track of successive time refresh failures have occurred. This is reset to zero when
@@ -378,6 +418,11 @@ public class NetworkTimeUpdateService extends Binder {
                 int normalPollingIntervalMillis, int shortPollingIntervalMillis,
                 int tryAgainTimesMax, @NonNull NtpTrustedTime ntpTrustedTime) {
             mElapsedRealtimeMillisSupplier = Objects.requireNonNull(elapsedRealtimeMillisSupplier);
+            if (shortPollingIntervalMillis > normalPollingIntervalMillis) {
+                throw new IllegalArgumentException(String.format(
+                        "shortPollingIntervalMillis (%s) > normalPollingIntervalMillis (%s)",
+                        shortPollingIntervalMillis, normalPollingIntervalMillis));
+            }
             mNormalPollingIntervalMillis = normalPollingIntervalMillis;
             mShortPollingIntervalMillis = shortPollingIntervalMillis;
             mTryAgainTimesMax = tryAgainTimesMax;
@@ -387,79 +432,137 @@ public class NetworkTimeUpdateService extends Binder {
         @Override
         public boolean forceRefreshForTests(
                 @NonNull Network network, @NonNull RefreshCallbacks refreshCallbacks) {
-            boolean success = mNtpTrustedTime.forceRefresh(network);
-            logToDebugAndDumpsys("forceRefreshForTests: success=" + success);
+            boolean refreshSuccessful = tryRefresh(network);
+            logToDebugAndDumpsys("forceRefreshForTests: refreshSuccessful=" + refreshSuccessful);
 
-            if (success) {
+            if (refreshSuccessful) {
                 makeNetworkTimeSuggestion(mNtpTrustedTime.getCachedTimeResult(),
                         "EngineImpl.forceRefreshForTests()", refreshCallbacks);
             }
-            return success;
+            return refreshSuccessful;
         }
 
         @Override
         public void refreshIfRequiredAndReschedule(
                 @NonNull Network network, @NonNull String reason,
                 @NonNull RefreshCallbacks refreshCallbacks) {
-            long currentElapsedRealtimeMillis = mElapsedRealtimeMillisSupplier.get();
-
-            final int maxNetworkTimeAgeMillis = mNormalPollingIntervalMillis;
-            // Force an NTP fix when outdated
+            // Attempt to refresh the network time if there is no latest time result, or if the
+            // latest time result is considered too old.
             NtpTrustedTime.TimeResult initialTimeResult = mNtpTrustedTime.getCachedTimeResult();
-            if (calculateTimeResultAgeMillis(initialTimeResult, currentElapsedRealtimeMillis)
-                    >= maxNetworkTimeAgeMillis) {
-                if (DBG) Log.d(TAG, "Stale NTP fix; forcing refresh using network=" + network);
-                boolean successful = mNtpTrustedTime.forceRefresh(network);
-                if (successful) {
-                    synchronized (this) {
-                        mTryAgainCounter = 0;
-                    }
-                } else {
-                    String logMsg = "forceRefresh() returned false:"
-                            + " initialTimeResult=" + initialTimeResult
-                            + ", currentElapsedRealtimeMillis=" + currentElapsedRealtimeMillis;
-                    logToDebugAndDumpsys(logMsg);
-                }
+            boolean shouldAttemptRefresh;
+            synchronized (this) {
+                long currentElapsedRealtimeMillis = mElapsedRealtimeMillisSupplier.get();
+
+                // calculateTimeResultAgeMillis() safely handles a null initialTimeResult.
+                long timeResultAgeMillis = calculateTimeResultAgeMillis(
+                        initialTimeResult, currentElapsedRealtimeMillis);
+                shouldAttemptRefresh =
+                        timeResultAgeMillis >= mNormalPollingIntervalMillis
+                        && isRefreshAllowed(currentElapsedRealtimeMillis);
+            }
+
+            boolean refreshSuccessful = false;
+            if (shouldAttemptRefresh) {
+                // This is a blocking call. Deliberately invoked without holding the "this" monitor
+                // to avoid blocking logic that wants to use the "this" monitor.
+                refreshSuccessful = tryRefresh(network);
             }
 
             synchronized (this) {
-                long nextPollDelayMillis;
-                NtpTrustedTime.TimeResult latestTimeResult = mNtpTrustedTime.getCachedTimeResult();
-                if (calculateTimeResultAgeMillis(latestTimeResult, currentElapsedRealtimeMillis)
-                        < maxNetworkTimeAgeMillis) {
-                    // Obtained fresh fix; schedule next normal update
-                    nextPollDelayMillis = mNormalPollingIntervalMillis
-                            - latestTimeResult.getAgeMillis(currentElapsedRealtimeMillis);
-
-                    makeNetworkTimeSuggestion(latestTimeResult, reason, refreshCallbacks);
-                } else {
-                    // No fresh fix; schedule retry
-                    mTryAgainCounter++;
-                    if (mTryAgainTimesMax < 0 || mTryAgainCounter <= mTryAgainTimesMax) {
-                        nextPollDelayMillis = mShortPollingIntervalMillis;
-                    } else {
-                        // Try much later
+                // Manage mTryAgainCounter.
+                if (shouldAttemptRefresh) {
+                    if (refreshSuccessful) {
+                        // Reset failure tracking.
                         mTryAgainCounter = 0;
-
-                        nextPollDelayMillis = mNormalPollingIntervalMillis;
+                    } else {
+                        if (mTryAgainTimesMax < 0) {
+                            // When mTryAgainTimesMax is negative there's no enforced maximum and
+                            // short intervals should be used until a successful refresh. Setting
+                            // mTryAgainCounter to 1 is sufficient for the interval calculations
+                            // below. There's no need to increment.
+                            mTryAgainCounter = 1;
+                        } else {
+                            mTryAgainCounter++;
+                            if (mTryAgainCounter > mTryAgainTimesMax) {
+                                mTryAgainCounter = 0;
+                            }
+                        }
                     }
                 }
-                long nextRefreshElapsedRealtimeMillis =
-                        currentElapsedRealtimeMillis + nextPollDelayMillis;
+
+                // currentElapsedRealtimeMillis is used to evaluate ages and refresh scheduling
+                // below. Capturing this after a possible successful refresh ensures that latest
+                // time result ages will be >= 0.
+                long currentElapsedRealtimeMillis = mElapsedRealtimeMillisSupplier.get();
+
+                // This section of code deliberately doesn't assume it is the only component using
+                // mNtpTrustedTime to obtain NTP times: another component in the same process could
+                // be gathering NTP signals (which then won't have been suggested to the time
+                // detector).
+                // TODO(b/222295093): Make this class the sole owner of mNtpTrustedTime and
+                //  simplify / reduce duplicate suggestions.
+                NtpTrustedTime.TimeResult latestTimeResult = mNtpTrustedTime.getCachedTimeResult();
+                long latestTimeResultAgeMillis = calculateTimeResultAgeMillis(
+                        latestTimeResult, currentElapsedRealtimeMillis);
+
+                // Suggest the latest time result to the time detector if it is fresh regardless of
+                // whether refresh happened above.
+                if (latestTimeResultAgeMillis < mNormalPollingIntervalMillis) {
+                    // We assume the time detector service will detect duplicate suggestions and not
+                    // do more work than it has to, so no need to avoid making duplicate
+                    // suggestions.
+                    makeNetworkTimeSuggestion(latestTimeResult, reason, refreshCallbacks);
+                }
+
+                // (Re)schedule the next refresh based on the latest state.
+                // Determine which refresh delay to use by using the current value of
+                // mTryAgainCounter. The refresh delay is applied to a different point in time
+                // depending on whether the latest available time result (if any) is still
+                // considered fresh to ensure the delay acts correctly.
+                long refreshDelayMillis = mTryAgainCounter > 0
+                        ? mShortPollingIntervalMillis : mNormalPollingIntervalMillis;
+                long nextRefreshElapsedRealtimeMillis;
+                if (latestTimeResultAgeMillis < mNormalPollingIntervalMillis) {
+                    // The latest time result is fresh, use it to determine when next to refresh.
+                    nextRefreshElapsedRealtimeMillis =
+                            latestTimeResult.getElapsedRealtimeMillis() + refreshDelayMillis;
+                } else if (mLastRefreshAttemptElapsedRealtimeMillis != null) {
+                    // The latest time result is missing or old and still needs to be refreshed.
+                    // mLastRefreshAttemptElapsedRealtimeMillis, which should always be set by this
+                    // point because there's no fresh time result, should be very close to
+                    // currentElapsedRealtimeMillis unless the refresh was not allowed.
+                    nextRefreshElapsedRealtimeMillis =
+                            mLastRefreshAttemptElapsedRealtimeMillis + refreshDelayMillis;
+                } else {
+                    // This should not happen: mLastRefreshAttemptElapsedRealtimeMillis should
+                    // always be non-null by this point.
+                    logToDebugAndDumpsys(
+                            "mLastRefreshAttemptElapsedRealtimeMillis unexpectedly missing."
+                                    + " Scheduling using currentElapsedRealtimeMillis");
+                    nextRefreshElapsedRealtimeMillis =
+                            currentElapsedRealtimeMillis + refreshDelayMillis;
+                }
                 refreshCallbacks.scheduleNextRefresh(nextRefreshElapsedRealtimeMillis);
 
                 logToDebugAndDumpsys("refreshIfRequiredAndReschedule:"
                         + " network=" + network
                         + ", reason=" + reason
-                        + ", currentElapsedRealtimeMillis=" + currentElapsedRealtimeMillis
                         + ", initialTimeResult=" + initialTimeResult
+                        + ", shouldAttemptRefresh=" + shouldAttemptRefresh
+                        + ", refreshSuccessful=" + refreshSuccessful
+                        + ", currentElapsedRealtimeMillis="
+                        + formatElapsedRealtimeMillis(currentElapsedRealtimeMillis)
                         + ", latestTimeResult=" + latestTimeResult
                         + ", mTryAgainCounter=" + mTryAgainCounter
-                        + ", nextPollDelayMillis=" + nextPollDelayMillis
+                        + ", refreshDelayMillis=" + refreshDelayMillis
                         + ", nextRefreshElapsedRealtimeMillis="
-                        + Duration.ofMillis(nextRefreshElapsedRealtimeMillis)
-                        + " (" + nextRefreshElapsedRealtimeMillis + ")");
+                        + formatElapsedRealtimeMillis(nextRefreshElapsedRealtimeMillis));
             }
+        }
+
+        private static String formatElapsedRealtimeMillis(
+                @ElapsedRealtimeLong long elapsedRealtimeMillis) {
+            return Duration.ofMillis(elapsedRealtimeMillis) + " (" + elapsedRealtimeMillis + ")";
         }
 
         private static long calculateTimeResultAgeMillis(
@@ -467,6 +570,26 @@ public class NetworkTimeUpdateService extends Binder {
                 @ElapsedRealtimeLong long currentElapsedRealtimeMillis) {
             return timeResult == null ? Long.MAX_VALUE
                     : timeResult.getAgeMillis(currentElapsedRealtimeMillis);
+        }
+
+        @GuardedBy("this")
+        private boolean isRefreshAllowed(@ElapsedRealtimeLong long currentElapsedRealtimeMillis) {
+            if (mLastRefreshAttemptElapsedRealtimeMillis == null) {
+                return true;
+            }
+            // Use the second meaning of mShortPollingIntervalMillis: to determine the minimum time
+            // allowed after an unsuccessful refresh before another can be attempted.
+            long nextRefreshAllowedElapsedRealtimeMillis =
+                    mLastRefreshAttemptElapsedRealtimeMillis + mShortPollingIntervalMillis;
+            return currentElapsedRealtimeMillis >= nextRefreshAllowedElapsedRealtimeMillis;
+        }
+
+        private boolean tryRefresh(@NonNull Network network) {
+            long currentElapsedRealtimeMillis = mElapsedRealtimeMillisSupplier.get();
+            synchronized (this) {
+                mLastRefreshAttemptElapsedRealtimeMillis = currentElapsedRealtimeMillis;
+            }
+            return mNtpTrustedTime.forceRefresh(network);
         }
 
         /** Suggests the time to the time detector. It may choose use it to set the system clock. */
@@ -489,6 +612,10 @@ public class NetworkTimeUpdateService extends Binder {
             ipw.println("mTryAgainTimesMax=" + mTryAgainTimesMax);
 
             synchronized (this) {
+                String lastRefreshAttemptValue = mLastRefreshAttemptElapsedRealtimeMillis == null
+                        ? "null"
+                        : formatElapsedRealtimeMillis(mLastRefreshAttemptElapsedRealtimeMillis);
+                ipw.println("mLastRefreshAttemptElapsedRealtimeMillis=" + lastRefreshAttemptValue);
                 ipw.println("mTryAgainCounter=" + mTryAgainCounter);
             }
             ipw.println();

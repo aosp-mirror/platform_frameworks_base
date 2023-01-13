@@ -22,12 +22,14 @@ import static org.testng.Assert.assertThrows;
 
 import android.os.Parcel;
 import android.os.SystemClock;
+import android.platform.test.annotations.Presubmit;
 
 import androidx.test.runner.AndroidJUnit4;
 
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
+@Presubmit
 @RunWith(AndroidJUnit4.class)
 public class VirtualSensorEventTest {
 

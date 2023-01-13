@@ -5329,6 +5329,10 @@
     <string name="work_mode_off_message">Get access to your work apps and notifications</string>
     <!-- Title for button to turn on work profile. [CHAR LIMIT=NONE] -->
     <string name="work_mode_turn_on">Turn on</string>
+    <!-- Title for button to launch the personal safety app to make an emergency call    -->
+    <string name="work_mode_emergency_call_button">Emergency</string>
+    <!-- Text shown in a dialog when the user tries to launch a disabled work profile app when work apps are paused-->
+    <string name="work_mode_dialer_off_message">Get access to your work apps and calls</string>
 
     <!-- Title of the dialog that is shown when the user tries to launch a blocked application [CHAR LIMIT=50] -->
     <string name="app_blocked_title">App is not available</string>

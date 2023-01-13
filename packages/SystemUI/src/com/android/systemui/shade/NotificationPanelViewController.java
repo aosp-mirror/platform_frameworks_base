@@ -2473,7 +2473,7 @@ public final class NotificationPanelViewController implements Dumpable {
             mInitialTouchY = event.getY();
             mInitialTouchX = event.getX();
         }
-        if (!isFullyCollapsed()) {
+        if (!isFullyCollapsed() && !isShadeOrQsHeightAnimationRunning()) {
             handleQsDown(event);
         }
         // defer touches on QQS to shade while shade is collapsing. Added margin for error
@@ -5263,6 +5263,11 @@ public final class NotificationPanelViewController implements Dumpable {
         }
     }
 
+    /** Returns whether a shade or QS expansion animation is running */
+    private boolean isShadeOrQsHeightAnimationRunning() {
+        return mHeightAnimator != null && !mHintAnimationRunning && !mIsSpringBackAnimation;
+    }
+
     /**
      * Phase 2: Bounce down.
      */
@@ -6280,8 +6285,7 @@ public final class NotificationPanelViewController implements Dumpable {
                     mCollapsedAndHeadsUpOnDown =
                             isFullyCollapsed() && mHeadsUpManager.hasPinnedHeadsUp();
                     addMovement(event);
-                    boolean regularHeightAnimationRunning = mHeightAnimator != null
-                            && !mHintAnimationRunning && !mIsSpringBackAnimation;
+                    boolean regularHeightAnimationRunning = isShadeOrQsHeightAnimationRunning();
                     if (!mGestureWaitForTouchSlop || regularHeightAnimationRunning) {
                         mTouchSlopExceeded = regularHeightAnimationRunning
                                 || mTouchSlopExceededBeforeDown;

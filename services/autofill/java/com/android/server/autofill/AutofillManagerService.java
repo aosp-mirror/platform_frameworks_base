@@ -67,6 +67,7 @@ import android.util.Slog;
 import android.util.SparseArray;
 import android.util.SparseBooleanArray;
 import android.util.TimeUtils;
+import android.view.autofill.AutofillFeatureFlags;
 import android.view.autofill.AutofillId;
 import android.view.autofill.AutofillManager;
 import android.view.autofill.AutofillManager.AutofillCommitReason;
@@ -298,12 +299,12 @@ public final class AutofillManagerService
     private void onDeviceConfigChange(@NonNull Set<String> keys) {
         for (String key : keys) {
             switch (key) {
-                case AutofillManager.DEVICE_CONFIG_AUTOFILL_SMART_SUGGESTION_SUPPORTED_MODES:
-                case AutofillManager.DEVICE_CONFIG_AUGMENTED_SERVICE_IDLE_UNBIND_TIMEOUT:
-                case AutofillManager.DEVICE_CONFIG_AUGMENTED_SERVICE_REQUEST_TIMEOUT:
+                case AutofillFeatureFlags.DEVICE_CONFIG_AUTOFILL_SMART_SUGGESTION_SUPPORTED_MODES:
+                case AutofillFeatureFlags.DEVICE_CONFIG_AUGMENTED_SERVICE_IDLE_UNBIND_TIMEOUT:
+                case AutofillFeatureFlags.DEVICE_CONFIG_AUGMENTED_SERVICE_REQUEST_TIMEOUT:
                     setDeviceConfigProperties();
                     break;
-                case AutofillManager.DEVICE_CONFIG_AUTOFILL_COMPAT_MODE_ALLOWED_PACKAGES:
+                case AutofillFeatureFlags.DEVICE_CONFIG_AUTOFILL_COMPAT_MODE_ALLOWED_PACKAGES:
                     updateCachedServices();
                     break;
                 default:
@@ -567,15 +568,15 @@ public final class AutofillManagerService
         synchronized (mLock) {
             mAugmentedServiceIdleUnbindTimeoutMs = DeviceConfig.getInt(
                     DeviceConfig.NAMESPACE_AUTOFILL,
-                    AutofillManager.DEVICE_CONFIG_AUGMENTED_SERVICE_IDLE_UNBIND_TIMEOUT,
+                    AutofillFeatureFlags.DEVICE_CONFIG_AUGMENTED_SERVICE_IDLE_UNBIND_TIMEOUT,
                     (int) AbstractRemoteService.PERMANENT_BOUND_TIMEOUT_MS);
             mAugmentedServiceRequestTimeoutMs = DeviceConfig.getInt(
                     DeviceConfig.NAMESPACE_AUTOFILL,
-                    AutofillManager.DEVICE_CONFIG_AUGMENTED_SERVICE_REQUEST_TIMEOUT,
+                    AutofillFeatureFlags.DEVICE_CONFIG_AUGMENTED_SERVICE_REQUEST_TIMEOUT,
                     DEFAULT_AUGMENTED_AUTOFILL_REQUEST_TIMEOUT_MILLIS);
             mSupportedSmartSuggestionModes = DeviceConfig.getInt(
                     DeviceConfig.NAMESPACE_AUTOFILL,
-                    AutofillManager.DEVICE_CONFIG_AUTOFILL_SMART_SUGGESTION_SUPPORTED_MODES,
+                    AutofillFeatureFlags.DEVICE_CONFIG_AUTOFILL_SMART_SUGGESTION_SUPPORTED_MODES,
                     AutofillManager.FLAG_SMART_SUGGESTION_SYSTEM);
             if (verbose) {
                 Slog.v(mTag, "setDeviceConfigProperties(): "
@@ -729,7 +730,7 @@ public final class AutofillManagerService
     private String getAllowedCompatModePackagesFromDeviceConfig() {
         String config = DeviceConfig.getString(
                 DeviceConfig.NAMESPACE_AUTOFILL,
-                AutofillManager.DEVICE_CONFIG_AUTOFILL_COMPAT_MODE_ALLOWED_PACKAGES,
+                AutofillFeatureFlags.DEVICE_CONFIG_AUTOFILL_COMPAT_MODE_ALLOWED_PACKAGES,
                 /* defaultValue */ null);
         if (!TextUtils.isEmpty(config)) {
             return config;

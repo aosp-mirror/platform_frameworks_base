@@ -13,4 +13,12 @@
      See the License for the specific language governing permissions and
      limitations under the License.
 -->
-<accessibility-service xmlns:android="http://schemas.android.com/apk/res/android"/>
+<accessibility-service xmlns:android="http://schemas.android.com/apk/res/android"
+    android:accessibilityFeedbackType="feedbackGeneric"
+    android:accessibilityFlags="flagRequestAccessibilityButton|flagRequestFilterKeyEvents"
+    android:canRequestFilterKeyEvents="true"
+    android:summary="@string/accessibility_menu_summary"
+    android:intro="@string/accessibility_menu_intro"
+    android:animatedImageDrawable="@drawable/a11ymenu_intro"
+    android:isAccessibilityTool="true"
+/>

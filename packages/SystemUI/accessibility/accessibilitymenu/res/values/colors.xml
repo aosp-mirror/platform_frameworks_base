@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<resources>
+  <color name="power_color">#757575</color>
+  <color name="quick_settings_color">#2196F3</color>
+  <color name="a11y_settings_color">#5806C9</color>
+  <color name="recent_apps_color">#AD2EC6</color>
+  <color name="lockscreen_color">#0F9D58</color>
+  <color name="volume_color">#01A2A0</color>
+  <color name="notifications_color">#F15B8D</color>
+  <color name="screenshot_color">#26459C</color>
+  <color name="assistant_color">#F1F3F4</color>
+  <color name="brightness_color">#E59810</color>
+  <color name="colorAccent">#1a73e8</color>
+
+  <color name="ripple_material_color">#1f000000</color>
+
+  <color name="overlay_bg_color">@android:color/white</color>
+  <color name="footer_icon_color">@android:color/black</color>
+  <color name="footer_icon_enabled_color">@android:color/black</color>
+  <color name="footer_icon_disabled_color">#ddd</color>
+  <color name="colorControlNormal">@android:color/white</color>
+
+  <color name="colorAccessibilityMenuIcon">#3AA757</color>
+</resources>

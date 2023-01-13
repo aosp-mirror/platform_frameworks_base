@@ -16,6 +16,7 @@
 
 package android.window;
 
+import static android.window.TaskFragmentOperation.OP_TYPE_CLEAR_ADJACENT_TASK_FRAGMENTS;
 import static android.window.TaskFragmentOperation.OP_TYPE_CREATE_TASK_FRAGMENT;
 import static android.window.TaskFragmentOperation.OP_TYPE_DELETE_TASK_FRAGMENT;
 import static android.window.TaskFragmentOperation.OP_TYPE_REPARENT_ACTIVITY_TO_TASK_FRAGMENT;
@@ -582,16 +583,14 @@ public final class WindowContainerTransaction implements Parcelable {
      * {@link #setAdjacentRoots(WindowContainerToken, WindowContainerToken)}, but can be used with
      * fragmentTokens when that TaskFragments haven't been created (but will be created in the same
      * {@link WindowContainerTransaction}).
-     * To reset it, pass {@code null} for {@code fragmentToken2}.
      * @param fragmentToken1    client assigned unique token to create TaskFragment with specified
      *                          in {@link TaskFragmentCreationParams#getFragmentToken()}.
      * @param fragmentToken2    client assigned unique token to create TaskFragment with specified
-     *                          in {@link TaskFragmentCreationParams#getFragmentToken()}. If it is
-     *                          {@code null}, the transaction will reset the adjacent TaskFragment.
+     *                          in {@link TaskFragmentCreationParams#getFragmentToken()}.
      */
     @NonNull
     public WindowContainerTransaction setAdjacentTaskFragments(
-            @NonNull IBinder fragmentToken1, @Nullable IBinder fragmentToken2,
+            @NonNull IBinder fragmentToken1, @NonNull IBinder fragmentToken2,
             @Nullable TaskFragmentAdjacentParams params) {
         final TaskFragmentOperation operation = new TaskFragmentOperation.Builder(
                 OP_TYPE_SET_ADJACENT_TASK_FRAGMENTS)
@@ -599,6 +598,21 @@ public final class WindowContainerTransaction implements Parcelable {
                 .setBundle(params != null ? params.toBundle() : null)
                 .build();
         return addTaskFragmentOperation(fragmentToken1, operation);
+    }
+
+    /**
+     * Clears the adjacent TaskFragments relationship that is previously set through
+     * {@link #setAdjacentTaskFragments}. Clear operation on one TaskFragment will also clear its
+     * current adjacent TaskFragment's.
+     * @param fragmentToken     client assigned unique token to create TaskFragment with specified
+     *                          in {@link TaskFragmentCreationParams#getFragmentToken()}.
+     */
+    @NonNull
+    public WindowContainerTransaction clearAdjacentTaskFragments(@NonNull IBinder fragmentToken) {
+        final TaskFragmentOperation operation = new TaskFragmentOperation.Builder(
+                OP_TYPE_CLEAR_ADJACENT_TASK_FRAGMENTS)
+                .build();
+        return addTaskFragmentOperation(fragmentToken, operation);
     }
 
     /**

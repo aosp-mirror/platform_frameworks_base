@@ -16,7 +16,7 @@
 
 package com.android.wm.shell.flicker.pip
 
-import android.platform.test.annotations.FlakyTest
+import android.platform.test.annotations.Presubmit
 import androidx.test.filters.RequiresDevice
 import com.android.server.wm.flicker.FlickerBuilder
 import com.android.server.wm.flicker.FlickerTest
@@ -62,7 +62,7 @@ class ExpandPipOnDoubleClickTest(flicker: FlickerTest) : PipTransition(flicker) 
      * Checks that the pip app window remains inside the display bounds throughout the whole
      * animation
      */
-    @FlakyTest(bugId = 249308003)
+    @Presubmit
     @Test
     fun pipWindowRemainInsideVisibleBounds() {
         flicker.assertWmVisibleRegion(pipApp) { coversAtMost(displayBounds) }
@@ -72,28 +72,28 @@ class ExpandPipOnDoubleClickTest(flicker: FlickerTest) : PipTransition(flicker) 
      * Checks that the pip app layer remains inside the display bounds throughout the whole
      * animation
      */
-    @FlakyTest(bugId = 249308003)
+    @Presubmit
     @Test
     fun pipLayerRemainInsideVisibleBounds() {
         flicker.assertLayersVisibleRegion(pipApp) { coversAtMost(displayBounds) }
     }
 
     /** Checks [pipApp] window remains visible throughout the animation */
-    @FlakyTest(bugId = 249308003)
+    @Presubmit
     @Test
     fun pipWindowIsAlwaysVisible() {
         flicker.assertWm { isAppWindowVisible(pipApp) }
     }
 
     /** Checks [pipApp] layer remains visible throughout the animation */
-    @FlakyTest(bugId = 249308003)
+    @Presubmit
     @Test
     fun pipLayerIsAlwaysVisible() {
         flicker.assertLayers { isVisible(pipApp) }
     }
 
     /** Checks that the visible region of [pipApp] always expands during the animation */
-    @FlakyTest(bugId = 249308003)
+    @Presubmit
     @Test
     fun pipLayerExpands() {
         flicker.assertLayers {
@@ -104,7 +104,7 @@ class ExpandPipOnDoubleClickTest(flicker: FlickerTest) : PipTransition(flicker) 
         }
     }
 
-    @FlakyTest(bugId = 249308003)
+    @Presubmit
     @Test
     fun pipSameAspectRatio() {
         flicker.assertLayers {
@@ -116,90 +116,24 @@ class ExpandPipOnDoubleClickTest(flicker: FlickerTest) : PipTransition(flicker) 
     }
 
     /** Checks [pipApp] window remains pinned throughout the animation */
-    @FlakyTest(bugId = 249308003)
+    @Presubmit
     @Test
     fun windowIsAlwaysPinned() {
         flicker.assertWm { this.invoke("hasPipWindow") { it.isPinned(pipApp) } }
     }
 
-    /** Checks [ComponentMatcher.LAUNCHER] layer remains visible throughout the animation */
-    @FlakyTest(bugId = 249308003)
+    /** Checks [ComponentNameMatcher.LAUNCHER] layer remains visible throughout the animation */
+    @Presubmit
     @Test
     fun launcherIsAlwaysVisible() {
         flicker.assertLayers { isVisible(ComponentNameMatcher.LAUNCHER) }
     }
 
     /** Checks that the focus doesn't change between windows during the transition */
-    @FlakyTest(bugId = 216306753)
+    @Presubmit
     @Test
     fun focusDoesNotChange() {
         flicker.assertEventLog { this.focusDoesNotChange() }
-    }
-
-    @FlakyTest(bugId = 216306753)
-    @Test
-    override fun navBarLayerIsVisibleAtStartAndEnd() {
-        super.navBarLayerIsVisibleAtStartAndEnd()
-    }
-
-    @FlakyTest(bugId = 216306753)
-    @Test
-    override fun navBarWindowIsAlwaysVisible() {
-        super.navBarWindowIsAlwaysVisible()
-    }
-
-    @FlakyTest(bugId = 216306753)
-    @Test
-    override fun statusBarLayerIsVisibleAtStartAndEnd() {
-        super.statusBarLayerIsVisibleAtStartAndEnd()
-    }
-
-    @FlakyTest(bugId = 216306753)
-    @Test
-    override fun statusBarLayerPositionAtStartAndEnd() {
-        super.statusBarLayerPositionAtStartAndEnd()
-    }
-
-    @FlakyTest(bugId = 216306753)
-    @Test
-    override fun taskBarLayerIsVisibleAtStartAndEnd() {
-        super.taskBarLayerIsVisibleAtStartAndEnd()
-    }
-
-    @FlakyTest(bugId = 216306753)
-    @Test
-    override fun taskBarWindowIsAlwaysVisible() {
-        super.taskBarWindowIsAlwaysVisible()
-    }
-
-    @FlakyTest(bugId = 216306753)
-    @Test
-    override fun visibleLayersShownMoreThanOneConsecutiveEntry() {
-        super.visibleLayersShownMoreThanOneConsecutiveEntry()
-    }
-
-    @FlakyTest(bugId = 216306753)
-    @Test
-    override fun statusBarWindowIsAlwaysVisible() {
-        super.statusBarWindowIsAlwaysVisible()
-    }
-
-    @FlakyTest(bugId = 216306753)
-    @Test
-    override fun visibleWindowsShownMoreThanOneConsecutiveEntry() {
-        super.visibleWindowsShownMoreThanOneConsecutiveEntry()
-    }
-
-    @FlakyTest(bugId = 216306753)
-    @Test
-    override fun entireScreenCovered() {
-        super.entireScreenCovered()
-    }
-
-    @FlakyTest(bugId = 216306753)
-    @Test
-    override fun navBarLayerPositionAtStartAndEnd() {
-        super.navBarLayerPositionAtStartAndEnd()
     }
 
     companion object {

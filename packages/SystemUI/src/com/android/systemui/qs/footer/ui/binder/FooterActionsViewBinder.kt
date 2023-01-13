@@ -219,9 +219,9 @@ object FooterActionsViewBinder {
             // Small button with the number only.
             foregroundServicesWithTextView.isVisible = false
 
-            foregroundServicesWithNumberView.visibility = View.VISIBLE
+            foregroundServicesWithNumberView.isVisible = true
             foregroundServicesWithNumberView.setOnClickListener {
-                foregroundServices.onClick(Expandable.fromView(foregroundServicesWithTextView))
+                foregroundServices.onClick(Expandable.fromView(foregroundServicesWithNumberView))
             }
             foregroundServicesWithNumberHolder.number.text = foregroundServicesCount.toString()
             foregroundServicesWithNumberHolder.number.contentDescription = foregroundServices.text
