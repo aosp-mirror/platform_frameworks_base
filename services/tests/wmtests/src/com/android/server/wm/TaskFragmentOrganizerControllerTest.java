@@ -819,6 +819,38 @@ public class TaskFragmentOrganizerControllerTest extends WindowTestsBase {
     }
 
     @Test
+    public void testApplyTransaction_createTaskFragment_overrideBounds() {
+        final Task task = createTask(mDisplayContent);
+        final ActivityRecord activityAtBottom = createActivityRecord(task);
+        final int uid = Binder.getCallingUid();
+        activityAtBottom.info.applicationInfo.uid = uid;
+        activityAtBottom.getTask().effectiveUid = uid;
+        mTaskFragment = new TaskFragmentBuilder(mAtm)
+                .setParentTask(task)
+                .setFragmentToken(mFragmentToken)
+                .createActivityCount(1)
+                .build();
+        mWindowOrganizerController.mLaunchTaskFragments.put(mFragmentToken, mTaskFragment);
+        final IBinder fragmentToken1 = new Binder();
+        final Rect bounds = new Rect(100, 100, 500, 1000);
+        final TaskFragmentCreationParams params = new TaskFragmentCreationParams.Builder(
+                mOrganizerToken, fragmentToken1, activityAtBottom.token)
+                .setPairedActivityToken(activityAtBottom.token)
+                .setInitialBounds(bounds)
+                .build();
+        mTransaction.setTaskFragmentOrganizer(mIOrganizer);
+        mTransaction.createTaskFragment(params);
+        assertApplyTransactionAllowed(mTransaction);
+
+        // Successfully created a TaskFragment.
+        final TaskFragment taskFragment = mWindowOrganizerController.getTaskFragment(
+                fragmentToken1);
+        assertNotNull(taskFragment);
+        // The relative embedded bounds is updated to the initial requested bounds.
+        assertEquals(bounds, taskFragment.getRelativeEmbeddedBounds());
+    }
+
+    @Test
     public void testApplyTransaction_createTaskFragment_withPairedActivityToken() {
         final Task task = createTask(mDisplayContent);
         final ActivityRecord activityAtBottom = createActivityRecord(task);
