@@ -38,6 +38,7 @@ import com.android.systemui.util.mockito.eq
 import com.android.systemui.util.mockito.mock
 import com.android.systemui.util.mockito.whenever
 import com.android.systemui.util.settings.FakeSettings
+import com.google.common.truth.Truth.assertThat
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.StandardTestDispatcher
 import kotlinx.coroutines.test.TestDispatcher
@@ -83,169 +84,205 @@ class DoNotDisturbQuickAffordanceConfigTest : SysuiTestCase() {
 
         settings = FakeSettings()
 
-        underTest = DoNotDisturbQuickAffordanceConfig(
-            context,
-            zenModeController,
-            settings,
-            userTracker,
-            testDispatcher,
-            conditionUri,
-            enableZenModeDialog,
-        )
+        underTest =
+            DoNotDisturbQuickAffordanceConfig(
+                context,
+                zenModeController,
+                settings,
+                userTracker,
+                testDispatcher,
+                conditionUri,
+                enableZenModeDialog,
+            )
     }
 
     @Test
-    fun `dnd not available - picker state hidden`() = testScope.runTest {
-        //given
-        whenever(zenModeController.isZenAvailable).thenReturn(false)
+    fun `dnd not available - picker state hidden`() =
+        testScope.runTest {
+            // given
+            whenever(zenModeController.isZenAvailable).thenReturn(false)
 
-        //when
-        val result = underTest.getPickerScreenState()
+            // when
+            val result = underTest.getPickerScreenState()
 
-        //then
-        assertEquals(KeyguardQuickAffordanceConfig.PickerScreenState.UnavailableOnDevice, result)
-    }
-
-    @Test
-    fun `dnd available - picker state visible`() = testScope.runTest {
-        //given
-        whenever(zenModeController.isZenAvailable).thenReturn(true)
-
-        //when
-        val result = underTest.getPickerScreenState()
-
-        //then
-        assertEquals(KeyguardQuickAffordanceConfig.PickerScreenState.Default, result)
-    }
+            // then
+            assertEquals(
+                KeyguardQuickAffordanceConfig.PickerScreenState.UnavailableOnDevice,
+                result
+            )
+        }
 
     @Test
-    fun `onTriggered - dnd mode is not ZEN_MODE_OFF - set to ZEN_MODE_OFF`() = testScope.runTest {
-        //given
-        whenever(zenModeController.isZenAvailable).thenReturn(true)
-        whenever(zenModeController.zen).thenReturn(-1)
-        settings.putInt(Settings.Secure.ZEN_DURATION, -2)
-        collectLastValue(underTest.lockScreenState)
-        runCurrent()
+    fun `dnd available - picker state visible`() =
+        testScope.runTest {
+            // given
+            whenever(zenModeController.isZenAvailable).thenReturn(true)
 
-        //when
-        val result = underTest.onTriggered(null)
-        verify(zenModeController).setZen(spyZenMode.capture(), spyConditionId.capture(), eq(DoNotDisturbQuickAffordanceConfig.TAG))
+            // when
+            val result = underTest.getPickerScreenState()
 
-        //then
-        assertEquals(KeyguardQuickAffordanceConfig.OnTriggeredResult.Handled, result)
-        assertEquals(ZEN_MODE_OFF, spyZenMode.value)
-        assertNull(spyConditionId.value)
-    }
-
-    @Test
-    fun `onTriggered - dnd mode is ZEN_MODE_OFF - setting is FOREVER - set zen with no condition`() = testScope.runTest {
-        //given
-        whenever(zenModeController.isZenAvailable).thenReturn(true)
-        whenever(zenModeController.zen).thenReturn(ZEN_MODE_OFF)
-        settings.putInt(Settings.Secure.ZEN_DURATION, ZEN_DURATION_FOREVER)
-        collectLastValue(underTest.lockScreenState)
-        runCurrent()
-
-        //when
-        val result = underTest.onTriggered(null)
-        verify(zenModeController).setZen(spyZenMode.capture(), spyConditionId.capture(), eq(DoNotDisturbQuickAffordanceConfig.TAG))
-
-        //then
-        assertEquals(KeyguardQuickAffordanceConfig.OnTriggeredResult.Handled, result)
-        assertEquals(ZEN_MODE_IMPORTANT_INTERRUPTIONS, spyZenMode.value)
-        assertNull(spyConditionId.value)
-    }
+            // then
+            assertThat(result)
+                .isInstanceOf(KeyguardQuickAffordanceConfig.PickerScreenState.Default::class.java)
+            val defaultPickerState =
+                result as KeyguardQuickAffordanceConfig.PickerScreenState.Default
+            assertThat(defaultPickerState.configureIntent).isNotNull()
+            assertThat(defaultPickerState.configureIntent?.action)
+                .isEqualTo(Settings.ACTION_ZEN_MODE_SETTINGS)
+        }
 
     @Test
-    fun `onTriggered - dnd mode is ZEN_MODE_OFF - setting is not FOREVER or PROMPT - set zen with condition`() = testScope.runTest {
-        //given
-        whenever(zenModeController.isZenAvailable).thenReturn(true)
-        whenever(zenModeController.zen).thenReturn(ZEN_MODE_OFF)
-        settings.putInt(Settings.Secure.ZEN_DURATION, -900)
-        collectLastValue(underTest.lockScreenState)
-        runCurrent()
+    fun `onTriggered - dnd mode is not ZEN_MODE_OFF - set to ZEN_MODE_OFF`() =
+        testScope.runTest {
+            // given
+            whenever(zenModeController.isZenAvailable).thenReturn(true)
+            whenever(zenModeController.zen).thenReturn(-1)
+            settings.putInt(Settings.Secure.ZEN_DURATION, -2)
+            collectLastValue(underTest.lockScreenState)
+            runCurrent()
 
-        //when
-        val result = underTest.onTriggered(null)
-        verify(zenModeController).setZen(spyZenMode.capture(), spyConditionId.capture(), eq(DoNotDisturbQuickAffordanceConfig.TAG))
+            // when
+            val result = underTest.onTriggered(null)
+            verify(zenModeController)
+                .setZen(
+                    spyZenMode.capture(),
+                    spyConditionId.capture(),
+                    eq(DoNotDisturbQuickAffordanceConfig.TAG)
+                )
 
-        //then
-        assertEquals(KeyguardQuickAffordanceConfig.OnTriggeredResult.Handled, result)
-        assertEquals(ZEN_MODE_IMPORTANT_INTERRUPTIONS, spyZenMode.value)
-        assertEquals(conditionUri, spyConditionId.value)
-    }
-
-    @Test
-    fun `onTriggered - dnd mode is ZEN_MODE_OFF - setting is PROMPT - show dialog`() = testScope.runTest {
-        //given
-        val expandable: Expandable = mock()
-        whenever(zenModeController.isZenAvailable).thenReturn(true)
-        whenever(zenModeController.zen).thenReturn(ZEN_MODE_OFF)
-        settings.putInt(Settings.Secure.ZEN_DURATION, ZEN_DURATION_PROMPT)
-        whenever(enableZenModeDialog.createDialog()).thenReturn(mock())
-        collectLastValue(underTest.lockScreenState)
-        runCurrent()
-
-        //when
-        val result = underTest.onTriggered(expandable)
-
-        //then
-        assertTrue(result is KeyguardQuickAffordanceConfig.OnTriggeredResult.ShowDialog)
-        assertEquals(expandable, (result as KeyguardQuickAffordanceConfig.OnTriggeredResult.ShowDialog).expandable)
-    }
+            // then
+            assertEquals(KeyguardQuickAffordanceConfig.OnTriggeredResult.Handled, result)
+            assertEquals(ZEN_MODE_OFF, spyZenMode.value)
+            assertNull(spyConditionId.value)
+        }
 
     @Test
-    fun `lockScreenState - dndAvailable starts as true - changes to false - State moves to Hidden`() = testScope.runTest {
-        //given
-        whenever(zenModeController.isZenAvailable).thenReturn(true)
-        val callbackCaptor: ArgumentCaptor<ZenModeController.Callback> = argumentCaptor()
-        val valueSnapshot = collectLastValue(underTest.lockScreenState)
-        val secondLastValue = valueSnapshot()
-        verify(zenModeController).addCallback(callbackCaptor.capture())
+    fun `onTriggered - dnd mode is ZEN_MODE_OFF - setting FOREVER - set zen without condition`() =
+        testScope.runTest {
+            // given
+            whenever(zenModeController.isZenAvailable).thenReturn(true)
+            whenever(zenModeController.zen).thenReturn(ZEN_MODE_OFF)
+            settings.putInt(Settings.Secure.ZEN_DURATION, ZEN_DURATION_FOREVER)
+            collectLastValue(underTest.lockScreenState)
+            runCurrent()
 
-        //when
-        callbackCaptor.value.onZenAvailableChanged(false)
-        val lastValue = valueSnapshot()
+            // when
+            val result = underTest.onTriggered(null)
+            verify(zenModeController)
+                .setZen(
+                    spyZenMode.capture(),
+                    spyConditionId.capture(),
+                    eq(DoNotDisturbQuickAffordanceConfig.TAG)
+                )
 
-        //then
-        assertTrue(secondLastValue is KeyguardQuickAffordanceConfig.LockScreenState.Visible)
-        assertTrue(lastValue is KeyguardQuickAffordanceConfig.LockScreenState.Hidden)
-    }
+            // then
+            assertEquals(KeyguardQuickAffordanceConfig.OnTriggeredResult.Handled, result)
+            assertEquals(ZEN_MODE_IMPORTANT_INTERRUPTIONS, spyZenMode.value)
+            assertNull(spyConditionId.value)
+        }
 
     @Test
-    fun `lockScreenState - dndMode starts as ZEN_MODE_OFF - changes to not OFF - State moves to Visible`() = testScope.runTest {
-        //given
-        whenever(zenModeController.isZenAvailable).thenReturn(true)
-        whenever(zenModeController.zen).thenReturn(ZEN_MODE_OFF)
-        val valueSnapshot = collectLastValue(underTest.lockScreenState)
-        val secondLastValue = valueSnapshot()
-        val callbackCaptor: ArgumentCaptor<ZenModeController.Callback> = argumentCaptor()
-        verify(zenModeController).addCallback(callbackCaptor.capture())
+    fun `onTriggered - dnd ZEN_MODE_OFF - setting not FOREVER or PROMPT - zen with condition`() =
+        testScope.runTest {
+            // given
+            whenever(zenModeController.isZenAvailable).thenReturn(true)
+            whenever(zenModeController.zen).thenReturn(ZEN_MODE_OFF)
+            settings.putInt(Settings.Secure.ZEN_DURATION, -900)
+            collectLastValue(underTest.lockScreenState)
+            runCurrent()
 
-        //when
-        callbackCaptor.value.onZenChanged(ZEN_MODE_IMPORTANT_INTERRUPTIONS)
-        val lastValue = valueSnapshot()
+            // when
+            val result = underTest.onTriggered(null)
+            verify(zenModeController)
+                .setZen(
+                    spyZenMode.capture(),
+                    spyConditionId.capture(),
+                    eq(DoNotDisturbQuickAffordanceConfig.TAG)
+                )
 
-        //then
-        assertEquals(
-            KeyguardQuickAffordanceConfig.LockScreenState.Visible(
-                Icon.Resource(
-                    R.drawable.qs_dnd_icon_off,
-                    ContentDescription.Resource(R.string.dnd_is_off)
+            // then
+            assertEquals(KeyguardQuickAffordanceConfig.OnTriggeredResult.Handled, result)
+            assertEquals(ZEN_MODE_IMPORTANT_INTERRUPTIONS, spyZenMode.value)
+            assertEquals(conditionUri, spyConditionId.value)
+        }
+
+    @Test
+    fun `onTriggered - dnd mode is ZEN_MODE_OFF - setting is PROMPT - show dialog`() =
+        testScope.runTest {
+            // given
+            val expandable: Expandable = mock()
+            whenever(zenModeController.isZenAvailable).thenReturn(true)
+            whenever(zenModeController.zen).thenReturn(ZEN_MODE_OFF)
+            settings.putInt(Settings.Secure.ZEN_DURATION, ZEN_DURATION_PROMPT)
+            whenever(enableZenModeDialog.createDialog()).thenReturn(mock())
+            collectLastValue(underTest.lockScreenState)
+            runCurrent()
+
+            // when
+            val result = underTest.onTriggered(expandable)
+
+            // then
+            assertTrue(result is KeyguardQuickAffordanceConfig.OnTriggeredResult.ShowDialog)
+            assertEquals(
+                expandable,
+                (result as KeyguardQuickAffordanceConfig.OnTriggeredResult.ShowDialog).expandable
+            )
+        }
+
+    @Test
+    fun `lockScreenState - dndAvailable starts as true - change to false - State is Hidden`() =
+        testScope.runTest {
+            // given
+            whenever(zenModeController.isZenAvailable).thenReturn(true)
+            val callbackCaptor: ArgumentCaptor<ZenModeController.Callback> = argumentCaptor()
+            val valueSnapshot = collectLastValue(underTest.lockScreenState)
+            val secondLastValue = valueSnapshot()
+            verify(zenModeController).addCallback(callbackCaptor.capture())
+
+            // when
+            callbackCaptor.value.onZenAvailableChanged(false)
+            val lastValue = valueSnapshot()
+
+            // then
+            assertTrue(secondLastValue is KeyguardQuickAffordanceConfig.LockScreenState.Visible)
+            assertTrue(lastValue is KeyguardQuickAffordanceConfig.LockScreenState.Hidden)
+        }
+
+    @Test
+    fun `lockScreenState - dndMode starts as ZEN_MODE_OFF - change to not OFF - State Visible`() =
+        testScope.runTest {
+            // given
+            whenever(zenModeController.isZenAvailable).thenReturn(true)
+            whenever(zenModeController.zen).thenReturn(ZEN_MODE_OFF)
+            val valueSnapshot = collectLastValue(underTest.lockScreenState)
+            val secondLastValue = valueSnapshot()
+            val callbackCaptor: ArgumentCaptor<ZenModeController.Callback> = argumentCaptor()
+            verify(zenModeController).addCallback(callbackCaptor.capture())
+
+            // when
+            callbackCaptor.value.onZenChanged(ZEN_MODE_IMPORTANT_INTERRUPTIONS)
+            val lastValue = valueSnapshot()
+
+            // then
+            assertEquals(
+                KeyguardQuickAffordanceConfig.LockScreenState.Visible(
+                    Icon.Resource(
+                        R.drawable.qs_dnd_icon_off,
+                        ContentDescription.Resource(R.string.dnd_is_off)
+                    ),
+                    ActivationState.Inactive
                 ),
-                ActivationState.Inactive
-            ),
-            secondLastValue,
-        )
-        assertEquals(
-            KeyguardQuickAffordanceConfig.LockScreenState.Visible(
-                Icon.Resource(
-                    R.drawable.qs_dnd_icon_on,
-                    ContentDescription.Resource(R.string.dnd_is_on)
+                secondLastValue,
+            )
+            assertEquals(
+                KeyguardQuickAffordanceConfig.LockScreenState.Visible(
+                    Icon.Resource(
+                        R.drawable.qs_dnd_icon_on,
+                        ContentDescription.Resource(R.string.dnd_is_on)
+                    ),
+                    ActivationState.Active
                 ),
-                ActivationState.Active
-            ),
-            lastValue,
-        )
-    }
+                lastValue,
+            )
+        }
 }

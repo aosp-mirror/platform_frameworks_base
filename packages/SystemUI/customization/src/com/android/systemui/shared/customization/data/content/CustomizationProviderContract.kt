@@ -113,6 +113,11 @@ object CustomizationProviderContract {
                  * opens a destination where the user can re-enable the disabled affordance.
                  */
                 const val ENABLEMENT_COMPONENT_NAME = "enablement_action_intent"
+                /**
+                 * Byte array. Optional parcelled `Intent` to use to start an activity that can be
+                 * used to configure the affordance.
+                 */
+                const val CONFIGURE_INTENT = "configure_intent"
             }
         }
 
