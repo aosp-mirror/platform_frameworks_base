@@ -388,14 +388,6 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
     int mPrepareSyncSeqId = 0;
 
     /**
-     * {@code true} when the client was still drawing for sync when the sync-set was finished or
-     * cancelled. This can happen if the window goes away during a sync. In this situation we need
-     * to make sure to still apply the postDrawTransaction when it finishes to prevent the client
-     * from getting stuck in a bad state.
-     */
-    boolean mClientWasDrawingForSync = false;
-
-    /**
      * Special mode that is intended only for the rounded corner overlay: during rotation
      * transition, we un-rotate the window token such that the window appears as it did before the
      * rotation.
@@ -5977,9 +5969,6 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
 
     @Override
     void finishSync(Transaction outMergedTransaction, boolean cancel) {
-        if (mSyncState == SYNC_STATE_WAITING_FOR_DRAW && mRedrawForSyncReported) {
-            mClientWasDrawingForSync = true;
-        }
         mPrepareSyncSeqId = 0;
         if (cancel) {
             // This is leaving sync so any buffers left in the sync have a chance of
@@ -6047,9 +6036,7 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
             layoutNeeded = onSyncFinishedDrawing();
         }
 
-        layoutNeeded |=
-                mWinAnimator.finishDrawingLocked(postDrawTransaction, mClientWasDrawingForSync);
-        mClientWasDrawingForSync = false;
+        layoutNeeded |= mWinAnimator.finishDrawingLocked(postDrawTransaction);
         // We always want to force a traversal after a finish draw for blast sync.
         return !skipLayout && (hasSyncHandlers || layoutNeeded);
     }
