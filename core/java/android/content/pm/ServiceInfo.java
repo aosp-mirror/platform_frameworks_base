@@ -420,6 +420,8 @@ public class ServiceInfo extends ComponentInfo
      * the {@link android.R.attr#foregroundServiceType} attribute.
      * The file management use case which manages files/directories, often involving file I/O
      * across the file system.
+     *
+     * @hide
      */
     @RequiresPermission(
             value = Manifest.permission.FOREGROUND_SERVICE_FILE_MANAGEMENT

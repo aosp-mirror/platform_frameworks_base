@@ -95,7 +95,6 @@ package android {
     field public static final String FOREGROUND_SERVICE_CAMERA = "android.permission.FOREGROUND_SERVICE_CAMERA";
     field public static final String FOREGROUND_SERVICE_CONNECTED_DEVICE = "android.permission.FOREGROUND_SERVICE_CONNECTED_DEVICE";
     field public static final String FOREGROUND_SERVICE_DATA_SYNC = "android.permission.FOREGROUND_SERVICE_DATA_SYNC";
-    field public static final String FOREGROUND_SERVICE_FILE_MANAGEMENT = "android.permission.FOREGROUND_SERVICE_FILE_MANAGEMENT";
     field public static final String FOREGROUND_SERVICE_HEALTH = "android.permission.FOREGROUND_SERVICE_HEALTH";
     field public static final String FOREGROUND_SERVICE_LOCATION = "android.permission.FOREGROUND_SERVICE_LOCATION";
     field public static final String FOREGROUND_SERVICE_MEDIA_PLAYBACK = "android.permission.FOREGROUND_SERVICE_MEDIA_PLAYBACK";
@@ -12694,7 +12693,6 @@ package android.content.pm {
     field @RequiresPermission(allOf={android.Manifest.permission.FOREGROUND_SERVICE_CAMERA}, anyOf={android.Manifest.permission.CAMERA}, conditional=true) public static final int FOREGROUND_SERVICE_TYPE_CAMERA = 64; // 0x40
     field @RequiresPermission(allOf={android.Manifest.permission.FOREGROUND_SERVICE_CONNECTED_DEVICE}, anyOf={android.Manifest.permission.BLUETOOTH_CONNECT, android.Manifest.permission.CHANGE_NETWORK_STATE, android.Manifest.permission.CHANGE_WIFI_STATE, android.Manifest.permission.CHANGE_WIFI_MULTICAST_STATE, android.Manifest.permission.NFC, android.Manifest.permission.TRANSMIT_IR}, conditional=true) public static final int FOREGROUND_SERVICE_TYPE_CONNECTED_DEVICE = 16; // 0x10
     field @RequiresPermission(value=android.Manifest.permission.FOREGROUND_SERVICE_DATA_SYNC, conditional=true) public static final int FOREGROUND_SERVICE_TYPE_DATA_SYNC = 1; // 0x1
-    field @RequiresPermission(android.Manifest.permission.FOREGROUND_SERVICE_FILE_MANAGEMENT) public static final int FOREGROUND_SERVICE_TYPE_FILE_MANAGEMENT = 4096; // 0x1000
     field @RequiresPermission(allOf={android.Manifest.permission.FOREGROUND_SERVICE_HEALTH}, anyOf={android.Manifest.permission.ACTIVITY_RECOGNITION, android.Manifest.permission.BODY_SENSORS, android.Manifest.permission.HIGH_SAMPLING_RATE_SENSORS}) public static final int FOREGROUND_SERVICE_TYPE_HEALTH = 256; // 0x100
     field @RequiresPermission(allOf={android.Manifest.permission.FOREGROUND_SERVICE_LOCATION}, anyOf={android.Manifest.permission.ACCESS_COARSE_LOCATION, android.Manifest.permission.ACCESS_FINE_LOCATION}, conditional=true) public static final int FOREGROUND_SERVICE_TYPE_LOCATION = 8; // 0x8
     field public static final int FOREGROUND_SERVICE_TYPE_MANIFEST = -1; // 0xffffffff

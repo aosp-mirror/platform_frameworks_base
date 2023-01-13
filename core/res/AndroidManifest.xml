@@ -6470,6 +6470,7 @@
     <!-- Allows a regular application to use {@link android.app.Service#startForeground
          Service.startForeground} with the type "fileManagement".
          <p>Protection level: normal|instant
+         @hide
     -->
     <permission android:name="android.permission.FOREGROUND_SERVICE_FILE_MANAGEMENT"
         android:description="@string/permdesc_foregroundServiceFileManagement"
