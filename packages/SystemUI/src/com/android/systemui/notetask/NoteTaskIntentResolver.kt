@@ -21,12 +21,12 @@ import android.content.Intent
 import android.content.pm.ActivityInfo
 import android.content.pm.PackageManager
 import android.content.pm.PackageManager.ResolveInfoFlags
-import com.android.systemui.notetask.NoteTaskIntentResolver.Companion.NOTES_ACTION
+import com.android.systemui.notetask.NoteTaskIntentResolver.Companion.ACTION_CREATE_NOTE
 import javax.inject.Inject
 
 /**
- * Class responsible to query all apps and find one that can handle the [NOTES_ACTION]. If found, an
- * [Intent] ready for be launched will be returned. Otherwise, returns null.
+ * Class responsible to query all apps and find one that can handle the [ACTION_CREATE_NOTE]. If
+ * found, an [Intent] ready for be launched will be returned. Otherwise, returns null.
  *
  * TODO(b/248274123): should be revisited once the notes role is implemented.
  */
@@ -37,15 +37,16 @@ constructor(
 ) {
 
     fun resolveIntent(): Intent? {
-        val intent = Intent(NOTES_ACTION)
+        val intent = Intent(ACTION_CREATE_NOTE)
         val flags = ResolveInfoFlags.of(PackageManager.MATCH_DEFAULT_ONLY.toLong())
         val infoList = packageManager.queryIntentActivities(intent, flags)
 
         for (info in infoList) {
-            val packageName = info.serviceInfo.applicationInfo.packageName ?: continue
+            val packageName = info.activityInfo.applicationInfo.packageName ?: continue
             val activityName = resolveActivityNameForNotesAction(packageName) ?: continue
 
-            return Intent(NOTES_ACTION)
+            return Intent(ACTION_CREATE_NOTE)
+                .setPackage(packageName)
                 .setComponent(ComponentName(packageName, activityName))
                 .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
         }
@@ -54,7 +55,7 @@ constructor(
     }
 
     private fun resolveActivityNameForNotesAction(packageName: String): String? {
-        val intent = Intent(NOTES_ACTION).setPackage(packageName)
+        val intent = Intent(ACTION_CREATE_NOTE).setPackage(packageName)
         val flags = ResolveInfoFlags.of(PackageManager.MATCH_DEFAULT_ONLY.toLong())
         val resolveInfo = packageManager.resolveActivity(intent, flags)
 
@@ -69,8 +70,8 @@ constructor(
     }
 
     companion object {
-        // TODO(b/254606432): Use Intent.ACTION_NOTES and Intent.ACTION_NOTES_LOCKED instead.
-        const val NOTES_ACTION = "android.intent.action.NOTES"
+        // TODO(b/254606432): Use Intent.ACTION_CREATE_NOTE instead.
+        const val ACTION_CREATE_NOTE = "android.intent.action.CREATE_NOTE"
     }
 }
 

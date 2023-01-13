@@ -292,7 +292,7 @@
 
     <queries>
         <intent>
-            <action android:name="android.intent.action.NOTES" />
+            <action android:name="android.intent.action.CREATE_NOTE" />
         </intent>
     </queries>
 

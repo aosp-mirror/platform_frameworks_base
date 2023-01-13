@@ -228,6 +228,7 @@ class MediaDataManagerTest : SysuiTestCase() {
         whenever(mediaSmartspaceTarget.iconGrid).thenReturn(validRecommendationList)
         whenever(mediaSmartspaceTarget.creationTimeMillis).thenReturn(1234L)
         whenever(mediaFlags.areMediaSessionActionsEnabled(any(), any())).thenReturn(false)
+        whenever(mediaFlags.isExplicitIndicatorEnabled()).thenReturn(true)
         whenever(logger.getNewInstanceId()).thenReturn(instanceIdSequence.newInstanceId())
     }
 
@@ -297,6 +298,60 @@ class MediaDataManagerTest : SysuiTestCase() {
     fun testLoadsMetadataOnBackground() {
         mediaDataManager.onNotificationAdded(KEY, mediaNotification)
         assertThat(backgroundExecutor.numPending()).isEqualTo(1)
+    }
+
+    @Test
+    fun testLoadMetadata_withExplicitIndicator() {
+        val metadata =
+            MediaMetadata.Builder().run {
+                putString(MediaMetadata.METADATA_KEY_ARTIST, SESSION_ARTIST)
+                putString(MediaMetadata.METADATA_KEY_TITLE, SESSION_TITLE)
+                putLong(
+                    MediaConstants.METADATA_KEY_IS_EXPLICIT,
+                    MediaConstants.METADATA_VALUE_ATTRIBUTE_PRESENT
+                )
+                build()
+            }
+        whenever(mediaControllerFactory.create(anyObject())).thenReturn(controller)
+        whenever(controller.metadata).thenReturn(metadata)
+
+        mediaDataManager.addListener(listener)
+        mediaDataManager.onNotificationAdded(KEY, mediaNotification)
+
+        assertThat(backgroundExecutor.runAllReady()).isEqualTo(1)
+        assertThat(foregroundExecutor.runAllReady()).isEqualTo(1)
+        verify(listener)
+            .onMediaDataLoaded(
+                eq(KEY),
+                eq(null),
+                capture(mediaDataCaptor),
+                eq(true),
+                eq(0),
+                eq(false)
+            )
+        assertThat(mediaDataCaptor.value!!.isExplicit).isTrue()
+    }
+
+    @Test
+    fun testOnMetaDataLoaded_withoutExplicitIndicator() {
+        whenever(mediaControllerFactory.create(anyObject())).thenReturn(controller)
+        whenever(controller.metadata).thenReturn(metadataBuilder.build())
+
+        mediaDataManager.addListener(listener)
+        mediaDataManager.onNotificationAdded(KEY, mediaNotification)
+
+        assertThat(backgroundExecutor.runAllReady()).isEqualTo(1)
+        assertThat(foregroundExecutor.runAllReady()).isEqualTo(1)
+        verify(listener)
+            .onMediaDataLoaded(
+                eq(KEY),
+                eq(null),
+                capture(mediaDataCaptor),
+                eq(true),
+                eq(0),
+                eq(false)
+            )
+        assertThat(mediaDataCaptor.value!!.isExplicit).isFalse()
     }
 
     @Test
@@ -599,6 +654,53 @@ class MediaDataManagerTest : SysuiTestCase() {
         assertThat(data.actions).hasSize(1)
         assertThat(data.semanticActions!!.playOrPause).isNotNull()
         assertThat(data.lastActive).isAtLeast(currentTime)
+        verify(logger).logResumeMediaAdded(anyInt(), eq(PACKAGE_NAME), eq(data.instanceId))
+    }
+
+    @Test
+    fun testAddResumptionControls_withExplicitIndicator() {
+        val bundle = Bundle()
+        // WHEN resumption controls are added with explicit indicator
+        bundle.putLong(
+            MediaConstants.METADATA_KEY_IS_EXPLICIT,
+            MediaConstants.METADATA_VALUE_ATTRIBUTE_PRESENT
+        )
+        val desc =
+            MediaDescription.Builder().run {
+                setTitle(SESSION_TITLE)
+                setExtras(bundle)
+                build()
+            }
+        val currentTime = clock.elapsedRealtime()
+        mediaDataManager.addResumptionControls(
+            USER_ID,
+            desc,
+            Runnable {},
+            session.sessionToken,
+            APP_NAME,
+            pendingIntent,
+            PACKAGE_NAME
+        )
+        assertThat(backgroundExecutor.runAllReady()).isEqualTo(1)
+        assertThat(foregroundExecutor.runAllReady()).isEqualTo(1)
+        // THEN the media data indicates that it is for resumption
+        verify(listener)
+            .onMediaDataLoaded(
+                eq(PACKAGE_NAME),
+                eq(null),
+                capture(mediaDataCaptor),
+                eq(true),
+                eq(0),
+                eq(false)
+            )
+        val data = mediaDataCaptor.value
+        assertThat(data.resumption).isTrue()
+        assertThat(data.song).isEqualTo(SESSION_TITLE)
+        assertThat(data.app).isEqualTo(APP_NAME)
+        assertThat(data.actions).hasSize(1)
+        assertThat(data.semanticActions!!.playOrPause).isNotNull()
+        assertThat(data.lastActive).isAtLeast(currentTime)
+        assertThat(data.isExplicit).isTrue()
         verify(logger).logResumeMediaAdded(anyInt(), eq(PACKAGE_NAME), eq(data.instanceId))
     }
 

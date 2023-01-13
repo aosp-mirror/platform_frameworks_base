@@ -209,7 +209,7 @@ class KeyguardTransitionRepositoryImpl @Inject constructor() : KeyguardTransitio
             return
         }
 
-        if (state == TransitionState.FINISHED) {
+        if (state == TransitionState.FINISHED || state == TransitionState.CANCELED) {
             updateTransitionId = null
         }
 

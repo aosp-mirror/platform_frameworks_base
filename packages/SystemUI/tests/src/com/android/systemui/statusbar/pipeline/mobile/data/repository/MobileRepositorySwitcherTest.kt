@@ -34,6 +34,8 @@ import com.android.systemui.statusbar.pipeline.mobile.data.repository.demo.valid
 import com.android.systemui.statusbar.pipeline.mobile.data.repository.prod.MobileConnectionsRepositoryImpl
 import com.android.systemui.statusbar.pipeline.mobile.util.FakeMobileMappingsProxy
 import com.android.systemui.statusbar.pipeline.shared.ConnectivityPipelineLogger
+import com.android.systemui.statusbar.pipeline.wifi.data.repository.FakeWifiRepository
+import com.android.systemui.statusbar.pipeline.wifi.data.repository.demo.DemoModeWifiDataSource
 import com.android.systemui.util.mockito.any
 import com.android.systemui.util.mockito.kotlinArgumentCaptor
 import com.android.systemui.util.mockito.mock
@@ -71,8 +73,10 @@ class MobileRepositorySwitcherTest : SysuiTestCase() {
     private lateinit var underTest: MobileRepositorySwitcher
     private lateinit var realRepo: MobileConnectionsRepositoryImpl
     private lateinit var demoRepo: DemoMobileConnectionsRepository
-    private lateinit var mockDataSource: DemoModeMobileConnectionDataSource
+    private lateinit var mobileDataSource: DemoModeMobileConnectionDataSource
+    private lateinit var wifiDataSource: DemoModeWifiDataSource
     private lateinit var logFactory: TableLogBufferFactory
+    private lateinit var wifiRepository: FakeWifiRepository
 
     @Mock private lateinit var connectivityManager: ConnectivityManager
     @Mock private lateinit var subscriptionManager: SubscriptionManager
@@ -96,10 +100,15 @@ class MobileRepositorySwitcherTest : SysuiTestCase() {
         // Never start in demo mode
         whenever(demoModeController.isInDemoMode).thenReturn(false)
 
-        mockDataSource =
+        mobileDataSource =
             mock<DemoModeMobileConnectionDataSource>().also {
                 whenever(it.mobileEvents).thenReturn(fakeNetworkEventsFlow)
             }
+        wifiDataSource =
+            mock<DemoModeWifiDataSource>().also {
+                whenever(it.wifiEvents).thenReturn(MutableStateFlow(null))
+            }
+        wifiRepository = FakeWifiRepository()
 
         realRepo =
             MobileConnectionsRepositoryImpl(
@@ -113,12 +122,14 @@ class MobileRepositorySwitcherTest : SysuiTestCase() {
                 context,
                 IMMEDIATE,
                 scope,
+                wifiRepository,
                 mock(),
             )
 
         demoRepo =
             DemoMobileConnectionsRepository(
-                dataSource = mockDataSource,
+                mobileDataSource = mobileDataSource,
+                wifiDataSource = wifiDataSource,
                 scope = scope,
                 context = context,
                 logFactory = logFactory,

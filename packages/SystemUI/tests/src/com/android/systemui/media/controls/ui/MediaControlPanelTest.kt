@@ -54,6 +54,7 @@ import androidx.constraintlayout.widget.ConstraintSet
 import androidx.lifecycle.LiveData
 import androidx.test.filters.SmallTest
 import com.android.internal.logging.InstanceId
+import com.android.internal.widget.CachingIconView
 import com.android.systemui.ActivityIntentHelper
 import com.android.systemui.R
 import com.android.systemui.SysuiTestCase
@@ -154,6 +155,7 @@ public class MediaControlPanelTest : SysuiTestCase() {
     @Mock private lateinit var albumView: ImageView
     private lateinit var titleText: TextView
     private lateinit var artistText: TextView
+    private lateinit var explicitIndicator: CachingIconView
     private lateinit var seamless: ViewGroup
     private lateinit var seamlessButton: View
     @Mock private lateinit var seamlessBackground: RippleDrawable
@@ -216,6 +218,7 @@ public class MediaControlPanelTest : SysuiTestCase() {
             this.set(Flags.UMO_SURFACE_RIPPLE, false)
             this.set(Flags.UMO_TURBULENCE_NOISE, false)
             this.set(Flags.MEDIA_FALSING_PENALTY, true)
+            this.set(Flags.MEDIA_EXPLICIT_INDICATOR, true)
         }
 
     @JvmField @Rule val mockito = MockitoJUnit.rule()
@@ -350,6 +353,7 @@ public class MediaControlPanelTest : SysuiTestCase() {
         appIcon = ImageView(context)
         titleText = TextView(context)
         artistText = TextView(context)
+        explicitIndicator = CachingIconView(context).also { it.id = R.id.media_explicit_indicator }
         seamless = FrameLayout(context)
         seamless.foreground = seamlessBackground
         seamlessButton = View(context)
@@ -396,6 +400,7 @@ public class MediaControlPanelTest : SysuiTestCase() {
         whenever(albumView.foreground).thenReturn(mock(Drawable::class.java))
         whenever(viewHolder.titleText).thenReturn(titleText)
         whenever(viewHolder.artistText).thenReturn(artistText)
+        whenever(viewHolder.explicitIndicator).thenReturn(explicitIndicator)
         whenever(seamlessBackground.getDrawable(0)).thenReturn(mock(GradientDrawable::class.java))
         whenever(viewHolder.seamless).thenReturn(seamless)
         whenever(viewHolder.seamlessButton).thenReturn(seamlessButton)
@@ -1019,6 +1024,7 @@ public class MediaControlPanelTest : SysuiTestCase() {
 
     @Test
     fun bindText() {
+        useRealConstraintSets()
         player.attachPlayer(viewHolder)
         player.bindPlayer(mediaData, PACKAGE)
 
@@ -1036,10 +1042,42 @@ public class MediaControlPanelTest : SysuiTestCase() {
         handler.onAnimationEnd(mockAnimator)
         assertThat(titleText.getText()).isEqualTo(TITLE)
         assertThat(artistText.getText()).isEqualTo(ARTIST)
+        assertThat(expandedSet.getVisibility(explicitIndicator.id)).isEqualTo(ConstraintSet.GONE)
+        assertThat(collapsedSet.getVisibility(explicitIndicator.id)).isEqualTo(ConstraintSet.GONE)
 
         // Rebinding should not trigger animation
         player.bindPlayer(mediaData, PACKAGE)
         verify(mockAnimator, times(2)).start()
+    }
+
+    @Test
+    fun bindTextWithExplicitIndicator() {
+        useRealConstraintSets()
+        val mediaDataWitExp = mediaData.copy(isExplicit = true)
+        player.attachPlayer(viewHolder)
+        player.bindPlayer(mediaDataWitExp, PACKAGE)
+
+        // Capture animation handler
+        val captor = argumentCaptor<Animator.AnimatorListener>()
+        verify(mockAnimator, times(2)).addListener(captor.capture())
+        val handler = captor.value
+
+        // Validate text views unchanged but animation started
+        assertThat(titleText.getText()).isEqualTo("")
+        assertThat(artistText.getText()).isEqualTo("")
+        verify(mockAnimator, times(1)).start()
+
+        // Binding only after animator runs
+        handler.onAnimationEnd(mockAnimator)
+        assertThat(titleText.getText()).isEqualTo(TITLE)
+        assertThat(artistText.getText()).isEqualTo(ARTIST)
+        assertThat(expandedSet.getVisibility(explicitIndicator.id)).isEqualTo(ConstraintSet.VISIBLE)
+        assertThat(collapsedSet.getVisibility(explicitIndicator.id))
+            .isEqualTo(ConstraintSet.VISIBLE)
+
+        // Rebinding should not trigger animation
+        player.bindPlayer(mediaData, PACKAGE)
+        verify(mockAnimator, times(3)).start()
     }
 
     @Test

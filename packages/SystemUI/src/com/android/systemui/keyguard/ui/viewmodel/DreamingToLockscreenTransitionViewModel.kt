@@ -22,10 +22,14 @@ import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.keyguard.domain.interactor.FromDreamingTransitionInteractor.Companion.TO_LOCKSCREEN_DURATION
 import com.android.systemui.keyguard.domain.interactor.KeyguardTransitionInteractor
 import com.android.systemui.keyguard.shared.model.AnimationParams
+import com.android.systemui.keyguard.shared.model.TransitionState.CANCELED
+import com.android.systemui.keyguard.shared.model.TransitionState.FINISHED
 import javax.inject.Inject
 import kotlin.time.Duration.Companion.milliseconds
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.merge
 
 /**
  * Breaks down DREAMING->LOCKSCREEN transition into discrete steps for corresponding views to
@@ -49,9 +53,15 @@ constructor(
 
     /** Lockscreen views y-translation */
     fun lockscreenTranslationY(translatePx: Int): Flow<Float> {
-        return flowForAnimation(LOCKSCREEN_TRANSLATION_Y).map { value ->
-            -translatePx + (EMPHASIZED_DECELERATE.getInterpolation(value) * translatePx)
-        }
+        return merge(
+            flowForAnimation(LOCKSCREEN_TRANSLATION_Y).map { value ->
+                -translatePx + (EMPHASIZED_DECELERATE.getInterpolation(value) * translatePx)
+            },
+            // On end, reset the translation to 0
+            interactor.dreamingToLockscreenTransition
+                .filter { it.transitionState == FINISHED || it.transitionState == CANCELED }
+                .map { 0f }
+        )
     }
 
     /** Lockscreen views alpha */

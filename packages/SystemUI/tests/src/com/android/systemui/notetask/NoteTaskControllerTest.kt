@@ -24,7 +24,7 @@ import android.os.UserManager
 import android.test.suitebuilder.annotation.SmallTest
 import androidx.test.runner.AndroidJUnit4
 import com.android.systemui.SysuiTestCase
-import com.android.systemui.notetask.NoteTaskIntentResolver.Companion.NOTES_ACTION
+import com.android.systemui.notetask.NoteTaskIntentResolver.Companion.ACTION_CREATE_NOTE
 import com.android.systemui.notetask.shortcut.CreateNoteTaskShortcutActivity
 import com.android.systemui.util.mockito.argumentCaptor
 import com.android.systemui.util.mockito.eq
@@ -50,7 +50,7 @@ import org.mockito.MockitoAnnotations
 @RunWith(AndroidJUnit4::class)
 internal class NoteTaskControllerTest : SysuiTestCase() {
 
-    private val notesIntent = Intent(NOTES_ACTION)
+    private val notesIntent = Intent(ACTION_CREATE_NOTE)
 
     @Mock lateinit var context: Context
     @Mock lateinit var packageManager: PackageManager
