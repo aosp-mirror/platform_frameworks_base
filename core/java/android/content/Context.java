@@ -7330,6 +7330,7 @@ public abstract class Context {
      * @see #createDeviceContext(int)
      * @hide
      */
+    @TestApi
     public void updateDeviceId(int deviceId) {
         throw new RuntimeException("Not implemented. Must override in a subclass.");
     }
