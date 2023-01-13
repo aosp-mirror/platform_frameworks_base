@@ -7510,6 +7510,48 @@ public class CarrierConfigManager {
         public static final String KEY_PREFER_IMS_EMERGENCY_WHEN_VOICE_CALLS_ON_CS_BOOL =
                 KEY_PREFIX + "prefer_ims_emergency_when_voice_calls_on_cs_bool";
 
+        /** @hide */
+        @IntDef({
+            VOWIFI_REQUIRES_NONE,
+            VOWIFI_REQUIRES_SETTING_ENABLED,
+            VOWIFI_REQUIRES_VALID_EID,
+        })
+        public @interface VoWiFiRequires {}
+
+        /**
+         * Default value.
+         * If {@link ImsWfc#KEY_EMERGENCY_CALL_OVER_EMERGENCY_PDN_BOOL} is {@code true},
+         * VoWi-Fi emergency call shall be attempted if Wi-Fi network is connected.
+         * Otherwise, it shall be attempted if IMS is registered over Wi-Fi.
+         * @hide
+         */
+        public static final int VOWIFI_REQUIRES_NONE = 0;
+
+        /**
+         * VoWi-Fi emergency call shall be attempted on IMS over Wi-Fi if Wi-Fi network is connected
+         * and Wi-Fi calling setting is enabled. This value is applicable if the value of
+         * {@link ImsWfc#KEY_EMERGENCY_CALL_OVER_EMERGENCY_PDN_BOOL} is {@code true}.
+         * @hide
+         */
+        public static final int VOWIFI_REQUIRES_SETTING_ENABLED = 1;
+
+        /**
+         * VoWi-Fi emergency call shall be attempted on IMS over Wi-Fi if Wi-Fi network is connected
+         * and Wi-Fi calling is activated successfully. This value is applicable if the value of
+         * {@link ImsWfc#KEY_EMERGENCY_CALL_OVER_EMERGENCY_PDN_BOOL} is {@code true}.
+         * @hide
+         */
+        public static final int VOWIFI_REQUIRES_VALID_EID = 2;
+
+        /**
+         * Specifies the condition when emergency call shall be attempted on IMS over Wi-Fi.
+         *
+         * The default value for this key is {@code #VOWIFI_REQUIRES_NONE}.
+         * @hide
+         */
+        public static final String KEY_EMERGENCY_VOWIFI_REQUIRES_CONDITION_INT =
+                KEY_PREFIX + "emergency_vowifi_requires_condition_int";
+
         /**
          * Specifies maximum number of emergency call retries over Wi-Fi.
          * This is valid only when {@link #DOMAIN_PS_NON_3GPP} is included in
@@ -7621,7 +7663,8 @@ public class CarrierConfigManager {
                 KEY_PREFIX + "emergency_cdma_preferred_numbers_string_array";
 
         /**
-         * Specifies if emergency call shall be attempted on IMS only when VoLTE is enabled.
+         * Specifies if emergency call shall be attempted on IMS over cellular network
+         * only when VoLTE is enabled.
          *
          * The default value for this key is {@code false}.
          * @hide
@@ -7685,6 +7728,7 @@ public class CarrierConfigManager {
                     });
 
             defaults.putBoolean(KEY_PREFER_IMS_EMERGENCY_WHEN_VOICE_CALLS_ON_CS_BOOL, false);
+            defaults.putInt(KEY_EMERGENCY_VOWIFI_REQUIRES_CONDITION_INT, VOWIFI_REQUIRES_NONE);
             defaults.putInt(KEY_MAXIMUM_NUMBER_OF_EMERGENCY_TRIES_OVER_VOWIFI_INT, 1);
             defaults.putInt(KEY_EMERGENCY_SCAN_TIMER_SEC_INT, 10);
             defaults.putInt(KEY_EMERGENCY_NETWORK_SCAN_TYPE_INT, SCAN_TYPE_NO_PREFERENCE);
