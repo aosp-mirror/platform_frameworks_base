@@ -445,6 +445,18 @@ public final class TvInteractiveAppManager {
             }
 
             @Override
+            public void onRequestCurrentVideoBounds(int seq) {
+                synchronized (mSessionCallbackRecordMap) {
+                    SessionCallbackRecord record = mSessionCallbackRecordMap.get(seq);
+                    if (record == null) {
+                        Log.e(TAG, "Callback not found for seq " + seq);
+                        return;
+                    }
+                    record.postRequestCurrentVideoBounds();
+                }
+            }
+
+            @Override
             public void onRequestCurrentChannelUri(int seq) {
                 synchronized (mSessionCallbackRecordMap) {
                     SessionCallbackRecord record = mSessionCallbackRecordMap.get(seq);
@@ -1079,6 +1091,18 @@ public final class TvInteractiveAppManager {
             }
             try {
                 mService.setTeletextAppEnabled(mToken, enable, mUserId);
+            } catch (RemoteException e) {
+                throw e.rethrowFromSystemServer();
+            }
+        }
+
+        void sendCurrentVideoBounds(@NonNull Rect bounds) {
+            if (mToken == null) {
+                Log.w(TAG, "The session has been already released");
+                return;
+            }
+            try {
+                mService.sendCurrentVideoBounds(mToken, bounds, mUserId);
             } catch (RemoteException e) {
                 throw e.rethrowFromSystemServer();
             }
@@ -1898,6 +1922,15 @@ public final class TvInteractiveAppManager {
             });
         }
 
+        void postRequestCurrentVideoBounds() {
+            mHandler.post(new Runnable() {
+                @Override
+                public void run() {
+                    mSessionCallback.onRequestCurrentVideoBounds(mSession);
+                }
+            });
+        }
+
         void postRequestCurrentChannelUri() {
             mHandler.post(new Runnable() {
                 @Override
@@ -2116,6 +2149,15 @@ public final class TvInteractiveAppManager {
          * @param session A {@link TvInteractiveAppManager.Session} associated with this callback.
          */
         public void onSetVideoBounds(Session session, Rect rect) {
+        }
+
+        /**
+         * This is called when {@link TvInteractiveAppService.Session#RequestCurrentVideoBounds} is
+         * called.
+         *
+         * @param session A {@link TvInteractiveAppManager.Session} associated with this callback.
+         */
+        public void onRequestCurrentVideoBounds(Session session) {
         }
 
         /**

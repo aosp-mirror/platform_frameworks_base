@@ -514,6 +514,19 @@ public class TvInteractiveAppView extends ViewGroup {
     }
 
     /**
+     * Sends current video bounds to related TV interactive app.
+     * @hide
+     */
+    public void sendCurrentVideoBounds(@NonNull Rect bounds) {
+        if (DEBUG) {
+            Log.d(TAG, "sendCurrentVideoBounds");
+        }
+        if (mSession != null) {
+            mSession.sendCurrentVideoBounds(bounds);
+        }
+    }
+
+    /**
      * Sends current channel URI to related TV interactive app.
      *
      * @param channelUri The current channel URI; {@code null} if there is no currently tuned
@@ -944,6 +957,16 @@ public class TvInteractiveAppView extends ViewGroup {
         }
 
         /**
+         * This is called when {@link TvInteractiveAppService.Session#requestCurrentVideoBounds()}
+         * is called.
+         *
+         * @param iAppServiceId The ID of the TV interactive app service bound to this view.
+         * @hide
+         */
+        public void onRequestCurrentVideoBounds(@NonNull String iAppServiceId) {
+        }
+
+        /**
          * This is called when {@link TvInteractiveAppService.Session#requestCurrentChannelUri()} is
          * called.
          *
@@ -1257,6 +1280,28 @@ public class TvInteractiveAppView extends ViewGroup {
                         synchronized (mCallbackLock) {
                             if (mCallback != null) {
                                 mCallback.onSetVideoBounds(mIAppServiceId, rect);
+                            }
+                        }
+                    });
+                }
+            }
+        }
+
+        @Override
+        public void onRequestCurrentVideoBounds(Session session) {
+            if (DEBUG) {
+                Log.d(TAG, "onRequestCurrentVideoBounds");
+            }
+            if (this != mSessionCallback) {
+                Log.w(TAG, "onRequestCurrentVideoBounds - session not created");
+                return;
+            }
+            synchronized (mCallbackLock) {
+                if (mCallbackExecutor != null) {
+                    mCallbackExecutor.execute(() -> {
+                        synchronized (mCallbackLock) {
+                            if (mCallback != null) {
+                                mCallback.onRequestCurrentVideoBounds(mIAppServiceId);
                             }
                         }
                     });

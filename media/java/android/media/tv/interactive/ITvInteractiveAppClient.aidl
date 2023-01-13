@@ -43,6 +43,7 @@ oneway interface ITvInteractiveAppClient {
     void onCommandRequest(in String cmdType, in Bundle parameters, int seq);
     void onTimeShiftCommandRequest(in String cmdType, in Bundle parameters, int seq);
     void onSetVideoBounds(in Rect rect, int seq);
+    void onRequestCurrentVideoBounds(int seq);
     void onRequestCurrentChannelUri(int seq);
     void onRequestCurrentChannelLcn(int seq);
     void onRequestStreamVolume(int seq);

@@ -33,11 +33,54 @@ public final class TableRequest extends BroadcastInfoRequest implements Parcelab
 
     /** @hide */
     @Retention(RetentionPolicy.SOURCE)
-    @IntDef({TABLE_NAME_PAT, TABLE_NAME_PMT})
+    @IntDef({TABLE_NAME_PAT, TABLE_NAME_PMT, TABLE_NAME_CAT})
     public @interface TableName {}
 
+    /** Program Association Table */
     public static final int TABLE_NAME_PAT = 0;
+    /** Program Mapping Table */
     public static final int TABLE_NAME_PMT = 1;
+    /**
+     * Conditional Access Table
+     * @hide
+     */
+    public static final int TABLE_NAME_CAT = 2;
+    /**
+     * Network Information Table
+     * @hide
+     */
+    public static final int TABLE_NAME_NIT = 3;
+    /**
+     * Bouquet Association Table
+     * @hide
+     */
+    public static final int TABLE_NAME_BAT = 4;
+    /**
+     * Service Description Table
+     * @hide
+     */
+    public static final int TABLE_NAME_SDT = 5;
+    /**
+     * Event Information Table
+     * @hide
+     */
+    public static final int TABLE_NAME_EIT = 6;
+    /**
+     * Time and Date Table
+     * @hide
+     */
+    public static final int TABLE_NAME_TDT = 7;
+    /**
+     * Time Offset Table
+     * @hide
+     */
+    public static final int TABLE_NAME_TOT = 8;
+    /**
+     * Selection Information Table
+     * @hide
+     */
+    public static final int TABLE_NAME_SIT = 9;
+
 
     public static final @NonNull Parcelable.Creator<TableRequest> CREATOR =
             new Parcelable.Creator<TableRequest>() {

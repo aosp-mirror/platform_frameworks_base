@@ -1336,6 +1336,31 @@ public class TvInteractiveAppManagerService extends SystemService {
         }
 
         @Override
+        public void sendCurrentVideoBounds(IBinder sessionToken, Rect bounds, int userId) {
+            if (DEBUG) {
+                Slogf.d(TAG, "sendCurrentVideoBounds(bounds=%s)", bounds.toString());
+            }
+            final int callingUid = Binder.getCallingUid();
+            final int resolvedUserId = resolveCallingUserId(Binder.getCallingPid(), callingUid,
+                    userId, "sendCurrentVideoBounds");
+            SessionState sessionState = null;
+            final long identity = Binder.clearCallingIdentity();
+            try {
+                synchronized (mLock) {
+                    try {
+                        sessionState = getSessionStateLocked(sessionToken, callingUid,
+                                resolvedUserId);
+                        getSessionLocked(sessionState).sendCurrentVideoBounds(bounds);
+                    } catch (RemoteException | SessionNotFoundException e) {
+                        Slogf.e(TAG, "error in sendCurrentVideoBounds", e);
+                    }
+                }
+            } finally {
+                Binder.restoreCallingIdentity(identity);
+            }
+        }
+
+        @Override
         public void sendCurrentChannelUri(IBinder sessionToken, Uri channelUri, int userId) {
             if (DEBUG) {
                 Slogf.d(TAG, "sendCurrentChannelUri(channelUri=%s)", channelUri.toString());
@@ -2470,6 +2495,23 @@ public class TvInteractiveAppManagerService extends SystemService {
                     mSessionState.mClient.onSetVideoBounds(rect, mSessionState.mSeq);
                 } catch (RemoteException e) {
                     Slogf.e(TAG, "error in onSetVideoBounds", e);
+                }
+            }
+        }
+
+        @Override
+        public void onRequestCurrentVideoBounds() {
+            synchronized (mLock) {
+                if (DEBUG) {
+                    Slogf.d(TAG, "onRequestCurrentVideoBounds");
+                }
+                if (mSessionState.mSession == null || mSessionState.mClient == null) {
+                    return;
+                }
+                try {
+                    mSessionState.mClient.onRequestCurrentVideoBounds(mSessionState.mSeq);
+                } catch (RemoteException e) {
+                    Slogf.e(TAG, "error in onRequestCurrentVideoBounds", e);
                 }
             }
         }
