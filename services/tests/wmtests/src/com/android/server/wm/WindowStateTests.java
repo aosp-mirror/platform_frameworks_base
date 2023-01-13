@@ -1119,7 +1119,9 @@ public class WindowStateTests extends WindowTestsBase {
         spyOn(app.getDisplayContent());
         app.mActivityRecord.getRootTask().setWindowingMode(WINDOWING_MODE_FULLSCREEN);
 
-        verify(app.getDisplayContent()).updateImeControlTarget();
+        // Expect updateImeParent will be invoked when the configuration of the IME control
+        // target has changed.
+        verify(app.getDisplayContent()).updateImeControlTarget(eq(true) /* updateImeParent */);
         assertEquals(mAppWindow, mDisplayContent.getImeTarget(IME_TARGET_CONTROL).getWindow());
     }
 

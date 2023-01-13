@@ -113,4 +113,18 @@ class ImeAppAutoFocusHelper @JvmOverloads constructor(
         }
         return false
     }
+
+    fun toggleFixPortraitOrientation(wmHelper: WindowManagerStateHelper) {
+        val button = uiDevice.wait(Until.findObject(By.res(getPackage(),
+                "toggle_fixed_portrait_btn")), FIND_TIMEOUT)
+        require(button != null) {
+            "Button not found, this usually happens when the device " +
+                    "was left in an unknown state (e.g. Screen turned off)"
+        }
+        button.click()
+        mInstrumentation.waitForIdleSync()
+        // Ensure app relaunching transition finish and the IME has shown
+        wmHelper.waitForAppTransitionIdle()
+        wmHelper.waitImeShown()
+    }
 }

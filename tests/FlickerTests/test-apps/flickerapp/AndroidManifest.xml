@@ -45,7 +45,7 @@
              android:theme="@style/CutoutShortEdges"
              android:taskAffinity="com.android.server.wm.flicker.testapp.ImeActivityAutoFocus"
              android:windowSoftInputMode="stateVisible"
-             android:configChanges="orientation|screenSize"
+             android:configChanges="orientation|screenSize|smallestScreenSize|screenLayout"
              android:label="ImeAppAutoFocus"
              android:exported="true">
             <intent-filter>
