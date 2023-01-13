@@ -719,7 +719,8 @@ final class DisplayPowerController implements AutomaticBrightnessController.Call
     }
 
     @Override
-    public void setBrightnessToFollow(float leadDisplayBrightness, float nits) {
+    public void setBrightnessToFollow(float leadDisplayBrightness, float nits, float ambientLux) {
+        mHbmController.onAmbientLuxChange(ambientLux);
         if (mAutomaticBrightnessController == null || nits < 0) {
             mBrightnessToFollow = leadDisplayBrightness;
         } else {
@@ -751,7 +752,8 @@ final class DisplayPowerController implements AutomaticBrightnessController.Call
         }
         for (int i = 0; i < followers.size(); i++) {
             DisplayPowerControllerInterface follower = followers.valueAt(i);
-            follower.setBrightnessToFollow(PowerManager.BRIGHTNESS_INVALID_FLOAT, /* nits= */ -1);
+            follower.setBrightnessToFollow(PowerManager.BRIGHTNESS_INVALID_FLOAT, /* nits= */ -1,
+                    /* ambientLux= */ 0);
         }
     }
 
@@ -1523,6 +1525,9 @@ final class DisplayPowerController implements AutomaticBrightnessController.Call
                     mShouldResetShortTermModel);
             mShouldResetShortTermModel = false;
         }
+        mHbmController.setAutoBrightnessEnabled(mUseAutoBrightness
+                ? AutomaticBrightnessController.AUTO_BRIGHTNESS_ENABLED
+                : AutomaticBrightnessController.AUTO_BRIGHTNESS_DISABLED);
 
         if (mBrightnessTracker != null) {
             mBrightnessTracker.setBrightnessConfiguration(mBrightnessConfiguration);
@@ -1634,9 +1639,12 @@ final class DisplayPowerController implements AutomaticBrightnessController.Call
             mAppliedThrottling = false;
         }
 
+        float ambientLux = mAutomaticBrightnessController == null ? 0
+                : mAutomaticBrightnessController.getAmbientLux();
         for (int i = 0; i < displayBrightnessFollowers.size(); i++) {
             DisplayPowerControllerInterface follower = displayBrightnessFollowers.valueAt(i);
-            follower.setBrightnessToFollow(rawBrightnessState, convertToNits(rawBrightnessState));
+            follower.setBrightnessToFollow(rawBrightnessState, convertToNits(rawBrightnessState),
+                    ambientLux);
         }
 
         if (updateScreenBrightnessSetting) {

@@ -173,9 +173,11 @@ public interface DisplayPowerControllerInterface {
      * displays.
      * @param leadDisplayBrightness The brightness of the lead display in the set of concurrent
      *                              displays
-     * @param nits The brightness value in nits if the device supports nits
+     * @param nits The brightness value in nits if the device supports nits. Set to a negative
+     *             number otherwise.
+     * @param ambientLux The lux value that will be passed to {@link HighBrightnessModeController}
      */
-    void setBrightnessToFollow(float leadDisplayBrightness, float nits);
+    void setBrightnessToFollow(float leadDisplayBrightness, float nits, float ambientLux);
 
     /**
      * Add an additional display that will copy the brightness value from this display. This is used
