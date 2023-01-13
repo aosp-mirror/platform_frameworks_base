@@ -30,6 +30,7 @@ import static android.content.Intent.FLAG_ACTIVITY_NEW_TASK;
 import static android.content.pm.ActivityInfo.LAUNCH_MULTIPLE;
 import static android.content.pm.ActivityInfo.LAUNCH_SINGLE_INSTANCE;
 import static android.content.res.Configuration.ORIENTATION_PORTRAIT;
+import static android.os.Process.NOBODY_UID;
 
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.doNothing;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.doReturn;
@@ -1195,21 +1196,36 @@ public class RecentTasksTest extends WindowTestsBase {
 
     @Test
     public void testCreateRecentTaskInfo_detachedTask() {
-        final Task task = createTaskBuilder(".Task").setCreateActivity(true).build();
+        final Task task = createTaskBuilder(".Task").build();
+        final ComponentName componentName = new ComponentName("com.foo", ".BarActivity");
+        new ActivityBuilder(mSupervisor.mService)
+                .setTask(task)
+                .setUid(NOBODY_UID)
+                .setComponent(componentName)
+                .build();
         final TaskDisplayArea tda = task.getDisplayArea();
 
         assertTrue(task.isAttached());
         assertTrue(task.supportsMultiWindow());
 
-        RecentTaskInfo info = mRecentTasks.createRecentTaskInfo(task, true);
+        RecentTaskInfo info = mRecentTasks.createRecentTaskInfo(task, true /* stripExtras */,
+                true /* getTasksAllowed */);
 
         assertTrue(info.supportsMultiWindow);
         assertTrue(info.supportsSplitScreenMultiWindow);
 
+        info = mRecentTasks.createRecentTaskInfo(task, true /* stripExtras */,
+                false /* getTasksAllowed */);
+
+        assertFalse(info.topActivity.equals(componentName));
+        assertFalse(info.topActivityInfo.packageName.equals(componentName.getPackageName()));
+        assertFalse(info.baseActivity.equals(componentName));
+
         // The task can be put in split screen even if it is not attached now.
         task.removeImmediately();
 
-        info = mRecentTasks.createRecentTaskInfo(task, true);
+        info = mRecentTasks.createRecentTaskInfo(task, true /* stripExtras */,
+                true /* getTasksAllowed */);
 
         assertTrue(info.supportsMultiWindow);
         assertTrue(info.supportsSplitScreenMultiWindow);
@@ -1219,7 +1235,8 @@ public class RecentTasksTest extends WindowTestsBase {
         doReturn(false).when(tda).supportsNonResizableMultiWindow();
         doReturn(false).when(task).isResizeable();
 
-        info = mRecentTasks.createRecentTaskInfo(task, true);
+        info = mRecentTasks.createRecentTaskInfo(task, true /* stripExtras */,
+                true /* getTasksAllowed */);
 
         assertFalse(info.supportsMultiWindow);
         assertFalse(info.supportsSplitScreenMultiWindow);
@@ -1228,7 +1245,8 @@ public class RecentTasksTest extends WindowTestsBase {
         // the device supports it.
         doReturn(true).when(tda).supportsNonResizableMultiWindow();
 
-        info = mRecentTasks.createRecentTaskInfo(task, true);
+        info = mRecentTasks.createRecentTaskInfo(task, true /* stripExtras */,
+                true /* getTasksAllowed */);
 
         assertTrue(info.supportsMultiWindow);
         assertTrue(info.supportsSplitScreenMultiWindow);
