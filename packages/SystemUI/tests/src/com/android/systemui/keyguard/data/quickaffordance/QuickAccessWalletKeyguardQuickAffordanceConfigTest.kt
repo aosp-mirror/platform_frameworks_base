@@ -114,20 +114,8 @@ class QuickAccessWalletKeyguardQuickAffordanceConfigTest : SysuiTestCase() {
     }
 
     @Test
-    fun `affordance - missing icon - model is none`() = runBlockingTest {
-        setUpState(hasWalletIcon = false)
-        var latest: KeyguardQuickAffordanceConfig.LockScreenState? = null
-
-        val job = underTest.lockScreenState.onEach { latest = it }.launchIn(this)
-
-        assertThat(latest).isEqualTo(KeyguardQuickAffordanceConfig.LockScreenState.Hidden)
-
-        job.cancel()
-    }
-
-    @Test
     fun `affordance - no selected card - model is none`() = runBlockingTest {
-        setUpState(hasWalletIcon = false)
+        setUpState(hasSelectedCard = false)
         var latest: KeyguardQuickAffordanceConfig.LockScreenState? = null
 
         val job = underTest.lockScreenState.onEach { latest = it }.launchIn(this)
@@ -165,7 +153,7 @@ class QuickAccessWalletKeyguardQuickAffordanceConfigTest : SysuiTestCase() {
     @Test
     fun `getPickerScreenState - unavailable`() = runTest {
         setUpState(
-            isWalletEnabled = false,
+            isWalletServiceAvailable = false,
         )
 
         assertThat(underTest.getPickerScreenState())
@@ -173,9 +161,9 @@ class QuickAccessWalletKeyguardQuickAffordanceConfigTest : SysuiTestCase() {
     }
 
     @Test
-    fun `getPickerScreenState - disabled when there is no icon`() = runTest {
+    fun `getPickerScreenState - disabled when the feature is not enabled`() = runTest {
         setUpState(
-            hasWalletIcon = false,
+            isWalletEnabled = false,
         )
 
         assertThat(underTest.getPickerScreenState())
@@ -194,20 +182,16 @@ class QuickAccessWalletKeyguardQuickAffordanceConfigTest : SysuiTestCase() {
 
     private fun setUpState(
         isWalletEnabled: Boolean = true,
+        isWalletServiceAvailable: Boolean = true,
         isWalletQuerySuccessful: Boolean = true,
-        hasWalletIcon: Boolean = true,
         hasSelectedCard: Boolean = true,
     ) {
         whenever(walletController.isWalletEnabled).thenReturn(isWalletEnabled)
 
         val walletClient: QuickAccessWalletClient = mock()
-        val icon: Drawable? =
-            if (hasWalletIcon) {
-                ICON
-            } else {
-                null
-            }
-        whenever(walletClient.tileIcon).thenReturn(icon)
+        whenever(walletClient.tileIcon).thenReturn(ICON)
+        whenever(walletClient.isWalletServiceAvailable).thenReturn(isWalletServiceAvailable)
+
         whenever(walletController.walletClient).thenReturn(walletClient)
 
         whenever(walletController.queryWalletCards(any())).thenAnswer { invocation ->
