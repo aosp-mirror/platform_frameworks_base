@@ -215,6 +215,21 @@ final class IInputMethodManagerGlobalInvoker {
     }
 
     @AnyThread
+    @Nullable
+    @RequiresPermission(value = Manifest.permission.INTERACT_ACROSS_USERS_FULL, conditional = true)
+    static InputMethodInfo getCurrentInputMethodInfoAsUser(@UserIdInt int userId) {
+        final IInputMethodManager service = getService();
+        if (service == null) {
+            return null;
+        }
+        try {
+            return service.getCurrentInputMethodInfoAsUser(userId);
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
+    @AnyThread
     @NonNull
     @RequiresPermission(value = Manifest.permission.INTERACT_ACROSS_USERS_FULL, conditional = true)
     static List<InputMethodInfo> getInputMethodList(@UserIdInt int userId,

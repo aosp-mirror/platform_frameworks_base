@@ -54830,6 +54830,7 @@ package android.view.inputmethod {
   public final class InputMethodManager {
     method public void dispatchKeyEventFromInputMethod(@Nullable android.view.View, @NonNull android.view.KeyEvent);
     method public void displayCompletions(android.view.View, android.view.inputmethod.CompletionInfo[]);
+    method @Nullable public android.view.inputmethod.InputMethodInfo getCurrentInputMethodInfo();
     method @Nullable public android.view.inputmethod.InputMethodSubtype getCurrentInputMethodSubtype();
     method @NonNull public java.util.List<android.view.inputmethod.InputMethodInfo> getEnabledInputMethodList();
     method @NonNull public java.util.List<android.view.inputmethod.InputMethodSubtype> getEnabledInputMethodSubtypeList(@Nullable android.view.inputmethod.InputMethodInfo, boolean);

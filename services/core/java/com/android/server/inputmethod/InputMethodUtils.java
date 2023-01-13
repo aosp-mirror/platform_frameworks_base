@@ -330,11 +330,17 @@ final class InputMethodUtils {
 
         @Nullable
         private String getString(@NonNull String key, @Nullable String defaultValue) {
+            return getStringForUser(key, defaultValue, mCurrentUserId);
+        }
+
+        @Nullable
+        private String getStringForUser(
+                @NonNull String key, @Nullable String defaultValue, @UserIdInt int userId) {
             final String result;
             if (mCopyOnWrite && mCopyOnWriteDataStore.containsKey(key)) {
                 result = mCopyOnWriteDataStore.get(key);
             } else {
-                result = Settings.Secure.getStringForUser(mResolver, key, mCurrentUserId);
+                result = Settings.Secure.getStringForUser(mResolver, key, userId);
             }
             return result != null ? result : defaultValue;
         }
@@ -737,6 +743,16 @@ final class InputMethodUtils {
             final String imi = getString(Settings.Secure.DEFAULT_INPUT_METHOD, null);
             if (DEBUG) {
                 Slog.d(TAG, "getSelectedInputMethodStr: " + imi);
+            }
+            return imi;
+        }
+
+        @Nullable
+        String getSelectedInputMethodForUser(@UserIdInt int userId) {
+            final String imi =
+                    getStringForUser(Settings.Secure.DEFAULT_INPUT_METHOD, null, userId);
+            if (DEBUG) {
+                Slog.d(TAG, "getSelectedInputMethodForUserStr: " + imi);
             }
             return imi;
         }

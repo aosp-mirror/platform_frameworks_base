@@ -16633,6 +16633,14 @@ package android.view.displayhash {
 
 }
 
+package android.view.inputmethod {
+
+  public final class InputMethodManager {
+    method @Nullable @RequiresPermission(android.Manifest.permission.INTERACT_ACROSS_USERS_FULL) public android.view.inputmethod.InputMethodInfo getCurrentInputMethodInfoAsUser(@NonNull android.os.UserHandle);
+  }
+
+}
+
 package android.view.translation {
 
   public final class TranslationCapability implements android.os.Parcelable {
