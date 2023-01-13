@@ -508,16 +508,7 @@ class BroadcastQueueModernImpl extends BroadcastQueue {
             mService.updateOomAdjPendingTargetsLocked(OOM_ADJ_REASON_START_RECEIVER);
         }
 
-        if (waitingFor) {
-            mWaitingFor.removeIf((pair) -> {
-                if (pair.first.getAsBoolean()) {
-                    pair.second.countDown();
-                    return true;
-                } else {
-                    return false;
-                }
-            });
-        }
+        checkAndRemoveWaitingFor();
 
         traceEnd(cookie);
     }
@@ -1181,6 +1172,9 @@ class BroadcastQueueModernImpl extends BroadcastQueue {
             mLocalHandler.removeMessages(MSG_DELIVERY_TIMEOUT_HARD, queue);
         }
 
+        // Given that a receiver just finished, check if the "waitingFor" conditions are met.
+        checkAndRemoveWaitingFor();
+
         if (early) {
             // This is an early receiver that was transmitted as part of a group.  The delivery
             // state has been updated but don't make any further decisions.
@@ -1509,7 +1503,7 @@ class BroadcastQueueModernImpl extends BroadcastQueue {
         waitFor(() -> isBeyondBarrierLocked(now, pw));
     }
 
-    public void waitFor(@NonNull BooleanSupplier condition) {
+    private void waitFor(@NonNull BooleanSupplier condition) {
         final CountDownLatch latch = new CountDownLatch(1);
         synchronized (mService) {
             mWaitingFor.add(Pair.create(condition, latch));
@@ -1528,6 +1522,19 @@ class BroadcastQueueModernImpl extends BroadcastQueue {
                             (q) -> q.setPrioritizeEarliest(false));
                 }
             }
+        }
+    }
+
+    private void checkAndRemoveWaitingFor() {
+        if (!mWaitingFor.isEmpty()) {
+            mWaitingFor.removeIf((pair) -> {
+                if (pair.first.getAsBoolean()) {
+                    pair.second.countDown();
+                    return true;
+                } else {
+                    return false;
+                }
+            });
         }
     }
 
