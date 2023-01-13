@@ -5664,6 +5664,44 @@ public final class Settings {
         public static final String POINTER_SPEED = "pointer_speed";
 
         /**
+         * Touchpad pointer speed setting.
+         * This is an integer value in a range between -7 and +7, so there are 15 possible values.
+         *   -7 = slowest
+         *    0 = default speed
+         *   +7 = fastest
+         * @hide
+         */
+        public static final String TOUCHPAD_POINTER_SPEED = "touchpad_pointer_speed";
+
+        /**
+         * Whether to invert the touchpad scrolling direction.
+         *
+         * If set to 1 (the default), moving two fingers downwards on the touchpad will scroll
+         * upwards, consistent with normal touchscreen scrolling. If set to 0, moving two fingers
+         * downwards will scroll downwards.
+         *
+         * @hide
+         */
+        public static final String TOUCHPAD_NATURAL_SCROLLING = "touchpad_natural_scrolling";
+
+        /**
+         * Whether to enable tap-to-click on touchpads.
+         *
+         * @hide
+         */
+        public static final String TOUCHPAD_TAP_TO_CLICK = "touchpad_tap_to_click";
+
+        /**
+         * Whether to enable a right-click zone on touchpads.
+         *
+         * When set to 1, pressing to click in a section on the right-hand side of the touchpad will
+         * result in a context click (a.k.a. right click).
+         *
+         * @hide
+         */
+        public static final String TOUCHPAD_RIGHT_CLICK_ZONE = "touchpad_right_click_zone";
+
+        /**
          * Whether lock-to-app will be triggered by long-press on recents.
          * @hide
          */
@@ -5849,6 +5887,10 @@ public final class Settings {
             PRIVATE_SETTINGS.add(DISPLAY_COLOR_MODE_VENDOR_HINT);
             PRIVATE_SETTINGS.add(DESKTOP_MODE);
             PRIVATE_SETTINGS.add(LOCALE_PREFERENCES);
+            PRIVATE_SETTINGS.add(TOUCHPAD_POINTER_SPEED);
+            PRIVATE_SETTINGS.add(TOUCHPAD_NATURAL_SCROLLING);
+            PRIVATE_SETTINGS.add(TOUCHPAD_TAP_TO_CLICK);
+            PRIVATE_SETTINGS.add(TOUCHPAD_RIGHT_CLICK_ZONE);
         }
 
         /**

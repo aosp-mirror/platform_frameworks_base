@@ -292,6 +292,10 @@ public:
     void setPointerDisplayId(int32_t displayId);
     void setPointerSpeed(int32_t speed);
     void setPointerAcceleration(float acceleration);
+    void setTouchpadPointerSpeed(int32_t speed);
+    void setTouchpadNaturalScrollingEnabled(bool enabled);
+    void setTouchpadTapToClickEnabled(bool enabled);
+    void setTouchpadRightClickZoneEnabled(bool enabled);
     void setInputDeviceEnabled(uint32_t deviceId, bool enabled);
     void setShowTouches(bool enabled);
     void setInteractive(bool interactive);
@@ -409,6 +413,20 @@ private:
 
         // True if stylus button reporting through motion events is enabled.
         bool stylusButtonMotionEventsEnabled{true};
+
+        // The touchpad pointer speed, as a number from -7 (slowest) to 7 (fastest).
+        int32_t touchpadPointerSpeed{0};
+
+        // True to invert the touchpad scrolling direction, so that moving two fingers downwards on
+        // the touchpad scrolls the content upwards.
+        bool touchpadNaturalScrollingEnabled{true};
+
+        // True to enable tap-to-click on touchpads.
+        bool touchpadTapToClickEnabled{true};
+
+        // True to enable a zone on the right-hand side of touchpads where clicks will be turned
+        // into context (a.k.a. "right") clicks.
+        bool touchpadRightClickZoneEnabled{false};
     } mLocked GUARDED_BY(mLock);
 
     std::atomic<bool> mInteractive;
@@ -656,6 +674,11 @@ void NativeInputManager::getReaderConfiguration(InputReaderConfiguration* outCon
         outConfig->setDisplayViewports(mLocked.viewports);
 
         outConfig->defaultPointerDisplayId = mLocked.pointerDisplayId;
+
+        outConfig->touchpadPointerSpeed = mLocked.touchpadPointerSpeed;
+        outConfig->touchpadNaturalScrollingEnabled = mLocked.touchpadNaturalScrollingEnabled;
+        outConfig->touchpadTapToClickEnabled = mLocked.touchpadTapToClickEnabled;
+        outConfig->touchpadRightClickZoneEnabled = mLocked.touchpadRightClickZoneEnabled;
 
         outConfig->disabledDevices = mLocked.disabledInputDevices;
 
@@ -1097,6 +1120,70 @@ void NativeInputManager::setPointerAcceleration(float acceleration) {
 
     mInputManager->getReader().requestRefreshConfiguration(
             InputReaderConfiguration::CHANGE_POINTER_SPEED);
+}
+
+void NativeInputManager::setTouchpadPointerSpeed(int32_t speed) {
+    { // acquire lock
+        AutoMutex _l(mLock);
+
+        if (mLocked.touchpadPointerSpeed == speed) {
+            return;
+        }
+
+        ALOGI("Setting touchpad pointer speed to %d.", speed);
+        mLocked.touchpadPointerSpeed = speed;
+    } // release lock
+
+    mInputManager->getReader().requestRefreshConfiguration(
+            InputReaderConfiguration::CHANGE_TOUCHPAD_SETTINGS);
+}
+
+void NativeInputManager::setTouchpadNaturalScrollingEnabled(bool enabled) {
+    { // acquire lock
+        AutoMutex _l(mLock);
+
+        if (mLocked.touchpadNaturalScrollingEnabled == enabled) {
+            return;
+        }
+
+        ALOGI("Setting touchpad natural scrolling to %s.", toString(enabled));
+        mLocked.touchpadNaturalScrollingEnabled = enabled;
+    } // release lock
+
+    mInputManager->getReader().requestRefreshConfiguration(
+            InputReaderConfiguration::CHANGE_TOUCHPAD_SETTINGS);
+}
+
+void NativeInputManager::setTouchpadTapToClickEnabled(bool enabled) {
+    { // acquire lock
+        AutoMutex _l(mLock);
+
+        if (mLocked.touchpadTapToClickEnabled == enabled) {
+            return;
+        }
+
+        ALOGI("Setting touchpad tap to click to %s.", toString(enabled));
+        mLocked.touchpadTapToClickEnabled = enabled;
+    } // release lock
+
+    mInputManager->getReader().requestRefreshConfiguration(
+            InputReaderConfiguration::CHANGE_TOUCHPAD_SETTINGS);
+}
+
+void NativeInputManager::setTouchpadRightClickZoneEnabled(bool enabled) {
+    { // acquire lock
+        AutoMutex _l(mLock);
+
+        if (mLocked.touchpadRightClickZoneEnabled == enabled) {
+            return;
+        }
+
+        ALOGI("Setting touchpad right click zone to %s.", toString(enabled));
+        mLocked.touchpadRightClickZoneEnabled = enabled;
+    } // release lock
+
+    mInputManager->getReader().requestRefreshConfiguration(
+            InputReaderConfiguration::CHANGE_TOUCHPAD_SETTINGS);
 }
 
 void NativeInputManager::setInputDeviceEnabled(uint32_t deviceId, bool enabled) {
@@ -1944,6 +2031,33 @@ static void nativeSetPointerAcceleration(JNIEnv* env, jobject nativeImplObj, jfl
     im->setPointerAcceleration(acceleration);
 }
 
+static void nativeSetTouchpadPointerSpeed(JNIEnv* env, jobject nativeImplObj, jint speed) {
+    NativeInputManager* im = getNativeInputManager(env, nativeImplObj);
+
+    im->setTouchpadPointerSpeed(speed);
+}
+
+static void nativeSetTouchpadNaturalScrollingEnabled(JNIEnv* env, jobject nativeImplObj,
+                                                     jboolean enabled) {
+    NativeInputManager* im = getNativeInputManager(env, nativeImplObj);
+
+    im->setTouchpadNaturalScrollingEnabled(enabled);
+}
+
+static void nativeSetTouchpadTapToClickEnabled(JNIEnv* env, jobject nativeImplObj,
+                                               jboolean enabled) {
+    NativeInputManager* im = getNativeInputManager(env, nativeImplObj);
+
+    im->setTouchpadTapToClickEnabled(enabled);
+}
+
+static void nativeSetTouchpadRightClickZoneEnabled(JNIEnv* env, jobject nativeImplObj,
+                                                   jboolean enabled) {
+    NativeInputManager* im = getNativeInputManager(env, nativeImplObj);
+
+    im->setTouchpadRightClickZoneEnabled(enabled);
+}
+
 static void nativeSetShowTouches(JNIEnv* env, jobject nativeImplObj, jboolean enabled) {
     NativeInputManager* im = getNativeInputManager(env, nativeImplObj);
 
@@ -2463,6 +2577,11 @@ static const JNINativeMethod gInputManagerMethods[] = {
         {"transferTouch", "(Landroid/os/IBinder;I)Z", (void*)nativeTransferTouch},
         {"setPointerSpeed", "(I)V", (void*)nativeSetPointerSpeed},
         {"setPointerAcceleration", "(F)V", (void*)nativeSetPointerAcceleration},
+        {"setTouchpadPointerSpeed", "(I)V", (void*)nativeSetTouchpadPointerSpeed},
+        {"setTouchpadNaturalScrollingEnabled", "(Z)V",
+         (void*)nativeSetTouchpadNaturalScrollingEnabled},
+        {"setTouchpadTapToClickEnabled", "(Z)V", (void*)nativeSetTouchpadTapToClickEnabled},
+        {"setTouchpadRightClickZoneEnabled", "(Z)V", (void*)nativeSetTouchpadRightClickZoneEnabled},
         {"setShowTouches", "(Z)V", (void*)nativeSetShowTouches},
         {"setInteractive", "(Z)V", (void*)nativeSetInteractive},
         {"reloadCalibration", "()V", (void*)nativeReloadCalibration},

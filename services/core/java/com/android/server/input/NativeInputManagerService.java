@@ -120,6 +120,14 @@ interface NativeInputManagerService {
 
     void setPointerAcceleration(float acceleration);
 
+    void setTouchpadPointerSpeed(int speed);
+
+    void setTouchpadNaturalScrollingEnabled(boolean enabled);
+
+    void setTouchpadTapToClickEnabled(boolean enabled);
+
+    void setTouchpadRightClickZoneEnabled(boolean enabled);
+
     void setShowTouches(boolean enabled);
 
     void setInteractive(boolean interactive);
@@ -312,6 +320,18 @@ interface NativeInputManagerService {
 
         @Override
         public native void setPointerAcceleration(float acceleration);
+
+        @Override
+        public native void setTouchpadPointerSpeed(int speed);
+
+        @Override
+        public native void setTouchpadNaturalScrollingEnabled(boolean enabled);
+
+        @Override
+        public native void setTouchpadTapToClickEnabled(boolean enabled);
+
+        @Override
+        public native void setTouchpadRightClickZoneEnabled(boolean enabled);
 
         @Override
         public native void setShowTouches(boolean enabled);

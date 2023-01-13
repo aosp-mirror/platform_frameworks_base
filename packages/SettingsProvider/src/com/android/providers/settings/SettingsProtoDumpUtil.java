@@ -2913,6 +2913,22 @@ class SettingsProtoDumpUtil {
         dumpSetting(s, p,
                 Settings.System.TIME_12_24,
                 SystemSettingsProto.TIME_12_24);
+
+        final long touchpadToken = p.start(SystemSettingsProto.TOUCHPAD);
+        dumpSetting(s, p,
+                Settings.System.TOUCHPAD_NATURAL_SCROLLING,
+                SystemSettingsProto.Touchpad.NATURAL_SCROLLING);
+        dumpSetting(s, p,
+                Settings.System.TOUCHPAD_POINTER_SPEED,
+                SystemSettingsProto.Touchpad.POINTER_SPEED);
+        dumpSetting(s, p,
+                Settings.System.TOUCHPAD_RIGHT_CLICK_ZONE,
+                SystemSettingsProto.Touchpad.RIGHT_CLICK_ZONE);
+        dumpSetting(s, p,
+                Settings.System.TOUCHPAD_TAP_TO_CLICK,
+                SystemSettingsProto.Touchpad.TAP_TO_CLICK);
+        p.end(touchpadToken);
+
         dumpSetting(s, p,
                 Settings.System.TTY_MODE,
                 SystemSettingsProto.TTY_MODE);

@@ -51,6 +51,7 @@ import android.os.RemoteException;
 import android.os.ServiceManager;
 import android.os.ServiceManager.ServiceNotFoundException;
 import android.os.SystemClock;
+import android.os.UserHandle;
 import android.os.VibrationEffect;
 import android.os.Vibrator;
 import android.os.VibratorManager;
@@ -1163,6 +1164,7 @@ public final class InputManager {
      *
      * @hide
      */
+    @RequiresPermission(Manifest.permission.WRITE_SETTINGS)
     public void setPointerSpeed(Context context, int speed) {
         if (speed < MIN_POINTER_SPEED || speed > MAX_POINTER_SPEED) {
             throw new IllegalArgumentException("speed out of range");
@@ -2183,9 +2185,9 @@ public final class InputManager {
      * @hide
      */
     public int getTouchpadPointerSpeed(@NonNull Context context) {
-        int speed = DEFAULT_POINTER_SPEED;
-        // TODO: obtain the actual speed from the settings
-        return speed;
+        return Settings.System.getIntForUser(context.getContentResolver(),
+                Settings.System.TOUCHPAD_POINTER_SPEED, DEFAULT_POINTER_SPEED,
+                UserHandle.USER_CURRENT);
     }
 
     /**
@@ -2199,31 +2201,14 @@ public final class InputManager {
      *
      * @hide
      */
+    @RequiresPermission(Manifest.permission.WRITE_SETTINGS)
     public void setTouchpadPointerSpeed(@NonNull Context context, int speed) {
         if (speed < MIN_POINTER_SPEED || speed > MAX_POINTER_SPEED) {
             throw new IllegalArgumentException("speed out of range");
         }
 
-        // TODO: set the right setting
-    }
-
-    /**
-     * Changes the touchpad pointer speed temporarily, but does not save the setting.
-     *
-     * The new speed will only apply to gesture-compatible touchpads.
-     * Requires {@link android.Manifest.permission#SET_POINTER_SPEED}.
-     *
-     * @param speed The pointer speed as a value between {@link #MIN_POINTER_SPEED} and
-     * {@link #MAX_POINTER_SPEED}, or the default value {@link #DEFAULT_POINTER_SPEED}.
-     *
-     * @hide
-     */
-    public void tryTouchpadPointerSpeed(int speed) {
-        if (speed < MIN_POINTER_SPEED || speed > MAX_POINTER_SPEED) {
-            throw new IllegalArgumentException("speed out of range");
-        }
-
-        // TODO: set the touchpad pointer speed on the gesture library
+        Settings.System.putIntForUser(context.getContentResolver(),
+                Settings.System.TOUCHPAD_POINTER_SPEED, speed, UserHandle.USER_CURRENT);
     }
 
     /**
@@ -2267,8 +2252,8 @@ public final class InputManager {
      * @hide
      */
     public boolean useTouchpadNaturalScrolling(@NonNull Context context) {
-        // TODO: obtain the actual behavior from the settings
-        return true;
+        return Settings.System.getIntForUser(context.getContentResolver(),
+                Settings.System.TOUCHPAD_NATURAL_SCROLLING, 0, UserHandle.USER_CURRENT) == 1;
     }
 
     /**
@@ -2282,8 +2267,11 @@ public final class InputManager {
      *
      * @hide
      */
+    @RequiresPermission(Manifest.permission.WRITE_SETTINGS)
     public void setTouchpadNaturalScrolling(@NonNull Context context, boolean enabled) {
-        // TODO: set the right setting
+        Settings.System.putIntForUser(context.getContentResolver(),
+                Settings.System.TOUCHPAD_NATURAL_SCROLLING, enabled ? 1 : 0,
+                UserHandle.USER_CURRENT);
     }
 
     /**
@@ -2297,8 +2285,8 @@ public final class InputManager {
      * @hide
      */
     public boolean useTouchpadTapToClick(@NonNull Context context) {
-        // TODO: obtain the actual behavior from the settings
-        return true;
+        return Settings.System.getIntForUser(context.getContentResolver(),
+                Settings.System.TOUCHPAD_TAP_TO_CLICK, 0, UserHandle.USER_CURRENT) == 1;
     }
 
     /**
@@ -2311,8 +2299,11 @@ public final class InputManager {
      *
      * @hide
      */
+    @RequiresPermission(Manifest.permission.WRITE_SETTINGS)
     public void setTouchpadTapToClick(@NonNull Context context, boolean enabled) {
-        // TODO: set the right setting
+        Settings.System.putIntForUser(context.getContentResolver(),
+                Settings.System.TOUCHPAD_TAP_TO_CLICK, enabled ? 1 : 0,
+                UserHandle.USER_CURRENT);
     }
 
     /**
@@ -2355,8 +2346,8 @@ public final class InputManager {
      * @hide
      */
     public boolean useTouchpadRightClickZone(@NonNull Context context) {
-        // TODO: obtain the actual behavior from the settings
-        return true;
+        return Settings.System.getIntForUser(context.getContentResolver(),
+                Settings.System.TOUCHPAD_RIGHT_CLICK_ZONE, 0, UserHandle.USER_CURRENT) == 1;
     }
 
     /**
@@ -2369,8 +2360,11 @@ public final class InputManager {
      *
      * @hide
      */
+    @RequiresPermission(Manifest.permission.WRITE_SETTINGS)
     public void setTouchpadRightClickZone(@NonNull Context context, boolean enabled) {
-        // TODO: set the right setting
+        Settings.System.putIntForUser(context.getContentResolver(),
+                Settings.System.TOUCHPAD_RIGHT_CLICK_ZONE, enabled ? 1 : 0,
+                UserHandle.USER_CURRENT);
     }
 
     /**
