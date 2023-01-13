@@ -1476,6 +1476,8 @@ public class SystemConfig {
             addFeature(PackageManager.FEATURE_IPSEC_TUNNELS, 0);
         }
 
+        enableIpSecTunnelMigrationOnVsrUAndAbove();
+
         if (isErofsSupported()) {
             if (isKernelVersionAtLeast(5, 10)) {
                 addFeature(PackageManager.FEATURE_EROFS, 0);
@@ -1486,6 +1488,18 @@ public class SystemConfig {
 
         for (String featureName : mUnavailableFeatures) {
             removeFeature(featureName);
+        }
+    }
+
+    // This method only enables a new Android feature added in U and will not have impact on app
+    // compatibility
+    @SuppressWarnings("AndroidFrameworkCompatChange")
+    private void enableIpSecTunnelMigrationOnVsrUAndAbove() {
+        final int vsrApi =
+                SystemProperties.getInt(
+                        "ro.vendor.api_level", Build.VERSION.DEVICE_INITIAL_SDK_INT);
+        if (vsrApi > Build.VERSION_CODES.TIRAMISU) {
+            addFeature(PackageManager.FEATURE_IPSEC_TUNNEL_MIGRATION, 0);
         }
     }
 
