@@ -285,18 +285,16 @@ public class BinaryTransparencyService extends SystemService {
                 Bundle apexMeasurement = measurePackage(packageInfo);
 
                 if (record) {
-                    // compute digests of signing info
-                    String[] signerDigestHexStrings = computePackageSignerSha256Digests(
-                            packageInfo.signingInfo);
+                    var apexInfo = new IBinaryTransparencyService.ApexInfo();
+                    apexInfo.packageName = packageInfo.packageName;
+                    apexInfo.longVersion = packageInfo.getLongVersionCode();
+                    apexInfo.digest = apexMeasurement.getByteArray(BUNDLE_CONTENT_DIGEST);
+                    apexInfo.digestAlgorithm =
+                            apexMeasurement.getInt(BUNDLE_CONTENT_DIGEST_ALGORITHM);
+                    apexInfo.signerDigests =
+                            computePackageSignerSha256Digests(packageInfo.signingInfo);
 
-                    // log to statsd
-                    FrameworkStatsLog.write(FrameworkStatsLog.APEX_INFO_GATHERED,
-                                            packageInfo.packageName,
-                                            packageInfo.getLongVersionCode(),
-                                            HexEncoding.encodeToString(apexMeasurement.getByteArray(
-                                                    BUNDLE_CONTENT_DIGEST), false),
-                                            apexMeasurement.getInt(BUNDLE_CONTENT_DIGEST_ALGORITHM),
-                                            signerDigestHexStrings);
+                    recordApexInfo(apexInfo);
                 }
             }
             if (DEBUG) {
@@ -313,11 +311,11 @@ public class BinaryTransparencyService extends SystemService {
                 }
                 packagesMeasured.add(packageInfo.packageName);
 
-                int mba_status = MBA_STATUS_PRELOADED;
+                int mbaStatus = MBA_STATUS_PRELOADED;
                 if (packageInfo.signingInfo == null) {
                     Slog.d(TAG, "Preload " + packageInfo.packageName  + " at "
                             + packageInfo.applicationInfo.sourceDir + " has likely been updated.");
-                    mba_status = MBA_STATUS_UPDATED_PRELOAD;
+                    mbaStatus = MBA_STATUS_UPDATED_PRELOAD;
 
                     PackageInfo origPackageInfo = packageInfo;
                     try {
@@ -328,32 +326,24 @@ public class BinaryTransparencyService extends SystemService {
                         Slog.e(TAG, "Failed to obtain an updated PackageInfo of "
                                 + origPackageInfo.packageName, e);
                         packageInfo = origPackageInfo;
-                        mba_status = MBA_STATUS_ERROR;
+                        mbaStatus = MBA_STATUS_ERROR;
                     }
                 }
 
+                if (record && (mbaStatus == MBA_STATUS_UPDATED_PRELOAD)) {
+                    Bundle packageMeasurement = measurePackage(packageInfo);
 
-                Bundle packageMeasurement = measurePackage(packageInfo);
+                    var appInfo = new IBinaryTransparencyService.AppInfo();
+                    appInfo.packageName = packageInfo.packageName;
+                    appInfo.longVersion = packageInfo.getLongVersionCode();
+                    appInfo.digest = packageMeasurement.getByteArray(BUNDLE_CONTENT_DIGEST);
+                    appInfo.digestAlgorithm =
+                            packageMeasurement.getInt(BUNDLE_CONTENT_DIGEST_ALGORITHM);
+                    appInfo.signerDigests =
+                            computePackageSignerSha256Digests(packageInfo.signingInfo);
+                    appInfo.mbaStatus = mbaStatus;
 
-                if (record && (mba_status == MBA_STATUS_UPDATED_PRELOAD)) {
-                    // compute digests of signing info
-                    String[] signerDigestHexStrings = computePackageSignerSha256Digests(
-                            packageInfo.signingInfo);
-
-                    // now we should have all the bits for the atom
-                    byte[] cDigest = packageMeasurement.getByteArray(BUNDLE_CONTENT_DIGEST);
-                    FrameworkStatsLog.write(FrameworkStatsLog.MOBILE_BUNDLED_APP_INFO_GATHERED,
-                            packageInfo.packageName,
-                            packageInfo.getLongVersionCode(),
-                            (cDigest != null) ? HexEncoding.encodeToString(cDigest, false) : null,
-                            packageMeasurement.getInt(BUNDLE_CONTENT_DIGEST_ALGORITHM),
-                            signerDigestHexStrings, // signer_cert_digest
-                            mba_status,             // mba_status
-                            null,                   // initiator
-                            null,                   // initiator_signer_digest
-                            null,                   // installer
-                            null                    // originator
-                    );
+                    writeAppInfoToLog(appInfo);
                 }
             }
             if (DEBUG) {
@@ -372,50 +362,36 @@ public class BinaryTransparencyService extends SystemService {
                     Bundle packageMeasurement = measurePackage(packageInfo);
 
                     if (record) {
-                        // compute digests of signing info
-                        String[] signerDigestHexStrings = computePackageSignerSha256Digests(
-                                packageInfo.signingInfo);
-
-                        // then extract package's InstallSourceInfo
                         if (DEBUG) {
                             Slog.d(TAG,
                                     "Extracting InstallSourceInfo for " + packageInfo.packageName);
                         }
+                        var appInfo = new IBinaryTransparencyService.AppInfo();
+                        appInfo.packageName = packageInfo.packageName;
+                        appInfo.longVersion = packageInfo.getLongVersionCode();
+                        appInfo.digest = packageMeasurement.getByteArray(BUNDLE_CONTENT_DIGEST);
+                        appInfo.digestAlgorithm =
+                                packageMeasurement.getInt(BUNDLE_CONTENT_DIGEST_ALGORITHM);
+                        appInfo.signerDigests =
+                                computePackageSignerSha256Digests(packageInfo.signingInfo);
+                        appInfo.mbaStatus = MBA_STATUS_NEW_INSTALL;
+
+                        // extract package's InstallSourceInfo
                         InstallSourceInfo installSourceInfo = getInstallSourceInfo(
                                 packageInfo.packageName);
-                        String initiator = null;
-                        SigningInfo initiatorSignerInfo = null;
-                        String[] initiatorSignerInfoDigest = null;
-                        String installer = null;
-                        String originator = null;
-
                         if (installSourceInfo != null) {
-                            initiator = installSourceInfo.getInitiatingPackageName();
-                            initiatorSignerInfo =
+                            appInfo.initiator = installSourceInfo.getInitiatingPackageName();
+                            SigningInfo initiatorSignerInfo =
                                     installSourceInfo.getInitiatingPackageSigningInfo();
                             if (initiatorSignerInfo != null) {
-                                initiatorSignerInfoDigest = computePackageSignerSha256Digests(
-                                        initiatorSignerInfo);
+                                appInfo.initiatorSignerDigests =
+                                        computePackageSignerSha256Digests(initiatorSignerInfo);
                             }
-                            installer = installSourceInfo.getInstallingPackageName();
-                            originator = installSourceInfo.getOriginatingPackageName();
+                            appInfo.installer = installSourceInfo.getInstallingPackageName();
+                            appInfo.originator = installSourceInfo.getOriginatingPackageName();
                         }
 
-                        // we should now have all the info needed for the atom
-                        byte[] cDigest = packageMeasurement.getByteArray(BUNDLE_CONTENT_DIGEST);
-                        FrameworkStatsLog.write(FrameworkStatsLog.MOBILE_BUNDLED_APP_INFO_GATHERED,
-                                packageInfo.packageName,
-                                packageInfo.getLongVersionCode(),
-                                (cDigest != null) ? HexEncoding.encodeToString(cDigest, false)
-                                        : null,
-                                packageMeasurement.getInt(BUNDLE_CONTENT_DIGEST_ALGORITHM),
-                                signerDigestHexStrings,
-                                MBA_STATUS_NEW_INSTALL,   // mba_status
-                                initiator,
-                                initiatorSignerInfoDigest,
-                                installer,
-                                originator
-                        );
+                        writeAppInfoToLog(appInfo);
                     }
                 }
             }
@@ -424,6 +400,31 @@ public class BinaryTransparencyService extends SystemService {
                 Slog.d(TAG, "Measured " + packagesMeasured.size()
                         + " packages altogether in " + timeSpentMeasuring + "ms");
             }
+        }
+
+        private void recordApexInfo(IBinaryTransparencyService.ApexInfo apexInfo) {
+            FrameworkStatsLog.write(FrameworkStatsLog.APEX_INFO_GATHERED,
+                    apexInfo.packageName,
+                    apexInfo.longVersion,
+                    (apexInfo.digest != null) ? HexEncoding.encodeToString(apexInfo.digest, false)
+                            : null,
+                    apexInfo.digestAlgorithm,
+                    apexInfo.signerDigests);
+        }
+
+        private void writeAppInfoToLog(IBinaryTransparencyService.AppInfo appInfo) {
+            FrameworkStatsLog.write(FrameworkStatsLog.MOBILE_BUNDLED_APP_INFO_GATHERED,
+                    appInfo.packageName,
+                    appInfo.longVersion,
+                    (appInfo.digest != null) ? HexEncoding.encodeToString(appInfo.digest, false)
+                            : null,
+                    appInfo.digestAlgorithm,
+                    appInfo.signerDigests,
+                    appInfo.mbaStatus,
+                    appInfo.initiator,
+                    appInfo.initiatorSignerDigests,
+                    appInfo.installer,
+                    appInfo.originator);
         }
 
         /**
