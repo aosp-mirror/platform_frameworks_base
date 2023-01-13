@@ -40519,7 +40519,9 @@ package android.service.voice {
     method public android.os.IBinder onBind(android.content.Intent);
     method @NonNull public java.util.Set<java.lang.String> onGetSupportedVoiceActions(@NonNull java.util.Set<java.lang.String>);
     method public void onLaunchVoiceAssistFromKeyguard();
+    method public void onPrepareToShowSession(@NonNull android.os.Bundle, int);
     method public void onReady();
+    method public void onShowSessionFailed();
     method public void onShutdown();
     method public void setDisabledShowContext(int);
     method public final void setUiHints(@NonNull android.os.Bundle);

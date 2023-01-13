@@ -251,11 +251,29 @@ class VoiceInteractionManagerServiceImpl implements VoiceInteractionSessionConne
             @Nullable String attributionTag,
             @Nullable IVoiceInteractionSessionShowCallback showCallback,
             @Nullable IBinder activityToken) {
+        try {
+            if (mService != null) {
+                mService.prepareToShowSession(args, flags);
+            }
+        } catch (RemoteException e) {
+            Slog.w(TAG, "RemoteException while calling prepareToShowSession", e);
+        }
+
         if (mActiveSession == null) {
             mActiveSession = new VoiceInteractionSessionConnection(mServiceStub,
                     mSessionComponentName, mUser, mContext, this,
                     mInfo.getServiceInfo().applicationInfo.uid, mHandler);
         }
+        if (!mActiveSession.mBound) {
+            try {
+                if (mService != null) {
+                    mService.showSessionFailed();
+                }
+            } catch (RemoteException e) {
+                Slog.w(TAG, "RemoteException while calling showSessionFailed", e);
+            }
+        }
+
         List<ActivityAssistInfo> allVisibleActivities =
                 LocalServices.getService(ActivityTaskManagerInternal.class)
                         .getTopVisibleActivities();
