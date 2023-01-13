@@ -248,6 +248,32 @@ public final class EnergyConsumerSnapshotTest {
         assertThat(details.toString()).isEqualTo("DISPLAY=2667 HPU=3200000 GPU=0 IPU &_=0");
     }
 
+    @Test
+    public void testUpdateAndGetDelta_updatesCameraCharge() {
+        EnergyConsumer cameraConsumer =
+                createEnergyConsumer(7, 0, EnergyConsumerType.CAMERA, "CAMERA");
+        final EnergyConsumerSnapshot snapshot =
+                new EnergyConsumerSnapshot(createIdToConsumerMap(cameraConsumer));
+
+        // An initial result with only one energy consumer
+        EnergyConsumerResult[] result0 = new EnergyConsumerResult[]{
+                createEnergyConsumerResult(cameraConsumer.id, 60_000, null, null),
+        };
+        snapshot.updateAndGetDelta(result0, VOLTAGE_1);
+
+        // A subsequent result
+        EnergyConsumerResult[] result1 = new EnergyConsumerResult[]{
+                createEnergyConsumerResult(cameraConsumer.id, 90_000, null, null),
+        };
+        EnergyConsumerDeltaData delta = snapshot.updateAndGetDelta(result1, VOLTAGE_1);
+
+        // Verify that the delta between the two results is reported.
+        BatteryStats.EnergyConsumerDetails details = snapshot.getEnergyConsumerDetails(delta);
+        assertThat(details.consumers).hasLength(1);
+        long expectedDeltaUC = calculateChargeConsumedUC(60_000, VOLTAGE_1, 90_000, VOLTAGE_1);
+        assertThat(details.chargeUC[0]).isEqualTo(expectedDeltaUC);
+    }
+
     private static EnergyConsumer createEnergyConsumer(int id, int ord, byte type, String name) {
         final EnergyConsumer ec = new EnergyConsumer();
         ec.id = id;
