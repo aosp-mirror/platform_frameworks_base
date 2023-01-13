@@ -405,6 +405,13 @@ public class KeyguardSecurityContainerControllerTest extends SysuiTestCase {
     }
 
     @Test
+    public void onBouncerVisibilityChanged_resetsScale() {
+        mKeyguardSecurityContainerController.onBouncerVisibilityChanged(View.INVISIBLE);
+
+        verify(mView).resetScale();
+    }
+
+    @Test
     public void onStartingToHide_sideFpsHintShown_sideFpsHintHidden() {
         setupGetSecurityView();
         setupConditionsToEnableSideFpsHint();
