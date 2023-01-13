@@ -310,7 +310,8 @@ interface IActivityManager {
     int handleIncomingUser(int callingPid, int callingUid, int userId, boolean allowAll,
             boolean requireFull, in String name, in String callerPackage);
     void addPackageDependency(in String packageName);
-    void killApplication(in String pkg, int appId, int userId, in String reason);
+    void killApplication(in String pkg, int appId, int userId, in String reason,
+            int exitInfoReason);
     @UnsupportedAppUsage
     void closeSystemDialogs(in String reason);
     @UnsupportedAppUsage

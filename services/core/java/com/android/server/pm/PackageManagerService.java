@@ -55,6 +55,7 @@ import android.annotation.UserIdInt;
 import android.annotation.WorkerThread;
 import android.app.ActivityManager;
 import android.app.AppOpsManager;
+import android.app.ApplicationExitInfo;
 import android.app.ApplicationPackageManager;
 import android.app.BroadcastOptions;
 import android.app.IActivityManager;
@@ -3050,12 +3051,12 @@ public class PackageManagerService implements PackageSender, TestUtilityService 
         onChanged();
     }
 
-    void killApplication(String pkgName, @AppIdInt int appId, String reason) {
-        killApplication(pkgName, appId, UserHandle.USER_ALL, reason);
+    void killApplication(String pkgName, @AppIdInt int appId, String reason, int exitInfoReason) {
+        killApplication(pkgName, appId, UserHandle.USER_ALL, reason, exitInfoReason);
     }
 
     void killApplication(String pkgName, @AppIdInt int appId,
-            @UserIdInt int userId, String reason) {
+            @UserIdInt int userId, String reason, int exitInfoReason) {
         // Request the ActivityManager to kill the process(only for existing packages)
         // so that we do not end up in a confused state while the user is still using the older
         // version of the application while the new one gets installed.
@@ -3064,7 +3065,7 @@ public class PackageManagerService implements PackageSender, TestUtilityService 
             IActivityManager am = ActivityManager.getService();
             if (am != null) {
                 try {
-                    am.killApplication(pkgName, appId, userId, reason);
+                    am.killApplication(pkgName, appId, userId, reason, exitInfoReason);
                 } catch (RemoteException e) {
                 }
             }
@@ -4338,25 +4339,17 @@ public class PackageManagerService implements PackageSender, TestUtilityService 
         }
     }
 
-    public PackageFreezer freezePackage(String packageName, String killReason) {
-        return freezePackage(packageName, UserHandle.USER_ALL, killReason);
-    }
-
-    public PackageFreezer freezePackage(String packageName, int userId, String killReason) {
-        return new PackageFreezer(packageName, userId, killReason, this);
-    }
-
-    public PackageFreezer freezePackageForDelete(String packageName, int deleteFlags,
-            String killReason) {
-        return freezePackageForDelete(packageName, UserHandle.USER_ALL, deleteFlags, killReason);
+    public PackageFreezer freezePackage(String packageName, int userId, String killReason,
+            int exitInfoReason) {
+        return new PackageFreezer(packageName, userId, killReason, this, exitInfoReason);
     }
 
     public PackageFreezer freezePackageForDelete(String packageName, int userId, int deleteFlags,
-            String killReason) {
+            String killReason, int exitInfoReason) {
         if ((deleteFlags & PackageManager.DELETE_DONT_KILL_APP) != 0) {
             return new PackageFreezer(this);
         } else {
-            return freezePackage(packageName, userId, killReason);
+            return freezePackage(packageName, userId, killReason, exitInfoReason);
         }
     }
 
@@ -4660,7 +4653,9 @@ public class PackageManagerService implements PackageSender, TestUtilityService 
             final Computer snapshot = snapshotComputer();
             final AndroidPackage pkg = snapshot.getPackage(packageName);
             try (PackageFreezer ignored =
-                            freezePackage(packageName, "clearApplicationProfileData")) {
+                            freezePackage(packageName, UserHandle.USER_ALL,
+                                    "clearApplicationProfileData",
+                                    ApplicationExitInfo.REASON_OTHER)) {
                 synchronized (mInstallLock) {
                     mAppDataHelper.clearAppProfilesLIF(pkg);
                 }
@@ -4701,8 +4696,9 @@ public class PackageManagerService implements PackageSender, TestUtilityService 
                 public void run() {
                     mHandler.removeCallbacks(this);
                     final boolean succeeded;
-                    try (PackageFreezer freezer = freezePackage(packageName,
-                            "clearApplicationUserData")) {
+                    try (PackageFreezer freezer = freezePackage(packageName, UserHandle.USER_ALL,
+                            "clearApplicationUserData",
+                            ApplicationExitInfo.REASON_USER_REQUESTED)) {
                         synchronized (mInstallLock) {
                             succeeded = clearApplicationUserDataLIF(snapshotComputer(), packageName,
                                     userId);
@@ -5776,7 +5772,8 @@ public class PackageManagerService implements PackageSender, TestUtilityService 
                         newSnapshot.getPackageStateInternal(packageName);
 
                 if (hidden) {
-                    killApplication(packageName, newPackageState.getAppId(), userId, "hiding pkg");
+                    killApplication(packageName, newPackageState.getAppId(), userId, "hiding pkg",
+                            ApplicationExitInfo.REASON_OTHER);
                     sendApplicationHiddenForUser(packageName, newPackageState, userId);
                 } else {
                     sendPackageAddedForUser(newSnapshot, packageName, newPackageState, userId,

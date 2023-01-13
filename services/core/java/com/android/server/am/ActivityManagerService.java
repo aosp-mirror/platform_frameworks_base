@@ -1820,11 +1820,13 @@ public class ActivityManagerService extends IActivityManager.Stub
                 synchronized (ActivityManagerService.this) {
                     final int appId = msg.arg1;
                     final int userId = msg.arg2;
-                    Bundle bundle = (Bundle) msg.obj;
-                    String pkg = bundle.getString("pkg");
-                    String reason = bundle.getString("reason");
+                    SomeArgs args = (SomeArgs) msg.obj;
+                    String pkg = (String) args.arg1;
+                    String reason = (String) args.arg2;
+                    int exitInfoReason = (int) args.arg3;
+                    args.recycle();
                     forceStopPackageLocked(pkg, appId, false, false, true, false,
-                            false, userId, reason);
+                            false, userId, reason, exitInfoReason);
                 }
             } break;
 
@@ -4236,7 +4238,8 @@ public class ActivityManagerService extends IActivityManager.Stub
      * The pkg name and app id have to be specified.
      */
     @Override
-    public void killApplication(String pkg, int appId, int userId, String reason) {
+    public void killApplication(String pkg, int appId, int userId, String reason,
+            int exitInfoReason) {
         if (pkg == null) {
             return;
         }
@@ -4252,10 +4255,11 @@ public class ActivityManagerService extends IActivityManager.Stub
             Message msg = mHandler.obtainMessage(KILL_APPLICATION_MSG);
             msg.arg1 = appId;
             msg.arg2 = userId;
-            Bundle bundle = new Bundle();
-            bundle.putString("pkg", pkg);
-            bundle.putString("reason", reason);
-            msg.obj = bundle;
+            SomeArgs args = SomeArgs.obtain();
+            args.arg1 = pkg;
+            args.arg2 = reason;
+            args.arg3 = exitInfoReason;
+            msg.obj = args;
             mHandler.sendMessage(msg);
         } else {
             throw new SecurityException(callerUid + " cannot kill pkg: " +
@@ -4645,7 +4649,20 @@ public class ActivityManagerService extends IActivityManager.Stub
     @GuardedBy("this")
     final boolean forceStopPackageLocked(String packageName, int appId,
             boolean callerWillRestart, boolean purgeCache, boolean doit,
-            boolean evenPersistent, boolean uninstalling, int userId, String reason) {
+            boolean evenPersistent, boolean uninstalling, int userId, String reasonString) {
+
+        int reason = packageName == null ? ApplicationExitInfo.REASON_USER_STOPPED
+                : ApplicationExitInfo.REASON_USER_REQUESTED;
+        return forceStopPackageLocked(packageName, appId, callerWillRestart, purgeCache, doit,
+                evenPersistent, uninstalling, userId, reasonString, reason);
+
+    }
+
+    @GuardedBy("this")
+    final boolean forceStopPackageLocked(String packageName, int appId,
+            boolean callerWillRestart, boolean purgeCache, boolean doit,
+            boolean evenPersistent, boolean uninstalling, int userId, String reasonString,
+            int reason) {
         int i;
 
         if (userId == UserHandle.USER_ALL && packageName == null) {
@@ -4661,9 +4678,9 @@ public class ActivityManagerService extends IActivityManager.Stub
         if (doit) {
             if (packageName != null) {
                 Slog.i(TAG, "Force stopping " + packageName + " appid=" + appId
-                        + " user=" + userId + ": " + reason);
+                        + " user=" + userId + ": " + reasonString);
             } else {
-                Slog.i(TAG, "Force stopping u" + userId + ": " + reason);
+                Slog.i(TAG, "Force stopping u" + userId + ": " + reasonString);
             }
 
             mAppErrors.resetProcessCrashTime(packageName == null, appId, userId);
@@ -4675,15 +4692,20 @@ public class ActivityManagerService extends IActivityManager.Stub
             // becomes visible when killing its other processes with visible activities.
             didSomething = mAtmInternal.onForceStopPackage(
                     packageName, doit, evenPersistent, userId);
+            int subReason;
+            if (reason == ApplicationExitInfo.REASON_USER_REQUESTED) {
+                subReason = ApplicationExitInfo.SUBREASON_FORCE_STOP;
+            } else {
+                subReason = ApplicationExitInfo.SUBREASON_UNKNOWN;
+            }
 
             didSomething |= mProcessList.killPackageProcessesLSP(packageName, appId, userId,
                     ProcessList.INVALID_ADJ, callerWillRestart, false /* allowRestart */, doit,
                     evenPersistent, true /* setRemoved */, uninstalling,
-                    packageName == null ? ApplicationExitInfo.REASON_USER_STOPPED
-                    : ApplicationExitInfo.REASON_USER_REQUESTED,
-                    ApplicationExitInfo.SUBREASON_FORCE_STOP,
+                    reason,
+                    subReason,
                     (packageName == null ? ("stop user " + userId) : ("stop " + packageName))
-                    + " due to " + reason);
+                    + " due to " + reasonString);
         }
 
         if (mServices.bringDownDisabledPackageServicesLocked(
@@ -14356,12 +14378,13 @@ public class ActivityManagerService extends IActivityManager.Stub
                                 final boolean killProcess =
                                         !intent.getBooleanExtra(Intent.EXTRA_DONT_KILL_APP, false);
                                 final boolean fullUninstall = removed && !replacing;
+
                                 if (removed) {
                                     if (killProcess) {
                                         forceStopPackageLocked(ssp, UserHandle.getAppId(
                                                 intent.getIntExtra(Intent.EXTRA_UID, -1)),
                                                 false, true, true, false, fullUninstall, userId,
-                                                removed ? "pkg removed" : "pkg changed");
+                                                "pkg removed");
                                         getPackageManagerInternal()
                                                 .onPackageProcessKilledForUninstall(ssp);
                                     } else {
@@ -14392,14 +14415,25 @@ public class ActivityManagerService extends IActivityManager.Stub
                                     }
                                 } else {
                                     if (killProcess) {
+                                        int reason;
+                                        int subReason;
+                                        if (replacing) {
+                                            reason = ApplicationExitInfo.REASON_PACKAGE_UPDATED;
+                                            subReason = ApplicationExitInfo.SUBREASON_UNKNOWN;
+                                        } else {
+                                            reason =
+                                                    ApplicationExitInfo.REASON_PACKAGE_STATE_CHANGE;
+                                            subReason = ApplicationExitInfo.SUBREASON_UNKNOWN;
+                                        }
+
                                         final int extraUid = intent.getIntExtra(Intent.EXTRA_UID,
                                                 -1);
                                         synchronized (mProcLock) {
                                             mProcessList.killPackageProcessesLSP(ssp,
                                                     UserHandle.getAppId(extraUid),
                                                     userId, ProcessList.INVALID_ADJ,
-                                                    ApplicationExitInfo.REASON_USER_REQUESTED,
-                                                    ApplicationExitInfo.SUBREASON_PACKAGE_UPDATE,
+                                                    reason,
+                                                    subReason,
                                                     "change " + ssp);
                                         }
                                     }
