@@ -50560,6 +50560,7 @@ package android.view {
     field public static final int AXIS_GENERIC_7 = 38; // 0x26
     field public static final int AXIS_GENERIC_8 = 39; // 0x27
     field public static final int AXIS_GENERIC_9 = 40; // 0x28
+    field public static final int AXIS_GESTURE_PINCH_SCALE_FACTOR = 52; // 0x34
     field public static final int AXIS_GESTURE_SCROLL_X_DISTANCE = 50; // 0x32
     field public static final int AXIS_GESTURE_SCROLL_Y_DISTANCE = 51; // 0x33
     field public static final int AXIS_GESTURE_X_OFFSET = 48; // 0x30
@@ -50600,6 +50601,7 @@ package android.view {
     field public static final int CLASSIFICATION_AMBIGUOUS_GESTURE = 1; // 0x1
     field public static final int CLASSIFICATION_DEEP_PRESS = 2; // 0x2
     field public static final int CLASSIFICATION_NONE = 0; // 0x0
+    field public static final int CLASSIFICATION_PINCH = 5; // 0x5
     field public static final int CLASSIFICATION_TWO_FINGER_SWIPE = 3; // 0x3
     field @NonNull public static final android.os.Parcelable.Creator<android.view.MotionEvent> CREATOR;
     field public static final int EDGE_BOTTOM = 2; // 0x2
