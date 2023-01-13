@@ -189,7 +189,6 @@ import com.android.modules.utils.TypedXmlSerializer;
 import com.android.permission.persistence.RuntimePermissionsPersistence;
 import com.android.server.EventLogTags;
 import com.android.server.FgThread;
-import com.android.server.IntentResolver;
 import com.android.server.LocalManagerRegistry;
 import com.android.server.LocalServices;
 import com.android.server.LockGuard;
@@ -4775,7 +4774,7 @@ public class PackageManagerService implements PackageSender, TestUtilityService 
                 ArraySet<CrossProfileIntentFilter> set =
                         new ArraySet<>(resolver.filterSet());
                 for (CrossProfileIntentFilter filter : set) {
-                    if (IntentResolver.filterEquals(filter.mFilter, intentFilter)
+                    if (IntentFilter.filterEquals(filter.mFilter, intentFilter)
                             && filter.getOwnerPackage().equals(ownerPackage)
                             && filter.getTargetUserId() == targetUserId
                             && filter.getFlags() == flags) {
