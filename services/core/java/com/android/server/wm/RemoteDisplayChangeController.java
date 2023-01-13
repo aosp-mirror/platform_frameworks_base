@@ -114,9 +114,15 @@ public class RemoteDisplayChangeController {
         // timed-out, so run all continue callbacks and clear the list
         synchronized (mService.mGlobalLock) {
             for (int i = 0; i < mCallbacks.size(); ++i) {
-                mCallbacks.get(i).onContinueRemoteDisplayChange(null /* transaction */);
+                final ContinueRemoteDisplayChangeCallback callback = mCallbacks.get(i);
+                if (i == mCallbacks.size() - 1) {
+                    // Clear all callbacks before calling the last one, so that if the callback
+                    // itself calls {@link #isWaitingForRemoteDisplayChange()}, it will get
+                    // {@code false}. After all, there is nothing pending after this one.
+                    mCallbacks.clear();
+                }
+                callback.onContinueRemoteDisplayChange(null /* transaction */);
             }
-            mCallbacks.clear();
         }
     }
 
