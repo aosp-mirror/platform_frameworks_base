@@ -17,9 +17,9 @@
     <!-- Telephony notification channel name for performance boost notifications. -->
     <string name="performance_boost_notification_channel">Performance boost</string>
     <!-- Notification title text for the performance boost notification. -->
-    <string name="performance_boost_notification_title">%s recommends a performance boost</string>
+    <string name="performance_boost_notification_title">Improve your 5G experience</string>
     <!-- Notification detail text for the performance boost notification. -->
-    <string name="performance_boost_notification_detail">Buy a performance boost for better network performance</string>
+    <string name="performance_boost_notification_detail">%1$s recommends buying a performance boost plan. Tap to buy through %2$s.</string>
     <!-- Notification button text to cancel the performance boost notification. -->
     <string name="performance_boost_notification_button_not_now">Not now</string>
     <!-- Notification button text to manage the performance boost notification. -->

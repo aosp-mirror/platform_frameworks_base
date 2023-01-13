@@ -62,7 +62,7 @@ import java.util.Locale;
 @RunWith(AndroidJUnit4.class)
 public class SlicePurchaseBroadcastReceiverTest {
     private static final int PHONE_ID = 0;
-    private static final String TAG = "SlicePurchaseBroadcastReceiverTest";
+    private static final String CARRIER = "Some Carrier";
     private static final String EXTRA = "EXTRA";
 
     @Mock Intent mIntent;
@@ -136,8 +136,7 @@ public class SlicePurchaseBroadcastReceiverTest {
                 eq(SlicePurchaseController.EXTRA_PREMIUM_CAPABILITY), anyInt());
         doReturn(SlicePurchaseController.SLICE_PURCHASE_TEST_FILE).when(mIntent).getStringExtra(
                 eq(SlicePurchaseController.EXTRA_PURCHASE_URL));
-        doReturn(TAG).when(mIntent).getStringExtra(
-                eq(SlicePurchaseController.EXTRA_REQUESTING_APP_NAME));
+        doReturn(CARRIER).when(mIntent).getStringExtra(eq(SlicePurchaseController.EXTRA_CARRIER));
         assertFalse(SlicePurchaseBroadcastReceiver.isIntentValid(mIntent));
 
         // set up pending intent
@@ -229,8 +228,7 @@ public class SlicePurchaseBroadcastReceiverTest {
                 eq(SlicePurchaseController.EXTRA_PREMIUM_CAPABILITY), anyInt());
         doReturn(SlicePurchaseController.SLICE_PURCHASE_TEST_FILE).when(mIntent).getStringExtra(
                 eq(SlicePurchaseController.EXTRA_PURCHASE_URL));
-        doReturn(TAG).when(mIntent).getStringExtra(
-                eq(SlicePurchaseController.EXTRA_REQUESTING_APP_NAME));
+        doReturn(CARRIER).when(mIntent).getStringExtra(eq(SlicePurchaseController.EXTRA_CARRIER));
         mSlicePurchaseBroadcastReceiver.onReceive(mContext, mIntent);
     }
 
