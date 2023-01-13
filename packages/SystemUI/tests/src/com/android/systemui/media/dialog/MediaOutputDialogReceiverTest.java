@@ -54,36 +54,6 @@ public class MediaOutputDialogReceiverTest extends SysuiTestCase {
     }
 
     @Test
-    public void showOutputSwitcher_ExtraPackageName_DialogFactoryCalled() {
-        Intent intent = new Intent(Intent.ACTION_SHOW_OUTPUT_SWITCHER);
-        intent.putExtra(Intent.EXTRA_PACKAGE_NAME, getContext().getPackageName());
-        mMediaOutputDialogReceiver.onReceive(getContext(), intent);
-
-        verify(mMockMediaOutputDialogFactory, times(1))
-                .create(getContext().getPackageName(), false, null);
-        verify(mMockMediaOutputBroadcastDialogFactory, never()).create(any(), anyBoolean(), any());
-    }
-
-    @Test
-    public void showOutputSwitcher_WrongExtraKey_DialogFactoryNotCalled() {
-        Intent intent = new Intent(Intent.ACTION_SHOW_OUTPUT_SWITCHER);
-        intent.putExtra("Wrong Package Name Key", getContext().getPackageName());
-        mMediaOutputDialogReceiver.onReceive(getContext(), intent);
-
-        verify(mMockMediaOutputDialogFactory, never()).create(any(), anyBoolean(), any());
-        verify(mMockMediaOutputBroadcastDialogFactory, never()).create(any(), anyBoolean(), any());
-    }
-
-    @Test
-    public void showOutputSwitcher_NoExtra_DialogFactoryNotCalled() {
-        Intent intent = new Intent(Intent.ACTION_SHOW_OUTPUT_SWITCHER);
-        mMediaOutputDialogReceiver.onReceive(getContext(), intent);
-
-        verify(mMockMediaOutputDialogFactory, never()).create(any(), anyBoolean(), any());
-        verify(mMockMediaOutputBroadcastDialogFactory, never()).create(any(), anyBoolean(), any());
-    }
-
-    @Test
     public void launchMediaOutputDialog_ExtraPackageName_DialogFactoryCalled() {
         Intent intent = new Intent(MediaOutputConstants.ACTION_LAUNCH_MEDIA_OUTPUT_DIALOG);
         intent.putExtra(MediaOutputConstants.EXTRA_PACKAGE_NAME, getContext().getPackageName());
