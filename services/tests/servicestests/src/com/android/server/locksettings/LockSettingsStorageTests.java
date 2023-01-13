@@ -266,6 +266,20 @@ public class LockSettingsStorageTests {
     }
 
     @Test
+    public void testNullKey() {
+        mStorage.setString(null, "value", 0);
+
+        // Verify that this doesn't throw an exception.
+        assertEquals("value", mStorage.readKeyValue(null, null, 0));
+
+        // The read that happens as part of prefetchUser shouldn't throw an exception either.
+        mStorage.clearCache();
+        mStorage.prefetchUser(0);
+
+        assertEquals("value", mStorage.readKeyValue(null, null, 0));
+    }
+
+    @Test
     public void testRemoveUser() {
         mStorage.writeKeyValue("key", "value", 0);
         mStorage.writeKeyValue("key", "value", 1);

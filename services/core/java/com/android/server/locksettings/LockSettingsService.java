@@ -1156,18 +1156,21 @@ public class LockSettingsService extends ILockSettings.Stub {
     @Override
     public void setBoolean(String key, boolean value, int userId) {
         checkWritePermission();
+        Objects.requireNonNull(key);
         mStorage.setBoolean(key, value, userId);
     }
 
     @Override
     public void setLong(String key, long value, int userId) {
         checkWritePermission();
+        Objects.requireNonNull(key);
         mStorage.setLong(key, value, userId);
     }
 
     @Override
     public void setString(String key, String value, int userId) {
         checkWritePermission();
+        Objects.requireNonNull(key);
         mStorage.setString(key, value, userId);
     }
 
