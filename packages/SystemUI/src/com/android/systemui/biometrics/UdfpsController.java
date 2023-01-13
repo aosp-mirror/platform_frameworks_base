@@ -222,6 +222,10 @@ public class UdfpsController implements DozeReceiver, Dumpable {
     @Override
     public void dump(@NonNull PrintWriter pw, @NonNull String[] args) {
         pw.println("mSensorProps=(" + mSensorProps + ")");
+        pw.println("Using new touch detection framework: " + mFeatureFlags.isEnabled(
+                Flags.UDFPS_NEW_TOUCH_DETECTION));
+        pw.println("Using ellipse touch detection: " + mFeatureFlags.isEnabled(
+                Flags.UDFPS_ELLIPSE_DETECTION));
     }
 
     public class UdfpsOverlayController extends IUdfpsOverlayController.Stub {
