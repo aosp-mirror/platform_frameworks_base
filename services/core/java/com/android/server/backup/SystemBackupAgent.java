@@ -84,7 +84,8 @@ public class SystemBackupAgent extends BackupAgentHelper {
     private static final String WALLPAPER_IMAGE_KEY = WallpaperBackupHelper.WALLPAPER_IMAGE_KEY;
 
     private static final Set<String> sEligibleForMultiUser = Sets.newArraySet(
-            PERMISSION_HELPER, NOTIFICATION_HELPER, SYNC_SETTINGS_HELPER, APP_LOCALES_HELPER);
+            PERMISSION_HELPER, NOTIFICATION_HELPER, SYNC_SETTINGS_HELPER, APP_LOCALES_HELPER,
+            ACCOUNT_MANAGER_HELPER);
 
     private int mUserId = UserHandle.USER_SYSTEM;
 
@@ -100,7 +101,7 @@ public class SystemBackupAgent extends BackupAgentHelper {
         addHelper(PERMISSION_HELPER, new PermissionBackupHelper(mUserId));
         addHelper(USAGE_STATS_HELPER, new UsageStatsBackupHelper(this));
         addHelper(SHORTCUT_MANAGER_HELPER, new ShortcutBackupHelper());
-        addHelper(ACCOUNT_MANAGER_HELPER, new AccountManagerBackupHelper());
+        addHelper(ACCOUNT_MANAGER_HELPER, new AccountManagerBackupHelper(mUserId));
         addHelper(SLICES_HELPER, new SliceBackupHelper(this));
         addHelper(PEOPLE_HELPER, new PeopleBackupHelper(mUserId));
         addHelper(APP_LOCALES_HELPER, new AppSpecificLocalesBackupHelper(mUserId));
