@@ -184,6 +184,7 @@ import android.app.AppOpsManager.AttributionFlags;
 import android.app.AppOpsManagerInternal.CheckOpsDelegate;
 import android.app.ApplicationErrorReport;
 import android.app.ApplicationExitInfo;
+import android.app.ApplicationStartInfo;
 import android.app.ApplicationThreadConstants;
 import android.app.BackgroundStartPrivileges;
 import android.app.BroadcastOptions;
@@ -192,6 +193,7 @@ import android.app.ContentProviderHolder;
 import android.app.ForegroundServiceDelegationOptions;
 import android.app.IActivityController;
 import android.app.IActivityManager;
+import android.app.IApplicationStartInfoCompleteListener;
 import android.app.IApplicationThread;
 import android.app.IForegroundServiceObserver;
 import android.app.IInstrumentationWatcher;
@@ -9449,6 +9451,37 @@ public class ActivityManagerService extends IActivityManager.Stub
             }
         }
         return retList;
+    }
+
+    @Override
+    public ParceledListSlice<ApplicationStartInfo> getHistoricalProcessStartReasons(
+            String packageName, int maxNum, int userId) {
+        if (!mConstants.mFlagApplicationStartInfoEnabled) {
+            return new ParceledListSlice<ApplicationStartInfo>(
+                new ArrayList<ApplicationStartInfo>());
+        }
+        enforceNotIsolatedCaller("getHistoricalProcessStartReasons");
+
+        final ArrayList<ApplicationStartInfo> results = new ArrayList<ApplicationStartInfo>();
+
+        return new ParceledListSlice<ApplicationStartInfo>(results);
+    }
+
+    @Override
+    public void setApplicationStartInfoCompleteListener(
+            IApplicationStartInfoCompleteListener listener, int userId) {
+        if (!mConstants.mFlagApplicationStartInfoEnabled) {
+            return;
+        }
+        enforceNotIsolatedCaller("setApplicationStartInfoCompleteListener");
+    }
+
+    @Override
+    public void removeApplicationStartInfoCompleteListener(int userId) {
+        if (!mConstants.mFlagApplicationStartInfoEnabled) {
+            return;
+        }
+        enforceNotIsolatedCaller("removeApplicationStartInfoCompleteListener");
     }
 
     @Override

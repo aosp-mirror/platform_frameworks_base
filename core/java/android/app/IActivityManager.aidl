@@ -19,10 +19,12 @@ package android.app;
 import android.app.ActivityManager;
 import android.app.ActivityManager.PendingIntentInfo;
 import android.app.ActivityTaskManager;
+import android.app.ApplicationStartInfo;
 import android.app.ApplicationErrorReport;
 import android.app.ApplicationExitInfo;
 import android.app.ContentProviderHolder;
 import android.app.GrantedUriPermission;
+import android.app.IApplicationStartInfoCompleteListener;
 import android.app.IApplicationThread;
 import android.app.IActivityController;
 import android.app.IAppTask;
@@ -632,6 +634,45 @@ interface IActivityManager {
      * Method for the app to tell system that it's wedged and would like to trigger an ANR.
      */
     void appNotResponding(String reason);
+
+    /**
+     * Return a list of {@link ApplicationStartInfo} records.
+     *
+     * <p class="note"> Note: System stores historical information in a ring buffer, older
+     * records would be overwritten by newer records. </p>
+     *
+     * @param packageName Optional, an empty value means match all packages belonging to the
+     *                    caller's UID. If this package belongs to another UID, you must hold
+     *                    {@link android.Manifest.permission#DUMP} in order to retrieve it.
+     * @param maxNum      Optional, the maximum number of results should be returned; A value of 0
+     *                    means to ignore this parameter and return all matching records
+     * @param userId      The userId in the multi-user environment.
+     *
+     * @return a list of {@link ApplicationStartInfo} records with the matching criteria, sorted in
+     *         the order from most recent to least recent.
+     */
+    ParceledListSlice<ApplicationStartInfo> getHistoricalProcessStartReasons(String packageName,
+            int maxNum, int userId);
+
+
+    /**
+     * Sets a callback for {@link ApplicationStartInfo} upon completion of collecting startup data.
+     *
+     * <p class="note"> Note: completion of startup is no guaranteed and as such this callback may not occur.</p>
+     *
+     * @param listener    A listener to for the callback upon completion of startup data collection.
+     * @param userId      The userId in the multi-user environment.
+     */
+    void setApplicationStartInfoCompleteListener(IApplicationStartInfoCompleteListener listener,
+            int userId);
+
+
+    /**
+     * Removes callback for {@link ApplicationStartInfo} upon completion of collecting startup data.
+     *
+     * @param userId      The userId in the multi-user environment.
+     */
+    void removeApplicationStartInfoCompleteListener(int userId);
 
     /**
      * Return a list of {@link ApplicationExitInfo} records.
